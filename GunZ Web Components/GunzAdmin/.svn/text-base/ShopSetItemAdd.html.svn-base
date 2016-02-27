@@ -1,0 +1,89 @@
+<?
+	require_once("core.php");
+	check_session();
+?>
+<?php
+
+include ("dbconn.inc"); 
+
+//// Declare Functions ////////////////////////////////////////////////////////
+function GetBackMenu()
+{
+	return("[<a href='#' OnClick='history.back();'>뒤로</a>]");
+}
+
+function GetSetItemShopMenu()
+{
+	return("[<a href='ShopSetItem.html'>아이템관리</a>]");
+}
+
+function SetItemAdd()
+{
+	global $db;
+	
+	$NAME = $_POST['name'];
+	$SEX = $_POST['sex'];
+	$LEVEL = $_POST['level'];
+	$DESCRIPTION = $_POST['description'];
+	$OPENED = $_POST['opened'];
+	$NEWORDER = $_POST['neworder'];
+	$PRICE = $_POST['price'];
+	$ICON = $_POST['icon'];
+	
+	//// Examine Registered Item //////////////////////////////////////////////
+	$ItemID = NULL;
+	$query_item = "SELECT Name FROM CashSetShop where Name='$NAME'";
+	$result = $db->query($query_item);
+	$row = $db->fetch();
+	if ($row > 0) 
+	{
+		$BackMenu = GetBackMenu();
+		echo("
+			<CENTER>
+				<B>아이템 '$NAME' : 이미 등록된 이름입니다.</B> <BR><BR>
+				$BackMenu
+			</CENTER>			
+		");
+		return;
+	}
+	
+	//// Add SetItemShop ///////////////////////////////////////////////////
+	echo("
+		<CENTER>
+		<B>셋트아이템을 추가합니다. (Name=$NAME, Sex=$SEX, Level=$LEVEL, Desc=$DESCRIPTION, Opened=$OPENED, NewOrder=$NEWORDER, Price=$PRICE, Icon=$ICON)</B>
+		</CENTER>
+		<BR><BR>
+	");
+	
+	$query_add = "INSERT INTO CashSetShop (Name, ResSex, ResLevel, Description, Opened, NewItemOrder, CashPrice, WebImgName, RegDate) 
+				VALUES ('$NAME', $SEX, $LEVEL, '$DESCRIPTION', $OPENED, $NEWORDER, $PRICE, '$ICON', GETDATE())";
+	$result = $db->query($query_add);
+	if ($result == FALSE) {
+		$BackMenu = GetBackMenu();
+		echo("
+			<CENTER>
+				<B>아이템 추가에 실패하였습니다.</B> <BR><BR>
+				$BackMenu
+			</CENTER>
+			<BR><BR>
+		");
+	} else {
+		$SetItemShopMenu = GetSetItemShopMenu();
+		echo("
+			<CENTER>
+				<B>아이템 추가에 성공하였습니다.</B> <BR><BR>
+				$SetItemShopMenu
+			</CENTER>
+			<BR><BR>
+		");
+	}
+}
+
+
+//// Main /////////////////////////////////////////////////////////////////////
+SetItemAdd();
+
+?>
+
+<? $db->close(); ?>
+<? include ("sign.inc"); ?>

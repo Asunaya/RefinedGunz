@@ -1,0 +1,64 @@
+BEGIN TRAN
+ALTER TABLE ClanGameLog ADD WinnerPoint int, LoserPoint int
+IF 0 <> @@ERROR
+	ROLLBACK TRAN
+ELSE
+	COMMIT TRAN
+
+
+------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+SET QUOTED_IDENTIFIER ON 
+GO
+SET ANSI_NULLS ON 
+GO
+
+-- 클랜전 결과 업데이트
+ALTER  PROC [spWinTheClanGame]
+	@WinnerCLID		int,
+	@LoserCLID		int,
+	@IsDrawGame		tinyint,
+	@WinnerPoint		int,
+	@LoserPoint		int,
+	@WinnerClanName		varchar(24),
+	@LoserClanName		varchar(24),
+	@RoundWins		tinyint,
+	@RoundLosses		tinyint,
+	@MapID			tinyint,
+	@GameType		tinyint,
+	@WinnerMembers		varchar(110),
+	@LoserMembers		varchar(110)
+AS
+	SET NOCOUNT ON	-- 추가.
+
+	IF @IsDrawGame = 0
+	BEGIN
+		-- 이긴팀 Wins+1
+		UPDATE Clan SET Wins=Wins+1, Point=Point+@WinnerPoint, TotalPoint=TotalPoint+@WinnerPoint WHERE CLID=@WinnerCLID
+		-- 진팀 Losses+1
+		UPDATE Clan SET Losses=Losses+1, Point= dbo.fnGetMax(0, Point+(@LoserPoint)) WHERE CLID=@LoserCLID
+--		UPDATE Clan SET Point=0 WHERE CLID=@LoserCLID AND Point<0
+
+		-- 전적 로그를 남긴다.
+		INSERT INTO ClanGameLog(WinnerCLID, LoserCLID, WinnerClanName, LoserClanName, RoundWins, RoundLosses, MapID, GameType, RegDate, WinnerMembers, LoserMembers, WinnerPoint, LoserPoint)
+		VALUES (@WinnerCLID, @LoserCLID, @WinnerClanName, @LoserClanName, @RoundWins, @RoundLosses, @MapID, @GameType, GETDATE(), @WinnerMembers, @LoserMembers, @WinnerPoint, @LoserPoint)
+	END
+	ELSE
+	BEGIN
+		UPDATE Clan SET Draws=Draws+1 WHERE CLID=@WinnerCLID OR CLID=@LoserCLID
+	END
+
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON 
+GO
+
+
+------------------------------------------------------------------------------------------------------------------------------------------
+
+-- 이건 덤으로...-_-;;
+-- ServerStatus의 Time컬럼의 자료구조 변경. (datetime -> smalldatetime)
+ALTER TABLE ServerStatus ALTER COLUMN Time smalldatetime

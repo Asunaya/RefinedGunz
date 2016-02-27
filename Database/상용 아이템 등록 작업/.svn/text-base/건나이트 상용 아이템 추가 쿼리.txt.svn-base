@@ -1,0 +1,54 @@
+INSERT INTO Item (ItemID, Name) Values (521014, '남성 건나이트 롱코트')
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=1, ResLevel=25, Slot=5, Weight=14, HP=4, AP=22, MAXWT=0, 
+Description='액시움의 어느 전설적인 남성 건파이터가 입었다던 롱코트.' 
+WHERE ItemID=521014
+
+
+INSERT INTO Item (ItemID, Name) Values (521514, '여성 건나이트 자켓')
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=2, ResLevel=25, Slot=5, Weight=14, HP=4, AP=22, MAXWT=0, 
+Description='액시움의 어느 전설적인 여성 건파이터가 입었다던 자켓' 
+WHERE ItemID=521514
+
+
+INSERT INTO Item (ItemID, Name) Values (522013, '남성 건나이트 장갑')
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=1, ResLevel=25, Slot=6, Weight=4, HP=3, AP=13, MAXWT=0, 
+Description='액시움의 어느 전설적인 남성 건파이터가 입었다던 장갑' 
+WHERE ItemID=522013
+
+
+INSERT INTO Item (ItemID, Name) Values (522513, '여성 건나이트 장갑')
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=2, ResLevel=25, Slot=6, Weight=4, HP=3, AP=13, MAXWT=0, 
+Description='액시움의 어느 전설적인 여성 건파이터가 입었다던 장갑' 
+WHERE ItemID=522513
+
+
+INSERT INTO Item (ItemID, Name) Values (523013, '남성 건나이트 바지')
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=1, ResLevel=25, Slot=7, Weight=13, HP=3, AP=24, MAXWT=0, 
+Description='액시움의 어느 전설적인 남성 건파이터가 입었다던 바지.' 
+WHERE ItemID=523013
+
+
+INSERT INTO Item (ItemID, Name) Values (523513, '여성 건나이트 바지')
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=2, ResLevel=25, Slot=7, Weight=13, HP=3, AP=24, MAXWT=0, 
+Description='액시움의 어느 전설적인 여성 건파이터가 입었다던 바지.' 
+WHERE ItemID=523513
+
+
+INSERT INTO Item (ItemID, Name) Values (524013, '남성 건나이트 구두')
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=1, ResLevel=25, Slot=8, Weight=4, HP=3, AP=16, MAXWT=0, 
+Description='액시움의 어느 전설적인 남성 건파이터가 입었다던 구두.' 
+WHERE ItemID=524013
+
+
+INSERT INTO Item (ItemID, Name) Values (524513, '여성 건나이트 구두')
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=2, ResLevel=25, Slot=8, Weight=4, HP=3, AP=16, MAXWT=0, 
+Description='액시움의 어느 전설적인 여성 건파이터가 입었다던 장갑' 
+WHERE ItemID=524513

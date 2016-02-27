@@ -1,0 +1,109 @@
+-- 현제 날짜를 기준으로 틀정 일수 이전의 날을 구함( EX, 2004-10-15 )
+CREATE PROC spGetAgoDay
+	@DiffDay int
+,	@AgoDay datetime OUTPUT
+AS
+	DECLARE @CurDay datetime
+
+	SELECT @CurDay = CONVERT( varchar(30), GETDATE(), 2 )
+	SELECT @AgoDay = DATEADD( dd, -@DiffDay, @CurDay )
+
+---------------------------------------------------------------------------------
+
+
+-- CharacterMakingLog
+DECLARE @Date datetime
+
+EXEC spGetAgoDay 0, @Date OUTPUT
+
+SELECT * FROM CharacterMakingLog WHERE Date < @Date ORDER BY id
+
+DELETE FROM CharacterMakingLog WHERE Date < @Date
+
+
+
+-- PlayerLog
+DECLARE @Date datetime
+
+EXEC spGetAgoDay 0, @Date OUTPUT
+
+SELECT * FROM PlayerLog WHERE DisTime < @Date ORDER BY id
+
+DELETE FROM PlayerLog WHERE DisTime < @Date
+
+
+
+-- ConnLog
+DECLARE @Date datetime
+
+EXEC spGetAgoDay 0, @Date OUTPUT
+
+SELECT * FROM ConnLog WHERE Time < @Date ORDER BY id
+
+DELETE FROM ConnLog WHERE Time < @Date
+
+
+
+-- GameLog
+DECLARE @Date datetime
+
+EXEC spGetAgoDay 0, @Date OUTPUT
+
+SELECT * FROM GameLog WHERE StartTime < @Date ORDER BY id
+
+DELETE FROM GameLog WHERE StartTime < @Date
+
+
+
+-- LevelUpLog
+DECLARE @Date datetime
+
+EXEC spGetAgoDay 0, @Date OUTPUT
+
+SELECT * FROM LevelUpLog WHERE Date < @Date ORDER BY id
+
+DELETE FROM LevelUpLog WHERE Date < @Date
+
+
+
+-- BringAccountItemLog
+DECLARE @Date datetime
+
+EXEC spGetAgoDay 0, @Date OUTPUT
+
+SELECT * FROM BringAccountItemLog WHERE Date < @Date ORDER BY id
+
+DELETE FROM BringAccountItemLog WHERE Date < @Date
+
+
+
+-- ClanGameLog
+DECLARE @Date datetime
+
+EXEC spGetAgoDay 0, @Date OUTPUT
+
+SELECT * FROM ClanGameLog WHERE RegDate < @Date ORDER BY id
+
+DELETE FROM ClanGameLog WHERE RegDate < @Date
+
+
+
+-- ItemPurchaseLogByBounty
+DECLARE @Date datetime
+
+EXEC spGetAgoDay 0, @Date OUTPUT
+
+SELECT * FROM ItemPurchaseLogByBounty WHERE Date < @Date ORDER BY id
+
+DELETE FROM ItemPurchaseLogByBounty WHERE Date < @Date
+
+
+
+-- ServerLog
+DECLARE @Date datetime 
+
+EXEC spGetAgoDay 0, @Date OUTPUT
+
+SELECT * FROM ServerLog WHERE Time < @Date ORDER BY id
+
+DELETE FROM ServerLog WHERE Time < @Date

@@ -1,0 +1,436 @@
+<?
+	require_once("core.php");
+	check_session();
+?>
+
+<HTML>
+<HEAD>
+<LINK REL='StyleSheet' HREF='style.css'>
+</HEAD>
+<BODY>
+
+<?php
+
+include ("dbconn.inc"); 
+
+
+function GetCommandMenu()
+{
+	return("[<a href='ShopSingleItem.html?mode=add'>추가</a>]");
+}
+
+function GetBackMenu()
+{
+	return("[<a href='#' OnClick='history.back();'>뒤로</a>]");
+}
+
+function SingleItemView()
+{
+	global $db;
+	global $dbName, $db_hostname, $db_username, $db_password;
+
+	$CommandMenu = GetCommandMenu();
+	
+	//// Get Shop List ////////////////////////////////////////////////////////
+	$query = "SELECT cs.csid AS CSID, i.name AS Name, i.Slot AS ItemSlot, 
+			cs.Opened AS Opened, cs.NewItemOrder AS NewOrder, 
+			cs.CashPrice AS Cash, cs.WebImgName As WebImgName,
+			i.Description AS Description, cs.RegDate AS RegDate,
+			cs.RentType AS RentType
+			FROM CashShop cs, Item i 
+			WHERE i.ItemID = cs.ItemID order by cs.csid asc";
+	$result = $db->query($query);
+	$count = $db->getNumRow();
+
+	//// Table Header /////////////////////////////////////////////////////////
+	echo("
+		<CENTER>
+		<TABLE border=0><TR><TD>
+		
+		<TABLE border=0><TR><TD>$CommandMenu</TD></TR></TABLE>
+		
+		<TABLE border=1>
+		<TR bgcolor=#EEEEEE>
+		<TD width=20 align=center>ID</TD>
+		<TD width=170 align=center>이름</TD>
+		<TD width=40 align=center>슬롯</TD>
+		<TD width=40 align=center>진열</TD>
+		<TD width=40 align=center>신상품</TD>
+		<TD width=100 align=center>가격</TD>
+		<TD width=100 align=center>아이콘</TD>		
+		<TD width=40 align=center>명령</TD>
+		</TR>
+	");
+	
+	while ($row = $db->fetch())
+	{
+	  $cash_str = "대표: $row->Cash" . "<BR>";
+	  if ($row->RentType >= 1)
+	  {
+	    $db2 = new db($dbName, $db_hostname, $db_username, $db_password);
+      $query2 = "SELECT CSID, RentHourPeriod, CashPrice FROM RentCashShopPrice where csid=" . $row->CSID . " ORDER BY RCSPID";
+    	$result2 = $db2->query($query2);
+    	while ($row2 = $db2->fetch())
+    	{
+    	  $day = ($row2->RentHourPeriod / 24);
+    	  $day = $day . "일";
+    	  if ($row2->RentHourPeriod == NULL)
+    	  {
+    	    $day = "무제한";
+    	  }
+    	  $cash_str = $cash_str . $day . ":" . $row2->CashPrice . "<BR>";
+    	}
+      
+	  }
+	  
+		echo("
+			<TR>
+			<TD align=center>$row->CSID</TD>
+			<TD>$row->Name</TD>
+			<TD align=center>$row->ItemSlot</TD>
+			<TD align=center>$row->Opened</TD>
+			<TD align=center>$row->NewOrder</TD>
+			<TD>$cash_str</TD>
+			<TD>$row->WebImgName</TD>			
+			<TD><a href='ShopSingleItem.html?mode=edit&CSID=$row->CSID'>수정</a>
+				<!--<a href='ShopSingleItem.html?mode=delete&CSID=$row->CSID'>삭제</a>-->
+			</TD>
+			</TR>
+		");
+	}
+	
+	//// Table Footer /////////////////////////////////////////////////////////
+	echo("
+		</TABLE>
+		
+		</TD></TR>
+		<TR><TD>$CommandMenu : $count Item Listed</TD></TR>
+		</TABLE>		
+		</CENTER>
+	");
+}
+
+function view_ItemName()
+{
+  global $db;
+
+  $query = "SELECT ItemID, Name FROM Item WHERE IsCashItem=1 order by ItemID";
+	$result = $db->query($query);
+	
+	$str = "<SELECT name=itemid>\n";
+	
+ 	while ($row = $db->fetch())
+	{
+	  $str .= "<OPTION value=" . $row->ItemID . ">" . $row->Name . "</OPTION>\n";
+	}
+  
+  $str .= "</SELECT>\n";
+  echo $str;
+}
+
+function SingleItemAdd_PrintForm()
+{
+	global $db;
+	
+	//// Table Header /////////////////////////////////////////////////////
+	echo("
+		<CENTER>
+		<BR><H3>상품 추가</H3>
+		<FORM action=ShopSingleItemAdd.html method=post>
+		<TABLE border=1>
+		<TR>
+			<TD width=80 align=center bgcolor=#EEEEEE>아이템</TD>
+			<TD colspan=3 width=400>&nbsp;\n");
+			
+	view_ItemName();
+	
+  echo("
+			</TD>
+		</TR>
+		<TR>
+			<TD width=80 align=center bgcolor=#EEEEEE>상품진열</TD>
+			<TD colspan=3>&nbsp;<input type=checkbox value=1 name=itemopened> 진열</TD>
+		</TR>
+		<TR>
+			<TD width=80 align=center bgcolor=#EEEEEE>신상품코드</TD>
+			<TD colspan=3>&nbsp;<input type=checkbox value=1 name=isnewitem> 신상품 &nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;순서			
+        <select name=newitem_order>
+          <option value='1'>1</option>
+          <option value='2'>2</option>
+          <option value='3'>3</option>
+          <option value='4'>4</option>
+          <option value='5'>5</option>
+          <option value='6'>6</option>
+          <option value='7'>7</option>
+          <option value='8'>8</option>
+        </select>			
+
+			</TD>
+		</TR>
+		<TR>
+			<TD width=80 align=center bgcolor=#EEEEEE>아이콘</TD>
+			<TD colspan=3><INPUT type=text name=itemicon style=width:99%></TD>
+		</TR>
+		<TR>
+			<TD width=80 align=center bgcolor=#EEEEEE rowspan=6>가격</TD>
+			<TD colspan=3>
+			  <INPUT type=radio name=renttype value=0>무제한
+  			&nbsp;&nbsp;&nbsp;
+        <INPUT type=radio name=renttype value=1>기간제
+  			&nbsp;&nbsp;&nbsp;  			
+        <INPUT type=radio name=renttype value=2 checked>무제한+기간제
+  			&nbsp;&nbsp;&nbsp;  			
+			</TD>
+		</TR>
+		<TR>
+			<TD colspan=3>
+			  &nbsp; 대표가격 &nbsp;<INPUT type=text name='itemprice'>
+			</TD>
+		</TR>
+		<TR>
+		  <TD>&nbsp;<input type=checkbox value=1 name=rent_add1> 추가
+		  </TD>
+		  <TD>기간 &nbsp;
+        <select name=rent_period1>
+          <option value='168'>7일</option>
+          <option value='360'>15일</option>
+          <option value='720'>30일</option>
+          <option value='0'>무제한</option>
+        </select>
+      </TD>
+      <TD>
+        가격 &nbsp;
+        <INPUT type=text name=rent_cash1 width=50>
+		  </TD>
+		</TR>
+		<TR>
+		  <TD>&nbsp;<input type=checkbox value=1 name=rent_add2> 추가
+		  </TD>
+		  <TD>기간 &nbsp;
+        <select name=rent_period2>
+          <option value='168'>7일</option>
+          <option value='360' selected>15일</option>
+          <option value='720'>30일</option>
+          <option value='0'>무제한</option>
+        </select>
+      </TD>
+      <TD>
+        가격 &nbsp;
+        <INPUT type=text name=rent_cash2 width=50>
+		  </TD>
+		</TR>
+		<TR>
+		  <TD>&nbsp;<input type=checkbox value=1 name=rent_add3> 추가
+		  </TD>
+		  <TD>기간 &nbsp;
+        <select name=rent_period3>
+          <option value='168'>7일</option>
+          <option value='360'>15일</option>
+          <option value='720' selected>30일</option>
+          <option value='0'>무제한</option>
+        </select>
+      </TD>
+      <TD>
+        가격 &nbsp;
+        <INPUT type=text name=rent_cash3 width=50>
+		  </TD>
+		</TR>
+		<TR>
+		  <TD>&nbsp;<input type=checkbox value=1 name=rent_add4> 추가
+		  </TD>
+		  <TD>기간 &nbsp;
+        <select name=rent_period4>
+          <option value='168'>7일</option>
+          <option value='360'>15일</option>
+          <option value='720'>30일</option>
+          <option value='0' selected>무제한</option>
+        </select>
+      </TD>
+      <TD>
+        가격 &nbsp;
+        <INPUT type=text name=rent_cash4 width=50>
+		  </TD>
+		</TR>
+		
+		</TABLE>
+		<TABLE border=0 width=400>
+		<TR>
+			<TD align=right><INPUT type=submit name=additem value='추가'></TD>
+			<TD><INPUT type=reset name=addcancel value='취소' OnClick='history.back();'></TD>
+		</TR>
+		</TABLE>
+		</FORM>
+		</CENTER>
+	");
+}
+
+function SingleItemDelete_PrintForm($CSID)
+{
+	global $db;
+
+	//// Get Item Data ////////////////////////////////////////////////////////
+	$query = "SELECT cs.csid AS CSID, i.name AS Name, i.Slot AS ItemSlot, 
+			cs.CashPrice AS Cash, cs.WebImgName As WebImgName,
+			i.Description AS Description, cs.RegDate AS RegDate
+			FROM CashShop cs, Item i 
+			WHERE i.ItemID = cs.ItemID AND CSID = $CSID";
+	$result = $db->query($query);
+	$count = $db->getNumRow();
+	if ($count <= 0) {
+		echo("
+			<CENTER>
+				<B>아이템 '$_POST[itemname]' : 등록되지 않은 아이템입니다.</B> <BR><BR>
+				$BackMenu
+			</CENTER>
+		");
+		return;
+	}
+	
+	//// Table ////////////////////////////////////////////////////////////////
+	$row = $db->fetch();
+	echo("
+		<CENTER>
+		<BR><H3>상품 삭제</H3>
+		<B>정말로 삭제하시겠습니까?</B><BR>
+		<FORM action=ShopSingleItemDelete.html method=post>
+		<TABLE border=1 width=400>
+		<TR>
+			<TD width=60 bgcolor=#EEEEEE>ID</TD><TD>$row->CSID</TD>
+		</TR>
+		<TR>
+			<TD width=60 bgcolor=#EEEEEE>이름</TD><TD>$row->Name</TD>
+		</TR>
+		<TR>
+			<TD width=60 bgcolor=#EEEEEE>슬롯</TD><TD>$row->ItemSlot</TD>
+		</TR>
+		<TR>
+			<TD width=60 bgcolor=#EEEEEE>가격</TD><TD>$row->Cash</TD>
+		</TR>
+		<TR>
+			<TD width=60 bgcolor=#EEEEEE>아이콘</TD><TD>$row->WebImgName</TD>
+		</TR>
+		<TR>
+			<TD width=60 bgcolor=#EEEEEE>설명</TD><TD>$row->Description</TD>
+		</TR>
+		<TR>
+			<TD width=60 bgcolor=#EEEEEE>등록일</TD><TD>$row->RegDate</TD>
+		</TR>
+		</TABLE>
+		<TABLE border=0 width=400>
+		<TR>
+			<TD align=right>
+				<INPUT type=hidden name=CSID value='$row->CSID'>
+				<INPUT type=submit name=deleteitem value='삭제'>
+			</TD>
+			<TD><INPUT type=reset name=deletecancel value='취소' OnClick='history.back();'></TD>
+		</TR>
+		</TABLE>
+		</FORM>
+		</CENTER>
+	");
+}
+
+function SingleItemEdit_PrintForm($CSID)
+{
+	global $db;
+
+	//// Get Item Data ////////////////////////////////////////////////////////
+	$query = "SELECT cs.csid AS CSID, i.name AS Name, i.Slot AS ItemSlot, 
+			cs.Opened AS Opened, cs.NewItemOrder AS NewOrder, 
+			cs.CashPrice AS Cash, cs.WebImgName AS WebImgName,
+			i.Description AS Description, cs.RegDate AS RegDate
+			FROM CashShop cs, Item i 
+			WHERE i.ItemID = cs.ItemID AND CSID = $CSID";
+	$result = $db->query($query);
+	$count = $db->getNumRow();
+	if ($count <= 0) {
+		echo("
+			<CENTER>
+				<B>아이템 '$_POST[itemname]' : 등록되지 않은 아이템입니다.</B> <BR><BR>
+				$BackMenu
+			</CENTER>
+		");
+		return;
+	}
+	
+	//// Table ////////////////////////////////////////////////////////////////
+	$row = $db->fetch();
+	echo("
+		<CENTER>
+		<BR><H3>상품 수정</H3>
+		<FORM action=ShopSingleItemEdit.html method=post>
+		<TABLE border=1 width=400>
+		<TR>
+			<TD width=80 bgcolor=#EEEEEE>CSID</TD><TD>$row->CSID</TD>
+		</TR>
+		<TR>
+			<TD width=80 bgcolor=#EEEEEE>이름</TD><TD>$row->Name</TD>
+		</TR>
+		<TR>
+			<TD width=80 bgcolor=#EEEEEE>슬롯</TD><TD>$row->ItemSlot</TD>
+		</TR>
+		<TR>
+			<TD width=80 bgcolor=#EEEEEE>설명</TD><TD>$row->Description</TD>
+		</TR>
+		<TR>
+			<TD width=80 bgcolor=#EEEEEE>상품진열</TD><TD><INPUT type=text name=itemopened value='$row->Opened' style=width:99%></TD>
+		</TR>
+		<TR>
+			<TD width=80 bgcolor=#EEEEEE>신상품코드</TD><TD><INPUT type=text name=itemneworder value='$row->NewOrder' style=width:99%></TD>
+		</TR>
+		<TR>
+			<TD width=80 bgcolor=#EEEEEE>가격</TD><TD><INPUT type=text name=itemprice value='$row->Cash' style=width:99%></TD>
+		</TR>
+		<TR>
+			<TD width=80 bgcolor=#EEEEEE>아이콘</TD><TD><INPUT type=text name=itemicon value='$row->WebImgName' style=width:99%></TD>
+		</TR>
+		<TR>
+			<TD width=80 bgcolor=#EEEEEE>등록일</TD><TD>$row->RegDate</TD>
+		</TR>		
+		</TABLE>
+		<TABLE border=0 width=400>
+		<TR>
+			<TD align=right>
+				<INPUT type=hidden name=CSID value='$row->CSID'>
+				<INPUT type=submit name=edititem value='수정'>
+			</TD>
+			<TD><INPUT type=reset name=editcancel value='취소' OnClick='history.back();'></TD>
+		</TR>
+		</TABLE>
+		</FORM>
+		</CENTER>
+	");	
+}
+
+echo("
+<CENTER><H1>개별 아이템 관리</H1></CENTER>
+");
+
+//// Main /////////////////////////////////////////////////////////////////////
+if ($_GET[mode] == "add")
+{
+	SingleItemAdd_PrintForm();
+}
+else if ($_GET[mode] == "edit")
+{
+	SingleItemEdit_PrintForm($_GET[CSID]);
+}
+else if ($_GET[mode] == "delete")
+{
+	SingleItemDelete_PrintForm($_GET[CSID]);
+}
+else
+{
+	$_GET[mode] = "view";
+	SingleItemView();
+}
+
+
+?>
+
+<? $db->close(); ?>
+<? include ("sign.inc"); ?>
+
+</BODY>
+</HTML>

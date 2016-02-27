@@ -1,0 +1,38 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HelloWin", "HelloWin.vcproj", "{C5B8F010-A078-4FB7-9025-7C273FC03FE2}"
+	ProjectSection(ProjectDependencies) = postProject
+		{2BD64696-C3FA-448C-B4EE-2C7356C6D2CC} = {2BD64696-C3FA-448C-B4EE-2C7356C6D2CC}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "XWheelDll", "XWheelDll\XWheelDll.vcproj", "{2BD64696-C3FA-448C-B4EE-2C7356C6D2CC}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SourceCodeControl) = preSolution
+		SccNumberOfProjects = 1
+		SccProjectUniqueName0 = HelloWin.vcproj
+		SccProjectName0 = \u0022$/Utils/DDakzi\u0022,\u0020CXYAAAAA
+		SccLocalPath0 = .
+		SccProvider0 = MSSCCI:Microsoft\u0020Visual\u0020SourceSafe
+		CanCheckoutShared = false
+	EndGlobalSection
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{C5B8F010-A078-4FB7-9025-7C273FC03FE2}.Debug.ActiveCfg = Debug|Win32
+		{C5B8F010-A078-4FB7-9025-7C273FC03FE2}.Debug.Build.0 = Debug|Win32
+		{C5B8F010-A078-4FB7-9025-7C273FC03FE2}.Release.ActiveCfg = Release|Win32
+		{C5B8F010-A078-4FB7-9025-7C273FC03FE2}.Release.Build.0 = Release|Win32
+		{2BD64696-C3FA-448C-B4EE-2C7356C6D2CC}.Debug.ActiveCfg = Debug|Win32
+		{2BD64696-C3FA-448C-B4EE-2C7356C6D2CC}.Debug.Build.0 = Debug|Win32
+		{2BD64696-C3FA-448C-B4EE-2C7356C6D2CC}.Release.ActiveCfg = Release|Win32
+		{2BD64696-C3FA-448C-B4EE-2C7356C6D2CC}.Release.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal

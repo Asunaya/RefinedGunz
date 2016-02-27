@@ -1,0 +1,401 @@
+<?
+	require_once("core.php");
+	check_session();
+?>
+
+<HTML>
+<HEAD>
+<LINK REL='StyleSheet' HREF='style.css'>
+</HEAD>
+<BODY>
+
+<?php
+
+include ("dbconn.inc"); 
+
+
+function GetCommandMenu()
+{
+	return("[<a href='ShopSetItem.html?mode=add'>추가</a>]");
+}
+
+function GetBackMenu()
+{
+	return("[<a href='#' OnClick='history.back();'>뒤로</a>]");
+}
+
+function SetItemView()
+{
+	global $db;
+	global $dbName, $db_hostname, $db_username, $db_password;
+		
+	$CommandMenu = GetCommandMenu();
+	
+	//// Get SetShop List /////////////////////////////////////////////////////
+	$query = "SELECT * FROM CashSetShop";
+	$result = $db->query($query);
+	$count = $db->getNumRow();
+
+	//// Table Header /////////////////////////////////////////////////////////
+	echo("
+		<CENTER>
+		<TABLE border=0><TR><TD>
+		
+		<TABLE border=0><TR><TD>$CommandMenu</TD></TR></TABLE>
+		
+		<TABLE border=1>
+		<TR bgcolor=#EEEEEE>
+		<TD width=30 align=center>ID</TD>
+		<TD width=140 align=center>이름</TD>
+		<TD width=40 align=center>성별</TD>		
+		<TD width=40 align=center>레벨제한</TD>
+		<TD width=40 align=center>무게</TD>
+		<TD width=40 align=center>진열</TD>
+		<TD width=50 align=center>신상품</TD>
+		<TD width=40 align=center>가격</TD>
+		<TD width=100 align=center>아이콘</TD>		
+		<TD width=150 align=center>세부아이템</TD>
+		<TD width=40 align=center>명령</TD>
+		</TR>
+	");
+	
+	while ($row = $db->fetch())
+	{
+	  $cash_str = "대표: $row->CashPrice" . "<BR>";
+	  if ($row->RentType >= 1)
+	  {
+	    $db2 = new db($dbName, $db_hostname, $db_username, $db_password);
+      $query2 = "SELECT * FROM RentCashSetShopPrice where cssid=" . $row->CSSID . " ORDER BY RCSSPID";
+
+    	$result2 = $db2->query($query2);
+    	while ($row2 = $db2->fetch())
+    	{
+    	  $day = ($row2->RentHourPeriod / 24);
+    	  $day = $day . "일";
+    	  if ($row2->RentHourPeriod == NULL)
+    	  {
+    	    $day = "무제한";
+    	  }
+    	  $cash_str = $cash_str . $day . ":" . $row2->CashPrice . "<BR>";
+    	}
+	  }
+	
+		$CSSID = $row->CSSID;
+		$NAME = $row->Name;
+		$SEX = $row->ResSex;
+		$LEVEL = $row->ResLevel;
+		$WEIGHT = $row->Weight;
+		$OPENED = $row->Opened;
+		$NEWORDER = $row->NewItemOrder;
+		$PRICE = $cash_str;
+		$ICON = $row->WebImgName;
+		$DATE = $row->RegDate;
+	
+		if ($SEX == 1)
+			$SEX = '남성';
+		else if ($SEX == 2)
+			$SEX = '여성';
+		if ($SEX == 3)
+			$SEX = '혼용';
+				
+				
+    $ITEMS_STR = '';
+    $db2 = new db($dbName, $db_hostname, $db_username, $db_password);
+    $query2 = "SELECT i.Name AS ItemName FROM CashSetItem csi, CashShop cs, Item i 
+WHERE csi.CSID=cs.CSID AND cs.ItemID=i.ItemID AND CSSID=" . $row->CSSID;
+
+  	$result2 = $db2->query($query2);
+  	while ($row2 = $db2->fetch())
+  	{
+      $ITEMS_STR .= $row2->ItemName . "<BR>\n";
+  	}
+    
+    				
+		echo("
+			<TR>
+			<TD>$CSSID</TD>
+			<TD>$NAME</TD>
+			<TD>$SEX</TD>
+			<TD>$LEVEL</TD>
+			<TD>$WEIGHT</TD>
+			<TD>$OPENED</TD>
+			<TD>$NEWORDER</TD>			
+			<TD>$PRICE</TD>
+			<TD>$ICON</TD>
+			<TD>$ITEMS_STR</TD>
+			<TD><a href='ShopSetItem.html?mode=edit&CSSID=$CSSID'>수정</a>
+				<!--<a href='ShopSetItem.html?mode=delete&CSSID=$CSSID'>삭제</a>-->
+			</TD>
+			</TR>
+		");
+	}
+	
+	//// Table Footer /////////////////////////////////////////////////////////
+	echo("
+		</TABLE>
+		
+		</TD></TR>
+		<TR><TD>$CommandMenu : $count Item Listed</TD></TR>
+		</TABLE>		
+		</CENTER>
+	");
+}
+
+
+function SetItemAdd_PrintForm()
+{
+	global $db;
+	
+	//// Table Header /////////////////////////////////////////////////////
+	echo("
+		<CENTER>
+		<BR><H3>셋트상품 추가</H3>
+		<FORM action=ShopSetItemAdd.html method=post>
+		<TABLE border=1 width=400>
+		<TR>
+			<TD width=80 bgcolor=#EEEEEE>이름</TD><TD><INPUT type=text name=name style=width:99%></TD>
+		</TR>
+		<TR>
+			<TD width=80 bgcolor=#EEEEEE>성별</TD>
+			<TD>
+				<SELECT name=sex>
+					<OPTION value=1>남성용</OPTION>
+					<OPTION value=2>여성용</OPTION>
+					<OPTION value=3>혼용</OPTION>
+				</SELECT>
+			</TD>
+		</TR>
+		<TR>
+			<TD width=80 bgcolor=#EEEEEE>레벨제한</TD><TD><INPUT type=text name=level style=width:99%></TD>
+		</TR>
+		<TR>
+			<TD width=80 bgcolor=#EEEEEE>설명</TD><TD><INPUT type=text name=description style=width:99%></TD>
+		</TR>
+		<TR>
+			<TD width=80 bgcolor=#EEEEEE>상품진열</TD><TD><INPUT type=text name=opened style=width:99%></TD>
+		</TR>
+		<TR>
+			<TD width=80 bgcolor=#EEEEEE>신상품코드</TD><TD><INPUT type=text name=neworder style=width:99%></TD>
+		</TR>
+		<TR>
+			<TD width=80 bgcolor=#EEEEEE>가격</TD><TD><INPUT type=text name=price style=width:99%></TD>
+		</TR>
+		<TR>
+			<TD width=80 bgcolor=#EEEEEE>아이콘</TD><TD><INPUT type=text name=icon style=width:99%></TD>
+		</TR>
+		</TABLE>
+		<TABLE border=0 width=400>
+		<TR>
+			<TD align=right><INPUT type=submit name=additem value='추가'></TD>
+			<TD><INPUT type=reset name=addcancel value='취소' OnClick='history.back();'></TD>
+		</TR>
+		</TABLE>
+		</FORM>
+		</CENTER>
+	");
+}
+
+function SetItemDelete_PrintForm($CSSID)
+{
+	global $db;
+
+	//// Get Item Data ////////////////////////////////////////////////////////
+	$query = "SELECT * FROM CashSetShop	WHERE CSSID = $CSSID";
+	$result = $db->query($query);
+	$count = $db->getNumRow();
+	if ($count <= 0) {
+		echo("
+			<CENTER>
+				<B>아이템 '$CSSID' : 등록되지 않은 아이템입니다.</B> <BR><BR>
+				$BackMenu
+			</CENTER>
+		");
+		return;
+	}
+	
+	//// Table ////////////////////////////////////////////////////////////////
+	$row = $db->fetch();
+
+	$CSSID = $row->CSSID;
+	$NAME = $row->Name;
+	$SEX = $row->ResSex;
+	$LEVEL = $row->ResLevel;
+	$WEIGHT = $row->Weight;
+	$DESCRIPTION = $row->Description;
+	$OPENED = $row->Opened;
+	$NEWORDER = $row->NewItemOrder;
+	$PRICE = $row->CashPrice;
+	$ICON = $row->WebImgName;
+	$DATE = $row->RegDate;
+	
+	echo("
+		<CENTER>
+		<BR><H3>상품 삭제</H3>
+		<B>정말로 삭제하시겠습니까?</B><BR>
+		<FORM action=ShopSetItemDelete.html method=post>
+		<TABLE border=1 width=400>
+		<TR>
+			<TD width=60 bgcolor=#EEEEEE>CSSID</TD><TD>$CSSID</TD>
+		</TR>
+		<TR>
+			<TD width=60 bgcolor=#EEEEEE>이름</TD><TD>$NAME</TD>
+		</TR>
+		<TR>
+			<TD width=60 bgcolor=#EEEEEE>설명</TD><TD>$DESCRIPTION</TD>
+		</TR>
+		<TR>
+			<TD width=60 bgcolor=#EEEEEE>상품진열</TD><TD>$OPENED</TD>
+		</TR>
+		<TR>
+			<TD width=60 bgcolor=#EEEEEE>신상품코드</TD><TD>$NEWORDER</TD>
+		</TR>
+		<TR>
+			<TD width=60 bgcolor=#EEEEEE>아이콘</TD><TD>$ICON</TD>
+		</TR>
+		<TR>
+			<TD width=60 bgcolor=#EEEEEE>등록일</TD><TD>$DATE</TD>
+		</TR>
+		</TABLE>
+		<TABLE border=0 width=400>
+		<TR>
+			<TD align=right>
+				<INPUT type=hidden name=CSSID value='$CSSID'>
+				<INPUT type=submit name=deleteitem value='삭제'>
+			</TD>
+			<TD><INPUT type=reset name=deletecancel value='취소' OnClick='history.back();'></TD>
+		</TR>
+		</TABLE>
+		</FORM>
+		</CENTER>
+	");
+}
+
+function SetItemEdit_PrintForm($CSSID)
+{
+	global $db;
+
+	//// Get Item Data ////////////////////////////////////////////////////////
+	$query = "SELECT * FROM CashSetShop(NOLOCK) WHERE cssid=$CSSID";
+	$result = $db->query($query);
+	$count = $db->getNumRow();
+	if ($count <= 0) {
+		echo("
+			<CENTER>
+				<B>셋트아이템 '$CSSID' : 등록되지 않은 아이템입니다.</B> <BR><BR>
+				$BackMenu
+			</CENTER>
+		");
+		return;
+	}
+	
+	//// Table ////////////////////////////////////////////////////////////////
+	$row = $db->fetch();
+	
+	if ($row->ResSex == 1) {
+		$HTML_SEX = "
+				<SELECT name=itemsex>
+					<OPTION value=1 SELECTED>남성용</OPTION>
+					<OPTION value=2>여성용</OPTION>
+					<OPTION value=3>혼용</OPTION>
+				</SELECT>
+		";
+	} else if ($row->ResSex == 2) {
+		$HTML_SEX = "
+				<SELECT name=itemsex>
+					<OPTION value=1>남성용</OPTION>
+					<OPTION value=2 SELECTED>여성용</OPTION>
+					<OPTION value=3>혼용</OPTION>
+				</SELECT>
+		";
+	} else if ($row->ResSex == 3) {
+		$HTML_SEX = "
+				<SELECT name=itemsex>
+					<OPTION value=1>남성용</OPTION>
+					<OPTION value=2>여성용</OPTION>
+					<OPTION value=3 SELECTED>혼용</OPTION>
+				</SELECT>
+		";
+	}
+	
+	echo("
+		<CENTER>
+		<BR><H3>상품 수정</H3>
+		<FORM action=ShopSetItemEdit.html method=post>
+		<TABLE border=1 width=400>
+		<TR>
+			<TD width=80 bgcolor=#EEEEEE>CSSID</TD><TD>$row->CSSID</TD>
+		</TR>
+		<TR>
+			<TD width=80 bgcolor=#EEEEEE>이름</TD><TD>$row->Name</TD>
+		</TR>
+		<TR>
+			<TD width=80 bgcolor=#EEEEEE>설명</TD><TD>$row->Description</TD>
+		</TR>
+		<TR>
+			<TD width=80 bgcolor=#EEEEEE>성별</TD>
+			<TD>$HTML_SEX</TD>
+		</TR>
+		<TR>
+			<TD width=80 bgcolor=#EEEEEE>레벨</TD><TD><INPUT type=text name=itemlevel value='$row->ResLevel' style=width:99%></TD>
+		</TR>
+		<TR>
+			<TD width=80 bgcolor=#EEEEEE>무게</TD><TD>$row->Weight</TD>
+		</TR>
+		<TR>
+			<TD width=80 bgcolor=#EEEEEE>상품진열</TD><TD><INPUT type=text name=itemopened value='$row->Opened' style=width:99%></TD>
+		</TR>
+		<TR>
+			<TD width=80 bgcolor=#EEEEEE>신상품코드</TD><TD><INPUT type=text name=itemneworder value='$row->NewItemOrder' style=width:99%></TD>
+		</TR>
+		<TR>
+			<TD width=80 bgcolor=#EEEEEE>가격</TD><TD><INPUT type=text name=itemprice value='$row->CashPrice' style=width:99%></TD>
+		</TR>
+		<TR>
+			<TD width=80 bgcolor=#EEEEEE>아이콘</TD><TD><INPUT type=text name=itemicon value='$row->WebImgName' style=width:99%></TD>
+		</TR>
+		<TR>
+			<TD width=80 bgcolor=#EEEEEE>등록일</TD><TD>$row->RegDate</TD>
+		</TR>		
+		</TABLE>
+		<TABLE border=0 width=400>
+		<TR>
+			<TD align=right>
+				<INPUT type=hidden name=CSSID value='$row->CSSID'>
+				<INPUT type=submit name=edititem value='수정'>
+			</TD>
+			<TD><INPUT type=reset name=editcancel value='취소' OnClick='history.back();'></TD>
+		</TR>
+		</TABLE>
+		</FORM>
+		</CENTER>
+	");	
+}
+
+
+//// Main /////////////////////////////////////////////////////////////////////
+if ($_GET[mode] == "add")
+{
+	SetItemAdd_PrintForm();
+}
+else if ($_GET[mode] == "edit")
+{
+	SetItemEdit_PrintForm($_GET[CSSID]);
+}
+else if ($_GET[mode] == "delete")
+{
+	SetItemDelete_PrintForm($_GET[CSSID]);
+}
+else
+{
+	$_GET[mode] = "view";
+	SetItemView();
+}
+
+
+?>
+
+<? $db->close(); ?>
+<? include ("sign.inc"); ?>
+
+</BODY>
+</HTML>

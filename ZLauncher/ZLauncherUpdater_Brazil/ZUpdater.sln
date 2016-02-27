@@ -1,0 +1,21 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZUpdater", "ZUpdater.vcproj", "{2A6720C8-6698-4D87-8512-32456AB098B6}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{2A6720C8-6698-4D87-8512-32456AB098B6}.Debug.ActiveCfg = Debug|Win32
+		{2A6720C8-6698-4D87-8512-32456AB098B6}.Debug.Build.0 = Debug|Win32
+		{2A6720C8-6698-4D87-8512-32456AB098B6}.Release.ActiveCfg = Release|Win32
+		{2A6720C8-6698-4D87-8512-32456AB098B6}.Release.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal

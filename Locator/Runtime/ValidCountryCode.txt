@@ -1,0 +1,223 @@
+AD           yes  ANDORRA
+AE           yes  UNITED ARAB EMIRATES
+AF           yes  AFGHANISTAN
+AG           yes  ANTIGUA AND BARBUDA
+AI           yes  ANGUILLA
+AL           yes  ALBANIA
+AM           yes  ARMENIA
+AN           yes  NETHERLANDS ANTILLES
+AO           yes  ANGOLA
+AQ           yes  ANTARCTICA
+AR           yes  ARGENTINA
+AS           yes  AMERICAN SAMOA
+AT           yes  AUSTRIA
+AU           yes  AUSTRALIA
+AW           yes  ARUBA
+AZ           yes  AZERBAIJAN
+BA           yes  BOSNIA AND HERZEGOVINA
+BB           yes  BARBADOS
+BD           yes  BANGLADESH
+BE           yes  BELGIUM
+BG           yes  BULGARIA
+BH           yes  BAHRAIN
+BI           yes  BURUNDI
+BJ           yes  BENIN
+BM           yes  BERMUDA
+BN           yes  BRUNEI DARUSSALAM
+BO           yes  BOLIVIA
+BR           yes  BRAZIL
+BS           yes  BAHAMAS
+BT           yes  BHUTAN
+BW           yes  BOTSWANA
+BY           yes  BELARUS
+BZ           yes  BELIZE
+CA           yes  CANADA
+CD           yes  THE DEMOCRATIC REPUBLIC OF THE CONGO
+CF           yes  CENTRAL AFRICAN REPUBLIC
+CG           yes  CONGO
+CH           yes  SWITZERLAND
+CI           yes  COTE D'IVOIRE
+CK           yes  COOK ISLANDS
+CL           yes  CHILE
+CM           yes  CAMEROON
+CN           yes  CHINA
+CO           yes  COLOMBIA
+CR           yes  COSTA RICA
+CS           yes  SERBIA AND MONTENEGRO
+CU           yes  CUBA
+CV           yes  CAPE VERDE
+CY           yes  CYPRUS
+CZ           yes  CZECH REPUBLIC
+DE           yes  GERMANY
+DJ           yes  DJIBOUTI
+DK           yes  DENMARK
+DM           yes  DOMINICA
+DO           yes  DOMINICAN REPUBLIC
+DZ           yes  ALGERIA
+EC           yes  ECUADOR
+EE           yes  ESTONIA
+EG           yes  EGYPT
+ER           yes  ERITREA
+ES           yes  SPAIN
+ET           yes  ETHIOPIA
+FI           yes  FINLAND
+FJ           yes  FIJI
+FK           yes  FALKLAND ISLANDS (MALVINAS)
+FM           yes  FEDERATED STATES OF MICRONESIA
+FO           yes  FAROE ISLANDS
+FR           yes  FRANCE
+GA           yes  GABON
+GB           yes  UNITED KINGDOM
+GD           yes  GRENADA
+GE           yes  GEORGIA
+GF           yes  FRENCH GUIANA
+GH           yes  GHANA
+GI           yes  GIBRALTAR
+GL           yes  GREENLAND
+GM           yes  GAMBIA
+GN           yes  GUINEA
+GP           yes  GUADELOUPE
+GQ           yes  EQUATORIAL GUINEA
+GR           yes  GREECE
+GT           yes  GUATEMALA
+GU           yes  GUAM
+GW           yes  GUINEA-BISSAU
+GY           yes  GUYANA
+HK           yes  HONG KONG
+HN           yes  HONDURAS
+HR           yes  CROATIA
+HT           yes  HAITI
+HU           yes  HUNGARY
+ID           yes  INDONESIA
+IE           yes  IRELAND
+IL           yes  ISRAEL
+IN           yes  INDIA
+IO           yes  BRITISH INDIAN OCEAN TERRITORY
+IQ           yes  IRAQ
+IR           yes  ISLAMIC REPUBLIC OF IRAN
+IS           yes  ICELAND
+IT           yes  ITALY
+JM           yes  JAMAICA
+JO           yes  JORDAN
+JP           yes  JAPAN
+KE           yes  KENYA
+KG           yes  KYRGYZSTAN
+KH           yes  CAMBODIA
+KI           yes  KIRIBATI
+KM           yes  COMOROS
+KN           yes  SAINT KITTS AND NEVIS
+KR           no  REPUBLIC OF KOREA
+KW           yes  KUWAIT
+KY           yes  CAYMAN ISLANDS
+KZ           yes  KAZAKHSTAN
+LA           yes  LAO PEOPLE'S DEMOCRATIC REPUBLIC
+LB           yes  LEBANON
+LC           yes  SAINT LUCIA
+LI           yes  LIECHTENSTEIN
+LK           yes  SRI LANKA
+LR           yes  LIBERIA
+LS           yes  LESOTHO
+LT           yes  LITHUANIA
+LU           yes  LUXEMBOURG
+LV           yes  LATVIA
+LY           yes  LIBYAN ARAB JAMAHIRIYA
+MA           yes  MOROCCO
+MC           yes  MONACO
+MD           yes  REPUBLIC OF MOLDOVA
+MG           yes  MADAGASCAR
+MH           yes  MARSHALL ISLANDS
+MK           yes  THE FORMER YUGOSLAV REPUBLIC OF MACEDONIA
+ML           yes  MALI
+MM           yes  MYANMAR
+MN           yes  MONGOLIA
+MO           yes  MACAO
+MP           yes  NORTHERN MARIANA ISLANDS
+MQ           yes  MARTINIQUE
+MR           yes  MAURITANIA
+MT           yes  MALTA
+MU           yes  MAURITIUS
+MV           yes  MALDIVES
+MW           yes  MALAWI
+MX           yes  MEXICO
+MY           yes  MALAYSIA
+MZ           yes  MOZAMBIQUE
+NA           yes  NAMIBIA
+NC           yes  NEW CALEDONIA
+NE           yes  NIGER
+NF           yes  NORFOLK ISLAND
+NG           yes  NIGERIA
+NI           yes  NICARAGUA
+NL           yes  NETHERLANDS
+NO           yes  NORWAY
+NP           yes  NEPAL
+NR           yes  NAURU
+NU           yes  NIUE
+NZ           yes  NEW ZEALAND
+OM           yes  OMAN
+PA           yes  PANAMA
+PE           yes  PERU
+PF           yes  FRENCH POLYNESIA
+PG           yes  PAPUA NEW GUINEA
+PH           yes  PHILIPPINES
+PK           yes  PAKISTAN
+PL           yes  POLAND
+PR           yes  PUERTO RICO
+PS           yes  PALESTINIAN TERRITORY, OCCUPIED
+PT           yes  PORTUGAL
+PW           yes  PALAU
+PY           yes  PARAGUAY
+QA           yes  QATAR
+RE           yes  REUNION
+RO           yes  ROMANIA
+RU           yes  RUSSIAN FEDERATION
+RW           yes  RWANDA
+SA           yes  SAUDI ARABIA
+SB           yes  SOLOMON ISLANDS
+SC           yes  SEYCHELLES
+SD           yes  SUDAN
+SE           yes  SWEDEN
+SG           yes  SINGAPORE
+SI           yes  SLOVENIA
+SK           yes  SLOVAKIA
+SL           yes  SIERRA LEONE
+SM           yes  SAN MARINO
+SN           yes  SENEGAL
+SO           yes  SOMALIA
+SR           yes  SURINAME
+ST           yes  SAO TOME AND PRINCIPE
+SV           yes  EL SALVADOR
+SY           yes  SYRIAN ARAB REPUBLIC
+SZ           yes  SWAZILAND
+TD           yes  CHAD
+TF           yes  FRENCH SOUTHERN TERRITORIES
+TG           yes  TOGO
+TH           yes  THAILAND
+TJ           yes  TAJIKISTAN
+TK           yes  TOKELAU
+TL           yes  TIMOR-LESTE
+TM           yes  TURKMENISTAN
+TN           yes  TUNISIA
+TO           yes  TONGA
+TR           yes  TURKEY
+TT           yes  TRINIDAD AND TOBAGO
+TV           yes  TUVALU
+TW           yes  TAIWAN
+TZ           yes  UNITED REPUBLIC OF TANZANIA
+UA           yes  UKRAINE
+UG           yes  UGANDA
+US           yes  UNITED STATES
+UY           yes  URUGUAY
+UZ           yes  UZBEKISTAN
+VA           yes  HOLY SEE (VATICAN CITY STATE)
+VC           yes  SAINT VINCENT AND THE GRENADINES
+VE           yes  VENEZUELA
+VG           yes  VIRGIN ISLANDS, BRITISH
+VI           yes  VIRGIN ISLANDS, U.S.
+VN           yes  VIET NAM
+VU           yes  VANUATU
+WS           yes  SAMOA
+YE           yes  YEMEN
+YT           yes  MAYOTTE
+ZA           yes  SOUTH AFRICA
+ZM           yes  ZAMBIA
+ZW           yes  ZIMBABWE

@@ -1,0 +1,61 @@
+<STR id="ZITEM_NAME_520026">올드맨 가죽모자</STR>
+<STR id="ZITEM_DESC_520026">클래식한 매력이 돋보이는 가죽 재질의 남성용 모자. 방어구의 의미는 없을것 같지만 웬지 즐거운 일이 일어날 것만 같다.</STR>
+
+<ITEM id="520026" name="STR:ZITEM_NAME_520026" mesh_name="eq_head_musketeer3" totalpoint="0"
+ type="equip" iscashitem="true" res_sex="m" res_level="0" slot="head" weight="5" bt_price="500000" bp_solo_bonus="50"
+ hp="1" ap="1" maxwt="0" sf="0" fr="0" cr="0" pr="0" lr="0" color="#FFFFFFFF" desc="STR:ZITEM_DESC_520026" />
+
+INSERT INTO Item (ItemID, Name) Values (520026, '올드맨 가죽모자')
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=1, ResLevel=0, Slot=4, Weight=5, HP=1, AP=1, MAXWT=0, 
+Description='클래식한 매력이 돋보이는 가죽 재질의 남성용 모자. 방어구의 의미는 없을것 같지만 웬지 즐거운 일이 일어날 것만 같다.' 
+WHERE ItemID = 520026
+
+---------------------------------------------------------
+
+<STR id="ZITEM_NAME_520526">나들이 모자</STR>
+<STR id="ZITEM_DESC_520526">클래식한 매력이 돋보이는 여성용 나들이 모자. 방어구의 의미는 없어보이지만 웬지 즐거운 일이 일어날 것 같다.</STR>
+
+<ITEM id="520526" name="STR:ZITEM_NAME_520526" mesh_name="eq_head_hat" totalpoint="0"
+ type="equip" iscashitem="true" res_sex="f" res_level="0" slot="head" weight="5" bt_price="500000" bp_solo_bonus="50"
+ hp="1" ap="1" maxwt="0" sf="0" fr="0" cr="0" pr="0" lr="0" color="#FFFFFFFF" desc="STR:ZITEM_DESC_520526" />
+
+INSERT INTO Item (ItemID, Name) Values (520526, '나들이 모자')
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=2, ResLevel=0, Slot=4, Weight=5, HP=1, AP=1, MAXWT=0, 
+Description='클래식한 매력이 돋보이는 여성용 나들이 모자. 방어구의 의미는 없어보이지만 웬지 즐거운 일이 일어날 것 같다.' 
+WHERE ItemID = 520526
+
+---------------------------------------------------------
+
+<STR id="ZITEM_NAME_400011">남성용 버닝타이드 헬멧</STR>
+<STR id="ZITEM_DESC_400011">빈츠의 야심찬 브랜드 '버닝타이드' 남성용 헬멧. 열정적인 모습이 인상적.</STR>
+
+<ITEM id="400011" name="STR:ZITEM_NAME_400011" mesh_name="eq_head_helmet2" totalpoint="0"
+ type="equip" iscashitem="false" res_sex="f" res_level="0" slot="head" weight="5" bt_price="500000"
+ hp="0" ap="3" maxwt="0" sf="0" fr="0" cr="0" pr="0" lr="0" color="#FFFFFFFF" desc="STR:ZITEM_DESC_400011" />
+
+INSERT INTO Item (ItemID, Name) Values (400011, '남성용 버닝타이드 헬멧')
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=0, 
+ResSex=1, ResLevel=0, Slot=4, Weight=5, HP=0, AP=3, MAXWT=0, 
+Description='빈츠의 야심찬 브랜드 '버닝타이드' 남성용 헬멧. 열정적인 모습이 인상적.' 
+WHERE ItemID = 400011
+
+---------------------------------------------------------
+
+<STR id="ZITEM_NAME_400012">여성용 버닝타이드 헬멧</STR>
+<STR id="ZITEM_DESC_400012">빈츠의 야심찬 브랜드 '버닝타이드' 여성용 헬멧. 열정적인 모습이 인상적.</STR>
+
+<ITEM id="400012" name="STR:ZITEM_NAME_400012" mesh_name="eq_head_helmet" totalpoint="0"
+ type="equip" iscashitem="false" res_sex="f" res_level="0" slot="head" weight="5" bt_price="500000"
+ hp="0" ap="3" maxwt="0" sf="0" fr="0" cr="0" pr="0" lr="0" color="#FFFFFFFF" desc="STR:ZITEM_DESC_400012" />
+
+INSERT INTO Item (ItemID, Name) Values (400012, '여성용 버닝타이드 헬멧')
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=0, 
+ResSex=2, ResLevel=0, Slot=4, Weight=5, HP=0, AP=3, MAXWT=0, 
+Description='빈츠의 야심찬 브랜드 '버닝타이드' 여성용 헬멧. 열정적인 모습이 인상적.' 
+WHERE ItemID = 400012

@@ -1,0 +1,32 @@
+*시간 날때마다 차근차근 추가하려 합니다. 마지막 수정: 2001-04-18
+
+RealSpace
+
+::Feature
+* DX 8 기반
+* Heightmap & LOD 지원 (64x64 ~ 512x512)
+* 3DSMax 모델/애니메이션 익스포터
+* 한개의 directional light, 다수의 point light
+* particle system
+
+::알려진 문제점.
+1. RSVisualObject의 Non-Uniform Scaling시에 boundingbox Test가 실패함. ( 화면에 안나올수있음 )
+
+
+
+RealSpace BatchExporter for 3dsmax 3.1
+
+::지원하는 텍스쳐 포맷
+* 현재 bmp 만 지원
+* bmp사이즈 가로,세로 각각 1,2,4,8,16,32,64,128,256 중 하나여야 하며 
+  비율은 1:8 1:4 1:2 1:1 2:1 4:1 8:1 중 하나여야 함.
+
+::지원하는 애니메이션 (두경우 모두 sampling 방식을 취함)
+* Transform animation ( Translation, Rotation, Scaling )
+* Vertex animation ( morphing, character studio )
+
+::규칙들
+* object의 이름 맨 앞자리가 _로 시작하면 vertex animation 생략
+* object의 이름이 algn0로 시작하면 피벗의 -y 방향을 카메라방향으로 맞춤
+* object의 이름이 algn1로 시작하면 피벗의 z 방향을 축으로 회전하면서 -y 방향을 카메라방향으로 맞춤.
+* scheme에 관한 규칙들은 ASSSchemeManager.h를 참조.

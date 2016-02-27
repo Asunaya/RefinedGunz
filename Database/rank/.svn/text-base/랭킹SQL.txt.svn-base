@@ -1,0 +1,140 @@
+/* 전체랭킹 산출 */
+TRUNCATE TABLE TotalRanking
+
+
+insert into TotalRanking(Rank, UserID, Name, Level, XP, KillCount, DeathCount)
+
+
+SELECT 
+
+(SELECT count(*)+1 from Character b(nolock)
+ WHERE a.xp < b.xp AND a.deleteflag=0 AND b.deleteflag=0) AS Rank,
+
+	Account.UserID,	a.Name, a.Level, a.XP, a.KillCount, a.DeathCount
+	FROM Character a(nolock), Account 
+	WHERE Account.AID = a.AID AND a.deleteflag=0
+	ORDER BY a.xp DESC, a.level DESC
+
+
+//
+
+
+
+
+
+
+
+
+--------------------------------------------------
+
+TRUNCATE TABLE ModeRanking
+
+
+insert into ModeRanking(name, level, md1point, md1rank)
+
+SELECT TOP 1000
+
+name, level, md1point,
+
+(SELECT count(*)+1 from Character b
+ WHERE a.md1point < b.md1point AND a.deleteflag=0 AND b.deleteflag=0) AS md1rank
+
+
+FROM Character a 
+WHERE a.deleteflag=0
+order by a.md1point desc, a.level desc
+
+
+insert into ModeRanking(name, level, md2point, md2rank)
+
+SELECT TOP 1000
+
+name, level, md2point,
+
+(SELECT count(*)+1 from Character b
+ WHERE a.md2point < b.md2point AND a.deleteflag=0 AND b.deleteflag=0) AS md2rank
+
+
+FROM Character a 
+WHERE a.deleteflag=0
+order by a.md2point desc, a.level desc
+
+
+insert into ModeRanking(name, level, md3point, md3rank)
+
+SELECT TOP 1000
+
+name, level, md3point,
+
+(SELECT count(*)+1 from Character b
+ WHERE a.md3point < b.md3point AND a.deleteflag=0 AND b.deleteflag=0) AS md3rank
+
+
+FROM Character a 
+WHERE a.deleteflag=0
+order by a.md3point desc, a.level desc
+
+
+insert into ModeRanking(name, level, md4point, md4rank)
+
+SELECT TOP 1000
+
+name, level, md4point,
+
+(SELECT count(*)+1 from Character b
+ WHERE a.md4point < b.md4point AND a.deleteflag=0 AND b.deleteflag=0) AS md4rank
+
+
+FROM Character a 
+WHERE a.deleteflag=0
+order by a.md4point desc, a.level desc
+
+
+
+
+//
+TRUNCATE TABLE WeekRanking
+
+
+insert into WeekRanking(name, level, point, rank)
+
+
+SELECT TOP 1000 name, level, (a.weekpoint) AS point,
+
+(SELECT count(*)+1 from Character b
+ WHERE a.weekpoint < b.weekpoint AND a.deleteflag=0 AND b.deleteflag=0) AS Rank
+
+FROM Character a 
+WHERE a.deleteflag=0
+order by a.weekpoint desc, a.level desc
+
+UPDATE Character set weekpoint = 0
+
+
+insert into WeekHonorRanking(name, level, point, rank, date)
+SELECT TOP 3 name, level, point, rank, GETDATE() as date
+FROM WeekRanking order by id 
+
+
+//
+TRUNCATE TABLE MonthRanking
+
+
+insert into MonthRanking(name, level, point, rank)
+
+
+SELECT TOP 1000 name, level, (a.monthpoint) AS point,
+
+(SELECT count(*)+1 from Character b
+ WHERE a.monthpoint < b.monthpoint AND a.deleteflag=0 AND b.deleteflag=0) AS Rank
+
+FROM Character a 
+WHERE a.deleteflag=0
+order by a.monthpoint desc, a.level desc
+
+UPDATE Character set monthpoint = 0
+
+
+insert into MonthHonorRanking(name, level, point, rank, date)
+SELECT TOP 3 name, level, point, rank, GETDATE() as date
+FROM MonthRanking order by id 

@@ -1,0 +1,91 @@
+-- 현제 달을 기준으로 특정 달수 이전 달을 구함( ex. 2004-10-01 )
+CREATE PROC spGetAgoMonth
+	@DiffMonth int
+,	@AgoMonth datetime OUTPUT
+AS
+	DECLARE @FirstDayOfMonth datetime
+	DECLARE @CurDate varchar( 30 )
+	DECLARE @DiffDay int
+	
+	SELECT @CurDate = CONVERT( varchar(30), GETDATE(), 2 )
+	SELECT @DiffDay = DATEPART( dd, GETDATE() )
+
+	SET @DiffDay = @DiffDay - 1
+
+	SELECT @FirstDayOfMonth = DATEADD( dd, -@DiffDay, @CurDate )
+
+	SELECT @AgoMonth = DATEADD( mm, -(@DiffMonth - 1), @FirstDayOfMonth )
+
+
+---------------------------------------------------------------------------------
+
+
+-- CharacterMakingLog
+DECLARE @Date datetime
+
+EXEC spGetAgoMonth 3, @Date OUTPUT
+
+DELETE FROM CharacterMakingLog WHERE Date < @Date
+
+
+
+-- PlayerLog
+DECLARE @Date datetime
+
+EXEC spGetAgoMonth 3, @Date OUTPUT
+
+DELETE FROM PlayerLog WHERE DisTime < @Date
+
+
+
+-- ConnLog
+DECLARE @Date datetime
+
+EXEC spGetAgoMonth 3, @Date OUTPUT
+
+DELETE FROM ConnLog WHERE Time < @Date
+
+
+
+-- GameLog
+DECLARE @Date datetime
+
+EXEC spGetAgoMonth 3, @Date OUTPUT
+
+DELETE FROM GameLog WHERE StartTime < @Date
+
+
+
+-- LevelUpLog
+DECLARE @Date datetime
+
+EXEC spGetAgoMonth 3, @Date OUTPUT
+
+DELETE FROM LevelUpLog WHERE Date < @Date
+
+
+
+-- BringAccountItemLog
+DECLARE @Date datetime
+
+EXEC spGetAgoMonth 3, @Date OUTPUT
+
+DELETE FROM BringAccountItemLog WHERE Date < @Date
+
+
+
+-- ClanGameLog
+DECLARE @Date datetime
+
+EXEC spGetAgoMonth 3, @Date OUTPUT
+
+DELETE FROM ClanGameLog WHERE RegDate < @Date
+
+
+
+-- ServerLog
+DECLARE @Date datetime
+
+EXEC spGetAgoMonth 3, @Date OUTPUT
+
+DELETE FROM ServerLog WHERE Time < @Date

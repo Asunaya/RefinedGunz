@@ -1,0 +1,306 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Doc">
+      <UniqueIdentifier>{d6298b7d-935c-46dc-820e-7cf19ad2cbdc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Model">
+      <UniqueIdentifier>{c24cf236-53ca-492c-adf6-d5bc7af30b71}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Model\Animation">
+      <UniqueIdentifier>{60138073-4ffa-44a4-8e89-f0c1d9b17e4d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Model\Cloth">
+      <UniqueIdentifier>{2b15d6c3-7290-46ec-980f-051a221ddf9a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Map">
+      <UniqueIdentifier>{51b67a4b-fbeb-4821-a61a-4d8acb95c77c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Map\Navigation">
+      <UniqueIdentifier>{fbac6d65-319b-4596-abb7-225d7d543eaf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Util">
+      <UniqueIdentifier>{672507d7-bcc6-4da0-89d1-c4c955d3d7ca}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Doc\맵 디자인 규칙 문서.txt">
+      <Filter>Doc</Filter>
+    </None>
+    <None Include="doc\캐릭터 디자인 규칙 문서.txt">
+      <Filter>Doc</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Source\RHalfEdgeMesh.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RMesh.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="source\RMesh_Frame.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="source\RMesh_Load.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="source\RMesh_Mtrl.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="source\RMesh_Render.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="source\RMeshMgr.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="source\RMeshNode.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RMeshNodeData.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RMeshNodeStringTable.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="source\RMeshUtil.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RMtrl.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="source\RVisualMesh.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="source\RVisualMeshMgr.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="source\RVisualMeshUtil.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="source\RAnimation.cpp">
+      <Filter>Model\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RAnimationFile.cpp">
+      <Filter>Model\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="source\RAnimationMgr.cpp">
+      <Filter>Model\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RAnimationNode.cpp">
+      <Filter>Model\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RBoundary.cpp">
+      <Filter>Model\Cloth</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RCharCloth.cpp">
+      <Filter>Model\Cloth</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RCloth.cpp">
+      <Filter>Model\Cloth</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RCylinder.cpp">
+      <Filter>Model\Cloth</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RSphere.cpp">
+      <Filter>Model\Cloth</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RBspObject.cpp">
+      <Filter>Map</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RCollisionDetection.cpp">
+      <Filter>Map</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RDummyList.cpp">
+      <Filter>Map</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RDynamicLight.cpp">
+      <Filter>Map</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RLenzFlare.cpp">
+      <Filter>Map</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RLightList.cpp">
+      <Filter>Map</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RMaterialList.cpp">
+      <Filter>Map</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ROcclusionList.cpp">
+      <Filter>Map</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RPVS.cpp">
+      <Filter>Map</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RRoam.cpp">
+      <Filter>Map</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RSolidBsp.cpp">
+      <Filter>Map</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RAStar.cpp">
+      <Filter>Map\Navigation</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RNavigationMesh.cpp">
+      <Filter>Map\Navigation</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RNavigationNode.cpp">
+      <Filter>Map\Navigation</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RBaseTexture.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RCamera.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RError.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RFont.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RParticleSystem.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RShaderMgr.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RToken.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RealSpace2.cpp" />
+    <ClCompile Include="Source\RFrameWork.cpp" />
+    <ClCompile Include="Source\RTypes.cpp" />
+    <ClCompile Include="Source\stdafx.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Include\RHalfEdgeMesh.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\RMesh.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="INCLUDE\RMeshMgr.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\RMeshNode.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\RMeshNodeData.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\RMeshNodeStringTable.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="INCLUDE\RMeshUtil.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\RMtrl.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\RVisualMesh.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="INCLUDE\RVisualMeshMgr.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\RVisualMeshUtil.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\RAnimation.h">
+      <Filter>Model\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\RAnimationDef.h">
+      <Filter>Model\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\RAnimationFile.h">
+      <Filter>Model\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="INCLUDE\RAnimationMgr.h">
+      <Filter>Model\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\RAnimationNode.h">
+      <Filter>Model\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\RBoundary.h">
+      <Filter>Model\Cloth</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\RCharCloth.h">
+      <Filter>Model\Cloth</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\RCloth.h">
+      <Filter>Model\Cloth</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\RCylinder.h">
+      <Filter>Model\Cloth</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\RSphere.h">
+      <Filter>Model\Cloth</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\RBspObject.h">
+      <Filter>Map</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\RCollisionDetection.h">
+      <Filter>Map</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\RDummyList.h">
+      <Filter>Map</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\RDynamicLight.h">
+      <Filter>Map</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\RLenzFlare.h">
+      <Filter>Map</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\RLightList.h">
+      <Filter>Map</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\RMaterialList.h">
+      <Filter>Map</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\ROcclusionList.h">
+      <Filter>Map</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\RRoam.h">
+      <Filter>Map</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\RSolidBsp.h">
+      <Filter>Map</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\RAStar.h">
+      <Filter>Map\Navigation</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\RLine.h">
+      <Filter>Map\Navigation</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\RNavigationMesh.h">
+      <Filter>Map\Navigation</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\RNavigationNode.h">
+      <Filter>Map\Navigation</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\RBaseTexture.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\RError.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\RFont.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\RParticleSystem.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\RShaderMgr.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\RToken.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\RealSpace2.h" />
+    <ClInclude Include="Include\RFrameWork.h" />
+    <ClInclude Include="Include\RNameSpace.h" />
+    <ClInclude Include="Include\RTypes.h" />
+    <ClInclude Include="Include\RVersions.h" />
+    <ClInclude Include="Include\stdafx.h" />
+  </ItemGroup>
+</Project>

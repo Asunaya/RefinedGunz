@@ -1,0 +1,60 @@
+1000,1,Member
+1100,1,See Member List
+1110,1,Membership Registration/Alteration
+1120,1,Setup Rights by Grade
+1200,1,Password Alteration  
+1300,1,Verify Business Log  
+1400,1,Forbidden Word See/Register  
+2000,2,Server  
+2100,2,See Server Information  
+2110,2,Server Open/Close  
+3000,3,User
+3100,3,See Member Information  
+3110,3,UGrade Alteration  
+3500,3,See CashItem Use Log  
+3120,3,Member Alteration  
+3130,3,See Character Delete Log  
+3131,3,Character Delete/Restoration  
+3132,3,Character Restoration Register  
+3140,3,CashItem Refund/Exchange Register  
+3150,3,CashItem Delete  
+3160,3,CashItem Add  
+3200,3,See Character Information  
+3210,3,Character Information Alteration  
+3600,3,BountyItem Purchase Log  
+4000,4,Treatment Record  
+4100,4,CashItem Refund Approval  
+3220,3,BountyItem Delete  
+3230,3,BountyItem Add  
+4200,4,CashItem Exchange Approval  
+4300,4,CashItem Payment Approval  
+4400,4,CashItem Manual Process  
+3300,3,See Clan Information  
+3310,3,Clan Information Alteration  
+3320,3,Clan Delete  
+3330,3,Clan Making  
+3400,3,See CashItem Purchase Log  
+4500,4,Character Restoration Approval  
+4600,4,Character Manual Process  
+4700,4,Etc Report Manul Process  
+5000,5,Statistic  
+5100,5,User Statistic  
+5200,5,Charging Fee Statistic  
+5300,5,Event Statistic  
+6000,6,Forum  
+6100,6,Forum FAQ  
+6110,6,See Forum FAQ   
+6120,6,Forum FAQ Register  
+6130,6,Forum FAQ Management  
+6200,6,Free Bulletin Board  
+6210,6,See Free Bulletin Board  
+6220,6,Free Bulletin Board Register  
+6230,6,Free Bulletin Board Management  
+6300,6,Communication by Team  
+6310,6,See Communication by Team  
+6320,6,Communication by Team Register  
+6330,6,Communication by Team Management  
+7000,7,Chatting Report
+7100,7,Report Record
+7110,7,See Report Record
+7120,7,Report Treatment

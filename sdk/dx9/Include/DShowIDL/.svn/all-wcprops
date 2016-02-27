@@ -1,0 +1,215 @@
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/DShowIDL
+END
+dyngraph.idl
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/DShowIDL/dyngraph.idl
+END
+Videoacc.idl
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/DShowIDL/Videoacc.idl
+END
+dshowasf.idl
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/DShowIDL/dshowasf.idl
+END
+bdaiface.idl
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/DShowIDL/bdaiface.idl
+END
+axextend.idl
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/DShowIDL/axextend.idl
+END
+Vmrender.idl
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/DShowIDL/Vmrender.idl
+END
+Msvidctl.idl
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/DShowIDL/Msvidctl.idl
+END
+medparam.idl
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/DShowIDL/medparam.idl
+END
+regbag.idl
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/DShowIDL/regbag.idl
+END
+dvdif.idl
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/DShowIDL/dvdif.idl
+END
+tuner.idl
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/DShowIDL/tuner.idl
+END
+Mstvca.idl
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/DShowIDL/Mstvca.idl
+END
+mixerocx.idl
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/DShowIDL/mixerocx.idl
+END
+sbe.idl
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/DShowIDL/sbe.idl
+END
+amstream.idl
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/DShowIDL/amstream.idl
+END
+mediaobj.idl
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/DShowIDL/mediaobj.idl
+END
+austream.idl
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/DShowIDL/austream.idl
+END
+axcore.idl
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/DShowIDL/axcore.idl
+END
+tvratings.idl
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/DShowIDL/tvratings.idl
+END
+dxtrans.idl
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/DShowIDL/dxtrans.idl
+END
+Mstvgs.idl
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/DShowIDL/Mstvgs.idl
+END
+dmodshow.idl
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/DShowIDL/dmodshow.idl
+END
+mmstream.idl
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/DShowIDL/mmstream.idl
+END
+control.odl
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/DShowIDL/control.odl
+END
+Bdatif.idl
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/DShowIDL/Bdatif.idl
+END
+vmr9.idl
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/DShowIDL/vmr9.idl
+END
+mstve.idl
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/DShowIDL/mstve.idl
+END
+Mpeg2Structs.idl
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/DShowIDL/Mpeg2Structs.idl
+END
+Segment.idl
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/DShowIDL/Segment.idl
+END
+devenum.idl
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/DShowIDL/devenum.idl
+END
+ddstream.idl
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/DShowIDL/ddstream.idl
+END
+strmif.idl
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/DShowIDL/strmif.idl
+END
+Mpeg2Data.idl
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/DShowIDL/Mpeg2Data.idl
+END
+qedit.idl
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/DShowIDL/qedit.idl
+END
+vidcap.idl
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/DShowIDL/vidcap.idl
+END

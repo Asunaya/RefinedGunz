@@ -1,0 +1,905 @@
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include
+END
+tuner.h
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/tuner.h
+END
+mixerocx.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/mixerocx.h
+END
+d3dx9anim.h
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/d3dx9anim.h
+END
+dmoimpl.h
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/dmoimpl.h
+END
+ddraw.h
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/ddraw.h
+END
+mpconfig.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/mpconfig.h
+END
+dxva.h
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/dxva.h
+END
+d3d8.h
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/d3d8.h
+END
+d3dvec.inl
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/d3dvec.inl
+END
+d3dx9xof.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/d3dx9xof.h
+END
+dvoice.h
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/dvoice.h
+END
+dplay.h
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/dplay.h
+END
+d3drm.h
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/d3drm.h
+END
+sbe.h
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/sbe.h
+END
+d3d9caps.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/d3d9caps.h
+END
+bdatypes.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/bdatypes.h
+END
+errors.h
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/errors.h
+END
+dxerr8.h
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/dxerr8.h
+END
+ks.h
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/ks.h
+END
+dvdmedia.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/dvdmedia.h
+END
+dmoreg.h
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/dmoreg.h
+END
+ksproxy.h
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/ksproxy.h
+END
+Msvidctl.tlb
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/Msvidctl.tlb
+END
+control.h
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/control.h
+END
+dxtrans.h
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/dxtrans.h
+END
+edevdefs.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/edevdefs.h
+END
+bdamedia.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/bdamedia.h
+END
+uuids.h
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/uuids.h
+END
+d3dx9.h
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/d3dx9.h
+END
+dmusici.h
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/dmusici.h
+END
+vmr9.h
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/vmr9.h
+END
+DxDiag.h
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/DxDiag.h
+END
+ddstream.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/ddstream.h
+END
+d3dx8math.h
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/d3dx8math.h
+END
+d3dx9core.h
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/d3dx9core.h
+END
+multimon.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/multimon.h
+END
+strmif.h
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/strmif.h
+END
+vidcap.h
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/vidcap.h
+END
+d3dxmath.inl
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/d3dxmath.inl
+END
+strsafe.h
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/strsafe.h
+END
+dv.h
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/dv.h
+END
+dpnathlp.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/dpnathlp.h
+END
+d3dx8tex.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/d3dx8tex.h
+END
+vpconfig.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/vpconfig.h
+END
+dmo.h
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/dmo.h
+END
+d3dx9shader.h
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/d3dx9shader.h
+END
+Amvideo.h
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/Amvideo.h
+END
+Tuner.tlb
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/Tuner.tlb
+END
+d3d9types.h
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/d3d9types.h
+END
+d3dxsprite.h
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/d3dxsprite.h
+END
+mpegtype.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/mpegtype.h
+END
+Mstvca.h
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/Mstvca.h
+END
+dvdevcod.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/dvdevcod.h
+END
+d3dx.h
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/d3dx.h
+END
+d3d9.h
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/d3d9.h
+END
+d3d8caps.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/d3d8caps.h
+END
+dxfile.h
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/dxfile.h
+END
+dmusbuff.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/dmusbuff.h
+END
+ksmedia.h
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/ksmedia.h
+END
+dxerr9.h
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/dxerr9.h
+END
+videoacc.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/videoacc.h
+END
+dplobby8.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/dplobby8.h
+END
+mmstream.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/mmstream.h
+END
+d3d8types.h
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/d3d8types.h
+END
+d3drmdef.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/d3drmdef.h
+END
+dx7todx8.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/dx7todx8.h
+END
+dmusicf.h
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/dmusicf.h
+END
+d3dx8core.h
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/d3dx8core.h
+END
+mpeg2data.h
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/mpeg2data.h
+END
+d3d.h
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/d3d.h
+END
+d3dxerr.h
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/d3dxerr.h
+END
+DShow.h
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/DShow.h
+END
+Mpeg2Error.h
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/Mpeg2Error.h
+END
+d3drmwin.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/d3drmwin.h
+END
+vptype.h
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/vptype.h
+END
+Mpeg2Bits.h
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/Mpeg2Bits.h
+END
+Mstve.h
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/Mstve.h
+END
+xprtdefs.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/xprtdefs.h
+END
+dplay8.h
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/dplay8.h
+END
+playlist.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/playlist.h
+END
+d3dx9mesh.h
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/d3dx9mesh.h
+END
+rmxftmpl.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/rmxftmpl.h
+END
+tune.h
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/tune.h
+END
+d3dxmath.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/d3dxmath.h
+END
+vpnotify.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/vpnotify.h
+END
+amaudio.h
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/amaudio.h
+END
+PixPlugin.h
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/PixPlugin.h
+END
+dmodshow.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/dmodshow.h
+END
+amva.h
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/amva.h
+END
+basetsd.h
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/basetsd.h
+END
+ksuuids.h
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/ksuuids.h
+END
+dmusicc.h
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/dmusicc.h
+END
+amparse.h
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/amparse.h
+END
+dplobby.h
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/dplobby.h
+END
+Iwstdec.h
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/Iwstdec.h
+END
+Segment.h
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/Segment.h
+END
+dls1.h
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/dls1.h
+END
+dsetup.h
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/dsetup.h
+END
+qedit.h
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/qedit.h
+END
+dmusics.h
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/dmusics.h
+END
+dinputd.h
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/dinputd.h
+END
+qnetwork.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/qnetwork.h
+END
+dsconf.h
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/dsconf.h
+END
+d3dx9shape.h
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/d3dx9shape.h
+END
+dmplugin.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/dmplugin.h
+END
+d3dcaps.h
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/d3dcaps.h
+END
+dmksctrl.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/dmksctrl.h
+END
+Msvidctl.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/Msvidctl.h
+END
+rmxfguid.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/rmxfguid.h
+END
+aviriff.h
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/aviriff.h
+END
+regbag.h
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/regbag.h
+END
+dsound.h
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/dsound.h
+END
+d3dtypes.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/d3dtypes.h
+END
+d3dx8math.inl
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/d3dx8math.inl
+END
+d3dx9math.inl
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/d3dx9math.inl
+END
+dmdls.h
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/dmdls.h
+END
+dinput.h
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/dinput.h
+END
+d3drmobj.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/d3drmobj.h
+END
+evcode.h
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/evcode.h
+END
+d3dx8effect.h
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/d3dx8effect.h
+END
+d3dx8mesh.h
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/d3dx8mesh.h
+END
+edevctrl.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/edevctrl.h
+END
+d3dx9effect.h
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/d3dx9effect.h
+END
+amstream.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/amstream.h
+END
+mediaobj.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/mediaobj.h
+END
+dmerror.h
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/dmerror.h
+END
+d3dx8shape.h
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/d3dx8shape.h
+END
+d3dxcore.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/d3dxcore.h
+END
+d3dx9tex.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/d3dx9tex.h
+END
+austream.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/austream.h
+END
+tvratings.h
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/tvratings.h
+END
+activecf.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/activecf.h
+END
+dmort.h
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/dmort.h
+END
+atsmedia.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/atsmedia.h
+END
+mediaerr.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/mediaerr.h
+END
+dvp.h
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/dvp.h
+END
+Bdatif.h
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/Bdatif.h
+END
+audevcod.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/audevcod.h
+END
+d3dx8.h
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/d3dx8.h
+END
+comlite.h
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/comlite.h
+END
+vfwmsgs.h
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/vfwmsgs.h
+END
+dpaddr.h
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/dpaddr.h
+END
+dls2.h
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/dls2.h
+END
+d3dx9math.h
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/d3dx9math.h
+END
+d3dxshapes.h
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/d3dxshapes.h
+END
+dshowasf.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/dshowasf.h
+END
+bdaiface.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/bdaiface.h
+END
+il21dec.h
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/il21dec.h
+END
+medparam.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/medparam.h
+END
+ksguid.h
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/Gunz/!svn/ver/4866/Develop/sdk/dx9/Include/ksguid.h
+END

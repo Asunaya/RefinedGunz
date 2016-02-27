@@ -1,0 +1,209 @@
+K 25
+svn:wc:ra_dav:version-url
+V 42
+/svn/Gunz/!svn/ver/7495/Develop/MatchAgent
+END
+stdafx.h
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/Gunz/!svn/ver/4866/Develop/MatchAgent/stdafx.h
+END
+MatchAgentDoc.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/Gunz/!svn/ver/7495/Develop/MatchAgent/MatchAgentDoc.cpp
+END
+MAgentConfig.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/Gunz/!svn/ver/7495/Develop/MatchAgent/MAgentConfig.cpp
+END
+MStageAgent.h
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/Gunz/!svn/ver/4866/Develop/MatchAgent/MStageAgent.h
+END
+MatchAgentView.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/Gunz/!svn/ver/7495/Develop/MatchAgent/MatchAgentView.cpp
+END
+MDebugUtil.h
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/Gunz/!svn/ver/4866/Develop/MatchAgent/MDebugUtil.h
+END
+MAgentClient.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/Gunz/!svn/ver/7495/Develop/MatchAgent/MAgentClient.cpp
+END
+MatchAgent.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/Gunz/!svn/ver/7495/Develop/MatchAgent/MatchAgent.cpp
+END
+CommandLogView.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/Gunz/!svn/ver/4866/Develop/MatchAgent/CommandLogView.cpp
+END
+MatchAgent.sln
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/Gunz/!svn/ver/7495/Develop/MatchAgent/MatchAgent.sln
+END
+MMatchAgent.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/7495/Develop/MatchAgent/MMatchAgent.cpp
+END
+stdafx.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/Gunz/!svn/ver/4866/Develop/MatchAgent/stdafx.cpp
+END
+resource.h
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/Gunz/!svn/ver/7495/Develop/MatchAgent/resource.h
+END
+MatchAgent.rc
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/Gunz/!svn/ver/7495/Develop/MatchAgent/MatchAgent.rc
+END
+ChildFrm.h
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/Gunz/!svn/ver/4866/Develop/MatchAgent/ChildFrm.h
+END
+MainFrm.h
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/Gunz/!svn/ver/4866/Develop/MatchAgent/MainFrm.h
+END
+MStageAgent.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/MatchAgent/MStageAgent.cpp
+END
+MBMatchAgent.h
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/Gunz/!svn/ver/7495/Develop/MatchAgent/MBMatchAgent.h
+END
+OutputView.h
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/Gunz/!svn/ver/4866/Develop/MatchAgent/OutputView.h
+END
+MDebugUtil.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/Gunz/!svn/ver/4866/Develop/MatchAgent/MDebugUtil.cpp
+END
+MAgentConfig.h
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/Gunz/!svn/ver/7495/Develop/MatchAgent/MAgentConfig.h
+END
+MatchAgentDoc.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/7495/Develop/MatchAgent/MatchAgentDoc.h
+END
+ExceptionAttacher.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/Gunz/!svn/ver/7495/Develop/MatchAgent/ExceptionAttacher.cpp
+END
+MatchAgentView.h
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/Gunz/!svn/ver/4866/Develop/MatchAgent/MatchAgentView.h
+END
+MAgentClient.h
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/Gunz/!svn/ver/7495/Develop/MatchAgent/MAgentClient.h
+END
+CommandLogView.h
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/Gunz/!svn/ver/4866/Develop/MatchAgent/CommandLogView.h
+END
+MatchAgent.h
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/Gunz/!svn/ver/4866/Develop/MatchAgent/MatchAgent.h
+END
+ChildFrm.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/Gunz/!svn/ver/4866/Develop/MatchAgent/ChildFrm.cpp
+END
+MainFrm.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/Gunz/!svn/ver/4866/Develop/MatchAgent/MainFrm.cpp
+END
+ReadMe.txt
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/Gunz/!svn/ver/4866/Develop/MatchAgent/ReadMe.txt
+END
+MBMatchAgent.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/Gunz/!svn/ver/7495/Develop/MatchAgent/MBMatchAgent.cpp
+END
+OutputView.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/Gunz/!svn/ver/4866/Develop/MatchAgent/OutputView.cpp
+END
+MatchAgent.vcproj
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/Gunz/!svn/ver/7495/Develop/MatchAgent/MatchAgent.vcproj
+END
+MMatchAgent.h
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/Gunz/!svn/ver/7495/Develop/MatchAgent/MMatchAgent.h
+END

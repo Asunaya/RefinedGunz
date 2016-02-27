@@ -1,0 +1,64 @@
+<?
+	require_once("core.php");
+	check_session();
+?>
+<?php
+
+include ("dbconn.inc");
+
+
+function PenaltyLogView()
+{
+	global $db;
+
+	$COUNT_PER_PAGE = 100;
+
+	//// Get PenaltyLog List /////////////////////////////////////////////////////
+	$query = "SELECT TOP $COUNT_PER_PAGE a.UserID AS UserID, ug.Name AS UGrade, pl.Date AS Date FROM PenaltyLog pl(nolock), Account a(nolock), UserGrade ug(nolock) WHERE pl.AID=a.aid AND pl.UGradeID = ug.UGradeID order by id desc";
+	$result = $db->query($query);
+	$count = $db->getNumRow();
+
+
+	//// Table Header /////////////////////////////////////////////////////////
+	echo("
+		<CENTER>
+		<B>최근 불량 유저 처리 로그</B><BR>
+		<TABLE border=1 font=2>
+		<TR bgcolor=#EEEEEE>
+		<TD width=80 align=center>계정</TD>
+		<TD width=80 align=center>등급</TD>
+		<TD width=40 align=center>날짜</TD>
+	");
+
+	while ($row = $db->fetch())
+	{
+		$ACCOUNT = $row->UserID;
+		$UGrade = $row->UGrade;
+		$DATE = $row->Date;
+
+		echo("
+			<TR>
+			<TD>$ACCOUNT</TD>
+			<TD>$UGrade</TD>
+			<TD>$DATE</TD>
+			</TR>
+		");
+	}
+
+	//// Table Footer /////////////////////////////////////////////////////////
+	echo("
+		</TABLE>
+
+		</TD></TR>
+		</TABLE>
+		</CENTER>
+	");
+}
+
+//// Main /////////////////////////////////////////////////////////////////////
+PenaltyLogView();
+
+?>
+
+<? $db->close(); ?>
+<? include ("sign.inc"); ?>

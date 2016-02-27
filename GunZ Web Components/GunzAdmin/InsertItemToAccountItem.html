@@ -1,0 +1,162 @@
+<?
+	require_once("core.php");
+	check_session();
+
+	if ($_POST['mode'] == "confirm")
+	{
+		setcookie("ck_gap_ai_itemid", $_POST['itemid'], time()+43200);
+	}
+	else
+	{
+		$ck_itemid = stripslashes($_COOKIE["ck_gap_ai_itemid"]);
+	}
+
+?>
+<HTML>
+<BODY>
+<?php
+
+
+$r_userid = $_POST['userid'];
+$r_mode = $_POST['mode'];
+
+include ("dbconn.inc");
+
+echo("<CENTER><H1>중앙은행에 아이템 추가</H1></CENTER>\n");
+
+if ($r_mode == "")
+{
+  $query = "SELECT i.ItemID AS ItemID, i.Name AS ItemName FROM Item i(nolock) ORDER by i.Name";
+  $result = $db->query($query);
+
+  echo("
+  <FORM action='./InsertItemToAccountItem.html' method=post name=f>
+  <TABLE border=1>
+  <TR>
+  <TD>넷마블 아이디</TD>
+  <TD><INPUT type=text name=userid value=''></TD>
+");
+
+  echo("<TD><SELECT name='itemid'>\n");
+  while ($row = $db->fetch())
+  {
+	  echo ("ck = $ck_itemid");
+	  $sel_str = "";
+	  if (($ck_itemid) && ($ck_itemid == $row->ItemID))
+	  {
+		$sel_str = "selected";
+	  }
+	echo("<OPTION value=$row->ItemID $sel_str> $row->ItemName </OPTION>\n");
+  }
+  echo("</SELECT></TD>\n");
+
+  echo("
+  <TD><INPUT type=hidden name=mode value='confirm'>
+  <INPUT type=submit value='구매가능확인'></TD>
+  </TR>
+  </TABLE>
+  </FORM>
+  <SCRIPT>
+	f.userid.focus();
+	</SCRIPT>
+
+  ");
+
+
+} // if ($r_mode == "")
+###################################################################
+else if ($r_mode == "confirm")
+{
+	if ($r_userid == "")
+	{
+		echo("넷마블 ID가 존재하지 않습니다.\n");
+		_DBExit();
+	}
+
+	$r_itemid = $_POST['itemid'];
+	if ($r_itemid == "")
+	{
+		echo("아이템이 존재하지 않습니다.\n");
+		_DBExit();
+	}
+
+	view_db_account_info($r_userid);
+
+	echo("<BR><BR>\n");
+	view_db_item_info($r_itemid);
+
+
+    echo("<BR><BR>
+<FORM name='form' action='./InsertItemToAccountItem.html' method=post>
+<INPUT type=hidden name='mode' value='process'>
+<INPUT type=hidden name='userid' value='$r_userid'>
+<INPUT type=hidden name='itemid' value='$r_itemid'>
+<TABLE>
+<TR>
+<TD>구입하시겠습니까?</TD>
+<TD><INPUT type=submit value='구입'></TD>
+</TR>
+</TABLE>
+</FORM>
+");
+
+
+
+
+}   // else if ($r_mode == "confirm")
+###################################################################
+else if ($r_mode == "process")
+{
+    $r_itemid = $_POST['itemid'];
+    if ($r_itemid == "")
+    {
+		echo("아이템이 존재하지 않습니다.\n");
+		_DBExit();
+    }
+	if ($r_userid == "")
+	{
+		echo("넷마블 ID가 존재하지 않습니다.\n");
+		_DBExit();
+	}
+
+	$query = "SELECT a.AID AS aid FROM Account a(nolock) WHERE UserID='" . $r_userid . "'";
+	$result = $db->query($query);
+	$row = $db->fetch();
+
+	$aid = $row->aid;
+
+	if (!$aid)
+	{
+		echo("넷마블 ID가 존재하지 않습니다.\n");
+		_DBExit();
+	}
+
+    $query = "INSERT AccountItem (AID, ItemID) Values ($aid, $r_itemid)";
+    $result = $db->query($query);
+
+    if ($result)
+    {
+      echo ("<BR><B>구입완료</B>\n");
+
+		$url = "./accountinfo.html?aid=$aid&mode=process";
+		echo ("<meta http-equiv='Refresh' content='1; URL=$url'>");
+    }
+    else
+    {
+		echo ($query);
+		echo ("<BR>");
+		echo("구입에 실패하였습니다.");
+    }
+
+}
+
+
+$db->close();
+
+?>
+
+
+
+<? include ("sign.inc"); ?>
+</BODY>
+</HTML>

@@ -1,0 +1,284 @@
+<?
+	require_once("core.php");
+	check_session();
+?>
+<HTML>
+<BODY>
+<?php
+
+require_once('core.php');
+
+
+$r_userid = $_POST['userid'];
+$r_mode = $_POST['mode'];
+
+include ("dbconn.inc");
+
+echo("<CENTER><H1>캐쉬아이템 구매</H1></CENTER>\n");
+
+if ($r_mode == "")
+{
+  ## 캐쉬 일반아이템
+  $query = "SELECT cs.CSID AS CSID, cs.ItemID AS ItemID, i.Name AS ItemName, cs.CashPrice AS CashPrice, cs.Opened AS Opened ".
+           "FROM CashShop cs(nolock), Item i(nolock) where cs.ItemID=i.ItemID ORDER by cs.CSID desc";
+  $result = $db->query($query);
+
+  echo("
+  <FORM action='./ShopBuyItem.html' method=post>
+  <TABLE border=1>
+  <TR bgcolor=#EEEEEE><TD colspan=4><B>일반아이템 구매</B></TD></TR>
+  <TR>
+  <TD>넷마블 아이디</TD>
+  <TD><INPUT type=text name=userid value=''></TD>
+");
+
+  echo("<TD><SELECT name='itemsel'>\n");
+  while ($row = $db->fetch())
+  {
+	  $opened_str = "";
+	  if ($row->Opened != 1) $opened_str = "closed";
+
+	$CashPrice = $row->CashPrice;
+	echo("<OPTION value=$row->CSID>$row->ItemName (" . $CashPrice . "원" . $opened_str . ")</OPTION>\n");
+  }
+  echo("</SELECT></TD>\n");
+
+  echo("
+  <TD><INPUT type=hidden name=mode value='confirm'>
+      <INPUT type=hidden name=itemtype value='normal'>
+  <INPUT type=submit value='구매가능확인'></TD>
+  </TR>
+  </TABLE>
+  </FORM>
+  ");
+
+
+  ## 캐쉬 세트아이템
+  $query = "SELECT CSSID, Name, CashPrice, Opened FROM CashSetShop css(nolock) ORDER by CSSID desc";
+  $result = $db->query($query);
+
+  echo("<BR><BR>
+  <FORM action='./ShopBuyItem.html' method=post>
+  <TABLE border=1>
+  <TR bgcolor=#EEEEEE><TD colspan=4><B>세트아이템 구매</B></TD></TR>
+  <TR>
+  <TD>넷마블 아이디</TD>
+  <TD><INPUT type=text name=userid value=''></TD>
+");
+
+  echo("<TD><SELECT name='setitemsel'>\n");
+  while ($row = $db->fetch())
+  {
+	  $opened_str = "";
+	  if ($row->Opened != 1) $opened_str = "closed";
+
+	  $CashPrice = $row->CashPrice;
+    echo("<OPTION value=$row->CSSID>$row->Name (" . $CashPrice . "원" . $opened_str . ")</OPTION>\n");
+  }
+  echo("</SELECT></TD>\n");
+
+
+  echo("
+  <TD><INPUT type=hidden name=mode value='confirm'>
+      <INPUT type=hidden name=itemtype value='set'>
+  <INPUT type=submit value='구매가능확인'></TD>
+  </TR>
+  </TABLE>
+  </FORM>
+  ");
+
+} // if ($r_mode == "")
+###################################################################
+else if ($r_mode == "confirm")
+{
+  $r_itemtype = $_POST['itemtype'];
+
+  if ($r_userid == "")
+  {
+    echo("넷마블 ID가 존재하지 않습니다.\n");
+    _DBExit();
+  }
+
+  if ($r_itemtype == 'normal')
+  {
+    $r_csid = $_POST['itemsel'];
+    if ($r_csid == "")
+    {
+      echo("csid가 존재하지 않습니다.\n");
+      _DBExit();
+    }
+
+    view_db_account_info($r_userid);
+
+    echo("<BR><BR>\n");
+    view_db_cash_item_info($r_csid);
+
+
+    echo("<BR><BR>
+<FORM name='form' action='./ShopBuyItem.html' method=post>
+<INPUT type=hidden name='mode' value='process'>
+<INPUT type=hidden name='userid' value='$r_userid'>
+<INPUT type=hidden name='itemtype' value='$r_itemtype'>
+<INPUT type=hidden name='csid' value='$r_csid'>
+<TABLE>
+<TR>
+<TD>구입하시겠습니까?</TD>
+<TD><INPUT type=submit value='구입'></TD>
+</TR>
+</TABLE>
+</FORM>
+");
+
+  }
+  ## 세트 아이템 구매가능 확인
+  else if ($r_itemtype == 'set')
+  {
+    $r_cssid = $_POST['setitemsel'];
+    if ($r_cssid == "")
+    {
+      echo("cssid가 존재하지 않습니다.\n");
+      _DBExit();
+    }
+
+    view_db_account_info($r_userid);
+
+    echo("<BR><BR>\n");
+    view_db_cash_setitem_info($r_cssid);
+
+    echo("<BR><BR>
+<FORM name='form' action='./ShopBuyItem.html' method=post>
+<INPUT type=hidden name='mode' value='process'>
+<INPUT type=hidden name='userid' value='$r_userid'>
+<INPUT type=hidden name='itemtype' value='$r_itemtype'>
+<INPUT type=hidden name='cssid' value='$r_cssid'>
+<TABLE>
+<TR>
+<TD>구입하시겠습니까?</TD>
+<TD><INPUT type=submit value='구입'></TD>
+</TR>
+</TABLE>
+</FORM>
+");
+
+
+
+
+
+
+
+
+
+
+
+
+  }
+
+
+
+
+}   // else if ($r_mode == "confirm")
+###################################################################
+else if ($r_mode == "process")
+{
+  $r_itemtype = $_POST['itemtype'];
+
+  if ($r_itemtype == 'normal')
+  {
+    $r_csid = $_POST['csid'];
+    if ($r_csid == "")
+    {
+      echo("csid가 존재하지 않습니다.\n");
+      _DBExit();
+    }
+
+    $query = "SELECT CashPrice FROM  CashShop cs(nolock) WHERE csid=". $r_csid;
+    $result = $db->query($query);
+
+    if ($result == 0)
+    {
+      echo ("Error\n");
+      _DBExit();
+    }
+
+    $row = $db->fetch();
+    $cash = $row->CashPrice;
+
+    $query = "EXEC spBuyCashItem '$r_userid', $r_csid, $cash";
+    $result = $db->query($query);
+
+    if ($result)
+    {
+      echo ("<BR><B>구입완료</B>\n");
+    }
+    else
+    {
+		echo ($query);
+		echo ("<BR>");
+      echo("구입에 실패하였습니다.");
+    }
+
+
+  }
+  else if ($r_itemtype == 'set')
+  {
+    $r_cssid = $_POST['cssid'];
+    if ($r_cssid == "")
+    {
+      echo("cssid가 존재하지 않습니다.\n");
+      _DBExit();
+    }
+
+    $query = "SELECT CashPrice FROM  CashSetShop css(nolock) WHERE cssid=". $r_cssid;
+    $result = $db->query($query);
+
+    if ($result == 0)
+    {
+      echo ("Error\n");
+      _DBExit();
+    }
+
+    $row = $db->fetch();
+    $cash = $row->CashPrice;
+
+    $query = "EXEC spBuyCashSetItem '$r_userid', $r_cssid, $cash";
+
+    $result = $db->query($query);
+
+    if ($result)
+    {
+      echo ("<BR><B>구입완료</B>\n");
+    }
+    else
+    {
+		echo ($query);
+		echo ("<BR>");
+
+      echo("구입에 실패하였습니다.");
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+  }
+
+}
+
+
+$db->close();
+
+?>
+
+
+
+<? include ("sign.inc"); ?>
+
+</BODY>
+</HTML>

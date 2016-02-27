@@ -1,0 +1,12 @@
+INSERT INTO Item (ItemID, Name) Values (400008, '남성용 팜포아 컴패니언 코트')
+INSERT INTO Item (ItemID, Name) Values (400009, '여성용 팜포아 컴패니언 코트')
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=1, ResLevel=0, Slot=5, Weight=5, HP=2, AP=2, MAXWT=2, 
+Description='귀여운 팜포아가 그려져 있는 트렌치 코트. 무언가를 기념하기 위해 만들어진 것 같다.' 
+WHERE ItemID=400008
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=2, ResLevel=0, Slot=5, Weight=5, HP=2, AP=2, MAXWT=2, 
+Description='귀여운 팜포아가 그려져 있는 트렌치 코트. 무언가를 기념하기 위해 만들어진 것 같다.' 
+WHERE ItemID=400009

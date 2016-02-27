@@ -1,0 +1,13 @@
+<?
+	require_once("core.php");
+	check_session();
+?>
+<HTML>
+<HEAD>
+<TITLE>GUNZServer Administration Page</TITLE>
+</HEAD>
+<FRAMESET COLS="200, 100%">
+  <FRAME Name="gapmenu" Src="Menu.html">
+  <FRAME Name="gapmain" Src="main.html">
+</FRAMESET>
+</HTML>

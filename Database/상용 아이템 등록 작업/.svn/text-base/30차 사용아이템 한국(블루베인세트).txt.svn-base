@@ -1,0 +1,374 @@
+﻿<!-- 모자 -->
+<STR id="ZITEM_NAME_520029">남성용 블루베인 모자</STR>
+<STR id="ZITEM_DESC_520029">신축성이 강한 소재로 개발된 블루베인 시리즈에 어울리도록 만든 모자.</STR>
+
+<STR id="ZITEM_NAME_520529">여성용 블루베인 모자</STR>
+<STR id="ZITEM_DESC_520529">신축성이 강한 소재로 개발된 블루베인 시리즈에 어울리도록 만든 모자.</STR>
+
+INSERT INTO Item (ItemID, Name) Values (520029, '남성용 블루베인 모자')
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=1, ResLevel=0, Slot=4, Weight=4, HP=1, AP=2, MAXWT=0, 
+Description='신축성이 강한 소재로 개발된 블루베인 시리즈에 어울리도록 만든 모자.' 
+WHERE ItemID = 520029
+
+INSERT INTO Item (ItemID, Name) Values (520529, '여성용 블루베인 모자')
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=2, ResLevel=0, Slot=4, Weight=5, HP=2, AP=2, MAXWT=0, 
+Description='신축성이 강한 소재로 개발된 블루베인 시리즈에 어울리도록 만든 모자.' 
+WHERE ItemID = 520529
+
+<!-- 장갑-->
+<STR id="ZITEM_NAME_522018">남성용 블루베인 장갑</STR>
+<STR id="ZITEM_DESC_522018">신축성이 강한 소재로 개발된 블루베인 장갑.</STR>
+
+<STR id="ZITEM_NAME_522518">여성용 블루베인 장갑</STR>
+<STR id="ZITEM_DESC_522518">신축성이 강한 소재로 개발된 블루베인 장갑.</STR>
+
+INSERT INTO Item (ItemID, Name) Values (522018, '남성용 블루베인 장갑')
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=1, ResLevel=0, Slot=6, Weight=2, HP=2, AP=4, MAXWT=0, 
+Description='신축성이 강한 소재로 개발된 블루베인 장갑.' 
+WHERE ItemID = 522018
+
+INSERT INTO Item (ItemID, Name) Values (522518, '여성용 블루베인 장갑')
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=2, ResLevel=0, Slot=6, Weight=2, HP=2, AP=4, MAXWT=0, 
+Description='신축성이 강한 소재로 개발된 블루베인 장갑.' 
+WHERE ItemID = 522518
+
+<!-- 신발 -->
+<STR id="ZITEM_NAME_524021">남성 블루베인 신발</STR>
+<STR id="ZITEM_DESC_524021">신축성이 강한 소재로 출시된 블루베인 시리즈에 어울리도록 만들어진 가벼운 무게의 신발.</STR>
+
+<STR id="ZITEM_NAME_524521">여성 블루베인 신발</STR>
+<STR id="ZITEM_DESC_524521">신축성이 강한 소재로 출시된 블루베인 시리즈에 어울리도록 만들어진 가벼운 무게의 신발.</STR>
+
+INSERT INTO Item (ItemID, Name) Values (524021, '남성 블루베인 신발')
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=1, ResLevel=0, Slot=8, Weight=2, HP=2, AP=6, MAXWT=0, 
+Description='신축성이 강한 소재로 출시된 블루베인 시리즈에 어울리도록 만들어진 가벼운 무게의 신발.' 
+WHERE ItemID = 524021
+
+INSERT INTO Item (ItemID, Name) Values (524521, '여성 블루베인 신발')
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=2, ResLevel=0, Slot=8, Weight=2, HP=2, AP=6, MAXWT=0, 
+Description='신축성이 강한 소재로 출시된 블루베인 시리즈에 어울리도록 만들어진 가벼운 무게의 신발.' 
+WHERE ItemID = 524521
+
+<!-- 상의 -->
+<STR id="ZITEM_NAME_521023">남성용 블루베인 상의</STR>
+<STR id="ZITEM_DESC_521023">신축성이 강한 소재로 출시된 블루베인 시리즈의 상의.</STR>
+
+<STR id="ZITEM_NAME_521523">여성용 블루베인 상의</STR>
+<STR id="ZITEM_DESC_521523">신축성이 강한 소재로 출시된 블루베인 시리즈의 상의.</STR>
+
+INSERT INTO Item (ItemID, Name) Values (521023, '남성용 블루베인 상의')
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=1, ResLevel=0, Slot=5, Weight=9, HP=0, AP=14, MAXWT=0, 
+Description='신축성이 강한 소재로 출시된 블루베인 시리즈의 상의.' 
+WHERE ItemID = 521023
+
+INSERT INTO Item (ItemID, Name) Values (521523, '여성용 블루베인 상의')
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=2, ResLevel=0, Slot=5, Weight=9, HP=0, AP=14, MAXWT=0, 
+Description='신축성이 강한 소재로 출시된 블루베인 시리즈의 상의.' 
+WHERE ItemID = 521523
+
+<!- 하의 -->
+<STR id="ZITEM_NAME_523021">남성용 블루베인 하의</STR>
+<STR id="ZITEM_DESC_523021">신축성이 강한 소재로 출시된 블루베인 시리즈의 하의.</STR>
+
+<STR id="ZITEM_NAME_523521">여성용 블루베인 하의</STR>
+<STR id="ZITEM_DESC_523521">신축성이 강한 소재로 출시된 블루베인 시리즈의 하의.</STR>
+
+INSERT INTO Item (ItemID, Name) Values (523021, '남성용 블루베인 하의')
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=1, ResLevel=0, Slot=7, Weight=9, HP=0, AP=16, MAXWT=0, 
+Description='신축성이 강한 소재로 출시된 블루베인 시리즈의 하의.' 
+WHERE ItemID = 523021
+
+INSERT INTO Item (ItemID, Name) Values (523521, '여성용 블루베인 하의')
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=2, ResLevel=0, Slot=7, Weight=9, HP=0, AP=16, MAXWT=0, 
+Description='신축성이 강한 소재로 출시된 블루베인 시리즈의 하의.' 
+WHERE ItemID = 523521
+
+-----------------------------------------------------------------------
+
+-- 남자 장갑
+insert into cashshop(itemid, newitemorder, cashprice, opened, regdate, renttype)
+values(520029, 0, 400, 0, getdate(), 2)
+
+insert into cashshop(itemid, newitemorder, cashprice, opened, regdate, renttype)
+values(522018, 0, 400, 0, getdate(), 2)
+
+insert into cashshop(itemid, newitemorder, cashprice, opened, regdate, renttype)
+values(524021, 0, 500, 0, getdate(), 2)
+
+insert into cashshop(itemid, newitemorder, cashprice, opened, regdate, renttype)
+values(521023, 0, 1000, 0, getdate(), 2)
+
+insert into cashshop(itemid, newitemorder, cashprice, opened, regdate, renttype)
+values(523021, 0, 800, 0, getdate(), 2)
+
+-- 여자 장갑
+insert into cashshop(itemid, newitemorder, cashprice, opened, regdate, renttype)
+values(520529, 0, 400, 0, getdate(), 2)
+
+insert into cashshop(itemid, newitemorder, cashprice, opened, regdate, renttype)
+values(522518, 0, 400, 0, getdate(), 2)
+
+insert into cashshop(itemid, newitemorder, cashprice, opened, regdate, renttype)
+values(524521, 0, 500, 0, getdate(), 2)
+
+insert into cashshop(itemid, newitemorder, cashprice, opened, regdate, renttype)
+values(521523, 0, 1000, 0, getdate(), 2)
+
+insert into cashshop(itemid, newitemorder, cashprice, opened, regdate, renttype)
+values(523521, 0, 800, 0, getdate(), 2)
+
+---------------------------------------------------------------------------
+
+-- 남성 모자.
+insert into rentcashshopprice(csid, renthourperiod, cashprice)
+values(248, 168, 400)
+
+insert into rentcashshopprice(csid, renthourperiod, cashprice)
+values(248, 360, 500)
+
+insert into rentcashshopprice(csid, renthourperiod, cashprice)
+values(248, 720, 600)
+
+insert into rentcashshopprice(csid, renthourperiod, cashprice)
+values(248, null, 800)
+
+-- 여성 모자
+insert into rentcashshopprice(csid, renthourperiod, cashprice)
+values(253, 168, 400)
+
+insert into rentcashshopprice(csid, renthourperiod, cashprice)
+values(253, 360, 500)
+
+insert into rentcashshopprice(csid, renthourperiod, cashprice)
+values(253, 720, 600)
+
+insert into rentcashshopprice(csid, renthourperiod, cashprice)
+values(253, null, 800)
+
+--------------------------
+
+-- 남성 장갑.
+insert into rentcashshopprice(csid, renthourperiod, cashprice)
+values(249, 168, 400)
+
+insert into rentcashshopprice(csid, renthourperiod, cashprice)
+values(249, 360, 500)
+
+insert into rentcashshopprice(csid, renthourperiod, cashprice)
+values(249, 720, 600)
+
+insert into rentcashshopprice(csid, renthourperiod, cashprice)
+values(249, null, 800)
+
+-- 여성 장갑.
+insert into rentcashshopprice(csid, renthourperiod, cashprice)
+values(254, 168, 400)
+
+insert into rentcashshopprice(csid, renthourperiod, cashprice)
+values(254, 360, 500)
+
+insert into rentcashshopprice(csid, renthourperiod, cashprice)
+values(254, 720, 600)
+
+insert into rentcashshopprice(csid, renthourperiod, cashprice)
+values(254, null, 800)
+
+------------------------------
+
+-- 남성 신발.
+insert into rentcashshopprice(csid, renthourperiod, cashprice)
+values(250, 168, 500)
+
+insert into rentcashshopprice(csid, renthourperiod, cashprice)
+values(250, 360, 600)
+
+insert into rentcashshopprice(csid, renthourperiod, cashprice)
+values(250, 720, 800)
+
+insert into rentcashshopprice(csid, renthourperiod, cashprice)
+values(250, null, 1000)
+
+-- 여성 신발.
+insert into rentcashshopprice(csid, renthourperiod, cashprice)
+values(255, 168, 500)
+
+insert into rentcashshopprice(csid, renthourperiod, cashprice)
+values(255, 360, 600)
+
+insert into rentcashshopprice(csid, renthourperiod, cashprice)
+values(255, 720, 800)
+
+insert into rentcashshopprice(csid, renthourperiod, cashprice)
+values(255, null, 1000)
+
+----------------------------------
+
+-- 남성 상의.
+insert into rentcashshopprice(csid, renthourperiod, cashprice)
+values(251, 168, 1800)
+
+insert into rentcashshopprice(csid, renthourperiod, cashprice)
+values(251, 360, 1500)
+
+insert into rentcashshopprice(csid, renthourperiod, cashprice)
+values(251, 720, 1200)
+
+insert into rentcashshopprice(csid, renthourperiod, cashprice)
+values(251, null, 1000)
+
+-- 여성 상의.
+insert into rentcashshopprice(csid, renthourperiod, cashprice)
+values(256, 168, 1800)
+
+insert into rentcashshopprice(csid, renthourperiod, cashprice)
+values(256, 360, 1500)
+
+insert into rentcashshopprice(csid, renthourperiod, cashprice)
+values(256, 720, 1200)
+
+insert into rentcashshopprice(csid, renthourperiod, cashprice)
+values(256, null, 1000)
+
+-----------------------------------
+
+-- 남성 하의.
+insert into rentcashshopprice(csid, renthourperiod, cashprice)
+values(252, 168, 800)
+
+insert into rentcashshopprice(csid, renthourperiod, cashprice)
+values(252, 360, 1000)
+
+insert into rentcashshopprice(csid, renthourperiod, cashprice)
+values(252, 720, 1300)
+
+insert into rentcashshopprice(csid, renthourperiod, cashprice)
+values(252, null, 1600)
+
+-- 여성 하의.
+insert into rentcashshopprice(csid, renthourperiod, cashprice)
+values(257, 168, 800)
+
+insert into rentcashshopprice(csid, renthourperiod, cashprice)
+values(257, 360, 1000)
+
+insert into rentcashshopprice(csid, renthourperiod, cashprice)
+values(257, 720, 1300)
+
+insert into rentcashshopprice(csid, renthourperiod, cashprice)
+values(257, null, 1600)
+
+-----------------------------------------------------------------
+
+-- 남성.
+insert into cashsetshop(name, description, cashprice, webimgname, newitemorder, ressex, reslevel
+, weight, opened, regdate, renttype)
+values('남성 블루베인 세트', '신축성이 강한 소재로 출시된 블루베인 시리즈의 남성용 종합세트.'
+, 3100, null, 0, 1, 0, 26, 0, getdate(), 2)
+
+-- 여성.
+insert into cashsetshop(name, description, cashprice, webimgname, newitemorder, ressex, reslevel
+, weight, opened, regdate, renttype)
+values('여성 블루베인 세트', '신축성이 강한 소재로 출시된 블루베인 시리즈의 여성용 종합세트.'
+, 3100, null, 0, 2, 0, 26, 0, getdate(), 2)
+
+-- 남성
+insert into cashsetitem(cssid, csid) values(41, 248)
+insert into cashsetitem(cssid, csid) values(41, 249)
+insert into cashsetitem(cssid, csid) values(41, 250)
+insert into cashsetitem(cssid, csid) values(41, 251)
+insert into cashsetitem(cssid, csid) values(41, 252)
+
+-- 여성
+insert into cashsetitem(cssid, csid) values(42, 253)
+insert into cashsetitem(cssid, csid) values(42, 254)
+insert into cashsetitem(cssid, csid) values(42, 255)
+insert into cashsetitem(cssid, csid) values(42, 256)
+insert into cashsetitem(cssid, csid) values(42, 257)
+
+-- 남성
+insert into rentcashsetshopprice(cssid, renthourperiod, cashprice) values(41, 168, 3100)
+insert into rentcashsetshopprice(cssid, renthourperiod, cashprice) values(41, 360, 3700)
+insert into rentcashsetshopprice(cssid, renthourperiod, cashprice) values(41, 720, 4600)
+insert into rentcashsetshopprice(cssid, renthourperiod, cashprice) values(41, null, 5400)
+
+-- 여성
+insert into rentcashsetshopprice(cssid, renthourperiod, cashprice) values(42, 168, 3100)
+insert into rentcashsetshopprice(cssid, renthourperiod, cashprice) values(42, 360, 3700)
+insert into rentcashsetshopprice(cssid, renthourperiod, cashprice) values(42, 720, 4600)
+insert into rentcashsetshopprice(cssid, renthourperiod, cashprice) values(42, null, 5400)
+
+-----------------------------------------------------------
+-- 145번 서버
+
+insert into cashshop(csid, itemid, newitemorder, cashprice, opened, regdate, renttype)  values(257, 523521, 0, 800, 0, getdate(), 2)
+insert into cashshop(csid, itemid, newitemorder, cashprice, opened, regdate, renttype)  values(256, 521523, 0, 1000, 0, getdate(), 2)
+insert into cashshop(csid, itemid, newitemorder, cashprice, opened, regdate, renttype)  values(255, 524521, 0, 500, 0, getdate(), 2)
+insert into cashshop(csid, itemid, newitemorder, cashprice, opened, regdate, renttype)  values(254, 522518, 0, 400, 0, getdate(), 2)
+insert into cashshop(csid, itemid, newitemorder, cashprice, opened, regdate, renttype)  values(253, 520529, 0, 400, 0, getdate(), 2)
+insert into cashshop(csid, itemid, newitemorder, cashprice, opened, regdate, renttype)  values(252, 523021, 0, 800, 0, getdate(), 2)
+insert into cashshop(csid, itemid, newitemorder, cashprice, opened, regdate, renttype)  values(251, 521023, 0, 1000, 0, getdate(), 2)
+insert into cashshop(csid, itemid, newitemorder, cashprice, opened, regdate, renttype)  values(250, 524021, 0, 500, 0, getdate(), 2)
+insert into cashshop(csid, itemid, newitemorder, cashprice, opened, regdate, renttype)  values(249, 522018, 0, 400, 0, getdate(), 2)
+insert into cashshop(csid, itemid, newitemorder, cashprice, opened, regdate, renttype)  values(248, 520029, 0, 400, 0, getdate(), 2)
+
+
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(465, 257, null, 1600)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(464, 257, 720, 1300)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(463, 257, 360, 1000)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(462, 257, 168, 800)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(461, 252, null, 1600)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(460, 252, 720, 1300)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(459, 252, 360, 1000)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(458, 252, 168, 800)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(457, 256, null, 1000)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(456, 256, 720, 1200)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(455, 256, 360, 1500)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(454, 256, 168, 1800)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(453, 251, null, 1000)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(452, 251, 720, 1200)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(451, 251, 360, 1500)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(450, 251, 168, 1800)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(449, 255, null, 1000)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(448, 255, 720, 800)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(447, 255, 360, 600)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(446, 255, 168, 500)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(445, 250, null, 1000)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(444, 250, 720, 800)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(443, 250, 360, 600)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(442, 250, 168, 500)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(441, 254, null, 800)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(440, 254, 720, 600)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(439, 254, 360, 500)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(438, 254, 168, 400)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(437, 249, null, 800)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(436, 249, 720, 600)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(435, 249, 360, 500)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(434, 249, 168, 400)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(433, 253, null, 800)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(432, 253, 720, 600)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(431, 253, 360, 500)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(430, 253, 168, 400)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(429, 248, null, 800)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(428, 248, 720, 600)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(427, 248, 360, 500)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(426, 248, 168, 400)
+
+insert into rentcashsetshopprice(rcsspid, cssid, renthourperiod, cashprice)   values(92, 42, null, 5400)
+insert into rentcashsetshopprice(rcsspid, cssid, renthourperiod, cashprice)   values(91, 42, 720, 4600)
+insert into rentcashsetshopprice(rcsspid, cssid, renthourperiod, cashprice)   values(90, 42, 360, 3700)
+insert into rentcashsetshopprice(rcsspid, cssid, renthourperiod, cashprice)   values(89, 42, 168, 3100)
+insert into rentcashsetshopprice(rcsspid, cssid, renthourperiod, cashprice)   values(88, 41, null, 5400)
+insert into rentcashsetshopprice(rcsspid, cssid, renthourperiod, cashprice)   values(87, 41, 720, 4600)
+insert into rentcashsetshopprice(rcsspid, cssid, renthourperiod, cashprice)   values(86, 41, 360, 3700)
+insert into rentcashsetshopprice(rcsspid, cssid, renthourperiod, cashprice)   values(85, 41, 168, 3100)
+

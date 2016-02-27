@@ -1,0 +1,81 @@
+<STR id="ZITEM_NAME_504503">골드하운드 x2</STR>
+<STR id="ZITEM_DESC_504503">동급 최강의 파괴력에 집중하여 개발된 리볼버. 떨어지는 연사력과 파괴력의 증가로 인한 반동때문에 초심자가 쓰기는 어렵다.</STR>
+
+<STR id="ZITEM_NAME_506004">크루얼리즌</STR>
+<STR id="ZITEM_DESC_506004">브레이커 시리즈보다 향상된 파괴력을 가진 샷건. 연사력과 제어성은 상대적으로 희생되어 다루기가 까다롭다.</STR>
+
+<STR id="ZITEM_NAME_507003">프라임 TX</STR>
+<STR id="ZITEM_DESC_507003">연사력과 안정성에 초점이 맞추어진 라이플. 안정감 있는 제어성이 발군이다.</STR>
+
+---------------------------------------------------------------------------------------------------
+
+INSERT INTO Item (ItemID, Name) Values (504503, '골드하운드 x2')
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=48, Delay=450, Controllability=80, Magazine=6, ReloadTime=4, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=48, LimitSpeed=100, IsCashItem=1, 
+ResSex=3, ResLevel=24, Slot=2, Weight=16, HP=0, AP=0, MAXWT=0, 
+Description='동급 최강의 파괴력에 집중하여 개발된 리볼버. 떨어지는 연사력과 파괴력의 증가로 인한 반동때문에 초심자가 쓰기는 어렵다.' 
+WHERE ItemID=504503
+
+
+INSERT INTO Item (ItemID, Name) Values (506004, '크루얼리즌')
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=9, Delay=1100, Controllability=90, Magazine=5, ReloadTime=5, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=25, LimitSpeed=100, IsCashItem=1, 
+ResSex=3, ResLevel=24, Slot=2, Weight=18, HP=0, AP=0, MAXWT=0, 
+Description='브레이커 시리즈보다 향상된 파괴력을 가진 샷건. 연사력과 제어성은 상대적으로 희생되어 다루기가 까다롭다.' 
+WHERE ItemID=506004
+
+
+INSERT INTO Item (ItemID, Name) Values (507003, '프라임 TX')
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=17, Delay=100, Controllability=30, Magazine=36, ReloadTime=6, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=180, LimitSpeed=100, IsCashItem=1, 
+ResSex=3, ResLevel=24, Slot=2, Weight=18, HP=0, AP=0, MAXWT=0, 
+Description='연사력과 안정성에 초점이 맞추어진 라이플. 안정감 있는 제어성이 발군이다.' 
+WHERE ItemID=507003
+
+---------------------------------------------------------------------------------------------
+
+INSERT INTO CashShop(ItemID, NewItemOrder, CashPrice, Opened, RegDate, RentType)
+VALUES (504503, 0, 2300, 0, GETDATE(), 1)
+
+INSERT INTO CashShop(ItemID, NewItemOrder, CashPrice, Opened, RegDate, RentType)
+VALUES (506004, 0, 2300, 0, GETDATE(), 1)
+
+INSERT INTO CashShop(ItemID, NewItemOrder, CashPrice, Opened, RegDate, RentType)
+VALUES (507003, 0, 2300, 0, GETDATE(), 1)
+
+----------------------------------------------------------------------------------------------
+
+INSERT INTO RentCashShopPrice(CSID, RentHourPeriod, CashPrice)
+VALUES (169, '168', 2300)
+
+INSERT INTO RentCashShopPrice(CSID, RentHourPeriod, CashPrice)
+VALUES (169, '360', 2800)
+
+INSERT INTO RentCashShopPrice(CSID, RentHourPeriod, CashPrice)
+VALUES (169, '720', 3400)
+
+INSERT INTO RentCashShopPrice(CSID, RentHourPeriod, CashPrice)
+VALUES (169, '4320', 4500)
+
+
+INSERT INTO RentCashShopPrice(CSID, RentHourPeriod, CashPrice)
+VALUES (170, '168', 2300)
+
+INSERT INTO RentCashShopPrice(CSID, RentHourPeriod, CashPrice)
+VALUES (170, '360', 2800)
+
+INSERT INTO RentCashShopPrice(CSID, RentHourPeriod, CashPrice)
+VALUES (170, '720', 3400)
+
+INSERT INTO RentCashShopPrice(CSID, RentHourPeriod, CashPrice)
+VALUES (170, '4320', 4500)
+
+
+INSERT INTO RentCashShopPrice(CSID, RentHourPeriod, CashPrice)
+VALUES (171, '168', 2300)
+
+INSERT INTO RentCashShopPrice(CSID, RentHourPeriod, CashPrice)
+VALUES (171, '360', 2800)
+
+INSERT INTO RentCashShopPrice(CSID, RentHourPeriod, CashPrice)
+VALUES (171, '720', 3400)
+
+INSERT INTO RentCashShopPrice(CSID, RentHourPeriod, CashPrice)
+VALUES (171, '4320', 4500)

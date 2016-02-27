@@ -1,0 +1,318 @@
+== 웹페이지에서의 아이템 관련 쿼리 사용방법 ==
+
+작성자: 건즈개발팀 남기룡(zelinde@dreamwiz.com)
+최종수정일: 2004.3.29
+
+
+○ 대문페이지
+
+* 신규아이템 정보 가져오기
+
+사용sql) 
+
+EXEC spGetNewCashItem @ItemCount(int)
+
+변수설명) 
+
+@ItemCount > 가져오려는 아이템 갯수, Default값은 0으로 0이면 모든 신규 아이템을 가져온다
+
+반환값 설명)
+CSID(int)		> 상점아이템 목록 ID
+Name(varchar(256))	> 아이템 이름
+Slot(tinyint)		> 슬롯 타입
+Cash(int)		> 넷마블 캐쉬
+WebImgName(varchar(64))	> 이미지 파일 이름
+ResSex(tinyint)		> 성별제한
+ResLevel(int)		> 레벨제한
+Weight(int)		> 무게
+Description(text)	> 설명
+
+
+
+
+○ 아이템 목록 페이지
+
+* 아이템 리스트 가져오기(세트아이템 제외)
+
+사용sql) 
+
+EXEC spGetCashItemList @ItemType(int), @Page(int), @PageCount(int OUTPUT)
+
+변수설명)
+
+@ItemType > 아이템 종류 : 1 - 근접무기, 2 - 원거리무기, 3 - 방어구, 4 - 특수아이템
+@Page > 보려고 하는 페이지
+@PageCount > 총 페이지 개수. OUTPUT 변수이다.
+
+반환값 설명)
+CSID(int)		> 상점아이템 목록 ID
+Name(varchar(256))	> 아이템 이름
+Slot(tinyint)		> 슬롯 타입
+Cash(int)		> 넷마블 캐쉬
+WebImgName(varchar(64))	> 이미지 파일 이름
+ResSex(tinyint)		> 성별제한
+ResLevel(int)		> 레벨제한
+Weight(int)		> 무게
+Description(text)	> 설명
+IsNewItem(tinyint)	> 신상품인지 여부 : 1 - 신상품
+
+　
+* 세트 아이템 리스트 가져오기
+
+사용sql) 
+
+EXEC spGetCashSetItemList @Page(int), @PageCount(int OUTPUT)
+
+변수설명)
+
+@Page > 보려고 하는 페이지
+@PageCount > 총 페이지 개수. OUTPUT 변수이다
+
+
+반환값 설명)
+CSSID(int)		> 세트아이템 상점아이템 목록 ID
+Name(varchar(256))	> 아이템 이름
+Cash(int)		> 넷마블 캐쉬
+WebImgName(varchar(64))	> 이미지 파일 이름
+ResSex(tinyint)		> 성별제한
+ResLevel(int)		> 레벨제한
+Weight(int)		> 무게
+Description(text)	> 설명
+IsNewItem(tinyint)	> 신상품인지 여부 : 1 - 신상품
+
+
+
+* 아이템 검색(세트 아이템은 검색하지 못한다.)
+
+사용sql) 
+
+EXEC spSearchCashItem @Slot(tinyint), @ResSex(tinyint), @ResMinLevel(int), @ResMaxLevel(int), @ItemName(varchar(256)), @Page(int), @PageCount(int OUTPUT)
+
+변수설명)
+
+@SlotType > 슬롯타입 : 0 - 제한없음, 1 - Melee, 2 - Range, 3 - Item, 4 - Head, 5 - Chest,
+                       6 - Hands, 7 - Legs, 8 - Feet, 9 - Finger
+											 
+@ResSex > 캐릭터 성별 : 1 - 남자, 2 - 여자, 3 - 제한없음
+
+@ResMinLevel> 캐릭터 제한 레벨 최소값, 제한이 없으면 NULL값(기본값 = NULL)
+@ResMaxLevel> 캐릭터 제한 레벨 최대값, 제한이 없으면 NULL값(기본값 = NULL)
+@ItemName > 아이템 이름, 제한이 없으면 ''(기본값 = '')
+
+@Page > 보려고 하는 페이지
+@PageCount > 총 페이지 개수. OUTPUT 변수이다.
+
+
+반환값 설명)
+CSID(int)		> 상점아이템 목록 ID
+Name(varchar(256))	> 아이템 이름
+Slot(tinyint)		> 슬롯 타입
+Cash(int)		> 넷마블 캐쉬
+WebImgName(varchar(64))	> 이미지 파일 이름
+ResSex(tinyint)		> 성별제한
+ResLevel(int)		> 레벨제한
+Weight(int)		> 무게
+Description(text)	> 설명
+IsNewItem(tinyint)	> 신상품인지 여부 : 1 - 신상품
+
+
+
+○ 아이템 상세 정보
+
+* 아이템 상세 정보 가져오기
+
+사용sql) 
+
+EXEC spGetCashItemInfo @CSID(int)
+
+변수설명)
+
+@CSID > 보고자 하는 아이템의 상점목록 ID
+
+반환값 설명)
+CSID(int)		> 상점아이템 목록 ID
+Name(varchar(256))	> 아이템 이름
+Slot(tinyint)		> 슬롯 타입
+Cash(int)		> 넷마블 캐쉬
+WebImgName(varchar(64))	> 이미지 파일 이름
+ResSex(tinyint)		> 성별 제한
+ResLevel(int)		> 레벨 제한
+Weight(int)		> 무게
+Damage(int)		> 공격력
+Delay(int)		> 지연시간
+Controllability(int)	> 제어성
+Magazine(int)		> 탄창탄환수
+MaxBullet(int)		> 최대탄환수
+ReloadTime(int)		> 장전시간
+HP(int)			> 추가되는 HP
+AP(int)			> 추가되는 AP
+MaxWeight(int)		> 추가되는 무게 능력
+LimitSpeed(int)		> 속도 : 퍼센트값을 나타낸다. (100 = 100%)
+FR(int)			> 불 저항력
+CR(int)			> 얼음 저항력
+PR(int)			> 독 저항력
+LR(int)			> 번개 저항력
+Description(text)	> 설명
+IsNewItem(tinyint)	> 신상품인지 여부 : 1 - 신상품
+
+
+* 세트아이템의 상세 정보 가져오기
+
+사용sql) 
+
+EXEC spGetCashSetItemInfo @CSSID(int)
+
+변수설명)
+
+@CSSID > 보고자 하는 세트아이템의 상점목록 ID
+
+반환값 설명)
+CSSID(int)		> 상점아이템 목록 ID
+Name(varchar(256))	> 세트 아이템 이름
+Cash(int)		> 넷마블 캐쉬
+WebImgName(varchar(64))	> 이미지 파일 이름
+ResSex(tinyint)		> 성별 제한
+ResLevel(int)		> 레벨 제한
+Weight(int)		> 무게
+Description(text)	> 설명
+IsNewItem(tinyint)	> 신상품인지 여부 : 1 - 신상품
+
+
+
+* 세트아이템의 세부 아이템 목록 가져오기
+
+사용sql)
+
+EXEC spGetCashSetItemComposition @CSSID(int), @OutRowCount(int OUTPUT)
+
+변수설명)
+
+@CSSID > 보고자 하는 세트아이템의 상정목록 ID
+
+반환값 설명)
+CSID(int)		> 상점아이템 목록 ID
+Name(varchar(256))	> 아이템 이름
+Slot(tinyint)		> 슬롯 타입
+Cash(int)		> 넷마블 캐쉬
+WebImgName(varchar(64))	> 이미지 파일 이름
+ResSex(tinyint)		> 성별제한
+ResLevel(int)		> 레벨제한
+Weight(int)		> 무게
+Description(text)	> 설명
+IsNewItem(tinyint)	> 신상품인지 여부 : 1 - 신상품
+
+
+
+○ 아이템 구매
+
+* 아이템 구매하기
+
+사용sql)
+
+EXEC spBuyCashItem @UserID(varchar(20)), @CSID(int), @Cash(int)
+
+변수설명)
+
+@UserID > 넷마블 ID
+@CSID > 사고자 하는 아이템의 상점목록 ID
+@Cash > 넷마블 캐쉬 가격
+
+
+반환값)
+
+성공 : 1, 실패 : 0
+
+
+* 세트아이템 구매하기
+
+사용sql)
+
+EXEC spBuyCashSetItem @UserID(varchar(20)), @CSSID(int), @Cash(int)
+
+변수설명)
+
+@UserID > 넷마블 ID
+@CSID > 사고자 하는 세트아이템의 상점목록 ID
+@Cash > 넷마블 캐쉬 가격
+
+반환값)
+
+성공 : 1, 실패 : 0
+
+
+* 아이템 구매가능인지 확인하기(세트아이템 제외)
+
+사용sql)
+
+EXEC spConfirmBuyCashItem @UserID(varchar(20)), @CSID(int), @RetEnableBuyItem(int) OUTPUT, @RetRepeatBuySameItem(int) OUTPUT
+
+
+변수설명)
+@UserID > 넷마블 ID
+@CSID		> 사고자 하는 아이템 ID
+@RetEnableBuyItem > 구매가능한지 여부. 반환값. (0 : 구매불가, 1 : 구매가능)
+@RetRepeatBuySameItem > 이미 아이템을 샀는지 여부. 반환값. (0 : 아직안샀음, 1 : 이미 샀음)
+
+
+* 세트아이템 구매가능인지 확인하기
+
+사용sql)
+
+EXEC spConfirmBuyCashSetItem @UserID(varchar(20)), @CSSID(int), @RetEnableBuyItem(int) OUTPUT, @RetRepeatBuySameItem(int) OUTPUT
+
+
+변수설명)
+@UserID > 넷마블 ID
+@CSSID		> 사고자 하는 세트 아이템 ID
+@RetEnableBuyItem > 구매가능한지 여부. 반환값. (0 : 구매불가, 1 : 구매가능)
+@RetRepeatBuySameItem > 이미 아이템을 샀는지 여부. 반환값. (0 : 아직안샀음, 1 : 이미 샀음)
+
+
+
+
+* 신규아이템중 하나 가져오기
+
+사용sql)
+
+EXEC spGetNewRandomCashItem @NewItemIndex(int)
+
+
+변수설명)
+CSID(int)		> 상점아이템 목록 ID
+Name(varchar(256))	> 아이템 이름
+WebImgName(varchar(64))	> 이미지 파일 이름
+Description(text)	> 설명
+
+
+
+
+
+-- 뷰 -----------------------------
+
+
+* 아이템 구매로그 뷰테이블
+
+뷰테이블 이름 : viewItemPurchaseLogByCash
+
+반환값)
+id(int)								> 구매로그 ID
+UserID(varchar(20)		> 넷마블 ID
+ItemName(varchar(256)	> 아이템 이름
+Date(DateTime)				> 구매일시
+Cash(int)							> 구매 캐쉬
+
+
+
+* 세트아이템 구매로그 뷰테이블
+
+뷰테이블 이름 : viewSetItemPurchaseLogByCash
+
+반환값)
+id(int)										> 구매로그 ID
+UserID(varchar(20)				> 넷마블 ID
+SetItemName(varchar(256)	> 세트아이템 이름
+Date(DateTime)						> 구매일시
+Cash(int)									> 구매 캐쉬
+
+
+

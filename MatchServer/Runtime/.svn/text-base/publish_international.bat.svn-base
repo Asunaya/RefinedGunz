@@ -1,0 +1,1 @@
+call publish.bat international

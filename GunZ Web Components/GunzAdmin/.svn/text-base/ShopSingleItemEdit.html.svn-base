@@ -1,0 +1,94 @@
+<?
+	require_once("core.php");
+	check_session();
+?>
+<?php
+
+include ("dbconn.inc"); 
+
+//// Declare Functions ////////////////////////////////////////////////////////
+function GetBackMenu()
+{
+	return("[<a href='#' OnClick='history.back();'>뒤로</a>]");
+}
+
+function GetSingleItemShopMenu()
+{
+	return("[<a href='ShopSingleItem.html'>아이템관리</a>]");
+}
+
+function SingleItemEdit()
+{
+	global $db;
+	
+	//// Get Post Values //////////////////////////////////////////////////////
+	$CSID = $_POST['CSID'];
+	$OPENED = $_POST['itemopened'];
+	$NEWORDER = $_POST['itemneworder'];
+	$PRICE = $_POST['itemprice'];
+	$ICON = $_POST['itemicon'];
+	
+	//// Examine Registered  ...../////////////////////////////////////////////
+	$query_shop = "SELECT cs.csid AS CSID, i.name AS Name, i.Slot AS ItemSlot, 
+			cs.Opened AS Opened, cs.NewItemOrder AS NewOrder, 
+			cs.CashPrice AS Cash, cs.WebImgName AS WebImgName,
+			i.Description AS Description, cs.RegDate AS RegDate
+			FROM CashShop cs, Item i 
+			WHERE i.ItemID = cs.ItemID AND CSID = $CSID";
+
+	$result = $db->query($query_shop);
+	$row = $db->fetch();
+	if ($row <= 0) 
+	{
+		$BackMenu = GetBackMenu();
+		echo("
+			<CENTER>
+				<B>등록되지 않은 상품입니다. : '$row->Name(CSID=$CSID)'</B> <BR><BR>
+				$BackMenu
+			</CENTER>			
+		");
+		return;
+	}
+	
+	//// Update SingleItemShop ////////////////////////////////////////////////
+	echo("
+		<CENTER>
+		<B>아이템을 수정합니다. (CSID=$CSID, Opened=$OPENED, NewOrder=$NEWORDER, Price=$PRICE, Icon=$ICON)</B>
+		</CENTER>
+		<BR><BR>
+	");
+	
+	$query_edit = "UPDATE CashShop SET Opened=$OPENED, NewItemOrder=$NEWORDER, CashPrice=$PRICE,
+				WebImgName='$ICON', RegDate=GETDATE() WHERE CSID=$CSID";
+
+
+	$result = $db->query($query_edit);
+	if ($result == FALSE) {
+		$BackMenu = GetBackMenu();
+		echo("
+			<CENTER>
+				<B>아이템 수정에 실패하였습니다.</B> <BR><BR>
+				$BackMenu
+			</CENTER>
+			<BR><BR>
+		");
+	} else {
+		$SingleItemShopMenu = GetSingleItemShopMenu();
+		echo("
+			<CENTER>
+				<B>아이템 수정에 성공하였습니다.</B> <BR><BR>
+				$SingleItemShopMenu
+			</CENTER>
+			<BR><BR>
+		");
+	}
+}
+
+
+//// Main /////////////////////////////////////////////////////////////////////
+SingleItemEdit();
+
+?>
+
+<? $db->close(); ?>
+<? include ("sign.inc"); ?>

@@ -1,0 +1,21 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GunzItemTool", "GunzItemTool.vcproj", "{271ABFB5-3D0A-4565-9763-1C438BE9FE0E}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{271ABFB5-3D0A-4565-9763-1C438BE9FE0E}.Debug.ActiveCfg = Debug|Win32
+		{271ABFB5-3D0A-4565-9763-1C438BE9FE0E}.Debug.Build.0 = Debug|Win32
+		{271ABFB5-3D0A-4565-9763-1C438BE9FE0E}.Release.ActiveCfg = Release|Win32
+		{271ABFB5-3D0A-4565-9763-1C438BE9FE0E}.Release.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal

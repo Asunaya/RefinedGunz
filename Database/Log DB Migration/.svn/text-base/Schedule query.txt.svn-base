@@ -1,0 +1,96 @@
+-- [CharacterMakingLog]
+DECLARE @Date datetime
+EXEC spGetAgoDay 1, @Date OUTPUT
+
+INSERT INTO GunzLogDB.sa.CharacterMakingLog( AID, CharName, Type, Date )
+SELECT AID, CharName, Type, Date FROM GunzDB.sa.CharacterMakingLog WHERE Date < @Date
+
+DELETE FROM GunzDB.sa.CharacterMakingLog WHERE Date < @Date
+
+----------------------------------------------------------------------------
+
+-- [PlayerLog]
+DECLARE @Date datetime
+EXEC spGetAgoDay 0, @Date OUTPUT
+
+INSERT INTO GunzLogDB.sa.PlayerLog( CID, DisTime, PlayTime, Kills, Deaths, XP, TotalXP )
+SELECT CID, DisTime, PlayTime, Kills, Deaths, XP, TotalXP FROM GunzDB.sa.PlayerLog WHERE DisTime < @Date
+
+DELETE FROM FROM GunzDB.sa.PlayerLog WHERE DisTime < @Date
+
+----------------------------------------------------------------------------
+
+-- [ConnLog]
+DECLARE @Date datetime
+EXEC spGetAgoDay 0, @Date OUTPUT
+
+INSERT INTO GunzLogDB.sa.ConnLog( AID, UserID, Time, IP )
+SELECT AID, UserID, Time, IP FROM GunzDB.sa.ConnLog
+
+DELETE FROM GunzDB.sa.ConnLog WHERE Time < @Date
+
+----------------------------------------------------------------------------
+
+-- [GameLog]
+DECLARE @Date datetime
+EXEC spGetAgoDay 0, @Date OUTPUT
+
+INSERT INTO GunzLogDB.sa.GameLog( GameName, MasterCID, Map, GameType, Round, StartTime, PlayerCount, Players )
+SELECT GameName, MasterCID, Map, GameType, Round, StartTime, PlayerCount, Players FROM GunzDB.sa.GameLog WHERE StartTime < @Date
+
+DELETE FROM GunzDB.sa.GameLog WHERE StartTime < @Date
+
+----------------------------------------------------------------------------
+
+-- [LevelUpLog]
+DECLARE @Date datetime
+EXEC spGetAgoDay 0, @Date OUTPUT
+
+INSERT INTO GunzLogDB.sa.LevelUpLog( CID, Level, BP, KillCount, DeathCount, PlayTime, Date )
+SELECT CID, Level, BP, KillCount, DeathCount, PlayTime, Date FROM GunzDB.sa.LevelUpLog WHERE Date < @Date
+
+DELETE FROM GunzDB.sa.LevelUpLog WHERE Date < @Date
+
+----------------------------------------------------------------------------
+
+-- [BringAccountItemLog]
+DECLARE @Date datetime
+EXEC spGetAgoDay 0, @Date OUTPUT
+
+INSERT INTO GunzLogDB.sa.BringAccountItemLog( AID, CID, ItemID, Date )
+SELECT AID, CID, ItemID, Date FROM GunzDB.sa.BringAccountItemLog WHERE Date < @Date
+
+DELETE FROM GunzDB.sa.BringAccountItemLog WHERE Date < @Date
+
+----------------------------------------------------------------------------
+
+-- [ClanGameLog]
+DECLARE @Date datetime
+EXEC spGetAgoDay 0, @Date OUTPUT
+
+INSERT INTO GunzLogDB.sa.ClanGameLog( WinnerCLID, LoserCLID, WinnerClanName, LoserClanName, WinnerMembers, LoserMembers, RoundWins, RoundLosses, MapID, GameType, RegDate )
+SELECT WinnerCLID, LoserCLID, WinnerClanName, LoserClanName, WinnerMembers, LoserMembers, RoundWins, RoundLosses, MapID, GameType, RegDate FROM GunzDB.sa.ClanGameLog WHERE RegDate < @Date
+
+DELETE FROM GunzDB.sa.ClanGameLog WHERE RegDate < @Date
+
+----------------------------------------------------------------------------
+
+-- [ItemPurchaseLogByBounty]
+DECLARE @Date datetime
+EXEC spGetAgoDay 0, @Date OUTPUT
+
+INSERT INTO GunzLogDB.sa.ItemPurchaseLogByBounty( ItemID, CID, Date, Bounty, CharBounty, Type )
+SELECT ItemID, CID, Date, Bounty, CharBounty, Type FROM GunzDB.sa.ItemPurchaseLogByBounty WHERE Date < @Date
+
+DELETE FROM GunzDB.sa.ItemPurchaseLogByBounty WHERE Date < @Date
+
+----------------------------------------------------------------------------
+
+-- [ServerLog]
+DECLARE @Date datetime 
+EXEC spGetAgoDay 0, @Date OUTPUT
+
+INSERT INTO GunzLogDB.sa.ServerLog( ServerID, PlayerCount, GameCount, Time )
+SELECT ServerID, PlayerCount, GameCount, Time FROM GunzDB.sa.ServerLog WHERE Time < @Date
+
+DELETE FROM GunzDB.sa.ServerLog WHERE Time < @Date

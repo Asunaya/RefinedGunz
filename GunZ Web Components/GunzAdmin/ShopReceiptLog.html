@@ -1,0 +1,78 @@
+<?
+	require_once("core.php");
+	check_session();
+?>
+<?php
+
+include ("dbconn.inc"); 
+
+
+function GetCommandMenu()
+{
+	return("[<a href='ShopSetItem.html?mode=add'>추가</a>]");
+}
+
+function GetBackMenu()
+{
+	return("[<a href='#' OnClick='history.back();'>뒤로</a>]");
+}
+
+function ShopLogView()
+{
+	global $db;
+	
+	$COUNT_PER_PAGE = 30;
+	
+	//// Get SetShop List /////////////////////////////////////////////////////
+	$query = "SELECT TOP $COUNT_PER_PAGE * FROM viewItemPurchaseLogByCash log(NOLOCK) ORDER BY Date DESC";
+	$result = $db->query($query);
+	$count = $db->getNumRow();
+	$cashsum = 0;
+
+	//// Table Header /////////////////////////////////////////////////////////
+	echo("
+		<CENTER>
+		<TABLE border=1>
+		<TR bgcolor=#EEEEEE>
+		<TD width=80 align=center>계정</TD>
+		<TD width=140 align=center>아이템</TD>
+		<TD width=40 align=center>금액</TD>		
+		<TD width=40 align=center>날짜</TD>
+	");
+		
+	while ($row = $db->fetch())
+	{
+		$ACCOUNT = $row->UserID;
+		$ITEMNAME = $row->ItemName;
+		$CASH = $row->Cash;
+		$DATE = $row->Date;
+		$cashsum += $CASH;
+		
+		echo("
+			<TR>
+			<TD>$ACCOUNT</TD>
+			<TD>$ITEMNAME</TD>
+			<TD>$CASH</TD>		
+			<TD>$DATE</TD>		
+			</TR>
+		");
+	}
+	
+	//// Table Footer /////////////////////////////////////////////////////////
+	echo("
+		</TABLE>
+		
+		</TD></TR>
+		<TR><TD>$CommandMenu : $count Item Listed , CashSum : $cashsum</TD></TR>
+		</TABLE>		
+		</CENTER>
+	");	
+}
+
+//// Main /////////////////////////////////////////////////////////////////////
+ShopLogView();
+
+?>
+
+<? $db->close(); ?>
+<? include ("sign.inc"); ?>

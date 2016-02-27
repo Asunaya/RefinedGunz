@@ -1,0 +1,326 @@
+<STR id="ZITEM_NAME_520030">남성 트레인가드 모자</STR>
+<STR id="ZITEM_DESC_520030">제국과 공화국을 관통하는 기관차를 지키는 병사들의 남성용 모자. 경량형의 잇점이 존재한다.</STR>
+
+<STR id="ZITEM_NAME_520530">여성 트레인가드 모자</STR>
+<STR id="ZITEM_DESC_520530">제국과 공화국을 관통하는 기관차를 지키는 병사들의 여성용 모자. 경량형의 잇점이 존재한다.</STR>
+
+<ITEM id="520030" name="STR:ZITEM_NAME_520030" mesh_name="eq_head_29" totalpoint="0"
+type="equip" iscashitem="true" res_sex="m" res_level="15" slot="head" weight="5" bt_price="500000"
+hp="1" ap="10" maxwt="0" sf="0" fr="0" cr="0" pr="0" lr="0" color="#FFFFFFFF" desc="STR:ZITEM_DESC_520030" />
+
+<ITEM id="520530" name="STR:ZITEM_NAME_520530" mesh_name="eq_head_30" totalpoint="0"
+type="equip" iscashitem="true" res_sex="f" res_level="15" slot="head" weight="5" bt_price="500000"
+hp="1" ap="10" maxwt="0" sf="0" fr="0" cr="0" pr="0" lr="0" color="#FFFFFFFF" desc="STR:ZITEM_DESC_520530" />
+
+
+INSERT INTO Item (ItemID, Name) Values (520030, '남성 트레인가드 모자')
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=1, ResLevel=15, Slot=4, Weight=5, HP=1, AP=10, MAXWT=0, 
+Description='제국과 공화국을 관통하는 기관차를 지키는 병사들의 남성용 모자. 경량형의 잇점이 존재한다.' 
+WHERE ItemID = 520030
+
+INSERT INTO Item (ItemID, Name) Values (520530, '여성 트레인가드 모자')
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=2, ResLevel=15, Slot=4, Weight=5, HP=1, AP=10, MAXWT=0, 
+Description='제국과 공화국을 관통하는 기관차를 지키는 병사들의 여성용 모자. 경량형의 잇점이 존재한다.' 
+WHERE ItemID = 520530
+-------------------------------------------------------------------
+
+<STR id="ZITEM_NAME_522019">남성 트레인가드 장갑</STR>
+<STR id="ZITEM_DESC_522019">제국과 공화국을 관통하는 기관차를 지키는 병사들의 남성용 장갑. 경량형의 잇점이 존재한다.</STR>
+
+<STR id="ZITEM_NAME_522519">여성 트레인가드 장갑</STR>
+<STR id="ZITEM_DESC_522519">제국과 공화국을 관통하는 기관차를 지키는 병사들의 여성용 장갑. 경량형의 잇점이 존재한다.</STR>
+
+<ITEM id="522019" name="STR:ZITEM_NAME_522019" mesh_name="eq_heads_29" totalpoint="0"
+type="equip" res_sex="m" res_level="15" slot="hands" weight="3" bt_price="500000"
+hp="1" ap="14" maxwt="0" sf="0" fr="0" cr="0" pr="0" lr="0" color="#FFFFFFFF" desc="STR:ZITEM_DESC_522019" />
+
+<ITEM id="522519" name="STR:ZITEM_NAME_522519" mesh_name="eq_hands_30" totalpoint="0"
+type="equip" res_sex="f" res_level="15" slot="hands" weight="3" bt_price="500000"
+hp="1" ap="14" maxwt="0" sf="0" fr="0" cr="0" pr="0" lr="0" color="#FFFFFFFF" desc="STR:ZITEM_DESC_522519" />
+
+INSERT INTO Item (ItemID, Name) Values (522019, '남성 트레인가드 장갑')
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=1, ResLevel=15, Slot=6, Weight=3, HP=1, AP=14, MAXWT=0, 
+Description='제국과 공화국을 관통하는 기관차를 지키는 병사들의 남성용 장갑. 경량형의 잇점이 존재한다.' 
+WHERE ItemID = 522019
+
+INSERT INTO Item (ItemID, Name) Values (522519, '여성 트레인가드 장갑')
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=2, ResLevel=15, Slot=6, Weight=3, HP=1, AP=14, MAXWT=0, 
+Description='제국과 공화국을 관통하는 기관차를 지키는 병사들의 여성용 장갑. 경량형의 잇점이 존재한다.' 
+WHERE ItemID = 522519
+--------------------------------------------------------------------
+
+<STR id="ZITEM_NAME_524022">남성 트레인가드 부츠</STR>
+<STR id="ZITEM_DESC_524022">제국과 공화국을 관통하는 기관차를 지키는 병사들의 남성용 가죽 부츠. 경량형의 잇점이 존재한다.</STR>
+
+<STR id="ZITEM_NAME_524522">여성 트레인가드 부츠</STR>
+<STR id="ZITEM_DESC_524522">제국과 공화국을 관통하는 기관차를 지키는 병사들의 여성용 부츠. 경량형의 잇점이 존재한다.</STR>
+
+<ITEM id="524022" name="STR:ZITEM_NAME_524022" mesh_name="eq_feet_29" totalpoint="0" type="equip"
+res_sex="m" res_level="15" slot="feet" weight="3" bt_price="500000" hp="1" ap="17"
+maxwt="0" sf="0" fr="0" cr="0" pr="0" lr="0" color="#FFFFFFFF" desc="STR:ZITEM_DESC_524022" />
+
+<ITEM id="524522" name="STR:ZITEM_NAME_524522" mesh_name="eq_feets_30" totalpoint="0" type="equip"
+res_sex="f" res_level="15" slot="feet" weight="3" bt_price="500000" hp="1" ap="17"
+maxwt="0" sf="0" fr="0" cr="0" pr="0" lr="0" color="#FFFFFFFF" desc="STR:ZITEM_DESC_524522" />
+
+
+INSERT INTO Item (ItemID, Name) Values (524022, '남성 트레인가드 부츠')
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=1, ResLevel=15, Slot=8, Weight=3, HP=1, AP=17, MAXWT=0, 
+Description='제국과 공화국을 관통하는 기관차를 지키는 병사들의 남성용 가죽 부츠. 경량형의 잇점이 존재한다.' 
+WHERE ItemID = 524022
+
+INSERT INTO Item (ItemID, Name) Values (524522, '여성 트레인가드 부츠')
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=2, ResLevel=15, Slot=8, Weight=3, HP=1, AP=17, MAXWT=0, 
+Description='제국과 공화국을 관통하는 기관차를 지키는 병사들의 여성용 부츠. 경량형의 잇점이 존재한다.' 
+WHERE ItemID = 524522
+--------------------------------------------------------------------
+
+<STR id="ZITEM_NAME_521024">남성 트레인가드 상의</STR>
+<STR id="ZITEM_DESC_521024">제국과 공화국을 관통하는 기관차를 지키는 병사들의 남성용 상의. 경량형의 잇점이 존재한다.</STR>
+
+<STR id="ZITEM_NAME_521524">여성 트레인가드 상의</STR>
+<STR id="ZITEM_DESC_521524">제국과 공화국을 관통하는 기관차를 지키는 병사들의 여성용 상의. 경량형의 잇점이 존재한다.</STR>
+
+<ITEM id="521024" name="STR:ZITEM_NAME_521024" mesh_name="eq_chest_29" totalpoint="0"
+type="equip" res_sex="m" res_level="15" slot="chest" weight="14" bt_price="500000"
+hp="2" ap="24" maxwt="0" sf="0" fr="0" cr="0" pr="0" lr="0" color="#FFFFFFFF" desc="STR:ZITEM_DESC_521024" />
+
+<ITEM id="521524" name="STR:ZITEM_NAME_521524" mesh_name="eq_chest_30" totalpoint="0"
+type="equip" res_sex="f" res_level="15" slot="chest" weight="14" bt_price="500000"
+hp="2" ap="24" maxwt="0" sf="0" fr="0" cr="0" pr="0" lr="0" color="#FFFFFFFF" desc="STR:ZITEM_DESC_521524" />	
+
+
+INSERT INTO Item (ItemID, Name) Values (521024, '남성 트레인가드 상의')
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=1, ResLevel=15, Slot=5, Weight=14, HP=2, AP=24, MAXWT=0, 
+Description='제국과 공화국을 관통하는 기관차를 지키는 병사들의 남성용 상의. 경량형의 잇점이 존재한다.' 
+WHERE ItemID = 521024
+
+INSERT INTO Item (ItemID, Name) Values (521524, '여성 트레인가드 상의')
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=2, ResLevel=15, Slot=5, Weight=14, HP=2, AP=24, MAXWT=0, 
+Description='제국과 공화국을 관통하는 기관차를 지키는 병사들의 여성용 상의. 경량형의 잇점이 존재한다.' 
+WHERE ItemID = 521524
+---------------------------------------------------------------------
+
+<STR id="ZITEM_NAME_523022">남성 트레인가드 하의</STR>
+<STR id="ZITEM_DESC_523022">제국과 공화국을 관통하는 기관차를 지키는 병사들의 남성용 하의. 경량형의 잇점이 존재한다.</STR>
+
+<STR id="ZITEM_NAME_523522">여성 트레인가드 하의</STR>
+<STR id="ZITEM_DESC_523522">제국과 공화국을 관통하는 기관차를 지키는 병사들의 여성용 하의. 경량형의 잇점이 존재한다.</STR>
+
+<ITEM id="523022" name="STR:ZITEM_NAME_523022" mesh_name="eq_legs_29" totalpoint="0" type="equip"
+res_sex="m" res_level="15" slot="legs" weight="13" bt_price="500000" hp="1" ap="26"
+maxwt="0" sf="0" fr="0" cr="0" pr="0" lr="0" color="#FFFFFFFF" desc="STR:ZITEM_DESC_523022" />
+
+<ITEM id="523522" name="STR:ZITEM_NAME_523522" mesh_name="eq_legs_30" totalpoint="0" type="equip"
+res_sex="f" res_level="15" slot="legs" weight="13" bt_price="500000" hp="1" ap="26"
+maxwt="0" sf="0" fr="0" cr="0" pr="0" lr="0" color="#FFFFFFFF" desc="STR:ZITEM_DESC_523522" />
+
+
+INSERT INTO Item (ItemID, Name) Values (523022, '남성 트레인가드 하의')
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=1, ResLevel=15, Slot=7, Weight=13, HP=1, AP=26, MAXWT=0, 
+Description='제국과 공화국을 관통하는 기관차를 지키는 병사들의 남성용 하의. 경량형의 잇점이 존재한다.' 
+WHERE ItemID = 523022
+
+INSERT INTO Item (ItemID, Name) Values (523522, '여성 트레인가드 하의')
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=2, ResLevel=15, Slot=7, Weight=13, HP=1, AP=26, MAXWT=0, 
+Description='제국과 공화국을 관통하는 기관차를 지키는 병사들의 여성용 하의. 경량형의 잇점이 존재한다.' 
+WHERE ItemID = 523522
+
+----------------------------------------------------------------------
+
+--남성
+insert into cashshop(itemid, newitemorder, cashprice, opened, regdate, renttype) values (520030, 0, 500, 0, getdate(), 2)
+insert into cashshop(itemid, newitemorder, cashprice, opened, regdate, renttype) values (522019, 0, 600, 0, getdate(), 2)
+insert into cashshop(itemid, newitemorder, cashprice, opened, regdate, renttype) values (524022, 0, 700, 0, getdate(), 2)
+insert into cashshop(itemid, newitemorder, cashprice, opened, regdate, renttype) values (521024, 0, 1100, 0, getdate(), 2)
+insert into cashshop(itemid, newitemorder, cashprice, opened, regdate, renttype) values (523022, 0, 900, 0, getdate(), 2)
+
+-- 여성
+insert into cashshop(itemid, newitemorder, cashprice, opened, regdate, renttype) values (520530, 0, 500, 0, getdate(), 2)
+insert into cashshop(itemid, newitemorder, cashprice, opened, regdate, renttype) values (522519, 0, 600, 0, getdate(), 2)
+insert into cashshop(itemid, newitemorder, cashprice, opened, regdate, renttype) values (524522, 0, 700, 0, getdate(), 2)
+insert into cashshop(itemid, newitemorder, cashprice, opened, regdate, renttype) values (521524, 0, 1100, 0, getdate(), 2)
+insert into cashshop(itemid, newitemorder, cashprice, opened, regdate, renttype) values (523522, 0, 900, 0, getdate(), 2)
+
+----------------------------------------------------------------------
+
+-- 남성 모자
+insert into rentcashshopprice(csid, renthourperiod, cashprice) values( 258, 168, 500)
+insert into rentcashshopprice(csid, renthourperiod, cashprice) values( 258, 360, 600)
+insert into rentcashshopprice(csid, renthourperiod, cashprice) values( 258, 720, 800)
+insert into rentcashshopprice(csid, renthourperiod, cashprice) values( 258, null, 1100)
+
+-- 여성 모자
+insert into rentcashshopprice(csid, renthourperiod, cashprice) values( 263, 168, 500)
+insert into rentcashshopprice(csid, renthourperiod, cashprice) values( 263, 360, 600)
+insert into rentcashshopprice(csid, renthourperiod, cashprice) values( 263, 720, 800)
+insert into rentcashshopprice(csid, renthourperiod, cashprice) values( 263, null, 1100)
+
+----------------------------------------------------------------------
+
+-- 남성 장갑
+insert into rentcashshopprice(csid, renthourperiod, cashprice) values( 259, 168, 600)
+insert into rentcashshopprice(csid, renthourperiod, cashprice) values( 259, 360, 700)
+insert into rentcashshopprice(csid, renthourperiod, cashprice) values( 259, 720, 900)
+insert into rentcashshopprice(csid, renthourperiod, cashprice) values( 259, null, 1200)
+
+-- 여성 장갑
+insert into rentcashshopprice(csid, renthourperiod, cashprice) values( 264, 168, 600)
+insert into rentcashshopprice(csid, renthourperiod, cashprice) values( 264, 360, 700)
+insert into rentcashshopprice(csid, renthourperiod, cashprice) values( 264, 720, 900)
+insert into rentcashshopprice(csid, renthourperiod, cashprice) values( 264, null, 1100)
+
+----------------------------------------------------------------------
+
+-- 남성 부츠
+insert into rentcashshopprice(csid, renthourperiod, cashprice) values( 260, 168, 700)
+insert into rentcashshopprice(csid, renthourperiod, cashprice) values( 260, 360, 900)
+insert into rentcashshopprice(csid, renthourperiod, cashprice) values( 260, 720, 1100)
+insert into rentcashshopprice(csid, renthourperiod, cashprice) values( 260, null, 1400)
+
+-- 여성 부츠
+insert into rentcashshopprice(csid, renthourperiod, cashprice) values( 265, 168, 700)
+insert into rentcashshopprice(csid, renthourperiod, cashprice) values( 265, 360, 900)
+insert into rentcashshopprice(csid, renthourperiod, cashprice) values( 265, 720, 1100)
+insert into rentcashshopprice(csid, renthourperiod, cashprice) values( 265, null, 1400)
+
+----------------------------------------------------------------------
+
+-- 남성 상의
+insert into rentcashshopprice(csid, renthourperiod, cashprice) values( 261, 168, 1100)
+insert into rentcashshopprice(csid, renthourperiod, cashprice) values( 261, 360, 1300)
+insert into rentcashshopprice(csid, renthourperiod, cashprice) values( 261, 720, 1700)
+insert into rentcashshopprice(csid, renthourperiod, cashprice) values( 261, null, 2300)
+
+-- 여성 상의
+insert into rentcashshopprice(csid, renthourperiod, cashprice) values( 266, 168, 1100)
+insert into rentcashshopprice(csid, renthourperiod, cashprice) values( 266, 360, 1300)
+insert into rentcashshopprice(csid, renthourperiod, cashprice) values( 266, 720, 1700)
+insert into rentcashshopprice(csid, renthourperiod, cashprice) values( 266, null, 2300)
+
+----------------------------------------------------------------------
+
+-- 남성 하의
+insert into rentcashshopprice(csid, renthourperiod, cashprice) values( 262, 168, 900)
+insert into rentcashshopprice(csid, renthourperiod, cashprice) values( 262, 360, 1100)
+insert into rentcashshopprice(csid, renthourperiod, cashprice) values( 262, 720, 1500)
+insert into rentcashshopprice(csid, renthourperiod, cashprice) values( 262, null, 2000)
+
+-- 여성 하의
+insert into rentcashshopprice(csid, renthourperiod, cashprice) values( 267, 168, 1900)
+insert into rentcashshopprice(csid, renthourperiod, cashprice) values( 267, 360, 1100)
+insert into rentcashshopprice(csid, renthourperiod, cashprice) values( 267, 720, 1500)
+insert into rentcashshopprice(csid, renthourperiod, cashprice) values( 267, null, 2000)
+
+-----------------------------------------------------------------------
+
+insert into cashsetshop(name, description, cashprice, newitemorder, ressex, reslevel, weight, opened, regdate, renttype)
+values('남성 트레인가드 세트', '제국과 공화국을 관통하는 기관차를 지키는 병사들의 남성용 제식복장. 이 병사들은 제국과 공화국 어느쪽에도 속하지 않고 오로지 철도회사를 위하여 일하고 있다고 알려져 있다. 가벼우면서도 쓸만한 성능을 가지고 있어서 애용되고 있다.'
+, 3800, 0, 1, 15, 46, 0, getdate(), 2)
+
+insert into cashsetshop(name, description, cashprice, newitemorder, ressex, reslevel, weight, opened, regdate, renttype)
+values('여성 트레인가드 세트', '제국과 공화국을 관통하는 기관차를 지키는 병사들의 여성용 제식복장. 이 병사들은 제국과 공화국 어느쪽에도 속하지 않고 오로지 철도회사를 위하여 일하고 있다고 알려져 있다. 가벼우면서도 쓸만한 성능을 가지고 있어서 애용되고 있다.'
+, 3800, 0, 2, 15, 46, 0, getdate(), 2)
+
+-----------------------------------------------------------------------
+
+insert into rentcashsetshopprice(cssid, renthourperiod, cashprice) values( 43, 168, 3800)
+insert into rentcashsetshopprice(cssid, renthourperiod, cashprice) values( 43, 360, 4500)
+insert into rentcashsetshopprice(cssid, renthourperiod, cashprice) values( 43, 720, 5800)
+insert into rentcashsetshopprice(cssid, renthourperiod, cashprice) values( 43, null, 7200)
+
+
+insert into rentcashsetshopprice(cssid, renthourperiod, cashprice) values( 44, 168, 3800)
+insert into rentcashsetshopprice(cssid, renthourperiod, cashprice) values( 44, 360, 4500)
+insert into rentcashsetshopprice(cssid, renthourperiod, cashprice) values( 44, 720, 5800)
+insert into rentcashsetshopprice(cssid, renthourperiod, cashprice) values( 44, null, 7200)
+
+-------------------------------------------------------------------------------------------------------------------------
+------------------------------------ 145번 백업 디비겸 아이템 디비
+-------------------------------------------------------------------------------------------------------------------------
+
+insert into cashshop(csid, itemid, newitemorder, cashprice, opened, regdate, renttype)  values(267, 523522, 0, 900, 0, getdate(), 2)
+insert into cashshop(csid, itemid, newitemorder, cashprice, opened, regdate, renttype)  values(266, 521524, 0, 1100, 0, getdate(), 2)
+insert into cashshop(csid, itemid, newitemorder, cashprice, opened, regdate, renttype)  values(265, 524522, 0, 700, 0, getdate(), 2)
+insert into cashshop(csid, itemid, newitemorder, cashprice, opened, regdate, renttype)  values(264, 522519, 0, 600, 0, getdate(), 2)
+insert into cashshop(csid, itemid, newitemorder, cashprice, opened, regdate, renttype)  values(263, 520530, 0, 500, 0, getdate(), 2)
+insert into cashshop(csid, itemid, newitemorder, cashprice, opened, regdate, renttype)  values(262, 523022, 0, 900, 0, getdate(), 2)
+insert into cashshop(csid, itemid, newitemorder, cashprice, opened, regdate, renttype)  values(261, 521024, 0, 1100, 0, getdate(), 2)
+insert into cashshop(csid, itemid, newitemorder, cashprice, opened, regdate, renttype)  values(260, 524022, 0, 700, 0, getdate(), 2)
+insert into cashshop(csid, itemid, newitemorder, cashprice, opened, regdate, renttype)  values(259, 522019, 0, 600, 0, getdate(), 2)
+insert into cashshop(csid, itemid, newitemorder, cashprice, opened, regdate, renttype)  values(258, 520030, 0, 500, 0, getdate(), 2)
+
+-------------------------------------------------------------------------
+
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(505, 267, null, 2000)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(504, 267, 720, 1500)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(503, 267, 360, 1100)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(502, 267, 168, 1900)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(501, 262, null, 2000)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(500, 262, 720, 1500)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(499, 262, 360, 1100)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(498, 262, 168, 900)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(497, 266, null, 2300)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(496, 266, 720, 1700)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(495, 266, 360, 1300)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(494, 266, 168, 1100)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(493, 261, null, 2300)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(492, 261, 720, 1700)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(491, 261, 360, 1300)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(490, 261, 168, 1100)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(489, 265, null, 1400)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(488, 265, 720, 1100)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(487, 265, 360, 900)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(486, 265, 168, 700)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(485, 260, null, 1400)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(484, 260, 720, 1100)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(483, 260, 360, 900)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(482, 260, 168, 700)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(481, 264, null, 1100)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(480, 264, 720, 900)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(479, 264, 360, 700)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(478, 264, 168, 600)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(477, 259, null, 1200)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(476, 259, 720, 900)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(475, 259, 360, 700)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(474, 259, 168, 600)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(473, 263, null, 1100)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(472, 263, 720, 800)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(471, 263, 360, 600)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(470, 263, 168, 500)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(469, 258, null, 1100)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(468, 258, 720, 800)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(467, 258, 360, 600)
+insert into rentcashshopprice(rcspid, csid, renthourperiod, cashprice)   values(466, 258, 168, 500)
+
+---------------------------------------------------------------------------
+
+insert into cashsetshop(cssid, name, description, cashprice, newitemorder, ressex, reslevel, weight, opened, regdate, renttype)
+values(43, '남성 트레인가드 세트', '제국과 공화국을 관통하는 기관차를 지키는 병사들의 남성용 제식복장. 이 병사들은 제국과 공화국 어느쪽에도 속하지 않고 오로지 철도회사를 위하여 일하고 있다고 알려져 있다. 가벼우면서도 쓸만한 성능을 가지고 있어서 애용되고 있다.'
+, 3800, 0, 1, 15, 46, 0, getdate(), 2)
+
+insert into cashsetshop(cssid, name, description, cashprice, newitemorder, ressex, reslevel, weight, opened, regdate, renttype)
+values(44, '여성 트레인가드 세트', '제국과 공화국을 관통하는 기관차를 지키는 병사들의 여성용 제식복장. 이 병사들은 제국과 공화국 어느쪽에도 속하지 않고 오로지 철도회사를 위하여 일하고 있다고 알려져 있다. 가벼우면서도 쓸만한 성능을 가지고 있어서 애용되고 있다.'
+, 3800, 0, 2, 15, 46, 0, getdate(), 2)
+
+---------------------------------------------------------------------------
+
+insert into rentcashsetshopprice(rcsspid, cssid, renthourperiod, cashprice)  values(100, 44, null, 7200)
+insert into rentcashsetshopprice(rcsspid, cssid, renthourperiod, cashprice)  values(99, 44, 720, 5800)
+insert into rentcashsetshopprice(rcsspid, cssid, renthourperiod, cashprice)  values(98, 44, 360, 4500)
+insert into rentcashsetshopprice(rcsspid, cssid, renthourperiod, cashprice)  values(97, 44, 168, 3800)
+insert into rentcashsetshopprice(rcsspid, cssid, renthourperiod, cashprice)  values(96, 43, null, 7200)
+insert into rentcashsetshopprice(rcsspid, cssid, renthourperiod, cashprice)  values(95, 43, 720, 5800)
+insert into rentcashsetshopprice(rcsspid, cssid, renthourperiod, cashprice)  values(94, 43, 360, 4500)
+insert into rentcashsetshopprice(rcsspid, cssid, renthourperiod, cashprice)  values(93, 43, 168, 3800)
+

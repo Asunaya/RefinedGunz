@@ -1,0 +1,1911 @@
+CREATE PROC spAdmWebGetAccountInfoByUserID
+	@UserID varchar( 20 )
+AS
+	SET NOCOUNT ON
+
+	SELECT AID, UserID, Name, Age, Sex, UGradeID, RegDate
+	FROM Account(NOLOCK)
+	WHERE UserID = @UserID
+GO
+
+--------------------------------------------------------------------------
+
+CREATE PROC spAdmWebGetAccountInfoByCharName
+	@CharName varchar( 24 ) 
+AS
+	SET NOCOUNT ON
+
+	SELECT a.UserID, a.AID, a.RegDate, a.UGradeID, a.Sex, a.Age, a.Name
+	FROM Character c(NOLOCK) JOIN Account a(NOLOCK)
+	ON c.Name = @CharName AND c.AID = a.AID
+GO
+
+--------------------------------------------------------------------------
+
+CREATE PROC spAdmWebGetLiveCharListByUserID
+	@UserID varchar( 20 )
+AS 
+	SET NOCOUNT ON
+
+	SELECT c.Name, c.AID, c.CID, c.RegDate, c.PlayTime, c.LastTime, 
+		c.Sex, c.CharNum, c.Level, c.XP, c.BP, c.KillCount, c.DeathCount
+	FROM Account a(NOLOCK) JOIN Character c(NOLOCK)
+	ON a.UserID = @UserID AND c.AID = a.AID
+	WHERE c.DeleteFlag <> 1
+	ORDER BY c.CharNum
+GO
+
+--------------------------------------------------------------------------
+
+CREATE PROC spAdmWebGetLiveCharInfoByCharName
+ @CharName varchar( 24 )
+AS 
+ SET NOCOUNT ON
+
+ SELECT Name, AID, CID, RegDate, PlayTime, LastTime, Sex, 
+  CharNum, Level, XP, BP, KillCount, DeathCount
+ FROM Character(NOLOCK)
+ WHERE Name = @CharName AND DeleteFlag <> 1
+ ORDER BY CharNum 
+GO
+
+--------------------------------------------------------------------------
+
+CREATE PROC spAdmWebGetAllCharInfoByUserID
+ @UserID varchar( 20 )
+AS
+ SET NOCOUNT ON
+
+ SELECT c.Name, c.AID, c.CID, c.RegDate, c.PlayTime, c.LastTime, 
+  c.Sex, c.CharNum, c.Level, c.XP, c.BP, c.DeleteFlag, 
+  c.DeleteName, c.KillCount, c.DeathCount
+ FROM Account a(NOLOCK) JOIN Character c(NOLOCK)
+ ON a.UserID = @UserID AND c.AID = a.AID
+ ORDER BY c.DeleteFlag, c.CharNum
+GO
+
+--------------------------------------------------------------------------
+
+CREATE PROC spAdmWebGetAllCharInfoByCharName
+ @CharName varchar( 24 )
+AS
+ SET NOCOUNT ON
+ 
+ SELECT Name, AID, CID, RegDate, PlayTime, LastTime, Sex,
+  CharNum, Level, XP, BP, DeleteFlag, DeleteName, 
+  KillCount, DeathCount
+ FROM Character(NOLOCK)
+ WHERE Name = @CharName
+ ORDER BY DeleteFlag, CharNum
+GO
+
+--------------------------------------------------------------------------
+
+CREATE PROC spAdmWebGetBountyItemPurchaseLogByCharName  
+ @CharName varchar( 24 )  
+AS  
+ SET NOCOUNT ON  
+  
+ SELECT ipl.id AS ID, ipl.ItemID, i.Name, c.CID, 0 AS CIID, ipl.Bounty,    
+  ipl.CharBounty, i.Slot, ipl.type, ipl.Date  
+ FROM (Character c(NOLOCK) JOIN ItemPurchaseLogByBounty ipl(NOLOCK)  
+ ON c.Name = @CharName AND ipl.CID = c.CID) JOIN Item i(NOLOCK)  
+ ON i.ItemID = ipl.ItemID  
+ ORDER BY ipl.Date DESC
+GO
+
+--------------------------------------------------------------------------
+
+CREATE PROC spAdmWebGetBountyItemPurchaseLog
+ @CID int
+, @ItemID int
+AS
+ SET NOCOUNT ON
+
+ SELECT ipl.id AS ID, c.Name AS CharName, ipl.ItemID, i.Name, c.CID, 
+  0 AS CIID, ipl.Bounty, ipl.CharBounty, i.Slot, ipl.Type, ipl.Date
+ FROM (Character c(NOLOCK) JOIN ItemPurchaseLogByBounty ipl(NOLOCK)
+ ON c.CID = @CID AND ipl.CID = c.CID) JOIN Item i(NOLOCK)
+ ON i.ItemID = ipl.ItemID
+ WHERE ipl.ItemID = @ItemID
+ ORDER BY ipl.id DESC
+GO
+
+--------------------------------------------------------------------------
+
+CREATE PROC spAdmWebGetCharItemByCID
+	@CID int
+AS
+BEGIN
+	SET NOCOUNT ON
+
+	SELECT ci.ItemID, i.Name, ci.CIID, ci.RegDate AS RegDate,  
+		CASE 
+		WHEN ci.RentHourPeriod IS NOT NULL THEN (RentHourPeriod) - (DateDiff(hh, RentDate, GETDATE()))
+		WHEN ci.RentHourPeriod IS NULL THEN -1
+		ELSE -2 -- error.
+		END AS RentPeriodRemainderHour,
+		CASE ci.CIID 
+		WHEN c.head_slot THEN 'Head'
+		WHEN c.chest_slot THEN 'Chest'
+		WHEN c.hands_slot THEN 'Hands'
+		WHEN c.legs_slot THEN 'Legs'
+		WHEN c.feet_slot THEN 'Feet'
+		WHEN c.fingerl_slot THEN 'Left finger'
+		WHEN c.fingerr_slot THEN 'Right finger'
+		WHEN c.melee_slot THEN 'Melee'
+		WHEN c.primary_slot THEN 'Primary'
+		WHEN c.secondary_slot THEN 'Secondary'
+		WHEN c.custom1_slot THEN 'Custom1'
+		WHEN c.custom2_slot THEN 'Custom2'
+		ELSE 'Free item'
+		END AS KeepOnPosition,
+		CASE ci.CIID
+		WHEN c.head_slot THEN 11
+		WHEN c.chest_slot THEN 12
+		WHEN c.hands_slot THEN 13
+		WHEN c.legs_slot THEN 14
+		WHEN c.feet_slot THEN 15
+		WHEN c.fingerl_slot THEN 16
+		WHEN c.fingerr_slot THEN 17
+		WHEN c.melee_slot THEN 18
+		WHEN c.primary_slot THEN 19
+		WHEN c.secondary_slot THEN 20
+		WHEN c.custom1_slot THEN 21
+		WHEN c.custom2_slot THEN 22
+		ELSE 23
+		END AS Orders
+	FROM (Character c(NOLOCK) JOIN CharacterItem ci(NOLOCK)
+	ON c.CID = @CID AND ci.CID = c.CID) JOIN Item i(NOLOCK)
+	ON i.ItemID = ci.ItemID
+	ORDER BY Orders 
+END
+GO
+
+--------------------------------------------------------------------------
+
+CREATE PROC spAdmWebGetCharQuestItem
+	@CharName varchar( 24 )
+AS	
+BEGIN
+	SET NOCOUNT ON
+
+	SELECT QuestItemInfo
+	FROM Character( NOLOCK )
+	WHERE Name = @CharName
+END
+GO
+
+--------------------------------------------------------------------------
+
+CREATE PROC spAdmWebGetCharLogByCharName
+ @CharName varchar(24)
+AS
+ SET NOCOUNT ON
+
+ SELECT a.UserID, cml.CharName, cml.Type, cml.Date
+ FROM CharacterMakingLog cml(NOLOCK) JOIN Account a(NOLOCK)
+ ON cml.CharName = @CharName AND a.AID = cml.AID
+GO
+
+--------------------------------------------------------------------------
+
+CREATE PROC spAdmWebGetCharQuestItemInfoByCID
+	@CID int
+AS
+	SET NOCOUNT ON
+
+	SELECT QuestItemInfo FROM Character(NOLOCK) WHERE CID = @CID
+GO
+
+--------------------------------------------------------------------------
+
+CREATE PROC spAdmWebGetAllSimpleCharInfoByOneCharName
+ @CharName varchar( 24 )
+AS
+ SET NOCOUNT ON
+
+ SELECT c2.Name, c2.CID
+ FROM (Character c1(NOLOCK) JOIN Account a(NOLOCK)
+ ON c1.Name = 'sunge_se' AND a.AID = c1.AID) JOIN Character c2(NOLOCK)
+ ON c2.AID = a.AID
+ ORDER BY c2.DeleteFlag, c2.CharNum
+GO
+
+------------------------------------------------------------------------------
+
+CREATE PROC spAdmWebGetSimpleLiveCharInfoByOneCharName
+	@CharName varchar( 24 )
+AS
+	SET NOCOUNT ON
+
+	DECLARE @AID int
+	
+	SELECT @AID = a.AID
+	FROM Character c(NOLOCK) JOIN Account a(NOLOCK)
+	ON c.Name = @CharName AND a.AID = c.AID
+
+	IF @AID IS NULL RETURN
+
+	SELECT Name, CID FROM Character(NOLOCK) WHERE AID = @AID AND DeleteFlag <> 1
+	ORDER BY CharNum
+GO
+
+------------------------------------------------------------------------------
+
+CREATE PROC spAdmWebGetAccountInfoByCharName
+	@CharName varchar( 24 )
+AS
+	SET NOCOUNT ON
+
+	SELECT a.AID, a.UserID, a.UGradeID, a.RegDate, a.Name, a.Age, a.Sex
+	FROM Character c(NOLOCK) JOIN Account a(NOLOCK)
+	ON c.Name = @CharName AND a.AID = c.AID
+GO
+
+------------------------------------------------------------------------------
+
+CREATE PROC spAdmWebGetAllCharNameCIDByUserID
+	@UserID varchar(20)
+AS
+	SET NOCOUNT ON
+
+	SELECT c.Name, c.CID, c.DeleteFlag
+	FROM Account a(NOLOCK) JOIN Character c(NOLOCK)
+	ON a.UserID = @UserID AND c.AID = a.AID
+	ORDER BY c.DeleteFlag, c.CharNum
+GO
+
+------------------------------------------------------------------------------
+
+CREATE PROC spAdmWebGetLiveCharNameCIDByUserID
+	@UserID varchar(20)
+AS
+	SET NOCOUNT ON 
+
+	SELECT c.Name, c.CID, c.DeleteFlag
+	FROM Account a(NOLOCK) JOIN Character c(NOLOCK)
+	ON a.UserID = @UserID AND c.AID = a.AID
+	WHERE c.DeleteFlag <> 1
+	ORDER BY c.DeleteFlag, c.CharNum
+GO
+
+------------------------------------------------------------------------------
+
+CREATE PROC spAdmWebChangeCharName
+ @CID int
+, @CharName varchar(24)
+, @GMID varchar(20)
+, @Ret int OUTPUT
+AS
+ SET NOCOUNT ON
+ IF NOT EXISTS( SELECT CID FROM Character(NOLOCK) 
+  WHERE (DeleteFlag <> 1) AND (Name = @CharName)) BEGIN
+  UPDATE Character SET Name = @CharName WHERE CID = @CID
+  IF 0 = @@ROWCOUNT BEGIN
+   SET @Ret = 0
+   RETURN @Ret
+  END
+ END
+ ELSE BEGIN
+  SET @Ret = 0
+  RETURN @Ret
+ END
+
+ SET @Ret = 1
+ RETURN @Ret
+GO
+
+------------------------------------------------------------------------------
+
+CREATE PROC spAdmWebChangeCharKillCount
+ @CID int
+, @KillCount int
+, @GMID varchar(20)
+, @Ret int OUTPUT
+AS
+ SET NOCOUNT ON
+ IF (0 > @KillCount) BEGIN
+  SET @Ret = 0
+  RETURN @Ret
+ END
+
+ UPDATE Character SET KillCount = @KillCount 
+ WHERE CID = @CID
+ IF 0 = @@ROWCOUNT BEGIN 
+  SET @Ret = 0
+  RETURN @Ret
+ END
+
+ SET @Ret = 1
+ RETURN @Ret
+GO
+
+------------------------------------------------------------------------------
+
+CREATE PROC spAdmWebChangeCharDeathCount
+ @CID int
+, @DeathCount int
+, @GMID varchar(20)
+, @Ret int OUTPUT
+AS
+ SET NOCOUNT ON
+
+ IF (0 > @DeathCount) BEGIN
+  SET @Ret = 0
+  RETURN @Ret
+ END
+
+ UPDATE Character SET DeathCount = @DeathCount
+ WHERE CID = @CID
+ IF 0 = @@ROWCOUNT BEGIN
+  SET @Ret = 0
+  RETURN @Ret
+ END
+
+ SET @Ret = 1
+ RETURN @Ret
+GO
+
+------------------------------------------------------------------------------
+
+CREATE PROC spAdmWebEditCharPlayTime
+ @CID int
+, @PlayTime int
+, @GMID varchar(20)
+, @Ret int OUTPUT
+AS
+ SET NOCOUNT ON 
+ IF (0 > @PlayTime) BEGIN
+  SET @Ret = 0
+  RETURN @Ret
+ END
+
+ UPDATE Character SET PlayTime = @PlayTime WHERE CID = @CID
+ IF 0 = @@ROWCOUNT BEGIN 
+  SET @Ret = 0
+  RETURN @Ret
+ END
+	
+ SET @Ret = 1
+ RETURN @Ret
+GO
+------------------------------------------------------------------------------
+
+-- 캐릭터 Level 변경 프로시져	  
+CREATE PROC spAdmWebEditCharLevel
+ @CID int
+, @Level smallint
+, @XP int
+, @GMID varchar(20)
+, @Ret int OUTPUT
+AS
+ SET NOCOUNT ON 
+
+ DECLARE @MIN int
+	
+ IF NOT EXISTS (SELECT CID FROM Character(NOLOCK) WHERE CID = @CID) BEGIN
+  SET @Ret = 0
+  RETURN @Ret
+ END
+
+ IF 99 > @Level BEGIN
+  DECLARE @MAX int
+  DECLARE @NextLevel smallint
+
+  SET @NextLevel = @Level + 1
+
+  SELECT @MIN = MIN(MinXP), @MAX =(MAX(MinXP) - 1)
+  FROM Level(NOLOCK)
+  WHERE Level <= @Level AND Level >= @NextLevel
+
+  IF NOT (@XP BETWEEN @MIN AND @MAX) BEGIN
+   SET @Ret = 0
+   RETURN @Ret
+  END
+ END
+ ELSE BEGIN
+  SELECT @MIN = MinXP FROM Level(NOLOCK) WHERE Level = @Level
+  IF @XP < @MIN BEGIN
+   SET @Ret = 0
+   RETURN @Ret
+  END
+ END
+
+ UPDATE Character SET Level = @Level, XP = @XP WHERE CID = @CID
+ IF 0 = @@ROWCOUNT BEGIN
+  SET @Ret = 0
+  RETURN @Ret
+ END
+
+ SET @Ret = 1
+ RETURN @Ret
+GO
+
+------------------------------------------------------------------------------
+
+CREATE PROC spAdmWebEditCharBP
+ @CID int
+, @BP int
+, @GMID varchar(20)
+, @Ret int OUTPUT
+AS
+ SET NOCOUNT ON
+ UPDATE Character SET BP = @BP WHERE CID = @CID
+ IF 0 = @@ROWCOUNT BEGIN
+  SET @Ret = 0
+  RETURN @Ret
+ END
+
+ SET @Ret = 1
+ RETURN @Ret
+GO
+
+------------------------------------------------------------------------------
+
+-- 중앙은행 아이템지급  프로시져
+CREATE PROC spAdmWebInsertAccountItem
+ @AID int
+, @ItemID int
+, @Period int 
+, @GMID varchar(20)
+, @Ret int OUTPUT
+AS
+ SET NOCOUNT ON
+ IF (500001 > @ItemID) OR ((@Period IS NOT NULL) AND (0 > @Period)) BEGIN
+  SET @Ret = 0
+  RETURN @Ret
+ END
+
+ IF NOT EXISTS (SELECT AID FROM Account(NOLOCK) WHERE AID = @AID) BEGIN
+  SET @Ret = 0
+  RETURN @Ret
+ END
+
+ DECLARE @RentHourPeriod int
+ DECLARE @RentDate datetime
+	
+ IF (0 = @Period) OR (@Period IS NULL)
+  SELECT @RentHourPeriod = NULL, @RentDate = NULL
+ ELSE
+  SELECT @RentHourPeriod = @Period, @RentDate = GETDATE()
+
+ INSERT INTO AccountItem( AID, ItemID, RentDate, RentHourPeriod)
+ VALUES (@AID, @ItemID, @RentDate, @RentHourPeriod )
+ IF (0 <> @@ERROR) OR (0 = @@ROWCOUNT) BEGIN
+  SET @Ret = 0
+  RETURN @Ret
+ END
+
+ SET @Ret = 1
+ RETURN @Ret
+GO
+
+------------------------------------------------------------------------------
+
+-- 캐릭터 장비창 아이템지급  프로시져, CashItem은 지급할수 없음.
+CREATE PROC spAdmWebInsertCharacterItem
+	@CID int
+,	@ItemID int
+,	@Period smallint 
+,	@GMID varchar(20)
+,	@Ret int OUTPUT
+AS
+	SET NOCOUNT ON 
+	IF (500000 < @ItemID) OR ((@Period IS NOT NULL) AND (0 > @Period)) BEGIN
+		SET @Ret = 0
+		RETURN @Ret
+	END
+
+	IF NOT EXISTS( SELECT CID FROM Character(NOLOCK) WHERE CID = @CID) BEGIN
+		SET @Ret = 0
+		RETURN @Ret
+	END
+
+	DECLARE @RentHourPeriod smallint
+	DECLARE @RentDate datetime
+	
+	IF (0 = @Period) OR (@Period IS NULL)
+		SELECT @RentHourPeriod = NULL, @RentDate = NULL
+	ELSE
+		SELECT @RentHourPeriod = @Period, @RentDate = GETDATE()
+
+	INSERT INTO CharacterItem( CID, ItemID, RegDate, RentDate, RentHourPeriod )
+	VALUES (@CID, @ItemID, GETDATE(), @RentDate, @RentHourPeriod )
+	IF (0 <> @@ERROR) OR (0 = @@ROWCOUNT) BEGIN
+		SET @Ret = 0
+		RETURN @Ret
+	END
+
+	SET @Ret = 1
+	RETURN @Ret
+GO
+
+------------------------------------------------------------------------------
+
+-- 세트 아이템 지급 추가.
+CREATE PROC spAdmWebInsertSetItem
+	@UserID varchar( 20 )
+,	@CSSID int
+,	@RentHourPeriod smallint
+,	@GMID varchar(20)
+,	@Ret int OUTPUT
+AS 
+ SET NOCOUNT ON
+  
+ DECLARE @AID  int  
+   
+ SELECT @AID = AID FROM Account WHERE UserID = @UserID  
+  
+ -- 존제하는 유저인지 검사.  
+ IF @AID IS NULL  
+ BEGIN  
+  SET @Ret = 0
+  RETURN @Ret
+ END  
+ ELSE  
+ BEGIN  
+  DECLARE @RentDate  datetime     
+  
+  -- @RentHourPeriod값을 가지고 기간제인지 검사.  
+  IF @RentHourPeriod = 0 OR @RentHourPeriod IS NULL  
+  BEGIN  
+   -- 기간제 아이템일 경우 영구 아이템 판매 여부 검사  
+   DECLARE @RentType  TINYINT  
+   DECLARE @RCSSPID  INT  
+  
+   SELECT @RentType = RentType FROM CashSetShop WHERE CSSID=@CSSID  
+   IF @RentType = 1  
+   BEGIN  
+    SELECT @RCSSPID = RCSSPID FROM RentCashSetShopPrice WHERE CSSID=@CSSID AND RentHourPeriod is NULL  
+    IF @RCSSPID IS NULL  
+    BEGIN  
+     SET @Ret = 0
+     RETURN @Ret
+    END  
+   END  
+  
+   -- 일반 아이템일 경우  
+   SET @RentDate = NULL  
+  END  
+  ELSE  
+  BEGIN  
+   SET @RentDate = GETDATE()  
+  END  
+      
+  BEGIN TRAN  
+  
+  DECLARE curBuyCashSetItem  INSENSITIVE CURSOR  
+  
+  FOR  
+   SELECT CSID FROM CashSetItem (NOLOCK) WHERE CSSID = @CSSID  
+  FOR READ ONLY  
+  
+  OPEN curBuyCashSetItem   
+  
+  DECLARE @varCSID  int  
+  DECLARE @ItemID   int  
+  
+  FETCH FROM curBuyCashSetItem INTO @varCSID  
+  
+  WHILE @@FETCH_STATUS = 0  
+  BEGIN  
+   SELECT @ItemID = cs.ItemID  
+   FROM CashShop cs (NOLOCK)   
+   WHERE cs.CSID = @varCSID   
+  
+   IF @ItemID IS NOT NULL  
+   BEGIN  
+    -- 아이템 생성.  
+    INSERT INTO AccountItem(AID, ItemID, RentDate, RentHourPeriod)  
+    VALUES (@AID, @ItemID, @RentDate, @RentHourPeriod)  
+   END  
+  
+   FETCH curBuyCashSetItem  INTO @varCSID  
+  END  
+  
+  CLOSE curBuyCashSetItem   
+  DEALLOCATE curBuyCashSetItem   
+  
+  -- GM로그 기록.
+  
+  COMMIT TRAN  
+  SET @Ret = 1
+  RETURN @Ret
+ END 
+go
+
+------------------------------------------------------------------------------
+
+-- 계정정보 조회  프로시져
+CREATE PROC spAdmWebGetAccountInfoByAID  
+	@AID int
+AS  
+ 	SET NOCOUNT ON  
+  
+ 	SELECT AID, UserID, Name, Age, Sex, UGradeID, RegDate  
+ 	FROM Account(NOLOCK)  
+ 	WHERE AID = @AID
+GO
+
+------------------------------------------------------------------------------
+
+-- 캐릭터 정보 조회  프로시져 (삭제된 캐릭터 제외)
+CREATE PROC spAdmWebGetLiveCharInfoByAID
+ @AID int
+AS
+ SET NOCOUNT ON
+
+ SELECT c.Name, c.AID, c.CID, c.RegDate, c.PlayTime, c.LastTime, 
+  c.Sex, c.CharNum, c.Level, c.XP, c.BP, c.KillCount, c.DeathCount
+ FROM Account a(NOLOCK) JOIN Character c(NOLOCK)
+ ON a.AID = @AID AND c.AID = a.AID 
+ WHERE c.DeleteFlag <> 1
+GO
+
+------------------------------------------------------------------------------
+
+-- 캐릭터 정보 조회  프로시져 (삭제된 캐릭터 포함)
+CREATE PROC spAdmWebGetAllCharInfoByAID  
+ @AID int  
+AS  
+ SET NOCOUNT ON  
+  
+ SELECT c.Name, c.AID, c.CID, c.RegDate, c.PlayTime, c.LastTime
+  , c.Sex, c.CharNum, c.Level, c.XP, c.BP, c.KillCount, c.DeathCount
+  , c.DeleteFlag, c.DeleteName  
+ FROM Account a(NOLOCK) JOIN Character c(NOLOCK)  
+ ON a.AID = @AID AND c.AID = a.AID
+GO
+
+------------------------------------------------------------------------------
+
+-- 캐릭터 삭제  프로시져
+CREATE PROC spAdmWebDeleteChar
+ @AID  int
+, @CharNum smallint
+, @CharName varchar(24)
+, @GMID varchar(20)
+, @Ret int OUTPUT	
+AS
+ SET NOCOUNT ON 
+
+ DECLARE @CID int
+ DECLARE @ErrSlot int
+ DECLARE @ErrDelInfo int
+ DECLARE @ErrName int
+
+ SELECT @CID = CID FROM Character(NOLOCK) 
+ WHERE AID = @AID AND Name = @CharName AND CharNum = @CharNum
+ IF @CID IS NULL BEGIN 
+  SET @Ret = 0
+  RETURN @Ret
+ END
+
+ BEGIN TRAN
+ -- 캐쉬아이템은 중앙은행으로 돌려줘야 함.
+ INSERT INTO AccountItem( AID, ItemID, RentDate, RentHourPeriod, Cnt )
+ SELECT @AID AS AID, ItemID, RentDate, RentHourPeriod, Cnt
+ FROM CharacterItem(NOLOCK)
+ WHERE CID = @CID AND ItemID > 499999
+ IF 0 <> @@ERROR BEGIN 
+  ROLLBACK TRAN
+  SET @Ret = 0
+  RETURN @Ret
+ END
+
+ DELETE CharacterItem WHERE CID = @CID
+ IF 0 <> @@ERROR BEGIN 
+  ROLLBACK TRAN
+  SET @Ret = 0
+  RETURN @Ret
+ END
+
+ UPDATE Character SET head_slot = NULL, chest_slot = NULL, hands_slot = NULL,
+ legs_slot = NULL, feet_slot = NULL, fingerl_slot = NULL, 
+ fingerr_slot = NULL, melee_slot = NULL, primary_slot = NULL, 
+ secondary_slot = NULL, custom1_slot = NULL, custom2_slot = NULL
+ WHERE CID = @CID
+ SET @ErrSlot = @@ROWCOUNT
+
+ UPDATE Character SET DeleteName = Name, DeleteFlag = 1 WHERE CID = @CID
+ SET @ErrDelInfo = @@ROWCOUNT
+
+ UPDATE Character SET Name = '' WHERE CID = @CID
+ SET @ErrName = @@ROWCOUNT
+
+ IF (0 = @ErrSlot) OR (0 = @ErrDelInfo) OR (0 = @ErrName) BEGIN
+  ROLLBACK TRAN
+  SET @Ret = 0
+  RETURN @Ret
+ END
+ COMMIT TRAN
+	
+ SET @Ret = 1
+ RETURN @Ret
+GO
+
+------------------------------------------------------------------------------
+
+--  캐릭터 복구  프로시져 
+CREATE   PROC spAdmWebUndeleteCharacter    
+ @AID int    
+, @CID int
+, @GMID varchar(20)  
+, @Ret int OUTPUT    
+AS    
+ SET NOCOUNT ON   
+  
+ IF EXISTS (SELECT LiveChar.CID FROM Character DelChar(NOLOCK) JOIN Character LiveChar(NOLOCK)
+	ON DelChar.CID = @CID AND DelChar.DeleteFlag = 1 AND LiveChar.Name = DelChar.DeleteName
+	WHERE LiveChar.DeleteFlag <> 1) BEGIN
+  SET @Ret = 0    
+  RETURN @Ret   
+ END    
+  
+ DECLARE @CharCount int     
+    
+ SELECT @CharCount = COUNT(CID) FROM Character(NOLOCK) WHERE AID = @AID AND DeleteFlag <> 1    
+ IF 4 > @CharCount BEGIN     
+  DECLARE @FreeNum int    
+  DECLARE @tb table( a int )  
+  
+  INSERT @tb VALUES( 0 )  
+  INSERT @tb VALUES( 1 )  
+  INSERT @tb VALUES( 2 )  
+  INSERT @tb VALUES( 3 )  
+  
+  SELECT TOP 1 @FreeNum = t.a  
+  FROM @tb t LEFT OUTER JOIN Character c(NOLOCK)  
+  ON c.AID = @AID AND c.DeleteFlag <> 1 AND c.CharNum = t.a  
+  WHERE c.CharNum IS NULL  
+  
+  IF @FreeNum IS NULL BEGIN    
+   SET @Ret = 0    
+   RETURN @Ret    
+  END    
+    
+  BEGIN TRAN    
+  UPDATE Character     
+  SET Name = DeleteName, CharNum = @FreeNum, DeleteFlag = 0, DeleteName = ''
+  WHERE CID = @CID AND AID = @AID AND DeleteFlag = 1 
+  IF 0 = @@ROWCOUNT BEGIN    
+   ROLLBACK TRAN    
+   SET @Ret = 0    
+   RETURN  @Ret  
+  END    
+  COMMIT TRAN    
+  SET @Ret = 1    
+  RETURN @Ret  
+ END
+GO
+
+
+------------------------------------------------------------------------------
+
+-- 중앙은행 아이템 삭제.
+CREATE PROC spAdmWebDeleteAccountItem
+	@AID int
+,	@AIID int
+,	@ItemID int
+,	@GMID varchar(20)
+,	@Ret int OUTPUT
+AS
+ SET NOCOUNT ON 
+
+ IF NOT EXISTS (SELECT AID FROM Account(NOLOCK) 
+ WHERE AID = @AID) BEGIN
+  SET @Ret = 0
+  RETURN @Ret	
+ END
+
+ DELETE AccountItem WHERE AIID = @AIID AND AID = @AID AND ItemID = @ItemID
+ IF 0 <> @@ERROR BEGIN
+  SET @Ret = 0
+  RETURN @Ret
+ END
+
+ SET @Ret = 1
+ RETURN @Ret
+GO
+
+------------------------------------------------------------------------------
+
+-- 캐릭터 아이템 삭제.
+CREATE PROC spAdmWebDeleteCharacterItem
+ @CID int
+, @CIID int
+, @ItemID int
+, @GMID varchar(20)
+, @Ret int OUTPUT
+AS
+ SET NOCOUNT ON
+
+ IF NOT EXISTS (SELECT CID FROM Character(NOLOCK) WHERE CID = @CID) BEGIN
+  SET @Ret = 0
+  RETURN @Ret
+ END
+
+ -- 삭제하려는 아이템을 착용하고 있다면 먼저 해제시쳐야 함.
+ BEGIN TRAN
+ UPDATE Character SET head_slot = NULL WHERE CID = @CID AND head_slot = @CIID
+ UPDATE Character SET chest_slot = NULL WHERE CID = @CID AND chest_slot = @CIID
+ UPDATE Character SET hands_slot = NULL WHERE CID = @CID AND hands_slot = @CIID
+ UPDATE Character SET legs_slot = NULL WHERE CID = @CID AND legs_slot = @CIID
+ UPDATE Character SET feet_slot = NULL WHERE CID = @CID AND feet_slot = @CIID
+ UPDATE Character SET fingerl_slot = NULL WHERE CID = @CID AND fingerl_slot = @CIID
+ UPDATE Character SET fingerr_slot = NULL WHERE CID = @CID AND fingerr_slot = @CIID
+ UPDATE Character SET melee_slot = NULL WHERE CID = @CID AND melee_slot = @CIID
+ UPDATE Character SET primary_slot = NULL WHERE CID = @CID AND primary_slot = @CIID
+ UPDATE Character SET secondary_slot = NULL WHERE CID = @CID AND secondary_slot = @CIID
+ UPDATE Character SET custom1_slot = NULL WHERE CID = @CID AND custom1_slot = @CIID
+ UPDATE Character SET custom2_slot = NULL WHERE CID = @CID AND custom2_slot = @CIID
+
+ DELETE CharacterItem WHERE CIID = @CIID AND CID = @CID AND ItemID = @ItemID
+ IF 0 <> @@ERROR BEGIN
+  ROLLBACK TRAN
+  SET @Ret = 0
+  RETURN @Ret
+ END
+ COMMIT TRAN	
+
+ SET @Ret = 1
+ RETURN @Ret
+GO
+
+---------------------------------------------------------------------------------------
+
+CREATE TABLE AccountPenaltyLog( 
+	PenaltyLogID int IDENTITY PRIMARY KEY NONCLUSTERED
+,	AID int 
+,	UGradeID int
+,	DayLeft int
+,	RegDate smalldatetime
+,	GMID varchar(20) )
+GO
+
+CREATE CLUSTERED INDEX IX_AccountPenaltyLog_AID
+ON AccountPenaltyLog( AID )
+GO
+
+------------------------------------------------------------------------------------------
+
+CREATE PROC spAdmWebUpdateAccountPenaltyPeriod
+	@AID int
+,	@UGradeID int
+,	@Period int 
+,	@GMID varchar(20)
+,	@Ret int OUTPUT
+AS
+	SET NOCOUNT ON
+
+	IF NOT EXISTS (SELECT AID FROM Account(NOLOCK) WHERE AID = @AID) BEGIN
+		SET @Ret = 0
+		RETURN @Ret
+	END
+
+	IF (0 > @Period) OR (@Period IS NULL) OR (0 > @UGradeID) OR (@UGradeID IS NULL) BEGIN
+		SET @Ret = 0
+		RETURN @Ret
+	END
+
+	BEGIN TRAN
+	UPDATE Account SET UGradeID = @UGradeID WHERE AID = @AID
+	IF 0 = @@ROWCOUNT BEGIN
+		ROLLBACK TRAN
+		SET @Ret = 0
+		RETURN @Ret
+	END
+
+	IF NOT EXISTS (SELECT AID FROM AccountPenaltyPeriod(NOLOCK) WHERE AID = @AID) BEGIN
+		IF 0 < @Period BEGIN
+			-- 처음 재제를 받을경우.
+			INSERT INTO AccountPenaltyPeriod( AID, DayLeft ) VALUES (@AID, @Period)
+			IF 0 <> @@ERROR BEGIN 
+				ROLLBACK TRAN
+				SET @Ret = 0
+				RETURN @Ret
+			END
+		END
+	END
+	ELSE BEGIN
+		IF 0 < @Period BEGIN
+			-- 이미 다른 재제를 받을경우 기간만 수정함.
+			UPDATE AccountPenaltyPeriod SET DayLeft = @Period WHERE AID = @AID
+				IF 0 = @@ROWCOUNT BEGIN
+				ROLLBACK TRAN
+				SET @Ret = 0
+				RETURN @Ret
+			END
+		END
+		ELSE BEGIN
+			DELETE AccountPenaltyPeriod WHERE AID = @AID
+			IF 0 <> @@ERROR BEGIN
+				ROLLBACK TRAN	
+				SET @Ret = 0
+				RETURN @Ret
+			END
+		END
+	END
+
+	INSERT INTO AccountPenaltyLog( AID, UGradeID, DayLeft, RegDate, GMID )
+	VALUES (@AID, @UGradeID, @Period, GETDATE(), @GMID )
+	IF 0 <> @@ERROR BEGIN 
+		ROLLBACK TRAN
+		SET @Ret = 0
+		RETURN @Ret
+	END
+	COMMIT TRAN
+
+	SET @Ret = 1
+	RETURN @Ret
+GO
+
+-----------------------------------------------------------------------------------------------------------------
+
+CREATE TABLE CharacterMgrType(
+	CharMgrTypeID tinyint PRIMARY KEY CLUSTERED
+,	Description varchar(20) )
+GO
+
+-----------------------------------------------------------------------------------------------------------------
+
+CREATE TABLE CharacterMgrLogByGM(
+	CharMgrLogID int IDENTITY PRIMARY KEY NONCLUSTERED
+,	CID int FOREIGN KEY REFERENCES Character(CID) ON DELETE NO ACTION
+,	CharName varchar(24)  NOT NULL
+,	CharMgrTypeID tinyint FOREIGN KEY REFERENCES CharacterMgrType(CharMgrTypeID) ON DELETE NO ACTION
+,	GMID varchar(20) NOT NULL
+,	NewName varchar(24)
+,	OrgValue int
+,	NewValue int
+,	RegDate smalldatetime )
+GO
+
+CREATE CLUSTERED INDEX IX_CharacterMgrLogByGM_CID
+ON CharacterMgrLogByGM( CID )
+
+CREATE NONCLUSTERED INDEX IX_CharacterMgrLogByGM_CharName
+ON CharacterMgrLogByGM( CharName )
+
+CREATE NONCLUSTERED INDEX IX_CharacterMgrLogByGM_CharMgrTypeID
+ON CharacterMgrLogByGM( CharMgrTypeID )
+
+CREATE NONCLUSTERED INDEX IX_CharacterMgrLogByGM_RegDate
+ON CharacterMgrLogByGM( RegDate )
+GO
+
+-------------------------------------------------------------------------------------------------------------------
+
+CREATE PROC spAdmWebGetClanInfoByCharName
+ @CharName varchar(24)
+AS
+ SET NOCOUNT ON
+
+ DECLARE @CLID int
+
+ SELECT @CLID = cm.CLID
+ FROM Character c(NOLOCK) JOIN ClanMember cm(NOLOCK)
+ ON c.Name = @CharName AND cm.CID = c.CID
+ IF @CLID IS NULL RETURN
+
+ SELECT cl.CLID, cl.Name, c.Name AS 'MastName', cl.Introduction, cl.RegDate, cl.HomePage, cl.EmblemURL, cl.DeleteFlag
+ FROM Clan cl(NOLOCK) JOIN Character c(NOLOCK)
+ ON cl.CLID = @CLID AND cl.MasterCID = c.CID
+GO
+
+-------------------------------------------------------------------------------------------------------------------
+
+CREATE PROC spAdmWebGetClanInfoByClanName
+ @ClanName varchar(24)
+AS
+ SET NOCOUNT ON
+
+ SELECT cl.CLID, cl.Name, c.Name AS 'MastName', cl.Introduction, 
+  cl.RegDate, cl.HomePage, cl.EmblemURL, cl.DeleteFlag
+ FROM Clan cl(NOLOCK) JOIN Character c(NOLOCK)
+ ON cl.Name = @ClanName AND cl.MasterCID = c.CID
+GO
+
+-------------------------------------------------------------------------------------------------------------------
+
+CREATE PROC spAdmWebGetClanRanknfoByCLID
+ @CLID int 
+AS
+ SET NOCOUNT ON
+
+ SELECT Exp, Point, TotalPoint, Wins, Losses, Ranking, LastDayRanking, 
+  LastMonthRanking, RankIncrease
+ FROM Clan(NOLOCK)
+ WHERE CLID = @CLID
+GO
+
+-------------------------------------------------------------------------------------------------------------------
+
+CREATE PROC spAdmWebGetClanMemberInfoByCLID
+ @CLID int
+AS
+ SET NOCOUNT ON 
+
+ SELECT cm.CLID, cm.Grade, a.UserID, c.Name, cm.CID, c.Level, 
+  cm.ContPoint, cm.RegDate
+ FROM (ClanMember cm(NOLOCK) JOIN Character c(NOLOCK)
+ ON cm.CLID = @CLID AND c.CID = cm.CID) JOIN Account a( NOLOCK)
+ ON a.AID = c.AID
+ WHERE c.DeleteFlag <> 1
+ ORDER BY cm.Grade, cm.RegDate
+GO
+
+-------------------------------------------------------------------------------------------------------------------
+
+CREATE PROC spAdmWebChangeClanName
+ @CLID int
+, @NewClanName varchar(24)
+, @GMID varchar(20)
+, @Ret int OUTPUT
+AS
+ SET NOCOUNT ON 
+
+ IF EXISTS (SELECT CLID FROM Clan(NOLOCK) 
+  WHERE Name = @NewClanName AND DeleteFlag <> 1) BEGIN
+  SET @Ret = 0
+  RETURN @Ret
+ END
+
+ UPDATE Clan SET Name = @NewClanName 
+ WHERE CLID = @CLID AND DeleteFlag <> 1
+ IF 0 = @@ROWCOUNT BEGIN
+  SET @Ret = 0
+  RETURN @Ret
+ END
+
+ SET @Ret = 1
+ RETURN @Ret
+GO
+
+-------------------------------------------------------------------------------------------------------------------
+
+CREATE PROC spAdmWebChangeClanHomepage
+ @CLID int
+, @NewHomePage varchar(128)
+, @GMID varchar(20)
+, @Ret int OUTPUT
+AS
+ SET NOCOUNT ON 
+
+ UPDATE Clan SET Homepage = @NewHomepage 
+  WHERE CLID = @CLID AND DeleteFlag <> 1
+ IF 0 = @@ROWCOUNT BEGIN 
+  SET @Ret = 0
+  RETURN @Ret
+ END
+
+ SET @Ret = 1
+ RETURN @Ret
+GO
+
+-------------------------------------------------------------------------------------------------------------------
+
+CREATE PROC spAdmWebChangeClanEXP
+ @CLID int
+, @NewEXP int
+, @GMID varchar(20)
+, @Ret int OUTPUT
+AS
+ SET NOCOUNT ON
+
+ IF 0 > @NewEXP BEGIN
+  SET @Ret = 0
+  RETURN @Ret
+ END
+
+ UPDATE Clan SET EXP = @NewEXP 
+  WHERE CLID = @CLID AND DeleteFlag <> 1
+ IF 0 = @@ROWCOUNT BEGIN
+  SET @Ret = 0
+  RETURN @Ret
+ END
+
+ SET @Ret = 1
+ RETURN @Ret
+GO
+
+-------------------------------------------------------------------------------------------------------------------
+
+CREATE PROC spAdmWebChangeClanPoint
+ @CLID int
+, @NewClanPoint int
+, @GMID varchar(20)
+, @Ret int OUTPUT
+AS
+ SET NOCOUNT ON
+
+ IF 0 > @NewClanPoint BEGIN 
+  SET @Ret = 0
+  RETURN @Ret
+ END
+
+ UPDATE Clan SET Point = @NewClanPoint 
+  WHERE CLID = @CLID AND DeleteFlag <> 1
+ IF 0 = @@ROWCOUNT BEGIN
+  SET @Ret = 0
+  RETURN @Ret
+ END
+
+ SET @Ret = 1
+ RETURN @Ret
+GO
+
+-------------------------------------------------------------------------------------------------------------------
+
+CREATE PROC spAdmWebChangeClanTotalPoint
+ @CLID int
+, @NewClanTotalPoint int
+, @GMID varchar(20)
+, @Ret int OUTPUT
+AS
+ SET NOCOUNT ON 
+
+ IF 0 > @NewClanTotalPoint BEGIN
+  SET @Ret = 0
+  RETURN @Ret
+ END
+
+ UPDATE Clan SET TotalPoint = @NewClanTotalPoint 
+ WHERE CLID = @CLID AND DeleteFlag <> 1
+ IF 0 = @@ROWCOUNT BEGIN
+  SET @Ret = 0
+  RETURN @Ret
+ END
+
+ SET @Ret = 1
+ RETURN @Ret
+GO
+
+-------------------------------------------------------------------------------------------------------------------
+
+CREATE PROC spAdmWebChangeWinsLosses
+ @CLID int
+, @NewWins int
+, @NewLosses int
+, @GMID varchar(20)
+, @Ret int OUTPUT
+AS
+ SET NOCOUNT ON
+
+ IF (0 > @NewWins) OR (0 > @NewLosses) BEGIN
+  SET @Ret = 0
+  RETURN @Ret
+ END
+
+ UPDATE Clan SET Wins = @NewWins, Losses = @NewLosses 
+ WHERE CLID = @CLID AND DeleteFlag <> 1
+ IF 0=@@ROWCOUNT BEGIN
+  SET @Ret = 0
+  RETURN @Ret
+ END
+
+ SET @Ret = 1
+ RETURN @Ret
+GO
+
+-------------------------------------------------------------------------------------------------------------------
+
+CREATE TABLE ClanMemberGrade(
+ GradeID int PRIMARY KEY CLUSTERED
+, Grade varchar(24) NOT NULL )
+GO
+
+INSERT INTO ClanMemberGrade(GradeID, Grade)
+VALUES (0, 'None')
+
+INSERT INTO ClanMemberGrade(GradeID, Grade)
+VALUES (1, 'Master')
+
+INSERT INTO ClanMemberGrade(GradeID, Grade)
+VALUES (2, 'Admin')
+
+INSERT INTO ClanMemberGrade(GradeID, Grade)
+VALUES (9, 'Member')
+go
+
+-------------------------------------------------------------------------------------------------------------------
+
+CREATE PROC spAdmWebChangeClanMemberGrade
+ @CLID int
+, @CID int
+, @NewGrade int
+, @GMID varchar(20)
+, @Ret int OUTPUT
+AS
+ SET NOCOUNT ON 
+
+ IF NOT EXISTS (SELECT GradeID FROM ClanMemberGrade(NOLOCK) 
+  WHERE GradeID=@NewGrade) BEGIN
+  SET @Ret=0
+  RETURN @Ret
+ END
+
+ IF 1=@NewGrade BEGIN -- master duplication check.
+  IF EXISTS (SELECT CID FROM ClanMember(NOLOCK) 
+   WHERE CLID=@CLID AND Grade=@NewGrade) BEGIN
+   SET @Ret=0
+   RETURN @Ret
+  END
+ END
+
+ UPDATE ClanMember SET Grade=@NewGrade WHERE CLID=@CLID AND CID=@CID
+ IF 0=@@ROWCOUNT BEGIN
+  SET @Ret=0
+  RETURN @Ret
+ END
+
+ SET @Ret=1
+ RETURN @Ret
+GO
+
+-------------------------------------------------------------------------------------------------------------------
+
+CREATE PROC spAdmWebAddClanMember
+ @CLID int
+, @NewCID int
+, @GMID varchar(20)
+, @Ret int OUTPUT
+AS
+ SET NOCOUNT ON 
+
+ IF NOT EXISTS (SELECT CID FROM Character(NOLOCK)
+  WHERE CID = @NewCID AND DeleteFlag <> 1) BEGIN 
+  SET @Ret = 0
+  RETURN @Ret
+ END 
+
+ IF NOT EXISTS (SELECT CLID FROM Clan(NOLOCK) 
+  WHERE CLID = @CLID AND DeleteFlag <> 1) BEGIN
+  SET @Ret = 0
+  RETURN @Ret
+ END
+
+ IF EXISTS (SELECT CMID FROM ClanMember(NOLOCK)
+  WHERE CID = @NewCID) BEGIN
+  SET @Ret = 0
+  RETURN @Ret
+ END
+
+ INSERT INTO ClanMember(CLID, CID, Grade, RegDate, ContPoint)
+ VALUES (@CLID, @NewCID, 9, GETDATE(), 0)
+ IF 0 <> @@ERROR BEGIN
+  SET @Ret = 0
+  RETURN @Ret
+ END
+
+ SET @Ret = 1
+ RETURN @Ret
+GO
+
+-------------------------------------------------------------------------------------------
+  
+CREATE PROC spAdmWebChangeClanIntroduction  
+ @CLID int  
+, @NewIntroduction varchar(1024)  
+, @GMID varchar(20)
+, @Ret int OUTPUT  
+AS  
+ SET NOCOUNT ON  
+  
+ UPDATE Clan SET Introduction = @NewIntroduction WHERE CLID = @CLID  
+ IF 0 = @@ROWCOUNT BEGIN  
+  SET @Ret = 0  
+  RETURN @Ret  
+ END  
+  
+ SET @Ret = 1  
+ RETURN @Ret  
+GO
+
+-------------------------------------------------------------------------------------------
+
+CREATE PROC spAdmWebGetCharInfoByUserID  
+ @UserID varchar(20)  
+AS  
+ SET NOCOUNT ON  
+  
+ SELECT c.Name, c.AID, c.CID, c.RegDate, c.PlayTime, c.LastTime,c.Sex,  
+  c.CharNum, c.Level, c.XP, c.BP, c.DeleteFlag, c.DeleteName,  
+  c.KillCount, c.DeathCount  
+ FROM Account a(NOLOCK) JOIN Character c(NOLOCK)  
+ ON a.UserID = @UserID AND c.AID = a.AID  
+ ORDER BY DeleteFlag, CharNum
+GO
+
+-------------------------------------------------------------------------------
+
+CREATE PROC spAdmWebGetLiveCharInfoByOneCharName
+ @CharName varchar(24)
+AS
+ SET NOCOUNT ON
+ 
+ SELECT c2.Name, c2.CID
+ FROM (Character c1(NOLOCK) JOIN Account a(NOLOCK)
+ ON c1.Name = @CharName AND a.AID = c1.AID) JOIN Character c2(NOLOCK)
+ ON c2.AID = a.AID
+ WHERE c2.DeleteFlag <> 1
+ ORDER BY c2.CharNum
+GO
+
+----------------------------------------------------------------------------
+
+CREATE PROC spAdmWebGetAllCharInfoByOneCharName
+ @CharName varchar(24)
+AS
+ SET NOCOUNT ON 
+
+ SELECT c2.Name, c2.CID
+ FROM (Character c1(NOLOCK) JOIN Account a(NOLOCK)
+ ON c1.Name = @CharName AND a.AID = c1.AID) JOIN Character c2(NOLOCK)
+ ON c2.AID = a.AID
+ ORDER BY c2.DeleteFlag, c2.CharNum
+GO
+
+---------------------------------------------------------------------------------------------------------
+
+CREATE PROC spAdmWebGetClanRankInfoByCLID  
+ @CLID int   
+AS  
+ SELECT Exp, Point, TotalPoint, Wins, Losses, Ranking, LastDayRanking, LastMonthRanking, RankIncrease  
+ FROM Clan(NOLOCK)  
+ WHERE CLID = @CLID  
+GO
+
+----------------------------------------------------------------------------------
+/*
+CREATE     PROC [spWebItemUseLog]  
+ @UserID  VARCHAR(32)  
+AS  
+BEGIN  
+  
+ DECLARE @TargetAID INT  
+ SELECT @TargetAID = AID FROM Account(NOLOCK) WHERE UserID=@UserID  
+  
+ SELECT l.AID, l.CID, c.Name AS CharName, i.ItemID, i.Name AS ItemName, l.Date, c.DeleteName   
+ FROM BringAccountItemLog l(NOLOCK), Item i(NOLOCK), Character c(NOLOCK)  
+ WHERE l.AID=@TargetAID AND l.CID=c.CID AND l.ItemID=i.ItemID  
+ ORDER BY  Date DESC  
+END
+*/
+go
+
+----------------------------------------------------------------------------------
+
+CREATE PROC spAdmWebEditCharKillDeathCount
+ @CID int
+, @KillCount int
+, @DeathCount int
+, @GMID varchar(20)
+, @Ret int OUTPUT
+AS
+ IF (0 > @KillCount) OR (0 > @DeathCount) BEGIN
+  SET @Ret = 0
+  RETURN @Ret
+ END
+
+ UPDATE Character SET KillCount = @KillCount, DeathCount = @DeathCount
+ WHERE CID = @CID
+ IF 0 = @@ROWCOUNT BEGIN
+  SET @Ret = 0
+  RETURN @Ret
+ END
+
+ SET @Ret = 1
+ RETURN @Ret
+GO
+
+----------------------------------------------------------------------------------
+
+CREATE PROC spAdmWebLeaveClanByCID  
+ @CID int /* 탈퇴요청 캐릭터 CID */  
+, @GMID varchar(20)
+, @Ret int OUTPUT
+AS  
+ IF (@CID IS NULL) OR (@GMID IS NULL) BEGIN
+  SET @Ret = 0
+  RETURN @Ret
+ END
+
+ DECLARE @CLID int  
+ DECLARE @MasterCID int  
+  
+ -- 존재하는 아이디인가?  
+ SELECT @CLID = cm.CLID, @MasterCID = cl.MasterCID  
+ FROM Clan cl(NOLOCK), ClanMember cm(NOLOCK)  
+ WHERE cm.CID = @CID AND cl.CLID = cm.CLID  
+  
+ -- 클랜마스터가 아니고 클랜에 가입되 있을 경우만.  
+ IF (@CID IS NULL) OR (@MasterCID = @CID) OR (@CLID IS NULL) BEGIN  
+  SET @Ret = 0
+  RETURN @Ret
+ END  
+    
+ DELETE ClanMember WHERE CID = @CID  
+ IF 0 <> @@ERROR  
+ BEGIN  
+  SET @Ret = 0
+  RETURN @Ret
+ END  
+  
+ SET @Ret = 1
+ RETURN @Ret
+GO  
+
+----------------------------------------------------------------------------
+
+CREATE PROC spAdmWebEditCharLevel
+ @CID int
+, @Level smallint
+, @GMID varchar(20)
+, @Ret int OUTPUT
+AS
+ SET NOCOUNT ON
+
+ IF 1 > @Level  BEGIN
+  SET @Ret = 0
+  RETURN @Ret
+ END
+
+ IF EXISTS (SELECT CID FROM Character(NOLOCK) 
+  WHERE CID = @CID AND Level = @Level) BEGIN
+  SET @Ret = 1
+  RETURN @Ret
+ END
+
+ DECLARE @XP int
+
+ SELECT @XP = MinXP FROM Level(NOLOCK) WHERE Level = @Level
+ IF @XP IS NULL BEGIN
+  SET @Ret = 0
+  RETURN @Ret
+ END
+
+ UPDATE Character SET Level = @Level, XP = @XP 
+ WHERE CID = @CID AND DeleteFlag <> 1
+ IF 0 = @@ROWCOUNT BEGIN
+  SET @Ret = 0
+  RETURN @Ret
+ END
+
+ SET @Ret = 1
+ RETURN @Ret
+GO
+
+-------------------------------------------------------------------
+
+CREATE PROC spAdmWebEditCharXP
+ @CID int
+, @XP int
+, @GMID varchar(20)
+, @Ret int OUTPUT
+AS
+ SET NOCOUNT ON
+
+ IF 0 > @XP BEGIN
+  SET @Ret = 0
+  RETURN @Ret
+ END
+
+ DECLARE @MaxMinXP int
+ DECLARE @Level smallint
+
+ SELECT TOP 1 @MaxMinXP = MinXP FROM Level(NOLOCK) 
+ ORDER BY MinXP DESC
+
+ IF @MaxMinXP > @XP BEGIN
+  SELECT TOP 1 @Level = Level FROM Level(NOLOCK) 
+  WHERE MinXP <= @XP ORDER BY Level DESC
+ END
+ ELSE BEGIN
+  SELECT TOP 1 @Level = Level FROM Level(NOLOCK) 
+  ORDER BY Level DESC
+ END
+
+ UPDATE Character SET Level = @Level, XP = @XP 
+ WHERE CID = @CID AND DeleteFlag <> 1
+ IF 0 = @@ROWCOUNT BEGIN 
+  SET @Ret = 0
+  RETURN @Ret
+ END
+ 
+ SET @Ret = 1
+ RETURN @Ret
+GO
+
+--------------------------------------------------------------------
+
+CREATE NONCLUSTERED INDEX IX_ItemPurchaseLogByBounty_CID
+ON ItemPurchaseLogByBounty(CID)
+
+CREATE NONCLUSTERED INDEX IX_ItemPurhcaseLogByBountry_Date
+ON ItemPurchaseLogByBounty(Date)
+
+------------------------------------------------------------------------------------
+
+CREATE PROC spAdmWebGetItemList
+AS
+ SET NOCOUNT ON
+ SELECT ItemID, Name, Slot, IsCashItem
+ FROM Item(NOLOCK)
+ ORDER BY ItemID
+GO
+
+------------------------------------------------------------------------------------
+
+CREATE PROC spAdmWebGetCashSetShopList
+AS
+ SET NOCOUNT ON
+ SELECT CSSID, Name
+ FROM CashSetShop(NOLOCK)
+ ORDER BY CSSID
+GO
+------------------------------------------------------------------------------------
+
+CREATE PROC spAdmWebDeleteClanByCID  
+ @MasterCID int /* 마스터 CID */  
+AS  
+ SET NOCOUNT ON
+ DECLARE @CLID int  
+  
+ SELECT @CLID = c.CLID  
+ FROM Clan c(NOLOCK)  
+ WHERE c.MasterCID = @MasterCID  
+  
+ -- 요청 조건 검사.  
+ IF (@MasterCID IS NULL) OR (@CLID IS NULL) BEGIN  
+  SELECT 0 AS Ret  
+  ROLLBACK TRAN  
+  RETURN  
+ END  
+
+ BEGIN TRAN    
+ -- Clan Member 삭제.  
+ DELETE ClanMember WHERE CLID = @CLID  
+ IF 0  <> @@ERROR BEGIN  
+  SELECT 0 AS Ret  
+  ROLLBACK TRAN  
+  RETURN  
+ END  
+  
+ -- Clan을 유효하지 않은 상태로 설정.  
+ UPDATE Clan SET DeleteFlag = 1, MasterCID = NULL WHERE CLID = @CLID  
+ UPDATE Clan SET DeleteName = Name WHERE CLID = @CLID  
+ UPDATE Clan SET Name = NULL WHERE CLID = @CLID  
+ COMMIT TRAN  
+ 
+ SELECT 1 AS Ret  
+GO
+
+------------------------------------------------------------------------------------
+
+CREATE PROC spAdmWebGetBlockCountryCodeList
+ @Code char
+AS
+ SET NOCOUNT ON
+
+ SELECT bcc.CountryCode3, bcc.RoutingURL, bcc.IsBlock, cc.CountryName
+ FROM BlockCountryCode bcc(NOLOCK) JOIN CountryCode cc(NOLOCK)
+ ON cc.CountryCode3 = bcc.CountryCode3
+ WHERE cc.CountryName LIKE @Code + '%'
+ ORDER BY CountryName ASC
+GO
+
+------------------------------------------------------------------------------------
+ 
+CREATE PROC spAdmWebUpdateBlockCountryCode  
+ @CountryCode3 char(3)  
+, @RoutingURL varchar(64)  
+, @IsBlock tinyint  
+, @Ret int Output  
+AS  
+ SET NOCOUNT ON  
+ UPDATE BlockCountryCode   
+ SET RoutingURL = @RoutingURL , IsBlock = @IsBlock  
+ WHERE CountryCode3 = @CountryCode3   
+ IF 0 = @@ROWCOUNT SET @Ret = 0  
+ ELSE SET @Ret = 1  
+ RETURN @Ret
+GO
+
+------------------------------------------------------------------------------------
+
+CREATE PROC spAdmWebGetCustomIPByIP
+ @IP varchar(15)
+, @RegDateFrom smalldatetime
+, @RegDateTo smalldatetime
+AS
+ SET NOCOUNT ON
+ DECLARE @TmpIP bigint
+
+ SET @TmpIP = TestDB.dbo.inet_aton( @IP )
+ SET @RegDateTo = DATEADD( dd, 1, @RegDateTo )
+
+ SELECT GunzDB.dbo.inet_ntoa(IPFrom) AS IPFrom, GunzDB.dbo.inet_ntoa(IPTo) AS IPTo, 
+  CountryCode3, Comment, IsBlock, RegDate
+ FROM CustomIP(NOLOCK)
+ WHERE RegDate >= @RegDateFrom AND RegDate <= @RegDateTo AND
+  IPFrom <= @TmpIP AND IPTo >= @TmpIP
+GO
+
+--------------------------------------------------------------
+
+CREATE PROC spAdmWebGetCustomIP
+ @RegDateFrom smalldatetime
+, @RegDateTo smalldatetime
+AS
+ SET NOCOUNT ON
+ DECLARE @TmpIP bigint
+
+ SET @RegDateTo = DATEADD( dd, 1, @RegDateTo )
+
+ SELECT GunzDB.dbo.inet_ntoa(IPFrom) AS IPFrom, GunzDB.dbo.inet_ntoa(IPTo) AS IPTo, 
+  CountryCode3, Comment, IsBlock, RegDate
+ FROM CustomIP(NOLOCK)
+ WHERE RegDate >= @RegDateFrom AND RegDate <= @RegDateTo
+GO
+
+--------------------------------------------------------------
+
+/*
+ * @Ret(0:Fail, 1:Success, 2:Duplicate, 3:Invers range)
+ */
+CREATE PROC spAdmWebInsertCustomIP
+ @IPFrom varchar(15)
+, @IPTo varchar(15)
+, @IsBlock tinyint
+, @CountryCode3 char(3)
+, @Comment varchar(128)
+, @Ret int OUTPUT
+AS
+ SET NOCOUNT ON
+ DECLARE @DupRet int
+ DECLARE @TmpIPFrom BIGINT
+ DECLARE @TmpIPTo BIGINT
+
+ SET @TmpIPFrom = GunzDB.dbo.inet_aton( @IPFrom )
+ SET @TmpIPTo = GunzDB.dbo.inet_aton( @IPTo )
+ IF @TmpIPFrom > @TmpIPTo BEGIN
+  SET @Ret = 3
+  RETURN @Ret
+ END
+
+ EXEC spIPFltCheckIsDuplicateRange @TmpIPFrom, @TmpIPTo, @DupRet OUTPUT
+ IF 1 = @DupRet BEGIN
+  SET @Ret = 2
+  RETURN @Ret
+ END 
+
+ INSERT INTO CustomIP(IPFrom, IPTo, CountryCode3, IsBlock, Comment, RegDate)
+ VALUES (@TmpIPFrom, @TmpIPTo, @CountryCode3, @IsBlock, @Comment, GETDATE() )
+ IF 0 <> @@ERROR SET @Ret = 0
+ ELSE SET @Ret = 1
+ RETURN @Ret
+GO
+
+--------------------------------------------------------------
+
+CREATE PROC spAdmWebDeleteCustomIP
+ @IPFrom varchar(15)
+, @IPTo varchar(15)
+, @Ret int OUTPUT
+AS
+ SET NOCOUNT ON
+ DECLARE @TmpIPFrom BIGINT
+ DECLARE @TmpIPTo BIGINT
+ 
+ SET @TmpIPFrom = GunzDB.dbo.inet_aton( @IPFrom )
+ SET @TmpIPTo = GunzDB.dbo.inet_aton( @IPTo )
+ IF @TmpIPFrom > @TmpIPTo BEGIN
+  SET @Ret = 0
+  RETURN @Ret
+ END
+ 
+ DELETE CustomIP WHERE IPFrom = @TmpIPFrom AND IPTo = @TmpIPTo
+ IF 0 <> @@ERROR SET @Ret = 0
+ ELSE SET @Ret = 1
+ RETURN @Ret
+GO
+
+--------------------------------------------------------------
+/*
+ * @Ret(0:Fail, 1:Success, 2:Duplicate, 3:Invers range)
+ */
+CREATE PROC spAdmWebUpdateCustomIP
+ @IPFrom varchar(15)
+, @IPTo varchar(15)
+, @NewIPFrom varchar(15)
+, @NewIPTo varchar(15)
+, @IsBlock tinyint
+, @CountryCode3 char(3)
+, @Comment varchar(128)
+, @Ret int OUTPUT
+AS
+ SET NOCOUNT ON 
+ DECLARE @DupRet bigint
+ DECLARE @TmpIPFrom BIGINT
+ DECLARE @TmpIPTo BIGINT
+ DECLARE @TmpNewIPFrom bigint
+ DECLARE @TmpNewIPTo bigint
+
+ SET @TmpIPFrom = GunzDB.dbo.inet_aton( @IPFrom )
+ SET @TmpIPTo = GunzDB.dbo.inet_aton( @IPTo )
+
+ IF @TmpIPFrom > @TmpIPTo BEGIN
+  SET @Ret = 3
+  RETURN @Ret
+ END
+
+ SET @TmpNewIPFrom = GunzDB.dbo.inet_aton( @NewIPFrom )
+ SET @TmpNewIPTo = GunzDB.dbo.inet_aton( @NewIPTo )
+
+ IF @TmpNewIPFrom > @TmpNewIPTo BEGIN
+  SET @Ret = 0
+  RETURN @Ret
+ END
+
+ -- 이전 IP범위와 같으면 IP변경 없이 다른 데이터만 변경하는 것임.
+ IF (@TmpIPFrom <> @TmpNewIPFrom) OR (@TmpIPTo <> @TmpNewIPTo) BEGIN
+  EXEC spIPFltCheckIsDuplicateRange @TmpNewIPFrom, @TmpNewIPTo, @DupRet OUTPUT
+  IF 1 = @DupRet BEGIN 
+   SET @Ret = 2
+   RETURN @Ret
+  END
+ END
+
+ UPDATE CustomIP
+ SET IPFrom = @TmpNewIPFrom, IPTo = @TmpNewIPTo,
+  IsBlock = @IsBlock, CountryCode3 = @CountryCode3,
+  Comment = @Comment
+ WHERE IPFrom = @TmpIPFrom AND IPTo = @TmpIPTo
+ IF 0 <> @@ERROR OR 0 = @@ROWCOUNT SET @Ret = 0
+ ELSE SET @Ret = 1
+ RETURN @Ret
+GO
+
+------------------------------------------------------------------------------------
+
+CREATE PROC spAdmWebGetCaracterMakingLog  
+ @CharName varchar(24)  
+AS  
+ SET NOCOUNT ON  
+ SELECT a.UserID, cml.AID,  cml.CharName, cml.Type, cml.Date  
+ FROM Account a(nolock), CharacterMakingLog cml(nolock)   
+ WHERE cml.CharName = @CharName AND a.AID = cml.AID   
+ ORDER BY cml.Date DESC  
+GO
+
+------------------------------------------------------------------------------------
+
+CREATE PROC spAdmWebAccountItemInfoByAID 
+ @AID int
+AS
+ SET NOCOUNT ON
+ SELECT ai.AIID, ai.RentHourPeriod, i.Name, i.ItemID
+  , CASE ISNULL(RentDate, 0 )
+    WHEN 0 THEN '0'
+    ELSE (RentHourPeriod-DATEDIFF (hh, RentDate, GetDate()))  
+    END AS RentRemain
+  , CASE ISNULL(ai.RentDate, 0)
+    WHEN 0 THEN '0'
+    ELSE CAST(ai.RentDate AS varchar(24))
+    END as RentDate
+ FROM   AccountItem ai(NOLOCK) JOIN Item i(NOLOCK) 
+ ON ai.AID = @AID AND i.ItemID = ai.ItemID
+GO
+
+--------------------------------------------------------------------------------------
+
+CREATE PROC spAdmWebGetItemPurchaseLogByCash
+ @AID int  
+AS  
+ SET NOCOUNT ON  
+ SELECT ipl.id, a.UserID AS SenderUserID, a.UserID AS ReceiverUserID, 
+  i.Name AS ItemName, ipl.Date, ipl.Cash
+  , CASE ISNULL(ipl.RentHourPeriod, 0) 
+   WHEN 0 THEN '0'
+   ELSE CAST(ipl.RentHourPeriod AS varchar(10)) 
+   END AS 'RentHourPeriod'
+ FROM (Account a(NOLOCK) JOIN ItemPurchaseLogByCash ipl(NOLOCK)  
+ ON a.AID = @AID AND ipl.AID = a.AID) JOIN Item i(NOLOCK)  
+ ON i.ItemID = ipl.ItemID  
+ ORDER BY ipl.Date DESC  
+GO
+
+--------------------------------------------------------------------------------------
+
+CREATE PROC spAdmWebGetSetItemPurchaseLogByCash  
+ @AID int  
+AS  
+ SET NOCOUNT ON  
+ SELECT sipl.id, a.UserID AS SenderUserID, a.UserID AS ReceiverUserID
+  , css.Name AS ItemName, sipl.Date, sipl.Cash  
+  , CASE ISNULL(sipl.RentHourPeriod, 0)
+   WHEN 0 THEN '0'
+   ELSE CAST(sipl.RentHourPeriod AS varchar(10))
+  END AS 'RentHourPeriod'
+ FROM (Account a(NOLOCK) JOIN SetItemPurchaseLogByCash sipl(NOLOCK)  
+ ON a.AID = @AID AND sipl.AID = a.AID) JOIN CashSetShop css(NOLOCK)  
+ ON css.CSSID = sipl.CSSID  
+ ORDER BY Date DESC  
+GO
+
+--------------------------------------------------------------------------------------
+
+CREATE PROC spAdmWebGetCashItemPresentRecvLog
+ @AID int  
+AS  
+ SET NOCOUNT ON  
+ SELECT cpl.id, cpl.SenderUserID, a.UserID AS ReceiverUserID
+  , i.Name AS ItemName, cpl.Date, cpl.Cash  
+  , CASE ISNULL(cpl.RentHourPeriod, 0)
+   WHEN 0 THEN '0'
+   ELSE CAST(cpl.RentHourPeriod AS varchar(10))
+   END AS 'RentHourPeriod'
+ FROM ((Account a(NOLOCK) JOIN CashItemPresentLog cpl(NOLOCK)  
+ ON a.AID = @AID AND cpl.ReceiverAID = a.AID) JOIN CashShop cs(NOLOCK)  
+ ON cs.CSID = cpl.CSID) JOIN Item i(NOLOCK)  
+ ON i.ItemID = cs.ItemID  
+ ORDER BY cpl.Date DESC  
+GO
+
+--------------------------------------------------------------------------------------
+
+CREATE PROC spAdmWebGetCashSetItemPresentRecvLog  
+ @AID int  
+AS  
+ SET NOCOUNT ON  
+ SELECT cpl.id, cpl.SenderUserID, a.UserID AS ReceiverUserID
+  , css.Name AS ItemName, cpl.Date, cpl.Cash
+  , CASE ISNULL(cpl.RentHourPeriod, 0)
+    WHEN 0 THEN '0'
+    ELSE CAST(cpl.RentHourPeriod AS varchar(10))
+   END AS 'RentHourPeriod'
+ FROM (Account a(NOLOCK) JOIN CashItemPresentLog cpl(NOLOCK)  
+ ON a.AID = @AID AND cpl.ReceiverAID = a.AID) JOIN CashSetShop css(NOLOCK)  
+ ON css.CSSID = cpl.CSSID  
+ ORDER BY cpl.Date DESC  
+GO
+
+--------------------------------------------------------------------------------------
+
+CREATE PROC spAdmWebGetCashItemPresentSendLog
+ @AID int  
+AS  
+ SET NOCOUNT ON   
+ SELECT cpl.id, cpl.SenderUserID, ar.UserID AS ReceiverUserID
+  , i.Name AS ItemName, cpl.Date, cpl.Cash  
+  , CASE ISNULL(cpl.RentHourPeriod, 0)
+    WHEN 0 THEN '0'
+    ELSE CAST(cpl.RentHourPeriod AS varchar(10))
+   END AS 'RentHourPeriod'
+ FROM (((Account a(NOLOCK) JOIN CashItemPresentLog cpl(NOLOCK)  
+ ON a.AID = @AID AND cpl.SenderUserID = a.UserID) JOIN CashShop cs(NOLOCK)  
+ ON cs.CSID = cpl.CSID) JOIN Item i(NOLOCK)  
+ ON i.ItemID = cs.ItemID) JOIN Account ar(NOLOCK)   
+ ON ar.AID = cpl.ReceiverAID  
+ ORDER BY cpl.Date DESC  
+GO
+
+--------------------------------------------------------------------------------------
+CREATE PROC spAdmWebGetCashSetItemPresentSendLog  
+ @AID int  
+AS  
+ SET NOCOUNT ON   
+ SELECT cpl.id, cpl.SenderUserID, a.UserID AS ReceiverUserID
+  , css.Name AS SetItemName
+  , cpl.Date, cpl.Cash  
+  , CASE ISNULL(cpl.RentHourPeriod, 0)
+    WHEN 0 THEN '0'
+    ELSE CAST(cpl.RentHourPeriod AS varchar(10)) 
+   END AS 'RentHourPeriod' 
+ FROM (Account a(NOLOCK) JOIN CashItemPresentLog cpl(NOLOCK)  
+ ON a.AID = @AID AND cpl.SenderUserID = a.UserID) JOIN CashSetShop css(NOLOCK)  
+ ON css.CSSID = cpl.CSSID  
+ ORDER BY cpl.Date DESC  
+GO

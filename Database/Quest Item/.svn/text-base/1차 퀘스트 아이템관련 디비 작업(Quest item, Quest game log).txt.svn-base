@@ -1,0 +1,333 @@
+-- 기존의 Character에 QuestItem정보를 저장할 필드 추가.
+ALTER TABLE Character DROP COLUMN QuestItemInfo
+
+GO
+
+ALTER TABLE Character ADD QuestItemInfo binary(292) 
+
+GO
+
+
+
+--------------------------------------------------------------------------------------------------
+
+
+
+IF (OBJECT_ID('QuestItem') IS NOT NULL)
+	DROP TABLE QuestItem
+
+GO
+
+-- QuestItem테이블 생성.
+CREATE TABLE QuestItem(
+	QIID		int		PRIMARY KEY NOT NULL
+,	Name		char(32)
+,	Level		tinyint
+,	Description	varchar(200)
+,	Price		int
+,	UniqueItem	bit		NOT NULL
+,	Sacrifice		bit		NOT NULL
+,	Type		char(10)
+,	Param		int )
+
+GO
+
+
+
+--------------------------------------------------------------------------------------------------
+
+
+
+
+-- 퀘스트 아이템 등록
+-- Page
+INSERT INTO QuestItem( QIID, Name, Level, Description, Price, UniqueItem, Sacrifice, Type, Param)
+VALUES (200001, '찢겨진 13페이지', 0, '무언가의 책으로부터 찢겨진 페이지. 희미하게 13이라고 표시되어 있다.', 25, 0, 1, 'Page', 0)
+
+INSERT INTO QuestItem( QIID, Name, Level, Description, Price, UniqueItem, Sacrifice, Type, Param)
+VALUES (200002, '찢겨진 25페이지', 0, '무언가의 책으로부터 찢겨진 페이지. 희미하게 25이라고 표시되어 있다.', 75, 0, 1, 'Page', 0)
+
+INSERT INTO QuestItem( QIID, Name, Level, Description, Price, UniqueItem, Sacrifice, Type, Param)
+VALUES (200003, '찢겨진 41페이지', 0, '무언가의 책으로부터 찢겨진 페이지. 희미하게 41이라고 표시되어 있다.', 125, 0, 1, 'Page', 0)
+
+INSERT INTO QuestItem( QIID, Name, Level, Description, Price, UniqueItem, Sacrifice, Type, Param)
+VALUES (200004, '찢겨진 65페이지', 0, '무언가의 책으로부터 찢겨진 페이지. 희미하게 65이라고 표시되어 있다.', 500, 0, 1, 'Page', 0)
+
+
+-- Skull
+INSERT INTO QuestItem( QIID, Name, Level, Description, Price, UniqueItem, Sacrifice, Type, Param)
+VALUES (200005, '작은 두골', 0, '수수께기의 두골. 마치 조류의 두골같다는 느낌이다.', 50, 0, 1, 'Skull', 0)
+
+INSERT INTO QuestItem( QIID, Name, Level, Description, Price, UniqueItem, Sacrifice, Type, Param)
+VALUES (200006, '큰 두골', 0, '수수께기의 두골. 누군지 몰라도 아마도 머리가 컸던것 같다.', 200, 0, 1, 'Skull', 0)
+
+INSERT INTO QuestItem( QIID, Name, Level, Description, Price, UniqueItem, Sacrifice, Type, Param)
+VALUES (200007, '수수께끼의 두골', 0, '도무지 용도를 알수 없는 수수께끼의 두골', 500, 0, 1, 'Skull', 1)
+
+INSERT INTO QuestItem( QIID, Name, Level, Description, Price, UniqueItem, Sacrifice, Type, Param)
+VALUES (200008, '고블린 두골', 0, '고블린의 두골. 한쪽에 "새로운 세계를 부른다."라고 새겨져 있다.', 200, 0, 1, 'Skull', 0)
+
+INSERT INTO QuestItem( QIID, Name, Level, Description, Price, UniqueItem, Sacrifice, Type, Param)
+VALUES (200009, '고블린 킹의 두골', 0, '고블린 킹의 두골.', 5000, 0, 1, 'Skull', 0)
+
+INSERT INTO QuestItem( QIID, Name, Level, Description, Price, UniqueItem, Sacrifice, Type, Param)
+VALUES (200010, '거대한 유골', 0, '생김새로 보아선 인간의 것. 그러나 그 크기는 공룡의 것과도 흡사하다.', 500, 0, 1, 'Skull', 0)
+
+
+-- Fresh
+INSERT INTO QuestItem( QIID, Name, Level, Description, Price, UniqueItem, Sacrifice, Type, Param)
+VALUES (200011, '날고기', 0, '알수없는 동물의 익히지 않은 고기. 식량으로 사용되었던것 같다.', 50, 0, 1, 'Fresh', 0)
+
+INSERT INTO QuestItem( QIID, Name, Level, Description, Price, UniqueItem, Sacrifice, Type, Param)
+VALUES (200012, '불고기', 0, '굉장히 맛있어 보이는 익힌 양념 고기.', 200, 0, 1, 'Fresh', 0)
+
+INSERT INTO QuestItem( QIID, Name, Level, Description, Price, UniqueItem, Sacrifice, Type, Param)
+VALUES (200013, '스테이크', 0, '굉장히 맛있어 보이는 스테이크. 몬스터가 즐겼던 것 같다.', 500, 0, 1, 'Fresh', 0)
+
+
+-- Ring
+INSERT INTO QuestItem( QIID, Name, Level, Description, Price, UniqueItem, Sacrifice, Type, Param)
+VALUES (200014, '철 귀걸이', 0, '코볼드 족이사용하는 철로 만들어진 귀걸이. 사람은 쓸수 없다.', 50, 0, 1, 'Ring', 0)
+
+INSERT INTO QuestItem( QIID, Name, Level, Description, Price, UniqueItem, Sacrifice, Type, Param)
+VALUES (200015, '은 귀걸이', 0, '코볼드 족이사용하는 은으로 만들어진 귀걸이. 사람은 쓸수 없다.', 200, 0, 1, 'Ring', 0)
+
+INSERT INTO QuestItem( QIID, Name, Level, Description, Price, UniqueItem, Sacrifice, Type, Param)
+VALUES (200016, '금 귀걸이', 0, '코볼드 족이사용하는 금으로 만들어진 귀걸이. 사람은 쓸수 없다.', 500, 0, 1, 'Ring', 0)
+
+INSERT INTO QuestItem( QIID, Name, Level, Description, Price, UniqueItem, Sacrifice, Type, Param)
+VALUES (200017, '플래티넘 귀걸이', 0, '코볼드 족이사용하는 특수 금속 재질의 귀걸이. 사람은 쓸수 없다.', 2000, 0, 1, 'Ring', 0)
+
+
+-- Necklace
+INSERT INTO QuestItem( QIID, Name, Level, Description, Price, UniqueItem, Sacrifice, Type, Param)
+VALUES (200018, '그림스크의 목걸이', 0, '고블린 족장의 목에 걸고 있던 목걸이. 사람이 쓸수 있을것 같진 않다.', 500, 0, 1, 'Necklace', 0)
+
+
+-- Doll
+INSERT INTO QuestItem( QIID, Name, Level, Description, Price, UniqueItem, Sacrifice, Type, Param)
+VALUES (200019, '스켈레톤 인형', 0, '해골 병사의 모습과 똑같은 인형. 만든 사람의 취향이 의심스럽다.', 1000, 0, 1, 'Doll', 0)
+
+INSERT INTO QuestItem( QIID, Name, Level, Description, Price, UniqueItem, Sacrifice, Type, Param)
+VALUES (200020, '코볼드 인형', 0, '이것은 코볼드의 모습과 똑같다. 이것을 아이들에게 주면 좋아할까?', 1000, 0, 1, 'Doll', 0)
+
+INSERT INTO QuestItem( QIID, Name, Level, Description, Price, UniqueItem, Sacrifice, Type, Param)
+VALUES (200021, '고블린 인형', 0, '고블린의 모습과 똑같다. 그러나 쓸모는 없어보인다.', 1000, 0, 1, 'Doll', 0)
+
+INSERT INTO QuestItem( QIID, Name, Level, Description, Price, UniqueItem, Sacrifice, Type, Param)
+VALUES (200022, '팜포우 인형', 0, '장난꾸러기 요정 팜포우를 꼭 닮은 인형', 1000, 0, 1, 'Doll', 0)
+
+INSERT INTO QuestItem( QIID, Name, Level, Description, Price, UniqueItem, Sacrifice, Type, Param)
+VALUES (200023, '토끼인형', 0, '귀여운 토끼 모양의 인형. 그런데 이것은 무슨 용도?!', 1000, 0, 1, 'Doll', 0)
+
+INSERT INTO QuestItem( QIID, Name, Level, Description, Price, UniqueItem, Sacrifice, Type, Param)
+VALUES (200024, '곰인형', 0, '꼬마 아이들이 잠을 잘때 꼭 안고 자던 인형. 그런데 왜 이런 것이?!', 1000, 0, 1, 'Doll', 0)
+	
+INSERT INTO QuestItem( QIID, Name, Level, Description, Price, UniqueItem, Sacrifice, Type, Param)
+VALUES (200025, '저주 받은 곰인형', 0, '꼬마 아이들이 잠을 잘때 안고 있을수는 없을 것 같다. 왜 이런 것이?!', 1000, 0, 1, 'Doll', 0)
+
+INSERT INTO QuestItem( QIID, Name, Level, Description, Price, UniqueItem, Sacrifice, Type, Param)
+VALUES (200026, '팜포우 아이돌', 0, '꿈속의 요정, 팜포우를 꼭 빼닮은 성상.', 1000, 0, 1, 'Doll', 0)
+
+INSERT INTO QuestItem( QIID, Name, Level, Description, Price, UniqueItem, Sacrifice, Type, Param)
+VALUES (200027, '저주 받은 팜포우 아이돌', 0, '팜포우를 닮은듯한 성상. 한데 어딘지 모르게 무서워 보인다.', 1000, 0, 1, 'Doll', 0)
+
+
+-- Book
+INSERT INTO QuestItem( QIID, Name, Level, Description, Price, UniqueItem, Sacrifice, Type, Param)
+VALUES (200028, '악마의 사전', 0, '이상한 내용들이 가득한 사전.', 20000, 0, 1, 'Book', 0)
+
+INSERT INTO QuestItem( QIID, Name, Level, Description, Price, UniqueItem, Sacrifice, Type, Param)
+VALUES (200029, '스크라이더의 명부 상편', 0, '사람들의 이르으로 가득찬 이상한 책 상권. 지옥으로부터 왔다고 한다.', 10000, 0, 1, 'Book', 0)
+
+INSERT INTO QuestItem( QIID, Name, Level, Description, Price, UniqueItem, Sacrifice, Type, Param)
+VALUES (200030, '스크라이더의 명부 하편', 0, '사람들의 이르으로 가득찬 이상한 책 하권. 지옥으로부터 왔다고 한다.', 10000, 0, 1, 'Book', 0)
+
+-- Object
+INSERT INTO QuestItem( QIID, Name, Level, Description, Price, UniqueItem, Sacrifice, Type, Param)
+VALUES (200031, '축복받은 십자가', 0, '건프리스틀이 지니고 다니던 그것과 모양이 흡사하다.', 500, 0, 1, 'Object', 0)
+
+INSERT INTO QuestItem( QIID, Name, Level, Description, Price, UniqueItem, Sacrifice, Type, Param)
+VALUES (200032, '저주받은 십자가', 0, '건프리스틀이 지니고 다니던 그것과 모양이 흡사하다. 그러나...', 500, 0, 1, 'Object', 0)
+
+INSERT INTO QuestItem( QIID, Name, Level, Description, Price, UniqueItem, Sacrifice, Type, Param)
+VALUES (200033, '곡갱이', 0, '캐굴현장에서 사용하는 곡괭이다. 그러나 채굴을 어디에서?', 200, 0, 1, 'Object', 0)
+
+INSERT INTO QuestItem( QIID, Name, Level, Description, Price, UniqueItem, Sacrifice, Type, Param)
+VALUES (200034, '말하는 돌맹이', 0, '가끔 이상한 소리를 해대는 돌맹이 스스로움직이기도 한다.', 1000, 0, 1, 'Object', 0)
+
+INSERT INTO QuestItem( QIID, Name, Level, Description, Price, UniqueItem, Sacrifice, Type, Param)
+VALUES (200035, '얼음의 결정', 0, '어진간한 열로는 녹일수 없어보이는 얼음의 결정.', 50, 0, 1, 'Object', 0)
+
+INSERT INTO QuestItem( QIID, Name, Level, Description, Price, UniqueItem, Sacrifice, Type, Param)
+VALUES (200036, '부서진 기어', 0, '부서져버린 기어. 다시는 쓸수 없을 것 같다.', 1000, 0, 1, 'Object', 0)
+
+INSERT INTO QuestItem( QIID, Name, Level, Description, Price, UniqueItem, Sacrifice, Type, Param)
+VALUES (200037, '고급 기어', 0, '기계안에서 무언가의 중요한 작업을 했던 것으로 보이는 기어.', 2000, 0, 1, 'Object', 0)
+
+-- Sword
+INSERT INTO QuestItem( QIID, Name, Level, Description, Price, UniqueItem, Sacrifice, Type, Param)
+VALUES (200038, '고블린 킹의 도끼', 0, '고블린 킹이 쓰던 무시무시한 도끼. 사람이 쓸수 없다는 것이 아쉽다.', 2000, 0, 1, 'Sword', 0)
+
+
+GO
+
+
+--------------------------------------------------------------------------------------------------
+
+-- Character의 QuestItem정보를 가져오는 저장 프로시져 생성.
+BEGIN TRAN
+DECLARE @ProcName varchar(100)
+
+SELECT @ProcName = NAME 
+FROM sysobjects 
+WHERE name LIKE 'spSelectCharQuestItemInfoByCID'
+
+IF (@ProcName IS NOT NULL)
+BEGIN
+	DROP PROC spSelectCharQuestItemInfoByCID
+END
+COMMIT TRAN
+GO
+
+CREATE  PROC spSelectCharQuestItemInfoByCID
+	@CID	int
+AS
+BEGIN
+	SELECT QuestItemInfo FROM Character (NOLOCK) WHERE CID = @CID
+END
+GO
+
+
+SELECT NAME FROM sysobjects WHERE NAME LIKE 'spSelectCharQuestItemInfoByCID'
+GO
+
+
+
+--------------------------------------------------------------------------------------------------
+
+
+
+IF (OBJECT_ID('QuestGameLog') IS NOT NULL)
+	DROP TABLE QuestGameLog
+
+GO
+
+
+-- Quest게임 로그 테이블 생성.
+CREATE TABLE QuestGameLog(
+	id		int		identity PRIMARY KEY NONCLUSTERED
+,	GameName	varchar(64)
+,	MasterCID	int		FOREIGN KEY REFERENCES Character(CID) ON DELETE NO ACTION
+,	Map		varchar(32)
+,	QL		tinyint
+,	EndTime		smalldatetime
+,	PlayerCount	tinyint
+,	SacriItemOwner	varchar(40)
+,	Players		varchar(1000)
+,	QuestItems	varchar(1000) )
+
+GO
+
+
+-- QuestGameLog에 인덱스 생성.
+CREATE CLUSTERED INDEX QuestGameDate
+ON QuestGameLog( EndTime )
+
+GO
+
+
+
+--------------------------------------------------------------------------------------------------
+
+-- Quest게임 로그 추가 쿼리 생성.
+BEGIN TRAN
+DECLARE @ProcName varchar(100)
+
+SELECT @ProcName = NAME 
+FROM sysobjects 
+WHERE name LIKE 'spInsertQuestGameLog'
+
+IF (@ProcName IS NOT NULL)
+	DROP PROC spInsertQuestGameLog
+COMMIT TRAN
+GO
+
+
+CREATE 	PROC spInsertQuestGameLog
+	@GameName 	varchar(64)
+,	@MasterCID	int 
+,	@Map		varchar(32)
+,	@QL		tinyint
+,	@PlayerCount	tinyint
+,	@Players	varchar(1000)
+,	@SacriItemOwner	varchar( 40 )
+,	@QuestItems	varchar(1000)
+AS
+BEGIN
+	-- Quest게임의 로그.
+	INSERT INTO QuestGameLog(GameName, MasterCID, Map, QL, EndTime, PlayerCount, Players, SacriItemOwner, QuestItems) 
+	VALUES (@GameName, @MasterCID, @Map, @QL, GETDATE(), @PlayerCount, @Players, @SacriItemOwner, @QuestItems )
+END
+GO
+
+SELECT NAME FROM sysobjects WHERE NAME LIKE 'spInsertQuestGameLog'
+GO
+
+
+
+--------------------------------------------------------------------------------------------------
+
+
+
+-- spGetCharInfoByCharNum쿼리 수정된 것. 퀘스트 아이템 컬럼때문에 수정이 되었음.
+-- 다음 업데이트에서는 반드시 적용시켜야 함.
+SET QUOTED_IDENTIFIER ON 
+GO
+SET ANSI_NULLS ON 
+GO
+
+-- 캐릭터 정보 가져오기
+ALTER  PROC [spGetCharInfoByCharNum]
+	@AID		int
+,	@CharNum	smallint
+AS
+
+DECLARE @CID		int
+DECLARE @CLID		int
+DECLARE @ClanName	varchar(24)
+DECLARE @ClanGrade	int
+DECLARE @ClanContPoint	int
+BEGIN
+SELECT @CID=CID FROM Character WITH (nolock) WHERE AID=@AID and CharNum=@CharNum
+SELECT @CLID=cl.CLID, @ClanName=cl.Name, @ClanGrade=cm.Grade, @ClanContPoint=cm.ContPoint FROM ClanMember cm(nolock), Clan cl(nolock) WHERE cm.cid=@CID AND cm.CLID=cl.CLID
+
+SELECT CID, AID, Name, Level, Sex, CharNum, Hair, Face, XP, BP, HP, AP, FR, CR, ER, WR, GameCount, KillCount, DeathCount, PlayTime,
+       head_slot, chest_slot, hands_slot, legs_slot, feet_slot, fingerl_slot, fingerr_slot, melee_slot, primary_slot,
+       secondary_slot, custom1_slot, custom2_slot,
+       @CLID AS CLID, @ClanName AS ClanName, @ClanGrade AS ClanGrade, @ClanContPoint AS ClanContPoint 
+FROM Character WITH (nolock) where cid=@CID
+END
+
+
+GO
+
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON 
+GO
+
+
+
+--------------------------------------------------------------------------------------------------
+
+-- CharacterMakingLog에 Index생성.
+CREATE CLUSTERED INDEX CharacterMakingDateIndex
+ON CharacterMakingLog( Date )
+
+GO
+
+CREATE NONCLUSTERED INDEX CharacterMakingName
+ON CharacterMakingLog( CharName )
+
+GO

@@ -1,0 +1,188 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#define APSTUDIO_HIDDEN_SYMBOLS
+#include "windows.h"
+#undef APSTUDIO_HIDDEN_SYMBOLS
+#include "resource.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// 한국어 resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_KOR)
+#ifdef _WIN32
+LANGUAGE LANG_KOREAN, SUBLANG_DEFAULT
+#pragma code_page(949)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+2 TEXTINCLUDE 
+BEGIN
+    "#define APSTUDIO_HIDDEN_SYMBOLS\r\n"
+    "#include ""windows.h""\r\n"
+    "#undef APSTUDIO_HIDDEN_SYMBOLS\r\n"
+    "#include ""resource.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MENU1 MENU 
+BEGIN
+    POPUP "menu"
+    BEGIN
+        MENUITEM "Show Calendar",               ID_MENUITEM_SHOW_CALENDAR
+        MENUITEM SEPARATOR
+        MENUITEM "New Memo",                    ID_MENUITEM_NEW_MEMO
+        MENUITEM "Show All",                    ID_MENUITEM_SHOWHIDEALL
+        MENUITEM SEPARATOR
+        POPUP "Skin"
+        BEGIN
+            MENUITEM "Default",                     ID_MENUITEM32787
+        END
+        MENUITEM "About",                       ID_MENUITEM_ABOUT
+        MENUITEM "Exit",                        ID_MENUITEM_EXIT
+    END
+    MENUITEM SEPARATOR
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUTBOX DIALOG  0, 0, 237, 60
+STYLE DS_SETFONT | WS_CHILD | WS_VISIBLE
+FONT 9, "Tahoma"
+BEGIN
+    LTEXT           "",IDC_STATIC_BUILDDATE,106,6,81,8
+    CONTROL         "",IDC_STATIC_LOGO,"Static",SS_BLACKRECT | 
+                    SS_REALSIZEIMAGE,8,10,98,33
+    LTEXT           "Coded by",IDC_STATIC,106,46,31,8
+    LTEXT           "Designed by",IDC_STATIC,106,16,39,8
+    LTEXT           "dubble@maietgames.com",IDC_STATIC,150,46,81,8
+    LTEXT           "valhashi@orgio.net",IDC_STATIC,150,16,59,8
+    LTEXT           "angelyh@orgio.net",IDC_STATIC,150,36,60,8
+    LTEXT           "follow@maietgames.com",IDC_STATIC,150,26,78,8
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_ABOUTBOX, DIALOG
+    BEGIN
+        VERTGUIDE, 8
+        VERTGUIDE, 106
+        VERTGUIDE, 150
+        HORZGUIDE, 10
+        HORZGUIDE, 20
+        HORZGUIDE, 30
+        HORZGUIDE, 40
+        HORZGUIDE, 50
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_BITMAP_LOGO         BITMAP                  "resources\\logo.bmp"
+IDDS_resize_right_mask  BITMAP                  "resources\\DefaultSkin\\resize_right_mask.bmp"
+IDDS_color              BITMAP                  "resources\\DefaultSkin\\color.bmp"
+IDDS_color_pressed      BITMAP                  "resources\\DefaultSkin\\color_pressed.bmp"
+IDDS_exit               BITMAP                  "resources\\DefaultSkin\\exit.bmp"
+IDDS_exit_pressed       BITMAP                  "resources\\DefaultSkin\\exit_pressed.bmp"
+IDDS_menu               BITMAP                  "resources\\DefaultSkin\\menu.bmp"
+IDDS_menu_pressed       BITMAP                  "resources\\DefaultSkin\\menu_pressed.bmp"
+IDDS_resize_left        BITMAP                  "resources\\DefaultSkin\\resize_left.bmp"
+IDDS_resize_left_mask   BITMAP                  "resources\\DefaultSkin\\resize_left_mask.bmp"
+IDDS_resize_right       BITMAP                  "resources\\DefaultSkin\\resize_right.bmp"
+IDDS_caption            BITMAP                  "resources\\DefaultSkin\\caption.bmp"
+IDDS_minimized          BITMAP                  "resources\\DefaultSkin\\minimized.bmp"
+IDDS_caption_left       BITMAP                  "resources\\DefaultSkin\\caption_left.bmp"
+IDDS_caption_right      BITMAP                  "resources\\DefaultSkin\\caption_right.bmp"
+IDDS_new                BITMAP                  "resources\\DefaultSkin\\new.bmp"
+IDDS_new_pressed        BITMAP                  "resources\\DefaultSkin\\new_pressed.bmp"
+IDB_arrow_r_pressed_mask BITMAP                  "resources\\arrow_r_pressed_mask.bmp"
+IDB_arrow_l_mask        BITMAP                  "resources\\arrow_l_mask.bmp"
+IDB_arrow_l_pressed     BITMAP                  "resources\\arrow_l_pressed.bmp"
+IDB_arrow_l_pressed_mask BITMAP                  "resources\\arrow_l_pressed_mask.bmp"
+IDB_arrow_r             BITMAP                  "resources\\arrow_r.bmp"
+IDB_arrow_r_mask        BITMAP                  "resources\\arrow_r_mask.bmp"
+IDB_arrow_r_pressed     BITMAP                  "resources\\arrow_r_pressed.bmp"
+IDB_arrow_l             BITMAP                  "resources\\arrow_l.bmp"
+IDB_arrow_r_hover_mask  BITMAP                  "resources\\arrow_r_hover_mask.bmp"
+IDB_arrow_l_hover_mask  BITMAP                  "resources\\arrow_l_hover_mask.bmp"
+IDB_arrow_r_hover       BITMAP                  "resources\\arrow_r_hover.bmp"
+IDB_arrow_l_hover       BITMAP                  "resources\\arrow_l_hover.bmp"
+IDDS_color_hover        BITMAP                  "resources\\DefaultSkin\\color_hover.bmp"
+IDDS_exit_hover         BITMAP                  "resources\\DefaultSkin\\exit_hover.bmp"
+IDDS_menu_hover         BITMAP                  "resources\\DefaultSkin\\menu_hover.bmp"
+IDDS_new_hover          BITMAP                  "resources\\DefaultSkin\\new_hover.bmp"
+IDB_BITMAP_LOGO_MASK    BITMAP                  "resources\\logo_mask.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_LARGE               ICON                    "resources\\icon1_large.ico"
+IDI_SMALL               ICON                    "resources\\icon2_small.ico"
+#endif    // 한국어 resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

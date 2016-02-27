@@ -1,0 +1,329 @@
+K 25
+svn:wc:ra_dav:version-url
+V 40
+/svn/Gunz/!svn/ver/7495/Develop/Database
+END
+DB추가작업_20040825_클랜전.sql
+K 25
+svn:wc:ra_dav:version-url
+V 120
+/svn/Gunz/!svn/ver/7495/Develop/Database/DB%EC%B6%94%EA%B0%80%EC%9E%91%EC%97%85_20040825_%ED%81%B4%EB%9E%9C%EC%A0%84.sql
+END
+가입자.sql
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/Gunz/!svn/ver/7495/Develop/Database/%EA%B0%80%EC%9E%85%EC%9E%90.sql
+END
+하루매출.sql
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/Gunz/!svn/ver/7495/Develop/Database/%ED%95%98%EB%A3%A8%EB%A7%A4%EC%B6%9C.sql
+END
+DB추가작업_20041213_기간제상용화_1.sql
+K 25
+svn:wc:ra_dav:version-url
+V 149
+/svn/Gunz/!svn/ver/7495/Develop/Database/DB%EC%B6%94%EA%B0%80%EC%9E%91%EC%97%85_20041213_%EA%B8%B0%EA%B0%84%EC%A0%9C%EC%83%81%EC%9A%A9%ED%99%94_1.sql
+END
+상점 sp함수들.sxc
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/Gunz/!svn/ver/7495/Develop/Database/%EC%83%81%EC%A0%90%20sp%ED%95%A8%EC%88%98%EB%93%A4.sxc
+END
+DB추가작업_20041213_기간제상용화_2.sql
+K 25
+svn:wc:ra_dav:version-url
+V 149
+/svn/Gunz/!svn/ver/7495/Develop/Database/DB%EC%B6%94%EA%B0%80%EC%9E%91%EC%97%85_20041213_%EA%B8%B0%EA%B0%84%EC%A0%9C%EC%83%81%EC%9A%A9%ED%99%94_2.sql
+END
+temp_delete.sql
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/Gunz/!svn/ver/7495/Develop/Database/temp_delete.sql
+END
+DB추가작업_20040618_클랜전명예의전당.sql
+K 25
+svn:wc:ra_dav:version-url
+V 165
+/svn/Gunz/!svn/ver/7495/Develop/Database/DB%EC%B6%94%EA%B0%80%EC%9E%91%EC%97%85_20040618_%ED%81%B4%EB%9E%9C%EC%A0%84%EB%AA%85%EC%98%88%EC%9D%98%EC%A0%84%EB%8B%B9.sql
+END
+팀정보.sql
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/Gunz/!svn/ver/7495/Develop/Database/%ED%8C%80%EC%A0%95%EB%B3%B4.sql
+END
+GunzDB.DDL
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/Gunz/!svn/ver/7495/Develop/Database/GunzDB.DDL
+END
+Gunz_선물하기SP_20040518.xls
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/Gunz/!svn/ver/7495/Develop/Database/Gunz_%EC%84%A0%EB%AC%BC%ED%95%98%EA%B8%B0SP_20040518.xls
+END
+item.sql
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/Gunz/!svn/ver/7495/Develop/Database/item.sql
+END
+Gunz_선물하기SP_20040519.xls
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/Gunz/!svn/ver/7495/Develop/Database/Gunz_%EC%84%A0%EB%AC%BC%ED%95%98%EA%B8%B0SP_20040519.xls
+END
+DB추가작업_20041118_기간제아이템.sql
+K 25
+svn:wc:ra_dav:version-url
+V 147
+/svn/Gunz/!svn/ver/7495/Develop/Database/DB%EC%B6%94%EA%B0%80%EC%9E%91%EC%97%85_20041118_%EA%B8%B0%EA%B0%84%EC%A0%9C%EC%95%84%EC%9D%B4%ED%85%9C.sql
+END
+맵플레이분포.sql
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/Gunz/!svn/ver/7495/Develop/Database/%EB%A7%B5%ED%94%8C%EB%A0%88%EC%9D%B4%EB%B6%84%ED%8F%AC.sql
+END
+상용화로 추가하는것.sql
+K 25
+svn:wc:ra_dav:version-url
+V 129
+/svn/Gunz/!svn/ver/7495/Develop/Database/%EC%83%81%EC%9A%A9%ED%99%94%EB%A1%9C%20%EC%B6%94%EA%B0%80%ED%95%98%EB%8A%94%EA%B2%83.sql
+END
+누적가입자수.sql
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/Gunz/!svn/ver/7495/Develop/Database/%EB%88%84%EC%A0%81%EA%B0%80%EC%9E%85%EC%9E%90%EC%88%98.sql
+END
+init.sql
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/Gunz/!svn/ver/7495/Develop/Database/init.sql
+END
+DB추가작업_20041213_기간제상용화.sql
+K 25
+svn:wc:ra_dav:version-url
+V 147
+/svn/Gunz/!svn/ver/7495/Develop/Database/DB%EC%B6%94%EA%B0%80%EC%9E%91%EC%97%85_20041213_%EA%B8%B0%EA%B0%84%EC%A0%9C%EC%83%81%EC%9A%A9%ED%99%94.sql
+END
+DB추가작업_20050707_캐릭터초기화.sql
+K 25
+svn:wc:ra_dav:version-url
+V 147
+/svn/Gunz/!svn/ver/7495/Develop/Database/DB%EC%B6%94%EA%B0%80%EC%9E%91%EC%97%85_20050707_%EC%BA%90%EB%A6%AD%ED%84%B0%EC%B4%88%EA%B8%B0%ED%99%94.sql
+END
+접속시간분포.sql
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/Gunz/!svn/ver/7495/Develop/Database/%EC%A0%91%EC%86%8D%EC%8B%9C%EA%B0%84%EB%B6%84%ED%8F%AC.sql
+END
+클랜전통계.sql
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/Gunz/!svn/ver/7495/Develop/Database/%ED%81%B4%EB%9E%9C%EC%A0%84%ED%86%B5%EA%B3%84.sql
+END
+storeproc.sql
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/Gunz/!svn/ver/7495/Develop/Database/storeproc.sql
+END
+DB추가작업_20041208_클랜마크.sql
+K 25
+svn:wc:ra_dav:version-url
+V 129
+/svn/Gunz/!svn/ver/7495/Develop/Database/DB%EC%B6%94%EA%B0%80%EC%9E%91%EC%97%85_20041208_%ED%81%B4%EB%9E%9C%EB%A7%88%ED%81%AC.sql
+END
+DB추가작업_20041224_기간제상용화_수정.sql
+K 25
+svn:wc:ra_dav:version-url
+V 166
+/svn/Gunz/!svn/ver/7495/Develop/Database/DB%EC%B6%94%EA%B0%80%EC%9E%91%EC%97%85_20041224_%EA%B8%B0%EA%B0%84%EC%A0%9C%EC%83%81%EC%9A%A9%ED%99%94_%EC%88%98%EC%A0%95.sql
+END
+DB추가작업_20040525_119.sql
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/Gunz/!svn/ver/7495/Develop/Database/DB%EC%B6%94%EA%B0%80%EC%9E%91%EC%97%85_20040525_119.sql
+END
+DB추가작업_20040519_friend.sql
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/Gunz/!svn/ver/7495/Develop/Database/DB%EC%B6%94%EA%B0%80%EC%9E%91%EC%97%85_20040519_friend.sql
+END
+레벨분포.sql
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/Gunz/!svn/ver/7495/Develop/Database/%EB%A0%88%EB%B2%A8%EB%B6%84%ED%8F%AC.sql
+END
+DB추가작업_20050218_ConnLog수정.sql
+K 25
+svn:wc:ra_dav:version-url
+V 118
+/svn/Gunz/!svn/ver/7495/Develop/Database/DB%EC%B6%94%EA%B0%80%EC%9E%91%EC%97%85_20050218_ConnLog%EC%88%98%EC%A0%95.sql
+END
+GunzDB.vsd
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/Gunz/!svn/ver/7495/Develop/Database/GunzDB.vsd
+END
+Clan전 Log수정 작업20050809.txt
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svn/Gunz/!svn/ver/7495/Develop/Database/Clan%EC%A0%84%20Log%EC%88%98%EC%A0%95%20%EC%9E%91%EC%97%8520050809.txt
+END
+DB추가작업_20050617_상점아이템구매.sql
+K 25
+svn:wc:ra_dav:version-url
+V 156
+/svn/Gunz/!svn/ver/7495/Develop/Database/DB%EC%B6%94%EA%B0%80%EC%9E%91%EC%97%85_20050617_%EC%83%81%EC%A0%90%EC%95%84%EC%9D%B4%ED%85%9C%EA%B5%AC%EB%A7%A4.sql
+END
+Character_table설명.xls
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/Gunz/!svn/ver/7495/Develop/Database/Character_table%EC%84%A4%EB%AA%85.xls
+END
+DB추가작업_20040722_액션리그.sql
+K 25
+svn:wc:ra_dav:version-url
+V 129
+/svn/Gunz/!svn/ver/7495/Develop/Database/DB%EC%B6%94%EA%B0%80%EC%9E%91%EC%97%85_20040722_%EC%95%A1%EC%85%98%EB%A6%AC%EA%B7%B8.sql
+END
+이미지파일요청쿼리에 아이템 이름 추가sql 20050801.txt
+K 25
+svn:wc:ra_dav:version-url
+V 221
+/svn/Gunz/!svn/ver/7495/Develop/Database/%EC%9D%B4%EB%AF%B8%EC%A7%80%ED%8C%8C%EC%9D%BC%EC%9A%94%EC%B2%AD%EC%BF%BC%EB%A6%AC%EC%97%90%20%EC%95%84%EC%9D%B4%ED%85%9C%20%EC%9D%B4%EB%A6%84%20%EC%B6%94%EA%B0%80sql%2020050801.txt
+END
+최고동접.sql
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/Gunz/!svn/ver/7495/Develop/Database/%EC%B5%9C%EA%B3%A0%EB%8F%99%EC%A0%91.sql
+END
+리딕유저.xls
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/Gunz/!svn/ver/7495/Develop/Database/%EB%A6%AC%EB%94%95%EC%9C%A0%EC%A0%80.xls
+END
+이벤트 아이템.txt
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/svn/Gunz/!svn/ver/7495/Develop/Database/%EC%9D%B4%EB%B2%A4%ED%8A%B8%20%EC%95%84%EC%9D%B4%ED%85%9C.txt
+END
+DB추가작업_20040519_선물.sql
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svn/Gunz/!svn/ver/7495/Develop/Database/DB%EC%B6%94%EA%B0%80%EC%9E%91%EC%97%85_20040519_%EC%84%A0%EB%AC%BC.sql
+END
+하루유니크유저수.sql
+K 25
+svn:wc:ra_dav:version-url
+V 117
+/svn/Gunz/!svn/ver/7495/Develop/Database/%ED%95%98%EB%A3%A8%EC%9C%A0%EB%8B%88%ED%81%AC%EC%9C%A0%EC%A0%80%EC%88%98.sql
+END
+DB추가작업_20050629_넷마블PC방검색.sql
+K 25
+svn:wc:ra_dav:version-url
+V 149
+/svn/Gunz/!svn/ver/7495/Develop/Database/DB%EC%B6%94%EA%B0%80%EC%9E%91%EC%97%85_20050629_%EB%84%B7%EB%A7%88%EB%B8%94PC%EB%B0%A9%EA%B2%80%EC%83%89.sql
+END
+DB추가작업_20041117_Character쓰레기청소.sql
+K 25
+svn:wc:ra_dav:version-url
+V 147
+/svn/Gunz/!svn/ver/7495/Develop/Database/DB%EC%B6%94%EA%B0%80%EC%9E%91%EC%97%85_20041117_Character%EC%93%B0%EB%A0%88%EA%B8%B0%EC%B2%AD%EC%86%8C.sql
+END
+createchar.sql
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/Gunz/!svn/ver/7495/Develop/Database/createchar.sql
+END
+DB추가작업_20040618_클랜.sql
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svn/Gunz/!svn/ver/7495/Develop/Database/DB%EC%B6%94%EA%B0%80%EC%9E%91%EC%97%85_20040618_%ED%81%B4%EB%9E%9C.sql
+END
+migrationToTestDB.sql
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/Gunz/!svn/ver/7495/Develop/Database/migrationToTestDB.sql
+END
+안쓰임-아이템관련저장프로시져.sql
+K 25
+svn:wc:ra_dav:version-url
+V 172
+/svn/Gunz/!svn/ver/7495/Develop/Database/%EC%95%88%EC%93%B0%EC%9E%84-%EC%95%84%EC%9D%B4%ED%85%9C%EA%B4%80%EB%A0%A8%EC%A0%80%EC%9E%A5%ED%94%84%EB%A1%9C%EC%8B%9C%EC%A0%B8.sql
+END
+쿼리사용방법.txt
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/Gunz/!svn/ver/7495/Develop/Database/%EC%BF%BC%EB%A6%AC%EC%82%AC%EC%9A%A9%EB%B0%A9%EB%B2%95.txt
+END
+평균동접.sql
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/Gunz/!svn/ver/7495/Develop/Database/%ED%8F%89%EA%B7%A0%EB%8F%99%EC%A0%91.sql
+END
+상용화로 추가하는sp.sql
+K 25
+svn:wc:ra_dav:version-url
+V 122
+/svn/Gunz/!svn/ver/7495/Develop/Database/%EC%83%81%EC%9A%A9%ED%99%94%EB%A1%9C%20%EC%B6%94%EA%B0%80%ED%95%98%EB%8A%94sp.sql
+END
+DB추가작업_20040610_중앙은행넣기.sql
+K 25
+svn:wc:ra_dav:version-url
+V 147
+/svn/Gunz/!svn/ver/7495/Develop/Database/DB%EC%B6%94%EA%B0%80%EC%9E%91%EC%97%85_20040610_%EC%A4%91%EC%95%99%EC%9D%80%ED%96%89%EB%84%A3%EA%B8%B0.sql
+END
+진짜아이템넣기.sql
+K 25
+svn:wc:ra_dav:version-url
+V 108
+/svn/Gunz/!svn/ver/7495/Develop/Database/%EC%A7%84%EC%A7%9C%EC%95%84%EC%9D%B4%ED%85%9C%EB%84%A3%EA%B8%B0.sql
+END
+하루 총 플레이시간.sql
+K 25
+svn:wc:ra_dav:version-url
+V 123
+/svn/Gunz/!svn/ver/7495/Develop/Database/%ED%95%98%EB%A3%A8%20%EC%B4%9D%20%ED%94%8C%EB%A0%88%EC%9D%B4%EC%8B%9C%EA%B0%84.sql
+END
+_절대임의로sql문을 실행하지 마세요
+K 25
+svn:wc:ra_dav:version-url
+V 177
+/svn/Gunz/!svn/ver/7495/Develop/Database/_%EC%A0%88%EB%8C%80%EC%9E%84%EC%9D%98%EB%A1%9Csql%EB%AC%B8%EC%9D%84%20%EC%8B%A4%ED%96%89%ED%95%98%EC%A7%80%20%EB%A7%88%EC%84%B8%EC%9A%94
+END
+상점 이미지 파일 요청 쿼리에 아이템이름 추가sql_note 20050801.doc
+K 25
+svn:wc:ra_dav:version-url
+V 253
+/svn/Gunz/!svn/ver/7495/Develop/Database/%EC%83%81%EC%A0%90%20%EC%9D%B4%EB%AF%B8%EC%A7%80%20%ED%8C%8C%EC%9D%BC%20%EC%9A%94%EC%B2%AD%20%EC%BF%BC%EB%A6%AC%EC%97%90%20%EC%95%84%EC%9D%B4%ED%85%9C%EC%9D%B4%EB%A6%84%20%EC%B6%94%EA%B0%80sql_note%2020050801.doc
+END

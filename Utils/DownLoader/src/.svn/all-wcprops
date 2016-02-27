@@ -1,0 +1,263 @@
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/src
+END
+StdAfx.h
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/src/StdAfx.h
+END
+settings.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/src/settings.cpp
+END
+lexicon.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/src/lexicon.cpp
+END
+sha1.h
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/src/sha1.h
+END
+torrent.h
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/src/torrent.h
+END
+Downloader.h
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/src/Downloader.h
+END
+NATUPnP_p.c
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/src/NATUPnP_p.c
+END
+listctrl.h
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/src/listctrl.h
+END
+memory.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/src/memory.cpp
+END
+gzip.h
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/src/gzip.h
+END
+Downloader.rc
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/src/Downloader.rc
+END
+connectionInfo.h
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/src/connectionInfo.h
+END
+upnp.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/src/upnp.cpp
+END
+util.h
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/src/util.h
+END
+client.h
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/src/client.h
+END
+torrentdlg.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/src/torrentdlg.cpp
+END
+datasocket.h
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/src/datasocket.h
+END
+StdAfx.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/src/StdAfx.cpp
+END
+NATUPnP.h
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/src/NATUPnP.h
+END
+debug.h
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/src/debug.h
+END
+resource.h
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/src/resource.h
+END
+torrent.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/src/torrent.cpp
+END
+Downloader.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/src/Downloader.cpp
+END
+listctrl.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/src/listctrl.cpp
+END
+qword.h
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/src/qword.h
+END
+stickydlg.h
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/src/stickydlg.h
+END
+settings.h
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/src/settings.h
+END
+dlldata.c
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/src/dlldata.c
+END
+lexicon.h
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/src/lexicon.h
+END
+accrue.h
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/src/accrue.h
+END
+connectionInfo.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/src/connectionInfo.cpp
+END
+NATUPnP.idl
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/src/NATUPnP.idl
+END
+memory.h
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/src/memory.h
+END
+util.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/src/util.cpp
+END
+client.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/src/client.cpp
+END
+Downloader.vcproj
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/src/Downloader.vcproj
+END
+list.h
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/src/list.h
+END
+datasocket.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/src/datasocket.cpp
+END
+upnp.h
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/src/upnp.h
+END
+torrentdlg.h
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/src/torrentdlg.h
+END
+version.h
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/src/version.h
+END
+NATUPnP_i.c
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/src/NATUPnP_i.c
+END
+stickydlg.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/src/stickydlg.cpp
+END

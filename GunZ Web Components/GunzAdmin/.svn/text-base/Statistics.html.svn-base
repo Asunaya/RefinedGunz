@@ -1,0 +1,68 @@
+<?
+	require_once("core.php");
+	check_session();
+?>
+
+<HTML>
+<HEAD>
+<LINK REL='StyleSheet' HREF='style.css'>
+</HEAD>
+<BODY>
+<?php
+
+include ("dbconn.inc"); 
+
+$query = "SELECT * FROM ServerStatus ORDER BY ServerID";
+$result = $db->query($query);
+
+echo("
+<CENTER>
+<H1>서버 현황</H1>
+<TABLE border=1 cellspacing=0 cellpadding=0>
+<TR bgcolor=#EEEEEE>
+<TD width=50 align=center>번호</TD>
+<TD width=160 align=center>서버이름</TD>
+<TD width=180 align=center>아이피(포트)</TD>
+<TD width=80 align=center>상태</TD>
+<TD width=120 align=center>기록</TD>
+</TR>
+");
+
+$total_players = 0;
+
+while ($row = $db->fetch($result))
+{
+  $total_players += $row->CurrPlayer;
+  if ($row->Opened >= 1) 
+  {
+    $s_status = "O"; 
+  }
+  else 
+  {
+    $s_status = "X";
+  }
+  
+        echo ("<TR>
+
+<TD align=center>$row->ServerID</TD>
+<TD> $row->ServerName ($row->CurrPlayer / $row->MaxPlayer)</TD>
+<TD align=center>$row->IP($row->Port)</TD>
+<TD align=center>$s_status</TD>
+<TD>$row->Time</TD>
+</TR>
+");
+}
+
+echo ("<TR height=50 valign=bottom><TD colspan=5>총 동접 : <B>$total_players</B> 명</TD></TR>\n");
+
+echo("</TABLE>
+</CENTER>");
+
+$db->close();
+
+?>
+
+
+<? include ("sign.inc"); ?>
+</BODY>
+</HTML>

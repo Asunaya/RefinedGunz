@@ -1,0 +1,396 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// 한국어 resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_KOR)
+#ifdef _WIN32
+LANGUAGE LANG_KOREAN, SUBLANG_DEFAULT
+#pragma code_page(949)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_KOR)\r\n"
+    "LANGUAGE 18, 1\r\n"
+    "#pragma code_page(949)\r\n"
+    "#include ""res\\PatchInterface.rc2""  // Microsoft Visual C++에서 편집되지 않은 리소스\r\n"
+    "#include ""afxres.rc""         // 표준 구성 요소\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON                    "res\\PatchInterface.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUTBOX DIALOGEX 0, 0, 235, 55
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "PatchInterface 정보"
+FONT 9, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    ICON            IDR_MAINFRAME,IDC_STATIC,11,17,20,20
+    LTEXT           "PatchInterface Version 1.0",IDC_STATIC,40,10,119,8,
+                    SS_NOPREFIX
+    LTEXT           "Copyright (C) 2005",IDC_STATIC,40,25,119,8
+    DEFPUSHBUTTON   "확인",IDOK,178,7,50,16,WS_GROUP
+END
+
+IDD_PATCHINTERFACE_DIALOG DIALOGEX 0, 0, 614, 195
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_MINIMIZEBOX | 
+    WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "PatchInterface"
+MENU IDR_NORMAL
+FONT 9, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    EDITTEXT        IDC_ADVERTISEMENT,195,171,234,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "SEND",IDC_SEND,439,170,34,13
+END
+
+IDD_PATCH_CRC32MAKER_DIALOG DIALOGEX 0, 0, 278, 92
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | 
+    WS_CAPTION | WS_SYSMENU
+CAPTION "Dialog"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "저장",IDOK,236,51,25,14
+    PUSHBUTTON      "닫기",IDCANCEL,246,71,25,14
+    CTEXT           "ServerPatchFile",IDC_SERVER_PATCH_FALE,14,15,53,10
+    CTEXT           "AgentPatchFile",IDC_AGENT_PATCH_FALE2,14,32,53,10
+    EDITTEXT        IDC_SERVER_FILE_NAME,73,12,155,14,ES_AUTOHSCROLL | 
+                    ES_READONLY | NOT WS_BORDER,WS_EX_STATICEDGE
+    EDITTEXT        IDC_AGENT_FILE_NAME,73,32,155,14,ES_AUTOHSCROLL | 
+                    ES_READONLY | NOT WS_BORDER,WS_EX_STATICEDGE
+    PUSHBUTTON      "찾기",IDC_FIND_SERVER_FILE,233,13,32,14
+    PUSHBUTTON      "찾기",IDC_FIND_AGENT_FILE,233,32,32,14
+    GROUPBOX        "",IDC_STATIC,8,3,263,66
+    GROUPBOX        "",IDC_STATIC,12,10,58,16
+    GROUPBOX        "",IDC_STATIC,12,27,58,16
+END
+
+IDD_SCHEDULE_MAKER_DLG DIALOGEX 0, 0, 359, 58
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | 
+    WS_CAPTION | WS_SYSMENU
+CAPTION "Schedule Maker"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "확인",IDOK,302,7,50,14
+    PUSHBUTTON      "취소",IDCANCEL,302,25,50,14
+    COMBOBOX        IDC_SCHEDULE_TYPE,10,37,40,48,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_SCHEDULE_YEAR,54,37,40,48,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_SCHEDULE_MONTH,98,37,40,48,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_SCHEDULE_HOUR,184,37,40,48,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_SCHEDULE_MIN,226,37,40,48,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_SCHEDULE_DAY,141,37,40,48,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_SCHEDULE_COUNT,268,37,29,13,ES_AUTOHSCROLL
+    COMBOBOX        IDC_SCHEDULE_COMMAND,9,12,62,48,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    GROUPBOX        "TIME",IDC_TIME,8,27,292,24
+    EDITTEXT        IDC_ANNOUNCE,74,12,222,12,ES_AUTOHSCROLL
+    GROUPBOX        "COMMAND",IDC_COMMAND,7,3,292,24
+END
+
+IDD_PATCH_DLG DIALOGEX 0, 0, 172, 87
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | 
+    WS_CAPTION | WS_SYSMENU
+CAPTION "PATCH"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "확인",IDOK,115,66,50,14
+    PUSHBUTTON      "취소",IDCANCEL,115,24,50,14,NOT WS_VISIBLE | 
+                    WS_DISABLED
+    PUSHBUTTON      "시작",ID_PATCH_SERVER,12,47,39,14
+    PUSHBUTTON      "다운로드",ID_DOWNLOAD_SERVER_PATCH,12,18,39,14
+    PUSHBUTTON      "준비작업",ID_PREPARE_SERVER_PATCH,12,32,39,14
+    GROUPBOX        "S_PATCH",IDC_SERVER_PATCH,7,9,49,72
+    PUSHBUTTON      "시작",ID_PATCH_AGENT,67,47,39,14
+    PUSHBUTTON      "다운로드",ID_DOWNLOAD_AGENT_PATCH,67,18,39,14
+    PUSHBUTTON      "준비작업",ID_PREPARE_AGENT_PATCH,67,32,39,14
+    GROUPBOX        "A_PATCH",IDC_AGENT_PATCH,62,8,50,73
+    PUSHBUTTON      "리셋",ID_RESET_SERVER_PATCH,12,62,39,14
+    PUSHBUTTON      "리셋",ID_RESET_AGENT_PATCH,67,62,39,14
+END
+
+IDD_SERVER_INFO_DLG DIALOGEX 0, 0, 499, 158
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Server Info"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "확인",IDOK,435,136,50,14
+    PUSHBUTTON      "취소",IDCANCEL,381,136,50,14,NOT WS_VISIBLE | 
+                    WS_DISABLED
+    CONTROL         "",IDC_INFO_LIST,"SysListView32",LVS_REPORT | 
+                    LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,7,7,485,124
+END
+
+IDD_ReloadFileListDlg DIALOGEX 0, 0, 276, 230
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Dialog"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "다시 읽기",ID_RELOAD,219,7,50,14
+    PUSHBUTTON      "취소",IDCANCEL,219,24,50,14
+    EDITTEXT        IDC_NEWHASHVALUE,7,203,205,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "추가",IDC_ADDHASHMAP,220,203,37,14
+    LTEXT           "( hashcode앞에 '@'를 입력하면 이전건 전부 지우고 hashcode가 새롭게 추가됨. ex. @41231 )",
+                    IDC_STATIC,15,185,196,16
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,1
+ PRODUCTVERSION 1,0,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "041203b5"
+        BEGIN
+            VALUE "CompanyName", "TODO: <회사 이름>"
+            VALUE "FileDescription", "TODO: <파일 설명>"
+            VALUE "FileVersion", "1.0.0.1"
+            VALUE "InternalName", "PatchInterface.exe"
+            VALUE "LegalCopyright", "TODO: (c) <회사 이름>.  All rights reserved."
+            VALUE "OriginalFilename", "PatchInterface.exe"
+            VALUE "ProductName", "TODO: <제품 이름>"
+            VALUE "ProductVersion", "1.0.0.1"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x412, 949
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_ABOUTBOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 228
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 48
+    END
+
+    IDD_PATCHINTERFACE_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 609
+        TOPMARGIN, 5
+        BOTTOMMARGIN, 187
+    END
+
+    IDD_PATCH_CRC32MAKER_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 271
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 85
+    END
+
+    IDD_SCHEDULE_MAKER_DLG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 352
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 51
+    END
+
+    IDD_PATCH_DLG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 165
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 80
+    END
+
+    IDD_SERVER_INFO_DLG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 492
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 151
+    END
+
+    IDD_ReloadFileListDlg, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 269
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 223
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// HTML
+//
+
+IDR_HTML_ANNOUNCE       HTML                    "Announce.htm"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_NORMAL MENU 
+BEGIN
+    POPUP "파일"
+    BEGIN
+        MENUITEM "서버 리스트 읽어오기",        ID_LoadServerList
+    END
+    POPUP "접속"
+    BEGIN
+        POPUP "키퍼"
+        BEGIN
+            MENUITEM "키퍼 접속",                   ID_CONNECT_KEEPER
+            MENUITEM "키퍼 접속 종료",              ID_DISCONNECT_KEEPER
+        END
+        POPUP "서버"
+        BEGIN
+            MENUITEM "서버 접속",                   ID_CONNECT_SERVER
+            MENUITEM "서버 접속 종료",              ID_DISCONNECT_SERVER
+        END
+    END
+    POPUP "서버제어"
+    BEGIN
+        POPUP "AGENT"
+        BEGIN
+            MENUITEM "AGENT 정지",                  ID_AGENT_STOP
+            MENUITEM "AGENT 시작",                  ID_AGENT_START
+        END
+        POPUP "SERVER"
+        BEGIN
+            MENUITEM "SERVER 정지",                 ID_SERVER_STOP
+            MENUITEM "SERVER 시작",                 ID_SERVER_START
+            MENUITEM "공지후 SERVER 정지",          ID_SERVER_STOP_WITH_ANNCOUNCE
+
+        END
+        MENUITEM "리스트 갱신",                 ID_REFRESH_LIST
+        MENUITEM "서버머신 재부팅",             ID_REBOOT
+        MENUITEM "서버설정파일 다시 읽기",      ID_SERVER_RELOAD_CONFIG
+    END
+    POPUP "툴"
+    BEGIN
+        MENUITEM "패치",                        ID_PATCH
+        MENUITEM "파일CRC생성",                 ID_MAKE_CRC
+        MENUITEM "스케줄",                      ID_SCHEDULE
+        MENUITEM "서버 정보",                   ID_SERVER_INFO
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDS_ABOUTBOX            "PatchInterface 정보(&A)..."
+END
+
+#endif    // 한국어 resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_KOR)
+LANGUAGE 18, 1
+#pragma code_page(949)
+#include "res\PatchInterface.rc2"  // Microsoft Visual C++에서 편집되지 않은 리소스
+#include "afxres.rc"         // 표준 구성 요소
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

@@ -1,0 +1,45 @@
+<?php
+
+
+include ("menu.inc");
+include ("dbconn.inc"); 
+
+$query = "SELECT cl.id id, c.name name, cl.msg msg, cl.time time FROM ChatLog cl " .
+         "JOIN Character c ON cl.cid=c.cid Order by id desc";
+  
+
+
+$result = mssql_query($query, $con);
+
+echo("<CENTER>
+<H1>Chat 로그</H1>
+<TABLE border=1>
+<TR bgcolor=#EEEEEE>
+<TD width=50 align=center>id</TD>
+<TD width=120 align=center>이름</TD>
+<TD width=120 align=center>메세지</TD>
+<TD width=150 align=center>시간</TD>
+</TR>
+");
+
+while ($row = mssql_fetch_array($result))
+{
+        echo ("<TR>
+<TD align=center>$row[id]</TD>
+<TD>$row[name]</TD>
+<TD>$row[msg]</TD>
+<TD>$row[time]</TD>
+</TR>
+");
+}
+
+echo("</TABLE>
+</CENTER>");
+
+mssql_close($con);
+
+?>
+
+
+
+<? include ("sign.inc"); ?>

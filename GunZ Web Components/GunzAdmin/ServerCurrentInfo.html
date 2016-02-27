@@ -1,0 +1,126 @@
+<?
+	require_once("core.php");
+	check_session();
+?>
+
+<HTML>
+<HEAD>
+<LINK REL='StyleSheet' HREF='style.css'>
+</HEAD>
+<BODY>
+<?php
+
+include ("dbconn.inc"); 
+
+$query = "SELECT * FROM ServerStatus ORDER BY ServerID";
+$result = $db->query($query);
+
+echo("
+<CENTER>
+<H1>서버 현황</H1>
+<TABLE border=1 cellspacing=0 cellpadding=0>
+<TR bgcolor=#EEEEEE>
+<TD width=50 align=center>번호</TD>
+<TD width=160 align=center>서버이름</TD>
+<TD width=180 align=center>아이피(포트)</TD>
+<TD width=80 align=center>상태</TD>
+<TD width=120 align=center>기록</TD>
+</TR>
+");
+
+$total_players = 0;
+
+$busy_server = 0;
+$total_server = 0;
+
+$now = time();
+
+$normal_player_count = 0;
+$clan_player_count = 0;
+$quest_player_count = 0;
+
+while ($row = $db->fetch($result))
+{
+  $total_players += $row->CurrPlayer;
+  if ($row->Opened >= 1) 
+  {
+    $s_status = "O"; 
+    $total_server++;
+  }
+  else 
+  {
+    $s_status = "X";
+  }
+
+  $name_font = "";
+  if ($row->CurrPlayer >= ($row->MaxPlayer-20))
+  {
+    $name_font = "<FONT color=#FF0000>";
+
+    if ($row->Opened >= 0) $busy_server++;
+  }
+  else if ($row->CurrPlayer >= 1000)
+  {
+    $name_font = "<FONT color=#EE5500>";
+
+  }
+  else
+  {
+    $name_font = "<FONT color=#000000>";
+  }
+  if ($row->Opened == 0)
+  {
+    $name_font = "<FONT color=#AAAAAA>";
+  } 
+  
+ 
+  if ($row->Opened >= 1)
+  {
+    if (strncmp($row->ServerName, "클랜", 4) == 0)
+    {
+      $clan_player_count += $row->CurrPlayer;
+    }
+    else if (strncmp($row->ServerName, "퀘스", 4) == 0)
+    {
+      $quest_player_count += $row->CurrPlayer;
+    }
+    else
+    {
+      $normal_player_count += $row->CurrPlayer;
+    }
+    
+  }
+        echo ("<TR>
+
+<TD align=center>$row->ServerID</TD>
+<TD>$name_font $row->ServerName ($row->CurrPlayer / $row->MaxPlayer)</FONT></TD>
+<TD align=center>$row->IP($row->Port)</TD>
+<TD align=center>$s_status</TD>
+<TD>$row->Time $time_diff</TD>
+</TR>
+");
+}
+
+  if ($total_players != 0)
+  {
+    $p_normal = round(($normal_player_count / $total_players) * 100);
+    $p_clan = round(($clan_player_count / $total_players) * 100);
+    $p_quest = round(($quest_player_count / $total_players) * 100);
+  }
+  
+echo ("<TR height=50 valign=bottom><TD colspan=5>총 동접 : <B>$total_players</B> 명 , 풀섭: <B>$busy_server / $total_server</B>
+( N: $normal_player_count($p_normal%) , C: $clan_player_count($p_clan%) , Q: $quest_player_count($p_quest%) )
+</TD></TR>\n");
+
+
+echo("</TABLE>
+</CENTER>");
+
+$db->close();
+
+?>
+
+
+<? include ("sign.inc"); ?>
+</BODY>
+</HTML>

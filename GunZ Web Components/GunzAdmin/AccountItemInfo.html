@@ -1,0 +1,135 @@
+<?
+	require_once("core.php");
+	check_session();
+?>
+<HTML>
+<BODY>
+<?php
+
+require_once('core.php');
+
+echo("<CENTER><H1>캐쉬아이템 정보</H1></CENTER>\n");
+
+echo("
+<FORM action='./AccountItemInfo.html' method=post>
+<TABLE>
+<TR>
+<TD>넷마블 아이디</TD>
+<TD><INPUT type=text name=userid value=''></TD>
+<TD><INPUT type=hidden name=mode value='process'>
+<INPUT type=image src='/img/search.gif'></TD>
+</TR>
+</TABLE>
+</FORM>
+");
+
+$userid = $_POST['userid'];
+
+if ($_POST['mode'] == "")
+{
+  if ($userid =='')
+  {
+  
+  
+  }
+
+}
+else if ($_POST['mode'] == "process")
+{
+  include ("dbconn.inc"); 
+  
+  $aid = 0;
+  
+  $query = "SELECT AID, UserID, Name, Age, Sex, UGradeID, RegDate FROM Account(nolock) where userid='$userid'";
+  $result = $db->query($query);
+
+
+  $rownum = $db->getNumRow();
+  if ($rownum == 0) 
+  {
+    echo ("<BR>\n해당 계정은 존재하지 않습니다.<BR>\n");
+    _DBExit();
+  }
+  
+  else
+  {
+  
+    echo("<B>계정정보</B><BR>\n");  
+    echo("<TABLE border=1 cellpadding=0 cellspacing=0>
+<TR bgcolor=#EEEEEE>
+<TD width=70 align=center>AID</TD>
+<TD width=100 align=center>넷마블ID</TD>
+<TD width=80 align=center>이름</TD>
+<TD width=50 align=center>Age</TD>
+<TD width=50 align=center>Sex</TD>
+<TD width=50 align=center>등급</TD>
+<TD width=150 align=center>등록일</TD>
+</TR>
+");
+    while ($row = $db->fetch())
+    {
+      if ($row->Sex == 0) $sex="남자"; else $sex="여자";
+      $aid = $row->AID;
+      
+      echo("<TR>
+<TD align=center>$row->AID</TD>
+<TD align=center>$row->UserID</TD>
+<TD align=center>$row->Name</TD>
+<TD align=center>$row->Age</TD>
+<TD align=center>$sex</TD>
+<TD align=center>$row->UGradeID</TD>
+<TD align=center>$row->RegDate</TD>
+</TR>
+");      
+    } // while
+  }
+  
+  echo ("</TABLE>\n<BR><BR>\n");
+  
+  ##
+  ## 캐릭터 정보
+  #################
+  $query = "SELECT CID, Level, Name, CharNum, XP, BP, Sex, RegDate, PlayTime, LastTime, KillCount, DeathCount, DeleteFlag FROM Character(nolock) where AID=$aid order by DeleteFlag, CharNum";
+  $result = $db->query($query);
+
+  $cnt = 0;
+  while ($row = $db->fetch())
+  {
+    if ($row->Sex == 0) $char_arr[$cnt]['Sex']="남자"; else $char_arr[$cnt]['Sex']="여자";
+    
+    if ($row->DeleteFlag == 1) $char_arr[$cnt]['Name']="<font color=#AAAAAA>삭제됨</font>";
+    else $char_arr[$cnt]['Name']=$row->Name;
+    
+    if ($row->LastTime == "") $char_arr[$cnt]['LastTime'] = "&nbsp;";
+    else $char_arr[$cnt]['LastTime'] = $row->LastTime;
+
+    $char_arr[$cnt]['CID'] = $row->CID;
+    $char_arr[$cnt]['Level'] = $row->Level;
+    $char_arr[$cnt]['CharNum'] = $row->CharNum;
+    $char_arr[$cnt]['XP'] = $row->XP;
+    $char_arr[$cnt]['BP'] = $row->BP;
+    $char_arr[$cnt]['RegDate'] = $row->RegDate;
+    $char_arr[$cnt]['PlayTime'] = $row->PlayTime;
+    $char_arr[$cnt]['KillCount'] = $row->KillCount;
+    $char_arr[$cnt]['DeathCount'] = $row->DeathCount;
+       
+    $aid = $row->AID;
+    
+    $cnt++;
+  } // while
+
+
+  view_character_info($char_arr, $cnt);
+  
+  
+  $db->close();
+} // if
+
+
+?>
+
+
+
+<? include ("sign.inc"); ?>
+</BODY>
+</HTML>

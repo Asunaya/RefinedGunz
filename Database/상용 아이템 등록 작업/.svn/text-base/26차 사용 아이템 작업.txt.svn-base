@@ -1,0 +1,357 @@
+<STR id="ZITEM_NAME_520021">남성 배틀브루드 헬멧</STR>
+<STR id="ZITEM_DESC_520021">강화재질로 만들어진 남성용 특수 갑옷의 일부. 머리를 보호한다.</STR>
+
+
+<STR id="ZITEM_NAME_522016">남성 배틀브루드 건틀렛</STR>
+<STR id="ZITEM_DESC_522016">강화재질로 만들어진 남성용 특수 갑옷의 일부. 손을 보호한다.</STR>
+
+
+<STR id="ZITEM_NAME_524016">남성 배틀브루드 부츠</STR>
+<STR id="ZITEM_DESC_524016">강화재질로 만들어진 남성용 특수 갑옷의 일부. 발을 보호한다.</STR>
+
+
+<STR id="ZITEM_NAME_521017">남성 배틀부르드 갑옷</STR>
+<STR id="ZITEM_DESC_521017">강화재질로 만들어진 남성용 특수 갑옷의 일부. 상반신을 보호한다.</STR>
+
+
+<STR id="ZITEM_NAME_523016">남성 배틀브루드 바지</STR>
+<STR id="ZITEM_DESC_523016">강화재질로 만들어진 남성용 특수 갑옷의 일부. 하반신을 보호한다.</STR>
+
+------------------------------------------------------------------------------------------
+
+<STR id="ZITEM_NAME_520521">여성 배틀브루드 헬멧</STR>
+<STR id="ZITEM_DESC_520521">강화재질로 만들어진 여성용 특수 갑옷의 일부. 머리를 보호한다.</STR>
+
+
+<STR id="ZITEM_NAME_522516">여성 배틀브루드 건틀렛</STR>
+<STR id="ZITEM_DESC_522516">강화재질로 만들어진 여성용 특수 갑옷의 일부. 손을 보호한다.</STR>
+
+
+<STR id="ZITEM_NAME_524516">여성 배틀브루드 부츠</STR>
+<STR id="ZITEM_DESC_524516">강화재질로 만들어진 여성용 특수 갑옷의 일부. 발을 보호한다.</STR>
+
+
+<STR id="ZITEM_NAME_521517">여성 배틀브루드 갑옷</STR>
+<STR id="ZITEM_DESC_521517">강화재질로 만들어진 여성용 특수 갑옷의 일부. 상반신을 보호한다.</STR>
+
+
+<STR id="ZITEM_NAME_523516">여성 배틀브루드 바지</STR>
+<STR id="ZITEM_DESC_523516">강화재질로 만들어진 여성용 특수 갑옷의 일부. 하반신을 보호한다.</STR>
+
+-------------------------------------------------------------------------------------------
+
+INSERT INTO Item (ItemID, Name) Values (520021, '남성 배틀브루드 헬멧')
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=1, ResLevel=15, Slot=4, Weight=5, HP=0, AP=12, MAXWT=0, 
+Description='강화재질로 만들어진 남성용 특수 갑옷의 일부. 머리를 보호한다.' 
+WHERE ItemID = 520021
+
+--
+
+INSERT INTO Item (ItemID, Name) Values (522016, '남성 배틀브루드 건틀렛')
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=1, ResLevel=15, Slot=6, Weight=4, HP=1, AP=16, MAXWT=0, 
+Description='강화재질로 만들어진 남성용 특수 갑옷의 일부. 손을 보호한다.' 
+WHERE ItemID = 522016
+
+--
+
+INSERT INTO Item (ItemID, Name) Values (524016, '남성 배틀브루드 부츠')
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=1, ResLevel=15, Slot=8, Weight=4, HP=2, AP=17, MAXWT=0, 
+Description='강화재질로 만들어진 남성용 특수 갑옷의 일부. 발을 보호한다.' 
+WHERE ItemID = 524016
+
+--
+
+INSERT INTO Item (ItemID, Name) Values (521017, '남성 배틀브루드 갑옷')
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=1, ResLevel=15, Slot=5, Weight=17, HP=4, AP=25, MAXWT=0, 
+Description='강화재질로 만들어진 남성용 특수 갑옷의 일부. 상반신을 보호한다.' 
+WHERE ItemID = 521017
+
+-- 
+
+INSERT INTO Item (ItemID, Name) Values (523016, '남성 배틀브루드 바지')
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=1, ResLevel=15, Slot=7, Weight=16, HP=3, AP=27, MAXWT=0, 
+Description='강화재질로 만들어진 남성용 특수 갑옷의 일부. 하반신을 보호한다.' 
+WHERE ItemID = 523016
+
+------------------------------------------------------------------------------------------
+
+INSERT INTO Item (ItemID, Name) Values (520521, '여성 배틀브루드 헬멧')
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=2, ResLevel=15, Slot=4, Weight=5, HP=0, AP=12, MAXWT=0, 
+Description='강화재질로 만들어진 여성용 특수 갑옷의 일부. 머리를 보호한다.' 
+WHERE ItemID = 520521
+
+--
+
+INSERT INTO Item (ItemID, Name) Values (522516, '여성 배틀브루드 건틀렛')
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=2, ResLevel=15, Slot=6, Weight=4, HP=1, AP=16, MAXWT=0, 
+Description='강화재질로 만들어진 여성용 특수 갑옷의 일부. 손을 보호한다.' 
+WHERE ItemID = 522516
+
+-- 
+
+INSERT INTO Item (ItemID, Name) Values (524516, '여성 배틀브루드 부츠')
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=2, ResLevel=15, Slot=8, Weight=4, HP=2, AP=17, MAXWT=0, 
+Description='강화재질로 만들어진 여성용 특수 갑옷의 일부. 발을 보호한다.' 
+WHERE ItemID = 524516
+
+-- 
+
+INSERT INTO Item (ItemID, Name) Values (521517, '여성 배틀브루드 갑옷')
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=2, ResLevel=15, Slot=5, Weight=17, HP=4, AP=25, MAXWT=0, 
+Description='강화재질로 만들어진 여성용 특수 갑옷의 일부. 상반신을 보호한다.' 
+WHERE ItemID = 521517
+
+-- 
+
+INSERT INTO Item (ItemID, Name) Values (523516, '여성 배틀브루드 바지')
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=2, ResLevel=15, Slot=7, Weight=16, HP=3, AP=27, MAXWT=0, 
+Description='강화재질로 만들어진 여성용 특수 갑옷의 일부. 하반신을 보호한다.' 
+WHERE ItemID = 523516
+
+---------------------------------------------------------------------------------------------
+
+INSERT INTO CashShop (CSID, ItemID, CashPrice, RegDate, RentType)
+VALUES (206, 520021, 500, GETDATE(), 2)
+
+INSERT INTO CashShop (CSID, ItemID, CashPrice, RegDate, RentType)
+VALUES (207, 522016, 600, GETDATE(), 2)
+
+INSERT INTO CashShop (CSID, ItemID, CashPrice, RegDate, RentType)
+VALUES (208, 524016, 700, GETDATE(), 2)
+
+INSERT INTO CashShop (CSID, ItemID, CashPrice, RegDate, RentType)
+VALUES (209, 521017, 1100, GETDATE(), 2)
+
+INSERT INTO CashShop (CSID, ItemID, CashPrice, RegDate, RentType)
+VALUES (210, 523016, 900, GETDATE(), 2)
+
+--
+
+INSERT INTO CashShop (CSID, ItemID, CashPrice, RegDate, RentType)
+VALUES (211, 520521, 500, GETDATE(), 2)
+
+INSERT INTO CashShop (CSID, ItemID, CashPrice, RegDate, RentType)
+VALUES (212, 522516, 600, GETDATE(), 2)
+
+INSERT INTO CashShop (CSID, ItemID, CashPrice, RegDate, RentType)
+VALUES (213, 524516, 700, GETDATE(), 2)
+
+INSERT INTO CashShop (CSID, ItemID, CashPrice, RegDate, RentType)
+VALUES (214, 521517, 1100, GETDATE(), 2)
+
+INSERT INTO CashShop (CSID, ItemID, CashPrice, RegDate, RentType)
+VALUES (215, 523516, 900, GETDATE(), 2)
+
+-----------------------------------------------------------------------------------------------
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (298, 206, 168, 500)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (299, 206, 360, 600)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (300, 206, 720, 800)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (301, 206, NULL, 1100)
+
+--
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (302, 207, 168, 600)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (303, 207, 360, 700)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (304, 207, 720, 900)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (305, 207, NULL, 1200)
+
+-- 
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (306, 208, 168, 700)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (307, 208, 360, 900)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (308, 208, 720, 1100)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (309, 208, NULL, 1400)
+
+-- 
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (310, 209, 168, 1100)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (311, 209, 360, 1300)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (312, 209, 720, 1700)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (313, 209, NULL, 2300)
+
+-- 
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (314, 210, 168, 900)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (315, 210, 360, 1100)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (316, 210, 720, 1500)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (317, 210, NULL, 2000)
+
+----------------------------------------------------------------
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (318, 211, 168, 500)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (319, 211, 360, 600)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (320, 211, 720, 800)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (321, 211, NULL, 1100)
+
+--
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (322, 212, 168, 600)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (323, 212, 360, 700)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (324, 212, 720, 900)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (325, 212, NULL, 1200)
+
+-- 
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (326, 213, 168, 700)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (327, 213, 360, 900)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (328, 213, 720, 1100)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (329, 213, NULL, 1400)
+
+-- 
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (330, 214, 168, 1100)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (331, 214, 360, 1300)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (332, 214, 720, 1700)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (333, 214, NULL, 2300)
+
+-- 
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (334, 215, 168, 900)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (335, 215, 360, 1100)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (336, 215, 720, 1500)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (337, 215, NULL, 2000)
+
+-------------------------------------------------------------------------------------
+
+INSERT INTO CashSetShop (CSSID, Name, Description, CashPrice, ResSex, ResLevel, Weight, RegDate, RentType)
+VALUES(33, '남성 배틀브루드 세트', '강화재질로 만들어진 전투 전용의 남성 갑옷. 높은 방어력을 자랑하지만 무게가 다소 무겁다.', 
+ 3800, 1, 15, 46, GETDATE(), 2)
+
+
+INSERT INTO CashSetShop (CSSID, Name, Description, CashPrice, ResSex, ResLevel, Weight, RegDate, RentType)
+VALUES(34, '여성 배틀브루드 세트', '강화재질로 만들어진 전투 전용의 여성 갑옷. 높은 방어력을 자랑하지만 무게가 다소 무겁다.', 
+ 3800, 2, 15, 46, GETDATE(), 2)
+
+----------------------------------------------------------------------------------------
+
+INSERT INTO CashSetItem (CSIID, CSSID, CSID) VALUES (189, 33, 206)
+INSERT INTO CashSetItem (CSIID, CSSID, CSID) VALUES (190, 33, 207)
+INSERT INTO CashSetItem (CSIID, CSSID, CSID) VALUES (191, 33, 208)
+INSERT INTO CashSetItem (CSIID, CSSID, CSID) VALUES (192, 33, 209)
+INSERT INTO CashSetItem (CSIID, CSSID, CSID) VALUES (193, 33, 210)
+
+
+INSERT INTO CashSetItem (CSIID, CSSID, CSID) VALUES (194, 34, 211)
+INSERT INTO CashSetItem (CSIID, CSSID, CSID) VALUES (195, 34, 212)
+INSERT INTO CashSetItem (CSIID, CSSID, CSID) VALUES (196, 34, 213)
+INSERT INTO CashSetItem (CSIID, CSSID, CSID) VALUES (197, 34, 214)
+INSERT INTO CashSetItem (CSIID, CSSID, CSID) VALUES (198, 34, 215)
+
+-----------------------------------------------------------------------------------------
+
+INSERT INTO RentCashSetShopPrice (RCSSPID, CSSID, RentHourPeriod, CashPrice)
+VALUES (61, 33, 168, 3800)
+
+INSERT INTO RentCashSetShopPrice (RCSSPID, CSSID, RentHourPeriod, CashPrice)
+VALUES (62, 33, 360, 4500)
+
+INSERT INTO RentCashSetShopPrice (RCSSPID, CSSID, RentHourPeriod, CashPrice)
+VALUES (63, 33, 720, 5800)
+
+INSERT INTO RentCashSetShopPrice (RCSSPID, CSSID, RentHourPeriod, CashPrice)
+VALUES (64, 33, NULL, 7200)
+
+-- 
+
+INSERT INTO RentCashSetShopPrice (RCSSPID, CSSID, RentHourPeriod, CashPrice)
+VALUES (65, 34, 168, 3800)
+
+INSERT INTO RentCashSetShopPrice (RCSSPID, CSSID, RentHourPeriod, CashPrice)
+VALUES (66, 34, 360, 4500)
+
+INSERT INTO RentCashSetShopPrice (RCSSPID, CSSID, RentHourPeriod, CashPrice)
+VALUES (67, 34, 720, 5800)
+
+INSERT INTO RentCashSetShopPrice (RCSSPID, CSSID, RentHourPeriod, CashPrice)
+VALUES (68, 34, NULL, 7200)

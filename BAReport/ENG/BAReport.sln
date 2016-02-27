@@ -1,0 +1,32 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BAReport", "BAReport.vcproj", "{76D79620-505D-4580-B42C-28D164BFDB6C}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{76D79620-505D-4580-B42C-28D164BFDB6C}.Debug.ActiveCfg = Debug|Win32
+		{76D79620-505D-4580-B42C-28D164BFDB6C}.Debug.Build.0 = Debug|Win32
+		{76D79620-505D-4580-B42C-28D164BFDB6C}.Release.ActiveCfg = Release|Win32
+		{76D79620-505D-4580-B42C-28D164BFDB6C}.Release.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+	GlobalSection(DPCodeReviewSolutionGUID) = preSolution
+		DPCodeReviewSolutionGUID = {00000000-0000-0000-0000-000000000000}
+	EndGlobalSection
+	GlobalSection(SourceCodeControl) = preSolution
+		SccNumberOfProjects = 1
+		SccProjectUniqueName0 = BAReport.vcproj
+		SccProjectName0 = \u0022$/BAReport\u0022,\u0020DCEAAAAA
+		SccLocalPath0 = .
+		SccProvider0 = MSSCCI:Microsoft\u0020Visual\u0020SourceSafe
+		CanCheckoutShared = false
+	EndGlobalSection
+EndGlobal

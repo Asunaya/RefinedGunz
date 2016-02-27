@@ -1,0 +1,2 @@
+SELECT COUNT(*) FROM Account(nolock)
+WHERE RegDate BETWEEN '2004.07.24' AND '2004.07.25'

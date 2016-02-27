@@ -1,0 +1,52 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MatchServerTools", "MatchServerTools.vcproj", "{37DF3B54-CC58-4134-BB45-B6437919C4A5}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8D451493-65C2-49C3-ADAE-ACB17E6B0650} = {8D451493-65C2-49C3-ADAE-ACB17E6B0650}
+		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5} = {CBD109C1-1AA3-4A57-B439-9919C08FAAA5}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CSCommon", "..\..\CSCommon\CSCommon.vcproj", "{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cml", "..\..\CML\cml.vcproj", "{8D451493-65C2-49C3-ADAE-ACB17E6B0650}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SourceCodeControl) = preSolution
+		SccNumberOfProjects = 2
+		SccProjectUniqueName0 = ..\\..\\CSCommon\\CSCommon.vcproj
+		SccProjectName0 = \u0022$/CSCommon\u0022,\u0020MALAAAAA
+		SccLocalPath0 = ..\\..\\CSCommon
+		SccProvider0 = MSSCCI:Microsoft\u0020Visual\u0020SourceSafe
+		CanCheckoutShared = false
+		SccProjectUniqueName1 = ..\\..\\CML\\cml.vcproj
+		SccProjectName1 = \u0022$/CML\u0022,\u0020NLAAAAAA
+		SccLocalPath1 = ..\\..\\CML
+		SccProvider1 = MSSCCI:Microsoft\u0020Visual\u0020SourceSafe
+		CanCheckoutShared = false
+	EndGlobalSection
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{37DF3B54-CC58-4134-BB45-B6437919C4A5}.Debug.ActiveCfg = Debug|Win32
+		{37DF3B54-CC58-4134-BB45-B6437919C4A5}.Debug.Build.0 = Debug|Win32
+		{37DF3B54-CC58-4134-BB45-B6437919C4A5}.Release.ActiveCfg = Release|Win32
+		{37DF3B54-CC58-4134-BB45-B6437919C4A5}.Release.Build.0 = Release|Win32
+		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.Debug.ActiveCfg = Debug|Win32
+		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.Debug.Build.0 = Debug|Win32
+		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.Release.ActiveCfg = Release|Win32
+		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.Release.Build.0 = Release|Win32
+		{8D451493-65C2-49C3-ADAE-ACB17E6B0650}.Debug.ActiveCfg = Debug|Win32
+		{8D451493-65C2-49C3-ADAE-ACB17E6B0650}.Debug.Build.0 = Debug|Win32
+		{8D451493-65C2-49C3-ADAE-ACB17E6B0650}.Release.ActiveCfg = Release|Win32
+		{8D451493-65C2-49C3-ADAE-ACB17E6B0650}.Release.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal

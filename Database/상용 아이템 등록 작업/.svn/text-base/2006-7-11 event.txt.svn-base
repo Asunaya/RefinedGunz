@@ -1,0 +1,172 @@
+SET QUOTED_IDENTIFIER ON 
+GO
+SET ANSI_NULLS ON 
+GO
+
+/* 계정 추가 */
+ALTER  PROC [spInsertAccount] 
+ @UserID		varchar(20)
+, @Password	varchar(20)
+, @Cert		tinyint
+, @Name		varchar(128)
+, @Age		smallint
+, @Sex		tinyint
+
+AS
+
+DECLARE @AIDIdent 	int
+
+BEGIN TRAN
+INSERT INTO Account (UserID, Cert, Name, Age, Sex, UGradeID, PGradeID, RegDate)
+Values (@UserID, @Cert, @Name, @Age, @Sex, 0, 0, GETDATE())
+IF (0 <> @@ERROR) OR (0 = @@ROWCOUNT) BEGIN
+ ROLLBACK TRAN
+ RETURN
+END
+
+SET @AIDIdent = @@IDENTITY
+
+INSERT INTO Login(UserID, AID, Password)
+Values(@UserID, @AIDIdent, @Password)
+IF (0 <> @@ERROR) OR (0 = @@ROWCOUNT) BEGIN
+ ROLLBACK TRAN
+ RETURN
+END
+
+-- 07.11 ~ 08.08
+IF ('2006-07-11' <= GETDATE()) AND ('2006-08-09' > GETDATE()) BEGIN
+ INSERT INTO AccountItem(AID, ItemID, RentDate, RentHourPeriod)
+ VALUES (@AIDIdent, 520026, GETDATE(), 168 )
+ IF (0 <> @@ERROR) OR (0 = @@ROWCOUNT) BEGIN
+  ROLLBACK TRAN
+  RETURN
+ END
+
+ INSERT INTO AccountItem(AID, ItemID, RentDate, RentHourPeriod)
+ VALUES (@AIDIdent, 520526, GETDATE(), 168 )
+ IF (0 <> @@ERROR) OR (0 = @@ROWCOUNT) BEGIN
+  ROLLBACK TRAN
+  RETURN
+ END
+END
+COMMIT TRAN
+
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON 
+GO
+
+------------------------------------------------------------------------------
+
+SET QUOTED_IDENTIFIER ON 
+GO
+SET ANSI_NULLS ON 
+GO
+
+ALTER   PROC spInsertEvent 
+ @AID int
+, @CID int
+, @EventName varchar(24)
+AS
+ SET NOCOUNT ON 
+
+ IF ('2006-07-11' <= GETDATE()) AND ('2006-08-09' > GETDATE()) BEGIN
+  BEGIN TRAN
+  INSERT INTO Event( AID, CID, RegDate, Checked, EventName )
+  VALUES (@AID, @CID, GETDATE(), 0, @EventName)
+  IF (0 <> @@ERROR) OR (0 = @@ROWCOUNT) BEGIN
+   ROLLBACK TRAN
+   RETURN
+  END
+
+  DECLARE @id int
+  DECLARE @EventItemID int
+
+  SET @id = 10 + CAST((RAND() * 10) AS int)
+  SELECT @EventItemID = EventItemID FROM EventItem(NOLOCK) WHERE id = @id
+
+  INSERT INTO AccountItem(AID, ItemID, RentDate, RentHourPeriod)
+  VALUES (@AID, @EventItemID, GETDATE(), 72 )
+  IF (0 <> @@ERROR) OR (0 = @@ROWCOUNT) BEGIN
+   ROLLBACK TRAN
+   RETURN
+  END
+
+ COMMIT TRAN
+ END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON 
+GO
+
+------------------------------------------------------------------------------
+
+CREATE TABLE EventItem( 
+ id int PRIMARY KEY CLUSTERED
+, EventItemID int NOT NULL )
+
+------------------------------------------------------------------------------
+
+INSERT INTO EventItem(id, EventItemID)
+VALUES (0, 520026)
+
+INSERT INTO EventItem(id, EventItemID)
+VALUES (1, 520026)
+
+INSERT INTO EventItem(id, EventItemID)
+VALUES (2, 520026)
+
+INSERT INTO EventItem(id, EventItemID)
+VALUES (3, 520026)
+
+INSERT INTO EventItem(id, EventItemID)
+VALUES (4, 520526)
+
+INSERT INTO EventItem(id, EventItemID)
+VALUES (5, 520526)
+
+INSERT INTO EventItem(id, EventItemID)
+VALUES (6, 520526)
+
+INSERT INTO EventItem(id, EventItemID)
+VALUES (7, 520526)
+
+INSERT INTO EventItem(id, EventItemID)
+VALUES (8, 520526)
+
+INSERT INTO EventItem(id, EventItemID)
+VALUES (9, 520526)
+
+------------------------------------------------------------------------------
+
+INSERT INTO EventItem(id, EventItemID)
+VALUES (10, 400011)
+
+INSERT INTO EventItem(id, EventItemID)
+VALUES (11, 400011)
+
+INSERT INTO EventItem(id, EventItemID)
+VALUES (12, 400011)
+
+INSERT INTO EventItem(id, EventItemID)
+VALUES (13, 400011)
+
+INSERT INTO EventItem(id, EventItemID)
+VALUES (14, 400012)
+
+INSERT INTO EventItem(id, EventItemID)
+VALUES (15, 400012)
+
+INSERT INTO EventItem(id, EventItemID)
+VALUES (16, 400012)
+
+INSERT INTO EventItem(id, EventItemID)
+VALUES (17, 400012)
+
+INSERT INTO EventItem(id, EventItemID)
+VALUES (18, 400012)
+
+INSERT INTO EventItem(id, EventItemID)
+VALUES (19, 400012)

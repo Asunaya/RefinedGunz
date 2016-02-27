@@ -1,0 +1,73 @@
+<HTML>
+<BODY>
+<?php
+
+if ($_POST['mode'] == 'process')
+{
+  $dbname=$_POST['dbname'];
+  if ($dbname=="") exit();
+
+  $r_passwd = $_POST['passwd'];
+  if ($r_passwd != "1233")
+  {
+    echo ("패스워드가 틀립니다.");
+    exit();
+    
+  }
+  
+  $fp = fopen(dirname(__FILE__).DIRECTORY_SEPARATOR.'conf.php', "w");
+
+  $text = "<?PHP
+
+  #데이터베이스 이름
+  \$g_db_name = '$dbname';
+?>
+";
+  
+  if ($fp !== FALSE)
+  {
+    fwrite($fp, $text);
+    fclose($fp);
+    echo ("처리 완료. F5를 누르세요.<BR>\n");
+  }
+  else
+  {
+    echo("파일 오류<BR>\n");
+  }
+  
+}
+else
+{
+  require_once("conf.php");
+  
+echo("
+<CENTER><H1>설정변경</H1></CENTER>
+<FORM action='./config.html' method=post>
+<TABLE>
+<TR>
+<TD>Database</TD>
+<TD><INPUT type=text name=dbname value='$g_db_name'></TD>
+<TD><INPUT type=hidden name=mode value='process'></TD>
+</TR>
+<TD>Password</TD>
+<TD><INPUT type=password name=passwd value=''></TD>
+</TR>
+<TR>
+<TD colspan=2 align=right>
+<INPUT type=submit value='설정완료'>
+</TD>
+</TR>
+</TABLE>
+</FORM>
+");
+
+
+} // if 
+?>
+
+
+
+<? include ("sign.inc"); ?>
+
+</BODY>
+</HTML>

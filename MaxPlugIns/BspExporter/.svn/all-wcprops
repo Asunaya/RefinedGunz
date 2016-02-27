@@ -1,0 +1,197 @@
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/Gunz/!svn/ver/7495/Develop/MaxPlugIns/BspExporter
+END
+stdafx.h
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/Gunz/!svn/ver/7495/Develop/MaxPlugIns/BspExporter/stdafx.h
+END
+BspExporter.vcproj
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/Gunz/!svn/ver/7495/Develop/MaxPlugIns/BspExporter/BspExporter.vcproj
+END
+dmath.h
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/Gunz/!svn/ver/4866/Develop/MaxPlugIns/BspExporter/dmath.h
+END
+RToken.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/Gunz/!svn/ver/4866/Develop/MaxPlugIns/BspExporter/RToken.cpp
+END
+rbsexp.CPP
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/Gunz/!svn/ver/4866/Develop/MaxPlugIns/BspExporter/rbsexp.CPP
+END
+MDebug.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/Gunz/!svn/ver/4866/Develop/MaxPlugIns/BspExporter/MDebug.cpp
+END
+mssccprj.scc
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/Gunz/!svn/ver/4866/Develop/MaxPlugIns/BspExporter/mssccprj.scc
+END
+RCamera.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/Gunz/!svn/ver/4866/Develop/MaxPlugIns/BspExporter/RCamera.cpp
+END
+ROcclusionList.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/Gunz/!svn/ver/4866/Develop/MaxPlugIns/BspExporter/ROcclusionList.cpp
+END
+RBSEXP.DEF
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/Gunz/!svn/ver/4866/Develop/MaxPlugIns/BspExporter/RBSEXP.DEF
+END
+RealSpace2.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/Gunz/!svn/ver/4866/Develop/MaxPlugIns/BspExporter/RealSpace2.cpp
+END
+Export.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/Gunz/!svn/ver/4866/Develop/MaxPlugIns/BspExporter/Export.cpp
+END
+RSBspExporter.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/Gunz/!svn/ver/7495/Develop/MaxPlugIns/BspExporter/RSBspExporter.cpp
+END
+RLightList.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/Gunz/!svn/ver/4866/Develop/MaxPlugIns/BspExporter/RLightList.cpp
+END
+RTypes.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/Gunz/!svn/ver/4866/Develop/MaxPlugIns/BspExporter/RTypes.cpp
+END
+BspExporter.sln
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/Gunz/!svn/ver/7495/Develop/MaxPlugIns/BspExporter/BspExporter.sln
+END
+OpenDlg.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/Gunz/!svn/ver/4866/Develop/MaxPlugIns/BspExporter/OpenDlg.cpp
+END
+DialogProc.h
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/Gunz/!svn/ver/4866/Develop/MaxPlugIns/BspExporter/DialogProc.h
+END
+BELog.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/Gunz/!svn/ver/4866/Develop/MaxPlugIns/BspExporter/BELog.cpp
+END
+stdafx.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/Gunz/!svn/ver/4866/Develop/MaxPlugIns/BspExporter/stdafx.cpp
+END
+FileInfo.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/Gunz/!svn/ver/4866/Develop/MaxPlugIns/BspExporter/FileInfo.cpp
+END
+resource.h
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/Gunz/!svn/ver/4866/Develop/MaxPlugIns/BspExporter/resource.h
+END
+rbsexp.aps
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/Gunz/!svn/ver/4866/Develop/MaxPlugIns/BspExporter/rbsexp.aps
+END
+rbsexp.H
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/Gunz/!svn/ver/4866/Develop/MaxPlugIns/BspExporter/rbsexp.H
+END
+RMaterialList.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/Gunz/!svn/ver/4866/Develop/MaxPlugIns/BspExporter/RMaterialList.cpp
+END
+MXml.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/Gunz/!svn/ver/4866/Develop/MaxPlugIns/BspExporter/MXml.cpp
+END
+MPdb.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/Gunz/!svn/ver/4866/Develop/MaxPlugIns/BspExporter/MPdb.cpp
+END
+DialogProc.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/Gunz/!svn/ver/4866/Develop/MaxPlugIns/BspExporter/DialogProc.cpp
+END
+rbsexp.rc
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/Gunz/!svn/ver/4866/Develop/MaxPlugIns/BspExporter/rbsexp.rc
+END
+RSBspExporter.h
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/Gunz/!svn/ver/4866/Develop/MaxPlugIns/BspExporter/RSBspExporter.h
+END
+BELog.h
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/Gunz/!svn/ver/4866/Develop/MaxPlugIns/BspExporter/BELog.h
+END
+OpenDlg.h
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/Gunz/!svn/ver/4866/Develop/MaxPlugIns/BspExporter/OpenDlg.h
+END

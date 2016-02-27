@@ -1,0 +1,93 @@
+/* Account테이블 추가 작업 내역. */
+
+
+-- 현제 County컴럼의 길이를 50바이에서 실제 사용할 2바이트로 축소.
+-- 비밀번호 질문 ID필드 추가. 1byte(tinyint).
+-- 비밀번호 질문 대답 컬럼 추가.
+
+
+-- 비번 질문 ID
+BEGIN TRAN
+	ALTER TABLE Account ADD PasswordQuestionID tinyint
+	IF 0 <> @@ERROR
+		ROLLBACK TRAN
+	ELSE
+		COMMIT TRAN
+GO
+
+-- 비번 질문 답변저장 컬럼 추가.
+BEGIN TRAN
+	ALTER TABLE Account ADD PasswordQuestionAnswer varchar(30)
+	IF 0 <> @@ERROR
+		ROLLBACK TRAN
+	ELSE
+		COMMIT TRAN
+GO
+
+-- 크기 축소.
+BEGIN TRAN
+	ALTER TABLE Account ALTER COLUMN Country char(2)
+	IF 0 <> @@ERROR
+		ROLLBACK TRAN
+	ELSE
+		COMMIT TRAN
+GO
+
+
+--------------------------------------------------------------------------------------------------
+
+
+IF OBJECT_ID( 'spWebInsertAccount' ) IS NOT NULL
+	DROP PROC spWebInsertAccount
+GO
+
+USE GunzDB
+GO
+
+/* 계정 추가 */  
+CREATE PROC [spWebInsertAccount]   
+ 	@UserID  varchar(20)  
+, 	@Password varchar(20)  
+, 	@Cert  tinyint  
+, 	@Name  varchar(128)  
+, 	@Age  smallint  
+, 	@Sex  tinyint  
+, 	@PasswordQuestionID tinyint		-- 비번찾을시 사용할 질문.
+, 	@PasswordQuestionAnswer varchar(30)	-- 질문의 답.
+, 	@Country char(2)			-- 나라. 2Byte코드.
+AS  
+BEGIN TRAN
+
+	SET NOCOUNT ON
+
+	DECLARE @AIDIdent  int  
+	DECLARE @ErrCode int
+  
+	INSERT INTO Account( UserID, Cert, Name, Age, Sex, UGradeID, PGradeID, RegDate, PasswordQuestionID, PasswordQuestionAnswer, Country )  
+	VALUES (@UserID, @Cert, @Name, @Age, @Sex, 0, 0, GETDATE(), @PasswordQuestionID, @PasswordQuestionAnswer, @Country)  
+
+	IF (0 <> @@ERROR)
+	BEGIN
+		ROLLBACK TRAN
+		SELECT 0 AS Ret
+		RETURN
+	END
+  
+	SET @AIDIdent = @@IDENTITY  
+  
+	INSERT INTO Login( UserID, AID, Password )  
+	VALUES (@UserID, @AIDIdent, @Password)  
+
+	IF (0 <> @@ERROR)
+	BEGIN
+		ROLLBACK TRAN
+		SELECT 0 AS Ret
+		RETURN
+	END
+
+	SELECT 1 AS Ret
+
+COMMIT TRAN
+GO
+  
+

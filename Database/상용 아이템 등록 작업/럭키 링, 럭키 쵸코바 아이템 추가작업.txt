@@ -1,0 +1,13 @@
+INSERT INTO Item (ItemID, Name) Values (525005, '럭키 링')
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=3, ResLevel=0, Slot=9, Weight=0, HP=0, AP=2, MAXWT=2, 
+Description='많은 힘이 깃든 신비한 반지. 한 사람이 하나만 장착할 수 있다.' 
+WHERE ItemID = 525005
+
+INSERT INTO Item (ItemID, Name) Values (525101, '럭키 쵸코바')
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=1000, Controllability=0, Magazine=4, ReloadTime=10, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=4, LimitSpeed=100, IsCashItem=1, 
+ResSex=3, ResLevel=0, Slot=3, Weight=4, HP=0, AP=0, MAXWT=0, 
+Description='맛있게 보이는 초코렛. 먹으면 HP와 AP가 한꺼번에 소량 회복된다.' 
+WHERE ItemID = 525101

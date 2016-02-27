@@ -1,0 +1,143 @@
+<?
+	require_once("core.php");
+	check_session();
+
+	$sess_login = $_SESSION["Login"];
+	$sess_level = $_SESSION["Level"];
+?>
+<HTML>
+<HEAD>
+<LINK REL='StyleSheet' HREF='style.css'>
+</HEAD>
+<BODY>
+<?php
+
+require_once('core.php');
+include ("dbconn.inc");
+
+echo("<CENTER><H1>캐릭터 정보</H1></CENTER>\n");
+
+echo("
+<FORM name=form action='./CharacterInfo.html' method=post>
+<TABLE >
+<TR>
+<TD align=center bgcolor=#EAEAE>캐릭터이름</TD>
+<TD bgcolor=#EEEEEE><INPUT type=text name=charname value=''></TD>
+<TD bgcolor=#EEEEEE><INPUT type=hidden name=mode value='process'>
+<INPUT type=image src='/img/search.gif'></TD>
+</TR>
+<TR>
+<TD align=center bgcolor=#EAEAE>CID</TD>
+<TD bgcolor=#EEEEEE><INPUT type=text name=cid value=''></TD>
+<TD bgcolor=#EEEEEE><INPUT type=hidden name=mode value='process'>
+<INPUT type=image src='/img/search.gif'></TD>
+</TR>
+
+</TABLE>
+</FORM>
+<SCRIPT>
+	form.charname.focus();
+</SCRIPT>
+");
+
+
+$mode = $_POST['mode'];
+if ($mode == '') $mode = $_GET['mode'];
+
+if ($mode == "process")
+{
+  $query = "";
+  $r_charname = $_POST[charname];
+  if ($r_charname == '') $r_charname = $_GET[charname];
+  if ($r_charname == '') $r_cid = $_POST['cid'];
+  if ($r_cid == '') $r_cid = $_GET['cid'];
+
+  if (($r_charname == '') && ($r_cid ==''))
+  {
+		echo ("<BR>\n해당 캐릭터는 존재하지 않습니다.<BR>\n");
+	    $db->close();
+	    exit();
+  }
+
+
+  if ($r_charname != "")
+  {
+     $query = "SELECT * FROM Character c(nolock) " .
+              "WHERE c.name='" . $r_charname . "'";
+  }
+  else
+  {
+     $query = "SELECT * FROM Character c(nolock) WHERE c.cid=" . $r_cid;
+  }
+
+  $result = $db->query($query);
+
+  $rownum = $db->getNumRow();
+  if ($rownum == 0)
+  {
+	    echo ("<BR>\n해당 캐릭터는 존재하지 않습니다.<BR>\n");
+	    $db->close();
+	    exit();
+
+  }
+
+  $row = $db->fetch();
+  $aid = $row->AID;
+  $cid = $row->CID;
+  $charname = $row->Name;
+
+  $quest_item = $row->QuestItemInfo;
+  
+  
+  
+  # 캐릭터 정보
+  $char_arr[0] = $row;
+  view_character_info($char_arr, 1);
+
+
+  # 장비 아이템 목록
+  $result = db_query_equiped_itemname_from_cid($cid);
+  $row = $db->fetch();
+
+  view_character_equiped_item($row);
+
+
+
+  # 가지고 있는 아이템 목록
+  $query = "SELECT ci.CIID AS CIID, i.ItemID AS ItemID, i.Name AS ItemName, ci.RegDate AS RegDate, RentHourPeriod-DATEDIFF (hh, RentDate, GetDate()) AS RentRemain 
+			FROM CharacterItem ci(nolock), Item i(nolock) 
+			WHERE ci.CID = $cid AND ci.ItemID=i.ItemID order by ci.ciid desc";
+  $result = $db->query($query);
+
+  $cnt = 0;
+  while ($row = $db->fetch())
+  {
+    $charitem_arr[$cnt]->CIID = $row->CIID;
+    $charitem_arr[$cnt]->ItemName = $row->ItemName;
+    $charitem_arr[$cnt]->ItemID = $row->ItemID;
+    $charitem_arr[$cnt]->RegDate = $row->RegDate;
+	$charitem_arr[$cnt]->RentRemain = $row->RentRemain;
+	
+    $cnt++;
+  }
+
+  echo("<BR><BR>\n");
+  view_character_item_info($charitem_arr, $cnt);
+
+  view_character_questitem_info($quest_item, $cid);
+  
+  view_characterinfo_order($cid, $aid);
+
+
+} // if mode
+
+$db->close();
+
+?>
+
+
+
+<? include ("sign.inc"); ?>
+
+</BODY>
+</HTML>

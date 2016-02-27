@@ -1,0 +1,60 @@
+<VisualStudioProject>
+    <VisualBasic LastOpenVersion = "7.10.3077" >
+        <Build>
+            <Settings ReferencePath = "" >
+                <Config
+                    Name = "Debug"
+                    EnableASPDebugging = "false"
+                    EnableASPXDebugging = "false"
+                    EnableUnmanagedDebugging = "false"
+                    EnableSQLServerDebugging = "false"
+                    RemoteDebugEnabled = "false"
+                    RemoteDebugMachine = ""
+                    StartAction = "Program"
+                    StartArguments = ""
+                    StartPage = ""
+                    StartProgram = "C:\Program Files\Microsoft Visual Studio .NET 2003\Common7\IDE\devenv.exe"
+                    StartURL = ""
+                    StartWorkingDirectory = "C:\Program Files\Microsoft Visual Studio .NET 2003\Common7\IDE\"
+                    StartWithIE = "true"
+                >
+                    <InteropRegistration
+                        RegisteredComClassic = "true"
+                        RegisteredOutput = "OpenOpposite.dll"
+                        RegisteredTypeLib = "OpenOpposite.tlb"
+                    />
+                </Config>
+                <Config
+                    Name = "Release"
+                    EnableASPDebugging = "false"
+                    EnableASPXDebugging = "false"
+                    EnableUnmanagedDebugging = "false"
+                    EnableSQLServerDebugging = "false"
+                    RemoteDebugEnabled = "false"
+                    RemoteDebugMachine = ""
+                    StartAction = "Program"
+                    StartArguments = ""
+                    StartPage = ""
+                    StartProgram = "C:\Program Files\Microsoft Visual Studio .NET 2003\Common7\IDE\devenv.exe"
+                    StartURL = ""
+                    StartWorkingDirectory = "C:\Program Files\Microsoft Visual Studio .NET 2003\Common7\IDE\"
+                    StartWithIE = "true"
+                >
+                    <InteropRegistration
+                        RegisteredComClassic = "true"
+                        RegisteredOutput = "OpenOpposite.dll"
+                        RegisteredTypeLib = "OpenOpposite.tlb"
+                    />
+                </Config>
+            </Settings>
+        </Build>
+        <OtherProjectSettings
+            CopyProjectDestinationFolder = ""
+            CopyProjectUncPath = ""
+            CopyProjectOption = "0"
+            ProjectView = "ProjectFiles"
+            ProjectTrust = "0"
+        />
+    </VisualBasic>
+</VisualStudioProject>
+

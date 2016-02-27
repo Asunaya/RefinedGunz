@@ -1,0 +1,227 @@
+<?
+	require_once("core.php");
+	check_session();
+?>
+<HTML>
+<BODY>
+<?php
+
+require_once('core.php');
+
+
+$r_userid = $_POST['userid'];
+$r_aiid = $_POST['aiid'];
+$r_mode = $_POST['mode'];
+
+$g_aid = 0;
+
+echo("<CENTER><H1>중앙은행 아이템 삭제</H1></CENTER>\n");
+
+include ("dbconn.inc"); 
+  
+if ($r_mode == '')
+{
+	if ($r_userid =='')
+	{
+		echo ("<BR>\n해당 계정은 존재하지 않습니다.<BR>\n");
+		exit();
+	}
+
+	$g_aid = db_get_aid_from_userid($r_userid);
+	if ($g_aid == 0)
+	{
+		echo ("<BR>\n해당 계정은 존재하지 않습니다.<BR>\n");
+		exit();
+	}
+
+
+	$query = "SELECT ai.aiid AS AIID, ai.ItemID AS ItemID, i.Name AS ItemName FROM AccountItem ai(nolock), Item i(nolock) WHERE aiid=" . $r_aiid . 
+			" AND ai.ItemID = i.ItemID";
+	$result = $db->query($query);
+
+	if (!$result)
+	{
+	echo ("<BR>DB Error\n<BR>\n");
+	exit();
+	}
+
+	$row = $db->fetch();
+	if (!$row)
+	{
+	echo ("<BR>DB Error\n<BR>\n");
+	exit();
+	}    
+
+	$item_name = $row->ItemName;
+
+	echo("<FORM action='./AccountItemDelete.html' method=post>\n");
+	echo("<CENTER>
+<B>삭제할 아이템</B>
+<TABLE border=1>
+<TR bgcolor=#EEEEEE>
+<TD align=center>AID</TD>
+<TD align=center>넷마블ID</TD>
+<TD align=center>AIID</TD>
+<TD align=center>아이템</TD>
+</TR>
+<TR>
+<TD align=center>$g_aid</TD>
+<TD align=center>$r_userid</TD>
+<TD>$r_aiid</TD>
+<TD>$item_name</TD>
+</TR>
+</TABLE>
+");
+
+	## 싱글 아이템 로그 출력
+	$query = "SELECT TOP 10 ipl.ID AS ID, ipl.AID AS AID, i.Name AS ItemName, ipl.Date AS Date, ipl.Cash AS Cash FROM ItemPurchaseLogByCash ipl(nolock), Item i(nolock) WHERE AID=" . $g_aid . " AND ipl.ItemID=i.ItemID ORDER by id DESC";
+	$db->query($query);
+
+	echo("<BR><BR><B>일반아이템 구매 로그</B><TABLE border=1>
+<TR bgcolor=#EEEEEE>
+<TD align=center>AID</TD>
+<TD align=center>아이템</TD>
+<TD align=center>Date</TD>
+<TD align=center>Cash</TD>
+<TD align=center>삭제여부</TD>
+</TR>\n");
+
+	$cnt = 1;
+	while ($row = $db->fetch())
+	{
+		echo("<TR>
+<TD>$row->AID</TD>
+<TD>$row->ItemName</TD>
+<TD>$row->Date</TD>
+<TD>$row->Cash</TD>
+<TD align=center><INPUT type=checkbox name=single_log_id$cnt value='$row->ID'></TD>
+</TR>\n");
+
+		$cnt++;
+	}
+	echo("</TABLE>\n");
+
+
+	## 세트아이템 구매 로그 출력
+	$query = "SELECT TOP 10 spl.ID AS ID, spl.AID AS AID, css.Name AS ItemName, spl.Date AS Date, spl.Cash AS Cash FROM SetItemPurchaseLogByCash spl(nolock), CashSetShop css(nolock) WHERE AID=" . $g_aid . " AND spl.CSSID=css.CSSID ORDER by id DESC";
+	$db->query($query);
+
+	echo("<BR><BR><B>세트아이템 구매 로그</B><TABLE border=1>
+<TR bgcolor=#EEEEEE>
+<TD align=center>AID</TD>
+<TD align=center>아이템</TD>
+<TD align=center>Date</TD>
+<TD align=center>Cash</TD>
+<TD align=center>삭제여부</TD>
+</TR>\n");
+
+	$cnt = 1;
+	while ($row = $db->fetch())
+	{
+		echo("<TR>
+<TD>$row->AID</TD>
+<TD>$row->ItemName</TD>
+<TD>$row->Date</TD>
+<TD>$row->Cash</TD>
+<TD align=center><INPUT type=checkbox name=set_log_id$cnt value='$row->ID'></TD>
+</TR>\n");
+		$cnt++;
+	}
+	echo("</TABLE>\n");
+
+
+	echo("<BR><BR>
+<TABLE border=0>
+<TR>
+<TD>다음 아이템을 정말로 삭제하시겠습니까?</TD>
+<TD>
+
+<INPUT type=hidden name='mode' value='process'>
+<INPUT type=hidden name='aid' value='$g_aid'>
+<INPUT type=hidden name='userid' value='$r_userid'>
+<INPUT type=hidden name='aiid' value='$r_aiid'>
+<INPUT type=submit value='적용'>
+</TD>
+</TR>
+</TABLE>
+
+</CENTER>
+");
+
+
+}
+else if ($_POST['mode'] == "process")
+{
+	$r_userid = $_POST['userid'];
+	$r_aid = $_POST['aid'];
+	$r_aiid = $_POST['aiid'];
+
+
+	$r_single_log_id = array("", "", "", "", "", "", "", "", "", "");
+
+	for ($i=0; $i < 10; $i++)
+	{
+		$t = $i+1;
+		$str = 'single_log_id' . $t;
+
+		$r_single_log_id[$i] = $_POST[$str];
+
+		$str = 'set_log_id' . $t;
+		$r_set_log_id[$i] = $_POST[$str];
+	}
+
+	$query = "DELETE FROM AccountItem WHERE AIID=" . $r_aiid . " AND AID=" . $r_aid;
+	if ($db->query($query))
+	{
+		echo ("<B>아이템을 삭제하였습니다.</B><BR>\n");
+	}
+	else
+	{
+		echo ("<B>중앙은행 아이템 삭제 실패</B><BR>\n");
+	}
+
+	for ($i = 0; $i < 10; $i++)
+	{
+		if ($r_single_log_id[$i])
+		{
+			$query = "DELETE FROM ItemPurchaseLogByCash WHERE id=" . $r_single_log_id[$i] . " AND AID=" . $r_aid;
+			if ($db->query($query))
+			{
+				echo ("<B>일반 아이템 구매 로그를 삭제하였습니다.</B><BR>\n");
+			}
+			else
+			{
+				echo ("<B>일반아이템 구매로그 삭제 실패</B><BR>\n");
+			}
+		}
+
+
+		if ($r_set_log_id[$i])
+		{
+			$query = "DELETE FROM SetItemPurchaseLogByCash WHERE id=" . $r_set_log_id[$i] . " AND AID=" . $r_aid;
+			if ($db->query($query))
+			{
+				echo ("<B>세트아이템 구매 로그를 삭제하였습니다.</B><BR>\n");
+			}
+			else
+			{
+				echo ("<B>세트아이템 구매로그 삭제 실패</B><BR>\n");
+			}
+	
+		}
+	}
+
+
+}   // else if ($_POST['mode'] == "process")
+
+
+$db->close();
+
+?>
+
+
+
+<? include ("sign.inc"); ?>
+
+</BODY>
+</HTML>

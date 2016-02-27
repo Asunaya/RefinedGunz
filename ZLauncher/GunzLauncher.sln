@@ -1,0 +1,84 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NewApp", "ZLauncher3\NewApp.vcproj", "{9397EEB3-59FC-49FD-B050-AF9173275368}"
+	ProjectSection(ProjectDependencies) = postProject
+		{3F0BBE13-206F-405A-92DD-91C6AD9172AE} = {3F0BBE13-206F-405A-92DD-91C6AD9172AE}
+		{8D451493-65C2-49C3-ADAE-ACB17E6B0650} = {8D451493-65C2-49C3-ADAE-ACB17E6B0650}
+		{337D7595-B209-4544-BB08-3BBD9DE423E0} = {337D7595-B209-4544-BB08-3BBD9DE423E0}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cml", "..\cml\cml.vcproj", "{8D451493-65C2-49C3-ADAE-ACB17E6B0650}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gzip", "..\Utils\DownLoader\gzip\gzip.vcproj", "{337D7595-B209-4544-BB08-3BBD9DE423E0}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sha1", "..\Utils\DownLoader\sha1\sha1.vcproj", "{3F0BBE13-206F-405A-92DD-91C6AD9172AE}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Debug_tracememory = Debug_tracememory
+		Release = Release
+		Release Amd64 = Release Amd64
+		Release_publish = Release_publish
+		Release_tracememory = Release_tracememory
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{9397EEB3-59FC-49FD-B050-AF9173275368}.Debug.ActiveCfg = Debug|Win32
+		{9397EEB3-59FC-49FD-B050-AF9173275368}.Debug.Build.0 = Debug|Win32
+		{9397EEB3-59FC-49FD-B050-AF9173275368}.Debug_tracememory.ActiveCfg = Debug|Win32
+		{9397EEB3-59FC-49FD-B050-AF9173275368}.Debug_tracememory.Build.0 = Debug|Win32
+		{9397EEB3-59FC-49FD-B050-AF9173275368}.Release.ActiveCfg = Release|Win32
+		{9397EEB3-59FC-49FD-B050-AF9173275368}.Release.Build.0 = Release|Win32
+		{9397EEB3-59FC-49FD-B050-AF9173275368}.Release Amd64.ActiveCfg = Release|Win32
+		{9397EEB3-59FC-49FD-B050-AF9173275368}.Release Amd64.Build.0 = Release|Win32
+		{9397EEB3-59FC-49FD-B050-AF9173275368}.Release_publish.ActiveCfg = Release|Win32
+		{9397EEB3-59FC-49FD-B050-AF9173275368}.Release_publish.Build.0 = Release|Win32
+		{9397EEB3-59FC-49FD-B050-AF9173275368}.Release_tracememory.ActiveCfg = Release|Win32
+		{9397EEB3-59FC-49FD-B050-AF9173275368}.Release_tracememory.Build.0 = Release|Win32
+		{8D451493-65C2-49C3-ADAE-ACB17E6B0650}.Debug.ActiveCfg = Debug|Win32
+		{8D451493-65C2-49C3-ADAE-ACB17E6B0650}.Debug.Build.0 = Debug|Win32
+		{8D451493-65C2-49C3-ADAE-ACB17E6B0650}.Debug_tracememory.ActiveCfg = Debug_tracememory|Win32
+		{8D451493-65C2-49C3-ADAE-ACB17E6B0650}.Debug_tracememory.Build.0 = Debug_tracememory|Win32
+		{8D451493-65C2-49C3-ADAE-ACB17E6B0650}.Release.ActiveCfg = Release|Win32
+		{8D451493-65C2-49C3-ADAE-ACB17E6B0650}.Release.Build.0 = Release|Win32
+		{8D451493-65C2-49C3-ADAE-ACB17E6B0650}.Release Amd64.ActiveCfg = Release|Win32
+		{8D451493-65C2-49C3-ADAE-ACB17E6B0650}.Release Amd64.Build.0 = Release|Win32
+		{8D451493-65C2-49C3-ADAE-ACB17E6B0650}.Release_publish.ActiveCfg = Release_publish|Win32
+		{8D451493-65C2-49C3-ADAE-ACB17E6B0650}.Release_publish.Build.0 = Release_publish|Win32
+		{8D451493-65C2-49C3-ADAE-ACB17E6B0650}.Release_tracememory.ActiveCfg = Release_tracememory|Win32
+		{8D451493-65C2-49C3-ADAE-ACB17E6B0650}.Release_tracememory.Build.0 = Release_tracememory|Win32
+		{337D7595-B209-4544-BB08-3BBD9DE423E0}.Debug.ActiveCfg = Debug|Win32
+		{337D7595-B209-4544-BB08-3BBD9DE423E0}.Debug.Build.0 = Debug|Win32
+		{337D7595-B209-4544-BB08-3BBD9DE423E0}.Debug_tracememory.ActiveCfg = Debug|Win32
+		{337D7595-B209-4544-BB08-3BBD9DE423E0}.Debug_tracememory.Build.0 = Debug|Win32
+		{337D7595-B209-4544-BB08-3BBD9DE423E0}.Release.ActiveCfg = Release|Win32
+		{337D7595-B209-4544-BB08-3BBD9DE423E0}.Release.Build.0 = Release|Win32
+		{337D7595-B209-4544-BB08-3BBD9DE423E0}.Release Amd64.ActiveCfg = Release Amd64|Win32
+		{337D7595-B209-4544-BB08-3BBD9DE423E0}.Release Amd64.Build.0 = Release Amd64|Win32
+		{337D7595-B209-4544-BB08-3BBD9DE423E0}.Release_publish.ActiveCfg = Release Amd64|Win32
+		{337D7595-B209-4544-BB08-3BBD9DE423E0}.Release_publish.Build.0 = Release Amd64|Win32
+		{337D7595-B209-4544-BB08-3BBD9DE423E0}.Release_tracememory.ActiveCfg = Release Amd64|Win32
+		{337D7595-B209-4544-BB08-3BBD9DE423E0}.Release_tracememory.Build.0 = Release Amd64|Win32
+		{3F0BBE13-206F-405A-92DD-91C6AD9172AE}.Debug.ActiveCfg = Debug|Win32
+		{3F0BBE13-206F-405A-92DD-91C6AD9172AE}.Debug.Build.0 = Debug|Win32
+		{3F0BBE13-206F-405A-92DD-91C6AD9172AE}.Debug_tracememory.ActiveCfg = Debug|Win32
+		{3F0BBE13-206F-405A-92DD-91C6AD9172AE}.Debug_tracememory.Build.0 = Debug|Win32
+		{3F0BBE13-206F-405A-92DD-91C6AD9172AE}.Release.ActiveCfg = Release|Win32
+		{3F0BBE13-206F-405A-92DD-91C6AD9172AE}.Release.Build.0 = Release|Win32
+		{3F0BBE13-206F-405A-92DD-91C6AD9172AE}.Release Amd64.ActiveCfg = Release Amd64|Win32
+		{3F0BBE13-206F-405A-92DD-91C6AD9172AE}.Release Amd64.Build.0 = Release Amd64|Win32
+		{3F0BBE13-206F-405A-92DD-91C6AD9172AE}.Release_publish.ActiveCfg = Release Amd64|Win32
+		{3F0BBE13-206F-405A-92DD-91C6AD9172AE}.Release_publish.Build.0 = Release Amd64|Win32
+		{3F0BBE13-206F-405A-92DD-91C6AD9172AE}.Release_tracememory.ActiveCfg = Release Amd64|Win32
+		{3F0BBE13-206F-405A-92DD-91C6AD9172AE}.Release_tracememory.Build.0 = Release Amd64|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal

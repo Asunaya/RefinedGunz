@@ -1,0 +1,89 @@
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/Gunz/!svn/ver/4866/Develop/Utils/UpdateBuilder
+END
+UpdateBuilder.h
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/Gunz/!svn/ver/4866/Develop/Utils/UpdateBuilder/UpdateBuilder.h
+END
+stdafx.h
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/Gunz/!svn/ver/4866/Develop/Utils/UpdateBuilder/stdafx.h
+END
+UpdateBuilderDlg.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/Gunz/!svn/ver/4866/Develop/Utils/UpdateBuilder/UpdateBuilderDlg.cpp
+END
+FolderDlg.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/Gunz/!svn/ver/4866/Develop/Utils/UpdateBuilder/FolderDlg.cpp
+END
+UpdateBuilder.sln
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/Gunz/!svn/ver/4866/Develop/Utils/UpdateBuilder/UpdateBuilder.sln
+END
+UpdateBuilderDlg.h
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/Gunz/!svn/ver/4866/Develop/Utils/UpdateBuilder/UpdateBuilderDlg.h
+END
+FolderDlg.h
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/Gunz/!svn/ver/4866/Develop/Utils/UpdateBuilder/FolderDlg.h
+END
+UpdateBuilder.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/Gunz/!svn/ver/4866/Develop/Utils/UpdateBuilder/UpdateBuilder.cpp
+END
+stdafx.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/Gunz/!svn/ver/4866/Develop/Utils/UpdateBuilder/stdafx.cpp
+END
+ReadMe.txt
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/Gunz/!svn/ver/4866/Develop/Utils/UpdateBuilder/ReadMe.txt
+END
+UpdateBuilder.aps
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/Gunz/!svn/ver/4866/Develop/Utils/UpdateBuilder/UpdateBuilder.aps
+END
+UpdateBuilder.vcproj
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/Gunz/!svn/ver/4866/Develop/Utils/UpdateBuilder/UpdateBuilder.vcproj
+END
+UpdateBuilder.rc
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/Gunz/!svn/ver/4866/Develop/Utils/UpdateBuilder/UpdateBuilder.rc
+END
+Resource.h
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/Gunz/!svn/ver/4866/Develop/Utils/UpdateBuilder/Resource.h
+END

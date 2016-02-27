@@ -1,0 +1,87 @@
+/*
+	GUNZ RANKING VIEW SCRIPT STYLESHEET
+*/
+
+a.zrank:link
+{
+	color: #FF6600;
+	text-decoration:none;
+}
+
+a.zrank:visited
+{
+	color: #FF6600;
+	text-decoration:none;
+}
+
+a.zrank:hover
+{
+	color: #0000FF;
+	text-decoration:underline;
+}
+
+a.zrank:active
+{
+	color: #0000FF;
+	text-decoration:none;
+}
+
+table.zrank, select.zrank
+{
+	font-family: 굴림, verdana;
+	font-size: 9pt;
+	line-height: 12pt;
+}
+
+/* 랭킹이 실제 표시되는 테이블의 모양 */
+table.zrank_main
+{
+	font-family: 굴림, verdana;
+	font-size: 9pt;
+	line-height: 12pt;
+	background-color: #f0f0f0;
+}
+
+td.zrank_main
+{
+	background-color: #ffffff;
+	padding: 4;
+}
+
+td.zrank_main_static
+{
+	background-color: #404040;
+	color: #ffffff;
+	padding: 4;
+	font-weight: bold;
+}
+
+a.zrank_main_static
+{
+	color: #ffffff;
+}
+
+input.zrank, textarea.zrank
+{
+	border: solid 1px;
+}
+
+body
+{
+	font-family: 굴림, verdana;
+	font-size: 9pt;
+	line-height: 24pt;
+	margin-top: 0px;
+	margin-left: 0px;
+	margin-bottom: 0px;
+	margin-right: 0px;
+	padding: 0;
+}
+
+/* 넷마블 아이디 표시용 */
+.zrank_small
+{
+	font-family: Verdana, Tahoma;
+	font-size: 8pt;
+	color: #808080;
+}

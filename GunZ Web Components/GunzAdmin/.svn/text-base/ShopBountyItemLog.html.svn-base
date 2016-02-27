@@ -1,0 +1,127 @@
+<?
+	require_once("core.php");
+	check_session();
+?>
+<HTML>
+<BODY>
+<?php
+
+require_once('core.php');
+
+
+$char_name = $_POST['char_name'];
+
+echo("<CENTER><H1>바운티 아이템 구매정보</H1></CENTER>\n");
+
+echo("
+<FORM action='./ShopBountyItemLog.html' method=post>
+<TABLE>
+<TR>
+<TD>캐릭터 이름</TD>
+<TD><INPUT type=text name=char_name value='$char_name'></TD>
+<TD><INPUT type=hidden name=mode value='process'>
+<INPUT type=image src='/img/search.gif'></TD>
+</TR>
+</TABLE>
+</FORM>
+");
+
+if ($_POST['mode'] == "")
+{
+  if ($char_name =='')
+  {
+  
+  
+  }
+
+}
+else if ($_POST['mode'] == "process")
+{
+	
+	if ($char_name == '')
+	{
+		echo ("캐릭터 이름을 입력하세요");
+		exit();
+	}
+  
+	include ("dbconn.inc"); 
+
+	$query = "SELECT cid FROM Character(nolock) WHERE name='$char_name' AND DeleteFlag=0";
+	$result = $db->query($query);
+
+	if (!$result)
+	{
+		echo ("그런 캐릭터는 존재하지 않습니다.");
+		$db->close();
+		exit();
+	}
+
+	$row = $db->fetch();
+	$cid = $row->cid;
+
+
+	if ($cid == '')
+	{
+		echo ("그런 캐릭터는 존재하지 않습니다.");
+		$db->close();
+		exit();
+	}
+
+	
+	$query = "SELECT ipl.id AS id, ipl.ItemID AS ItemID, i.Name AS ItemName, ipl.Bounty AS Bounty, ipl.CharBounty AS CharBounty, ipl.Type AS Type, ipl.Date AS Date FROM ItemPurchaseLogByBounty ipl(nolock), Item i(nolock) WHERE CID=" . $cid ." AND ipl.ItemID=i.ItemID ORDER BY id DESC";
+	$result = $db->query($query);
+
+	echo ("<CENTER><TABLE border=0 cellspacing=1 cellpadding=3>
+<TR bgcolor=#EEEEEE>
+<TD align=center>id</TD>
+<TD align=center>캐릭터이름</TD>
+<TD align=center>아이템</TD>
+<TD align=center>바운티</TD>
+<TD align=center>캐릭터바운티</TD>
+<TD align=center>type</TD>
+<TD align=center>Date</TD>
+</TR>
+");
+
+	while ($row = $db->fetch())
+	{
+		$id = $row->id;
+		$item_name = $row->ItemName . "(" . $row->ItemID . ")";
+		$bounty = $row->Bounty;
+		$char_bounty = $row->CharBounty;
+		$date = $row->Date;
+		$type = $row->Type;
+
+		$cell_color = '';
+		if ($type == '구입') $cell_color='#FFCCBB'; else $cell_color = '#FFDDDD';
+
+		echo ("<TR bgcolor=$cell_color>
+<TD>$id</TD>
+<TD>$char_name</TD>
+<TD>$item_name</TD>
+<TD>$bounty</TD>
+<TD>$char_bounty</TD>
+<TD>$type</TD>
+<TD>$date</TD>
+</TR>
+");
+
+	} // while
+
+
+  
+
+  echo("</TABLE>\n</CENTER>\n");
+    
+  $db->close();
+
+
+}   // else if ($_POST['mode'] == "process")
+?>
+
+
+
+<? include ("sign.inc"); ?>
+
+</BODY>
+</HTML>

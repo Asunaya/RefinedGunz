@@ -1,0 +1,46 @@
+<?
+	require_once("core.php");
+	check_session();
+?>
+
+<HTML>
+<HEAD>
+<LINK REL='StyleSheet' HREF='style.css'>
+</HEAD>
+<BODY>
+<?php
+
+include ("dbconn.inc");
+
+echo("
+<CENTER>
+<H1>요약 정보</H1>
+<BR><BR>
+");
+
+
+//$query = "SELECT COUNT(*) AS Cnt FROM Account(nolock)";
+$query = "EXEC sp_spaceused Account";
+$result = $db->query($query);
+$row = $db->fetch($result);
+
+$total_account_count = 0;
+
+if ($row)
+{
+	$total_account_count = $row->rows;
+}
+
+$total_account_count_str = number_format($total_account_count);
+echo("총가입자: $total_account_count_str 명<BR>\n");
+
+echo("</CENTER>\n");
+
+$db->close();
+
+?>
+
+
+<? include ("sign.inc"); ?>
+</BODY>
+</HTML>

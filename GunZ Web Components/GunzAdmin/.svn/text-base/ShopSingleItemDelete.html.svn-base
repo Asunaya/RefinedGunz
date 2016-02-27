@@ -1,0 +1,66 @@
+<?
+	require_once("core.php");
+	check_session();
+?>
+<?php
+
+include ("dbconn.inc"); 
+
+//// Declare Functions ////////////////////////////////////////////////////////
+function GetBackMenu()
+{
+	return("[<a href='#' OnClick='history.back();'>뒤로</a>]");
+}
+
+function GetSingleItemShopMenu()
+{
+	return("[<a href='ShopSingleItem.html'>아이템관리</a>]");
+}
+
+function SingleItemDelete()
+{
+	//// 봉인 ////
+	echo("<CENTER>삭제기능은 보안상 봉인되었습니다.</CENTER>");
+	return;
+	
+	////
+	global $db;
+	
+	$CSID_TO_DELETE = $_POST['CSID'];
+	
+	//// Delete Item from SingleItemShop ///////////////////////////////////////////////////
+	echo("
+		<CENTER>
+			아이템($CSID_TO_DELETE)를 삭제합니다.<BR><BR>
+		</CENTER>
+	");
+	
+	$SingleItemShopMenu = GetSingleItemShopMenu();	
+	$query_del = "DELETE FROM CashShop WHERE CSID = $CSID_TO_DELETE";
+	$result = $db->query($query_del);
+	if ($result == FALSE) {
+		echo("
+			<CENTER>
+				<B>아이템 삭제에 실패하였습니다.</B> <BR><BR>
+				$SingleItemShopMenu
+			</CENTER>
+			<BR><BR>
+		");
+	} else {
+		echo("
+			<CENTER>
+				<B>아이템 삭제에 성공하였습니다.</B> <BR><BR>
+				$SingleItemShopMenu
+			</CENTER>
+			<BR><BR>
+		");
+	}
+}
+
+//// Main /////////////////////////////////////////////////////////////////////
+SingleItemDelete();
+
+?>
+
+<? $db->close(); ?>
+<? include ("sign.inc"); ?>

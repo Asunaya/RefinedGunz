@@ -1,0 +1,244 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+// Generated Help ID header file
+#define APSTUDIO_HIDDEN_SYMBOLS
+#include "resource.hm"
+#undef APSTUDIO_HIDDEN_SYMBOLS
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// 한국어 resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_KOR)
+#ifdef _WIN32
+LANGUAGE LANG_KOREAN, SUBLANG_DEFAULT
+#pragma code_page(949)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_KOR)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 18, 1\r\n"
+    "#pragma code_page(949)\r\n"
+    "#endif //_WIN32\r\n"
+    "#include ""res\\NewApp.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""l.kor\\afxres.rc""          // Standard components\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_ICON_MAINFRAME      ICON                    "res\\icon_mainframe.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_DIALOG_MAINDLG DIALOGEX 0, 0, 343, 240
+STYLE DS_SETFONT | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "Gunz Launcher"
+FONT 10, "Tahoma", 400, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_EXPLORER,"{8856F961-340A-11D0-A96B-00C04FD705A2}",
+                    0x0,30,11,287,90
+    PUSHBUTTON      "   ",IDC_STARTGAME,215,203,83,17,NOT WS_TABSTOP,
+                    WS_EX_ACCEPTFILES,HIDC_STARTGAME
+    PUSHBUTTON      "",IDC_CANCELDOWNLOAD,160,211,20,16,NOT WS_VISIBLE | NOT 
+                    WS_TABSTOP
+    LTEXT           "",IDC_UPDATEINFO,17,199,191,8,SS_CENTERIMAGE
+    LTEXT           "",IDC_PERCENT1,123,208,24,8,SS_CENTERIMAGE
+    LTEXT           "",IDC_PERCENT2,123,216,25,8,SS_CENTERIMAGE
+    CONTROL         "",IDC_ANIBMP_RUN,"Static",SS_BLACKRECT,17,210,19,12
+END
+
+IDD_DIALOG_POPUP DIALOGEX 0, 0, 175, 113
+STYLE DS_SETFONT | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Notice"
+FONT 10, "Tahoma", 400, 0, 0x0
+BEGIN
+    DEFPUSHBUTTON   "Close",IDOK,60,91,52,12
+    LTEXT           "",IDC_MESSAGE,43,13,123,76
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,6
+ PRODUCTVERSION 1,0,0,6
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "000004b0"
+        BEGIN
+            VALUE "CompanyName", "MAIET entertainment"
+            VALUE "FileDescription", "GunzLauncher"
+            VALUE "FileVersion", "1, 0, 0, 6"
+            VALUE "InternalName", "GunzLauncher"
+            VALUE "LegalCopyright", "Copyright (C) 2005"
+            VALUE "OriginalFilename", "GunzLauncher.exe"
+            VALUE "ProductName", "GunzLauncher"
+            VALUE "ProductVersion", "1, 0, 0, 6"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0, 1200
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_SKIN_MAINDLG        BITMAP                  "res\\skin_maindlg.bmp"
+IDB_BTNSKIN_STARTGAME   BITMAP                  "res\\btnskin_start.bmp"
+IDB_BTNSKIN_STOP        BITMAP                  "res\\btnskin_stop.bmp"
+IDB_ANIBMP_RUN          BITMAP                  "res\\anibmp_run.bmp"
+IDB_SKIN_POPUP          BITMAP                  "res\\skin_popupdlg.bmp"
+IDB_BTNSKIN_NORMAL      BITMAP                  "res\\btnskin_normal.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MENU_PANEL MENU 
+BEGIN
+    POPUP "PanelSubMenu0"
+    BEGIN
+        MENUITEM "Open...",                     IDM_OPENFILE
+        MENUITEM SEPARATOR
+        MENUITEM "Save",                        IDM_SAVEFILE
+        MENUITEM "Save As...",                  IDM_SAVEAS
+    END
+    POPUP "PanelSubMenu1"
+    BEGIN
+        MENUITEM SEPARATOR
+    END
+END
+
+IDR_MENU_TRAYICON MENU 
+BEGIN
+    POPUP "TrayIcon"
+    BEGIN
+        MENUITEM "About NewApp...",             IDM_ABOUTBOX
+        MENUITEM SEPARATOR
+        MENUITEM "Quit",                        IDM_QUIT
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog Info
+//
+
+IDD_DIALOG_MAINDLG DLGINIT
+BEGIN
+    IDC_EXPLORER, 0x376, 160, 0
+0x0000, 0x0000, 0x004c, 0x0000, 0x356a, 0x0000, 0x1383, 0x0000, 0x0000, 
+0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 
+0x0000, 0x0000, 0x004c, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0001, 
+0x0000, 0xd0e0, 0x0057, 0x3573, 0x11cf, 0x69ae, 0x0008, 0x2e2b, 0x6212, 
+0x0000, 0x0000, 0x0000, 0x0000, 0x004c, 0x0000, 0x1401, 0x0002, 0x0000, 
+0x0000, 0x00c0, 0x0000, 0x0000, 0x4600, 0x0080, 0x0000, 0x0000, 0x0000, 
+0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 
+0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0001, 0x0000, 
+0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 
+    0
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// EXE
+//
+
+IDR_UPDATER             EXE                     "res\\updater.ex_"
+#endif    // 한국어 resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_KOR)
+#ifdef _WIN32
+LANGUAGE 18, 1
+#pragma code_page(949)
+#endif //_WIN32
+#include "res\NewApp.rc2"  // non-Microsoft Visual C++ edited resources
+#include "l.kor\afxres.rc"          // Standard components
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

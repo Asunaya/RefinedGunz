@@ -1,0 +1,36 @@
+Microsoft Visual Studio Solution File, Format Version 7.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "XMLSample", "XMLSample.vcproj", "{F01FA524-A47B-40FC-BFBD-CD170296C937}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cml", "..\..\CML\cml.vcproj", "{8D451493-65C2-49C3-ADAE-ACB17E6B0650}"
+EndProject
+Global
+	GlobalSection(SourceCodeControl) = preSolution
+		SccNumberOfProjects = 1
+		SccProjectUniqueName0 = ..\\..\\CML\\cml.vcproj
+		SccProjectName0 = \u0022$/CML\u0022,\u0020WLAAAAAA
+		SccLocalPath0 = ..\\..\\CML
+		SccProvider0 = MSSCCI:Microsoft\u0020Visual\u0020SourceSafe
+		CanCheckoutShared = false
+	EndGlobalSection
+	GlobalSection(SolutionConfiguration) = preSolution
+		ConfigName.0 = Debug
+		ConfigName.1 = Release
+	EndGlobalSection
+	GlobalSection(ProjectDependencies) = postSolution
+		{F01FA524-A47B-40FC-BFBD-CD170296C937}.0 = {8D451493-65C2-49C3-ADAE-ACB17E6B0650}
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{F01FA524-A47B-40FC-BFBD-CD170296C937}.Debug.ActiveCfg = Debug|Win32
+		{F01FA524-A47B-40FC-BFBD-CD170296C937}.Debug.Build.0 = Debug|Win32
+		{F01FA524-A47B-40FC-BFBD-CD170296C937}.Release.ActiveCfg = Release|Win32
+		{F01FA524-A47B-40FC-BFBD-CD170296C937}.Release.Build.0 = Release|Win32
+		{8D451493-65C2-49C3-ADAE-ACB17E6B0650}.Debug.ActiveCfg = Debug|Win32
+		{8D451493-65C2-49C3-ADAE-ACB17E6B0650}.Debug.Build.0 = Debug|Win32
+		{8D451493-65C2-49C3-ADAE-ACB17E6B0650}.Release.ActiveCfg = Release|Win32
+		{8D451493-65C2-49C3-ADAE-ACB17E6B0650}.Release.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal

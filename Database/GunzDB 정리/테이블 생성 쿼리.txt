@@ -1,0 +1,1819 @@
+-- GunzDB Table생성 쿼리. (의존성때문에 색인과 순서가 다를수 있음.)
+
+
+CREATE TABLE [PremiumGrade] (
+	[PGradeID] [int] NOT NULL ,
+	[Name] [varchar] (128) NOT NULL ,
+	CONSTRAINT [PremiumGrade_PK] PRIMARY KEY  CLUSTERED 
+	(
+		[PGradeID]
+	)  ON [PRIMARY] 
+) ON [PRIMARY]
+
+insert into PremiumGrade(PGradeID, Name) values(0, 'free') 
+
+GO
+
+---------------------------------------------------------------------
+
+CREATE TABLE [UserGrade] (
+	[UGradeID] [int] NOT NULL ,
+	[Name] [varchar] (128) NOT NULL ,
+	CONSTRAINT [UserGrade_PK] PRIMARY KEY  CLUSTERED 
+	(
+		[UGradeID]
+	)  ON [PRIMARY] 
+) ON [PRIMARY]
+GO
+
+insert into usergrade(ugradeid, name) values(0,'free')
+insert into usergrade(ugradeid, name) values(1,'Subscription Account')
+insert into usergrade(ugradeid, name) values(2,'Best Gamer')
+insert into usergrade(ugradeid, name) values(100,'Marked Man')
+insert into usergrade(ugradeid, name) values(101,'First Warning')
+insert into usergrade(ugradeid, name) values(102,'Second Warning')
+insert into usergrade(ugradeid, name) values(103,'Third Warning')
+insert into usergrade(ugradeid, name) values(104,'Chatting Forbidden')
+insert into usergrade(ugradeid, name) values(105,'Time Block')
+insert into usergrade(ugradeid, name) values(252,'Event Manager')
+insert into usergrade(ugradeid, name) values(253,'Permanent Block')
+insert into usergrade(ugradeid, name) values(254,'Developer')
+insert into usergrade(ugradeid, name) values(255,'Manager')
+GO
+
+---------------------------------------------------------------------
+
+CREATE TABLE [Account] (
+		[AID] [int] IDENTITY (1, 1) NOT NULL ,
+	[UserID] [varchar] (20) NOT NULL ,
+	[UGradeID] [int] NOT NULL ,
+	[PGradeID] [int] NOT NULL ,
+	[RegDate] [datetime] NOT NULL ,
+	[Name] [varchar] (50) NOT NULL ,
+	[Email] [varchar] (50) NULL ,
+	[RegNum] [varchar] (50) NULL ,
+	[Age] [smallint] NULL ,
+	[Sex] [tinyint] NULL ,
+	[ZipCode] [varchar] (50) NULL ,
+	[Address] [varchar] (256) NULL ,
+	[Country] [varchar] (50) NULL ,
+	[LastCID] [int] NULL ,
+	[Cert] [tinyint] NULL ,
+	CONSTRAINT [Account_PK] PRIMARY KEY  CLUSTERED 
+	(
+		[AID]
+	)  ON [PRIMARY] ,
+	CONSTRAINT [PremiumGrade_Account_FK1] FOREIGN KEY 
+	(
+		[PGradeID]
+	) REFERENCES [PremiumGrade] (
+		[PGradeID]
+	),
+	CONSTRAINT [UserGrade_Account_FK1] FOREIGN KEY 
+	(
+		[UGradeID]
+	) REFERENCES [UserGrade] (
+		[UGradeID]
+	)
+) ON [PRIMARY]
+GO
+
+CREATE NONCLUSTERED INDEX IX_Account_RegDate ON Account( RegDate )
+CREATE NONCLUSTERED INDEX IX_Account_UserID ON Account( UserID )
+GO
+
+---------------------------------------------------------------------
+
+CREATE TABLE [AccountPenaltyPeriod] (
+	[id] [int] IDENTITY (1, 1) NOT NULL ,
+	[AID] [int] NOT NULL ,
+	[DayLeft] [int] NOT NULL ,
+	CONSTRAINT [AccountPenaltyPeriod_PK] PRIMARY KEY  CLUSTERED 
+	(
+		[id]
+	)  ON [PRIMARY] ,
+	CONSTRAINT [AccountPenaltyPeriod_Account_FK1] FOREIGN KEY 
+	(
+		[AID]
+	) REFERENCES [Account] (
+		[AID]
+	)
+) ON [PRIMARY]
+GO
+
+---------------------------------------------------------------------
+
+CREATE TABLE [PenaltyLog] (
+	[id] [int] IDENTITY (1, 1) NOT NULL ,
+	[AID] [int] NOT NULL ,
+	[UGradeID] [int] NOT NULL ,
+	[Date] [datetime] NOT NULL ,
+	CONSTRAINT [PenaltyLog_PK] PRIMARY KEY  CLUSTERED 
+	(
+		[id]
+	)  ON [PRIMARY] 
+) ON [PRIMARY]
+GO
+
+CREATE NONCLUSTERED INDEX IX_PenaltyLog_AID
+ON PenaltyLog( AID )
+GO
+
+CREATE NONCLUSTERED INDEX IX_PenaltyLog_Date
+ON PenaltyLog( Date )
+GO
+
+---------------------------------------------------------------------
+
+CREATE TABLE [Character] (
+	[CID] [int] IDENTITY (1, 1) NOT NULL ,
+	[AID] [int] NOT NULL ,
+	[Name] [varchar] (24) NOT NULL ,
+	[Level] [smallint] NOT NULL ,
+	[Sex] [tinyint] NOT NULL ,
+	[CharNum] [smallint] NOT NULL ,
+	[Hair] [tinyint] NULL ,
+	[Face] [tinyint] NULL ,
+	[XP] [int] NOT NULL ,
+	[BP] [int] NOT NULL ,
+	[HP] [smallint] NULL ,
+	[AP] [smallint] NULL ,
+	[FR] [int] NULL ,
+	[CR] [int] NULL ,
+	[ER] [int] NULL ,
+	[WR] [int] NULL ,
+	[head_slot] [int] NULL ,
+	[chest_slot] [int] NULL ,
+	[hands_slot] [int] NULL ,
+	[legs_slot] [int] NULL ,
+	[feet_slot] [int] NULL ,
+	[fingerl_slot] [int] NULL ,
+	[fingerr_slot] [int] NULL ,
+	[melee_slot] [int] NULL ,
+	[primary_slot] [int] NULL ,
+	[secondary_slot] [int] NULL ,
+	[custom1_slot] [int] NULL ,
+	[custom2_slot] [int] NULL ,
+	[RegDate] [datetime] NULL ,
+	[LastTime] [datetime] NULL ,
+	[PlayTime] [int] NULL ,
+	[GameCount] [int] NULL ,
+	[KillCount] [int] NULL ,
+	[DeathCount] [int] NULL ,
+	[DeleteFlag] [tinyint] NULL ,
+	[DeleteName] [varchar] (24) NULL ,
+	[head_itemid] [int] NULL ,
+	[chest_itemid] [int] NULL ,
+	[hands_itemid] [int] NULL ,
+	[legs_itemid] [int] NULL ,
+	[feet_itemid] [int] NULL ,
+	[fingerl_itemid] [int] NULL ,
+	[fingerr_itemid] [int] NULL ,
+	[melee_itemid] [int] NULL ,
+	[primary_itemid] [int] NULL ,
+	[secondary_itemid] [int] NULL ,
+	[custom1_itemid] [int] NULL ,
+	[custom2_itemid] [int] NULL ,
+	[QuestItemInfo] [binary] (292) NULL ,
+	CONSTRAINT [Character_PK] PRIMARY KEY  CLUSTERED 
+	(
+		[CID]
+	)  ON [PRIMARY] ,
+	CONSTRAINT [Account_Character_FK1] FOREIGN KEY 
+	(
+		[AID]
+	) REFERENCES [Account] (
+		[AID]
+	)
+) ON [PRIMARY]
+GO
+
+CREATE NONCLUSTERED INDEX IX_Character_AID 
+ON Character( AID, CharNum )
+GO
+
+CREATE NONCLUSTERED INDEX IX_Character_AID_DeleteFlag
+ON Character( AID, DeleteFlag )
+GO
+
+CREATE NONCLUSTERED INDEX IX_Character_DeleteFlag
+ON Character( DeleteFlag )
+GO
+
+CREATE NONCLUSTERED INDEX IX_Character_Name
+ON Character( Name )
+GO
+
+---------------------------------------------------------------------
+
+CREATE TABLE [CharacterMakingLog] (
+	[id] [int] IDENTITY (1, 1) NOT NULL ,
+	[AID] [int] NULL ,
+	[CharName] [varchar] (32) NULL ,
+	[Type] [varchar] (20) NULL ,
+	[Date] [datetime] NULL 
+) ON [PRIMARY]
+GO
+
+CREATE CLUSTERED INDEX IX_CharacterMakingDete
+ON CharacterMakingLog( Date )
+GO
+
+CREATE NONCLUSTERED INDEX IX_CharacterMakingName
+ON CharacterMakingLog( CharName )
+GO
+
+---------------------------------------------------------------------
+
+CREATE TABLE [Friend] (
+	[id] [int] IDENTITY (1, 1) NOT NULL ,
+	[CID] [int] NOT NULL ,
+	[FriendCID] [int] NOT NULL ,
+	[Type] [int] NOT NULL ,
+	[Favorite] [tinyint] NULL ,
+	[DeleteFlag] [tinyint] NULL ,
+	CONSTRAINT [Friend_PK] PRIMARY KEY  CLUSTERED 
+	(
+		[id]
+	)  ON [PRIMARY] ,
+	CONSTRAINT [Character_Friend_FK1] FOREIGN KEY 
+	(
+		[CID]
+	) REFERENCES [Character] (
+		[CID]
+	),
+	CONSTRAINT [Character_Friend_FK2] FOREIGN KEY 
+	(
+		[FriendCID]
+	) REFERENCES [Character] (
+		[CID]
+	)
+) ON [PRIMARY]
+GO
+
+CREATE NONCLUSTERED INDEX IX_Friend_CID_FriendCID
+ON Friend( CID, FriendCID )
+GO
+
+---------------------------------------------------------------------
+
+CREATE TABLE [LevelUpLog] (
+	[id] [int] IDENTITY (1, 1) NOT NULL ,
+	[CID] [int] NULL ,
+	[Level] [smallint] NULL ,
+	[BP] [int] NULL ,
+	[KillCount] [int] NULL ,
+	[DeathCount] [int] NULL ,
+	[PlayTime] [int] NULL ,
+	[Date] [datetime] NULL ,
+	CONSTRAINT [LevelUpLog_PK_20050310] PRIMARY KEY  NONCLUSTERED 
+	(
+		[id]
+	)  ON [PRIMARY] 
+) ON [PRIMARY]
+GO
+
+---------------------------------------------------------------------
+
+CREATE TABLE [Effect] (
+	[ID] [int] NOT NULL ,
+	[Name] [varchar] (32) NOT NULL ,
+	[Area] [int] NULL ,
+	[Time] [int] NULL ,
+	[ModHP] [int] NULL ,
+	[ModAP] [int] NULL ,
+	[ModMaxWT] [int] NULL ,
+	[ModSF] [int] NULL ,
+	[ModFR] [int] NULL ,
+	[ModCR] [int] NULL ,
+	[ModPR] [int] NULL ,
+	[ModLR] [int] NULL ,
+	[ResAP] [int] NULL ,
+	[ResFR] [int] NULL ,
+	[ResCR] [int] NULL ,
+	[ResPR] [int] NULL ,
+	[ResLR] [int] NULL ,
+	[Stun] [int] NULL ,
+	[KnockBack] [int] NULL ,
+	[Smoke] [int] NULL ,
+	[Flash] [int] NULL ,
+	[Tear] [int] NULL ,
+	[Flame] [int] NULL ,
+	CONSTRAINT [Effect_PK] PRIMARY KEY  CLUSTERED 
+	(
+		[ID]
+	)  ON [PRIMARY] 
+) ON [PRIMARY]
+GO
+
+---------------------------------------------------------------------
+
+CREATE TABLE [Item] (
+	[ItemID] [int] NOT NULL ,
+	[Name] [varchar] (256) NOT NULL ,
+	[TotalPoint] [int] NULL ,
+	[ResSex] [tinyint] NULL ,
+	[ResRace] [tinyint] NULL ,
+	[ResLevel] [int] NULL ,
+	[Slot] [tinyint] NULL ,
+	[Weight] [int] NULL ,
+	[BountyPrice] [int] NULL ,
+	[Damage] [int] NULL ,
+	[Delay] [int] NULL ,
+	[EffectID] [int] NULL ,
+	[Controllability] [int] NULL ,
+	[Magazine] [int] NULL ,
+	[ReloadTime] [int] NULL ,
+	[SlugOutput] [tinyint] NULL ,
+	[Gadget] [int] NULL ,
+	[HP] [int] NULL ,
+	[AP] [int] NULL ,
+	[MAXWT] [int] NULL ,
+	[SF] [int] NULL ,
+	[FR] [int] NULL ,
+	[CR] [int] NULL ,
+	[PR] [int] NULL ,
+	[LR] [int] NULL ,
+	[BlendColor] [int] NULL ,
+	[ModelName] [varchar] (64) NULL ,
+	[Description] [varchar] (1024) NULL ,
+	[MaxBullet] [int] NULL ,
+	[LimitSpeed] [tinyint] NULL ,
+	[IsCashItem] [tinyint] NULL ,
+	CONSTRAINT [Item_PK] PRIMARY KEY  CLUSTERED 
+	(
+		[ItemID]
+	)  ON [PRIMARY] ,
+	CONSTRAINT [Effect_Item_FK1] FOREIGN KEY 
+	(
+		[EffectID]
+	) REFERENCES [Effect] (
+		[ID]
+	)
+) ON [PRIMARY] 
+GO
+
+CREATE NONCLUSTERED INDEX IX_Item_Name
+ON Item( Name )
+GO
+
+CREATE NONCLUSTERED INDEX IX_Item_ResLevel
+ON Item( ResLevel )
+GO
+
+CREATE NONCLUSTERED INDEX IX_Item_ResSex
+ON Item( ResSex )
+GO
+
+CREATE NONCLUSTERED INDEX IX_Item_Slot
+ON Item( Slot )
+GO
+
+---------------------------------------------------------------------
+
+CREATE TABLE [AccountItem] (
+	[AIID] [int] IDENTITY (1, 1) NOT NULL ,
+	[AID] [int] NOT NULL ,
+	[ItemID] [int] NOT NULL ,
+	[RentDate] [datetime] NULL CONSTRAINT [DF__AccountIt__RentD__116A8EFB] DEFAULT (null),
+	[RentHourPeriod] [smallint] NULL CONSTRAINT [DF__AccountIt__RentH__125EB334] DEFAULT (null),
+	[Cnt] [smallint] NULL CONSTRAINT [DF__AccountItem__Cnt__1352D76D] DEFAULT (null),
+	CONSTRAINT [테이블1_PK] PRIMARY KEY  CLUSTERED 
+	(
+		[AIID]
+	)  ON [PRIMARY] ,
+	CONSTRAINT [Account_Table1_FK1] FOREIGN KEY 
+	(
+		[AID]
+	) REFERENCES [Account] (
+		[AID]
+	),
+	CONSTRAINT [Item_Table1_FK1] FOREIGN KEY 
+	(
+		[ItemID]
+	) REFERENCES [Item] (
+		[ItemID]
+	)
+) ON [PRIMARY]
+GO
+
+CREATE NONCLUSTERED INDEX IX_AccountItem_RentDate
+ON AccountItem( RentDate )
+GO
+
+CREATE NONCLUSTERED INDEX IX_AccountItem_AID
+ON AccountItem( AID )
+GO
+
+---------------------------------------------------------------------
+
+CREATE TABLE [BringAccountItemLog] (
+	[id] [int] IDENTITY (1, 1) NOT NULL ,
+	[AID] [int] NULL ,
+	[CID] [int] NULL ,
+	[ItemID] [int] NOT NULL ,
+	[Date] [datetime] NOT NULL ,
+	CONSTRAINT [BringAccountItemLog_PK] PRIMARY KEY  NONCLUSTERED 
+	(
+		[id]
+	)  ON [PRIMARY] ,
+	CONSTRAINT [Account_BringAccountItemLog_FK1] FOREIGN KEY 
+	(
+		[AID]
+	) REFERENCES [Account] (
+		[AID]
+	),
+	CONSTRAINT [Character_BringAccountItemLog_FK1] FOREIGN KEY 
+	(
+		[CID]
+	) REFERENCES [Character] (
+		[CID]
+	),
+	CONSTRAINT [Item_BringAccountItemLog_FK1] FOREIGN KEY 
+	(
+		[ItemID]
+	) REFERENCES [Item] (
+		[ItemID]
+	)
+) ON [PRIMARY]
+GO
+
+CREATE NONCLUSTERED INDEX IX_BringAccoutItem_AID
+ON BringAccountItemLog( AID )
+GO
+
+---------------------------------------------------------------------
+
+CREATE TABLE [CashSetShop] (
+	[CSSID] [int] IDENTITY (1, 1) NOT NULL ,
+	[Name] [varchar] (64) NULL ,
+	[Description] [varchar] (1024) NULL ,
+	[CashPrice] [int] NOT NULL ,
+	[WebImgName] [varchar] (64) NULL ,
+	[NewItemOrder] [tinyint] NULL ,
+	[ResSex] [tinyint] NULL ,
+	[ResLevel] [int] NULL ,
+	[Weight] [int] NULL ,
+	[Opened] [tinyint] NULL ,
+	[RegDate] [datetime] NULL ,
+	[RentType] [tinyint] NULL ,
+	CONSTRAINT [CashSetShop_PK] PRIMARY KEY  CLUSTERED 
+	(
+		[CSSID]
+	)  ON [PRIMARY] 
+) ON [PRIMARY] 
+GO
+
+CREATE NONCLUSTERED INDEX IX_CashSetShop_NewItemOrder
+ON CashSetShop( NewItemOrder )
+GO
+
+CREATE NONCLUSTERED INDEX IX_CashSetShop_Opened
+ON CashSetShop( Opened )
+GO
+
+---------------------------------------------------------------------
+
+CREATE TABLE [CashShop] (
+	[CSID] [int] IDENTITY (1, 1) NOT NULL ,
+	[ItemID] [int] NOT NULL ,
+	[NewItemOrder] [tinyint] NULL ,
+	[CashPrice] [int] NOT NULL ,
+	[WebImgName] [varchar] (64) NULL ,
+	[Opened] [tinyint] NULL ,
+	[RegDate] [datetime] NULL ,
+	[RentType] [tinyint] NULL ,
+	CONSTRAINT [CashShop_PK] PRIMARY KEY  CLUSTERED 
+	(
+		[CSID]
+	)  ON [PRIMARY] ,
+	CONSTRAINT [Item_CashShop_FK1] FOREIGN KEY 
+	(
+		[ItemID]
+	) REFERENCES [Item] (
+		[ItemID]
+	)
+) ON [PRIMARY]
+GO
+
+CREATE NONCLUSTERED INDEX IX_CashShop_ItemID_Opened
+ON CashShop( ItemID, Opened )
+GO
+
+CREATE NONCLUSTERED INDEX IX_CashShop_NewItemOrder
+ON CashShop( NewItemOrder )
+GO
+
+CREATE NONCLUSTERED INDEX IX_CashShop_Opened
+ON CashShop( Opened )
+GO
+
+---------------------------------------------------------------------
+
+CREATE TABLE [CashSetItem] (
+	[CSIID] [int] IDENTITY (1, 1) NOT NULL ,
+	[CSSID] [int] NOT NULL ,
+	[CSID] [int] NOT NULL ,
+	CONSTRAINT [CashSetItem_PK] PRIMARY KEY  CLUSTERED 
+	(
+		[CSIID]
+	)  ON [PRIMARY] ,
+	CONSTRAINT [CashSetShop_CashSetItem_FK1] FOREIGN KEY 
+	(
+		[CSSID]
+	) REFERENCES [CashSetShop] (
+		[CSSID]
+	),
+	CONSTRAINT [Item_CashSetItem_FK1] FOREIGN KEY 
+	(
+		[CSID]
+	) REFERENCES [CashShop] (
+		[CSID]
+	)
+) ON [PRIMARY]
+GO
+
+---------------------------------------------------------------------
+
+CREATE TABLE [CharacterItem] (
+	[CIID] [int] IDENTITY (1, 1) NOT NULL ,
+	[CID] [int] NULL ,
+	[ItemID] [int] NOT NULL ,
+	[RegDate] [datetime] NULL ,
+	[RentDate] [datetime] NULL CONSTRAINT [DF__Character__RentD__0E8E2250] DEFAULT (null),
+	[RentHourPeriod] [smallint] NULL CONSTRAINT [DF__Character__RentH__0F824689] DEFAULT (null),
+	[Cnt] [smallint] NULL CONSTRAINT [DF__CharacterIt__Cnt__10766AC2] DEFAULT (null),
+	CONSTRAINT [CharacterItem_PK] PRIMARY KEY  CLUSTERED 
+	(
+		[CIID]
+	)  ON [PRIMARY] ,
+	CONSTRAINT [Character_CharacterItem_FK1] FOREIGN KEY 
+	(
+		[CID]
+	) REFERENCES [Character] (
+		[CID]
+	),
+	CONSTRAINT [Item_CharacterItem_FK1] FOREIGN KEY 
+	(
+		[ItemID]
+	) REFERENCES [Item] (
+		[ItemID]
+	)
+) ON [PRIMARY]
+GO
+
+CREATE NONCLUSTERED INDEX IX_CharacterItem_CID
+ON CharacterItem( CID )
+GO
+
+---------------------------------------------------------------------
+
+CREATE TABLE [QuestItem] (
+	[QIID] [int] NOT NULL ,
+	[Name] [char] (32) NULL ,
+	[Level] [tinyint] NULL ,
+	[Description] [varchar] (200) NULL ,
+	[Price] [int] NULL ,
+	[UniqueItem] [bit] NOT NULL ,
+	[Sacrifice] [bit] NOT NULL ,
+	[Type] [char] (10) NULL ,
+	[Param] [int] NULL ,
+	 PRIMARY KEY  CLUSTERED 
+	(
+		[QIID]
+	)  ON [PRIMARY] 
+) ON [PRIMARY]
+GO
+
+---------------------------------------------------------------------
+
+CREATE TABLE [QUniqueItemLog] (
+	[QUILID] [int] IDENTITY (1, 1) NOT NULL ,
+	[QGLID] [int] NULL ,
+	[CID] [int] NOT NULL ,
+	[QIID] [int] NOT NULL ,
+	 PRIMARY KEY  NONCLUSTERED 
+	(
+		[QUILID]
+	)  ON [PRIMARY] 
+) ON [PRIMARY]
+GO
+
+CREATE CLUSTERED INDEX IX_QUniqueItemLog_CID
+ON QUniqueItemLog ( CID )
+GO
+
+CREATE NONCLUSTERED INDEX IX_QUniqueItemLog_QGLID
+ON QUniqueItemLog ( QGLID )
+GO
+
+CREATE NONCLUSTERED INDEX IX_QUniqueItemLog_QIID
+ON QUniqueItemLog ( QIID )
+GO
+
+---------------------------------------------------------------------
+
+CREATE TABLE [CashItemPresentLog] (
+	[id] [int] IDENTITY (1, 1) NOT NULL ,
+	[SenderUserID] [varchar] (20) NOT NULL ,
+	[ReceiverAID] [int] NOT NULL ,
+	[CSID] [int] NULL ,
+	[CSSID] [int] NULL ,
+	[Cash] [int] NOT NULL ,
+	[Date] [datetime] NOT NULL ,
+	[RentHourPeriod] [int] NULL ,
+	MobileCode char(16),
+	CONSTRAINT [CashItemPresentLog_PK] PRIMARY KEY  CLUSTERED 
+	(
+		[id]
+	)  ON [PRIMARY] ,
+	CONSTRAINT [Account_CashItemPresentLog_FK1] FOREIGN KEY 
+	(
+		[ReceiverAID]
+	) REFERENCES [Account] (
+		[AID]
+	)
+) ON [PRIMARY]
+GO
+
+CREATE NONCLUSTERED INDEX IX_CashItemPresentLog_Date
+ON CashItemPresentLog( Date )
+GO
+
+CREATE NONCLUSTERED INDEX IX_CashItemPresentLog_ReceiverAID
+ON CashItemPresentLog( ReceiverAID )
+GO
+
+CREATE NONCLUSTERED INDEX IX_CashItemPresentLog_SenderUserID
+ON CashItemPresentLog( SenderUserID )
+GO
+
+---------------------------------------------------------------------
+
+CREATE TABLE [ItemPurchaseLogByBounty] (
+	[id] [int] IDENTITY (1, 1) NOT NULL ,
+	[ItemID] [int] NOT NULL ,
+	[CID] [int] NULL ,
+	[Date] [datetime] NULL ,
+	[Bounty] [int] NULL ,
+	[CharBounty] [int] NULL ,
+	[Type] [varchar] (20) NULL ,
+	CONSTRAINT [Character_PurchaseItemByBountyHistory_FK20050314] FOREIGN KEY 
+	(
+		[CID]
+	) REFERENCES [Character] (
+		[CID]
+	),
+	CONSTRAINT [Item_PurchaseItemByBountyHistory_FK20050314] FOREIGN KEY 
+	(
+		[ItemID]
+	) REFERENCES [Item] (
+		[ItemID]
+	)
+) ON [PRIMARY]
+GO
+
+CREATE CLUSTERED INDEX IX_ItemPurchaseLogByBounty_Date
+ON ItemPurchaseLogByBounty( Date )
+GO
+
+---------------------------------------------------------------------
+
+CREATE TABLE [ItemPurchaseLogByCash] (
+	[id] [int] IDENTITY (1, 1) NOT NULL ,
+	[AID] [int] NULL ,
+	[ItemID] [int] NOT NULL ,
+	[Date] [datetime] NOT NULL ,
+	[Cash] [int] NULL ,
+	[RentHourPeriod] [int] NULL ,
+	MobileCode char(16),
+	CONSTRAINT [Account_PurchaseLogByCash_FK1] FOREIGN KEY 
+	(
+		[AID]
+	) REFERENCES [Account] (
+		[AID]
+	),
+	CONSTRAINT [Item_PurchaseLogByCash_FK1] FOREIGN KEY 
+	(
+		[ItemID]
+	) REFERENCES [Item] (
+		[ItemID]
+	)
+) ON [PRIMARY]
+GO
+
+CREATE NONCLUSTERED INDEX IX_ItemPurchaseLogByCash_AID
+ON ItemPurchaseLogByCash( AID )
+GO
+
+CREATE CLUSTERED INDEX IX_ItemPurchaseLogByCash_Date
+ON ItemPurchaseLogByCash( Date )
+GO
+
+---------------------------------------------------------------------
+
+CREATE TABLE [PurchaseMethod] (
+	[PurchaseMethodID] [int] NOT NULL ,
+	[Name] [varchar] (256) NULL ,
+	CONSTRAINT [PurchaseMethod_PK] PRIMARY KEY  CLUSTERED 
+	(
+		[PurchaseMethodID]
+	)  ON [PRIMARY] 
+) ON [PRIMARY]
+GO
+
+insert into purchasemethod(purchasemethodid, name)
+values(0, 'cash')
+
+insert into purchasemethod(purchasemethodid, name)
+values(1, 'bounty')
+
+insert into purchasemethod(purchasemethodid, name)
+values(2, 'cash & bounty')
+
+insert into purchasemethod(purchasemethodid, name)
+values(3, 'special(evenet)')
+go
+
+---------------------------------------------------------------------
+
+CREATE TABLE [SetItemPurchaseLogByCash] (
+	[id] [int] IDENTITY (1, 1) NOT NULL ,
+	[AID] [int] NULL ,
+	[CSSID] [int] NULL ,
+	[Date] [datetime] NOT NULL ,
+	[Cash] [int] NULL ,
+	[RentHourPeriod] [int] NULL ,
+	MobileCode char(16),
+	CONSTRAINT [Account_SetItemPurchaseLogByCash_FK1] FOREIGN KEY 
+	(
+		[AID]
+	) REFERENCES [Account] (
+		[AID]
+	),
+	CONSTRAINT [CashSetShop_SetItemPurchaseLogByCash_FK1] FOREIGN KEY 
+	(
+		[CSSID]
+	) REFERENCES [CashSetShop] (
+		[CSSID]
+	)
+) ON [PRIMARY]
+GO
+
+
+CREATE NONCLUSTERED INDEX IX_SetItemPurchaseLogByCash_AID
+ON SetItemPurchaseLogByCash( AID )
+GO
+
+CREATE CLUSTERED INDEX IX_SetItemPurchaseLogByCash_Date
+ON SetItemPurchaseLogByCash( Date )
+GO
+
+---------------------------------------------------------------------
+
+CREATE TABLE [BillingMethod] (
+	[BillingMethodID] [int] NOT NULL ,
+	[Name] [varchar] (256) NOT NULL ,
+	CONSTRAINT [BillingMethod_PK] PRIMARY KEY  CLUSTERED 
+	(
+		[BillingMethodID]
+	)  ON [PRIMARY] 
+) ON [PRIMARY]
+GO
+
+---------------------------------------------------------------------
+
+CREATE TABLE [CashShopNewItem] (
+	[id] [int] IDENTITY (1, 1) NOT NULL ,
+	[Category] [varchar] (32) NOT NULL ,
+	[NewOrder] [int] NOT NULL ,
+	[IsSetItem] [int] NOT NULL ,
+	[CSID] [int] NULL ,
+	[CSSID] [int] NULL ,
+	[Slot] [varchar] (32) NOT NULL ,
+	[Name] [varchar] (256) NOT NULL ,
+	[ResSex] [int] NOT NULL ,
+	[ResLevel] [int] NOT NULL ,
+	[CashPrice] [int] NOT NULL ,
+	[WebImgName] [varchar] (64) NULL ,
+	[RegDate] [datetime] NOT NULL CONSTRAINT [DF__CashShopN__RegDa__2D67AF2B] DEFAULT (getdate())
+) ON [PRIMARY]
+GO
+
+CREATE NONCLUSTERED INDEX IX_CashShopNewItem_NewOrder
+ON CashShopNewItem( NewOrder )
+GO
+
+---------------------------------------------------------------------
+
+CREATE TABLE [RentCashSetShopPrice] (
+	[RCSSPID] [int] IDENTITY (1, 1) NOT NULL ,
+	[CSSID] [int] NULL ,
+	[RentHourPeriod] [smallint] NULL ,
+	[CashPrice] [int] NULL ,
+	 PRIMARY KEY  CLUSTERED 
+	(
+		[RCSSPID]
+	)  ON [PRIMARY] ,
+	 FOREIGN KEY 
+	(
+		[CSSID]
+	) REFERENCES [CashSetShop] (
+		[CSSID]
+	) ON UPDATE CASCADE 
+) ON [PRIMARY]
+GO
+
+CREATE NONCLUSTERED INDEX IX_RentCashSetShopPrice_CSSID
+ON RentCashSetShopPrice( CSSID )
+GO
+
+---------------------------------------------------------------------
+
+CREATE TABLE [RentCashShopPrice] (
+	[RCSPID] [int] IDENTITY (1, 1) NOT NULL ,
+	[CSID] [int] NULL ,
+	[RentHourPeriod] [smallint] NULL ,
+	[CashPrice] [int] NULL ,
+	 PRIMARY KEY  CLUSTERED 
+	(
+		[RCSPID]
+	)  ON [PRIMARY] ,
+	 FOREIGN KEY 
+	(
+		[CSID]
+	) REFERENCES [CashShop] (
+		[CSID]
+	) ON UPDATE CASCADE 
+) ON [PRIMARY]
+GO
+
+CREATE NONCLUSTERED INDEX IX_RentCashShopPrice_CSID
+ON RentCashShopPrice( CSID )
+GO
+
+---------------------------------------------------------------------
+
+CREATE TABLE [Clan] (
+	[CLID] [int] IDENTITY (1, 1) NOT NULL ,
+	[Name] [varchar] (24) NULL ,
+	[Exp] [int] NOT NULL CONSTRAINT [DF__Clan__Exp__740F363E] DEFAULT (0),
+	[Level] [tinyint] NOT NULL CONSTRAINT [DF__Clan__Level__75035A77] DEFAULT (1),
+	[Point] [int] NOT NULL DEFAULT 1000,
+	[MasterCID] [int] NULL ,
+	[Wins] [int] NOT NULL CONSTRAINT [DF__Clan__Wins__76EBA2E9] DEFAULT (0),
+	[MarkWebImg] [varchar] (48) NULL ,
+	[Introduction] [varchar] (1024) NULL ,
+	[RegDate] [datetime] NOT NULL ,
+	[DeleteFlag] [tinyint] NULL CONSTRAINT [DF__Clan__DeleteFlag__78D3EB5B] DEFAULT (0),
+	[DeleteName] [varchar] (24) NULL ,
+	[Homepage] [varchar] (128) NULL ,
+	[Losses] [int] NOT NULL CONSTRAINT [DF__Clan__Losses__6774552F] DEFAULT (0),
+	[Draws] [int] NOT NULL CONSTRAINT [DF__Clan__Draws__68687968] DEFAULT (0),
+	[Ranking] [int] NOT NULL CONSTRAINT [DF__Clan__Ranking__695C9DA1] DEFAULT (0),
+	[TotalPoint] [int] NOT NULL CONSTRAINT [DF__Clan__TotalPoint__6A50C1DA] DEFAULT (0),
+	[Cafe_Url] [varchar] (20) NULL ,
+	[Email] [varchar] (70) NULL ,
+	[EmblemUrl] [varchar] (256) NULL ,
+	[RankIncrease] [int] NOT NULL CONSTRAINT [DF__Clan__RankIncrea__7E57BA87] DEFAULT (0),
+	[EmblemChecksum] [int] NOT NULL CONSTRAINT [DF__Clan__EmblemChec__004002F9] DEFAULT (0),
+	[LastDayRanking] [int] NOT NULL CONSTRAINT [DF__Clan__LastDayRan__031C6FA4] DEFAULT (0),
+	[LastMonthRanking] [int] NOT NULL CONSTRAINT [DF__Clan__LastMonthR__041093DD] DEFAULT (0),
+	CONSTRAINT [Clan_PK] PRIMARY KEY  CLUSTERED 
+	(
+		[CLID]
+	)  ON [PRIMARY] ,
+	CONSTRAINT [Clan_Character_FK1] FOREIGN KEY 
+	(
+		[MasterCID]
+	) REFERENCES [Character] (
+		[CID]
+	)
+) ON [PRIMARY] 
+GO
+
+CREATE NONCLUSTERED INDEX IX_Clan_DeleteFlag
+ON Clan( DeleteFlag )
+GO
+
+CREATE NONCLUSTERED INDEX IX_Clan_MasterCID
+ON Clan( MasterCID )
+GO
+
+CREATE NONCLUSTERED INDEX IX_Clan_Name
+ON Clan( Name )
+GO
+
+CREATE NONCLUSTERED INDEX IX_Clan_Ranking
+ON Clan( Ranking )
+GO
+
+CREATE NONCLUSTERED INDEX IX_Clan_RegDate
+ON Clan( RegDate DESC )
+GO
+
+---------------------------------------------------------------------
+
+CREATE TABLE [ClanMember] (
+	[CMID] [int] IDENTITY (1, 1) NOT NULL ,
+	[CLID] [int] NULL ,
+	[CID] [int] NULL ,
+	[Grade] [tinyint] NOT NULL ,
+	[RegDate] [datetime] NOT NULL ,
+	[ContPoint] [int] NOT NULL CONSTRAINT [DF__ClanMembe__ContP__6B44E613] DEFAULT (0),
+	CONSTRAINT [ClanMember_PK] PRIMARY KEY  CLUSTERED 
+	(
+		[CMID]
+	)  ON [PRIMARY] ,
+	CONSTRAINT [ClanMember_Clan_FK1] FOREIGN KEY 
+	(
+		[CLID]
+	) REFERENCES [Clan] (
+		[CLID]
+	),
+	CONSTRAINT [ClanMember_Clan_FK2] FOREIGN KEY 
+	(
+		[CID]
+	) REFERENCES [Character] (
+		[CID]
+	)
+) ON [PRIMARY]
+GO
+
+CREATE NONCLUSTERED INDEX IX_ClanMember_CID
+ON ClanMember( CID )
+GO
+
+CREATE NONCLUSTERED INDEX IX_ClanMember_CLID
+ON ClanMember( CLID )
+GO
+
+---------------------------------------------------------------------
+
+CREATE TABLE [DayRanking] (
+	[id] [int] IDENTITY (1, 1) NOT NULL ,
+	[Name] [varchar] (24) NOT NULL ,
+	[Level] [smallint] NOT NULL ,
+	[Point] [int] NULL ,
+	[Rank] [int] NULL ,
+	CONSTRAINT [PK_DayRanking_ID] PRIMARY KEY  CLUSTERED 
+	(
+		[id]
+	)  ON [PRIMARY] 
+) ON [PRIMARY]
+GO
+
+CREATE NONCLUSTERED INDEX IX_DayRanking_Rank
+ON DayRanking( Rank )
+GO
+
+---------------------------------------------------------------------
+
+CREATE TABLE [TotalRanking] (
+	[Rank] [int] IDENTITY (1, 1) NOT NULL ,
+	[UserID] [varchar] (20) NULL ,
+	[Name] [varchar] (24) NOT NULL ,
+	[Level] [smallint] NOT NULL ,
+	[XP] [int] NULL ,
+	[KillCount] [int] NULL ,
+	[DeathCount] [int] NULL ,
+	CONSTRAINT [PK_TotalRanking_Rank] PRIMARY KEY  CLUSTERED 
+	(
+		[Rank]
+	)  ON [PRIMARY] 
+) ON [PRIMARY]
+GO
+
+CREATE NONCLUSTERED INDEX IX_TotalRanking_Name
+ON TotalRanking( Name )
+GO
+
+CREATE NONCLUSTERED INDEX IX_TotalRanking_UserID
+ON TotalRanking( UserID )
+GO
+---------------------------------------------------------------------
+
+CREATE TABLE [CashShopRank] (
+	[id] [int] IDENTITY (1, 1) NOT NULL ,
+	[Rank] [int] NOT NULL ,
+	[Category] [varchar] (32) NOT NULL ,
+	[Name] [varchar] (256) NOT NULL ,
+	[Count] [int] NOT NULL ,
+	[CSID] [int] NULL ,
+	[CSSID] [int] NULL ,
+	[Slot] [varchar] (32) NOT NULL ,
+	[ResSex] [int] NOT NULL ,
+	[ResLevel] [int] NOT NULL ,
+	[CashPrice] [int] NOT NULL ,
+	[RegDate] [datetime] NOT NULL CONSTRAINT [DF__CashShopR__RegDa__1C3D2329] DEFAULT (getdate()),
+	CONSTRAINT [pk_CashShopRank_id] PRIMARY KEY  CLUSTERED 
+	(
+		[id]
+	)  ON [PRIMARY] 
+) ON [PRIMARY]
+GO
+
+CREATE NONCLUSTERED INDEX IX_CashShopRank_Category
+ON CashShopRank( Category )
+
+CREATE NONCLUSTERED INDEX IX_CashShopRank_Rank
+ON CashShopRank( Rank )
+GO
+
+---------------------------------------------------------------------
+
+CREATE TABLE [ClanHonorRanking] (
+	[id] [int] IDENTITY (1, 1) NOT NULL ,
+	[CLID] [int] NULL ,
+	[ClanName] [varchar] (24) NOT NULL ,
+	[Point] [int] NULL ,
+	[Wins] [int] NULL ,
+	[Losses] [int] NULL ,
+	[Ranking] [int] NULL ,
+	[Year] [smallint] NULL ,
+	[Month] [tinyint] NULL ,
+	[RankIncrease] [int] NOT NULL CONSTRAINT [DF__ClanHonor__RankI__0504B816] DEFAULT (0),
+	CONSTRAINT [PK_ClanHonorRanking_ID] PRIMARY KEY  CLUSTERED 
+	(
+		[id]
+	)  ON [PRIMARY] ,
+	CONSTRAINT [ClanHonorRanking_CLID_FK1] FOREIGN KEY 
+	(
+		[CLID]
+	) REFERENCES [Clan] (
+		[CLID]
+	)
+) ON [PRIMARY]
+GO
+
+CREATE NONCLUSTERED INDEX IX_ClanHonorRanking_ClanName
+ON ClanHonorRanking( ClanName )
+GO
+
+CREATE NONCLUSTERED INDEX IX_ClanHonorRanking_CLID
+ON ClanHonorRanking( CLID )
+GO
+
+CREATE NONCLUSTERED INDEX IX_ClanHonorRanking_Ranking
+ON ClanHonorRanking( Ranking )
+GO
+
+CREATE NONCLUSTERED INDEX IX_ClanHonorRanking_YearMonthRanking
+ON ClanHonorRanking( Year, Month, Ranking )
+GO
+
+---------------------------------------------------------------------
+
+CREATE TABLE [ClanGameLog] (
+	[id] [int] IDENTITY (1, 1) NOT NULL ,
+	[WinnerCLID] [int] NOT NULL ,
+	[LoserCLID] [int] NOT NULL ,
+	[WinnerClanName] [varchar] (24) NULL ,
+	[LoserClanName] [varchar] (24) NULL ,
+	[WinnerMembers] [varchar] (110) NULL ,
+	[LoserMembers] [varchar] (110) NULL ,
+	[RoundWins] [tinyint] NOT NULL ,
+	[RoundLosses] [tinyint] NOT NULL ,
+	[MapID] [tinyint] NOT NULL ,
+	[GameType] [tinyint] NOT NULL ,
+	[RegDate] [datetime] NOT NULL ,
+	[WinnerPoint] [int] NULL ,
+	[LoserPoint] [int] NULL ,
+	CONSTRAINT [ClanGameLog_PK] PRIMARY KEY  NONCLUSTERED 
+	(
+		[id]
+	)  ON [PRIMARY] ,
+	CONSTRAINT [ClanGameLog_LoserCLID_FK1] FOREIGN KEY 
+	(
+		[LoserCLID]
+	) REFERENCES [Clan] (
+		[CLID]
+	),
+	CONSTRAINT [ClanGameLog_WinnerCLID_FK1] FOREIGN KEY 
+	(
+		[WinnerCLID]
+	) REFERENCES [Clan] (
+		[CLID]
+	)
+) ON [PRIMARY]
+GO
+
+CREATE NONCLUSTERED INDEX IX_ClanGameLog_LoserCLID
+ON ClanGameLog( LoserCLID )
+GO
+
+CREATE CLUSTERED INDEX IX_ClanGameLog_RegDate
+ON ClanGameLog( RegDate )
+GO
+
+CREATE NONCLUSTERED INDEX IX_ClanGameLog_WinnerCLID
+ON ClanGameLog( WinnerCLID )
+GO
+
+---------------------------------------------------------------------
+
+CREATE TABLE [PlayerLog] (
+	[id] [int] IDENTITY (1, 1) NOT NULL ,
+	[CID] [int] NULL ,
+	[DisTime] [datetime] NULL ,
+	[PlayTime] [int] NULL ,
+	[Kills] [int] NULL ,
+	[Deaths] [int] NULL ,
+	[XP] [int] NULL ,
+	[TotalXP] [int] NULL 
+) ON [PRIMARY]
+GO
+
+CREATE NONCLUSTERED INDEX IX_PlyaerLog_CID 
+ON PlayerLog(CID)
+
+CREATE NONCLUSTERED INDEX IX_PlayerLog_DisTime
+ON PlayerLog(DisTime)
+GO
+
+---------------------------------------------------------------------
+
+
+CREATE TABLE [GameLog] (
+	[id] [int] IDENTITY (1, 1) NOT NULL ,
+	[GameName] [varchar] (64) NULL ,
+	[MasterCID] [int] NULL ,
+	[Map] [varchar] (32) NULL ,
+	[GameType] [varchar] (24) NULL ,
+	[Round] [int] NULL ,
+	[StartTime] [datetime] NOT NULL ,
+	[PlayerCount] [tinyint] NULL ,
+	[Players] [varchar] (1000) NULL 
+) ON [PRIMARY]
+GO
+
+CREATE CLUSTERED INDEX IX_GameLog_StartTime
+ON GameLog( StartTime )
+GO
+
+---------------------------------------------------------------------
+
+
+CREATE TABLE [KillLog] (
+	[id] [int] IDENTITY (1, 1) NOT NULL ,
+	[AttackerCID] [int] NULL ,
+	[VictimCID] [int] NULL ,
+	[Time] [datetime] NULL ,
+	CONSTRAINT [KillLog_PK] PRIMARY KEY  CLUSTERED 
+	(
+		[id]
+	)  ON [PRIMARY] 
+) ON [PRIMARY]
+GO
+
+
+---------------------------------------------------------------------
+
+CREATE TABLE [Map] (
+	[MapID] [int] NOT NULL ,
+	[Name] [varchar] (256) NOT NULL ,
+	[MaxPlayer] [int] NOT NULL ,
+	CONSTRAINT [Map_PK] PRIMARY KEY  CLUSTERED 
+	(
+		[MapID]
+	)  ON [PRIMARY] 
+) ON [PRIMARY]
+GO
+
+INSERT INTO Map(MapID, Name, MaxPlayer) VALUES(0,'Mansion',32)
+INSERT INTO Map(MapID, Name, MaxPlayer) VALUES(1,'Prison',32)
+INSERT INTO Map(MapID, Name, MaxPlayer) VALUES(2,'Prison II',32)
+INSERT INTO Map(MapID, Name, MaxPlayer) VALUES(3,'Station',32)
+INSERT INTO Map(MapID, Name, MaxPlayer) VALUES(4,'Battle Arena',32)
+INSERT INTO Map(MapID, Name, MaxPlayer) VALUES(5,'Town',32)
+INSERT INTO Map(MapID, Name, MaxPlayer) VALUES(6,'Dungeon',32)
+INSERT INTO Map(MapID, Name, MaxPlayer) VALUES(7,'Ruin',32)
+INSERT INTO Map(MapID, Name, MaxPlayer) VALUES(8,'Island',32)
+INSERT INTO Map(MapID, Name, MaxPlayer) VALUES(9,'Garden',32)
+INSERT INTO Map(MapID, Name, MaxPlayer) VALUES(10,'Castle',32)
+INSERT INTO Map(MapID, Name, MaxPlayer) VALUES(11,'Factory',8)
+go
+
+---------------------------------------------------------------------
+
+CREATE TABLE [QuestGameLog] (
+	[id] [int] IDENTITY (1, 1) NOT NULL ,
+	[GameName] [varchar] (64) NULL ,
+	[Master] [int] NOT NULL ,
+	[Player1] [int] NULL ,
+	[Player2] [int] NULL ,
+	[Player3] [int] NULL ,
+	[TotalQItemCount] [tinyint] NULL ,
+	[ScenarioID] [smallint] NOT NULL ,
+	[StartTime] [smalldatetime] NOT NULL ,
+	[EndTime] [smalldatetime] NOT NULL ,
+	 PRIMARY KEY  NONCLUSTERED 
+	(
+		[id]
+	)  ON [PRIMARY] 
+) ON [PRIMARY]
+GO
+
+CREATE NONCLUSTERED INDEX IX_QuestGameLog_EndTime
+ON QuestGameLog( EndTime )
+GO
+
+CREATE CLUSTERED INDEX IX_QuestGameLog_StartTime
+ON QuestGameLog( StartTime )
+GO
+
+---------------------------------------------------------------------
+
+CREATE TABLE [Login] (
+	[UserID] [varchar] (20) NOT NULL ,
+	[AID] [int] NOT NULL ,
+	[Password] [varchar] (20) NULL ,
+	[LastConnDate] [datetime] NULL ,
+	[LastIP] [varchar] (20) NULL ,
+	CONSTRAINT [Login_PK] PRIMARY KEY  CLUSTERED 
+	(
+		[UserID]
+	)  ON [PRIMARY] 
+) ON [PRIMARY]
+GO
+
+CREATE NONCLUSTERED INDEX IX_Login_AID
+ON Login( AID )
+GO
+
+---------------------------------------------------------------------
+
+CREATE TABLE [ServerLog] (
+	[id] [int] IDENTITY (1, 1) NOT NULL ,
+	[ServerID] [smallint] NULL ,
+	[PlayerCount] [smallint] NULL ,
+	[GameCount] [smallint] NULL ,
+	[Time] [smalldatetime] NULL 
+) ON [PRIMARY]
+GO
+
+ALTER TABLE ServerLog ADD BlockCount int, NonBlockCount int
+
+CREATE NONCLUSTERED INDEX IX_ServerLog_ID_Time
+ON ServerLog( ServerID, Time )
+GO
+
+CREATE CLUSTERED INDEX IX_ServerLog_Time
+ON ServerLog( Time )
+GO
+
+---------------------------------------------------------------------
+
+CREATE TABLE [ServerStatus] (
+	[ServerID] [int] NOT NULL ,
+	[CurrPlayer] [smallint] NULL ,
+	[MaxPlayer] [smallint] NULL ,
+	[Time] [datetime] NULL ,
+	[IP] [varchar] (32) NULL ,
+	[Port] [int] NULL ,
+	[ServerName] [varchar] (64) NULL ,
+	[Opened] [tinyint] NULL ,
+	[Type] [int],
+	CONSTRAINT [ServerStatus_PK] PRIMARY KEY  CLUSTERED 
+	(
+		[ServerID]
+	)  ON [PRIMARY] 
+) ON [PRIMARY]
+GO
+
+---------------------------------------------------------------------
+
+CREATE TABLE [UV] (
+	[id] [int] IDENTITY (1, 1) NOT NULL ,
+	[Time] [smalldatetime] NOT NULL ,
+	[Count] [int] NOT NULL ,
+	 PRIMARY KEY  CLUSTERED 
+	(
+		[id]
+	)  ON [PRIMARY] 
+) ON [PRIMARY]
+GO
+
+CREATE NONCLUSTERED INDEX IX_UV_Time
+ON UV( Time )
+GO
+
+---------------------------------------------------------------------
+
+CREATE TABLE [dtproperties] (
+	[id] [int] IDENTITY (1, 1) NOT NULL ,
+	[objectid] [int] NULL ,
+	[property] [varchar] (64) NOT NULL ,
+	[value] [varchar] (255) NULL ,
+	[uvalue] [nvarchar] (255) NULL ,
+	[lvalue] [image] NULL ,
+	[version] [int] NOT NULL CONSTRAINT [DF__dtpropert__versi__0A9D95DB] DEFAULT (0),
+	CONSTRAINT [pk_dtproperties] PRIMARY KEY  CLUSTERED 
+	(
+		[id],
+		[property]
+	)  ON [PRIMARY] 
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+
+---------------------------------------------------------------------
+
+CREATE TABLE [Event_ClanPointRanking] (
+	[id] [int] IDENTITY (1, 1) NOT NULL ,
+	[Rank] [int] NOT NULL ,
+	[CLID] [int] NOT NULL ,
+	[Name] [varchar] (24) NOT NULL ,
+	[Count] [int] NOT NULL ,
+	[Point] [int] NOT NULL ,
+	[RegDate] [datetime] NOT NULL CONSTRAINT [DF__Event_Cla__RegDa__49CEE3AF] DEFAULT (getdate())
+) ON [PRIMARY]
+GO
+
+CREATE NONCLUSTERED INDEX IX_Event_ClanPointRanking_CLID
+ON Event_ClanPointRanking( CLID )
+GO
+
+CREATE NONCLUSTERED INDEX IX_Event_ClanPointRanking_Rank
+ON Event_ClanPointRanking( Rank )
+GO
+
+CREATE NONCLUSTERED INDEX IX_Event_ClanPointRanking_RegDate
+ON Event_ClanPointRanking( RegDate )
+GO
+
+---------------------------------------------------------------------
+
+CREATE TABLE [sjr_TableSizeIncr] (
+	[name] [varchar] (40) NULL ,
+	[rows] [int] NULL ,
+	[reserved] [varchar] (100) NULL ,
+	[date] [varchar] (100) NULL ,
+	[index_size] [varchar] (100) NULL ,
+	[unused] [varchar] (100) NULL ,
+	[rd] [datetime] NULL CONSTRAINT [DF__sjr_TableSiz__rd__1229A90A] DEFAULT (getdate())
+) ON [PRIMARY]
+GO
+
+---------------------------------------------------------------------
+
+CREATE TABLE [GameType] (
+	[GameTypeID] [int] NOT NULL ,
+	[Name] [varchar] (256) NULL ,
+	CONSTRAINT [GameType_PK] PRIMARY KEY  CLUSTERED 
+	(
+		[GameTypeID]
+	)  ON [PRIMARY] 
+) ON [PRIMARY]
+GO
+
+INSERT INTO GameType(GameTypeID, Name) VALUES(0,'Solo Death Match')
+INSERT INTO GameType(GameTypeID, Name) VALUES(1,'Team Death Match')
+INSERT INTO GameType(GameTypeID, Name) VALUES(2,'Solo Gladiator')
+INSERT INTO GameType(GameTypeID, Name) VALUES(3,'Team Gladiator')
+INSERT INTO GameType(GameTypeID, Name) VALUES(4,'Assassinate')
+INSERT INTO GameType(GameTypeID, Name) VALUES(5,'Training')
+INSERT INTO GameType(GametypeID, Name) VALUES(6, 'Quest servival')
+INSERT INTO GameType(GameTypeID, Name) VALUES(7, 'Quest' )
+INSERT INTO GameType(GameTypeID, Name) VALUES(8, 'Berserker')
+INSERT INTO GameType(GameTypeID, Name) VALUES(9, 'DeathMatch_Team2')
+INSERT INTO GameType(GameTypeID, Name) VALUES(10, 'Duel')
+GO
+
+---------------------------------------------------------------------
+
+
+CREATE TABLE CustomIP(
+ IPFrom BIGINT NOT NULL UNIQUE
+, IPTo BIGINT NOT NULL UNIQUE
+, IsBlock tinyint NOT NULL
+, CountryCode3 char(3) NOT NULL 
+, Comment varchar(128)
+, RegDate smalldatetime )
+
+CREATE NONCLUSTERED INDEX IX_CustomIP_IPFrom
+ON CustomIP( IPFrom )
+
+CREATE NONCLUSTERED INDEX IX_CustomIP_IPTo
+ON CustomIP( IPTo )
+
+CREATE NONCLUSTERED INDEX IX_CustomIP_CountryCode3
+ON CustomIP( CountryCode3 )
+
+-- CREATE NONCLUSTERED INDEX IX_CustomIP_RegDate
+-- ON CustomIP( RegDate )
+
+GO
+-----------------------------------------------------------------------
+
+CREATE TABLE [IPtoCountry] (
+	[IPFrom] [numeric](18, 0) NOT NULL ,
+	[IPTo] [numeric](18, 0) NOT NULL ,
+	[CountryCode2] [char] (2) NOT NULL ,
+	[CountryCode3] [char] (3) NOT NULL ,
+	[CountryName] [varchar] (50) NOT NULL ,
+	CONSTRAINT [PK_IPtoCountry_IPRange] PRIMARY KEY  CLUSTERED 
+	(
+		[IPFrom],
+		[IPTo]
+	)  ON [PRIMARY] 
+) ON [PRIMARY]
+GO
+
+-----------------------------------------------------------------------
+
+CREATE TABLE BlockCountryCode(
+ CountryCode3 char(3) PRIMARY KEY CLUSTERED
+, RoutingURL varchar(64)
+, IsBlock tinyint DEFAULT 0 )
+
+CREATE NONCLUSTERED INDEX IX_BlockCountryCode_IsBlock
+ON BlockCountryCode( IsBlock )
+GO
+
+INSERT INTO BlockCountryCode( CountryCode3, RoutingURL, IsBlock )
+SELECT CountryCode3, '' AS RoutingURL, 0 AS IsBlock
+FROM IPtoCountry(NOLOCK)
+GROUP BY CountryCode3
+ORDER BY CountryCode3
+GO
+
+--------------------------------------------------------------------------------------
+
+
+CREATE TABLE LocatorStatus(
+ LocatorID int PRIMARY KEY CLUSTERED
+, IP varchar(15) UNIQUE NOT NULL
+, Port int NOT NULL
+, RecvCount int
+, SendCount int
+, BlockCount int
+, DuplicatedCount int
+, UpdateElapsedTime int NOT NULL
+, LastUpdatedTime datetime)
+GO
+
+CREATE NONCLUSTERED INDEX IX_LocatorStatus_IP
+ON LocatorStatus( IP )
+GO
+
+-----------------------------------------------------------------
+
+CREATE TABLE LocatorCountryStatistics (
+ LocatorID int
+, CountryCode3 char(3)
+, Count int
+, RegDate smalldatetime )
+GO
+
+CREATE NONCLUSTERED INDEX IX_LocatorCountryStatistics_CountryCode3
+ON LocatorCountryStatistics( CountryCode3 )
+
+CREATE NONCLUSTERED INDEX IX_LocatorCountryStatistics_RegDate
+ON LocatorCountryStatistics( RegDate )
+GO
+
+------------------------------------------------------------------------------------------------
+-- create on log db.
+CREATE TABLE LocatorLog(
+ LocatorID int
+, CountryCode3 varchar(3)
+, Count int
+, RegDate smalldatetime )
+
+CREATE NONCLUSTERED INDEX IX_LocatorLog_CountryCode3
+ON LocatorLog( CountryCode3 )
+
+CREATE NONCLUSTERED INDEX IX_LocatorLog_RegDate
+ON LocatorLog( RegDate )
+GO
+
+------------------------------------------------------------------------------------------------
+
+
+CREATE TABLE CountryCode(
+ CountryCode3 char(3) PRIMARY KEY CLUSTERED
+, CountryName varchar(50) )
+
+INSERT INTO CountryCode( CountryCode3, CountryName )
+SELECT CountryCode3, CountryName
+FROM IPtoCountry(NOLOCK)
+GROUP BY CountryCode3, CountryName
+ORDER BY CountryCode3
+GO
+
+------------------------------------------------------------------------------------------------
+
+CREATE TABLE Event( 
+ AID int NOT NULL
+, CID int NOT NULL
+, RegDate smalldatetime NOT NULL
+, Checked bit
+, EventName varchar(24) 
+, SubDescription varchar(128) )
+
+CREATE NONCLUSTERED INDEX IX_Event_AID
+ON Event( AID )
+
+CREATE NONCLUSTERED INDEX IX_Event_CID
+ON Event( CID )
+
+CREATE NONCLUSTERED INDEX IX_Event_RegDate
+ON Event( RegDate )
+GO
+
+----------------------------------------------------------------------------------------------
+
+
+CREATE TABLE RentType(
+ TypeID int PRIMARY KEY
+, Description varchar(256) )
+
+INSERT INTO RentType( TypeID, Description )
+VALUES (0, 'unlimited')
+
+INSERT INTO RentType( TypeID, Description )
+VALUES (1, 'rent')
+
+INSERT INTO RentType( TypeID, Description )
+VALUES (2, 'rent and unlimited')
+GO
+
+----------------------------------------------------------------------------------------------------
+
+CREATE TABLE ItemSlotType(
+ SlotType int PRIMARY KEY CLUSTERED
+, Description varchar(24)
+, Category varchar(24) )
+
+INSERT INTO ItemSlotType( SlotType, Description, Category )
+VALUES (0, 'No restriction', 'NO' )
+INSERT INTO ItemSlotType( SlotType, Description, Category )
+VALUES (1, 'Melee', 'Weapon' )
+INSERT INTO ItemSlotType( SlotType, Description, Category )
+VALUES (2, 'Range', 'Weapon' )
+INSERT INTO ItemSlotType( SlotType, Description, Category )
+VALUES (3, 'Item', 'Special item' )
+INSERT INTO ItemSlotType( SlotType, Description, Category )
+VALUES (4, 'Head', 'Defence' )
+INSERT INTO ItemSlotType( SlotType, Description, Category )
+VALUES (5, 'Chest', 'Defence' )
+INSERT INTO ItemSlotType( SlotType, Description, Category )
+VALUES (6, 'Hands', 'Defence' )
+INSERT INTO ItemSlotType( SlotType, Description, Category )
+VALUES (7, 'Legs', 'Defence' )
+INSERT INTO ItemSlotType( SlotType, Description, Category )
+VALUES (8, 'Feet', 'Defence' )
+INSERT INTO ItemSlotType( SlotType, Description, Category )
+VALUES (9, 'Finger', 'Special item' )
+INSERT INTO ItemSlotType( SlotType, Description, Category )
+VALUES (10, 'SetItem', 'SetItem' )
+
+GO
+
+-----------------------------------------------------------------------------------------------------
+
+
+CREATE TABLE RentPeriodDay( 
+ Day int PRIMARY KEY CLUSTERED NOT NULL
+, Hour int NOT NULL UNIQUE );
+GO
+
+INSERT INTO RentPeriodDay( Day, Hour )
+VALUES (0, 0)
+INSERT INTO RentPeriodDay( Day, Hour )
+VALUES (7, 168)
+INSERT INTO RentPeriodDay( Day, Hour )
+VALUES (15, 360)
+INSERT INTO RentPeriodDay( Day, Hour )
+VALUES (30, 720)
+INSERT INTO RentPeriodDay( Day, Hour )
+VALUES (90, 2160)
+INSERT INTO RentPeriodDay( Day, Hour )
+VALUES (180, 4320)
+INSERT INTO RentPeriodDay( Day, Hour )
+VALUES (365, 8760)
+GO
+
+CREATE PROC spAdmWebGetRentPeriodDayList
+AS
+ SET NOCOUNT ON
+ SELECT  Day FROM RentPeriodDay(NOLOCK) ORDER BY Day
+GO
+
+--------------------------------------------------------------------------------------------------------
+
+CREATE TABLE CashShopNewItemCategory(
+ CategoryID int PRIMARY KEY CLUSTERED
+, Description varchar(12) NOT NULL UNIQUE )
+
+INSERT INTO CashShopNewItemCategory(CategoryID, Description)
+VALUES (1, 'Range')
+
+INSERT INTO CashShopNewItemCategory(CategoryID, Description)
+VALUES (2, 'Melee')
+
+INSERT INTO CashShopNewItemCategory(CategoryID, Description)
+VALUES (3, 'SPItem')
+
+INSERT INTO CashShopNewItemCategory(CategoryID, Description)
+VALUES (4, 'Set')
+
+INSERT INTO CashShopNewItemCategory(CategoryID, Description)
+VALUES (5, 'Armor')
+
+GO
+
+---------------------------------------------------------------------------------------------------------
+
+CREATE TABLE [ClanAdsBoard] (
+	[Seq] [int] IDENTITY (1, 1) NOT NULL ,
+	[UserID] [varchar] (20) COLLATE Korean_Wansung_CI_AS NOT NULL ,
+	[Subject] [varchar] (50) COLLATE Korean_Wansung_CI_AS NOT NULL ,
+	[RegDate] [smalldatetime] NOT NULL ,
+	[ReadCount] [int] NOT NULL CONSTRAINT [DF__ClanAdsBo__ReadC__7A721B0A] DEFAULT (0),
+	[Recommend] [int] NULL CONSTRAINT [DF__ClanAdsBo__Recom__7B663F43] DEFAULT (0),
+	[Content] [varchar] (2000) COLLATE Korean_Wansung_CI_AS NOT NULL ,
+	[FileName] [varchar] (128) COLLATE Korean_Wansung_CI_AS NULL ,
+	[Link] [varchar] (255) COLLATE Korean_Wansung_CI_AS NULL ,
+	[HTML] [smallint] NOT NULL CONSTRAINT [DF__ClanAdsBoa__HTML__7C5A637C] DEFAULT (0),
+	[CommentCount] [int] NOT NULL CONSTRAINT [DF__ClanAdsBo__Comme__7D4E87B5] DEFAULT (0),
+	[GR_ID] [int] NOT NULL CONSTRAINT [DF__ClanAdsBo__GR_ID__7E42ABEE] DEFAULT (0),
+	[GR_Depth] [int] NOT NULL CONSTRAINT [DF__ClanAdsBo__GR_De__7F36D027] DEFAULT (0),
+	[GR_Pos] [int] NOT NULL CONSTRAINT [DF__ClanAdsBo__GR_Po__002AF460] DEFAULT (0),
+	[Thread] [int] NOT NULL CONSTRAINT [DF__ClanAdsBo__Threa__011F1899] DEFAULT (0),
+	 PRIMARY KEY  CLUSTERED 
+	(
+		[Seq]
+	)  ON [PRIMARY] 
+) ON [PRIMARY]
+GO
+
+
+CREATE NONCLUSTERED INDEX IX_ClanAdsBoard_GR_Depth
+ON ClanAdsBoard(GR_Depth)
+
+CREATE NONCLUSTERED INDEX IX_ClanAdsBoard_GR_ID
+ON ClanAdsBoard(GR_ID)
+
+CREATE NONCLUSTERED INDEX IX_ClanAdsBoard_GR_Pos
+ON ClanAdsBoard(GR_Pos)
+
+CREATE NONCLUSTERED INDEX IX_ClanAdsBoard_Subject
+ON ClanAdsBoard(Subject)
+
+CREATE NONCLUSTERED INDEX IX_ClanAdsBoard_Thread
+ON ClanAdsBoard(Thread)
+
+CREATE NONCLUSTERED INDEX IX_ClanAdsBoard_UserID
+ON ClanAdsBoard(UserID)
+
+GO
+
+-----------------------------------------------------------
+
+create table AccountPenaltyLog(
+ PenaltyLocdID int identity primary key
+, AID int
+, UGradeID int
+, DayLeft int
+, RegDate smalldatetime
+, GMID varchar(20))
+
+create nonclustered index IX_AccountPenaltyLog_AID
+on AccountPenaltyLog(AID)
+
+go
+
+---------------------------------------------------------------
+
+create table ClanMemberGrade(
+ GradeID int primary key clustered
+, Grade varchar(24) )
+
+insert into ClanMemberGrade(gradeid, grade)
+values( 0, 'None' )
+
+insert into ClanMemberGrade(gradeid, grade)
+values( 1, 'Master' )
+
+insert into ClanMemberGrade(gradeid, grade)
+values( 2, 'Admin' )
+
+insert into ClanMemberGrade(gradeid, grade)
+values( 9, 'Member' )
+
+---------------------------------------------------------------
+
+create table Level(
+ Level smallint primary key clustered
+, MinXP int)
+go
+
+insert into level(level, minxp) values(1, 0)
+insert into level(level, minxp) values(2,200)
+insert into level(level, minxp) values(3,1000)
+insert into level(level, minxp) values(4,2800)
+insert into level(level, minxp) values(5,6000)
+insert into level(level, minxp) values(6,11000)
+insert into level(level, minxp) values(7,18200)
+insert into level(level, minxp) values(8,28000)
+insert into level(level, minxp) values(9,40800)
+insert into level(level, minxp) values(10,57000)
+insert into level(level, minxp) values(11,77000)
+insert into level(level, minxp) values(12,101200)
+insert into level(level, minxp) values(13,130000)
+insert into level(level, minxp) values(14,163800)
+insert into level(level, minxp) values(15,203000)
+insert into level(level, minxp) values(16,248000)
+insert into level(level, minxp) values(17,299200)
+insert into level(level, minxp) values(18,357000)
+insert into level(level, minxp) values(19,421800)
+insert into level(level, minxp) values(20,494000)
+insert into level(level, minxp) values(21,574000)
+insert into level(level, minxp) values(22,671020)
+insert into level(level, minxp) values(23,777500)
+insert into level(level, minxp) values(24,893880)
+insert into level(level, minxp) values(25,1020600)
+insert into level(level, minxp) values(26,1158100)
+insert into level(level, minxp) values(27,1306820)
+insert into level(level, minxp) values(28,1467200)
+insert into level(level, minxp) values(29,1639680)
+insert into level(level, minxp) values(30,1824700)
+insert into level(level, minxp) values(31,2022700)
+insert into level(level, minxp) values(32,2253340)
+insert into level(level, minxp) values(33,2499100)
+insert into level(level, minxp) values(34,2760460)
+insert into level(level, minxp) values(35,3037900)
+insert into level(level, minxp) values(36,3331900)
+insert into level(level, minxp) values(37,3642940)
+insert into level(level, minxp) values(38,3971500)
+insert into level(level, minxp) values(39,4318060)
+insert into level(level, minxp) values(40,4683100)
+insert into level(level, minxp) values(41,5067100)
+insert into level(level, minxp) values(42,5537780)
+insert into level(level, minxp) values(43,6031700)
+insert into level(level, minxp) values(44,6549420)
+insert into level(level, minxp) values(45,7091500)
+insert into level(level, minxp) values(46,7658500)
+insert into level(level, minxp) values(47,8335620)
+insert into level(level, minxp) values(48,9042500)
+insert into level(level, minxp) values(49,9779780)
+insert into level(level, minxp) values(50,10548100)
+insert into level(level, minxp) values(51,11348100)
+insert into level(level, minxp) values(52,12284460)
+insert into level(level, minxp) values(53,13257900)
+insert into level(level, minxp) values(54,14269140)
+insert into level(level, minxp) values(55,15318900)
+insert into level(level, minxp) values(56,16407900)
+insert into level(level, minxp) values(57,17662300)
+insert into level(level, minxp) values(58,18961900)
+insert into level(level, minxp) values(59,20307500)
+insert into level(level, minxp) values(60,21699900)
+insert into level(level, minxp) values(61,23139900)
+insert into level(level, minxp) values(62,26116700)
+insert into level(level, minxp) values(63,29191900)
+insert into level(level, minxp) values(64,32367100)
+insert into level(level, minxp) values(65,35643900)
+insert into level(level, minxp) values(66,39023900)
+insert into level(level, minxp) values(67,45993500)
+insert into level(level, minxp) values(68,53175900)
+insert into level(level, minxp) values(69,60574300)
+insert into level(level, minxp) values(70,68191900)
+insert into level(level, minxp) values(71,76031900)
+insert into level(level, minxp) values(72,88130300)
+insert into level(level, minxp) values(73,100571900)
+insert into level(level, minxp) values(74,113361500)
+insert into level(level, minxp) values(75,126503900)
+insert into level(level, minxp) values(76,140003900)
+insert into level(level, minxp) values(77,158487100)
+insert into level(level, minxp) values(78,177459900)
+insert into level(level, minxp) values(79,196928700)
+insert into level(level, minxp) values(80,216899900)
+insert into level(level, minxp) values(81,237379900)
+insert into level(level, minxp) values(82,263623900)
+insert into level(level, minxp) values(83,290519900)
+insert into level(level, minxp) values(84,318075900)
+insert into level(level, minxp) values(85,346299900)
+insert into level(level, minxp) values(86,375199900)
+insert into level(level, minxp) values(87,404783900)
+insert into level(level, minxp) values(88,435059900)
+insert into level(level, minxp) values(89,466035900)
+insert into level(level, minxp) values(90,497719900)
+insert into level(level, minxp) values(91,530119900)
+insert into level(level, minxp) values(92,596367900)
+insert into level(level, minxp) values(93,664079900)
+insert into level(level, minxp) values(94,733271900)
+insert into level(level, minxp) values(95,803959900)
+insert into level(level, minxp) values(96,876159900)
+insert into level(level, minxp) values(97,949887900)
+insert into level(level, minxp) values(98,1025159900)
+insert into level(level, minxp) values(99,1101991900)
+go
+
+
+create nonclustered index IX_Level_MinXP
+on Level(MinXP)
+go
+
+
+---------------------------------------------------------------------	

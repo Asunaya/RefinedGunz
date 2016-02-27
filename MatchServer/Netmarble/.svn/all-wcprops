@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/Gunz/!svn/ver/7495/Develop/MatchServer/Netmarble
+END
+libcomservice2.dll
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/Gunz/!svn/ver/4866/Develop/MatchServer/Netmarble/libcomservice2.dll
+END
+CPSSOLib.lib
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/Gunz/!svn/ver/7495/Develop/MatchServer/Netmarble/CPSSOLib.lib
+END
+CPSSOLib.h
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/Gunz/!svn/ver/7495/Develop/MatchServer/Netmarble/CPSSOLib.h
+END

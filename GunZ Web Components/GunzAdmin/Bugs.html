@@ -1,0 +1,50 @@
+<HTML>
+<HEAD>
+<LINK REL='StyleSheet' HREF='style.css'>
+</HEAD>
+<BODY>
+<?php
+
+	$REMOTE_DIR = sprintf("incoming/gunzlog/");
+
+	$FTP_USER = "ftp";
+	$fTP_PASS = "ftp@";
+	$FTP_SERVER = "www.battlearena.com";
+
+	$ftp_conn = ftp_connect($FTP_SERVER, 21);
+	if (!$ftp_conn) { die("Cannot connect to $FTP_SERVER"); }
+
+	$LOGIN = ftp_login($ftp_conn, $FTP_USER, $FTP_PASS);
+	if (!$LOGIN) { die ("Cannot login to $FTP_SERVER"); }
+
+
+	if (!ftp_chdir($ftp_conn, $REMOTE_DIR)) { die("Cannot change directory"); }
+
+
+	$f_lists = ftp_nlist($ftp_conn, ".");
+
+	sort($f_lists);
+
+	echo ("<TABLE border=0 cellspacing=1 cellpadding=3>\n");
+
+	$cnt = 0;
+	foreach($f_lists as $filename)
+	{
+		$cnt++;
+		echo("<TR bgcolor=#F0F0F0><TD>$cnt</TD><TD><A href='ftp://acesaga.co.kr/incoming/gunzlog/$filename' target='_BLANK'>$filename</A></TD></TR>\n");
+	}
+
+	echo("</TABLE>\n");
+
+
+//	var_dump($f_lists);
+
+
+	ftp_quit($ftp_conn);
+
+?>
+
+
+<? include ("sign.inc"); ?>
+</BODY>
+</HTML>

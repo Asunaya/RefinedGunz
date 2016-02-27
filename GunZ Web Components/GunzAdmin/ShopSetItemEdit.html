@@ -1,0 +1,94 @@
+<?
+	require_once("core.php");
+	check_session();
+?>
+<?php
+
+include ("dbconn.inc"); 
+
+//// Declare Functions ////////////////////////////////////////////////////////
+function GetBackMenu()
+{
+	return("[<a href='#' OnClick='history.back();'>뒤로</a>]");
+}
+
+function GetSetItemShopMenu()
+{
+	return("[<a href='ShopSetItem.html'>셋트아이템관리</a>]");
+}
+
+function SetItemEdit()
+{
+	global $db;
+	
+	//// Get Post Values //////////////////////////////////////////////////////
+	$CSSID = $_POST['CSSID'];
+	$SEX = $_POST['itemsex'];
+	$LEVEL = $_POST['itemlevel'];
+	$OPENED = $_POST['itemopened'];
+	$NEWORDER = $_POST['itemneworder'];
+	$PRICE = $_POST['itemprice'];
+	$ICON = $_POST['itemicon'];
+	
+	//// Examine Registered  ...../////////////////////////////////////////////
+	$query_shop = "SELECT * FROM CashSetShop WHERE CSSID = $CSSID";
+				
+	$result = $db->query($query_shop);
+	$row = $db->fetch();
+	if ($row <= 0) 
+	{
+		$BackMenu = GetBackMenu();
+		echo("
+			<CENTER>
+				<B>등록되지 않은 셋트상품입니다. : '(CSSID=$CSSID)'</B> <BR><BR>
+				$BackMenu
+			</CENTER>			
+		");
+		return;
+	}
+	
+	//// Update SetItemShop ////////////////////////////////////////////////
+	echo("
+		<CENTER>
+		<B>셋트아이템을 수정합니다. (CSSID=$CSSID, Sex=$SEX, Level=$LEVEL, Opened=$OPENED, NewOrder=$NEWORDER, Price=$PRICE, Icon=$ICON)</B>
+		</CENTER>
+		<BR><BR>
+	");
+	
+	$query_edit = "
+		UPDATE CashSetShop 
+		SET ResSex=$SEX, ResLevel=$LEVEL, 
+		Opened=$OPENED, NewItemOrder=$NEWORDER, CashPrice=$PRICE,
+		WebImgName='$ICON', RegDate=GETDATE() 
+		WHERE CSSID=$CSSID
+	";
+	$result = $db->query($query_edit);
+	if ($result == FALSE) {
+		$BackMenu = GetBackMenu();
+		echo("
+			<CENTER>
+				<B>셋트아이템 수정에 실패하였습니다.</B> <BR><BR>
+				$BackMenu
+			</CENTER>
+			<BR><BR>
+		");
+	} else {
+		$SetItemShopMenu = GetSetItemShopMenu();
+		echo("
+			<CENTER>
+				<B>셋트아이템 수정에 성공하였습니다.</B> <BR><BR>
+				$SetItemShopMenu
+			</CENTER>
+			<BR><BR>
+		");
+	}
+}
+
+
+//// Main /////////////////////////////////////////////////////////////////////
+SetItemEdit();
+
+?>
+
+<? $db->close(); ?>
+<? include ("sign.inc"); ?>

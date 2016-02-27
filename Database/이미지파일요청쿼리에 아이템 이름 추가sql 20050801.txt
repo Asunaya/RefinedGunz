@@ -1,0 +1,46 @@
+IF OBJECT_ID('spWebGetCashItemImageFile') IS NOT NULL
+BEGIN
+	DROP PROC spWebGetCashItemImageFile
+END
+GO
+
+-- 캐쉬아이템 이미지 파일 이름과 아이템 이름을 가져옴.
+CREATE PROC spWebGetCashItemImageFile
+	@CSID int
+,	@RetImageFileName varchar(64) OUT
+,	@RetItemName varchar(256) OUT
+AS
+BEGIN
+	SELECT @RetImageFileName = cs.WebImgName, @RetItemName = i.Name
+	FROM CashShop cs(NOLOCK), Item i(NOLOCK)
+	WHERE cs.CSID = @CSID AND i.ItemID = cs.ItemID
+
+	RETURN 1
+END
+GO
+
+
+---------------------------------------------------------------------------------------------------
+
+
+IF OBJECT_ID('spWebGetCashSetItemImageFile') IS NOT NULL
+BEGIN
+	DROP PROC spWebGetCashSetItemImageFile
+END
+GO
+
+ -- 캐쉬 세트아이템 이미지파일과 아이템 이름 알아오기.
+CREATE PROC [spWebGetCashSetItemImageFile]
+ 	@CSSID   int  
+, 	@RetImageFileName varchar(64) OUTPUT  
+,	@RetSetItemName varchar(64) OUTPUT
+AS  
+BEGIN
+	SELECT @RetImageFileName = css.WebImgName, @RetSetItemName = css.Name
+	FROM CashSetShop css(NOLOCK)
+	WHERE css.CSSID=@CSSID  
+  
+	RETURN 1  
+END
+GO
+

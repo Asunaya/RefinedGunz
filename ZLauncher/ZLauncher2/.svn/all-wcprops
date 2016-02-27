@@ -1,0 +1,185 @@
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/Gunz/!svn/ver/4866/Develop/ZLauncher/ZLauncher2
+END
+StdAfx.h
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/Gunz/!svn/ver/4866/Develop/ZLauncher/ZLauncher2/StdAfx.h
+END
+NewApp.h
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/Gunz/!svn/ver/4866/Develop/ZLauncher/ZLauncher2/NewApp.h
+END
+Global.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/Gunz/!svn/ver/4866/Develop/ZLauncher/ZLauncher2/Global.cpp
+END
+CSound.h
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/Gunz/!svn/ver/4866/Develop/ZLauncher/ZLauncher2/CSound.h
+END
+explorer.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/Gunz/!svn/ver/4866/Develop/ZLauncher/ZLauncher2/explorer.cpp
+END
+CDDB.h
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/Gunz/!svn/ver/4866/Develop/ZLauncher/ZLauncher2/CDDB.h
+END
+Global.h
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/Gunz/!svn/ver/4866/Develop/ZLauncher/ZLauncher2/Global.h
+END
+NewAppPopupDlg.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/Gunz/!svn/ver/4866/Develop/ZLauncher/ZLauncher2/NewAppPopupDlg.cpp
+END
+explorer.h
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/Gunz/!svn/ver/4866/Develop/ZLauncher/ZLauncher2/explorer.h
+END
+resource.hm
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/Gunz/!svn/ver/4866/Develop/ZLauncher/ZLauncher2/resource.hm
+END
+NewAppPopupDlg.h
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/Gunz/!svn/ver/4866/Develop/ZLauncher/ZLauncher2/NewAppPopupDlg.h
+END
+NewApp.vcproj
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/Gunz/!svn/ver/4866/Develop/ZLauncher/ZLauncher2/NewApp.vcproj
+END
+NewApp.rc
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/Gunz/!svn/ver/4866/Develop/ZLauncher/ZLauncher2/NewApp.rc
+END
+CDDBDialog.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/Gunz/!svn/ver/4866/Develop/ZLauncher/ZLauncher2/CDDBDialog.cpp
+END
+ZUpdate.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/Gunz/!svn/ver/4866/Develop/ZLauncher/ZLauncher2/ZUpdate.cpp
+END
+ZFileTransfer.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/Gunz/!svn/ver/4866/Develop/ZLauncher/ZLauncher2/ZFileTransfer.cpp
+END
+CDDBDialog.h
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/Gunz/!svn/ver/4866/Develop/ZLauncher/ZLauncher2/CDDBDialog.h
+END
+ZUpdate.h
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/Gunz/!svn/ver/4866/Develop/ZLauncher/ZLauncher2/ZUpdate.h
+END
+CDDBAniBmp.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/Gunz/!svn/ver/4866/Develop/ZLauncher/ZLauncher2/CDDBAniBmp.cpp
+END
+ZFileTransfer.h
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/Gunz/!svn/ver/4866/Develop/ZLauncher/ZLauncher2/ZFileTransfer.h
+END
+NewAppMainDlg.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/Gunz/!svn/ver/4866/Develop/ZLauncher/ZLauncher2/NewAppMainDlg.cpp
+END
+CDDBButton.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/Gunz/!svn/ver/4866/Develop/ZLauncher/ZLauncher2/CDDBButton.cpp
+END
+CDDBAniBmp.h
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/Gunz/!svn/ver/4866/Develop/ZLauncher/ZLauncher2/CDDBAniBmp.h
+END
+StdAfx.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/Gunz/!svn/ver/4866/Develop/ZLauncher/ZLauncher2/StdAfx.cpp
+END
+NewApp.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/Gunz/!svn/ver/4866/Develop/ZLauncher/ZLauncher2/NewApp.cpp
+END
+CSound.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/Gunz/!svn/ver/4866/Develop/ZLauncher/ZLauncher2/CSound.cpp
+END
+NewAppMainDlg.h
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/Gunz/!svn/ver/4866/Develop/ZLauncher/ZLauncher2/NewAppMainDlg.h
+END
+CDDB.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/Gunz/!svn/ver/4866/Develop/ZLauncher/ZLauncher2/CDDB.cpp
+END
+resource.h
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/Gunz/!svn/ver/4866/Develop/ZLauncher/ZLauncher2/resource.h
+END
+CDDBButton.h
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/Gunz/!svn/ver/4866/Develop/ZLauncher/ZLauncher2/CDDBButton.h
+END

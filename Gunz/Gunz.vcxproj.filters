@@ -1,0 +1,1454 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Interface">
+      <UniqueIdentifier>{86a1ff04-41fa-4cd2-a4dc-a4f62bdf1e0d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Interface\Game">
+      <UniqueIdentifier>{e5729b40-2d8c-4913-bc38-1463e83bdd53}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Interface\Mint">
+      <UniqueIdentifier>{5e6c83cf-bab0-42dd-99b7-2076e6ab0221}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Interface\Base">
+      <UniqueIdentifier>{5f0fa485-4b20-484d-88e6-a0b4baf850bb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Interface\Quest">
+      <UniqueIdentifier>{75205ffc-4717-4e3c-a03d-a08d29112f03}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Effect">
+      <UniqueIdentifier>{4fc7ba59-220b-49cb-a8cb-97d6d4734306}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Character">
+      <UniqueIdentifier>{624e154e-9412-4e2b-9185-e866dab1e9ff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Character\Modules">
+      <UniqueIdentifier>{845822e0-0775-4fb5-9601-37b25feccad6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Character\AI">
+      <UniqueIdentifier>{1ac25360-1018-4c00-8776-21ff924234a3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Character\AI\Tasks">
+      <UniqueIdentifier>{8c6dd694-ace6-4057-b62c-113a31ed9935}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Character\AI\Behavior">
+      <UniqueIdentifier>{f5bfafd9-6e1c-4f0b-ae84-f2727b8639a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sound">
+      <UniqueIdentifier>{c4086809-7e40-441d-bbcf-bce0750bdd49}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Physics">
+      <UniqueIdentifier>{f55c06cb-83ac-4558-95b4-cf9393fde8a7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Interface\Game\Rule">
+      <UniqueIdentifier>{7fae9326-0408-40e8-9392-903fd34a1f22}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ZWeapon">
+      <UniqueIdentifier>{f4a43aa0-5aaf-448d-b712-c6fc013883d2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Test">
+      <UniqueIdentifier>{14f258ad-a8b3-4464-9f41-81c8e0fdeacd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="etc">
+      <UniqueIdentifier>{1eae45e3-47e7-4f3b-b285-2af3c2d51e87}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="etc\Shader">
+      <UniqueIdentifier>{7439f5ae-4f04-4b0e-b4fa-c4209d9363ba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources">
+      <UniqueIdentifier>{eba5943d-39b3-475c-a4c8-74d987a10b93}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="xml">
+      <UniqueIdentifier>{84a388ec-0d72-4733-87ec-a596ee36ee96}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Network">
+      <UniqueIdentifier>{cb266767-e37a-4aff-93cf-7082643314d2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Network\UPNP">
+      <UniqueIdentifier>{d95fdb27-a454-479b-b52f-9f76f7fe2bb9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Locale">
+      <UniqueIdentifier>{1010b3bb-7217-47a1-ae62-f6a3607fae48}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Locale\Auth">
+      <UniqueIdentifier>{6132884a-c64a-43b2-a154-f467817ca957}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="extern">
+      <UniqueIdentifier>{5df0c933-d30d-4515-9ae7-4c93cbe112da}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="extern\Netmarble">
+      <UniqueIdentifier>{5b82434c-a146-401d-898c-66302dff8fac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="extern\NetmarbleJP">
+      <UniqueIdentifier>{12f73a53-3769-48eb-ac42-38c1eac9fa94}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="extern\lib">
+      <UniqueIdentifier>{f8419ac7-d788-4758-8eea-afd25f5d8209}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="StringRes">
+      <UniqueIdentifier>{4bf0a98d-9848-412f-87bd-b45471e3b2bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="XTrap">
+      <UniqueIdentifier>{ab55048e-7eb3-4f19-90d6-83e4e32b8949}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HShield">
+      <UniqueIdentifier>{ecf1dcb1-5f10-4800-9748-c0cdc27c026c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="RGunz">
+      <UniqueIdentifier>{b577666d-eb78-4eeb-b7e5-cebd06cc7328}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ZActionDef.h">
+      <Filter>Interface\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="ZCanvas.h">
+      <Filter>Interface\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="ZCombatChat.h">
+      <Filter>Interface\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="ZCombatInterface.h">
+      <Filter>Interface\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="ZCombatQuestScreen.h">
+      <Filter>Interface\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="ZCrossHair.h">
+      <Filter>Interface\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="ZDirectInput.h">
+      <Filter>Interface\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="ZGameInput.h">
+      <Filter>Interface\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="ZInput.h">
+      <Filter>Interface\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="ZMiniMap.h">
+      <Filter>Interface\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="ZObserver.h">
+      <Filter>Interface\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="ZRadar.h">
+      <Filter>Interface\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="ZVoteInterface.h">
+      <Filter>Interface\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="ZWeaponScreenEffect.h">
+      <Filter>Interface\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="MCommandLogFrame.h">
+      <Filter>Interface\Mint</Filter>
+    </ClInclude>
+    <ClInclude Include="Mint4Gunz.h">
+      <Filter>Interface\Mint</Filter>
+    </ClInclude>
+    <ClInclude Include="Mint4R2.h">
+      <Filter>Interface\Mint</Filter>
+    </ClInclude>
+    <ClInclude Include="ZActionKey.h">
+      <Filter>Interface\Mint</Filter>
+    </ClInclude>
+    <ClInclude Include="ZBmNumLabel.h">
+      <Filter>Interface\Mint</Filter>
+    </ClInclude>
+    <ClInclude Include="ZButton.h">
+      <Filter>Interface\Mint</Filter>
+    </ClInclude>
+    <ClInclude Include="ZChannelListItem.h">
+      <Filter>Interface\Mint</Filter>
+    </ClInclude>
+    <ClInclude Include="ZCharacterSelectView.h">
+      <Filter>Interface\Mint</Filter>
+    </ClInclude>
+    <ClInclude Include="ZCharacterView.h">
+      <Filter>Interface\Mint</Filter>
+    </ClInclude>
+    <ClInclude Include="ZCharacterViewList.h">
+      <Filter>Interface\Mint</Filter>
+    </ClInclude>
+    <ClInclude Include="ZClanListBox.h">
+      <Filter>Interface\Mint</Filter>
+    </ClInclude>
+    <ClInclude Include="ZCombatMenu.h">
+      <Filter>Interface\Mint</Filter>
+    </ClInclude>
+    <ClInclude Include="ZEquipmentListBox.h">
+      <Filter>Interface\Mint</Filter>
+    </ClInclude>
+    <ClInclude Include="ZFrame.h">
+      <Filter>Interface\Mint</Filter>
+    </ClInclude>
+    <ClInclude Include="ZIDLResource.h">
+      <Filter>Interface\Mint</Filter>
+    </ClInclude>
+    <ClInclude Include="ZItemMenu.h">
+      <Filter>Interface\Mint</Filter>
+    </ClInclude>
+    <ClInclude Include="ZItemSlotView.h">
+      <Filter>Interface\Mint</Filter>
+    </ClInclude>
+    <ClInclude Include="ZMapListBox.h">
+      <Filter>Interface\Mint</Filter>
+    </ClInclude>
+    <ClInclude Include="ZMeshView.h">
+      <Filter>Interface\Mint</Filter>
+    </ClInclude>
+    <ClInclude Include="ZMeshViewList.h">
+      <Filter>Interface\Mint</Filter>
+    </ClInclude>
+    <ClInclude Include="ZMsgBox.h">
+      <Filter>Interface\Mint</Filter>
+    </ClInclude>
+    <ClInclude Include="ZPlayerListBox.h">
+      <Filter>Interface\Mint</Filter>
+    </ClInclude>
+    <ClInclude Include="ZPlayerMenu.h">
+      <Filter>Interface\Mint</Filter>
+    </ClInclude>
+    <ClInclude Include="ZPlayerSelectListBox.h">
+      <Filter>Interface\Mint</Filter>
+    </ClInclude>
+    <ClInclude Include="ZRoomListBox.h">
+      <Filter>Interface\Mint</Filter>
+    </ClInclude>
+    <ClInclude Include="ZScoreListBox.h">
+      <Filter>Interface\Mint</Filter>
+    </ClInclude>
+    <ClInclude Include="ZServerView.h">
+      <Filter>Interface\Mint</Filter>
+    </ClInclude>
+    <ClInclude Include="ZStageInfoBox.h">
+      <Filter>Interface\Mint</Filter>
+    </ClInclude>
+    <ClInclude Include="ZToolTip.h">
+      <Filter>Interface\Mint</Filter>
+    </ClInclude>
+    <ClInclude Include="resource1.h">
+      <Filter>Interface\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="ZChat.h">
+      <Filter>Interface\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="ZChat_CmdID.h">
+      <Filter>Interface\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="ZChatCmd.h">
+      <Filter>Interface\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="ZColorTable.h">
+      <Filter>Interface\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="ZConsole.h">
+      <Filter>Interface\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="ZCountDown.h">
+      <Filter>Interface\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="ZEmblemInterface.h">
+      <Filter>Interface\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="ZFile.h">
+      <Filter>Interface\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="ZGameInterface.h">
+      <Filter>Interface\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="ZInitialLoading.h">
+      <Filter>Interface\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="ZInterface.h">
+      <Filter>Interface\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="ZInterfaceBackground.h">
+      <Filter>Interface\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="ZInterfaceItem.h">
+      <Filter>Interface\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="ZInterfaceListener.h">
+      <Filter>Interface\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="ZLoading.h">
+      <Filter>Interface\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="ZMonsterBookInterface.h">
+      <Filter>Interface\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="ZMyInfo.h">
+      <Filter>Interface\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="ZMyItemList.h">
+      <Filter>Interface\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="ZNetRepository.h">
+      <Filter>Interface\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="ZOptionInterface.h">
+      <Filter>Interface\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="ZPlayerList.h">
+      <Filter>Interface\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="ZReportAbuse.h">
+      <Filter>Interface\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="ZScreenDebugger.h">
+      <Filter>Interface\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="ZShop.h">
+      <Filter>Interface\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="ZStageInterface.h">
+      <Filter>Interface\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="ZStageSetting.h">
+      <Filter>Interface\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="ZQuest.h">
+      <Filter>Interface\Quest</Filter>
+    </ClInclude>
+    <ClInclude Include="ZQuestGameInfo.h">
+      <Filter>Interface\Quest</Filter>
+    </ClInclude>
+    <ClInclude Include="ZQuestMap.h">
+      <Filter>Interface\Quest</Filter>
+    </ClInclude>
+    <ClInclude Include="ZEffectAniMesh.h">
+      <Filter>Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="ZEffectBase.h">
+      <Filter>Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="ZEffectBillboard.h">
+      <Filter>Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="ZEffectBillboardList.h">
+      <Filter>Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="ZEffectBulletMark.h">
+      <Filter>Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="ZEffectBulletMarkList.h">
+      <Filter>Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="ZEffectFlashBang.h">
+      <Filter>Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="ZEffectGunFire.h">
+      <Filter>Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="ZEffectLightFragment.h">
+      <Filter>Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="ZEffectLightFragmentList.h">
+      <Filter>Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="ZEffectLightTracer.h">
+      <Filter>Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="ZEffectManager.h">
+      <Filter>Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="ZEffectMesh.h">
+      <Filter>Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="ZEffectSmoke.h">
+      <Filter>Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="ZEffectStaticMesh.h">
+      <Filter>Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="ZScreenEffectManager.h">
+      <Filter>Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="ZCharacter.h">
+      <Filter>Character</Filter>
+    </ClInclude>
+    <ClInclude Include="ZCharacterItem.h">
+      <Filter>Character</Filter>
+    </ClInclude>
+    <ClInclude Include="ZCharacterManager.h">
+      <Filter>Character</Filter>
+    </ClInclude>
+    <ClInclude Include="ZCharacterObject.h">
+      <Filter>Character</Filter>
+    </ClInclude>
+    <ClInclude Include="ZItem.h">
+      <Filter>Character</Filter>
+    </ClInclude>
+    <ClInclude Include="ZItemDesc.h">
+      <Filter>Character</Filter>
+    </ClInclude>
+    <ClInclude Include="ZMyCharacter.h">
+      <Filter>Character</Filter>
+    </ClInclude>
+    <ClInclude Include="ZNetCharacter.h">
+      <Filter>Character</Filter>
+    </ClInclude>
+    <ClInclude Include="ZObject.h">
+      <Filter>Character</Filter>
+    </ClInclude>
+    <ClInclude Include="ZObjectManager.h">
+      <Filter>Character</Filter>
+    </ClInclude>
+    <ClInclude Include="ZShadow.h">
+      <Filter>Character</Filter>
+    </ClInclude>
+    <ClInclude Include="ZModule.h">
+      <Filter>Character\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="ZModule_ColdDamage.h">
+      <Filter>Character\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="ZModule_FireDamage.h">
+      <Filter>Character\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="ZModule_HPAP.h">
+      <Filter>Character\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="ZModule_LightningDamage.h">
+      <Filter>Character\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="ZModule_Movable.h">
+      <Filter>Character\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="ZModule_PoisonDamage.h">
+      <Filter>Character\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="ZModule_QuestStatus.h">
+      <Filter>Character\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="ZModule_Resistance.h">
+      <Filter>Character\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="ZModule_Skills.h">
+      <Filter>Character\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="ZModuleID.h">
+      <Filter>Character\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="ZSkill.h">
+      <Filter>Character\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="ZActor.h">
+      <Filter>Character\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="ZActorAnimation.h">
+      <Filter>Character\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="ZActorController.h">
+      <Filter>Character\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="ZAI_Base.h">
+      <Filter>Character\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="ZBrain.h">
+      <Filter>Character\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="ZEnemy.h">
+      <Filter>Character\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="ZEnvObject.h">
+      <Filter>Character\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="ZRangeWeaponHitDice.h">
+      <Filter>Character\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="ZStateMachine.h">
+      <Filter>Character\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="ZTask.h">
+      <Filter>Character\AI\Tasks</Filter>
+    </ClInclude>
+    <ClInclude Include="ZTask_AttackMelee.h">
+      <Filter>Character\AI\Tasks</Filter>
+    </ClInclude>
+    <ClInclude Include="ZTask_AttackRange.h">
+      <Filter>Character\AI\Tasks</Filter>
+    </ClInclude>
+    <ClInclude Include="ZTask_Delay.h">
+      <Filter>Character\AI\Tasks</Filter>
+    </ClInclude>
+    <ClInclude Include="ZTask_MoveToPos.h">
+      <Filter>Character\AI\Tasks</Filter>
+    </ClInclude>
+    <ClInclude Include="ZTask_RotateToDir.h">
+      <Filter>Character\AI\Tasks</Filter>
+    </ClInclude>
+    <ClInclude Include="ZTask_Skill.h">
+      <Filter>Character\AI\Tasks</Filter>
+    </ClInclude>
+    <ClInclude Include="ZTaskBase_Attack.h">
+      <Filter>Character\AI\Tasks</Filter>
+    </ClInclude>
+    <ClInclude Include="ZTaskID.h">
+      <Filter>Character\AI\Tasks</Filter>
+    </ClInclude>
+    <ClInclude Include="ZTaskManager.h">
+      <Filter>Character\AI\Tasks</Filter>
+    </ClInclude>
+    <ClInclude Include="ZBehavior.h">
+      <Filter>Character\AI\Behavior</Filter>
+    </ClInclude>
+    <ClInclude Include="ZBehavior_Attack.h">
+      <Filter>Character\AI\Behavior</Filter>
+    </ClInclude>
+    <ClInclude Include="ZBehavior_Idle.h">
+      <Filter>Character\AI\Behavior</Filter>
+    </ClInclude>
+    <ClInclude Include="ZBehavior_Patrol.h">
+      <Filter>Character\AI\Behavior</Filter>
+    </ClInclude>
+    <ClInclude Include="ZBehavior_Script.h">
+      <Filter>Character\AI\Behavior</Filter>
+    </ClInclude>
+    <ClInclude Include="ZActorSound.h">
+      <Filter>Sound</Filter>
+    </ClInclude>
+    <ClInclude Include="ZSoundEngine.h">
+      <Filter>Sound</Filter>
+    </ClInclude>
+    <ClInclude Include="ZSoundFMod.h">
+      <Filter>Sound</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics.h">
+      <Filter>Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="CGLEncription.h">
+      <Filter>Interface\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Config.h">
+      <Filter>Interface\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="main.h">
+      <Filter>Interface\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Interface\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="ZApplication.h">
+      <Filter>Interface\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="ZCamera.h">
+      <Filter>Interface\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="ZChannelRule.h">
+      <Filter>Interface\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="ZClan.h">
+      <Filter>Interface\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="ZConfiguration.h">
+      <Filter>Interface\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="ZFilePath.h">
+      <Filter>Interface\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="ZGame.h">
+      <Filter>Interface\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="ZGameAction.h">
+      <Filter>Interface\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="ZGameConst.h">
+      <Filter>Interface\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="ZGameTimer.h">
+      <Filter>Interface\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="ZGameType.h">
+      <Filter>Interface\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="ZGlobal.h">
+      <Filter>Interface\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="ZHelpScreen.h">
+      <Filter>Interface\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="ZMap.h">
+      <Filter>Interface\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="ZMapDesc.h">
+      <Filter>Interface\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="ZPrerequisites.h">
+      <Filter>Interface\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="ZReplay.h">
+      <Filter>Interface\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="ZTestGame.h">
+      <Filter>Interface\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="ZTimer.h">
+      <Filter>Interface\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="ZUtil.h">
+      <Filter>Interface\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="ZWorld.h">
+      <Filter>Interface\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="ZWorldManager.h">
+      <Filter>Interface\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="ZMatch.h">
+      <Filter>Interface\Game\Rule</Filter>
+    </ClInclude>
+    <ClInclude Include="ZRule.h">
+      <Filter>Interface\Game\Rule</Filter>
+    </ClInclude>
+    <ClInclude Include="ZRuleAssassinate.h">
+      <Filter>Interface\Game\Rule</Filter>
+    </ClInclude>
+    <ClInclude Include="ZRuleBaseQuest.h">
+      <Filter>Interface\Game\Rule</Filter>
+    </ClInclude>
+    <ClInclude Include="ZRuleBerserker.h">
+      <Filter>Interface\Game\Rule</Filter>
+    </ClInclude>
+    <ClInclude Include="ZRuleDeathMatch.h">
+      <Filter>Interface\Game\Rule</Filter>
+    </ClInclude>
+    <ClInclude Include="ZRuleDuel.h">
+      <Filter>Interface\Game\Rule</Filter>
+    </ClInclude>
+    <ClInclude Include="ZRuleGladiator.h">
+      <Filter>Interface\Game\Rule</Filter>
+    </ClInclude>
+    <ClInclude Include="ZRuleQuest.h">
+      <Filter>Interface\Game\Rule</Filter>
+    </ClInclude>
+    <ClInclude Include="ZRuleSurvival.h">
+      <Filter>Interface\Game\Rule</Filter>
+    </ClInclude>
+    <ClInclude Include="ZRuleTraining.h">
+      <Filter>Interface\Game\Rule</Filter>
+    </ClInclude>
+    <ClInclude Include="ZWeapon.h">
+      <Filter>ZWeapon</Filter>
+    </ClInclude>
+    <ClInclude Include="ZWeaponMgr.h">
+      <Filter>ZWeapon</Filter>
+    </ClInclude>
+    <ClInclude Include="ZBirdDummyAI.h">
+      <Filter>Test</Filter>
+    </ClInclude>
+    <ClInclude Include="ZBirdDummyClient.h">
+      <Filter>Test</Filter>
+    </ClInclude>
+    <ClInclude Include="MSysInfo.h">
+      <Filter>etc</Filter>
+    </ClInclude>
+    <ClInclude Include="ZClothEmblem.h">
+      <Filter>etc</Filter>
+    </ClInclude>
+    <ClInclude Include="ZProfiler.h">
+      <Filter>etc</Filter>
+    </ClInclude>
+    <ClInclude Include="ZSkyBox.h">
+      <Filter>etc</Filter>
+    </ClInclude>
+    <ClInclude Include="ZStencilLight.h">
+      <Filter>etc</Filter>
+    </ClInclude>
+    <ClInclude Include="ZWater.h">
+      <Filter>etc</Filter>
+    </ClInclude>
+    <ClInclude Include="ZWorldItem.h">
+      <Filter>etc</Filter>
+    </ClInclude>
+    <ClInclude Include="resource2.h">
+      <Filter>Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="VersionNo.h">
+      <Filter>Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="MEmblemMgr.h">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="ZCommandTable.h">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="ZGameClient.h">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="ZGameTypeList.h">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="ZLocatorList.h">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="ZNetAgreementBuilder.h">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="ZPost.h">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="ZPostLocal.h">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="ZSecurity.h">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="NATUPnP.h">
+      <Filter>Network\UPNP</Filter>
+    </ClInclude>
+    <ClInclude Include="upnp.h">
+      <Filter>Network\UPNP</Filter>
+    </ClInclude>
+    <ClInclude Include="ZBaseAuthInfo.h">
+      <Filter>Locale</Filter>
+    </ClInclude>
+    <ClInclude Include="ZLocale.h">
+      <Filter>Locale</Filter>
+    </ClInclude>
+    <ClInclude Include="ZLocaleDefine.h">
+      <Filter>Locale</Filter>
+    </ClInclude>
+    <ClInclude Include="ZNetmarble.h">
+      <Filter>Locale\Auth</Filter>
+    </ClInclude>
+    <ClInclude Include="ZNetmarbleJP.h">
+      <Filter>Locale\Auth</Filter>
+    </ClInclude>
+    <ClInclude Include="extern\Netmarble\NMCrypt.h">
+      <Filter>extern\Netmarble</Filter>
+    </ClInclude>
+    <ClInclude Include="extern\NetmarbleJP\NMCrypt.h">
+      <Filter>extern\NetmarbleJP</Filter>
+    </ClInclude>
+    <ClInclude Include="ZLanguageConf.h">
+      <Filter>StringRes</Filter>
+    </ClInclude>
+    <ClInclude Include="ZMessages.h">
+      <Filter>StringRes</Filter>
+    </ClInclude>
+    <ClInclude Include="ZStringResManager.h">
+      <Filter>StringRes</Filter>
+    </ClInclude>
+    <ClInclude Include="ZTips.h">
+      <Filter>StringRes</Filter>
+    </ClInclude>
+    <ClInclude Include="XTrap\XTrap.h">
+      <Filter>XTrap</Filter>
+    </ClInclude>
+    <ClInclude Include="HShield\HShield.h">
+      <Filter>HShield</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="FuncList.h">
+      <Filter>RGunz</Filter>
+    </ClInclude>
+    <ClInclude Include="Events.h">
+      <Filter>RGunz</Filter>
+    </ClInclude>
+    <ClInclude Include="Portal.h">
+      <Filter>RGunz</Filter>
+    </ClInclude>
+    <ClInclude Include="Rules.h">
+      <Filter>RGunz</Filter>
+    </ClInclude>
+    <ClInclude Include="NewChat.h">
+      <Filter>RGunz</Filter>
+    </ClInclude>
+    <ClInclude Include="RGMain.h">
+      <Filter>RGunz</Filter>
+    </ClInclude>
+    <ClInclude Include="Hitboxes.h">
+      <Filter>RGunz</Filter>
+    </ClInclude>
+    <ClInclude Include="ReplayControl.h">
+      <Filter>RGunz</Filter>
+    </ClInclude>
+    <ClInclude Include="Draw.h">
+      <Filter>RGunz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\cml\Include\SafeString.h">
+      <Filter>RGunz</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="ZCanvas.cpp">
+      <Filter>Interface\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="ZCombatChat.cpp">
+      <Filter>Interface\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="ZCombatInterface.cpp">
+      <Filter>Interface\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="ZCombatQuestScreen.cpp">
+      <Filter>Interface\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="ZCrossHair.cpp">
+      <Filter>Interface\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="ZDirectInput.cpp">
+      <Filter>Interface\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="ZGameInput.cpp">
+      <Filter>Interface\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="ZGameInput_Debug.cpp">
+      <Filter>Interface\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="ZInput.cpp">
+      <Filter>Interface\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="ZMiniMap.cpp">
+      <Filter>Interface\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="ZObserver.cpp">
+      <Filter>Interface\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="ZRadar.cpp">
+      <Filter>Interface\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="ZVoteInterface.cpp">
+      <Filter>Interface\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="ZWeaponScreenEffect.cpp">
+      <Filter>Interface\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="MCommandLogFrame.cpp">
+      <Filter>Interface\Mint</Filter>
+    </ClCompile>
+    <ClCompile Include="Mint4Gunz.cpp">
+      <Filter>Interface\Mint</Filter>
+    </ClCompile>
+    <ClCompile Include="Mint4R2.cpp">
+      <Filter>Interface\Mint</Filter>
+    </ClCompile>
+    <ClCompile Include="ZActionKey.cpp">
+      <Filter>Interface\Mint</Filter>
+    </ClCompile>
+    <ClCompile Include="ZBmNumLabel.cpp">
+      <Filter>Interface\Mint</Filter>
+    </ClCompile>
+    <ClCompile Include="ZButton.cpp">
+      <Filter>Interface\Mint</Filter>
+    </ClCompile>
+    <ClCompile Include="ZCharacterSelectView.cpp">
+      <Filter>Interface\Mint</Filter>
+    </ClCompile>
+    <ClCompile Include="ZCharacterView.cpp">
+      <Filter>Interface\Mint</Filter>
+    </ClCompile>
+    <ClCompile Include="ZCharacterViewList.cpp">
+      <Filter>Interface\Mint</Filter>
+    </ClCompile>
+    <ClCompile Include="ZClanListBox.cpp">
+      <Filter>Interface\Mint</Filter>
+    </ClCompile>
+    <ClCompile Include="ZCombatMenu.cpp">
+      <Filter>Interface\Mint</Filter>
+    </ClCompile>
+    <ClCompile Include="ZEquipmentListBox.cpp">
+      <Filter>Interface\Mint</Filter>
+    </ClCompile>
+    <ClCompile Include="ZFrame.cpp">
+      <Filter>Interface\Mint</Filter>
+    </ClCompile>
+    <ClCompile Include="ZIDLResource.cpp">
+      <Filter>Interface\Mint</Filter>
+    </ClCompile>
+    <ClCompile Include="ZItemMenu.cpp">
+      <Filter>Interface\Mint</Filter>
+    </ClCompile>
+    <ClCompile Include="ZItemSlotView.cpp">
+      <Filter>Interface\Mint</Filter>
+    </ClCompile>
+    <ClCompile Include="ZMapListBox.cpp">
+      <Filter>Interface\Mint</Filter>
+    </ClCompile>
+    <ClCompile Include="ZMeshView.cpp">
+      <Filter>Interface\Mint</Filter>
+    </ClCompile>
+    <ClCompile Include="ZMeshViewList.cpp">
+      <Filter>Interface\Mint</Filter>
+    </ClCompile>
+    <ClCompile Include="ZMsgBox.cpp">
+      <Filter>Interface\Mint</Filter>
+    </ClCompile>
+    <ClCompile Include="ZPlayerListBox.cpp">
+      <Filter>Interface\Mint</Filter>
+    </ClCompile>
+    <ClCompile Include="ZPlayerMenu.cpp">
+      <Filter>Interface\Mint</Filter>
+    </ClCompile>
+    <ClCompile Include="ZPlayerSelectListBox.cpp">
+      <Filter>Interface\Mint</Filter>
+    </ClCompile>
+    <ClCompile Include="ZRoomListBox.cpp">
+      <Filter>Interface\Mint</Filter>
+    </ClCompile>
+    <ClCompile Include="ZScoreListBox.cpp">
+      <Filter>Interface\Mint</Filter>
+    </ClCompile>
+    <ClCompile Include="ZServerView.cpp">
+      <Filter>Interface\Mint</Filter>
+    </ClCompile>
+    <ClCompile Include="ZStageInfoBox.cpp">
+      <Filter>Interface\Mint</Filter>
+    </ClCompile>
+    <ClCompile Include="ZToolTip.cpp">
+      <Filter>Interface\Mint</Filter>
+    </ClCompile>
+    <ClCompile Include="ZChat.cpp">
+      <Filter>Interface\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="ZChat_Cmds.cpp">
+      <Filter>Interface\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="ZChatCmd.cpp">
+      <Filter>Interface\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="ZConsole.cpp">
+      <Filter>Interface\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="ZCountDown.cpp">
+      <Filter>Interface\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="ZEmblemInterface.cpp">
+      <Filter>Interface\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="ZFile.cpp">
+      <Filter>Interface\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="ZGameInterface.cpp">
+      <Filter>Interface\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="ZGameInterface_OnCommand.cpp">
+      <Filter>Interface\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="ZInitialLoading.cpp">
+      <Filter>Interface\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="ZInterface.cpp">
+      <Filter>Interface\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="ZInterfaceBackground.cpp">
+      <Filter>Interface\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="ZInterfaceListener.cpp">
+      <Filter>Interface\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="ZLoading.cpp">
+      <Filter>Interface\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="ZMonsterBookInterface.cpp">
+      <Filter>Interface\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="ZMyInfo.cpp">
+      <Filter>Interface\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="ZMyItemList.cpp">
+      <Filter>Interface\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="ZNetRepository.cpp">
+      <Filter>Interface\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="ZOptionInterface.cpp">
+      <Filter>Interface\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="ZPlayerList.cpp">
+      <Filter>Interface\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="ZReportAbuse.cpp">
+      <Filter>Interface\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="ZScreenDebugger.cpp">
+      <Filter>Interface\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="ZShop.cpp">
+      <Filter>Interface\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="ZStageInterface.cpp">
+      <Filter>Interface\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="ZStageSetting.cpp">
+      <Filter>Interface\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="ZQuest.cpp">
+      <Filter>Interface\Quest</Filter>
+    </ClCompile>
+    <ClCompile Include="ZQuestGameInfo.cpp">
+      <Filter>Interface\Quest</Filter>
+    </ClCompile>
+    <ClCompile Include="ZQuestMap.cpp">
+      <Filter>Interface\Quest</Filter>
+    </ClCompile>
+    <ClCompile Include="ZEffectAniMesh.cpp">
+      <Filter>Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="ZEffectBase.cpp">
+      <Filter>Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="ZEffectBillboard.cpp">
+      <Filter>Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="ZEffectBillboardList.cpp">
+      <Filter>Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="ZEffectBulletMark.cpp">
+      <Filter>Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="ZEffectBulletMarkList.cpp">
+      <Filter>Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="ZEffectFlashBang.cpp">
+      <Filter>Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="ZEffectGunFire.cpp">
+      <Filter>Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="ZEffectLightFragment.cpp">
+      <Filter>Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="ZEffectLightFragmentList.cpp">
+      <Filter>Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="ZEffectLightTracer.cpp">
+      <Filter>Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="ZEffectManager.cpp">
+      <Filter>Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="ZEffectMesh.cpp">
+      <Filter>Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="ZEffectSmoke.cpp">
+      <Filter>Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="ZEffectStaticMesh.cpp">
+      <Filter>Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="ZScreenEffectManager.cpp">
+      <Filter>Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="ZCharacter.cpp">
+      <Filter>Character</Filter>
+    </ClCompile>
+    <ClCompile Include="ZCharacterItem.cpp">
+      <Filter>Character</Filter>
+    </ClCompile>
+    <ClCompile Include="ZCharacterManager.cpp">
+      <Filter>Character</Filter>
+    </ClCompile>
+    <ClCompile Include="ZCharacterObject.cpp">
+      <Filter>Character</Filter>
+    </ClCompile>
+    <ClCompile Include="ZItem.cpp">
+      <Filter>Character</Filter>
+    </ClCompile>
+    <ClCompile Include="ZItemDesc.cpp">
+      <Filter>Character</Filter>
+    </ClCompile>
+    <ClCompile Include="ZMyCharacter.cpp">
+      <Filter>Character</Filter>
+    </ClCompile>
+    <ClCompile Include="ZNetCharacter.cpp">
+      <Filter>Character</Filter>
+    </ClCompile>
+    <ClCompile Include="ZObject.cpp">
+      <Filter>Character</Filter>
+    </ClCompile>
+    <ClCompile Include="ZObjectManager.cpp">
+      <Filter>Character</Filter>
+    </ClCompile>
+    <ClCompile Include="ZShadow.cpp">
+      <Filter>Character</Filter>
+    </ClCompile>
+    <ClCompile Include="ZModule.cpp">
+      <Filter>Character\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="ZModule_ColdDamage.cpp">
+      <Filter>Character\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="ZModule_FireDamage.cpp">
+      <Filter>Character\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="ZModule_HPAP.cpp">
+      <Filter>Character\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="ZModule_LightningDamage.cpp">
+      <Filter>Character\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="ZModule_Movable.cpp">
+      <Filter>Character\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="ZModule_PoisonDamage.cpp">
+      <Filter>Character\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="ZModule_QuestStatus.cpp">
+      <Filter>Character\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="ZModule_Resistance.cpp">
+      <Filter>Character\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="ZModule_Skills.cpp">
+      <Filter>Character\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="ZSkill.cpp">
+      <Filter>Character\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="ZActor.cpp">
+      <Filter>Character\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="ZActorAnimation.cpp">
+      <Filter>Character\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="ZActorController.cpp">
+      <Filter>Character\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="ZBrain.cpp">
+      <Filter>Character\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="ZEnemy.cpp">
+      <Filter>Character\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="ZEnvObject.cpp">
+      <Filter>Character\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="ZRangeWeaponHitDice.cpp">
+      <Filter>Character\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="ZStateMachine.cpp">
+      <Filter>Character\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="ZTask.cpp">
+      <Filter>Character\AI\Tasks</Filter>
+    </ClCompile>
+    <ClCompile Include="ZTask_AttackMelee.cpp">
+      <Filter>Character\AI\Tasks</Filter>
+    </ClCompile>
+    <ClCompile Include="ZTask_AttackRange.cpp">
+      <Filter>Character\AI\Tasks</Filter>
+    </ClCompile>
+    <ClCompile Include="ZTask_Delay.cpp">
+      <Filter>Character\AI\Tasks</Filter>
+    </ClCompile>
+    <ClCompile Include="ZTask_MoveToPos.cpp">
+      <Filter>Character\AI\Tasks</Filter>
+    </ClCompile>
+    <ClCompile Include="ZTask_RotateToDir.cpp">
+      <Filter>Character\AI\Tasks</Filter>
+    </ClCompile>
+    <ClCompile Include="ZTask_Skill.cpp">
+      <Filter>Character\AI\Tasks</Filter>
+    </ClCompile>
+    <ClCompile Include="ZTaskManager.cpp">
+      <Filter>Character\AI\Tasks</Filter>
+    </ClCompile>
+    <ClCompile Include="ZBehavior.cpp">
+      <Filter>Character\AI\Behavior</Filter>
+    </ClCompile>
+    <ClCompile Include="ZBehavior_Attack.cpp">
+      <Filter>Character\AI\Behavior</Filter>
+    </ClCompile>
+    <ClCompile Include="ZBehavior_Idle.cpp">
+      <Filter>Character\AI\Behavior</Filter>
+    </ClCompile>
+    <ClCompile Include="ZBehavior_Patrol.cpp">
+      <Filter>Character\AI\Behavior</Filter>
+    </ClCompile>
+    <ClCompile Include="ZBehavior_Script.cpp">
+      <Filter>Character\AI\Behavior</Filter>
+    </ClCompile>
+    <ClCompile Include="ZActorSound.cpp">
+      <Filter>Sound</Filter>
+    </ClCompile>
+    <ClCompile Include="ZSoundEngine.cpp">
+      <Filter>Sound</Filter>
+    </ClCompile>
+    <ClCompile Include="ZSoundFMod.cpp">
+      <Filter>Sound</Filter>
+    </ClCompile>
+    <ClCompile Include="Physics.cpp">
+      <Filter>Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="CGLEncription.cpp">
+      <Filter>Interface\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Interface\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="ZApplication.cpp">
+      <Filter>Interface\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="ZCamera.cpp">
+      <Filter>Interface\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="ZChannelRule.cpp">
+      <Filter>Interface\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="ZClan.cpp">
+      <Filter>Interface\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="ZConfiguration.cpp">
+      <Filter>Interface\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="ZGame.cpp">
+      <Filter>Interface\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="ZGameAction.cpp">
+      <Filter>Interface\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="ZGameType.cpp">
+      <Filter>Interface\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="ZGlobal.cpp">
+      <Filter>Interface\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="ZHelpScreen.cpp">
+      <Filter>Interface\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="ZMap.cpp">
+      <Filter>Interface\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="ZMapDesc.cpp">
+      <Filter>Interface\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="ZReplay.cpp">
+      <Filter>Interface\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="ZTestGame.cpp">
+      <Filter>Interface\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="ZTimer.cpp">
+      <Filter>Interface\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="ZUtil.cpp">
+      <Filter>Interface\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="ZWorld.cpp">
+      <Filter>Interface\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="ZWorldManager.cpp">
+      <Filter>Interface\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="ZMatch.cpp">
+      <Filter>Interface\Game\Rule</Filter>
+    </ClCompile>
+    <ClCompile Include="ZRule.cpp">
+      <Filter>Interface\Game\Rule</Filter>
+    </ClCompile>
+    <ClCompile Include="ZRuleAssassinate.cpp">
+      <Filter>Interface\Game\Rule</Filter>
+    </ClCompile>
+    <ClCompile Include="ZRuleBaseQuest.cpp">
+      <Filter>Interface\Game\Rule</Filter>
+    </ClCompile>
+    <ClCompile Include="ZRuleBerserker.cpp">
+      <Filter>Interface\Game\Rule</Filter>
+    </ClCompile>
+    <ClCompile Include="ZRuleDeathMatch.cpp">
+      <Filter>Interface\Game\Rule</Filter>
+    </ClCompile>
+    <ClCompile Include="ZRuleDuel.cpp">
+      <Filter>Interface\Game\Rule</Filter>
+    </ClCompile>
+    <ClCompile Include="ZRuleGladiator.cpp">
+      <Filter>Interface\Game\Rule</Filter>
+    </ClCompile>
+    <ClCompile Include="ZRuleQuest.cpp">
+      <Filter>Interface\Game\Rule</Filter>
+    </ClCompile>
+    <ClCompile Include="ZRuleSurvival.cpp">
+      <Filter>Interface\Game\Rule</Filter>
+    </ClCompile>
+    <ClCompile Include="ZRuleTraining.cpp">
+      <Filter>Interface\Game\Rule</Filter>
+    </ClCompile>
+    <ClCompile Include="ZWeapon.cpp">
+      <Filter>ZWeapon</Filter>
+    </ClCompile>
+    <ClCompile Include="ZWeaponMgr.cpp">
+      <Filter>ZWeapon</Filter>
+    </ClCompile>
+    <ClCompile Include="ZBirdDummyAI.cpp">
+      <Filter>Test</Filter>
+    </ClCompile>
+    <ClCompile Include="ZBirdDummyClient.cpp">
+      <Filter>Test</Filter>
+    </ClCompile>
+    <ClCompile Include="ZBirdTest.cpp">
+      <Filter>Test</Filter>
+    </ClCompile>
+    <ClCompile Include="MSysInfo.cpp">
+      <Filter>etc</Filter>
+    </ClCompile>
+    <ClCompile Include="ZClothEmblem.cpp">
+      <Filter>etc</Filter>
+    </ClCompile>
+    <ClCompile Include="ZProfiler.cpp">
+      <Filter>etc</Filter>
+    </ClCompile>
+    <ClCompile Include="ZSkyBox.cpp">
+      <Filter>etc</Filter>
+    </ClCompile>
+    <ClCompile Include="ZStencilLight.cpp">
+      <Filter>etc</Filter>
+    </ClCompile>
+    <ClCompile Include="ZWater.cpp">
+      <Filter>etc</Filter>
+    </ClCompile>
+    <ClCompile Include="ZWorldItem.cpp">
+      <Filter>etc</Filter>
+    </ClCompile>
+    <ClCompile Include="MEmblemMgr.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="ZCommandTable.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="ZGameClient.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="ZGameClient_Clan.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="ZGameClient_Ladder.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="ZGameTypeList.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="ZLocatorList.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="ZNetAgreementBuilder.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="ZPost.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="ZPostLocal.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="ZSecurity.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="upnp.cpp">
+      <Filter>Network\UPNP</Filter>
+    </ClCompile>
+    <ClCompile Include="ZBaseAuthInfo.cpp">
+      <Filter>Locale</Filter>
+    </ClCompile>
+    <ClCompile Include="ZLocale.cpp">
+      <Filter>Locale</Filter>
+    </ClCompile>
+    <ClCompile Include="ZNetmarble.cpp">
+      <Filter>Locale\Auth</Filter>
+    </ClCompile>
+    <ClCompile Include="ZNetmarbleJP.cpp">
+      <Filter>Locale\Auth</Filter>
+    </ClCompile>
+    <ClCompile Include="ZLanguageConf.cpp">
+      <Filter>StringRes</Filter>
+    </ClCompile>
+    <ClCompile Include="ZMessages.cpp">
+      <Filter>StringRes</Filter>
+    </ClCompile>
+    <ClCompile Include="ZStringResManager.cpp">
+      <Filter>StringRes</Filter>
+    </ClCompile>
+    <ClCompile Include="ZTips.cpp">
+      <Filter>StringRes</Filter>
+    </ClCompile>
+    <ClCompile Include="XTrap\XTrap.cpp">
+      <Filter>XTrap</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="Portal.cpp">
+      <Filter>RGunz</Filter>
+    </ClCompile>
+    <ClCompile Include="Rules.cpp">
+      <Filter>RGunz</Filter>
+    </ClCompile>
+    <ClCompile Include="Events.cpp">
+      <Filter>RGunz</Filter>
+    </ClCompile>
+    <ClCompile Include="RGCommands.cpp">
+      <Filter>RGunz</Filter>
+    </ClCompile>
+    <ClCompile Include="NewChat.cpp">
+      <Filter>RGunz</Filter>
+    </ClCompile>
+    <ClCompile Include="RGMain.cpp">
+      <Filter>RGunz</Filter>
+    </ClCompile>
+    <ClCompile Include="FuncList.cpp">
+      <Filter>RGunz</Filter>
+    </ClCompile>
+    <ClCompile Include="Hitboxes.cpp">
+      <Filter>RGunz</Filter>
+    </ClCompile>
+    <ClCompile Include="ReplayControl.cpp">
+      <Filter>RGunz</Filter>
+    </ClCompile>
+    <ClCompile Include="Draw.cpp">
+      <Filter>RGunz</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="runtime\shader\skin.vsh">
+      <Filter>etc\Shader</Filter>
+    </None>
+    <None Include="runtime\shader\skin1.vsh">
+      <Filter>etc\Shader</Filter>
+    </None>
+    <None Include="res\Gunz.rc2">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="icon1.ico">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="runtime\System\channelrule.xml">
+      <Filter>xml</Filter>
+    </None>
+    <None Include="Share\cserror.xml">
+      <Filter>xml</Filter>
+    </None>
+    <None Include="runtime\lang\kor\messages.xml">
+      <Filter>xml</Filter>
+    </None>
+    <None Include="runtime\System\notify.xml">
+      <Filter>xml</Filter>
+    </None>
+    <None Include="runtime\System\tips.xml">
+      <Filter>xml</Filter>
+    </None>
+    <None Include="runtime\System\worlditem.xml">
+      <Filter>xml</Filter>
+    </None>
+    <None Include="runtime\System\zeffect.xml">
+      <Filter>xml</Filter>
+    </None>
+    <None Include="Share\zitem.xml">
+      <Filter>xml</Filter>
+    </None>
+    <None Include="Runtime\system\zskill.xml">
+      <Filter>xml</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Gunz.rc">
+      <Filter>Resources</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="fmodvc.lib">
+      <Filter>extern\lib</Filter>
+    </Library>
+    <Library Include="HShield\HShield.lib">
+      <Filter>HShield</Filter>
+    </Library>
+  </ItemGroup>
+</Project>

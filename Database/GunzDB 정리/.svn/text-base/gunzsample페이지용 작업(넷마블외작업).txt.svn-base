@@ -1,0 +1,712 @@
+/***************************************************************************/
+/****			클랜 홍보 게시판 관련 테이블			****/
+/***************************************************************************/
+
+CREATE TABLE ClanAdsBoard
+(
+	Seq		int	IDENTITY(1,1)	Primary Key,		-- CLUSTERED INDEX
+	UserID		varchar(20)	NOT NULL,			-- NONCLUSTERED INDEX
+	Subject		varchar(50)	NOT NULL,			-- NONCLUSTERED INDEX
+	RegDate		SmallDateTime	NOT NULL,
+	ReadCount	int	Default(0)	NOT NULL,
+	Recommend	int	Default(0)	NULL,
+	Content		varchar(2000)	NOT NULL,
+	FileName	varchar(128)	NULL,
+	Link		varchar(255)	NULL,
+	HTML		smallint	Default(0)	NOT NULL,
+	CommentCount	int	Default(0)	NOT NULL,
+	GR_ID		int	Default(0)	NOT NULL,		-- NONCLUSTERED INDEX
+	GR_Depth	int	Default(0)	NOT NULL,		-- NONCLUSTERED INDEX
+	GR_Pos		int	Default(0)	NOT NULL,		-- NONCLUSTERED INDEX
+	Thread		int	Default(0)	NOT NULL		-- NONCLUSTERED INDEX
+)
+
+CREATE NONCLUSTERED INDEX IX_ClanAdsBoard_UserID
+ON ClanAdsBoard(UserID)
+
+CREATE NONCLUSTERED INDEX IX_ClanAdsBoard_Subject
+ON ClanAdsBoard(Subject)
+
+CREATE NONCLUSTERED INDEX IX_ClanAdsBoard_GR_ID
+ON ClanAdsBoard(GR_ID)
+
+CREATE NONCLUSTERED INDEX IX_ClanAdsBoard_GR_Depth
+ON ClanAdsBoard(GR_Depth)
+
+CREATE NONCLUSTERED INDEX IX_ClanAdsBoard_GR_Pos
+ON ClanAdsBoard(GR_Pos)
+
+CREATE NONCLUSTERED INDEX IX_ClanAdsBoard_Thraed
+ON ClanAdsBoard(Thread)
+
+-----------------------------------------------------------------------------------------------------------
+
+CREATE TABLE ClanAdsComment
+(
+	ID		int	IDENTITY(1,1)	Primary Key,		-- CLUSTERED INDEX
+	Seq		int	NOT NULL,				-- NONCLUSTERED INDEX
+	UserID		varchar(20)	NOT NULL,
+	RegDate		SmallDateTime	NOT NULL,			-- NONCLUSTERED INDEX
+	Content		varchar(500)	NOT NULL
+)
+
+CREATE NONCLUSTERED INDEX IX_ClanAdsComment_Seq
+ON ClanAdsComment(Seq)
+
+CREATE NONCLUSTERED INDEX IX_ClanAdsComment_RegDate
+ON ClanAdsComment(RegDate)
+
+-----------------------------------------------------------------------------------------------------------
+
+
+/***************************************************************************/
+/****			클랜 홍보 게시판 관련 프로시져			****/
+/***************************************************************************/
+
+
+-- 게시물 등록
+CREATE PROC spWebInsertClanAdsBoard
+ @UserID	varchar(20),
+ @Subject	varchar(50),
+ @Content	varchar(2000),
+ @FileName	varchar(128),
+ @Link		varchar(255),
+ @HTML		smallint
+AS
+ SET NOCOUNT ON
+ DECLARE @NewThread int
+ SELECT @NewThread = ISNULL(MAX(Thread), 0) + 1000 FROM ClanAdsBoard(NOLOCK) 
+
+ BEGIN TRAN
+ INSERT INTO ClanAdsboard (UserID, Subject, Content,  Regdate, ReadCount, FileName, Link, HTML, GR_ID, GR_Depth,GR_Pos,Thread)
+ VALUES (@UserID, @Subject, @Content,  GetDate(), 0, @FileName, @Link, @HTML, 0,0,0,@NewThread)
+ IF 0 <> @@ERROR BEGIN
+  ROLLBACK TRAN
+  RETURN
+ END
+
+ UPDATE ClanAdsBoard SET GR_ID = seq where GR_ID = 0
+ IF (0 <> @@ERROR) OR (0 = @@ROWCOUNT) BEGIN
+  ROLLBACK TRAN
+  RETURN
+ END
+
+ COMMIT TRAN
+GO
+
+----------------------------------------------------------------------------
+
+-- 게시물 수정
+CREATE PROC spWebUpdateClanAdsBoard
+ @Seq		int,
+ @Subject	varchar(50),
+ @Content	varchar(2000),
+ @FileName	varchar(128),
+ @Link		varchar(255),
+ @HTML		smallint
+AS
+ SET NOCOUNT ON
+ UPDATE ClanAdsBoard
+ SET Subject= @Subject, Content=@Content, FileName=@FileName, Link=@Link, HTML=@HTML
+ WHERE Seq = @Seq
+GO
+
+----------------------------------------------------------------------------
+
+-- 게시물 답글
+CREATE PROC spWebReplyClanAdsBoard
+ @Seq		int,
+ @UserID	varchar(20),
+ @Subject	varchar(50),
+ @Content	varchar(2000),
+ @FileName	varchar(128),
+ @Link		varchar(255),
+ @HTML		smallint,
+ @GR_ID		int,
+ @GR_Depth	int,
+ @GR_Pos	int
+AS
+ SET NOCOUNT ON
+ DECLARE @ParentThread       int
+ DECLARE @PrevThread          int
+
+ SELECT @ParentThread = Thread FROM ClanAdsBoard(NOLOCK) WHERE Seq = @Seq
+ SELECT @PrevThread = @ParentThread -1000 FROM ClanAdsBoard(NOLOCK) WHERE GR_ID =@GR_ID and GR_Depth = '0'
+
+ BEGIN TRAN
+ UPDATE ClanAdsBoard 
+ SET Thread = Thread - 1
+ WHERE Thread < @ParentThread and Thread > @PrevThread
+ IF (0 <> @@ERROR) OR (0 = @@ROWCOUNT) BEGIN
+  ROLLBACK TRAN
+  RETURN
+ END
+
+ UPDATE ClanAdsBoard SET GR_Pos =GR_Pos+1
+ WHERE GR_ID = @GR_ID and GR_Pos = @GR_Pos
+ IF (0 <> @@ERROR) OR (0 = @@ROWCOUNT) BEGIN
+  ROLLBACK TRAN
+  RETURN
+ END
+
+ SET @GR_Depth = @GR_Depth+1;
+ SET @GR_Pos = @GR_Pos + 1;
+
+ INSERT INTO ClanAdsBoard (UserID, Subject, Content,  Regdate, ReadCount,  FileName, Link, HTML, GR_ID, GR_Depth, GR_Pos, Thread)
+ VALUES	(@UserID, @Subject, @Content,  GetDate(), 0, @FileName, @Link, @HTML, @GR_ID, @GR_Depth, @GR_Pos, @ParentThread-1)
+ IF (@@ERROR <> 0) BEGIN
+  ROLLBACK TRAN
+  RETURN
+ END
+
+ COMMIT TRAN
+GO
+
+----------------------------------------------------------------------------
+
+-- 게시물 삭제
+CREATE PROC spWebDeleteClanAdsBoard
+ @Seq int
+AS
+ SET NOCOUNT ON
+ BEGIN TRAN
+ DELETE ClanAdsBoard  WHERE Seq = @Seq
+ IF (0 <> @@ERROR) OR (0 = @@ROWCOUNT) BEGIN
+  ROLLBACK TRAN
+  RETURN
+ END
+
+ DECLARE @SEQCOUNT int
+
+ SELECT @SEQCOUNT = COUNT(Seq) FROM ClanAdsComment(NOLOCK) WHERE Seq = @Seq
+
+ IF ( @SEQCOUNT > 0) BEGIN
+  DELETE ClanAdsComment  WHERE Seq = @Seq
+  IF (0 <> @@ERROR) OR (0 = @@ROWCOUNT) BEGIN
+   ROLLBACK TRAN
+   RETURN 
+  END
+ END
+ COMMIT TRAN
+GO
+
+----------------------------------------------------------------------------
+
+-- 코멘트 게시물 등록
+CREATE PROC spWebInsertClanAdsComment
+ @Seq int,
+ @Userid varchar(20),
+ @Content varchar(500)
+AS
+ SET NOCOUNT ON
+
+ BEGIN TRAN
+ INSERT INTO ClanAdsComment (Seq, UserID, Content, RegDate)
+ VALUES(@Seq,  @UserID, @Content, GetDate())
+ IF (0 <> @@ERROR) OR (0 = @@ROWCOUNT) BEGIN
+  ROLLBACK TRAN
+  RETURN
+ END
+
+ UPDATE ClanAdsBoard SET CommentCount = CommentCount + 1 WHERE Seq = @Seq
+ IF (0 <> @@ERROR) OR (0 = @@ROWCOUNT) BEGIN
+  ROLLBACK TRAN
+  RETURN
+ END
+
+ COMMIT TRAN
+GO
+
+----------------------------------------------------------------------------
+
+-- 코멘트 게시물 삭제
+CREATE PROC spWebDeleteClanAdsComment
+ @ID int
+AS
+ SET NOCOUNT ON
+ DECLARE @Seq    int
+
+ SELECT @Seq = Seq FROM ClanAdsComment(NOLOCK) WHERE ID = @ID
+
+ BEGIN TRAN
+ DELETE ClanAdsComment WHERE ID = @ID
+ IF (@@ERROR <> 0) BEGIN
+  ROLLBACK TRAN
+  RETURN
+ END
+
+ UPDATE ClanAdsBoard SET CommentCount = CommentCount - 1 WHERE Seq = @Seq
+ IF (0 <> @@ERROR) OR (0 = @@ROWCOUNT) BEGIN
+  ROLLBACK TRAN
+  RETURN
+ END
+
+ COMMIT TRAN
+GO
+
+----------------------------------------------------------------------------
+
+-- 게시물 조회
+CREATE PROC spWebGetClanAdsBoardList
+AS
+ SET NOCOUNT ON
+ SELECT Seq, Userid, Subject, RegDate, ReadCount, Recommend, CommentCount
+ FROM ClanAdsBoard(NOLOCK)
+ ORDER BY Thread DESC
+GO
+
+----------------------------------------------------------------------------
+
+-- 게시물 검색 by Subject 
+CREATE PROC spWebSearchClanAdsBoardbySubject
+ @Subject	varchar(30)
+AS
+ SET NOCOUNT ON
+ SELECT Seq, Userid, Subject, RegDate, ReadCount, Recommend, CommentCount
+ FROM ClanAdsBoard(NOLOCK)
+ WHERE Subject like @Subject
+ ORDER BY Thread DESC
+GO
+
+----------------------------------------------------------------------------
+
+-- 게시물 내용 조회
+CREATE PROC spWebGetClanAdsBoardContent
+ @Seq int
+AS
+ SET NOCOUNT ON
+ SELECT Seq, Userid, Subject, Content, RegDate, ReadCount, Recommend, FileName, 
+  Link, HTML, CommentCount, GR_ID, GR_Depth, GR_Pos, Thread
+ FROM ClanAdsBoard 
+ WHERE Seq = @Seq
+ ORDER BY Thread DESC
+GO
+
+----------------------------------------------------------------------------
+
+-- 게시물 코멘트 내용 조회
+CREATE PROC spWebGetClanAdsCommentContent
+ @Seq int
+AS
+ SET NOCOUNT ON
+ SELECT ID, Userid, Content, RegDate
+ FROM ClanAdsComment(NOLOCK)
+ WHERE Seq = @Seq
+ ORDER BY RegDate
+GO
+
+----------------------------------------------------------------------------
+
+CREATE PROC spWebUpdateClanAdsBoardReadCount
+ @Seq int
+AS
+ SET NOCOUNT ON
+ UPDATE ClanAdsBoard SET ReadCount = ReadCount + 1 WHERE Seq = @Seq
+GO
+
+----------------------------------------------------------------------------
+
+CREATE PROC spWebGetClanAdsCommentContentByID
+ @ID int
+AS
+ SET NOCOUNT ON
+ SELECT ID, Userid, Content, RegDate
+ FROM ClanAdsComment(NOLOCK)
+ WHERE ID = @ID
+ ORDER BY RegDate
+GO
+
+----------------------------------------------------------------------------
+
+CREATE PROC spWebSearchClanAdsBoardbyUserID
+ @UserID	varchar(20)
+AS
+ SET NOCOUNT ON
+ SELECT Seq, Userid, Subject, RegDate, ReadCount, Recommend, CommentCount
+ FROM ClanAdsBoard (NOLOCK)
+ WHERE UserID = @UserID
+ ORDER BY Thread DESC
+GO
+
+----------------------------------------------------------------------------
+
+/***************************************************************************/
+/****			클랜  게시판 관련 테이블			****/
+/***************************************************************************/
+
+CREATE TABLE ClanBoard
+(
+	Seq		int	IDENTITY(1,1)	Primary Key,		-- CLUSTERED INDEX
+	CLID		int	NOT NULL,
+	UserID		varchar(20)	NOT NULL,			-- NONCLUSTERED INDEX
+	Subject		varchar(50)	NOT NULL,			-- NONCLUSTERED INDEX
+	RegDate		smallDateTime	NOT NULL,
+	ReadCount	int	Default(0)	NOT NULL,
+	Recommend	int	Default(0)	NULL,
+	Content		varchar(4000)	NOT NULL,
+	FileName	varchar(128)	NULL,
+	Link		varchar(255)	NULL,
+	HTML		smallint	Default(0)	NOT NULL,
+	CommentCount	int	Default(0)	NOT NULL,
+	GR_ID		int	Default(0)	NOT NULL,		-- NONCLUSTERED INDEX
+	GR_Depth	int	Default(0)	NOT NULL,		-- NONCLUSTERED INDEX
+	GR_Pos		int	Default(0)	NOT NULL,		-- NONCLUSTERED INDEX
+	Thread		int	Default(0)	NOT NULL		-- NONCLUSTERED INDEX
+)
+
+CREATE NONCLUSTERED INDEX IX_ClanBoard_CLID
+ON ClanBoard(CLID)
+
+CREATE NONCLUSTERED INDEX IX_ClanBoard_UserID
+ON ClanBoard(UserID)
+
+CREATE NONCLUSTERED INDEX IX_ClanBoard_GR_ID
+ON ClanBoard(GR_ID)
+
+CREATE NONCLUSTERED INDEX IX_ClanBoard_GR_Depth
+ON ClanBoard(GR_Depth)
+
+CREATE NONCLUSTERED INDEX IX_ClanBoard_GR_Pos
+ON ClanBoard(GR_Pos)
+
+CREATE NONCLUSTERED INDEX IX_ClanBoard_Thread
+ON ClanBoard(Thread)
+
+GO
+--------------------------------------------------------------------------------------------------------
+
+CREATE TABLE ClanBoardComment
+(
+	ID		int	IDENTITY(1,1)	Primary Key,		-- CLUSTERED INDEX
+	Seq		int	NOT NULL,				-- NONCLUSTERED INDEX
+	UserID		varchar(20)	NOT NULL,
+	RegDate		smallDateTime	NOT NULL,			-- NONCLUSTERED INDEX
+	Content		varchar(500)	NOT NULL
+)
+
+CREATE NONCLUSTERED INDEX IX_ClanBoardComment_Seq
+ON ClanBoardComment(Seq)
+
+CREATE NONCLUSTERED INDEX IX_ClanBoardComment_RegDate
+ON ClanBoardComment(RegDate)
+
+GO
+
+--------------------------------------------------------------------------------------------------------
+
+/***************************************************************************/
+/****			클랜  게시판 관련 프로시져			****/
+/***************************************************************************/
+
+
+-- 게시물 등록
+
+CREATE   PROC spWebInsertClanBoard
+ @CLID		int,
+ @UserID		varchar(20),
+ @Subject	varchar(50),
+ @Content	varchar(4000),
+ @FileName	varchar(128),
+ @Link		varchar(255),
+ @HTML		smallint
+AS
+ SET NOCOUNT ON
+ DECLARE @NewThread int
+ SELECT @NewThread = ISNULL(MAX(Thread),0) + 1000 FROM ClanBoard(NOLOCK)
+
+ BEGIN TRAN
+ INSERT INTO ClanBoard (CLID, UserID, Subject, Content,  Regdate, ReadCount, FileName, Link, HTML, GR_ID, GR_Depth,GR_Pos,Thread)
+ VALUES	(@CLID, @UserID, @Subject, @Content,  GetDate(), 0, @FileName, @Link, @HTML, 0,0,0,@NewThread)
+ IF (0 <> @@ERROR) OR (0 = @@ROWCOUNT) BEGIN
+  ROLLBACK TRAN
+  RETURN
+ END
+
+ UPDATE ClanBoard SET GR_ID = seq where GR_ID = 0
+ IF( 0 <> @@ERROR) BEGIN
+  ROLLBACK TRAN
+  RETURN
+ END
+ COMMIT TRAN
+GO
+
+--------------------------------------------------------------------------------------------------------
+
+
+-- 게시물 수정
+
+CREATE   PROC spWebUpdateClanBoard
+ @Seq		int,
+ @Subject	varchar(50),
+ @Content	varchar(4000),
+ @FileName	varchar(128),
+ @Link		varchar(255),
+ @HTML		smallint
+AS
+ SET NOCOUNT ON
+ UPDATE ClanBoard
+ SET Subject= @Subject, Content=@Content,
+   FileName=@FileName, Link=@Link, HTML=@HTML
+ WHERE Seq = @Seq
+GO
+
+--------------------------------------------------------------------------------------------------------
+
+-- 게시물 답글
+
+CREATE   PROC spWebReplyClanBoard
+ @Seq		int,
+ @UserID	varchar(20),
+ @Subject	varchar(50),
+ @Content	varchar(4000),
+ @FileName	varchar(128),
+ @Link		varchar(255),
+ @HTML		smallint,
+ @GR_ID		int,
+ @GR_Depth	int,
+ @GR_Pos	int
+AS
+ SET NOCOUNT ON
+ DECLARE @CLID	int
+ DECLARE @ParentThread       int
+ DECLARE @PrevThread          int
+
+ SELECT @CLID = CLID FROM ClanBoard(NOLOCK) Where Seq = @Seq
+ SELECT @ParentThread = Thread FROM ClanBoard(NOLOCK) Where Seq = @Seq
+ SELECT @PrevThread = @ParentThread -1000 FROM ClanBoard(NOLOCK) where GR_ID =@GR_ID and GR_Depth = '0'
+
+ BEGIN TRAN
+ UPDATE ClanBoard 
+ SET Thread = Thread - 1
+ Where Thread < @ParentThread and Thread > @PrevThread
+ IF (@@ERROR <> 0) BEGIN
+  ROLLBACK TRAN
+  RETURN
+ END
+
+ UPDATE ClanBoard SET GR_Pos =GR_Pos+1
+ WHERE GR_ID = @GR_ID and GR_Pos = @GR_Pos
+ IF (@@ERROR <> 0) BEGIN
+  ROLLBACK TRAN
+  RETURN
+ END
+
+ SET @GR_Depth = @GR_Depth+1;
+ SET @GR_Pos = @GR_Pos + 1;
+
+ INSERT INTO ClanBoard (CLID, UserID, Subject, Content,  Regdate, ReadCount,  FileName, Link, HTML, GR_ID, GR_Depth, GR_Pos, Thread)
+ VALUES (@CLID, @UserID, @Subject, @Content,  GetDate(), 0, @FileName, @Link, @HTML, @GR_ID, @GR_Depth, @GR_Pos, @ParentThread-1)
+ IF (@@ERROR <> 0) BEGIN
+  ROLLBACK TRAN
+  RETURN
+ END
+ COMMIT TRAN
+GO
+
+--------------------------------------------------------------------------------------------------------
+
+-- 게시물 삭제
+
+CREATE PROC spWebDeleteClanBoard
+ 	@Seq int
+AS
+ SET NOCOUNT ON
+ BEGIN TRAN
+ DELETE ClanBoard  WHERE Seq = @Seq
+ IF (0 <> @@ERROR) OR (0 = @@ROWCOUNT) BEGIN
+  ROLLBACK TRAN
+  RETURN
+ END
+
+ DECLARE @SEQCOUNT int
+
+ SELECT @SEQCOUNT = COUNT(Seq) FROM ClanBoardComment(NOLOCK) WHERE Seq = @Seq
+
+ IF ( @SEQCOUNT > 0) BEGIN
+  DELETE ClanBoardComment  WHERE Seq = @Seq
+  IF (0 <> @@ERROR) OR (0 = @@ROWCOUNT) BEGIN
+   ROLLBACK TRAN
+   RETURN 
+  END
+ END
+ COMMIT TRAN
+
+GO
+
+--------------------------------------------------------------------------------------------------------
+
+-- 코멘트 게시물 등록
+
+CREATE PROC spWebInsertClanBoardComment
+ @Seq int,
+ @UserID varchar(20),
+ @Content varchar(500)
+AS
+ SET NOCOUNT ON
+ BEGIN TRAN
+ INSERT INTO ClanBoardComment (Seq, UserID, Content, RegDate)
+ VALUES(@Seq,  @UserID, @Content, GetDate())
+ IF (@@ERROR <> 0)  BEGIN
+  ROLLBACK TRAN
+  RETURN
+ END
+
+ Update ClanBoard Set CommentCount = CommentCount + 1 WHERE Seq = @Seq
+ IF (0 <> @@ERROR) BEGIN
+  ROLLBACK TRAN
+  RETURN
+ END
+ COMMIT TRAN
+GO
+
+--------------------------------------------------------------------------------------------------------
+
+-- 코멘트 게시물 삭제
+
+CREATE PROC spWebDeleteClanBoardComment
+ @ID int
+AS
+ SET NOCOUNT ON
+ DECLARE @Seq    int
+
+ SELECT @Seq = Seq FROM ClanBoardComment(NOLOCK) Where ID = @ID
+
+ BEGIN TRAN
+ DELETE ClanBoardComment WHERE ID = @ID
+ IF (@@ERROR <> 0) BEGIN
+  ROLLBACK TRAN
+  RETURN
+ END
+
+ Update ClanBoard Set CommentCount = CommentCount - 1 WHERE Seq = @Seq
+ IF (0 <> @@ERROR) BEGIN
+  ROLLBACK TRAN
+  RETURN
+ END
+ COMMIT TRAN
+GO
+
+--------------------------------------------------------------------------------------------------------
+
+-- 게시물 조회
+
+CREATE PROC spWebGetClanBoardList
+ @CLID int
+AS
+ SET NOCOUNT ON
+ SELECT Seq, CLID, Userid, Subject, RegDate, ReadCount, Recommend, CommentCount
+ FROM ClanBoard(NOLOCK)
+ WHERE CLID = @CLID
+ ORDER BY Thread DESC
+GO
+
+--------------------------------------------------------------------------------------------------------
+
+-- 게시물 검색 by Subject 
+
+CREATE PROC spWebSearchClanBoardbySubject
+ @CLID int
+, @Subject varchar(30)
+AS
+ SET NOCOUNT ON
+ SELECT Seq, CLID, Userid, Subject, RegDate, ReadCount, Recommend, CommentCount
+ FROM ClanBoard(NOLOCK)
+ WHERE CLID = @CLID and Subject like @Subject
+ ORDER BY Thread DESC
+GO
+
+--------------------------------------------------------------------------------------------------------
+
+-- 게시물 검색 by UserID 
+
+CREATE PROC spWebSearchClanBoardbyUserID
+ @CLID int
+, @UserID varchar(20)
+AS
+ SET NOCOUNT ON
+ SELECT Seq, CLID, Userid, Subject, RegDate, ReadCount, Recommend, CommentCount
+ FROM ClanBoard(NOLOCK)
+ WHERE CLID = @CLID and UserID = @UserID
+ ORDER BY Thread DESC
+GO
+
+--------------------------------------------------------------------------------------------------------
+
+-- 게시물 내용 조회
+
+CREATE PROC spWebGetClanBoardContent
+ @Seq int
+AS
+ SET NOCOUNT ON
+ SELECT Seq, CLID, Userid, Subject, Content, RegDate, ReadCount, Recommend, FileName,
+  Link, HTML, CommentCount, GR_ID, GR_Depth, GR_Pos, Thread
+ FROM ClanBoard (NOLOCK)
+ WHERE Seq = @Seq
+ ORDER BY Thread DESC
+GO
+
+--------------------------------------------------------------------------------------------------------
+
+-- 게시물 코멘트 내용 조회
+
+CREATE PROC spWebGetClanBoardCommentContent
+ @Seq int
+AS
+ SET NOCOUNT ON
+ SELECT ID, Userid, Content, RegDate
+ FROM ClanBoardComment (NOLOCK)
+ WHERE Seq = @Seq
+ ORDER BY RegDate
+GO
+
+--------------------------------------------------------------------------------------------------------
+
+-- 게시물 코멘트 내용 조회 By ID
+
+CREATE PROC spWebGetClanBoardCommentContentByID
+ @ID int
+AS
+ SET NOCOUNT ON
+ SELECT ID, Userid, Content, RegDate
+ FROM ClanBoardComment(NOLOCK)
+ WHERE ID = @ID
+ ORDER BY RegDate
+GO
+
+--------------------------------------------------------------------------------------------------------
+
+-- 조회수 증가 
+
+CREATE PROC spWebUpdateClanBoardReadCount
+ @Seq int
+AS
+ SET NOCOUNT ON
+ Update ClanBoard Set ReadCount = ReadCount + 1 WHERE Seq = @Seq
+GO
+
+-----------------------------------------------------------------------------------------------------
+
+CREATE PROC spWebGetClanMembers
+ @CLID int
+AS
+ SET NOCOUNT ON
+ SELECT cm.CLID, cm.Grade, c.Name, c.Level, c.XP, cm.RegDate
+ FROM ClanMember cm(NOLOCK) JOIN Character c(NOLOCK)
+ ON cm.CLID = @CLID AND c.CID = cm.CID
+ ORDER BY cm.RegDate DESC
+GO
+
+---------------------------------------------------------------------------
+
+CREATE PROC spWebSearchClanMemberByCharName  
+ @CLID int  
+, @CharName varchar(20)  
+AS  
+ SET NOCOUNT ON  
+ SELECT cm.CLID, cm.Grade, c.Name, c.Level, c.XP, cm.RegDate  
+ FROM ClanMember cm(NOLOCK) JOIN Character c(NOLOCK)  
+ ON cm.CLID = @CLID AND c.CID = cm.CID AND c.Name = @CharName  
+ ORDER BY cm.RegDate DESC  
+GO
+
+---------------------------------------------------------------------------

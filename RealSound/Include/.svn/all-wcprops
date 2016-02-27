@@ -1,0 +1,65 @@
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/Gunz/!svn/ver/4866/Develop/RealSound/Include
+END
+RealSoundEffect.h
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/Gunz/!svn/ver/4866/Develop/RealSound/Include/RealSoundEffect.h
+END
+RealSoundOgg.h
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/Gunz/!svn/ver/4866/Develop/RealSound/Include/RealSoundOgg.h
+END
+stdafx.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/Gunz/!svn/ver/4866/Develop/RealSound/Include/stdafx.h
+END
+MMTimer.h
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/Gunz/!svn/ver/4866/Develop/RealSound/Include/MMTimer.h
+END
+RealSoundDef.h
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/Gunz/!svn/ver/4866/Develop/RealSound/Include/RealSoundDef.h
+END
+RealSound.h
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/Gunz/!svn/ver/4866/Develop/RealSound/Include/RealSound.h
+END
+RealSoundMP3.h
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/Gunz/!svn/ver/4866/Develop/RealSound/Include/RealSoundMP3.h
+END
+RealSoundWaveFile.h
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/Gunz/!svn/ver/4866/Develop/RealSound/Include/RealSoundWaveFile.h
+END
+RealSoundBgm.h
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/Gunz/!svn/ver/4866/Develop/RealSound/Include/RealSoundBgm.h
+END
+RealSoundEffectPlayer.h
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/Gunz/!svn/ver/4866/Develop/RealSound/Include/RealSoundEffectPlayer.h
+END

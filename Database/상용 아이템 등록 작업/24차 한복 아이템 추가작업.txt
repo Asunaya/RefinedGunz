@@ -1,0 +1,303 @@
+<STR id="ZIETM_NAME_520019">남성 개량 한복용 모자</STR>
+<STR id="ZITEM_DESC_520019">새해 시즌 아이템. 남성용</STR>
+
+INSERT INTO Item (ItemID, Name) Values (520019, '남성 개량 한복용 모자')
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=1, ResLevel=0, Slot=4, Weight=3, HP=0, AP=4, MAXWT=0, 
+Description='새해 시즌 아이템. 남성용' 
+WHERE ItemID = 520019
+
+<STR id="ZITEM_NAME_520519">여성 개량한복용 모자</STR>
+<STR id="ZITEM_DESC_520519">새해 시즌 아이템. 여성용</STR>
+
+INSERT INTO Item (ItemID, Name) Values (520519, '여성 개량한복용 모자')
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=2, ResLevel=0, Slot=4, Weight=3, HP=0, AP=4, MAXWT=0, 
+Description='새해 시즌 아이템. 여성용' 
+WHERE ItemID = 520519
+
+------------------------------
+
+<STR id="ZITEM_NAME_521015">남성 개량한복 두루마기</STR>
+<STR id="ZITEM_DESC_521015">새해 시즌 아이템. 남성용</STR>
+
+INSERT INTO Item (ItemID, Name) Values (521015, '남성 개량한복 두루마기')
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=1, ResLevel=0, Slot=5, Weight=10, HP=1, AP=13, MAXWT=0, 
+Description='새해 시즌 아이템. 남성용' 
+WHERE ItemID = 521015
+
+<STR id="ZITEM_NAME_521515">여성 개량한복 저고리</STR>
+<STR id="ZITEM_DESC_521515">새해 시즌 아이템. 여성용</STR>
+
+INSERT INTO Item (ItemID, Name) Values (521515, '여성 개량한복 저고리')
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=2, ResLevel=0, Slot=5, Weight=10, HP=1, AP=13, MAXWT=0, 
+Description='새해 시즌 아이템. 여성용' 
+WHERE ItemID = 521515
+
+------------------------------
+
+<STR id="ZITEM_NAME_522014">남성 개량 한복용 장갑</STR>
+<STR id="ZITEM_DESC_522014">새해 시즌 아이템. 남성용</STR>
+
+INSERT INTO Item (ItemID, Name) Values (522014, '남성 개량 한복용 장갑')
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=1, ResLevel=0, Slot=6, Weight=2, HP=0, AP=9, MAXWT=0, 
+Description='새해 시즌 아이템. 남성용' 
+WHERE ItemID = 522014
+
+<STR id="ZITEM_NAME_522514">여성 개량한복용 장갑</STR>
+<STR id="ZITEM_DESC_522514">새해 시즌 아이템. 여성용</STR>
+
+INSERT INTO Item (ItemID, Name) Values (522514, '여성 개량한복용 장갑')
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=2, ResLevel=0, Slot=6, Weight=2, HP=0, AP=9, MAXWT=0, 
+Description='새해 시즌 아이템. 여성용' 
+WHERE ItemID = 522514
+
+------------------------------
+
+<STR id="ZITEM_NAME_523014">남성 개량한복 바지</STR>
+<STR id="ZITEM_DESC_523014">새해 시즌 아이템. 남성용</STR>
+
+INSERT INTO Item (ItemID, Name) Values (523014, '남성 개량한복 바지')
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=1, ResLevel=0, Slot=7, Weight=10, HP=1, AP=15, MAXWT=0, 
+Description='새해 시즌 아이템. 남성용' 
+WHERE ItemID = 523014
+
+<STR id="ZITEM_NAME_523514">여성 개량한복 바지</STR>
+<STR id="ZITEM_DESC_523514">새해 시즌 아이템. 여성용</STR>
+
+INSERT INTO Item (ItemID, Name) Values (523514, '여성 개량한복 바지')
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=2, ResLevel=0, Slot=7, Weight=10, HP=1, AP=15, MAXWT=0, 
+Description='새해 시즌 아이템. 여성용' 
+WHERE ItemID = 523514
+
+------------------------------
+
+<STR id="ZITEM_NAME_524014">남성 개량 한복용 신발</STR>
+<STR id="ZITEM_DESC_524014">새해 시즌 아이템. 남성용</STR>
+
+INSERT INTO Item (ItemID, Name) Values (524014, '남성 개량 한복용 신발')
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=1, ResLevel=0, Slot=8, Weight=2, HP=0, AP=11, MAXWT=0, 
+Description='새해 시즌 아이템. 남성용' 
+WHERE ItemID = 524014
+
+<STR id="ZITEM_NAME_524514">여성 개량한복용 신발</STR>
+<STR id="ZITEM_DESC_524514">새해 시즌 아이템. 여성용</STR>
+
+INSERT INTO Item (ItemID, Name) Values (524514, '여성 개량한복용 신발')
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=2, ResLevel=0, Slot=8, Weight=2, HP=0, AP=11, MAXWT=0, 
+Description='새해 시즌 아이템. 여성용' 
+WHERE ItemID = 524514
+
+------------------------------
+
+------------------------------
+
+INSERT INTO CashShop(ItemID, CashPrice, Opened, RegDate, RentType )
+VALUES (520519, 400, 0, GETDATE(), 1)
+
+INSERT INTO CashShop(ItemID, CashPrice, Opened, RegDate, RentType )
+VALUES (521515, 900, 0, GETDATE(), 1)
+
+INSERT INTO CashShop(ItemID, CashPrice, Opened, RegDate, RentType )
+VALUES (522514, 400, 0, GETDATE(), 1)
+
+INSERT INTO CashShop(ItemID, CashPrice, Opened, RegDate, RentType )
+VALUES (523514, 800, 0, GETDATE(), 1)
+
+INSERT INTO CashShop(ItemID, CashPrice, Opened, RegDate, RentType )
+VALUES (524514, 600, 0, GETDATE(), 1)
+
+---------------------------------
+
+INSERT INTO CashShop(ItemID, CashPrice, Opened, RegDate, RentType )
+VALUES (520019, 400, 0, GETDATE(), 1)
+
+INSERT INTO CashShop(ItemID, CashPrice, Opened, RegDate, RentType )
+VALUES (521015, 900, 0, GETDATE(), 1)
+
+INSERT INTO CashShop(ItemID, CashPrice, Opened, RegDate, RentType )
+VALUES (522014, 400, 0, GETDATE(), 1)
+
+INSERT INTO CashShop(ItemID, CashPrice, Opened, RegDate, RentType )
+VALUES (523014, 800, 0, GETDATE(), 1)
+
+INSERT INTO CashShop(ItemID, CashPrice, Opened, RegDate, RentType )
+VALUES (524014, 600, 0, GETDATE(), 1)
+
+-----------------------------------
+
+-----------------------------------
+
+-- 모자.
+INSERT INTO RentCashShopPrice(CSID, RentHourPeriod, CashPrice)
+VALUES (@CSID, 168, 400)
+
+INSERT INTO RentCashShopPrice(CSID, RentHourPeriod, CashPrice)
+VALUES (@CSID, 360, 500)
+
+INSERT INTO RentCashShopPrice(CSID, RentHourPeriod, CashPrice)
+VALUES (@CSID, 720, 600)
+
+-----------------------------------------------------
+
+INSERT INTO RentCashShopPrice(CSID, RentHourPeriod, CashPrice)
+VALUES (@CSID, 168, 400)
+
+INSERT INTO RentCashShopPrice(CSID, RentHourPeriod, CashPrice)
+VALUES (@CSID, 360, 500)
+
+INSERT INTO RentCashShopPrice(CSID, RentHourPeriod, CashPrice)
+VALUES (@CSID, 720, 600)
+
+------------------------------------------------------
+------------------------------------------------------
+
+-- 저고리, 두루마기
+INSERT INTO RentCashShopPrice(CSID, RentHourPeriod, CashPrice)
+VALUES (@CSID, 168, 900)
+
+INSERT INTO RentCashShopPrice(CSID, RentHourPeriod, CashPrice)
+VALUES (@CSID, 360, 1200)
+
+INSERT INTO RentCashShopPrice(CSID, RentHourPeriod, CashPrice)
+VALUES (@CSID, 720, 1400)
+
+-------------------------------------------------------
+
+INSERT INTO RentCashShopPrice(CSID, RentHourPeriod, CashPrice)
+VALUES (@CSID, 168, 900)
+
+INSERT INTO RentCashShopPrice(CSID, RentHourPeriod, CashPrice)
+VALUES (@CSID, 360, 1200)
+
+INSERT INTO RentCashShopPrice(CSID, RentHourPeriod, CashPrice)
+VALUES (@CSID, 720, 1400)
+
+------------------------------------------------------
+------------------------------------------------------
+
+-- 장갑
+INSERT INTO RentCashShopPrice(CSID, RentHourPeriod, CashPrice)
+VALUES (@CSID, 168, 400)
+
+INSERT INTO RentCashShopPrice(CSID, RentHourPeriod, CashPrice)
+VALUES (@CSID, 360, 500)
+
+INSERT INTO RentCashShopPrice(CSID, RentHourPeriod, CashPrice)
+VALUES (@CSID, 720, 600)
+
+------------------------------------------------------
+
+INSERT INTO RentCashShopPrice(CSID, RentHourPeriod, CashPrice)
+VALUES (@CSID, 168, 400)
+
+INSERT INTO RentCashShopPrice(CSID, RentHourPeriod, CashPrice)
+VALUES (@CSID, 360, 500)
+
+INSERT INTO RentCashShopPrice(CSID, RentHourPeriod, CashPrice)
+VALUES (@CSID, 720, 600)
+
+------------------------------------------------------
+------------------------------------------------------
+
+-- 바지
+INSERT INTO RentCashShopPrice(CSID, RentHourPeriod, CashPrice)
+VALUES (@CSID, 168, 800)
+
+INSERT INTO RentCashShopPrice(CSID, RentHourPeriod, CashPrice)
+VALUES (@CSID, 360, 1100)
+
+INSERT INTO RentCashShopPrice(CSID, RentHourPeriod, CashPrice)
+VALUES (@CSID, 720, 1300)
+
+------------------------------------------------------
+
+INSERT INTO RentCashShopPrice(CSID, RentHourPeriod, CashPrice)
+VALUES (@CSID, 168, 800)
+
+INSERT INTO RentCashShopPrice(CSID, RentHourPeriod, CashPrice)
+VALUES (@CSID, 360, 1100)
+
+INSERT INTO RentCashShopPrice(CSID, RentHourPeriod, CashPrice)
+VALUES (@CSID, 720, 1300)
+
+------------------------------------------------------
+------------------------------------------------------
+
+-- 신발
+INSERT INTO RentCashShopPrice(CSID, RentHourPeriod, CashPrice)
+VALUES (@CSID, 168, 600)
+
+INSERT INTO RentCashShopPrice(CSID, RentHourPeriod, CashPrice)
+VALUES (@CSID, 360, 700)
+
+INSERT INTO RentCashShopPrice(CSID, RentHourPeriod, CashPrice)
+VALUES (@CSID, 720, 800)
+
+------------------------------------------------------
+
+INSERT INTO RentCashShopPrice(CSID, RentHourPeriod, CashPrice)
+VALUES (@CSID, 168, 600)
+
+INSERT INTO RentCashShopPrice(CSID, RentHourPeriod, CashPrice)
+VALUES (@CSID, 360, 700)
+
+INSERT INTO RentCashShopPrice(CSID, RentHourPeriod, CashPrice)
+VALUES (@CSID, 720, 800)
+
+------------------------------------------------------
+------------------------------------------------------
+
+INSERT INTO CashSetShop(Name, Description, CashPrice, ResSex, ResLevel, Weight, Opened, RegDate, RentType)
+VALUES ('남성 개량한복 세트', '새해 시즌 아이템. 고풍스러운 느낌이 들면서도 활동적인 남성용 개량 한복 세트', 3000, 1, 0, 27, 0, GetDate(), 1)
+
+INSERT INTO CashSetShop(Name, Description, CashPrice, ResSex, ResLevel, Weight, Opened, RegDate, RentType)
+VALUES ('여성 개량한복 세트', '새해 시즌 아이템. 고풍스러운 느낌이 들면서도 활동적인 여성용 개량 한복 세트', 3000, 2, 0, 27, 0, GetDate(), 1)
+
+------------------------------------------------------
+------------------------------------------------------
+
+INSERT INTO CashSetItem(CSSID, CSID)
+VALUES (@CSSID, )
+
+INSERT INTO CashSetItem(CSSID, CSID)
+VALUES (@CSSID, )
+
+INSERT INTO CashSetItem(CSSID, CSID)
+VALUES (@CSSID, )
+
+INSERT INTO CashSetItem(CSSID, CSID)
+VALUES (@CSSID, )
+
+INSERT INTO CashSetItem(CSSID, CSID)
+VALUES (@CSSID, )
+
+------------------------------------------------------
+------------------------------------------------------
+
+INSERT INTO RentCashSetShopPrice(CSSID, RentHourPeriod, CashPrice)
+VALUES (@CSSID, 168, 3000)
+
+INSERT INTO RentCashSetShopPrice(CSSID, RentHourPeriod, CashPrice)
+VALUES (@CSSID, 360, 3900)
+
+INSERT INTO RentCashSetShopPrice(CSSID, RentHourPeriod, CashPrice)
+VALUES (@CSSID, 720, 4500)

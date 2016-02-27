@@ -1,0 +1,11 @@
+<? 
+//   include("menu.inc");
+?>
+
+<BR><BR><BR><BR>
+<CENTER>
+<H2>”î!</H2>
+</CENTER>
+<BR><BR><BR><BR><BR><BR>
+
+<? //include ("sign.inc"); ?>

@@ -1,0 +1,508 @@
+IF OBJECT_ID('spWebGetClanRanking') IS NOT NULL
+BEGIN 
+	DROP PROC spWebGetClanRanking
+END
+GO
+
+-- Master이름과 RegDate추가.
+/* 클랜 랭킹보기 : 한페이지 20개씩 고정  
+    Arg1 : @Page (페이지넘버)  
+    Arg2 : @Backward (생략하면 정상순서, 1일경우 역순 */  
+CREATE PROC [spWebGetClanRanking]  
+ @Page INT,  
+ @Backward INT  = 0  
+AS  
+BEGIN  
+ /* 한페이지에 20개씩 보여준다 (속도를위해 갯수 고정) */  
+ DECLARE @RowCount INT  
+ DECLARE @PageHead INT  
+  
+ IF @Backward = 0  
+ BEGIN  
+  SELECT @RowCount = ((@Page -1) * 20 + 1)  
+  SELECT TOP 20 cl.Ranking, cl.RankIncrease, cl.Name as ClanName, cl.Point, cl.Wins, cl.Losses, cl.CLID, cl.EmblemUrl, ch.Name AS Master, cl.RegDate
+  FROM Clan cl(NOLOCK), Character ch(NOLOCK)
+  WHERE cl.DeleteFlag=0 AND cl.Ranking>0 AND cl.Ranking >= @RowCount  AND ch.CID = cl.MasterCID
+  ORDER BY cl.Ranking  
+ END  
+ ELSE  
+ BEGIN  
+  SELECT @RowCount = ((@Page -1) * 20 + 1)  
+   
+  SET ROWCOUNT @RowCount  
+  SELECT @PageHead = Ranking FROM Clan(NOLOCK) WHERE DeleteFlag=0 ORDER BY Ranking DESC  
+   
+  SET ROWCOUNT 20  
+  SELECT Ranking, RankIncrease, ClanName, Point, Wins, Losses, CLID, EmblemUrl, Master, RegDate FROM  
+  (  
+  -- SELECT TOP 20 Ranking, RankIncrease, Name as ClanName, Point, Wins, Losses, CLID, EmblemUrl 
+   SELECT TOP 20 cl.Ranking, cl.RankIncrease, cl.Name as ClanName, cl.Point, cl.Wins, cl.Losses, cl.CLID, cl.EmblemUrl, ch.Name AS Master, cl.RegDate
+   FROM Clan cl(NOLOCK), Character ch(NOLOCK)
+   WHERE cl.DeleteFlag=0 AND cl.Ranking>0 AND cl.Ranking <= @PageHead AND ch.CID = cl.MasterCID
+   ORDER BY cl.Ranking DESC  
+  ) AS t ORDER BY Ranking  
+ END  
+END  
+GO
+
+-----------------------------------------------------------------------------------------------
+
+
+IF OBJECT_ID('spWebGetClanRankByMaster') IS NOT NULL
+BEGIN
+	DROP PROC spWebGetClanRankByMaster
+END
+GO
+
+-- 클랜 랭킹을 마스터 이름을 사용해서 검색.
+CREATE PROC spWebGetClanRankByMaster
+	@MasterName varchar(24)
+AS
+BEGIN
+	SELECT cl.CLID, cl.Name AS ClanName, cl.Point, cl.Wins, cl.Losses, cl.EmblemUrl, cl.Ranking, cl.RankIncrease, c.Name AS Master, cl.RegDate
+	FROM Clan cl(NOLOCK) JOIN Character c(NOLOCK) 
+	ON c.Name = @MasterName AND cl.MasterCID = c.CID AND cl.Ranking > 0
+END
+GO
+
+
+-----------------------------------------------------------------------------------------------
+
+IF OBJECT_ID('spWebGetClanRankingSortByRegDate') IS NOT NULL
+BEGIN
+	DROP PROC spWebGetClanRankingSortByRegDate
+END
+GO
+
+-- 개설일로 클랜 정렬. 아직 작업중.
+
+
+
+-----------------------------------------------------------------------------------------------
+
+
+-- ID정보 추가.
+IF OBJECT_ID('spWebSearchTotalRankingByNetmarbleID') IS NOT NULL
+BEGIN
+	DROP PROC spWebSearchTotalRankingByNetmarbleID
+END
+GO
+
+-- 자신의 랭킹 정보.
+CREATE PROC spWebSearchTotalRankingByNetmarbleID
+	@UserID varchar(20)
+AS
+BEGIN
+	SELECT Rank, Level, Name, XP, KillCount, DeathCount, UserID 
+	FROM TotalRanking (NOLOCK)
+	WHERE UserID = @UserID
+END
+GO
+
+
+-----------------------------------------------------------------------------------------------
+
+
+IF OBJECT_ID('spWebDeleteClan') IS NOT NULL
+BEGIN
+	DROP PROC spWebDeleteClan
+END
+GO
+
+-- 웹에서 클랜 폐쇄.
+CREATE PROC spWebDeleteClan
+	@MasterName varchar(24)	/* 마스터 이름 */
+,	@ClanName varchar(24)	/* 방출할 클랜원 이름 */
+AS
+BEGIN TRAN
+	SET NOCOUNT ON
+
+	DECLARE @MasterCID int
+	DECLARE @CLID int
+
+	SELECT @MasterCID = c.MasterCID, @CLID = c.CLID
+	FROM Clan c (NOLOCK), Character ch(NOLOCK)
+	WHERE ch.Name = @MasterName AND c.MasterCID = ch.CID
+
+	-- 요청 조건 검사.
+	IF (@MasterCID IS NULL) OR (@CLID IS NULL)
+	BEGIN
+		SELECT 0 AS Ret
+		ROLLBACK TRAN
+		SET NOCOUNT OFF
+		RETURN
+	END
+
+	-- Clan Member 삭제.
+	DELETE ClanMember WHERE CLID = @CLID
+	IF 0  <> @@ERROR
+	BEGIN
+		SELECT 0 AS Ret
+		ROLLBACK TRAN
+		SET NOCOUNT OFF
+		RETURN
+	END
+
+	-- Clan을 유효하지 않은 상태로 설정.
+	UPDATE Clan SET DeleteFlag = 1, MasterCID = NULL WHERE CLID = @CLID
+	UPDATE Clan SET DeleteName = Name WHERE CLID = @CLID
+	UPDATE Clan SET Name = NULL WHERE CLID = @CLID
+
+	SELECT 1 AS Ret
+
+	SET NOCOUNT OFF
+COMMIT TRAN
+GO
+
+
+-----------------------------------------------------------------------------------------------
+
+
+IF OBJECT_ID('spWebGetMyClanInfo') IS NOT NULL
+BEGIN
+	DROP PROC spWebGetMyClanInfo
+END
+GO
+
+-- My랭킹정보.
+CREATE PROC spWebGetMyClanInfo
+	@CharName varchar(24) /* 캐릭터 이름 */
+AS
+BEGIN
+	DECLARE @CLID int
+
+	SELECT @CLID = cm.CLID 
+	FROM Account a (NOLOCK), Character c (NOLOCK), ClanMember cm (NOLOCK)
+	WHERE c.Name = @CharName AND a.AID = c.AID AND cm.CID = c.CID
+
+	IF @CLID IS NOT NULL
+	BEGIN
+		SELECT cl.Name, ch.Name AS Master, cl.IntroDuction, cl.RegDate, cl.Homepage, cl.EmblemUrl, cl.Ranking
+		FROM Clan cl(NOLOCK), Character ch(NOLOCK)
+		WHERE cl.CLID = @CLID AND cl.DeleteFlag = 0 AND ch.CID = cl.MasterCID
+	END
+END
+GO
+
+
+-----------------------------------------------------------------------------------------------
+
+
+-- 이전의 프로시져 삭제.
+IF OBJECT_ID('spWebLeaveClan') IS NOT NULL
+BEGIN
+	DROP PROC spWebLeaveClan
+END
+GO
+
+-- 자신의 클랜 탈퇴.
+CREATE PROC spWebLeaveClan
+	@CharName varchar(24) /* 캐릭터 이름 */
+AS
+BEGIN TRAN
+	SET NOCOUNT ON
+
+	DECLARE @CLID int
+	DECLARE @CID int
+	DECLARE @MasterCID int
+
+	-- 존재하는 아이디인가?
+	SELECT @CLID = cm.CLID, @CID = c.CID, @MasterCID = cl.MasterCID
+	FROM Account a (NOLOCK), Character c (NOLOCK), Clan cl(NOLOCK), ClanMember cm (NOLOCK)
+	WHERE c.Name = @CharName AND a.AID = c.AID AND cm.CID = c.CID AND cl.CLID = cm.CLID
+
+	-- 클랜마스터가 아니고 클랜에 가입되 있을 경우만.
+	IF (@CID IS NULL) OR (@MasterCID = @CID) OR (@CLID IS NULL)
+	BEGIN
+		ROLLBACK TRAN
+		SET NOCOUNT OFF 
+		RETURN
+	END
+		
+	DELETE ClanMember WHERE CID = @CID
+	IF 0 <> @@ERROR
+	BEGIN
+		ROLLBACK TRAN
+		SET NOCOUNT OFF 
+		RETURN
+	END
+
+	SET NOCOUNT OFF 
+COMMIT TRAN
+GO
+
+
+-----------------------------------------------------------------------------------------------
+
+
+IF OBJECT_ID('spWebGetMyClanList') IS NOT NULL
+BEGIN
+	DROP PROC spWebGetMyClanList
+END
+GO
+
+
+-- 가입한 클랜 리스트를 Ranking으로 정렬해서 보여줌. 클랜이 중복으로 보일수 있음.
+CREATE PROC spWebGetMyClanList
+	@UserID varchar(20) /* 넷마블 아이디 */
+AS
+BEGIN
+	SELECT t.Ranking, t.RankIncrease, t.ClanName, t.Point, t.Wins, t.Losses, t.CLID, t.EmblemUrl, ch.Name AS Master, t.RegDate
+	FROM 
+	(
+		SELECT cl.CLID, cl.Name AS ClanName, cl.Point, cl.Wins, cl.Losses, cl.EmblemUrl, cl.Ranking, cl.RankIncrease, cl.MasterCID, cl.RegDate
+		FROM Account ac (NOLOCK), Character ch(NOLOCK), ClanMember cm(NOLOCK), Clan cl(NOLOCK)
+		WHERE ac.UserID = @UserID AND ac.AID = ch.AID AND cm.CID = ch.CID AND cl.CLID = cm.CLID
+	) AS t, Character ch(NOLOCK)
+	WHERE t.MasterCID = ch.CID ORDER BY t.Ranking DESC
+END
+GO
+
+
+-----------------------------------------------------------------------------------------------
+
+
+IF OBJECT_ID('spWebFireClanMember') IS NOT NULL
+BEGIN
+	DROP PROC spWebFireClanMember
+END
+GO
+
+-- 마스터가 클랜원 방출.
+CREATE PROC spWebFireClanMember
+	@Master varchar(24) 	/* 클랜 마스터 CID */
+,	@ClanMem varchar(24) 	/* 방출할 클랜원 캐릭터 CID */
+AS
+SET NOCOUNT ON
+BEGIN TRAN
+	DECLARE @MasterCID int
+	DECLARE @CLID int
+	DECLARE @ClanMemCID int
+
+	-- 자격 검사를 위해 클랜아이디와 마스터 아이티를 구함.
+	SELECT @CLID = cl.CLID, @MasterCID = cl.MasterCID
+	FROM Character ch(NOLOCK), Clan cl(NOLOCK)
+	WHERE ch.Name = @Master AND cl.MasterCID = ch.CID
+
+	-- 방충하려는 클랜 맴버.
+	SELECT @ClanMemCID = ch.CID
+	FROM Character ch(NOLOCK)
+	WHERE ch.Name = @ClanMem
+
+	-- 클랜이 존재하고 클랜맴버가 존재해야 하고 방출되는 맴버가 마스터가 아니어야 함.
+	IF (@CLID IS NULL) OR (@ClanMemCID IS NULL) OR (@MasterCID = @ClanMemCID)
+	BEGIN
+		ROLLBACK TRAN
+		SELECT 0
+		RETURN
+	END
+
+	DELETE ClanMember 
+	WHERE CLID = @CLID AND 	CID = @ClanMemCID
+	IF 0 <> @@ERROR
+	BEGIN
+		ROLLBACK TRAN
+		SELECT 0
+		RETURN
+	END
+
+	SELECT 1
+COMMIT TRAN
+SET NOCOUNT OFF
+GO
+
+
+-----------------------------------------------------------------------------------------------
+
+
+IF OBJECT_ID('spWebGetMyClanInfoByCID ') IS NOT NULL
+BEGIN
+	DROP PROC spWebGetMyClanInfoByCID 
+END
+GO
+
+ -- My랭킹정보를 CID로 가져옴.  
+CREATE PROC spWebGetMyClanInfoByCID  
+ 	@CID int /* 캐릭터 CID */  
+AS  
+BEGIN  
+	SELECT t.Name, t.Name AS Master, t.IntroDuction, t.RegDate, t.Homepage, t.EmblemUrl, t.Ranking
+	FROM 
+	(
+	 	SELECT cl.Name, cl.MasterCID, cl.IntroDuction, cl.RegDate, cl.Homepage, cl.EmblemUrl, cl.Ranking
+	 	FROM ClanMember cm(NOLOCK), Clan cl(NOLOCK), Character ch(NOLOCK)  
+	 	WHERE cm.CID = @CID AND cl.CLID = cm.CLID AND ch.CID = @CID  
+	) AS t, Character ch(NOLOCK)
+	WHERE t.MasterCID = ch.CID
+END  
+
+
+
+
+-----------------------------------------------------------------------------------------------
+
+
+IF OBJECT_ID('spWebDeleteClanByCID') IS NOT NULL
+BEGIN
+	DROP PROC spWebDeleteClanByCID
+END
+GO
+-- CID로 클랜 폐쇄.
+CREATE PROC spWebDeleteClanByCID
+	@MasterCID int /* 마스터 CID */
+AS
+SET NOCOUNT ON
+BEGIN TRAN
+	DECLARE @CLID int
+
+	SELECT @CLID = c.CLID
+	FROM Clan c(NOLOCK)
+	WHERE c.MasterCID = @MasterCID
+
+	-- 요청 조건 검사.
+	IF (@MasterCID IS NULL) OR (@CLID IS NULL)
+	BEGIN
+		SELECT 0 AS Ret
+		ROLLBACK TRAN
+		SELECT 0
+		RETURN
+	END
+
+	-- Clan Member 삭제.
+	DELETE ClanMember WHERE CLID = @CLID
+	IF 0  <> @@ERROR
+	BEGIN
+		SELECT 0 AS Ret
+		ROLLBACK TRAN
+		SELECT 0
+		RETURN
+	END
+
+	-- Clan을 유효하지 않은 상태로 설정.
+	UPDATE Clan SET DeleteFlag = 1, MasterCID = NULL WHERE CLID = @CLID
+	UPDATE Clan SET DeleteName = Name WHERE CLID = @CLID
+	UPDATE Clan SET Name = NULL WHERE CLID = @CLID
+
+	SELECT 1
+COMMIT TRAN
+SET NOCOUNT OFF
+GO
+
+
+-----------------------------------------------------------------------------------------------
+
+
+IF OBJECT_ID('spWebLeaveClanByCID') IS NOT NULL
+BEGIN
+	DROP PROC spWebLeaveClanByCID
+END
+GO
+
+-- CID로 클랜 탈퇴.
+CREATE PROC spWebLeaveClanByCID
+	@CID int /* 탈퇴요청 캐릭터 CID */
+AS
+BEGIN TRAN
+	SET NOCOUNT ON
+
+	DECLARE @CLID int
+	DECLARE @MasterCID int
+
+	-- 존재하는 아이디인가?
+	SELECT @CLID = cm.CLID, @MasterCID = cl.MasterCID
+	FROM Clan cl(NOLOCK), ClanMember cm (NOLOCK)
+	WHERE cm.CID = @CID AND cl.CLID = cm.CLID
+
+	-- 클랜마스터가 아니고 클랜에 가입되 있을 경우만.
+	IF (@CID IS NULL) OR (@MasterCID = @CID) OR (@CLID IS NULL)
+	BEGIN
+		ROLLBACK TRAN
+		SET NOCOUNT OFF
+		RETURN
+	END
+		
+	DELETE ClanMember WHERE CID = @CID
+	IF 0 <> @@ERROR
+	BEGIN
+		ROLLBACK TRAN
+		SET NOCOUNT OFF
+		RETURN
+	END
+
+	SET NOCOUNT OFF
+COMMIT TRAN
+GO
+
+
+-----------------------------------------------------------------------------------------------
+
+
+IF OBJECT_ID('spWebGetClanRankingSearchByName') IS NOT NULL
+BEGIN
+	DROP PROC spWebGetClanRankingSearchByName
+END
+GO
+
+-- 클랜 이름으로 검색.
+CREATE PROC [spWebGetClanRankingSearchByName]  
+ 	@Name VARCHAR(24)  /* 클랜 이름 */
+AS  
+BEGIN  
+ 	SELECT TOP 1 cl.Ranking, cl.RankIncrease, cl.Name as ClanName, cl.Point, cl.Wins, cl.Losses, cl.CLID, cl.EmblemUrl, ch.Name AS Master, cl.RegDate
+	FROM Clan cl(NOLOCK), Character ch(NOLOCK)
+ 	WHERE ch.CID = cl.MasterCID AND cl.Ranking>0 AND cl.DeleteFlag=0 AND cl.Name=@Name
+END  
+GO
+
+
+-----------------------------------------------------------------------------------------------
+
+
+
+IF OBJECT_ID('spWebGetClanListSearchByMaster') IS NOT NULL
+BEGIN
+	DROP PROC spWebGetClanListSearchByMaster
+END
+GO
+
+
+/* 클랜 목록찾기 (마스터이름으로)  
+    Arg1 : @CharName (클랜 마스터 이름) */  
+CREATE PROC [spWebGetClanListSearchByMaster]  
+ 	@CharName VARCHAR(24)  
+AS  
+BEGIN  
+  	SELECT TOP 1 cl.Ranking, cl.RankIncrease, cl.Name as ClanName, cl.Point, cl.Wins, cl.Losses, cl.CLID, cl.EmblemUrl, c.Name AS Master, cl.RegDate
+	FROM Clan cl(NOLOCK), Character c(nolock)  
+  	WHERE c.Name = @CharName AND cl.DeleteFlag = 0 AND cl.MasterCID = c.CID
+END  
+GO
+
+
+-----------------------------------------------------------------------------------------------
+
+
+IF OBJECT_ID('spWebGetMyClanInfoByCLID') IS NOT NULL
+BEGIN
+	DROP PROC spWebGetMyClanInfoByCLID
+END
+GO
+
+-- 클랜 CLID로 클랜 정보 가져옴.
+CREATE PROC spWebGetMyClanInfoByCLID
+	@CLID int /* 클랜 CLID */
+AS
+BEGIN
+	SELECT cl.Name, ch.Name AS Master, cl.IntroDuction, cl.RegDate, cl.Homepage, cl.EmblemUrl, cl.Ranking
+	FROM Clan cl(NOLOCK), Character ch(NOLOCK)
+	WHERE cl.CLID = @CLID AND cl.DeleteFlag = 0 AND ch.CID = cl.MasterCID
+END
+GO
+
+
+
+
+-- 2005.07.15일 작업 리스트 
+-- spWebGetMyClanList
+-- spGetClanRankingSearchByName -> spWebGetClanRankingSearchByName
+-- spGetClanListSearchByMaster -> spWebGetClanListSearchByMaster

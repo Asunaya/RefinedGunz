@@ -1,0 +1,49 @@
+1. LOG 테이블에서 기존에 있던 2달 이전의 자료를 모두 삭제
+
+ - CharacterMakingLog( ~ 6621560)
+ - PlayerLog( ~ 45169148)
+ - ConnLog( ~ 38237863)
+ - GameLog( ~ 20065714)
+ - LevelupLog( ~ 2064862)
+ - Team4GameLog(완전 삭제)
+ - BringAccountItemLog( ~ 1108160)
+ - ClanGameLog( ~ 155785)
+ - ItemPurchaseLogByBounty( ~ 21616454)
+
+-----------------------------------------------------------------------------
+2. GunzLogDB 생성 및 테이블 생성(Log DB Migration 테이블 생성 쿼리.txt)
+
+ - GunzLogDB 생성
+
+ - CharacterMakingLog 테이블 생성
+ - PlayerLog 테이블 생성
+ - ConnLog 테이블 생성
+ - GameLog 테이블 생성
+ - LevelupLog 테이블 생성
+ - BringAccountItemLog 테이블 생성
+ - ClanGameLog 테이블 생성
+ - ItemPurchaseLogByBounty 테이블 생성
+
+-----------------------------------------------------------------------------
+3. GunzDB의 LOG 테이블에 인덱스를 걸자(게임 디비에 인덱스 추가 쿼리명령어.txt)
+
+ - ItemPurchaseLogByCash()
+ - SetItemPurchaseLogByCash()
+ - CashItemPresentLog()
+
+ - PenaltyLog()
+ - CharacterMakingLog()
+ - PlayerLog()
+ - ConnLog()
+ - GameLog()
+ - LevelUpLog()
+ - BringAccountItemLog()
+ - ClanGameLog()
+ - ItemPurchaseLogByBounty()
+
+
+-----------------------------------------------------------------------------
+4. GunzDB의 로그를 GunzLogDB로 옮기는 작업을 Server Agent에 등록(Log DB Migration schedule query.txt)
+ - 매일 오전 5시 10분에 예약
+
+5. 실제로 옮겨지는지 확인하기

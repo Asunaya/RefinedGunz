@@ -1,0 +1,3 @@
+REGEDIT4
+[HKEY_CURRENT_USER\SOFTWARE\Microsoft\VisualStudio\7.1\PreloadAddinState]
+"IncBuildNumber.Connect"=dword:1

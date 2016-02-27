@@ -1,0 +1,64 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BirdAgent", "BirdAgent.vcproj", "{E648A65D-DCC1-4185-AD3A-1CB107E3E5CC}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8D451493-65C2-49C3-ADAE-ACB17E6B0650} = {8D451493-65C2-49C3-ADAE-ACB17E6B0650}
+		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5} = {CBD109C1-1AA3-4A57-B439-9919C08FAAA5}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CSCommon", "..\..\CSCommon\CSCommon.vcproj", "{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cml", "..\..\CML\cml.vcproj", "{8D451493-65C2-49C3-ADAE-ACB17E6B0650}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SourceCodeControl) = preSolution
+		SccNumberOfProjects = 3
+		SccProjectUniqueName0 = ..\\..\\CSCommon\\CSCommon.vcproj
+		SccProjectName0 = \u0022$/CSCommon\u0022,\u0020MALAAAAA
+		SccLocalPath0 = ..\\..\\CSCommon
+		SccProvider0 = MSSCCI:Microsoft\u0020Visual\u0020SourceSafe
+		CanCheckoutShared = false
+		SccProjectUniqueName1 = ..\\..\\CML\\cml.vcproj
+		SccProjectName1 = \u0022$/CML\u0022,\u0020NLAAAAAA
+		SccLocalPath1 = ..\\..\\CML
+		SccProvider1 = MSSCCI:Microsoft\u0020Visual\u0020SourceSafe
+		CanCheckoutShared = false
+		SccProjectUniqueName2 = BirdAgent.vcproj
+		SccProjectName2 = \u0022$/UTILS/BirdAgent\u0022,\u0020CPVAAAAA
+		SccLocalPath2 = .
+		SccProvider2 = MSSCCI:Microsoft\u0020Visual\u0020SourceSafe
+		CanCheckoutShared = false
+	EndGlobalSection
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Release = Release
+		Release_publish = Release_publish
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{E648A65D-DCC1-4185-AD3A-1CB107E3E5CC}.Debug.ActiveCfg = Debug|Win32
+		{E648A65D-DCC1-4185-AD3A-1CB107E3E5CC}.Debug.Build.0 = Debug|Win32
+		{E648A65D-DCC1-4185-AD3A-1CB107E3E5CC}.Release.ActiveCfg = Release|Win32
+		{E648A65D-DCC1-4185-AD3A-1CB107E3E5CC}.Release.Build.0 = Release|Win32
+		{E648A65D-DCC1-4185-AD3A-1CB107E3E5CC}.Release_publish.ActiveCfg = Release|Win32
+		{E648A65D-DCC1-4185-AD3A-1CB107E3E5CC}.Release_publish.Build.0 = Release|Win32
+		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.Debug.ActiveCfg = Debug|Win32
+		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.Debug.Build.0 = Debug|Win32
+		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.Release.ActiveCfg = Release|Win32
+		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.Release.Build.0 = Release|Win32
+		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.Release_publish.ActiveCfg = Release|Win32
+		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.Release_publish.Build.0 = Release|Win32
+		{8D451493-65C2-49C3-ADAE-ACB17E6B0650}.Debug.ActiveCfg = Debug|Win32
+		{8D451493-65C2-49C3-ADAE-ACB17E6B0650}.Debug.Build.0 = Debug|Win32
+		{8D451493-65C2-49C3-ADAE-ACB17E6B0650}.Release.ActiveCfg = Release|Win32
+		{8D451493-65C2-49C3-ADAE-ACB17E6B0650}.Release.Build.0 = Release|Win32
+		{8D451493-65C2-49C3-ADAE-ACB17E6B0650}.Release_publish.ActiveCfg = Release_publish|Win32
+		{8D451493-65C2-49C3-ADAE-ACB17E6B0650}.Release_publish.Build.0 = Release_publish|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal

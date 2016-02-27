@@ -1,0 +1,9 @@
+SCC = This is a Source Code Control file
+
+[ddsgen.sln]
+SCC_Aux_Path = "\\databank\VSS\"
+SCC_Project_Name = "$/UTILS/ddsgen", VTSAAAAA
+
+[ddsgen.vcproj]
+SCC_Aux_Path = "\\Databank\VSS\"
+SCC_Project_Name = "$/UTILS/ddsgen", VTSAAAAA

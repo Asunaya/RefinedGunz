@@ -1,0 +1,101 @@
+<?php
+
+
+include ("menu.inc");
+include ("dbconn.inc"); 
+
+$query = "SELECT TOP 100 c.Name c_name, a.userid a_userid, Level, c.Sex c_sex, XP, BP, KillCount, DeathCount FROM Character c " .
+         "JOIN Account a On a.aid = c.aid ORDER BY XP Desc";
+
+if ($_GET[sort_mode] == "rank")
+{
+   $query = "SELECT TOP 100 c.Name c_name, a.userid a_userid, Level, c.Sex c_sex, XP, BP, KillCount, DeathCount FROM Character c " .
+            "JOIN Account a On a.aid = c.aid ORDER BY (KillCount/(DeathCount+0.0001)) Desc";
+}
+else if ($_GET[sort_mode] == "kill")
+{
+   $query = "SELECT TOP 100 c.Name c_name, a.userid a_userid, Level, c.Sex c_sex, XP, BP, KillCount, DeathCount FROM Character c " .
+            "JOIN Account a On a.aid = c.aid ORDER BY KillCount Desc";
+
+}  
+else if ($_GET[sort_mode] == "death")
+{
+   $query = "SELECT TOP 100 c.Name c_name, a.userid a_userid, Level, c.Sex c_sex, XP, BP, KillCount, DeathCount FROM Character c " .
+            "JOIN Account a On a.aid = c.aid ORDER BY DeathCount Desc";
+
+}  
+else if ($_GET[sort_mode] == "bp")
+{
+   $query = "SELECT TOP 100 c.Name c_name, a.userid a_userid, Level, c.Sex c_sex, XP, BP, KillCount, DeathCount FROM Character c " .
+            "JOIN Account a On a.aid = c.aid ORDER BY c.bp Desc";
+
+}  
+else if ($_GET[sort_mode] == "aid")
+{
+   $query = "SELECT c.Name c_name, a.userid a_userid, Level, c.Sex c_sex, XP, BP, KillCount, DeathCount FROM Character c " .
+            "JOIN Account a On a.aid = c.aid ORDER BY a.userid";
+
+}  
+
+
+$result = mssql_query($query, $con);
+
+echo("<CENTER>
+<H1>GUNZ 랭킹</H1>
+<TABLE border=1>
+<TR bgcolor=#EEEEEE>
+<TD width=50 align=center>순위</TD>
+<TD width=120 align=center>이름</TD>
+<TD width=80 align=center><a href='ranking.html?sort_mode=aid'>계정</a></TD>
+<TD width=40 align=center>레벨</TD>
+<TD width=40 align=center>성별</TD>
+<TD width=70 align=center><a href='ranking.html'>경험치</a></TD>
+<TD width=100 align=center><a href='ranking.html?sort_mode=bp'>바운티</a></TD>
+<TD width=40 align=center><a href='ranking.html?sort_mode=kill'>Kill</a></TD>
+<TD width=40 align=center><a href='ranking.html?sort_mode=death'>Death</a></TD>
+<TD width=50 align=center><a href='ranking.html?sort_mode=rank'>승률</a></TD>
+</TR>
+");
+
+$no = 0;
+while ($row = mssql_fetch_array($result))
+{
+	$no++;
+	$t = $row[KillCount] + $row[DeathCount];
+	if ($t != 0) $ratio = $row[KillCount] / $t; else $ratio = 0;
+	$ratio = (int)($ratio * 100);
+	if ($row[c_sex] == 0) $strSex = "<img src='img/m.gif'>"; else $strSex = "<img src='img/f.gif'>";
+
+	if ($no == 1) echo("<TR bgcolor=#DDDDEE>");
+	else if ($no == 2) echo("<TR bgcolor=#DDDDCC>");
+	else if ($no == 3) echo("<TR bgcolor=#DDDDBB>");
+        else echo ("<TR>");
+
+	$realcname = $row[c_name];
+	if ($realcname == "") $realcname = "[[삭제캐릭]]";
+
+	echo("
+<TD align=center>$no</TD>
+<TD><B><a href='characterinfo.html?charname=$realcname'>$realcname</a></B></TD>
+<TD><a href='accountinfo.html?aname=$row[a_userid]'>$row[a_userid]</a></TD>
+<TD>$row[Level]</TD>
+<TD align=center>$strSex</TD>
+<TD align=right>$row[XP]</TD>
+<TD align=right>$row[BP]</TD>
+<TD align=center>$row[KillCount]</TD>
+<TD align=center>$row[DeathCount]</TD>
+<TD align=center>$ratio %</TD>
+</TR>
+");
+}
+
+echo("</TABLE>
+</CENTER>");
+
+mssql_close($con);
+
+?>
+
+
+
+<? include ("sign.inc"); ?>

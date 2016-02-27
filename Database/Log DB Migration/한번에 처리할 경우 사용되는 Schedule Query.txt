@@ -1,0 +1,76 @@
+-- 날짜 정함: @Date에는 오늘 일자의 0:00 이 들어간다.
+DECLARE @Date datetime
+DECLARE @CurDay datetime
+SELECT @CurDay = CONVERT( varchar(30), GETDATE(), 2 )
+SELECT @Date = DATEADD( dd, 0, @CurDay )
+
+
+-- [CharacterMakingLog]
+INSERT INTO GunzLogDB.dbo.CharacterMakingLog( AID, CharName, Type, Date )
+SELECT AID, CharName, Type, Date FROM GunzDB.dbo.CharacterMakingLog WHERE Date < @Date ORDER BY id
+
+DELETE FROM GunzDB.dbo.CharacterMakingLog WHERE Date < @Date
+
+----------------------------------------------------------------------------
+
+-- [PlayerLog]
+INSERT INTO GunzLogDB.dbo.PlayerLog( CID, DisTime, PlayTime, Kills, Deaths, XP, TotalXP )
+SELECT CID, DisTime, PlayTime, Kills, Deaths, XP, TotalXP FROM GunzDB.dbo.PlayerLog WHERE DisTime < @Date ORDER BY id
+
+DELETE FROM GunzDB.dbo.PlayerLog WHERE DisTime < @Date
+
+----------------------------------------------------------------------------
+
+-- [ConnLog]
+INSERT INTO GunzLogDB.dbo.ConnLog( AID, UserID, Time, IP )
+SELECT AID, UserID, Time, IP FROM GunzDB.dbo.ConnLog ORDER BY id
+
+DELETE FROM GunzDB.dbo.ConnLog WHERE Time < @Date
+
+----------------------------------------------------------------------------
+
+-- [GameLog]
+INSERT INTO GunzLogDB.dbo.GameLog( GameName, MasterCID, Map, GameType, Round, StartTime, PlayerCount, Players )
+SELECT GameName, MasterCID, Map, GameType, Round, StartTime, PlayerCount, Players FROM GunzDB.dbo.GameLog WHERE StartTime < @Date ORDER BY id
+
+DELETE FROM GunzDB.dbo.GameLog WHERE StartTime < @Date
+
+----------------------------------------------------------------------------
+
+-- [LevelUpLog]
+INSERT INTO GunzLogDB.dbo.LevelUpLog( CID, Level, BP, KillCount, DeathCount, PlayTime, Date )
+SELECT CID, Level, BP, KillCount, DeathCount, PlayTime, Date FROM GunzDB.dbo.LevelUpLog WHERE Date < @Date ORDER BY id
+
+DELETE FROM GunzDB.dbo.LevelUpLog WHERE Date < @Date
+
+----------------------------------------------------------------------------
+
+-- [BringAccountItemLog]
+INSERT INTO GunzLogDB.dbo.BringAccountItemLog( AID, CID, ItemID, Date )
+SELECT AID, CID, ItemID, Date FROM GunzDB.dbo.BringAccountItemLog WHERE Date < @Date ORDER BY id
+
+DELETE FROM GunzDB.dbo.BringAccountItemLog WHERE Date < @Date
+
+----------------------------------------------------------------------------
+
+-- [ClanGameLog]
+INSERT INTO GunzLogDB.dbo.ClanGameLog( WinnerCLID, LoserCLID, WinnerClanName, LoserClanName, WinnerMembers, LoserMembers, RoundWins, RoundLosses, MapID, GameType, RegDate )
+SELECT WinnerCLID, LoserCLID, WinnerClanName, LoserClanName, WinnerMembers, LoserMembers, RoundWins, RoundLosses, MapID, GameType, RegDate FROM GunzDB.dbo.ClanGameLog WHERE RegDate < @Date ORDER BY id
+
+DELETE FROM GunzDB.dbo.ClanGameLog WHERE RegDate < @Date
+
+----------------------------------------------------------------------------
+
+-- [ItemPurchaseLogByBounty]
+INSERT INTO GunzLogDB.dbo.ItemPurchaseLogByBounty( ItemID, CID, Date, Bounty, CharBounty, Type )
+SELECT ItemID, CID, Date, Bounty, CharBounty, Type FROM GunzDB.dbo.ItemPurchaseLogByBounty WHERE Date < @Date ORDER BY id
+
+DELETE FROM GunzDB.dbo.ItemPurchaseLogByBounty WHERE Date < @Date
+
+----------------------------------------------------------------------------
+
+-- [ServerLog]
+INSERT INTO GunzLogDB.dbo.ServerLog( ServerID, PlayerCount, GameCount, Time )
+SELECT ServerID, PlayerCount, GameCount, Time FROM GunzDB.dbo.ServerLog WHERE Time < @Date ORDER BY id
+
+DELETE FROM GunzDB.dbo.ServerLog WHERE Time < @Date

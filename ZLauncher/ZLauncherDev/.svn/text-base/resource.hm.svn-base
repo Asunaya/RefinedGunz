@@ -1,0 +1,4 @@
+// Microsoft Visual C++ generated Help ID include file.
+// Used by NewApp.rc
+//
+#define HIDC_STARTGAME                  0x806403ef    // IDD_DIALOG_MAINDLG

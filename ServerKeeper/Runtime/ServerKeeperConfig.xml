@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="euc-kr" ?>
+<XML id="ServerKeeperConfig">
+	<SERVERITEM slotid="0">
+		<VITALCHECK>TRUE</VITALCHECK>
+		<SERVERTYPE>MatchServer</SERVERTYPE>
+		<NAME>MatchServer01</NAME>
+		<PATH>C:\GunzServer\MatchServer\MatchServerD.exe</PATH>
+	</SERVERITEM>
+	<SERVERITEM slotid="1">
+		<VITALCHECK>TRUE</VITALCHECK>
+		<SERVERTYPE>MatchAgent</SERVERTYPE>
+		<NAME>AgentServer01</NAME>
+		<PATH>C:\GunzServer\MatchAgent\MatchAgent.exe</PATH>
+	</SERVERITEM>	
+	<SERVERITEM slotid="2">
+		<VITALCHECK>FALSE</VITALCHECK>
+		<SERVERTYPE>Locator</SERVERTYPE>
+		<NAME>Locator</NAME>	
+		<PATH>C:\GunzServer\Locator\Locator.exe</PATH>
+	</SERVERITEM>
+</XML>

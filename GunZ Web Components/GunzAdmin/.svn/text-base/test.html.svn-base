@@ -1,0 +1,24 @@
+<?php
+
+
+include ("menu.inc");
+include ("dbconn.inc"); 
+
+$query = "INSERT INTO CharacterItem (CID, ItemID) Values (72, 1)";
+  
+
+for ($i = 0; $i < 5000000; $i++)
+{
+	if (($i % 10000) == 0) { echo ("$i °³ ÀÔ·Â<BR>\n"); }
+	$result = mssql_query($query, $con);	
+}
+
+
+
+mssql_close($con);
+
+?>
+
+
+
+<? include ("sign.inc"); ?>

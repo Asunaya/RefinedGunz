@@ -1,0 +1,116 @@
+<?
+	require_once("core.php");
+	check_session();
+?>
+<HTML>
+<BODY>
+<?php
+
+require_once('core.php');
+
+
+$charname = $_POST['charname'];
+
+echo("<CENTER><H1>캐릭터 관리 기록</H1></CENTER>\n");
+
+echo("
+<FORM action='./CharacterCareLog.html' method=post>
+<TABLE>
+<TR>
+<TD>캐릭터 이름</TD>
+<TD><INPUT type=text name=charname value=''></TD>
+<TD><INPUT type=hidden name=mode value='process'>
+<INPUT type=image src='/img/search.gif'></TD>
+</TR>
+</TABLE>
+</FORM>
+");
+
+if ($_POST['mode'] == "")
+{
+  if ($userid =='')
+  {
+  
+  
+  }
+
+}
+else if ($_POST['mode'] == "process")
+{
+  include ("dbconn.inc"); 
+  
+  $query = "SELECT a.UserID, l.CharName, l.Type, l.Date 
+			FROM CharacterMakingLog l(NOLOCK), Account a(NOLOCK) 
+			WHERE l.AID=a.AID AND CharName='$charname' ORDER BY Date DESC";
+  $result = $db->query($query);
+  
+  $cnt = 0;
+  $total_cash = 0;
+  
+  while ($row = $db->fetch())
+  {
+	$arr[$cnt]['UserID'] =    $row->UserID;
+	$arr[$cnt]['CharName'] =    $row->CharName;
+	$arr[$cnt]['Type'] =    $row->Type;
+	$arr[$cnt]['Date'] =      $row->Date;
+
+	$cnt++;
+  } // while
+
+  echo("<BR><BR>
+<CENTER>
+<TABLE border=1>
+<TR bgcolor=#EEEEEE>
+<TD width=100 align=center>계정</TD>
+<TD width=100 align=center>캐릭터이름</TD>
+<TD width=80 align=center>관리기록</TD>
+<TD width=200 align=center>날짜</TD>
+</TR>
+  ");
+  
+/*  if ($cnt > 0)
+  {
+    $arr=dArray_sort($arr, 'Date');
+    $arr = array_reverse($arr);
+  }
+  */
+
+  for ($i = 0; $i < $cnt; $i++)
+  {
+	echo ("<TR bgcolor=#FFF9E7>\n");
+
+
+echo (
+"<TD align=center>{$arr[$i]['UserID']}</TD>
+<TD align=center>{$arr[$i]['CharName']}</TD>
+<TD>{$arr[$i]['Type']}</TD>
+<TD>{$arr[$i]['Date']}</TD>
+</TR>
+");
+  } // for
+  
+  if ($cnt == 0)
+  {
+    echo("<TR>
+<TD align=center>$charname</TD>
+<TD colspan=4 align=center>일치하는 이름이 없습니다.</TD>
+</TR>
+"); 
+  }
+
+  echo("</TABLE>
+</CENTER>
+  ");
+    
+  $db->close();
+
+
+}   // else if ($_POST['mode'] == "process")
+?>
+
+
+
+<? include ("sign.inc"); ?>
+
+</BODY>
+</HTML>

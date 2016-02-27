@@ -1,0 +1,161 @@
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/gzip
+END
+inffast.h
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/gzip/inffast.h
+END
+inffixed.h
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/gzip/inffixed.h
+END
+deflate.c
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/gzip/deflate.c
+END
+zlib.h
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/gzip/zlib.h
+END
+zutil.c
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/gzip/zutil.c
+END
+gzio.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/gzip/gzio.cpp
+END
+gzip.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/gzip/gzip.cpp
+END
+deflate.h
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/gzip/deflate.h
+END
+crc32.c
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/gzip/crc32.c
+END
+zutil.h
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/gzip/zutil.h
+END
+gzip.h
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/gzip/gzip.h
+END
+inftrees.c
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/gzip/inftrees.c
+END
+crc32.h
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/gzip/crc32.h
+END
+inflate.c
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/gzip/inflate.c
+END
+trees.c
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/gzip/trees.c
+END
+uncompr.c
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/gzip/uncompr.c
+END
+inftrees.h
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/gzip/inftrees.h
+END
+zconf.h
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/gzip/zconf.h
+END
+inflate.h
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/gzip/inflate.h
+END
+trees.h
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/gzip/trees.h
+END
+zconf.in.h
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/gzip/zconf.in.h
+END
+inffast.c
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/gzip/inffast.c
+END
+gzip.vcproj
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/gzip/gzip.vcproj
+END
+compress.c
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/gzip/compress.c
+END
+adler32.c
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/gzip/adler32.c
+END
+infback.c
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/Gunz/!svn/ver/4866/Develop/Utils/DownLoader/gzip/infback.c
+END

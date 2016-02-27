@@ -1,0 +1,102 @@
+<?
+	require_once("core.php");
+	check_session();
+?>
+<?php
+
+require_once("core.php");
+
+
+
+
+echo("<CENTER>
+<H1>GUNZ 접속 로그</H1>
+</CENTER>
+");
+
+
+echo("
+<FORM action='./connlog.html' method=post>
+<TABLE>
+<TR>
+<TD>넷마블 아이디</TD>
+<TD><INPUT type=text name=userid value=''></TD>
+<TD><INPUT type=hidden name=mode value='process'>
+<INPUT type=image src='/img/search.gif'></TD>
+</TR>
+<TR>
+<TD align=right>개수</TD>
+<TD><INPUT type=text name=count value='100'></TD>
+</TR>
+<TR>
+<TD colspan=2 align=right>
+<INPUT type=hidden name='mode' value='view'>
+</TD>
+</TR>
+</TABLE>
+</FORM>
+");
+
+
+$r_mode = $_POST['mode'];
+
+if ($r_mode == 'view')
+{
+  $r_userid = $_POST['userid'];
+  $r_count = $_POST['count'];
+  if ($r_count >= 1000) $r_count=1000;
+
+  include ("dbconn.inc");
+
+  $query = '';
+  if ($r_userid == '')
+  {
+    $query = "SELECT TOP " . $r_count . " * FROM ConnLog(nolock) ORDER BY id desc";
+  }
+  else
+  {
+    $query = "SELECT TOP " . $r_count . " * FROM ConnLog(nolock) WHERE userid='" . $r_userid . "' ORDER BY id desc";
+  }
+
+  $result = $db->query($query);
+
+  echo("<CENTER>
+  <TABLE border=1>
+  <TR bgcolor=#EEEEEE>
+  <TD width=50 align=center>no</TD>
+  <TD width=100 align=center>아이디</TD>
+  <TD width=150 align=center>접속시간</TD>
+  <TD width=100 align=center>접속IP</TD>
+  </TR>
+  ");
+
+  $cnt = 1;
+  while ($row = $db->fetch())
+  {
+          echo ("<TR>
+  <TD align=center width=50>$cnt</TD>
+  <TD width=100>$row->UserID</TD>
+  <TD width=150>$row->Time</TD>
+  <TD width=100>$row->IP</TD>
+  </TR>
+  ");
+    $cnt++;
+  }
+
+  echo("</TABLE>\n</CENTER>\n");
+
+  $db->close();
+
+
+
+
+
+
+
+}
+
+
+?>
+
+
+<? include ("sign.inc"); ?>

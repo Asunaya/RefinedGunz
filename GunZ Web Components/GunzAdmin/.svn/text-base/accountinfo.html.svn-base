@@ -1,0 +1,194 @@
+<?
+	require_once("core.php");
+	check_session();
+
+	$sess_login = $_SESSION["Login"];
+	$sess_level = $_SESSION["Level"];
+?>
+<HTML>
+<HEAD>
+<LINK REL='StyleSheet' HREF='style.css'>
+</HEAD>
+<BODY>
+<?php
+function printCharacterUndeleteLink($CID, $msg)
+{
+	return "<A HREF=CharacterUndelete.html?mode=proceed&CID=$CID>$msg</A>";
+}
+
+require_once('core.php');
+
+echo("<CENTER><H1>계정 정보</H1></CENTER>\n");
+
+echo("
+<FORM name=form action='./AccountInfo.html' method=post>
+<TABLE>
+<TR>
+<TD>넷마블 아이디</TD>
+<TD><INPUT type=text name=userid value=''></TD>
+<TD><INPUT type=hidden name=mode value='process'>
+<INPUT type=image src='/img/search.gif'></TD>
+</TR>
+</TABLE>
+</FORM>
+<SCRIPT>
+	form.userid.focus();
+</SCRIPT>
+");
+
+$userid = $_POST['userid'];
+if ($userid == '') $userid = $_GET['userid'];
+
+$r_aid = $_POST['aid'];
+if ($r_aid == '') $r_aid = $_GET['aid'];
+
+$mode = $_POST['mode'];
+if ($mode == '') $mode = $_GET['mode'];
+
+$aid = 0;
+
+if ($mode == "")
+{
+  if ($userid =='')
+  {
+
+
+  }
+
+}
+else if ($mode == "process")
+{
+  include ("dbconn.inc");
+
+
+  if ($userid != '')
+	  $result = db_query_account_info_from_userid($userid);
+  else if ($r_aid != '')
+	  $result = db_query_account_info_from_aid($r_aid);
+
+
+  $rownum = $db->getNumRow();
+  if ($rownum == 0)
+  {
+    echo ("<BR>\n해당 계정은 존재하지 않습니다.<BR>\n");
+    $db->close();
+	exit();
+  }
+
+  else
+  {
+    $cnt = 0;
+    while ($row = $db->fetch())
+    {
+      if ($row->Sex == 0) $account_arr[$cnt]->Sex="남자";
+      else $account_arr[$cnt]->Sex="여자";
+
+      $aid = $row->AID;
+
+      $account_arr[$cnt]->AID = $row->AID;
+      $account_arr[$cnt]->UserID = $row->UserID;
+      $account_arr[$cnt]->Name = $row->Name;
+      $account_arr[$cnt]->Age = $row->Age;
+      $account_arr[$cnt]->UGradeID = $row->UGradeID;
+      $account_arr[$cnt]->RegDate = $row->RegDate;
+
+      $cnt++;
+    } // while
+
+
+    view_account_info($account_arr, $cnt);
+  }
+
+  ## 징계정보 ##
+  $query = "SELECT DayLeft FROM AccountPenaltyPeriod(NOLOCK) WHERE AID=$aid ORDER BY id DESC";
+  $result = $db->query($query);
+  if ($row = $db->fetch()) {
+	echo("<TABLE border=1 cellpadding=0 cellspacing=0>
+	   <TR bgcolor=#EEEEEE><TD width=90 align=center>남은징계기간</TD></TR>
+	   <TR><TD align=center>$row->DayLeft 일</TD></TR>
+	   </TABLE><BR>
+	");	
+  }
+  
+
+  ##
+  ## 캐릭터 정보
+  #################
+  $query = "SELECT AID, CID, Level, Name, CharNum, XP, BP, Sex, RegDate, PlayTime, LastTime, KillCount, DeathCount, DeleteFlag, DeleteName FROM Character(nolock) where AID=$aid order by DeleteFlag, CharNum";
+  $result = $db->query($query);
+
+  $cnt = 0;
+  while ($row = $db->fetch())
+  {
+    if ($row->Sex == 0) $char_arr[$cnt]->Sex="남자"; else $char_arr[$cnt]->Sex="여자";
+
+    if ($row->DeleteFlag == 1) {
+		$link = printCharacterUndeleteLink($row->CID,'[복구]');
+		$char_arr[$cnt]->Name="<font color=#AAAAAA>삭제됨<br>($row->DeleteName)<br>$link</font>";
+		
+	} else {
+		$char_arr[$cnt]->Name=$row->Name;
+	}
+
+    if ($row->LastTime == "") $char_arr[$cnt]->LastTime = "&nbsp;";
+    else $char_arr[$cnt]->LastTime = $row->LastTime;
+
+    $char_arr[$cnt]->AID = $row->AID;
+    $char_arr[$cnt]->CID = $row->CID;
+    $char_arr[$cnt]->Level = $row->Level;
+    $char_arr[$cnt]->CharNum = $row->CharNum;
+    $char_arr[$cnt]->XP = $row->XP;
+    $char_arr[$cnt]->BP = $row->BP;
+    $char_arr[$cnt]->RegDate = $row->RegDate;
+    $char_arr[$cnt]->PlayTime = $row->PlayTime;
+    $char_arr[$cnt]->KillCount = $row->KillCount;
+    $char_arr[$cnt]->DeathCount = $row->DeathCount;
+
+
+    $cnt++;
+  } // while
+
+
+  view_character_info($char_arr, $cnt);
+
+
+  ## 캐쉬아이템 정보
+  ##########################
+  $query = "SELECT ai.AIID AS AIID, i.Name AS ItemName, i.ItemID AS ItemID, RentHourPeriod-DATEDIFF (hh, RentDate, GetDate()) AS RentRemain 
+			FROM AccountItem ai(nolock), Item i(nolock) 
+			WHERE AID=".$aid." AND ai.ItemID=i.ItemID";
+  $result = $db->query($query);
+
+  $cnt = 0;
+  while ($row = $db->fetch())
+  {
+    $accountitem_arr[$cnt]->AIID = $row->AIID;
+    $accountitem_arr[$cnt]->ItemName = $row->ItemName;
+    $accountitem_arr[$cnt]->ItemID = $row->ItemID;
+	$accountitem_arr[$cnt]->RentRemain = $row->RentRemain;
+
+    $cnt++;
+  } // while
+
+  echo("<BR><BR>\n");
+
+  $delete_item_enabled = 1;
+  if ($sess_level >= 5)  $delete_item_enabled = 0;
+
+  view_accountitem_info($accountitem_arr, $cnt, $delete_item_enabled , $userid);
+
+
+  view_accountinfo_order($aid);
+
+
+  $db->close();
+} // if
+
+
+?>
+
+
+
+<? include ("sign.inc"); ?>
+</BODY>
+</HTML>

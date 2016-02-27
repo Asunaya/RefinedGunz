@@ -1,0 +1,158 @@
+<?
+	require_once("core.php");
+	check_session();
+?>
+<HTML>
+<BODY>
+<?php
+
+require_once('core.php');
+
+
+$userid = $_POST['userid'];
+
+echo("<CENTER><H1>캐쉬아이템 선물구매정보</H1></CENTER>\n");
+
+echo("
+<FORM action='./ShopPresentLog.html' method=post>
+<TABLE>
+<TR>
+<TD>넷마블 아이디</TD>
+<TD><INPUT type=text name=userid value=''></TD>
+<TD><INPUT type=hidden name=mode value='process'>
+<INPUT type=image src='/img/search.gif'></TD>
+</TR>
+</TABLE>
+</FORM>
+");
+
+if ($_POST['mode'] == "")
+{
+  if ($userid =='')
+  {
+  
+  
+  }
+
+}
+else if ($_POST['mode'] == "process")
+{
+  include ("dbconn.inc"); 
+  
+  $query = "SELECT AID FROM Account(NOLOCK) WHERE UserID='$userid' ";
+  $result = $db->query($query);
+  	if (!$result)
+	{
+		echo ("그런 아이디는 존재하지 않습니다.");
+		$db->close();
+		exit();
+	}
+
+	$row = $db->fetch();
+	$aid = $row->AID;
+
+	if ($aid == '')
+	{
+		echo ("그런 아이디는 존재하지 않습니다..");
+		$db->close();
+		exit();
+	}
+
+$query = "SELECT id, SenderUserID, a.UserID AS UserID, i.Name AS ItemName, Cash, Date 
+FROM CashItemPresentLog l(NOLOCK), Account a(NOLOCK), CashShop cs(NOLOCK), Item i(NOLOCK)
+WHERE SenderUserID='$userid' AND ReceiverAID=a.AID AND l.CSID=cs.CSID AND cs.ItemID=i.ItemID
+UNION
+SELECT id, SenderUserID, a.UserID, css.Name, Cash, Date 
+FROM CashItemPresentLog l(NOLOCK), Account a(NOLOCK), CashSetShop css(NOLOCK)
+WHERE SenderUserID='$userid' AND ReceiverAID=a.AID AND  l.CSSID=css.CSSID
+UNION
+SELECT id, SenderUserID, a.UserID, i.Name, Cash, Date 
+FROM CashItemPresentLog l(NOLOCK), Account a(NOLOCK), CashShop cs(NOLOCK), Item i(NOLOCK)
+WHERE ReceiverAID=$aid AND ReceiverAID=a.AID AND l.CSID=cs.CSID AND cs.ItemID=i.ItemID
+UNION
+SELECT id, SenderUserID, a.UserID, css.Name, Cash, Date 
+FROM CashItemPresentLog l(NOLOCK), Account a(NOLOCK), CashSetShop css(NOLOCK)
+WHERE ReceiverAID=$aid AND ReceiverAID=a.AID AND l.CSSID=css.CSSID
+";
+  $result = $db->query($query);
+
+  $cnt = 0;
+  $total_cash = 0;
+  
+  while ($row = $db->fetch())
+  {
+    $arr[$cnt]['id'] =    $row->id;
+    $arr[$cnt]['SenderUserID'] = $row->SenderUserID;
+    $arr[$cnt]['UserID'] = $row->UserID;
+    $arr[$cnt]['ItemName'] = $row->ItemName;
+    $arr[$cnt]['Cash'] = $row->Cash;
+    $arr[$cnt]['Date'] = $row->Date;
+
+    $total_cash += $row->Cash;
+    
+    $cnt++;
+  } // while
+
+ echo("<BR><BR>
+<CENTER>
+<TABLE border=1>
+<TR bgcolor=#EEEEEE>
+<TD width=50 align=center>id</TD>
+<TD width=100 align=center>보낸이</TD>
+<TD width=100 align=center>받은이</TD>
+<TD align=center>아이템</TD>
+<TD width=40 align=center>가격</TD>
+<TD width=150 align=center>날짜</TD>
+</TR>
+  ");
+  
+  if ($cnt > 0)
+  {
+    $arr = dArray_sort($arr, 'Date');
+    $arr = array_reverse($arr);
+  }
+  
+  for ($i = 0; $i < $cnt; $i++)
+  {
+    echo ("<TR bgcolor=#F2F9E8>\n");
+    echo ("<TD align=center>{$arr[$i]['id']}</TD>
+<TD align=center>{$arr[$i]['SenderUserID']}</TD>
+<TD align=center>{$arr[$i]['UserID']}</TD>
+<TD>{$arr[$i]['ItemName']}</TD>
+<TD align=right>{$arr[$i]['Cash']}</TD>
+<TD>{$arr[$i]['Date']}</TD>
+</TR>
+");
+  } // for
+  
+  if ($cnt == 0)
+  {
+    echo("<TR>
+<TD align=center>$userid</TD>
+<TD colspan=6 align=center>구매 정보가 없습니다.</TD>
+</TR>
+"); 
+  }
+  else
+  {  
+    echo("
+<TR height=40><TD colspan=6>총 캐쉬액 : $total_cash 원</TD></TR>
+    ");
+  }
+
+  echo("</TABLE>
+</CENTER>
+  ");
+    
+  $db->close();
+
+
+}   // else if ($_POST['mode'] == "process")
+?>
+
+
+
+<? include ("sign.inc"); ?>
+
+</BODY>
+</HTML>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="euc-kr" ?>
+<XML ID="Server Config">
+	<GLOBAL>
+		<SERVERNAME>AceSaga</SERVERNAME>
+		<LOCATION>Seoul Korea</LOCATION>
+		<DESCRIPTION>AceSaga BattleArena Server SITE-1</DESCRIPTION>
+		<ADMINNAME>Webmaster</ADMINNAME>
+		<ADMINEMAIL>webmaster@maietgames.com</ADMINEMAIL>
+	</GLOBAL>
+	<MAP ID="bird">
+		<WIDTH>4000</WIDTH>
+		<HEIGHT>4000</HEIGHT>
+	</MAP>
+	<MAP ID="test">
+		<WIDTH>500</WIDTH>
+		<HEIGHT>500</HEIGHT>
+	</MAP>
+	<MAP ID="alpha">
+		<WIDTH>10000</WIDTH>
+		<HEIGHT>20000</HEIGHT>
+	</MAP>
+
+</XML>

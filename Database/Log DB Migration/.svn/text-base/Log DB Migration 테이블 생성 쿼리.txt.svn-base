@@ -1,0 +1,200 @@
+DROP TABLE CharacterMakingLog
+DROP TABLE PlayerLog
+DROP TABLE ConnLog
+DROP TABLE GameLog
+DROP TABLE LevelUpLog
+DROP TABLE BringAccountItemLog
+DROP TABLE ClanGameLog
+DROP TABLE ItemPurchaseLogByBounty
+
+
+
+CREATE TABLE CharacterMakingLog(
+	id	int	IDENTITY PRIMARY KEY
+,	AID	int
+,	CharName	varchar( 32 )
+,	Type	varchar( 20 )
+,	Date	datetime )
+
+CREATE NONCLUSTERED INDEX CharacterMakingLogAIDIndex
+ON CharacterMakingLog( AID )
+
+CREATE NONCLUSTERED INDEX CharacterMakingLogCharNameIndex
+ON CharacterMakingLog( CharName )
+
+CREATE NONCLUSTERED INDEX CharacterMakingLogDateIndex
+ON CharacterMakingLog( Date )
+
+
+---------------------------------------------------------------------
+
+
+CREATE TABLE PlayerLog(
+	id	int 	IDENTITY PRIMARY KEY
+,	CID	int
+,	DisTime	datetime
+,	PlayTime	int
+,	Kills	int
+,	Deaths	int
+, 	XP	int
+,	TotalXP	int )
+
+CREATE NONCLUSTERED INDEX PlayerLogCIDIndex
+ON PlayerLog( CID )
+
+CREATE NONCLUSTERED INDEX PlayerLogDisTime
+ON PlayerLog( DisTime )
+
+
+---------------------------------------------------------------------
+
+
+CREATE TABLE ConnLog(
+	id	int	IDENTITY PRIMARY KEY
+,	AID	int
+,	UserID	varchar( 20 )
+,	Time	datetime
+,	IP	varchar( 20 ) )
+
+CREATE NONCLUSTERED INDEX ConnLogAIDIndex
+ON ConnLog( AID )
+
+CREATE NONCLUSTERED INDEX ConnLogUserIDIndex
+ON ConnLog( UserID )
+
+CREATE NONCLUSTERED INDEX ConnLogTimeIndex
+ON ConnLog( Time )
+
+CREATE NONCLUSTERED INDEX ConnLogIPIndex
+ON ConnLog( IP )
+
+
+---------------------------------------------------------------------
+
+
+CREATE TABLE GameLog(
+	id	int 	IDENTITY PRIMARY KEY
+,	GameName	varchar( 64 )
+,	MasterCID	int
+,	Map	varchar( 32 )
+,	GameType	varchar( 24 )
+,	Round	int
+,	StartTime	datetime NOT NULL
+,	PlayerCount	tinyint
+,	Players	varchar( 1000 ) )
+
+CREATE NONCLUSTERED INDEX GameLogMapIndex
+ON GameLog( Map )
+
+CREATE NONCLUSTERED INDEX GameLogMasterCIDIndex
+ON GameLog( MasterCID )
+
+CREATE NONCLUSTERED INDEX GameLogGameTypeIndex
+ON GameLog( GameType )
+
+CREATE NONCLUSTERED INDEX GameLogStartTimeIndex
+ON GameLog( StartTime )
+
+
+---------------------------------------------------------------------
+
+
+CREATE TABLE LevelUpLog(
+	id	int	IDENTITY PRIMARY KEY
+,	CID	int
+,	Level	smallint
+,	BP	int
+,	KillCount	int
+,	DeathCount	int
+,	PlayTime	int
+,	Date	datetime )
+
+CREATE NONCLUSTERED INDEX LevelUpLogCIDIndex
+ON LevelUpLog( CID )
+
+CREATE NONCLUSTERED INDEX LevelUpLogDateIndex
+ON LevelUpLog( Date )
+
+
+---------------------------------------------------------------------
+
+
+CREATE TABLE BringAccountItemLog(
+	id	int 	IDENTITY PRIMARY KEY
+,	AID	int
+,	CID	int
+,	ItemID	int	NOT NULL
+,	Date	datetime	NOT NULL )
+
+CREATE NONCLUSTERED INDEX BringAccountItemLogAIDIndex
+ON BringAccountItemLog( AID )
+
+CREATE NONCLUSTERED INDEX BringAccountItemLogCIDIndex
+ON BringAccountItemLog( CID )
+
+CREATE NONCLUSTERED INDEX BringAccountItemDateIndex
+ON BringAccountItemLog( Date )
+
+
+---------------------------------------------------------------------
+
+
+CREATE TABLE ClanGameLog(
+	id	int	IDENTITY PRIMARY KEY
+,	WinnerCLID	int	NOT NULL
+,	LoserCLID	int	NOT NULL
+,	WinnerClanName	varchar( 24 )
+,	LoserClanName	varchar( 24 )
+,	WinnerMembers	varchar( 110 )
+,	LoserMembers	varchar( 110 )
+,	RoundWins	tinyint	NOT NULL
+,	RoundLosses	tinyint	NOT NULL
+,	MapID	tinyint	NOT NULL
+,	GameType	tinyint	NOT NULL
+,	RegDate	datetime	NOT NULL )
+
+CREATE NONCLUSTERED INDEX ClanGameLogWinnerCLIDIndex
+ON ClanGameLog( WinnerCLID )
+
+CREATE NONCLUSTERED INDEX ClanGameLogLoserCLIDIndex
+ON ClanGameLog( LoserCLID )
+
+CREATE NONCLUSTERED INDEX ClanGameLogRegDateIndex
+ON ClanGameLog( RegDate )
+
+
+---------------------------------------------------------------------
+
+
+CREATE TABLE ItemPurchaseLogByBounty(
+	id		int	IDENTITY PRIMARY KEY
+,	ItemID		int	NOT NULL
+,	CID		int
+,	Date		datetime
+,	Bounty		int
+,	CharBounty	int
+,	Type		varchar( 20 ) )
+
+
+CREATE NONCLUSTERED INDEX ItemPurchaseLogByBountyCIDIndex
+ON ItemPurchaseLogByBounty( CID )
+
+CREATE NONCLUSTERED INDEX ItemPurchaseLogByBountyDateIndex
+ON ItemPurchaseLogByBounty( Date )
+
+
+---------------------------------------------------------------------
+
+
+CREATE TABLE ServerLog(
+	id		int		IDENTITY PRIMARY KEY
+,	ServerID	smallint
+,	PlayerCount 	smallint
+,	GameCount 	smallint
+,	Time		smalldatetime )
+
+CREATE NONCLUSTERED INDEX ServerLogServerIDIndex
+ON ServerLog( ServerID )
+
+CREATE NONCLUSTERED INDEX ServerLogTimeIndex
+ON ServerLog( Time )

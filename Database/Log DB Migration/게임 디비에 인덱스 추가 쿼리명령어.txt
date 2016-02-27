@@ -1,0 +1,185 @@
+-- [AccountItem]
+-- RentDate 추가
+CREATE NONCLUSTERED INDEX AccountItemRentDateIndex
+ON AccountItem( RentDate )
+
+---------------------------------------------------------------------
+
+-- [CashItemPresentLog]
+-- ReceiverAID 추가
+-- Date 추가
+CREATE NONCLUSTERED INDEX CashItemPresentLogReceiverAIDIndex
+ON CashItemPresentLog( ReceiverAID )
+
+CREATE NONCLUSTERED INDEX CashItemPresentLogDateIndex
+ON CashItemPresentLog( Date )
+
+---------------------------------------------------------------------
+
+-- [CharacterItem]
+-- RegDate 추가
+-- RentDate 추가
+CREATE NONCLUSTERED INDEX CharacterItemRegDateIndex
+ON CharacterItem( RegDate )
+
+CREATE NONCLUSTERED INDEX CharacterItemRentDateIndex
+ON CharacterItem( RentDate )
+
+---------------------------------------------------------------------
+
+-- [Friend]
+-- FriendCID 추가
+CREATE NONCLUSTERED INDEX FriendCIDIndex
+ON Friend( FriendCID )
+
+---------------------------------------------------------------------
+
+-- [FriendList] 테이블 제거
+DROP TABLE FriendList
+
+---------------------------------------------------------------------
+
+-- [ItemPurchaseLogByCash]
+-- AID 추가
+-- Date 추가
+CREATE NONCLUSTERED INDEX ItemPurchaseLogByCashAIDIndex
+ON ItemPurchaseLogByCash( AID )
+
+CREATE NONCLUSTERED INDEX ItemPurchaseLogByCashDateIndex
+ON ItemPurchaseLogByCash( Date )
+
+---------------------------------------------------------------------
+
+-- [SetItemPurchaseLogByCash]
+-- AID 추가
+-- Date 추가
+CREATE NONCLUSTERED INDEX SetItemPurchaseLogByCashAIDIndex
+ON SetItemPurchaseLogByCash( AID )
+
+CREATE NONCLUSTERED INDEX SetItemPurchaseLogByCashDateIndex
+ON SetItemPurchaseLogByCash( Date )
+
+---------------------------------------------------------------------
+
+-- [Login]
+-- AID 추가
+CREATE NONCLUSTERED INDEX LoginAIDIndex
+ON Login( AID )
+
+---------------------------------------------------------------------
+
+-- [PenaltyLog]
+-- AID 추가
+-- Date 추가
+CREATE NONCLUSTERED INDEX PenaltyLogAIDIndex
+ON PenaltyLog( AID )
+
+CREATE NONCLUSTERED INDEX PenaltyLogDateIndex
+ON PenaltyLog( Date )
+
+---------------------------------------------------------------------
+
+-- [ServerLog]
+-- ServerID 추가
+-- Time 추가
+CREATE NONCLUSTERED INDEX ServerLogServerIDIndex
+ON ServerLog( ServerID )
+
+CREATE NONCLUSTERED INDEX ServerLogTimeIndex
+ON ServerLog( Time )
+
+---------------------------------------------------------------------
+
+-- [CharacterMakingLog]
+CREATE NONCLUSTERED INDEX CharacterMakingLogAIDIndex
+ON CharacterMakingLog( AID )
+
+CREATE NONCLUSTERED INDEX CharacterMakingLogCharNameIndex
+ON CharacterMakingLog( CharName )
+
+CREATE NONCLUSTERED INDEX CharacterMakingLogDateIndex
+ON CharacterMakingLog( Date )
+
+---------------------------------------------------------------------
+
+-- [PlayerLog]
+CREATE NONCLUSTERED INDEX PlayerLogCIDIndex
+ON PlayerLog( CID )
+
+CREATE NONCLUSTERED INDEX PlayerLogDisTime
+ON PlayerLog( DisTime )
+
+---------------------------------------------------------------------
+
+-- [ConnLog]
+CREATE NONCLUSTERED INDEX ConnLogAIDIndex
+ON ConnLog( AID )
+
+CREATE NONCLUSTERED INDEX ConnLogUserIDIndex
+ON ConnLog( UserID )
+
+CREATE NONCLUSTERED INDEX ConnLogTimeIndex
+ON ConnLog( Time )
+
+CREATE NONCLUSTERED INDEX ConnLogIPIndex
+ON ConnLog( IP )
+
+---------------------------------------------------------------------
+
+-- [GameLog]
+CREATE NONCLUSTERED INDEX GameLogMapIndex
+ON GameLog( Map )
+
+CREATE NONCLUSTERED INDEX GameLogMasterCIDIndex
+ON GameLog( MasterCID )
+
+CREATE NONCLUSTERED INDEX GameLogGameTypeIndex
+ON GameLog( GameType )
+
+CREATE NONCLUSTERED INDEX GameLogStartTimeIndex
+ON GameLog( StartTime )
+
+---------------------------------------------------------------------
+
+-- [LevelUpLog]
+CREATE NONCLUSTERED INDEX LevelUpLogCIDIndex
+ON LevelUpLog( CID )
+
+CREATE NONCLUSTERED INDEX LevelUpLogDateIndex
+ON LevelUpLog( Date )
+
+---------------------------------------------------------------------
+
+-- [BringAccountItemLog]
+CREATE NONCLUSTERED INDEX BringAccountItemLogAIDIndex
+ON BringAccountItemLog( AID )
+
+CREATE NONCLUSTERED INDEX BringAccountItemLogCIDIndex
+ON BringAccountItemLog( CID )
+
+CREATE NONCLUSTERED INDEX BringAccountItemDateIndex
+ON BringAccountItemLog( Date )
+
+---------------------------------------------------------------------
+
+-- [ClanGameLog]
+CREATE NONCLUSTERED INDEX ClanGameLogRegDateIndex
+ON ClanGameLog( RegDate )
+
+---------------------------------------------------------------------
+
+-- [ItemPurchaseLogByBounty]
+CREATE NONCLUSTERED INDEX ItemPurchaseLogByBountyCIDIndex
+ON ItemPurchaseLogByBounty( CID )
+
+CREATE NONCLUSTERED INDEX ItemPurchaseLogByBountyDateIndex
+ON ItemPurchaseLogByBounty( Date )
+
+---------------------------------------------------------------------
+
+-- [ServerLog]
+CREATE NONCLUSTERED INDEX ServerLogServerIDIndex
+ON ServerLog( ServerID )
+
+CREATE NONCLUSTERED INDEX ServerLogTimeIndex
+ON ServerLog( Time )

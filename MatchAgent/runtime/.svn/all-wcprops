@@ -1,0 +1,47 @@
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/Gunz/!svn/ver/7495/Develop/MatchAgent/runtime
+END
+dbghelp.dll
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/Gunz/!svn/ver/4866/Develop/MatchAgent/runtime/dbghelp.dll
+END
+publish_india.bat
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/Gunz/!svn/ver/4866/Develop/MatchAgent/runtime/publish_india.bat
+END
+publish_international.bat
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/Gunz/!svn/ver/4866/Develop/MatchAgent/runtime/publish_international.bat
+END
+publish_jpn.bat
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/Gunz/!svn/ver/4866/Develop/MatchAgent/runtime/publish_jpn.bat
+END
+AgentConfig.xml
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/Gunz/!svn/ver/7495/Develop/MatchAgent/runtime/AgentConfig.xml
+END
+publish_brz.bat
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/Gunz/!svn/ver/4866/Develop/MatchAgent/runtime/publish_brz.bat
+END
+publish.bat
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/Gunz/!svn/ver/7495/Develop/MatchAgent/runtime/publish.bat
+END

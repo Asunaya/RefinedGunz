@@ -1,0 +1,388 @@
+<?
+	require_once("core.php");
+	check_session();
+?>
+<HTML>
+<HEAD>
+<LINK REL='StyleSheet' HREF='style.css'>
+</HEAD>
+<BODY>
+<?php
+
+require_once('core.php');
+
+$r_year = $_POST['year'];
+$r_month = $_POST['month'];
+$r_day = $_POST['day'];
+
+$today = getdate();
+
+if ($r_year == "")
+{
+	$r_year = $today[year];
+}
+if ($r_month == "")
+{
+	$r_month = $today[mon];
+}
+if ($r_day == "")
+{
+	$r_day = $today[mday];
+}
+
+
+echo("<CENTER><H1>매출 현황</H1></CENTER>\n");
+
+echo("<CENTER>
+<TABLE border=1>
+<TR bgcolor=#eeeecc>
+<FORM action='./Sale.html' method=post>
+<TD>일별 검색</TD>
+<TD>
+");
+
+view_form_select_date(0, "", $r_year, $r_month, $r_day);
+
+echo("
+&nbsp;<INPUT type=checkbox name=view_item value='1'>item
+</TD>
+<TD>
+<INPUT type=hidden name=mode value='process'>
+<INPUT type=hidden name=search_type value='date'>
+<INPUT type=image src='/img/search.gif'></TD>
+</TR>
+</FORM>
+");
+
+echo("
+<TR bgcolor=#e5eecc>
+<FORM action='./Sale.html' method=post>
+<TD>월별 검색</TD>
+<TD>
+");
+
+view_form_select_date(3, "", $r_year, $r_month);
+
+echo("
+&nbsp;<INPUT type=checkbox name=view_type value='all'>일별보기
+&nbsp;<INPUT type=checkbox name=view_item value='1'>item
+</TD>
+<TD><INPUT type=hidden name=mode value='process'>
+<INPUT type=hidden name=search_type value='month'>
+
+<INPUT type=image src='/img/search.gif'></TD>
+</TR>
+</FORM>
+");
+
+echo("
+<TR bgcolor=#ddeecc>
+<FORM action='./Sale.html' method=post>
+<TD>기간 검색</TD>
+<TD>
+");
+
+view_form_select_date(0, "s_");
+echo(" &nbsp; ~ &nbsp; \n");
+view_form_select_date(0, "e_");
+echo("
+&nbsp;<INPUT type=checkbox name=view_type value='all'>일별보기
+&nbsp;<INPUT type=checkbox name=view_item value='1'>item
+</TD>
+<TD><INPUT type=hidden name=mode value='process'>
+<INPUT type=hidden name=search_type value='period'>
+<INPUT type=image src='/img/search.gif'></TD>
+</TR>
+</FORM>
+");
+
+
+echo("</TABLE></CENTER>\n");
+
+include ("dbconn.inc");
+
+if ($_POST['mode'] == "")
+{
+
+
+
+}
+else if ($_POST['mode'] == "process")
+{
+	$r_view_item = $_POST['view_item'];
+	$where_date_str = '';
+
+	$cash_into[2]['SingleCash'] = 100;
+
+	$r_search_type = $_POST['search_type'];
+
+	if ($r_search_type == 'date')
+	{
+		$r_year = $_POST['year'];
+		$r_month = $_POST['month'];
+		$r_day = $_POST['day'];
+
+		$the_day = mktime(0, 0, 0, $r_month, $r_day, $r_year);
+		$start_date_str = date("Y.n.j", $the_day);
+		$end_date_str = date("Y.n.j", $the_day + (24*60*60));
+
+
+	}
+	else if ($r_search_type == 'month')
+	{
+		$r_year = $_POST['year'];
+		$r_month = $_POST['month'];
+		$r_day = $_POST['day'];
+
+		$start_year = $r_year;
+		$start_month = $r_month;
+		$start_day = 1;
+
+
+
+		$month = $r_month+1;
+		$year = $r_year;
+		if ($month >= 13)
+		{
+			$month = 1;
+			$year = $year+1;
+		}
+
+		$end_year = $year;
+		$end_month = $month;
+		$end_day = 1;
+
+		$start_date = mktime(0, 0, 0, $start_month, $start_day, $start_year);
+		$end_date = mktime(0, 0, 0, $end_month, $end_day, $end_year);
+	}
+	else if ($r_search_type == 'period')
+	{
+		$start_year = $_POST['s_year'];
+		$start_month = $_POST['s_month'];
+		$start_day = $_POST['s_day'];
+		$end_year = $_POST['e_year'];
+		$end_month = $_POST['e_month'];
+		$end_day = $_POST['e_day'];
+
+
+		$start_date = mktime(0, 0, 0, $start_month, $start_day, $start_year);
+		$end_date = mktime(0, 0, 0, $end_month, $end_day, $end_year);
+		$end_date = $end_date + (24*60*60);
+	}
+
+	if ($r_search_type == 'date')
+	{
+		$ret = db_get_cash_info($start_date_str, $end_date_str);
+
+		$cash_info_cnt = 1;
+		$cash_info[0][SingleCash] = $ret[SingleCash];
+		$cash_info[0][SetCash] = $ret[SetCash];
+		$cash_info[0][PresentCash] = $ret[PresentCash];
+		$cash_info[0][SingleCnt] = $ret[SingleCnt];
+		$cash_info[0][SetCnt] = $ret[SetCnt];
+		$cash_info[0][PresentCnt] = $ret[PresentCnt];
+		$cash_info[0][TotalCash] = $ret[TotalCash];
+		$cash_info[0][Date] = $start_date_str;
+		$cash_info[0][Date_month] = $start_month;
+		$cash_info[0][Date_year] = $start_year;
+		$cash_info[0][Date_day] = $start_day;
+
+	}
+	else if (($r_search_type == 'month') || ($r_search_type == 'period'))
+	{
+		$r_viewtype = $_POST['view_type'];
+
+		if ($r_viewtype == 'all')
+		{
+			$cash_info_cnt = 0;
+			$date = $start_date;
+
+			$cnt = 0;
+
+			$total_single_cash = 0;			$total_set_cash = 0;			$total_present_cash = 0;			$total_total_cash = 0;			$total_single_cnt = 0;			$total_set_cnt = 0;			$total_present_cnt = 0;
+
+			while ($end_date > $date)
+			{
+				$datearr = getdate($date);
+				$year = $datearr[year];
+				$month = $datearr[mon];
+				$day = $datearr[mday];
+
+				$start_date_str = db_get_date_str($year, $month, $day);
+				$end_date_str = date("Y.n.j", $date + (24*60*60));
+				$date = $date + (24*60*60);
+
+				$ret = db_get_cash_info($start_date_str, $end_date_str);
+				$cash_info[$cnt][SingleCash] = $ret[SingleCash];	$total_single_cash += $ret[SingleCash];
+				$cash_info[$cnt][SetCash] = $ret[SetCash];			$total_set_cash += $ret[SetCash];
+				$cash_info[$cnt][PresentCash] = $ret[PresentCash];	$total_present_cash += $ret[PresentCash];
+				$cash_info[$cnt][SingleCnt] = $ret[SingleCnt];		$total_single_cnt += $ret[SingleCnt];
+				$cash_info[$cnt][SetCnt] = $ret[SetCnt];			$total_set_cnt += $ret[SetCnt];
+				$cash_info[$cnt][PresentCnt] = $ret[PresentCnt];	$total_present_cnt += $ret[PresentCnt];
+				$cash_info[$cnt][TotalCash] = $ret[TotalCash];		$total_total_cash += $ret[TotalCash];
+				$cash_info[$cnt][Date] = $start_date_str;
+				$cash_info[$cnt][Date_month] = $month;
+				$cash_info[$cnt][Date_year] = $year;
+				$cash_info[$cnt][Date_day] = $day;
+
+				$cnt++;
+			}
+
+			$cash_info_cnt = $cnt + 1;
+			$cash_info[$cnt][SingleCash] = $total_single_cash;
+			$cash_info[$cnt][SetCash] = $total_set_cash;
+			$cash_info[$cnt][PresentCash] = $total_present_cash;
+			$cash_info[$cnt][TotalCash] = $total_total_cash;
+			$cash_info[$cnt][SingleCnt] = $total_single_cnt;
+			$cash_info[$cnt][SetCnt] = $total_set_cnt;
+			$cash_info[$cnt][PresentCnt] = $total_present_cnt;
+			$cash_info[$cnt][Date] = "전체";
+			$cash_info[$cnt][Date_month] = 0;
+			$cash_info[$cnt][Date_year] = 0;
+			$cash_info[$cnt][Date_day] = 0;
+
+		}
+		else
+		{
+			$start_date_str = date("Y.n.j", $start_date);
+			$end_date_str = date("Y.n.j", $end_date);
+
+			$ret = db_get_cash_info($start_date_str, $end_date_str);
+
+			$cash_info_cnt = 1;
+			$cash_info[0][SingleCash] = $ret[SingleCash];
+			$cash_info[0][SetCash] = $ret[SetCash];
+			$cash_info[0][PresentCash] = $ret[PresentCash];
+			$cash_info[0][SingleCnt] = $ret[SingleCnt];
+			$cash_info[0][SetCnt] = $ret[SetCnt];
+			$cash_info[0][PresentCnt] = $ret[PresentCnt];
+			$cash_info[0][TotalCash] = $ret[TotalCash];
+			$cash_info[0][Date] = "전체";
+			$cash_info[$cnt][Date_month] = 0;
+			$cash_info[$cnt][Date_year] = 0;
+			$cash_info[$cnt][Date_day] = 0;
+
+		}
+	}
+
+
+
+	$desc_str = "";
+	if ($r_search_type == 'date') $desc_str = " (일: " . $r_year . "-" . $r_month . "-" . $r_day . ")";
+	else if ($r_search_type == 'month') $desc_str = " (월: " . $r_year . "-" . $r_month . ")";
+	else if ($r_search_type == 'period') $desc_str = " (기간: " . $start_year . "-".$start_month."-".$start_day. " ~ " . $end_year."-".$end_month."-".$end_day.")";
+
+
+
+
+
+	echo ("<BR><BR><B>매출 정보</B>" . $desc_str . "<TABLE border=1>
+<TR bgcolor=#EEEEEE>
+<TD width=140 align=center>날짜</TD>
+<TD width=140 align=center>일반</TD>
+<TD width=140 align=center>세트</TD>
+<TD width=140 align=center>선물</TD>
+<TD width=140 align=center>총합</TD>
+</TR>
+");
+
+
+	for ($i = 0; $i < $cash_info_cnt; $i++)
+	{
+
+		$td_color_str = "";
+
+		if ($i != $cash_info_cnt-1)
+		{
+			if ($cash_info[$i][Date_year] != 0)
+			{
+				$week = date('w', mktime(0,0,0,$cash_info[$i][Date_month], $cash_info[$i][Date_day], $cash_info[$i][Date_year]));
+				if ($week==0) $td_color_str = " bgcolor='#FFCCCC' ";	// 일요일
+				else if ($week==6) $td_color_str = " bgcolor='#A2E9FF' ";	// 일요일
+			}
+		}
+
+		$date_str = $cash_info[$i][Date];
+		$single_cash_str = number_format($cash_info[$i][SingleCash]) . " 원";
+		$set_cash_str = number_format($cash_info[$i][SetCash]) . " 원";
+		$present_cash_str = number_format($cash_info[$i][PresentCash]) . " 원";
+		$total_cash_str = number_format($cash_info[$i][TotalCash]) . " 원";
+
+			echo ("<TR $td_color_str >
+<TD align=center>$date_str </TD>
+<TD align=right><FONT color=#888888>({$cash_info[$i][SingleCnt]})</FONT> $single_cash_str</TD>
+<TD align=right><FONT color=#888888>({$cash_info[$i][SetCnt]})</FONT> $set_cash_str</TD>
+<TD align=right><FONT color=#888888>({$cash_info[$i][PresentCnt]})</FONT> $present_cash_str</TD>
+<TD align=right>$total_cash_str</TD>
+</TR>
+");
+
+	}
+	echo ("</TABLE>\n");
+
+
+	if ($r_view_item)
+	{
+		$where_date_str = "'" . $start_date_str . "'" . ' AND ' . "'" . $end_date_str . "'";
+		$query = "SELECT i.Name AS ItemName, ipl.ItemID AS ItemID, COUNT(*) AS cnt, Sum(Cash) AS Cash FROM ItemPurchaseLogByCash ipl(nolock), Item i(nolock) " .
+	             "WHERE ipl.ItemID=i.ItemID AND ipl.Date BETWEEN " . $where_date_str .
+			     " GROUP BY  ipl.ItemID, i.Name ORDER BY cnt desc";
+		$db->query($query);
+
+		echo("<BR><BR><B>일반아이템별 매출</B>
+<TABLE border=1>
+<TR bgcolor=#EEEEEE>
+<TD align=center>아이템</TD>
+<TD align=center width=50>수량</TD>
+<TD align=center width=80>캐쉬</TD>
+</TR>\n");
+
+		while ($row = $db->fetch())
+		{
+			echo ("<TR>
+<TD>$row->ItemName ( $row->ItemID )</TD>
+<TD align=right>$row->cnt</TD>
+<TD align=right>$row->Cash</TD>
+</TR>\n");
+		}
+		echo ("</TABLE>\n");
+
+
+		$query = "SELECT css.Name AS ItemName, spl.CSSID AS CSSID, COUNT(*) AS cnt, Sum(Cash) AS Cash FROM SetItemPurchaseLogByCash spl(nolock), CashSetShop css(nolock) " .
+	             "WHERE spl.CSSID=css.CSSID AND spl.Date BETWEEN " . $where_date_str .
+			     " GROUP BY  spl.CSSID, css.Name ORDER BY cnt desc";
+		$db->query($query);
+
+		echo("<BR><BR><B>세트아이템별 매출</B>
+<TABLE border=1>
+<TR bgcolor=#EEEEEE>
+<TD align=center>아이템</TD>
+<TD align=center width=50>수량</TD>
+<TD align=center width=80>캐쉬</TD>
+</TR>\n");
+
+		while ($row = $db->fetch())
+		{
+			echo ("<TR>
+<TD>$row->ItemName</TD>
+<TD align=right>$row->cnt</TD>
+<TD align=right>$row->Cash</TD>
+</TR>\n");
+		}
+		echo ("</TABLE>\n");
+
+	}
+
+
+
+} // if
+
+$db->close();
+
+?>
+
+
+
+<? include ("sign.inc"); ?>
+</BODY>
+</HTML>

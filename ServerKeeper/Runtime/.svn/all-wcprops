@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/Gunz/!svn/ver/7495/Develop/ServerKeeper/Runtime
+END
+Configure.ini
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/Gunz/!svn/ver/7495/Develop/ServerKeeper/Runtime/Configure.ini
+END
+dbghelp.dll
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/Gunz/!svn/ver/4866/Develop/ServerKeeper/Runtime/dbghelp.dll
+END
+config_save.txt
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/Gunz/!svn/ver/4866/Develop/ServerKeeper/Runtime/config_save.txt
+END
+PrepareAgentPatch.bat
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/Gunz/!svn/ver/4866/Develop/ServerKeeper/Runtime/PrepareAgentPatch.bat
+END
+ServerKeeperConfig.xml
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/Gunz/!svn/ver/4866/Develop/ServerKeeper/Runtime/ServerKeeperConfig.xml
+END
+PrepareServerPatch.bat
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/Gunz/!svn/ver/4866/Develop/ServerKeeper/Runtime/PrepareServerPatch.bat
+END

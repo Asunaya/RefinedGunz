@@ -1,0 +1,726 @@
+<?xml version='1.0' encoding="euc-kr"?>
+<DOLL_MOTION DATE="20011108" MOS="doll" SCHEMA="OBJECT_SCHEMA">
+	<PRIMARY_IDLE>
+		<STAND>
+			<PANG_01_STAND>
+				<NAME>
+					서있기
+				</NAME>
+				<FACE>
+					0
+				</FACE>
+				<SOUND>
+					
+				</SOUND>
+				<f_SPEED>
+					  1.000
+				</f_SPEED>
+				<i_REPEAT>
+					1
+				</i_REPEAT>
+			</PANG_01_STAND>
+		</STAND>
+		<WALK>
+			<PANG_02_WALK>
+				<NAME>
+					걸어다니기
+				</NAME>
+				<FACE>
+					0
+				</FACE>
+				<SOUND>
+					
+				</SOUND>
+				<f_SPEED>
+					  1.000
+				</f_SPEED>
+				<i_REPEAT>
+					1
+				</i_REPEAT>
+			</PANG_02_WALK>
+		</WALK>
+	</PRIMARY_IDLE>
+	<SECONDARY_IDLE>
+		<ROOM>
+			<PANG_10_IDLE01>
+				<NAME>
+					기본 아이들 1
+				</NAME>
+				<FACE>
+					3
+				</FACE>
+				<SOUND>
+					
+				</SOUND>
+				<f_SPEED>
+					  1.000
+				</f_SPEED>
+				<i_REPEAT>
+					1
+				</i_REPEAT>
+			</PANG_10_IDLE01>
+			<PANG_10_IDLE02>
+				<NAME>
+					기본 아이들 2
+				</NAME>
+				<FACE>
+					0
+				</FACE>
+				<SOUND>
+					
+				</SOUND>
+				<f_SPEED>
+					  1.000
+				</f_SPEED>
+				<i_REPEAT>
+					1
+				</i_REPEAT>
+			</PANG_10_IDLE02>
+			<PANG_10_IDLE03>
+				<NAME>
+					기본 아이들 3
+				</NAME>
+				<FACE>
+					3
+				</FACE>
+				<SOUND>
+					
+				</SOUND>
+				<f_SPEED>
+					  1.000
+				</f_SPEED>
+				<i_REPEAT>
+					1
+				</i_REPEAT>
+			</PANG_10_IDLE03>
+		</ROOM>
+		<BATHTUB>
+			<PANG_10_IDLE01>
+				<NAME>
+					기본 아이들 1
+				</NAME>
+				<FACE>
+					3
+				</FACE>
+				<SOUND>
+					
+				</SOUND>
+				<f_SPEED>
+					  1.000
+				</f_SPEED>
+				<i_REPEAT>
+					1
+				</i_REPEAT>
+			</PANG_10_IDLE01>
+			<PANG_10_IDLE02>
+				<NAME>
+					기본 아이들 2
+				</NAME>
+				<FACE>
+					0
+				</FACE>
+				<SOUND>
+					
+				</SOUND>
+				<f_SPEED>
+					  1.000
+				</f_SPEED>
+				<i_REPEAT>
+					1
+				</i_REPEAT>
+			</PANG_10_IDLE02>
+			<PANG_10_IDLE03>
+				<NAME>
+					기본 아이들 3
+				</NAME>
+				<FACE>
+					3
+				</FACE>
+				<SOUND>
+					
+				</SOUND>
+				<f_SPEED>
+					  1.000
+				</f_SPEED>
+				<i_REPEAT>
+					1
+				</i_REPEAT>
+			</PANG_10_IDLE03>
+		</BATHTUB>
+		<NO_BATHTUB>
+			<PANG_10_IDLE01>
+				<NAME>
+					기본 아이들 1
+				</NAME>
+				<FACE>
+					3
+				</FACE>
+				<SOUND>
+					
+				</SOUND>
+				<f_SPEED>
+					  1.000
+				</f_SPEED>
+				<i_REPEAT>
+					1
+				</i_REPEAT>
+			</PANG_10_IDLE01>
+			<PANG_10_IDLE02>
+				<NAME>
+					기본 아이들 2
+				</NAME>
+				<FACE>
+					0
+				</FACE>
+				<SOUND>
+					
+				</SOUND>
+				<f_SPEED>
+					  1.000
+				</f_SPEED>
+				<i_REPEAT>
+					1
+				</i_REPEAT>
+			</PANG_10_IDLE02>
+			<PANG_10_IDLE03>
+				<NAME>
+					기본 아이들 3
+				</NAME>
+				<FACE>
+					3
+				</FACE>
+				<SOUND>
+					
+				</SOUND>
+				<f_SPEED>
+					  1.000
+				</f_SPEED>
+				<i_REPEAT>
+					1
+				</i_REPEAT>
+			</PANG_10_IDLE03>
+		</NO_BATHTUB>
+		<GARDEN>
+			<PANG_10_IDLE01>
+				<NAME>
+					기본 아이들 1
+				</NAME>
+				<FACE>
+					3
+				</FACE>
+				<SOUND>
+					
+				</SOUND>
+				<f_SPEED>
+					  1.000
+				</f_SPEED>
+				<i_REPEAT>
+					1
+				</i_REPEAT>
+			</PANG_10_IDLE01>
+			<PANG_10_IDLE02>
+				<NAME>
+					기본 아이들 2
+				</NAME>
+				<FACE>
+					0
+				</FACE>
+				<SOUND>
+					
+				</SOUND>
+				<f_SPEED>
+					  1.000
+				</f_SPEED>
+				<i_REPEAT>
+					1
+				</i_REPEAT>
+			</PANG_10_IDLE02>
+			<PANG_10_IDLE03>
+				<NAME>
+					기본 아이들 3
+				</NAME>
+				<FACE>
+					3
+				</FACE>
+				<SOUND>
+					
+				</SOUND>
+				<f_SPEED>
+					  1.000
+				</f_SPEED>
+				<i_REPEAT>
+					1
+				</i_REPEAT>
+			</PANG_10_IDLE03>
+		</GARDEN>
+		<SICK>
+			<PANG_15_SICK>
+				<NAME>
+					마법에 걸렸을때
+				</NAME>
+				<FACE>
+					5
+				</FACE>
+				<SOUND>
+					
+				</SOUND>
+				<f_SPEED>
+					  1.000
+				</f_SPEED>
+				<i_REPEAT>
+					1
+				</i_REPEAT>
+			</PANG_15_SICK>
+		</SICK>
+	</SECONDARY_IDLE>
+	<STATUS_IDLE>
+		<HUNGRY>
+			<PANG_21_HUNGRY>
+				<NAME>
+					배가 고플때
+				</NAME>
+				<FACE>
+					4
+				</FACE>
+				<SOUND>
+					
+				</SOUND>
+				<f_SPEED>
+					  1.000
+				</f_SPEED>
+				<i_REPEAT>
+					1
+				</i_REPEAT>
+			</PANG_21_HUNGRY>
+		</HUNGRY>
+		<DIRTY>
+			<PANG_22_DIRTY>
+				<NAME>
+					공격하지 못할때
+				</NAME>
+				<FACE>
+					4
+				</FACE>
+				<SOUND>
+					
+				</SOUND>
+				<f_SPEED>
+					  1.000
+				</f_SPEED>
+				<i_REPEAT>
+					1
+				</i_REPEAT>
+			</PANG_22_DIRTY>
+		</DIRTY>
+		<BORED>
+			<PANG_23_BORED>
+				<NAME>
+					심심할때
+				</NAME>
+				<FACE>
+					0
+				</FACE>
+				<SOUND>
+					
+				</SOUND>
+				<f_SPEED>
+					  1.000
+				</f_SPEED>
+				<i_REPEAT>
+					1
+				</i_REPEAT>
+			</PANG_23_BORED>
+		</BORED>
+		<SLEEPY>
+			<PANG_24_SLEEPY>
+				<NAME>
+					힘이 없을때
+				</NAME>
+				<FACE>
+					0
+				</FACE>
+				<SOUND>
+					
+				</SOUND>
+				<f_SPEED>
+					  1.000
+				</f_SPEED>
+				<i_REPEAT>
+					1
+				</i_REPEAT>
+			</PANG_24_SLEEPY>
+		</SLEEPY>
+	</STATUS_IDLE>
+	<EAT>
+		<EAT_ON_FLOOR>
+			<PANG_41_EAT_ON_FLOOR>
+				<NAME>
+					바닥에서 밥먹는 동작
+				</NAME>
+				<FACE>
+					6,7
+				</FACE>
+				<SOUND>
+					
+				</SOUND>
+				<f_SPEED>
+					  1.000
+				</f_SPEED>
+				<i_REPEAT>
+					1
+				</i_REPEAT>
+			</PANG_41_EAT_ON_FLOOR>
+		</EAT_ON_FLOOR>
+		<EAT_ON_TABLE>
+			<PANG_42_EAT_ON_TABLE>
+				<NAME>
+					식탁에서 밥먹는 동작
+				</NAME>
+				<FACE>
+					6,7
+				</FACE>
+				<SOUND>
+					
+				</SOUND>
+				<f_SPEED>
+					  1.000
+				</f_SPEED>
+				<i_REPEAT>
+					1
+				</i_REPEAT>
+			</PANG_42_EAT_ON_TABLE>
+		</EAT_ON_TABLE>
+	</EAT>
+	<SLEEP>
+		<SLEEP_ON_FLOOR>
+			<PANG_51_SLEEP_ON_FLOOR01>
+				<NAME>
+					바닥에서 자는 동작 1
+				</NAME>
+				<FACE>
+					1
+				</FACE>
+				<SOUND>
+					
+				</SOUND>
+				<f_SPEED>
+					  1.000
+				</f_SPEED>
+				<i_REPEAT>
+					1
+				</i_REPEAT>
+			</PANG_51_SLEEP_ON_FLOOR01>
+			<PANG_51_SLEEP_ON_FLOOR02>
+				<NAME>
+					바닥에서 자는 동작 2
+				</NAME>
+				<FACE>
+					1
+				</FACE>
+				<SOUND>
+					
+				</SOUND>
+				<f_SPEED>
+					  1.000
+				</f_SPEED>
+				<i_REPEAT>
+					1
+				</i_REPEAT>
+			</PANG_51_SLEEP_ON_FLOOR02>
+			<PANG_51_SLEEP_ON_FLOOR03>
+				<NAME>
+					바닥에서 자는 동작 3
+				</NAME>
+				<FACE>
+					1
+				</FACE>
+				<SOUND>
+					
+				</SOUND>
+				<f_SPEED>
+					  1.000
+				</f_SPEED>
+				<i_REPEAT>
+					1
+				</i_REPEAT>
+			</PANG_51_SLEEP_ON_FLOOR03>
+		</SLEEP_ON_FLOOR>
+		<SLEEP_ON_BED>
+			<PANG_52_SLEEP_ON_BED01>
+				<NAME>
+					침대에서 자는 동작 1
+				</NAME>
+				<FACE>
+					1
+				</FACE>
+				<SOUND>
+					
+				</SOUND>
+				<f_SPEED>
+					  1.000
+				</f_SPEED>
+				<i_REPEAT>
+					1
+				</i_REPEAT>
+			</PANG_52_SLEEP_ON_BED01>
+			<PANG_52_SLEEP_ON_BED02>
+				<NAME>
+					침대에서 자는 동작 2
+				</NAME>
+				<FACE>
+					1
+				</FACE>
+				<SOUND>
+					
+				</SOUND>
+				<f_SPEED>
+					  1.000
+				</f_SPEED>
+				<i_REPEAT>
+					1
+				</i_REPEAT>
+			</PANG_52_SLEEP_ON_BED02>
+			<PANG_52_SLEEP_ON_BED03>
+				<NAME>
+					침대에서 자는 동작 3
+				</NAME>
+				<FACE>
+					1
+				</FACE>
+				<SOUND>
+					
+				</SOUND>
+				<f_SPEED>
+					  1.000
+				</f_SPEED>
+				<i_REPEAT>
+					1
+				</i_REPEAT>
+			</PANG_52_SLEEP_ON_BED03>
+		</SLEEP_ON_BED>
+	</SLEEP>
+	<BATH>
+		<BATHTUB_READY>
+			<PANG_61_READY_ON_TUB>
+				<NAME>
+					욕조에서 씻기 대기
+				</NAME>
+				<FACE>
+					0
+				</FACE>
+				<SOUND>
+					
+				</SOUND>
+				<f_SPEED>
+					  1.000
+				</f_SPEED>
+				<i_REPEAT>
+					1
+				</i_REPEAT>
+			</PANG_61_READY_ON_TUB>
+		</BATHTUB_READY>
+		<BATHTUB_REACT>
+			<PANG_62_REACT_ON_TUB>
+				<NAME>
+					욕조에서 씻기 반응
+				</NAME>
+				<FACE>
+					1
+				</FACE>
+				<SOUND>
+					
+				</SOUND>
+				<f_SPEED>
+					  1.000
+				</f_SPEED>
+				<i_REPEAT>
+					1
+				</i_REPEAT>
+			</PANG_62_REACT_ON_TUB>
+		</BATHTUB_REACT>
+		<NO_BATHTUB_READY>
+			<PANG_63_READY_ON_FLOOR>
+				<NAME>
+					바닥에서 씻기 대기
+				</NAME>
+				<FACE>
+					0
+				</FACE>
+				<SOUND>
+					
+				</SOUND>
+				<f_SPEED>
+					  1.000
+				</f_SPEED>
+				<i_REPEAT>
+					1
+				</i_REPEAT>
+			</PANG_63_READY_ON_FLOOR>
+		</NO_BATHTUB_READY>
+		<NO_BATHTUB_REACT>
+			<PANG_64_REACT_ON_FLOOR>
+				<NAME>
+					바닥에서 씻기 반응
+				</NAME>
+				<FACE>
+					1
+				</FACE>
+				<SOUND>
+					
+				</SOUND>
+				<f_SPEED>
+					  1.000
+				</f_SPEED>
+				<i_REPEAT>
+					1
+				</i_REPEAT>
+			</PANG_64_REACT_ON_FLOOR>
+		</NO_BATHTUB_REACT>
+	</BATH>
+	<ETC>
+		<DISLIKE>
+			<PANG_81_DISLIKE>
+				<NAME>
+					기분이 나쁠때
+				</NAME>
+				<FACE>
+					4
+				</FACE>
+				<SOUND>
+					
+				</SOUND>
+				<f_SPEED>
+					  1.000
+				</f_SPEED>
+				<i_REPEAT>
+					1
+				</i_REPEAT>
+			</PANG_81_DISLIKE>
+		</DISLIKE>
+		<LIKE>
+			<PANG_82_LIKE>
+				<NAME>
+					기분이 좋을때
+				</NAME>
+				<FACE>
+					3
+				</FACE>
+				<SOUND>
+					
+				</SOUND>
+				<f_SPEED>
+					  1.000
+				</f_SPEED>
+				<i_REPEAT>
+					1
+				</i_REPEAT>
+			</PANG_82_LIKE>
+		</LIKE>
+		<PAT>
+			<PANG_83_PAT>
+				<NAME>
+					쓰다듬기를 했을 경우
+				</NAME>
+				<FACE>
+					0
+				</FACE>
+				<SOUND>
+					
+				</SOUND>
+				<f_SPEED>
+					  1.000
+				</f_SPEED>
+				<i_REPEAT>
+					1
+				</i_REPEAT>
+			</PANG_83_PAT>
+		</PAT>
+		<PUNISH>
+			<PANG_84_PUNISH>
+				<NAME>
+					벌주기를 했을 경우
+				</NAME>
+				<FACE>
+					4
+				</FACE>
+				<SOUND>
+					
+				</SOUND>
+				<f_SPEED>
+					  1.000
+				</f_SPEED>
+				<i_REPEAT>
+					1
+				</i_REPEAT>
+			</PANG_84_PUNISH>
+		</PUNISH>
+		<COLLAPSE>
+			<PANG_85_COLLAPSE>
+				<NAME>
+					좌절하며 슬퍼하는 동작
+				</NAME>
+				<FACE>
+					1
+				</FACE>
+				<SOUND>
+					
+				</SOUND>
+				<f_SPEED>
+					  1.000
+				</f_SPEED>
+				<i_REPEAT>
+					1
+				</i_REPEAT>
+			</PANG_85_COLLAPSE>
+		</COLLAPSE>
+		<ANGER>
+			<PANG_86_ANGER>
+				<NAME>
+					충분히 자지 못하고 일어난 경우
+				</NAME>
+				<FACE>
+					4
+				</FACE>
+				<SOUND>
+					
+				</SOUND>
+				<f_SPEED>
+					  1.000
+				</f_SPEED>
+				<i_REPEAT>
+					1
+				</i_REPEAT>
+			</PANG_86_ANGER>
+		</ANGER>
+		<GOODMORNING>
+			<PANG_87_GOODMORNING>
+				<NAME>
+					충분히 자고 일어난 경우
+				</NAME>
+				<FACE>
+					3
+				</FACE>
+				<SOUND>
+					
+				</SOUND>
+				<f_SPEED>
+					  1.000
+				</f_SPEED>
+				<i_REPEAT>
+					1
+				</i_REPEAT>
+			</PANG_87_GOODMORNING>
+		</GOODMORNING>
+	</ETC>
+	<INFO>
+		<f_WALK_LENGTH>
+			  0.500
+		</f_WALK_LENGTH>
+		<f_ROTATE_GAP>
+			  0.050
+		</f_ROTATE_GAP>
+		<i_FPS>
+			24
+		</i_FPS>
+	</INFO>
+</DOLL_MOTION>

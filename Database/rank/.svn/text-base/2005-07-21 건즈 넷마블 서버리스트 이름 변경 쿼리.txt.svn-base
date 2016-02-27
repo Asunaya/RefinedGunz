@@ -1,0 +1,69 @@
+-- 일반 서버 이름변경.
+DECLARE @sql varchar(8000)
+DECLARE @Count int
+
+SET @Count = 1
+
+WHILE @Count <= 33
+BEGIN
+	SET @sql = 
+		'UPDATE ServerStatus SET ServerName = ' + '''' + CAST(@Count AS varchar(4)) + '''' + 
+		' WHERE ServerName = ' + '''' + '서버' + CAST(@Count AS varchar(4)) + ''''
+
+
+	EXEC( @sql )
+
+	SET @Count = @Count + 1
+END
+GO
+
+
+--------------------------------------------------------------------------------------------------------------------
+
+-- 클랜전 서버 이름변경.
+DECLARE @sql varchar(8000)
+DECLARE @Count int
+
+SET @Count = 1
+
+WHILE @Count <= 5
+BEGIN
+	SET @sql = 
+		'UPDATE ServerStatus SET ServerName = ' + '''' + '클' + CAST(@Count AS varchar(4)) + '''' + 
+		' WHERE ServerName = ' + '''' + '클랜전' + CAST(@Count AS varchar(4)) + ''''
+
+
+	EXEC( @sql )
+	
+	SET @Count = @Count + 1
+END
+GO
+
+
+--------------------------------------------------------------------------------------------------------------------
+
+-- 퀘스트 서버 이름변경.
+DECLARE @sql varchar(8000)
+DECLARE @Count int
+
+SET @Count = 1
+
+WHILE @Count <= 10
+BEGIN
+	SET @sql = 
+		'UPDATE ServerStatus SET ServerName = ' + '''' + '퀘' + CAST(@Count AS varchar(4)) + '''' + 
+		' WHERE ServerName = ' + '''' + '퀘스트' + CAST(@Count AS varchar(4)) + ''''
+
+
+	EXEC( @sql )
+
+	SET @Count = @Count + 1
+END
+GO
+
+
+--------------------------------------------------------------------------------------------------------------------
+
+-- 온게임넷 서버 이름변경.
+UPDATE ServerStatus SET ServerName = '온' WHERE ServerName = '온게임넷'
+GO

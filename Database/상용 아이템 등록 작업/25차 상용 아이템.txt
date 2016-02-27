@@ -1,0 +1,333 @@
+<STR id="ZITEM_NAME_520020">남성 데저트플레임 모자</STR>
+<STR id="ZITEM_DESC_520020">사막에서 활동하는 데저트플레임 부대의 남성용 모자</STR>
+
+INSERT INTO Item (ItemID, Name) Values (520020, '남성 데저트플레임 모자')
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=1, ResLevel=15, Slot=4, Weight=3, HP=0, AP=10, MAXWT=0, 
+Description='사막에서 활동하는 데저트플레임 부대의 남성용 모자' 
+WHERE ItemID = 520020
+
+--------------------------------------------------------------------------------------------------------
+
+<STR id="ZITEM_NAME_522015">남성 데저트플레임 장갑</STR>
+<STR id="ZITEM_DESC_522015">사막에서 활동하는 데저트플레임 부대의 남성용 가죽장갑</STR>
+
+INSERT INTO Item (ItemID, Name) Values (522015, '남성 데저트플레임 장갑')
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=1, ResLevel=15, Slot=6, Weight=4, HP=1, AP=16, MAXWT=0, 
+Description='사막에서 활동하는 데저트플레임 부대의 남성용 가죽장갑' 
+WHERE ItemID = 522015
+
+---------------------------------------------------------------------------------------------------------
+
+<STR id="ZITEM_NAME_524015">남성 데저트플레임 부츠</STR>
+<STR id="ZITEM_DESC_524015">사막에서 활동하는 데저트플레임 부대의 남성용 가죽부츠</STR>
+
+INSERT INTO Item (ItemID, Name) Values (524015, '남성 데저트플레임 부츠')
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=1, ResLevel=15, Slot=8, Weight=4, HP=2, AP=17, MAXWT=0, 
+Description='사막에서 활동하는 데저트플레임 부대의 남성용 가죽부츠' 
+WHERE ItemID = 524015
+
+----------------------------------------------------------------------------------------------------------
+
+<STR id="ZITEM_NAME_521016">남성 데저트플레임 상의</STR>
+<STR id="ZITEM_DESC_521016">사막에서 활동하는 데저트플레임 부대의 남성용 상의</STR>
+
+INSERT INTO Item (ItemID, Name) Values (521016, '남성 데저트플레임 상의')
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=1, ResLevel=15, Slot=5, Weight=15, HP=4, AP=22, MAXWT=0, 
+Description='사막에서 활동하는 데저트플레임 부대의 남성용 상의' 
+WHERE ItemID = 521016
+
+----------------------------------------------------------------------------------------------------------
+
+<STR id="ZITEM_NAME_523015">남성 데저트플레임 하의</STR>
+<STR id="ZITEM_DESC_523015">사막에서 활동하는 데저트플레임 부대의 남성용 하의</STR>
+
+INSERT INTO Item (ItemID, Name) Values (523015, '남성 데저트플레임 하의')
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=1, ResLevel=15, Slot=7, Weight=14, HP=3, AP=24, MAXWT=0, 
+Description='사막에서 활동하는 데저트플레임 부대의 남성용 하의' 
+WHERE ItemID = 523015
+
+----------------------------------------------------------------------------------------------------------
+
+<STR id="ZITEM_NAME_520520">여성 데저트플레임 모자</STR>
+<STR id="ZITEM_DESC_520520">사막에서 활동하는 데저트플레임 부대의 여성용 모자</STR>
+
+INSERT INTO Item (ItemID, Name) Values (520520, '여성 데저트플레임 모자')
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=2, ResLevel=15, Slot=4, Weight=3, HP=0, AP=10, MAXWT=0, 
+Description='사막에서 활동하는 데저트플레임 부대의 여성용 모자' 
+WHERE ItemID = 520520
+
+----------------------------------------------------------------------------------------------------------
+
+<STR id="ZITEM_NAME_522515">여성 데저트플레임 장갑</STR>
+<STR id="ZITEM_DESC_522515">사막에서 활동하는 데저트플레임 부대의 여성용 가죽장갑</STR>
+
+INSERT INTO Item (ItemID, Name) Values (522515, '여성 데저트플레임 장갑')
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=2, ResLevel=15, Slot=6, Weight=4, HP=1, AP=16, MAXWT=0, 
+Description='사막에서 활동하는 데저트플레임 부대의 여성용 가죽장갑' 
+WHERE ItemID = 522515
+
+----------------------------------------------------------------------------------------------------------
+
+<STR id="ZITEM_NAME_524515">여성 데저트플레임 부츠</STR>
+<STR id="ZITEM_DESC_524515">사막에서 활동하는 데저트플레임 부대의 여성용 가죽부츠</STR>
+
+INSERT INTO Item (ItemID, Name) Values (524515, '여성 데저트플레임 부츠')
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=2, ResLevel=15, Slot=8, Weight=4, HP=2, AP=17, MAXWT=0, 
+Description='사막에서 활동하는 데저트플레임 부대의 여성용 가죽부츠' 
+WHERE ItemID = 524515
+
+----------------------------------------------------------------------------------------------------------
+
+<STR id="ZITEM_NAME_521516">여성 데저트플레임 상의</STR>
+<STR id="ZITEM_DESC_521516">사막에서 활동하는 데저트플레임 부대의 여성용 상의</STR>
+
+INSERT INTO Item (ItemID, Name) Values (521516, '여성 데저트플레임 상의')
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=2, ResLevel=15, Slot=5, Weight=15, HP=4, AP=22, MAXWT=0, 
+Description='사막에서 활동하는 데저트플레임 부대의 여성용 상의' 
+WHERE ItemID = 521516
+
+----------------------------------------------------------------------------------------------------------
+
+<STR id="ZITEM_NAME_523515">여성 데저트플레임 하의</STR>
+<STR id="ZITEM_DESC_523515">사막에서 활동하는 데저트플레임 부대의 여성용 하의</STR>
+
+INSERT INTO Item (ItemID, Name) Values (523515, '여성 데저트플레임 하의')
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=2, ResLevel=15, Slot=7, Weight=14, HP=3, AP=24, MAXWT=0, 
+Description='사막에서 활동하는 데저트플레임 부대의 여성용 하의' 
+WHERE ItemID = 523515
+
+-----------------------------------------------------------------------------------------------------------
+
+-- 남성.
+INSERT INTO CashShop(CSID, ItemID, CashPrice, Opened, RegDate, RentType)
+VALUES (194, 520020, 500, 0, GETDATE(), 2)
+
+INSERT INTO CashShop(CSID, ItemID, CashPrice, Opened, RegDate, RentType)
+VALUES (195, 522015, 600, 0, GETDATE(), 2)
+
+INSERT INTO CashShop(CSID, ItemID, CashPrice, Opened, RegDate, RentType)
+VALUES (196, 524015, 700, 0, GETDATE(), 2)
+
+INSERT INTO CashShop(CSID, ItemID, CashPrice, Opened, RegDate, RentType)
+VALUES (197, 521016, 1100, 0, GETDATE(), 2)
+
+INSERT INTO CashShop(CSID, ItemID, CashPrice, Opened, RegDate, RentType)
+VALUES (198, 523015, 900, 0, GETDATE(), 2)
+
+--------------------------------------------------------------------
+
+-- 여성.
+INSERT INTO CashShop(CSID, ItemID, CashPrice, Opened, RegDate, RentType)
+VALUES (199, 520520, 500, 0, GETDATE(), 2)
+
+INSERT INTO CashShop(CSID, ItemID, CashPrice, Opened, RegDate, RentType)
+VALUES (200, 522515, 600, 0, GETDATE(), 2)
+
+INSERT INTO CashShop(CSID, ItemID, CashPrice, Opened, RegDate, RentType)
+VALUES (201, 524515, 700, 0, GETDATE(), 2)
+
+INSERT INTO CashShop(CSID, ItemID, CashPrice, Opened, RegDate, RentType)
+VALUES (202, 521516, 1100, 0, GETDATE(), 2)
+
+INSERT INTO CashShop(CSID, ItemID, CashPrice, Opened, RegDate, RentType)
+VALUES (203, 523515, 900, 0, GETDATE(), 2)
+
+--------------------------------------------------------------------
+
+INSERT INTO CashSetShop(CSSID, Name, Description, CashPrice, ResSex, ResLevel, Weight, Opened, RegDate, RentType)
+VALUES (31, '남성 데저트플레임 세트', '사막에서 활동하는 데저트플레임 부대의 남성용 복식이다.', 3800, 1, 15, 40, 0, GETDATE(), 2)
+
+INSERT INTO CashSetShop(CSSID, Name, Description, CashPrice, ResSex, ResLevel, Weight, Opened, RegDate, RentType)
+VALUES (32, '여성 데저트플레임 세트', '사막에서 활동하는 데저트플레임 부대의 여성용 복식이다.', 3800, 1, 15, 40, 0, GETDATE(), 2)
+
+-----------------------------------------------------------------------
+
+INSERT INTO CashSetItem(CSIID, CSSID, CSID) VALUES(179, 31, 194)
+INSERT INTO CashSetItem(CSIID, CSSID, CSID) VALUES(180, 31, 197)
+INSERT INTO CashSetItem(CSIID, CSSID, CSID) VALUES(181, 31, 195)
+INSERT INTO CashSetItem(CSIID, CSSID, CSID) VALUES(182, 31, 198)
+INSERT INTO CashSetItem(CSIID, CSSID, CSID) VALUES(183, 31, 196)
+
+INSERT INTO CashSetItem(CSIID, CSSID, CSID) VALUES(184, 32, 199)
+INSERT INTO CashSetItem(CSIID, CSSID, CSID) VALUES(185, 32, 202)
+INSERT INTO CashSetItem(CSIID, CSSID, CSID) VALUES(186, 32, 200)
+INSERT INTO CashSetItem(CSIID, CSSID, CSID) VALUES(187, 32, 203)
+INSERT INTO CashSetItem(CSIID, CSSID, CSID) VALUES(188, 32, 201)
+
+-----------------------------------------------------------------------
+-- 520020, 남성 데저트플레임 모자
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (256, 194, 168, 500)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (257, 194, 360, 600)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (258, 194, 720, 800)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (259, 194, 0, 1100)
+
+------------------------------------------------------------------------
+-- 522015, 남성 데저트플레임 장갑	
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (260, 195, 168, 600)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (261, 195, 360, 700)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (262, 195, 720, 900)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (263, 195, 0, 1200)
+
+------------------------------------------------------------------------
+-- 524015, 남성 데저트플레임 부츠	
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (264, 196, 168, 700)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (265, 196, 360, 900)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (266, 196, 720, 1100)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (267, 196, 0, 1400)
+
+-------------------------------------------------------------------------
+-- 521016, 남성 데저트플레임 상의
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (268, 197, 168, 1100)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (269, 197, 360, 1300)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (270, 197, 720, 1700)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (271, 197, 0, 2300)
+
+-------------------------------------------------------------------------
+-- 523015, 남성 데저트플레임 하의	
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (272, 198, 168, 900)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (273, 198, 360, 1100)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (274, 198, 720, 1500)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (275, 198, 0, 2000)
+
+------------------------------------------------------------------------
+-- 520520, 여성 데저트플레임 모자
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (276, 199, 168, 500)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (277, 199, 360, 600)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (278, 199, 720, 800)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (279, 199, 0, 1100)
+
+------------------------------------------------------------------------
+-- 522515, 여성 데저트플레임 장갑
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (280, 200, 168, 600)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (281, 200, 360, 700)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (282, 200, 720, 900)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (283, 200, 0, 1200)
+
+------------------------------------------------------------------------
+-- 524515, 여성 데저트플레임 부츠
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (284, 201, 168, 700)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (285, 201, 360, 900)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (286, 201, 720, 1100)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (287, 201, 0, 1400)
+
+------------------------------------------------------------------------
+-- 521516, 여성 데저트플레임 상의
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (288, 202, 168, 1100)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (289, 202, 360, 1300)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (290, 202, 720, 1700)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (291, 202, 0, 2300)
+
+------------------------------------------------------------------------
+-- 523515, 여성 데저트플레임 하의
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (292, 203, 168, 900)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (293, 203, 360, 1100)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (294, 203, 720, 1500)
+
+INSERT INTO RentCashShopPrice(RCSPID, CSID, RentHourPeriod, CashPrice)
+VALUES (295, 203, 0, 2000)
+
+-------------------------------------------------------------------------
+
+INSERT INTO RentCashSetShopPrice(RCSSPID, CSSID, RentHourPeriod, CashPrice)
+VALUES (53, 31, 168, 3800)
+
+INSERT INTO RentCashSetShopPrice(RCSSPID, CSSID, RentHourPeriod, CashPrice)
+VALUES (54, 31, 360, 4500)
+
+INSERT INTO RentCashSetShopPrice(RCSSPID, CSSID, RentHourPeriod, CashPrice)
+VALUES (55, 31, 720, 5800)
+
+INSERT INTO RentCashSetShopPrice(RCSSPID, CSSID, RentHourPeriod, CashPrice)
+VALUES (56, 31, 0, 7200)
+
+-------------------------------------------------------------------------
+
+INSERT INTO RentCashSetShopPrice(RCSSPID, CSSID, RentHourPeriod, CashPrice)
+VALUES (57, 32, 168, 3800)
+
+INSERT INTO RentCashSetShopPrice(RCSSPID, CSSID, RentHourPeriod, CashPrice)
+VALUES (58, 32, 360, 4500)
+
+INSERT INTO RentCashSetShopPrice(RCSSPID, CSSID, RentHourPeriod, CashPrice)
+VALUES (59, 32, 720, 5800)
+
+INSERT INTO RentCashSetShopPrice(RCSSPID, CSSID, RentHourPeriod, CashPrice)
+VALUES (60, 32, 0, 7200)

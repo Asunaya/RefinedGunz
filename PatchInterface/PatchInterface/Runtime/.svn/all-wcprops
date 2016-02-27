@@ -1,0 +1,47 @@
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/Gunz/!svn/ver/7495/Develop/PatchInterface/PatchInterface/Runtime
+END
+config.ini
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/Gunz/!svn/ver/4866/Develop/PatchInterface/PatchInterface/Runtime/config.ini
+END
+KeeperList.txt
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/Gunz/!svn/ver/7495/Develop/PatchInterface/PatchInterface/Runtime/KeeperList.txt
+END
+해외 - KeeperList.txt
+K 25
+svn:wc:ra_dav:version-url
+V 109
+/svn/Gunz/!svn/ver/4866/Develop/PatchInterface/PatchInterface/Runtime/%ED%95%B4%EC%99%B8%20-%20KeeperList.txt
+END
+BR-KeeperList.txt
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/Gunz/!svn/ver/4866/Develop/PatchInterface/PatchInterface/Runtime/BR-KeeperList.txt
+END
+한국 - KeeperList.txt
+K 25
+svn:wc:ra_dav:version-url
+V 109
+/svn/Gunz/!svn/ver/7495/Develop/PatchInterface/PatchInterface/Runtime/%ED%95%9C%EA%B5%AD%20-%20KeeperList.txt
+END
+IND-KeeperList.txt
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svn/Gunz/!svn/ver/4866/Develop/PatchInterface/PatchInterface/Runtime/IND-KeeperList.txt
+END
+일본 - KeeperList.txt
+K 25
+svn:wc:ra_dav:version-url
+V 109
+/svn/Gunz/!svn/ver/7495/Develop/PatchInterface/PatchInterface/Runtime/%EC%9D%BC%EB%B3%B8%20-%20KeeperList.txt
+END

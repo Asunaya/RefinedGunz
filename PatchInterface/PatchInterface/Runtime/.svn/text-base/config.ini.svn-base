@@ -1,0 +1,8 @@
+[NETWORK]
+PORT="7779"
+
+[PATCH_ROOT_DIR]
+DIR="C:\TeamWorks\Develop"
+
+[OUTPUT_DIR]
+LIST_FILE_PATH="C:\Temp\LIST.TXT"

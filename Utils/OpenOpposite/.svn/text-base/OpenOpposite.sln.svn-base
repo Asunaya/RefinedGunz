@@ -1,0 +1,27 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "OpenOppositeSetup", "OpenOppositeSetup\OpenOppositeSetup.vdproj", "{F7593593-AFFE-4FB4-A618-FCCE118C1CEC}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "OpenOpposite", "OpenOpposite.vbproj", "{703026F4-6222-40B8-9A47-8C226314CF17}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{F7593593-AFFE-4FB4-A618-FCCE118C1CEC}.Debug.ActiveCfg = Debug
+		{F7593593-AFFE-4FB4-A618-FCCE118C1CEC}.Release.ActiveCfg = Release
+		{703026F4-6222-40B8-9A47-8C226314CF17}.Debug.ActiveCfg = Debug|.NET
+		{703026F4-6222-40B8-9A47-8C226314CF17}.Debug.Build.0 = Debug|.NET
+		{703026F4-6222-40B8-9A47-8C226314CF17}.Release.ActiveCfg = Release|.NET
+		{703026F4-6222-40B8-9A47-8C226314CF17}.Release.Build.0 = Release|.NET
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal

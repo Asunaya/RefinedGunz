@@ -1,0 +1,55 @@
+<?
+	require_once("core.php");
+	check_session();
+?>
+<?php
+
+
+include ("menu.inc");
+include ("dbconn.inc"); 
+
+$query = "SELECT TOP 500 * FROM ItemPurchaseLogByBounty order by id desc";
+  
+
+
+$result = $db->query($query);
+
+echo("<CENTER>
+<H1>상점 로그</H1>
+<TABLE border=1>
+<TR bgcolor=#EEEEEE>
+<TD width=50 align=center>id</TD>
+<TD width=120 align=center>아이템ID</TD>
+<TD width=120 align=center>CID</TD>
+<TD width=80 align=center>바운티</TD>
+<TD width=80 align=center>캐릭터잔액</TD>
+<TD width=80 align=center>구매타입</TD>
+<TD width=150 align=center>시간</TD>
+</TR>
+");
+
+while ($row = $db->fetch())
+{
+
+        echo ("<TR>
+<TD align=center>$row->id</TD>
+<TD>$row->ItemID</TD>
+<TD>$row->CID</TD>
+<TD>$row->Bounty</TD>
+<TD>$row->CharBounty</TD>
+<TD>$row->Type</TD>
+<TD>$row->Date</TD>
+</TR>
+");
+}
+
+echo("</TABLE>
+</CENTER>");
+
+$db->close();
+
+?>
+
+
+
+<? include ("sign.inc"); ?>

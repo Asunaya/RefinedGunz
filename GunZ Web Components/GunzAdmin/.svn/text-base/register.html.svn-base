@@ -1,0 +1,50 @@
+<?php
+
+
+include ("menu.inc");
+include ("dbconn.inc"); 
+
+$query = "SELECT kl.id, ".
+  "(SELECT c.Name FROM Character c WHERE kl.AttackerCID=c.CID) As Attacker, ".
+  "(SELECT c.Name FROM Character c WHERE kl.VictimCID=c.CID) As Victim, kl.Time ".
+  "FROM KillLog kl ORDER BY id desc";
+  
+
+
+$result = mssql_query($query, $con);
+
+echo("<CENTER>
+<H1>GUNZ KILL 로그</H1>
+<TABLE border=1>
+<TR bgcolor=#EEEEEE>
+<TD width=50 align=center>id</TD>
+<TD width=120 align=center>공격자</TD>
+<TD width=120 align=center>피해자</TD>
+<TD width=150 align=center>시간</TD>
+</TR>
+");
+
+while ($row = mssql_fetch_array($result))
+{
+	if ($row[Attacker] == "") $row[Attacker] = "&nbsp;";
+	if ($row[Victim] == "") $row[Victim] = "&nbsp;";
+
+        echo ("<TR>
+<TD align=center>$row[id]</TD>
+<TD>$row[Attacker]</TD>
+<TD>$row[Victim]</TD>
+<TD>$row[Time]</TD>
+</TR>
+");
+}
+
+echo("</TABLE>
+</CENTER>");
+
+mssql_close($con);
+
+?>
+
+
+
+<? include ("sign.inc"); ?>

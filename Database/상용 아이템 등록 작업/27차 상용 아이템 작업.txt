@@ -1,0 +1,218 @@
+남자
+eq_chest_korea
+eq_feet_korea
+eq_legs_korea
+eq_head_korea
+
+eq_chest_brazil
+eq_feet_brazil
+eq_legs_brazil
+eq_head_brazil
+
+eq_chest_japan
+eq_feet_japan
+eq_legs_japan
+eq_head_japan
+
+
+여자
+eq_chest_korea
+eq_feets_korea
+eq_legs_korea
+eq_head_korea
+
+eq_chest_brazil
+eq_feets_brazil
+eq_legs_brazil
+eq_head_brazil
+
+eq_chest_japan
+eq_feets_japan
+eq_legs_japan
+eq_head_japan
+
+----------------------------------------------
+
+<STR id="ZITEM_NAME_520022">남성 액티브 스포츠 두건</STR>
+<STR id="ZITEM_DESC_520022">(한정기간판매) 어떤 스포츠에 적합하도록 만들어진듯한 남성용 스포츠 슈트. 입으면 강력한 힘을 발휘할 것 같다.</STR>
+
+<STR id="ZITEM_NAME_520522">여성 액티브 스포츠 두건</STR>
+<STR id="ZITEM_DESC_520522">(한정기간판매) 어떤 스포츠에 적합하도록 만들어진듯한 여성용 스포츠 슈트. 입으면 강력한 힘을 발휘할 것 같다.</STR>
+
+INSERT INTO Item (ItemID, Name) Values (520022, '남성 액티브 스포츠 두건')
+INSERT INTO Item (ItemID, Name) Values (520023, '남성 액티브 스포츠 두건')
+INSERT INTO Item (ItemID, Name) Values (520024, '남성 액티브 스포츠 두건')
+
+INSERT INTO Item (ItemID, Name) Values (520522, '여성 액티브 스포츠 두건')
+INSERT INTO Item (ItemID, Name) Values (520523, '여성 액티브 스포츠 두건')
+INSERT INTO Item (ItemID, Name) Values (520524, '여성 액티브 스포츠 두건')
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=1, ResLevel=0, Slot=4, Weight=3, HP=0, AP=5, MAXWT=0, 
+Description='(한정기간판매) 어떤 스포츠에 적합하도록 만들어진듯한 남성용 스포츠 슈트. 입으면 강력한 힘을 발휘할 것 같다.' 
+WHERE ItemID = 520022
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=1, ResLevel=0, Slot=4, Weight=3, HP=0, AP=5, MAXWT=0, 
+Description='(한정기간판매) 어떤 스포츠에 적합하도록 만들어진듯한 남성용 스포츠 슈트. 입으면 강력한 힘을 발휘할 것 같다.' 
+WHERE ItemID = 520023
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=1, ResLevel=0, Slot=4, Weight=3, HP=0, AP=5, MAXWT=0, 
+Description='(한정기간판매) 어떤 스포츠에 적합하도록 만들어진듯한 남성용 스포츠 슈트. 입으면 강력한 힘을 발휘할 것 같다.' 
+WHERE ItemID = 520024
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=2, ResLevel=0, Slot=4, Weight=3, HP=0, AP=5, MAXWT=0, 
+Description='(한정기간판매) 어떤 스포츠에 적합하도록 만들어진듯한 여성용 스포츠 슈트. 입으면 강력한 힘을 발휘할 것 같다.' 
+WHERE ItemID = 520522
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=2, ResLevel=0, Slot=4, Weight=3, HP=0, AP=5, MAXWT=0, 
+Description='(한정기간판매) 어떤 스포츠에 적합하도록 만들어진듯한 여성용 스포츠 슈트. 입으면 강력한 힘을 발휘할 것 같다.' 
+WHERE ItemID = 520523
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=2, ResLevel=0, Slot=4, Weight=3, HP=0, AP=5, MAXWT=0, 
+Description='(한정기간판매) 어떤 스포츠에 적합하도록 만들어진듯한 여성용 스포츠 슈트. 입으면 강력한 힘을 발휘할 것 같다.' 
+WHERE ItemID = 520524
+
+----------------------------------------------
+
+<STR id="ZITEM_NAME_524017">남성 액티브 스포츠 슈즈</STR>
+<STR id="ZITEM_DESC_524017">(한정기간판매) 어떤 스포츠에 적합하도록 만들어진듯한 남성용 스포츠 슈트. 입으면 강력한 힘을 발휘할 것 같다.</STR>
+
+<STR id="ZITEM_NAME_524517">여성 액티브 스포츠 슈즈</STR>
+<STR id="ZITEM_DESC_524517">(한정기간판매) 어떤 스포츠에 적합하도록 만들어진듯한 여성용 스포츠 슈트. 입으면 강력한 힘을 발휘할 것 같다.</STR>
+
+INSERT INTO Item (ItemID, Name) Values (524017, '남성 액티브 스포츠 슈즈')
+INSERT INTO Item (ItemID, Name) Values (524018, '남성 액티브 스포츠 슈즈')
+INSERT INTO Item (ItemID, Name) Values (524019, '남성 액티브 스포츠 슈즈')
+
+INSERT INTO Item (ItemID, Name) Values (524517, '여성 액티브 스포츠 슈즈')
+INSERT INTO Item (ItemID, Name) Values (524518, '여성 액티브 스포츠 슈즈')
+INSERT INTO Item (ItemID, Name) Values (524519, '여성 액티브 스포츠 슈즈')
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=1, ResLevel=0, Slot=8, Weight=2, HP=0, AP=13, MAXWT=0, 
+Description='(한정기간판매) 어떤 스포츠에 적합하도록 만들어진듯한 남성용 스포츠 슈트. 입으면 강력한 힘을 발휘할 것 같다.' 
+WHERE ItemID = 524017
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=1, ResLevel=0, Slot=8, Weight=2, HP=0, AP=13, MAXWT=0, 
+Description='(한정기간판매) 어떤 스포츠에 적합하도록 만들어진듯한 남성용 스포츠 슈트. 입으면 강력한 힘을 발휘할 것 같다.' 
+WHERE ItemID = 524018
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=1, ResLevel=0, Slot=8, Weight=2, HP=0, AP=13, MAXWT=0, 
+Description='(한정기간판매) 어떤 스포츠에 적합하도록 만들어진듯한 남성용 스포츠 슈트. 입으면 강력한 힘을 발휘할 것 같다.' 
+WHERE ItemID = 524019
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=2, ResLevel=0, Slot=8, Weight=2, HP=0, AP=13, MAXWT=0, 
+Description='(한정기간판매) 어떤 스포츠에 적합하도록 만들어진듯한 여성용 스포츠 슈트. 입으면 강력한 힘을 발휘할 것 같다.' 
+WHERE ItemID = 524517
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=2, ResLevel=0, Slot=8, Weight=2, HP=0, AP=13, MAXWT=0, 
+Description='(한정기간판매) 어떤 스포츠에 적합하도록 만들어진듯한 여성용 스포츠 슈트. 입으면 강력한 힘을 발휘할 것 같다.' 
+WHERE ItemID = 524518
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=2, ResLevel=0, Slot=8, Weight=2, HP=0, AP=13, MAXWT=0, 
+Description='(한정기간판매) 어떤 스포츠에 적합하도록 만들어진듯한 여성용 스포츠 슈트. 입으면 강력한 힘을 발휘할 것 같다.' 
+WHERE ItemID = 524519
+
+----------------------------------------------
+
+<STR id="ZITEM_NAME_521018">남성 액티브 스포츠 상의</STR>
+<STR id="ZITEM_DESC_521018">(한정기간판매) 어떤 스포츠에 적합하도록 만들어진듯한 남성용 스포츠 슈트. 입으면 강력한 힘을 발휘할 것 같다.</STR>
+
+<STR id="ZITEM_NAME_521518">여성 액티브 스포츠 상의</STR>
+<STR id="ZITEM_DESC_521518">(한정기간판매) 어떤 스포츠에 적합하도록 만들어진듯한 여성용 스포츠 슈트. 입으면 강력한 힘을 발휘할 것 같다.</STR>
+
+INSERT INTO Item (ItemID, Name) Values (521018, '남성 액티브 스포츠 상의')
+INSERT INTO Item (ItemID, Name) Values (521019, '남성 액티브 스포츠 상의')
+INSERT INTO Item (ItemID, Name) Values (521020, '남성 액티브 스포츠 상의')
+
+INSERT INTO Item (ItemID, Name) Values (521518, '여성 액티브 스포츠 상의')
+INSERT INTO Item (ItemID, Name) Values (521519, '여성 액티브 스포츠 상의')
+INSERT INTO Item (ItemID, Name) Values (521520, '여성 액티브 스포츠 상의')
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=1, ResLevel=0, Slot=5, Weight=10, HP=2, AP=14, MAXWT=0, 
+Description='(한정기간판매) 어떤 스포츠에 적합하도록 만들어진듯한 남성용 스포츠 슈트. 입으면 강력한 힘을 발휘할 것 같다.' 
+WHERE ItemID = 521018
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=1, ResLevel=0, Slot=5, Weight=10, HP=2, AP=14, MAXWT=0, 
+Description='(한정기간판매) 어떤 스포츠에 적합하도록 만들어진듯한 남성용 스포츠 슈트. 입으면 강력한 힘을 발휘할 것 같다.' 
+WHERE ItemID = 521019
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=1, ResLevel=0, Slot=5, Weight=10, HP=2, AP=14, MAXWT=0, 
+Description='(한정기간판매) 어떤 스포츠에 적합하도록 만들어진듯한 남성용 스포츠 슈트. 입으면 강력한 힘을 발휘할 것 같다.' 
+WHERE ItemID = 521020
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=2, ResLevel=0, Slot=5, Weight=10, HP=2, AP=14, MAXWT=0, 
+Description='(한정기간판매) 어떤 스포츠에 적합하도록 만들어진듯한 여성용 스포츠 슈트. 입으면 강력한 힘을 발휘할 것 같다.' 
+WHERE ItemID = 521518
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=2, ResLevel=0, Slot=5, Weight=10, HP=2, AP=14, MAXWT=0, 
+Description='(한정기간판매) 어떤 스포츠에 적합하도록 만들어진듯한 여성용 스포츠 슈트. 입으면 강력한 힘을 발휘할 것 같다.' 
+WHERE ItemID = 521519
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=2, ResLevel=0, Slot=5, Weight=10, HP=2, AP=14, MAXWT=0, 
+Description='(한정기간판매) 어떤 스포츠에 적합하도록 만들어진듯한 여성용 스포츠 슈트. 입으면 강력한 힘을 발휘할 것 같다.' 
+WHERE ItemID = 521520
+
+----------------------------------------------
+
+<STR id="ZITEM_NAME_523017">남성 액티브 스포츠 하의</STR>
+<STR id="ZITEM_DESC_523017">(한정기간판매) 어떤 스포츠에 적합하도록 만들어진듯한 남성용 스포츠 슈트. 입으면 강력한 힘을 발휘할 것 같다.</STR>
+
+<STR id="ZITEM_NAME_523517">여성 액티브 스포츠 하의</STR>
+<STR id="ZITEM_DESC_523517">(한정기간판매) 어떤 스포츠에 적합하도록 만들어진듯한 여성용 스포츠 슈트. 입으면 강력한 힘을 발휘할 것 같다.</STR>
+
+INSERT INTO Item (ItemID, Name) Values (523017, '남성 액티브 스포츠 하의')
+INSERT INTO Item (ItemID, Name) Values (523018, '남성 액티브 스포츠 하의')
+INSERT INTO Item (ItemID, Name) Values (523019, '남성 액티브 스포츠 하의')
+
+INSERT INTO Item (ItemID, Name) Values (523517, '여성 액티브 스포츠 하의')
+INSERT INTO Item (ItemID, Name) Values (523518, '여성 액티브 스포츠 하의')
+INSERT INTO Item (ItemID, Name) Values (523519, '여성 액티브 스포츠 하의')
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=1, ResLevel=0, Slot=7, Weight=10, HP=2, AP=16, MAXWT=0, 
+Description='(한정기간판매) 어떤 스포츠에 적합하도록 만들어진듯한 남성용 스포츠 슈트. 입으면 강력한 힘을 발휘할 것 같다.' 
+WHERE ItemID = 523017
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=1, ResLevel=0, Slot=7, Weight=10, HP=2, AP=16, MAXWT=0, 
+Description='(한정기간판매) 어떤 스포츠에 적합하도록 만들어진듯한 남성용 스포츠 슈트. 입으면 강력한 힘을 발휘할 것 같다.' 
+WHERE ItemID = 523018
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=1, ResLevel=0, Slot=7, Weight=10, HP=2, AP=16, MAXWT=0, 
+Description='(한정기간판매) 어떤 스포츠에 적합하도록 만들어진듯한 남성용 스포츠 슈트. 입으면 강력한 힘을 발휘할 것 같다.' 
+WHERE ItemID = 523019
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=2, ResLevel=0, Slot=7, Weight=10, HP=2, AP=16, MAXWT=0, 
+Description='(한정기간판매) 어떤 스포츠에 적합하도록 만들어진듯한 여성용 스포츠 슈트. 입으면 강력한 힘을 발휘할 것 같다.' 
+WHERE ItemID = 523517
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=2, ResLevel=0, Slot=7, Weight=10, HP=2, AP=16, MAXWT=0, 
+Description='(한정기간판매) 어떤 스포츠에 적합하도록 만들어진듯한 여성용 스포츠 슈트. 입으면 강력한 힘을 발휘할 것 같다.' 
+WHERE ItemID = 523518
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=2, ResLevel=0, Slot=7, Weight=10, HP=2, AP=16, MAXWT=0, 
+Description='(한정기간판매) 어떤 스포츠에 적합하도록 만들어진듯한 여성용 스포츠 슈트. 입으면 강력한 힘을 발휘할 것 같다.' 
+WHERE ItemID = 523519
+
+----------------------------------------------

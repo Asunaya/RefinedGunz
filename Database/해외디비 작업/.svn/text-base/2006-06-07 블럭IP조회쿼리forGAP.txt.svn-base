@@ -1,0 +1,9 @@
+CREATE PROC spGetCheckBlockedIP
+@IP varchar(15)
+AS
+BEGIN
+	SELECT ic.CountryName as Name, bcc.CountryCode3 as Code, bcc.IsBlock
+	FROM BlockCountryCode bcc(NOLOCK), IPtoCountry ic(NOLOCK)
+	WHERE   ic.CountryCode3 = bcc.CountryCode3 and 
+		ic.IPFrom <= GunzDB.game.inet_aton( @IP ) and ic.IPTo >= GunzDB.game.inet_aton( @IP ) 
+END

@@ -1,0 +1,46 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UpdateBuilder", "UpdateBuilder.vcproj", "{CE8419DC-D424-407B-AC5E-D57727126A21}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8D451493-65C2-49C3-ADAE-ACB17E6B0650} = {8D451493-65C2-49C3-ADAE-ACB17E6B0650}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cml", "..\..\CML\cml.vcproj", "{8D451493-65C2-49C3-ADAE-ACB17E6B0650}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SourceCodeControl) = preSolution
+		SccNumberOfProjects = 2
+		SccProjectUniqueName0 = UpdateBuilder.vcproj
+		SccProjectName0 = \u0022$/UTILS/UpdateBuilder\u0022,\u0020OUTAAAAA
+		SccLocalPath0 = .
+		SccProvider0 = MSSCCI:Microsoft\u0020Visual\u0020SourceSafe
+		SccProjectUniqueName1 = ..\\..\\CML\\cml.vcproj
+		SccProjectName1 = \u0022$/CML\u0022,\u0020NLAAAAAA
+		SccLocalPath1 = ..\\..\\CML
+		SccProvider1 = MSSCCI:Microsoft\u0020Visual\u0020SourceSafe
+	EndGlobalSection
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Release = Release
+		Release_publish = Release_publish
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{CE8419DC-D424-407B-AC5E-D57727126A21}.Debug.ActiveCfg = Debug|Win32
+		{CE8419DC-D424-407B-AC5E-D57727126A21}.Debug.Build.0 = Debug|Win32
+		{CE8419DC-D424-407B-AC5E-D57727126A21}.Release.ActiveCfg = Release|Win32
+		{CE8419DC-D424-407B-AC5E-D57727126A21}.Release.Build.0 = Release|Win32
+		{CE8419DC-D424-407B-AC5E-D57727126A21}.Release_publish.ActiveCfg = Release|Win32
+		{CE8419DC-D424-407B-AC5E-D57727126A21}.Release_publish.Build.0 = Release|Win32
+		{8D451493-65C2-49C3-ADAE-ACB17E6B0650}.Debug.ActiveCfg = Debug|Win32
+		{8D451493-65C2-49C3-ADAE-ACB17E6B0650}.Debug.Build.0 = Debug|Win32
+		{8D451493-65C2-49C3-ADAE-ACB17E6B0650}.Release.ActiveCfg = Release|Win32
+		{8D451493-65C2-49C3-ADAE-ACB17E6B0650}.Release.Build.0 = Release|Win32
+		{8D451493-65C2-49C3-ADAE-ACB17E6B0650}.Release_publish.ActiveCfg = Release_publish|Win32
+		{8D451493-65C2-49C3-ADAE-ACB17E6B0650}.Release_publish.Build.0 = Release_publish|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal

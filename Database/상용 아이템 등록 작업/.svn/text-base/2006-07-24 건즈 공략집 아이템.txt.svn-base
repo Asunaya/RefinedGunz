@@ -1,0 +1,90 @@
+<STR id="ZITEM_NAME_520027">남성용 제우스 머리띠</STR>
+<STR id="ZITEM_DESC_520027">경량형의 남성용 머리띠. 방어의 효과는 없지만 체력 증가의 보너스가 강한 아이템.</STR>
+
+<STR id="ZITEM_NAME_520527">여성용 제우스 머리띠</STR>
+<STR id="ZITEM_DESC_520527">경량형의 여성용 머리띠. 방어의 효과는 없지만 체력 증가의 보너스가 강한 아이템.</STR>
+
+-------------------------------------------------------------------------
+
+<STR id="ZITEM_NAME_521022">남성용 제우스 코트</STR>
+<STR id="ZITEM_DESC_521022">경량형의 남성용 코트. 주황색과 남색의 조화가 눈길을 끈다.</STR>
+
+<STR id="ZITEM_NAME_521522">여성용 제우스 코트</STR>
+<STR id="ZITEM_DESC_521522">경량형의 여성용 코트. 주황색과 남색의 조화가 눈길을 끈다.</STR>
+
+-------------------------------------------------------------------------
+
+
+insert into item(itemid, name) values(520027, '남성용 제우스 머리띠')
+insert into item(itemid, name) values(520527, '여성용 제우스 머리띠')
+insert into item(itemid, name) values(521022, '남성용 제우스 코트')
+insert into item(itemid, name) values(521522, '여성용 제우스 코트')
+
+-------------------------------------------------------------------------------
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=1, ResLevel=0, Slot=4, Weight=2, HP=3, AP=0, MAXWT=0, 
+Description='경량형의 남성용 머리띠. 방어의 효과는 없지만 체력 증가의 보너스가 강한 아이템.' 
+WHERE ItemID = 520027
+
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=2, ResLevel=0, Slot=4, Weight=2, HP=3, AP=0, MAXWT=0, 
+Description='경량형의 여성용 머리띠. 방어의 효과는 없지만 체력 증가의 보너스가 강한 아이템.' 
+WHERE ItemID = 520527
+
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=1, ResLevel=0, Slot=5, Weight=10, HP=2, AP=12, MAXWT=0, 
+Description='경량형의 남성용 코트. 주황색과 남색의 조화가 눈길을 끈다.' 
+WHERE ItemID = 521022
+
+
+UPDATE Item SET TotalPoint=0, BountyPrice=0, Damage=0, Delay=0, Controllability=0, Magazine=0, ReloadTime=0, SlugOutput=0, Gadget=0, SF=0, FR=0,CR=0,PR=0,LR=0, BlendColor=0, ModelName='', MaxBullet=0, LimitSpeed=100, IsCashItem=1, 
+ResSex=2, ResLevel=0, Slot=5, Weight=10, HP=2, AP=12, MAXWT=0, 
+Description='경량형의 여성용 코트. 주황색과 남색의 조화가 눈길을 끈다.' 
+WHERE ItemID = 521522
+
+-------------------------------------------------------------------------------
+
+insert into cashshop(itemid, newitemorder, cashprice, opened, regdate, renttype)
+values(520027, 0, 1000000, 0, getdate(), 1)
+insert into cashshop(itemid, newitemorder, cashprice, opened, regdate, renttype)
+values(520527, 0, 1000000, 0, getdate(), 1)
+insert into cashshop(itemid, newitemorder, cashprice, opened, regdate, renttype)
+values(521022, 0, 1000000, 0, getdate(), 1)
+insert into cashshop(itemid, newitemorder, cashprice, opened, regdate, renttype)
+values(521522, 0, 1000000, 0, getdate(), 1)
+
+
+insert into rentcashshopprice(csid, renthourperiod, cashprice)
+values(234, 8760, 1000000)
+insert into rentcashshopprice(csid, renthourperiod, cashprice)
+values(235, 8760, 1000000)
+insert into rentcashshopprice(csid, renthourperiod, cashprice)
+values(236, 8760, 1000000)
+insert into rentcashshopprice(csid, renthourperiod, cashprice)
+values(237, 8760, 1000000)
+
+-------------------------------------------------------------------------------
+
+insert into cashsetshop(name, description, cashprice, ressex, reslevel, weight, opened,
+ regdate, renttype)
+values('남성 제우스 세트', '남성용 제우스 세트아이템', 1000000, 1, 0, 12, 0, getdate(), 1)
+
+insert into cashsetshop(name, description, cashprice, ressex, reslevel, weight, opened,
+ regdate, renttype)
+values('여성 제우스 세트', '여성용 제우스 세트아이템', 1000000, 2, 0, 12, 0, getdate(), 1)
+
+insert into cashsetitem(cssid, csid) values(39, 234)
+insert into cashsetitem(cssid, csid) values(39, 236)
+insert into cashsetitem(cssid, csid) values(40, 235)
+insert into cashsetitem(cssid, csid) values(40, 237)
+
+insert into rentcashsetshopprice(cssid, renthourperiod, cashprice)
+values(39, 8760, 1000000)
+
+insert into rentcashsetshopprice(cssid, renthourperiod, cashprice)
+values(40, 8760, 1000000)
+
+-------------------------------------------------------------------------------

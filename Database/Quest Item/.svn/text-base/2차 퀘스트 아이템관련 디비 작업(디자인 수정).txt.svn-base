@@ -1,0 +1,97 @@
+/* 
+QuestGameLog의 테이블 구조 변경.
+QuestGameLog를 저장하는 저장 프로시져 변경.
+이전에 있던것 제거후 다시 구성.
+
+Quest unique item획득 정보를 저장하는 테이블 추가.
+Quest unique item로그를 저장하는 저장 프로시져 추가.
+*/
+ 
+
+
+
+-- 퀘스트 게임에서 획득한 유니크 아이템 정보 로그 저장 테이블.
+BEGIN TRAN
+
+CREATE TABLE QUniqueItemLog (
+	QUILID 	int identity PRIMARY KEY NONCLUSTERED
+,	QGLID 	int NOT NULL
+,	CID 	int NOT NULL
+,	QIID 	int NOT NULL )
+
+GO
+
+CREATE CLUSTERED INDEX QUniqueItemLogCIDIndex
+ON QUniqueItemLog( CID )
+
+CREATE NONCLUSTERED INDEX QUniqueItemLogQGLIDIndex
+ON QUniqueItemLog( QGLID )
+
+CREATE NONCLUSTERED INDEX QUniqueItemLogQIIDIndex
+ON QUniqueItemLog( QIID )
+
+COMMIT TRAN
+
+GO
+
+///////////////////////////////////////////////////////////////////////////////
+-- 퀘스트 게임 로그 저장 테이블.
+BEGIN TRAN
+
+CREATE TABLE QuestGameLog(
+	id		int identity PRIMARY KEY NONCLUSTERED
+,	GameName	varchar(64)	
+,	Master		int NOT NULL
+,	Player1		int 
+, 	Player2		int
+,	Player3		int
+,	TotalQItemCount	tinyint
+,	ScenarioID	smallint NOT NULL
+,	StartTime	smalldatetime NOT NULL
+,	EndTime		smalldatetime NOT NULL )
+
+GO
+
+CREATE CLUSTERED INDEX QuestGameLogStartTimeIndex
+ON QuestGameLog( StartTime )
+
+CREATE NONCLUSTERED INDEX QuestGameLogEndTimeIndex
+ON QuestGameLog( EndTime )
+
+COMMIT TRAN
+
+GO
+
+/////////////////////////////////////////////////////////////////////////////
+-- 퀘스트 게임 로그 정보 저장 프로시져.
+CREATE PROC spInsertQuestGameLog
+	@GameName varchar(64)
+,	@Master int 
+,	@Player1 int 
+,	@Player2 int
+,	@Player3 int
+,	@TotalQItemCount smallint 
+,	@ScenarioID smallint 
+,	@GamePlayTime tinyint 
+AS
+BEGIN
+	INSERT INTO QuestGameLog(GameName, Master, Player1, Player2, Player3, TotalQItemCount, ScenarioID, StartTime, EndTime)
+	VALUES (@GameName, @Master, @Player1, @Player2, @Player3, @TotalQItemCount, @ScenarioID, DATEADD(n, -(@GamePlayTime), GETDATE()), GETDATE() )
+
+	SELECT @@IDENTITY AS 'ORDERQGLID'
+END
+
+GO
+
+////////////////////////////////////////////////////////////////////////////////
+-- 퀘스트 유니크 아이템 저장 프로시져.
+CREATE PROC spInsertQUniqueItemLog
+	@QGLID int
+,	@CID int
+,	@QIID int
+AS
+BEGIN
+	INSERT INTO QUniqueItemLog(QGLID, CID, QIID) VALUES (@QGLID, @CID, @QIID)
+END
+
+GO

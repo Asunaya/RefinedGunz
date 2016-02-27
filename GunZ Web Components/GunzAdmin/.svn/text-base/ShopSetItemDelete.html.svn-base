@@ -1,0 +1,69 @@
+<?
+	require_once("core.php");
+	check_session();
+?>
+<?php
+
+include ("dbconn.inc"); 
+
+//// Declare Functions ////////////////////////////////////////////////////////
+function GetBackMenu()
+{
+	return("[<a href='#' OnClick='history.back();'>뒤로</a>]");
+}
+
+function GetSetItemShopMenu()
+{
+	return("[<a href='ShopSetItem.html'>아이템관리</a>]");
+}
+
+function SetItemDelete()
+{
+	//// 봉인 ////
+	echo("<CENTER>삭제기능은 보안상 봉인되었습니다.</CENTER>");
+	return;
+
+	////
+	global $db;
+	
+	$CSSID_TO_DELETE = $_POST['CSSID'];
+	
+	//// Delete Item from SetItemShop ///////////////////////////////////////////////////
+	echo("
+		<CENTER>
+			셋트아이템($CSSID_TO_DELETE)를 삭제합니다.<BR><BR>
+		</CENTER>
+	");
+	
+	$SetItemShopMenu = GetSetItemShopMenu();	
+	$query_del = "
+		DELETE FROM CashSetItem WHERE CSSID = $CSSID_TO_DELETE;
+		DELETE FROM CashSetShop WHERE CSSID = $CSSID_TO_DELETE;
+	";
+	$result = $db->query($query_del);
+	if ($result == FALSE) {
+		echo("
+			<CENTER>
+				<B>셋트아이템 삭제에 실패하였습니다.</B> <BR><BR>
+				$SetItemShopMenu
+			</CENTER>
+			<BR><BR>
+		");
+	} else {
+		echo("
+			<CENTER>
+				<B>셋트아이템 삭제에 성공하였습니다.</B> <BR><BR>
+				$SetItemShopMenu
+			</CENTER>
+			<BR><BR>
+		");
+	}
+}
+
+//// Main /////////////////////////////////////////////////////////////////////
+SetItemDelete();
+
+?>
+
+<? $db->close(); ?>
+<? include ("sign.inc"); ?>

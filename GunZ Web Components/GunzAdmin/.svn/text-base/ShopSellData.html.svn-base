@@ -1,0 +1,141 @@
+<?
+	require_once("core.php");
+	check_session();
+?>
+<HTML>
+<BODY>
+<?php
+
+require_once('core.php');
+
+
+$userid = $_POST['userid'];
+
+echo("<CENTER><H1>캐쉬아이템 구매정보</H1></CENTER>\n");
+
+echo("
+<FORM action='./ShopSellData.html' method=post>
+<TABLE>
+<TR>
+<TD>넷마블 아이디</TD>
+<TD><INPUT type=text name=userid value=''></TD>
+<TD><INPUT type=hidden name=mode value='process'>
+<INPUT type=image src='/img/search.gif'></TD>
+</TR>
+</TABLE>
+</FORM>
+");
+
+if ($_POST['mode'] == "")
+{
+  if ($userid =='')
+  {
+  
+  
+  }
+
+}
+else if ($_POST['mode'] == "process")
+{
+  include ("dbconn.inc"); 
+  
+  $query = "SELECT * FROM viewItemPurchaseLogByCash(nolock) where userid='$userid' order by Date desc";
+  $result = $db->query($query);
+  
+  $cnt = 0;
+  $total_cash = 0;
+  
+  while ($row = $db->fetch())
+  {
+    $arr[$cnt]['UserID'] =    $row->UserID;
+    $arr[$cnt]['ItemName'] =  $row->ItemName;
+    $arr[$cnt]['Date'] =      $row->Date;
+    $arr[$cnt]['Cash'] =      $row->Cash;
+    $arr[$cnt]['ItemType'] = "일반";
+
+    $total_cash += $row->Cash;
+    
+    $cnt++;
+  } // while
+
+
+  $query = "SELECT * FROM viewSetItemPurchaseLogByCash(nolock) where userid='$userid' order by Date desc";
+  $result = $db->query($query);
+  
+  while ($row = $db->fetch())
+  {
+    $arr[$cnt]['UserID'] =    $row->UserID;
+    $arr[$cnt]['ItemName'] =  $row->SetItemName;
+    $arr[$cnt]['Date'] =      $row->Date;
+    $arr[$cnt]['Cash'] =      $row->Cash;
+    $arr[$cnt]['ItemType'] = "세트";
+    
+    $total_cash += $row->Cash;
+    $cnt++;    
+  } // while
+  
+  
+  echo("<BR><BR>
+<CENTER>
+<TABLE border=1>
+<TR bgcolor=#EEEEEE>
+<TD width=100 align=center>아이디</TD>
+<TD width=60 align=center>구분</TD>
+<TD width=300 align=center>상품명</TD>
+<TD width=60 align=center>구매가</TD>
+<TD width=200 align=center>구매일</TD>
+</TR>
+  ");
+  
+/*  if ($cnt > 0)
+  {
+    $arr=dArray_sort($arr, 'Date');
+    $arr = array_reverse($arr);
+  }
+  */
+
+  for ($i = 0; $i < $cnt; $i++)
+  {
+    if ($arr[$i]['ItemType'] == '일반') echo ("<TR bgcolor=#F2F9E8>\n");
+    else echo ("<TR bgcolor=#FFF9E7>\n");
+
+          echo ("<TD align=center>{$arr[$i]['UserID']}</TD>
+<TD align=center>{$arr[$i]['ItemType']}</TD>
+<TD>{$arr[$i]['ItemName']}</TD>
+<TD align=right>{$arr[$i]['Cash']}</TD>
+<TD>{$arr[$i]['Date']}</TD>
+</TR>
+");
+  } // for
+  
+  if ($cnt == 0)
+  {
+    echo("<TR>
+<TD align=center>$userid</TD>
+<TD colspan=4 align=center>구매 정보가 없습니다.</TD>
+</TR>
+"); 
+  }
+  else
+  {  
+    echo("
+<TR height=40><TD colspan=5>총 캐쉬액 : $total_cash 원</TD></TR>
+    ");
+  }
+
+  echo("</TABLE>
+</CENTER>
+  ");
+    
+  $db->close();
+
+
+}   // else if ($_POST['mode'] == "process")
+?>
+
+
+
+<? include ("sign.inc"); ?>
+
+</BODY>
+</HTML>

@@ -1,0 +1,55 @@
+상수 테이블.
+BillingMethod - 이름.
+CashShop
+CashSetShop - 이름, 설명
+Currency -- 사용안함.
+GameType 11
+Item - 이름
+Map 11
+CashSetItem 
+PremiumGrade - 이름 11
+PurchaseMethod - 이름 
+UserGrade - 이름 11
+
+
+INSERT INTO GameType(GameTypeID, Name) VALUES(0,'Solo Death Match')
+INSERT INTO GameType(GameTypeID, Name) VALUES(1,'Team Death Match')
+INSERT INTO GameType(GameTypeID, Name) VALUES(2,'Solo Gladiator')
+INSERT INTO GameType(GameTypeID, Name) VALUES(3,'Team Gladiator')
+INSERT INTO GameType(GameTypeID, Name) VALUES(4,'Assassinate')
+INSERT INTO GameType(GameTypeID, Name) VALUES(5,'Training')
+
+
+INSERT INTO Map(MapID, Name, MaxPlayer) VALUES(0,'Mansion',32)
+INSERT INTO Map(MapID, Name, MaxPlayer) VALUES(1,'Prison',32)
+INSERT INTO Map(MapID, Name, MaxPlayer) VALUES(2,'Prison II',32)
+INSERT INTO Map(MapID, Name, MaxPlayer) VALUES(3,'Station',32)
+INSERT INTO Map(MapID, Name, MaxPlayer) VALUES(4,'Battle Arena',32)
+INSERT INTO Map(MapID, Name, MaxPlayer) VALUES(5,'Town',32)
+INSERT INTO Map(MapID, Name, MaxPlayer) VALUES(6,'Dungeon',32)
+INSERT INTO Map(MapID, Name, MaxPlayer) VALUES(7,'Ruin',32)
+INSERT INTO Map(MapID, Name, MaxPlayer) VALUES(8,'Island',32)
+INSERT INTO Map(MapID, Name, MaxPlayer) VALUES(9,'Garden',32)
+INSERT INTO Map(MapID, Name, MaxPlayer) VALUES(10,'Castle',32)
+INSERT INTO Map(MapID, Name, MaxPlayer) VALUES(11,'Factory',8)
+
+
+INSERT INTO PurchaseMethod(PurchaseMethodID, Name) VALUES (0, 'Cash')
+INSERT INTO PurchaseMethod(PurchaseMethodID, Name) VALUES (1, 'Bounty')
+INSERT INTO PurchaseMethod(PurchaseMethodID, Name) VALUES (2, 'Cash&Bounty')
+INSERT INTO PurchaseMethod(PurchaseMethodID, Name) VALUES (3, 'Special(Event)')
+
+INSERT INTO UserGrade(UGradeID, Name) VALUES (0, 'Free Account')
+INSERT INTO UserGrade(UGradeID, Name) VALUES (1, 'Cash Account')
+INSERT INTO UserGrade(UGradeID, Name) VALUES (100, 'Relapsed criminal')
+INSERT INTO UserGrade(UGradeID, Name) VALUES (101, '1st Warring')
+INSERT INTO UserGrade(UGradeID, Name) VALUES (102, '2nd Warring')
+INSERT INTO UserGrade(UGradeID, Name) VALUES (103, '3rd Warring')
+INSERT INTO UserGrade(UGradeID, Name) VALUES (104, 'Chatting Prohibition')
+INSERT INTO UserGrade(UGradeID, Name) VALUES (105, 'Period Prohibition')
+INSERT INTO UserGrade(UGradeID, Name) VALUES (252, 'Event User')
+INSERT INTO UserGrade(UGradeID, Name) VALUES (253, 'Block')
+INSERT INTO UserGrade(UGradeID, Name) VALUES (254, 'Developer')
+INSERT INTO UserGrade(UGradeID, Name) VALUES (255, 'Administrator')
+
+INSERT INTO PremiumGrade(PGradeID, Name) VALUES (0, 'Free')

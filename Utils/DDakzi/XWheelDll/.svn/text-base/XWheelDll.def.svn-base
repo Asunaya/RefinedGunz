@@ -1,0 +1,10 @@
+LIBRARY	XWHEEL
+DESCRIPTION		'Mouse Hook for Wheel Scrolling without focus'
+
+EXPORTS
+	StartMouseHook
+	EndMouseHook
+	MouseProc
+
+SECTIONS
+	.hdata	READ WRITE SHARED
