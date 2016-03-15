@@ -8,6 +8,7 @@
 #include "MMath.h"
 
 #include "SafeString.h"
+#include "VersionNo.h"
 
 #pragma pack(1)
 
@@ -153,9 +154,9 @@ inline void ZPostDisconnect()
 	ZPOSTCMD0(MC_NET_DISCONNECT);
 }
 
-inline void ZPostLogin(char* szUserID, char* szPassword, unsigned int nChecksumPack)
+inline void ZPostLogin(const char* szUserID, const unsigned char *HashedPassword, int HashLength, unsigned int nChecksumPack)
 {
-	ZPOSTCMD4(MC_MATCH_LOGIN, MCmdParamStr(szUserID), MCmdParamStr(szPassword), MCmdParamInt(MCOMMAND_VERSION), MCmdParamUInt(nChecksumPack));
+	ZPOSTCMD5(MC_MATCH_LOGIN, MCmdParamStr(szUserID), MCmdParamBlob(HashedPassword, HashLength), MCmdParamInt(MCOMMAND_VERSION), MCmdParamUInt(nChecksumPack), MCmdParamInt(RGUNZ_VERSION));
 }
 
 inline void ZPostNetmarbleLogin(char* szCPCookie, char* szSpareParam, unsigned int nChecksumPack)
@@ -849,6 +850,11 @@ inline void ZPostAdminRemoveJjang(char* pszTargetName)
 	ZPOSTCMD1(MC_EVENT_REMOVE_JJANG, MCmdParamStr(pszTargetName));
 }
 
+inline void ZPostAdminMute(const char *szTarget, const char *szReason, int nSeconds)
+{
+	ZPOSTCMD3(MC_ADMIN_MUTE, MCmdParamStr(szTarget), MCmdParamStr(szReason), MCmdParamInt(nSeconds));
+}
+
 
 // Emblem ////////////////////////////////////////////////////////////////////////////////////////////
 inline void ZPostRequestEmblemURL(unsigned int nCLID)
@@ -914,6 +920,35 @@ inline void ZPostQuestPong(unsigned long int nTime)
 	ZPOSTCMD1(MC_QUEST_PONG, MCmdParamUInt(nTime));
 }
 
+inline void ZPostRGSlash(const rvector &Pos, const rvector &Dir, int Type)
+{
+	ZPOSTCMD3(MC_PEER_RG_SLASH, MCmdParamVector(Pos.x, Pos.y, Pos.z), MCmdParamVector(Dir.x, Dir.y, Dir.z), MCmdParamInt(Type));
+}
+
+inline void ZPostRGMassive(const rvector &Pos, const rvector &Dir)
+{
+	ZPOSTCMD2(MC_PEER_RG_MASSIVE, MCmdParamVector(Pos.x, Pos.y, Pos.z), MCmdParamVector(Dir.x, Dir.y, Dir.z));
+}
+
+#define VEC(v) MCmdParamVector(v.x, v.y, v.z)
+
+inline void ZPostPortal(int iPortal, const rvector &Pos, const rvector &Normal, const rvector &Up)
+{
+	ZPOSTCMD4(MC_PEER_PORTAL, MCmdParamInt(iPortal), VEC(Pos), VEC(Normal), VEC(Up));
+}
+
+inline void ZPostSpec()
+{
+	ZPOSTCMD0(MC_PEER_SPEC);
+}
+
+inline void ZPostCompletedSkillmap(float fTime, const char *szCourse)
+{
+	ZPOSTCMD2(MC_PEER_COMPLETED_SKILLMAP, MCmdParamFloat(fTime), MCmdParamStr(szCourse));
+}
+
+#undef VEC
+
 
 #ifdef _QUEST_ITEM
 inline void ZPostRequestGetCharQuestItemInfo( const MUID& uid )
@@ -965,25 +1000,6 @@ inline void ZPostResponseNewHashValue( const char* szNewSerialKey )
 {
 	ZPOSTCMD1( MC_RESPONSE_XTRAP_HASHVALUE, MCmdParamStr(szNewSerialKey) );
 }
-
-inline void ZPostRGSlash(const rvector &Pos, const rvector &Dir, int Type)
-{
-	ZPOSTCMD3(MC_PEER_RG_SLASH, MCmdParamVector(Pos.x, Pos.y, Pos.z), MCmdParamVector(Dir.x, Dir.y, Dir.z), MCmdParamInt(Type));
-}
-
-inline void ZPostRGMassive(const rvector &Pos, const rvector &Dir)
-{
-	ZPOSTCMD2(MC_PEER_RG_MASSIVE, MCmdParamVector(Pos.x, Pos.y, Pos.z), MCmdParamVector(Dir.x, Dir.y, Dir.z));
-}
-
-#define VEC(v) MCmdParamVector(v.x, v.y, v.z)
-
-inline void ZPostPortal(int iPortal, const rvector &Pos, const rvector &Normal, const rvector &Up)
-{
-	ZPOSTCMD4(MC_PEER_RG_PORTAL, MCmdParamInt(iPortal), VEC(Pos), VEC(Normal), VEC(Up));
-}
-
-#undef VEC
 
 
 #endif

@@ -401,13 +401,18 @@ void MMatchDBMgr::LogCallback( const string& strLog )
 #define _STATUS_DB_START	unsigned long int nStatusStartTime = timeGetTime();
 #define _STATUS_DB_END(nID) MGetServerStatusSingleton()->AddDBQuery(nID, timeGetTime()-nStatusStartTime);
 
+#define SODIUM_STATIC
+#include "sodium.h"
+
 bool MMatchDBMgr::GetLoginInfo(const TCHAR* szUserID, unsigned int* poutnAID, TCHAR* poutPassword, int maxlen)
 {
 _STATUS_DB_START
 	if (!CheckOpen()) return false;
 
-	
-	
+	auto temp = m_DBFilter.Filtering(szUserID); // Need this temporary to fix weird compiler bug!!
+
+	szUserID = temp.c_str();
+
 	CString strSQL;
 	strSQL.Format(g_szDB_GET_LOGININFO, szUserID);
 
@@ -427,7 +432,7 @@ _STATUS_DB_START
 		return false;
 	}
 
-	if ((rs.IsOpen() == FALSE) || (rs.GetRecordCount() <= 0) || (rs.IsBOF()==TRUE)) 
+	if ((rs.IsOpen() == FALSE) || (rs.GetRecordCount() <= 0) || (rs.IsBOF()==TRUE))
 	{
 		return false;
 	}
@@ -435,35 +440,144 @@ _STATUS_DB_START
 	_STATUS_DB_END(0);
 
 	*poutnAID = rs.Field("AID").AsInt();
-	strcpy_safe(poutPassword, maxlen, rs.Field("Password").AsString());
+	strcpy_safe(poutPassword, maxlen, rs.Field("PasswordData").AsString());
+
 	return true;
 }
-bool MMatchDBMgr::CreateAccount(const TCHAR* szUserID, 
-				   const TCHAR* szPassword, 
-				   const int nCert,
-				   const TCHAR* szName,
-				   const int nAge, 
-				   const int nSex)
+bool MMatchDBMgr::CreateAccount(const TCHAR* szUserID,
+	const TCHAR* szPassword,
+	const int nCert,
+	const TCHAR* szName,
+	const int nAge,
+	const int nSex)
 
 {
-_STATUS_DB_START
+	_STATUS_DB_START
 	if (!CheckOpen()) return false;
-	
 
-	try 
+
+	try
 	{
+		auto temp1 = m_DBFilter.Filtering(szUserID);
+		auto temp2 = m_DBFilter.Filtering(szPassword);
 		CString strSQL;
-		strSQL.Format(g_szDB_CREATE_ACCOUNT, szUserID, szPassword, nCert, szName, nAge, nSex);
+		strSQL.Format(g_szDB_CREATE_ACCOUNT, temp1.c_str(), temp2.c_str(), nCert, szName, nAge, nSex);
 
-		m_DB.ExecuteSQL( strSQL );
-	} 
-	catch(CDBException* e)
+		m_DB.ExecuteSQL(strSQL);
+	}
+	catch (CDBException* e)
 	{
 		Log("MMatchDBMgr::CreateAccount - %s\n", e->m_strError);
 		return false;
 	}
 
 	_STATUS_DB_END(1);
+
+	return true;
+}
+
+AccountCreationResult MMatchDBMgr::CreateAccountNew(const char *szUsername, const char *szPasswordData, const char *szEmail)
+{
+	_STATUS_DB_START
+	if (!CheckOpen()) return ACR_DB_ERROR;
+
+	CODBCRecordset rs(&m_DB);
+
+	std::string Username = m_DBFilter.Filtering(szUsername), Email = m_DBFilter.Filtering(szEmail);
+
+	szUsername = Username.c_str();
+	szEmail = Email.c_str();
+
+	try
+	{
+		TCHAR sql[1024];
+
+		sprintf_safe(sql, "SELECT AID FROM Account WHERE UserID = '%s'",
+			szUsername);
+
+		rs.Open(sql, CRecordset::forwardOnly, CRecordset::readOnly);
+
+		if (rs.IsOpen() == FALSE)
+			return ACR_DB_ERROR;
+
+		if (rs.GetRecordCount() > 0)
+			return ACR_USERNAME_ALREADY_EXISTS;
+
+		sprintf_safe(sql, "INSERT INTO Account (UserID, UGradeID, PGradeID, RegDate, Email, Age, Name) VALUES ('%s', '0', '0', GETDATE(), '%s', %d, '%s')",
+			szUsername, szEmail, 0, "");
+
+		m_DB.ExecuteSQL(sql);
+
+		rs.Close();
+
+		sprintf_safe(sql, "SELECT AID FROM Account WHERE UserID = '%s'",
+			szUsername);
+
+		rs.Open(sql, CRecordset::forwardOnly, CRecordset::readOnly);
+
+		if (rs.IsOpen() == FALSE || rs.GetRecordCount() <= 0 || rs.IsBOF() == TRUE)
+			return ACR_DB_ERROR;
+
+		int AID = rs.Field("AID").AsInt();
+
+		rs.Close();
+
+		sprintf_safe(sql, "INSERT INTO Login(UserID, AID, PasswordData) VALUES('%s', %d, '%s')", szUsername, AID, szPasswordData);
+
+		m_DB.ExecuteSQL(sql);
+	}
+	catch (CDBException* e)
+	{
+		Log("MMatchDBMgr::CreateAccountNew - CDBException: %s\n", e->m_strError);
+		return ACR_DB_ERROR;
+	}
+	catch (CException *e)
+	{
+		char szError[128];
+		e->GetErrorMessage(szError, sizeof(szError));
+		Log("MMatchDBMgr::CreateAccountNew - CException: %s\n", szError);
+		return ACR_DB_ERROR;
+	}
+	catch (...)
+	{
+		Log("MMatchDBMgr::CreateAccountNew - Unknown exception\n");
+		return ACR_DB_ERROR;
+	}
+
+	_STATUS_DB_END(1);
+
+	return ACR_OK;
+}
+
+bool MMatchDBMgr::BanPlayer(int nAID, const char *szReason, const time_t &UnbanTime)
+{
+	auto temp = m_DBFilter.Filtering(szReason);
+
+	char szTime[128];
+
+	tm Tm;
+
+	localtime_s(&Tm, &UnbanTime);
+
+	strftime(szTime, sizeof(szTime), "%c", &Tm);
+
+	try
+	{
+		TCHAR sql[1024];
+
+		sprintf_safe(sql, "UPDATE Account SET UGradeID = %d WHERE AID = %d", MMUG_BLOCKED, nAID);
+
+		m_DB.ExecuteSQL(sql);
+
+		sprintf_safe(sql, "INSERT INTO Blocks (AID, Type, Reason, EndDate) VALUES (%d, %d, '%s', '%s')", nAID, MMBT_BANNED, temp.c_str(), szTime);
+
+		m_DB.ExecuteSQL(sql);
+	}
+	catch (CDBException* e)
+	{
+		Log("MMatchDBMgr::BanPlayer - %s\n", e->m_strError);
+		return false;
+	}
 
 	return true;
 }
@@ -481,8 +595,10 @@ _STATUS_DB_START
 
 	try
 	{
+		auto temp = m_DBFilter.Filtering(szNewName);
+
 		CString strSQL;
-		strSQL.Format("SELECT COUNT(*) AS NUM FROM Character WHERE Name='%s'", szNewName);
+		strSQL.Format("SELECT COUNT(*) AS NUM FROM Character WHERE Name='%s'", temp.c_str());
 		rs.Open(strSQL, CRecordset::forwardOnly, CRecordset::readOnly);
 	}
 	catch (CDBException* e)
@@ -510,7 +626,9 @@ _STATUS_DB_START
 	{
 		CString strSQL;
 
-		strSQL.Format(g_szDB_CREATE_CHAR, nAID, nCharIndex, szNewName,  nSex, nHair, nFace, nCostume);
+		auto temp = m_DBFilter.Filtering(szNewName);
+
+		strSQL.Format(g_szDB_CREATE_CHAR, nAID, nCharIndex, temp.c_str(), nSex, nHair, nFace, nCostume);
 		m_DB.ExecuteSQL( strSQL );
 	} 
 	catch(CDBException* e)
@@ -864,7 +982,7 @@ _STATUS_DB_START
 	if (!CheckOpen()) return false;
 
 	CString strSQL;
-	strSQL.Format(g_szDB_DELETE_CHAR, nAID, nCharIndex, szCharName);
+	strSQL.Format(g_szDB_DELETE_CHAR, nAID, nCharIndex, m_DBFilter.Filtering(szCharName));
 
 	CODBCRecordset rs(&m_DB);
 
@@ -902,7 +1020,7 @@ _STATUS_DB_START
 	try 
 	{
 		CString strSQL;
-		strSQL.Format(g_szDB_SIMPLE_UPDATE_CHARINFO, pCharInfo->m_nCID, pCharInfo->m_szName,
+		strSQL.Format(g_szDB_SIMPLE_UPDATE_CHARINFO, pCharInfo->m_nCID, m_DBFilter.Filtering(pCharInfo->m_szName),
 						pCharInfo->m_nLevel, pCharInfo->m_nXP, pCharInfo->m_nBP);
 
 		m_DB.ExecuteSQL( strSQL );
@@ -1257,9 +1375,11 @@ _STATUS_DB_START
 	
 	try 
 	{
+		auto temp = m_DBFilter.Filtering(strCountryCode3);
+
 		CString strSQL;
 		// strSQL.Format(g_szDB_INSERT_CONN_LOG, nAID, szUserID, szIP);
-		strSQL.Format( g_szDB_INSERT_CONN_LOG, nAID, vIP[0], vIP[1], vIP[2], vIP[3], strCountryCode3.c_str() );
+		strSQL.Format(g_szDB_INSERT_CONN_LOG, nAID, vIP[0], vIP[1], vIP[2], vIP[3], temp.c_str());
 
 		m_DB.ExecuteSQL( strSQL );
 	} 
@@ -1329,8 +1449,9 @@ bool MMatchDBMgr::InsertChatLog(const unsigned long int nCID, const char* szMsg,
 
 	try 
 	{
+		auto temp = m_DBFilter.Filtering(szMsg);
 		CString strSQL;
-		strSQL.Format("INSERT Into ChatLog (CID, Msg, Time) Values (%u, '%s', GETDATE())", nCID, szMsg);
+		strSQL.Format("INSERT Into ChatLog (CID, Msg, Time) Values (%u, '%s', GETDATE())", nCID, temp.c_str());
 		m_DB.ExecuteSQL( strSQL );
 	} 
 	catch(CDBException* e)
@@ -1446,8 +1567,10 @@ _STATUS_DB_START
 
 	try 
 	{
+		auto temp = m_DBFilter.Filtering(szCharName);
+
 		CString strSQL;
-		strSQL.Format(g_szDB_INSERT_CHAR_MAKING_LOG, nAID, szCharName, szType);
+		strSQL.Format(g_szDB_INSERT_CHAR_MAKING_LOG, nAID, temp.c_str(), szType);
 
 		m_DB.ExecuteSQL( strSQL );
 	} 
@@ -1515,8 +1638,10 @@ _STATUS_DB_START
 
 	try 
 	{
+		auto temp = m_DBFilter.Filtering(szServerName);
+
 		CString strSQL;
-		strSQL.Format(g_szDB_UPDATE_SERVER_INFO, nMaxPlayer, szServerName, nServerID);
+		strSQL.Format(g_szDB_UPDATE_SERVER_INFO, nMaxPlayer, temp.c_str(), nServerID);
 
 		m_DB.ExecuteSQL( strSQL );
 	} 
@@ -1632,14 +1757,16 @@ _STATUS_DB_START
 
 	try 
 	{
+		auto temp = m_DBFilter.Filtering(szIP);
+
 		CString strSQL;
-		strSQL.Format(g_szDB_UPDATE_LAST_CONNDATE, szIP, szUserID);
+		strSQL.Format(g_szDB_UPDATE_LAST_CONNDATE, temp.c_str(), szUserID);
 
 		m_DB.ExecuteSQL( strSQL );
 	} 
 	catch(CDBException* e)
 	{
-		TRACE("MMatchDBMgr::UpdateLastConnDate - %s\n", e->m_strError);
+		Log("MMatchDBMgr::UpdateLastConnDate - %s\n", e->m_strError);
 		return false;
 	}
 
@@ -1749,8 +1876,10 @@ _STATUS_DB_START
 
 	try
 	{
+		auto temp = m_DBFilter.Filtering(pszName);
+
 		CString strSQL;
-		strSQL.Format("SELECT CID, Name FROM Character(NOLOCK) WHERE Name='%s'", pszName);
+		strSQL.Format("SELECT CID, Name FROM Character(NOLOCK) WHERE Name='%s'", temp.c_str());
 		rs.Open(strSQL, CRecordset::forwardOnly, CRecordset::readOnly);
 	}
 	catch (CDBException* e)
@@ -1904,9 +2033,11 @@ bool MMatchDBMgr::GetClanIDFromName(const TCHAR* szClanName, int* poutCLID)
 {
 _STATUS_DB_START
 	if (!CheckOpen()) return false;
+
+	auto temp = m_DBFilter.Filtering(szClanName);
 	
 	CString strSQL;
-	strSQL.Format(g_szDB_GET_CLID_FROM_CLANNAME, szClanName);
+	strSQL.Format(g_szDB_GET_CLID_FROM_CLANNAME, temp.c_str());
 
 	CODBCRecordset rs(&m_DB);
 
@@ -1943,9 +2074,10 @@ bool MMatchDBMgr::CreateClan(const TCHAR* szClanName, const int nMasterCID, cons
 _STATUS_DB_START
 	if (!CheckOpen()) return false;
 
+	auto temp = m_DBFilter.Filtering(szClanName);
 
 	CString strSQL;
-	strSQL.Format(g_szDB_CREATE_CLAN, szClanName, nMasterCID, nMember1CID, nMember2CID, nMember3CID, nMember4CID);
+	strSQL.Format(g_szDB_CREATE_CLAN, temp.c_str(), nMasterCID, nMember1CID, nMember2CID, nMember3CID, nMember4CID);
 
 	CODBCRecordset rs(&m_DB);
 
@@ -1987,8 +2119,11 @@ _STATUS_DB_START
 
 	try 
 	{
+		auto temp1 = m_DBFilter.Filtering(szClanName);
+		auto temp2 = m_DBFilter.Filtering(strDeleteDate);
+
 		CString strSQL;
-		strSQL.Format(g_szDB_RESERVE_CLOSE_CLAN, nCLID, szClanName, nMasterCID, strDeleteDate.c_str() );
+		strSQL.Format(g_szDB_RESERVE_CLOSE_CLAN, nCLID, temp1.c_str(), nMasterCID, temp2.c_str());
 		m_DB.ExecuteSQL( strSQL );
 	} 
 	catch(CDBException* e)
@@ -2092,9 +2227,10 @@ bool MMatchDBMgr::ExpelClanMember(const int nCLID, const int nAdminGrade, TCHAR*
 _STATUS_DB_START
 	if (!CheckOpen()) return false;
 
+	auto temp = m_DBFilter.Filtering(szMember);
 
 	CString strSQL;
-	strSQL.Format(g_szDB_EXPEL_CLAN_MEMBER, nCLID, nAdminGrade, szMember);
+	strSQL.Format(g_szDB_EXPEL_CLAN_MEMBER, nCLID, nAdminGrade, temp.c_str());
 
 	CODBCRecordset rs(&m_DB);
 
@@ -2346,11 +2482,17 @@ _STATUS_DB_START
 
 	try 
 	{
+		std::string temp[] = { m_DBFilter.Filtering(szWinnerClanName),
+			m_DBFilter.Filtering(szLoserClanName),
+			m_DBFilter.Filtering(szWinnerMembers),
+			m_DBFilter.Filtering(szLoserMembers),
+		};
+
 		CString strSQL;
 
 		strSQL.Format(g_szDB_WIN_THE_CLAN_GAME, nWinnerCLID, nLoserCLID, nDrawGame, nWinnerPoint, nLoserPoint,
-			szWinnerClanName, szLoserClanName, nRoundWins, nRoundLosses, nMapID, nGameType,
-			szWinnerMembers, szLoserMembers);
+			temp[0].c_str(), temp[1].c_str(), nRoundWins, nRoundLosses, nMapID, nGameType,
+			temp[2].c_str(), temp[3].c_str());
 						
 		m_DB.ExecuteSQL( strSQL );
 	} 
@@ -2772,8 +2914,10 @@ _STATUS_DB_START
 	if( !CheckOpen() )
 		return false;
 
+	auto temp = m_DBFilter.Filtering(szIP);
+
 	CString strSQL;
-	strSQL.Format(g_szDB_CHECK_PREMIUM_IP, szIP);
+	strSQL.Format(g_szDB_CHECK_PREMIUM_IP, temp.c_str());
 	
 	CODBCRecordset rs(&m_DB);
 
@@ -2829,10 +2973,13 @@ bool MMatchDBMgr::GetIPContryCode( const string& strIP,
 					 DWORD& dwOutIPTo, 
 					 string& strOutCountryCode )
 {
-_STATUS_DB_START
+	_STATUS_DB_START
+
+	auto temp = m_DBFilter.Filtering(strIP);
+
 	try 
 	{
-		m_CountryFilterDBMgr.GetIPContryCode( strIP, dwOutIPFrom, dwOutIPTo, strOutCountryCode );
+	m_CountryFilterDBMgr.GetIPContryCode(temp.c_str(), dwOutIPFrom, dwOutIPTo, strOutCountryCode);
 	}
 	catch( CDBException* e )
 	{
@@ -2864,9 +3011,12 @@ _STATUS_DB_END(60);
 bool MMatchDBMgr::GetCustomIP( const string& strIP, DWORD& dwIPFrom, DWORD& dwIPTo, bool& bIsBlock, string& strCountryCode3, string& strComment )
 {
 _STATUS_DB_START
+
+	auto temp = m_DBFilter.Filtering(strIP);
+
 	try
 	{
-		m_CountryFilterDBMgr.GetCustomIP( strIP, dwIPFrom, dwIPTo, bIsBlock, strCountryCode3, strComment );
+	m_CountryFilterDBMgr.GetCustomIP(temp.c_str(), dwIPFrom, dwIPTo, bIsBlock, strCountryCode3, strComment);
 	}
 	catch( CDBException* e )
 	{
@@ -2918,8 +3068,10 @@ _STATUS_DB_START
 	if( !CheckOpen() )
 		return false;
 
+	auto temp = m_DBFilter.Filtering(strEventName);
+
 	CString strSQL;
-	strSQL.Format( g_szInsertEvent, dwAID, dwCID, strEventName.c_str() );
+	strSQL.Format(g_szInsertEvent, dwAID, dwCID, temp.c_str());
 	try
 	{
 		m_DB.ExecuteSQL( strSQL );

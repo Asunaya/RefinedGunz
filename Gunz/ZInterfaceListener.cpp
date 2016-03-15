@@ -35,6 +35,9 @@
 
 #include "ZMonsterBookInterface.h"
 
+#define SODIUM_STATIC
+#include "sodium.h"
+
 
 // Chat Input Listener
 class MChatInputListener : public MListener{
@@ -125,7 +128,7 @@ public:
 			if ( !pServerList)
 				return false;
 
-			ServerInfo* pServer = pServerList->GetSelectedServer();
+			const ServerInfo *pServer = pServerList->GetSelectedServer();
 			if ( pServer)
 			{
 				if ( pServer->nType == 0 )
@@ -150,16 +153,61 @@ public:
 				ZGetGameInterface()->m_bLoginTimeout = true;
 				ZGetGameInterface()->m_dwLoginTimeout = timeGetTime() + 10000;
 
+				extern bool g_bConnected;
+				extern std::function<void()> g_OnConnectCallback;
 
-				if ( pServer->nType == 1)
+				g_OnConnectCallback = []()
 				{
-					MWidget* pAddr = pResource->FindWidget( "ServerAddress");
-					MWidget* pPort = pResource->FindWidget( "ServerPort");
+					char szID[256];
+					char szPassword[256];
+					ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
+					MWidget* pWidget = pResource->FindWidget("LoginID");
+					if (pWidget == NULL) return;
+					strcpy_safe(szID, pWidget->GetText());
+					pWidget = pResource->FindWidget("LoginPassword");
+					if (pWidget == NULL) return;
+					strcpy_safe(szPassword, pWidget->GetText());
 
-					ZPostConnect( pAddr->GetText(), atoi(pPort->GetText()));		// Debug server
+					unsigned char hashed_password[crypto_generichash_BYTES];
+
+					crypto_generichash(hashed_password, sizeof(hashed_password), (const unsigned char *)szPassword, strlen(szPassword), NULL, 0);
+
+					//sodium_memzero(const_cast<char *>(pWidget->GetText()), ((MEdit *)pWidget)->GetMaxLength());
+
+					pWidget->SetText("");
+
+#ifdef _BIRDTEST
+					ZChangeGameState(GUNZ_BIRDTEST);
+					return ret;
+#endif
+
+					//			unsigned long nChecksum = ZGetMZFileChecksum(FILENAME_ZITEM_DESC);
+					//			unsigned long nChecksum = MGetMatchItemDescMgr()->GetChecksum();
+					unsigned long nChecksum = ZGetApplication()->GetFileListCRC();
+					//nChecksum = nChecksum ^ (*pAllocUID).High ^ (*pAllocUID).Low;
+
+					// 접속되면 바로 로그인한다
+					ZPostLogin(szID, hashed_password, sizeof(hashed_password), nChecksum);
+					mlog("Login Posted\n");
+				};
+
+
+				if (!g_bConnected)
+				{
+					if (pServer->nType == 1)
+					{
+						MWidget* pAddr = pResource->FindWidget("ServerAddress");
+						MWidget* pPort = pResource->FindWidget("ServerPort");
+
+						ZPostConnect(pAddr->GetText(), atoi(pPort->GetText()));		// Debug server
+					}
+					else
+						ZPostConnect(pServer->szAddress, pServer->nPort);				// Game server
 				}
 				else
-					ZPostConnect( pServer->szAddress, pServer->nPort);				// Game server
+				{
+					g_OnConnectCallback();
+				}
 
 				MLabel* pLabel = (MLabel*)pResource->FindWidget( "LoginError");
 				if ( pLabel)
@@ -170,6 +218,105 @@ public:
 	}
 };
 MLoginListener	g_LoginListener;
+
+class MCreateAccountFrameCallerListener : public MListener{
+public:
+	virtual bool OnCommand(MWidget* pWidget, const char* szMessage){
+		if (MWidget::IsMsg(szMessage, MBTN_CLK_MSG) == true){
+			ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
+			MWidget* pFindWidget = pResource->FindWidget("CreateAccountFrame");
+			if (pFindWidget != NULL) pFindWidget->Show(true, true);
+
+			return true;
+		}
+		return false;
+	}
+};
+MCreateAccountFrameCallerListener	g_CreateAccountFrameCallerListener;
+
+class MCreateAccountBtnListener : public MListener{
+public:
+	virtual bool OnCommand(MWidget* pWidget, const char* szMessage){
+		if (MWidget::IsMsg(szMessage, MBTN_CLK_MSG) == true){
+			ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
+
+			MEdit* pUsernameEdit = (MEdit*)pResource->FindWidget("AccountUsername");
+			MEdit* pPassEdit = (MEdit*)pResource->FindWidget("AccountPassword");
+
+			if (!pUsernameEdit || !pPassEdit)
+				return true;
+
+			auto szUsername = pUsernameEdit->GetText();
+			auto szPassword = pPassEdit->GetText();
+
+			if (strlen(szUsername) < 2)
+			{
+				ZGetGameInterface()->ShowErrorMessage("Username too short");
+				return true;
+			}
+
+			if (strlen(szPassword) < 4)
+			{
+				ZGetGameInterface()->ShowErrorMessage("Password too short");
+				return true;
+			}
+
+			extern bool g_bConnected;
+			extern std::function<void()> g_OnConnectCallback;
+
+			g_OnConnectCallback = [pResource]()
+			{
+				MEdit* pUsernameEdit = (MEdit*)pResource->FindWidget("AccountUsername");
+				MEdit* pPassEdit = (MEdit*)pResource->FindWidget("AccountPassword");
+				MEdit* pEmailEdit = (MEdit*)pResource->FindWidget("AccountEmail");
+
+				if (!pUsernameEdit || !pPassEdit || !pEmailEdit)
+					return;
+
+				auto szUsername = pUsernameEdit->GetText();
+				auto szPassword = pPassEdit->GetText();
+				auto szEmail = pEmailEdit->GetText();
+
+				unsigned char hashed_password[crypto_generichash_BYTES];
+
+				crypto_generichash(hashed_password, sizeof(hashed_password), (const unsigned char *)szPassword, strlen(szPassword), NULL, 0);
+
+				ZPOSTCMD3(MC_MATCH_REQUEST_CREATE_ACCOUNT, MCmdParamStr(szUsername), MCmdParamBlob(hashed_password, sizeof(hashed_password)), MCmdParamStr(szEmail));
+			};
+
+			if (!g_bConnected)
+			{
+				auto TryConnect = [pResource]()
+				{
+					auto pServerList = (ZServerView*)pResource->FindWidget("SelectedServer");
+					
+					if (!pServerList)
+						return false;
+
+					auto pServer = pServerList->GetFirstServer();
+
+					if (!pServer)
+						return false;
+
+					ZPostConnect(pServer->szAddress, pServer->nPort);
+
+					return true;
+				};
+
+				if (!TryConnect())
+					ZGetGameInterface()->ShowErrorMessage("Couldn't find server to register on");
+			}
+			else
+				g_OnConnectCallback();
+
+			//sodium_memzero(const_cast<char *>(szPassword), pPassEdit->GetMaxLength());
+
+			return true;
+		}
+		return false;
+	}
+};
+MCreateAccountBtnListener	g_CreateAccountBtnListener;
 
 class MLogoutListener : public MListener{
 public:
@@ -382,6 +529,16 @@ MListener* ZGetChatInputListener(void)
 MListener* ZGetLoginListener(void)
 {
 	return &g_LoginListener;
+}
+
+MListener* ZGetCreateAccountFrameCallerListener(void)
+{
+	return &g_CreateAccountFrameCallerListener;
+}
+
+MListener* ZGetCreateAccountBtnListener(void)
+{
+	return &g_CreateAccountBtnListener;
 }
 
 MListener* ZGetLogoutListener(void)

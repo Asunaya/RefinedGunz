@@ -432,7 +432,8 @@ static int	_fileheaderReaderSize = 0;
 
 bool MZip::UpgradeMrs(char* mrs_name) // Mrs To Mrs2
 {
-	FILE* fp = fopen(mrs_name, "rb+");
+	FILE* fp;
+	fopen_s(&fp, mrs_name, "rb+");
 
 	if(fp==NULL) {
 		mlog("%s 파일이 읽기 전용인지 확인하세요!~ \n",mrs_name);
@@ -566,7 +567,8 @@ bool MZip::UpgradeMrs(char* mrs_name) // Mrs To Mrs2
 
 bool MZip::ConvertZip(char* zip_name)
 {
-	FILE* fp = fopen(zip_name, "rb+");
+	FILE* fp;
+	fopen_s(&fp, zip_name, "rb+");
 
 	if(fp==NULL) {
 		mlog("%s 파일이 읽기 전용인지 확인하세요!~ \n",zip_name);

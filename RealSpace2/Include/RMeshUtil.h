@@ -698,7 +698,7 @@ public:
 	string m_str;
 };
 
-void GetPath(char* str,char* path);
+void GetPath(const char* str,char* path);
 
 class RBaseObject
 {

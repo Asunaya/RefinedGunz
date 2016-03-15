@@ -46,7 +46,8 @@ public:
 	void ClearServerList( void);
 	bool AddServer( char* szName, char* szAddress, int nPort, int nType, int nNumOfUser, int nCapacity, bool IsLive );
 
-	ServerInfo* GetSelectedServer();
+	const ServerInfo *GetSelectedServer();
+	const ServerInfo *GetFirstServer();
 	int GetCurrSel();
 	int GetCurrSel2()						{ return m_nSelectNum; }
 	void SetCurrSel( int nNumber);

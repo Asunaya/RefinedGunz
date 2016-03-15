@@ -353,7 +353,7 @@ void CMatchServerApp::OnMessageExit()
 void CMatchServerApp::OnShowCmdLog()
 {
 	// TODO: 여기에 명령 처리기 코드를 추가합니다.
-	m_bOutputLog = 1-(int)m_bOutputLog;
+	m_bOutputLog = !m_bOutputLog;
 }
 
 void CMatchServerApp::OnUpdateShowCmdLog(CCmdUI *pCmdUI)

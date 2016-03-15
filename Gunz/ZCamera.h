@@ -72,6 +72,8 @@ public:
 
 
 private:
+	friend class Portal;
+
 	ZCAMERALOOKMODE		m_nLookMode;
 
 	float m_fRecoilAngleX;

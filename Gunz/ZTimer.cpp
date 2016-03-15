@@ -66,7 +66,7 @@ void ZTimer::ResetFrame()
 	m_bInitialized=false;
 }
 
-float ZTimer::UpdateFrame()
+double ZTimer::UpdateFrame()
 {
 	static BOOL bUsingQPF=FALSE;
 	static LONGLONG llQPFTicksPerSec  = 0;
@@ -94,14 +94,14 @@ float ZTimer::UpdateFrame()
 		}
 	}
 
-	float fElapsed;
+	double fElapsed;
 
 	if( bUsingQPF )
 	{
 		QueryPerformanceCounter( &qwTime );
 		QueryPerformanceFrequency((PLARGE_INTEGER)&llQPFTicksPerSec);
 
-		fElapsed = (float)((double) ( qwTime.QuadPart - llLastElapsedTime ) / (double) llQPFTicksPerSec);
+		fElapsed = double( qwTime.QuadPart - llLastElapsedTime ) / llQPFTicksPerSec;
 		llLastElapsedTime = qwTime.QuadPart;
 	}
 	else

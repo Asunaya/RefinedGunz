@@ -146,9 +146,9 @@ bool MCommand::GetParameter(void* pValue, int i, MCommandParameterType t, int nB
 	if( 0 == pValue ) return false;
 
 	MCommandParameter* pParam = GetParameter(i);
-	if(pParam==NULL) return false;
+	if (pParam == NULL) return false;
 
-	if(pParam->GetType()!=t) return false;
+	if (pParam->GetType() != t) return false;
 
 #ifdef _DEBUG
 	// 스트링과 blob 은 버퍼오버플로우 체크를 할 필요가 있다.
@@ -265,7 +265,7 @@ int MCommand::GetData(char* pData, int nSize)
 	return nDataCount;
 }
 
-bool MCommand::SetData(char* pData, MCommandManager* pCM, unsigned short nDataLen)
+bool MCommand::SetData(char* pData, MCommandManager* pCM, unsigned short nDataLen, bool ReadSerial)
 {
 	Reset();
 
@@ -293,9 +293,11 @@ bool MCommand::SetData(char* pData, MCommandManager* pCM, unsigned short nDataLe
 	}
 	SetID(pDesc);
 
-	// serial number
-	memcpy(&m_nSerialNumber, pData+nDataCount, sizeof(m_nSerialNumber));
-	nDataCount += sizeof(m_nSerialNumber);
+	if (ReadSerial)
+	{
+		memcpy(&m_nSerialNumber, pData + nDataCount, sizeof(m_nSerialNumber));
+		nDataCount += sizeof(m_nSerialNumber);
+	}
 
 
 	// Parameters

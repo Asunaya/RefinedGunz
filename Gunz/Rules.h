@@ -15,6 +15,7 @@ public:
 	bool IsVanillaMode() const { return VanillaMode; }
 	bool MassiveEffectEnabled() const { return !NoMassiveEffect; }
 	bool GetShowHitboxes() const { return ShowHitboxes; }
+	bool IsSwordsOnly() const { return NoGuns; }
 
 private:
 	int HP;

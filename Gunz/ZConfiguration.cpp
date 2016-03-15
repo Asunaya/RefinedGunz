@@ -41,11 +41,6 @@ ZConfiguration::ZConfiguration()
 
 	m_pGameTypeList = new ZGameTypeList;
 
-	nFPSLimit = 250;
-	bCamFix = false;
-	ChatBackgroundColor = 0;
-	bShowHitboxes = false;
-
 	m_bIsComplete = false;
 }
 

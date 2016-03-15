@@ -8,6 +8,9 @@
 
 #include "RCharCloth.h"
 
+#include "../../Gunz/RGMain.h"
+#include "../../Gunz/MeshManager.h"
+
 _USING_NAMESPACE_REALSPACE2
 
 _NAMESPACE_REALSPACE2_BEGIN
@@ -456,6 +459,9 @@ RVisualMesh::RVisualMesh() {
 
 RVisualMesh::~RVisualMesh() 
 {
+	if (g_pMeshManager)
+		g_pMeshManager->OnDestroyObject(this);
+
 	Destroy();
 }
 
@@ -476,6 +482,25 @@ void RVisualMesh::Destroy()
 	}
 
 	if(m_pTMesh) {
+		if (g_pMeshManager)
+		{
+			for (int i = 0; i < eq_parts_end; i++)
+			{
+				if (!m_pTMesh[i])
+					continue;
+
+				switch (i)
+				{
+				case eq_parts_head:
+				case eq_parts_chest:
+				case eq_parts_hands:
+				case eq_parts_legs:
+				case eq_parts_feet:
+					g_pMeshManager->Release(m_pTMesh[i]);
+				}
+			}
+		}
+
 		delete [] m_pTMesh;
 		m_pTMesh = NULL;
 	}
@@ -1765,12 +1790,25 @@ void RVisualMesh::ClearParts() {
 
 	if(m_pTMesh==NULL) return;
 
-	for(int i=0;i<eq_parts_end;i++){
+	for(int i = 0;i < eq_parts_end; i++){
+		if (m_pTMesh[i] && g_pMeshManager)
+		{
+			switch (i)
+			{
+			case eq_parts_head:
+			case eq_parts_chest:
+			case eq_parts_hands:
+			case eq_parts_legs:
+			case eq_parts_feet:
+				g_pMeshManager->Release(m_pTMesh[i]);
+			};
+		}
+
 		m_pTMesh[i] = NULL;
 	}
 }
 
-void RVisualMesh::SetParts(RMeshPartsType parts,RMeshNode* pMN) {
+void RVisualMesh::SetParts(RMeshPartsType parts, RMeshNode* pMN) {
 
 	if(parts < 0 && parts >= eq_parts_end ) 
 		return;
@@ -1784,7 +1822,7 @@ void RVisualMesh::SetParts(RMeshPartsType parts,RMeshNode* pMN) {
 	}
 }
 
-void RVisualMesh::SetParts(RMeshPartsType parts,char* name)
+void RVisualMesh::SetParts(RMeshPartsType parts, char* name)
 {
 	if(parts < 0 && parts >= eq_parts_end ) 
 		return;
@@ -1793,14 +1831,43 @@ void RVisualMesh::SetParts(RMeshPartsType parts,char* name)
 
 	if(!m_pMesh) return;
 
-	RMeshNode* pNode = m_pMesh->GetPartsNode(name);
-
-	if(pNode) 
+	if (g_pMeshManager)
 	{
-//		if(m_pTMesh[parts] != pNode) 
+		std::string saved_name(name);
+		g_pMeshManager->GetAsync(m_pMesh->GetName(), name, this, [this, saved_name, parts](RMeshNode *pNode)
 		{
+			RMeshNode *pPreviousNode = m_pTMesh[parts];
+
+			if (pPreviousNode)
+			{
+				g_pMeshManager->Release(pPreviousNode);
+			}
+
+			if (!pNode)
+				pNode = m_pMesh->GetPartsNode(saved_name.c_str());
+
+			if (!pNode)
+			{
+				MLog("RVisualMesh::SetParts(): Failed to find parts %s\n", saved_name);
+				return;
+			}
+
 			m_pTMesh[parts] = pNode;
 			m_pMesh->ConnectPhysiqueParent(pNode);
+		}
+		);
+	}
+	else
+	{
+		RMeshNode* pNode = m_pMesh->GetPartsNode(name);
+
+		if (pNode)
+		{
+			//		if(m_pTMesh[parts] != pNode) 
+			{
+				m_pTMesh[parts] = pNode;
+				m_pMesh->ConnectPhysiqueParent(pNode);
+			}
 		}
 	}
 }

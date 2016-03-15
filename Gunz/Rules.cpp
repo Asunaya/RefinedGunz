@@ -27,7 +27,6 @@ void Rules::OnGameCreate()
 
 	if (GetRoomTag("[glad]"))
 	{
-		MLog("Roomtag: [glad]\n");
 		HP = 100;
 		AP = 50;
 		NoFlip = true;

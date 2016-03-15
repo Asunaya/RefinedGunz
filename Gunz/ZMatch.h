@@ -7,6 +7,7 @@ using namespace std;
 #include "ZPrerequisites.h"
 #include "MUID.h"
 #include "MMatchStage.h"
+#include "Rules.h"
 
 class ZCharacter;
 class MMatchStageSetting;
@@ -49,7 +50,7 @@ public:
 	void OnForcedEntry(ZCharacter* pCharacter);			///< 난입했을 경우
 	void InitCharactersPosition();						///< 라운드 시작할때 캐릭터 위치 설정
 	void OnDrawGameMessage();
-	void RespawnSolo();
+	void RespawnSolo(bool bForce = false);
 
 	int GetRemainedSpawnTime();
 	int GetRoundCount(); 
@@ -148,7 +149,8 @@ inline void ZMatch::AddRoundKills()
 inline bool ZMatch::IsRuleGladiator()
 {
 	return ((GetMatchType() == MMATCH_GAMETYPE_GLADIATOR_SOLO) || 
-			(GetMatchType() == MMATCH_GAMETYPE_GLADIATOR_TEAM));
+			(GetMatchType() == MMATCH_GAMETYPE_GLADIATOR_TEAM) ||
+			g_Rules.IsSwordsOnly());
 }
 inline ZRule* ZMatch::GetRule() 
 { 

@@ -179,7 +179,7 @@ RVisualMesh* RMesh::GetVisualMesh()
 
 void RMesh::SetMtrlAutoLoad(bool b) 
 { 
-	m_mtrl_auto_load = b; 
+	m_mtrl_auto_load = b;
 }
 
 bool RMesh::GetMtrlAutoLoad() 
@@ -203,7 +203,7 @@ char* RMesh::GetFileName()
 	return (char*)m_FileName.c_str();
 }
 
-void RMesh::SetFileName(char* name)
+void RMesh::SetFileName(const char* name)
 {
 	if(!name[0]) return;
 
@@ -341,7 +341,7 @@ RMeshNode* RMesh::GetMeshData(RMeshPartsType type)
 	return NULL;
 }
 
-RMeshNode* RMesh::GetMeshData(char* name)
+RMeshNode* RMesh::GetMeshData(const char* name)
 {
 	RMeshNode*	pMesh = NULL;
 
@@ -356,7 +356,7 @@ RMeshNode* RMesh::GetMeshData(char* name)
 	return NULL;
 }
 
-RMeshNode* RMesh::GetPartsNode(char* name)
+RMeshNode* RMesh::GetPartsNode(const char* name)
 {
 	if(!m_parts_mgr)
 		return NULL;

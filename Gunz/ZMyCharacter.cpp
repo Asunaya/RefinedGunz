@@ -2332,8 +2332,15 @@ void ZMyCharacter::OnUpdate(float fDelta)
 	if(m_bShot && m_nShot==1 && !m_b1ShotSended && g_pGame->GetTime()-m_f1ShotTime>GUARD_TIME) {
 		m_b1ShotSended=true;
 //		mlog("zpost_melee 첫번째칼질!\n");
-		ZPostShotMelee(g_pGame->GetTime(),m_Position,1);
-		AddDelayedWork(g_pGame->GetTime()+0.2f,ZDW_RECOIL);
+		if (g_Rules.IsVanillaMode())
+		{
+			ZPostShotMelee(g_pGame->GetTime(), m_Position, 1);
+			AddDelayedWork(g_pGame->GetTime() + 0.2f, ZDW_RECOIL);
+		}
+		else
+		{
+			AddDelayedWork(g_pGame->GetTime() + 0.1, ZDW_RG_SLASH, (void *)1);
+		}
 	}
 
 	// ZDelayedWork 으로 대체
@@ -3000,6 +3007,9 @@ void ZMyCharacter::SetDirection(rvector& dir)
 
 void ZMyCharacter::OnDamagedAnimation(ZObject *pAttacker,int type)
 {
+	if (ZGetGame()->GetMatch()->GetMatchType() == MMATCH_GAMETYPE_SKILLMAP)
+		return;
+
 	ZCharacter::OnDamagedAnimation(pAttacker,type);
 
 	m_bShot=false;
@@ -3539,6 +3549,9 @@ void ZMyCharacter::OnGuardSuccess()
 
 void ZMyCharacter::OnDamaged(ZObject* pAttacker, rvector srcPos, ZDAMAGETYPE damageType, MMatchWeaponType weaponType, float fDamage, float fPiercingRatio, int nMeleeType)
 {
+	if (ZGetGame()->GetMatch()->GetMatchType() == MMATCH_GAMETYPE_SKILLMAP)
+		return;
+
 	ZCharacter::OnDamaged(pAttacker,srcPos,damageType,weaponType,fDamage,fPiercingRatio,nMeleeType);
 	ZGetScreenEffectManager()->AddAlert(GetPosition(),m_Direction, srcPos);
 
@@ -3563,6 +3576,9 @@ void ZMyCharacter::OnDamaged(ZObject* pAttacker, rvector srcPos, ZDAMAGETYPE dam
 
 void ZMyCharacter::OnKnockback(const rvector& dir, float fForce)
 {
+	if (ZGetGame()->GetMatch()->GetMatchType() == MMATCH_GAMETYPE_SKILLMAP)
+		return;
+
 	if(m_bBlast || m_bBlastFall) {	
 		// 떠있을때 넉백
 		rvector vKnockBackDir = dir;

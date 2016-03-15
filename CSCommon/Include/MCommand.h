@@ -146,7 +146,7 @@ public:
 	/// @param pData	[in] 커맨드 데이터 블럭
 	/// @param pPM		[in] 커맨드 매니져(MCommandDesc를 enum할 수 있다.)
 	/// @return			성공 여부
-	bool SetData(char* pData, MCommandManager* pCM, unsigned short nDataLen=USHRT_MAX);
+	bool SetData(char* pData, MCommandManager* pCM, unsigned short nDataLen=USHRT_MAX, bool ReadSerial = true);
 
 	int GetSize();
 };

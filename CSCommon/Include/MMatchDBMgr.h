@@ -22,6 +22,13 @@ struct MAccountItemNode
 	int					nRentMinutePeriodRemainder;
 };
 
+enum AccountCreationResult
+{
+	ACR_OK,
+	ACR_USERNAME_ALREADY_EXISTS,
+	ACR_DB_ERROR,
+};
+
 class MMatchDBMgr {
 protected:
 	MDatabase	m_DB;
@@ -63,6 +70,11 @@ public:
 					   const TCHAR* szName,						// 사용자이름
 					   const int nAge,							// 나이
 					   const int nSex);							// 성별 0 - 여자, 1 - 남자
+
+	AccountCreationResult CreateAccountNew(const char *szUsername, const char *szPasswordData, const char *szEmail);
+
+	bool BanPlayer(int nAID, const char *szReason, const time_t &UnbanTime);
+
 	bool CreateCharacter(int* pnOutResult,						// 결과값
 						 const int nAID,						// AID
 						 const TCHAR* szNewName,				// 캐릭터 이름

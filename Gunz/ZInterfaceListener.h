@@ -28,6 +28,8 @@ public:																	\
 // Gunz에 쓰이는 전역 Listener Object 얻기
 MListener* ZGetChatInputListener(void);
 MListener* ZGetLoginListener(void);
+MListener* ZGetCreateAccountFrameCallerListener(void);
+MListener* ZGetCreateAccountBtnListener(void);
 MListener* ZGetLogoutListener(void);
 MListener* ZGetExitListener(void);
 MListener* ZGetChannelChatInputListener(void);

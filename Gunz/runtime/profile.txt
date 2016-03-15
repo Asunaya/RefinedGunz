@@ -1,3 +1,0 @@
- total time = 13.036 seconds 
-id   (loop ms)  seconds     %        calledcount   name 
-=========================================================

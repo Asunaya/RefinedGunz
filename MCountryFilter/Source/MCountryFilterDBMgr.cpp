@@ -276,7 +276,7 @@ bool MCountryFilterDBMgr::GetCustomIPList( CustomIPList& rfCustomIPList )
 		{
 			dwIPFrom		= static_cast< DWORD >( rs.Field( "IPFrom" ).AsLong() );
 			dwIPTo			= static_cast< DWORD >( rs.Field( "IPTo" ).AsLong() );
-			bIsBlock		= static_cast< bool >( rs.Field( "IsBlock" ).AsInt() );
+			bIsBlock		= rs.Field( "IsBlock" ).AsInt() != 0;
 			strCountryCode3	= rs.Field( "CountryCode3" ).AsString().GetBuffer();
 			strComment		= rs.Field( "Comment" ).AsString().GetBuffer();
 

@@ -1,19 +1,45 @@
 #include "stdafx.h"
+#include "RGMain.h"
 #include "Portal.h"
 #include "NewChat.h"
 #include "ZConfiguration.h"
 #include "Hitboxes.h"
 #include "Draw.h"
+#include "MeshManager.h"
+#include "ZRule.h"
+#include "ZRuleSkillmap.h"
 
-void OnCreateDevice()
+RGMain g_RGMain;
+
+void OnAppCreate()
 {
+	ZRuleSkillmap::CourseMgr.Init();
+
 #ifdef PORTAL
 	g_pPortal = new Portal();
 #endif
+
+	g_pHitboxManager = new HitboxManager;
+
+	if (ZGetConfiguration()->GetDynamicResourceLoad())
+		g_pMeshManager = new MeshManager;
+	else
+		g_pMeshManager = nullptr;
+}
+
+void OnCreateDevice()
+{
 	g_pChat = new Chat(std::string("Arial"), 16);
 	g_pChat->SetBackgroundColor(ZGetConfiguration()->GetChatBackgroundColor());
+}
 
-	g_pHitboxManager = new HitboxManager();
+void OnGameDraw()
+{
+	if (ZGetGame()->GetMatch()->GetMatchType() == MMATCH_GAMETYPE_SKILLMAP)
+		((ZRuleSkillmap *)ZGetGame()->GetMatch()->GetRule())->Draw();
+
+	if(ZGetConfiguration()->GetShowHitboxes())
+		g_pHitboxManager->Draw();
 }
 
 HRESULT GenerateTexture(IDirect3DDevice9 *pD3Ddev, IDirect3DTexture9 **ppD3Dtex, DWORD colour32){
@@ -32,4 +58,39 @@ HRESULT GenerateTexture(IDirect3DDevice9 *pD3Ddev, IDirect3DTexture9 **ppD3Dtex,
 	(*ppD3Dtex)->UnlockRect(0);
 
 	return S_OK;
+}
+
+std::pair<bool, std::string> ReadFile(const char *szPath)
+{
+	MZFile File;
+
+	if (!File.Open(szPath, ZApplication::GetFileSystem()))
+	{
+		return { false, "" };
+	}
+
+	int FileLength = File.GetLength();
+
+	if (FileLength <= 0)
+	{
+		return { false, "" };
+	}
+
+	std::string InflatedFile;
+	InflatedFile.resize(FileLength);
+
+	File.Read(&InflatedFile[0], FileLength);
+
+	return { true, InflatedFile };
+}
+
+void RGMain::OnUpdate(double Elapsed)
+{
+	std::lock_guard<std::mutex> lock(QueueMutex);
+
+	while (QueuedInvokations.size())
+	{
+		QueuedInvokations.front()();
+		QueuedInvokations.pop();
+	}
 }

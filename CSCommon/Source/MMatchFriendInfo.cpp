@@ -86,8 +86,7 @@ void MMatchFriendInfo::UpdateDesc()
 			MMatchChannel* pChannel = pServer->FindChannel(pObj->GetChannelUID());
 			if (pChannel) {
 				sprintf_s(szDesc, "Channel '%s'", pChannel->GetName());
-				strncpy(pNode->szDescription, szDesc, MATCH_SIMPLE_DESC_LENGTH);
-				pNode->szDescription[MATCH_SIMPLE_DESC_LENGTH-1] = NULL;
+				strcpy_safe(pNode->szDescription, szDesc);
 			} else {
 				strcpy_safe(pNode->szDescription, "Unknown Channel");
 			}

@@ -47,6 +47,11 @@ public:
 
 	static bool OnEvent(MEvent* pEvent);
 	void Update(float fElapsed);
+	
+private:
+	friend class Portal;
+
+	float lastanglex, lastanglez;
 };
 
 

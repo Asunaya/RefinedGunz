@@ -56,7 +56,7 @@ bool ZQuest::OnCreate()
 	LoadNPCMeshes();
 	LoadNPCSounds();
 
-	return ZGetScreenEffectManager()->CreateQuestRes();
+	return true;// ZGetScreenEffectManager()->CreateQuestRes();
 }
 
 void ZQuest::OnDestroy()

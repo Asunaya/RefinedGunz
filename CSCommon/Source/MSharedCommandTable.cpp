@@ -14,14 +14,27 @@ void MAddSharedCommandTable(MCommandManager* pCommandManager, int nSharedType)
 	C(MC_PEER_RG_SLASH, "", "", MCDT_PEER2PEER)
 		P(MPT_VECTOR, "Position")
 		P(MPT_VECTOR, "Direction")
+		P(MPT_INT, "Type")
 	C(MC_PEER_RG_MASSIVE, "", "", MCDT_PEER2PEER)
 		P(MPT_VECTOR, "Position")
 		P(MPT_VECTOR, "Direction")
-	C(MC_PEER_RG_PORTAL, "", "", MCDT_PEER2PEER)
+	C(MC_PEER_PORTAL, "", "", MCDT_PEER2PEER)
 		P(MPT_INT, "Portal index")
 		P(MPT_VECTOR, "Position")
 		P(MPT_VECTOR, "Normal")
 		P(MPT_VECTOR, "Up")
+	C(MC_PEER_SPEC, "", "", MCDT_PEER2PEER)
+	C(MC_PEER_MOVE_DELTA, "", "", MCDT_PEER2PEER)
+		P(MPT_BLOB, "Bloooob")
+	C(MC_PEER_COMPLETED_SKILLMAP, "", "", MCDT_PEER2PEER)
+		P(MPT_FLOAT, "Time")
+		P(MPT_STR, "Course name")
+	C(MC_MATCH_REQUEST_CREATE_ACCOUNT, "", "", MCDT_MACHINE2MACHINE)
+		P(MPT_STR, "Username")
+		P(MPT_BLOB, "Hashed password")
+		P(MPT_STR, "Email")
+	C(MC_MATCH_RESPONSE_CREATE_ACCOUNT, "", "", MCDT_MACHINE2MACHINE)
+		P(MPT_STR, "Message")
 
 
 	C(MC_LOCAL_INFO, "Local.Info", "Local information", MCDT_LOCAL)
@@ -80,9 +93,12 @@ void MAddSharedCommandTable(MCommandManager* pCommandManager, int nSharedType)
 			P(MPT_UINT, "GlobalClock(msec)");
 		C(MC_MATCH_LOGIN, "Match.Login", "Login Match Server", MCDT_MACHINE2MACHINE)
 			P(MPT_STR, "UserID");
-			P(MPT_STR, "Password");
+			P(MPT_BLOB, "Hashed password");
 			P(MPT_INT, "CommandVersion");
 			P(MPT_UINT, "nChecksumPack");
+			P(MPT_INT, "ClientVersion");
+		C(MC_MATCH_RESPONSE_LOGIN_FAILED, "", "", MCDT_MACHINE2MACHINE)
+			P(MPT_STR, "Reason");
 		C(MC_MATCH_RESPONSE_LOGIN, "Match.ResponseLogin", "Response Login", MCDT_MACHINE2MACHINE)
 			P(MPT_INT,	"Result")
 			P(MPT_STR,	"ServerName")
@@ -949,6 +965,10 @@ void MAddSharedCommandTable(MCommandManager* pCommandManager, int nSharedType)
 			C(MC_ADMIN_HIDE, "Admin.Hide", "Hide Admin Player", MCDT_MACHINE2MACHINE)
 			C(MC_ADMIN_RELOAD_CLIENT_HASH, "Admin.ReloadClientHash", "Reload Client Hash", MCDT_MACHINE2MACHINE)
 			C(MC_ADMIN_RESET_ALL_HACKING_BLOCK, "MC_ADMIN_RESET_ALL_HACKING_BLOCK", "reset all hacking block", MCDT_MACHINE2MACHINE)
+			C(MC_ADMIN_MUTE, "", "", MCDT_MACHINE2MACHINE)
+				P(MPT_STR, "Target")
+				P(MPT_STR, "Reason")
+				P(MPT_INT, "Seconds")
 		}		
 	}
 

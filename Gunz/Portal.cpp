@@ -9,6 +9,9 @@
 #include "ZGlobal.h"
 #include "RTypes.h"
 #include "RMeshUtil.h"
+#include "RGMain.h"
+#include "ZGameInterface.h"
+#include "ZGameInput.h"
 
 Portal *g_pPortal = 0;
 
@@ -152,13 +155,23 @@ Portal::Portal()
 
 	GenerateTexture(RGetDevice(), &pBlackTex, 0xFF000000);
 
-	if (FAILED(D3DXCreateTextureFromFile(RGetDevice(), "Interface/portal1.png", &pPortalEdgeTex[0])))
+	for (int i = 0; i < 2; i++)
 	{
-		MLog("Failed to load portal 1 tex\n");
-	}
-	if (FAILED(D3DXCreateTextureFromFile(RGetDevice(), "Interface/portal2.png", &pPortalEdgeTex[1])))
-	{
-		MLog("Failed to load portal 2 tex\n");
+		char path[128];
+		sprintf(path, "Interface/default/portal%d.png", i + 1);
+		auto ret = ReadFile(path);
+
+		if (!ret.first)
+		{
+			MLog("Failed to load portal %d texture file %s\n", i + 1, path);
+			break;
+		}
+
+		if (FAILED(D3DXCreateTextureFromFileInMemory(RGetDevice(), ret.second.c_str(), ret.second.length(), &pPortalEdgeTex[i])))
+		{
+			MLog("Failed to create portal %d texture\n", i + 1);
+			break;
+		}
 	}
 
 
@@ -468,14 +481,16 @@ void Portal::RenderWorldStencil()
 			RGetDevice()->SetRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_KEEP);
 			RGetDevice()->SetRenderState(D3DRS_ZENABLE, TRUE);
 
+			rmatrix mView;
 
 			D3DXVECTOR3 pos = vCameraPos * portalinfo.matTransform[i],
 				dir = vCameraDir * portalinfo.matRot[i];
 
-			rmatrix mView;
 			D3DXVECTOR3 at = pos + dir, up = portalinfo.vUp[!i];
 
 			D3DXMatrixLookAtLH(&mView, &pos, &at, &up);
+
+			//mView = mOrigView * portalinfo.matTransform[i];
 
 			RGetDevice()->SetTransform(D3DTS_VIEW, &mView);
 
@@ -781,6 +796,8 @@ void GetIntersectedScreenLine(rvector &pos, rvector &dir)
 	D3DXPlaneIntersectLine(&checkpos, &myplane, &pos, &checkposto);
 }
 
+//#define DEBUG
+
 void Portal::OnShot()
 {
 	int n = -1;
@@ -809,12 +826,7 @@ void Portal::OnShot()
 	if (!pDesc)
 		return;
 
-	char *pszItemName = pDesc->m_szName;
-
-	if (!pszItemName)
-		return;
-
-	if (strcmp(pszItemName, "Portal Gun") != 0)
+	if (pDesc->m_nID != 8500) // Change this to something saner later
 		return;
 #endif
 	
@@ -1022,6 +1034,9 @@ bool Portal::Move(ZObject *pObj, D3DXVECTOR3 &diff)
 
 		ZGetCamera()->SetDirection(ZGetCamera()->GetCurrentDir() * ppi->matRot[iPortal]);
 
+		ZGetGameInterface()->GetGameInput()->lastanglex = ZGetCamera()->m_fCurrentAngleX;
+		ZGetGameInterface()->GetGameInput()->lastanglez = ZGetCamera()->m_fCurrentAngleZ;
+
 		RCameraPosition *= ppi->matTransform[iPortal];
 		RCameraDirection *= ppi->matRot[iPortal];
 		RUpdateCamera();
@@ -1091,90 +1106,110 @@ void Portal::RedirectCamera()
 
 	target = charpos + offset;
 
+	bool bInsidePortal = false;
+
 	int iPortal;
 	PortalInfo *ppi;
 	if (ZObjectPortalIntersection(ZGetGame()->m_pMyCharacter, &ppi, &iPortal))
 	{
-		if (DotProduct(vCameraDir, ppi->vNormal[iPortal]) >= 0) // arccos(0) = 2/pi
-		{
-			target += vCameraDir * 30;
-		}
+		//if (DotProduct(vCameraDir, ppi->vNormal[iPortal]) >= 0) // arccos(0) = tau/4
+		//{
+		if (DotProduct(target - ZGetCamera()->m_fDist * vCameraDir, ppi->vNormal[iPortal]) + ppi->d[iPortal] < 0)
+			{
+				bInsidePortal = true;
+
+				//MLog("InsidePortal");
+			}
+		//}
 	}
 
-	ZPICKINFO zpi;
+	rvector newpos, newdir;
 
-	rvector dir = -ZGetCamera()->GetCurrentDir();
-
-	rvector idealpos = target + dir * ZGetCamera()->m_fDist;
-
-	if (!( ZGetGame()->Pick(ZGetGame()->m_pMyCharacter, target, dir, &zpi, RM_FLAG_ADDITIVE | RM_FLAG_HIDE | RM_FLAG_PASSBULLET, 0)
-		&& zpi.bBspPicked
-		&& Magnitude(target - zpi.bpi.PickPos) < ZGetCamera()->m_fDist ))
-	//{
-		//cprint("No hit\n");
-		return;
-	//}
-
-	rvector &pick = zpi.bpi.PickPos;
-
-	int portal = -1;
-	rvector hit;
-	for (auto pair : PortalList)
+	if (bInsidePortal)
 	{
-		for (int i = 0; i < 2; i++)
+		newdir = vCameraDir * ppi->matRot[iPortal];
+		newpos = target * ppi->matTransform[iPortal];
+		newpos -= ZGetCamera()->m_fDist * newdir;
+
+		bMakeNearProjectionMatrix = DotProduct(newpos, ppi->vNormal[!iPortal]) + ppi->d[!iPortal] < 15;
+	}
+	else
+	{
+		ZPICKINFO zpi;
+
+		rvector dir = -ZGetCamera()->GetCurrentDir();
+
+		rvector idealpos = target + dir * ZGetCamera()->m_fDist;
+
+		if (!(ZGetGame()->Pick(ZGetGame()->m_pMyCharacter, target, dir, &zpi, RM_FLAG_ADDITIVE | RM_FLAG_HIDE | RM_FLAG_PASSBULLET, 0)
+			&& zpi.bBspPicked
+			&& Magnitude(target - zpi.bpi.PickPos) < ZGetCamera()->m_fDist))
+			//{
+			//cprint("No hit\n");
+			return;
+		//}
+
+		rvector &pick = zpi.bpi.PickPos;
+
+		rvector hit;
+		int portal = -1;
+		for (auto pair : PortalList)
 		{
-			if (LinePortalIntersection(target, pick, pair.second, i, hit))
+			for (int i = 0; i < 2; i++)
 			{
-				ppi = &pair.second;
-				portal = i;
+				if (LinePortalIntersection(target, pick, pair.second, i, hit))
+				{
+					ppi = &pair.second;
+					portal = i;
+					break;
+				}
+			}
+		}
+
+		if (portal == -1)
+			//{
+			//cprint("No portal");
+			return;
+		//}
+
+		int axis = -1;
+
+		for (int i = 0; i < 3; i++)
+		{
+			if (fabs(hit[i] - idealpos[i]) > 1)
+			{
+				axis = i;
 				break;
 			}
 		}
+
+		if (axis == -1)
+			return;
+
+		rvector diff = idealpos - target;
+		float distoutside = (idealpos[axis] - hit[axis]) / (idealpos[axis] - target[axis]) * D3DXVec3Length(&diff);
+
+		rvector disp = hit;
+		Transform(disp, *ppi, portal);
+
+		newdir = -dir;
+		Rotate(newdir, *ppi, portal);
+
+		newpos = disp - newdir * distoutside;
+
+		bMakeNearProjectionMatrix = distoutside < 15;
 	}
-
-	if (portal == -1)
-	//{
-		//cprint("No portal");
-		return;
-	//}
-
-	int axis = -1;
-	
-	for (int i = 0; i < 3; i++)
-	{
-		if (fabs(hit[i] - idealpos[i]) > 1)
-		{
-			axis = i;
-			break;
-		}
-	}
-
-	if (axis == -1)
-		return;
-
-	rvector diff = idealpos - target;
-	float distoutside = (idealpos[axis] - hit[axis]) / (idealpos[axis] - target[axis]) * D3DXVec3Length(&diff);
-
-	rvector disp = hit;
-	Transform(disp, *ppi, portal);
-
-	rvector newdir = dir;
-	Rotate(newdir, *ppi, portal);
-
-	rvector newpos = disp + newdir * distoutside;
 
 	/*pZCam->m_Position = newpos;
 	pZCam->SetDirection(-newdir);*/
 
 	D3DXMATRIX mView;
 
-	MakeViewMatrix(mView, newpos, -newdir, D3DXVECTOR3(0, 0, 1));
+	MakeViewMatrix(mView, newpos, newdir, D3DXVECTOR3(0, 0, 1));
 	RGetDevice()->SetTransform(D3DTS_VIEW, &mView);
 
 	vCameraPos = newpos;
-	vCameraDir = -newdir;
-
-	bMakeNearProjectionMatrix = distoutside < 15;
+	vCameraDir = newdir;
 
 	bLookingThroughPortal = true;
 
@@ -1467,7 +1502,7 @@ void Portal::AddPlayer(ZCharacter *pZChar)
 
 void Portal::DeletePlayer(ZCharacter *pZChar)
 {
-	PortalListIt it = PortalList.find(pZChar);
+	auto it = PortalList.find(pZChar);
 	if(it != PortalList.end())
 		PortalList.erase(it);
 }
@@ -1543,7 +1578,7 @@ void Portal::CreatePortal(ZCharacter *pZChar, int iPortal, const D3DXVECTOR3 &vP
 	D3DXMatrixIdentity(&mat);
 	mat._11 = right.x; mat._12 = right.y; mat._13 = right.z;
 	mat._21 = local_up.x; mat._22 = local_up.y; mat._23 = local_up.z;
-	mat._31 = dir.x; mat._32 = dir.y; mat._33 = dir.z;
+	mat._31 = -dir.x; mat._32 = -dir.y; mat._33 = -dir.z;
 
 	D3DXMatrixTranslation(&matTranslation, Pos.x, Pos.y, Pos.z);
 
@@ -1555,8 +1590,8 @@ void Portal::CreatePortal(ZCharacter *pZChar, int iPortal, const D3DXVECTOR3 &vP
 	{
 		rmatrix mat1, mat2;
 
-		MakeOrientationMatrix(mat1, -portalinfo.vNormal[i], portalinfo.vUp[i]);
-		MakeOrientationMatrix(mat2, portalinfo.vNormal[!i], portalinfo.vUp[!i]);
+		MakeOrientationMatrix(mat1, portalinfo.vNormal[i], portalinfo.vUp[i]);
+		MakeOrientationMatrix(mat2, -portalinfo.vNormal[!i], portalinfo.vUp[!i]);
 		D3DXMatrixInverse(&mat1, NULL, &mat1);
 
 		portalinfo.matRot[i] = mat1 * mat2;
@@ -1609,7 +1644,7 @@ void Portal::CreatePortal(ZCharacter *pZChar, int iPortal, const D3DXVECTOR3 &vP
 
 void Portal::PreDraw()
 {
-	if (bDontDraw || !bPortalSetExists))
+	if (bDontDraw || !bPortalSetExists)
 		return;
 
 #ifndef PORTAL_USE_RT_TEXTURE
@@ -1635,14 +1670,6 @@ void Portal::PostDraw()
 #endif
 
 	RenderEdge();
-}
-
-void Portal::PostCameraUpdate()
-{
-	if (bDontDraw || !bPortalSetExists)
-		return;
-
-	RedirectCamera();
 }
 
 #endif

@@ -243,6 +243,7 @@ void Chat::CalcLineBreaks(ChatLine &cl){
 }
 
 void Chat::Scale(double fWidthRatio, double fHeightRatio){
+	MLog("Scale: %f, %f\n", fWidthRatio, fHeightRatio);
 	Border.x1 *= fWidthRatio;
 	Border.x2 *= fWidthRatio;
 	Border.y1 *= fHeightRatio;
@@ -1021,7 +1022,7 @@ ret:;
 
 	D3DRECT Rect = { Border.x1, Border.y1 - 20, Border.x2 + 1, Border.y1 };
 
-	Quad(Rect, InterfaceColor, 1);
+	Quad(Rect, InterfaceColor);
 
 	DrawBorder();
 

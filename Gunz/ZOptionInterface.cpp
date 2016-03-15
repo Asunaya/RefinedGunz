@@ -8,6 +8,8 @@
 #include "ZInput.h"
 #include "ZRoomListBox.h"
 
+#include "NewChat.h"
+
 #define DEFAULT_SLIDER_MAX			10000
 
 #define DEFAULT_GAMMA_SLIDER_MIN	50
@@ -1364,14 +1366,15 @@ void ZOptionInterface::GetOldScreenResolution()
 	ModeParams.bFullScreen	= RIsFullScreen();
 	ModeParams.PixelFormat	= mnOldBpp;
 
-	//mOldScreenWidth = RGetScreenWidth();
-	//mOldScreenHeight = RGetScreenHeight();
-	//mnOldBpp = RGetPixelFormat();
+	mOldScreenWidth = RGetScreenWidth();
+	mOldScreenHeight = RGetScreenHeight();
+	mnOldBpp = RGetPixelFormat();
 
 	RResetDevice( &ModeParams );
 	Mint::GetInstance()->SetWorkspaceSize(ModeParams.nWidth, ModeParams.nHeight);
 	Mint::GetInstance()->GetMainFrame()->SetSize(ModeParams.nWidth, ModeParams.nHeight);
 	Resize(ModeParams.nWidth, ModeParams.nHeight);
+	g_pChat->Scale(double(RGetScreenWidth()) / mOldScreenWidth, double(RGetScreenHeight()) / mOldScreenHeight);
 
 	D3DDISPLAYMODE ddm;
 	ddm.Width = ModeParams.nWidth;
@@ -1437,6 +1440,7 @@ bool ZOptionInterface::TestScreenResolution()
 		Mint::GetInstance()->SetWorkspaceSize(ModeParams.nWidth, ModeParams.nHeight);
 		Mint::GetInstance()->GetMainFrame()->SetSize(ModeParams.nWidth, ModeParams.nHeight);
 		Resize(ModeParams.nWidth, ModeParams.nHeight);
+		g_pChat->Scale(double(RGetScreenWidth()) / mOldScreenWidth, double(RGetScreenHeight()) / mOldScreenHeight);
 	}
 	return true;
 }

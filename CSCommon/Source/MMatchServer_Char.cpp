@@ -104,10 +104,10 @@ void MMatchServer::OnRequestAccountCharList(const MUID& uidPlayer, char* szXTrap
 			{
 				DWORD dwMsgID = 0;
 
-				if( (MMBT_XTRAP_HACKER == MBlockType) || (MMBT_HSHIELD_HACKER == MBlockType) )
-					dwMsgID = 130002;
-				else if( MMBT_BADUSER == MBlockType )
-					dwMsgID =  13003;
+				//if( (MMBT_XTRAP_HACKER == MBlockType) || (MMBT_HSHIELD_HACKER == MBlockType) )
+				//	dwMsgID = 130002;
+				//else if( MMBT_BADUSER == MBlockType )
+				//	dwMsgID =  13003;
 
 				pObj->GetDisconnStatusInfo().SetMsgID( dwMsgID );
 				pObj->GetDisconnStatusInfo().SetStatus( MMDS_DISCONN_WAIT );

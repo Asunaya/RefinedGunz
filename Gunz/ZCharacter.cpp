@@ -1048,7 +1048,7 @@ void ZCharacter::OnDraw()
 		m_pVMesh->SetVisibility(fOpacity);
 	}
 	else
-		if(!m_bHero) m_pVMesh->SetVisibility(1.f);
+	if (!m_bHero) m_pVMesh->SetVisibility(ZGetGame()->GetMatch()->GetMatchType() == MMATCH_GAMETYPE_SKILLMAP ? 0.4 : 1.f);
 
 	__BP(25, "ZCharacter::Draw::VisualMesh::Render");
 
@@ -3815,7 +3815,21 @@ bool ZCharacter::Load(ZFile *file, const ReplayVersion &Version)
 
 	if(!m_Items.Load(file)) return false;
 
-	if (Version.Server == SERVER_FREESTYLE_GUNZ)
+	if (Version.Server == SERVER_OFFICIAL)
+	{
+		if (Version.nVersion >= 6)
+		{
+			int item[5 * 2];
+			file->Read(item);
+
+			if (Version.nVersion == 11)
+			{
+				char unk[136];
+				file->Read(unk);
+			}
+		}
+	}
+	else if (Version.Server == SERVER_FREESTYLE_GUNZ)
 	{
 		if (Version.nVersion == 9)
 		{

@@ -2110,6 +2110,25 @@ void ZCombatInterface::DrawScoreBoard(MDrawContext* pDC)
 		delete *items.begin();
 		items.erase(items.begin());
 	}
+
+	char buf[256] = "Spectators: ";
+	int count = 0;
+	for (auto it : *ZGetCharacterManager())
+	{
+		ZCharacter &Player = *it.second;
+
+		if (Player.GetTeamID() != MMT_SPECTATOR)
+			continue;
+
+		if (count)
+			strcat_safe(buf, ", ");
+
+		strcat_safe(buf, Player.GetUserNameA());
+		count++;
+	}
+
+	if (count)
+		TextRelative(pDC, 0.2, 0.8, buf);
 }
 
 // 팀 / 생사 / 성적이 소트의 기준이다

@@ -25,7 +25,7 @@ void __cdecl RCPLog(const char *pFormat,...)
 	int nEnd = (int)(strlen(szBuf)-1);
 	if ((nEnd >= 0) && (szBuf[nEnd] == '\n')) {
 		szBuf[nEnd] = NULL;
-		strcat(szBuf, "\n");
+		strcat_safe(szBuf, "\n");
 	}
 	OutputDebugString(szBuf);
 }

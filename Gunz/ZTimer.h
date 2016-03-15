@@ -23,7 +23,7 @@ public:
 	ZTimer();
 	virtual ~ZTimer();
 
-	float UpdateFrame();
+	double UpdateFrame();
 	void ResetFrame();
 
 	// 타이머 이벤트 관련

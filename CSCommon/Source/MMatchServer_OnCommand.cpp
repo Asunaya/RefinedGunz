@@ -17,6 +17,8 @@
 #include "MMatchSchedule.h"
 #include "MTypes.h"
 
+#include "sodium.h"
+
 #define _STATUS_CMD_START	unsigned long int nStatusStartTime = timeGetTime();
 #define _STATUS_CMD_END		MGetServerStatusSingleton()->AddCmd(pCommand->GetID(), 0, timeGetTime()-nStatusStartTime);
 
@@ -33,18 +35,46 @@ _STATUS_CMD_START;
 		case MC_MATCH_LOGIN:
 			{
 				char szUserID[64];
-				char szPassword[64];
+				//char szPassword[64];
 				int nCommandVersion = 0;
 				unsigned long nChecksumPack = 0;
+				int nVersion = -1;
 				if (pCommand->GetParameter(szUserID, 0, MPT_STR, sizeof(szUserID) )==false) break;
-				if (pCommand->GetParameter(szPassword, 1, MPT_STR, sizeof(szPassword) )==false) break;
-				if (pCommand->GetParameter(&nCommandVersion, 2, MPT_INT)==false) break;
-				if (pCommand->GetParameter(&nChecksumPack, 3, MPT_UINT)==false) break;
+				//if (pCommand->GetParameter(szPassword, 1, MPT_STR, sizeof(szPassword) )==false) break;
 
-				OnMatchLogin(pCommand->GetSenderUID(), szUserID, szPassword, nCommandVersion, nChecksumPack);
+				auto Param = pCommand->GetParameter(1);
+				if (!Param || Param->GetType() != MPT_BLOB)
+					break;
+
+				unsigned char *HashedPassword = (unsigned char *)Param->GetPointer();
+				int HashLength = Param->GetSize() - sizeof(int); // Awk
+
+				if (pCommand->GetParameter(&nCommandVersion, 2, MPT_INT)==false) break;
+				if (pCommand->GetParameter(&nChecksumPack, 3, MPT_UINT) == false) break;
+				if (pCommand->GetParameter(&nVersion, 4, MPT_INT) == false) break;
+
+				OnMatchLogin(pCommand->GetSenderUID(), szUserID, HashedPassword, HashLength, nCommandVersion, nChecksumPack, nVersion);
 			}
 			break;
-		case MC_MATCH_LOGIN_NETMARBLE:
+		case MC_MATCH_REQUEST_CREATE_ACCOUNT:
+		{
+			char szUserID[64];
+			char szEmail[64];
+			if (pCommand->GetParameter(szUserID, 0, MPT_STR, sizeof(szUserID)) == false) break;
+
+			auto Param = pCommand->GetParameter(1);
+			if (!Param || Param->GetType() != MPT_BLOB)
+				break;
+
+			unsigned char *HashedPassword = (unsigned char *)Param->GetPointer();
+			int HashLength = Param->GetSize() - sizeof(int);
+
+			if (pCommand->GetParameter(szEmail, 2, MPT_STR, sizeof(szEmail)) == false) break;
+
+			CreateAccount(pCommand->GetSenderUID(), szUserID, HashedPassword, HashLength, szEmail);
+		}
+			break;
+		/*case MC_MATCH_LOGIN_NETMARBLE:
 			{
 				char szCPCookie[4096];
 				char szSpareParam[4096];
@@ -73,7 +103,7 @@ _STATUS_CMD_START;
 				OnMatchLoginFromNetmarbleJP(pCommand->GetSenderUID(), 
 										szLoginID, szLoginPW, nCommandVersion, nChecksumPack);
 			}
-			break;
+			break;*/
 		case MC_MATCH_LOGIN_FROM_DBAGENT:
 			{
 				MUID CommUID;
@@ -116,11 +146,11 @@ _STATUS_CMD_START;
 				OnBridgePeer(uidChar, dwIP, nPort);
 			}
 			break;
-		case MC_DEBUG_TEST:
+		/*case MC_DEBUG_TEST:
 			{
 				DebugTest();
 			}
-			break;
+			break;*/
 		case MC_MATCH_REQUEST_RECOMMANDED_CHANNEL:
 			{
 				OnRequestRecommendedChannel(pCommand->GetSenderUID());

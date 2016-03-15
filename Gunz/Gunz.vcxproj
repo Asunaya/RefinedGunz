@@ -451,6 +451,8 @@
       <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <AdditionalOptions>/Zm500</AdditionalOptions>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
     </ClCompile>
     <Link>
       <AdditionalDependencies>fmodvc.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -461,6 +463,7 @@
       <ProgramDatabaseFile>$(OutDir)Gunzd.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <PreBuildEvent>
       <Message>공유 파일들을 복사합니다.</Message>
@@ -561,7 +564,7 @@ rem call copy_share.bat
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <OmitFramePointers>true</OmitFramePointers>
-      <AdditionalIncludeDirectories>../sdk/dx9/include;../CSCommon/Include;../SafeUDP/Include;../CML/Include;../RealSpace2/Include;../MAI/Include;../RealSpace/Include;../Mint2/Include;../RealSound/Include;../MDatabase/Include/;../MCountryFilter/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../sdk/dx9/include;../CSCommon/Include;../SafeUDP/Include;../CML/Include;../RealSpace2/Include;../MAI/Include;../RealSpace/Include;../Mint2/Include;../RealSound/Include;../MDatabase/Include/;../MCountryFilter/Include;../libsodium/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;LOCALE_US;_LOCATOR;_PUBLISH;NO_WARN_MBCS_MFC_DEPRECATION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -582,8 +585,8 @@ rem call copy_share.bat
       <BrowseInformation>false</BrowseInformation>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>../CML/Lib/zlib.lib;fmodvc.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(OutDir)Gunz.exe</OutputFile>
+      <AdditionalDependencies>../CML/Lib/zlib.lib;fmodvc.lib;..\libsodium\Win32\Release\v120\static\libsodium.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>../sdk/dx9/lib;../RealSound/Lib;Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>libc.lib;libci.lib;Nafxcwd.lib;Libcmtd.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -1295,11 +1298,13 @@ rem call copy_share.bat
     <ClInclude Include="Events.h" />
     <ClInclude Include="FuncList.h" />
     <ClInclude Include="Hitboxes.h" />
+    <ClInclude Include="MeshManager.h" />
     <ClInclude Include="NewChat.h" />
     <ClInclude Include="Portal.h" />
     <ClInclude Include="ReplayControl.h" />
     <ClInclude Include="RGMain.h" />
     <ClInclude Include="Rules.h" />
+    <ClInclude Include="Tasks.h" />
     <ClInclude Include="ZActionDef.h" />
     <ClInclude Include="ZCanvas.h" />
     <ClInclude Include="ZCombatChat.h" />
@@ -1312,6 +1317,7 @@ rem call copy_share.bat
     <ClInclude Include="ZMiniMap.h" />
     <ClInclude Include="ZObserver.h" />
     <ClInclude Include="ZRadar.h" />
+    <ClInclude Include="ZRuleSkillmap.h" />
     <ClInclude Include="ZVoteInterface.h" />
     <ClInclude Include="ZWeaponScreenEffect.h" />
     <ClInclude Include="MCommandLogFrame.h" />
@@ -1521,12 +1527,18 @@ rem call copy_share.bat
     <ClCompile Include="Events.cpp" />
     <ClCompile Include="FuncList.cpp" />
     <ClCompile Include="Hitboxes.cpp" />
+    <ClCompile Include="MeshManager.cpp" />
     <ClCompile Include="NewChat.cpp" />
     <ClCompile Include="Portal.cpp" />
     <ClCompile Include="ReplayControl.cpp" />
     <ClCompile Include="RGCommands.cpp" />
     <ClCompile Include="RGMain.cpp" />
     <ClCompile Include="Rules.cpp" />
+    <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_publish|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Tasks.cpp" />
     <ClCompile Include="ZCanvas.cpp" />
     <ClCompile Include="ZCombatChat.cpp" />
     <ClCompile Include="ZCombatInterface.cpp" />
@@ -1539,6 +1551,7 @@ rem call copy_share.bat
     <ClCompile Include="ZMiniMap.cpp" />
     <ClCompile Include="ZObserver.cpp" />
     <ClCompile Include="ZRadar.cpp" />
+    <ClCompile Include="ZRuleSkillmap.cpp" />
     <ClCompile Include="ZVoteInterface.cpp" />
     <ClCompile Include="ZWeaponScreenEffect.cpp" />
     <ClCompile Include="MCommandLogFrame.cpp" />
@@ -1724,38 +1737,6 @@ rem call copy_share.bat
     <ClCompile Include="ZStringResManager.cpp" />
     <ClCompile Include="ZTips.cpp" />
     <ClCompile Include="XTrap\XTrap.cpp" />
-    <ClCompile Include="stdafx.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='BirdTest|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='BirdTest|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DEBUG_FAST|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DEBUG_FAST|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug_tracememory|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug_tracememory|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_HShield|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_HShield|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_publish|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_publish|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='z_BRZ_Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='z_BRZ_Debug|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='z_BRZ_Release_publish|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='z_BRZ_Release_publish|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='z_IND_Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='z_IND_Debug|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='z_IND_Release_publish|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='z_IND_Release_publish|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='z_JPN_Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='z_JPN_Debug|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='z_JPN_Release_publish|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='z_JPN_Release_publish|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='z_US_Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='z_US_Debug|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='z_US_Release_publish|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='z_US_Release_publish|x64'">Create</PrecompiledHeader>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="runtime\shader\skin.vsh" />

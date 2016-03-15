@@ -11,6 +11,9 @@ void ReplayControl::Draw()
 	if (!ZGetGame()->IsReplay())
 		return;
 
+	if (!g_pChat->IsInputEnabled())
+		return;
+
 	D3DXVECTOR2 v1, v2;
 	v1.x = RELWIDTH(1920.f / 2 - 220);
 	v1.y = RELHEIGHT(830);

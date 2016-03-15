@@ -1,0 +1,356 @@
+GUNZ 1,0,0,290 launched. build (Feb 22 2016 18:19:57) 
+Log time (02/22/16 18:25:39)
+test.txt not found 
+NON-Skip XTrapPatch
+CPU ID = GenuineIntel ( family = 774 , model = 10 , stepping = 9 ) @ 3410 MHz
+Display Device = NVIDIA GeForce GTX 760 ( vendor=10de device=1187 subsys=28471462 revision=a1 )
+Display Driver Version = 10.18.0013.5362
+Windows = 6.1 Build 7601 , Service Pack 1 (4194303KB) :  ..
+Load XML from memory : system/locale.xml- SUCCESS
+Country : (BRZ), Language : (BRZ)
+Load XML from memory : system/gametypecfg.xmlLoad Config from file : config.xml- SUCCESS
+Load XML from memory : system/system.xml- SUCCESS
+Load XML from memory : system/strings.xml(0x0016) - SUCCESS
+Load XML from memory : system/cserror.xml(0x0016) - SUCCESS
+Load XML from memory : system/messages.xml(0x0016) - SUCCESS
+WFog Enabled Device.
+device created.
+Video memory 2011.500000 
+shader initialize successful : 1
+main : RGetLenzFlare()->Initialize() 
+main : ZGetInitialLoading()->Initialize() 
+main : g_Mint.Initialize() 
+ZApplication::OnCreate : begin
+0(Primary Sound Driver): Hardware Mixing Not Supported
+1(Speakers (Realtek High Definition Audio)): Hardware Mixing Not Supported
+2(Realtek Digital Output (Realtek High Definition Audio)): Hardware Mixing Not Supported
+3(Realtek Digital Output(Optical) (Realtek High Definition Audio)): Hardware Mixing Not Supported
+[[[getMaxChannel32]]]]
+
+-------------------> Sound Engine Create : 0.354000 
+
+ZApplication::OnCreate : m_SoundEngine.Create
+1
+3
+Load XML from memory : System/tips.xml(0x0016)- SUCCESS
+ZGameInterface::LoadBitmaps
+ZGameInterface::LoadBitmaps2
+loading pictures : 0.367000 
+warning : bitmap frame_t.png not found.
+warning : bitmap slot_head.tga not found.
+warning : bitmap slot_head.tga not found.
+warning : bitmap icon_gameroom.tga not found.
+warning : bitmap icon_gameroom_s.tga not found.
+warning : bitmap icon_gameroom_s.tga not found.
+warning : bitmap icon_gameroom_s.tga not found.
+warning : bitmap icon_gameroom_s.tga not found.
+warning : bitmap icon_gameroom_s.tga not found.
+warning : bitmap icon_gameroom_s.tga not found.
+warning : bitmap icon_gameroom_s.tga not found.
+warning : bitmap icon_gameroom_s.tga not found.
+warning : bitmap icon_gameroom_s.tga not found.
+warning : bitmap icon_gameroom_s.tga not found.
+warning : bitmap icon_gameroom_s.tga not found.
+warning : bitmap icon_gameroom_s.tga not found.
+warning : bitmap icon_gameroom_s.tga not found.
+warning : bitmap icon_gameroom_s.tga not found.
+warning : bitmap icon_gameroom_s.tga not found.
+warning : bitmap icon_gameroom_s.tga not found.
+warning : bitmap icon_gameroom_s.tga not found.
+warning : bitmap icon_gameroom_s.tga not found.
+warning : bitmap icon_gameroom_s.tga not found.
+warning : bitmap icon_gameroom_s.tga not found.
+warning : bitmap icon_gameroom_s.tga not found.
+warning : bitmap icon_gameroom_s.tga not found.
+warning : bitmap icon_gameroom_s.tga not found.
+warning : bitmap icon_gameroom_s.tga not found.
+IDLResource Loading Success!!
+IDL resources : 0.129000 
+ZOptionInterface::InitInterfaceOption
+Number of Display mode : 36
+Number of Display mode : 36
+ZGameInterface::InitInterfaceOption ok
+::InitMaps() > No Current ChannelRule 
+ZGameInterface::OnCreate : InitInterface 
+Screen Effect Manager Create : 0.046000 
+ZGameInterface::OnCreate : m_pScreenEffectManager->Create()
+ZGameInterface::OnCreate : m_pEffectManager->Create()
+ZGameInterface::OnCreate : g_pGameClient->Create()
+ZGameInterface::OnCreate : done 
+
+-------------------> GameInterface Create : 0.703000 
+
+ZApplication::OnCreate : GameInterface Created
+ZApplication::OnCreate : m_pInterface->OnCreate() 
+ZApplication::OnCreate : m_MeshMgr.LoadXmlList(character.xml) 
+
+-------------------> Character Loading : 0.798000 
+
+
+-------------------> WeaponMesh Loading : 0.173000 
+
+----------> in zip ( model/weapon/item/chocobar.elu ) file not found!! 
+ ZApplication::OnCreate : m_WeaponMeshMgr.LoadXmlList(weapon.xml) 
+
+-------------------> Worlditem Loading : 0.012000 
+
+ZApplication::OnCreate : CreateConsole 
+ZApplication::OnCreate : MGetMatchItemDescMgr()->ReadXml 
+Error while Read Item Descriptor system/zeffect.xmlZApplication::OnCreate : MGetMatchItemEffectDescMgr()->ReadXml 
+ZApplication::OnCreate : MGetMatchWorldItemDescMgr()->ReadXml 
+ZApplication::OnCreate : ZGetChannelRuleMgr()->ReadXml 
+ZApplication::OnCreate : MGetChattingFilter()->Create 
+
+-------------------> ETC .. : 0.105000 
+
+main : g_App.OnCreate() 
+Fail to create Bitmap for Initial loading
+ZGame::Create() begin , type = 0
+RBspObject::Open : begin maps/Superflip/Superflip.rs 
+RBspObject::Open : Open_MaterialList
+RBspObject::Open : OpenDescription
+RBspObject::OpenRs : file.Open 
+RBspObject::OpenRs : file.Read(&header) 
+RBspObject::OpenRs : file.Read(&nMaterial) 
+RBspObject::OpenRs : Open_Nodes begin 
+RBspObject::OpenRs : Open_Nodes end 
+RBspObject::Open : OpenRs 
+RBspObject::Open : OpenBsp 
+RBspObject::Open : done
+ZGame::Create() World Create Superflip 
+ZGame::Create() pMapDesc->LoadSmokeDesc 
+ZGame::Create() :: ReloadAllAnimation Begin 
+in zip : model/man/man_sword_guard_start2.elu.ani file not found!! 
+ in zip : model/woman/woman_sword_guard_start2.elu.ani file not found!! 
+ in zip : model/woman/woman_sword_guard_block_1.elu.ani file not found!! 
+ ZGame::Create() :: ReloadAllAnimation End 
+ZGame::Create() m_CharacterManager.Clear done 
+ZGame Created ( 18:25:45 )
+ZGame::CreateMyCharacter : Name=Maiet Level=12288 
+main : OnCreate() done
+Crash ( 18:25:45 )
+Build Feb 15 2016 16:20:15
+
+
+[Exception]
+Address	:	004c2e11
+ExpCode	:	c0000005
+Flags	:	00000000
+#Param	:	00000002
+other	:	00000000
+
+[Context]
+GS : 0000002b  FS : 00000053  ES : 0000002b  DS : 0000002b
+EDI: 23b4e828  ESI: 0035f6a4  EBX: 0035f5ec  EDX: 1ffb8748
+ECX: 00000000  EAX: 00000000  EBP: 0035f608  EIP: 004c2e11
+CS : 00000023  Flg: 00210246  ESP: 0035f5e4  SS : 0000002b
+
+[Stack]
+1e747c90 23a2a3f0 b475ffff 00000000 bf7f05de 3db2c058 3914afff 00000000 
+22b04621 0035f848 00465e96 0035f64c 0035f628 0035f6a4 0035f634 06825ebc 
+23a2a3f0 00000000 00000000 bf800000 bf7f05de 3db2c058 3914afff 01000100 
+befa66f4 3f30c852 c33c4646 c50a8bcf c4d3bbd2 c31493fd c50c5515 c4d3c911 
+3f00cac9 3f38edc0 3ef2e5f8 00000000 c3337e1f c50e1c79 c4c9e037 3f7ffff9 
+befa66f4 3f30c852 bf0869c6 00000000 bf3668d8 3d13b642 3f33617e 00000000 
+3f00cac9 3f38edc0 3ef2e5f8 00000000 c3337e1f c50e1c79 c4c9e037 3f7ffff9 
+22b046e1 0035f718 004bdd05 23a2a430 23a2a300 23a2a3f0 c36de898 c50ef857 
+c4d54224 c30d3c32 c508152f c4bf1b69 c25707ae 3ea7ec00 c282eed8 424498f6 
+433189d5 0045c63e 23a2a3f0 00000000 c282eed8 0035f848 00459564 00000001 
+00000000 23a2a3f0 06825ebc 23a2a3f0 00000001 42f3fc44 004661ba 23820890 
+42c80000 00000000 0045c7d9 23a2a3f0 42c80000 23a2a3f0 00465ac2 06825ebc 
+23820890 00465a4e 23a2a3f0 04e82fd8 06825e60 04e82fd8 0047ed37 068bc818 
+04e82fd8 3f800000 00000000 00000000 00000000 00000000 3f800000 00000000 
+00000000 00000000 00000000 3f800000 00000000 00000000 00000000 00000000 
+3f800000 0041d754 068bc818 00000438 0050a3ca 04e82fd8 00000000 04e82fd8 
+
+SymLoadModule failed 0 ( module =  ) 
+Frame 01: Address: 004C2E11 (base + 132E11), return address: 00465E96
+     ModuleName : Gunz
+     Param[0] : 0035f64c
+     Param[1] : 0035f628
+     Param[2] : 0035f6a4
+     Param[3] : 0035f634
+     File Name : c:\users\dys\desktop\oldgunz\realspace2\source\rbspobject.cpp
+     Line Number : 3857
+     Function Name : RealSpace2::RBspObject::GetShadowPosition
+Frame 02: Address: 00465E96 (base + D5E96), return address: 004661BA
+     ModuleName : Gunz
+     Param[0] : 23820890
+     Param[1] : 42c80000
+     Param[2] : 00000000
+     Param[3] : 0045c7d9
+     File Name : c:\users\dys\desktop\oldgunz\gunz\zshadow.cpp
+     Line Number : 122
+     Function Name : ZShadow::setMatrix
+Frame 03: Address: 004661BA (base + D61BA), return address: 0045C7D9
+     ModuleName : Gunz
+     Param[0] : 23a2a3f0
+     Param[1] : 42c80000
+     Param[2] : 23a2a3f0
+     Param[3] : 00465ac2
+     File Name : c:\users\dys\desktop\oldgunz\gunz\zshadow.cpp
+     Line Number : 104
+     Function Name : ZShadow::setMatrix
+Frame 04: Address: 0045C7D9 (base + CC7D9), return address: 00465AC2
+     ModuleName : Gunz
+     Param[0] : 06825ebc
+     Param[1] : 23820890
+     Param[2] : 00465a4e
+     Param[3] : 23a2a3f0
+     File Name : c:\users\dys\desktop\oldgunz\gunz\zcharacterobject.cpp
+     Line Number : 499
+     Function Name : ZCharacterObject::DrawShadow
+Frame 05: Address: 00465AC2 (base + D5AC2), return address: 00465A4E
+     ModuleName : Gunz
+     Param[0] : 23a2a3f0
+     Param[1] : 04e82fd8
+     Param[2] : 06825e60
+     Param[3] : 04e82fd8
+     File Name : c:\users\dys\desktop\oldgunz\gunz\zobjectmanager.cpp
+     Line Number : 80
+     Function Name : ZObjectManager::DrawObject
+Frame 06: Address: 00465A4E (base + D5A4E), return address: 0047ED37
+     ModuleName : Gunz
+     Param[0] : 068bc818
+     Param[1] : 04e82fd8
+     Param[2] : 3f800000
+     Param[3] : 00000000
+     File Name : c:\users\dys\desktop\oldgunz\gunz\zobjectmanager.cpp
+     Line Number : 211
+     Function Name : ZObjectManager::Draw
+Frame 07: Address: 0047ED37 (base + EED37), return address: 0041D754
+     ModuleName : Gunz
+     Param[0] : 068bc818
+     Param[1] : 00000438
+     Param[2] : 0050a3ca
+     Param[3] : 04e82fd8
+     File Name : c:\users\dys\desktop\oldgunz\gunz\zgame.cpp
+     Line Number : 1005
+     Function Name : ZGame::Draw
+Frame 08: Address: 0041D754 (base + 8D754), return address: 0050A3CA
+     ModuleName : Gunz
+     Param[0] : 04e82fd8
+     Param[1] : 00000000
+     Param[2] : 04e82fd8
+     Param[3] : 06809138
+     File Name : c:\users\dys\desktop\oldgunz\gunz\zgameinterface.cpp
+     Line Number : 2390
+     Function Name : ZGameInterface::OnDrawStateGame
+Frame 09: Address: 0050A3CA (base + 17A3CA), return address: 0050A3F7
+     ModuleName : Gunz
+     Param[0] : 04e82fff
+     Param[1] : 00779c88
+     Param[2] : 04e82fd8
+     Param[3] : 00779c88
+     File Name : c:\users\dys\desktop\oldgunz\mint2\source\mwidget.cpp
+     Line Number : 367
+     Function Name : MWidget::Draw
+Frame 10: Address: 0050A3F7 (base + 17A3F7), return address: 00522524
+     ModuleName : Gunz
+     Param[0] : 04e82fff
+     Param[1] : 776e7809
+     Param[2] : 776f5f74
+     Param[3] : 7142cd5e
+     File Name : c:\users\dys\desktop\oldgunz\mint2\source\mwidget.cpp
+     Line Number : 367
+     Function Name : MWidget::Draw
+Frame 11: Address: 00522524 (base + 192524), return address: 00474098
+     ModuleName : Gunz
+     Param[0] : 007795f0
+     Param[1] : 0047680d
+     Param[2] : 76d010ff
+     Param[3] : 00475078
+     File Name : c:\users\dys\desktop\oldgunz\mint2\source\mint.cpp
+     Line Number : 241
+     Function Name : Mint::Draw
+Frame 12: Address: 00474098 (base + E4098), return address: 0047680D
+     ModuleName : Gunz
+     Param[0] : 76d010ff
+     Param[1] : 00475078
+     Param[2] : 776e7809
+     Param[3] : 76d010ff
+     File Name : c:\users\dys\desktop\oldgunz\gunz\mint4gunz.h
+     Line Number : 52
+     Function Name : Mint4Gunz::Draw
+Frame 13: Address: 0047680D (base + E680D), return address: 00475078
+     ModuleName : Gunz
+     Param[0] : 776e7809
+     Param[1] : 76d010ff
+     Param[2] : 776f5f74
+     Param[3] : 7368270c
+     File Name : c:\users\dys\desktop\oldgunz\gunz\zapplication.cpp
+     Line Number : 717
+     Function Name : ZApplication::OnDraw
+Frame 14: Address: 00475078 (base + E5078), return address: 7368270C
+     ModuleName : Gunz
+     Param[0] : 037bc64f
+     Param[1] : 00000000
+     Param[2] : 00002710
+     Param[3] : 00000000
+     File Name : c:\users\dys\desktop\oldgunz\gunz\main.cpp
+     Line Number : 503
+     Function Name : OnRender
+SymGetSymFromAddr error 487
+Frame 15: Address: 7368270C (base + 200BB395), return address: 004BF8DC
+     ModuleName : l
+     Param[0] : 00000000
+     Param[1] : 00000000
+     Param[2] : 00000001
+     Param[3] : 0000000b
+SymGetLineFromAddr error 487
+     Function Name : <nosymbols>
+Frame 16: Address: 004BF8DC (base + 12F8DC), return address: 00475A15
+     ModuleName : Gunz
+     Param[0] : 006967a0
+     Param[1] : 00390000
+     Param[2] : 00000000
+     Param[3] : 02434963
+     File Name : c:\users\dys\desktop\oldgunz\realspace2\source\rframework.cpp
+     Line Number : 388
+     Function Name : RealSpace2::RMain
+Frame 17: Address: 00475A15 (base + E5A15), return address: 0064BFDD
+     ModuleName : Gunz
+     Param[0] : 00390000
+     Param[1] : 00000000
+     Param[2] : 02434963
+     Param[3] : 00000001
+     File Name : c:\users\dys\desktop\oldgunz\gunz\main.cpp
+     Line Number : 1514
+     Function Name : WinMain
+Frame 18: Address: 0064BFDD (base + 2BBFDD), return address: 76D033CA
+     ModuleName : Gunz
+     Param[0] : 7efde000
+     Param[1] : 0035fe98
+     Param[2] : 77c49ed2
+     Param[3] : 7efde000
+     File Name : f:\dd\vctools\crt\crtw32\startup\crt0.c
+     Line Number : 251
+     Function Name : __tmainCRTStartup
+SymGetSymFromAddr error 487
+Frame 19: Address: 76D033CA (base + 2373C053), return address: 77C49ED2
+     ModuleName : l
+     Param[0] : 7efde000
+     Param[1] : 7cd82e41
+     Param[2] : 00000000
+     Param[3] : 00000000
+SymGetLineFromAddr error 487
+     Function Name : <nosymbols>
+SymGetSymFromAddr error 487
+Frame 20: Address: 77C49ED2 (base + 24682B5B), return address: 77C49EA5
+     ModuleName : l
+     Param[0] : 0064bed6
+     Param[1] : 7efde000
+     Param[2] : 00000000
+     Param[3] : 00000000
+SymGetLineFromAddr error 487
+     Function Name : <nosymbols>
+SymGetSymFromAddr error 487
+Frame 21: Address: 77C49EA5 (base + 24682B2E), return address: 00000000
+     ModuleName : l
+     Param[0] : 0064bed6
+     Param[1] : 7efde000
+     Param[2] : 00000000
+     Param[3] : 00000000
+SymGetLineFromAddr error 487
+     Function Name : <nosymbols>
+

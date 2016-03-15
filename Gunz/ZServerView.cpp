@@ -243,15 +243,14 @@ bool ZServerView::AddServer( char* szName, char* szAddress, int nPort, int nType
 
 	m_cServerList.push_back( pServerNode);
 
-
 	return true;
 }
 
 
-ServerInfo* ZServerView::GetSelectedServer()
+const ServerInfo *ZServerView::GetSelectedServer()
 {
 	if ( m_nSelectNum < 0)
-		return NULL;
+		return GetFirstServer();
 
 	SERVERLIST::iterator itr = m_cServerList.begin();
 
@@ -264,6 +263,15 @@ ServerInfo* ZServerView::GetSelectedServer()
 	}
 
 	return (*itr);
+}
+
+const ServerInfo *ZServerView::GetFirstServer()
+{
+	auto it = m_cServerList.begin();
+	if (it == m_cServerList.end())
+		return nullptr;
+
+	return *it;
 }
 
 

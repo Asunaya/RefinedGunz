@@ -113,10 +113,10 @@ void MMatchObject::FreeFriendInfo()
 
 void MMatchObject::SetTeam(MMatchTeam nTeam)
 { 
-	m_nTeam = nTeam; 
-
 	if (IsAdminGrade(this) && CheckPlayerFlags(MTD_PlayerFlags_AdminHide))
-		m_nTeam = MMT_SPECTATOR;
+		nTeam = MMT_SPECTATOR;
+
+	m_nTeam = nTeam;
 }
 
 void MMatchObject::SetStageCursor(int nStageCursor)
@@ -518,35 +518,35 @@ void MMatchObject::CheckClientHashValue( const DWORD dwTime )
 
 void MMatchObject::SetXTrapHackerDisconnectWaitInfo( const MMatchDisconnectStatus DisStatus )
 {
-	GetDisconnStatusInfo().SetStatus( DisStatus );
+	//GetDisconnStatusInfo().SetStatus( DisStatus );
 
-	GetDisconnStatusInfo().SetMsgID( 130001 ); 
-	GetDisconnStatusInfo().SetBlockType( MMBT_XTRAP_HACKER ); // 이 기능은 X-Trap에서 사용함.
-	GetDisconnStatusInfo().SetComment( "x-trap hacking detected." );
-	GetDisconnStatusInfo().SetEndDate( MGetStrLocalTime(0, 0, 0, 1, 0) ); // 1시간 후에 접속 가능.
-	GetDisconnStatusInfo().SetBlockLevel( MMBL_LOGONLY );
+	//GetDisconnStatusInfo().SetMsgID( 130001 ); 
+	//GetDisconnStatusInfo().SetBlockType( MMBT_XTRAP_HACKER ); // 이 기능은 X-Trap에서 사용함.
+	//GetDisconnStatusInfo().SetComment( "x-trap hacking detected." );
+	//GetDisconnStatusInfo().SetEndDate( MGetStrLocalTime(0, 0, 0, 1, 0) ); // 1시간 후에 접속 가능.
+	//GetDisconnStatusInfo().SetBlockLevel( MMBL_LOGONLY );
 }
 
 
 void MMatchObject::SetHShieldHackerDisconnectWaitInfo( const MMatchDisconnectStatus DisStatus )
 {
-	GetDisconnStatusInfo().SetStatus( DisStatus );
+	//GetDisconnStatusInfo().SetStatus( DisStatus );
 
-	GetDisconnStatusInfo().SetMsgID( 130001 ); 
-	GetDisconnStatusInfo().SetBlockType( MMBT_HSHIELD_HACKER ); // 이 기능은 HShield에서 사용.
-	GetDisconnStatusInfo().SetComment( "hackshield hacking detected." );
-	GetDisconnStatusInfo().SetEndDate( MGetStrLocalTime(0, 0, 0, 1, 0) ); // 1시간 후에 접속 가능.
-	GetDisconnStatusInfo().SetBlockLevel( MMBL_LOGONLY );
+	//GetDisconnStatusInfo().SetMsgID( 130001 ); 
+	//GetDisconnStatusInfo().SetBlockType( MMBT_HSHIELD_HACKER ); // 이 기능은 HShield에서 사용.
+	//GetDisconnStatusInfo().SetComment( "hackshield hacking detected." );
+	//GetDisconnStatusInfo().SetEndDate( MGetStrLocalTime(0, 0, 0, 1, 0) ); // 1시간 후에 접속 가능.
+	//GetDisconnStatusInfo().SetBlockLevel( MMBL_LOGONLY );
 }
 
 
 void MMatchObject::SetBadFileCRCDisconnectWaitInfo( const MMatchDisconnectStatus DisStatus )
 {
-	GetDisconnStatusInfo().SetStatus( DisStatus );
+	//GetDisconnStatusInfo().SetStatus( DisStatus );
 
-	GetDisconnStatusInfo().SetMsgID( 130004 ); 
-	GetDisconnStatusInfo().SetBlockType( MMBT_BADFILECRC ); // 이 기능은 X-Trap에서 사용함.
-	GetDisconnStatusInfo().SetComment( "bad filecrc." );
-	GetDisconnStatusInfo().SetEndDate( MGetStrLocalTime(0, 0, 0, 0, 0) ); // 1시간 후에 접속 가능.
-	GetDisconnStatusInfo().SetBlockLevel( MMBL_LOGONLY );
+	//GetDisconnStatusInfo().SetMsgID( 130004 ); 
+	//GetDisconnStatusInfo().SetBlockType( MMBT_BADFILECRC ); // 이 기능은 X-Trap에서 사용함.
+	//GetDisconnStatusInfo().SetComment( "bad filecrc." );
+	//GetDisconnStatusInfo().SetEndDate( MGetStrLocalTime(0, 0, 0, 0, 0) ); // 1시간 후에 접속 가능.
+	//GetDisconnStatusInfo().SetBlockLevel( MMBL_LOGONLY );
 }

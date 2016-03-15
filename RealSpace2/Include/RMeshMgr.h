@@ -60,7 +60,7 @@ public:
 	void ReloadAllAnimation();
 
 	void GetPartsNode(RMeshPartsType parts,vector<RMeshNode*>& nodetable);
-	RMeshNode* GetPartsNode(char* name);
+	RMeshNode* GetPartsNode(const char* name);
 //	RMeshNode* GetParts(RMeshPartsType parts,char* name);
 
 	void SetMtrlAutoLoad(bool b) {

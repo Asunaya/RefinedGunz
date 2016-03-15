@@ -99,8 +99,19 @@ bool InitMaps(MWidget *pWidget)
 			if ( ZGetGameClient() && (ZGetGameClient()->GetMatchStageSetting()->GetGameType() == MMATCH_GAMETYPE_DUEL))
 				bDuelMode = true;
 
-			if ( pRule->CheckMap( fname, bDuelMode))
-				pCombo->Add(fname);
+			if (ZGetGameClient()->GetMatchStageSetting()->GetGameType() == MMATCH_GAMETYPE_SKILLMAP)
+			{
+				char lwrfname[_MAX_FNAME];
+				strcpy(lwrfname, fname);
+				strlwr(lwrfname);
+				if (strstr(lwrfname, "skill") || !_stricmp(fname, "Superflip"))
+					pCombo->Add(fname);
+			}
+			else
+			{
+				if (pRule->CheckMap(fname, bDuelMode))
+					pCombo->Add(fname);
+			}
 		}
 	}
 

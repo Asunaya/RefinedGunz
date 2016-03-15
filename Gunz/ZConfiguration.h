@@ -139,6 +139,7 @@ struct ZCONFIG_LOCALE {
 class ZLocatorList;
 class ZGameTypeList;
 class ZLocale;
+class ZChatCmdManager;
 
 class ZConfiguration {
 private:
@@ -161,10 +162,11 @@ private:
 	int					m_nServerCount;
 	bool				m_bViewGameChat;
 
-	int nFPSLimit;
-	bool bCamFix;
-	DWORD ChatBackgroundColor;
-	bool bShowHitboxes;
+	int nFPSLimit = 250;
+	bool bCamFix = false;
+	DWORD ChatBackgroundColor = 0x00000000;
+	bool bShowHitboxes = false;
+	bool bDynamicResourceLoad = false;
 
 	ZLocatorList*		m_pLocatorList;
 	ZLocatorList*		m_pTLocatorList;
@@ -232,17 +234,23 @@ public:
 	ZCONFIG_LOCALE* GetLocale()		{ return &m_Locale; }
 
 	int GetFPSLimit() const { return nFPSLimit; }
-	void SetFPSLimit(int n) { nFPSLimit = n; Save(); }
 	bool GetCamFix() const { return bCamFix; }
-	void SetCamFix(bool b) { bCamFix = b; Save(); }
 	D3DCOLOR GetChatBackgroundColor() const { return ChatBackgroundColor; }
-	void SetChatBackgroundColor(DWORD Color) { ChatBackgroundColor = Color; Save(); }
 	bool GetShowHitboxes() const { return bShowHitboxes; }
-	void SetShowHitboxes(bool b) { bShowHitboxes = b; }
+	bool GetDynamicResourceLoad() const { return bDynamicResourceLoad; }
 
 	const bool IsComplete()			{ return m_bIsComplete; }
 
 	const bool LateStringConvert();
+
+private:
+	friend void LoadRGCommands(ZChatCmdManager &CmdManager);
+	friend class ZOptionInterface;
+	void SetFPSLimit(int n) { nFPSLimit = n; Save(); }
+	void SetCamFix(bool b) { bCamFix = b; Save(); }
+	void SetChatBackgroundColor(DWORD Color) { ChatBackgroundColor = Color; Save(); }
+	void SetShowHitboxes(bool b) { bShowHitboxes = b; }
+	void SetDynamicResourceLoad(bool b) { bDynamicResourceLoad = b; }
 };
 
 

@@ -11,20 +11,287 @@
 #include "ZRuleDuel.h"
 
 #include "RGMain.h"
+#include <boost/mpl/has_xxx.hpp>
+
+struct REPLAY_STAGE_SETTING_NODE_OLD
+{
+	MUID				uidStage;
+	char				szMapName[32];	// 맵이름
+	char				nMapIndex;					// 맵인덱스
+	MMATCH_GAMETYPE		nGameType;					// 게임타입
+	int					nRoundMax;					// 라운드
+	int					nLimitTime;					// 제한시간(1 - 1분)
+	int					nLimitLevel;				// 제한레벨
+	int					nMaxPlayers;				// 최대인원
+	bool				bTeamKillEnabled;			// 팀킬여부
+	bool				bTeamWinThePoint;			// 선승제 여부
+	bool				bForcedEntryEnabled;		// 게임중 참가 여부
+};
+
+struct REPLAY_STAGE_SETTING_NODE_FG
+{
+	MUID				uidStage;
+	char				szMapName[32];
+	char				nMapIndex;
+	MMATCH_GAMETYPE		nGameType;
+	int					nRoundMax;
+	int					nLimitTime;
+	int					nLimitLevel;
+	int					nMaxPlayers;
+	bool				bTeamKillEnabled;
+	bool				bTeamWinThePoint;
+	bool				bForcedEntryEnabled;
+	char				szStageName[64];
+};
+
+struct REPLAY_STAGE_SETTING_NODE_V11
+{
+	MUID				uidStage;
+	char				szMapName[32];
+	char unk[32];
+	char				nMapIndex;
+	MMATCH_GAMETYPE		nGameType;
+	int					nRoundMax;
+	int					nLimitTime;
+	int					nLimitLevel;
+	int					nMaxPlayers;
+	bool				bTeamKillEnabled;
+	bool				bTeamWinThePoint;
+	bool				bForcedEntryEnabled;
+};
+
+#pragma pack(push)
+#pragma pack(1)
+
+struct MTD_CharInfo_V5
+{
+	// 캐릭터 정보
+	char				szName[32];
+	char				szClanName[16];
+	MMatchClanGrade		nClanGrade;
+	unsigned short		nClanContPoint;
+	char				nCharNum;
+	unsigned short		nLevel;
+	char				nSex;
+	char				nHair;
+	char				nFace;
+	unsigned long int	nXP;
+	int					nBP;
+	float				fBonusRate;
+	unsigned short		nPrize;
+	unsigned short		nHP;
+	unsigned short		nAP;
+	unsigned short		nMaxWeight;
+	unsigned short		nSafeFalls;
+	unsigned short		nFR;
+	unsigned short		nCR;
+	unsigned short		nER;
+	unsigned short		nWR;
+
+	// 아이템 정보
+	unsigned long int	nEquipedItemDesc[12];
+
+	// account 의 정보
+	MMatchUserGradeID	nUGradeID;
+
+	// ClanCLID
+	unsigned int		nClanCLID;
+};
+
+struct MTD_CharInfo_V6
+{
+	char				szName[32];
+	char				szClanName[16];
+	MMatchClanGrade		nClanGrade;
+	unsigned short		nClanContPoint;
+	char				nCharNum;
+	unsigned short		nLevel;
+	char				nSex;
+	char				nHair;
+	char				nFace;
+	unsigned long int	nXP;
+	int					nBP;
+	float				fBonusRate;
+	unsigned short		nPrize;
+	unsigned short		nHP;
+	unsigned short		nAP;
+	unsigned short		nMaxWeight;
+	unsigned short		nSafeFalls;
+	unsigned short		nFR;
+	unsigned short		nCR;
+	unsigned short		nER;
+	unsigned short		nWR;
+
+	// 아이템 정보
+	unsigned long int	nEquipedItemDesc[17];
+
+	// account 의 정보
+	MMatchUserGradeID	nUGradeID;
+
+	// ClanCLID
+	unsigned int		nClanCLID;
+
+	// 지난주 듀얼토너먼트 등급
+	int					nDTLastWeekGrade;
+
+	MUID				uidEquipedItem[17];
+	unsigned long int	nEquipedItemCount[17];
+};
+
+struct MTD_CharInfo_V11
+{
+	char				szName[32];
+	char				szClanName[16];
+	MMatchClanGrade		nClanGrade;
+	unsigned short		nClanContPoint;
+	char				nCharNum;
+	unsigned short		nLevel;
+	char				nSex;
+	char				nHair;
+	char				nFace;
+	unsigned long int	nXP;
+	int					nBP;
+	float				fBonusRate;
+	unsigned short		nPrize;
+	unsigned short		nHP;
+	unsigned short		nAP;
+	unsigned short		nMaxWeight;
+	unsigned short		nSafeFalls;
+	unsigned short		nFR;
+	unsigned short		nCR;
+	unsigned short		nER;
+	unsigned short		nWR;
+
+	// 아이템 정보
+	unsigned long int	nEquipedItemDesc[17];
+
+	// account 의 정보
+	MMatchUserGradeID	nUGradeID;
+
+	// ClanCLID
+	unsigned int		nClanCLID;
+
+	// 지난주 듀얼토너먼트 등급
+	int					nDTLastWeekGrade;
+
+	MUID				uidEquipedItem[17];
+	unsigned long int	nEquipedItemCount[17];
+
+	char unk[8];
+};
+
+typedef MTD_CharInfo_V6 MTD_CharInfo_FG_V7_0;
+
+struct MTD_CharInfo_FG_V7_1
+{
+	char				szName[32];
+	char				szClanName[16];
+	MMatchClanGrade		nClanGrade;
+	unsigned short		nClanContPoint;
+	char				nCharNum;
+	unsigned short		nLevel;
+	char				nSex;
+	char				nHair;
+	char				nFace;
+	unsigned long int	nXP;
+	int					nBP;
+	float				fBonusRate;
+	unsigned short		nPrize;
+	unsigned short		nHP;
+	unsigned short		nAP;
+	unsigned short		nMaxWeight;
+	unsigned short		nSafeFalls;
+	unsigned short		nFR;
+	unsigned short		nCR;
+	unsigned short		nER;
+	unsigned short		nWR;
+
+	unsigned long int	nEquipedItemDesc[22];
+
+	MMatchUserGradeID	nUGradeID;
+
+	unsigned int		nClanCLID;
+
+	int					nDTLastWeekGrade;
+
+	__int64				uidEquipedItem[22];
+	unsigned long int	nEquipedItemCount[22];
+	unsigned long int	nEquipedItemRarity[22];
+	unsigned long int	nEquipedItemLevel[22];
+};
+
+struct MTD_CharInfo_FG_V9
+{
+	char				szName[32];
+	char				szClanName[16];
+	MMatchClanGrade		nClanGrade;
+	unsigned short		nClanContPoint;
+	char				nCharNum;
+	unsigned short		nLevel;
+	char				nSex;
+	char				nHair;
+	char				nFace;
+	unsigned long int	nXP;
+	int					nBP;
+	float				fBonusRate;
+	unsigned short		nPrize;
+	unsigned short		nHP;
+	unsigned short		nAP;
+	unsigned short		nMaxWeight;
+	unsigned short		nSafeFalls;
+	unsigned short		nFR;
+	unsigned short		nCR;
+	unsigned short		nER;
+	unsigned short		nWR;
+
+	// 아이템 정보
+	unsigned long int	nEquipedItemDesc[22];
+
+	// account 의 정보
+	MMatchUserGradeID	nUGradeID;
+
+	// ClanCLID
+	unsigned int		nClanCLID;
+
+	// 지난주 듀얼토너먼트 등급
+	int					nDTLastWeekGrade;
+
+	DWORD unk[6];
+
+	// 아이템 정보 추가
+	__int64				uidEquipedItem[22];
+	unsigned long int	nEquipedItemCount[22];
+	unsigned long int	nEquipedItemRarity[22];
+	unsigned long int	nEquipedItemLevel[22];
+
+	char unk2[24];
+};
+
+#pragma pack(pop)
 
 bool g_bTestFromReplay = false;
 
 bool CreateReplayGame(char *filename)
 {
-	static char szLastFile[256] = "";
-	char szBuf[256];
-	if (filename != NULL) strcpy_safe(szBuf, filename);
-	else strcpy_safe(szBuf, szLastFile);
+	static std::string LastFile;
 
-	if (filename != NULL) strcpy_safe(szLastFile, filename);
+	char szBuf[256];
+
+	if (filename != nullptr)
+	{
+		strcpy_safe(szBuf, filename);
+		LastFile = szBuf;
+	}
+	else if (LastFile.size())
+		strcpy_safe(szBuf, LastFile.c_str());
+	else
+		return false;
 
 	ZReplayLoader loader;
-	if (!loader.Load(szBuf)) return false;
+
+	if (!loader.Load(szBuf))
+		return false;
+
 	g_pGame->OnLoadReplay(&loader);
 
 	return true;
@@ -38,13 +305,14 @@ ZReplayLoader::ZReplayLoader() : m_fGameTime(0.0f)
 	Version.nVersion = 0;
 	Version.nSubVersion = 0;
 	pFile = nullptr;
-	FileBuffer = nullptr;
+	InflatedFile = nullptr;
+	bDojo = false;
 	memset(&m_StageSetting, 0, sizeof(REPLAY_STAGE_SETTING_NODE));
 }
 
 ZReplayLoader::~ZReplayLoader()
 {
-	delete[] FileBuffer;
+	delete[] InflatedFile;
 }
 
 bool ZReplayLoader::Load(const char* filename)
@@ -54,9 +322,9 @@ bool ZReplayLoader::Load(const char* filename)
 	if(!file) return false;
 
 	const int bufsize = 10000000;
-	FileBuffer = new BYTE[bufsize];
+	InflatedFile = new BYTE[bufsize]; // Make the rest of the class use this buffer sometime
 
-	file->Read(FileBuffer, bufsize);
+	file->Read(InflatedFile, bufsize);
 
 	zfclose(file);
 
@@ -96,6 +364,7 @@ bool ZReplayLoader::LoadHeader()
 	int nRead;
 
 	char szServer[32] = "Unknown";
+	bool bFoundServer = false;
 
 	nRead = zfread(&header, sizeof(header), 1, pFile);
 	if(nRead==0) return false;
@@ -104,6 +373,7 @@ bool ZReplayLoader::LoadHeader()
 	{
 		Version.Server = SERVER_REFINED_GUNZ;
 		strcpy_safe(szServer, "Refined Gunz");
+		bFoundServer = true;
 	}
 	else if(header != GUNZ_REC_FILE_ID)
 	{
@@ -117,15 +387,18 @@ bool ZReplayLoader::LoadHeader()
 
 	Version.nVersion = version;
 
-	if (Version.nVersion >= 7)
+	if (!bFoundServer)
 	{
-		Version.Server = SERVER_FREESTYLE_GUNZ;
-		strcpy_safe(szServer, "Freestyle Gunz");
-	}
-	else
-	{
-		Version.Server = SERVER_OFFICIAL;
-		strcpy_safe(szServer, "Official");
+		if (Version.nVersion >= 7 && Version.nVersion <= 9 && InflatedFile[0x4A] <= 0x01)
+		{
+			Version.Server = SERVER_FREESTYLE_GUNZ;
+			strcpy_safe(szServer, "Freestyle Gunz");
+		}
+		else
+		{
+			Version.Server = SERVER_OFFICIAL;
+			strcpy_safe(szServer, "Official");
+		}
 	}
 
 	MLog("Replay header loaded -- Server: %s, version: %d\n", szServer, Version.nVersion);
@@ -133,37 +406,68 @@ bool ZReplayLoader::LoadHeader()
 	return true;
 }
 
+BOOST_MPL_HAS_XXX_TRAIT_DEF(szStageName);
+
+// No template lambdas >__>
+template<typename T>
+typename std::enable_if<has_szStageName<T>::value>::type CopyStageName(REPLAY_STAGE_SETTING_NODE &m_StageSetting, const T &Setting) {
+	memcpy(m_StageSetting.szStageName, Setting.szStageName, min(sizeof(m_StageSetting.szStageName), sizeof(Setting.szStageName)));
+	m_StageSetting.szStageName[sizeof(m_StageSetting.szStageName) - 1] = 0;
+}
+
+template<typename T>
+typename std::enable_if<!has_szStageName<T>::value>::type CopyStageName(REPLAY_STAGE_SETTING_NODE &m_StageSetting, const T &Setting) {
+	m_StageSetting.szStageName[0] = 0;
+}
+
 #define COPY_SETTING(member) m_StageSetting.member = Setting.member;
+template<typename T>
+void copy_setting(REPLAY_STAGE_SETTING_NODE &m_StageSetting, const T &Setting)
+{
+	COPY_SETTING(uidStage);
+	strcpy_safe(m_StageSetting.szMapName, Setting.szMapName);
+	COPY_SETTING(nMapIndex);
+	COPY_SETTING(nGameType);
+	COPY_SETTING(nRoundMax);
+	COPY_SETTING(nLimitTime);
+	COPY_SETTING(nLimitLevel);
+	COPY_SETTING(nMaxPlayers);
+	COPY_SETTING(bTeamKillEnabled);
+	COPY_SETTING(bTeamWinThePoint);
+	COPY_SETTING(bForcedEntryEnabled);
+
+	CopyStageName(m_StageSetting, Setting);
+}
+#undef COPY_SETTING
+
 bool ZReplayLoader::LoadStageSetting()
 {
 	switch (Version.Server)
 	{
 	case SERVER_OFFICIAL:
 	{
-					 REPLAY_STAGE_SETTING_NODE_OLD Setting;
-					 int nRead = zfread(&Setting, sizeof(REPLAY_STAGE_SETTING_NODE_OLD), 1, pFile);
-					 if (nRead == 0) return false;
+							if (Version.nVersion <= 5)
+							{
+								REPLAY_STAGE_SETTING_NODE_OLD Setting;
+								int nRead = zfread(&Setting, sizeof(REPLAY_STAGE_SETTING_NODE_OLD), 1, pFile);
+								if (nRead == 0) return false;
 
-					 COPY_SETTING(uidStage);
-					 m_StageSetting.szStageName[0] = 0;
-					 strcpy_safe(m_StageSetting.szMapName, Setting.szMapName);
-					 COPY_SETTING(nMapIndex);
-					 COPY_SETTING(nGameType);
-					 COPY_SETTING(nRoundMax);
-					 COPY_SETTING(nLimitTime);
-					 COPY_SETTING(nLimitLevel);
-					 COPY_SETTING(nMaxPlayers);
-					 COPY_SETTING(bTeamKillEnabled);
-					 COPY_SETTING(bTeamWinThePoint);
-					 COPY_SETTING(bForcedEntryEnabled);
+								copy_setting(m_StageSetting, Setting);
+							}
+							else
+							{
+								REPLAY_STAGE_SETTING_NODE_V11 Setting;
+								int nRead = pFile->Read(Setting);
+								if (nRead == 0) return false;
+
+								copy_setting(m_StageSetting, Setting);
+							}
 	}
 		break;
 	case SERVER_REFINED_GUNZ:
 	{
-						 int nRead = zfread(&m_StageSetting, sizeof(REPLAY_STAGE_SETTING_NODE), 1, pFile);
-						 if (nRead == 0) return false;
-
-						 MLog("Read stage setting: stage name %s\n", m_StageSetting.szStageName);
+								int nRead = zfread(&m_StageSetting, sizeof(REPLAY_STAGE_SETTING_NODE), 1, pFile);
+								if (nRead == 0) return false;
 	}
 		break;
 	case SERVER_FREESTYLE_GUNZ:
@@ -171,24 +475,13 @@ bool ZReplayLoader::LoadStageSetting()
 								  REPLAY_STAGE_SETTING_NODE_FG Setting;
 								  int nRead = pFile->Read(Setting);
 
-								  COPY_SETTING(uidStage);
-								  strcpy_safe(m_StageSetting.szStageName, Setting.szStageName);
-								  strcpy_safe(m_StageSetting.szMapName, Setting.szMapName);
-								  COPY_SETTING(nMapIndex);
-								  COPY_SETTING(nGameType);
-								  COPY_SETTING(nRoundMax);
-								  COPY_SETTING(nLimitTime);
-								  COPY_SETTING(nLimitLevel);
-								  COPY_SETTING(nMaxPlayers);
-								  COPY_SETTING(bTeamKillEnabled);
-								  COPY_SETTING(bTeamWinThePoint);
-								  COPY_SETTING(bForcedEntryEnabled);
+								  copy_setting(m_StageSetting, Setting);
 
 								  // Position 527 holds the first char of the first ZCharacter's name in the proper V7 format, but holds an item count value in the interim V7 format.
 								  int offset = 527;
 								  if (m_StageSetting.nGameType == MMATCH_GAMETYPE_DUEL)
 									  offset += sizeof(MTD_DuelQueueInfo);
-								  if (Version.nVersion == 7 && (FileBuffer[offset] == 0x00 || FileBuffer[offset] == 0x01))
+								  if (Version.nVersion == 7 && (InflatedFile[offset] == 0x00 || InflatedFile[offset] == 0x01))
 								  {
 									  Version.nSubVersion = 1;
 									  MLog("FG replay subversion 1\n");
@@ -196,6 +489,8 @@ bool ZReplayLoader::LoadStageSetting()
 	}
 		break;
 	};
+
+	bDojo = !strcmp(m_StageSetting.szMapName, "Dojo");
 
 	return true;
 }
@@ -212,9 +507,40 @@ bool ZReplayLoader::LoadStageSettingEtc()
 		int nRead = zfread(&pDuel->QInfo,sizeof(MTD_DuelQueueInfo), 1, pFile);
 		if(nRead==0) return false;
 	}
+
 	return true;
 }
 
+#define COPY_CHARINFO(member) info.member = oldinfo.member
+template<typename T>
+static void copy_charinfo(MTD_CharInfo &info, const T& oldinfo)
+{
+	strcpy_safe(info.szName, oldinfo.szName);
+	strcpy_safe(info.szClanName, oldinfo.szClanName);
+	COPY_CHARINFO(nClanGrade);
+	COPY_CHARINFO(nClanContPoint);
+	COPY_CHARINFO(nCharNum);
+	COPY_CHARINFO(nLevel);
+	COPY_CHARINFO(nSex);
+	COPY_CHARINFO(nHair);
+	COPY_CHARINFO(nFace);
+	COPY_CHARINFO(nXP);
+	COPY_CHARINFO(nBP);
+	COPY_CHARINFO(fBonusRate);
+	COPY_CHARINFO(nPrize);
+	COPY_CHARINFO(nHP);
+	COPY_CHARINFO(nAP);
+	COPY_CHARINFO(nMaxWeight);
+	COPY_CHARINFO(nSafeFalls);
+	COPY_CHARINFO(nFR);
+	COPY_CHARINFO(nCR);
+	COPY_CHARINFO(nER);
+	COPY_CHARINFO(nWR);
+	for (int i = 0; i < min(MMCIP_END, sizeof(oldinfo.nEquipedItemDesc) / sizeof(oldinfo.nEquipedItemDesc[0])); i++)
+		COPY_CHARINFO(nEquipedItemDesc[i]);
+	COPY_CHARINFO(nUGradeID);
+};
+#undef COPY_CHARINFO
 
 bool ZReplayLoader::LoadCharInfo()
 {
@@ -234,16 +560,33 @@ bool ZReplayLoader::LoadCharInfo()
 
 		if (Version.Server == SERVER_OFFICIAL)
 		{
-			if (Version.nVersion < 2)
+			if (Version.nVersion <= 5)
 			{
-				nRead = zfread(&info, sizeof(info)-4, 1, pFile);
-				if (nRead != 1) return false;
-				info.nClanCLID = 0;
+				MTD_CharInfo_V5 oldinfo;
+				if (Version.nVersion < 2)
+				{
+					nRead = zfread(&oldinfo, sizeof(oldinfo)-4, 1, pFile);
+					if (nRead != 1) return false;
+					oldinfo.nClanCLID = 0;
+				}
+				else
+				{
+					nRead = zfread(&oldinfo, sizeof(oldinfo), 1, pFile);
+					if (nRead != 1) return false;
+				}
+				copy_charinfo(info, oldinfo);
 			}
-			else
+			else if (Version.nVersion == 6)
 			{
-				nRead = zfread(&info, sizeof(info), 1, pFile);
-				if (nRead != 1) return false;
+				MTD_CharInfo_V6 oldinfo;
+				pFile->Read(oldinfo);
+				copy_charinfo(info, oldinfo);
+			}
+			else if (Version.nVersion == 11)
+			{
+				MTD_CharInfo_V11 oldinfo;
+				pFile->Read(oldinfo);
+				copy_charinfo(info, oldinfo);
 			}
 		}
 		else if (Version.Server == SERVER_FREESTYLE_GUNZ)
@@ -252,7 +595,7 @@ bool ZReplayLoader::LoadCharInfo()
 			{
 				MTD_CharInfo_FG_V9 charinfo;
 				pFile->Read(charinfo);
-				memcpy(&info, &charinfo, sizeof(info)); // Lazy, fix sometime
+				copy_charinfo(info, charinfo);
 			}
 			else if (Version.nVersion == 7)
 			{
@@ -260,13 +603,13 @@ bool ZReplayLoader::LoadCharInfo()
 				{
 					MTD_CharInfo_FG_V7_0 charinfo;
 					pFile->Read(charinfo);
-					memcpy(&info, &charinfo, sizeof(info));
+					copy_charinfo(info, charinfo);
 				}
 				else if (Version.nSubVersion == 1)
 				{
 					MTD_CharInfo_FG_V7_1 charinfo;
 					pFile->Read(charinfo);
-					memcpy(&info, &charinfo, sizeof(info));
+					copy_charinfo(info, charinfo);
 				}
 			}
 
@@ -327,7 +670,7 @@ bool ZReplayLoader::LoadCommandStream()
 		zfread(CommandBuffer, nSize, 1, pFile);
 
 
-		ZObserverCommandItem *pZCommand=new ZObserverCommandItem;
+		ZObserverCommandItem *pZCommand = new ZObserverCommandItem;
 
 		if (!CreateCommandFromStream(CommandBuffer, &pZCommand->pCommand))
 			continue;
@@ -336,7 +679,7 @@ bool ZReplayLoader::LoadCommandStream()
 
 		pZCommand->fTime=fTime;
 
-		if (Version.Server == SERVER_FREESTYLE_GUNZ && !strcmp(m_StageSetting.szMapName, "Dojo"))
+		if (Version.Server == SERVER_FREESTYLE_GUNZ && bDojo)
 		{
 			auto Transform = [](float pos[3])
 			{
@@ -360,6 +703,22 @@ bool ZReplayLoader::LoadCommandStream()
 				ppbi->posx = pos[0];
 				ppbi->posy = pos[1];
 				ppbi->posz = pos[2];
+			}
+		}
+		else if (Version.Server == SERVER_OFFICIAL && Version.nVersion == 11)
+		{
+			if (pZCommand->pCommand->GetID() == MC_PEER_BASICINFO)
+			{
+				MCommandParameter* pParam = pZCommand->pCommand->GetParameter(0);
+				if (pParam->GetType() != MPT_BLOB)
+					continue;
+
+				BYTE *ppbi = (BYTE *)pParam->GetPointer();
+
+				for (int i = 0; i < 3; i++)
+				{
+					ppbi[22 + i] = ppbi[28 + i];
+				}
 			}
 		}
 
@@ -394,8 +753,10 @@ bool ZReplayLoader::CreateCommandFromStream(char* pStream, MCommand **pRetComman
 		return true;
 	}
 
+	bool ReadSerial = !(Version.Server == SERVER_OFFICIAL && Version.nVersion == 11);
+
 	MCommand* pCommand = new MCommand;
-	if (!pCommand->SetData(pStream, ZGetGameClient()->GetCommandManager()))
+	if (!pCommand->SetData(pStream, ZGetGameClient()->GetCommandManager(), 65535, ReadSerial))
 	{
 		delete pCommand;
 		return false;

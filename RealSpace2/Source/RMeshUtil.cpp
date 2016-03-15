@@ -443,7 +443,7 @@ void RVertexBuffer::RenderIndexBuffer(RIndexBuffer* ib)
 	dev->DrawIndexedPrimitive(m_PrimitiveType,0, 0,m_nVertexCnt,0,ib->GetFaceCnt() );
 }
 
-void GetPath(char* str,char* path)
+void GetPath(const char* str,char* path)
 {
 	if(!str) { 
 		path[0] = NULL;

@@ -321,10 +321,10 @@ bool MMatchServer::StageEnterBattle(const MUID& uidPlayer, const MUID& uidStage)
 	CopyCharInfoForTrans(&pNode->CharInfo, pObj->GetCharInfo(), pObj);
 
 	ZeroMemory(&pNode->ExtendInfo, sizeof(MTD_ExtendInfo));
-	if (pStage->GetStageSetting()->IsTeamPlay())
+	//if (pStage->GetStageSetting()->IsTeamPlay())
 		pNode->ExtendInfo.nTeam = (char)pObj->GetTeam();
-	else
-		pNode->ExtendInfo.nTeam = 0;
+	//else
+		//pNode->ExtendInfo.nTeam = 0;
 	pNode->ExtendInfo.nPlayerFlags = pObj->GetPlayerFlags();
 
 	pNew->AddParameter(new MCommandParameterBlob(pPeerArray, MGetBlobArraySize(pPeerArray)));
@@ -1228,8 +1228,9 @@ void MMatchServer::OnRequestSpawn(const MUID& uidChar, const MVector& pos, const
 	MMatchObject* pObj = GetObject(uidChar);
 	if (pObj == NULL) return;
 
-	if (IsAdminGrade(pObj) && pObj->CheckPlayerFlags(MTD_PlayerFlags_AdminHide)) {
-		// Do Not Spawn when AdminHiding
+	if ((IsAdminGrade(pObj) && pObj->CheckPlayerFlags(MTD_PlayerFlags_AdminHide))
+		|| pObj->GetTeam() == MMT_SPECTATOR) {
+		// Do not spawn when admin-hiding or spectating
 		return;
 	}
 

@@ -19,6 +19,8 @@
 
 #include "RShaderMgr.h"
 
+#include "MeshManager.h"
+
 #ifndef _PUBLISH
 
 #define __BP(i,n)	MBeginProfile(i,n);
@@ -96,6 +98,8 @@ bool RMesh::ReadXmlElement(MXmlElement* PNode,char* Path)
 			m_ani_mgr.MakeListMap( (int)eq_weapon_end );//최대모션타잎만큼 만들어준다..
 		}
 		else if(strcmp(NodeName, "AddParts")==0) {
+			if(g_pMeshManager)
+				continue;
 
 			if(RMesh::m_parts_mesh_loading_skip==0) {
 			
@@ -737,7 +741,7 @@ void RMesh::CheckNameToType(RMeshNode* pMeshNode)
 
 }
 
-bool RMesh::ReadElu(char* fname)
+bool RMesh::ReadElu(const char* fname)
 {
 #define MZF_READ(x,y) { if(!mzf.Read((x),(y))) return false; }
 
@@ -847,6 +851,8 @@ bool RMesh::ReadElu(char* fname)
 			MZF_READ(&node->m_opa_name,MAX_PATH_NAME_LEN );
 		}
 
+		//MLog("Mtrl name %s\n", node->m_name);
+
 		if(t_hd.ver > EXPORTER_MESH_VER2) {//ver3 부터
 			int twoside=0;
 			MZF_READ(&twoside,sizeof(int) );
@@ -919,6 +925,8 @@ bool RMesh::ReadElu(char* fname)
 		MZF_READ(&pMeshNode->m_mat_base,sizeof(D3DXMATRIX) );//mat
 
 		pMeshNode->SetName( Name );
+
+		//MLog("Node name: %s, parent %s\n", pMeshNode->GetName(), pMeshNode->m_Parent);
 
 		pMeshNode->m_mat_ref = pMeshNode->m_mat_base;
 		D3DXMatrixInverse( &pMeshNode->m_mat_ref_inv , 0, &pMeshNode->m_mat_ref );
@@ -1447,7 +1455,7 @@ bool RMesh::ConnectPhysiqueParent(RMeshNode* pNode)
 	// 부모 연결
 	int p_num,ret,j;
 
-	if(!pNode)		return false;
+	if (!pNode)		return false;
 
 	if(pNode->m_physique_num==0) 
 		return true;

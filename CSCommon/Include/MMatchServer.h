@@ -169,7 +169,7 @@ protected:
 	virtual void OnNetPong(const MUID& CommUID, unsigned int nTimeStamp);
 	virtual void OnHShieldPong(const MUID& CommUID, unsigned int nTimeStamp);
 	bool CheckOnLoginPre(const MUID& CommUID, int nCmdVersion, bool& outbFreeIP, string& strCountryCode3);
-	void OnMatchLogin(MUID CommUID, const char* szUserID, const char* szPassword, int nCommandVersion, unsigned long nChecksumPack);
+	void OnMatchLogin(MUID CommUID, const char* szUserID, const unsigned char *HashedPassword, int HashLength, int nCommandVersion, unsigned long nChecksumPack, int nVersion);
 	void OnMatchLoginFromNetmarble(const MUID& CommUID, const char* szCPCookie, const char* szSpareData, int nCmdVersion, unsigned long nChecksumPack);
 	void OnMatchLoginFromNetmarbleJP(const MUID& CommUID, const char* szLoginID, const char* szLoginPW, int nCmdVersion, unsigned long nChecksumPack);
 	void OnMatchLoginFromDBAgent(const MUID& CommUID, const char* szLoginID, const char* szName, int nSex, bool bFreeLoginIP, unsigned long nChecksumPack);
@@ -180,6 +180,10 @@ protected:
 							   bool bFreeLoginIP,
 							   string strCountryCode3,
 							   unsigned long nChecksumPack);
+
+	void NotifyFailedLogin(const MUID &uidComm, const char *szReason);
+	void CreateAccount(const MUID &uidComm, const char *szUsername, const unsigned char *HashedPassword, int HashLength, const char *szEmail);
+	void CreateAccountResponse(const MUID &uidComm, const char *szMessage);
 
 	void LockUIDGenerate()		{ m_csUIDGenerateLock.Lock(); }
 	void UnlockUIDGenerate()	{ m_csUIDGenerateLock.Unlock(); }

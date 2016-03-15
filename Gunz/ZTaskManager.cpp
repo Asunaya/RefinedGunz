@@ -8,7 +8,7 @@
 #include "ZTask_Skill.h"
 
 #ifdef _DEBUG
-static g_bTaskDebug = true;
+static bool g_bTaskDebug = true;
 #endif
 
 ZTaskManager::ZTaskManager() : m_pCurrTask(NULL), m_pOnFinishedFunc(NULL)

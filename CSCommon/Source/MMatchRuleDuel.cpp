@@ -191,6 +191,11 @@ void MMatchRuleDuel::OnGameKill(const MUID& uidAttacker, const MUID& uidVictim)
 
 void MMatchRuleDuel::OnEnterBattle(MUID& uidChar)
 {
+	MMatchObject* pChar;
+	pChar = m_pStage->GetObj(uidChar);
+	if (pChar->GetTeam() == MMT_SPECTATOR)
+		return;
+
 	if ((uidChar != uidChampion) && (uidChar != uidChallenger) && (find(WaitQueue.begin(), WaitQueue.end(), uidChar) == WaitQueue.end()))
 	{
 		WaitQueue.push_back(uidChar);
@@ -221,6 +226,21 @@ void MMatchRuleDuel::OnLeaveBattle(MUID& uidChar)
 		SendQueueInfo();
 		LogInfo();
 	}
+}
+
+void MMatchRuleDuel::OnTeam(const MUID &uidPlayer, MMatchTeam nTeam)
+{
+	if (nTeam != MMT_SPECTATOR)
+		return;
+
+	auto it = std::find(WaitQueue.begin(), WaitQueue.end(), uidPlayer);
+
+	if (it == WaitQueue.end())
+		return;
+
+	WaitQueue.remove(uidPlayer);
+
+	MGetMatchServer()->Announce(uidPlayer, "Popped from duel queue");
 }
 
 void MMatchRuleDuel::SpawnPlayers()

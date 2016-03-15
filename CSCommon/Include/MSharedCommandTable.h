@@ -6,6 +6,8 @@ class MCommandManager;
 
 #define MCOMMAND_VERSION	55
 
+#define RGUNZ_VERSION 1
+
 
 
 #define MSCT_MASTER			1
@@ -81,6 +83,7 @@ void MAddSharedCommandTable(MCommandManager* pCommandManager, int nSharedType);
 #define MC_ADMIN_HIDE						531		///< 운영자 안보이기
 #define MC_ADMIN_RELOAD_CLIENT_HASH			532		///< reload XTrap Hashmap
 #define MC_ADMIN_RESET_ALL_HACKING_BLOCK	533		///< 모든 해킹 블럭을 취소한다.
+#define MC_ADMIN_MUTE						534
 
 // 이벤트 마스터 명령어
 #define MC_EVENT_CHANGE_MASTER				601		///< 방장권한을 뺏어온다
@@ -92,6 +95,7 @@ void MAddSharedCommandTable(MCommandManager* pCommandManager, int nSharedType);
 
 // 매치서버-클라이언트
 #define MC_MATCH_LOGIN							1001	///< 로그인
+#define MC_MATCH_RESPONSE_LOGIN_FAILED			1011
 #define MC_MATCH_RESPONSE_LOGIN					1002	///< 로그인 응답
 #define MC_MATCH_LOGIN_NETMARBLE				1003	///< 넷마블에서 로그인
 #define MC_MATCH_LOGIN_NETMARBLE_JP				1004	///< 일본넷마블에서 로그인
@@ -443,10 +447,15 @@ void MAddSharedCommandTable(MCommandManager* pCommandManager, int nSharedType);
 #define MC_MATCH_SCHEDULE_CLAN_SERVER_SWITCH_ON		7004	///< 클랜서버 클랜전 활성화.
 #define MC_MATCH_SCHEDULE_STOP_SERVER				7005	///< 서버 종료.
 
-// Custom RG commands
+// Random custom commands
 #define MC_PEER_RG_SLASH 8000
 #define MC_PEER_RG_MASSIVE 8801
-#define MC_PEER_RG_PORTAL 8802
+#define MC_PEER_PORTAL 8802
+#define MC_PEER_SPEC 8003
+#define MC_PEER_MOVE_DELTA 8004
+#define MC_PEER_COMPLETED_SKILLMAP 8005
+#define MC_MATCH_REQUEST_CREATE_ACCOUNT 8006
+#define MC_MATCH_RESPONSE_CREATE_ACCOUNT 8007
 
 
 //// 피어투피어 관련 명령어 /////////////////////////////////////////////////////////////

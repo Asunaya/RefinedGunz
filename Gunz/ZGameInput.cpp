@@ -613,7 +613,6 @@ void ZGameInput::Update(float fElapsed)
 						pCamera->m_fAngleX=max(D3DX_PI/2+.1f,pCamera->m_fAngleX);
 						pCamera->m_fAngleX = min(D3DX_PI - 0.1f, pCamera->m_fAngleX);
 					}else {
-						static float lastanglex,lastanglez;
 						if(bRotateEnable)
 						{
 							pCamera->m_fAngleX=max(CAMERA_ANGLEX_MIN,pCamera->m_fAngleX);

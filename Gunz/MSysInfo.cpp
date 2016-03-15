@@ -28,10 +28,10 @@ void MSysInfoLog_CPU()
 	// start number of ticks
 	ulStartCounter.QuadPart = ulEAX_EDX.QuadPart;
 	// loop for 1 second
-	do
+	/*do
 	{
 		QueryPerformanceCounter(&ulTicks);
-	} while (ulTicks.QuadPart <= ulValue.QuadPart);
+	} while (ulTicks.QuadPart <= ulValue.QuadPart);*/
 
 	// get the actual number of ticks
 	_asm

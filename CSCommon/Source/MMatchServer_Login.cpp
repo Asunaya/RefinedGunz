@@ -21,6 +21,9 @@
 #include "MMatchStatus.h"
 #include "MMatchLocale.h"
 
+#define SODIUM_STATIC
+#include "sodium.h"
+
 bool MMatchServer::CheckOnLoginPre(const MUID& CommUID, int nCmdVersion, bool& outbFreeIP, string& strCountryCode3)
 {
 	MCommObject* pCommObj = (MCommObject*)m_CommRefCache.GetRef(CommUID);
@@ -70,19 +73,26 @@ bool MMatchServer::CheckOnLoginPre(const MUID& CommUID, int nCmdVersion, bool& o
 	return true;
 }
 
-void MMatchServer::OnMatchLogin(MUID CommUID, const char* szUserID, const char* szPassword, int nCommandVersion, unsigned long nChecksumPack)
+void MMatchServer::OnMatchLogin(MUID CommUID, const char* szUserID, const unsigned char *HashedPassword, int HashLength, int nCommandVersion, unsigned long nChecksumPack, int nVersion)
 {
-//	MCommObject* pCommObj = (MCommObject*)m_CommRefCache.GetRef(CommUID);
-//	if (pCommObj == NULL) return;
+	if (HashLength != crypto_generichash_BYTES)
+		return;
 
-	// 초기 위치의 노드는 검색해서 얻어낸다.
 	int nMapID = 0;
 
 	unsigned int nAID = 0;
-	char szDBPassword[32] = "";
+	char szDBPassword[256] = "";
 	string strCountryCode3;
 
 	bool bFreeLoginIP = false;
+
+	if (nVersion < RGUNZ_VERSION)
+	{
+		char buf[128];
+		sprintf_safe(buf, "Your client is outdated (expected version %d, got %d)", RGUNZ_VERSION, nVersion);
+		NotifyFailedLogin(CommUID, buf);
+		return;
+	}
 
 	// 프로토콜, 최대인원 체크
 	if (!CheckOnLoginPre(CommUID, nCommandVersion, bFreeLoginIP, strCountryCode3)) return;
@@ -98,8 +108,11 @@ void MMatchServer::OnMatchLogin(MUID CommUID, const char* szUserID, const char* 
 		m_MatchDBMgr.GetLoginInfo(szUserID, &nAID, szDBPassword);
 #endif
 
-		MCommand* pCmd = CreateCmdMatchResponseLoginFailed(CommUID, MERR_CLIENT_WRONG_PASSWORD);
-		Post(pCmd);	
+		/*MCommand* pCmd = CreateCmdMatchResponseLoginFailed(CommUID, MERR_CLIENT_WRONG_PASSWORD);
+		Post(pCmd);*/
+		char buf[128];
+		sprintf_safe(buf, "Couldn't find username %s", szUserID);
+		NotifyFailedLogin(CommUID, buf);
 
 		return;
 	}
@@ -118,17 +131,24 @@ void MMatchServer::OnMatchLogin(MUID CommUID, const char* szUserID, const char* 
 
 
 	// 패스워드가 틀렸을 경우 처리
-	if (strcmp(szDBPassword, szPassword))
+	/*if (strcmp(szDBPassword, szPassword))
 	{
 		MCommand* pCmd = CreateCmdMatchResponseLoginFailed(CommUID, MERR_CLIENT_WRONG_PASSWORD);
 		Post(pCmd);	
 
 		return;
+	}*/
+
+	if (crypto_pwhash_scryptsalsa208sha256_str_verify
+		(szDBPassword, (char *)HashedPassword, HashLength) != 0) {
+		MCommand* pCmd = CreateCmdMatchResponseLoginFailed(CommUID, MERR_CLIENT_WRONG_PASSWORD);
+		Post(pCmd);
 	}
 
 	MMatchAccountInfo accountInfo;
 	if (!m_MatchDBMgr.GetAccountInfo(nAID, &accountInfo))
 	{
+		NotifyFailedLogin(CommUID, "Failed to retrieve account information");
 		// 접속 끊어버리자
 		Disconnect(CommUID);
 	}
@@ -152,82 +172,63 @@ void MMatchServer::OnMatchLogin(MUID CommUID, const char* szUserID, const char* 
 
 	// 로그인성공하여 오브젝트(MMatchObject) 생성
 	AddObjectOnMatchLogin(CommUID, &accountInfo, bFreeLoginIP, strCountryCode3, nChecksumPack);
-
-/*
-	MUID AllocUID = CommUID;
-	int nErrCode = ObjectAdd(CommUID);
-	if(nErrCode!=MOK){
-		LOG(LOG_DEBUG, MErrStr(nErrCode) );
-	}
-
-	MMatchObject* pObj = GetObject(AllocUID);
-	pObj->AddCommListener(CommUID);
-	pObj->SetObjectType(MOT_PC);
-	memcpy(pObj->GetAccountInfo(), &accountInfo, sizeof(MMatchAccountInfo));
-	pObj->SetFreeLoginIP(bFreeLoginIP);
-	pObj->SetCountryCode3( strCountryCode3 );
-	pObj->UpdateTickLastPacketRecved();
-
-	if (pCommObj != NULL)
-	{
-		pObj->SetPeerAddr(pCommObj->GetIP(), pCommObj->GetIPString(), pCommObj->GetPort());
-	}
-	
-	SetClientClockSynchronize(CommUID);
-
-
-	// 프리미엄 IP를 체크한다.
-	if (MGetServerConfig()->CheckPremiumIP())
-	{
-		if (pCommObj)
-		{
-			bool bIsPremiumIP = false;
-			bool bExistPremiumIPCache = false;
-			
-			bExistPremiumIPCache = MPremiumIPCache()->CheckPremiumIP(pCommObj->GetIP(), bIsPremiumIP);
-
-			// 만약 캐쉬에 없으면 직접 DB에서 찾도록 한다.
-			if (!bExistPremiumIPCache)
-			{
-				if (m_MatchDBMgr.CheckPremiumIP(pCommObj->GetIPString(), bIsPremiumIP))
-				{
-					// 결과를 캐쉬에 저장
-					MPremiumIPCache()->AddIP(pCommObj->GetIP(), bIsPremiumIP);
-				}
-				else
-				{
-					MPremiumIPCache()->OnDBFailed();
-				}
-
-			}
-
-			if (bIsPremiumIP) pObj->GetAccountInfo()->m_nPGrade = MMPG_PREMIUM_IP;
-		}		
-	}
-
-
-	MCommand* pCmd = CreateCmdMatchResponseLoginOK(CommUID, 
-												   AllocUID, 
-												   pObj->GetAccountInfo()->m_szUserID,
-												   pObj->GetAccountInfo()->m_nUGrade,
-                                                   pObj->GetAccountInfo()->m_nPGrade);
-	Post(pCmd);	
-
-	// 접속 로그를 남긴다.
-	m_MatchDBMgr.InsertConnLog(pObj->GetAccountInfo()->m_nAID, pObj->GetIPString(), pObj->GetCountryCode3() );
-
-#ifndef _DEBUG
-	// Client DataFile Checksum을 검사한다.
-	unsigned long nChecksum = nChecksumPack ^ CommUID.High ^ CommUID.Low;
-	if (nChecksum != GetItemFileChecksum()) {
-		LOG(LOG_ALL, "Invalid ZItemChecksum(%u) , UserID(%s) ", nChecksum, pObj->GetAccountInfo()->m_szUserID);
-		Disconnect(CommUID);
-	}
-#endif
-
-*/
 }
 
+void MMatchServer::NotifyFailedLogin(const MUID& uidComm, const char *szReason)
+{
+	MCommand* pCmd = CreateCommand(MC_MATCH_RESPONSE_LOGIN_FAILED, uidComm);
+	pCmd->AddParameter(new MCommandParameterString(szReason));
+	Post(pCmd);
+}
+
+void MMatchServer::CreateAccount(const MUID &uidComm, const char *szUsername, const unsigned char *HashedPassword, int HashLength, const char *szEmail)
+{
+	if (szUsername[0] == 0)
+	{
+		CreateAccountResponse(uidComm, "Account creation failed: Empty username");
+		return;
+	}
+
+	if (HashLength != crypto_generichash_BYTES)
+	{
+		CreateAccountResponse(uidComm, "Account creation failed: Invalid hash");
+		return;
+	}
+
+	char szPasswordData[crypto_pwhash_scryptsalsa208sha256_STRBYTES];
+
+	if (crypto_pwhash_scryptsalsa208sha256_str
+		(szPasswordData, (char *)HashedPassword, HashLength,
+		crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_INTERACTIVE,
+		crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_INTERACTIVE) != 0) {
+		CreateAccountResponse(uidComm, "Account creation failed: Server ran out of memory");
+		return;
+	}
+
+	auto ret = m_MatchDBMgr.CreateAccountNew(szUsername, szPasswordData, szEmail);
+	switch (ret)
+	{
+	case ACR_OK:
+		CreateAccountResponse(uidComm, "Account created!");
+		break;
+	case ACR_USERNAME_ALREADY_EXISTS:
+		CreateAccountResponse(uidComm, "Account creation failed: Username already exists");
+		break;
+	case ACR_DB_ERROR:
+		CreateAccountResponse(uidComm, "Account creation failed: Unknown database error");
+		break;
+	default:
+		CreateAccountResponse(uidComm, "Account creatIon failed: Unknown error");
+		break;
+	};
+}
+
+void MMatchServer::CreateAccountResponse(const MUID& uidComm, const char *szReason)
+{
+	MCommand* pCmd = CreateCommand(MC_MATCH_RESPONSE_CREATE_ACCOUNT, uidComm);
+	pCmd->AddParameter(new MCommandParameterString(szReason));
+	Post(pCmd);
+}
 
 void MMatchServer::OnMatchLoginFromNetmarble(const MUID& CommUID, const char* szCPCookie, const char* szSpareData, int nCmdVersion, unsigned long nChecksumPack)
 {
@@ -509,17 +510,17 @@ bool MMatchServer::AddObjectOnMatchLogin(const MUID& uidComm,
 
 	// Client DataFile Checksum을 검사한다.
 	// 2006.2.20 dubble. filelist checksum으로 변경
-	unsigned long nChecksum = nChecksumPack ^ uidComm.High ^ uidComm.Low;
-	if( MGetServerConfig()->IsUseFileCrc() && !MMatchAntiHack::CheckClientFileListCRC(nChecksum, pObj->GetUID()) && 
-		!MGetServerConfig()->IsDebugLoginIPList(pObj->GetIPString()) )
-	{
-		LOG(LOG_ALL, "Invalid filelist crc (%u) , UserID(%s) ", nChecksum, pObj->GetAccountInfo()->m_szUserID);
-		pObj->SetBadFileCRCDisconnectWaitInfo();
-		// Disconnect(uidComm);
-		// return false;
+	//unsigned long nChecksum = nChecksumPack ^ uidComm.High ^ uidComm.Low;
+	//if( MGetServerConfig()->IsUseFileCrc() && !MMatchAntiHack::CheckClientFileListCRC(nChecksum, pObj->GetUID()) && 
+	//	!MGetServerConfig()->IsDebugLoginIPList(pObj->GetIPString()) )
+	//{
+	//	LOG(LOG_ALL, "Invalid filelist crc (%u) , UserID(%s) ", nChecksum, pObj->GetAccountInfo()->m_szUserID);
+	//	pObj->SetBadFileCRCDisconnectWaitInfo();
+	//	// Disconnect(uidComm);
+	//	// return false;
 
-		
-	}
+	//	
+	//}
 	/*
 	if (nChecksum != GetItemFileChecksum()) {
 		LOG(LOG_ALL, "Invalid ZItemChecksum(%u) , UserID(%s) ", nChecksum, pObj->GetAccountInfo()->m_szUserID);

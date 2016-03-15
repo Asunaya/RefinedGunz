@@ -196,17 +196,15 @@ bool ZChatCmdManager::DoCommand(const char* szLine, ZChatCmdFlag nCurrFlag, unsi
 	ZChatCmd* pCmd = MakeArgv(szLine, &ai);
 	if (pCmd != NULL)
 	{
-		/*int MinArgs = pCmd->GetMinArgs();
-		if (MinArgs != -1 && ai.cargc < MinArgs)
-		{
-			return false;
-		}
+		int MinArgs = pCmd->GetMinArgs() + 1;
+		int MaxArgs = pCmd->GetMaxArgs() + 1;
 
-		int MaxArgs = pCmd->GetMaxArgs();
-		if (MaxArgs != -1 && ai.cargc > MaxArgs)
+		if ((MinArgs != 0 && ai.cargc < MinArgs) ||
+			(MaxArgs != 0 && ai.cargc > MaxArgs))
 		{
-			return false;
-		}*/
+			ZChatOutput(pCmd->GetUsage());
+			return true;
+		}
 
 		// 包府磊 疙飞绢老锭 贸府
 		if (pCmd->GetFlag() & CCF_ADMIN)

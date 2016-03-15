@@ -1,0 +1,137 @@
+GUNZ 1,0,0,290 launched. build (Feb 21 2016 18:14:19) 
+Log time (02/21/16 18:22:15)
+test.txt not found 
+NON-Skip XTrapPatch
+CPU ID = GenuineIntel ( family = 774 , model = 10 , stepping = 9 ) @ 3410 MHz
+Display Device = NVIDIA GeForce GTX 760 ( vendor=10de device=1187 subsys=28471462 revision=a1 )
+Display Driver Version = 10.18.0013.5362
+Windows = 6.1 Build 7601 , Service Pack 1 (4194303KB) :  ..
+Load XML from memory : system/locale.xml- SUCCESS
+Country : (BRZ), Language : (BRZ)
+Load XML from memory : system/gametypecfg.xmlLoad Config from file : config.xml- SUCCESS
+Load XML from memory : system/system.xml- SUCCESS
+Load XML from memory : system/strings.xml(0x0016) - SUCCESS
+Load XML from memory : system/cserror.xml(0x0016) - SUCCESS
+Load XML from memory : system/messages.xml(0x0016) - SUCCESS
+WFog Enabled Device.
+device created.
+Video memory 2011.500000 
+shader initialize successful : 1
+Crash ( 18:22:17 )
+Build Feb 15 2016 16:20:15
+
+
+[Exception]
+Address	:	71427a16
+ExpCode	:	c0000005
+Flags	:	00000000
+#Param	:	00000002
+other	:	00000000
+
+[Context]
+GS : 0000002b  FS : 00000053  ES : 0000002b  DS : 0000002b
+EDI: 436c696f  ESI: 04148d70  EBX: 00000000  EDX: 00000000
+ECX: 0222efec  EAX: 00000001  EBP: 0222efdc  EIP: 71427a16
+CS : 00000023  Flg: 00010246  ESP: 0222efc4  SS : 0000002b
+
+[Stack]
+00000000 0040d8dc 041487e0 00000000 c357be63 00000000 0222eff4 71456ced 
+0222efec 7770f670 040c1f98 04148d70 0222f02c 000a33fb 041487e0 3f7d70a4 
+3d969697 0409a040 0682cfe0 041488a0 0682cfe0 00000075 00000011 0222f054 
+0032bf48 00000000 0222f344 000a919b 00000001 0682cfe0 61697200 0000006c 
+00000000 7770f670 00000000 0000000f 0222f2e4 0032c12f 00000003 00134bea 
+026393c8 0682cfc8 026396a8 0082a9f8 0222f008 00000000 0222f788 77c81ecd 
+060184e8 fffffffe 77c3e36c 77c3e0d2 00000bf4 0000000c 000000ff 77c43ca3 
+77c43cce 00000c00 00000c08 0682a9f2 0682a9f0 00000100 00000c00 00851078 
+00000001 00000001 00000000 00000000 068064f8 0409f000 05796b70 0409a044 
+0222f15c 71d00198 00000000 00000000 00000000 00000000 00000000 00000000 
+00000001 06806400 00000000 00000000 00000000 051f7000 006e86ec 00000000 
+06806400 0a37c0fb 06806530 00000000 00000000 0a37c0fc 0000004f 0a37c0fc 
+71426b95 0409a040 05796d00 05796ae8 00000000 00000000 0409c9a8 0222f178 
+7142cf29 05796d00 00000000 0409a040 05796ae8 0222f190 05796d00 0409a040 
+0222f194 7142cf58 040fab00 0409f000 0222f1b8 7148151c 040fab00 05796b70 
+05796b70 0409f000 00000000 000029e0 00000004 0222f1ec 71468dd3 05796b70 
+
+SymLoadModule failed 0 ( module =  ) 
+SymGetSymFromAddr error 487
+Frame 01: Address: 71427A16 (base + 1DE6069F), return address: 71456CED
+     ModuleName : l
+     Param[0] : 0222efec
+     Param[1] : 7770f670
+     Param[2] : 040c1f98
+     Param[3] : 04148d70
+SymGetLineFromAddr error 487
+     Function Name : <nosymbols>
+SymGetSymFromAddr error 487
+Frame 02: Address: 71456CED (base + 1DE8F976), return address: 000A33FB
+     ModuleName : l
+     Param[0] : 041487e0
+     Param[1] : 3f7d70a4
+     Param[2] : 3d969697
+     Param[3] : 0409a040
+SymGetLineFromAddr error 487
+     Function Name : <nosymbols>
+SymGetSymFromAddr error 487
+Frame 03: Address: 000A33FB (base + 533FB), return address: 000A919B
+     ModuleName : Gunz
+     Param[0] : 00000001
+     Param[1] : 0682cfe0
+     Param[2] : 61697200
+     Param[3] : 0000006c
+SymGetLineFromAddr error 487
+     Function Name : <nosymbols>
+SymGetSymFromAddr error 487
+Frame 04: Address: 000A919B (base + 5919B), return address: 00135E55
+     ModuleName : Gunz
+     Param[0] : 00356740
+     Param[1] : 00050000
+     Param[2] : 00000000
+     Param[3] : 02634963
+SymGetLineFromAddr error 487
+     Function Name : <nosymbols>
+SymGetSymFromAddr error 487
+Frame 05: Address: 00135E55 (base + E5E55), return address: 0030C2AD
+     ModuleName : Gunz
+     Param[0] : 00050000
+     Param[1] : 00000000
+     Param[2] : 02634963
+     Param[3] : 00000001
+SymGetLineFromAddr error 487
+     Function Name : <nosymbols>
+SymGetSymFromAddr error 487
+Frame 06: Address: 0030C2AD (base + 2BC2AD), return address: 76D033CA
+     ModuleName : Gunz
+     Param[0] : 7efde000
+     Param[1] : 0222f830
+     Param[2] : 77c49ed2
+     Param[3] : 7efde000
+SymGetLineFromAddr error 487
+     Function Name : <nosymbols>
+SymGetSymFromAddr error 487
+Frame 07: Address: 76D033CA (base + 2373C053), return address: 77C49ED2
+     ModuleName : l
+     Param[0] : 7efde000
+     Param[1] : 73e0ae90
+     Param[2] : 00000000
+     Param[3] : 00000000
+SymGetLineFromAddr error 487
+     Function Name : <nosymbols>
+SymGetSymFromAddr error 487
+Frame 08: Address: 77C49ED2 (base + 24682B5B), return address: 77C49EA5
+     ModuleName : l
+     Param[0] : 0030c1a6
+     Param[1] : 7efde000
+     Param[2] : 00000000
+     Param[3] : 00000000
+SymGetLineFromAddr error 487
+     Function Name : <nosymbols>
+SymGetSymFromAddr error 487
+Frame 09: Address: 77C49EA5 (base + 24682B2E), return address: 00000000
+     ModuleName : l
+     Param[0] : 0030c1a6
+     Param[1] : 7efde000
+     Param[2] : 00000000
+     Param[3] : 00000000
+SymGetLineFromAddr error 487
+     Function Name : <nosymbols>
+

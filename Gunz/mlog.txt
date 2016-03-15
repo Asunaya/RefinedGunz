@@ -1,7 +1,5 @@
-GUNZ 1,0,0,290 launched. build (Feb 24 2016 01:15:35) 
-Log time (02/24/16 01:24:30)
-test.txt not found 
-NON-Skip XTrapPatch
+GUNZ 1,0,0,290 launched. build (Mar  3 2016 22:55:44) 
+Log time (03/04/16 01:16:35)
 CPU ID = GenuineIntel ( family = 774 , model = 10 , stepping = 9 ) @ 3410 MHz
 Display Device = NVIDIA GeForce GTX 760 ( vendor=10de device=1187 subsys=28471462 revision=a1 )
 Display Driver Version = 10.18.0013.5362
@@ -17,6 +15,7 @@ WFog Enabled Device.
 device created.
 Video memory 2011.500000 
 shader initialize successful : 1
+parts_index length: 24926
 main : RGetLenzFlare()->Initialize() 
 main : ZGetInitialLoading()->Initialize() 
 main : g_Mint.Initialize() 
@@ -27,7 +26,7 @@ ZApplication::OnCreate : begin
 3(Realtek Digital Output(Optical) (Realtek High Definition Audio)): Hardware Mixing Not Supported
 [[[getMaxChannel32]]]]
 
--------------------> Sound Engine Create : 0.555000 
+-------------------> Sound Engine Create : 1.297000 
 
 ZApplication::OnCreate : m_SoundEngine.Create
 1
@@ -35,7 +34,7 @@ ZApplication::OnCreate : m_SoundEngine.Create
 Load XML from memory : System/tips.xml(0x0016)- SUCCESS
 ZGameInterface::LoadBitmaps
 ZGameInterface::LoadBitmaps2
-loading pictures : 0.483000 
+loading pictures : 0.577000 
 warning : bitmap frame_t.png not found.
 warning : bitmap slot_head.tga not found.
 warning : bitmap slot_head.tga not found.
@@ -65,14 +64,67 @@ warning : bitmap icon_gameroom_s.tga not found.
 warning : bitmap icon_gameroom_s.tga not found.
 warning : bitmap icon_gameroom_s.tga not found.
 IDLResource Loading Success!!
-IDL resources : 1.238000 
+IDL resources : 2.066000 
 ZOptionInterface::InitInterfaceOption
 Number of Display mode : 36
 Number of Display mode : 36
 ZGameInterface::InitInterfaceOption ok
 ::InitMaps() > No Current ChannelRule 
 ZGameInterface::OnCreate : InitInterface 
-Screen Effect Manager Create : 0.081000 
+Screen Effect Manager Create : 0.094000 
 ZGameInterface::OnCreate : m_pScreenEffectManager->Create()
 ZGameInterface::OnCreate : m_pEffectManager->Create()
 ZGameInterface::OnCreate : g_pGameClient->Create()
+ZGameInterface::OnCreate : done 
+
+-------------------> GameInterface Create : 3.161000 
+
+ZApplication::OnCreate : GameInterface Created
+ZApplication::OnCreate : m_pInterface->OnCreate() 
+ZApplication::OnCreate : m_MeshMgr.LoadXmlList(character.xml) 
+
+-------------------> Character Loading : 0.964000 
+
+
+-------------------> WeaponMesh Loading : 0.231000 
+
+----------> in zip ( model/weapon/item/chocobar.elu ) file not found!! 
+ ZApplication::OnCreate : m_WeaponMeshMgr.LoadXmlList(weapon.xml) 
+
+-------------------> Worlditem Loading : 0.024000 
+
+ZApplication::OnCreate : CreateConsole 
+ZApplication::OnCreate : MGetMatchItemDescMgr()->ReadXml 
+Error while Read Item Descriptor system/zeffect.xmlZApplication::OnCreate : MGetMatchItemEffectDescMgr()->ReadXml 
+ZApplication::OnCreate : MGetMatchWorldItemDescMgr()->ReadXml 
+ZApplication::OnCreate : ZGetChannelRuleMgr()->ReadXml 
+ZApplication::OnCreate : MGetChattingFilter()->Create 
+
+-------------------> ETC .. : 0.216000 
+
+main : g_App.OnCreate() 
+RBspObject::Open : begin interface/login/login.rs 
+RBspObject::Open : Open_MaterialList
+RBspObject::Open : Open_LightList
+RBspObject::Open_ObjectList : begin
+RBspObject::Open_ObjectList : size 5 
+RBspObject::Open_ObjectList : end
+RBspObject::Open : OpenDescription
+RBspObject::OpenRs : file.Open 
+RBspObject::OpenRs : file.Read(&header) 
+RBspObject::OpenRs : file.Read(&nMaterial) 
+RBspObject::OpenRs : Open_Nodes begin 
+RBspObject::OpenRs : Open_Nodes end 
+RBspObject::Open : OpenRs 
+RBspObject::Open : OpenBsp 
+RBspObject::Open : done
+ZInterfaceBackground::LoadMesh pMapDesc->LoadSmokeDesc 
+main : OnCreate() done
+Server Connected
+Login Posted
+Login Successful. 
+Responsed Account Charlist
+Loaded mesh Model/woman/woman-parts11.elu
+Loaded mesh Model/woman/woman-parts07_1.elu
+Loaded mesh Model/woman/woman-parts03.elu
+Loaded mesh Model/woman/woman-parts02.elu

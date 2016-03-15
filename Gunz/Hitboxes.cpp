@@ -88,6 +88,7 @@ void HitboxManager::OnSlash(const D3DXVECTOR3 &Pos, const D3DXVECTOR3 &Dir)
 
 	Info i;
 	i.Pos = Pos;
+	i.Pos.z += 10;
 	i.Dir = Dir;
 	i.Dir.z = 0;
 	Normalize(i.Dir);
@@ -106,6 +107,7 @@ void HitboxManager::OnMassive(const D3DXVECTOR3 &Pos)
 
 	Info i;
 	i.Pos = Pos;
+	i.Pos.z += 10;
 	i.Dir = D3DXVECTOR3(1, 0, 0);
 	i.type = MASSIVE;
 	i.Time = ZGetGame()->GetTime();

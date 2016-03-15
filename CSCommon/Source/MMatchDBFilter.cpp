@@ -23,7 +23,7 @@ string MMatchDBFilter::Filtering( const string& str )
 	string::size_type pos;
 
 	while( (pos = strTmp.find_first_of(strRemoveTok)) != string::npos )
-		strTmp.erase( pos, 1 );
+		strTmp.erase(pos, 1);
 
 	return strTmp;
 }

@@ -78,6 +78,7 @@
 #include "Portal.h"
 #include "Rules.h"
 #include "Hitboxes.h"
+#include "ZRuleSkillmap.h"
 
 _USING_NAMESPACE_REALSPACE2
 
@@ -816,18 +817,24 @@ void ZGame::CheckMyCharDead(float fElapsed)
 	// 나락으로 떨어지면 끝..-_-;
 	if (m_pMyCharacter->GetPosition().z < DIE_CRITICAL_LINE)
 	{
-		//m_pMyCharacter->SetVelocity(rvector(0,0,0));
-		uidAttacker = m_pMyCharacter->GetLastThrower();
-
-		ZObject *pAttacker = ZGetObjectManager()->GetObject(uidAttacker);
-		if(pAttacker==NULL || !IsAttackable(pAttacker,m_pMyCharacter))
+		if (ZGetGameClient()->GetMatchStageSetting()->GetGameType() == MMATCH_GAMETYPE_SKILLMAP)
 		{
-			uidAttacker = ZGetMyUID();
-			pAttacker = m_pMyCharacter;
+			((ZRuleSkillmap *)GetMatch()->GetRule())->OnFall();
 		}
+		else
+		{
+			//m_pMyCharacter->SetVelocity(rvector(0,0,0));
+			uidAttacker = m_pMyCharacter->GetLastThrower();
 
-		m_pMyCharacter->OnDamaged(pAttacker,m_pMyCharacter->GetPosition(),ZD_FALLING,MWT_NONE,m_pMyCharacter->GetHP());
-		ZChatOutput( ZMsg(MSG_GAME_FALL_NARAK) );
+			ZObject *pAttacker = ZGetObjectManager()->GetObject(uidAttacker);
+			if (pAttacker == NULL || !IsAttackable(pAttacker, m_pMyCharacter))
+			{
+				uidAttacker = ZGetMyUID();
+				pAttacker = m_pMyCharacter;
+			}
+			m_pMyCharacter->OnDamaged(pAttacker, m_pMyCharacter->GetPosition(), ZD_FALLING, MWT_NONE, m_pMyCharacter->GetHP());
+			ZChatOutput(ZMsg(MSG_GAME_FALL_NARAK));
+		}
 	}
 
 	if ((m_pMyCharacter->IsDie() == false) && (m_pMyCharacter->GetHP() <= 0))
@@ -1106,7 +1113,7 @@ void ZGame::Draw()
 	g_pPortal->PostDraw();
 #endif
 
-	g_pHitboxManager->Draw();
+	OnGameDraw();
 
 //	빨간라인을 그려본다 화면에 보이면 색이 바뀌도록...? 기본은 파랑 체크되면 빨강...
 /*
@@ -1565,42 +1572,103 @@ bool ZGame::OnCommand_Immediate(MCommand* pCommand)
 	{
 	case MC_PEER_RG_SLASH:
 	{
-							 ZCharacter *pOwner = m_CharacterManager[pCommand->GetSenderUID()];
+							 auto it = m_CharacterManager.find(pCommand->GetSenderUID());
+							 if (it == m_CharacterManager.end())
+								 break;
+
+							 ZCharacter &pSender = *it->second;
+
 							 rvector pos, dir;
 							 int type;
-							 pCommand->GetParameter(&pos, 0, MPT_VECTOR);
-							 pCommand->GetParameter(&dir, 1, MPT_VECTOR);
-							 pCommand->GetParameter(&type, 2, MPT_INT);
-							 OnPeerSlash(pOwner, pos, dir, type);
+
+							 if (!pCommand->GetParameter(&pos, 0, MPT_VECTOR))
+								 break;
+							 if (!pCommand->GetParameter(&dir, 1, MPT_VECTOR))
+								 break;
+							 if (!pCommand->GetParameter(&type, 2, MPT_INT))
+							 {
+								 ZChatOutputF("Not get int");
+								 break;
+							 }
+
+							 OnPeerSlash(&pSender, pos, dir, type);
 	}
 		break;
 	case MC_PEER_RG_MASSIVE:
 	{
-							   ZCharacter *pOwner = m_CharacterManager[pCommand->GetSenderUID()];
+							   auto it = m_CharacterManager.find(pCommand->GetSenderUID());
+							   if (it == m_CharacterManager.end())
+								   break;
+
+							   ZCharacter &pSender = *it->second;
+
 							   rvector pos, dir;
-							   pCommand->GetParameter(&pos, 0, MPT_VECTOR);
-							   pCommand->GetParameter(&dir, 1, MPT_VECTOR);
-							   OnPeerMassive(pOwner, pos, dir);
+
+							   if (!pCommand->GetParameter(&pos, 0, MPT_VECTOR))
+								   break;
+							   if (!pCommand->GetParameter(&dir, 1, MPT_VECTOR))
+								   break;
+
+							   OnPeerMassive(&pSender, pos, dir);
 	}
 		break;
 #ifdef PORTAL
-	case MC_PEER_RG_PORTAL:
+	case MC_PEER_PORTAL:
 	{
-							   ZCharacter *pOwner = m_CharacterManager[pCommand->GetSenderUID()];
-							   int iPortal;
-							   rvector pos, normal, up;
-							   pCommand->GetParameter(&iPortal, 0, MPT_INT);
-							   pCommand->GetParameter(&pos, 1, MPT_VECTOR);
-							   pCommand->GetParameter(&normal, 2, MPT_VECTOR);
-							   pCommand->GetParameter(&up, 3, MPT_VECTOR);
-							   g_pPortal->CreatePortal(pOwner, iPortal, pos, normal, up);
+						   auto it = m_CharacterManager.find(pCommand->GetSenderUID());
+						   if (it == m_CharacterManager.end())
+							   break;
+
+						   ZCharacter &pSender = *it->second;
+
+						   int iPortal;
+						   rvector pos, normal, up;
+						   pCommand->GetParameter(&iPortal, 0, MPT_INT);
+						   pCommand->GetParameter(&pos, 1, MPT_VECTOR);
+						   pCommand->GetParameter(&normal, 2, MPT_VECTOR);
+						   pCommand->GetParameter(&up, 3, MPT_VECTOR);
+						   g_pPortal->CreatePortal(&pSender, iPortal, pos, normal, up);
 	}
 		break;
 #endif
+	case MC_PEER_SPEC:
+	{
+							   auto it = m_CharacterManager.find(pCommand->GetSenderUID());
+							   if (it == m_CharacterManager.end())
+								   break;
+
+							   ZCharacter &pSender = *it->second;
+
+							   pSender.SetTeamID(MMT_SPECTATOR);
+							   pSender.ForceDie();
+	}
+		break;
+	case MC_PEER_COMPLETED_SKILLMAP:
+	{
+									   auto it = m_CharacterManager.find(pCommand->GetSenderUID());
+									   if (it == m_CharacterManager.end())
+										   break;
+
+									   ZCharacter &pSender = *it->second;
+
+									   float fTime;
+									   char szCourse[64];
+
+									   if (!pCommand->GetParameter(&fTime, 0, MPT_FLOAT))
+										   break;
+									   if (!pCommand->GetParameter(szCourse, 1, MPT_STR))
+										   break;
+
+									   if (szCourse[0] == 0)
+										   ZChatOutputF("%s completed the map in %f seconds!", pSender.GetUserNameA(), fTime);
+									   else
+										   ZChatOutputF("%s completed course %s in %f seconds!", pSender.GetUserNameA(), szCourse, fTime);
+	}
+		break;
 	case MC_MATCH_STAGE_ENTERBATTLE:
 		{	
 			unsigned char nParam;
-			pCommand->GetParameter(&nParam,		0, MPT_UCHAR);
+			pCommand->GetParameter(&nParam, 0, MPT_UCHAR);
 
 			MCommandParameter* pParam = pCommand->GetParameter(1);
 			if(pParam->GetType()!=MPT_BLOB) break;
@@ -2606,6 +2674,9 @@ bool ZGame::CheckWall(ZObject* pObj1,ZObject* pObj2)
 
 void ZGame::OnExplosionGrenade(MUID uidOwner,rvector pos,float fDamage,float fRange,float fMinDamage,float fKnockBack,MMatchTeam nTeamID)
 {
+	if (ZGetGame()->GetMatch()->GetMatchType() == MMATCH_GAMETYPE_SKILLMAP)
+		return;
+
 	ZObject* pTarget = NULL;
 
 	float fDist,fDamageRange;
@@ -3129,10 +3200,11 @@ void ZGame::OnPeerSlash(ZCharacter *pOwner, const rvector &pos, const rvector &d
 			if (pCharTarget->IsGuardCustom() && DotProduct(OwnerHDir, TargetHDir) < 0)
 			{
 				rvector pos = pTarget->GetPosition() + rvector(0, 0, 120) + pTarget->GetDirection() * 50;
+				ZGetEffectManager()->AddSwordDefenceEffect(pos, pTarget->m_Direction);
 				pTarget->OnMeleeGuardSuccess();
 
 				if (pOwner == m_pMyCharacter && pCharTarget->IsGuard())
-					static_cast<ZMyCharacter *>(pOwner)->AddRecoilTarget(pCharTarget);
+					m_pMyCharacter->AddRecoilTarget(pCharTarget);
 
 				continue;
 			}
@@ -3273,9 +3345,9 @@ void ZGame::OnPeerMassive(ZCharacter *pOwner, const rvector &pos, const rvector 
 		int damage = (1.5f - (1.5f - 0.9f) * (max(fDist - MAX_DMG_RANGE, 0) / (nRange - MAX_DMG_RANGE))) * nSwordDamage;
 
 		// Stop dash locks
-		if (pVictim == m_pMyCharacter && static_cast<ZCharacter *>(pVictim)->m_bTumble)
+		if (pVictim == m_pMyCharacter && m_pMyCharacter->m_bTumble)
 		{
-			static_cast<ZCharacter *>(pVictim)->m_bTumble = false;
+			m_pMyCharacter->m_bTumble = false;
 		}
 
 		pVictim->OnDamaged(pOwner, pos, ZD_KATANA_SPLASH, MWT_KATANA, damage, .4, -1);
@@ -4870,8 +4942,54 @@ void ZGame::PostBasicInfo()
 		pbi.selweapon = m_pMyCharacter->GetItems()->GetSelectedWeaponParts();
 
 
-		ZPOSTCMD1(MC_PEER_BASICINFO,MCommandParameterBlob(&pbi,sizeof(ZPACKEDBASICINFO)));
+		ZPOSTCMD1(MC_PEER_BASICINFO, MCommandParameterBlob(&pbi, sizeof(ZPACKEDBASICINFO)));
 	}
+
+	/*if (false)
+	{
+		std::vector<BYTE> packet;
+
+		packet.push_back(0);
+		packet.push_back(0);
+
+		short flags = 0;
+
+		for (int i = 0; i < 3; i++)
+		{
+			short var = m_pMyCharacter->GetPosition()[i];
+			if (LastNetPos[i] != var)
+			{
+				packet.push_back(var - LastNetPos[i]);
+				flags |= 1 << (0 + i);
+			}
+
+			var = m_pMyCharacter->GetVelocity()[i];
+			if (LastNetVel[i] != var)
+			{
+				packet.push_back(var - LastNetVel[i]);
+				flags |= 1 << (5 + i);
+			}
+		}
+
+		D3DXVECTOR3 ve = m_pMyCharacter->GetDirection();
+		ve.z = 0;
+		Normalize(ve);
+		ve.x = atan2(ve.x, ve.y) * 180.f / PI;
+		ve.y = m_pMyCharacter->GetDirection().z * 90;
+		for (int i = 0; i < 2; i++)
+		{
+			if (LastNetAngles[i] != ve[i])
+			{
+				packet.push_back(var - LastNetAngles[i]);
+				flags |= 1 << (3 + i);
+			}
+		}
+
+		packet[0] = flags >> 8;
+		packet[1] = flags & 0xFF;
+
+		ZPOSTCMD1(MC_PEER_MOVE_DELTA, MCommandParameterBlob(packet.data(), packet.size()));
+	}*/
 }
 
 void ZGame::PostPeerPingInfo()

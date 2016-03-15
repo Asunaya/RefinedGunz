@@ -621,6 +621,8 @@ bool ZGameInterface::InitInterfaceListener()
 	// 로그인화면
 	SetListenerWidget("Exit", ZGetExitListener());
 	SetListenerWidget("LoginOK", ZGetLoginListener());
+	SetListenerWidget("CreateAccountFrameCaller", ZGetCreateAccountFrameCallerListener());
+	SetListenerWidget("CreateAccountBtn", ZGetCreateAccountBtnListener());
 	SetListenerWidget("OptionFrame", ZGetOptionFrameButtonListener());
 	SetListenerWidget("Register", ZGetRegisterListener());
 	SetListenerWidget("Stage_OptionFrame", ZGetOptionFrameButtonListener());
@@ -2746,12 +2748,12 @@ void ZGameInterface::OnDrawStateLobbyNStage(MDrawContext* pDC)
 			}
 
 			// Character View
-			if ( bShowMe)
+			/*if ( bShowMe)
 			{
 				ZCharacterView* pCharView = (ZCharacterView*)pRes->FindWidget( "Stage_Charviewer");
 				if ( pCharView)
 					pCharView->SetCharacter( ZGetMyUID());
-			}
+			}*/
 		}
 
 
@@ -4071,13 +4073,18 @@ void ZGameInterface::ShowMessage(int nMessageID)
 
 void ZGameInterface::ShowErrorMessage(int nErrorID)
 {
-	const char *str = ZErrStr( nErrorID );
-	if(str)
+	const char *str = ZErrStr(nErrorID);
+	if (str)
 	{
 		char text[1024];
 		sprintf_s(text, "%s (E%d)", str, nErrorID);
 		ShowMessage(text);
 	}
+}
+
+void ZGameInterface::ShowErrorMessage(const char *szMessage)
+{
+	ShowMessage(szMessage);
 }
 
 
@@ -6724,7 +6731,11 @@ void ZGameInterface::OnResponseServerStatusInfoList( const int nListCount, void*
 		}
 	}
 
-	pServerList->SetCurrSel( nCurrSel);
+	//pServerList->SetCurrSel( nCurrSel);
+	if (nListCount)
+		pServerList->SetCurrSel(0);
+	else
+		pServerList->SetCurrSel(-1);
 
 	m_dwRefreshTime = timeGetTime() + 10000;
 }

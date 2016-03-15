@@ -22,11 +22,7 @@
 #include "ZApplication.h"
 #include "ZChat_CmdID.h"
 
-#include "NewChat.h"
-
-void ChatCmd_SetFPSLimit(const char* line, const int argc, char **const argv);
-void ChatCmd_SetCamFix(const char* line, const int argc, char **const argv);
-void ChatCmd_SetBackgroundColor(const char* line, const int argc, char **const argv);
+#include "RGMain.h"
 
 void ChatCmd_Test(const char* line, const int argc, char **const argv);				// Testing
 
@@ -127,10 +123,7 @@ void ZChat::InitCmds()
 		MLog("Error while Read Item Descriptor %s", "system/chatcmds.xml");
 	}
 
-	_CC_AC("fpslimit", &ChatCmd_SetFPSLimit, CCF_ALL, 1, 1, true, "/fpslimit <fps>", "");
-	_CC_AC("camfix", &ChatCmd_SetCamFix, CCF_ALL, 0, 1, true, "/camfix [0/1]", "");
-	_CC_AC("backgroundcolor", &ChatCmd_SetBackgroundColor, CCF_ALL, 1, 1, true, "/backgroundcolor <AARRGGBB hex color>", "");
-	_CC_AC("replayseek", [](const char *line, int argc, char ** const argv){ZGetGame()->SetReplayTime(atof(argv[1])); }, CCF_ALL, 1, 1, true, "/replayseek <time>", "");
+	LoadRGCommands(m_CmdManager);
 
 	_CC_ACX(CCMD_ID_HELP,				&ChatCmd_Help,				CCF_ALL, ARGVNoMin, ARGVNoMax, true);
 	_CC_ACX(CCMD_ID_WHISPER,			&ChatCmd_Whisper,			CCF_ALL, ARGVNoMin, 1, false);
@@ -209,38 +202,6 @@ void ZChat::InitCmds()
 	_CC_AC("gtlspn",		&ChatCmd_QUESTTEST_LocalSpawnNPC,	CCF_TEST, ARGVNoMin, 2    , true,"/gtlspn <NPCÅ¸ÀÔ> <NPC¼ö>", "");
 	_CC_AC("gtweaknpcs",	&ChatCmd_QUESTTEST_WeakNPCs,		CCF_TEST, ARGVNoMin, 1    , true,"/gtweaknpcs", "");
 }
-
-void ChatCmd_SetFPSLimit(const char* line, const int argc, char **const argv)
-{
-	int nFPSLimit = atoi(argv[1]);
-	ZGetConfiguration()->SetFPSLimit(nFPSLimit);
-	ZChatOutputF("FPS limit set to %d", nFPSLimit);
-}
-
-void ChatCmd_SetCamFix(const char* line, const int argc, char **const argv)
-{
-	bool bCamFix;
-	if (argc == 0)
-		bCamFix = !ZGetConfiguration()->GetCamFix();
-	else
-		bCamFix = atoi(argv[1]) != 0;
-
-	ZGetConfiguration()->SetCamFix(bCamFix);
-	if(bCamFix)
-		ZGetCamera()->m_fDist = CAMERA_DEFAULT_DISTANCE * RGetScreenWidth() / RGetScreenHeight() / (4.f / 3.f);
-	else
-		ZGetCamera()->m_fDist = CAMERA_DEFAULT_DISTANCE;
-	ZChatOutputF("Cam fix is now %s", bCamFix ? "enabled" : "disabled");
-}
-
-void ChatCmd_SetBackgroundColor(const char* line, const int argc, char **const argv)
-{
-	DWORD BackgroundColor = strtoul(argv[1], NULL, 16);
-	g_pChat->SetBackgroundColor(BackgroundColor);
-	ZGetConfiguration()->SetChatBackgroundColor(BackgroundColor);
-	ZChatOutputF("Background color was set to %08X", BackgroundColor);
-}
-
 
 
 void OutputCmdHelp(const char* cmd)

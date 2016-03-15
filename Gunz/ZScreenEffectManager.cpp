@@ -498,6 +498,8 @@ bool ZScreenEffectManager::Create()
 	m_pTDScoreBlink_B = new ZTDMBlinkEffect(m_pEffectMeshMgr->Get("td_scoreblink_b"));
 	m_pTDScoreBlink_R = new ZTDMBlinkEffect(m_pEffectMeshMgr->Get("td_scoreblink_r"));
 
+	CreateQuestRes();
+
 
 	END_("Screen Effect Manager Create");
 	return true;
@@ -1267,44 +1269,51 @@ bool ZScreenEffectManager::CreateQuestRes()
 		return false;
 	}
 
-	m_pBossHPPanel = new ZBossGaugeEffect(m_pQuestEffectMeshMgr->Get("boss_hppanel"));
-	m_pArrow = new ZScreenEffect(m_pQuestEffectMeshMgr->Get("arrow"));
+	auto p = m_pQuestEffectMeshMgr->Get("ko");
+	if (!p)
+		return false;
 
-	m_pKO = new ZKOEffect(m_pQuestEffectMeshMgr->Get("ko"));
+	m_pKO = new ZKOEffect(p);
 	for (int i = 0; i < 10; i++)
 	{
-		_ASSERT(m_pKONumberEffect[i]==NULL);
+		_ASSERT(m_pKONumberEffect[i] == NULL);
 		char name[64];
 		sprintf_s(name, "ko%d", i);
-		m_pKONumberEffect[i] = new ZKOEffect(m_pQuestEffectMeshMgr->Get(name));
+
+		p = m_pQuestEffectMeshMgr->Get(name);
+		if (!p)
+			return false;
+
+		m_pKONumberEffect[i] = new ZKOEffect(p);
 	}
+
+	p = m_pQuestEffectMeshMgr->Get("boss_hppanel");
+	if (!p)
+		return false;
+
+	m_pBossHPPanel = new ZBossGaugeEffect(p);
+
+	p = m_pQuestEffectMeshMgr->Get("arrow");
+	if (!p)
+		return false;
+
+	m_pArrow = new ZScreenEffect(p);
+
 	return true;
 }
 
 void ZScreenEffectManager::DestroyQuestRes()
 {
-	if (m_pBossHPPanel)
+	SAFE_DELETE(m_pBossHPPanel);
+	SAFE_DELETE(m_pArrow);
+	SAFE_DELETE(m_pKO);
+
+	for (int i = 0; i < 10; i++)
 	{
-		SAFE_DELETE(m_pBossHPPanel);
-	}
-	if (m_pArrow)
-	{
-		SAFE_DELETE(m_pArrow);
-	}
-	if (m_pKO)
-	{
-		SAFE_DELETE(m_pKO);
+		SAFE_DELETE(m_pKONumberEffect[i]);
 	}
 
-	for (int i = 0; i < 10; i++) 
-	{
-		if (m_pKONumberEffect[i]) SAFE_DELETE(m_pKONumberEffect[i]);
-	}
-
-	if (m_pQuestEffectMeshMgr)
-	{
-		SAFE_DELETE(m_pQuestEffectMeshMgr);
-	}
+	SAFE_DELETE(m_pQuestEffectMeshMgr);
 }
 
 
@@ -1361,6 +1370,8 @@ void ZScreenEffectManager::DrawKO()
 	for(int i=0;i<nCount;i++)
 	{
 		int nIndex = buffer[i]-'0';
+		if (nIndex < 0 || nIndex > 9)
+			continue;
 
 
 		if (i > 0)
@@ -1418,6 +1429,7 @@ void ZScreenEffectManager::ShockBossGauge(float fPower)
 
 void ZScreenEffectManager::DrawDuelEffects()
 {
+	return;
 	if (ZGetGameClient()->GetMatchStageSetting()->GetGameType() != MMATCH_GAMETYPE_DUEL) return;
 
 	if (ZGetCombatInterface()->GetObserver()->IsVisible()) return;
@@ -1435,6 +1447,8 @@ void ZScreenEffectManager::DrawDuelEffects()
 		for(int i=0;i<nCount;i++)
 		{
 			int nIndex = buffer[i]-'0';
+			if (nIndex < 0 || nIndex > 9)
+				continue;
 
 			if (i > 0)
 			{

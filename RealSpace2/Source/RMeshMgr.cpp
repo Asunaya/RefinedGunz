@@ -191,7 +191,6 @@ int	RMeshMgr::LoadXmlList(char* name,RFPROGRESSCALLBACK pfnProgressCallback, voi
 			}
 		}
 		else if(strcmp(NodeName, "AddElu")==0) {
-
 			Node.GetAttribute(IDName, "name");
 			Node.GetAttribute(FileName, "filename");
 
@@ -202,7 +201,6 @@ int	RMeshMgr::LoadXmlList(char* name,RFPROGRESSCALLBACK pfnProgressCallback, voi
 			}
 		}
 		else if(strcmp(NodeName, "AddWeaponElu")==0) {
-
 			Node.GetAttribute(IDName, "name");
 			Node.GetAttribute(WeaponMotionType, "weapon_motion_type");
 
@@ -650,7 +648,7 @@ void RMeshMgr::GetPartsNode(RMeshPartsType parts,vector<RMeshNode*>& nodetable)
 	}
 }
 
-RMeshNode* RMeshMgr::GetPartsNode(char* name)
+RMeshNode* RMeshMgr::GetPartsNode(const char* name)
 {
 	r_mesh_node node;
 	RMesh* pMesh = NULL;

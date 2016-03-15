@@ -41,7 +41,7 @@
 
 // 캐릭터 관련
 #define MIN_CHARNAME	4				// 최소 4자이상 12자 이하만 캐릭터 이름을 만들 수 있다.
-#define MAX_CHARNAME	12
+#define MAX_CHARNAME	16
 
 #define MAX_CHAR_LEVEL	99
 

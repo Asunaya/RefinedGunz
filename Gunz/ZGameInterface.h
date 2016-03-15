@@ -294,6 +294,7 @@ public:
 	void ShowConfirmMessage(const char* szText, MListener* pCustomListenter=NULL);
 	void ShowMessage(int nMessageID);
 	void ShowErrorMessage(int nErrorID);
+	void ShowErrorMessage(const char *szMessage);
 	
 	void ShowInterface(bool bShowInterface);
 	bool IsShowInterface() { return m_bShowInterface; }
@@ -412,6 +413,7 @@ public:
 	ZScreenDebugger* GetScreenDebugger()		{ return &m_ScreenDebugger; }
 	ZCombatMenu*	 GetCombatMenu()			{ return &m_CombatMenu; }
 	ZMonsterBookInterface* GetMonsterBookInterface()	{ return m_pMonsterBookInterface; }
+	ZGameInput *GetGameInput() const { return m_pGameInput; }
 };
 
 

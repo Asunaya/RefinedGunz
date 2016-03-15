@@ -469,6 +469,9 @@
     </ClInclude>
     <ClInclude Include="Include\MMatchDebug.h" />
     <ClInclude Include="Include\stdafx.h" />
+    <ClInclude Include="MMatchRuleSkillmap.h">
+      <Filter>MatchServer\Game\GameType</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\MCommand.cpp">
@@ -842,6 +845,9 @@
     </ClCompile>
     <ClCompile Include="Source\MMatchDebug.cpp" />
     <ClCompile Include="Source\stdafx.cpp" />
+    <ClCompile Include="MMatchRuleSkillmap.cpp">
+      <Filter>MatchServer\Game\GameType</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Library Include="HShield\HsCryptLib.lib">

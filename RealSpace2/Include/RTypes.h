@@ -92,6 +92,42 @@ struct rboundingbox
 		if ( vmax.y < kPoint.y )	vmax.y = kPoint.y;
 		if ( vmax.z < kPoint.z )	vmax.z = kPoint.z;
 	}
+
+	bool Intersects(const rboundingbox &rhs) const
+	{
+		if (vmin.x > rhs.vmax.x)
+			return false;
+
+		if (vmax.x < rhs.vmin.x)
+			return false;
+
+		if (vmin.y > rhs.vmax.y)
+			return false;
+
+		if (vmax.y < rhs.vmin.y)
+			return false;
+
+		if (vmin.z > rhs.vmax.z)
+			return false;
+
+		if (vmax.z < rhs.vmin.z)
+			return false;
+
+		return true;
+	}
+
+	void Sort()
+	{
+		rvector tmin, tmax;
+		tmin.x = min(vmin.x, vmax.x);
+		tmin.y = min(vmin.y, vmax.y);
+		tmin.z = min(vmin.z, vmax.z);
+		tmax.x = max(vmin.x, vmax.x);
+		tmax.y = max(vmin.y, vmax.y);
+		tmax.z = max(vmin.z, vmax.z);
+		vmin = tmin;
+		vmax = tmax;
+	}
 };
 
 /*

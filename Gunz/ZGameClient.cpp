@@ -46,6 +46,9 @@
 #include "ZMap.h"
 #include "UPnP.h"
 
+#define SODIUM_STATIC
+#include "sodium.h"
+
 #ifdef _XTRAP
 #include "XTrap/XTrap.h"
 //#include "XTrap/XTrapCC.h"
@@ -1040,12 +1043,34 @@ void ZGameClient::OnMatchNotify(unsigned int nMsgID)
 	*/
 }
 
+#include "ZMsgBox.h"
+
 bool ZGameClient::OnCommand(MCommand* pCommand)
 {
 	bool ret;
 	ret = MMatchClient::OnCommand(pCommand);
 	
-	switch(pCommand->GetID()){
+	switch (pCommand->GetID()){
+	case MC_MATCH_RESPONSE_LOGIN_FAILED:
+	{
+		char szReason[128];
+		if (!pCommand->GetParameter(szReason, 0, MPT_STR, sizeof(szReason)))
+			break;
+
+		ZGetGameInterface()->ShowErrorMessage(szReason);
+
+		ZPostDisconnect();
+	}
+		break;
+	case MC_MATCH_RESPONSE_CREATE_ACCOUNT:
+	{
+		char szMessage[128];
+		if (!pCommand->GetParameter(szMessage, 0, MPT_STR, sizeof(szMessage)))
+			break;
+
+		ZGetGameInterface()->ShowErrorMessage(szMessage);
+	}
+		break;
 		case MC_NET_ONDISCONNECT:
 			{
 
@@ -2160,6 +2185,10 @@ void ZGameClient::OutputMessage(const char* szMessage, MZMOMType nType)
 	ZChatOutput(MCOLOR(0xFFFFC600), szMessage);
 }
 
+// Awk
+bool g_bConnected = false;
+std::function<void()> g_OnConnectCallback = [](){};
+
 int ZGameClient::OnConnected(SOCKET sock, MUID* pTargetUID, MUID* pAllocUID, unsigned int nTimeStamp)
 {
 	mlog("Server Connected\n");
@@ -2172,29 +2201,8 @@ int ZGameClient::OnConnected(SOCKET sock, MUID* pTargetUID, MUID* pAllocUID, uns
 			ZGetLocale()->PostLoginViaHomepage(pAllocUID);
 
 		} else {
-			char szID[256];
-			char szPassword[256];
-			ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
-			MWidget* pWidget = pResource->FindWidget("LoginID");
-			if(pWidget==NULL) return true;
-			strcpy_safe(szID, pWidget->GetText());
-			pWidget = pResource->FindWidget("LoginPassword");
-			if(pWidget==NULL) return true;
-			strcpy_safe(szPassword, pWidget->GetText());
-
-			#ifdef _BIRDTEST
-				ZChangeGameState(GUNZ_BIRDTEST);
-				return ret;
-			#endif
-
-//			unsigned long nChecksum = ZGetMZFileChecksum(FILENAME_ZITEM_DESC);
-//			unsigned long nChecksum = MGetMatchItemDescMgr()->GetChecksum();
-			unsigned long nChecksum = ZGetApplication()->GetFileListCRC();
-			nChecksum = nChecksum ^ (*pAllocUID).High ^ (*pAllocUID).Low;
-
-			// 접속되면 바로 로그인한다
-			ZPostLogin(szID, szPassword, nChecksum);
-			mlog("Login Posted\n");
+			g_OnConnectCallback();
+			g_bConnected = true;
 		}
 	} else if (sock == m_AgentSocket.GetSocket()) {
 		
@@ -2237,6 +2245,8 @@ bool ZGameClient::OnSockDisconnect(SOCKET sock)
 			if (pLogin) pLogin->Show(false);
 
 			ZGetGameInterface()->m_bLoginTimeout = false;
+
+			g_bConnected = false;
 		}
 	} else if (sock == m_AgentSocket.GetSocket()) {
 	}

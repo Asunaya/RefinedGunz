@@ -1,0 +1,438 @@
+GUNZ 1,0,0,290 launched. build (Feb 17 2016 03:19:23) 
+Log time (02/17/16 21:03:08)
+test.txt not found 
+NON-Skip XTrapPatch
+CPU ID = GenuineIntel ( family = 774 , model = 10 , stepping = 9 ) @ 3410 MHz
+Display Device = NVIDIA GeForce GTX 760 ( vendor=10de device=1187 subsys=28471462 revision=a1 )
+Display Driver Version = 10.18.0013.5362
+Windows = 6.1 Build 7601 , Service Pack 1 (4194303KB) :  ..
+Load XML from memory : system/locale.xml- SUCCESS
+Country : (BRZ), Language : (BRZ)
+Load XML from memory : system/gametypecfg.xmlLoad Config from file : config.xml- SUCCESS
+Load XML from memory : system/system.xml- SUCCESS
+Load XML from memory : system/strings.xml(0x0016) - SUCCESS
+Load XML from memory : system/cserror.xml(0x0016) - SUCCESS
+Load XML from memory : system/messages.xml(0x0016) - SUCCESS
+WFog Enabled Device.
+device created.
+Video memory 2011.500000 
+shader initialize successful : 1
+main : RGetLenzFlare()->Initialize() 
+main : ZGetInitialLoading()->Initialize() 
+main : g_Mint.Initialize() 
+ZApplication::OnCreate : begin
+0(Primary Sound Driver): Hardware Mixing Not Supported
+1(Speakers (Realtek High Definition Audio)): Hardware Mixing Not Supported
+2(Realtek Digital Output (Realtek High Definition Audio)): Hardware Mixing Not Supported
+3(Realtek Digital Output(Optical) (Realtek High Definition Audio)): Hardware Mixing Not Supported
+[[[getMaxChannel32]]]]
+
+-------------------> Sound Engine Create : 0.382000 
+
+ZApplication::OnCreate : m_SoundEngine.Create
+1
+3
+Load XML from memory : System/tips.xml(0x0016)- SUCCESS
+ZGameInterface::LoadBitmaps
+ZGameInterface::LoadBitmaps2
+loading pictures : 0.355000 
+warning : bitmap frame_t.png not found.
+warning : bitmap slot_head.tga not found.
+warning : bitmap slot_head.tga not found.
+warning : bitmap icon_gameroom.tga not found.
+warning : bitmap icon_gameroom_s.tga not found.
+warning : bitmap icon_gameroom_s.tga not found.
+warning : bitmap icon_gameroom_s.tga not found.
+warning : bitmap icon_gameroom_s.tga not found.
+warning : bitmap icon_gameroom_s.tga not found.
+warning : bitmap icon_gameroom_s.tga not found.
+warning : bitmap icon_gameroom_s.tga not found.
+warning : bitmap icon_gameroom_s.tga not found.
+warning : bitmap icon_gameroom_s.tga not found.
+warning : bitmap icon_gameroom_s.tga not found.
+warning : bitmap icon_gameroom_s.tga not found.
+warning : bitmap icon_gameroom_s.tga not found.
+warning : bitmap icon_gameroom_s.tga not found.
+warning : bitmap icon_gameroom_s.tga not found.
+warning : bitmap icon_gameroom_s.tga not found.
+warning : bitmap icon_gameroom_s.tga not found.
+warning : bitmap icon_gameroom_s.tga not found.
+warning : bitmap icon_gameroom_s.tga not found.
+warning : bitmap icon_gameroom_s.tga not found.
+warning : bitmap icon_gameroom_s.tga not found.
+warning : bitmap icon_gameroom_s.tga not found.
+warning : bitmap icon_gameroom_s.tga not found.
+warning : bitmap icon_gameroom_s.tga not found.
+warning : bitmap icon_gameroom_s.tga not found.
+IDLResource Loading Success!!
+IDL resources : 0.164000 
+ZOptionInterface::InitInterfaceOption
+Number of Display mode : 36
+Number of Display mode : 36
+ZGameInterface::InitInterfaceOption ok
+::InitMaps() > No Current ChannelRule 
+ZGameInterface::OnCreate : InitInterface 
+Screen Effect Manager Create : 0.046000 
+ZGameInterface::OnCreate : m_pScreenEffectManager->Create()
+ZGameInterface::OnCreate : m_pEffectManager->Create()
+ZGameInterface::OnCreate : g_pGameClient->Create()
+ZGameInterface::OnCreate : done 
+Bird : 5
+
+-------------------> GameInterface Create : 0.879000 
+
+ZApplication::OnCreate : GameInterface Created
+ZApplication::OnCreate : m_pInterface->OnCreate() 
+ZApplication::OnCreate : m_MeshMgr.LoadXmlList(character.xml) 
+
+-------------------> Character Loading : 0.833000 
+
+
+-------------------> WeaponMesh Loading : 0.174000 
+
+----------> in zip ( model/weapon/item/chocobar.elu ) file not found!! 
+ ZApplication::OnCreate : m_WeaponMeshMgr.LoadXmlList(weapon.xml) 
+
+-------------------> Worlditem Loading : 0.012000 
+
+ZApplication::OnCreate : CreateConsole 
+ZApplication::OnCreate : MGetMatchItemDescMgr()->ReadXml 
+Error while Read Item Descriptor system/zeffect.xmlZApplication::OnCreate : MGetMatchItemEffectDescMgr()->ReadXml 
+ZApplication::OnCreate : MGetMatchWorldItemDescMgr()->ReadXml 
+ZApplication::OnCreate : ZGetChannelRuleMgr()->ReadXml 
+ZApplication::OnCreate : MGetChattingFilter()->Create 
+
+-------------------> ETC .. : 0.107000 
+
+main : g_App.OnCreate() 
+Fail to create Bitmap for Initial loading
+ZGame::Create() begin , type = 0
+RBspObject::Open : begin maps/Superflip/Superflip.rs 
+RBspObject::Open : Open_MaterialList
+RBspObject::Open : OpenDescription
+RBspObject::OpenRs : file.Open 
+RBspObject::OpenRs : file.Read(&header) 
+RBspObject::OpenRs : file.Read(&nMaterial) 
+RBspObject::OpenRs : Open_Nodes begin 
+RBspObject::OpenRs : Open_Nodes end 
+RBspObject::Open : OpenRs 
+RBspObject::Open : OpenBsp 
+RBspObject::Open : done
+ZGame::Create() World Create Superflip 
+ZGame::Create() pMapDesc->LoadSmokeDesc 
+ZGame::Create() :: ReloadAllAnimation Begin 
+in zip : model/man/man_sword_guard_start2.elu.ani file not found!! 
+ in zip : model/woman/woman_sword_guard_start2.elu.ani file not found!! 
+ in zip : model/woman/woman_sword_guard_block_1.elu.ani file not found!! 
+ ZGame::Create() :: ReloadAllAnimation End 
+ZGame::Create() m_CharacterManager.Clear done 
+ZGame Created ( 21:03:13 )
+ZGame::CreateMyCharacter : Name=Maiet Level=10240 
+main : OnCreate() done
+Crash ( 21:03:15 )
+Build Feb 15 2016 16:20:15
+
+
+[Exception]
+Address	:	00faf59b
+ExpCode	:	c0000005
+Flags	:	00000000
+#Param	:	00000002
+other	:	00000000
+
+[Context]
+GS : 0000002b  FS : 00000053  ES : 0000002b  DS : 0000002b
+EDI: 00000000  ESI: 00000000  EBX: 00000000  EDX: 00000028
+ECX: 00000000  EAX: 003bebf8  EBP: 003bee3c  EIP: 00faf59b
+CS : 00000023  Flg: 00210202  ESP: 003bea7c  SS : 0000002b
+
+[Stack]
+003bec20 41004a0b 00740000 00000001 0000000b 00000003 00740150 02000002 
+234db988 04000004 00000004 003becd0 00740000 00000003 04000004 00000004 
+00000004 77231ecd 41004a0b 003bebf8 012397b8 ffffffff 00fc2446 003bec20 
+00000000 01346ce8 00000002 22cb7ff8 00000000 37010533 00740174 1ad57510 
+00000000 00000000 00000000 003beb5c 003beb30 010f1248 00000011 010f12b0 
+00000000 01346ce8 00000000 00000000 00740000 003bed78 010d9399 00340cba 
+00000084 00000000 03460735 00000000 00000000 010d9534 41004a0b 00740000 
+00000001 77202135 00000003 00740150 02000002 25860900 02000002 00000002 
+00000000 00740000 00000003 02000002 00000002 003bed2c 77231ecd 41004a0b 
+00000002 771f3ca3 262ecf90 0000000c 00000018 2586099a 003bec1c 75f3ecfb 
+003bebd4 00000735 00000346 00000000 003bec20 003bebf4 010f1248 00000011 
+010f12b0 00000000 01346ce8 00000000 003beb24 dc9846f1 003bee3c 003bef10 
+01239eac ffffffff 010d94e2 003bec20 00000000 00000000 00000200 00000346 
+003bec98 00000019 00000735 00000346 03460735 00340cba ffffff00 00000084 
+20d7bc57 00340cba 00340cba 75f1692a 75f17290 75f17276 75f17257 00340cba 
+0000a918 00000011 00340cba 003bec78 00250808 75f1717a 20d7bc9f 75f17136 
+
+SymLoadModule failed 0 ( module =  ) 
+frame : (01) : PC Address : 00faf59b
+     Param[0] : 003bec20
+     Param[1] : 00000000
+     Param[2] : 01346ce8
+     Param[3] : 00000002
+     ModuleName : Gunz
+     File Name : c:\users\dys\desktop\oldgunz\gunz\newchat.cpp
+     Line Number : 432
+     Function Name : Chat::OnEvent
+frame : (02) : PC Address : 00fc2446
+     Param[0] : 003bec20
+     Param[1] : 00000000
+     Param[2] : 00000000
+     Param[3] : 00000200
+     ModuleName : Gunz
+     File Name : c:\users\dys\desktop\oldgunz\gunz\zgameinput.cpp
+     Line Number : 63
+     Function Name : ZGameInput::OnEvent
+frame : (03) : PC Address : 010d94e2
+     Param[0] : 00340cba
+     Param[1] : 00000200
+     Param[2] : 00000000
+     Param[3] : 03460735
+     ModuleName : Gunz
+     File Name : c:\users\dys\desktop\oldgunz\mint2\source\mint.cpp
+     Line Number : 208
+     Function Name : Mint::ProcessEvent
+frame : (04) : PC Address : 01043bb9
+     Param[0] : 00340cba
+     Param[1] : 00000200
+     Param[2] : 00000000
+     Param[3] : 03460735
+     ModuleName : Gunz
+     File Name : c:\users\dys\desktop\oldgunz\gunz\main.cpp
+     Line Number : 868
+     Function Name : WndProc
+frame : (05) : PC Address : 0108da52
+     Param[0] : 00340cba
+     Param[1] : 00000200
+     Param[2] : 00000000
+     Param[3] : 03460735
+     ModuleName : Gunz
+     File Name : c:\users\dys\desktop\oldgunz\realspace2\source\rframework.cpp
+     Line Number : 281
+     Function Name : RealSpace2::WndProc
+SymGetSymFromAddr error 487
+frame : (06) : PC Address : 75f162fa
+     Param[0] : 0108d940
+     Param[1] : 00340cba
+     Param[2] : 00000200
+     Param[3] : 00000000
+     ModuleName : l
+SymGetLineFromAddr error 487
+     Function Name : <nosymbols>
+SymGetSymFromAddr error 487
+frame : (07) : PC Address : 75f16d3a
+     Param[0] : 00000000
+     Param[1] : 0108d940
+     Param[2] : 00340cba
+     Param[3] : 00000200
+     ModuleName : l
+SymGetLineFromAddr error 487
+     Function Name : <nosymbols>
+SymGetSymFromAddr error 487
+frame : (08) : PC Address : 75f20d27
+     Param[0] : 0108d940
+     Param[1] : 00340cba
+     Param[2] : 00000200
+     Param[3] : 00000000
+     ModuleName : l
+SymGetLineFromAddr error 487
+     Function Name : <nosymbols>
+SymGetSymFromAddr error 487
+frame : (09) : PC Address : 75f20d4d
+     Param[0] : 0108d940
+     Param[1] : 00340cba
+     Param[2] : 00000200
+     Param[3] : 00000000
+     ModuleName : l
+SymGetLineFromAddr error 487
+     Function Name : <nosymbols>
+SymGetSymFromAddr error 487
+frame : (10) : PC Address : 73ca6c89
+     Param[0] : 0108d940
+     Param[1] : 00000200
+     Param[2] : 00000000
+     Param[3] : 03460735
+     ModuleName : l
+SymGetLineFromAddr error 487
+     Function Name : <nosymbols>
+SymGetSymFromAddr error 487
+frame : (11) : PC Address : 75f162fa
+     Param[0] : 73ca6bb5
+     Param[1] : 00340cba
+     Param[2] : 00000200
+     Param[3] : 00000000
+     ModuleName : l
+SymGetLineFromAddr error 487
+     Function Name : <nosymbols>
+SymGetSymFromAddr error 487
+frame : (12) : PC Address : 75f16d3a
+     Param[0] : 00000000
+     Param[1] : 73ca6bb5
+     Param[2] : 00340cba
+     Param[3] : 00000200
+     ModuleName : l
+SymGetLineFromAddr error 487
+     Function Name : <nosymbols>
+SymGetSymFromAddr error 487
+frame : (13) : PC Address : 75f20d27
+     Param[0] : ffff13c3
+     Param[1] : 00340cba
+     Param[2] : 00000200
+     Param[3] : 00000000
+     ModuleName : l
+SymGetLineFromAddr error 487
+     Function Name : <nosymbols>
+SymGetSymFromAddr error 487
+frame : (14) : PC Address : 75f20d4d
+     Param[0] : ffff13c3
+     Param[1] : 00340cba
+     Param[2] : 00000200
+     Param[3] : 00000000
+     ModuleName : l
+SymGetLineFromAddr error 487
+     Function Name : <nosymbols>
+SymGetSymFromAddr error 487
+frame : (15) : PC Address : 5fe0a10f
+     Param[0] : 00340cba
+     Param[1] : 00000200
+     Param[2] : 00000000
+     Param[3] : 03460735
+     ModuleName : l
+SymGetLineFromAddr error 487
+     Function Name : <nosymbols>
+SymGetSymFromAddr error 487
+frame : (16) : PC Address : 5fe0a407
+     Param[0] : 04f91338
+     Param[1] : 00340cba
+     Param[2] : 00000200
+     Param[3] : 00000000
+     ModuleName : l
+SymGetLineFromAddr error 487
+     Function Name : <nosymbols>
+SymGetSymFromAddr error 487
+frame : (17) : PC Address : 5fe0a471
+     Param[0] : 00340cba
+     Param[1] : 00000200
+     Param[2] : 00000000
+     Param[3] : 03460735
+     ModuleName : l
+SymGetLineFromAddr error 487
+     Function Name : <nosymbols>
+SymGetSymFromAddr error 487
+frame : (18) : PC Address : 5fe025ec
+     Param[0] : 00340cba
+     Param[1] : 00000200
+     Param[2] : 00000000
+     Param[3] : 03460735
+     ModuleName : l
+SymGetLineFromAddr error 487
+     Function Name : <nosymbols>
+SymGetSymFromAddr error 487
+frame : (19) : PC Address : 5fe0a407
+     Param[0] : 04f91338
+     Param[1] : 00340cba
+     Param[2] : 00000200
+     Param[3] : 00000000
+     ModuleName : l
+SymGetLineFromAddr error 487
+     Function Name : <nosymbols>
+SymGetSymFromAddr error 487
+frame : (20) : PC Address : 5fe0a4dc
+     Param[0] : 00340cba
+     Param[1] : 00000200
+     Param[2] : 00000000
+     Param[3] : 03460735
+     ModuleName : l
+SymGetLineFromAddr error 487
+     Function Name : <nosymbols>
+SymGetSymFromAddr error 487
+frame : (21) : PC Address : 75f162fa
+     Param[0] : 5fe0a48a
+     Param[1] : 00340cba
+     Param[2] : 00000200
+     Param[3] : 00000000
+     ModuleName : l
+SymGetLineFromAddr error 487
+     Function Name : <nosymbols>
+SymGetSymFromAddr error 487
+frame : (22) : PC Address : 75f16d3a
+     Param[0] : 00000000
+     Param[1] : 5fe0a48a
+     Param[2] : 00340cba
+     Param[3] : 00000200
+     ModuleName : l
+SymGetLineFromAddr error 487
+     Function Name : <nosymbols>
+SymGetSymFromAddr error 487
+frame : (23) : PC Address : 75f177c4
+     Param[0] : 5fe0a48a
+     Param[1] : 00000001
+     Param[2] : 003bf320
+     Param[3] : 0108d8f2
+     ModuleName : l
+SymGetLineFromAddr error 487
+     Function Name : <nosymbols>
+SymGetSymFromAddr error 487
+frame : (24) : PC Address : 75f17bca
+     Param[0] : 003bf304
+     Param[1] : 00000000
+     Param[2] : 00000000
+     Param[3] : 00000001
+     ModuleName : l
+SymGetLineFromAddr error 487
+     Function Name : <nosymbols>
+frame : (25) : PC Address : 0108d8f2
+     Param[0] : 012642ac
+     Param[1] : 00f50000
+     Param[2] : 00000000
+     Param[3] : 00744a9b
+     ModuleName : Gunz
+     File Name : c:\users\dys\desktop\oldgunz\realspace2\source\rframework.cpp
+     Line Number : 370
+     Function Name : RealSpace2::RMain
+frame : (26) : PC Address : 01044085
+     Param[0] : 00f50000
+     Param[1] : 00000000
+     Param[2] : 00744a9b
+     Param[3] : 00000001
+     ModuleName : Gunz
+     File Name : c:\users\dys\desktop\oldgunz\gunz\main.cpp
+     Line Number : 1515
+     Function Name : WinMain
+frame : (27) : PC Address : 0121975e
+     Param[0] : 7efde000
+     Param[1] : 003bf80c
+     Param[2] : 771f9ed2
+     Param[3] : 7efde000
+     ModuleName : Gunz
+     File Name : f:\dd\vctools\crt\crtw32\startup\crt0.c
+     Line Number : 251
+     Function Name : __tmainCRTStartup
+SymGetSymFromAddr error 487
+frame : (28) : PC Address : 765533ca
+     Param[0] : 7efde000
+     Param[1] : 385f7864
+     Param[2] : 00000000
+     Param[3] : 00000000
+     ModuleName : l
+SymGetLineFromAddr error 487
+     Function Name : <nosymbols>
+SymGetSymFromAddr error 487
+frame : (29) : PC Address : 771f9ed2
+     Param[0] : 01219657
+     Param[1] : 7efde000
+     Param[2] : 00000000
+     Param[3] : 00000000
+     ModuleName : l
+SymGetLineFromAddr error 487
+     Function Name : <nosymbols>
+SymGetSymFromAddr error 487
+frame : (30) : PC Address : 771f9ea5
+     Param[0] : 01219657
+     Param[1] : 7efde000
+     Param[2] : 00000000
+     Param[3] : 00000000
+     ModuleName : l
+SymGetLineFromAddr error 487
+     Function Name : <nosymbols>
+

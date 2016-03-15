@@ -32,7 +32,9 @@ protected:
 	/// 게임중 난입할때 호출된다.
 	virtual void OnEnterBattle(MUID& uidChar);
 	// 게임중 나갔을때 호출된다.
-	virtual void OnLeaveBattle(MUID& uidChar);		
+	virtual void OnLeaveBattle(MUID& uidChar);	
+
+	virtual void OnTeam(const MUID &uidPlayer, MMatchTeam nTeam) override;
 
 	void		 SpawnPlayers();									///< 플레이어들을 스폰시킨다.
 

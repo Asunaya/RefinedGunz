@@ -67,4 +67,6 @@
 
 #include "MMatchDebug.h"
 
+#include "SafeString.h"
+
 #endif

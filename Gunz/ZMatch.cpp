@@ -201,41 +201,39 @@ void ZMatch::OnDrawGameMessage()
 void ZMatch::SoloSpawn()
 {
 	if (GetMatchType() == MMATCH_GAMETYPE_DUEL) return;
-	if (ZApplication::GetGame()->m_pMyCharacter->IsDie())
-	{
-		rvector pos = rvector(0.0f, 0.0f, 0.0f);
-		rvector dir = rvector(0.0f, 1.0f, 0.0f);
 
-		ZMapSpawnData* pSpawnData;
+	rvector pos = rvector(0.0f, 0.0f, 0.0f);
+	rvector dir = rvector(0.0f, 1.0f, 0.0f);
+
+	ZMapSpawnData* pSpawnData;
 		
-		if (IsTeamPlay())
-		{
-			int nSpawnIndex[2] = { 0, 0 };
-			for (int i = 0; i < 2; i++)
-				if (ZApplication::GetGame()->m_pMyCharacter->GetTeamID() == MMT_RED + i)
-					pSpawnData = g_pGame->GetMapDesc()->GetSpawnManager()->GetTeamData(i, nSpawnIndex[i]);
-		}
-		else
-			pSpawnData = ZApplication::GetGame()->GetMapDesc()->GetSpawnManager()->GetSoloRandomData();
-		
-		if (pSpawnData == NULL)
-		{
-			_ASSERT(0);
-		}
-		else
-		{
-			if (ZApplication::GetInstance()->GetLaunchMode() == ZApplication::ZLAUNCH_MODE_DEBUG) {
-				ZPostSpawn(pSpawnData->m_Pos, pSpawnData->m_Dir);
-			} else {
-				if (g_pGame->GetSpawnRequested() == false) {
-					ZPostRequestSpawn(ZGetMyUID(), pSpawnData->m_Pos, pSpawnData->m_Dir);
-					g_pGame->SetSpawnRequested(true);
-				}
-			}	
-		}
-		
-		m_nSoloSpawnTime = -1;
+	if (IsTeamPlay())
+	{
+		int nSpawnIndex[2] = { 0, 0 };
+		for (int i = 0; i < 2; i++)
+			if (ZApplication::GetGame()->m_pMyCharacter->GetTeamID() == MMT_RED + i)
+				pSpawnData = g_pGame->GetMapDesc()->GetSpawnManager()->GetTeamData(i, nSpawnIndex[i]);
 	}
+	else
+		pSpawnData = ZApplication::GetGame()->GetMapDesc()->GetSpawnManager()->GetSoloRandomData();
+		
+	if (pSpawnData == NULL)
+	{
+		_ASSERT(0);
+	}
+	else
+	{
+		if (ZApplication::GetInstance()->GetLaunchMode() == ZApplication::ZLAUNCH_MODE_DEBUG) {
+			ZPostSpawn(pSpawnData->m_Pos, pSpawnData->m_Dir);
+		} else {
+			if (g_pGame->GetSpawnRequested() == false) {
+				ZPostRequestSpawn(ZGetMyUID(), pSpawnData->m_Pos, pSpawnData->m_Dir);
+				g_pGame->SetSpawnRequested(true);
+			}
+		}	
+	}
+		
+	m_nSoloSpawnTime = -1;
 }
 
 
@@ -362,6 +360,7 @@ void ZMatch::InitRound()
 			}
 			else
 			{
+				MLog("Requested spawn!\n");
 				ZPostRequestSpawn(ZGetMyUID(), pos, dir);
 				g_pGame->SetSpawnRequested(true);
 			}
@@ -545,9 +544,9 @@ void ZMatch::GetTeamAliveCount(int* pnRedTeam, int* pnBlueTeam)
 	*pnBlueTeam = nBlueTeam;
 }
 
-void ZMatch::RespawnSolo()
+void ZMatch::RespawnSolo(bool bForce)
 {
-	if ((!IsWaitForRoundEnd()) && (g_pGame->m_pMyCharacter->IsDie()))
+	if ((!IsWaitForRoundEnd() && g_pGame->m_pMyCharacter->IsDie()) || bForce)
 	{
 		SoloSpawn();
 	}

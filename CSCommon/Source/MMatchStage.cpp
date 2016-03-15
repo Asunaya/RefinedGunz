@@ -15,6 +15,7 @@
 #include "MMatchRuleSurvival.h"
 #include "MMatchRuleBerserker.h"
 #include "MMatchRuleDuel.h"
+#include "..\MMatchRuleSkillmap.h"
 
 //////////////////////////////////////////////////////////////////////////////////
 MMatchStage::MMatchStage()
@@ -384,6 +385,11 @@ MMatchRule* MMatchStage::CreateRule(MMATCH_GAMETYPE nGameType)
 			return (new MMatchRuleDuel(this));
 		}
 		break;
+	case MMATCH_GAMETYPE_SKILLMAP:
+	{
+								 return (new MMatchRuleSkillmap(this));
+	}
+		break;
 	default:
 		{
 			_ASSERT(0);
@@ -461,6 +467,8 @@ void MMatchStage::PlayerTeam(const MUID& uidPlayer, MMatchTeam nTeam)
 
 	MMatchStageSetting* pSetting = GetStageSetting();
 	pSetting->UpdateCharSetting(uidPlayer, nTeam, pObj->GetStageState());
+
+	GetRule()->OnTeam(uidPlayer, nTeam);
 }
 
 void MMatchStage::PlayerState(const MUID& uidPlayer, MMatchObjectStageState nStageState)

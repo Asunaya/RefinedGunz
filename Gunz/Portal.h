@@ -1,11 +1,11 @@
 #pragma once
 //#ifdef DEBUG
-//#define PORTAL
+#define PORTAL
 //#endif
 #ifdef PORTAL
 #include "rtypes.h"
 #include "ZCharacter.h"
-#include <map>
+#include <unordered_map>
 
 //#define PORTAL_USE_RT_TEXTURE
 
@@ -31,8 +31,6 @@ struct PortalInfo
 	}
 };
 
-typedef std::map<ZCharacter *, PortalInfo>::iterator PortalListIt;
-
 class Portal
 {
 private:
@@ -48,7 +46,7 @@ private:
 	IDirect3DTexture9 *pBlackTex;
 	IDirect3DTexture9 *pPortalEdgeTex[2];
 
-	std::map<ZCharacter *, PortalInfo> PortalList;
+	std::unordered_map<ZCharacter *, PortalInfo> PortalList;
 
 	PortalInfo *pMyPortalInfo;
 
@@ -132,7 +130,6 @@ public:
 
 	void PreDraw();
 	void PostDraw();
-	void PostCameraUpdate();
 
 	void CreatePortal(ZCharacter *pZChar, int iPortal, const D3DXVECTOR3 &vPos, const D3DXVECTOR3 &vNormal, const D3DXVECTOR3 &vUp);
 

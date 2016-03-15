@@ -9,6 +9,8 @@
 #include "RFont.h"
 #include "dxerr9.h"
 
+#include "../../Gunz/ZConfiguration.h"
+
 #ifdef _HSHIELD
 #include "../../Gunz/HShield/HShield.h"
 #endif
@@ -324,10 +326,10 @@ bool RInitDisplay(HWND hWnd, const RMODEPARAMS *params)
 	HRESULT hr;
 	hr=g_pD3D->GetAdapterDisplayMode( D3DADAPTER_DEFAULT, &g_d3ddm );
 	
-	g_bFullScreen=params->bFullScreen;
-	g_nScreenWidth=params->nWidth;
-	g_nScreenHeight=params->nHeight;
-	g_PixelFormat=params->bFullScreen ? params->PixelFormat	 : g_d3ddm.Format;
+	g_bFullScreen = params->bFullScreen;
+	g_nScreenWidth = params->nWidth;
+	g_nScreenHeight = params->nHeight;
+	g_PixelFormat = /*params->bFullScreen ? params->PixelFormat :*/ g_d3ddm.Format;
 	
 	ZeroMemory( &g_d3dpp, sizeof(g_d3dpp) );
 	g_d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;
@@ -372,12 +374,13 @@ bool RInitDisplay(HWND hWnd, const RMODEPARAMS *params)
 
 	
 	g_d3dpp.Flags=NULL;//D3DPRESENTFLAG_LOCKABLE_BACKBUFFER;
-	g_d3dpp.PresentationInterval=
-		params->bFullScreen ? D3DPRESENT_INTERVAL_IMMEDIATE : D3DPRESENT_INTERVAL_DEFAULT;
+	g_d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
 
-	DWORD BehaviorFlags=D3DCREATE_FPU_PRESERVE | 
+	DWORD BehaviorFlags = D3DCREATE_FPU_PRESERVE |
 		(g_bHardwareTNL ? D3DCREATE_HARDWARE_VERTEXPROCESSING : D3DCREATE_SOFTWARE_VERTEXPROCESSING);
-	//BehaviorFlags=D3DCREATE_FPU_PRESERVE | D3DCREATE_SOFTWARE_VERTEXPROCESSING;
+
+	if (ZGetConfiguration()->GetDynamicResourceLoad())
+		BehaviorFlags |= D3DCREATE_MULTITHREADED;
 
 #ifdef _MT
 //	mlog("multithread.\n");
@@ -476,10 +479,10 @@ void RAdjustWindow(const RMODEPARAMS *pModeParams)
 
 	if(pModeParams->bFullScreen)
 	{
-		SetWindowLong( g_hWnd, GWL_STYLE, WS_POPUP | WS_SYSMENU );
+		SetWindowLong( g_hWnd, GWL_STYLE, WS_POPUP /*| WS_SYSMENU*/ );
 	}
 	else
-		SetWindowLong( g_hWnd, GWL_STYLE, WS_POPUP | WS_CAPTION | WS_SYSMENU );
+		SetWindowLong( g_hWnd, GWL_STYLE, WS_POPUP/* | WS_CAPTION | WS_SYSMENU*/ );
 
 	RECT rt;
 	GetClientRect(g_hWnd,&rt);
@@ -506,7 +509,7 @@ void RResetDevice(const RMODEPARAMS *params)
 	g_bFullScreen=params->bFullScreen;
 	g_nScreenWidth=params->nWidth;
 	g_nScreenHeight=params->nHeight;
-	g_PixelFormat= params->bFullScreen ? params->PixelFormat : g_d3ddm.Format;		// 윈도우 모드는 원래 포맷으로
+	g_PixelFormat = /*params->bFullScreen ? params->PixelFormat :*/ g_d3ddm.Format;		// 윈도우 모드는 원래 포맷으로
 
 	g_d3dpp.Windowed   = !params->bFullScreen;
  	g_d3dpp.BackBufferWidth = g_nScreenWidth;

@@ -32,6 +32,7 @@
 #include "ZInput.h"
 #include "ZOptionInterface.h"
 
+#include "RGMain.h"
 #include "Events.h"
 
 #ifdef _QEUST_ITEM_DEBUG
@@ -337,6 +338,8 @@ bool ZApplication::OnCreate(ZLoadingProgress *pLoadingProgress)
 
 	__BP(2000,"ZApplication::OnCreate");
 
+	OnAppCreate();
+
 #define MMTIMER_RESOLUTION	1
 	if (TIMERR_NOERROR == timeGetDevCaps(&tc,sizeof(TIMECAPS)))
 	{
@@ -387,7 +390,6 @@ bool ZApplication::OnCreate(ZLoadingProgress *pLoadingProgress)
 		SAFE_DELETE(m_pGameInterface);
 		return false;
 	}
-	//mlog("Bird : 5\n");
 
 	m_pGameInterface->SetBounds(0,0,MGetWorkspaceWidth(),MGetWorkspaceHeight());
 	END_("GameInterface Create");
@@ -619,9 +621,11 @@ void ZApplication::OnUpdate()
 {
 	__BP(0,"ZApplication::OnUpdate");
 
-	float fElapsed;
+	double fElapsed;
 
 	fElapsed = ZApplication::m_Timer.UpdateFrame();
+
+	g_RGMain.OnUpdate(fElapsed);
 
 	
 

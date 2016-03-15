@@ -109,7 +109,7 @@ public:
 	virtual int GetData(char* pData, int nSize);
 	virtual int SetData(char* pData);
 	virtual void *GetPointer() { return &m_Value; }
-	virtual const char* GetClassName(void){ return "Int"; }
+	virtual const char* GetClassName(void) override { return "Int"; }
 	virtual void GetString(char* szValue, int maxlen){ sprintf_s(szValue, maxlen, "%d", m_Value); }
 	virtual int GetSize() { return sizeof(int); }
 };

@@ -37,7 +37,6 @@ bool MChannelRuleMapList::Exist(int nMapID, bool bOnlyDuel)
 
 bool MChannelRuleMapList::Exist(const char* pszMapName, bool bOnlyDuel)
 {
-	return true;
 	for (set<int>::iterator itor = m_Set.begin(); itor != m_Set.end(); ++itor)
 	{
 		int id = (*itor);
@@ -46,8 +45,8 @@ bool MChannelRuleMapList::Exist(const char* pszMapName, bool bOnlyDuel)
 		{
 			if ( !_stricmp(pszMapName, g_MapDesc[id].szMapName))
 			{
-				//if ( !bOnlyDuel && g_MapDesc[id].bOnlyDuelMap)
-					//return false;
+				if ( !bOnlyDuel && g_MapDesc[id].bOnlyDuelMap)
+					return false;
 
 				return true;
 			}

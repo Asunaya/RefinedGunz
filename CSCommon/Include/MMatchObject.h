@@ -69,10 +69,8 @@ enum MMatchSex
 enum MMatchBlockType
 {
 	MMBT_NO = 0,
-	MMBT_XTRAP_HACKER,
-	MMBT_HSHIELD_HACKER,
-	MMBT_BADFILECRC,
-	MMBT_BADUSER,
+	MMBT_BANNED,
+	MMBT_MUTED,
 
 	MMBT_END,
 };
@@ -424,6 +422,7 @@ protected:
 	bool			m_bBridgePeer;
 	bool			m_bRelayPeer;
 	MUID			m_uidAgent;
+	MMatchTeam		m_nTeam;
 
 	DWORD			m_dwIP;
 	char 			m_szIP[64];
@@ -446,7 +445,6 @@ protected:
 	MRefreshClientClanMemberImpl	m_RefreshClientClanMemberImpl;
 
 	MMatchObjectStageState	m_nStageState;	// 대기방에서의 상태정보
-	MMatchTeam		m_nTeam;
 	int				m_nLadderGroupID;
 	bool			m_bLadderChallenging;	// 클랜전 상대팀 대기중인지 여부
 
@@ -551,7 +549,7 @@ public:
 	MRefreshClientChannelImpl* GetRefreshClientChannelImplement()		{ return &m_RefreshClientChannelImpl; }
 	MRefreshClientClanMemberImpl* GetRefreshClientClanMemberImplement()	{ return &m_RefreshClientClanMemberImpl; }
 
-	MMatchTeam GetTeam()			{ return m_nTeam; }
+	MMatchTeam GetTeam() const { return m_nTeam; }
 	void SetTeam(MMatchTeam nTeam);
 	MMatchObjectStageState GetStageState()	{ return m_nStageState; }
 	void SetStageState(MMatchObjectStageState nStageState)	{ m_nStageState = nStageState; }
@@ -708,14 +706,29 @@ const string g_szHairMeshName[MAX_COSTUME_HAIR][2] =
 	{"eq_head_08", "eq_head_hair002"}		// 이건 현재 사용안함 - 나중에 다른 모델로 대체해도 됨
 };
 
-#define MAX_COSTUME_FACE		5
+#define MAX_COSTUME_FACE		20
 const string g_szFaceMeshName[MAX_COSTUME_FACE][2] = 
 {
 	{"eq_face_01", "eq_face_001"},
 	{"eq_face_02", "eq_face_002"},
 	{"eq_face_04", "eq_face_003"},
 	{"eq_face_05", "eq_face_004"},
-	{"eq_face_06", "eq_face_001"}
+	{ "eq_face_a01", "eq_face_001" },
+	{ "eq_face_newface01", "eq_face_newface01" },
+	{ "eq_face_newface02", "eq_face_newface02" },
+	{ "eq_face_newface03", "eq_face_newface03" },
+	{ "eq_face_newface04", "eq_face_newface04" },
+	{ "eq_face_newface05", "eq_face_newface05" },
+	{ "eq_face_newface06", "eq_face_newface06" },
+	{ "eq_face_newface07", "eq_face_newface07" },
+	{ "eq_face_newface08", "eq_face_newface08" },
+	{ "eq_face_newface09", "eq_face_newface09" },
+	{ "eq_face_newface10", "eq_face_newface10" },
+	{ "eq_face_newface11", "eq_face_newface11" },
+	{ "eq_face_newface12", "eq_face_newface12" },
+	{ "eq_face_newface13", "eq_face_newface13" },
+	{ "eq_face_newface13", "eq_face_newface14" },
+	{ "eq_face_newface13", "eq_face_newface15" },
 };
 
 

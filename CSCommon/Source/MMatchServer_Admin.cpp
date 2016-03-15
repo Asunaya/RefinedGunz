@@ -132,6 +132,7 @@ void MMatchServer::OnAdminRequestBanPlayer(const MUID& uidAdmin, const char* szP
 	if (pTargetObj != NULL) 
 	{
 		DisconnectObject(pTargetObj->GetUID());
+		m_MatchDBMgr.BanPlayer(pTargetObj->GetAccountInfo()->m_nAID, "", 0);
 	}
 	else
 	{

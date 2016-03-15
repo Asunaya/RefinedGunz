@@ -335,7 +335,7 @@ public:
 
 	bool ReadXmlElement(MXmlElement* pNode,char* Path);
 
-	bool ReadElu(char* fname);
+	bool ReadElu(const char* fname);
 	bool SaveElu(char* fname);
 
 	void RenderFrame();
@@ -467,7 +467,7 @@ public:
 	bool GetMapObject();
 
 	char* GetFileName();
-	void  SetFileName(char* name);
+	void  SetFileName(const char* name);
 	bool  CmpFileName(char* name);
 
 	char* GetName();
@@ -478,8 +478,8 @@ public:
 	void GetPartsNode(RMeshPartsType type,vector<RMeshNode*>& nodetable);
 
 	RMeshNode* GetMeshData(RMeshPartsType type);
-	RMeshNode* GetMeshData(char* name);
-	RMeshNode* GetPartsNode(char* name);
+	RMeshNode* GetMeshData(const char* name);
+	RMeshNode* GetPartsNode(const char* name);
 
 	// 항상쓰는것도아니니까 나중에속도가 떨어진다면 사용
 //	RMeshNode* GetPartsNode(RMeshPartsType parts,char* name);
