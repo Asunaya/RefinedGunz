@@ -279,7 +279,7 @@ void ZMiniMap::OnDraw(MDrawContext* pDC)
 
 		MFont *pFont=NULL;
 
-		if(pCharacter->IsAdminName()) {
+		if(pCharacter->IsAdmin()) {
 			pFont = MFontManager::Get("FONTa12_O1Org");
 			pDC->SetColor(MCOLOR(ZCOLOR_ADMIN_NAME));
 		}

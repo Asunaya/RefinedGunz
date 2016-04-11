@@ -64,7 +64,7 @@ public:
 	char*				val;
 
 	MHTA_StringArg(char *szText):MHyperTextArg(Arg){
-		val = strdup(szText);
+		val = _strdup(szText);
 	}
 	~MHTA_StringArg(){
 		if(val) free(val);

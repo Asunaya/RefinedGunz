@@ -30,7 +30,8 @@ void MCommandProfiler::Reset()
 
 void MCommandProfiler::Analysis()
 {
-	FILE* fp = fopen("CmdProfile.txt", "wt");
+	FILE* fp;
+	fopen_s(&fp, "CmdProfile.txt", "wt");
 	if (fp == 0) return;
 
 	PrintTitle(fp);
@@ -52,7 +53,7 @@ void MCommandProfiler::PrintTitle(FILE* fp)
 static char* AddCommaToNum(int num, char *buf, int buflen)
 { 
 	char strNum[128];
-	itoa(num, strNum, 10);
+	_itoa_s(num, strNum, 10);
 	int len = (int)strlen(strNum); 
 	char* str = strNum;
 

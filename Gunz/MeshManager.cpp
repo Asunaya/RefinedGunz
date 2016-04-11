@@ -56,8 +56,6 @@ MeshManager::MeshManager()
 		const char *Mesh = meshattr->value();
 		auto &map = PartsToEluMap.insert({ Mesh, std::unordered_map<std::string, std::string>() }).first->second;
 
-		//MLog("Adding mesh %s\n", Mesh);
-
 		for (auto node = listnode->first_node("parts"); node; node = node->next_sibling())
 		{
 			auto fileattr = node->first_attribute("file");
@@ -68,22 +66,15 @@ MeshManager::MeshManager()
 			const char *szFile = fileattr->value();
 			FileList.push_back(szFile);
 
-			//static const char parts_name[6][8] = { "face", "head", "chest", "hands", "legs", "feet" };
+			auto attr = node->first_attribute("part");
 
-			for (int i = 0; i < 5; i++)
+			while (attr)
 			{
-				auto attr = node->first_attribute("part");// parts_name[i]);
+				const char *parts = attr->value();
 
-				while (attr)
-				{
-					const char *parts = attr->value();
+				map.insert({ parts, szFile });
 
-					map.insert({ parts, szFile });
-
-					//MLog("Added parts %s -> %s\n", parts, szFile);
-
-					attr = attr->next_attribute("part");// parts_name[i]);
-				}
+				attr = attr->next_attribute("part");
 			}
 		}
 	}
@@ -101,7 +92,7 @@ RMeshNode *MeshManager::Get(const char *szMeshName, const char *szNodeName)
 
 	if (allocnode != AllocatedNodes.end())
 	{
-		allocnode->second.Inc();
+		allocnode->second.nReferences++;
 
 		auto meshit = MeshNodeToMeshMap.find(allocnode->second.pObj);
 
@@ -111,7 +102,7 @@ RMeshNode *MeshManager::Get(const char *szMeshName, const char *szNodeName)
 
 			if (allocmesh != AllocatedMeshes.end())
 			{
-				allocmesh->second.Inc();
+				allocmesh->second.nReferences++;
 			}
 		}
 
@@ -145,7 +136,7 @@ RMeshNode *MeshManager::Get(const char *szMeshName, const char *szNodeName)
 	if (allocmesh != AllocatedMeshes.end())
 	{
 		pMesh = allocmesh->second.pObj;
-		allocmesh->second.Inc();
+		allocmesh->second.nReferences++;
 		//MLog("Found already allocated mesh %s, ref count %d\n", pMesh->GetFileName(), allocmesh->second.nReferences);
 	}
 	else
@@ -204,7 +195,8 @@ void MeshManager::Release(RMeshNode *pNode)
 
 	if (allocnode != AllocatedNodes.end())
 	{
-		allocnode->second.Dec();
+		allocnode->second.nReferences--;
+
 		if (allocnode->second.nReferences <= 0)
 		{
 			AllocatedNodes.erase(allocnode);
@@ -226,7 +218,7 @@ void MeshManager::Release(RMeshNode *pNode)
 
 	if (allocmesh != AllocatedMeshes.end())
 	{
-		allocmesh->second.Dec();
+		allocmesh->second.nReferences--;
 
 		//MLog("Release mesh %s: ref count %d\n", meshname->second.c_str(), allocmesh->second.nReferences);
 

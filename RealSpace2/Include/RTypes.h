@@ -71,6 +71,7 @@ struct RMODEPARAMS {
 
 struct rboundingbox
 {
+	rboundingbox() {}
 	union {
 	struct {
 		float minx,miny,minz,maxx,maxy,maxz;
@@ -207,7 +208,7 @@ float GetDistance(const rboundingbox &bb,const rvector &point);
 // 삼각형의 면적
 float GetArea(rvector &v1,rvector &v2,rvector &v3);
 
-// 두 벡터의 x, y상에서의 각도
+// Returns the clockwise rotation of ta such that tb aligns with ta on xy
 float GetAngleOfVectors(rvector &ta,rvector &tb);
 
 // 원형보간된 vector.. a,b는 normalized 되어있어야함.

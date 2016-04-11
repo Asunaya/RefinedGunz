@@ -38,7 +38,6 @@ struct ZPACKEDDASHINFO {
 
 #pragma pack()
 
-
 inline void ZPostHPInfo(float fHP)
 {
 	ZPOSTCMD1(MC_PEER_HPINFO, MCmdParamFloat(fHP));
@@ -945,6 +944,17 @@ inline void ZPostSpec()
 inline void ZPostCompletedSkillmap(float fTime, const char *szCourse)
 {
 	ZPOSTCMD2(MC_PEER_COMPLETED_SKILLMAP, MCmdParamFloat(fTime), MCmdParamStr(szCourse));
+}
+
+inline void ZPostVoiceChat(const void *Buffer, int Length)
+{
+	ZPOSTCMD1(MC_MATCH_SEND_VOICE_CHAT, MCmdParamBlob(Buffer, Length));
+}
+
+template <size_t size>
+inline void ZPostCreateAccount(const char *Username, const unsigned char (&HashedPassword)[size], const char *Email)
+{
+	ZPOSTCMD3(MC_MATCH_REQUEST_CREATE_ACCOUNT, MCmdParamStr(szUsername), MCmdParamBlob(HashedPassword, sizeof(HashedPassword)), MCmdParamStr(szEmail));
 }
 
 #undef VEC

@@ -481,9 +481,8 @@ void ZPlayerListBox::AddPlayer(MUID& puid, ePlayerState state, int  nLevel,char*
 	bool bSpUser = false;
 
 	if(GetUserGradeIDColor(nGrade,_color,sp_name)) {
-//	if(GetUserInfoUID(puid,_color,sp_name,gid)) {
-		sprintf_s(szLevel,"--");
-		szRefName = sp_name;
+		sprintf_s(szLevel, "%2d", nLevel);
+		szRefName = szName;
 		bSpUser = true;
 	}
 	else {
@@ -531,8 +530,8 @@ void ZPlayerListBox::AddPlayer(MUID& puid, MMatchObjectStageState state, int nLe
 	MMatchUserGradeID gid = MMUG_FREE;
 
 	if(GetUserInfoUID(puid,_color,sp_name,gid)){
-		sprintf_s(szLevel,"--");
-		szRefName = sp_name;
+		sprintf_s(szLevel, "%2d", nLevel);
+		szRefName = szName;
 		bSpUser = true;
 	}
 	else {

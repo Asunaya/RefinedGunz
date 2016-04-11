@@ -12,8 +12,8 @@
 MAsyncProxy::MAsyncProxy()
 {
 	m_nThreadCount = 0;
-	BYTE nInitVal = (BYTE)(INVALID_HANDLE_VALUE);
-	FillMemory(m_ThreadPool, sizeof(HANDLE)*MAX_THREADPOOL_COUNT, nInitVal);
+	BYTE nInitVal = -1; //(BYTE)(INVALID_HANDLE_VALUE);
+	FillMemory(m_ThreadPool, sizeof(HANDLE) * MAX_THREADPOOL_COUNT, nInitVal);
 }
 
 MAsyncProxy::~MAsyncProxy()
@@ -170,17 +170,17 @@ DWORD MAsyncProxy::CrashDump(PEXCEPTION_POINTERS ExceptionInfo)
 		CreateDirectory("Log", NULL);
 
 	time_t		tClock;
-	struct tm*	ptmTime;
+	struct tm	tmTime;
 
 	time(&tClock);
-	ptmTime = localtime(&tClock);
+	localtime_s(&tmTime, &tClock);
 
 	char szFileName[_MAX_DIR];
 
 	int nFooter = 1;
 	while(TRUE) {
 		sprintf_s(szFileName, "Log/MAsyncProxy_%02d-%02d-%02d-%d.dmp", 
-			ptmTime->tm_year+1900, ptmTime->tm_mon+1, ptmTime->tm_mday, nFooter);
+			tmTime.tm_year+1900, tmTime.tm_mon+1, tmTime.tm_mday, nFooter);
 
 		if (PathFileExists(szFileName) == FALSE)
 			break;

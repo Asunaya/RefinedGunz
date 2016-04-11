@@ -406,12 +406,12 @@ int Mint::RegisterHotKey(unsigned long int nModifier, unsigned long int nVirtKey
 	_ASSERT(m_hWnd!=NULL);	// Should call SetHWND() before this function
 
 	char szAtomName[64] = {0,};
-	if(nModifier==MMODIFIER_ALT) strcat(szAtomName, "Alt");
-	if(nModifier==MMODIFIER_CTRL) strcat(szAtomName, "Ctrl");
-	if(nModifier==MMODIFIER_SHIFT) strcat(szAtomName, "Shift");
+	if(nModifier==MMODIFIER_ALT) strcat_safe(szAtomName, "Alt");
+	if(nModifier==MMODIFIER_CTRL) strcat_safe(szAtomName, "Ctrl");
+	if(nModifier==MMODIFIER_SHIFT) strcat_safe(szAtomName, "Shift");
 	char szKey[16] = {0, };
-	sprintf_s(szKey, "%d", nVirtKey);
-	strcat(szAtomName, szKey);
+	sprintf_safe(szKey, "%d", nVirtKey);
+	strcat_safe(szAtomName, szKey);
 
 	int nID = GlobalAddAtom(szAtomName);
 	if(nID==0) return 0;

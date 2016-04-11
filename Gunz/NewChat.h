@@ -2,11 +2,12 @@
 #include <d3dx9.h>
 #include <vector>
 #include <string>
+#include <memory>
 
 #define CHAT_DEFAULT_TEXT_COLOR 0xFFC8C8C8
 #define CHAT_DEFAULT_INTERFACE_COLOR 0xFF00A5C3
 
-// Note that while FT_WRAP and FT_LINEBREAK are both linebreaks, the former is placed by the linewrapping mechanism and the latter is explicitly placed by the message creator.
+// Note that while FT_WRAP and FT_LINEBREAK are both linebreaks, the former is placed by the line-wrapping mechanism and the latter is explicitly placed by the message creator.
 enum FormatSpecifierType{
 	FT_WRAP,
 	FT_LINEBREAK,
@@ -104,7 +105,9 @@ enum ChatWindowAction{
 
 class Chat{
 public:
-	Chat(std::string &strFont, int nFontSize);
+	void Create(const std::string &strFont, int nFontSize);
+	void Destroy();
+
 	void EnableInput(bool bEnable, bool bToTeam);
 	void OutputChatMsg(const char *szMsg);
 	void OutputChatMsg(const char *szMsg, DWORD dwColor);
@@ -146,8 +149,8 @@ private:
 	bool bInputEnabled;
 	POINT Cursor;
 	D3DRECT Border;
-	MFontR2 *pFont;
-	MFontR2 *pItalicFont;
+	std::unique_ptr<MFontR2> pFont;
+	std::unique_ptr<MFontR2> pItalicFont;
 	// The normal font is already bold right now.
 	//MFontR2 *pBoldFont;
 	//MFontR2 *pBoldItalicFont;
@@ -228,5 +231,5 @@ private:
 	void ResetFonts();
 };
 
-extern Chat *g_pChat;
+extern Chat g_Chat;
 extern bool g_bNewChat;

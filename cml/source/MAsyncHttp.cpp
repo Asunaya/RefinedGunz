@@ -198,8 +198,8 @@ bool MAsyncHttp::Get(const char* pszURL)
 
 	char szFullPath[_MAX_DIR];
 	strcpy_safe(szFullPath, GetBasePath());
-	strcat(szFullPath, "/");
-	strcat(szFullPath, szFileName);
+	strcat_safe(szFullPath, "/");
+	strcat_safe(szFullPath, szFileName);
 
 	sprintf_s(szLog, "MAsyncHttp> Download Begin : %s \n", szFileName);
 	OutputDebugString(szLog);

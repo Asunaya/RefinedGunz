@@ -495,8 +495,44 @@ void LoadModuleSymbols(DWORD dwProcessId, HANDLE hProcess)
 	}   
 }
 
-DWORD GetCrashInfo(LPEXCEPTION_POINTERS exceptionInfo,string& str)
+DWORD GetCrashInfo(LPEXCEPTION_POINTERS exceptionInfo, std::string& str)
 {
+	auto Append = [&](const char *Format, ...)
+	{
+		char buf[512];
+
+		va_list args;
+
+		va_start(args, Format);
+		int ret = _vsnprintf_s(buf, sizeof(buf) - 1, Format, args);
+		va_end(args);
+
+		str += buf;
+	};
+
+	char LastError[256];
+
+	auto GetLastErrorString = [&]() -> const char*
+	{
+		auto ret = FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM, nullptr, GetLastError(),
+			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), LastError, sizeof(LastError), nullptr);
+
+		if (!ret)
+			return "Failed to retrieve error string";
+
+		return LastError;
+	};
+
+	auto PrintError = [&](const char* FunctionName)
+	{
+		auto LastError = GetLastError();
+
+		if (LastError == ERROR_INVALID_ADDRESS)
+			return;
+
+		Append("     %s failed with error code %d: %s\n", LastError, GetLastErrorString());
+	};
+
 	DWORD             dwDisplacement = 0;
 	DWORD             dwMachType;
 	int               nframes = 0;
@@ -595,8 +631,6 @@ DWORD GetCrashInfo(LPEXCEPTION_POINTERS exceptionInfo,string& str)
 	pSymbol->SizeOfStruct = sizeof(IMAGEHLP_SYMBOL);
 	pSymbol->MaxNameLength = sizeof(buffer) - sizeof(IMAGEHLP_SYMBOL) + 1;
 
-	char t_temp[1024];
-
 	while (g_pfnStackWalk(dwMachType, hProcess, hThread, &stk, lpContext, 0, g_pfnFunctionTableAccessRoutine, g_pfnGetModuleBaseRoutine, 0))
 	{
 		if (!fDisplayCurrentStackFrame)
@@ -619,39 +653,42 @@ DWORD GetCrashInfo(LPEXCEPTION_POINTERS exceptionInfo,string& str)
 			szSymName = "<nosymbols>";
 //			::MessageBox(NULL,"SymGetSymFromAddr failed","error",MB_OK);
 
-			sprintf_s(t_temp,"SymGetSymFromAddr error %d\n",GetLastError());str += t_temp;			
+			PrintError("SymGetSymFromAddr");
 		}
 
 		nframes++;
 
 		mi.SizeOfStruct = sizeof(mi);
 
-		int Offset = 0x1337;
+		//int Offset = 0x1337;
+		char Offset[32];
 		bool bGotModule = false;
 
 		if (g_pfnSymGetModuleInfo(hProcess, stk.AddrPC.Offset, &mi))
 		{
-			Offset = stk.AddrPC.Offset - mi.BaseOfImage;
+			//Offset = stk.AddrPC.Offset - mi.BaseOfImage;
+			_itoa_s(stk.AddrPC.Offset - mi.BaseOfImage, Offset, 16);
 			bGotModule = true;
 		}
 		else {
+			strcpy(Offset, "???");
 		}
 
-		sprintf_s(t_temp, "Frame %02d: Address: %08X (base + %X), return address: %08X\n", nframes, stk.AddrPC.Offset, Offset, stk.AddrReturn.Offset); str += t_temp;
+		Append("Frame %02d: Address: %08X (base + 0x%s), return address: %08X\n", nframes, stk.AddrPC.Offset, Offset, stk.AddrReturn.Offset);
 
 		if (bGotModule)
 		{
-			sprintf_s(t_temp, "     ModuleName : %s\n", mi.ModuleName);	str += t_temp;
+			Append("     ModuleName : %s\n", mi.ModuleName);
 		}
 		else
 		{
-			sprintf_s(t_temp, "     SymGetModuleInfo error %d\n", GetLastError()); str += t_temp;
+			PrintError("SymGetModuleInfo");
 		}
 
-		sprintf_s(t_temp, "     Param[0] : %08x\n", stk.Params[0]);		str += t_temp;
-		sprintf_s(t_temp, "     Param[1] : %08x\n", stk.Params[1]);		str += t_temp;
-		sprintf_s(t_temp, "     Param[2] : %08x\n", stk.Params[2]);		str += t_temp;
-		sprintf_s(t_temp, "     Param[3] : %08x\n", stk.Params[3]);		str += t_temp;
+		Append("     Param[0] : %08x\n", stk.Params[0]);
+		Append("     Param[1] : %08x\n", stk.Params[1]);
+		Append("     Param[2] : %08x\n", stk.Params[2]);
+		Append("     Param[3] : %08x\n", stk.Params[3]);
 
 		dwDisplacement = 0;
 
@@ -661,16 +698,16 @@ DWORD GetCrashInfo(LPEXCEPTION_POINTERS exceptionInfo,string& str)
 		{
 			if (g_pfnSymGetLineFromAddr( hProcess, stk.AddrPC.Offset, &dwDisplacement, &imageLine))
 			{
-				sprintf_s(t_temp, "     File Name : %s\n", imageLine.FileName);		str += t_temp;
-				sprintf_s(t_temp, "     Line Number : %d\n", imageLine.LineNumber);	str += t_temp;
+				Append("     File Name : %s\n", imageLine.FileName);
+				Append("     Line Number : %d\n", imageLine.LineNumber);
 			}else {
-				sprintf_s(t_temp, "SymGetLineFromAddr error %d\n", GetLastError()); str += t_temp;
+				PrintError("SymGetLineFromAddr");
 			}
 		}
 
-		sprintf_s(t_temp, "     Function Name : %s\n", szSymName);			str += t_temp;
+		Append("     Function Name : %s\n", szSymName);
 
-		sprintf_s(t_temp, "\n\n");
+		Append("\n\n");
 
 		if (!stk.AddrReturn.Offset)
 		{

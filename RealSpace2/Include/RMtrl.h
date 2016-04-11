@@ -46,6 +46,7 @@ class RMtrl
 public:
 	RMtrl();
 	~RMtrl();
+	//RMtrl(const RMtrl& rhs);
 
 	void CheckAniTexture();
 

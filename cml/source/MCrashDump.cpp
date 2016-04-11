@@ -43,9 +43,9 @@ DWORD CrashExceptionDump(PEXCEPTION_POINTERS ExceptionInfo, const char* szDumpFi
 	CloseHandle(hFile);
 
 	if (IsLogAvailable())
-	{
 		MFilterException(ExceptionInfo);
-	}
+	else
+		MessageBox(0, "Crashed! MLog not available", "RGunz", 0);
 
 	return EXCEPTION_EXECUTE_HANDLER;
 }

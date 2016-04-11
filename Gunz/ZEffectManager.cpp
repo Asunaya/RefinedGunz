@@ -26,6 +26,8 @@
 
 #include <dxerr9.h>
 
+#include "RGMain.h"
+
 
 #ifndef _PUBLISH
 class ZEffectValidator : public set<ZEffect*> 
@@ -166,6 +168,104 @@ public:
 		return false;
 	}
 };
+
+template <typename T, typename T2>
+class TexSwapEffect : public T
+{
+public:
+	MUID UID;
+	T2 Getter;
+
+	template <typename... Args>
+	TexSwapEffect(const MUID& uid, T2 fn, Args... args) : UID(uid), Getter(fn), T(args...)
+	{
+	}
+
+	virtual ~TexSwapEffect() override
+	{
+	}
+
+	virtual bool Draw(unsigned long int nTime) override
+	{
+		auto SetTextures = [&](std::vector<IDirect3DTexture9*> &Vec)
+		{
+			size_t i = 0;
+			for (auto Mtrl : m_VMesh.m_pMesh->m_mtrl_list_ex)
+			{
+				if (Vec.size() < i + 1)
+					break;
+
+				Mtrl->m_pTexture->m_pTex = Vec[i];
+
+				i++;
+			}
+		};
+
+		std::vector<IDirect3DTexture9*> OrigTextures;
+		std::vector<IDirect3DTexture9*>* Textures = Getter(UID);
+		bool SwitchTextures = Textures != nullptr;
+
+		if (SwitchTextures)
+		{
+			for (auto Mtrl : m_VMesh.m_pMesh->m_mtrl_list_ex)
+				OrigTextures.push_back(Mtrl->m_pTexture->m_pTex);
+
+			SetTextures(*Textures);
+		}
+
+		auto ret = T::Draw(nTime);
+
+		if (SwitchTextures)
+		{
+			SetTextures(OrigTextures);
+		}
+
+		return ret;
+	}
+};
+
+template <typename T, typename T2, typename... ArgsType>
+TexSwapEffect<T, T2>* MakeTexSwapEffect(const MUID& UID, T2 fn, ArgsType... args)
+{
+	return new TexSwapEffect<T, T2>(UID, fn, args...);
+}
+
+uint32_t BlendColor = 0;
+
+template <typename T, typename T2>
+class TexBlendEffect : public T
+{
+	T2 Get;
+public:
+
+	template <typename... Args>
+	TexBlendEffect(T2 fn, Args... args) : Get(fn), T(args...)
+	{
+	}
+
+	virtual ~TexBlendEffect() override
+	{
+	}
+
+	virtual bool Draw(unsigned long int nTime) override
+	{
+		uint32_t Color = Get();
+		
+		BlendColor = Color;
+
+		auto ret = T::Draw(nTime);
+
+		BlendColor = 0;
+
+		return ret;
+	}
+};
+
+template <typename T, typename T2, typename... ArgsType>
+TexBlendEffect<T, T2>* MakeTexBlendEffect(T2 fn, ArgsType... args)
+{
+	return new TexBlendEffect<T, T2>(fn, args...);
+}
 
 //////////////////////////////////////////////////////////////////////////////////
 // ZEffect
@@ -354,6 +454,9 @@ bool ZEffectManager::Create(void)
 
 	m_pSwordWaveEffect[0]		= m_pEffectMeshMgr->Get("sword_wave_effect");
 	m_pSwordWaveEffect[1]		= m_pEffectMeshMgr->Get("sword_slash_effect");
+
+	m_pChargingEffect = m_pEffectMeshMgr->Get("ef_spirits.elu");
+	m_pChargedEffect = m_pEffectMeshMgr->Get("ef_spirits.elu_1.elu");
 
 	m_pPinkSwordWaveEffect = m_pEffectMeshMgr->Get("pink_massive");
 	m_pGreenSwordWaveEffect = m_pEffectMeshMgr->Get("green_massive");
@@ -1854,61 +1957,53 @@ void ZEffectManager::AddShotEffect(rvector* pSource,int size, rvector& Target, r
 	}
 }
 
-void ZEffectManager::AddSwordWaveEffect(const rvector &Target, const rvector &Dir)
+void ZEffectManager::AddSwordWaveEffect(const MUID& UID, const rvector &Target, const rvector &Dir)
 {
-	ZEffect* pNew = NULL;
+	ZEffectSlash* pNew = nullptr;
 
 	rvector dir = Dir;//rvector(0.f,1.f,0.f);
 	dir.z = 0.f;
 	Normalize(dir);
 
-	pNew = new ZEffectSlash(m_pSwordWaveEffect[1], Target, dir);
-//	((ZEffectSlash*)pNew)->SetScale(rvector(3.5f,3.5f,3.5f));
-	((ZEffectSlash*)pNew)->SetAlignType(1);
-//	((ZEffectSlash*)pNew)->SetStartTime(start_time);
-//	((ZEffectSlash*)pNew)->SetDelayPos(pObj->m_UID);
+	auto pair = g_RGMain.GetPlayerSwordColor(UID);
 
-	Add(pNew);
-}
+	if (pair.first)
+	{
+		hsv HSVColor;
+		HSVColor.h = rand() % 360;
+		HSVColor.s = 1.0;
+		HSVColor.v = 1.0;
 
-void ZEffectManager::AddPinkSwordWaveEffect(const rvector &Target, const rvector &Dir)
-{
-	ZEffect* pNew = NULL;
+		auto GetRainbowColor = [HSVColor]() mutable
+		{
+			double Delta = g_RGMain.GetElapsedTime();
 
-	rvector dir = Dir;
-	dir.z = 0.f;
-	Normalize(dir);
+			HSVColor.h += 360.0 / 2.0 * Delta;
+			HSVColor.h = fmod(HSVColor.h, 360.0);
 
-	pNew = new ZEffectSlash(m_pPinkSwordWaveEffect, Target, dir);
-	((ZEffectSlash*)pNew)->SetAlignType(1);
+			rgb RGBColor = hsv2rgb(HSVColor);
 
-	Add(pNew);
-}
+			uint32_t Color = 0xFF000000 | (int(RGBColor.r * 255) << 16) | (int(RGBColor.g * 255) << 8) | int(RGBColor.b * 255);
 
-void ZEffectManager::AddGreenSwordWaveEffect(const rvector &Target, const rvector &Dir)
-{
-	ZEffect* pNew = NULL;
+			return Color;
+		};
 
-	rvector dir = Dir;
-	dir.z = 0.f;
-	Normalize(dir);
+		auto GetColor = [GetRainbowColor, Color = pair.second]() mutable
+		{
+			if (Color == 0x12345678)
+				return GetRainbowColor();
 
-	pNew = new ZEffectSlash(m_pGreenSwordWaveEffect, Target, dir);
-	((ZEffectSlash*)pNew)->SetAlignType(1);
+			return Color;
+		};
 
-	Add(pNew);
-}
+		pNew = MakeTexBlendEffect<ZEffectSlash>(GetColor, m_pSwordWaveEffect[1], Target, dir);
+	}
+	else
+	{
+		pNew = new ZEffectSlash(m_pSwordWaveEffect[1], Target, dir);
+	}
 
-void ZEffectManager::AddBlueSwordWaveEffect(const rvector &Target, const rvector &Dir)
-{
-	ZEffect* pNew = NULL;
-
-	rvector dir = Dir;
-	dir.z = 0.f;
-	Normalize(dir);
-
-	pNew = new ZEffectSlash(m_pBlueSwordWaveEffect, Target, dir);
-	((ZEffectSlash*)pNew)->SetAlignType(1);
+	pNew->SetAlignType(1);
 
 	Add(pNew);
 }
@@ -2906,22 +3001,47 @@ void ZEffectManager::AddChargingEffect( ZObject *pObj )
 {
 	ZCharacter *pChar = static_cast<ZCharacter *>(pObj);
 
-	ZItem *pItem = pChar->GetItems()->GetItem(MMCIP_MELEE);
-	if (!pItem) return;
-
-	MMatchItemDesc *pDesc = pItem->GetDesc();
-	if (!pDesc) return;
-
-	if (pDesc->m_nID == 8501)
-		return ZGetEffectManager()->AddPinkChargingEffect(pObj);
-	else if (pDesc->m_nID == 8502)
-		return ZGetEffectManager()->AddGreenChargingEffect(pObj);
-	else if (pDesc->m_nID == 8503)
-		return ZGetEffectManager()->AddBlueChargingEffect(pObj);
-
 	rvector TargetNormal = rvector(1,0,0);
-	ZEffectCharging *pNew = new ZEffectCharging(m_pEffectMeshMgr->Get("ef_spirits.elu"),pObj->m_Position,TargetNormal,pObj);	
-	((ZEffectCharging*)pNew)->SetAlignType(1);
+
+	ZEffectCharging* pNew;
+
+	auto pair = g_RGMain.GetPlayerSwordColor(pObj->GetUID());
+
+	if (pair.first)
+	{
+		hsv HSVColor;
+		HSVColor.h = rand() % 360;
+		HSVColor.s = 1.0;
+		HSVColor.v = 1.0;
+
+		auto GetRainbowColor = [HSVColor]() mutable
+		{
+			double Delta = g_RGMain.GetElapsedTime();
+
+			HSVColor.h += 360.0 / 2.0 * Delta;
+			HSVColor.h = fmod(HSVColor.h, 360.0);
+
+			rgb RGBColor = hsv2rgb(HSVColor);
+
+			uint32_t Color = 0xFF000000 | (int(RGBColor.r * 255) << 16) | (int(RGBColor.g * 255) << 8) | int(RGBColor.b * 255);
+
+			return Color;
+		};
+
+		auto GetColor = [GetRainbowColor, Color = pair.second]() mutable
+		{
+			if (Color == 0x12345678)
+				return GetRainbowColor();
+
+			return Color;
+		};
+
+		pNew = MakeTexBlendEffect<ZEffectCharging>(GetColor, m_pChargingEffect, pObj->m_Position, TargetNormal, pObj);
+	}
+	else
+		pNew = new ZEffectCharging(m_pChargingEffect,pObj->m_Position,TargetNormal,pObj);
+
+	pNew->SetAlignType(1);
 	Add(pNew);
 }
 
@@ -2929,70 +3049,47 @@ void ZEffectManager::AddChargedEffect( ZObject *pObj )
 {
 	ZCharacter *pChar = static_cast<ZCharacter *>(pObj);
 
-	ZItem *pItem = pChar->GetItems()->GetItem(MMCIP_MELEE);
-	if (!pItem) return;
-
-	MMatchItemDesc *pDesc = pItem->GetDesc();
-	if (!pDesc) return;
-
-	if (pDesc->m_nID == 8501)
-		return ZGetEffectManager()->AddPinkChargedEffect(pObj);
-	else if (pDesc->m_nID == 8502)
-		return ZGetEffectManager()->AddGreenChargedEffect(pObj);
-	else if (pDesc->m_nID == 8503)
-		return ZGetEffectManager()->AddBlueChargedEffect(pObj);
-
 	rvector TargetNormal = rvector(1,0,0);
-	ZEffectCharged *pNew = new ZEffectCharged(m_pEffectMeshMgr->Get("ef_spirits.elu_1.elu"),pObj->m_Position,TargetNormal,pObj);
-	((ZEffectCharged*)pNew)->SetAlignType(1);
-	Add(pNew);
-}
 
-void ZEffectManager::AddPinkChargingEffect(ZObject *pObj)
-{
-	rvector TargetNormal = rvector(1, 0, 0);
-	ZEffectCharging *pNew = new ZEffectCharging(m_pPinkChargingEffect, pObj->m_Position, TargetNormal, pObj);
-	((ZEffectCharging*)pNew)->SetAlignType(1);
-	Add(pNew);
-}
+	ZEffectCharged* pNew;
 
-void ZEffectManager::AddPinkChargedEffect(ZObject *pObj)
-{
-	rvector TargetNormal = rvector(1, 0, 0);
-	ZEffectCharged *pNew = new ZEffectCharged(m_pPinkChargedEffect, pObj->m_Position, TargetNormal, pObj);
-	((ZEffectCharged*)pNew)->SetAlignType(1);
-	Add(pNew);
-}
+	auto pair = g_RGMain.GetPlayerSwordColor(pObj->GetUID());
 
-void ZEffectManager::AddGreenChargingEffect(ZObject *pObj)
-{
-	rvector TargetNormal = rvector(1, 0, 0);
-	ZEffectCharging *pNew = new ZEffectCharging(m_pGreenChargingEffect, pObj->m_Position, TargetNormal, pObj);
-	((ZEffectCharging*)pNew)->SetAlignType(1);
-	Add(pNew);
-}
+	if (pair.first)
+	{
+		hsv HSVColor;
+		HSVColor.h = rand() % 360;
+		HSVColor.s = 1.0;
+		HSVColor.v = 1.0;
 
-void ZEffectManager::AddGreenChargedEffect(ZObject *pObj)
-{
-	rvector TargetNormal = rvector(1, 0, 0);
-	ZEffectCharged *pNew = new ZEffectCharged(m_pGreenChargedEffect, pObj->m_Position, TargetNormal, pObj);
-	((ZEffectCharged*)pNew)->SetAlignType(1);
-	Add(pNew);
-}
+		auto GetRainbowColor = [HSVColor]() mutable
+		{
+			double Delta = g_RGMain.GetElapsedTime();
 
-void ZEffectManager::AddBlueChargingEffect(ZObject *pObj)
-{
-	rvector TargetNormal = rvector(1, 0, 0);
-	ZEffectCharging *pNew = new ZEffectCharging(m_pBlueChargingEffect, pObj->m_Position, TargetNormal, pObj);
-	((ZEffectCharging*)pNew)->SetAlignType(1);
-	Add(pNew);
-}
+			HSVColor.h += 360.0 / 2.0 * Delta;
+			HSVColor.h = fmod(HSVColor.h, 360.0);
 
-void ZEffectManager::AddBlueChargedEffect(ZObject *pObj)
-{
-	rvector TargetNormal = rvector(1, 0, 0);
-	ZEffectCharged *pNew = new ZEffectCharged(m_pBlueChargedEffect, pObj->m_Position, TargetNormal, pObj);
-	((ZEffectCharged*)pNew)->SetAlignType(1);
+			rgb RGBColor = hsv2rgb(HSVColor);
+
+			uint32_t Color = 0xFF000000 | (int(RGBColor.r * 255) << 16) | (int(RGBColor.g * 255) << 8) | int(RGBColor.b * 255);
+
+			return Color;
+		};
+
+		auto GetColor = [GetRainbowColor, Color = pair.second]() mutable
+		{
+			if (Color == 0x12345678)
+				return GetRainbowColor();
+
+			return Color;
+		};
+
+		pNew = MakeTexBlendEffect<ZEffectCharged>(GetColor, m_pChargedEffect, pObj->m_Position, TargetNormal, pObj);
+	}
+	else
+		pNew = new ZEffectCharged(m_pChargedEffect, pObj->m_Position, TargetNormal, pObj);
+
+	pNew->SetAlignType(1);
 	Add(pNew);
 }
 

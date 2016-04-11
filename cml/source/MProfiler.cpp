@@ -236,7 +236,8 @@ void MProfiler::EndProfile(char* szProfileName)
 
 bool MProfiler::FinalAnalysis(char* szFileName)
 {
-	FILE* fp = fopen(szFileName, "wt");
+	FILE* fp;
+	fopen_s(&fp, szFileName, "wt");
 	if(fp==NULL) return false;
 
 	static char szLog[1024];

@@ -555,9 +555,6 @@
     <ClCompile Include="Source\MMatchFormula.cpp">
       <Filter>MatchServer\Game</Filter>
     </ClCompile>
-    <ClCompile Include="Source\MMatchMap.cpp">
-      <Filter>MatchServer\Game</Filter>
-    </ClCompile>
     <ClCompile Include="Source\MMatchStage.cpp">
       <Filter>MatchServer\Game</Filter>
     </ClCompile>
@@ -660,9 +657,6 @@
     <ClCompile Include="Source\MMatchRuleSurvival.cpp">
       <Filter>MatchServer\Game\GameType\QuestGameType</Filter>
     </ClCompile>
-    <ClCompile Include="Source\MAgentObject.cpp">
-      <Filter>MatchServer\Object</Filter>
-    </ClCompile>
     <ClCompile Include="Source\MMatchAntiHack.cpp">
       <Filter>MatchServer\Object</Filter>
     </ClCompile>
@@ -700,9 +694,6 @@
       <Filter>MatchServer\Server</Filter>
     </ClCompile>
     <ClCompile Include="Source\MMatchFriendInfo.cpp">
-      <Filter>MatchServer\Server</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\MMatchGlobal.cpp">
       <Filter>MatchServer\Server</Filter>
     </ClCompile>
     <ClCompile Include="Source\MMatchNotify.cpp">
@@ -843,7 +834,6 @@
     <ClCompile Include="Source\MMatchStringResManager.cpp">
       <Filter>StringRes</Filter>
     </ClCompile>
-    <ClCompile Include="Source\MMatchDebug.cpp" />
     <ClCompile Include="Source\stdafx.cpp" />
     <ClCompile Include="MMatchRuleSkillmap.cpp">
       <Filter>MatchServer\Game\GameType</Filter>

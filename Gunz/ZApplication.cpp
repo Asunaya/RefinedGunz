@@ -790,7 +790,7 @@ void ZApplication::OnRestore()
 		}
 	}
 
-	g_OnResetDevice.CallAll();
+	g_RGMain.OnReset();
 }
 
 void ZApplication::Exit()

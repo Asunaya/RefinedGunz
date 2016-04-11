@@ -626,10 +626,13 @@ public:
 	void RouteToStageWaitRoom(const MUID& uidStage, MCommand* pCommand);
 	/// Command를 지정 Stage 배틀 참가자에게 전송
 	void RouteToBattle(const MUID& uidStage, MCommand* pCommand);
+	void RouteToBattleExcept(const MUID& uidStage, MCommand* pCommand, const MUID& uidExceptedPlayer);
 	/// Command를 지정 Clan 에게 전송
 	void RouteToClan(const int nCLID, MCommand* pCommand);
 	// int 결과값있는 Command를 지정 Object Listener에게 전송
 	void RouteResponseToListener(MObject* pObject, const int nCmdID, int nResult);
+
+	void OnVoiceChat(const MUID& Player, unsigned char* EncodedFrame, int Length);
 
 //	void ResponseObjectUpdate(MUID& TargetUID, MObject* pObject);
 	void ResponseBridgePeer(const MUID& uidChar, int nCode);

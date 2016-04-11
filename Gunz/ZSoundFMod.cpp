@@ -432,3 +432,70 @@ signed char F_CALLBACKAPI ZSoundFMod::STREAM_END_CALLBACK(FSOUND_STREAM *stream,
 
     return TRUE;
 }
+
+MicStream ZSoundFMod::OpenMicStream(int nSampleRate)
+{
+	//FSOUND_Stream_SetBufferSize(60);
+	auto pStream = FSOUND_Stream_Create(MicStreamCallback, sizeof(MicFrame::pcm), FSOUND_LOOP_OFF | FSOUND_NORMAL | FSOUND_STREAMABLE | FSOUND_LOADMEMORY, nSampleRate, nullptr);
+
+	MicStreams.insert({ pStream, MicStuff() });
+
+	return pStream;
+}
+
+bool ZSoundFMod::AddMicData(MicStream pStream, void *pData, int Length)
+{
+	auto it = MicStreams.find(pStream);
+
+	if (it == MicStreams.end())
+		return false;
+
+	//MLog("Add mic data!\n");
+
+	auto &Queue = it->second.Data;
+
+	MicFrame mf;
+	memcpy(mf.pcm, pData, sizeof(mf.pcm));
+	Queue.push(mf);
+
+	if (!it->second.bStreaming && Queue.size() > 2)
+	{
+		FSOUND_Stream_Play(FSOUND_FREE, pStream);
+		it->second.bStreaming = true;
+		MLog("Playing!\n");
+	}
+
+	return true;
+}
+
+void ZSoundFMod::CloseMicStream(MicStream pStream)
+{
+	FSOUND_Stream_Close(pStream);
+}
+
+signed char F_CALLBACKAPI ZSoundFMod::MicStreamCallback(FSOUND_STREAM *stream, void *buff, int len, void *userdata)
+{
+	auto it = GetInstance()->MicStreams.find(stream);
+
+	if (it == GetInstance()->MicStreams.end())
+		return FALSE;
+
+	auto &Queue = it->second.Data;
+
+	if (Queue.empty())
+	{
+		MLog("Empty!\n");
+		it->second.bStreaming = false;
+		return FALSE;
+	}
+
+	auto &p = Queue.front();
+
+	memcpy(buff, p.pcm, len);
+
+	Queue.pop();
+
+	//MLog("Added more stuff!\n");
+
+	return TRUE;
+}

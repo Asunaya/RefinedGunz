@@ -23,9 +23,6 @@ private:
 	{
 		T *pObj;
 		int nReferences;
-
-		void Inc() { nReferences++; }
-		void Dec() { nReferences--; }
 	};
 
 	std::unordered_map<std::string, Allocation<RMesh>> AllocatedMeshes;
@@ -45,18 +42,20 @@ private:
 template<typename T_this, typename T_callback>
 void MeshManager::GetAsync(const char *szMeshName, const char *szNodeName, T_this pThis, T_callback Callback)
 {
-	std::unique_lock<std::mutex> lock(ObjQueueMutex);
+	{
+		std::lock_guard<std::mutex> lock(ObjQueueMutex);
 
-	QueuedObjs.push_back(pThis);
-
-	lock.unlock();
+		QueuedObjs.push_back(pThis);
+	}
 
 	std::string PersistentMesh(szMeshName), PersistentNode(szNodeName);
 
 	g_TaskManager.AddTask([this, PersistentMesh, PersistentNode, pThis, Callback](){
 		auto ret = Get(PersistentMesh.c_str(), PersistentNode.c_str());
 
-		g_RGMain.Invoke([=](){
+		extern void Invoke(std::function<void()>);
+
+		Invoke([=](){
 			// We want to make sure the object hasn't been destroyed between the GetAsync call and the invokation.
 			std::lock_guard<std::mutex> lock(ObjQueueMutex);
 

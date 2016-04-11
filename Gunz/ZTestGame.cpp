@@ -12,7 +12,7 @@
 
 #include "ZModule_Skills.h"
 
-void CreateTestGame(char *mapname, int nDummyCharacterCount, bool bShot,bool bAITest, int nParam1)
+void CreateTestGame(char *mapname, int nDummyCharacterCount, bool bShot, bool bAITest, int nParam1)
 {
 	ZApplication::GetStageInterface()->SetMapName(mapname);
 	ZGetGameClient()->GetMatchStageSetting()->SetMapName(mapname);
@@ -27,7 +27,7 @@ void CreateTestGame(char *mapname, int nDummyCharacterCount, bool bShot,bool bAI
 	MTD_CharInfo info;
 	strcpy_safe(info.szName,"Maiet");
 	info.szClanName[0]=0;
-	info.nSex=1;
+	info.nSex = 0;
 	info.nHP = 100;
 	info.nAP = 100;
 
@@ -45,7 +45,7 @@ void CreateTestGame(char *mapname, int nDummyCharacterCount, bool bShot,bool bAI
 	info.nEquipedItemDesc[MMCIP_CUSTOM1] = 400007;
 	//info.nEquipedItemDesc[MMCIP_CUSTOM2] = 600005;	// Ä«³ëÇª½ºÀÇ ´«
 
-	g_pGame->CreateMyCharacter(&info);
+	g_pGame->CreateMyCharacter(info);
 	g_pGame->m_pMyCharacter->Revival();
 
 	rvector pos=rvector(0,0,0), dir=rvector(0,1,0);

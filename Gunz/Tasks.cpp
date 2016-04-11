@@ -5,7 +5,7 @@ TaskManager g_TaskManager;
 
 TaskManager::TaskManager()
 {
-	thr = std::thread([this](){ while (true) ThreadLoop(); });
+	//thr = std::thread([this](){ while (true) ThreadLoop(); });
 }
 
 void TaskManager::ThreadLoop()

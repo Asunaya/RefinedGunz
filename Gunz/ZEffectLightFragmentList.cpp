@@ -29,15 +29,15 @@ void ZEffectLightFragmentList::Update(float fElapsed)
 
 		rvector dir=p->velocity;
 		Normalize(dir);
-		
+
 		rvector right;
 		CrossProduct(&right, dir, RCameraDirection);
 		CrossProduct(&p->normal, dir, right);
 		CrossProduct(&p->up, p->normal, dir);
 
-		p->velocity+=fElapsed*p->accel;
-		p->position+=fElapsed*p->velocity;
-		p->fOpacity = min(1,max(0,(m_fLifeTime - p->fElapsedTime)/m_fVanishTime));
+		p->velocity += fElapsed*p->accel;
+		p->position += fElapsed*p->velocity;
+		p->fOpacity = min(1.f, max(0.f, (m_fLifeTime - p->fElapsedTime) / m_fVanishTime));
 		i++;
 	}
 }

@@ -49,6 +49,8 @@ class ZInput
 	float			m_fRotationDeltaX;	// 누적된 회전값 움직임
 	float			m_fRotationDeltaY;
 
+	friend class Chat;
+
 public:
 	ZInput(ZDirectInput* pDI);
 	virtual ~ZInput(void);

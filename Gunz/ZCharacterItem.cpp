@@ -181,3 +181,23 @@ bool ZCharacterItem::Load(ZFile *file)
 
 	return true;
 }
+
+void ZCharacterItem::Save(BulletInfo(&Bullets)[MMCIP_END])
+{
+	for (int i = 0; i < ArraySize(Bullets); i++)
+	{
+		ZItem *Item = GetItem(MMatchCharItemParts(i));
+		Bullets[i].Clip = Item->GetBullet();
+		Bullets[i].Magazine = Item->GetBulletAMagazine();
+	}
+}
+
+void ZCharacterItem::Load(const BulletInfo(&Bullets)[MMCIP_END])
+{
+	for (int i = 0; i < ArraySize(Bullets); i++)
+	{
+		ZItem *Item = GetItem(MMatchCharItemParts(i));
+		Item->SetBullet(Bullets[i].Clip);
+		Item->SetBulletAMagazine(Bullets[i].Magazine);
+	}
+}

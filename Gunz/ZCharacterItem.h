@@ -8,6 +8,7 @@
 #include <algorithm>
 using namespace std;
 
+struct BulletInfo;
 
 /// 캐릭터가 장비하고 있는 아이템들
 class ZCharacterItem
@@ -52,6 +53,8 @@ public:
 
 	bool Save(ZFile *file);
 	bool Load(ZFile *file);
+	void Save(BulletInfo(&Bullets)[MMCIP_END]);
+	void Load(const BulletInfo(&Bullets)[MMCIP_END]);
 };
 
 #endif

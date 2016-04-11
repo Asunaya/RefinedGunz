@@ -2,7 +2,7 @@
 #define AFX_RMESH_H__6FD23F3A_D138_4F55_B03F_A629D35788CB__INCLUDED_
 
 #include <vector>
-#include <hash_map>
+#include <unordered_map>
 
 #include "RMeshNode.h"
 #include "RAnimationMgr.h"
@@ -325,6 +325,7 @@ public:
 
 	RMesh();
 	~RMesh();
+	RMesh(const RMesh& rhs);
 
 	void Init();
 	void Destroy();
@@ -444,9 +445,9 @@ public:
 
 	bool CheckOcclusion( RMeshNode *pMeshNode );
 
-	inline void CalcNodeMatrixBBox(RMeshNode* pNode);
-	inline void CalcBBox(D3DXVECTOR3* v);
-	inline void SubCalcBBox(D3DXVECTOR3* max,D3DXVECTOR3* min,D3DXVECTOR3* v);
+	void CalcNodeMatrixBBox(RMeshNode* pNode);
+	void CalcBBox(D3DXVECTOR3* v);
+	void SubCalcBBox(D3DXVECTOR3* max,D3DXVECTOR3* min,D3DXVECTOR3* v);
 
 private:
 

@@ -210,7 +210,7 @@ bool MEmblemMgr::SaveCache()
 
 		emblemElement.AppendText("\n\t\t");
 
-		sprintf_s(szBuf,"%u", pNode->GetTimeLastUsed());
+		sprintf_s(szBuf, "%u", (unsigned int)pNode->GetTimeLastUsed());
 		childElement = emblemElement.CreateChildElement(MTOK_EMBLEM_TIMELASTUSED);
 		childElement.SetContents(szBuf);
 

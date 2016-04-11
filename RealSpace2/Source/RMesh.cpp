@@ -63,6 +63,35 @@ RMesh::~RMesh()
 	Destroy();
 }
 
+// Do this sometime!! -__-
+#define COPY_MEMBER(member) member = rhs.member
+RMesh::RMesh(const RMesh& rhs)
+{
+	COPY_MEMBER(m_ParticleLinkInfo);
+	COPY_MEMBER(m_fVis);
+	COPY_MEMBER(m_isPhysiqueMesh);
+	COPY_MEMBER(m_bUnUsededCheck);
+	COPY_MEMBER(m_FileName);
+	COPY_MEMBER(m_ModelName);
+	COPY_MEMBER(m_id);
+	COPY_MEMBER(m_list);
+	COPY_MEMBER(m_data);
+	COPY_MEMBER(m_MeshWeaponMotionType);
+	COPY_MEMBER(m_PickingType);
+	COPY_MEMBER(m_data_num);
+	for (int i = 0; i < 2; i++)
+		COPY_MEMBER(m_max_frame[i]);
+	for (int i = 0; i < 2; i++)
+		COPY_MEMBER(m_frame[i]);
+	COPY_MEMBER(m_vBBMax);
+	COPY_MEMBER(m_vBBMin);
+	COPY_MEMBER(m_vBBMaxNodeMatrix);
+	COPY_MEMBER(m_vBBMinNodeMatrix);
+	COPY_MEMBER(m_is_use_ani_set);
+	COPY_MEMBER(m_vAddBipCenter);
+}
+#undef COPY_MEMBER
+
 void RMesh::Init()
 {
 	m_id			= -1;

@@ -73,7 +73,19 @@ _STATUS_CMD_START;
 
 			CreateAccount(pCommand->GetSenderUID(), szUserID, HashedPassword, HashLength, szEmail);
 		}
-			break;
+		break;
+		case MC_MATCH_SEND_VOICE_CHAT:
+		{
+			auto Param = pCommand->GetParameter(0);
+			if (!Param || Param->GetType() != MPT_BLOB)
+				break;
+
+			unsigned char *Data = (unsigned char *)Param->GetPointer();
+			auto Length = Param->GetSize() - sizeof(int);
+
+			OnVoiceChat(pCommand->GetSenderUID(), Data, Length);
+		}
+		break;
 		/*case MC_MATCH_LOGIN_NETMARBLE:
 			{
 				char szCPCookie[4096];

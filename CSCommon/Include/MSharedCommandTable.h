@@ -456,6 +456,9 @@ void MAddSharedCommandTable(MCommandManager* pCommandManager, int nSharedType);
 #define MC_PEER_COMPLETED_SKILLMAP 8005
 #define MC_MATCH_REQUEST_CREATE_ACCOUNT 8006
 #define MC_MATCH_RESPONSE_CREATE_ACCOUNT 8007
+#define MC_MATCH_SEND_VOICE_CHAT 8008
+#define MC_MATCH_RECEIVE_VOICE_CHAT 8009
+#define MC_PEER_SET_SWORD_COLOR 8010
 
 
 //// 피어투피어 관련 명령어 /////////////////////////////////////////////////////////////

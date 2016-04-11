@@ -655,7 +655,8 @@ bool MHyperTextFile::Open(char *szPath)
 	long lFileSize;
 	int i, ch;
 
-	fp = fopen(szPath, "rt");
+	fopen_s(&fp, szPath, "rt");
+
 	if(fp){
 		fseek(fp, 0, SEEK_END);
 		lFileSize = ftell(fp);

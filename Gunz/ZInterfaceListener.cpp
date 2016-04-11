@@ -35,6 +35,8 @@
 
 #include "ZMonsterBookInterface.h"
 
+#include "RGMain.h"
+
 #define SODIUM_STATIC
 #include "sodium.h"
 
@@ -281,7 +283,6 @@ public:
 
 				crypto_generichash(hashed_password, sizeof(hashed_password), (const unsigned char *)szPassword, strlen(szPassword), NULL, 0);
 
-				ZPOSTCMD3(MC_MATCH_REQUEST_CREATE_ACCOUNT, MCmdParamStr(szUsername), MCmdParamBlob(hashed_password, sizeof(hashed_password)), MCmdParamStr(szEmail));
 			};
 
 			if (!g_bConnected)
@@ -2284,8 +2285,10 @@ MListener* ZGetReplayFileListBoxListener( void)
 			if ( MWidget::IsMsg( szMessage, MLB_ITEM_SEL) == true)
 			{
 				MWidget* pFindWidget = ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "Replay_View");
-				if ( pFindWidget != NULL)
-					pFindWidget->Enable( true);
+				if (pFindWidget != NULL)
+					pFindWidget->Enable(true);
+
+				g_RGMain.OnReplaySelected();
 
                 return true;
 			}

@@ -11,13 +11,7 @@ protected:
 	char			m_szMessage[128];	
 public:
 	MShutdownNotify(unsigned short nDelay, const char* pszMsg) {
-		// 공지를 저장할때 문자열 길이를 검사함. 
-		// 만약 최대 길이를 넘어서면 복사할수 있는 길이만큼만 복사. - by 추교성.
-		memset( m_szMessage, 0, 128 );
 		m_nDelay = nDelay;
-		/*const size_t len = strlen( pszMsg );
-		ASSERT( (len < 128) && "문자열의 길이가 128보다 작아야 함." );
-		strncpy( m_szMessage, pszMsg,  len < 128 ? len : 127 );*/
 		strcpy_safe(m_szMessage, pszMsg);
 	}
 	virtual ~MShutdownNotify() {}

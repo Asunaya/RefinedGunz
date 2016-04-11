@@ -174,7 +174,8 @@ bool RealSoundOgg::Open(const char* szFileName)
 {
 	if (m_bOpened) Close();
 
-	FILE* fp = fopen(szFileName, "rb");
+	FILE* fp = nullptr;
+	fopen_s(&fp, szFileName, "rb");
 	if (!fp) return false;
 
 	ov_open(fp, &m_vf, NULL, 0);

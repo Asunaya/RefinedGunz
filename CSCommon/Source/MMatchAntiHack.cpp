@@ -9,7 +9,8 @@ void MMatchAntiHack::InitHashMap()
 #ifdef _XTRAP
 	if( MGetServerConfig()->IsUseXTrap() )
 	{
-		FILE* fp = fopen("hashmap.txt", "r");
+		FILE* fp;
+		fopen_s(&fp, "hashmap.txt", "r");
 		if (fp == NULL) return;
 
 		char str[256];
@@ -17,7 +18,7 @@ void MMatchAntiHack::InitHashMap()
 		while (fgets(str, 256, fp) != NULL)
 		{
 			char szHash[256] = {0,};
-			sscanf(str, "%s", szHash);
+			sscanf_s(str, "%s", szHash, 256);
 			m_ClientHashValueList.push_back(szHash);
 		}
 
@@ -69,7 +70,8 @@ bool MMatchAntiHack::AddNewHashValue( const string& strNewHashValue )
 
 			m_ClientHashValueList.push_back( strRealHashValue );
 
-			FILE* fp = fopen("hashmap.txt", "w");
+			FILE* fp;
+			fopen_s(&fp, "hashmap.txt", "w");
 			if( 0 == fp )
 				return false;
 
@@ -91,7 +93,8 @@ list<unsigned int>	MMatchAntiHack::m_clientFileListCRC;
 
 void MMatchAntiHack::InitClientFileList()
 {
-	FILE* fp = fopen("filelistcrc.txt", "r");
+	FILE* fp;
+	fopen_s(&fp, "filelistcrc.txt", "r");
 	if (fp == NULL) return;
 
 	char str[256];
@@ -99,7 +102,7 @@ void MMatchAntiHack::InitClientFileList()
 	while (fgets(str, 256, fp) != NULL)
 	{
 		unsigned int crc;
-		sscanf(str, "%u", &crc);
+		sscanf_s(str, "%u", &crc);
 		m_clientFileListCRC.push_back(crc);
 	}
 

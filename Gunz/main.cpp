@@ -162,7 +162,7 @@ RRESULT OnCreate(void *pParam)
 	char szFileName[256];
 #define FONT_DIR	"Font/"
 #define FONT_EXT	"ttf"
-	if( (hFile = _findfirst(FONT_DIR"*."FONT_EXT, &c_file )) != -1L ){
+	if( (hFile = _findfirst(FONT_DIR "*." FONT_EXT, &c_file )) != -1L ){
 		do{
 			strcpy_safe(szFileName, FONT_DIR);
 			strcat(szFileName, c_file.name);
@@ -312,7 +312,7 @@ RRESULT OnDestroy(void *pParam)
 	char szFileName[256];
 #define FONT_DIR	"Font/"
 #define FONT_EXT	"ttf"
-	if( (hFile = _findfirst(FONT_DIR"*."FONT_EXT, &c_file )) != -1L ){
+	if( (hFile = _findfirst(FONT_DIR" *." FONT_EXT, &c_file )) != -1L ){
 		do{
 			strcpy_safe(szFileName, FONT_DIR);
 			strcat(szFileName, c_file.name);
@@ -539,6 +539,8 @@ RRESULT OnRender(void *pParam)
 		g_pDefFont->m_Font.DrawText( MGetWorkspaceWidth()-150,0,__buffer );
 //		OutputDebugString(__buffer);
 	}
+
+	g_RGMain.OnRender();
 
 //#endif
 
@@ -1057,17 +1059,17 @@ void CheckFileAssociation()
 
 	// 체크해봐서 등록이 안되어있으면 등록한다. 사용자에게 물어볼수도 있겠다.
 	char szValue[256];
-	if(!MRegistry::Read(HKEY_CLASSES_ROOT,"."GUNZ_REC_FILE_EXT,NULL,szValue))
+	if (!MRegistry::Read(HKEY_CLASSES_ROOT, "." GUNZ_REC_FILE_EXT, NULL, szValue))
 	{
-		MRegistry::Write(HKEY_CLASSES_ROOT,"."GUNZ_REC_FILE_EXT,NULL,GUNZ_REPLAY_CLASS_NAME);
+		MRegistry::Write(HKEY_CLASSES_ROOT, "." GUNZ_REC_FILE_EXT, NULL, GUNZ_REPLAY_CLASS_NAME);
 
-		char szModuleFileName[_MAX_PATH] = {0,};
+		char szModuleFileName[_MAX_PATH] = { 0, };
 		GetModuleFileName(NULL, szModuleFileName, _MAX_DIR);
 
 		char szCommand[_MAX_PATH];
-		sprintf_s(szCommand,"\"%s\" \"%%1\"",szModuleFileName);
+		sprintf_s(szCommand, "\"%s\" \"%%1\"", szModuleFileName);
 
-		MRegistry::Write(HKEY_CLASSES_ROOT,GUNZ_REPLAY_CLASS_NAME"\\shell\\open\\command",NULL,szCommand);
+		MRegistry::Write(HKEY_CLASSES_ROOT, GUNZ_REPLAY_CLASS_NAME "\\shell\\open\\command", NULL, szCommand);
 
 		SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_FLUSH, NULL, NULL);
 	}
@@ -1093,8 +1095,6 @@ DWORD g_dwMainThreadID;
 
 int PASCAL WinMain(HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline, int cmdshow)
 {
-	InitLog(MLOGSTYLE_DEBUGSTRING | MLOGSTYLE_FILE);
-
 	SetUnhandledExceptionFilter(static_cast<LONG(__stdcall *)(_EXCEPTION_POINTERS *)>(
 		[](_EXCEPTION_POINTERS *p) -> LONG {
 		return CrashExceptionDump(p, "Gunz.dmp");
@@ -1112,7 +1112,7 @@ int PASCAL WinMain(HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline, int 
 
 #ifdef SUPPORT_EXCEPTIONHANDLING
 	char szDumpFileName[256];
-	sprintf_s(szDumpFileName, "Gunz.dmp");
+	strcat(szDumpFileName, "Gunz.dmp");
 
 	__try{
 #endif
@@ -1132,22 +1132,23 @@ int PASCAL WinMain(HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline, int 
 	SetCurrentDirectory(szModuleFileName);
 
 #ifdef _PUBLISH
-	// 중복 실행 금지
 	Mutex = CreateMutex(NULL, TRUE, "RGunz");
 	if (GetLastError() == ERROR_ALREADY_EXISTS)
 	{
+		MessageBox(0, "Refined Gunz is already running", "RGunz", 0);
 		exit(-1);
 		return 0;
 	}
 #endif
 
+	InitLog(MLOGSTYLE_DEBUGSTRING | MLOGSTYLE_FILE);
+
 	ClearTrashFiles();
 
-	srand( (unsigned)time( NULL ));
+	srand((unsigned int)time(nullptr));
 
 
-	// 로그 시작
-	mlog("GUNZ " STRFILEVER " launched. build ("__DATE__" "__TIME__") \n");
+	mlog("Refined Gunz version %d launched. Build date: " __DATE__ " " __TIME__ "\n", RGUNZ_VERSION);
 
 	char szDateRun[128]="";
 	char szTimeRun[128]="";
@@ -1297,7 +1298,7 @@ int PASCAL WinMain(HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline, int 
 
 //	while(ShowCursor(FALSE)>0);
 
-	int nReturn = RMain(APPLICATION_NAME,this_inst,prev_inst,cmdline,cmdshow,&g_ModeParams,WndProc,IDI_ICON1);
+	int nReturn = RMain(APPLICATION_NAME, this_inst, prev_inst, cmdline, cmdshow, &g_ModeParams, WndProc, IDI_ICON1);
 
 #ifdef _MTRACEMEMORY
 	MShutdownTraceMemory();

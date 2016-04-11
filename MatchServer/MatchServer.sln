@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
+# Visual Studio 14
+VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CSCommon", "..\CSCommon\CSCommon.vcxproj", "{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}"
 EndProject
@@ -38,28 +38,28 @@ Global
 		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.Debug|Win32.Build.0 = Debug|Win32
 		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.MatchServer|Win32.ActiveCfg = Release|Win32
 		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.MatchServer|Win32.Build.0 = Release|Win32
-		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.Release_HShield|Win32.ActiveCfg = Release_HShield|Win32
-		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.Release_HShield|Win32.Build.0 = Release_HShield|Win32
+		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.Release_HShield|Win32.ActiveCfg = Release_publish|Win32
+		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.Release_HShield|Win32.Build.0 = Release_publish|Win32
 		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.Release_publish|Win32.ActiveCfg = Release|Win32
 		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.Release_publish|Win32.Build.0 = Release|Win32
 		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.Release|Win32.ActiveCfg = Release|Win32
 		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.Release|Win32.Build.0 = Release|Win32
-		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.z_BRZ_Debug|Win32.ActiveCfg = z_BRZ_Debug|Win32
-		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.z_BRZ_Debug|Win32.Build.0 = z_BRZ_Debug|Win32
-		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.z_BRZ_Release_publish|Win32.ActiveCfg = z_BRZ_Release_publish|Win32
-		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.z_BRZ_Release_publish|Win32.Build.0 = z_BRZ_Release_publish|Win32
-		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.z_IND_Debug|Win32.ActiveCfg = z_IND_Debug|Win32
-		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.z_IND_Debug|Win32.Build.0 = z_IND_Debug|Win32
-		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.z_IND_Release_publish|Win32.ActiveCfg = z_IND_Release_publish|Win32
-		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.z_IND_Release_publish|Win32.Build.0 = z_IND_Release_publish|Win32
-		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.z_JPN_DEBUG|Win32.ActiveCfg = z_JPN_DEBUG|Win32
-		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.z_JPN_DEBUG|Win32.Build.0 = z_JPN_DEBUG|Win32
-		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.z_JPN_Release_publish|Win32.ActiveCfg = z_JPN_Release_publish|Win32
-		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.z_JPN_Release_publish|Win32.Build.0 = z_JPN_Release_publish|Win32
-		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.z_US_Debug|Win32.ActiveCfg = z_US_Debug|Win32
-		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.z_US_Debug|Win32.Build.0 = z_US_Debug|Win32
-		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.z_US_Release_publish|Win32.ActiveCfg = z_US_Release_publish|Win32
-		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.z_US_Release_publish|Win32.Build.0 = z_US_Release_publish|Win32
+		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.z_BRZ_Debug|Win32.ActiveCfg = Debug|Win32
+		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.z_BRZ_Debug|Win32.Build.0 = Debug|Win32
+		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.z_BRZ_Release_publish|Win32.ActiveCfg = Release_publish|Win32
+		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.z_BRZ_Release_publish|Win32.Build.0 = Release_publish|Win32
+		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.z_IND_Debug|Win32.ActiveCfg = Debug|Win32
+		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.z_IND_Debug|Win32.Build.0 = Debug|Win32
+		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.z_IND_Release_publish|Win32.ActiveCfg = Release_publish|Win32
+		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.z_IND_Release_publish|Win32.Build.0 = Release_publish|Win32
+		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.z_JPN_DEBUG|Win32.ActiveCfg = Release_publish|Win32
+		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.z_JPN_DEBUG|Win32.Build.0 = Release_publish|Win32
+		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.z_JPN_Release_publish|Win32.ActiveCfg = Release_publish|Win32
+		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.z_JPN_Release_publish|Win32.Build.0 = Release_publish|Win32
+		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.z_US_Debug|Win32.ActiveCfg = Debug|Win32
+		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.z_US_Debug|Win32.Build.0 = Debug|Win32
+		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.z_US_Release_publish|Win32.ActiveCfg = Release_publish|Win32
+		{CBD109C1-1AA3-4A57-B439-9919C08FAAA5}.z_US_Release_publish|Win32.Build.0 = Release_publish|Win32
 		{6C8069BD-5E8C-41EC-8BD9-2F819291BA67}.Debug_tracememory|Win32.ActiveCfg = Debug|Win32
 		{6C8069BD-5E8C-41EC-8BD9-2F819291BA67}.Debug_tracememory|Win32.Build.0 = Debug|Win32
 		{6C8069BD-5E8C-41EC-8BD9-2F819291BA67}.Debug|Win32.ActiveCfg = Debug|Win32

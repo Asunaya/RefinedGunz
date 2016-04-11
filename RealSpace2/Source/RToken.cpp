@@ -3,7 +3,7 @@
 
 char *Format(char *buffer, int maxlen, const rvector &v)
 {
-	sprintf_s(buffer, maxlen, FORMAT_FLOAT" "FORMAT_FLOAT" "FORMAT_FLOAT,v.x,v.y,v.z);
+	sprintf_s(buffer, maxlen, FORMAT_FLOAT " " FORMAT_FLOAT " " FORMAT_FLOAT,v.x,v.y,v.z);
 	return buffer;
 }
 

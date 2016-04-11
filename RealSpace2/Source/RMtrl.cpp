@@ -83,6 +83,30 @@ RMtrl::~RMtrl()
 	}
 }
 
+//#define COPY_MEMBER(member) member = rhs.member
+//#define COPY_ARRAY(member) memcpy(member, rhs.member, sizeof(member))
+//RMtrl::RMtrl(const RMtrl& rhs)
+//{
+//	COPY_MEMBER(m_pTexture);
+//	COPY_MEMBER(m_pToonTexture);
+//	COPY_MEMBER(m_FilterType);
+//	COPY_MEMBER(m_ToonFilterType);
+//	COPY_MEMBER(m_AlphaRefValue);
+//	COPY_MEMBER(m_TextureBlendMode);
+//	COPY_MEMBER(m_ToonTextureBlendMode);
+//	COPY_MEMBER(m_ambient);
+//	COPY_MEMBER(m_diffuse);
+//	COPY_MEMBER(m_specular);
+//	COPY_MEMBER(m_power);
+//	COPY_ARRAY(m_mtrl_name);
+//	COPY_ARRAY(m_name);
+//	COPY_ARRAY(m_opa_name);
+//	COPY_ARRAY(m_name_ani_tex);
+//	COPY_ARRAY(m_name_ani_tex_ext);
+//	COPY_MEMBER(
+//}
+//#undef COPY_MEMBER
+
 LPDIRECT3DTEXTURE9 RMtrl::GetTexture() {
 
 	if(m_bAniTex) {

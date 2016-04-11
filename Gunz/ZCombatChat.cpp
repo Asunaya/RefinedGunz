@@ -299,7 +299,7 @@ void ZCombatChat::OutputChatMsg(const char* szMsg)
 {
 	if (g_bNewChat)
 	{
-		g_pChat->OutputChatMsg(szMsg);
+		g_Chat.OutputChatMsg(szMsg);
 		return;
 	}
 
@@ -316,7 +316,7 @@ void ZCombatChat::OutputChatMsg(MCOLOR color, const char* szMsg)
 {
 	if (g_bNewChat)
 	{
-		g_pChat->OutputChatMsg(szMsg, *PDWORD(&color));
+		g_Chat.OutputChatMsg(szMsg, *PDWORD(&color));
 		return;
 	}
 

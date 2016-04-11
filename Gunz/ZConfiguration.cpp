@@ -518,6 +518,7 @@ bool ZConfiguration::LoadConfig(const char* szFileName)
 			childElement.GetChildContents(&m_Etc.bRejectWhisper, ZTOK_ETC_REJECT_WHISPER);
 			childElement.GetChildContents(&m_Etc.bRejectInvite, ZTOK_ETC_REJECT_INVITE);
 			childElement.GetChildContents(&m_Etc.nCrossHair, ZTOK_ETC_CROSSHAIR);
+			childElement.GetChildContents((int *)&bDrawTrails, "DRAWTRAILS");
 		}
 
 
@@ -1000,13 +1001,17 @@ bool ZConfiguration::SaveToFile(const char *szFileName, const char* szHeader)
 		sprintf_s(temp, "%d", m_Etc.nCrossHair);
 		aElement.SetContents(temp);
 
+		parentElement.AppendText("\n\t\t");
+		aElement = parentElement.CreateChildElement("DRAWTRAILS");
+		sprintf_s(temp, "%d", bDrawTrails);
+		aElement.SetContents(temp);
+
 		parentElement.AppendText("\n\t");
 	}
 
 	aRootElement.AppendText("\n\n\t");
 
 	aRootElement.AppendText("\n\n\t");
-	// Joystick
 	{
 		MXmlElement	parentElement = aRootElement.CreateChildElement("CHAT");
 
@@ -1178,6 +1183,7 @@ void ZConfiguration::LoadDefaultKeySetting()
 		{"UseWeapon",	0x1D,258},	// 'ctrl' or	mouse LButton
 		{"UseWeapon2", 259, -1},		// mouse RButton
 		{ "ShowFullChat", 44, -1 },
+		{ "VoiceChat", 37, -1 },
 		// Ãß°¡ by Á¤µ¿¼· @ 2006/3/16
 	};
 

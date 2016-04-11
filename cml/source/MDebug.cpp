@@ -6,6 +6,7 @@
 #include <string>
 #include "MPdb.h"
 #include <windows.h>
+#include <mutex>
 
 using namespace std;
 
@@ -40,8 +41,12 @@ void InitLog(int logmethodflags, const char* pszLogFileName)
 	g_bLogInitialized = true;
 }
 
+static std::mutex LogMutex;
+
 void __cdecl MLog(const char *pFormat,...)
 {
+	std::lock_guard<std::mutex> lock(LogMutex);
+
 	char temp[16*1024];
 
 	va_list args;
@@ -135,10 +140,11 @@ void MShowStack(DWORD* sp, int nSize)
 DWORD MFilterException(LPEXCEPTION_POINTERS p)
 {
 	char tmpbuf[128];
-	_strtime( tmpbuf );
-	mlog("Crash ( %s )\n",tmpbuf);
+	_strtime_s(tmpbuf);
 
-	mlog("Build "__DATE__" "__TIME__"\n\n");
+	mlog("Crash (%s)\n",tmpbuf);
+
+	mlog("Build " __DATE__ " " __TIME__ "\n\n");
 
 	mlog("\n[Exception]\n");
 	mlog("Address	:	%08x\n", p->ExceptionRecord->ExceptionAddress);
@@ -229,7 +235,8 @@ void MSaveProfile(const char *filename)
 {
 	DWORD dwTotalTime = timeGetTime()-g_dwEnableTime;
 
-	FILE *file=fopen(filename,"w+");
+	FILE *file = nullptr;
+	fopen_s(&file, filename, "w+");
 
 	fprintf(file," total time = %6.3f seconds \n",(float)dwTotalTime*0.001f);
 

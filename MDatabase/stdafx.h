@@ -17,3 +17,5 @@
 #include <afxwin.h>         // MFC 핵심 및 표준 구성 요소입니다.
 
 // TODO: 프로그램에 필요한 추가 헤더는 여기에서 참조합니다.
+
+#include <SafeString.h>

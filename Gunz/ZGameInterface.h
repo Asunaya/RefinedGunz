@@ -157,6 +157,7 @@ protected:
 
 	bool ResizeWidget(const char* szName, int w, int h);
 	bool ResizeWidgetRecursive( MWidget* pWidget, int w, int h);
+	friend class RGMain;
 	void SetListenerWidget(const char* szName, MListener* pListener);
 
 	void UpdateCursorEnable();

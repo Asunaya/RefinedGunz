@@ -53,7 +53,7 @@ public:
 
 	void addCollisionObject( RBoundary* co_ );	// add collision object
 
-	void	SetAccelationRatio( float t_ ) { m_AccelationRatio = min( max( t_, 0 ), 1 ); }
+	void	SetAccelationRatio( float t_ ) { m_AccelationRatio = min( max( t_, 0.f ), 1.f ); }
 	float	GetAccelationRatio() const { return m_AccelationRatio;	}
 
 	void	SetTimeStep( float t_ ) { m_fTimeStep = t_; }

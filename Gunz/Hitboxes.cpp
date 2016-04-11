@@ -27,7 +27,7 @@ HitboxManager::HitboxManager()
 	}
 
 	pV[0].x = 0;
-	pV[0].y = 0;
+	pV[0].y = 10;
 	pV[0].z = 0;
 
 	for (int i = 1; i < nSlashVertices - 1; i++)
@@ -35,13 +35,13 @@ HitboxManager::HitboxManager()
 		float f = (float(i - 1) / (nSlashVertices - 2) - 0.5) * (120.f / 360.f);
 
 		pV[i].x = -sin(f * TAU) * RG_SLASH_RADIUS;
-		pV[i].y = 0;
+		pV[i].y = 10;
 		pV[i].z = -cos(f * TAU) * RG_SLASH_RADIUS;
 	}
 
 	// End of line strip
 	pV[nSlashVertices - 1].x = 0;
-	pV[nSlashVertices - 1].y = 0;
+	pV[nSlashVertices - 1].y = 10;
 	pV[nSlashVertices - 1].z = -cos(0) * RG_SLASH_RADIUS;
 
 	for (int i = nSlashVertices; i < nSlashVertices + nMassiveVertices - 1; i++)
@@ -49,25 +49,25 @@ HitboxManager::HitboxManager()
 		float f = float(i - nSlashVertices) / nMassiveVertices;
 
 		pV[i].x = sin(f * TAU) * RG_MASSIVE_RADIUS;
-		pV[i].y = cos(f * TAU) * RG_MASSIVE_RADIUS;
-		pV[i].z = 0;
+		pV[i].y = 5;
+		pV[i].z = cos(f * TAU) * RG_MASSIVE_RADIUS;
 	}
 
 	// End of line strip
 	pV[nSlashVertices + nMassiveVertices - 1].x = 0;
-	pV[nSlashVertices + nMassiveVertices - 1].y = cos(0) * RG_MASSIVE_RADIUS;
-	pV[nSlashVertices + nMassiveVertices - 1].z = 0;
+	pV[nSlashVertices + nMassiveVertices - 1].y = 5;
+	pV[nSlashVertices + nMassiveVertices - 1].z = cos(0) * RG_MASSIVE_RADIUS;
 
 	// Position line
 	int i = nSlashVertices + nMassiveVertices;
 	pV[i].x = 0;
-	pV[i].y = 0;
-	pV[i].z = -180;
+	pV[i].y = 0;//-180;
+	pV[i].z = 0;
 	i++;
 
 	pV[i].x = 0;
-	pV[i].y = 0;
-	pV[i].z = 180;
+	pV[i].y = 180;
+	pV[i].z = 0;
 
 	if (FAILED(pVB->Unlock()))
 	{
@@ -83,6 +83,8 @@ HitboxManager::~HitboxManager()
 
 void HitboxManager::OnSlash(const D3DXVECTOR3 &Pos, const D3DXVECTOR3 &Dir)
 {
+	return;
+
 	if (!Enabled())
 		return;
 
@@ -102,6 +104,8 @@ void HitboxManager::OnSlash(const D3DXVECTOR3 &Pos, const D3DXVECTOR3 &Dir)
 
 void HitboxManager::OnMassive(const D3DXVECTOR3 &Pos)
 {
+	return;
+
 	if (!Enabled())
 		return;
 
@@ -155,7 +159,7 @@ void HitboxManager::Draw()
 
 	RGetDevice()->SetStreamSource(0, pVB, 0, sizeof(Vertex));
 
-	for (auto it = List.begin(); it != List.end(); it++)
+	/*for (auto it = List.begin(); it != List.end(); it++)
 	{
 		auto &val = *it;
 
@@ -191,6 +195,31 @@ void HitboxManager::Draw()
 			RGetDevice()->SetTextureStageState(0, D3DTSS_CONSTANT, 0xFF000080);
 			RGetDevice()->DrawPrimitive(D3DPT_LINESTRIP, nSlashVertices + nMassiveVertices, 1);
 		}
+	}*/
+
+	for (auto &it : *ZGetCharacterManager())
+	{
+		auto &Char = *it.second;
+
+		rmatrix mat;
+		rvector HDir = Char.GetDirection();
+		HDir.z = 0;
+		Normalize(HDir);
+
+		MakeWorldMatrix(&mat, Char.GetPosition(), HDir, rvector(0, 0, 1));
+
+		RGetDevice()->SetTransform(D3DTS_WORLD, &mat);
+
+		RGetDevice()->SetTextureStageState(0, D3DTSS_CONSTANT, 0x20FF0000);
+
+		RGetDevice()->DrawPrimitive(D3DPT_TRIANGLEFAN, 0, nSlashVertices - 3);
+
+		RGetDevice()->SetTextureStageState(0, D3DTSS_CONSTANT, 0x10FF0000);
+
+		RGetDevice()->DrawPrimitive(D3DPT_TRIANGLEFAN, nSlashVertices, nMassiveVertices - 3);
+
+		RGetDevice()->SetTextureStageState(0, D3DTSS_CONSTANT, 0xFF000080);
+		RGetDevice()->DrawPrimitive(D3DPT_LINESTRIP, nSlashVertices + nMassiveVertices, 1);
 	}
 }
 

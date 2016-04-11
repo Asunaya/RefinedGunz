@@ -135,6 +135,7 @@
 #include "ZActor.h"
 
 #include "SafeString.h"
+#include "RGGlobal.h"
 
 
 

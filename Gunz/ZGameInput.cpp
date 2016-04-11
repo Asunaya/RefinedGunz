@@ -19,9 +19,7 @@
 #include "ZMinimap.h"
 #include "ZInput.h"
 
-#include "Portal.h"
-#include "NewChat.h"
-#include "ReplayControl.h"
+#include "RGMain.h"
 
 #undef _DONOTUSE_DINPUT_MOUSE
 
@@ -66,19 +64,8 @@ bool ZGameInput::OnEvent(MEvent* pEvent)
 	MWidget* p112ConfirmWidget = ZGetGameInterface()->GetIDLResource()->FindWidget("112Confirm");
 	if (p112ConfirmWidget->IsVisible()) return false;
 
-	g_pChat->OnEvent(pEvent);
-
-	if (g_pChat->IsInputEnabled())
-	{
-		if (ZGetGame()->IsReplay())
-			g_ReplayControl.OnEvent(pEvent);
-
-		return false;
-	}
-
-#ifdef PORTAL
-	g_pPortal->OnShot();
-#endif
+	if (g_RGMain.OnEvent(pEvent))
+		return true;
 
 #ifndef _PUBLISH
 	if (m_pInstance) 
@@ -553,10 +540,8 @@ void ZGameInput::Update(float fElapsed)
 
 //	if(RIsActive() && !g_pGame->IsReplay())
 
-	if (g_pChat->IsInputEnabled()){
-		g_pChat->OnUpdate();
+	if (OnGameInput())
 		return;
-	}
 
 	if(RIsActive())
 	{
@@ -591,7 +576,7 @@ void ZGameInput::Update(float fElapsed)
 				ZGetInput()->GetRotation(&fRotateX,&fRotateY);
 #endif
 
-				bool bRotateEnable=false;
+				bool bRotateEnable = true;//false;
 				// TODO : 칼로 벽에 꽂았을때 프리카메라로 바꾸자
 				if( !pMyCharacter->m_bSkill && !pMyCharacter->m_bWallJump && !pMyCharacter->m_bWallJump2 && !pMyCharacter->m_bWallHang && 
 					!pMyCharacter->m_bTumble && !pMyCharacter->m_bBlast && !pMyCharacter->m_bBlastStand && !pMyCharacter->m_bBlastDrop )

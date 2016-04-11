@@ -859,8 +859,8 @@ void MMatchServer::OnStageStart(const MUID& uidPlayer, const MUID& uidStage, int
 				itor != pStage->GetObjEnd(); ++itor)
 			{
 				MMatchObject* pObject = (MMatchObject*)((*itor).second);
-				strcat(szPlayers, pObject->GetCharInfo()->m_szName);
-				strcat(szPlayers, " ");
+				strcat_safe(szPlayers, pObject->GetCharInfo()->m_szName);
+				strcat_safe(szPlayers, " ");
 			}
 
 			if (pStage->GetStageType() != MST_LADDER)

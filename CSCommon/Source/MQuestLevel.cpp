@@ -122,7 +122,7 @@ MQuestLevel::~MQuestLevel()
 
 void MQuestLevel::Make_MTDQuestGameInfo(MTD_QuestGameInfo* pout)
 {
-	pout->nNPCInfoCount = (int)m_StaticInfo.NPCs.size();
+	pout->nNPCInfoCount = (decltype(pout->nNPCInfoCount))m_StaticInfo.NPCs.size();
 	_ASSERT (pout->nNPCInfoCount < MAX_QUEST_NPC_INFO_COUNT);
 
 	int idx = 0;
@@ -132,7 +132,7 @@ void MQuestLevel::Make_MTDQuestGameInfo(MTD_QuestGameInfo* pout)
 		idx++;
 	}
 
-	pout->nMapSectorCount = (int)m_StaticInfo.SectorList.size();
+	pout->nMapSectorCount = (decltype(pout->nMapSectorCount))m_StaticInfo.SectorList.size();
 	_ASSERT(pout->nMapSectorCount < MAX_QUEST_MAP_SECTOR_COUNT);
 
 	for (int i = 0; i < pout->nMapSectorCount; i++)

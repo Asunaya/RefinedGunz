@@ -28,6 +28,8 @@
 #include "ZStringResManager.h"
 #include "ZActionKey.h"
 
+#include "RGMain.h"
+
 ZIDLResource::ZIDLResource()
 {
 
@@ -462,8 +464,11 @@ ZRoomListBox* ZIDLResource::GetRoomListBox( MXmlElement& element )
 				childElement.GetContents(szAttr);
 
 				MBitmap* pBitmap =GetBitmap(childElement);
-				if( pBitmap != 0 )
-					pWidget->SetBannerImage( szAttr, pBitmap);
+				if (pBitmap)
+				{
+					pWidget->SetBannerImage(szAttr, pBitmap);
+					g_RGMain.AddMapBanner(szAttr, pBitmap);
+				}
 			}
  			else if( _stricmp( szAttr,"icon" )==0 )
 			{
@@ -471,7 +476,7 @@ ZRoomListBox* ZIDLResource::GetRoomListBox( MXmlElement& element )
 				childElement.GetAttribute(&mode, "mode");
 				childElement.GetContents(szAttr);
 				MBitmap* pBitmap = GetBitmap(childElement);
-				if( pBitmap != 0 )
+				if(pBitmap)
 					pWidget->SetIconImage( (MMATCH_GAMETYPE)mode, pBitmap );
 			}
 		}

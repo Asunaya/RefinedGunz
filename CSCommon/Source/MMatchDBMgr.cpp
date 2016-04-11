@@ -16,6 +16,9 @@
 #include "MQuestConst.h"
 #include "MQuestItem.h"
 
+#define SODIUM_STATIC
+#include "sodium.h"
+
 // SQL ////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -401,15 +404,12 @@ void MMatchDBMgr::LogCallback( const string& strLog )
 #define _STATUS_DB_START	unsigned long int nStatusStartTime = timeGetTime();
 #define _STATUS_DB_END(nID) MGetServerStatusSingleton()->AddDBQuery(nID, timeGetTime()-nStatusStartTime);
 
-#define SODIUM_STATIC
-#include "sodium.h"
-
 bool MMatchDBMgr::GetLoginInfo(const TCHAR* szUserID, unsigned int* poutnAID, TCHAR* poutPassword, int maxlen)
 {
 _STATUS_DB_START
 	if (!CheckOpen()) return false;
-
-	auto temp = m_DBFilter.Filtering(szUserID); // Need this temporary to fix weird compiler bug!!
+	
+	auto temp = m_DBFilter.Filtering(szUserID);
 
 	szUserID = temp.c_str();
 

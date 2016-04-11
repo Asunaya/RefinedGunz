@@ -475,8 +475,7 @@ MCOLOR MEdit::GetTextColor(void)
 void MEdit::SetText(const char* szText)
 {
 	if(m_pBuffer) {
-		strncpy(m_pBuffer, szText, m_nMaxLength-1);
-		m_pBuffer[m_nMaxLength-1]=0;
+		strcpy_safe(m_pBuffer, m_nMaxLength, szText);
 	}
 
 	MoveCaretEnd();

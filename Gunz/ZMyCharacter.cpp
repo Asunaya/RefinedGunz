@@ -1614,7 +1614,7 @@ void ZMyCharacter::ProcessShot()
 	}
 	else
 	{
-		if (ZApplication::GetGame()->GetMatch()->IsRuleGladiator()) return;
+		if (ZApplication::GetGame()->GetMatch()->IsRuleGladiator() && !IsAdmin()) return;
 		if(!m_bLButtonPressed) return;
 	}
 

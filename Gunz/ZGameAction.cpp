@@ -126,7 +126,7 @@ void ZGameAction::OnPeerSkill_LastShot(float fShotTime,ZCharacter *pOwnerCharact
 
 		// ¹Ù´ÚÀÇ wave ÀÌÆåÆ®
 		{
-			ZGetEffectManager()->AddSwordWaveEffect(waveCenter, pOwnerCharacter->GetDirection());
+			ZGetEffectManager()->AddSwordWaveEffect(pOwnerCharacter->GetUID(), waveCenter, pOwnerCharacter->GetDirection());
 		}
 
 		for (ZObjectManager::iterator itor = ZGetObjectManager()->begin();

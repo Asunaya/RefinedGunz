@@ -448,13 +448,14 @@ void ZGameClient::OnChannelChat(const MUID& uidChannel, char* szName, char* szCh
 
 	if(bSpUser)	// 특수유저
 	{
-		wsprintf(szText, "%s : %s", sp_name , szChat);
+		//wsprintf(szText, "%s : %s", sp_name , szChat);
+		wsprintf(szText, "%s: %s", szName, szChat);
 		ZChatOutput(szText, ZChat::CMT_NORMAL, ZChat::CL_LOBBY,_color);
 	}
 	else if ( !ZGetGameClient()->GetRejectNormalChat() ||				// 일반 유저
 			  (strcmp( szName, ZGetMyInfo()->GetCharName()) == 0))
 	{
-		wsprintf(szText, "^4%s^9 : %s", szName, szChat);
+		wsprintf(szText, "^4%s^9: %s", szName, szChat);
 		ZChatOutput(szText, ZChat::CMT_NORMAL, ZChat::CL_LOBBY);
 	}
 }
@@ -718,13 +719,14 @@ void ZGameClient::OnStageChat(const MUID& uidChar, const MUID& uidStage, char* s
 
 	if(bSpUser)	// 특수유저
 	{
-		wsprintf(szText, "%s : %s", sp_name , szChat);
+		//wsprintf(szText, "%s : %s", sp_name , szChat);
+		wsprintf(szText, "%s: %s", name.c_str(), szChat);
 		ZChatOutput(szText, ZChat::CMT_NORMAL, ZChat::CL_STAGE,_color);
 	}
 	else if ( !ZGetGameClient()->GetRejectNormalChat() ||				// 일반 유저
 		(strcmp( pObjCache->GetName(), ZGetMyInfo()->GetCharName()) == 0))
 	{
-		wsprintf(szText, "^4%s^9 : %s", name.c_str(), szChat);
+		wsprintf(szText, "^4%s^9: %s", name.c_str(), szChat);
 		ZChatOutput(szText, ZChat::CMT_NORMAL, ZChat::CL_STAGE);
 	}
 }

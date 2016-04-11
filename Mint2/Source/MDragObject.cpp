@@ -5,7 +5,7 @@
 MDragObject::MDragObject(int nID, const char* szString, MBitmap* pBitmap)
 {
 	m_nID = nID;
-	strncpy(m_szString, szString, MDRAGOBJECT_STRING_LENGTH);
+	strcpy_safe(m_szString, szString);
 	m_pBitmap = pBitmap;
 }
 

@@ -43,7 +43,7 @@ bool MDatabase::Connect(CString strDSNConnect)
 			bRet = m_DB.Open(NULL);
 		} catch(CDBException* e) {
 			char szLog[ 256 ] = {0,};
-			_snprintf( szLog, 255, "MDatabase::Connect - %s\n", e->m_strError );
+			sprintf_safe( szLog, "MDatabase::Connect - %s\n", (const char*)e->m_strError );
 			WriteLog( szLog );
 		}
 	} else {
@@ -55,13 +55,13 @@ bool MDatabase::Connect(CString strDSNConnect)
 							 TRUE);			//	Use cursor lib
 		} catch(CDBException* e) {
 			char szLog[ 256 ] = {0,};
-			_snprintf( szLog, 255, "MDatabase::Connect - %s\n", e->m_strError );
+			sprintf_safe( szLog, "MDatabase::Connect - %s\n", (const char*)e->m_strError );
 			WriteLog( szLog );
 			try {
 				bRet = m_DB.Open(NULL);
 			} catch(CDBException* e) {
 				char szLog2[ 256 ] = {0,};
-				_snprintf( szLog2, 255, "MDatabase::Connect - %s\n", e->m_strError );
+				sprintf_safe( szLog2, "MDatabase::Connect - %s\n", (const char*)e->m_strError );
 				WriteLog( szLog2 );
 				
 				AfxMessageBox(e->m_strError);

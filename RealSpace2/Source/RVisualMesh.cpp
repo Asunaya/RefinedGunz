@@ -8,7 +8,7 @@
 
 #include "RCharCloth.h"
 
-#include "../../Gunz/RGMain.h"
+//#include "../../Gunz/RGMain.h"
 #include "../../Gunz/MeshManager.h"
 
 _USING_NAMESPACE_REALSPACE2
@@ -128,7 +128,7 @@ void AniFrameInfo::Frame(RAniMode amode,RVisualMesh* pVMesh)
 				}
 				else if( looptype == RAniLoopType_HoldLastFrame) {
 					m_nFrame = max_frame - 1;
-					m_isPlayDone = true; 
+					m_isPlayDone = true;
 					m_save_time = cur;
 					m_1frame_time = cur;
 					return;

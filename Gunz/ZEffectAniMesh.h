@@ -56,8 +56,8 @@ public:
 
 };
 
-
 class ZEffectSlash : public ZEffectAniMesh , public CMemPoolSm<ZEffectSlash> {
+	MUID UID;
 public:
 	ZEffectSlash(RMesh* pMesh, const rvector& Pos, const rvector& Dir);
 };

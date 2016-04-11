@@ -78,7 +78,7 @@ void MMatchStatus::SaveToLogFile()
 
 			sprintf_s(szTemp, "%5d : %4u, 평균처리시간: %u(ms), 마지막처리시간: %u(ms)\n", i, m_nCmdCount[i][0], nAvg,
 				m_nCmdCount[i][2]);
-			strcat(szBuf, szTemp);
+			strcat_safe(szBuf, szTemp);
 		}
 	}
 	mlog(szBuf);
@@ -94,7 +94,7 @@ void MMatchStatus::SaveToLogFile()
 
 			sprintf_s(szTemp, "%5d : %4u, 평균처리시간: %u(ms), 마지막처리시간: %u(ms)\n", i, m_nDBQueryCount[i][0], nAvg,
 				m_nDBQueryCount[i][2]);
-			strcat(szBuf, szTemp);
+			strcat_safe(szBuf, szTemp);
 		}
 	}
 	mlog(szBuf);

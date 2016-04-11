@@ -32,7 +32,7 @@ typedef MPacketList::iterator		MPacketListItor;
 class MRealCPNet;
 
 
-typedef enum RCP_IO_OPERATION {
+enum RCP_IO_OPERATION {
 	RCP_IO_NONE,
 	RCP_IO_ACCEPT,
 	RCP_IO_CONNECT,

@@ -10,9 +10,7 @@ MMatchChatRoom::MMatchChatRoom(const MUID& uidRoom, const MUID& uidMaster, const
 	m_uidChatRoom = uidRoom;
 	m_uidMaster = uidMaster;
 
-	const size_t NameLen = strlen( pszName) + 1;
-
-	strncpy(m_szName, pszName, NameLen > 128 ? 128 : NameLen );
+	strcpy_safe(m_szName, pszName);
 }
 
 MMatchChatRoom::~MMatchChatRoom() 

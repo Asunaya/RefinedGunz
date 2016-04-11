@@ -4,16 +4,10 @@
 
 class Draw
 {
-	struct ScreenSpaceVertex {
-		float x, y, z, rhw;
-		DWORD color;
-	};
-
-	std::vector<ScreenSpaceVertex> Lines;
-	std::vector<ScreenSpaceVertex> Triangles;
-	bool bAlpha;
-	bool bBegunDrawing;
 public:
+	void OnCreateDevice();
+	void OnReset();
+
 	void Line(float x1, float y1, float x2, float y2, D3DCOLOR Color = 0xFF00A5C3, float z = 0) {
 		Line(D3DXVECTOR2(x1, y1), D3DXVECTOR2(x2, y2), Color, z);
 	}
@@ -25,10 +19,36 @@ public:
 		Quad(D3DXVECTOR2(r.x1, r.y1), D3DXVECTOR2(r.x2, r.y2), Color, z);
 	}
 	void Quad(const D3DXVECTOR2 &v1, const D3DXVECTOR2 &v2, D3DCOLOR Color = 0xFF00A5C3, float z = 0);
+
+	void TexturedQuad(const D3DXVECTOR2 &v1, const D3DXVECTOR2 &v2, IDirect3DTexture9 *Texture, D3DCOLOR Color = 0xFF00A5C3, float z = 0);
+
 	void Border(const D3DXVECTOR2 &v1, const D3DXVECTOR2 &v2, D3DCOLOR Color = 0xFF00A5C3, float z = 0);
+
+	void Text(const char * Str, int x, int y);
 
 	void BeginDraw();
 	void EndDraw();
+
+private:
+	struct ScreenSpaceVertex
+	{
+		float x, y, z, rhw;
+		DWORD color;
+	};
+
+	struct ScreenSpaceTexVertex
+	{
+		float x, y, z, rhw;
+		float tu, tv;
+	};
+
+	std::vector<ScreenSpaceVertex> Lines;
+	std::vector<ScreenSpaceVertex> Triangles;
+	bool Alpha;
+	bool BegunDrawing;
+
+	MFontR2 Font;
+	static constexpr int FontSize = 16;
 };
 
 extern Draw g_Draw;

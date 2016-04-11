@@ -30,6 +30,7 @@
 #include "ZModule_QuestStatus.h"
 #include "ZGameConst.h"
 
+#include "RGMain.h"
 #include "Portal.h"
 #include "Rules.h"
 
@@ -479,6 +480,8 @@ ZCharacter::ZCharacter() : ZCharacterObject(), m_DirectionLower(1,0,0),m_Directi
 	m_szUserAndClanName[0]=0;
 
 	SetInvincibleTime(0);
+
+	m_bChatEffect = false;
 }
 
 //void ZCharacter::RegisterModules()
@@ -856,22 +859,25 @@ void ZCharacter::CheckDrawWeaponTrack()
 
 	bool bDrawTracks = false;//칼 궤적을 그릴것인가?
 
-	if( ( m_pVMesh->m_SelectWeaponMotionType == eq_wd_katana ) || 
-		( m_pVMesh->m_SelectWeaponMotionType == eq_wd_sword  ) || 
-		( m_pVMesh->m_SelectWeaponMotionType == eq_wd_blade  ) ) 
+	if (ZGetConfiguration()->GetDrawTrails())
 	{
-
-		if( (ZC_STATE_LOWER_ATTACK1 <= m_AniState_Lower && m_AniState_Lower <= ZC_STATE_LOWER_GUARD_CANCEL) ||
-			(ZC_STATE_UPPER_LOAD <= m_AniState_Upper && m_AniState_Upper <= ZC_STATE_UPPER_GUARD_CANCEL))
+		if ((m_pVMesh->m_SelectWeaponMotionType == eq_wd_katana) ||
+			(m_pVMesh->m_SelectWeaponMotionType == eq_wd_sword) ||
+			(m_pVMesh->m_SelectWeaponMotionType == eq_wd_blade))
 		{
-			if(m_AniState_Upper!=ZC_STATE_UPPER_GUARD_IDLE) {
 
-				// 복귀할때는 안 그린다
-				if(	(m_AniState_Lower != ZC_STATE_LOWER_ATTACK1_RET) &&
-					(m_AniState_Lower != ZC_STATE_LOWER_ATTACK2_RET) &&
-					(m_AniState_Lower != ZC_STATE_LOWER_ATTACK3_RET) &&
-					(m_AniState_Lower != ZC_STATE_LOWER_ATTACK4_RET) )
-					bDrawTracks = true;
+			if ((ZC_STATE_LOWER_ATTACK1 <= m_AniState_Lower && m_AniState_Lower <= ZC_STATE_LOWER_GUARD_CANCEL) ||
+				(ZC_STATE_UPPER_LOAD <= m_AniState_Upper && m_AniState_Upper <= ZC_STATE_UPPER_GUARD_CANCEL))
+			{
+				if (m_AniState_Upper != ZC_STATE_UPPER_GUARD_IDLE) {
+
+					// 복귀할때는 안 그린다
+					if ((m_AniState_Lower != ZC_STATE_LOWER_ATTACK1_RET) &&
+						(m_AniState_Lower != ZC_STATE_LOWER_ATTACK2_RET) &&
+						(m_AniState_Lower != ZC_STATE_LOWER_ATTACK3_RET) &&
+						(m_AniState_Lower != ZC_STATE_LOWER_ATTACK4_RET))
+						bDrawTracks = true;
+				}
 			}
 		}
 	}
@@ -2547,10 +2553,10 @@ void ZCharacter::UpdateSound()
 				{
 					strcpy_safe(szSndName, g_pGame->GetSndNameFromBsp(pSInfo->Name, pMaterial));
 
-					int nStr = (int)strlen( szSndName );
-					strncpy( m_pSoundMaterial, szSndName + ( nStr - 6 ), 7 );  
+					int nStr = (int)strlen(szSndName);
+					strncpy(m_pSoundMaterial, szSndName + (nStr - 6), 7);
 
-					ZApplication::GetSoundEngine()->PlaySoundElseDefault(szSndName,pSInfo->Name,p,IsObserverTarget());
+					ZApplication::GetSoundEngine()->PlaySoundElseDefault(szSndName, pSInfo->Name, p, IsObserverTarget());
 				}
 				else {
 					m_pSoundMaterial[0] = 0;
@@ -2707,7 +2713,7 @@ void ZCharacter::InitStatus()
 		m_pVMesh->SetVisibility(1);
 
 	m_bLostConEffect = false;
-	m_bChatEffect	= false;
+	//m_bChatEffect	= false;
 
 	m_bCharged = false;
 	m_bCharging = false;
@@ -3152,7 +3158,7 @@ void ZCharacter::ChangeLowPolyModel()
 	m_pVMesh->SetLowPolyModel(pLowMesh);
 }
 
-bool ZCharacter::IsAdminName()
+bool ZCharacter::IsAdmin()
 {
 	if(m_InitialInfo.nUGradeID == MMUG_DEVELOPER ||
 		m_InitialInfo.nUGradeID == MMUG_ADMIN)
@@ -3224,16 +3230,16 @@ void ZCharacter::InitProperties()
 		m_Property.fMaxAP = g_Rules.MaxAP();
 }
 
-bool ZCharacter::Create(MTD_CharInfo* pCharInfo)
+bool ZCharacter::Create(const MTD_CharInfo& CharInfo)
 {
 	_ASSERT(!m_bInitialized);
 
-	memcpy(&m_InitialInfo,pCharInfo,sizeof(MTD_CharInfo));
+	memcpy(&m_InitialInfo, &CharInfo, sizeof(MTD_CharInfo));
 
 	// 아이템 세팅
 	for (int i = 0; i < MMCIP_END; i++)
 	{
-		m_Items.EquipItem(MMatchCharItemParts(i), pCharInfo->nEquipedItemDesc[i]);
+		m_Items.EquipItem(MMatchCharItemParts(i), CharInfo.nEquipedItemDesc[i]);
 	}
 
 
@@ -3271,13 +3277,13 @@ bool ZCharacter::Create(MTD_CharInfo* pCharInfo)
 		switch (pDesc->m_nID)
 		{
 		case 8501:
-			m_pVMesh->SetCustomColor(0x80FFB7D5, 0);
+			g_RGMain.SetSwordColor(GetUID(), 0xFFFFB7D5);
 			break;
 		case 8502:
-			m_pVMesh->SetCustomColor(0x8000FF00, 0);
+			g_RGMain.SetSwordColor(GetUID(), 0xFF00FF00);
 			break;
 		case 8503:
-			m_pVMesh->SetCustomColor(0x8000FFFF, 0);
+			g_RGMain.SetSwordColor(GetUID(), 0xFF00FFFF);
 			break;
 		}
 	}
@@ -3293,12 +3299,6 @@ void ZCharacter::Destroy()
 	m_bInitialized = false;
 
 	DestroyShadow();
-	
-//	if( m_pCloth != NULL )
-//	{
-//		delete m_pCloth;
-//		m_pCloth = 0;
-//	}
 }
 
 void ZCharacter::InitMeshParts()
@@ -3409,7 +3409,7 @@ void ZCharacter::ChangeWeapon(MMatchCharItemParts nParts)
 	}
 //*/
 	// 글래디에이터일때는 총무기 사용 금지
-	if (g_pGame->GetMatch()->IsRuleGladiator())
+	if (g_pGame->GetMatch()->IsRuleGladiator() && !IsAdmin())
 	{
 		if ((nParts == MMCIP_PRIMARY) || (nParts == MMCIP_SECONDARY)) {
 			return;
@@ -3888,6 +3888,21 @@ bool ZCharacter::Load(ZFile *file, const ReplayVersion &Version)
 	return true;
 }
 
+void ZCharacter::Load(const ZCharacterReplayState& State)
+{
+	m_UID = State.UID;
+	m_Property = State.Property;
+	m_pModule_HPAP->SetHP(State.HP);
+	m_pModule_HPAP->SetAP(State.AP);
+	m_Status = State.Status;
+	m_Items.Load(State.BulletInfos);
+	m_Position = State.Position;
+	m_Direction = State.Direction;
+	m_nTeamID = State.Team;
+	m_bDie = State.Dead;
+	m_bAdminHide = State.HidingAdmin;
+}
+
 /*
 void ZCharacter::DrawForce(bool bDrawShadow)
 {
@@ -4001,27 +4016,14 @@ bool ZCharacter::IsGuard() const
 
 void ZCharacter::AddMassiveEffect(const rvector &pos, const rvector &dir)
 {
-	ZItem *pItem = GetItems()->GetItem(MMCIP_MELEE);
-	if (!pItem) return;
-
-	MMatchItemDesc *pDesc = pItem->GetDesc();
-	if (!pDesc) return;
-
-	if (pDesc->m_nID == 8501)
-		ZGetEffectManager()->AddPinkSwordWaveEffect(pos, dir);
-	else if (pDesc->m_nID == 8502)
-		ZGetEffectManager()->AddGreenSwordWaveEffect(pos, dir);
-	else if (pDesc->m_nID == 8503)
-		ZGetEffectManager()->AddBlueSwordWaveEffect(pos, dir);
-	else
-		ZGetEffectManager()->AddSwordWaveEffect(pos, dir);
+	ZGetEffectManager()->AddSwordWaveEffect(GetUID(), pos, dir);
 }
 
 void ZCharacter::InitRound()
 {
 	// 온게임넷의 요청으로 짱 아이콘을 달아준다. initround시에, 난입할때 달아준다
 	if(GetUserGrade()==MMUG_STAR) {
-		ZGetEffectManager()->AddStarEffect(this);        
+		ZGetEffectManager()->AddStarEffect(this);
 	}
 }
 
@@ -4201,39 +4203,7 @@ void ZCharacter::OnShot()
 	if (m_bChatEffect) m_bChatEffect = false;
 }
 
-
-void ZCharacter::SetInvincibleTime(int nDuration)
-{
-	m_dwInvincibleStartTime = gaepanEncode(timeGetTime(), 4);
-	m_dwInvincibleDuration = gaepanEncode(nDuration, 5);
-}
-
 bool ZCharacter::isInvincible()
 {
-	return ((int)timeGetTime() < (gaepanDecode(m_dwInvincibleStartTime, 4) + gaepanDecode(m_dwInvincibleDuration, 5)));
-}
-
-
-int gaepanEncode(int a, int depth)
-{
-	if (depth > 0)
-	{
-		int t = a ^ 0xa56b21;
-		t += 516912;
-		t = gaepanEncode(t, depth-1);
-		return t;
-	}
-	return a;
-}
-
-int gaepanDecode(int a, int depth)
-{
-	if (depth > 0)
-	{
-		int t = gaepanDecode(a, depth-1);
-		t -= 516912;
-		t ^= 0xa56b21;
-		return t;
-	}
-	return a;
+	return ((int)timeGetTime() < (m_dwInvincibleStartTime + m_dwInvincibleDuration));
 }

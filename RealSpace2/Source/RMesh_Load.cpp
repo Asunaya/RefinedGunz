@@ -160,6 +160,8 @@ bool RMesh::ReadXmlElement(MXmlElement* PNode,char* Path)
 				MLoopType = RAniLoopType_OnceLowerBody;
 			}
 
+			//MLog("Name: %s, filename: %s, motion_type %s, motion_loop_type %s\n", IDName, FileName, MotionTypeID, MotionLoopTypeID);
+
 			int nGameMotion = atoi(GameMotion);
 
 			if( GetToolMesh() ) // 툴에서 사용되는거라면 무조건 바로 로딩~

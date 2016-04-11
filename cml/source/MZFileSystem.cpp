@@ -146,7 +146,7 @@ void MZFileSystem::RefreshFileList(const char* szBasePath)
 				_splitpath_s(c_file.name, szDrive, szDir, szFileName, szExt);
 				
 				// zip 파일이면 안의 파일들을 더한다
-				if(_stricmp(szExt, "."DEF_EXT)==0 || _stricmp(szExt, ".zip")==0) {
+				if(_stricmp(szExt, "." DEF_EXT)==0 || _stricmp(szExt, ".zip")==0) {
 
 					char szZipFileName[_MAX_PATH],szBaseLocation[_MAX_PATH];
 					sprintf_s(szZipFileName,"%s%s",szBasePath,c_file.name);

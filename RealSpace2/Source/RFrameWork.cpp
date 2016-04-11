@@ -357,23 +357,16 @@ int RMain(const char *AppName, HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR c
 
 	//CreateThread(0, 0, thrUpdate, 0, 0, 0);
 
-//	RGetDevice()->ShowCursor( TRUE );	// RAONHAJE Mouse Cursor HardwareDraw
-	// message loop
-    // Now we're ready to recieve and process Windows messages.
     BOOL bGotMsg;
     MSG  msg;
-//    PeekMessage( &msg, NULL, 0U, 0U, PM_NOREMOVE );
 
     do
     {
-        // Use PeekMessage() if the app is active, so we can use idle time to
-        // render the scene. Else, use GetMessage() to avoid eating CPU time.
-//        if( g_bActive )
-            bGotMsg = PeekMessage( &msg, NULL, 0U, 0U, PM_REMOVE );
-//        else
-//            bGotMsg = GetMessage( &msg, NULL, 0U, 0U );
+		bGotMsg = PeekMessage( &msg, NULL, 0U, 0U, PM_REMOVE );
 
         if( bGotMsg ) {
+			/*if (msg.message != 512)
+				MLog("Got message %d\n", msg.message);*/
             TranslateMessage( &msg );
             DispatchMessage( &msg );
         }

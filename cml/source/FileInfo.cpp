@@ -148,8 +148,8 @@ void GetRelativePath(char *pRelativePath, int maxlen, const char *pBasePath, con
 	_fullpath(szBasePath, pBasePath, 256);
 	_fullpath(szPath, pPath, 256);
 
-	_strlwr(szPath);
-	_strlwr(szBasePath);
+	_strlwr_s(szPath);
+	_strlwr_s(szBasePath);
 
 	if(szBasePath[0]!=szPath[0]){
 		strcpy_safe(pRelativePath, maxlen, szPath);
@@ -231,7 +231,7 @@ void GetFullPath(char *pFullPath, int maxlen, const char *pRelativePath)
 	GetCurrentDirectory(sizeof(pBasePath),pBasePath);
 	if(pBasePath[strlen(pBasePath)]!='\\') strcat(pBasePath,"\\");
 	_fullpath(szFullPath, pBasePath, 256);
-	_splitpath(szFullPath, szDrive, szDir, szFileName, szExt);
+	_splitpath_s(szFullPath, szDrive, szDir, szFileName, szExt);
 	wsprintf(pFullPath, "%s%s%s", szDrive, szDir, pRelativePath);
 }
 
@@ -268,7 +268,7 @@ BOOL ReadHeader(HANDLE hFile, void *pHeader, int nHeaderSize)
 void GetPurePath(char *pPurePath, int maxlen, const char *pFilename)
 {
 	char drive[_MAX_DRIVE],dir[_MAX_DIR],fname[_MAX_FNAME],ext[_MAX_EXT];
-	_splitpath(pFilename,drive,dir,fname,ext);
+	_splitpath_s(pFilename,drive,dir,fname,ext);
 	sprintf_s(pPurePath, maxlen, "%s%s", drive, dir);
 	
 	int len = strlen(pPurePath);
@@ -323,7 +323,8 @@ DWORD GetFileCheckSum(char* pszFileName)
 
 bool IsExist(const char *filename)
 {
-	FILE *file=fopen(filename,"r");
+	FILE *file;
+	fopen_s(&file, filename, "r");
 	bool breturn=(file!=NULL);
 	if(file) fclose(file);
 	return breturn;
@@ -387,7 +388,7 @@ void time_tToFILETIME(time_t t, LPFILETIME pft)
 {
 	LONGLONG ll = Int32x32To64(t, 10000000) + 116444736000000000;
 	pft->dwLowDateTime = (DWORD) ll;
-	pft->dwHighDateTime = (DWORD)ll >>32;
+	pft->dwHighDateTime = (DWORD)(ll >> 32);
 }
 
 BOOL MSetFileTime(LPCTSTR lpszPath, FILETIME ft) 

@@ -360,7 +360,6 @@ void ZMatch::InitRound()
 			}
 			else
 			{
-				MLog("Requested spawn!\n");
 				ZPostRequestSpawn(ZGetMyUID(), pos, dir);
 				g_pGame->SetSpawnRequested(true);
 			}

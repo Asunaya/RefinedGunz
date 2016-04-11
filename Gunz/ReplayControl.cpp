@@ -11,7 +11,7 @@ void ReplayControl::Draw()
 	if (!ZGetGame()->IsReplay())
 		return;
 
-	if (!g_pChat->IsInputEnabled())
+	if (!g_Chat.IsInputEnabled())
 		return;
 
 	D3DXVECTOR2 v1, v2;
@@ -60,7 +60,7 @@ bool CursorInRange(const POINT &Cursor, int x1, int y1, int x2, int y2){
 
 bool ReplayControl::OnEvent(MEvent *pEvent)
 {
-	if (!ZGetGame()->IsReplay() || !g_pChat->IsInputEnabled())
+	if (!ZGetGame()->IsReplay() || !g_Chat.IsInputEnabled())
 		return false;
 
 	static bool bLastLb = false;
@@ -79,7 +79,7 @@ bool ReplayControl::OnEvent(MEvent *pEvent)
 	if (!CursorInRange(p, RELWIDTH(1920.f / 2 - 170), RELHEIGHT(835), RELWIDTH(1920.f / 2 + 170), RELHEIGHT(865)))
 		return false;
 
-	float Index = (p.x - RELWIDTH(1920.f / 2 - 170)) / 340;
+	float Index = float(p.x - RELWIDTH(1920.f / 2 - 170)) / 340;
 
 	ZGetGame()->SetReplayTime(Index * ZGetGame()->GetReplayLength());
 

@@ -2,6 +2,7 @@
 #define ZEFFECTMANAGER_H
 
 #include <list>
+#include <unordered_map>
 using namespace std;
 
 #include "ZItem.h"
@@ -164,6 +165,8 @@ public:
 	
 };
 
+#include "RGGlobal.h"
+
 class ZEffectManager{
 protected:
 	/// Effect List
@@ -253,6 +256,9 @@ protected:
 	RMesh*	m_pSwordCold;
 	RMesh*	m_pSwordPoison;
 
+	RMesh* m_pChargingEffect;
+	RMesh* m_pChargedEffect;
+
 	RMesh*	m_pPinkChargingEffect;
 	RMesh*	m_pGreenChargingEffect;
 	RMesh*	m_pBlueChargingEffect;
@@ -337,10 +343,7 @@ public:
 	void AddMapSmokeTSEffect(rvector& Target,rvector& dir,rvector& acc,DWORD color,DWORD delay,float fLife,float fStartScale,float fEndScale);
 
 	void AddSwordDefenceEffect(const rvector& Target, const rvector& vDir);
-	void AddSwordWaveEffect(const rvector &Target, const rvector &Dir);
-	void AddPinkSwordWaveEffect(const rvector &Target, const rvector &Dir);
-	void AddGreenSwordWaveEffect(const rvector &Target, const rvector &Dir);
-	void AddBlueSwordWaveEffect(const rvector &Target, const rvector &Dir);
+	void AddSwordWaveEffect(const MUID& UID, const rvector &Target, const rvector &Dir);
 	void AddSwordEnchantEffect(ZC_ENCHANT type, const rvector& Target, DWORD start_time, float fScale = 1.0f);
 	void AddMagicEffect(const rvector& Target, DWORD start_time, float fScale = 1.0f);
 
@@ -402,12 +405,6 @@ public:
 
 	void AddChargingEffect(ZObject* pObj);
 	void AddChargedEffect(ZObject* pObj);
-	void AddPinkChargingEffect(ZObject* pObj);
-	void AddPinkChargedEffect(ZObject* pObj);
-	void AddGreenChargingEffect(ZObject* pObj);
-	void AddGreenChargedEffect(ZObject* pObj);
-	void AddBlueChargingEffect(ZObject* pObj);
-	void AddBlueChargedEffect(ZObject* pObj);
 
 	void AddShadowEffect(rmatrix& m,DWORD _color);
 
@@ -418,7 +415,6 @@ public:
 	void Add(const char* szName,const rvector& pos, const rvector& dir,const MUID& uidOwner,int nLifeTime);
 	void AddSp(const char* szName,int nCnt,const rvector& pos, const rvector& dir,const MUID& uidOwner);
 	void AddPartsPosType(const char* szName,const MUID& uidOwner,RMeshPartsPosInfoType type,int nLifeTime);
-
 };
 
 // 이펙트 디테일 레벨..옵션

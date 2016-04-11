@@ -781,6 +781,18 @@
     <ClInclude Include="ZRuleSkillmap.h">
       <Filter>Interface\Game\Rule</Filter>
     </ClInclude>
+    <ClInclude Include="VoiceChat.h">
+      <Filter>RGunz</Filter>
+    </ClInclude>
+    <ClInclude Include="ZReplayStructs.h">
+      <Filter>Interface\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="RGGlobal.h">
+      <Filter>RGunz</Filter>
+    </ClInclude>
+    <ClInclude Include="ZCharacterStructs.h">
+      <Filter>Character</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ZCanvas.cpp">
@@ -1414,6 +1426,9 @@
     <ClCompile Include="Tasks.cpp">
       <Filter>RGunz</Filter>
     </ClCompile>
+    <ClCompile Include="VoiceChat.cpp">
+      <Filter>RGunz</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="runtime\shader\skin.vsh">
@@ -1454,6 +1469,9 @@
     </None>
     <None Include="Runtime\system\zskill.xml">
       <Filter>xml</Filter>
+    </None>
+    <None Include="ZReplay.inl">
+      <Filter>Interface\Game</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

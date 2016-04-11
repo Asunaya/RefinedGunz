@@ -21,7 +21,6 @@ void GetLocalIP( char* szOutIP, int nSize )
 	if( (0 == szOutIP) || (0 >= nSize) )
 		return;
 
-	unsigned long dwBytesRet ;
     unsigned int optval = 1 ;
 
     string ip;

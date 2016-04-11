@@ -497,7 +497,7 @@ void ZObserver::OnDraw(MDrawContext* pDC)
 	{
 		char szName[128];
 		sprintf_s(szName, "%s (HP:%d, AP:%d)", m_pTargetCharacter->GetUserName(), m_pTargetCharacter->GetHP(), m_pTargetCharacter->GetAP());
-		if ( m_pTargetCharacter->IsAdminName())
+		if ( m_pTargetCharacter->IsAdmin())
 			pDC->SetColor(MCOLOR(ZCOLOR_ADMIN_NAME));
 		else
 			pDC->SetColor(MCOLOR(0xFFFFFFFF));

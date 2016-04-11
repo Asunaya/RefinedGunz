@@ -14,8 +14,8 @@ int	ZModule_HPAP::GetHP()
 }
 
 void ZModule_HPAP::SetHP(int nHP) 
-{ 
-	nHP = min(max(0,nHP),m_nMaxHP);
+{
+	nHP = min(max(0, nHP), m_nMaxHP);
 
 	MDataChecker* pChecker = NULL;
 

@@ -894,7 +894,7 @@ void MMatchServer::StandbyClanList(const MUID& uidPlayer, int nClanListStartInde
 				strcpy_safe(pNode->szClanName, pMember->GetCharInfo()->m_ClanInfo.m_szClanName);
 			}
 
-			pNode->nPlayers = (int)pLadderGroup->GetPlayerCount();
+			pNode->nPlayers = (decltype(pNode->nPlayers))pLadderGroup->GetPlayerCount();
 			pNode->nCLID = pLadderGroup->GetCLID();
 
 			MMatchClan* pClan = FindClan(pLadderGroup->GetCLID());

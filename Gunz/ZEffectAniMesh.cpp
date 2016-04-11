@@ -52,9 +52,8 @@ ZEffectAniMesh::ZEffectAniMesh(RMesh* pMesh, const rvector& Pos, const rvector& 
 }
 
 ZEffectSlash::ZEffectSlash(RMesh* pMesh, const rvector& Pos, const rvector& dir)
-:ZEffectAniMesh(pMesh,Pos,dir)
+: ZEffectAniMesh(pMesh, Pos, dir)
 {
-
 }
 
 #define SC_ROTATION	1.2f

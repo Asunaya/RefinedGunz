@@ -149,7 +149,7 @@ BOOL CConsoleBar::PreTranslateMessage(MSG* pMsg)
 			list<string>	RecommededCommands;
 			for(int i=0; i<pMonitor->GetCommandManager()->GetCommandDescCount(); i++){
 				MCommandDesc* pCD = pMonitor->GetCommandManager()->GetCommandDesc(i);
-				if(strnicmp(pCD->GetName(), szCommand, szCommand.GetLength())==0){
+				if(_strnicmp(pCD->GetName(), szCommand, szCommand.GetLength())==0){
 					RecommededCommands.insert(RecommededCommands.end(), pCD->GetName());
 				}
 			}

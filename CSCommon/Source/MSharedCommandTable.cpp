@@ -35,6 +35,13 @@ void MAddSharedCommandTable(MCommandManager* pCommandManager, int nSharedType)
 		P(MPT_STR, "Email")
 	C(MC_MATCH_RESPONSE_CREATE_ACCOUNT, "", "", MCDT_MACHINE2MACHINE)
 		P(MPT_STR, "Message")
+	C(MC_MATCH_SEND_VOICE_CHAT, "", "", MCDT_MACHINE2MACHINE)
+		P(MPT_BLOB, "Encoded microphone data")
+	C(MC_MATCH_RECEIVE_VOICE_CHAT, "", "", MCDT_MACHINE2MACHINE)
+		P(MPT_UID, "Sender")
+		P(MPT_BLOB, "Encoded microphone data")
+	C(MC_PEER_SET_SWORD_COLOR, "", "", MCDT_PEER2PEER)
+		P(MPT_UINT, "Color")
 
 
 	C(MC_LOCAL_INFO, "Local.Info", "Local information", MCDT_LOCAL)
@@ -1017,7 +1024,7 @@ void MAddSharedCommandTable(MCommandManager* pCommandManager, int nSharedType)
 			P(MPT_INT, "AttackType")
 			P(MPT_VECTOR, "Position")
 
-			C(MC_PEER_DAMAGE, "Peer.ObjectDamage", "Object Damage", MCDT_PEER2PEER)
+		C(MC_PEER_DAMAGE, "Peer.ObjectDamage", "Object Damage", MCDT_PEER2PEER)
 			P(MPT_UID, "TargetUID")
 			P(MPT_INT, "Damage")
 

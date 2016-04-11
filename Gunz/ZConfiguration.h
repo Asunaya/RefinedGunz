@@ -95,9 +95,7 @@ struct ZCONFIG_MACRO
 		if(str==NULL)
 			return;
 
-		int nLen = min( 256, (int)strlen( str));
-		strncpy(szMacro[i], str, nLen);
-		szMacro[i][nLen] = 0;
+		strcpy_safe(szMacro[i], str);
 	}
 
 	char* GetString(int i) {
@@ -143,6 +141,9 @@ class ZChatCmdManager;
 
 class ZConfiguration {
 private:
+	friend void LoadRGCommands(ZChatCmdManager &CmdManager);
+	friend class ZOptionInterface;
+
 	ZCONFIG_VIDEO		m_Video;
 	ZCONFIG_AUDIO		m_Audio;
 	ZCONFIG_MOUSE		m_Mouse;
@@ -162,18 +163,19 @@ private:
 	int					m_nServerCount;
 	bool				m_bViewGameChat;
 
-	int nFPSLimit = 250;
-	bool bCamFix = false;
-	DWORD ChatBackgroundColor = 0x00000000;
-	bool bShowHitboxes = false;
-	bool bDynamicResourceLoad = false;
-
 	ZLocatorList*		m_pLocatorList;
 	ZLocatorList*		m_pTLocatorList;
 
 	ZGameTypeList*		m_pGameTypeList;
 
 	bool				m_bIsComplete;
+
+	int nFPSLimit = 250;
+	bool bCamFix = false;
+	DWORD ChatBackgroundColor = 0x80000000;
+	bool bShowHitboxes = false;
+	bool bDynamicResourceLoad = false;
+	bool bDrawTrails = true;
 
 protected:
 public:
@@ -238,19 +240,11 @@ public:
 	D3DCOLOR GetChatBackgroundColor() const { return ChatBackgroundColor; }
 	bool GetShowHitboxes() const { return bShowHitboxes; }
 	bool GetDynamicResourceLoad() const { return bDynamicResourceLoad; }
+	bool GetDrawTrails() const { return bDrawTrails; }
 
 	const bool IsComplete()			{ return m_bIsComplete; }
 
 	const bool LateStringConvert();
-
-private:
-	friend void LoadRGCommands(ZChatCmdManager &CmdManager);
-	friend class ZOptionInterface;
-	void SetFPSLimit(int n) { nFPSLimit = n; Save(); }
-	void SetCamFix(bool b) { bCamFix = b; Save(); }
-	void SetChatBackgroundColor(DWORD Color) { ChatBackgroundColor = Color; Save(); }
-	void SetShowHitboxes(bool b) { bShowHitboxes = b; }
-	void SetDynamicResourceLoad(bool b) { bDynamicResourceLoad = b; }
 };
 
 

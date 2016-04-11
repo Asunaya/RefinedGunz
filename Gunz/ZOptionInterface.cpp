@@ -425,7 +425,21 @@ void ZOptionInterface::InitInterfaceOption(void)
 		}
 	}
 
-	mlog("ZGameInterface::InitInterfaceOption ok\n");
+	{
+		auto pHitboxes = (MButton*)pResource->FindWidget("HitboxOption");
+		if (pHitboxes)
+		{
+			pHitboxes->SetCheck(ZGetConfiguration()->GetShowHitboxes());
+		}
+
+		auto pTrails = (MButton*)pResource->FindWidget("DrawTrailsOption");
+		if (pTrails)
+		{
+			pTrails->SetCheck(ZGetConfiguration()->GetDrawTrails());
+		}
+	}
+
+	//mlog("ZGameInterface::InitInterfaceOption ok\n");
 }
 
 bool ZOptionInterface::SaveInterfaceOption(void)
@@ -779,10 +793,16 @@ bool ZOptionInterface::SaveInterfaceOption(void)
 			}
 		}
 
-		MButton* pHitboxes = (MButton*)pResource->FindWidget("HitboxOption");
+		auto pHitboxes = (MButton*)pResource->FindWidget("HitboxOption");
 		if (pHitboxes)
 		{
-			ZGetConfiguration()->SetShowHitboxes(pHitboxes->GetCheck());
+			ZGetConfiguration()->bShowHitboxes = pHitboxes->GetCheck();
+		}
+
+		auto pTrails = (MButton*)pResource->FindWidget("DrawTrailsOption");
+		if (pTrails)
+		{
+			ZGetConfiguration()->bDrawTrails = pTrails->GetCheck();
 		}
 
 		MComboBox* pComboBox = (MComboBox*)pResource->FindWidget("CrossHairComboBox");
@@ -1355,7 +1375,7 @@ void ZOptionInterface::Resize(int w, int h)
 
 	if (ZGetCombatInterface()) ZGetCombatInterface()->Resize(w, h);
 
-	g_pChat->Resize(w, h);
+	g_Chat.Resize(w, h);
 }
 
 void ZOptionInterface::GetOldScreenResolution()
@@ -1374,7 +1394,7 @@ void ZOptionInterface::GetOldScreenResolution()
 	Mint::GetInstance()->SetWorkspaceSize(ModeParams.nWidth, ModeParams.nHeight);
 	Mint::GetInstance()->GetMainFrame()->SetSize(ModeParams.nWidth, ModeParams.nHeight);
 	Resize(ModeParams.nWidth, ModeParams.nHeight);
-	g_pChat->Scale(double(RGetScreenWidth()) / mOldScreenWidth, double(RGetScreenHeight()) / mOldScreenHeight);
+	g_Chat.Scale(double(RGetScreenWidth()) / mOldScreenWidth, double(RGetScreenHeight()) / mOldScreenHeight);
 
 	D3DDISPLAYMODE ddm;
 	ddm.Width = ModeParams.nWidth;
@@ -1440,7 +1460,7 @@ bool ZOptionInterface::TestScreenResolution()
 		Mint::GetInstance()->SetWorkspaceSize(ModeParams.nWidth, ModeParams.nHeight);
 		Mint::GetInstance()->GetMainFrame()->SetSize(ModeParams.nWidth, ModeParams.nHeight);
 		Resize(ModeParams.nWidth, ModeParams.nHeight);
-		g_pChat->Scale(double(RGetScreenWidth()) / mOldScreenWidth, double(RGetScreenHeight()) / mOldScreenHeight);
+		g_Chat.Scale(double(RGetScreenWidth()) / mOldScreenWidth, double(RGetScreenHeight()) / mOldScreenHeight);
 	}
 	return true;
 }

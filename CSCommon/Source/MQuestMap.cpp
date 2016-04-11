@@ -410,8 +410,9 @@ bool MQuestMapCatalogue::ReadXml(MZFileSystem* pFileSystem,const char* szFileNam
 
 void MQuestMapCatalogue::DebugReport()
 {
-	FILE* fp = fopen("report_questmap.txt", "wt");
-	if (fp == NULL) return;
+	FILE* fp;
+	fopen_s(&fp, "report_questmap.txt", "wt");
+	if (!fp) return;
 
 	for (MQuestMapsetMap::iterator itor = m_MapsetInfo.begin(); itor != m_MapsetInfo.end(); ++itor)
 	{

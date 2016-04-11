@@ -169,14 +169,13 @@ public:
 
 // 라인수 줄이기 위한 매크로
 #define NEWCMD(_ID)		(new MCommand(_ID))
-#define AP(_P)			AddParameter(new _P)
 #define MKCMD(_C, _ID)									{ _C = NEWCMD(_ID); }
-#define MKCMD1(_C, _ID, _P0)							{ _C = NEWCMD(_ID); _C->AP(_P0); }
-#define MKCMD2(_C, _ID, _P0, _P1)						{ _C = NEWCMD(_ID); _C->AP(_P0); _C->AP(_P1); }
-#define MKCMD3(_C, _ID, _P0, _P1, _P2)					{ _C = NEWCMD(_ID); _C->AP(_P0); _C->AP(_P1); _C->AP(_P2); }
-#define MKCMD4(_C, _ID, _P0, _P1, _P2, _P3)				{ _C = NEWCMD(_ID); _C->AP(_P0); _C->AP(_P1); _C->AP(_P2); _C->AP(_P3); }
-#define MKCMD5(_C, _ID, _P0, _P1, _P2, _P3, _P4)		{ _C = NEWCMD(_ID); _C->AP(_P0); _C->AP(_P1); _C->AP(_P2); _C->AP(_P3); _C->AP(_P4); }
-#define MKCMD6(_C, _ID, _P0, _P1, _P2, _P3, _P4, _P5)	{ _C = NEWCMD(_ID); _C->AP(_P0); _C->AP(_P1); _C->AP(_P2); _C->AP(_P3); _C->AP(_P4); _C->AP(_P5); }
+#define MKCMD1(_C, _ID, _P0)							{ _C = NEWCMD(_ID); _C->AddParameter(new _P0); }
+#define MKCMD2(_C, _ID, _P0, _P1)						{ _C = NEWCMD(_ID); _C->AddParameter(new _P0); _C->AddParameter(new _P1); }
+#define MKCMD3(_C, _ID, _P0, _P1, _P2)					{ _C = NEWCMD(_ID); _C->AddParameter(new _P0); _C->AddParameter(new _P1); _C->AddParameter(new _P2); }
+#define MKCMD4(_C, _ID, _P0, _P1, _P2, _P3)				{ _C = NEWCMD(_ID); _C->AddParameter(new _P0); _C->AddParameter(new _P1); _C->AddParameter(new _P2); _C->AddParameter(new _P3); }
+#define MKCMD5(_C, _ID, _P0, _P1, _P2, _P3, _P4)		{ _C = NEWCMD(_ID); _C->AddParameter(new _P0); _C->AddParameter(new _P1); _C->AddParameter(new _P2); _C->AddParameter(new _P3); _C->AddParameter(new _P4); }
+#define MKCMD6(_C, _ID, _P0, _P1, _P2, _P3, _P4, _P5)	{ _C = NEWCMD(_ID); _C->AddParameter(new _P0); _C->AddParameter(new _P1); _C->AddParameter(new _P2); _C->AddParameter(new _P3); _C->AddParameter(new _P4); _C->AddParameter(new _P5); }
 
 
 // Short Name

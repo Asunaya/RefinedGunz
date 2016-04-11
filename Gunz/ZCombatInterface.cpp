@@ -1244,7 +1244,7 @@ void ZCombatInterface::SetPickTarget(bool bPick, ZCharacter* pCharacter)
 			m_pTargetLabel->SetTextColor(0xffff0000);
 		}
 
-		if(pCharacter->IsAdminName())
+		if(pCharacter->IsAdmin())
 			m_pTargetLabel->SetTextColor(ZCOLOR_ADMIN_NAME);
 
 		if (!bFriend == true && !pCharacter->IsDie()) 
@@ -1363,7 +1363,7 @@ void ZCombatInterface::DrawFriendName(MDrawContext* pDC)
 
 				MFont *pFont=NULL;
 
-				if(pCharacter->IsAdminName()) {
+				if(pCharacter->IsAdmin()) {
 					pFont = MFontManager::Get("FONTa12_O1Org");
 					pDC->SetColor(MCOLOR(ZCOLOR_ADMIN_NAME));
 				}
@@ -1420,7 +1420,7 @@ void ZCombatInterface::DrawEnemyName(MDrawContext* pDC)
 
 				MFont *pFont = NULL;//MFontManager::Get("FONTa12_O1Red");
 
-				if(pPickedCharacter->IsAdminName()) {
+				if(pPickedCharacter->IsAdmin()) {
 					pDC->SetColor(MCOLOR(ZCOLOR_ADMIN_NAME));
 					pFont = MFontManager::Get("FONTa12_O1Org");
 				}
@@ -1469,7 +1469,7 @@ void ZCombatInterface::DrawAllPlayerName(MDrawContext* pDC)
 
 			MFont *pFont=NULL;
 
-			if(pCharacter->IsAdminName()) {
+			if(pCharacter->IsAdmin()) {
 				pFont = MFontManager::Get("FONTa12_O1Org");
 				pDC->SetColor(MCOLOR(ZCOLOR_ADMIN_NAME));
 			}
@@ -1836,19 +1836,16 @@ void ZCombatInterface::DrawScoreBoard(MDrawContext* pDC)
 	{
 		ZCharacter* pCharacter = (*itor).second;
 
-		if(pCharacter->GetTeamID() == MMT_SPECTATOR) continue;	// 옵저버는 뺸다
+		if(pCharacter->GetTeamID() == MMT_SPECTATOR) continue;
 
 		if(pCharacter->IsAdminHide()) continue;
 
 		ZScoreBoardItem *pItem=new ZScoreBoardItem;
 
-		if(pCharacter->IsAdminName()) {
-			sprintf_s(pItem->szName,"--%s  %s", ZMsg(MSG_CHARINFO_LEVELMARKER), pCharacter->GetUserName());
+		sprintf_s(pItem->szName, "%d%s %s", pCharacter->GetProperty()->nLevel, ZMsg(MSG_CHARINFO_LEVELMARKER), pCharacter->GetUserName());
+
+		if(pCharacter->IsAdmin())
 			pItem->SetColor(ZCOLOR_ADMIN_NAME);
-		}
-		else{
-			sprintf_s(pItem->szName,"%d%s %s",pCharacter->GetProperty()->nLevel, ZMsg(MSG_CHARINFO_LEVELMARKER), pCharacter->GetUserName());
-		}
 
 		memcpy(pItem->szClan,pCharacter->GetProperty()->szClanName,CLAN_NAME_LENGTH);
 		
@@ -3087,7 +3084,7 @@ void ZCombatInterface::OnFinish()
 
 		if(pCharacter->IsAdminHide()) continue;
 
-		if(pCharacter->IsAdminName()) {
+		if(pCharacter->IsAdmin()) {
 			sprintf_s(pItem->szName,"--%s  %s", ZMsg(MSG_CHARINFO_LEVELMARKER), pCharacter->GetUserName());
 		}
 		else {

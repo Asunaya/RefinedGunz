@@ -20,7 +20,7 @@ bool Portal::bPortalSetExists = false;
 
 Portal::Portal()
 {
-	static const int coords[] = { 200, 20,
+	static constexpr int coords[] = { 200, 20,
 		287, 50,
 		363, 159,
 		384, 372,
@@ -32,7 +32,7 @@ Portal::Portal()
 		109, 49,
 	};
 
-	static const int NumVertices = sizeof(coords) / sizeof(coords[0]) / 2;
+	static constexpr int NumVertices = sizeof(coords) / sizeof(coords[0]) / 2;
 
 	DWORD dwFVF = (D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_TEX1);
 	D3DXCreateMeshFVF(4, 4, D3DXMESH_MANAGED, dwFVF, RGetDevice(), &pRectangleMesh);
@@ -48,28 +48,6 @@ Portal::Portal()
 	D3DVERTEX*              pSrc;
 
 	pRectangleMesh->LockVertexBuffer(0, (void**)&pSrc);
-
-	/*
-	//left bottom point
-	((D3DVERTEX*)pSrc)[0].p.x = -1;
-	((D3DVERTEX*)pSrc)[0].p.y = -1;
-	((D3DVERTEX*)pSrc)[0].p.z = 0;
-
-	//left top point
-	((D3DVERTEX*)pSrc)[1].p.x = -1;
-	((D3DVERTEX*)pSrc)[1].p.y = 1;
-	((D3DVERTEX*)pSrc)[1].p.z = 0;
-
-	//right top point
-	((D3DVERTEX*)pSrc)[2].p.x = 1;
-	((D3DVERTEX*)pSrc)[2].p.y = 1;
-	((D3DVERTEX*)pSrc)[2].p.z = 0;
-
-	//right bottom point
-	((D3DVERTEX*)pSrc)[3].p.x = 1;
-	((D3DVERTEX*)pSrc)[3].p.y = -1;
-	((D3DVERTEX*)pSrc)[3].p.z = 0;
-	*/
 
 	//left bottom point
 	((D3DVERTEX*)pSrc)[0].p.x = -100;
@@ -109,7 +87,6 @@ Portal::Portal()
 	WORD* pIndexBuffer = 0;
 	pRectangleMesh->LockIndexBuffer(0, (void**)&pIndexBuffer);
 
-	// fill in the front face index data
 	pIndexBuffer[0] = 0; pIndexBuffer[1] = 1; pIndexBuffer[2] = 2;
 	pIndexBuffer[3] = 0; pIndexBuffer[4] = 2; pIndexBuffer[5] = 3;
 	pRectangleMesh->UnlockIndexBuffer();
@@ -159,7 +136,7 @@ Portal::Portal()
 	{
 		char path[128];
 		sprintf(path, "Interface/default/portal%d.png", i + 1);
-		auto ret = ReadFile(path);
+		auto ret = ReadMZFile(path);
 
 		if (!ret.first)
 		{
@@ -167,13 +144,12 @@ Portal::Portal()
 			break;
 		}
 
-		if (FAILED(D3DXCreateTextureFromFileInMemory(RGetDevice(), ret.second.c_str(), ret.second.length(), &pPortalEdgeTex[i])))
+		if (FAILED(D3DXCreateTextureFromFileInMemory(RGetDevice(), ret.second.data(), ret.second.size(), &pPortalEdgeTex[i])))
 		{
 			MLog("Failed to create portal %d texture\n", i + 1);
 			break;
 		}
 	}
-
 
 	bLastLClick = false;
 	bLastRClick = false;
@@ -841,7 +817,6 @@ void Portal::OnShot()
 	rvector pos = zpi.bpi.PickPos + normal;
 	rvector up = fabs(normal.z) != 1 ? rvector(0, 0, 1) : rvector(1, 0, 0);
 
-	CreatePortal(ZGetGame()->m_pMyCharacter, n, pos, normal, up);
 	ZPostPortal(n, pos, normal, up);
 }
 

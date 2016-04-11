@@ -70,7 +70,7 @@ int	HashAdd( HASHTABLE table, const char *key, const void *data )
     item = (HashItem *) malloc(sizeof (HashItem));	// 아이템 할당
     if(item == NULL) return 0;
 
-    item->key = strdup(key);	/* Fill in the item node. */
+    item->key = _strdup(key);	/* Fill in the item node. */
 	if(item->key == NULL){
 		free ((char *) item);
 		return 0;

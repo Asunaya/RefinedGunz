@@ -1153,6 +1153,21 @@ void RMeshNode::Render(D3DXMATRIX* pWorldMatrix)
 		/////////////////////////////////////////////////////////////////////////////////		
 #endif
 
+		extern uint32_t BlendColor;
+
+		if (BlendColor)
+		{
+			RGetDevice()->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_MODULATE);
+			RGetDevice()->SetTextureStageState(1, D3DTSS_COLORARG1, D3DTA_CURRENT);
+			RGetDevice()->SetTextureStageState(1, D3DTSS_COLORARG2, D3DTA_CONSTANT);
+			RGetDevice()->SetTextureStageState(1, D3DTSS_CONSTANT, BlendColor);
+
+			RGetDevice()->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+			RGetDevice()->SetTextureStageState(1, D3DTSS_ALPHAARG1, D3DTA_CURRENT);
+
+			RGetDevice()->SetTexture(1, nullptr);
+		}
+
 		if(bSoft)	m_vb->RenderIndexSoft(m_ib[index]);		// vertexbuffer 없이 그린다..
 		else 		m_vb->RenderIndexBuffer(m_ib[index]);
 

@@ -1081,6 +1081,22 @@ void MMatchServer::RouteResponseToListener(MObject* pObject, const int nCmdID, i
 	RouteToListener(pObject, pNew);
 }
 
+void MMatchServer::OnVoiceChat(const MUID & Player, unsigned char* EncodedFrame, int Length)
+{
+	auto Obj = GetObject(Player);
+
+	if (!Obj)
+		return;
+
+	auto Stage = Obj->GetStageUID();
+
+	auto Command = CreateCommand(MC_MATCH_RECEIVE_VOICE_CHAT, MUID(0, 0));
+	Command->AddParameter(new MCommandParameterUID(Player));
+	Command->AddParameter(new MCommandParameterBlob(EncodedFrame, Length));
+
+	RouteToBattleExcept(Stage, Command, Player);
+}
+
 struct stRouteListenerNode
 {
 	DWORD				nUserContext;
@@ -1275,6 +1291,37 @@ void MMatchServer::RouteToBattle(const MUID& uidStage, MCommand* pCommand)
 		}else {
 			LOG(LOG_ALL, "WARNING(RouteToBattle) : Not Existing Obj(%u:%u)\n", uidObj.High, uidObj.Low);
 			i=pStage->RemoveObject(uidObj);	// RAONHAJE : 방에 쓰레기UID 남는것 발견시 로그&청소
+		}
+	}
+	delete pCommand;
+}
+
+void MMatchServer::RouteToBattleExcept(const MUID& uidStage, MCommand* pCommand, const MUID& uidExceptedPlayer)
+{
+	MMatchStage* pStage = FindStage(uidStage);
+	if (pStage == NULL)
+	{
+		delete pCommand;
+		return;
+	}
+
+	for (MUIDRefCache::iterator i = pStage->GetObjBegin(); i != pStage->GetObjEnd(); i++) {
+		MUID uidObj = (MUID)(*i).first;
+
+		if (uidObj == uidExceptedPlayer)
+			continue;
+
+		MMatchObject* pObj = (MMatchObject*)GetObject(uidObj);
+		if (pObj) {
+			if (pObj->GetEnterBattle())
+			{
+				MCommand* pSendCmd = pCommand->Clone();
+				RouteToListener(pObj, pSendCmd);
+			}
+		}
+		else {
+			LOG(LOG_ALL, "WARNING(RouteToBattle) : Not Existing Obj(%u:%u)\n", uidObj.High, uidObj.Low);
+			i = pStage->RemoveObject(uidObj);	// RAONHAJE : 방에 쓰레기UID 남는것 발견시 로그&청소
 		}
 	}
 	delete pCommand;
@@ -3090,4 +3137,3 @@ void MMatchServer::SendHShieldReqMsg()
 
 	delete pCommand;
 }
-

@@ -76,6 +76,7 @@
 #include "Events.h"
 #include "NewChat.h"
 #include "ReplayControl.h"
+#include "RGMain.h"
 
 #ifdef _XTRAP
 #include "XTrap/XTrap.h"
@@ -506,6 +507,8 @@ bool ZGameInterface::InitInterface(const char* szSkinName, ZLoadingProgress *pLo
 		mlog("IDLResource Loading Success!!\n");
 	}
 	END_("IDL resources");
+
+	g_RGMain.OnInitInterface(m_IDLResource);
 
 // 다이알로그 look 세팅
 //	MBFrameLook* pFrameLook = (MBFrameLook*)m_IDLResource.FindFrameLook("Custom1FrameLook");
@@ -991,18 +994,18 @@ bool ZGameInterface::OnGameCreate(void)
 	if(ZGetConfiguration()->GetCamFix())
 		ZGetCamera()->m_fDist = CAMERA_DEFAULT_DISTANCE * RGetScreenWidth() / RGetScreenHeight() / (4.f / 3.f);
 
-	// WPE hacking protect
-	HMODULE hMod = GetModuleHandle( "ws2_32.dll"); 
-	FARPROC RetVal = GetProcAddress( hMod, "recv"); 
-	if ( (BYTE)RetVal == 0xE9)
-	{
-		mlog( "Hacking detected");
-
-//		MessageBox(NULL, ZMsg(MSG_HACKING_DETECTED), ZMsg( MSG_WARNING), MB_OK);
-		ZApplication::GetGameInterface()->ShowWidget("HackWarnings", true, true);
-
-		ZPostDisconnect();
-	}
+//	// WPE hacking protect
+//	HMODULE hMod = GetModuleHandle( "ws2_32.dll"); 
+//	FARPROC RetVal = GetProcAddress( hMod, "recv"); 
+//	if ( (BYTE)RetVal == 0xE9)
+//	{
+//		mlog( "Hacking detected");
+//
+////		MessageBox(NULL, ZMsg(MSG_HACKING_DETECTED), ZMsg( MSG_WARNING), MB_OK);
+//		ZApplication::GetGameInterface()->ShowWidget("HackWarnings", true, true);
+//
+//		ZPostDisconnect();
+//	}
 
 
 	m_Camera.Init();
@@ -1220,18 +1223,18 @@ void ZGameInterface::OnGreeterDestroy(void)
 
 void ZGameInterface::OnLoginCreate(void)
 {
-	// WPE hacking protect
-	HMODULE hMod = GetModuleHandle( "ws2_32.dll"); 
-	FARPROC RetVal = GetProcAddress( hMod, "recv"); 
-	if ( (BYTE)RetVal == 0xE9)
-	{
-		mlog( "Hacking detected");
-
-//		MessageBox(NULL, ZMsg(MSG_HACKING_DETECTED), ZMsg( MSG_WARNING), MB_OK);
-		ZApplication::GetGameInterface()->ShowWidget("HackWarnings", true, true);
-
-		ZPostDisconnect();
-	}
+//	// WPE hacking protect
+//	HMODULE hMod = GetModuleHandle( "ws2_32.dll"); 
+//	FARPROC RetVal = GetProcAddress( hMod, "recv"); 
+//	if ( (BYTE)RetVal == 0xE9)
+//	{
+//		mlog( "Hacking detected");
+//
+////		MessageBox(NULL, ZMsg(MSG_HACKING_DETECTED), ZMsg( MSG_WARNING), MB_OK);
+//		ZApplication::GetGameInterface()->ShowWidget("HackWarnings", true, true);
+//
+//		ZPostDisconnect();
+//	}
 
 
 	m_bLoginTimeout = false;
@@ -1656,18 +1659,18 @@ void ZGameInterface::OnLobbyDestroy(void)
 
 void ZGameInterface::OnStageCreate(void)
 {
-	// WPE hacking protect
-	HMODULE hMod = GetModuleHandle( "ws2_32.dll"); 
-	FARPROC RetVal = GetProcAddress( hMod, "recv"); 
-	if ( ZCheckHackProcess() || (BYTE)RetVal == 0xE9)
-	{
-		mlog( "Hacking detected");
-
-//		MessageBox(NULL, ZMsg(MSG_HACKING_DETECTED), ZMsg( MSG_WARNING), MB_OK);
-		ZApplication::GetGameInterface()->ShowWidget("HackWarnings", true, true);
-
-		ZPostDisconnect();
-	}
+//	// WPE hacking protect
+//	HMODULE hMod = GetModuleHandle( "ws2_32.dll"); 
+//	FARPROC RetVal = GetProcAddress( hMod, "recv"); 
+//	if ( ZCheckHackProcess() || (BYTE)RetVal == 0xE9)
+//	{
+//		mlog( "Hacking detected");
+//
+////		MessageBox(NULL, ZMsg(MSG_HACKING_DETECTED), ZMsg( MSG_WARNING), MB_OK);
+//		ZApplication::GetGameInterface()->ShowWidget("HackWarnings", true, true);
+//
+//		ZPostDisconnect();
+//	}
 
 
 	mlog("StageCreated\n");
@@ -2406,7 +2409,7 @@ void ZGameInterface::OnDrawStateGame(MDrawContext* pDC)
 			m_pCombatInterface->OnDrawCustom(pDC);
 
 			if (g_bNewChat)
-				g_pChat->Display();
+				g_Chat.Display();
 
 			if (ZGetGame()->IsReplay())
 				g_ReplayControl.Draw();
@@ -2859,6 +2862,8 @@ void ZGameInterface::OnDraw(MDrawContext *pDC)
 	case GUNZ_STAGE:
 		{
 			OnDrawStateLobbyNStage(pDC);
+			if(GetState() == GUNZ_LOBBY)
+				g_RGMain.OnDrawLobby();
 		}
 		break;
 	case GUNZ_CHARSELECTION:
@@ -3170,7 +3175,7 @@ void ZGameInterface::ChangeWeapon(ZChangeWeaponType nType)
 	if (pChar->IsDie() ) return;
 
 	// 글래디에이터면 칼만써라
-	if (m_pGame->GetMatch()->IsRuleGladiator())
+	if (m_pGame->GetMatch()->IsRuleGladiator() && !pChar->IsAdmin())
 		return;
 
 

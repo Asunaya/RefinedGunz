@@ -10,7 +10,7 @@
 
 #include <list>
 #include <string>
-#include <hash_map>
+#include <unordered_map>
 
 #include <D3DX9.h>
 
@@ -732,14 +732,14 @@ template<class T>
 class RHashList : public list<T>
 {
 protected:
-	hash_map<string,T>	m_HashMap;
-	hash_map<int,T>		m_HashMapID;
+	unordered_map<string,T>	m_HashMap;
+	unordered_map<int,T>		m_HashMapID;
 public:
 	void PushBack(T pNode) {
 		push_back(pNode);
-		m_HashMap.insert(hash_map<string,T>::value_type(string(pNode->GetName()),pNode));
+		m_HashMap.insert(unordered_map<string,T>::value_type(string(pNode->GetName()),pNode));
 		if(pNode->m_NameID != -1)
-			m_HashMapID.insert(hash_map<int,T>::value_type( pNode->m_NameID, pNode) );
+			m_HashMapID.insert(unordered_map<int,T>::value_type( pNode->m_NameID, pNode) );
 
 	}
 
@@ -755,16 +755,16 @@ public:
 
 		if (itor != end()) {
 
-			hash_map<string,T>::iterator hash_map_itor = m_HashMap.find( string( (*itor)->GetName() ) );
+			unordered_map<string,T>::iterator unordered_map_itor = m_HashMap.find( string( (*itor)->GetName() ) );
 
-			if (hash_map_itor != m_HashMap.end()) {
-				m_HashMap.erase(hash_map_itor);
+			if (unordered_map_itor != m_HashMap.end()) {
+				m_HashMap.erase(unordered_map_itor);
 			}
 
-			hash_map<int,T>::iterator hash_map_itor_id = m_HashMapID.find( (*itor)->m_NameID );
+			unordered_map<int,T>::iterator unordered_map_itor_id = m_HashMapID.find( (*itor)->m_NameID );
 
-			if (hash_map_itor_id != m_HashMapID.end()) {
-				m_HashMapID.erase(hash_map_itor_id);
+			if (unordered_map_itor_id != m_HashMapID.end()) {
+				m_HashMapID.erase(unordered_map_itor_id);
 			}
 		}
 		return itor;
@@ -772,7 +772,7 @@ public:
 
 	T Find(char *name) {
 
-		hash_map<string,T>::iterator itor = m_HashMap.find( string(name) );
+		unordered_map<string,T>::iterator itor = m_HashMap.find( string(name) );
 
 		if (itor != m_HashMap.end()) {
 			return (*itor).second;
@@ -781,7 +781,7 @@ public:
 	}
 
 	T Find(int id) {
-		hash_map<int,T>::iterator itor = m_HashMapID.find(id);
+		unordered_map<int,T>::iterator itor = m_HashMapID.find(id);
 		if (itor != m_HashMapID.end()) {
 			return (*itor).second;
 		}

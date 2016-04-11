@@ -1,0 +1,2 @@
+#TargetFrameworkVersion=v4.0:PlatformToolSet=v120:EnableManagedIncrementalBuild=false:VCToolArchitecture=Native32Bit
+Static CRT|Win32|C:\Users\Dys\Desktop\opus-1.1.1\win32\VS2010\|

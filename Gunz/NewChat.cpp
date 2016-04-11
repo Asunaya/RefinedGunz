@@ -6,18 +6,21 @@
 #include "ZInput.h"
 
 // Resize flags
-#define RESIZE_X1 1 << 0
-#define RESIZE_Y1 1 << 1
-#define RESIZE_X2 1 << 2
-#define RESIZE_Y2 1 << 3
+enum
+{
+	RESIZE_X1 = 1 << 0,
+	RESIZE_Y1 = 1 << 1,
+	RESIZE_X2 = 1 << 2,
+	RESIZE_Y2 = 1 << 3,
+};
 
-#define MAX_INPUT_LENGTH 230
+static constexpr int MAX_INPUT_LENGTH = 230;
 
-Chat *g_pChat;
+Chat g_Chat;
 bool g_bNewChat = true;
 
 // Chat colors
-const unsigned long MMColorSet[] = {
+static const unsigned long MMColorSet[] = {
 	0xFF808080,	//0
 	0xFFFF0000,	//1
 	0xFF00FF00,	//2
@@ -31,7 +34,7 @@ const unsigned long MMColorSet[] = {
 	0xFFFFFFFF,	//9
 };
 
-Chat::Chat(std::string &strFont, int nFontSize){
+void Chat::Create(const std::string &strFont, int nFontSize){
 	fFadeTime = 10;
 
 	Border.x1 = 10;
@@ -54,9 +57,9 @@ Chat::Chat(std::string &strFont, int nFontSize){
 	Cursor.x = RGetScreenWidth() / 2;
 	Cursor.y = RGetScreenHeight() / 2;
 
-	pFont = new MFontR2();
+	pFont = std::make_unique<MFontR2>();
 	pFont->Create("NewChatFont", strFont.c_str(), int(float(nFontSize) / 1080 * RGetScreenHeight() + 0.5), 1, true);
-	pItalicFont = new MFontR2();
+	pItalicFont = std::make_unique<MFontR2>();
 	pItalicFont->Create("NewChatItalicFont", strFont.c_str(), int(float(nFontSize) / 1080 * RGetScreenHeight() + 0.5), 1, true, true);
 
 	nFontHeight = pFont->GetHeight();
@@ -71,6 +74,34 @@ Chat::Chat(std::string &strFont, int nFontSize){
 
 	RGetDevice()->CreateVertexBuffer(6 * sizeof(ScreenSpaceVertex), 0, D3DFVF_XYZRHW | D3DFVF_DIFFUSE, D3DPOOL_MANAGED, &pBorderVertexBuffer, NULL);
 	RGetDevice()->CreateIndexBuffer(5 * sizeof(LineListIndex), 0, D3DFMT_INDEX16, D3DPOOL_MANAGED, &pBorderIndexBuffer, NULL);
+
+	LineListIndex *pIdx;
+	if (FAILED(pBorderIndexBuffer->Lock(0, 5 * sizeof(LineListIndex), (void **)&pIdx, 0)))
+	{
+		MLog("Chat::UpdateBorder() - Failed to lock index buffer\n");
+		return;
+	}
+
+	pIdx[0].v1 = 0;
+	pIdx[0].v2 = 1;
+
+	pIdx[1].v1 = 1;
+	pIdx[1].v2 = 2;
+
+	pIdx[2].v1 = 2;
+	pIdx[2].v2 = 3;
+
+	pIdx[3].v1 = 3;
+	pIdx[3].v2 = 0;
+
+	pIdx[4].v1 = 4;
+	pIdx[4].v2 = 5;
+
+	if (FAILED(pBorderIndexBuffer->Unlock()))
+	{
+		MLog("Chat::UpdateBorder() - Failed to unlock index buffer\n");
+		return;
+	}
 
 	UpdateBorder();
 
@@ -106,8 +137,7 @@ void Chat::OutputChatMsg(const char *szMsg){
 }
 
 void Chat::OutputChatMsg(const char *szMsg, DWORD dwColor){
-	unsigned long long t;
-	QPC(t);
+	unsigned long long t = QPC();
 
 	vMsgs.push_back(ChatLine(t, std::string(szMsg)));
 
@@ -219,7 +249,7 @@ void Chat::CalcLineBreaks(ChatLine &cl){
 
 	RECT r = { Border.x1 + 5, 0, Border.x2 - 5, RGetScreenHeight() };
 
-	int nTempLines = GetLines(pFont, cl.Msg.c_str(), r.right - r.left);
+	int nTempLines = GetLines(pFont.get(), cl.Msg.c_str(), r.right - r.left);
 
 	int Lines = 1;
 	int StringLength = strlen(cl.Msg.c_str());
@@ -307,7 +337,7 @@ bool Chat::GetPos(const ChatLine &c, unsigned long nPos, POINT *pRet){
 					nOffset = c.GetLineBreak(nLine - 1)->nStartPos;
 			}
 
-			pRet->x = Output.x1 + 5 + GetTextLength(pFont, "%.*s_", nPos - nOffset, &c.Msg.at(nOffset)) - GetTextLength(pFont, "_");
+			pRet->x = Output.x1 + 5 + GetTextLength(pFont.get(), "%.*s_", nPos - nOffset, &c.Msg.at(nOffset)) - GetTextLength(pFont.get(), "_");
 
 			return 1;
 		}
@@ -530,11 +560,11 @@ void Chat::OnEvent(MEvent *pEvent){
 }
 
 int Chat::GetTextLen(ChatLine &cl, int nPos, int nCount){
-	return GetTextLength(pFont, "_%.*s_", nCount, &cl.Msg.at(nPos)) - GetTextLength(pFont, "__");
+	return GetTextLength(pFont.get(), "_%.*s_", nCount, &cl.Msg.at(nPos)) - GetTextLength(pFont.get(), "__");
 }
 
 int Chat::GetTextLen(const char *szMsg, int nCount){
-	return GetTextLength(pFont, "_%.*s_", nCount, szMsg) - GetTextLength(pFont, "__");
+	return GetTextLength(pFont.get(), "_%.*s_", nCount, szMsg) - GetTextLength(pFont.get(), "__");
 }
 
 void Chat::OnUpdate(){
@@ -814,11 +844,9 @@ void Chat::Display(){
 	else
 		nLimit = (Output.y2 - Output.y1 - 10) / nFontHeight;
 
-	unsigned long long tNow;
-	QPC(tNow);
+	unsigned long long tNow = QPC();
 
-	unsigned __int64 nTPS;
-	QueryPerformanceFrequency((PLARGE_INTEGER)&nTPS);
+	unsigned long long nTPS = QPF();
 
 	if (BackgroundColor & 0xFF000000)
 	{
@@ -833,9 +861,10 @@ void Chat::Display(){
 
 		if (!bInputEnabled)
 		{
-			// Need to cache this value instead of calculating it every frame
+			// Need to store this value instead of calculating it every frame
 			int nLines = 0;
-			for (int i = int(vMsgs.size() - 1); nLines < nLimit && i >= 0; i--){ // i needs to be signed since it terminates on -1
+			for (int i = int(vMsgs.size() - 1); nLines < nLimit && i >= 0; i--) // i needs to be signed since it terminates on -1
+			{
 				ChatLine &cl = vMsgs.at(i);
 
 				if (cl.Time + nTPS * fFadeTime < tNow && !bShowAll && !bInputEnabled)
@@ -872,10 +901,10 @@ void Chat::Display(){
 		if (cl.Time + nTPS * fFadeTime < tNow && !bShowAll && !bInputEnabled)
 			break;
 
-		unsigned long nMsgOffset;
-		unsigned long nTempLines;
+		long nMsgOffset;
+		long nTempLines;
 
-		std::vector<FormatSpecifier>::const_iterator it = cl.vFormatSpecifiers.begin();
+		auto it = cl.vFormatSpecifiers.begin();
 
 		if (cl.GetLines() + nLines > nLimit){
 			nMsgOffset = cl.GetLineBreak(cl.GetLines() + nLines - nLimit - 1)->nStartPos;
@@ -894,13 +923,13 @@ void Chat::Display(){
 
 		if (it == cl.vFormatSpecifiers.end()){
 			RECT Rect = { Output.x1 + 5, Output.y2 - 5 - (nTempLines + nLines) * nFontHeight, Output.x2 - 5, Output.y2 - 5 };
-			DrawTextN(pFont, cl.Msg.data() + nMsgOffset, Rect, 0xFFC8C8C8);
+			DrawTextN(pFont.get(), cl.Msg.data() + nMsgOffset, Rect, 0xFFC8C8C8);
 			nLines++;
 		}
 		else{
-			MFontR2 *pFont = this->pFont;
+			MFontR2 *pFont = this->pFont.get();
 			D3DCOLOR dwColor = TextColor;
-			unsigned long nTemp = nTempLines;
+			long nTemp = nTempLines;
 			int nOffsetX = 0;
 			int nPos = nMsgOffset;
 
@@ -931,7 +960,7 @@ void Chat::Display(){
 						break;
 
 					case FT_DEFAULT:
-						pFont = this->pFont;
+						pFont = this->pFont.get();
 						break;
 
 					case FT_BOLD:
@@ -939,7 +968,7 @@ void Chat::Display(){
 						break;
 
 					case FT_ITALIC:
-						pFont = pItalicFont;
+						pFont = pItalicFont.get();
 						break;
 
 					case FT_WRAP:
@@ -1026,7 +1055,7 @@ ret:;
 
 	DrawBorder();
 
-	DrawTextN(pFont, "D", r, TextColor);
+	DrawTextN(pFont.get(), "D", r, TextColor);
 
 	D3DXCOLOR Color;
 	if (GetAsyncKeyState(VK_LBUTTON) & 0x8000)
@@ -1058,7 +1087,7 @@ ret:;
 
 	y -= 2;
 
-	DrawTextN(pFont, strField.c_str(), r, TextColor);
+	DrawTextN(pFont.get(), strField.c_str(), r, TextColor);
 
 	//EndDraw();
 
@@ -1196,34 +1225,6 @@ void Chat::UpdateBorder()
 	if (FAILED(pBorderVertexBuffer->Unlock()))
 	{
 		MLog("Chat::UpdateBorder() - Failed to unlock vertex buffer\n");
-		return;
-	}
-
-	LineListIndex *pIdx;
-	if (FAILED(pBorderIndexBuffer->Lock(0, 5 * sizeof(LineListIndex), (void **)&pIdx, 0)))
-	{
-		MLog("Chat::UpdateBorder() - Failed to lock index buffer\n");
-		return;
-	}
-
-	pIdx[0].v1 = 0;
-	pIdx[0].v2 = 1;
-
-	pIdx[1].v1 = 1;
-	pIdx[1].v2 = 2;
-
-	pIdx[2].v1 = 2;
-	pIdx[2].v2 = 3;
-
-	pIdx[3].v1 = 3;
-	pIdx[3].v2 = 0;
-
-	pIdx[4].v1 = 4;
-	pIdx[4].v2 = 5;
-
-	if (FAILED(pBorderIndexBuffer->Unlock()))
-	{
-		MLog("Chat::UpdateBorder() - Failed to unlock index buffer\n");
 		return;
 	}
 }
@@ -1368,8 +1369,8 @@ void Chat::EndDraw()
 }
 
 void Chat::ResetFonts(){
-	SAFE_DESTROY(pFont);
-	SAFE_DESTROY(pItalicFont);
+	SAFE_DESTROY(pFont.get());
+	SAFE_DESTROY(pItalicFont.get());
 
 	pFont->Create("NewChatFont", strFont.c_str(), int(float(nFontSize) / 1080 * RGetScreenHeight() + 0.5), 1, true);
 	pItalicFont->Create("NewChatItalicFont", strFont.c_str(), int(float(nFontSize) / 1080 * RGetScreenHeight() + 0.5), 1, true, true);

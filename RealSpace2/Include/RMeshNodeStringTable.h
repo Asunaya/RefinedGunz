@@ -1,8 +1,8 @@
 #ifndef _RMeshNodeStringTable_h
 #define _RMeshNodeStringTable_h
 
-#include "string"
-#include "hash_map"
+#include <string>
+#include <unordered_map>
 
 #pragma warning(disable : 4996)
 
@@ -72,7 +72,7 @@ enum RMeshNodeNameType
 	RMeshNodeNameType_End
 };
 
-typedef hash_map< string , int > rmesh_node_table;
+typedef std::unordered_map< string , int > rmesh_node_table;
 
 class RMeshNodeStringTable
 {

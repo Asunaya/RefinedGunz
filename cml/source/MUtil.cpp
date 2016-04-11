@@ -44,26 +44,26 @@ const string MGetStrLocalTime( const unsigned short wYear, const unsigned short 
 
 	if( MDT_Y == DateType )
 	{
-		_snprintf( szBuf, 127, "%u", st.wYear );
+		sprintf_safe( szBuf, "%u", st.wYear );
 	}
 	else if( MDT_YM == DateType )
 	{
-		_snprintf( szBuf, 127, "%u-%u",
+		sprintf_safe( szBuf, "%u-%u",
 			st.wYear, st.wMonth );
 	}
 	else if( MDT_YMD == DateType )
 	{
-		_snprintf( szBuf, 127, "%u-%u-%u",
+		sprintf_safe( szBuf, "%u-%u-%u",
 			st.wYear, st.wMonth, st.wDay );
 	}
 	else if( MDT_YMDH == DateType )
 	{
-		_snprintf( szBuf, 127, "%u-%u-%u %u",
+		sprintf_safe( szBuf, "%u-%u-%u %u",
 			st.wYear, st.wMonth, st.wDay, st.wHour );
 	}
 	else if( MDT_YMDHM == DateType )
 	{
-		_snprintf( szBuf, 127, "%u-%u-%u %u:%u",
+		sprintf_safe( szBuf, "%u-%u-%u %u:%u",
 			st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute );
 	}
 	

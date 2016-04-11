@@ -94,13 +94,13 @@ bool ZBirdPostCommand(ZBirdDummyClient* pDummyClient, MCommand* pCmd);
 MCommand* ZNewBirdCmd(int nID);
 
 #define ZBIRDPOSTCMD0(_CLIENT, _ID)									{ MCommand* pC=ZNewCmd(_ID); ZBirdPostCommand(_CLIENT, pC); }
-#define ZBIRDPOSTCMD1(_CLIENT, _ID, _P0)								{ MCommand* pC=ZNewCmd(_ID); pC->AP(_P0); ZBirdPostCommand(_CLIENT, pC); }
-#define ZBIRDPOSTCMD2(_CLIENT, _ID, _P0, _P1)						{ MCommand* pC=ZNewCmd(_ID); pC->AP(_P0); pC->AP(_P1); ZBirdPostCommand(_CLIENT, pC); }
-#define ZBIRDPOSTCMD3(_CLIENT, _ID, _P0, _P1, _P2)					{ MCommand* pC=ZNewCmd(_ID); pC->AP(_P0); pC->AP(_P1); pC->AP(_P2); ZBirdPostCommand(_CLIENT, pC); }
-#define ZBIRDPOSTCMD4(_CLIENT, _ID, _P0, _P1, _P2, _P3)				{ MCommand* pC=ZNewCmd(_ID); pC->AP(_P0); pC->AP(_P1); pC->AP(_P2); pC->AP(_P3); ZBirdPostCommand(_CLIENT, pC); }
-#define ZBIRDPOSTCMD5(_CLIENT, _ID, _P0, _P1, _P2, _P3, _P4)			{ MCommand* pC=ZNewCmd(_ID); pC->AP(_P0); pC->AP(_P1); pC->AP(_P2); pC->AP(_P3); pC->AP(_P4); ZBirdPostCommand(_CLIENT, pC); }
-#define ZBIRDPOSTCMD6(_CLIENT, _ID, _P0, _P1, _P2, _P3, _P4, _P5)	{ MCommand* pC=ZNewCmd(_ID); pC->AP(_P0); pC->AP(_P1); pC->AP(_P2); pC->AP(_P3); pC->AP(_P4); pC->AP(_P5); ZBirdPostCommand(_CLIENT, pC); }
-#define ZBIRDPOSTCMD7(_CLIENT, _ID, _P0, _P1, _P2, _P3, _P4, _P5, _P6)	{ MCommand* pC=ZNewCmd(_ID); pC->AP(_P0); pC->AP(_P1); pC->AP(_P2); pC->AP(_P3); pC->AP(_P4); pC->AP(_P5); pC->AP(_P6); ZBirdPostCommand(_CLIENT, pC); }
+#define ZBIRDPOSTCMD1(_CLIENT, _ID, _P0)								{ MCommand* pC=ZNewCmd(_ID); pC->AddParameter(new _P0); ZBirdPostCommand(_CLIENT, pC); }
+#define ZBIRDPOSTCMD2(_CLIENT, _ID, _P0, _P1)						{ MCommand* pC=ZNewCmd(_ID); pC->AddParameter(new _P0); pC->AddParameter(new _P1); ZBirdPostCommand(_CLIENT, pC); }
+#define ZBIRDPOSTCMD3(_CLIENT, _ID, _P0, _P1, _P2)					{ MCommand* pC=ZNewCmd(_ID); pC->AddParameter(new _P0); pC->AddParameter(new _P1); pC->AddParameter(new _P2); ZBirdPostCommand(_CLIENT, pC); }
+#define ZBIRDPOSTCMD4(_CLIENT, _ID, _P0, _P1, _P2, _P3)				{ MCommand* pC=ZNewCmd(_ID); pC->AddParameter(new _P0); pC->AddParameter(new _P1); pC->AddParameter(new _P2); pC->AddParameter(new _P3); ZBirdPostCommand(_CLIENT, pC); }
+#define ZBIRDPOSTCMD5(_CLIENT, _ID, _P0, _P1, _P2, _P3, _P4)			{ MCommand* pC=ZNewCmd(_ID); pC->AddParameter(new _P0); pC->AddParameter(new _P1); pC->AddParameter(new _P2); pC->AddParameter(new _P3); pC->AddParameter(new _P4); ZBirdPostCommand(_CLIENT, pC); }
+#define ZBIRDPOSTCMD6(_CLIENT, _ID, _P0, _P1, _P2, _P3, _P4, _P5)	{ MCommand* pC=ZNewCmd(_ID); pC->AddParameter(new _P0); pC->AddParameter(new _P1); pC->AddParameter(new _P2); pC->AddParameter(new _P3); pC->AddParameter(new _P4); pC->AddParameter(new _P5); ZBirdPostCommand(_CLIENT, pC); }
+#define ZBIRDPOSTCMD7(_CLIENT, _ID, _P0, _P1, _P2, _P3, _P4, _P5, _P6)	{ MCommand* pC=ZNewCmd(_ID); pC->AddParameter(new _P0); pC->AddParameter(new _P1); pC->AddParameter(new _P2); pC->AddParameter(new _P3); pC->AddParameter(new _P4); pC->AddParameter(new _P5); pC->AddParameter(new _P6); ZBirdPostCommand(_CLIENT, pC); }
 
 void AddToLogFrame(int nDummyID, const char* szStr);
 

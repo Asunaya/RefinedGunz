@@ -176,7 +176,7 @@ public:
 	void InitRound();
 	void AddEffectRoundState(MMATCH_ROUNDSTATE nRoundState, int nArg);
 
-	bool CreateMyCharacter(MTD_CharInfo* pCharInfo);
+	bool CreateMyCharacter(const MTD_CharInfo& pCharInfo);
 	void DeleteCharacter(const MUID& uid);
 	void RefreshCharacters();
 	void ConfigureCharacter(const MUID& uidChar, MMatchTeam nTeam, unsigned char nPlayerFlags);

@@ -79,6 +79,7 @@
 #include "Rules.h"
 #include "Hitboxes.h"
 #include "ZRuleSkillmap.h"
+#include "VoiceChat.h"
 
 _USING_NAMESPACE_REALSPACE2
 
@@ -229,7 +230,7 @@ void TestCreateEffect(int nEffIndex)
 		pEM->AddSwordDefenceEffect(vPos,-vTarNormal);
 		break;
 	case 6:
-		pEM->AddSwordWaveEffect(vPos, pCharacter->GetDirection());
+		pEM->AddSwordWaveEffect(pCharacter->GetUID(), vPos, pCharacter->GetDirection());
 		break;
 	case 7:
 		pEM->AddSwordUppercutDamageEffect(vPos, pCharacter->GetUID());
@@ -674,16 +675,16 @@ void ZGame::Destroy()
 	mlog("ZGame Destroyed ( %s )\n",tmpbuf);
 }
 
-bool ZGame::CreateMyCharacter(MTD_CharInfo* pCharInfo)
+bool ZGame::CreateMyCharacter(const MTD_CharInfo& CharInfo)
 {
 	if (!m_pMyCharacter) return false;
 
-	m_pMyCharacter->Create(pCharInfo);
+	m_pMyCharacter->Create(CharInfo);
 	m_pMyCharacter->SetVisible(true);
 
 	ZGetEffectManager()->AddBerserkerIcon(m_pMyCharacter);
 
-	mlog("ZGame::CreateMyCharacter : Name=%s Level=%d \n", pCharInfo->szName, pCharInfo->nLevel);
+	//mlog("ZGame::CreateMyCharacter : Name=%s Level=%d \n", CharInfo.szName, CharInfo.nLevel);
 	return true;
 }
 
@@ -1113,7 +1114,7 @@ void ZGame::Draw()
 	g_pPortal->PostDraw();
 #endif
 
-	OnGameDraw();
+	g_RGMain.OnGameDraw();
 
 //	빨간라인을 그려본다 화면에 보이면 색이 바뀌도록...? 기본은 파랑 체크되면 빨강...
 /*
@@ -1450,14 +1451,14 @@ bool GetUserGradeIDColor(MMatchUserGradeID gid,MCOLOR& UserNameColor,char* sp_na
 
 	if(gid == MMUG_DEVELOPER) 
 	{ 
-		UserNameColor = MCOLOR(255,128, 64); 
+		UserNameColor = MCOLOR(255, 128, 64); 
 		if(sp_name) { 
 			strcpy(sp_name,ZMsg(MSG_WORD_DEVELOPER));
 		}
 		return true; 
 	}
 	else if(gid == MMUG_ADMIN) {
-		UserNameColor = MCOLOR(255,128, 64); 
+		UserNameColor = MCOLOR(255, 128, 64); 
 		if(sp_name) { 
 			strcpy(sp_name,ZMsg(MSG_WORD_ADMIN));
 		}
@@ -1572,99 +1573,126 @@ bool ZGame::OnCommand_Immediate(MCommand* pCommand)
 	{
 	case MC_PEER_RG_SLASH:
 	{
-							 auto it = m_CharacterManager.find(pCommand->GetSenderUID());
-							 if (it == m_CharacterManager.end())
-								 break;
+		auto it = m_CharacterManager.find(pCommand->GetSenderUID());
+		if (it == m_CharacterManager.end())
+			break;
 
-							 ZCharacter &pSender = *it->second;
+		ZCharacter &pSender = *it->second;
 
-							 rvector pos, dir;
-							 int type;
+		rvector pos, dir;
+		int type;
 
-							 if (!pCommand->GetParameter(&pos, 0, MPT_VECTOR))
-								 break;
-							 if (!pCommand->GetParameter(&dir, 1, MPT_VECTOR))
-								 break;
-							 if (!pCommand->GetParameter(&type, 2, MPT_INT))
-							 {
-								 ZChatOutputF("Not get int");
-								 break;
-							 }
+		if (!pCommand->GetParameter(&pos, 0, MPT_VECTOR))
+			break;
+		if (!pCommand->GetParameter(&dir, 1, MPT_VECTOR))
+			break;
+		if (!pCommand->GetParameter(&type, 2, MPT_INT))
+			break;
 
-							 OnPeerSlash(&pSender, pos, dir, type);
+		OnPeerSlash(&pSender, pos, dir, type);
 	}
 		break;
 	case MC_PEER_RG_MASSIVE:
 	{
-							   auto it = m_CharacterManager.find(pCommand->GetSenderUID());
-							   if (it == m_CharacterManager.end())
-								   break;
+		auto it = m_CharacterManager.find(pCommand->GetSenderUID());
+		if (it == m_CharacterManager.end())
+			break;
 
-							   ZCharacter &pSender = *it->second;
+		ZCharacter &pSender = *it->second;
 
-							   rvector pos, dir;
+		rvector pos, dir;
 
-							   if (!pCommand->GetParameter(&pos, 0, MPT_VECTOR))
-								   break;
-							   if (!pCommand->GetParameter(&dir, 1, MPT_VECTOR))
-								   break;
+		if (!pCommand->GetParameter(&pos, 0, MPT_VECTOR))
+			break;
+		if (!pCommand->GetParameter(&dir, 1, MPT_VECTOR))
+			break;
 
-							   OnPeerMassive(&pSender, pos, dir);
+		OnPeerMassive(&pSender, pos, dir);
 	}
 		break;
 #ifdef PORTAL
 	case MC_PEER_PORTAL:
 	{
-						   auto it = m_CharacterManager.find(pCommand->GetSenderUID());
-						   if (it == m_CharacterManager.end())
-							   break;
+		auto it = m_CharacterManager.find(pCommand->GetSenderUID());
+		if (it == m_CharacterManager.end())
+			break;
 
-						   ZCharacter &pSender = *it->second;
+		ZCharacter &pSender = *it->second;
 
-						   int iPortal;
-						   rvector pos, normal, up;
-						   pCommand->GetParameter(&iPortal, 0, MPT_INT);
-						   pCommand->GetParameter(&pos, 1, MPT_VECTOR);
-						   pCommand->GetParameter(&normal, 2, MPT_VECTOR);
-						   pCommand->GetParameter(&up, 3, MPT_VECTOR);
-						   g_pPortal->CreatePortal(&pSender, iPortal, pos, normal, up);
+		int iPortal;
+		rvector pos, normal, up;
+		pCommand->GetParameter(&iPortal, 0, MPT_INT);
+		pCommand->GetParameter(&pos, 1, MPT_VECTOR);
+		pCommand->GetParameter(&normal, 2, MPT_VECTOR);
+		pCommand->GetParameter(&up, 3, MPT_VECTOR);
+		g_pPortal->CreatePortal(&pSender, iPortal, pos, normal, up);
 	}
 		break;
 #endif
 	case MC_PEER_SPEC:
 	{
-							   auto it = m_CharacterManager.find(pCommand->GetSenderUID());
-							   if (it == m_CharacterManager.end())
-								   break;
+		auto it = m_CharacterManager.find(pCommand->GetSenderUID());
+		if (it == m_CharacterManager.end())
+			break;
 
-							   ZCharacter &pSender = *it->second;
+		ZCharacter &pSender = *it->second;
 
-							   pSender.SetTeamID(MMT_SPECTATOR);
-							   pSender.ForceDie();
+		pSender.SetTeamID(MMT_SPECTATOR);
+		pSender.ForceDie();
 	}
 		break;
 	case MC_PEER_COMPLETED_SKILLMAP:
 	{
-									   auto it = m_CharacterManager.find(pCommand->GetSenderUID());
-									   if (it == m_CharacterManager.end())
-										   break;
+		auto it = m_CharacterManager.find(pCommand->GetSenderUID());
+		if (it == m_CharacterManager.end())
+			break;
 
-									   ZCharacter &pSender = *it->second;
+		ZCharacter &pSender = *it->second;
 
-									   float fTime;
-									   char szCourse[64];
+		float fTime;
+		char szCourse[64];
 
-									   if (!pCommand->GetParameter(&fTime, 0, MPT_FLOAT))
-										   break;
-									   if (!pCommand->GetParameter(szCourse, 1, MPT_STR))
-										   break;
+		if (!pCommand->GetParameter(&fTime, 0, MPT_FLOAT))
+			break;
+		if (!pCommand->GetParameter(szCourse, 1, MPT_STR))
+			break;
 
-									   if (szCourse[0] == 0)
-										   ZChatOutputF("%s completed the map in %f seconds!", pSender.GetUserNameA(), fTime);
-									   else
-										   ZChatOutputF("%s completed course %s in %f seconds!", pSender.GetUserNameA(), szCourse, fTime);
+		if (szCourse[0] == 0)
+			ZChatOutputF("%s completed the map in %.02f seconds!", pSender.GetUserNameA(), fTime);
+		else
+			ZChatOutputF("%s completed course %s in %.02f seconds!", pSender.GetUserNameA(), szCourse, fTime);
 	}
 		break;
+	case MC_MATCH_RECEIVE_VOICE_CHAT:
+	{
+		MLog("MC_MATCH_RECEIVE_VOICE_CHAT\n");
+		MUID uid;
+		if (!pCommand->GetParameter(&uid, 0, MPT_UID))
+			break;
+
+		auto it = m_CharacterManager.find(uid);
+
+		if (it == m_CharacterManager.end())
+			break;
+
+		auto Char = it->second;
+
+		MCommandParameter* pParam = pCommand->GetParameter(1);
+		if (pParam->GetType() != MPT_BLOB) break;
+		void* pBlob = pParam->GetPointer();
+
+		g_VoiceChat.OnReceiveVoiceChat(Char, (unsigned char *)pBlob, pParam->GetSize() - sizeof(int));
+	}
+		break;
+	case MC_PEER_SET_SWORD_COLOR:
+	{
+		uint32_t Color;
+		if (!pCommand->GetParameter(&Color, 0, MPT_UINT))
+			break;
+
+		g_RGMain.SetSwordColor(pCommand->GetSenderUID(), Color);
+	}
+	break;
 	case MC_MATCH_STAGE_ENTERBATTLE:
 		{	
 			unsigned char nParam;
@@ -1767,7 +1795,7 @@ bool ZGame::OnCommand_Immediate(MCommand* pCommand)
 			MCOLOR UserNameColor = MCOLOR(190,190,0);
 
 			char sp_name[256];
-			bool bSpUser = GetUserNameColor(uid,UserNameColor,sp_name);
+			bool bSpUser = GetUserNameColor(uid, UserNameColor, sp_name);
 /*
 			bool GetPureUserName(char* name,char* pure_name)
 			{
@@ -1798,11 +1826,12 @@ bool ZGame::OnCommand_Immediate(MCommand* pCommand)
 
 
 						if(bSpUser) {
-							sprintf_s(szTemp, "%s : %s", sp_name,szMsg);
+							//sprintf_s(szTemp, "%s : %s", sp_name, szMsg);
+							sprintf_s(szTemp, "%s: %s", pChar->GetProperty()->szName, szMsg);
 							ZChatOutput(UserNameColor, szTemp);
 						}
 						else {
-							sprintf_s(szTemp, "%s : %s", pChar->GetProperty()->szName,szMsg);
+							sprintf_s(szTemp, "%s: %s", pChar->GetProperty()->szName, szMsg);
 							ZChatOutput(ChatColor, szTemp);
 						}
 					}
@@ -1819,11 +1848,11 @@ bool ZGame::OnCommand_Immediate(MCommand* pCommand)
 						char szTemp[512];
 
 						if(bSpUser) {
-							sprintf_s(szTemp, "(Team)%s : %s", sp_name,szMsg);
+							sprintf_s(szTemp, "(Team)%s: %s", sp_name,szMsg);
 							ZChatOutput(UserNameColor, szTemp);
 						}
 						else {
-							sprintf_s(szTemp, "(Team)%s : %s", pChar->GetProperty()->szName,szMsg);
+							sprintf_s(szTemp, "(Team)%s: %s", pChar->GetProperty()->szName,szMsg);
 							ZChatOutput(TeamChatColor, szTemp);
 						}
 					}
@@ -2322,10 +2351,9 @@ void ZGame::OnPeerHPInfo(MCommand *pCommand)
 	float fHP=0.0f;
 	pCommand->GetParameter(&fHP, 0, MPT_FLOAT);
 
-	// 옵저브 하고 있을때는 보여주기 위해 hp 정보를 갱신한다.
-	if(ZGetGameInterface()->GetCombatInterface()->GetObserverMode()) {
+	//if(ZGetGameInterface()->GetCombatInterface()->GetObserverMode()) {
 		pCharacter->SetHP(fHP);
-	}
+	//}
 }
 
 
@@ -2340,11 +2368,10 @@ void ZGame::OnPeerHPAPInfo(MCommand *pCommand)
 	float fAP=0.0f;
 	pCommand->GetParameter(&fAP, 1, MPT_FLOAT);
 
-	// 옵저브 하고 있을때는 보여주기 위해 hp 정보를 갱신한다.
-	if(ZGetGameInterface()->GetCombatInterface()->GetObserverMode()) {
+	//if(ZGetGameInterface()->GetCombatInterface()->GetObserverMode()) {
 		pCharacter->SetHP(fHP);
 		pCharacter->SetAP(fAP);
-	}
+	//}
 }
 
 #ifdef _DEBUG
@@ -3157,7 +3184,7 @@ void ZGame::OnPeerSlash(ZCharacter *pOwner, const rvector &pos, const rvector &d
 
 		rvector swordPos = pos;
 		swordPos.z += 180 * .5;
-		float fDist = GetDistanceLineSegment(swordPos, TargetPos, TargetPos + rvector(0, 0, 180));
+		float fDist = GetDistanceLineSegment(swordPos, TargetPos, TargetPos + rvector(0, 0, CHARACTER_HEIGHT));
 
 		if (fDist > nRange)
 			continue;
@@ -3356,12 +3383,12 @@ void ZGame::OnPeerMassive(ZCharacter *pOwner, const rvector &pos, const rvector 
 		ZPostPeerEnchantDamage(pOwner->GetUID(), pVictim->GetUID());
 	}
 
-#define KATANA_SHOCK_RANGE		1000.f
-
-	float fPower = (KATANA_SHOCK_RANGE - Magnitude(m_pMyCharacter->GetPosition() + rvector(0, 0, 50) - pos));
-
-	if (fPower > 0)
-		ZGetCamera()->Shock(fPower * .5, .5, rvector(0, 0, -1));
+//#define KATANA_SHOCK_RANGE		1000.f
+//
+//	float fPower = (KATANA_SHOCK_RANGE - Magnitude(m_pMyCharacter->GetPosition() + rvector(0, 0, 50) - pos));
+//
+//	if (fPower > 0)
+//		ZGetCamera()->Shock(fPower * .5, .5, rvector(0, 0, -1));
 }
 
 void ZGame::OnPeerShot_Range(MMatchCharItemParts sel_type, const MUID& uidOwner, float fShotTime, rvector& pos, rvector& to)
@@ -4178,7 +4205,7 @@ void ZGame::OnPeerDieMessage(ZCharacter* pVictim, ZCharacter* pAttacker)
 //		sprintf_s(szMsg, "당신은 %s님에게 패배하였습니다.", szAttacker );
 		/*ZTransMsg( szMsg, MSG_GAME_LOSE_FROM_WHO, 1, szAttacker );
 		ZChatOutput(MCOLOR(0xFFCF2020), szMsg);*/
-		ZChatOutputF("%s has defeated you. (HP: %d / %d, AP : %d / %d)", pAttacker->GetProperty()->szName, pAttacker->GetHP(), (int)pAttacker->GetProperty()->fMaxHP, pAttacker->GetAP(), (int)pAttacker->GetProperty()->fMaxAP);
+		ZChatOutputF("%s has defeated you. (HP: %d / %d, AP: %d / %d)", pAttacker->GetProperty()->szName, pAttacker->GetHP(), (int)pAttacker->GetProperty()->fMaxHP, pAttacker->GetAP(), (int)pAttacker->GetProperty()->fMaxAP);
 	}
 
 	// 다른 사람이 다른 사람 죽였을때
@@ -5447,7 +5474,7 @@ void ZGame::StartRecording()
 	}
 
 	do {
-		sprintf_s(replayfilename,"%s/Gunz%03d."GUNZ_REC_FILE_EXT , replayfoldername , nsscount);
+		sprintf_s(replayfilename, "%s/Gunz%03d." GUNZ_REC_FILE_EXT, replayfoldername, nsscount);
 		m_nGunzReplayNumber = nsscount;
 		nsscount++;
 	}
@@ -5559,7 +5586,7 @@ void ZGame::StopRecording()
 	else
 	{
 		char szOutputFilename[256];
-		sprintf_s(szOutputFilename,GUNZ_FOLDER REPLAY_FOLDER"/Gunz%03d."GUNZ_REC_FILE_EXT , m_nGunzReplayNumber );
+		sprintf_s(szOutputFilename, GUNZ_FOLDER REPLAY_FOLDER "/Gunz%03d." GUNZ_REC_FILE_EXT, m_nGunzReplayNumber);
 
 		char szOutput[256];
 		// ZTranslateMessage(szOutput,MSG_RECORD_SAVED,1,szOutputFilename);
@@ -5793,10 +5820,10 @@ void ZGame::RefreshCharacters()
 		MMatchPeerInfo* pPeerInfo = (*itor).second;
 		ZCharacter* pCharacter = m_CharacterManager.Find(pPeerInfo->uidChar);
 
-		if (pCharacter == NULL) {
+		if (!pCharacter) {
 
 			pCharacter = m_CharacterManager.Add(pPeerInfo->uidChar, rvector(0.0f, 0.0f, 0.0f));
-			pCharacter->Create(&pPeerInfo->CharInfo);
+			pCharacter->Create(pPeerInfo->CharInfo);
 
 			if (m_Match.GetRoundState() == MMATCH_ROUNDSTATE_PREPARE)
 			{
@@ -5858,7 +5885,7 @@ void ZGame::OnStageEnterBattle(MCmdEnterBattleParam nParam, MTD_PeerListNode* pP
 
 	if (uidChar == ZGetMyUID())		// enter한사람이 나자신일 경우
 	{
-		if (g_pGame->CreateMyCharacter(&pPeerNode->CharInfo) == true)
+		if (g_pGame->CreateMyCharacter(pPeerNode->CharInfo) == true)
 		{
 			ConfigureCharacter(uidChar, (MMatchTeam)pPeerNode->ExtendInfo.nTeam, pPeerNode->ExtendInfo.nPlayerFlags);	// Player Character 포함
 		}
@@ -6100,7 +6127,8 @@ bool ZGame::FilterDelayedCommand(MCommand *pCommand)
 // 퀘스트 커맨드들
 		case MC_QUEST_PEER_NPC_ATTACK_MELEE :	// npc 칼질
 			ZGetQuest()->OnPrePeerNPCAttackMelee(pCommand);
-			fDelayTime = .4f;break;
+			fDelayTime = .4f;
+			break;
 
 
 		// 이것들 이외의 것들은 
