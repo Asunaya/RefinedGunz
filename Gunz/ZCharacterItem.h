@@ -51,8 +51,6 @@ public:
 		return m_nSelectedWeapon;
 	}
 
-	bool Save(ZFile *file);
-	bool Load(ZFile *file);
 	void Save(BulletInfo(&Bullets)[MMCIP_END]);
 	void Load(const BulletInfo(&Bullets)[MMCIP_END]);
 };

@@ -3733,159 +3733,21 @@ void ZCharacter::ToggleClothSimulation()
 		m_pVMesh->ChangeChestCloth(1.f,1);
 	else
 		m_pVMesh->DestroyCloth();
-}					  
-
-bool ZCharacter::Save(ZFile *file)
-{
-	size_t n;
-
-	n=zfwrite(&m_bHero,sizeof(m_bHero),1,file);
-	if(n!=1) return false;
-
-	n=zfwrite(&m_InitialInfo,sizeof(m_InitialInfo),1,file);
-	if(n!=1) return false;
-
-	n=zfwrite(&m_UID,sizeof(m_UID),1,file);
-	if(n!=1) return false;
-
-	n=zfwrite(&m_Property,sizeof(m_Property),1,file);
-	if(n!=1) return false;
-
-	n=zfwrite(m_pModule_HPAP->GetHPPointer(),sizeof(float),1,file);
-	if(n!=1) return false;
-
-	n=zfwrite(m_pModule_HPAP->GetAPPointer(),sizeof(float),1,file);
-	if(n!=1) return false;
-
-	n=zfwrite(&m_Status,sizeof(m_Status),1,file);
-	if(n!=1) return false;
-
-	if(!m_Items.Save(file)) return false;
-
-	n=zfwrite(&m_Position,sizeof(m_Position),1,file);
-	if(n!=1) return false;
-
-	n=zfwrite(&m_Direction,sizeof(m_Direction),1,file);
-	if(n!=1) return false;
-
-	n=zfwrite(&m_nTeamID,sizeof(m_nTeamID),1,file);
-	if(n!=1) return false;
-
-	bool bDie = m_bDie;
-	n=zfwrite(&bDie,sizeof(bDie),1,file);
-	if(n!=1) return false;
-
-	bool bAdminHide = m_bAdminHide;
-	n=zfwrite(&bAdminHide,sizeof(bAdminHide),1,file);
-	if(n!=1) return false;
-
-	return true;
 }
 
-bool ZCharacter::Load(ZFile *file, const ReplayVersion &Version)
+void ZCharacter::Save(ZCharacterReplayState& State)
 {
-	size_t n;
-
-	// m_bHero 와 initial info 는 앞에서 create하기 전에 읽었다.
-//	n=fread(&m_InitialInfo,sizeof(m_InitialInfo),1,file);
-//	if(n!=1) return false;
-
-	n=zfread(&m_UID,sizeof(m_UID),1,file);
-	if(n!=1) return false;
-
-	n=zfread(&m_Property,sizeof(m_Property),1,file);
-	if(n!=1) return false;
-
-	MLog("Name: %s\n", m_Property.szName);
-	MLog("Clan name: %s\n", m_Property.szClanName);
-	MLog("Max HP: %f\n", m_Property.fMaxHP);
-	MLog("Max AP: %f\n", m_Property.fMaxAP);
-	MLog("Level: %d\n", m_Property.nLevel);
-	MLog("Sex: %d\n", m_Property.nSex);
-
-	n=zfread(m_pModule_HPAP->GetHPPointer(),sizeof(float),1,file);
-	if(n!=1) return false;
-	n=zfread(m_pModule_HPAP->GetAPPointer(),sizeof(float),1,file);
-	if(n!=1) return false;
-
-	MLog("HP/AP: %d/%d\n", m_pModule_HPAP->GetHP(), m_pModule_HPAP->GetAP());
-
-	n=zfread(&m_Status,sizeof(m_Status),1,file);
-	if(n!=1) return false;
-
-	if(!m_Items.Load(file)) return false;
-
-	if (Version.Server == SERVER_OFFICIAL)
-	{
-		if (Version.nVersion >= 6)
-		{
-			int item[5 * 2];
-			file->Read(item);
-
-			if (Version.nVersion == 11)
-			{
-				char unk[136];
-				file->Read(unk);
-			}
-		}
-	}
-	else if (Version.Server == SERVER_FREESTYLE_GUNZ)
-	{
-		if (Version.nVersion == 9)
-		{
-			int item[10 * 2 + 4];
-			file->Read(item);
-		}
-		else if (Version.nVersion == 7)
-		{
-			if (Version.nSubVersion == 0)
-			{
-				int item[5 * 2];
-				file->Read(item);
-			}
-			else if (Version.nSubVersion == 1)
-			{
-				int item[10 * 2];
-				file->Read(item);
-			}
-		}
-	}
-
-	/*
-	MMatchCharItemParts nSelectedWeapon=m_Items.GetSelectedWeaponParts();
-	m_Items.ResetItems();
-
-	ChangeWeapon(nSelectedWeapon);
-	*/
-
-	n=zfread(&m_Position,sizeof(m_Position),1,file);
-	if (n != 1) return false;
-
-	MLog("Position: %08X, %08X, %08X\n", *(DWORD *)&m_Position.x, *(DWORD *)&m_Position.y, *(DWORD *)&m_Position.z);
-
-	n=zfread(&m_Direction,sizeof(m_Direction),1,file);
-	if (n != 1) return false;
-
-	MLog("Direction: %08X, %08X, %08X\n", *(DWORD *)&m_Direction.x, *(DWORD *)&m_Direction.y, *(DWORD *)&m_Direction.z);
-
-	n=zfread(&m_nTeamID,sizeof(m_nTeamID),1,file);
-	if(n!=1) return false;
-
-	MLog("m_nTeamID: %d\n", m_nTeamID);
-
-	bool bDie;
-	n=zfread(&bDie,sizeof(bDie),1,file);
-	m_bDie = bDie;
-	if(n!=1) return false;
-
-	if((Version.Server == SERVER_OFFICIAL && Version.nVersion>=2) || Version.Server != SERVER_OFFICIAL) {
-		bool bAdminHide;
-		n=zfread(&bAdminHide,sizeof(bAdminHide),1,file);
-		m_bAdminHide = bAdminHide;
-		if(n!=1) return false;
-	}
-
-	return true;
+	State.UID = m_UID;
+	State.Property = m_Property;
+	State.HP = m_pModule_HPAP->GetHP();
+	State.AP = m_pModule_HPAP->GetAP();
+	State.Status = m_Status;
+	m_Items.Save(State.BulletInfos);
+	State.Position = m_Position;
+	State.Direction = m_Direction;
+	State.Team = m_nTeamID;
+	State.Dead = m_bDie;
+	State.HidingAdmin = m_bAdminHide;
 }
 
 void ZCharacter::Load(const ZCharacterReplayState& State)
@@ -3902,21 +3764,6 @@ void ZCharacter::Load(const ZCharacterReplayState& State)
 	m_bDie = State.Dead;
 	m_bAdminHide = State.HidingAdmin;
 }
-
-/*
-void ZCharacter::DrawForce(bool bDrawShadow)
-{
-	Draw();
-
-	// 그림자 찍기
-	if (bDrawShadow)
-	{
-		ZShadow::predraw();
-		DrawShadow();
-		ZShadow::postdraw();
-	}
-}
-*/
 
 void ZCharacter::OnLevelDown()
 {

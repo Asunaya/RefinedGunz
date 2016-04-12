@@ -129,7 +129,7 @@ bool ZCharacterItem::Reload()
 
 ZItem* ZCharacterItem::GetSelectedWeapon()
 {
-	if(m_nSelectedWeapon<MMCIP_MELEE || m_nSelectedWeapon>MMCIP_CUSTOM2) return NULL;
+	if(m_nSelectedWeapon<MMCIP_MELEE || m_nSelectedWeapon>MMCIP_CUSTOM2) return nullptr;
 	return &m_Items[(int)m_nSelectedWeapon]; 
 }
 
@@ -145,46 +145,9 @@ bool ZCharacterItem::IsWeaponItem(MMatchCharItemParts parts)
 	return false;
 }
 
-bool ZCharacterItem::Save(ZFile *file)
-{
-	size_t n;
-	for(int i=0;i<MMCIP_END;i++)
-	{
-		ZItem *pItem=GetItem(MMatchCharItemParts(i));
-		int nBullet=pItem->GetBullet();
-		n=zfwrite(&nBullet,sizeof(nBullet),1,file);
-		if(n!=1) return false;
-
-		int nBulletAMagazine=pItem->GetBulletAMagazine();
-		n=zfwrite(&nBulletAMagazine,sizeof(nBulletAMagazine),1,file);
-		if(n!=1) return false;
-	}
-	return true;
-}
-
-bool ZCharacterItem::Load(ZFile *file)
-{
-	size_t n;
-	for(int i=0;i<MMCIP_END;i++)
-	{
-		ZItem *pItem=GetItem(MMatchCharItemParts(i));
-		int nBullet;
-		n=zfread(&nBullet,sizeof(nBullet),1,file);
-		pItem->SetBullet(nBullet);
-		if(n!=1) return false;
-
-		int nBulletAMagazine;
-		n=zfread(&nBulletAMagazine,sizeof(nBulletAMagazine),1,file);
-		pItem->SetBulletAMagazine(nBulletAMagazine);
-		if(n!=1) return false;
-	}
-
-	return true;
-}
-
 void ZCharacterItem::Save(BulletInfo(&Bullets)[MMCIP_END])
 {
-	for (int i = 0; i < ArraySize(Bullets); i++)
+	for (size_t i = 0; i < ArraySize(Bullets); i++)
 	{
 		ZItem *Item = GetItem(MMatchCharItemParts(i));
 		Bullets[i].Clip = Item->GetBullet();
@@ -194,7 +157,7 @@ void ZCharacterItem::Save(BulletInfo(&Bullets)[MMCIP_END])
 
 void ZCharacterItem::Load(const BulletInfo(&Bullets)[MMCIP_END])
 {
-	for (int i = 0; i < ArraySize(Bullets); i++)
+	for (size_t i = 0; i < ArraySize(Bullets); i++)
 	{
 		ZItem *Item = GetItem(MMatchCharItemParts(i));
 		Item->SetBullet(Bullets[i].Clip);

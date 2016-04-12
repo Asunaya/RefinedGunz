@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ZRuleDuel.h"
 #include <boost/mpl/has_xxx.hpp>
 
 inline ReplayVersion ZReplayLoader::GetVersion()
@@ -137,6 +138,12 @@ inline void ZReplayLoader::GetStageSetting(REPLAY_STAGE_SETTING_NODE& ret)
 	};
 
 	IsDojo = !_stricmp(m_StageSetting.szMapName, "Dojo");
+
+	if (m_StageSetting.nGameType == MMATCH_GAMETYPE_DUEL)
+	{
+		ZRuleDuel* pDuel = static_cast<ZRuleDuel*>(ZGetGameInterface()->GetGame()->GetMatch()->GetRule());
+		Read(pDuel->QInfo);
+	}
 }
 
 inline std::vector<ReplayPlayerInfo> ZReplayLoader::GetCharInfo()
@@ -374,7 +381,7 @@ bool ZReplayLoader::GetCommands(T ForEachCommand)
 
 		MCommand *Command;
 
-		if (!CreateCommandFromStream(Version, CommandBuffer, &Command))
+		if (!CreateCommandFromStream(CommandBuffer, &Command))
 			continue;
 
 		Command->m_Sender = uidSender;

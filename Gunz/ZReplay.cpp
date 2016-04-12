@@ -76,8 +76,6 @@ bool ZReplayLoader::Load(const char* filename)
 
 		ChangeGameState();
 
-		LoadStageSettingEtc();
-
 		CreatePlayers(GetCharInfo());
 
 		auto PerCommand = [&](MCommand *Command, float Time)
@@ -103,19 +101,6 @@ bool ZReplayLoader::Load(const char* filename)
 		return false;
 	}
 
-	/*pFile = zfopen(filename);
-	
-	if (!LoadHeader()) return false;
-	if (!LoadStageSetting()) return false;
-	ChangeGameState();
-
-	if (!LoadStageSettingEtc()) return false;
-
-	if (!LoadCharInfo()) return false;
-	if (!LoadCommandStream()) return false;
-
-	zfclose(pFile);*/
-
 	return true;
 }
 
@@ -129,204 +114,6 @@ void ZReplayLoader::ChangeGameState()
 	ZGetGameInterface()->SetState(GUNZ_GAME);
 	ZGetCharacterManager()->Clear();
 	ZGetObjectManager()->Clear();
-}
-
-bool ZReplayLoader::LoadHeader()
-{
-	unsigned int version = 0;
-	unsigned int header;
-	int nRead;
-
-	char szServer[32] = "Unknown";
-	bool bFoundServer = false;
-
-	nRead = zfread(&header, sizeof(header), 1, pFile);
-	if(nRead==0) return false;
-
-	if (header == RG_REPLAY_MAGIC_NUMBER)
-	{
-		Version.Server = SERVER_REFINED_GUNZ;
-		strcpy_safe(szServer, "Refined Gunz");
-		bFoundServer = true;
-	}
-	else if(header != GUNZ_REC_FILE_ID)
-	{
-		Version.Server = SERVER_NONE;
-		return false;
-	}
-
-	nRead = zfread(&version, sizeof(version), 1, pFile);
-	if (!nRead)// || ( version > GUNZ_REC_FILE_VERSION))
-		return false;
-
-	Version.nVersion = version;
-
-	if (!bFoundServer)
-	{
-		if (Version.nVersion >= 7 && Version.nVersion <= 9 && InflatedFile[0x4A] <= 0x01)
-		{
-			Version.Server = SERVER_FREESTYLE_GUNZ;
-			strcpy_safe(szServer, "Freestyle Gunz");
-		}
-		else
-		{
-			Version.Server = SERVER_OFFICIAL;
-			strcpy_safe(szServer, "Official");
-		}
-	}
-
-	MLog("Replay header loaded -- Server: %s, version: %d\n", szServer, Version.nVersion);
-
-	return true;
-}
-
-bool ZReplayLoader::LoadStageSettingEtc()
-{
-	if (Version.Server == SERVER_OFFICIAL && Version.nVersion < 4)
-		return true;
-
-	if(m_StageSetting.nGameType==MMATCH_GAMETYPE_DUEL)
-	{
-		ZRuleDuel* pDuel = (ZRuleDuel*)ZGetGameInterface()->GetGame()->GetMatch()->GetRule();
-		/*int nRead = zfread(&pDuel->QInfo,sizeof(MTD_DuelQueueInfo), 1, pFile);
-		if(nRead==0) return false;*/
-		Read(pDuel->QInfo);
-	}
-
-	return true;
-}
-
-#define COPY_CHARINFO(member) info.member = oldinfo.member
-template<typename T>
-static void copy_charinfo(MTD_CharInfo &info, const T& oldinfo)
-{
-	strcpy_safe(info.szName, oldinfo.szName);
-	strcpy_safe(info.szClanName, oldinfo.szClanName);
-	COPY_CHARINFO(nClanGrade);
-	COPY_CHARINFO(nClanContPoint);
-	COPY_CHARINFO(nCharNum);
-	COPY_CHARINFO(nLevel);
-	COPY_CHARINFO(nSex);
-	COPY_CHARINFO(nHair);
-	COPY_CHARINFO(nFace);
-	COPY_CHARINFO(nXP);
-	COPY_CHARINFO(nBP);
-	COPY_CHARINFO(fBonusRate);
-	COPY_CHARINFO(nPrize);
-	COPY_CHARINFO(nHP);
-	COPY_CHARINFO(nAP);
-	COPY_CHARINFO(nMaxWeight);
-	COPY_CHARINFO(nSafeFalls);
-	COPY_CHARINFO(nFR);
-	COPY_CHARINFO(nCR);
-	COPY_CHARINFO(nER);
-	COPY_CHARINFO(nWR);
-	for (int i = 0; i < min(MMCIP_END, sizeof(oldinfo.nEquipedItemDesc) / sizeof(oldinfo.nEquipedItemDesc[0])); i++)
-		COPY_CHARINFO(nEquipedItemDesc[i]);
-	COPY_CHARINFO(nUGradeID);
-};
-#undef COPY_CHARINFO
-
-bool ZReplayLoader::LoadCharInfo()
-{
-	int nRead;
-
-	// character info
-	int nCharacterCount;
-	zfread(&nCharacterCount, sizeof(nCharacterCount), 1, pFile);
-
-	for(int i = 0; i < nCharacterCount; i++)
-	{
-		bool bHero;
-		nRead = zfread(&bHero, sizeof(bHero), 1, pFile);
-		if(nRead != 1) return false;
-
-		MTD_CharInfo info;
-
-		if (Version.Server == SERVER_OFFICIAL)
-		{
-			if (Version.nVersion <= 5)
-			{
-				MTD_CharInfo_V5 oldinfo;
-				if (Version.nVersion < 2)
-				{
-					nRead = zfread(&oldinfo, sizeof(oldinfo)-4, 1, pFile);
-					if (nRead != 1) return false;
-					oldinfo.nClanCLID = 0;
-				}
-				else
-				{
-					nRead = zfread(&oldinfo, sizeof(oldinfo), 1, pFile);
-					if (nRead != 1) return false;
-				}
-				copy_charinfo(info, oldinfo);
-			}
-			else if (Version.nVersion == 6)
-			{
-				MTD_CharInfo_V6 oldinfo;
-				pFile->Read(oldinfo);
-				copy_charinfo(info, oldinfo);
-			}
-			else if (Version.nVersion == 11)
-			{
-				MTD_CharInfo_V11 oldinfo;
-				pFile->Read(oldinfo);
-				copy_charinfo(info, oldinfo);
-			}
-		}
-		else if (Version.Server == SERVER_FREESTYLE_GUNZ)
-		{
-			if (Version.nVersion == 9)
-			{
-				MTD_CharInfo_FG_V9 charinfo;
-				pFile->Read(charinfo);
-				copy_charinfo(info, charinfo);
-			}
-			else if (Version.nVersion == 7)
-			{
-				if (Version.nSubVersion == 0)
-				{
-					MTD_CharInfo_FG_V7_0 charinfo;
-					pFile->Read(charinfo);
-					copy_charinfo(info, charinfo);
-				}
-				else if (Version.nSubVersion == 1)
-				{
-					MTD_CharInfo_FG_V7_1 charinfo;
-					pFile->Read(charinfo);
-					copy_charinfo(info, charinfo);
-				}
-			}
-
-			//MLog("HP/AP: %08X/%08X\n", info.nHP, info.nAP);
-
-			info.nEquipedItemDesc[MMCIP_MELEE] = 2;
-		}
-		else if(Version.Server == SERVER_REFINED_GUNZ)
-		{
-			nRead = zfread(&info, sizeof(info), 1, pFile);
-			if(nRead != 1) return false;
-		}
-
-		ZCharacter* pChar=NULL;
-		if(bHero)
-		{
-			g_pGame->m_pMyCharacter=new ZMyCharacter;
-			g_pGame->CreateMyCharacter(info);
-			pChar=g_pGame->m_pMyCharacter;
-			pChar->Load(pFile, Version);
-		}else
-		{
-			pChar=new ZNetCharacter;
-			pChar->Load(pFile, Version);
-			pChar->Create(info);
-		}
-		ZGetCharacterManager()->Add(pChar);
-
-		pChar->SetVisible(true);
-	}
-
-	return true;
 }
 
 void ZReplayLoader::CreatePlayers(const std::vector<ReplayPlayerInfo>& Players)
@@ -354,94 +141,6 @@ void ZReplayLoader::CreatePlayers(const std::vector<ReplayPlayerInfo>& Players)
 	}
 }
 
-bool ZReplayLoader::LoadCommandStream()
-{
-	float fGameTime;
-	zfread(&fGameTime, sizeof(fGameTime), 1, pFile);
-	m_fGameTime = fGameTime;
-
-	int nCommandCount=0;
-
-	int nSize;
-	float fTime;
-	while (zfread(&fTime, sizeof(fTime), 1, pFile))
-	{
-		nCommandCount++;
-
-		char CommandBuffer[1024];
-
-		MUID uidSender;
-		zfread(&uidSender, sizeof(uidSender), 1, pFile);
-		zfread(&nSize, sizeof(nSize), 1, pFile);
-
-		if(nSize<=0 || nSize>sizeof(CommandBuffer)) {
-			return false;
-		}
-		zfread(CommandBuffer, nSize, 1, pFile);
-
-
-		ZObserverCommandItem *pZCommand = new ZObserverCommandItem;
-
-		if (!CreateCommandFromStream(Version, CommandBuffer, &pZCommand->pCommand))
-			continue;
-
-		pZCommand->pCommand->m_Sender=uidSender;
-
-		pZCommand->fTime=fTime;
-
-		if (Version.Server == SERVER_FREESTYLE_GUNZ && IsDojo)
-		{
-			auto Transform = [](float pos[3])
-			{
-				pos[0] -= 600;
-				pos[1] += 2800;
-				pos[2] += 400;
-			};
-
-			if (pZCommand->pCommand->GetID() == MC_PEER_BASICINFO)
-			{
-				MCommandParameter* pParam = pZCommand->pCommand->GetParameter(0);
-				if (pParam->GetType() != MPT_BLOB)
-					continue;
-
-				ZPACKEDBASICINFO* ppbi = (ZPACKEDBASICINFO*)pParam->GetPointer();
-
-				float pos[3] = { (float)ppbi->posx, (float)ppbi->posy, (float)ppbi->posz };
-
-				if (pos[2] < 0)
-				{
-					Transform(pos);
-
-					ppbi->posx = pos[0];
-					ppbi->posy = pos[1];
-					ppbi->posz = pos[2];
-				}
-			}
-		}
-		else if (Version.Server == SERVER_OFFICIAL && Version.nVersion == 11)
-		{
-			if (pZCommand->pCommand->GetID() == MC_PEER_BASICINFO)
-			{
-				MCommandParameter* pParam = pZCommand->pCommand->GetParameter(0);
-				if (pParam->GetType() != MPT_BLOB)
-					continue;
-
-				BYTE *ppbi = (BYTE *)pParam->GetPointer();
-
-				for (int i = 0; i < 3; i++)
-				{
-					ppbi[22 + i] = ppbi[28 + i];
-				}
-			}
-		}
-
-		g_pGame->GetReplayCommandList()->push_back(pZCommand);
-	}
-
-	return true;
-}
-
-
 void ZReplayLoader::ConvertStageSettingNode(REPLAY_STAGE_SETTING_NODE* pSource, MSTAGE_SETTING_NODE* pTarget)
 {
 	pTarget->uidStage = pSource->uidStage;
@@ -458,7 +157,7 @@ void ZReplayLoader::ConvertStageSettingNode(REPLAY_STAGE_SETTING_NODE* pSource, 
 	pTarget->bForcedEntryEnabled = pSource->bForcedEntryEnabled;
 }
 
-bool ZReplayLoader::CreateCommandFromStream(const ReplayVersion& Version, char* pStream, MCommand **ppRetCommand)
+bool ZReplayLoader::CreateCommandFromStream(char* pStream, MCommand **ppRetCommand)
 {
 	if (Version.Server == SERVER_OFFICIAL && Version.nVersion <= 2)
 	{

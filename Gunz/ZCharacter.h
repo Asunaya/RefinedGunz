@@ -570,8 +570,7 @@ public:
 	void LevelUp();
 	void LevelDown();
 
-	bool Save(ZFile *file);
-	bool Load(ZFile *file, const ReplayVersion &Version);
+	void Save(ZCharacterReplayState& State);
 	void Load(const ZCharacterReplayState& State);
 
 	RMesh *GetWeaponMesh(MMatchCharItemParts parts);

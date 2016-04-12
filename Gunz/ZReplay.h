@@ -129,16 +129,10 @@ private:
 
 	void CreatePlayers(const std::vector<ReplayPlayerInfo>& Players);
 
-	bool LoadHeader();
-	bool LoadStageSetting();
-	bool LoadStageSettingEtc();
-	bool LoadCharInfo();
-	bool LoadCommandStream();
-
 	void ConvertStageSettingNode(REPLAY_STAGE_SETTING_NODE* pSource, MSTAGE_SETTING_NODE* pTarget);
 	void ChangeGameState();
 
-	static bool CreateCommandFromStream(const ReplayVersion& Version, char* pStream, MCommand **ppRetCommand);
+	bool CreateCommandFromStream(char* pStream, MCommand **ppRetCommand);
 	static MCommand* CreateCommandFromStreamVersion2(char* pStream);
 	static bool ParseVersion2Command(char* pStream, MCommand* pCmd);
 	static MCommandParameter* MakeVersion2CommandParameter(MCommandParameterType nType, char* pStream, unsigned short int* pnDataCount);

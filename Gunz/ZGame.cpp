@@ -5511,10 +5511,13 @@ void ZGame::StartRecording()
 	nWritten = zfwrite(&nCharacterCount,sizeof(nCharacterCount),1,m_pReplayFile);
 	if(nWritten==0) goto RECORDING_FAIL;
 
-	for (ZCharacterManager::iterator itor = m_CharacterManager.begin(); itor != m_CharacterManager.end(); ++itor)
+	for (auto Item : m_CharacterManager)
 	{
-		ZCharacter* pCharacter = (*itor).second;
-		if(!pCharacter->Save(m_pReplayFile)) goto RECORDING_FAIL;
+		auto Char = Item.second;
+		ZCharacterReplayState State;
+		Char->Save(State);
+		if (!m_pReplayFile->Write(State))
+			goto RECORDING_FAIL;
 	}	
 
 	nWritten = zfwrite(&m_fTime,sizeof(m_fTime),1,m_pReplayFile);
@@ -5526,7 +5529,7 @@ void ZGame::StartRecording()
 		ZMsg(MSG_RECORD_STARTING));
 	return;
 
-RECORDING_FAIL:	// ½ÇÆÐ
+RECORDING_FAIL:
 
 	if(m_pReplayFile)
 	{

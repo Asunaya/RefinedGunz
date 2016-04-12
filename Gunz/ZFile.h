@@ -27,12 +27,12 @@ public:
 	int Read(void *pBuffer,int nByte);
 	int Write(void *pBuffer,int nByte);
 
-	template<typename T>
+	template <typename T>
 	int Read(T &obj)
 	{
 		return Read(&obj, sizeof(T)) / sizeof(T);
 	}
-	template<typename T, size_t size>
+	template <typename T, size_t size>
 	int Read(T(&obj)[size])
 	{
 		int ItemsRead = 0;
@@ -41,6 +41,11 @@ public:
 			ItemsRead += Read(obj[i]);
 		}
 		return ItemsRead;
+	}
+	template <typename T>
+	bool Write(T& Obj)
+	{
+		return Write(&Obj, sizeof(Obj)) == sizeof(Obj);
 	}
 
 	bool Close();
