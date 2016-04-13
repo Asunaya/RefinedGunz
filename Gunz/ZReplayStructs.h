@@ -287,6 +287,8 @@ typedef ZCharacterReplayStateImpl<MMCIP_END> ZCharacterReplayState;
 typedef ZCharacterReplayStateImpl<17> ZCharacterReplayState_FG_V7_0;
 typedef ZCharacterReplayStateImpl<22> ZCharacterReplayState_FG_V7_1;
 typedef ZCharacterReplayStateImpl<24> ZCharacterReplayState_FG_V9;
+typedef ZCharacterReplayStateImpl<17> ZCharacterReplayState_Official_V6;
+typedef ZCharacterReplayStateImpl<34> ZCharacterReplayState_Official_V11;
 
 #pragma pack(pop)
 

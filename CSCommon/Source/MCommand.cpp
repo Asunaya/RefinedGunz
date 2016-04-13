@@ -374,7 +374,6 @@ bool MCommand::SetData(char* pData, MCommandManager* pCM, unsigned short nDataLe
 			//mlog("Error(MCommand::SetData): Wrong Param Type\n");
 			_ASSERT(false);		// Unknow Parameter!!!
 			return false;
-			break;
 		}
 
 		nDataCount += pParam->SetData(pData+nDataCount);

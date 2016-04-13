@@ -138,12 +138,20 @@ inline void ZReplayLoader::GetStageSetting(REPLAY_STAGE_SETTING_NODE& ret)
 	};
 
 	IsDojo = !_stricmp(m_StageSetting.szMapName, "Dojo");
+}
 
-	if (m_StageSetting.nGameType == MMATCH_GAMETYPE_DUEL)
+inline void ZReplayLoader::GetDuelQueueInfo(MTD_DuelQueueInfo* QueueInfo)
+{
+	if (m_StageSetting.nGameType != MMATCH_GAMETYPE_DUEL)
+		return;
+
+	if (!QueueInfo)
 	{
-		ZRuleDuel* pDuel = static_cast<ZRuleDuel*>(ZGetGameInterface()->GetGame()->GetMatch()->GetRule());
-		Read(pDuel->QInfo);
+		Position += sizeof(*QueueInfo);
+		return;
 	}
+
+	Read(*QueueInfo);
 }
 
 inline std::vector<ReplayPlayerInfo> ZReplayLoader::GetCharInfo()
@@ -197,7 +205,7 @@ inline std::vector<ReplayPlayerInfo> ZReplayLoader::GetCharInfo()
 				MTD_CharInfo_V5 oldinfo;
 				if (Version.nVersion < 2)
 				{
-					Read(oldinfo);
+					ReadN(&oldinfo, sizeof(oldinfo) - sizeof(oldinfo.nClanCLID));
 					oldinfo.nClanCLID = 0;
 				}
 				else
@@ -302,7 +310,25 @@ inline std::vector<ReplayPlayerInfo> ZReplayLoader::GetCharInfo()
 		}
 		else if (Version.Server == SERVER_OFFICIAL)
 		{
-			Read(CharState);
+			if (Version.nVersion >= 6)
+			{
+				if (Version.nVersion == 11)
+				{
+					ZCharacterReplayState_Official_V11 OldState;
+					Read(OldState);
+					CopyCharState(OldState);
+				}
+				else
+				{
+					ZCharacterReplayState_Official_V6 OldState;
+					Read(OldState);
+					CopyCharState(OldState);
+				}
+			}
+			else
+			{
+				Read(CharState);
+			}
 		}
 
 		ret.push_back({ IsHero, CharInfo, CharState });
@@ -347,6 +373,9 @@ bool ZReplayLoader::TryRead(T& Obj)
 
 inline void ZReplayLoader::ReadN(void* Obj, size_t Size)
 {
+	if (Position + Size > InflatedFile.size())
+		throw EOFException(Position);
+
 	memcpy(Obj, &InflatedFile[Position], Size);
 	Position += Size;
 };
@@ -373,9 +402,8 @@ bool ZReplayLoader::GetCommands(T ForEachCommand)
 		Read(uidSender);
 		Read(nSize);
 
-		if (nSize <= 0 || nSize > sizeof(CommandBuffer)) {
+		if (nSize <= 0 || nSize > sizeof(CommandBuffer))
 			return false;
-		}
 
 		ReadN(CommandBuffer, nSize);
 
@@ -419,16 +447,46 @@ bool ZReplayLoader::GetCommands(T ForEachCommand)
 		{
 			if (Command->GetID() == MC_PEER_BASICINFO)
 			{
-				MCommandParameter* pParam = Command->GetParameter(0);
-				if (pParam->GetType() != MPT_BLOB)
+				auto Param = (MCommandParameterBlob*)Command->GetParameter(0);
+				if (Param->GetType() != MPT_BLOB)
 					continue;
 
-				BYTE *ppbi = (BYTE *)pParam->GetPointer();
+				auto pbi = Param->GetPointer();
 
-				for (int i = 0; i < 3; i++)
+				[pbi = (short*)pbi]
 				{
-					ppbi[22 + i] = ppbi[28 + i];
-				}
+					for (int i = 0; i < 3; i++)
+					{
+						pbi[8 + i] = pbi[11 + i];
+					}
+				}();
+
+				[pbi = (BYTE*)pbi]
+				{
+					for (int i = 0; i < 3; i++)
+					{
+						pbi[22 + i] = pbi[28 + i];
+					}
+				}();
+
+				[pbi = (ZPACKEDBASICINFO*)pbi]
+				{
+					pbi->posz -= 125;
+					pbi->velx = 0;
+					pbi->vely = 0;
+					pbi->velz = 0;
+
+					ZBasicInfo bi;
+					pbi->Unpack(bi);
+
+					if (fabs(fabs(Magnitude(bi.direction)) - 1.f) > 0.001)
+					{
+						bi.direction = rvector(1, 0, 0);
+						pbi->Pack(bi);
+					}
+				}();
+
+				//Param->m_nSize = sizeof(ZPACKEDBASICINFO);
 			}
 		}
 

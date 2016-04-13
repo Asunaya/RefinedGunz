@@ -660,21 +660,21 @@ DWORD GetCrashInfo(LPEXCEPTION_POINTERS exceptionInfo, std::string& str)
 
 		mi.SizeOfStruct = sizeof(mi);
 
-		//int Offset = 0x1337;
 		char Offset[32];
 		bool bGotModule = false;
 
 		if (g_pfnSymGetModuleInfo(hProcess, stk.AddrPC.Offset, &mi))
 		{
-			//Offset = stk.AddrPC.Offset - mi.BaseOfImage;
-			_itoa_s(stk.AddrPC.Offset - mi.BaseOfImage, Offset, 16);
+			if (_itoa_s(stk.AddrPC.Offset - mi.BaseOfImage, Offset, 16))
+				strcpy_safe(Offset, "???");
 			bGotModule = true;
 		}
-		else {
-			strcpy(Offset, "???");
+		else
+		{
+			strcpy_safe(Offset, "???");
 		}
 
-		Append("Frame %02d: Address: %08X (base + 0x%s), return address: %08X\n", nframes, stk.AddrPC.Offset, Offset, stk.AddrReturn.Offset);
+		Append("Frame %02d: Address: %08X (base + %s), return address: %08X\n", nframes, stk.AddrPC.Offset, Offset, stk.AddrReturn.Offset);
 
 		if (bGotModule)
 		{

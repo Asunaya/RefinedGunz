@@ -12,7 +12,6 @@
 
 #pragma pack(1)
 
-// 일정 시간간격으로 캐릭터들끼리 계속 주고받는 데이터
 struct ZPACKEDBASICINFO {
 	float	fTime;
 	short	posx,posy,posz;
@@ -21,6 +20,28 @@ struct ZPACKEDBASICINFO {
 	BYTE	upperstate;
 	BYTE	lowerstate;
 	BYTE	selweapon;
+
+	void Unpack(ZBasicInfo& bi)
+	{
+		bi.position = rvector(posx, posy, posz);
+		bi.velocity = rvector(velx, vely, velz);
+		bi.direction = 1.f / 32000.f * rvector(dirx, diry, dirz);
+	}
+
+	void Pack(const ZBasicInfo& bi)
+	{
+		posx = bi.position.x;
+		posy = bi.position.y;
+		posz = bi.position.z;
+
+		velx = bi.velocity.x;
+		vely = bi.velocity.y;
+		velz = bi.velocity.z;
+
+		dirx = bi.direction.x * 32000;
+		diry = bi.direction.y * 32000;
+		dirz = bi.direction.z * 32000;
+	}
 };
 
 struct ZPACKEDSHOTINFO {

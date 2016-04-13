@@ -26,7 +26,7 @@ bool CreateReplayGame(char *filename)
 		strcpy_safe(szBuf, filename);
 		LastFile = szBuf;
 	}
-	else if (LastFile.size())
+	else if (!LastFile.empty())
 		strcpy_safe(szBuf, LastFile.c_str());
 	else
 		return false;
@@ -76,6 +76,12 @@ bool ZReplayLoader::Load(const char* filename)
 
 		ChangeGameState();
 
+		if (m_StageSetting.nGameType == MMATCH_GAMETYPE_DUEL)
+		{
+			ZRuleDuel* pDuel = static_cast<ZRuleDuel*>(ZGetGameInterface()->GetGame()->GetMatch()->GetRule());
+			GetDuelQueueInfo(&pDuel->QInfo);
+		}
+
 		CreatePlayers(GetCharInfo());
 
 		auto PerCommand = [&](MCommand *Command, float Time)
@@ -86,13 +92,30 @@ bool ZReplayLoader::Load(const char* filename)
 			pZCommand->fTime = Time;
 
 			g_pGame->GetReplayCommandList()->push_back(pZCommand);
+
+			/*MLog("Command ID %d\n", Command->GetID());
+
+			if (Command->GetID() == MC_PEER_BASICINFO)
+			{
+				MCommandParameter* pParam = Command->GetParameter(0);
+				if (pParam->GetType() != MPT_BLOB)
+					return;
+
+				auto ppbi = (ZPACKEDBASICINFO*)pParam->GetPointer();
+
+				ZBasicInfo bi;
+				ppbi->Unpack(bi);
+
+				MLog("Velocity: %f, %f, %f\n", bi.velocity.x, bi.velocity.y, bi.velocity.z);
+				MLog("Direction: %f, %f, %f\n", bi.direction.x, bi.direction.y, bi.direction.z);
+			}*/
 		};
 
 		GetCommands(PerCommand);
 	}
 	catch (EOFException& e)
 	{
-		MLog("Unexpected EOF while reading replay %s at position %d\n", filename, e.GetPosition());
+		MLog("Unexpected EOF while reading replay %s at position %d; attempting to play the replay nonetheless\n", filename, e.GetPosition());
 		return true; // Try to play it
 	}
 	catch (...)

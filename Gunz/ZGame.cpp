@@ -5603,9 +5603,9 @@ void ZGame::StopRecording()
 
 void ZGame::ToggleRecording()
 {
-	if(m_bReplaying) return;	// 재생중 녹화불가 -_-;
+	if(m_bReplaying)
+		return;
 
-	// 퀘스트는 녹화되지 않는다
 	if (ZGetGameTypeManager()->IsQuestDerived(ZGetGameClient()->GetMatchStageSetting()->GetGameType()))
 		return;
 
@@ -5631,120 +5631,19 @@ bool ZGame::OnLoadReplay(ZReplayLoader* pLoader)
 	dwReplayStartTime=timeGetTime();
 
 	ReplayIterator = m_ReplayCommandList.begin();
-
-
-
-
-
-/*
-	size_t n;
-
-	m_bReplaying=true;
-
-	int nCharacterCount;
-	zfread(&nCharacterCount,sizeof(nCharacterCount),1,file);
-
-	ZGetCharacterManager()->Clear();
-	m_ObjectManager.Clear();
-
-	for(int i=0;i<nCharacterCount;i++)
-	{
-		bool bHero;
-		n=zfread(&bHero,sizeof(bHero),1,file);
-		if(n!=1) return false;
-
-		MTD_CharInfo info;
-
-		if(nVersion<2) {
-			n=zfread(&info,sizeof(info)-4,1,file);
-			if(n!=1) return false;
-			info.nClanCLID = 0;
-		}
-		else {
-			n=zfread(&info,sizeof(info),1,file);
-			if(n!=1) return false;
-		}
-
-		ZCharacter *pChar=NULL;
-		if(bHero)
-		{
-			m_pMyCharacter=new ZMyCharacter;
-			CreateMyCharacter(&info);
-			pChar=m_pMyCharacter;
-			pChar->Load(file,nVersion);
-		}else
-		{
-			pChar=new ZNetCharacter;
-			pChar->Load(file,nVersion);
-			pChar->Create(&info);
-		}
-
-		ZGetCharacterManager()->Add(pChar);
-		mlog("%s : %d %d\n",pChar->GetProperty()->szName,pChar->GetUID().High,pChar->GetUID().Low);
-
-		pChar->SetVisible(true);
-	}
-
-	float fGameTime;
-	zfread(&fGameTime,sizeof(fGameTime),1,file);
-	m_fTime=fGameTime;
-
-	int nCommandCount=0;
-
-	int nSize;
-	float fTime;
-	while( zfread(&fTime,sizeof(fTime),1,file) )
-	{
-		nCommandCount++;
-
-		char CommandBuffer[1024];
-
-		MUID uidSender;
-		zfread(&uidSender,sizeof(uidSender),1,file);
-		zfread(&nSize,sizeof(nSize),1,file);
-		if(nSize<0 || nSize>sizeof(CommandBuffer)) {
-			m_bReplaying=false;
-			ShowReplayInfo( true);
-			return false;
-		}
-		zfread(CommandBuffer,nSize,1,file);
-
-		ZObserverCommandItem *pZCommand=new ZObserverCommandItem;
-		pZCommand->pCommand=new MCommand;
-		pZCommand->pCommand->SetData(CommandBuffer,ZGetGameClient()->GetCommandManager());
-		pZCommand->pCommand->m_Sender=uidSender;
-		pZCommand->fTime=fTime;
-		m_ReplayCommandList.push_back(pZCommand);
-
-	}
-
-	SetReadyState(ZGAME_READYSTATE_RUN);
-	GetMatch()->SetRoundState(MMATCH_ROUNDSTATE_FREE);
-	ZGetGameInterface()->GetCombatInterface()->SetObserverMode(true);
-
-	ZGetGameInterface()->GetCombatInterface()->GetObserver()->SetTarget(m_pMyCharacter->GetUID());
-
-	g_bProfile=true;	
-
-	dwReplayStartTime=timeGetTime();
-
-	return true;
-*/
 	return true;
 }
 
 void ZGame::EndReplay()
 {
-	g_bProfile=false;
+	g_bProfile = false;
 
 	DWORD dwReplayEndTime=timeGetTime();
 	
-	mlog("replay end. profile saved. playtime = %3.3f seconds , average fps = %3.3f \n", 
+	mlog("replay end. profile saved. playtime = %3.3f seconds , average fps = %3.3f \n",
 		float(dwReplayEndTime-dwReplayStartTime)/1000.f,
 		1000.f*g_nFrameCount/float(dwReplayEndTime-dwReplayStartTime));
 
-
-	// 리플레이가 다 끝나면 다시 처음부터 돌려보자. - (버드)
 	ZChangeGameState(GUNZ_LOBBY);
 }
 

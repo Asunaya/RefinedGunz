@@ -358,6 +358,7 @@ void RGMain::OnReplaySelected()
 		ZReplayLoader Loader;
 		SelectedReplayInfo.Version = Loader.GetVersion();
 		Loader.GetStageSetting(SelectedReplayInfo.StageSetting);
+		Loader.GetDuelQueueInfo(nullptr);
 		auto InitialCharInfos = Loader.GetCharInfo();
 
 		for (const auto &CharInfo : InitialCharInfos)
