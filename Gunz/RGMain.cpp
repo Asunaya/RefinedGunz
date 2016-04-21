@@ -13,10 +13,11 @@
 #include "FileInfo.h"
 #include "ZReplay.inl"
 #include "ZInput.h"
+#include "MeshManager.h"
 
-RGMain g_RGMain;
+RGMain *g_RGMain = nullptr;
 
-void OnAppCreate()
+void RGMain::OnAppCreate()
 {
 	ZRuleSkillmap::CourseMgr.Init();
 
@@ -24,22 +25,20 @@ void OnAppCreate()
 	g_pPortal = new Portal();
 #endif
 
-	g_pHitboxManager = new HitboxManager;
-
 	if (ZGetConfiguration()->GetDynamicResourceLoad())
-		g_pMeshManager = new MeshManager;
-	else
-		g_pMeshManager = nullptr;
+		m_MeshManager = std::make_unique<MeshManager>();
 }
 
-void OnCreateDevice()
+void RGMain::OnCreateDevice()
 {
 	g_Chat.Create("Arial", 16);
 	g_Chat.SetBackgroundColor(ZGetConfiguration()->GetChatBackgroundColor());
 
 	g_Draw.OnCreateDevice();
 
-	g_VoiceChat.OnCreateDevice();
+	m_VoiceChat.OnCreateDevice();
+
+	m_HitboxManager.Create();
 }
 
 void RGMain::OnGameDraw()
@@ -48,9 +47,9 @@ void RGMain::OnGameDraw()
 		((ZRuleSkillmap *)ZGetGame()->GetMatch()->GetRule())->Draw();
 
 	if(ZGetConfiguration()->GetShowHitboxes())
-		g_pHitboxManager->Draw();
+		m_HitboxManager.Draw();
 
-	g_VoiceChat.Draw();
+	m_VoiceChat.Draw();
 
 	/*for (auto pair : *ZGetCharacterManager())
 	{
@@ -153,7 +152,7 @@ std::pair<bool, std::vector<unsigned char>> ReadZFile(const char *szPath)
 
 void Invoke(std::function<void()> fn)
 {
-	g_RGMain.Invoke(fn);
+	g_RGMain->Invoke(fn);
 }
 
 std::pair<int, ZCharacter*> FindSinglePlayer(const char * NameSubstring)
@@ -234,13 +233,13 @@ bool RGMain::OnEvent(MEvent *pEvent)
 	{
 		if (CurState && !LastState)
 		{
-			g_VoiceChat.StartRecording();
+			m_VoiceChat.StartRecording();
 
 			return true;
 		}
 		else if (!CurState && LastState)
 		{
-			g_VoiceChat.StopRecording();
+			m_VoiceChat.StopRecording();
 
 			return true;
 		}
@@ -358,7 +357,7 @@ void RGMain::OnReplaySelected()
 		ZReplayLoader Loader;
 		SelectedReplayInfo.Version = Loader.GetVersion();
 		Loader.GetStageSetting(SelectedReplayInfo.StageSetting);
-		Loader.GetDuelQueueInfo(nullptr);
+		Loader.GetDuelQueueInfo();
 		auto InitialCharInfos = Loader.GetCharInfo();
 
 		for (const auto &CharInfo : InitialCharInfos)
@@ -384,10 +383,9 @@ void RGMain::OnReplaySelected()
 	//MLog("Read version %s, %d", SelectedReplayInfo.Version.GetServerString(), SelectedReplayInfo.Version.nVersion);
 }
 
-void RGMain::DrawReplayInfo()
+void RGMain::DrawReplayInfo() const
 {
 	extern MFontR2 *g_pDefFont;
-	auto Font = g_pDefFont;
 
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
 
@@ -506,16 +504,6 @@ IDirect3DTexture9* HueShiftTexture(IDirect3DTexture9* Tex, float Hue)
 
 	int Level = 0;
 
-	/*IDirect3DSurface9* DummySurface = nullptr;
-
-	hr = RGetDevice()->CreateOffscreenPlainSurface(Desc.Width, Desc.Height, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &DummySurface, nullptr);
-
-	if (FAILED(hr))
-	{
-	MLog("Failed to create surface\n");
-	return false;
-	}*/
-
 	for (int Level = 0; Level < Levels; Level++)
 	{
 		Tex->GetLevelDesc(Level, &Desc);
@@ -537,7 +525,7 @@ IDirect3DTexture9* HueShiftTexture(IDirect3DTexture9* Tex, float Hue)
 
 		if (FAILED(hr))
 		{
-			MLog("Failed to lock massive texture\n");
+			MLog("Failed to lock texture\n");
 			return nullptr;
 		}
 
@@ -545,19 +533,15 @@ IDirect3DTexture9* HueShiftTexture(IDirect3DTexture9* Tex, float Hue)
 		{
 			for (int i = 0; i < Rect.Pitch; i += 4)
 			{
-				RGB& Pixel = *(RGB *)(PBYTE(Rect.pBits) + i + j * Rect.Pitch);
-				Pixel.Color = _byteswap_ulong(Pixel.Color);
+				uint32_t& Pixel = *(uint32_t *)(PBYTE(Rect.pBits) + i + j * Rect.Pitch);
 				rgb color;
-				color.r = Pixel.r / 2.55;
-				color.g = Pixel.g / 2.55;
-				color.b = Pixel.b / 2.55;
+				color.r = ((Pixel & 0x0000FF00) >> 8) / 2.55;
+				color.g = ((Pixel & 0x00FF0000) >> 16) / 2.55;
+				color.b = ((Pixel & 0xFF000000) >> 24) / 2.55;
 				hsv HSV = rgb2hsv(color);
 				HSV.h += fmod(Hue, 360.0);
 				color = hsv2rgb(HSV);
-				Pixel.r = color.r * 2.55;
-				Pixel.g = color.g * 2.55;
-				Pixel.b = color.b * 2.55;
-				Pixel.Color = _byteswap_ulong(Pixel.Color);
+				Pixel = (int(color.r * 2.55) << 8) | (int(color.g * 2.55) << 16) | (int(color.b * 2.55) << 24) | (Pixel & 0xFF);
 			}
 		}
 
@@ -565,20 +549,10 @@ IDirect3DTexture9* HueShiftTexture(IDirect3DTexture9* Tex, float Hue)
 
 		if (FAILED(hr))
 		{
-			MLog("Failed to lock massive texture\n");
+			MLog("Failed to unlock texture\n");
 			return false;
 		}
 	}
-
-	/*hr = D3DXLoadSurfaceFromSurface(NewSurface, nullptr, nullptr, DummySurface, nullptr, nullptr, D3DX_FILTER_NONE, 0);
-
-	if (FAILED(hr))
-	{
-	MLog("Failed to load dummy surface\n");
-	return false;
-	}
-
-	DummySurface->Release();*/
 
 	return NewTex;
 }
@@ -593,4 +567,54 @@ void RGMain::SetSwordColor(const MUID& UID, uint32_t Color)
 		return;
 
 	Char->m_pVMesh->SetCustomColor(Color & 0x80FFFFFF, Color & 0x0FFFFFFF);
+}
+
+void RGMain::OnReceiveVoiceChat(ZCharacter *Char, const uint8_t *Buffer, int Length)
+{
+	m_VoiceChat.OnReceiveVoiceChat(Char, Buffer, Length);
+}
+
+void RGMain::OnGameCreate()
+{
+	g_Rules.OnGameCreate();
+}
+
+void RGMain::OnSlash(ZCharacter * Char, const D3DXVECTOR3 & Pos, const D3DXVECTOR3 & Dir)
+{
+	m_HitboxManager.OnSlash(Pos, Dir);
+}
+
+void RGMain::OnMassive(ZCharacter * Char, const D3DXVECTOR3 & Pos, const D3DXVECTOR3 & Dir)
+{
+	m_HitboxManager.OnMassive(Pos);
+}
+
+void OnDestroyObject(void* Obj)
+{
+	g_RGMain->OnDestroyObject(Obj);
+}
+
+void ReleaseMeshNode(RMeshNode* Node)
+{
+	g_RGMain->ReleaseMeshNode(Node);
+}
+
+bool IsDynamicResourceLoad()
+{
+	return ZGetConfiguration()->GetDynamicResourceLoad();
+}
+
+void GetMeshNodeAsync(const char *MeshName, const char *NodeName, void* Obj, std::function<void(RMeshNode*)> Callback)
+{
+	g_RGMain->GetMeshNode(MeshName, NodeName, Obj, Callback);
+}
+
+void AddTask(std::function<void()> fn)
+{
+
+}
+
+bool RGMain::IsCursorEnabled() const
+{
+	return g_Chat.IsInputEnabled();
 }

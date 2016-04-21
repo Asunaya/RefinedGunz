@@ -742,12 +742,6 @@
       <Filter>HShield</Filter>
     </ClInclude>
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="FuncList.h">
-      <Filter>RGunz</Filter>
-    </ClInclude>
-    <ClInclude Include="Events.h">
-      <Filter>RGunz</Filter>
-    </ClInclude>
     <ClInclude Include="Portal.h">
       <Filter>RGunz</Filter>
     </ClInclude>
@@ -1392,9 +1386,6 @@
     <ClCompile Include="Rules.cpp">
       <Filter>RGunz</Filter>
     </ClCompile>
-    <ClCompile Include="Events.cpp">
-      <Filter>RGunz</Filter>
-    </ClCompile>
     <ClCompile Include="RGCommands.cpp">
       <Filter>RGunz</Filter>
     </ClCompile>
@@ -1402,9 +1393,6 @@
       <Filter>RGunz</Filter>
     </ClCompile>
     <ClCompile Include="RGMain.cpp">
-      <Filter>RGunz</Filter>
-    </ClCompile>
-    <ClCompile Include="FuncList.cpp">
       <Filter>RGunz</Filter>
     </ClCompile>
     <ClCompile Include="Hitboxes.cpp">

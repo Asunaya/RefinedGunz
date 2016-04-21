@@ -1965,7 +1965,7 @@ void ZEffectManager::AddSwordWaveEffect(const MUID& UID, const rvector &Target, 
 	dir.z = 0.f;
 	Normalize(dir);
 
-	auto pair = g_RGMain.GetPlayerSwordColor(UID);
+	auto pair = g_RGMain->GetPlayerSwordColor(UID);
 
 	if (pair.first)
 	{
@@ -1976,7 +1976,7 @@ void ZEffectManager::AddSwordWaveEffect(const MUID& UID, const rvector &Target, 
 
 		auto GetRainbowColor = [HSVColor]() mutable
 		{
-			double Delta = g_RGMain.GetElapsedTime();
+			double Delta = g_RGMain->GetElapsedTime();
 
 			HSVColor.h += 360.0 / 2.0 * Delta;
 			HSVColor.h = fmod(HSVColor.h, 360.0);
@@ -3005,7 +3005,7 @@ void ZEffectManager::AddChargingEffect( ZObject *pObj )
 
 	ZEffectCharging* pNew;
 
-	auto pair = g_RGMain.GetPlayerSwordColor(pObj->GetUID());
+	auto pair = g_RGMain->GetPlayerSwordColor(pObj->GetUID());
 
 	if (pair.first)
 	{
@@ -3016,7 +3016,7 @@ void ZEffectManager::AddChargingEffect( ZObject *pObj )
 
 		auto GetRainbowColor = [HSVColor]() mutable
 		{
-			double Delta = g_RGMain.GetElapsedTime();
+			double Delta = g_RGMain->GetElapsedTime();
 
 			HSVColor.h += 360.0 / 2.0 * Delta;
 			HSVColor.h = fmod(HSVColor.h, 360.0);
@@ -3053,7 +3053,7 @@ void ZEffectManager::AddChargedEffect( ZObject *pObj )
 
 	ZEffectCharged* pNew;
 
-	auto pair = g_RGMain.GetPlayerSwordColor(pObj->GetUID());
+	auto pair = g_RGMain->GetPlayerSwordColor(pObj->GetUID());
 
 	if (pair.first)
 	{
@@ -3064,7 +3064,7 @@ void ZEffectManager::AddChargedEffect( ZObject *pObj )
 
 		auto GetRainbowColor = [HSVColor]() mutable
 		{
-			double Delta = g_RGMain.GetElapsedTime();
+			double Delta = g_RGMain->GetElapsedTime();
 
 			HSVColor.h += 360.0 / 2.0 * Delta;
 			HSVColor.h = fmod(HSVColor.h, 360.0);

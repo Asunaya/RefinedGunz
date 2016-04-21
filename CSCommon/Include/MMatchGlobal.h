@@ -74,7 +74,7 @@ enum MMatchTeam
 // 서버모드
 enum MMatchServerMode
 {
-	MSM_NORMAL		= 0,		// 일반
+	MSM_NORMAL_		= 0,		// 일반
 	MSM_CLAN		= 1,		// 클랜전 전용 서버
 	MSM_LADDER		= 2,		// 래더 전용 서버
 	MSM_EVENT		= 3,		// 이벤트 서버

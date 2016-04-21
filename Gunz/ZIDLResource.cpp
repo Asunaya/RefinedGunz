@@ -467,7 +467,7 @@ ZRoomListBox* ZIDLResource::GetRoomListBox( MXmlElement& element )
 				if (pBitmap)
 				{
 					pWidget->SetBannerImage(szAttr, pBitmap);
-					g_RGMain.AddMapBanner(szAttr, pBitmap);
+					g_RGMain->AddMapBanner(szAttr, pBitmap);
 				}
 			}
  			else if( _stricmp( szAttr,"icon" )==0 )

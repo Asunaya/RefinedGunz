@@ -33,7 +33,6 @@
 #include "ZOptionInterface.h"
 
 #include "RGMain.h"
-#include "Events.h"
 
 #ifdef _QEUST_ITEM_DEBUG
 #include "MQuestItem.h"
@@ -338,7 +337,7 @@ bool ZApplication::OnCreate(ZLoadingProgress *pLoadingProgress)
 
 	__BP(2000,"ZApplication::OnCreate");
 
-	OnAppCreate();
+	g_RGMain->OnAppCreate();
 
 #define MMTIMER_RESOLUTION	1
 	if (TIMERR_NOERROR == timeGetDevCaps(&tc,sizeof(TIMECAPS)))
@@ -625,7 +624,7 @@ void ZApplication::OnUpdate()
 
 	fElapsed = ZApplication::m_Timer.UpdateFrame();
 
-	g_RGMain.OnUpdate(fElapsed);
+	g_RGMain->OnUpdate(fElapsed);
 
 	
 
@@ -773,8 +772,6 @@ void ZApplication::OnInvalidate()
 	RGetShaderMgr()->Release();
 	if(m_pGameInterface)
 		m_pGameInterface->OnInvalidate();
-
-	g_OnLostDevice.CallAll();
 }
 
 void ZApplication::OnRestore()
@@ -790,7 +787,7 @@ void ZApplication::OnRestore()
 		}
 	}
 
-	g_RGMain.OnReset();
+	g_RGMain->OnReset();
 }
 
 void ZApplication::Exit()

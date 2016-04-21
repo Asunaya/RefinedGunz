@@ -1,11 +1,9 @@
 #include "stdafx.h"
 #include "Rules.h"
-#include "Events.h"
 #include "ZGameClient.h"
 
 Rules::Rules()
 {
-	g_OnGameCreate.AddMethod(this, &Rules::OnGameCreate);
 }
 
 bool Rules::GetRoomTag(const char* szTag)

@@ -5,9 +5,9 @@
 class HitboxManager
 {
 public:
-	HitboxManager();
-	~HitboxManager();
+	HitboxManager() { }
 
+	void Create();
 	void Draw();
 	void Update();
 	void OnSlash(const D3DXVECTOR3 &Pos, const D3DXVECTOR3 &Dir);
@@ -35,9 +35,7 @@ private:
 	{
 		float x, y, z;
 	};
-	IDirect3DVertexBuffer9 *pVB;
+	D3DPtr<IDirect3DVertexBuffer9> pVB;
 
 	bool Enabled() const;
 };
-
-extern HitboxManager *g_pHitboxManager;

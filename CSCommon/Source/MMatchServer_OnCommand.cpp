@@ -58,6 +58,7 @@ _STATUS_CMD_START;
 			break;
 		case MC_MATCH_REQUEST_CREATE_ACCOUNT:
 		{
+			Log(LOG_ALL, "CreateAccount");
 			char szUserID[64];
 			char szEmail[64];
 			if (pCommand->GetParameter(szUserID, 0, MPT_STR, sizeof(szUserID)) == false) break;

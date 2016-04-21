@@ -23,6 +23,9 @@ bld/
 [Rr]untime/
 *[Rr]elease*/
 !libsodium/**/*
+lib/
+Lib_LTCG/
+cml/MatchServer/*
 
 # Visual Studio 2015 cache/options directory
 .vs/
@@ -70,6 +73,7 @@ artifacts/
 *.pidb
 *.svclog
 *.scc
+*.idb
 
 # Chutzpah Test files
 _Chutzpah*

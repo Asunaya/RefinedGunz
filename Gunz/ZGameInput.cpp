@@ -64,7 +64,7 @@ bool ZGameInput::OnEvent(MEvent* pEvent)
 	MWidget* p112ConfirmWidget = ZGetGameInterface()->GetIDLResource()->FindWidget("112Confirm");
 	if (p112ConfirmWidget->IsVisible()) return false;
 
-	if (g_RGMain.OnEvent(pEvent))
+	if (g_RGMain->OnEvent(pEvent))
 		return true;
 
 #ifndef _PUBLISH

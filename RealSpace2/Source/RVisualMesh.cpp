@@ -8,8 +8,12 @@
 
 #include "RCharCloth.h"
 
-//#include "../../Gunz/RGMain.h"
-#include "../../Gunz/MeshManager.h"
+#include <functional>
+
+extern bool IsDynamicResourceLoad();
+extern void GetMeshNodeAsync(const char *szMeshName, const char *szNodeName, void* Obj, std::function<void(RMeshNode*)> Callback);
+extern void ReleaseMeshNode(RMeshNode* Node);
+extern void OnDestroyObject(void*);
 
 _USING_NAMESPACE_REALSPACE2
 
@@ -459,8 +463,7 @@ RVisualMesh::RVisualMesh() {
 
 RVisualMesh::~RVisualMesh() 
 {
-	if (g_pMeshManager)
-		g_pMeshManager->OnDestroyObject(this);
+	OnDestroyObject(this);
 
 	Destroy();
 }
@@ -482,22 +485,19 @@ void RVisualMesh::Destroy()
 	}
 
 	if(m_pTMesh) {
-		if (g_pMeshManager)
+		for (int i = 0; i < eq_parts_end; i++)
 		{
-			for (int i = 0; i < eq_parts_end; i++)
-			{
-				if (!m_pTMesh[i])
-					continue;
+			if (!m_pTMesh[i])
+				continue;
 
-				switch (i)
-				{
-				case eq_parts_head:
-				case eq_parts_chest:
-				case eq_parts_hands:
-				case eq_parts_legs:
-				case eq_parts_feet:
-					g_pMeshManager->Release(m_pTMesh[i]);
-				}
+			switch (i)
+			{
+			case eq_parts_head:
+			case eq_parts_chest:
+			case eq_parts_hands:
+			case eq_parts_legs:
+			case eq_parts_feet:
+				ReleaseMeshNode(m_pTMesh[i]);
 			}
 		}
 
@@ -1791,20 +1791,20 @@ void RVisualMesh::ClearParts() {
 	if(m_pTMesh==NULL) return;
 
 	for(int i = 0;i < eq_parts_end; i++){
-		if (m_pTMesh[i] && g_pMeshManager)
-		{
-			switch (i)
-			{
-			case eq_parts_head:
-			case eq_parts_chest:
-			case eq_parts_hands:
-			case eq_parts_legs:
-			case eq_parts_feet:
-				g_pMeshManager->Release(m_pTMesh[i]);
-			};
-		}
+		if (!m_pTMesh[i])
+			continue;
 
-		m_pTMesh[i] = NULL;
+		switch (i)
+		{
+		case eq_parts_head:
+		case eq_parts_chest:
+		case eq_parts_hands:
+		case eq_parts_legs:
+		case eq_parts_feet:
+			ReleaseMeshNode(m_pTMesh[i]);
+		};
+
+		m_pTMesh[i] = nullptr;
 	}
 }
 
@@ -1831,16 +1831,16 @@ void RVisualMesh::SetParts(RMeshPartsType parts, char* name)
 
 	if(!m_pMesh) return;
 
-	if (g_pMeshManager)
+	if (IsDynamicResourceLoad())
 	{
 		std::string saved_name(name);
-		g_pMeshManager->GetAsync(m_pMesh->GetName(), name, this, [this, saved_name, parts](RMeshNode *pNode)
+		GetMeshNodeAsync(m_pMesh->GetName(), name, this, [this, saved_name, parts](RMeshNode *pNode)
 		{
 			RMeshNode *pPreviousNode = m_pTMesh[parts];
 
 			if (pPreviousNode)
 			{
-				g_pMeshManager->Release(pPreviousNode);
+				ReleaseMeshNode(pPreviousNode);
 			}
 
 			if (!pNode)
@@ -1863,11 +1863,8 @@ void RVisualMesh::SetParts(RMeshPartsType parts, char* name)
 
 		if (pNode)
 		{
-			//		if(m_pTMesh[parts] != pNode) 
-			{
-				m_pTMesh[parts] = pNode;
-				m_pMesh->ConnectPhysiqueParent(pNode);
-			}
+			m_pTMesh[parts] = pNode;
+			m_pMesh->ConnectPhysiqueParent(pNode);
 		}
 	}
 }

@@ -28,7 +28,7 @@ MMatchConfig::MMatchConfig()
 	m_szDB_Password[0]			= '\0';
 	m_nServerID					= 0;
 	m_szServerName[0]			= '\0';
-	m_nServerMode				= MSM_NORMAL;
+	m_nServerMode				= MSM_NORMAL_;
 	m_bRestrictionMap			= false;
 	m_bCheckPremiumIP			= false;
 	m_bUseFilter				= false;
@@ -64,7 +64,7 @@ bool MMatchConfig::Create()
 	char szServerMode[128] = "";
 	GetPrivateProfileString("SERVER", "MODE", SERVER_CONFIG_SERVERMODE_NORMAL, szServerMode, 128, SERVER_CONFIG_FILENAME);
 
-	if (!_stricmp(szServerMode, SERVER_CONFIG_SERVERMODE_NORMAL)) m_nServerMode = MSM_NORMAL;
+	if (!_stricmp(szServerMode, SERVER_CONFIG_SERVERMODE_NORMAL)) m_nServerMode = MSM_NORMAL_;
 	else if (!_stricmp(szServerMode, SERVER_CONFIG_SERVERMODE_CLAN)) m_nServerMode = MSM_CLAN;
 	else if (!_stricmp(szServerMode, SERVER_CONFIG_SERVERMODE_LADDER)) m_nServerMode = MSM_LADDER;
 	else if (!_stricmp(szServerMode, SERVER_CONFIG_SERVERMODE_EVENT)) m_nServerMode = MSM_EVENT;

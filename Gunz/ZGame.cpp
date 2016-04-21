@@ -788,8 +788,6 @@ void ZGame::Update(float fElapsed)
 		ZGetStencilLight()->Update();
 
 	OnCameraUpdate(fElapsed);
-
-	g_pHitboxManager->Update();
 }
 
 
@@ -1114,7 +1112,7 @@ void ZGame::Draw()
 	g_pPortal->PostDraw();
 #endif
 
-	g_RGMain.OnGameDraw();
+	g_RGMain->OnGameDraw();
 
 //	빨간라인을 그려본다 화면에 보이면 색이 바뀌도록...? 기본은 파랑 체크되면 빨강...
 /*
@@ -1665,7 +1663,6 @@ bool ZGame::OnCommand_Immediate(MCommand* pCommand)
 		break;
 	case MC_MATCH_RECEIVE_VOICE_CHAT:
 	{
-		MLog("MC_MATCH_RECEIVE_VOICE_CHAT\n");
 		MUID uid;
 		if (!pCommand->GetParameter(&uid, 0, MPT_UID))
 			break;
@@ -1681,7 +1678,7 @@ bool ZGame::OnCommand_Immediate(MCommand* pCommand)
 		if (pParam->GetType() != MPT_BLOB) break;
 		void* pBlob = pParam->GetPointer();
 
-		g_VoiceChat.OnReceiveVoiceChat(Char, (unsigned char *)pBlob, pParam->GetSize() - sizeof(int));
+		g_RGMain->OnReceiveVoiceChat(Char, (unsigned char *)pBlob, pParam->GetSize() - sizeof(int));
 	}
 		break;
 	case MC_PEER_SET_SWORD_COLOR:
@@ -1690,7 +1687,7 @@ bool ZGame::OnCommand_Immediate(MCommand* pCommand)
 		if (!pCommand->GetParameter(&Color, 0, MPT_UINT))
 			break;
 
-		g_RGMain.SetSwordColor(pCommand->GetSenderUID(), Color);
+		g_RGMain->SetSwordColor(pCommand->GetSenderUID(), Color);
 	}
 	break;
 	case MC_MATCH_STAGE_ENTERBATTLE:
@@ -3151,7 +3148,7 @@ void ZGame::OnPeerSlash(ZCharacter *pOwner, const rvector &pos, const rvector &d
 {
 	//g_Attacks[pOwner].TotalSlashes++;
 
-	g_pHitboxManager->OnSlash(pos, dir);
+	g_RGMain->OnSlash(pOwner, pos, dir);
 
 	ZItem *pItem = pOwner->GetItems()->GetItem(MMCIP_MELEE);
 	if (!pItem) return;
@@ -3289,9 +3286,7 @@ void ZGame::OnPeerMassive(ZCharacter *pOwner, const rvector &pos, const rvector 
 
 	const int nRange = 280;
 
-	//g_Attacks[pOwner].TotalMassives++;
-
-	g_pHitboxManager->OnMassive(pos);
+	g_RGMain->OnMassive(pOwner, pos, dir);
 
 	ZItem *pItem = pOwner->GetItems()->GetItem(MMCIP_MELEE);
 	if (!pItem) return;

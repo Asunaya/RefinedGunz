@@ -5,10 +5,12 @@
 #include <mutex>
 #include <queue>
 #include <memory>
+#include "VoiceChat.h"
+#include "Tasks.h"
+#include "MeshManager.h"
+#include "Hitboxes.h"
 
 class ZChatCmdManager;
-void OnAppCreate();
-void OnCreateDevice();
 bool OnGameInput();
 HRESULT GenerateTexture(IDirect3DDevice9 *pD3Ddev, IDirect3DTexture9 **ppD3Dtex, DWORD colour32);
 void LoadRGCommands(ZChatCmdManager &CmdManager);
@@ -49,10 +51,20 @@ public:
 	void OnReset();
 	void OnInitInterface(ZIDLResource &IDLResource);
 	void OnReplaySelected();
+	void OnCreateDevice();
+	void OnAppCreate();
+	decltype(auto) MutePlayer(const MUID& UID)
+	{
+		return m_VoiceChat.MutePlayer(UID);
+	}
 
 	void OnDrawLobby();
 	void OnRender();
 	void OnGameDraw();
+	void OnGameCreate();
+
+	void OnSlash(ZCharacter* Char, const D3DXVECTOR3& Pos, const D3DXVECTOR3& Dir);
+	void OnMassive(ZCharacter* Char, const D3DXVECTOR3& Pos, const D3DXVECTOR3& Dir);
 
 	void SetSwordColor(const MUID& UID, uint32_t Hue);
 
@@ -60,6 +72,31 @@ public:
 	{
 		MapBanners.insert({ MapName, Bitmap });
 	}
+
+	void OnReceiveVoiceChat(ZCharacter *Char, const uint8_t *Buffer, int Length);
+
+	void OnDestroyObject(void* Obj)
+	{
+		if (!m_MeshManager)
+			return;
+
+		m_MeshManager->OnDestroyObject(Obj);
+	}
+
+	void ReleaseMeshNode(RMeshNode* Node)
+	{
+		if (!m_MeshManager)
+			return;
+
+		m_MeshManager->Release(Node);
+	}
+
+	void GetMeshNode(const char *MeshName, const char *NodeName, void* Obj, std::function<void(RMeshNode*)> Callback)
+	{
+		m_MeshManager->GetAsync(MeshName, NodeName, Obj, Callback);
+	}
+
+	bool IsCursorEnabled() const;
 
 	double GetTime() const { return Time; }
 	double GetElapsedTime() const { return Time - LastTime; }
@@ -75,7 +112,7 @@ public:
 	}
 
 private:
-	void DrawReplayInfo();
+	void DrawReplayInfo() const;
 
 	double Time = 0;
 	double LastTime = 0;
@@ -95,105 +132,14 @@ private:
 	std::unordered_map<std::string, MBitmap *> MapBanners;
 
 	std::unordered_map<MUID, uint32_t> SwordColors;
+
+	VoiceChat m_VoiceChat;
+	TaskManager m_TaskManager;
+	std::unique_ptr<MeshManager> m_MeshManager = nullptr;
+	HitboxManager m_HitboxManager;
 };
 
-extern RGMain g_RGMain;
-
-struct RGB
-{
-	union
-	{
-#pragma pack(push)
-#pragma pack(1)
-		struct { uint8_t a, r, g, b; };
-#pragma pack(pop)
-		//struct { uint8_t A, R, G, B; };
-		struct { uint32_t Color; };
-	};
-};
-
-struct HSL
-{
-	static constexpr double HUE_UPPER_LIMIT = 240;
-
-	double a;
-	struct { double h, s, l; };
-
-	HSL(RGB rgb) : HSL(rgb.a, rgb.r, rgb.g, rgb.b) { }
-
-	HSL(uint8_t a, uint8_t r, uint8_t g, uint8_t b)
-	{
-		h = 0;
-		s = 0;
-		l = 0;
-
-		double M = 0.0, m = 0.0, c = 0.0;
-		M = max(max(r, g), b);
-		m = min(min(r, g), b);
-		c = M - m;
-		l = 0.5 * (M + m);
-		if (c != 0.0)
-		{
-			if (M == r)
-			{
-				h = fmod(((g - b) / c), 6.0);
-			}
-			else if (M == g)
-			{
-				h = ((b - r) / c) + 2.0;
-			}
-			else/*if(M==b)*/
-			{
-				h = ((r - g) / c) + 4.0;
-			}
-			h *= 60.0;
-			s = c / (1.0 - fabs(2.0 * l - 1.0));
-		}
-	}
-
-	RGB ToRGB()
-	{
-		double c = 0.0, m = 0.0, x = 0.0;
-		c = (1.0 - fabs(2 * l - 1.0)) * s;
-		m = 1.0 * (l - 0.5 * c);
-		x = c * (1.0 - fabs(fmod(h / 60.0, 2) - 1.0));
-
-		RGB ret;
-
-		if (h >= 0.0 && h < (HUE_UPPER_LIMIT / 6.0))
-		{
-			ret.Color = ARGB(a, c + m, x + m, m);
-		}
-		else if (h >= (HUE_UPPER_LIMIT / 6.0) && h < (HUE_UPPER_LIMIT / 3.0))
-		{
-			ret.Color = ARGB(a, x + m, c + m, m);
-		}
-		else if (h < (HUE_UPPER_LIMIT / 3.0) && h < (HUE_UPPER_LIMIT / 2.0))
-		{
-			ret.Color = ARGB(a, m, c + m, x + m);
-		}
-		else if (h >= (HUE_UPPER_LIMIT / 2.0)
-			&& h < (2.0f * HUE_UPPER_LIMIT / 3.0))
-		{
-			ret.Color = ARGB(a, m, x + m, c + m);
-		}
-		else if (h >= (2.0 * HUE_UPPER_LIMIT / 3.0)
-			&& h < (5.0 * HUE_UPPER_LIMIT / 6.0))
-		{
-			ret.Color = ARGB(a, x + m, m, c + m);
-		}
-		else if (h >= (5.0 * HUE_UPPER_LIMIT / 6.0) && h < HUE_UPPER_LIMIT)
-		{
-			ret.Color = ARGB(a, c + m, m, x + m);
-		}
-		else
-		{
-			ret.Color = ARGB(a, m, m, m);
-		}
-
-		return ret;
-	}
-};
+extern RGMain* g_RGMain;
 
 struct rgb
 {

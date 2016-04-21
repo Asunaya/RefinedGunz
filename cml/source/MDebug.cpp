@@ -45,7 +45,7 @@ static std::mutex LogMutex;
 
 void __cdecl MLog(const char *pFormat,...)
 {
-	std::lock_guard<std::mutex> lock(LogMutex);
+	//std::lock_guard<std::mutex> lock(LogMutex);
 
 	char temp[16*1024];
 

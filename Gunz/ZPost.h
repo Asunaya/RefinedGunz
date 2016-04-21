@@ -975,7 +975,7 @@ inline void ZPostVoiceChat(const void *Buffer, int Length)
 template <size_t size>
 inline void ZPostCreateAccount(const char *Username, const unsigned char (&HashedPassword)[size], const char *Email)
 {
-	ZPOSTCMD3(MC_MATCH_REQUEST_CREATE_ACCOUNT, MCmdParamStr(szUsername), MCmdParamBlob(HashedPassword, sizeof(HashedPassword)), MCmdParamStr(szEmail));
+	ZPOSTCMD3(MC_MATCH_REQUEST_CREATE_ACCOUNT, MCmdParamStr(Username), MCmdParamBlob(HashedPassword, sizeof(HashedPassword)), MCmdParamStr(Email));
 }
 
 #undef VEC

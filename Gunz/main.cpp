@@ -108,7 +108,7 @@ RRESULT OnCreate(void *pParam)
 {
 	g_App.PreCheckArguments();
 
-	OnCreateDevice();
+	g_RGMain->OnCreateDevice();
 
 	RCreateLenzFlare("System/LenzFlare.xml");
 	RGetLenzFlare()->Initialize();
@@ -540,7 +540,7 @@ RRESULT OnRender(void *pParam)
 //		OutputDebugString(__buffer);
 	}
 
-	g_RGMain.OnRender();
+	g_RGMain->OnRender();
 
 //#endif
 
@@ -1110,13 +1110,6 @@ int PASCAL WinMain(HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline, int 
 		MLog("Invalid parameter detected in function %s.\nFile: %s, line: %d.\nExpression: %s.\n", function, file, line, expression);
 	});
 
-#ifdef SUPPORT_EXCEPTIONHANDLING
-	char szDumpFileName[256];
-	strcat(szDumpFileName, "Gunz.dmp");
-
-	__try{
-#endif
-
 	g_dwMainThreadID = GetCurrentThreadId();
 	
 #ifdef _MTRACEMEMORY
@@ -1147,6 +1140,8 @@ int PASCAL WinMain(HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline, int 
 
 	srand((unsigned int)time(nullptr));
 
+	g_RGMain = new RGMain;
+
 
 	mlog("Refined Gunz version %d launched. Build date: " __DATE__ " " __TIME__ "\n", RGUNZ_VERSION);
 
@@ -1165,6 +1160,8 @@ int PASCAL WinMain(HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline, int 
 	// Don't know why this is here
 	//UpgradeMrsFile();// mrs1 이라면 mrs2로 업그래이드 한다..
 #endif
+
+	//g_RGMain = new RGMain;
 
 	MSysInfoLog();
 
@@ -1304,13 +1301,6 @@ int PASCAL WinMain(HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline, int 
 	MShutdownTraceMemory();
 #endif
 	return nReturn;
-
-#ifdef SUPPORT_EXCEPTIONHANDLING
-	}
-	__except(CrashExceptionDump(GetExceptionInformation(), szDumpFileName)){
-		//HandleExceptionLog();
-	}
-#endif
 
 #ifdef _PUBLISH
 	if (Mutex != 0) CloseHandle(Mutex);

@@ -104,7 +104,7 @@ public:
 
 	ReplayVersion GetVersion();
 	void GetStageSetting(REPLAY_STAGE_SETTING_NODE &ret);
-	void GetDuelQueueInfo(MTD_DuelQueueInfo* QueueInfo);
+	void GetDuelQueueInfo(MTD_DuelQueueInfo* QueueInfo = nullptr);
 	std::vector<ReplayPlayerInfo> GetCharInfo();
 	template <typename T>
 	bool GetCommands(T ForEachCommand);

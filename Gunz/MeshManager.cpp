@@ -7,38 +7,15 @@
 
 using namespace boost::property_tree::detail;
 
-MeshManager *g_pMeshManager;
-
-MeshManager::MeshManager()
+void MeshManager::LoadParts(std::vector<unsigned char>& File)
 {
-	MZFile File;
-
-	if (!File.Open("system/parts_index.xml", g_pFileSystem))
-	{
-		MLog("failed to open parts_index.xml\n");
-		return;
-	}
-
-	int FileLength = File.GetLength();
-
-	if (FileLength <= 0)
-	{
-		MLog("Invalid parts_index.xml length\n");
-		return;
-	}
-
-	std::string InflatedFile;
-	InflatedFile.resize(FileLength);
-
-	File.Read(&InflatedFile[0], FileLength);
-
 	std::list<std::string> FileList;
 
 	rapidxml::xml_document<> parts;
 
 	try
 	{
-		parts.parse<rapidxml::parse_declaration_node | rapidxml::parse_no_data_nodes>(&InflatedFile[0]);
+		parts.parse<rapidxml::parse_declaration_node | rapidxml::parse_no_data_nodes>((char*)&File[0]);
 	}
 	catch (rapidxml::parse_error &e)
 	{
@@ -260,4 +237,31 @@ bool MeshManager::RemoveObject(void *pObj)
 	}
 
 	return false;
+}
+
+void MeshManager::GetAsync(const char *szMeshName, const char *szNodeName, void* Obj, std::function<void(RMeshNode*)> Callback)
+{
+	{
+		std::lock_guard<std::mutex> lock(ObjQueueMutex);
+
+		QueuedObjs.push_back(Obj);
+	}
+
+	std::string PersistentMesh(szMeshName), PersistentNode(szNodeName);
+
+	extern void AddTask(std::function<void()>);
+
+	AddTask([this, PersistentMesh, PersistentNode, Obj, Callback]() {
+		auto ret = Get(PersistentMesh.c_str(), PersistentNode.c_str());
+
+		extern void Invoke(std::function<void()>);
+
+		Invoke([=]() {
+			// We want to make sure the object hasn't been destroyed between the GetAsync call and the invokation.
+			std::lock_guard<std::mutex> lock(ObjQueueMutex);
+
+			if (RemoveObject(Obj))
+				Callback(ret);
+		});
+	});
 }

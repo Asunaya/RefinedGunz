@@ -117,10 +117,12 @@ VoiceChat::~VoiceChat()
 {
 #ifdef WAVEIN
 	waveInClose(WaveIn);
+#else
+	if(pOpusEncoder)
+		opus_encoder_destroy(pOpusEncoder);
+	if(pOpusDecoder)
+		opus_decoder_destroy(pOpusDecoder);
 #endif
-
-	opus_encoder_destroy(pOpusEncoder);
-	opus_decoder_destroy(pOpusDecoder);
 }
 
 void VoiceChat::StartRecording()
@@ -192,7 +194,7 @@ void VoiceChat::StopRecording()
 	Recording = false;
 }
 
-void VoiceChat::OnReceiveVoiceChat(ZCharacter *Char, const BYTE *Buffer, int Length)
+void VoiceChat::OnReceiveVoiceChat(ZCharacter *Char, const uint8_t *Buffer, int Length)
 {
 	if (!CanDecode)
 		return;
@@ -239,9 +241,9 @@ void VoiceChat::OnReceiveVoiceChat(ZCharacter *Char, const BYTE *Buffer, int Len
 			//return;
 		}
 
-		it = MicStreams.insert({ Char, MicStuff(Stream) }).first;
+		it = MicStreams.emplace(Char, MicStuff(Stream)).first;
 
-		MLog("Inserted stream, size %d\n", MicStreams.size());
+		//MLog("Inserted stream, size %d\n", MicStreams.size());
 
 		return;
 	}
@@ -316,7 +318,7 @@ void VoiceChat::ThreadLoop()
 			ZPostVoiceChat(EncodedFrame.data(), Size);
 		};
 
-		g_RGMain.Invoke(lambda, 2);
+		g_RGMain->Invoke(lambda, 2);
 
 		CurrentBufferIndex = (CurrentBufferIndex + 1) % NumBuffers;
 
@@ -357,7 +359,7 @@ int VoiceChat::RecordCallback(const void *inputBuffer, void *outputBuffer,
 		ZPostVoiceChat(EncodedFrame.data(), Size);
 	};
 
-	g_RGMain.Invoke(lambda);
+	g_RGMain->Invoke(lambda);
 
 	return paContinue;
 }

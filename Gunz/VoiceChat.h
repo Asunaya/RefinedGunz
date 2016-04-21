@@ -24,7 +24,7 @@ public:
 	void StartRecording();
 	void StopRecording();
 
-	void OnReceiveVoiceChat(ZCharacter *Char, const BYTE *Buffer, int Length);
+	void OnReceiveVoiceChat(ZCharacter *Char, const uint8_t *Buffer, int Length);
 
 	void OnDestroyCharacter(ZCharacter *Char);
 
@@ -63,8 +63,8 @@ private:
 	int CurrentBufferIndex = 0;
 #endif
 
-	OpusEncoder *pOpusEncoder;
-	OpusDecoder *pOpusDecoder;
+	OpusEncoder *pOpusEncoder = nullptr;
+	OpusDecoder *pOpusDecoder = nullptr;
 
 	//MicStream test;
 
@@ -107,5 +107,3 @@ private:
 
 	IDirect3DTexture9* SpeakerTexture;
 };
-
-extern VoiceChat g_VoiceChat;

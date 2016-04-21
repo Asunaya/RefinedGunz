@@ -169,7 +169,7 @@ MMatchClient::MMatchClient()
 	SetAgentPeerPort(7776);
 
 	m_szServerName[0] = 0;
-	m_nServerMode = MSM_NORMAL;
+	m_nServerMode = MSM_NORMAL_;
 //	m_SafeUDP.Create(true, MATCHCLIENT_DEFAULT_UDP_PORT);
 }
 

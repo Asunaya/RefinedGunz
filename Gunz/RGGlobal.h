@@ -5,7 +5,7 @@ inline void cprint(...)
 }
 
 template <typename T, size_t size>
-inline size_t ArraySize(T(&)[size])
+inline constexpr size_t ArraySize(T(&)[size])
 {
 	return size;
 }
@@ -95,6 +95,10 @@ class D3DPtr
 {
 public:
 	T* ptr = nullptr;
+
+	D3DPtr() : ptr(nullptr)
+	{
+	}
 
 	D3DPtr(T* p) : ptr(p)
 	{

@@ -15,7 +15,7 @@ public:
 		{
 			std::lock_guard<std::mutex> lock(QueueMutex);
 			Tasks.push(Task);
-			bNotified = true;
+			Notified = true;
 		}
 
 		cv.notify_one();
@@ -27,9 +27,7 @@ private:
 	std::mutex QueueMutex;
 	std::queue<std::function<void()>> Tasks;
 	std::condition_variable cv;
-	bool bNotified = false;
+	bool Notified = false;
 
 	std::thread thr;
 };
-
-extern TaskManager g_TaskManager;

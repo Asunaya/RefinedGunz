@@ -367,7 +367,7 @@ void ZGameClient::OnChannelResponseJoin(const MUID& uidChannel, MCHANNEL_TYPE nC
 
 	switch (GetServerMode())
 	{
-	case MSM_NORMAL:
+	case MSM_NORMAL_:
 		{
 //			wsprintf(szText, "레벨제한을 원치 않으시면 자유채널을 이용해 주시기 바랍니다.");
 			wsprintf( szText, 

@@ -283,6 +283,7 @@ public:
 
 				crypto_generichash(hashed_password, sizeof(hashed_password), (const unsigned char *)szPassword, strlen(szPassword), NULL, 0);
 
+				ZPostCreateAccount(szUsername, hashed_password, szEmail);
 			};
 
 			if (!g_bConnected)
@@ -2288,7 +2289,7 @@ MListener* ZGetReplayFileListBoxListener( void)
 				if (pFindWidget != NULL)
 					pFindWidget->Enable(true);
 
-				g_RGMain.OnReplaySelected();
+				g_RGMain->OnReplaySelected();
 
                 return true;
 			}

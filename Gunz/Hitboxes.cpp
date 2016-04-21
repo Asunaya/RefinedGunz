@@ -4,16 +4,14 @@
 #include "Rules.h"
 #include "ZConfiguration.h"
 
-HitboxManager *g_pHitboxManager;
-
 static const int nSlashVertices = 17;
 static const int nMassiveVertices = 100;
 static const int nVBOffset[] = { 0, nSlashVertices, nSlashVertices + nMassiveVertices };
 
-HitboxManager::HitboxManager()
+void HitboxManager::Create()
 {
 	static const int size = (nSlashVertices + nMassiveVertices + 2) * sizeof(Vertex);
-	if (FAILED(RGetDevice()->CreateVertexBuffer(size, 0, D3DFVF_XYZ, D3DPOOL_MANAGED, &pVB, NULL)))
+	if (FAILED(RGetDevice()->CreateVertexBuffer(size, 0, D3DFVF_XYZ, D3DPOOL_MANAGED, &pVB.ptr, NULL)))
 	{
 		MLog("HitboxManager::HitboxManager() - Failed to create vertex buffer\n");
 		return;
@@ -74,11 +72,6 @@ HitboxManager::HitboxManager()
 		MLog("HitboxManager::HitboxManager() - Failed to unlock vertex buffer\n");
 		return;
 	}
-}
-
-HitboxManager::~HitboxManager()
-{
-	SAFE_RELEASE(pVB);
 }
 
 void HitboxManager::OnSlash(const D3DXVECTOR3 &Pos, const D3DXVECTOR3 &Dir)
@@ -158,44 +151,6 @@ void HitboxManager::Draw()
 	RGetDevice()->SetFVF(D3DFVF_XYZ);
 
 	RGetDevice()->SetStreamSource(0, pVB, 0, sizeof(Vertex));
-
-	/*for (auto it = List.begin(); it != List.end(); it++)
-	{
-		auto &val = *it;
-
-		float t = ZGetGame()->GetTime();
-
-		if (val.Time + 5 < t)
-		{
-			it = List.erase(it);
-			if (it == List.end())
-				break;
-		}
-
-		int alpha = int((1 - ((t - val.Time) / 5)) * 0x40);
-		DWORD Color = (alpha << 24) | 0xFF0000;
-		RGetDevice()->SetTextureStageState(0, D3DTSS_CONSTANT, Color);
-
-		RGetDevice()->SetTransform(D3DTS_WORLD, &val.World);
-
-		if (val.type == SLASH)
-		{
-			RGetDevice()->DrawPrimitive(D3DPT_TRIANGLEFAN, 0, nSlashVertices - 3);
-			RGetDevice()->SetTextureStageState(0, D3DTSS_CONSTANT, 0xFFFF0000);
-			RGetDevice()->DrawPrimitive(D3DPT_LINESTRIP, 0, nSlashVertices - 1);
-		}
-		else if (val.type == MASSIVE)
-		{
-			RGetDevice()->DrawPrimitive(D3DPT_TRIANGLEFAN, nSlashVertices, nMassiveVertices - 3);
-			RGetDevice()->SetTextureStageState(0, D3DTSS_CONSTANT, 0xFFFF0000);
-			RGetDevice()->DrawPrimitive(D3DPT_LINESTRIP, nSlashVertices, nMassiveVertices - 1);
-		}
-		else if (val.type == POS)
-		{
-			RGetDevice()->SetTextureStageState(0, D3DTSS_CONSTANT, 0xFF000080);
-			RGetDevice()->DrawPrimitive(D3DPT_LINESTRIP, nSlashVertices + nMassiveVertices, 1);
-		}
-	}*/
 
 	for (auto &it : *ZGetCharacterManager())
 	{

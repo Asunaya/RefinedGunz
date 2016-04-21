@@ -3277,13 +3277,13 @@ bool ZCharacter::Create(const MTD_CharInfo& CharInfo)
 		switch (pDesc->m_nID)
 		{
 		case 8501:
-			g_RGMain.SetSwordColor(GetUID(), 0xFFFFB7D5);
+			g_RGMain->SetSwordColor(GetUID(), 0xFFFFB7D5);
 			break;
 		case 8502:
-			g_RGMain.SetSwordColor(GetUID(), 0xFF00FF00);
+			g_RGMain->SetSwordColor(GetUID(), 0xFF00FF00);
 			break;
 		case 8503:
-			g_RGMain.SetSwordColor(GetUID(), 0xFF00FFFF);
+			g_RGMain->SetSwordColor(GetUID(), 0xFF00FFFF);
 			break;
 		}
 	}

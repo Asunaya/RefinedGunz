@@ -40,7 +40,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release LTCG|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v140_xp</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release LTCG|x64'" Label="Configuration">
@@ -104,6 +104,9 @@
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release LTCG|Win32'">$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release LTCG|Win32'">false</LinkIncremental>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release LTCG|x64'">false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release LTCG|Win32'">
+    <IncludePath>$(WindowsSdk_71A_IncludePath);$(VC_IncludePath);</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -233,7 +236,7 @@ rem call copy_share.bat
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <OmitFramePointers>true</OmitFramePointers>
-      <AdditionalIncludeDirectories>../sdk/dx9/include;../CSCommon/Include;../SafeUDP/Include;../CML/Include;../RealSpace2/Include;../MAI/Include;../RealSpace/Include;../Mint2/Include;../RealSound/Include;../MDatabase/Include/;../MCountryFilter/Include;../libsodium/include;../opus-1.1.1/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../CSCommon/Include;../SafeUDP/Include;../CML/Include;../RealSpace2/Include;../MAI/Include;../RealSpace/Include;../Mint2/Include;../RealSound/Include;../MDatabase/Include/;../MCountryFilter/Include;../libsodium/include;../opus-1.1.1/include;%(AdditionalIncludeDirectories);../sdk/dx9/include;</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;LOCALE_US;_LOCATOR;_PUBLISH;NO_WARN_MBCS_MFC_DEPRECATION;LTCG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -312,8 +315,6 @@ rem call copy_share.bat
   <ItemGroup>
     <ClInclude Include="..\cml\Include\SafeString.h" />
     <ClInclude Include="Draw.h" />
-    <ClInclude Include="Events.h" />
-    <ClInclude Include="FuncList.h" />
     <ClInclude Include="Hitboxes.h" />
     <ClInclude Include="MeshManager.h" />
     <ClInclude Include="NewChat.h" />
@@ -545,8 +546,6 @@ rem call copy_share.bat
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Draw.cpp" />
-    <ClCompile Include="Events.cpp" />
-    <ClCompile Include="FuncList.cpp" />
     <ClCompile Include="Hitboxes.cpp" />
     <ClCompile Include="MeshManager.cpp" />
     <ClCompile Include="NewChat.cpp" />

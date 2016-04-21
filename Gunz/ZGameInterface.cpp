@@ -73,7 +73,6 @@
 #include "ZGameInput.h"
 #include "ZOptionInterface.h"
 
-#include "Events.h"
 #include "NewChat.h"
 #include "ReplayControl.h"
 #include "RGMain.h"
@@ -508,7 +507,7 @@ bool ZGameInterface::InitInterface(const char* szSkinName, ZLoadingProgress *pLo
 	}
 	END_("IDL resources");
 
-	g_RGMain.OnInitInterface(m_IDLResource);
+	g_RGMain->OnInitInterface(m_IDLResource);
 
 // 다이알로그 look 세팅
 //	MBFrameLook* pFrameLook = (MBFrameLook*)m_IDLResource.FindFrameLook("Custom1FrameLook");
@@ -1149,7 +1148,7 @@ bool ZGameInterface::OnGameCreate(void)
 		m_CombatMenu.EnableItem(ZCombatMenu::ZCMI_BATTLE_EXIT, true);
 	}
 
-	g_OnGameCreate.CallAll();
+	g_RGMain->OnGameCreate();
 
 	return true;
 }
@@ -2863,7 +2862,7 @@ void ZGameInterface::OnDraw(MDrawContext *pDC)
 		{
 			OnDrawStateLobbyNStage(pDC);
 			if(GetState() == GUNZ_LOBBY)
-				g_RGMain.OnDrawLobby();
+				g_RGMain->OnDrawLobby();
 		}
 		break;
 	case GUNZ_CHARSELECTION:
@@ -3337,29 +3336,6 @@ void ZGameInterface::ChangeWeapon(ZChangeWeaponType nType)
 	m_pMyCharacter->ChangeWeapon((MMatchCharItemParts)nParts);
 }
 
-/*
-void ZGameInterface::ChangeWeapon(int key)
-{
-//7번8번키등록
-int mode = 0;
-
-if(key=='7') mode = 0;
-else if(key=='8') mode = 1;
-else if(key=='9') mode = 2;
-else if(key=='0') mode = 3;
-else return;
-
-//	g_select_weapon = mode;
-//	g_weapon_change = true;
-
-// -1 remove ..
-
-g_pGame->m_pMyCharacter->OnChangeWeapon(mode);
-
-ZPostChangeWeapon(mode);
-}
-*/
-
 void ZGameInterface::OnGameUpdate(float fElapsed)
 {
 	__BP(12,"ZGameInterface::OnGameUpdate");
@@ -3394,7 +3370,6 @@ bool ZGameInterface::Update(float fElapsed)
 	if ( m_pBackground && ( ( GetState() == GUNZ_CHARSELECTION) || ( GetState() == GUNZ_CHARCREATION)))
 		m_pBackground->OnUpdate( fElapsed);
 
-	// 테스트로 리플레이는 다시 처음부터 시작하기 위해 이렇게 만들었다.
 	if (GetState() == GUNZ_LOBBY)
 	{
 		if (g_bTestFromReplay == true) 
@@ -3460,26 +3435,10 @@ void ZGameInterface::OnResetCursor()
 
 void ZGameInterface::SetCursorEnable(bool bEnable)
 {
-	//	_RPT1(_CRT_WARN,"cursor %d\n",bEnable);
-	
 	if(m_bCursor==bEnable) return;
 
 	m_bCursor = bEnable;
 	MCursorSystem::Show(bEnable);
-
-	/*
-	if(!bEnable)
-	{
-	ShowCursor(FALSE);
-	}else
-	ShowCursor(TRUE);
-	*/
-
-/*	if(m_pCursorSurface)	// RAONHAJE Mouse Cursor HardwareDraw
-	{
-		RGetDevice()->SetCursorProperties(0,0,m_pCursorSurface);
-		RGetDevice()->ShowCursor(bEnable);
-	}	*/
 }
 
 void ZGameInterface::UpdateCursorEnable()
@@ -3489,7 +3448,9 @@ void ZGameInterface::UpdateCursorEnable()
 		(GetCombatInterface() && GetCombatInterface()->IsShowResult()) ||
 		IsMenuVisible() || 
 		m_pMsgBox->IsVisible() ||
-		m_pConfirmMsgBox->IsVisible() )
+		m_pConfirmMsgBox->IsVisible() ||
+		g_RGMain->IsCursorEnabled()
+		)
 		SetCursorEnable(true);
 	else
 	{

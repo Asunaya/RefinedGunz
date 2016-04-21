@@ -141,7 +141,7 @@ void LoadRGCommands(ZChatCmdManager &CmdManager)
 			return;
 		}
 
-		bool b = g_VoiceChat.MutePlayer(ret.second->GetUID());
+		bool b = g_RGMain->MutePlayer(ret.second->GetUID());
 
 		ZChatOutputF("%s has been %s", ret.second->GetUserNameA(), b ? "muted" : "unmuted");
 	}, CCF_ALL, 1, 1, true, "/swordcolor <AARRGGBB>", "");

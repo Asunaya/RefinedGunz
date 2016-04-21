@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "NewChat.h"
 #include "RGMain.h"
-#include "Events.h"
 #include "ZCharacterManager.h"
 #include "ZInput.h"
 
@@ -128,6 +127,8 @@ void Chat::EnableInput(bool bEnable, bool bToTeam){
 		pFromMsg = 0;
 		pToMsg = 0;
 	}
+
+	ZGetGameInterface()->SetCursorEnable(bEnable);
 
 	ZPostPeerChatIcon(bEnable);
 }
@@ -273,7 +274,7 @@ void Chat::CalcLineBreaks(ChatLine &cl){
 }
 
 void Chat::Scale(double fWidthRatio, double fHeightRatio){
-	MLog("Scale: %f, %f\n", fWidthRatio, fHeightRatio);
+	//MLog("Scale: %f, %f\n", fWidthRatio, fHeightRatio);
 	Border.x1 *= fWidthRatio;
 	Border.x2 *= fWidthRatio;
 	Border.y1 *= fHeightRatio;
@@ -1369,8 +1370,8 @@ void Chat::EndDraw()
 }
 
 void Chat::ResetFonts(){
-	SAFE_DESTROY(pFont.get());
-	SAFE_DESTROY(pItalicFont.get());
+	SafeDestroy(pFont.get());
+	SafeDestroy(pItalicFont.get());
 
 	pFont->Create("NewChatFont", strFont.c_str(), int(float(nFontSize) / 1080 * RGetScreenHeight() + 0.5), 1, true);
 	pItalicFont->Create("NewChatItalicFont", strFont.c_str(), int(float(nFontSize) / 1080 * RGetScreenHeight() + 0.5), 1, true, true);

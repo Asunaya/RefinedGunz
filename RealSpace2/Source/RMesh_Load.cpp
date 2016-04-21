@@ -19,8 +19,6 @@
 
 #include "RShaderMgr.h"
 
-#include "MeshManager.h"
-
 #ifndef _PUBLISH
 
 #define __BP(i,n)	MBeginProfile(i,n);
@@ -98,7 +96,8 @@ bool RMesh::ReadXmlElement(MXmlElement* PNode,char* Path)
 			m_ani_mgr.MakeListMap( (int)eq_weapon_end );//최대모션타잎만큼 만들어준다..
 		}
 		else if(strcmp(NodeName, "AddParts")==0) {
-			if(g_pMeshManager)
+			extern bool IsDynamicResourceLoad();
+			if(IsDynamicResourceLoad())
 				continue;
 
 			if(RMesh::m_parts_mesh_loading_skip==0) {
