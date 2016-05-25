@@ -146,7 +146,7 @@ public:
 	/// @param pPM		[in] 커맨드 매니져(MCommandDesc를 enum할 수 있다.)
 	/// @return			성공 여부
 	template <typename T = std::allocator<uint8_t>>
-	bool SetData(char* pData, MCommandManager* pCM, unsigned short nDataLen=USHRT_MAX, bool ReadSerial = true, T& Alloc = T());
+	bool SetData(const char* pData, MCommandManager* pCM, unsigned short nDataLen=USHRT_MAX, bool ReadSerial = true, T& Alloc = T());
 
 	int GetSize();
 };
@@ -160,7 +160,7 @@ auto MakeParam(AllocT& Alloc, ArgsT&&... Args)
 }
 
 template <typename T>
-bool MCommand::SetData(char* pData, MCommandManager* pCM, unsigned short nDataLen, bool ReadSerial, T& Alloc)
+bool MCommand::SetData(const char* pData, MCommandManager* pCM, unsigned short nDataLen, bool ReadSerial, T& Alloc)
 {
 	Reset();
 

@@ -203,6 +203,8 @@ inline std::vector<ReplayPlayerInfo> ZReplayLoader::GetCharInfo()
 		};
 #undef COPY_CHARINFO
 
+#define READ_CHARINFO(type) do { type info; Read(info); CopyCharInfo(info); } while(false)
+
 		if (Version.Server == SERVER_OFFICIAL)
 		{
 			if (Version.nVersion <= 5)
@@ -221,39 +223,33 @@ inline std::vector<ReplayPlayerInfo> ZReplayLoader::GetCharInfo()
 			}
 			else if (Version.nVersion == 6)
 			{
-				MTD_CharInfo_V6 oldinfo;
-				Read(oldinfo);
-				CopyCharInfo(oldinfo);
+				READ_CHARINFO(MTD_CharInfo_V6);
 			}
 			else if (Version.nVersion == 11)
 			{
-				MTD_CharInfo_V11 oldinfo;
-				Read(oldinfo);
-				CopyCharInfo(oldinfo);
+				READ_CHARINFO(MTD_CharInfo_V11);
 			}
 		}
 		else if (Version.Server == SERVER_FREESTYLE_GUNZ)
 		{
-			if (Version.nVersion == 9)
-			{
-				MTD_CharInfo_FG_V9 charinfo;
-				Read(charinfo);
-				CopyCharInfo(charinfo);
-			}
-			else if (Version.nVersion == 7)
+			if (Version.nVersion == 7)
 			{
 				if (Version.nSubVersion == 0)
 				{
-					MTD_CharInfo_FG_V7_0 charinfo;
-					Read(charinfo);
-					CopyCharInfo(charinfo);
+					READ_CHARINFO(MTD_CharInfo_FG_V7_0);
 				}
 				else if (Version.nSubVersion == 1)
 				{
-					MTD_CharInfo_FG_V7_1 charinfo;
-					Read(charinfo);
-					CopyCharInfo(charinfo);
+					READ_CHARINFO(MTD_CharInfo_FG_V7_1);
 				}
+			}
+			else if (Version.nVersion = 8)
+			{
+				READ_CHARINFO(MTD_CharInfo_FG_V8);
+			}
+			else if (Version.nVersion == 9)
+			{
+				READ_CHARINFO(MTD_CharInfo_FG_V9);
 			}
 
 			CharInfo.nEquipedItemDesc[MMCIP_MELEE] = 2; // Rusty Sword
@@ -262,11 +258,12 @@ inline std::vector<ReplayPlayerInfo> ZReplayLoader::GetCharInfo()
 		{
 			Read(CharInfo);
 		}
+#undef READ_CHARINFO
 
 		ZCharacterReplayState CharState;
 
 #define COPY_CHARSTATE(member) CharState.member = src.member
-		auto CopyCharState = [&](auto src)
+		auto CopyCharState = [&](const auto& src)
 		{
 			COPY_CHARSTATE(UID);
 			COPY_CHARSTATE(Property);
@@ -285,28 +282,28 @@ inline std::vector<ReplayPlayerInfo> ZReplayLoader::GetCharInfo()
 		};
 #undef COPY_CHARSTATE
 
+#define READ_CHARSTATE(type) do { type state; Read(state); CopyCharState(state); } while (false)
+
 		if (Version.Server == SERVER_FREESTYLE_GUNZ)
 		{
 			if (Version.nVersion == 7)
 			{
 				if (Version.nSubVersion == 0)
 				{
-					ZCharacterReplayState_FG_V7_0 stuff;
-					Read(stuff);
-					CopyCharState(stuff);
+					READ_CHARSTATE(ZCharacterReplayState_FG_V7_0);
 				}
 				else
 				{
-					ZCharacterReplayState_FG_V7_1 stuff;
-					Read(stuff);
-					CopyCharState(stuff);
+					READ_CHARSTATE(ZCharacterReplayState_FG_V7_1);
 				}
+			}
+			else if (Version.nVersion == 8)
+			{
+				READ_CHARSTATE(ZCharacterReplayState_FG_V8);
 			}
 			else if (Version.nVersion == 9)
 			{
-				ZCharacterReplayState_FG_V9 stuff;
-				Read(stuff);
-				CopyCharState(stuff);
+				READ_CHARSTATE(ZCharacterReplayState_FG_V9);
 			}
 		}
 		else if (Version.Server == SERVER_REFINED_GUNZ)
@@ -319,15 +316,11 @@ inline std::vector<ReplayPlayerInfo> ZReplayLoader::GetCharInfo()
 			{
 				if (Version.nVersion == 11)
 				{
-					ZCharacterReplayState_Official_V11 OldState;
-					Read(OldState);
-					CopyCharState(OldState);
+					READ_CHARSTATE(ZCharacterReplayState_Official_V11);
 				}
 				else
 				{
-					ZCharacterReplayState_Official_V6 OldState;
-					Read(OldState);
-					CopyCharState(OldState);
+					READ_CHARSTATE(ZCharacterReplayState_Official_V6);
 				}
 			}
 			else
@@ -335,6 +328,7 @@ inline std::vector<ReplayPlayerInfo> ZReplayLoader::GetCharInfo()
 				Read(CharState);
 			}
 		}
+#undef READ_CHARSTATE
 
 		ret.push_back({ IsHero, CharInfo, CharState });
 	}
@@ -427,37 +421,37 @@ inline bool ZReplayLoader::FixCommand(MCommand& Command)
 			auto pbi = Param->GetPointer();
 
 			[pbi = (short*)pbi]
-		{
-			for (int i = 0; i < 3; i++)
 			{
-				pbi[8 + i] = pbi[11 + i];
-			}
-		}();
+				for (int i = 0; i < 3; i++)
+				{
+					pbi[8 + i] = pbi[11 + i];
+				}
+			}();
 
-		[pbi = (BYTE*)pbi]
-		{
-			for (int i = 0; i < 3; i++)
+			[pbi = (BYTE*)pbi]
 			{
-				pbi[22 + i] = pbi[28 + i];
-			}
-		}();
+				for (int i = 0; i < 3; i++)
+				{
+					pbi[22 + i] = pbi[28 + i];
+				}
+			}();
 
-		[pbi = (ZPACKEDBASICINFO*)pbi]
-		{
-			pbi->posz -= 125;
-			pbi->velx = 0;
-			pbi->vely = 0;
-			pbi->velz = 0;
-
-			ZBasicInfo bi;
-			pbi->Unpack(bi);
-
-			if (fabs(fabs(Magnitude(bi.direction)) - 1.f) > 0.001)
+			[pbi = (ZPACKEDBASICINFO*)pbi]
 			{
-				bi.direction = rvector(1, 0, 0);
-				pbi->Pack(bi);
-			}
-		}();
+				pbi->posz -= 125;
+				pbi->velx = 0;
+				pbi->vely = 0;
+				pbi->velz = 0;
+
+				ZBasicInfo bi;
+				pbi->Unpack(bi);
+
+				if (fabs(fabs(Magnitude(bi.direction)) - 1.f) > 0.001)
+				{
+					bi.direction = rvector(1, 0, 0);
+					pbi->Pack(bi);
+				}
+			}();
 		}
 	}
 
@@ -465,11 +459,8 @@ inline bool ZReplayLoader::FixCommand(MCommand& Command)
 }
 
 template <typename T>
-bool ZReplayLoader::GetCommands(T ForEachCommand, bool PersistentMCommands, ArrayView<u32>* WantedCommandIDs)
+bool ZReplayLoader::GetCommandsImpl(T fn, ArrayView<u32>* WantedCommandIDs)
 {
-	MCommand StackCommand;
-	u8 Stack[512];
-	stack_allocator<u8, ArraySize(Stack)> Alloc(Stack);
 	char CommandBuffer[1024];
 
 	float fGameTime;
@@ -508,27 +499,48 @@ bool ZReplayLoader::GetCommands(T ForEachCommand, bool PersistentMCommands, Arra
 			if (OuterContinue)
 				continue;
 		}
+		
+		fn(CommandBuffer, uidSender, fTime);
+	}
 
-		auto DoStuff = [&](MCommand& Command)
-		{
-			Command.m_Sender = uidSender;
+	return true;
+}
 
-			if (!FixCommand(Command))
-				return;
+template <typename T>
+bool ZReplayLoader::GetCommands(T ForEachCommand, bool PersistentMCommands, ArrayView<u32>* WantedCommandIDs)
+{
+	auto DoStuff = [&](MCommand& Command, const MUID& Sender, auto fTime)
+	{
+		Command.m_Sender = Sender;
 
-			ForEachCommand(&Command, fTime);
-		};
+		if (!FixCommand(Command))
+			return;
 
-		if (PersistentMCommands)
+		ForEachCommand(&Command, fTime);
+	};
+
+	if (PersistentMCommands)
+	{
+		auto Stuff = [&](const char *CommandBuffer, const MUID& Sender, auto fTime)
 		{
 			MCommand* Command = new MCommand;
 
 			if (!CreateCommandFromStream(CommandBuffer, *Command))
-				continue;
+				return;
 
-			DoStuff(*Command);
-		}
-		else
+			DoStuff(*Command, Sender, fTime);
+		};
+
+		if (!GetCommandsImpl(Stuff, WantedCommandIDs))
+			return false;
+	}
+	else
+	{
+		MCommand StackCommand;
+		u8 Stack[512];
+		stack_allocator<u8, ArraySize(Stack)> Alloc(Stack);
+
+		auto Stuff = [&](const char *CommandBuffer, const MUID& Sender, auto fTime)
 		{
 			auto ClearStackCommandParams = [&]()
 			{
@@ -572,16 +584,20 @@ bool ZReplayLoader::GetCommands(T ForEachCommand, bool PersistentMCommands, Arra
 				StackCommand.m_Params.clear();
 			}
 
-			if (!CreateCommandFromStream(CommandBuffer, StackCommand, Alloc))
+			if (CreateCommandFromStream(CommandBuffer, StackCommand, Alloc))
+			{
+				DoStuff(StackCommand, Sender, fTime);
+			}
+			else
 			{
 				//MLog("Failed to read command ID %d, total size %d\n", *(u16 *)(CommandBuffer + sizeof(u16)), *(u16*)CommandBuffer);
-				ClearStackCommandParams();
-				continue;
 			}
 
-			DoStuff(StackCommand);
 			ClearStackCommandParams();
-		}
+		};
+
+		if (!GetCommandsImpl(Stuff, WantedCommandIDs))
+			return false;
 	}
 
 	return true;

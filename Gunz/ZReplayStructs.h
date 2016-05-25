@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ZCharacterStructs.h"
+
 struct REPLAY_STAGE_SETTING_NODE_OLD
 {
 	MUID				uidStage;
@@ -35,7 +37,7 @@ struct REPLAY_STAGE_SETTING_NODE_V11
 {
 	MUID				uidStage;
 	char				szMapName[32];
-	char unk[32];
+	char				unk[32];
 	char				nMapIndex;
 	MMATCH_GAMETYPE		nGameType;
 	int					nRoundMax;
@@ -201,7 +203,52 @@ struct MTD_CharInfo_FG_V7_1
 
 	int					nDTLastWeekGrade;
 
-	__int64				uidEquipedItem[22];
+	int64_t				uidEquipedItem[22];
+	unsigned long int	nEquipedItemCount[22];
+	unsigned long int	nEquipedItemRarity[22];
+	unsigned long int	nEquipedItemLevel[22];
+};
+
+struct MTD_CharInfo_FG_V8
+{
+	char				szName[32];
+	char				szClanName[16];
+	MMatchClanGrade		nClanGrade;
+	unsigned short		nClanContPoint;
+	char				nCharNum;
+	unsigned short		nLevel;
+	char				nSex;
+	char				nHair;
+	char				nFace;
+	unsigned long int	nXP;
+	int					nBP;
+	float				fBonusRate;
+	unsigned short		nPrize;
+	unsigned short		nHP;
+	unsigned short		nAP;
+	unsigned short		nMaxWeight;
+	unsigned short		nSafeFalls;
+	unsigned short		nFR;
+	unsigned short		nCR;
+	unsigned short		nER;
+	unsigned short		nWR;
+
+	// 아이템 정보
+	unsigned long int	nEquipedItemDesc[22];
+
+	// account 의 정보
+	MMatchUserGradeID	nUGradeID;
+
+	// ClanCLID
+	unsigned int		nClanCLID;
+
+	// 지난주 듀얼토너먼트 등급
+	int					nDTLastWeekGrade;
+
+	uint32_t unk[6];
+
+	// 아이템 정보 추가
+	int64_t				uidEquipedItem[22];
 	unsigned long int	nEquipedItemCount[22];
 	unsigned long int	nEquipedItemRarity[22];
 	unsigned long int	nEquipedItemLevel[22];
@@ -246,7 +293,7 @@ struct MTD_CharInfo_FG_V9
 	uint32_t unk[6];
 
 	// 아이템 정보 추가
-	__int64				uidEquipedItem[22];
+	int64_t				uidEquipedItem[22];
 	unsigned long int	nEquipedItemCount[22];
 	unsigned long int	nEquipedItemRarity[22];
 	unsigned long int	nEquipedItemLevel[22];
@@ -259,8 +306,6 @@ struct BulletInfo
 	int Clip;
 	int Magazine;
 };
-
-#include "ZCharacterStructs.h"
 
 template<size_t NumItems>
 struct ZCharacterReplayStateImpl
@@ -283,18 +328,29 @@ struct ZCharacterReplayStateImpl
 	bool HidingAdmin;
 };
 
-typedef ZCharacterReplayStateImpl<MMCIP_END> ZCharacterReplayState;
-typedef ZCharacterReplayStateImpl<17> ZCharacterReplayState_FG_V7_0;
-typedef ZCharacterReplayStateImpl<22> ZCharacterReplayState_FG_V7_1;
-typedef ZCharacterReplayStateImpl<24> ZCharacterReplayState_FG_V9;
-typedef ZCharacterReplayStateImpl<17> ZCharacterReplayState_Official_V6;
-typedef ZCharacterReplayStateImpl<34> ZCharacterReplayState_Official_V11;
+using ZCharacterReplayState = ZCharacterReplayStateImpl<MMCIP_END>;
+using ZCharacterReplayState_FG_V7_0 = ZCharacterReplayStateImpl<17>;
+using ZCharacterReplayState_FG_V7_1 = ZCharacterReplayStateImpl<22>;
+using ZCharacterReplayState_FG_V8 = ZCharacterReplayStateImpl<23>;
+using ZCharacterReplayState_FG_V9 = ZCharacterReplayStateImpl<24>;
+using ZCharacterReplayState_Official_V6 = ZCharacterReplayStateImpl<17>;
+using ZCharacterReplayState_Official_V11 = ZCharacterReplayStateImpl<34>;
 
-#pragma pack(pop)
-
-struct ReplayPlayerInfo
+template <typename CharInfo, typename ReplayState>
+struct ReplayPlayerInfoImpl
 {
 	bool IsHero;
-	MTD_CharInfo Info;
-	ZCharacterReplayState State;
+	CharInfo Info;
+	ReplayState State;
 };
+
+using ReplayPlayerInfo = ReplayPlayerInfoImpl<MTD_CharInfo, ZCharacterReplayState>;
+
+using ReplayPlayerInfo_FG_V7_0 = ReplayPlayerInfoImpl<MTD_CharInfo_FG_V7_0, ZCharacterReplayState_FG_V7_0>;
+using ReplayPlayerInfo_FG_V7_1 = ReplayPlayerInfoImpl<MTD_CharInfo_FG_V7_1, ZCharacterReplayState_FG_V7_1>;
+using ReplayPlayerInfo_FG_V8 = ReplayPlayerInfoImpl<MTD_CharInfo_FG_V8, ZCharacterReplayState_FG_V8>;
+using ReplayPlayerInfo_FG_V9 = ReplayPlayerInfoImpl<MTD_CharInfo_FG_V9, ZCharacterReplayState_FG_V9>;
+using ReplayPlayerInfo_Official_V6 = ReplayPlayerInfoImpl<MTD_CharInfo_V6, ZCharacterReplayState_Official_V6>;
+using ReplayPlayerInfo_Official_V11 = ReplayPlayerInfoImpl<MTD_CharInfo_V11, ZCharacterReplayState_Official_V11>;
+
+#pragma pack(pop)

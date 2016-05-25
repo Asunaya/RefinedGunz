@@ -117,10 +117,12 @@ private:
 	template <typename T>
 	bool TryRead(T& Obj);
 
+	template <typename T>
+	bool GetCommandsImpl(T fn, ArrayView<u32>* WantedCommandIDs);
 	template <typename T = std::allocator<uint8_t>>
-	bool CreateCommandFromStream(char* pStream, MCommand& Command, T& Alloc = T());
+	bool CreateCommandFromStream(const char* pStream, MCommand& Command, T& Alloc = T());
 	bool FixCommand(MCommand& Command);
-	static bool CreateCommandFromStreamVersion2(char* pStream, MCommand& Command);
-	static bool ParseVersion2Command(char* pStream, MCommand* pCmd);
-	static MCommandParameter* MakeVersion2CommandParameter(MCommandParameterType nType, char* pStream, unsigned short int* pnDataCount);
+	static bool CreateCommandFromStreamVersion2(const char* pStream, MCommand& Command);
+	static bool ParseVersion2Command(const char* pStream, MCommand* pCmd);
+	static MCommandParameter* MakeVersion2CommandParameter(MCommandParameterType nType, const char* pStream, unsigned short int* pnDataCount);
 };

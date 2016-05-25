@@ -32,6 +32,7 @@ static void CreatePlayers(const std::vector<ReplayPlayerInfo>& Players)
 			Char->Load(Player.State);
 			Char->Create(Player.Info);
 		}
+
 		ZGetCharacterManager()->Add(Char);
 
 		Char->SetVisible(true);
@@ -172,7 +173,7 @@ bool ZReplayLoader::LoadFile(const char* FileName)
 }
 
 template <typename T>
-bool ZReplayLoader::CreateCommandFromStream(char* pStream, MCommand& Command, T& Alloc)
+bool ZReplayLoader::CreateCommandFromStream(const char* pStream, MCommand& Command, T& Alloc)
 {
 	if (Version.Server == SERVER_OFFICIAL && Version.nVersion <= 2)
 	{
@@ -186,7 +187,7 @@ bool ZReplayLoader::CreateCommandFromStream(char* pStream, MCommand& Command, T&
 }
 
 
-bool ZReplayLoader::CreateCommandFromStreamVersion2(char* pStream, MCommand& Command)
+bool ZReplayLoader::CreateCommandFromStreamVersion2(const char* pStream, MCommand& Command)
 {
 	MCommandManager* pCM = ZGetGameClient()->GetCommandManager();
 	
@@ -236,7 +237,7 @@ bool ZReplayLoader::CreateCommandFromStreamVersion2(char* pStream, MCommand& Com
 	return true;
 }
 
-bool ZReplayLoader::ParseVersion2Command(char* pStream, MCommand* pCmd)
+bool ZReplayLoader::ParseVersion2Command(const char* pStream, MCommand* pCmd)
 {
 	switch (pCmd->GetID())
 	{
@@ -469,7 +470,7 @@ bool ZReplayLoader::ParseVersion2Command(char* pStream, MCommand* pCmd)
 }
 
 
-MCommandParameter* ZReplayLoader::MakeVersion2CommandParameter(MCommandParameterType nType, char* pStream, unsigned short int* pnDataCount)
+MCommandParameter* ZReplayLoader::MakeVersion2CommandParameter(MCommandParameterType nType, const char* pStream, unsigned short int* pnDataCount)
 {
 	MCommandParameter* pParam = NULL;
 
@@ -489,7 +490,7 @@ MCommandParameter* ZReplayLoader::MakeVersion2CommandParameter(MCommandParameter
 			pParam = new MCommandParameterString;
 			MCommandParameterString* pStringParam = (MCommandParameterString*)pParam;
 
-			char* pStreamData = pStream+ *pnDataCount;
+			const char* pStreamData = pStream + *pnDataCount;
 
 			int nValueSize = 0;
 			memcpy(&nValueSize, pStreamData, sizeof(nValueSize));
@@ -546,7 +547,7 @@ MCommandParameter* ZReplayLoader::MakeVersion2CommandParameter(MCommandParameter
 		return NULL;
 	}
 
-	*pnDataCount += pParam->SetData(pStream+ *pnDataCount);
+	*pnDataCount += pParam->SetData(pStream + *pnDataCount);
 
 	return pParam;
 }

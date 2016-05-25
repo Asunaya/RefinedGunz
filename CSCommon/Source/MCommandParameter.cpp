@@ -108,7 +108,7 @@ int MCommandParameterInt::GetData(char* pData, int nSize)
 	memcpy(pData, &m_Value, nValueSize);
 	return nValueSize;
 }
-int MCommandParameterInt::SetData(char* pData)
+int MCommandParameterInt::SetData(const char* pData)
 {
 	int nValueSize = sizeof(m_Value);
 	memcpy(&m_Value, pData, nValueSize);
@@ -140,7 +140,7 @@ int MCommandParameterUInt::GetData(char* pData, int nSize)
 	memcpy(pData, &m_Value, nValueSize);
 	return nValueSize;
 }
-int MCommandParameterUInt::SetData(char* pData)
+int MCommandParameterUInt::SetData(const char* pData)
 {
 	int nValueSize = sizeof(m_Value);
 	memcpy(&m_Value, pData, nValueSize);
@@ -173,7 +173,7 @@ int MCommandParameterFloat::GetData(char* pData, int nSize)
 	memcpy(pData, &m_Value, nValueSize);
 	return nValueSize;
 }
-int MCommandParameterFloat::SetData(char* pData)
+int MCommandParameterFloat::SetData(const char* pData)
 {
 	int nValueSize = sizeof(m_Value);
 	memcpy(&m_Value, pData, nValueSize);
@@ -232,7 +232,7 @@ int MCommandParameterString::GetData(char* pData, int nSize)
 
 	return nValueSize+sizeof(nValueSize);
 }
-int MCommandParameterString::SetData(char* pData)
+int MCommandParameterString::SetData(const char* pData)
 {
 	if(m_Value!=NULL) 
 	{
@@ -294,7 +294,7 @@ int MCommandParameterVector::GetData(char* pData, int nSize)
 	memcpy(pData, v, nValueSize);
 	return nValueSize;
 }
-int MCommandParameterVector::SetData(char* pData)
+int MCommandParameterVector::SetData(const char* pData)
 {
 	int nValueSize = sizeof(m_fX) * 3;
 	float v[3];
@@ -320,7 +320,7 @@ int MCommandParameterBool::GetData(char* pData, int nSize)
 	memcpy(pData, &m_Value, nValueSize);
 	return nValueSize;
 }
-int MCommandParameterBool::SetData(char* pData)
+int MCommandParameterBool::SetData(const char* pData)
 {
 	int nValueSize = sizeof(m_Value);
 	memcpy(&m_Value, pData, nValueSize);
@@ -358,7 +358,7 @@ int MCommandParameterUID::GetData(char* pData, int nSize)
 	memcpy(pData, &m_Value, nValueSize);
 	return nValueSize;
 }
-int MCommandParameterUID::SetData(char* pData)
+int MCommandParameterUID::SetData(const char* pData)
 {
 	int nValueSize = sizeof(m_Value);
 	memcpy(&m_Value, pData, nValueSize);
@@ -411,7 +411,7 @@ int MCommandParameterBlob::GetData(char* pData, int nSize)
 
 	return m_nSize+sizeof(m_nSize);
 }
-int MCommandParameterBlob::SetData(char* pData)
+int MCommandParameterBlob::SetData(const char* pData)
 {
 	if(m_Value!=NULL) delete[] m_Value;
 
@@ -462,7 +462,7 @@ int MCommandParameterChar::GetData(char* pData, int nSize)
 	memcpy(pData, &m_Value, nValueSize);
 	return nValueSize;
 }
-int MCommandParameterChar::SetData(char* pData)
+int MCommandParameterChar::SetData(const char* pData)
 {
 	int nValueSize = sizeof(m_Value);
 	memcpy(&m_Value, pData, nValueSize);
@@ -497,7 +497,7 @@ int MCommandParameterUChar::GetData(char* pData, int nSize)
 	memcpy(pData, &m_Value, nValueSize);
 	return nValueSize;
 }
-int MCommandParameterUChar::SetData(char* pData)
+int MCommandParameterUChar::SetData(const char* pData)
 {
 	int nValueSize = sizeof(m_Value);
 	memcpy(&m_Value, pData, nValueSize);
@@ -532,7 +532,7 @@ int MCommandParameterShort::GetData(char* pData, int nSize)
 	memcpy(pData, &m_Value, nValueSize);
 	return nValueSize;
 }
-int MCommandParameterShort::SetData(char* pData)
+int MCommandParameterShort::SetData(const char* pData)
 {
 	int nValueSize = sizeof(m_Value);
 	memcpy(&m_Value, pData, nValueSize);
@@ -567,7 +567,7 @@ int MCommandParameterUShort::GetData(char* pData, int nSize)
 	memcpy(pData, &m_Value, nValueSize);
 	return nValueSize;
 }
-int MCommandParameterUShort::SetData(char* pData)
+int MCommandParameterUShort::SetData(const char* pData)
 {
 	int nValueSize = sizeof(m_Value);
 	memcpy(&m_Value, pData, nValueSize);
@@ -602,7 +602,7 @@ int MCommandParameterInt64::GetData(char* pData, int nSize)
 	memcpy(pData, &m_Value, nValueSize);
 	return nValueSize;
 }
-int MCommandParameterInt64::SetData(char* pData)
+int MCommandParameterInt64::SetData(const char* pData)
 {
 	int nValueSize = sizeof(m_Value);
 	memcpy(&m_Value, pData, nValueSize);
@@ -637,7 +637,7 @@ int MCommandParameterUInt64::GetData(char* pData, int nSize)
 	memcpy(pData, &m_Value, nValueSize);
 	return nValueSize;
 }
-int MCommandParameterUInt64::SetData(char* pData)
+int MCommandParameterUInt64::SetData(const char* pData)
 {
 	int nValueSize = sizeof(m_Value);
 	memcpy(&m_Value, pData, nValueSize);
@@ -689,7 +689,7 @@ int MCommandParameterShortVector::GetData(char* pData, int nSize)
 	memcpy(pData, v, nValueSize);
 	return nValueSize;
 }
-int MCommandParameterShortVector::SetData(char* pData)
+int MCommandParameterShortVector::SetData(const char* pData)
 {
 	int nValueSize = sizeof(m_nX) * 3;
 	short v[3];
