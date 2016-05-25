@@ -101,12 +101,12 @@ void MMatchServer::OnMatchLogin(MUID CommUID, const char* szUserID, const unsign
 	// 원래 계정은 넷마블에 있으므로 해당 계정이 없으면 새로 생성한다. 
 	if (!m_MatchDBMgr.GetLoginInfo(szUserID, &nAID, szDBPassword))
 	{
-#ifdef _DEBUG
-		m_MatchDBMgr.CreateAccount(szUserID, szPassword, 0, szUserID, 20, 1);
-		strcpy_safe(szDBPassword, szPassword);
-
-		m_MatchDBMgr.GetLoginInfo(szUserID, &nAID, szDBPassword);
-#endif
+//#ifdef _DEBUG
+//		m_MatchDBMgr.CreateAccount(szUserID, szPassword, 0, szUserID, 20, 1);
+//		strcpy_safe(szDBPassword, szPassword);
+//
+//		m_MatchDBMgr.GetLoginInfo(szUserID, &nAID, szDBPassword);
+//#endif
 
 		/*MCommand* pCmd = CreateCmdMatchResponseLoginFailed(CommUID, MERR_CLIENT_WRONG_PASSWORD);
 		Post(pCmd);*/

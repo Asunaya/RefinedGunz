@@ -69,41 +69,6 @@ void Chat::Create(const std::string &strFont, int nFontSize){
 	strField.assign("");
 	nCaretPos = -1;
 
-	//bPlayerList = 0;
-
-	RGetDevice()->CreateVertexBuffer(6 * sizeof(ScreenSpaceVertex), 0, D3DFVF_XYZRHW | D3DFVF_DIFFUSE, D3DPOOL_MANAGED, &pBorderVertexBuffer, NULL);
-	RGetDevice()->CreateIndexBuffer(5 * sizeof(LineListIndex), 0, D3DFMT_INDEX16, D3DPOOL_MANAGED, &pBorderIndexBuffer, NULL);
-
-	LineListIndex *pIdx;
-	if (FAILED(pBorderIndexBuffer->Lock(0, 5 * sizeof(LineListIndex), (void **)&pIdx, 0)))
-	{
-		MLog("Chat::UpdateBorder() - Failed to lock index buffer\n");
-		return;
-	}
-
-	pIdx[0].v1 = 0;
-	pIdx[0].v2 = 1;
-
-	pIdx[1].v1 = 1;
-	pIdx[1].v2 = 2;
-
-	pIdx[2].v1 = 2;
-	pIdx[2].v2 = 3;
-
-	pIdx[3].v1 = 3;
-	pIdx[3].v2 = 0;
-
-	pIdx[4].v1 = 4;
-	pIdx[4].v2 = 5;
-
-	if (FAILED(pBorderIndexBuffer->Unlock()))
-	{
-		MLog("Chat::UpdateBorder() - Failed to unlock index buffer\n");
-		return;
-	}
-
-	UpdateBorder();
-
 	bAlpha = false;
 	bBegunDrawing = false;
 }
@@ -582,8 +547,6 @@ void Chat::OnUpdate(){
 		if (dwResize & RESIZE_Y2 && Border.y2 + Cursor.y - PrevCursorPos.y > Border.y1 + 20)
 			Border.y2 += Cursor.y - PrevCursorPos.y;
 
-		UpdateBorder();
-
 		for (std::vector<ChatLine>::iterator it = vMsgs.begin(); it != vMsgs.end(); it++)
 			CalcLineBreaks(*it);
 	}
@@ -593,8 +556,6 @@ void Chat::OnUpdate(){
 		Border.y1 += Cursor.y - PrevCursorPos.y;
 		Border.x2 += Cursor.x - PrevCursorPos.x;
 		Border.y2 += Cursor.y - PrevCursorPos.y;
-
-		UpdateBorder();
 	}
 
 	if (pFromMsg && pToMsg && GetAsyncKeyState(VK_CONTROL) & 0x8000 && GetAsyncKeyState('C') & 0x8000){
@@ -1089,37 +1050,6 @@ ret:;
 	y -= 2;
 
 	DrawTextN(pFont.get(), strField.c_str(), r, TextColor);
-
-	//EndDraw();
-
-	/*if (!bPlayerList)
-		return;
-
-	pPlayerListLine->Begin();
-
-	r.left = Border.x1 + 5;
-	r.top = Border.y1 - 25 - nFontHeight * vstrPlayerList.size();
-	r.right = Border.x1 + nPlayerListWidth + 20;
-	r.bottom = Border.y1 - 25;
-
-	if (r.top < 0)
-		r.top = Border.y2 + 10;
-
-	Line(pPlayerListLine, ARGB(0x80, 0, 0, 0), r.left + nPlayerListWidth / 2, r.top, r.left + nPlayerListWidth / 2, r.bottom);
-
-	r.left += 1;
-	r.top += 1;
-
-	for (unsigned long i = 0; i < vstrPlayerList.size(); i++){
-		std::string &it = vstrPlayerList.at(i);
-		if (i == nCurPlayer){
-			Line(pPlayerListLine, ARGB(0x80, 0x80, 0x80, 0x80), r.left + nPlayerListWidth / 2, r.top, r.left + nPlayerListWidth / 2, r.top + nFontHeight);
-		}
-		pFont->m_Font.DrawTextA(r.left, r.top, it.c_str(), 0xFF00A5C3);
-		r.top += nFontHeight;
-	}
-
-	pPlayerListLine->End();*/
 }
 
 int Chat::DrawTextWordWrap(MFontR2 *pFont, const TCHAR *szStr, const RECT &r, DWORD dwColor)
@@ -1171,92 +1101,18 @@ void Chat::DrawTextN(MFontR2 *pFont, const TCHAR *szStr, const RECT &r, DWORD dw
 		delete[] String;
 }
 
-void Chat::UpdateBorder()
-{
-	ScreenSpaceVertex *pData;
-	if (FAILED(pBorderVertexBuffer->Lock(0, 6 * sizeof(ScreenSpaceVertex), (void **)&pData, 0)))
-	{
-		MLog("Chat::UpdateBorder() - Failed to lock vertex buffer\n");
-		return;
-	}
-
-	int i = 0;
-
-	pData[i].x = Border.x1;
-	pData[i].y = Border.y1;
-	pData[i].z = 0;
-	pData[i].rhw = 1;
-	pData[i].color = InterfaceColor;
-	i++;
-
-	pData[i].x = Border.x2;
-	pData[i].y = Border.y1;
-	pData[i].z = 0;
-	pData[i].rhw = 1;
-	pData[i].color = InterfaceColor;
-	i++;
-
-	pData[i].x = Border.x2;
-	pData[i].y = Border.y2;
-	pData[i].z = 0;
-	pData[i].rhw = 1;
-	pData[i].color = InterfaceColor;
-	i++;
-
-	pData[i].x = Border.x1;
-	pData[i].y = Border.y2;
-	pData[i].z = 0;
-	pData[i].rhw = 1;
-	pData[i].color = InterfaceColor;
-	i++;
-	
-	pData[i].x = Border.x1;
-	pData[i].y = Border.y2 - 2 - nFontHeight;
-	pData[i].z = 0;
-	pData[i].rhw = 1;
-	pData[i].color = InterfaceColor;
-	i++;
-
-	pData[i].x = Border.x2;
-	pData[i].y = Border.y2 - 2 - nFontHeight;
-	pData[i].z = 0;
-	pData[i].rhw = 1;
-	pData[i].color = InterfaceColor;
-
-	if (FAILED(pBorderVertexBuffer->Unlock()))
-	{
-		MLog("Chat::UpdateBorder() - Failed to unlock vertex buffer\n");
-		return;
-	}
-}
-
 void Chat::DrawBorder()
 {
-	RGetDevice()->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
-	RGetDevice()->SetRenderState(D3DRS_LIGHTING, FALSE);
-	RGetDevice()->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
-	RGetDevice()->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_DIFFUSE);
-	RGetDevice()->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
-	RGetDevice()->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_DIFFUSE);
-	RGetDevice()->SetTexture(0, NULL);
-	RGetDevice()->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
+	v2 vs[] = { { float(Border.x1), float(Border.y1) },
+	{ float(Border.x2), float(Border.y1) },
+	{ float(Border.x2), float(Border.y2) },
+	{ float(Border.x1), float(Border.y2) },
+	};
 
-	if (InterfaceColor < 0xFF000000)
-	{
-		RGetDevice()->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-		RGetDevice()->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
-		RGetDevice()->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-		RGetDevice()->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
-	}
+	for (size_t i = 0; i < ArraySize(vs); i++)
+		Line(vs[i], vs[(i + 1) % ArraySize(vs)]);
 
-	RGetDevice()->SetStreamSource(0, pBorderVertexBuffer, 0, sizeof(ScreenSpaceVertex));
-	RGetDevice()->SetIndices(pBorderIndexBuffer);
-	RGetDevice()->DrawIndexedPrimitive(D3DPT_LINELIST, 0, 0, 6, 0, 5);
-
-	if (InterfaceColor < 0xFF000000)
-	{
-		RGetDevice()->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
-	}
+	Line({ float(Border.x1), float(Border.y2 - 2 - nFontHeight) }, { float(Border.x2), float(Border.y2 - 2 - nFontHeight) });
 }
 
 void Chat::Line(const D3DXVECTOR2 &v1, const D3DXVECTOR2 &v2, D3DCOLOR Color, float z)

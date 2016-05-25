@@ -5,6 +5,7 @@
 #include <mutex>
 #include <queue>
 #include <memory>
+#include "Extensions.h"
 #include "VoiceChat.h"
 #include "Tasks.h"
 #include "MeshManager.h"
@@ -30,6 +31,7 @@ struct ReplayInfo
 	ReplayVersion Version;
 	REPLAY_STAGE_SETTING_NODE StageSetting;
 	std::string VersionString;
+	bool Dead = true;
 
 	struct PlayerInfo
 	{
@@ -53,10 +55,12 @@ public:
 	void OnReplaySelected();
 	void OnCreateDevice();
 	void OnAppCreate();
-	decltype(auto) MutePlayer(const MUID& UID)
+#ifdef VOICECHAT
+	auto MutePlayer(const MUID& UID)
 	{
 		return m_VoiceChat.MutePlayer(UID);
 	}
+#endif
 
 	void OnDrawLobby();
 	void OnRender();
@@ -133,7 +137,9 @@ private:
 
 	std::unordered_map<MUID, uint32_t> SwordColors;
 
+#ifdef VOICECHAT
 	VoiceChat m_VoiceChat;
+#endif
 	TaskManager m_TaskManager;
 	std::unique_ptr<MeshManager> m_MeshManager = nullptr;
 	HitboxManager m_HitboxManager;

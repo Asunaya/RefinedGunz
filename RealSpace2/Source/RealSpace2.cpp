@@ -228,7 +228,7 @@ static void InitDevice()
 */
 	g_nVidioMemory = g_pd3dDevice->GetAvailableTextureMem()/2;
 
-	mlog("Video memory %f \n",g_nVidioMemory / float(1024*1024) );
+	//mlog("Video memory %f \n",g_nVidioMemory / float(1024*1024) );
 
 	if( D3DERR_NOTAVAILABLE == g_pd3dDevice->CreateQuery( D3DQUERYTYPE_OCCLUSION, NULL ) )
 		g_bQuery = false;
@@ -501,7 +501,7 @@ void RAdjustWindow(const RMODEPARAMS *pModeParams)
 
 void RResetDevice(const RMODEPARAMS *params)
 {
-	mlog("Reset Device \n");
+	mlog("Resetting device... ");
 
 	RFrame_Invalidate();
 	RBaseTexture_Invalidate();
@@ -566,7 +566,7 @@ void RResetDevice(const RMODEPARAMS *params)
 	
 	_ASSERT(hr==D3D_OK);
 	if( hr != D3D_OK ) {
-		mlog("device reset failed : %s\n",DXGetErrorString9(hr));
+		mlog("\nDevice reset failed: %s\n", DXGetErrorString9(hr));
 		int *a=0;
 		*a = 1;	// 반드시 체크해보자
 	}
@@ -586,6 +586,8 @@ void RResetDevice(const RMODEPARAMS *params)
 
 	RBaseTexture_Restore();
 	RFrame_Restore();
+
+	MLog("SUCCESS!\n");
 }
 
 RRESULT RIsReadyToRender()

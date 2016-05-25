@@ -43,9 +43,19 @@ template<size_t size> void GetPurePath(char(&pPurePath)[size], const char *pFile
 // path 만 얻어내기..
 void GetPurePath(char *pPurePath, int maxlen, const char *pFilename);
 // path 와 extension을 제거한 순수한 파일이름 얻기.
-void GetPureFilename(char *pPureFilename,const char *pFilename);
+template <size_t size>
+void GetPureFilename(char (&PureFilename)[size],const char *pFilename)
+{
+	char drive[_MAX_DRIVE], dir[_MAX_DIR], ext[_MAX_EXT];
+	_splitpath_s(pFilename, drive, dir, PureFilename, ext);
+}
 // extension 을 얻어낸다
-void GetPureExtension(char *pPureExtension,const char *pFilename);
+template <size_t size>
+void GetPureExtension(char (&PureExtension)[size],const char *pFilename)
+{
+	char drive[_MAX_DRIVE], dir[_MAX_DIR], fname[_MAX_FNAME];
+	_splitpath_s(pFilename, drive, dir, fname, PureExtension);
+}
 
 // 절대 경로인가? ( 네트워크 경로는 지원하지 않음 )
 BOOL IsFullPath(const char *pPath);

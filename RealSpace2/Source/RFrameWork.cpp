@@ -153,7 +153,6 @@ void RFrame_Render()
 	{
 		RMODEPARAMS ModeParams={ RGetScreenWidth(),RGetScreenHeight(),RIsFullScreen(),RGetPixelFormat() };
 		RResetDevice(&ModeParams);
-		mlog("devices Restored. \n");
 	}
 
 	if(timeGetTime() > g_last_mouse_move_time + RTOOLTIP_GAP)

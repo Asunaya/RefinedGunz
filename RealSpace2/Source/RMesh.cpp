@@ -123,9 +123,6 @@ void RMesh::Init()
 
 	m_data.reserve(MAX_MESH_NODE_TABLE);//±âº»
 
-	for(int i=0;i<MAX_MESH_NODE_TABLE;i++)
-		m_data[i] = NULL;
-
 	m_isScale = false;
 	m_vScale = rvector(1.f,1.f,1.f);
 

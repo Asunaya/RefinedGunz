@@ -158,8 +158,8 @@ void GetRelativePath(char *pRelativePath, int maxlen, const char *pBasePath, con
 
 	char szBaseDir[256], szBaseDrive[4], szBaseFileName[256], szBaseExt[16];
 	char szDir[256], szDrive[4], szFileName[256], szExt[16];
-	_splitpath(szBasePath, szBaseDrive, szBaseDir, szBaseFileName, szBaseExt);
-	_splitpath(szPath, szDrive, szDir, szFileName, szExt);
+	_splitpath_s(szBasePath, szBaseDrive, szBaseDir, szBaseFileName, szBaseExt);
+	_splitpath_s(szPath, szDrive, szDir, szFileName, szExt);
 
 	char szBaseDepthDir[256];
 	char szDepthDir[256];
@@ -204,14 +204,14 @@ void GetFullPath(char *pFullPath, int maxlen, const char *pBasePath, const char 
 		strcpy_safe(pFullPath, maxlen, pRelativePath);
 		return;
 	}
-	char szFullPath[256];
-	char szDrive[8];
-	char szDir[256];
-	char szFileName[32];
-	char szExt[16];
+	char szFullPath[_MAX_PATH];
+	char szDrive[_MAX_DRIVE];
+	char szDir[_MAX_DIR];
+	char szFileName[_MAX_FNAME];
+	char szExt[_MAX_EXT];
 
 	_fullpath(szFullPath, pBasePath, 256);
-	_splitpath(szFullPath, szDrive, szDir, szFileName, szExt);
+	_splitpath_s(szFullPath, szDrive, szDir, szFileName, szExt);
 	wsprintf(pFullPath, "%s%s%s", szDrive, szDir, pRelativePath);
 }
 
@@ -229,7 +229,8 @@ void GetFullPath(char *pFullPath, int maxlen, const char *pRelativePath)
 	char pBasePath[256];
 
 	GetCurrentDirectory(sizeof(pBasePath),pBasePath);
-	if(pBasePath[strlen(pBasePath)]!='\\') strcat(pBasePath,"\\");
+	if(pBasePath[strlen(pBasePath)]!='\\')
+		strcat_safe(pBasePath,"\\");
 	_fullpath(szFullPath, pBasePath, 256);
 	_splitpath_s(szFullPath, szDrive, szDir, szFileName, szExt);
 	wsprintf(pFullPath, "%s%s%s", szDrive, szDir, pRelativePath);
@@ -278,18 +279,6 @@ void GetPurePath(char *pPurePath, int maxlen, const char *pFilename)
 		if(last!='/' && last!='\\')
 			strcat_s(pPurePath, maxlen, "/");
 	}
-}
-
-void GetPureFilename(char *pPureFilename,const char *pFilename)
-{
-	char drive[_MAX_DRIVE],dir[_MAX_DIR],ext[_MAX_EXT];
-	_splitpath(pFilename,drive,dir,pPureFilename,ext);
-}
-
-void GetPureExtension(char *pPureExtension,const char*pFilename)
-{
-	char drive[_MAX_DRIVE],dir[_MAX_DIR],fname[_MAX_FNAME];
-	_splitpath(pFilename,drive,dir,fname,pPureExtension);
 }
 
 DWORD GetFileCheckSum(char* pszFileName)

@@ -754,7 +754,7 @@ void ZCharacter::UpdateMotion(float fDelta)
 
 			bool bInversed = false;
 			//	if(IsKeyDown('S'))
-			if (DotProduct(targetdir, dir) < -cos(pi / 4.f) + 0.01f)
+			if (DotProduct(targetdir, dir) < -cos(D3DX_PI / 4.f) + 0.01f)
 			{
 				dir = -dir;
 				bInversed = true;
@@ -768,15 +768,15 @@ void ZCharacter::UpdateMotion(float fDelta)
 #define ROTATION_SPEED	400.f
 
 			// 일정각도 이상되면 하체를 틀어준다
-			if (fAngleLower > 5.f / 180.f*pi)
+			if (fAngleLower > 5.f / 180.f*D3DX_PI)
 			{
-				D3DXMatrixRotationZ(&mat, max(-ROTATION_SPEED*fDelta / 180.f*pi, -fAngleLower));
+				D3DXMatrixRotationZ(&mat, max(-ROTATION_SPEED*fDelta / 180.f*D3DX_PI, -fAngleLower));
 				m_DirectionLower = m_DirectionLower * mat;
 			}
 
-			if (fAngleLower < -5.f / 180.f*pi)
+			if (fAngleLower < -5.f / 180.f*D3DX_PI)
 			{
-				D3DXMatrixRotationZ(&mat, min(ROTATION_SPEED*fDelta / 180.f*pi, -fAngleLower));
+				D3DXMatrixRotationZ(&mat, min(ROTATION_SPEED*fDelta / 180.f*D3DX_PI, -fAngleLower));
 				m_DirectionLower = m_DirectionLower * mat;
 			}
 
@@ -786,21 +786,21 @@ void ZCharacter::UpdateMotion(float fDelta)
 
 			// 그러나 하체와의 각도를 항상 일정각도 이하로 유지한다.
 
-			if (fAngle < -65.f / 180.f*pi)
+			if (fAngle < -65.f / 180.f*D3DX_PI)
 			{
-				fAngle = -65.f / 180.f*pi;
-				D3DXMatrixRotationZ(&mat, -65.f / 180.f*pi);
+				fAngle = -65.f / 180.f*D3DX_PI;
+				D3DXMatrixRotationZ(&mat, -65.f / 180.f*D3DX_PI);
 				m_DirectionLower = m_Direction * mat;
 			}
 
-			if (fAngle >= 65.f / 180.f*pi)
+			if (fAngle >= 65.f / 180.f*D3DX_PI)
 			{
-				fAngle = 65.f / 180.f*pi;
-				D3DXMatrixRotationZ(&mat, 65.f / 180.f*pi);
+				fAngle = 65.f / 180.f*D3DX_PI;
+				D3DXMatrixRotationZ(&mat, 65.f / 180.f*D3DX_PI);
 				m_DirectionLower = m_Direction * mat;
 			}
 
-			m_pVMesh->m_vRotXYZ.x = -fAngle * 180 / pi *.9f;
+			m_pVMesh->m_vRotXYZ.x = -fAngle * 180 / D3DX_PI *.9f;
 
 			// 실제보다 약간 고개를 들어준다 :)
 			m_pVMesh->m_vRotXYZ.y = (m_TargetDir.z + 0.05f) * 50.f;
@@ -859,7 +859,7 @@ void ZCharacter::CheckDrawWeaponTrack()
 
 	bool bDrawTracks = false;//칼 궤적을 그릴것인가?
 
-	if (ZGetConfiguration()->GetDrawTrails())
+	if (ZGetConfiguration()->GetDrawTrails() && !g_pPortal->IsDrawingFakeChar())
 	{
 		if ((m_pVMesh->m_SelectWeaponMotionType == eq_wd_katana) ||
 			(m_pVMesh->m_SelectWeaponMotionType == eq_wd_sword) ||
@@ -1009,10 +1009,12 @@ void ZCharacter::OnDraw()
 	}
 
 	rboundingbox bb;
-	bb.vmax=m_Position+rvector(50,50,190);
-	bb.vmin=m_Position-rvector(50,50,0);
-	if(!ZGetGame()->GetWorld()->GetBsp()->IsVisible(bb)) return ;
-	if(!isInViewFrustum(&bb, RGetViewFrustum())) return ;
+	static constexpr auto Radius = 150;
+	static constexpr auto Height = 190;
+	bb.vmax = m_Position + rvector(Radius, Radius, Height);
+	bb.vmin = m_Position - rvector(Radius, Radius, 0);
+	if (!ZGetGame()->GetWorld()->GetBsp()->IsVisible(bb)) return;
+	if (!isInViewFrustum(&bb, RGetViewFrustum())) return;
 
 	__BP(24, "ZCharacter::Draw::Light");
 
@@ -1081,54 +1083,6 @@ void ZCharacter::OnDraw()
 #ifdef PORTAL
 	g_pPortal->DrawFakeCharacter(this);
 #endif
-
-	/*rvector pos = GetPosition();
-	pos.z += 5;
-	rvector head = GetVisualMesh()->GetHeadPosition();
-	head.z += 5;
-
-	RGetDevice()->SetTexture(0, NULL);
-	RGetDevice()->SetRenderState(D3DRS_LIGHTING, FALSE);
-	RGetDevice()->SetFVF(D3DFVF_XYZ | D3DFVF_DIFFUSE);
-	RGetDevice()->SetRenderState(D3DRS_ZENABLE, FALSE);
-
-	RDrawLine(pos, head, 0xFFFF0000);
-	RDrawSphere(head, 15, 20);
-
-	rmatrix mat;
-
-	rvector dir, up;
-	up = pos - head;
-	Normalize(up);
-	CrossProduct(&dir, up, rvector(1, 0, 0));
-	Normalize(dir);
-
-	MakeWorldMatrix(&mat, pos, up, dir);
-
-	float Height = D3DXVec3Length(&(head - pos));
-	rvector v, v2, last, last2;
-	last = rvector(sin(0) * 30, cos(0) * 30, 0) * mat;
-	last2 = rvector(sin(0) * 30, cos(0) * 30, Height) * mat;
-	for (int i = 1; i < 10; i++)
-	{
-		v = rvector(sin(i / 9.f * D3DX_PI * 2) * 30, cos(i / 9.f * D3DX_PI * 2) * 30, 0) * mat;
-		v2 = rvector(sin(i / 9.f * D3DX_PI * 2) * 30, cos(i / 9.f * D3DX_PI * 2) * 30, Height) * mat;
-		RDrawLine(last, v, 0xFFFF0000);
-		RDrawLine(v, v2, 0xFFFF0000);
-		RDrawLine(last2, v2, 0xFFFF0000);
-		last = v;
-		last2 = v2;
-	}*/
-
-	/*last = rvector(sin(0) * 30, cos(0) * 30, 0) * mat;// +head;
-	for (int i = 1; i < 10; i++)
-	{
-		v = rvector(sin(double(i) / 9 * D3DX_PI * 2) * 30, cos(double(i) / 9 * D3DX_PI * 2) * 30, 0);
-		v = v * mat;
-		//v += head;
-		RDrawLine(last, v, 0xFF0000FF);
-		last = v;
-	}*/
 	
 	if (bNarakSetState)
 	{
@@ -1554,7 +1508,7 @@ void ZCharacter::OnUpdate(float fDelta)
 
 			float fAngle = GetAngleOfVectors(_vDir,m_vProxyDirection);
 
-			vRot.x = -fAngle*180/pi *.9f;
+			vRot.x = -fAngle*180/ D3DX_PI *.9f;
 			vRot.y = (_vDir.z+0.05f) * 50.f;
 			vRot.z = 0.f;
 
@@ -1766,7 +1720,7 @@ void ZCharacter::UpdateVelocity(float fDelta)
 		float back_speed = BACK_SPEED * fRatio;
 		float stop_formax_speed = STOP_FORMAX_SPEED * (1/fRatio);  
 
-		if(DotProduct(forward,dir)>cosf(10.f*pi/180.f))	// 앞방향이면
+		if(DotProduct(forward,dir)>cosf(10.f*D3DX_PI /180.f))	// 앞방향이면
 		{
 			if(fSpeed>run_speed)
 				fSpeed=max(fSpeed-stop_formax_speed*fDelta,run_speed);

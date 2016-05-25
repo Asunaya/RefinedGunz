@@ -33,9 +33,9 @@ class CMFileLog : public CMLog {
 public :
 	CMFileLog( char *szFileName = NULL ){
 		if( szFileName ){
-			m_pFileName = strdup(szFileName);
+			m_pFileName = _strdup(szFileName);
 		} else {
-			m_pFileName = strdup("mlog.txt");
+			m_pFileName = _strdup("mlog.txt");
 		}
 	}
 
@@ -55,14 +55,19 @@ public :
 	}
 
 	virtual void Print( const char *string ){
-		FILE *pFile;
+		FILE *pFile = nullptr;
 
-		pFile = fopen( m_pFileName, "a" );
-		if( !pFile ){
-			pFile = fopen( m_pFileName, "w" );
+		auto err = fopen_s( &pFile, m_pFileName, "a" );
+
+		if( err != 0 || pFile == nullptr ){
+			fopen_s( &pFile, m_pFileName, "w" );
 			fclose( pFile );
-			pFile = fopen( m_pFileName, "a" );
+			fopen_s( &pFile, m_pFileName, "a" );
+
+			if (err != 0 || pFile == nullptr)
+				return;
 		}
+
 		fprintf(pFile,string);
 		fclose(pFile);
 	}

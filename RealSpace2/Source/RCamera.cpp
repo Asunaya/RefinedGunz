@@ -57,6 +57,16 @@ void RSetCamera(const rvector &from, const rvector &at, const rvector &up)
 	RCameraPosition=from;
 	RCameraDirection=at-from;
 	RCameraUp=up;
+
+	auto CheckNaN = [](auto& vec)
+	{
+		if (isnan(vec.x) || isnan(vec.y) || isnan(vec.z))
+			vec = { 1, 0, 0 };
+	};
+
+	CheckNaN(RCameraPosition);
+	CheckNaN(RCameraDirection);
+	CheckNaN(RCameraUp);
 	
 	RUpdateCamera();
 }

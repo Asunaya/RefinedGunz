@@ -8,7 +8,14 @@ void MShutdownTraceMemory()	{ }
 #else
 
 #include "Windows.h"
-#include "Dbghelp.h"
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4091)
+#endif
+#include <dbghelp.h>
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 #include "crtdbg.h"
 #include "Tlhelp32.h"
 #include <vector>
@@ -149,7 +156,8 @@ void MInitTraceMemory()
 {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
-	file = fopen(MTMFILENAME,"wb+");
+	file = nullptr;
+	fopen_s(&file, MTMFILENAME, "wb+");
 //	InitializeCriticalSection(&csNewMemoryDumpLock);
 
    _CrtSetAllocHook( MyAllocHook );
@@ -172,7 +180,8 @@ void MShutdownTraceMemory()
 
 	char szFileName[_MAX_PATH];
 	sprintf_s(szFileName,"%s/%s",szCurrentDir,MTMFILENAME);
-	FILE *file = fopen(szFileName,"rb");
+	FILE *file = nullptr;
+	fopen_s(&file, szFileName, "rb");
 
 	int nCount = 0;
 	while(fread(&nCount,sizeof(int),1,file)) {

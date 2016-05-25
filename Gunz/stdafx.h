@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include "targetver.h"
+
 #define POINTER_64 __ptr64
 
 // Windows 헤더 파일입니다.

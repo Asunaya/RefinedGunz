@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "launcher", "launcher\launcher.vcxproj", "{3195C941-8CFC-42D6-9847-6469631E0E6E}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zdelta", "zdelta\zdelta.vcxproj", "{0F54CBC1-6F56-48D6-A06E-9006D98CB4BD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3195C941-8CFC-42D6-9847-6469631E0E6E}.Debug|Win32.ActiveCfg = Debug|Win32
+		{3195C941-8CFC-42D6-9847-6469631E0E6E}.Debug|Win32.Build.0 = Debug|Win32
+		{3195C941-8CFC-42D6-9847-6469631E0E6E}.Release|Win32.ActiveCfg = Release|Win32
+		{3195C941-8CFC-42D6-9847-6469631E0E6E}.Release|Win32.Build.0 = Release|Win32
+		{0F54CBC1-6F56-48D6-A06E-9006D98CB4BD}.Debug|Win32.ActiveCfg = Debug|Win32
+		{0F54CBC1-6F56-48D6-A06E-9006D98CB4BD}.Debug|Win32.Build.0 = Debug|Win32
+		{0F54CBC1-6F56-48D6-A06E-9006D98CB4BD}.Release|Win32.ActiveCfg = Release|Win32
+		{0F54CBC1-6F56-48D6-A06E-9006D98CB4BD}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

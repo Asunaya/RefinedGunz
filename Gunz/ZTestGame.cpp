@@ -27,7 +27,7 @@ void CreateTestGame(char *mapname, int nDummyCharacterCount, bool bShot, bool bA
 	MTD_CharInfo info;
 	strcpy_safe(info.szName,"Maiet");
 	info.szClanName[0]=0;
-	info.nSex = 0;
+	info.nSex = MMS_FEMALE;
 	info.nHP = 100;
 	info.nAP = 100;
 

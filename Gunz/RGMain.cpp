@@ -36,7 +36,9 @@ void RGMain::OnCreateDevice()
 
 	g_Draw.OnCreateDevice();
 
+#ifdef VOICECHAT
 	m_VoiceChat.OnCreateDevice();
+#endif
 
 	m_HitboxManager.Create();
 }
@@ -49,7 +51,9 @@ void RGMain::OnGameDraw()
 	if(ZGetConfiguration()->GetShowHitboxes())
 		m_HitboxManager.Draw();
 
+#ifdef VOICECHAT
 	m_VoiceChat.Draw();
+#endif
 
 	/*for (auto pair : *ZGetCharacterManager())
 	{
@@ -226,10 +230,13 @@ bool RGMain::OnEvent(MEvent *pEvent)
 		return true;
 	}
 
+	bool ret = false;
+
+#ifdef VOICECHAT
 	static bool LastState = false;
 	bool CurState = ZIsActionKeyPressed(ZACTION_VOICE_CHAT);
 
-	auto ret = [&]
+	ret = [&]
 	{
 		if (CurState && !LastState)
 		{
@@ -248,6 +255,7 @@ bool RGMain::OnEvent(MEvent *pEvent)
 	}();
 
 	LastState = CurState;
+#endif
 
 #ifdef PORTAL
 	g_pPortal->OnShot();
@@ -348,13 +356,12 @@ void RGMain::OnReplaySelected()
 		}
 		break;
 		};
-
-		delete Command;
 	};
 
 	try
 	{
 		ZReplayLoader Loader;
+		Loader.LoadFile(Path);
 		SelectedReplayInfo.Version = Loader.GetVersion();
 		Loader.GetStageSetting(SelectedReplayInfo.StageSetting);
 		Loader.GetDuelQueueInfo();
@@ -367,20 +374,23 @@ void RGMain::OnReplaySelected()
 			SelectedReplayInfo.PlayerInfos.insert({ CharInfo.State.UID, Player });
 		}
 
-		Loader.GetCommands(PerCommand);
+		uint32_t WantedCommands[] = { MC_MATCH_RESPONSE_PEERLIST, MC_PEER_DIE };
+
+		Loader.GetCommands(PerCommand, false, &ArrayView<u32>(WantedCommands));
+
+		SelectedReplayInfo.VersionString = SelectedReplayInfo.Version.GetVersionString();
+		SelectedReplayInfo.Dead = false;
 	}
 	catch (EOFException& e)
 	{
 		MLog("Unexpected EOF while reading replay %s at position %d\n", SelectedReplay->GetString(), e.GetPosition());
+		SelectedReplayInfo.Dead = true;
 	}
 	catch (...)
 	{
 		MLog("Something went wrong while reading replay %s\n", SelectedReplay->GetString());
+		SelectedReplayInfo.Dead = true;
 	}
-
-	SelectedReplayInfo.VersionString = SelectedReplayInfo.Version.GetVersionString();
-
-	//MLog("Read version %s, %d", SelectedReplayInfo.Version.GetServerString(), SelectedReplayInfo.Version.nVersion);
 }
 
 void RGMain::DrawReplayInfo() const
@@ -422,6 +432,12 @@ void RGMain::DrawReplayInfo() const
 
 		Offset.y += 12;
 	};
+
+	if (SelectedReplayInfo.Dead)
+	{
+		Print("Failed to load replay");
+		return;
+	}
 
 	[&]
 	{
@@ -571,7 +587,9 @@ void RGMain::SetSwordColor(const MUID& UID, uint32_t Color)
 
 void RGMain::OnReceiveVoiceChat(ZCharacter *Char, const uint8_t *Buffer, int Length)
 {
+#ifdef VOICECHAT
 	m_VoiceChat.OnReceiveVoiceChat(Char, Buffer, Length);
+#endif
 }
 
 void RGMain::OnGameCreate()

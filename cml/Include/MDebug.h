@@ -29,7 +29,7 @@ void __cdecl MMsg(const char *pFormat,...);
 
 DWORD MFilterException(LPEXCEPTION_POINTERS p);
 
-void MInstallSEH();	// Compile Option에 /EHa 있어야함
+//void MInstallSEH();	// Compile Option에 /EHa 있어야함
 
 void MInitProfile();
 void MBeginProfile(int nIndex,const char *szName);

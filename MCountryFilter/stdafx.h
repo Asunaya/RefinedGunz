@@ -5,6 +5,10 @@
 
 #pragma once
 
+#include "../cml/Include/targetver.h"
+
+#define POINTER_64 __ptr64
+
 
 #define WIN32_LEAN_AND_MEAN		// 거의 사용되지 않는 내용은 Windows 헤더에서 제외합니다.
 #define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS	// 일부 CString 생성자는 명시적으로 선언됩니다.

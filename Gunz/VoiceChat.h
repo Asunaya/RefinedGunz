@@ -1,5 +1,9 @@
 #pragma once
 
+#include "Extensions.h"
+
+#ifdef VOICECHAT
+
 #include <thread>
 #include <array>
 #include <mutex>
@@ -46,6 +50,9 @@ private:
 	static int PlayCallback(const void *inputBuffer, void *outputBuffer, unsigned long framesPerBuffer, const PaStreamCallbackTimeInfo* timeInfo, PaStreamCallbackFlags statusFlags, void *userData);
 	static int RecordCallbackWrapper(const void *inputBuffer, void *outputBuffer, unsigned long framesPerBuffer, const PaStreamCallbackTimeInfo* timeInfo, PaStreamCallbackFlags statusFlags, void *userData);
 	int RecordCallback(const void *inputBuffer, void *outputBuffer, unsigned long framesPerBuffer, const PaStreamCallbackTimeInfo* timeInfo, PaStreamCallbackFlags statusFlags, void *userData);
+
+	static VoiceChat* Instance;
+	static VoiceChat* GetInstance() { return Instance; }
 
 	bool CanRecord = false;
 	bool CanDecode = false;
@@ -105,5 +112,6 @@ private:
 	std::unordered_map<ZCharacter*, MicStuff> MicStreams;
 	std::unordered_set<MUID> MutedPlayers;
 
-	IDirect3DTexture9* SpeakerTexture;
+	D3DPtr<IDirect3DTexture9> SpeakerTexture = nullptr;
 };
+#endif

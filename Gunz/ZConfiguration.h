@@ -13,12 +13,6 @@ using namespace std;
 #define FILENAME_SYSTEM		"system/system.xml"
 #define FILENAME_GTCFG		"system/gametypecfg.xml"
 
-struct ZHOTKEY {
-	unsigned long int nVirtKey;
-	unsigned long int nModifier;
-	string command;
-};
-
 
 struct ZSERVERNODE
 {
@@ -27,9 +21,6 @@ struct ZSERVERNODE
 	int		nPort;
 	int		nType;
 };
-
-
-typedef map<int,ZHOTKEY*> ZHOTKEYS;
 
 
 struct ZCONFIG_VIDEO
@@ -194,7 +185,6 @@ public:
 	bool Save() { return Save(GetLocale()->szXmlHeader); }
 	bool Save( const char* szHeader)	{ return SaveToFile(FILENAME_CONFIG, szHeader); }
 	bool SaveToFile(const char*szFileName, const char* szHeader);
-	bool LoadHotKey(const char* szFileName);
 
 	ZLocatorList* GetLocatorList()	{ return m_pLocatorList; }
 	ZLocatorList* GetTLocatorList()	{ return m_pTLocatorList; }
@@ -219,10 +209,6 @@ public:
 
 	void SetForceOptimization(bool b) {	m_bOptimization = b;}
 	bool GetForceOptimization() const {	return m_bOptimization;}
-
-	ZHOTKEY *GetHotkey(int nID);
-
-	ZHOTKEYS m_HotKeys;
 
 	map<int,ZSERVERNODE>	m_ServerList;
 

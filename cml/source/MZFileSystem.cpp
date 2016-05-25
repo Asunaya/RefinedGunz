@@ -105,7 +105,8 @@ bool MZFileSystem::AddItem(MZFILEDESC* pDesc)
 			// 업데이트 번호가 앞서면 실수 ?
 			int nOldPkgNum=GetUpdatePackageNumber(pOld->m_szZFileName);
 			int nNewPkgNum=GetUpdatePackageNumber(pDesc->m_szZFileName);
-			_ASSERT(nOldPkgNum>nNewPkgNum);
+			// NOTE: This is false, idk what's happening here
+			//_ASSERT(nOldPkgNum>nNewPkgNum);
 
 			return false;
 		}

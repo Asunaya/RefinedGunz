@@ -102,30 +102,6 @@ MHotKey::MHotKey(const char* szName, MWidget* pParent, MListener* pListener)
 	m_nKey = -1;
 }
 
-void MHotKey::GetHotKeyName(char* szHotKeyName)
-{
-	if(m_bCtrl==true){
-		strcat(szHotKeyName, "Ctrl");
-	}
-	if(m_bAlt==true){
-		if(szHotKeyName[0]!=0) strcat(szHotKeyName, "+");
-		strcat(szHotKeyName, "Alt");
-	}
-	if(m_bShift==true){
-		if(szHotKeyName[0]!=0) strcat(szHotKeyName, "+");
-		strcat(szHotKeyName, "Shift");
-	}
-
-	if(m_nKey>0){
-		char szKey[128];
-		GetKeyName(szKey, 128, m_nKey, false);
-		if(szKey[0]!=0){
-			if(szHotKeyName[0]!=0) strcat(szHotKeyName, "+");
-			strcat(szHotKeyName, szKey);
-		}
-	}
-}
-
 void MHotKey::GetHotKey(unsigned int* pKey, bool* pCtrl, bool* pAlt, bool* pShift)
 {
 	if(pKey!=NULL) *pKey = m_nKey;

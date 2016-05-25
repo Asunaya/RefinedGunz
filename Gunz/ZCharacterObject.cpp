@@ -566,8 +566,22 @@ void ZCharacterObject::EmptyHistory()
 
 bool ZCharacterObject::GetHistory(rvector *pos, rvector *direction, float fTime)
 {
-	if(GetVisualMesh() == NULL) 
+	if(GetVisualMesh() == NULL)
 		return false;
+
+	auto SetReturnValues = [&](const rvector& Pos, const rvector& Dir)
+	{
+		if (isnan(Pos.x) || isnan(Pos.y) || isnan(Pos.z))
+			return false;
+
+		if (isnan(Dir.x) || isnan(Dir.y) || isnan(Dir.z))
+			return false;
+
+		*pos = Pos;
+		*direction = Dir;
+
+		return true;
+	};
 
 	if(m_BasicHistory.size()>1)
 	{
@@ -582,8 +596,8 @@ bool ZCharacterObject::GetHistory(rvector *pos, rvector *direction, float fTime)
 			hi--;
 			binext=bi;
 			bi=*hi;
-
-		}while(hi!=m_BasicHistory.begin() && bi->fSendTime>fTime);
+		}
+		while(hi!=m_BasicHistory.begin() && bi->fSendTime>fTime);
 
 		if(fTime<bi->fSendTime) // 역사가 기록된 이전의 데이터를 요구하면 좆치않다
 			return false;
@@ -594,41 +608,27 @@ bool ZCharacterObject::GetHistory(rvector *pos, rvector *direction, float fTime)
 		{
 			if(fTime>=g_pGame->GetTime())	// 미래의 위치는 알수없다. 현재의 위치를 리턴한다
 			{
-				*pos=m_Position;
-				*direction = m_Direction;
-//				*headpos=GetVisualMesh()->GetHeadPosition();
-//				if(direction_low) *direction_low = m_DirectionLower;
-				return true;
+				return SetReturnValues(m_Position, m_Direction);
 			}
 
 			next.fSendTime=g_pGame->GetTime();
 			next.info.position=m_Position;
 			next.info.direction=m_Direction;
-//			next.info.lowerstate=m_AniState_Lower;
 			pnext=&next;
-		}else
-			pnext=binext;
+		}
+		else
+		{
+			pnext = binext;
+		}
 
 		float t=(fTime-bi->fSendTime)/(pnext->fSendTime-bi->fSendTime);
 
-		//*pos = bi->info.position *(1-t) + pnext->info.position*t;
-//		*headpos = bi->info.headpos*(1-t) + pnext->headpos*t;
-//		*headpos=GetVisualMesh()->GetHeadPosition();
-		//*direction = InterpolatedVector(bi->info.direction,pnext->info.direction,t);
-//		if(direction_low) *direction_low = InterpolatedVector(bi->info.direction_low,pnext->direction_low,t);
-
-		*pos = Lerp(bi->info.position, pnext->info.position, t);
-		*direction = Slerp(bi->info.direction, pnext->info.direction, t);
-
-		return true;
-	}else
+		return SetReturnValues(Lerp(bi->info.position, pnext->info.position, t),
+			Slerp(bi->info.direction, pnext->info.direction, t));
+	}
+	else
 	{
-		// 아마도 인형 ?
-		*pos=m_Position;
-		*direction=m_Direction;
-//		if(direction_low) *direction_low=m_DirectionLower;
-//		*headpos=GetVisualMesh()->GetHeadPosition();
-		return true;
+		return SetReturnValues(m_Position, m_Direction);
 	}
 
 	return false;

@@ -125,7 +125,7 @@ reterr:
 			return ret;
 		} else {
 			ret.id = TSYMBOL;
-			ret.v.szval = strdup(m_szText);
+			ret.v.szval = _strdup(m_szText);
 			return ret;
 		}
 	}
@@ -157,7 +157,7 @@ reterr:
 		Gather('\0');
 
 		ret.id = TSTRING;
-		ret.v.szval = strdup(m_szText);
+		ret.v.szval = _strdup(m_szText);
 		return ret;
     } else if(c == '='){
 		ret.id = TEQUAL;
@@ -191,15 +191,15 @@ int CfgFile::Open(char *filename)
 
 	m_nErrorLine = -1; m_nLineNum = 0;
 
-	m_FilePointer = fopen(filename, "r");
-	if(m_FilePointer == NULL) {
+	m_FilePointer = nullptr;
+	if (fopen_s(&m_FilePointer, filename, "r") != 0 || m_FilePointer == nullptr) {
 		ret = CFG_OPENFAIL;	
 		goto return_label;
 	}
 	m_iptr = -1; m_pbptr = -1;
 	ReadLine();
 
-	while(1){		
+	while(true){		
 		token = Scan();
 
 		if( token.id == TEOF ){

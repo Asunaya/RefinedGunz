@@ -887,7 +887,7 @@ MImplementRTTI(ZWeaponSmokeGrenade,ZWeaponGrenade);
 
 const float ZWeaponSmokeGrenade::mcfTrigerTimeList[NUM_SMOKE] =
 {
-	0, 0.5, 1, 1.7, 2.3, 2.5, 3
+	0.f, 0.5f, 1.f, 1.7f, 2.3f, 2.5f, 3.f
 };
 
 bool ZWeaponSmokeGrenade::Update( float fElapsedTime )

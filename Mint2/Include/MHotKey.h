@@ -16,16 +16,40 @@ protected:
 	bool			m_bShift;
 
 protected:
-	virtual void OnRun(void);
-	virtual bool OnEvent(MEvent* pEvent, MListener* pListener);
+	virtual void OnRun(void) override;
+	virtual bool OnEvent(MEvent* pEvent, MListener* pListener) override;
 
 public:
 	MHotKey(const char* szName=NULL, MWidget* pParent=NULL, MListener* pListener=NULL);
 
 #define MINT_HOTKEY	"HotKey"
-	virtual const char* GetClassName(void){ return MINT_HOTKEY; }
+	virtual const char* GetClassName(void) override { return MINT_HOTKEY; }
 
-	void GetHotKeyName(char* szHotKeyName);
+	template <size_t size>
+	void GetHotKeyName(char (&szHotKeyName)[size])
+	{
+		if (m_bCtrl == true) {
+			strcat_safe(szHotKeyName, "Ctrl");
+		}
+		if (m_bAlt == true) {
+			if (szHotKeyName[0] != 0) strcat_safe(szHotKeyName, "+");
+			strcat_safe(szHotKeyName, "Alt");
+		}
+		if (m_bShift == true) {
+			if (szHotKeyName[0] != 0) strcat_safe(szHotKeyName, "+");
+			strcat_safe(szHotKeyName, "Shift");
+		}
+
+		if (m_nKey>0) {
+			char szKey[128];
+			GetKeyName(szKey, 128, m_nKey, false);
+			if (szKey[0] != 0) {
+				if (szHotKeyName[0] != 0) strcat_safe(szHotKeyName, "+");
+				strcat_safe(szHotKeyName, szKey);
+			}
+		}
+	}
+
 	void GetHotKey(unsigned int* pKey, bool* pCtrl, bool* pAlt, bool* pShift);
 
 	int RegisterHotKey(void);

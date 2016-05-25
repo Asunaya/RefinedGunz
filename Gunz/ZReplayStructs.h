@@ -243,7 +243,7 @@ struct MTD_CharInfo_FG_V9
 	// 지난주 듀얼토너먼트 등급
 	int					nDTLastWeekGrade;
 
-	DWORD unk[6];
+	uint32_t unk[6];
 
 	// 아이템 정보 추가
 	__int64				uidEquipedItem[22];

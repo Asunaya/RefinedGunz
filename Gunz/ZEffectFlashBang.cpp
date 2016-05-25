@@ -140,7 +140,7 @@ void ZEffectFlashBang::SetBuffer()
 			RGetDevice()->GetDepthStencilSurface( &mpHoldDepthBuffer );	// 나중에 반드시 Release해줘야 한다.. Ref 증가..!
 		}
 
-		mlog("---------------------------------setBuffer\n");
+		//mlog("---------------------------------setBuffer\n");
 	}
 
 	mbActivated		= false;
@@ -158,7 +158,7 @@ void ZEffectFlashBang::ReleaseBuffer()
 	SAFE_RELEASE( mpBlurTexture );
 	SAFE_RELEASE( mpDepthBuffer );
 	SAFE_RELEASE( mpHoldDepthBuffer );
-	mlog("------------------------ReleaseBuffer\n");
+	//mlog("------------------------ReleaseBuffer\n");
 }
 
 //////////////////////////////////////////////////////////////////////////

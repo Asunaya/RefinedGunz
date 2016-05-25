@@ -367,7 +367,7 @@ bool ZApplication::OnCreate(ZLoadingProgress *pLoadingProgress)
 
 	__EP(2001);
 
-	mlog("ZApplication::OnCreate : m_SoundEngine.Create\n");
+	//mlog("ZApplication::OnCreate : m_SoundEngine.Create\n");
 
 //	ZGetInitialLoading()->SetPercentage( 15.0f );
 //	ZGetInitialLoading()->Draw( MODE_DEFAULT, 0 , true );
@@ -490,51 +490,51 @@ BirdGo:
 
 	if (!MGetMatchItemDescMgr()->ReadXml(GetFileSystem(), FILENAME_ZITEM_DESC))
 	{
-		MLog("Error while Read Item Descriptor %s", FILENAME_ZITEM_DESC);
+		MLog("Error while Read Item Descriptor %s\n", FILENAME_ZITEM_DESC);
 	}
 	mlog("ZApplication::OnCreate : MGetMatchItemDescMgr()->ReadXml \n");
 
 	if (!MGetMatchItemEffectDescMgr()->ReadXml(GetFileSystem(), FILENAME_ZITEMEFFECT_DESC))
 	{
-		MLog("Error while Read Item Descriptor %s", FILENAME_ZITEMEFFECT_DESC);
+		MLog("Error while Read Item Descriptor %s\n", FILENAME_ZITEMEFFECT_DESC);
 	}
 	mlog("ZApplication::OnCreate : MGetMatchItemEffectDescMgr()->ReadXml \n");
 
 	if (!MGetMatchWorldItemDescMgr()->ReadXml(GetFileSystem(), "system/worlditem.xml"))
 	{
-		MLog("Error while Read Item Descriptor %s", "system/worlditem.xml");
+		MLog("Error while Read Item Descriptor %s\n", "system/worlditem.xml");
 	}
 	mlog("ZApplication::OnCreate : MGetMatchWorldItemDescMgr()->ReadXml \n");
 
 	if (!ZGetChannelRuleMgr()->ReadXml(GetFileSystem(), "system/channelrule.xml"))
 	{
-		MLog("Error while Read Item Descriptor %s", "system/channelrule.xml");
+		MLog("Error while Read Item Descriptor %s\n", "system/channelrule.xml");
 	}
 	mlog("ZApplication::OnCreate : ZGetChannelRuleMgr()->ReadXml \n");
 /*
 	if (!MGetNPCGroupMgr()->ReadXml(GetFileSystem(), "system/monstergroup.xml"))
 	{
-		MLog("Error while Read Item Descriptor %s", "system/monstergroup.xml");
+		MLog("Error while Read Item Descriptor %s\n", "system/monstergroup.xml");
 	}
 	mlog("ZApplication::OnCreate : ZGetNPCGroupMgr()->ReadXml \n");
 */
 	// if (!MGetChattingFilter()->Create(GetFileSystem(), "system/abuse.xml"))
 	if (!MGetChattingFilter()->LoadFromFile(GetFileSystem(), "system/abuse.txt"))
 	{
-		MLog("Error while Read Abuse Filter %s", "system/abuse.xml");
+		MLog("Error while Read Abuse Filter %s\n", "system/abuse.xml");
 	}
 
 #ifdef _QUEST_ITEM
 	if( !GetQuestItemDescMgr().ReadXml(GetFileSystem(), FILENAME_QUESTITEM_DESC) )
 	{
-		MLog( "Error while read quest tiem descrition xml file." );
+		MLog( "Error while read quest tiem descrition xml file.\n" );
 	}
 #endif
 
 	mlog("ZApplication::OnCreate : MGetChattingFilter()->Create \n");
 
 	if(!m_SkillManager.Create()) {
-		MLog("Error while create skill manager");
+		MLog("Error while create skill manager\n");
 	}
 
 	END_("ETC ..");
@@ -882,7 +882,6 @@ void ZApplication::ParseStandAloneArguments(const char* pszArgs)
 void ZApplication::SetInitialState()
 {
 	if(GetLaunchMode()==ZLAUNCH_MODE_STANDALONE_REPLAY) {
-		g_bTestFromReplay = true;
 		CreateReplayGame(m_szFileName);
 		return;
 	}

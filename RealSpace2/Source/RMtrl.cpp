@@ -288,9 +288,6 @@ RMtrlMgr::RMtrlMgr()
 
 	m_node_table.reserve(MAX_MTRL_NODE);//±âº»
 
-	for(int i=0;i<MAX_MTRL_NODE;i++)
-		m_node_table[i] = NULL;
-
 	m_bObjectMtrl = false;
 }
 

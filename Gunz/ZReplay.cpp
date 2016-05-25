@@ -13,133 +13,7 @@
 #include "RGMain.h"
 #include "ZReplay.inl"
 
-bool g_bTestFromReplay = false;
-
-bool CreateReplayGame(char *filename)
-{
-	static std::string LastFile;
-
-	char szBuf[256];
-
-	if (filename)
-	{
-		strcpy_safe(szBuf, filename);
-		LastFile = szBuf;
-	}
-	else if (!LastFile.empty())
-		strcpy_safe(szBuf, LastFile.c_str());
-	else
-		return false;
-
-	ZReplayLoader loader;
-
-	if (!loader.Load(szBuf))
-		return false;
-
-	g_pGame->OnLoadReplay(&loader);
-
-	return true;
-
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-ZReplayLoader::ZReplayLoader() : m_fGameTime(0.0f)
-{
-	Version.Server = SERVER_NONE;
-	Version.nVersion = 0;
-	Version.nSubVersion = 0;
-	memset(&m_StageSetting, 0, sizeof(REPLAY_STAGE_SETTING_NODE));
-}
-
-ZReplayLoader::~ZReplayLoader()
-{
-}
-
-bool ZReplayLoader::Load(const char* filename)
-{
-	auto pair = ReadZFile(filename);
-
-	if (!pair.first)
-		return false;
-
-	InflatedFile = std::move(pair.second);
-
-	try
-	{
-		Version = GetVersion();
-
-		auto VersionString = Version.GetVersionString();
-
-		MLog("Replay header loaded -- %s\n", VersionString.c_str());
-
-		GetStageSetting(m_StageSetting);
-
-		ChangeGameState();
-
-		if (m_StageSetting.nGameType == MMATCH_GAMETYPE_DUEL)
-		{
-			ZRuleDuel* pDuel = static_cast<ZRuleDuel*>(ZGetGameInterface()->GetGame()->GetMatch()->GetRule());
-			GetDuelQueueInfo(&pDuel->QInfo);
-		}
-
-		CreatePlayers(GetCharInfo());
-
-		auto PerCommand = [&](MCommand *Command, float Time)
-		{
-			ZObserverCommandItem *pZCommand = new ZObserverCommandItem;
-
-			pZCommand->pCommand = Command;
-			pZCommand->fTime = Time;
-
-			g_pGame->GetReplayCommandList()->push_back(pZCommand);
-
-			/*MLog("Command ID %d\n", Command->GetID());
-
-			if (Command->GetID() == MC_PEER_BASICINFO)
-			{
-				MCommandParameter* pParam = Command->GetParameter(0);
-				if (pParam->GetType() != MPT_BLOB)
-					return;
-
-				auto ppbi = (ZPACKEDBASICINFO*)pParam->GetPointer();
-
-				ZBasicInfo bi;
-				ppbi->Unpack(bi);
-
-				MLog("Velocity: %f, %f, %f\n", bi.velocity.x, bi.velocity.y, bi.velocity.z);
-				MLog("Direction: %f, %f, %f\n", bi.direction.x, bi.direction.y, bi.direction.z);
-			}*/
-		};
-
-		GetCommands(PerCommand);
-	}
-	catch (EOFException& e)
-	{
-		MLog("Unexpected EOF while reading replay %s at position %d; attempting to play the replay nonetheless\n", filename, e.GetPosition());
-		return true; // Try to play it
-	}
-	catch (...)
-	{
-		MLog("Something went wrong while reading replay %s\n", filename);
-		return false;
-	}
-
-	return true;
-}
-
-void ZReplayLoader::ChangeGameState()
-{
-	MSTAGE_SETTING_NODE stageSetting;
-	memset(&stageSetting, 0, sizeof(MSTAGE_SETTING_NODE));
-	ConvertStageSettingNode(&m_StageSetting, &stageSetting);
-	ZGetGameClient()->GetMatchStageSetting()->UpdateStageSetting(&stageSetting);
-	ZApplication::GetStageInterface()->SetMapName(ZGetGameClient()->GetMatchStageSetting()->GetMapName());
-	ZGetGameInterface()->SetState(GUNZ_GAME);
-	ZGetCharacterManager()->Clear();
-	ZGetObjectManager()->Clear();
-}
-
-void ZReplayLoader::CreatePlayers(const std::vector<ReplayPlayerInfo>& Players)
+static void CreatePlayers(const std::vector<ReplayPlayerInfo>& Players)
 {
 	for (auto& Player : Players)
 	{
@@ -164,7 +38,7 @@ void ZReplayLoader::CreatePlayers(const std::vector<ReplayPlayerInfo>& Players)
 	}
 }
 
-void ZReplayLoader::ConvertStageSettingNode(REPLAY_STAGE_SETTING_NODE* pSource, MSTAGE_SETTING_NODE* pTarget)
+static void ConvertStageSettingNode(REPLAY_STAGE_SETTING_NODE* pSource, MSTAGE_SETTING_NODE* pTarget)
 {
 	pTarget->uidStage = pSource->uidStage;
 	strcpy_safe(pTarget->szStageName, pSource->szStageName);
@@ -180,34 +54,141 @@ void ZReplayLoader::ConvertStageSettingNode(REPLAY_STAGE_SETTING_NODE* pSource, 
 	pTarget->bForcedEntryEnabled = pSource->bForcedEntryEnabled;
 }
 
-bool ZReplayLoader::CreateCommandFromStream(char* pStream, MCommand **ppRetCommand)
+static void ChangeGameState(REPLAY_STAGE_SETTING_NODE& rssn)
+{
+	MSTAGE_SETTING_NODE stageSetting;
+	memset(&stageSetting, 0, sizeof(MSTAGE_SETTING_NODE));
+
+	ConvertStageSettingNode(&rssn, &stageSetting);
+
+	ZGetGameClient()->GetMatchStageSetting()->UpdateStageSetting(&stageSetting);
+	ZApplication::GetStageInterface()->SetMapName(ZGetGameClient()->GetMatchStageSetting()->GetMapName());
+	ZGetGameInterface()->SetState(GUNZ_GAME);
+
+	ZGetCharacterManager()->Clear();
+	ZGetObjectManager()->Clear();
+}
+
+static bool LoadReplayData(ZReplayLoader& Loader, const char* filename)
+{
+	try
+	{
+		if (!Loader.LoadFile(filename))
+			return false;
+
+		auto Version = Loader.GetVersion();
+
+		auto VersionString = Version.GetVersionString();
+
+		MLog("Replay header loaded -- %s\n", VersionString.c_str());
+
+		REPLAY_STAGE_SETTING_NODE StageSetting;
+		Loader.GetStageSetting(StageSetting);
+
+		ChangeGameState(StageSetting);
+
+		if (StageSetting.nGameType == MMATCH_GAMETYPE_DUEL)
+		{
+			ZRuleDuel* pDuel = static_cast<ZRuleDuel*>(ZGetGameInterface()->GetGame()->GetMatch()->GetRule());
+			Loader.GetDuelQueueInfo(&pDuel->QInfo);
+		}
+
+		CreatePlayers(Loader.GetCharInfo());
+
+		auto PerCommand = [&](MCommand *Command, float Time)
+		{
+			ZObserverCommandItem *pZCommand = new ZObserverCommandItem;
+
+			pZCommand->pCommand = Command;
+			pZCommand->fTime = Time;
+
+			g_pGame->GetReplayCommandList()->push_back(pZCommand);
+		};
+
+		Loader.GetCommands(PerCommand, true);
+	}
+	catch (EOFException& e)
+	{
+		MLog("Unexpected EOF while reading replay %s at position %d\n", filename, e.GetPosition());
+		return false;
+	}
+	catch (...)
+	{
+		MLog("Something went wrong while reading replay %s\n", filename);
+		return false;
+	}
+
+	return true;
+}
+
+bool CreateReplayGame(const char *SelectedFilename)
+{
+	static std::string LastFile;
+
+	const char* Filename = nullptr;
+
+	if (SelectedFilename)
+	{
+		Filename = SelectedFilename;
+		LastFile = SelectedFilename;
+	}
+	else if (!LastFile.empty())
+	{
+		Filename = LastFile.c_str();
+	}
+	else
+	{
+		return false;
+	}
+
+	ZReplayLoader loader;
+
+	if (!LoadReplayData(loader, Filename))
+		return false;
+
+	ZGetGame()->OnLoadReplay(&loader);
+
+	return true;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+ZReplayLoader::ZReplayLoader() : m_fGameTime(0.0f)
+{
+	Version.Server = SERVER_NONE;
+	Version.nVersion = 0;
+	Version.nSubVersion = 0;
+}
+
+bool ZReplayLoader::LoadFile(const char* FileName)
+{
+	auto pair = ReadZFile(FileName);
+
+	if (!pair.first)
+		return false;
+
+	InflatedFile = std::move(pair.second);
+
+	return true;
+}
+
+template <typename T>
+bool ZReplayLoader::CreateCommandFromStream(char* pStream, MCommand& Command, T& Alloc)
 {
 	if (Version.Server == SERVER_OFFICIAL && Version.nVersion <= 2)
 	{
-		*ppRetCommand = CreateCommandFromStreamVersion2(pStream);
+		CreateCommandFromStreamVersion2(pStream, Command);
 		return true;
 	}
 
 	bool ReadSerial = !(Version.Server == SERVER_OFFICIAL && Version.nVersion == 11);
 
-	MCommand* pCommand = new MCommand;
-	if (!pCommand->SetData(pStream, ZGetGameClient()->GetCommandManager(), 65535, ReadSerial))
-	{
-		delete pCommand;
-		*ppRetCommand = nullptr;
-		return false;
-	}
-
-	*ppRetCommand = pCommand;
-	return true;
+	return Command.SetData(pStream, ZGetGameClient()->GetCommandManager(), 65535, ReadSerial, Alloc);
 }
 
 
-MCommand* ZReplayLoader::CreateCommandFromStreamVersion2(char* pStream)
+bool ZReplayLoader::CreateCommandFromStreamVersion2(char* pStream, MCommand& Command)
 {
 	MCommandManager* pCM = ZGetGameClient()->GetCommandManager();
-
-	MCommand* pCommand = new MCommand;
 	
 	BYTE nParamCount = 0;
 	unsigned short int nDataCount = 0;
@@ -228,13 +209,13 @@ MCommand* ZReplayLoader::CreateCommandFromStreamVersion2(char* pStream)
 		mlog("Error(MCommand::SetData): Wrong Command ID(%d)\n", nCommandID);
 		_ASSERT(0);
 
-		return pCommand;
+		return true;
 	}
-	pCommand->SetID(pDesc);
+	Command.SetID(pDesc);
 
-	if (ParseVersion2Command(pStream+nDataCount, pCommand))
+	if (ParseVersion2Command(pStream+nDataCount, &Command))
 	{
-		return pCommand;
+		return true;
 	}
 
 	// Parameters
@@ -249,10 +230,10 @@ MCommand* ZReplayLoader::CreateCommandFromStreamVersion2(char* pStream)
 		MCommandParameter* pParam = MakeVersion2CommandParameter((MCommandParameterType)nType, pStream, &nDataCount);
 		if (pParam == NULL) return false;
 		
-		pCommand->m_Params.push_back(pParam);
+		Command.m_Params.push_back(pParam);
 	}
 
-	return pCommand;
+	return true;
 }
 
 bool ZReplayLoader::ParseVersion2Command(char* pStream, MCommand* pCmd)

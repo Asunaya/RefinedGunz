@@ -5621,7 +5621,8 @@ bool ZGame::OnLoadReplay(ZReplayLoader* pLoader)
 	SetReadyState(ZGAME_READYSTATE_RUN);
 	GetMatch()->SetRoundState(MMATCH_ROUNDSTATE_FREE);
 	ZGetGameInterface()->GetCombatInterface()->SetObserverMode(true);
-	ZGetGameInterface()->GetCombatInterface()->GetObserver()->SetTarget(g_pGame->m_pMyCharacter->GetUID());
+	// This bugs out the replay when the target is an admin going into admin hiding
+	//ZGetGameInterface()->GetCombatInterface()->GetObserver()->SetTarget(g_pGame->m_pMyCharacter->GetUID());
 	g_bProfile=true;	
 	dwReplayStartTime=timeGetTime();
 

@@ -25,6 +25,17 @@
 
 #endif
 
+#include "Extensions.h"
+
+#ifdef VOICECHAT
+#pragma comment(lib, "opus.lib")
+#pragma comment(lib, "celt.lib")
+#pragma comment(lib, "silk_common.lib")
+#pragma comment(lib, "silk_fixed.lib")
+#pragma comment(lib, "silk_float.lib")
+#pragma comment(lib, "../portaudio/build/msvc/Win32/Release/portaudio.lib")
+#endif
+
 
 #pragma comment(lib,"winmm.lib")
 

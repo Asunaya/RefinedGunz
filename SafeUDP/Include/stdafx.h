@@ -10,6 +10,10 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+#include "targetver.h"
+
+#define POINTER_64 __ptr64
+
 // ¿©±â´Ù include
 
 #endif

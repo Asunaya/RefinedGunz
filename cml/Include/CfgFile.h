@@ -48,7 +48,7 @@ public :
 	char*		szKey;
 
 	CFGVALUE(char *Key){
-		szKey = strdup(Key);
+		szKey = _strdup(Key);
 	}
 	
 	~CFGVALUE(){
@@ -72,7 +72,7 @@ public :
 
 	void SetString(char *szVal){
 		tValue.id = CFG_STRINGTYPE;			// TSTRING
-		tValue.v.szval = strdup(szVal);
+		tValue.v.szval = _strdup(szVal);
 	}
 
 	int GetInteger(){
@@ -118,7 +118,7 @@ public:
 	CMLinkedList<CFGVALUE>	aValList;
 
 	CFGSECTION( char *Key ){
-		szKey = strdup(Key);
+		szKey = _strdup(Key);
 	}
 
 	virtual ~CFGSECTION(){

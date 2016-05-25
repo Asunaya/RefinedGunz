@@ -41,13 +41,9 @@ void InitLog(int logmethodflags, const char* pszLogFileName)
 	g_bLogInitialized = true;
 }
 
-static std::mutex LogMutex;
-
 void __cdecl MLog(const char *pFormat,...)
 {
-	//std::lock_guard<std::mutex> lock(LogMutex);
-
-	char temp[16*1024];
+	char temp[16 * 1024];
 
 	va_list args;
 
@@ -56,16 +52,21 @@ void __cdecl MLog(const char *pFormat,...)
 	va_end(args);
 
 
-	if(g_nLogMethod&MLOGSTYLE_FILE)
+	if (g_nLogMethod & MLOGSTYLE_FILE)
 	{
 		FILE *pFile = nullptr;
-		fopen_s(&pFile, logfilename, "a" );
-		if( !pFile ) pFile=fopen(logfilename,"w");
-		if( pFile==NULL ) return;
-		fprintf(pFile,temp);
+		fopen_s(&pFile, logfilename, "a");
+
+		if (!pFile)
+			fopen_s(&pFile, logfilename, "w");
+
+		if (pFile == nullptr)
+			return;
+
+		fprintf(pFile, "%s", temp);
 		fclose(pFile);
 	}
-	if(g_nLogMethod&MLOGSTYLE_DEBUGSTRING)
+	if (g_nLogMethod & MLOGSTYLE_DEBUGSTRING)
 	{
 		OutputDebugString(temp);
 	}
@@ -182,16 +183,14 @@ void MSEHTranslator(UINT nSeCode, _EXCEPTION_POINTERS* pExcPointers)
 	_exit(3);
 }
 
-void MInstallSEH()	// Compile Option에 /EHa 있어야함
-{
-	#ifndef _DEBUG
-		_set_se_translator(MSEHTranslator);
-	#endif
-}
+//void MInstallSEH()	// Compile Option에 /EHa 있어야함
+//{
+//	#ifndef _DEBUG
+//		_set_se_translator(MSEHTranslator);
+//	#endif
+//}
 
 #ifndef _PUBLISH
-
-#pragma comment(lib, "winmm.lib")
 
 #define MAX_PROFILE_COUNT	10000
 

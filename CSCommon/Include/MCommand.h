@@ -78,7 +78,6 @@ public:
 };
 
 
-
 /// 머신과 머신 혹은 로컬에 전달되는 커멘드
 class MCommand : public CMemPool<MCommand> 
 {
@@ -89,10 +88,10 @@ public:
 	vector<MCommandParameter*>	m_Params;				///< 파라미터
 	unsigned char				m_nSerialNumber;		///< 커맨드의 무결성을 체크하기 위한 일련번호
 	void ClearParam(int i);
+	void Reset(void);
 
 protected:
 	/// 초기화
-	void Reset(void);
 	/// 파라미터 초기화
 	void ClearParam(void);
 
@@ -146,10 +145,156 @@ public:
 	/// @param pData	[in] 커맨드 데이터 블럭
 	/// @param pPM		[in] 커맨드 매니져(MCommandDesc를 enum할 수 있다.)
 	/// @return			성공 여부
-	bool SetData(char* pData, MCommandManager* pCM, unsigned short nDataLen=USHRT_MAX, bool ReadSerial = true);
+	template <typename T = std::allocator<uint8_t>>
+	bool SetData(char* pData, MCommandManager* pCM, unsigned short nDataLen=USHRT_MAX, bool ReadSerial = true, T& Alloc = T());
 
 	int GetSize();
 };
+
+template <typename ParamT, typename AllocT, typename... ArgsT>
+auto MakeParam(AllocT& Alloc, ArgsT&&... Args)
+{
+	auto p = (ParamT*)Alloc.allocate(sizeof(ParamT));
+	Alloc.construct(p, Args...);
+	return p;
+}
+
+template <typename T>
+bool MCommand::SetData(char* pData, MCommandManager* pCM, unsigned short nDataLen, bool ReadSerial, T& Alloc)
+{
+	Reset();
+
+	unsigned short int nDataCount = 0;
+
+	// Get Total Size
+	unsigned short nTotalSize = 0;
+	memcpy(&nTotalSize, pData, sizeof(nTotalSize));
+
+	if ((nDataLen != USHRT_MAX) && (nDataLen != nTotalSize)) return false;
+
+	nDataCount += sizeof(nTotalSize);
+
+	// Command
+	unsigned short int nCommandID = 0;
+	memcpy(&nCommandID, pData + nDataCount, sizeof(nCommandID));
+	nDataCount += sizeof(nCommandID);
+
+	MCommandDesc* pDesc = pCM->GetCommandDescByID(nCommandID);
+	if (pDesc == NULL)
+	{
+		_ASSERT(0);
+		//MLog("Unknown command ID %04X\n", nCommandID);
+
+		return false;
+	}
+	SetID(pDesc);
+
+	if (ReadSerial)
+	{
+		memcpy(&m_nSerialNumber, pData + nDataCount, sizeof(m_nSerialNumber));
+		nDataCount += sizeof(m_nSerialNumber);
+	}
+
+
+	// Parameters
+	int nParamCount = pDesc->GetParameterDescCount();
+
+	//memcpy(&nParamCount, pData+nDataCount, sizeof(nParamCount));
+	//if (nParamCount != pDesc->GetParameterDescCount()) return false;
+	//nDataCount += sizeof(nParamCount);
+
+	for (int i = 0; i<nParamCount; ++i) {
+		//BYTE nType;
+		//memcpy(&nType, pData+nDataCount, sizeof(BYTE));
+		//nDataCount += sizeof(BYTE);
+
+		MCommandParameterType nParamType = pDesc->GetParameterType(i);
+
+		MCommandParameter* pParam = NULL;
+		switch (nParamType) {
+		case MPT_INT:
+			pParam = MakeParam<MCommandParameterInt>(Alloc);
+			break;
+		case MPT_UINT:
+			pParam = MakeParam<MCommandParameterUInt>(Alloc);
+			break;
+		case MPT_FLOAT:
+			pParam = MakeParam<MCommandParameterFloat>(Alloc);
+			break;
+		case MPT_STR:
+			if (std::is_same<T, std::allocator<uint8_t>>::value)
+				pParam = MakeParam<MCommandParameterString>(Alloc);
+			else
+				pParam = MakeParam<MCommandParameterStringCustomAlloc<T>>(Alloc, Alloc);
+			break;
+		case MPT_VECTOR:
+			pParam = MakeParam<MCommandParameterVector>(Alloc);
+			break;
+		case MPT_POS:
+			pParam = MakeParam<MCommandParameterPos>(Alloc);
+			break;
+		case MPT_DIR:
+			pParam = MakeParam<MCommandParameterDir>(Alloc);
+			break;
+		case MPT_BOOL:
+			pParam = MakeParam<MCommandParameterBool>(Alloc);
+			break;
+		case MPT_COLOR:
+			pParam = MakeParam<MCommandParameterColor>(Alloc);
+			break;
+		case MPT_UID:
+			pParam = MakeParam<MCommandParameterUID>(Alloc);
+			break;
+		case MPT_BLOB:
+			if (std::is_same<T, std::allocator<uint8_t>>::value)
+				pParam = MakeParam<MCommandParameterBlob>(Alloc);
+			else
+				pParam = MakeParam<MCommandParameterBlobCustomAlloc<T>>(Alloc, Alloc);
+			break;
+		case MPT_CHAR:
+			pParam = MakeParam<MCommandParameterChar>(Alloc);
+			break;
+		case MPT_UCHAR:
+			pParam = MakeParam<MCommandParameterUChar>(Alloc);
+			break;
+		case MPT_SHORT:
+			pParam = MakeParam<MCommandParameterShort>(Alloc);
+			break;
+		case MPT_USHORT:
+			pParam = MakeParam<MCommandParameterUShort>(Alloc);
+			break;
+		case MPT_INT64:
+			pParam = MakeParam<MCommandParameterInt64>(Alloc);
+			break;
+		case MPT_UINT64:
+			pParam = MakeParam<MCommandParameterUInt64>(Alloc);
+			break;
+		case MPT_SVECTOR:
+			pParam = MakeParam<MCommandParameterShortVector>(Alloc);
+			break;
+		default:
+			//mlog("Error(MCommand::SetData): Wrong Param Type\n");
+			_ASSERT(false);		// Unknow Parameter!!!
+			return false;
+		}
+
+		nDataCount += pParam->SetData(pData + nDataCount);
+
+		m_Params.push_back(pParam);
+
+		if (nDataCount > nTotalSize)
+		{
+			return false;
+		}
+	}
+
+	if (nDataCount != nTotalSize)
+	{
+		return false;
+	}
+
+	return true;
+}
 
 
 class MCommandSNChecker

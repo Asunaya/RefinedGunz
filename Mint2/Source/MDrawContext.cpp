@@ -380,19 +380,17 @@ void MDrawContext::TextMC(int x, int y, const char* szText)
 {
 	unsigned int nPos = 0, nLen, nOffset = 0;
 	const char *pSrc = szText;
-	char *pText;
 
 	if(GetFont() == NULL) return;
 
 	while(true){
 		nPos = strcspn(pSrc, "^");
-		pText = (char *)malloc(nPos+1);
-		if(pText){
-			strncpy(pText, pSrc, nPos);				// 사이즈만큼 카피
-			pText[nPos] = '\0';						// 문자열 만들고,
-			Text(x+nOffset, y, pText);		// 출력
-			nOffset += GetFont()->GetWidth(pText);
-			free(pText);							// 텍스트 버퍼 삭제
+
+		{
+			const std::string UncoloredText(pSrc, pSrc + nPos);
+
+			Text(x + nOffset, y, UncoloredText.c_str());
+			nOffset += GetFont()->GetWidth(UncoloredText.c_str());
 		}
 
 		nLen = strlen(pSrc);
@@ -429,8 +427,9 @@ char *MDrawContext::GetPureText(const char *szText)
 	char *pText;
 
 	nLen = strlen(szText);
-	pText = (char *)malloc(nLen+1);
-	memset(pText, 0, nLen+1);
+	const int pTextSize = nLen + 1;
+	pText = (char *)malloc(pTextSize);
+	memset(pText, 0, pTextSize);
 
 	while(true){
 		nPos = strcspn(pSrc, "^");
@@ -443,15 +442,15 @@ char *MDrawContext::GetPureText(const char *szText)
 				pSrc = pSrc + nPos + 2;
 			} else {
 				pSrc = pSrc + nPos + 1;
-				strcat(pText, "^");
+				strcat_safe(pText, pTextSize, "^");
 			}
 		} else {
 			if(nPos+1 == nLen && TestDigit(pSrc[nPos]) == false){
-				strcat(pText, "^");
+				strcat_safe(pText, pTextSize, "^");
 				//pSrc = pSrc + 1;
 			}
 			if(nPos == nLen && (pSrc[nPos-1] == '^')){
-				strcat(pText, "^");				
+				strcat_safe(pText, pTextSize, "^");				
 			}
 			break;
 		}
@@ -533,9 +532,8 @@ int MDrawContext::TextMultiLine(MRECT& r, const char* szText,int nLineGap,bool b
 				FLUSH;
 			}else
 			{
-				strncpy(buffer,szCurrent,nCharCount);
-				buffer[nCharCount]=0;
-				Text(r.x+nX, y,buffer);
+				strcpy_safe(buffer, szCurrent);
+				Text(r.x+nX, y, buffer);
 				FLUSHPOS(r.x+nX);
 			}
 			y+=pFont->GetHeight()+nLineGap;
@@ -549,6 +547,8 @@ int MDrawContext::TextMultiLine(MRECT& r, const char* szText,int nLineGap,bool b
 	MEndProfile(99);
 	return nLine-nSkipLine;
 }
+#undef FLUSHPOS
+#undef FLUSH
 
 // TODO: TextMultiLine2를 없애고 align을 TextMultiLine에 통합한다
 int MDrawContext::TextMultiLine2( MRECT& r, const char* szText,int nLineGap,bool bAutoNextLine,MAlignmentMode am )
@@ -563,7 +563,7 @@ int MDrawContext::TextMultiLine2( MRECT& r, const char* szText,int nLineGap,bool
 	int nCurrLine = 0;
 	int IncY = ( r.h	/ nLine ) ; // 세로축 증분
 
-#define		MAX_WIDGET_LINE_LENGTH	1024
+	static constexpr auto MAX_WIDGET_LINE_LENGTH = 1024;
 	int clip = 0;
 	char	TempStr[MAX_WIDGET_LINE_LENGTH];
 

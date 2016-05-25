@@ -39,7 +39,7 @@ static char g_pGetLastErrStr[256];
 void _SetError(int nErrCode,const char *pErrSubStr,const char *pFileName,int nLineNum,const char *pLastModification,const char *pErrStr)
 {
 #ifdef _WIN32
-	LPVOID lpMsgBuf;
+	LPSTR lpMsgBuf;
 #endif
 
 	g_nErrCode=nErrCode;

@@ -637,7 +637,8 @@ void MMatchItemDescMgr::ParseItem(MXmlElement& element)
 	iterator tempitor = find(pNewDesc->m_nID);
 	if (tempitor != end())
 	{
-		_ASSERT(0);		// 같은 ID의 아이템이 존재한다.
+		//_ASSERT(0);		// 같은 ID의 아이템이 존재한다.
+		MLog("ZItem error: %s has identical id (%d) to %s\n", pNewDesc->m_szName, pNewDesc->m_nID, tempitor->second->m_szName);
 	}
 #endif
 

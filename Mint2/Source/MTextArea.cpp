@@ -911,14 +911,7 @@ void MTextAreaLook::OnTextDraw_WordWrap(MTextArea* pTextArea, MDrawContext* pDC)
 			strcpy_safe(szText,text.c_str());
 		}
 		else {
-			// 혹시 이런경우인가 테스트해보자.
-			if(itor->text.length()>sizeof(szText))
-			{
-				strncpy(szText,itor->text.c_str(),sizeof(szText)-2);
-				szText[sizeof(szText)-1]=0;
-			}
-			else
-				strcpy_safe(szText,itor->text.c_str());
+			strcpy_safe(szText,itor->text.c_str());
 		}
 
 		// 첫줄이면 skip count 만큼 넘겨준다

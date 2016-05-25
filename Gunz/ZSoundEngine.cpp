@@ -794,16 +794,8 @@ void ZSoundEngine::PlaySEHitObject( float x, float y, float z, RBSPPICKINFO& inf
 		return;
 	}
 
-	if( strcpy_safe( buffer, base_snd_name ) == NULL )
-	{
-		// 기본 소리 출력
-		PlaySound("fx_bullethit_mt_con", rvector(x,y,z), false, false );
-	}
-	if( strncat( buffer, temp + index, size - index ) == NULL )
-	{
-		// 기본 소리 출력
-		PlaySound("fx_bullethit_mt_con", rvector(x,y,z), false, false );
-	}
+	strcpy_safe(buffer, base_snd_name);
+	strncat(buffer, temp + index, size - index);
 
 	PlaySoundElseDefault(buffer, "fx_bullethit_mt_con", rvector(x,y,z) );
 }

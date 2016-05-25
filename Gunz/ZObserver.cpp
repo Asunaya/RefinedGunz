@@ -64,8 +64,10 @@ bool ZObserver::OnKeyEvent(bool bCtrl, char nKey)
 		}
 		
 		ZCharacter* pCharacter = g_pGame->m_CharacterManager.Find(uidTarget);
-		if(pCharacter && pCharacter->IsDie() == false)		
+		if (pCharacter && pCharacter->IsDie() == false)
+		{
 			SetTarget(uidTarget);
+		}
 	}
 	return true;
 }
@@ -133,30 +135,12 @@ void ZObserver::Show(bool bVisible)
 	m_bVisible = false;
 //	ZApplication::GetGameInterface()->SetCursorEnable(false);
 
-	ZApplication::GetGame()->ReleaseObserver();	// Observe Command Queue 청소
+	ZApplication::GetGame()->ReleaseObserver();
 }
 
 void ZObserver::ShowInfo(bool bShow)
 {
 	if (m_pTargetCharacter == NULL) return;
-/*
-	MWidget* pWidget = m_pIDLResource->FindWidget("ObserverInfoLabel");
-	
-	if (pWidget!=NULL)
-	{
-		pWidget->Show(bShow);
-
-		if (bShow)
-		{
-			char szTemp[128];
-			sprintf_s(szTemp, "%s (HP:%d, AP:%d)", m_pTargetCharacter->GetProperty()->szName,
-					m_pTargetCharacter->GetStatus()->nHP, m_pTargetCharacter->GetStatus()->nAP);
-			pWidget->SetText(szTemp);
-
-			((MLabel*)pWidget)->SetAlignment(MAM_HCENTER);
-		}
-	}
-*/
 }
 
 void ZObserver::ChangeToNextTarget()
@@ -178,7 +162,7 @@ void ZObserver::ChangeToNextTarget()
 				if (bFlag) 
 				{
 					Show(false);
-					return;		// 두번 루프를 돌면 타겟이 아무도 없는 것이니 옵져버 해제
+					return;
 				}
 
 				itor = g_pGame->m_CharacterManager.begin();
@@ -210,7 +194,7 @@ void ZObserver::SetType(ZObserverType nType)
 
 bool ZObserver::SetFirstTarget()
 {
-	for (ZCharacterManager::iterator itor = g_pGame->m_CharacterManager.begin(); 
+	for (ZCharacterManager::iterator itor = g_pGame->m_CharacterManager.begin();
 		itor != g_pGame->m_CharacterManager.end(); ++itor)
 	{
 		ZCharacter* pCharacter =  (*itor).second;
@@ -232,6 +216,8 @@ bool ZObserver::SetFirstTarget()
 bool ZObserver::IsVisibleSetTarget(ZCharacter* pCharacter)
 {
 	if(pCharacter->IsDie()) return false;
+	if (pCharacter->IsAdminHide()) return false;
+	if (pCharacter->GetTeamID() == MMT_SPECTATOR) return false;
 
 	if(g_pGame->IsReplay()) return true;
 
@@ -256,30 +242,6 @@ bool ZObserver::IsVisibleSetTarget(ZCharacter* pCharacter)
 
 	if(m_nType==ZOM_BLUE && pCharacter->GetTeamID()==MMT_BLUE)
 		return true;
-
-
-	/*
-	// AdminHide 처리
-	MMatchObjCache* pObjCache = ZGetGameClient()->FindObjCache(ZGetMyUID());
-	if (pObjCache && pObjCache->CheckFlag(MTD_PlayerFlags_AdminHide))
-		return true;
-
-	// 디버그 버젼에서는 아무나 볼수 있다
-#ifndef _PUBLISH
-	return true;
-#endif
-
-	if (pCharacter != g_pGame->m_pMyCharacter)
-	{
-		if (g_pGame->GetMatch()->IsTeamPlay())
-		{
-			if (pCharacter->GetTeamID() == g_pGame->m_pMyCharacter->GetTeamID())
-			{
-				return true;
-			}
-		}
-	}
-	*/
 
 	return false;
 
@@ -478,17 +440,6 @@ void ZObserver::OnDraw(MDrawContext* pDC)
 			TextRelative( pDC, 0.83f, 0.01f, charName[ 2], false);
 		}
 
-
-		// 현재 보고있는 캐릭터 이름 표시
-/*		if ( m_pTargetCharacter)
-		{
-			char szName[128];
-			sprintf_s( szName, "%s (HP:%d, AP:%d)", m_pTargetCharacter->GetUserName(), m_pTargetCharacter->GetHP(), m_pTargetCharacter->GetAP());
-			pDC->SetColor(MCOLOR(0xFFA0A0A0));
-			TextRelative(pDC, 0.5f, 75.0f/800.0f, szName, true);
-		}
-*/
-		// 연승 마크 표시
 		ZGetCombatInterface()->DrawVictory( pDC, 162, 20, pDuel->QInfo.m_nVictory);
 	}
 	
@@ -581,18 +532,6 @@ void ZObserver::OnDraw(MDrawContext* pDC)
 			sprintf_s( szText, "%s:%d", ZMsg( MSG_WORD_BLUETEAM), nNumOfBlueTeam); 
 			TextRelative( pDC, 0.92f, 65.0f/600.0f, szText, true);
 		}
-		else
-		{
-/*			backgroundcolor = MCOLOR(0,0,0, 150);
-			pDC->SetColor(backgroundcolor);
-			pDC->FillRectangle( 700 * sizex, 37 * sizey, 85 * sizex, 22 * sizey);
-
-			// 인원수 표시
-			backgroundcolor = MCOLOR(180,180,180, 255);
-			pDC->SetColor(backgroundcolor);
-			sprintf_s( szText, "인원:%d", nNumOfTotal); 
-			TextRelative( pDC, 0.92f, 40.0f/600.0f, szText, true);
-*/		}
 	}
 
 	CheckDeadTarget();
@@ -631,7 +570,7 @@ void ZObserver::CheckDeadTarget()
 	nLastTime = nNowTime;
 }
 
-void ZObserver::SetTarget(MUID muid)
+void ZObserver::SetTarget(const MUID& muid)
 {
 	ZCharacter* pCharacter = NULL;
 	pCharacter = g_pGame->m_CharacterManager.Find(muid);
@@ -645,33 +584,4 @@ void ZObserver::NextLookMode()
 {
 	ZCamera *pCamera = ZGetGameInterface()->GetCamera();
 	pCamera->SetNextLookMode();
-
-	/*
-	m_nLookType = ZObserverLookMode(m_nLookType +1);
-
-	// 운영자 등급만 가능하다
-	if(ZGetMyInfo()->IsAdminGrade())
-	{
-		if(m_nLookType==ZOLM_MAX)
-			m_nLookType = ZOLM_BACKVIEW;
-	}else
-	{
-		if(m_nLookType==ZOLM_FREELOOK)
-			m_nLookType = ZOLM_BACKVIEW;
-	}
-
-	ZCamera *pCamera = ZGetGameInterface()->GetCamera();
-	switch(m_nLookType) {
-		case ZOLM_BACKVIEW: 
-			pCamera->SetLookMode(ZCAMERA_DEFAULT);break;
-		case ZOLM_FREEANGLELOOK: 
-			pCamera->SetLookMode(ZCAMERA_FREEANGLE);break;
-		case ZOLM_FREELOOK: 
-			pCamera->SetLookMode(ZCAMERA_FREELOOK);break;
-		case ZOLM_MINIMAP: 
-			pCamera->SetLookMode(ZCAMERA_MINIMAP);break;
-		default:
-			_ASSERT(FALSE);
-	}
-	*/
 }

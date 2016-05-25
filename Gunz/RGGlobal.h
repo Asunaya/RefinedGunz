@@ -1,5 +1,7 @@
 #pragma once
 
+#include "RGTypes.h"
+
 inline void cprint(...)
 {
 }
@@ -120,8 +122,65 @@ public:
 		ptr = rhs;
 	}
 
-	T* operator ->()
+	T* operator ->() const
 	{
 		return ptr;
 	}
+};
+
+#define STACK_ALLOC(sa_type, sa_num) static_cast<std::add_pointer<sa_type>::type>((sa_num) * sizeof(sa_type) > 5012 ? new char[sa_num * sizeof(sa_type)] : alloca(sa_num * sizeof(sa_type)))
+#define MAKE_STACK_ARRAY(msa_type, msa_num, ...) StackArray<msa_type>(STACK_ALLOC(msa_type, msa_num), msa_num, (msa_num) * sizeof(msa_type) > 5012, __VA_ARGS__)
+
+template <typename T>
+class StackArray
+{
+public:
+	template <typename... ArgsType>
+	StackArray(T* p, size_t s, bool h, ArgsType... Args) : ptr(p), Size(s), Heap(h)
+	{
+		for (size_t i = 0; i < s; i++)
+		{
+			new (p + i) T(Args...);
+		}
+	}
+
+	template <typename T_fn>
+	StackArray(T* p, size_t s, bool h, T_fn fn) : ptr(p), Size(s), Heap(h)
+	{
+		for (size_t i = 0; i < s; i++)
+		{
+			fn(p + i, i);
+		}
+	}
+
+	T& operator[](size_t Index)
+	{
+		return ptr[Index];
+	}
+
+	T* get()
+	{
+		return ptr;
+	}
+
+	size_t size()
+	{
+		return Size;
+	}
+
+	~StackArray()
+	{
+		for (size_t i = 0; i < Size; i++)
+		{
+			ptr[i].~T();
+		}
+
+		if (Heap)
+			delete[] ptr;
+	}
+
+private:
+	T* ptr;
+	size_t Size;
+	bool Heap;
 };

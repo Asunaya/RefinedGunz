@@ -54,12 +54,6 @@ ZConfiguration::~ZConfiguration()
 
 void ZConfiguration::Destroy()
 {
-	while(m_HotKeys.size())
-	{
-		Mint::GetInstance()->UnregisterHotKey(m_HotKeys.begin()->first);
-		delete m_HotKeys.begin()->second;
-		m_HotKeys.erase(m_HotKeys.begin());
-	}
 }
 
 unsigned long int GetVirtKey(const char *key)
@@ -228,6 +222,8 @@ bool ZConfiguration::LoadGameTypeCfg(const char* szFileName)
 		delete []buffer;
 		return false;
 	}
+
+	mlog("- SUCCESS\n");
 
 
 	MXmlElement rootElement, chrElement, attrElement;
@@ -518,7 +514,9 @@ bool ZConfiguration::LoadConfig(const char* szFileName)
 			childElement.GetChildContents(&m_Etc.bRejectWhisper, ZTOK_ETC_REJECT_WHISPER);
 			childElement.GetChildContents(&m_Etc.bRejectInvite, ZTOK_ETC_REJECT_INVITE);
 			childElement.GetChildContents(&m_Etc.nCrossHair, ZTOK_ETC_CROSSHAIR);
-			childElement.GetChildContents((int *)&bDrawTrails, "DRAWTRAILS");
+			int temp = 0;
+			childElement.GetChildContents(&temp, "DRAWTRAILS");
+			bDrawTrails = temp != 0;
 		}
 
 
@@ -526,123 +524,11 @@ bool ZConfiguration::LoadConfig(const char* szFileName)
 		{
 			childElement.GetChildContents((int *)&ChatBackgroundColor, "BACKGROUNDCOLOR");
 		}
-
-		/*
-		if (parentElement.FindChildNode(ZTOK_BINDS, &bindsElement))
-		{
-			for(int i=0;i<bindsElement.GetChildNodeCount();i++)
-			{
-				char tagname[256];
-				MXmlElement bind=bindsElement.GetChildNode(i);
-				bind.GetTagName(tagname);
-				if(strcmp(tagname,ZTOK_BIND)==0)
-				{
-					char key[256],command[256];
-					int ctrl,alt,shift;
-
-					bind.GetAttribute(key,ZTOK_KEY);
-					bind.GetAttribute(&ctrl,ZTOK_KEY_CTRL);
-					bind.GetAttribute(&alt,ZTOK_KEY_ALT);
-					bind.GetAttribute(&shift,ZTOK_KEY_SHIFT);
-					bind.GetContents(command);
-
-					ZHOTKEY *photkey=new ZHOTKEY;
-					photkey->nModifier=0;
-
-					if(ctrl) photkey->nModifier|=MOD_CONTROL;
-					if(alt) photkey->nModifier|=MOD_ALT;
-					if(shift) photkey->nModifier|=MOD_SHIFT;
-
-					photkey->nVirtKey=GetVirtKey(key);
-
-					photkey->command=string(command);
-
-					int nHotkeyID=MRegisterHotKey(photkey->nModifier,photkey->nVirtKey);
-					m_HotKeys.insert(ZHOTKEYS::value_type(nHotkeyID,photkey));
-				}
-			}
-		}
-		*/
-	}
-
-	//if( m_Video.bTerrible )
-	//{
-	//	//m_Video.nCharTexLevel = 2;
-	//	//m_Video.nMapTexLevel = 2;
-	//	//m_Video.nEffectLevel = 2;
-	//	//m_Video.bDynamicLight = false;
-	//	//m_Video.bReflection = false;
-	//}
-	//else 
-	//{
-	//	m_Video.bLightMap = false; // 최하위 버전이 아닐 경우 라이트 맵을 끄지 못한다
-	//}
-
-	xmlConfig.Destroy();
-
-	return true;
-}
-
-// 핫키는 봉인되었다.
-bool ZConfiguration::LoadHotKey(const char* szFileName)
-{
-	MXmlDocument	xmlConfig;
-	MXmlElement		parentElement, serverElement, bindsElement;
-	MXmlElement		childElement;
-
-	xmlConfig.Create();
-	if (!xmlConfig.LoadFromFile(szFileName)) 
-	{
-		xmlConfig.Destroy();
-		return false;
-	}
-
-	parentElement = xmlConfig.GetDocumentElement();
-	int iCount = parentElement.GetChildNodeCount();
-
-	if (!parentElement.IsEmpty())
-	{
-		if (parentElement.FindChildNode(ZTOK_BINDS, &bindsElement))
-		{
-			for(int i=0;i<bindsElement.GetChildNodeCount();i++)
-			{
-				char tagname[256];
-				MXmlElement bind=bindsElement.GetChildNode(i);
-				bind.GetTagName(tagname);
-				if(strcmp(tagname,ZTOK_BIND)==0)
-				{
-					char key[256],command[256];
-					bool ctrl,alt,shift;
-
-					bind.GetAttribute(key,ZTOK_KEY);
-					bind.GetAttribute(&ctrl,ZTOK_KEY_CTRL);
-					bind.GetAttribute(&alt,ZTOK_KEY_ALT);
-					bind.GetAttribute(&shift,ZTOK_KEY_SHIFT);
-					bind.GetContents(command);
-
-					ZHOTKEY *photkey=new ZHOTKEY;
-					photkey->nModifier=0;
-
-					if(ctrl) photkey->nModifier|=MOD_CONTROL;
-					if(alt) photkey->nModifier|=MOD_ALT;
-					if(shift) photkey->nModifier|=MOD_SHIFT;
-
-					photkey->nVirtKey=GetVirtKey(key);
-
-					photkey->command=string(command);
-
-					int nHotkeyID=Mint::GetInstance()->RegisterHotKey(photkey->nModifier,photkey->nVirtKey);
-
-					m_HotKeys.insert(ZHOTKEYS::value_type(nHotkeyID,photkey));
-				}
-			}
-		}
 	}
 
 	xmlConfig.Destroy();
 
 	return true;
-
 }
 
 bool ZConfiguration::SaveToFile(const char *szFileName, const char* szHeader)
@@ -1027,34 +913,6 @@ bool ZConfiguration::SaveToFile(const char *szFileName, const char* szHeader)
 
 	aRootElement.AppendText("\n\n\t");
 
-	// Bind : 봉인
-
-	/*
-	aRootElement.AppendText("\n\t");
-	MXmlElement bindsElement=aRootElement.CreateChildElement(ZTOK_BINDS);
-
-	for(ZHOTKEYS::iterator i=m_HotKeys.begin();i!=m_HotKeys.end();i++)
-	{
-		bindsElement.AppendText("\n\t\t");
-
-		MXmlElement bind=bindsElement.CreateChildElement(ZTOK_BIND);
-
-		ZHOTKEY *photkey=(*i).second;
-
-		bind.SetContents(photkey->command.c_str());
-		
-
-		char buffer[256];
-		bind.SetAttribute(ZTOK_KEY,GetKeyName(photkey->nVirtKey,buffer));
-
-		bind.SetAttribute(ZTOK_KEY_CTRL,photkey->nModifier & MOD_CONTROL ? 1 : 0);
-		bind.SetAttribute(ZTOK_KEY_ALT,photkey->nModifier & MOD_ALT ? 1 : 0);
-		bind.SetAttribute(ZTOK_KEY_SHIFT,photkey->nModifier & MOD_SHIFT ? 1 : 0);
-		
-	}
-	bindsElement.AppendText("\n\t");
-	*/
-
 	aRootElement.AppendText("\n");
 
 
@@ -1070,12 +928,6 @@ bool ZConfiguration::SaveToFile(const char *szFileName, const char* szHeader)
 //#endif
 
 	return xmlConfig.SaveToFile(szFileName);
-}
-
-ZHOTKEY *ZConfiguration::GetHotkey(int nID) 
-{ 
-	ZHOTKEYS::iterator found=m_HotKeys.find(nID);
-	return found==m_HotKeys.end() ? NULL : found->second;
 }
 
 void ZConfiguration::Init()

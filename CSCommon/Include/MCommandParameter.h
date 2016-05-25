@@ -180,6 +180,53 @@ public:
 	virtual int GetSize();
 };
 
+template <typename AllocT>
+class MCommandParameterStringCustomAlloc : public MCommandParameterString
+{
+public:
+	explicit MCommandParameterStringCustomAlloc(AllocT& Alloc_) : Alloc(Alloc_) { }
+
+	virtual ~MCommandParameterStringCustomAlloc() override
+	{
+		if (m_Value)
+		{
+			Alloc.deallocate((unsigned char*)m_Value, strlen(m_Value) + 1);
+			m_Value = nullptr;
+		}
+	}
+
+	virtual MCommandParameterStringCustomAlloc<AllocT>* Clone(void) override
+	{
+		return new MCommandParameterStringCustomAlloc<AllocT>(Alloc);
+	}
+
+	virtual int SetData(char* pData) override
+	{
+		if (m_Value)
+		{
+			Alloc.deallocate((unsigned char*)m_Value, strlen(m_Value) + 1);
+			m_Value = nullptr;
+		}
+
+		unsigned short nValueSize = 0;
+		memcpy(&nValueSize, pData, sizeof(nValueSize));
+
+		if ((nValueSize > (USHRT_MAX - 2)) || (0 == nValueSize))
+		{
+			ASSERT(0 && "비정상 길이의 문자.");
+			return sizeof(nValueSize);
+		}
+
+		m_Value = (char*)Alloc.allocate(nValueSize);
+
+		memcpy(m_Value, pData + sizeof(nValueSize), nValueSize);
+		return nValueSize + sizeof(nValueSize);
+	}
+
+private:
+	AllocT& Alloc;
+};
+
 /// 3D 벡터 파라미터
 class MCommandParameterVector : public MCommandParameter {
 public:
@@ -274,21 +321,68 @@ public:
 
 class MCommandParameterBlob : public MCommandParameter{
 public:
-	void*	m_Value;
-	int		m_nSize;
+	void*	m_Value = nullptr;
+	int		m_nSize = 0;
 public:
 	MCommandParameterBlob(void);
-	MCommandParameterBlob(const void* Value, int nSize);
-	virtual ~MCommandParameterBlob(void);
+	explicit MCommandParameterBlob(const void* Value, int nSize);
+	virtual ~MCommandParameterBlob(void) override;
 
-	virtual MCommandParameterBlob* Clone(void);
-	virtual void GetValue(void* p);
-	virtual int GetData(char* pData, int nSize);
-	virtual int SetData(char* pData);
-	virtual void *GetPointer() { return m_Value; }
-	virtual const char* GetClassName(void){ return "Blob"; }
-	virtual void GetString(char* szValue, int maxlen){ sprintf_s(szValue, maxlen, "%02X%02X..", *((unsigned char*)(m_Value)), *((unsigned char*)(m_Value)+1)); }
+	virtual MCommandParameterBlob* Clone(void) override;
+	virtual void GetValue(void* p) override;
+	virtual int GetData(char* pData, int nSize) override;
+	virtual int SetData(char* pData) override;
+	virtual void *GetPointer() override { return m_Value; }
+	virtual const char* GetClassName(void) override { return "Blob"; }
+	virtual void GetString(char* szValue, int maxlen) override { sprintf_s(szValue, maxlen, "%02X%02X..", *((unsigned char*)(m_Value)), *((unsigned char*)(m_Value)+1)); }
 	virtual int GetSize();
+};
+
+template <typename AllocT>
+class MCommandParameterBlobCustomAlloc : public MCommandParameterBlob
+{
+public:
+	explicit MCommandParameterBlobCustomAlloc(AllocT& Alloc_) : Alloc(Alloc_) { }
+
+	virtual ~MCommandParameterBlobCustomAlloc() override
+	{
+		if (m_Value)
+		{
+			Alloc.deallocate((unsigned char*)m_Value, m_nSize);
+			m_Value = nullptr;
+		}
+	}
+
+	virtual MCommandParameterBlobCustomAlloc<AllocT>* Clone(void) override
+	{
+		return new MCommandParameterBlobCustomAlloc<AllocT>(Alloc);
+	}
+
+	virtual int SetData(char* pData) override
+	{
+		if (m_Value)
+		{
+			Alloc.deallocate((unsigned char*)m_Value, m_nSize);
+			m_Value = nullptr;
+		}
+
+		memcpy(&m_nSize, pData, sizeof(m_nSize));
+		if (m_nSize > MAX_BLOB_SIZE)
+		{
+			m_Value = nullptr;
+			m_nSize = 0;
+			return sizeof(m_nSize);
+		}
+
+		m_Value = Alloc.allocate(m_nSize);
+
+		memcpy(m_Value, pData + sizeof(m_nSize), m_nSize);
+
+		return m_nSize + sizeof(m_nSize);
+	}
+
+private:
+	AllocT& Alloc;
 };
 
 

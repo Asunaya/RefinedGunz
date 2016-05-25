@@ -1807,9 +1807,7 @@ char* GetItemSlotName( const char* szName, int nItem)
 
 bool ZGameInterface::OnCreate(ZLoadingProgress *pLoadingProgress)
 {
-	mlog("1\n");
 	g_pGameClient = new ZGameClient();
-	mlog("3\n");
 
 	if(!m_Tips.Initialize(ZApplication::GetFileSystem(), ZGetLocale()->GetLanguage())) {
 		mlog("Check tips.xml\n");
@@ -3356,8 +3354,6 @@ void ZGameInterface::OnGameUpdate(float fElapsed)
 }
 
 
-extern bool g_bTestFromReplay;
-
 void ZGameInterface::OnReplay()
 {
 	ShowWidget( "ReplayConfirm", false);
@@ -3372,7 +3368,7 @@ bool ZGameInterface::Update(float fElapsed)
 
 	if (GetState() == GUNZ_LOBBY)
 	{
-		if (g_bTestFromReplay == true) 
+		if (ZGetApplication()->GetLaunchMode() == ZApplication::ZLAUNCH_MODE_STANDALONE_REPLAY)
 		{
 			ShowWidget( "Lobby", false);
 			ShowWidget( "ReplayConfirm", true);

@@ -1,8 +1,9 @@
-#ifndef _ZREPLAY_H
-#define _ZREPLAY_H
+#pragma once
 
 #include "ZCharacter.h"
 #include "ZReplayStructs.h"
+#include "ArrayView.h"
+#include "RGTypes.h"
 
 struct REPLAY_STAGE_SETTING_NODE
 {
@@ -21,29 +22,16 @@ struct REPLAY_STAGE_SETTING_NODE
 	bool				bAutoTeamBalancing;
 };
 
-extern bool g_bTestFromReplay;
-
-bool CreateReplayGame(char *filename);
+bool CreateReplayGame(const char *filename);
 
 
-// 건즈 리플레이 파일
 #define GUNZ_REC_FILE_ID		0x95b1308a
 
-// version 4 : duel 모드의 현재 상태 저장이 추가되었습니다.
 #define GUNZ_REC_FILE_VERSION	4
 #define GUNZ_REC_FILE_EXT		"gzr"
 
 #define RG_REPLAY_MAGIC_NUMBER 0x00DEFBAD
 #define RG_REPLAY_BINARY_VERSION 1
-
-class ZReplay
-{
-private:
-public:
-	ZReplay() {}
-	~ZReplay() {}
-
-};
 
 enum SERVER
 {
@@ -98,8 +86,9 @@ class ZReplayLoader
 {
 public:
 	ZReplayLoader();
-	~ZReplayLoader();
-	bool Load(const char* filename);
+
+	bool LoadFile(const char* FileName);
+
 	float GetGameTime() const { return m_fGameTime; }
 
 	ReplayVersion GetVersion();
@@ -107,16 +96,16 @@ public:
 	void GetDuelQueueInfo(MTD_DuelQueueInfo* QueueInfo = nullptr);
 	std::vector<ReplayPlayerInfo> GetCharInfo();
 	template <typename T>
-	bool GetCommands(T ForEachCommand);
+	bool GetCommands(T ForEachCommand, bool PersistentMCommands, ArrayView<u32>* WantedCommandIDs = nullptr);
 
 private:
-	ZFile *pFile = nullptr;
-	ReplayVersion Version;
-	REPLAY_STAGE_SETTING_NODE m_StageSetting;
-	float m_fGameTime = 0.f;
 	std::vector<unsigned char> InflatedFile;
+
+	ReplayVersion Version;
+	float m_fGameTime = 0.f;
 	int Position = 0;
 	bool IsDojo = false;
+	MMATCH_GAMETYPE GameType;
 
 	template <typename T>
 	void Read(T& Obj);
@@ -128,19 +117,10 @@ private:
 	template <typename T>
 	bool TryRead(T& Obj);
 
-	void CreatePlayers(const std::vector<ReplayPlayerInfo>& Players);
-
-	void ConvertStageSettingNode(REPLAY_STAGE_SETTING_NODE* pSource, MSTAGE_SETTING_NODE* pTarget);
-	void ChangeGameState();
-
-	bool CreateCommandFromStream(char* pStream, MCommand **ppRetCommand);
-	static MCommand* CreateCommandFromStreamVersion2(char* pStream);
+	template <typename T = std::allocator<uint8_t>>
+	bool CreateCommandFromStream(char* pStream, MCommand& Command, T& Alloc = T());
+	bool FixCommand(MCommand& Command);
+	static bool CreateCommandFromStreamVersion2(char* pStream, MCommand& Command);
 	static bool ParseVersion2Command(char* pStream, MCommand* pCmd);
 	static MCommandParameter* MakeVersion2CommandParameter(MCommandParameterType nType, char* pStream, unsigned short int* pnDataCount);
 };
-
-
-
-
-
-#endif

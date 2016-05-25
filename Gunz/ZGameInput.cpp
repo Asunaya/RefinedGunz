@@ -81,17 +81,7 @@ bool ZGameInput::OnEvent(MEvent* pEvent)
 	////////////////////////////////////////////////////////////////////////////
 	switch(pEvent->nMessage){
 	case MWM_HOTKEY:
-		{
-			int nKey = pEvent->nKey;
-			ZHOTKEY *hk=ZGetConfiguration()->GetHotkey(nKey);
-			//if(ProcessLowLevelCommand(hk->command.c_str())==false)
-			
-			char buffer[256];
-			strcpy_safe(buffer,hk->command.c_str());
-			ZApplication::GetGameInterface()->GetChat()->Input(buffer);
-
-//			ConsoleInputEvent(hk->command.c_str());
-		}break;
+		break;
 
 	case MWM_LBUTTONDOWN:
 		{
@@ -699,12 +689,13 @@ void ZGameInput::GameCheckSequenceKeyCommand()
 
 	if(m_ActionKeyHistory.size())
 	{
-		for(int ai=0;ai<(int)m_SequenceActions.size();ai++)
+		for (int ai = 0; ai < (int)m_SequenceActions.size() && !m_ActionKeyHistory.empty(); ai++)
 		{
 			ZKEYSEQUENCEACTION action=m_SequenceActions.at(ai);
 
 			list<ZACTIONKEYITEM>::iterator itr=m_ActionKeyHistory.end();
 			itr--;
+
 			bool bAction=true;
 			for(int i=action.nKeyCount-1;i>=0;i--)
 			{

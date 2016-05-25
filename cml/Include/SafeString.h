@@ -3,8 +3,55 @@
 #include <string.h>
 #include <stdarg.h>
 
-template<size_t size>
-inline char *strcpy_safe(char(&Dest)[size], const char *Source)
+#pragma warning(push)
+#pragma warning(disable:4996)
+
+//template <bool b, size_t size1, size_t size2>
+//inline char* strcpy_safe_fixed_impl(char *Dest, const char* Source);
+//
+//template <size_t size1, size_t size2>
+//inline char* strcpy_safe_fixed_impl<true, size1, size2>(char* Dest, const char* Source)
+//{
+//	return strcpy(Dest, Source);
+//}
+//
+//template <size_t size1, size_t size2>
+//inline char* strcpy_safe_fixed_impl<false, size1, size2>(char (&Dest)[size1], const char (&Source)[size2])
+//{
+//	strcpy_safe(Dest, (const char*)Source);
+//}
+//
+//template <size_t size1, size_t size2>
+//inline char* strcpy_safe(char (&Dest)[size1], const char (&Source)[size2])
+//{
+//	strcpy_safe_fixed_impl<(size2 < size1)>(Dest, Source);
+//}
+
+template <bool b, size_t size1, size_t size2>
+struct strcpy_literal_dummy
+{
+	static inline char* strcpy_literal_impl(char (&Dest)[size1], const char (&Source)[size2]);
+};
+
+template <size_t size1, size_t size2>
+struct strcpy_literal_dummy<true, size1, size2>
+{
+	static inline char* strcpy_literal_impl(char(&Dest)[size1], const char(&Source)[size2])
+	{
+		memcpy(Dest, Source, size2);
+
+		return Dest + size2 - 1;
+	}
+};
+
+template <size_t size1, size_t size2>
+inline char* strcpy_literal(char(&Dest)[size1], const char(&Source)[size2])
+{
+	return strcpy_literal_dummy<(size2 < size1), size1, size2>::strcpy_literal_impl(Dest, Source);
+}
+
+template <size_t size>
+inline char* strcpy_safe(char(&Dest)[size], const char *Source)
 {
 	int len = strlen(Source);
 
@@ -17,10 +64,10 @@ inline char *strcpy_safe(char(&Dest)[size], const char *Source)
 
 	Dest[len] = 0;
 
-	return Dest;
+	return Dest + len;
 }
 
-inline char *strcpy_safe(char *Dest, int size, const char *Source)
+inline char* strcpy_safe(char *Dest, int size, const char *Source)
 {
 	int len = strlen(Source);
 
@@ -33,11 +80,20 @@ inline char *strcpy_safe(char *Dest, int size, const char *Source)
 
 	Dest[len] = 0;
 
-	return Dest;
+	return Dest + len;
 }
 
-template<size_t size>
-inline char *strcat_safe(char(&Dest)[size], const char *Source)
+//template <size_t size>
+//inline char* strncpy_safe(char(&Dest)[size], const char *Source, size_t Count)
+//{
+//	strncpy(Dest, Source, Count);
+//	Dest[Count - 1] = 0;
+//
+//	return Dest + Count - 1;
+//}
+
+template <size_t size>
+inline char* strcat_safe(char(&Dest)[size], const char *Source)
 {
 	int DestLen = strlen(Dest);
 	int SourceLen = strlen(Source);
@@ -52,10 +108,10 @@ inline char *strcat_safe(char(&Dest)[size], const char *Source)
 
 	Dest[DestLen + BytesToCopy] = 0;
 
-	return Dest;
+	return Dest + DestLen + BytesToCopy;
 }
 
-inline char *strcat_safe(char *Dest, int size, const char *Source)
+inline char* strcat_safe(char *Dest, int size, const char *Source)
 {
 	int DestLen = strlen(Dest);
 	int SourceLen = strlen(Source);
@@ -70,11 +126,9 @@ inline char *strcat_safe(char *Dest, int size, const char *Source)
 
 	Dest[DestLen + BytesToCopy] = 0;
 
-	return Dest;
+	return Dest + DestLen + BytesToCopy;
 }
 
-#pragma warning(push)
-#pragma warning(disable:4996)
 template<size_t size>
 inline int sprintf_safe(char(&Dest)[size], const char *Format, ...)
 {
@@ -101,4 +155,5 @@ inline int sprintf_safe(char *Dest, int size, const char *Format, ...)
 
 	return ret;
 }
+
 #pragma warning(pop)

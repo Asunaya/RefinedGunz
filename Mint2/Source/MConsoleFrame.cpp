@@ -57,8 +57,8 @@ bool MConsoleEdit::InputFilterKey(int nKey)
 	{
 		const char* cp = GetText();
 		char szBuf[1024];
-		strcpy_safe(szBuf, ">");
-		strcat(szBuf, cp);
+		strcpy_literal(szBuf, ">");
+		strcat_safe(szBuf, cp);
 
 		m_pConsoleFrame->OutputMessage(szBuf);
 

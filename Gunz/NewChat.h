@@ -120,8 +120,8 @@ public:
 	void ClearHistory() { vMsgs.clear(); }
 
 	const D3DRECT &GetRect() const { return Border; }
-	void SetRect(D3DRECT &r) { Border = r; UpdateBorder(); }
-	void SetRect(int x1, int y1, int x2, int y2) { Border.x1 = x1; Border.y1 = y1; Border.x2 = x2; Border.y2 = y2; UpdateBorder(); }
+	void SetRect(D3DRECT &r) { Border = r; }
+	void SetRect(int x1, int y1, int x2, int y2) { Border.x1 = x1; Border.y1 = y1; Border.x2 = x2; Border.y2 = y2; }
 
 	float GetFadeTime() const { return fFadeTime; }
 	void SetFadeTime(float fFade) { fFadeTime = fFade; }
@@ -188,10 +188,7 @@ private:
 		short v2;
 		short v3;
 	};
-	IDirect3DVertexBuffer9 *pBorderVertexBuffer;
-	IDirect3DIndexBuffer9 *pBorderIndexBuffer;
 
-	void UpdateBorder();
 	void DrawBorder();
 
 	void Line(float x1, float y1, float x2, float y2, D3DCOLOR Color = CHAT_DEFAULT_INTERFACE_COLOR, float z = 0) {

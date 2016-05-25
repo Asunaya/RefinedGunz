@@ -3,7 +3,7 @@
 #include "RGMain.h"
 #include "Draw.h"
 
-VoiceChat g_VoiceChat;
+#ifdef VOICECHAT
 
 template <typename SampleType = VoiceChat::SampleFormat>
 static inline unsigned long GetSampleFormat()
@@ -17,8 +17,12 @@ template <> static inline unsigned long GetSampleFormat<short>()			{ return paIn
 template <> static inline unsigned long GetSampleFormat<int>()				{ return paInt32; }
 template <> static inline unsigned long GetSampleFormat<float>()			{ return paFloat32; }
 
+VoiceChat* VoiceChat::Instance = nullptr;
+
 VoiceChat::VoiceChat()
 {
+	Instance = this;
+
 #ifdef WAVEIN
 	thr = std::thread([this]()
 	{
@@ -331,7 +335,7 @@ void VoiceChat::ThreadLoop()
 
 int VoiceChat::RecordCallbackWrapper(const void *inputBuffer, void *outputBuffer, unsigned long framesPerBuffer, const PaStreamCallbackTimeInfo* timeInfo, PaStreamCallbackFlags statusFlags, void *userData)
 {
-	return g_VoiceChat.RecordCallback(inputBuffer, outputBuffer, framesPerBuffer, timeInfo, statusFlags, userData);
+	return GetInstance()->RecordCallback(inputBuffer, outputBuffer, framesPerBuffer, timeInfo, statusFlags, userData);
 }
 
 int VoiceChat::RecordCallback(const void *inputBuffer, void *outputBuffer,
@@ -372,9 +376,9 @@ int VoiceChat::PlayCallback(const void *inputBuffer, void *outputBuffer,
 	PaStreamCallbackFlags statusFlags,
 	void *userData)
 {
-	auto it = g_VoiceChat.MicStreams.find((ZCharacter *)userData);
+	auto it = GetInstance()->MicStreams.find((ZCharacter *)userData);
 
-	if (it == g_VoiceChat.MicStreams.end())
+	if (it == GetInstance()->MicStreams.end())
 		return paComplete;
 
 	//MLog("Play! Size: %d\n", g_VoiceChat.MicStreams.size());
@@ -386,7 +390,7 @@ int VoiceChat::PlayCallback(const void *inputBuffer, void *outputBuffer,
 
 		if (Queue.empty())
 		{
-			MLog("Empty!\n");
+			//MLog("Empty!\n");
 			it->second.Streaming = false;
 			return paComplete;
 		}
@@ -410,7 +414,7 @@ void VoiceChat::OnCreateDevice()
 	if (!ret.first)
 		return MLog("Failed to load speaker icon texture file\n");
 
-	auto hr = D3DXCreateTextureFromFileInMemory(RGetDevice(), ret.second.data(), ret.second.size(), &SpeakerTexture);
+	auto hr = D3DXCreateTextureFromFileInMemory(RGetDevice(), ret.second.data(), ret.second.size(), &SpeakerTexture.ptr);
 
 	if (FAILED(hr))
 		return MLog("Failed to create speaker icon texture\n");
@@ -456,3 +460,4 @@ void VoiceChat::Draw()
 		DrawStuff(item.first);
 	}
 }
+#endif

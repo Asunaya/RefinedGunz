@@ -42,7 +42,7 @@ char* MLex::GetTwoArgs(char* pszArg, char* pszOutArg1, char* pszOutArg2)
 bool MLex::SplitValue(char* pszSource, char* pszSeperator, char* pszField, char* pszValue)
 {
 	char* pszCursor = strstr(pszSource, pszSeperator);
-	if (pszCursor == NULL) return false;
+	if (pszCursor == nullptr) return false;
 
 	int nFieldLen = static_cast<int>(pszCursor - pszSource);
 	if (nFieldLen <= 0) return false;
@@ -52,10 +52,10 @@ bool MLex::SplitValue(char* pszSource, char* pszSeperator, char* pszField, char*
 	if (nValueEnd - nValueBegin <= 0) return false;
 
 	strncpy(pszField, pszSource, nFieldLen );
-	pszField[nFieldLen] = NULL;
+	pszField[nFieldLen] = 0;
 
 	strncpy(pszValue, pszSource+nValueBegin, nValueEnd-nValueBegin);
-	pszValue[nValueEnd] = NULL;
+	pszValue[nValueEnd] = 0;
 
 	return true;
 }
@@ -75,7 +75,7 @@ int MLex::FindCommand(char* szString)
 
 void MLex::Interprete(void* pData, char* pszString)
 {
-	if ((m_pCmdTable == NULL) || (pszString == NULL))
+	if ((m_pCmdTable == nullptr) || (pszString == nullptr))
 		return; 
 
 	char szCmd[128];

@@ -601,7 +601,7 @@ bool MHyperText::Open(char *szTextBuffer)
 	Close();
 
 	m_nLen = strlen(szTextBuffer);
-	m_pBuffer = strdup(szTextBuffer);
+	m_pBuffer = _strdup(szTextBuffer);
 
 	ret = Parse();
 	if(ret == false){

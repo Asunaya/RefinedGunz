@@ -18,9 +18,6 @@ RVisualMeshMgr::RVisualMeshMgr() {
 	m_id_last = 0;
 	m_node_table.reserve(MAX_VMESH_TABLE);//±âº»
 
-	for(int i=0;i<MAX_VMESH_TABLE;i++)
-		m_node_table[i] = NULL;
-
 }
 
 RVisualMeshMgr::~RVisualMeshMgr() {

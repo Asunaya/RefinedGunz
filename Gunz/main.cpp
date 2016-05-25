@@ -1095,6 +1095,10 @@ DWORD g_dwMainThreadID;
 
 int PASCAL WinMain(HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline, int cmdshow)
 {
+//#ifdef DEBUG
+//	MessageBox(0, "hi", "hi", 0);
+//#endif
+
 	SetUnhandledExceptionFilter(static_cast<LONG(__stdcall *)(_EXCEPTION_POINTERS *)>(
 		[](_EXCEPTION_POINTERS *p) -> LONG {
 		return CrashExceptionDump(p, "Gunz.dmp");

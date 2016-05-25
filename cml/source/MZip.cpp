@@ -841,10 +841,12 @@ bool MZip::isVersion1Mrs(FILE* fp)
 
 bool MZip::RecoveryZip(char* zip_name)
 {
-	FILE* fp = fopen(zip_name, "rb+");
+	FILE* fp = nullptr;
+	
+	auto err = fopen_s(&fp, zip_name, "rb+");
 
-	if(fp==NULL) {
-		mlog("%s 파일이 읽기 전용인지 확인하세요!~ \n",zip_name);
+	if(err != 0 || fp == nullptr) {
+		mlog("Couldn't open file %s \n", zip_name);
 		return false;
 	}
 
@@ -961,12 +963,12 @@ void FFileList::ConvertVtf()
 		pNode = (*node);
 
 //		ShellExecute()
-		strcpy_safe(temp,pNode->m_name);
+		strcpy_safe(temp, pNode->m_name);
 		len = strlen(temp);
 		temp[len-3] = 0;
-		strcat(temp,"tga");
+		strcat_safe(temp, "tga");
 
-		sprintf_s(temp_arg,"%s %s",pNode->m_name,temp);
+		sprintf_safe(temp_arg,"%s %s",pNode->m_name,temp);
 		HINSTANCE hr = ShellExecute(NULL, _T("open"), _T("vtf2tga.exe"),_T(temp_arg), NULL, SW_HIDE);
 //		ShellExecute()
 //		_execl("vtf2tga.exe","%s %s",pNode->m_name,temp);
@@ -988,7 +990,7 @@ void FFileList::ConvertNameMRes2Zip()
 		len = (int)strlen(pNode->m_name);
 
 		_buf_rename[len-3] = NULL;
-		strcat(_buf_rename,"zip");
+		strcat_safe(_buf_rename,"zip");
 
 		rename( pNode->m_name, _buf_rename);
 
@@ -1011,7 +1013,7 @@ void FFileList::ConvertNameZip2MRes()
 		len = (int)strlen(pNode->m_name);
 
 		_buf_rename[len-3] = NULL;
-		strcat(_buf_rename,"mrs");
+		strcat_safe(_buf_rename,"mrs");
 
 		rename( pNode->m_name, _buf_rename);
 
@@ -1123,8 +1125,8 @@ bool GetFindFileList(char* path,char* ext,FFileList& pList)
 			if(file_t.attrib & _A_SUBDIR ) {
 				char _path[256];
 				strcpy_safe(_path,file_t.name);
-				strcat(_path,"/");
-				strcat(_path,path);
+				strcat_safe(_path,"/");
+				strcat_safe(_path,path);
 
 				GetFindFileList(_path,ext,pList);
 				continue;
@@ -1143,9 +1145,9 @@ bool GetFindFileList(char* path,char* ext,FFileList& pList)
 
 				if(len > 3) {
 
-					strncpy(temp_name,path,len-3);
+					memcpy(temp_name,path,len-3);
 					temp_name[len-3]=0;
-					strcat(temp_name,file_t.name);
+					strcat_safe(temp_name,file_t.name);
 				}
 				else {
 					strcpy_safe(temp_name,file_t.name);
@@ -1187,8 +1189,8 @@ bool GetFindFileListWin(char* path,char* ext,FFileList& pList)
 
 				strcpy_safe(_path,path);
 				_path[len-1] = 0;
-				strcat(_path,file_t.cFileName);
-				strcat(_path,"/*");
+				strcat_safe(_path,file_t.cFileName);
+				strcat_safe(_path,"/*");
 
 				GetFindFileListWin(_path,ext,pList);
 				continue;
@@ -1209,7 +1211,7 @@ bool GetFindFileListWin(char* path,char* ext,FFileList& pList)
 
 					strncpy(temp_name,path,len-1);
 					temp_name[len-1]=0;
-					strcat(temp_name,file_t.cFileName);
+					strcat_safe(temp_name,file_t.cFileName);
 				}
 				else {
 					strcpy_safe(temp_name,file_t.cFileName);

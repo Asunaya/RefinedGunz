@@ -2,6 +2,7 @@
 
 #include "ZRuleDuel.h"
 #include <boost/mpl/has_xxx.hpp>
+#include "stack_allocator.hpp"
 
 inline ReplayVersion ZReplayLoader::GetVersion()
 {
@@ -10,14 +11,14 @@ inline ReplayVersion ZReplayLoader::GetVersion()
 	unsigned int version = 0;
 	unsigned int header;
 
-	bool bFoundServer = false;
+	bool FoundServer = false;
 
 	Read(header);
 
 	if (header == RG_REPLAY_MAGIC_NUMBER)
 	{
 		Version.Server = SERVER_REFINED_GUNZ;
-		bFoundServer = true;
+		FoundServer = true;
 	}
 	else if (header != GUNZ_REC_FILE_ID)
 	{
@@ -28,12 +29,13 @@ inline ReplayVersion ZReplayLoader::GetVersion()
 	Read(version);
 
 	Version.nVersion = version;
+	Version.nSubVersion = 0;
 
 	unsigned char Something;
 
 	ReadAt(Something, 0x4A);
 
-	if (!bFoundServer)
+	if (!FoundServer)
 	{
 		if (Version.nVersion >= 7 && Version.nVersion <= 9 && Something <= 0x01)
 		{
@@ -62,6 +64,8 @@ inline ReplayVersion ZReplayLoader::GetVersion()
 			Version.nSubVersion = 1;
 		}
 	}
+
+	this->Version = Version;
 
 	return Version;
 }
@@ -137,12 +141,13 @@ inline void ZReplayLoader::GetStageSetting(REPLAY_STAGE_SETTING_NODE& ret)
 	break;
 	};
 
-	IsDojo = !_stricmp(m_StageSetting.szMapName, "Dojo");
+	IsDojo = !_stricmp(ret.szMapName, "Dojo");
+	GameType = ret.nGameType;
 }
 
 inline void ZReplayLoader::GetDuelQueueInfo(MTD_DuelQueueInfo* QueueInfo)
 {
-	if (m_StageSetting.nGameType != MMATCH_GAMETYPE_DUEL)
+	if (GameType != MMATCH_GAMETYPE_DUEL)
 		return;
 
 	if (!QueueInfo)
@@ -380,24 +385,102 @@ inline void ZReplayLoader::ReadN(void* Obj, size_t Size)
 	Position += Size;
 };
 
-template <typename T>
-bool ZReplayLoader::GetCommands(T ForEachCommand)
+inline bool ZReplayLoader::FixCommand(MCommand& Command)
 {
+	if (Version.Server == SERVER_FREESTYLE_GUNZ && IsDojo)
+	{
+		auto Transform = [](float pos[3])
+		{
+			pos[0] -= 600;
+			pos[1] += 2800;
+			pos[2] += 400;
+		};
+
+		if (Command.GetID() == MC_PEER_BASICINFO)
+		{
+			MCommandParameter* pParam = Command.GetParameter(0);
+			if (pParam->GetType() != MPT_BLOB)
+				return false;
+
+			ZPACKEDBASICINFO* ppbi = (ZPACKEDBASICINFO*)pParam->GetPointer();
+
+			float pos[3] = { (float)ppbi->posx, (float)ppbi->posy, (float)ppbi->posz };
+
+			if (pos[2] < 0)
+			{
+				Transform(pos);
+
+				ppbi->posx = pos[0];
+				ppbi->posy = pos[1];
+				ppbi->posz = pos[2];
+			}
+		}
+	}
+	else if (Version.Server == SERVER_OFFICIAL && Version.nVersion == 11)
+	{
+		if (Command.GetID() == MC_PEER_BASICINFO)
+		{
+			auto Param = (MCommandParameterBlob*)Command.GetParameter(0);
+			if (Param->GetType() != MPT_BLOB)
+				return false;
+
+			auto pbi = Param->GetPointer();
+
+			[pbi = (short*)pbi]
+		{
+			for (int i = 0; i < 3; i++)
+			{
+				pbi[8 + i] = pbi[11 + i];
+			}
+		}();
+
+		[pbi = (BYTE*)pbi]
+		{
+			for (int i = 0; i < 3; i++)
+			{
+				pbi[22 + i] = pbi[28 + i];
+			}
+		}();
+
+		[pbi = (ZPACKEDBASICINFO*)pbi]
+		{
+			pbi->posz -= 125;
+			pbi->velx = 0;
+			pbi->vely = 0;
+			pbi->velz = 0;
+
+			ZBasicInfo bi;
+			pbi->Unpack(bi);
+
+			if (fabs(fabs(Magnitude(bi.direction)) - 1.f) > 0.001)
+			{
+				bi.direction = rvector(1, 0, 0);
+				pbi->Pack(bi);
+			}
+		}();
+		}
+	}
+
+	return true;
+}
+
+template <typename T>
+bool ZReplayLoader::GetCommands(T ForEachCommand, bool PersistentMCommands, ArrayView<u32>* WantedCommandIDs)
+{
+	MCommand StackCommand;
+	u8 Stack[512];
+	stack_allocator<u8, ArraySize(Stack)> Alloc(Stack);
+	char CommandBuffer[1024];
+
 	float fGameTime;
 	Read(fGameTime);
 	m_fGameTime = fGameTime;
-
-	int nCommandCount = 0;
 
 	int nSize;
 	float fTime;
 
 	while (TryRead(fTime))
 	{
-		nCommandCount++;
-
-		char CommandBuffer[1024];
-
 		MUID uidSender;
 		Read(uidSender);
 		Read(nSize);
@@ -407,90 +490,98 @@ bool ZReplayLoader::GetCommands(T ForEachCommand)
 
 		ReadN(CommandBuffer, nSize);
 
-		MCommand *Command;
-
-		if (!CreateCommandFromStream(CommandBuffer, &Command))
-			continue;
-
-		Command->m_Sender = uidSender;
-
-		if (Version.Server == SERVER_FREESTYLE_GUNZ && IsDojo)
+		if (WantedCommandIDs)
 		{
-			auto Transform = [](float pos[3])
+			u32 CommandID = *(u16 *)(CommandBuffer + sizeof(u16));
+
+			bool OuterContinue = true;
+
+			for (auto id : *WantedCommandIDs)
 			{
-				pos[0] -= 600;
-				pos[1] += 2800;
-				pos[2] += 400;
-			};
-
-			if (Command->GetID() == MC_PEER_BASICINFO)
-			{
-				MCommandParameter* pParam = Command->GetParameter(0);
-				if (pParam->GetType() != MPT_BLOB)
-					continue;
-
-				ZPACKEDBASICINFO* ppbi = (ZPACKEDBASICINFO*)pParam->GetPointer();
-
-				float pos[3] = { (float)ppbi->posx, (float)ppbi->posy, (float)ppbi->posz };
-
-				if (pos[2] < 0)
+				if (id == CommandID)
 				{
-					Transform(pos);
-
-					ppbi->posx = pos[0];
-					ppbi->posy = pos[1];
-					ppbi->posz = pos[2];
+					OuterContinue = false;
+					break;
 				}
 			}
+
+			if (OuterContinue)
+				continue;
 		}
-		else if (Version.Server == SERVER_OFFICIAL && Version.nVersion == 11)
+
+		auto DoStuff = [&](MCommand& Command)
 		{
-			if (Command->GetID() == MC_PEER_BASICINFO)
-			{
-				auto Param = (MCommandParameterBlob*)Command->GetParameter(0);
-				if (Param->GetType() != MPT_BLOB)
-					continue;
+			Command.m_Sender = uidSender;
 
-				auto pbi = Param->GetPointer();
+			if (!FixCommand(Command))
+				return;
 
-				[pbi = (short*)pbi]
-				{
-					for (int i = 0; i < 3; i++)
-					{
-						pbi[8 + i] = pbi[11 + i];
-					}
-				}();
+			ForEachCommand(&Command, fTime);
+		};
 
-				[pbi = (BYTE*)pbi]
-				{
-					for (int i = 0; i < 3; i++)
-					{
-						pbi[22 + i] = pbi[28 + i];
-					}
-				}();
+		if (PersistentMCommands)
+		{
+			MCommand* Command = new MCommand;
 
-				[pbi = (ZPACKEDBASICINFO*)pbi]
-				{
-					pbi->posz -= 125;
-					pbi->velx = 0;
-					pbi->vely = 0;
-					pbi->velz = 0;
+			if (!CreateCommandFromStream(CommandBuffer, *Command))
+				continue;
 
-					ZBasicInfo bi;
-					pbi->Unpack(bi);
-
-					if (fabs(fabs(Magnitude(bi.direction)) - 1.f) > 0.001)
-					{
-						bi.direction = rvector(1, 0, 0);
-						pbi->Pack(bi);
-					}
-				}();
-
-				//Param->m_nSize = sizeof(ZPACKEDBASICINFO);
-			}
+			DoStuff(*Command);
 		}
+		else
+		{
+			auto ClearStackCommandParams = [&]()
+			{
+				for (auto Param : StackCommand.m_Params)
+				{
+					Alloc.destroy(Param);
 
-		ForEachCommand(Command, fTime);
+					size_t size = 0;
+
+					switch (Param->GetType())
+					{
+					case MPT_INT: size = sizeof(MCommandParameterInt); break;
+					case MPT_UINT: size = sizeof(MCommandParameterUInt); break;
+					case MPT_FLOAT: size = sizeof(MCommandParameterFloat); break;
+					case MPT_STR: size = sizeof(MCommandParameterStringCustomAlloc<decltype(Alloc)>); break;
+					case MPT_VECTOR: size = sizeof(MCommandParameterVector); break;
+					case MPT_POS: size = sizeof(MCommandParameterPos); break;
+					case MPT_DIR: size = sizeof(MCommandParameterDir); break;
+					case MPT_BOOL: size = sizeof(MCommandParameterBool); break;
+					case MPT_COLOR: size = sizeof(MCommandParameterColor); break;
+					case MPT_UID: size = sizeof(MCommandParameterUID); break;
+					case MPT_BLOB: size = sizeof(MCommandParameterBlobCustomAlloc<decltype(Alloc)>); break;
+					case MPT_CHAR: size = sizeof(MCommandParameterChar); break;
+					case MPT_UCHAR: size = sizeof(MCommandParameterUChar); break;
+					case MPT_SHORT: size = sizeof(MCommandParameterShort); break;
+					case MPT_USHORT: size = sizeof(MCommandParameterUShort); break;
+					case MPT_INT64: size = sizeof(MCommandParameterInt64); break;
+					case MPT_UINT64: size = sizeof(MCommandParameterUInt64); break;
+					case MPT_SVECTOR: size = sizeof(MCommandParameterShortVector); break;
+					};
+
+					Alloc.deallocate((uint8_t*)Param, size);
+				}
+
+				StackCommand.m_Params.clear();
+			};
+
+			if (!StackCommand.m_Params.empty())
+			{
+				MLog("Not empty! size %d, command id %d\n", StackCommand.m_Params.size(), StackCommand.GetID());
+				StackCommand.m_Params.clear();
+			}
+
+			if (!CreateCommandFromStream(CommandBuffer, StackCommand, Alloc))
+			{
+				//MLog("Failed to read command ID %d, total size %d\n", *(u16 *)(CommandBuffer + sizeof(u16)), *(u16*)CommandBuffer);
+				ClearStackCommandParams();
+				continue;
+			}
+
+			DoStuff(StackCommand);
+			ClearStackCommandParams();
+		}
 	}
 
 	return true;

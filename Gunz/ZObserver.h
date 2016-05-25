@@ -68,6 +68,7 @@ protected:
 
 	void ShowInfo(bool bShow);
 	void SetTarget(ZCharacter* pCharacter);
+	void SetTarget(const MUID& muid);
 	bool IsVisibleSetTarget(ZCharacter* pCharacter);	///< 타겟 가능한지 체크
 	void CheckDeadTarget();		// 타겟이 죽었으면 다음타겟으로 넘긴다.
 public:
@@ -77,7 +78,6 @@ public:
 	void Destroy();
 	void ChangeToNextTarget();
 	bool SetFirstTarget();
-	void SetTarget(MUID muid);
 
 	bool IsVisible() { return m_bVisible; }
 	void Show(bool bVisible);

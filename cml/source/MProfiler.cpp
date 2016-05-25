@@ -246,8 +246,8 @@ bool MProfiler::FinalAnalysis(char* szFileName)
 	if(nTotalTime==0) nTotalTime = 1;
 
 	char szTime[128], szDate[128];
-    _strtime(szTime);
-    _strdate(szDate);
+    _strtime_s(szTime);
+    _strdate_s(szDate);
 
 	sprintf_s(szLog, "%s %s\n\n", szDate, szTime);
 	fputs(szLog, fp);

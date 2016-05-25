@@ -3167,7 +3167,7 @@ ZDummyCharacter::ZDummyCharacter() : ZMyCharacter()
 	info.nEquipedItemDesc[MMCIP_LEGS] = nLegsPreset[RandomNumber(0, 4)];
 	info.nEquipedItemDesc[MMCIP_FEET] = nFeetPreset[RandomNumber(0, 4)];
 
-	Create(&info);
+	Create(info);
 	SetVisible(true);
 
 	m_Items.GetItem(MMCIP_PRIMARY)->InitBullet(999999);
@@ -3258,6 +3258,9 @@ void ZMyCharacter::ProcessDelayedWork()
 			OnDelayedWork(pItem);
 			i = m_DelayedWorkList.erase(i);
 			delete pItem;
+
+			if (i == m_DelayedWorkList.end())
+				break;
 		}
 	}
 }

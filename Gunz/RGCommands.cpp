@@ -119,6 +119,7 @@ void LoadRGCommands(ZChatCmdManager &CmdManager)
 		ZPOSTCMD1(MC_PEER_SET_SWORD_COLOR, MCmdParamUInt(Color));
 	}, CCF_ALL, 1, 1, true, "/swordcolor <AARRGGBB>", "");
 
+#ifdef VOICECHAT
 	CmdManager.AddCommand(0, "mute", [](const char *line, int argc, char ** const argv) {
 		auto ret = FindSinglePlayer(argv[1]);
 
@@ -145,4 +146,5 @@ void LoadRGCommands(ZChatCmdManager &CmdManager)
 
 		ZChatOutputF("%s has been %s", ret.second->GetUserNameA(), b ? "muted" : "unmuted");
 	}, CCF_ALL, 1, 1, true, "/swordcolor <AARRGGBB>", "");
+#endif
 }

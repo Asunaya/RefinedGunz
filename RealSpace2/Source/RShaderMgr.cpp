@@ -73,8 +73,11 @@ bool RShaderMgr::Initialize()
 			D3DDECL_END()
 		};
 */
-		if(FAILED( hr=RGetDevice()->CreateVertexDeclaration(decl,&_pVShaderDecl) ) )
+		if (FAILED(hr = RGetDevice()->CreateVertexDeclaration(decl, &_pVShaderDecl)))
+		{
+			MLog("RShaderMgr::Initialize -- Failed to create vertex declaration\n");
 			return false;
+		}
 
 		m_ShaderDeclVec.push_back(_pVShaderDecl);
 
@@ -91,7 +94,7 @@ bool RShaderMgr::Initialize()
 	
 	mbUsingShader	= false;
 
-	mlog("shader initialize successful : %d\n", m_ShaderVec.size() );
+	//mlog("shader initialize successful : %d\n", m_ShaderVec.size() );
 	return	true;
 }
 

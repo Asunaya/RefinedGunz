@@ -521,9 +521,9 @@ MWidget* Mint::SetDragObject(MWidget* pSender, MBitmap* pBitmap, const char* szS
 	MWidget* pPrev = m_pDragSourceObject;
 	m_pDragSourceObject = pSender;
 	if(szString==NULL) m_szDragObjectString[0] = 0;
-	else strncpy(m_szDragObjectString, szString, 256);
+	else strcpy_safe(m_szDragObjectString, szString);
 	if(szItemString==NULL) m_szDragObjectItemString[0] = 0;
-	else strncpy(m_szDragObjectItemString, szItemString, 256);
+	else strcpy_safe(m_szDragObjectItemString, szItemString);
 	m_pDragObjectBitmap = pBitmap;
 	m_GrabPoint = MEvent::GetMousePos();
 	m_bVisibleDragObject = false;
