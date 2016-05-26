@@ -1,0 +1,4 @@
+EXPORTS
+
+opus_get_version_string						@1
+opus_strerror								@2

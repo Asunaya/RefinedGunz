@@ -10,8 +10,6 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
-#undef OPUS_BUILD
-#define OPUS_EXPORT
 #include "opus.h"
 #include "../portaudio/include/portaudio.h"
 
