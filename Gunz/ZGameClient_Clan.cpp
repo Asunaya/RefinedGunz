@@ -277,14 +277,14 @@ void ZGameClient::OnClanAnswerSponsorAgreement(const int nRequestID, const MUID&
 void ZGameClient::AnswerSponsorAgreement(bool bAnswer)
 {
 	char szCharName[256];
-	sprintf_s(szCharName, ZGetMyInfo()->GetCharName());
+	sprintf_safe(szCharName, ZGetMyInfo()->GetCharName());
 	ZPostAnswerSponsorAgreement(m_nRequestID, m_uidRequestPlayer, szCharName, bAnswer);
 }
 
 void ZGameClient::AnswerJoinerAgreement(bool bAnswer)
 {
 	char szCharName[256];
-	sprintf_s(szCharName, ZGetMyInfo()->GetCharName());
+	sprintf_safe(szCharName, ZGetMyInfo()->GetCharName());
 
 	ZPostAnswerJoinAgreement(m_uidRequestPlayer, szCharName, bAnswer);
 }
@@ -330,7 +330,7 @@ void ZGameClient::OnClanResponseCloseClan(const int nResult)
 		char szDay[ 4 ] = "";
 		char szText[256] = "";
 
-		sprintf_s( szDay, "%u", DAY_OF_DELETE_CLAN );
+		sprintf_safe( szDay, "%u", DAY_OF_DELETE_CLAN );
 		ZTransMsg( szText, MSG_CLAN_CLOSE_RESERVED, 1, szDay );
 
 		ZApplication::GetGameInterface()->ShowMessage( szText );
@@ -403,7 +403,7 @@ void ZGameClient::OnClanAnswerJoinAgreement(const MUID& uidClanAdmin, const char
 		if (IsUpperClanGrade(ZGetMyInfo()->GetClanGrade(), MCG_ADMIN))
 		{
 			char szClanName[256];
-			sprintf_s(szClanName, ZGetMyInfo()->GetClanName());
+			sprintf_safe(szClanName, ZGetMyInfo()->GetClanName());
 			ZPostRequestAgreedJoinClan(uidClanAdmin, szClanName, (char*)szJoiner);
 		}
 	}
@@ -523,12 +523,12 @@ void ZGameClient::OnClanResponseExpelMember(const int nResult)
 void ZGameClient::OnClanMsg(const char* szSenderName, const char* szMsg)
 {
 	char szText[512];
-	sprintf_s(szText, "%s(%s) : %s", ZMsg( MSG_CHARINFO_CLAN), szSenderName, szMsg);
+	sprintf_safe(szText, "%s(%s) : %s", ZMsg( MSG_CHARINFO_CLAN), szSenderName, szMsg);
 
 	/*if ( ZApplication::GetGame())
 	{
 		if ( (ZApplication::GetGame()->GetMatch()->GetMatchType() == MMATCH_GAMETYPE_DUEL)	&& !ZApplication::GetGame()->m_pMyCharacter->IsDie())
-			sprintf_s(szText, "%s(%s) : %s", ZMsg( MSG_CHARINFO_CLAN), szSenderName, ". . . . .");
+			sprintf_safe(szText, "%s(%s) : %s", ZMsg( MSG_CHARINFO_CLAN), szSenderName, ". . . . .");
 	}*/
 
 	ZChatOutput(MCOLOR(ZCOLOR_CHAT_CLANMSG), szText);
@@ -607,7 +607,7 @@ void ZGameClient::OnClanResponseClanInfo(void* pBlob)
 
 	// 접속된 사람수
 	char szCount[16];
-	sprintf_s(szCount,"%d",ZGetNetRepository()->GetClanInfo()->nConnedMember);
+	sprintf_safe(szCount,"%d",ZGetNetRepository()->GetClanInfo()->nConnedMember);
 
 	char szOutput[256];
 //	ZTranslateMessage(szOutput,MSG_LOBBY_CLAN_DETAIL,2,
@@ -619,16 +619,16 @@ void ZGameClient::OnClanResponseClanInfo(void* pBlob)
 	pLabel->SetText(szOutput);
 
 
-	sprintf_s(szOutput,"%d/%d",ZGetNetRepository()->GetClanInfo()->nWins,ZGetNetRepository()->GetClanInfo()->nLosses);
+	sprintf_safe(szOutput,"%d/%d",ZGetNetRepository()->GetClanInfo()->nWins,ZGetNetRepository()->GetClanInfo()->nLosses);
 	ZBmNumLabel *pNumLabel = (ZBmNumLabel*)pRes->FindWidget("Lobby_ClanInfoWinLose");
 	pNumLabel->SetText(szOutput);
 
-	sprintf_s(szOutput,"%d", ZGetNetRepository()->GetClanInfo()->nPoint);
+	sprintf_safe(szOutput,"%d", ZGetNetRepository()->GetClanInfo()->nPoint);
 	pNumLabel = (ZBmNumLabel*)pRes->FindWidget("Lobby_ClanInfoPoints");
 	pNumLabel->SetText(szOutput);
 
 	pNumLabel = (ZBmNumLabel*)pRes->FindWidget("Lobby_ClanInfoTotalPoints");
-	//		sprintf_s(szOutput,"%d",ZGetNetRepository()->GetClanInfo()->nWins,ZGetNetRepository()->GetClanInfo()->nXP);
+	//		sprintf_safe(szOutput,"%d",ZGetNetRepository()->GetClanInfo()->nWins,ZGetNetRepository()->GetClanInfo()->nXP);
 	//		pNumLabel->SetText(szOutput);
 	pNumLabel->SetNumber(ZGetNetRepository()->GetClanInfo()->nTotalPoint,true);
 
@@ -653,26 +653,26 @@ void ZGameClient::OnClanResponseClanInfo(void* pBlob)
 	// UI상에 보여줘야 하지만 지금은 준비가 안되어있는 관계로 채팅창에 뿌린다.
 
 	char szText[256];
-	sprintf_s(szText, "클랜명: %s", pClanInfo->szClanName);
+	sprintf_safe(szText, "클랜명: %s", pClanInfo->szClanName);
 	ZChatOutput(MCOLOR(ZCOLOR_CHAT_CLANMSG), szText);
 
 
-	sprintf_s(szText, "레벨: %d", pClanInfo->nLevel);
+	sprintf_safe(szText, "레벨: %d", pClanInfo->nLevel);
 	ZChatOutput(MCOLOR(ZCOLOR_CHAT_CLANMSG), szText);
 
-	sprintf_s(szText, "경험치: %d", pClanInfo->nXP);
+	sprintf_safe(szText, "경험치: %d", pClanInfo->nXP);
 	ZChatOutput(MCOLOR(ZCOLOR_CHAT_CLANMSG), szText);
 
-	sprintf_s(szText, "포인트: %d", pClanInfo->nPoint);
+	sprintf_safe(szText, "포인트: %d", pClanInfo->nPoint);
 	ZChatOutput(MCOLOR(ZCOLOR_CHAT_CLANMSG), szText);
 
-	sprintf_s(szText, "마스터: %s", pClanInfo->szMaster);
+	sprintf_safe(szText, "마스터: %s", pClanInfo->szMaster);
 	ZChatOutput(MCOLOR(ZCOLOR_CHAT_CLANMSG), szText);
 
-	sprintf_s(szText, "전적: %d승 %d패", pClanInfo->nWins, pClanInfo->nLoses);
+	sprintf_safe(szText, "전적: %d승 %d패", pClanInfo->nWins, pClanInfo->nLoses);
 	ZChatOutput(MCOLOR(ZCOLOR_CHAT_CLANMSG), szText);
 
-	sprintf_s(szText, "클랜원정보: 총 %d명중 %d명 접속함", pClanInfo->nTotalMemberCount, pClanInfo->nConnedMember);
+	sprintf_safe(szText, "클랜원정보: 총 %d명중 %d명 접속함", pClanInfo->nTotalMemberCount, pClanInfo->nConnedMember);
 	ZChatOutput(MCOLOR(ZCOLOR_CHAT_CLANMSG), szText);
 	*/
 }
@@ -750,7 +750,7 @@ void ZGameClient::OnBroadcastClanRenewVictories(const char* pszWinnerClanName, c
 	else if ((nVictories % 10) == 0) nStringCode = MSG_CLANBATTLE_BROADCAST_RENEW_VICTORIES_10;
 	else nStringCode = MSG_CLANBATTLE_BROADCAST_RENEW_VICTORIES_11;
 
-	sprintf_s(szVic, "%d", nVictories);
+	sprintf_safe(szVic, "%d", nVictories);
 	
 	ZTransMsg(szText, nStringCode, 3, pszWinnerClanName, pszLoserClanName, szVic);
 
@@ -783,7 +783,7 @@ void ZGameClient::OnBroadcastClanInterruptVictories(const char* pszWinnerClanNam
 {
 	char szText[256];
 	char szVic[32];
-	sprintf_s(szVic, "%d", nVictories);
+	sprintf_safe(szVic, "%d", nVictories);
 	ZTransMsg(szText, MSG_CLANBATTLE_BROADCAST_INTERRUPT_VICTORIES, 3, pszWinnerClanName, pszLoserClanName, szVic);
 
 	ZChatOutput(szText, ZChat::CMT_BROADCAST);

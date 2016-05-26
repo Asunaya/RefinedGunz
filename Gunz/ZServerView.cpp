@@ -87,31 +87,31 @@ void ZServerView::OnDraw(MDrawContext* pDC)
 			switch ( (*itr)->nType)
 			{
 				case 1 :	// Debug server
-					sprintf_s( szText, (*itr)->szName, nDebugCount++);
+					sprintf_safe( szText, (*itr)->szName, nDebugCount++);
 					if ( bSelected)		pDC->SetColor( MCOLOR(0xFFFF0098));
 					else				pDC->SetColor( MCOLOR(0xFFAC5387));
 					break;
 
 				case 2 :	// Match server
-					sprintf_s( szText, (*itr)->szName, nMatchCount++);
+					sprintf_safe( szText, (*itr)->szName, nMatchCount++);
 					if ( bSelected)		pDC->SetColor( MCOLOR(0xFF00E9FF));
 					else				pDC->SetColor( MCOLOR(0xFF53A4AC));
 					break;
 
 				case 3 :	// Clan server
-					sprintf_s( szText, (*itr)->szName, nClanCount++);
+					sprintf_safe( szText, (*itr)->szName, nClanCount++);
 					if ( bSelected)		pDC->SetColor( MCOLOR(0xFFFFBE00));
 					else				pDC->SetColor( MCOLOR(0xFFAC9553));
 					break;
 
 				case 4 :	// Quest server
-					sprintf_s( szText, (*itr)->szName, nQuestCount++);
+					sprintf_safe( szText, (*itr)->szName, nQuestCount++);
 					if ( bSelected)		pDC->SetColor( MCOLOR(0xFF44FF00));
 					else				pDC->SetColor( MCOLOR(0xFF6BAC53));
 					break;
 
 				case 5 :	// Event server
-					sprintf_s( szText, (*itr)->szName, nEventCount++);
+					sprintf_safe( szText, (*itr)->szName, nEventCount++);
 					if ( bSelected)		pDC->SetColor( MCOLOR(0xFF8800FF));
 					else				pDC->SetColor( MCOLOR(0xFF8453AC));
 					break;
@@ -120,13 +120,13 @@ void ZServerView::OnDraw(MDrawContext* pDC)
 			if ( (*itr)->bIsLive)
 			{
 				if ( (*itr)->nNumOfUser >= (*itr)->nCapacity)
-					sprintf_s( szText, "%s (FULL / %d)", (*itr)->szName, (*itr)->nCapacity);
+					sprintf_safe( szText, "%s (FULL / %d)", (*itr)->szName, (*itr)->nCapacity);
 				else
-					sprintf_s( szText, "%s (%d / %d)", (*itr)->szName, (*itr)->nNumOfUser, (*itr)->nCapacity);
+					sprintf_safe( szText, "%s (%d / %d)", (*itr)->szName, (*itr)->nNumOfUser, (*itr)->nCapacity);
 			}
 			else
 			{
-				sprintf_s( szText, "%s (checking)", (*itr)->szName);
+				sprintf_safe( szText, "%s (checking)", (*itr)->szName);
 
 				pDC->SetColor( MCOLOR(0xFF505050));
 			}

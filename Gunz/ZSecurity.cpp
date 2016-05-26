@@ -49,7 +49,7 @@ public:
 	static string Encode(const char* pszString) {
 		// XOR Encoding
 		char szBuf[256];
-		sprintf_s(szBuf, pszString);
+		sprintf_safe(szBuf, pszString);
 		for (int i=0; i<256; i++) {
 			if (szBuf[i] == NULL) break;
 			szBuf[i] = szBuf[i] ^ HACKFINDERKEY;
@@ -59,7 +59,7 @@ public:
 	static void EncodeTest(const char* pszString) {
 		char szLog[256];
 		string strEncoded = Encode(pszString);
-		sprintf_s(szLog, "ENCODETEST: [%s] -> [%s] \n", pszString, strEncoded.c_str());
+		sprintf_safe(szLog, "ENCODETEST: [%s] -> [%s] \n", pszString, strEncoded.c_str());
 		OutputDebugString(szLog);
 	}
 	void AddHackList(const string& strHackName, bool bEncoded=false) {

@@ -71,7 +71,7 @@ void RcpLog(const char *pFormat,...)
 	va_list args;
 
 	va_start(args,pFormat);
-	vsprintf_s(szBuf, pFormat, args);
+	vsprintf_safe(szBuf, pFormat, args);
 	va_end(args);
 
 	int nEnd = (int)strlen(szBuf)-1;
@@ -373,7 +373,7 @@ bool MMatchServer::LoadInitFile()
 	if (MGetServerConfig()->IsResMap())
 	{
 		char szText[512];
-		sprintf_s(szText, "Enable Maps: ");
+		sprintf_safe(szText, "Enable Maps: ");
 		for (int i = 0; i < MMATCH_MAP_MAX; i++)
 		{
 			if (MGetServerConfig()->IsEnableMap(MMATCH_MAP(i)))
@@ -1546,7 +1546,7 @@ return;
 
 /*	if (pObj->GetBridgePeer() == false) {
 		char szMsg[128];
-		sprintf_s(szMsg, "BridgePeer : Player[%d%d] Local(%s:%u) , Routed(%s:%u)", 
+		sprintf_safe(szMsg, "BridgePeer : Player[%d%d] Local(%s:%u) , Routed(%s:%u)", 
 			uidChar.High, uidChar.Low, szLocalIP, nLocalPort, szIP, nPort);
 		LOG(LOG_DEBUG, szMsg);
 	}*/
@@ -1818,7 +1818,7 @@ void MMatchServer::OnUserWhere(const MUID& uidComm, char* pszTargetName)
 		if (pTargetObj->GetPlace() == MMP_LOBBY)
 		{
 			bUnknownChannel = false;
-			sprintf_s(szLog, "[%s] '%s'",
+			sprintf_safe(szLog, "[%s] '%s'",
 				pTargetObj->GetName(), 
 				pChannel->GetName() );
 		}
@@ -1828,7 +1828,7 @@ void MMatchServer::OnUserWhere(const MUID& uidComm, char* pszTargetName)
 			if( 0 != pStage )
 			{
 				bUnknownChannel = false;
-				sprintf_s(szLog, "[%s] '%s' , '(%d)%s'",
+				sprintf_safe(szLog, "[%s] '%s' , '(%d)%s'",
 					pTargetObj->GetName(), 
 					pChannel->GetName(), 
 					pStage->GetIndex()+1,
@@ -1838,7 +1838,7 @@ void MMatchServer::OnUserWhere(const MUID& uidComm, char* pszTargetName)
 	}
 	
 	if (bUnknownChannel)
-		sprintf_s(szLog, "%s , Unknown Channel", pTargetObj->GetName());
+		sprintf_safe(szLog, "%s , Unknown Channel", pTargetObj->GetName());
 
 	Announce(pObj, szLog);
 }
@@ -2450,7 +2450,7 @@ bool MMatchServer::CheckItemXML()
 			{
 				_ASSERT(0);	// 아이템 ID 중복
 				char szTemp[256];
-				sprintf_s(szTemp, "item xml 아이디 중복: %u\n", id);
+				sprintf_safe(szTemp, "item xml 아이디 중복: %u\n", id);
 				mlog(szTemp);
 				return false;
 			}
@@ -2485,7 +2485,7 @@ bool MMatchServer::CheckItemXML()
 		if( 0 == _stricmp("nomsg", MGetStringResManager()->GetString(name)) )
 			mlog( "Item : %s\n", name.c_str() );
 		
-		sprintf_s(szTemp2, "INSERT INTO Item (ItemID, Name) Values (%u, '%s')\n", // id, name.c_str() );
+		sprintf_safe(szTemp2, "INSERT INTO Item (ItemID, Name) Values (%u, '%s')\n", // id, name.c_str() );
 			id, MGetStringResManager()->GetString(name) );
 
 		fputs(szTemp2, fp);

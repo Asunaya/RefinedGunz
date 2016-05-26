@@ -129,8 +129,8 @@ RRESULT OnCreate(void *pParam)
 	//	mlog("main : VideoCard support Vertex Shader...\n");
 	//}
 
-//	sprintf_s( cstrReleaseDate, "Release Date : %s", __DATE__ );
-	sprintf_s( cstrReleaseDate, "");				// 삭제.
+//	sprintf_safe( cstrReleaseDate, "Release Date : %s", __DATE__ );
+	sprintf_safe( cstrReleaseDate, "");				// 삭제.
 	g_DInput.Create(g_hWnd, FALSE, FALSE);
 	g_pInput = new ZInput(&g_DInput);
 	/*
@@ -535,7 +535,7 @@ RRESULT OnRender(void *pParam)
 	if(g_pDefFont) {
 		char __buffer[256];
 
-		sprintf_s(__buffer, "FPS: %3.3f", g_fFPS);
+		sprintf_safe(__buffer, "FPS: %3.3f", g_fFPS);
 		g_pDefFont->m_Font.DrawText( MGetWorkspaceWidth()-150,0,__buffer );
 //		OutputDebugString(__buffer);
 	}
@@ -606,7 +606,7 @@ RRESULT OnError(void *pParam)
 			ShowCursor(TRUE);
 
 			char szLog[512];
-			sprintf_s(szLog, ZMsg( MSG_DIRECTX_NOT_INSTALL));
+			sprintf_safe(szLog, ZMsg( MSG_DIRECTX_NOT_INSTALL));
 
 			int ret=MessageBox(NULL, szLog, ZMsg( MSG_WARNING), MB_YESNO);
 			if(ret==IDYES)
@@ -1067,7 +1067,7 @@ void CheckFileAssociation()
 		GetModuleFileName(NULL, szModuleFileName, _MAX_DIR);
 
 		char szCommand[_MAX_PATH];
-		sprintf_s(szCommand, "\"%s\" \"%%1\"", szModuleFileName);
+		sprintf_safe(szCommand, "\"%s\" \"%%1\"", szModuleFileName);
 
 		MRegistry::Write(HKEY_CLASSES_ROOT, GUNZ_REPLAY_CLASS_NAME "\\shell\\open\\command", NULL, szCommand);
 
@@ -1078,7 +1078,7 @@ void CheckFileAssociation()
 void UpgradeMrsFile()
 {
 	char temp_path[ 1024];
-	sprintf_s( temp_path,"*");
+	sprintf_safe( temp_path,"*");
 
 	FFileList file_list;
 	GetFindFileListWin(temp_path,".mrs",file_list);

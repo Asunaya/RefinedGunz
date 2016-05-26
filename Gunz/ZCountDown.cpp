@@ -21,7 +21,7 @@ void OnTimer_CountDown(void* pParam)
 			if(pWidget)
 			{
 				char buffer[256];
-				sprintf_s(buffer,"%d",pCountDown->nSeconds);
+				sprintf_safe(buffer,"%d",pCountDown->nSeconds);
 				pWidget->SetText(buffer);		
 			}
 		}

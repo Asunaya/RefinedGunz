@@ -222,7 +222,7 @@ void MCommandCommunicator::LOG(unsigned int nLogLevel, const char *pFormat,...)
 		static char temp[1024];
 
 		va_start(args, pFormat);
-		vsprintf_s(temp, pFormat, args);
+		vsprintf_safe(temp, pFormat, args);
 		Log(nLogLevel, temp);
 		va_end(args);
 	}
@@ -233,7 +233,7 @@ void MCommandCommunicator::LOG(unsigned int nLogLevel, const char *pFormat,...)
 		static char temp[1024];
 
 		va_start(args, pFormat);
-		vsprintf_s(temp, pFormat, args);
+		vsprintf_safe(temp, pFormat, args);
 		Log(nLogLevel, temp);
 		va_end(args);
 #endif

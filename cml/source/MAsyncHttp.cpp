@@ -201,7 +201,7 @@ bool MAsyncHttp::Get(const char* pszURL)
 	strcat_safe(szFullPath, "/");
 	strcat_safe(szFullPath, szFileName);
 
-	sprintf_s(szLog, "MAsyncHttp> Download Begin : %s \n", szFileName);
+	sprintf_safe(szLog, "MAsyncHttp> Download Begin : %s \n", szFileName);
 	OutputDebugString(szLog);
 
 	// Create File
@@ -258,7 +258,7 @@ bool MAsyncHttp::Get(const char* pszURL)
 
 	CloseHandle(hFile);
 
-	sprintf_s(szLog, "MAsyncHttp> Download End : %s \n", szFileName);
+	sprintf_safe(szLog, "MAsyncHttp> Download End : %s \n", szFileName);
 	OutputDebugString(szLog);
 
 	//------------------- Request Complete ----------------
@@ -319,7 +319,7 @@ void CALLBACK MAsyncHttp::StatusCallback(HINTERNET hInternet,
 					if (pAsyncHttp->IsVerbose())
 					{
 						char szLog[256];
-						sprintf_s(szLog, "MAsyncHttp::StatusCallback> RequestComplete(Result=%u, Error=%u) \n", 
+						sprintf_safe(szLog, "MAsyncHttp::StatusCallback> RequestComplete(Result=%u, Error=%u) \n", 
 								(unsigned long)pAsyncRes->dwResult, pAsyncRes->dwError);
 						OutputDebugString(szLog);
 					}

@@ -240,11 +240,11 @@ void RMtrl::Restore(LPDIRECT3DDEVICE9 dev,char* path)
 			strcat(name2,m_name_ani_tex);//보관..
 
 			for(int i=1;i<m_nAniTexCnt;i++) {
-				sprintf_s(name,"%s%02d%s",name2,i,m_name_ani_tex_ext);
+				sprintf_safe(name,"%s%02d%s",name2,i,m_name_ani_tex_ext);
 				m_pAniTexture[i] = RCreateBaseTextureMg(name,level);
 
 				if(m_pAniTexture[i]==NULL) {// 경로에 없을 경우 현 폴더에서 찾아보기
-					sprintf_s(name,"%s%2d.%s",m_name_ani_tex,i,m_name_ani_tex_ext);
+					sprintf_safe(name,"%s%2d.%s",m_name_ani_tex,i,m_name_ani_tex_ext);
 					m_pAniTexture[i] = RCreateBaseTextureMg(name,level);
 					if(m_pAniTexture[i]==NULL)
 						int a= 0;
@@ -270,7 +270,7 @@ void RMtrl::Restore(LPDIRECT3DDEVICE9 dev,char* path)
 			m_pAniTexture[0] = RCreateBaseTextureMg(m_name,level);
 
 			for(int i=1;i<m_nAniTexCnt;i++) {
-				sprintf_s(name,"%s%02d%s",m_name_ani_tex,i,m_name_ani_tex_ext);
+				sprintf_safe(name,"%s%02d%s",m_name_ani_tex,i,m_name_ani_tex_ext);
 				m_pAniTexture[i] = RCreateBaseTextureMg(name,level);
 			}
 
@@ -309,7 +309,7 @@ int RMtrlMgr::Add(char* name,int u_id)
 
 	// tool 구분용..
 
-	sprintf_s(node->m_mtrl_name,"%s%d",name,m_id_last);
+	sprintf_safe(node->m_mtrl_name,"%s%d",name,m_id_last);
 
 	m_node_table.push_back(node);
 //	m_data[m_id_last] = node;
@@ -324,7 +324,7 @@ int RMtrlMgr::Add(RMtrl* tex)
 	tex->m_id = m_id_last;
 	tex->m_bObjectMtrl = m_bObjectMtrl;
 
-	sprintf_s(tex->m_mtrl_name,"%s%d",tex->m_name,tex->m_id);
+	sprintf_safe(tex->m_mtrl_name,"%s%d",tex->m_name,tex->m_id);
 
 	m_node_table.push_back(tex);
 //	m_node_table[m_id_last] = tex;
@@ -503,7 +503,7 @@ RMtrl*	RMtrlMgr::Get_s(int mtrl_id,int sub_id)
 	_cnt++;
 	_size = size();
 
-	sprintf_s(_buffer,"%d : RMtrlMgr::Get_s : %d\n",_cnt,_size);
+	sprintf_safe(_buffer,"%d : RMtrlMgr::Get_s : %d\n",_cnt,_size);
 
 	OutputDebugString(_buffer);
 

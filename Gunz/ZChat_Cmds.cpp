@@ -214,7 +214,7 @@ void OutputCmdHelp(const char* cmd)
 		return;
 
     char szBuf[512];
-	sprintf_s(szBuf, "%s: %s", pCmd->GetName(), pCmd->GetHelp());
+	sprintf_safe(szBuf, "%s: %s", pCmd->GetName(), pCmd->GetHelp());
 	ZChatOutput(szBuf, ZChat::CMT_SYSTEM);
 }
 
@@ -228,7 +228,7 @@ void OutputCmdUsage(const char* cmd)
 		return;
 
     char szBuf[512];
-	sprintf_s(szBuf, "%s: %s", ZMsg(MSG_WORD_USAGE), pCmd->GetUsage());
+	sprintf_safe(szBuf, "%s: %s", ZMsg(MSG_WORD_USAGE), pCmd->GetUsage());
 	ZChatOutput(szBuf, ZChat::CMT_SYSTEM);
 }
 
@@ -274,7 +274,7 @@ void ChatCmd_Help(const char* line, const int argc, char **const argv)
 			case GUNZ_GAME: nCurrFlag = CCF_GAME; break;
 		}
 
-		sprintf_s(szBuf, "%s: ", ZMsg(MSG_WORD_COMMANDS));
+		sprintf_safe(szBuf, "%s: ", ZMsg(MSG_WORD_COMMANDS));
 
 		int nCnt=0;
 		int nCmdCount = pCCM->GetCmdCount();
@@ -307,7 +307,7 @@ void ChatCmd_Help(const char* line, const int argc, char **const argv)
 
 		ZChatOutput(szBuf, ZChat::CMT_SYSTEM);
 
-		sprintf_s(szBuf, "%s: /h %s", ZMsg(MSG_WORD_HELP), ZMsg(MSG_WORD_COMMANDS));
+		sprintf_safe(szBuf, "%s: /h %s", ZMsg(MSG_WORD_HELP), ZMsg(MSG_WORD_COMMANDS));
 		ZChatOutput(szBuf, ZChat::CMT_SYSTEM);
 	}
 	else if (argc == 2)
@@ -359,7 +359,7 @@ void ChatCmd_Whisper(const char* line, const int argc, char **const argv)
 
 	// loop back
 	char szMsg[512];
-	sprintf_s(szMsg, "(To %s) : %s", szName, pszMsg);
+	sprintf_safe(szMsg, "(To %s) : %s", szName, pszMsg);
 	ZChatOutput(MCOLOR(96,96,168), szMsg, ZChat::CL_CURRENT);
 }
 

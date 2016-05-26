@@ -55,7 +55,7 @@ bool ZMiniMap::Create(const char *szName)
 	char szXMLName[256];
 	char szMapPath[64];
 	ZGetCurrMapPath(szMapPath);
-	sprintf_s(szXMLName, "%s%s/%s.minimap.xml", szMapPath, szName, szName);
+	sprintf_safe(szXMLName, "%s%s/%s.minimap.xml", szMapPath, szName, szName);
 
 	MZFile mzf;
 	if(!mzf.Open(szXMLName,ZGetFileSystem()))
@@ -91,7 +91,7 @@ bool ZMiniMap::Create(const char *szName)
 
 			char szMapPath[64];
 			ZGetCurrMapPath(szMapPath);
-			sprintf_s(szTextureName, "%s%s/%s", szMapPath, szName,szContents);
+			sprintf_safe(szTextureName, "%s%s/%s", szMapPath, szName,szContents);
 
 		}else
 		if(_stricmp(szTagName,ZMINIMAPTOK_LEFTTOP)==0) {

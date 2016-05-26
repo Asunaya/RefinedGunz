@@ -165,7 +165,7 @@ inline void ZPostPeerEnchantDamage(MUID ownerUID,MUID targetUID)
 inline void ZPostConnect(const char* szAddr, unsigned int nPort)
 {
 	char szCmd[256];
-	sprintf_s(szCmd, "%s:%u", szAddr, nPort);
+	sprintf_safe(szCmd, "%s:%u", szAddr, nPort);
 	ZPOSTCMD1(MC_NET_CONNECT, MCmdParamStr(szCmd));
 }
 

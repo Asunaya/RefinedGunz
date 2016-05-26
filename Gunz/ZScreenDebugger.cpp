@@ -51,7 +51,7 @@ void ZScreenDebugger::DrawDebugInfo(MDrawContext *pDC)
 		int zcr_cnt = ZGetObjectManager()->GetRenderedCount();
 		int zco_cnt = ZGetObjectManager()->GetDrawCount();
 
-		sprintf_s(buffer, "FPS : %3.3f , ms %4.1f,score %4.1f    Send:%d CPS, Recv:%d CPS    CmdQueue: %d RenderCharCnt = %d/%d", g_fFPS, fMs, fScore, nSendTraffic, nRecvTraffic,
+		sprintf_safe(buffer, "FPS : %3.3f , ms %4.1f,score %4.1f    Send:%d CPS, Recv:%d CPS    CmdQueue: %d RenderCharCnt = %d/%d", g_fFPS, fMs, fScore, nSendTraffic, nRecvTraffic,
 			ZGetGameClient()->GetCommandManager()->GetCommandQueueCount(),zcr_cnt,zco_cnt );
 
 		pDC->BeginFont();
@@ -111,37 +111,37 @@ void ZScreenDebugger::DrawDebugInfo(MDrawContext *pDC)
 		int zcr_cnt = ZGetObjectManager()->GetRenderedCount();
 		int zco_cnt = ZGetObjectManager()->GetDrawCount();
 
-		sprintf_s(buffer, "FPS : %3.3f , ms %4.1f,score %4.1f 점    Send:%d CPS, Recv:%d CPS    CmdQueue: %d RenderCharCnt = %d/%d", g_fFPS, fMs, fScore, nSendTraffic, nRecvTraffic,
+		sprintf_safe(buffer, "FPS : %3.3f , ms %4.1f,score %4.1f 점    Send:%d CPS, Recv:%d CPS    CmdQueue: %d RenderCharCnt = %d/%d", g_fFPS, fMs, fScore, nSendTraffic, nRecvTraffic,
 			ZGetGameClient()->GetCommandManager()->GetCommandQueueCount(),zcr_cnt,zco_cnt );
 		OUTTEXT();
 		NEXTLINE();
 
-		sprintf_s(buffer, "observer cmd q=%d , effect 0=%d ,1=%d, 2=%d   seffect = %d, dynlight = %d",g_pGame->GetObserverCommandListCount(),
+		sprintf_safe(buffer, "observer cmd q=%d , effect 0=%d ,1=%d, 2=%d   seffect = %d, dynlight = %d",g_pGame->GetObserverCommandListCount(),
 			ZGetEffectManager()->GetEffectCount(0),ZGetEffectManager()->GetEffectCount(1),ZGetEffectManager()->GetEffectCount(2),
 			ZGetScreenEffectManager()->GetCount(),ZGetStencilLight()->GetCount());
 		OUTTEXT();
 		NEXTLINE();
 
-		sprintf_s(buffer, "mapobject = %d , frustum culled = %d , occlusion culled = %d",
+		sprintf_safe(buffer, "mapobject = %d , frustum culled = %d , occlusion culled = %d",
 			ZGetGame()->GetWorld()->GetBsp()->GetMapObjectList()->size(),ZGetGame()->GetWorld()->GetBsp()->GetDebugInfo()->nMapObjectFrustumCulled,ZGetGame()->GetWorld()->GetBsp()->GetDebugInfo()->nMapObjectOcclusionCulled);
 		OUTTEXT();
 		NEXTLINE();
 
 #ifndef _PUBLISH
-		sprintf_s(buffer, "Sound Channels: %d", FSOUND_GetChannelsPlaying());
+		sprintf_safe(buffer, "Sound Channels: %d", FSOUND_GetChannelsPlaying());
 		OUTTEXT();
 		NEXTLINE();
 #endif
 		//NEXTLINE();
 		//{
-		//	sprintf_s( buffer, "2D Sound Effect Number : %d 3D Sound Effect Number : %d", ZGetSoundEngine()->GetMySoundEffectPlayer()->GetSoundEffectNum(), ZGetSoundEngine()->GetSoundEffectPlayer()->GetSoundEffectNum() );
+		//	sprintf_safe( buffer, "2D Sound Effect Number : %d 3D Sound Effect Number : %d", ZGetSoundEngine()->GetMySoundEffectPlayer()->GetSoundEffectNum(), ZGetSoundEngine()->GetSoundEffectPlayer()->GetSoundEffectNum() );
 		//	pDC->SetColor( MCOLOR(0xFFFFFFFF) );
 		//	OUTTEXT();
 		//	NEXTLINE();
 		//}
 
 
-		sprintf_s(buffer, "%d textures , %d bytes ", RGetTextureManager()->CalcUsedCount(), RGetTextureManager()->CalcUsedSize() );
+		sprintf_safe(buffer, "%d textures , %d bytes ", RGetTextureManager()->CalcUsedCount(), RGetTextureManager()->CalcUsedSize() );
 		OUTTEXT();
 		pDC->EndFont();
 
@@ -150,13 +150,13 @@ void ZScreenDebugger::DrawDebugInfo(MDrawContext *pDC)
 
 	for (int i = 0; i < 4; i++)
 	{
-		if (pCamera->m_bCollision[i]) sprintf_s(buffer, "True");
-		else sprintf_s(buffer, "False");
+		if (pCamera->m_bCollision[i]) sprintf_safe(buffer, "True");
+		else sprintf_safe(buffer, "False");
 
 		OUTTEXT();
 		NEXTLINE();
 	}
-	sprintf_s(buffer, "AngleX : %3.3f , AngleZ : %3.3f , Dist : %3.3f", pCamera->m_fAngleX, pCamera->m_fAngleZ,
+	sprintf_safe(buffer, "AngleX : %3.3f , AngleZ : %3.3f , Dist : %3.3f", pCamera->m_fAngleX, pCamera->m_fAngleZ,
 		pCamera->m_fCurrentDist);
 	OUTTEXT();
 	NEXTLINE();
@@ -164,12 +164,12 @@ void ZScreenDebugger::DrawDebugInfo(MDrawContext *pDC)
 
 	switch(g_pGame->GetMatch()->GetRoundState())
 	{
-	case MMATCH_ROUNDSTATE_PREPARE: sprintf_s(buffer, "RoundState: Wait"); break;
-	case MMATCH_ROUNDSTATE_COUNTDOWN: sprintf_s(buffer, "RoundState: CountDown"); break;
-	case MMATCH_ROUNDSTATE_PLAY: sprintf_s(buffer, "RoundState: Play"); break;
-	case MMATCH_ROUNDSTATE_FINISH: sprintf_s(buffer, "RoundState: Finish"); break;
-	case MMATCH_ROUNDSTATE_EXIT: sprintf_s(buffer, "RoundState: Exit"); break;
-	case MMATCH_ROUNDSTATE_FREE: sprintf_s(buffer, "RoundState: Free"); break;
+	case MMATCH_ROUNDSTATE_PREPARE: sprintf_safe(buffer, "RoundState: Wait"); break;
+	case MMATCH_ROUNDSTATE_COUNTDOWN: sprintf_safe(buffer, "RoundState: CountDown"); break;
+	case MMATCH_ROUNDSTATE_PLAY: sprintf_safe(buffer, "RoundState: Play"); break;
+	case MMATCH_ROUNDSTATE_FINISH: sprintf_safe(buffer, "RoundState: Finish"); break;
+	case MMATCH_ROUNDSTATE_EXIT: sprintf_safe(buffer, "RoundState: Exit"); break;
+	case MMATCH_ROUNDSTATE_FREE: sprintf_safe(buffer, "RoundState: Free"); break;
 	}
 	OUTTEXT();
 	NEXTLINE();
@@ -189,12 +189,12 @@ void ZScreenDebugger::DrawDebugInfo(MDrawContext *pDC)
 	float fMs = 1000.f/g_fFPS;
 	float fScore = 100-(fMs-(1000.f/60.f))*2;
 
-	sprintf_s(buffer, "FPS : %3.3f , %d polygon , %d calls , %4.1f ms,score %4.1f 점, CmdQueue: %d",g_fFPS,g_nPoly,g_nCall,fMs,fScore,
+	sprintf_safe(buffer, "FPS : %3.3f , %d polygon , %d calls , %4.1f ms,score %4.1f 점, CmdQueue: %d",g_fFPS,g_nPoly,g_nCall,fMs,fScore,
 		ZGetGameClient()->GetCommandManager()->GetCommandQueueCount());
 	OUTTEXT();
 	NEXTLINE();
 
-	sprintf_s(buffer,"pos ( %3.1f %3.1f %3.1f ) dir ( %3.1f %3.1f %3.1f )    speed %3.1f ( %3.1f %3.1f %3.1f ) , camera ( %3.1f %3.1f %3.1f )"
+	sprintf_safe(buffer,"pos ( %3.1f %3.1f %3.1f ) dir ( %3.1f %3.1f %3.1f )    speed %3.1f ( %3.1f %3.1f %3.1f ) , camera ( %3.1f %3.1f %3.1f )"
 		,pCharacter->m_Position.x,pCharacter->m_Position.y,pCharacter->m_Position.z
 		,pCharacter->m_Direction.x,pCharacter->m_Direction.y,pCharacter->m_Direction.z
 		,Magnitude(rvector(pCharacter->GetVelocity().x,pCharacter->GetVelocity().y,0))
@@ -221,7 +221,7 @@ void ZScreenDebugger::DrawDebugInfo(MDrawContext *pDC)
 		if(g_pGame->m_pMyCharacter->m_nGuardBlock)
 		{
 			char buf[256];
-			sprintf_s(buf,"bl%d",g_pGame->m_pMyCharacter->m_nGuardBlock);
+			sprintf_safe(buf,"bl%d",g_pGame->m_pMyCharacter->m_nGuardBlock);
 			strcat(buffer,buf);
 		}
 		if(g_pGame->m_pMyCharacter->m_bGuardStart) strcat(buffer,"start");
@@ -266,14 +266,14 @@ void ZScreenDebugger::DrawDebugInfo(MDrawContext *pDC)
 					delay_time = org_time * (1.f/( pAniInfo[i]->m_fSpeed / 4.8f ));
 				}
 
-				sprintf_s(buffer,"speed %d = %d 퍼센트 ( %d/%d ) ms (delay = %d) ",i, speed, org_time , delay_time,delay_time-org_time);
+				sprintf_safe(buffer,"speed %d = %d 퍼센트 ( %d/%d ) ms (delay = %d) ",i, speed, org_time , delay_time,delay_time-org_time);
 				pDC->SetColor(MCOLOR(0xFFffffff));
 				OUTTEXT();
 				NEXTLINE();
 
 			}
 
-			sprintf_s(buffer,"poly_cnt:%d,low_ani_state %d,%s frame : weapon type %d : down %d / %d CAFactor = %.2f",
+			sprintf_safe(buffer,"poly_cnt:%d,low_ani_state %d,%s frame : weapon type %d : down %d / %d CAFactor = %.2f",
 				g_pGame->m_render_poly_cnt,g_pGame->m_pMyCharacter->m_AniState_Lower,
 				pAniInfo[0]->m_pAniSet->GetName(),
 				pVMesh->GetSetectedWeaponMotionID() ,
@@ -286,7 +286,7 @@ void ZScreenDebugger::DrawDebugInfo(MDrawContext *pDC)
 			NEXTLINE();
 
 			if( pAniInfo[1]->m_pAniSet ) {
-				sprintf_s(buffer,"%s frame : weapon type %d : up %d / %d ",
+				sprintf_safe(buffer,"%s frame : weapon type %d : up %d / %d ",
 					pAniInfo[1]->m_pAniSet->GetName(), 
 					pVMesh->GetSetectedWeaponMotionID() ,
 					pAniInfo[1]->m_nFrame,
@@ -304,13 +304,13 @@ void ZScreenDebugger::DrawDebugInfo(MDrawContext *pDC)
 		rvector rfoot = pVMesh->GetRFootPosition();
 		rvector lfoot = pVMesh->GetLFootPosition();
 
-		sprintf_s(buffer,"rfoot:(%.2f,%.2f,%.2f)lfoot:(%.2f,%.2f,%.2f)",rfoot.x,rfoot.y,rfoot.z,lfoot.x,lfoot.y,lfoot.z);
+		sprintf_safe(buffer,"rfoot:(%.2f,%.2f,%.2f)lfoot:(%.2f,%.2f,%.2f)",rfoot.x,rfoot.y,rfoot.z,lfoot.x,lfoot.y,lfoot.z);
 		OUTTEXT();
 		NEXTLINE();
 
 		float _fsize = RGetTextureManager()->CalcUsedSize() / (1024.f*1024.f);
 
-		sprintf_s(buffer,"texture used size : %f M,update size : %d" , _fsize , g_debug_tex_update_cnt);
+		sprintf_safe(buffer,"texture used size : %f M,update size : %d" , _fsize , g_debug_tex_update_cnt);
 		OUTTEXT();
 		NEXTLINE();
 	}
@@ -328,7 +328,7 @@ void ZScreenDebugger::DrawDebugInfo(MDrawContext *pDC)
 		char szAlive[256];
 		if (pCharacter->IsDie()) strcpy_safe(szAlive, "Dead"); else strcpy_safe(szAlive, "Alive");
 
-		sprintf_s(buffer,"%s(%s) : %s pos ( %3.1f %3.1f %3.1f ) dir ( %3.1f %3.1f %3.1f )    speed %3.1f ( %3.1f %3.1f %3.1f )"
+		sprintf_safe(buffer,"%s(%s) : %s pos ( %3.1f %3.1f %3.1f ) dir ( %3.1f %3.1f %3.1f )    speed %3.1f ( %3.1f %3.1f %3.1f )"
 			,pCharacter->GetProperty()->szName
 			, szAlive
 			, szVisible
@@ -358,7 +358,7 @@ void ZScreenDebugger::DrawDebugInfo(MDrawContext *pDC)
 		char szAlive[256];
 		if (pCharacter->IsDie()) strcpy_safe(szAlive, "Dead"); else strcpy_safe(szAlive, "Alive");
 
-		sprintf_s(buffer,"%s(%s) : %s pos ( %3.1f %3.1f %3.1f ) dir ( %3.1f %3.1f %3.1f )    speed %3.1f ( %3.1f %3.1f %3.1f )"
+		sprintf_safe(buffer,"%s(%s) : %s pos ( %3.1f %3.1f %3.1f ) dir ( %3.1f %3.1f %3.1f )    speed %3.1f ( %3.1f %3.1f %3.1f )"
 			,"npc"
 			, szAlive
 			, szVisible
@@ -399,7 +399,7 @@ void ZScreenDebugger::DrawDebugInfo(MDrawContext *pDC)
 
 			BSPVERTEX *v=bpi.pNode->pInfo[bpi.nIndex].pVertices;
 
-			sprintf_s(buffer,"( %3.1f %3.1f %3.1f ) ( %3.1f %3.1f %3.1f ) ( %3.1f %3.1f %3.1f ) ",
+			sprintf_safe(buffer,"( %3.1f %3.1f %3.1f ) ( %3.1f %3.1f %3.1f ) ( %3.1f %3.1f %3.1f ) ",
 				v->x,v->y,v->z,
 				(v+1)->x,(v+1)->y,(v+1)->z,
 				(v+2)->x,(v+2)->y,(v+2)->z);
@@ -463,7 +463,7 @@ void ZScreenDebugger::DrawDebugInfo(MDrawContext *pDC)
 		*/
 
 		rvector checkpos=pCharacter->m_Position+rvector(0,0,90);
-		sprintf_s(buffer,"dist to floor = %6.3f ", g_pGame->m_pMyCharacter->GetDistToFloor());
+		sprintf_safe(buffer,"dist to floor = %6.3f ", g_pGame->m_pMyCharacter->GetDistToFloor());
 		pDC->SetColor(MCOLOR(0xFFffffff));
 		OUTTEXT();
 		NEXTLINE();
@@ -475,7 +475,7 @@ void ZScreenDebugger::DrawDebugInfo(MDrawContext *pDC)
 	ZEffectManager* pZEM = ZGetEffectManager();
 
 	if(pZEM) {
-		sprintf_s(buffer,"effectmgr -> skip cnt : %d ,rendered :%d / %d", pZEM->m__skip_cnt , pZEM->m__rendered , pZEM->m__cnt );
+		sprintf_safe(buffer,"effectmgr -> skip cnt : %d ,rendered :%d / %d", pZEM->m__skip_cnt , pZEM->m__rendered , pZEM->m__cnt );
 		pDC->SetColor(MCOLOR(0xFFffffff));
 		OUTTEXT();
 		NEXTLINE();
@@ -484,14 +484,14 @@ void ZScreenDebugger::DrawDebugInfo(MDrawContext *pDC)
 	ZScreenEffectManager* pZSEM = ZGetScreenEffectManager();
 
 	if(pZEM) {
-		sprintf_s(buffer,"screeneffectmgr -> %d ", pZSEM->GetCount() );
+		sprintf_safe(buffer,"screeneffectmgr -> %d ", pZSEM->GetCount() );
 		pDC->SetColor(MCOLOR(0xFFffffff));
 		OUTTEXT();
 		NEXTLINE();
 	}	
 
 	//{
-	//	sprintf_s( buffer, "2D Sound Effect Number : %d 3D Sound Effect Number : %d", ZGetSoundEngine()->GetMySoundEffectPlayer()->GetSoundEffectNum(), ZGetSoundEngine()->GetSoundEffectPlayer()->GetSoundEffectNum() );
+	//	sprintf_safe( buffer, "2D Sound Effect Number : %d 3D Sound Effect Number : %d", ZGetSoundEngine()->GetMySoundEffectPlayer()->GetSoundEffectNum(), ZGetSoundEngine()->GetSoundEffectPlayer()->GetSoundEffectNum() );
 	//	pDC->SetColor( MCOLOR(0xFFFFFFFF) );
 	//	OUTTEXT();
 	//	NEXTLINE();
@@ -655,7 +655,7 @@ void ZScreenDebugger::DrawActorInfo(int num, MDrawContext *pDC, ZActor* pActor)
 		strcpy_safe(szTaskName, pCurrTask->GetTaskName());
 	}
 
-	sprintf_s(buf, "[%02d], %s, HP(%02d)AP(%2d) pos(%.2f %.2f %.2f), dir(%.2f %.2f %.2f), vel(%.2f %.2f %.2f), Task: %d, CurrTask: %s",
+	sprintf_safe(buf, "[%02d], %s, HP(%02d)AP(%2d) pos(%.2f %.2f %.2f), dir(%.2f %.2f %.2f), vel(%.2f %.2f %.2f), Task: %d, CurrTask: %s",
 		num, pNPCInfo->szName, 
 		pActor->GetHP(), pActor->GetAP(),
 		pos.x, pos.y, pos.z, dir.x, dir.y, dir.z, vel.x, vel.y, vel.z,
@@ -678,7 +678,7 @@ void ZScreenDebugger::DrawActorInfo(int num, MDrawContext *pDC, ZActor* pActor)
 	if (pActor->CheckFlag(AF_REQUESTED_DEAD)) strcpy_safe(szFlagRequestedDead, "●");
 	if (pActor->CheckFlag(AF_MY_CONTROL)) strcpy_safe(szFlagMyControl, "●");
 
-	sprintf_s(buf, "     FLAG: LAND(%s), BLAST(%s), BLASTDAGGER(%s), MOVING(%s), DEAD(%s), REQUESTED_DEAD(%s), MY_CONTROL(%s)",
+	sprintf_safe(buf, "     FLAG: LAND(%s), BLAST(%s), BLASTDAGGER(%s), MOVING(%s), DEAD(%s), REQUESTED_DEAD(%s), MY_CONTROL(%s)",
 		szFlagLand, szFlagBlast, szFlagBlastDagger ,szFlagMoving, szFlagDead, szFlagRequestedDead, szFlagMyControl);
 	PrintText(pDC, buf);
 #endif

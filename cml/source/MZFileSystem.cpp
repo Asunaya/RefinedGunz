@@ -125,7 +125,7 @@ void MZFileSystem::RefreshFileList(const char* szBasePath)
 	_ASSERT(szBasePath!=NULL);
 
 	char szFilter[_MAX_PATH];
-	sprintf_s(szFilter,"%s*",szBasePath);
+	sprintf_safe(szFilter,"%s*",szBasePath);
 
     struct _finddata_t c_file;
     long hFile;
@@ -138,7 +138,7 @@ void MZFileSystem::RefreshFileList(const char* szBasePath)
 				if(strcmp(c_file.name, "..")==0) continue;
 				
 				char szPath[256];
-				sprintf_s(szPath,"%s%s/",szBasePath,c_file.name);
+				sprintf_safe(szPath,"%s%s/",szBasePath,c_file.name);
 				RefreshFileList(szPath);
 			}
 			else{
@@ -150,7 +150,7 @@ void MZFileSystem::RefreshFileList(const char* szBasePath)
 				if(_stricmp(szExt, "." DEF_EXT)==0 || _stricmp(szExt, ".zip")==0) {
 
 					char szZipFileName[_MAX_PATH],szBaseLocation[_MAX_PATH];
-					sprintf_s(szZipFileName,"%s%s",szBasePath,c_file.name);
+					sprintf_safe(szZipFileName,"%s%s",szBasePath,c_file.name);
 					char szRelZipFileName[_MAX_PATH];
 					GetRelativePath(szRelZipFileName, sizeof(szRelZipFileName), m_szBasePath,szZipFileName);
 					ReplaceBackSlashToSlash(szRelZipFileName);
@@ -162,7 +162,7 @@ void MZFileSystem::RefreshFileList(const char* szBasePath)
 					}else
 					{
 						GetRelativePath(szBaseLocation,m_szBasePath,szBasePath);
-						sprintf_s(szBaseLocation,"%s%s/",szBaseLocation,szFileName);
+						sprintf_safe(szBaseLocation,"%s%s/",szBaseLocation,szFileName);
 					}
 
 					FILE* fp = nullptr;
@@ -184,7 +184,7 @@ void MZFileSystem::RefreshFileList(const char* szBasePath)
 							if(lastchar!='\\' && lastchar!='/')
 							{
 								MZFILEDESC* pDesc = new MZFILEDESC;
-								sprintf_s(pDesc->m_szFileName, "%s%s",szBaseLocation,szCurFileName);
+								sprintf_safe(pDesc->m_szFileName, "%s%s",szBaseLocation,szCurFileName);
 								ReplaceBackSlashToSlash(pDesc->m_szFileName);
 								strcpy_safe(pDesc->m_szZFileName, szRelZipFileName);
 								pDesc->m_iSize = zf.GetFileLength(i);
@@ -208,7 +208,7 @@ void MZFileSystem::RefreshFileList(const char* szBasePath)
 
 					// 절대경로
 					char szFullPath[_MAX_PATH];
-					sprintf_s(szFullPath, "%s%s", szBasePath, c_file.name);
+					sprintf_safe(szFullPath, "%s%s", szBasePath, c_file.name);
 					GetRelativePath(pDesc->m_szFileName,m_szBasePath,szFullPath);
 					ReplaceBackSlashToSlash(pDesc->m_szFileName);
 					pDesc->m_szZFileName[0] = NULL;
@@ -310,7 +310,7 @@ bool MZFileSystem::Create(const char* szBasePath,const char* szUpdateName)
 
 	if(szUpdateName) {
 		char szRelative[_MAX_PATH];
-		sprintf_s(szRelative, "%s%s", m_szBasePath, szUpdateName);
+		sprintf_safe(szRelative, "%s%s", m_szBasePath, szUpdateName);
 		GetRelativePath(m_szUpdateName, sizeof(m_szUpdateName), m_szBasePath,szRelative);
 	}
 
@@ -517,10 +517,10 @@ bool MZFile::Open(const char* szFileName, MZFileSystem* pZFS)
 			}
 			if(*pRelative=='/') pRelative++;
 
-			sprintf_s(relativename, "%s", pRelative);
+			sprintf_safe(relativename, "%s", pRelative);
 
 			char szZipFullPath[_MAX_PATH];
-			sprintf_s(szZipFullPath, "%s%s", pZFS->GetBasePath(), pDesc->m_szZFileName);
+			sprintf_safe(szZipFullPath, "%s%s", pZFS->GetBasePath(), pDesc->m_szZFileName);
 
 			// 파일체크를 해야하고 zip 파일 안에 있는경우에 crc검사 한다
 			bool bFileCheck = false;
@@ -530,7 +530,7 @@ bool MZFile::Open(const char* szFileName, MZFileSystem* pZFS)
 				if(crc!=pDesc->m_crc32) {
 #ifdef _DEBUG
 					char szBuffer[256];
-					sprintf_s(szBuffer,"crc error, %s file %u , source %u \n",szFileName, m_crc32, crc);
+					sprintf_safe(szBuffer,"crc error, %s file %u , source %u \n",szFileName, m_crc32, crc);
 					OutputDebugString(szBuffer);
 #endif
 					mlog("crc error file %s file %u, source %u\n", szFileName, m_crc32, crc);
@@ -546,7 +546,7 @@ bool MZFile::Open(const char* szFileName, MZFileSystem* pZFS)
 
 		// 맨 폴더에 있는경우
 		char szFullPath[_MAX_PATH];
-		sprintf_s(szFullPath, "%s%s", pZFS->GetBasePath(), szFileName);
+		sprintf_safe(szFullPath, "%s%s", pZFS->GetBasePath(), szFileName);
 
 		return Open(szFullPath);
 	}
@@ -580,7 +580,7 @@ bool MZFile::Open(const char* szFileName, const char* szZipFileName, bool bFileC
 		// filesystem 이 초기화 될때와 현재의 crc가 다르다!
 #ifdef _DEBUG
 		char szBuffer[256];
-		sprintf_s(szBuffer,"crc error, modified after initialize, %s file in %s %u , source %u \n",szFileName, szZipFileName, m_crc32, crc32);
+		sprintf_safe(szBuffer,"crc error, modified after initialize, %s file in %s %u , source %u \n",szFileName, szZipFileName, m_crc32, crc32);
 		OutputDebugString(szBuffer);
 #endif
 		return false;

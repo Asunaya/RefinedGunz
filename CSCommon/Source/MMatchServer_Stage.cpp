@@ -810,7 +810,7 @@ bool StageShowInfo(MMatchServer* pServer, const MUID& uidPlayer, const MUID& uid
 		if (pszCmd) {
 			if (_stricmp(pszCmd, "/showinfo") == 0) {
 				char szMsg[256]="";
-				sprintf_s(szMsg, "FirstMaster : (%s)", pStage->GetFirstMasterName());
+				sprintf_safe(szMsg, "FirstMaster : (%s)", pStage->GetFirstMasterName());
 				pServer->Announce(pChar, szMsg);
 				bResult = true;
 			}	// ShowInfo

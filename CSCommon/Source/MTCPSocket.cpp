@@ -126,7 +126,7 @@ bool MClientSocketThread::FlushSend()
 							pSendItem->dwPacketSize-nTransBytes, 0);
 			if (nSent == SOCKET_ERROR) {
 				int nErrCode = WSAGetLastError();
-					char szBuf[64]; sprintf_s(szBuf, "FLUSHSEND> FlushSend Error(%d)\n", nErrCode);
+					char szBuf[64]; sprintf_safe(szBuf, "FLUSHSEND> FlushSend Error(%d)\n", nErrCode);
 					OutputDebugString(szBuf);
 
 				if ( (nErrCode == WSAECONNABORTED) ||
@@ -162,7 +162,7 @@ bool MClientSocketThread::FlushSend()
 
 /*
 	char buf[255];
-	sprintf_s(buf, "Flush : %d 남았다\n", m_SendList.size());
+	sprintf_safe(buf, "Flush : %d 남았다\n", m_SendList.size());
 	OutputDebugString(buf);
 */
 
@@ -997,14 +997,14 @@ bool MClientSocket::Connect(SOCKET* pSocket, char *szIP, int nPort)
 		DWORD dwError = WSAGetLastError();
 		if (dwError != WSAEWOULDBLOCK) {
 			char szLog[64];
-			sprintf_s(szLog, "Connect Failed (ErrorCode=%d) \n", dwError);
+			sprintf_safe(szLog, "Connect Failed (ErrorCode=%d) \n", dwError);
 			OutputDebugString(szLog);
 			return false;
 		}
 	}
 
 	char szLog[64];
-	sprintf_s(szLog, "Connect Succeed \n");
+	sprintf_safe(szLog, "Connect Succeed \n");
 	OutputDebugString(szLog);
 
 	return true;

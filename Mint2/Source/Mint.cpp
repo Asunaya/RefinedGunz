@@ -73,12 +73,12 @@ void Mint::DrawCandidateList(MDrawContext* pDC, MPOINT& p)
 			else
 				pDC->SetColor(MCOLOR(0xFF909090));
 			int nIndexInPage = i-nStart;
-			sprintf_s(temp, "%d: %s", nIndexInPage+1, szCandidate);
+			sprintf_safe(temp, "%d: %s", nIndexInPage+1, szCandidate);
 			pDC->Text(p.x+4, p.y + nIndexInPage*pDC->GetFont()->GetHeight() + 4, temp);
 		}
 
 		// 현재 선택 인덱스 및 총 개수 출력
-		sprintf_s(temp, "(%d/%d)", GetCandidateSelection()+1, GetCandidateCount());
+		sprintf_safe(temp, "(%d/%d)", GetCandidateSelection()+1, GetCandidateCount());
 		pDC->SetColor(MCOLOR(DEFCOLOR_NORMAL));
 		pDC->Text(p.x + 4, p.y + GetCandidatePageSize()*pDC->GetFont()->GetHeight() + 4, temp);
 
@@ -1026,7 +1026,7 @@ void MCreateSample(void)
 				m_nRenderCount = 0;
 			}
 			m_nRenderCount++;
-			sprintf_s(temp, "FPS = %d", m_nFPS);
+			sprintf_safe(temp, "FPS = %d", m_nFPS);
 			pDC->Text(r.x, r.y, temp);
 
 			// Cursor Pos
@@ -1036,7 +1036,7 @@ void MCreateSample(void)
 			ScreenToClient(m_hWnd, &p);
 			*/
 			MPOINT p = MEvent::GetMousePos();
-			sprintf_s(temp, "Cursor Pos = %d, %d", p.x, p.y);
+			sprintf_safe(temp, "Cursor Pos = %d, %d", p.x, p.y);
 			pDC->Text(r.x, r.y+GetFont()->GetHeight(), temp);
 
 		}

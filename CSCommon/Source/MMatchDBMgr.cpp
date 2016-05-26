@@ -387,7 +387,7 @@ void MMatchDBMgr::Log(const char *pFormat,...)
 	char msg[1024];
 
 	va_start(args, pFormat);
-	vsprintf_s(msg, pFormat, args);
+	vsprintf_safe(msg, pFormat, args);
 
 	mlog(msg);
 
@@ -2322,7 +2322,7 @@ _STATUS_DB_START
 //#ifdef _DEBUG
 	strcpy_safe(szFieldName, "TID4");	// 지금은 모두다 TID4로 통일중
 //#else
-//	sprintf_s(szFieldName, "TID%d", nTeamTableIndex);
+//	sprintf_safe(szFieldName, "TID%d", nTeamTableIndex);
 //#endif
 
 	*pnoutTID = rs.Field(szFieldName).AsInt();

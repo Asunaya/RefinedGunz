@@ -331,7 +331,7 @@ bool ZApplication::OnCreate(ZLoadingProgress *pLoadingProgress)
 	//ZGetSoundEngine()->Enumerate();
 	//for( int i = 0 ; i < ZGetSoundEngine()->GetEnumDeviceCount() ; ++i)
 	//{
-	//	sprintf_s(szDesc, "Sound Device %d = %s\n", i, ZGetSoundEngine()->GetDeviceDescription( i ) );
+	//	sprintf_safe(szDesc, "Sound Device %d = %s\n", i, ZGetSoundEngine()->GetDeviceDescription( i ) );
 	//	mlog(szDesc);
 	//}
 

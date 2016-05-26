@@ -246,7 +246,7 @@ public :
 		char szTemp[ 100 ] = {0};
 		DWORD t = timeGetTime();
 		int a = t - m_dwLastUpdateTime;
-		sprintf_s( szTemp, "Update Elapse %d %d\n", timeGetTime() - m_dwLastUpdateTime, a );
+		sprintf_safe( szTemp, "Update Elapse %d %d\n", timeGetTime() - m_dwLastUpdateTime, a );
 		mlog( szTemp );
 #endif
 		return timeGetTime() - m_dwLastUpdateTime; 

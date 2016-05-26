@@ -284,7 +284,7 @@ bool RBaseTexture::OnRestore(bool bManaged)
 
 #ifdef LOAD_FROM_DDS
 	char ddstexturefile[MAX_PATH];
-	sprintf_s(ddstexturefile,"%s.dds",m_szTextureName);
+	sprintf_safe(ddstexturefile,"%s.dds",m_szTextureName);
 	if(!mzf.Open(ddstexturefile,pfs))
 #endif
 	{
@@ -604,7 +604,7 @@ RBaseTexture *RTextureManager::CreateBaseTextureSub(bool Mg,const char* filename
 
 	/*
 	char ddstexturefile[MAX_PATH];
-	sprintf_s(ddstexturefile,"%s.dds",texturefilename);
+	sprintf_safe(ddstexturefile,"%s.dds",texturefilename);
 	D3DXSaveTextureToFile(ddstexturefile,D3DXIFF_DDS,pnew->GetTexture(),NULL);
 	*/
 

@@ -120,11 +120,11 @@ bool MClient::OnCommand(MCommand* pCommand)
 			for(int i=0; i<m_CommandManager.GetCommandDescCount(); i++){
 				MCommandDesc* pCmdDesc = m_CommandManager.GetCommandDesc(i);
 				static char szMessage[1024];
-				sprintf_s(szMessage, "%s : %s", pCmdDesc->GetName(), pCmdDesc->GetDescription());
+				sprintf_safe(szMessage, "%s : %s", pCmdDesc->GetName(), pCmdDesc->GetDescription());
 				OutputMessage(szMessage, MZMOM_LOCALREPLY);
 				char szSyntax[256];
 				m_CommandManager.GetSyntax(szSyntax, pCmdDesc);
-				sprintf_s(szMessage, "[Syntax] %s", szSyntax);
+				sprintf_safe(szMessage, "[Syntax] %s", szSyntax);
 				OutputMessage(szMessage, MZMOM_LOCALREPLY);
 			}
 			break;
@@ -321,7 +321,7 @@ bool MClient::OnSockRecv(SOCKET sock, char* pPacket, DWORD dwSize)
 		//// LOG ////////
 		#ifdef _DEBUG
 		char szBuf[64];
-		sprintf_s(szBuf, "Recv Command(%d) , %d Bytes \n", pCmd->GetID(), dwSize);
+		sprintf_safe(szBuf, "Recv Command(%d) , %d Bytes \n", pCmd->GetID(), dwSize);
 		OutputDebugString(szBuf);
 		#endif
 		/////////////////
@@ -389,7 +389,7 @@ void MClient::OutputMessage(MZMOMType nType, const char *pFormat,...)
 	static char temp[1024];
 
 	va_start(args, pFormat);
-	vsprintf_s(temp, pFormat, args);
+	vsprintf_safe(temp, pFormat, args);
 	OutputMessage(temp, nType);
 	va_end(args);
 }

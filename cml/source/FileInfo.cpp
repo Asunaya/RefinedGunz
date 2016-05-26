@@ -270,7 +270,7 @@ void GetPurePath(char *pPurePath, int maxlen, const char *pFilename)
 {
 	char drive[_MAX_DRIVE],dir[_MAX_DIR],fname[_MAX_FNAME],ext[_MAX_EXT];
 	_splitpath_s(pFilename,drive,dir,fname,ext);
-	sprintf_s(pPurePath, maxlen, "%s%s", drive, dir);
+	sprintf_safe(pPurePath, maxlen, "%s%s", drive, dir);
 	
 	int len = strlen(pPurePath);
 	if(len)

@@ -18,7 +18,7 @@ void OutputToConsole(const char* pFormat,...)
 	static char temp[1024];
 
 	va_start(args, pFormat);
-	vsprintf_s(temp, pFormat, args);
+	vsprintf_safe(temp, pFormat, args);
 
 	g_pConsole->OutputMessage(temp);
 

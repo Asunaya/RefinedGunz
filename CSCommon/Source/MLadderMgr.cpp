@@ -234,7 +234,7 @@ void MLadderMgr::LaunchLadder(MLADDERTYPE nLadderType, int nGroupA, int nGroupB)
 {
 #ifdef _DEBUG
 	//char szLog[128];
-	//sprintf_s(szLog, "Team(%d) vs Group(%d) LADDER LAUNCHED \n", nGroupA, nGroupB);
+	//sprintf_safe(szLog, "Team(%d) vs Group(%d) LADDER LAUNCHED \n", nGroupA, nGroupB);
 	//OutputDebugString(szLog);
 #endif 
 

@@ -193,7 +193,7 @@ bool MEmblemMgr::SaveCache()
 
 		MXmlElement	childElement;
 
-		sprintf_s(szBuf,"%u", pNode->GetCLID());
+		sprintf_safe(szBuf,"%u", pNode->GetCLID());
 		childElement = emblemElement.CreateChildElement(MTOK_EMBLEM_CLID);
 		childElement.SetContents(szBuf);
 
@@ -204,13 +204,13 @@ bool MEmblemMgr::SaveCache()
 
 		emblemElement.AppendText("\n\t\t");
 
-		sprintf_s(szBuf,"%u", pNode->GetChecksum());
+		sprintf_safe(szBuf,"%u", pNode->GetChecksum());
 		childElement = emblemElement.CreateChildElement(MTOK_EMBLEM_CHECKSUM);
 		childElement.SetContents(szBuf);
 
 		emblemElement.AppendText("\n\t\t");
 
-		sprintf_s(szBuf, "%u", (unsigned int)pNode->GetTimeLastUsed());
+		sprintf_safe(szBuf, "%u", (unsigned int)pNode->GetTimeLastUsed());
 		childElement = emblemElement.CreateChildElement(MTOK_EMBLEM_TIMELASTUSED);
 		childElement.SetContents(szBuf);
 
@@ -377,7 +377,7 @@ void MEmblemMgr::Tick(unsigned long nTick)
 
 		// Logs
 		char szLog[128];
-		sprintf_s(szLog, "EmblemCache> Cached Emblem : %d/%d \n", 
+		sprintf_safe(szLog, "EmblemCache> Cached Emblem : %d/%d \n", 
 				GetCachedRequest(), GetTotalRequest());
 		OutputDebugString(szLog);
 	} */

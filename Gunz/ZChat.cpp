@@ -380,7 +380,7 @@ bool ZChat::CheckChatFilter(const char* szMsg)
 		if ((timeGetTime() - m_nLastAbuseTime) < ZCHAT_CHAT_ABUSE_COOLTIME)
 		{
 			char szOutput[512];
-			sprintf_s(szOutput, 
+			sprintf_safe(szOutput, 
 				ZErrStr(MERR_CHAT_PENALTY_FOR_ONE_MINUTE) );
 			Output(szOutput, CMT_SYSTEM);
 			return false;
@@ -401,7 +401,7 @@ bool ZChat::CheckChatFilter(const char* szMsg)
 #endif
 
 		char szOutput[512];
-		sprintf_s( szOutput, "%s (%s)", ZErrStr( MERR_CANNOT_ABUSE), MGetChattingFilter()->GetLastFilteredStr());
+		sprintf_safe( szOutput, "%s (%s)", ZErrStr( MERR_CANNOT_ABUSE), MGetChattingFilter()->GetLastFilteredStr());
 		Output( szOutput, CMT_SYSTEM);
 
 		return false;
@@ -444,7 +444,7 @@ void ZChat::FilterWhisperKey(MWidget* pWidget)
 		ZChatCmd* pWhisperCmd = GetCmdManager()->GetCommandByID(CCMD_ID_WHISPER);
 		if (pWhisperCmd)
 		{
-			sprintf_s(msg, "/%s ", pWhisperCmd->GetName());
+			sprintf_safe(msg, "/%s ", pWhisperCmd->GetName());
 		}
 
 		//strcpy_safe(msg, "/±Ó¸» ");

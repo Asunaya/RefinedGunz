@@ -431,7 +431,7 @@ bool ZGame::Create(MZFileSystem *pfs, ZLoadingProgress *pLoading )
 	//char szMapPath[64] = "";
 	//ZGetCurrMapPath(szMapPath);
 
-	//sprintf_s(szMapFileName, "%s%s/%s.rs", 
+	//sprintf_safe(szMapFileName, "%s%s/%s.rs", 
 	//	szMapPath,
 	//	ZGetGameClient()->GetMatchStageSetting()->GetMapName(),
 	//	ZGetGameClient()->GetMatchStageSetting()->GetMapName());
@@ -1180,7 +1180,7 @@ void ZGame::Draw()
 		nPick = 0;
 
 	char szTemp[256];
-	sprintf_s(szTemp, "line1 = %6.3f %6.3f %6.3f  line2 = %6.3f %6.3f %6.3f Pick %d", new_line1.x,new_line1.y,new_line1.z, new_line2.x,new_line2.y,new_line2.z,nPick);
+	sprintf_safe(szTemp, "line1 = %6.3f %6.3f %6.3f  line2 = %6.3f %6.3f %6.3f Pick %d", new_line1.x,new_line1.y,new_line1.z, new_line2.x,new_line2.y,new_line2.z,nPick);
 	g_pDC->Text(100,200,szTemp);
 */
 
@@ -1195,14 +1195,14 @@ void ZGame::DrawDebugInfo()
 	for (ZCharacterManager::iterator itor = m_CharacterManager.begin(); itor != m_CharacterManager.end(); ++itor)
 	{
 		ZCharacter* pCharacter = (*itor).second;
-		sprintf_s(szTemp, "Pos = %6.3f %6.3f %6.3f  Dir = %6.3f %6.3f %6.3f", pCharacter->m_Position.x,
+		sprintf_safe(szTemp, "Pos = %6.3f %6.3f %6.3f  Dir = %6.3f %6.3f %6.3f", pCharacter->m_Position.x,
 				pCharacter->m_Position.y, pCharacter->m_Position.z, 
 				pCharacter->m_Direction.x, pCharacter->m_Direction.y, pCharacter->m_Direction.z);
 		g_pDC->Text(20,n,szTemp);
 		n += 15;
 
 /*
-		sprintf_s(szTemp, "state = %d , %d", (int)(pCharacter->GetState()), (int)(pCharacter->GetStateSub()));
+		sprintf_safe(szTemp, "state = %d , %d", (int)(pCharacter->GetState()), (int)(pCharacter->GetStateSub()));
 		g_pDC->Text(20, n, szTemp);
 		n+= 15;
 */
@@ -1212,13 +1212,13 @@ void ZGame::DrawDebugInfo()
 		AniFrameInfo* pAniLow = pVMesh->GetFrameInfo(ani_mode_lower);
 		AniFrameInfo* pAniUp  = pVMesh->GetFrameInfo(ani_mode_upper);
 
-		sprintf_s(szTemp,"%s frame down %d / %d ",pAniLow->m_pAniSet->GetName() , pAniLow->m_nFrame , pAniLow->m_pAniSet->GetMaxFrame());
+		sprintf_safe(szTemp,"%s frame down %d / %d ",pAniLow->m_pAniSet->GetName() , pAniLow->m_nFrame , pAniLow->m_pAniSet->GetMaxFrame());
 		g_pDC->Text(20,n,szTemp);
 		n+= 15;
 
 		if( pAniUp->m_pAniSet ) 
 		{
-			sprintf_s(szTemp,"%s frame up %d / %d ",pAniUp->m_pAniSet->GetName(),pAniUp->m_nFrame,pAniUp->m_pAniSet->GetMaxFrame());
+			sprintf_safe(szTemp,"%s frame up %d / %d ",pAniUp->m_pAniSet->GetName(),pAniUp->m_nFrame,pAniUp->m_pAniSet->GetMaxFrame());
 			g_pDC->Text(20,n,szTemp);
 			n+= 15;
 		}
@@ -1230,7 +1230,7 @@ void ZGame::DrawDebugInfo()
 		 itor != ZGetGameClient()->GetPeers()->end(); ++itor)
 	{
 		MMatchPeerInfo* pPeerInfo = (*itor);
-		sprintf_s(szTemp, "MUID(%d, %d) , IP = %s, port = %d", pPeerInfo->uidChar.High, 
+		sprintf_safe(szTemp, "MUID(%d, %d) , IP = %s, port = %d", pPeerInfo->uidChar.High, 
 			    pPeerInfo->uidChar.Low, pPeerInfo->szIP, pPeerInfo->nPort);
 		g_pDC->Text(20,n,szTemp);
 		n+=15;
@@ -1243,7 +1243,7 @@ void ZGame::Draw(MDrawContextR2 &dc)
 {
 	/*	// 패스노드 출력.. for debug
 	char buffer[256];
-	sprintf_s(buffer," state: %d , pathnode: %d",m_pMyCharacter->m_State,m_pMyCharacter->m_nPathNodeID);
+	sprintf_safe(buffer," state: %d , pathnode: %d",m_pMyCharacter->m_State,m_pMyCharacter->m_nPathNodeID);
 
 	dc.SetColor(MCOLOR(0xFFffffff));
 	dc.Text(0,20,buffer);
@@ -1265,9 +1265,9 @@ void ZGame::ParseReservedWord(char* pszDest, const char* pszSrc)
 		pszNext = MStringCutter::GetOneArg(pszNext, szWord);
 
 		if ( (*szWord == '$') && (_stricmp(szWord, "$player")==0) ) {
-			sprintf_s(szWord, "%d %d", m_pMyCharacter->GetUID().High, m_pMyCharacter->GetUID().Low);
+			sprintf_safe(szWord, "%d %d", m_pMyCharacter->GetUID().High, m_pMyCharacter->GetUID().Low);
 		} else if ( (*szWord == '$') && (_stricmp(szWord, "$target")==0) ) {
-			sprintf_s(szWord, "%d %d", m_pMyCharacter->GetUID().High, m_pMyCharacter->GetUID().Low);	// Target생기믄 꼭 Target 으로 바꾸기
+			sprintf_safe(szWord, "%d %d", m_pMyCharacter->GetUID().High, m_pMyCharacter->GetUID().Low);	// Target생기믄 꼭 Target 으로 바꾸기
 		}
 
 		strcpy(szOut+nOutOffset, szWord);	nOutOffset += (int)strlen(szWord);
@@ -1823,12 +1823,12 @@ bool ZGame::OnCommand_Immediate(MCommand* pCommand)
 
 
 						if(bSpUser) {
-							//sprintf_s(szTemp, "%s : %s", sp_name, szMsg);
-							sprintf_s(szTemp, "%s: %s", pChar->GetProperty()->szName, szMsg);
+							//sprintf_safe(szTemp, "%s : %s", sp_name, szMsg);
+							sprintf_safe(szTemp, "%s: %s", pChar->GetProperty()->szName, szMsg);
 							ZChatOutput(UserNameColor, szTemp);
 						}
 						else {
-							sprintf_s(szTemp, "%s: %s", pChar->GetProperty()->szName, szMsg);
+							sprintf_safe(szTemp, "%s: %s", pChar->GetProperty()->szName, szMsg);
 							ZChatOutput(ChatColor, szTemp);
 						}
 					}
@@ -1845,11 +1845,11 @@ bool ZGame::OnCommand_Immediate(MCommand* pCommand)
 						char szTemp[512];
 
 						if(bSpUser) {
-							sprintf_s(szTemp, "(Team)%s: %s", sp_name,szMsg);
+							sprintf_safe(szTemp, "(Team)%s: %s", sp_name,szMsg);
 							ZChatOutput(UserNameColor, szTemp);
 						}
 						else {
-							sprintf_s(szTemp, "(Team)%s: %s", pChar->GetProperty()->szName,szMsg);
+							sprintf_safe(szTemp, "(Team)%s: %s", pChar->GetProperty()->szName,szMsg);
 							ZChatOutput(TeamChatColor, szTemp);
 						}
 					}
@@ -2448,7 +2448,7 @@ void ZGame::OnPeerOpened(MCommand *pCommand)
 	}
 
 	char szBuf[64];
-	sprintf_s(szBuf, "PEER_OPENED(%s) : %s(%d%d) \n", pszNAT, pszName, uidChar.High, uidChar.Low);
+	sprintf_safe(szBuf, "PEER_OPENED(%s) : %s(%d%d) \n", pszNAT, pszName, uidChar.High, uidChar.Low);
 	OutputDebugString(szBuf);
 #endif
 }
@@ -4122,7 +4122,7 @@ void ZGame::OnReceiveTeamBonus(const MUID& uidChar, const unsigned long int nExp
 	{
 #ifdef _DEBUG
 		char szTemp[128];
-		sprintf_s(szTemp, "TeamBonus = %d\n", nExp);
+		sprintf_safe(szTemp, "TeamBonus = %d\n", nExp);
 		OutputDebugString(szTemp);
 #endif
 
@@ -4155,19 +4155,19 @@ void ZGame::OnPeerDieMessage(ZCharacter* pVictim, ZCharacter* pAttacker)
 		if (pVictim == m_pMyCharacter)
 		{
 			if(m_pMyCharacter->GetLastDamageType()==ZD_EXPLOSION) {
-//				sprintf_s(szMsg, "당신은 자신의 폭탄으로 인하여 패배 하였습니다.");
-				sprintf_s( szMsg, ZMsg(MSG_GAME_LOSE_BY_MY_BOMB) );
+//				sprintf_safe(szMsg, "당신은 자신의 폭탄으로 인하여 패배 하였습니다.");
+				sprintf_safe( szMsg, ZMsg(MSG_GAME_LOSE_BY_MY_BOMB) );
 			}
 			else {
-//				sprintf_s(szMsg, "당신은 스스로 패배하였습니다.");
-				sprintf_s( szMsg, ZMsg(MSG_GAME_LOSE_MYSELF) );
+//				sprintf_safe(szMsg, "당신은 스스로 패배하였습니다.");
+				sprintf_safe( szMsg, ZMsg(MSG_GAME_LOSE_MYSELF) );
 			}
 
 			ZChatOutput(MCOLOR(0xFFCF2020), szMsg);
 		}
 		else
 		{
-//			sprintf_s(szMsg, "%s님이 스스로 패배하였습니다.", szAttacker);
+//			sprintf_safe(szMsg, "%s님이 스스로 패배하였습니다.", szAttacker);
 			ZTransMsg( szMsg, MSG_GAME_WHO_LOSE_SELF, 1, szAttacker );
 			ZChatOutput(MCOLOR(0xFF707070), szMsg);
 
@@ -4176,7 +4176,7 @@ void ZGame::OnPeerDieMessage(ZCharacter* pVictim, ZCharacter* pAttacker)
 				MMatchObjCache* pCache = ZGetGameClient()->FindObjCache(ZGetMyUID());
 				if (pCache && pCache->CheckFlag(MTD_PlayerFlags_AdminHide))
 				{
-					sprintf_s( szMsg, "^%d%s^9 스스로 패배",
+					sprintf_safe( szMsg, "^%d%s^9 스스로 패배",
 									(pAttacker->GetTeamID() == MMT_BLUE) ? 3 : 1,
 									pAttacker->GetProperty()->szName);
 					ZGetGameInterface()->GetCombatInterface()->m_AdminMsg.OutputChatMsg( szMsg);
@@ -4189,7 +4189,7 @@ void ZGame::OnPeerDieMessage(ZCharacter* pVictim, ZCharacter* pAttacker)
 	// 내가 죽였을 때
 	else if (pAttacker == m_pMyCharacter)
 	{
-//		sprintf_s(szMsg, "당신은 %s님으로부터 승리하였습니다.", szVictim );
+//		sprintf_safe(szMsg, "당신은 %s님으로부터 승리하였습니다.", szVictim );
 		ZTransMsg( szMsg, MSG_GAME_WIN_FROM_WHO, 1, szVictim );
 		ZChatOutput(MCOLOR(0xFF80FFFF), szMsg);
 	}
@@ -4197,7 +4197,7 @@ void ZGame::OnPeerDieMessage(ZCharacter* pVictim, ZCharacter* pAttacker)
 	// 내가 죽었을 때
 	else if (pVictim == m_pMyCharacter)
 	{
-//		sprintf_s(szMsg, "당신은 %s님에게 패배하였습니다.", szAttacker );
+//		sprintf_safe(szMsg, "당신은 %s님에게 패배하였습니다.", szAttacker );
 		/*ZTransMsg( szMsg, MSG_GAME_LOSE_FROM_WHO, 1, szAttacker );
 		ZChatOutput(MCOLOR(0xFFCF2020), szMsg);*/
 		ZChatOutputF("%s has defeated you. (HP: %d / %d, AP: %d / %d)", pAttacker->GetProperty()->szName, pAttacker->GetHP(), (int)pAttacker->GetProperty()->fMaxHP, pAttacker->GetAP(), (int)pAttacker->GetProperty()->fMaxAP);
@@ -4206,7 +4206,7 @@ void ZGame::OnPeerDieMessage(ZCharacter* pVictim, ZCharacter* pAttacker)
 	// 다른 사람이 다른 사람 죽였을때
 	else
 	{
-// 		sprintf_s(szMsg, "%s님이 %s님으로부터 승리하였습니다.", szAttacker, szVictim );
+// 		sprintf_safe(szMsg, "%s님이 %s님으로부터 승리하였습니다.", szAttacker, szVictim );
 		ZTransMsg( szMsg, MSG_GAME_WHO_WIN_FROM_OTHER, 2, szAttacker, szVictim );
 		ZChatOutput(MCOLOR(0xFF707070), szMsg);
 		
@@ -4215,7 +4215,7 @@ void ZGame::OnPeerDieMessage(ZCharacter* pVictim, ZCharacter* pAttacker)
 			MMatchObjCache* pCache = ZGetGameClient()->FindObjCache(ZGetMyUID());
 			if (pCache && pCache->CheckFlag(MTD_PlayerFlags_AdminHide))
 			{
-				sprintf_s( szMsg, "^%d%s^9 승리,  ^%d%s^9 패배",
+				sprintf_safe( szMsg, "^%d%s^9 승리,  ^%d%s^9 패배",
 							(pAttacker->GetTeamID() == MMT_BLUE) ? 3 : 1, pAttacker->GetProperty()->szName,
 							(pVictim->GetTeamID() == MMT_BLUE) ? 3 : 1,   pVictim->GetProperty()->szName);
 				ZGetGameInterface()->GetCombatInterface()->m_AdminMsg.OutputChatMsg( szMsg);
@@ -4334,7 +4334,7 @@ void ZGame::AssignCommander(const MUID& uidRedCommander, const MUID& uidBlueComm
 	//// DEBUG LOG ////
 	const char *szUnknown = "unknown";
 	char szBuf[128];
-	sprintf_s(szBuf, "RedCMDER=%s , BlueCMDER=%s \n", 
+	sprintf_safe(szBuf, "RedCMDER=%s , BlueCMDER=%s \n", 
 		pRedChar ? pRedChar->GetProperty()->szName : szUnknown , 
 		pBlueChar ? pBlueChar->GetProperty()->szName : szUnknown );
 	OutputDebugString(szBuf);
@@ -4392,7 +4392,7 @@ void ZGame::OnPeerSpawn(MUID& uid, rvector& pos, rvector& dir)
 
 #ifndef _PUBLISH
 	char szLog[128];
-	sprintf_s(szLog, "ZGame::OnPeerSpawn() - %s(%u) Spawned \n", 
+	sprintf_safe(szLog, "ZGame::OnPeerSpawn() - %s(%u) Spawned \n", 
 		pCharacter->GetProperty()->szName, pCharacter->GetUID().Low);
 	OutputDebugString(szLog);
 #endif
@@ -4749,7 +4749,7 @@ if(fabs(pCharacter->m_fAccumulatedTimeError)>10.f)
 {
 #ifndef _PUBLISH
 char szTemp[256];
-sprintf_s(szTemp, "%s님이 스피드핵 ? %3.1f", pCharacter->GetProperty()->szName,pCharacter->m_fAccumulatedTimeError);
+sprintf_safe(szTemp, "%s님이 스피드핵 ? %3.1f", pCharacter->GetProperty()->szName,pCharacter->m_fAccumulatedTimeError);
 ZGetGameInterface()->OutputChatMsg(MCOLOR(0xFFFF0000), szTemp);
 #endif
 
@@ -5469,7 +5469,7 @@ void ZGame::StartRecording()
 	}
 
 	do {
-		sprintf_s(replayfilename, "%s/Gunz%03d." GUNZ_REC_FILE_EXT, replayfoldername, nsscount);
+		sprintf_safe(replayfilename, "%s/Gunz%03d." GUNZ_REC_FILE_EXT, replayfoldername, nsscount);
 		m_nGunzReplayNumber = nsscount;
 		nsscount++;
 	}
@@ -5584,7 +5584,7 @@ void ZGame::StopRecording()
 	else
 	{
 		char szOutputFilename[256];
-		sprintf_s(szOutputFilename, GUNZ_FOLDER REPLAY_FOLDER "/Gunz%03d." GUNZ_REC_FILE_EXT, m_nGunzReplayNumber);
+		sprintf_safe(szOutputFilename, GUNZ_FOLDER REPLAY_FOLDER "/Gunz%03d." GUNZ_REC_FILE_EXT, m_nGunzReplayNumber);
 
 		char szOutput[256];
 		// ZTranslateMessage(szOutput,MSG_RECORD_SAVED,1,szOutputFilename);
@@ -5840,7 +5840,7 @@ void ZGame::OnAddPeer(const MUID& uidChar, DWORD dwIP, const int nPort, MTD_Peer
 	/*
 	//// UDPTEST LOG ////////////////////////////////
 	char szLog[256];
-	sprintf_s(szLog, "[%d:%d] ADDPEER: Char(%d:%d) IP:%s, Port:%d \n", 
+	sprintf_safe(szLog, "[%d:%d] ADDPEER: Char(%d:%d) IP:%s, Port:%d \n", 
 	GetPlayerUID().High, GetPlayerUID().Low, uidChar.High, uidChar.Low, szIP, nPort);
 	mlog(szLog);
 	/////////////////////////////////////////////////

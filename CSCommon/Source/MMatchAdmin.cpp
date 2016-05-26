@@ -126,7 +126,7 @@ bool MMatchServer::OnAdminExecute(MAdminArgvInfo* pAI, char* szOut, int maxlen)
 	{
 		if (pAI->cargc < 3)
 		{
-			sprintf_s(szOut, maxlen, "인자가 부족합니다.");
+			sprintf_safe(szOut, maxlen, "인자가 부족합니다.");
 			return true;
 		}
 
@@ -146,7 +146,7 @@ bool MMatchServer::OnAdminExecute(MAdminArgvInfo* pAI, char* szOut, int maxlen)
 	}
 	else
 	{
-		sprintf_s(szOut, maxlen, "%s: no such command", pAI->cargv[0]);
+		sprintf_safe(szOut, maxlen, "%s: no such command", pAI->cargv[0]);
 	}
 	
 	return true;

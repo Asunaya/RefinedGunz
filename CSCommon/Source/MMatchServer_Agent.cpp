@@ -93,7 +93,7 @@ void MMatchServer::LocateAgentToClient(const MUID& uidPlayer, const MUID& uidAge
 
 	char szCharName[64];
 	MMatchObject* pChar = GetObject(uidPlayer);
-	sprintf_s(szCharName, "%s(%d%d)", (pChar?pChar->GetAccountName():"?"), uidPlayer.High, uidPlayer.Low);
+	sprintf_safe(szCharName, "%s(%d%d)", (pChar?pChar->GetAccountName():"?"), uidPlayer.High, uidPlayer.Low);
 	LOG(LOG_DEBUG, "Locate Agent : Locate Agent(%d%d) to Player %s ", uidAgent.High, uidAgent.Low, szCharName);
 
 	MCommand* pCmd = CreateCommand(MC_AGENT_LOCATETO_CLIENT, MUID(0,0));
@@ -143,7 +143,7 @@ void MMatchServer::OnRegisterAgent(const MUID& uidComm, char* szIP, int nTCPPort
 		szBulk[i] = pszAlpha[i%nAlphaLen];
 	for (i=0; i<1000; i++) {
 		char szMsg[512];
-		sprintf_s(szMsg, "TEST_STRING=%d  (%s)", i, szBulk);
+		sprintf_safe(szMsg, "TEST_STRING=%d  (%s)", i, szBulk);
 
 		MCommand* pCmd = CreateCommand(MC_AGENT_DEBUGTEST, pAgent->GetCommListener());
 		pCmd->AddParameter(new MCmdParamStr(szMsg));

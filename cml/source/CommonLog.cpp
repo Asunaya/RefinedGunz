@@ -30,7 +30,7 @@ void Log( const char *pFormat, ... )
 
 	if(pCurrentLog){
 		va_start(args, pFormat);
-		vsprintf_s(szTemp, pFormat, args);
+		vsprintf_safe(szTemp, pFormat, args);
 		va_end(args);
 
 		pCurrentLog->Print(szTemp);

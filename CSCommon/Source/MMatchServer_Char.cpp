@@ -505,7 +505,7 @@ bool MMatchServer::CharFinalize(const MUID& uidPlayer)
 			strcat( szDbgOut, "BP:");
 
 			char szBP[ 20 ] = {0};
-			sprintf_s( szBP, "BP:%d\n", pCharInfo->m_nBP );
+			sprintf_safe( szBP, "BP:%d\n", pCharInfo->m_nBP );
 
 			strcat( szDbgOut, szBP );
 			
@@ -515,7 +515,7 @@ bool MMatchServer::CharFinalize(const MUID& uidPlayer)
 			for( ; it != end; ++it )
 			{
 				char tmp[ 100 ] = {0};
-				sprintf_s( tmp, "QuestItemName:%s : Count:%d\n", it->second->GetDesc()->m_szQuestItemName, it->second->GetCount() );
+				sprintf_safe( tmp, "QuestItemName:%s : Count:%d\n", it->second->GetDesc()->m_szQuestItemName, it->second->GetCount() );
 				strcat( szDbgOut, tmp );
 			}
 			strcat( szDbgOut, "\n" );

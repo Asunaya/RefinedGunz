@@ -91,7 +91,7 @@ void MSysInfoLog_CPU()
 	nCPUStepping = (nCPUStepping & 0x0000000f);
 
 	char szDesc[512]="";
-	sprintf_s(szDesc, "CPU ID = %s ( family = %d , model = %d , stepping = %d ) @ %d MHz\n",
+	sprintf_safe(szDesc, "CPU ID = %s ( family = %d , model = %d , stepping = %d ) @ %d MHz\n",
 		pszCPUType,nCPUFamily,nCPUModel,nCPUStepping,nCPUClock);
 	mlog(szDesc);
 }
@@ -190,28 +190,28 @@ void MSysInfoLog_OS()
 	dwPhysicalMemory=ms.dwTotalPhys;
 
 	char szDesc[512]="";
-	sprintf_s(szDesc, "Windows = %d.%d Build %d , %s (%dKB) : ", os.dwMajorVersion, os.dwMinorVersion,
+	sprintf_safe(szDesc, "Windows = %d.%d Build %d , %s (%dKB) : ", os.dwMajorVersion, os.dwMinorVersion,
 		os.dwBuildNumber, os.szCSDVersion, (int)(dwPhysicalMemory/1024));
 	mlog(szDesc);
 
 	if(os.dwMajorVersion==5) {
-		if(os.dwMinorVersion==0)		sprintf_s(szDesc," Windows 2000..\n");
-		else if(os.dwMinorVersion==1)	sprintf_s(szDesc," Windows xp..\n");
-		else if(os.dwMinorVersion==2)	sprintf_s(szDesc," Windows 2003..\n");
-		else							sprintf_s(szDesc," ..\n");
+		if(os.dwMinorVersion==0)		sprintf_safe(szDesc," Windows 2000..\n");
+		else if(os.dwMinorVersion==1)	sprintf_safe(szDesc," Windows xp..\n");
+		else if(os.dwMinorVersion==2)	sprintf_safe(szDesc," Windows 2003..\n");
+		else							sprintf_safe(szDesc," ..\n");
 	}
 	else if(os.dwMajorVersion==4) {
-		if(os.dwMinorVersion==0)		sprintf_s(szDesc," Windows 95..\n");
-		else if(os.dwMinorVersion==10)	sprintf_s(szDesc," Windows 98..\n");
-		else if(os.dwMinorVersion==90)	sprintf_s(szDesc," Windows Me..\n");
-		else							sprintf_s(szDesc," ..\n");
+		if(os.dwMinorVersion==0)		sprintf_safe(szDesc," Windows 95..\n");
+		else if(os.dwMinorVersion==10)	sprintf_safe(szDesc," Windows 98..\n");
+		else if(os.dwMinorVersion==90)	sprintf_safe(szDesc," Windows Me..\n");
+		else							sprintf_safe(szDesc," ..\n");
 	}
 	else if(os.dwMajorVersion==3) {
-		if(os.dwMinorVersion==51)		sprintf_s(szDesc," Windows NT 3.51..\n");
-		else							sprintf_s(szDesc," ..\n");
+		if(os.dwMinorVersion==51)		sprintf_safe(szDesc," Windows NT 3.51..\n");
+		else							sprintf_safe(szDesc," ..\n");
 	}
 	else	{
-		sprintf_s(szDesc," ..\n");
+		sprintf_safe(szDesc," ..\n");
 	}
 	mlog(szDesc);
 }

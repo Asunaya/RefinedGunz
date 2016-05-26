@@ -41,7 +41,7 @@ bool ZEffectBulletMark::Draw(unsigned long int nTime)
 	ZEffectBillboard::Draw(nTime);
 
 //	static char buffer[40];
-//	sprintf_s(buffer,"ZEffectBulletMark::Draw : %d \n",g_bullet_mark_cnt);
+//	sprintf_safe(buffer,"ZEffectBulletMark::Draw : %d \n",g_bullet_mark_cnt);
 //	OutputDebugString(buffer);
 
 	return true;

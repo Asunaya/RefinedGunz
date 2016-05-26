@@ -179,7 +179,7 @@ void MShutdownTraceMemory()
 	memories = new vector<MCallStackInfo*>;
 
 	char szFileName[_MAX_PATH];
-	sprintf_s(szFileName,"%s/%s",szCurrentDir,MTMFILENAME);
+	sprintf_safe(szFileName,"%s/%s",szCurrentDir,MTMFILENAME);
 	FILE *file = nullptr;
 	fopen_s(&file, szFileName, "rb");
 
@@ -254,13 +254,13 @@ void MDumpCallStack(int lRequest)
 
 			SymGetLineFromAddr( GetCurrentProcess(), address, &dwDisplacement, &imageLine);
 
-//			sprintf_s(buffer,"   %s(%d) \n",imageLine.FileName, imageLine.LineNumber );
-			sprintf_s(buffer,"   %s(%d) : %s \n",imageLine.FileName, imageLine.LineNumber, szSymName);
+//			sprintf_safe(buffer,"   %s(%d) \n",imageLine.FileName, imageLine.LineNumber );
+			sprintf_safe(buffer,"   %s(%d) : %s \n",imageLine.FileName, imageLine.LineNumber, szSymName);
 			OutputDebugString(buffer);
 		}
 	}else
 	{
-		sprintf_s(buffer,"%d request not found\n",lRequest);
+		sprintf_safe(buffer,"%d request not found\n",lRequest);
 		OutputDebugString(buffer);
 	}
 }

@@ -776,7 +776,7 @@ __try{
 
 				if (pRCPAccept->GetSocket() == INVALID_SOCKET) {
 					static int nInvalidAccept = 0;
-					char szLog[64]; sprintf_s(szLog, "Accept with INVALID_SOCKET (Count=%d) \n", nInvalidAccept++);
+					char szLog[64]; sprintf_safe(szLog, "Accept with INVALID_SOCKET (Count=%d) \n", nInvalidAccept++);
 					OutputDebugString(szLog);
 					delete pRCPAccept;
 					pRealCPNet->CreateAcceptSocket(FALSE);
@@ -954,7 +954,7 @@ DWORD MRealCPNet::CrashDump(PEXCEPTION_POINTERS ExceptionInfo)
 
 	int nFooter = 1;
 	while(TRUE) {
-		sprintf_s(szFileName, "Log/RealCPNet_%02d-%02d-%02d-%d.dmp", 
+		sprintf_safe(szFileName, "Log/RealCPNet_%02d-%02d-%02d-%d.dmp", 
 			tmTime.tm_year + 1900, tmTime.tm_mon + 1, tmTime.tm_mday, nFooter);
 
 		if (PathFileExists(szFileName) == FALSE)

@@ -221,7 +221,7 @@ void ZObjectManager::Draw()
 		fTime=fmod(fTime,1.f);
 
 		char szTimeMessage[256] = "";
-		sprintf_s(szTimeMessage, "%d:%02d.%02d",nTimeMinute,nTimeSecond,int(fTime*100.f));
+		sprintf_safe(szTimeMessage, "%d:%02d.%02d",nTimeMinute,nTimeSecond,int(fTime*100.f));
 
 		ZMyCharacter* pMyChar =	g_pGame->m_pMyCharacter;
 

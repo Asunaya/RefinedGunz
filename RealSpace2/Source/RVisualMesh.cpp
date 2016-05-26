@@ -830,7 +830,7 @@ void RVisualMesh::Render(bool low,bool render_buffer) {
 			if(m_RenderQuery.isNeedRender()==false) {
 				m_bIsRender = false;
 //				char temp[1024];
-//				sprintf_s(temp,"%s skip query render \n ", m_pMesh->GetFileName() );
+//				sprintf_safe(temp,"%s skip query render \n ", m_pMesh->GetFileName() );
 //				OutputDebugString( temp );
 				return;
 			}

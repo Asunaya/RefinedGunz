@@ -37,7 +37,7 @@ void ZBmNumLabel::SetCharMargin( int* nMargin)
 void ZBmNumLabel::SetNumber(int n,bool bAddComma)
 {
 	char buffer[256];
-	sprintf_s(buffer,"%d",n);
+	sprintf_safe(buffer,"%d",n);
 
 	int nLength = (int)strlen(buffer);
 

@@ -95,7 +95,7 @@ void ZInterfaceBackground::LoadMesh( void)
 			if( m_pMapDesc ) {
 
 				char szBuf[128];
-				sprintf_s( szBuf, "%s/smoke.xml", DIR_LOGIN );
+				sprintf_safe( szBuf, "%s/smoke.xml", DIR_LOGIN );
 				m_pMapDesc->LoadSmokeDesc(szBuf);
 				//mlog("ZInterfaceBackground::LoadMesh pMapDesc->LoadSmokeDesc \n");
 			}

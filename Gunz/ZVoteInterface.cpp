@@ -73,7 +73,7 @@ void ZVoteInterface::DrawVoteTargetlist(MDrawContext* pDC)
 		string& strName = m_TargetList[i];
 
 		char szBuffer[256];
-		sprintf_s(szBuffer,"[%c] %s", ConvIndexToKey(i), strName.c_str());
+		sprintf_safe(szBuffer,"[%c] %s", ConvIndexToKey(i), strName.c_str());
 
 		pDC->SetColor(MCOLOR(0xFFFFFFFF));
 		TextRelative(pDC,.05f,y,szBuffer);

@@ -671,7 +671,7 @@ void MMatchServer::ResponseExpelMember(const MUID& uidClanAdmin, const char* szM
 	int nCLID = pAdminObject->GetCharInfo()->m_ClanInfo.m_nClanID;
 	int nClanGrade = pAdminObject->GetCharInfo()->m_ClanInfo.m_nGrade;
 	char szTarMember[256]; 
-	sprintf_s(szTarMember, szMember);
+	sprintf_safe(szTarMember, szMember);
 
 	// 실제로 디비상에서 권한 변경
 	if (!m_MatchDBMgr.ExpelClanMember(nCLID, nClanGrade, szTarMember, &nDBRet))

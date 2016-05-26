@@ -116,7 +116,7 @@ void ZRoomListBox::OnDraw( MDrawContext* pDC )
 		r.y = height + m_RoomHeight*0.1f + pressed_reposition;
 		r.w = m_RoomWidth*0.1;
 		r.h = m_RoomHeight *0.5;
-     	sprintf_s(szBuf,"%03d", m_pMapInfo[i].RoomNumber);
+     	sprintf_safe(szBuf,"%03d", m_pMapInfo[i].RoomNumber);
 
 		pDC->SetFont( MFontManager::Get("FONTc8b") );
 		pDC->SetColor( 0,0,0);
@@ -132,7 +132,7 @@ void ZRoomListBox::OnDraw( MDrawContext* pDC )
 		r.y = height + m_RoomHeight*0.5f + pressed_reposition;
 		r.w = m_RoomWidth*0.1f;
 		r.h = m_RoomHeight*0.5f;
-		sprintf_s(szBuf,"%d/%d", m_pMapInfo[i].nPeople, m_pMapInfo[i].nMaxPeople );
+		sprintf_safe(szBuf,"%d/%d", m_pMapInfo[i].nPeople, m_pMapInfo[i].nMaxPeople );
 
 		pDC->SetColor( 0,0,0);
 		pDC->Text( MRECT( r.x+1, r.y+1, r.w, r.h), szBuf);
@@ -198,7 +198,7 @@ void ZRoomListBox::OnDraw( MDrawContext* pDC )
 		if( m_pMapInfo[i].bLimitLevel )
 		{
 			char szBufTemp[64];
-			sprintf_s( szBufTemp, "%d~%d", max(m_pMapInfo[i].nMasterLevel - m_pMapInfo[i].nLimitLevel,1), m_pMapInfo[i].nMasterLevel + m_pMapInfo[i].nLimitLevel);
+			sprintf_safe( szBufTemp, "%d~%d", max(m_pMapInfo[i].nMasterLevel - m_pMapInfo[i].nLimitLevel,1), m_pMapInfo[i].nMasterLevel + m_pMapInfo[i].nLimitLevel);
 
 			pDC->SetColor( 0,0,0);
 			pDC->Text( MRECT( r.x+1, r.y+1, r.w, r.h), szBufTemp);

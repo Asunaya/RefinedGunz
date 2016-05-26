@@ -89,7 +89,7 @@ void ZBirdDummyAIMakeRoomFlood::OnCommand(MCommand* pCmd)
 
 			static int nChannelID = 0;
 			char szStageName[256];
-			sprintf_s(szStageName, "%s_stage%d", m_szUserID, nChannelID);
+			sprintf_safe(szStageName, "%s_stage%d", m_szUserID, nChannelID);
 			nChannelID++;
 
 
@@ -117,7 +117,7 @@ void ZBirdDummyAIMakeRoomFlood::OnCommand(MCommand* pCmd)
 			{
 				int nRandNum = rand() % 100000;
 				char szStageName[256];
-				sprintf_s(szStageName, "%s_stage%d", "≤ø∫ÿ¡Ò", nRandNum);
+				sprintf_safe(szStageName, "%s_stage%d", "≤ø∫ÿ¡Ò", nRandNum);
 
 
 				ZBIRDPOSTCMD4(m_pClient, MC_MATCH_STAGE_CREATE, 
@@ -152,7 +152,7 @@ void ZBirdDummyAIMakeRoomFlood::OnCommand(MCommand* pCmd)
 				char szTemp[512];
 				if ((stJoinCount % 100) == 0)
 				{
-					sprintf_s(szTemp, "Join Flood(%u)", stJoinCount++);
+					sprintf_safe(szTemp, "Join Flood(%u)", stJoinCount++);
 					AddToLogFrame(m_nID, szTemp);
 				}
 			}
@@ -281,7 +281,7 @@ void ZBirdDummyAIJoinFlood::OnCommand(MCommand* pCmd)
 
 			static int nChannelID = 0;
 			char szStageName[256];
-			sprintf_s(szStageName, "%s_stage%d", m_szUserID, nChannelID);
+			sprintf_safe(szStageName, "%s_stage%d", m_szUserID, nChannelID);
 			nChannelID++;
 		}
 		break;
@@ -351,7 +351,7 @@ void ZBirdDummyAIJoinFlood::OnCommand(MCommand* pCmd)
 				char szTemp[512];
 				if ((stJoinCount % 100) == 0)
 				{
-					sprintf_s(szTemp, "Join Flood(%u)", stJoinCount++);
+					sprintf_safe(szTemp, "Join Flood(%u)", stJoinCount++);
 					AddToLogFrame(m_nID, szTemp);
 				}
 		}

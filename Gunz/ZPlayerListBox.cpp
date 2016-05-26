@@ -481,12 +481,12 @@ void ZPlayerListBox::AddPlayer(MUID& puid, ePlayerState state, int  nLevel,char*
 	bool bSpUser = false;
 
 	if(GetUserGradeIDColor(nGrade,_color,sp_name)) {
-		sprintf_s(szLevel, "%2d", nLevel);
+		sprintf_safe(szLevel, "%2d", nLevel);
 		szRefName = szName;
 		bSpUser = true;
 	}
 	else {
-		sprintf_s(szLevel,"%2d",nLevel);
+		sprintf_safe(szLevel,"%2d",nLevel);
 		szRefName = szName;
 	}
 
@@ -530,12 +530,12 @@ void ZPlayerListBox::AddPlayer(MUID& puid, MMatchObjectStageState state, int nLe
 	MMatchUserGradeID gid = MMUG_FREE;
 
 	if(GetUserInfoUID(puid,_color,sp_name,gid)){
-		sprintf_s(szLevel, "%2d", nLevel);
+		sprintf_safe(szLevel, "%2d", nLevel);
 		szRefName = szName;
 		bSpUser = true;
 	}
 	else {
-		sprintf_s(szLevel,"%2d",nLevel);
+		sprintf_safe(szLevel,"%2d",nLevel);
 		szRefName = szName;
 	}
 
@@ -651,14 +651,14 @@ void ZPlayerListBox::AddPlayer(MUID& puid, ePlayerState state, char* szName, int
 
 	switch(nGrade) {
 		case MCG_MASTER : 
-			sprintf_s(szGradeName, ZMsg( MSG_WORD_CLAN_MASTER));
+			sprintf_safe(szGradeName, ZMsg( MSG_WORD_CLAN_MASTER));
 			bSpUser = true;
 			break;
 		case MCG_ADMIN	: 
-			sprintf_s(szGradeName, ZMsg( MSG_WORD_CLAN_ADMIN));
+			sprintf_safe(szGradeName, ZMsg( MSG_WORD_CLAN_ADMIN));
 			bSpUser = true;
 			break;
-		default : sprintf_s(szGradeName, ZMsg( MSG_WORD_CLAN_MEMBER));
+		default : sprintf_safe(szGradeName, ZMsg( MSG_WORD_CLAN_MEMBER));
 			break;
 	}
 	szRefName = szName;
@@ -836,7 +836,7 @@ void ZPlayerListBox::UpdatePlayer(MUID& puid,MMatchObjectStageState state, bool 
 		pItem->m_pBitmap = pBitmap;
 //		pItem->m_pBitmapState = pBitmapState;
 //		char temp[256];
-//		sprintf_s(temp,"UpdatePlayer (%s,%s)/%d \n",szFileName,szFileNameState,GetCount() );
+//		sprintf_safe(temp,"UpdatePlayer (%s,%s)/%d \n",szFileName,szFileNameState,GetCount() );
 //		OutputDebugString(temp);
 	}	
 
@@ -946,17 +946,17 @@ void ZPlayerListBox::UpdatePlayer(MUID& puid,MMatchObjectStageState state, char*
 		char sp_name[256];
 
 		if(GetUserInfoUID(puid,_color,sp_name,gid)) {
-			sprintf_s(szLevel,"Lv ---");
+			sprintf_safe(szLevel,"Lv ---");
 			strcpy_safe(pItem->m_szLevel,szLevel);
 			strcpy_safe(pItem->m_szName,sp_name);
 		}
 		else {
-			sprintf_s(szLevel,"Lv %2d",nLevel);
+			sprintf_safe(szLevel,"Lv %2d",nLevel);
 			strcpy_safe(pItem->m_szLevel,szLevel);
 			strcpy_safe(pItem->m_szName,szName);
 		}
 */
-		sprintf_s(szLevel,"Lv %2d",nLevel);
+		sprintf_safe(szLevel,"Lv %2d",nLevel);
 		strcpy_safe(pItem->m_szLevel,szLevel);
 		strcpy_safe(pItem->m_szName,szName);
 
@@ -1048,7 +1048,7 @@ bool ZPlayerListBox::OnCommand(MWidget* pWidget, const char* szMessage)
 				ZStagePlayerListItem* pItem = (ZStagePlayerListItem*)Get(m_nSelItem);
 				if(pItem) {
 					char temp[1024];
-					sprintf_s(temp,"/kick %s", pItem->m_szName);
+					sprintf_safe(temp,"/kick %s", pItem->m_szName);
 					ZPostStageChat(ZGetGameClient()->GetPlayerUID(), ZGetGameClient()->GetStageUID(), temp);
 				}
 			}
@@ -1315,7 +1315,7 @@ void ZStagePlayerListBox::UpdatePlayer(MUID& puid,eStagePlayerState state, char*
 		char szFileNameState[64] = "";
 		char szLevel[64];
 
-		sprintf_s(szLevel,"Lv %2d",nLevel);
+		sprintf_safe(szLevel,"Lv %2d",nLevel);
 
 		MBitmap* pBitmap = NULL;
 		MBitmap* pBitmapState = NULL;
@@ -1345,7 +1345,7 @@ void ZStagePlayerListBox::UpdatePlayer(MUID& puid,eStagePlayerState state, char*
 		pItem->m_pBitmap = pBitmap;
 		pItem->m_pBitmapState = pBitmapState;
 		
-		sprintf_s(szLevel,"Lv %2d",nLevel);
+		sprintf_safe(szLevel,"Lv %2d",nLevel);
 		strcpy_safe(pItem->m_szLevel,szLevel);
 		strcpy_safe(pItem->m_szName,szName);
 	}
@@ -1364,7 +1364,7 @@ void ZStagePlayerListBox::AddPlayer(MUID& puid, MMatchObjectStageState state, ch
 	char szFileNameState[64] = "";
 	char szLevel[64];
 
-	sprintf_s(szLevel,"Lv %2d",nLevel);
+	sprintf_safe(szLevel,"Lv %2d",nLevel);
 
 	MBitmap* pBitmap = NULL;
 	MBitmap* pBitmapState = NULL;

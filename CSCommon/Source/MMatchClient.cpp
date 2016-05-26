@@ -543,7 +543,7 @@ void MMatchClient::OnUDPTestReply(const MUID& uidChar)
 //// UDPTEST LOG ////////////////////////////////
 #ifndef _PUBLISH
 char szLog[64];
-sprintf_s(szLog, "[%d:%d] UDP_TEST_REPLY: from (%d:%d) \n", 
+sprintf_safe(szLog, "[%d:%d] UDP_TEST_REPLY: from (%d:%d) \n", 
 		GetPlayerUID().High, GetPlayerUID().Low, uidChar.High, uidChar.Low);
 mlog(szLog);
 #endif
@@ -917,9 +917,9 @@ string MMatchClient::GetObjName(const MUID& uid)
 	MMatchObjCache* pCache = FindObjCache(uid);
 	char szName[32];
 	if (pCache && strlen(pCache->GetName()) > 2)
-		sprintf_s(szName, "%s", pCache->GetName());
+		sprintf_safe(szName, "%s", pCache->GetName());
 	else
-		sprintf_s(szName, "%d%d", uid.High, uid.Low);
+		sprintf_safe(szName, "%d%d", uid.High, uid.Low);
 	string name = szName;
 	return name;
 }

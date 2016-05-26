@@ -862,10 +862,10 @@ bool RScreenShot(int x,int y,void *data,const char *szFilename)
 	char szFullFileName[_MAX_DIR];
 
 	#ifdef _USE_GDIPLUS
-		sprintf_s(szFullFileName, "%s.jpg", szFilename);
+		sprintf_safe(szFullFileName, "%s.jpg", szFilename);
 		return RSaveAsJpeg(x, y, data, szFullFileName);
 	#else
-		sprintf_s(szFullFileName, "%s.bmp", szFilename);
+		sprintf_safe(szFullFileName, "%s.bmp", szFilename);
 		return RSaveAsBmp(x, y, data, szFullFileName);
 	#endif
 }

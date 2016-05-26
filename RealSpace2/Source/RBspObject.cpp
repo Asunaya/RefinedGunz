@@ -1411,7 +1411,7 @@ bool RBspObject::Open(const char *filename,ROpenFlag nOpenFlag,RFPROGRESSCALLBAC
 	m_filename=filename;
 
 	char xmlname[_MAX_PATH];
-	sprintf_s(xmlname,"%s.xml",filename);
+	sprintf_safe(xmlname,"%s.xml",filename);
 
 	if(!OpenDescription(xmlname))
 	{
@@ -1433,14 +1433,14 @@ bool RBspObject::Open(const char *filename,ROpenFlag nOpenFlag,RFPROGRESSCALLBAC
 
 /*	// 봉인
 	char pathfilename[_MAX_PATH];
-	sprintf_s(pathfilename,"%s.pat",filename);
+	sprintf_safe(pathfilename,"%s.pat",filename);
 	if((nOpenFlag==ROF_ALL || nOpenFlag==ROF_BSPANDPATH) && !OpenPathNode(pathfilename))
 		MLog("Error while loading %s\n",pathfilename);
 */
 
 
 	char bspname[_MAX_PATH];
-	sprintf_s(bspname,"%s.bsp",filename);
+	sprintf_safe(bspname,"%s.bsp",filename);
 	if(!OpenBsp(bspname))
 	{
 		MLog("Error while loading %s\n",bspname);
@@ -1451,7 +1451,7 @@ bool RBspObject::Open(const char *filename,ROpenFlag nOpenFlag,RFPROGRESSCALLBAC
 	mlog("RBspObject::Open : OpenBsp \n");
 
 	char colfilename[_MAX_PATH];
-	sprintf_s(colfilename,"%s.col",filename);
+	sprintf_safe(colfilename,"%s.col",filename);
 	if(!OpenCol(colfilename))
 	{
 		MLog("Error while loading %s\n",colfilename);
@@ -1460,7 +1460,7 @@ bool RBspObject::Open(const char *filename,ROpenFlag nOpenFlag,RFPROGRESSCALLBAC
 
 	// 퀘스트맵만 네비게이션 맵을 읽는다.
 	char navfilename[_MAX_PATH];
-	sprintf_s(navfilename,"%s.nav",filename);
+	sprintf_safe(navfilename,"%s.nav",filename);
 	if(!OpenNav(navfilename))
 	{
 		//MLog("Error while loading %s\n",navfilename);
@@ -2245,7 +2245,7 @@ bool RBspObject::OpenLightmap()
 //	if(m_ppLightmapTextures) return true;	// 이미 로드되어있다
 
 	char lightmapinfofilename[_MAX_PATH];
-	sprintf_s(lightmapinfofilename,"%s.lm",m_filename.c_str());
+	sprintf_safe(lightmapinfofilename,"%s.lm",m_filename.c_str());
 
 	int i;
 //	int *pLightmapInfo=new int[m_nConvexPolygon];		// lightmap 에 중복이 제거된 인덱스.
@@ -3361,7 +3361,7 @@ bool RBspObject::GenerateLightmap(const char *filename,int nMaxlightmapsize,int 
 			if(i<100)	// 100개만하자 -_-;
 			{
 				char lightmapfilename[256];
-				sprintf_s(lightmapfilename,"%s%d.bmp",m_filename.c_str(),nLightmap);
+				sprintf_safe(lightmapfilename,"%s%d.bmp",m_filename.c_str(),nLightmap);
 				RSaveAsBmp(lightmapsize,lightmapsize,lightmapdata,lightmapfilename);
 			}
 #endif			//*/
@@ -3401,14 +3401,14 @@ bool RBspObject::GenerateLightmap(const char *filename,int nMaxlightmapsize,int 
 	{
 		/*//	라이트맵 저장
 		char filename[256];
-		sprintf_s(filename,"temp%d.bmp",i);
+		sprintf_safe(filename,"temp%d.bmp",i);
 		m_sourcelightmaplist[i]->Save(filename);
 		//*/
 
 //		/*
 		// 합쳐진 큰 라이트맵 저장
 		char lightfilename[256];
-		sprintf_s(lightfilename,"%s.light%d.bmp",filename,i);
+		sprintf_safe(lightfilename,"%s.light%d.bmp",filename,i);
 		RSaveAsBmp(m_LightmapList[i]->GetSize(),m_LightmapList[i]->GetSize(),m_LightmapList[i]->GetData(),lightfilename);
 		//*/
 

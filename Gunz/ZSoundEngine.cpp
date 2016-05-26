@@ -176,7 +176,7 @@ bool ZSoundEngine::OpenMusic(int nBgmIndex)
 	int nRealBgmIndex = nBgmIndex;
 	if ((nBgmIndex >= BGMID_BATTLE) && (nBgmIndex < BGMID_FIN)) nRealBgmIndex = RandomNumber(BGMID_BATTLE, BGMID_BATTLE+2);
 
-	sprintf_s(szFileName, "%s%s", BGM_FOLDER, m_stSndFileName[nRealBgmIndex]);
+	sprintf_safe(szFileName, "%s%s", BGM_FOLDER, m_stSndFileName[nRealBgmIndex]);
 
 	return RealSound2::OpenMusic((const char*)szFileName);
 }
@@ -211,7 +211,7 @@ int ZSoundEngine::PlaySoundCharacter(const char* szSoundName, rvector& pos, bool
 	}
 /*
 	char temp[256];
-	sprintf_s(temp, "Play Channel:%4d\n", nChannel);
+	sprintf_safe(temp, "Play Channel:%4d\n", nChannel);
 	mlog(temp);
 */
 
@@ -358,7 +358,7 @@ void ZSoundEngine::PlaySEFire(MMatchItemDesc *pDesc, float x, float y, float z, 
 		if (bHero)
 		{
 			char szFireSndName[256];
-			sprintf_s(szFireSndName, "%s%s", szSndName, "_2d");
+			sprintf_safe(szFireSndName, "%s%s", szSndName, "_2d");
 
 			char key[256] = "";
 			GetSoundName(szFireSndName, key);
@@ -389,7 +389,7 @@ void ZSoundEngine::PlaySEReload(MMatchItemDesc *pDesc, float x, float y, float z
 		if(bHero)
 		{
 			char szBuffer[64];
-			sprintf_s( szBuffer, "%s_2d", szSndName );
+			sprintf_safe( szBuffer, "%s_2d", szSndName );
 
 			char key[256] = "";
 			GetSoundName(szBuffer, key);
@@ -712,7 +712,7 @@ void ZSoundEngine::PlaySEFire(MMatchItemDesc *pDesc, float x, float y, float z, 
 		if(bPlayer)
 		{
 			char szBuffer[64];
-			sprintf_s( szBuffer, "%s_2d", szSndName );
+			sprintf_safe( szBuffer, "%s_2d", szSndName );
 #ifdef _SOUND_LOG
 			mlog("%s stereo 2d sound is played..\n",szBuffer);
 #endif
@@ -738,7 +738,7 @@ void ZSoundEngine::PlaySEReload(MMatchItemDesc *pDesc, float x, float y, float z
 		if(bPlayer)
 		{
 			char szBuffer[64];
-			sprintf_s( szBuffer, "%s_2d", szSndName );
+			sprintf_safe( szBuffer, "%s_2d", szSndName );
 #ifdef _SOUND_LOG
 			mlog("%s stereo 2d sound is played..\n",szBuffer);
 #endif
@@ -1081,7 +1081,7 @@ const char* ZSoundEngine::GetBGMFileName(int nBgmIndex)
 
 	int nRealBgmIndex = nBgmIndex;
 	if ((nBgmIndex >= BGMID_BATTLE) && (nBgmIndex < BGMID_FIN)) nRealBgmIndex = RandomNumber(BGMID_BATTLE, BGMID_FIN-1);
-	sprintf_s(szFileName, "%s%s", BGM_FOLDER, m_stSndFileName[nRealBgmIndex]);
+	sprintf_safe(szFileName, "%s%s", BGM_FOLDER, m_stSndFileName[nRealBgmIndex]);
 
 	return szFileName;
 }

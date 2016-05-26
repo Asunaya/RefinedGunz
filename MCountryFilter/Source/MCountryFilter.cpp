@@ -3,38 +3,32 @@
 
 #include <algorithm>
 
-bool SplitStrIP( const string& strIP, vector<BYTE>& vIP )
+bool SplitStrIP(const std::string& strIP, std::vector<uint8_t>& vIP)
 {
-	if( strIP.empty() ) 
+	if (strIP.empty())
 		return false;
 
-	size_t a, b, c;
-	char szPos1[ 4 ] = {0,};
-	char szPos2[ 4 ] = {0,};
-	char szPos3[ 4 ] = {0,};
-	char szPos4[ 4 ] = {0,};
+	size_t lastSeparator = 0;
+	for (size_t i = 0; i < 4; i++)
+	{
+		auto curSeparator = strIP.find(".", lastSeparator + 1);
 
-	a = strIP.find( "." );
-	if( string::npos == a ) 
-		return false;
+		if (i == 3)
+			curSeparator = strIP.length();
+		else if (curSeparator == std::string::npos)
+			return false;
 
-	b = strIP.find( ".", a + 1 );
-	if( string::npos == b ) 
-		return false;
+		auto strOctet = strIP.substr(lastSeparator, curSeparator - lastSeparator);
 
-	c = strIP.find( ".", b + 1 );
-	if( string::npos == c )
-		return false;
+		auto nOctet = atoi(strOctet.c_str());
 
-	strncpy( szPos1, &strIP[0], a );
-	strncpy( szPos2, &strIP[a + 1], b - a - 1 );
-	strncpy( szPos3, &strIP[b + 1], c - b - 1 );
-	strncpy( szPos4, &strIP[c + 1], strIP.length() - c - 1 );
+		if (nOctet < 0 || nOctet > 255)
+			return false;
 
-	vIP.push_back( static_cast<BYTE>(atoi(szPos1)) );
-	vIP.push_back( static_cast<BYTE>(atoi(szPos2)) );
-	vIP.push_back( static_cast<BYTE>(atoi(szPos3)) );
-	vIP.push_back( static_cast<BYTE>(atoi(szPos4)) );
+		vIP.push_back(nOctet);
+
+		lastSeparator = curSeparator + 1;
+	}
 
 	return true;
 }
@@ -154,10 +148,10 @@ const int IPRangeAlgorithm<T>::BinarySearch( const DWORD dwIP, const T& tVector 
 						if( it->dwIPFrom <= m_dwIP )
 						{
 							memset( szBuf, 0, 1024 );
-							sprintf_s( szBuf, "================== CountryCode miss hit trace ====================\n" );
+							sprintf_safe( szBuf, "================== CountryCode miss hit trace ====================\n" );
 							OutputDebugString( szBuf );
 							memset( szBuf, 0, 1024 );
-							sprintf_s( szBuf, "Index:%u, IP:%u\n", i, m_dwIP );
+							sprintf_safe( szBuf, "Index:%u, IP:%u\n", i, m_dwIP );
 							OutputDebugString( szBuf );
 							vector< MdlTrace >::iterator it2, end2;
 							it2 = vMdlTrace.begin();
@@ -165,18 +159,18 @@ const int IPRangeAlgorithm<T>::BinarySearch( const DWORD dwIP, const T& tVector 
 							for( ; it2 != end2; ++it2 )
 							{
 								memset( szBuf, 0, 1024 );
-								sprintf_s( szBuf, "H:%u, M:%u, T:%u\n", it2->head, it2->middle, it2->tail );
+								sprintf_safe( szBuf, "H:%u, M:%u, T:%u\n", it2->head, it2->middle, it2->tail );
 								OutputDebugString( szBuf );
 							}
 							memset( szBuf, 0, 1024 );
-							sprintf_s( szBuf, "\n==================================================================\n" );
+							sprintf_safe( szBuf, "\n==================================================================\n" );
 							OutputDebugString( szBuf );
 							++m_dwTraceCount;
 						}
 					}
 				}
 				memset( szBuf, 0, 1024 );
-				sprintf_s( szBuf, "Can't find : %u\n", m_dwIP );
+				sprintf_safe( szBuf, "Can't find : %u\n", m_dwIP );
 				OutputDebugString( szBuf );
 			}
 #endif

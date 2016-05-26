@@ -33,13 +33,13 @@ void MMatchRule::SetRoundState(MMATCH_ROUNDSTATE nState)
 		char szTemp[256]="";
 		switch (nState)
 		{
-		case MMATCH_ROUNDSTATE_PREPARE: sprintf_s(szTemp, "SetRoundState: PREPARE\n"); break;
-		case MMATCH_ROUNDSTATE_COUNTDOWN: sprintf_s(szTemp, "SetRoundState: COUNTDOWN\n"); break;
-		case MMATCH_ROUNDSTATE_PLAY: sprintf_s(szTemp, "SetRoundState: PLAY(%d)\n", m_nRoundCount); break;
-			case MMATCH_ROUNDSTATE_FINISH: sprintf_s(szTemp, "SetRoundState: FINISH\n"); break;
-		case MMATCH_ROUNDSTATE_EXIT: sprintf_s(szTemp, "SetRoundState: EXIT\n"); break;
-		case MMATCH_ROUNDSTATE_FREE: sprintf_s(szTemp, "SetRoundState: FREE\n"); break;
-		case MMATCH_ROUNDSTATE_FAILED: sprintf_s(szTemp, "SetRoundState: FAILED\n"); break;
+		case MMATCH_ROUNDSTATE_PREPARE: sprintf_safe(szTemp, "SetRoundState: PREPARE\n"); break;
+		case MMATCH_ROUNDSTATE_COUNTDOWN: sprintf_safe(szTemp, "SetRoundState: COUNTDOWN\n"); break;
+		case MMATCH_ROUNDSTATE_PLAY: sprintf_safe(szTemp, "SetRoundState: PLAY(%d)\n", m_nRoundCount); break;
+			case MMATCH_ROUNDSTATE_FINISH: sprintf_safe(szTemp, "SetRoundState: FINISH\n"); break;
+		case MMATCH_ROUNDSTATE_EXIT: sprintf_safe(szTemp, "SetRoundState: EXIT\n"); break;
+		case MMATCH_ROUNDSTATE_FREE: sprintf_safe(szTemp, "SetRoundState: FREE\n"); break;
+		case MMATCH_ROUNDSTATE_FAILED: sprintf_safe(szTemp, "SetRoundState: FAILED\n"); break;
 		}
 		OutputDebugString(szTemp);
 	}

@@ -601,7 +601,7 @@ BEGIN_IMPLEMENT_LISTENER(ZGetMapListListener, MLB_ITEM_DBLCLK)
 	const char* pszSelItemString = pMapList->GetSelItemString();
 	if (pszSelItemString) {
 		char szMapName[_MAX_DIR];
-		sprintf_s(szMapName, pszSelItemString);
+		sprintf_safe(szMapName, pszSelItemString);
 		ZApplication::GetStageInterface()->SetMapName(szMapName);
 		ZPostStageMap(ZGetGameClient()->GetStageUID(), szMapName);
 		// 현재 창을 닫는다.
@@ -1024,7 +1024,7 @@ void PostMapname()
 
 	if (pszSelItemString) {
 		char szMapName[_MAX_DIR];
-		sprintf_s(szMapName, pszSelItemString);
+		sprintf_safe(szMapName, pszSelItemString);
 /*
 		// 완전 하드코딩... -_-;
 		if ( strcmp( szMapName, "Island") == 0)
@@ -1152,7 +1152,7 @@ BEGIN_IMPLEMENT_LISTENER(ZGetDeleteCharacterButtonListener, MBTN_CLK_MSG)
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
 
 	char szName[256];
-	sprintf_s( szName, "CharSel_Name%d", ZCharacterSelectView::GetSelectedCharacter() );
+	sprintf_safe( szName, "CharSel_Name%d", ZCharacterSelectView::GetSelectedCharacter() );
 	MLabel* pLabel = (MLabel*)pResource->FindWidget( szName);
 	
 	if( ZCharacterSelectView::GetNumOfCharacter())
@@ -1188,7 +1188,7 @@ BEGIN_IMPLEMENT_LISTENER(ZGetConfirmDeleteCharacterButtonListener, MBTN_CLK_MSG)
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
 
 	char szName[256];
-	sprintf_s( szName, "CharSel_Name%d", ZCharacterSelectView::GetSelectedCharacter() );
+	sprintf_safe( szName, "CharSel_Name%d", ZCharacterSelectView::GetSelectedCharacter() );
 	MLabel* pLabel = (MLabel*)pResource->FindWidget( szName);
 
 	if( ZCharacterSelectView::GetNumOfCharacter())
@@ -1721,7 +1721,7 @@ void ZReport112FromListener()
 	const struct tm* pLocalTime = _localtime64( &long_time);
 
 	char szBuff[ 256];
-	sprintf_s( szBuff, "%s\n%s\n%03d:%s\n%04d-%02d-%02d %02d:%02d:%02d\n",	ZGetMyInfo()->GetCharName(), pCombo1->GetSelItemString(),
+	sprintf_safe( szBuff, "%s\n%s\n%03d:%s\n%04d-%02d-%02d %02d:%02d:%02d\n",	ZGetMyInfo()->GetCharName(), pCombo1->GetSelItemString(),
 																			100+pCombo2->GetSelIndex(), pCombo2->GetSelItemString(),
 																			pLocalTime->tm_year+1900, pLocalTime->tm_mon+1, pLocalTime->tm_mday,
 																			pLocalTime->tm_hour, pLocalTime->tm_min, pLocalTime->tm_sec);

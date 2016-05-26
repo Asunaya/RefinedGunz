@@ -75,7 +75,7 @@ int MLadderGameStrategy::ValidateRequestInviteProposal(MMatchObject* pProposerOb
 				NULL, szMemberTable, 4)) 
 			{
 				char szAnnounce[1024];
-				sprintf_s(szAnnounce, "^1´ç½ÅÀÇ ÆÀ¸â¹ö´Â ");
+				sprintf_safe(szAnnounce, "^1´ç½ÅÀÇ ÆÀ¸â¹ö´Â ");
 				for (int i=0; i<4; i++) {
 					if (strlen(szMembers[i]) <= 0) break;
 					strcat(szAnnounce, szMembers[i]);

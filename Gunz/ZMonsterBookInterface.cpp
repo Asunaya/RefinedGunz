@@ -219,7 +219,7 @@ void ZMonsterBookInterface::DrawPage( void)
 	if ( pLabel)
 	{
 		char szPageNum[ 20];
-		sprintf_s( szPageNum, "- %d -", m_nCurrentPage);
+		sprintf_safe( szPageNum, "- %d -", m_nCurrentPage);
 		pLabel->SetText( szPageNum);
 	}
 
@@ -246,7 +246,7 @@ void ZMonsterBookInterface::DrawPage( void)
 			for ( set<int>::iterator i = pDropItem->GetQuestItems().begin();  i != pDropItem->GetQuestItems().end();  i++)
 			{
 				char szWidgetName[ 50];
-				sprintf_s( szWidgetName, "MonsterBook_DropItem%d", nCount);
+				sprintf_safe( szWidgetName, "MonsterBook_DropItem%d", nCount);
 				MPicture* pPicture = (MPicture*)pResource->FindWidget( szWidgetName);
 				if ( pPicture)
 				{
@@ -280,7 +280,7 @@ void ZMonsterBookInterface::DrawPage( void)
 	for ( ;  nCount < 10;  nCount++)
 	{
 		char szWidgetName[ 50];
-		sprintf_s( szWidgetName, "MonsterBook_DropItem%d", nCount);
+		sprintf_safe( szWidgetName, "MonsterBook_DropItem%d", nCount);
 		MWidget* pWidget = pResource->FindWidget( szWidgetName);
 		if ( pWidget)
 			pWidget->Show( false);
@@ -302,7 +302,7 @@ void ZMonsterBookInterface::DrawPage( void)
 			if  ( pMonsterInfo)
 			{
 				char szGrade[ 128];
-				sprintf_s( szGrade, "%s : ", ZMsg(MSG_WORD_GRADE));
+				sprintf_safe( szGrade, "%s : ", ZMsg(MSG_WORD_GRADE));
 				switch ( pMonsterInfo->nGrade)
 				{
 					case NPC_GRADE_REGULAR :
@@ -333,7 +333,7 @@ void ZMonsterBookInterface::DrawPage( void)
 		else
 		{
 			char szGrade[ 128];
-			sprintf_s( szGrade, "%s : ?????", ZMsg(MSG_WORD_GRADE));
+			sprintf_safe( szGrade, "%s : ?????", ZMsg(MSG_WORD_GRADE));
 			pLabel->SetText( szGrade);
 		}
 	}
@@ -413,7 +413,7 @@ void ZMonsterBookInterface::DrawPage( void)
 	{
 		char szFileName[ 256];
 		if ( pMonsterInfo)
-			sprintf_s( szFileName, "monster_Illust%02d.jpg", (int)pMonsterInfo->nID);		// 몬스터의 ID값을 이용해서 파일명을 생성한다
+			sprintf_safe( szFileName, "monster_Illust%02d.jpg", (int)pMonsterInfo->nID);		// 몬스터의 ID값을 이용해서 파일명을 생성한다
 		SetIllustImage( (pMonsterInfo) ? szFileName : "");
 	}
 	else
@@ -508,7 +508,7 @@ void ZMonsterBookInterface::DrawFirstPage( void)
 	for ( int i = 0;  i < 10;  i++)
 	{
 		char szWidgetName[ 128];
-		sprintf_s( szWidgetName, "MonsterBook_DropItem%d", i);
+		sprintf_safe( szWidgetName, "MonsterBook_DropItem%d", i);
 		MWidget* pWidget = pResource->FindWidget( szWidgetName);
 		if ( pWidget)
 			pWidget->Show( false);
@@ -554,7 +554,7 @@ bool ZMonsterBookInterface::SetIllustImage( const char* szFileName)
 	// 일러스트 이미지를 읽어와서 메모리에 저장한다
 	m_pIllustImg = new MBitmapR2;
 	char szFullFileName[256];
-	sprintf_s( szFullFileName, "interface/MonsterIllust/%s", szFileName);
+	sprintf_safe( szFullFileName, "interface/MonsterIllust/%s", szFileName);
 	((MBitmapR2*)m_pIllustImg)->Create( "monsterIllust.png", RGetDevice(), szFullFileName);
 
 
@@ -748,7 +748,7 @@ void ZMonsterBookInterface::DrawComplete( void)
 	if ( pLabel)
 	{
 		char szComplete[ 128];
-		sprintf_s( szComplete, "%s : %d%%", ZMsg(MSG_WORD_RATE), nPercentage);
+		sprintf_safe( szComplete, "%s : %d%%", ZMsg(MSG_WORD_RATE), nPercentage);
 		pLabel->SetText( szComplete);
 	}
 }

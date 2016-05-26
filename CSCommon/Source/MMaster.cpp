@@ -77,7 +77,7 @@ void MMaster::ResponseInfo(MUID& Target)
 {
 	char szTemp[1024];
 	MUIDRANGE r = m_GlobalUIDRefMap.GetReservedCount();
-	sprintf_s(szTemp, "MAIET Master-Controller\n UID : %u:%u\n UID Reserved Count : %u:%u ~ %u:%u", m_This.High, m_This.Low, r.Start.High, r.Start.Low, r.End.High, r.End.Low);
+	sprintf_safe(szTemp, "MAIET Master-Controller\n UID : %u:%u\n UID Reserved Count : %u:%u ~ %u:%u", m_This.High, m_This.Low, r.Start.High, r.Start.Low, r.End.High, r.End.Low);
 
 	MCommand* pNew = new MCommand(m_CommandManager.GetCommandDescByID(MC_NET_RESPONSE_INFO), Target, m_This);
 	pNew->AddParameter(new MCommandParameterString(szTemp));

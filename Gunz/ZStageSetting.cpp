@@ -386,7 +386,7 @@ void ZStageSetting::InitStageSettingDialog()
 
 
 	// 레벨제한
-#define GET_LIMITLEVEL(_value)		sprintf_s(szText,"%s %d",ZMsg(MSG_WORD_LEVELDIFF),_value);
+#define GET_LIMITLEVEL(_value)		sprintf_safe(szText,"%s %d",ZMsg(MSG_WORD_LEVELDIFF),_value);
 	strcpy_safe( StageSetting_LimitLevel[0].szText, ZMsg( MSG_WORD_NONE));
 	GET_LIMITLEVEL( 5);	strcpy_safe( StageSetting_LimitLevel[1].szText, szText);
 	GET_LIMITLEVEL( 10);	strcpy_safe( StageSetting_LimitLevel[2].szText, szText);

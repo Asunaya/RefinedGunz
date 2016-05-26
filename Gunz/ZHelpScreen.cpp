@@ -65,7 +65,7 @@ void TextOutKeymap(int skey,int x,int y)
 	}
 	if(nLen) { nLen/=2;	}
 
-	sprintf_s(szTemp,"%s",pStr);
+	sprintf_safe(szTemp,"%s",pStr);
 	g_pDC->Text( x-nLen*7, y, szTemp);
 }
 

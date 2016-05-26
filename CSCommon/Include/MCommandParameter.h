@@ -111,7 +111,7 @@ public:
 	virtual int SetData(const char* pData) override;
 	virtual void *GetPointer() override { return &m_Value; }
 	virtual const char* GetClassName(void) override { return "Int"; }
-	virtual void GetString(char* szValue, int maxlen) override { sprintf_s(szValue, maxlen, "%d", m_Value); }
+	virtual void GetString(char* szValue, int maxlen) override { sprintf_safe(szValue, maxlen, "%d", m_Value); }
 	virtual int GetSize() override { return sizeof(int); }
 };
 
@@ -130,7 +130,7 @@ public:
 	virtual int SetData(const char* pData);
 	virtual void *GetPointer() { return &m_Value; }
 	virtual const char* GetClassName(void){ return "UInt"; }
-	virtual void GetString(char* szValue, int maxlen){ sprintf_s(szValue, maxlen, "%u", m_Value); }
+	virtual void GetString(char* szValue, int maxlen){ sprintf_safe(szValue, maxlen, "%u", m_Value); }
 	virtual int GetSize() { return sizeof(unsigned int); }
 };
 
@@ -148,7 +148,7 @@ public:
 	virtual int SetData(const char* pData);
 	virtual void *GetPointer() { return &m_Value; }
 	virtual const char* GetClassName(void){ return "Float"; }
-	virtual void GetString(char* szValue, int maxlen){ sprintf_s(szValue, maxlen, "%f", m_Value); }
+	virtual void GetString(char* szValue, int maxlen){ sprintf_safe(szValue, maxlen, "%f", m_Value); }
 	virtual int GetSize() { return sizeof(float); }
 };
 
@@ -246,7 +246,7 @@ public:
 	virtual int SetData(const char* pData) override;
 	virtual void *GetPointer() override { return &m_fX; }
 	virtual const char* GetClassName(void) override { return "Vector"; }
-	virtual void GetString(char* szValue, int maxlen) override { sprintf_s(szValue, maxlen, "%.2f,%.2f,%.2f", m_fX, m_fY, m_fZ); }
+	virtual void GetString(char* szValue, int maxlen) override { sprintf_safe(szValue, maxlen, "%.2f,%.2f,%.2f", m_fX, m_fY, m_fZ); }
 	virtual int GetSize() override { return (sizeof(float)*3); }
 };
 
@@ -318,7 +318,7 @@ public:
 	virtual int SetData(const char* pData) override;
 	virtual void *GetPointer() override { return &m_Value; }
 	virtual const char* GetClassName(void) override { return "UID"; }
-	virtual void GetString(char* szValue, int maxlen) override { sprintf_s(szValue, maxlen, "%u:%u", m_Value.High, m_Value.Low); }
+	virtual void GetString(char* szValue, int maxlen) override { sprintf_safe(szValue, maxlen, "%u:%u", m_Value.High, m_Value.Low); }
 	virtual int GetSize() override { return sizeof(MUID); }
 };
 
@@ -337,7 +337,7 @@ public:
 	virtual int SetData(const char* pData) override;
 	virtual void *GetPointer() override { return m_Value; }
 	virtual const char* GetClassName(void) override { return "Blob"; }
-	virtual void GetString(char* szValue, int maxlen) override { sprintf_s(szValue, maxlen, "%02X%02X..", *((unsigned char*)(m_Value)), *((unsigned char*)(m_Value)+1)); }
+	virtual void GetString(char* szValue, int maxlen) override { sprintf_safe(szValue, maxlen, "%02X%02X..", *((unsigned char*)(m_Value)), *((unsigned char*)(m_Value)+1)); }
 	virtual int GetSize() override;
 };
 
@@ -405,7 +405,7 @@ public:
 	virtual int SetData(const char* pData) override;
 	virtual void *GetPointer() override { return &m_Value; }
 	virtual const char* GetClassName(void) override { return "Char"; }
-	virtual void GetString(char* szValue, int maxlen) override { sprintf_s(szValue, maxlen, "%d", m_Value); }
+	virtual void GetString(char* szValue, int maxlen) override { sprintf_safe(szValue, maxlen, "%d", m_Value); }
 	virtual int GetSize() override { return sizeof(char); }
 };
 
@@ -426,7 +426,7 @@ public:
 	virtual int SetData(const char* pData) override;
 	virtual void *GetPointer() override { return &m_Value; }
 	virtual const char* GetClassName(void) override { return "UChar"; }
-	virtual void GetString(char* szValue, int maxlen) override { sprintf_s(szValue, maxlen, "%u", m_Value); }
+	virtual void GetString(char* szValue, int maxlen) override { sprintf_safe(szValue, maxlen, "%u", m_Value); }
 	virtual int GetSize() override { return sizeof(unsigned char); }
 };
 
@@ -447,7 +447,7 @@ public:
 	virtual int SetData(const char* pData) override;
 	virtual void *GetPointer() override { return &m_Value; }
 	virtual const char* GetClassName(void) override { return "Short"; }
-	virtual void GetString(char* szValue, int maxlen) override { sprintf_s(szValue, maxlen, "%d", m_Value); }
+	virtual void GetString(char* szValue, int maxlen) override { sprintf_safe(szValue, maxlen, "%d", m_Value); }
 	virtual int GetSize() override { return sizeof(short); }
 };
 
@@ -467,7 +467,7 @@ public:
 	virtual int SetData(const char* pData) override;
 	virtual void *GetPointer() override { return &m_Value; }
 	virtual const char* GetClassName(void) override { return "UShort"; }
-	virtual void GetString(char* szValue, int maxlen) override { sprintf_s(szValue, maxlen, "%u", m_Value); }
+	virtual void GetString(char* szValue, int maxlen) override { sprintf_safe(szValue, maxlen, "%u", m_Value); }
 	virtual int GetSize() override { return sizeof(unsigned short); }
 };
 
@@ -488,7 +488,7 @@ public:
 	virtual int SetData(const char* pData) override;
 	virtual void *GetPointer() override { return &m_Value; }
 	virtual const char* GetClassName(void) override { return "Int64"; }
-	virtual void GetString(char* szValue, int maxlen) override { sprintf_s(szValue, maxlen, "%lld", m_Value); }
+	virtual void GetString(char* szValue, int maxlen) override { sprintf_safe(szValue, maxlen, "%lld", m_Value); }
 	virtual int GetSize() override { return sizeof(int64); }
 };
 
@@ -508,7 +508,7 @@ public:
 	virtual int SetData(const char* pData) override;
 	virtual void *GetPointer() override { return &m_Value; }
 	virtual const char* GetClassName(void) override { return "UInt64"; }
-	virtual void GetString(char* szValue, int maxlen) override { sprintf_s(szValue, maxlen, "%llu", m_Value); }
+	virtual void GetString(char* szValue, int maxlen) override { sprintf_safe(szValue, maxlen, "%llu", m_Value); }
 	virtual int GetSize() override { return sizeof(uint64); }
 };
 
@@ -531,7 +531,7 @@ public:
 	virtual int SetData(const char* pData) override;
 	virtual void *GetPointer() override { return &m_nX; }
 	virtual const char* GetClassName(void) override { return "ShortVector"; }
-	virtual void GetString(char* szValue, int maxlen) override { sprintf_s(szValue, maxlen, "%d,%d,%d", m_nX, m_nY, m_nZ); }
+	virtual void GetString(char* szValue, int maxlen) override { sprintf_safe(szValue, maxlen, "%d,%d,%d", m_nX, m_nY, m_nZ); }
 	virtual int GetSize() override { return (sizeof(short)*3); }
 };
 

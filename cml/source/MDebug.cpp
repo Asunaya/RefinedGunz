@@ -48,7 +48,7 @@ void __cdecl MLog(const char *pFormat,...)
 	va_list args;
 
 	va_start(args,pFormat);
-	vsprintf_s(temp,pFormat,args);
+	vsprintf_safe(temp,pFormat,args);
 	va_end(args);
 
 

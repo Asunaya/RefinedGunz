@@ -212,7 +212,7 @@ bool MMatchMapsWorldItemSpawnInfo::Read()
 	char szFileName[256];
 	for (int i = 0; i < MMATCH_MAP_COUNT; i++)
 	{
-		sprintf_s(szFileName, "Maps/%s/%s", g_MapDesc[i].szMapName, FILENAME_WORLDITEM_SPAWN);
+		sprintf_safe(szFileName, "Maps/%s/%s", g_MapDesc[i].szMapName, FILENAME_WORLDITEM_SPAWN);
 
 		if (IsExist(szFileName))
 		{

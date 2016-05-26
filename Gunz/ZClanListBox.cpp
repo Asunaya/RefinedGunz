@@ -59,7 +59,7 @@ void ZClanListBox::OnDraw( MDrawContext* pDC )
 
 				// 대기중인 사람 수 ( x명 대기중 )
 				char szBuffer[256];
-				sprintf_s(szBuffer,ZMsg( MSG_LOBBY_WAITING ),pInfo->nPlayers );
+				sprintf_safe(szBuffer,ZMsg( MSG_LOBBY_WAITING ),pInfo->nPlayers );
 				pDC->Text((int)(fRatio*280) , (int)(y + fRatio*10) , szBuffer);
 			}
 		}

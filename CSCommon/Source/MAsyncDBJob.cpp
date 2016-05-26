@@ -9,7 +9,7 @@
 void MAsyncDBJob_Test::Run(void* pContext)
 {
 	char szLog[128];
-	sprintf_s(szLog, "Thread=%d , MAsyncDBJob_Test BEGIN \n", GetCurrentThreadId());
+	sprintf_safe(szLog, "Thread=%d , MAsyncDBJob_Test BEGIN \n", GetCurrentThreadId());
 	OutputDebugString(szLog);
 
 	MMatchDBMgr* pDBMgr = (MMatchDBMgr*)pContext;
@@ -50,7 +50,7 @@ void MAsyncDBJob_Test::Run(void* pContext)
 
 	int nCount = rs.GetRecordCount();
 
-	sprintf_s(szLog, "Thread=%d , MAsyncDBJob_Test END RecordCount=%d \n", 
+	sprintf_safe(szLog, "Thread=%d , MAsyncDBJob_Test END RecordCount=%d \n", 
 			GetCurrentThreadId(), nCount);
 	OutputDebugString(szLog);
 }

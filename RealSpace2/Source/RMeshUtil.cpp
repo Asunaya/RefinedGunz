@@ -966,9 +966,9 @@ void RDebugStr::Add(char* str,bool line) {
 void RDebugStr::Add(bool b,bool line) {
 
 	if(b) 
-		sprintf_s(m_temp,"true");
+		sprintf_safe(m_temp,"true");
 	else 
-		sprintf_s(m_temp,"false");
+		sprintf_safe(m_temp,"false");
 
 	m_str += m_temp;
 
@@ -977,7 +977,7 @@ void RDebugStr::Add(bool b,bool line) {
 
 void RDebugStr::Add(char c,bool line) {
 
-	sprintf_s(m_temp,"%c",c);
+	sprintf_safe(m_temp,"%c",c);
 	m_str += m_temp;
 
 	if(line) AddLine();
@@ -985,7 +985,7 @@ void RDebugStr::Add(char c,bool line) {
 
 void RDebugStr::Add(short s,bool line) {
 
-	sprintf_s(m_temp,"%d",s);
+	sprintf_safe(m_temp,"%d",s);
 	m_str += m_temp;
 
 	if(line) AddLine();
@@ -993,7 +993,7 @@ void RDebugStr::Add(short s,bool line) {
 
 void RDebugStr::Add(WORD w,bool line) {
 
-	sprintf_s(m_temp,"%d",w);
+	sprintf_safe(m_temp,"%d",w);
 	m_str += m_temp;
 
 	if(line) AddLine();
@@ -1001,7 +1001,7 @@ void RDebugStr::Add(WORD w,bool line) {
 
 void RDebugStr::Add(int i,bool line) {
 
-	sprintf_s(m_temp,"%d",i);
+	sprintf_safe(m_temp,"%d",i);
 	m_str += m_temp;
 
 	if(line) AddLine();
@@ -1009,7 +1009,7 @@ void RDebugStr::Add(int i,bool line) {
 
 void RDebugStr::Add(DWORD d,bool line) {
 
-	sprintf_s(m_temp,"%d",d);
+	sprintf_safe(m_temp,"%d",d);
 	m_str += m_temp;
 
 	if(line) AddLine();
@@ -1017,7 +1017,7 @@ void RDebugStr::Add(DWORD d,bool line) {
 
 void RDebugStr::Add(float f,bool line) {
 
-	sprintf_s(m_temp,"%f",f);
+	sprintf_safe(m_temp,"%f",f);
 	m_str += m_temp;
 
 	if(line) AddLine();
@@ -1025,7 +1025,7 @@ void RDebugStr::Add(float f,bool line) {
 
 void RDebugStr::Add(rvector& v,bool line) {
 
-	sprintf_s(m_temp,"%f %f %f", v.x, v.y, v.z);
+	sprintf_safe(m_temp,"%f %f %f", v.x, v.y, v.z);
 	m_str += m_temp;
 
 	if(line) AddLine();
@@ -1034,14 +1034,14 @@ void RDebugStr::Add(rvector& v,bool line) {
 void RDebugStr::AddLine(int cnt) {
 
 	for(int i=0;i<cnt;i++) {
-		sprintf_s(m_temp,"\n");
+		sprintf_safe(m_temp,"\n");
 		m_str += m_temp;
 	}
 }
 
 void RDebugStr::AddTab(int cnt) {
 	for(int i=0;i<cnt;i++){
-		sprintf_s(m_temp,"\t");
+		sprintf_safe(m_temp,"\t");
 		m_str += m_temp;
 	}
 }

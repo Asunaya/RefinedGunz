@@ -361,7 +361,7 @@ bool GetCrashInfo(char* FullPathFileName,DWORD CrashAddress,char* OutInfo)
 
 	char temp[256];
 
-	sprintf_s(temp,		"Line Number	= %d line\n",line_num);
+	sprintf_safe(temp,		"Line Number	= %d line\n",line_num);
 
 	string all_str =	"Module Name	= "+ mod_name +"\n"+ 
 						"Function Name	= "+ func_name +"()\n"+ 

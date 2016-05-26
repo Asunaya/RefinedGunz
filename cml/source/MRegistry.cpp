@@ -14,7 +14,7 @@ bool MRegistry::Read(HKEY hRegKey, const char* szRegString, char* pOutBuffer, in
 	DWORD dwType = REG_SZ;
 
 	char szRegistryPath[256];
-	sprintf_s(szRegistryPath, "%s%s", szRegistryBasePath, szApplicationName);
+	sprintf_safe(szRegistryPath, "%s%s", szRegistryBasePath, szApplicationName);
 	
 	// Extract patch address in registry.
 	if (RegOpenKeyEx(hRegKey, szRegistryPath, 0, KEY_READ, &hKey) != ERROR_SUCCESS) {
@@ -42,7 +42,7 @@ void MRegistry::Write(HKEY hRegKey, const char* szRegString, const char* pInBuff
 	DWORD dwType = REG_SZ;
 
 	char szRegistryPath[256];
-	sprintf_s(szRegistryPath, "%s%s", szRegistryBasePath, szApplicationName);
+	sprintf_safe(szRegistryPath, "%s%s", szRegistryBasePath, szApplicationName);
 	if (RegOpenKeyEx(hRegKey, szRegistryPath, 0, KEY_WRITE, &hKey ) != ERROR_SUCCESS ) {
 		RegCreateKey( hRegKey, szRegistryPath, &hKey);
 	}
@@ -56,7 +56,7 @@ bool MRegistry::ReadBinary(HKEY hRegKey, const char* szRegString, char* pOutBuff
 	DWORD dwType = REG_BINARY;
 
 	char szRegistryPath[256];
-	sprintf_s(szRegistryPath, "%s%s", szRegistryBasePath, szApplicationName);
+	sprintf_safe(szRegistryPath, "%s%s", szRegistryBasePath, szApplicationName);
 	
 	// Extract patch address in registry.
 	if (RegOpenKeyEx(hRegKey, szRegistryPath, 0, KEY_READ, &hKey) != ERROR_SUCCESS) {
@@ -87,7 +87,7 @@ void MRegistry::WriteBinary(HKEY hRegKey, const char* szRegString, const char* p
 	DWORD dwType = REG_BINARY;
 
 	char szRegistryPath[256];
-	sprintf_s(szRegistryPath, "%s%s", szRegistryBasePath, szApplicationName);
+	sprintf_safe(szRegistryPath, "%s%s", szRegistryBasePath, szApplicationName);
 	if (RegOpenKeyEx(hRegKey, szRegistryPath, 0, KEY_WRITE, &hKey ) != ERROR_SUCCESS ) {
 		RegCreateKey(hRegKey, szRegistryPath, &hKey);
 	}

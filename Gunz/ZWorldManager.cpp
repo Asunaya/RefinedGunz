@@ -47,7 +47,7 @@ void ZWorldManager::AddWorld(const char* szMapName)
 	char szMapFileName[256];
 	char szMapPath[64] = "";
 	ZGetCurrMapPath(szMapPath);
-	sprintf_s(szMapFileName, "%s%s/%s.rs", szMapPath,szMapName,szMapName);
+	sprintf_safe(szMapFileName, "%s%s/%s.rs", szMapPath,szMapName,szMapName);
 
 	ZWorld *pWorld = new ZWorld;
 	strcpy_safe(pWorld->m_szName,szMapName);

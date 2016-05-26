@@ -122,7 +122,7 @@ bool ZPlayerMenuListener::OnCommand(MWidget* pWidget, const char* szMessage)
 			ZChatCmd* pWhisperCmd = ZApplication::GetGameInterface()->GetChat()->GetCmdManager()->GetCommandByID(CCMD_ID_WHISPER);
 			if (pWhisperCmd)
 			{
-				sprintf_s(szMsg, "/%s %s ", pWhisperCmd->GetName(), pMenu->GetTargetName());
+				sprintf_safe(szMsg, "/%s %s ", pWhisperCmd->GetName(), pMenu->GetTargetName());
 			}
 			
 			if (GunzState == GUNZ_LOBBY) {
@@ -159,7 +159,7 @@ bool ZPlayerMenuListener::OnCommand(MWidget* pWidget, const char* szMessage)
 				if ((ZGetGameClient()->AmIStageMaster()) || (ZGetMyInfo()->IsAdminGrade()))
 				{
 					char szMsg[128];
-					sprintf_s(szMsg, "/kick %s", pMenu->GetTargetName());
+					sprintf_safe(szMsg, "/kick %s", pMenu->GetTargetName());
 					ZPostStageChat(ZGetGameClient()->GetPlayerUID(), ZGetGameClient()->GetStageUID(), szMsg);
 				}
 			}

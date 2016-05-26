@@ -202,7 +202,7 @@ bool ZWorld::Create(ZLoadingProgress *pLoading )
 	
 	if(  m_flags.size() > 0 )
 	{
-		sprintf_s( szBuf, "%s%s/flag.xml", szMapPath, ZGetGameClient()->GetMatchStageSetting()->GetMapName());
+		sprintf_safe( szBuf, "%s%s/flag.xml", szMapPath, ZGetGameClient()->GetMatchStageSetting()->GetMapName());
 		m_flags.InitEnv(szBuf);
 
 		mlog("ZGame::Create() m_flags.InitEnv \n");
@@ -211,7 +211,7 @@ bool ZWorld::Create(ZLoadingProgress *pLoading )
 	m_pMapDesc = new ZMapDesc;
 	m_pMapDesc->Open(m_pBsp);
 
-	sprintf_s( szBuf, "%s%s/smoke.xml", szMapPath, ZGetGameClient()->GetMatchStageSetting()->GetMapName());
+	sprintf_safe( szBuf, "%s%s/smoke.xml", szMapPath, ZGetGameClient()->GetMatchStageSetting()->GetMapName());
 	m_pMapDesc->LoadSmokeDesc(szBuf);
 
 	mlog("ZGame::Create() pMapDesc->LoadSmokeDesc \n");

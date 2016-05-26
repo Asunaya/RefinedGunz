@@ -32,7 +32,7 @@ bool CGLEncription::CreateSerialKey()
 	DWORD dwLimitedTime = timeGetTime() + 60000;
 	char szTime[ 20];
 	memset( szTime, 0, sizeof(szTime));
-	sprintf_s( szTime, "%X", dwLimitedTime);
+	sprintf_safe( szTime, "%X", dwLimitedTime);
 
 
 	// Get Disk serial number
@@ -51,7 +51,7 @@ bool CGLEncription::CreateSerialKey()
 														sizeof( szFileSysName) - 1);
 	char szDiskSerial[ 20];
 	memset( szDiskSerial, 0, sizeof(szDiskSerial));
-	sprintf_s( szDiskSerial, "%X", dwDiskSerial);
+	sprintf_safe( szDiskSerial, "%X", dwDiskSerial);
 
 
 	// Set Data

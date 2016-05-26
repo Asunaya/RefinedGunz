@@ -1441,7 +1441,7 @@ void ZCharacter::UpdateSpeed()
 					speed_upper = 0.1f;
 
 //				static char temp[256];
-//				sprintf_s(temp,"reload time %f \n", speed );
+//				sprintf_safe(temp,"reload time %f \n", speed );
 //				OutputDebugString( temp );
 			}
 		}
@@ -1742,7 +1742,7 @@ void ZCharacter::UpdateVelocity(float fDelta)
 //			fSpeed = 1000.f;//*fDelta*HP_SCALE;
 
 //			static char _temp[256];
-//			sprintf_s(_temp,"speed = %f \n",fSpeed);
+//			sprintf_safe(_temp,"speed = %f \n",fSpeed);
 //			OutputDebugString(_temp);
 
 		}
@@ -2681,7 +2681,7 @@ void ZCharacter::InitStatus()
 
 #ifndef _PUBLISH
 	char szLog[128];
-	sprintf_s(szLog, "ZCharacter::InitStatus() - %s(%u) Initialized \n", 
+	sprintf_safe(szLog, "ZCharacter::InitStatus() - %s(%u) Initialized \n", 
 		GetProperty()->szName, m_UID.Low);
 	OutputDebugString(szLog);
 #endif
@@ -3166,9 +3166,9 @@ void ZCharacter::InitProperties()
 	else {
 		strcpy_safe(m_szUserName,m_Property.szName);
 		if(m_Property.szClanName[0])
-			sprintf_s(m_szUserAndClanName,"%s(%s)",m_Property.szName,m_Property.szClanName);
+			sprintf_safe(m_szUserAndClanName,"%s(%s)",m_Property.szName,m_Property.szClanName);
 		else
-			sprintf_s(m_szUserAndClanName,"%s",m_Property.szName);
+			sprintf_safe(m_szUserAndClanName,"%s",m_Property.szName);
 	}
 
 	MMatchObjCache* pObjCache = ZGetGameClient()->FindObjCache(GetUID());
@@ -3414,7 +3414,7 @@ bool ZCharacter::CheckValidShotTime(int nItemID, float fTime, ZItem* pItem)
 			} else {
 				// 불법적인 속도인경우
 #ifdef _CHECKVALIDSHOTLOG
-				sprintf_s(szLog, "IGNORE>> [%s] (%u:%u) Interval(%0.2f) Delay(%0.2f) \n", 
+				sprintf_safe(szLog, "IGNORE>> [%s] (%u:%u) Interval(%0.2f) Delay(%0.2f) \n", 
 					szTime, GetUID().High, GetUID().Low, fTime - GetLastShotTime(), (float)pItem->GetDesc()->m_nDelay/1000.0f);
 				OutputDebugString(szLog);	
 #endif
@@ -3424,7 +3424,7 @@ bool ZCharacter::CheckValidShotTime(int nItemID, float fTime, ZItem* pItem)
 	}
 
 #ifdef _CHECKVALIDSHOTLOG
-	sprintf_s(szLog, "[%s] (%u:%u) %u(%f)\n", 
+	sprintf_safe(szLog, "[%s] (%u:%u) %u(%f)\n", 
 			szTime, GetUID().High, GetUID().Low, nItemID, fTime);
 	OutputDebugString(szLog);
 #endif

@@ -19,7 +19,7 @@ void __cdecl RCPLog(const char *pFormat,...)
 	va_list args;
 
 	va_start(args,pFormat);
-	vsprintf_s(szBuf, pFormat, args);
+	vsprintf_safe(szBuf, pFormat, args);
 	va_end(args);
 
 	int nEnd = (int)(strlen(szBuf)-1);
@@ -347,7 +347,7 @@ void MServer::OnLocalLogin(MUID CommUID, MUID PlayerUID)
 	int nResult = ReplyConnect(&m_This, &CommUID, nTimeStamp, pCommObj);
 
 /*	char szMsg[128];
-	sprintf_s(szMsg, "Accept from %s:%d \n", pCommObj->GetIP(), pCommObj->GetPort());
+	sprintf_safe(szMsg, "Accept from %s:%d \n", pCommObj->GetIP(), pCommObj->GetPort());
 	LOG(LOG_DEBUG, szMsg); */
 }
 

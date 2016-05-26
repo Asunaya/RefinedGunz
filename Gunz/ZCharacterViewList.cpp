@@ -36,7 +36,7 @@ ZCharacterViewList::ZCharacterViewList(const char* szName, MWidget* pParent, MLi
 	/*
 	for(int i=0; i<10; i++){
 		char temp[256];
-		sprintf_s(temp, "Test%d", i);
+		sprintf_safe(temp, "Test%d", i);
 		Add(MUID(0,0), temp);
 	}
 	*/
@@ -82,7 +82,7 @@ bool ZCharacterViewList::OnCommand(MWidget* pWidget, const char* szMessage)
 
 				if(pCharView) {
 					char temp[1024];
-					sprintf_s(temp,"/kick %s", pCharView->m_szName);
+					sprintf_safe(temp,"/kick %s", pCharView->m_szName);
 					ZPostStageChat(ZGetGameClient()->GetPlayerUID(), ZGetGameClient()->GetStageUID(), temp);
 				}
 			}
@@ -424,7 +424,7 @@ void ZCharacterViewList::OnDraw(MDrawContext* pDC)
 			pDC->SetColor(255, 0, 0);
 			pDC->FillRectangle(tr);
 			tr = MRECT( 60, 4, 12, 12);
-			sprintf_s(temp,":%d",red);
+			sprintf_safe(temp,":%d",red);
 			pDC->SetColor(255, 255, 255);
 			pDC->Text(tr,temp);
 
@@ -432,12 +432,12 @@ void ZCharacterViewList::OnDraw(MDrawContext* pDC)
 			pDC->SetColor(0, 0, 255);
 			pDC->FillRectangle(tr);
 			tr = MRECT( 100, 4, 12, 12);
-			sprintf_s(temp,":%d",blue);
+			sprintf_safe(temp,":%d",blue);
 			pDC->SetColor(255, 255, 255);
 			pDC->Text(tr,temp);
 //*/
 			char cTemp[10];
-			sprintf_s( cTemp, "Red : %02d", red );
+			sprintf_safe( cTemp, "Red : %02d", red );
 			MLabel* pWidget;
 			pWidget = (MLabel*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "Stage_Team_Red_Count" );
 			if(pWidget != 0)
@@ -445,7 +445,7 @@ void ZCharacterViewList::OnDraw(MDrawContext* pDC)
 				pWidget->SetTextColor(0xFFFF0000);
 				pWidget->SetText( cTemp );
 				pWidget->Show( true );
-				sprintf_s( cTemp, "Blue : %02d", blue );
+				sprintf_safe( cTemp, "Blue : %02d", blue );
 				pWidget = (MLabel*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "Stage_Team_Blue_Count" );
 				pWidget->SetTextColor(0xFF0000FF);
 				pWidget->SetText( cTemp ); 

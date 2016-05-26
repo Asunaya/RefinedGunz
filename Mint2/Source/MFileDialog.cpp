@@ -117,7 +117,7 @@ const char* MFileDialog::GetFileName(void)
 
 const char* MFileDialog::GetPathName(void)
 {
-	sprintf_s(m_szTempPathName, "%s\\%s", GetBaseDir(), GetFileName());
+	sprintf_safe(m_szTempPathName, "%s\\%s", GetBaseDir(), GetFileName());
 	return m_szTempPathName;
 }
 

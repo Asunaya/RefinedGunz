@@ -76,9 +76,9 @@ char *GetKeyName(unsigned long int nVirtKey, char(&out)[size]) {
 char *GetKeyName(unsigned long int nVirtKey, char *out, int maxlen)
 {
 	if(nVirtKey>=VK_F1 && nVirtKey<=VK_F12)
-		sprintf_s(out, maxlen, "F%d",nVirtKey-VK_F1+1);
+		sprintf_safe(out, maxlen, "F%d",nVirtKey-VK_F1+1);
 	else
-		sprintf_s(out, maxlen, "%d",nVirtKey);
+		sprintf_safe(out, maxlen, "%d",nVirtKey);
 
 	return out;
 }
@@ -300,7 +300,7 @@ bool ZConfiguration::LoadSystem(const char* szFileName)
 		while ( 1)
 		{
 			char szText[ 256];
-			sprintf_s( szText, "%s%d", ZTOK_SERVER, m_nServerCount);
+			sprintf_safe( szText, "%s%d", ZTOK_SERVER, m_nServerCount);
 			if (parentElement.FindChildNode( szText, &serverElement))
 			{
 				char szServerIP[ 32];
@@ -560,7 +560,7 @@ bool ZConfiguration::SaveToFile(const char *szFileName, const char* szHeader)
 
 		serverElement.AppendText("\n\t\t");
 		aElement = serverElement.CreateChildElement(ZTOK_PORT);
-		sprintf_s(buffer,"%d",m_nServerPort);
+		sprintf_safe(buffer,"%d",m_nServerPort);
 		aElement.SetContents(buffer);
 
 		serverElement.AppendText("\n\t");
@@ -585,22 +585,22 @@ bool ZConfiguration::SaveToFile(const char *szFileName, const char* szHeader)
 		MXmlElement		aElement;
 		aElement = parentElement.CreateChildElement(ZTOK_VIDEO_WIDTH);
 		char temp[256];
-		sprintf_s(temp, "%d", m_Video.nWidth);
+		sprintf_safe(temp, "%d", m_Video.nWidth);
 		aElement.SetContents(temp);
 
 		parentElement.AppendText("\n\t\t");
 		aElement = parentElement.CreateChildElement(ZTOK_VIDEO_HEIGHT);
-		sprintf_s(temp, "%d", m_Video.nHeight);
+		sprintf_safe(temp, "%d", m_Video.nHeight);
 		aElement.SetContents(temp);
 
 		parentElement.AppendText("\n\t\t");
 		aElement = parentElement.CreateChildElement(ZTOK_VIDEO_COLORBITS);
-		sprintf_s(temp, "%d", m_Video.nColorBits);
+		sprintf_safe(temp, "%d", m_Video.nColorBits);
 		aElement.SetContents(temp);
 
 		parentElement.AppendText("\n\t\t");
 		aElement = parentElement.CreateChildElement(ZTOK_VIDEO_GAMMA);
-		sprintf_s(temp, "%d", m_Video.nGamma);
+		sprintf_safe(temp, "%d", m_Video.nGamma);
 		aElement.SetContents(temp);
 
 		parentElement.AppendText("\n\t\t");
@@ -635,37 +635,37 @@ bool ZConfiguration::SaveToFile(const char *szFileName, const char* szHeader)
 
 		parentElement.AppendText("\n\t\t");
 		aElement = parentElement.CreateChildElement(ZTOK_VIDEO_CHARTEXLEVEL);
-		sprintf_s(temp, "%d", m_Video.nCharTexLevel);
+		sprintf_safe(temp, "%d", m_Video.nCharTexLevel);
 		aElement.SetContents(temp);
 
 		parentElement.AppendText("\n\t\t");
 		aElement = parentElement.CreateChildElement(ZTOK_VIDEO_MAPTEXLEVEL);
-		sprintf_s(temp, "%d", m_Video.nMapTexLevel);
+		sprintf_safe(temp, "%d", m_Video.nMapTexLevel);
 		aElement.SetContents(temp);
 
 		parentElement.AppendText("\n\t\t");
 		aElement = parentElement.CreateChildElement(ZTOK_VIDEO_EFFECTLEVEL);
-		sprintf_s(temp, "%d", m_Video.nEffectLevel);
+		sprintf_safe(temp, "%d", m_Video.nEffectLevel);
 		aElement.SetContents(temp);
 
 		parentElement.AppendText("\n\t\t");
 		aElement = parentElement.CreateChildElement(ZTOK_VIDEO_TEXTUREFORMAT);
-		sprintf_s(temp, "%d", m_Video.nTextureFormat);
+		sprintf_safe(temp, "%d", m_Video.nTextureFormat);
 		aElement.SetContents(temp);
 
 		parentElement.AppendText("\n\t\t");
 		aElement = parentElement.CreateChildElement("NHARDWARETNL");
-		sprintf_s(temp, "%s", m_Video.bTerrible ? "true" : "false" );
+		sprintf_safe(temp, "%s", m_Video.bTerrible ? "true" : "false" );
 		aElement.SetContents(temp);
 
 		parentElement.AppendText("\n\t\t");
 		aElement = parentElement.CreateChildElement("FPSLIMIT");
-		sprintf_s(temp, "%d", nFPSLimit);
+		sprintf_safe(temp, "%d", nFPSLimit);
 		aElement.SetContents(temp);
 
 		parentElement.AppendText("\n\t\t");
 		aElement = parentElement.CreateChildElement("CAMFIX");
-		sprintf_s(temp, "%d", bCamFix);
+		sprintf_safe(temp, "%d", bCamFix);
 		aElement.SetContents(temp);
 
 		parentElement.AppendText("\n\t");
@@ -688,7 +688,7 @@ bool ZConfiguration::SaveToFile(const char *szFileName, const char* szHeader)
 
 		parentElement.AppendText("\n\t\t");
 		aElement = parentElement.CreateChildElement(ZTOK_AUDIO_BGM_VOLUME);
-		sprintf_s(temp, "%f", m_Audio.fBGMVolume );
+		sprintf_safe(temp, "%f", m_Audio.fBGMVolume );
 		aElement.SetContents(temp);
 
 		parentElement.AppendText("\n\t\t");
@@ -699,12 +699,12 @@ bool ZConfiguration::SaveToFile(const char *szFileName, const char* szHeader)
 
 		parentElement.AppendText("\n\t\t");
 		aElement = parentElement.CreateChildElement(ZTOK_AUDIO_EFFECT_VOLUME);
-		sprintf_s(temp, "%f", m_Audio.fEffectVolume);
+		sprintf_safe(temp, "%f", m_Audio.fEffectVolume);
 		aElement.SetContents(temp);
 
 		parentElement.AppendText("\n\t\t");
 		aElement = parentElement.CreateChildElement(ZTOK_AUDIO_3D_SOUND);
-		sprintf_s(temp, "%d", m_Audio.b3DSound);
+		sprintf_safe(temp, "%d", m_Audio.b3DSound);
 		aElement.SetContents(temp);
 
 		parentElement.AppendText("\n\t\t");
@@ -744,7 +744,7 @@ bool ZConfiguration::SaveToFile(const char *szFileName, const char* szHeader)
 		MXmlElement		aElement;
 		aElement = parentElement.CreateChildElement(ZTOK_MOUSE_SENSITIVITY);
 		char temp[256];
-		sprintf_s(temp, "%f", m_Mouse.fSensitivity);
+		sprintf_safe(temp, "%f", m_Mouse.fSensitivity);
 		aElement.SetContents(temp);
 
 		parentElement.AppendText("\n\t\t");
@@ -765,7 +765,7 @@ bool ZConfiguration::SaveToFile(const char *szFileName, const char* szHeader)
 		MXmlElement		aElement;
 		aElement = parentElement.CreateChildElement(ZTOK_JOYSTICK_SENSITIVITY);
 		char temp[256];
-		sprintf_s(temp, "%f", m_Joystick.fSensitivity);
+		sprintf_safe(temp, "%f", m_Joystick.fSensitivity);
 		aElement.SetContents(temp);
 
 		parentElement.AppendText("\n\t");
@@ -785,7 +785,7 @@ bool ZConfiguration::SaveToFile(const char *szFileName, const char* szHeader)
 				MXmlElement		aElement;
 				aElement = parentElement.CreateChildElement(szItemName);
 				char temp[256];
-				sprintf_s(temp, "%d", m_Keyboard.ActionKeys[i].nVirtualKey);
+				sprintf_safe(temp, "%d", m_Keyboard.ActionKeys[i].nVirtualKey);
 				aElement.SetContents(temp);
 				aElement.SetAttribute("alt",m_Keyboard.ActionKeys[i].nVirtualKeyAlt);
 			}
@@ -837,59 +837,59 @@ bool ZConfiguration::SaveToFile(const char *szFileName, const char* szHeader)
 		parentElement.AppendText("\n\t\t");
 		aElement = parentElement.CreateChildElement(ZTOK_ETC_NETWORKPORT1);
 		char temp[256];
-		sprintf_s(temp, "%d", m_Etc.nNetworkPort1);
+		sprintf_safe(temp, "%d", m_Etc.nNetworkPort1);
 		aElement.SetContents(temp);
 
 		parentElement.AppendText("\n\t\t");
 		aElement = parentElement.CreateChildElement(ZTOK_ETC_NETWORKPORT2);
-		sprintf_s(temp, "%d", m_Etc.nNetworkPort2);
+		sprintf_safe(temp, "%d", m_Etc.nNetworkPort2);
 		aElement.SetContents(temp);
 
 		// Boost
 		parentElement.AppendText("\n\t\t");
 		aElement = parentElement.CreateChildElement(ZTOK_ETC_BOOST);
-		sprintf_s(temp, "%s", m_Etc.bBoost?"TRUE":"FALSE");
+		sprintf_safe(temp, "%s", m_Etc.bBoost?"TRUE":"FALSE");
 		aElement.SetContents(temp);
 
 		// Reject normal chat
 		parentElement.AppendText("\n\t\t");
 		aElement = parentElement.CreateChildElement(ZTOK_ETC_REJECT_NORMALCHAT);
-		sprintf_s(temp, "%s", m_Etc.bRejectNormalChat?"TRUE":"FALSE");
+		sprintf_safe(temp, "%s", m_Etc.bRejectNormalChat?"TRUE":"FALSE");
 		aElement.SetContents(temp);
 
 		// Reject team chat
 		parentElement.AppendText("\n\t\t");
 		aElement = parentElement.CreateChildElement(ZTOK_ETC_REJECT_TEAMCHAT);
-		sprintf_s(temp, "%s", m_Etc.bRejectTeamChat?"TRUE":"FALSE");
+		sprintf_safe(temp, "%s", m_Etc.bRejectTeamChat?"TRUE":"FALSE");
 		aElement.SetContents(temp);
 
 		// Reject clan chat
 		parentElement.AppendText("\n\t\t");
 		aElement = parentElement.CreateChildElement(ZTOK_ETC_REJECT_CLANCHAT);
-		sprintf_s(temp, "%s", m_Etc.bRejectClanChat?"TRUE":"FALSE");
+		sprintf_safe(temp, "%s", m_Etc.bRejectClanChat?"TRUE":"FALSE");
 		aElement.SetContents(temp);
 
 		// Reject whisper
 		parentElement.AppendText("\n\t\t");
 		aElement = parentElement.CreateChildElement(ZTOK_ETC_REJECT_WHISPER);
-		sprintf_s(temp, "%s", m_Etc.bRejectWhisper?"TRUE":"FALSE");
+		sprintf_safe(temp, "%s", m_Etc.bRejectWhisper?"TRUE":"FALSE");
 		aElement.SetContents(temp);
 
 		// Reject invite
 		parentElement.AppendText("\n\t\t");
 		aElement = parentElement.CreateChildElement(ZTOK_ETC_REJECT_INVITE);
-		sprintf_s(temp, "%s", m_Etc.bRejectInvite?"TRUE":"FALSE");
+		sprintf_safe(temp, "%s", m_Etc.bRejectInvite?"TRUE":"FALSE");
 		aElement.SetContents(temp);
 
 		// crosshair
 		parentElement.AppendText("\n\t\t");
 		aElement = parentElement.CreateChildElement(ZTOK_ETC_CROSSHAIR);
-		sprintf_s(temp, "%d", m_Etc.nCrossHair);
+		sprintf_safe(temp, "%d", m_Etc.nCrossHair);
 		aElement.SetContents(temp);
 
 		parentElement.AppendText("\n\t\t");
 		aElement = parentElement.CreateChildElement("DRAWTRAILS");
-		sprintf_s(temp, "%d", bDrawTrails);
+		sprintf_safe(temp, "%d", bDrawTrails);
 		aElement.SetContents(temp);
 
 		parentElement.AppendText("\n\t");
@@ -905,7 +905,7 @@ bool ZConfiguration::SaveToFile(const char *szFileName, const char* szHeader)
 		MXmlElement		aElement;
 		aElement = parentElement.CreateChildElement("BACKGROUNDCOLOR");
 		char temp[256];
-		sprintf_s(temp, "%d", ChatBackgroundColor);
+		sprintf_safe(temp, "%d", ChatBackgroundColor);
 		aElement.SetContents(temp);
 
 		parentElement.AppendText("\n\t");

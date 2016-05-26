@@ -55,7 +55,7 @@ void _SetError(int nErrCode,const char *pErrSubStr,const char *pFileName,int nLi
 	FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(),
 		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
 		(LPTSTR) &lpMsgBuf, 0, NULL );// Display the string.
-	sprintf_s(g_pGetLastErrStr, "%s", lpMsgBuf);
+	sprintf_safe(g_pGetLastErrStr, "%s", lpMsgBuf);
 	LocalFree( lpMsgBuf );
 #endif
 }
@@ -128,14 +128,14 @@ void ErrMsgBox(HWND hWnd)
 
 	if( g_nErrCode == CM_OK ) return;
 
-	sprintf_s(strTemp,"[ %d ]  %s\n",g_nErrCode,g_pErrStr);
+	sprintf_safe(strTemp,"[ %d ]  %s\n",g_nErrCode,g_pErrStr);
 	if(g_pErrSubStr[0]!=0)
-		sprintf_s(strTemp,"%s\nSecond Error Message	: %s\n",strTemp,g_pErrSubStr);
+		sprintf_safe(strTemp,"%s\nSecond Error Message	: %s\n",strTemp,g_pErrSubStr);
 	// Win32 GetLastErr...
-	sprintf_s(strTemp, "%s\nGet Last Error		: %s", strTemp, g_pGetLastErrStr);
+	sprintf_safe(strTemp, "%s\nGet Last Error		: %s", strTemp, g_pGetLastErrStr);
 #ifdef _DEBUG
-	sprintf_s(strTemp,"%s\n\nError Occured Source	: %s ( %d line )",strTemp,g_pFileName,g_nLineNum);
-	sprintf_s(strTemp,"%s\nLast Modify Date		: %s",strTemp,g_pLastModification);
+	sprintf_safe(strTemp,"%s\n\nError Occured Source	: %s ( %d line )",strTemp,g_pFileName,g_nLineNum);
+	sprintf_safe(strTemp,"%s\nLast Modify Date		: %s",strTemp,g_pLastModification);
 #endif
 
 	MessageBox(hWnd,strTemp,ERROR_MESSAGE_TITLE,MB_ICONERROR);

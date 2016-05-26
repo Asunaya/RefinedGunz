@@ -171,7 +171,7 @@ bool ZBossGaugeEffect::Draw(unsigned long int nTime)
 			offset = fPower * m_ShockOffset;
 /*
 			char text[256];
-			sprintf_s(text, "%.3f, %.3f\n", offset.x, offset.y);
+			sprintf_safe(text, "%.3f, %.3f\n", offset.x, offset.y);
 			OutputDebugString(text);
 */
 		}
@@ -448,10 +448,10 @@ bool ZScreenEffectManager::Create()
 	for(int i=0;i<10;i++)
 	{
 		char meshname[256];
-		sprintf_s(meshname,"combo%d",i);
+		sprintf_safe(meshname,"combo%d",i);
 		m_pComboNumberEffect[i] = m_pEffectMeshMgr->Get(meshname);
 
-		sprintf_s(meshname,"exp%d",i);
+		sprintf_safe(meshname,"exp%d",i);
 		m_pExpNumberEffect[i] = m_pEffectMeshMgr->Get(meshname);
 	}
 
@@ -490,7 +490,7 @@ bool ZScreenEffectManager::Create()
 	//for (int i = 0; i < 10; i++)
 	//{
 	//	char name[64];
-	//	sprintf_s(name, "ko%d", i);
+	//	sprintf_safe(name, "ko%d", i);
 	//	m_pKONumberEffect[i] = new ZKOEffect(m_pQuestEffectMeshMgr->Get(name));
 	//}
 
@@ -965,7 +965,7 @@ void ZScreenEffectManager::AddRoundStart(int nRound)
 	ZEffect* pNew = NULL;
 
 	char buffer[32];
-	sprintf_s(buffer,"%d",nRound);
+	sprintf_safe(buffer,"%d",nRound);
 	int nCount=(int)strlen(buffer);
 
 	int nOver=max(nCount-2,0);
@@ -973,7 +973,7 @@ void ZScreenEffectManager::AddRoundStart(int nRound)
 	for(int i=0;i<nCount;i++)
 	{
 		char meshname[256];
-		sprintf_s(meshname,"round%d",buffer[i]-'0');
+		sprintf_safe(meshname,"round%d",buffer[i]-'0');
 		RMesh *pMesh = m_pEffectMeshMgr->Get(meshname);
 		if(pMesh)
 			Add(new ZScreenEffect(pMesh , rvector(ROUND_NUMBER_SPACE*(float)(i-nCount+1+nOver),0,0)));
@@ -1063,7 +1063,7 @@ void ZScreenEffectManager::SetCombo(int nCombo)
 	}
 
 	char buffer[32];
-	sprintf_s(buffer,"%d",nCombo);
+	sprintf_safe(buffer,"%d",nCombo);
 	int nCount=(int)strlen(buffer);
 
 	for(int i=0;i<nCount;i++)
@@ -1106,7 +1106,7 @@ void ZScreenEffectManager::AddExpEffect(int nExp)
 	ZEffect* pNew = NULL;
 
 	char buffer[32];
-	sprintf_s(buffer,"%d",abs(nExp));
+	sprintf_safe(buffer,"%d",abs(nExp));
 	int nCount=(int)strlen(buffer);
 
 
@@ -1278,7 +1278,7 @@ bool ZScreenEffectManager::CreateQuestRes()
 	{
 		_ASSERT(m_pKONumberEffect[i] == NULL);
 		char name[64];
-		sprintf_s(name, "ko%d", i);
+		sprintf_safe(name, "ko%d", i);
 
 		p = m_pQuestEffectMeshMgr->Get(name);
 		if (!p)
@@ -1359,7 +1359,7 @@ void ZScreenEffectManager::DrawKO()
 	if ((m_pKO == NULL) || (m_nKO <= 0)) return;
 
 	char buffer[32];
-	sprintf_s(buffer,"%d", m_nKO);
+	sprintf_safe(buffer,"%d", m_nKO);
 	int nCount=(int)strlen(buffer);
 
 
@@ -1437,7 +1437,7 @@ void ZScreenEffectManager::DrawDuelEffects()
 	if (g_pGame->m_pMyCharacter->GetKils() > 0)
 	{
 		char buffer[32];
-		sprintf_s(buffer,"%d", g_pGame->m_pMyCharacter->GetKils());
+		sprintf_safe(buffer,"%d", g_pGame->m_pMyCharacter->GetKils());
 		int nCount=(int)strlen(buffer);
 
 		unsigned int nNowTime = timeGetTime();
@@ -1492,13 +1492,13 @@ void ZScreenEffectManager::UpdateDuelEffects()
 //	if (pDuel->QInfo.m_nVictory + 1 >= 3)
 	{
 		char buffer[32];
-		sprintf_s(buffer,"%d", pDuel->QInfo.m_nVictory);
+		sprintf_safe(buffer,"%d", pDuel->QInfo.m_nVictory);
 		int nCount=(int)strlen(buffer);
 
 		for(int i=0;i<nCount;i++)
 		{
 			char meshname[256];
-			sprintf_s(meshname,"duel%d",buffer[i]-'0');
+			sprintf_safe(meshname,"duel%d",buffer[i]-'0');
 			RMesh *pMesh = m_pEffectMeshMgr->Get(meshname);
 			if(pMesh)
 				Add(new ZScreenEffect(pMesh , rvector(60*(float)(i-nCount+2),0,0)));

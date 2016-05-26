@@ -364,25 +364,25 @@ bool ZEffectManager::Create(void)
 	char szFileName[256];
 
 	for(int i=0; i<MUZZLESMOKE_COUNT; i++){
-		sprintf_s(szFileName, "SFX/muzzle_smoke0%d.tga", i+1);
+		sprintf_safe(szFileName, "SFX/muzzle_smoke0%d.tga", i+1);
 		m_pEBSMuzzleSmoke[i]  = new ZEffectBillboardSource(szFileName);
 	}
 
 	for(int i=0; i<MUZZLESMOKE_SHOTGUN_COUNT; i++){
-		sprintf_s(szFileName, "SFX/muzzle_smoke4%d.tga", i+1);
+		sprintf_safe(szFileName, "SFX/muzzle_smoke4%d.tga", i+1);
 		m_pEBSMuzzleSmokeShotgun[i]  = new ZEffectBillboardSource(szFileName);
 	}
 
 	for(int i=0; i<SMOKE_COUNT; i++){
-		sprintf_s(szFileName, "SFX/smoke0%d.tga", i+1);
+		sprintf_safe(szFileName, "SFX/smoke0%d.tga", i+1);
 		m_pEBSSmokes[i] = new ZEffectBillboardSource(szFileName);
 	}
 	for(int i=0; i<BLOOD_COUNT; i++){
-		sprintf_s(szFileName, "SFX/blood0%d.tga", i+1);
+		sprintf_safe(szFileName, "SFX/blood0%d.tga", i+1);
 		m_pEBSBloods[i] = new ZEffectBillboardSource(szFileName);
 	}
 	for(int i=0; i<BLOODMARK_COUNT; i++){
-		sprintf_s(szFileName, "SFX/blood-mark0%d.tga", i+1);
+		sprintf_safe(szFileName, "SFX/blood-mark0%d.tga", i+1);
 		m_pEBSBloodMark[i] = new ZEffectBillboardSource(szFileName);
 	}
 
@@ -395,21 +395,21 @@ bool ZEffectManager::Create(void)
 	m_pEBSBulletMark[2] = new ZEffectBillboardSource("SFX/gz_effect004.tga");
 
 	for(int i=0; i<RIFLEFIRE_COUNT; i++){
-		sprintf_s(szFileName, "SFX/gz_sfx_mf0%d.bmp", i+1);
+		sprintf_safe(szFileName, "SFX/gz_sfx_mf0%d.bmp", i+1);
 		m_pEBSRifleFire[i][0] = new ZEffectBillboardSource(szFileName);
-		sprintf_s(szFileName, "SFX/gz_sfx_mf1%d.bmp", i+1);
+		sprintf_safe(szFileName, "SFX/gz_sfx_mf1%d.bmp", i+1);
 		m_pEBSRifleFire[i][1] = new ZEffectBillboardSource(szFileName);
 	}
 
 	for(int i=0; i<SHOTGUNFIRE_COUNT; i++) {
-		sprintf_s(szFileName, "SFX/gz_sfx_mf4%d.bmp", i+1);
+		sprintf_safe(szFileName, "SFX/gz_sfx_mf4%d.bmp", i+1);
 		m_pEBSShotGunFire[i] = new ZEffectBillboardSource(szFileName);
 	}
 
 	for(int i=0; i<GUNFIRE_COUNT; i++){
-		sprintf_s(szFileName, "SFX/gz_sfx_mf2%d.bmp", i+1);
+		sprintf_safe(szFileName, "SFX/gz_sfx_mf2%d.bmp", i+1);
 		m_pEBSGunFire[i][0] = new ZEffectBillboardSource(szFileName);
-		sprintf_s(szFileName, "SFX/gz_sfx_mf3%d.bmp", i+1);
+		sprintf_safe(szFileName, "SFX/gz_sfx_mf3%d.bmp", i+1);
 		m_pEBSGunFire[i][1] = new ZEffectBillboardSource(szFileName);
 	}
 
@@ -1170,7 +1170,7 @@ void ZEffectManager::Draw(unsigned long int nTime)
 	/////////////////////////////////////////////////////////
 /*
 	static char _temp[256];
-	sprintf_s(_temp,"skip cnt : %d ,rendered :%d / %d \n", m__skip_cnt , m__rendered , m__cnt );
+	sprintf_safe(_temp,"skip cnt : %d ,rendered :%d / %d \n", m__skip_cnt , m__rendered , m__cnt );
 	OutputDebugString(_temp);
 */
 	m_BulletMarkList.Draw();

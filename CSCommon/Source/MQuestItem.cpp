@@ -506,7 +506,7 @@ bool DBQuestCachingData::DoUpdateDBCharQuestItemInfo()
 		for( ; it != end; ++it )
 		{
 			char tmp[ 100 ] = {0};
-			sprintf_s( tmp, "%s : %d\n", it->second->GetDesc()->m_szQuestItemName, it->second->GetCount() );
+			sprintf_safe( tmp, "%s : %d\n", it->second->GetDesc()->m_szQuestItemName, it->second->GetCount() );
 			strcat( szDbgOut, tmp );
 		}
 		strcat( szDbgOut, "\n" );

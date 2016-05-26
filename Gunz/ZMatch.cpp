@@ -160,7 +160,7 @@ void ZMatch::OnDrawGameMessage()
 	fTime=fmod(fTime,1.f);
 
 	char szTimeMessage[256] = "";
-	sprintf_s(szTimeMessage, "%d:%02d.%02d",nTimeMinute,nTimeSecond,int(fTime*100.f));
+	sprintf_safe(szTimeMessage, "%d:%02d.%02d",nTimeMinute,nTimeSecond,int(fTime*100.f));
 	ZApplication::GetGameInterface()->SetTextWidget("Time", szTimeMessage);
 #endif
 
@@ -408,7 +408,7 @@ void ZMatch::SetRoundState(MMATCH_ROUNDSTATE nRoundState, int nArg)
 
 #ifndef _PUBLISH
 	char szLog[128];
-	sprintf_s(szLog, "RoundState:%d À¸·Î ¹Ù²ñ\n", m_nRoundState);
+	sprintf_safe(szLog, "RoundState:%d À¸·Î ¹Ù²ñ\n", m_nRoundState);
 	OutputDebugString(szLog);
 #endif
 

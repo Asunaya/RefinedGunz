@@ -47,7 +47,7 @@ void ZCharacterSelectView::LoadLastChar()
 			for (int i = 0; i < MAX_CHAR_COUNT; i++)
 			{
 				char szWidget[256];
-				sprintf_s( szWidget, "CharSel_Name%d", i);
+				sprintf_safe( szWidget, "CharSel_Name%d", i);
 				MLabel* pLabel = (MLabel*)pResource->FindWidget( szWidget);
 
 				if ( pLabel)
@@ -331,7 +331,7 @@ bool ZCharacterSelectView::SelectMyCharacter()
 
 
 	char szWidgetName[256];
-	sprintf_s( szWidgetName, "CharSel_Name%d", m_nSelCharIndex);
+	sprintf_safe( szWidgetName, "CharSel_Name%d", m_nSelCharIndex);
 
 	MLabel* pLabel;
 	pLabel = (MLabel*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( szWidgetName);
@@ -615,7 +615,7 @@ void ZCharacterSelectView::UpdateInterface(int nSelIndex)
 	// 위치 재정렬
 	for ( int i = 0; i < MAX_CHAR_COUNT; i++)
 	{
-		sprintf_s( szName, "CharSel_Name%d", i);
+		sprintf_safe( szName, "CharSel_Name%d", i);
 		pLabel = (MLabel*)pResource->FindWidget( szName);
 		if ( pLabel)
 		{
@@ -625,7 +625,7 @@ void ZCharacterSelectView::UpdateInterface(int nSelIndex)
 				pLabel->SetTextColor( MCOLOR(0xFF606060));		// 회색
 		}
 
-		sprintf_s( szName, "CharSel_Level%d", i);
+		sprintf_safe( szName, "CharSel_Level%d", i);
 		pLabel = (MLabel*)pResource->FindWidget( szName);
 		if ( pLabel)
 		{
@@ -635,7 +635,7 @@ void ZCharacterSelectView::UpdateInterface(int nSelIndex)
 				pLabel->SetTextColor( MCOLOR(0xFF606060));		// 회색
 		}
 
-		sprintf_s( szName, "CharSel_ClanName%d", i);
+		sprintf_safe( szName, "CharSel_ClanName%d", i);
 		pLabel = (MLabel*)pResource->FindWidget( szName);
 		if ( pLabel)
 		{
@@ -683,27 +683,27 @@ void ZCharacterSelectView::ClearInterfaces()
 	{
 		char szWidgetName[256];
 
-		sprintf_s( szWidgetName, "CharSel_Name%d", i);
+		sprintf_safe( szWidgetName, "CharSel_Name%d", i);
 		pLabel = (MLabel*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( szWidgetName);
 		if ( pLabel)
 			pLabel->SetText( "");
 
-		sprintf_s( szWidgetName, "CharSel_Level%d", i);
+		sprintf_safe( szWidgetName, "CharSel_Level%d", i);
 		pLabel = (MLabel*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( szWidgetName);
 		if ( pLabel)
 			pLabel->SetText( "");
 
-		sprintf_s( szWidgetName, "CharSel_ClanName%d", i);
+		sprintf_safe( szWidgetName, "CharSel_ClanName%d", i);
 		pLabel = (MLabel*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( szWidgetName);
 		if ( pLabel)
 			pLabel->SetText( "");
 
-		sprintf_s( szWidgetName, "CharSel_SelectBtn%d", i);
+		sprintf_safe( szWidgetName, "CharSel_SelectBtn%d", i);
 		pPicture = (MPicture*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( szWidgetName);
 		if ( pPicture)
 			pPicture->Show( false);
 
-		sprintf_s( szWidgetName, "CharSel_Selectbar%d", i);
+		sprintf_safe( szWidgetName, "CharSel_Selectbar%d", i);
 		pPicture = (MPicture*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( szWidgetName);
 		if ( pPicture)
 			pPicture->Show( false);
@@ -754,7 +754,7 @@ void ZCharacterSelectView::OnReceivedAccountCharInfo(void* pCharListBlob)
 
 			char szWidgetName[256];
 			MRECT rect;
-			sprintf_s( szWidgetName, "CharSel_Name%d", nIndex);
+			sprintf_safe( szWidgetName, "CharSel_Name%d", nIndex);
 
 			MLabel* pLabel;
 			pLabel = (MLabel*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( szWidgetName);
@@ -766,19 +766,19 @@ void ZCharacterSelectView::OnReceivedAccountCharInfo(void* pCharListBlob)
 				pLabel->SetBounds( rect);
 			}
 
-			sprintf_s( szWidgetName, "CharSel_Level%d", nIndex);
+			sprintf_safe( szWidgetName, "CharSel_Level%d", nIndex);
 			pLabel = (MLabel*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( szWidgetName);
 			if ( pLabel)
 			{
 				char szString[256];
-				sprintf_s( szString, "%d %s", pAccountCharInfo->nLevel, ZMsg(MSG_CHARINFO_LEVELMARKER));
+				sprintf_safe( szString, "%d %s", pAccountCharInfo->nLevel, ZMsg(MSG_CHARINFO_LEVELMARKER));
 				pLabel->SetText( szString);
 				rect = pLabel->GetRect();
 				rect.y = nPosY;
 				pLabel->SetBounds( rect);
 			}
 
-			sprintf_s( szWidgetName, "CharSel_ClanName%d", nIndex);
+			sprintf_safe( szWidgetName, "CharSel_ClanName%d", nIndex);
 			pLabel = (MLabel*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( szWidgetName);
 			if ( pLabel)
 			{
@@ -787,7 +787,7 @@ void ZCharacterSelectView::OnReceivedAccountCharInfo(void* pCharListBlob)
 				if ( strcmp( pAccountCharInfo->szClanName, "") == 0)
 					strcpy_safe( szString, "클랜 : ---");
 				else
-					sprintf_s( szString, "클랜 : %s", pAccountCharInfo->szClanName);
+					sprintf_safe( szString, "클랜 : %s", pAccountCharInfo->szClanName);
 				pLabel->SetText( szString);
 				*/
 				pLabel->SetText("");
@@ -797,7 +797,7 @@ void ZCharacterSelectView::OnReceivedAccountCharInfo(void* pCharListBlob)
 				pLabel->SetBounds( rect);
 			}
 
-			sprintf_s( szWidgetName, "CharSel_Selectbar%d", nIndex);
+			sprintf_safe( szWidgetName, "CharSel_Selectbar%d", nIndex);
 			pPicture = (MPicture*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( szWidgetName);
 			if ( pPicture)
 			{
@@ -808,7 +808,7 @@ void ZCharacterSelectView::OnReceivedAccountCharInfo(void* pCharListBlob)
 			}
 
 
-			sprintf_s( szWidgetName, "CharSel_SelectBtn%d", nIndex);
+			sprintf_safe( szWidgetName, "CharSel_SelectBtn%d", nIndex);
 			pButton = (MButton*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( szWidgetName);
 			if ( pButton)
 			{

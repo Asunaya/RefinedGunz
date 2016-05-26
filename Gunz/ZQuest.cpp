@@ -1117,7 +1117,7 @@ void ZQuest::GetMyObtainQuestItemList( int nRewardXP, int nRewardBP, void* pMyOb
 		{
 			MQuestItemDesc* pQuestItemDesc = GetQuestItemDescMgr().FindQItemDesc( pQuestItemNode->m_nItemID);
 			char szNum[ 10];
-			sprintf_s( szNum, "%d", pQuestItemNode->m_nCount);
+			sprintf_safe( szNum, "%d", pQuestItemNode->m_nCount);
 			char szMsg[ 128];
 			ZTransMsg( szMsg, MSG_GAME_GET_QUEST_ITEM2, 2, pQuestItemDesc->m_szQuestItemName, szNum);
 			pListBox->Add( new ObtainItemListBoxItem( ZGetGameInterface()->GetQuestItemIcon( pQuestItemNode->m_nItemID, true), szMsg));

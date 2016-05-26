@@ -241,10 +241,10 @@ bool ZItemSlotView::OnEvent(MEvent* pEvent, MListener* pListener)
 			// 아이템 설명 업데이트
 			ZMyItemNode* pItemNode = ZGetMyInfo()->GetItemList()->GetEquipedItem( m_nParts);
 			char szItemDescription1[128], szItemDescription2[128], szItemDescription3[128], szItemIcon[128];
-			sprintf_s( szItemDescription1, "%s_ItemDescription1", m_szItemSlotPlace);
-			sprintf_s( szItemDescription2, "%s_ItemDescription2", m_szItemSlotPlace);
-			sprintf_s( szItemDescription3, "%s_ItemDescription3", m_szItemSlotPlace);
-			sprintf_s( szItemIcon,         "%s_ItemIcon",         m_szItemSlotPlace);
+			sprintf_safe( szItemDescription1, "%s_ItemDescription1", m_szItemSlotPlace);
+			sprintf_safe( szItemDescription2, "%s_ItemDescription2", m_szItemSlotPlace);
+			sprintf_safe( szItemDescription3, "%s_ItemDescription3", m_szItemSlotPlace);
+			sprintf_safe( szItemIcon,         "%s_ItemIcon",         m_szItemSlotPlace);
 
 			ZGetGameInterface()->SetupItemDescription(  pItemDesc,
 														szItemDescription1,

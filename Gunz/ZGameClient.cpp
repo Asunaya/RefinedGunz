@@ -560,7 +560,7 @@ void ZGameClient::OnStageJoin(const MUID& uidChar, const MUID& uidStage, unsigne
 		ZGetGameInterface()->GetChat()->Clear(ZChat::CL_STAGE);
 
 		char szTmp[ 256];
-		sprintf_s(szTmp, "(%03d)%s", nRoomNo, szStageName);
+		sprintf_safe(szTmp, "(%03d)%s", nRoomNo, szStageName);
 
 		ZTransMsg( szText, MSG_JOINED_STAGE, 1, szTmp);
 		ZChatOutput(szText, ZChat::CMT_SYSTEM, ZChat::CL_STAGE);
@@ -735,7 +735,7 @@ void ZGameClient::OnStageList(int nPrevStageCount, int nNextStageCount, void* pB
 {
 #ifdef _DEBUG
 	char szTemp[256];
-	sprintf_s(szTemp, "OnStageList (nPrevStageCount = %d , nNextStageCount = %d , nCount = %d\n",
+	sprintf_safe(szTemp, "OnStageList (nPrevStageCount = %d , nNextStageCount = %d , nCount = %d\n",
 		nPrevStageCount, nNextStageCount, nCount);
 	OutputDebugString(szTemp);
 #endif
@@ -872,7 +872,7 @@ void ZGameClient::OnResponseFriendList(void* pBlob, int nCount)
 		} else {
 			if (ZApplication::GetGameInterface()->GetState() != GUNZ_LOBBY )
 			{
-				sprintf_s(szBuf, "    %s (%s)", pNode->szName, pNode->szDescription);
+				sprintf_safe(szBuf, "    %s (%s)", pNode->szName, pNode->szDescription);
 				ZChatOutput(szBuf,  ZChat::CMT_NORMAL, ZChat::CL_CURRENT);
 			}
 		}
@@ -1171,7 +1171,7 @@ bool ZGameClient::OnCommand(MCommand* pCommand)
 		case ZC_CON_CONNECT:
 			{
 				char szBuf[256];
-				sprintf_s(szBuf, "Net.Connect %s:%d", ZGetConfiguration()->GetServerIP(), 
+				sprintf_safe(szBuf, "Net.Connect %s:%d", ZGetConfiguration()->GetServerIP(), 
 													ZGetConfiguration()->GetServerPort());
 				ConsoleInputEvent(szBuf);
 				SetServerAddr(ZGetConfiguration()->GetServerIP(), ZGetConfiguration()->GetServerPort());
@@ -1224,9 +1224,9 @@ bool ZGameClient::OnCommand(MCommand* pCommand)
 		case ZC_TEST_SETCLIENT1:
 			{
 				char szBuf[256];
-				sprintf_s(szBuf, "peer.setport 10000");
+				sprintf_safe(szBuf, "peer.setport 10000");
 				ConsoleInputEvent(szBuf);
-				sprintf_s(szBuf, "peer.addpeer 127.0.0.1 10001");
+				sprintf_safe(szBuf, "peer.addpeer 127.0.0.1 10001");
 				ConsoleInputEvent(szBuf);
 
 				MClient::OutputMessage(MZMOM_LOCALREPLY, "Done SetClient1");
@@ -1235,9 +1235,9 @@ bool ZGameClient::OnCommand(MCommand* pCommand)
 		case ZC_TEST_SETCLIENT2:
 			{
 				char szBuf[256];
-				sprintf_s(szBuf, "peer.setport 10001");
+				sprintf_safe(szBuf, "peer.setport 10001");
 				ConsoleInputEvent(szBuf);
-				sprintf_s(szBuf, "peer.addpeer 127.0.0.1 10000");
+				sprintf_safe(szBuf, "peer.addpeer 127.0.0.1 10000");
 				ConsoleInputEvent(szBuf);
 
 				MClient::OutputMessage(MZMOM_LOCALREPLY, "Done SetClient2");
@@ -1254,13 +1254,13 @@ bool ZGameClient::OnCommand(MCommand* pCommand)
 					                  "192.168.0.11", "192.168.0.16", "192.168.0.20",
 				                      "192.168.0.25", "192.168.0.30", "192.168.0.32",
 										"192.168.0.200", "192.168.0.15", "192.168.0.17"};
-				sprintf_s(szBuf, "peer.setport 10000");
+				sprintf_safe(szBuf, "peer.setport 10000");
 				ConsoleInputEvent(szBuf);
 
 				for (int i = 0; i < 12; i++)
 				{
 					if (!strcmp(szMyIP, szIPs[i])) continue;
-					sprintf_s(szBuf, "peer.addpeer %s 10000", szIPs[i]);
+					sprintf_safe(szBuf, "peer.addpeer %s 10000", szIPs[i]);
 					ConsoleInputEvent(szBuf);
 				}
 
@@ -1731,7 +1731,7 @@ bool ZGameClient::OnCommand(MCommand* pCommand)
 			{
 				MUID uidSender = pCommand->GetSenderUID();
 				char szLog[128];
-				sprintf_s(szLog, "PEERTEST_PING: from (%d%d)", uidSender.High, uidSender.Low);
+				sprintf_safe(szLog, "PEERTEST_PING: from (%d%d)", uidSender.High, uidSender.Low);
 				ZChatOutput(szLog, ZChat::CMT_SYSTEM);
 			}
 			break;
@@ -2394,7 +2394,7 @@ void ZGameClient::Tick(void)
 				ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
 				MListBox* pWidget = (MListBox*)pResource->FindWidget("StageChattingOutput");
 				char szMsg[256];
-				sprintf_s(szMsg, "    %d", GetCountdown()+1);
+				sprintf_safe(szMsg, "    %d", GetCountdown()+1);
 				pWidget->Add(szMsg);
 			}
 		}*/
@@ -2431,7 +2431,7 @@ void ZGameClient::OnBirdTest()
 		strcat(szList, ", ");
 	}
 
-	sprintf_s(szText, "BirdTest: %d, %s", nCount, szList);
+	sprintf_safe(szText, "BirdTest: %d, %s", nCount, szList);
 	MClient::OutputMessage(MZMOM_LOCALREPLY, szText);
 
 	ZCharacterViewList* pWidget = ZGetCharacterViewList(GUNZ_STAGE);
@@ -2482,7 +2482,7 @@ void ZGameClient::OnResponsePeerRelay(const MUID& uidPeer)
 	if (pPeer) pszName = pPeer->CharInfo.szName;
 
 	char szMsg[128];
-	sprintf_s(szMsg, "%s : from %s", strNotify.c_str(), pszName);
+	sprintf_safe(szMsg, "%s : from %s", strNotify.c_str(), pszName);
 
 
 	ZCharacter* pChar = ZGetCharacterManager()->Find( uidPeer);
@@ -2533,7 +2533,7 @@ void ZGameClient::OnAdminAnnounce(const char* szMsg, const ZAdminAnnounceType nT
 	case ZAAT_CHAT:
 		{
 			char szText[512];
-//			sprintf_s(szText, "%s : %s", "관리자", szMsg);
+//			sprintf_safe(szText, "%s : %s", "관리자", szMsg);
 			ZTransMsg( szText, MSG_ADMIN_ANNOUNCE, 1, szMsg );
 			ZChatOutput(szText, ZChat::CMT_SYSTEM);
 		}
@@ -2735,7 +2735,7 @@ void ZGameClient::OnUserWhisper(char* pszSenderName, char* pszTargetName, char* 
 void ZGameClient::OnChatRoomJoin(char* pszPlayerName, char* pszChatRoomName)
 {
 	char szText[256];
-//	sprintf_s(szText, "채팅방 '%s'에 '%s'님이 입장하셨습니다.", pszChatRoomName, pszPlayerName);
+//	sprintf_safe(szText, "채팅방 '%s'에 '%s'님이 입장하셨습니다.", pszChatRoomName, pszPlayerName);
 	ZTransMsg( szText, MSG_LOBBY_WHO_CHAT_ROMM_JOIN, 2, pszChatRoomName, pszPlayerName );
 	ZChatOutput(szText, ZChat::CMT_NORMAL, ZChat::CL_CURRENT);
 }
@@ -2743,7 +2743,7 @@ void ZGameClient::OnChatRoomJoin(char* pszPlayerName, char* pszChatRoomName)
 void ZGameClient::OnChatRoomLeave(char* pszPlayerName, char* pszChatRoomName)
 {
 	char szText[256];
-//	sprintf_s(szText, "채팅방 '%s'에서 '%s'님이 퇴장하셨습니다.", pszChatRoomName, pszPlayerName);
+//	sprintf_safe(szText, "채팅방 '%s'에서 '%s'님이 퇴장하셨습니다.", pszChatRoomName, pszPlayerName);
 	ZTransMsg( szText, MSG_LOBBY_WHO_CHAT_ROOM_EXIT, 2, pszChatRoomName, pszPlayerName );
 	ZChatOutput(szText, ZChat::CMT_NORMAL, ZChat::CL_CURRENT);
 }
@@ -2751,7 +2751,7 @@ void ZGameClient::OnChatRoomLeave(char* pszPlayerName, char* pszChatRoomName)
 void ZGameClient::OnChatRoomSelectWrite(char* pszChatRoomName)
 {
 	char szText[256];
-// 	sprintf_s(szText, "채팅방 '%s'로 전환합니다.", pszChatRoomName);
+// 	sprintf_safe(szText, "채팅방 '%s'로 전환합니다.", pszChatRoomName);
 	ZTransMsg( szText, MSG_LOBBY_CHAT_ROOM_CHANGE, 1, pszChatRoomName );
 	ZChatOutput(szText, ZChat::CMT_NORMAL, ZChat::CL_CURRENT);
 }
@@ -2759,7 +2759,7 @@ void ZGameClient::OnChatRoomSelectWrite(char* pszChatRoomName)
 void ZGameClient::OnChatRoomInvite(char* pszSenderName, char* pszRoomName)
 {
 	char szLog[256];
-//	sprintf_s(szLog, "'%s' 님이 채팅방 '%s'로 초대하셨습니다.", pszSenderName, pszRoomName);
+//	sprintf_safe(szLog, "'%s' 님이 채팅방 '%s'로 초대하셨습니다.", pszSenderName, pszRoomName);
 	ZTransMsg( szLog, MSG_LOBBY_WHO_INVITATION, 2, pszSenderName, pszRoomName );
 	ZChatOutput(szLog, ZChat::CMT_NORMAL, ZChat::CL_CURRENT);
 
@@ -2769,7 +2769,7 @@ void ZGameClient::OnChatRoomInvite(char* pszSenderName, char* pszRoomName)
 void ZGameClient::OnChatRoomChat(char* pszChatRoomName, char* pszPlayerName, char* pszChat)
 {
 	char szText[256];
-//	sprintf_s(szText, "채팅방(%s) %s : %s", pszChatRoomName, pszPlayerName, pszChat);
+//	sprintf_safe(szText, "채팅방(%s) %s : %s", pszChatRoomName, pszPlayerName, pszChat);
 	ZTransMsg( szText, MRESULT_CHAT_ROOM, 3, pszChatRoomName, pszPlayerName, pszChat );
 	ZChatOutput(MCOLOR(ZCOLOR_CHAT_ROOMCHAT), szText, ZChat::CL_CURRENT);
 }
@@ -2918,7 +2918,7 @@ void blog(const char *pFormat,...)
 
 	va_list args;
 	va_start(args,pFormat);
-	vsprintf_s(szBuf, pFormat, args);
+	vsprintf_safe(szBuf, pFormat, args);
 	va_end(args);
 
 	strcat(szBuf, "\n");
@@ -2963,7 +2963,7 @@ void ZGameClient::OnResponseCharInfoDetail(void* pBlob)
 	if ( strcmp( pCharInfoDetail->szClanName, "") == 0)
 		strcpy_safe( sztemp, "---");
 	else
-		sprintf_s( sztemp, "%s(%s)", pCharInfoDetail->szClanName, ZGetClanGradeStr(pCharInfoDetail->nClanGrade));
+		sprintf_safe( sztemp, "%s(%s)", pCharInfoDetail->szClanName, ZGetClanGradeStr(pCharInfoDetail->nClanGrade));
 	blog("^9%s : %s", ZMsg( MSG_CHARINFO_CLAN), sztemp);
 	blog("^9%s : %d %s", ZMsg( MSG_CHARINFO_LEVEL), pCharInfoDetail->nLevel, ZMsg(MSG_CHARINFO_LEVELMARKER));
 	int nWinPercent = (int)( (float)pCharInfoDetail->nKillCount / (float)(pCharInfoDetail->nKillCount + pCharInfoDetail->nDeathCount) * 100.0f);
@@ -3012,7 +3012,7 @@ void ZGameClient::OnNotifyCallVote(const char* pszDiscuss, const char* pszArg)
 		ZChatOutput(szText, ZChat::CMT_SYSTEM, ZChat::CL_CURRENT);
 	}
 	else if ( _stricmp(pszDiscuss, "kick") == 0 ) {
-		sprintf_s( m_szVoteText, ZMsg(MSG_VOTE_KICK), pszArg );
+		sprintf_safe( m_szVoteText, ZMsg(MSG_VOTE_KICK), pszArg );
 		ZChatOutput(szText, ZChat::CMT_SYSTEM, ZChat::CL_CURRENT);
 	}
 }
@@ -3091,8 +3091,8 @@ void ZGameClient::RequestEmblemURL(unsigned int nCLID)
 void ZGameClient::OnClanResponseEmblemURL(unsigned int nCLID, unsigned int nEmblemChecksum, const char* szEmblemURL)
 {
 	char szFullURL[2048]="";
-	//sprintf_s(szFullURL, "http://cwfile.netmarble.com%s", szEmblemURL);
-	sprintf_s(szFullURL, "%s%s", Z_LOCALE_EMBLEM_URL, szEmblemURL);
+	//sprintf_safe(szFullURL, "http://cwfile.netmarble.com%s", szEmblemURL);
+	sprintf_safe(szFullURL, "%s%s", Z_LOCALE_EMBLEM_URL, szEmblemURL);
 
 	m_EmblemMgr.ProcessEmblem(nCLID, szFullURL, nEmblemChecksum);
 }
@@ -3116,7 +3116,7 @@ void ZGameClient::OnExpiredRentItem(void* pBlob)
 	int nBlobSize = MGetBlobArrayCount(pBlob);
 
 	char szText[1024];
-	sprintf_s(szText, "%s", ZMsg( MSG_EXPIRED));
+	sprintf_safe(szText, "%s", ZMsg( MSG_EXPIRED));
 
 	for(int i=0; i < nBlobSize; i++)
 	{
@@ -3127,7 +3127,7 @@ void ZGameClient::OnExpiredRentItem(void* pBlob)
 		MMatchItemDesc* pItemDesc = MGetMatchItemDescMgr()->GetItemDesc(*pExpiredItemID);
 		if (pItemDesc)
 		{
-			sprintf_s(szItemText, "[%d] %s\n", i+1, pItemDesc->m_szName);
+			sprintf_safe(szItemText, "[%d] %s\n", i+1, pItemDesc->m_szName);
 			if ((strlen(szText) + strlen(szItemText)) <= 1022) strcat(szText, szItemText);
 		}
 	}
@@ -3180,8 +3180,8 @@ void ZGameClient::OnBroadcastDuelRenewVictories(const char* pszChampionName, con
 	char szText[256];
 	char szVic[32], szRoomno[32];
 
-	sprintf_s(szVic, "%d", nVictories);
-	sprintf_s(szRoomno, "%d", nRoomno);
+	sprintf_safe(szVic, "%d", nVictories);
+	sprintf_safe(szRoomno, "%d", nRoomno);
 
 	ZTransMsg(szText, MSG_DUEL_BROADCAST_RENEW_VICTORIES, 4, pszChampionName, pszChannelName, szRoomno, szVic);
 
@@ -3192,7 +3192,7 @@ void ZGameClient::OnBroadcastDuelInterruptVictories(const char* pszChampionName,
 {
 	char szText[256];
 	char szVic[32];
-	sprintf_s(szVic, "%d", nVictories);
+	sprintf_safe(szVic, "%d", nVictories);
 	ZTransMsg(szText, MSG_DUEL_BROADCAST_INTERRUPT_VICTORIES, 3, pszChampionName, pszInterrupterName, szVic);
 
 	ZChatOutput(szText, ZChat::CMT_BROADCAST);

@@ -248,7 +248,7 @@ bool MChattingFilter::FindInvalidChar( const string& strText)
 
 			if ( ch1 == ch2)
 			{
-				sprintf_s( m_szLastFilterdStr, "%c", ch1);
+				sprintf_safe( m_szLastFilterdStr, "%c", ch1);
 
 				return true;
 			}

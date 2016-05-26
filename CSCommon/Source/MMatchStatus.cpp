@@ -50,19 +50,19 @@ void MMatchStatus::SaveToLogFile()
 	char szTemp[1024];
 
 	// 경과시간
-	sprintf_s(szBuf, "============================\n경과시간 = %d초\n", (timeGetTime() - m_nStartTime) / 1000);
+	sprintf_safe(szBuf, "============================\n경과시간 = %d초\n", (timeGetTime() - m_nStartTime) / 1000);
 	mlog(szBuf);
 
 	// 접속자수
-	sprintf_s(szBuf, "접속자수 = %d\n", (int)MMatchServer::GetInstance()->GetObjects()->size());
+	sprintf_safe(szBuf, "접속자수 = %d\n", (int)MMatchServer::GetInstance()->GetObjects()->size());
 	mlog(szBuf);
 
 	// 방개수
-	sprintf_s(szBuf, "방개수 = %d\n", (int)MMatchServer::GetInstance()->GetStageMap()->size());
+	sprintf_safe(szBuf, "방개수 = %d\n", (int)MMatchServer::GetInstance()->GetStageMap()->size());
 	mlog(szBuf);
 
 	// 총 처리 큐 개수, 현재틱의 큐 개수
-	sprintf_s(szBuf, "총처리된 커맨드 = %u , 현재틱 커맨드 = %u\n", 
+	sprintf_safe(szBuf, "총처리된 커맨드 = %u , 현재틱 커맨드 = %u\n", 
 		m_nTotalCommandQueueCount, m_nTickCommandQueueCount);
 	mlog(szBuf);
 
@@ -76,7 +76,7 @@ void MMatchStatus::SaveToLogFile()
 		{
 			int nAvg = m_nCmdCount[i][1] / m_nCmdCount[i][0];
 
-			sprintf_s(szTemp, "%5d : %4u, 평균처리시간: %u(ms), 마지막처리시간: %u(ms)\n", i, m_nCmdCount[i][0], nAvg,
+			sprintf_safe(szTemp, "%5d : %4u, 평균처리시간: %u(ms), 마지막처리시간: %u(ms)\n", i, m_nCmdCount[i][0], nAvg,
 				m_nCmdCount[i][2]);
 			strcat_safe(szBuf, szTemp);
 		}
@@ -92,7 +92,7 @@ void MMatchStatus::SaveToLogFile()
 		{
 			int nAvg = m_nDBQueryCount[i][1] / m_nDBQueryCount[i][0];
 
-			sprintf_s(szTemp, "%5d : %4u, 평균처리시간: %u(ms), 마지막처리시간: %u(ms)\n", i, m_nDBQueryCount[i][0], nAvg,
+			sprintf_safe(szTemp, "%5d : %4u, 평균처리시간: %u(ms), 마지막처리시간: %u(ms)\n", i, m_nDBQueryCount[i][0], nAvg,
 				m_nDBQueryCount[i][2]);
 			strcat_safe(szBuf, szTemp);
 		}

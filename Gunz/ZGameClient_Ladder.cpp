@@ -131,7 +131,7 @@ void ZGameClient::OnAskAgreement(const MUID& uidProposer, void* pMemberNamesBlob
 	if ((IsWaitingRepliersAgreement()) || (!ZGetGameInterface()->IsReadyToPropose()))
 	{
 		char szCharName[MATCHOBJECT_NAME_LENGTH];
-		sprintf_s(szCharName, ZGetMyInfo()->GetCharName());
+		sprintf_safe(szCharName, ZGetMyInfo()->GetCharName());
 		ZPostReplyAgreement(uidProposer, GetPlayerUID(), szCharName, nProposalMode, nRequestID, false);
 
 		return;
@@ -323,7 +323,7 @@ void ZGameClient::RequestProposal(const MMatchProposalMode nProposalMode, char**
 void ZGameClient::ReplyAgreement(const MUID& uidProposer, const MMatchProposalMode nProposalMode, bool bAgreement)
 {
 	char szCharName[MATCHOBJECT_NAME_LENGTH];
-	sprintf_s(szCharName, ZGetMyInfo()->GetCharName());
+	sprintf_safe(szCharName, ZGetMyInfo()->GetCharName());
 	ZPostReplyAgreement(uidProposer, GetPlayerUID(), szCharName, nProposalMode, m_nRequestID, bAgreement);
 }
 

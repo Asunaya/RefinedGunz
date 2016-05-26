@@ -402,7 +402,7 @@ void ZCombatInterface::DrawNPCName(MDrawContext* pDC)
 				int y= screen_pos.y;
 				y+=pFont->GetHeight();
 				char temp[256];
-				sprintf_s(temp,"%2.2f",fElapsedTime);
+				sprintf_safe(temp,"%2.2f",fElapsedTime);
 				x = screen_pos.x - pDC->GetFont()->GetWidth(temp) / 2;
 				pDC->Text(x, y - 12, temp);
 			}
@@ -546,7 +546,7 @@ void ZCombatInterface::OnDraw(MDrawContext* pDC)
 
 			char buffer[256];
 
-			sprintf_s(buffer,"%d  %s", pCharacter->GetProperty()->nLevel, pCharacter->GetProperty()->szName);
+			sprintf_safe(buffer,"%d  %s", pCharacter->GetProperty()->nLevel, pCharacter->GetProperty()->szName);
 
 			if ( (ZApplication::GetGame()->GetMatch()->GetMatchType() != MMATCH_GAMETYPE_DUEL) || ( !pCharacter->IsObserverTarget()))
 			{
@@ -559,13 +559,13 @@ void ZCombatInterface::OnDraw(MDrawContext* pDC)
 			// melee일때는 탄알수 표시를 하지 않는다.
 			if (pCharacter->GetItems()->GetSelectedWeaponParts() != MMCIP_MELEE) 
 			{
-				sprintf_s(buffer, "%d / %d", m_nBulletAMagazine, m_nBullet);
+				sprintf_safe(buffer, "%d / %d", m_nBulletAMagazine, m_nBullet);
 				TextRelative(pDC,720.f/800.f,585.f/600.f,buffer);
 			}
 
-			sprintf_s(buffer, "%d", pCharacter->GetHP());
+			sprintf_safe(buffer, "%d", pCharacter->GetHP());
 			TextRelative(pDC, 160.f / 1920, 44.f / 1080, buffer);
-			sprintf_s(buffer, "%d", pCharacter->GetAP());
+			sprintf_safe(buffer, "%d", pCharacter->GetAP());
 			TextRelative(pDC, 160.f / 1920, 92.f / 1080, buffer);
 		}
 
@@ -603,7 +603,7 @@ void ZCombatInterface::OnDraw(MDrawContext* pDC)
 						}
 						else
 						{
-							sprintf_s( charName[ 0], "%s%d  %s", ZMsg( MSG_CHARINFO_LEVELMARKER), pCharacter->GetProperty()->nLevel, pCharacter->GetUserName());
+							sprintf_safe( charName[ 0], "%s%d  %s", ZMsg( MSG_CHARINFO_LEVELMARKER), pCharacter->GetProperty()->nLevel, pCharacter->GetUserName());
 
 							if ( (ZGetMyUID() == pDuel->QInfo.m_uidChampion) || (ZGetMyUID() == pDuel->QInfo.m_uidChallenger))
 							{
@@ -618,18 +618,18 @@ void ZCombatInterface::OnDraw(MDrawContext* pDC)
 					else if ( pCharacter->GetUID() == pDuel->QInfo.m_uidChallenger)
 					{
 						if ( ZGetMyUID() != pDuel->QInfo.m_uidChallenger)
-							sprintf_s( charName[ 0], "%s%d  %s", ZMsg( MSG_CHARINFO_LEVELMARKER), pCharacter->GetProperty()->nLevel, pCharacter->GetUserName());
+							sprintf_safe( charName[ 0], "%s%d  %s", ZMsg( MSG_CHARINFO_LEVELMARKER), pCharacter->GetProperty()->nLevel, pCharacter->GetUserName());
 
 						bIsChallengerDie = pCharacter->IsDie();
 					}
 
 					// Waiting 1
 					else if (pCharacter->GetUID() == pDuel->QInfo.m_WaitQueue[0])
-						sprintf_s( charName[ 1], "%s%d  %s", ZMsg( MSG_CHARINFO_LEVELMARKER), pCharacter->GetProperty()->nLevel, pCharacter->GetUserName());
+						sprintf_safe( charName[ 1], "%s%d  %s", ZMsg( MSG_CHARINFO_LEVELMARKER), pCharacter->GetProperty()->nLevel, pCharacter->GetUserName());
 
 					// Waiting 2
 					else if (pCharacter->GetUID() == pDuel->QInfo.m_WaitQueue[1])
-						sprintf_s( charName[ 2], "%s%d  %s", ZMsg( MSG_CHARINFO_LEVELMARKER), pCharacter->GetProperty()->nLevel, pCharacter->GetUserName());
+						sprintf_safe( charName[ 2], "%s%d  %s", ZMsg( MSG_CHARINFO_LEVELMARKER), pCharacter->GetProperty()->nLevel, pCharacter->GetUserName());
 				}
 			}
 
@@ -876,7 +876,7 @@ int ZCombatInterface::DrawVictory( MDrawContext* pDC, int x, int y, int nWinCoun
 		pDC->SetFont( pFont);
 		pDC->SetColor( MCOLOR(0xFFFFFFFF));
 		char szVictory[ 16];
-		sprintf_s( szVictory, "%d", nWinCount);
+		sprintf_safe( szVictory, "%d", nWinCount);
 		TextRelative( pDC, 0.195f, 0.01f, szVictory, true);
 	}
 */
@@ -942,7 +942,7 @@ void ZCombatInterface::OnDrawCustom(MDrawContext* pDC)
 		if ( pLabel)
 		{
 			char szRemaindTime[ 100];
-			sprintf_s( szRemaindTime, "%d", ( m_nReservedOutTime - timeGetTime()) / 1000);
+			sprintf_safe( szRemaindTime, "%d", ( m_nReservedOutTime - timeGetTime()) / 1000);
 			char szText[ 100];
 			ZTransMsg( szText, MSG_GAME_EXIT_N_MIN_AFTER, 1, szRemaindTime);
 
@@ -985,15 +985,15 @@ void ZCombatInterface::DrawSoloSpawnTimeMessage(MDrawContext* pDC)
 				int nRemainTime = pMatch->GetRemainedSpawnTime();
 				if ((nRemainTime > 0) && (nRemainTime <= 5))
 				{
-//					sprintf_s(szMsg, "%d 초동안 기다려주세요!", nRemainTime);
+//					sprintf_safe(szMsg, "%d 초동안 기다려주세요!", nRemainTime);
 					char temp[ 4 ];
-					sprintf_s( temp, "%d", nRemainTime );
+					sprintf_safe( temp, "%d", nRemainTime );
 					ZTransMsg( szMsg, MSG_GAME_WAIT_N_MIN, 1, temp );
 				}
 				else if ((nRemainTime == 0) && (!g_pGame->GetSpawnRequested()))
 				{
-//					sprintf_s(szMsg, "플레이하려면 Fire키를 눌러주세요!");
-					sprintf_s( szMsg, 
+//					sprintf_safe(szMsg, "플레이하려면 Fire키를 눌러주세요!");
+					sprintf_safe( szMsg, 
 						ZMsg(MSG_GAME_CLICK_FIRE) );
 				}
 
@@ -1009,10 +1009,10 @@ void ZCombatInterface::DrawSoloSpawnTimeMessage(MDrawContext* pDC)
 void ZCombatInterface::DrawLeaveBattleTimeMessage(MDrawContext* pDC)
 {
 	char szMsg[128] = "";
-//	sprintf_s(szMsg, "%d 초후에 게임에서 나갑니다", m_nDrawLeaveBattleSeconds);
+//	sprintf_safe(szMsg, "%d 초후에 게임에서 나갑니다", m_nDrawLeaveBattleSeconds);
 
 	char temp[ 4 ];
-	sprintf_s( temp, "%d", m_nDrawLeaveBattleSeconds );
+	sprintf_safe( temp, "%d", m_nDrawLeaveBattleSeconds );
 	ZTransMsg( szMsg, MSG_GAME_EXIT_N_MIN_AFTER, 1, temp );
 
 	MFont *pFont=GetGameFont();
@@ -1092,7 +1092,7 @@ void ZCombatInterface::ShowInfo(bool bVisible)
 	char szTemp[256];
 	for (int i = 0; i < 9; i++)
 	{
-		sprintf_s(szTemp, "%s%d", ZIITEM_COMBAT_INFO, i);
+		sprintf_safe(szTemp, "%s%d", ZIITEM_COMBAT_INFO, i);
 		pWidget = m_pIDLResource->FindWidget(szTemp);
 		if (pWidget!=NULL)
 		{
@@ -1252,7 +1252,7 @@ void ZCombatInterface::SetPickTarget(bool bPick, ZCharacter* pCharacter)
 			
 			strcpy_safe(m_szTargetName, pCharacter->GetUserName());
 #ifdef _DEBUG
-			sprintf_s(m_szTargetName, "%s : %d", pCharacter->GetUserName(), pCharacter->GetHP());
+			sprintf_safe(m_szTargetName, "%s : %d", pCharacter->GetUserName(), pCharacter->GetHP());
 #endif
 			m_pTargetLabel->SetText(m_szTargetName);
 		}
@@ -1276,7 +1276,7 @@ void ZCombatInterface::SetPickTarget(bool bPick, ZCharacter* pCharacter)
 void ZCombatInterface::SetItemImageIndex(int nIndex)
 {
 	char szTemp[256];
-	sprintf_s(szTemp, "item%02d.png", nIndex);
+	sprintf_safe(szTemp, "item%02d.png", nIndex);
 	BEGIN_WIDGETLIST("CombatItemPic", ZApplication::GetGameInterface()->GetIDLResource(),
 		MPicture*, pPicture);
 
@@ -1290,7 +1290,7 @@ void ZCombatInterface::SetMagazine(int nMagazine)
 	if (m_nMagazine == nMagazine) return;
 
 	char szTemp[256];
-	sprintf_s(szTemp, "%02d", nMagazine);
+	sprintf_safe(szTemp, "%02d", nMagazine);
 	BEGIN_WIDGETLIST("CombatMagazine", ZApplication::GetGameInterface()->GetIDLResource(),
 		MWidget*, pWidget);
 
@@ -1559,14 +1559,14 @@ void ZCombatInterface::DrawScoreBoard(MDrawContext* pDC)
 		}
 
 		char nvsn[32];
-		sprintf_s(nvsn,"%d:%d",nRed,nBlue);
+		sprintf_safe(nvsn,"%d:%d",nRed,nBlue);
 		ZTransMsg( szText, MSG_GAME_SCORESCREEN_STAGENAME, 3, nvsn, m_szRedClanName, m_szBlueClanName );
 		
 	}
 	else
 	{
 		// 클랜전이 아니면 방제를 표시한다
-		sprintf_s(szText, "(%03d) %s", ZGetGameClient()->GetStageNumber(), ZGetGameClient()->GetStageName());
+		sprintf_safe(szText, "(%03d) %s", ZGetGameClient()->GetStageNumber(), ZGetGameClient()->GetStageName());
 	}
 	TextRelative(pDC,0.26f,0.22f,szText);
 
@@ -1580,24 +1580,24 @@ void ZCombatInterface::DrawScoreBoard(MDrawContext* pDC)
 	{
 		if ( bClanGame)
 		{
-			sprintf_s(szText, "%d (%s)  VS  %d (%s)", 
+			sprintf_safe(szText, "%d (%s)  VS  %d (%s)", 
 				g_pGame->GetMatch()->GetTeamScore(MMT_RED), m_szRedClanName,
 				g_pGame->GetMatch()->GetTeamScore(MMT_BLUE), m_szBlueClanName);
 		}
 		else
 		{
 			if (ZApplication::GetGame()->GetMatch()->GetMatchType() == MMATCH_GAMETYPE_DEATHMATCH_TEAM2) // 팀전일때 무한데스매치만 예외가 많이 발생합니다 =_=;
-				sprintf_s(szText, "%s : %d(Red) vs %d(Blue)",  ZGetGameTypeManager()->GetGameTypeStr(g_pGame->GetMatch()->GetMatchType()),
+				sprintf_safe(szText, "%s : %d(Red) vs %d(Blue)",  ZGetGameTypeManager()->GetGameTypeStr(g_pGame->GetMatch()->GetMatchType()),
 															g_pGame->GetMatch()->GetTeamKills(MMT_RED), 
 															g_pGame->GetMatch()->GetTeamKills(MMT_BLUE));
 			else
-				sprintf_s(szText, "%s : %d(Red) vs %d(Blue)",  ZGetGameTypeManager()->GetGameTypeStr(g_pGame->GetMatch()->GetMatchType()),
+				sprintf_safe(szText, "%s : %d(Red) vs %d(Blue)",  ZGetGameTypeManager()->GetGameTypeStr(g_pGame->GetMatch()->GetMatchType()),
 															g_pGame->GetMatch()->GetTeamScore(MMT_RED), 
 															g_pGame->GetMatch()->GetTeamScore(MMT_BLUE));
 		}
 	}
 	else
-		sprintf_s(szText, "%s", ZGetGameTypeManager()->GetGameTypeStr(g_pGame->GetMatch()->GetMatchType()));
+		sprintf_safe(szText, "%s", ZGetGameTypeManager()->GetGameTypeStr(g_pGame->GetMatch()->GetMatchType()));
 	TextRelative(pDC,x,y,szText);
 	y-=linespace2;
 
@@ -1626,7 +1626,7 @@ void ZCombatInterface::DrawScoreBoard(MDrawContext* pDC)
 	// 보상 아이템
 	if ( ZGetGameTypeManager()->IsQuestOnly( g_pGame->GetMatch()->GetMatchType()))		// 퀘스트 모드일경우
 	{
-		sprintf_s( szText, "%s : %d", ZMsg( MSG_WORD_GETITEMQTY), ZGetQuest()->GetGameInfo()->GetNumOfObtainQuestItem());
+		sprintf_safe( szText, "%s : %d", ZMsg( MSG_WORD_GETITEMQTY), ZGetQuest()->GetGameInfo()->GetNumOfObtainQuestItem());
 		TextRelative( pDC, x, y, szText);
 		y -= linespace2;
 	}
@@ -1634,7 +1634,7 @@ void ZCombatInterface::DrawScoreBoard(MDrawContext* pDC)
 	// NPC 수
 	if ( ZGetGameTypeManager()->IsQuestDerived( g_pGame->GetMatch()->GetMatchType())) 	// 서바이벌, 퀘스트 모드일 경우
 	{
-		sprintf_s( szText, "%s : %d", ZMsg( MSG_WORD_REMAINNPC), ZGetQuest()->GetGameInfo()->GetNPCCount() - ZGetQuest()->GetGameInfo()->GetNPCKilled());
+		sprintf_safe( szText, "%s : %d", ZMsg( MSG_WORD_REMAINNPC), ZGetQuest()->GetGameInfo()->GetNPCCount() - ZGetQuest()->GetGameInfo()->GetNPCKilled());
 		TextRelative( pDC, x, y, szText);
 		y -= linespace2;
 	}
@@ -1652,22 +1652,22 @@ void ZCombatInterface::DrawScoreBoard(MDrawContext* pDC)
 				if ( dwTime <= dwLimitTime)
 				{
 					dwTime = (dwLimitTime - dwTime) / 1000;
-					sprintf_s( szText, "%s : %d:%02d", ZMsg( MSG_WORD_REMAINTIME), (dwTime / 60), (dwTime % 60));
+					sprintf_safe( szText, "%s : %d:%02d", ZMsg( MSG_WORD_REMAINTIME), (dwTime / 60), (dwTime % 60));
 				}
 				else
-					sprintf_s( szText, "%s :", ZMsg( MSG_WORD_REMAINTIME));
+					sprintf_safe( szText, "%s :", ZMsg( MSG_WORD_REMAINTIME));
 			}
 			else
-				sprintf_s( szText, "%s : ---", ZMsg( MSG_WORD_REMAINTIME));
+				sprintf_safe( szText, "%s : ---", ZMsg( MSG_WORD_REMAINTIME));
 		}
 		else
-			sprintf_s( szText, "%s : ---", ZMsg( MSG_WORD_REMAINTIME));
+			sprintf_safe( szText, "%s : ---", ZMsg( MSG_WORD_REMAINTIME));
 
 		TextRelative( pDC, x, y, szText);
 		y -= linespace2;
 
 		
-		sprintf_s( szText, "%s : %d", ZMsg( MSG_WORD_ENDKILL), g_pGame->GetMatch()->GetRoundCount());
+		sprintf_safe( szText, "%s : %d", ZMsg( MSG_WORD_ENDKILL), g_pGame->GetMatch()->GetRoundCount());
 	}
 
 	// 라운드를 기다려야 하는 종류라면 라운드 표시 아니면 시간 표시
@@ -1683,24 +1683,24 @@ void ZCombatInterface::DrawScoreBoard(MDrawContext* pDC)
 				if ( dwTime <= dwLimitTime)
 				{
 					dwTime = (dwLimitTime - dwTime) / 1000;
-					sprintf_s( szText, "%s : %d:%02d", ZMsg( MSG_WORD_REMAINTIME), (dwTime / 60), (dwTime % 60));
+					sprintf_safe( szText, "%s : %d:%02d", ZMsg( MSG_WORD_REMAINTIME), (dwTime / 60), (dwTime % 60));
 				}
 				else
-					sprintf_s( szText, "%s :", ZMsg( MSG_WORD_REMAINTIME));
+					sprintf_safe( szText, "%s :", ZMsg( MSG_WORD_REMAINTIME));
 			}
 			else
-				sprintf_s( szText, "%s : ---", ZMsg( MSG_WORD_REMAINTIME));
+				sprintf_safe( szText, "%s : ---", ZMsg( MSG_WORD_REMAINTIME));
 		}
 		else
-			sprintf_s( szText, "%s : ---", ZMsg( MSG_WORD_REMAINTIME)); 
+			sprintf_safe( szText, "%s : ---", ZMsg( MSG_WORD_REMAINTIME)); 
 
 		TextRelative( pDC, x, y, szText);
 		y -= linespace2;
 
-		sprintf_s( szText, "%s : %d / %d %s", ZMsg( MSG_WORD_RPROGRESS), g_pGame->GetMatch()->GetCurrRound() + 1, g_pGame->GetMatch()->GetRoundCount(), ZMsg( MSG_WORD_ROUND));
+		sprintf_safe( szText, "%s : %d / %d %s", ZMsg( MSG_WORD_RPROGRESS), g_pGame->GetMatch()->GetCurrRound() + 1, g_pGame->GetMatch()->GetRoundCount(), ZMsg( MSG_WORD_ROUND));
 	}
 	else if ( ZGetGameTypeManager()->IsQuestDerived(g_pGame->GetMatch()->GetMatchType())) 	// 서바이벌, 퀘스트 모드일 경우
-		sprintf_s( szText, "%s : %d / %d", ZMsg( MSG_WORD_RPROGRESS), ZGetQuest()->GetGameInfo()->GetCurrSectorIndex() + 1, ZGetQuest()->GetGameInfo()->GetMapSectorCount());
+		sprintf_safe( szText, "%s : %d / %d", ZMsg( MSG_WORD_RPROGRESS), ZGetQuest()->GetGameInfo()->GetCurrSectorIndex() + 1, ZGetQuest()->GetGameInfo()->GetMapSectorCount());
 	// 남은 시간 표시( 클랜전 제외)
 	else if ( !bClanGame)
 	{
@@ -1714,21 +1714,21 @@ void ZCombatInterface::DrawScoreBoard(MDrawContext* pDC)
 				if ( dwTime <= dwLimitTime)
 				{
 					dwTime = (dwLimitTime - dwTime) / 1000;
-					sprintf_s( szText, "%s : %d:%02d", ZMsg( MSG_WORD_REMAINTIME), (dwTime / 60), (dwTime % 60));
+					sprintf_safe( szText, "%s : %d:%02d", ZMsg( MSG_WORD_REMAINTIME), (dwTime / 60), (dwTime % 60));
 				}
 				else
-					sprintf_s( szText, "%s :", ZMsg( MSG_WORD_REMAINTIME));
+					sprintf_safe( szText, "%s :", ZMsg( MSG_WORD_REMAINTIME));
 			}
 			else
-				sprintf_s( szText, "%s : ---", ZMsg( MSG_WORD_REMAINTIME));
+				sprintf_safe( szText, "%s : ---", ZMsg( MSG_WORD_REMAINTIME));
 		}
 		else
-			sprintf_s( szText, "%s : ---", ZMsg( MSG_WORD_REMAINTIME));
+			sprintf_safe( szText, "%s : ---", ZMsg( MSG_WORD_REMAINTIME));
 
 		TextRelative( pDC, x, y, szText);
 		y -= linespace2;
 		
-		sprintf_s( szText, "%s : %d", ZMsg( MSG_WORD_ENDKILL), g_pGame->GetMatch()->GetRoundCount());
+		sprintf_safe( szText, "%s : %d", ZMsg( MSG_WORD_ENDKILL), g_pGame->GetMatch()->GetRoundCount());
 
 	}
 	TextRelative( pDC, x, y, szText);
@@ -1750,14 +1750,14 @@ void ZCombatInterface::DrawScoreBoard(MDrawContext* pDC)
 	char szBuff[ 25];
 	pDC->SetColor(MCOLOR(TEXT_COLOR_TITLE));
 	x = ITEM_XPOS[0];	// level, 이름
-	sprintf_s( szBuff, "%s   %s", ZMsg(MSG_CHARINFO_LEVEL), ZMsg(MSG_CHARINFO_NAME));
+	sprintf_safe( szBuff, "%s   %s", ZMsg(MSG_CHARINFO_LEVEL), ZMsg(MSG_CHARINFO_NAME));
 	TextRelative(pDC,x,y, szBuff);
 	x = ITEM_XPOS[1] + .02f;;	// Clan
 	TextRelative(pDC,x,y, ZMsg(MSG_CHARINFO_CLAN));
 	if ( ZGetGameTypeManager()->IsQuestDerived( g_pGame->GetMatch()->GetMatchType()))
 	{
 		x = ITEM_XPOS[2];	// HP/AP
-		sprintf_s( szBuff, "%s/%s", ZMsg(MSG_CHARINFO_HP), ZMsg(MSG_CHARINFO_AP));
+		sprintf_safe( szBuff, "%s/%s", ZMsg(MSG_CHARINFO_HP), ZMsg(MSG_CHARINFO_AP));
 		TextRelative(pDC,x,y, szBuff);
 	}
 	else
@@ -1820,7 +1820,7 @@ void ZCombatInterface::DrawScoreBoard(MDrawContext* pDC)
 			TextRelative(pDC,clanx,clany ,szClanName);
 
 			// 점수 출력. 가운데 정렬
-			sprintf_s(szText,"%d",g_pGame->GetMatch()->GetTeamScore(nTeam));
+			sprintf_safe(szText,"%d",g_pGame->GetMatch()->GetTeamScore(nTeam));
 			clanx = clancenter - .5f*((float)pClanFont->GetWidth(szText)/(float)MGetWorkspaceWidth());
 			clany+=1.f*linespace;
 			TextRelative(pDC,clanx,clany,szText);
@@ -1842,7 +1842,7 @@ void ZCombatInterface::DrawScoreBoard(MDrawContext* pDC)
 
 		ZScoreBoardItem *pItem=new ZScoreBoardItem;
 
-		sprintf_s(pItem->szName, "%d%s %s", pCharacter->GetProperty()->nLevel, ZMsg(MSG_CHARINFO_LEVELMARKER), pCharacter->GetUserName());
+		sprintf_safe(pItem->szName, "%d%s %s", pCharacter->GetProperty()->nLevel, ZMsg(MSG_CHARINFO_LEVELMARKER), pCharacter->GetUserName());
 
 		if(pCharacter->IsAdmin())
 			pItem->SetColor(ZCOLOR_ADMIN_NAME);
@@ -2043,7 +2043,7 @@ void ZCombatInterface::DrawScoreBoard(MDrawContext* pDC)
 				MCOLOR tmpColor = pDC->GetColor();
 
 				x=ITEM_XPOS[2];
-//				sprintf_s(szText,"%d/%d", pQuestPlayerInfo->GetHP(), pQuestPlayerInfo->GetAP());
+//				sprintf_safe(szText,"%d/%d", pQuestPlayerInfo->GetHP(), pQuestPlayerInfo->GetAP());
 //				TextRelative(pDC,x,texty,szText);
 				pDC->SetColor( MCOLOR( 0x40FF0000));
 				pDC->FillRectangle( (x*MGetWorkspaceWidth()), texty*MGetWorkspaceHeight()+1, 0.08*MGetWorkspaceWidth(), 7);
@@ -2064,14 +2064,14 @@ void ZCombatInterface::DrawScoreBoard(MDrawContext* pDC)
 				ZModule_QuestStatus* pMod = (ZModule_QuestStatus*)pQuestPlayerInfo->GetModule(ZMID_QUESTSTATUS);
 				if (pMod)
 					nKills = pMod->GetKills();
-				sprintf_s(szText,"%d", nKills);
+				sprintf_safe(szText,"%d", nKills);
 				TextRelative(pDC,x,texty,szText,true);
 			}
 		}
 		else
 		{
 			x=ITEM_XPOS[2];
-			sprintf_s(szText,"%d",pItem->nExp);
+			sprintf_safe(szText,"%d",pItem->nExp);
 			TextRelative(pDC,x,texty,szText,true);
 
 			MCOLOR color = pDC->GetColor();
@@ -2085,18 +2085,18 @@ void ZCombatInterface::DrawScoreBoard(MDrawContext* pDC)
 			}
 
 			x=ITEM_XPOS[3];
-			sprintf_s(szText,"%d",pItem->nKills);
+			sprintf_safe(szText,"%d",pItem->nKills);
 			TextRelative(pDC,x,texty,szText,true);
 
 			pDC->SetColor( color);
 		}
 
 		x=ITEM_XPOS[4];
-		sprintf_s(szText,"%d",pItem->nDeaths);
+		sprintf_safe(szText,"%d",pItem->nDeaths);
 		TextRelative(pDC,x,texty,szText,true);
 
 		x=ITEM_XPOS[5];
-		sprintf_s(szText,"%d",pItem->nPing);
+		sprintf_safe(szText,"%d",pItem->nPing);
 		TextRelative(pDC,x,texty,szText,true);
 
 //		y+=linespace;
@@ -2153,17 +2153,17 @@ void AddCombatResultInfo( const char* szName, int nScore, int nKill, int nDeath,
 	for ( int i = 0;  i < 16;  i++)
 	{
 		char szWidget[ 128];
-		sprintf_s( szWidget, "CombatResult_PlayerScore%d", i);
+		sprintf_safe( szWidget, "CombatResult_PlayerScore%d", i);
 		MLabel* pLabel = (MLabel*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( szWidget);
 		if ( pLabel)
 		{
 			if ( strcmp( pLabel->GetText(), "") == 0)
 			{
-				sprintf_s( szText, "%d", nScore);
+				sprintf_safe( szText, "%d", nScore);
 				pLabel->SetText( szText);
 				pLabel->SetAlignment( MAM_RIGHT);
 
-				sprintf_s( szWidget, "CombatResult_GameRoomImg%02d", i);
+				sprintf_safe( szWidget, "CombatResult_GameRoomImg%02d", i);
 				MWidget* pWidget = ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( szWidget);
 				if ( pWidget)
 					pWidget->Show( bGameRoomUser);
@@ -2176,14 +2176,14 @@ void AddCombatResultInfo( const char* szName, int nScore, int nKill, int nDeath,
 	pWidget = (MTextArea*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "CombatResult_PlayerKillList");
 	if ( pWidget)
 	{
-		sprintf_s( szText, "%d", nKill);
+		sprintf_safe( szText, "%d", nKill);
 		pWidget->AddText( szText, MCOLOR( 0xFFFFF794));
 	}
 
 	pWidget = (MTextArea*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "CombatResult_PlayerDeathList");
 	if ( pWidget)
 	{
-		sprintf_s( szText, "%d", nDeath);
+		sprintf_safe( szText, "%d", nDeath);
 		pWidget->AddText( szText, MCOLOR( 0xFFFFF794));
 	}
 }
@@ -2200,17 +2200,17 @@ void AddClanResultInfoWin( const char* szName, int nScore, int nKill, int nDeath
 	for ( int i = 0;  i < 4;  i++)
 	{
 		char szWidget[ 128];
-		sprintf_s( szWidget, "ClanResult_PlayerScore1%d", i);
+		sprintf_safe( szWidget, "ClanResult_PlayerScore1%d", i);
 		MLabel* pLabel = (MLabel*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( szWidget);
 		if ( pLabel)
 		{
 			if ( strcmp( pLabel->GetText(), "") == 0)
 			{
-				sprintf_s( szText, "%d", nScore);
+				sprintf_safe( szText, "%d", nScore);
 				pLabel->SetText( szText);
 				pLabel->SetAlignment( MAM_RIGHT);
 
-				sprintf_s( szWidget, "ClanResult_GameRoomImg1%d", i);
+				sprintf_safe( szWidget, "ClanResult_GameRoomImg1%d", i);
 				MWidget* pWidget = ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( szWidget);
 				if ( pWidget)
 					pWidget->Show( bGameRoomUser);
@@ -2223,14 +2223,14 @@ void AddClanResultInfoWin( const char* szName, int nScore, int nKill, int nDeath
 	pWidget = (MTextArea*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "ClanResult_PlayerKillList1");
 	if ( pWidget)
 	{
-		sprintf_s( szText, "%d", nKill);
+		sprintf_safe( szText, "%d", nKill);
 		pWidget->AddText( szText, MCOLOR( 0xFFFFF794));
 	}
 
 	pWidget = (MTextArea*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "ClanResult_PlayerDeathList1");
 	if ( pWidget)
 	{
-		sprintf_s( szText, "%d", nDeath);
+		sprintf_safe( szText, "%d", nDeath);
 		pWidget->AddText( szText, MCOLOR( 0xFFFFF794));
 	}
 }
@@ -2246,17 +2246,17 @@ void AddClanResultInfoLose( const char* szName, int nScore, int nKill, int nDeat
 	for ( int i = 0;  i < 4;  i++)
 	{
 		char szWidget[ 128];
-		sprintf_s( szWidget, "ClanResult_PlayerScore2%d", i);
+		sprintf_safe( szWidget, "ClanResult_PlayerScore2%d", i);
 		MLabel* pLabel = (MLabel*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( szWidget);
 		if ( pLabel)
 		{
 			if ( strcmp( pLabel->GetText(), "") == 0)
 			{
-				sprintf_s( szText, "%d", nScore);
+				sprintf_safe( szText, "%d", nScore);
 				pLabel->SetText( szText);
 				pLabel->SetAlignment( MAM_RIGHT);
 
-				sprintf_s( szWidget, "ClanResult_GameRoomImg2%d", i);
+				sprintf_safe( szWidget, "ClanResult_GameRoomImg2%d", i);
 				MWidget* pWidget = ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( szWidget);
 				if ( pWidget)
 					pWidget->Show( bGameRoomUser);
@@ -2269,14 +2269,14 @@ void AddClanResultInfoLose( const char* szName, int nScore, int nKill, int nDeat
 	pWidget = (MTextArea*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "ClanResult_PlayerKillList2");
 	if ( pWidget)
 	{
-		sprintf_s( szText, "%d", nKill);
+		sprintf_safe( szText, "%d", nKill);
 		pWidget->AddText( szText, MCOLOR( 0xFFFFF794));
 	}
 
 	pWidget = (MTextArea*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "ClanResult_PlayerDeathList2");
 	if ( pWidget)
 	{
-		sprintf_s( szText, "%d", nDeath);
+		sprintf_safe( szText, "%d", nDeath);
 		pWidget->AddText( szText, MCOLOR( 0xFFFFF794));
 	}
 }
@@ -2317,7 +2317,7 @@ void ZCombatInterface::GetResultInfo( void)
 	for ( int i = 0;  i < 16;  i++)
 	{
 		char szWidget[ 128];
-		sprintf_s( szWidget, "CombatResult_PlayerScore%d", i);
+		sprintf_safe( szWidget, "CombatResult_PlayerScore%d", i);
 		MLabel* pLabel = (MLabel*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( szWidget);
 		if ( pLabel)
 		{
@@ -2331,7 +2331,7 @@ void ZCombatInterface::GetResultInfo( void)
 			pLabel->SetAlignment( MAM_LEFT | MAM_TOP);
 		}
 
-		sprintf_s( szWidget, "CombatResult_GameRoomImg%02d", i);
+		sprintf_safe( szWidget, "CombatResult_GameRoomImg%02d", i);
 		MWidget* pWidget = ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( szWidget);
 		if ( pWidget)
 			pWidget->Show( false);
@@ -2345,7 +2345,7 @@ void ZCombatInterface::GetResultInfo( void)
 	for ( int i = 0;  i < 4;  i++)
 	{
 		char szWidget[ 128];
-		sprintf_s( szWidget, "ClanResult_PlayerScore1%d", i);
+		sprintf_safe( szWidget, "ClanResult_PlayerScore1%d", i);
 		MLabel* pLabel = (MLabel*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( szWidget);
 		if ( pLabel)
 		{
@@ -2359,7 +2359,7 @@ void ZCombatInterface::GetResultInfo( void)
 			pLabel->SetAlignment( MAM_LEFT | MAM_TOP);
 		}
 
-		sprintf_s( szWidget, "ClanResult_GameRoomImg1%d", i);
+		sprintf_safe( szWidget, "ClanResult_GameRoomImg1%d", i);
 		MWidget* pWidget = ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( szWidget);
 		if ( pWidget)
 			pWidget->Show( false);
@@ -2373,7 +2373,7 @@ void ZCombatInterface::GetResultInfo( void)
 	for ( int i = 0;  i < 4;  i++)
 	{
 		char szWidget[ 128];
-		sprintf_s( szWidget, "ClanResult_PlayerScore2%d", i);
+		sprintf_safe( szWidget, "ClanResult_PlayerScore2%d", i);
 		MLabel* pLabel = (MLabel*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( szWidget);
 		if ( pLabel)
 		{
@@ -2387,7 +2387,7 @@ void ZCombatInterface::GetResultInfo( void)
 			pLabel->SetAlignment( MAM_LEFT | MAM_TOP);
 		}
 
-		sprintf_s( szWidget, "ClanResult_GameRoomImg2%d", i);
+		sprintf_safe( szWidget, "ClanResult_GameRoomImg2%d", i);
 		MWidget* pWidget = ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( szWidget);
 		if ( pWidget)
 			pWidget->Show( false);
@@ -2479,7 +2479,7 @@ void ZCombatInterface::GetResultInfo( void)
 			int nStartX = 0;
 			int nStartY = 0;
 			char szName[ 256];
-			sprintf_s( szName, "ClanResult_PlayerNameList%d", i+1);
+			sprintf_safe( szName, "ClanResult_PlayerNameList%d", i+1);
 			pWidget = ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( szName);
 			if ( pWidget)
 			{
@@ -2490,7 +2490,7 @@ void ZCombatInterface::GetResultInfo( void)
 			for ( int j = 0;  j < 4;  j++)
 			{
 				char szName[ 256];
-				sprintf_s( szName, "ClanResult_GameRoomImg%d%d", i+1, j);
+				sprintf_safe( szName, "ClanResult_GameRoomImg%d%d", i+1, j);
 				pWidget = ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( szName);
 				if ( pWidget)
 				{
@@ -2567,7 +2567,7 @@ void ZCombatInterface::GetResultInfo( void)
             for ( int j = MMT_RED;  j <= MMT_BLUE;  j++)
 			{
 				char szName[ 128];
-				sprintf_s( szName, "CombatResult_%sTeamBG%02d", ((j==MMT_RED) ? "Red" : "Blue"), i);
+				sprintf_safe( szName, "CombatResult_%sTeamBG%02d", ((j==MMT_RED) ? "Red" : "Blue"), i);
 
 				pWidget = ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( szName);
 				if ( pWidget)
@@ -2588,7 +2588,7 @@ void ZCombatInterface::GetResultInfo( void)
 
 
 					// 좀 안좋은 위치지만...  -_-;
-					sprintf_s( szName, "CombatResult_GameRoomImg%02d", i);
+					sprintf_safe( szName, "CombatResult_GameRoomImg%02d", i);
 					pWidget = ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( szName);
 					if ( pWidget)
 					{
@@ -2858,7 +2858,7 @@ void ZCombatInterface::DrawResultBoard(MDrawContext* pDC)
 				TextRelative(pDC,clanx,0.15,pItem->szClan);
 
 				char szText[32];
-				sprintf_s(szText,"%d",g_pGame->GetMatch()->GetTeamScore((MMatchTeam)pItem->nTeam));
+				sprintf_safe(szText,"%d",g_pGame->GetMatch()->GetTeamScore((MMatchTeam)pItem->nTeam));
 
 				clanx = clancenter - .5f*(float)pClanFont->GetWidth(szText)/(float)MGetWorkspaceWidth();
 				TextRelative(pDC,clanx,0.2,szText);
@@ -2892,13 +2892,13 @@ void ZCombatInterface::DrawResultBoard(MDrawContext* pDC)
 			float texty= itemy + (linespace - (float)pFont->GetHeight() / (float)RGetScreenHeight())*.5f;
 			TextRelative(pDC,x,texty,pItem->szName);
 
-			sprintf_s(szText,"%d",pItem->nScore);
+			sprintf_safe(szText,"%d",pItem->nScore);
 			TextRelative(pDC,x+.25f,texty,szText,true);
 
-			sprintf_s(szText,"%d",pItem->nKills);
+			sprintf_safe(szText,"%d",pItem->nKills);
 			TextRelative(pDC,x+.32f,texty,szText,true);
 
-			sprintf_s(szText,"%d",pItem->nDeaths);
+			sprintf_safe(szText,"%d",pItem->nDeaths);
 			TextRelative(pDC,x+.39f,texty,szText,true);
 		}
 	}else
@@ -2965,15 +2965,15 @@ void ZCombatInterface::DrawResultBoard(MDrawContext* pDC)
 			TextRelative(pDC,x,texty,pItem->szName);
 
 			x=0.43f;
-			sprintf_s(szText,"%d",pItem->nScore);
+			sprintf_safe(szText,"%d",pItem->nScore);
 			TextRelative(pDC,x,texty,szText,true);
 
 			x=0.52f;
-			sprintf_s(szText,"%d",pItem->nKills);
+			sprintf_safe(szText,"%d",pItem->nKills);
 			TextRelative(pDC,x,texty,szText,true);
 
 			x=0.61f;
-			sprintf_s(szText,"%d",pItem->nDeaths);
+			sprintf_safe(szText,"%d",pItem->nDeaths);
 			TextRelative(pDC,x,texty,szText,true);
 
 			const float iconspace=0.053f;
@@ -2991,15 +2991,15 @@ void ZCombatInterface::DrawResultBoard(MDrawContext* pDC)
 			pDC->SetBitmapColor(MCOLOR(255,255,255,255));
 
 			x=0.705f+(float(pFont->GetHeight()*1.3f)/MGetWorkspaceWidth());
-			sprintf_s(szText,"%d",pItem->nAllKill);
+			sprintf_safe(szText,"%d",pItem->nAllKill);
 			TextRelative(pDC,x,texty,szText);x+=iconspace;
-			sprintf_s(szText,"%d",pItem->nUnbelievable);
+			sprintf_safe(szText,"%d",pItem->nUnbelievable);
 			TextRelative(pDC,x,texty,szText);x+=iconspace;
-			sprintf_s(szText,"%d",pItem->nExcellent);
+			sprintf_safe(szText,"%d",pItem->nExcellent);
 			TextRelative(pDC,x,texty,szText);x+=iconspace;
-			sprintf_s(szText,"%d",pItem->nFantastic);
+			sprintf_safe(szText,"%d",pItem->nFantastic);
 			TextRelative(pDC,x,texty,szText);x+=iconspace;
-			sprintf_s(szText,"%d",pItem->nHeadShot);
+			sprintf_safe(szText,"%d",pItem->nHeadShot);
 			TextRelative(pDC,x,texty,szText);x+=iconspace;
 
 			//		y+=linespace;
@@ -3085,10 +3085,10 @@ void ZCombatInterface::OnFinish()
 		if(pCharacter->IsAdminHide()) continue;
 
 		if(pCharacter->IsAdmin()) {
-			sprintf_s(pItem->szName,"--%s  %s", ZMsg(MSG_CHARINFO_LEVELMARKER), pCharacter->GetUserName());
+			sprintf_safe(pItem->szName,"--%s  %s", ZMsg(MSG_CHARINFO_LEVELMARKER), pCharacter->GetUserName());
 		}
 		else {
-			sprintf_s(pItem->szName,"%d%s %s",pCharacter->GetProperty()->nLevel, ZMsg(MSG_CHARINFO_LEVELMARKER), pCharacter->GetUserName());
+			sprintf_safe(pItem->szName,"%d%s %s",pCharacter->GetProperty()->nLevel, ZMsg(MSG_CHARINFO_LEVELMARKER), pCharacter->GetUserName());
 		}
 
 		strcpy_safe(pItem->szClan,pCharacter->GetProperty()->szClanName);

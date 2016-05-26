@@ -79,7 +79,7 @@ bool MVoteMgr::CheckDiscuss()
 	int nNoCount = (int)pDiscuss->GetNoVoterCount();
 
 //	char szLog[128]="";
-//	sprintf_s(szLog, "VOTERESULT: Y(%f), N(%f)", (float)nYesCount, (float)m_VoterMap.size() * 0.5f);
+//	sprintf_safe(szLog, "VOTERESULT: Y(%f), N(%f)", (float)nYesCount, (float)m_VoterMap.size() * 0.5f);
 //	MMatchServer::GetInstance()->LOG(MMatchServer::LOG_PROG, szLog);
 
 	if ( (float)nYesCount > (float)m_VoterMap.size() * 0.66f )	// 2/3이상 찬성하면.

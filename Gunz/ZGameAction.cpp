@@ -227,7 +227,7 @@ void ZGameAction::OnPeerSkill_LastShot(float fShotTime,ZCharacter *pOwnerCharact
 
 		// 이거 칼질 제대로 안한넘이다. 수상하다.
 		char szTemp[256];
-		sprintf_s(szTemp, "%s 치트 ?", pOwnerCharacter->GetProperty()->szName);
+		sprintf_safe(szTemp, "%s 치트 ?", pOwnerCharacter->GetProperty()->szName);
 		ZChatOutput(MCOLOR(0xFFFF0000), szTemp);
 
 		mlog("anistate %d\n",pOwnerCharacter->m_AniState_Lower);

@@ -314,7 +314,7 @@ void ZStageInterface::OnStageInterfaceSettup( void)
  	pPicture = (MPicture*)pResource->FindWidget( "Stage_MainBGTop");
 	if ( pPicture)
 	{
-		sprintf_s( szMapName, "interface/loadable/%s", MGetMapImageName( ZGetGameClient()->GetMatchStageSetting()->GetMapName()));
+		sprintf_safe( szMapName, "interface/loadable/%s", MGetMapImageName( ZGetGameClient()->GetMatchStageSetting()->GetMapName()));
 
 		// 임시 하드코딩 우에엥~~~
 		if ( m_nGameType == MMATCH_GAMETYPE_QUEST)
@@ -338,7 +338,7 @@ void ZStageInterface::OnStageInterfaceSettup( void)
 	if ( pLabel != 0)
 	{
 		char szStr[ 256];
-		sprintf_s( szStr, "%s > %s > %03d:%s", ZGetGameClient()->GetServerName(), ZMsg( MSG_WORD_STAGE), ZGetGameClient()->GetStageNumber(), ZGetGameClient()->GetStageName());
+		sprintf_safe( szStr, "%s > %s > %03d:%s", ZGetGameClient()->GetServerName(), ZMsg( MSG_WORD_STAGE), ZGetGameClient()->GetStageNumber(), ZGetGameClient()->GetStageName());
 		pLabel->SetText( szStr);
 	}
 
@@ -883,7 +883,7 @@ void ZStageInterface::UpdateSacrificeItem( void)
 	for ( int i = SACRIFICEITEM_SLOT0;  i <= SACRIFICEITEM_SLOT1;  i++)
 	{
 		char szWidgetNameItem[ 128];
-		sprintf_s( szWidgetNameItem, "Stage_SacrificeItemImage%d", i);
+		sprintf_safe( szWidgetNameItem, "Stage_SacrificeItemImage%d", i);
 		MPicture* pPicture = (MPicture*)pResource->FindWidget( szWidgetNameItem);
 		if ( pPicture)
 		{
@@ -893,7 +893,7 @@ void ZStageInterface::UpdateSacrificeItem( void)
 				char szMsg[ 128];
 				MMatchObjCache* pObjCache = ZGetGameClient()->FindObjCache( m_SacrificeItem[ i].GetUID());
 				if ( pObjCache)
-					sprintf_s( szMsg, "%s (%s)", m_SacrificeItem[ i].GetName(), pObjCache->GetName());
+					sprintf_safe( szMsg, "%s (%s)", m_SacrificeItem[ i].GetName(), pObjCache->GetName());
 				else
 					strcpy_safe( szMsg, m_SacrificeItem[ i].GetName());
 				pPicture->AttachToolTip( szMsg);
@@ -1057,7 +1057,7 @@ public:
 			if ( pItemDesc && pDesc)
 			{
 				char szCount[ 128];
-				sprintf_s( szCount, "%s : %d", ZMsg( MSG_WORD_QUANTITY), pItemDesc->GetItemCount());
+				sprintf_safe( szCount, "%s : %d", ZMsg( MSG_WORD_QUANTITY), pItemDesc->GetItemCount());
 				pDesc->SetTextColor( MCOLOR( 0xFFD0D0D0));
 				pDesc->SetText( szCount);
 				pDesc->AddText( "\n");
@@ -1311,7 +1311,7 @@ bool ZStageInterface::OnResponseQL( const int nQL )
 	if ( pLabel)
 	{
 		char szText[125];
-		sprintf_s( szText, "%s %s : %d", ZMsg( MSG_WORD_QUEST), ZMsg( MSG_CHARINFO_LEVEL), nQL);
+		sprintf_safe( szText, "%s %s : %d", ZMsg( MSG_WORD_QUEST), ZMsg( MSG_CHARINFO_LEVEL), nQL);
 		pLabel->SetText( szText);
 	}
 
@@ -1372,7 +1372,7 @@ bool ZStageInterface::OnQuestStartFailed( const int nState )
 	if ( pTextArea)
 	{
 		char text[256];
-		sprintf_s(text, "^1%s", ZMsg(MSG_GANE_NO_QUEST_SCENARIO));
+		sprintf_safe(text, "^1%s", ZMsg(MSG_GANE_NO_QUEST_SCENARIO));
 		pTextArea->AddText( text);
 	}
 
@@ -1411,7 +1411,7 @@ void ZStageInterface::UpdateStageGameInfo(const int nQL, const int nMapsetID, co
 	if ( pLabel)
 	{
 		char szText[125];
-		sprintf_s( szText, "%s %s : %d", ZMsg( MSG_WORD_QUEST), ZMsg( MSG_CHARINFO_LEVEL), nQL);
+		sprintf_safe( szText, "%s %s : %d", ZMsg( MSG_WORD_QUEST), ZMsg( MSG_CHARINFO_LEVEL), nQL);
 		pLabel->SetText( szText);
 	}
 

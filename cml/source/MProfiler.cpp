@@ -249,10 +249,10 @@ bool MProfiler::FinalAnalysis(char* szFileName)
     _strtime_s(szTime);
     _strdate_s(szDate);
 
-	sprintf_s(szLog, "%s %s\n\n", szDate, szTime);
+	sprintf_safe(szLog, "%s %s\n\n", szDate, szTime);
 	fputs(szLog, fp);
 	//fputs(Profiling Data\n, fp);
-	sprintf_s(szLog, "Total Profiling Time : %8.3f sec\n", nTotalTime/1000.0f);
+	sprintf_safe(szLog, "Total Profiling Time : %8.3f sec\n", nTotalTime/1000.0f);
 	fputs(szLog, fp);
 
 	// Total Profile Loop Count
@@ -271,7 +271,7 @@ bool MProfiler::FinalAnalysis(char* szFileName)
 		float fMinTimePercent = min(pLog->nMinTime*100/(float)nTotalTime, 100);
 		float fMaxTime = pLog->nMaxTime/1000.0f;
 		float fMaxTimePercent = min(pLog->nMaxTime*100/(float)nTotalTime, 100);
-		sprintf_s(szLog, " %8.3f (%6.2f%%) | %8d   | %8.3f (%6.2f%%) | %8.3f (%6.2f%%) | %8.3f (%6.2f%%) |",
+		sprintf_safe(szLog, " %8.3f (%6.2f%%) | %8d   | %8.3f (%6.2f%%) | %8.3f (%6.2f%%) | %8.3f (%6.2f%%) |",
 			fTotalTime, fTotalTimePercent,
 			pLog->nCount,
 			fAverageTime, fAverageTimePercent,
@@ -286,7 +286,7 @@ bool MProfiler::FinalAnalysis(char* szFileName)
 	fputs("----------------------------------------------------------------------------------------------------------------------------------------\n", fp);
 
 	if(m_ProfileStack.size()>0){
-		sprintf_s(szLog, "Remained Profile Stack = %d\n", m_ProfileStack.size());
+		sprintf_safe(szLog, "Remained Profile Stack = %d\n", m_ProfileStack.size());
 		fputs(szLog, fp);
 	}
 

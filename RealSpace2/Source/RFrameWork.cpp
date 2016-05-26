@@ -176,7 +176,7 @@ void RFrame_Render()
 	float fMs = 1000.f/g_fFPS;
 	float fScore = 100-(fMs-(1000.f/60.f))*2;
 
-	sprintf_s(buf, "FPS : %3.3f , %d triangles, %4.1f ms,score %4.1f Á¡",g_fFPS,gNumTrisRendered,fMs,fScore);
+	sprintf_safe(buf, "FPS : %3.3f , %d triangles, %4.1f ms,score %4.1f Á¡",g_fFPS,gNumTrisRendered,fMs,fScore);
 	RECT drawRect;
 	SetRect(&drawRect, 0, 0, RGetScreenWidth(), RGetScreenHeight());
 	g_lpFont->DrawText(buf, -1, &drawRect, DT_LEFT | DT_TOP, D3DCOLOR_RGBA(255, 255, 255, 255));

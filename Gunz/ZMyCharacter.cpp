@@ -3155,7 +3155,7 @@ ZDummyCharacter::ZDummyCharacter() : ZMyCharacter()
 	static int m_stIndex = 0; m_stIndex++;
 
 	MTD_CharInfo info;
-	char szTempName[128]; sprintf_s(szTempName, "noname%d", m_stIndex); strcpy_safe(info.szName, szTempName);
+	char szTempName[128]; sprintf_safe(szTempName, "noname%d", m_stIndex); strcpy_safe(info.szName, szTempName);
 	info.nSex = 0;
 
 	for (int j=0; j < MMCIP_END; j++) info.nEquipedItemDesc[j] = 0;

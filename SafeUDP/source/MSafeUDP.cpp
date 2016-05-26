@@ -26,7 +26,7 @@
 void MTRACE(char* pszLog)
 {
 	char szBuf[_MAX_DIR];
-	sprintf_s(szBuf, "%s", pszLog);
+	sprintf_safe(szBuf, "%s", pszLog);
 	OutputDebugString(szBuf);
 }
 
@@ -524,7 +524,7 @@ bool MSocketThread::FlushSend()
 						 0, (sockaddr*)&DestAddr, sizeof(sockaddr_in));
 		if (nResult == SOCKET_ERROR) {
 			int nErrCode = WSAGetLastError();
-			char szBuf[64]; sprintf_s(szBuf, "<SAFEUDP_ERROR>FlushSend() - sendto() ErrCode=%d \n", nErrCode);
+			char szBuf[64]; sprintf_safe(szBuf, "<SAFEUDP_ERROR>FlushSend() - sendto() ErrCode=%d \n", nErrCode);
 			MTRACE(szBuf);
 //			return false;
 		} else {

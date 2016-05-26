@@ -76,12 +76,12 @@ bool ZInput::GetInputKeyName(ZVIRTUALKEY key, char* pBuffer, int nBuffer)
 			int nPov = (key-JOY_BASE)/4;
 			int nButton = (key-JOY_BASE)%4;
 			const char *buttonName[] = { "Up", "Right", "Down", "Left" };
-			sprintf_s(pBuffer, nBuffer, "Joystick Pov%d %s",nPov,buttonName[nButton]);
+			sprintf_safe(pBuffer, nBuffer, "Joystick Pov%d %s",nPov,buttonName[nButton]);
 			return true;
 		}else
 		if(key>=JOY_BUTTON_BASE && key<=JOY_BUTTON_BASE+(int)m_pDirectInput->GetJoystickButtonCount())
 		{
-			sprintf_s(pBuffer, nBuffer, "Joystick button %d",key-JOY_BUTTON_BASE);
+			sprintf_safe(pBuffer, nBuffer, "Joystick button %d",key-JOY_BUTTON_BASE);
 			return true;
 		}
 

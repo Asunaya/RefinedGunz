@@ -205,7 +205,7 @@ void MXmlElement::SetContents(int iValue)
 void MXmlElement::SetContents(float fValue)
 {
 	char szTemp[32];
-	sprintf_s(szTemp, "%12.4f", fValue);
+	sprintf_safe(szTemp, "%12.4f", fValue);
 	SetContents(szTemp);
 }
 
@@ -681,15 +681,15 @@ bool MXmlDocument::LoadFromFile(const char* m_sFileName)
 
 		char szBuf[8192];
 
-		sprintf_s(szBuf, "-------------------------------\n");
+		sprintf_safe(szBuf, "-------------------------------\n");
 		OutputDebugString(szBuf);
-		sprintf_s(szBuf, "Error In Xml File(%s)\n", m_sFileName);		
+		sprintf_safe(szBuf, "Error In Xml File(%s)\n", m_sFileName);		
 		OutputDebugString(szBuf);
-		sprintf_s(szBuf, "Code = 0x%x\n", errPtr->errorCode);
+		sprintf_safe(szBuf, "Code = 0x%x\n", errPtr->errorCode);
 		OutputDebugString(szBuf);
-		sprintf_s(szBuf, "Source = Line : %ld; Char : %ld\n", errPtr->line, errPtr->linepos);
+		sprintf_safe(szBuf, "Source = Line : %ld; Char : %ld\n", errPtr->line, errPtr->linepos);
 		OutputDebugString(szBuf);
-		sprintf_s(szBuf, "Error Description = %s\n", (char*)bstrErr);
+		sprintf_safe(szBuf, "Error Description = %s\n", (char*)bstrErr);
 		OutputDebugString(szBuf);
 
 		_ASSERT(0);
@@ -757,15 +757,15 @@ bool MXmlDocument::LoadFromMemory(char* szBuffer, LANGID lanid)
 
 		char szBuf[8192];
 
-		sprintf_s(szBuf, "-------------------------------\n");
+		sprintf_safe(szBuf, "-------------------------------\n");
 		OutputDebugString(szBuf);
-		sprintf_s(szBuf, "Error In Load Xml Memory\n");		
+		sprintf_safe(szBuf, "Error In Load Xml Memory\n");		
 		OutputDebugString(szBuf);
-		sprintf_s(szBuf, "Code = 0x%x\n", errPtr->errorCode);
+		sprintf_safe(szBuf, "Code = 0x%x\n", errPtr->errorCode);
 		OutputDebugString(szBuf);
-		sprintf_s(szBuf, "Source = Line : %ld; Char : %ld\n", errPtr->line, errPtr->linepos);
+		sprintf_safe(szBuf, "Source = Line : %ld; Char : %ld\n", errPtr->line, errPtr->linepos);
 		OutputDebugString(szBuf);
-		sprintf_s(szBuf, "Error Description = %s\n", (char*)bstrErr);
+		sprintf_safe(szBuf, "Error Description = %s\n", (char*)bstrErr);
 		OutputDebugString(szBuf);
 
 		_ASSERT(0);
@@ -830,7 +830,7 @@ bool MXmlDocument::Delete(MXmlNode* pNode)
 MXmlNode MXmlDocument::FindElement(TCHAR* sTagName)
 {
 	char sBuf[1023];
-	sprintf_s(sBuf, "//%s", sTagName);
+	sprintf_safe(sBuf, "//%s", sTagName);
 
 	BSTR bszQueryStr;
 	bszQueryStr = _AsciiToBSTR(sBuf);

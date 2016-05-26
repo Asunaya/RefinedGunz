@@ -74,7 +74,7 @@ void ZGameInterface::OnBirdTestCreate()
 	for (int i = 0; i < MAX_DUMMYCASE; i++)
 	{
 		char szKey[256];
-		sprintf_s(szKey, "DummyCase%d", i+1);
+		sprintf_safe(szKey, "DummyCase%d", i+1);
 		g_nDummyCaseCount[i] = GetPrivateProfileInt("OPTION", szKey, 0, "./BirdTest.ini");
 	}
 	
@@ -137,7 +137,7 @@ void InitBTDummyClient()
 
 			// 서버에 연결한다
 			char szCmd[256];
-			sprintf_s(szCmd, "%s:%u", pAddr->GetText(), atoi(pPort->GetText()));
+			sprintf_safe(szCmd, "%s:%u", pAddr->GetText(), atoi(pPort->GetText()));
 			ZBIRDPOSTCMD1(&g_DummyClient[nCaseCounter], MC_NET_CONNECT, MCmdParamStr(szCmd));
 
 			nCaseCounter++;
@@ -189,7 +189,7 @@ bool OnCommonLogin(ZBirdDummyClient* pClient, MCommand* pCmd)
 	{
 	case MC_NET_ONCONNECT:
 		{
-			sprintf_s(g_szBT_ID, "BirdTest%d", pClient->GetDummyID());
+			sprintf_safe(g_szBT_ID, "BirdTest%d", pClient->GetDummyID());
 			char szPassword[256] = "1111";
 
 			ZBIRDPOSTCMD4(pClient, MC_MATCH_LOGIN, MCmdParamStr(g_szBT_ID), MCmdParamStr(szPassword), MCommandParameterInt(MCOMMAND_VERSION),
@@ -209,7 +209,7 @@ bool OnCommonLogin(ZBirdDummyClient* pClient, MCommand* pCmd)
 			if (!pAddr || !pPort) return true;
 
 			char szCmd[256];
-			sprintf_s(szCmd, "%s:%u", pAddr->GetText(), atoi(pPort->GetText()));
+			sprintf_safe(szCmd, "%s:%u", pAddr->GetText(), atoi(pPort->GetText()));
 			ZBIRDPOSTCMD1(pClient, MC_NET_CONNECT, MCmdParamStr(szCmd));
 		}
 		return true;
@@ -244,7 +244,7 @@ bool OnCommonLogin(ZBirdDummyClient* pClient, MCommand* pCmd)
 			{
 				// 캐릭이 없으면 새로 생성
 				char szCharName[256];
-				sprintf_s(szCharName, "버드꼬붕%d", pClient->GetDummyID());
+				sprintf_safe(szCharName, "버드꼬붕%d", pClient->GetDummyID());
 
 				ZBIRDPOSTCMD7(pClient, MC_MATCH_REQUEST_CREATE_CHAR, 
 					MCommandParameterUID(pClient->GetPlayerUID()), 
@@ -312,7 +312,7 @@ void OnBTDummyConnFloodOnCommand(ZBirdDummyClient* pClient, MCommand* pCmd)
 	{
 	case MC_NET_ONCONNECT:
 		{
-			sprintf_s(g_szBT_ID, "BirdTest%d", pClient->GetDummyID());
+			sprintf_safe(g_szBT_ID, "BirdTest%d", pClient->GetDummyID());
 			char szPassword[256] = "1111";
 
 			ZBIRDPOSTCMD4(pClient, MC_MATCH_LOGIN, MCmdParamStr(g_szBT_ID), MCmdParamStr(szPassword), MCommandParameterInt(MCOMMAND_VERSION),
@@ -324,7 +324,7 @@ void OnBTDummyConnFloodOnCommand(ZBirdDummyClient* pClient, MCommand* pCmd)
 			char szTemp[512];
 			if ((stConnCount % 100) == 0)
 			{
-				sprintf_s(szTemp, "ConnFlood OnConnected(%u)", stConnCount++);
+				sprintf_safe(szTemp, "ConnFlood OnConnected(%u)", stConnCount++);
 				AddToLogFrame(pClient->GetDummyID(), szTemp);
 			}
 
@@ -339,7 +339,7 @@ void OnBTDummyConnFloodOnCommand(ZBirdDummyClient* pClient, MCommand* pCmd)
 			if (!pAddr || !pPort) return;
 
 			char szCmd[256];
-			sprintf_s(szCmd, "%s:%u", pAddr->GetText(), atoi(pPort->GetText()));
+			sprintf_safe(szCmd, "%s:%u", pAddr->GetText(), atoi(pPort->GetText()));
 			ZBIRDPOSTCMD1(pClient, MC_NET_CONNECT, MCmdParamStr(szCmd));
 			return;
 		}
@@ -426,7 +426,7 @@ void OnBTDummyChannelChatFloodOnCommand(ZBirdDummyClient* pClient, MCommand* pCm
 			char szTemp[512];
 
 			if ((st_nChatCount % 100) == 0) {
-				sprintf_s(szTemp, "ChatFlood(%u)", st_nChatCount);
+				sprintf_safe(szTemp, "ChatFlood(%u)", st_nChatCount);
 				AddToLogFrame(pClient->GetDummyID(), szTemp);
 			}
 		}
@@ -461,7 +461,7 @@ void OnBTDummyEchoFloodOnCommand(ZBirdDummyClient* pClient, MCommand* pCmd)
 			char szTemp[512];
 			if ((st_nEchoCount % 100) == 0)
 			{
-				sprintf_s(szTemp, "EchoFlood(%u)", st_nEchoCount);
+				sprintf_safe(szTemp, "EchoFlood(%u)", st_nEchoCount);
 				AddToLogFrame(pClient->GetDummyID(), szTemp);
 			}
 
@@ -486,7 +486,7 @@ void OnBTDummyChannelChangeOnCommand(ZBirdDummyClient* pClient, MCommand* pCmd)
 			char szTemp[128];
 			if ((st_nCount % 100) == 0)
 			{
-				sprintf_s(szTemp, "Change Channel Flood(%u)", st_nCount);
+				sprintf_safe(szTemp, "Change Channel Flood(%u)", st_nCount);
 				AddToLogFrame(pClient->GetDummyID(), szTemp);
 			}
 

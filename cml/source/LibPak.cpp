@@ -150,7 +150,7 @@ BOOL Package::Open( char *szFileName )
 	}
 
 #ifdef _DEBUG
-	sprintf_s( szMessage, "Package : Success to open package. It contains %d file(s).\n", m_nFiles );
+	sprintf_safe( szMessage, "Package : Success to open package. It contains %d file(s).\n", m_nFiles );
 	OutputDebugString(szMessage);
 #endif
 

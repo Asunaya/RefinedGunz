@@ -135,7 +135,7 @@ inline int sprintf_safe(char(&Dest)[size], const char *Format, ...)
 	va_list args;
 
 	va_start(args, Format);
-	int ret = _vsnprintf(Dest, size, Format, args);
+	int ret = vsnprintf(Dest, size, Format, args);
 	va_end(args);
 
 	Dest[size - 1] = 0;
@@ -148,12 +148,16 @@ inline int sprintf_safe(char *Dest, int size, const char *Format, ...)
 	va_list args;
 
 	va_start(args, Format);
-	int ret = _vsnprintf(Dest, size, Format, args);
+	int ret = vsnprintf(Dest, size, Format, args);
 	va_end(args);
 
-	Dest[size - 1] = 0;
-
 	return ret;
+}
+
+template <size_t size>
+inline int vsprintf_safe(char (&Dest)[size], const char* Format, va_list va)
+{
+	return vsnprintf(Dest, size, Format, va);
 }
 
 #pragma warning(pop)

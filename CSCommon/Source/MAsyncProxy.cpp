@@ -104,7 +104,7 @@ void MAsyncProxy::OnRun()
 	if (!DatabaseMgr.Connect(str))
 	{
 		char szLog[32];
-		sprintf_s(szLog, "DBCONNECT FAILED ThreadID=%d \n", GetCurrentThreadId());
+		sprintf_safe(szLog, "DBCONNECT FAILED ThreadID=%d \n", GetCurrentThreadId());
 		OutputDebugString(szLog);
 		MessageBox(NULL, szLog, "MatchServer DB Error", MB_OK);
 	}
@@ -179,7 +179,7 @@ DWORD MAsyncProxy::CrashDump(PEXCEPTION_POINTERS ExceptionInfo)
 
 	int nFooter = 1;
 	while(TRUE) {
-		sprintf_s(szFileName, "Log/MAsyncProxy_%02d-%02d-%02d-%d.dmp", 
+		sprintf_safe(szFileName, "Log/MAsyncProxy_%02d-%02d-%02d-%d.dmp", 
 			tmTime.tm_year+1900, tmTime.tm_mon+1, tmTime.tm_mday, nFooter);
 
 		if (PathFileExists(szFileName) == FALSE)

@@ -591,7 +591,7 @@ bool RLenzFlare::open( const char* pFileName_, MZFileSystem* pfs_ )
 {
 	//MXmlDocument	aXml;
 	//char szXmlFileName[256];
-	//sprintf_s(szXmlFileName, "%s.xml", pFileName_);
+	//sprintf_safe(szXmlFileName, "%s.xml", pFileName_);
 	//MZFile mzf;
 	//if(!mzf.Open(szXmlFileName,pfs_)) return false;
 	//char *buffer;

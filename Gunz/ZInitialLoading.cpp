@@ -70,9 +70,9 @@ bool ZInitialLoading::Initialize( int numScene_,
 	// 청소년 자율 규제 적용안(쓰벌쓰벌쓰벌...)...
 #ifdef LOCALE_KOREA
 	if ( (rand() % 2) == 0)
-		sprintf_s( m_szNotice, "장시간의 게임 이용은 건강을 해칠 수 있습니다.");
+		sprintf_safe( m_szNotice, "장시간의 게임 이용은 건강을 해칠 수 있습니다.");
 	else
-		sprintf_s( m_szNotice, "공부와 일에 휴식이 필요하듯이, 게임 이용에도 적절한 휴식이 필요 합니다.");
+		sprintf_safe( m_szNotice, "공부와 일에 휴식이 필요하듯이, 게임 이용에도 적절한 휴식이 필요 합니다.");
 #endif
 
 	m_pLoadingStr = NULL;
@@ -90,7 +90,7 @@ bool ZInitialLoading::AddBitmap( int index_, const char* bitmapName_ )
 		return false;
 	}
 	char Buff[64];
-	sprintf_s( Buff, "Scene%d", index_ );
+	sprintf_safe( Buff, "Scene%d", index_ );
 	if( !mBitmaps[index_].Create( Buff, RGetDevice(), bitmapName_ ) )
 	{
 		mlog("Fail to create Bitmap for Initial loading\n" );
@@ -242,7 +242,7 @@ void	ZInitialLoading::Draw( LOADING_SCENE_MODE mode_ /* = MODE_DEFAULT */, int d
 		// 로딩 이름
 		if(m_pLoadingStr && mpDC ) {
 			char buffer[256];
-			sprintf_s(buffer,"Loading %s ...",m_pLoadingStr);
+			sprintf_safe(buffer,"Loading %s ...",m_pLoadingStr);
 			int nWidth = mpDC->m_Font.GetTextWidth(buffer);
 			int x = (int)(RGetScreenWidth() * 0.5) - nWidth/2;
 			int y = (int)(RGetScreenHeight() * 0.9f);
@@ -425,65 +425,65 @@ void	ZInitialLoading::DrawTips()
 				case ( 0) :			// loading_dash.tga
 					nPosx = 20;
 					nPosy = 20;
-					sprintf_s( szStr1, ZMsg( MSG_LOADING_MESSAGE11));
-					sprintf_s( szStr2, ZMsg( MSG_LOADING_MESSAGE12));
-					sprintf_s( szStr3, ZMsg( MSG_LOADING_MESSAGE13));
+					sprintf_safe( szStr1, ZMsg( MSG_LOADING_MESSAGE11));
+					sprintf_safe( szStr2, ZMsg( MSG_LOADING_MESSAGE12));
+					sprintf_safe( szStr3, ZMsg( MSG_LOADING_MESSAGE13));
 					break;
 				case ( 1) :			// loading_gaurd.tga
 					nPosx = 20;
 					nPosy = 20;
-					sprintf_s( szStr1, ZMsg( MSG_LOADING_MESSAGE21));
-					sprintf_s( szStr2, ZMsg( MSG_LOADING_MESSAGE22));
-					sprintf_s( szStr3, ZMsg( MSG_LOADING_MESSAGE23));
+					sprintf_safe( szStr1, ZMsg( MSG_LOADING_MESSAGE21));
+					sprintf_safe( szStr2, ZMsg( MSG_LOADING_MESSAGE22));
+					sprintf_safe( szStr3, ZMsg( MSG_LOADING_MESSAGE23));
 					break;
 				case ( 2) :			// loading_ksa.tga
 					nPosx = 20;
 					nPosy = 390;
-					sprintf_s( szStr1, ZMsg( MSG_LOADING_MESSAGE31));
-					sprintf_s( szStr2, ZMsg( MSG_LOADING_MESSAGE32));
-					sprintf_s( szStr3, ZMsg( MSG_LOADING_MESSAGE33));
+					sprintf_safe( szStr1, ZMsg( MSG_LOADING_MESSAGE31));
+					sprintf_safe( szStr2, ZMsg( MSG_LOADING_MESSAGE32));
+					sprintf_safe( szStr3, ZMsg( MSG_LOADING_MESSAGE33));
 					break;
 				case ( 3) :			// loading_safefall.tga
 					nPosx = 20;
 					nPosy = 390;
-					sprintf_s( szStr1, ZMsg( MSG_LOADING_MESSAGE41));
-					sprintf_s( szStr2, ZMsg( MSG_LOADING_MESSAGE42));
-					sprintf_s( szStr3, ZMsg( MSG_LOADING_MESSAGE43));
+					sprintf_safe( szStr1, ZMsg( MSG_LOADING_MESSAGE41));
+					sprintf_safe( szStr2, ZMsg( MSG_LOADING_MESSAGE42));
+					sprintf_safe( szStr3, ZMsg( MSG_LOADING_MESSAGE43));
 					break;
 				case ( 4) :			// loading_tumbling.tga
 					nPosx = 20;
 					nPosy = 390;
-					sprintf_s( szStr1, ZMsg( MSG_LOADING_MESSAGE51));
-					sprintf_s( szStr2, ZMsg( MSG_LOADING_MESSAGE52));
-					sprintf_s( szStr3, ZMsg( MSG_LOADING_MESSAGE53));
+					sprintf_safe( szStr1, ZMsg( MSG_LOADING_MESSAGE51));
+					sprintf_safe( szStr2, ZMsg( MSG_LOADING_MESSAGE52));
+					sprintf_safe( szStr3, ZMsg( MSG_LOADING_MESSAGE53));
 					break;
 				case ( 5) :			// loading_wallhang.tga
 					nPosx = 20;
 					nPosy = 20;
-					sprintf_s( szStr1, ZMsg( MSG_LOADING_MESSAGE61));
-					sprintf_s( szStr2, ZMsg( MSG_LOADING_MESSAGE62));
-					sprintf_s( szStr3, ZMsg( MSG_LOADING_MESSAGE63));
+					sprintf_safe( szStr1, ZMsg( MSG_LOADING_MESSAGE61));
+					sprintf_safe( szStr2, ZMsg( MSG_LOADING_MESSAGE62));
+					sprintf_safe( szStr3, ZMsg( MSG_LOADING_MESSAGE63));
 					break;
 				case ( 6) :			// loading_walljump.tga
 					nPosx = 20;
 					nPosy = 20;
-					sprintf_s( szStr1, ZMsg( MSG_LOADING_MESSAGE71));
-					sprintf_s( szStr2, ZMsg( MSG_LOADING_MESSAGE72));
-					sprintf_s( szStr3, ZMsg( MSG_LOADING_MESSAGE73));
+					sprintf_safe( szStr1, ZMsg( MSG_LOADING_MESSAGE71));
+					sprintf_safe( szStr2, ZMsg( MSG_LOADING_MESSAGE72));
+					sprintf_safe( szStr3, ZMsg( MSG_LOADING_MESSAGE73));
 					break;
 				case ( 7) :			// loading_wallrun01.tga
 					nPosx = 20;
 					nPosy = 390;
-					sprintf_s( szStr1, ZMsg( MSG_LOADING_MESSAGE81));
-					sprintf_s( szStr2, ZMsg( MSG_LOADING_MESSAGE82));
-					sprintf_s( szStr3, ZMsg( MSG_LOADING_MESSAGE83));
+					sprintf_safe( szStr1, ZMsg( MSG_LOADING_MESSAGE81));
+					sprintf_safe( szStr2, ZMsg( MSG_LOADING_MESSAGE82));
+					sprintf_safe( szStr3, ZMsg( MSG_LOADING_MESSAGE83));
 					break;
 				case ( 8) :			// loading_wallrun02.tga
 					nPosx = 20;
 					nPosy = 390;
-					sprintf_s( szStr1, ZMsg( MSG_LOADING_MESSAGE91));
-					sprintf_s( szStr2, ZMsg( MSG_LOADING_MESSAGE92));
-					sprintf_s( szStr3, ZMsg( MSG_LOADING_MESSAGE93));
+					sprintf_safe( szStr1, ZMsg( MSG_LOADING_MESSAGE91));
+					sprintf_safe( szStr2, ZMsg( MSG_LOADING_MESSAGE92));
+					sprintf_safe( szStr3, ZMsg( MSG_LOADING_MESSAGE93));
 					break;
 				default :
 					nPosx = 20;

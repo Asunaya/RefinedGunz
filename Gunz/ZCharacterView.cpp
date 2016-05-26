@@ -183,7 +183,7 @@ void ZCharacterView::OnDraw(MDrawContext* pDC)
 	// 레벨을 쓴다.
 	r.y -= TEXTAREA_HEIGHT;
 	char szLevel[16];
-	sprintf_s(szLevel, "Lv.%d", m_Info.nLevel);
+	sprintf_safe(szLevel, "Lv.%d", m_Info.nLevel);
 	pDC->SetColor(255, 125, 125);
 	pDC->Text(r, szLevel, MAM_HCENTER);
 
@@ -214,7 +214,7 @@ void ZCharacterView::OnDraw(MDrawContext* pDC)
 
 	pDC->SetColor( 255, 255, 255 );
 	char szLevel[16];
-	sprintf_s( szLevel, "%2d", m_Info.nLevel );
+	sprintf_safe( szLevel, "%2d", m_Info.nLevel );
  	pDC->Text( MRECT(r.x + r.w - 30, r.y + r.h - 22, 30, 22 ), szLevel );
 */	// 동환이가 막음
 }

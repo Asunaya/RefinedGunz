@@ -492,7 +492,7 @@ const char* MEdit::GetText(void)
 void MEdit::AddText(const char* szText)
 {
 	char temp[1024];
-	sprintf_s(temp, "%s%s", GetText(), szText);
+	sprintf_safe(temp, "%s%s", GetText(), szText);
 	SetText(temp);
 }
 
@@ -668,7 +668,7 @@ void MEdit::SetMaxLength(int nMaxLength)
 	ZeroMemory(pNewBuffer,nMaxLength);
 
 	if (m_pBuffer != NULL) {
-		strncpy(pNewBuffer,m_pBuffer,min(nMaxLength,m_nMaxLength));
+		strcpy_safe(pNewBuffer, nMaxLength, m_pBuffer);
 		delete []m_pBuffer;
 		m_pBuffer = pNewBuffer;
 	}

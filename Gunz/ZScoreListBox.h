@@ -60,19 +60,19 @@ public:
 			return m_szState;
 			break;
 		case 3:
-			sprintf_s(szTemp, "%d", m_nScore);
+			sprintf_safe(szTemp, "%d", m_nScore);
 			return szTemp;
 			break;
 		case 4:
-			sprintf_s(szTemp, "%d", m_nKills);
+			sprintf_safe(szTemp, "%d", m_nKills);
 			return szTemp;
 			break;
 		case 5:
-			sprintf_s(szTemp, "%d", m_nDeaths);
+			sprintf_safe(szTemp, "%d", m_nDeaths);
 			return szTemp;
 			break;
 		case 6:
-			sprintf_s(szTemp, "%d", m_nPing);
+			sprintf_safe(szTemp, "%d", m_nPing);
 			return szTemp;
 			break;
 		}

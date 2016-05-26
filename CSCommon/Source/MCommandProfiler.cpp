@@ -207,7 +207,7 @@ void MCommandProfiler::PrintCmdItems(FILE* fp)
 
 		if (m_Items[i].nSendCount != 0)
 		{
-			sprintf_s(text, "  %5d  |  %3d  ||  Send  || %6d(%4.1f%%)  |     %4.1f    |    %6.1f(%4.1f%%)  |                 |           |           |  %s\n",
+			sprintf_safe(text, "  %5d  |  %3d  ||  Send  || %6d(%4.1f%%)  |     %4.1f    |    %6.1f(%4.1f%%)  |                 |           |           |  %s\n",
 				nID, 
 				nAvgSize, 
 				m_Items[i].nSendCount, 
@@ -219,7 +219,7 @@ void MCommandProfiler::PrintCmdItems(FILE* fp)
 		}
 		else
 		{
-			sprintf_s(text, "  %5d  |  %3d  ||   --   ||      -         |       -     |         -         |        -        |       -   |       -   |  %s\n",
+			sprintf_safe(text, "  %5d  |  %3d  ||   --   ||      -         |       -     |         -         |        -        |       -   |       -   |  %s\n",
 				nID, 
 				nAvgSize,
 				szDesc);
@@ -228,7 +228,7 @@ void MCommandProfiler::PrintCmdItems(FILE* fp)
 
 		if (m_Items[i].nRecvCount != 0)
 		{
-			sprintf_s(text, "\t\t ||  Recv  || %6d(%4.1f%%)  |     %4.1f    |    %6.1f(%4.1f%%)  |   %6u(%4.1f%%) |  %6u   |  %6u   |\n",
+			sprintf_safe(text, "\t\t ||  Recv  || %6d(%4.1f%%)  |     %4.1f    |    %6.1f(%4.1f%%)  |   %6u(%4.1f%%) |  %6u   |  %6u   |\n",
 				m_Items[i].nRecvCount, 
 				fRecvCountRate, 
 				fRecvCountPerSec,
@@ -241,7 +241,7 @@ void MCommandProfiler::PrintCmdItems(FILE* fp)
 		}
 		else
 		{
-			sprintf_s(text, "\t\t ||   --   ||      -         |       -     |         -         |        -        |       -   |       -   |    \n");
+			sprintf_safe(text, "\t\t ||   --   ||      -         |       -     |         -         |        -        |       -   |       -   |    \n");
 		}
 		fputs(text, fp);
 		fputs("----------------------------------------------------------------------------------------------------------------------------------------\n", fp);

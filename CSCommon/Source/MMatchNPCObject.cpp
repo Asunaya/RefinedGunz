@@ -61,7 +61,7 @@ bool MMatchNPCManager::AssignControl(MUID& uidNPC, MUID& uidPlayer)
 
 	#ifdef _DEBUG
 	char text[256];
-	sprintf_s(text, "AssignControl(%u:%u) - (%u:%u)\n", uidNPC.High, uidNPC.Low, uidPlayer.High, uidPlayer.Low);
+	sprintf_safe(text, "AssignControl(%u:%u) - (%u:%u)\n", uidNPC.High, uidNPC.Low, uidPlayer.High, uidPlayer.Low);
 	OutputDebugString(text);
 	#endif
 
@@ -90,7 +90,7 @@ bool MMatchNPCManager::Spawn(MUID& uidNPC, MUID& uidController, unsigned char nS
 
 //			#ifdef _DEBUG
 //			char text[256];
-//			sprintf_s(text, "Spawn(%u:%u) - (%u:%u)\n", uidNPC.High, uidNPC.Low, uidController.High, uidController.Low);
+//			sprintf_safe(text, "Spawn(%u:%u) - (%u:%u)\n", uidNPC.High, uidNPC.Low, uidController.High, uidController.Low);
 //			OutputDebugString(text);
 //			#endif
 

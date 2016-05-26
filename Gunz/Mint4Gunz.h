@@ -19,7 +19,7 @@ public:
 		char aliasname[256];
 		char drive[_MAX_DRIVE],dir[_MAX_DIR],fname[_MAX_FNAME],ext[_MAX_EXT];
 		_splitpath(szName,drive,dir,fname,ext);
-		sprintf_s(aliasname,"%s%s",fname,ext);
+		sprintf_safe(aliasname,"%s%s",fname,ext);
 
 		MBitmapR2* pNew = new MBitmapR2;
 		bool bRet = pNew->Create(aliasname, RGetDevice(), szName);

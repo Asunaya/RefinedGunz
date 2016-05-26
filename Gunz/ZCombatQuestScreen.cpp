@@ -77,7 +77,7 @@ void ZCombatQuestScreen::OnDraw(MDrawContext* pDC)
 			dwSec = (ZGetQuest()->GetRemainedTime() - dwCurrTime) / 1000;
 
 		char szSec[ 10];
-		sprintf_s( szSec, "%d", dwSec);
+		sprintf_safe( szSec, "%d", dwSec);
 		char szMsg[ 128];
 		ZTransMsg( szMsg, MSG_GAME_NEXT_N_MIN_AFTER, 1, szSec);
 
@@ -115,7 +115,7 @@ void ZCombatQuestScreen::DrawPlayer(MDrawContext* pDC, int index, ZCharacter* pC
 		nKills = pMod->GetKills();
 	}
 
-	sprintf_s(szMsg, "%d. %s / %d K.O.", index+1, pCharacter->GetProperty()->szName, nKills);
+	sprintf_safe(szMsg, "%d. %s / %d K.O.", index+1, pCharacter->GetProperty()->szName, nKills);
 	pDC->Text(screenx, screeny, szMsg);
 
 /*

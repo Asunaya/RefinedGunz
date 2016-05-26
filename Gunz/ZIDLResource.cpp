@@ -828,7 +828,7 @@ void ZIDLResource::TransText(const char* szSrc, char* szOut, int maxlen)
 
 void ZGetInterfaceSkinPath(char* pOutPath, int maxlen, const char* szSkinName)
 {
-	sprintf_s(pOutPath, maxlen, "%s%s/", PATH_INTERFACE, szSkinName);
+	sprintf_safe(pOutPath, maxlen, "%s%s/", PATH_INTERFACE, szSkinName);
 }
 
 

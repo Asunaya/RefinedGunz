@@ -307,7 +307,7 @@ bool ZBrain::BuildPath(rvector& vTarPos)
 void OutputDebugVector(char* szText, rvector &v)
 {
 	char text[128];
-	sprintf_s(text, "[%s] %.3f %.3f %.3f\n", szText, v.x, v.y, v.z);
+	sprintf_safe(text, "[%s] %.3f %.3f %.3f\n", szText, v.x, v.y, v.z);
 	OutputDebugString(text);
 }
 
@@ -352,7 +352,7 @@ void ZBrain::DebugTest()
 
 
 //		int nCnt=0;
-//		sprintf_s(num, "%d", ++nCnt);
+//		sprintf_safe(num, "%d", ++nCnt);
 //		OutputDebugVector(num, v1);
 
 		while (itorNext != m_WayPointList.end())
@@ -363,13 +363,13 @@ void ZBrain::DebugTest()
 			v2.z=0.0f;
 			RDrawLine(v1, v2, 0xFFFFFF00);
 
-//			sprintf_s(num, "%d", ++nCnt);
+//			sprintf_safe(num, "%d", ++nCnt);
 //			OutputDebugVector(num, v1);
 
 			++itor;
 			++itorNext;
 		}
-//		sprintf_s(num, "%d", ++nCnt);
+//		sprintf_safe(num, "%d", ++nCnt);
 //		OutputDebugVector(num, v2);
 
 	}

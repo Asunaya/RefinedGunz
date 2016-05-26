@@ -122,7 +122,7 @@ void ZShop::Serialize()
 
 				MUID uidItem = MUID(0, i+1);
 				char szPrice[ 128];
-				sprintf_s( szPrice, "%d", pQuestItemDesc->m_nPrice);
+				sprintf_safe( szPrice, "%d", pQuestItemDesc->m_nPrice);
 
 				if ( (m_ListFilter == zshop_item_filter_all) || (m_ListFilter == zshop_item_filter_quest))
 				{

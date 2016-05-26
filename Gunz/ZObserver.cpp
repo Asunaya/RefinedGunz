@@ -286,7 +286,7 @@ void ZObserver::OnDraw(MDrawContext* pDC)
 		pDC->SetColor( backgroundcolor);
 
 		char szName[128];
-		sprintf_s( szName, "%s (HP:%d, AP:%d)", m_pTargetCharacter->GetUserName(), m_pTargetCharacter->GetHP(), m_pTargetCharacter->GetAP());
+		sprintf_safe( szName, "%s (HP:%d, AP:%d)", m_pTargetCharacter->GetUserName(), m_pTargetCharacter->GetHP(), m_pTargetCharacter->GetAP());
 		TextRelative(pDC, 0.5f, 650.0f/800.0f, szName, true);
 	}
 
@@ -447,7 +447,7 @@ void ZObserver::OnDraw(MDrawContext* pDC)
 	else if ( ZApplication::GetGame()->GetMatch()->GetMatchType() != MMATCH_GAMETYPE_DUEL)
 	{
 		char szName[128];
-		sprintf_s(szName, "%s (HP:%d, AP:%d)", m_pTargetCharacter->GetUserName(), m_pTargetCharacter->GetHP(), m_pTargetCharacter->GetAP());
+		sprintf_safe(szName, "%s (HP:%d, AP:%d)", m_pTargetCharacter->GetUserName(), m_pTargetCharacter->GetHP(), m_pTargetCharacter->GetAP());
 		if ( m_pTargetCharacter->IsAdmin())
 			pDC->SetColor(MCOLOR(ZCOLOR_ADMIN_NAME));
 		else
@@ -472,7 +472,7 @@ void ZObserver::OnDraw(MDrawContext* pDC)
 //		TextRelative(pDC, 0.9f, 50.0f/800.0f, szModes[pCamera->GetLookMode()], true);
 
 		char szFileName[ 50];
-		sprintf_s( szFileName, "camera_%s.tga", szModes[pCamera->GetLookMode()]);
+		sprintf_safe( szFileName, "camera_%s.tga", szModes[pCamera->GetLookMode()]);
 		pDC->SetBitmap( MBitmapManager::Get( szFileName));
 
 		float fGain = (float)MGetWorkspaceWidth() / 800.0f;
@@ -525,11 +525,11 @@ void ZObserver::OnDraw(MDrawContext* pDC)
 			// 인원수 표시
 			backgroundcolor = MCOLOR(255,180,180, 255);
 			pDC->SetColor(backgroundcolor);
-			sprintf_s( szText, "%s:%d", ZMsg( MSG_WORD_REDTEAM), nNumOfRedTeam); 
+			sprintf_safe( szText, "%s:%d", ZMsg( MSG_WORD_REDTEAM), nNumOfRedTeam); 
 			TextRelative( pDC, 0.92f, 40.0f/600.0f, szText, true);
 			backgroundcolor = MCOLOR(180,180,255, 255);
 			pDC->SetColor(backgroundcolor);
-			sprintf_s( szText, "%s:%d", ZMsg( MSG_WORD_BLUETEAM), nNumOfBlueTeam); 
+			sprintf_safe( szText, "%s:%d", ZMsg( MSG_WORD_BLUETEAM), nNumOfBlueTeam); 
 			TextRelative( pDC, 0.92f, 65.0f/600.0f, szText, true);
 		}
 	}

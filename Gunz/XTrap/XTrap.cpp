@@ -23,9 +23,9 @@
 	DWORD	PatchType		= 0x00000000;
 	DWORD	ModuleType		= 0x00000000;
 
-	sprintf_s(sGameName, "%s",	"XGAME");			/* 게임 식별이름						*/
-	sprintf_s(sGameProcessName,	"Xgame.exe");		/* 게임 프로세서명을 입력				*/
-	sprintf_s(sGamePath, "%s",	GPath);				/* 게임 프로세서가 실행된 경로명 입력	*/	
+	sprintf_safe(sGameName, "%s",	"XGAME");			/* 게임 식별이름						*/
+	sprintf_safe(sGameProcessName,	"Xgame.exe");		/* 게임 프로세서명을 입력				*/
+	sprintf_safe(sGamePath, "%s",	GPath);				/* 게임 프로세서가 실행된 경로명 입력	*/	
 
 	//
 	// KnightOnline(Korea)		URL				"http://wizweb.nefficient.co.kr/wizweb/wizgate3/xtrap/Knight"

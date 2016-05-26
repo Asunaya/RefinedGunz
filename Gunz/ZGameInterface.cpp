@@ -166,8 +166,8 @@ void ZGameInterface::LoadBitmaps(const char* szDir, ZLoadingProgress *pLoadingPr
 					char drive[_MAX_DRIVE],dir[_MAX_DIR],fname[_MAX_FNAME],ext[_MAX_EXT];
 					_splitpath(szFileName,drive,dir,fname,ext);
 
-					if (!bAddDirToAliasName) sprintf_s(aliasname,"%s%s",fname,ext);
-					else sprintf_s(aliasname, "%s%s%s", dir, fname,ext);
+					if (!bAddDirToAliasName) sprintf_safe(aliasname,"%s%s",fname,ext);
+					else sprintf_safe(aliasname, "%s%s%s", dir, fname,ext);
 
 #ifdef _PUBLISH
 					MZFile::SetReadMode( MZIPREADFLAG_ZIP | MZIPREADFLAG_MRS | MZIPREADFLAG_MRS2 | MZIPREADFLAG_FILE );
@@ -270,8 +270,8 @@ bool InitItemList(MWidget* pWidget)
 	{
 		char szName[256], szItem[256];
 		int d = i % 6;
-		sprintf_s(szItem, "item%03d.png", d);
-		sprintf_s(szName, "나무블레이드%d", i);
+		sprintf_safe(szItem, "item%03d.png", d);
+		sprintf_safe(szName, "나무블레이드%d", i);
 		AddListItem(pList, MBitmapManager::Get(szItem), szName, "Command Something");
 	}
 
@@ -451,7 +451,7 @@ bool ZGameInterface::InitInterface(const char* szSkinName, ZLoadingProgress *pLo
 	strcpy_safe(a_szSkinName, szSkinName);
 
 	ZGetInterfaceSkinPath(szPath, a_szSkinName);
-	sprintf_s(szFileName, "%s%s", szPath, FILENAME_INTERFACE_MAIN);
+	sprintf_safe(szFileName, "%s%s", szPath, FILENAME_INTERFACE_MAIN);
 
 	/*
 	BEGIN_;
@@ -459,7 +459,7 @@ bool ZGameInterface::InitInterface(const char* szSkinName, ZLoadingProgress *pLo
 	{
 		strcpy_safe(a_szSkinName, DEFAULT_INTERFACE_SKIN);
 		ZGetInterfaceSkinPath(szPath, a_szSkinName);
-		sprintf_s(szFileName, "%s%s", szPath, FILENAME_INTERFACE_MAIN);
+		sprintf_safe(szFileName, "%s%s", szPath, FILENAME_INTERFACE_MAIN);
 		bRet = false;
 	}
 	END_("interface skin");
@@ -484,7 +484,7 @@ bool ZGameInterface::InitInterface(const char* szSkinName, ZLoadingProgress *pLo
 		// 로드 실패하면 Default로 로드
 		strcpy_safe(a_szSkinName, DEFAULT_INTERFACE_SKIN);
 		ZGetInterfaceSkinPath(szPath, a_szSkinName);
-		sprintf_s(szFileName, "%s%s", szPath, FILENAME_INTERFACE_MAIN);
+		sprintf_safe(szFileName, "%s%s", szPath, FILENAME_INTERFACE_MAIN);
 		//ZLoadBitmap(szPath, ".png");
 		//ZLoadBitmap(szPath, ".bmp");
 		//ZLoadBitmap(szPath, ".tga");
@@ -907,7 +907,7 @@ bool ZGameInterface::ChangeInterfaceSkin(const char* szNewSkinName)
 	char szPath[256];
 	char szFileName[256];
 	ZGetInterfaceSkinPath(szPath, szNewSkinName);
-	sprintf_s(szFileName, "%s%s", szPath, FILENAME_INTERFACE_MAIN);
+	sprintf_safe(szFileName, "%s%s", szPath, FILENAME_INTERFACE_MAIN);
 
 	FinalInterface();
 	bool bSuccess=InitInterface(szNewSkinName);
@@ -1386,7 +1386,7 @@ void ZGameInterface::OnLoginCreate(void)
 	if(pWidget)
 	{
 		char szText[ 25];
-		sprintf_s( szText, "%d", ZGetConfiguration()->GetServerPort());
+		sprintf_safe( szText, "%d", ZGetConfiguration()->GetServerPort());
 		pWidget->SetText( szText);
 	}
 
@@ -2346,7 +2346,7 @@ return;
 
 char szReadyMessage[256] = "";
 if(nRoundReadyCount>0){
-sprintf_s(szReadyMessage, "Round %d : Start in %d", 
+sprintf_safe(szReadyMessage, "Round %d : Start in %d", 
 ZApplication::GetGame()->GetMatch()->GetNowRound()+1, nRoundReadyCount);
 }
 else{
@@ -2365,7 +2365,7 @@ break;
 case ZMS_ROUND_FINISH:
 {
 char szReadyMessage[256] = "";
-sprintf_s(szReadyMessage, "Finish!");
+sprintf_safe(szReadyMessage, "Finish!");
 
 ShowWidget(CENTERMESSAGE, true);
 SetTextWidget(CENTERMESSAGE, szReadyMessage);
@@ -2446,7 +2446,7 @@ void ZGameInterface::OnDrawStateLogin(MDrawContext* pDC)
         int nCount = ( timeGetTime() / 800) % 4;
 		for ( int i = 0;  i < nCount;  i++)
 			szMsg[ i] = '<';
-		sprintf_s( szMsg, "%s %s ", szMsg, "Connecting");
+		sprintf_safe( szMsg, "%s %s ", szMsg, "Connecting");
 		for ( int i = 0;  i < nCount;  i++)
 			strcat( szMsg, ">");
 
@@ -2597,43 +2597,43 @@ void ZGameInterface::OnDrawStateLobbyNStage(MDrawContext* pDC)
 		MLabel* pLabel = (MLabel*)pRes->FindWidget("Lobby_PlayerName");
 		if (pLabel)
 		{
-			sprintf_s( buf, "%s", ZGetMyInfo()->GetCharName() );
+			sprintf_safe( buf, "%s", ZGetMyInfo()->GetCharName() );
 			pLabel->SetText(buf);
 		}
 		// 상세정보 (동환이가 추가)
 		// Clan
 		pLabel = (MLabel*)pRes->FindWidget("Lobby_PlayerSpecClan");
-		sprintf_s( buf, "%s : %s", ZMsg( MSG_CHARINFO_CLAN), ZGetMyInfo()->GetClanName());
+		sprintf_safe( buf, "%s : %s", ZMsg( MSG_CHARINFO_CLAN), ZGetMyInfo()->GetClanName());
 		if (pLabel) pLabel->SetText(buf);
 		// LV
 		pLabel = (MLabel*)pRes->FindWidget("Lobby_PlayerSpecLevel");
-		sprintf_s( buf, "%s : %d %s", ZMsg( MSG_CHARINFO_LEVEL), ZGetMyInfo()->GetLevel(), ZMsg(MSG_CHARINFO_LEVELMARKER));
+		sprintf_safe( buf, "%s : %d %s", ZMsg( MSG_CHARINFO_LEVEL), ZGetMyInfo()->GetLevel(), ZMsg(MSG_CHARINFO_LEVELMARKER));
 		if (pLabel) pLabel->SetText(buf);
 		// XP
 		pLabel = (MLabel*)pRes->FindWidget("Lobby_PlayerSpecXP");
-		sprintf_s( buf, "%s : %d%%", ZMsg( MSG_CHARINFO_XP), ZGetMyInfo()->GetLevelPercent());
+		sprintf_safe( buf, "%s : %d%%", ZMsg( MSG_CHARINFO_XP), ZGetMyInfo()->GetLevelPercent());
 		if (pLabel) pLabel->SetText(buf);
 		// BP
 		pLabel = (MLabel*)pRes->FindWidget("Lobby_PlayerSpecBP");
-		sprintf_s( buf, "%s : %d", ZMsg( MSG_CHARINFO_BOUNTY), ZGetMyInfo()->GetBP());
+		sprintf_safe( buf, "%s : %d", ZMsg( MSG_CHARINFO_BOUNTY), ZGetMyInfo()->GetBP());
 		if (pLabel) pLabel->SetText(buf);
 		// HP
 		pLabel = (MLabel*)pRes->FindWidget("Lobby_PlayerSpecHP");
-		sprintf_s( buf, "%s : %d", ZMsg( MSG_CHARINFO_HP), ZGetMyInfo()->GetHP());
+		sprintf_safe( buf, "%s : %d", ZMsg( MSG_CHARINFO_HP), ZGetMyInfo()->GetHP());
 		if (pLabel) pLabel->SetText(buf);
 		// AP
 		pLabel = (MLabel*)pRes->FindWidget("Lobby_PlayerSpecAP");
-		sprintf_s( buf, "%s : %d", ZMsg( MSG_CHARINFO_AP), ZGetMyInfo()->GetAP());
+		sprintf_safe( buf, "%s : %d", ZMsg( MSG_CHARINFO_AP), ZGetMyInfo()->GetAP());
 		if (pLabel) pLabel->SetText(buf);
 		// WT
 		pLabel = (MLabel*)pRes->FindWidget("Lobby_PlayerSpecWT");
 		ZMyItemList* pItems= ZGetMyInfo()->GetItemList();
-		sprintf_s( buf, "%s : %d/%d", ZMsg( MSG_CHARINFO_WEIGHT), pItems->GetEquipedTotalWeight(), pItems->GetMaxWeight());
+		sprintf_safe( buf, "%s : %d/%d", ZMsg( MSG_CHARINFO_WEIGHT), pItems->GetEquipedTotalWeight(), pItems->GetMaxWeight());
 		if (pLabel) pLabel->SetText(buf);
 
 		// 채널 정보
 		pLabel = (MLabel*)pRes->FindWidget("Lobby_ChannelName");
-		sprintf_s( buf, "%s > %s > %s", ZGetGameClient()->GetServerName(), ZMsg( MSG_WORD_LOBBY), ZGetGameClient()->GetChannelName());
+		sprintf_safe( buf, "%s > %s > %s", ZGetGameClient()->GetServerName(), ZMsg( MSG_WORD_LOBBY), ZGetGameClient()->GetChannelName());
 		if (pLabel) 
 			pLabel->SetText(buf);
 	}
@@ -2660,38 +2660,38 @@ void ZGameInterface::OnDrawStateLobbyNStage(MDrawContext* pDC)
 			// 이름
 			MLabel* pLabel = (MLabel*)pRes->FindWidget("Stage_PlayerName");
 			if ( bShowMe)
-				sprintf_s( buf, "%s", ZGetMyInfo()->GetCharName() );
+				sprintf_safe( buf, "%s", ZGetMyInfo()->GetCharName() );
 			else
-				sprintf_s( buf, "%s", pItem->GetString( 2));
+				sprintf_safe( buf, "%s", pItem->GetString( 2));
 			if (pLabel) pLabel->SetText(buf);
 
 			// 클랜
 			pLabel = (MLabel*)pRes->FindWidget("Stage_PlayerSpecClan");
 			if ( bShowMe)
-				sprintf_s( buf, "%s : %s", ZMsg( MSG_CHARINFO_CLAN), ZGetMyInfo()->GetClanName());
+				sprintf_safe( buf, "%s : %s", ZMsg( MSG_CHARINFO_CLAN), ZGetMyInfo()->GetClanName());
 			else
 			{
 				if ( strcmp( pItem->GetString( 4), "") == 0)
-                    sprintf_s( buf, "%s :", ZMsg( MSG_CHARINFO_CLAN));
+                    sprintf_safe( buf, "%s :", ZMsg( MSG_CHARINFO_CLAN));
 				else
-                    sprintf_s( buf, "%s : %s", ZMsg( MSG_CHARINFO_CLAN), pItem->GetString( 4));
+                    sprintf_safe( buf, "%s : %s", ZMsg( MSG_CHARINFO_CLAN), pItem->GetString( 4));
 			}
 			if (pLabel) pLabel->SetText(buf);
 
 			// 레벨
 			pLabel = (MLabel*)pRes->FindWidget("Stage_PlayerSpecLevel");
 			if ( bShowMe)
-				sprintf_s( buf, "%s : %d %s", ZMsg( MSG_CHARINFO_LEVEL), ZGetMyInfo()->GetLevel(), ZMsg(MSG_CHARINFO_LEVELMARKER));
+				sprintf_safe( buf, "%s : %d %s", ZMsg( MSG_CHARINFO_LEVEL), ZGetMyInfo()->GetLevel(), ZMsg(MSG_CHARINFO_LEVELMARKER));
 			else
-				sprintf_s( buf, "%s : %s %s", ZMsg( MSG_CHARINFO_LEVEL), pItem->GetString( 1), ZMsg(MSG_CHARINFO_LEVELMARKER));
+				sprintf_safe( buf, "%s : %s %s", ZMsg( MSG_CHARINFO_LEVEL), pItem->GetString( 1), ZMsg(MSG_CHARINFO_LEVELMARKER));
 			if (pLabel) pLabel->SetText(buf);
 
 			// XP
 			pLabel = (MLabel*)pRes->FindWidget("Stage_PlayerSpecXP");
 			if ( bShowMe)
-				sprintf_s( buf, "%s : %d%%", ZMsg( MSG_CHARINFO_XP), ZGetMyInfo()->GetLevelPercent());
+				sprintf_safe( buf, "%s : %d%%", ZMsg( MSG_CHARINFO_XP), ZGetMyInfo()->GetLevelPercent());
 			else
-				sprintf_s( buf, "%s : -", ZMsg( MSG_CHARINFO_XP));
+				sprintf_safe( buf, "%s : -", ZMsg( MSG_CHARINFO_XP));
 			if (pLabel)
 			{
 				pLabel->SetText(buf);
@@ -2701,9 +2701,9 @@ void ZGameInterface::OnDrawStateLobbyNStage(MDrawContext* pDC)
 			// BP
 			pLabel = (MLabel*)pRes->FindWidget("Stage_PlayerSpecBP");
 			if ( bShowMe)
-				sprintf_s( buf, "%s : %d", ZMsg( MSG_CHARINFO_BOUNTY), ZGetMyInfo()->GetBP());
+				sprintf_safe( buf, "%s : %d", ZMsg( MSG_CHARINFO_BOUNTY), ZGetMyInfo()->GetBP());
 			else
-				sprintf_s( buf, "%s : -", ZMsg( MSG_CHARINFO_BOUNTY));
+				sprintf_safe( buf, "%s : -", ZMsg( MSG_CHARINFO_BOUNTY));
 			if (pLabel)
 			{
 				pLabel->SetText(buf);
@@ -2713,9 +2713,9 @@ void ZGameInterface::OnDrawStateLobbyNStage(MDrawContext* pDC)
 			// HP
 			pLabel = (MLabel*)pRes->FindWidget("Stage_PlayerSpecHP");
 			if ( bShowMe)
-				sprintf_s( buf, "%s : %d", ZMsg( MSG_CHARINFO_HP), ZGetMyInfo()->GetHP());
+				sprintf_safe( buf, "%s : %d", ZMsg( MSG_CHARINFO_HP), ZGetMyInfo()->GetHP());
 			else
-				sprintf_s( buf, "%s : -", ZMsg( MSG_CHARINFO_HP));
+				sprintf_safe( buf, "%s : -", ZMsg( MSG_CHARINFO_HP));
 			if (pLabel)
 			{
 				pLabel->SetText(buf);
@@ -2725,9 +2725,9 @@ void ZGameInterface::OnDrawStateLobbyNStage(MDrawContext* pDC)
 			// AP
 			pLabel = (MLabel*)pRes->FindWidget("Stage_PlayerSpecAP");
 			if ( bShowMe)
-				sprintf_s( buf, "%s : %d", ZMsg( MSG_CHARINFO_AP), ZGetMyInfo()->GetAP());
+				sprintf_safe( buf, "%s : %d", ZMsg( MSG_CHARINFO_AP), ZGetMyInfo()->GetAP());
 			else
-				sprintf_s( buf, "%s : -", ZMsg( MSG_CHARINFO_AP));
+				sprintf_safe( buf, "%s : -", ZMsg( MSG_CHARINFO_AP));
 			if (pLabel)
 			{
 				pLabel->SetText(buf);
@@ -2738,9 +2738,9 @@ void ZGameInterface::OnDrawStateLobbyNStage(MDrawContext* pDC)
 			pLabel = (MLabel*)pRes->FindWidget("Stage_PlayerSpecWT");
 			ZMyItemList* pItems= ZGetMyInfo()->GetItemList();
 			if ( bShowMe)
-				sprintf_s( buf, "%s : %d/%d", ZMsg( MSG_CHARINFO_WEIGHT), pItems->GetEquipedTotalWeight(), pItems->GetMaxWeight());
+				sprintf_safe( buf, "%s : %d/%d", ZMsg( MSG_CHARINFO_WEIGHT), pItems->GetEquipedTotalWeight(), pItems->GetMaxWeight());
 			else
-				sprintf_s( buf, "%s : -", ZMsg( MSG_CHARINFO_WEIGHT));
+				sprintf_safe( buf, "%s : -", ZMsg( MSG_CHARINFO_WEIGHT));
 			if (pLabel)
 			{
 				pLabel->SetText(buf);
@@ -2880,9 +2880,9 @@ void ZGameInterface::OnDraw(MDrawContext *pDC)
 
 		char szText[ 256];
 		if ( m_dwHourCount > 3)
-			sprintf_s( szText, "%d 시간이 경과했습니다. 잠시 쉬었다 하시기 바랍니다.", m_dwHourCount);
+			sprintf_safe( szText, "%d 시간이 경과했습니다. 잠시 쉬었다 하시기 바랍니다.", m_dwHourCount);
 		else
-			sprintf_s( szText, "%d 시간이 경과 하였습니다.", m_dwHourCount);
+			sprintf_safe( szText, "%d 시간이 경과 하였습니다.", m_dwHourCount);
 		ZChatOutput( MCOLOR(ZCOLOR_CHAT_SYSTEM), szText);
 	}
 #endif
@@ -3408,7 +3408,7 @@ bool ZGameInterface::Update(float fElapsed)
 			dots[nCount]=0;
 
 			char szBuffer[256];
-			sprintf_s(szBuffer,"%s%s", ZMsg( MSG_WORD_FINDTEAM), dots);
+			sprintf_safe(szBuffer,"%s%s", ZMsg( MSG_WORD_FINDTEAM), dots);
 			pLabel->SetText(szBuffer);
 		}
 	}
@@ -3464,12 +3464,12 @@ void ZGameInterface::SetMapThumbnail(const char* szMapName)
 	SAFE_DELETE(m_pThumbnailBitmap);
 
 	char szThumbnail[256];
-	sprintf_s(szThumbnail, "maps/%s/%s.rs.bmp", szMapName,szMapName);
+	sprintf_safe(szThumbnail, "maps/%s/%s.rs.bmp", szMapName,szMapName);
 
 	m_pThumbnailBitmap=Mint::GetInstance()->OpenBitmap(szThumbnail);
 	if(!m_pThumbnailBitmap)
 	{
-		sprintf_s(szThumbnail, "maps/%s/%s.bmp", szMapName,szMapName);
+		sprintf_safe(szThumbnail, "maps/%s/%s.bmp", szMapName,szMapName);
 		m_pThumbnailBitmap=Mint::GetInstance()->OpenBitmap(szThumbnail);
 	}
 }
@@ -3534,18 +3534,18 @@ void ZGameInterface::SaveScreenShot()
 	}
 
 	do {
-		sprintf_s(screenshotfilename,"%s/Gunz%03d" , screenshotfoldername , nsscount);
-		sprintf_s(screenshotfilenameJPG,"%s/Gunz%03d.jpg" , screenshotfoldername , nsscount);
-		sprintf_s(screenshotfilenameBMP,"%s/Gunz%03d.bmp" , screenshotfoldername , nsscount);
+		sprintf_safe(screenshotfilename,"%s/Gunz%03d" , screenshotfoldername , nsscount);
+		sprintf_safe(screenshotfilenameJPG,"%s/Gunz%03d.jpg" , screenshotfoldername , nsscount);
+		sprintf_safe(screenshotfilenameBMP,"%s/Gunz%03d.bmp" , screenshotfoldername , nsscount);
 		nsscount++;
 	}
 	while( (IsExist(screenshotfilenameJPG)||(IsExist(screenshotfilenameBMP))) && nsscount<1000);
 
 	/*
 	do {
-		sprintf_s(screenshotfilename,"Gunz%03d",nsscount++);
-		sprintf_s(screenshotBMP, "%s.bmp", screenshotfilename);
-		sprintf_s(screenshotJPG, "%s.jpg", screenshotfilename);
+		sprintf_safe(screenshotfilename,"Gunz%03d",nsscount++);
+		sprintf_safe(screenshotBMP, "%s.bmp", screenshotfilename);
+		sprintf_safe(screenshotJPG, "%s.jpg", screenshotfilename);
 	}
 	while( (IsExist(screenshotBMP)||(IsExist(screenshotJPG))) && nsscount<1000);
 	*/
@@ -3590,7 +3590,7 @@ void ZGameInterface::SaveScreenShot()
 			if(!bSuccess) goto SCREENSHOTERROR;
 
 			char szOutputFilename[256];
-			sprintf_s(szOutputFilename,GUNZ_FOLDER SCREENSHOT_FOLDER"/Gunz%03d.jpg" , nsscount-1);
+			sprintf_safe(szOutputFilename,GUNZ_FOLDER SCREENSHOT_FOLDER"/Gunz%03d.jpg" , nsscount-1);
 
 			char szOutput[256];
 //			ZTranslateMessage(szOutput,MSG_SCREENSHOT_SAVED,1,szOutputFilename);
@@ -3700,7 +3700,7 @@ void ZGameInterface::SetSellQuestItemConfirmFrame( void)
 			if ( pLabel && pQuestItemDesc)
 			{
 				char szText[ 128];
-				sprintf_s( szText, "%s(%d bounty) x %d", pQuestItemDesc->m_szQuestItemName,
+				sprintf_safe( szText, "%s(%d bounty) x %d", pQuestItemDesc->m_szQuestItemName,
 														 (int)( pQuestItemDesc->m_nPrice * 0.25),
 														 m_nSellQuestItemCount);
 				pLabel->SetText( szText);
@@ -3709,7 +3709,7 @@ void ZGameInterface::SetSellQuestItemConfirmFrame( void)
 			if ( pLabel && pQuestItemDesc)
 			{
 				char szText[ 128];
-				sprintf_s( szText, "= %d bounty", (int)(pQuestItemDesc->m_nPrice * 0.25) * m_nSellQuestItemCount);
+				sprintf_safe( szText, "= %d bounty", (int)(pQuestItemDesc->m_nPrice * 0.25) * m_nSellQuestItemCount);
 				pLabel->SetText( szText);
 			}
 		}
@@ -3720,7 +3720,7 @@ void ZGameInterface::SetSellQuestItemConfirmFrame( void)
 	if ( pLabel)
 	{
 		char szText[ 128];
-		sprintf_s( szText, "%d", m_nSellQuestItemCount);
+		sprintf_safe( szText, "%d", m_nSellQuestItemCount);
 		pLabel->SetAlignment( MAM_RIGHT | MAM_VCENTER);
 		pLabel->SetText( szText);
 	}
@@ -3797,10 +3797,10 @@ void ZGameInterface::Buy(void)
 		if ( pItemDesc->IsCashItem())		// 캐쉬 아이템이면...
 		{
 			TCHAR szURL[ 256];
-			sprintf_s( szURL, "explorer.exe \"%s\"", Z_LOCALE_CASHSHOP_URL);
+			sprintf_safe( szURL, "explorer.exe \"%s\"", Z_LOCALE_CASHSHOP_URL);
 			WinExec( szURL, SW_SHOWNORMAL);
 
-//			sprintf_s( szURL, "http://www.netmarble.net/cp_site/gunz/itemshop/common/buy_item.asp?item_idx=%d&i_class=%d&i_part=%d", 122, 0, 0);
+//			sprintf_safe( szURL, "http://www.netmarble.net/cp_site/gunz/itemshop/common/buy_item.asp?item_idx=%d&i_class=%d&i_part=%d", 122, 0, 0);
 //			ShellExecute( g_hWnd, "open", "IEXPLORE.EXE", szURL, NULL, SW_SHOW);		// 이건 로그인 해야됨... -_-;		
 		}
 		else
@@ -3827,7 +3827,7 @@ void ZGameInterface::BuyCashItem(void)
 	}
 
 	TCHAR szURL[ 256];
-	sprintf_s( szURL, "explorer.exe \"%s\"", Z_LOCALE_CASHSHOP_URL);
+	sprintf_safe( szURL, "explorer.exe \"%s\"", Z_LOCALE_CASHSHOP_URL);
 	WinExec( szURL, SW_SHOWNORMAL);
 }
 
@@ -4002,7 +4002,7 @@ void ZGameInterface::ShowMessage(const char* szText, MListener* pCustomListenter
 	// nMessageID가 0이 아니면 메세지 뒤에 메세지 번호도 함께 출력해준다.(다른 나라 말일때 확인하기 위함)
 	if (nMessageID != 0)
 	{
-		sprintf_s(text, "%s (M%d)", szText, nMessageID);
+		sprintf_safe(text, "%s (M%d)", szText, nMessageID);
 	}
 	else
 	{
@@ -4028,7 +4028,7 @@ void ZGameInterface::ShowMessage(int nMessageID)
 	if(str)
 	{
 		char text[1024];
-		sprintf_s(text, "%s (M%d)", str, nMessageID);
+		sprintf_safe(text, "%s (M%d)", str, nMessageID);
 		ShowMessage(text);
 	}
 }
@@ -4039,7 +4039,7 @@ void ZGameInterface::ShowErrorMessage(int nErrorID)
 	if (str)
 	{
 		char text[1024];
-		sprintf_s(text, "%s (E%d)", str, nErrorID);
+		sprintf_safe(text, "%s (E%d)", str, nErrorID);
 		ShowMessage(text);
 	}
 }
@@ -4235,8 +4235,8 @@ void ZGameInterface::UpdateBlueRedTeam( void)
 			ZIDLResource* pRes = ZApplication::GetGameInterface()->GetIDLResource();
 			ZBmNumLabel *pNumLabel;
 
-//			sprintf_s(buffer,"%d",nB);
-			sprintf_s(buffer,"%s:%d", ZMsg( MSG_WORD_BLUETEAM), nB);
+//			sprintf_safe(buffer,"%d",nB);
+			sprintf_safe(buffer,"%s:%d", ZMsg( MSG_WORD_BLUETEAM), nB);
 			pNumLabel = (ZBmNumLabel*)pRes->FindWidget("StageNumOfBlueTeam");
 			if ( pNumLabel)
 			{
@@ -4247,8 +4247,8 @@ void ZGameInterface::UpdateBlueRedTeam( void)
 			if ( pButton)
 				pButton->SetText( buffer);
 
-//			sprintf_s(buffer,"%d",nR);
-			sprintf_s(buffer,"%s:%d", ZMsg( MSG_WORD_REDTEAM), nR);
+//			sprintf_safe(buffer,"%d",nR);
+			sprintf_safe(buffer,"%s:%d", ZMsg( MSG_WORD_REDTEAM), nR);
 			pNumLabel = (ZBmNumLabel*)pRes->FindWidget("StageNumOfRedTeam");
 			if ( pNumLabel)
 			{
@@ -4260,7 +4260,7 @@ void ZGameInterface::UpdateBlueRedTeam( void)
 			if ( pButton)
 				pButton->SetText( buffer);
 
-			sprintf_s( buffer, "%s : %d", ZMsg( MSG_WORD_PLAYERS), nB+nR);
+			sprintf_safe( buffer, "%s : %d", ZMsg( MSG_WORD_PLAYERS), nB+nR);
 			MLabel* pLabel = (MLabel*)pRes->FindWidget( "Stage_NumOfPerson");
 			if ( pLabel)
 				pLabel->SetText( buffer);
@@ -4300,7 +4300,7 @@ void ZGameInterface::UpdateBlueRedTeam( void)
 			if ( pNumLabel)
 				pNumLabel->Show( false);
 
-			sprintf_s( buffer, "%s : %d", ZMsg( MSG_WORD_PLAYERS), nPlayerNum);
+			sprintf_safe( buffer, "%s : %d", ZMsg( MSG_WORD_PLAYERS), nPlayerNum);
 			MLabel* pLabel = (MLabel*)pRes->FindWidget( "Stage_NumOfPerson");
 			if ( pLabel)
 				pLabel->SetText( buffer);
@@ -4406,19 +4406,19 @@ void ZGameInterface::OnResponseCharacterItemList(MUID* puidEquipItem, MTD_ItemNo
 		pTextArea->Clear();
 
 		char szTemp[64];
-		sprintf_s(szTemp, "^9%s : %d %s", ZMsg(MSG_CHARINFO_LEVEL), ZGetMyInfo()->GetLevel(), ZMsg(MSG_CHARINFO_LEVELMARKER));
+		sprintf_safe(szTemp, "^9%s : %d %s", ZMsg(MSG_CHARINFO_LEVEL), ZGetMyInfo()->GetLevel(), ZMsg(MSG_CHARINFO_LEVELMARKER));
 		pTextArea->AddText(szTemp);
 
-		sprintf_s(szTemp, "^9%s : %d", ZMsg(MSG_CHARINFO_BOUNTY), ZGetMyInfo()->GetBP());
+		sprintf_safe(szTemp, "^9%s : %d", ZMsg(MSG_CHARINFO_BOUNTY), ZGetMyInfo()->GetBP());
 		pTextArea->AddText(szTemp);
 
-		sprintf_s(szTemp, "^9%s : %d", ZMsg(MSG_CHARINFO_HP), ZGetMyInfo()->GetHP());
+		sprintf_safe(szTemp, "^9%s : %d", ZMsg(MSG_CHARINFO_HP), ZGetMyInfo()->GetHP());
 		pTextArea->AddText(szTemp);
 
-		sprintf_s(szTemp, "^9%s : %d", ZMsg(MSG_CHARINFO_AP), ZGetMyInfo()->GetAP());
+		sprintf_safe(szTemp, "^9%s : %d", ZMsg(MSG_CHARINFO_AP), ZGetMyInfo()->GetAP());
 		pTextArea->AddText(szTemp);
 
-		sprintf_s(szTemp, "^9%s : %d/%d", ZMsg(MSG_CHARINFO_WEIGHT), ZGetMyInfo()->GetItemList()->GetEquipedTotalWeight(), ZGetMyInfo()->GetItemList()->GetMaxWeight());
+		sprintf_safe(szTemp, "^9%s : %d/%d", ZMsg(MSG_CHARINFO_WEIGHT), ZGetMyInfo()->GetItemList()->GetEquipedTotalWeight(), ZGetMyInfo()->GetItemList()->GetMaxWeight());
 		pTextArea->AddText(szTemp);
 	}
 
@@ -4428,19 +4428,19 @@ void ZGameInterface::OnResponseCharacterItemList(MUID* puidEquipItem, MTD_ItemNo
 		pTextArea->Clear();
 
 		char szTemp[64];
-		sprintf_s(szTemp, "^9%s : %d %s", ZMsg(MSG_CHARINFO_LEVEL), ZGetMyInfo()->GetLevel(), ZMsg(MSG_CHARINFO_LEVELMARKER));
+		sprintf_safe(szTemp, "^9%s : %d %s", ZMsg(MSG_CHARINFO_LEVEL), ZGetMyInfo()->GetLevel(), ZMsg(MSG_CHARINFO_LEVELMARKER));
 		pTextArea->AddText(szTemp);
 
-		sprintf_s(szTemp, "^9%s : %d", ZMsg(MSG_CHARINFO_BOUNTY), ZGetMyInfo()->GetBP());
+		sprintf_safe(szTemp, "^9%s : %d", ZMsg(MSG_CHARINFO_BOUNTY), ZGetMyInfo()->GetBP());
 		pTextArea->AddText(szTemp);
 
-		sprintf_s(szTemp, "^9%s : %d", ZMsg(MSG_CHARINFO_HP), ZGetMyInfo()->GetHP());
+		sprintf_safe(szTemp, "^9%s : %d", ZMsg(MSG_CHARINFO_HP), ZGetMyInfo()->GetHP());
 		pTextArea->AddText(szTemp);
 
-		sprintf_s(szTemp, "^9%s : %d", ZMsg(MSG_CHARINFO_AP), ZGetMyInfo()->GetAP());
+		sprintf_safe(szTemp, "^9%s : %d", ZMsg(MSG_CHARINFO_AP), ZGetMyInfo()->GetAP());
 		pTextArea->AddText(szTemp);
 
-		sprintf_s(szTemp, "^9%s : %d/%d", ZMsg(MSG_CHARINFO_WEIGHT), ZGetMyInfo()->GetItemList()->GetEquipedTotalWeight(), ZGetMyInfo()->GetItemList()->GetMaxWeight());
+		sprintf_safe(szTemp, "^9%s : %d/%d", ZMsg(MSG_CHARINFO_WEIGHT), ZGetMyInfo()->GetItemList()->GetEquipedTotalWeight(), ZGetMyInfo()->GetItemList()->GetMaxWeight());
 		pTextArea->AddText(szTemp);
 	}
 }
@@ -4587,7 +4587,7 @@ bool GetItemDescStr(string& str,DWORD nItemID) {
 
 	if(pItemDesc->m_nResLevel) {
 		if(bAdd) str += " / ";
-		sprintf_s(temp,"제한레벨:%d",pItemDesc->m_nResLevel);
+		sprintf_safe(temp,"제한레벨:%d",pItemDesc->m_nResLevel);
 
 		nLen = (int)strlen(temp);
 		if((int)str.size() + nLen > (nLine+1) * MAX_TOOLTIP_LINE_STRING+3) { str += "\n"; nLine++; }
@@ -4598,7 +4598,7 @@ bool GetItemDescStr(string& str,DWORD nItemID) {
 
 	if(pItemDesc->m_nWeight){
 		if(bAdd) str += " / ";
-		sprintf_s(temp,"무게:%d",pItemDesc->m_nWeight);
+		sprintf_safe(temp,"무게:%d",pItemDesc->m_nWeight);
 
 		nLen = (int)strlen(temp);
 		if((int)str.size() + nLen > (nLine+1) * MAX_TOOLTIP_LINE_STRING+3) { str += "\n"; nLine++; }
@@ -4609,7 +4609,7 @@ bool GetItemDescStr(string& str,DWORD nItemID) {
 
 	if(pItemDesc->m_nMaxBullet) {
 		if(bAdd) str += " / ";
-		sprintf_s(temp,"최대탄수 : %d",pItemDesc->m_nMaxBullet);
+		sprintf_safe(temp,"최대탄수 : %d",pItemDesc->m_nMaxBullet);
 
 		nLen = (int)strlen(temp);
 		if((int)str.size() + nLen > (nLine+1) * MAX_TOOLTIP_LINE_STRING+3) { str += "\n"; nLine++; }
@@ -4621,7 +4621,7 @@ bool GetItemDescStr(string& str,DWORD nItemID) {
 	
 	if(pItemDesc->m_nMagazine) {
 		if(bAdd) str += " / ";
-		sprintf_s(temp,"탄창 : %d",pItemDesc->m_nMagazine);
+		sprintf_safe(temp,"탄창 : %d",pItemDesc->m_nMagazine);
 
 		nLen = (int)strlen(temp);
 		if((int)str.size() + nLen > (nLine+1) * MAX_TOOLTIP_LINE_STRING+3) { str += "\n"; nLine++; }
@@ -4632,7 +4632,7 @@ bool GetItemDescStr(string& str,DWORD nItemID) {
 
 	if(pItemDesc->m_nDamage) {
 		if(bAdd) str += " / ";
-		sprintf_s(temp,"공격력 : %d",pItemDesc->m_nDamage);
+		sprintf_safe(temp,"공격력 : %d",pItemDesc->m_nDamage);
 
 		nLen = (int)strlen(temp);
 		if((int)str.size() + nLen > (nLine+1) * MAX_TOOLTIP_LINE_STRING+3) { str += "\n"; nLine++; }
@@ -4643,7 +4643,7 @@ bool GetItemDescStr(string& str,DWORD nItemID) {
 
 	if(pItemDesc->m_nDelay) {
 		if(bAdd) str += " / ";
-		sprintf_s(temp,"딜레이 : %d",pItemDesc->m_nDelay);
+		sprintf_safe(temp,"딜레이 : %d",pItemDesc->m_nDelay);
 
 		nLen = (int)strlen(temp);
 		if((int)str.size() + nLen > (nLine+1) * MAX_TOOLTIP_LINE_STRING+3) { str += "\n"; nLine++; }
@@ -4654,7 +4654,7 @@ bool GetItemDescStr(string& str,DWORD nItemID) {
 
 	if(pItemDesc->m_nReloadTime) {
 		if(bAdd) str += " / ";
-		sprintf_s(temp,"장전시간 : %d",pItemDesc->m_nReloadTime);
+		sprintf_safe(temp,"장전시간 : %d",pItemDesc->m_nReloadTime);
 
 		nLen = (int)strlen(temp);
 		if((int)str.size() + nLen > (nLine+1) * MAX_TOOLTIP_LINE_STRING+3) { str += "\n"; nLine++; }
@@ -4665,7 +4665,7 @@ bool GetItemDescStr(string& str,DWORD nItemID) {
 
 	if(pItemDesc->m_nHP) {
 		if(bAdd) str += " / ";
-		sprintf_s(temp,"+HP : %d",pItemDesc->m_nHP);
+		sprintf_safe(temp,"+HP : %d",pItemDesc->m_nHP);
 
 		nLen = (int)strlen(temp);
 		if((int)str.size() + nLen > (nLine+1) * MAX_TOOLTIP_LINE_STRING+3) { str += "\n"; nLine++; }
@@ -4676,7 +4676,7 @@ bool GetItemDescStr(string& str,DWORD nItemID) {
 
 	if(pItemDesc->m_nAP) {
 		if(bAdd) str += " / ";
-		sprintf_s(temp,"+AP : %d",pItemDesc->m_nAP);
+		sprintf_safe(temp,"+AP : %d",pItemDesc->m_nAP);
 
 		nLen = (int)strlen(temp);
 		if((int)str.size() + nLen > (nLine+1) * MAX_TOOLTIP_LINE_STRING+3) { str += "\n"; nLine++; }
@@ -4687,7 +4687,7 @@ bool GetItemDescStr(string& str,DWORD nItemID) {
 
 	if(pItemDesc->m_nMaxWT) {
 		if(bAdd) str += " / ";
-		sprintf_s(temp,"+최대무게 : %d",pItemDesc->m_nMaxWT);
+		sprintf_safe(temp,"+최대무게 : %d",pItemDesc->m_nMaxWT);
 
 		nLen = (int)strlen(temp);
 		if((int)str.size() + nLen > (nLine+1) * MAX_TOOLTIP_LINE_STRING+3) { str += "\n"; nLine++; }
@@ -4756,13 +4756,13 @@ void ZGameInterface::ShowEquipmentDialog(bool bShow)
 			if ( ZApplication::GetGameInterface()->GetState() == GUNZ_STAGE)
 			{
 				pButton->Show( false);
-				sprintf_s( buf, "%s > %s > %s", ZGetGameClient()->GetServerName(), ZMsg( MSG_WORD_STAGE), ZMsg( MSG_WORD_EQUIPMENT));
+				sprintf_safe( buf, "%s > %s > %s", ZGetGameClient()->GetServerName(), ZMsg( MSG_WORD_STAGE), ZMsg( MSG_WORD_EQUIPMENT));
 				pLabel->SetText( buf);
 			}
 			else
 			{
 				pButton->Show( true);
-				sprintf_s( buf, "%s > %s > %s", ZGetGameClient()->GetServerName(), ZMsg( MSG_WORD_LOBBY), ZMsg( MSG_WORD_EQUIPMENT));
+				sprintf_safe( buf, "%s > %s > %s", ZGetGameClient()->GetServerName(), ZMsg( MSG_WORD_LOBBY), ZMsg( MSG_WORD_EQUIPMENT));
 				pLabel->SetText( buf);
 			}
 		}
@@ -4878,7 +4878,7 @@ void ZGameInterface::ShowShopDialog(bool bShow)
 
 		char buf[256];
 		MLabel* pLabel = (MLabel*)pResource->FindWidget("Shop_Message");
-		sprintf_s( buf, "%s > %s > %s", ZGetGameClient()->GetServerName(), ZMsg( MSG_WORD_LOBBY), ZMsg( MSG_WORD_SHOP));
+		sprintf_safe( buf, "%s > %s > %s", ZGetGameClient()->GetServerName(), ZMsg( MSG_WORD_LOBBY), ZMsg( MSG_WORD_SHOP));
 		if (pLabel) 
 			pLabel->SetText(buf);
 
@@ -4951,7 +4951,7 @@ void ZGameInterface::SelectEquipmentFrameList( const char* szName, bool bOpen)
 
 	// Resize item slot
 	char szWidgetName[ 256];
-	sprintf_s( szWidgetName, "%s_EquipmentSlot_Head", szName);
+	sprintf_safe( szWidgetName, "%s_EquipmentSlot_Head", szName);
 	MWidget* itemSlot = (MWidget*)pResource->FindWidget( szWidgetName);
 	if ( itemSlot)
 	{
@@ -5270,7 +5270,7 @@ void ZGameInterface::EnableCharSelectionInterface(bool bEnable)
 		for ( int i = 0;  i < MAX_CHAR_COUNT;  i++)
 		{
 			char szName[ 256];
-			sprintf_s( szName, "CharSel_SelectBtn%d", i);
+			sprintf_safe( szName, "CharSel_SelectBtn%d", i);
 			pWidget = m_IDLResource.FindWidget( szName);
 			if ( pWidget)
 				pWidget->Show( false);
@@ -5355,7 +5355,7 @@ void ZGameInterface::SetRoomNoLight( int d )
 	for(int i=1;i<=6;i++)
 	{
 		char szBuffer[64];
-		sprintf_s(szBuffer, "Lobby_RoomNo%d", i);
+		sprintf_safe(szBuffer, "Lobby_RoomNo%d", i);
 		MButton* pButton = (MButton*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget(szBuffer);
 		if(pButton)
 		{
@@ -5366,7 +5366,7 @@ void ZGameInterface::SetRoomNoLight( int d )
 	*/
 
 	char szBuffer[64];
-	sprintf_s(szBuffer, "Lobby_RoomNo%d", d);
+	sprintf_safe(szBuffer, "Lobby_RoomNo%d", d);
 	MButton* pButton = (MButton*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget(szBuffer);
 	if(pButton) 
 		pButton->SetCheck(true);
@@ -5775,25 +5775,25 @@ string GetRestrictionString(MMatchItemDesc* pItemDesc)
 	if ( pItemDesc->m_nResSex != -1)
 	{
 		if ( pItemDesc->m_nResSex == 0)
-			sprintf_s( temp, "%s\n", ZMsg( MSG_WORD_FORMEN));
+			sprintf_safe( temp, "%s\n", ZMsg( MSG_WORD_FORMEN));
 		else if ( pItemDesc->m_nResSex == 1)
-			sprintf_s( temp, "%s\n", ZMsg( MSG_WORD_FORWOMEN));
+			sprintf_safe( temp, "%s\n", ZMsg( MSG_WORD_FORWOMEN));
 		str += temp;
 	}
 
 	if ( pItemDesc->m_nResLevel)
 	{
 		if ( pItemDesc->m_nResLevel > ZGetMyInfo()->GetLevel())
-			sprintf_s( temp,"%s : ^1%d ^0%s\n", ZMsg( MSG_WORD_LIMITEDLEVEL), pItemDesc->m_nResLevel, ZMsg(MSG_CHARINFO_LEVELMARKER));
+			sprintf_safe( temp,"%s : ^1%d ^0%s\n", ZMsg( MSG_WORD_LIMITEDLEVEL), pItemDesc->m_nResLevel, ZMsg(MSG_CHARINFO_LEVELMARKER));
 		else
-			sprintf_s( temp,"%s : %d %s\n", ZMsg( MSG_WORD_LIMITEDLEVEL), pItemDesc->m_nResLevel, ZMsg(MSG_CHARINFO_LEVELMARKER));
+			sprintf_safe( temp,"%s : %d %s\n", ZMsg( MSG_WORD_LIMITEDLEVEL), pItemDesc->m_nResLevel, ZMsg(MSG_CHARINFO_LEVELMARKER));
 		str += temp;
 		bAdd = true;
 	}
 
 	if ( pItemDesc->m_nWeight)
 	{
-		sprintf_s( temp,"%s : %d Wt.", ZMsg( MSG_WORD_WEIGHT), pItemDesc->m_nWeight);
+		sprintf_safe( temp,"%s : %d Wt.", ZMsg( MSG_WORD_WEIGHT), pItemDesc->m_nWeight);
 		str += temp;
 		bAdd = true;
 	}
@@ -5814,53 +5814,53 @@ string GetItemSpecString(MMatchItemDesc* pItemDesc)
 		switch ( pItemDesc->m_nWeaponType)
 		{
 			case MWT_ENCHANT_FIRE :
-				sprintf_s( temp, "<%s>\n", ZMsg( MSG_WORD_ATTRIBUTE_FIRE));
+				sprintf_safe( temp, "<%s>\n", ZMsg( MSG_WORD_ATTRIBUTE_FIRE));
 				str += temp;
-				sprintf_s(temp,"%s : %d%s\n", ZMsg( MSG_WORD_RUNTIME), pItemDesc->m_nDelay/1000, ZMsg( MSG_CHARINFO_SECOND));
+				sprintf_safe(temp,"%s : %d%s\n", ZMsg( MSG_WORD_RUNTIME), pItemDesc->m_nDelay/1000, ZMsg( MSG_CHARINFO_SECOND));
 				str += temp;
 				if ( pItemDesc->m_nDamage)
 				{
-					sprintf_s(temp,"%s : %d dmg/%s\n", ZMsg( MSG_WORD_DAMAGE), pItemDesc->m_nDamage, ZMsg( MSG_CHARINFO_SECOND));
+					sprintf_safe(temp,"%s : %d dmg/%s\n", ZMsg( MSG_WORD_DAMAGE), pItemDesc->m_nDamage, ZMsg( MSG_CHARINFO_SECOND));
 					str += temp;
 				}
 				break;
 		
 			case MWT_ENCHANT_COLD :
-				sprintf_s( temp, "<%s>\n", ZMsg( MSG_WORD_ATTRIBUTE_COLD));
+				sprintf_safe( temp, "<%s>\n", ZMsg( MSG_WORD_ATTRIBUTE_COLD));
 				str += temp;
-				sprintf_s(temp,"%s : %d%s\n", ZMsg( MSG_WORD_RUNTIME), pItemDesc->m_nDelay/1000, ZMsg( MSG_CHARINFO_SECOND));
+				sprintf_safe(temp,"%s : %d%s\n", ZMsg( MSG_WORD_RUNTIME), pItemDesc->m_nDelay/1000, ZMsg( MSG_CHARINFO_SECOND));
 				str += temp;
 				if ( pItemDesc->m_nLimitSpeed)
 				{
-					sprintf_s(temp,"%s -%d%%\n",  ZMsg( MSG_WORD_RUNSPEED), 100-pItemDesc->m_nLimitSpeed);
+					sprintf_safe(temp,"%s -%d%%\n",  ZMsg( MSG_WORD_RUNSPEED), 100-pItemDesc->m_nLimitSpeed);
 					str += temp;
 				}
-				sprintf_s(temp,"%s\n", ZMsg( MSG_WORD_DONOTDASH));
+				sprintf_safe(temp,"%s\n", ZMsg( MSG_WORD_DONOTDASH));
 				str += temp;
-				sprintf_s(temp,"%s\n", ZMsg( MSG_WORD_DONOTHANGWALL));
+				sprintf_safe(temp,"%s\n", ZMsg( MSG_WORD_DONOTHANGWALL));
 				str += temp;
 				break;
 			
 			case MWT_ENCHANT_LIGHTNING :
-				sprintf_s( temp, "<%s>\n", ZMsg( MSG_WORD_ATTRIBUTE_LIGHTNING));
+				sprintf_safe( temp, "<%s>\n", ZMsg( MSG_WORD_ATTRIBUTE_LIGHTNING));
 				str += temp;
-				sprintf_s(temp,"%s : %d%s\n", ZMsg( MSG_WORD_RUNTIME), pItemDesc->m_nDelay/1000, ZMsg( MSG_CHARINFO_SECOND));
+				sprintf_safe(temp,"%s : %d%s\n", ZMsg( MSG_WORD_RUNTIME), pItemDesc->m_nDelay/1000, ZMsg( MSG_CHARINFO_SECOND));
 				str += temp;
 				if ( pItemDesc->m_nDamage)
 				{
-					sprintf_s(temp,"%s : %d dmg.\n", ZMsg( MSG_WORD_ATTACK), pItemDesc->m_nDamage);
+					sprintf_safe(temp,"%s : %d dmg.\n", ZMsg( MSG_WORD_ATTACK), pItemDesc->m_nDamage);
 					str += temp;
 				}
 				break;
 			
 			case MWT_ENCHANT_POISON :
-				sprintf_s( temp, "<%s>\n", ZMsg( MSG_WORD_ATTRIBUTE_POISON));
+				sprintf_safe( temp, "<%s>\n", ZMsg( MSG_WORD_ATTRIBUTE_POISON));
 				str += temp;
-				sprintf_s(temp,"%s : %d%s\n", ZMsg( MSG_WORD_RUNTIME), pItemDesc->m_nDelay/1000, ZMsg( MSG_CHARINFO_SECOND));
+				sprintf_safe(temp,"%s : %d%s\n", ZMsg( MSG_WORD_RUNTIME), pItemDesc->m_nDelay/1000, ZMsg( MSG_CHARINFO_SECOND));
 				str += temp;
 				if ( pItemDesc->m_nDamage)
 				{
-					sprintf_s(temp,"%s : %d dmg/%s\n", ZMsg( MSG_WORD_DAMAGE), pItemDesc->m_nDamage, ZMsg( MSG_CHARINFO_SECOND));
+					sprintf_safe(temp,"%s : %d dmg/%s\n", ZMsg( MSG_WORD_DAMAGE), pItemDesc->m_nDamage, ZMsg( MSG_CHARINFO_SECOND));
 					str += temp;
 				}
 				break;
@@ -5872,10 +5872,10 @@ string GetItemSpecString(MMatchItemDesc* pItemDesc)
 	else
 	{
 		if(pItemDesc->m_nMaxBullet) {
-			sprintf_s( temp, "%s : %d", ZMsg( MSG_WORD_BULLET), pItemDesc->m_nMagazine);
+			sprintf_safe( temp, "%s : %d", ZMsg( MSG_WORD_BULLET), pItemDesc->m_nMagazine);
 
 			if ( ( pItemDesc->m_nMaxBullet / pItemDesc->m_nMagazine) > 1)
-			sprintf_s( temp, "%s x %d", temp, pItemDesc->m_nMaxBullet / pItemDesc->m_nMagazine);
+			sprintf_safe( temp, "%s x %d", temp, pItemDesc->m_nMaxBullet / pItemDesc->m_nMagazine);
 
 			str += temp;
 			str += "\n";
@@ -5883,19 +5883,19 @@ string GetItemSpecString(MMatchItemDesc* pItemDesc)
 		}
 
 		if(pItemDesc->m_nDamage) {
-			sprintf_s(temp,"%s : %d dmg.\n", ZMsg( MSG_WORD_ATTACK), pItemDesc->m_nDamage);
+			sprintf_safe(temp,"%s : %d dmg.\n", ZMsg( MSG_WORD_ATTACK), pItemDesc->m_nDamage);
 			str += temp;
 			bAdd = true;
 		}
 
 		if(pItemDesc->m_nDelay) {
-			sprintf_s(temp,"%s : %d\n", ZMsg( MSG_WORD_DELAY), pItemDesc->m_nDelay);
+			sprintf_safe(temp,"%s : %d\n", ZMsg( MSG_WORD_DELAY), pItemDesc->m_nDelay);
 			str += temp;
 			bAdd = true;
 		}
 
 //		if(pItemDesc->m_nReloadTime) {
-//			sprintf_s(temp,"장전시간 : %d s\n",pItemDesc->m_nReloadTime);
+//			sprintf_safe(temp,"장전시간 : %d s\n",pItemDesc->m_nReloadTime);
 //			str += temp;
 //			bAdd = true;
 //		}
@@ -5903,7 +5903,7 @@ string GetItemSpecString(MMatchItemDesc* pItemDesc)
 
 		// HP
 		if(pItemDesc->m_nHP) {
-			sprintf_s(temp,"%s +%d\n", ZMsg(MSG_CHARINFO_HP), pItemDesc->m_nHP);
+			sprintf_safe(temp,"%s +%d\n", ZMsg(MSG_CHARINFO_HP), pItemDesc->m_nHP);
 			str += temp;
 			bAdd = true;
 		}
@@ -5911,44 +5911,44 @@ string GetItemSpecString(MMatchItemDesc* pItemDesc)
 
 		// AP
 		if(pItemDesc->m_nAP) {
-			sprintf_s(temp,"%s +%d\n", ZMsg(MSG_CHARINFO_AP), pItemDesc->m_nAP);
+			sprintf_safe(temp,"%s +%d\n", ZMsg(MSG_CHARINFO_AP), pItemDesc->m_nAP);
 			str += temp;
 			bAdd = true;
 		}
 
 
 		if(pItemDesc->m_nMaxWT) {
-			sprintf_s(temp,"%s +%d\n", ZMsg( MSG_WORD_MAXWEIGHT), pItemDesc->m_nMaxWT);
+			sprintf_safe(temp,"%s +%d\n", ZMsg( MSG_WORD_MAXWEIGHT), pItemDesc->m_nMaxWT);
 			str += temp;
 			bAdd = true;
 		}
 
 		if(pItemDesc->m_nSF) {
-			sprintf_s(temp,"SF +%d\n",pItemDesc->m_nSF);
+			sprintf_safe(temp,"SF +%d\n",pItemDesc->m_nSF);
 			str += temp;
 			bAdd = true;
 		}
 
 		if(pItemDesc->m_nFR) {
-			sprintf_s(temp,"FR +%d\n",pItemDesc->m_nFR);
+			sprintf_safe(temp,"FR +%d\n",pItemDesc->m_nFR);
 			str += temp;
 			bAdd = true;
 		}
 
 		if(pItemDesc->m_nCR) {
-			sprintf_s(temp,"CR +%d\n",pItemDesc->m_nCR);
+			sprintf_safe(temp,"CR +%d\n",pItemDesc->m_nCR);
 			str += temp;
 			bAdd = true;
 		}
 
 		if(pItemDesc->m_nPR) {
-			sprintf_s(temp,"PR +%d\n",pItemDesc->m_nPR);
+			sprintf_safe(temp,"PR +%d\n",pItemDesc->m_nPR);
 			str += temp;
 			bAdd = true;
 		}
 
 		if(pItemDesc->m_nLR ) {
-			sprintf_s(temp,"LR +%d\n",pItemDesc->m_nLR);
+			sprintf_safe(temp,"LR +%d\n",pItemDesc->m_nLR);
 			str += temp;
 			bAdd = true;
 		}
@@ -5956,25 +5956,25 @@ string GetItemSpecString(MMatchItemDesc* pItemDesc)
 		str += "\n";
 
 		if(pItemDesc->m_nLimitSpeed != 100) {
-			sprintf_s(temp,"%s -%d%%\n", ZMsg( MSG_WORD_RUNSPEED), 100-pItemDesc->m_nLimitSpeed);
+			sprintf_safe(temp,"%s -%d%%\n", ZMsg( MSG_WORD_RUNSPEED), 100-pItemDesc->m_nLimitSpeed);
 			str += temp;
 			bAdd = true;
 		}
 
 		if(pItemDesc->m_nLimitJump) {
-			sprintf_s(temp,"%s\n", ZMsg( MSG_WORD_DONOTJUMP));
+			sprintf_safe(temp,"%s\n", ZMsg( MSG_WORD_DONOTJUMP));
 			str += temp;
 			bAdd = true;
 		}
 
 		if(pItemDesc->m_nLimitTumble) {
-			sprintf_s(temp,"%s\n", ZMsg( MSG_WORD_DONOTDASH));
+			sprintf_safe(temp,"%s\n", ZMsg( MSG_WORD_DONOTDASH));
 			str += temp;
 			bAdd = true;
 		}
 
 		if(pItemDesc->m_nLimitWall) {
-			sprintf_s(temp,"%s\n", ZMsg( MSG_WORD_DONOTHANGWALL));
+			sprintf_safe(temp,"%s\n", ZMsg( MSG_WORD_DONOTHANGWALL));
 			str += temp;
 			bAdd = true;
 		}
@@ -6005,16 +6005,16 @@ string GetPeriodItemString( ZMyItemNode* pRentalNode)
 
 				if ( dwRemaind > 1440)
 				{
-					sprintf_s( temp, "%d%s ", dwRemaind / 1440, ZMsg( MSG_CHARINFO_DAY));
+					sprintf_safe( temp, "%d%s ", dwRemaind / 1440, ZMsg( MSG_CHARINFO_DAY));
 					str += temp;
 					dwRemaind %= 1440;
 				}
 
-				sprintf_s( temp, "%d%s ", dwRemaind / 60, ZMsg( MSG_CHARINFO_HOUR));
+				sprintf_safe( temp, "%d%s ", dwRemaind / 60, ZMsg( MSG_CHARINFO_HOUR));
 				str += temp;
 				dwRemaind %= 60;
 
-				sprintf_s( temp, "%d%s", dwRemaind, ZMsg( MSG_CHARINFO_MINUTE));
+				sprintf_safe( temp, "%d%s", dwRemaind, ZMsg( MSG_CHARINFO_MINUTE));
 				str += temp;
 
 				str += "  ";
@@ -6084,49 +6084,49 @@ void ZGameInterface::SetupItemDescription( MMatchItemDesc* pItemDesc, const char
 		pTextArea->Clear();
 
 		if ( pItemDesc->m_nResLevel > ZGetMyInfo()->GetLevel())
-			sprintf_s(szBuff, "^9%s : ^1%d ^9%s", ZMsg(MSG_CHARINFO_LEVEL), ZGetMyInfo()->GetLevel(), ZMsg(MSG_CHARINFO_LEVELMARKER));
+			sprintf_safe(szBuff, "^9%s : ^1%d ^9%s", ZMsg(MSG_CHARINFO_LEVEL), ZGetMyInfo()->GetLevel(), ZMsg(MSG_CHARINFO_LEVELMARKER));
 		else
-			sprintf_s(szBuff, "^9%s : %d %s", ZMsg(MSG_CHARINFO_LEVEL), ZGetMyInfo()->GetLevel(), ZMsg(MSG_CHARINFO_LEVELMARKER));
+			sprintf_safe(szBuff, "^9%s : %d %s", ZMsg(MSG_CHARINFO_LEVEL), ZGetMyInfo()->GetLevel(), ZMsg(MSG_CHARINFO_LEVELMARKER));
 		pTextArea->AddText(szBuff);
 
 
 		if ( pItemDesc->m_nBountyPrice > ZGetMyInfo()->GetBP())
-			sprintf_s(szBuff, "^9%s : ^1%d", ZMsg(MSG_CHARINFO_BOUNTY), ZGetMyInfo()->GetBP());
+			sprintf_safe(szBuff, "^9%s : ^1%d", ZMsg(MSG_CHARINFO_BOUNTY), ZGetMyInfo()->GetBP());
 		else
-			sprintf_s(szBuff, "^9%s : %d", ZMsg(MSG_CHARINFO_BOUNTY), ZGetMyInfo()->GetBP());
+			sprintf_safe(szBuff, "^9%s : %d", ZMsg(MSG_CHARINFO_BOUNTY), ZGetMyInfo()->GetBP());
 		pTextArea->AddText(szBuff);
 
 
 		if ( pItemDesc->m_nHP > pMyItemDesc->m_nHP)
-			sprintf_s(szBuff,"^9%s : %d ^2+%d", ZMsg(MSG_CHARINFO_HP), ZGetMyInfo()->GetHP(), pItemDesc->m_nHP - pMyItemDesc->m_nHP);
+			sprintf_safe(szBuff,"^9%s : %d ^2+%d", ZMsg(MSG_CHARINFO_HP), ZGetMyInfo()->GetHP(), pItemDesc->m_nHP - pMyItemDesc->m_nHP);
 		else if ( pItemDesc->m_nHP < pMyItemDesc->m_nHP)
-			sprintf_s(szBuff,"^9%s : %d ^1-%d", ZMsg(MSG_CHARINFO_HP), ZGetMyInfo()->GetHP(), pMyItemDesc->m_nHP - pItemDesc->m_nHP);
+			sprintf_safe(szBuff,"^9%s : %d ^1-%d", ZMsg(MSG_CHARINFO_HP), ZGetMyInfo()->GetHP(), pMyItemDesc->m_nHP - pItemDesc->m_nHP);
 		else
-			sprintf_s(szBuff,"^9%s : %d", ZMsg(MSG_CHARINFO_HP), ZGetMyInfo()->GetHP());
+			sprintf_safe(szBuff,"^9%s : %d", ZMsg(MSG_CHARINFO_HP), ZGetMyInfo()->GetHP());
 		pTextArea->AddText( szBuff);
 
 
 		if ( pItemDesc->m_nAP > pMyItemDesc->m_nAP)
-			sprintf_s(szBuff,"^9%s : %d ^2+%d", ZMsg(MSG_CHARINFO_AP), ZGetMyInfo()->GetAP(), pItemDesc->m_nAP - pMyItemDesc->m_nAP);
+			sprintf_safe(szBuff,"^9%s : %d ^2+%d", ZMsg(MSG_CHARINFO_AP), ZGetMyInfo()->GetAP(), pItemDesc->m_nAP - pMyItemDesc->m_nAP);
 		else if ( pItemDesc->m_nAP < pMyItemDesc->m_nAP)
-			sprintf_s(szBuff,"^9%s : %d ^1-%d", ZMsg(MSG_CHARINFO_AP), ZGetMyInfo()->GetAP(), pMyItemDesc->m_nAP - pItemDesc->m_nAP);
+			sprintf_safe(szBuff,"^9%s : %d ^1-%d", ZMsg(MSG_CHARINFO_AP), ZGetMyInfo()->GetAP(), pMyItemDesc->m_nAP - pItemDesc->m_nAP);
 		else
-			sprintf_s(szBuff,"^9%s : %d", ZMsg(MSG_CHARINFO_AP), ZGetMyInfo()->GetAP());
+			sprintf_safe(szBuff,"^9%s : %d", ZMsg(MSG_CHARINFO_AP), ZGetMyInfo()->GetAP());
 		pTextArea->AddText( szBuff);
 
 
 		if ( (ZGetMyInfo()->GetItemList()->GetEquipedTotalWeight() - pMyItemDesc->m_nWeight + pItemDesc->m_nWeight) > ZGetMyInfo()->GetItemList()->GetMaxWeight())
-			sprintf_s(szBuff,"^9%s : ^1%d^9/", ZMsg(MSG_CHARINFO_WEIGHT), ZGetMyInfo()->GetItemList()->GetEquipedTotalWeight());
+			sprintf_safe(szBuff,"^9%s : ^1%d^9/", ZMsg(MSG_CHARINFO_WEIGHT), ZGetMyInfo()->GetItemList()->GetEquipedTotalWeight());
 		else
-			sprintf_s(szBuff,"^9%s : %d/", ZMsg(MSG_CHARINFO_WEIGHT), ZGetMyInfo()->GetItemList()->GetEquipedTotalWeight());
+			sprintf_safe(szBuff,"^9%s : %d/", ZMsg(MSG_CHARINFO_WEIGHT), ZGetMyInfo()->GetItemList()->GetEquipedTotalWeight());
 
 		char chTmp[ 32];
 		if ( pItemDesc->m_nMaxWT > pMyItemDesc->m_nMaxWT)
-			sprintf_s(chTmp,"%d ^2+%d", ZGetMyInfo()->GetItemList()->GetMaxWeight(), pItemDesc->m_nMaxWT - pMyItemDesc->m_nMaxWT);
+			sprintf_safe(chTmp,"%d ^2+%d", ZGetMyInfo()->GetItemList()->GetMaxWeight(), pItemDesc->m_nMaxWT - pMyItemDesc->m_nMaxWT);
 		else if ( pItemDesc->m_nMaxWT < pMyItemDesc->m_nMaxWT)
-			sprintf_s(chTmp,"%d ^1-%d", ZGetMyInfo()->GetItemList()->GetMaxWeight(), pMyItemDesc->m_nMaxWT - pItemDesc->m_nMaxWT);
+			sprintf_safe(chTmp,"%d ^1-%d", ZGetMyInfo()->GetItemList()->GetMaxWeight(), pMyItemDesc->m_nMaxWT - pItemDesc->m_nMaxWT);
 		else
-			sprintf_s(chTmp,"%d", ZGetMyInfo()->GetItemList()->GetMaxWeight());
+			sprintf_safe(chTmp,"%d", ZGetMyInfo()->GetItemList()->GetMaxWeight());
 		strcat( szBuff, chTmp);
 		pTextArea->AddText( szBuff);
 	}
@@ -6148,14 +6148,14 @@ void ZGameInterface::SetupItemDescription( MQuestItemDesc* pItemDesc, const char
 		pTextArea1->SetText( pItemDesc->m_szQuestItemName);
 		pTextArea1->AddText( "\n");
 		char szText[256];
-		sprintf_s( szText, "(%s %s)", ZMsg( MSG_WORD_QUEST), ZMsg( MSG_WORD_ITEM));
+		sprintf_safe( szText, "(%s %s)", ZMsg( MSG_WORD_QUEST), ZMsg( MSG_WORD_ITEM));
 		pTextArea1->AddText( szText, MCOLOR( 170, 170, 170));
 		pTextArea1->AddText( "\n\n");
 
 		// 제약사항
 		if ( pItemDesc->m_bSecrifice)
 		{
-			sprintf_s( szText, "%s %s", ZMsg( MSG_WORD_SACRIFICE), ZMsg( MSG_WORD_ITEM));
+			sprintf_safe( szText, "%s %s", ZMsg( MSG_WORD_SACRIFICE), ZMsg( MSG_WORD_ITEM));
 			pTextArea1->AddText( szText, MCOLOR( 170, 170, 170));
 		}
 	}
@@ -6184,19 +6184,19 @@ void ZGameInterface::SetupItemDescription( MQuestItemDesc* pItemDesc, const char
 		pTextArea->Clear();
 
 		char szTemp[64];
-		sprintf_s(szTemp, "^9%s : %d %s", ZMsg(MSG_CHARINFO_LEVEL), ZGetMyInfo()->GetLevel(), ZMsg(MSG_CHARINFO_LEVELMARKER));
+		sprintf_safe(szTemp, "^9%s : %d %s", ZMsg(MSG_CHARINFO_LEVEL), ZGetMyInfo()->GetLevel(), ZMsg(MSG_CHARINFO_LEVELMARKER));
 		pTextArea->AddText(szTemp);
 
-		sprintf_s(szTemp, "^9%s : %d", ZMsg(MSG_CHARINFO_BOUNTY), ZGetMyInfo()->GetBP());
+		sprintf_safe(szTemp, "^9%s : %d", ZMsg(MSG_CHARINFO_BOUNTY), ZGetMyInfo()->GetBP());
 		pTextArea->AddText(szTemp);
 
-		sprintf_s(szTemp, "^9%s : %d", ZMsg(MSG_CHARINFO_HP), ZGetMyInfo()->GetHP());
+		sprintf_safe(szTemp, "^9%s : %d", ZMsg(MSG_CHARINFO_HP), ZGetMyInfo()->GetHP());
 		pTextArea->AddText(szTemp);
 
-		sprintf_s(szTemp, "^9%s : %d", ZMsg(MSG_CHARINFO_AP), ZGetMyInfo()->GetAP());
+		sprintf_safe(szTemp, "^9%s : %d", ZMsg(MSG_CHARINFO_AP), ZGetMyInfo()->GetAP());
 		pTextArea->AddText(szTemp);
 
-		sprintf_s(szTemp, "^9%s : %d/%d", ZMsg(MSG_CHARINFO_WEIGHT), ZGetMyInfo()->GetItemList()->GetEquipedTotalWeight(), ZGetMyInfo()->GetItemList()->GetMaxWeight());
+		sprintf_safe(szTemp, "^9%s : %d/%d", ZMsg(MSG_CHARINFO_WEIGHT), ZGetMyInfo()->GetItemList()->GetEquipedTotalWeight(), ZGetMyInfo()->GetItemList()->GetMaxWeight());
 		pTextArea->AddText(szTemp);
 	}
 
@@ -6206,19 +6206,19 @@ void ZGameInterface::SetupItemDescription( MQuestItemDesc* pItemDesc, const char
 		pTextArea->Clear();
 
 		char szTemp[64];
-		sprintf_s(szTemp, "^9%s : %d %s", ZMsg(MSG_CHARINFO_LEVEL), ZGetMyInfo()->GetLevel(), ZMsg(MSG_CHARINFO_LEVELMARKER));
+		sprintf_safe(szTemp, "^9%s : %d %s", ZMsg(MSG_CHARINFO_LEVEL), ZGetMyInfo()->GetLevel(), ZMsg(MSG_CHARINFO_LEVELMARKER));
 		pTextArea->AddText(szTemp);
 
-		sprintf_s(szTemp, "^9%s : %d", ZMsg(MSG_CHARINFO_BOUNTY), ZGetMyInfo()->GetBP());
+		sprintf_safe(szTemp, "^9%s : %d", ZMsg(MSG_CHARINFO_BOUNTY), ZGetMyInfo()->GetBP());
 		pTextArea->AddText(szTemp);
 
-		sprintf_s(szTemp, "^9%s : %d", ZMsg(MSG_CHARINFO_HP), ZGetMyInfo()->GetHP());
+		sprintf_safe(szTemp, "^9%s : %d", ZMsg(MSG_CHARINFO_HP), ZGetMyInfo()->GetHP());
 		pTextArea->AddText(szTemp);
 
-		sprintf_s(szTemp, "^9%s : %d", ZMsg(MSG_CHARINFO_AP), ZGetMyInfo()->GetAP());
+		sprintf_safe(szTemp, "^9%s : %d", ZMsg(MSG_CHARINFO_AP), ZGetMyInfo()->GetAP());
 		pTextArea->AddText(szTemp);
 
-		sprintf_s(szTemp, "^9%s : %d/%d", ZMsg(MSG_CHARINFO_WEIGHT), ZGetMyInfo()->GetItemList()->GetEquipedTotalWeight(), ZGetMyInfo()->GetItemList()->GetMaxWeight());
+		sprintf_safe(szTemp, "^9%s : %d/%d", ZMsg(MSG_CHARINFO_WEIGHT), ZGetMyInfo()->GetItemList()->GetEquipedTotalWeight(), ZGetMyInfo()->GetItemList()->GetMaxWeight());
 		pTextArea->AddText(szTemp);
 	}
 }
@@ -6357,7 +6357,7 @@ void ZGameInterface::ShowReplayDialog( bool bShow)
 						if( (nRead != 0) && (header == GUNZ_REC_FILE_ID))
 						{
 							zfread( &dwFileVersion, sizeof( dwFileVersion), 1, file);
-							sprintf_s( szVersion, "v%d.0", dwFileVersion);
+							sprintf_safe( szVersion, "v%d.0", dwFileVersion);
 						}
 						else
 							strcpy_safe( szVersion, "--");
@@ -6671,17 +6671,17 @@ void ZGameInterface::OnResponseServerStatusInfoList( const int nListCount, void*
 //					_snprintf( szServName, 127, "server%d(dead)", pss->m_nServerID );
 
 			if ( pss->m_nType == 1)					// Debug server
-				sprintf_s( szServName, "%s %d", ZMsg(MSG_SERVER_DEBUG), pss->m_nServerID );
+				sprintf_safe( szServName, "%s %d", ZMsg(MSG_SERVER_DEBUG), pss->m_nServerID );
 			else if ( pss->m_nType == 2)			// Match server
-				sprintf_s( szServName, "%s %d", ZMsg(MSG_SERVER_MATCH), pss->m_nServerID );
+				sprintf_safe( szServName, "%s %d", ZMsg(MSG_SERVER_MATCH), pss->m_nServerID );
 			else if ( pss->m_nType == 3)			// Clan server
-				sprintf_s( szServName, "%s %d", ZMsg(MSG_SERVER_CLAN), pss->m_nServerID );
+				sprintf_safe( szServName, "%s %d", ZMsg(MSG_SERVER_CLAN), pss->m_nServerID );
 			else if ( pss->m_nType == 4)			// Quest server
-				sprintf_s( szServName, "%s %d", ZMsg(MSG_SERVER_QUEST), pss->m_nServerID );
+				sprintf_safe( szServName, "%s %d", ZMsg(MSG_SERVER_QUEST), pss->m_nServerID );
 			else if ( pss->m_nType == 5)			// Event server
-				sprintf_s( szServName, "%s %d", ZMsg(MSG_SERVER_EVENT), pss->m_nServerID );
+				sprintf_safe( szServName, "%s %d", ZMsg(MSG_SERVER_EVENT), pss->m_nServerID );
 			else if ( pss->m_nType == 6)			// Test server
-				sprintf_s( szServName, "Test Server %d", pss->m_nServerID );
+				sprintf_safe( szServName, "Test Server %d", pss->m_nServerID );
 			else
 				continue;
 
@@ -6843,6 +6843,6 @@ void ZGameInterface::OnAnnounceDeleteClan( const string& strAnnounce )
 {
 	char szMsg[ 128 ];
 	
-	sprintf_s( szMsg, MGetStringResManager()->GetErrorStr(MERR_CLAN_ANNOUNCE_DELETE), strAnnounce.c_str() );
+	sprintf_safe( szMsg, MGetStringResManager()->GetErrorStr(MERR_CLAN_ANNOUNCE_DELETE), strAnnounce.c_str() );
 	ShowMessage( szMsg );
 }

@@ -56,20 +56,20 @@ void ZGetTimeStrFromSec(char* poutStr, unsigned long int nSec)
 	poutStr[0] = 0;
 	if (d != 0)
 	{
-		sprintf_s(sztemp, "%d%s ", d, ZMsg( MSG_CHARINFO_DAY));
+		sprintf_safe(sztemp, "%d%s ", d, ZMsg( MSG_CHARINFO_DAY));
 		strcat(poutStr, sztemp);
 	}
 	if (h != 0)
 	{
-		sprintf_s(sztemp, "%d%s ", h, ZMsg( MSG_CHARINFO_HOUR));
+		sprintf_safe(sztemp, "%d%s ", h, ZMsg( MSG_CHARINFO_HOUR));
 		strcat(poutStr, sztemp);
 	}
 	if (m != 0)
 	{
-		sprintf_s(sztemp, "%d%s ", m, ZMsg( MSG_CHARINFO_MINUTE));
+		sprintf_safe(sztemp, "%d%s ", m, ZMsg( MSG_CHARINFO_MINUTE));
 		strcat(poutStr, sztemp);
 	}
-	sprintf_s(sztemp, "%d%s", s, ZMsg( MSG_CHARINFO_SECOND));
+	sprintf_safe(sztemp, "%d%s", s, ZMsg( MSG_CHARINFO_SECOND));
 	strcat(poutStr, sztemp);
 }
 

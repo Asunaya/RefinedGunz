@@ -108,7 +108,7 @@ void ZOptionInterface::InitInterfaceOption(void)
 	// Action Key
 	for(int i=0; i<ZACTION_COUNT; i++){
 		char szItemName[256];
-		sprintf_s(szItemName, "%sActionKey", ZGetConfiguration()->GetKeyboard()->ActionKeys[i].szName);
+		sprintf_safe(szItemName, "%sActionKey", ZGetConfiguration()->GetKeyboard()->ActionKeys[i].szName);
 
 		BEGIN_WIDGETLIST(szItemName, pResource, ZActionKey*, pWidget);
 		pWidget->SetActionKey(ZGetConfiguration()->GetKeyboard()->ActionKeys[i].nVirtualKey);
@@ -155,7 +155,7 @@ void ZOptionInterface::InitInterfaceOption(void)
 							if( iter_ == gDisplayMode.end() )
 							{
 								gDisplayMode.insert( map<int, D3DDISPLAYMODE>::value_type( dmIndex++, ddm ) );
-								sprintf_s( szBuf, "%d x %d %dbpp", ddm.Width, ddm.Height, ddm.Format==D3DFMT_X8R8G8B8?32:16 );
+								sprintf_safe( szBuf, "%d x %d %dbpp", ddm.Width, ddm.Height, ddm.Format==D3DFMT_X8R8G8B8?32:16 );
 								pWidget->Add(szBuf);
 							}
 						}
@@ -175,7 +175,7 @@ void ZOptionInterface::InitInterfaceOption(void)
 
 					int bpp = (i%2 == 1)? 32 : 16;
 					gDisplayMode.insert( map<int, D3DDISPLAYMODE>::value_type(i,ddm) );
-					sprintf_s( szBuf, "%dx%d  %d bpp", ddm.Width, ddm.Height, bpp );
+					sprintf_safe( szBuf, "%dx%d  %d bpp", ddm.Width, ddm.Height, bpp );
 					pWidget->Add( szBuf );
 				}
 			}
@@ -314,7 +314,7 @@ void ZOptionInterface::InitInterfaceOption(void)
 		if (pEdit)
 		{
 			char szBuf[64];
-			sprintf_s(szBuf, "%d", Z_ETC_NETWORKPORT1);
+			sprintf_safe(szBuf, "%d", Z_ETC_NETWORKPORT1);
 			pEdit->SetText(szBuf);
 		}
 
@@ -322,7 +322,7 @@ void ZOptionInterface::InitInterfaceOption(void)
 		if (pEdit)
 		{
 			char szBuf[64];
-			sprintf_s(szBuf, "%d", Z_ETC_NETWORKPORT2);
+			sprintf_safe(szBuf, "%d", Z_ETC_NETWORKPORT2);
 			pEdit->SetText(szBuf);
 		}
 
@@ -372,11 +372,11 @@ void ZOptionInterface::InitInterfaceOption(void)
 			for (int i = 0; i < ZCSP_CUSTOM; i++)
 			{
 				char szText[256];
-				sprintf_s(szText, "%s %d", ZMsg(MSG_WORD_TYPE), i+1);
+				sprintf_safe(szText, "%s %d", ZMsg(MSG_WORD_TYPE), i+1);
 				pComboBox->Add(szText);
 			}
 			char szCustomFile[256];
-			sprintf_s(szCustomFile, "%s%s%s", PATH_CUSTOM_CROSSHAIR, FN_CROSSHAIR_HEADER, FN_CROSSHAIR_TAILER);
+			sprintf_safe(szCustomFile, "%s%s%s", PATH_CUSTOM_CROSSHAIR, FN_CROSSHAIR_HEADER, FN_CROSSHAIR_TAILER);
 			if (IsExist(szCustomFile)) pComboBox->Add("Custom");
 
 			if (Z_ETC_CROSSHAIR >= pComboBox->GetCount())	// 사용자지정이였는데 사용자지정이 없어졌을 경우
@@ -482,7 +482,7 @@ bool ZOptionInterface::SaveInterfaceOption(void)
 
 	for(i=0; i<ZACTION_COUNT; i++){
 		char szItemName[256];
-		sprintf_s(szItemName, "%sActionKey", ZGetConfiguration()->GetKeyboard()->ActionKeys[i].szName);
+		sprintf_safe(szItemName, "%sActionKey", ZGetConfiguration()->GetKeyboard()->ActionKeys[i].szName);
 		ZActionKey* pWidget = (ZActionKey*)pResource->FindWidget(szItemName);
 		if(pWidget==NULL) continue;
 		int nKey = 0;
@@ -903,7 +903,7 @@ bool ZOptionInterface::SetTimer( bool b, float time /* = 0.f  */ )
 	else
 	{
 		char szBuf[128];
-		sprintf_s(szBuf, "%d", min(max( (10 - (int)(( timeGetTime() - mTimerTime ) * 0.001)),0),10));
+		sprintf_safe(szBuf, "%d", min(max( (10 - (int)(( timeGetTime() - mTimerTime ) * 0.001)),0),10));
 
 		char szText[ 128];
 		ZTransMsg( szText, MSG_BACKTOTHEPREV, 1, szBuf);
@@ -1484,7 +1484,7 @@ void ZOptionInterface::OnActionKeySet(ZActionKey* pActionKey, ZVIRTUALKEY key)
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
 	for(int i=0; i<ZACTION_COUNT; i++){
 		char szItemName[256];
-		sprintf_s(szItemName, "%sActionKey", ZGetConfiguration()->GetKeyboard()->ActionKeys[i].szName);
+		sprintf_safe(szItemName, "%sActionKey", ZGetConfiguration()->GetKeyboard()->ActionKeys[i].szName);
 		ZActionKey* pWidget = (ZActionKey*)pResource->FindWidget(szItemName);
 		if(pWidget==NULL) continue;
 		if(pWidget==pActionKey) continue;
@@ -1606,7 +1606,7 @@ BEGIN_IMPLEMENT_LISTENER( ZGetLoadDefaultKeySettingListener, MBTN_CLK_MSG)
 	for(int i=0; i<ZACTION_COUNT; i++)
 	{
 		char szItemName[256];
-		sprintf_s(szItemName, "%sActionKey", ZGetConfiguration()->GetKeyboard()->ActionKeys[i].szName);
+		sprintf_safe(szItemName, "%sActionKey", ZGetConfiguration()->GetKeyboard()->ActionKeys[i].szName);
 		ZActionKey* pWidget = (ZActionKey*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget(szItemName);
 		if(pWidget==NULL) continue;
 		//unsigned int nKey = 0;

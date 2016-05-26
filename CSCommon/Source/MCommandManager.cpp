@@ -131,10 +131,10 @@ MCommand* MCommandManager::PeekCommand(void)
 
 void MCommandManager::GetSyntax(char* szSyntax, int maxlen, const MCommandDesc* pCD)
 {
-	sprintf_s(szSyntax, maxlen, "%s ", pCD->GetName());
+	sprintf_safe(szSyntax, maxlen, "%s ", pCD->GetName());
 	for(int i=0; i<pCD->GetParameterDescCount(); i++){
 		MCommandParameterDesc* pPD = pCD->GetParameterDesc(i);
-		sprintf_s(szSyntax, maxlen, "%s %s", szSyntax, pPD->GetDescription());
+		sprintf_safe(szSyntax, maxlen, "%s %s", szSyntax, pPD->GetDescription());
 	}
 }
 
@@ -286,7 +286,7 @@ bool MCommandManager::ParseMessage(MCommand* pCmd, char* szErrMsg, int nErrMsgMa
 					char szSyntax[256];
 					static char temp[512];
 					GetSyntax(szSyntax, pCmd->m_pCommandDesc);
-					sprintf_s(temp, "Sytax Error: [Syntax] %s", szSyntax);
+					sprintf_safe(temp, "Sytax Error: [Syntax] %s", szSyntax);
 					MStrNCpy(szErrMsg, nErrMsgMaxLength, temp);
 					return false;
 				}

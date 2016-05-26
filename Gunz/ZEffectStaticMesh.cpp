@@ -54,7 +54,7 @@ bool ZEffectStaticMesh::Draw(unsigned long int nTime)
 	////////////////////////////////////////////////////////////////////////////////////
 /*
 	static char _buffer[40];
-	sprintf_s(_buffer,"ZEffectStaticMesh::Draw : %d \n",g_effect_empty_cartridge_cnt);
+	sprintf_safe(_buffer,"ZEffectStaticMesh::Draw : %d \n",g_effect_empty_cartridge_cnt);
 	OutputDebugString(_buffer);
 */
 	////////////////////////////////////////////////////////////////////////////////////

@@ -36,11 +36,11 @@ void MCommandLogFrame::AddCommand(unsigned long int nGlobalClock, MCommand* pCmd
 	char szParam[256];
 	MUID uid;
 
-	sprintf_s(temp, "%u: %s", nGlobalClock, pCmd->m_pCommandDesc->GetName());
+	sprintf_safe(temp, "%u: %s", nGlobalClock, pCmd->m_pCommandDesc->GetName());
 	for(int i=0; i<pCmd->GetParameterCount(); i++){
 		pCmd->GetParameter(i)->GetString(szParam);
 		uid = pCmd->GetSenderUID();
-		sprintf_s(temp, "%s (uid:%d) %s(%s)", temp, uid.Low , pCmd->GetParameter(i)->GetClassName(), szParam);
+		sprintf_safe(temp, "%s (uid:%d) %s(%s)", temp, uid.Low , pCmd->GetParameter(i)->GetClassName(), szParam);
 		
 	}
 	m_pCommandList->Add(temp);

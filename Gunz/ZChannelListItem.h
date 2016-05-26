@@ -24,7 +24,7 @@ public:
 	}
 	virtual ~ZChannelListItem()			{}
 	virtual const char* GetString(void)	{ 
-		sprintf_s(m_szItemString,"%s (%d/%d)",m_szChannelName,m_nPlayers,m_nMaxPlayers);
+		sprintf_safe(m_szItemString,"%s (%d/%d)",m_szChannelName,m_nPlayers,m_nMaxPlayers);
 		return m_szItemString; 
 	}
 	MUID GetUID()						{ return m_uidChannel; }

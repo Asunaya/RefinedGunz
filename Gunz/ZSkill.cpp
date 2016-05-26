@@ -672,7 +672,7 @@ void ZSkill::Use(MUID& uidTarget, rvector& targetPos)
 		char szSoundName[64];
 		char *pszSoundName = szSoundName;
 		if(bObserverTarget) {
-			sprintf_s(szSoundName,"%s_2d",m_pDesc->szEffectSound);
+			sprintf_safe(szSoundName,"%s_2d",m_pDesc->szEffectSound);
 			if(!ZGetSoundEngine()->isPlayAble(szSoundName))
 				pszSoundName = m_pDesc->szEffectSound;
 		}

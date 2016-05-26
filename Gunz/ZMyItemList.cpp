@@ -244,10 +244,10 @@ void ZMyItemList::Serialize()
 				char szName[ 128];
 				if ( pItemNode->m_nCount > 0)
 				{
-					sprintf_s( szName, "%s(x%d)", pItemDesc->m_szQuestItemName, pItemNode->m_nCount);
+					sprintf_safe( szName, "%s(x%d)", pItemDesc->m_szQuestItemName, pItemNode->m_nCount);
 
 					char szPrice[ 128];
-					sprintf_s( szPrice, "%d", (int)( pItemDesc->m_nPrice * 0.25));
+					sprintf_safe( szPrice, "%d", (int)( pItemDesc->m_nPrice * 0.25));
 
 					if ( (m_ListFilter == zshop_item_filter_all) || (m_ListFilter == zshop_item_filter_quest))
 					{

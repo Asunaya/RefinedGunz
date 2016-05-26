@@ -63,7 +63,7 @@ void ZRuleAssassinate::AssignCommander(const MUID& uidRedCommander, const MUID& 
 	//// DEBUG LOG ////
 	const char *szUnknown = "unknown";
 	char szBuf[128];
-	sprintf_s(szBuf, "RedCMDER=%s , BlueCMDER=%s \n", 
+	sprintf_safe(szBuf, "RedCMDER=%s , BlueCMDER=%s \n", 
 		pRedChar ? pRedChar->GetProperty()->szName : szUnknown , 
 		pBlueChar ? pBlueChar->GetProperty()->szName : szUnknown );
 	OutputDebugString(szBuf);

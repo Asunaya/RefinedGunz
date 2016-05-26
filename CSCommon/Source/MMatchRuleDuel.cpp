@@ -281,20 +281,20 @@ void MMatchRuleDuel::LogInfo()
 	if (m_pStage == NULL) return;
 	MMatchObject* pObj;
 	char buf[250];
-	sprintf_s(buf, "Logging Que--------------------\n");
+	sprintf_safe(buf, "Logging Que--------------------\n");
 	OutputDebugString(buf);
 
 	pObj = m_pStage->GetObj(uidChampion);
 	if (pObj != NULL)
 	{
-		sprintf_s(buf, "Champion name : %s \n", pObj->GetName());
+		sprintf_safe(buf, "Champion name : %s \n", pObj->GetName());
 		OutputDebugString(buf);
 	}
 
 	pObj = m_pStage->GetObj(uidChallenger);
 	if (pObj != NULL)
 	{
-		sprintf_s(buf, "Challenger name : %s \n", pObj->GetName());
+		sprintf_safe(buf, "Challenger name : %s \n", pObj->GetName());
 		OutputDebugString(buf);
 	}
 
@@ -304,7 +304,7 @@ void MMatchRuleDuel::LogInfo()
 		pObj = m_pStage->GetObj(*i);
 		if (pObj != NULL)
 		{
-			sprintf_s(buf, "Wait Queue #%d : %s \n", x, pObj->GetName());
+			sprintf_safe(buf, "Wait Queue #%d : %s \n", x, pObj->GetName());
 			OutputDebugString(buf);		
 			x++;
 		}

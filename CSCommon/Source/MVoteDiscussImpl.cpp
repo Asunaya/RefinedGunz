@@ -33,7 +33,7 @@ bool MVoteDiscussJoke::OnJudge(bool bJudge)
 	MMatchServer* pServer = MMatchServer::GetInstance();
 
 	char szMsg[256];
-	sprintf_s(szMsg, "%s", m_strJoke.c_str());
+	sprintf_safe(szMsg, "%s", m_strJoke.c_str());
 
 	MCommand* pCmd = pServer->CreateCommand(MC_MATCH_ANNOUNCE, MUID(0,0));
 	pCmd->AddParameter(new MCmdParamUInt(0));

@@ -519,7 +519,7 @@ bool MMatchStage::StartGame()
 	if (nPlayer > m_StageSetting.GetMaxPlayers())
 	{
 		char szMsg[ 256];
-		sprintf_s(szMsg, (char*)MErrStr( MERR_PERSONNEL_TOO_MUCH));
+		sprintf_safe(szMsg, (char*)MErrStr( MERR_PERSONNEL_TOO_MUCH));
 
 		MCommand* pCmd = MMatchServer::GetInstance()->CreateCommand(MC_MATCH_ANNOUNCE, MUID(0,0));
 		pCmd->AddParameter(new MCmdParamUInt(0));
@@ -548,9 +548,9 @@ bool MMatchStage::StartGame()
 			char sp_name[256];
 
 			if(_GetUserGradeIDName(pObj->GetAccountInfo()->m_nUGrade,sp_name))
-				sprintf_s(szMsg, (char*)MErrStr( MERR_HE_IS_NOT_READY), sp_name);
+				sprintf_safe(szMsg, (char*)MErrStr( MERR_HE_IS_NOT_READY), sp_name);
 			else
-				sprintf_s(szMsg, (char*)MErrStr( MERR_HE_IS_NOT_READY), pObj->GetName());
+				sprintf_safe(szMsg, (char*)MErrStr( MERR_HE_IS_NOT_READY), pObj->GetName());
 
 			MCommand* pCmd = MMatchServer::GetInstance()->CreateCommand(MC_MATCH_ANNOUNCE, MUID(0,0));
 			pCmd->AddParameter(new MCmdParamUInt(0));
