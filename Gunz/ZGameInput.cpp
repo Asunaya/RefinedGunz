@@ -718,6 +718,10 @@ void ZGameInput::GameCheckSequenceKeyCommand()
 					bAction=false;
 					break;
 				}
+
+				if (itr == m_ActionKeyHistory.begin())
+					break;
+
 				itr--;
 			}
 

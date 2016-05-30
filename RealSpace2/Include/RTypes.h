@@ -243,6 +243,13 @@ void MergeBoundingBox(rboundingbox *dest,rboundingbox *src);
 // aabb box 를 트랜스폼 한다. 더 커진다
 void TransformBox( rboundingbox* result, const rboundingbox& src, const rmatrix& matrix );
 
+static inline rvector GetReflectionVector(const rvector& v, const rvector& n)
+{
+	float dot = D3DXVec3Dot(&(-v), &n);
+
+	return (2 * dot)*n + v;
+}
+
 
 // 변환 매크로들
 

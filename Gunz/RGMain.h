@@ -149,16 +149,16 @@ extern RGMain* g_RGMain;
 
 struct rgb
 {
-	double r;       // percent
-	double g;       // percent
-	double b;       // percent
+	double r;
+	double g;
+	double b;
 };
 
 struct hsv
 {
-	double h;       // angle in degrees
-	double s;       // percent
-	double v;       // percent
+	double h;
+	double s;
+	double v;
 };
 
 hsv   rgb2hsv(rgb in);

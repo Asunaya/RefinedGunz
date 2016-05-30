@@ -18,7 +18,7 @@ void SplitIAddress(char* szIP, int maxlen, int* pPort, const char* szAddress)
 	*szIP = NULL;
 	*pPort = 0;
 
-	int len = strlen(szAddress) + 2;
+	auto len = strlen(szAddress) + 2;
 	char* szCopyAddress = new char[len];
 	strcpy_safe(szCopyAddress, len, szAddress);
 

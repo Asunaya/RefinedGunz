@@ -41,6 +41,32 @@ void InitLog(int logmethodflags, const char* pszLogFileName)
 	g_bLogInitialized = true;
 }
 
+void __cdecl DMLog(const char* Format, ...)
+{
+	char temp[16 * 1024];
+
+	va_list args;
+
+	va_start(args, Format);
+	vsprintf_safe(temp, Format, args);
+	va_end(args);
+
+
+	FILE *pFile = nullptr;
+	fopen_s(&pFile, logfilename, "a");
+
+	if (!pFile)
+		fopen_s(&pFile, logfilename, "w");
+
+	if (pFile == nullptr)
+		return;
+
+	fprintf(pFile, "%s", temp);
+	fclose(pFile);
+
+	OutputDebugString(temp);
+}
+
 void __cdecl MLog(const char *pFormat,...)
 {
 	char temp[16 * 1024];

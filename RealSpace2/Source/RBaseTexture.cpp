@@ -479,16 +479,18 @@ int RTextureManager::CalcUsedCount()
 
 static int Floorer2PowerSize(int v)
 {
-	if(v<=2)			return 2;
-	else if(v<=4)		return 4;
-	else if(v<=8)		return 8;
-	else if(v<=16)		return 16;
-	else if(v<=32)		return 32;
-	else if(v<=64)		return 64;
-	else if(v<=128)		return 128;
-	else if(v<=256)		return 256;
-	else if(v<=512)		return 512;
-	else if(v<=1024)	return 1024;
+	if (v <= 2)			return 2;
+	else if (v <= 4)	return 4;
+	else if (v <= 8)	return 8;
+	else if (v <= 16)	return 16;
+	else if (v <= 32)	return 32;
+	else if (v <= 64)	return 64;
+	else if (v <= 128)	return 128;
+	else if (v <= 256)	return 256;
+	else if (v <= 512)	return 512;
+	else if (v <= 1024)	return 1024;
+	else if (v <= 2048)	return 2048;
+	else if (v <= 4096)	return 4096;
 
 	_ASSERT(FALSE);	// Too Big!
 

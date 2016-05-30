@@ -15,6 +15,14 @@ bool IsLogAvailable();
 
 void InitLog(int logmethodflags=MLOGSTYLE_DEBUGSTRING, const char* pszLogFileName="mlog.txt");
 
+#ifdef DEBUG
+void DMLog(const char* Format, ...);
+#else
+static inline void DMLog(...)
+{
+}
+#endif
+
 void __cdecl MLog(const char *pFormat,...);
 #define mlog MLog
 

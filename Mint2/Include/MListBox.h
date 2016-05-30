@@ -84,7 +84,7 @@ public:
 	}
 	virtual void SetString(const char* szString){
 		if(m_szString!=NULL) delete[] m_szString;
-		int len = strlen(szString) + 2;
+		auto len = strlen(szString) + 2;
 		m_szString = new char[len];
 		strcpy_safe(m_szString, len, szString);
 	}

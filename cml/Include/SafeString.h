@@ -53,7 +53,7 @@ inline char* strcpy_literal(char(&Dest)[size1], const char(&Source)[size2])
 template <size_t size>
 inline char* strcpy_safe(char(&Dest)[size], const char *Source)
 {
-	int len = strlen(Source);
+	auto len = strlen(Source);
 
 	if (size - 1 < len)
 	{
@@ -67,9 +67,9 @@ inline char* strcpy_safe(char(&Dest)[size], const char *Source)
 	return Dest + len;
 }
 
-inline char* strcpy_safe(char *Dest, int size, const char *Source)
+inline char* strcpy_safe(char *Dest, size_t size, const char *Source)
 {
-	int len = strlen(Source);
+	auto len = strlen(Source);
 
 	if (size - 1 < len && size > 0)
 	{
@@ -83,22 +83,30 @@ inline char* strcpy_safe(char *Dest, int size, const char *Source)
 	return Dest + len;
 }
 
-//template <size_t size>
-//inline char* strncpy_safe(char(&Dest)[size], const char *Source, size_t Count)
-//{
-//	strncpy(Dest, Source, Count);
-//	Dest[Count - 1] = 0;
-//
-//	return Dest + Count - 1;
-//}
+template <size_t size>
+inline char* strncpy_safe(char(&Dest)[size], const char *Source, size_t Count)
+{
+	int len = Count - 1;
+
+	if (size - 1 < len)
+	{
+		len = size - 1;
+	}
+
+	memcpy(Dest, Source, len);
+
+	Dest[len] = 0;
+
+	return Dest + len;
+}
 
 template <size_t size>
 inline char* strcat_safe(char(&Dest)[size], const char *Source)
 {
-	int DestLen = strlen(Dest);
-	int SourceLen = strlen(Source);
+	auto DestLen = strlen(Dest);
+	auto SourceLen = strlen(Source);
 
-	int BytesToCopy = SourceLen;
+	auto BytesToCopy = SourceLen;
 	if (DestLen + BytesToCopy + 1 > size)
 	{
 		BytesToCopy = size - 1 - DestLen;
@@ -111,13 +119,50 @@ inline char* strcat_safe(char(&Dest)[size], const char *Source)
 	return Dest + DestLen + BytesToCopy;
 }
 
-inline char* strcat_safe(char *Dest, int size, const char *Source)
+inline char* strcat_safe(char *Dest, size_t size, const char *Source)
 {
-	int DestLen = strlen(Dest);
-	int SourceLen = strlen(Source);
+	auto DestLen = strlen(Dest);
+	auto SourceLen = strlen(Source);
 
-	int BytesToCopy = SourceLen;
+	auto BytesToCopy = SourceLen;
 	if (DestLen + BytesToCopy + 1 > size && size > 0)
+	{
+		BytesToCopy = size - 1 - DestLen;
+	}
+
+	memcpy(Dest + DestLen, Source, BytesToCopy);
+
+	Dest[DestLen + BytesToCopy] = 0;
+
+	return Dest + DestLen + BytesToCopy;
+}
+
+template <size_t size>
+inline char* strncat_safe(char(&Dest)[size], const char* Source, size_t Count)
+{
+	auto DestLen = strlen(Dest);
+	auto SourceLen = Count;
+
+	auto BytesToCopy = SourceLen;
+	if (DestLen + BytesToCopy + 1 > size)
+	{
+		BytesToCopy = size - 1 - DestLen;
+	}
+
+	memcpy(Dest + DestLen, Source, BytesToCopy);
+
+	Dest[DestLen + BytesToCopy] = 0;
+
+	return Dest + DestLen + BytesToCopy;
+}
+
+inline char* strncat_safe(char* Dest, size_t size, const char* Source, size_t Count)
+{
+	auto DestLen = strlen(Dest);
+	auto SourceLen = Count;
+
+	auto BytesToCopy = SourceLen;
+	if (DestLen + BytesToCopy + 1 > size)
 	{
 		BytesToCopy = size - 1 - DestLen;
 	}

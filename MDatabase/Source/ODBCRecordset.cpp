@@ -338,7 +338,7 @@ bool CODBCRecordset::InsertBinary( CString strQuery, unsigned char* pData, const
 
 	HSTMT		hStmt;
 	SQLTCHAR*	pWriteBuff;
-	SQLINTEGER  ind			= SQL_DATA_AT_EXEC;
+	SQLLEN  ind			= SQL_DATA_AT_EXEC;
 
 	// 이부분을 서버에서 사용하고있는 DB객체로 바꿔줘야 함!!
 	if( SQL_ERROR == SQLAllocHandle(SQL_HANDLE_STMT, m_pDatabase->m_hdbc, &hStmt) )
@@ -418,7 +418,7 @@ CDBBinary CODBCRecordset::SelectBinary( CString strQuery )
 
 	HSTMT			hStmt;
 	unsigned char	Data[ BINARY_FIELD_MAX_SIZE ]	= {0};
-	SQLINTEGER		ind								= SQL_DATA_AT_EXEC;
+	SQLLEN		ind								= SQL_DATA_AT_EXEC;
 
 	if( SQL_SUCCESS != SQLAllocHandle(SQL_HANDLE_STMT, m_pDatabase->m_hdbc, &hStmt) )
 	{

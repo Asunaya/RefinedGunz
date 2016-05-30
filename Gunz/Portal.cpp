@@ -28,7 +28,7 @@ static void MakeProjectionMatrix(D3DXMATRIX &mat, float NearZ = 5, float FarZ = 
 static void MakeObliquelyClippingProjectionMatrix(D3DXMATRIX &matProjection, const D3DXMATRIX &matView, const D3DXVECTOR3 &p, const D3DXVECTOR3 &normal);
 static void MakePlane(D3DXPLANE &plane, const D3DXVECTOR3 &v, const D3DXVECTOR3 &u, const D3DXVECTOR3 &origin);
 
-Portal::Portal()
+Portal::Portal() : ValidPortals(PortalList)
 {
 	static constexpr int coords[] = { 200, 20,
 		287, 50,
@@ -946,6 +946,32 @@ bool Portal::Move(ZObject *pObj, D3DXVECTOR3 &diff)
 	return true;
 }
 
+bool Portal::Move(ZMovingWeapon & Obj, v3 & diff)
+{
+	if (!bPortalSetExists)
+		return false;
+
+	v3& origin = Obj.m_Position;
+	v3 target = origin + diff;
+
+	PortalInfo* pi = LineIntersect(origin, target);
+
+	if (!pi)
+		return false;
+
+	if (DotProduct(target, pi->vNormal) + pi->d < 0)
+	{
+		DMLog("Portal::Move(ZMovingWeapon&, v3&) -- Old vel %f, %f, %f\n", Obj.m_Velocity.x, Obj.m_Velocity.y, Obj.m_Velocity.z);
+		origin *= pi->matTransform;
+		Obj.m_Dir *= pi->matRot;
+		Obj.m_Velocity *= pi->matRot;
+		diff *= pi->matRot;
+		DMLog("Portal::Move(ZMovingWeapon&, v3&) -- New vel %f, %f, %f\n", Obj.m_Velocity.x, Obj.m_Velocity.y, Obj.m_Velocity.z);
+	}
+
+	return true;
+}
+
 void Portal::RedirectCamera()
 {
 	if(!bPortalSetExists)
@@ -1112,10 +1138,24 @@ void Portal::RedirectCamera()
 	//cprint("distoutside: %f\n", distoutside);
 }
 
+PortalInfo* Portal::LineIntersect(const v3& l1, const v3& l2)
+{
+	for (auto& pi : ValidPortals)
+	{
+		v3 hit;
+		if (LinePortalIntersection(l1, l2, pi, hit))
+		{
+			return &pi;
+		}
+	}
+
+	return nullptr;
+}
+
 bool Portal::CheckIntersection(const D3DXVECTOR3 &target, float fRadius, float fHeight, PortalInfo **pppi)
 {
-	rvector mins = target - rvector(fRadius, fRadius, 0),
-		maxs = target + rvector(fRadius, fRadius, fHeight);
+	rvector mins = target - rvector(fRadius, fRadius, 0);
+	rvector maxs = target + rvector(fRadius, fRadius, fHeight);
 
 	for (auto &pair : PortalList)
 	{

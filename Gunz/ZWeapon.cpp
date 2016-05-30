@@ -19,6 +19,10 @@
 #include "ZStencilLight.h"
 #include "ZScreenDebugger.h"
 
+#include "Extensions.h"
+
+#include "Portal.h"
+
 #define BOUND_EPSILON	5
 #define LANDING_VELOCITY	20
 #define MAX_ROT_VELOCITY	50
@@ -128,9 +132,12 @@ void ZWeaponRocket::Create(RMesh* pMesh,rvector &pos, rvector &dir,ZObject* pOwn
 
 #define ROCKET_LIFE			10.f		// 10ÃÊ µÚ¿¡ ÅÍÁü
 
-
 bool ZWeaponRocket::Update(float fElapsedTime)
 {
+	rvector diff = m_Velocity*fElapsedTime;
+
+	g_pPortal->Move(*this, diff);
+
 	rvector oldPos = m_Position;
 
 	if(g_pGame->GetTime() - m_fStartTime > ROCKET_LIFE ) {
@@ -148,7 +155,6 @@ bool ZWeaponRocket::Update(float fElapsedTime)
 	const DWORD dwPickPassFlag = RM_FLAG_ADDITIVE | RM_FLAG_HIDE | RM_FLAG_PASSROCKET;
 
 	{
-		rvector diff=m_Velocity*fElapsedTime;
 		rvector dir=diff;
 		Normalize(dir);
 
@@ -156,14 +162,39 @@ bool ZWeaponRocket::Update(float fElapsedTime)
 
 		rvector pickpos;
 		ZPICKINFO zpi;
-		bool bPicked=g_pGame->Pick(ZGetObjectManager()->GetObject(m_uidOwner),m_Position,dir,&zpi,dwPickPassFlag);
+		bool bPicked=g_pGame->Pick(nullptr,m_Position,dir,&zpi,dwPickPassFlag);
 		if(bPicked)
 		{
-			if(zpi.bBspPicked)
-				pickpos=zpi.bpi.PickPos;
+			if (zpi.bBspPicked)
+			{
+				pickpos = zpi.bpi.PickPos;
+			}
 			else
-				if(zpi.pObject)
-					pickpos=zpi.info.vOut;
+			{
+				if (zpi.pObject)
+				{
+#ifdef REFLECT_ROCKETS
+					if (zpi.pObject->IsGuard() && DotProduct(zpi.pObject->GetDirection(), m_Dir) < 0)
+					{
+						auto ReflectedDir = GetReflectionVector(m_Dir, zpi.pObject->GetDirection());
+						auto ReflectedVel = GetReflectionVector(m_Velocity, zpi.pObject->GetDirection());
+
+						m_Dir = ReflectedDir;
+						m_Velocity = ReflectedVel;
+
+						diff = m_Velocity * fElapsedTime;
+						dir = diff;
+						Normalize(dir);
+
+						bPicked = false;
+
+						DMLog("Reflected rocket!\n");
+					}
+#endif
+
+					pickpos = zpi.info.vOut;
+				}
+			}
 
 		}
 /*
@@ -203,7 +234,6 @@ bool ZWeaponRocket::Update(float fElapsedTime)
 		rvector pos = m_Position + 20.f*add;
 
 		ZGetEffectManager()->AddRocketSmokeEffect(pos);
-//		ZGetEffectManager()->AddSmokeEffect(NULL,pos,rvector(0,0,0),rvector(0,0,0),60.f,80.f,1.5f);
 		ZGetWorld()->GetFlags()->CheckSpearing( oldPos, pos	, ROCKET_SPEAR_EMBLEM_POWER );
 		m_fLastAddTime = this_time;
 	}
@@ -327,13 +357,6 @@ void ZWeaponItemkit::Create(RMesh* pMesh,rvector &pos, rvector &velocity,ZObject
 //	m_nSpItemID = m_nMySpItemID++;
 
 	m_bSendMsg = false;
-}
-
-rvector GetReflectionVector(rvector& v,rvector& n) {
-
-	float dot = D3DXVec3Dot(&(-v),&n);
-
-	return (2*dot)*n+v;
 }
 
 void ZWeaponItemkit::Render()
@@ -462,8 +485,8 @@ void ZWeaponItemkit::UpdatePos(float fElapsedTime,DWORD dwPickPassFlag)
 		float fAbsorb=DotProduct(normal,m_Velocity);
 		m_Velocity -= 0.1*fAbsorb*normal;
 
-		float fA=RANDOMFLOAT*2*pi;
-		float fB=RANDOMFLOAT*2*pi;
+		float fA = RANDOMFLOAT * TAU;
+		float fB=RANDOMFLOAT * TAU;
 		m_RotAxis=rvector(sin(fA)*sin(fB),cos(fA)*sin(fB),cos(fB));
 
 	} else {
@@ -657,8 +680,8 @@ bool ZWeaponGrenade::Update(float fElapsedTime)
 			float fAbsorb=DotProduct(normal,m_Velocity);
 			m_Velocity-=0.5*fAbsorb*normal;
 
-			float fA=RANDOMFLOAT*2*pi;
-			float fB=RANDOMFLOAT*2*pi;
+			float fA = RANDOMFLOAT*TAU;
+			float fB = RANDOMFLOAT*TAU;
 			m_RotAxis=rvector(sin(fA)*sin(fB),cos(fA)*sin(fB),cos(fB));
 
 		}else
@@ -828,8 +851,8 @@ bool	ZWeaponFlashBang::Update( float fElapsedTime )
 			float fAbsorb	= DotProduct( normal, m_Velocity );
 			m_Velocity		-= 0.5 * fAbsorb * normal;
 
-			float fA	= RANDOMFLOAT * 2 * pi;
-			float fB	= RANDOMFLOAT * 2 * pi;
+			float fA = RANDOMFLOAT * TAU;
+			float fB = RANDOMFLOAT * TAU;
 			m_RotAxis	= rvector( sin(fA) * sin(fB), cos(fA) * sin(fB), cos(fB) );
 
 		}
@@ -958,8 +981,8 @@ bool ZWeaponSmokeGrenade::Update( float fElapsedTime )
 			float fAbsorb	= DotProduct( normal, m_Velocity );
 			m_Velocity		-= 0.5 * fAbsorb * normal;
 
-			float fA	= RANDOMFLOAT * 2 * pi;
-			float fB	= RANDOMFLOAT * 2 * pi;
+			float fA = RANDOMFLOAT * TAU;
+			float fB = RANDOMFLOAT * TAU;
 			m_RotAxis	= rvector( sin(fA) * sin(fB), cos(fA) * sin(fB), cos(fB) );
 
 		}

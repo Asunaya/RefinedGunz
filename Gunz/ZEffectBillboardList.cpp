@@ -488,7 +488,7 @@ bool ZEffectBillboardList::Draw()
 				{ 1, -1, 0, 0xFFFFFFFF, 0, 0},
 			};
 
-			static rvector sv[4] = { rvector(-1,-1,0) , rvector(-1,1,0) , rvector(1,1,0) , rvector(1,-1,0) };
+			static const rvector sv[4] = { rvector(-1,-1,0) , rvector(-1,1,0) , rvector(1,1,0) , rvector(1,-1,0) };
 
 			// 좋은코드는 아니지만 버텍스 카피를 줄이기위해 타입캐스팅했다.
 			D3DXVec3TransformCoord((D3DXVECTOR3*)&v[0].x,sv+0,&matWorld);

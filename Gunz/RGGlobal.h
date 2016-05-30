@@ -117,14 +117,21 @@ public:
 		return ptr;
 	}
 
-	D3DPtr* operator =(T* rhs)
+	T* operator =(T* rhs)
 	{
 		ptr = rhs;
+
+		return ptr;
 	}
 
 	T* operator ->() const
 	{
 		return ptr;
+	}
+
+	T** operator &()
+	{
+		return &ptr;
 	}
 };
 

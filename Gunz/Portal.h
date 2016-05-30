@@ -121,11 +121,113 @@ public:
 	virtual void DrawPortals(const RecursionContext& rc) override final;
 };
 
+class ValidPortalIterator
+{
+public:
+	ValidPortalIterator(const std::unordered_map<ZCharacter *, PortalPair>& pl, const std::unordered_map<ZCharacter *, PortalPair>::iterator& it_) : PortalList(pl), it(it_)
+	{
+	}
+
+	ValidPortalIterator& operator++(int)
+	{
+		auto prev_it = *this;
+
+		++*this;
+
+		return prev_it;
+	}
+
+	ValidPortalIterator& operator++()
+	{
+		if (index == 0)
+		{
+			index = 1;
+			return *this;
+		}
+
+		index = 0;
+
+		do
+		{
+			it++;
+		} while (it != PortalList.end() && !it->second.IsValid());
+
+		return *this;
+	}
+
+	bool operator!=(const ValidPortalIterator& rhs) const
+	{
+		return it != rhs.it;
+	}
+
+	PortalInfo& operator*()
+	{
+		return it->second[index];
+	}
+
+private:
+	std::unordered_map<ZCharacter *, PortalPair>::iterator it;
+	int index = 0;
+	const std::unordered_map<ZCharacter *, PortalPair>& PortalList;
+};
+
+class ValidPortalAdapter
+{
+public:
+	ValidPortalAdapter(std::unordered_map<ZCharacter *, PortalPair>& pl) : PortalList(pl)
+	{
+	}
+
+	auto begin() const
+	{
+		return ValidPortalIterator(PortalList, PortalList.begin());
+	}
+
+	auto end() const
+	{
+		return ValidPortalIterator(PortalList, PortalList.end());
+	}
+
+private:
+	std::unordered_map<ZCharacter *, PortalPair>& PortalList;
+};
+
 class Portal
 {
+public:
+	Portal();
+
+	void OnInvalidate();
+	void OnRestore();
+
+	void OnShot();
+	bool RedirectPos(D3DXVECTOR3 &from, D3DXVECTOR3 &to);
+
+	void DeletePlayer(ZCharacter *pZChar);
+
+	void DrawFakeCharacter(ZCharacter *pZChar);
+
+	bool Move(ZObject *pObj, D3DXVECTOR3 &diff);
+	bool Move(ZMovingWeapon& Obj, v3& diff);
+
+	void PreDraw();
+	void PostDraw();
+
+	void CreatePortal(ZCharacter *pZChar, int iPortal, const D3DXVECTOR3 &vPos, const D3DXVECTOR3 &vNormal, const D3DXVECTOR3 &vUp);
+
+	bool ForceProjection() const
+	{
+		return bForceProjection;
+	}
+
+	bool IsDrawingFakeChar() const
+	{
+		return bDontDrawChar;
+	}
+
 private:
-	ID3DXMesh *pEdgeMesh;
-	ID3DXMesh *pRectangleMesh;
+	D3DPtr<ID3DXMesh> pEdgeMesh;
+	D3DPtr<ID3DXMesh> pRectangleMesh;
 	D3DMATERIAL9 Mat;
 #ifdef PORTAL_USE_RT_TEXTURE
 	IDirect3DTexture9 *pTex[2];
@@ -137,6 +239,7 @@ private:
 	D3DPtr<IDirect3DTexture9> PortalEdgeTex[2];
 
 	std::unordered_map<ZCharacter *, PortalPair> PortalList;
+	ValidPortalAdapter ValidPortals;
 
 	PortalInfo *pMyPortalInfo;
 
@@ -194,6 +297,7 @@ private:
 	bool LinePortalIntersection(const D3DXVECTOR3 &L1, const D3DXVECTOR3 &L2, const PortalInfo &ppi, D3DXVECTOR3 &Hit);
 	bool AABBPortalIntersection(const D3DXVECTOR3 &B1, const D3DXVECTOR3 &B2, const PortalInfo &ppi);
 
+	PortalInfo* LineIntersect(const v3& l1, const v3& l2);
 	bool CheckIntersection(const D3DXVECTOR3 &target, float fRadius, float fHeight, PortalInfo **retppi);
 
 	void Transform(D3DXVECTOR3 &v, const PortalInfo &ppi);
@@ -225,35 +329,6 @@ private:
 				fn(p[i]);
 			}
 		}
-	}
-
-public:
-	Portal();
-
-	void OnInvalidate();
-	void OnRestore();
-
-	void OnShot();
-	bool RedirectPos(D3DXVECTOR3 &from, D3DXVECTOR3 &to);
-
-	void DeletePlayer(ZCharacter *pZChar);
-
-	void DrawFakeCharacter(ZCharacter *pZChar);
-
-	bool Move(ZObject *pObj, D3DXVECTOR3 &diff);
-
-	void PreDraw();
-	void PostDraw();
-
-	void CreatePortal(ZCharacter *pZChar, int iPortal, const D3DXVECTOR3 &vPos, const D3DXVECTOR3 &vNormal, const D3DXVECTOR3 &vUp);
-
-	bool ForceProjection(){
-		return bForceProjection;
-	}
-
-	bool IsDrawingFakeChar() const
-	{
-		return bDontDrawChar;
 	}
 };
 

@@ -434,7 +434,7 @@ char *MDrawContext::GetPureText(const char *szText)
 	while(true){
 		nPos = strcspn(pSrc, "^");
 
-		strncat(pText, pSrc, nPos);				// 사이즈만큼 카피
+		strncat_safe(pText, pTextSize, pSrc, nPos);
 		nLen = strlen(pSrc);
 
 		if(nPos + 1 < strlen(pSrc)){
@@ -584,8 +584,7 @@ int MDrawContext::TextMultiLine2( MRECT& r, const char* szText,int nLineGap,bool
 			rTemp.w	= r.w;
 			rTemp.h	= IncY;
 
-            strncpy( TempStr, szText + clip, i - clip );
-			TempStr[i-clip] = '\0';
+            strncpy_safe( TempStr, szText + clip, i - clip + 1 );
 			Text( rTemp, TempStr, am );
 
 			clip	= i+1;
@@ -618,8 +617,7 @@ int MDrawContext::TextMultiLine2( MRECT& r, const char* szText,int nLineGap,bool
 			rTemp.h	= IncY;
 			++nCurrLine;
 
- 			strncpy( TempStr, szText + clip, i - clip - 1 );
-			TempStr[i-clip-1] = '\0';
+ 			strncpy_safe( TempStr, szText + clip, i - clip );
 			Text( rTemp, TempStr, am );
  			clip	= i - 1;
 			continue;
@@ -632,8 +630,7 @@ int MDrawContext::TextMultiLine2( MRECT& r, const char* szText,int nLineGap,bool
 	rTemp.w	= r.w;
 	rTemp.h	= IncY;
 
-	strncpy( TempStr, szText + clip, i - clip +1 );
-	TempStr[i-clip + 1] = '\0';
+	strncpy_safe( TempStr, szText + clip, i - clip + 2 );
 	Text( rTemp, TempStr, am );
 
 	return nLine;

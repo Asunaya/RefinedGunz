@@ -1209,8 +1209,7 @@ bool GetFindFileListWin(char* path,char* ext,FFileList& pList)
 
 				if(len > 1) {
 
-					strncpy(temp_name,path,len-1);
-					temp_name[len-1]=0;
+					strncpy_safe(temp_name, path, len);
 					strcat_safe(temp_name,file_t.cFileName);
 				}
 				else {

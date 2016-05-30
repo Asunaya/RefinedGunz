@@ -5,6 +5,7 @@
 
 void MSysInfoLog_CPU()
 {
+#ifdef ENV32BIT
 	LARGE_INTEGER ulFreq, ulTicks, ulValue, ulStartCounter,
 		ulEAX_EDX, ulResult;
 
@@ -94,6 +95,7 @@ void MSysInfoLog_CPU()
 	sprintf_safe(szDesc, "CPU ID = %s ( family = %d , model = %d , stepping = %d ) @ %d MHz\n",
 		pszCPUType,nCPUFamily,nCPUModel,nCPUStepping,nCPUClock);
 	mlog(szDesc);
+#endif
 }
 
 void MSysInfoLog_Display()

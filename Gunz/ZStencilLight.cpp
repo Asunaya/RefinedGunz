@@ -18,7 +18,7 @@ ZStencilLight ZStencilLight::m_instance;
 ZStencilLight* ZGetStencilLight() { return ZStencilLight::GetInstance(); }
 
 ZStencilLight::ZStencilLight()
-{	
+{
 	m_id = 1;
 	m_pTex = NULL;
 	m_pMesh = NULL;
@@ -51,10 +51,9 @@ void ZStencilLight::Destroy()
 
 void ZStencilLight::PreRender()
 {
-	LPDIRECT3DDEVICE9 pd3dDevice=RGetDevice();
-	pd3dDevice->SetFVF( LIGHT_BSP_FVF );
+	LPDIRECT3DDEVICE9 pd3dDevice = RGetDevice();
 
-	// 멀티패스 테스트
+	pd3dDevice->SetFVF( LIGHT_BSP_FVF );
 
 	pd3dDevice->SetRenderState( D3DRS_TEXTUREFACTOR, 0xffffffff );
 
@@ -92,35 +91,9 @@ void ZStencilLight::PreRender()
 	pd3dDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
 	pd3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
 
-#ifdef _PUBLISH
-	// 멀티패스 이므로 맨위의 폴리곤과 z값이 같을때만 그리면된다
-	pd3dDevice->SetRenderState(D3DRS_ZENABLE, true );
-	pd3dDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_EQUAL );
-#endif
-
 	rmatrix World;
 	D3DXMatrixIdentity(&World);
 	RGetDevice()->SetTransform(D3DTS_WORLD, &World);
-
-
-	return;
-
-	LPDIRECT3DDEVICE9 dev = RGetDevice();
-
-	dev->Clear(0, NULL, D3DCLEAR_STENCIL, 0.f, 0x0, 0L);
-	
-	dev->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
-	dev->SetRenderState(D3DRS_STENCILENABLE, TRUE);
-	dev->SetRenderState(D3DRS_SHADEMODE, D3DSHADE_FLAT);
-	dev->SetRenderState(D3DRS_STENCILFAIL, D3DSTENCILOP_KEEP);
-	dev->SetRenderState(D3DRS_STENCILZFAIL, D3DSTENCILOP_KEEP);
-	dev->SetRenderState(D3DRS_STENCILREF, 0x1);
-	dev->SetRenderState(D3DRS_STENCILMASK, 0xFFFFFFFF);
-	dev->SetRenderState(D3DRS_STENCILWRITEMASK, 0xFFFFFFFF);
-	dev->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-	dev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ZERO);
-	dev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
-	dev->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
 }
 
 void ZStencilLight::RenderStencil()
@@ -265,30 +238,23 @@ void ZStencilLight::PostRender()
 	pd3dDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
 	pd3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
 	pd3dDevice->SetRenderState(D3DRS_ZWRITEENABLE, true );
-	pd3dDevice->SetTexture(0,NULL);
-	pd3dDevice->SetTexture(1,NULL);
+	pd3dDevice->SetTexture(0, nullptr);
+	pd3dDevice->SetTexture(1, nullptr);
 	pd3dDevice->SetTextureStageState( 0, D3DTSS_COLORARG1, D3DTA_TEXTURE );
 	pd3dDevice->SetTextureStageState( 0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
 	pd3dDevice->SetTextureStageState( 0, D3DTSS_COLOROP,   D3DTOP_MODULATE );
-	pd3dDevice->SetTextureStageState( 0, D3DTSS_ALPHAOP,   D3DTOP_SELECTARG2 );
+	pd3dDevice->SetTextureStageState( 0, D3DTSS_ALPHAOP,   D3DTOP_SELECTARG1 );
 	pd3dDevice->SetTextureStageState( 0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE );
 	pd3dDevice->SetTextureStageState( 1, D3DTSS_COLOROP,   D3DTOP_DISABLE );
 	pd3dDevice->SetTextureStageState( 1, D3DTSS_ALPHAOP,   D3DTOP_DISABLE );
+	pd3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
 
 	pd3dDevice->SetSamplerState( 0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP );
 	pd3dDevice->SetSamplerState( 0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP );
 
 	pd3dDevice->SetFVF(D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_TEX1 );
 
-	return;
-
-
-	LPDIRECT3DDEVICE9 dev = RGetDevice();
-	dev->SetRenderState(D3DRS_SHADEMODE, D3DSHADE_GOURAUD);
- 	dev->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
-	dev->SetRenderState(D3DRS_STENCILENABLE, FALSE);
-	dev->SetRenderState(D3DRS_FOGENABLE, FALSE);
-	dev->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
+	pd3dDevice->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_ALWAYS);
 } 
 
 void ZStencilLight::Render()

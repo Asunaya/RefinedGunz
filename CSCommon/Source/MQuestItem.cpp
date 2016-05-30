@@ -496,9 +496,9 @@ bool DBQuestCachingData::DoUpdateDBCharQuestItemInfo()
 		char szDbgOut[ 1000 ] = {0};
 		MQuestItemMap::iterator it, end;
 		
-		strcat( szDbgOut, "Quest Item Caching UpdateDB\n" );
-		strcat( szDbgOut, m_pObject->GetName() );
-		strcat( szDbgOut, "\n" );
+		strcat_safe( szDbgOut, "Quest Item Caching UpdateDB\n" );
+		strcat_safe( szDbgOut, m_pObject->GetName() );
+		strcat_safe( szDbgOut, "\n" );
 		
 		it = m_pObject->GetCharInfo()->m_QuestItemList.begin();
 		end = m_pObject->GetCharInfo()->m_QuestItemList.end();
@@ -507,9 +507,9 @@ bool DBQuestCachingData::DoUpdateDBCharQuestItemInfo()
 		{
 			char tmp[ 100 ] = {0};
 			sprintf_safe( tmp, "%s : %d\n", it->second->GetDesc()->m_szQuestItemName, it->second->GetCount() );
-			strcat( szDbgOut, tmp );
+			strcat_safe( szDbgOut, tmp );
 		}
-		strcat( szDbgOut, "\n" );
+		strcat_safe( szDbgOut, "\n" );
 		MMatchServer::GetInstance()->LOG( MMatchServer::LOG_ALL, szDbgOut );
 	}
 #endif
