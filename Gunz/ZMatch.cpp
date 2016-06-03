@@ -422,10 +422,7 @@ void ZMatch::SetRoundState(MMATCH_ROUNDSTATE nRoundState, int nArg)
 		break;
 	case MMATCH_ROUNDSTATE_COUNTDOWN : 
 		{
-			mlog("RoundState:Countdown\n");
-			OutputDebugString("MMATCH_ROUNDSTATE_COUNTDOWN>> InitRound BEGIN \n");
 			InitRound();
-			OutputDebugString("MMATCH_ROUNDSTATE_COUNTDOWN>> InitRound END \n");
 		}
 		break;
 	case MMATCH_ROUNDSTATE_PLAY:
@@ -438,7 +435,6 @@ void ZMatch::SetRoundState(MMATCH_ROUNDSTATE nRoundState, int nArg)
 		break;
 	case MMATCH_ROUNDSTATE_FINISH:
 		{
-			mlog("RoundState:Finish\n");
 			g_pGame->FlushObserverCommands();
 
 			if (GetMatchType() != MMATCH_GAMETYPE_DUEL)

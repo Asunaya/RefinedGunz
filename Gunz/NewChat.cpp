@@ -1027,14 +1027,14 @@ ret:;
 		D3DXColorScale(&Color, &Color, 1.2);
 	}
 
-	Line(Cursor.x, Cursor.y, Cursor.x + 15, Cursor.y + 6, Color);
+	/*Line(Cursor.x, Cursor.y, Cursor.x + 15, Cursor.y + 6, Color);
 	Line(Cursor.x, Cursor.y, Cursor.x + 6, Cursor.y + 15, Color);
 
 	if (!(GetAsyncKeyState(VK_LBUTTON) & 0x8000))
 		Color = XRGB(0, 0, 0);
 
 	Line(Cursor.x + 1, Cursor.y + 1, Cursor.x + 15, Cursor.y + 7, Color);
-	Line(Cursor.x + 1, Cursor.y + 1, Cursor.x + 7, Cursor.y + 15, Color);
+	Line(Cursor.x + 1, Cursor.y + 1, Cursor.x + 7, Cursor.y + 15, Color);*/
 
 	r.left = Border.x1 + 5;
 	r.top = Border.y2 - 2 - nFontHeight;

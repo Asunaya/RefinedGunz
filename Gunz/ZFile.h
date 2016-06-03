@@ -25,7 +25,7 @@ public:
 	bool Open(const char *szFileName,bool bWrite = false);
 
 	int Read(void *pBuffer,int nByte);
-	int Write(void *pBuffer,int nByte);
+	int Write(const void *pBuffer,int nByte);
 
 	template <typename T>
 	int Read(T &obj)
@@ -43,7 +43,7 @@ public:
 		return ItemsRead;
 	}
 	template <typename T>
-	bool Write(T& Obj)
+	bool Write(const T& Obj)
 	{
 		return Write(&Obj, sizeof(Obj)) == sizeof(Obj);
 	}

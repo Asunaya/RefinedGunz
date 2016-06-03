@@ -31,6 +31,7 @@ struct ReplayInfo
 	ReplayVersion Version;
 	REPLAY_STAGE_SETTING_NODE StageSetting;
 	std::string VersionString;
+	time_t Timestamp = 0;
 	bool Dead = true;
 
 	struct PlayerInfo

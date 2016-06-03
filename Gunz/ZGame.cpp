@@ -597,6 +597,8 @@ bool ZGame::Create(MZFileSystem *pfs, ZLoadingProgress *pLoading )
 
 void ZGame::Destroy()
 {
+	StopRecording();
+
 	g_SnowTownParticleSystem.Destroy();
 
 	SetClearColor(0);
@@ -934,9 +936,6 @@ extern MDrawContextR2* g_pDC;
 
 void ZGame::Draw()
 {
-#ifdef PORTAL
-	g_pPortal->PreDraw();
-#endif
 
 	__BP(20,"ZGame::Draw");
 
@@ -947,6 +946,10 @@ void ZGame::Draw()
 		__EP(20);
 		return ;
 	}
+
+#ifdef PORTAL
+	g_pPortal->PreDraw();
+#endif
 
 	// 자살 확인
 	if ( m_bSuicide && ( timeGetTime() > m_dwReservedSuicideTime))
@@ -3373,7 +3376,7 @@ void ZGame::OnPeerMassive(ZCharacter *pOwner, const rvector &pos, const rvector 
 		}
 
 		pVictim->OnDamaged(pOwner, pos, ZD_KATANA_SPLASH, MWT_KATANA, damage, .4, -1);
-		pVictim->OnDamagedAnimation(pOwner, 21);
+		pVictim->OnDamagedAnimation(pOwner, SEM_WomanSlash5);
 
 		ZPostPeerEnchantDamage(pOwner->GetUID(), pVictim->GetUID());
 	}
@@ -5481,8 +5484,9 @@ void ZGame::StartRecording()
 	if(!m_pReplayFile) goto RECORDING_FAIL;
 
 	int nWritten;
+	bool Success = false;
 
-	DWORD header;
+	u32 header;
 	header = RG_REPLAY_MAGIC_NUMBER;//GUNZ_REC_FILE_ID;
 	nWritten = zfwrite(&header,sizeof(header),1,m_pReplayFile);
 	if(nWritten==0) goto RECORDING_FAIL;
@@ -5490,6 +5494,13 @@ void ZGame::StartRecording()
 	header = RG_REPLAY_BINARY_VERSION;//GUNZ_REC_FILE_VERSION;
 	nWritten = zfwrite(&header,sizeof(header),1,m_pReplayFile);
 	if(nWritten==0) goto RECORDING_FAIL;
+
+	if (!m_pReplayFile->Write<u32>(RGUNZ_VERSION))
+		goto RECORDING_FAIL;
+
+	i64 Timestamp = time(nullptr);
+	if (!m_pReplayFile->Write(Timestamp))
+		goto RECORDING_FAIL;
 
 	nWritten = zfwrite(ZGetGameClient()->GetMatchStageSetting()->GetStageSetting(),sizeof(MSTAGE_SETTING_NODE),1,m_pReplayFile);
 	if(nWritten==0) goto RECORDING_FAIL;
@@ -5506,12 +5517,12 @@ void ZGame::StartRecording()
 	nWritten = zfwrite(&nCharacterCount,sizeof(nCharacterCount),1,m_pReplayFile);
 	if(nWritten==0) goto RECORDING_FAIL;
 
-	for (auto Item : m_CharacterManager)
+	for (auto& Item : m_CharacterManager)
 	{
 		auto Char = Item.second;
-		ZCharacterReplayState State;
-		Char->Save(State);
-		if (!m_pReplayFile->Write(State))
+		ReplayPlayerInfo Info;
+		Char->Save(Info);
+		if (!m_pReplayFile->Write(Info))
 			goto RECORDING_FAIL;
 	}	
 

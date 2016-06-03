@@ -19,17 +19,22 @@ static void CreatePlayers(const std::vector<ReplayPlayerInfo>& Players)
 	{
 		ZCharacter* Char = nullptr;
 
+#ifdef DEBUG
+		MLog("Name = %s\n", Player.Info.szName);
+		MLog("Hero = %d\n", Player.IsHero);
+#endif
+
 		if (Player.IsHero)
 		{
 			g_pGame->m_pMyCharacter = new ZMyCharacter;
 			g_pGame->CreateMyCharacter(Player.Info);
 			Char = g_pGame->m_pMyCharacter;
-			Char->Load(Player.State);
+			Char->Load(Player);
 		}
 		else
 		{
 			Char = new ZNetCharacter;
-			Char->Load(Player.State);
+			Char->Load(Player);
 			Char->Create(Player.Info);
 		}
 
@@ -155,7 +160,7 @@ bool CreateReplayGame(const char *SelectedFilename)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ZReplayLoader::ZReplayLoader() : m_fGameTime(0.0f)
 {
-	Version.Server = SERVER_NONE;
+	Version.Server = SERVER::NONE;
 	Version.nVersion = 0;
 	Version.nSubVersion = 0;
 }
@@ -175,13 +180,13 @@ bool ZReplayLoader::LoadFile(const char* FileName)
 template <typename T>
 bool ZReplayLoader::CreateCommandFromStream(const char* pStream, MCommand& Command, T& Alloc)
 {
-	if (Version.Server == SERVER_OFFICIAL && Version.nVersion <= 2)
+	if (Version.Server == SERVER::OFFICIAL && Version.nVersion <= 2)
 	{
 		CreateCommandFromStreamVersion2(pStream, Command);
 		return true;
 	}
 
-	bool ReadSerial = !(Version.Server == SERVER_OFFICIAL && Version.nVersion == 11);
+	bool ReadSerial = !(Version.Server == SERVER::OFFICIAL && Version.nVersion == 11);
 
 	return Command.SetData(pStream, ZGetGameClient()->GetCommandManager(), 65535, ReadSerial, Alloc);
 }

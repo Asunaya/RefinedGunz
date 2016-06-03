@@ -17,12 +17,12 @@ inline ReplayVersion ZReplayLoader::GetVersion()
 
 	if (header == RG_REPLAY_MAGIC_NUMBER)
 	{
-		Version.Server = SERVER_REFINED_GUNZ;
+		Version.Server = SERVER::REFINED_GUNZ;
 		FoundServer = true;
 	}
 	else if (header != GUNZ_REC_FILE_ID)
 	{
-		Version.Server = SERVER_NONE;
+		Version.Server = SERVER::NONE;
 		return Version;
 	}
 
@@ -31,23 +31,32 @@ inline ReplayVersion ZReplayLoader::GetVersion()
 	Version.nVersion = version;
 	Version.nSubVersion = 0;
 
-	unsigned char Something;
-
-	ReadAt(Something, 0x4A);
-
 	if (!FoundServer)
 	{
+		u8 Something;
+		ReadAt(Something, 0x4A);
+
 		if (Version.nVersion >= 7 && Version.nVersion <= 9 && Something <= 0x01)
 		{
-			Version.Server = SERVER_FREESTYLE_GUNZ;
+			Version.Server = SERVER::FREESTYLE_GUNZ;
 		}
 		else
 		{
-			Version.Server = SERVER_OFFICIAL;
+			Version.Server = SERVER::OFFICIAL;
 		}
 	}
 
-	if (Version.Server == SERVER_FREESTYLE_GUNZ && Version.nVersion == 7)
+	if (Version.Server == SERVER::REFINED_GUNZ && Version.nVersion >= 2)
+	{
+		u32 ClientVersion = 0;
+		Read(ClientVersion);
+		Version.nSubVersion = ClientVersion;
+
+		i64 Time;
+		Read(Time);
+		Timestamp = Time;
+	}
+	else if(Version.Server == SERVER::FREESTYLE_GUNZ && Version.nVersion == 7)
 	{
 		REPLAY_STAGE_SETTING_NODE_FG Setting;
 		Peek(Setting);
@@ -57,6 +66,7 @@ inline ReplayVersion ZReplayLoader::GetVersion()
 		if (Setting.nGameType == MMATCH_GAMETYPE_DUEL)
 			offset += sizeof(MTD_DuelQueueInfo);
 
+		u8 Something;
 		ReadAt(Something, offset);
 
 		if (Version.nVersion == 7 && (Something == 0x00 || Something == 0x01))
@@ -108,7 +118,7 @@ inline void ZReplayLoader::GetStageSetting(REPLAY_STAGE_SETTING_NODE& ret)
 
 	switch (Version.Server)
 	{
-	case SERVER_OFFICIAL:
+	case SERVER::OFFICIAL:
 	{
 		if (Version.nVersion <= 5)
 		{
@@ -126,12 +136,12 @@ inline void ZReplayLoader::GetStageSetting(REPLAY_STAGE_SETTING_NODE& ret)
 		}
 	}
 	break;
-	case SERVER_REFINED_GUNZ:
+	case SERVER::REFINED_GUNZ:
 	{
 		Read(ret);
 	}
 	break;
-	case SERVER_FREESTYLE_GUNZ:
+	case SERVER::FREESTYLE_GUNZ:
 	{
 		REPLAY_STAGE_SETTING_NODE_FG Setting;
 		Read(Setting);
@@ -205,7 +215,7 @@ inline std::vector<ReplayPlayerInfo> ZReplayLoader::GetCharInfo()
 
 #define READ_CHARINFO(type) do { type info; Read(info); CopyCharInfo(info); } while(false)
 
-		if (Version.Server == SERVER_OFFICIAL)
+		if (Version.Server == SERVER::OFFICIAL)
 		{
 			if (Version.nVersion <= 5)
 			{
@@ -230,7 +240,7 @@ inline std::vector<ReplayPlayerInfo> ZReplayLoader::GetCharInfo()
 				READ_CHARINFO(MTD_CharInfo_V11);
 			}
 		}
-		else if (Version.Server == SERVER_FREESTYLE_GUNZ)
+		else if (Version.Server == SERVER::FREESTYLE_GUNZ)
 		{
 			if (Version.nVersion == 7)
 			{
@@ -254,7 +264,7 @@ inline std::vector<ReplayPlayerInfo> ZReplayLoader::GetCharInfo()
 
 			CharInfo.nEquipedItemDesc[MMCIP_MELEE] = 2; // Rusty Sword
 		}
-		else if (Version.Server == SERVER_REFINED_GUNZ)
+		else if (Version.Server == SERVER::REFINED_GUNZ)
 		{
 			Read(CharInfo);
 		}
@@ -284,7 +294,7 @@ inline std::vector<ReplayPlayerInfo> ZReplayLoader::GetCharInfo()
 
 #define READ_CHARSTATE(type) do { type state; Read(state); CopyCharState(state); } while (false)
 
-		if (Version.Server == SERVER_FREESTYLE_GUNZ)
+		if (Version.Server == SERVER::FREESTYLE_GUNZ)
 		{
 			if (Version.nVersion == 7)
 			{
@@ -306,11 +316,11 @@ inline std::vector<ReplayPlayerInfo> ZReplayLoader::GetCharInfo()
 				READ_CHARSTATE(ZCharacterReplayState_FG_V9);
 			}
 		}
-		else if (Version.Server == SERVER_REFINED_GUNZ)
+		else if (Version.Server == SERVER::REFINED_GUNZ)
 		{
 			Read(CharState);
 		}
-		else if (Version.Server == SERVER_OFFICIAL)
+		else if (Version.Server == SERVER::OFFICIAL)
 		{
 			if (Version.nVersion >= 6)
 			{
@@ -381,7 +391,7 @@ inline void ZReplayLoader::ReadN(void* Obj, size_t Size)
 
 inline bool ZReplayLoader::FixCommand(MCommand& Command)
 {
-	if (Version.Server == SERVER_FREESTYLE_GUNZ && IsDojo)
+	if (Version.Server == SERVER::FREESTYLE_GUNZ && IsDojo)
 	{
 		auto Transform = [](float pos[3])
 		{
@@ -410,7 +420,7 @@ inline bool ZReplayLoader::FixCommand(MCommand& Command)
 			}
 		}
 	}
-	else if (Version.Server == SERVER_OFFICIAL && Version.nVersion == 11)
+	else if (Version.Server == SERVER::OFFICIAL && Version.nVersion == 11)
 	{
 		if (Command.GetID() == MC_PEER_BASICINFO)
 		{

@@ -107,7 +107,7 @@ int ZFile::Read(void *pBuffer,int nByte)
 	return nByte - m_Stream.avail_out;
 }
 
-int ZFile::Write(void *pBuffer,int nByte)
+int ZFile::Write(const void *pBuffer,int nByte)
 {
 	// 파일이 열려있고 writemode 인지 확인
 	if(!m_pFile || !m_bWrite) return 0;

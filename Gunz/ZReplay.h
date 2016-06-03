@@ -31,14 +31,15 @@ bool CreateReplayGame(const char *filename);
 #define GUNZ_REC_FILE_EXT		"gzr"
 
 #define RG_REPLAY_MAGIC_NUMBER 0x00DEFBAD
-#define RG_REPLAY_BINARY_VERSION 1
+#define RG_REPLAY_BINARY_VERSION 2
 
-enum SERVER
+enum class SERVER
 {
-	SERVER_NONE,
-	SERVER_OFFICIAL, // igunz, ijji gunz, aeria gunz
-	SERVER_REFINED_GUNZ,
-	SERVER_FREESTYLE_GUNZ,
+	NONE,
+	OFFICIAL, // igunz, ijji gunz, aeria gunz
+	REFINED_GUNZ,
+	FREESTYLE_GUNZ,
+	MAX,
 };
 
 struct ReplayVersion
@@ -51,13 +52,13 @@ struct ReplayVersion
 	{
 		switch (Server)
 		{
-		case SERVER_OFFICIAL:
+		case SERVER::OFFICIAL:
 			return "Official";
-		case SERVER_FREESTYLE_GUNZ:
+		case SERVER::FREESTYLE_GUNZ:
 			return "Freestyle Gunz";
-		case SERVER_REFINED_GUNZ:
+		case SERVER::REFINED_GUNZ:
 			return "Refined Gunz";
-		case SERVER_NONE:
+		case SERVER::NONE:
 		default:
 			return "Unknown";
 		}
@@ -70,7 +71,7 @@ struct ReplayVersion
 		ret += " V";
 		ret += std::to_string(nVersion);
 
-		if (Server == SERVER_FREESTYLE_GUNZ && nVersion == 7)
+		if (Server == SERVER::FREESTYLE_GUNZ && nVersion == 7)
 		{
 			ret += ".";
 			ret += std::to_string(nSubVersion);
@@ -92,6 +93,7 @@ public:
 	float GetGameTime() const { return m_fGameTime; }
 
 	ReplayVersion GetVersion();
+	time_t GetTimestamp() const { return Timestamp; }
 	void GetStageSetting(REPLAY_STAGE_SETTING_NODE &ret);
 	void GetDuelQueueInfo(MTD_DuelQueueInfo* QueueInfo = nullptr);
 	std::vector<ReplayPlayerInfo> GetCharInfo();
@@ -106,6 +108,7 @@ private:
 	int Position = 0;
 	bool IsDojo = false;
 	MMATCH_GAMETYPE GameType;
+	time_t Timestamp = 0;
 
 	template <typename T>
 	void Read(T& Obj);

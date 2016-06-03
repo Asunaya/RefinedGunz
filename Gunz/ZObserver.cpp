@@ -110,7 +110,8 @@ void ZObserver::Show(bool bVisible)
 	if (bVisible)
 	{
 		if(g_pGame->GetMatch()->IsTeamPlay()) {
-			if(g_pGame->m_pMyCharacter->GetTeamID()==MMT_BLUE) 
+			MLog("MyChar: %p\n", g_pGame->m_pMyCharacter);
+			if(g_pGame->m_pMyCharacter->GetTeamID()==MMT_BLUE)
 				m_nType = ZOM_BLUE;
 			else
 				m_nType = ZOM_RED;

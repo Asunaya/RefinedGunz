@@ -179,7 +179,14 @@ void AniFrameInfo::Frame(RAniMode amode,RVisualMesh* pVMesh)
 
 //	m_fSpeed = 2.1f;
 
-	m_nFrame += (int)(delta * m_fSpeed);
+	int FrameAdvance = delta * m_fSpeed;
+
+	if (m_pAniSet->PlaybackRate != 1)
+	{
+		FrameAdvance *= m_pAniSet->PlaybackRate;
+	}
+
+	m_nFrame += FrameAdvance;
 
 	// frame 을 나눠서 사용할 경우 대비
 	if(bf != 0) {

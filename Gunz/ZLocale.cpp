@@ -33,7 +33,7 @@ bool ZLocale::IsTeenMode()
 void ZLocale::SetTeenMode(bool bTeenMode)
 {
 	if (m_pAuthInfo) m_pAuthInfo->SetTeenMode(bTeenMode);
-	else _ASSERT(0);
+	//else _ASSERT(0);
 }
 
 bool ZLocale::OnInit()

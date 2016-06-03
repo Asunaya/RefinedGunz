@@ -6,7 +6,7 @@ class MCommandManager;
 
 #define MCOMMAND_VERSION	55
 
-#define RGUNZ_VERSION 1
+#define RGUNZ_VERSION 2
 
 
 

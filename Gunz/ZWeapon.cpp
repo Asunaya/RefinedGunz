@@ -136,7 +136,9 @@ bool ZWeaponRocket::Update(float fElapsedTime)
 {
 	rvector diff = m_Velocity*fElapsedTime;
 
+#ifdef PORTAL
 	g_pPortal->Move(*this, diff);
+#endif
 
 	rvector oldPos = m_Position;
 

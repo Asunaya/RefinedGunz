@@ -65,6 +65,8 @@ public:
 	bool				m_isConnected;
 	bool				m_isLoadDone;
 
+	float PlaybackRate = 1;
+
 private:
 
 	AnimationLoopType	m_ani_loop_type;

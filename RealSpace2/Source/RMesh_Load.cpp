@@ -184,6 +184,12 @@ bool RMesh::ReadXmlElement(MXmlElement* PNode,char* Path)
 				pAni = m_ani_mgr.Add(IDName,PathFileName,-1,nMTypeID);
 			}
 
+			// NOTE: Hack to slow down massives
+			if (!strcmp(IDName, "slash"))// || !strncmp(IDName, "jump_slash", 10))
+			{
+				pAni->PlaybackRate = 0.9;
+			}
+
 			if(pAni) {
 
 				pAni->SetAnimationLoopType( MLoopType );

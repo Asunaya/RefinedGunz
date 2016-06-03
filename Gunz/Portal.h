@@ -196,9 +196,10 @@ class Portal
 {
 public:
 	Portal();
+	~Portal();
 
-	void OnInvalidate();
-	void OnRestore();
+	void OnLostDevice();
+	void OnResetDevice();
 
 	void OnShot();
 	bool RedirectPos(D3DXVECTOR3 &from, D3DXVECTOR3 &to);

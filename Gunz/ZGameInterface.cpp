@@ -5400,8 +5400,6 @@ void ZGameInterface::LeaveBattle()
 {
 	ShowMenu(false);
 
-	ZGetGame()->StopRecording();
-
 	ZPostStageLeaveBattle(ZGetGameClient()->GetPlayerUID(), ZGetGameClient()->GetStageUID());
 	if (m_bLeaveStageReserved) {
 		ZPostStageLeave(ZGetGameClient()->GetPlayerUID(), ZGetGameClient()->GetStageUID());

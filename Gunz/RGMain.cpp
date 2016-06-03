@@ -363,6 +363,7 @@ void RGMain::OnReplaySelected()
 		ZReplayLoader Loader;
 		Loader.LoadFile(Path);
 		SelectedReplayInfo.Version = Loader.GetVersion();
+		SelectedReplayInfo.Timestamp = Loader.GetTimestamp();
 		Loader.GetStageSetting(SelectedReplayInfo.StageSetting);
 		Loader.GetDuelQueueInfo();
 		auto InitialCharInfos = Loader.GetCharInfo();
@@ -458,6 +459,22 @@ void RGMain::DrawReplayInfo() const
 	}();
 
 	Print("%s", SelectedReplayInfo.VersionString.c_str());
+
+	[&]()
+	{
+		if (SelectedReplayInfo.Timestamp == 0)
+			return;
+
+		tm Tm;
+		auto err = localtime_s(&Tm, &SelectedReplayInfo.Timestamp);
+		if (err != 0)
+			return;
+
+		char buf[64];
+		strftime(buf, sizeof(buf), "%x", &Tm);
+
+		Print("%s", buf);
+	}();
 
 	Print("Map: %s", SelectedReplayInfo.StageSetting.szMapName);
 

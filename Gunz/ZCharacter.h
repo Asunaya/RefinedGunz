@@ -570,8 +570,8 @@ public:
 	void LevelUp();
 	void LevelDown();
 
-	void Save(ZCharacterReplayState& State);
-	void Load(const ZCharacterReplayState& State);
+	void Save(ReplayPlayerInfo& Info);
+	void Load(const ReplayPlayerInfo& Info);
 
 	RMesh *GetWeaponMesh(MMatchCharItemParts parts);
 

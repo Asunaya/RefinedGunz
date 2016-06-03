@@ -639,6 +639,8 @@ void MMatchItemDescMgr::ParseItem(MXmlElement& element)
 	{
 		//_ASSERT(0);		// 같은 ID의 아이템이 존재한다.
 		MLog("ZItem error: %s has identical id (%d) to %s\n", pNewDesc->m_szName, pNewDesc->m_nID, tempitor->second->m_szName);
+		delete pNewDesc;
+		return;
 	}
 #endif
 

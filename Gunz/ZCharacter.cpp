@@ -859,7 +859,11 @@ void ZCharacter::CheckDrawWeaponTrack()
 
 	bool bDrawTracks = false;//Ä® ±ËÀûÀ» ±×¸±°ÍÀÎ°¡?
 
-	if (ZGetConfiguration()->GetDrawTrails() && !g_pPortal->IsDrawingFakeChar())
+	if (ZGetConfiguration()->GetDrawTrails()
+#ifdef PORTAL
+		&& !g_pPortal->IsDrawingFakeChar()
+#endif
+		)
 	{
 		if ((m_pVMesh->m_SelectWeaponMotionType == eq_wd_katana) ||
 			(m_pVMesh->m_SelectWeaponMotionType == eq_wd_sword) ||
@@ -3448,7 +3452,7 @@ void ZCharacter::OnDamagedAnimation(ZObject *pAttacker,int type)
 	if(pAttacker==NULL)
 		return;
 
-	if(!m_bBlastDrop && !m_bBlastDrop)
+	if(!m_bBlastDrop)
 	{
 		rvector dir = m_Position-pAttacker->m_Position;
 		Normalize(dir);
@@ -3689,34 +3693,37 @@ void ZCharacter::ToggleClothSimulation()
 		m_pVMesh->DestroyCloth();
 }
 
-void ZCharacter::Save(ZCharacterReplayState& State)
+void ZCharacter::Save(ReplayPlayerInfo& rpi)
 {
-	State.UID = m_UID;
-	State.Property = m_Property;
-	State.HP = m_pModule_HPAP->GetHP();
-	State.AP = m_pModule_HPAP->GetAP();
-	State.Status = m_Status;
-	m_Items.Save(State.BulletInfos);
-	State.Position = m_Position;
-	State.Direction = m_Direction;
-	State.Team = m_nTeamID;
-	State.Dead = m_bDie;
-	State.HidingAdmin = m_bAdminHide;
+	rpi.IsHero = IsHero();
+	rpi.Info = m_InitialInfo;
+	rpi.State.UID = m_UID;
+	rpi.State.Property = m_Property;
+	rpi.State.HP = m_pModule_HPAP->GetHP();
+	rpi.State.AP = m_pModule_HPAP->GetAP();
+	rpi.State.Status = m_Status;
+	m_Items.Save(rpi.State.BulletInfos);
+	rpi.State.Position = m_Position;
+	rpi.State.Direction = m_Direction;
+	rpi.State.Team = m_nTeamID;
+	rpi.State.Dead = m_bDie;
+	rpi.State.HidingAdmin = m_bAdminHide;
 }
 
-void ZCharacter::Load(const ZCharacterReplayState& State)
+void ZCharacter::Load(const ReplayPlayerInfo& rpi)
 {
-	m_UID = State.UID;
-	m_Property = State.Property;
-	m_pModule_HPAP->SetHP(State.HP);
-	m_pModule_HPAP->SetAP(State.AP);
-	m_Status = State.Status;
-	m_Items.Load(State.BulletInfos);
-	m_Position = State.Position;
-	m_Direction = State.Direction;
-	m_nTeamID = State.Team;
-	m_bDie = State.Dead;
-	m_bAdminHide = State.HidingAdmin;
+	m_InitialInfo = rpi.Info;
+	m_UID = rpi.State.UID;
+	m_Property = rpi.State.Property;
+	m_pModule_HPAP->SetHP(rpi.State.HP);
+	m_pModule_HPAP->SetAP(rpi.State.AP);
+	m_Status = rpi.State.Status;
+	m_Items.Load(rpi.State.BulletInfos);
+	m_Position = rpi.State.Position;
+	m_Direction = rpi.State.Direction;
+	m_nTeamID = rpi.State.Team;
+	m_bDie = rpi.State.Dead;
+	m_bAdminHide = rpi.State.HidingAdmin;
 }
 
 void ZCharacter::OnLevelDown()

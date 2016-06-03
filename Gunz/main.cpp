@@ -1095,9 +1095,7 @@ DWORD g_dwMainThreadID;
 
 int PASCAL WinMain(HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline, int cmdshow)
 {
-//#ifdef DEBUG
-//	MessageBox(0, "hi", "hi", 0);
-//#endif
+	//MessageBox(0, "hi", "hi", 0);
 
 	SetUnhandledExceptionFilter(static_cast<LONG(__stdcall *)(_EXCEPTION_POINTERS *)>(
 		[](_EXCEPTION_POINTERS *p) -> LONG {
@@ -1144,8 +1142,6 @@ int PASCAL WinMain(HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline, int 
 
 	srand((unsigned int)time(nullptr));
 
-	g_RGMain = new RGMain;
-
 
 	mlog("Refined Gunz version %d launched. Build date: " __DATE__ " " __TIME__ "\n", RGUNZ_VERSION);
 
@@ -1164,8 +1160,6 @@ int PASCAL WinMain(HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline, int 
 	// Don't know why this is here
 	//UpgradeMrsFile();// mrs1 이라면 mrs2로 업그래이드 한다..
 #endif
-
-	//g_RGMain = new RGMain;
 
 	MSysInfoLog();
 
@@ -1195,6 +1189,8 @@ int PASCAL WinMain(HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline, int 
 
 	// StringRes먼저 로드하고 그다음에 Config을 로드한다.
 	ZGetConfiguration()->Load();
+
+	g_RGMain = new RGMain;
 
 	ZStringResManager::MakeInstance();
 	if( !ZApplication::GetInstance()->InitLocale() )

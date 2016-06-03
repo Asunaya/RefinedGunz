@@ -12,8 +12,9 @@
 #include "RGMain.h"
 #include "ZGameInterface.h"
 #include "ZGameInput.h"
+#include "ZConfiguration.h"
 
-Portal *g_pPortal = 0;
+Portal *g_pPortal = nullptr;
 
 const D3DXVECTOR3 Portal::vDim = rvector(100, 150, 0);
 bool Portal::bPortalSetExists = false;
@@ -178,6 +179,10 @@ Portal::Portal() : ValidPortals(PortalList)
 #endif
 }
 
+Portal::~Portal()
+{
+}
+
 #ifdef PORTAL_USE_RT_TEXTURE
 void Portal::CreateTextures()
 {
@@ -227,11 +232,11 @@ void Portal::ReleaseTextures()
 }
 #endif
 
-void Portal::OnInvalidate()
+void Portal::OnLostDevice()
 {
 }
 
-void Portal::OnRestore()
+void Portal::OnResetDevice()
 {
 }
 
@@ -782,7 +787,7 @@ void Portal::OnShot()
 		return;
 
 	rvector normal = D3DXVECTOR3(zpi.bpi.pInfo->plane.a, zpi.bpi.pInfo->plane.b, zpi.bpi.pInfo->plane.c);
-	rvector pos = zpi.bpi.PickPos + normal;
+	rvector pos = zpi.bpi.PickPos + normal * 5;
 	rvector up = fabs(normal.z) != 1 ? rvector(0, 0, 1) : rvector(1, 0, 0);
 
 	ZPostPortal(n, pos, normal, up);
@@ -865,8 +870,6 @@ bool Portal::RedirectPos(D3DXVECTOR3 &from, D3DXVECTOR3 &to)
 
 	return false;
 }
-
-#include "ZConfiguration.h"
 
 void Portal::DrawFakeCharacter(ZCharacter *pZChar)
 {
