@@ -459,6 +459,7 @@ void MAddSharedCommandTable(MCommandManager* pCommandManager, int nSharedType);
 #define MC_MATCH_SEND_VOICE_CHAT 8008
 #define MC_MATCH_RECEIVE_VOICE_CHAT 8009
 #define MC_PEER_SET_SWORD_COLOR 8010
+#define MC_PEER_ANTILEAD_DAMAGE 8011
 
 
 //// 피어투피어 관련 명령어 /////////////////////////////////////////////////////////////

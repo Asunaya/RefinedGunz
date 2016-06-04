@@ -42,6 +42,12 @@ void MAddSharedCommandTable(MCommandManager* pCommandManager, int nSharedType)
 		P(MPT_BLOB, "Encoded microphone data")
 	C(MC_PEER_SET_SWORD_COLOR, "", "", MCDT_PEER2PEER)
 		P(MPT_UINT, "Color")
+	C(MC_PEER_ANTILEAD_DAMAGE, "", "", MCDT_PEER2PEER)
+		P(MPT_UID, "Target")
+		P(MPT_USHORT, "Damage")
+		P(MPT_FLOAT, "PiercingRatio")
+		P(MPT_UCHAR, "DamageType")
+		P(MPT_UCHAR, "WeaponType")
 
 
 	C(MC_LOCAL_INFO, "Local.Info", "Local information", MCDT_LOCAL)

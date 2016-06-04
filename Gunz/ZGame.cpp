@@ -1693,6 +1693,41 @@ bool ZGame::OnCommand_Immediate(MCommand* pCommand)
 		g_RGMain->SetSwordColor(pCommand->GetSenderUID(), Color);
 	}
 	break;
+	case MC_PEER_ANTILEAD_DAMAGE:
+	{
+		MUID Target;
+		u16 Damage;
+		float PiercingRatio;
+		u8 DamageType;
+		u8 WeaponType;
+
+		if (!pCommand->GetParameter(&Target, 0, MPT_UID))
+			break;
+		if (!pCommand->GetParameter(&Damage, 1, MPT_USHORT))
+			break;
+		if (!pCommand->GetParameter(&PiercingRatio, 2, MPT_FLOAT))
+			break;
+		if (!pCommand->GetParameter(&DamageType, 3, MPT_UCHAR))
+			break;
+		if (!pCommand->GetParameter(&WeaponType, 4, MPT_UCHAR))
+			break;
+
+		auto it = m_CharacterManager.find(Target);
+		if (it == m_CharacterManager.end())
+			break;
+
+		if (it->second != m_pMyCharacter)
+			break;
+
+		it = m_CharacterManager.find(pCommand->GetSenderUID());
+
+		auto Attacker = it->second;
+
+		m_pMyCharacter->OnDamaged(Attacker, Attacker->GetPosition(), ZDAMAGETYPE(DamageType), MMatchWeaponType(WeaponType), Damage, PiercingRatio);
+
+		DMLog("Antilead damage %d\n", Damage);
+	}
+	break;
 	case MC_MATCH_STAGE_ENTERBATTLE:
 		{	
 			unsigned char nParam;
@@ -3476,11 +3511,23 @@ void ZGame::OnPeerShot_Range(MMatchCharItemParts sel_type, const MUID& uidOwner,
 				float fRatio = pItem->GetPiercingRatio( pDesc->m_nWeaponType
  , pickinfo.info.parts );
 				ZDAMAGETYPE dt = (pickinfo.info.parts==eq_parts_head) ? ZD_BULLET_HEADSHOT : ZD_BULLET;
-				pickinfo.pObject->OnDamaged(pOwner, pOwner->GetPosition(), dt, pDesc->m_nWeaponType, fActualDamage, fRatio );
+
+				if (!GetRules().IsAntilead())
+					pickinfo.pObject->OnDamaged(pOwner, pOwner->GetPosition(), dt, pDesc->m_nWeaponType, fActualDamage, fRatio );
 
 				if(pOwner == m_pMyCharacter) {
 					CheckCombo(m_pMyCharacter,pickinfo.pObject,!bPushSkip);
 					CheckStylishAction(m_pMyCharacter);
+
+					if (GetRules().IsAntilead() && !IsReplay())
+					{
+						auto Char = MDynamicCast(ZCharacter, pickinfo.pObject);
+
+						if (Char)
+						{
+							ZPostAntileadDamage(Char->GetUID(), fActualDamage, fRatio, dt, pDesc->m_nWeaponType);
+						}
+					}
 				}
 			}
 
@@ -3662,6 +3709,16 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 
 	int nHitCount = 0;
 
+	struct DamageInfo
+	{
+		int Damage = 0;
+		float PiercingRatio = 0;
+		ZDAMAGETYPE DamageType;
+		MMatchWeaponType WeaponType;
+	};
+
+	std::unordered_map<MUID, DamageInfo> DamageMap;
+
 	for(int i=0;i<SHOTGUN_BULLET_COUNT;i++)
 	{
 		rvector dir = origdir;
@@ -3739,7 +3796,9 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 					float fActualDamage = CalcActualDamage(pOwnerCharacter, pObject, (float)pDesc->m_nDamage);
 					float fRatio = ZItem::GetPiercingRatio( pDesc->m_nWeaponType , pickinfo.info.parts );
 					ZDAMAGETYPE dt = (pickinfo.info.parts==eq_parts_head) ? ZD_BULLET_HEADSHOT : ZD_BULLET;
-					pObject->OnDamaged(pOwnerCharacter, pOwnerCharacter->GetPosition(), dt, pDesc->m_nWeaponType, fActualDamage, fRatio );
+
+					if (!GetRules().IsAntilead())
+						pObject->OnDamaged(pOwnerCharacter, pOwnerCharacter->GetPosition(), dt, pDesc->m_nWeaponType, fActualDamage, fRatio );
 
 					nTargetType = ZTT_CHARACTER;
 					bHitBody=true;
@@ -3748,6 +3807,26 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 					if(!m_Match.IsTeamPlay() || (pTargetCharacter->GetTeamID()!=pObject->GetTeamID()))
 					{
 						bHitEnemy=true;
+					}
+
+					if (GetRules().IsAntilead() && pOwnerCharacter == m_pMyCharacter && !IsReplay())
+					{
+						auto Char = MDynamicCast(ZCharacter, pObject);
+
+						if (Char)
+						{
+							int Damage = int(fActualDamage);
+
+							auto& item = DamageMap[Char->GetUID()];
+
+							int NewDamage = item.Damage + Damage;
+							item.PiercingRatio = (item.Damage * item.PiercingRatio + Damage * fRatio) / NewDamage;
+
+							item.Damage = NewDamage;
+							static_assert(ZD_BULLET_HEADSHOT > ZD_BULLET, "Fix this");
+							item.DamageType = max(item.DamageType, dt);
+							item.WeaponType = pDesc->m_nWeaponType;
+						}
 					}
 				}
 
@@ -3817,6 +3896,14 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 		}
 
 		waterSound = GetWorld()->GetWaters()->CheckSpearing( v1, v2, 250, 0.3, !waterSound );
+	}
+
+	if (GetRules().IsAntilead())
+	{
+		for (auto& Pair : DamageMap)
+		{
+			ZPostAntileadDamage(Pair.first, Pair.second.Damage, Pair.second.PiercingRatio, Pair.second.DamageType, Pair.second.WeaponType);
+		}
 	}
 
 	

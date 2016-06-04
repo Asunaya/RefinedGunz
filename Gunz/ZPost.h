@@ -978,6 +978,11 @@ inline void ZPostCreateAccount(const char *Username, const unsigned char (&Hashe
 	ZPOSTCMD3(MC_MATCH_REQUEST_CREATE_ACCOUNT, MCmdParamStr(Username), MCmdParamBlob(HashedPassword, sizeof(HashedPassword)), MCmdParamStr(Email));
 }
 
+inline void ZPostAntileadDamage(const MUID& Target, int Damage, float PiercingRatio, ZDAMAGETYPE DamageType, MMatchWeaponType WeaponType)
+{
+	ZPOSTCMD5(MC_PEER_ANTILEAD_DAMAGE, MCmdParamUID(Target), MCmdParamUShort(Damage), MCmdParamFloat(PiercingRatio), MCmdParamUChar(DamageType), MCmdParamUChar(WeaponType));
+}
+
 #undef VEC
 
 
