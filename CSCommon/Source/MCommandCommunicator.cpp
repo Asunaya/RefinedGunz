@@ -151,6 +151,10 @@ void MCommandCommunicator::Run(void)
 
 		OnPrepareCommand(pCommand);
 
+		/*if (pCommand->GetID() == MC_MATCH_P2P_COMMAND)
+			MLog("Run MC_MATCH_P2P_COMMAND %d %d\n", pCommand->m_pCommandDesc->IsFlag(MCDT_PEER2PEER), pCommand->m_pCommandDesc->IsFlag(MCDT_LOCAL) == true ||
+				(m_This.IsValid() && pCommand->m_Receiver == m_This));*/
+
 		if ((pCommand->m_pCommandDesc->IsFlag(MCDT_PEER2PEER)==true))
 		{
 			if (pCommand->m_Sender != m_This)
@@ -238,6 +242,31 @@ void MCommandCommunicator::LOG(unsigned int nLogLevel, const char *pFormat,...)
 		va_end(args);
 #endif
 	}
+}
+
+MCommand* MCommandCommunicator::BlobToCommand(const void* Data, size_t Size)
+{
+	auto Command = new MCommand();
+
+	Command->SetData((char*)Data, &m_CommandManager, Size);
+
+	return Command;
+}
+
+MCommand* MCommandCommunicator::BlobToCommand(MCmdParamBlob* Blob)
+{
+	return BlobToCommand(Blob->GetPointer(), Blob->GetPayloadSize());
+}
+
+MCmdParamBlob* CommandToBlob(MCommand& Command)
+{
+	size_t BlobSize = Command.GetSize();
+
+	auto Param = new MCmdParamBlob();
+
+	Param->m_Value = new char[BlobSize];
+
+	Command.GetData(static_cast<char*>(Param->m_Value), BlobSize);
 }
 
 

@@ -42,12 +42,12 @@ _STATUS_CMD_START;
 				if (pCommand->GetParameter(szUserID, 0, MPT_STR, sizeof(szUserID) )==false) break;
 				//if (pCommand->GetParameter(szPassword, 1, MPT_STR, sizeof(szPassword) )==false) break;
 
-				auto Param = pCommand->GetParameter(1);
+				auto Param = static_cast<MCmdParamBlob*>(pCommand->GetParameter(1));
 				if (!Param || Param->GetType() != MPT_BLOB)
 					break;
 
 				unsigned char *HashedPassword = (unsigned char *)Param->GetPointer();
-				int HashLength = Param->GetSize() - sizeof(int); // Awk
+				int HashLength = Param->GetPayloadSize();
 
 				if (pCommand->GetParameter(&nCommandVersion, 2, MPT_INT)==false) break;
 				if (pCommand->GetParameter(&nChecksumPack, 3, MPT_UINT) == false) break;
@@ -58,7 +58,6 @@ _STATUS_CMD_START;
 			break;
 		case MC_MATCH_REQUEST_CREATE_ACCOUNT:
 		{
-			Log(LOG_ALL, "CreateAccount");
 			char szUserID[64];
 			char szEmail[64];
 			if (pCommand->GetParameter(szUserID, 0, MPT_STR, sizeof(szUserID)) == false) break;
@@ -85,6 +84,17 @@ _STATUS_CMD_START;
 			auto Length = Param->GetSize() - sizeof(int);
 
 			OnVoiceChat(pCommand->GetSenderUID(), Data, Length);
+		}
+		break;
+		case MC_MATCH_P2P_COMMAND:
+		{
+			auto& Sender = pCommand->GetSenderUID();
+			MUID Receiver;
+			if (!pCommand->GetParameter(&Receiver, 1, MPT_UID)) break;
+			auto Blob = pCommand->GetParameter(2)->GetPointer();
+			auto ID = *(unsigned short*)(((unsigned char*)Blob) + 2);
+
+			OnTunnelledP2PCommand(Sender, Receiver, Blob, MGetBlobArraySize(Blob));
 		}
 		break;
 		/*case MC_MATCH_LOGIN_NETMARBLE:

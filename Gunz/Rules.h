@@ -16,7 +16,7 @@ public:
 	bool MassiveEffectEnabled() const { return !NoMassiveEffect; }
 	bool GetShowHitboxes() const { return ShowHitboxes; }
 	bool IsSwordsOnly() const { return NoGuns; }
-	bool IsAntilead() const { return Antilead; }
+	bool IsP2PAntilead() const { return Antilead; }
 
 private:
 	int HP;

@@ -234,7 +234,7 @@ void MMatchClient::OnSockError(SOCKET sock, SOCKET_ERROR_EVENT ErrorEvent, int &
 {
 	MClient::OnSockError(sock, ErrorEvent, ErrorCode);
 
-	if (ErrorCode == 10053)
+	if (ErrorCode == WSAECONNABORTED)
 		OutputMessage(MZMOM_LOCALREPLY, "Disconnected", ErrorCode);
 	else
 		OutputMessage(MZMOM_LOCALREPLY, "TCP Socket Error(Code =  %d)", ErrorCode);	
@@ -272,6 +272,30 @@ bool MMatchClient::OnCommand(MCommand* pCommand)
 
 	switch(pCommand->GetID())
 	{
+	case MC_MATCH_P2P_COMMAND:
+	{
+		if (PeerToPeer)
+			break;
+
+		MUID Sender, Receiver;
+		if (pCommand->GetParameter(&Sender, 0, MPT_UID) == false) break;
+		if (pCommand->GetParameter(&Receiver, 1, MPT_UID) == false) break;
+
+		MCommandParameter* pParam = pCommand->GetParameter(2);
+		if (pParam->GetType() != MPT_BLOB) break;
+		void* Blob = pParam->GetPointer();
+		int Count = MGetBlobArrayCount(Blob);
+
+		MCommand* pCmd = MakeCmdFromTunnelingBlob(Sender, Blob, Count);
+		if (pCmd == nullptr) break;
+
+		LockRecv();
+		m_CommandManager.Post(pCmd);
+		UnlockRecv();
+
+		DMLog("Received tunnelled P2P command ID %x\n", pCmd->GetID());
+	}
+	break;
 		case MC_MATCH_RESPONSE_LOGIN:
 			{
 				int nResult;
@@ -698,36 +722,44 @@ void MMatchClient::SendCommand(MCommand* pCommand)
 		if (GetBridgePeerFlag() == false) {
 			SendCommandByTunneling(pCommand);
 		} else {
-			if (pCommand->GetReceiverUID() == MUID(0,0)) {	// BroadCasting
-				int nTunnelingCount = 0;
+			if (!PeerToPeer)
+			{
+				SendCommandByMatchServerTunneling(pCommand);
+			}
+			else
+			{
+				if (pCommand->GetReceiverUID() == MUID(0, 0)) {	// BroadCasting
+					int nTunnelingCount = 0;
 
-				// Peer2Peer 메세지는 Sender가 플레이어이다.
-				for (MMatchPeerInfoList::iterator itor = m_Peers.begin(); 
+					// Peer2Peer 메세지는 Sender가 플레이어이다.
+					for (MMatchPeerInfoList::iterator itor = m_Peers.begin();
 					itor != m_Peers.end(); ++itor)
-				{
-					MMatchPeerInfo* pPeerInfo = (*itor).second;
-					if ( (pPeerInfo->uidChar==MUID(0,0)) || 
-						 (pPeerInfo->uidChar != GetPlayerUID()) )	
 					{
-						if ( (pPeerInfo->GetProcess() == false) &&
-							 (pPeerInfo->GetUDPTestResult() == false) )
-							nTunnelingCount++;
+						MMatchPeerInfo* pPeerInfo = (*itor).second;
+						if ((pPeerInfo->uidChar == MUID(0, 0)) ||
+							(pPeerInfo->uidChar != GetPlayerUID()))
+						{
+							if ((pPeerInfo->GetProcess() == false) &&
+								(pPeerInfo->GetUDPTestResult() == false))
+								nTunnelingCount++;
+							else
+								SendCommandByUDP(pCommand, pPeerInfo->szIP, pPeerInfo->nPort);
+						}
+					}
+
+					if (nTunnelingCount > 0) {
+						SendCommandByTunneling(pCommand);
+					}
+				}
+				else {
+					MMatchPeerInfo* pPeerInfo = FindPeer(pCommand->GetReceiverUID());
+					if (pPeerInfo) {
+						if ((pPeerInfo->GetProcess() == false) &&
+							(pPeerInfo->GetUDPTestResult() == false))
+							SendCommandByTunneling(pCommand);
 						else
 							SendCommandByUDP(pCommand, pPeerInfo->szIP, pPeerInfo->nPort);
 					}
-				}
-
-				if (nTunnelingCount > 0) {
-					SendCommandByTunneling(pCommand);
-				}
-			} else {
-				MMatchPeerInfo* pPeerInfo = FindPeer(pCommand->GetReceiverUID());
-				if (pPeerInfo) {
-					if ( (pPeerInfo->GetProcess() == false) &&
-						 (pPeerInfo->GetUDPTestResult() == false) )
-						SendCommandByTunneling(pCommand);
-					else	
-						SendCommandByUDP(pCommand, pPeerInfo->szIP, pPeerInfo->nPort);
 				}
 			}
 		}
@@ -855,6 +887,40 @@ void MMatchClient::SendCommandByTunneling(MCommand* pCommand)
 			SendCommandByUDP(pCmd, GetAgentIP(), GetAgentPeerPort());
 			delete pCmd;	// PACKETQUEUE 만들때까지 delete 임시로 사용
 		}
+	}
+}
+
+void MMatchClient::SendCommandByMatchServerTunneling(MCommand* pCommand)
+{
+	//DMLog("SendCommandByMatchServerTunneling %d %d\n", GetAllowTunneling(), GetBridgePeerFlag());
+
+	if (GetBridgePeerFlag() == false) {
+		MCommand* pCmd = CreateCommand(MC_AGENT_TUNNELING_TCP, GetAgentServerUID());
+		pCmd->AddParameter(new MCmdParamUID(GetPlayerUID()));
+		pCmd->AddParameter(new MCmdParamUID(pCommand->GetReceiverUID()));
+
+		// Create Param : Command Blob ////
+		if (!MakeTunnelingCommandBlob(pCmd, pCommand))
+		{
+			delete pCmd; pCmd = NULL; return;
+		}
+		///////////////////////////////////
+		SendCommandToAgent(pCmd);
+		delete pCmd;	// PACKETQUEUE 만들때까지 delete 임시로 사용
+	}
+	else {
+		MCommand* pCmd = CreateCommand(MC_MATCH_P2P_COMMAND, GetServerUID());
+		pCmd->AddParameter(new MCmdParamUID(GetPlayerUID()));
+		pCmd->AddParameter(new MCmdParamUID(pCommand->GetReceiverUID()));
+
+		if (!MakeTunnelingCommandBlob(pCmd, pCommand))
+		{
+			delete pCmd; pCmd = NULL; return;
+		}
+
+		//MClient::SendCommand(pCmd);
+		Post(pCmd);
+		//delete pCmd;
 	}
 }
 

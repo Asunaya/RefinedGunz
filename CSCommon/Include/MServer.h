@@ -92,7 +92,9 @@ public:
 	virtual void Disconnect(MUID uid);
 	virtual int OnDisconnect(const MUID& uid);	// Thread not safe
 
-	virtual void Log(unsigned int nLogLevel, const char* szLog){}
+	virtual void Log(unsigned int nLogLevel, const char* szLog) = 0;
+
+	void LogF(unsigned int Level, const char* Format, ...);
 };
 
 #endif

@@ -1097,6 +1097,27 @@ void MMatchServer::OnVoiceChat(const MUID & Player, unsigned char* EncodedFrame,
 	RouteToBattleExcept(Stage, Command, Player);
 }
 
+void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Receiver, const void * Blob, size_t BlobSize)
+{
+	MCommand* pCmd = CreateCommand(MC_MATCH_P2P_COMMAND, MUID(0, 0));
+	pCmd->AddParameter(new MCmdParamUID(Sender));
+	pCmd->AddParameter(new MCmdParamUID(Receiver));
+	pCmd->AddParameter(new MCmdParamBlob(Blob, BlobSize));
+
+	auto Command = BlobToCommand(
+
+	auto Obj = GetObject(Sender);
+
+	if (!Obj)
+		return;
+
+	auto Stage = Obj->GetStageUID();
+
+	RouteToBattleExcept(Stage, pCmd, Sender);
+
+	//LogF(LOG_ALL, "P2P Command! Sender = %X:%X, receiver = %X:%X, command ID = %X", Sender.High, Sender.Low, Receiver.High, Receiver.Low, ID);
+}
+
 struct stRouteListenerNode
 {
 	DWORD				nUserContext;

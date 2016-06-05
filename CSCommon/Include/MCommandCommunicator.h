@@ -145,8 +145,12 @@ public:
 #ifdef _CMD_PROFILE
 	MCommandProfiler		m_CommandProfiler;
 #endif
+
+	MCommand* MCommandCommunicator::BlobToCommand(const void* Data, size_t Size);
+	MCommand * BlobToCommand(MCmdParamBlob * Blob);
 };
 
+MCmdParamBlob* CommandToBlob(MCommand& Command);
 int CalcPacketSize(MCommand* pCmd);
 
 #endif

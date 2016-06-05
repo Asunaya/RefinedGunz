@@ -215,7 +215,7 @@ public:
 
 		if ((nValueSize > (USHRT_MAX - 2)) || (0 == nValueSize))
 		{
-			ASSERT(0 && "비정상 길이의 문자.");
+			//ASSERT(0 && "비정상 길이의 문자.");
 			return sizeof(nValueSize);
 		}
 
@@ -339,6 +339,11 @@ public:
 	virtual const char* GetClassName(void) override { return "Blob"; }
 	virtual void GetString(char* szValue, int maxlen) override { sprintf_safe(szValue, maxlen, "%02X%02X..", *((unsigned char*)(m_Value)), *((unsigned char*)(m_Value)+1)); }
 	virtual int GetSize() override;
+
+	size_t GetPayloadSize() const
+	{
+		return m_nSize;
+	}
 };
 
 template <typename AllocT>

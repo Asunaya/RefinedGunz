@@ -3512,14 +3512,14 @@ void ZGame::OnPeerShot_Range(MMatchCharItemParts sel_type, const MUID& uidOwner,
  , pickinfo.info.parts );
 				ZDAMAGETYPE dt = (pickinfo.info.parts==eq_parts_head) ? ZD_BULLET_HEADSHOT : ZD_BULLET;
 
-				if (!GetRules().IsAntilead())
+				if (!GetRules().IsP2PAntilead())
 					pickinfo.pObject->OnDamaged(pOwner, pOwner->GetPosition(), dt, pDesc->m_nWeaponType, fActualDamage, fRatio );
 
 				if(pOwner == m_pMyCharacter) {
 					CheckCombo(m_pMyCharacter,pickinfo.pObject,!bPushSkip);
 					CheckStylishAction(m_pMyCharacter);
 
-					if (GetRules().IsAntilead() && !IsReplay())
+					if (GetRules().IsP2PAntilead() && !IsReplay())
 					{
 						auto Char = MDynamicCast(ZCharacter, pickinfo.pObject);
 
@@ -3797,7 +3797,7 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 					float fRatio = ZItem::GetPiercingRatio( pDesc->m_nWeaponType , pickinfo.info.parts );
 					ZDAMAGETYPE dt = (pickinfo.info.parts==eq_parts_head) ? ZD_BULLET_HEADSHOT : ZD_BULLET;
 
-					if (!GetRules().IsAntilead())
+					if (!GetRules().IsP2PAntilead())
 						pObject->OnDamaged(pOwnerCharacter, pOwnerCharacter->GetPosition(), dt, pDesc->m_nWeaponType, fActualDamage, fRatio );
 
 					nTargetType = ZTT_CHARACTER;
@@ -3809,7 +3809,7 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 						bHitEnemy=true;
 					}
 
-					if (GetRules().IsAntilead() && pOwnerCharacter == m_pMyCharacter && !IsReplay())
+					if (GetRules().IsP2PAntilead() && pOwnerCharacter == m_pMyCharacter && !IsReplay())
 					{
 						auto Char = MDynamicCast(ZCharacter, pObject);
 
@@ -3898,7 +3898,7 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 		waterSound = GetWorld()->GetWaters()->CheckSpearing( v1, v2, 250, 0.3, !waterSound );
 	}
 
-	if (GetRules().IsAntilead())
+	if (GetRules().IsP2PAntilead())
 	{
 		for (auto& Pair : DamageMap)
 		{

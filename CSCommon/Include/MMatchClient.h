@@ -133,6 +133,8 @@ protected:
 
 	bool				m_bAllowTunneling;
 
+	bool PeerToPeer = false;
+
 public:
 	MCommand* MakeCmdFromTunnelingBlob(const MUID& uidSender, void* pBlob, int nBlobArrayCount);
 	bool MakeTunnelingCommandBlob(MCommand* pWrappingCmd, MCommand* pSrcCmd);
@@ -182,6 +184,7 @@ protected:
 	virtual void SendCommand(MCommand* pCommand);
 	bool SendCommandToAgent(MCommand* pCommand);
 	void SendCommandByTunneling(MCommand* pCommand);
+	void SendCommandByMatchServerTunneling(MCommand* pCommand);
 	void ParseUDPPacket(char* pData,MPacketHeader* pPacketHeader,DWORD dwIP,unsigned int nPort);
 public:
 	void SendCommandByUDP(MCommand* pCommand, char* szIP, int nPort);

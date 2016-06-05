@@ -72,5 +72,6 @@
 #include "MMatchDebug.h"
 
 #include "SafeString.h"
+#include "GlobalTypes.h"
 
 #endif

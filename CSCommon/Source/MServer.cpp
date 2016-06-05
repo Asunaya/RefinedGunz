@@ -523,3 +523,16 @@ void MServer::RCPCallback(void* pCallbackContext, RCP_IO_OPERATION nIO, DWORD nK
 	}
 
 }
+
+void MServer::LogF(unsigned int Level, const char* Format, ...)
+{
+	char buf[512];
+
+	va_list args;
+
+	va_start(args, Format);
+	vsprintf_safe(buf, Format, args);
+	va_end(args);
+
+	Log(Level, buf);
+}
