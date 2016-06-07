@@ -24,9 +24,10 @@
 #include "MStringRes.h"
 #include "MMatchStringResManager.h"
 #include "MMatchEventManager.h"
-
-
-#include <vector>
+#include "GlobalTypes.h"
+#include <queue>
+#include <unordered_map>
+#include "LagCompensation.h"
 using namespace std;
 
 class MMatchAuthBuilder;
@@ -127,6 +128,8 @@ protected:
 	DWORD					m_dwNonBlockCount;
 
 	MMatchEventManager		m_CustomEventManager;
+
+	LagCompManager LagComp;
 
 public:
 	MMatchServer(void);
@@ -634,7 +637,7 @@ public:
 
 	void OnVoiceChat(const MUID& Player, unsigned char* EncodedFrame, int Length);
 
-	void OnTunnelledP2PCommand(const MUID& Sender, const MUID& Receiver, const void* Blob, size_t BlobSize);
+	void OnTunnelledP2PCommand(const MUID& Sender, const MUID& Receiver, const char* Blob, size_t BlobSize);
 
 //	void ResponseObjectUpdate(MUID& TargetUID, MObject* pObject);
 	void ResponseBridgePeer(const MUID& uidChar, int nCode);

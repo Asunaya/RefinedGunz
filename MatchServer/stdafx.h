@@ -47,6 +47,8 @@
 #include <comutil.h>
 #include <stdio.h>
 
+#include "SafeString.h"
+
 #define _QUEST
 #define _QUEST_ITEM
-#define _MONSTER_BIBLE 
+#define _MONSTER_BIBLE

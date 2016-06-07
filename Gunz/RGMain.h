@@ -8,7 +8,6 @@
 #include "Extensions.h"
 #include "VoiceChat.h"
 #include "Tasks.h"
-#include "MeshManager.h"
 #include "Hitboxes.h"
 
 class ZChatCmdManager;
@@ -80,27 +79,6 @@ public:
 
 	void OnReceiveVoiceChat(ZCharacter *Char, const uint8_t *Buffer, int Length);
 
-	void OnDestroyObject(void* Obj)
-	{
-		if (!m_MeshManager)
-			return;
-
-		m_MeshManager->OnDestroyObject(Obj);
-	}
-
-	void ReleaseMeshNode(RMeshNode* Node)
-	{
-		if (!m_MeshManager)
-			return;
-
-		m_MeshManager->Release(Node);
-	}
-
-	void GetMeshNode(const char *MeshName, const char *NodeName, void* Obj, std::function<void(RMeshNode*)> Callback)
-	{
-		m_MeshManager->GetAsync(MeshName, NodeName, Obj, Callback);
-	}
-
 	bool IsCursorEnabled() const;
 
 	double GetTime() const { return Time; }
@@ -142,7 +120,6 @@ private:
 	VoiceChat m_VoiceChat;
 #endif
 	TaskManager m_TaskManager;
-	std::unique_ptr<MeshManager> m_MeshManager = nullptr;
 	HitboxManager m_HitboxManager;
 };
 

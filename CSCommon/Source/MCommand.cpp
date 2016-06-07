@@ -230,7 +230,7 @@ bool MCommand::CheckRule(void)
 	return true;
 }
 
-int MCommand::GetData(char* pData, int nSize)
+int MCommand::GetData(char* pData, int nSize) const
 {
 	if(m_pCommandDesc==NULL) return 0;
 
@@ -265,7 +265,7 @@ int MCommand::GetData(char* pData, int nSize)
 	return nDataCount;
 }
 
-int MCommand::GetSize()
+int MCommand::GetSize() const
 {
 	if(m_pCommandDesc==NULL) return 0;
 

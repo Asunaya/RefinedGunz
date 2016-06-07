@@ -550,3 +550,8 @@ void MMatchObject::SetBadFileCRCDisconnectWaitInfo( const MMatchDisconnectStatus
 	//GetDisconnStatusInfo().SetEndDate( MGetStrLocalTime(0, 0, 0, 0, 0) ); // 1시간 후에 접속 가능.
 	//GetDisconnStatusInfo().SetBlockLevel( MMBL_LOGONLY );
 }
+
+void MMatchObject::OnBasicInfo(const BasicInfo & bi)
+{
+	BasicInfoHistory.push_front(bi);
+}

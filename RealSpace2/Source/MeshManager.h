@@ -6,6 +6,8 @@
 class MeshManager
 {
 public:
+	MeshManager();
+
 	// This kills the file.
 	void LoadParts(std::vector<unsigned char>& File);
 	RMeshNode *Get(const char *szMeshName, const char *szNodeName);
@@ -13,6 +15,11 @@ public:
 	void Release(RMeshNode *pNode);
 
 	void OnDestroyObject(void *pObj);
+
+	friend MeshManager* GetMeshManager()
+	{
+		return Instance;
+	}
 
 private:
 	std::unordered_map<std::string, std::unordered_map<std::string, std::string>> PartsToEluMap;
@@ -36,4 +43,8 @@ private:
 	bool RemoveObject(void *);
 
 	std::mutex ObjQueueMutex;
+
+	static MeshManager* Instance;
 };
+
+MeshManager* GetMeshManager();

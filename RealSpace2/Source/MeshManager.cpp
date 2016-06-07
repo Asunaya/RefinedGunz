@@ -3,9 +3,18 @@
 #undef pi
 #include <boost/property_tree/detail/rapidxml.hpp>
 #include <fstream>
-#include "RGMain.h"
 
 using namespace boost::property_tree::detail;
+
+MeshManager* MeshManager::Instance = nullptr;
+
+MeshManager::MeshManager()
+{
+	if (Instance)
+		throw std::runtime_error("MeshManager created more than once");
+
+	Instance = this;
+}
 
 void MeshManager::LoadParts(std::vector<unsigned char>& File)
 {
@@ -264,4 +273,12 @@ void MeshManager::GetAsync(const char *szMeshName, const char *szNodeName, void*
 				Callback(ret);
 		});
 	});
+}
+
+void AddTask(std::function<void()>)
+{
+}
+
+void Invoke(std::function<void()>)
+{
 }

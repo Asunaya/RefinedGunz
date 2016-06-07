@@ -659,6 +659,8 @@ bool MMatchServer::Create(int nPort)
 	g_PointerChecker[1].Init(m_pScheduler);
 	g_PointerChecker[2].Init(m_pAuthBuilder);
 
+	LagComp.Create();
+
 	return true;
 }
 
@@ -1097,14 +1099,21 @@ void MMatchServer::OnVoiceChat(const MUID & Player, unsigned char* EncodedFrame,
 	RouteToBattleExcept(Stage, Command, Player);
 }
 
-void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Receiver, const void * Blob, size_t BlobSize)
+static int GetBlobCmdID(const char* Data)
+{
+	return *(u16*)(Data + 2);
+}
+
+void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Receiver, const char * Blob, size_t BlobSize)
 {
 	MCommand* pCmd = CreateCommand(MC_MATCH_P2P_COMMAND, MUID(0, 0));
 	pCmd->AddParameter(new MCmdParamUID(Sender));
 	pCmd->AddParameter(new MCmdParamUID(Receiver));
 	pCmd->AddParameter(new MCmdParamBlob(Blob, BlobSize));
 
-	auto Command = BlobToCommand(
+	if (GetBlobCmdID(Blob) == MC_PEER_BASICINFO)
+	{
+	}
 
 	auto Obj = GetObject(Sender);
 

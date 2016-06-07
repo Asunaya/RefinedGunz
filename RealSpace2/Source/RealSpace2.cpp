@@ -9,8 +9,6 @@
 #include "RFont.h"
 #include "dxerr9.h"
 
-#include "../../Gunz/ZConfiguration.h"
-
 #ifdef _HSHIELD
 #include "../../Gunz/HShield/HShield.h"
 #endif
@@ -34,6 +32,12 @@ MZFileSystem			*g_pFileSystem=NULL;
 RParticleSystem			g_ParticleSystem;
 HMODULE					g_hD3DLibrary=NULL;
 bool g_bStencilBuffer;
+static bool DynamicResourceLoading = false;
+
+bool IsDynamicResourceLoad()
+{
+	return DynamicResourceLoading;
+}
 
 // FIXED RESOLUTION ฐüทร ...
 //LPDIRECT3DTEXTURE9 g_lpTexture = 0;
@@ -379,7 +383,7 @@ bool RInitDisplay(HWND hWnd, const RMODEPARAMS *params)
 	DWORD BehaviorFlags = D3DCREATE_FPU_PRESERVE |
 		(g_bHardwareTNL ? D3DCREATE_HARDWARE_VERTEXPROCESSING : D3DCREATE_SOFTWARE_VERTEXPROCESSING);
 
-	if (ZGetConfiguration()->GetDynamicResourceLoad())
+	if (IsDynamicResourceLoad())
 		BehaviorFlags |= D3DCREATE_MULTITHREADED;
 
 #ifdef _MT

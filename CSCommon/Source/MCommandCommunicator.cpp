@@ -247,9 +247,7 @@ void MCommandCommunicator::LOG(unsigned int nLogLevel, const char *pFormat,...)
 MCommand* MCommandCommunicator::BlobToCommand(const void* Data, size_t Size)
 {
 	auto Command = new MCommand();
-
-	Command->SetData((char*)Data, &m_CommandManager, Size);
-
+	Command->SetData((char*)Data, &m_CommandManager, (u16)Size);
 	return Command;
 }
 
@@ -261,12 +259,10 @@ MCommand* MCommandCommunicator::BlobToCommand(MCmdParamBlob* Blob)
 MCmdParamBlob* CommandToBlob(MCommand& Command)
 {
 	size_t BlobSize = Command.GetSize();
-
 	auto Param = new MCmdParamBlob();
-
 	Param->m_Value = new char[BlobSize];
-
 	Command.GetData(static_cast<char*>(Param->m_Value), BlobSize);
+	return Param;
 }
 
 

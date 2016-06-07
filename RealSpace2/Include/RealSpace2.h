@@ -31,6 +31,7 @@ void SetClearColor(DWORD c);
 int		RGetVideoMemory();
 void	RSetWBuffer(bool bEnable);
 bool	RIsStencilBuffer();
+bool IsDynamicResourceLoad();
 
 
 int RGetAdapterModeCount( D3DFORMAT Format,UINT Adapter = D3DADAPTER_DEFAULT );

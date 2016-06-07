@@ -324,7 +324,6 @@ rem call copy_share.bat
     <ClInclude Include="Draw.h" />
     <ClInclude Include="Extensions.h" />
     <ClInclude Include="Hitboxes.h" />
-    <ClInclude Include="MeshManager.h" />
     <ClInclude Include="NewChat.h" />
     <ClInclude Include="Portal.h" />
     <ClInclude Include="ReplayControl.h" />
@@ -557,7 +556,6 @@ rem call copy_share.bat
   <ItemGroup>
     <ClCompile Include="Draw.cpp" />
     <ClCompile Include="Hitboxes.cpp" />
-    <ClCompile Include="MeshManager.cpp" />
     <ClCompile Include="NewChat.cpp" />
     <ClCompile Include="Portal.cpp" />
     <ClCompile Include="ReplayControl.cpp" />

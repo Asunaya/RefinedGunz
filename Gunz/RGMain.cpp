@@ -5,7 +5,6 @@
 #include "ZConfiguration.h"
 #include "Hitboxes.h"
 #include "Draw.h"
-#include "MeshManager.h"
 #include "ZRule.h"
 #include "ZRuleSkillmap.h"
 #include "VoiceChat.h"
@@ -13,7 +12,6 @@
 #include "FileInfo.h"
 #include "ZReplay.inl"
 #include "ZInput.h"
-#include "MeshManager.h"
 
 RGMain *g_RGMain = nullptr;
 
@@ -24,9 +22,6 @@ void RGMain::OnAppCreate()
 #ifdef PORTAL
 	g_pPortal = new Portal();
 #endif
-
-	if (ZGetConfiguration()->GetDynamicResourceLoad())
-		m_MeshManager = std::make_unique<MeshManager>();
 }
 
 void RGMain::OnCreateDevice()
@@ -154,10 +149,10 @@ std::pair<bool, std::vector<unsigned char>> ReadZFile(const char *szPath)
 	return{ true, InflatedFile };
 }
 
-void Invoke(std::function<void()> fn)
-{
-	g_RGMain->Invoke(fn);
-}
+//void Invoke(std::function<void()> fn)
+//{
+//	g_RGMain->Invoke(fn);
+//}
 
 std::pair<int, ZCharacter*> FindSinglePlayer(const char * NameSubstring)
 {
@@ -622,31 +617,6 @@ void RGMain::OnSlash(ZCharacter * Char, const D3DXVECTOR3 & Pos, const D3DXVECTO
 void RGMain::OnMassive(ZCharacter * Char, const D3DXVECTOR3 & Pos, const D3DXVECTOR3 & Dir)
 {
 	m_HitboxManager.OnMassive(Pos);
-}
-
-void OnDestroyObject(void* Obj)
-{
-	g_RGMain->OnDestroyObject(Obj);
-}
-
-void ReleaseMeshNode(RMeshNode* Node)
-{
-	g_RGMain->ReleaseMeshNode(Node);
-}
-
-bool IsDynamicResourceLoad()
-{
-	return ZGetConfiguration()->GetDynamicResourceLoad();
-}
-
-void GetMeshNodeAsync(const char *MeshName, const char *NodeName, void* Obj, std::function<void(RMeshNode*)> Callback)
-{
-	g_RGMain->GetMeshNode(MeshName, NodeName, Obj, Callback);
-}
-
-void AddTask(std::function<void()> fn)
-{
-
 }
 
 bool RGMain::IsCursorEnabled() const

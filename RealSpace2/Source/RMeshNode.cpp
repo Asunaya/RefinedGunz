@@ -1102,6 +1102,8 @@ void RMeshNode::ToonRenderSilhouetteSettingOff()
 	}
 }
 
+uint32_t BlendColor = 0;
+
 void RMeshNode::Render(D3DXMATRIX* pWorldMatrix)
 {
 	RMtrl* pMtrl = NULL;
@@ -1152,8 +1154,6 @@ void RMeshNode::Render(D3DXMATRIX* pWorldMatrix)
 
 		/////////////////////////////////////////////////////////////////////////////////		
 #endif
-
-		extern uint32_t BlendColor;
 
 		if (BlendColor)
 		{

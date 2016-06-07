@@ -472,6 +472,9 @@
     <ClInclude Include="MMatchRuleSkillmap.h">
       <Filter>MatchServer\Game\GameType</Filter>
     </ClInclude>
+    <ClInclude Include="Include\LagCompensation.h">
+      <Filter>MatchServer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\MCommand.cpp">
@@ -837,6 +840,9 @@
     <ClCompile Include="Source\stdafx.cpp" />
     <ClCompile Include="MMatchRuleSkillmap.cpp">
       <Filter>MatchServer\Game\GameType</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\LagCompensation.cpp">
+      <Filter>MatchServer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

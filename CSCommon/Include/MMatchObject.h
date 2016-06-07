@@ -5,6 +5,7 @@
 #include <map>
 #include <algorithm>
 #include <string>
+#include <deque>
 using namespace std;
 #include "MMatchItem.h"
 #include "MUID.h"
@@ -17,6 +18,7 @@ using namespace std;
 #include "MQuestItem.h"
 #include "MMatchAntiHack.h"
 #include "MMatchHShield.h"
+#include "GlobalTypes.h"
 
 // 등급 - 이것은 디비의 UserGrade테이블과 싱크가 맞아야 한다.
 enum MMatchUserGradeID
@@ -404,6 +406,18 @@ struct MMatchObjectChannelInfo
 	}
 };
 
+struct BasicInfo {
+	v3 position;
+	v3 velocity;
+	//	rvector accel;
+	v3 direction;
+	//	ZC_STATE_UPPER upperstate;
+	//	ZC_STATE_LOWER lowerstate;
+
+	float SentTime;
+	float RecvTime;
+};
+
 
 class MMatchObject : public MObject {
 protected:
@@ -478,6 +492,9 @@ protected:
 
 	unsigned long int m_nLastPingTime;		// 퀘스트모드, 핑 보낸 시간
 	unsigned long int m_nQuestLatency;		// 퀘스트모드
+	
+	// This is awkward.
+	std::deque<BasicInfo> BasicInfoHistory;
 
 protected:
 	void UpdateChannelListChecksum(unsigned long nChecksum)	{ m_ChannelInfo.nChannelListChecksum = nChecksum; }
@@ -643,6 +660,10 @@ public:
 	void SetXTrapHackerDisconnectWaitInfo( const MMatchDisconnectStatus DisStatus = MMDS_DISCONN_WAIT );
 	void SetHShieldHackerDisconnectWaitInfo( const MMatchDisconnectStatus DisStatus = MMDS_DISCONN_WAIT );
 	void SetBadFileCRCDisconnectWaitInfo( const MMatchDisconnectStatus DisStatus = MMDS_DISCONN_WAIT );
+
+	void OnBasicInfo(const BasicInfo& bi);
+
+	const BasicInfo* GetBasicInfo(float Time);
 
 public:
 	enum MMO_ACTION

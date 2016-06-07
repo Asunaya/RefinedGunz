@@ -6,6 +6,7 @@
 #include "mempool.h"
 
 #include "SafeString.h"
+#include "GlobalTypes.h"
 
 class MCommandParamCondition;
 class MCommandParamConditionMinMax;
@@ -33,7 +34,8 @@ enum MCommandParameterType{
 	// 숫자는 고정된 값이다. (확장은 가능하되, 수정은 불가)
 
 	MPT_SVECTOR	= 17,
-	MPT_END		= 18,		///< 파라미터 타입 총 갯수
+	MPT_CMD     = 18,
+	MPT_END		= 19,		///< 파라미터 타입 총 갯수
 };
 
 #define MAX_BLOB_SIZE		(0x100000)			// 1메가바이트
@@ -539,6 +541,79 @@ public:
 	virtual void GetString(char* szValue, int maxlen) override { sprintf_safe(szValue, maxlen, "%d,%d,%d", m_nX, m_nY, m_nZ); }
 	virtual int GetSize() override { return (sizeof(short)*3); }
 };
+
+class MCommand;
+class MCommandParameterCommand;
+MCommandParameterCommand* MakeOwningMCmdParamCmd(const void* Data, size_t Size);
+
+class MCommandParameterCommand : public MCommandParameter {
+public:
+	char* Data = nullptr;
+	size_t Size = 0;
+	bool OwnsData = false;
+public:
+	MCommandParameterCommand(void) : MCommandParameter(MPT_CMD), Data(nullptr), Size(0), OwnsData(false) { }
+	explicit MCommandParameterCommand(const MCommand& Command);
+
+	virtual ~MCommandParameterCommand(void) override
+	{
+		if (OwnsData)
+			delete Data;
+	}
+
+	virtual MCommandParameterCommand* Clone(void) override
+	{
+		return MakeOwningMCmdParamCmd(Data, Size);
+	}
+
+	virtual void GetValue(void* p) override
+	{
+	}
+
+	virtual int GetData(char* pData, int nSize) override
+	{
+		return Size;
+	}
+	virtual int SetData(const char* pData) override
+	{
+		return Size;
+	}
+	virtual void *GetPointer() override { return Data; }
+	virtual const char* GetClassName(void) override { return "Command"; }
+	virtual void GetString(char* szValue, int maxlen) override { sprintf_safe(szValue, maxlen, "Command ID %d/0x%04X", GetID(), GetID()); }
+	virtual int GetSize() override
+	{
+		return Size;
+	}
+
+	int GetID() const
+	{
+		return *(const u16*)(Data + 2);
+	}
+};
+
+static inline MCommandParameterCommand* MakeOwningMCmdParamCmd(const void* Data, size_t Size)
+{
+	auto Param = new MCommandParameterCommand;
+
+	Param->Data = new char[Size];
+	Param->Size = Size;
+	Param->OwnsData = true;
+	memcpy(Param->Data, Data, Size);
+
+	return Param;
+}
+
+static inline MCommandParameterCommand* MakeNonOwningMCmdParamCmd(const void* Data, size_t Size)
+{
+	auto Param = new MCommandParameterCommand;
+
+	Param->Data = (char*)Data;
+	Param->Size = Size;
+	Param->OwnsData = false;
+
+	return Param;
+}
 
 
 /// Command Parameter Condition Abstract Class

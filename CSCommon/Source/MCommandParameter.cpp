@@ -699,3 +699,13 @@ int MCommandParameterShortVector::SetData(const char* pData)
 	m_nZ = v[2];
 	return nValueSize;
 }
+
+MCommandParameterCommand::MCommandParameterCommand(const MCommand& Command) : MCommandParameter(MPT_CMD)
+{
+	Size = Command.GetSize();
+	Data = new char[Size];
+	OwnsData = true;
+
+	Command.GetData(Data, Size);
+}
+

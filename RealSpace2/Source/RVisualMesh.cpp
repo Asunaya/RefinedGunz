@@ -3,17 +3,10 @@
 #include "RVisualMeshMgr.h"
 #include "MDebug.h"
 #include "RealSpace2.h"
-
 #include "MProfiler.h"
-
 #include "RCharCloth.h"
-
 #include <functional>
-
-extern bool IsDynamicResourceLoad();
-extern void GetMeshNodeAsync(const char *szMeshName, const char *szNodeName, void* Obj, std::function<void(RMeshNode*)> Callback);
-extern void ReleaseMeshNode(RMeshNode* Node);
-extern void OnDestroyObject(void*);
+#include "MeshManager.h"
 
 _USING_NAMESPACE_REALSPACE2
 
@@ -470,7 +463,7 @@ RVisualMesh::RVisualMesh() {
 
 RVisualMesh::~RVisualMesh() 
 {
-	OnDestroyObject(this);
+	GetMeshManager()->OnDestroyObject(this);
 
 	Destroy();
 }
@@ -504,7 +497,7 @@ void RVisualMesh::Destroy()
 			case eq_parts_hands:
 			case eq_parts_legs:
 			case eq_parts_feet:
-				ReleaseMeshNode(m_pTMesh[i]);
+				GetMeshManager()->Release(m_pTMesh[i]);
 			}
 		}
 
@@ -1808,7 +1801,7 @@ void RVisualMesh::ClearParts() {
 		case eq_parts_hands:
 		case eq_parts_legs:
 		case eq_parts_feet:
-			ReleaseMeshNode(m_pTMesh[i]);
+			GetMeshManager()->Release(m_pTMesh[i]);
 		};
 
 		m_pTMesh[i] = nullptr;
@@ -1841,13 +1834,13 @@ void RVisualMesh::SetParts(RMeshPartsType parts, char* name)
 	if (IsDynamicResourceLoad())
 	{
 		std::string saved_name(name);
-		GetMeshNodeAsync(m_pMesh->GetName(), name, this, [this, saved_name, parts](RMeshNode *pNode)
+		GetMeshManager()->GetAsync(m_pMesh->GetName(), name, this, [this, saved_name, parts](RMeshNode *pNode)
 		{
 			RMeshNode *pPreviousNode = m_pTMesh[parts];
 
 			if (pPreviousNode)
 			{
-				ReleaseMeshNode(pPreviousNode);
+				GetMeshManager()->Release(pPreviousNode);
 			}
 
 			if (!pNode)

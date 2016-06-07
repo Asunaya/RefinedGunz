@@ -171,6 +171,7 @@
     <ClCompile Include="Source\RFrameWork.cpp" />
     <ClCompile Include="Source\RTypes.cpp" />
     <ClCompile Include="Source\stdafx.cpp" />
+    <ClCompile Include="Source\MeshManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\RHalfEdgeMesh.h">
@@ -302,5 +303,6 @@
     <ClInclude Include="Include\RTypes.h" />
     <ClInclude Include="Include\RVersions.h" />
     <ClInclude Include="Include\stdafx.h" />
+    <ClInclude Include="Source\MeshManager.h" />
   </ItemGroup>
 </Project>

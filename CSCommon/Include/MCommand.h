@@ -12,6 +12,7 @@ using namespace std;
 
 #include "MCommandParameter.h"
 #include "mempool.h"
+#include "GlobalTypes.h"
 
 class MCommandManager;
 
@@ -140,15 +141,15 @@ public:
 	/// @param pData	[out] 커맨드 데이터 블럭
 	/// @param nSize	[in] 커맨드 데이터 블럭 최대 사이즈
 	/// @return			블럭 사이즈
-	int GetData(char* pData, int nSize);
+	int GetData(char* pData, int nSize) const;
 	/// 커맨드 메모리 블럭 데이터로부터 저장
 	/// @param pData	[in] 커맨드 데이터 블럭
 	/// @param pPM		[in] 커맨드 매니져(MCommandDesc를 enum할 수 있다.)
 	/// @return			성공 여부
-	template <typename T = std::allocator<uint8_t>>
+	template <typename T = std::allocator<u8>>
 	bool SetData(const char* pData, MCommandManager* pCM, unsigned short nDataLen=USHRT_MAX, bool ReadSerial = true, T& Alloc = T());
 
-	int GetSize();
+	int GetSize() const;
 };
 
 template <typename ParamT, typename AllocT, typename... ArgsT>

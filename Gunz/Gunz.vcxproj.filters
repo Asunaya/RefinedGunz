@@ -766,9 +766,6 @@
     <ClInclude Include="..\cml\Include\SafeString.h">
       <Filter>RGunz</Filter>
     </ClInclude>
-    <ClInclude Include="MeshManager.h">
-      <Filter>RGunz</Filter>
-    </ClInclude>
     <ClInclude Include="Tasks.h">
       <Filter>RGunz</Filter>
     </ClInclude>
@@ -1417,9 +1414,6 @@
       <Filter>RGunz</Filter>
     </ClCompile>
     <ClCompile Include="stdafx.cpp" />
-    <ClCompile Include="MeshManager.cpp">
-      <Filter>RGunz</Filter>
-    </ClCompile>
     <ClCompile Include="ZRuleSkillmap.cpp">
       <Filter>Interface\Game\Rule</Filter>
     </ClCompile>

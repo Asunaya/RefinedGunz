@@ -92,9 +92,8 @@ _STATUS_CMD_START;
 			MUID Receiver;
 			if (!pCommand->GetParameter(&Receiver, 1, MPT_UID)) break;
 			auto Blob = pCommand->GetParameter(2)->GetPointer();
-			auto ID = *(unsigned short*)(((unsigned char*)Blob) + 2);
 
-			OnTunnelledP2PCommand(Sender, Receiver, Blob, MGetBlobArraySize(Blob));
+			OnTunnelledP2PCommand(Sender, Receiver, (char*)Blob, MGetBlobArraySize(Blob));
 		}
 		break;
 		/*case MC_MATCH_LOGIN_NETMARBLE:
