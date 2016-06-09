@@ -463,7 +463,8 @@ RVisualMesh::RVisualMesh() {
 
 RVisualMesh::~RVisualMesh() 
 {
-	GetMeshManager()->OnDestroyObject(this);
+	if (IsDynamicResourceLoad())
+		GetMeshManager()->OnDestroyObject(this);
 
 	Destroy();
 }
@@ -485,19 +486,22 @@ void RVisualMesh::Destroy()
 	}
 
 	if(m_pTMesh) {
-		for (int i = 0; i < eq_parts_end; i++)
+		if (IsDynamicResourceLoad())
 		{
-			if (!m_pTMesh[i])
-				continue;
-
-			switch (i)
+			for (int i = 0; i < eq_parts_end; i++)
 			{
-			case eq_parts_head:
-			case eq_parts_chest:
-			case eq_parts_hands:
-			case eq_parts_legs:
-			case eq_parts_feet:
-				GetMeshManager()->Release(m_pTMesh[i]);
+				if (!m_pTMesh[i])
+					continue;
+
+				switch (i)
+				{
+				case eq_parts_head:
+				case eq_parts_chest:
+				case eq_parts_hands:
+				case eq_parts_legs:
+				case eq_parts_feet:
+					GetMeshManager()->Release(m_pTMesh[i]);
+				}
 			}
 		}
 
@@ -1790,21 +1794,24 @@ void RVisualMesh::ClearParts() {
 
 	if(m_pTMesh==NULL) return;
 
-	for(int i = 0;i < eq_parts_end; i++){
-		if (!m_pTMesh[i])
-			continue;
+	if (IsDynamicResourceLoad())
+	{
+		for (int i = 0; i < eq_parts_end; i++) {
+			if (!m_pTMesh[i])
+				continue;
 
-		switch (i)
-		{
-		case eq_parts_head:
-		case eq_parts_chest:
-		case eq_parts_hands:
-		case eq_parts_legs:
-		case eq_parts_feet:
-			GetMeshManager()->Release(m_pTMesh[i]);
-		};
+			switch (i)
+			{
+			case eq_parts_head:
+			case eq_parts_chest:
+			case eq_parts_hands:
+			case eq_parts_legs:
+			case eq_parts_feet:
+				GetMeshManager()->Release(m_pTMesh[i]);
+			};
 
-		m_pTMesh[i] = nullptr;
+			m_pTMesh[i] = nullptr;
+		}
 	}
 }
 
@@ -1833,8 +1840,7 @@ void RVisualMesh::SetParts(RMeshPartsType parts, char* name)
 
 	if (IsDynamicResourceLoad())
 	{
-		std::string saved_name(name);
-		GetMeshManager()->GetAsync(m_pMesh->GetName(), name, this, [this, saved_name, parts](RMeshNode *pNode)
+		GetMeshManager()->GetAsync(m_pMesh->GetName(), name, this, [this, saved_name = std::string(name), parts](RMeshNode *pNode)
 		{
 			RMeshNode *pPreviousNode = m_pTMesh[parts];
 
@@ -2519,7 +2525,7 @@ rvector	RVisualMesh::GetHeadPosition()
 	rvector root=GetRootPosition()-rv;
 	Normalize(root);
 
-	return rv + 10.f * root;
+	return rv;// +10.f * root;
 }
 
 rvector	RVisualMesh::GetRootPosition() 

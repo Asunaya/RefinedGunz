@@ -52,6 +52,9 @@ void MAddSharedCommandTable(MCommandManager* pCommandManager, int nSharedType)
 		P(MPT_UID, "Sender")
 		P(MPT_UID, "Receiver")
 		P(MPT_BLOB, "Data")
+	C(MC_MATCH_DAMAGE, "", "", MCDT_MACHINE2MACHINE)
+		P(MPT_UID, "Attacker")
+		P(MPT_USHORT, "Damage")
 
 
 	C(MC_LOCAL_INFO, "Local.Info", "Local information", MCDT_LOCAL)

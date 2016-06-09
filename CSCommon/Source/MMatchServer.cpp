@@ -858,6 +858,14 @@ void MMatchServer::OnRun(void)
 
 	MGetServerStatusSingleton()->SetRunStatus(106);
 
+	if (nGlobalClock - LastPingTime > 500) // Ping every half second
+	{
+		MCommand* pNew = CreateCommand(MC_NET_PING, MUID(0, 0));
+		pNew->AddParameter(new MCmdParamUInt(GetGlobalClockCount()));
+		RouteToAllConnection(pNew);
+		LastPingTime = nGlobalClock;
+	}
+
 	// Garbage Session Cleaning
 #define MINTERVAL_GARBAGE_SESSION_PING	(5 * 60 * 1000)	// 3 min
 	static unsigned long tmLastGarbageSessionCleaning = nGlobalClock;
@@ -1104,23 +1112,152 @@ static int GetBlobCmdID(const char* Data)
 	return *(u16*)(Data + 2);
 }
 
+struct ZPACKEDSHOTINFO {
+	float	fTime;
+	short	posx, posy, posz;
+	short	tox, toy, toz;
+	BYTE	sel_type;
+};
+
+enum ZOBJECTHITTEST {
+	ZOH_NONE = 0,
+	ZOH_BODY = 1,
+	ZOH_HEAD = 2,
+	ZOH_LEGS = 3
+};
+
+static ZOBJECTHITTEST HitTest(const v3& head, const v3& foot, const v3& src, const v3& dest, v3* pOutPos = nullptr)
+{
+	// 적절한 시점의 위치를 얻어낼수없으면 실패..
+	rvector footpos, headpos, characterdir;
+
+	footpos = foot;
+	headpos = head;
+
+	footpos.z += 5.f;
+	headpos.z += 5.f;
+
+	rvector rootpos = (footpos + headpos)*0.5f;
+
+	// headshot 판정
+	rvector nearest = GetNearestPoint(headpos, src, dest);
+	float fDist = Magnitude(nearest - headpos);
+	float fDistToChar = Magnitude(nearest - src);
+
+	rvector ap, cp;
+
+	if (fDist < 15.f)
+	{
+		if (pOutPos) *pOutPos = nearest;
+		return ZOH_HEAD;
+	}
+	else
+	{
+		rvector dir = dest - src;
+		Normalize(dir);
+
+		// 실린더로 몸통 판정
+		rvector rootdir = (rootpos - headpos);
+		Normalize(rootdir);
+		float fDist = GetDistanceBetweenLineSegment(src, dest, headpos + 20.f*rootdir, rootpos - 20.f*rootdir, &ap, &cp);
+		if (fDist < 30)		// 상체
+		{
+			rvector ap2cp = ap - cp;
+			float fap2cpsq = D3DXVec3LengthSq(&ap2cp);
+			float fdiff = sqrtf(30.f*30.f - fap2cpsq);
+
+			if (pOutPos) *pOutPos = ap - dir*fdiff;;
+			return ZOH_BODY;
+		}
+		else
+		{
+			float fDist = GetDistanceBetweenLineSegment(src, dest, rootpos - 20.f*rootdir, footpos, &ap, &cp);
+			if (fDist < 30)	// 하체
+			{
+				rvector ap2cp = ap - cp;
+				float fap2cpsq = D3DXVec3LengthSq(&ap2cp);
+				float fdiff = sqrtf(30.f*30.f - fap2cpsq);
+
+				if (pOutPos) *pOutPos = ap - dir*fdiff;;
+				return ZOH_LEGS;
+			}
+		}
+	}
+
+	return ZOH_NONE;
+}
+
 void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Receiver, const char * Blob, size_t BlobSize)
 {
+	auto SenderObj = GetObjectA(Sender);
+
+	if (!SenderObj)
+		return;
+
+	auto CommandID = GetBlobCmdID(Blob);
+
+	//LogF(LOG_ALL, "Received command ID %d, size %d\n", CommandID, BlobSize);
+	
+	switch (CommandID)
+	{
+	case MC_PEER_BASICINFO:
+	{
+		BasicInfo bi;
+		ZPACKEDBASICINFO& pbi = *(ZPACKEDBASICINFO*)(Blob + 2 + 2 + 1 + 4);
+		pbi.Unpack(bi);
+		bi.RecvTime = MGetMatchServer()->GetGlobalClockCount();
+		SenderObj->OnBasicInfo(bi);
+
+		//mlog("BasicInfo %d, %d, %d\n", pbi.posx, pbi.posy, pbi.posz);
+	}
+		break;
+	case MC_PEER_SHOT:
+	{
+		ZPACKEDSHOTINFO& psi = *(ZPACKEDSHOTINFO*)(Blob + 2 + 2 + 1 + 4);
+
+		v3 src = v3(psi.posx, psi.posy, psi.posz);
+		v3 dest = v3(psi.tox, psi.toy, psi.toz);
+
+		AnnounceF(Sender, "Shot! %f, %f, %f -> %f, %f, %f", src.x, src.y, src.z, dest.x, dest.y, dest.z);
+
+		for (auto& item : m_Objects)
+		{
+			auto& Obj = *item.second;
+
+			/*if (&Obj == SenderObj)
+				continue;*/
+
+			v3 Head, Root;
+			Obj.GetPositions(Head, Root, GetGlobalClockCount() - SenderObj->GetPing());
+
+			AnnounceF(Sender, "%s: ping = %d, abs time = %X\nHead: %f, %f, %f; foot: %f, %f, %f", Obj.GetName(), Obj.GetPing(), GetGlobalClockCount() - Obj.GetPing(),
+				Head.x, Head.y, Head.z, Root.x, Root.y, Root.z);
+
+			if (&Obj == SenderObj)
+				continue;
+
+			auto HitParts = HitTest(Head, Root, src, dest);
+
+			if (HitParts == ZOH_NONE)
+				continue;
+
+			MCommand* pCmd = CreateCommand(MC_MATCH_DAMAGE, Obj.GetUID());
+			pCmd->AddParameter(new MCmdParamUID(Sender));
+			pCmd->AddParameter(new MCmdParamUShort(20));
+			Post(pCmd);
+
+			Announce(Sender, "Hit!");
+		}
+	}
+		break;
+	};
+
 	MCommand* pCmd = CreateCommand(MC_MATCH_P2P_COMMAND, MUID(0, 0));
 	pCmd->AddParameter(new MCmdParamUID(Sender));
 	pCmd->AddParameter(new MCmdParamUID(Receiver));
 	pCmd->AddParameter(new MCmdParamBlob(Blob, BlobSize));
 
-	if (GetBlobCmdID(Blob) == MC_PEER_BASICINFO)
-	{
-	}
-
-	auto Obj = GetObject(Sender);
-
-	if (!Obj)
-		return;
-
-	auto Stage = Obj->GetStageUID();
+	auto Stage = SenderObj->GetStageUID();
 
 	RouteToBattleExcept(Stage, pCmd, Sender);
 
@@ -1301,7 +1438,7 @@ void MMatchServer::RouteToStageWaitRoom(const MUID& uidStage, MCommand* pCommand
 void MMatchServer::RouteToBattle(const MUID& uidStage, MCommand* pCommand)
 {
 	MMatchStage* pStage = FindStage(uidStage);
-	if (pStage == NULL) 
+	if (pStage == nullptr) 
 	{
 		delete pCommand;
 		return;
@@ -1329,7 +1466,7 @@ void MMatchServer::RouteToBattle(const MUID& uidStage, MCommand* pCommand)
 void MMatchServer::RouteToBattleExcept(const MUID& uidStage, MCommand* pCommand, const MUID& uidExceptedPlayer)
 {
 	MMatchStage* pStage = FindStage(uidStage);
-	if (pStage == NULL)
+	if (pStage == nullptr)
 	{
 		delete pCommand;
 		return;
@@ -2379,6 +2516,7 @@ void MMatchServer::OnNetPong(const MUID& CommUID, unsigned int nTimeStamp)
 	MMatchObject* pObj = GetObject(CommUID);
 	if (pObj) {
 		pObj->UpdateTickLastPacketRecved();	// Last Packet Timestamp
+		pObj->AddPing(GetGlobalClockCount() - nTimeStamp);
 	}
 }
 

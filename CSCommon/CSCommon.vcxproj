@@ -99,11 +99,14 @@
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release LTCG|Win32'">$(Configuration)\</IntDir>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <TargetName>CSCommonD</TargetName>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>Include;../SafeUDP/Include;../CML/Include;../RealSpace2/Include;../MAI/Include;../sdk/dx9/Include;../MDatabase/Include;../MCountryFilter/Include;../libsodium/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;NO_WARN_MBCS_DEPRECATION;_WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>Include;../SafeUDP/Include;../CML/Include;../RealSpace2/Include;../MAI/Include;../sdk/dx9/Include;../MDatabase/Include;../MCountryFilter/Include;../GunzShared/;../libsodium/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;NO_WARN_MBCS_MFC_DEPRECATION;_WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -143,7 +146,7 @@
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <OmitFramePointers>true</OmitFramePointers>
-      <AdditionalIncludeDirectories>Include;../SafeUDP/Include;../CML/Include;../RealSpace2/Include;../MAI/Include;../sdk/dx9/Include;../MDatabase/Include;../MCountryFilter/Include;../libsodium/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>Include;../SafeUDP/Include;../CML/Include;../RealSpace2/Include;../MAI/Include;../sdk/dx9/Include;../MDatabase/Include;../MCountryFilter/Include;../GunzShared/;../libsodium/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;_XTRAP;NO_WARN_MBCS_MFC_DEPRECATION;_WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -167,7 +170,7 @@
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <OmitFramePointers>true</OmitFramePointers>
-      <AdditionalIncludeDirectories>Include;../SafeUDP/Include;../CML/Include;../RealSpace2/Include;../MAI/Include;../sdk/dx9/Include;../MDatabase/Include;../MCountryFilter/Include;../libsodium/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>Include;../SafeUDP/Include;../CML/Include;../RealSpace2/Include;../MAI/Include;../sdk/dx9/Include;../MDatabase/Include;../MCountryFilter/Include;../GunzShared/;../libsodium/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;NO_WARN_MBCS_MFC_DEPRECATION;_WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>

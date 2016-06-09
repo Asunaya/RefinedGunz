@@ -293,6 +293,7 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <TreatWChar_tAsBuiltInType>false</TreatWChar_tAsBuiltInType>
+      <DisableSpecificWarnings>4091</DisableSpecificWarnings>
     </ClCompile>
     <Lib>
       <AdditionalDependencies>lib\zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>

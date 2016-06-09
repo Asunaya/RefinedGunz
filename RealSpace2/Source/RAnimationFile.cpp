@@ -258,6 +258,21 @@ bool RAnimationFile::LoadAni(char* filename)
 //			strcpy_safe(pANode->m_Name,t_mesh_name);
 			pANode->SetName(t_mesh_name);
 
+			/*if (pANode->m_Name == "Bip01 Neck")
+			{
+				DMLog("Animation base:\n");
+
+				for (int i = 0; i < 4; i++)
+				{
+					for (int j = 0; j < 4; j++)
+					{
+						DMLog("%f ", pANode->m_mat_base(i, j));
+					}
+
+					DMLog("\n");
+				}
+			}*/
+
 			if(strcmp(pANode->GetName(),"Bip01")==0) {
 				m_pBipRootNode = pANode;
 			}

@@ -19,6 +19,7 @@ using namespace std;
 #include "MMatchAntiHack.h"
 #include "MMatchHShield.h"
 #include "GlobalTypes.h"
+#include "stuff.h"
 
 // 등급 - 이것은 디비의 UserGrade테이블과 싱크가 맞아야 한다.
 enum MMatchUserGradeID
@@ -406,18 +407,6 @@ struct MMatchObjectChannelInfo
 	}
 };
 
-struct BasicInfo {
-	v3 position;
-	v3 velocity;
-	//	rvector accel;
-	v3 direction;
-	//	ZC_STATE_UPPER upperstate;
-	//	ZC_STATE_LOWER lowerstate;
-
-	float SentTime;
-	float RecvTime;
-};
-
 
 class MMatchObject : public MObject {
 protected:
@@ -495,6 +484,8 @@ protected:
 	
 	// This is awkward.
 	std::deque<BasicInfo> BasicInfoHistory;
+	std::deque<int> Pings;
+	int AveragePing;
 
 protected:
 	void UpdateChannelListChecksum(unsigned long nChecksum)	{ m_ChannelInfo.nChannelListChecksum = nChecksum; }
@@ -663,7 +654,26 @@ public:
 
 	void OnBasicInfo(const BasicInfo& bi);
 
-	const BasicInfo* GetBasicInfo(float Time);
+	bool GetPositions(v3& Head, v3& Root, u32 Time);
+
+	void AddPing(int Ping)
+	{
+		Pings.push_front(Ping);
+
+		while (Pings.size() > 10)
+			Pings.pop_back();
+
+		int sum = 0;
+		for (auto val : Pings)
+			sum += val;
+
+		AveragePing = sum / Pings.size();
+	}
+
+	auto GetPing() const
+	{
+		return AveragePing;
+	}
 
 public:
 	enum MMO_ACTION

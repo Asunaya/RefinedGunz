@@ -284,16 +284,16 @@ bool MMatchClient::OnCommand(MCommand* pCommand)
 		MCommandParameter* pParam = pCommand->GetParameter(2);
 		if (pParam->GetType() != MPT_BLOB) break;
 		void* Blob = pParam->GetPointer();
-		int Count = MGetBlobArrayCount(Blob);
+		auto Size = ((MCmdParamBlob*)pParam)->GetPayloadSize();
 
-		MCommand* pCmd = MakeCmdFromTunnelingBlob(Sender, Blob, Count);
+		MCommand* pCmd = MakeCmdFromSaneTunnelingBlob(Sender, Blob, Size);
 		if (pCmd == nullptr) break;
 
 		LockRecv();
 		m_CommandManager.Post(pCmd);
 		UnlockRecv();
 
-		DMLog("Received tunnelled P2P command ID %x\n", pCmd->GetID());
+		//DMLog("Received tunnelled P2P command ID %x\n", pCmd->GetID());
 	}
 	break;
 		case MC_MATCH_RESPONSE_LOGIN:
@@ -628,7 +628,7 @@ void MMatchClient::OnLocateAgentToClient(const MUID& uidAgent, char* szIP, int n
 
 MCommand* MMatchClient::MakeCmdFromTunnelingBlob(const MUID& uidSender, void* pBlob, int nBlobArrayCount)
 {
-	if (nBlobArrayCount != 1) 
+	if (nBlobArrayCount != 1)
 	{
 		mlog("MakeCmdFromTunnelingBlob: BlobArrayCount is not 1\n");
 		return NULL;
@@ -647,7 +647,7 @@ MCommand* MMatchClient::MakeCmdFromTunnelingBlob(const MUID& uidSender, void* pB
 
 	if (!m_PeerPacketCrypter.Decrypt(pPacket, nSize, pData, nSize))
 	{
-		delete [] pData;
+		delete[] pData;
 		return NULL;
 	}
 
@@ -655,12 +655,12 @@ MCommand* MMatchClient::MakeCmdFromTunnelingBlob(const MUID& uidSender, void* pB
 	MCommand* pCmd = new MCommand();
 	if (!pCmd->SetData(pData, &m_CommandManager))
 	{
-		delete [] pData;
-		delete pCmd; 
+		delete[] pData;
+		delete pCmd;
 		return NULL;
 	}
 
-	delete [] pData;
+	delete[] pData;
 
 	pCmd->m_Sender = uidSender;
 	pCmd->m_Receiver = m_This;
@@ -670,6 +670,28 @@ MCommand* MMatchClient::MakeCmdFromTunnelingBlob(const MUID& uidSender, void* pB
 	{
 		delete pCmd;
 		return NULL;
+	}
+
+	return pCmd;
+}
+
+MCommand* MMatchClient::MakeCmdFromSaneTunnelingBlob(const MUID& uidSender, void* pBlob, size_t Size)
+{
+	MCommand* pCmd = new MCommand();
+	if (!pCmd->SetData((char*)pBlob, &m_CommandManager, (u16)Size))
+	{
+		delete pCmd;
+		return nullptr;
+	}
+
+	pCmd->m_Sender = uidSender;
+	pCmd->m_Receiver = m_This;
+
+	MMatchPeerInfo* pPeer = FindPeer(uidSender);
+	if (pPeer == nullptr)
+	{
+		delete pCmd;
+		return nullptr;
 	}
 
 	return pCmd;
@@ -857,6 +879,30 @@ bool MMatchClient::MakeTunnelingCommandBlob(MCommand* pWrappingCmd, MCommand* pS
 	return true;
 }
 
+bool MMatchClient::MakeSaneTunnelingCommandBlob(MCommand* pWrappingCmd, MCommand* pSrcCmd)
+{
+	// Create Param : Command Blob ////
+	int nCmdSize = pSrcCmd->GetSize();
+	if (nCmdSize == 0)
+	{
+		return false;
+	}
+
+	char* pCmdData = new char[nCmdSize];
+	int nSize = pSrcCmd->GetData(pCmdData, nCmdSize);
+	if (nSize != nCmdSize)
+	{
+		delete[] pCmdData;
+		return false;
+	}
+
+	pWrappingCmd->AddParameter(new MCmdParamBlob(pCmdData, nCmdSize));
+
+	delete[] pCmdData;
+
+	return true;
+}
+
 void MMatchClient::SendCommandByTunneling(MCommand* pCommand)
 {
 	if (GetAllowTunneling() == false) {
@@ -913,7 +959,7 @@ void MMatchClient::SendCommandByMatchServerTunneling(MCommand* pCommand)
 		pCmd->AddParameter(new MCmdParamUID(GetPlayerUID()));
 		pCmd->AddParameter(new MCmdParamUID(pCommand->GetReceiverUID()));
 
-		if (!MakeTunnelingCommandBlob(pCmd, pCommand))
+		if (!MakeSaneTunnelingCommandBlob(pCmd, pCommand))
 		{
 			delete pCmd; pCmd = NULL; return;
 		}

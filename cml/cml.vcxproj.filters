@@ -76,6 +76,7 @@
     <ClInclude Include="Include\MZip.h" />
     <ClInclude Include="Include\stdafx.h" />
     <ClInclude Include="Include\targetver.h" />
+    <ClInclude Include="Include\GlobalTypes.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\MMatrix.cpp">

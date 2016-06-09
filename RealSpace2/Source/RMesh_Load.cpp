@@ -990,6 +990,33 @@ bool RMesh::ReadElu(const char* fname)
 
 		RMatInv(pMeshNode->m_mat_inv,pMeshNode->m_mat_local);
 
+		/*if (pMeshNode->m_Name == "Bip01 Neck")
+		{
+			DMLog("Node base:\n");
+
+			for (int i = 0; i < 4; i++)
+			{
+				for (int j = 0; j < 4; j++)
+				{
+					DMLog("%f ", pMeshNode->m_mat_base(i, j));
+				}
+
+				DMLog("\n");
+			}
+
+			DMLog("Node inv:\n");
+
+			for (int i = 0; i < 4; i++)
+			{
+				for (int j = 0; j < 4; j++)
+				{
+					DMLog("%f ", pMeshNode->m_mat_inv(i, j));
+				}
+
+				DMLog("\n");
+			}
+		}*/
+
 		CheckNameToType(pMeshNode);
 
 		MZF_READ(&pMeshNode->m_point_num,4 );

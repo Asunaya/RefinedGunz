@@ -554,4 +554,79 @@ void MMatchObject::SetBadFileCRCDisconnectWaitInfo( const MMatchDisconnectStatus
 void MMatchObject::OnBasicInfo(const BasicInfo & bi)
 {
 	BasicInfoHistory.push_front(bi);
+
+	while (BasicInfoHistory.size() > 1000)
+		BasicInfoHistory.pop_back();
+}
+
+bool MMatchObject::GetPositions(v3& Head, v3& Root, u32 Time)
+{
+	auto& LagComp = MGetMatchServer()->LagComp;
+
+	if (BasicInfoHistory.size() < 2)
+		return false;
+
+	MLog("BasicInfoHistory.size() = %d, BasicInfoHistory.begin()->RecvTime = %u\n", BasicInfoHistory.size(), BasicInfoHistory.begin()->RecvTime);
+
+	auto pre_it = BasicInfoHistory.begin();
+	auto post_it = BasicInfoHistory.begin();
+
+	while (post_it != BasicInfoHistory.end() && Time > post_it->RecvTime)
+	{
+		pre_it = post_it;
+		post_it++;
+	}
+
+	if (post_it == BasicInfoHistory.end())
+		post_it = pre_it;
+
+	v3 AbsPos;
+	v3 Dir;
+
+	if (pre_it != post_it)
+	{
+		float t = (post_it->RecvTime - pre_it->RecvTime) / (Time - pre_it->RecvTime);
+		AbsPos = Lerp(pre_it->position, post_it->position, t);
+		Dir = Slerp(pre_it->direction, post_it->direction, t);
+		MGetMatchServer()->LogF(MMatchServer::LOG_ALL, "t = %f; %f / %f; AbsPos = %f, %f, %f; Dir = %f, %f, %f", t, post_it->RecvTime - pre_it->RecvTime, Time - pre_it->RecvTime,
+			AbsPos.x, AbsPos.y, AbsPos.z, Dir.x, Dir.y, Dir.z);
+	}
+	else
+	{
+		AbsPos = pre_it->position;
+		Dir = pre_it->direction;
+	}
+
+	auto diff_ani_it = pre_it;
+
+	while (diff_ani_it != BasicInfoHistory.end() && diff_ani_it->lowerstate == pre_it->lowerstate)
+	{
+		diff_ani_it++;
+	}
+
+	if (diff_ani_it == BasicInfoHistory.end())
+		diff_ani_it = BasicInfoHistory.end() - 1;
+
+	auto Frame = u32(Time - diff_ani_it->RecvTime);
+	MGetMatchServer()->LogF(MMatchServer::LOG_ALL, "Ani %d; Frame = %d", pre_it->lowerstate, Frame);
+
+	auto HeadMatrix = LagComp.GetHeadMatrix(m_pCharInfo->m_nSex, pre_it->lowerstate, Frame);
+
+	auto Rot = RGetRotY((Dir.z + 0.05) * 50 * 0.3);
+
+	HeadMatrix *= Rot;
+
+	v3 xydir = Dir;
+	xydir.z = 0;
+	Normalize(xydir);
+
+	matrix World;
+	MakeWorldMatrix(&World, AbsPos, xydir, v3(0, 0, 1));
+
+	HeadMatrix *= World;
+
+	Head = GetTransPos(HeadMatrix);
+	Root = AbsPos;
+
+	return true;
 }

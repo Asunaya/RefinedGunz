@@ -54,6 +54,12 @@ RMeshNode* RMesh::UpdateNodeAniMatrix(RMeshNode* pNode)
 
 	pTMeshNode->m_mat_result = ani_mat;
 
+	if (pTMeshNode->m_PartsPosInfoType == eq_parts_pos_info_Head && m_pVisualMesh)
+	{
+		ani_mat *= m_pVisualMesh->m_WorldMat;
+		DMLog("%p: head: %f, %f, %f, parent = %p, %d\n", pNode, ani_mat._41, ani_mat._42, ani_mat._43, pNode->m_pParent, GetNodeAniSet(pNode) ? GetNodeAniSet(pNode)->GetAnimationType() : -1);
+	}
+
 	return pTMeshNode;
 }
 
@@ -397,6 +403,8 @@ void RMesh::CalcLookAtParts(D3DXMATRIX& pAniMat,RMeshNode* pMeshNode,RVisualMesh
 		}
 
 		if(pMeshNode->m_LookAtParts == lookat_parts_head) {
+
+			DMLog("pMeshNode->m_PartsPosInfoType = %d, add_value = %f, rot_x = %f, rot_y = %f\n", pMeshNode->m_PartsPosInfoType, add_value, rot_x, rot_y);
 
 			rmatrix mx,my;
 

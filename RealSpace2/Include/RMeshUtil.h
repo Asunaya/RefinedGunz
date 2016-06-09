@@ -601,7 +601,7 @@ public:
 
 void	RRot2Quat( RQuatKey& q,RRotKey& v );
 void	RQuat2Mat( D3DXMATRIX& mat, RQuatKey&q );
-int		RMatInv( D3DXMATRIX& q, D3DXMATRIX& a );
+int		RMatInv( D3DXMATRIX& q, const D3DXMATRIX& a );
 void	ConvertMat(rmatrix& mat1,rmatrix& mat2);
 
 
@@ -657,7 +657,7 @@ inline rmatrix GetIdentityMatrix() {
 	return _init_mat;
 }
 
-inline rvector GetTransPos(rmatrix& m) {
+inline rvector GetTransPos(const rmatrix& m) {
 	return rvector(m._41,m._42,m._43);
 }
 

@@ -257,7 +257,7 @@
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <OmitFramePointers>true</OmitFramePointers>
-      <AdditionalIncludeDirectories>../CSCommon/Include;../CML/Include;../MAI/Include;../RealSpace2/Include;../RealSpace/Include;../SafeUDP/Include;../MDatabase/Include;../MCountryFilter/Include;../libsodium/include;../sdk/dx9/Include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../CSCommon/Include;../CML/Include;../MAI/Include;../RealSpace2/Include;../RealSpace/Include;../GunzShared/;../SafeUDP/Include;../MDatabase/Include;../MCountryFilter/Include;../libsodium/include;../sdk/dx9/Include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_WORLDITEM_SERVER;_WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <MinimalRebuild>false</MinimalRebuild>

@@ -1336,9 +1336,11 @@ void ZGame::ProcessDelayedCommand()
 		if(GetTime() > pItem->fTime) 
 		{
 			OnCommand_Immediate(pItem->pCommand);
-			i = m_DelayedCommandList.erase(i);
 			delete pItem->pCommand;
 			delete pItem;
+			i = m_DelayedCommandList.erase(i);
+			if (i == m_DelayedCommandList.end())
+				break;
 		}
 	}
 }
@@ -1726,6 +1728,27 @@ bool ZGame::OnCommand_Immediate(MCommand* pCommand)
 		m_pMyCharacter->OnDamaged(Attacker, Attacker->GetPosition(), ZDAMAGETYPE(DamageType), MMatchWeaponType(WeaponType), Damage, PiercingRatio);
 
 		DMLog("Antilead damage %d\n", Damage);
+	}
+	break;
+	case MC_MATCH_DAMAGE:
+	{
+		MUID uidAttacker;
+		u16 Damage;
+
+		if (!pCommand->GetParameter(&uidAttacker, 0, MPT_UID)) break;
+		if (!pCommand->GetParameter(&Damage, 1, MPT_USHORT)) break;
+
+		auto it = m_CharacterManager.find(uidAttacker);
+		if (it == m_CharacterManager.end())
+			break;
+
+		auto Attacker = it->second;
+
+		auto PiercingRatio = 0.6;
+
+		m_pMyCharacter->OnDamaged(Attacker, Attacker->GetPosition(), ZD_BULLET, MWT_RIFLE, Damage, PiercingRatio);
+
+		DMLog("MatchServer damage %d\n", Damage);
 	}
 	break;
 	case MC_MATCH_STAGE_ENTERBATTLE:
@@ -4675,7 +4698,7 @@ bool ZGame::PickHistory(ZObject *pOwnerObject,float fTime,rvector &origin,rvecto
 				if(fDistToChar<fCharacterDist) {
 					pObject=pc;
 					fCharacterDist=fDistToChar;
-					info.vOut=hitPos;								
+					info.vOut=hitPos;
 					switch(ht) {
 						case ZOH_HEAD : info.parts=eq_parts_head;break;
 						case ZOH_BODY : info.parts=eq_parts_chest;break;

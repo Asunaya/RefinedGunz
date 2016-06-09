@@ -4,6 +4,8 @@
 #include <Windows.h>
 #include <crtdbg.h>
 
+#include "GlobalTypes.h"
+
 #define MASSERT(x) _ASSERT(x)
 
 #define MLOGSTYLE_FILE 0x0001
@@ -15,10 +17,27 @@ bool IsLogAvailable();
 
 void InitLog(int logmethodflags=MLOGSTYLE_DEBUGSTRING, const char* pszLogFileName="mlog.txt");
 
-#ifdef DEBUG
+#ifdef _DEBUG
 void DMLog(const char* Format, ...);
+
+static inline void DLogMatrix(matrix& mat)
+{
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 4; j++)
+		{
+			DMLog("%f ", mat(i, j));
+		}
+
+		DMLog("\n");
+	}
+}
 #else
 static inline void DMLog(...)
+{
+}
+
+static inline void DLogMatrix(matrix& mat)
 {
 }
 #endif

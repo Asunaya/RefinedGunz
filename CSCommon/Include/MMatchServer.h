@@ -129,9 +129,11 @@ protected:
 
 	MMatchEventManager		m_CustomEventManager;
 
-	LagCompManager LagComp;
+	u32 LastPingTime = 0;
 
 public:
+	LagCompManager LagComp;
+
 	MMatchServer(void);
 	virtual ~MMatchServer(void);
 
@@ -610,6 +612,18 @@ public:
 	/// 서버의 공지 메시지 전송
 	void Announce(const MUID& CommUID, char* pszMsg);
 	void Announce(MObject* pObj, char* pszMsg);
+	void AnnounceF(const MUID& CommUID, char* pszMsg, ...)
+	{
+		char buf[512];
+
+		va_list args;
+
+		va_start(args, pszMsg);
+		vsprintf_safe(buf, pszMsg, args);
+		va_end(args);
+
+		Announce(CommUID, buf);
+	}
 	/// 서버의 에러 메시지 전송
 	void AnnounceErrorMsg(const MUID& CommUID, const int nErrorCode);
 	void AnnounceErrorMsg(MObject* pObj, const int nErrorCode);

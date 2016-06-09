@@ -343,7 +343,7 @@ public:
 
 	void Render(D3DXMATRIX* world_mat,bool NoPartsChange=false);
 
-private:
+//private:
 
 	void RenderFrameSingleParts();
 	void RenderFrameMultiParts();
@@ -449,7 +449,7 @@ public:
 	void CalcBBox(D3DXVECTOR3* v);
 	void SubCalcBBox(D3DXVECTOR3* max,D3DXVECTOR3* min,D3DXVECTOR3* v);
 
-private:
+//private:
 
 	void _RGetRotAniMat(RMeshNode* pMeshNode,int frame,D3DXMATRIX& t_ani_mat);
 	void _RGetPosAniMat(RMeshNode* pMeshNode,int frame,D3DXMATRIX& t_ani_mat);

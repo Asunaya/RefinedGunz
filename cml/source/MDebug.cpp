@@ -52,7 +52,7 @@ void __cdecl DMLog(const char* Format, ...)
 	va_end(args);
 
 
-	FILE *pFile = nullptr;
+	/*FILE *pFile = nullptr;
 	fopen_s(&pFile, logfilename, "a");
 
 	if (!pFile)
@@ -62,7 +62,7 @@ void __cdecl DMLog(const char* Format, ...)
 		return;
 
 	fprintf(pFile, "%s", temp);
-	fclose(pFile);
+	fclose(pFile);*/
 
 	OutputDebugString(temp);
 }

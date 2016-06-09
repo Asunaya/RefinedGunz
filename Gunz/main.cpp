@@ -537,7 +537,197 @@ RRESULT OnRender(void *pParam)
 
 		sprintf_safe(__buffer, "FPS: %3.3f", g_fFPS);
 		g_pDefFont->m_Font.DrawText( MGetWorkspaceWidth()-150,0,__buffer );
-//		OutputDebugString(__buffer);
+
+#ifdef _DEBUG
+		if (ZGetGame() && ZGetGame()->m_pMyCharacter)
+		{
+			v3 pos = ZGetGame()->m_pMyCharacter->GetPosition();
+			sprintf_safe(__buffer, "Pos: %d, %d, %d", int(pos.x), int(pos.y), int(pos.z));
+			g_pDefFont->m_Font.DrawText(MGetWorkspaceWidth() - 200, 30, __buffer);
+
+			if (ZGetGame()->m_pMyCharacter->m_pVMesh)
+			{
+				pos = ZGetGame()->m_pMyCharacter->m_pVMesh->GetHeadPosition();
+				sprintf_safe(__buffer, "Head pos: %d, %d, %d", int(pos.x), int(pos.y), int(pos.z));
+				g_pDefFont->m_Font.DrawText(MGetWorkspaceWidth() - 200, 60, __buffer);
+
+#if 0
+				[&]()
+				{
+					rmatrix mat;
+
+					D3DXMatrixIdentity(&mat);
+
+					auto pVMesh = ZGetGame()->m_pMyCharacter->m_pVMesh;
+					auto pMesh = pVMesh->m_pMesh;
+					auto pNode = pVMesh->m_pMesh->FindNode(eq_parts_pos_info_Head);
+
+					if (!pNode)
+						return;
+
+					auto frame = pNode->GetNodeAniSetFrame();
+
+					auto pANode = pNode->m_pAnimationNode;
+
+					auto Pos = pANode->GetPosValue(frame);
+					auto Rot = pANode->GetRotValue(frame);
+
+					DMLog("%d, %d\n", pANode->m_pos_cnt, pANode->m_rot_cnt);
+
+					DMLog("Pos: %f, %f, %f\n", Pos.x, Pos.y, Pos.z);
+					DMLog("pNode->->m_Name = %s\n", pNode->m_Name.c_str());
+					DMLog("pNode->m_pParent->m_Name = %s\n", pNode->m_pParent->m_Name.c_str());
+
+					D3DXMatrixRotationQuaternion(&mat, &Rot);
+
+					matrix buffer, Inv;
+					//D3DXMatrixIdentity(&buffer);
+
+					//if (pMesh->m_isNPCMesh && (pNode->m_WeaponDummyType != weapon_dummy_etc)) // ÃÑ±¸¿ë ´õ¹Ì¸é
+					//{
+					//	memcpy(&buffer, &pNode->m_mat_local, sizeof(D3DXMATRIX));
+
+					//}
+					//else {
+
+					//	if (pNode->m_pParent) {
+					//		RMatInv(Inv, pNode->m_pParent->m_mat_base);
+					//		D3DXMatrixMultiply(&buffer, &pNode->m_mat_base, &Inv);
+					//	}
+					//	else {
+					//		memcpy(&buffer, &pNode->m_mat_local, sizeof(D3DXMATRIX));
+					//	}
+					//}
+
+					//buffer._41 = buffer._42 = buffer._43 = 0;
+					//D3DXMatrixMultiply(&mat, &mat, &buffer);
+
+					if (pANode->m_pos_cnt)
+						for (int i = 0; i < 3; i++)
+							mat(3, i) = Pos[i];
+					else
+					{
+						D3DXMatrixIdentity(&buffer);
+
+						DMLog("%d\n", pMesh->m_isNPCMesh);
+
+						auto Neck = pMesh->m_ani_mgr.GetAnimation("idle");
+
+						auto Pos = Neck->m_pAniData->GetNode("Bip01 Neck")->GetPosValue(frame);
+
+						DMLog("Idle neck pos: %f, %f, %f\n", Pos.x, Pos.y, Pos.z);
+
+						//		if( pNode->m_pParentMesh->m_isNPCMesh && pNode->m_WeaponDummyType != weapon_dummy_etc ) // ÃÑ±¸¿ë ´õ¹Ì¸é
+						if (pMesh->m_isNPCMesh && pNode->m_WeaponDummyType != weapon_dummy_etc) // ÃÑ±¸¿ë ´õ¹Ì¸é
+						{
+							buffer = pNode->m_mat_local;
+
+						}
+						else {
+
+							if (pNode->m_pParent) {
+								buffer = pNode->m_mat_base * pNode->m_pParent->m_mat_inv;
+							}
+							else {
+								buffer = pNode->m_mat_local;
+							}
+
+						}
+
+						mat._41 = buffer._41;
+						mat._42 = buffer._42;
+						mat._43 = buffer._43;
+
+						DMLog("Base:\n");
+						for (int i = 0; i < 4; i++)
+						{
+							for (int j = 0; j < 4; j++)
+							{
+								DMLog("%f ", pNode->m_mat_base(i, j));
+							}
+
+							DMLog("\n");
+						}
+
+						DMLog("Parent base:\n");
+						for (int i = 0; i < 4; i++)
+						{
+							for (int j = 0; j < 4; j++)
+							{
+								DMLog("%f ", pNode->m_pParent->m_mat_base(i, j));
+							}
+
+							DMLog("\n");
+						}
+
+						DMLog("Parent inv:\n");
+						for (int i = 0; i < 4; i++)
+						{
+							for (int j = 0; j < 4; j++)
+							{
+								DMLog("%f ", pNode->m_pParent->m_mat_inv(i, j));
+							}
+
+							DMLog("\n");
+						}
+					}
+
+					float rot_y = (ZGetGame()->m_pMyCharacter->GetDirection().z + 0.05) * 50;
+
+#define MAX_YA_FRONT	50.f
+#define MAX_YA_BACK		-70.f
+					if (rot_y > MAX_YA_FRONT)	rot_y = MAX_YA_FRONT;
+					if (rot_y < MAX_YA_BACK)		rot_y = MAX_YA_BACK;
+
+					auto RotY = RGetRotY(rot_y * 0.3);
+
+					mat *= RotY;
+					
+					if (pNode->m_pParent)
+						mat *= pNode->m_pParent->m_mat_result;
+
+					matrix World;
+					MakeWorldMatrix(&World, ZGetGame()->m_pMyCharacter->GetPosition(), ZGetGame()->m_pMyCharacter->m_vProxyDirection, v3(0, 0, 1));
+
+					mat *= World;
+
+					pos = v3(mat(3, 0), mat(3, 1), mat(3, 2));
+
+					sprintf_safe(__buffer, "Head pos2: %d, %d, %d", int(pos.x), int(pos.y), int(pos.z));
+					g_pDefFont->m_Font.DrawText(MGetWorkspaceWidth() - 200, 90, __buffer);
+
+					D3DXMatrixIdentity(&mat);
+					pVMesh->m_pMesh->_RGetRotAniMat(pNode, frame, mat);
+					pVMesh->m_pMesh->_RGetPosAniMat(pNode, frame, mat);
+					pVMesh->m_pMesh->CalcLookAtParts(mat, pNode, pVMesh);
+
+					if (pNode->m_pParent)
+						mat *= pNode->m_pParent->m_mat_result;
+
+					mat *= World;
+
+					pos = v3(mat(3, 0), mat(3, 1), mat(3, 2));
+
+					sprintf_safe(__buffer, "Head pos3: %d, %d, %d", int(pos.x), int(pos.y), int(pos.z));
+					g_pDefFont->m_Font.DrawText(MGetWorkspaceWidth() - 200, 120, __buffer);
+
+					/*if (pNode->m_pParent)
+					{
+						for (int i = 0; i < 4; i++)
+						{
+							for (int j = 0; j < 4; j++)
+							{
+								DMLog("%f ", pNode->m_pParent->m_mat_result(i, j));
+							}
+
+							DMLog("\n");
+						}
+					}*/
+				}();
+#endif
+			}
+		}
+#endif
 	}
 
 	g_RGMain->OnRender();

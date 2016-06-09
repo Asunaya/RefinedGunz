@@ -670,7 +670,7 @@ void RQuat2Mat( D3DXMATRIX& mat, RQuatKey&q )
 	D3DXMatrixRotationQuaternion(&mat,&out);
 }
 
-int RMatInv( D3DXMATRIX& q, D3DXMATRIX& a ) {
+int RMatInv( D3DXMATRIX& q, const D3DXMATRIX& a ) {
 	D3DXMatrixInverse(&q,NULL,&a);
 	return 1;
 }
