@@ -487,6 +487,319 @@ RRESULT OnUpdate(void* pParam)
 	return R_OK;
 }
 
+static void GetRotAniMat(RAnimationNode& node, const matrix* parent_base_inv, int frame, matrix& mat);
+static void GetPosAniMat(RAnimationNode& node, const matrix* parent_base_inv, int frame, matrix& mat);
+
+matrix GetHeadMatrix(const matrix& World, float y, MMatchSex Sex, ZC_STATE_LOWER v, int Frame)
+{
+	extern ZANIMATIONINFO g_AnimationInfoTableLower[ZC_STATE_LOWER_END];
+	auto Ani = ZGetMeshMgr()->Get("herowoman1")->m_ani_mgr.GetAnimation(g_AnimationInfoTableLower[v].Name, ZGetGame()->m_pMyCharacter->m_pVMesh->GetSetectedWeaponMotionID());
+	DMLog("Motion type: %d\n", ZGetGame()->m_pMyCharacter->m_pVMesh->GetSetectedWeaponMotionID());
+
+	/*if (!Ani)
+	{
+	MGetMatchServer()->LogF(MMatchServer::LOG_ALL, "GetHeadPosition -- Can't find animation!");
+	return v3(0, 0, 0);
+	}
+
+	auto Node = Ani->m_pAniData->GetNode("Bip01 Head");
+
+	if (!Node)
+	{
+	MGetMatchServer()->LogF(MMatchServer::LOG_ALL, "GetHeadPosition -- Can't find head node!");
+	return v3(0, 0, 0);
+	}*/
+
+	static const char* Hierarchy[] = { "Bip01", "Bip01 Pelvis", "Bip01 Spine", "Bip01 Spine1", "Bip01 Spine2", "Bip01 Neck", "Bip01 Head" };
+	static const RMeshPartsPosInfoType HierarchyParts[] = { eq_parts_pos_info_Root, eq_parts_pos_info_Pelvis,
+		eq_parts_pos_info_Spine, eq_parts_pos_info_Spine1, eq_parts_pos_info_Spine2, eq_parts_pos_info_Neck, eq_parts_pos_info_Head };
+
+	matrix last_mat;
+	matrix last_mat_inv;
+	matrix mat;
+	bool parent = false;
+	for (size_t i = 0; i < ArraySize(Hierarchy); i++)
+	{
+		auto& cur = *Ani->m_pAniData->GetNode(Hierarchy[i]);
+
+		rmatrix* last_mat_inv_ptr = parent ? &last_mat_inv : nullptr;
+		D3DXMatrixIdentity(&mat);
+		GetRotAniMat(cur, last_mat_inv_ptr, Frame, mat);
+		GetPosAniMat(cur, last_mat_inv_ptr, Frame, mat);
+
+		float ratio = 0;
+
+		switch (HierarchyParts[i])
+		{
+		case eq_parts_pos_info_Head:
+			ratio = 0.3;
+			break;
+		case eq_parts_pos_info_Spine1:
+			ratio = 0.6;
+			break;
+		case eq_parts_pos_info_Spine2:
+			ratio = 0.5;
+			break;
+		default:
+			goto no_calc_lookat;
+		};
+
+		{
+			float y_clamped = y;
+
+#define MAX_YA_FRONT	50.f
+#define MAX_YA_BACK		-70.f
+
+			if (y_clamped > MAX_YA_FRONT)	y_clamped = MAX_YA_FRONT;
+			if (y_clamped < MAX_YA_BACK)		y_clamped = MAX_YA_BACK;
+
+			auto my = RGetRotY(y_clamped * ratio);
+
+			/*DMLog("my for %f * %f:\n", y_clamped, ratio);
+			DLogMatrix(my);
+
+			DMLog("pre mat:\n");
+			DLogMatrix(mat);*/
+
+			mat *= my;
+
+			/*DMLog("post mat:\n");
+			DLogMatrix(mat);*/
+
+			DMLog("y_clamped: %f\n", y_clamped);
+		}
+
+	no_calc_lookat:
+
+		DMLog("Trans %d: %f, %f, %f\n", i, mat(3, 0), mat(3, 1), mat(3, 2));
+
+		if (parent)
+			mat *= last_mat;
+
+		/*DMLog("%d:\n", i);
+		DLogMatrix(mat);
+
+		DMLog("%s:\n", Hierarchy[i]);
+		DLogMatrix(cur.m_mat_base);*/
+
+		parent = true;
+		last_mat = mat;
+		RMatInv(last_mat_inv, cur.m_mat_base);
+	}
+
+	return mat * World;
+}
+
+static void GetRotAniMat(RAnimationNode& node, const matrix* parent_base_inv, int frame, matrix& mat)
+{
+	D3DXMATRIX buffer, Inv;
+
+	bool bAni = false;
+
+	if (node.m_rot_cnt)
+		bAni = true;
+
+	if (bAni) {
+		D3DXQUATERNION out = node.GetRotValue(frame);
+
+		D3DXMatrixRotationQuaternion(&mat, &out);
+	}
+	else {
+
+		D3DXMatrixIdentity(&buffer);
+
+		if (parent_base_inv) {
+			D3DXMatrixMultiply(&buffer, &node.m_mat_base, parent_base_inv);
+		}
+		else {
+			memcpy(&buffer, &node.m_mat_base, sizeof(D3DXMATRIX));
+		}
+
+		buffer._41 = buffer._42 = buffer._43 = 0;
+		mat *= buffer;
+	}
+}
+
+static void GetPosAniMat(RAnimationNode& node, const matrix* parent_base_inv, int frame, matrix& mat)
+{
+	D3DXMATRIX buffer, Inv;
+
+	bool bAni = false;
+
+	if (node.m_pos_cnt)
+	{
+		bAni = true;
+	}
+
+	if (bAni) {
+		auto pos = node.GetPosValue(frame);
+
+		for (int i = 0; i < 3; i++)
+			mat(3, i) = pos[i];
+	}
+	else {
+
+		D3DXMatrixIdentity(&buffer);
+
+		if (parent_base_inv) {
+			D3DXMatrixMultiply(&buffer, &node.m_mat_base, parent_base_inv);
+		}
+		else {
+			memcpy(&buffer, &node.m_mat_base, sizeof(D3DXMATRIX));
+		}
+
+		for (int i = 0; i < 3; i++)
+			mat(3, i) = buffer(3, i);
+	}
+}
+
+static void GetRotAniMat(RMeshNode& node, const matrix* parent_base_inv, int frame, matrix& mat);
+static void GetPosAniMat(RMeshNode& node, const matrix* parent_base_inv, int frame, matrix& mat);
+
+matrix GetHeadMatrix(const matrix& World, float y, MMatchSex Sex, ZC_STATE_LOWER v, int Frame, RMeshNode& base_node)
+{
+	static const char* Hierarchy[] = { "Bip01", "Bip01 Pelvis", "Bip01 Spine", "Bip01 Spine1", "Bip01 Spine2", "Bip01 Neck", "Bip01 Head" };
+	static const RMeshPartsPosInfoType HierarchyParts[] = { eq_parts_pos_info_Root, eq_parts_pos_info_Pelvis,
+		eq_parts_pos_info_Spine, eq_parts_pos_info_Spine1, eq_parts_pos_info_Spine2, eq_parts_pos_info_Neck, eq_parts_pos_info_Head };
+
+	RMeshNode* nodes[7];
+	auto& p = base_node;
+	nodes[6] = &base_node;
+	for (int i = 5; i >= 0; i--)
+	{
+		nodes[i] = nodes[i + 1]->m_pParent;
+	}
+
+	matrix last_mat;
+	matrix last_mat_inv;
+	matrix mat;
+	bool parent = false;
+	for (size_t i = 0; i < ArraySize(Hierarchy); i++)
+	{
+		auto& cur = *nodes[i];
+
+		rmatrix* last_mat_inv_ptr = parent ? &last_mat_inv : nullptr;
+		D3DXMatrixIdentity(&mat);
+		GetRotAniMat(cur, last_mat_inv_ptr, Frame, mat);
+		GetPosAniMat(cur, last_mat_inv_ptr, Frame, mat);
+
+		float ratio = 0;
+
+		switch (HierarchyParts[i])
+		{
+		case eq_parts_pos_info_Head:
+			ratio = 0.3;
+			break;
+		case eq_parts_pos_info_Spine1:
+			ratio = 0.6;
+			break;
+		case eq_parts_pos_info_Spine2:
+			ratio = 0.5;
+			break;
+		default:
+			goto no_calc_lookat;
+		};
+
+		{
+			float y_clamped = y;
+
+#define MAX_YA_FRONT	50.f
+#define MAX_YA_BACK		-70.f
+
+			if (y_clamped > MAX_YA_FRONT)	y_clamped = MAX_YA_FRONT;
+			if (y_clamped < MAX_YA_BACK)		y_clamped = MAX_YA_BACK;
+
+			auto my = RGetRotY(y_clamped * ratio);
+
+			mat *= my;
+		}
+
+	no_calc_lookat:
+
+		if (parent)
+			mat *= last_mat;
+
+		/*DMLog("%d:\n", i);
+		DLogMatrix(mat);
+
+		DMLog("%s:\n", Hierarchy[i]);
+		DLogMatrix(cur.m_mat_base);*/
+
+		parent = true;
+		last_mat = mat;
+		RMatInv(last_mat_inv, mat);
+	}
+
+	return mat * World;
+}
+
+static void GetRotAniMat(RMeshNode& node, const matrix* parent_base_inv, int frame, matrix& mat)
+{
+	D3DXMATRIX buffer, Inv;
+
+	bool bAni = false;
+
+	auto* anode = node.m_pAnimationNode;
+
+	if (anode && anode->m_rot_cnt)
+		bAni = true;
+
+	if (bAni) {
+		D3DXQUATERNION out = anode->GetRotValue(frame);
+
+		D3DXMatrixRotationQuaternion(&mat, &out);
+	}
+	else {
+
+		D3DXMatrixIdentity(&buffer);
+
+		if (parent_base_inv) {
+			D3DXMatrixMultiply(&buffer, &node.m_mat_base, parent_base_inv);
+		}
+		else {
+			memcpy(&buffer, &node.m_mat_base, sizeof(D3DXMATRIX));
+		}
+
+		buffer._41 = buffer._42 = buffer._43 = 0;
+		mat *= buffer;
+	}
+}
+
+static void GetPosAniMat(RMeshNode& node, const matrix* parent_base_inv, int frame, matrix& mat)
+{
+	D3DXMATRIX buffer, Inv;
+
+	bool bAni = false;
+	
+	auto* anode = node.m_pAnimationNode;
+
+	if (anode && anode->m_pos_cnt)
+	{
+		bAni = true;
+	}
+
+	if (bAni) {
+		auto pos = anode->GetPosValue(frame);
+
+		for (int i = 0; i < 3; i++)
+			mat(3, i) = pos[i];
+	}
+	else {
+
+		D3DXMatrixIdentity(&buffer);
+
+		if (parent_base_inv) {
+			D3DXMatrixMultiply(&buffer, &node.m_mat_base, parent_base_inv);
+		}
+		else {
+			memcpy(&buffer, &node.m_mat_base, sizeof(D3DXMATRIX));
+		}
+
+		for (int i = 0; i < 3; i++)
+			mat(3, i) = buffer(3, i);
+	}
+}
+
 RRESULT OnRender(void *pParam)
 {
 	__BP(101, "main::OnRender");
@@ -551,7 +864,7 @@ RRESULT OnRender(void *pParam)
 				sprintf_safe(__buffer, "Head pos: %d, %d, %d", int(pos.x), int(pos.y), int(pos.z));
 				g_pDefFont->m_Font.DrawText(MGetWorkspaceWidth() - 200, 60, __buffer);
 
-#if 0
+#if 1
 				[&]()
 				{
 					rmatrix mat;
@@ -572,11 +885,11 @@ RRESULT OnRender(void *pParam)
 					auto Pos = pANode->GetPosValue(frame);
 					auto Rot = pANode->GetRotValue(frame);
 
-					DMLog("%d, %d\n", pANode->m_pos_cnt, pANode->m_rot_cnt);
+					/*DMLog("%d, %d\n", pANode->m_pos_cnt, pANode->m_rot_cnt);
 
 					DMLog("Pos: %f, %f, %f\n", Pos.x, Pos.y, Pos.z);
 					DMLog("pNode->->m_Name = %s\n", pNode->m_Name.c_str());
-					DMLog("pNode->m_pParent->m_Name = %s\n", pNode->m_pParent->m_Name.c_str());
+					DMLog("pNode->m_pParent->m_Name = %s\n", pNode->m_pParent->m_Name.c_str());*/
 
 					D3DXMatrixRotationQuaternion(&mat, &Rot);
 
@@ -609,13 +922,13 @@ RRESULT OnRender(void *pParam)
 					{
 						D3DXMatrixIdentity(&buffer);
 
-						DMLog("%d\n", pMesh->m_isNPCMesh);
+						//DMLog("%d\n", pMesh->m_isNPCMesh);
 
 						auto Neck = pMesh->m_ani_mgr.GetAnimation("idle");
 
 						auto Pos = Neck->m_pAniData->GetNode("Bip01 Neck")->GetPosValue(frame);
 
-						DMLog("Idle neck pos: %f, %f, %f\n", Pos.x, Pos.y, Pos.z);
+						//DMLog("Idle neck pos: %f, %f, %f\n", Pos.x, Pos.y, Pos.z);
 
 						//		if( pNode->m_pParentMesh->m_isNPCMesh && pNode->m_WeaponDummyType != weapon_dummy_etc ) // ÃÑ±¸¿ë ´õ¹Ì¸é
 						if (pMesh->m_isNPCMesh && pNode->m_WeaponDummyType != weapon_dummy_etc) // ÃÑ±¸¿ë ´õ¹Ì¸é
@@ -624,21 +937,19 @@ RRESULT OnRender(void *pParam)
 
 						}
 						else {
-
 							if (pNode->m_pParent) {
 								buffer = pNode->m_mat_base * pNode->m_pParent->m_mat_inv;
 							}
 							else {
 								buffer = pNode->m_mat_local;
 							}
-
 						}
 
 						mat._41 = buffer._41;
 						mat._42 = buffer._42;
 						mat._43 = buffer._43;
 
-						DMLog("Base:\n");
+						/*DMLog("Base:\n");
 						for (int i = 0; i < 4; i++)
 						{
 							for (int j = 0; j < 4; j++)
@@ -669,7 +980,7 @@ RRESULT OnRender(void *pParam)
 							}
 
 							DMLog("\n");
-						}
+						}*/
 					}
 
 					float rot_y = (ZGetGame()->m_pMyCharacter->GetDirection().z + 0.05) * 50;
@@ -685,6 +996,16 @@ RRESULT OnRender(void *pParam)
 					
 					if (pNode->m_pParent)
 						mat *= pNode->m_pParent->m_mat_result;
+
+					/*auto p = pNode;
+
+					int i = 0;
+					while (p)
+					{
+						DMLog("%d: %s, %d\n", i, p->GetName(), p->m_PartsPosInfoType);
+						p = p->m_pParent;
+						i++;
+					}*/
 
 					matrix World;
 					MakeWorldMatrix(&World, ZGetGame()->m_pMyCharacter->GetPosition(), ZGetGame()->m_pMyCharacter->m_vProxyDirection, v3(0, 0, 1));
@@ -710,6 +1031,20 @@ RRESULT OnRender(void *pParam)
 
 					sprintf_safe(__buffer, "Head pos3: %d, %d, %d", int(pos.x), int(pos.y), int(pos.z));
 					g_pDefFont->m_Font.DrawText(MGetWorkspaceWidth() - 200, 120, __buffer);
+
+					mat = GetHeadMatrix(World, rot_y, (MMatchSex)!ZGetGame()->m_pMyCharacter->IsMan(), ZGetGame()->m_pMyCharacter->GetStateLower(), frame);
+
+					pos = v3(mat(3, 0), mat(3, 1), mat(3, 2));
+
+					sprintf_safe(__buffer, "Head pos4: %d, %d, %d", int(pos.x), int(pos.y), int(pos.z));
+					g_pDefFont->m_Font.DrawText(MGetWorkspaceWidth() - 200, 150, __buffer);
+
+					mat = GetHeadMatrix(World, rot_y, (MMatchSex)!ZGetGame()->m_pMyCharacter->IsMan(), ZGetGame()->m_pMyCharacter->GetStateLower(), frame, *pNode);
+
+					pos = v3(mat(3, 0), mat(3, 1), mat(3, 2));
+
+					sprintf_safe(__buffer, "Head pos5: %d, %d, %d", int(pos.x), int(pos.y), int(pos.z));
+					g_pDefFont->m_Font.DrawText(MGetWorkspaceWidth() - 200, 180, __buffer);
 
 					/*if (pNode->m_pParent)
 					{

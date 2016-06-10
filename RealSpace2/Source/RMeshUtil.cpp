@@ -1069,7 +1069,7 @@ bool RBaseObject::CheckName(string& name)
 	return false;
 }
 
-bool RBaseObject::CheckName(char* name) 
+bool RBaseObject::CheckName(const char* name) 
 {
 	return CheckName(string(name));
 }

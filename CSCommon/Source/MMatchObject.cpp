@@ -610,12 +610,6 @@ bool MMatchObject::GetPositions(v3& Head, v3& Root, u32 Time)
 	auto Frame = u32(Time - diff_ani_it->RecvTime);
 	MGetMatchServer()->LogF(MMatchServer::LOG_ALL, "Ani %d; Frame = %d", pre_it->lowerstate, Frame);
 
-	auto HeadMatrix = LagComp.GetHeadMatrix(m_pCharInfo->m_nSex, pre_it->lowerstate, Frame);
-
-	auto Rot = RGetRotY((Dir.z + 0.05) * 50 * 0.3);
-
-	HeadMatrix *= Rot;
-
 	v3 xydir = Dir;
 	xydir.z = 0;
 	Normalize(xydir);
@@ -623,9 +617,9 @@ bool MMatchObject::GetPositions(v3& Head, v3& Root, u32 Time)
 	matrix World;
 	MakeWorldMatrix(&World, AbsPos, xydir, v3(0, 0, 1));
 
-	HeadMatrix *= World;
+	float y = (Dir.z + 0.05) * 50;
 
-	Head = GetTransPos(HeadMatrix);
+	Head = LagComp.GetHeadPosition(World, y, m_pCharInfo->m_nSex, pre_it->lowerstate, Frame);
 	Root = AbsPos;
 
 	return true;

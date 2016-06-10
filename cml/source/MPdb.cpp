@@ -504,7 +504,7 @@ DWORD GetCrashInfo(LPEXCEPTION_POINTERS exceptionInfo, std::string& str)
 		va_list args;
 
 		va_start(args, Format);
-		int ret = _vsnprintf_s(buf, sizeof(buf) - 1, Format, args);
+		int ret = vsprintf_safe(buf, Format, args);
 		va_end(args);
 
 		str += buf;
@@ -530,7 +530,7 @@ DWORD GetCrashInfo(LPEXCEPTION_POINTERS exceptionInfo, std::string& str)
 		if (LastError == ERROR_INVALID_ADDRESS)
 			return;
 
-		Append("     %s failed with error code %d: %s\n", LastError, GetLastErrorString());
+		Append("     %s failed with error code %d: %s\n", FunctionName, LastError, GetLastErrorString());
 	};
 
 	DWORD             dwDisplacement = 0;

@@ -539,9 +539,6 @@ void MMatchItemDescMgr::ParseItem(MXmlElement& element)
 		else if (!_stricmp(szAttrName, MICTOK_LIMITSPEED))
 		{
 			pNewDesc->m_nLimitSpeed = atoi(szAttrValue);
-#ifdef _DEBUG
-			mlog( "limit speed:(%d)\n", pNewDesc->m_nLimitSpeed );
-#endif
 		}
 		else if (!_stricmp(szAttrName, MICTOK_LIMITJUMP))
 		{

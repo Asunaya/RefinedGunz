@@ -448,9 +448,6 @@ public:
 
 //	bool Move(rvector &diff);
 
-	void OnSetSlot(int nSlot,int WeaponID);
-	void OnChangeSlot(int nSlot);
-
 	virtual void OnChangeWeapon(char* WeaponModelName);
 	void OnChangeParts(RMeshPartsType type,int PartsID);
 	void OnAttack(int type,rvector& pos);

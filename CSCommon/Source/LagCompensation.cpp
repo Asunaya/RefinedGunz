@@ -144,10 +144,17 @@ bool LagCompManager::Create()
 		return false;
 	}
 
-	LoadAnimations("model/woman/woman01.xml", 1);
+	ret = LoadAnimations("model/woman/woman01.xml", 1);
 	if (!ret)
 	{
 		MGetMatchServer()->LogF(MMatchServer::LOG_ALL, "LoadAnimations1 failed!");
+		return false;
+	}
+
+	ret = MGetMatchItemDescMgr()->ReadXml(g_pFileSystem, "system/zitem.xml");
+	if (!ret)
+	{
+		MGetMatchServer()->LogF(MMatchServer::LOG_ALL, "Falied to load zitems!");
 		return false;
 	}
 
@@ -348,11 +355,21 @@ bool LagCompManager::LoadAnimations(const char* filename, int Index)
 	return true;
 }
 
-matrix LagCompManager::GetHeadMatrix(MMatchSex Sex, ZC_STATE_LOWER v, int Frame)
+template <typename T, size_t size>
+inline constexpr size_t ArraySize(T(&)[size])
+{
+	return size;
+}
+
+static void GetRotAniMat(RAnimationNode& node, const matrix* parent_base_inv, int frame, matrix& mat);
+static void GetPosAniMat(RAnimationNode& node, const matrix* parent_base_inv, int frame, matrix& mat);
+
+matrix LagCompManager::GetHeadMatrix(const matrix& World, float y, MMatchSex Sex, ZC_STATE_LOWER v, int Frame)
 {
 	auto Ani = AniMgrs[Sex].GetAnimation(g_AnimationInfoTableLower[v].Name);
+	MGetMatchServer()->LogF(MMatchServer::LOG_ALL, "Hi!");
 
-	if (!Ani)
+	/*if (!Ani)
 	{
 		MGetMatchServer()->LogF(MMatchServer::LOG_ALL, "GetHeadPosition -- Can't find animation!");
 		return v3(0, 0, 0);
@@ -364,27 +381,116 @@ matrix LagCompManager::GetHeadMatrix(MMatchSex Sex, ZC_STATE_LOWER v, int Frame)
 	{
 		MGetMatchServer()->LogF(MMatchServer::LOG_ALL, "GetHeadPosition -- Can't find head node!");
 		return v3(0, 0, 0);
+	}*/
+
+	static const char* Hierarchy[] = {"Bip01", "Bip01 Pelvis", "Bip01 Spine", "Bip01 Spine1", "Bip01 Spine2", "Bip01 Neck", "Bip01 Head"};
+	static const RMeshPartsPosInfoType HierarchyParts[] = { eq_parts_pos_info_Root, eq_parts_pos_info_Pelvis,
+		eq_parts_pos_info_Spine, eq_parts_pos_info_Spine1, eq_parts_pos_info_Spine2, eq_parts_pos_info_Neck, eq_parts_pos_info_Head };
+
+	matrix last_mat;
+	matrix mat;
+	bool parent = false;
+	for (size_t i = 0; i < ArraySize(Hierarchy); i++)
+	{
+		MGetMatchServer()->LogF(MMatchServer::LOG_ALL, "%d");
+		MGetMatchServer()->LogF(MMatchServer::LOG_ALL, "%d: %s", i, Hierarchy[i]);
+		auto& cur = *Ani->m_pAniData->GetNode(Hierarchy[i]);
+
+		rmatrix* last_mat_ptr = parent ? &last_mat : nullptr;
+		GetRotAniMat(cur, last_mat_ptr, Frame, mat);
+		GetPosAniMat(cur, last_mat_ptr, Frame, mat);
+
+		float ratio = 0;
+
+		switch (HierarchyParts[i])
+		{
+		case eq_parts_pos_info_Head:
+			ratio = 0.3;
+			break;
+		case eq_parts_pos_info_Spine1:
+			ratio = 0.5;
+			break;
+		case eq_parts_pos_info_Spine2:
+			ratio = 0.6;
+			break;
+		default:	
+			goto no_calc_lookat;
+		};
+
+		{
+			float y_clamped = y;
+
+			auto rot_mat = RGetRotY(y_clamped * ratio);
+
+			mat *= rot_mat;
+		}
+
+	no_calc_lookat:
+
+		parent = true;
+		last_mat = mat;
 	}
 
-	auto Rot = Node->GetRotValue(Frame);
+	return mat * World;
+}
 
-	matrix mat;
-	D3DXMatrixRotationQuaternion(&mat, &Rot);
+static void GetRotAniMat(RAnimationNode& node, const matrix* parent_base_inv, int frame, matrix& mat)
+{
+	D3DXMATRIX buffer, Inv;
 
-	/*auto Pos = Node->GetPosValue(Frame);
+	bool bAni = false;
 
-	for (int i = 0; i < 3; i++)
-		mat(3, i) = Pos[i];*/
+	if (node.m_rot_cnt)
+		bAni = true;
 
-	auto Neck = Ani->m_pAniData->GetNode("Bip01 Head");
+	if (bAni) {
+		D3DXQUATERNION out = node.GetRotValue(frame);
 
-	matrix NeckInv;
-	RMatInv(NeckInv, Neck->m_mat_base);
+		D3DXMatrixRotationQuaternion(&mat, &out);
+	}
+	else {
 
-	auto Pos = GetTransPos(Node->m_mat_base * NeckInv);
+		D3DXMatrixIdentity(&buffer);
 
-	for (int i = 0; i < 3; i++)
-		mat(3, i) = Pos[i];
+		if (parent_base_inv) {
+			D3DXMatrixMultiply(&buffer, &node.m_mat_base, parent_base_inv);
+		}
+		else {
+			memcpy(&buffer, &node.m_mat_base, sizeof(D3DXMATRIX));
+		}
 
-	return mat;
+		buffer._41 = buffer._42 = buffer._43 = 0;
+		mat *= buffer;
+	}
+}
+
+static void GetPosAniMat(RAnimationNode& node, const matrix* parent_base_inv, int frame, matrix& mat)
+{
+	D3DXMATRIX buffer, Inv;
+
+	bool bAni = false;
+
+	if (node.m_pos_cnt)
+		bAni = true;
+
+	if (bAni) {
+		auto pos = node.GetPosValue(frame);
+
+		for (int i = 0; i < 3; i++)
+			mat(3, i) = pos[i];
+	}
+	else {
+
+		D3DXMatrixIdentity(&buffer);
+
+		if (parent_base_inv) {
+			D3DXMatrixMultiply(&buffer, &node.m_mat_base, parent_base_inv);
+		}
+		else {
+			memcpy(&buffer, &node.m_mat_base, sizeof(D3DXMATRIX));
+		}
+
+		for (int i = 0; i < 3; i++)
+			mat(3, i) = buffer(3, i);
+	}
 }

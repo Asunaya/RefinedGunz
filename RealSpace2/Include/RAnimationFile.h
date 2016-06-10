@@ -13,7 +13,7 @@ public:
 
 	bool LoadAni(char* filename);
 
-	RAnimationNode* GetNode(char* name);
+	RAnimationNode* GetNode(const char* name);
 
 	void AddRef();
 	void DecRef();

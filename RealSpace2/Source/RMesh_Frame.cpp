@@ -54,12 +54,6 @@ RMeshNode* RMesh::UpdateNodeAniMatrix(RMeshNode* pNode)
 
 	pTMeshNode->m_mat_result = ani_mat;
 
-	if (pTMeshNode->m_PartsPosInfoType == eq_parts_pos_info_Head && m_pVisualMesh)
-	{
-		ani_mat *= m_pVisualMesh->m_WorldMat;
-		DMLog("%p: head: %f, %f, %f, parent = %p, %d\n", pNode, ani_mat._41, ani_mat._42, ani_mat._43, pNode->m_pParent, GetNodeAniSet(pNode) ? GetNodeAniSet(pNode)->GetAnimationType() : -1);
-	}
-
 	return pTMeshNode;
 }
 
@@ -90,6 +84,25 @@ void RMesh::GetNodeAniMatrix(RMeshNode* pMeshNode,D3DXMATRIX& ani_mat)
 		_RGetPosAniMat(pMeshNode,frame,ani_mat);
 
 		CalcLookAtParts( ani_mat, pMeshNode , m_pVisualMesh );
+
+		if (m_pVisualMesh)
+		{
+			switch (pMeshNode->m_PartsPosInfoType)
+			{
+			case eq_parts_pos_info_Head:
+			case eq_parts_pos_info_Neck:
+			case eq_parts_pos_info_Spine2:
+			case eq_parts_pos_info_Spine1:
+			case eq_parts_pos_info_Spine:
+			case eq_parts_pos_info_Pelvis:
+			case eq_parts_pos_info_Root:
+				DMLog("%d, %d, %p: trans: %f, %f, %f, parent = %p, %d\n", pMeshNode->m_PartsPosInfoType, pMeshNode->m_PartsType, pMeshNode, ani_mat._41, ani_mat._42, ani_mat._43,
+					pMeshNode->m_pParent, GetNodeAniSet(pMeshNode) ? GetNodeAniSet(pMeshNode)->GetAnimationType() : -1);
+
+				/*DMLog("MeshNode %s:\n", pNode->GetName());
+				DLogMatrix(pNode->m_mat_base);*/
+			};
+		}
 
 		if (pMeshNode->m_pParent) {
 			D3DXMatrixMultiply(&ani_mat,&ani_mat,&pMeshNode->m_pParent->m_mat_result);
@@ -219,6 +232,7 @@ void RMesh::_RGetPosAniMat(RMeshNode* pMeshNode,int frame,D3DXMATRIX& t_ani_mat)
 //		if( pMeshNode->m_pParentMesh->m_pAniSet[1] ) {//자신의 원래 에니메이션의 로컬mat 를 유지한다.
 		if( m_pAniSet[1] ) {//자신의 원래 에니메이션의 로컬mat 를 유지한다.
 
+			//DMLog("m_pAniSet[1]\n");
 			t_ani_mat._41 = pMeshNode->m_spine_local_pos.x;
 			t_ani_mat._42 = pMeshNode->m_spine_local_pos.y;
 			t_ani_mat._43 = pMeshNode->m_spine_local_pos.z;
@@ -322,39 +336,6 @@ void RMesh::CalcLookAtParts(D3DXMATRIX& pAniMat,RMeshNode* pMeshNode,RVisualMesh
 {
 	if( pMeshNode && pVisualMesh ) {
 
-		// 임시 테스트
-/*
-		rvector target = pVisualMesh->m_vTargetPos;
-
-		// 한프레임이전것...우선은 테스트로 쓰고 지금것구해서 쓰기.. 부모계층까지 탄 위치값..
-		rvector pos = rvector( 
-			pMeshNode->m_mat_result._41,
-			pMeshNode->m_mat_result._42,
-			pMeshNode->m_mat_result._43 );
-		
-		rvector dir1 = rvector( 
-			pMeshNode->m_mat_result._31,
-			pMeshNode->m_mat_result._32,
-			pMeshNode->m_mat_result._33 );
-
-		rvector dir2 = target - pos;
-
-		float _cos = DotProduct(dir1,dir2);
-		rvector axis;
-		CrossProduct(&axis,dir1,dir2);
-		float rad = acos(_cos);
-		
-		
-		if(pMeshNode->m_LookAtParts == lookat_parts_head) {
-
-			D3DXMatrixMultiply( &pAniMat,&pAniMat,&pVisualMesh->m_RotMat );
-		}
-
-		return;
-*/
-
-		// 팔을 흔들어 주면 좋고 머리는 좀더 흔들도록.. 
-
 		float add_value = pVisualMesh->m_FrameTime.GetValue();
 		float add_value_npc = 0.f;
 
@@ -378,6 +359,8 @@ void RMesh::CalcLookAtParts(D3DXMATRIX& pAniMat,RMeshNode* pMeshNode,RVisualMesh
 
 		if(pMeshNode->m_LookAtParts == lookat_parts_spine1) {
 
+			DMLog("pMeshNode->m_PartsPosInfoType = %d, add_value = %f, rot_x = %f, rot_y = %f\n", pMeshNode->m_PartsPosInfoType, add_value, rot_x, rot_y);
+
 			rmatrix mx,my;
 
 			float rot_y2 = rot_y + add_value_npc;
@@ -390,6 +373,8 @@ void RMesh::CalcLookAtParts(D3DXMATRIX& pAniMat,RMeshNode* pMeshNode,RVisualMesh
 		}
 
 		if(pMeshNode->m_LookAtParts == lookat_parts_spine2) {
+
+			DMLog("pMeshNode->m_PartsPosInfoType = %d, add_value = %f, rot_x = %f, rot_y = %f\n", pMeshNode->m_PartsPosInfoType, add_value, rot_x, rot_y);
 
 			rmatrix mx,my;
 

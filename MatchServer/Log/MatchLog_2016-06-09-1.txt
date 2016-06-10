@@ -1,0 +1,2 @@
+Error!! - StringTable Initalize Failed
+[Thu Jun  9 19:31:17 2016] Open Formula Table FAILED

@@ -1877,7 +1877,7 @@ void RVisualMesh::SetParts(RMeshPartsType parts, char* name)
 
 RMeshNode* RVisualMesh::GetParts(RMeshPartsType parts) {
 
-	if(parts < 0 && parts >= eq_parts_end ) 
+	if(parts < 0 || parts >= eq_parts_end ) 
 		return NULL;
 
 	if(m_pTMesh==NULL) return NULL;

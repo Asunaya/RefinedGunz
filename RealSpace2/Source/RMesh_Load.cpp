@@ -1295,8 +1295,6 @@ bool RMesh::AddNode(char* name,char* pname,rmatrix& base_mat)
 
 	CheckNameToType(pMeshNode);
 
-//	CalcLocalMatrix(pMeshNode);//뺀다..부모 연결 등이지만 이후에 호출.. local matrix 등을 계산..
-
 	return true;
 }
 

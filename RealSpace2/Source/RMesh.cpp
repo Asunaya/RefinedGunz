@@ -663,7 +663,6 @@ bool RMesh::SetAnimation1Parts(RAnimation* pAniSet) {
 				memcpy(&pM->m_mat_base,&pANode->m_mat_base ,sizeof(D3DXMATRIX));
 				memcpy(&pM->m_mat_local,&pM->m_mat_base,sizeof(D3DXMATRIX));
 				RMatInv(pM->m_mat_inv,pM->m_mat_local);
-//				CalcLocalMatrix(pM);
 			}
 		}
 	}
@@ -797,7 +796,6 @@ bool RMesh::SetAnimation2Parts(RAnimation* pAniSet,RAnimation* pAniSetUpper) {
 						memcpy(&pM->m_mat_base,&pANode->m_mat_base ,sizeof(D3DXMATRIX));
 						memcpy(&pM->m_mat_local,&pM->m_mat_base,sizeof(D3DXMATRIX));
 						RMatInv(pM->m_mat_inv,pM->m_mat_local);
-//						CalcLocalMatrix(pM);
 					}
 				}
 			}
@@ -826,7 +824,6 @@ bool RMesh::SetAnimation2Parts(RAnimation* pAniSet,RAnimation* pAniSetUpper) {
 						memcpy(&pM->m_mat_base,&pANode->m_mat_base ,sizeof(D3DXMATRIX));
 						memcpy(&pM->m_mat_local,&pM->m_mat_base,sizeof(D3DXMATRIX));
 						RMatInv(pM->m_mat_inv,pM->m_mat_local);
-	//					CalcLocalMatrix(pM);
 						//spine 의 경우 더미를 대신할 자신의 원본로컬을 갖는다.
 						if(pM->m_LookAtParts == lookat_parts_spine1) {
 							rmatrix m,inv;
@@ -845,64 +842,6 @@ bool RMesh::SetAnimation2Parts(RAnimation* pAniSet,RAnimation* pAniSetUpper) {
 		}
 	}
 
-/*
-	if( m_pVisualMesh && m_pVisualMesh->m_pAniNodeTable )
-	{
-		RAnimationNode* pAniNode = NULL;
-		RMeshNode* pMeshNode = NULL;
-
-		for(i=0;i<m_data_num;i++)
-		{
-			pANode = m_pVisualMesh->m_pAniNodeTable[i];
-			pMeshNode = m_data[i];
-
-			if( pANode && pMeshNode ) {
-
-				if(pMeshNode->m_CutPartsType == cut_parts_lower_body) {
-
-					pMeshNode->m_pAnimationNode = pANode;
-					memcpy(&pMeshNode->m_mat_base,&pANode->m_mat_base ,sizeof(D3DXMATRIX));
-					memcpy(&pMeshNode->m_mat_local,&pMeshNode->m_mat_base,sizeof(D3DXMATRIX));
-					RMatInv(pMeshNode->m_mat_inv,pMeshNode->m_mat_local);
-
-				}
-				else if(pMeshNode->m_CutPartsType == cut_parts_upper_body) {
-
-					pMeshNode->m_pAnimationNode = pANode;
-					memcpy(&pMeshNode->m_mat_base,&pANode->m_mat_base ,sizeof(D3DXMATRIX));
-					memcpy(&pMeshNode->m_mat_local,&pMeshNode->m_mat_base,sizeof(D3DXMATRIX));
-					RMatInv(pMeshNode->m_mat_inv,pMeshNode->m_mat_local);
-//					CalcLocalMatrix(pM);
-					//spine 의 경우 더미를 대신할 자신의 원본로컬을 갖는다.
-					if(pMeshNode->m_LookAtParts == lookat_parts_spine1) {
-						rmatrix m,inv;
-						RAnimationNode* pANodePa = pAniSetUpper->GetNode(pMeshNode->m_Parent);
-						RMatInv(inv,pANodePa->m_mat_base);
-
-						m = pANode->m_mat_base * inv;
-
-						pMeshNode->m_spine_local_pos.x = m._41;
-						pMeshNode->m_spine_local_pos.y = m._42;
-						pMeshNode->m_spine_local_pos.z = m._43;
-					}
-				}
-			}
-		}
-
-		RAnimationNode* pANode1 = pAniSet->GetNode("Bip01");
-		RAnimationNode* pANode2 = pAniSetUpper->GetNode("Bip01");
-
-		m_vAddBipCenter.x = 0.f;
-		m_vAddBipCenter.y = 0.f;
-		m_vAddBipCenter.z = 0.f;
-
-		if( pANode1 && pANode2 ) {
-			m_vAddBipCenter.x = pANode2->m_mat_base._41 - pANode1->m_mat_base._41;
-			m_vAddBipCenter.y = pANode2->m_mat_base._42 - pANode1->m_mat_base._42;
-			m_vAddBipCenter.z = pANode2->m_mat_base._43 - pANode1->m_mat_base._43;
-		}
-	}
-*/
 	RAnimationNode* pANode1 = pAniSet->GetNode("Bip01");
 	RAnimationNode* pANode2 = pAniSetUpper->GetNode("Bip01");
 

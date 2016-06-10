@@ -63,7 +63,7 @@ static ZFACECOSTUME g_FaceCostume[MAX_FACE_COSTUME] =
 
 //	   이름  ,캔슬가능  ,반복	,이동값이 들어있는지	, 이동값이 시작부터 이어지는지
 
-static ZANIMATIONINFO g_AnimationInfoTableLower[ZC_STATE_LOWER_END] = {
+ZANIMATIONINFO g_AnimationInfoTableLower[ZC_STATE_LOWER_END] = {
 	{ ""				,true	,true	,false 	,false },
 										   
 	{ "idle"			,true	,true	,false 	,false },
@@ -1931,55 +1931,11 @@ WeaponST g_WeaponST[ ST_MAX_WEAPON ] = {
 	{ 3,"rifle01",	eq_wd_rifle  },
 };
 
-void ZCharacter::OnSetSlot(int nSlot,int WeaponID)
-{
-	
-}
-
 void ZCharacter::SetTargetDir(rvector vTarget) {
 
 	Normalize(vTarget);
 	m_TargetDir = vTarget;
 //	m_dwBackUpTime = timeGetTime();
-}
-
-void ZCharacter::OnChangeSlot(int nSlot)
-{
-	if (m_bInitialized==false) return;
-	if(nSlot < 0 || nSlot > ZC_SLOT_END-1) 
-		return;
-
-	if( m_pVMesh ) {
-
-
-		m_nSelectSlot = nSlot;
-
-		int nWeaponID = m_Slot[m_nSelectSlot].m_WeaponID;
-
-		int SelModelID  = nWeaponID;
-		int SelToggleID = nWeaponID;
-
-		RWeaponMotionType type = eq_weapon_etc;
-
-		if( nWeaponID != -1 )
-			type = g_WeaponST[ nWeaponID ].weapontype;
-
-		// 이름으로 검색하기..
-
-		RMesh* pMesh = ZGetWeaponMeshMgr()->GetFast(SelModelID);
-
-		if( pMesh ) {
-
-			if( SelModelID == -1 ) {
-				m_pVMesh->RemoveWeapon(type);
-			}
-			else  {
-				CheckTeenVersionMesh(&pMesh);
-				m_pVMesh->AddWeapon(type , pMesh);
-				m_pVMesh->SelectWeaponMotion(type);
-			}
-		}
-	}
 }
 
 // 가진 무기중에서만 선택하게 된다...

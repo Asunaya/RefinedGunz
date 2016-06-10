@@ -715,7 +715,7 @@ public:
 	char* GetName();
 	void  SetName(char* name);
 
-	bool  CheckName(char* name);
+	bool  CheckName(const char* name);
 	bool  CheckName(string& name);
 
 public:

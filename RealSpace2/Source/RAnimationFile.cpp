@@ -69,7 +69,7 @@ void RAnimationFile::SetName(char* name) {
 }
 */
 
-RAnimationNode* RAnimationFile::GetNode(char* name)
+RAnimationNode* RAnimationFile::GetNode(const char* name)
 {
 	for(int i=0;i<m_ani_node_cnt;i++) {
 		if(m_ani_node[i]->CheckName(name))

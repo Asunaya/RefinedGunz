@@ -14,7 +14,7 @@ public:
 	bool Create();
 	bool LoadAnimations(const char* filename, int Index);
 
-	matrix GetHeadMatrix(MMatchSex Sex, ZC_STATE_LOWER v, int Frame);
+	matrix GetHeadMatrix(const matrix& World, float y, MMatchSex Sex, ZC_STATE_LOWER v, int Frame);
 
 private:
 	RAnimationMgr AniMgrs[2]; // 0 = male, 1 = female
