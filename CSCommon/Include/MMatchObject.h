@@ -675,6 +675,14 @@ public:
 		return AveragePing;
 	}
 
+	auto GetSelectedSlot() const
+	{
+		if (BasicInfoHistory.empty())
+			return MMCIP_PRIMARY;
+
+		return BasicInfoHistory.begin()->SelectedSlot;
+	}
+
 public:
 	enum MMO_ACTION
 	{

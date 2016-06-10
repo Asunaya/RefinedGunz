@@ -16,7 +16,6 @@ public:
 	bool MassiveEffectEnabled() const { return !NoMassiveEffect; }
 	bool GetShowHitboxes() const { return ShowHitboxes; }
 	bool IsSwordsOnly() const { return NoGuns; }
-	bool IsP2PAntilead() const { return Antilead; }
 
 private:
 	int HP;
@@ -29,7 +28,6 @@ private:
 	bool NoMassiveEffect;
 	bool ShowHitboxes;
 	bool VanillaMode;
-	bool Antilead = true;
 
 	bool GetRoomTag(const char* szString);
 };

@@ -315,7 +315,9 @@ bool MMatchServer::StageEnterBattle(const MUID& uidPlayer, const MUID& uidStage)
 	MTD_PeerListNode* pNode = (MTD_PeerListNode*)MGetBlobArrayElement(pPeerArray, 0);
 	pNode->uidChar = pObj->GetUID();
 
-	pNode->dwIP = pObj->GetIP();
+	if (pStage->GetStageSetting()->GetNetcode() != NetcodeType::ServerBased)
+		pNode->dwIP = pObj->GetIP();
+
 	pNode->nPort = pObj->GetPort();
 
 	CopyCharInfoForTrans(&pNode->CharInfo, pObj->GetCharInfo(), pObj);

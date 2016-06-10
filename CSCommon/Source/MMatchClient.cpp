@@ -293,7 +293,7 @@ bool MMatchClient::OnCommand(MCommand* pCommand)
 		m_CommandManager.Post(pCmd);
 		UnlockRecv();
 
-		//DMLog("Received tunnelled P2P command ID %x\n", pCmd->GetID());
+		DMLog("Received tunnelled P2P command ID %x\n", pCmd->GetID());
 	}
 	break;
 		case MC_MATCH_RESPONSE_LOGIN:
@@ -967,6 +967,8 @@ void MMatchClient::SendCommandByMatchServerTunneling(MCommand* pCommand)
 		//MClient::SendCommand(pCmd);
 		Post(pCmd);
 		//delete pCmd;
+
+		DMLog("SendCommandByMatchServerTunnelling %d\n", pCommand->GetID());
 	}
 }
 

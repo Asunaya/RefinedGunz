@@ -8,6 +8,7 @@
 #include "ZModule.h"
 #include "ZModule_Movable.h"
 #include "ZCharacterItem.h"
+#include "stuff.h"
 
 #include <list>
 #include <string>
@@ -21,21 +22,6 @@ enum ZOBJECTHITTEST {
 	ZOH_BODY = 1,
 	ZOH_HEAD = 2,
 	ZOH_LEGS = 3
-};
-
-enum ZDAMAGETYPE {
-	ZD_NONE=-1,
-	ZD_BULLET,
-	ZD_MELEE,
-	ZD_FALLING,
-	ZD_EXPLOSION,
-	ZD_BULLET_HEADSHOT,
-	ZD_KATANA_SPLASH,
-	ZD_HEAL,
-	ZD_REPAIR,
-	ZD_MAGIC,
-
-	ZD_END
 };
 
 enum ZC_ENCHANT {

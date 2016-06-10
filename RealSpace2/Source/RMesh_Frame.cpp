@@ -96,11 +96,12 @@ void RMesh::GetNodeAniMatrix(RMeshNode* pMeshNode,D3DXMATRIX& ani_mat)
 			case eq_parts_pos_info_Spine:
 			case eq_parts_pos_info_Pelvis:
 			case eq_parts_pos_info_Root:
-				DMLog("%d, %d, %p: trans: %f, %f, %f, parent = %p, %d\n", pMeshNode->m_PartsPosInfoType, pMeshNode->m_PartsType, pMeshNode, ani_mat._41, ani_mat._42, ani_mat._43,
-					pMeshNode->m_pParent, GetNodeAniSet(pMeshNode) ? GetNodeAniSet(pMeshNode)->GetAnimationType() : -1);
+				/*DMLog("%d, %d, %p: trans: %f, %f, %f, parent = %p, %d\n", pMeshNode->m_PartsPosInfoType, pMeshNode->m_PartsType, pMeshNode, ani_mat._41, ani_mat._42, ani_mat._43,
+					pMeshNode->m_pParent, GetNodeAniSet(pMeshNode) ? GetNodeAniSet(pMeshNode)->GetAnimationType() : -1);*/
 
 				/*DMLog("MeshNode %s:\n", pNode->GetName());
 				DLogMatrix(pNode->m_mat_base);*/
+				;
 			};
 		}
 
@@ -232,7 +233,6 @@ void RMesh::_RGetPosAniMat(RMeshNode* pMeshNode,int frame,D3DXMATRIX& t_ani_mat)
 //		if( pMeshNode->m_pParentMesh->m_pAniSet[1] ) {//자신의 원래 에니메이션의 로컬mat 를 유지한다.
 		if( m_pAniSet[1] ) {//자신의 원래 에니메이션의 로컬mat 를 유지한다.
 
-			//DMLog("m_pAniSet[1]\n");
 			t_ani_mat._41 = pMeshNode->m_spine_local_pos.x;
 			t_ani_mat._42 = pMeshNode->m_spine_local_pos.y;
 			t_ani_mat._43 = pMeshNode->m_spine_local_pos.z;
@@ -359,7 +359,7 @@ void RMesh::CalcLookAtParts(D3DXMATRIX& pAniMat,RMeshNode* pMeshNode,RVisualMesh
 
 		if(pMeshNode->m_LookAtParts == lookat_parts_spine1) {
 
-			DMLog("pMeshNode->m_PartsPosInfoType = %d, add_value = %f, rot_x = %f, rot_y = %f\n", pMeshNode->m_PartsPosInfoType, add_value, rot_x, rot_y);
+			//DMLog("pMeshNode->m_PartsPosInfoType = %d, add_value = %f, rot_x = %f, rot_y = %f\n", pMeshNode->m_PartsPosInfoType, add_value, rot_x, rot_y);
 
 			rmatrix mx,my;
 
@@ -374,7 +374,7 @@ void RMesh::CalcLookAtParts(D3DXMATRIX& pAniMat,RMeshNode* pMeshNode,RVisualMesh
 
 		if(pMeshNode->m_LookAtParts == lookat_parts_spine2) {
 
-			DMLog("pMeshNode->m_PartsPosInfoType = %d, add_value = %f, rot_x = %f, rot_y = %f\n", pMeshNode->m_PartsPosInfoType, add_value, rot_x, rot_y);
+			////DMLog("pMeshNode->m_PartsPosInfoType = %d, add_value = %f, rot_x = %f, rot_y = %f\n", pMeshNode->m_PartsPosInfoType, add_value, rot_x, rot_y);
 
 			rmatrix mx,my;
 
@@ -389,7 +389,7 @@ void RMesh::CalcLookAtParts(D3DXMATRIX& pAniMat,RMeshNode* pMeshNode,RVisualMesh
 
 		if(pMeshNode->m_LookAtParts == lookat_parts_head) {
 
-			DMLog("pMeshNode->m_PartsPosInfoType = %d, add_value = %f, rot_x = %f, rot_y = %f\n", pMeshNode->m_PartsPosInfoType, add_value, rot_x, rot_y);
+			//DMLog("pMeshNode->m_PartsPosInfoType = %d, add_value = %f, rot_x = %f, rot_y = %f\n", pMeshNode->m_PartsPosInfoType, add_value, rot_x, rot_y);
 
 			rmatrix mx,my;
 

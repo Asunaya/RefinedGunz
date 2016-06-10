@@ -55,6 +55,9 @@ void MAddSharedCommandTable(MCommandManager* pCommandManager, int nSharedType)
 	C(MC_MATCH_DAMAGE, "", "", MCDT_MACHINE2MACHINE)
 		P(MPT_UID, "Attacker")
 		P(MPT_USHORT, "Damage")
+		P(MPT_FLOAT, "PiercingRatio")
+		P(MPT_UCHAR, "DamageType")
+		P(MPT_UCHAR, "WeaponType")
 
 
 	C(MC_LOCAL_INFO, "Local.Info", "Local information", MCDT_LOCAL)

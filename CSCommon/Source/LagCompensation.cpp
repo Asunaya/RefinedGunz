@@ -364,74 +364,69 @@ inline constexpr size_t ArraySize(T(&)[size])
 static void GetRotAniMat(RAnimationNode& node, const matrix* parent_base_inv, int frame, matrix& mat);
 static void GetPosAniMat(RAnimationNode& node, const matrix* parent_base_inv, int frame, matrix& mat);
 
-matrix LagCompManager::GetHeadMatrix(const matrix& World, float y, MMatchSex Sex, ZC_STATE_LOWER v, int Frame)
+v3 LagCompManager::GetHeadPosition(const matrix& World, float y, MMatchSex Sex, ZC_STATE_LOWER v, int Frame, RWeaponMotionType MotionType)
 {
-	auto Ani = AniMgrs[Sex].GetAnimation(g_AnimationInfoTableLower[v].Name);
-	MGetMatchServer()->LogF(MMatchServer::LOG_ALL, "Hi!");
+	auto Ani = AniMgrs[Sex].GetAnimation(g_AnimationInfoTableLower[v].Name, MotionType);
 
-	/*if (!Ani)
-	{
-		MGetMatchServer()->LogF(MMatchServer::LOG_ALL, "GetHeadPosition -- Can't find animation!");
-		return v3(0, 0, 0);
-	}
-
-	auto Node = Ani->m_pAniData->GetNode("Bip01 Head");
-
-	if (!Node)
-	{
-		MGetMatchServer()->LogF(MMatchServer::LOG_ALL, "GetHeadPosition -- Can't find head node!");
-		return v3(0, 0, 0);
-	}*/
-
-	static const char* Hierarchy[] = {"Bip01", "Bip01 Pelvis", "Bip01 Spine", "Bip01 Spine1", "Bip01 Spine2", "Bip01 Neck", "Bip01 Head"};
+	static const char* Hierarchy[] = { "Bip01", "Bip01 Pelvis",
+		"Bip01 Spine", "Bip01 Spine1", "Bip01 Spine2", "Bip01 Neck", "Bip01 Head" };
 	static const RMeshPartsPosInfoType HierarchyParts[] = { eq_parts_pos_info_Root, eq_parts_pos_info_Pelvis,
 		eq_parts_pos_info_Spine, eq_parts_pos_info_Spine1, eq_parts_pos_info_Spine2, eq_parts_pos_info_Neck, eq_parts_pos_info_Head };
 
 	matrix last_mat;
+	matrix last_mat_inv;
 	matrix mat;
 	bool parent = false;
 	for (size_t i = 0; i < ArraySize(Hierarchy); i++)
 	{
-		MGetMatchServer()->LogF(MMatchServer::LOG_ALL, "%d");
-		MGetMatchServer()->LogF(MMatchServer::LOG_ALL, "%d: %s", i, Hierarchy[i]);
 		auto& cur = *Ani->m_pAniData->GetNode(Hierarchy[i]);
 
-		rmatrix* last_mat_ptr = parent ? &last_mat : nullptr;
-		GetRotAniMat(cur, last_mat_ptr, Frame, mat);
-		GetPosAniMat(cur, last_mat_ptr, Frame, mat);
+		rmatrix* last_mat_inv_ptr = parent ? &last_mat_inv : nullptr;
+		D3DXMatrixIdentity(&mat);
+		GetRotAniMat(cur, last_mat_inv_ptr, Frame, mat);
+		GetPosAniMat(cur, last_mat_inv_ptr, Frame, mat);
 
-		float ratio = 0;
-
-		switch (HierarchyParts[i])
+		[&]()
 		{
-		case eq_parts_pos_info_Head:
-			ratio = 0.3;
-			break;
-		case eq_parts_pos_info_Spine1:
-			ratio = 0.5;
-			break;
-		case eq_parts_pos_info_Spine2:
-			ratio = 0.6;
-			break;
-		default:	
-			goto no_calc_lookat;
-		};
+			float ratio = 0;
 
-		{
+			switch (HierarchyParts[i])
+			{
+			case eq_parts_pos_info_Head:
+				ratio = 0.3;
+				break;
+			case eq_parts_pos_info_Spine1:
+				ratio = 0.6;
+				break;
+			case eq_parts_pos_info_Spine2:
+				ratio = 0.5;
+				break;
+			default:
+				return;
+			};
+
 			float y_clamped = y;
 
-			auto rot_mat = RGetRotY(y_clamped * ratio);
+#define MAX_YA_FRONT	50.f
+#define MAX_YA_BACK		-70.f
 
-			mat *= rot_mat;
-		}
+			if (y_clamped > MAX_YA_FRONT)	y_clamped = MAX_YA_FRONT;
+			if (y_clamped < MAX_YA_BACK)		y_clamped = MAX_YA_BACK;
 
-	no_calc_lookat:
+			auto my = RGetRotY(y_clamped * ratio);
+
+			mat *= my;
+		}();
+
+		if (parent)
+			mat *= last_mat;
 
 		parent = true;
 		last_mat = mat;
+		RMatInv(last_mat_inv, cur.m_mat_base);
 	}
 
-	return mat * World;
+	return GetTransPos(mat * World);
 }
 
 static void GetRotAniMat(RAnimationNode& node, const matrix* parent_base_inv, int frame, matrix& mat)
@@ -471,7 +466,9 @@ static void GetPosAniMat(RAnimationNode& node, const matrix* parent_base_inv, in
 	bool bAni = false;
 
 	if (node.m_pos_cnt)
+	{
 		bAni = true;
+	}
 
 	if (bAni) {
 		auto pos = node.GetPosValue(frame);

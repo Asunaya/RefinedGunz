@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GlobalTypes.h"
+#include "RMeshUtil.h"
 
 enum ZC_STATE_UPPER {
 
@@ -125,9 +126,16 @@ struct BasicInfo {
 	v3 direction;
 	ZC_STATE_UPPER upperstate;
 	ZC_STATE_LOWER lowerstate;
+	MMatchCharItemParts SelectedSlot;
 
 	float SentTime;
 	u32 RecvTime;
+
+	void Validate()
+	{
+		if (SelectedSlot < MMCIP_PRIMARY || SelectedSlot > MMCIP_CUSTOM2)
+			SelectedSlot = MMCIP_PRIMARY;
+	}
 };
 
 struct ZBasicInfo {
@@ -179,6 +187,8 @@ struct ZPACKEDBASICINFO {
 		bi.direction = 1.f / 32000.f * v3(dirx, diry, dirz);
 		bi.upperstate = ZC_STATE_UPPER(upperstate);
 		bi.lowerstate = ZC_STATE_LOWER(lowerstate);
+		bi.SelectedSlot = MMatchCharItemParts(selweapon);
+		bi.Validate();
 	}
 
 	void Pack(const BasicInfo& bi)
@@ -201,3 +211,162 @@ struct ZPACKEDBASICINFO {
 };
 
 #pragma pack(pop)
+
+static RWeaponMotionType WeaponTypeToMotionType(MMatchWeaponType WeaponType)
+{
+	switch (WeaponType)
+	{
+	case MWT_ROCKET:
+		return eq_wd_rlauncher;
+	case MWT_SHOTGUN:
+		return eq_wd_shotgun;
+	case MWT_RIFLE:
+		return eq_wd_rifle;
+	case MWT_DAGGER:
+		return eq_wd_dagger;
+	case MWT_KATANA:
+		return eq_wd_katana;
+	case MWT_PISTOL:
+		return eq_ws_pistol;
+	case MWT_PISTOLx2:
+		return eq_wd_pistol;
+	case MWT_SMG:
+		return eq_ws_smg;
+	case MWT_SMGx2:
+		return eq_wd_smg;
+	case MWT_MACHINEGUN:
+		return eq_wd_shotgun;
+	case MWT_MED_KIT:
+	case MWT_REPAIR_KIT:
+	case MWT_BULLET_KIT:
+	case MWT_FLASH_BANG:
+	case MWT_FRAGMENTATION:
+	case MWT_SMOKE_GRENADE:
+	case MWT_FOOD:
+	case MWT_SKILL:
+		return eq_wd_item;
+	case MWT_GREAT_SWORD:
+		return eq_wd_sword;
+	case MWT_DOUBLE_KATANA:
+		return eq_wd_blade;
+	};
+
+	return eq_weapon_etc;
+}
+
+static float GetPiercingRatio(MMatchWeaponType wtype, RMeshPartsType partstype)
+{
+	float fRatio = 0.5f;
+
+	bool bHead = false;
+
+	if (partstype == eq_parts_head) { // 헤드샷 구분~ 
+		bHead = true;
+	}
+
+	switch (wtype) {
+
+	case MWT_DAGGER:		// 단검
+	case MWT_DUAL_DAGGER:	// 양손단검
+	{
+		if (bHead)	fRatio = 0.75f;
+		else		fRatio = 0.7f;
+	}
+	break;
+	case MWT_KATANA:		// 카타나
+	{
+		if (bHead)	fRatio = 0.65f;
+		else		fRatio = 0.6f;
+	}
+	break;
+	case MWT_DOUBLE_KATANA:
+	{
+		if (bHead)	fRatio = 0.65f;
+		else		fRatio = 0.6f;
+	}
+	break;
+	case MWT_GREAT_SWORD:
+	{
+		if (bHead)	fRatio = 0.65f;
+		else		fRatio = 0.6f;
+	}
+	break;
+
+	case MWT_PISTOL:
+	case MWT_PISTOLx2:
+	{
+		if (bHead)	fRatio = 0.7f;
+		else		fRatio = 0.5f;
+	}
+	break;
+
+	case MWT_REVOLVER:
+	case MWT_REVOLVERx2:
+	{
+		if (bHead)	fRatio = 0.9f;
+		else		fRatio = 0.7f;
+	}
+	break;
+
+	case MWT_SMG:
+	case MWT_SMGx2:			// 서브머신건
+	{
+		if (bHead)	fRatio = 0.5f;
+		else		fRatio = 0.3f;
+	}
+	break;
+	case MWT_SHOTGUN:
+	case MWT_SAWED_SHOTGUN:
+	{
+		if (bHead)	fRatio = 0.2f;
+		else		fRatio = 0.2f;
+	}
+	break;
+	case MWT_MACHINEGUN:	// 머신건
+	{
+		if (bHead)	fRatio = 0.8f;
+		else		fRatio = 0.4f;
+	}
+	break;
+	case MWT_RIFLE:			// 돌격소총
+	{
+		if (bHead)	fRatio = 0.8f;
+		else		fRatio = 0.4f;
+	}
+	break;
+	case MWT_SNIFER:		//우선은 라이플처럼...
+	{
+		if (bHead)	fRatio = 0.8f;
+		else		fRatio = 0.4f;
+	}
+	break;
+	case MWT_FRAGMENTATION:
+	case MWT_FLASH_BANG:
+	case MWT_SMOKE_GRENADE:
+	case MWT_ROCKET:		// 로켓런쳐
+	{
+		if (bHead)	fRatio = 0.4f;
+		else		fRatio = 0.4f;
+	}
+	break;
+	default:
+		// case eq_wd_item
+		break;
+	}
+	return fRatio;
+}
+
+enum ZDAMAGETYPE {
+	ZD_NONE = -1,
+	ZD_BULLET,
+	ZD_MELEE,
+	ZD_FALLING,
+	ZD_EXPLOSION,
+	ZD_BULLET_HEADSHOT,
+	ZD_KATANA_SPLASH,
+	ZD_HEAL,
+	ZD_REPAIR,
+	ZD_MAGIC,
+
+	ZD_END
+};

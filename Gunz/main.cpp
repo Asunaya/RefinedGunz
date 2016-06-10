@@ -494,7 +494,7 @@ matrix GetHeadMatrix(const matrix& World, float y, MMatchSex Sex, ZC_STATE_LOWER
 {
 	extern ZANIMATIONINFO g_AnimationInfoTableLower[ZC_STATE_LOWER_END];
 	auto Ani = ZGetMeshMgr()->Get("herowoman1")->m_ani_mgr.GetAnimation(g_AnimationInfoTableLower[v].Name, ZGetGame()->m_pMyCharacter->m_pVMesh->GetSetectedWeaponMotionID());
-	DMLog("Motion type: %d\n", ZGetGame()->m_pMyCharacter->m_pVMesh->GetSetectedWeaponMotionID());
+	//DMLog("Motion type: %d\n", ZGetGame()->m_pMyCharacter->m_pVMesh->GetSetectedWeaponMotionID());
 
 	/*if (!Ani)
 	{
@@ -566,12 +566,12 @@ matrix GetHeadMatrix(const matrix& World, float y, MMatchSex Sex, ZC_STATE_LOWER
 			/*DMLog("post mat:\n");
 			DLogMatrix(mat);*/
 
-			DMLog("y_clamped: %f\n", y_clamped);
+			//DMLog("y_clamped: %f\n", y_clamped);
 		}
 
 	no_calc_lookat:
 
-		DMLog("Trans %d: %f, %f, %f\n", i, mat(3, 0), mat(3, 1), mat(3, 2));
+		//DMLog("Trans %d: %f, %f, %f\n", i, mat(3, 0), mat(3, 1), mat(3, 2));
 
 		if (parent)
 			mat *= last_mat;

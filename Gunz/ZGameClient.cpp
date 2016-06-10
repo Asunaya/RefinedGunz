@@ -511,9 +511,15 @@ void ZGameClient::OnChannelResponseRule(const MUID& uidchannel, const char* pszR
 
 void ZGameClient::OnStageEnterBattle(const MUID& uidChar, MCmdEnterBattleParam nParam, MTD_PeerListNode* pPeerNode)
 {	
+	MLog("ZGameClient::OnStageEnterBattle -- Netcode: %d\n", GetMatchStageSetting()->GetNetcode());
 	// 이것은 ZGame 에서 불러준다
 	if (uidChar == GetPlayerUID())		// enter한사람이 나자신일 경우
 	{
+		if (GetMatchStageSetting()->GetNetcode() == NetcodeType::ServerBased)
+			PeerToPeer = false;
+		else
+			PeerToPeer = true;
+
 		ZPostRequestGameInfo(ZGetGameClient()->GetPlayerUID(), ZGetGameClient()->GetStageUID());
 
 		// 게임이 시작되면 모든 사람들의 ready를 푼다.
@@ -524,7 +530,9 @@ void ZGameClient::OnStageEnterBattle(const MUID& uidChar, MCmdEnterBattleParam n
 			pCharNode->nState = MOSS_NONREADY;
 		}
 	}
-	StartUDPTest(uidChar);	
+
+	if (GetMatchStageSetting()->GetNetcode() != NetcodeType::ServerBased)
+		StartUDPTest(uidChar);
 }
 
 void ZGameClient::OnStageJoin(const MUID& uidChar, const MUID& uidStage, unsigned int nRoomNo, char* szStageName)

@@ -1734,9 +1734,15 @@ bool ZGame::OnCommand_Immediate(MCommand* pCommand)
 	{
 		MUID uidAttacker;
 		u16 Damage;
+		float PiercingRatio;
+		u8 DamageType;
+		u8 WeaponType;
 
 		if (!pCommand->GetParameter(&uidAttacker, 0, MPT_UID)) break;
 		if (!pCommand->GetParameter(&Damage, 1, MPT_USHORT)) break;
+		if (!pCommand->GetParameter(&PiercingRatio, 2, MPT_FLOAT)) break;
+		if (!pCommand->GetParameter(&DamageType, 3, MPT_UCHAR)) break;
+		if (!pCommand->GetParameter(&WeaponType, 4, MPT_UCHAR)) break;
 
 		auto it = m_CharacterManager.find(uidAttacker);
 		if (it == m_CharacterManager.end())
@@ -1744,9 +1750,7 @@ bool ZGame::OnCommand_Immediate(MCommand* pCommand)
 
 		auto Attacker = it->second;
 
-		auto PiercingRatio = 0.6;
-
-		m_pMyCharacter->OnDamaged(Attacker, Attacker->GetPosition(), ZD_BULLET, MWT_RIFLE, Damage, PiercingRatio);
+		m_pMyCharacter->OnDamaged(Attacker, Attacker->GetPosition(), ZDAMAGETYPE(DamageType), MMatchWeaponType(WeaponType), Damage, PiercingRatio);
 
 		DMLog("MatchServer damage %d\n", Damage);
 	}
@@ -3531,18 +3535,17 @@ void ZGame::OnPeerShot_Range(MMatchCharItemParts sel_type, const MUID& uidOwner,
 				pickinfo.pObject->OnKnockback( pOwner->m_Direction, fKnockbackForce );
 
 				float fActualDamage = CalcActualDamage(pOwner, pickinfo.pObject, (float)pDesc->m_nDamage);
-				float fRatio = pItem->GetPiercingRatio( pDesc->m_nWeaponType
- , pickinfo.info.parts );
+				float fRatio = pItem->GetPiercingRatio( pDesc->m_nWeaponType, pickinfo.info.parts );
 				ZDAMAGETYPE dt = (pickinfo.info.parts==eq_parts_head) ? ZD_BULLET_HEADSHOT : ZD_BULLET;
 
-				if (!GetRules().IsP2PAntilead())
+				if (ZGetGameClient()->GetMatchStageSetting()->GetNetcode() == NetcodeType::P2PLead)
 					pickinfo.pObject->OnDamaged(pOwner, pOwner->GetPosition(), dt, pDesc->m_nWeaponType, fActualDamage, fRatio );
 
 				if(pOwner == m_pMyCharacter) {
 					CheckCombo(m_pMyCharacter,pickinfo.pObject,!bPushSkip);
 					CheckStylishAction(m_pMyCharacter);
 
-					if (GetRules().IsP2PAntilead() && !IsReplay())
+					if (ZGetGameClient()->GetMatchStageSetting()->GetNetcode() == NetcodeType::P2PAntilead && !IsReplay())
 					{
 						auto Char = MDynamicCast(ZCharacter, pickinfo.pObject);
 
@@ -3809,7 +3812,7 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 
 					if(bPushSkip) {
 //						ZGetSoundEngine()->PlaySound("fx_bullethit_mt_met");
-						rvector vPos = pOwnerCharacter->GetPosition() + (pObject->GetPosition() - pOwnerCharacter->GetPosition()) * 0.1f; 
+						rvector vPos = pOwnerCharacter->GetPosition() + (pObject->GetPosition() - pOwnerCharacter->GetPosition()) * 0.1f;
 						ZGetSoundEngine()->PlaySound("fx_bullethit_mt_met", vPos );
 						fKnockbackForce = 1.0;
 					}
@@ -3820,7 +3823,7 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 					float fRatio = ZItem::GetPiercingRatio( pDesc->m_nWeaponType , pickinfo.info.parts );
 					ZDAMAGETYPE dt = (pickinfo.info.parts==eq_parts_head) ? ZD_BULLET_HEADSHOT : ZD_BULLET;
 
-					if (!GetRules().IsP2PAntilead())
+					if (ZGetGameClient()->GetMatchStageSetting()->GetNetcode() != NetcodeType::P2PAntilead)
 						pObject->OnDamaged(pOwnerCharacter, pOwnerCharacter->GetPosition(), dt, pDesc->m_nWeaponType, fActualDamage, fRatio );
 
 					nTargetType = ZTT_CHARACTER;
@@ -3832,7 +3835,7 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 						bHitEnemy=true;
 					}
 
-					if (GetRules().IsP2PAntilead() && pOwnerCharacter == m_pMyCharacter && !IsReplay())
+					if (ZGetGameClient()->GetMatchStageSetting()->GetNetcode() == NetcodeType::P2PAntilead && pOwnerCharacter == m_pMyCharacter && !IsReplay())
 					{
 						auto Char = MDynamicCast(ZCharacter, pObject);
 
@@ -3846,7 +3849,7 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 							item.PiercingRatio = (item.Damage * item.PiercingRatio + Damage * fRatio) / NewDamage;
 
 							item.Damage = NewDamage;
-							static_assert(ZD_BULLET_HEADSHOT > ZD_BULLET, "Fix this");
+							static_assert(ZD_BULLET_HEADSHOT > ZD_BULLET, "Fix me");
 							item.DamageType = max(item.DamageType, dt);
 							item.WeaponType = pDesc->m_nWeaponType;
 						}
@@ -3921,7 +3924,7 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 		waterSound = GetWorld()->GetWaters()->CheckSpearing( v1, v2, 250, 0.3, !waterSound );
 	}
 
-	if (GetRules().IsP2PAntilead())
+	if (ZGetGameClient()->GetMatchStageSetting()->GetNetcode() == NetcodeType::P2PAntilead)
 	{
 		for (auto& Pair : DamageMap)
 		{

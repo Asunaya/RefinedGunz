@@ -561,20 +561,17 @@ void MMatchObject::OnBasicInfo(const BasicInfo & bi)
 
 bool MMatchObject::GetPositions(v3& Head, v3& Root, u32 Time)
 {
-	auto& LagComp = MGetMatchServer()->LagComp;
-
 	if (BasicInfoHistory.size() < 2)
 		return false;
-
-	MLog("BasicInfoHistory.size() = %d, BasicInfoHistory.begin()->RecvTime = %u\n", BasicInfoHistory.size(), BasicInfoHistory.begin()->RecvTime);
 
 	auto pre_it = BasicInfoHistory.begin();
 	auto post_it = BasicInfoHistory.begin();
 
-	while (post_it != BasicInfoHistory.end() && Time > post_it->RecvTime)
+	while (pre_it != BasicInfoHistory.end() && Time < post_it->RecvTime)
 	{
-		pre_it = post_it;
-		post_it++;
+		//MGetMatchServer()->LogF(MMatchServer::LOG_ALL, "Time = %08X, pre_it = %08X, post_it = %08X", Time, pre_it->RecvTime, post_it->RecvTime);
+		post_it = pre_it;
+		pre_it++;
 	}
 
 	if (post_it == BasicInfoHistory.end())
@@ -585,7 +582,7 @@ bool MMatchObject::GetPositions(v3& Head, v3& Root, u32 Time)
 
 	if (pre_it != post_it)
 	{
-		float t = (post_it->RecvTime - pre_it->RecvTime) / (Time - pre_it->RecvTime);
+		float t = float(post_it->RecvTime - pre_it->RecvTime) / float(Time - pre_it->RecvTime);
 		AbsPos = Lerp(pre_it->position, post_it->position, t);
 		Dir = Slerp(pre_it->direction, post_it->direction, t);
 		MGetMatchServer()->LogF(MMatchServer::LOG_ALL, "t = %f; %f / %f; AbsPos = %f, %f, %f; Dir = %f, %f, %f", t, post_it->RecvTime - pre_it->RecvTime, Time - pre_it->RecvTime,
@@ -597,9 +594,9 @@ bool MMatchObject::GetPositions(v3& Head, v3& Root, u32 Time)
 		Dir = pre_it->direction;
 	}
 
-	auto diff_ani_it = pre_it;
+	auto diff_ani_it = post_it;
 
-	while (diff_ani_it != BasicInfoHistory.end() && diff_ani_it->lowerstate == pre_it->lowerstate)
+	while (diff_ani_it != BasicInfoHistory.end() && diff_ani_it->lowerstate == post_it->lowerstate)
 	{
 		diff_ani_it++;
 	}
@@ -619,7 +616,28 @@ bool MMatchObject::GetPositions(v3& Head, v3& Root, u32 Time)
 
 	float y = (Dir.z + 0.05) * 50;
 
-	Head = LagComp.GetHeadPosition(World, y, m_pCharInfo->m_nSex, pre_it->lowerstate, Frame);
+	auto MotionType = eq_weapon_etc;
+
+	[&]()
+	{
+		auto slot = pre_it->SelectedSlot;
+
+		auto item = m_pCharInfo->m_EquipedItem.GetItem(slot);
+		if (!item)
+			return;
+
+		auto id = item->GetDescID();
+
+		auto ItemDesc = MGetMatchItemDescMgr()->GetItemDesc(id);
+		if (!ItemDesc)
+			return;
+
+		MGetMatchServer()->LogF(MMatchServer::LOG_ALL, "Found item desc!");
+
+		MotionType = WeaponTypeToMotionType(ItemDesc->m_nWeaponType);
+	}();
+
+	Head = MGetMatchServer()->LagComp.GetHeadPosition(World, y, m_pCharInfo->m_nSex, pre_it->lowerstate, Frame, MotionType);
 	Root = AbsPos;
 
 	return true;

@@ -1197,69 +1197,107 @@ void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Recei
 	auto CommandID = GetBlobCmdID(Blob);
 
 	//LogF(LOG_ALL, "Received command ID %d, size %d\n", CommandID, BlobSize);
-	
-	switch (CommandID)
+
+	auto uidStage = SenderObj->GetStageUID();
+	auto Stage = FindStage(uidStage);
+
+	if (!Stage)
+		return;
+
+	auto Netcode = Stage->GetStageSetting()->GetNetcode();
+
+	[&]()
 	{
-	case MC_PEER_BASICINFO:
-	{
-		BasicInfo bi;
-		ZPACKEDBASICINFO& pbi = *(ZPACKEDBASICINFO*)(Blob + 2 + 2 + 1 + 4);
-		pbi.Unpack(bi);
-		bi.RecvTime = MGetMatchServer()->GetGlobalClockCount();
-		SenderObj->OnBasicInfo(bi);
+		if (Netcode != NetcodeType::ServerBased)
+			return;
 
-		//mlog("BasicInfo %d, %d, %d\n", pbi.posx, pbi.posy, pbi.posz);
-	}
-		break;
-	case MC_PEER_SHOT:
-	{
-		ZPACKEDSHOTINFO& psi = *(ZPACKEDSHOTINFO*)(Blob + 2 + 2 + 1 + 4);
-
-		v3 src = v3(psi.posx, psi.posy, psi.posz);
-		v3 dest = v3(psi.tox, psi.toy, psi.toz);
-
-		AnnounceF(Sender, "Shot! %f, %f, %f -> %f, %f, %f", src.x, src.y, src.z, dest.x, dest.y, dest.z);
-
-		for (auto& item : m_Objects)
+		switch (CommandID)
 		{
-			auto& Obj = *item.second;
+		case MC_PEER_BASICINFO:
+		{
+			BasicInfo bi;
+			ZPACKEDBASICINFO& pbi = *(ZPACKEDBASICINFO*)(Blob + 2 + 2 + 1 + 4);
+			pbi.Unpack(bi);
+			bi.RecvTime = MGetMatchServer()->GetGlobalClockCount();
+			SenderObj->OnBasicInfo(bi);
 
-			/*if (&Obj == SenderObj)
-				continue;*/
-
-			v3 Head, Root;
-			Obj.GetPositions(Head, Root, GetGlobalClockCount() - SenderObj->GetPing());
-
-			AnnounceF(Sender, "%s: ping = %d, abs time = %X\nHead: %f, %f, %f; foot: %f, %f, %f", Obj.GetName(), Obj.GetPing(), GetGlobalClockCount() - Obj.GetPing(),
-				Head.x, Head.y, Head.z, Root.x, Root.y, Root.z);
-
-			if (&Obj == SenderObj)
-				continue;
-
-			auto HitParts = HitTest(Head, Root, src, dest);
-
-			if (HitParts == ZOH_NONE)
-				continue;
-
-			MCommand* pCmd = CreateCommand(MC_MATCH_DAMAGE, Obj.GetUID());
-			pCmd->AddParameter(new MCmdParamUID(Sender));
-			pCmd->AddParameter(new MCmdParamUShort(20));
-			Post(pCmd);
-
-			Announce(Sender, "Hit!");
+			//mlog("BasicInfo %d, %d, %d\n", pbi.posx, pbi.posy, pbi.posz);
 		}
-	}
 		break;
-	};
+		case MC_PEER_SHOT:
+		{
+			ZPACKEDSHOTINFO& psi = *(ZPACKEDSHOTINFO*)(Blob + 2 + 2 + 1 + 4);
+
+			v3 src = v3(psi.posx, psi.posy, psi.posz);
+			v3 dest = v3(psi.tox, psi.toy, psi.toz);
+
+			//AnnounceF(Sender, "Shot! %f, %f, %f -> %f, %f, %f", src.x, src.y, src.z, dest.x, dest.y, dest.z);
+
+			for (auto& item : m_Objects)
+			{
+				auto& Obj = *item.second;
+
+				/*if (&Obj == SenderObj)
+					continue;*/
+
+				v3 Head, Foot;
+				Obj.GetPositions(Head, Foot, GetGlobalClockCount() - SenderObj->GetPing());
+
+				/*AnnounceF(Sender, "%s: ping = %d, abs time = %X\nHead: %f, %f, %f; foot: %f, %f, %f", Obj.GetName(), Obj.GetPing(), GetGlobalClockCount() - Obj.GetPing(),
+					Head.x, Head.y, Head.z, Root.x, Root.y, Root.z);*/
+
+				auto HitParts = HitTest(Head, Foot, src, dest);
+
+				/*if (HitParts == ZOH_NONE)
+					continue;*/
+
+				auto Slot = SenderObj->GetSelectedSlot();
+
+				auto Item = SenderObj->GetCharInfo()->m_EquipedItem.GetItem(Slot);
+				if (!Item)
+					return;
+
+				auto ItemDesc = Item->GetDesc();
+
+				if (!ItemDesc)
+					return;
+
+				RMeshPartsType parts = eq_parts_etc;
+				switch (HitParts)
+				{
+				case ZOH_HEAD: parts = eq_parts_head; break;
+				case ZOH_BODY: parts = eq_parts_chest; break;
+				case ZOH_LEGS:	parts = eq_parts_legs; break;
+				}
+
+				auto Damage = ItemDesc->m_nDamage;
+				float PiercingRatio = GetPiercingRatio(ItemDesc->m_nWeaponType, parts);
+				auto DamageType = (HitParts == ZOH_HEAD) ? ZD_BULLET_HEADSHOT : ZD_BULLET;
+				auto WeaponType = ItemDesc->m_nWeaponType;
+
+				LogF(LOG_ALL, "Damage: %d", Damage);
+
+				MCommand* pCmd = CreateCommand(MC_MATCH_DAMAGE, Obj.GetUID());
+				pCmd->AddParameter(new MCmdParamUID(Sender));
+				pCmd->AddParameter(new MCmdParamUShort(Damage));
+				pCmd->AddParameter(new MCmdParamFloat(PiercingRatio));
+				pCmd->AddParameter(new MCmdParamUChar(DamageType));
+				pCmd->AddParameter(new MCmdParamUChar(WeaponType));
+				Post(pCmd);
+
+				//Announce(Sender, "Hit!");
+			}
+		}
+		break;
+		};
+	}();
 
 	MCommand* pCmd = CreateCommand(MC_MATCH_P2P_COMMAND, MUID(0, 0));
 	pCmd->AddParameter(new MCmdParamUID(Sender));
 	pCmd->AddParameter(new MCmdParamUID(Receiver));
 	pCmd->AddParameter(new MCmdParamBlob(Blob, BlobSize));
 
-	auto Stage = SenderObj->GetStageUID();
-
-	RouteToBattleExcept(Stage, pCmd, Sender);
+	RouteToBattleExcept(uidStage, pCmd, Sender);
 
 	//LogF(LOG_ALL, "P2P Command! Sender = %X:%X, receiver = %X:%X, command ID = %X", Sender.High, Sender.Low, Receiver.High, Receiver.Low, ID);
 }

@@ -47,11 +47,15 @@ enum STAGE_STATE {
 #define MSTAGENODE_FLAG_PRIVATE					2		// 비밀방
 #define MSTAGENODE_FLAG_LIMITLEVEL				4		// 레벨제한
 
+enum class NetcodeType : u8
+{
+	ServerBased,
+	P2PAntilead,
+	P2PLead,
+};
 
-/// 스테이지 세팅값. 
-/// - 네트웍 전송용으로도 사용한다. 차후 MTD로 이동해야함.
-/// 여기에 변수를 추가하려면, 리플레이와도 관련이 있으므로 
-/// ZReplayLoader::ConvertStageSettingNode() 함수도 수정해줘야 한다.
+
+#pragma pack(push, 1)
 struct MSTAGE_SETTING_NODE {
 	MUID				uidStage;
 	char				szStageName[64];
@@ -72,7 +76,10 @@ struct MSTAGE_SETTING_NODE {
 	bool				bVoteEnabled;				// 투표가능 여부
 	bool				bObserverEnabled;			// 관전모드 여부
 #endif
+
+	NetcodeType Netcode = NetcodeType::ServerBased;
 };
+#pragma pack(pop)
 
 // 방 처음 만들었을때 스테이지 세팅 초기값
 #define MMATCH_DEFAULT_STAGESETTING_MAPNAME			"Mansion"
@@ -137,6 +144,7 @@ public:
 	int GetMaxPlayers()								{ return m_StageSetting.nMaxPlayers; }
 	bool GetForcedEntry()							{ return m_StageSetting.bForcedEntryEnabled; }
 	bool GetAutoTeamBalancing()						{ return m_StageSetting.bAutoTeamBalancing; }
+	auto GetNetcode() const { return m_StageSetting.Netcode; }
 	MSTAGE_SETTING_NODE* GetStageSetting()			{ return &m_StageSetting; }
 	const MMatchGameTypeInfo* GetCurrGameTypeInfo();
 

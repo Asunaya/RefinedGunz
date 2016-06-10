@@ -107,8 +107,15 @@ static struct _STAGESETTING_TEAMBALANCING
 {
 	bool	Value;
 	char	szText[32];
-} StageSetting_TeamBalancing[STAGESETTING_TEAMBALANCING_MAX] = 
+} StageSetting_TeamBalancing[STAGESETTING_TEAMBALANCING_MAX] =
 { {true, "ON"}, {false, "OFF"} };
+
+static struct _STAGESETTING_NETCODE
+{
+	NetcodeType	Value;
+	char	szText[32];
+} StageSetting_Netcode[3] =
+{ { NetcodeType::ServerBased, "Server-based" },{ NetcodeType::P2PAntilead, "Peer to Peer Antilead" },{ NetcodeType::P2PLead, "Peer to Peer Lead" }, };
 
 
 
@@ -222,6 +229,9 @@ static bool BuildStageSetting(MSTAGE_SETTING_NODE* pOutNode)
 //	pOutNode->uidStage = ZGetGameClient()->GetStageUID();
 //	strcpy_safe(pOutNode->szMapName , ZGetGameClient()->GetMatchStageSetting()->GetMapName());
 
+	BUILD_STAGESETTING_ITEM("StageNetcode", pOutNode->Netcode,
+		StageSetting_Netcode, 3);
+
 	return true;
 }
 
@@ -295,6 +305,19 @@ void ZStageSetting::ShowStageSettingDialog( MSTAGE_SETTING_NODE* pStageSetting, 
 
 		// 제한시간
 		SHOWSTAGESETTING_LISTITEM( "StageLimitTime", pStageSetting->nLimitTime, pGameTypeCfg->m_LimitTime, 99999);
+	}
+
+	auto cb = static_cast<MComboBox*>(pResource->FindWidget("StageNetcode"));
+
+	if (cb)
+	{
+		cb->RemoveAll();
+
+		cb->Add("Server-based");
+		cb->Add("Peer to Peer Antilead");
+		cb->Add("Peer to Peer Lead");
+
+		cb->SetSelIndex((int)pStageSetting->Netcode);
 	}
 
 
