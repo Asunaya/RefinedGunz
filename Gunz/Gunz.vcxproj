@@ -801,6 +801,9 @@ rem call copy_share.bat
       <Project>{cbd109c1-1aa3-4a57-b439-9919c08faaa5}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
+    <ProjectReference Include="..\GunzShared\GunzShared.vcxproj">
+      <Project>{aeb4206b-52ec-44fa-ab0a-947642bf9972}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\MCountryFilter\MCountryFilter.vcxproj">
       <Project>{43faaf56-ea88-4d3f-95b7-14a0582f3290}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>

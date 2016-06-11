@@ -49,8 +49,9 @@ void MAddSharedCommandTable(MCommandManager* pCommandManager, int nSharedType)
 		P(MPT_UCHAR, "DamageType")
 		P(MPT_UCHAR, "WeaponType")
 	C(MC_MATCH_P2P_COMMAND, "Match.P2PCommand", "Forwards Peer to Peer commands", MCDT_MACHINE2MACHINE | MCCT_NON_ENCRYPTED)
-		P(MPT_UID, "Sender")
-		P(MPT_UID, "Receiver")
+		// Client -> Server = Receiver
+		// Server -> Client = Sender
+		P(MPT_UID, "Sender/Receiver") 
 		P(MPT_BLOB, "Data")
 	C(MC_MATCH_DAMAGE, "", "", MCDT_MACHINE2MACHINE)
 		P(MPT_UID, "Attacker")

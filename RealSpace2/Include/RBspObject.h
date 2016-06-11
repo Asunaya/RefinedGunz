@@ -251,7 +251,7 @@ public:
 	void ClearLightmaps();
 
 	// open 을 수행하면 기본 확장자로 다음의 Open...펑션들을 순서대로 부른다.
-	bool Open(const char *, ROpenFlag nOpenFlag=ROF_RUNTIME,RFPROGRESSCALLBACK pfnProgressCallback=NULL, void *CallbackParam=NULL);
+	bool Open(const char *, ROpenFlag nOpenFlag = ROF_RUNTIME, RFPROGRESSCALLBACK pfnProgressCallback = nullptr, void *CallbackParam = nullptr, bool PhysOnly = false);
 
 	bool OpenDescription(const char *);				// 디스크립션 팔일		.xml 파일을 연다.
 	bool OpenRs(const char *);						// 실제 월드 정보파일	.rs 파일을 연다. 
@@ -272,8 +272,8 @@ public:
 	bool DrawLight(RSBspNode *pNode,int nMaterial);
 	void DrawLight(D3DLIGHT9 *pLight);			// 광원 처리를.. 멀티 패스로 덧그린다.
 
-	bool GenerateLightmap(const char *filename,int nMaxLightmapSize,int nMinLightmapSize,int nSuperSample,float fToler,RGENERATELIGHTMAPCALLBACK pProgressFn=NULL);
-	bool GeneratePathData(const char *filename,float fAngle, float fToler);
+	bool GenerateLightmap(const char *filename, int nMaxLightmapSize, int nMinLightmapSize, int nSuperSample, float fToler, RGENERATELIGHTMAPCALLBACK pProgressFn = nullptr);
+	bool GeneratePathData(const char *filename, float fAngle, float fToler);
 	void GeneratePathNodeTable();
 
 	void SetWireframeMode(bool bWireframe) { m_bWireframe=bWireframe;}
@@ -391,6 +391,8 @@ public:
 
 	void SetMapObjectOcclusion(bool b) { m_bNotOcclusion = b;}
 private:
+
+	bool PhysOnly;
 
 	string m_filename,m_descfilename;
 	

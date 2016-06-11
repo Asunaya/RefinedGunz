@@ -75,6 +75,9 @@
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <TargetName>Mint2d</TargetName>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
@@ -213,7 +216,6 @@
     <ClCompile Include="Source\MHyperText.cpp" />
     <ClCompile Include="Source\Mint.cpp" />
     <ClCompile Include="Source\MLabel.cpp" />
-    <ClCompile Include="Source\MLayoutManager.cpp" />
     <ClCompile Include="Source\MListBox.cpp" />
     <ClCompile Include="Source\MMsgBox.cpp" />
     <ClCompile Include="Source\MPanel.cpp" />

@@ -656,6 +656,9 @@ bool MMatchStage::StartGame()
 
 		ChangeState(STAGE_STATE_COUNTDOWN);
 	}
+
+	BspObject = MGetMatchServer()->LagComp.GetBspObject(m_StageSetting.GetMapName());
+
 	return bResult;
 }
 

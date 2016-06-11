@@ -277,9 +277,8 @@ bool MMatchClient::OnCommand(MCommand* pCommand)
 		if (PeerToPeer)
 			break;
 
-		MUID Sender, Receiver;
+		MUID Sender;
 		if (pCommand->GetParameter(&Sender, 0, MPT_UID) == false) break;
-		if (pCommand->GetParameter(&Receiver, 1, MPT_UID) == false) break;
 
 		MCommandParameter* pParam = pCommand->GetParameter(2);
 		if (pParam->GetType() != MPT_BLOB) break;
@@ -956,7 +955,6 @@ void MMatchClient::SendCommandByMatchServerTunneling(MCommand* pCommand)
 	}
 	else {
 		MCommand* pCmd = CreateCommand(MC_MATCH_P2P_COMMAND, GetServerUID());
-		pCmd->AddParameter(new MCmdParamUID(GetPlayerUID()));
 		pCmd->AddParameter(new MCmdParamUID(pCommand->GetReceiverUID()));
 
 		if (!MakeSaneTunnelingCommandBlob(pCmd, pCommand))
@@ -968,7 +966,7 @@ void MMatchClient::SendCommandByMatchServerTunneling(MCommand* pCommand)
 		Post(pCmd);
 		//delete pCmd;
 
-		DMLog("SendCommandByMatchServerTunnelling %d\n", pCommand->GetID());
+		//DMLog("SendCommandByMatchServerTunnelling %d\n", pCommand->GetID());
 	}
 }
 

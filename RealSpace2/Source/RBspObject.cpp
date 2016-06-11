@@ -409,17 +409,20 @@ RBspObject::~RBspObject()
 		m_sourcelightmaplist.erase(m_sourcelightmaplist.begin());
 	}
 */
-	if(m_nMaterial)
+	if (!PhysOnly)
 	{
-		for(int i=0;i<m_nMaterial;i++)
+		if (m_nMaterial)
 		{
-			RDestroyBaseTexture(m_pMaterials[i].texture);
-			m_pMaterials[i].texture=NULL;
-		}
-		if(m_pMaterials)
-		{
-			delete []m_pMaterials;
-			m_pMaterials=NULL;
+			for (int i = 0; i < m_nMaterial; i++)
+			{
+				RDestroyBaseTexture(m_pMaterials[i].texture);
+				m_pMaterials[i].texture = NULL;
+			}
+			if (m_pMaterials)
+			{
+				delete[]m_pMaterials;
+				m_pMaterials = NULL;
+			}
 		}
 	}
 
@@ -1403,20 +1406,24 @@ void RecalcBoundingBox(RSBspNode *pNode)
 	}
 }
 
-bool RBspObject::Open(const char *filename,ROpenFlag nOpenFlag,RFPROGRESSCALLBACK pfnProgressCallback, void *CallbackParam)
+bool RBspObject::Open(const char *filename,ROpenFlag nOpenFlag,RFPROGRESSCALLBACK pfnProgressCallback, void *CallbackParam, bool PhysOnly)
 {
 	mlog("RBspObject::Open : begin %s \n",filename);
 
+	this->PhysOnly = PhysOnly;
 	m_OpenMode = nOpenFlag;
 	m_filename=filename;
 
 	char xmlname[_MAX_PATH];
 	sprintf_safe(xmlname,"%s.xml",filename);
 
-	if(!OpenDescription(xmlname))
+	if (!PhysOnly)
 	{
-		MLog("Error while loading %s\n",xmlname);
-		return false;
+		if (!OpenDescription(xmlname))
+		{
+			MLog("Error while loading %s\n", xmlname);
+			return false;
+		}
 	}
 	if(pfnProgressCallback) pfnProgressCallback(CallbackParam,.3f);
 
@@ -1467,23 +1474,28 @@ bool RBspObject::Open(const char *filename,ROpenFlag nOpenFlag,RFPROGRESSCALLBAC
 		//return false;
 	}
 
-
-	if(RIsHardwareTNL())
+	if (!PhysOnly)
 	{
-		if(!CreateVertexBuffer())
-			mlog("Error while Creating VB\n");
-	}
+		if (RIsHardwareTNL())
+		{
+			if (!CreateVertexBuffer())
+				mlog("Error while Creating VB\n");
+		}
 
-	// 라이트맵을 읽는다
-	if(m_bisDrawLightMap)
-		OpenLightmap();
+		// 라이트맵을 읽는다
+		if (m_bisDrawLightMap)
+			OpenLightmap();
+	}
 
 	Sort_Nodes(m_pOcRoot);
 
-	if(RIsHardwareTNL())
+	if (!PhysOnly)
 	{
-		//	CreateVertexBuffer();
-		UpdateVertexBuffer();
+		if (RIsHardwareTNL())
+		{
+			//	CreateVertexBuffer();
+			UpdateVertexBuffer();
+		}
 	}
     
 	CreatePolygonTable();
@@ -2054,8 +2066,15 @@ bool RBspObject::OpenRs(const char *filename)
 
 	mlog("RBspObject::OpenRs : file.Read(&nMaterial) \n");
 
-	if(m_nMaterial-1!=nMaterial)
-		return false;
+	if (!PhysOnly)
+	{
+		if (m_nMaterial - 1 != nMaterial)
+			return false;
+	}
+	else
+	{
+		m_nMaterial = nMaterial + 1;
+	}
 
 	for(int i=1;i<m_nMaterial;i++)
 	{
@@ -2391,6 +2410,8 @@ bool RBspObject::Open_ConvexPolygons(MZFile *pfile)
 	pfile->Read(&m_nConvexPolygon,sizeof(int));
 	pfile->Read(&nConvexVertices,sizeof(int));
 
+	MLog("Convex polygon count: %d\n", m_nConvexPolygon);
+
 	// 이 정보들은 라이트맵을 생성할때 필요하므로 런타임에서는 읽을필요가 없다
 
 	if(m_OpenMode==ROF_RUNTIME) {
@@ -2683,7 +2704,8 @@ bool RBspObject::Open_Nodes(RSBspNode *pNode,MZFile *pfile)
 				if(nMaterial<0 || nMaterial>=m_nMaterial) nMaterial=0;	
 
 				pInfo->nMaterial=nMaterial;
-				pInfo->dwFlags|=m_pMaterials[nMaterial].dwFlags;
+				if (!PhysOnly)
+					pInfo->dwFlags|=m_pMaterials[nMaterial].dwFlags;
 			}
 			_ASSERT(pInfo->nMaterial<m_nMaterial);
 			pInfo->nPolygonID=g_nCreatingPosition;

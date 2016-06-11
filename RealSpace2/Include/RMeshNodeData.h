@@ -45,13 +45,18 @@ public:
 
 	// matrix
 
+	// Base matrix -- transforms from mesh origin to the node's bone on an untransformed skeleton
 	D3DXMATRIX		m_mat_base;
+	// Parent inverse base matrix
 	D3DXMATRIX		m_mat_parent_inv;
+	// Local matrix -- base * inverse parent base
 	D3DXMATRIX		m_mat_local;
+	// Inverse base matrix
 	D3DXMATRIX		m_mat_inv;
 	D3DXMATRIX		m_mat_etc;
 	D3DXMATRIX		m_mat_flip;
 	D3DXMATRIX		m_mat_scale;
+	// Fully transformed bone matrix -- transforms from mesh origin to the node's bone on a transformed skeleton
 	D3DXMATRIX		m_mat_result;
 
 	D3DXMATRIX		m_mat_add;			// 추가 장작된 모델..

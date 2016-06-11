@@ -108,6 +108,7 @@ protected:
 	void SetStageType(MMatchStageType nStageType);
 	void SetLadderTeam(MMatchLadderTeamInfo* pRedLadderTeamInfo, MMatchLadderTeamInfo* pBlueLadderTeamInfo);
 public:
+	class RBspObject* BspObject = nullptr;
 	MMatchWorldItemManager	m_WorldItemManager;
 
 	void UpdateStateTimer();

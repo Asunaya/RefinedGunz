@@ -108,9 +108,6 @@
     <ClCompile Include="Source\MLabel.cpp">
       <Filter>Base</Filter>
     </ClCompile>
-    <ClCompile Include="Source\MLayoutManager.cpp">
-      <Filter>Base</Filter>
-    </ClCompile>
     <ClCompile Include="Source\MListBox.cpp">
       <Filter>Base</Filter>
     </ClCompile>

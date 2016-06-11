@@ -100,6 +100,7 @@ class MMatchClient : public MClient
 {
 protected:
 	MUID				m_uidServer;
+	// Note that this is equivalent to m_This
 	MUID				m_uidPlayer;
 	MUID				m_uidChannel;
 	MUID				m_uidStage;

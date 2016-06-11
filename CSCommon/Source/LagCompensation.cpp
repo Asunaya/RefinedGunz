@@ -158,6 +158,14 @@ bool LagCompManager::Create()
 		return false;
 	}
 
+	Maps.emplace("Mansion", RBspObject());
+	ret = Maps["Mansion"].Open("maps/Mansion/Mansion.rs", RBspObject::ROF_RUNTIME, nullptr, nullptr, true);
+	if (!ret)
+	{
+		MGetMatchServer()->LogF(MMatchServer::LOG_ALL, "Falied to load Mansion!");
+		return false;
+	}
+
 	//for (int AniIdx = 0; AniIdx < ZC_STATE_LOWER_END; AniIdx++)
 	//{
 	//	auto& AniItem = g_AnimationInfoTableLower[AniIdx];
@@ -427,6 +435,15 @@ v3 LagCompManager::GetHeadPosition(const matrix& World, float y, MMatchSex Sex, 
 	}
 
 	return GetTransPos(mat * World);
+}
+
+RBspObject * LagCompManager::GetBspObject(const char * MapName)
+{
+	auto it = Maps.find(MapName);
+	if (it == Maps.end())
+		return nullptr;
+
+	return &it->second;
 }
 
 static void GetRotAniMat(RAnimationNode& node, const matrix* parent_base_inv, int frame, matrix& mat)

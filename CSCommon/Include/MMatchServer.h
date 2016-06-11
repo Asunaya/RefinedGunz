@@ -28,6 +28,7 @@
 #include <queue>
 #include <unordered_map>
 #include "LagCompensation.h"
+#include "stuff.h"
 using namespace std;
 
 class MMatchAuthBuilder;
@@ -652,6 +653,7 @@ public:
 	void OnVoiceChat(const MUID& Player, unsigned char* EncodedFrame, int Length);
 
 	void OnTunnelledP2PCommand(const MUID& Sender, const MUID& Receiver, const char* Blob, size_t BlobSize);
+	void PickHistory(MMatchObject& Exception, u32 Time, rvector &origin, rvector &to, MMatchStage& Stage, struct MPICKINFO& pickinfo);
 
 //	void ResponseObjectUpdate(MUID& TargetUID, MObject* pObject);
 	void ResponseBridgePeer(const MUID& uidChar, int nCode);

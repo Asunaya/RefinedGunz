@@ -1,7 +1,22 @@
 #pragma once
 
+#define POINTER_64 __ptr64
+
+#include "targetver.h"
+
+// ¿©±â´Ù include
+#include <afxdb.h>
+#include <afxtempl.h>
+#include <afxdtctl.h>
+
+#include <Winsock2.h>
+
 #include "GlobalTypes.h"
 #include "RMeshUtil.h"
+#undef pi
+#include "MMatchItem.h"
+#define pi D3DX_PI
+#include "RBspObject.h"
 
 enum ZC_STATE_UPPER {
 
@@ -369,4 +384,12 @@ enum ZDAMAGETYPE {
 	ZD_MAGIC,
 
 	ZD_END
+};
+
+struct MPICKINFO {
+	class MMatchObject*	Object;
+	RPickInfo	info;
+
+	bool bBspPicked;
+	RBSPPICKINFO bpi;
 };
