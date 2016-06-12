@@ -280,7 +280,7 @@ bool MMatchClient::OnCommand(MCommand* pCommand)
 		MUID Sender;
 		if (pCommand->GetParameter(&Sender, 0, MPT_UID) == false) break;
 
-		MCommandParameter* pParam = pCommand->GetParameter(2);
+		MCommandParameter* pParam = pCommand->GetParameter(1);
 		if (pParam->GetType() != MPT_BLOB) break;
 		void* Blob = pParam->GetPointer();
 		auto Size = ((MCmdParamBlob*)pParam)->GetPayloadSize();

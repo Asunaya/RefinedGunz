@@ -409,20 +409,20 @@ RBspObject::~RBspObject()
 		m_sourcelightmaplist.erase(m_sourcelightmaplist.begin());
 	}
 */
-	if (!PhysOnly)
+	if (m_nMaterial)
 	{
-		if (m_nMaterial)
+		if (!PhysOnly)
 		{
 			for (int i = 0; i < m_nMaterial; i++)
 			{
 				RDestroyBaseTexture(m_pMaterials[i].texture);
 				m_pMaterials[i].texture = NULL;
 			}
-			if (m_pMaterials)
-			{
-				delete[]m_pMaterials;
-				m_pMaterials = NULL;
-			}
+		}
+		if (m_pMaterials)
+		{
+			delete[]m_pMaterials;
+			m_pMaterials = NULL;
 		}
 	}
 
@@ -1489,19 +1489,16 @@ bool RBspObject::Open(const char *filename,ROpenFlag nOpenFlag,RFPROGRESSCALLBAC
 
 	Sort_Nodes(m_pOcRoot);
 
-	if (!PhysOnly)
+	if (RIsHardwareTNL() && !PhysOnly)
 	{
-		if (RIsHardwareTNL())
-		{
-			//	CreateVertexBuffer();
-			UpdateVertexBuffer();
-		}
+		//	CreateVertexBuffer();
+		UpdateVertexBuffer();
 	}
     
 	CreatePolygonTable();
 
 
-	if(RIsHardwareTNL())
+	if(RIsHardwareTNL() && !PhysOnly)
 	{
 		if(!CreateIndexBuffer())
 			mlog("Error while Creating IB\n");
@@ -3963,7 +3960,7 @@ DWORD			g_dwPassFlag;
 
 #endif
 
-bool RBspObject::Pick(rvector &pos,rvector &dir,RBSPPICKINFO *pOut,DWORD dwPassFlag)
+bool RBspObject::Pick(const rvector &pos, const rvector &dir,RBSPPICKINFO *pOut,DWORD dwPassFlag)
 {
 	if(!m_pBspRoot) return false;
 
@@ -3991,7 +3988,7 @@ bool RBspObject::Pick(rvector &pos,rvector &dir,RBSPPICKINFO *pOut,DWORD dwPassF
 	return false;
 }
 
-bool RBspObject::PickTo(rvector &pos,rvector &to,RBSPPICKINFO *pOut,DWORD dwPassFlag)
+bool RBspObject::PickTo(const rvector &pos, const rvector &to,RBSPPICKINFO *pOut,DWORD dwPassFlag)
 {
 	if(!m_pBspRoot) return false;
 
@@ -4019,7 +4016,7 @@ bool RBspObject::PickTo(rvector &pos,rvector &to,RBSPPICKINFO *pOut,DWORD dwPass
 	return false;
 }
 
-bool RBspObject::PickOcTree(rvector &pos,rvector &dir,RBSPPICKINFO *pOut,DWORD dwPassFlag)
+bool RBspObject::PickOcTree(const rvector &pos, const rvector &dir,RBSPPICKINFO *pOut,DWORD dwPassFlag)
 {
 	if(!m_pOcRoot) return false;
 
@@ -4069,7 +4066,7 @@ bool RBspObject::PickShadow(rvector &pos,rvector &to,RBSPPICKINFO *pOut)
 #define PICK_SIGN(x) ( (x)<-PICK_TOLERENCE ? -1 : (x)>PICK_TOLERENCE ? 1 : 0 )
 
 // side 쪽과 v0-v1 선분이 교차하는 부분이 있으면 true 를 리턴하면서 교차부분을 w0-w1로 리턴
-bool pick_checkplane(int side,rplane &plane,rvector &v0,rvector &v1,rvector *w0,rvector *w1)
+static bool pick_checkplane(int side, const rplane &plane, const rvector &v0, const rvector &v1, rvector *w0, rvector *w1)
 {
 	float dotv0=D3DXPlaneDotCoord(&plane,&v0);
 	float dotv1=D3DXPlaneDotCoord(&plane,&v1);
@@ -4112,7 +4109,7 @@ bool pick_checkplane(int side,rplane &plane,rvector &v0,rvector &v1,rvector *w0,
 }
 
 
-bool RBspObject::Pick(RSBspNode *pNode,rvector &v0,rvector &v1)
+bool RBspObject::Pick(RSBspNode *pNode, const rvector &v0, const rvector &v1)
 {
 	if(!pNode) return false;
 
@@ -4123,6 +4120,10 @@ bool RBspObject::Pick(RSBspNode *pNode,rvector &v0,rvector &v1)
 		for(int i=0;i<pNode->nPolygon;i++)
 		{
 			RPOLYGONINFO *pInfo = &pNode->pInfo[i];
+
+			/*MLog("Poly flags & pass flag = %X, dot = %f\n",
+				pInfo->dwFlags & g_dwPassFlag, D3DXPlaneDotCoord(&pInfo->plane, &g_PickOrigin));*/
+
 			if( (pInfo->dwFlags & g_dwPassFlag) != 0 ) continue;
 			if( D3DXPlaneDotCoord(&pInfo->plane,&g_PickOrigin)<0 ) continue;
 

@@ -80,6 +80,8 @@
 #include "Hitboxes.h"
 #include "ZRuleSkillmap.h"
 #include "VoiceChat.h"
+#include <random>
+#include "HitRegistration.h"
 
 _USING_NAMESPACE_REALSPACE2
 
@@ -3451,7 +3453,10 @@ void ZGame::OnPeerMassive(ZCharacter *pOwner, const rvector &pos, const rvector 
 //		ZGetCamera()->Shock(fPower * .5, .5, rvector(0, 0, -1));
 }
 
-void ZGame::OnPeerShot_Range(MMatchCharItemParts sel_type, const MUID& uidOwner, float fShotTime, rvector& pos, rvector& to)
+//RBspObject* test = nullptr;
+
+void ZGame::OnPeerShot_Range(MMatchCharItemParts sel_type, const MUID& uidOwner, float fShotTime,
+	rvector& pos, rvector& to, u32 seed)
 {
 	ZObject *pOwner = m_ObjectManager.GetObject(uidOwner);
 	if(!pOwner) return;
@@ -3493,10 +3498,24 @@ void ZGame::OnPeerShot_Range(MMatchCharItemParts sel_type, const MUID& uidOwner,
 	}
 */
 
+	/*if (!test)
+	{
+		test = new RBspObject;
+		test->Open("maps/Mansion/Mansion.RS", RBspObject::ROF_RUNTIME, nullptr, nullptr, true);
+	}
+
+	::PickHistory(*m_pMyCharacter, pos, to, test, pickinfo,
+		m_CharacterManager, [](auto&, auto&, auto&) {}, dwPickPassFlag);*/
+
 	if(g_pGame->PickHistory(pOwner,fShotTime,pos,to,&pickinfo,dwPickPassFlag))
 	{
-		/* 땜빵 -bird */
-		
+#ifdef _DEBUG
+		if (pickinfo.bBspPicked)
+			ZChatOutputF("Client: Hit wall at %d, %d, %d",
+				(int)pickinfo.bpi.PickPos.x, (int)pickinfo.bpi.PickPos.y, (int)pickinfo.bpi.PickPos.z);
+		else
+			ZChatOutputF("Client: Hit nothing");
+#endif
 		if(pickinfo.pObject)
 		{
 			ZObject *pObject = pickinfo.pObject;
@@ -3697,7 +3716,8 @@ void ZGame::OnPeerShot_Range(MMatchCharItemParts sel_type, const MUID& uidOwner,
 		ZGetStencilLight()->AddLightSource( v1, 2.0f, 75 );
 }
 
-void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float fShotTime, rvector& pos, rvector& to)
+void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float fShotTime,
+	rvector& pos, rvector& to, u32 seed)
 {
 	// 내 캐릭터 혹은 내가 보고있는 캐릭터
 	ZCharacter *pTargetCharacter = ZGetGameInterface()->GetCombatInterface()->GetTargetCharacter();
@@ -3722,8 +3742,10 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 	if (pOwnerCharacter == NULL) return;
 
 	// 모든사람이 같은 random seed 를 갖도록 같은값으로 초기화 해준다
-	int *seed=(int*)&fShotTime;
-	srand(*seed);
+	/*int *seed=(int*)&fShotTime;
+	srand(*seed);*/
+
+	DMLog("Seed: %08X\n", seed);
 
 	bool bHitGuard=false,bHitBody=false,bHitGround=false,bHitEnemy=false;
 	rvector GuardPos,BodyPos,GroundPos;
@@ -3745,30 +3767,34 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 
 	std::unordered_map<MUID, DamageInfo> DamageMap;
 
+	auto DirGen = GetShotgunPelletDirGenerator(origdir, seed);
+
 	for(int i=0;i<SHOTGUN_BULLET_COUNT;i++)
 	{
-		rvector dir = origdir;
+		//rvector dir = origdir;
 
-		{
-			// 오차값 - 반동대신 시범삼아 넣음
-			rvector r, up(0,0,1), right;
-			D3DXQUATERNION q;
-			D3DXMATRIX mat;
+		//{
+		//	// 오차값 - 반동대신 시범삼아 넣음
+		//	rvector r, up(0,0,1), right;
+		//	D3DXQUATERNION q;
+		//	D3DXMATRIX mat;
 
-			float fAngle = (rand() % (31415 * 2)) / 1000.0f;
-			float fForce = RANDOMFLOAT*SHOTGUN_DIFFUSE_RANGE;
+		//	float fAngle = (rand() % (31415 * 2)) / 1000.0f;
+		//	float fForce = RANDOMFLOAT*SHOTGUN_DIFFUSE_RANGE;
 
-			D3DXVec3Cross(&right,&dir,&up);
-			D3DXVec3Normalize(&right,&right);
-			D3DXMatrixRotationAxis(&mat, &right, fForce);
-			D3DXVec3TransformCoord(&r, &dir, &mat);
+		//	D3DXVec3Cross(&right,&dir,&up);
+		//	D3DXVec3Normalize(&right,&right);
+		//	D3DXMatrixRotationAxis(&mat, &right, fForce);
+		//	D3DXVec3TransformCoord(&r, &dir, &mat);
 
-			D3DXQuaternionRotationAxis(&q, &dir, fAngle);
-			D3DXMatrixRotationQuaternion(&mat, &q);
-			D3DXVec3TransformCoord(&r, &r, &mat);
+		//	D3DXQuaternionRotationAxis(&q, &dir, fAngle);
+		//	D3DXMatrixRotationQuaternion(&mat, &q);
+		//	D3DXVec3TransformCoord(&r, &r, &mat);
 
-			dir=r;
-		}
+		//	dir=r;
+		//}
+
+		auto dir = DirGen();
 
 		rvector BulletMarkNormal;
 		bool bBulletMark = false;
@@ -3781,7 +3807,16 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 		// 총알은 로켓이 통과하는곳도 통과한다
 		const DWORD dwPickPassFlag=RM_FLAG_ADDITIVE | RM_FLAG_HIDE | RM_FLAG_PASSROCKET | RM_FLAG_PASSBULLET;
 
-		if(g_pGame->PickHistory(pOwnerCharacter,fShotTime,pos,pos+10000.f*dir,&pickinfo,dwPickPassFlag))
+		auto GetPositions = [&](auto& Obj, auto& Head, auto& Foot)
+		{
+			Obj.GetHistory(&Foot, nullptr, fShotTime);
+		};
+
+		::PickHistory(*pOwnerCharacter, pos, pos + 10000 * dir, GetWorld()->GetBsp(),
+			pickinfo, m_CharacterManager, GetPositions, dwPickPassFlag);
+
+		//if(g_pGame->PickHistory(pOwnerCharacter,fShotTime,pos,pos+10000.f*dir,&pickinfo,dwPickPassFlag))
+		if(pickinfo.bBspPicked || pickinfo.bBspPicked)
 		{
 			ZObject *pObject = pickinfo.pObject;
 			if(pObject)
@@ -3921,6 +3956,14 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 			nTargetType	= ZTT_NOTHING;
 		}
 
+#ifdef _DEBUG
+		if (pickinfo.bBspPicked)
+			ZChatOutputF("Client: Hit wall at %d, %d, %d",
+				(int)pickinfo.bpi.PickPos.x, (int)pickinfo.bpi.PickPos.y, (int)pickinfo.bpi.PickPos.z);
+		else
+			ZChatOutputF("Client: Hit nothing");
+#endif
+
 		waterSound = GetWorld()->GetWaters()->CheckSpearing( v1, v2, 250, 0.3, !waterSound );
 	}
 
@@ -3992,6 +4035,8 @@ void ZGame::OnPeerShot(MUID& uid, float fShotTime, rvector& pos, rvector& to,MMa
 
 	pOwnerCharacter->OnShot();
 
+	u32 seed = reinterpret<u32>(fShotTime);
+
 	// fShotTime 이 그 캐릭터의 로컬 시간이므로 내 시간으로 변환해준다
 	fShotTime-=pOwnerCharacter->m_fTimeOffset;
 
@@ -4049,11 +4094,11 @@ void ZGame::OnPeerShot(MUID& uid, float fShotTime, rvector& pos, rvector& to,MMa
 
 	if(wtype == MWT_SHOTGUN)
 	{
-		OnPeerShot_Shotgun(pItem,pOwnerCharacter,fShotTime,pos,to);
+		OnPeerShot_Shotgun(pItem,pOwnerCharacter,fShotTime,pos,to, seed);
 		return;
 	}
 
-	OnPeerShot_Range(sel_type,uid,fShotTime,pos,to);
+	OnPeerShot_Range(sel_type,uid,fShotTime,pos,to, seed);
 
 	rvector position;
 	pOwnerCharacter->GetWeaponTypePos( weapon_dummy_muzzle_flash , &position );

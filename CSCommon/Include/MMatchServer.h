@@ -634,6 +634,21 @@ public:
 	void RouteToAllConnection(MCommand* pCommand);
 	/// Command를 전체 클라이언트로 전송
 	void RouteToAllClient(MCommand* pCommand);
+	template <typename T>
+	void RouteToAllClientIf(MCommand* pCommand, T& pred)
+	{
+		for (MMatchObjectList::iterator i = m_Objects.begin(); i != m_Objects.end(); i++) {
+			MMatchObject* pObj = (MMatchObject*)((*i).second);
+			if (pObj->GetUID() < MUID(0, 3)) continue;	// MUID로 Client인지 판별할수 있는 코드 필요함
+			if (!pred(*pObj))
+				continue;
+
+			MCommand* pSendCmd = pCommand->Clone();
+			pSendCmd->m_Receiver = pObj->GetUID();
+			Post(pSendCmd);
+		}
+		delete pCommand;
+	}
 	/// Command를 지정 Channel 참가자에게 전송
 	void RouteToChannel(const MUID& uidChannel, MCommand* pCommand);
 	/// Command를 지정 Channel 로비에 있는 참가자에게 전송
@@ -653,7 +668,7 @@ public:
 	void OnVoiceChat(const MUID& Player, unsigned char* EncodedFrame, int Length);
 
 	void OnTunnelledP2PCommand(const MUID& Sender, const MUID& Receiver, const char* Blob, size_t BlobSize);
-	void PickHistory(MMatchObject& Exception, u32 Time, rvector &origin, rvector &to, MMatchStage& Stage, struct MPICKINFO& pickinfo);
+	//void PickHistory(MMatchObject& Exception, u32 Time, rvector &origin, rvector &to, MMatchStage& Stage, struct MPICKINFO& pickinfo);
 
 //	void ResponseObjectUpdate(MUID& TargetUID, MObject* pObject);
 	void ResponseBridgePeer(const MUID& uidChar, int nCode);

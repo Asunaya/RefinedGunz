@@ -466,6 +466,7 @@ public:
 	}
 
 	bool IsDie() { return m_bDie; }
+	bool IsAlive() const { return !m_bDie; }
 	void ForceDie() { SetHP(0); m_bDie = true; }		// 이것은 그냥 죽은 상태로 만들기 위할때 사용
 
 	void SetAccel(rvector& accel) { m_Accel = accel; }

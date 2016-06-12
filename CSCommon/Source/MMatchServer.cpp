@@ -41,6 +41,8 @@
 #include "MMatchEventManager.h"
 #include "MMatchEventFactory.h"
 #include "../../MatchServer/HSHIELD/AntiCpSvrFunc.h"
+#include "HitRegistration.h"
+#include "MUtil.h"
 
 #define DEFAULT_REQUEST_UID_SIZE		4200000000	///< UID 할당 요청 기본 단위
 #define DEFAULT_REQUEST_UID_SPARE_SIZE	10000		///< UID 남은 갯수
@@ -862,7 +864,8 @@ void MMatchServer::OnRun(void)
 	{
 		MCommand* pNew = CreateCommand(MC_NET_PING, MUID(0, 0));
 		pNew->AddParameter(new MCmdParamUInt(GetGlobalClockCount()));
-		RouteToAllConnection(pNew);
+		RouteToAllClientIf(pNew, [](MMatchObject& Obj) {
+			return Obj.GetPlace() == MMP_BATTLE; });
 		LastPingTime = nGlobalClock;
 	}
 
@@ -872,7 +875,7 @@ void MMatchServer::OnRun(void)
 	if (nGlobalClock - tmLastGarbageSessionCleaning > MINTERVAL_GARBAGE_SESSION_PING){
 		tmLastGarbageSessionCleaning = nGlobalClock;
 
-		LOG(LOG_ALL, "GARBAGE SESSION CLEANING : ClientCount=%d, SessionCount=%d, AgentCount=%d", 
+		LOG(LOG_ALL, "ClientCount=%d, SessionCount=%d, AgentCount=%d", 
 			GetClientCount(), GetCommObjCount(), GetAgentCount());
 		MCommand* pNew = CreateCommand(MC_NET_PING, MUID(0,0));
 		pNew->AddParameter(new MCmdParamUInt(GetGlobalClockCount()));
@@ -1121,146 +1124,6 @@ struct ZPACKEDSHOTINFO {
 };
 #pragma pack(pop)
 
-enum ZOBJECTHITTEST {
-	ZOH_NONE = 0,
-	ZOH_BODY = 1,
-	ZOH_HEAD = 2,
-	ZOH_LEGS = 3
-};
-
-static ZOBJECTHITTEST HitTest(const v3& head, const v3& foot, const v3& src, const v3& dest, v3* pOutPos = nullptr)
-{
-	// 적절한 시점의 위치를 얻어낼수없으면 실패..
-	rvector footpos, headpos, characterdir;
-
-	footpos = foot;
-	headpos = head;
-
-	footpos.z += 5.f;
-	headpos.z += 5.f;
-
-	rvector rootpos = (footpos + headpos)*0.5f;
-
-	// headshot 판정
-	rvector nearest = GetNearestPoint(headpos, src, dest);
-	float fDist = Magnitude(nearest - headpos);
-	float fDistToChar = Magnitude(nearest - src);
-
-	rvector ap, cp;
-
-	if (fDist < 15.f)
-	{
-		if (pOutPos) *pOutPos = nearest;
-		return ZOH_HEAD;
-	}
-	else
-	{
-		rvector dir = dest - src;
-		Normalize(dir);
-
-		// 실린더로 몸통 판정
-		rvector rootdir = (rootpos - headpos);
-		Normalize(rootdir);
-		float fDist = GetDistanceBetweenLineSegment(src, dest, headpos + 20.f*rootdir, rootpos - 20.f*rootdir, &ap, &cp);
-		if (fDist < 30)		// 상체
-		{
-			rvector ap2cp = ap - cp;
-			float fap2cpsq = D3DXVec3LengthSq(&ap2cp);
-			float fdiff = sqrtf(30.f*30.f - fap2cpsq);
-
-			if (pOutPos) *pOutPos = ap - dir*fdiff;;
-			return ZOH_BODY;
-		}
-		else
-		{
-			float fDist = GetDistanceBetweenLineSegment(src, dest, rootpos - 20.f*rootdir, footpos, &ap, &cp);
-			if (fDist < 30)	// 하체
-			{
-				rvector ap2cp = ap - cp;
-				float fap2cpsq = D3DXVec3LengthSq(&ap2cp);
-				float fdiff = sqrtf(30.f*30.f - fap2cpsq);
-
-				if (pOutPos) *pOutPos = ap - dir*fdiff;;
-				return ZOH_LEGS;
-			}
-		}
-	}
-
-	return ZOH_NONE;
-}
-
-void MMatchServer::PickHistory(MMatchObject& Exception, u32 Time, rvector &src, rvector &dest, MMatchStage& Stage, MPICKINFO& pickinfo)
-{
-	MMatchObject* HitObject = nullptr;
-	v3 HitPos;
-
-	for (auto& item : Stage.m_ObjUIDCaches)
-	{
-		auto& Obj = *static_cast<MMatchObject*>(item.second);
-		if (&Exception == &Obj)
-			continue;
-
-		v3 Head;
-		v3 Foot;
-		Obj.GetPositions(Head, Foot, Time);
-
-		v3 TempHitPos;
-		auto HitParts = HitTest(Head, Foot, src, dest, &TempHitPos);
-
-		if (HitParts == ZOH_NONE)
-			continue;
-
-		auto Hit = [&]()
-		{
-			HitObject = &Obj;
-			HitPos = TempHitPos;
-		};
-
-		if (!Obj.CheckAlive())
-			continue;
-
-		if (HitObject)
-		{
-			if (Magnitude(TempHitPos - src) < Magnitude(HitPos - src))
-			{
-				Hit();
-			}
-		}
-		else
-		{
-			Hit();
-		}
-	}
-
-#define DIDNT_HIT_BSP()				\
-	pickinfo.bBspPicked = false;	\
-	pickinfo.Object = HitObject;	\
-	return;							\
-
-	auto BspObject = Stage.BspObject;
-
-	if (!BspObject)
-	{
-		DIDNT_HIT_BSP();
-	}
-
-	bool HitBsp = BspObject->PickTo(src, dest, &pickinfo.bpi);
-	if (!HitBsp)
-	{
-		DIDNT_HIT_BSP();
-	}
-
-	if (Magnitude(HitPos - src) < Magnitude(pickinfo.bpi.PickPos - src))
-	{
-		DIDNT_HIT_BSP();
-	}
-
-	pickinfo.bBspPicked = true;
-	pickinfo.Object = nullptr;
-
-#undef DIDNT_HIT_BSP
-}
-
 void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Receiver, const char * Blob, size_t BlobSize)
 {
 	auto SenderObj = GetObjectA(Sender);
@@ -1304,32 +1167,12 @@ void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Recei
 
 			v3 src = v3(psi.posx, psi.posy, psi.posz);
 			v3 dest = v3(psi.tox, psi.toy, psi.toz);
+			v3 orig_dir = dest - src;
+			Normalize(orig_dir);
 
 			//AnnounceF(Sender, "Shot! %f, %f, %f -> %f, %f, %f", src.x, src.y, src.z, dest.x, dest.y, dest.z);
 
-
 			auto Time = GetGlobalClockCount() - SenderObj->GetPing();
-
-			/*AnnounceF(Sender, "%s: ping = %d, abs time = %X\nHead: %f, %f, %f; foot: %f, %f, %f", Obj.GetName(), Obj.GetPing(), GetGlobalClockCount() - Obj.GetPing(),
-				Head.x, Head.y, Head.z, Root.x, Root.y, Root.z);*/
-
-			MPICKINFO pickinfo;
-			PickHistory(*SenderObj, Time, src, dest, *Stage, pickinfo);
-
-			if (pickinfo.bBspPicked)
-			{
-				AnnounceF(Sender, "Hit wall at %d, %d, %d", (int)pickinfo.bpi.PickPos.x, (int)pickinfo.bpi.PickPos.y, (int)pickinfo.bpi.PickPos.z);
-				return;
-			}
-
-			if (!pickinfo.Object)
-			{
-				AnnounceF(Sender, "No wall, no object");
-				return;
-			}
-
-			/*if (HitParts == ZOH_NONE)
-				continue;*/
 
 			auto Slot = SenderObj->GetSelectedSlot();
 
@@ -1338,24 +1181,113 @@ void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Recei
 				return;
 
 			auto ItemDesc = Item->GetDesc();
-
 			if (!ItemDesc)
 				return;
 
 			auto Damage = ItemDesc->m_nDamage;
-			float PiercingRatio = GetPiercingRatio(ItemDesc->m_nWeaponType, pickinfo.info.parts);
-			auto DamageType = (pickinfo.info.parts == eq_parts_head) ? ZD_BULLET_HEADSHOT : ZD_BULLET;
-			auto WeaponType = ItemDesc->m_nWeaponType;
 
-			LogF(LOG_ALL, "Damage: %d", Damage);
+			auto GetPositions = [&](auto& Obj, auto& Head, auto& Foot)
+			{
+				Obj.GetPositions(Head, Foot, Time);
+			};
 
-			MCommand* pCmd = CreateCommand(MC_MATCH_DAMAGE, pickinfo.Object->GetUID());
-			pCmd->AddParameter(new MCmdParamUID(Sender));
-			pCmd->AddParameter(new MCmdParamUShort(Damage));
-			pCmd->AddParameter(new MCmdParamFloat(PiercingRatio));
-			pCmd->AddParameter(new MCmdParamUChar(DamageType));
-			pCmd->AddParameter(new MCmdParamUChar(WeaponType));
-			Post(pCmd);
+			auto SendDamage = [&](auto& UID, auto Damage, auto PiercingRatio, auto DamageType, auto WeaponType)
+			{
+				MCommand* pCmd = CreateCommand(MC_MATCH_DAMAGE, UID);
+				pCmd->AddParameter(new MCmdParamUID(Sender));
+				pCmd->AddParameter(new MCmdParamUShort(Damage));
+				pCmd->AddParameter(new MCmdParamFloat(PiercingRatio));
+				pCmd->AddParameter(new MCmdParamUChar(DamageType));
+				pCmd->AddParameter(new MCmdParamUChar(WeaponType));
+				Post(pCmd);
+			};
+
+			if (ItemDesc->m_nWeaponType == MWT_SHOTGUN)
+			{
+				struct DamageInfo
+				{
+					int Damage = 0;
+					float PiercingRatio = 0;
+					ZDAMAGETYPE DamageType;
+					MMatchWeaponType WeaponType;
+				};
+
+				auto DirGen = GetShotgunPelletDirGenerator(orig_dir, reinterpret<u32>(psi.fTime));
+
+				std::unordered_map<MUID, DamageInfo> DamageMap;
+
+				for (int i = 0; i < SHOTGUN_BULLET_COUNT; i++)
+				{
+					auto dir = DirGen();
+					auto dest = src + dir * 10000;
+
+					const u32 PassFlag = RM_FLAG_ADDITIVE | RM_FLAG_HIDE | RM_FLAG_PASSROCKET | RM_FLAG_PASSBULLET;
+
+					MPICKINFO pickinfo;
+					PickHistory(*SenderObj, src, dest, Stage->BspObject,
+						pickinfo, Stage->m_ObjUIDCaches, GetPositions, PassFlag);
+
+					if (pickinfo.bBspPicked)
+					{
+						AnnounceF(Sender, "Hit wall at %d, %d, %d",
+							(int)pickinfo.bpi.PickPos.x, (int)pickinfo.bpi.PickPos.y, (int)pickinfo.bpi.PickPos.z);
+						continue;
+					}
+
+					if (!pickinfo.pObject)
+					{
+						AnnounceF(Sender, "No wall, no object");
+						continue;
+					}
+
+					float PiercingRatio = GetPiercingRatio(ItemDesc->m_nWeaponType, pickinfo.info.parts);
+
+					auto& item = DamageMap[pickinfo.pObject->GetUID()];
+
+					int NewDamage = item.Damage + Damage;
+					item.PiercingRatio = (item.Damage * item.PiercingRatio + Damage * PiercingRatio) / NewDamage;
+					item.Damage += Damage;
+					auto DamageType = (pickinfo.info.parts == eq_parts_head) ? ZD_BULLET_HEADSHOT : ZD_BULLET;
+					static_assert(ZD_BULLET_HEADSHOT > ZD_BULLET, "Fix me");
+					item.DamageType = max(item.DamageType, DamageType);
+					item.WeaponType = ItemDesc->m_nWeaponType;
+				}
+
+				for (auto& item : DamageMap)
+					SendDamage(item.first, item.second.Damage, item.second.PiercingRatio, item.second.DamageType, item.second.WeaponType);
+			}
+			else
+			{
+				/*AnnounceF(Sender, "%s: ping = %d, abs time = %X\nHead: %f, %f, %f; foot: %f, %f, %f",
+				Obj.GetName(), Obj.GetPing(), GetGlobalClockCount() - Obj.GetPing(),
+					Head.x, Head.y, Head.z, Root.x, Root.y, Root.z);*/
+
+				const u32 PassFlag = RM_FLAG_ADDITIVE | RM_FLAG_HIDE | RM_FLAG_PASSROCKET | RM_FLAG_PASSBULLET;
+
+				MPICKINFO pickinfo;
+				PickHistory(*SenderObj, src, dest, Stage->BspObject, pickinfo, Stage->m_ObjUIDCaches, GetPositions, PassFlag);
+
+				if (pickinfo.bBspPicked)
+				{
+					AnnounceF(Sender, "Hit wall at %d, %d, %d",
+						(int)pickinfo.bpi.PickPos.x, (int)pickinfo.bpi.PickPos.y, (int)pickinfo.bpi.PickPos.z);
+					return;
+				}
+
+				if (!pickinfo.pObject)
+				{
+					AnnounceF(Sender, "No wall, no object");
+					return;
+				}
+
+				float PiercingRatio = GetPiercingRatio(ItemDesc->m_nWeaponType, pickinfo.info.parts);
+				auto DamageType = (pickinfo.info.parts == eq_parts_head) ? ZD_BULLET_HEADSHOT : ZD_BULLET;
+				auto WeaponType = ItemDesc->m_nWeaponType;
+
+				LogF(LOG_ALL, "Damage: %d", Damage);
+
+				SendDamage(pickinfo.pObject->GetUID(), Damage, PiercingRatio, DamageType, WeaponType);
+			}
 		}
 		break;
 		};

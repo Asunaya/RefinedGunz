@@ -387,7 +387,7 @@ enum ZDAMAGETYPE {
 };
 
 struct MPICKINFO {
-	class MMatchObject*	Object;
+	class MMatchObject*	pObject;
 	RPickInfo	info;
 
 	bool bBspPicked;

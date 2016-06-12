@@ -598,7 +598,8 @@ bool ZQuest::OnPeerNPCAttackRange(MCommand* pCommand)
 
 	}
 
-	ZGetGame()->OnPeerShot_Range((MMatchCharItemParts)pinfo->sel_type,uidOwner,ZGetGame()->GetTime(),pos,to);
+	ZGetGame()->OnPeerShot_Range((MMatchCharItemParts)pinfo->sel_type,uidOwner,
+		ZGetGame()->GetTime(),pos,to, reinterpret<u32>(ZGetGame()->GetTime()));
 	
 
 	return true;

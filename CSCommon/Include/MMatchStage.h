@@ -12,6 +12,7 @@ using namespace std;
 #include "MMatchStageSetting.h"
 #include "MVoteMgr.h"
 #include "MMatchGlobal.h"
+#include "MUtil.h"
 
 #define MTICK_STAGE			100
 
@@ -73,7 +74,9 @@ private:
 	MMatchStageTeamBonus	m_TeamBonus;
 	MMatchStageTeam			m_Teams[MMT_END];
 
+public:
 	MUIDRefCache			m_ObjUIDCaches;
+private:
 	list<int>				m_BanCIDList;
 
 	unsigned long			m_nStateTimer;
@@ -118,6 +121,11 @@ public:
 public:
 	MMatchStage();
 	virtual ~MMatchStage();
+
+	auto GetObjectList()
+	{
+		return MakePairValueAdapter(m_ObjUIDCaches);
+	}
 
 	bool Create(const MUID& uid, const char* pszName, bool bPrivate, const char* pszPassword);
 	void Destroy();

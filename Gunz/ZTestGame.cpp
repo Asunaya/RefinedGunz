@@ -39,7 +39,7 @@ void CreateTestGame(char *mapname, int nDummyCharacterCount, bool bShot, bool bA
 	//	info.nEquipedItemDesc[MMCIP_PRIMARY] = 5018;
 	//	info.nEquipedItemDesc[MMCIP_PRIMARY] = 4514;	// ÀÚ¿ì¸£½º B x2
 	info.nEquipedItemDesc[MMCIP_PRIMARY] = 7006;	// LX 44
-	info.nEquipedItemDesc[MMCIP_PRIMARY] = 9003;	// ¿ùÄÞ L1 mk. II
+	info.nEquipedItemDesc[MMCIP_PRIMARY] = 6001;// 9003;	// ¿ùÄÞ L1 mk. II
 	//	info.nEquipedItemDesc[MMCIP_SECONDARY] = 6001;	// ¼¦°Ç
 	info.nEquipedItemDesc[MMCIP_SECONDARY] = 8003;	// ¸Ó½Å°Ç
 	info.nEquipedItemDesc[MMCIP_CUSTOM1] = 400007;

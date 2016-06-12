@@ -24,6 +24,12 @@ void ZItem::InitBullet(int nBullet)
 		return;
 	}
 
+#ifdef _DEBUG
+	m_nBulletAMagazine = 1000;
+	m_nBullet = 1000;
+	return;
+#endif
+
 	if(GetItemType() == MMIT_RANGE) 
 	{
 		m_nBulletAMagazine = m_pDesc->m_nMagazine;

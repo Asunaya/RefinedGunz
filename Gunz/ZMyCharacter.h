@@ -215,7 +215,8 @@ private:
 
 	virtual void	OnDie();
 //	void UpdatePosition(float fDelta);	// 속도에 따라 실제 위치를 이동
-	void CalcRangeShotControllability(rvector& vOutDir, rvector& vSrcDir, int nControllability);
+	void CalcRangeShotControllability(rvector& vOutDir, const rvector& vSrcDir, int nControllability, u32 Seed);
+	void IncreaseCAFactor();
 	float GetControllabilityFactor();
 	void UpdateCAFactor(float fDelta);
 	void ReleaseLButtonQueue();

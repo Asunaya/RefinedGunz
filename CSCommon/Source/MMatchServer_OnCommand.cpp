@@ -90,8 +90,8 @@ _STATUS_CMD_START;
 		{
 			auto& Sender = pCommand->GetSenderUID();
 			MUID Receiver;
-			if (!pCommand->GetParameter(&Receiver, 1, MPT_UID)) break;
-			auto Param = pCommand->GetParameter(2);
+			if (!pCommand->GetParameter(&Receiver, 0, MPT_UID)) break;
+			auto Param = pCommand->GetParameter(1);
 			if (Param->GetType() != MPT_BLOB) break;
 			auto Blob = (MCmdParamBlob*)Param;
 			auto BlobPtr = Blob->GetPointer();

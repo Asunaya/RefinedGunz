@@ -9,6 +9,7 @@
 #include "ZModule_Movable.h"
 #include "ZCharacterItem.h"
 #include "stuff.h"
+#include "HitRegistration.h"
 
 #include <list>
 #include <string>
@@ -16,13 +17,6 @@
 using namespace std;
 
 _USING_NAMESPACE_REALSPACE2
-
-enum ZOBJECTHITTEST {
-	ZOH_NONE = 0,
-	ZOH_BODY = 1,
-	ZOH_HEAD = 2,
-	ZOH_LEGS = 3
-};
 
 enum ZC_ENCHANT {
 	ZC_ENCHANT_NONE = 0,

@@ -282,9 +282,9 @@ public:
 	bool GetShowLightmapMode() { return m_bShowLightmap; }
 
 	// 월드 좌표 pos 에서 dir 방향의 반직선에 대해 pick !
-	bool Pick(rvector &pos,rvector &dir,RBSPPICKINFO *pOut,DWORD dwPassFlag=RM_FLAG_ADDITIVE | RM_FLAG_USEOPACITY | RM_FLAG_HIDE);
-	bool PickTo(rvector &pos,rvector &to,RBSPPICKINFO *pOut,DWORD dwPassFlag=RM_FLAG_ADDITIVE | RM_FLAG_USEOPACITY | RM_FLAG_HIDE);
-	bool PickOcTree(rvector &pos,rvector &dir,RBSPPICKINFO *pOut,DWORD dwPassFlag=RM_FLAG_ADDITIVE | RM_FLAG_USEOPACITY | RM_FLAG_HIDE);
+	bool Pick(const rvector &pos, const rvector &dir,RBSPPICKINFO *pOut,DWORD dwPassFlag=RM_FLAG_ADDITIVE | RM_FLAG_USEOPACITY | RM_FLAG_HIDE);
+	bool PickTo(const rvector &pos, const rvector &to,RBSPPICKINFO *pOut,DWORD dwPassFlag=RM_FLAG_ADDITIVE | RM_FLAG_USEOPACITY | RM_FLAG_HIDE);
+	bool PickOcTree(const rvector &pos, const rvector &dir,RBSPPICKINFO *pOut,DWORD dwPassFlag=RM_FLAG_ADDITIVE | RM_FLAG_USEOPACITY | RM_FLAG_HIDE);
 
 	// pathnode 는 봉인..
 	/*
@@ -406,7 +406,7 @@ private:
 
 	void SetDiffuseMap(int nMaterial);
 
-	bool Pick(RSBspNode *pNode,rvector &v0,rvector &v1);
+	bool Pick(RSBspNode *pNode, const rvector &v0, const rvector &v1);
 //	bool PickCol(RSolidBspNode *pNode,rvector v0,rvector v1);
 //	bool PickPathNode(RSBspNode *pNode);
 	bool PickShadow(rvector &pos,rvector &to,RBSPPICKINFO *pOut);

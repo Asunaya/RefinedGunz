@@ -563,7 +563,8 @@ public:
 	void SetStageState(MMatchObjectStageState nStageState)	{ m_nStageState = nStageState; }
 	bool GetEnterBattle()			{ return m_bEnterBattle; }
 	void SetEnterBattle(bool bEnter){ m_bEnterBattle = bEnter; }
-	bool CheckAlive()				{ return m_bAlive; }
+	bool CheckAlive() const			{ return m_bAlive; }
+	bool IsAlive() const			{ return m_bAlive; }
 	void SetAlive(bool bVal)		{ m_bAlive = bVal; }
 	void SetKillCount(unsigned int nKillCount) { m_nKillCount = nKillCount; }
 	unsigned int GetKillCount()		{ return m_nKillCount; }

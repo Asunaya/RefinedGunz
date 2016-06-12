@@ -20,8 +20,9 @@ desc : 무기 사용 키 커스터마이즈 관련
 #include "MMath.h"
 #include "ZGameConst.h"
 #include "ZInput.h"
-
 #include "Rules.h"
+#include "HitRegistration.h"
+#include "MUtil.h"
 
 #define CHARGE_SHOT		// 모아서 강베기 가능
 
@@ -909,6 +910,8 @@ void ZMyCharacter::OnShotRange()
 	if(pSelectedItem->GetDesc())
 		wtype = pSelectedItem->GetDesc()->m_nWeaponType;
 
+	u32 seed = reinterpret<u32>(g_pGame->GetTime());
+
 	if( ( wtype == MWT_SHOTGUN ) || ( wtype == MWT_SAWED_SHOTGUN ) )
 	{
 		int sel_type = GetItems()->GetSelectedWeaponParts();
@@ -934,7 +937,7 @@ void ZMyCharacter::OnShotRange()
 		if (pSelectedItem->GetDesc() != NULL && !skip_controllability)
 		{
 			// 반동력을 계산한다
-			CalcRangeShotControllability(r, dir, pSelectedItem->GetDesc()->m_nControllability);
+			CalcRangeShotControllability(r, dir, pSelectedItem->GetDesc()->m_nControllability, seed);
 		}
 		else
 		{
@@ -947,40 +950,14 @@ void ZMyCharacter::OnShotRange()
 	}
 }
 
-void ZMyCharacter::CalcRangeShotControllability(rvector& vOutDir, rvector& vSrcDir, int nControllability)
+void ZMyCharacter::CalcRangeShotControllability(rvector& vOutDir, const rvector& vSrcDir, int nControllability, u32 Seed)
 {
-	// 오차값
-	rvector up(0,0,1), right;
-	D3DXQUATERNION q;
-	D3DXMATRIX mat;
+	::CalcRangeShotControllability(vOutDir, vSrcDir, nControllability, Seed, m_fCAFactor);
+	IncreaseCAFactor();
+}
 
-	float fAngle = (rand() % (31415 * 2)) / 1000.0f;
-
-	float fControl;
-	if( nControllability <= 0 )
-	{
-		fControl = 0;
-	}
-	else
-	{
-		fControl = (float)(rand() % ( nControllability * 100 ));
-		fControl = fControl * m_fCAFactor;
-	}			
-
-	float fForce = fControl / 100000.0f;		// 0.02보다 작도록.
-
-	D3DXVec3Cross(&right,&vSrcDir,&up);
-	D3DXVec3Normalize(&right,&right);
-	D3DXMatrixRotationAxis(&mat, &right, fForce);
-	D3DXVec3TransformCoord(&vOutDir, &vSrcDir, &mat);
-
-	D3DXQuaternionRotationAxis(&q, &vSrcDir, fAngle);
-	D3DXMatrixRotationQuaternion(&mat, &q);
-	D3DXVec3TransformCoord(&vOutDir, &vOutDir, &mat);
-
-	Normalize(vOutDir);
-
-	// Factor 를 업데이트한다.
+void ZMyCharacter::IncreaseCAFactor()
+{
 	m_fElapsedCAFactorTime = 0.0f;
 	m_fCAFactor += GetControllabilityFactor();
 	if (m_fCAFactor > 1.0f) m_fCAFactor = 1.0f;

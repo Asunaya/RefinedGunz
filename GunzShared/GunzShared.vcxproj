@@ -116,6 +116,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="HitRegistration.h" />
     <ClInclude Include="stuff.h" />
   </ItemGroup>
   <ItemGroup>
