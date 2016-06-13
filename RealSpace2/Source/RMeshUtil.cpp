@@ -1057,12 +1057,12 @@ char* RBaseObject::GetName()
 	return (char*)m_Name.c_str();
 }
 
-void RBaseObject::SetName(char* name)
+void RBaseObject::SetName(const char* name)
 {
 	m_Name = name;
 }
 
-bool RBaseObject::CheckName(string& name)
+bool RBaseObject::CheckName(const string& name)
 {
 	if(m_Name==name)
 		return true;

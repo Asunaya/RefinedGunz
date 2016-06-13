@@ -111,7 +111,7 @@ bool MMatchChannel::CheckLifePeriod()
 
 void MMatchChannel::AddObject(const MUID& uid, MMatchObject* pObj)
 {
-	m_ObjUIDCaches.Insert(uid, (void*)pObj); // Channel Cache
+	m_ObjUIDCaches.Insert(uid, pObj); // Channel Cache
 	//m_ObjStrCaches.insert(MObjectStrMap::value_type(string(pObj->GetCharInfo()->m_szName), pObj));
 	
 	m_UserArray.Add(pObj);
@@ -123,10 +123,10 @@ void MMatchChannel::RemoveObject(const MUID& uid)
 {
 	LeaveLobby(uid);
 
-	MUIDRefCache::iterator i = m_ObjUIDCaches.find(uid);
+	auto i = m_ObjUIDCaches.find(uid);
 	if (i != m_ObjUIDCaches.end())
 	{
-		MMatchObject* pObj = (MMatchObject*)((*i).second);
+		MMatchObject* pObj = i->second;
 		m_UserArray.Remove(pObj);
 
 		m_ObjUIDCaches.erase(i); // Channel Cache
@@ -144,11 +144,11 @@ void MMatchChannel::RemoveObject(const MUID& uid)
 */	
 }
 
-void MMatchChannel::JoinLobby(const MUID& uid, const MMatchObject* pObj)
+void MMatchChannel::JoinLobby(const MUID& uid, MMatchObject* pObj)
 {
 	if (m_ObjUIDLobbyCaches.find(uid) == m_ObjUIDLobbyCaches.end())
 	{
-		m_ObjUIDLobbyCaches.Insert(uid, (void*)pObj); // Channel Cache
+		m_ObjUIDLobbyCaches.Insert(uid, pObj); // Channel Cache
 	}
 	else
 	{
@@ -158,7 +158,7 @@ void MMatchChannel::JoinLobby(const MUID& uid, const MMatchObject* pObj)
 
 void MMatchChannel::LeaveLobby(const MUID& uid)
 {
-	MUIDRefCache::iterator LobbyObjItor = m_ObjUIDLobbyCaches.find(uid);
+	auto LobbyObjItor = m_ObjUIDLobbyCaches.find(uid);
 	if (LobbyObjItor != m_ObjUIDLobbyCaches.end())
 	{
 		m_ObjUIDLobbyCaches.erase(LobbyObjItor);
@@ -394,9 +394,9 @@ int MMatchChannel::GetPlayers()
 {
 	int nPlayers = 0;
 
-	for( MUIDRefCache::iterator i = GetObjBegin();  i != GetObjEnd();  i++)
+	for(auto i = GetObjBegin();  i != GetObjEnd();  i++)
 	{
-		MMatchObject* pObj = (MMatchObject*)((*i).second);
+		MMatchObject* pObj = i->second;
 		
 //		if ( IsAdminGrade(pObj) && pObj->CheckPlayerFlags(MTD_PlayerFlags_AdminHide))		// 테스트 요함
 //			continue;

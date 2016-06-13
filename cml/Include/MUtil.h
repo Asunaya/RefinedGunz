@@ -128,6 +128,12 @@ auto MakePairValueAdapter(T& Container)
 	return PairValueAdapter<T>(Container);
 }
 
+template <typename T, size_t size>
+inline constexpr size_t ArraySize(T(&)[size])
+{
+	return size;
+}
+
 
 
 #endif

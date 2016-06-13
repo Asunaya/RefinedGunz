@@ -938,13 +938,13 @@ bool RMesh::Pick(int mx,int my,RPickInfo* pInfo,rmatrix* world_mat)
 
 }
 
-bool RMesh::Pick(rvector& pos,rvector& dir,RPickInfo* pInfo,rmatrix* world_mat)
+bool RMesh::Pick(const rvector& pos, const rvector& dir,RPickInfo* pInfo,rmatrix* world_mat)
 {
 	rvector v[2]; v[0] = pos; v[1] = dir;
 	return CalcIntersectsTriangle(v, pInfo, world_mat);
 }
 
-bool RMesh::Pick(rvector* vInVec,RPickInfo* pInfo,rmatrix* world_mat)
+bool RMesh::Pick(const rvector* vInVec,RPickInfo* pInfo,rmatrix* world_mat)
 {
 	return Pick(vInVec[0],vInVec[1], pInfo, world_mat);
 }

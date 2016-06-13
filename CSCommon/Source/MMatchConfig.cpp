@@ -7,6 +7,9 @@
 
 #include "MErrorTable.h"
 #include "MMatchServer.h"
+#undef pi
+#include <boost/property_tree/detail/rapidxml.hpp>
+#include <fstream>
 
 
 bool MMatchConfig::GetPrivateProfileBool(const char* szAppName, const char* szKeyName, 
@@ -195,6 +198,33 @@ bool MMatchConfig::Create()
 		ASSERT( 0 && "hackshield와 x-trap은 같이 사용할 수 없다." );
 		mlog( "server.ini - HackShield and XTrap is duplicated\n" );
 		return false;
+	}
+
+	std::string File;
+	std::ifstream FileStream("server.xml", std::ios::in | std::ios::binary | std::ios::ate);
+	File.resize(FileStream.tellg());
+	FileStream.seekg(std::ios::beg);
+	FileStream.read(&File[0], File.size());
+
+	if (FileStream.fail())
+	{
+		mlog("Failed to load server.xml!\n");
+		return false;
+	}
+
+	using namespace boost::property_tree::detail::rapidxml;
+
+	xml_document<> doc;
+	doc.parse<0>(&File[0]);
+
+	auto GameDirNode = doc.first_node("game_dir");
+	if (!GameDirNode)
+	{
+		mlog("Failed to find game_dir node in server.xml!\n");
+	}
+	else
+	{
+		GameDirectory = GameDirNode->value();
 	}
 
 	m_bIsComplete = true;

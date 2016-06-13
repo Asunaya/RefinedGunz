@@ -488,8 +488,8 @@ public:
 	// RVisualMesh class 로 옮기기 ( m_world_mat 내장한... )
 
 	bool Pick(int x,int y,RPickInfo* pInfo,rmatrix* world_mat=NULL);
-	bool Pick(rvector* vInVec,RPickInfo* pInfo,rmatrix* world_mat=NULL);
-	bool Pick(rvector& pos,rvector& dir,RPickInfo* pInfo,rmatrix* world_mat=NULL);
+	bool Pick(const rvector* vInVec,RPickInfo* pInfo,rmatrix* world_mat=NULL);
+	bool Pick(const rvector& pos, const rvector& dir,RPickInfo* pInfo,rmatrix* world_mat=NULL);
 
 	void ClearMtrl();
 	void SetBaseMtrlMesh(RMesh* pMesh);
@@ -517,7 +517,7 @@ public:
 
 private:
 
-	bool CalcIntersectsTriangle(rvector* vInVec,RPickInfo* pInfo, D3DXMATRIX* world_mat=NULL,bool fastmode=false);
+	bool CalcIntersectsTriangle(const rvector* vInVec,RPickInfo* pInfo, D3DXMATRIX* world_mat=NULL,bool fastmode=false);
 
 	void GetNodeAniMatrix(RMeshNode* pMeshNode,D3DXMATRIX& m);
 

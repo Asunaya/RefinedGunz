@@ -23,7 +23,7 @@ int MMaster::OnAccept(MCommObject* pCommObj)
 	MCommandBuilder* pCmdBuilder = pCommObj->GetCommandBuilder();
 	pCmdBuilder->SetUID(GetUID(), AllocUID);
 
-	m_CommRefCache.insert(MUIDRefCache::value_type(pCommObj->GetUID(), pCommObj));
+	m_CommRefCache.emplace(pCommObj->GetUID(), pCommObj);
 
 	LOG(LOG_DEBUG, "New Communicator connected. UID %u:%u assigned", AllocUID.High, AllocUID.Low);
 

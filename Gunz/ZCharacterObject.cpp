@@ -577,8 +577,10 @@ bool ZCharacterObject::GetHistory(rvector *pos, rvector *direction, float fTime)
 		if (isnan(Dir.x) || isnan(Dir.y) || isnan(Dir.z))
 			return false;
 
-		*pos = Pos;
-		*direction = Dir;
+		if (pos)
+			*pos = Pos;
+		if (direction)
+			*direction = Dir;
 
 		return true;
 	};

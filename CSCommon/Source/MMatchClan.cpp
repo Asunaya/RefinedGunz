@@ -83,14 +83,13 @@ void MMatchClan::InitClanInfoEx(const int nLevel, const int nTotalPoint, const i
 
 void MMatchClan::AddObject(const MUID& uid, MMatchObject* pObj)
 {
-	m_Members.Insert(uid, (void*)pObj);
+	m_Members.Insert(uid, pObj);
 
 }
 
 void MMatchClan::RemoveObject(const MUID& uid)
 {
-	MUIDRefCache::iterator itor = m_Members.find(uid);
-	MMatchObject* pObj = (MMatchObject*)((*itor).second);
+	auto itor = m_Members.find(uid);
 	if (itor != m_Members.end())
 	{
 		m_Members.erase(itor);

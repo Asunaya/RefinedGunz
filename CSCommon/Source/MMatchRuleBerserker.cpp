@@ -46,8 +46,8 @@ MUID MMatchRuleBerserker::RecommendBerserker()
 	if (pStage == NULL) return MUID(0,0);
 
 	int nCount = 0;
-	for(MUIDRefCache::iterator itor=pStage->GetObjBegin(); itor!=pStage->GetObjEnd(); itor++) {
-		MMatchObject* pObj = (MMatchObject*)(*itor).second;
+	for(auto itor=pStage->GetObjBegin(); itor!=pStage->GetObjEnd(); itor++) {
+		MMatchObject* pObj = itor->second;
 		if (pObj->GetEnterBattle() == false) continue;	// 배틀참가하고 있는 플레이어만 체크
 		if (pObj->CheckAlive())
 		{

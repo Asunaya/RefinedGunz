@@ -713,10 +713,10 @@ public:
 public:
 
 	char* GetName();
-	void  SetName(char* name);
+	void  SetName(const char* name);
 
 	bool  CheckName(const char* name);
-	bool  CheckName(string& name);
+	bool  CheckName(const string& name);
 
 public:
 
@@ -770,7 +770,7 @@ public:
 		return itor;
 	}
 
-	T Find(char *name) {
+	T Find(const char *name) {
 
 		unordered_map<string,T>::iterator itor = m_HashMap.find( string(name) );
 

@@ -15,11 +15,14 @@
 
 static void CreatePlayers(const std::vector<ReplayPlayerInfo>& Players)
 {
+#ifdef _DEBUG
+	MLog("Size = %d\n", Players.size());
+#endif
 	for (auto& Player : Players)
 	{
 		ZCharacter* Char = nullptr;
 
-#ifdef DEBUG
+#ifdef _DEBUG
 		MLog("Name = %s\n", Player.Info.szName);
 		MLog("Hero = %d\n", Player.IsHero);
 #endif

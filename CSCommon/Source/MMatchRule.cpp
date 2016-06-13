@@ -377,9 +377,9 @@ void MMatchRule::CheckOnBeginEvent()
 		MMatchObject* pObj;
 		const DWORD dwClock = MMatchServer::GetInstance()->GetGlobalClockCount();
 		GetOnBeginEventManager().StartNewEvent();
-		for (MUIDRefCache::iterator i=GetStage()->GetObjBegin(); i!=GetStage()->GetObjEnd(); i++) 
+		for (auto i=GetStage()->GetObjBegin(); i!=GetStage()->GetObjEnd(); i++)
 		{
-			pObj = (MMatchObject*)(*i).second;
+			pObj = i->second;
 			if( MMP_STAGE == pObj->GetPlace() )
 				GetOnBeginEventManager().CheckEventObj( pObj, dwClock );
 		}
@@ -396,12 +396,12 @@ void MMatchRule::CheckOnGameEvent()
 		// 게임상에 아무도 없으면 exit
 		int nInGamePlayer = 0;
 
-		MMatchObject*	pObj;
+		MMatchObject*	pObj = nullptr;
 		const DWORD		dwClock = MMatchServer::GetInstance()->GetGlobalClockCount();
 
-		for (MUIDRefCache::iterator i=GetStage()->GetObjBegin(); i!=GetStage()->GetObjEnd(); i++) 
+		for (auto i=GetStage()->GetObjBegin(); i!=GetStage()->GetObjEnd(); i++)
 		{
-			pObj = (MMatchObject*)(*i).second;
+			pObj = i->second;
 			if( (pObj->GetEnterBattle() == true) || pObj->IsLaunchedGame() )
 			{
 				GetOnGameEventManager().CheckEventObj( pObj, dwClock );
@@ -425,9 +425,9 @@ void MMatchRule::CheckOnEndEvent()
 		const DWORD		dwClock = MMatchServer::GetInstance()->GetGlobalClockCount();
 
 		GetOnEndEventManager().StartNewEvent();
-		for (MUIDRefCache::iterator i=GetStage()->GetObjBegin(); i!=GetStage()->GetObjEnd(); i++) 
+		for (auto i=GetStage()->GetObjBegin(); i!=GetStage()->GetObjEnd(); i++)
 		{
-			pObj = (MMatchObject*)(*i).second;
+			pObj = i->second;
 			if( MMP_BATTLE == pObj->GetPlace() )
 				GetOnEndEventManager().CheckEventObj( pObj, dwClock );
 		}

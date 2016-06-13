@@ -53,7 +53,7 @@ private:
 	};
 
 	ClanInfoEx		m_ClanInfoEx;
-	MUIDRefCache	m_Members;							///< 플레이어들
+	MMatchObjectMap	m_Members;							///< 플레이어들
 	MSmartRefresh	m_SmartRefresh;						///< 플레이어 캐슁
 
 	int				m_nSeriesOfVictories;				///< 클랜전 연승수
@@ -105,8 +105,8 @@ public:
 												}
 	void InsertMatchedClanID(int nCLID);	///< 대전했던 클랜
 
-	MUIDRefCache::iterator GetMemberBegin()		{ return m_Members.begin(); }
-	MUIDRefCache::iterator GetMemberEnd()		{ return m_Members.end(); }
+	auto GetMemberBegin()	{ return m_Members.begin(); }
+	auto GetMemberEnd()		{ return m_Members.end(); }
 };
 
 ///////////////////////////////////

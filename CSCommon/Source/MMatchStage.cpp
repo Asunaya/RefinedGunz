@@ -63,7 +63,7 @@ bool MMatchStage::Create(const MUID& uid, const char* pszName, bool bPrivate, co
 
 void MMatchStage::Destroy()
 {
-	MUIDRefCache::iterator itor=GetObjBegin();
+	auto itor=GetObjBegin();
 	while(itor!=GetObjEnd()) {
 		MUID uidPlayer = (*itor).first;
 		itor = RemoveObject(uidPlayer);
@@ -119,13 +119,13 @@ bool MMatchStage::CheckBanList(int nCID)
 		return false;
 }
 
-void MMatchStage::AddObject(const MUID& uid, const MMatchObject* pObj)
+void MMatchStage::AddObject(const MUID& uid, MMatchObject* pObj)
 {
-	m_ObjUIDCaches.Insert(uid, (void*)pObj);
+	m_ObjUIDCaches.Insert(uid, pObj);
 
 
 	// 어드민 유저 따로 관리한다.
-	MMatchObject* pObject = (MMatchObject*)pObj;
+	MMatchObject* pObject = pObj;
 	if (IsEnabledObject(pObject))
 	{
 		if (IsAdminGrade(pObject->GetAccountInfo()->m_nUGrade))
@@ -143,7 +143,7 @@ void MMatchStage::AddObject(const MUID& uid, const MMatchObject* pObj)
 	m_VoteMgr.AddVoter(uid);
 }
 
-MUIDRefCache::iterator MMatchStage::RemoveObject(const MUID& uid)
+MMatchObjectMap::iterator MMatchStage::RemoveObject(const MUID& uid)
 {
 	m_VoteMgr.RemoveVoter(uid);
 	if( CheckUserWasVoted(uid) )
@@ -167,7 +167,7 @@ MUIDRefCache::iterator MMatchStage::RemoveObject(const MUID& uid)
 		pObj->SetStageListTransfer(true);
 	}
 
-	MUIDRefCache::iterator i = m_ObjUIDCaches.find(uid);
+	MMatchObjectMap::iterator i = m_ObjUIDCaches.find(uid);
 	if (i==m_ObjUIDCaches.end()) 
 	{
 		//MMatchServer::GetInstance()->LOG(MCommandCommunicator::LOG_FILE, "RemoveObject: Cannot Find Object uid");
@@ -176,7 +176,7 @@ MUIDRefCache::iterator MMatchStage::RemoveObject(const MUID& uid)
 		return i;
 	}
 
-	MUIDRefCache::iterator itorNext = m_ObjUIDCaches.erase(i);
+	MMatchObjectMap::iterator itorNext = m_ObjUIDCaches.erase(i);
 
 	if (m_ObjUIDCaches.empty())
 		ChangeState(STAGE_STATE_CLOSE);
@@ -196,9 +196,9 @@ MUIDRefCache::iterator MMatchStage::RemoveObject(const MUID& uid)
 bool MMatchStage::KickBanPlayer(const char* pszName, bool bBanPlayer)
 {
 	MMatchServer* pServer = MMatchServer::GetInstance();
-	for (MUIDRefCache::iterator i=m_ObjUIDCaches.begin(); i!=m_ObjUIDCaches.end(); i++) 
+	for (auto i=m_ObjUIDCaches.begin(); i!=m_ObjUIDCaches.end(); i++)
 	{
-		MMatchObject* pObj = (MMatchObject*)(*i).second;
+		MMatchObject* pObj = i->second;
 		if (pObj->GetCharInfo() == NULL) 
 			continue;
 		if (_stricmp(pObj->GetCharInfo()->m_szName, pszName) == 0) {
@@ -215,7 +215,7 @@ bool MMatchStage::KickBanPlayer(const char* pszName, bool bBanPlayer)
 
 const MUID MMatchStage::RecommandMaster(bool bInBattleOnly)
 {
-	for (MUIDRefCache::iterator i=m_ObjUIDCaches.begin(); i!=m_ObjUIDCaches.end(); i++) 
+	for (auto i=m_ObjUIDCaches.begin(); i!=m_ObjUIDCaches.end(); i++)
 	{
 		MMatchObject* pObj = (MMatchObject*)(*i).second;
 		if (bInBattleOnly && (pObj->GetEnterBattle() == false))
@@ -458,11 +458,11 @@ MMatchTeam MMatchStage::GetRecommandedTeam()
 
 void MMatchStage::PlayerTeam(const MUID& uidPlayer, MMatchTeam nTeam)
 {
-	MUIDRefCache::iterator i = m_ObjUIDCaches.find(uidPlayer);
+	auto i = m_ObjUIDCaches.find(uidPlayer);
 	if (i==m_ObjUIDCaches.end())
 		return;
 
-	MMatchObject* pObj = (MMatchObject*)(*i).second;
+	MMatchObject* pObj = i->second;
 	pObj->SetTeam(nTeam);
 
 	MMatchStageSetting* pSetting = GetStageSetting();
@@ -473,7 +473,7 @@ void MMatchStage::PlayerTeam(const MUID& uidPlayer, MMatchTeam nTeam)
 
 void MMatchStage::PlayerState(const MUID& uidPlayer, MMatchObjectStageState nStageState)
 {
-	MUIDRefCache::iterator i = m_ObjUIDCaches.find(uidPlayer);
+	auto i = m_ObjUIDCaches.find(uidPlayer);
 	if (i==m_ObjUIDCaches.end())
 		return;
 
@@ -533,9 +533,9 @@ bool MMatchStage::StartGame()
 	bool bNotReadyExist = false;
 
 	// 대기 체크
-	for (MUIDRefCache::iterator i=m_ObjUIDCaches.begin(); i!=m_ObjUIDCaches.end(); i++) {
+	for (auto i=m_ObjUIDCaches.begin(); i!=m_ObjUIDCaches.end(); i++) {
 
-		MMatchObject* pObj = (MMatchObject*)(*i).second;
+		MMatchObject* pObj = i->second;
 
 		if ((GetMasterUID() != (*i).first) && (pObj->GetStageState() != MOSS_READY)) {
 			if (IsAdminGrade(pObj) && pObj->CheckPlayerFlags(MTD_PlayerFlags_AdminHide))
@@ -648,9 +648,9 @@ bool MMatchStage::StartGame()
 	
 	if (bResult == true)
 	{
-		for (MUIDRefCache::iterator i=m_ObjUIDCaches.begin(); i!=m_ObjUIDCaches.end(); i++) 
+		for (auto i=m_ObjUIDCaches.begin(); i!=m_ObjUIDCaches.end(); i++)
 		{
-			MMatchObject* pObj = (MMatchObject*)(*i).second;
+			MMatchObject* pObj = i->second;
 			pObj->SetLaunchedGame(true);
 		}
 
@@ -692,9 +692,9 @@ void MMatchStage::SetStageType(MMatchStageType nStageType)
 void MMatchStage::OnStartGame()
 {
 	// Death, Kill 카운트를 0으로 리셋
-	for (MUIDRefCache::iterator i=m_ObjUIDCaches.begin(); i!=m_ObjUIDCaches.end(); i++) 
+	for (auto i=m_ObjUIDCaches.begin(); i!=m_ObjUIDCaches.end(); i++)
 	{
-		MMatchObject* pObj = (MMatchObject*)(*i).second;
+		MMatchObject* pObj = i->second;
 		pObj->SetAllRoundDeathCount(0);	
 		pObj->SetAllRoundKillCount(0);
 		pObj->SetVoteState( false );
@@ -768,8 +768,8 @@ void MMatchStage::OnFinishGame()
 	}
 
 	// Ready Reset
-	for (MUIDRefCache::iterator i=m_ObjUIDCaches.begin(); i!=m_ObjUIDCaches.end(); i++) {
-		MMatchObject* pObj = (MMatchObject*)(*i).second;
+	for (auto i=m_ObjUIDCaches.begin(); i!=m_ObjUIDCaches.end(); i++) {
+		MMatchObject* pObj = i->second;
 		if (pObj->GetStageState())
 			pObj->SetStageState(MOSS_NONREADY);
 	}
@@ -793,8 +793,8 @@ void MMatchStage::OnFinishGame()
 bool MMatchStage::CheckBattleEntry()
 {
 	bool bResult = true;
-	for (MUIDRefCache::iterator i=m_ObjUIDCaches.begin(); i!=m_ObjUIDCaches.end(); i++) {
-		MMatchObject* pObj = (MMatchObject*)(*i).second;
+	for (auto i=m_ObjUIDCaches.begin(); i!=m_ObjUIDCaches.end(); i++) {
+		MMatchObject* pObj = i->second;
 		if (pObj->IsLaunchedGame())
 		{
 			if (pObj->GetEnterBattle() == false) bResult = false;
@@ -811,9 +811,9 @@ void MMatchStage::RoundStateFromClient(const MUID& uidStage, int nState, int nRo
 int MMatchStage::GetObjInBattleCount()
 {
 	int nCount = 0;
-	for (MUIDRefCache::iterator itor=GetObjBegin(); itor!=GetObjEnd(); ++itor) 
+	for (auto itor=GetObjBegin(); itor!=GetObjEnd(); ++itor)
 	{
-		MMatchObject* pObj = (MMatchObject*)(*itor).second;
+		MMatchObject* pObj = itor->second;
 		if (pObj->GetEnterBattle() == true)
 		{
 			nCount++;
@@ -888,8 +888,8 @@ void MMatchStage::OnInitRound()
 	int nRedTeamCount = 0, nBlueTeamCount = 0;
 
 	// Setup Life
-	for (MUIDRefCache::iterator i=GetObjBegin(); i!=GetObjEnd(); i++) {
-		MMatchObject* pObj = (MMatchObject*)(*i).second;
+	for (auto i=GetObjBegin(); i!=GetObjEnd(); i++) {
+		MMatchObject* pObj = i->second;
 		if (pObj->GetEnterBattle() == true)
 		{
 			pObj->OnInitRound();
@@ -932,9 +932,9 @@ void MMatchStage::OnApplyTeamBonus(MMatchTeam nTeam)
 {
 	if (GetStageType() != MMATCH_GAMETYPE_DEATHMATCH_TEAM2)		// 으아아악 이런 갓뎀코드를 만들다니 -_-;
 	{
-		for (MUIDRefCache::iterator i=GetObjBegin(); i!=GetObjEnd(); i++) 
+		for (auto i=GetObjBegin(); i!=GetObjEnd(); i++)
 		{
-			MMatchObject* pObj = (MMatchObject*)(*i).second;
+			MMatchObject* pObj = i->second;
 			if (pObj->GetEnterBattle() == true)
 			{
 				if ((pObj->GetTeam() == nTeam) && (pObj->GetGameInfo()->bJoinedGame == true))
@@ -953,9 +953,9 @@ void MMatchStage::OnApplyTeamBonus(MMatchTeam nTeam)
 	else
 	{
 		int TotalKills = 0;
-		for (MUIDRefCache::iterator i=GetObjBegin(); i!=GetObjEnd(); i++) 
+		for (auto i=GetObjBegin(); i!=GetObjEnd(); i++)
 		{
-			MMatchObject* pObj = (MMatchObject*)(*i).second;
+			MMatchObject* pObj = i->second;
 			if (pObj->GetEnterBattle() == true)
 			{
 				if ((pObj->GetTeam() == nTeam) && (pObj->GetGameInfo()->bJoinedGame == true))
@@ -969,9 +969,9 @@ void MMatchStage::OnApplyTeamBonus(MMatchTeam nTeam)
 			TotalKills = 10000000;
 
 
-		for (MUIDRefCache::iterator i=GetObjBegin(); i!=GetObjEnd(); i++) 
+		for (auto i=GetObjBegin(); i!=GetObjEnd(); i++)
 		{
-			MMatchObject* pObj = (MMatchObject*)(*i).second;
+			MMatchObject* pObj = i->second;
 			if (pObj->GetEnterBattle() == true)
 			{
 				if ((pObj->GetTeam() == nTeam) && (pObj->GetGameInfo()->bJoinedGame == true))
@@ -1025,9 +1025,9 @@ int MMatchStage::GetMinPlayerLevel()
 {
 	int nMinLevel = MAX_CHAR_LEVEL;
 
-	for (MUIDRefCache::iterator i=GetObjBegin(); i!=GetObjEnd(); i++) 
+	for (auto i=GetObjBegin(); i!=GetObjEnd(); i++)
 	{
-		MMatchObject* pObj = (MMatchObject*)(*i).second;
+		MMatchObject* pObj = i->second;
 		if (!IsEnabledObject(pObj)) continue;
 
 		if (nMinLevel > pObj->GetCharInfo()->m_nLevel) nMinLevel = pObj->GetCharInfo()->m_nLevel;
@@ -1106,9 +1106,9 @@ void MMatchStage::ShuffleTeamMembers()
 
 	vector<MMatchObject*> sortedObjectList;
 
-	for (MUIDRefCache::iterator i=m_ObjUIDCaches.begin(); i!=m_ObjUIDCaches.end(); i++) 
+	for (auto i=m_ObjUIDCaches.begin(); i!=m_ObjUIDCaches.end(); i++)
 	{
-		MMatchObject* pObj = (MMatchObject*)(*i).second;
+		MMatchObject* pObj = i->second;
 
 		if ((pObj->GetEnterBattle() == true) && (pObj->GetGameInfo()->bJoinedGame == true))
 		{
@@ -1137,9 +1137,9 @@ void MMatchStage::ShuffleTeamMembers()
 	void* pTeamMemberDataArray = MMakeBlobArray(sizeof(MTD_ResetTeamMembersData), nMemberCount);
 
 	nCounter = 0;
-	for (MUIDRefCache::iterator i=m_ObjUIDCaches.begin(); i!=m_ObjUIDCaches.end(); i++) 
+	for (auto i=m_ObjUIDCaches.begin(); i!=m_ObjUIDCaches.end(); i++)
 	{
-		MMatchObject* pObj = (MMatchObject*)(*i).second;
+		MMatchObject* pObj = i->second;
 		MTD_ResetTeamMembersData* pNode = (MTD_ResetTeamMembersData*)MGetBlobArrayElement(pTeamMemberDataArray, nCounter);
 		pNode->m_uidPlayer = pObj->GetUID();
 		pNode->nTeam = (char)pObj->GetTeam();
@@ -1187,9 +1187,9 @@ void MMatchStage::GetTeamMemberCount(int* poutnRedTeamMember, int* poutnBlueTeam
 	if (poutnBlueTeamMember) *poutnBlueTeamMember = 0;
 	if (poutSpecMember) *poutSpecMember = 0;
 
-	for (MUIDRefCache::iterator itor=GetObjBegin(); itor!=GetObjEnd(); itor++) 
+	for (auto itor=GetObjBegin(); itor!=GetObjEnd(); itor++)
 	{
-		MMatchObject* pObj = (MMatchObject*)(*itor).second;
+		MMatchObject* pObj = itor->second;
 
 		if (((bInBattle == true) && (pObj->GetEnterBattle() == true)) || (bInBattle == false))
 		{
@@ -1207,9 +1207,9 @@ int MMatchStage::GetPlayers()
 {
 	int nPlayers = 0;
 
-	for ( MUIDRefCache::iterator i = GetObjBegin();  i != GetObjEnd();  i++)
+	for (auto i = GetObjBegin();  i != GetObjEnd();  i++)
 	{
-		MMatchObject* pObj = (MMatchObject*)((*i).second);
+		MMatchObject* pObj = i->second;
 		
 		if ( IsAdminGrade(pObj) && pObj->CheckPlayerFlags(MTD_PlayerFlags_AdminHide))
 			continue;

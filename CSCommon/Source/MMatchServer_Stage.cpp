@@ -147,8 +147,8 @@ bool MMatchServer::StageJoin(const MUID& uidPlayer, const MUID& uidStage)
 
 	// Cache Update
 	CacheBuilder.Reset();
-	for (MUIDRefCache::iterator i=pStage->GetObjBegin(); i!=pStage->GetObjEnd(); i++) {
-		MUID uidObj = (MUID)(*i).first;
+	for (auto i=pStage->GetObjBegin(); i!=pStage->GetObjEnd(); i++) {
+		MUID uidObj = i->first;
 		MMatchObject* pScanObj = (MMatchObject*)GetObject(uidObj);
 		if (pScanObj) {
 			CacheBuilder.AddObject(pScanObj);
@@ -511,9 +511,9 @@ MCommand* MMatchServer::CreateCmdResponseStageSetting(const MUID& uidStage)
 	int nCharCount = (int)pStage->GetObjCount();
 	void* pCharArray = MMakeBlobArray(sizeof(MSTAGE_CHAR_SETTING_NODE), nCharCount);
 	int nIndex=0;
-	for (MUIDRefCache::iterator itor=pStage->GetObjBegin(); itor!=pStage->GetObjEnd(); itor++) {
+	for (auto itor=pStage->GetObjBegin(); itor!=pStage->GetObjEnd(); itor++) {
 		MSTAGE_CHAR_SETTING_NODE* pCharNode = (MSTAGE_CHAR_SETTING_NODE*)MGetBlobArrayElement(pCharArray, nIndex++);
-		MMatchObject* pObj = (MMatchObject*)(*itor).second;
+		MMatchObject* pObj = itor->second;
 		pCharNode->uidChar = pObj->GetUID();
 		pCharNode->nTeam = pObj->GetTeam();
 		pCharNode->nState = pObj->GetStageState();
@@ -715,8 +715,8 @@ void MMatchServer::OnStageRequestPlayerList(const MUID& uidPlayer, const MUID& u
 	// 방인원 목록
 	MMatchObjectCacheBuilder CacheBuilder;
 	CacheBuilder.Reset();
-	for (MUIDRefCache::iterator i=pStage->GetObjBegin(); i!=pStage->GetObjEnd(); i++) {
-		MMatchObject* pScanObj = (MMatchObject*)(*i).second;
+	for (auto i=pStage->GetObjBegin(); i!=pStage->GetObjEnd(); i++) {
+		MMatchObject* pScanObj = i->second;
 		CacheBuilder.AddObject(pScanObj);
 	}
     MCommand* pCmdCacheUpdate = CacheBuilder.GetResultCmd(MATCHCACHEMODE_UPDATE, this);
@@ -772,10 +772,10 @@ bool StageKick(MMatchServer* pServer, const MUID& uidPlayer, const MUID& uidStag
 				if (lex.GetCount() >= 2) {
 					char* pszTarget = lex.GetByStr(1);
 					if (pszTarget) {
-						for (MUIDRefCache::iterator itor = pStage->GetObjBegin(); 
+						for (auto itor = pStage->GetObjBegin();
 							itor != pStage->GetObjEnd(); ++itor)
 						{
-							MMatchObject* pTarget = (MMatchObject*)((*itor).second);
+							MMatchObject* pTarget = itor->second;
 							if (_stricmp(pszTarget, pTarget->GetName()) == 0) {
 								if (pTarget->GetPlace() != MMP_BATTLE) {
 									pServer->StageLeave(pTarget->GetUID(), uidStage);
@@ -857,10 +857,10 @@ void MMatchServer::OnStageStart(const MUID& uidPlayer, const MUID& uidStage, int
 		if ( (MIsCorrectMap(nMapID)) && (pMaster) && (MGetGameTypeMgr()->IsCorrectGameType(nGameType)) )
 		{
 			char szPlayers[1024] = "";
-			for (MUIDRefCache::iterator itor = pStage->GetObjBegin(); 
+			for (auto itor = pStage->GetObjBegin();
 				itor != pStage->GetObjEnd(); ++itor)
 			{
-				MMatchObject* pObject = (MMatchObject*)((*itor).second);
+				MMatchObject* pObject = itor->second;
 				strcat_safe(szPlayers, pObject->GetCharInfo()->m_szName);
 				strcat_safe(szPlayers, " ");
 			}
@@ -1129,9 +1129,9 @@ void MMatchServer::ResponseGameInfo(const MUID& uidChar, const MUID& uidStage)
 
 	void* pPlayerItemArray = MMakeBlobArray(sizeof(MTD_GameInfoPlayerItem), nPlayerCount);
 	int nIndex=0;
-	for (MUIDRefCache::iterator itor=pStage->GetObjBegin(); itor!=pStage->GetObjEnd(); itor++) 
+	for (auto itor=pStage->GetObjBegin(); itor!=pStage->GetObjEnd(); itor++)
 	{
-		MMatchObject* pObj = (MMatchObject*)(*itor).second;
+		MMatchObject* pObj = itor->second;
 		if (pObj->GetEnterBattle() == false) continue;
 
 		MTD_GameInfoPlayerItem* pPlayerItem = (MTD_GameInfoPlayerItem*)MGetBlobArrayElement(pPlayerItemArray, nIndex++);
@@ -2163,8 +2163,8 @@ void MMatchServer::OnVoteCallVote(const MUID& uidPlayer, const char* pszDiscuss,
 	if (pStage == NULL) return;
 
 	// 운영자가 같이 게임중이면 투표 불가능
-	for (MUIDRefCache::iterator itor = pStage->GetObjBegin(); itor != pStage->GetObjEnd(); itor++) {
-		MUID uidObj = (MUID)(*itor).first;
+	for (auto itor = pStage->GetObjBegin(); itor != pStage->GetObjEnd(); itor++) {
+		MUID uidObj = itor->first;
 		MMatchObject* pPlayer = (MMatchObject*)GetObject(uidObj);
 		if ((pPlayer) && (IsAdminGrade(pPlayer)))
 		{

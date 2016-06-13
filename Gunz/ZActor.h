@@ -173,7 +173,8 @@ public:
 	
 
 	// 특정시점의 hit test 를 리턴해줘야 한다, pOutPos 가 있으면 hit된 위치를 리턴해줘야 한다
-	virtual ZOBJECTHITTEST HitTest(rvector& origin, rvector& to,float fTime,rvector *pOutPos=NULL);
+	virtual ZOBJECTHITTEST HitTest(const rvector& origin, const rvector& to,
+		float fTime, rvector *pOutPos = NULL) override;
 
 	// 동작/이벤트 상속
 	virtual bool IsDie();

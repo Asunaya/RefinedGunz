@@ -9,6 +9,7 @@
 #include "VoiceChat.h"
 #include "Tasks.h"
 #include "Hitboxes.h"
+#include "ZReplay.h"
 
 class ZChatCmdManager;
 bool OnGameInput();

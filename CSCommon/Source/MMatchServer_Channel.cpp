@@ -419,7 +419,7 @@ void MMatchServer::ChannelResponsePlayerList(const MUID& uidPlayer, const MUID& 
 		nPlayerIndex = nPage * NUM_PLAYERLIST_NODE;
 	}
 
-	MUIDRefCache::iterator FirstItor = pChannel->GetObjBegin();
+	auto FirstItor = pChannel->GetObjBegin();
 
 	for (int i = 0; i < nPlayerIndex; i++) 
 	{
@@ -443,9 +443,9 @@ void MMatchServer::ChannelResponsePlayerList(const MUID& uidPlayer, const MUID& 
 	void* pPlayerArray = MMakeBlobArray(sizeof(MTD_ChannelPlayerListNode), nNodeCount);
 
 	int nArrayIndex=0;
-	for (MUIDRefCache::iterator i=FirstItor; i != pChannel->GetObjEnd(); i++) 
+	for (auto i=FirstItor; i != pChannel->GetObjEnd(); i++)
 	{
-		MMatchObject* pScanObj = (MMatchObject*)(*i).second;
+		MMatchObject* pScanObj = i->second;
 
 		MTD_ChannelPlayerListNode* pNode = (MTD_ChannelPlayerListNode*)MGetBlobArrayElement(pPlayerArray, nArrayIndex++);
 
@@ -483,9 +483,9 @@ void MMatchServer::ChannelResponseAllPlayerList(const MUID& uidPlayer, const MUI
 	memset(ppTransObjectArray, 0, sizeof(MMatchObject*) * DEFAULT_CHANNEL_MAXPLAYERS);
 
 	// TransObjectArray에 전송할 Object의 포인터만 저장해놓는다.
-	for (MUIDRefCache::iterator i=pChannel->GetObjBegin(); i != pChannel->GetObjEnd(); i++) 
+	for (auto i=pChannel->GetObjBegin(); i != pChannel->GetObjEnd(); i++)
 	{
-		MMatchObject* pScanObj = (MMatchObject*)(*i).second;
+		MMatchObject* pScanObj = i->second;
 
 		if (IsEnabledObject(pScanObj))
 		{

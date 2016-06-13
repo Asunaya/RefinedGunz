@@ -855,7 +855,7 @@ void ZActor::DebugTest()
 }
 
 
-ZOBJECTHITTEST ZActor::HitTest(rvector& origin, rvector& to,float fTime,rvector *pOutPos)
+ZOBJECTHITTEST ZActor::HitTest(const rvector& origin, const rvector& to, float fTime, rvector *pOutPos)
 {
 	rvector footpos,actor_dir;
 	// 적절한 시점의 위치를 얻어낼수없으면 실패..

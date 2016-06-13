@@ -1417,13 +1417,10 @@ bool RBspObject::Open(const char *filename,ROpenFlag nOpenFlag,RFPROGRESSCALLBAC
 	char xmlname[_MAX_PATH];
 	sprintf_safe(xmlname,"%s.xml",filename);
 
-	if (!PhysOnly)
+	if (!OpenDescription(xmlname))
 	{
-		if (!OpenDescription(xmlname))
-		{
-			MLog("Error while loading %s\n", xmlname);
-			return false;
-		}
+		MLog("Error while loading %s\n", xmlname);
+		return false;
 	}
 	if(pfnProgressCallback) pfnProgressCallback(CallbackParam,.3f);
 
@@ -1618,7 +1615,7 @@ bool RBspObject::Open_MaterialList(MXmlElement *pElement)
 		char szMapName[256];
 		GetRefineFilename(szMapName, DiffuseMapName.c_str());
 
-		if(strlen(szMapName))
+		if(!PhysOnly && szMapName[0])
 		{
 			m_pMaterials[i].texture = RCreateBaseTexture(szMapName,RTextureType_Map,true);
 		}
@@ -2002,21 +1999,22 @@ bool RBspObject::OpenDescription(const char *filename)
 		aChild = aParent.GetChildNode(i);
 		aChild.GetTagName(szTagName);
 		if(_stricmp(szTagName,RTOK_MATERIALLIST)==0)
-			Open_MaterialList(&aChild); else
-		if(_stricmp(szTagName,RTOK_LIGHTLIST)==0)
-			Open_LightList(&aChild); else
-		if(_stricmp(szTagName,RTOK_OBJECTLIST)==0)
-			Open_ObjectList(&aChild); else
-		if(_stricmp(szTagName,RTOK_OCCLUSIONLIST)==0)
-			Open_OcclusionList(&aChild);
-		if(_stricmp(szTagName,RTOK_DUMMYLIST)==0)
+			Open_MaterialList(&aChild);
+		else if (!PhysOnly)
 		{
-			Open_DummyList(&aChild);
+			if (_stricmp(szTagName, RTOK_LIGHTLIST) == 0)
+				Open_LightList(&aChild);
+			else if (_stricmp(szTagName, RTOK_OBJECTLIST) == 0)
+				Open_ObjectList(&aChild);
+			else if (_stricmp(szTagName, RTOK_OCCLUSIONLIST) == 0)
+				Open_OcclusionList(&aChild);
+			else if (_stricmp(szTagName, RTOK_DUMMYLIST) == 0)
+				Open_DummyList(&aChild);
+			else if (_stricmp(szTagName, RTOK_FOG) == 0)
+				Set_Fog(&aChild);
+			else if (_stricmp(szTagName, "AMBIENTSOUNDLIST") == 0)
+				Set_AmbSound(&aChild);
 		}
-		if(_stricmp(szTagName,RTOK_FOG)==0)
-			Set_Fog(&aChild);
-		if(_stricmp(szTagName,"AMBIENTSOUNDLIST")==0)
-			Set_AmbSound(&aChild);
 	}
 
 	delete buffer;
@@ -2701,8 +2699,7 @@ bool RBspObject::Open_Nodes(RSBspNode *pNode,MZFile *pfile)
 				if(nMaterial<0 || nMaterial>=m_nMaterial) nMaterial=0;	
 
 				pInfo->nMaterial=nMaterial;
-				if (!PhysOnly)
-					pInfo->dwFlags|=m_pMaterials[nMaterial].dwFlags;
+				pInfo->dwFlags|=m_pMaterials[nMaterial].dwFlags;
 			}
 			_ASSERT(pInfo->nMaterial<m_nMaterial);
 			pInfo->nPolygonID=g_nCreatingPosition;

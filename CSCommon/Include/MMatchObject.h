@@ -20,6 +20,8 @@ using namespace std;
 #include "MMatchHShield.h"
 #include "GlobalTypes.h"
 #include "stuff.h"
+#include "BasicInfoHistory.h"
+#include "HitRegistration.h"
 
 // 등급 - 이것은 디비의 UserGrade테이블과 싱크가 맞아야 한다.
 enum MMatchUserGradeID
@@ -483,7 +485,6 @@ protected:
 	unsigned long int m_nQuestLatency;		// 퀘스트모드
 	
 	// This is awkward.
-	std::deque<BasicInfo> BasicInfoHistory;
 	std::deque<int> Pings;
 	int AveragePing;
 
@@ -493,7 +494,7 @@ protected:
 
 	void UpdateStageListChecksum(unsigned long nChecksum)	{ m_nStageListChecksum = nChecksum; }
 	unsigned long GetStageListChecksum()					{ return m_nStageListChecksum; }
-	MMatchObject() : MObject() 
+	MMatchObject() : MObject()
 	{
 	}
 	void DeathCount()				{ m_nDeathCount++; m_nAllRoundDeathCount++; }
@@ -653,10 +654,6 @@ public:
 	void SetHShieldHackerDisconnectWaitInfo( const MMatchDisconnectStatus DisStatus = MMDS_DISCONN_WAIT );
 	void SetBadFileCRCDisconnectWaitInfo( const MMatchDisconnectStatus DisStatus = MMDS_DISCONN_WAIT );
 
-	void OnBasicInfo(const BasicInfo& bi);
-
-	bool GetPositions(v3& Head, v3& Root, u32 Time);
-
 	void AddPing(int Ping)
 	{
 		Pings.push_front(Ping);
@@ -676,12 +673,23 @@ public:
 		return AveragePing;
 	}
 
+	void GetPositions(v3& Head, v3& Foot, double Time);
+
+	BasicInfoHistoryManager BasicInfoHistory;
+
 	auto GetSelectedSlot() const
 	{
 		if (BasicInfoHistory.empty())
 			return MMCIP_PRIMARY;
 
-		return BasicInfoHistory.begin()->SelectedSlot;
+		return BasicInfoHistory.front().SelectedSlot;
+	}
+
+	ZOBJECTHITTEST HitTest(const v3& src, const v3& dest, double Time, v3* OutPos = nullptr)
+	{
+		v3 Head, Foot;
+		GetPositions(Head, Foot, Time);
+		return PlayerHitTest(Head, Foot, src, dest, OutPos);
 	}
 
 public:

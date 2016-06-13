@@ -221,9 +221,9 @@ void MMatchRuleBaseQuest::CheckRewards(MUID& uidPlayer, MQuestDropItem* pDropIte
 
 void MMatchRuleBaseQuest::RefreshPlayerStatus()
 {
-	for (MUIDRefCache::iterator i=m_pStage->GetObjBegin(); i!=m_pStage->GetObjEnd(); i++) 
+	for (auto i=m_pStage->GetObjBegin(); i!=m_pStage->GetObjEnd(); i++)
 	{
-		MMatchObject* pObj = (MMatchObject*)(*i).second;
+		MMatchObject* pObj = i->second;
 		if (pObj->GetEnterBattle() == false) continue;	// 배틀참가하고 있는 플레이어만 체크
 		if (IsAdminGrade(pObj) && pObj->CheckPlayerFlags(MTD_PlayerFlags_AdminHide)) continue;
 
@@ -249,9 +249,9 @@ bool MMatchRuleBaseQuest::CheckPlayersAlive()
 {
 	int nAliveCount = 0;
 	MMatchObject* pObj;
-	for (MUIDRefCache::iterator i=m_pStage->GetObjBegin(); i!=m_pStage->GetObjEnd(); i++) 
+	for (auto i=m_pStage->GetObjBegin(); i!=m_pStage->GetObjEnd(); i++)
 	{
-		pObj = (MMatchObject*)(*i).second;
+		pObj = i->second;
 		if (pObj->GetEnterBattle() == false) continue;	// 배틀참가하고 있는 플레이어만 체크
 		if (IsAdminGrade(pObj) && pObj->CheckPlayerFlags(MTD_PlayerFlags_AdminHide)) continue;
 
@@ -398,9 +398,9 @@ void MMatchRuleBaseQuest::ReAssignNPC()
 
 		m_nLastNPCAssignCheckTime = nowTime;
 
-		for (MUIDRefCache::iterator i=pStage->GetObjBegin(); i!=pStage->GetObjEnd(); i++) 
+		for (auto i=pStage->GetObjBegin(); i!=pStage->GetObjEnd(); i++)
 		{
-			MMatchObject* pObj = (MMatchObject*)(*i).second;
+			MMatchObject* pObj = i->second;
 			if (pObj->GetEnterBattle() == false) continue;	// 배틀참가하고 있는 플레이어만 체크
 
 			unsigned long int lat = pObj->GetQuestLatency();
@@ -427,9 +427,9 @@ void MMatchRuleBaseQuest::SendClientLatencyPing()
 
 		if (pStage == NULL) return;
 
-		for (MUIDRefCache::iterator i=pStage->GetObjBegin(); i!=pStage->GetObjEnd(); i++) 
+		for (auto i=pStage->GetObjBegin(); i!=pStage->GetObjEnd(); i++)
 		{
-			MMatchObject* pObj = (MMatchObject*)(*i).second;
+			MMatchObject* pObj = i->second;
 			if (pObj->GetEnterBattle() == false) continue;	// 배틀참가하고 있는 플레이어만 체크
 
 			if (pObj->m_bQuestRecvPong)

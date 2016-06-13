@@ -25,8 +25,10 @@
 #include <list>
 #include <string>
 
-#include "ZReplay.h"
 #include "ZCharacterStructs.h"
+#include "AnimationStuff.h"
+#include "BasicInfoHistory.h"
+#include "ZReplayStructs.h"
 
 using namespace std;
 
@@ -45,14 +47,6 @@ _USING_NAMESPACE_REALSPACE2
 #define ARRIVAL_TOLER		5.f
 
 class ZShadow;
-
-struct ZANIMATIONINFO {
-	char *Name;
-	bool bEnableCancel;		// 캔슬 가능한지
-	bool bLoop;				// 반복 되는 동작
-	bool bMove;				// 움직임이 포함된 애니메이션
-	bool bContinuos;		// 포함된 움직임이 시작부터 연결되어있는지.
-};
 
 struct ZFACECOSTUME
 {
@@ -252,6 +246,9 @@ protected:
 	virtual void	OnDie();
 
 public:
+	BasicInfoHistoryManager BasicInfoHistory;
+	void GetPositions(v3& Head, v3& Foot, u64 Time);
+
 	float	m_fLastValidTime;		// Dead Reckoning에 필요한 변수 -> 지금 코드에서 필요없어보임
 //	float	m_fDistToFloor;			// 바닥까지의 거리
 //	rplane	m_FloorPlane;			// 바닥 평면의 방정식
@@ -588,7 +585,7 @@ public:
 	virtual void OnDamagedAnimation(ZObject *pAttacker,int type);
 
 	// ZObject에 맞게 만든 동작이나 이벤트에 관한 것들.
-	virtual ZOBJECTHITTEST HitTest(rvector& origin, rvector& to,float fTime,rvector *pOutPos=NULL);
+	virtual ZOBJECTHITTEST HitTest(const rvector& origin, const rvector& to, float fTime, rvector *pOutPos = NULL) override;
 
 	virtual void OnKnockback(const rvector& dir, float fForce);
 //	virtual void OnDamage(int damage, float fRatio = 1.0f);

@@ -183,7 +183,7 @@ bool MCommand::SetData(const char* pData, MCommandManager* pCM, unsigned short n
 	MCommandDesc* pDesc = pCM->GetCommandDescByID(nCommandID);
 	if (pDesc == NULL)
 	{
-		_ASSERT(0);
+		//_ASSERT(0);
 		//MLog("Unknown command ID %04X\n", nCommandID);
 
 		return false;

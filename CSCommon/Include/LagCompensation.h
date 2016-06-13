@@ -14,13 +14,12 @@ class LagCompManager
 {
 public:
 	bool Create();
-	bool LoadAnimations(const char* filename, int Index);
-
-	v3 GetHeadPosition(const matrix& World, float y, MMatchSex Sex, ZC_STATE_LOWER LowerState, int Frame, RWeaponMotionType MotionType);
 
 	RBspObject* GetBspObject(const char* MapName);
 
 private:
+	bool LoadAnimations(const char* filename, int Index);
+
 	RAnimationMgr AniMgrs[2]; // 0 = male, 1 = female
 	std::unordered_map<std::string, RBspObject> Maps;
 };

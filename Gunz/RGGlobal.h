@@ -6,12 +6,6 @@ inline void cprint(...)
 {
 }
 
-template <typename T, size_t size>
-inline constexpr size_t ArraySize(T(&)[size])
-{
-	return size;
-}
-
 static constexpr int RG_SLASH_RADIUS = 320;
 static constexpr int RG_MASSIVE_RADIUS = 280;
 

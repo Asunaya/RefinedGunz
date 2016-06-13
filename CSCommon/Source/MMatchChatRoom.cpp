@@ -19,7 +19,7 @@ MMatchChatRoom::~MMatchChatRoom()
 
 bool MMatchChatRoom::AddPlayer(const MUID& uidPlayer)
 {
-	MUIDRefCache::iterator i = m_PlayerList.find(uidPlayer);
+	auto i = m_PlayerList.find(uidPlayer);
 	if (i != m_PlayerList.end())
 		return false;
 
@@ -36,7 +36,7 @@ bool MMatchChatRoom::AddPlayer(const MUID& uidPlayer)
 
 void MMatchChatRoom::RemovePlayer(const MUID& uidPlayer)
 {
-	MUIDRefCache::iterator i = m_PlayerList.find(uidPlayer);
+	auto i = m_PlayerList.find(uidPlayer);
 	if (i != m_PlayerList.end()) {
 		m_PlayerList.erase(i);
 	}
@@ -52,12 +52,12 @@ void MMatchChatRoom::RouteChat(const MUID& uidSender, char* pszMessage)
 	if (pSenderObj == NULL)
 		return;
 
-	for (MUIDRefCache::iterator i=m_PlayerList.begin(); i!=m_PlayerList.end(); i++) {
-		MUID uidTarget = (*i).first;
+	for (auto i=m_PlayerList.begin(); i!=m_PlayerList.end(); i++) {
+		MUID uidTarget = i->first;
 		MMatchObject* pTargetObj = pServer->GetObject(uidTarget);
 		if (pTargetObj) {
 			MCommand* pCmd = pServer->CreateCommand(MC_MATCH_CHATROOM_CHAT, MUID(0,0));
-			pCmd->AddParameter(new MCmdParamStr( const_cast<char*>(GetName()) ));
+			pCmd->AddParameter(new MCmdParamStr( GetName() ));
 			pCmd->AddParameter(new MCmdParamStr(pSenderObj->GetName()));
 			pCmd->AddParameter(new MCmdParamStr(pszMessage));
 			pServer->RouteToListener(pTargetObj, pCmd);
@@ -76,8 +76,8 @@ void MMatchChatRoom::RouteCommand(const MCommand* pCommand)
 		return;
 
 	MMatchServer* pServer = MMatchServer::GetInstance();
-	for (MUIDRefCache::iterator i=m_PlayerList.begin(); i!=m_PlayerList.end(); i++) {
-		MUID uidTarget = (*i).first;
+	for (auto i=m_PlayerList.begin(); i!=m_PlayerList.end(); i++) {
+		MUID uidTarget = i->first;
 		MMatchObject* pTargetObj = pServer->GetObject(uidTarget);
 		if (pTargetObj) {
 			MCommand* pRouteCmd = pCommand->Clone();

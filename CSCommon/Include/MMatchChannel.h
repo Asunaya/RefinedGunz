@@ -64,8 +64,8 @@ private:
 	MCHANNEL_RULE	m_nRuleType;
 	//bool			m_bNewbieChannel;		// 뉴비채널은 정말 초보만 들어갈 수 있다.
 
-	MUIDRefCache	m_ObjUIDCaches;			// 채널전체 플레이어들
-	MUIDRefCache	m_ObjUIDLobbyCaches;	// 로비에 있는 플레이어들
+	MMatchObjectMap	m_ObjUIDCaches;			// 채널전체 플레이어들
+	MMatchObjectMap	m_ObjUIDLobbyCaches;	// 로비에 있는 플레이어들
 //	MObjectStrMap	m_ObjStrCaches;
 
 	MMatchStage*	m_pStages[MAX_CHANNEL_MAXSTAGES];
@@ -80,7 +80,7 @@ private:
 	unsigned long	m_nLastTick;
 	unsigned long	m_nEmptyPeriod;
 
-	void JoinLobby(const MUID& uid, const MMatchObject* pObj);
+	void JoinLobby(const MUID& uid, MMatchObject* pObj);
 	void LeaveLobby(const MUID& uid);
 protected:
 	inline bool IsChecksumUpdateTime(unsigned long nTick);
@@ -112,10 +112,10 @@ public:
 	int	GetMaxStages()				{ return m_nMaxStages; }
 	size_t GetObjCount()			{ return m_ObjUIDCaches.size(); }
 	int GetPlayers();
-	MUIDRefCache::iterator GetObjBegin()		{ return m_ObjUIDCaches.begin(); }
-	MUIDRefCache::iterator GetObjEnd()			{ return m_ObjUIDCaches.end(); }
-	MUIDRefCache::iterator GetLobbyObjBegin()	{ return m_ObjUIDLobbyCaches.begin(); }
-	MUIDRefCache::iterator GetLobbyObjEnd()		{ return m_ObjUIDLobbyCaches.end(); }
+	auto GetObjBegin()		{ return m_ObjUIDCaches.begin(); }
+	auto GetObjEnd()		{ return m_ObjUIDCaches.end(); }
+	auto GetLobbyObjBegin()	{ return m_ObjUIDLobbyCaches.begin(); }
+	auto GetLobbyObjEnd()	{ return m_ObjUIDLobbyCaches.end(); }
 
 
 	void AddObject(const MUID& uid, MMatchObject* pObj);

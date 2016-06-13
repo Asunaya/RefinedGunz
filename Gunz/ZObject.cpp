@@ -114,11 +114,6 @@ bool IsPlayerObject(ZObject* pObject)
 	return ((MIsExactlyClass(ZNetCharacter, pObject)) || ((MIsExactlyClass(ZMyCharacter, pObject))));
 }
 
-ZOBJECTHITTEST ZObject::HitTest(rvector& origin, rvector& to,float fTime,rvector *pOutPos)
-{
-	return ZOH_NONE;
-}
-
 void ZObject::Tremble(float fValue, DWORD nMaxTime, DWORD nReturnMaxTime)
 {
 	if(m_pVMesh)

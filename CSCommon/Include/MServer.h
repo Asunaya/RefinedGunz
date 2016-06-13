@@ -20,7 +20,7 @@ protected:
 	void LockAcceptWaitQueue()		{ EnterCriticalSection(&m_csAcceptWaitQueue); }
 	void UnlockAcceptWaitQueue()		{ LeaveCriticalSection(&m_csAcceptWaitQueue); }
 
-	MUIDRefCache				m_CommRefCache;			///< 현재 연결이 설정된 다른 커뮤니케이터 캐쉬
+	MUIDRefCache<MCommObject>			m_CommRefCache;			///< 현재 연결이 설정된 다른 커뮤니케이터 캐쉬
 	CRITICAL_SECTION			m_csCommList;
 
 	void LockCommList()			{ EnterCriticalSection(&m_csCommList); }

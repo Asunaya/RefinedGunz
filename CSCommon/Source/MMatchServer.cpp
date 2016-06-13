@@ -1152,11 +1152,11 @@ void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Recei
 		{
 		case MC_PEER_BASICINFO:
 		{
-			BasicInfo bi;
+			BasicInfoItem bi;
 			ZPACKEDBASICINFO& pbi = *(ZPACKEDBASICINFO*)(Blob + 2 + 2 + 1 + 4);
 			pbi.Unpack(bi);
-			bi.RecvTime = MGetMatchServer()->GetGlobalClockCount();
-			SenderObj->OnBasicInfo(bi);
+			bi.RecvTime = double(MGetMatchServer()->GetGlobalClockCount()) / 1000;
+			SenderObj->BasicInfoHistory.AddBasicInfo(bi);
 
 			//mlog("BasicInfo %d, %d, %d\n", pbi.posx, pbi.posy, pbi.posz);
 		}
@@ -1172,7 +1172,7 @@ void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Recei
 
 			//AnnounceF(Sender, "Shot! %f, %f, %f -> %f, %f, %f", src.x, src.y, src.z, dest.x, dest.y, dest.z);
 
-			auto Time = GetGlobalClockCount() - SenderObj->GetPing();
+			auto Time = double(GetGlobalClockCount() - SenderObj->GetPing()) / 1000;
 
 			auto Slot = SenderObj->GetSelectedSlot();
 
@@ -1185,11 +1185,6 @@ void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Recei
 				return;
 
 			auto Damage = ItemDesc->m_nDamage;
-
-			auto GetPositions = [&](auto& Obj, auto& Head, auto& Foot)
-			{
-				Obj.GetPositions(Head, Foot, Time);
-			};
 
 			auto SendDamage = [&](auto& UID, auto Damage, auto PiercingRatio, auto DamageType, auto WeaponType)
 			{
@@ -1225,18 +1220,19 @@ void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Recei
 
 					MPICKINFO pickinfo;
 					PickHistory(*SenderObj, src, dest, Stage->BspObject,
-						pickinfo, Stage->m_ObjUIDCaches, GetPositions, PassFlag);
+						pickinfo, MakePairValueAdapter(Stage->m_ObjUIDCaches), Time, PassFlag);
 
 					if (pickinfo.bBspPicked)
 					{
-						AnnounceF(Sender, "Hit wall at %d, %d, %d",
-							(int)pickinfo.bpi.PickPos.x, (int)pickinfo.bpi.PickPos.y, (int)pickinfo.bpi.PickPos.z);
+						/*AnnounceF(Sender, "Server: Hit wall at %d, %d, %d",
+							(int)pickinfo.bpi.PickPos.x, (int)pickinfo.bpi.PickPos.y,
+							(int)pickinfo.bpi.PickPos.z);*/
 						continue;
 					}
 
 					if (!pickinfo.pObject)
 					{
-						AnnounceF(Sender, "No wall, no object");
+						AnnounceF(Sender, "Server: No wall, no object");
 						continue;
 					}
 
@@ -1245,7 +1241,9 @@ void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Recei
 					auto& item = DamageMap[pickinfo.pObject->GetUID()];
 
 					int NewDamage = item.Damage + Damage;
-					item.PiercingRatio = (item.Damage * item.PiercingRatio + Damage * PiercingRatio) / NewDamage;
+					if (PiercingRatio != item.PiercingRatio)
+						item.PiercingRatio = (item.Damage * item.PiercingRatio + Damage * PiercingRatio)
+							/ NewDamage;
 					item.Damage += Damage;
 					auto DamageType = (pickinfo.info.parts == eq_parts_head) ? ZD_BULLET_HEADSHOT : ZD_BULLET;
 					static_assert(ZD_BULLET_HEADSHOT > ZD_BULLET, "Fix me");
@@ -1254,7 +1252,14 @@ void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Recei
 				}
 
 				for (auto& item : DamageMap)
-					SendDamage(item.first, item.second.Damage, item.second.PiercingRatio, item.second.DamageType, item.second.WeaponType);
+				{
+					SendDamage(item.first,
+						item.second.Damage, item.second.PiercingRatio,
+						item.second.DamageType, item.second.WeaponType);
+
+					AnnounceF(Sender, "Server: Hit %s for %d damage",
+						GetObject(item.first)->GetName(), item.second.Damage);
+				}
 			}
 			else
 			{
@@ -1265,18 +1270,20 @@ void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Recei
 				const u32 PassFlag = RM_FLAG_ADDITIVE | RM_FLAG_HIDE | RM_FLAG_PASSROCKET | RM_FLAG_PASSBULLET;
 
 				MPICKINFO pickinfo;
-				PickHistory(*SenderObj, src, dest, Stage->BspObject, pickinfo, Stage->m_ObjUIDCaches, GetPositions, PassFlag);
+				PickHistory(*SenderObj, src, dest, Stage->BspObject, pickinfo,
+					MakePairValueAdapter(Stage->m_ObjUIDCaches), Time, PassFlag);
 
 				if (pickinfo.bBspPicked)
 				{
-					AnnounceF(Sender, "Hit wall at %d, %d, %d",
-						(int)pickinfo.bpi.PickPos.x, (int)pickinfo.bpi.PickPos.y, (int)pickinfo.bpi.PickPos.z);
+					AnnounceF(Sender, "Server: Hit wall at %d, %d, %d",
+						(int)pickinfo.bpi.PickPos.x, (int)pickinfo.bpi.PickPos.y,
+						(int)pickinfo.bpi.PickPos.z);
 					return;
 				}
 
 				if (!pickinfo.pObject)
 				{
-					AnnounceF(Sender, "No wall, no object");
+					AnnounceF(Sender, "Server: No wall, no object");
 					return;
 				}
 
@@ -1284,7 +1291,7 @@ void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Recei
 				auto DamageType = (pickinfo.info.parts == eq_parts_head) ? ZD_BULLET_HEADSHOT : ZD_BULLET;
 				auto WeaponType = ItemDesc->m_nWeaponType;
 
-				LogF(LOG_ALL, "Damage: %d", Damage);
+				LogF(LOG_ALL, "Server: Hit %s for %d damage", pickinfo.pObject->GetName(), Damage);
 
 				SendDamage(pickinfo.pObject->GetUID(), Damage, PiercingRatio, DamageType, WeaponType);
 			}
@@ -1315,8 +1322,8 @@ void MMatchServer::RouteToAllConnection(MCommand* pCommand)
 
 	// Queueing for SafeSend
 	LockCommList();
-		for(MUIDRefCache::iterator i=m_CommRefCache.begin(); i!=m_CommRefCache.end(); i++){
-			MCommObject* pCommObj = (MCommObject*)((*i).second);
+		for(auto i=m_CommRefCache.begin(); i!=m_CommRefCache.end(); i++){
+			MCommObject* pCommObj = i->second;
 			if (pCommObj->GetUID() < MUID(0,3)) continue;	// MUID로 Client인지 판별할수 있는 코드 필요함
 
 			stRouteListenerNode* pNewNode = new stRouteListenerNode;
@@ -1396,8 +1403,8 @@ void MMatchServer::RouteToChannel(const MUID& uidChannel, MCommand* pCommand)
 		return;
 	}
 
-	for (MUIDRefCache::iterator i=pChannel->GetObjBegin(); i!=pChannel->GetObjEnd(); i++) {
-		MObject* pObj = (MObject*)(*i).second;
+	for (auto i=pChannel->GetObjBegin(); i!=pChannel->GetObjEnd(); i++) {
+		MObject* pObj = i->second;
 
 		MCommand* pSendCmd = pCommand->Clone();
 		RouteToListener(pObj, pSendCmd);
@@ -1414,9 +1421,9 @@ void MMatchServer::RouteToChannelLobby(const MUID& uidChannel, MCommand* pComman
 		return;
 	}
 
-	for (MUIDRefCache::iterator i=pChannel->GetLobbyObjBegin(); i!=pChannel->GetLobbyObjEnd(); i++) 
+	for (auto i=pChannel->GetLobbyObjBegin(); i!=pChannel->GetLobbyObjEnd(); i++)
 	{
-		MObject* pObj = (MObject*)(*i).second;
+		MObject* pObj = i->second;
 
 		MCommand* pSendCmd = pCommand->Clone();
 		RouteToListener(pObj, pSendCmd);
@@ -1433,10 +1440,8 @@ void MMatchServer::RouteToStage(const MUID& uidStage, MCommand* pCommand)
 		return;
 	}
 
-	for (MUIDRefCache::iterator i=pStage->GetObjBegin(); i!=pStage->GetObjEnd(); i++) {
-//		MObject* pObj = (MObject*)(*i).second;
-
-		MUID uidObj = (MUID)(*i).first;
+	for (auto i=pStage->GetObjBegin(); i!=pStage->GetObjEnd(); i++) {
+		MUID uidObj = i->first;
 		MObject* pObj = (MObject*)GetObject(uidObj);
 		if (pObj) {
 			MCommand* pSendCmd = pCommand->Clone();
@@ -1458,9 +1463,9 @@ void MMatchServer::RouteToStageWaitRoom(const MUID& uidStage, MCommand* pCommand
 		return;
 	}
 
-	for (MUIDRefCache::iterator i=pStage->GetObjBegin(); i!=pStage->GetObjEnd(); i++) {
+	for (auto i=pStage->GetObjBegin(); i!=pStage->GetObjEnd(); i++) {
 
-		MUID uidObj = (MUID)(*i).first;
+		MUID uidObj = i->first;
 		MMatchObject* pObj = (MMatchObject*)GetObject(uidObj);
 		if (pObj) {
 			if (! pObj->GetEnterBattle())
@@ -1482,10 +1487,10 @@ void MMatchServer::RouteToBattle(const MUID& uidStage, MCommand* pCommand)
 		return;
 	}
 
-	for (MUIDRefCache::iterator i=pStage->GetObjBegin(); i!=pStage->GetObjEnd(); i++) {
+	for (auto i=pStage->GetObjBegin(); i!=pStage->GetObjEnd(); i++) {
 		//MMatchObject* pObj = (MMatchObject*)(*i).second;
 
-		MUID uidObj = (MUID)(*i).first;
+		MUID uidObj = i->first;
 		MMatchObject* pObj = (MMatchObject*)GetObject(uidObj);
 		if (pObj) {
 			if (pObj->GetEnterBattle())
@@ -1510,8 +1515,8 @@ void MMatchServer::RouteToBattleExcept(const MUID& uidStage, MCommand* pCommand,
 		return;
 	}
 
-	for (MUIDRefCache::iterator i = pStage->GetObjBegin(); i != pStage->GetObjEnd(); i++) {
-		MUID uidObj = (MUID)(*i).first;
+	for (auto i = pStage->GetObjBegin(); i != pStage->GetObjEnd(); i++) {
+		MUID uidObj = i->first;
 
 		if (uidObj == uidExceptedPlayer)
 			continue;
@@ -1541,8 +1546,8 @@ void MMatchServer::RouteToClan(const int nCLID, MCommand* pCommand)
 		return;
 	}
 
-	for (MUIDRefCache::iterator i=pClan->GetMemberBegin(); i!=pClan->GetMemberEnd(); i++) {
-		MObject* pObj = (MObject*)(*i).second;
+	for (auto i=pClan->GetMemberBegin(); i!=pClan->GetMemberEnd(); i++) {
+		MObject* pObj = i->second;
 
 		MCommand* pSendCmd = pCommand->Clone();
 		RouteToListener(pObj, pSendCmd);
@@ -1930,8 +1935,8 @@ void MMatchServer::ResponsePeerList(const MUID& uidChar, const MUID& uidStage)
 
 	void* pPeerArray = MMakeBlobArray(sizeof(MTD_PeerListNode), nPeerCount);
 	int nIndex=0;
-	for (MUIDRefCache::iterator itor=pStage->GetObjBegin(); itor!=pStage->GetObjEnd(); itor++) {
-		MMatchObject* pObj = (MMatchObject*)(*itor).second;
+	for (auto itor=pStage->GetObjBegin(); itor!=pStage->GetObjEnd(); itor++) {
+		MMatchObject* pObj = itor->second;
 		if (pObj->GetEnterBattle() == false) continue;
 
 		MTD_PeerListNode* pNode = (MTD_PeerListNode*)MGetBlobArrayElement(pPeerArray, nIndex++);

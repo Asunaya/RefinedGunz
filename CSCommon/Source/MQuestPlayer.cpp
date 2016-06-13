@@ -23,9 +23,9 @@ void MQuestPlayerManager::Create(MMatchStage* pStage)
 {
 	m_pStage = pStage;
 
-	for (MUIDRefCache::iterator itorObj = pStage->GetObjBegin(); itorObj != pStage->GetObjEnd(); ++itorObj)
+	for (auto itorObj = pStage->GetObjBegin(); itorObj != pStage->GetObjEnd(); ++itorObj)
 	{
-		MUID uidChar = (*itorObj).first;
+		MUID uidChar = itorObj->first;
 
 		MMatchObject* pObj = MMatchServer::GetInstance()->GetObject(uidChar);
 		if (IsAdminGrade(pObj) && pObj->CheckPlayerFlags(MTD_PlayerFlags_AdminHide)) continue;

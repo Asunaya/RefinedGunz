@@ -11,9 +11,9 @@ public:
 	RAnimation();
 	~RAnimation();
 
-	bool LoadAni(char* filename);
+	bool LoadAni(const char* filename);
 
-	void  SetFileName(char* name);
+	void  SetFileName(const char* name);
 	char* GetFileName();
 
 	AnimationType GetAnimationType();
@@ -29,7 +29,7 @@ public:
 
 	bool CheckWeaponMotionType(int wtype);
 
-	RAnimationNode* GetNode(char* name);
+	RAnimationNode* GetNode(const char* name);
 
 	void SetLoadDone(bool b);
 	bool IsLoadDone();
@@ -37,7 +37,7 @@ public:
 	// Sound Link
 
 	void  ClearSoundFile(void);
-	bool  SetSoundFileName(char* pSoundName);
+	bool  SetSoundFileName(const char* pSoundName);
 	char* GetSoundFileName();
 	bool  IsHaveSoundFile();
 

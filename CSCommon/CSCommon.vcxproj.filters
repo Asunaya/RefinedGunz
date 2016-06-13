@@ -475,6 +475,7 @@
     <ClInclude Include="Include\LagCompensation.h">
       <Filter>MatchServer</Filter>
     </ClInclude>
+    <ClInclude Include="Include\BasicInfoHistory.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\MCommand.cpp">

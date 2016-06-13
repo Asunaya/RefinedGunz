@@ -207,23 +207,45 @@ public:
 
 /// MUID Reference Map Cache
 /// - 전체 UID의 검색 부하를 줄이기 위한 캐쉬 클래스
-class MUIDRefCache : public map<MUID, void*>{
+template <typename T>
+class MUIDRefCache : public map<MUID, T*>{
 public:
-	MUIDRefCache(void);
-	virtual ~MUIDRefCache(void);
-
 	/// 레퍼런스를 MUID하나에 할당한다.
 	/// @param pRef	레퍼런스 포인터
 	/// @return		할당된 MUID
-	void Insert(const MUID& uid, void* pRef);
+	void Insert(const MUID& uid, T* pRef)
+	{
+#ifdef _DEBUG
+		if (GetRef(uid)) {
+			_ASSERT(0);
+			OutputDebugString("MUIDRefCache DUPLICATED Data. \n");
+		}
+#endif
+		insert(value_type(uid, pRef));
+	}
 	/// MUID를 통해 레퍼런스 포인터를 얻어낸다.
 	/// @param uid	MUID
 	/// @return		레퍼런스 포인터, MUID가 존재하지 않으면 NULL을 리턴
-	void* GetRef(const MUID& uid);
+	T* GetRef(const MUID& uid)
+	{
+		iterator i = find(uid);
+		if (i == end()) return nullptr;
+		return i->second;
+	}
 	/// 등록된 MUID 삭제.
 	/// @param uid	MUID
 	/// @return		등록되었던 레퍼런스 포인터, MUID가 존재하지 않으면 NULL을 리턴
-	void* Remove(const MUID& uid);
+	T* Remove(const MUID& uid)
+	{
+		iterator i = find(uid);
+		if (i == end()) return nullptr;
+		auto pRef = i->second;
+		erase(i);
+		return pRef;
+	}
+
 };
+
+using MMatchObjectMap = MUIDRefCache<class MMatchObject>;
 
 #endif

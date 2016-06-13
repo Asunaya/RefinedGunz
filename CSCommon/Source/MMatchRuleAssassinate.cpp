@@ -30,8 +30,8 @@ const MUID MMatchRuleAssassinate::ChooseCommander(int nTeam)
 	int nChoose = time.MakeNumber(1, nChooseTeamCount);
 
 	int nCount = 0;
-	for(MUIDRefCache::iterator itor=pStage->GetObjBegin(); itor!=pStage->GetObjEnd(); itor++) {
-		MMatchObject* pObj = (MMatchObject*)(*itor).second;
+	for(auto itor=pStage->GetObjBegin(); itor!=pStage->GetObjEnd(); itor++) {
+		MMatchObject* pObj = itor->second;
 		if (pObj->GetEnterBattle() == false) continue;	// 배틀참가하고 있는 플레이어만 체크
 		if (pObj->GetTeam() == nTeam) {
 			nCount++;

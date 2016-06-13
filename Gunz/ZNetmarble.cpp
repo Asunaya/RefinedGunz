@@ -111,8 +111,8 @@ static BOOL AnalyzeArgument(char *key)
 	char buf[1024*20] = {0,};	// 버퍼는 충분히 크게 잡는다
 
 	// 클립보드에서 인자 데이터를 읽어온다(한번 얻어오면 삭제됨)
-	if(!GetNMClipData(buf, sizeof(buf)-1, key, true))
-		return FALSE;
+	//if(!GetNMClipData(buf, sizeof(buf)-1, key, true))
+	//	return FALSE;
 
 	if(strlen(buf)==0)
 		return FALSE;

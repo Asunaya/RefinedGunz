@@ -77,7 +77,7 @@ int  RAnimation::GetWeaponMotionType()
 	return m_weapon_motion_type;
 }
 
-RAnimationNode* RAnimation::GetNode(char* name)
+RAnimationNode* RAnimation::GetNode(const char* name)
 {
 	if(m_pAniData==NULL) 
 		return NULL;
@@ -85,7 +85,7 @@ RAnimationNode* RAnimation::GetNode(char* name)
 	return m_pAniData->GetNode(name);
 }
 
-void RAnimation::SetFileName(char* name)
+void RAnimation::SetFileName(const char* name)
 {
 	if(!name[0]) return;
 	strcpy_safe(m_filename,name);
@@ -122,7 +122,7 @@ void RAnimation::ClearSoundFile(void)
 	m_bIsHaveSound = false;
 }
 
-bool RAnimation::SetSoundFileName(char* pSoundName)
+bool RAnimation::SetSoundFileName(const char* pSoundName)
 {
 	if(!pSoundName[0])
 		return false;
@@ -141,7 +141,7 @@ bool RAnimation::CheckWeaponMotionType(int wtype) {
 	return false;
 }
 
-bool RAnimation::LoadAni(char* filename)
+bool RAnimation::LoadAni(const char* filename)
 {
 	RAnimationFile* pAnimationFile = RGetAnimationFileMgr()->Add(filename);
 

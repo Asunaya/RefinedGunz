@@ -199,12 +199,12 @@ public:
 	void Destroy();
 
 	bool BBoxPickCheck(int x,int y);
-	bool BBoxPickCheck(rvector& pos,rvector& dir);
+	bool BBoxPickCheck(const rvector& pos, const rvector& dir);
 
-	bool Pick(int x,int y,RPickInfo* pInfo);
-	bool Pick(rvector* vInVec,RPickInfo* pInfo);
-	bool Pick(rvector& pos,rvector& dir,RPickInfo* pInfo);
-	bool Pick(rvector& pos,rvector& dir,rvector* v,float* t);
+	bool Pick(int x, int y, RPickInfo* pInfo);
+	bool Pick(const rvector* vInVec, RPickInfo* pInfo);
+	bool Pick(const rvector& pos, const rvector& dir, RPickInfo* pInfo);
+	bool Pick(const rvector& pos, const rvector& dir, rvector* v, float* t);
 
 	int  GetMaxFrame(RAniMode amode);
 

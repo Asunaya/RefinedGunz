@@ -410,7 +410,7 @@ void MClanGameStrategy::SavePointOnFinishGame(MMatchStage* pStage, MMatchTeam nW
 	char szLoserMembers[512] = "";
 	list<MUID>		WinnerObjUIDs;
 
-	for (MUIDRefCache::iterator itor=pStage->GetObjBegin(); itor!=pStage->GetObjEnd(); itor++) 
+	for (auto itor=pStage->GetObjBegin(); itor!=pStage->GetObjEnd(); itor++) 
 	{
 		MMatchObject* pObj = (MMatchObject*)(*itor).second;
 		if (IsEnabledObject(pObj))

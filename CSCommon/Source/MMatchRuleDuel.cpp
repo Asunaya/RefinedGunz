@@ -26,8 +26,8 @@ void MMatchRuleDuel::OnBegin()
 
 	if (pStage != NULL)
 	{
-		for(MUIDRefCache::iterator itor=pStage->GetObjBegin(); itor!=pStage->GetObjEnd(); itor++) 
-			WaitQueue.push_back((*itor).first);			// 플레이어들 그냥 몽땅 대기 큐에 넣는다.
+		for(auto itor=pStage->GetObjBegin(); itor!=pStage->GetObjEnd(); itor++)
+			WaitQueue.push_back(itor->first);			// 플레이어들 그냥 몽땅 대기 큐에 넣는다.
 
 //		SpawnPlayers();
 	}
@@ -95,9 +95,9 @@ bool MMatchRuleDuel::RoundCount()
 	m_nRoundCount++;
 
 	MMatchStage* pStage = GetStage();
-	for (MUIDRefCache::iterator i=pStage->GetObjBegin(); i!=pStage->GetObjEnd(); i++) 
+	for (auto i=pStage->GetObjBegin(); i!=pStage->GetObjEnd(); i++)
 	{
-		MMatchObject* pObj = (MMatchObject*)(*i).second;
+		MMatchObject* pObj = i->second;
 		if (pObj->GetEnterBattle() == false) continue;
 
 		if (pObj->GetAllRoundKillCount() >= (unsigned int)pStage->GetStageSetting()->GetRoundMax())

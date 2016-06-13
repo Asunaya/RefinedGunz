@@ -772,9 +772,9 @@ void MMatchServer::ResponseClanMemberList(const MUID& uidChar)
 	void* pMemberArray = MMakeBlobArray(sizeof(MTD_ClanMemberListNode), nNodeCount);
 
 	int nArrayIndex=0;
-	for (MUIDRefCache::iterator itor= pClan->GetMemberBegin(); itor != pClan->GetMemberEnd(); ++itor) 
+	for (auto itor= pClan->GetMemberBegin(); itor != pClan->GetMemberEnd(); ++itor)
 	{
-		MMatchObject* pScanObj = (MMatchObject*)(*itor).second;
+		MMatchObject* pScanObj = itor->second;
 
 		MTD_ClanMemberListNode* pNode = (MTD_ClanMemberListNode*)MGetBlobArrayElement(pMemberArray, nArrayIndex++);
 

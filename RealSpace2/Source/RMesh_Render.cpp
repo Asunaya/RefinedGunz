@@ -699,7 +699,8 @@ void RMesh::RenderNode(RMeshNode *pMeshNode,D3DXMATRIX* world_mat)
 
 // find face
 
-bool find_intersects_triangle_sub(rvector& orig,rvector& dir, rvector& v0,rvector& v1, rvector& v2, float* t, float* u, float* v )
+bool find_intersects_triangle_sub(const rvector& orig, const rvector& dir,
+	const rvector& v0, const rvector& v1, const rvector& v2, float* t, float* u, float* v )
 {
 	rvector edge1 = v1 - v0;
 	rvector edge2 = v2 - v0;
@@ -737,11 +738,11 @@ bool find_intersects_triangle_sub(rvector& orig,rvector& dir, rvector& v0,rvecto
 	return true;
 }
 
-inline bool find_intersects_triangle_sub(rvector* vec, rvector* vPoint, float* t, float* u, float* v ) {
+inline bool find_intersects_triangle_sub(const rvector* vec, const rvector* vPoint, float* t, float* u, float* v ) {
 	return find_intersects_triangle_sub(vec[0],vec[1], vPoint[0],vPoint[1], vPoint[2],t,u,v );
 }
 
-bool RMesh::CalcIntersectsTriangle(rvector* vInVec, RPickInfo* pInfo, D3DXMATRIX* world_mat,bool fastmode)
+bool RMesh::CalcIntersectsTriangle(const rvector* vInVec, RPickInfo* pInfo, D3DXMATRIX* world_mat,bool fastmode)
 {
 	//////////////////////////////////////////////////
 

@@ -603,7 +603,7 @@ void BBoxSubCalc(D3DXVECTOR3* max,D3DXVECTOR3* min)
 	if(max->z < min->z) {	t = max->z; max->z = min->z; min->z = t; }
 }
 
-bool RVisualMesh::BBoxPickCheck(rvector& pos,rvector& dir)
+bool RVisualMesh::BBoxPickCheck(const rvector& pos, const rvector& dir)
 {
 	rvector min,max;
 
@@ -628,7 +628,7 @@ bool RVisualMesh::Pick(int x,int y,RPickInfo* pInfo)
 	return false;
 }
 
-bool RVisualMesh::Pick(rvector* vInVec,RPickInfo* pInfo)
+bool RVisualMesh::Pick(const rvector* vInVec,RPickInfo* pInfo)
 {
 	if(m_pMesh) {
 		if(!BBoxPickCheck(vInVec[0],vInVec[1]))
@@ -639,7 +639,7 @@ bool RVisualMesh::Pick(rvector* vInVec,RPickInfo* pInfo)
 	return false;
 }
 
-bool RVisualMesh::Pick(rvector& pos,rvector& dir,RPickInfo* pInfo)
+bool RVisualMesh::Pick(const rvector& pos, const rvector& dir,RPickInfo* pInfo)
 {
 	if(m_pMesh) {
 
@@ -651,7 +651,7 @@ bool RVisualMesh::Pick(rvector& pos,rvector& dir,RPickInfo* pInfo)
 	return false;
 }
 
-bool RVisualMesh::Pick(rvector& pos,rvector& dir,rvector* v,float* t)
+bool RVisualMesh::Pick(const rvector& pos, const rvector& dir,rvector* v,float* t)
 {
 	if(m_pMesh) {
 

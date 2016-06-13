@@ -53,6 +53,8 @@ private:
 
 	// keeper ip.
 	string				m_strKeeperIP;				/// Keeper와 server와의 통신에서 키퍼의 요청인지 검사하기 위해서.
+	
+	std::string GameDirectory;
 
 	bool				m_bIsComplete;
 
@@ -117,6 +119,8 @@ public:
 	const string& GetLanguage() { return m_strLanguage; }
 
 	const bool IsComplete() { return m_bIsComplete; }
+
+	const char* GetGameDirectory() const { return GameDirectory.c_str(); }
 };
 
 inline MMatchConfig* MGetServerConfig() { return MMatchConfig::GetInstance(); }

@@ -15,7 +15,8 @@ float RandomAngle(rngT& rng)
 	return dist(rng);
 }
 
-static void CalcRangeShotControllability(v3& vOutDir, const v3& vSrcDir, int nControllability, u32 seed, float CtrlFactor)
+static void CalcRangeShotControllability(v3& vOutDir, const v3& vSrcDir,
+	int nControllability, u32 seed, float CtrlFactor)
 {
 	v3 up(0, 0, 1);
 	v3 right;
@@ -24,7 +25,6 @@ static void CalcRangeShotControllability(v3& vOutDir, const v3& vSrcDir, int nCo
 	std::mt19937 rng;
 	rng.seed(seed);
 
-	// (rand() % (31415 * 2)) / 1000.0f
 	float fAngle = RandomAngle(rng);
 
 	float fControl;
@@ -35,11 +35,11 @@ static void CalcRangeShotControllability(v3& vOutDir, const v3& vSrcDir, int nCo
 	else
 	{
 		std::uniform_real_distribution<float> dist(0, nControllability * 100);
-		fControl = dist(rng);//(float)(rand() % (nControllability * 100));
+		fControl = dist(rng);
 		fControl = fControl * CtrlFactor;
 	}
 
-	float fForce = fControl / 100000.0f;		// 0.02보다 작도록.
+	float fForce = fControl / 100000.0f;
 
 	D3DXVec3Cross(&right, &vSrcDir, &up);
 	D3DXVec3Normalize(&right, &right);
@@ -93,7 +93,8 @@ enum ZOBJECTHITTEST {
 	ZOH_LEGS = 3
 };
 
-static ZOBJECTHITTEST HitTest(const v3& head, const v3& foot, const v3& src, const v3& dest, v3* pOutPos = nullptr)
+static ZOBJECTHITTEST PlayerHitTest(const v3& head, const v3& foot,
+	const v3& src, const v3& dest, v3* pOutPos = nullptr)
 {
 	// 적절한 시점의 위치를 얻어낼수없으면 실패..
 	rvector footpos, headpos, characterdir;
@@ -154,45 +155,40 @@ static ZOBJECTHITTEST HitTest(const v3& head, const v3& foot, const v3& src, con
 	return ZOH_NONE;
 }
 
-template <typename ObjectT, typename ContainerT, typename GetPositionsT, typename PickInfoT>
-static void PickHistory(const ObjectT& Exception, const v3 &src, const v3 &dest,
+template <typename ObjectT, typename ContainerT, typename PickInfoT>
+static bool PickHistory(const ObjectT& Exception, const v3& src, const v3& dest,
 	RBspObject* BspObject, PickInfoT& pickinfo, const ContainerT& Container,
-	const GetPositionsT& GetPositions, u32 PassFlag = RM_FLAG_ADDITIVE | RM_FLAG_USEOPACITY | RM_FLAG_HIDE)
+	double Time, u32 PassFlag = RM_FLAG_ADDITIVE | RM_FLAG_USEOPACITY | RM_FLAG_HIDE)
 {
 	ObjectT* HitObject = nullptr;
 	v3 HitPos;
 
-	for (auto& item : Container)
+	for (auto Obj : Container)
 	{
-		auto& Obj = *static_cast<ObjectT*>(item.second);
-		if (&Exception == &Obj)
+		if (&Exception == Obj)
 			continue;
 
-		v3 Head;
-		v3 Foot;
-		GetPositions(Obj, Head, Foot);
-
 		v3 TempHitPos;
-		auto HitParts = HitTest(Head, Foot, src, dest, &TempHitPos);
+		auto HitParts = Obj->HitTest(src, dest, Time, &TempHitPos);
 
 		if (HitParts == ZOH_NONE)
 			continue;
 
-		if (!Obj.IsAlive())
+		if (!Obj->IsAlive())
 			continue;
 
 		if (HitObject && Magnitude(TempHitPos - src) < Magnitude(HitPos - src)
 			|| !HitObject)
 		{
-			HitObject = &Obj;
+			HitObject = Obj;
 			HitPos = TempHitPos;
 		}
 	}
 
-#define DIDNT_HIT_BSP()				\
-	pickinfo.bBspPicked = false;	\
-	pickinfo.pObject = HitObject;	\
-	return;							\
+#define DIDNT_HIT_BSP()					\
+	pickinfo.bBspPicked = false;		\
+	pickinfo.pObject = HitObject;		\
+	return pickinfo.pObject != nullptr;	\
 
 
 	if (!BspObject)
@@ -213,6 +209,8 @@ static void PickHistory(const ObjectT& Exception, const v3 &src, const v3 &dest,
 
 	pickinfo.bBspPicked = true;
 	pickinfo.pObject = nullptr;
+
+	return true;
 
 #undef DIDNT_HIT_BSP
 }

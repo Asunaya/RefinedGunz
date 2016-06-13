@@ -167,6 +167,7 @@ private:
 	bool bShowHitboxes = false;
 	bool bDynamicResourceLoad = false;
 	bool bDrawTrails = true;
+	bool HitRegistrationDebugOutput = false;
 
 protected:
 public:
@@ -227,6 +228,7 @@ public:
 	bool GetShowHitboxes() const { return bShowHitboxes; }
 	bool GetDynamicResourceLoad() const { return bDynamicResourceLoad; }
 	bool GetDrawTrails() const { return bDrawTrails; }
+	bool IsHitRegistrationDebugOutputEnabled() const { return HitRegistrationDebugOutput; }
 
 	const bool IsComplete()			{ return m_bIsComplete; }
 

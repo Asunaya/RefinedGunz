@@ -11,7 +11,7 @@ public:
 	RAnimationFile();
 	~RAnimationFile();
 
-	bool LoadAni(char* filename);
+	bool LoadAni(const char* filename);
 
 	RAnimationNode* GetNode(const char* name);
 

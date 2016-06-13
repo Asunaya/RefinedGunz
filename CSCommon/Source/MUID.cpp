@@ -81,38 +81,3 @@ void* MUIDRefArray::GetRef(MUID& uid)
 	return at(uid.Low);
 }
 */
-
-MUIDRefCache::MUIDRefCache(void)
-{
-}
-MUIDRefCache::~MUIDRefCache(void)
-{
-}
-
-
-void MUIDRefCache::Insert(const MUID& uid, void* pRef)
-{
-#ifdef _DEBUG
-	if (GetRef(uid)) {
-		_ASSERT(0);
-		OutputDebugString("MUIDRefCache DUPLICATED Data. \n");
-	}
-#endif
-	insert(value_type(uid, pRef));
-}
-
-void* MUIDRefCache::GetRef(const MUID& uid)
-{
-	iterator i = find(uid);
-	if(i==end()) return NULL;
-	return (*i).second;
-}
-
-void* MUIDRefCache::Remove(const MUID& uid)
-{
-	iterator i = find(uid);
-	if(i==end()) return NULL;
-	void* pRef = (*i).second;
-	erase(i);
-	return pRef;
-}

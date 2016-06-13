@@ -296,6 +296,24 @@ void MMatchObject::SetChannelListTransfer(const bool bVal, const MCHANNEL_TYPE n
 	UpdateChannelListChecksum(0); 
 }
 
+void MMatchObject::GetPositions(v3 & Head, v3 & Foot, double Time)
+{
+	auto GetItemDesc = [&](MMatchCharItemParts slot) -> MMatchItemDesc*
+	{
+		auto item = GetCharInfo()->m_EquipedItem.GetItem(slot);
+		if (!item)
+			return nullptr;
+
+		auto id = item->GetDescID();
+
+		auto ItemDesc = MGetMatchItemDescMgr()->GetItemDesc(id);
+
+		return ItemDesc;
+	};
+
+	BasicInfoHistory.GetPositions(Head, Foot, Time, GetItemDesc, GetCharInfo()->m_nSex);
+}
+
 bool MMatchObject::CheckEnableAction(MMO_ACTION nAction)
 {
 	switch (nAction)
@@ -549,96 +567,4 @@ void MMatchObject::SetBadFileCRCDisconnectWaitInfo( const MMatchDisconnectStatus
 	//GetDisconnStatusInfo().SetComment( "bad filecrc." );
 	//GetDisconnStatusInfo().SetEndDate( MGetStrLocalTime(0, 0, 0, 0, 0) ); // 1시간 후에 접속 가능.
 	//GetDisconnStatusInfo().SetBlockLevel( MMBL_LOGONLY );
-}
-
-void MMatchObject::OnBasicInfo(const BasicInfo & bi)
-{
-	BasicInfoHistory.push_front(bi);
-
-	while (BasicInfoHistory.size() > 1000)
-		BasicInfoHistory.pop_back();
-}
-
-bool MMatchObject::GetPositions(v3& Head, v3& Root, u32 Time)
-{
-	if (BasicInfoHistory.size() < 2)
-		return false;
-
-	auto pre_it = BasicInfoHistory.begin();
-	auto post_it = BasicInfoHistory.begin();
-
-	while (pre_it != BasicInfoHistory.end() && Time < post_it->RecvTime)
-	{
-		//MGetMatchServer()->LogF(MMatchServer::LOG_ALL, "Time = %08X, pre_it = %08X, post_it = %08X", Time, pre_it->RecvTime, post_it->RecvTime);
-		post_it = pre_it;
-		pre_it++;
-	}
-
-	if (post_it == BasicInfoHistory.end())
-		post_it = pre_it;
-
-	v3 AbsPos;
-	v3 Dir;
-
-	if (pre_it != post_it)
-	{
-		float t = float(post_it->RecvTime - pre_it->RecvTime) / float(Time - pre_it->RecvTime);
-		AbsPos = Lerp(pre_it->position, post_it->position, t);
-		Dir = Slerp(pre_it->direction, post_it->direction, t);
-		MGetMatchServer()->LogF(MMatchServer::LOG_ALL, "t = %f; %f / %f; AbsPos = %f, %f, %f; Dir = %f, %f, %f", t, post_it->RecvTime - pre_it->RecvTime, Time - pre_it->RecvTime,
-			AbsPos.x, AbsPos.y, AbsPos.z, Dir.x, Dir.y, Dir.z);
-	}
-	else
-	{
-		AbsPos = pre_it->position;
-		Dir = pre_it->direction;
-	}
-
-	auto diff_ani_it = post_it;
-
-	while (diff_ani_it != BasicInfoHistory.end() && diff_ani_it->lowerstate == post_it->lowerstate)
-	{
-		diff_ani_it++;
-	}
-
-	if (diff_ani_it == BasicInfoHistory.end())
-		diff_ani_it = BasicInfoHistory.end() - 1;
-
-	auto Frame = u32(Time - diff_ani_it->RecvTime);
-	MGetMatchServer()->LogF(MMatchServer::LOG_ALL, "Ani %d; Frame = %d", pre_it->lowerstate, Frame);
-
-	v3 xydir = Dir;
-	xydir.z = 0;
-	Normalize(xydir);
-
-	matrix World;
-	MakeWorldMatrix(&World, AbsPos, xydir, v3(0, 0, 1));
-
-	float y = (Dir.z + 0.05) * 50;
-
-	auto MotionType = eq_weapon_etc;
-
-	[&]()
-	{
-		auto slot = pre_it->SelectedSlot;
-
-		auto item = m_pCharInfo->m_EquipedItem.GetItem(slot);
-		if (!item)
-			return;
-
-		auto id = item->GetDescID();
-
-		auto ItemDesc = MGetMatchItemDescMgr()->GetItemDesc(id);
-		if (!ItemDesc)
-			return;
-
-		MGetMatchServer()->LogF(MMatchServer::LOG_ALL, "Found item desc!");
-
-		MotionType = WeaponTypeToMotionType(ItemDesc->m_nWeaponType);
-	}();
-
-	Head = MGetMatchServer()->LagComp.GetHeadPosition(World, y, m_pCharInfo->m_nSex, pre_it->lowerstate, Frame, MotionType);
-	Root = AbsPos;
-
-	return true;
 }

@@ -31,8 +31,8 @@ public:
 	
 	void Destroy();
 
-	RAnimationFile* Add(char* filename);
-	RAnimationFile* Get(char* filename);
+	RAnimationFile* Add(const char* filename);
+	RAnimationFile* Get(const char* filename);
 
 	RAnimationFileHashList m_list;
 };
@@ -47,25 +47,25 @@ public:
 
 	// 특정 모델 로드시 자동으로 불리는 에니메이션 파일 목록 지원하기
 
-	bool LoadAnimationFileList(char* filename) {
+	bool LoadAnimationFileList(const char* filename) {
 		return true;
 	}
 
-	inline RAnimation* Add(char* name,char* filename,int sID,int MotionTypeID = -1) {
+	inline RAnimation* Add(const char* name, const char* filename,int sID,int MotionTypeID = -1) {
 		return AddAnimationFile(name,filename,sID,false,MotionTypeID);
 	}
 
-	inline RAnimation* AddGameLoad(char* name,char* filename,int sID,int MotionTypeID = -1) {
+	inline RAnimation* AddGameLoad(const char* name,char* filename,int sID,int MotionTypeID = -1) {
 		return AddAnimationFile(name,filename,sID,true,MotionTypeID);
 	}
 
-	RAnimation* AddAnimationFile(char* name,char* filename,int sID,bool notload,int MotionTypeID = -1);
+	RAnimation* AddAnimationFile(const char* name, const char* filename,int sID,bool notload,int MotionTypeID = -1);
 
 	void DelAll(); 
 
-	RAnimation* GetAnimation(char* name,int MotionTypeID=-1);
+	RAnimation* GetAnimation(const char* name,int MotionTypeID=-1);
 	RAnimation* GetAnimation(int sID,int MotionTypeID=-1);
-	RAnimation* GetAnimationListMap(char* name,int wtype);
+	RAnimation* GetAnimationListMap(const char* name,int wtype);
 
 	void ReloadAll();
 

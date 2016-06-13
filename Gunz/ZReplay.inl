@@ -36,9 +36,14 @@ inline ReplayVersion ZReplayLoader::GetVersion()
 		u8 Something;
 		ReadAt(Something, 0x4A);
 
-		if (Version.nVersion >= 7 && Version.nVersion <= 9 && Something <= 0x01)
+		if (Version.nVersion >= 6 && Version.nVersion <= 9 && Something <= 0x01)
 		{
-			Version.Server = SERVER::FREESTYLE_GUNZ;
+			ReadAt(Something, 0x91);
+
+			if (Something == 0x00)
+				Version.Server = SERVER::DarkGunz;
+			else
+				Version.Server = SERVER::FREESTYLE_GUNZ;
 		}
 		else
 		{
@@ -145,7 +150,13 @@ inline void ZReplayLoader::GetStageSetting(REPLAY_STAGE_SETTING_NODE& ret)
 	{
 		REPLAY_STAGE_SETTING_NODE_FG Setting;
 		Read(Setting);
-
+		CopySetting(Setting);
+	}
+	break;
+	case SERVER::DarkGunz:
+	{
+		REPLAY_STAGE_SETTING_NODE_DG Setting;
+		Read(Setting);
 		CopySetting(Setting);
 	}
 	break;
@@ -179,7 +190,8 @@ inline std::vector<ReplayPlayerInfo> ZReplayLoader::GetCharInfo()
 	for (int i = 0; i < nCharacterCount; i++)
 	{
 		bool IsHero;
-		Read(IsHero);
+		if (Version.Server != SERVER::DarkGunz)
+			Read(IsHero);
 
 		MTD_CharInfo CharInfo;
 
@@ -339,6 +351,17 @@ inline std::vector<ReplayPlayerInfo> ZReplayLoader::GetCharInfo()
 			}
 		}
 #undef READ_CHARSTATE
+
+		if (Version.Server == SERVER::DarkGunz)
+		{
+			ReplayPlayerInfo_DG rpi;
+			Read(rpi);
+			IsHero = rpi.IsHero;
+			CopyCharInfo(rpi.Info);
+			CopyCharState(rpi.State);
+		}
+
+		MLog("Offset: %X\n", Position);
 
 		ret.push_back({ IsHero, CharInfo, CharState });
 	}

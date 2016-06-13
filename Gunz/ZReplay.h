@@ -39,6 +39,7 @@ enum class SERVER
 	OFFICIAL, // igunz, ijji gunz, aeria gunz
 	REFINED_GUNZ,
 	FREESTYLE_GUNZ,
+	DarkGunz,
 	MAX,
 };
 
@@ -58,6 +59,8 @@ struct ReplayVersion
 			return "Freestyle Gunz";
 		case SERVER::REFINED_GUNZ:
 			return "Refined Gunz";
+		case SERVER::DarkGunz:
+			return "Dark Gunz";
 		case SERVER::NONE:
 		default:
 			return "Unknown";

@@ -420,6 +420,9 @@ bool ZApplication::OnCreate(ZLoadingProgress *pLoadingProgress)
 	if(m_MeshMgr.LoadXmlList("model/character.xml",ZProgressCallBack,&meshLoading)==-1)	
 		return false;
 
+	SetAnimationMgr(MMS_MALE, &m_MeshMgr.Get("heroman1")->m_ani_mgr);
+	SetAnimationMgr(MMS_FEMALE, &m_MeshMgr.Get("herowoman1")->m_ani_mgr);
+
 	mlog("ZApplication::OnCreate : m_MeshMgr.LoadXmlList(character.xml) \n");
 
 	END_("Character Loading");

@@ -44,7 +44,7 @@ RAnimationFileMgr* RAnimationFileMgr::GetInstance()
 	return &m_AniMgr;
 }
 
-RAnimationFile* RAnimationFileMgr::Add(char* filename)
+RAnimationFile* RAnimationFileMgr::Add(const char* filename)
 {
 	RAnimationFile* pFile = Get(filename);
 
@@ -67,7 +67,7 @@ RAnimationFile* RAnimationFileMgr::Add(char* filename)
 	return pFile;
 }
 
-RAnimationFile* RAnimationFileMgr::Get(char* filename)
+RAnimationFile* RAnimationFileMgr::Get(const char* filename)
 {
 	return m_list.Find(filename);
 }
@@ -88,7 +88,7 @@ RAnimationMgr::~RAnimationMgr() {
 }
 
 
-RAnimation* RAnimationMgr::AddAnimationFile(char* name,char* filename,int sID,bool notload,int MotionTypeID) {
+RAnimation* RAnimationMgr::AddAnimationFile(const char* name, const char* filename,int sID,bool notload,int MotionTypeID) {
 
 	RAnimation* node = new RAnimation;
 
@@ -192,7 +192,7 @@ void RAnimationMgr::MakeListMap(int size)
 	m_list_map_size = size;
 }
 
-RAnimation* RAnimationMgr::GetAnimationListMap(char* name,int wtype) {
+RAnimation* RAnimationMgr::GetAnimationListMap(const char* name,int wtype) {
 
 	if(m_list_map_size==0) return NULL;
 
@@ -205,7 +205,7 @@ RAnimation* RAnimationMgr::GetAnimationListMap(char* name,int wtype) {
 	return pAni;
 }
 
-RAnimation* RAnimationMgr::GetAnimation(char* name,int wtype) 
+RAnimation* RAnimationMgr::GetAnimation(const char* name,int wtype) 
 {
 	if(!name) 
 		return NULL;

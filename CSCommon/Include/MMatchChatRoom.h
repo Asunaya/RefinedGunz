@@ -17,7 +17,7 @@ protected:
 	MUID			m_uidChatRoom;
 	MUID			m_uidMaster;
 	char			m_szName[128];
-    MUIDRefCache	m_PlayerList;
+    MMatchObjectMap	m_PlayerList;
 
 public:
 	MMatchChatRoom(const MUID& uidRoom, const MUID& uidMaster, const char* pszName);

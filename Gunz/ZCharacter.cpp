@@ -51,125 +51,6 @@
 //////////////////////////////////////////////////////////////////////////
 
 bool Enable_Cloth	= true;
-/*
-static ZFACECOSTUME g_FaceCostume[MAX_FACE_COSTUME] = 
-{
-	{ "eq_face_04", "eq_face_001" },
-	{ "eq_face_01", "eq_face_001" },
-	{ "eq_face_02", "eq_face_001" },
-	{ "eq_face_03", "eq_face_001" }
-};
-*/
-
-//	   이름  ,캔슬가능  ,반복	,이동값이 들어있는지	, 이동값이 시작부터 이어지는지
-
-ZANIMATIONINFO g_AnimationInfoTableLower[ZC_STATE_LOWER_END] = {
-	{ ""				,true	,true	,false 	,false },
-										   
-	{ "idle"			,true	,true	,false 	,false },
-	{ "idle2"			,true	,true	,false 	,false },
-	{ "idle3"			,true	,true	,false 	,false },
-	{ "idle4"			,true	,true	,false 	,false },
-										   
-	{ "run"				,true	,true	,false 	,false },
-	{ "runB"			,true	,true	,false 	,false },
-	{ "runL"			,true	,true	,false 	,false },
-	{ "runR"			,true	,true	,false 	,false },
-										   
-	{ "jumpU"			,true	,false	,false 	,false },
-	{ "jumpD"			,true	,false	,false 	,false },
-										   
-	{ "die" 			,true	,false	,false 	,false },
-	{ "die2" 			,true	,false	,false 	,false },
-	{ "die3" 			,true	,false	,false 	,false },
-	{ "die4"			,true	,false	,false 	,false },
-
-	{ "runLW"			,false	,true 	,false	,false},
-	{ "runLW_down"		,false	,false	,false	,false},
-	{ "runW" 			,false	,false	,true	,false},
-	{ "runW_downF"		,false	,false	,false	,false},
-	{ "runW_downB"		,false	,false	,false	,false},
-	{ "runRW" 			,false	,true 	,false	,false},
-	{ "runRW_down"		,false	,false 	,false	,false},
-
-	{ "tumbleF"			,false	,false	,false	,false },   
-	{ "tumbleB"			,false	,false	,false	,false },   
-	{ "tumbleR"			,false	,false	,false	,false },
-	{ "tumbleL"			,false	,false	,false	,false },
-									  
-	{ "bind"			,false	,false	,false	,false },
-
-	{ "jumpwallF"		,false	,false 	,false	,false },
-	{ "jumpwallB"		,false	,false 	,false	,false },
-	{ "jumpwallL"		,false	,false 	,false	,false },
-	{ "jumpwallR"		,false	,false 	,false	,false },
-
-	{ "attack1"			,false	,false 	,true  	,false },
-	{ "attack1_ret"		,false	,false 	,true  	,true  },
-	{ "attack2"			,false	,false 	,true  	,false },
-	{ "attack2_ret"		,false	,false 	,true  	,true  },
-	{ "attack3"			,false	,false 	,true  	,false },
-	{ "attack3_ret"		,false	,false 	,true  	,true  },
-	{ "attack4"			,false	,false 	,true  	,false },
-	{ "attack4_ret"		,false	,false 	,true  	,true  },
-	{ "attack5"			,false	,false 	,true  	,false },
-
-	{ "attack_Jump"		,false	,false 	,false	,false },
-	{ "uppercut"		,false	,false 	,true	,false },
-
-	{ "guard_start"		,false	,false 	,true 	,false },
-	{ "guard_idle"		,false	,false 	,false	,false },
-	{ "guard_block1"	,false	,false 	,false	,false },
-	{ "guard_block1_ret",false	,false 	,false	,false },
-	{ "guard_block2"	,false	,false 	,false	,false },
-	{ "guard_cancel"	,false	,false 	,false	,false },
-												  
-	{ "blast"			,false	,false 	,false 	,false },
-	{ "blast_fall"		,false	,false 	,false 	,false },
-	{ "blast_drop"		,false	,false 	,false 	,false },
-	{ "blast_stand"		,false	,false 	,false 	,false },
-	{ "blast_airmove"	,false	,false 	,false 	,false },
-											  
-	{ "blast_dagger"	 ,false ,false 	,false 	,false },
-	{ "blast_drop_dagger",false ,false 	,false 	,false },
-											  
-	{ "damage"			,false	,false 	,false 	,false },
-	{ "damage2"			,false	,false 	,false 	,false },
-	{ "damage_down"		,false	,false 	,false 	,false },
-											  
-	{ "taunt"			,true	,false	,false	,false },
-	{ "bow"				,true	,false	,false	,false },
-	{ "wave"			,true	,false	,false	,false },
-	{ "laugh"			,true	,false	,false	,false },
-	{ "cry"				,true	,false	,false	,false },
-	{ "dance"			,true	,false	,false	,false },
-											  
-	{ "cancel"			,false	,false 	,false 	,false },
-	{ "charge"			,false	,false 	,true  	,true  },
-	{ "slash"			,false	,false 	,true  	,false },
-	{ "jump_slash1"		,false	,false 	,false	,false },
-	{ "jump_slash2"		,false	,false 	,false	,false },
-
-	{ "lightning"		,false	,false 	,false	,false },
-	{ "stun"			,false	,false 	,false	,false },	// 루프되는 스턴
-
-	{ "pit"				,false	,false 	,false	,false },	// 나락에서 떨어지는 거
-};
-
-static ZANIMATIONINFO g_AnimationInfoTableUpper[ZC_STATE_UPPER_END] = {
-	{ ""				,true	,true	,false	,false },
-											   
-	{ "attackS"			,false	,false	,false	,false },
-	{ "reload"			,false	,false	,false	,false },
-	{ "load"			,false	,false	,false	,false },
-											   
-	{ "guard_start"		,false	,false 	,false	,false },
-	{ "guard_idle"		,false	,false 	,false	,false },
-	{ "guard_block1"	,false	,false 	,false	,false },
-	{ "guard_block1_ret",false	,false 	,false	,false },
-	{ "guard_block2"	,false	,false 	,false	,false },
-	{ "guard_cancel"	,false	,false 	,false	,false },
-};
 
 // teen 버전은 강제로 바꿔준다~..
 bool CheckTeenVersionMesh(RMesh** ppMesh)
@@ -2168,6 +2049,16 @@ void ZCharacter::OnDie()
 	
 }
 
+void ZCharacter::GetPositions(v3 & Head, v3 & Foot, u64 Time)
+{
+	auto GetItemDesc = [&](MMatchCharItemParts slot)
+	{
+		return m_Items.GetDesc(slot);
+	};
+
+	BasicInfoHistory.GetPositions(Head, Foot, Time, GetItemDesc, m_Property.nSex);
+}
+
 // 부활 - 이것은 게임룰에 따라 달라질 수도 있다.
 void ZCharacter::Revival()
 {
@@ -3791,70 +3682,11 @@ void ZCharacter::InitRound()
 	}
 }
 
-ZOBJECTHITTEST ZCharacter::HitTest(rvector& origin, rvector& to,float fTime,rvector *pOutPos)
+ZOBJECTHITTEST ZCharacter::HitTest(const rvector& origin, const rvector& to,float fTime,rvector *pOutPos)
 {
-	// 적절한 시점의 위치를 얻어낼수없으면 실패..
-	rvector footpos,headpos,characterdir;
-	if(GetHistory(&footpos,&characterdir,fTime))
-	{
-		// 발위치 높이 보정 +5
-		footpos.z+= 5.f;			
-		// 머리위치만은 히스토리에서 찾지 않는다. - 패킷용량때문에..
-		if(IsRendered())
-		{
-			headpos = GetVisualMesh()->GetHeadPosition();
-			headpos.z+= 5.f; // 머리위치 높이 보정 +5			
-		}else
-			headpos=footpos+rvector(0,0,180);		// 보이지않으면 서있는 걸로 추정 - 이거 좆치않음(bird)
-
-		rvector rootpos=(footpos+headpos)*0.5f;
-
-		// headshot 판정
-		rvector nearest=GetNearestPoint(headpos,origin,to);
-		float fDist=Magnitude(nearest-headpos);
-		float fDistToChar=Magnitude(nearest-origin);
-
-		rvector ap,cp;
-
-		if(fDist<15.f)
-		{
-			if(pOutPos) *pOutPos = nearest;
-			return ZOH_HEAD;
-		}
-		else
-		{
-			rvector dir = to - origin;
-			Normalize(dir);
-
-			// 실린더로 몸통 판정
-			rvector rootdir=(rootpos-headpos);
-			Normalize(rootdir);
-			float fDist=GetDistanceBetweenLineSegment(origin,to,headpos+20.f*rootdir,rootpos-20.f*rootdir,&ap,&cp);
-			if(fDist<30)		// 상체
-			{
-				rvector ap2cp=ap-cp;
-				float fap2cpsq=D3DXVec3LengthSq(&ap2cp);
-				float fdiff=sqrtf(30.f*30.f-fap2cpsq);
-	
-				if(pOutPos) *pOutPos = ap-dir*fdiff;;
-				return ZOH_BODY;
-			}
-			else
-			{
-				float fDist=GetDistanceBetweenLineSegment(origin,to,rootpos-20.f*rootdir,footpos,&ap,&cp);
-				if(fDist<30)	// 하체
-				{
-					rvector ap2cp=ap-cp;
-					float fap2cpsq=D3DXVec3LengthSq(&ap2cp);
-					float fdiff=sqrtf(30.f*30.f-fap2cpsq);
-
-					if(pOutPos) *pOutPos = ap-dir*fdiff;;
-					return ZOH_LEGS;
-				}
-			}
-		}
-	}
-	return ZOH_NONE;
+	v3 Head, Foot;
+	GetPositions(Head, Foot, fTime * 1000);
+	return PlayerHitTest(Head, Foot, origin, to, pOutPos);
 }
 
 //void ZCharacter::OnDamagedMelee(ZObject* pAttacker, float fDamage, float fPiercingRatio, MMatchWeaponType weaponType, int nMeleeType)

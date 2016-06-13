@@ -2,21 +2,6 @@
 
 #include "ZCharacterStructs.h"
 
-struct REPLAY_STAGE_SETTING_NODE_OLD
-{
-	MUID				uidStage;
-	char				szMapName[32];	// 맵이름
-	char				nMapIndex;					// 맵인덱스
-	MMATCH_GAMETYPE		nGameType;					// 게임타입
-	int					nRoundMax;					// 라운드
-	int					nLimitTime;					// 제한시간(1 - 1분)
-	int					nLimitLevel;				// 제한레벨
-	int					nMaxPlayers;				// 최대인원
-	bool				bTeamKillEnabled;			// 팀킬여부
-	bool				bTeamWinThePoint;			// 선승제 여부
-	bool				bForcedEntryEnabled;		// 게임중 참가 여부
-};
-
 struct REPLAY_STAGE_SETTING_NODE_FG
 {
 	MUID				uidStage;
@@ -33,6 +18,24 @@ struct REPLAY_STAGE_SETTING_NODE_FG
 	char				szStageName[64];
 };
 
+
+#pragma pack(push)
+#pragma pack(1)
+
+struct REPLAY_STAGE_SETTING_NODE_OLD
+{
+	MUID				uidStage;
+	char				szMapName[32];	// 맵이름
+	char				nMapIndex;					// 맵인덱스
+	MMATCH_GAMETYPE		nGameType;					// 게임타입
+	int					nRoundMax;					// 라운드
+	int					nLimitTime;					// 제한시간(1 - 1분)
+	int					nLimitLevel;				// 제한레벨
+	int					nMaxPlayers;				// 최대인원
+	bool				bTeamKillEnabled;			// 팀킬여부
+	bool				bTeamWinThePoint;			// 선승제 여부
+	bool				bForcedEntryEnabled;		// 게임중 참가 여부
+};
 struct REPLAY_STAGE_SETTING_NODE_V11
 {
 	MUID				uidStage;
@@ -49,8 +52,21 @@ struct REPLAY_STAGE_SETTING_NODE_V11
 	bool				bForcedEntryEnabled;
 };
 
-#pragma pack(push)
-#pragma pack(1)
+struct REPLAY_STAGE_SETTING_NODE_DG
+{
+	MUID				uidStage;
+	char				szMapName[32];	// 맵이름
+	u32					nMapIndex;					// 맵인덱스
+	MMATCH_GAMETYPE		nGameType;					// 게임타입
+	int					nRoundMax;					// 라운드
+	int					nLimitTime;					// 제한시간(1 - 1분)
+	int					nLimitLevel;				// 제한레벨
+	int					nMaxPlayers;				// 최대인원
+	bool				bTeamKillEnabled;			// 팀킬여부
+	bool				bTeamWinThePoint;			// 선승제 여부
+	bool				bForcedEntryEnabled;		// 게임중 참가 여부
+	char unk[5];
+};
 
 struct MTD_CharInfo_V5
 {
@@ -342,6 +358,36 @@ struct ReplayPlayerInfoImpl
 	bool IsHero;
 	CharInfo Info;
 	ReplayState State;
+};
+
+struct ZCharacterReplayState_DG
+{
+	MUID UID;
+	ZCharacterProperty Property;
+	float HP;
+	float AP;
+	ZCharacterStatus Status;
+
+	BulletInfo BulletInfos[17];
+
+	char unk[14];
+
+	D3DXVECTOR3 Position;
+	D3DXVECTOR3 Direction;
+
+	MMatchTeam Team;
+
+	bool Dead;
+
+	bool HidingAdmin;
+};
+
+struct ReplayPlayerInfo_DG
+{
+	bool IsHero;
+	char unk[32];
+	MTD_CharInfo_V6 Info;
+	ZCharacterReplayState_DG State;
 };
 
 using ReplayPlayerInfo = ReplayPlayerInfoImpl<MTD_CharInfo, ZCharacterReplayState>;

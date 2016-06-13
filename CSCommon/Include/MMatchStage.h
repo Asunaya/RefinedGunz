@@ -75,7 +75,7 @@ private:
 	MMatchStageTeam			m_Teams[MMT_END];
 
 public:
-	MUIDRefCache			m_ObjUIDCaches;
+	MMatchObjectMap			m_ObjUIDCaches;
 private:
 	list<int>				m_BanCIDList;
 
@@ -151,8 +151,8 @@ public:
 	MMatchObject* GetObj(const MUID& uid)	{ if (m_ObjUIDCaches.count(uid) == 0) return NULL; else return (MMatchObject*)(m_ObjUIDCaches[uid]); }			///< 추가by 동섭, 듀얼을 위해 -_-
 	size_t GetObjCount()					{ return m_ObjUIDCaches.size(); }
 	int GetPlayers();
-	MUIDRefCache::iterator GetObjBegin()	{ return m_ObjUIDCaches.begin(); }
-	MUIDRefCache::iterator GetObjEnd()		{ return m_ObjUIDCaches.end(); }
+	auto GetObjBegin()	{ return m_ObjUIDCaches.begin(); }
+	auto GetObjEnd()	{ return m_ObjUIDCaches.end(); }
 	int GetObjInBattleCount();															///< 전투하고 있는 플레이어수
 	int GetCountableObjCount()				{ return ((int)GetObjCount() - m_nAdminObjectCount); }	///< 운영자를 제외한 플레이어수
 
@@ -160,8 +160,8 @@ public:
 	void AddBanList(int nCID);
 	bool CheckBanList(int nCID);
 
-	void AddObject(const MUID& uid, const MMatchObject* pObj);
-	MUIDRefCache::iterator RemoveObject(const MUID& uid);
+	void AddObject(const MUID& uid, MMatchObject* pObj);
+	MMatchObjectMap::iterator RemoveObject(const MUID& uid);
 	bool KickBanPlayer(const char* pszName, bool bBanPlayer=true);
 
 	const MUID RecommandMaster(bool bInBattleOnly);

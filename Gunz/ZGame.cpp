@@ -2358,6 +2358,12 @@ void ZGame::OnPeerBasicInfo(MCommand *pCommand,bool bAddHistory,bool bUpdate)
 			delete *pCharacter->m_BasicHistory.begin();
 			pCharacter->m_BasicHistory.erase(pCharacter->m_BasicHistory.begin());
 		}
+
+		BasicInfoItem bii;
+		ppbi->Unpack(bii);
+		bii.SentTime = ppbi->fTime;
+		bii.RecvTime = GetTime();
+		pCharacter->BasicInfoHistory.AddBasicInfo(bii);
 	}
 
 	if(bUpdate)
@@ -3506,16 +3512,21 @@ void ZGame::OnPeerShot_Range(MMatchCharItemParts sel_type, const MUID& uidOwner,
 
 	::PickHistory(*m_pMyCharacter, pos, to, test, pickinfo,
 		m_CharacterManager, [](auto&, auto&, auto&) {}, dwPickPassFlag);*/
+	
+	bool Picked = ::PickHistory<ZCharacter>(*m_pMyCharacter, pos, to, GetWorld()->GetBsp(), pickinfo,
+			MakePairValueAdapter(m_CharacterManager), fShotTime, dwPickPassFlag);
 
-	if(g_pGame->PickHistory(pOwner,fShotTime,pos,to,&pickinfo,dwPickPassFlag))
+	//if(g_pGame->PickHistory(pOwner,fShotTime,pos,to,&pickinfo,dwPickPassFlag))
+	if (Picked)
 	{
-#ifdef _DEBUG
-		if (pickinfo.bBspPicked)
-			ZChatOutputF("Client: Hit wall at %d, %d, %d",
-				(int)pickinfo.bpi.PickPos.x, (int)pickinfo.bpi.PickPos.y, (int)pickinfo.bpi.PickPos.z);
-		else
-			ZChatOutputF("Client: Hit nothing");
-#endif
+//#ifdef _DEBUG
+		if (ZGetGameClient()->GetMatchStageSetting()->GetNetcode() == NetcodeType::ServerBased)
+			if (pickinfo.bBspPicked)
+				ZChatOutputF("Client: Hit wall at %d, %d, %d",
+					(int)pickinfo.bpi.PickPos.x, (int)pickinfo.bpi.PickPos.y, (int)pickinfo.bpi.PickPos.z);
+			else
+				ZChatOutputF("Client: Hit nothing");
+//#endif
 		if(pickinfo.pObject)
 		{
 			ZObject *pObject = pickinfo.pObject;
@@ -3745,8 +3756,6 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 	/*int *seed=(int*)&fShotTime;
 	srand(*seed);*/
 
-	DMLog("Seed: %08X\n", seed);
-
 	bool bHitGuard=false,bHitBody=false,bHitGround=false,bHitEnemy=false;
 	rvector GuardPos,BodyPos,GroundPos;
 
@@ -3771,29 +3780,6 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 
 	for(int i=0;i<SHOTGUN_BULLET_COUNT;i++)
 	{
-		//rvector dir = origdir;
-
-		//{
-		//	// 오차값 - 반동대신 시범삼아 넣음
-		//	rvector r, up(0,0,1), right;
-		//	D3DXQUATERNION q;
-		//	D3DXMATRIX mat;
-
-		//	float fAngle = (rand() % (31415 * 2)) / 1000.0f;
-		//	float fForce = RANDOMFLOAT*SHOTGUN_DIFFUSE_RANGE;
-
-		//	D3DXVec3Cross(&right,&dir,&up);
-		//	D3DXVec3Normalize(&right,&right);
-		//	D3DXMatrixRotationAxis(&mat, &right, fForce);
-		//	D3DXVec3TransformCoord(&r, &dir, &mat);
-
-		//	D3DXQuaternionRotationAxis(&q, &dir, fAngle);
-		//	D3DXMatrixRotationQuaternion(&mat, &q);
-		//	D3DXVec3TransformCoord(&r, &r, &mat);
-
-		//	dir=r;
-		//}
-
 		auto dir = DirGen();
 
 		rvector BulletMarkNormal;
@@ -3807,16 +3793,11 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 		// 총알은 로켓이 통과하는곳도 통과한다
 		const DWORD dwPickPassFlag=RM_FLAG_ADDITIVE | RM_FLAG_HIDE | RM_FLAG_PASSROCKET | RM_FLAG_PASSBULLET;
 
-		auto GetPositions = [&](auto& Obj, auto& Head, auto& Foot)
-		{
-			Obj.GetHistory(&Foot, nullptr, fShotTime);
-		};
-
-		::PickHistory(*pOwnerCharacter, pos, pos + 10000 * dir, GetWorld()->GetBsp(),
-			pickinfo, m_CharacterManager, GetPositions, dwPickPassFlag);
+		bool Picked = ::PickHistory(*pOwnerCharacter, pos, pos + 10000 * dir, GetWorld()->GetBsp(),
+			pickinfo, MakePairValueAdapter(m_CharacterManager), fShotTime, dwPickPassFlag);
 
 		//if(g_pGame->PickHistory(pOwnerCharacter,fShotTime,pos,pos+10000.f*dir,&pickinfo,dwPickPassFlag))
-		if(pickinfo.bBspPicked || pickinfo.bBspPicked)
+		if(Picked)
 		{
 			ZObject *pObject = pickinfo.pObject;
 			if(pObject)
@@ -3870,7 +3851,9 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 						bHitEnemy=true;
 					}
 
-					if (ZGetGameClient()->GetMatchStageSetting()->GetNetcode() == NetcodeType::P2PAntilead && pOwnerCharacter == m_pMyCharacter && !IsReplay())
+					if (ZGetGameClient()->GetMatchStageSetting()->GetNetcode() == NetcodeType::P2PAntilead
+						&& pOwnerCharacter == m_pMyCharacter && !IsReplay()
+						|| ZGetGameClient()->GetMatchStageSetting()->GetNetcode() == NetcodeType::ServerBased)
 					{
 						auto Char = MDynamicCast(ZCharacter, pObject);
 
@@ -3881,7 +3864,8 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 							auto& item = DamageMap[Char->GetUID()];
 
 							int NewDamage = item.Damage + Damage;
-							item.PiercingRatio = (item.Damage * item.PiercingRatio + Damage * fRatio) / NewDamage;
+							if (fRatio != item.PiercingRatio)
+								item.PiercingRatio = (item.Damage * item.PiercingRatio + Damage * fRatio) / NewDamage;
 
 							item.Damage = NewDamage;
 							static_assert(ZD_BULLET_HEADSHOT > ZD_BULLET, "Fix me");
@@ -3915,35 +3899,6 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 					bool bDrawTargetEffects = isInViewFrustum(v2,20.f,RGetViewFrustum());
 					if(bDrawTargetEffects)
 						ZGetEffectManager()->AddBulletMark(v2,BulletMarkNormal);
-
-/*
-///////////////////////////////////////////////////////////////////////////////////////////////////////
-// by 베니
-// 샷건이 이펙트가 제대로 나오지 않아서 수정
-#define TARGET_SMOKE_MAX_SCALE		50.0f
-#define TARGET_SMOKE_MIN_SCALE		40.0f
-#define TARGET_SMOKE_LIFE_TIME		0.9f
-#define TARGET_SMOKE_VELOCITY		0.2f				// meter/sec
-#define TARGET_SMOKE_ACCEL			rvector(0,0,100.f)	// meter/sec
-
-	int max_cnt = 0;
-
-	if(GetEffectLevel()==0)	max_cnt = 5;
-	else if(GetEffectLevel()==1)	max_cnt = 3;
-	else if(GetEffectLevel()==2)	max_cnt = 1;
-
-	if(max_cnt) {
-	//m_EffectManager.AddShotEffect(v,size, v2, BulletMarkNormal, nTargetType, NULL,ring_draw,wtype,pOwnerCharacter);	
-		for(int i=0; i<max_cnt; i++) {
-			rvector p = v2+BulletMarkNormal*TARGET_SMOKE_MIN_SCALE*float(i)*0.5f + rvector(fmod((float)rand(), TARGET_SMOKE_MIN_SCALE), fmod((float)rand(), TARGET_SMOKE_MIN_SCALE), fmod((float)rand(), TARGET_SMOKE_MIN_SCALE));
-			float fSize = 1.0f+float(rand()%100)/100.0f;
-			m_EffectManager.AddSmokeEffect(m_EffectManager.m_pEBSSmokes[rand()%SMOKE_COUNT], p, BulletMarkNormal*TARGET_SMOKE_VELOCITY,rvector(0,100.f,0), TARGET_SMOKE_MIN_SCALE*fSize, TARGET_SMOKE_MAX_SCALE*fSize, TARGET_SMOKE_LIFE_TIME);
-		}
-		m_EffectManager.AddLightFragment(v2,BulletMarkNormal);
-
-	}
-///////////////////////////////////////////////////////////////////////////////////////////////////////
-*/
 				}
 				else {
 					_ASSERT(false);
@@ -3956,22 +3911,28 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 			nTargetType	= ZTT_NOTHING;
 		}
 
-#ifdef _DEBUG
-		if (pickinfo.bBspPicked)
-			ZChatOutputF("Client: Hit wall at %d, %d, %d",
-				(int)pickinfo.bpi.PickPos.x, (int)pickinfo.bpi.PickPos.y, (int)pickinfo.bpi.PickPos.z);
-		else
-			ZChatOutputF("Client: Hit nothing");
-#endif
+//#ifdef _DEBUG
+//		if (pickinfo.bBspPicked)
+//			ZChatOutputF("Client: Hit wall at %d, %d, %d",
+//				(int)pickinfo.bpi.PickPos.x, (int)pickinfo.bpi.PickPos.y, (int)pickinfo.bpi.PickPos.z);
+//		else
+//			ZChatOutputF("Client: Hit nothing");
+//#endif
 
 		waterSound = GetWorld()->GetWaters()->CheckSpearing( v1, v2, 250, 0.3, !waterSound );
 	}
 
-	if (ZGetGameClient()->GetMatchStageSetting()->GetNetcode() == NetcodeType::P2PAntilead)
+	if (ZGetGameClient()->GetMatchStageSetting()->GetNetcode() == NetcodeType::P2PAntilead
+		|| ZGetGameClient()->GetMatchStageSetting()->GetNetcode() == NetcodeType::ServerBased)
 	{
 		for (auto& Pair : DamageMap)
 		{
-			ZPostAntileadDamage(Pair.first, Pair.second.Damage, Pair.second.PiercingRatio, Pair.second.DamageType, Pair.second.WeaponType);
+			if (ZGetGameClient()->GetMatchStageSetting()->GetNetcode() == NetcodeType::P2PAntilead)
+				ZPostAntileadDamage(Pair.first, Pair.second.Damage, Pair.second.PiercingRatio,
+					Pair.second.DamageType, Pair.second.WeaponType);
+			else
+				ZChatOutputF("Client: Hit %s for %d damage",
+					m_CharacterManager.at(Pair.first)->GetUserNameA(), Pair.second.Damage);
 		}
 	}
 
@@ -4361,7 +4322,10 @@ void ZGame::OnPeerDieMessage(ZCharacter* pVictim, ZCharacter* pAttacker)
 //		sprintf_safe(szMsg, "당신은 %s님에게 패배하였습니다.", szAttacker );
 		/*ZTransMsg( szMsg, MSG_GAME_LOSE_FROM_WHO, 1, szAttacker );
 		ZChatOutput(MCOLOR(0xFFCF2020), szMsg);*/
-		ZChatOutputF("%s has defeated you. (HP: %d / %d, AP: %d / %d)", pAttacker->GetProperty()->szName, pAttacker->GetHP(), (int)pAttacker->GetProperty()->fMaxHP, pAttacker->GetAP(), (int)pAttacker->GetProperty()->fMaxAP);
+		ZChatOutputF("%s has defeated you. (HP: %d / %d, AP: %d / %d)",
+			pAttacker->GetProperty()->szName,
+			pAttacker->GetHP(), (int)pAttacker->GetProperty()->fMaxHP,
+			pAttacker->GetAP(), (int)pAttacker->GetProperty()->fMaxAP);
 	}
 
 	// 다른 사람이 다른 사람 죽였을때

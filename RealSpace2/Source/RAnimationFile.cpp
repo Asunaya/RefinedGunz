@@ -78,7 +78,7 @@ RAnimationNode* RAnimationFile::GetNode(const char* name)
 	return NULL;
 }
 
-bool RAnimationFile::LoadAni(char* filename)
+bool RAnimationFile::LoadAni(const char* filename)
 {
 	int node_cnt=0;
 

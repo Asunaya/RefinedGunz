@@ -65,9 +65,9 @@ bool MMatchRuleTeamDeath::OnCheckEnableBattleCondition()
 	MMatchStage* pStage = GetStage();
 	if (pStage == NULL) return false;
 
-	for (MUIDRefCache::iterator i=pStage->GetObjBegin(); i!=pStage->GetObjEnd(); i++) 
+	for (auto i=pStage->GetObjBegin(); i!=pStage->GetObjEnd(); i++)
 	{
-		MMatchObject* pObj = (MMatchObject*)(*i).second;
+		MMatchObject* pObj = i->second;
 		if ((pObj->GetEnterBattle() == false) && (!pObj->IsLaunchedGame()))
 		{
 			nStageObjects++;
@@ -103,9 +103,9 @@ bool MMatchRuleTeamDeath::GetAliveCount(int* pRedAliveCount, int* pBlueAliveCoun
 	MMatchStage* pStage = GetStage();
 	if (pStage == NULL) return false;
 
-	for (MUIDRefCache::iterator i=pStage->GetObjBegin(); i!=pStage->GetObjEnd(); i++) 
+	for (auto i=pStage->GetObjBegin(); i!=pStage->GetObjEnd(); i++)
 	{
-		MMatchObject* pObj = (MMatchObject*)(*i).second;
+		MMatchObject* pObj = i->second;
 		if (pObj->GetEnterBattle() == false) continue;	// 배틀참가하고 있는 플레이어만 체크
 
 		if (pObj->GetTeam() == MMT_RED)
@@ -251,9 +251,9 @@ bool MMatchRuleSoloDeath::RoundCount()
 bool MMatchRuleSoloDeath::CheckKillCount(MMatchObject* pOutObject)
 {
 	MMatchStage* pStage = GetStage();
-	for (MUIDRefCache::iterator i=pStage->GetObjBegin(); i!=pStage->GetObjEnd(); i++) 
+	for (auto i=pStage->GetObjBegin(); i!=pStage->GetObjEnd(); i++)
 	{
-		MMatchObject* pObj = (MMatchObject*)(*i).second;
+		MMatchObject* pObj = i->second;
 		if (pObj->GetEnterBattle() == false) continue;
 
 		if (pObj->GetKillCount() >= (unsigned int)pStage->GetStageSetting()->GetRoundMax())

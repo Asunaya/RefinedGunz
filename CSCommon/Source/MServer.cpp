@@ -75,8 +75,8 @@ void MServer::Destroy(void)
 	m_RealCPNet.Destroy();
 
 	LockCommList();
-		for(MUIDRefCache::iterator i=m_CommRefCache.begin(); i!=m_CommRefCache.end(); i++){
-			delete (MCommObject*)(((*i).second));
+		for(auto i=m_CommRefCache.begin(); i!=m_CommRefCache.end(); i++){
+			delete i->second;
 		}
 		m_CommRefCache.clear();
 	UnlockCommList();
@@ -104,13 +104,13 @@ void MServer::AddCommObject(const MUID& uid, MCommObject* pCommObj)
 	MCommandBuilder* pCmdBuilder = pCommObj->GetCommandBuilder();
 	pCmdBuilder->SetUID(GetUID(), uid);
 
-	m_CommRefCache.insert(MUIDRefCache::value_type(uid, pCommObj));
+	m_CommRefCache.emplace(uid, pCommObj);
 	g_LogCommObjectCreated++;
 }
 
 void MServer::RemoveCommObject(const MUID& uid)
 {
-	MCommObject* pNew = (MCommObject*)m_CommRefCache.Remove(uid);
+	MCommObject* pNew = m_CommRefCache.Remove(uid);
 	if (pNew) delete pNew;
 	g_LogCommObjectDestroyed++;
 }
