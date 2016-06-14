@@ -162,11 +162,12 @@ static bool PickHistory(const ObjectT& Exception, const v3& src, const v3& dest,
 {
 	ObjectT* HitObject = nullptr;
 	v3 HitPos;
+	pickinfo.info.t = 0;
 
-	for (auto Obj : Container)
+	for (auto& Obj : Container)
 	{
-		if (&Exception == Obj)
-			continue;
+		/*if (&Exception == Obj)
+			continue;*/
 
 		v3 TempHitPos;
 		auto HitParts = Obj->HitTest(src, dest, Time, &TempHitPos);
@@ -177,11 +178,17 @@ static bool PickHistory(const ObjectT& Exception, const v3& src, const v3& dest,
 		if (!Obj->IsAlive())
 			continue;
 
-		if (HitObject && Magnitude(TempHitPos - src) < Magnitude(HitPos - src)
-			|| !HitObject)
+		if (!HitObject || Magnitude(TempHitPos - src) < Magnitude(HitPos - src))
 		{
 			HitObject = Obj;
 			HitPos = TempHitPos;
+			switch (HitParts)
+			{
+			case ZOH_HEAD: pickinfo.info.parts = eq_parts_head; break;
+			case ZOH_BODY: pickinfo.info.parts = eq_parts_chest; break;
+			case ZOH_LEGS:	pickinfo.info.parts = eq_parts_legs; break;
+			}
+			pickinfo.info.vOut = TempHitPos;
 		}
 	}
 

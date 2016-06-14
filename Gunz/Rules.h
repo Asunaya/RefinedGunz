@@ -7,8 +7,6 @@ public:
 
 	void OnGameCreate();
 
-	int MaxHP() const { return HP; }
-	int MaxAP() const { return AP; }
 	bool CanFlip() const { return !NoFlip; }
 	bool CanUseElements() const { return !NoElements; }
 	bool CanTipslash() const { return !NoTipslash; }

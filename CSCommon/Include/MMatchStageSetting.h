@@ -78,6 +78,11 @@ struct MSTAGE_SETTING_NODE {
 #endif
 
 	NetcodeType Netcode = NetcodeType::ServerBased;
+
+	bool ForceHPAP = true;
+
+	int HP = 100;
+	int AP = 50;
 };
 #pragma pack(pop)
 
@@ -145,6 +150,9 @@ public:
 	bool GetForcedEntry()							{ return m_StageSetting.bForcedEntryEnabled; }
 	bool GetAutoTeamBalancing()						{ return m_StageSetting.bAutoTeamBalancing; }
 	auto GetNetcode() const { return m_StageSetting.Netcode; }
+	bool IsForcedHPAP() const { return m_StageSetting.ForceHPAP; }
+	int GetForcedHP() const { return m_StageSetting.HP; }
+	int GetForcedAP() const { return m_StageSetting.AP; }
 	MSTAGE_SETTING_NODE* GetStageSetting()			{ return &m_StageSetting; }
 	const MMatchGameTypeInfo* GetCurrGameTypeInfo();
 

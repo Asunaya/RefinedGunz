@@ -511,7 +511,7 @@ void ZGameClient::OnChannelResponseRule(const MUID& uidchannel, const char* pszR
 
 void ZGameClient::OnStageEnterBattle(const MUID& uidChar, MCmdEnterBattleParam nParam, MTD_PeerListNode* pPeerNode)
 {	
-	MLog("ZGameClient::OnStageEnterBattle -- Netcode: %d\n", GetMatchStageSetting()->GetNetcode());
+	//MLog("ZGameClient::OnStageEnterBattle -- Netcode: %d\n", GetMatchStageSetting()->GetNetcode());
 	// 이것은 ZGame 에서 불러준다
 	if (uidChar == GetPlayerUID())		// enter한사람이 나자신일 경우
 	{
@@ -540,6 +540,8 @@ void ZGameClient::OnStageJoin(const MUID& uidChar, const MUID& uidStage, unsigne
 //	SetBridgePeerFlag(false);
 
 	if (uidChar == GetPlayerUID()) {
+		JustJoinedStage = true;
+
 		m_nStageCursor = 0;
 		m_uidStage = uidStage;
 		m_nRoomNo = nRoomNo;
@@ -969,6 +971,23 @@ void ZGameClient::OnChannelAllPlayerList(const MUID& uidChannel, void* pBlob, in
 	}
 }
 
+static const char* GetNetcodeString(NetcodeType Netcode)
+{
+	switch (Netcode)
+	{
+	case NetcodeType::P2PLead:
+		return "Peer to Peer Lead";
+		break;
+	case NetcodeType::P2PAntilead:
+		return "Peer to Peer Antilead";
+		break;
+	case NetcodeType::ServerBased:
+		return "Server-based";
+	default:
+		return "Unknown";
+	}
+}
+
 void ZGameClient::UpdateStageSetting(MSTAGE_SETTING_NODE* pSetting, STAGE_STATE nStageState, const MUID& uidMaster)
 {
 	m_MatchStageSetting.UpdateStageSetting(pSetting);
@@ -981,6 +1000,59 @@ void ZGameClient::UpdateStageSetting(MSTAGE_SETTING_NODE* pSetting, STAGE_STATE 
 		bForceEntry = true;
 	}
 	m_bForcedEntry = bForceEntry;
+
+	char buf[256];
+	bool Changed = false;
+	auto CheckSetting = [&](auto& Old, auto& New)
+	{
+		if (JustJoinedStage)
+		{
+			Changed = false;
+
+			if (CreatedStage)
+				return false;
+
+			return true;
+		}
+
+		if (Old != New)
+		{
+			Changed = true;
+			return true;
+		}
+
+		Changed = false;
+		return false;
+	};
+
+#define CHECK_SETTING(member) CheckSetting(LastStageSetting.member, pSetting->member)
+
+	if (CHECK_SETTING(Netcode) && !IsSwordsOnly(pSetting->nGameType))
+	{
+		sprintf_safe(buf, "Netcode%s%s", Changed ? " changed to " : ": ", GetNetcodeString(pSetting->Netcode));
+		ZChatOutput(buf, ZChat::CMT_SYSTEM);
+	}
+	if (CHECK_SETTING(ForceHPAP))
+	{
+		sprintf_safe(buf, "Force HP/AP%s%s", Changed ? " changed to " : ": ", pSetting->ForceHPAP ? "true" : "false");
+		ZChatOutput(buf, ZChat::CMT_SYSTEM);
+	}
+	if (CHECK_SETTING(HP))
+	{
+		sprintf_safe(buf, "Forced HP%s%d", Changed ? " changed to " : ": ", pSetting->HP);
+		ZChatOutput(buf, ZChat::CMT_SYSTEM);
+	}
+	if (CHECK_SETTING(AP))
+	{
+		sprintf_safe(buf, "Forced AP%s%d", Changed ? " changed to " : ": ", pSetting->AP);
+		ZChatOutput(buf, ZChat::CMT_SYSTEM);
+	}
+
+#undef CHECK_SETTING
+
+	JustJoinedStage = false;
+	CreatedStage = false;
+	LastStageSetting = *pSetting;
 
 	ZApplication::GetGameInterface()->SerializeStageInterface();
 }
@@ -1000,7 +1072,7 @@ void ZGameClient::OnResponseStageSetting(const MUID& uidStage, void* pStageBlob,
 	for(int i=0; i<nCharCount; i++){
 		MSTAGE_CHAR_SETTING_NODE* pCharSetting = (MSTAGE_CHAR_SETTING_NODE*)MGetBlobArrayElement(pCharBlob, i);
 		m_MatchStageSetting.UpdateCharSetting(pCharSetting->uidChar, pCharSetting->nTeam, pCharSetting->nState);
-	}	
+	}
 
 	ZApplication::GetGameInterface()->SerializeStageInterface();
 }
@@ -1009,7 +1081,9 @@ void ZGameClient::OnAgentError(int nError)
 {
 	if (g_pGame) {
 		const MCOLOR ChatColor = MCOLOR(0xffffffff);
-		ZChatOutput(ChatColor, "Agent Error : Agent not available");
+		char Msg[256];
+		sprintf_safe(Msg, "Agent error: Agent not available", nError);
+		ZChatOutput(ChatColor, Msg);
 	}
 }
 

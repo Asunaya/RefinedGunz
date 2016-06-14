@@ -134,7 +134,7 @@ protected:
 
 	bool				m_bAllowTunneling;
 
-	bool PeerToPeer = false;
+	bool PeerToPeer = true;
 
 public:
 	MCommand* MakeCmdFromTunnelingBlob(const MUID& uidSender, void* pBlob, int nBlobArrayCount);

@@ -2361,7 +2361,7 @@ void ZGame::OnPeerBasicInfo(MCommand *pCommand,bool bAddHistory,bool bUpdate)
 
 		BasicInfoItem bii;
 		ppbi->Unpack(bii);
-		bii.SentTime = ppbi->fTime;
+		bii.SentTime = ppbi->fTime - pCharacter->m_fTimeOffset;
 		bii.RecvTime = GetTime();
 		pCharacter->BasicInfoHistory.AddBasicInfo(bii);
 	}

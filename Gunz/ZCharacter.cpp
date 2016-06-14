@@ -2049,7 +2049,7 @@ void ZCharacter::OnDie()
 	
 }
 
-void ZCharacter::GetPositions(v3 & Head, v3 & Foot, u64 Time)
+void ZCharacter::GetPositions(v3 & Head, v3 & Foot, double Time)
 {
 	auto GetItemDesc = [&](MMatchCharItemParts slot)
 	{
@@ -3029,10 +3029,12 @@ void ZCharacter::InitProperties()
 	else
 		m_bAdminHide = false;
 
-	if (g_Rules.MaxHP() > 0)
-		m_Property.fMaxHP = g_Rules.MaxHP();
-	if (g_Rules.MaxAP() > 0)
-		m_Property.fMaxAP = g_Rules.MaxAP();
+	auto& MatchSetting = *ZGetGameClient()->GetMatchStageSetting();
+	if (MatchSetting.IsForcedHPAP())
+	{
+		m_Property.fMaxHP = MatchSetting.GetForcedHP();
+		m_Property.fMaxAP = MatchSetting.GetForcedAP();
+	}
 }
 
 bool ZCharacter::Create(const MTD_CharInfo& CharInfo)
@@ -3685,7 +3687,7 @@ void ZCharacter::InitRound()
 ZOBJECTHITTEST ZCharacter::HitTest(const rvector& origin, const rvector& to,float fTime,rvector *pOutPos)
 {
 	v3 Head, Foot;
-	GetPositions(Head, Foot, fTime * 1000);
+	GetPositions(Head, Foot, fTime);
 	return PlayerHitTest(Head, Foot, origin, to, pOutPos);
 }
 

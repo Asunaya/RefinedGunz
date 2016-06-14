@@ -67,6 +67,9 @@ protected:
 	void UpdateBridgePeerTime(unsigned long int nClock)	{ m_tmLastBridgePeer = nClock; }
 	void StartBridgePeer();
 
+	bool JustJoinedStage = false;
+	MSTAGE_SETTING_NODE LastStageSetting;
+
 	void UpdateStageSetting(MSTAGE_SETTING_NODE* pSetting, STAGE_STATE nStageState, const MUID& uidMaster);
 	void SetCountdown(int nCountdown)	{ m_nCountdown = nCountdown; m_tmLastCountdown = 0; }
 	int GetCountdown()					{ return m_nCountdown; }
@@ -206,6 +209,8 @@ protected:
 protected:
 	void OnAdminAnnounce(const char* szMsg, const ZAdminAnnounceType nType);
 public:
+	bool CreatedStage = false;
+
 	ZGameClient();
 	virtual ~ZGameClient();
 

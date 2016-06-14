@@ -80,7 +80,7 @@ public:
 
 	bool operator!=(const ValueIterator& rhs) const
 	{
-		return it == rhs.it;
+		return it != rhs.it;
 	}
 
 	auto& operator*()
@@ -132,6 +132,18 @@ template <typename T, size_t size>
 inline constexpr size_t ArraySize(T(&)[size])
 {
 	return size;
+}
+
+static std::pair<bool, int> StringToInt(const char* String, int Radix = 10)
+{
+	char *endptr = nullptr;
+
+	int IntVal = strtol(String, &endptr, Radix);
+
+	if (endptr != String + strlen(String))
+		return{ false, -1 };
+
+	return{ true, IntVal };
 }
 
 

@@ -46,12 +46,16 @@ bool LagCompManager::Create()
 		return false;
 	}
 
-	Maps.emplace("Mansion", RBspObject());
-	ret = Maps["Mansion"].Open("maps/Mansion/Mansion.rs", RBspObject::ROF_RUNTIME, nullptr, nullptr, true);
-	if (!ret)
+	for (auto& Map : g_MapDesc)
 	{
-		MGetMatchServer()->LogF(MMatchServer::LOG_ALL, "Falied to load Mansion!");
-		return false;
+		char Path[128];
+		sprintf_safe(Path, "maps/%s/%s.rs", Map.szMapName, Map.szMapName);
+		ret = Maps[Map.szMapName].Open(Path, RBspObject::ROF_RUNTIME, nullptr, nullptr, true);
+		if (!ret)
+		{
+			MGetMatchServer()->LogF(MMatchServer::LOG_ALL, "Falied to load map %s!", Map.szMapName);
+			return false;
+		}
 	}
 
 	//for (int AniIdx = 0; AniIdx < ZC_STATE_LOWER_END; AniIdx++)

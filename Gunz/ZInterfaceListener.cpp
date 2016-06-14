@@ -672,6 +672,7 @@ BEGIN_IMPLEMENT_LISTENER(ZGetStageCreateBtnListener, MBTN_CLK_MSG)
 		// memset( szStageName, 0, 128 );
 		// strncpy( szStageName, &strStageName[0], strStageName.size() );
 		ZApplication::GetGameInterface()->EnableLobbyInterface(false);
+		ZGetGameClient()->CreatedStage = true;
 		ZPostStageCreate(ZGetGameClient()->GetPlayerUID(), szStageName, bPrivate, szStagePassword);
 	}
 END_IMPLEMENT_LISTENER()

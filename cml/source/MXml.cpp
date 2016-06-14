@@ -769,7 +769,7 @@ bool MXmlDocument::LoadFromMemory(char* szBuffer, LANGID lanid)
 		OutputDebugString(szBuf);
 
 		// TODO: Fix this ;w;
-		//_ASSERT(0);
+		_ASSERT(0);
 
 		s.clear();
 		return false;

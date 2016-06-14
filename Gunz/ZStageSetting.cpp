@@ -229,8 +229,46 @@ static bool BuildStageSetting(MSTAGE_SETTING_NODE* pOutNode)
 //	pOutNode->uidStage = ZGetGameClient()->GetStageUID();
 //	strcpy_safe(pOutNode->szMapName , ZGetGameClient()->GetMatchStageSetting()->GetMapName());
 
-	BUILD_STAGESETTING_ITEM("StageNetcode", pOutNode->Netcode,
-		StageSetting_Netcode, 3);
+	if (pOutNode->nGameType == MMATCH_GAMETYPE_GLADIATOR_SOLO
+		|| pOutNode->nGameType == MMATCH_GAMETYPE_GLADIATOR_TEAM)
+	{
+		pOutNode->Netcode = NetcodeType::P2PLead;
+	}
+	else
+	{
+		BUILD_STAGESETTING_ITEM("StageNetcode", pOutNode->Netcode,
+			StageSetting_Netcode, 3);
+	}
+
+	[&]()
+	{
+		auto ForceHPAPWidget = static_cast<MButton*>(pResource->FindWidget("StageForceHPAP"));
+		if (!ForceHPAPWidget)
+			return;
+
+		pOutNode->ForceHPAP = ForceHPAPWidget->GetCheck();
+
+		if (pOutNode->ForceHPAP)
+		{
+			auto GetWidgetInt = [&](const char* WidgetName, int& Ret)
+			{
+				auto Widget = static_cast<MEdit*>(pResource->FindWidget(WidgetName));
+				if (!Widget)
+					return;
+
+				auto Text = Widget->GetText();
+				auto Pair = StringToInt(Text);
+
+				if (!Pair.first)
+					return;
+
+				Ret = Pair.second;
+			};
+
+			GetWidgetInt("StageHP", pOutNode->HP);
+			GetWidgetInt("StageAP", pOutNode->AP);
+		}
+	}();
 
 	return true;
 }
@@ -307,18 +345,26 @@ void ZStageSetting::ShowStageSettingDialog( MSTAGE_SETTING_NODE* pStageSetting, 
 		SHOWSTAGESETTING_LISTITEM( "StageLimitTime", pStageSetting->nLimitTime, pGameTypeCfg->m_LimitTime, 99999);
 	}
 
-	auto cb = static_cast<MComboBox*>(pResource->FindWidget("StageNetcode"));
-
-	if (cb)
+	[&]()
 	{
+		auto cb = static_cast<MComboBox*>(pResource->FindWidget("StageNetcode"));
+
+		if (!cb)
+			return;
+
 		cb->RemoveAll();
 
 		cb->Add("Server-based");
 		cb->Add("Peer to Peer Antilead");
 		cb->Add("Peer to Peer Lead");
 
-		cb->SetSelIndex((int)pStageSetting->Netcode);
-	}
+		if (IsSwordsOnly(pStageSetting->nGameType))
+			cb->SetSelIndex(2);
+		else
+			cb->SetSelIndex((int)pStageSetting->Netcode);
+
+		cb->Enable(!IsSwordsOnly(pStageSetting->nGameType));
+	}();
 
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -368,6 +414,29 @@ void ZStageSetting::ShowStageSettingDialog( MSTAGE_SETTING_NODE* pStageSetting, 
 //	SHOWSTAGESETTING_ITEM("StageVote", pStageSetting->bVoteEnabled,
 //		STAGESETTING_VOTE_MAX, StageSetting_Vote);
 
+	[&]()
+	{
+		auto ForceHPAP = static_cast<MButton*>(pResource->FindWidget("StageForceHPAP"));
+		if (ForceHPAP)
+		{
+			ForceHPAP->SetCheck(pStageSetting->ForceHPAP);
+		}
+
+		char buf[64];
+		auto HP = static_cast<MEdit*>(pResource->FindWidget("StageHP"));
+		if (HP)
+		{
+			_itoa(pStageSetting->HP, buf, 10);
+			HP->SetText(buf);
+		}
+
+		auto AP = static_cast<MEdit*>(pResource->FindWidget("StageAP"));
+		if (AP)
+		{
+			_itoa(pStageSetting->AP, buf, 10);
+			AP->SetText(buf);
+		}
+	}();
 
 	if ( bShowAll)
 	{
@@ -447,6 +516,29 @@ void ZStageSetting::InitStageSettingDialog()
 	INITSTAGESETTING_ITEM("StageVote", pStageSetting->bVoteEnabled,
 		STAGESETTING_VOTE_MAX, StageSetting_Vote, STAGESETTING_VOTE_DEFAULT);
 
+	INITSTAGESETTING_ITEM("StageNetcode", (int)pStageSetting->Netcode,
+		3, StageSetting_Netcode, 0);
+
+	[&]()
+	{
+		auto ForceHPAP = static_cast<MButton*>(pResource->FindWidget("StageForceHPAP"));
+		if (ForceHPAP)
+		{
+			ForceHPAP->SetCheck(true);
+		}
+
+		auto HP = static_cast<MEdit*>(pResource->FindWidget("StageHP"));
+		if (HP)
+		{
+			HP->SetText("100");
+		}
+
+		auto AP = static_cast<MEdit*>(pResource->FindWidget("StageAP"));
+		if (AP)
+		{
+			AP->SetText("50");
+		}
+	}();
 }
 
 void ZStageSetting::ApplyStageSettingDialog()

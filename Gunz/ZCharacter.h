@@ -247,7 +247,7 @@ protected:
 
 public:
 	BasicInfoHistoryManager BasicInfoHistory;
-	void GetPositions(v3& Head, v3& Foot, u64 Time);
+	void GetPositions(v3& Head, v3& Foot, double Time);
 
 	float	m_fLastValidTime;		// Dead Reckoning에 필요한 변수 -> 지금 코드에서 필요없어보임
 //	float	m_fDistToFloor;			// 바닥까지의 거리

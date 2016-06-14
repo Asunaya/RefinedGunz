@@ -3220,7 +3220,11 @@ bool ZMyCharacter::IsGuard() const
 
 bool ZMyCharacter::IsGuardCustom() const
 {
+#ifdef GUARD_START_CAN_BLOCK
 	return m_bGuard;
+#else
+	return IsGuard();
+#endif
 }
 
 void ZMyCharacter::ProcessDelayedWork()

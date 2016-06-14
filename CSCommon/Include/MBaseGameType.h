@@ -178,4 +178,10 @@ inline bool MBaseGameTypeCatalogue::IsWorldItemSpawnEnable(MMATCH_GAMETYPE nGame
 
 }
 
+static bool IsSwordsOnly(MMATCH_GAMETYPE GameType)
+{
+	return GameType == MMATCH_GAMETYPE_GLADIATOR_SOLO
+		|| GameType == MMATCH_GAMETYPE_GLADIATOR_TEAM;
+}
+
 #endif
