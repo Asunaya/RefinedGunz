@@ -5,23 +5,6 @@
 #include "ArrayView.h"
 #include "RGTypes.h"
 
-struct REPLAY_STAGE_SETTING_NODE
-{
-	MUID				uidStage;
-	char				szStageName[64];
-	char				szMapName[MAPNAME_LENGTH];
-	char				nMapIndex;
-	MMATCH_GAMETYPE		nGameType;
-	int					nRoundMax;
-	int					nLimitTime;
-	int					nLimitLevel;
-	int					nMaxPlayers;
-	bool				bTeamKillEnabled;
-	bool				bTeamWinThePoint;
-	bool				bForcedEntryEnabled;
-	bool				bAutoTeamBalancing;
-};
-
 bool CreateReplayGame(const char *filename);
 
 
@@ -102,6 +85,8 @@ public:
 	std::vector<ReplayPlayerInfo> GetCharInfo();
 	template <typename T>
 	bool GetCommands(T ForEachCommand, bool PersistentMCommands, ArrayView<u32>* WantedCommandIDs = nullptr);
+
+	int GetPosition() const { return Position; }
 
 private:
 	std::vector<unsigned char> InflatedFile;

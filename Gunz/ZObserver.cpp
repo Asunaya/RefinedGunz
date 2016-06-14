@@ -162,7 +162,8 @@ void ZObserver::ChangeToNextTarget()
 			{
 				if (bFlag) 
 				{
-					Show(false);
+					// This bugs replays when both players die at the same time
+					//Show(false);
 					return;
 				}
 

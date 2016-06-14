@@ -193,6 +193,8 @@ inline std::vector<ReplayPlayerInfo> ZReplayLoader::GetCharInfo()
 		if (Version.Server != SERVER::DarkGunz)
 			Read(IsHero);
 
+		MLog("Server: %d, version: %d\n", Version.Server, Version.nVersion);
+
 		MTD_CharInfo CharInfo;
 
 #define COPY_CHARINFO(member) CharInfo.member = oldinfo.member
@@ -265,12 +267,13 @@ inline std::vector<ReplayPlayerInfo> ZReplayLoader::GetCharInfo()
 					READ_CHARINFO(MTD_CharInfo_FG_V7_1);
 				}
 			}
-			else if (Version.nVersion = 8)
+			else if (Version.nVersion == 8)
 			{
 				READ_CHARINFO(MTD_CharInfo_FG_V8);
 			}
 			else if (Version.nVersion == 9)
 			{
+				MLog("FG V9!\n");
 				READ_CHARINFO(MTD_CharInfo_FG_V9);
 			}
 
@@ -359,6 +362,8 @@ inline std::vector<ReplayPlayerInfo> ZReplayLoader::GetCharInfo()
 			IsHero = rpi.IsHero;
 			CopyCharInfo(rpi.Info);
 			CopyCharState(rpi.State);
+
+			CharInfo.nEquipedItemDesc[MMCIP_MELEE] = 2; // Rusty Sword
 		}
 
 		MLog("Offset: %X\n", Position);

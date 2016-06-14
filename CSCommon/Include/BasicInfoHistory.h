@@ -61,9 +61,9 @@ public:
 			AbsPos = Lerp(pre_it->position, post_it->position, t);
 			Dir = Slerp(pre_it->direction, post_it->direction, t);
 
-			MLog("t = %f; %f / %f; AbsPos = %f, %f, %f; Dir = %f, %f, %f",
+			/*MLog("t = %f; %f / %f; AbsPos = %f, %f, %f; Dir = %f, %f, %f",
 				t, post_it->RecvTime - pre_it->RecvTime, Time - pre_it->RecvTime,
-				AbsPos.x, AbsPos.y, AbsPos.z, Dir.x, Dir.y, Dir.z);
+				AbsPos.x, AbsPos.y, AbsPos.z, Dir.x, Dir.y, Dir.z);*/
 		}
 		else
 		{
@@ -83,7 +83,7 @@ public:
 			diff_ani_it = BasicInfoList.end() - 1;
 
 		auto Frame = u32(Time - diff_ani_it->RecvTime);
-		MLog("Ani %d; Frame = %d", pre_it->lowerstate, Frame);
+		/*MLog("Ani %d; Frame = %d", pre_it->lowerstate, Frame);*/
 
 		v3 xydir = Dir;
 		xydir.z = 0;

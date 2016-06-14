@@ -2,31 +2,31 @@
 
 #include "ZCharacterStructs.h"
 
-struct REPLAY_STAGE_SETTING_NODE_FG
+#pragma pack(push)
+#pragma pack(1)
+
+struct REPLAY_STAGE_SETTING_NODE
 {
 	MUID				uidStage;
-	char				szMapName[32];
-	char				nMapIndex;
+	char				szStageName[64];
+	char				szMapName[MAPNAME_LENGTH];
+	u32					nMapIndex;
 	MMATCH_GAMETYPE		nGameType;
-	int					nRoundMax;
-	int					nLimitTime;
-	int					nLimitLevel;
-	int					nMaxPlayers;
+	i32					nRoundMax;
+	i32					nLimitTime;
+	i32					nLimitLevel;
+	i32					nMaxPlayers;
 	bool				bTeamKillEnabled;
 	bool				bTeamWinThePoint;
 	bool				bForcedEntryEnabled;
-	char				szStageName[64];
+	bool				bAutoTeamBalancing;
 };
-
-
-#pragma pack(push)
-#pragma pack(1)
 
 struct REPLAY_STAGE_SETTING_NODE_OLD
 {
 	MUID				uidStage;
 	char				szMapName[32];	// 맵이름
-	char				nMapIndex;					// 맵인덱스
+	u32					nMapIndex;					// 맵인덱스
 	MMATCH_GAMETYPE		nGameType;					// 게임타입
 	int					nRoundMax;					// 라운드
 	int					nLimitTime;					// 제한시간(1 - 1분)
@@ -41,7 +41,7 @@ struct REPLAY_STAGE_SETTING_NODE_V11
 	MUID				uidStage;
 	char				szMapName[32];
 	char				unk[32];
-	char				nMapIndex;
+	u32					nMapIndex;
 	MMATCH_GAMETYPE		nGameType;
 	int					nRoundMax;
 	int					nLimitTime;
@@ -50,6 +50,24 @@ struct REPLAY_STAGE_SETTING_NODE_V11
 	bool				bTeamKillEnabled;
 	bool				bTeamWinThePoint;
 	bool				bForcedEntryEnabled;
+	char unk2;
+};
+
+struct REPLAY_STAGE_SETTING_NODE_FG
+{
+	MUID				uidStage;
+	char				szMapName[32];
+	u32					nMapIndex;
+	MMATCH_GAMETYPE		nGameType;
+	int					nRoundMax;
+	int					nLimitTime;
+	int					nLimitLevel;
+	int					nMaxPlayers;
+	bool				bTeamKillEnabled;
+	bool				bTeamWinThePoint;
+	bool				bForcedEntryEnabled;
+	char				szStageName[64];
+	char unk;
 };
 
 struct REPLAY_STAGE_SETTING_NODE_DG
@@ -360,6 +378,48 @@ struct ReplayPlayerInfoImpl
 	ReplayState State;
 };
 
+struct MTD_CharInfo_DG
+{
+	char				szName[32];
+	char				szClanName[16];
+	MMatchClanGrade		nClanGrade;
+	unsigned short		nClanContPoint;
+	char				nCharNum;
+	unsigned short		nLevel;
+	char				nSex;
+	char				nHair;
+	char				nFace;
+	unsigned long int	nXP;
+	int					nBP;
+	float				fBonusRate;
+	unsigned short		nPrize;
+	unsigned short		nHP;
+	unsigned short		nAP;
+	unsigned short		nMaxWeight;
+	unsigned short		nSafeFalls;
+	unsigned short		nFR;
+	unsigned short		nCR;
+	unsigned short		nER;
+	unsigned short		nWR;
+
+	// 아이템 정보
+	unsigned long int	nEquipedItemDesc[17];
+
+	// account 의 정보
+	MMatchUserGradeID	nUGradeID;
+
+	// ClanCLID
+	unsigned int		nClanCLID;
+
+	// 지난주 듀얼토너먼트 등급
+	int					nDTLastWeekGrade;
+
+	MUID				uidEquipedItem[17];
+	unsigned long int	nEquipedItemCount[17];
+
+	char unk[6];
+};
+
 struct ZCharacterReplayState_DG
 {
 	MUID UID;
@@ -370,7 +430,7 @@ struct ZCharacterReplayState_DG
 
 	BulletInfo BulletInfos[17];
 
-	char unk[14];
+	char unk[8];
 
 	D3DXVECTOR3 Position;
 	D3DXVECTOR3 Direction;
@@ -386,7 +446,7 @@ struct ReplayPlayerInfo_DG
 {
 	bool IsHero;
 	char unk[32];
-	MTD_CharInfo_V6 Info;
+	MTD_CharInfo_DG Info;
 	ZCharacterReplayState_DG State;
 };
 
