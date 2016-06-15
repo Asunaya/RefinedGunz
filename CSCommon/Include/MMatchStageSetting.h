@@ -83,6 +83,8 @@ struct MSTAGE_SETTING_NODE {
 
 	int HP = 100;
 	int AP = 50;
+
+	bool NoFlip = true;
 };
 #pragma pack(pop)
 
@@ -153,12 +155,13 @@ public:
 	bool IsForcedHPAP() const { return m_StageSetting.ForceHPAP; }
 	int GetForcedHP() const { return m_StageSetting.HP; }
 	int GetForcedAP() const { return m_StageSetting.AP; }
+	bool CanFlip() const { return !m_StageSetting.NoFlip; }
 	MSTAGE_SETTING_NODE* GetStageSetting()			{ return &m_StageSetting; }
 	const MMatchGameTypeInfo* GetCurrGameTypeInfo();
 
 	// Set
 	void SetMasterUID(const MUID& uid)		{ m_uidMaster = uid; }
-	void SetMapName(char* pszName);
+	void SetMapName(const char* pszName);
 	void SetMapIndex(int nMapIndex);
 	void SetRoundMax(int nRound)			{ m_StageSetting.nRoundMax = nRound; }
 	void SetLimitTime(int nTime)			{ m_StageSetting.nLimitTime = nTime; }

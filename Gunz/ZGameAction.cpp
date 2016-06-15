@@ -240,7 +240,7 @@ void ZGameAction::OnPeerSkill_LastShot(float fShotTime,ZCharacter *pOwnerCharact
 
 void ZGameAction::OnPeerSkill_Uppercut(ZCharacter *pOwnerCharacter)
 {
-	if (!g_Rules.CanFlip())
+	if (!ZGetGameClient()->GetMatchStageSetting()->CanFlip())
 		return;
 	if (ZGetGame()->GetMatch()->GetMatchType() == MMATCH_GAMETYPE_SKILLMAP)
 		return;

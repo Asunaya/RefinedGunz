@@ -507,6 +507,15 @@ _STATUS_CMD_START;
 				void* pStageBlob = pStageParam->GetPointer();
 				int nStageCount = MGetBlobArrayCount(pStageBlob);
 
+				// Verify size
+				auto BlobParam = static_cast<MCmdParamBlob*>(pStageParam);
+				auto BlobSize = BlobParam->GetPayloadSize();
+
+				auto BlobInfoSize = MGetBlobArrayInfoSize(pStageBlob);
+
+				if (BlobSize - BlobInfoSize != sizeof(MSTAGE_SETTING_NODE))
+					break;
+
 				OnStageSetting(uidPlayer, uidStage, pStageBlob, nStageCount);
 			}
 			break;

@@ -7,7 +7,6 @@ public:
 
 	void OnGameCreate();
 
-	bool CanFlip() const { return !NoFlip; }
 	bool CanUseElements() const { return !NoElements; }
 	bool CanTipslash() const { return !NoTipslash; }
 	bool IsVanillaMode() const { return VanillaMode; }

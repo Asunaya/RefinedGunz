@@ -1003,13 +1003,16 @@ void ZGameClient::UpdateStageSetting(MSTAGE_SETTING_NODE* pSetting, STAGE_STATE 
 
 	char buf[256];
 	bool Changed = false;
-	auto CheckSetting = [&](auto& Old, auto& New)
+	auto CheckSetting = [&](auto Old, auto New, auto Default)
 	{
 		if (JustJoinedStage)
 		{
 			Changed = false;
 
-			if (CreatedStage)
+			/*if (CreatedStage)
+				return false;*/
+
+			if (New == Default)
 				return false;
 
 			return true;
@@ -1025,26 +1028,31 @@ void ZGameClient::UpdateStageSetting(MSTAGE_SETTING_NODE* pSetting, STAGE_STATE 
 		return false;
 	};
 
-#define CHECK_SETTING(member) CheckSetting(LastStageSetting.member, pSetting->member)
+#define CHECK_SETTING(member, def) CheckSetting(LastStageSetting.member, pSetting->member, def)
 
-	if (CHECK_SETTING(Netcode) && !IsSwordsOnly(pSetting->nGameType))
+	if (CHECK_SETTING(Netcode, NetcodeType::ServerBased) && !IsSwordsOnly(pSetting->nGameType))
 	{
 		sprintf_safe(buf, "Netcode%s%s", Changed ? " changed to " : ": ", GetNetcodeString(pSetting->Netcode));
 		ZChatOutput(buf, ZChat::CMT_SYSTEM);
 	}
-	if (CHECK_SETTING(ForceHPAP))
+	if (CHECK_SETTING(ForceHPAP, true))
 	{
 		sprintf_safe(buf, "Force HP/AP%s%s", Changed ? " changed to " : ": ", pSetting->ForceHPAP ? "true" : "false");
 		ZChatOutput(buf, ZChat::CMT_SYSTEM);
 	}
-	if (CHECK_SETTING(HP))
+	if (CHECK_SETTING(HP, 100))
 	{
 		sprintf_safe(buf, "Forced HP%s%d", Changed ? " changed to " : ": ", pSetting->HP);
 		ZChatOutput(buf, ZChat::CMT_SYSTEM);
 	}
-	if (CHECK_SETTING(AP))
+	if (CHECK_SETTING(AP, 50))
 	{
 		sprintf_safe(buf, "Forced AP%s%d", Changed ? " changed to " : ": ", pSetting->AP);
+		ZChatOutput(buf, ZChat::CMT_SYSTEM);
+	}
+	if (CHECK_SETTING(NoFlip, true))
+	{
+		sprintf_safe(buf, "No flip%s%d", Changed ? " changed to " : ": ", pSetting->NoFlip);
 		ZChatOutput(buf, ZChat::CMT_SYSTEM);
 	}
 

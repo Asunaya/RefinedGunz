@@ -67,7 +67,7 @@ struct ReplayVersion
 	}
 };
 
-class ZGame;
+void GetReplayStageSetting(REPLAY_STAGE_SETTING_NODE& dest, const MSTAGE_SETTING_NODE& src);
 
 class ZReplayLoader
 {

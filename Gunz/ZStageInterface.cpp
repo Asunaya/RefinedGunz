@@ -396,6 +396,11 @@ void ZStageInterface::OnStageInterfaceSettup( void)
 		case MMATCH_GAMETYPE_DUEL:
 			color = SDM_COLOR;
 			break;
+
+		case MMATCH_GAMETYPE_SKILLMAP:
+			color = TRAINING_COLOR;
+			break;
+
 		default:
 			_ASSERT(0);
 			color = MCOLOR(255,255,255,255);

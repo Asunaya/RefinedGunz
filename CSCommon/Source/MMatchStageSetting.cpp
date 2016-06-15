@@ -39,7 +39,7 @@ void MMatchStageSetting::SetDefault()
 #endif
 }
 
-void MMatchStageSetting::SetMapName(char* pszName)
+void MMatchStageSetting::SetMapName(const char* pszName)
 { 
 	strcpy_safe(m_StageSetting.szMapName, pszName); 
 

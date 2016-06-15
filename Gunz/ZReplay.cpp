@@ -47,13 +47,33 @@ static void CreatePlayers(const std::vector<ReplayPlayerInfo>& Players)
 	}
 }
 
+#define COPY_MEMBER(member) dest.member = src.member
+void GetReplayStageSetting(REPLAY_STAGE_SETTING_NODE& dest, const MSTAGE_SETTING_NODE& src)
+{
+	COPY_MEMBER(uidStage);
+	COPY_MEMBER(nMapIndex);
+	COPY_MEMBER(nGameType);
+	COPY_MEMBER(nRoundMax);
+	COPY_MEMBER(nLimitTime);
+	COPY_MEMBER(nLimitLevel);
+	COPY_MEMBER(nMaxPlayers);
+	COPY_MEMBER(bTeamKillEnabled);
+	COPY_MEMBER(bTeamWinThePoint);
+	COPY_MEMBER(bForcedEntryEnabled);
+	COPY_MEMBER(ForceHPAP);
+	COPY_MEMBER(HP);
+	COPY_MEMBER(AP);
+	COPY_MEMBER(NoFlip);
+}
+#undef COPY_MEMBER
+
 static void ConvertStageSettingNode(REPLAY_STAGE_SETTING_NODE* pSource, MSTAGE_SETTING_NODE* pTarget)
 {
 	pTarget->uidStage = pSource->uidStage;
 	strcpy_safe(pTarget->szStageName, pSource->szStageName);
 	strcpy_safe(pTarget->szMapName, pSource->szMapName);
 	pTarget->nMapIndex = pSource->nMapIndex;
-	pTarget->nGameType = pSource->nGameType;
+	pTarget->nGameType = (MMATCH_GAMETYPE)pSource->nGameType;
 	pTarget->nRoundMax = pSource->nRoundMax;
 	pTarget->nLimitTime = pSource->nLimitTime;
 	pTarget->nLimitLevel = pSource->nLimitLevel;

@@ -4,13 +4,14 @@
 #include <map>
 #include <vector>
 #include <crtdbg.h>
+#include "GlobalTypes.h"
 
 using namespace std;
 
 /// MAIET Unique ID
 struct MUID{
-	unsigned long int	High;	///< High 4 Byte
-	unsigned long int	Low;	///< High 4 Byte
+	u32	High;	///< High 4 Byte
+	u32	Low;	///< High 4 Byte
 
 	MUID(void) { SetZero(); }
 	MUID(unsigned long int h, unsigned long int l){

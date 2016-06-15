@@ -143,7 +143,7 @@ public:
 	MUID GetUID()				{ return m_uidStage; }
 
 	const char* GetMapName()	{ return m_StageSetting.GetMapName(); }
-	void SetMapName(char* pszMapName)	{ m_StageSetting.SetMapName(pszMapName); }
+	void SetMapName(const char* pszMapName)	{ m_StageSetting.SetMapName(pszMapName); }
 
 	char* GetFirstMasterName()	{ return m_szFirstMasterName; }
 	void SetFirstMasterName(char* pszName)	{ strcpy_safe(m_szFirstMasterName, pszName); }

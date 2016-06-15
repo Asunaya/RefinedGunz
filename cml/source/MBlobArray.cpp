@@ -47,3 +47,15 @@ void* MGetBlobArrayPointer(void* pBlob)
 {
 	return ((unsigned char*)pBlob+sizeof(int)*2);
 }
+
+size_t MGetBlobArrayInfoSize(void* pBlob)
+{
+	return sizeof(int) * 2;
+}
+
+size_t MGetBlobArrayElementSize(void* pBlob)
+{
+	int nOneBlobSize;
+	memcpy(&nOneBlobSize, (unsigned char*)pBlob, sizeof(nOneBlobSize));
+	return nOneBlobSize;
+}

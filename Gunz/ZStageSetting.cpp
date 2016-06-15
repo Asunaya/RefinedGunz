@@ -240,35 +240,31 @@ static bool BuildStageSetting(MSTAGE_SETTING_NODE* pOutNode)
 			StageSetting_Netcode, 3);
 	}
 
-	[&]()
-	{
-		auto ForceHPAPWidget = static_cast<MButton*>(pResource->FindWidget("StageForceHPAP"));
-		if (!ForceHPAPWidget)
-			return;
-
+	auto ForceHPAPWidget = static_cast<MButton*>(pResource->FindWidget("StageForceHPAP"));
+	if (ForceHPAPWidget)
 		pOutNode->ForceHPAP = ForceHPAPWidget->GetCheck();
 
-		if (pOutNode->ForceHPAP)
-		{
-			auto GetWidgetInt = [&](const char* WidgetName, int& Ret)
-			{
-				auto Widget = static_cast<MEdit*>(pResource->FindWidget(WidgetName));
-				if (!Widget)
-					return;
+	auto GetWidgetInt = [&](const char* WidgetName, int& Ret)
+	{
+		auto Widget = static_cast<MEdit*>(pResource->FindWidget(WidgetName));
+		if (!Widget)
+			return;
 
-				auto Text = Widget->GetText();
-				auto Pair = StringToInt(Text);
+		auto Text = Widget->GetText();
+		auto Pair = StringToInt(Text);
 
-				if (!Pair.first)
-					return;
+		if (!Pair.first)
+			return;
 
-				Ret = Pair.second;
-			};
+		Ret = Pair.second;
+	};
 
-			GetWidgetInt("StageHP", pOutNode->HP);
-			GetWidgetInt("StageAP", pOutNode->AP);
-		}
-	}();
+	GetWidgetInt("StageHP", pOutNode->HP);
+	GetWidgetInt("StageAP", pOutNode->AP);
+
+	auto Widget = static_cast<MButton*>(pResource->FindWidget("StageNoFlip"));
+	if (Widget)
+		pOutNode->NoFlip = Widget->GetCheck();
 
 	return true;
 }
@@ -414,29 +410,33 @@ void ZStageSetting::ShowStageSettingDialog( MSTAGE_SETTING_NODE* pStageSetting, 
 //	SHOWSTAGESETTING_ITEM("StageVote", pStageSetting->bVoteEnabled,
 //		STAGESETTING_VOTE_MAX, StageSetting_Vote);
 
-	[&]()
+
+	auto ForceHPAP = static_cast<MButton*>(pResource->FindWidget("StageForceHPAP"));
+	if (ForceHPAP)
 	{
-		auto ForceHPAP = static_cast<MButton*>(pResource->FindWidget("StageForceHPAP"));
-		if (ForceHPAP)
-		{
-			ForceHPAP->SetCheck(pStageSetting->ForceHPAP);
-		}
+		ForceHPAP->SetCheck(pStageSetting->ForceHPAP);
+	}
 
-		char buf[64];
-		auto HP = static_cast<MEdit*>(pResource->FindWidget("StageHP"));
-		if (HP)
-		{
-			_itoa(pStageSetting->HP, buf, 10);
-			HP->SetText(buf);
-		}
+	char buf[64];
+	auto HP = static_cast<MEdit*>(pResource->FindWidget("StageHP"));
+	if (HP)
+	{
+		_itoa(pStageSetting->HP, buf, 10);
+		HP->SetText(buf);
+	}
 
-		auto AP = static_cast<MEdit*>(pResource->FindWidget("StageAP"));
-		if (AP)
-		{
-			_itoa(pStageSetting->AP, buf, 10);
-			AP->SetText(buf);
-		}
-	}();
+	auto AP = static_cast<MEdit*>(pResource->FindWidget("StageAP"));
+	if (AP)
+	{
+		_itoa(pStageSetting->AP, buf, 10);
+		AP->SetText(buf);
+	}
+
+	auto NoFlip = static_cast<MButton*>(pResource->FindWidget("StageNoFlip"));
+	if (NoFlip)
+	{
+		NoFlip->SetCheck(pStageSetting->NoFlip);
+	}
 
 	if ( bShowAll)
 	{
@@ -519,26 +519,29 @@ void ZStageSetting::InitStageSettingDialog()
 	INITSTAGESETTING_ITEM("StageNetcode", (int)pStageSetting->Netcode,
 		3, StageSetting_Netcode, 0);
 
-	[&]()
+	auto ForceHPAP = static_cast<MButton*>(pResource->FindWidget("StageForceHPAP"));
+	if (ForceHPAP)
 	{
-		auto ForceHPAP = static_cast<MButton*>(pResource->FindWidget("StageForceHPAP"));
-		if (ForceHPAP)
-		{
-			ForceHPAP->SetCheck(true);
-		}
+		ForceHPAP->SetCheck(true);
+	}
 
-		auto HP = static_cast<MEdit*>(pResource->FindWidget("StageHP"));
-		if (HP)
-		{
-			HP->SetText("100");
-		}
+	auto HP = static_cast<MEdit*>(pResource->FindWidget("StageHP"));
+	if (HP)
+	{
+		HP->SetText("100");
+	}
 
-		auto AP = static_cast<MEdit*>(pResource->FindWidget("StageAP"));
-		if (AP)
-		{
-			AP->SetText("50");
-		}
-	}();
+	auto AP = static_cast<MEdit*>(pResource->FindWidget("StageAP"));
+	if (AP)
+	{
+		AP->SetText("50");
+	}
+
+	auto NoFlip = static_cast<MButton*>(pResource->FindWidget("StageNoFlip"));
+	if (NoFlip)
+	{
+		NoFlip->SetCheck(true);
+	}
 }
 
 void ZStageSetting::ApplyStageSettingDialog()

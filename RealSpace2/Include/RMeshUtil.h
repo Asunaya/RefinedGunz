@@ -684,6 +684,10 @@ public:
 	void Add(WORD  w,bool line=true);
 	void Add(int i,bool line=true);
 	void Add(DWORD d,bool line=true);
+	void Add(unsigned int u, bool line = true)
+	{
+		Add((DWORD)u, line);
+	}
 	void Add(float f,bool line=true);
 	void Add(rvector& v,bool line=true);
 	void AddLine(int cnt=1);

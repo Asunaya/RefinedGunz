@@ -10,7 +10,7 @@
 using namespace std;
 
 // 클랜 등급
-enum MMatchClanGrade
+enum MMatchClanGrade : i32
 {
 	MCG_NONE		= 0,		// 클랜원이 아님
 	MCG_MASTER		= 1,		// 클랜 마스터

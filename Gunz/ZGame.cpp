@@ -5624,8 +5624,12 @@ void ZGame::StartRecording()
 	if (!m_pReplayFile->Write(Timestamp))
 		goto RECORDING_FAIL;
 
-	nWritten = zfwrite(ZGetGameClient()->GetMatchStageSetting()->GetStageSetting(),sizeof(MSTAGE_SETTING_NODE),1,m_pReplayFile);
-	if(nWritten==0) goto RECORDING_FAIL;
+	REPLAY_STAGE_SETTING_NODE rssn;
+	GetReplayStageSetting(rssn, *ZGetGameClient()->GetMatchStageSetting()->GetStageSetting());
+
+	Success = m_pReplayFile->Write(rssn);
+	if(!Success)
+		goto RECORDING_FAIL;
 
 	// duel 모드일때 상태 추가 저장
 	if(ZGetGameClient()->GetMatchStageSetting()->GetGameType() == MMATCH_GAMETYPE_DUEL)

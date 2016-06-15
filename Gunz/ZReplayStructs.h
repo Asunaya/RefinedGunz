@@ -5,12 +5,48 @@
 #pragma pack(push)
 #pragma pack(1)
 
+struct REPLAY_HEADER
+{
+	u32 Header;
+	u32 ReplayBinaryVersion;
+};
+
+struct REPLAY_HEADER_RG
+{
+	u32 Header;
+	u32 ReplayBinaryVersion;
+	u32 ClientVersion;
+	i64 Timestamp;
+};
+
 struct REPLAY_STAGE_SETTING_NODE
 {
 	MUID				uidStage;
 	char				szStageName[64];
 	char				szMapName[MAPNAME_LENGTH];
-	u32					nMapIndex;
+	i32					nMapIndex;
+	MMATCH_GAMETYPE		nGameType;
+	i32					nRoundMax;
+	i32					nLimitTime;
+	i32					nLimitLevel;
+	i32					nMaxPlayers;
+	bool				bTeamKillEnabled;
+	bool				bTeamWinThePoint;
+	bool				bForcedEntryEnabled;
+	bool				bAutoTeamBalancing;
+	NetcodeType			Netcode;
+	bool				ForceHPAP;
+	int					HP;
+	int					AP;
+	bool				NoFlip;
+};
+
+struct REPLAY_STAGE_SETTING_NODE_RG_V1
+{
+	MUID				uidStage;
+	char				szStageName[64];
+	char				szMapName[MAPNAME_LENGTH];
+	i32					nMapIndex;
 	MMATCH_GAMETYPE		nGameType;
 	i32					nRoundMax;
 	i32					nLimitTime;
@@ -25,23 +61,8 @@ struct REPLAY_STAGE_SETTING_NODE
 struct REPLAY_STAGE_SETTING_NODE_OLD
 {
 	MUID				uidStage;
-	char				szMapName[32];	// 맵이름
-	u32					nMapIndex;					// 맵인덱스
-	MMATCH_GAMETYPE		nGameType;					// 게임타입
-	int					nRoundMax;					// 라운드
-	int					nLimitTime;					// 제한시간(1 - 1분)
-	int					nLimitLevel;				// 제한레벨
-	int					nMaxPlayers;				// 최대인원
-	bool				bTeamKillEnabled;			// 팀킬여부
-	bool				bTeamWinThePoint;			// 선승제 여부
-	bool				bForcedEntryEnabled;		// 게임중 참가 여부
-};
-struct REPLAY_STAGE_SETTING_NODE_V11
-{
-	MUID				uidStage;
 	char				szMapName[32];
-	char				unk[32];
-	u32					nMapIndex;
+	i32					nMapIndex;
 	MMATCH_GAMETYPE		nGameType;
 	int					nRoundMax;
 	int					nLimitTime;
@@ -50,14 +71,29 @@ struct REPLAY_STAGE_SETTING_NODE_V11
 	bool				bTeamKillEnabled;
 	bool				bTeamWinThePoint;
 	bool				bForcedEntryEnabled;
-	char unk2;
+};
+struct REPLAY_STAGE_SETTING_NODE_V11
+{
+	MUID				uidStage;
+	char				szMapName[32];
+	char				unk[32];
+	i32					nMapIndex;
+	MMATCH_GAMETYPE		nGameType;
+	int					nRoundMax;
+	int					nLimitTime;
+	int					nLimitLevel;
+	int					nMaxPlayers;
+	bool				bTeamKillEnabled;
+	bool				bTeamWinThePoint;
+	bool				bForcedEntryEnabled;
+	char				unk2;
 };
 
 struct REPLAY_STAGE_SETTING_NODE_FG
 {
 	MUID				uidStage;
 	char				szMapName[32];
-	u32					nMapIndex;
+	i32					nMapIndex;
 	MMATCH_GAMETYPE		nGameType;
 	int					nRoundMax;
 	int					nLimitTime;
@@ -67,23 +103,23 @@ struct REPLAY_STAGE_SETTING_NODE_FG
 	bool				bTeamWinThePoint;
 	bool				bForcedEntryEnabled;
 	char				szStageName[64];
-	char unk;
+	char				unk;
 };
 
 struct REPLAY_STAGE_SETTING_NODE_DG
 {
 	MUID				uidStage;
-	char				szMapName[32];	// 맵이름
-	u32					nMapIndex;					// 맵인덱스
-	MMATCH_GAMETYPE		nGameType;					// 게임타입
-	int					nRoundMax;					// 라운드
-	int					nLimitTime;					// 제한시간(1 - 1분)
-	int					nLimitLevel;				// 제한레벨
-	int					nMaxPlayers;				// 최대인원
-	bool				bTeamKillEnabled;			// 팀킬여부
-	bool				bTeamWinThePoint;			// 선승제 여부
-	bool				bForcedEntryEnabled;		// 게임중 참가 여부
-	char unk[5];
+	char				szMapName[32];
+	i32					nMapIndex;
+	MMATCH_GAMETYPE		nGameType;
+	int					nRoundMax;
+	int					nLimitTime;
+	int					nLimitLevel;
+	int					nMaxPlayers;
+	bool				bTeamKillEnabled;
+	bool				bTeamWinThePoint;
+	bool				bForcedEntryEnabled;
+	char				unk[5];
 };
 
 struct MTD_CharInfo_V5
@@ -112,7 +148,7 @@ struct MTD_CharInfo_V5
 	unsigned short		nWR;
 
 	// 아이템 정보
-	unsigned long int	nEquipedItemDesc[12];
+	u32					nEquipedItemDesc[12];
 
 	// account 의 정보
 	MMatchUserGradeID	nUGradeID;
@@ -146,7 +182,7 @@ struct MTD_CharInfo_V6
 	unsigned short		nWR;
 
 	// 아이템 정보
-	unsigned long int	nEquipedItemDesc[17];
+	u32	nEquipedItemDesc[17];
 
 	// account 의 정보
 	MMatchUserGradeID	nUGradeID;
@@ -158,7 +194,7 @@ struct MTD_CharInfo_V6
 	int					nDTLastWeekGrade;
 
 	MUID				uidEquipedItem[17];
-	unsigned long int	nEquipedItemCount[17];
+	u32					nEquipedItemCount[17];
 };
 
 struct MTD_CharInfo_V11
@@ -186,7 +222,7 @@ struct MTD_CharInfo_V11
 	unsigned short		nWR;
 
 	// 아이템 정보
-	unsigned long int	nEquipedItemDesc[17];
+	u32					nEquipedItemDesc[17];
 
 	// account 의 정보
 	MMatchUserGradeID	nUGradeID;
@@ -198,12 +234,12 @@ struct MTD_CharInfo_V11
 	int					nDTLastWeekGrade;
 
 	MUID				uidEquipedItem[17];
-	unsigned long int	nEquipedItemCount[17];
+	u32					nEquipedItemCount[17];
 
 	char unk[8];
 };
 
-typedef MTD_CharInfo_V6 MTD_CharInfo_FG_V7_0;
+using MTD_CharInfo_FG_V7_0 = MTD_CharInfo_V6;
 
 struct MTD_CharInfo_FG_V7_1
 {
@@ -229,7 +265,7 @@ struct MTD_CharInfo_FG_V7_1
 	unsigned short		nER;
 	unsigned short		nWR;
 
-	unsigned long int	nEquipedItemDesc[22];
+	u32					nEquipedItemDesc[22];
 
 	MMatchUserGradeID	nUGradeID;
 
@@ -237,10 +273,10 @@ struct MTD_CharInfo_FG_V7_1
 
 	int					nDTLastWeekGrade;
 
-	int64_t				uidEquipedItem[22];
-	unsigned long int	nEquipedItemCount[22];
-	unsigned long int	nEquipedItemRarity[22];
-	unsigned long int	nEquipedItemLevel[22];
+	MUID				uidEquipedItem[22];
+	u32					nEquipedItemCount[22];
+	u32					nEquipedItemRarity[22];
+	u32					nEquipedItemLevel[22];
 };
 
 struct MTD_CharInfo_FG_V8
@@ -282,10 +318,10 @@ struct MTD_CharInfo_FG_V8
 	uint32_t unk[6];
 
 	// 아이템 정보 추가
-	int64_t				uidEquipedItem[22];
-	unsigned long int	nEquipedItemCount[22];
-	unsigned long int	nEquipedItemRarity[22];
-	unsigned long int	nEquipedItemLevel[22];
+	MUID				uidEquipedItem[22];
+	u32					nEquipedItemCount[22];
+	u32					nEquipedItemRarity[22];
+	u32					nEquipedItemLevel[22];
 };
 
 struct MTD_CharInfo_FG_V9
@@ -324,15 +360,15 @@ struct MTD_CharInfo_FG_V9
 	// 지난주 듀얼토너먼트 등급
 	int					nDTLastWeekGrade;
 
-	uint32_t unk[6];
+	u32					 unk[6];
 
 	// 아이템 정보 추가
-	int64_t				uidEquipedItem[22];
-	unsigned long int	nEquipedItemCount[22];
-	unsigned long int	nEquipedItemRarity[22];
-	unsigned long int	nEquipedItemLevel[22];
+	MUID				uidEquipedItem[22];
+	u32					nEquipedItemCount[22];
+	u32					nEquipedItemRarity[22];
+	u32					nEquipedItemLevel[22];
 
-	char unk2[24];
+	char				unk2[24];
 };
 
 struct BulletInfo
@@ -415,9 +451,9 @@ struct MTD_CharInfo_DG
 	int					nDTLastWeekGrade;
 
 	MUID				uidEquipedItem[17];
-	unsigned long int	nEquipedItemCount[17];
+	u32					nEquipedItemCount[17];
 
-	char unk[6];
+	char				unk[6];
 };
 
 struct ZCharacterReplayState_DG

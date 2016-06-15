@@ -2106,6 +2106,7 @@ bool ZGameInterface::OnCreate(ZLoadingProgress *pLoadingProgress)
 	ZGetGameTypeManager()->SetGameTypeStr(MMATCH_GAMETYPE_BERSERKER, ZMsg(MSG_MT_BERSERKER));
 	ZGetGameTypeManager()->SetGameTypeStr(MMATCH_GAMETYPE_DEATHMATCH_TEAM2, ZMsg(MSG_MT_DEATHMATCH_TEAM2));
 	ZGetGameTypeManager()->SetGameTypeStr(MMATCH_GAMETYPE_DUEL, ZMsg(MSG_MT_DUEL));
+	ZGetGameTypeManager()->SetGameTypeStr(MMATCH_GAMETYPE_SKILLMAP, "Skillmap");
 
 #ifndef _DEBUG
 	MWidget* pWidget = m_IDLResource.FindWidget( "MonsterBookCaller");

@@ -924,7 +924,7 @@ void MMatchServer::OnStageTeam(const MUID& uidPlayer, const MUID& uidStage, MMat
 	StageTeam(uidPlayer, uidStage, nTeam);
 }
 
-void MMatchServer::OnStageMap(const MUID& uidStage, char* pszMapName)
+void MMatchServer::OnStageMap(const MUID& uidStage, const char* pszMapName)
 {
 	MMatchStage* pStage = FindStage(uidStage);
 	if (pStage == NULL) return;
@@ -1052,7 +1052,7 @@ void MMatchServer::OnStageSetting(const MUID& uidPlayer, const MUID& uidStage, v
 		{
 			OnStageMap(uidStage, GetQuest()->GetSurvivalMapInfo(MSURVIVAL_MAP(0))->szName);
 
-			MMatchRuleQuest* pQuest = reinterpret_cast< MMatchRuleQuest* >( pStage->GetRule() );
+			MMatchRuleQuest* pQuest = static_cast<MMatchRuleQuest*>(pStage->GetRule());
 			pQuest->RefreshStageGameInfo();
 		}
 		else if ( (nLastGameType != MMATCH_GAMETYPE_DUEL) && ( pSetting->GetGameType() == MMATCH_GAMETYPE_DUEL))
@@ -1065,6 +1065,15 @@ void MMatchServer::OnStageSetting(const MUID& uidPlayer, const MUID& uidStage, v
 		{
 			strcpy_safe( szNewMap, MGetMapName( MMATCH_MAP_MANSION));
 			OnStageMap(uidStage, szNewMap);
+		}
+
+		if (nLastGameType != MMATCH_GAMETYPE_SKILLMAP && pSetting->GetGameType() == MMATCH_GAMETYPE_SKILLMAP)
+		{
+			OnStageMap(uidStage, "Skillmap");
+		}
+		else if (nLastGameType == MMATCH_GAMETYPE_SKILLMAP && pSetting->GetGameType() != MMATCH_GAMETYPE_SKILLMAP)
+		{
+			OnStageMap(uidStage, MGetMapName(MMATCH_MAP_MANSION));
 		}
 	}
 }

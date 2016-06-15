@@ -8,7 +8,8 @@ using namespace std;
 
 
 /// 게임 타입
-enum MMATCH_GAMETYPE {
+enum MMATCH_GAMETYPE : i32
+{
 	MMATCH_GAMETYPE_DEATHMATCH_SOLO		=0,			///< 개인 데쓰매치
 	MMATCH_GAMETYPE_DEATHMATCH_TEAM		=1,			///< 팀 데쓰매치
 	MMATCH_GAMETYPE_GLADIATOR_SOLO		=2,			///< 개인 글래디에이터

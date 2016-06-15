@@ -24,7 +24,7 @@ using namespace std;
 #include "HitRegistration.h"
 
 // 등급 - 이것은 디비의 UserGrade테이블과 싱크가 맞아야 한다.
-enum MMatchUserGradeID
+enum MMatchUserGradeID : i32
 {
 	MMUG_FREE			= 0,	// 무료 계정
 	MMUG_REGULAR		= 1,	// 정액 유저

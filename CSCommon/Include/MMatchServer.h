@@ -334,7 +334,7 @@ protected:
 	void OnStartStageList(const MUID& uidComm);
 	void OnStopStageList(const MUID& uidComm);
 	void OnStageRequestStageList(const MUID& uidPlayer, const MUID& uidChannel, const int nStageCursor);
-	void OnStageMap(const MUID& uidStage, char* pszMapName);
+	void OnStageMap(const MUID& uidStage, const char* pszMapName);
 	void OnStageSetting(const MUID& uidPlayer, const MUID& uidStage, void* pStageBlob, int nStageCount);
 	void OnRequestStageSetting(const MUID& uidComm, const MUID& uidStage);
 	void OnRequestPeerList(const MUID& uidChar, const MUID& uidStage);
