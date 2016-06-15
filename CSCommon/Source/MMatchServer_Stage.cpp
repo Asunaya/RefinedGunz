@@ -958,8 +958,7 @@ void MMatchServer::OnStageSetting(const MUID& uidPlayer, const MUID& uidStage, v
 
 	MSTAGE_SETTING_NODE* pNode = (MSTAGE_SETTING_NODE*)MGetBlobArrayElement(pStageBlob, 0);
 
-	if (pNode->nGameType == MMATCH_GAMETYPE_GLADIATOR_SOLO
-		|| pNode->nGameType == MMATCH_GAMETYPE_GLADIATOR_TEAM)
+	if (IsSwordsOnly(pNode->nGameType))
 	{
 		pNode->Netcode = NetcodeType::P2PLead;
 	}
@@ -1033,6 +1032,14 @@ void MMatchServer::OnStageSetting(const MUID& uidPlayer, const MUID& uidStage, v
 	if (!MGetGameTypeMgr()->IsTeamGame(pNode->nGameType))
 	{
 		pNode->bAutoTeamBalancing = true;
+	}
+
+	if (nLastGameType != pNode->nGameType)
+	{
+		if (IsSwordsOnly(nLastGameType) && !IsSwordsOnly(pNode->nGameType) && pNode->Netcode == NetcodeType::P2PLead)
+		{
+			pNode->Netcode = NetcodeType::ServerBased;
+		}
 	}
 
 	pSetting->UpdateStageSetting(pNode);

@@ -1030,7 +1030,8 @@ void ZGameClient::UpdateStageSetting(MSTAGE_SETTING_NODE* pSetting, STAGE_STATE 
 
 #define CHECK_SETTING(member, def) CheckSetting(LastStageSetting.member, pSetting->member, def)
 
-	if (CHECK_SETTING(Netcode, NetcodeType::ServerBased) && !IsSwordsOnly(pSetting->nGameType))
+	if (CHECK_SETTING(Netcode, NetcodeType::ServerBased) && !IsSwordsOnly(pSetting->nGameType)
+		&& !(IsSwordsOnly(LastStageSetting.nGameType) && pSetting->Netcode == NetcodeType::ServerBased))
 	{
 		sprintf_safe(buf, "Netcode%s%s", Changed ? " changed to " : ": ", GetNetcodeString(pSetting->Netcode));
 		ZChatOutput(buf, ZChat::CMT_SYSTEM);
@@ -1053,6 +1054,11 @@ void ZGameClient::UpdateStageSetting(MSTAGE_SETTING_NODE* pSetting, STAGE_STATE 
 	if (CHECK_SETTING(NoFlip, true))
 	{
 		sprintf_safe(buf, "No flip%s%d", Changed ? " changed to " : ": ", pSetting->NoFlip);
+		ZChatOutput(buf, ZChat::CMT_SYSTEM);
+	}
+	if (CHECK_SETTING(SwordsOnly, false))
+	{
+		sprintf_safe(buf, "Swords only%s%d", Changed ? " changed to " : ": ", pSetting->SwordsOnly);
 		ZChatOutput(buf, ZChat::CMT_SYSTEM);
 	}
 

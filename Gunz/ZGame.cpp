@@ -5059,11 +5059,11 @@ void ZGame::PostBasicInfo()
 	// 난입한 직후에도 보내지 않는다 ( global time 이 세팅되지 않았기 때문에 )
 	//	if(m_bForceEntry) return;
 
-	int nMoveTick = 10;
+	int nMoveTick = 20;
 	if (g_Rules.IsVanillaMode())
 		nMoveTick = (ZGetGameClient()->GetAllowTunneling() == false) ? PEERMOVE_TICK : PEERMOVE_AGENT_TICK;
 	else
-		nMoveTick = 10;
+		nMoveTick = 20;
 
 	if ((int)(nNowTime - m_nLastTime[ZLASTTIME_BASICINFO]) >= nMoveTick)
 	{

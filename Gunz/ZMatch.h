@@ -148,9 +148,8 @@ inline void ZMatch::AddRoundKills()
 }
 inline bool ZMatch::IsRuleGladiator()
 {
-	return (GetMatchType() == MMATCH_GAMETYPE_GLADIATOR_SOLO || 
-			GetMatchType() == MMATCH_GAMETYPE_GLADIATOR_TEAM ||
-			g_Rules.IsSwordsOnly());
+	return IsSwordsOnly(GetMatchType())
+		|| m_pStageSetting->IsSwordsOnly();
 }
 inline ZRule* ZMatch::GetRule() 
 { 

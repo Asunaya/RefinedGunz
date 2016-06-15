@@ -152,69 +152,57 @@ static bool BuildStageSetting(MSTAGE_SETTING_NODE* pOutNode)
 			strcpy_safe( pOutNode->szMapName, pCB->GetText());
 	}
 
-
-	/////////////////////////////////////////////////////////////////////////////////
-#define BUILD_STAGESETTING_LISTITEM( _WidgetItemName, _NodeVariable, _ItemList)	\
-{																				\
-	MComboBox* pCB = (MComboBox*)pResource->FindWidget( _WidgetItemName);		\
-	if ( pCB && (pCB->GetSelIndex() >= 0))										\
-	{																			\
-		int nItemCount = 0;														\
-		MGAMETYPECFGDATA::iterator itr = _ItemList.begin();						\
-		for ( int i = 0;  i < pCB->GetSelIndex();  i++)							\
-		{																		\
-			if ( itr == _ItemList.end())										\
-				return false;													\
-			itr++;																\
-		}																		\
-		_NodeVariable = (*itr)->m_nValue;										\
-	}																			\
-}
-/////////////////////////////////////////////////////////////////////////////////
+	auto BuildStageSettingListItem = [&](const char* WidgetItemName,
+		auto& NodeVariable, const auto& ItemList)
+	{
+		MComboBox* pCB = (MComboBox*)pResource->FindWidget(WidgetItemName);
+		if (pCB && (pCB->GetSelIndex() >= 0))
+		{
+			int nItemCount = 0;
+			auto itr = ItemList.begin();
+			for (int i = 0; i < pCB->GetSelIndex(); i++)
+			{
+				if (itr == ItemList.end())
+				{
+					itr = ItemList.begin();
+					break;
+				}
+				itr++;
+			}
+			NodeVariable = (*itr)->m_nValue;
+		}
+	};
 
 	ZGameTypeConfig* pGameTypeCfg = ZGetConfiguration()->GetGameTypeList()->GetGameTypeCfg( pOutNode->nGameType);
-	if ( pGameTypeCfg)
+	if (pGameTypeCfg)
 	{
-		// 최대 인원
-		BUILD_STAGESETTING_LISTITEM( "StageMaxPlayer", pOutNode->nMaxPlayers, pGameTypeCfg->m_MaxPlayers);
-
-		// 라운드
-		BUILD_STAGESETTING_LISTITEM( "StageRoundCount", pOutNode->nRoundMax, pGameTypeCfg->m_Round);
-
-		// 제한시간
-		BUILD_STAGESETTING_LISTITEM( "StageLimitTime", pOutNode->nLimitTime, pGameTypeCfg->m_LimitTime);
+		BuildStageSettingListItem("StageMaxPlayer", pOutNode->nMaxPlayers, pGameTypeCfg->m_MaxPlayers);
+		BuildStageSettingListItem("StageRoundCount", pOutNode->nRoundMax, pGameTypeCfg->m_Round);
+		BuildStageSettingListItem("StageLimitTime", pOutNode->nLimitTime, pGameTypeCfg->m_LimitTime);
 	}
 
-
-/////////////////////////////////////////////////////////////////////////////////////////////
-#define BUILD_STAGESETTING_ITEM(_WidgetItemName, _NodeVariable, _ItemList, _nItemCount)		\
-{																					\
-	MComboBox* pCB = (MComboBox*)pResource->FindWidget(_WidgetItemName);			\
-	if (pCB == NULL) return false;													\
-	if (pCB->GetSelIndex() < _nItemCount)											\
-	{																				\
-		_NodeVariable = _ItemList[pCB->GetSelIndex()].Value;						\
-	}																				\
-	else																			\
-	{																				\
-		return false;																\
-	}																				\
-}																					\
-/////////////////////////////////////////////////////////////////////////////////////////////
+	auto BuildStageSettingItem = [&](const char* WidgetItemName,
+		auto& NodeVariable, auto& ItemList, int MaxItemCount)
+	{
+		MComboBox* pCB = (MComboBox*)pResource->FindWidget(WidgetItemName);
+		if (pCB == nullptr) return;
+		if (pCB->GetSelIndex() < MaxItemCount)
+		{
+			NodeVariable = ItemList[pCB->GetSelIndex()].Value;
+		}
+		else
+		{
+			return;
+		}
+	};
 	
-	// 제한레벨
-	BUILD_STAGESETTING_ITEM("StageLevelLimit", pOutNode->nLimitLevel, 
+	BuildStageSettingItem("StageLevelLimit", pOutNode->nLimitLevel,
 							StageSetting_LimitLevel, STAGESETTING_LIMITLEVEL_MAX);
-
-	// 팀킬여부
-	BUILD_STAGESETTING_ITEM("StageTeamKill", pOutNode->bTeamKillEnabled, 
+	BuildStageSettingItem("StageTeamKill", pOutNode->bTeamKillEnabled,
 							StageSetting_TeamKill, STAGESETTING_TEAMKILL_MAX);
-
-	// 난입여부
-	BUILD_STAGESETTING_ITEM("StageIntrude", pOutNode->bForcedEntryEnabled, 
+	BuildStageSettingItem("StageIntrude", pOutNode->bForcedEntryEnabled,
 							StageSetting_ForcedEntry, STAGESETTING_FORCEDENTRY_MAX);
-	// 팀 밸런스
-	BUILD_STAGESETTING_ITEM("StageTeamBalancing", pOutNode->bAutoTeamBalancing,
+	BuildStageSettingItem("StageTeamBalancing", pOutNode->bAutoTeamBalancing,
 							StageSetting_TeamBalancing, STAGESETTING_FORCEDENTRY_MAX);
 
 	// 관전 허용
@@ -236,7 +224,7 @@ static bool BuildStageSetting(MSTAGE_SETTING_NODE* pOutNode)
 	}
 	else
 	{
-		BUILD_STAGESETTING_ITEM("StageNetcode", pOutNode->Netcode,
+		BuildStageSettingItem("StageNetcode", pOutNode->Netcode,
 			StageSetting_Netcode, 3);
 	}
 
@@ -265,6 +253,10 @@ static bool BuildStageSetting(MSTAGE_SETTING_NODE* pOutNode)
 	auto Widget = static_cast<MButton*>(pResource->FindWidget("StageNoFlip"));
 	if (Widget)
 		pOutNode->NoFlip = Widget->GetCheck();
+
+	Widget = static_cast<MButton*>(pResource->FindWidget("StageSwordsOnly"));
+	if (Widget)
+		pOutNode->SwordsOnly = Widget->GetCheck();
 
 	return true;
 }
@@ -438,6 +430,14 @@ void ZStageSetting::ShowStageSettingDialog( MSTAGE_SETTING_NODE* pStageSetting, 
 		NoFlip->SetCheck(pStageSetting->NoFlip);
 	}
 
+	auto SwordsOnly = static_cast<MButton*>(pResource->FindWidget("StageSwordsOnly"));
+	if (SwordsOnly)
+	{
+		SwordsOnly->SetCheck(pStageSetting->SwordsOnly);
+
+		SwordsOnly->Enable(!IsSwordsOnly(pStageSetting->nGameType));
+	}
+
 	if ( bShowAll)
 	{
 		AdjustLimitTimeStageSettingDialog();
@@ -541,6 +541,12 @@ void ZStageSetting::InitStageSettingDialog()
 	if (NoFlip)
 	{
 		NoFlip->SetCheck(true);
+	}
+
+	auto SwordsOnly = static_cast<MButton*>(pResource->FindWidget("StageSwordsOnly"));
+	if (SwordsOnly)
+	{
+		SwordsOnly->SetCheck(true);
 	}
 }
 

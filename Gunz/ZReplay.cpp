@@ -64,6 +64,7 @@ void GetReplayStageSetting(REPLAY_STAGE_SETTING_NODE& dest, const MSTAGE_SETTING
 	COPY_MEMBER(HP);
 	COPY_MEMBER(AP);
 	COPY_MEMBER(NoFlip);
+	COPY_MEMBER(SwordsOnly);
 }
 #undef COPY_MEMBER
 

@@ -85,6 +85,8 @@ struct MSTAGE_SETTING_NODE {
 	int AP = 50;
 
 	bool NoFlip = true;
+
+	bool SwordsOnly = false;
 };
 #pragma pack(pop)
 
@@ -156,6 +158,7 @@ public:
 	int GetForcedHP() const { return m_StageSetting.HP; }
 	int GetForcedAP() const { return m_StageSetting.AP; }
 	bool CanFlip() const { return !m_StageSetting.NoFlip; }
+	bool IsSwordsOnly() const { return m_StageSetting.SwordsOnly; }
 	MSTAGE_SETTING_NODE* GetStageSetting()			{ return &m_StageSetting; }
 	const MMatchGameTypeInfo* GetCurrGameTypeInfo();
 

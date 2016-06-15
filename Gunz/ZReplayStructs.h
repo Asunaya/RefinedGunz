@@ -39,6 +39,7 @@ struct REPLAY_STAGE_SETTING_NODE
 	int					HP;
 	int					AP;
 	bool				NoFlip;
+	bool				SwordsOnly;
 };
 
 struct REPLAY_STAGE_SETTING_NODE_RG_V1
