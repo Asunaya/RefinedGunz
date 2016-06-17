@@ -296,7 +296,7 @@ void MMatchObject::SetChannelListTransfer(const bool bVal, const MCHANNEL_TYPE n
 	UpdateChannelListChecksum(0); 
 }
 
-void MMatchObject::GetPositions(v3 & Head, v3 & Foot, double Time)
+void MMatchObject::GetPositions(v3& Head, v3& Foot, double Time)
 {
 	auto GetItemDesc = [&](MMatchCharItemParts slot) -> MMatchItemDesc*
 	{
@@ -311,7 +311,7 @@ void MMatchObject::GetPositions(v3 & Head, v3 & Foot, double Time)
 		return ItemDesc;
 	};
 
-	BasicInfoHistory.GetPositions(Head, Foot, Time, GetItemDesc, GetCharInfo()->m_nSex);
+	BasicInfoHistory.GetPositions(&Head, &Foot, nullptr, Time, GetItemDesc, GetCharInfo()->m_nSex, !IsAlive());
 }
 
 bool MMatchObject::CheckEnableAction(MMO_ACTION nAction)

@@ -555,88 +555,6 @@ bool ZCharacterObject::GetCurrentWeaponDirection(rvector* dir)
 }
 
 
-void ZCharacterObject::EmptyHistory()
-{
-	while(m_BasicHistory.size())
-	{
-		delete *m_BasicHistory.begin();
-		m_BasicHistory.erase(m_BasicHistory.begin());
-	}
-}
-
-bool ZCharacterObject::GetHistory(rvector *pos, rvector *direction, float fTime)
-{
-	if(GetVisualMesh() == NULL)
-		return false;
-
-	auto SetReturnValues = [&](const rvector& Pos, const rvector& Dir)
-	{
-		if (isnan(Pos.x) || isnan(Pos.y) || isnan(Pos.z))
-			return false;
-
-		if (isnan(Dir.x) || isnan(Dir.y) || isnan(Dir.z))
-			return false;
-
-		if (pos)
-			*pos = Pos;
-		if (direction)
-			*direction = Dir;
-
-		return true;
-	};
-
-	if(m_BasicHistory.size()>1)
-	{
-		ZBasicInfoHistory::iterator hi;
-		hi=m_BasicHistory.end();
-
-		// 시간순으로 bi < fTime < binext 되도록 두개의 두 아이템을 선택
-
-		ZBasicInfoItem *bi=NULL,*binext=NULL;
-
-		do {
-			hi--;
-			binext=bi;
-			bi=*hi;
-		}
-		while(hi!=m_BasicHistory.begin() && bi->fSendTime>fTime);
-
-		if(fTime<bi->fSendTime) // 역사가 기록된 이전의 데이터를 요구하면 좆치않다
-			return false;
-
-		ZBasicInfoItem *pnext,next;
-
-		if(!binext)
-		{
-			if(fTime>=g_pGame->GetTime())	// 미래의 위치는 알수없다. 현재의 위치를 리턴한다
-			{
-				return SetReturnValues(m_Position, m_Direction);
-			}
-
-			next.fSendTime=g_pGame->GetTime();
-			next.info.position=m_Position;
-			next.info.direction=m_Direction;
-			pnext=&next;
-		}
-		else
-		{
-			pnext = binext;
-		}
-
-		float t=(fTime-bi->fSendTime)/(pnext->fSendTime-bi->fSendTime);
-
-		return SetReturnValues(Lerp(bi->info.position, pnext->info.position, t),
-			Slerp(bi->info.direction, pnext->info.direction, t));
-	}
-	else
-	{
-		return SetReturnValues(m_Position, m_Direction);
-	}
-
-	return false;
-}
-
-
 #define MAX_KNOCKBACK_VELOCITY		1700.f
 
 void ZCharacterObject::OnKnockback(const rvector& dir, float fForce)
@@ -664,4 +582,84 @@ void ZCharacterObject::OnKnockback(const rvector& dir, float fForce)
 		fMaxValue = -fMaxValue;
 	}
 	Tremble(fMaxValue, 50, 100);
+}
+
+MImplementRTTI(ZCharacterObjectHistory, ZCharacterObject);
+
+void ZCharacterObjectHistory::EmptyHistory()
+{
+	while (m_BasicHistory.size())
+	{
+		delete *m_BasicHistory.begin();
+		m_BasicHistory.erase(m_BasicHistory.begin());
+	}
+}
+
+bool ZCharacterObjectHistory::GetHistory(rvector *pos, rvector *direction, float fTime)
+{
+	if (GetVisualMesh() == NULL)
+		return false;
+
+	auto SetReturnValues = [&](const rvector& Pos, const rvector& Dir)
+	{
+		if (isnan(Pos.x) || isnan(Pos.y) || isnan(Pos.z))
+			return false;
+
+		if (isnan(Dir.x) || isnan(Dir.y) || isnan(Dir.z))
+			return false;
+
+		if (pos)
+			*pos = Pos;
+		if (direction)
+			*direction = Dir;
+
+		return true;
+	};
+
+	if (m_BasicHistory.size() > 1)
+	{
+		ZBasicInfoHistory::iterator hi;
+		hi = m_BasicHistory.end();
+
+		ZBasicInfoItem *bi = NULL, *binext = NULL;
+
+		do {
+			hi--;
+			binext = bi;
+			bi = *hi;
+		} while (hi != m_BasicHistory.begin() && bi->fSendTime > fTime);
+
+		if (fTime < bi->fSendTime)
+			return false;
+
+		ZBasicInfoItem *pnext, next;
+
+		if (!binext)
+		{
+			if (fTime >= g_pGame->GetTime())
+			{
+				return SetReturnValues(m_Position, m_Direction);
+			}
+
+			next.fSendTime = g_pGame->GetTime();
+			next.info.position = m_Position;
+			next.info.direction = m_Direction;
+			pnext = &next;
+		}
+		else
+		{
+			pnext = binext;
+		}
+
+		float t = (fTime - bi->fSendTime) / (pnext->fSendTime - bi->fSendTime);
+
+		return SetReturnValues(Lerp(bi->info.position, pnext->info.position, t),
+			Slerp(bi->info.direction, pnext->info.direction, t));
+	}
+	else
+	{
+		return SetReturnValues(m_Position, m_Direction);
+	}
+
+	return false;
 }

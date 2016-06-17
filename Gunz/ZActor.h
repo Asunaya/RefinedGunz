@@ -54,7 +54,7 @@ struct ZACTOR_BASICINFO {
 struct MQuestNPCInfo;
 
 /// 플레이어가 아닌 오브젝트들의 부모 클래스
-class ZActor : public ZCharacterObject
+class ZActor : public ZCharacterObjectHistory
 {
 	MDeclareRTTI;
 

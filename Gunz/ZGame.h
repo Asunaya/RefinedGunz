@@ -99,7 +99,7 @@ protected:
 	ZGameTimer			m_GameTimer;
 	float				m_fTime;
 	
-	DWORD				m_nLastTime[ZLASTTIME_MAX];
+	u64				m_nLastTime[ZLASTTIME_MAX];
 	
 	
 	ZGAME_READYSTATE	m_nReadyState;

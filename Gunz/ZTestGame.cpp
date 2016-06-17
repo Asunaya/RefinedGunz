@@ -25,9 +25,9 @@ void CreateTestGame(char *mapname, int nDummyCharacterCount, bool bShot, bool bA
 	g_pGame->GetMatch()->SetRoundState(MMATCH_ROUNDSTATE_PLAY);
 
 	MTD_CharInfo info;
-	strcpy_safe(info.szName,"Maiet");
+	strcpy_safe(info.szName, "Dogs");
 	info.szClanName[0]=0;
-	info.nSex = MMS_FEMALE;
+	info.nSex = MMS_MALE;
 	info.nHP = 100;
 	info.nAP = 100;
 

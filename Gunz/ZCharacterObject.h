@@ -3,6 +3,7 @@
 
 #include "ZObject.h"
 #include "stuff.h"
+#include "BasicInfoHistory.h"
 
 // ZCharacter 와 ZActor 가 같이쓰는것들을 모은 class ..
 
@@ -59,16 +60,11 @@ public:
 	void SetHero(bool bHero = true) { m_bHero = bHero; }
 	bool IsHero() { return m_bHero; }
 
-	void EmptyHistory();
-	virtual bool GetHistory(rvector *pos,rvector *direction,float fTime); // 판정/옵저버등 과거의 데이터를 얻는다
-
 protected:
 
 	bool	m_bHero;					///< 내가 조종하는 사람인지 여부
 
 public:
-
-	ZBasicInfoHistory	m_BasicHistory;		///< 판정을 위해 몇초간의 데이터를 가지고있는다
 
 	char	m_pSoundMaterial[16];
 
@@ -86,6 +82,16 @@ public:
 	// knockback을 적용받아야한다
 	virtual void OnKnockback(const rvector& dir, float fForce);
 	void SetTremblePower(float fPower)		{ m_fTremblePower = fPower; }
+};
+
+class ZCharacterObjectHistory : public ZCharacterObject
+{
+	MDeclareRTTI;
+public:
+	virtual bool GetHistory(rvector *pos, rvector *direction, float fTime) override;
+	void EmptyHistory();
+
+	ZBasicInfoHistory	m_BasicHistory;
 };
 
 #endif//_ZCHARACTEROBJECT_H

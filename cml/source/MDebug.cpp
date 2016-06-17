@@ -195,7 +195,7 @@ DWORD MFilterException(LPEXCEPTION_POINTERS p)
 	mlog(str.c_str());
 	mlog("\n");
 
-	return EXCEPTION_EXECUTE_HANDLER;
+	return EXCEPTION_CONTINUE_SEARCH;
 }
 
 void MSEHTranslator(UINT nSeCode, _EXCEPTION_POINTERS* pExcPointers)

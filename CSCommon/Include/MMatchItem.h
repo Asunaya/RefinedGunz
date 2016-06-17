@@ -1,7 +1,6 @@
 #ifndef _MMATCHITEM_H
 #define _MMATCHITEM_H
 
-#include "winsock2.h"
 #include "MXml.h"
 #include "MUID.h"
 #include "MSync.h"

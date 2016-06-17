@@ -66,6 +66,46 @@ void RGMain::OnGameDraw()
 			g_Draw.Text("Not evading", 10, 500);
 		}
 	}*/
+
+	for (auto pair : *ZGetCharacterManager())
+	{
+		auto& Char = *pair.second;
+
+		auto GetItemDesc = [&](MMatchCharItemParts slot)
+		{
+			return Char.GetItems()->GetDesc(slot);
+		};
+
+		auto Time = ZGetGame()->GetTime();
+
+		if (ZGetGame()->IsReplay())
+			Time -= ZGetGameInterface()->GetCombatInterface()->GetObserver()->GetDelay();
+
+		v3 Head, Foot;
+		Char.BasicInfoHistory.GetPositions(&Head, &Foot, nullptr,
+			Time,
+			GetItemDesc, (MMatchSex)!Char.IsMan(), Char.IsDie());
+
+		v3 OldHead = Head;
+		v3 OldFoot = Foot;
+
+		RGetDevice()->SetTexture(0, NULL);
+		RGetDevice()->SetRenderState(D3DRS_LIGHTING, FALSE);
+		RGetDevice()->SetFVF(D3DFVF_XYZ | D3DFVF_DIFFUSE);
+		RGetDevice()->SetRenderState(D3DRS_ZENABLE, FALSE);
+
+		RDrawSphere(Head, 15, 20);
+		RDrawLine(Head, Foot, 0xFFFF0000);
+
+		Head = Char.m_pVMesh->GetHeadPosition();
+		Foot = Char.GetPosition();
+		RDrawSphere(Head, 15, 20, 0xFF0000FF);
+		RDrawLine(Head, Foot, 0xFF0000FF);
+
+		//DMLog("Diff: %f, %f\n", Magnitude(Head - OldHead), Magnitude(Foot - OldFoot));
+
+		RGetDevice()->SetRenderState(D3DRS_ZENABLE, TRUE);
+	}
 }
 
 bool OnGameInput()

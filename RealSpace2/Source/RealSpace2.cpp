@@ -1041,7 +1041,7 @@ void RDrawCorn(rvector center,rvector pole,float fRadius,int nSegment)
 	}
 }
 
-void RDrawSphere(rvector origin,float fRadius,int nSegment)
+void RDrawSphere(rvector origin,float fRadius,int nSegment, u32 Color)
 {
 	RGetDevice()->SetTexture(0,NULL);
 	RGetDevice()->SetTexture(1,NULL);
@@ -1059,11 +1059,11 @@ void RDrawSphere(rvector origin,float fRadius,int nSegment)
 			rvector a=fRadius*rvector(cos(fAngle)*cos(fAngleZ),sin(fAngle)*cos(fAngleZ),sin(fAngleZ))+origin;
 			rvector b=fRadius*rvector(cos(fAngle2)*cos(fAngleZ),sin(fAngle2)*cos(fAngleZ),sin(fAngleZ))+origin;
 
-			RDrawLine(a,b,0xffff0000);
+			RDrawLine(a,b, Color);
 
 			b=fRadius*rvector(cos(fAngle)*cos(fAngleZ2),sin(fAngle)*cos(fAngleZ2),sin(fAngleZ2))+origin;
 
-			RDrawLine(a,b,0xffff0000);
+			RDrawLine(a,b, Color);
 		}
 	}
 }

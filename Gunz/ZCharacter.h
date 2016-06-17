@@ -247,6 +247,8 @@ protected:
 
 public:
 	BasicInfoHistoryManager BasicInfoHistory;
+
+	bool GetHistory(rvector *pos, rvector *direction, float fTime) override;
 	void GetPositions(v3& Head, v3& Foot, double Time);
 
 	float	m_fLastValidTime;		// Dead Reckoning에 필요한 변수 -> 지금 코드에서 필요없어보임
@@ -403,8 +405,6 @@ public:
 	virtual void UpdateHeight(float fDelta);		// 높이와 폴링 데미지를 검사.
 	virtual void UpdateMotion(float fDelta=0.f);	// 허리돌리기등의 애니메이션 상태관련
 	virtual void UpdateAnimation();
-
-	int  GetSelectWeaponDelay(MMatchItemDesc* pSelectItemDesc);
 
 	void UpdateLoadAnimation();
 

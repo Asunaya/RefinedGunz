@@ -550,6 +550,25 @@ RRESULT OnRender(void *pParam)
 				pos = ZGetGame()->m_pMyCharacter->m_pVMesh->GetHeadPosition();
 				sprintf_safe(__buffer, "Head pos: %d, %d, %d", int(pos.x), int(pos.y), int(pos.z));
 				g_pDefFont->m_Font.DrawText(MGetWorkspaceWidth() - 200, 60, __buffer);
+
+				//DMLog("Head pos: %f, %f, %f\n", pos.x, pos.y, pos.z);
+
+				auto lower = ZGetGame()->m_pMyCharacter->GetStateLower();
+				auto upper = ZGetGame()->m_pMyCharacter->GetStateUpper();
+
+				sprintf_safe(__buffer, "Lower ani: %s\n", g_AnimationInfoTableLower[lower].Name);
+				g_pDefFont->m_Font.DrawText(MGetWorkspaceWidth() - 200, 80, __buffer);
+				sprintf_safe(__buffer, "Upper ani: %s\n", g_AnimationInfoTableUpper[upper].Name);
+				g_pDefFont->m_Font.DrawText(MGetWorkspaceWidth() - 200, 100, __buffer);
+
+				/*auto mesh = ZGetGame()->m_pMyCharacter->m_pVMesh->m_pMesh;
+				auto p = mesh->m_list.Find("Bip01 R Foot");
+
+				while (p)
+				{
+					DMLog("%s\n", p->GetName());
+					p = p->m_pParent;
+				}*/
 			}
 		}
 #endif

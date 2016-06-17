@@ -29,7 +29,7 @@ struct BasicInfo {
 
 	void Validate()
 	{
-		if (SelectedSlot < MMCIP_PRIMARY || SelectedSlot > MMCIP_CUSTOM2)
+		if (SelectedSlot < MMCIP_MELEE || SelectedSlot > MMCIP_CUSTOM2)
 			SelectedSlot = MMCIP_PRIMARY;
 	}
 };

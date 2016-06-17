@@ -2344,20 +2344,20 @@ void ZGame::OnPeerBasicInfo(MCommand *pCommand,bool bAddHistory,bool bUpdate)
 	// 나중에 판정을 위해 histroy 에 보관한다.
 	if(bAddHistory)
 	{
-		ZBasicInfoItem *pitem=new ZBasicInfoItem;
-		CopyMemory(&pitem->info, &bi, sizeof(ZBasicInfo));
+		//ZBasicInfoItem *pitem=new ZBasicInfoItem;
+		//CopyMemory(&pitem->info, &bi, sizeof(ZBasicInfo));
 
-		pitem->fReceivedTime=GetTime();
+		//pitem->fReceivedTime=GetTime();
 
-		pitem->fSendTime= ppbi->fTime - pCharacter->m_fTimeOffset;	// 내 기준으로 변환
-		
-		pCharacter->m_BasicHistory.push_back(pitem);
+		//pitem->fSendTime= ppbi->fTime - pCharacter->m_fTimeOffset;	// 내 기준으로 변환
+		//
+		//pCharacter->m_BasicHistory.push_back(pitem);
 
-		while(pCharacter->m_BasicHistory.size()>CHARACTER_HISTROY_COUNT)
-		{
-			delete *pCharacter->m_BasicHistory.begin();
-			pCharacter->m_BasicHistory.erase(pCharacter->m_BasicHistory.begin());
-		}
+		//while(pCharacter->m_BasicHistory.size()>CHARACTER_HISTROY_COUNT)
+		//{
+		//	delete *pCharacter->m_BasicHistory.begin();
+		//	pCharacter->m_BasicHistory.erase(pCharacter->m_BasicHistory.begin());
+		//}
 
 		BasicInfoItem bii;
 		ppbi->Unpack(bii);
@@ -3450,13 +3450,6 @@ void ZGame::OnPeerMassive(ZCharacter *pOwner, const rvector &pos, const rvector 
 
 		ZPostPeerEnchantDamage(pOwner->GetUID(), pVictim->GetUID());
 	}
-
-//#define KATANA_SHOCK_RANGE		1000.f
-//
-//	float fPower = (KATANA_SHOCK_RANGE - Magnitude(m_pMyCharacter->GetPosition() + rvector(0, 0, 50) - pos));
-//
-//	if (fPower > 0)
-//		ZGetCamera()->Shock(fPower * .5, .5, rvector(0, 0, -1));
 }
 
 //RBspObject* test = nullptr;
@@ -3487,31 +3480,9 @@ void ZGame::OnPeerShot_Range(MMatchCharItemParts sel_type, const MUID& uidOwner,
 
 	memset(&pickinfo,0,sizeof(ZPICKINFO));
 
-	// 총알은 로켓이 통과하는곳도 통과한다
 	const DWORD dwPickPassFlag=RM_FLAG_ADDITIVE | RM_FLAG_HIDE | RM_FLAG_PASSROCKET | RM_FLAG_PASSBULLET;
 
-	// 쏘는 캐릭터 흔들어 주기..
 	pOwner->Tremble(8.f, 50, 30);
-
-/*
-	if(pOwner->m_pVMesh)
-	{
-		float fMaxValue = 8.f;// 흔들 강도 +- 가능
-
-		RFrameTime* ft = &pOwner->m_pVMesh->m_FrameTime;
-		if(ft && !ft->m_bActive)
-			ft->Start(fMaxValue,50,30);// 강도 , 최대시간 , 복귀시간...
-	}
-*/
-
-	/*if (!test)
-	{
-		test = new RBspObject;
-		test->Open("maps/Mansion/Mansion.RS", RBspObject::ROF_RUNTIME, nullptr, nullptr, true);
-	}
-
-	::PickHistory(*m_pMyCharacter, pos, to, test, pickinfo,
-		m_CharacterManager, [](auto&, auto&, auto&) {}, dwPickPassFlag);*/
 	
 	bool Picked = ::PickHistory<ZCharacter>(*m_pMyCharacter, pos, to, GetWorld()->GetBsp(), pickinfo,
 			MakePairValueAdapter(m_CharacterManager), fShotTime, dwPickPassFlag);
@@ -5049,7 +5020,7 @@ void ZGame::PostHPInfo()
 
 void ZGame::PostBasicInfo()
 {
-	DWORD nNowTime = timeGetTime();
+	u64 nNowTime = timeGetTime();
 
 	if (m_pMyCharacter->GetInitialized() == false) return;
 
@@ -5065,7 +5036,7 @@ void ZGame::PostBasicInfo()
 	else
 		nMoveTick = 20;
 
-	if ((int)(nNowTime - m_nLastTime[ZLASTTIME_BASICINFO]) >= nMoveTick)
+	if (nNowTime - m_nLastTime[ZLASTTIME_BASICINFO] >= nMoveTick)
 	{
 		m_nLastTime[ZLASTTIME_BASICINFO] = nNowTime;
 
@@ -5624,12 +5595,13 @@ void ZGame::StartRecording()
 	if (!m_pReplayFile->Write(Timestamp))
 		goto RECORDING_FAIL;
 
-	REPLAY_STAGE_SETTING_NODE rssn;
-	GetReplayStageSetting(rssn, *ZGetGameClient()->GetMatchStageSetting()->GetStageSetting());
-
-	Success = m_pReplayFile->Write(rssn);
-	if(!Success)
-		goto RECORDING_FAIL;
+	{
+		REPLAY_STAGE_SETTING_NODE rssn;
+		GetReplayStageSetting(rssn, *ZGetGameClient()->GetMatchStageSetting()->GetStageSetting());
+		Success = m_pReplayFile->Write(rssn);
+		if (!Success)
+			goto RECORDING_FAIL;
+	}
 
 	// duel 모드일때 상태 추가 저장
 	if(ZGetGameClient()->GetMatchStageSetting()->GetGameType() == MMATCH_GAMETYPE_DUEL)

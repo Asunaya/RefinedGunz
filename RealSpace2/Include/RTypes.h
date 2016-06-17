@@ -7,6 +7,7 @@
 #include <string>
 #include <list>
 #include "d3dx9math.h"
+#include "GlobalTypes.h"
 
 using namespace std;
 

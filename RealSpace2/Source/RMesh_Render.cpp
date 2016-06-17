@@ -217,6 +217,8 @@ void RMesh::RenderSub(D3DXMATRIX* world_mat,bool NoPartsChange,bool bRenderBuffe
 
 		pPartsMeshNode->m_pBaseMesh = this;// base model 이 이 파일임을 등록,,,
 
+		//DMLog("%s: %d, %d\n", pMeshNode->GetName(), pMeshNode->m_isAddMeshNode, pMeshNode->m_isDummyMesh);
+
 		if(pMeshNode->m_isAddMeshNode) //pPartsMeshNode 조사하면 안됨.. pMeshNode 가 더미임...
 		{
 			if(pMeshNode->m_pParent) {

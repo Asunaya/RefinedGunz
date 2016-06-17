@@ -47,6 +47,12 @@ void ZCamera::Update(float fElapsed)
 {
 	if (g_pGame == NULL) return;
 
+	if (isnan(m_fCurrentAngleX) || isnan(m_fCurrentAngleZ))
+	{
+		m_fCurrentAngleX = m_fAngleX = CAMERA_DEFAULT_ANGLEX;
+		m_fCurrentAngleZ = m_fAngleZ = CAMERA_DEFAULT_ANGLEZ;
+	}
+
 	/////////////////////////////
 	//////////////////////////// 먼저 target 을 설정한다
 	ZCombatInterface*	pCombatInterface = ZGetGameInterface()->GetCombatInterface();

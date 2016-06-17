@@ -17,10 +17,10 @@
 #include "ZQuest.h"
 #include "ZInput.h"
 
-MImplementRTTI(ZActor, ZCharacterObject);
+MImplementRTTI(ZActor, ZCharacterObjectHistory);
 
 ///////////////////////////////////////////////////////////////////////
-ZActor::ZActor() : ZCharacterObject(), m_nFlags(0), m_nNPCType(NPC_GOBLIN_KING), m_pNPCInfo(NULL), m_pModule_Skills(NULL), m_fSpeed(0.0f), m_pBrain(NULL)
+ZActor::ZActor() : m_nFlags(0), m_nNPCType(NPC_GOBLIN_KING), m_pNPCInfo(NULL), m_pModule_Skills(NULL), m_fSpeed(0.0f), m_pBrain(NULL)
 {
 	m_bIsNPC = true;		// ZObject¿« false∑Œ µ» ∞™¿ª true∑Œ πŸ≤„¡‹
 

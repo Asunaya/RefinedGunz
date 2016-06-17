@@ -112,7 +112,7 @@ rvector RGetTransformCoord(rvector &coord);
 void RDrawLine(rvector &v1,rvector &v2,DWORD dwColor);
 void RDrawCylinder(rvector origin,float fRadius,float fHeight,int nSegment);
 void RDrawCorn(rvector center,rvector pole,float fRadius,int nSegment);
-void RDrawSphere(rvector origin,float fRadius,int nSegment);
+void RDrawSphere(rvector origin,float fRadius,int nSegment, u32 Color = 0xFFFF0000);
 void RDrawAxis(rvector origin,float fSize);
 void RDrawCircle(rvector origin,float fRadius, int nSegment);
 void RDrawArc(rvector origin, float fRadius, float fAngle1, float fAngle2, int nSegment, DWORD color);

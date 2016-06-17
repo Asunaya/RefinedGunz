@@ -19,6 +19,8 @@
 
 #include "RShaderMgr.h"
 
+#include "../../GunzShared/AnimationStuff.h"
+
 _NAMESPACE_REALSPACE2_BEGIN
 
 /////////////////////////////////////////////////////////////////////
@@ -67,11 +69,91 @@ void RMesh::GetNodeAniMatrix(RMeshNode* pMeshNode,D3DXMATRIX& ani_mat)
 	if(pAniSet) {
 		ani_type = pAniSet->GetAnimationType();
 	}
-	
-	// 에니메이션 종류에 따라서
 
-	if(ani_type == RAniType_Tm) 
-	{			
+#ifdef _DEBUG
+	bool CustomCalced = false;
+	
+	if (m_pVisualMesh)
+	{
+		matrix* parent_base_inv = nullptr;
+		if (pMeshNode->m_pParent)
+		{
+			parent_base_inv = &pMeshNode->m_pParent->m_mat_inv;
+		}
+
+		if (pMeshNode->m_PartsPosInfoType == eq_parts_pos_info_Spine1 && m_pAniSet[1])
+		{
+			CustomCalced = GetUpperSpine1(ani_mat, pAniSet, frame,
+				m_pVisualMesh->m_vRotXYZ.y, m_pVisualMesh->m_FrameTime.GetValue());
+		}
+		else
+		{
+			CustomCalced = GetNodeMatrix(ani_mat, pMeshNode->GetName(), parent_base_inv,
+				pAniSet, frame, m_pVisualMesh->m_vRotXYZ.y, m_pVisualMesh->m_FrameTime.GetValue());
+
+			switch (pMeshNode->m_PartsPosInfoType)
+			{
+			case eq_parts_pos_info_Head:
+			case eq_parts_pos_info_Neck:
+			case eq_parts_pos_info_Spine2:
+			case eq_parts_pos_info_Spine1:
+			case eq_parts_pos_info_Spine:
+			case eq_parts_pos_info_Pelvis:
+			case eq_parts_pos_info_Root:
+				if (!m_pAniSet[1])
+					break;
+
+				if (strncmp("guard_idle", m_pAniSet[1]->GetName(), 10))
+					break;
+
+				DMLog("%d, %p\n", ani_type, pAniSet);
+
+				matrix mat;
+				D3DXMatrixIdentity(&mat);
+				_RGetRotAniMat(pMeshNode, frame, mat);
+				_RGetPosAniMat(pMeshNode, frame, mat);
+
+				CalcLookAtParts(mat, pMeshNode, m_pVisualMesh);
+
+				/*if (pMeshNode->m_pParent) {
+					D3DXMatrixMultiply(&mat, &mat, &pMeshNode->m_pParent->m_mat_result);
+				}*/
+
+				v3 normal = GetTransPos(mat);
+				v3 trans = GetTransPos(ani_mat);
+
+				DMLog("%s: Normal trans: %f, %f, %f, new trans: %f, %f, %f\n",
+					pMeshNode->GetName(),
+					normal.x, normal.y, normal.z,
+					trans.x, trans.y, trans.z);
+
+				DMLog("Local: %f, %f, %f; base: %f, %f, %f\n",
+					GetTransPos(pMeshNode->m_mat_local).x, GetTransPos(pMeshNode->m_mat_local).y,
+					GetTransPos(pMeshNode->m_mat_local).z,
+					GetTransPos(pMeshNode->m_mat_base).x, GetTransPos(pMeshNode->m_mat_base).y,
+					GetTransPos(pMeshNode->m_mat_base).z);
+
+				if (pMeshNode->m_PartsPosInfoType == eq_parts_pos_info_Spine1)
+					DMLog("Spine pos: %d\n", pMeshNode->m_pAnimationNode->m_pos_cnt);
+
+				/*if (pMeshNode->m_PartsPosInfoType == eq_parts_pos_info_Spine1)
+					ani_mat = mat;*/
+			};
+		}
+
+
+		if (CustomCalced)
+		{
+			if (pMeshNode->m_pParent)
+				ani_mat *= pMeshNode->m_pParent->m_mat_result;
+
+			return;
+		}
+	}
+#endif
+
+	if(ani_type == RAniType_Tm)
+	{
 		_RGetAniMat(pMeshNode,frame,ani_mat);
 	}
 	else if(ani_type == RAniType_Vertex)
@@ -84,26 +166,6 @@ void RMesh::GetNodeAniMatrix(RMeshNode* pMeshNode,D3DXMATRIX& ani_mat)
 		_RGetPosAniMat(pMeshNode,frame,ani_mat);
 
 		CalcLookAtParts( ani_mat, pMeshNode , m_pVisualMesh );
-
-		if (m_pVisualMesh)
-		{
-			switch (pMeshNode->m_PartsPosInfoType)
-			{
-			case eq_parts_pos_info_Head:
-			case eq_parts_pos_info_Neck:
-			case eq_parts_pos_info_Spine2:
-			case eq_parts_pos_info_Spine1:
-			case eq_parts_pos_info_Spine:
-			case eq_parts_pos_info_Pelvis:
-			case eq_parts_pos_info_Root:
-				/*DMLog("%d, %d, %p: trans: %f, %f, %f, parent = %p, %d\n", pMeshNode->m_PartsPosInfoType, pMeshNode->m_PartsType, pMeshNode, ani_mat._41, ani_mat._42, ani_mat._43,
-					pMeshNode->m_pParent, GetNodeAniSet(pMeshNode) ? GetNodeAniSet(pMeshNode)->GetAnimationType() : -1);*/
-
-				/*DMLog("MeshNode %s:\n", pNode->GetName());
-				DLogMatrix(pNode->m_mat_base);*/
-				;
-			};
-		}
 
 		if (pMeshNode->m_pParent) {
 			D3DXMatrixMultiply(&ani_mat,&ani_mat,&pMeshNode->m_pParent->m_mat_result);

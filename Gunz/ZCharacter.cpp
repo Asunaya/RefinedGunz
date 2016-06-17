@@ -407,16 +407,7 @@ void ZCharacter::EmptyHistory()
 {
 	if (m_bInitialized == false) return;
 
-	while(m_BasicHistory.size())
-	{
-		delete *m_BasicHistory.begin();
-		m_BasicHistory.erase(m_BasicHistory.begin());
-	}
-	//while(m_HPHistory.size())
-	//{
-	//	delete *m_HPHistory.begin();
-	//	m_HPHistory.erase(m_HPHistory.begin());
-	//}
+	BasicInfoHistory.clear();
 }
 
 void ZCharacter::Stop()
@@ -1117,64 +1108,6 @@ void ZCharacter::UpdateHeight(float fDelta)
 	return;
 }
 
-int ZCharacter::GetSelectWeaponDelay(MMatchItemDesc* pSelectItemDesc)
-{
-//	칼의 경우는 모션의 길이가 포함되어 있다..
-//	무기타잎별로 하나만 등록되어 있으니까 기본공격 모션의 길이를 기준으로 한다..
-
-	if(!pSelectItemDesc) return 0;
-
-	int nReturnDelay = pSelectItemDesc->m_nDelay;
-
-	if(pSelectItemDesc->m_nType != MMIT_MELEE)
-		return 0;
-
-	switch(pSelectItemDesc->m_nWeaponType)
-	{
-		case MWT_DAGGER:		// attackS 공격 길이만큼... man_dagger_standshot.elu.ani기준..
-			nReturnDelay -= 266;
-			break;
-
-		case MWT_DUAL_DAGGER:	// attack1 공격 길이만큼.... man_2hdagger_standshot_1.elu.ani
-			nReturnDelay -= 299;
-			break;
-
-		case MWT_KATANA:		//	attack1 공격 길이만큼....man_knife_standshot_1.elu.ani
-			nReturnDelay -= 299;
-			break;
-
-		case MWT_DOUBLE_KATANA:	//	attack1 공격 길이만큼.... man_blade_standshot_1.elu.ani 
-			nReturnDelay -= 299;
-			break;
-
-		case MWT_GREAT_SWORD:	// attack1 공격 길이만큼.... man_sword_standshot_1.elu.ani
-			nReturnDelay -= 399;
-			break;
-
-		default:
-			_ASSERT(0);
-			break;
-	}
-
-	return nReturnDelay;
-/*
-	실시간으로 검색할 필요없을것 같다..
-
-	RAnimation* pAniSet = m_pVMesh->GetFrameInfo( ani_mode_upper )->m_pAniSet;
-
-	if( pAniSet==NULL )
-		pAniSet = m_pVMesh->GetFrameInfo( ani_mode_lower )->m_pAniSet;
-
-	if( pAniSet ) {
-		if( pAniSet->m_pAniData ) {
-			DWORD _ms  = pAniSet->m_pAniData->m_max_frame / 4.8f;
-			nWeaponDelay -= _ms;
-		}
-	}
-*/
-
-}
-
 void ZCharacter::UpdateSpeed()
 {
 	//////////////////////////////////////////////////////////////////
@@ -1189,42 +1122,6 @@ void ZCharacter::UpdateSpeed()
 	if( GetItems() && GetItems()->GetSelectedWeapon() && GetItems()->GetSelectedWeapon()->GetDesc() ) {
 
 		if( GetItems()->GetSelectedWeapon()->GetDesc()->m_nType==MMIT_MELEE) {
-
-			// 첫번째 공격은 비율을 계산한다..
-/*
-			if(m_AniState_Lower == ZC_STATE_LOWER_ATTACK1) {
-
-				MMatchItemDesc* pRangeDesc = GetItems()->GetSelectedWeapon()->GetDesc();
-
-//				DWORD nWeaponDelay = (DWORD)((float)pRangeDesc->m_nDelay * 0.7f);// 반으로 나눠서~
-				int  nWeaponDelay = pRangeDesc->m_nDelay;
-
-				int max_frame = 0;
-
-				max_frame = m_pVMesh->GetMaxFrame(ani_mode_upper);
-
-				if(max_frame==0)
-					max_frame = m_pVMesh->GetMaxFrame(ani_mode_lower);
-
-				if(max_frame) {
-
-					int _time = (int)(max_frame / 4.8f); 
-
-					int as = _time + nWeaponDelay;
-
-					if(as < 1)	as = 1;
-
-					float fas = 0.f;
-
-					fas = ( _time / (float)( as));
-
-					m_fAttack1Ratio = fas;
-
-				}
-			}
-
-			// 에니메이션 상태에 따라~
-
 			if( (m_AniState_Lower == ZC_STATE_LOWER_ATTACK1)	 ||
 				(m_AniState_Lower == ZC_STATE_LOWER_ATTACK1_RET) ||  
 				(m_AniState_Lower == ZC_STATE_LOWER_ATTACK2)	 ||
@@ -1236,30 +1133,9 @@ void ZCharacter::UpdateSpeed()
 				(m_AniState_Lower == ZC_STATE_LOWER_ATTACK5)	 ||
 				(m_AniState_Lower == ZC_STATE_LOWER_JUMPATTACK)  ||
 				(m_AniState_Upper == ZC_STATE_UPPER_SHOT) ) {
-//				(m_AniState_Lower == ZC_STATE_LOWER_UPPERCUT) ) {
-
-				speed = 4.8f * m_fAttack1Ratio;
-
-				if(speed < 0.1f)
-					speed = 0.1f;
-			}
-*/		
-			if( (m_AniState_Lower == ZC_STATE_LOWER_ATTACK1)	 ||
-				(m_AniState_Lower == ZC_STATE_LOWER_ATTACK1_RET) ||  
-				(m_AniState_Lower == ZC_STATE_LOWER_ATTACK2)	 ||
-				(m_AniState_Lower == ZC_STATE_LOWER_ATTACK2_RET) ||  
-				(m_AniState_Lower == ZC_STATE_LOWER_ATTACK3)	 ||
-				(m_AniState_Lower == ZC_STATE_LOWER_ATTACK3_RET) ||  
-				(m_AniState_Lower == ZC_STATE_LOWER_ATTACK4)	 ||
-				(m_AniState_Lower == ZC_STATE_LOWER_ATTACK4_RET) ||  
-				(m_AniState_Lower == ZC_STATE_LOWER_ATTACK5)	 ||
-				(m_AniState_Lower == ZC_STATE_LOWER_JUMPATTACK)  ||
-				(m_AniState_Upper == ZC_STATE_UPPER_SHOT) ) {
-//				(m_AniState_Lower == ZC_STATE_LOWER_UPPERCUT) ) {
 
 				MMatchItemDesc* pRangeDesc = GetItems()->GetSelectedWeapon()->GetDesc();
 
-//				DWORD nWeaponDelay = (DWORD)((float)pRangeDesc->m_nDelay * 0.7f);// 반으로 나눠서~
 				int  nWeaponDelay = GetSelectWeaponDelay( pRangeDesc );
 
 				int max_frame = 0;
@@ -1291,46 +1167,6 @@ void ZCharacter::UpdateSpeed()
 
 			} 
 		}
-/*
-		zitem.xml 바뀐후에 적용.....
-		// 장전중이라면..
-		else {
-
-			if(m_AniState_Upper==ZC_STATE_UPPER_RELOAD) {
-
-				MMatchItemDesc* pRangeDesc = GetItems()->GetSelectedWeapon()->GetDesc();
-				int  nReloadDelay = pRangeDesc->m_nReloadTime; // 장전딜레이
-
-				int max_frame = 0;
-
-				max_frame = m_pVMesh->GetMaxFrame(ani_mode_upper);
-
-				if(max_frame) {
-
-					int _time = (int)(max_frame / 4.8f); 
-
-					int as = _time + nReloadDelay;
-
-					if(as < 1)	as = 1;
-
-					float fas = 0.f;
-
-					fas = ( _time / (float)( as));
-
-					m_fAttack1Ratio = fas;
-
-					speed_upper = 4.8f * m_fAttack1Ratio;
-				}
-
-				if(speed_upper < 0.1f)
-					speed_upper = 0.1f;
-
-//				static char temp[256];
-//				sprintf_safe(temp,"reload time %f \n", speed );
-//				OutputDebugString( temp );
-			}
-		}
-*/
 	}
 
 	if(m_AniState_Upper == ZC_STATE_UPPER_LOAD) 
@@ -1339,7 +1175,9 @@ void ZCharacter::UpdateSpeed()
 		speed_upper = 4.8f * 1.2f;
 	}
 
-//	m_pVMesh->SetSpeed(speed,speed_upper);
+	if (m_AniState_Lower == ZC_STATE_SLASH)
+		speed = 4.8 * 0.9;
+
 	m_pVMesh->SetSpeed(speed,speed);
 }
 
@@ -1404,20 +1242,6 @@ void ZCharacter::OnUpdate(float fDelta)
 			m_vProxyDirection = _vDir;
 			m_DirectionLower = _vDir;
 		}
-
-/*
-		//rvector _vDir;
-		//rvector headpos;
-		GetHistory(&m_Position,&m_Direction,g_pGame->GetTime()-pObserver->GetDelay());
-
-		float fAngle = GetAngleOfVectors(m_Direction,m_DirectionLower);
-
-		vRot.x = -fAngle*180/pi *.9f;
-		vRot.y = (m_Direction.z+0.05f) * 50.f;
-		vRot.z = 0.f;
-
-		m_pVMesh->m_vRotXYZ = vRot;
-*/
 	}
 	else
 	{
@@ -2049,6 +1873,45 @@ void ZCharacter::OnDie()
 	
 }
 
+bool ZCharacter::GetHistory(rvector *pos, rvector *direction, float fTime)
+{
+	if (GetVisualMesh() == NULL)
+		return false;
+
+	auto SetReturnValues = [&](const rvector& Pos, const rvector& Dir)
+	{
+		if (isnan(Pos.x) || isnan(Pos.y) || isnan(Pos.z))
+			return false;
+
+		if (isnan(Dir.x) || isnan(Dir.y) || isnan(Dir.z))
+			return false;
+
+		if (pos)
+			*pos = Pos;
+		if (direction)
+			*direction = Dir;
+
+		return true;
+	};
+
+	auto GetItemDesc = [&](MMatchCharItemParts slot)
+	{
+		return m_Items.GetDesc(slot);
+	};
+
+	if (!BasicInfoHistory.empty() && fTime >= BasicInfoHistory.front().RecvTime)
+	{
+		return SetReturnValues(m_Position, m_Direction);
+	}
+
+	v3 Foot, Dir;
+	BasicInfoHistory.GetPositions(nullptr, &Foot, &Dir, fTime, GetItemDesc, MMS_MALE, IsDie());
+
+	return SetReturnValues(Foot, Dir);
+
+	return false;
+}
+
 void ZCharacter::GetPositions(v3 & Head, v3 & Foot, double Time)
 {
 	auto GetItemDesc = [&](MMatchCharItemParts slot)
@@ -2056,7 +1919,7 @@ void ZCharacter::GetPositions(v3 & Head, v3 & Foot, double Time)
 		return m_Items.GetDesc(slot);
 	};
 
-	BasicInfoHistory.GetPositions(Head, Foot, Time, GetItemDesc, m_Property.nSex);
+	BasicInfoHistory.GetPositions(&Head, &Foot, nullptr, Time, GetItemDesc, m_Property.nSex, IsDie());
 }
 
 // 부활 - 이것은 게임룰에 따라 달라질 수도 있다.
