@@ -78,8 +78,9 @@ void RGMain::OnGameDraw()
 
 		auto Time = ZGetGame()->GetTime();
 
-		if (ZGetGame()->IsReplay())
-			Time -= ZGetGameInterface()->GetCombatInterface()->GetObserver()->GetDelay();
+		auto Observer = ZGetGameInterface()->GetCombatInterface()->GetObserver();
+		if (Observer->IsVisible())
+			Time -= Observer->GetDelay();
 
 		v3 Head, Foot;
 		Char.BasicInfoHistory.GetPositions(&Head, &Foot, nullptr,
@@ -102,7 +103,7 @@ void RGMain::OnGameDraw()
 		RDrawSphere(Head, 15, 20, 0xFF0000FF);
 		RDrawLine(Head, Foot, 0xFF0000FF);
 
-		//DMLog("Diff: %f, %f\n", Magnitude(Head - OldHead), Magnitude(Foot - OldFoot));
+		DMLog("Time: %f, diff: %f, %f\n", Time, Magnitude(Head - OldHead), Magnitude(Foot - OldFoot));
 
 		RGetDevice()->SetRenderState(D3DRS_ZENABLE, TRUE);
 	}

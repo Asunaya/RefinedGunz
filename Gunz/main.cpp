@@ -561,7 +561,7 @@ RRESULT OnRender(void *pParam)
 				sprintf_safe(__buffer, "Upper ani: %s\n", g_AnimationInfoTableUpper[upper].Name);
 				g_pDefFont->m_Font.DrawText(MGetWorkspaceWidth() - 200, 100, __buffer);
 
-				/*auto mesh = ZGetGame()->m_pMyCharacter->m_pVMesh->m_pMesh;
+				/*auto mesh = ZGetGame()->m_pMyCharacter->m_pVMesh->m_pMesh;s
 				auto p = mesh->m_list.Find("Bip01 R Foot");
 
 				while (p)

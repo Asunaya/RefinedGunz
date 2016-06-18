@@ -19,7 +19,9 @@
 
 #include "RShaderMgr.h"
 
+#ifdef _DEBUG
 #include "../../GunzShared/AnimationStuff.h"
+#endif
 
 _NAMESPACE_REALSPACE2_BEGIN
 
@@ -90,55 +92,6 @@ void RMesh::GetNodeAniMatrix(RMeshNode* pMeshNode,D3DXMATRIX& ani_mat)
 		{
 			CustomCalced = GetNodeMatrix(ani_mat, pMeshNode->GetName(), parent_base_inv,
 				pAniSet, frame, m_pVisualMesh->m_vRotXYZ.y, m_pVisualMesh->m_FrameTime.GetValue());
-
-			switch (pMeshNode->m_PartsPosInfoType)
-			{
-			case eq_parts_pos_info_Head:
-			case eq_parts_pos_info_Neck:
-			case eq_parts_pos_info_Spine2:
-			case eq_parts_pos_info_Spine1:
-			case eq_parts_pos_info_Spine:
-			case eq_parts_pos_info_Pelvis:
-			case eq_parts_pos_info_Root:
-				if (!m_pAniSet[1])
-					break;
-
-				if (strncmp("guard_idle", m_pAniSet[1]->GetName(), 10))
-					break;
-
-				DMLog("%d, %p\n", ani_type, pAniSet);
-
-				matrix mat;
-				D3DXMatrixIdentity(&mat);
-				_RGetRotAniMat(pMeshNode, frame, mat);
-				_RGetPosAniMat(pMeshNode, frame, mat);
-
-				CalcLookAtParts(mat, pMeshNode, m_pVisualMesh);
-
-				/*if (pMeshNode->m_pParent) {
-					D3DXMatrixMultiply(&mat, &mat, &pMeshNode->m_pParent->m_mat_result);
-				}*/
-
-				v3 normal = GetTransPos(mat);
-				v3 trans = GetTransPos(ani_mat);
-
-				DMLog("%s: Normal trans: %f, %f, %f, new trans: %f, %f, %f\n",
-					pMeshNode->GetName(),
-					normal.x, normal.y, normal.z,
-					trans.x, trans.y, trans.z);
-
-				DMLog("Local: %f, %f, %f; base: %f, %f, %f\n",
-					GetTransPos(pMeshNode->m_mat_local).x, GetTransPos(pMeshNode->m_mat_local).y,
-					GetTransPos(pMeshNode->m_mat_local).z,
-					GetTransPos(pMeshNode->m_mat_base).x, GetTransPos(pMeshNode->m_mat_base).y,
-					GetTransPos(pMeshNode->m_mat_base).z);
-
-				if (pMeshNode->m_PartsPosInfoType == eq_parts_pos_info_Spine1)
-					DMLog("Spine pos: %d\n", pMeshNode->m_pAnimationNode->m_pos_cnt);
-
-				/*if (pMeshNode->m_PartsPosInfoType == eq_parts_pos_info_Spine1)
-					ani_mat = mat;*/
-			};
 		}
 
 

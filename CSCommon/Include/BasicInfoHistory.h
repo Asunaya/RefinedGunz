@@ -8,6 +8,8 @@ struct BasicInfoItem : public BasicInfo
 {
 	double SentTime;
 	double RecvTime;
+	double LowerFrameTime;
+	double UpperFrameTime;
 
 	BasicInfoItem() = default;
 	BasicInfoItem(const BasicInfo& a, float b, float c)
@@ -23,7 +25,38 @@ public:
 
 	void AddBasicInfo(const BasicInfoItem& bii)
 	{
-		BasicInfoList.push_front(bii);
+		BasicInfoItem local = bii;
+
+		if (BasicInfoList.empty())
+		{
+			local.LowerFrameTime = 0;
+			local.UpperFrameTime = local.upperstate == ZC_STATE_UPPER_NONE ? -1 : 0;
+		}
+		else
+		{
+			auto prev_it = BasicInfoList.begin();
+
+			if (prev_it->lowerstate != local.lowerstate)
+			{
+				local.LowerFrameTime = 0;
+			}
+			else
+			{
+				local.LowerFrameTime = prev_it->LowerFrameTime + (local.SentTime - prev_it->SentTime);
+			}
+
+			if (prev_it->upperstate != local.upperstate)
+			{
+				local.UpperFrameTime = local.upperstate == ZC_STATE_UPPER_NONE ? -1 : 0;
+			}
+			else
+			{
+				local.UpperFrameTime = local.upperstate == ZC_STATE_UPPER_NONE ? -1
+					: prev_it->UpperFrameTime + (local.SentTime - prev_it->SentTime);
+			}
+		}
+
+		BasicInfoList.push_front(local);
 
 		while (BasicInfoList.size() > 1000)
 		{
@@ -43,10 +76,6 @@ private:
 	std::deque<BasicInfoItem> BasicInfoList;
 };
 
-static v3 GetHead(const v3& Pos, const v3& Dir, RAnimation& Ani, int Frame)
-{
-}
-
 template <typename GetItemDescT>
 bool BasicInfoHistoryManager::GetPositions(v3* OutHead, v3* OutFoot, v3* OutDir, double Time,
 	GetItemDescT& GetItemDesc, MMatchSex Sex, bool IsDead)
@@ -61,7 +90,7 @@ bool BasicInfoHistoryManager::GetPositions(v3* OutHead, v3* OutFoot, v3* OutDir,
 			*OutDir = Dir;
 	};
 
-	auto GetHead = [&](const v3& Pos, const v3& Dir, auto pre_it, auto diff_ani_lower_it, auto diff_ani_upper_it)
+	auto GetHead = [&](const v3& Pos, const v3& Dir, auto pre_it, auto LowerFrameTime, auto UpperFrameTime)
 	{
 		auto ItemDesc = GetItemDesc(pre_it->SelectedSlot);
 		auto MotionType = eq_weapon_etc;
@@ -76,14 +105,14 @@ bool BasicInfoHistoryManager::GetPositions(v3* OutHead, v3* OutFoot, v3* OutDir,
 		if (!LowerAni)
 			return Pos + v3(0, 0, 180);
 
-		int LowerFrame = GetFrame(*LowerAni, pre_it->lowerstate, ItemDesc, Time - diff_ani_lower_it->SentTime);
+		int LowerFrame = GetFrame(*LowerAni, pre_it->lowerstate, ItemDesc, LowerFrameTime);
 		int UpperFrame = 0;
 		if (HasUpperAni)
-			UpperFrame = GetFrame(*UpperAni, ZC_STATE_LOWER(0), nullptr, Time - diff_ani_upper_it->SentTime);
+			UpperFrame = GetFrame(*UpperAni, ZC_STATE_LOWER(0), nullptr, UpperFrameTime);
 
 		float y = IsDead ? 0 : (Dir.z + 0.05) * 50;
 
-		v3 Head = GetHeadPosition(LowerAni, UpperAni, y, LowerFrame);
+		v3 Head = GetHeadPosition(LowerAni, UpperAni, LowerFrame, UpperFrame, y, 0);
 
 		v3 xydir = Dir;
 		xydir.z = 0;
@@ -118,7 +147,7 @@ bool BasicInfoHistoryManager::GetPositions(v3* OutHead, v3* OutFoot, v3* OutDir,
 	if (BasicInfoList.size() == 1)
 	{
 		auto it = BasicInfoList.begin();
-		Return(GetHead(it->position, it->direction, it, it, it), it->position, it->direction);
+		Return(GetHead(it->position, it->direction, it, it->LowerFrameTime, it->UpperFrameTime), it->position, it->direction);
 		return true;
 	}
 
@@ -136,45 +165,26 @@ bool BasicInfoHistoryManager::GetPositions(v3* OutHead, v3* OutFoot, v3* OutDir,
 
 	v3 AbsPos;
 	v3 Dir;
+	double LowerFrameTime;
+	double UpperFrameTime;
 
 	if (pre_it != post_it)
 	{
 		auto t = double(Time - pre_it->SentTime) / double(post_it->SentTime - pre_it->SentTime);
 		AbsPos = Lerp(pre_it->position, post_it->position, t);
 		Dir = Slerp(pre_it->direction, post_it->direction, t);
+		LowerFrameTime = Lerp(pre_it->LowerFrameTime, post_it->LowerFrameTime, t);
+		UpperFrameTime = Lerp(pre_it->UpperFrameTime, post_it->UpperFrameTime, t);
 	}
 	else
 	{
 		AbsPos = pre_it->position;
 		Dir = pre_it->direction;
+		LowerFrameTime = pre_it->LowerFrameTime;
+		UpperFrameTime = pre_it->UpperFrameTime;
 	}
 
-	auto diff_ani_lower_it = pre_it;
-
-	while (diff_ani_lower_it != BasicInfoList.end()
-		&& diff_ani_lower_it->lowerstate == pre_it->lowerstate)
-	{
-		diff_ani_lower_it++;
-	}
-
-	if (diff_ani_lower_it != pre_it)
-		diff_ani_lower_it--;
-
-	auto diff_ani_upper_it = pre_it;
-
-	if (pre_it->upperstate != ZC_STATE_UPPER_NONE)
-	{
-		while (diff_ani_upper_it != BasicInfoList.end()
-			&& diff_ani_upper_it->upperstate == pre_it->upperstate)
-		{
-			diff_ani_upper_it++;
-		}
-
-		if (diff_ani_upper_it != pre_it)
-			diff_ani_upper_it--;
-	}
-
-	Return(GetHead(AbsPos, Dir, pre_it, diff_ani_lower_it, diff_ani_upper_it), AbsPos, Dir);
+	Return(GetHead(AbsPos, Dir, pre_it, LowerFrameTime, UpperFrameTime), AbsPos, Dir);
 
 	return true;
 }

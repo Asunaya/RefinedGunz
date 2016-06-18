@@ -215,8 +215,18 @@ float GetAngleOfVectors(rvector &ta,rvector &tb);
 // 원형보간된 vector.. a,b는 normalized 되어있어야함.
 __declspec(deprecated("Use Slerp instead.")) rvector InterpolatedVector(rvector &a,rvector &b,float x);
 
-rvector Lerp(const rvector &from, const rvector &to, float t);
+//rvector Lerp(const rvector &from, const rvector &to, float t);
 rvector Slerp(const rvector &from, const rvector &to, float t);
+template <typename T>
+T Lerp(T src, T dest, float t)
+{
+	return src * (1 - t) + dest * t;
+}
+template <typename T>
+T Lerp(T src, T dest, double t)
+{
+	return src * (1 - t) + dest * t;
+}
 
 bool IsIntersect(rboundingbox *bb1,rboundingbox *bb2);
 bool isInPlane(const rboundingbox *bb, const rplane *plane);

@@ -244,7 +244,8 @@ using namespace RealSpace2;
 RAnimationMgr* GetAnimationMgr(enum MMatchSex Sex);
 void SetAnimationMgr(enum MMatchSex Sex, RAnimationMgr* AniMgr);
 
-v3 GetHeadPosition(RAnimation* LowerAni, RAnimation* UpperAni, float y, int Frame, float tremble = 0);
+v3 GetHeadPosition(RAnimation* LowerAni, RAnimation* UpperAni,
+	int LowerFrame, int UpperFrame, float y, float tremble);
 v3 GetFootPosition(RAnimation* LowerAni, int Frame);
 int GetSelectWeaponDelay(struct MMatchItemDesc* pSelectItemDesc);
 int GetFrame(RAnimation& Ani, ZC_STATE_LOWER LowerState, struct MMatchItemDesc* ItemDesc, float Time);

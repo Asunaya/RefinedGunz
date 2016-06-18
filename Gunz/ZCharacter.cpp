@@ -1225,6 +1225,8 @@ void ZCharacter::OnUpdate(float fDelta)
 		if(!GetHistory(&m_vProxyPosition,&_vDir,g_pGame->GetTime()-pObserver->GetDelay()))
 			return;
 
+		DMLog("OnUpdate: Time = %f\n", g_pGame->GetTime() - pObserver->GetDelay());
+
 		if (g_Rules.IsVanillaMode())
 		{
 			m_vProxyDirection = m_DirectionLower;

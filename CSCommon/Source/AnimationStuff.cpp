@@ -252,44 +252,56 @@ static void RotateSpine(matrix& mat, RMeshPartsPosInfoType parts, float y, float
 
 template <size_t size>
 static matrix GetNodeHierarchyMatrix(RAnimation* LowerAni, RAnimation* UpperAni,
+	int LowerFrame, int UpperFrame,
 	const RMeshPartsPosInfoType(&Hierarchy)[size],
-	int Frame, float y, float tremble)
+	float y, float tremble)
 {
-	DMLog("Lower: %p, %s; upper: %p, %s\n", LowerAni, LowerAni ? LowerAni->GetName() : "(null)",
-		UpperAni, UpperAni ? UpperAni->GetName() : "(null)");
 	matrix last_mat;
 	matrix last_mat_inv;
 	matrix mat;
-	bool parent = false;
 	rmatrix* last_mat_inv_ptr = nullptr;
-	for (size_t i = 0; i < ArraySize(Hierarchy); i++)
+	for (auto Parts : Hierarchy)
 	{
-		auto& nodeinfo = Nodes[Hierarchy[i]];
+		auto& nodeinfo = Nodes[Parts];
 
 		RAnimation* Ani = nullptr;
+		int Frame = 0;
 		if (UpperAni)
-			Ani = nodeinfo.cut_parts == cut_parts_lower_body ? LowerAni : UpperAni;
+		{
+			if (nodeinfo.cut_parts == cut_parts_lower_body)
+			{
+				Ani = LowerAni;
+				Frame = LowerFrame;
+			}
+			else
+			{
+				Ani = UpperAni;
+				Frame = UpperFrame;
+			}
+		}
 		else
+		{
 			Ani = LowerAni;
+			Frame = LowerFrame;
+		}
 
 		auto& cur = *Ani->m_pAniData->GetNode(nodeinfo.Name);
 
 		D3DXMatrixIdentity(&mat);
 
-		if (nodeinfo.PosParts == eq_parts_pos_info_Spine1 && UpperAni)
+		if (Parts == eq_parts_pos_info_Spine1 && UpperAni)
 		{
-			GetUpperSpine1(mat, UpperAni, Frame, y, tremble);
+			GetUpperSpine1(mat, UpperAni, UpperFrame, y, tremble);
 		}
 		else
 		{
 			GetAniMat(mat, cur, last_mat_inv_ptr, Frame);
-			RotateSpine(mat, Hierarchy[i], y, tremble);
+			RotateSpine(mat, Parts, y, tremble);
 		}
 
-		if (parent)
+		if (last_mat_inv_ptr)
 			mat *= last_mat;
 
-		parent = true;
 		last_mat = mat;
 		RMatInv(last_mat_inv, cur.m_mat_base);
 		last_mat_inv_ptr = &last_mat_inv;
@@ -338,13 +350,15 @@ bool GetUpperSpine1(matrix& mat, RAnimation* Ani, int Frame, float y, float trem
 	return true;
 }
 
-v3 GetHeadPosition(RAnimation* LowerAni, RAnimation* UpperAni, float y, int Frame, float tremble)
+v3 GetHeadPosition(RAnimation* LowerAni, RAnimation* UpperAni,
+	int LowerFrame, int UpperFrame, float y, float tremble)
 {
 	static const RMeshPartsPosInfoType Hierarchy[] = { eq_parts_pos_info_Root, eq_parts_pos_info_Pelvis,
 		eq_parts_pos_info_Spine, eq_parts_pos_info_Spine1, eq_parts_pos_info_Spine2,
 		eq_parts_pos_info_Neck, eq_parts_pos_info_Head };
 
-	matrix mat = GetNodeHierarchyMatrix(LowerAni, UpperAni, Hierarchy, Frame, y, tremble);
+	matrix mat = GetNodeHierarchyMatrix(LowerAni, UpperAni, LowerFrame, UpperFrame,
+		Hierarchy, y, tremble);
 
 	return GetTransPos(mat);
 }
@@ -356,8 +370,8 @@ v3 GetFootPosition(RAnimation* LowerAni, int Frame)
 	static const RMeshPartsPosInfoType HierarchyL[] = { eq_parts_pos_info_Root, eq_parts_pos_info_Pelvis,
 		eq_parts_pos_info_Spine, eq_parts_pos_info_LThigh, eq_parts_pos_info_LCalf, eq_parts_pos_info_LFoot };
 
-	matrix matR = GetNodeHierarchyMatrix(LowerAni, nullptr, HierarchyR, Frame, 0, 0);
-	matrix matL = GetNodeHierarchyMatrix(LowerAni, nullptr, HierarchyL, Frame, 0, 0);
+	matrix matR = GetNodeHierarchyMatrix(LowerAni, nullptr, Frame, 0 ,HierarchyR, 0, 0);
+	matrix matL = GetNodeHierarchyMatrix(LowerAni, nullptr, Frame, 0, HierarchyL, 0, 0);
 
 	v3 ret = GetTransPos(matR) + GetTransPos(matL);
 	ret /= 2;
@@ -580,9 +594,6 @@ int GetFrame(RAnimation& Ani, ZC_STATE_LOWER LowerState, MMatchItemDesc* ItemDes
 		Frame %= Ani.GetMaxFrame();
 	else if (Frame >= Ani.GetMaxFrame())
 		Frame = Ani.GetMaxFrame() - 1;
-
-	/*DMLog("Time: %f, %f, speed: %f, frame: %d\n", Time, Time * 1000,
-		GetSpeed(LowerState, Ani.GetMaxFrame(), ItemDesc), Frame);*/
 
 	return Frame;
 }
