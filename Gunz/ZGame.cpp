@@ -3490,14 +3490,15 @@ void ZGame::OnPeerShot_Range(MMatchCharItemParts sel_type, const MUID& uidOwner,
 	//if(g_pGame->PickHistory(pOwner,fShotTime,pos,to,&pickinfo,dwPickPassFlag))
 	if (Picked)
 	{
-//#ifdef _DEBUG
-		if (ZGetGameClient()->GetMatchStageSetting()->GetNetcode() == NetcodeType::ServerBased)
-			if (pickinfo.bBspPicked)
-				ZChatOutputF("Client: Hit wall at %d, %d, %d",
-					(int)pickinfo.bpi.PickPos.x, (int)pickinfo.bpi.PickPos.y, (int)pickinfo.bpi.PickPos.z);
-			else
-				ZChatOutputF("Client: Hit nothing");
-//#endif
+		if (ZGetGameClient()->GetMatchStageSetting()->GetNetcode() == NetcodeType::ServerBased
+			&& ZGetConfiguration()->GetShowHitRegDebugOutput()
+			&& pickinfo.pObject)
+		{
+			auto Char = MDynamicCast(ZCharacter, pickinfo.pObject);
+			if (Char)
+				ZChatOutputF("Client: Hit %s", Char->GetUserNameA());
+		}
+
 		if(pickinfo.pObject)
 		{
 			ZObject *pObject = pickinfo.pObject;
@@ -3810,7 +3811,8 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 					float fRatio = ZItem::GetPiercingRatio( pDesc->m_nWeaponType , pickinfo.info.parts );
 					ZDAMAGETYPE dt = (pickinfo.info.parts==eq_parts_head) ? ZD_BULLET_HEADSHOT : ZD_BULLET;
 
-					if (ZGetGameClient()->GetMatchStageSetting()->GetNetcode() != NetcodeType::P2PAntilead)
+					if (ZGetGameClient()->GetMatchStageSetting()->GetNetcode() == NetcodeType::P2PLead
+						&& pObject == m_pMyCharacter)
 						pObject->OnDamaged(pOwnerCharacter, pOwnerCharacter->GetPosition(), dt, pDesc->m_nWeaponType, fActualDamage, fRatio );
 
 					nTargetType = ZTT_CHARACTER;
@@ -3901,9 +3903,17 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 			if (ZGetGameClient()->GetMatchStageSetting()->GetNetcode() == NetcodeType::P2PAntilead)
 				ZPostAntileadDamage(Pair.first, Pair.second.Damage, Pair.second.PiercingRatio,
 					Pair.second.DamageType, Pair.second.WeaponType);
-			else
+			else if (ZGetConfiguration()->GetShowHitRegDebugOutput())
+			{
+				auto& Char = *m_CharacterManager.at(Pair.first);
 				ZChatOutputF("Client: Hit %s for %d damage",
-					m_CharacterManager.at(Pair.first)->GetUserNameA(), Pair.second.Damage);
+					Char.GetUserNameA(), Pair.second.Damage);
+				v3 Head, Origin;
+				Char.GetPositions(Head, Origin, fShotTime);
+				ZChatOutputF("Client: Head: %d, %d, %d; origin: %d, %d, %d",
+					Head.x, Head.y, Head.z,
+					Origin.x, Origin.y, Origin.z);
+			}
 		}
 	}
 

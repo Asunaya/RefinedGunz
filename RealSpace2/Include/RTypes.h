@@ -222,11 +222,6 @@ T Lerp(T src, T dest, float t)
 {
 	return src * (1 - t) + dest * t;
 }
-template <typename T>
-T Lerp(T src, T dest, double t)
-{
-	return src * (1 - t) + dest * t;
-}
 
 bool IsIntersect(rboundingbox *bb1,rboundingbox *bb2);
 bool isInPlane(const rboundingbox *bb, const rplane *plane);

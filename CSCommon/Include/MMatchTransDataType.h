@@ -1,7 +1,6 @@
 #ifndef _MMATCHTRANSDATATYPE_H
 #define _MMATCHTRANSDATATYPE_H
 
-#include "MMatchObject.h"
 #include "MMatchRule.h"		// MMATCH_GAMETYPE, MMATCH_ROUNDSTATE, MMATCH_ROUNDRESULT 참조 -> 정리요망
 #include "MMatchStageSetting.h"
 #include "MMatchGameType.h"
@@ -391,6 +390,11 @@ struct MTD_DuelQueueInfo
 	char			m_nQueueLength;
 	char			m_nVictory;						// 연승수
 	bool			m_bIsRoundEnd;					// 라운드 끝날때인가
+};
+
+struct MTD_ClientSettings
+{
+	bool DebugOutput = false;
 };
 
 

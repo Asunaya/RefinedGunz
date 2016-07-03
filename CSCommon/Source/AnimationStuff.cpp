@@ -1,5 +1,6 @@
 #pragma once
 
+#include "stdafx.h"
 #include "AnimationStuff.h"
 #include "MDebug.h"
 #define _WINSOCK2API_
@@ -256,6 +257,8 @@ static matrix GetNodeHierarchyMatrix(RAnimation* LowerAni, RAnimation* UpperAni,
 	const RMeshPartsPosInfoType(&Hierarchy)[size],
 	float y, float tremble)
 {
+	ASSERT(LowerFrame >= 0);
+	ASSERT(UpperFrame >= 0);
 	matrix last_mat;
 	matrix last_mat_inv;
 	matrix mat;
@@ -298,6 +301,72 @@ static matrix GetNodeHierarchyMatrix(RAnimation* LowerAni, RAnimation* UpperAni,
 			GetAniMat(mat, cur, last_mat_inv_ptr, Frame);
 			RotateSpine(mat, Parts, y, tremble);
 		}
+
+		if (last_mat_inv_ptr)
+			mat *= last_mat;
+
+		last_mat = mat;
+		RMatInv(last_mat_inv, cur.m_mat_base);
+		last_mat_inv_ptr = &last_mat_inv;
+	}
+
+	return mat;
+}
+
+template <size_t size>
+static matrix LogNodeHierarchyMatrix(RAnimation* LowerAni, RAnimation* UpperAni,
+	int LowerFrame, int UpperFrame,
+	const RMeshPartsPosInfoType(&Hierarchy)[size],
+	float y, float tremble)
+{
+	ASSERT(LowerFrame >= 0);
+	ASSERT(UpperFrame >= 0);
+	matrix last_mat;
+	matrix last_mat_inv;
+	matrix mat;
+	rmatrix* last_mat_inv_ptr = nullptr;
+	for (auto Parts : Hierarchy)
+	{
+		auto& nodeinfo = Nodes[Parts];
+
+		RAnimation* Ani = nullptr;
+		int Frame = 0;
+		if (UpperAni)
+		{
+			if (nodeinfo.cut_parts == cut_parts_lower_body)
+			{
+				Ani = LowerAni;
+				Frame = LowerFrame;
+			}
+			else
+			{
+				Ani = UpperAni;
+				Frame = UpperFrame;
+			}
+		}
+		else
+		{
+			Ani = LowerAni;
+			Frame = LowerFrame;
+		}
+
+		auto& cur = *Ani->m_pAniData->GetNode(nodeinfo.Name);
+
+		D3DXMatrixIdentity(&mat);
+
+		if (Parts == eq_parts_pos_info_Spine1 && UpperAni)
+		{
+			GetUpperSpine1(mat, UpperAni, UpperFrame, y, tremble);
+		}
+		else
+		{
+			GetAniMat(mat, cur, last_mat_inv_ptr, Frame);
+			RotateSpine(mat, Parts, y, tremble);
+		}
+
+		DMLog("%s: trans = %f, %f, %f\n",
+			cur.GetName(),
+			GetTransPos(mat).x, GetTransPos(mat).y, GetTransPos(mat).z);
 
 		if (last_mat_inv_ptr)
 			mat *= last_mat;
@@ -357,8 +426,27 @@ v3 GetHeadPosition(RAnimation* LowerAni, RAnimation* UpperAni,
 		eq_parts_pos_info_Spine, eq_parts_pos_info_Spine1, eq_parts_pos_info_Spine2,
 		eq_parts_pos_info_Neck, eq_parts_pos_info_Head };
 
+	/*DMLog("GetHeadPosition -- %p, %p, %d, %d, %f, %f\n", LowerAni, UpperAni, LowerFrame, UpperFrame,
+		y, tremble);*/
+
 	matrix mat = GetNodeHierarchyMatrix(LowerAni, UpperAni, LowerFrame, UpperFrame,
 		Hierarchy, y, tremble);
+
+	/*v3 trans = GetTransPos(mat);
+
+	if (trans.y < 100)
+	{
+		DMLog("GetHeadPosition -- %s, %s, %p, %p, %d/%d, %d/%d, %f, %f; trans: %f, %f, %f\n",
+			LowerAni->GetName(), UpperAni ? UpperAni->GetName() : "(null)",
+			LowerAni, UpperAni,
+			LowerFrame, LowerAni->GetMaxFrame(),
+			UpperFrame, UpperAni ? UpperAni->GetMaxFrame() : 0,
+			y, tremble,
+			trans.x, trans.y, trans.z);
+
+		LogNodeHierarchyMatrix(LowerAni, UpperAni, LowerFrame, UpperFrame,
+			Hierarchy, y, tremble);
+	}*/
 
 	return GetTransPos(mat);
 }
@@ -596,4 +684,45 @@ int GetFrame(RAnimation& Ani, ZC_STATE_LOWER LowerState, MMatchItemDesc* ItemDes
 		Frame = Ani.GetMaxFrame() - 1;
 
 	return Frame;
+}
+
+v3 GetAbsHead(const v3 & Origin, const v3 & Dir, MMatchSex Sex,
+	ZC_STATE_LOWER LowerState, ZC_STATE_UPPER UpperState,
+	int LowerFrame, int UpperFrame,
+	RWeaponMotionType MotionType, bool IsDead)
+{
+	auto LowerAni = GetAnimationMgr(Sex)->GetAnimation(g_AnimationInfoTableLower[LowerState].Name, MotionType);
+	RAnimation* UpperAni = nullptr;
+	bool HasUpperAni = UpperState != ZC_STATE_UPPER_NONE;
+	if (HasUpperAni)
+		UpperAni = GetAnimationMgr(Sex)->GetAnimation(g_AnimationInfoTableUpper[UpperState].Name, MotionType);
+	if (!LowerAni)
+		return Origin + v3(0, 0, 180);
+
+	float y = IsDead ? 0 : (Dir.z + 0.05) * 50;
+
+	v3 Head = GetHeadPosition(LowerAni, UpperAni, LowerFrame, UpperFrame, y, 0);
+
+	v3 xydir = Dir;
+	xydir.z = 0;
+	Normalize(xydir);
+
+	v3 AdjPos = Origin;
+
+	if (g_AnimationInfoTableLower[LowerState].bMove)
+	{
+		v3 Foot = GetFootPosition(LowerAni, LowerFrame);
+
+		matrix WorldRot;
+		MakeWorldMatrix(&WorldRot, { 0, 0, 0 }, xydir, { 0, 0, 1 });
+
+		Foot *= WorldRot;
+
+		AdjPos = Origin - Foot;
+	}
+
+	matrix World;
+	MakeWorldMatrix(&World, AdjPos, xydir, v3(0, 0, 1));
+
+	return Head * World;
 }

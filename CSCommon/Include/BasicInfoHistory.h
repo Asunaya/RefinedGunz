@@ -110,32 +110,10 @@ bool BasicInfoHistoryManager::GetPositions(v3* OutHead, v3* OutFoot, v3* OutDir,
 		if (HasUpperAni)
 			UpperFrame = GetFrame(*UpperAni, ZC_STATE_LOWER(0), nullptr, UpperFrameTime);
 
-		float y = IsDead ? 0 : (Dir.z + 0.05) * 50;
-
-		v3 Head = GetHeadPosition(LowerAni, UpperAni, LowerFrame, UpperFrame, y, 0);
-
-		v3 xydir = Dir;
-		xydir.z = 0;
-		Normalize(xydir);
-
-		v3 AdjPos = Pos;
-
-		if (g_AnimationInfoTableLower[pre_it->lowerstate].bMove)
-		{
-			v3 Foot = GetFootPosition(LowerAni, LowerFrame);
-
-			matrix WorldRot;
-			MakeWorldMatrix(&WorldRot, { 0, 0, 0 }, xydir, { 0, 0, 1 });
-
-			Foot *= WorldRot;
-
-			AdjPos = Pos - Foot;
-		}
-
-		matrix World;
-		MakeWorldMatrix(&World, AdjPos, xydir, v3(0, 0, 1));
-
-		return Head * World;
+		return GetAbsHead(Pos, Dir, Sex,
+			pre_it->lowerstate, pre_it->upperstate,
+			LowerFrame, UpperFrame,
+			MotionType, IsDead);
 	};
 
 	if (BasicInfoList.empty())
@@ -180,8 +158,8 @@ bool BasicInfoHistoryManager::GetPositions(v3* OutHead, v3* OutFoot, v3* OutDir,
 	{
 		AbsPos = pre_it->position;
 		Dir = pre_it->direction;
-		LowerFrameTime = pre_it->LowerFrameTime;
-		UpperFrameTime = pre_it->UpperFrameTime;
+		LowerFrameTime = pre_it->LowerFrameTime + (Time - pre_it->SentTime);
+		UpperFrameTime = pre_it->UpperFrameTime + (Time - pre_it->SentTime);
 	}
 
 	Return(GetHead(AbsPos, Dir, pre_it, LowerFrameTime, UpperFrameTime), AbsPos, Dir);

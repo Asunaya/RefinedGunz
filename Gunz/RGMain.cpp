@@ -67,9 +67,13 @@ void RGMain::OnGameDraw()
 		}
 	}*/
 
+#ifdef _DEBUG
 	for (auto pair : *ZGetCharacterManager())
 	{
 		auto& Char = *pair.second;
+
+		if (!Char.m_pVMesh)
+			continue;
 
 		auto GetItemDesc = [&](MMatchCharItemParts slot)
 		{
@@ -99,14 +103,15 @@ void RGMain::OnGameDraw()
 		RDrawLine(Head, Foot, 0xFFFF0000);
 
 		Head = Char.m_pVMesh->GetHeadPosition();
-		Foot = Char.GetPosition();
+		Foot = Char.m_vProxyPosition;
 		RDrawSphere(Head, 15, 20, 0xFF0000FF);
 		RDrawLine(Head, Foot, 0xFF0000FF);
 
-		DMLog("Time: %f, diff: %f, %f\n", Time, Magnitude(Head - OldHead), Magnitude(Foot - OldFoot));
+		///DMLog("Time: %f, diff: %f, %f\n", Time, Magnitude(Head - OldHead), Magnitude(Foot - OldFoot));
 
 		RGetDevice()->SetRenderState(D3DRS_ZENABLE, TRUE);
 	}
+#endif
 }
 
 bool OnGameInput()
@@ -190,11 +195,6 @@ std::pair<bool, std::vector<unsigned char>> ReadZFile(const char *szPath)
 	return{ true, InflatedFile };
 }
 
-//void Invoke(std::function<void()> fn)
-//{
-//	g_RGMain->Invoke(fn);
-//}
-
 std::pair<int, ZCharacter*> FindSinglePlayer(const char * NameSubstring)
 {
 	bool Found = false;
@@ -230,28 +230,45 @@ void RGMain::OnUpdate(double Elapsed)
 
 	Time += Elapsed;
 
-	std::lock_guard<std::mutex> lock(QueueMutex);
-
-	/*while (QueuedInvokations.size())
 	{
-		QueuedInvokations.front()();
-		QueuedInvokations.pop();
-	}*/
+		std::lock_guard<std::mutex> lock(QueueMutex);
 
-	for (auto it = QueuedInvokations.begin(); it != QueuedInvokations.end(); it++)
-	{
-		auto item = *it;
+		for (auto it = QueuedInvokations.begin(); it != QueuedInvokations.end(); it++)
+		{
+			auto item = *it;
 
-		if (Time < item.Time)
-			continue;
+			if (Time < item.Time)
+				continue;
 
-		item.fn();
+			item.fn();
 
-		it = QueuedInvokations.erase(it);
+			it = QueuedInvokations.erase(it);
 
-		if (it == QueuedInvokations.end())
-			break;
+			if (it == QueuedInvokations.end())
+				break;
+		}
 	}
+
+#ifdef _DEBUG
+	if (!ZGetGame())
+		return;
+
+	auto MyChar = ZGetGame()->m_pMyCharacter;
+	if (!MyChar)
+		return;
+
+	auto GetOffset = [&](float Time)
+	{
+		v3 offset;
+		float f = fmod(Time * 2, TAU);
+		offset.x = sin(f) * 500;
+		offset.y = cos(f) * 500;
+		offset.z = 0;
+		return offset;
+	};
+	MyChar->GetPosition() += GetOffset(Time) - GetOffset(LastTime);
+	MyChar->GetPosition().z = 0;
+#endif
 }
 
 bool RGMain::OnEvent(MEvent *pEvent)

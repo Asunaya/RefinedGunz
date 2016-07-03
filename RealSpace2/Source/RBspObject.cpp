@@ -2405,8 +2405,6 @@ bool RBspObject::Open_ConvexPolygons(MZFile *pfile)
 	pfile->Read(&m_nConvexPolygon,sizeof(int));
 	pfile->Read(&nConvexVertices,sizeof(int));
 
-	MLog("Convex polygon count: %d\n", m_nConvexPolygon);
-
 	// 이 정보들은 라이트맵을 생성할때 필요하므로 런타임에서는 읽을필요가 없다
 
 	if(m_OpenMode==ROF_RUNTIME) {

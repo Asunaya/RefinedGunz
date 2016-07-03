@@ -92,6 +92,8 @@ void ZModuleContainer::UpdateModules(float fElapsed)
 		ZModule *pModule = i->second;
 		if(!pModule->Update(fElapsed)) {
 			i = m_ActiveModules.erase(i);
+			if (i == m_ActiveModules.end())
+				break;
 		}
 	}
 }

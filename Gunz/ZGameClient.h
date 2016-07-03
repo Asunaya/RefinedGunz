@@ -210,6 +210,7 @@ protected:
 	void OnAdminAnnounce(const char* szMsg, const ZAdminAnnounceType nType);
 public:
 	bool CreatedStage = false;
+	MTD_ClientSettings ClientSettings;
 
 	ZGameClient();
 	virtual ~ZGameClient();

@@ -476,6 +476,8 @@
       <Filter>MatchServer</Filter>
     </ClInclude>
     <ClInclude Include="Include\BasicInfoHistory.h" />
+    <ClInclude Include="Include\AnimationStuff.h" />
+    <ClInclude Include="Include\HitRegistration.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\MCommand.cpp">
@@ -845,6 +847,9 @@
     <ClCompile Include="Source\LagCompensation.cpp">
       <Filter>MatchServer</Filter>
     </ClCompile>
+    <ClCompile Include="Source\AnimationStuff.cpp" />
+    <ClCompile Include="Source\stuff.cpp" />
+    <ClCompile Include="Include\BasicInfoHistory.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="HShield\HsCryptLib.lib">

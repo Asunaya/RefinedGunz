@@ -522,6 +522,9 @@ void ZGameClient::OnStageEnterBattle(const MUID& uidChar, MCmdEnterBattleParam n
 
 		ZPostRequestGameInfo(ZGetGameClient()->GetPlayerUID(), ZGetGameClient()->GetStageUID());
 
+		ClientSettings.DebugOutput = ZGetConfiguration()->GetShowHitRegDebugOutput();
+		ZPostClientSettings(ClientSettings);
+
 		// 게임이 시작되면 모든 사람들의 ready를 푼다.
 		for (MStageCharSettingList::iterator itor = m_MatchStageSetting.m_CharSettingList.begin();
 			itor != m_MatchStageSetting.m_CharSettingList.end(); ++itor) 
@@ -1028,10 +1031,13 @@ void ZGameClient::UpdateStageSetting(MSTAGE_SETTING_NODE* pSetting, STAGE_STATE 
 		return false;
 	};
 
+	bool CurSwordsOnly = IsSwordsOnly(pSetting->nGameType) || pSetting->SwordsOnly;
+	bool LastSwordsOnly = IsSwordsOnly(LastStageSetting.nGameType) || LastStageSetting.SwordsOnly;
+
 #define CHECK_SETTING(member, def) CheckSetting(LastStageSetting.member, pSetting->member, def)
 
-	if (CHECK_SETTING(Netcode, NetcodeType::ServerBased) && !IsSwordsOnly(pSetting->nGameType)
-		&& !(IsSwordsOnly(LastStageSetting.nGameType) && pSetting->Netcode == NetcodeType::ServerBased))
+	if (CHECK_SETTING(Netcode, NetcodeType::ServerBased) && !CurSwordsOnly
+		&& !(LastSwordsOnly && pSetting->Netcode == NetcodeType::ServerBased))
 	{
 		sprintf_safe(buf, "Netcode%s%s", Changed ? " changed to " : ": ", GetNetcodeString(pSetting->Netcode));
 		ZChatOutput(buf, ZChat::CMT_SYSTEM);
@@ -1053,12 +1059,12 @@ void ZGameClient::UpdateStageSetting(MSTAGE_SETTING_NODE* pSetting, STAGE_STATE 
 	}
 	if (CHECK_SETTING(NoFlip, true))
 	{
-		sprintf_safe(buf, "No flip%s%d", Changed ? " changed to " : ": ", pSetting->NoFlip);
+		sprintf_safe(buf, "No flip%s%s", Changed ? " changed to " : ": ", pSetting->NoFlip ? "true" : "false");
 		ZChatOutput(buf, ZChat::CMT_SYSTEM);
 	}
 	if (CHECK_SETTING(SwordsOnly, false))
 	{
-		sprintf_safe(buf, "Swords only%s%d", Changed ? " changed to " : ": ", pSetting->SwordsOnly);
+		sprintf_safe(buf, "Swords only%s%s", Changed ? " changed to " : ": ", pSetting->SwordsOnly ? "true" : "false");
 		ZChatOutput(buf, ZChat::CMT_SYSTEM);
 	}
 

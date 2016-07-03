@@ -240,7 +240,9 @@
     <None Include="footer.html" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Include\AnimationStuff.h" />
     <ClInclude Include="Include\BasicInfoHistory.h" />
+    <ClInclude Include="Include\HitRegistration.h" />
     <ClInclude Include="Include\IndexPage.h" />
     <ClInclude Include="Include\LagCompensation.h" />
     <ClInclude Include="Include\MCommand.h" />
@@ -369,7 +371,9 @@
     <ClInclude Include="MMatchRuleSkillmap.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Include\BasicInfoHistory.cpp" />
     <ClCompile Include="MMatchRuleSkillmap.cpp" />
+    <ClCompile Include="Source\AnimationStuff.cpp" />
     <ClCompile Include="Source\LagCompensation.cpp" />
     <ClCompile Include="Source\MCommand.cpp" />
     <ClCompile Include="Source\MCommandBuilder.cpp" />
@@ -499,6 +503,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release LTCG|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Source\stuff.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="HShield\HsCryptLib.lib" />

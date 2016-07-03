@@ -409,6 +409,11 @@ struct MMatchObjectChannelInfo
 	}
 };
 
+struct ClientSettings
+{
+	bool DebugOutput;
+};
+
 
 class MMatchObject : public MObject {
 protected:
@@ -504,6 +509,8 @@ protected:
 public:
 	MMatchObject(const MUID& uid);
 	virtual ~MMatchObject();
+
+	ClientSettings ClientSettings;
 
 	char* GetName() { 
 		if (m_pCharInfo)

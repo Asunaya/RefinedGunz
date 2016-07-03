@@ -1127,17 +1127,12 @@ struct ZPACKEDSHOTINFO {
 void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Receiver, const char * Blob, size_t BlobSize)
 {
 	auto SenderObj = GetObjectA(Sender);
-
 	if (!SenderObj)
 		return;
 
 	auto CommandID = GetBlobCmdID(Blob);
-
-	//LogF(LOG_ALL, "Received command ID %d, size %d\n", CommandID, BlobSize);
-
 	auto uidStage = SenderObj->GetStageUID();
 	auto Stage = FindStage(uidStage);
-
 	if (!Stage)
 		return;
 
@@ -1232,7 +1227,8 @@ void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Recei
 
 					if (!pickinfo.pObject)
 					{
-						AnnounceF(Sender, "Server: No wall, no object");
+						if (SenderObj->ClientSettings.DebugOutput)
+							AnnounceF(Sender, "Server: No wall, no object");
 						continue;
 					}
 
@@ -1257,8 +1253,9 @@ void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Recei
 						item.second.Damage, item.second.PiercingRatio,
 						item.second.DamageType, item.second.WeaponType);
 
-					AnnounceF(Sender, "Server: Hit %s for %d damage",
-						GetObject(item.first)->GetName(), item.second.Damage);
+					if (SenderObj->ClientSettings.DebugOutput)
+						AnnounceF(Sender, "Server: Hit %s for %d damage",
+							GetObject(item.first)->GetName(), item.second.Damage);
 				}
 			}
 			else
@@ -1275,15 +1272,16 @@ void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Recei
 
 				if (pickinfo.bBspPicked)
 				{
-					AnnounceF(Sender, "Server: Hit wall at %d, %d, %d",
+					/*AnnounceF(Sender, "Server: Hit wall at %d, %d, %d",
 						(int)pickinfo.bpi.PickPos.x, (int)pickinfo.bpi.PickPos.y,
-						(int)pickinfo.bpi.PickPos.z);
+						(int)pickinfo.bpi.PickPos.z);*/
 					return;
 				}
 
 				if (!pickinfo.pObject)
 				{
-					AnnounceF(Sender, "Server: No wall, no object");
+					if (SenderObj->ClientSettings.DebugOutput)
+						AnnounceF(Sender, "Server: No wall, no object");
 					return;
 				}
 
@@ -1291,7 +1289,8 @@ void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Recei
 				auto DamageType = (pickinfo.info.parts == eq_parts_head) ? ZD_BULLET_HEADSHOT : ZD_BULLET;
 				auto WeaponType = ItemDesc->m_nWeaponType;
 
-				LogF(LOG_ALL, "Server: Hit %s for %d damage", pickinfo.pObject->GetName(), Damage);
+				if (SenderObj->ClientSettings.DebugOutput)
+					LogF(LOG_ALL, "Server: Hit %s for %d damage", pickinfo.pObject->GetName(), Damage);
 
 				SendDamage(pickinfo.pObject->GetUID(), Damage, PiercingRatio, DamageType, WeaponType);
 			}

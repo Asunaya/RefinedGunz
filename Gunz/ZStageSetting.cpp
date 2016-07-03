@@ -346,12 +346,14 @@ void ZStageSetting::ShowStageSettingDialog( MSTAGE_SETTING_NODE* pStageSetting, 
 		cb->Add("Peer to Peer Antilead");
 		cb->Add("Peer to Peer Lead");
 
-		if (IsSwordsOnly(pStageSetting->nGameType))
+		bool SwordsOnly = IsSwordsOnly(pStageSetting->nGameType) || pStageSetting->SwordsOnly;
+
+		if (SwordsOnly)
 			cb->SetSelIndex(2);
 		else
 			cb->SetSelIndex((int)pStageSetting->Netcode);
 
-		cb->Enable(!IsSwordsOnly(pStageSetting->nGameType));
+		cb->Enable(!SwordsOnly);
 	}();
 
 

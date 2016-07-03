@@ -86,7 +86,7 @@ void LoadRGCommands(ZChatCmdManager &CmdManager)
 		ZGetConfiguration()->Save();
 	}, CCF_ALL, 0, 0, true, "/fullscreen", "");
 
-	CmdManager.AddCommand(0, "setpart", [](const char *line, int argc, char ** const argv){
+	CmdManager.AddCommand(0, "setparts", [](const char *line, int argc, char ** const argv){
 		ZGetGame()->m_pMyCharacter->m_pVMesh->SetParts((RMeshPartsType)atoi(argv[1]), argv[2]);
 	}, CCF_ALL, 0, 0, true, "/fullscreen", "");
 
@@ -147,4 +147,17 @@ void LoadRGCommands(ZChatCmdManager &CmdManager)
 		ZChatOutputF("%s has been %s", ret.second->GetUserNameA(), b ? "muted" : "unmuted");
 	}, CCF_ALL, 1, 1, true, "/swordcolor <AARRGGBB>", "");
 #endif
+
+
+	CmdManager.AddCommand(0, "debug", [](const char *line, int argc, char ** const argv) {
+		ZGetConfiguration()->HitRegistrationDebugOutput = !ZGetConfiguration()->HitRegistrationDebugOutput;
+		ZGetConfiguration()->Save();
+
+		ZGetGameClient()->ClientSettings.DebugOutput = ZGetConfiguration()->HitRegistrationDebugOutput;
+		ZPostClientSettings(ZGetGameClient()->ClientSettings);
+
+		ZChatOutputF("Debug output %s",
+			ZGetConfiguration()->HitRegistrationDebugOutput ? "enabled" : "disabled");
+	},
+		CCF_ALL, 0, 0, true, "/debug", "");
 }

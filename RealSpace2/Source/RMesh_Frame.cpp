@@ -20,7 +20,7 @@
 #include "RShaderMgr.h"
 
 #ifdef _DEBUG
-#include "../../GunzShared/AnimationStuff.h"
+#include "../../CSCommon/Include/AnimationStuff.h"
 #endif
 
 _NAMESPACE_REALSPACE2_BEGIN

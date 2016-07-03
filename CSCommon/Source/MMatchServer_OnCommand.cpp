@@ -99,6 +99,22 @@ _STATUS_CMD_START;
 			OnTunnelledP2PCommand(Sender, Receiver, (char*)BlobPtr, Blob->GetPayloadSize());
 		}
 		break;
+		case MC_MATCH_UPDATE_CLIENT_SETTINGS:
+		{
+			auto Param = pCommand->GetParameter(0);
+			if (Param->GetType() != MPT_BLOB) break;
+			auto Blob = (MCmdParamBlob*)Param;
+			auto BlobPtr = Blob->GetPointer();
+			auto BlobSize = Blob->GetPayloadSize();
+			if (BlobSize != sizeof(MTD_ClientSettings))
+				break;
+			auto Obj = GetObject(pCommand->GetSenderUID());
+			if (!Obj)
+				break;
+
+			Obj->ClientSettings = { reinterpret_cast<MTD_ClientSettings*>(BlobPtr)->DebugOutput };
+		}
+		break;
 		/*case MC_MATCH_LOGIN_NETMARBLE:
 			{
 				char szCPCookie[4096];

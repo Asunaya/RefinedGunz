@@ -81,6 +81,11 @@ bool ReplayControl::OnEvent(MEvent *pEvent)
 
 	float Index = float(p.x - RELWIDTH(1920.f / 2 - 170)) / 340;
 
+	for (auto Player : MakePairValueAdapter(*ZGetCharacterManager()))
+	{
+		Player->UpdateValidShotTime(0, 0);
+	}
+
 	ZGetGame()->SetReplayTime(Index * ZGetGame()->GetReplayLength());
 
 	return true;

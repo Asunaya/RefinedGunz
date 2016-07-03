@@ -1221,11 +1221,10 @@ void ZCharacter::OnUpdate(float fDelta)
 	if (pObserver->IsVisible())
 	{
 		rvector _vDir;
-		//rvector headpos;
 		if(!GetHistory(&m_vProxyPosition,&_vDir,g_pGame->GetTime()-pObserver->GetDelay()))
 			return;
 
-		DMLog("OnUpdate: Time = %f\n", g_pGame->GetTime() - pObserver->GetDelay());
+		//DMLog("OnUpdate: Time = %f\n", g_pGame->GetTime() - pObserver->GetDelay());
 
 		if (g_Rules.IsVanillaMode())
 		{
@@ -1347,7 +1346,7 @@ void ZCharacter::OnUpdate(float fDelta)
 	cpos = m_vProxyPosition - cpos;
 	float dist = Magnitude(cpos);
 
-	m_bIsLowModel = (fabs(dist) > 3000.f);
+	m_bIsLowModel = false;// (fabs(dist) > 3000.f);
 	if (m_bFallingToNarak) m_bIsLowModel = false;	// 나락으로 떨어질땐 LowModel을 쓰지 않는다.
 
 	m_bDamaged = false;
@@ -1921,7 +1920,35 @@ void ZCharacter::GetPositions(v3 & Head, v3 & Foot, double Time)
 		return m_Items.GetDesc(slot);
 	};
 
-	BasicInfoHistory.GetPositions(&Head, &Foot, nullptr, Time, GetItemDesc, m_Property.nSex, IsDie());
+	/*if (!BasicInfoHistory.empty())
+		DMLog("%f, %f\n", Time, BasicInfoHistory.front().SentTime);*/
+
+	if (!BasicInfoHistory.empty() && Time <= BasicInfoHistory.front().SentTime)
+	{
+		BasicInfoHistory.GetPositions(&Head, &Foot, nullptr, Time, GetItemDesc, m_Property.nSex, IsDie());
+		return;
+	}
+
+	Foot = m_Position;
+
+	int LowerFrame = 0;
+	int UpperFrame = 0;
+	auto FrameInfo = m_pVMesh->GetFrameInfo(ani_mode_lower);
+	if (FrameInfo)
+		LowerFrame = FrameInfo->m_nFrame;
+	FrameInfo = m_pVMesh->GetFrameInfo(ani_mode_upper);
+	if (FrameInfo)
+		UpperFrame = FrameInfo->m_nFrame;
+
+	auto MotionType = eq_weapon_etc;
+	auto ItemDesc = GetSelectItemDesc();
+	if (ItemDesc)
+		MotionType = WeaponTypeToMotionType(ItemDesc->m_nWeaponType);
+
+	Head = GetAbsHead(m_Position, m_Direction, m_Property.nSex,
+		GetStateLower(), GetStateUpper(),
+		LowerFrame, UpperFrame,
+		MotionType, IsDie());
 }
 
 // 부활 - 이것은 게임룰에 따라 달라질 수도 있다.
@@ -3555,65 +3582,6 @@ ZOBJECTHITTEST ZCharacter::HitTest(const rvector& origin, const rvector& to,floa
 	GetPositions(Head, Foot, fTime);
 	return PlayerHitTest(Head, Foot, origin, to, pOutPos);
 }
-
-//void ZCharacter::OnDamagedMelee(ZObject* pAttacker, float fDamage, float fPiercingRatio, MMatchWeaponType weaponType, int nMeleeType)
-//{
-//	if (m_bInitialized==false) return;
-//	if (!IsVisible() || IsDie()) return;
-//
-//	bool bCanAttack = g_pGame->IsAttackable(pAttacker,this);
-//
-//	rvector dir = GetPosition() - pAttacker->GetPosition();
-//	Normalize(dir);
-//
-//// lastAttacker 쓰지 않고 있다
-////	if (bCanAttack) m_LastAttacker= pAttacker->m_UID;
-//	m_LastDamageDir = dir;
-//	m_LastDamageType = ZD_KATANA;
-//	m_LastDamageWeapon = weaponType;
-//	m_LastDamageDot = DotProduct( m_Direction,dir );
-//	m_LastDamageDistance = Magnitude(GetPosition() - pAttacker->GetPosition());
-//
-//	// hp, ap 계산
-//	if (bCanAttack)
-//	{
-//		ZObject::OnDamagedMelee(pAttacker,fDamage,fPiercingRatio,weaponType,nMeleeType);
-//		
-//		if( pAttacker == g_pGame->m_pMyCharacter )
-//			g_pGame->m_pMyCharacter->HitSound();
-//	}
-//
-//	OnDamagedAnimation(pAttacker,nMeleeType);
-//}
-//
-//void ZCharacter::OnDamagedRange( ZObject* pAttacker, float fDamage, float fPiercingRatio, MMatchWeaponType weaponType)
-//{
-//	if (m_bInitialized==false) return;
-//	if (!IsVisible() || IsDie()) return;
-//
-//	bool bCanAttack = g_pGame->IsAttackable(pAttacker,this);
-//
-//	rvector dir = GetPosition() - pAttacker->GetPosition();
-//	Normalize(dir);
-//
-//// lastAttacker 쓰지 않고 있다
-////	if (bCanAttack) m_LastAttacker= pAttacker->m_UID;
-//	m_LastDamageDir = dir;
-//	m_LastDamageType = (partstype==eq_parts_head) ? ZD_BULLET_HEADSHOT : ZD_BULLET
-//	m_LastDamageWeapon = weaponType;
-//	m_LastDamageDot = DotProduct( m_Direction,dir );
-//	m_LastDamageDistance = Magnitude(GetPosition() - pAttacker->GetPosition());
-//
-//	// hp, ap 계산
-//	if (bCanAttack)
-//	{
-//		ZObject::OnDamagedRange(pAttacker,fDamage,fPiercingRatio,weaponType);
-//		
-//		if( pAttacker == g_pGame->m_pMyCharacter )
-//			g_pGame->m_pMyCharacter->HitSound();
-//	}
-//}
-//
 
 void ZCharacter::OnDamaged(ZObject* pAttacker, rvector srcPos, ZDAMAGETYPE damageType, MMatchWeaponType weaponType, float fDamage, float fPiercingRatio, int nMeleeType)
 {

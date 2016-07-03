@@ -6067,12 +6067,25 @@ void ZGameInterface::SetupItemDescription( MMatchItemDesc* pItemDesc, const char
 
 
 
+	int PrevHP = 0;
+	int PrevAP = 0;
+	int PrevWeight = 0;
+	int PrevMaxWeight = 0;
+	[&]()
+	{
+		ZMyItemNode* pMyItemNode = ZGetMyInfo()->GetItemList()->GetEquipedItem(GetSuitableItemParts(pItemDesc->m_nSlot));
+		if (!pMyItemNode)
+			return;
 
-	// 현재 내가 가진 아이템 정보를 가져온다
-	MMatchItemDesc* pMyItemDesc = new MMatchItemDesc();
-	ZMyItemNode* pMyItemNode = ZGetMyInfo()->GetItemList()->GetEquipedItem( GetSuitableItemParts( pItemDesc->m_nSlot));
-	if ( pMyItemNode)
-		pMyItemDesc = MGetMatchItemDescMgr()->GetItemDesc( pMyItemNode->GetItemID());
+		auto MyItemDesc = MGetMatchItemDescMgr()->GetItemDesc(pMyItemNode->GetItemID());
+		if (!MyItemDesc)
+			return;
+
+		PrevHP = MyItemDesc->m_nHP;
+		PrevAP = MyItemDesc->m_nAP;
+		PrevWeight = MyItemDesc->m_nWeight;
+		PrevMaxWeight = MyItemDesc->m_nMaxWT;
+	}();
 
 	// 으메... 하드코딩스러운거... -_-;
 	char szName[ 128], szBuff[ 128];
@@ -6083,9 +6096,11 @@ void ZGameInterface::SetupItemDescription( MMatchItemDesc* pItemDesc, const char
 		pTextArea->Clear();
 
 		if ( pItemDesc->m_nResLevel > ZGetMyInfo()->GetLevel())
-			sprintf_safe(szBuff, "^9%s : ^1%d ^9%s", ZMsg(MSG_CHARINFO_LEVEL), ZGetMyInfo()->GetLevel(), ZMsg(MSG_CHARINFO_LEVELMARKER));
+			sprintf_safe(szBuff, "^9%s : ^1%d ^9%s", ZMsg(MSG_CHARINFO_LEVEL),
+				ZGetMyInfo()->GetLevel(), ZMsg(MSG_CHARINFO_LEVELMARKER));
 		else
-			sprintf_safe(szBuff, "^9%s : %d %s", ZMsg(MSG_CHARINFO_LEVEL), ZGetMyInfo()->GetLevel(), ZMsg(MSG_CHARINFO_LEVELMARKER));
+			sprintf_safe(szBuff, "^9%s : %d %s", ZMsg(MSG_CHARINFO_LEVEL),
+				ZGetMyInfo()->GetLevel(), ZMsg(MSG_CHARINFO_LEVELMARKER));
 		pTextArea->AddText(szBuff);
 
 
@@ -6096,34 +6111,43 @@ void ZGameInterface::SetupItemDescription( MMatchItemDesc* pItemDesc, const char
 		pTextArea->AddText(szBuff);
 
 
-		if ( pItemDesc->m_nHP > pMyItemDesc->m_nHP)
-			sprintf_safe(szBuff,"^9%s : %d ^2+%d", ZMsg(MSG_CHARINFO_HP), ZGetMyInfo()->GetHP(), pItemDesc->m_nHP - pMyItemDesc->m_nHP);
-		else if ( pItemDesc->m_nHP < pMyItemDesc->m_nHP)
-			sprintf_safe(szBuff,"^9%s : %d ^1-%d", ZMsg(MSG_CHARINFO_HP), ZGetMyInfo()->GetHP(), pMyItemDesc->m_nHP - pItemDesc->m_nHP);
+		if ( pItemDesc->m_nHP > PrevHP)
+			sprintf_safe(szBuff,"^9%s : %d ^2+%d", ZMsg(MSG_CHARINFO_HP),
+				ZGetMyInfo()->GetHP(), pItemDesc->m_nHP - PrevHP);
+		else if ( pItemDesc->m_nHP < PrevHP)
+			sprintf_safe(szBuff,"^9%s : %d ^1-%d",
+				ZMsg(MSG_CHARINFO_HP), ZGetMyInfo()->GetHP(), PrevHP - pItemDesc->m_nHP);
 		else
 			sprintf_safe(szBuff,"^9%s : %d", ZMsg(MSG_CHARINFO_HP), ZGetMyInfo()->GetHP());
 		pTextArea->AddText( szBuff);
 
 
-		if ( pItemDesc->m_nAP > pMyItemDesc->m_nAP)
-			sprintf_safe(szBuff,"^9%s : %d ^2+%d", ZMsg(MSG_CHARINFO_AP), ZGetMyInfo()->GetAP(), pItemDesc->m_nAP - pMyItemDesc->m_nAP);
-		else if ( pItemDesc->m_nAP < pMyItemDesc->m_nAP)
-			sprintf_safe(szBuff,"^9%s : %d ^1-%d", ZMsg(MSG_CHARINFO_AP), ZGetMyInfo()->GetAP(), pMyItemDesc->m_nAP - pItemDesc->m_nAP);
+		if ( pItemDesc->m_nAP > PrevAP)
+			sprintf_safe(szBuff,"^9%s : %d ^2+%d", ZMsg(MSG_CHARINFO_AP),
+				ZGetMyInfo()->GetAP(), pItemDesc->m_nAP - PrevAP);
+		else if ( pItemDesc->m_nAP < PrevAP)
+			sprintf_safe(szBuff,"^9%s : %d ^1-%d", ZMsg(MSG_CHARINFO_AP),
+				ZGetMyInfo()->GetAP(), PrevAP - pItemDesc->m_nAP);
 		else
 			sprintf_safe(szBuff,"^9%s : %d", ZMsg(MSG_CHARINFO_AP), ZGetMyInfo()->GetAP());
 		pTextArea->AddText( szBuff);
 
 
-		if ( (ZGetMyInfo()->GetItemList()->GetEquipedTotalWeight() - pMyItemDesc->m_nWeight + pItemDesc->m_nWeight) > ZGetMyInfo()->GetItemList()->GetMaxWeight())
-			sprintf_safe(szBuff,"^9%s : ^1%d^9/", ZMsg(MSG_CHARINFO_WEIGHT), ZGetMyInfo()->GetItemList()->GetEquipedTotalWeight());
+		if ((ZGetMyInfo()->GetItemList()->GetEquipedTotalWeight() - PrevWeight + pItemDesc->m_nWeight)
+		> ZGetMyInfo()->GetItemList()->GetMaxWeight())
+			sprintf_safe(szBuff,"^9%s : ^1%d^9/", ZMsg(MSG_CHARINFO_WEIGHT),
+				ZGetMyInfo()->GetItemList()->GetEquipedTotalWeight());
 		else
-			sprintf_safe(szBuff,"^9%s : %d/", ZMsg(MSG_CHARINFO_WEIGHT), ZGetMyInfo()->GetItemList()->GetEquipedTotalWeight());
+			sprintf_safe(szBuff,"^9%s : %d/", ZMsg(MSG_CHARINFO_WEIGHT),
+				ZGetMyInfo()->GetItemList()->GetEquipedTotalWeight());
 
 		char chTmp[ 32];
-		if ( pItemDesc->m_nMaxWT > pMyItemDesc->m_nMaxWT)
-			sprintf_safe(chTmp,"%d ^2+%d", ZGetMyInfo()->GetItemList()->GetMaxWeight(), pItemDesc->m_nMaxWT - pMyItemDesc->m_nMaxWT);
-		else if ( pItemDesc->m_nMaxWT < pMyItemDesc->m_nMaxWT)
-			sprintf_safe(chTmp,"%d ^1-%d", ZGetMyInfo()->GetItemList()->GetMaxWeight(), pMyItemDesc->m_nMaxWT - pItemDesc->m_nMaxWT);
+		if ( pItemDesc->m_nMaxWT > PrevMaxWeight)
+			sprintf_safe(chTmp,"%d ^2+%d", ZGetMyInfo()->GetItemList()->GetMaxWeight(),
+				pItemDesc->m_nMaxWT - PrevMaxWeight);
+		else if ( pItemDesc->m_nMaxWT < PrevMaxWeight)
+			sprintf_safe(chTmp,"%d ^1-%d", ZGetMyInfo()->GetItemList()->GetMaxWeight(),
+				PrevMaxWeight - pItemDesc->m_nMaxWT);
 		else
 			sprintf_safe(chTmp,"%d", ZGetMyInfo()->GetItemList()->GetMaxWeight());
 		strcat( szBuff, chTmp);

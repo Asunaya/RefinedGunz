@@ -51,6 +51,8 @@ static void CreatePlayers(const std::vector<ReplayPlayerInfo>& Players)
 void GetReplayStageSetting(REPLAY_STAGE_SETTING_NODE& dest, const MSTAGE_SETTING_NODE& src)
 {
 	COPY_MEMBER(uidStage);
+	strcpy_safe(dest.szStageName, src.szStageName);
+	strcpy_safe(dest.szMapName, src.szMapName);
 	COPY_MEMBER(nMapIndex);
 	COPY_MEMBER(nGameType);
 	COPY_MEMBER(nRoundMax);

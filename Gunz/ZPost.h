@@ -984,6 +984,11 @@ inline void ZPostAntileadDamage(const MUID& Target, int Damage, float PiercingRa
 	ZPOSTCMD5(MC_PEER_ANTILEAD_DAMAGE, MCmdParamUID(Target), MCmdParamUShort(Damage), MCmdParamFloat(PiercingRatio), MCmdParamUChar(DamageType), MCmdParamUChar(WeaponType));
 }
 
+inline void ZPostClientSettings(MTD_ClientSettings& Settings)
+{
+	ZPOSTCMD1(MC_MATCH_UPDATE_CLIENT_SETTINGS, MCmdParamBlob(&Settings, sizeof(Settings)));
+}
+
 #undef VEC
 
 

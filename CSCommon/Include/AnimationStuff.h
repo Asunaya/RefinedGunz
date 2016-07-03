@@ -252,3 +252,7 @@ int GetFrame(RAnimation& Ani, ZC_STATE_LOWER LowerState, struct MMatchItemDesc* 
 bool GetNodeMatrix(matrix& mat, const char* Name, const matrix* parent_base_inv,
 	RAnimation* Ani, int Frame, float y, float tremble);
 bool GetUpperSpine1(matrix& mat, RAnimation* Ani, int Frame, float y, float tremble);
+v3 GetAbsHead(const v3& Origin, const v3& Dir, MMatchSex Sex,
+	ZC_STATE_LOWER LowerState, ZC_STATE_UPPER UpperState,
+	int LowerFrame, int UpperFrame,
+	RWeaponMotionType MotionType, bool IsDead);

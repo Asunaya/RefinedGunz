@@ -228,7 +228,7 @@ public:
 	bool GetShowHitboxes() const { return bShowHitboxes; }
 	bool GetDynamicResourceLoad() const { return bDynamicResourceLoad; }
 	bool GetDrawTrails() const { return bDrawTrails; }
-	bool IsHitRegistrationDebugOutputEnabled() const { return HitRegistrationDebugOutput; }
+	bool GetShowHitRegDebugOutput() const { return HitRegistrationDebugOutput; }
 
 	const bool IsComplete()			{ return m_bIsComplete; }
 
