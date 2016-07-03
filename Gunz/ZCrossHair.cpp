@@ -9,6 +9,7 @@
 #include "ZConfiguration.h"
 #include "MComboBox.h"
 #include "ZCanvas.h"
+#include "Extension.h"
 
 ZCrossHair::ZCrossHair()
 {
@@ -179,6 +180,7 @@ void ZCrossHair::Draw(MDrawContext* pDC)
 	float fFactor = g_pGame->m_pMyCharacter->GetCAFactor();
 	fFactor = fFactor +0.2f;
 
+#ifdef CROSSHAIR_PICK
 	switch(m_nStatus)
 	{
 		case ZCS_NORMAL:	
@@ -194,6 +196,9 @@ void ZCrossHair::Draw(MDrawContext* pDC)
 		}
 		break;
 	}
+#else
+	DrawCrossHair(pDC, m_pBitmaps, center, sizefactor, fFactor);
+#endif
 }
 
 
