@@ -9,7 +9,7 @@
 #include "ZConfiguration.h"
 #include "MComboBox.h"
 #include "ZCanvas.h"
-#include "Extension.h"
+#include "Extensions.h"
 
 ZCrossHair::ZCrossHair()
 {
