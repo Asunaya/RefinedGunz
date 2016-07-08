@@ -3911,8 +3911,8 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 				v3 Head, Origin;
 				Char.GetPositions(Head, Origin, fShotTime);
 				ZChatOutputF("Client: Head: %d, %d, %d; origin: %d, %d, %d",
-					Head.x, Head.y, Head.z,
-					Origin.x, Origin.y, Origin.z);
+					int(Head.x), int(Head.y), int(Head.z),
+					int(Origin.x), int(Origin.y), int(Origin.z));
 			}
 		}
 	}

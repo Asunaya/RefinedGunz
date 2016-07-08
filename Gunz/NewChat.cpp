@@ -99,7 +99,7 @@ void Chat::EnableInput(bool bEnable, bool bToTeam){
 }
 
 void Chat::OutputChatMsg(const char *szMsg){
-	OutputChatMsg(szMsg, 0);
+	OutputChatMsg(szMsg, TextColor);
 }
 
 void Chat::OutputChatMsg(const char *szMsg, DWORD dwColor){
@@ -885,12 +885,12 @@ void Chat::Display(){
 
 		if (it == cl.vFormatSpecifiers.end()){
 			RECT Rect = { Output.x1 + 5, Output.y2 - 5 - (nTempLines + nLines) * nFontHeight, Output.x2 - 5, Output.y2 - 5 };
-			DrawTextN(pFont.get(), cl.Msg.data() + nMsgOffset, Rect, 0xFFC8C8C8);
+			DrawTextN(pFont.get(), cl.Msg.data() + nMsgOffset, Rect, cl.DefaultColor);
 			nLines++;
 		}
 		else{
 			MFontR2 *pFont = this->pFont.get();
-			D3DCOLOR dwColor = TextColor;
+			D3DCOLOR dwColor = cl.DefaultColor;
 			long nTemp = nTempLines;
 			int nOffsetX = 0;
 			int nPos = nMsgOffset;

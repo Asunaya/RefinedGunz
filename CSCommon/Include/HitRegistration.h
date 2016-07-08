@@ -146,7 +146,7 @@ static ZOBJECTHITTEST PlayerHitTest(const v3& head, const v3& foot,
 				float fap2cpsq = D3DXVec3LengthSq(&ap2cp);
 				float fdiff = sqrtf(30.f*30.f - fap2cpsq);
 
-				if (pOutPos) *pOutPos = ap - dir*fdiff;;
+				if (pOutPos) *pOutPos = ap - dir*fdiff;
 				return ZOH_LEGS;
 			}
 		}
@@ -166,8 +166,8 @@ static bool PickHistory(const ObjectT& Exception, const v3& src, const v3& dest,
 
 	for (auto& Obj : Container)
 	{
-		/*if (&Exception == Obj)
-			continue;*/
+		if (&Exception == Obj)
+			continue;
 
 		v3 TempHitPos;
 		auto HitParts = Obj->HitTest(src, dest, Time, &TempHitPos);

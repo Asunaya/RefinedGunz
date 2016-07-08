@@ -148,7 +148,6 @@ void LoadRGCommands(ZChatCmdManager &CmdManager)
 	}, CCF_ALL, 1, 1, true, "/swordcolor <AARRGGBB>", "");
 #endif
 
-
 	CmdManager.AddCommand(0, "debug", [](const char *line, int argc, char ** const argv) {
 		ZGetConfiguration()->HitRegistrationDebugOutput = !ZGetConfiguration()->HitRegistrationDebugOutput;
 		ZGetConfiguration()->Save();
@@ -160,4 +159,9 @@ void LoadRGCommands(ZChatCmdManager &CmdManager)
 			ZGetConfiguration()->HitRegistrationDebugOutput ? "enabled" : "disabled");
 	},
 		CCF_ALL, 0, 0, true, "/debug", "");
+
+	CmdManager.AddCommand(0, "hello", [](const char *line, int argc, char ** const argv) {
+		ZChatOutput("Hi! ^__^", ZChat::CMT_SYSTEM, ZChat::CL_CURRENT);
+	},
+		CCF_ALL, 0, 0, true, "/hello", "");
 }

@@ -1254,8 +1254,15 @@ void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Recei
 						item.second.DamageType, item.second.WeaponType);
 
 					if (SenderObj->ClientSettings.DebugOutput)
+					{
 						AnnounceF(Sender, "Server: Hit %s for %d damage",
 							GetObject(item.first)->GetName(), item.second.Damage);
+						v3 Head, Origin;
+						SenderObj->GetPositions(Head, Origin, Time);
+						AnnounceF(Sender, "Server: Head: %d, %d, %d; origin: %d, %d, %d",
+							int(Head.x), int(Head.y), int(Head.z),
+							int(Origin.x), int(Origin.y), int(Origin.z));
+					}
 				}
 			}
 			else
@@ -1290,7 +1297,14 @@ void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Recei
 				auto WeaponType = ItemDesc->m_nWeaponType;
 
 				if (SenderObj->ClientSettings.DebugOutput)
-					LogF(LOG_ALL, "Server: Hit %s for %d damage", pickinfo.pObject->GetName(), Damage);
+				{
+					AnnounceF(Sender, "Server: Hit %s for %d damage", pickinfo.pObject->GetName(), Damage);
+					v3 Head, Origin;
+					SenderObj->GetPositions(Head, Origin, Time);
+					AnnounceF(Sender, "Server: Head: %d, %d, %d; origin: %d, %d, %d",
+						int(Head.x), int(Head.y), int(Head.z),
+						int(Origin.x), int(Origin.y), int(Origin.z));
+				}
 
 				SendDamage(pickinfo.pObject->GetUID(), Damage, PiercingRatio, DamageType, WeaponType);
 			}

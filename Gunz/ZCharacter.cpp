@@ -1929,26 +1929,8 @@ void ZCharacter::GetPositions(v3 & Head, v3 & Foot, double Time)
 		return;
 	}
 
+	Head = m_pVMesh->GetHeadPosition();
 	Foot = m_Position;
-
-	int LowerFrame = 0;
-	int UpperFrame = 0;
-	auto FrameInfo = m_pVMesh->GetFrameInfo(ani_mode_lower);
-	if (FrameInfo)
-		LowerFrame = FrameInfo->m_nFrame;
-	FrameInfo = m_pVMesh->GetFrameInfo(ani_mode_upper);
-	if (FrameInfo)
-		UpperFrame = FrameInfo->m_nFrame;
-
-	auto MotionType = eq_weapon_etc;
-	auto ItemDesc = GetSelectItemDesc();
-	if (ItemDesc)
-		MotionType = WeaponTypeToMotionType(ItemDesc->m_nWeaponType);
-
-	Head = GetAbsHead(m_Position, m_Direction, m_Property.nSex,
-		GetStateLower(), GetStateUpper(),
-		LowerFrame, UpperFrame,
-		MotionType, IsDie());
 }
 
 // 부활 - 이것은 게임룰에 따라 달라질 수도 있다.
