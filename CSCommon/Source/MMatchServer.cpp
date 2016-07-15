@@ -1150,6 +1150,7 @@ void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Recei
 			BasicInfoItem bi;
 			ZPACKEDBASICINFO& pbi = *(ZPACKEDBASICINFO*)(Blob + 2 + 2 + 1 + 4);
 			pbi.Unpack(bi);
+			bi.SentTime = pbi.fTime;
 			bi.RecvTime = double(MGetMatchServer()->GetGlobalClockCount()) / 1000;
 			SenderObj->BasicInfoHistory.AddBasicInfo(bi);
 

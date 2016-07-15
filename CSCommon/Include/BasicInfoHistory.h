@@ -42,7 +42,7 @@ public:
 			}
 			else
 			{
-				local.LowerFrameTime = prev_it->LowerFrameTime + (local.SentTime - prev_it->SentTime);
+				local.LowerFrameTime = prev_it->LowerFrameTime + (local.RecvTime - prev_it->RecvTime);
 			}
 
 			if (prev_it->upperstate != local.upperstate)
@@ -52,7 +52,7 @@ public:
 			else
 			{
 				local.UpperFrameTime = local.upperstate == ZC_STATE_UPPER_NONE ? -1
-					: prev_it->UpperFrameTime + (local.SentTime - prev_it->SentTime);
+					: prev_it->UpperFrameTime + (local.RecvTime - prev_it->RecvTime);
 			}
 		}
 
@@ -132,7 +132,7 @@ bool BasicInfoHistoryManager::GetPositions(v3* OutHead, v3* OutFoot, v3* OutDir,
 	auto pre_it = BasicInfoList.begin();
 	auto post_it = BasicInfoList.begin();
 
-	while (pre_it != BasicInfoList.end() && Time < pre_it->SentTime)
+	while (pre_it != BasicInfoList.end() && Time < pre_it->RecvTime)
 	{
 		post_it = pre_it;
 		pre_it++;
@@ -148,7 +148,7 @@ bool BasicInfoHistoryManager::GetPositions(v3* OutHead, v3* OutFoot, v3* OutDir,
 
 	if (pre_it != post_it)
 	{
-		auto t = double(Time - pre_it->SentTime) / double(post_it->SentTime - pre_it->SentTime);
+		auto t = double(Time - pre_it->RecvTime) / double(post_it->RecvTime - pre_it->RecvTime);
 		AbsPos = Lerp(pre_it->position, post_it->position, t);
 		Dir = Slerp(pre_it->direction, post_it->direction, t);
 		LowerFrameTime = Lerp(pre_it->LowerFrameTime, post_it->LowerFrameTime, t);
@@ -158,8 +158,8 @@ bool BasicInfoHistoryManager::GetPositions(v3* OutHead, v3* OutFoot, v3* OutDir,
 	{
 		AbsPos = pre_it->position;
 		Dir = pre_it->direction;
-		LowerFrameTime = pre_it->LowerFrameTime + (Time - pre_it->SentTime);
-		UpperFrameTime = pre_it->UpperFrameTime + (Time - pre_it->SentTime);
+		LowerFrameTime = pre_it->LowerFrameTime + (Time - pre_it->RecvTime);
+		UpperFrameTime = pre_it->UpperFrameTime + (Time - pre_it->RecvTime);
 	}
 
 	Return(GetHead(AbsPos, Dir, pre_it, LowerFrameTime, UpperFrameTime), AbsPos, Dir);
