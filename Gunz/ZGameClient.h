@@ -60,6 +60,8 @@ private:
 	bool					m_bRejectWhisper;		///< 귓말허용
 	bool					m_bRejectInvite;		///< 초대허용
 
+	int PingToServer = 0;
+
 protected:
 	void SetChannelRuleName(const char* pszName)	{ strcpy_safe(m_szChannelRule, pszName); }
 	int GetBridgePeerCount()			{ return m_nBridgePeerCount; }
@@ -326,6 +328,8 @@ protected:
 public:
 	bool CreateUPnP(unsigned short nUDPPort);
 	bool DestroyUPnP();
+
+	int GetPingToServer() const { return PingToServer; }
 };
 
 

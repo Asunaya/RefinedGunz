@@ -15,7 +15,7 @@ int MGetBlobArraySize(void* pBlob);
 /// Array Block으로 보고 맨 처음 포인터 얻어내기
 void* MGetBlobArrayPointer(void* pBlob);
 
-size_t MGetBlobArrayInfoSize(void* pBlob);
+size_t MGetBlobArrayInfoSize();
 
 size_t MGetBlobArrayElementSize(void* pBlob);
 

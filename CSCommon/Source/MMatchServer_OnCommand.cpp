@@ -527,7 +527,7 @@ _STATUS_CMD_START;
 				auto BlobParam = static_cast<MCmdParamBlob*>(pStageParam);
 				auto BlobSize = BlobParam->GetPayloadSize();
 
-				auto BlobInfoSize = MGetBlobArrayInfoSize(pStageBlob);
+				auto BlobInfoSize = MGetBlobArrayInfoSize();
 
 				if (BlobSize - BlobInfoSize != sizeof(MSTAGE_SETTING_NODE))
 					break;

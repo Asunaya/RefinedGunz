@@ -397,6 +397,12 @@ struct MTD_ClientSettings
 	bool DebugOutput = false;
 };
 
+struct MTD_PingInfo
+{
+	MUID UID;
+	uint16_t Ping;
+};
+
 
 #pragma pack(pop, old)
 

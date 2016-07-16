@@ -61,6 +61,8 @@ void MAddSharedCommandTable(MCommandManager* pCommandManager, int nSharedType)
 		P(MPT_UCHAR, "WeaponType")
 	C(MC_MATCH_UPDATE_CLIENT_SETTINGS, "", "", MCDT_MACHINE2MACHINE)
 		P(MPT_BLOB, "Settings")
+	C(MC_MATCH_PING_LIST, "", "", MCDT_MACHINE2MACHINE)
+		P(MPT_BLOB, "Ping list")
 
 
 	C(MC_LOCAL_INFO, "Local.Info", "Local information", MCDT_LOCAL)

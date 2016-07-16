@@ -5124,6 +5124,9 @@ void ZGame::PostPeerPingInfo()
 {
 	if (!ZGetGameInterface()->GetCombatInterface()->IsShowScoreBoard()) return;
 
+	if (ZGetGameClient()->GetMatchStageSetting()->GetNetcode() == NetcodeType::ServerBased)
+		return;
+
 	DWORD nNowTime = GetTickTime();
 
 	if ((nNowTime - m_nLastTime[ZLASTTIME_PEERPINGINFO]) >= PEER_PING_TICK) {

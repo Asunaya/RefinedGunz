@@ -1155,6 +1155,31 @@ bool ZGameClient::OnCommand(MCommand* pCommand)
 	ret = MMatchClient::OnCommand(pCommand);
 	
 	switch (pCommand->GetID()){
+	case MC_MATCH_PING_LIST:
+	{
+		auto Param = pCommand->GetParameter(0);
+		if (Param->GetType() != MPT_BLOB) break;
+		void* Blob = Param->GetPointer();
+		int Count = MGetBlobArrayCount(Blob);
+		MLog("Count: %d\n", Count);
+		for (int i = 0; i < Count; i++)
+		{
+			auto Ping = *static_cast<MTD_PingInfo*>(MGetBlobArrayElement(Blob, i));
+			MLog("Blob: %X, %d. GetPlayerUID(): %X, ZGetGame()->m_pMyCharacter->GetUID()\n", Ping.UID.Low, Ping.Ping, GetPlayerUID().Low, ZGetGame()->m_pMyCharacter->GetUID().Low);
+			if (Ping.UID == GetPlayerUID())
+			{
+				PingToServer = Ping.Ping;
+				continue;
+			}
+
+			auto Peer = GetPeers()->Find(Ping.UID);
+			if (!Peer)
+				continue;
+
+			Peer->UpdatePing(timeGetTime(), Ping.Ping);
+		}
+	}
+		break;
 	case MC_MATCH_RESPONSE_LOGIN_FAILED:
 	{
 		char szReason[128];

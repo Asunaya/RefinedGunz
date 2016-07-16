@@ -43,7 +43,7 @@ const string MGetStrLocalTime( const unsigned short wYear = 0,
 							   const MDateType = MDT_YMDHM );
 
 template <typename T1, typename T2>
-T1 reinterpret(T2 val)
+T1 reinterpret(const T2& val)
 {
 	union
 	{
@@ -52,6 +52,14 @@ T1 reinterpret(T2 val)
 	} conversion_union;
 	conversion_union.T2_rep = val;
 	return conversion_union.T1_rep;
+}
+
+template <typename T1>
+T1 reinterpret(void* val)
+{
+	T1 x;
+	memcpy(&x, val, sizeof(T1));
+	return x;
 }
 
 template <typename ItT>
@@ -66,7 +74,7 @@ public:
 		return *this;
 	}
 
-	ValueIterator& operator++(int)
+	ValueIterator operator++(int)
 	{
 		auto temp(*this);
 		++*this;
@@ -88,6 +96,11 @@ public:
 		return it->second;
 	}
 
+	auto& operator->()
+	{
+		return this->operator*();
+	}
+
 private:
 	ItT it;
 };
@@ -100,22 +113,22 @@ public:
 
 	auto begin()
 	{
-		return ValueIterator<ContainerT::iterator>(Container.begin());
+		return ValueIterator<typename ContainerT::iterator>(Container.begin());
 	}
 
 	auto end()
 	{
-		return ValueIterator<ContainerT::iterator>(Container.end());
+		return ValueIterator<typename ContainerT::iterator>(Container.end());
 	}
 
 	auto begin() const
 	{
-		return ValueIterator<ContainerT::iterator>(Container.begin());
+		return ValueIterator<typename ContainerT::iterator>(Container.begin());
 	}
 
 	auto end() const
 	{
-		return ValueIterator<ContainerT::iterator>(Container.end());
+		return ValueIterator<typename ContainerT::iterator>(Container.end());
 	}
 
 private:
@@ -123,9 +136,9 @@ private:
 };
 
 template <typename T>
-auto MakePairValueAdapter(T& Container)
+auto MakePairValueAdapter(T&& Container)
 {
-	return PairValueAdapter<T>(Container);
+	return PairValueAdapter<std::remove_reference<T>::type>(Container);
 }
 
 template <typename T, size_t size>

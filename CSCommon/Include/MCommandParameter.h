@@ -330,6 +330,7 @@ public:
 	int		m_nSize = 0;
 public:
 	MCommandParameterBlob(void);
+	explicit MCommandParameterBlob(size_t Size);
 	explicit MCommandParameterBlob(const void* Value, int nSize);
 	virtual ~MCommandParameterBlob(void) override;
 

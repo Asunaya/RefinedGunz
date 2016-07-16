@@ -463,6 +463,7 @@ void MAddSharedCommandTable(MCommandManager* pCommandManager, int nSharedType);
 #define MC_MATCH_P2P_COMMAND 8012
 #define MC_MATCH_DAMAGE 8013
 #define MC_MATCH_UPDATE_CLIENT_SETTINGS 8014
+#define MC_MATCH_PING_LIST 8015
 
 
 //// 피어투피어 관련 명령어 /////////////////////////////////////////////////////////////

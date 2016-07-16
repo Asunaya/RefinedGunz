@@ -371,6 +371,19 @@ MCommandParameterBlob::MCommandParameterBlob(void)
 	m_Value = 0;
 	m_nSize = 0;
 }
+MCommandParameterBlob::MCommandParameterBlob(size_t Size)
+	: MCommandParameter(MPT_BLOB)
+{
+	if (Size > MAX_BLOB_SIZE)
+	{
+		m_Value = NULL;
+		m_nSize = 0;
+		return;
+	}
+
+	m_Value = new unsigned char[Size];
+	m_nSize = Size;
+}
 MCommandParameterBlob::MCommandParameterBlob(const void* Value, int nSize)
 : MCommandParameter(MPT_BLOB)
 {

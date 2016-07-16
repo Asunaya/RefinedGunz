@@ -48,7 +48,7 @@ void* MGetBlobArrayPointer(void* pBlob)
 	return ((unsigned char*)pBlob+sizeof(int)*2);
 }
 
-size_t MGetBlobArrayInfoSize(void* pBlob)
+size_t MGetBlobArrayInfoSize()
 {
 	return sizeof(int) * 2;
 }

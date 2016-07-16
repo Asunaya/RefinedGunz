@@ -741,6 +741,17 @@ void MMatchServer::OnPrepareRun()
 	MGetServerStatusSingleton()->AddCmdCount(m_CommandManager.GetCommandQueueCount());
 }
 
+template <typename T>
+MCommandParameterBlob* MakeBlobArrayParameter(uint32_t NumBlobs)
+{
+	uint32_t OneBlobSize = sizeof(T);
+	size_t TotalSize = MGetBlobArrayInfoSize() + OneBlobSize * NumBlobs;
+	auto Param = new MCmdParamBlob(TotalSize);
+	memcpy(Param->GetPointer(), &OneBlobSize, sizeof(OneBlobSize));
+	memcpy(((uint8_t*)Param->GetPointer()) + sizeof(uint32_t), &NumBlobs, sizeof(NumBlobs));
+	return Param;
+}
+
 void MMatchServer::OnRun(void)
 {
 //	MGetLocale()->PostLoginInfoToDBAgent(MUID(1,1), "JM0000726991", "skarlfyd", 1);
@@ -862,6 +873,33 @@ void MMatchServer::OnRun(void)
 
 	if (nGlobalClock - LastPingTime > 500) // Ping every half second
 	{
+		// Send ping list
+		for (auto Stage : MakePairValueAdapter(m_StageMap))
+		{
+			if (Stage->GetState() == STAGE_STATE_RUN)
+			{
+				auto Command = CreateCommand(MC_MATCH_PING_LIST, MUID(0, 0));
+
+				size_t NumPlayers = Stage->GetObjCount();
+
+				auto Param = MakeBlobArrayParameter<MTD_PingInfo>(NumPlayers);
+				MTD_PingInfo* PingInfos = static_cast<MTD_PingInfo*>(MGetBlobArrayPointer(Param->GetPointer()));
+
+				auto ObjList = Stage->GetObjectList();
+				auto it = ObjList.begin();
+				auto end = ObjList.end();
+				for (size_t i = 0; i < Stage->GetObjCount() && it != end; i++, it++)
+				{
+					PingInfos[i] = MTD_PingInfo{ it->GetUID(), (uint16_t)it->GetPing() };
+				}
+
+				Command->AddParameter(Param);
+
+				RouteToBattle(Stage->GetUID(), Command);
+			}
+		}
+
+		// Ping all in-game clients
 		MCommand* pNew = CreateCommand(MC_NET_PING, MUID(0, 0));
 		pNew->AddParameter(new MCmdParamUInt(GetGlobalClockCount()));
 		RouteToAllClientIf(pNew, [](MMatchObject& Obj) {

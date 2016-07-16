@@ -1860,14 +1860,25 @@ void ZCombatInterface::DrawScoreBoard(MDrawContext* pDC)
 		pItem->nDeaths = pCharacter->GetStatus()->nDeaths;
 		pItem->uidUID = pCharacter->GetUID();
 
-		int nPing = (pCharacter->GetUID() == ZGetGameClient()->GetPlayerUID() ? 0 : MAX_PING);
-		MMatchPeerInfo* pPeer = ZGetGameClient()->FindPeer(pCharacter->GetUID());
-		if (pPeer) {
-			if ( g_pGame->IsReplay())
-				nPing = 0;
+		int nPing = MAX_PING;
+		if (pCharacter->GetUID() == ZGetGameClient()->GetPlayerUID())
+		{
+			if (ZGetGameClient()->GetMatchStageSetting()->GetNetcode() == NetcodeType::ServerBased)
+				nPing = ZGetGameClient()->GetPingToServer();
 			else
-				nPing = pPeer->GetPing(ZApplication::GetGame()->GetTickTime());
+				nPing = 0;
 		}
+		else
+		{
+			MMatchPeerInfo* pPeer = ZGetGameClient()->FindPeer(pCharacter->GetUID());
+			if (pPeer) {
+				if (g_pGame->IsReplay())
+					nPing = 0;
+				else
+					nPing = pPeer->GetPing(ZApplication::GetGame()->GetTickTime());
+			}
+		}
+
 		pItem->nPing = nPing;
 		pItem->bMyChar = pCharacter->IsHero();
 		
