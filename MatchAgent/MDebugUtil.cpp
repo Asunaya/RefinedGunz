@@ -16,7 +16,7 @@ void MDebugUtil_PrintStagePeerList()
 					++nStageCount, pServer->m_Stages.size(),
 					pStage->GetObjCount());
 	
-		for (MUIDRefCache::iterator i=pStage->GetObjBegin(); i!=pStage->GetObjEnd(); i++) 
+		for (auto i=pStage->GetObjBegin(); i!=pStage->GetObjEnd(); i++) 
 		{
 			MAgentClient* pClient = pServer->GetClient((*i).first);
 			pServer->LOG(MMatchAgent::LOG_PROG, "	Obj(%u%u) PeerCnt(%d)", 

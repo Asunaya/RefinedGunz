@@ -7,19 +7,19 @@ class MAgentClient;
 
 class MStageAgent {
 protected:
-	MUID			m_uidStage;
-	MUIDRefCache	m_ObjUIDCaches;
+	MUID				m_uidStage;
+	MUIDRefCache<void>	m_ObjUIDCaches;
 
-	unsigned long	m_tmCreateTime;
+	unsigned long		m_tmCreateTime;
 
 public:
 	bool Create(const MUID& uid);
 	void Destroy();
-	MUID GetUID()							{ return m_uidStage; }
+	const MUID& GetUID()					{ return m_uidStage; }
 
-	size_t GetObjCount()					{ return m_ObjUIDCaches.size(); }
-	MUIDRefCache::iterator GetObjBegin()	{ return m_ObjUIDCaches.begin(); }
-	MUIDRefCache::iterator GetObjEnd()		{ return m_ObjUIDCaches.end(); }
+	size_t GetObjCount() const				{ return m_ObjUIDCaches.size(); }
+	auto GetObjBegin()						{ return m_ObjUIDCaches.begin(); }
+	auto GetObjEnd()						{ return m_ObjUIDCaches.end(); }
 
 	void AddObject(const MUID& uid, const MAgentClient* pObj);
 	void RemoveObject(const MUID& uid);

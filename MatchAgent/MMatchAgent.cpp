@@ -788,7 +788,7 @@ bool MMatchAgent::StageLeave(const MUID& uidPlayer, const MUID& uidStage)
 	MStageAgent* pStage = FindStage(uidStage);
 	if (pStage == NULL) return false;
 
-	for (MUIDRefCache::iterator i=pStage->GetObjBegin(); i!=pStage->GetObjEnd(); i++) 
+	for (auto i=pStage->GetObjBegin(); i!=pStage->GetObjEnd(); i++) 
 	{
 		MUID uidCurrent = (*i).first;
 		if (uidCurrent == uidPlayer) 

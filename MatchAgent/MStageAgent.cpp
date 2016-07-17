@@ -25,7 +25,7 @@ void MStageAgent::AddObject(const MUID& uid, const MAgentClient* pObj)
 
 void MStageAgent::RemoveObject(const MUID& uid)
 {
-	MUIDRefCache::iterator i = m_ObjUIDCaches.find(uid);
+	auto i = m_ObjUIDCaches.find(uid);
 	if (i==m_ObjUIDCaches.end())
 		return;
 
@@ -33,7 +33,7 @@ void MStageAgent::RemoveObject(const MUID& uid)
 }
 
 bool MStageAgent::IsExistClient(const MUID& uid) {
-	MUIDRefCache::iterator i = m_ObjUIDCaches.find(uid);
+	auto i = m_ObjUIDCaches.find(uid);
 	if (i==m_ObjUIDCaches.end())
 		return false;
 	else

@@ -484,35 +484,39 @@ void MServer::RCPCallback(void* pCallbackContext, RCP_IO_OPERATION nIO, DWORD nK
 		{
 			// New Cmd Buffer ////////////////
 			MCommandBuilder* pCmdBuilder = pCommObj->GetCommandBuilder();
-			if (!pCmdBuilder->Read((char*)pPacket, dwPacketLen))
+
+			if (pCmdBuilder)
 			{
-				// 패킷이 제대로 안오면 끊어버린다.
-				pCommObj->SetAllowed(false);
-				pServer->m_RealCPNet.Disconnect(pCommObj->GetUserContext());
-				return;
-			}
+				if (!pCmdBuilder->Read((char*)pPacket, dwPacketLen))
+				{
+					// 패킷이 제대로 안오면 끊어버린다.
+					pCommObj->SetAllowed(false);
+					pServer->m_RealCPNet.Disconnect(pCommObj->GetUserContext());
+					return;
+				}
 
-			while(MCommand* pCmd = pCmdBuilder->GetCommand()) {
-				pServer->PostSafeQueue(pCmd);
-			}
+				while (MCommand* pCmd = pCmdBuilder->GetCommand()) {
+					pServer->PostSafeQueue(pCmd);
+				}
 
-			while(MPacketHeader* pNetCmd = pCmdBuilder->GetNetCommand()) {
-				if (pNetCmd->nMsg == MSGID_REPLYCONNECT) {
-					MReplyConnectMsg* pMsg = (MReplyConnectMsg*)pNetCmd;
-					MUID HostUID, AllocUID;
-					unsigned int nTimeStamp;
+				while (MPacketHeader* pNetCmd = pCmdBuilder->GetNetCommand()) {
+					if (pNetCmd->nMsg == MSGID_REPLYCONNECT) {
+						MReplyConnectMsg* pMsg = (MReplyConnectMsg*)pNetCmd;
+						MUID HostUID, AllocUID;
+						unsigned int nTimeStamp;
 
-					HostUID.High = pMsg->nHostHigh;
-					HostUID.Low = pMsg->nHostLow;
-					AllocUID.High = pMsg->nAllocHigh;
-					AllocUID.Low = pMsg->nAllocLow;
-					nTimeStamp = pMsg->nTimeStamp;
+						HostUID.High = pMsg->nHostHigh;
+						HostUID.Low = pMsg->nHostLow;
+						AllocUID.High = pMsg->nAllocHigh;
+						AllocUID.Low = pMsg->nAllocLow;
+						nTimeStamp = pMsg->nTimeStamp;
 
-					free(pNetCmd);
+						free(pNetCmd);
 
-					pServer->LockCommList();
+						pServer->LockCommList();
 						pServer->OnConnected(&HostUID, &AllocUID, nTimeStamp, pCommObj);
-					pServer->UnlockCommList();		
+						pServer->UnlockCommList();
+					}
 				}
 			}
 
