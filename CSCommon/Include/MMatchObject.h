@@ -493,6 +493,9 @@ protected:
 	std::deque<int> Pings;
 	int AveragePing;
 
+	int MaxHP, MaxAP;
+	int HP, AP;
+
 protected:
 	void UpdateChannelListChecksum(unsigned long nChecksum)	{ m_ChannelInfo.nChannelListChecksum = nChecksum; }
 	unsigned long GetChannelListChecksum()					{ return m_ChannelInfo.nChannelListChecksum; }
@@ -551,15 +554,15 @@ public:
 	MUID GetRecentChannelUID()					{ return m_ChannelInfo.uidRecentChannel; }
 	void SetRecentChannelUID(const MUID& uid)	{ m_ChannelInfo.uidRecentChannel = uid; }
 
-	MUID GetStageUID()					{ return m_uidStage; }
+	MUID GetStageUID() const			{ return m_uidStage; }
 	void SetStageUID(const MUID& uid)	{ m_uidStage = uid; }
-	MUID GetChatRoomUID()				{ return m_uidChatRoom; }
+	MUID GetChatRoomUID() const			{ return m_uidChatRoom; }
 	void SetChatRoomUID(const MUID& uid){ m_uidChatRoom = uid; }
 
-	bool CheckChannelListTransfer()	{ return m_ChannelInfo.bChannelListTransfer; }
+	bool CheckChannelListTransfer() const { return m_ChannelInfo.bChannelListTransfer; }
 	void SetChannelListTransfer(const bool bVal, const MCHANNEL_TYPE nChannelType=MCHANNEL_TYPE_PRESET);
 
-	bool CheckStageListTransfer()	{ return m_bStageListTransfer; }
+	bool CheckStageListTransfer() const { return m_bStageListTransfer; }
 	void SetStageListTransfer(bool bVal)	{ m_bStageListTransfer = bVal; UpdateStageListChecksum(0); }
 
 	MRefreshClientChannelImpl* GetRefreshClientChannelImplement()		{ return &m_RefreshClientChannelImpl; }
@@ -567,9 +570,9 @@ public:
 
 	MMatchTeam GetTeam() const { return m_nTeam; }
 	void SetTeam(MMatchTeam nTeam);
-	MMatchObjectStageState GetStageState()	{ return m_nStageState; }
+	MMatchObjectStageState GetStageState() const { return m_nStageState; }
 	void SetStageState(MMatchObjectStageState nStageState)	{ m_nStageState = nStageState; }
-	bool GetEnterBattle()			{ return m_bEnterBattle; }
+	bool GetEnterBattle() const		{ return m_bEnterBattle; }
 	void SetEnterBattle(bool bEnter){ m_bEnterBattle = bEnter; }
 	bool CheckAlive() const			{ return m_bAlive; }
 	bool IsAlive() const			{ return m_bAlive; }
@@ -698,6 +701,11 @@ public:
 		GetPositions(Head, Foot, Time);
 		return PlayerHitTest(Head, Foot, src, dest, OutPos);
 	}
+
+	void SetMaxHPAP();
+	void TakeDamage(const MMatchObject& Attacker, int Damage, float PiercingRatio, ZDAMAGETYPE DamageType, MMatchWeaponType WeaponType);
+	void Heal(int Amount);
+	void ResetHPAP();
 
 public:
 	enum MMO_ACTION

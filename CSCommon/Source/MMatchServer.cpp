@@ -728,7 +728,7 @@ void MMatchServer::OnDestroy(void)
 void MMatchServer::OnRegisterCommand(MCommandManager* pCommandManager)
 {
 	MCommandCommunicator::OnRegisterCommand(pCommandManager);
-	MAddSharedCommandTable(pCommandManager, MSCT_MATCHSERVER);
+	MAddSharedCommandTable(pCommandManager, MSCT_MATCHSERVER | MSCT_CLIENT);
 	Log(LOG_ALL, "Command registeration completed");
 
 }
@@ -1220,15 +1220,17 @@ void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Recei
 
 			auto Damage = ItemDesc->m_nDamage;
 
-			auto SendDamage = [&](auto& UID, auto Damage, auto PiercingRatio, auto DamageType, auto WeaponType)
+			auto DamagePlayer = [&](auto& Obj, auto Damage, auto PiercingRatio, auto DamageType, auto WeaponType)
 			{
-				MCommand* pCmd = CreateCommand(MC_MATCH_DAMAGE, UID);
+				MCommand* pCmd = CreateCommand(MC_MATCH_DAMAGE, Obj.GetUID());
 				pCmd->AddParameter(new MCmdParamUID(Sender));
 				pCmd->AddParameter(new MCmdParamUShort(Damage));
 				pCmd->AddParameter(new MCmdParamFloat(PiercingRatio));
 				pCmd->AddParameter(new MCmdParamUChar(DamageType));
 				pCmd->AddParameter(new MCmdParamUChar(WeaponType));
 				Post(pCmd);
+
+				Obj.TakeDamage(*SenderObj, Damage, PiercingRatio, DamageType, WeaponType);
 			};
 
 			if (ItemDesc->m_nWeaponType == MWT_SHOTGUN)
@@ -1243,7 +1245,7 @@ void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Recei
 
 				auto DirGen = GetShotgunPelletDirGenerator(orig_dir, reinterpret<u32>(psi.fTime));
 
-				std::unordered_map<MUID, DamageInfo> DamageMap;
+				std::unordered_map<MMatchObject*, DamageInfo> DamageMap;
 
 				for (int i = 0; i < SHOTGUN_BULLET_COUNT; i++)
 				{
@@ -1273,7 +1275,7 @@ void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Recei
 
 					float PiercingRatio = GetPiercingRatio(ItemDesc->m_nWeaponType, pickinfo.info.parts);
 
-					auto& item = DamageMap[pickinfo.pObject->GetUID()];
+					auto& item = DamageMap[pickinfo.pObject];
 
 					int NewDamage = item.Damage + Damage;
 					if (PiercingRatio != item.PiercingRatio)
@@ -1288,14 +1290,14 @@ void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Recei
 
 				for (auto& item : DamageMap)
 				{
-					SendDamage(item.first,
+					DamagePlayer(*item.first,
 						item.second.Damage, item.second.PiercingRatio,
 						item.second.DamageType, item.second.WeaponType);
 
 					if (SenderObj->ClientSettings.DebugOutput)
 					{
 						AnnounceF(Sender, "Server: Hit %s for %d damage",
-							GetObject(item.first)->GetName(), item.second.Damage);
+							item.first->GetName(), item.second.Damage);
 						v3 Head, Origin;
 						SenderObj->GetPositions(Head, Origin, Time);
 						AnnounceF(Sender, "Server: Head: %d, %d, %d; origin: %d, %d, %d",
@@ -1345,7 +1347,7 @@ void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Recei
 						int(Origin.x), int(Origin.y), int(Origin.z));
 				}
 
-				SendDamage(pickinfo.pObject->GetUID(), Damage, PiercingRatio, DamageType, WeaponType);
+				DamagePlayer(*pickinfo.pObject, Damage, PiercingRatio, DamageType, WeaponType);
 			}
 		}
 		break;
@@ -3399,4 +3401,14 @@ void MMatchServer::SendHShieldReqMsg()
 	}	
 
 	delete pCommand;
+}
+
+void MMatchServer::PostDeath(const MMatchObject & Victim, const MMatchObject & Attacker)
+{
+	auto DeathCmd = MCommand(m_CommandManager.GetCommandDescByID(MC_PEER_DIE), MUID(0, 0), m_This);
+	DeathCmd.AddParameter(new MCmdParamUID(Attacker.GetUID()));
+	auto P2PCmd = CreateCommand(MC_MATCH_P2P_COMMAND, MUID(0, 0));
+	P2PCmd->AddParameter(new MCmdParamUID(Victim.GetUID()));
+	P2PCmd->AddParameter(CommandToBlob(DeathCmd));
+	RouteToBattle(Victim.GetStageUID(), P2PCmd);
 }

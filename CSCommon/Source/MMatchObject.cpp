@@ -314,6 +314,55 @@ void MMatchObject::GetPositions(v3& Head, v3& Foot, double Time)
 	BasicInfoHistory.GetPositions(&Head, &Foot, nullptr, Time, GetItemDesc, GetCharInfo()->m_nSex, !IsAlive());
 }
 
+void MMatchObject::SetMaxHPAP()
+{
+	auto CharInfo = GetCharInfo();
+	if (!CharInfo)
+		return;
+
+	auto Stage = MGetMatchServer()->FindStage(m_uidStage);
+	if (!Stage)
+		return;
+
+	if (Stage->GetStageSetting()->IsForcedHPAP())
+	{
+		MaxHP = Stage->GetStageSetting()->GetForcedHP();
+		MaxAP = Stage->GetStageSetting()->GetForcedAP();
+	}
+
+	auto SetP = [&](int& MaxP, int Default, int MMatchItemDesc::* ItemP)
+	{
+		MaxP = Default;
+		for (auto Item : MakePairValueAdapter(CharInfo->m_ItemList))
+		{
+			MaxP += Item->GetDesc()->*ItemP;
+		}
+	};
+
+	SetP(MaxHP, 100, &MMatchItemDesc::m_nHP);
+	SetP(MaxAP, 0, &MMatchItemDesc::m_nAP);
+}
+
+void MMatchObject::TakeDamage(const MMatchObject& Attacker, int Damage, float PiercingRatio, ZDAMAGETYPE DamageType, MMatchWeaponType WeaponType)
+{
+	int HPDamage = int(Damage * PiercingRatio);
+	int APDamage = Damage - HPDamage;
+
+	if (AP - APDamage < 0)
+	{
+		HPDamage += APDamage - AP;
+		APDamage -= APDamage - AP;
+	}
+
+	HP -= HPDamage;
+	AP -= APDamage;
+
+	if (HP <= 0)
+	{
+		MGetMatchServer()->OnGameKill(GetUID(), Attacker.GetUID());
+	}
+}
+
 bool MMatchObject::CheckEnableAction(MMO_ACTION nAction)
 {
 	switch (nAction)

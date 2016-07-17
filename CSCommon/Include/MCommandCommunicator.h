@@ -153,4 +153,6 @@ public:
 MCmdParamBlob* CommandToBlob(MCommand& Command);
 int CalcPacketSize(MCommand* pCmd);
 
+bool MakeSaneTunnelingCommandBlob(MCommand* pWrappingCmd, MCommand* pSrcCmd);
+
 #endif

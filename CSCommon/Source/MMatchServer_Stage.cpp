@@ -1235,7 +1235,12 @@ void MMatchServer::OnGameKill(const MUID& uidAttacker, const MUID& uidVictim)
 		ProcessOnGameKill(pStage, pAttacker, pVictim);
 	}
 
-	pStage->OnGameKill(TheAttackerUID, uidVictim);	
+	pStage->OnGameKill(TheAttackerUID, uidVictim);
+
+	if (pStage->GetStageSetting()->GetNetcode() == NetcodeType::ServerBased)
+	{
+		PostDeath(*pVictim, *pAttacker);
+	}
 }
 
 

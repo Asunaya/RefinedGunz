@@ -343,7 +343,9 @@ protected:
 	void OnRequestRelayPeer(const MUID& uidChar, const MUID& uidPeer);
 	void OnPeerReady(const MUID& uidChar, const MUID& uidPeer);
 	void OnGameRoundState(const MUID& uidStage, int nState, int nRound);
+public:
 	void OnGameKill(const MUID& uidAttacker, const MUID& uidVictim);
+protected:
 	void OnRequestSpawn(const MUID& uidChar, const MVector& pos, const MVector& dir);
 	void OnGameRequestTimeSync(const MUID& uidComm, unsigned long nLocalTimeStamp);
 	void OnGameReportTimeSync(const MUID& uidComm, unsigned long nLocalTimeStamp, unsigned int nDataChecksum);
@@ -782,6 +784,8 @@ public:
 	virtual ULONG   HShield_AnalyzeAckMsg(unsigned long *pCrcInfo, unsigned char *pbyAckMsg, unsigned char *pbyReqInfo) { return 0L; }
 
 	void SendHShieldReqMsg();
+
+	void PostDeath(const MMatchObject& Victim, const MMatchObject& Attacker);
 };
 
 void CopyCharInfoForTrans(MTD_CharInfo* pDest, MMatchCharInfo* pSrc, MMatchObject* pSrcObject);
@@ -796,8 +800,8 @@ inline MMatchServer* MGetMatchServer()
 
 inline unsigned long int MMatchServer::GetTickTime()
 { 
-	m_csTickTimeLock.Lock();		
-	unsigned long int ret = m_nTickTime; 
+	m_csTickTimeLock.Lock();
+	unsigned long int ret = m_nTickTime;
 	m_csTickTimeLock.Unlock();
 	return ret;
 }

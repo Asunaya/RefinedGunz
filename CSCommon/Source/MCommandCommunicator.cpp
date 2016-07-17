@@ -259,9 +259,8 @@ MCommand* MCommandCommunicator::BlobToCommand(MCmdParamBlob* Blob)
 MCmdParamBlob* CommandToBlob(MCommand& Command)
 {
 	size_t BlobSize = Command.GetSize();
-	auto Param = new MCmdParamBlob();
-	Param->m_Value = new char[BlobSize];
-	Command.GetData(static_cast<char*>(Param->m_Value), BlobSize);
+	auto Param = new MCmdParamBlob(BlobSize);
+	Command.GetData(static_cast<char*>(Param->GetPointer()), BlobSize);
 	return Param;
 }
 
@@ -269,4 +268,27 @@ MCmdParamBlob* CommandToBlob(MCommand& Command)
 int CalcPacketSize(MCommand* pCmd)
 {
 	return (sizeof(MPacketHeader) + pCmd->GetSize());
+}
+
+bool MakeSaneTunnelingCommandBlob(MCommand* pWrappingCmd, MCommand* pSrcCmd)
+{
+	int nCmdSize = pSrcCmd->GetSize();
+	if (nCmdSize == 0)
+	{
+		return false;
+	}
+
+	char* pCmdData = new char[nCmdSize];
+	int nSize = pSrcCmd->GetData(pCmdData, nCmdSize);
+	if (nSize != nCmdSize)
+	{
+		delete[] pCmdData;
+		return false;
+	}
+
+	pWrappingCmd->AddParameter(new MCmdParamBlob(pCmdData, nCmdSize));
+
+	delete[] pCmdData;
+
+	return true;
 }

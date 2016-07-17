@@ -878,30 +878,6 @@ bool MMatchClient::MakeTunnelingCommandBlob(MCommand* pWrappingCmd, MCommand* pS
 	return true;
 }
 
-bool MMatchClient::MakeSaneTunnelingCommandBlob(MCommand* pWrappingCmd, MCommand* pSrcCmd)
-{
-	// Create Param : Command Blob ////
-	int nCmdSize = pSrcCmd->GetSize();
-	if (nCmdSize == 0)
-	{
-		return false;
-	}
-
-	char* pCmdData = new char[nCmdSize];
-	int nSize = pSrcCmd->GetData(pCmdData, nCmdSize);
-	if (nSize != nCmdSize)
-	{
-		delete[] pCmdData;
-		return false;
-	}
-
-	pWrappingCmd->AddParameter(new MCmdParamBlob(pCmdData, nCmdSize));
-
-	delete[] pCmdData;
-
-	return true;
-}
-
 void MMatchClient::SendCommandByTunneling(MCommand* pCommand)
 {
 	if (GetAllowTunneling() == false) {
