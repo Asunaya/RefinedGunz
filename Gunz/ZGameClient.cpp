@@ -1161,11 +1161,9 @@ bool ZGameClient::OnCommand(MCommand* pCommand)
 		if (Param->GetType() != MPT_BLOB) break;
 		void* Blob = Param->GetPointer();
 		int Count = MGetBlobArrayCount(Blob);
-		MLog("Count: %d\n", Count);
 		for (int i = 0; i < Count; i++)
 		{
 			auto Ping = *static_cast<MTD_PingInfo*>(MGetBlobArrayElement(Blob, i));
-			MLog("Blob: %X, %d. GetPlayerUID(): %X, ZGetGame()->m_pMyCharacter->GetUID()\n", Ping.UID.Low, Ping.Ping, GetPlayerUID().Low, ZGetGame()->m_pMyCharacter->GetUID().Low);
 			if (Ping.UID == GetPlayerUID())
 			{
 				PingToServer = Ping.Ping;

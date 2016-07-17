@@ -890,7 +890,7 @@ void MMatchServer::OnRun(void)
 				auto end = ObjList.end();
 				for (size_t i = 0; i < Stage->GetObjCount() && it != end; i++, it++)
 				{
-					PingInfos[i] = MTD_PingInfo{ it->GetUID(), (uint16_t)it->GetPing() };
+					PingInfos[i] = MTD_PingInfo{ it->GetUID(), uint16_t(it->GetPing() / 2) };
 				}
 
 				Command->AddParameter(Param);
