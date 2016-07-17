@@ -8,7 +8,7 @@
 #include "MErrorTable.h"
 #include "MMatchServer.h"
 #undef pi
-#include <boost/property_tree/detail/rapidxml.hpp>
+#include "rapidxml.hpp"
 #include <fstream>
 
 
@@ -212,9 +212,7 @@ bool MMatchConfig::Create()
 		return false;
 	}
 
-	using namespace boost::property_tree::detail::rapidxml;
-
-	xml_document<> doc;
+	rapidxml::xml_document<> doc;
 	doc.parse<0>(&File[0]);
 
 	auto GameDirNode = doc.first_node("game_dir");

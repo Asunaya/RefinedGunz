@@ -140,7 +140,6 @@ public:
 	MCommand* MakeCmdFromTunnelingBlob(const MUID& uidSender, void* pBlob, int nBlobArrayCount);
 	MCommand* MakeCmdFromSaneTunnelingBlob(const MUID& uidSender, void* pBlob, size_t Size);
 	bool MakeTunnelingCommandBlob(MCommand* pWrappingCmd, MCommand* pSrcCmd);
-	bool MakeSaneTunnelingCommandBlob(MCommand* pWrappingCmd, MCommand* pSrcCmd);
 protected:
 	bool GetAgentPeerFlag()				{ return m_bAgentPeerFlag; }
 	void SetAgentPeerFlag(bool bVal)	{ m_bAgentPeerFlag = bVal; }

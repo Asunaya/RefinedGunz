@@ -1,10 +1,8 @@
 #include "stdafx.h"
 #include "MeshManager.h"
 #undef pi
-#include <boost/property_tree/detail/rapidxml.hpp>
+#include "rapidxml.hpp"
 #include <fstream>
-
-using namespace boost::property_tree::detail;
 
 MeshManager* MeshManager::Instance = nullptr;
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ZRuleDuel.h"
-#include <boost/mpl/has_xxx.hpp>
+#include "has_xxx.h"
 #include "stack_allocator.hpp"
 
 inline ReplayVersion ZReplayLoader::GetVersion()
@@ -85,7 +85,7 @@ inline ReplayVersion ZReplayLoader::GetVersion()
 	return Version;
 }
 
-BOOST_MPL_HAS_XXX_TRAIT_DEF(szStageName);
+HAS_XXX(szStageName);
 
 template <typename T>
 typename std::enable_if<has_szStageName<T>::value>::type CopyStageName(REPLAY_STAGE_SETTING_NODE &m_StageSetting, const T &Setting) {

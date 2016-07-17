@@ -105,7 +105,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>Include;../SafeUDP/Include;../CML/Include;../RealSpace2/Include;../MAI/Include;../sdk/dx9/Include;../MDatabase/Include;../MCountryFilter/Include;../GunzShared/;../libsodium/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>Include;../SafeUDP/Include;../CML/Include;../RealSpace2/Include;../MAI/Include;../sdk/dx9/Include;../MDatabase/Include;../MCountryFilter/Include;../sdk/Misc/;../libsodium/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;NO_WARN_MBCS_MFC_DEPRECATION;_WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>

@@ -5,9 +5,7 @@
 #include "ZMyCharacter.h"
 #include "ZPost.h"
 #undef pi
-#include <boost/property_tree/detail/rapidxml.hpp>
-
-using namespace boost::property_tree::detail;
+#include "rapidxml.hpp"
 
 CourseManager ZRuleSkillmap::CourseMgr;
 

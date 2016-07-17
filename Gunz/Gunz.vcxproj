@@ -146,7 +146,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>../sdk/dx9/include;../CSCommon/Include;../SafeUDP/Include;../CML/Include;../RealSpace2/Include;../MAI/Include;../RealSpace/Include;../Mint2/Include;../RealSound/Include;../MDatabase/Include;../MCountryFilter/Include;../GunzShared/;../libsodium/include;../opus-1.1.1/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../sdk/dx9/include;../CSCommon/Include;../SafeUDP/Include;../CML/Include;../RealSpace2/Include;../MAI/Include;../RealSpace/Include;../Mint2/Include;../RealSound/Include;../MDatabase/Include;../MCountryFilter/Include;../sdk//Misc/;../libsodium/include;../opus-1.1.1/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;DEBUG;_WINDOWS;_DONOTUSE_DINPUT_MOUSE;NO_WARN_MBCS_MFC_DEPRECATION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -417,6 +417,7 @@ rem call copy_share.bat
     <ClInclude Include="ArrayView.h" />
     <ClInclude Include="Draw.h" />
     <ClInclude Include="Extensions.h" />
+    <ClInclude Include="has_xxx.h" />
     <ClInclude Include="Hitboxes.h" />
     <ClInclude Include="NewChat.h" />
     <ClInclude Include="Portal.h" />

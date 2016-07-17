@@ -796,6 +796,9 @@
     <ClInclude Include="RGTypes.h">
       <Filter>RGunz</Filter>
     </ClInclude>
+    <ClInclude Include="has_xxx.h">
+      <Filter>RGunz</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ZCanvas.cpp">
