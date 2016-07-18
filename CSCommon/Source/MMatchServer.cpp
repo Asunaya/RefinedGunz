@@ -1176,27 +1176,36 @@ void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Recei
 
 	auto Netcode = Stage->GetStageSetting()->GetNetcode();
 
-	[&]()
+	if (Netcode == NetcodeType::ServerBased)
 	{
-		if (Netcode != NetcodeType::ServerBased)
-			return;
-
 		switch (CommandID)
 		{
 		case MC_PEER_BASICINFO:
 		{
+			if (!SenderObj->IsAlive())
+				return;
+
 			BasicInfoItem bi;
 			ZPACKEDBASICINFO& pbi = *(ZPACKEDBASICINFO*)(Blob + 2 + 2 + 1 + 4);
 			pbi.Unpack(bi);
 			bi.SentTime = pbi.fTime;
-			bi.RecvTime = double(MGetMatchServer()->GetGlobalClockCount()) / 1000;
+			bi.RecvTime = MGetMatchServer()->GetGlobalClockCount() / 1000.0;
 			SenderObj->BasicInfoHistory.AddBasicInfo(bi);
+
+			constexpr auto DIE_CRITICAL_LINE = -2500.f;
+			if (bi.position.z <= DIE_CRITICAL_LINE)
+			{
+				OnGameKill(Sender, Sender);
+			}
 
 			//mlog("BasicInfo %d, %d, %d\n", pbi.posx, pbi.posy, pbi.posz);
 		}
 		break;
 		case MC_PEER_SHOT:
 		{
+			if (!SenderObj->IsAlive())
+				return;
+
 			ZPACKEDSHOTINFO& psi = *(ZPACKEDSHOTINFO*)(Blob + 2 + 2 + 1 + 4);
 
 			v3 src = v3(psi.posx, psi.posy, psi.posz);
@@ -1280,7 +1289,7 @@ void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Recei
 					int NewDamage = item.Damage + Damage;
 					if (PiercingRatio != item.PiercingRatio)
 						item.PiercingRatio = (item.Damage * item.PiercingRatio + Damage * PiercingRatio)
-							/ NewDamage;
+						/ NewDamage;
 					item.Damage += Damage;
 					auto DamageType = (pickinfo.info.parts == eq_parts_head) ? ZD_BULLET_HEADSHOT : ZD_BULLET;
 					static_assert(ZD_BULLET_HEADSHOT > ZD_BULLET, "Fix me");
@@ -1351,8 +1360,11 @@ void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Recei
 			}
 		}
 		break;
+		case MC_PEER_DIE:
+			// Players can't choose to die. They can choose to /suicide, but that's a different command.
+			return;
 		};
-	}();
+	}
 
 	MCommand* pCmd = CreateCommand(MC_MATCH_P2P_COMMAND, MUID(0, 0));
 	pCmd->AddParameter(new MCmdParamUID(Sender));

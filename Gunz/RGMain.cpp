@@ -248,27 +248,6 @@ void RGMain::OnUpdate(double Elapsed)
 				break;
 		}
 	}
-
-#ifdef _DEBUG
-	if (!ZGetGame())
-		return;
-
-	auto MyChar = ZGetGame()->m_pMyCharacter;
-	if (!MyChar)
-		return;
-
-	auto GetOffset = [&](float Time)
-	{
-		v3 offset;
-		float f = fmod(Time * 2, TAU);
-		offset.x = sin(f) * 500;
-		offset.y = cos(f) * 500;
-		offset.z = 0;
-		return offset;
-	};
-	MyChar->GetPosition() += GetOffset(Time) - GetOffset(LastTime);
-	MyChar->GetPosition().z = 0;
-#endif
 }
 
 bool RGMain::OnEvent(MEvent *pEvent)

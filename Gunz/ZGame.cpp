@@ -840,6 +840,9 @@ void ZGame::CheckMyCharDead(float fElapsed)
 		}
 	}
 
+	if (ZGetGameClient()->GetMatchStageSetting()->GetNetcode() != NetcodeType::ServerBased)
+		return;
+
 	if ((m_pMyCharacter->IsDie() == false) && (m_pMyCharacter->GetHP() <= 0))
 	{
 		if (uidAttacker == MUID(0,0) && m_pMyCharacter->GetLastAttacker() != MUID(0,0)) 
