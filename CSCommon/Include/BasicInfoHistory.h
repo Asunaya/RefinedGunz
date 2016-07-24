@@ -20,9 +20,6 @@ struct BasicInfoItem : public BasicInfo
 class BasicInfoHistoryManager
 {
 public:
-	BasicInfoHistoryManager()
-	{ }
-
 	void AddBasicInfo(const BasicInfoItem& bii)
 	{
 		BasicInfoItem local = bii;
@@ -66,7 +63,7 @@ public:
 
 	template <typename GetItemDescT>
 	bool GetPositions(v3* OutHead, v3* OutFoot, v3* OutDir, double Time,
-		GetItemDescT& GetItemDesc, MMatchSex Sex, bool IsDead);
+		GetItemDescT& GetItemDesc, MMatchSex Sex, bool IsDead) const;
 	
 	bool empty() const { return BasicInfoList.empty(); }
 	auto& front() const { return BasicInfoList.front(); }
@@ -78,7 +75,7 @@ private:
 
 template <typename GetItemDescT>
 bool BasicInfoHistoryManager::GetPositions(v3* OutHead, v3* OutFoot, v3* OutDir, double Time,
-	GetItemDescT& GetItemDesc, MMatchSex Sex, bool IsDead)
+	GetItemDescT& GetItemDesc, MMatchSex Sex, bool IsDead) const
 {
 	auto Return = [&](const v3& Head, const v3& Foot, const v3& Dir)
 	{

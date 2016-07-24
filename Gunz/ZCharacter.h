@@ -249,7 +249,7 @@ public:
 	BasicInfoHistoryManager BasicInfoHistory;
 
 	bool GetHistory(rvector *pos, rvector *direction, float fTime) override;
-	void GetPositions(v3& Head, v3& Foot, double Time);
+	void GetPositions(v3* Head, v3* Foot, double Time);
 
 	float	m_fLastValidTime;		// Dead Reckoning에 필요한 변수 -> 지금 코드에서 필요없어보임
 //	float	m_fDistToFloor;			// 바닥까지의 거리
@@ -577,20 +577,20 @@ public:
 	virtual bool IsGuardCustom() const override {
 		return IsGuard();
 	}
-	virtual void OnMeleeGuardSuccess();
+	virtual void OnMeleeGuardSuccess() override;
 
 	void AddMassiveEffect(const rvector &pos, const rvector &dir);
 
 
-	virtual void OnDamagedAnimation(ZObject *pAttacker,int type);
+	virtual void OnDamagedAnimation(ZObject *pAttacker, int type) override;
 
 	// ZObject에 맞게 만든 동작이나 이벤트에 관한 것들.
 	virtual ZOBJECTHITTEST HitTest(const rvector& origin, const rvector& to, float fTime, rvector *pOutPos = NULL) override;
 
-	virtual void OnKnockback(const rvector& dir, float fForce);
-//	virtual void OnDamage(int damage, float fRatio = 1.0f);
-	virtual void OnDamaged(ZObject* pAttacker, rvector srcPos, ZDAMAGETYPE damageType, MMatchWeaponType weaponType, float fDamage, float fPiercingRatio=1.f, int nMeleeType=-1);
-	virtual void OnScream();
+	virtual void OnKnockback(const rvector& dir, float fForce) override;
+	virtual void OnDamaged(ZObject* pAttacker, rvector srcPos, ZDAMAGETYPE damageType, MMatchWeaponType weaponType,
+		float fDamage, float fPiercingRatio=1.f, int nMeleeType=-1) override;
+	virtual void OnScream() override;
 };
 
 void ZChangeCharParts(RVisualMesh* pVMesh, MMatchSex nSex, int nHair, int nFace, unsigned long int* pItemID);

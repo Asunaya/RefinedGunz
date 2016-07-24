@@ -156,7 +156,7 @@ static ZOBJECTHITTEST PlayerHitTest(const v3& head, const v3& foot,
 }
 
 template <typename ObjectT, typename ContainerT, typename PickInfoT>
-static bool PickHistory(const ObjectT& Exception, const v3& src, const v3& dest,
+static bool PickHistory(const ObjectT* Exception, const v3& src, const v3& dest,
 	RBspObject* BspObject, PickInfoT& pickinfo, const ContainerT& Container,
 	double Time, u32 PassFlag = RM_FLAG_ADDITIVE | RM_FLAG_USEOPACITY | RM_FLAG_HIDE)
 {
@@ -166,7 +166,7 @@ static bool PickHistory(const ObjectT& Exception, const v3& src, const v3& dest,
 
 	for (auto& Obj : Container)
 	{
-		if (&Exception == Obj)
+		if (Exception == Obj)
 			continue;
 
 		v3 TempHitPos;
@@ -220,4 +220,43 @@ static bool PickHistory(const ObjectT& Exception, const v3& src, const v3& dest,
 	return true;
 
 #undef DIDNT_HIT_BSP
+}
+
+template <typename ObjectT, typename ContainerT, typename GetOriginT>
+void GrenadeExplosion(const ObjectT& Owner, const ContainerT& Container, const v3& ExplosionPos,
+	float fDamage, float fRange, float fMinDamage, float fKnockBack, const GetOriginT& GetOrigin)
+{
+	float fDist, fDamageRange;
+
+	for (auto* Target : Container)
+	{
+		if (!Target || !Target->IsAlive())
+			continue;
+
+		v3 TargetOrigin;
+		GetOrigin(*Target, TargetOrigin);
+
+		fDist = Magnitude(ExplosionPos - (TargetOrigin + v3(0, 0, 80)));
+		if (fDist > fRange)
+			continue;
+
+		auto dir = ExplosionPos - (TargetOrigin + v3(0, 0, 80));
+		Normalize(dir);
+
+		// 몸에 직접 맞았다.
+		if (GetDistance(ExplosionPos, TargetOrigin + v3(0, 0, 50), TargetOrigin + v3(0, 0, 130)) < 50)
+		{
+			fDamageRange = 1.f;
+		}
+		else
+		{
+			constexpr auto MAX_DMG_RANGE = 50.f;
+
+			fDamageRange = 1.f - (1.f - fMinDamage)*(max(fDist - MAX_DMG_RANGE, 0) / (fRange - MAX_DMG_RANGE));
+		}
+
+		float fActualDamage = fDamage * fDamageRange;
+		float fRatio = GetPiercingRatio(MWT_FRAGMENTATION, eq_parts_chest);
+		Target->OnDamaged(Owner, ExplosionPos, ZD_EXPLOSION, MWT_FRAGMENTATION, fActualDamage, fRatio);
+	}
 }

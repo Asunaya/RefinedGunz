@@ -683,7 +683,7 @@ public:
 		return AveragePing;
 	}
 
-	void GetPositions(v3& Head, v3& Foot, double Time);
+	void GetPositions(v3* Head, v3* Foot, double Time) const;
 
 	BasicInfoHistoryManager BasicInfoHistory;
 
@@ -698,12 +698,13 @@ public:
 	ZOBJECTHITTEST HitTest(const v3& src, const v3& dest, double Time, v3* OutPos = nullptr)
 	{
 		v3 Head, Foot;
-		GetPositions(Head, Foot, Time);
+		GetPositions(&Head, &Foot, Time);
 		return PlayerHitTest(Head, Foot, src, dest, OutPos);
 	}
 
 	void SetMaxHPAP();
-	void TakeDamage(const MMatchObject& Attacker, int Damage, float PiercingRatio, ZDAMAGETYPE DamageType, MMatchWeaponType WeaponType);
+	void OnDamaged(const MMatchObject& Attacker, const v3& SrcPos,
+		ZDAMAGETYPE DamageType, MMatchWeaponType WeaponType, int Damage, float PiercingRatio);
 	void Heal(int Amount);
 	void ResetHPAP();
 

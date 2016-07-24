@@ -1239,7 +1239,7 @@ void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Recei
 				pCmd->AddParameter(new MCmdParamUChar(WeaponType));
 				Post(pCmd);
 
-				Obj.TakeDamage(*SenderObj, Damage, PiercingRatio, DamageType, WeaponType);
+				Obj.OnDamaged(*SenderObj, { 0, 0, 0 }, DamageType, WeaponType, Damage, PiercingRatio);
 			};
 
 			if (ItemDesc->m_nWeaponType == MWT_SHOTGUN)
@@ -1264,7 +1264,7 @@ void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Recei
 					const u32 PassFlag = RM_FLAG_ADDITIVE | RM_FLAG_HIDE | RM_FLAG_PASSROCKET | RM_FLAG_PASSBULLET;
 
 					MPICKINFO pickinfo;
-					PickHistory(*SenderObj, src, dest, Stage->BspObject,
+					PickHistory(SenderObj, src, dest, Stage->BspObject,
 						pickinfo, MakePairValueAdapter(Stage->m_ObjUIDCaches), Time, PassFlag);
 
 					if (pickinfo.bBspPicked)
@@ -1308,7 +1308,7 @@ void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Recei
 						AnnounceF(Sender, "Server: Hit %s for %d damage",
 							item.first->GetName(), item.second.Damage);
 						v3 Head, Origin;
-						SenderObj->GetPositions(Head, Origin, Time);
+						SenderObj->GetPositions(&Head, &Origin, Time);
 						AnnounceF(Sender, "Server: Head: %d, %d, %d; origin: %d, %d, %d",
 							int(Head.x), int(Head.y), int(Head.z),
 							int(Origin.x), int(Origin.y), int(Origin.z));
@@ -1324,7 +1324,7 @@ void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Recei
 				const u32 PassFlag = RM_FLAG_ADDITIVE | RM_FLAG_HIDE | RM_FLAG_PASSROCKET | RM_FLAG_PASSBULLET;
 
 				MPICKINFO pickinfo;
-				PickHistory(*SenderObj, src, dest, Stage->BspObject, pickinfo,
+				PickHistory(SenderObj, src, dest, Stage->BspObject, pickinfo,
 					MakePairValueAdapter(Stage->m_ObjUIDCaches), Time, PassFlag);
 
 				if (pickinfo.bBspPicked)
@@ -1350,7 +1350,7 @@ void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Recei
 				{
 					AnnounceF(Sender, "Server: Hit %s for %d damage", pickinfo.pObject->GetName(), Damage);
 					v3 Head, Origin;
-					SenderObj->GetPositions(Head, Origin, Time);
+					SenderObj->GetPositions(&Head, &Origin, Time);
 					AnnounceF(Sender, "Server: Head: %d, %d, %d; origin: %d, %d, %d",
 						int(Head.x), int(Head.y), int(Head.z),
 						int(Origin.x), int(Origin.y), int(Origin.z));
@@ -1358,6 +1358,11 @@ void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Recei
 
 				DamagePlayer(*pickinfo.pObject, Damage, PiercingRatio, DamageType, WeaponType);
 			}
+		}
+		break;
+		case MC_PEER_SHOT_SP:
+		{
+			Command
 		}
 		break;
 		case MC_PEER_DIE:

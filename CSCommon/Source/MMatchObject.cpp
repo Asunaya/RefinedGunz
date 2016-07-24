@@ -296,11 +296,11 @@ void MMatchObject::SetChannelListTransfer(const bool bVal, const MCHANNEL_TYPE n
 	UpdateChannelListChecksum(0); 
 }
 
-void MMatchObject::GetPositions(v3& Head, v3& Foot, double Time)
+void MMatchObject::GetPositions(v3* Head, v3* Foot, double Time) const
 {
 	auto GetItemDesc = [&](MMatchCharItemParts slot) -> MMatchItemDesc*
 	{
-		auto item = GetCharInfo()->m_EquipedItem.GetItem(slot);
+		auto item = m_pCharInfo->m_EquipedItem.GetItem(slot);
 		if (!item)
 			return nullptr;
 
@@ -311,7 +311,7 @@ void MMatchObject::GetPositions(v3& Head, v3& Foot, double Time)
 		return ItemDesc;
 	};
 
-	BasicInfoHistory.GetPositions(&Head, &Foot, nullptr, Time, GetItemDesc, GetCharInfo()->m_nSex, !IsAlive());
+	BasicInfoHistory.GetPositions(Head, Foot, nullptr, Time, GetItemDesc, m_pCharInfo->m_nSex, !IsAlive());
 }
 
 void MMatchObject::SetMaxHPAP()
@@ -343,7 +343,8 @@ void MMatchObject::SetMaxHPAP()
 	SetP(MaxAP, 0, &MMatchItemDesc::m_nAP);
 }
 
-void MMatchObject::TakeDamage(const MMatchObject& Attacker, int Damage, float PiercingRatio, ZDAMAGETYPE DamageType, MMatchWeaponType WeaponType)
+void MMatchObject::OnDamaged(const MMatchObject& Attacker, const v3& SrcPos,
+	ZDAMAGETYPE DamageType, MMatchWeaponType WeaponType, int Damage, float PiercingRatio)
 {
 	int HPDamage = int(Damage * PiercingRatio);
 	int APDamage = Damage - HPDamage;

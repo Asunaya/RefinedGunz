@@ -27,7 +27,7 @@ void CreateTestGame(char *mapname, int nDummyCharacterCount, bool bShot, bool bA
 	MTD_CharInfo info;
 	strcpy_safe(info.szName, "Dogs");
 	info.szClanName[0]=0;
-	info.nSex = MMS_MALE;
+	info.nSex = MMS_FEMALE;
 	info.nHP = 100;
 	info.nAP = 100;
 
@@ -42,8 +42,8 @@ void CreateTestGame(char *mapname, int nDummyCharacterCount, bool bShot, bool bA
 	info.nEquipedItemDesc[MMCIP_PRIMARY] = 6001;// 9003;	// ¿ùÄÞ L1 mk. II
 	//	info.nEquipedItemDesc[MMCIP_SECONDARY] = 6001;	// ¼¦°Ç
 	info.nEquipedItemDesc[MMCIP_SECONDARY] = 8003;	// ¸Ó½Å°Ç
-	info.nEquipedItemDesc[MMCIP_CUSTOM1] = 400007;
-	//info.nEquipedItemDesc[MMCIP_CUSTOM2] = 600005;	// Ä«³ëÇª½ºÀÇ ´«
+	info.nEquipedItemDesc[MMCIP_CUSTOM1] = 30003;
+	info.nEquipedItemDesc[MMCIP_CUSTOM2] = 30103;
 
 	g_pGame->CreateMyCharacter(info);
 	g_pGame->m_pMyCharacter->Revival();

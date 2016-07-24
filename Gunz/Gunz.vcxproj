@@ -334,7 +334,7 @@ rem call copy_share.bat
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <OmitFramePointers>true</OmitFramePointers>
-      <AdditionalIncludeDirectories>../CSCommon/Include;../SafeUDP/Include;../CML/Include;../RealSpace2/Include;../MAI/Include;../RealSpace/Include;../Mint2/Include;../RealSound/Include;../MDatabase/Include/;../MCountryFilter/Include;../GunzShared/;../libsodium/include;../opus-1.1.1/include;%(AdditionalIncludeDirectories);../sdk/dx9/include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../CSCommon/Include;../SafeUDP/Include;../CML/Include;../RealSpace2/Include;../MAI/Include;../RealSpace/Include;../Mint2/Include;../RealSound/Include;../MDatabase/Include/;../MCountryFilter/Include;../sdk/Misc;../libsodium/include;../opus-1.1.1/include;%(AdditionalIncludeDirectories);../sdk/dx9/include;</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;LOCALE_US;_LOCATOR;_PUBLISH;NO_WARN_MBCS_MFC_DEPRECATION;LTCG;ENV32BIT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -571,7 +571,6 @@ rem call copy_share.bat
     <ClInclude Include="ZActorSound.h" />
     <ClInclude Include="ZSoundEngine.h" />
     <ClInclude Include="ZSoundFMod.h" />
-    <ClInclude Include="Physics.h" />
     <ClInclude Include="CGLEncription.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="main.h" />
@@ -799,7 +798,6 @@ rem call copy_share.bat
     <ClCompile Include="ZActorSound.cpp" />
     <ClCompile Include="ZSoundEngine.cpp" />
     <ClCompile Include="ZSoundFMod.cpp" />
-    <ClCompile Include="Physics.cpp" />
     <ClCompile Include="CGLEncription.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ZApplication.cpp" />

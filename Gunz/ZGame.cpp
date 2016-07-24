@@ -3487,7 +3487,7 @@ void ZGame::OnPeerShot_Range(MMatchCharItemParts sel_type, const MUID& uidOwner,
 
 	pOwner->Tremble(8.f, 50, 30);
 	
-	bool Picked = ::PickHistory<ZCharacter>(*m_pMyCharacter, pos, to, GetWorld()->GetBsp(), pickinfo,
+	bool Picked = ::PickHistory<ZCharacter>(m_pMyCharacter, pos, to, GetWorld()->GetBsp(), pickinfo,
 			MakePairValueAdapter(m_CharacterManager), fShotTime, dwPickPassFlag);
 
 	//if(g_pGame->PickHistory(pOwner,fShotTime,pos,to,&pickinfo,dwPickPassFlag))
@@ -3768,7 +3768,7 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 		// 총알은 로켓이 통과하는곳도 통과한다
 		const DWORD dwPickPassFlag=RM_FLAG_ADDITIVE | RM_FLAG_HIDE | RM_FLAG_PASSROCKET | RM_FLAG_PASSBULLET;
 
-		bool Picked = ::PickHistory(*pOwnerCharacter, pos, pos + 10000 * dir, GetWorld()->GetBsp(),
+		bool Picked = ::PickHistory(pOwnerCharacter, pos, pos + 10000 * dir, GetWorld()->GetBsp(),
 			pickinfo, MakePairValueAdapter(m_CharacterManager), fShotTime, dwPickPassFlag);
 
 		//if(g_pGame->PickHistory(pOwnerCharacter,fShotTime,pos,pos+10000.f*dir,&pickinfo,dwPickPassFlag))
@@ -3912,7 +3912,7 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 				ZChatOutputF("Client: Hit %s for %d damage",
 					Char.GetUserNameA(), Pair.second.Damage);
 				v3 Head, Origin;
-				Char.GetPositions(Head, Origin, fShotTime);
+				Char.GetPositions(&Head, &Origin, fShotTime);
 				ZChatOutputF("Client: Head: %d, %d, %d; origin: %d, %d, %d",
 					int(Head.x), int(Head.y), int(Head.z),
 					int(Origin.x), int(Origin.y), int(Origin.z));

@@ -154,73 +154,66 @@ bool ZWeaponRocket::Update(float fElapsedTime)
 		return false;
 	}
 
-	const DWORD dwPickPassFlag = RM_FLAG_ADDITIVE | RM_FLAG_HIDE | RM_FLAG_PASSROCKET;
+	constexpr u32 dwPickPassFlag = RM_FLAG_ADDITIVE | RM_FLAG_HIDE | RM_FLAG_PASSROCKET;
 
+	rvector dir = diff;
+	Normalize(dir);
+
+	float fDist = Magnitude(diff);
+
+	rvector pickpos;
+	ZPICKINFO zpi;
+	bool bPicked = ZGetGame()->Pick(nullptr, m_Position, dir, &zpi, dwPickPassFlag);
+	if (bPicked)
 	{
-		rvector dir=diff;
-		Normalize(dir);
-
-		float fDist=Magnitude(diff);
-
-		rvector pickpos;
-		ZPICKINFO zpi;
-		bool bPicked=g_pGame->Pick(nullptr,m_Position,dir,&zpi,dwPickPassFlag);
-		if(bPicked)
+		if (zpi.bBspPicked)
 		{
-			if (zpi.bBspPicked)
+			pickpos = zpi.bpi.PickPos;
+		}
+		else
+		{
+			if (zpi.pObject)
 			{
-				pickpos = zpi.bpi.PickPos;
-			}
-			else
-			{
-				if (zpi.pObject)
-				{
 #ifdef REFLECT_ROCKETS
-					if (zpi.pObject->IsGuard() && DotProduct(zpi.pObject->GetDirection(), m_Dir) < 0)
-					{
-						auto ReflectedDir = GetReflectionVector(m_Dir, zpi.pObject->GetDirection());
-						auto ReflectedVel = GetReflectionVector(m_Velocity, zpi.pObject->GetDirection());
+				if (zpi.pObject->IsGuard() && DotProduct(zpi.pObject->GetDirection(), m_Dir) < 0)
+				{
+					auto ReflectedDir = GetReflectionVector(m_Dir, zpi.pObject->GetDirection());
+					auto ReflectedVel = GetReflectionVector(m_Velocity, zpi.pObject->GetDirection());
 
-						m_Dir = ReflectedDir;
-						m_Velocity = ReflectedVel;
+					m_Dir = ReflectedDir;
+					m_Velocity = ReflectedVel;
 
-						diff = m_Velocity * fElapsedTime;
-						dir = diff;
-						Normalize(dir);
+					diff = m_Velocity * fElapsedTime;
+					dir = diff;
+					Normalize(dir);
 
-						bPicked = false;
-
-						DMLog("Reflected rocket!\n");
-					}
+					bPicked = false;
+				}
 #endif
 
-					pickpos = zpi.info.vOut;
-				}
+				pickpos = zpi.info.vOut;
 			}
-
 		}
-/*
-		RBSPPICKINFO bpi;
-		bool bPicked=ZGetGame()->GetWorld()->GetBsp()->Pick(m_Position,dir,&bpi,dwPickPassFlag);
-*/
-		if(bPicked && fabsf(Magnitude(pickpos-m_Position))<fDist)
-		{
-			Explosion();
 
-			if(Z_VIDEO_DYNAMICLIGHT && m_SLSid )
-			{
-				ZGetStencilLight()->DeleteLightSource( m_SLSid );
-				m_SLSid = 0;
-				ZGetStencilLight()->AddLightSource( pickpos, 3.0f, 1300 );
-			}
-
-			return false;
-		}else
-			m_Position+=diff;
 	}
 
+	if (bPicked && Magnitude(pickpos - m_Position) < fDist)
+	{
+		Explosion();
+
+		if(Z_VIDEO_DYNAMICLIGHT && m_SLSid )
+		{
+			ZGetStencilLight()->DeleteLightSource( m_SLSid );
+			m_SLSid = 0;
+			ZGetStencilLight()->AddLightSource( pickpos, 3.0f, 1300 );
+		}
+
+		return false;
+	}else
+		m_Position+=diff;
+
 	rmatrix mat;
-	rvector dir=m_Velocity;
+	dir=m_Velocity;
 	Normalize(dir);
 	MakeWorldMatrix(&mat,m_Position,m_Dir,m_Up);
 

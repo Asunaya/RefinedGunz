@@ -13,6 +13,13 @@
 #define GRAVITY_ACCELERATION 9.8f
 
 /// 포물선 운동
-rvector ParabolicMotion(rvector& InitialVelocity, float fSec);
+v3 ParabolicMotion(const v3& InitialVelocity, float fSec);
+
+template <typename T>
+bool MoveMovingWeapon(const v3 & Pos, v3 & Vel, const T& Pick)
+{
+	return false;
+}
+
 
 #endif

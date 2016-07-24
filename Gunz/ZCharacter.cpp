@@ -1913,7 +1913,7 @@ bool ZCharacter::GetHistory(rvector *pos, rvector *direction, float fTime)
 	return false;
 }
 
-void ZCharacter::GetPositions(v3 & Head, v3 & Foot, double Time)
+void ZCharacter::GetPositions(v3* Head, v3* Foot, double Time)
 {
 	auto GetItemDesc = [&](MMatchCharItemParts slot)
 	{
@@ -1925,12 +1925,14 @@ void ZCharacter::GetPositions(v3 & Head, v3 & Foot, double Time)
 
 	if (!BasicInfoHistory.empty() && Time <= BasicInfoHistory.front().SentTime)
 	{
-		BasicInfoHistory.GetPositions(&Head, &Foot, nullptr, Time, GetItemDesc, m_Property.nSex, IsDie());
+		BasicInfoHistory.GetPositions(Head, Foot, nullptr, Time, GetItemDesc, m_Property.nSex, IsDie());
 		return;
 	}
 
-	Head = m_pVMesh->GetHeadPosition();
-	Foot = m_Position;
+	if (Head)
+		*Head = m_pVMesh->GetHeadPosition();
+	if (Foot)
+		*Foot = m_Position;
 }
 
 // 부활 - 이것은 게임룰에 따라 달라질 수도 있다.
@@ -3561,7 +3563,7 @@ void ZCharacter::InitRound()
 ZOBJECTHITTEST ZCharacter::HitTest(const rvector& origin, const rvector& to,float fTime,rvector *pOutPos)
 {
 	v3 Head, Foot;
-	GetPositions(Head, Foot, fTime);
+	GetPositions(&Head, &Foot, fTime);
 	return PlayerHitTest(Head, Foot, origin, to, pOutPos);
 }
 
@@ -3570,7 +3572,8 @@ void ZCharacter::OnDamaged(ZObject* pAttacker, rvector srcPos, ZDAMAGETYPE damag
 	if (m_bInitialized==false) return;
 	if (!IsVisible() || IsDie()) return;
 
-	// If this isn't called on MyCharacter, it's unreliable predicted damage. Actual damage for other players is reported in HP/AP info packets.
+	// If this isn't called on MyCharacter, it's unreliable predicted damage.
+	// Actual damage for other players is reported in HP/AP info packets.
 	if (this != ZGetGame()->m_pMyCharacter)
 		return;
 

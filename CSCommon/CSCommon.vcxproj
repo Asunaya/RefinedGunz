@@ -170,7 +170,7 @@
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <OmitFramePointers>true</OmitFramePointers>
-      <AdditionalIncludeDirectories>Include;../SafeUDP/Include;../CML/Include;../RealSpace2/Include;../MAI/Include;../sdk/dx9/Include;../MDatabase/Include;../MCountryFilter/Include;../GunzShared/;../libsodium/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>Include;../SafeUDP/Include;../CML/Include;../RealSpace2/Include;../MAI/Include;../sdk/dx9/Include;../MDatabase/Include;../MCountryFilter/Include;../sdk/Misc;../libsodium/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;NO_WARN_MBCS_MFC_DEPRECATION;_WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -262,6 +262,7 @@
     <ClInclude Include="Include\MMatchClient.h" />
     <ClInclude Include="Include\MTCPSocket.h" />
     <ClInclude Include="Include\MServer.h" />
+    <ClInclude Include="Include\Physics.h" />
     <ClInclude Include="Include\RealCPNet.h" />
     <ClInclude Include="Include\MPacket.h" />
     <ClInclude Include="Include\MPacketCrypter.h" />
@@ -369,10 +370,12 @@
     <ClInclude Include="Include\MMatchDebug.h" />
     <ClInclude Include="Include\stdafx.h" />
     <ClInclude Include="MMatchRuleSkillmap.h" />
+    <ClInclude Include="MovingWeaponManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Include\BasicInfoHistory.cpp" />
     <ClCompile Include="MMatchRuleSkillmap.cpp" />
+    <ClCompile Include="MovingWeaponManager.cpp" />
     <ClCompile Include="Source\AnimationStuff.cpp" />
     <ClCompile Include="Source\LagCompensation.cpp" />
     <ClCompile Include="Source\MCommand.cpp" />
@@ -391,6 +394,7 @@
     <ClCompile Include="Source\MMatchClient.cpp" />
     <ClCompile Include="Source\MTCPSocket.cpp" />
     <ClCompile Include="Source\MServer.cpp" />
+    <ClCompile Include="Source\Physics.cpp" />
     <ClCompile Include="Source\RealCPNet.cpp" />
     <ClCompile Include="Source\MPacket.cpp" />
     <ClCompile Include="Source\MPacketCrypter.cpp" />
