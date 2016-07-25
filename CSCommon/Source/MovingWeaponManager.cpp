@@ -65,7 +65,7 @@ void MovingWeaponManager::Update(float Elapsed)
 void MovingWeaponManager::AddRocket(MMatchObject* Owner, MMatchItemDesc* ItemDesc,
 	const v3 & Pos, const v3 & Dir)
 {
-	Weapons.emplace<Rocket>(Pos, Dir, Dir * 1000, ItemDesc, Owner);
+	Weapons.emplace<Rocket>(Pos, Dir, Dir * 2700, ItemDesc, Owner);
 }
 
 void MovingWeaponManager::AddItemKit(MMatchObject * Owner, MMatchItemDesc * ItemDesc,
@@ -80,14 +80,14 @@ void Rocket::OnCollision(MovingWeaponManager& Mgr, const v3& ColPos, const MPICK
 		return;
 
 	constexpr auto ROCKET_SPLASH_RANGE = 350.f;
-	constexpr auto ROCKET_MINIMUM_DAMAGE = 3.f;
+	constexpr auto ROCKET_MINIMUM_DAMAGE = .3f;
 	constexpr auto ROCKET_KNOCKBACK_CONST = .5f;
 	auto GetOrigin = [&](const auto& Obj, auto& Origin)
 	{
 		Obj.GetPositions(nullptr, &Origin, MGetMatchServer()->GetGlobalClockCount() - Owner->GetPing() / 1000.f);
 	};
 
-	GrenadeExplosion(*Owner, Mgr.Stage->GetObjectList(), pi.bpi.PickPos, ItemDesc->m_nDamage,
+	GrenadeExplosion(*Owner, Mgr.Stage->GetObjectList(), ColPos, ItemDesc->m_nDamage,
 		ROCKET_SPLASH_RANGE, ROCKET_MINIMUM_DAMAGE, ROCKET_KNOCKBACK_CONST,
 		GetOrigin);
 }

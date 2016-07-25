@@ -57,6 +57,9 @@ struct Rocket : MovingWeapon
 class MovingWeaponManager
 {
 public:
+	MovingWeaponManager(MMatchStage& Stage)
+		: Stage(&Stage)
+	{ }
 	void Update(float Elapsed);
 	void AddRocket(MMatchObject* Owner, MMatchItemDesc* ItemDesc, const v3& Pos, const v3& Dir);
 	void AddItemKit(MMatchObject* Owner, MMatchItemDesc* ItemDesc, const v3& Pos, const v3& Dir);

@@ -3577,6 +3577,10 @@ void ZCharacter::OnDamaged(ZObject* pAttacker, rvector srcPos, ZDAMAGETYPE damag
 	if (this != ZGetGame()->m_pMyCharacter)
 		return;
 
+	if (ZGetGameClient()->GetMatchStageSetting()->GetNetcode() == NetcodeType::ServerBased
+		&& damageType != ZD_FALLING)
+		return;
+
 	// 자기가 쏜 폭발 데미지 & 나락 데미지는 무조건 먹는다
 	bool bCanAttack = g_pGame->IsAttackable(pAttacker,this) || (pAttacker==this && (damageType==ZD_EXPLOSION || damageType==ZD_FALLING));
 

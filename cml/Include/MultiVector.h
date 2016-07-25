@@ -12,7 +12,7 @@ struct MultiVector
 	template <typename FuncT>
 	void apply(const FuncT& Func)
 	{
-		vec.erase(std::remove_if(vec.begin(), vec.end(), [&](auto& x) { return !Func(x); }));
+		vec.erase(std::remove_if(vec.begin(), vec.end(), [&](auto& x) { return !Func(x); }), vec.end());
 		next.apply(Func);
 	}
 
@@ -61,7 +61,7 @@ struct MultiVector<Type>
 	template <typename FuncT>
 	void apply(FuncT Func)
 	{
-		vec.erase(std::remove_if(vec.begin(), vec.end(), [&](auto& x) { return !Func(x); }));
+		vec.erase(std::remove_if(vec.begin(), vec.end(), [&](auto& x) { return !Func(x); }), vec.end());
 	}
 
 	template <typename T>

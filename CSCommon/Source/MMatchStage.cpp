@@ -18,7 +18,7 @@
 #include "..\MMatchRuleSkillmap.h"
 
 //////////////////////////////////////////////////////////////////////////////////
-MMatchStage::MMatchStage()
+MMatchStage::MMatchStage() : MovingWeaponMgr(*this)
 {
 	m_pRule = NULL;
 	m_nIndex = 0;

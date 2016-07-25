@@ -1367,7 +1367,7 @@ void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Recei
 			v3 Pos, Dir;
 			ZC_SHOT_SP_TYPE Type;
 			int SelectedSlot;
-			if (!Cmd->GetParameter(&Pos, 1, MPT_VECTOR))
+			if (!Cmd->GetParameter(&Pos, 1, MPT_POS))
 				return;
 			if (!Cmd->GetParameter(&Dir, 2, MPT_VECTOR))
 				return;
