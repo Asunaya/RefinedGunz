@@ -447,9 +447,9 @@ void ZWeaponItemkit::UpdatePos(float fElapsedTime,DWORD dwPickPassFlag)
 
 	ZPICKINFO zpi;
 
-	bool bPicked = g_pGame->Pick(ZGetCharacterManager()->Find(m_uidOwner),m_Position,dir,&zpi,dwPickPassFlag);
+	bool bPicked = g_pGame->Pick(ZGetCharacterManager()->Find(m_uidOwner), m_Position, dir, &zpi, dwPickPassFlag);
 
-	if(bPicked) {
+	if (bPicked) {
 		if(zpi.bBspPicked)	{
 			pickpos=zpi.bpi.PickPos;
 			rplane plane=zpi.bpi.pNode->pInfo[zpi.bpi.nIndex].plane;

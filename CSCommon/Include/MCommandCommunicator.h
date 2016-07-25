@@ -141,6 +141,7 @@ public:
 
 	/// 자신의 UID를 얻어낸다.
 	MUID GetUID(void){ return m_This; }
+	MCommand* MakeCmdFromSaneTunnelingBlob(const MUID& Sender, const MUID& Receiver, const void* pBlob, size_t Size);
 
 #ifdef _CMD_PROFILE
 	MCommandProfiler		m_CommandProfiler;

@@ -310,6 +310,8 @@ void MMatchStage::Tick(unsigned long nClock)
 	// STAGE_STATE_CLOSE 는 MMatchServer::StageRemove 로 처리
 	}
 
+	MovingWeaponMgr.Update((nClock - m_nLastTick) / 1000.0);
+
 	m_VoteMgr.Tick(nClock);
 
 	if (IsChecksumUpdateTime(nClock))

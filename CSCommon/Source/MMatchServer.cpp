@@ -883,7 +883,7 @@ void MMatchServer::OnRun(void)
 				size_t NumPlayers = Stage->GetObjCount();
 
 				auto Param = MakeBlobArrayParameter<MTD_PingInfo>(NumPlayers);
-				MTD_PingInfo* PingInfos = static_cast<MTD_PingInfo*>(MGetBlobArrayPointer(Param->GetPointer()));
+				auto PingInfos = static_cast<MTD_PingInfo*>(MGetBlobArrayPointer(Param->GetPointer()));
 
 				auto ObjList = Stage->GetObjectList();
 				auto it = ObjList.begin();
@@ -1362,7 +1362,40 @@ void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Recei
 		break;
 		case MC_PEER_SHOT_SP:
 		{
-			Command
+			auto Cmd = MakeCmdFromSaneTunnelingBlob(Sender, MUID(0, 0), Blob, BlobSize);
+
+			v3 Pos, Dir;
+			ZC_SHOT_SP_TYPE Type;
+			int SelectedSlot;
+			if (!Cmd->GetParameter(&Pos, 1, MPT_VECTOR))
+				return;
+			if (!Cmd->GetParameter(&Dir, 2, MPT_VECTOR))
+				return;
+			if (!Cmd->GetParameter(&Type, 3, MPT_INT))
+				return;
+			if (!Cmd->GetParameter(&SelectedSlot, 4, MPT_INT))
+				return;
+
+			auto Item = SenderObj->GetCharInfo()->m_EquipedItem.GetItem(MMatchCharItemParts(SelectedSlot));
+			if (!Item)
+				return;
+			auto ItemDesc = Item->GetDesc();
+			if (!ItemDesc)
+				return;
+
+			switch (Type)
+			{
+			case ZC_WEAPON_SP_ROCKET:
+			{
+				Stage->MovingWeaponMgr.AddRocket(SenderObj, ItemDesc, Pos, Dir);
+			}
+			break;
+			case ZC_WEAPON_SP_ITEMKIT:
+			{
+				Stage->MovingWeaponMgr.AddItemKit(SenderObj, ItemDesc, Pos, Dir);
+			}
+			break;
+			};
 		}
 		break;
 		case MC_PEER_DIE:

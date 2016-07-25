@@ -13,6 +13,7 @@ using namespace std;
 #include "MVoteMgr.h"
 #include "MMatchGlobal.h"
 #include "MUtil.h"
+#include "MovingWeaponManager.h"
 
 #define MTICK_STAGE			100
 
@@ -73,10 +74,8 @@ private:
 	char					m_szStagePassword[STAGENAME_LENGTH];
 	MMatchStageTeamBonus	m_TeamBonus;
 	MMatchStageTeam			m_Teams[MMT_END];
-
-public:
 	MMatchObjectMap			m_ObjUIDCaches;
-private:
+
 	list<int>				m_BanCIDList;
 
 	unsigned long			m_nStateTimer;
@@ -112,6 +111,7 @@ protected:
 	void SetLadderTeam(MMatchLadderTeamInfo* pRedLadderTeamInfo, MMatchLadderTeamInfo* pBlueLadderTeamInfo);
 public:
 	class RBspObject* BspObject = nullptr;
+	MovingWeaponManager MovingWeaponMgr;
 	MMatchWorldItemManager	m_WorldItemManager;
 
 	void UpdateStateTimer();

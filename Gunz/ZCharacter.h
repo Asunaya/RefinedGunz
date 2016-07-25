@@ -101,24 +101,6 @@ enum ZC_WEAPON_SLOT_TYPE {
 	ZC_SLOT_END,
 };
 
-enum ZC_SHOT_SP_TYPE {
-	ZC_WEAPON_SP_NONE = 0,
-
-	// grenade type
-
-	ZC_WEAPON_SP_GRENADE,
-	ZC_WEAPON_SP_ROCKET,
-	ZC_WEAPON_SP_FLASHBANG,
-	ZC_WEAPON_SP_SMOKE,
-	ZC_WEAPON_SP_TEAR_GAS,
-
-	// item type
-
-	ZC_WEAPON_SP_ITEMKIT,	// medikit, repairkit, bulletkit µîµî
-
-	ZC_WEAPON_SP_END,
-};
-
 enum ZSTUNTYPE {
 	ZST_NONE	=	-1,
 	ZST_DAMAGE1	=	0,

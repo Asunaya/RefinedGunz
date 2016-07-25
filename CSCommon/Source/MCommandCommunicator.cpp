@@ -292,3 +292,19 @@ bool MakeSaneTunnelingCommandBlob(MCommand* pWrappingCmd, MCommand* pSrcCmd)
 
 	return true;
 }
+
+MCommand* MCommandCommunicator::MakeCmdFromSaneTunnelingBlob(const MUID& Sender, const MUID& Receiver, 
+	const void* pBlob, size_t Size)
+{
+	MCommand* pCmd = new MCommand();
+	if (!pCmd->SetData((char*)pBlob, &m_CommandManager, (u16)Size))
+	{
+		delete pCmd;
+		return nullptr;
+	}
+
+	pCmd->m_Sender = Sender;
+	pCmd->m_Receiver = Receiver;
+
+	return pCmd;
+}

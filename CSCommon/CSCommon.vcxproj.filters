@@ -478,8 +478,9 @@
     <ClInclude Include="Include\BasicInfoHistory.h" />
     <ClInclude Include="Include\AnimationStuff.h" />
     <ClInclude Include="Include\HitRegistration.h" />
-    <ClInclude Include="MovingWeaponManager.h" />
     <ClInclude Include="Include\Physics.h" />
+    <ClInclude Include="Include\stuff.h" />
+    <ClInclude Include="Include\MovingWeaponManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\MCommand.cpp">
@@ -852,8 +853,8 @@
     <ClCompile Include="Source\AnimationStuff.cpp" />
     <ClCompile Include="Source\stuff.cpp" />
     <ClCompile Include="Include\BasicInfoHistory.cpp" />
-    <ClCompile Include="MovingWeaponManager.cpp" />
     <ClCompile Include="Source\Physics.cpp" />
+    <ClCompile Include="Source\MovingWeaponManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="HShield\HsCryptLib.lib">

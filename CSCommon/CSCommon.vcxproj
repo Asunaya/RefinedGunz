@@ -251,6 +251,7 @@
     <ClInclude Include="Include\MCommandParameter.h" />
     <ClInclude Include="Include\MCommandProfiler.h" />
     <ClInclude Include="Include\MGridMap.h" />
+    <ClInclude Include="Include\MovingWeaponManager.h" />
     <ClInclude Include="Include\MUID.h" />
     <ClInclude Include="Include\MObject.h" />
     <ClInclude Include="Include\MObjectTypes.h" />
@@ -369,13 +370,12 @@
     <ClInclude Include="HShield\HsCryptLib.h" />
     <ClInclude Include="Include\MMatchDebug.h" />
     <ClInclude Include="Include\stdafx.h" />
+    <ClInclude Include="Include\stuff.h" />
     <ClInclude Include="MMatchRuleSkillmap.h" />
-    <ClInclude Include="MovingWeaponManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Include\BasicInfoHistory.cpp" />
     <ClCompile Include="MMatchRuleSkillmap.cpp" />
-    <ClCompile Include="MovingWeaponManager.cpp" />
     <ClCompile Include="Source\AnimationStuff.cpp" />
     <ClCompile Include="Source\LagCompensation.cpp" />
     <ClCompile Include="Source\MCommand.cpp" />
@@ -384,6 +384,7 @@
     <ClCompile Include="Source\MCommandParameter.cpp" />
     <ClCompile Include="Source\MCommandProfiler.cpp" />
     <ClCompile Include="Source\MGridMap.cpp" />
+    <ClCompile Include="Source\MovingWeaponManager.cpp" />
     <ClCompile Include="Source\MUID.cpp" />
     <ClCompile Include="Source\MObject.cpp" />
     <ClCompile Include="Source\MSharedCommandTable.cpp" />

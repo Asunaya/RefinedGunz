@@ -15,7 +15,7 @@ float RandomAngle(rngT& rng)
 	return dist(rng);
 }
 
-static void CalcRangeShotControllability(v3& vOutDir, const v3& vSrcDir,
+inline void CalcRangeShotControllability(v3& vOutDir, const v3& vSrcDir,
 	int nControllability, u32 seed, float CtrlFactor)
 {
 	v3 up(0, 0, 1);
@@ -56,7 +56,7 @@ static void CalcRangeShotControllability(v3& vOutDir, const v3& vSrcDir,
 #define SHOTGUN_DIFFUSE_RANGE	0.1f
 
 template <typename rngT>
-static v3 GetShotgunPelletDir(const v3& dir, rngT& rng)
+v3 GetShotgunPelletDir(const v3& dir, rngT& rng)
 {
 	std::uniform_real_distribution<float> dist(0, SHOTGUN_DIFFUSE_RANGE);
 
@@ -78,7 +78,7 @@ static v3 GetShotgunPelletDir(const v3& dir, rngT& rng)
 	return r;
 }
 
-static auto GetShotgunPelletDirGenerator(const v3& orig_dir, u32 seed)
+inline auto GetShotgunPelletDirGenerator(const v3& orig_dir, u32 seed)
 {
 	return [&orig_dir, rng = std::mt19937(seed)]() mutable
 	{
@@ -93,7 +93,7 @@ enum ZOBJECTHITTEST {
 	ZOH_LEGS = 3
 };
 
-static ZOBJECTHITTEST PlayerHitTest(const v3& head, const v3& foot,
+inline ZOBJECTHITTEST PlayerHitTest(const v3& head, const v3& foot,
 	const v3& src, const v3& dest, v3* pOutPos = nullptr)
 {
 	// 적절한 시점의 위치를 얻어낼수없으면 실패..
@@ -127,7 +127,9 @@ static ZOBJECTHITTEST PlayerHitTest(const v3& head, const v3& foot,
 		// 실린더로 몸통 판정
 		rvector rootdir = (rootpos - headpos);
 		Normalize(rootdir);
-		float fDist = GetDistanceBetweenLineSegment(src, dest, headpos + 20.f*rootdir, rootpos - 20.f*rootdir, &ap, &cp);
+		float fDist = GetDistanceBetweenLineSegment(src, dest, headpos + 20.f*rootdir,
+			rootpos - 20.f*rootdir, &ap, &cp);
+
 		if (fDist < 30)		// 상체
 		{
 			rvector ap2cp = ap - cp;
@@ -139,7 +141,9 @@ static ZOBJECTHITTEST PlayerHitTest(const v3& head, const v3& foot,
 		}
 		else
 		{
-			float fDist = GetDistanceBetweenLineSegment(src, dest, rootpos - 20.f*rootdir, footpos, &ap, &cp);
+			float fDist = GetDistanceBetweenLineSegment(src, dest, rootpos - 20.f*rootdir,
+				footpos, &ap, &cp);
+
 			if (fDist < 30)	// 하체
 			{
 				rvector ap2cp = ap - cp;
@@ -156,7 +160,7 @@ static ZOBJECTHITTEST PlayerHitTest(const v3& head, const v3& foot,
 }
 
 template <typename ObjectT, typename ContainerT, typename PickInfoT>
-static bool PickHistory(const ObjectT* Exception, const v3& src, const v3& dest,
+bool PickHistory(const ObjectT* Exception, const v3& src, const v3& dest,
 	RBspObject* BspObject, PickInfoT& pickinfo, const ContainerT& Container,
 	double Time, u32 PassFlag = RM_FLAG_ADDITIVE | RM_FLAG_USEOPACITY | RM_FLAG_HIDE)
 {

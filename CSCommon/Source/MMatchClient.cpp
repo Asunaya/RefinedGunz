@@ -285,7 +285,7 @@ bool MMatchClient::OnCommand(MCommand* pCommand)
 		void* Blob = pParam->GetPointer();
 		auto Size = ((MCmdParamBlob*)pParam)->GetPayloadSize();
 
-		MCommand* pCmd = MakeCmdFromSaneTunnelingBlob(Sender, Blob, Size);
+		MCommand* pCmd = MakeCmdFromSaneTunnelingBlob(Sender, m_This, Blob, Size);
 		if (pCmd == nullptr) break;
 
 		LockRecv();
@@ -669,28 +669,6 @@ MCommand* MMatchClient::MakeCmdFromTunnelingBlob(const MUID& uidSender, void* pB
 	{
 		delete pCmd;
 		return NULL;
-	}
-
-	return pCmd;
-}
-
-MCommand* MMatchClient::MakeCmdFromSaneTunnelingBlob(const MUID& uidSender, void* pBlob, size_t Size)
-{
-	MCommand* pCmd = new MCommand();
-	if (!pCmd->SetData((char*)pBlob, &m_CommandManager, (u16)Size))
-	{
-		delete pCmd;
-		return nullptr;
-	}
-
-	pCmd->m_Sender = uidSender;
-	pCmd->m_Receiver = m_This;
-
-	MMatchPeerInfo* pPeer = FindPeer(uidSender);
-	if (pPeer == nullptr)
-	{
-		delete pCmd;
-		return nullptr;
 	}
 
 	return pCmd;

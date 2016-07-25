@@ -4,12 +4,12 @@
 #include "MMatchStage.h"
 #undef pi
 
-void MovingWeaponMgr::Update(float Elapsed)
+void MovingWeaponManager::Update(float Elapsed)
 {
 	Weapons.apply([&](auto& Obj)
 	{
-		v3 diff = Obj.Vel * Elapsed;
-		v3 dir = diff;
+		auto diff = Obj.Vel * Elapsed;
+		auto dir = diff;
 		Normalize(dir);
 		auto dist = Magnitude(diff);
 
@@ -62,7 +62,19 @@ void MovingWeaponMgr::Update(float Elapsed)
 	});
 }
 
-void Rocket::OnCollision(MovingWeaponMgr& Mgr, const v3& ColPos, const MPICKINFO& pi)
+void MovingWeaponManager::AddRocket(MMatchObject* Owner, MMatchItemDesc* ItemDesc,
+	const v3 & Pos, const v3 & Dir)
+{
+	Weapons.emplace<Rocket>(Pos, Dir, Dir * 1000, ItemDesc, Owner);
+}
+
+void MovingWeaponManager::AddItemKit(MMatchObject * Owner, MMatchItemDesc * ItemDesc,
+	const v3 & Pos, const v3 & Dir)
+{
+	Weapons.emplace<MedKit>(Pos, Dir, v3{ 0, 0, 0 }, ItemDesc);
+}
+
+void Rocket::OnCollision(MovingWeaponManager& Mgr, const v3& ColPos, const MPICKINFO& pi)
 {
 	if (Mgr.Stage->GetStageSetting()->GetGameType() == MMATCH_GAMETYPE_SKILLMAP)
 		return;
@@ -78,8 +90,4 @@ void Rocket::OnCollision(MovingWeaponMgr& Mgr, const v3& ColPos, const MPICKINFO
 	GrenadeExplosion(*Owner, Mgr.Stage->GetObjectList(), pi.bpi.PickPos, ItemDesc->m_nDamage,
 		ROCKET_SPLASH_RANGE, ROCKET_MINIMUM_DAMAGE, ROCKET_KNOCKBACK_CONST,
 		GetOrigin);
-}
-
-void MedKit::OnCollision(MovingWeaponMgr& Mgr, const v3& ColPos, const MPICKINFO& pi)
-{
 }
