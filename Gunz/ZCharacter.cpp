@@ -3591,7 +3591,7 @@ void ZCharacter::OnDamaged(ZObject* pAttacker, rvector srcPos, ZDAMAGETYPE damag
 	m_LastDamageType = damageType;
 	m_LastDamageWeapon = weaponType;
 	m_LastDamageDot = DotProduct( m_Direction,dir );
-	m_LastDamageDistance = Magnitude(GetPosition() - srcPos);>
+	m_LastDamageDistance = Magnitude(GetPosition() - srcPos);
 
 	// hp, ap °è»ê
 	if (bCanAttack)
