@@ -2832,11 +2832,10 @@ void ZGame::OnExplosionGrenade(MUID uidOwner,rvector pos,float fDamage,float fRa
 						CheckStylishAction(pOwnerCharacter);
 					}
 
-
 					float fActualDamage = fDamage * fDamageRange;
 					float fRatio = ZItem::GetPiercingRatio( MWT_FRAGMENTATION , eq_parts_chest );//수류탄과 로켓 구분없다..
-					pTarget->OnDamaged(pOwnerCharacter,pos,ZD_EXPLOSION,MWT_FRAGMENTATION,fActualDamage,fRatio);
-//					pTarget->OnDamagedGrenade( uidOwner, dir, fDamage * fDamageRange, nTeamID);
+					if (ZGetGameClient()->GetMatchStageSetting()->GetNetcode() != NetcodeType::ServerBased)
+						pTarget->OnDamaged(pOwnerCharacter,pos,ZD_EXPLOSION,MWT_FRAGMENTATION,fActualDamage,fRatio);
 				}
 			}
 		}

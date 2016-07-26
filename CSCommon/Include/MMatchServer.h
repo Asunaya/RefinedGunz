@@ -786,6 +786,8 @@ public:
 	void SendHShieldReqMsg();
 
 	void PostDeath(const MMatchObject& Victim, const MMatchObject& Attacker);
+	void PostDamage(const MUID& Target, const MUID& Sender, ZDAMAGETYPE DamageType, MMatchWeaponType WeaponType,
+		int Damage, float PiercingRatio);
 };
 
 void CopyCharInfoForTrans(MTD_CharInfo* pDest, MMatchCharInfo* pSrc, MMatchObject* pSrcObject);

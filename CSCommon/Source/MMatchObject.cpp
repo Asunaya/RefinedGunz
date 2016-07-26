@@ -260,6 +260,7 @@ void MMatchObject::OnEnterBattle()
 	SetAllRoundDeathCount(0);	
 	SetAllRoundKillCount(0);
 
+	SetMaxHPAP();
 }
 
 void MMatchObject::OnLeaveBattle()
@@ -281,6 +282,8 @@ void MMatchObject::OnInitRound()
 
 	m_GameInfo.bJoinedGame = true;
 	m_nDeadTime = 0;
+
+	ResetHPAP();
 }
 
 void MMatchObject::SetChannelListTransfer(const bool bVal, const MCHANNEL_TYPE nChannelType)
@@ -343,6 +346,12 @@ void MMatchObject::SetMaxHPAP()
 	SetP(MaxAP, 0, &MMatchItemDesc::m_nAP);
 }
 
+void MMatchObject::ResetHPAP()
+{
+	HP = MaxHP;
+	AP = MaxAP;
+}
+
 void MMatchObject::OnDamaged(const MMatchObject& Attacker, const v3& SrcPos,
 	ZDAMAGETYPE DamageType, MMatchWeaponType WeaponType, int Damage, float PiercingRatio)
 {
@@ -357,6 +366,8 @@ void MMatchObject::OnDamaged(const MMatchObject& Attacker, const v3& SrcPos,
 
 	HP -= HPDamage;
 	AP -= APDamage;
+
+	MGetMatchServer()->PostDamage(GetUID(), Attacker.GetUID(), DamageType, WeaponType, Damage, PiercingRatio);
 
 	if (HP <= 0)
 	{

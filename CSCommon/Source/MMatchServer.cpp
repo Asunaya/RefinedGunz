@@ -1231,14 +1231,6 @@ void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Recei
 
 			auto DamagePlayer = [&](auto& Obj, auto Damage, auto PiercingRatio, auto DamageType, auto WeaponType)
 			{
-				MCommand* pCmd = CreateCommand(MC_MATCH_DAMAGE, Obj.GetUID());
-				pCmd->AddParameter(new MCmdParamUID(Sender));
-				pCmd->AddParameter(new MCmdParamUShort(Damage));
-				pCmd->AddParameter(new MCmdParamFloat(PiercingRatio));
-				pCmd->AddParameter(new MCmdParamUChar(DamageType));
-				pCmd->AddParameter(new MCmdParamUChar(WeaponType));
-				Post(pCmd);
-
 				Obj.OnDamaged(*SenderObj, { 0, 0, 0 }, DamageType, WeaponType, Damage, PiercingRatio);
 			};
 
@@ -3461,4 +3453,16 @@ void MMatchServer::PostDeath(const MMatchObject & Victim, const MMatchObject & A
 	P2PCmd->AddParameter(new MCmdParamUID(Victim.GetUID()));
 	P2PCmd->AddParameter(CommandToBlob(DeathCmd));
 	RouteToBattle(Victim.GetStageUID(), P2PCmd);
+}
+
+void MMatchServer::PostDamage(const MUID& Target, const MUID& Attacker, ZDAMAGETYPE DamageType, MMatchWeaponType WeaponType,
+	int Damage, float PiercingRatio)
+{
+	MCommand* pCmd = CreateCommand(MC_MATCH_DAMAGE, Target);
+	pCmd->AddParameter(new MCmdParamUID(Attacker));
+	pCmd->AddParameter(new MCmdParamUShort(Damage));
+	pCmd->AddParameter(new MCmdParamFloat(PiercingRatio));
+	pCmd->AddParameter(new MCmdParamUChar(DamageType));
+	pCmd->AddParameter(new MCmdParamUChar(WeaponType));
+	Post(pCmd);
 }

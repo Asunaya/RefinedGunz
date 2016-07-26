@@ -3577,12 +3577,9 @@ void ZCharacter::OnDamaged(ZObject* pAttacker, rvector srcPos, ZDAMAGETYPE damag
 	if (this != ZGetGame()->m_pMyCharacter)
 		return;
 
-	if (ZGetGameClient()->GetMatchStageSetting()->GetNetcode() == NetcodeType::ServerBased
-		&& damageType != ZD_FALLING)
-		return;
-
 	// 자기가 쏜 폭발 데미지 & 나락 데미지는 무조건 먹는다
-	bool bCanAttack = g_pGame->IsAttackable(pAttacker,this) || (pAttacker==this && (damageType==ZD_EXPLOSION || damageType==ZD_FALLING));
+	bool bCanAttack = g_pGame->IsAttackable(pAttacker,this)
+		|| (pAttacker==this && (damageType==ZD_EXPLOSION || damageType==ZD_FALLING));
 
 	if ( damageType != ZD_FALLING)
 		bCanAttack &= !isInvincible();
@@ -3594,7 +3591,7 @@ void ZCharacter::OnDamaged(ZObject* pAttacker, rvector srcPos, ZDAMAGETYPE damag
 	m_LastDamageType = damageType;
 	m_LastDamageWeapon = weaponType;
 	m_LastDamageDot = DotProduct( m_Direction,dir );
-	m_LastDamageDistance = Magnitude(GetPosition() - srcPos);
+	m_LastDamageDistance = Magnitude(GetPosition() - srcPos);>
 
 	// hp, ap 계산
 	if (bCanAttack)
