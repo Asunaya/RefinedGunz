@@ -516,9 +516,6 @@
     <ClInclude Include="ZSoundFMod.h">
       <Filter>Sound</Filter>
     </ClInclude>
-    <ClInclude Include="Physics.h">
-      <Filter>Physics</Filter>
-    </ClInclude>
     <ClInclude Include="CGLEncription.h">
       <Filter>Interface\Game</Filter>
     </ClInclude>
@@ -1196,9 +1193,6 @@
     </ClCompile>
     <ClCompile Include="ZSoundFMod.cpp">
       <Filter>Sound</Filter>
-    </ClCompile>
-    <ClCompile Include="Physics.cpp">
-      <Filter>Physics</Filter>
     </ClCompile>
     <ClCompile Include="CGLEncription.cpp">
       <Filter>Interface\Game</Filter>

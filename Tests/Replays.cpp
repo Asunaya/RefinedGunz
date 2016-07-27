@@ -12,6 +12,7 @@
 #include "ZRuleDuel.h"
 #include "RGMain.h"
 #include "ZReplay.inl"
+#include <direct.h>
 
 #undef ASSERT
 #undef assert
@@ -106,81 +107,137 @@ void PrintPlayers(ReplayData& Data)
 	}
 }
 
+struct ReplayFile : ReplayData
+{
+	std::string Name;
+	size_t CommandStreamPos;
+};
+
+void SetFileInfo(std::array<ReplayFile, 3>& Files)
+{
+	size_t i = 0;
+
+	Files[i].Name = "GLT[001]_Alwaysssss_2015-11-15_21-22-36.gzr";
+	strcpy_safe(Files[i].StageSetting.szMapName, "Dojo");
+	Files[i].StageSetting.nGameType = MMATCH_GAMETYPE_GLADIATOR_TEAM;
+	Files[i].StageSetting.bForcedEntryEnabled = true;
+	Files[i].Players.resize(2);
+	Files[i].Players[0].IsHero = true;
+	strcpy(Files[i].Players[0].Info.szName, "Alwaysssss");
+	Files[i].Players[0].Info.nLevel = 1;
+	Files[i].Players[1].IsHero = false;
+	strcpy(Files[i].Players[1].Info.szName, "AMITYVILLE");
+	Files[i].Players[0].Info.nLevel = 63;
+	Files[i].CommandStreamPos = 2250;
+	i++;
+
+	Files[i].Name = "GLT_Rinnema_20160612_175131.gzr";
+	strcpy_safe(Files[i].StageSetting.szMapName, "Battle Arena");
+	Files[i].StageSetting.nGameType = MMATCH_GAMETYPE_GLADIATOR_TEAM;
+	Files[i].Players.resize(2);
+	Files[i].Players[0].IsHero = true;
+	strcpy(Files[i].Players[0].Info.szName, "Rinnema");
+	Files[i].Players[1].IsHero = false;
+	strcpy(Files[i].Players[1].Info.szName, "bestgladna");
+	Files[i].CommandStreamPos = 1562;
+	i++;
+
+	Files[i].Name = "GLT_dystopiz_20130316_003344.gzr";
+	strcpy_safe(Files[i].StageSetting.szMapName, "Battle Arena");
+	Files[i].StageSetting.nGameType = MMATCH_GAMETYPE_GLADIATOR_TEAM;
+	Files[i].Players.resize(3);
+	Files[i].Players[0].IsHero = false;
+	strcpy(Files[i].Players[0].Info.szName, "Banner");
+	Files[i].Players[1].IsHero = true;
+	strcpy(Files[i].Players[1].Info.szName, "dystopiz");
+	Files[i].Players[2].IsHero = false;
+	strcpy(Files[i].Players[2].Info.szName, "MeetraSurik");
+	Files[i].CommandStreamPos = 2623;
+	i++;
+
+	std::string cwd(MAX_PATH, 0);
+	getcwd(&cwd[0], cwd.size());
+	cwd.resize(cwd.find_first_of('\0'));
+	printf("cwd: %s\n", cwd.c_str());
+	auto pos = cwd.find_last_of("\\/");
+	if (pos != std::string::npos)
+	{
+		cwd.assign(cwd.begin() + pos + 1, cwd.end());
+	}
+
+	if (cwd == "Tests")
+	{
+		for (auto& File : Files)
+		{
+			File.Name = "ReplayFiles/" + File.Name;
+		}
+	}
+	else
+	{
+		for (auto& File : Files)
+		{
+			File.Name = "../ReplayFiles/" + File.Name;
+		}
+	}
+}
+
 int main()
 {
 	InitLog();
 
+	std::array<ReplayFile, 3> Files;
+	SetFileInfo(Files);
+
 	ReplayData Data;
 
-	ASSERT(LoadFile(Data, "ReplayFiles/GLT[001]_Alwaysssss_2015-11-15_21-22-36.gzr"));
+	printf("%s\n", Files[0].Name.c_str());
 
-	printf_s("Map name: %s\n", Data.StageSetting.szMapName);
-	printf_s("Stage name: %s\n", Data.StageSetting.szStageName);
-	printf_s("Gametype: %d\n", Data.StageSetting.nGameType);
-	printf_s("Max players: %d\n", Data.StageSetting.nMaxPlayers);
-	printf_s("Team kill enabled: %d\n", Data.StageSetting.bTeamKillEnabled);
-	printf_s("Team win the point: %d\n", Data.StageSetting.bTeamWinThePoint);
-	printf_s("Forced entry enabled: %d\n", Data.StageSetting.bForcedEntryEnabled);
-	printf_s("Num commands = %d\n", Data.NumCommands);
-
-	PrintPlayers(Data);
-
-	ASSERT(Data.StageSetting.nGameType == MMATCH_GAMETYPE_GLADIATOR_TEAM);
-	ASSERT(Data.StageSetting.nMaxPlayers == 2);
-	ASSERT(Data.StageSetting.bTeamKillEnabled == false);
-	ASSERT(Data.StageSetting.bTeamWinThePoint == false);
-	ASSERT(Data.StageSetting.bForcedEntryEnabled == true);
-
-	ASSERT(Data.Players.size() == 2);
-
-	ASSERT(Data.CommandStreamPos == 2250);
-
-	decltype(ReplayData::Players)::iterator it;
-
-	auto FindPlayer = [&](const char* Name)
+	for (auto& File : Files)
 	{
-		it = std::find_if(Data.Players.begin(), Data.Players.end(), [&](ReplayPlayerInfo& Player) {
-			return strcmp(Player.Info.szName, Name) == 0;
-		});
+		ASSERT(LoadFile(Data, File.Name.c_str()));
 
-		ASSERT(it != Data.Players.end());
-	};
+		printf_s("Map name: %s\n", Data.StageSetting.szMapName);
+		printf_s("Stage name: %s\n", Data.StageSetting.szStageName);
+		printf_s("Gametype: %d\n", Data.StageSetting.nGameType);
+		printf_s("Max players: %d\n", Data.StageSetting.nMaxPlayers);
+		printf_s("Team kill enabled: %d\n", Data.StageSetting.bTeamKillEnabled);
+		printf_s("Team win the point: %d\n", Data.StageSetting.bTeamWinThePoint);
+		printf_s("Forced entry enabled: %d\n", Data.StageSetting.bForcedEntryEnabled);
+		printf_s("Num commands = %d\n", Data.NumCommands);
 
-	FindPlayer("Alwaysssss");
+		PrintPlayers(Data);
 
-	ASSERT(it->IsHero);
-	ASSERT(it->Info.nLevel == 1);
+		//ASSERT(memcmp(&Data.StageSetting, &File.StageSetting, sizeof(Data.StageSetting)) == 0);
+		ASSERT(!strcmp(Data.StageSetting.szMapName, File.StageSetting.szMapName));
+		ASSERT(Data.StageSetting.nGameType == File.StageSetting.nGameType);
+		ASSERT(Data.StageSetting.bTeamKillEnabled == false);
+		ASSERT(Data.StageSetting.bTeamWinThePoint == false);
 
-	FindPlayer("AMITYVILLE");
+		ASSERT(Data.Players.size() == File.Players.size());
 
-	ASSERT(!it->IsHero);
-	ASSERT(it->Info.nLevel == 63);
+		for (auto& ExpectedPlayer : File.Players)
+		{
+			decltype(ReplayData::Players)::iterator it;
 
-	printf_s("\nFreestyle Gunz V9 OK\n\n");
+			auto FindPlayer = [&](const char* Name) -> auto&
+			{
+				it = std::find_if(Data.Players.begin(), Data.Players.end(), [&](ReplayPlayerInfo& Player) {
+					return strcmp(Player.Info.szName, Name) == 0;
+				});
+				ASSERT(it != Data.Players.end());
+				return *it;
+			};
 
-	ASSERT(LoadFile(Data, "ReplayFiles/GLT_Rinnema_20160612_175131.gzr"));
+			auto& ActualPlayer = FindPlayer(ExpectedPlayer.Info.szName);
 
-	PrintPlayers(Data);
+			ASSERT(ActualPlayer.IsHero == ExpectedPlayer.IsHero);
+			//ASSERT(!strcmp(ActualPlayer.Info.szClanName, ExpectedPlayer.Info.szClanName));
+		}
 
-	ASSERT(Data.Players.size() == 2);
+		ASSERT(Data.CommandStreamPos == File.CommandStreamPos);
+	}
 
-	ASSERT(Data.CommandStreamPos == 1562);
-
-	FindPlayer("Rinnema");
-	FindPlayer("bestgladna");
-
-	printf_s("\nDark Gunz V6 OK\n\n");
-
-	ASSERT(LoadFile(Data, "ReplayFiles/GLT_dystopiz_20130316_003344.gzr"));
-
-	ASSERT(Data.Players.size() == 3);
-	ASSERT(Data.CommandStreamPos == 2623);
-
-	FindPlayer("dystopiz");
-	FindPlayer("MeetraSurik");
-	FindPlayer("Banner");
-
-	printf_s("\nAeria Gunz V11 OK\n\n");
+	printf("\n\n\nAll OK!\n\n");
 
 	system("pause");
 }
