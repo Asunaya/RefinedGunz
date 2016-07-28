@@ -2424,9 +2424,7 @@ void ZGame::OnPeerHPInfo(MCommand *pCommand)
 	float fHP=0.0f;
 	pCommand->GetParameter(&fHP, 0, MPT_FLOAT);
 
-	//if(ZGetGameInterface()->GetCombatInterface()->GetObserverMode()) {
-		pCharacter->SetHP(fHP);
-	//}
+	pCharacter->SetHP(fHP);
 }
 
 
@@ -2441,10 +2439,11 @@ void ZGame::OnPeerHPAPInfo(MCommand *pCommand)
 	float fAP=0.0f;
 	pCommand->GetParameter(&fAP, 1, MPT_FLOAT);
 
-	//if(ZGetGameInterface()->GetCombatInterface()->GetObserverMode()) {
-		pCharacter->SetHP(fHP);
-		pCharacter->SetAP(fAP);
-	//}
+	pCharacter->SetHP(fHP);
+	pCharacter->SetAP(fAP);
+
+	if (pCharacter == m_pMyCharacter && fHP > 0 && !m_pMyCharacter->IsAlive())
+		m_pMyCharacter->Revival();
 }
 
 #ifdef _DEBUG
