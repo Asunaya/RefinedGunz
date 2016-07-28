@@ -3550,6 +3550,8 @@ void ZMyCharacter::OnDamaged(ZObject* pAttacker, rvector srcPos, ZDAMAGETYPE dam
 			SetLastThrower(pAttacker->GetUID(), g_pGame->GetTime()+1.0f);
 	}
 
+	LastDamagedTime = ZGetGame()->GetTime();
+
 	//// 나락일때는 무조건 데미지 먹는다
 	//if(damageType==ZD_FALLING)
 	//{

@@ -5422,25 +5422,11 @@ void ZGameInterface::ReserveLeaveStage()
 
 void ZGameInterface::ReserveLeaveBattle()
 {
-	bool bLeaveImmediately = false;
-#ifndef _PUBLISH
-	bLeaveImmediately = true;
-#endif
-
 	if(!m_pGame) return;
 
-	// 옵저버일때나..
-	if (m_pCombatInterface->GetObserver()->IsVisible()) 
-		bLeaveImmediately = true;
-
-	// 죽어서 스폰되기를 기다릴때는
-	ZMatch* pMatch = ZApplication::GetGame()->GetMatch();
-	int nRemainTime = pMatch->GetRemainedSpawnTime();
-	if ((nRemainTime > 0) && (nRemainTime <= 5))
-		bLeaveImmediately = true;
-
-	// 바로 게임에서 나간다
-	if(bLeaveImmediately) 
+	if (ZGetGame()->GetTime() - ZGetGame()->m_pMyCharacter->LastDamagedTime > 5
+		|| !ZGetGame()->m_pMyCharacter->IsAlive()
+		|| ZGetGame()->IsReplay())
 	{
 		LeaveBattle();
 		return;

@@ -61,6 +61,8 @@ public:
 
 	int		m_nTumbleDir;
 
+	float LastDamagedTime = 0.f;
+
 	// 패킹되는 플래그들
 	union {
 		struct {
