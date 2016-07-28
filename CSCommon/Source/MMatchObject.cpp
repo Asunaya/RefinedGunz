@@ -241,7 +241,7 @@ void MMatchObject::Tick(unsigned long int nTime)
 	if (nTime - LastHPAPInfoTime > 1000)
 	{
 		MGetMatchServer()->PostHPAPInfo(*this, HP, AP);
-		LastHPAPInfoTime = 0;
+		LastHPAPInfoTime = nTime;
 	}
 }
 
@@ -337,13 +337,17 @@ void MMatchObject::SetMaxHPAP()
 	{
 		MaxHP = Stage->GetStageSetting()->GetForcedHP();
 		MaxAP = Stage->GetStageSetting()->GetForcedAP();
+		return;
 	}
 
-	auto SetP = [&](int& MaxP, int Default, int MMatchItemDesc::* ItemP)
+	auto SetP = [&](int& MaxP, int Default, auto ItemP)
 	{
 		MaxP = Default;
-		for (auto Item : MakePairValueAdapter(CharInfo->m_ItemList))
+		for (auto Item : GetCharInfo()->m_EquipedItem)
 		{
+			if (!Item)
+				continue;
+
 			MaxP += Item->GetDesc()->*ItemP;
 		}
 	};
@@ -377,7 +381,7 @@ void MMatchObject::OnDamaged(const MMatchObject& Attacker, const v3& SrcPos,
 
 	if (HP <= 0)
 	{
-		MGetMatchServer()->OnGameKill(GetUID(), Attacker.GetUID());
+		MGetMatchServer()->OnGameKill(Attacker.GetUID(), GetUID());
 	}
 }
 

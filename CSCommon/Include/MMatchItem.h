@@ -371,6 +371,8 @@ public:
 	void GetTotalWeight(int* poutWeight, int* poutMaxWeight);
 	bool IsEquipedItem(MMatchItem* pCheckItem, MMatchCharItemParts& outParts); // 해당 아이템이 장비중인지 체크
 	void Clear();
+	auto begin() const { return std::begin(m_pParts); }
+	auto end() const { return std::end(m_pParts); }
 };
 
 /// 캐릭터가 갖고 있는 아이템들

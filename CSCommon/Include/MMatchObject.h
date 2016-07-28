@@ -634,7 +634,9 @@ public:
 	bool IsLadderChallenging()			{ return m_bLadderChallenging; }		// 클랜전 상대팀 대기중인지 여부
 public:
 	MMatchAccountInfo* GetAccountInfo() { return &m_AccountInfo; }
-	MMatchCharInfo* GetCharInfo()	{ return m_pCharInfo; }
+	const MMatchAccountInfo* GetAccountInfo() const { return &m_AccountInfo; }
+	MMatchCharInfo* GetCharInfo() { return m_pCharInfo; }
+	const MMatchCharInfo* GetCharInfo() const { return m_pCharInfo; }
 	void SetCharInfo(MMatchCharInfo* pCharInfo);
 	
 	MMatchFriendInfo* GetFriendInfo()	{ return m_pFriendInfo; }
