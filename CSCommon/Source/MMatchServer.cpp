@@ -1393,6 +1393,8 @@ void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Recei
 		case MC_PEER_DIE:
 			// Players can't choose to die. They can choose to /suicide, but that's a different command.
 			return;
+		case MC_PEER_HPAPINFO:
+			return;
 		};
 	}
 
@@ -3465,4 +3467,15 @@ void MMatchServer::PostDamage(const MUID& Target, const MUID& Attacker, ZDAMAGET
 	pCmd->AddParameter(new MCmdParamUChar(DamageType));
 	pCmd->AddParameter(new MCmdParamUChar(WeaponType));
 	Post(pCmd);
+}
+
+void MMatchServer::PostHPAPInfo(const MMatchObject& Object, int HP, int AP)
+{
+	auto DeathCmd = MCommand(m_CommandManager.GetCommandDescByID(MC_PEER_HPAPINFO), MUID(0, 0), m_This);
+	DeathCmd.AddParameter(new MCmdParamFloat(HP));
+	DeathCmd.AddParameter(new MCmdParamFloat(AP));
+	auto P2PCmd = CreateCommand(MC_MATCH_P2P_COMMAND, MUID(0, 0));
+	P2PCmd->AddParameter(new MCmdParamUID(Object.GetUID()));
+	P2PCmd->AddParameter(CommandToBlob(DeathCmd));
+	RouteToBattle(Object.GetStageUID(), P2PCmd);
 }

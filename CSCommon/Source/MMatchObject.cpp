@@ -237,6 +237,12 @@ void MMatchObject::Tick(unsigned long int nTime)
 #endif
 
 	m_DisconnStatusInfo.Update( nTime );
+
+	if (nTime - LastHPAPInfoTime > 1000)
+	{
+		MGetMatchServer()->PostHPAPInfo(*this, HP, AP);
+		LastHPAPInfoTime = 0;
+	}
 }
 
 

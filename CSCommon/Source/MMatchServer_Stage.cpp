@@ -1292,6 +1292,7 @@ void MMatchServer::OnRequestSpawn(const MUID& uidChar, const MVector& pos, const
 
 
 	pObj->SetAlive(true);
+	pObj->ResetHPAP();
 
 	MCommand* pCmd = CreateCommand(MC_MATCH_GAME_RESPONSE_SPAWN, MUID(0,0));
 	pCmd->AddParameter(new MCmdParamUID(uidChar));

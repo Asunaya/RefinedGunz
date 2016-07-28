@@ -496,6 +496,8 @@ protected:
 	int MaxHP, MaxAP;
 	int HP, AP;
 
+	u64 LastHPAPInfoTime = 0;
+
 protected:
 	void UpdateChannelListChecksum(unsigned long nChecksum)	{ m_ChannelInfo.nChannelListChecksum = nChecksum; }
 	unsigned long GetChannelListChecksum()					{ return m_ChannelInfo.nChannelListChecksum; }
