@@ -14,6 +14,7 @@
 
 #define POINTER_64 __ptr64
 
+#include "MTime.h"
 #include "SafeString.h"
 
 #endif

@@ -13,6 +13,7 @@ using std::map;
 #include "MXml.h"
 #include "MSync.h"
 #include "MMatchGlobal.h"
+#include "MTime.h"
 
 
 class MMatchObject;
@@ -210,7 +211,7 @@ private :
 class DBQuestCachingData
 {
 public :
-	DBQuestCachingData() : m_dwLastUpdateTime( timeGetTime() ), m_nPlayCount( 0 ), m_bEnableUpdate( false ), m_nShopTradeCount( 0 ),
+	DBQuestCachingData() : m_dwLastUpdateTime( GetGlobalTimeMS() ), m_nPlayCount( 0 ), m_bEnableUpdate( false ), m_nShopTradeCount( 0 ),
 		m_pObject( 0 ), m_nRewardCount( 0 )
 	{
 	}
@@ -240,16 +241,16 @@ public :
 	bool CheckUniqueItem( MQuestItem* pQuestItem );
 	void Reset();
 	
-	DWORD GetUpdaetElapse() 
+	u64 GetUpdaetElapse() 
 	{
 #ifdef _DEBUG
 		char szTemp[ 100 ] = {0};
-		DWORD t = timeGetTime();
-		int a = t - m_dwLastUpdateTime;
-		sprintf_safe( szTemp, "Update Elapse %d %d\n", timeGetTime() - m_dwLastUpdateTime, a );
+		auto t = GetGlobalTimeMS();
+		auto a = t - m_dwLastUpdateTime;
+		sprintf_safe( szTemp, "Update Elapse %d %d\n", GetGlobalTimeMS() - m_dwLastUpdateTime, a );
 		mlog( szTemp );
 #endif
-		return timeGetTime() - m_dwLastUpdateTime; 
+		return GetGlobalTimeMS() - m_dwLastUpdateTime; 
 	}
 
 	void SetEnableUpdateState( const bool bState )	{ m_bEnableUpdate = bState; }
@@ -259,7 +260,7 @@ public :
 
 private :
 	MMatchObject*	m_pObject;				// DB업데이트때 데이터를 가져오기 위해서 저장해 놓은 포인터.
-	DWORD			m_dwLastUpdateTime;		// 업데이트가 적용되면 같이 갱신됨. 
+	u64				m_dwLastUpdateTime;		// 업데이트가 적용되면 같이 갱신됨. 
 	int				m_nPlayCount;			// 게임횟수는 게임에 들어가서 하는 모든 행동에 관계없이 완료를 해야 1번 적용됨. 
 	int				m_nShopTradeCount;		// 상점에서의 퀘스트 아이템 거래 횟수.
 	bool			m_bEnableUpdate;		// 현재 상태. 업데이트가 가능하면 true임.

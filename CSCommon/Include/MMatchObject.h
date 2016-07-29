@@ -311,7 +311,7 @@ public :
 	MMatchDisconnStatusInfo() 
 	{
 		m_DisconnStatus						= MMDS_CONNECTED;
-		m_dwLastDisconnStatusUpdatedTime	= timeGetTime();
+		m_dwLastDisconnStatusUpdatedTime	= GetGlobalTimeMS();
 		m_bIsSendDisconnMsg					= false;
 		m_dwDisconnSetTime					= 0;
 		m_bIsUpdateDB						= false;
@@ -336,7 +336,7 @@ public :
 	const bool IsUpdateDB()			{ return m_bIsUpdateDB; }
 	void UpdateDataBaseCompleted()	{ m_bIsUpdateDB = false; } // Update되면은 다음 BlockType이 설정전까진 false로 설정.
 
-	const bool IsDisconnectable( const DWORD dwTime = timeGetTime() )
+	const bool IsDisconnectable( const DWORD dwTime = GetGlobalTimeMS() )
 	{
 		if( (MMDS_DISCONNECT == GetStatus()) && (MINTERVAL_DISCONNECT_STATUS_MIN < (dwTime - m_dwDisconnSetTime)) )
 			return true;
@@ -350,7 +350,7 @@ public :
 			SendDisconnMsgPrepared();
 
 		if( MMDS_DISCONNECT == Status )
-			m_dwDisconnSetTime = (timeGetTime() - 2000);
+			m_dwDisconnSetTime = (GetGlobalTimeMS() - 2000);
 		
 	}
 	void SetUpdateTime( const DWORD dwTime )				{ m_dwLastDisconnStatusUpdatedTime = dwTime; }
@@ -840,7 +840,7 @@ inline bool IsAdminGrade(MMatchObject* pObject)
 
 unsigned long int MMatchObject::GetQuestLatency()
 {
-	unsigned long int nowTime = timeGetTime();
+	unsigned long int nowTime = GetGlobalTimeMS();
 
 	unsigned long int ret = nowTime - m_nLastPingTime;
 

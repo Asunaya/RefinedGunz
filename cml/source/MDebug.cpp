@@ -238,7 +238,7 @@ void MInitProfile()
 		g_ProfileItems[i].dwTotalTime=0;
 		g_ProfileItems[i].dwCalledCount=0;
 	}
-	g_dwEnableTime=timeGetTime();
+	g_dwEnableTime=GetGlobalTimeMS();
 }
 
 void MBeginProfile(int nIndex,const char *szName)
@@ -246,19 +246,19 @@ void MBeginProfile(int nIndex,const char *szName)
 	if(g_ProfileItems[nIndex].szName[0]==0)
 		strcpy_safe(g_ProfileItems[nIndex].szName,szName);
 
-	g_ProfileItems[nIndex].dwStartTime=timeGetTime();
+	g_ProfileItems[nIndex].dwStartTime=GetGlobalTimeMS();
 	g_ProfileItems[nIndex].dwCalledCount++;
 }
 
 void MEndProfile(int nIndex)
 {
 	g_ProfileItems[nIndex].dwTotalTime+= 
-		timeGetTime()-g_ProfileItems[nIndex].dwStartTime;
+		GetGlobalTimeMS()-g_ProfileItems[nIndex].dwStartTime;
 }
 
 void MSaveProfile(const char *filename)
 {
-	DWORD dwTotalTime = timeGetTime()-g_dwEnableTime;
+	DWORD dwTotalTime = GetGlobalTimeMS()-g_dwEnableTime;
 
 	FILE *file = nullptr;
 	fopen_s(&file, filename, "w+");

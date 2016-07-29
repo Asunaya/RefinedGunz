@@ -561,10 +561,10 @@ void DrawDebug()
 
 	if(testnode)
 	{
-		static DWORD lastprinttime=timeGetTime();
-		if(timeGetTime()-lastprinttime>200)
+		static DWORD lastprinttime=GetGlobalTimeMS();
+		if(GetGlobalTimeMS()-lastprinttime>200)
 		{
-			lastprinttime=timeGetTime();
+			lastprinttime=GetGlobalTimeMS();
 			mlog("current node has %d portals\n",testnode->portallist.size());
 		}
 	}

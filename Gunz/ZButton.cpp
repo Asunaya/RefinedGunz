@@ -42,14 +42,14 @@ bool ZButton::OnShow(void)
 {
 	m_bClicked=false;
 	m_dwCurrentTime=0;
-	m_dwLastTime=timeGetTime();
+	m_dwLastTime=GetGlobalTimeMS();
 	return MButton::OnShow();
 }
 
 void ZButton::OnHide(void)
 {
 	m_dwCurrentTime=0;
-	m_dwLastTime=timeGetTime();
+	m_dwLastTime=GetGlobalTimeMS();
 
 	MButton::OnHide();
 }
@@ -58,7 +58,7 @@ void ZButton::OnDraw(MDrawContext* pDC)
 {
 	MButton::OnDraw(pDC);
 
-	DWORD currenttime=timeGetTime();
+	DWORD currenttime=GetGlobalTimeMS();
 	DWORD elapsed=currenttime-m_dwLastTime;
 
 	m_dwCurrentTime+=elapsed;
@@ -189,21 +189,21 @@ bool ZBmButton::OnShow(void)
 {
 	m_bClicked=false;
 	m_dwCurrentTime=0;
-	m_dwLastTime=timeGetTime();
+	m_dwLastTime=GetGlobalTimeMS();
 	return true;
 }
 
 void ZBmButton::OnHide(void)
 {
 	m_dwCurrentTime=0;
-	m_dwLastTime=timeGetTime();
+	m_dwLastTime=GetGlobalTimeMS();
 }
 
 void ZBmButton::OnDraw(MDrawContext* pDC)
 {
   	MBmButton::OnDraw(pDC);
 
-	DWORD currenttime=timeGetTime();
+	DWORD currenttime=GetGlobalTimeMS();
 	DWORD elapsed=currenttime-m_dwLastTime;
 
 	m_dwCurrentTime+=elapsed;

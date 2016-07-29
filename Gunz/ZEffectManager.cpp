@@ -1931,10 +1931,10 @@ void ZEffectManager::AddShotEffect(rvector* pSource,int size, rvector& Target, r
 			
 			// low 이 아닌 거리라면..
 
-			static DWORD last_add_time = timeGetTime();
+			static DWORD last_add_time = GetGlobalTimeMS();
 			static DWORD this_time;
 
-			this_time = timeGetTime();
+			this_time = GetGlobalTimeMS();
 
 			// 사람일경우 맞는 곳에 나오는 이펙트
 
@@ -2792,7 +2792,7 @@ void ZEffectManager::AddSmokeGrenadeEffect( rvector& Target  )
 {
 	rvector v;
 	
-	srand( timeGetTime() );
+	srand( GetGlobalTimeMS() );
 	v.x	= (rand() % MAX_SG_VELOCITY) * 2 - MAX_SG_VELOCITY;
 	v.y	= (rand() % MAX_SG_VELOCITY) * 2 - MAX_SG_VELOCITY;
 	v.z	= 0.f;
@@ -2806,7 +2806,7 @@ void ZEffectManager::AddGrenadeSmokeEffect( rvector& Target ,float min,float max
 {
 	rvector v;
 	
-	srand( timeGetTime() );
+	srand( GetGlobalTimeMS() );
 	v.x	= (rand() % MAX_SG_VELOCITY) * 2 - MAX_SG_VELOCITY;
 	v.y	= (rand() % MAX_SG_VELOCITY) * 2 - MAX_SG_VELOCITY;
 	v.z	= 0.f;

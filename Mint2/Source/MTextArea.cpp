@@ -966,7 +966,7 @@ void MTextAreaLook::OnTextDraw_WordWrap(MTextArea* pTextArea, MDrawContext* pDC)
 			carpos.y=nCarY + carpos.y*pTextArea->GetLineHeight();
 
 			if(pTextArea->IsFocus() && pTextArea->GetEditable() 
-				&& timeGetTime()%(MEDIT_BLINK_TIME*2)>MEDIT_BLINK_TIME)
+				&& GetGlobalTimeMS()%(MEDIT_BLINK_TIME*2)>MEDIT_BLINK_TIME)
 			{
 				pDC->Line(carpos.x,carpos.y,carpos.x,carpos.y+pTextArea->GetLineHeight());
 			}
@@ -1020,7 +1020,7 @@ void MTextAreaLook::OnTextDraw(MTextArea* pTextArea, MDrawContext* pDC)
 
 	// Ä³·µ ±×¸®±â
 	if(pTextArea->IsFocus() && pTextArea->GetEditable() 
-		&& timeGetTime()%(MEDIT_BLINK_TIME*2)>MEDIT_BLINK_TIME)
+		&& GetGlobalTimeMS()%(MEDIT_BLINK_TIME*2)>MEDIT_BLINK_TIME)
 	{
 		MPOINT pt=pTextArea->GetCaretPos();
 		const char *pCarLine=pTextArea->GetTextLine(pt.y);

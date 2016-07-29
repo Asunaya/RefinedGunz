@@ -77,6 +77,8 @@
     <ClInclude Include="Include\stdafx.h" />
     <ClInclude Include="Include\targetver.h" />
     <ClInclude Include="Include\GlobalTypes.h" />
+    <ClInclude Include="Include\MultiVector.h" />
+    <ClInclude Include="Include\MTime.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\MMatrix.cpp">
@@ -128,5 +130,6 @@
     <ClCompile Include="Source\MZFileSystem.cpp" />
     <ClCompile Include="Source\MZip.cpp" />
     <ClCompile Include="source\stdafx.cpp" />
+    <ClCompile Include="source\MTime.cpp" />
   </ItemGroup>
 </Project>

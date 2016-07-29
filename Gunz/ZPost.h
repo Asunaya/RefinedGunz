@@ -554,7 +554,7 @@ inline void ZPostRequestRecommendChannel()
 inline void ZPostRequestStageList(const MUID& uidChar, const MUID& uidChannel, int nStageCursor)
 {
 	static unsigned long int st_nLastTime = 0;
-	unsigned long int nNowTime = timeGetTime();
+	unsigned long int nNowTime = GetGlobalTimeMS();
 	if ((nNowTime - st_nLastTime) > 500)
 	{
 		ZPOSTCMD3(MC_MATCH_REQUEST_STAGE_LIST, MCommandParameterUID(uidChar),

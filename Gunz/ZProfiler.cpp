@@ -5,7 +5,7 @@
 
 ZProfiler::ZProfiler(void) : m_nRingHead(0)
 {
-	m_dwLastTime = timeGetTime();
+	m_dwLastTime = GetGlobalTimeMS();
 	for(int i=0;i<FRAME_RING_BUFFER_SIZE;i++)
 	{
 		m_dwRingBuffer[i].dwElapsed = 0;
@@ -19,7 +19,7 @@ ZProfiler::~ZProfiler(void)
 
 void ZProfiler::Update()
 {
-	DWORD dwCurrent = timeGetTime();
+	DWORD dwCurrent = GetGlobalTimeMS();
 	DWORD dwElapsed = dwCurrent - m_dwLastTime;
 
 	m_dwRingBuffer[m_nRingHead].dwTime = dwCurrent;

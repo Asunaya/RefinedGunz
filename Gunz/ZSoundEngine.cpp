@@ -244,7 +244,7 @@ void ZSoundEngine::PlaySound(char* Name,rvector& pos,bool bHero, bool bLoop, DWO
 		_ASSERT(0);
 /*
 		DelaySound DS;
-		DS.dwDelay = dwDelay + timeGetTime();
+		DS.dwDelay = dwDelay + GetGlobalTimeMS();
 		DS.pSS = pSS;
 		DS.pos = pos;
 		DS.priority = priority;
@@ -281,7 +281,7 @@ int ZSoundEngine::PlaySound(const char* szSoundName, float* pos, float* vel, int
 void ZSoundEngine::OnUpdate()
 {
 /*
-	DWORD currentTime = timeGetTime();
+	DWORD currentTime = GetGlobalTimeMS();
 	if( (currentTime - m_Time) < m_DelayTime ) return;
 	m_Time = currentTime;
 */
@@ -876,7 +876,7 @@ int ZSoundEngine::PlaySound(const char* Name, const rvector& pos, bool bHero, bo
 	if( dwDelay > 0 )
 	{
 		DelaySound DS;
-		DS.dwDelay = dwDelay + timeGetTime();
+		DS.dwDelay = dwDelay + GetGlobalTimeMS();
 		DS.pSS = pSS;
 		DS.pos = pos;
 		DS.priority = priority;
@@ -925,7 +925,7 @@ void ZSoundEngine::PlaySoundElseDefault(char* Name,char* NameDefault,rvector& po
 	if( dwDelay > 0 )
 	{
 		DelaySound DS;
-		DS.dwDelay = dwDelay + timeGetTime();
+		DS.dwDelay = dwDelay + GetGlobalTimeMS();
 		DS.pSS = pSS;
 		DS.pos = pos;
 		DS.priority = priority;
@@ -962,7 +962,7 @@ int ZSoundEngine::PlaySound( const char* Name, bool bLoop, DWORD dwDelay )
 	if( dwDelay > 0 )
 	{
 		DelaySound DS;
-		DS.dwDelay = dwDelay + timeGetTime();
+		DS.dwDelay = dwDelay + GetGlobalTimeMS();
 		DS.pSS = pSS;
 		DS.priority = 200;
 		DS.bPlayer = true;
@@ -983,7 +983,7 @@ int ZSoundEngine::PlaySound( const char* Name, bool bLoop, DWORD dwDelay )
 
 void ZSoundEngine::Run(void)
 {
-	DWORD currentTime = timeGetTime();
+	DWORD currentTime = GetGlobalTimeMS();
 	if( (currentTime - m_Time) < m_DelayTime ) return;
 	m_Time = currentTime;
 
@@ -1496,7 +1496,7 @@ void ZSoundEngine::SetVolumeControlwithDuration( float fStartPercent, float fEnd
 	m_bEffectVolControl = bEffect;
 	m_bBGMVolControl = bBGM;
 
-	DWORD currentTime = timeGetTime();
+	DWORD currentTime = GetGlobalTimeMS();
 	DWORD endTime = currentTime + dwDuration;
 	int nUpdate = ( endTime - currentTime ) / m_DelayTime;
 	
@@ -1635,7 +1635,7 @@ bool ZSoundEngine::CheckCulling(const char* szName, SoundSource* pSS, const rvec
 	}
 
 
-	unsigned long int nNowTime = timeGetTime();
+	unsigned long int nNowTime = GetGlobalTimeMS();
 
 	if ((nNowTime - pSS->nLastPlayedTime) < 10)
 	{

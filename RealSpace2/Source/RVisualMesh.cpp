@@ -57,7 +57,7 @@ AniFrameInfo::AniFrameInfo()
 void AniFrameInfo::ClearFrame()
 {
 	m_nFrame			= 0;
-	m_save_time			= timeGetTime();
+	m_save_time			= GetGlobalTimeMS();
 	m_pAniSetNext		= NULL;
 	m_pAniSetReserve	= NULL;
 	m_nReserveTime		= 0;
@@ -69,7 +69,7 @@ void AniFrameInfo::Frame(RAniMode amode,RVisualMesh* pVMesh)
 
 	if(m_pAniSet==NULL) return;
 
-	DWORD cur = timeGetTime();//전역 타이머 생길때까지..
+	DWORD cur = GetGlobalTimeMS();//전역 타이머 생길때까지..
 
 	if(m_bChangeAnimation) {
 
@@ -215,7 +215,7 @@ void AniFrameInfo::Frame(RAniMode amode,RVisualMesh* pVMesh)
 void RFrameTime::Start(float fMax,DWORD MaxTime,DWORD ReturnMaxTime) {
 
 	m_fMaxValue = fMax;
-	m_dwStartTime = timeGetTime();
+	m_dwStartTime = GetGlobalTimeMS();
 	m_dwEndTime = m_dwStartTime + MaxTime;
 	m_dwReturnMaxTime = ReturnMaxTime;
 	m_bActive = true;
@@ -235,7 +235,7 @@ void RFrameTime::Update() {
 
 	if(!m_bActive) return;
 
-	DWORD dwThisTime = timeGetTime();
+	DWORD dwThisTime = GetGlobalTimeMS();
 
 	if(dwThisTime > m_dwEndTime ) {
 
@@ -678,7 +678,7 @@ void RVisualMesh::Play(RAniMode amode) {
 
 	pInfo->m_isPlayDone		= false;
 	pInfo->m_isOncePlayDone	= false;
-	pInfo->m_save_time		= timeGetTime();
+	pInfo->m_save_time		= GetGlobalTimeMS();
 }
 
 void RVisualMesh::Stop(RAniMode amode) {
@@ -958,7 +958,7 @@ bool RVisualMesh::UpdateSpWeaponFire()
 
 	if(m_bGrenadeFire) {
 
-		if( m_GrenadeFireTime + 70 < timeGetTime() ) {
+		if( m_GrenadeFireTime + 70 < GetGlobalTimeMS() ) {
 
 			m_bGrenadeRenderOnoff = false;
 			m_bGrenadeFire = false;
@@ -1175,7 +1175,7 @@ void RVisualMesh::DrawEnchantFire(RVisualMesh* pVWMesh,int mode,rmatrix& m)
 		g_toggle = true;
 	}
 
-//	if(timeGetTime()%3==0)
+//	if(GetGlobalTimeMS()%3==0)
 	m_FireEffectTexture.ProcessFire(1);
 
 	m_FireEffectTexture.UpdateTexture();
@@ -1236,7 +1236,7 @@ void RVisualMesh::DrawEnchantFire(RVisualMesh* pVWMesh,int mode,rmatrix& m)
 		add[0] = rvector(0,0,0);
 		add[1] = add[0];
 /*
-		if(timeGetTime()%15==0) {
+		if(GetGlobalTimeMS()%15==0) {
 
 			add[0].x = rand()%5;
 			add[0].y = rand()%5;
@@ -2308,7 +2308,7 @@ bool RVisualMesh::SetReserveAnimation(RAniMode animode,RAnimation* pAniSet,int t
 
 	if(pInfo==NULL) return false;
 
-	pInfo->m_nReserveTime = timeGetTime() + tick;
+	pInfo->m_nReserveTime = GetGlobalTimeMS() + tick;
 	pInfo->m_pAniSetReserve = pAniSet;
 
 //	CheckAnimationType(m_pAniSet[animode]);

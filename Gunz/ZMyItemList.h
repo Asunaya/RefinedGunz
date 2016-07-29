@@ -28,7 +28,7 @@ public:
 		m_nItemID = nItemID;
 		m_bIsRentItem = bIsRentItem;
 		m_nRentMinutePeriodRemainder = nRentMinutePeriodRemainder;
-		m_dwWhenReceivedClock = timeGetTime();
+		m_dwWhenReceivedClock = GetGlobalTimeMS();
 	}
 	void Create(unsigned long int nItemID, 
 				bool bIsRentItem=false, int nRentMinutePeriodRemainder=RENT_MINUTE_PERIOD_UNLIMITED)
@@ -36,7 +36,7 @@ public:
 		m_nItemID = nItemID;
 		m_bIsRentItem = bIsRentItem;
 		m_nRentMinutePeriodRemainder = nRentMinutePeriodRemainder;
-		m_dwWhenReceivedClock = timeGetTime();
+		m_dwWhenReceivedClock = GetGlobalTimeMS();
 	}
 	DWORD GetWhenReceivedClock()
 	{

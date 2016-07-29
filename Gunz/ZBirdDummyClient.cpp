@@ -375,11 +375,11 @@ bool ZBirdDummyClient::OnCommand(MCommand* pCommand)
 
 void AddToLogFrame(int nDummyID, const char* szStr)
 {
-	static unsigned long st_nFirstTime = timeGetTime();
+	static unsigned long st_nFirstTime = GetGlobalTimeMS();
 	if (!m_pLogFrame) return;
 	
 	char szTemp[1024];
-	sprintf_safe(szTemp, "%u(%d): %s", timeGetTime()-st_nFirstTime, nDummyID, szStr);
+	sprintf_safe(szTemp, "%u(%d): %s", GetGlobalTimeMS()-st_nFirstTime, nDummyID, szStr);
 
 	m_pLogFrame->GetCommandList()->Add(szTemp);
 	if (m_pLogFrame->GetCommandList()->GetCount() > 200)

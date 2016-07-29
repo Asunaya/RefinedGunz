@@ -35,6 +35,7 @@
 #include "RTypes.h"
 #include "RMesh.h"
 
+#include "MTime.h"
 #include "SafeString.h"
 
 #endif

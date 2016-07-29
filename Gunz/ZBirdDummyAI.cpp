@@ -43,7 +43,7 @@ void ZBirdDummyAI::OnCommand(MCommand* pCmd)
 	Sleep(1);
 	if (m_pClient == NULL) return;
 
-	m_nLastCommandTime = timeGetTime();
+	m_nLastCommandTime = GetGlobalTimeMS();
 
 
 }
@@ -69,7 +69,7 @@ void ZBirdDummyAIMakeRoomFlood::OnCommand(MCommand* pCmd)
 {
 	Sleep(1);
 	if (m_pClient == NULL) return;
-	m_nLastCommandTime = timeGetTime();
+	m_nLastCommandTime = GetGlobalTimeMS();
 
 	switch (pCmd->GetID())
 	{
@@ -233,7 +233,7 @@ void ZBirdDummyAIMakeRoomFlood::OnCommand(MCommand* pCmd)
 
 void ZBirdDummyAIMakeRoomFlood::OnRun()
 {
-	unsigned long int nNowTime = timeGetTime();
+	unsigned long int nNowTime = GetGlobalTimeMS();
 
 	if (m_bInCombat)
 	{
@@ -261,7 +261,7 @@ void ZBirdDummyAIJoinFlood::OnCommand(MCommand* pCmd)
 {
 	Sleep(1);
 	if (m_pClient == NULL) return;
-	m_nLastCommandTime = timeGetTime();
+	m_nLastCommandTime = GetGlobalTimeMS();
 
 	switch (pCmd->GetID())
 	{
@@ -332,7 +332,7 @@ void ZBirdDummyAIJoinFlood::OnCommand(MCommand* pCmd)
 		break;
 	case MC_MATCH_STAGE_JOIN:
 		{
-			m_nReservedTime = timeGetTime();
+			m_nReservedTime = GetGlobalTimeMS();
 			m_bReserved = true;
 
 			MUID uidChar, uidStage;
@@ -361,7 +361,7 @@ void ZBirdDummyAIJoinFlood::OnCommand(MCommand* pCmd)
 
 void ZBirdDummyAIJoinFlood::OnRun()
 {
-	unsigned long int nNowTime = timeGetTime();
+	unsigned long int nNowTime = GetGlobalTimeMS();
 
 	if (m_bReserved)
 	{

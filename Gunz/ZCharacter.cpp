@@ -457,7 +457,7 @@ void ZCharacter::SetAnimation(RAniMode mode,char *AnimationName,bool bEnableCanc
 //#define TRACE_ANIMATION
 
 // 시간 test 위한 변수
-DWORD g_dwLastAnimationTime=timeGetTime();
+DWORD g_dwLastAnimationTime=GetGlobalTimeMS();
 
 void ZCharacter::SetAnimationLower(ZC_STATE_LOWER nAni)
 {
@@ -492,7 +492,7 @@ void ZCharacter::SetAnimationLower(ZC_STATE_LOWER nAni)
 
 #ifdef TRACE_ANIMATION
 	{
-		DWORD curtime = timeGetTime();
+		DWORD curtime = GetGlobalTimeMS();
 		if(g_pGame->m_pMyCharacter==this)
 			mlog("animation - %d %s   - %d frame , interval %d \n",nAni,
 			m_pVMesh->GetFrameInfo(ani_mode_lower)->m_pAniSet->GetName(),m_pVMesh->GetFrameInfo(ani_mode_lower)->m_nFrame,
@@ -521,7 +521,7 @@ void ZCharacter::SetAnimationUpper(ZC_STATE_UPPER nAni)
 
 #ifdef TRACE_ANIMATION
 	{
-		DWORD curtime = timeGetTime();
+		DWORD curtime = GetGlobalTimeMS();
 		mlog("upper Animation Index : %d %s @ %d \n", nAni ,g_AnimationInfoTableUpper[nAni].Name,curtime-g_dwLastAnimationTime);
 		if(m_AniState_Upper==3 && nAni==0)
 		{
@@ -1641,7 +1641,7 @@ void ZCharacter::SetTargetDir(rvector vTarget) {
 
 	Normalize(vTarget);
 	m_TargetDir = vTarget;
-//	m_dwBackUpTime = timeGetTime();
+//	m_dwBackUpTime = GetGlobalTimeMS();
 }
 
 // 가진 무기중에서만 선택하게 된다...
@@ -3622,5 +3622,5 @@ void ZCharacter::OnShot()
 
 bool ZCharacter::isInvincible()
 {
-	return ((int)timeGetTime() < (m_dwInvincibleStartTime + m_dwInvincibleDuration));
+	return ((int)GetGlobalTimeMS() < (m_dwInvincibleStartTime + m_dwInvincibleDuration));
 }

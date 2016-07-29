@@ -70,7 +70,7 @@ void ZCombatQuestScreen::OnDraw(MDrawContext* pDC)
 		}
 
 		DWORD dwSec;
-		DWORD dwCurrTime = timeGetTime();
+		DWORD dwCurrTime = GetGlobalTimeMS();
 		if ( ZGetQuest()->GetRemainedTime() < dwCurrTime)
 			dwSec = 0;
 		else

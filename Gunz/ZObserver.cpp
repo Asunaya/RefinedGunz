@@ -413,7 +413,7 @@ void ZObserver::OnDraw(MDrawContext* pDC)
 		if ( pFont == NULL)
 			_ASSERT(0);
 		pDC->SetFont( pFont);
-		int nTime = timeGetTime() % 200;
+		int nTime = GetGlobalTimeMS() % 200;
 		if ( bIsChampOserved && (nTime < 100))
 			pDC->SetColor(MCOLOR(0xFFFFFF00));
 		else
@@ -542,10 +542,10 @@ void ZObserver::OnDraw(MDrawContext* pDC)
 
 void ZObserver::CheckDeadTarget()
 {
-	static unsigned long int nLastTime = timeGetTime();
+	static unsigned long int nLastTime = GetGlobalTimeMS();
 	static unsigned long int st_nDeadTime = 0;
 
-	unsigned long int nNowTime = timeGetTime();
+	unsigned long int nNowTime = GetGlobalTimeMS();
 
 	if (m_pTargetCharacter == NULL) 
 	{

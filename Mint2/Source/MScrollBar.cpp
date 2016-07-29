@@ -34,7 +34,7 @@ void MScrollBar::OnRun(void)
 	MListener* pListener = GetListener();
 	if(pListener==NULL) return;
 
-	int nCurrTime = timeGetTime();
+	int nCurrTime = GetGlobalTimeMS();
 	if(nCurrTime-m_nPrevThumbRefresh<m_nThumbRefreshDelay) return;		// m_nPrevThumbRefresh Time만큼 지났으면..
 
 	if(m_pUp->IsButtonDown()==true){

@@ -43,7 +43,7 @@ void RMesh::SetMtrlUvAni_ON()
 		rmatrix mat;
 		D3DXMatrixIdentity(&mat);
 
-		float add_t = timeGetTime() / 1000.f;
+		float add_t = GetGlobalTimeMS() / 1000.f;
 
 		mat._31 = add_t * m_pVisualMesh->m_fUAniValue;
 		mat._32 = add_t * m_pVisualMesh->m_fVAniValue;

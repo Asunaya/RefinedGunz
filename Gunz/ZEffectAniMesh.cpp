@@ -22,7 +22,7 @@ ZEffectAniMesh::ZEffectAniMesh(RMesh* pMesh, const rvector& Pos, const rvector& 
 	m_DirOrg = dir;
 
 	m_fRotateAngle = 0;
-	m_nStartTime = timeGetTime();
+	m_nStartTime = GetGlobalTimeMS();
 
 	m_Scale = rvector(1.f,1.f,1.f);
 

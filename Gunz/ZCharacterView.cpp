@@ -75,7 +75,7 @@ void ZCharacterView::OnSize(int w, int h)
 
 void ZCharacterView::OnDraw(MDrawContext* pDC)
 {
-	DWORD dwCurTime = timeGetTime();
+	DWORD dwCurTime = GetGlobalTimeMS();
 	if ( !m_bLButtonDown && m_bAutoRotate && m_bEnableRotate)
 		RotateRight( (float)( dwCurTime - m_dwTime) / 20.0f);
 
@@ -88,11 +88,11 @@ void ZCharacterView::OnDraw(MDrawContext* pDC)
 	}
 	else if( m_pTVisualMesh.m_pVisualMesh->isChestClothMesh() )
 	{
-		srand( timeGetTime());
+		srand( GetGlobalTimeMS());
 		int rint = rand() % 10;
 		force.x += rint - 7;
 		force.x = min(max( force.x, 5 ), maxForce * 0.3 );
-		srand( timeGetTime());
+		srand( GetGlobalTimeMS());
 		rint = rand() % (int)(maxForce*0.3);
 		force.y += rint - 4;	
 		force.y = min(max( force.y, 0 ), maxForce );
@@ -253,7 +253,7 @@ ZCharacterView::ZCharacterView(const char* szName, MWidget* pParent, MListener* 
 
 
 	m_bAutoRotate = false;
-	m_dwTime = timeGetTime();
+	m_dwTime = GetGlobalTimeMS();
 
 
 	for(int i=0; i<MMCIP_END; i++)

@@ -435,7 +435,7 @@ void ZCombatInterface::DrawTDMScore(MDrawContext* pDC)
 	{
 		int nTime[] = { 1, 1400, 1400, 900, 900, 200 };
 		int nDiff = min( abs( nBlueKills - nRedKills) , 5);
-		int nCurrTime = timeGetTime() % nTime[ nDiff];
+		int nCurrTime = GetGlobalTimeMS() % nTime[ nDiff];
 
 		if (nDiff == 0)
 		{
@@ -654,7 +654,7 @@ void ZCombatInterface::OnDraw(MDrawContext* pDC)
 
 			MCOLOR color;
 
-			int nTime = timeGetTime() % 200;
+			int nTime = GetGlobalTimeMS() % 200;
 			if ( nTime < 100)
 				pDC->SetColor( MCOLOR( 0xFFFFFF00));
 			else
@@ -732,7 +732,7 @@ void ZCombatInterface::OnDraw(MDrawContext* pDC)
 	{
 		// 배경 음악 볼륨을 서서히 낮춤
 		float fVolume;
-		DWORD dwClock = timeGetTime() - m_nReserveFinishTime;
+		DWORD dwClock = GetGlobalTimeMS() - m_nReserveFinishTime;
 		if ( dwClock > 4000)
 			fVolume = 0.0f;
 		else
@@ -741,7 +741,7 @@ void ZCombatInterface::OnDraw(MDrawContext* pDC)
 		ZApplication::GetSoundEngine()->SetMusicVolume( fVolume);
 
 
-		if ( timeGetTime() >= m_nReservedOutTime)
+		if ( GetGlobalTimeMS() >= m_nReservedOutTime)
 		{
 			MWidget* pWidget = ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "Option");
 			if ( pWidget)
@@ -785,7 +785,7 @@ void ZCombatInterface::OnDraw(MDrawContext* pDC)
 			ZApplication::GetSoundEngine()->OpenMusic(BGMID_FIN, ZApplication::GetFileSystem());
 			ZApplication::GetSoundEngine()->PlayMusic(false);
 #endif
-			m_nReservedOutTime = timeGetTime() + 15000;
+			m_nReservedOutTime = GetGlobalTimeMS() + 15000;
 			m_bShowResult = true;
 		}
 	}
@@ -831,11 +831,11 @@ int ZCombatInterface::DrawVictory( MDrawContext* pDC, int x, int y, int nWinCoun
 
 
 	// Get Image Number
-	int nImage = ( (timeGetTime() / 100) % 20);
+	int nImage = ( (GetGlobalTimeMS() / 100) % 20);
 	if ( nImage > 10)
 		nImage = 0;
 	nImage *= 32;
-	nImage = ( (timeGetTime() / 100) % 20);
+	nImage = ( (GetGlobalTimeMS() / 100) % 20);
 	if ( nImage > 10)
 		nImage = 0;
 	nImage *= 32;
@@ -892,7 +892,7 @@ void ZCombatInterface::OnDrawCustom(MDrawContext* pDC)
 	if ( m_bShowResult)
 	{
 		// 제한시간이면 종료한다.
-		if ( timeGetTime() > m_nReservedOutTime)
+		if ( GetGlobalTimeMS() > m_nReservedOutTime)
 		{
 			if(ZGetGameClient()->IsLadderGame())
 				ZChangeGameState(GUNZ_LOBBY);
@@ -906,7 +906,7 @@ void ZCombatInterface::OnDrawCustom(MDrawContext* pDC)
 		// 숫자를 카운터한다.
 		if ( ZGetGameTypeManager()->IsQuestOnly( g_pGame->GetMatch()->GetMatchType()))
 		{
-			int nNumCount = timeGetTime() - (m_nReservedOutTime - 15000);
+			int nNumCount = GetGlobalTimeMS() - (m_nReservedOutTime - 15000);
 			ZBmNumLabel* pBmNumLabel = (ZBmNumLabel*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "QuestResult_GetPlusXP");
 			if ( pBmNumLabel)
 			{
@@ -942,7 +942,7 @@ void ZCombatInterface::OnDrawCustom(MDrawContext* pDC)
 		if ( pLabel)
 		{
 			char szRemaindTime[ 100];
-			sprintf_safe( szRemaindTime, "%d", ( m_nReservedOutTime - timeGetTime()) / 1000);
+			sprintf_safe( szRemaindTime, "%d", ( m_nReservedOutTime - GetGlobalTimeMS()) / 1000);
 			char szText[ 100];
 			ZTransMsg( szText, MSG_GAME_EXIT_N_MIN_AFTER, 1, szRemaindTime);
 
@@ -1110,7 +1110,7 @@ void ZCombatInterface::Update()
 {
 	if (m_bReserveFinish)
 	{
-		if ((timeGetTime() - m_nReserveFinishTime) > 1000)
+		if ((GetGlobalTimeMS() - m_nReserveFinishTime) > 1000)
 		{
 			OnFinish();
 			m_bReserveFinish = false;
@@ -3039,7 +3039,7 @@ void ZCombatInterface::Finish()
 	ZGetFlashBangEffect()->End();
 
 	m_fOrgMusicVolume = ZApplication::GetSoundEngine()->GetMusicVolume();
-	m_nReserveFinishTime = timeGetTime();
+	m_nReserveFinishTime = GetGlobalTimeMS();
 	m_bReserveFinish = true;
 
 	m_CrossHair.Show(false);
@@ -3128,7 +3128,7 @@ void ZCombatInterface::OnFinish()
 
 	m_Observer.Show(false);
 
-	m_nReservedOutTime = timeGetTime() + 5000;		// 5초 후에 자동 종료.
+	m_nReservedOutTime = GetGlobalTimeMS() + 5000;		// 5초 후에 자동 종료.
 	m_bOnFinish = true;
 }
 

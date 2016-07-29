@@ -487,7 +487,7 @@ void ChatCmd_CopyToTestServer(const char* line, const int argc, char **const arg
 	if (argc != 1) return;
 
 	static unsigned long int st_nLastTime = 0;
-	unsigned long int nNowTime = timeGetTime();
+	unsigned long int nNowTime = GetGlobalTimeMS();
 
 #define DELAY_POST_COPY_TO_TESTSERVER		(1000 * 60)		// 5∫– µÙ∑π¿Ã
 

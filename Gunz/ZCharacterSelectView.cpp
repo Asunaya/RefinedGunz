@@ -227,11 +227,11 @@ void ZCharacterSelectView::Draw()
 	}
 	else if( m_pVisualMesh->isChestClothMesh() )
 	{
-		srand( timeGetTime());
+		srand( GetGlobalTimeMS());
  		int rint = rand() % 10;
 		force.x += rint - 7;
 		force.x = min(max( force.x, 5 ), maxForce * 0.3 );
-		srand( timeGetTime());
+		srand( GetGlobalTimeMS());
 		rint = rand() % (int)(maxForce*0.3);
 		force.y += rint - 4;	
 		force.y = min(max( force.y, 0 ), maxForce );
@@ -358,7 +358,7 @@ bool ZCharacterSelectView::SelectMyCharacter()
 
 	m_bReserveSelectChar = true;
 	m_nSelCharIndex = m_nSelectedCharacter;
-	m_nReservedSelectTime = timeGetTime();
+	m_nReservedSelectTime = GetGlobalTimeMS();
 
 #ifdef _FASTDEBUG
 	if (m_bReserveSelectChar == true)

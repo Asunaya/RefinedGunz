@@ -385,8 +385,8 @@ bool ZScreenEffectManager::Create()
 {
 
 	DWORD _begin_time,_end_time;
-#define BEGIN_ { _begin_time = timeGetTime(); }
-#define END_(x) { _end_time = timeGetTime(); float f_time = (_end_time - _begin_time) / 1000.f; mlog("%s : %f \n", x,f_time ); }
+#define BEGIN_ { _begin_time = GetGlobalTimeMS(); }
+#define END_(x) { _end_time = GetGlobalTimeMS(); float f_time = (_end_time - _begin_time) / 1000.f; mlog("%s : %f \n", x,f_time ); }
 
 	BEGIN_;
 
@@ -590,9 +590,9 @@ int ZScreenEffectManager::DrawResetGuages()
 
 	static float _hp = 0.f;
 	static float _ap = 0.f;
-	static DWORD _backtime = timeGetTime();
+	static DWORD _backtime = GetGlobalTimeMS();
 
-	DWORD newtime = timeGetTime();
+	DWORD newtime = GetGlobalTimeMS();
 
 	if(_backtime==0)
 		_backtime = newtime;
@@ -873,7 +873,7 @@ void ZScreenEffectManager::DrawSpectator()
 	if(!ZGetMyInfo()->IsAdminGrade())
 	{
 		m_pSpectator->Update();
-		m_pSpectator->Draw(timeGetTime());
+		m_pSpectator->Draw(GetGlobalTimeMS());
 	}
 
 	if(m_WeaponType != MWT_NONE) 
@@ -1363,7 +1363,7 @@ void ZScreenEffectManager::DrawKO()
 	int nCount=(int)strlen(buffer);
 
 
-	unsigned int nNowTime = timeGetTime();
+	unsigned int nNowTime = GetGlobalTimeMS();
 
 	int nFirstNumberFrame = -1;
 
@@ -1440,7 +1440,7 @@ void ZScreenEffectManager::DrawDuelEffects()
 		sprintf_safe(buffer,"%d", g_pGame->m_pMyCharacter->GetKils());
 		int nCount=(int)strlen(buffer);
 
-		unsigned int nNowTime = timeGetTime();
+		unsigned int nNowTime = GetGlobalTimeMS();
 
 		int nFirstNumberFrame = -1;
 
@@ -1511,7 +1511,7 @@ void ZScreenEffectManager::DrawTDMEffects()
 {
 	if (ZGetGameClient()->GetMatchStageSetting()->GetGameType() != MMATCH_GAMETYPE_DEATHMATCH_TEAM2) return;
 
-	unsigned int nNowTime = timeGetTime();
+	unsigned int nNowTime = GetGlobalTimeMS();
 
 	m_pTDScoreBoard->Update();
 	m_pTDScoreBoard->Draw(nNowTime);

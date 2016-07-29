@@ -22,6 +22,7 @@
 #include "winsock2.h"
 #include "windows.h"
 
+#include "MTime.h"
 #include "SafeString.h"
 
 

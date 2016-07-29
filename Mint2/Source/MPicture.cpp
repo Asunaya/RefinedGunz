@@ -42,12 +42,12 @@ void MPicture::SetAnimation( int animType, float fAnimTime )
 	m_bAnim = true;
 	m_fAnimTime = fAnimTime;
 	m_iAnimType = animType;
-	m_dwCurrentTime = timeGetTime();
+	m_dwCurrentTime = GetGlobalTimeMS();
 }
 
 void MPicture::OnAnimDraw( MDrawContext* pDC, int x, int y, int w, int h, int bx, int by, int bw, int bh )
 {
-   	DWORD e_time = timeGetTime() - m_dwCurrentTime;
+   	DWORD e_time = GetGlobalTimeMS() - m_dwCurrentTime;
  	float ratio	= e_time / m_fAnimTime;
 	
    	if( ratio >= 1.0f ) 
@@ -55,7 +55,7 @@ void MPicture::OnAnimDraw( MDrawContext* pDC, int x, int y, int w, int h, int bx
 		if(m_iAnimType == 2)
 		{
  			m_iAnimType = 0;
-			m_dwCurrentTime = timeGetTime();
+			m_dwCurrentTime = GetGlobalTimeMS();
 			if(m_bSwaped)
 			{
 				MCOLOR c = m_BitmapColor;
@@ -68,7 +68,7 @@ void MPicture::OnAnimDraw( MDrawContext* pDC, int x, int y, int w, int h, int bx
 		else if(m_iAnimType == 3) 
 		{
 			m_iAnimType = 1;
-			m_dwCurrentTime = timeGetTime();
+			m_dwCurrentTime = GetGlobalTimeMS();
 			if(m_bSwaped)
 			{
  				MCOLOR c = m_BitmapColor;

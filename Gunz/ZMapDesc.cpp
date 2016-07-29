@@ -182,7 +182,7 @@ void ZMapSpawnManager::ShiftBackupIndex(int index)
 ZMapSpawnData* ZMapSpawnManager::GetSoloRandomData()
 {
 	int nIndex = -1;
-	unsigned long nRandomNumber = timeGetTime();	// rand() 는 모든 peer가 seed값이 같은 관계로 쓰지 않는다.
+	unsigned long nRandomNumber = GetGlobalTimeMS();	// rand() 는 모든 peer가 seed값이 같은 관계로 쓰지 않는다.
 
 	m_nBackUpIndexCnt = min(GetSoloCount(),MAX_BACKUP_SPAWN);
 
@@ -193,7 +193,7 @@ ZMapSpawnData* ZMapSpawnManager::GetSoloRandomData()
 
 		while(1) {
 
-			nRandomNumber = timeGetTime() * rand();
+			nRandomNumber = GetGlobalTimeMS() * rand();
 			nIndex = nRandomNumber % GetSoloCount();
 
 			if( CheckBackup(nIndex) ) {
@@ -376,7 +376,7 @@ bool ZMapDesc::Open(RBspObject* pBspObject)
 	m_SmokeSTDrawBackupTime = 0.f;
 	m_SmokeTSDrawBackupTime = 0.f;
 
-	m_StartTime = timeGetTime();
+	m_StartTime = GetGlobalTimeMS();
 
 	return true;
 }
@@ -505,7 +505,7 @@ float ZMapDesc::GetThisTime()
 	if(g_pGame)//게임중이면
 		return g_pGame->GetTime();
 
-	float _time = (timeGetTime()-m_StartTime)/1000.f;
+	float _time = (GetGlobalTimeMS()-m_StartTime)/1000.f;
 	return _time;
 }
 

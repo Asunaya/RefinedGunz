@@ -161,12 +161,12 @@ void MCommandCommunicator::Run(void)
 			{
 				#ifdef _CMD_PROFILE
 					m_CommandProfiler.OnRecv(pCommand);
-					m_CommandProfiler.OnCommandBegin(pCommand, timeGetTime());
+					m_CommandProfiler.OnCommandBegin(pCommand, GetGlobalTimeMS());
 				#endif
 				OnCommand(pCommand);
 
 				#ifdef _CMD_PROFILE
-					m_CommandProfiler.OnCommandEnd(pCommand, timeGetTime());
+					m_CommandProfiler.OnCommandEnd(pCommand, GetGlobalTimeMS());
 				#endif
 			}
 			else
@@ -178,13 +178,13 @@ void MCommandCommunicator::Run(void)
 				SendCommand(pCommand);
 
 				#ifdef _CMD_PROFILE
-					m_CommandProfiler.OnCommandBegin(pCommand, timeGetTime());
+					m_CommandProfiler.OnCommandBegin(pCommand, GetGlobalTimeMS());
 				#endif
 
 				OnCommand(pCommand);
 
 				#ifdef _CMD_PROFILE
-					m_CommandProfiler.OnCommandEnd(pCommand, timeGetTime());
+					m_CommandProfiler.OnCommandEnd(pCommand, GetGlobalTimeMS());
 				#endif
 			}
 		}
@@ -193,13 +193,13 @@ void MCommandCommunicator::Run(void)
 		{
 			#ifdef _CMD_PROFILE
 				m_CommandProfiler.OnRecv(pCommand);
-				m_CommandProfiler.OnCommandBegin(pCommand, timeGetTime());
+				m_CommandProfiler.OnCommandBegin(pCommand, GetGlobalTimeMS());
 			#endif
 
 			OnCommand(pCommand);	// Local Command면 로컬에서 처리
 
 			#ifdef _CMD_PROFILE
-				m_CommandProfiler.OnCommandEnd(pCommand, timeGetTime());
+				m_CommandProfiler.OnCommandEnd(pCommand, GetGlobalTimeMS());
 			#endif
 		}
 		else 

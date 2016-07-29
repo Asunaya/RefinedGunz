@@ -1123,7 +1123,7 @@ void ZStageInterface::StartMovieOfQuest( void)
 {
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
 
-	m_dwClockOfStartMovie = timeGetTime();
+	m_dwClockOfStartMovie = GetGlobalTimeMS();
 
 	// 화염 애니메이션 시작
 	MAnimation* pAnimation = (MAnimation*)pResource->FindWidget( "Stage_Flame0");
@@ -1160,7 +1160,7 @@ void ZStageInterface::OnDrawStartMovieOfQuest( void)
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
 
 	// 경과 시간을 구한다.
-	DWORD dwClock = timeGetTime() - m_dwClockOfStartMovie;
+	DWORD dwClock = GetGlobalTimeMS() - m_dwClockOfStartMovie;
 
 	// 희생 아이템 페이드 아웃
 	int nOpacity = 255 - dwClock * 0.12f;

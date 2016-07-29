@@ -105,7 +105,7 @@ void RBaseTexture::OnInvalidate()
 
 LPDIRECT3DTEXTURE9	RBaseTexture::GetTexture()
 {
-	m_dwLastUseTime = timeGetTime();//마지막으로 사용된 시간
+	m_dwLastUseTime = GetGlobalTimeMS();//마지막으로 사용된 시간
 
 	if(m_pTex) {
 		return m_pTex;
@@ -394,7 +394,7 @@ int RTextureManager::UpdateTexture(DWORD max_life_time)
 {
 	RBaseTexture* pTex = NULL;
 
-	DWORD this_time = timeGetTime();
+	DWORD this_time = GetGlobalTimeMS();
 	int cnt = 0;
 /*
 	int cur_size = CalcUsedSize();//파일 사이즈 단위

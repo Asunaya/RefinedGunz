@@ -169,7 +169,7 @@ void ZInterfaceBackground::Draw(void)
 		case  LOGIN_SCENE_FALLDOWN :
 		{
 			// Get current clock
-			DWORD dwClock = ( timeGetTime() - m_dwClock);
+			DWORD dwClock = ( GetGlobalTimeMS() - m_dwClock);
 
 			/*
 			// Show maiet logo
@@ -246,7 +246,7 @@ void ZInterfaceBackground::Draw(void)
 		case  LOGIN_SCENE_SELECTCHAR :
 		{
 			// Get current clock
-			DWORD dwClock = ( timeGetTime() - m_dwClock);
+			DWORD dwClock = ( GetGlobalTimeMS() - m_dwClock);
 
 			MPicture* pPicture = (MPicture*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "CharSel_TopScreen");
 			if ( pPicture)
@@ -295,7 +295,7 @@ void ZInterfaceBackground::Draw(void)
 		m_pMapDesc->DrawMapDesc();
 
 	// Draw effects(smoke, cloud)
-//	ZGetEffectManager()->Draw( timeGetTime());
+//	ZGetEffectManager()->Draw( GetGlobalTimeMS());
 
 	// Draw maiet logo effect
 //	ZGetScreenEffectManager()->DrawEffects();
@@ -330,7 +330,7 @@ void ZInterfaceBackground::SetScene( int nSceneNumber)
 		return;
 
 	if ( (nSceneNumber == LOGIN_SCENE_FALLDOWN) || (nSceneNumber == LOGIN_SCENE_SELECTCHAR))
-		m_dwClock = timeGetTime();
+		m_dwClock = GetGlobalTimeMS();
 
 	// 로고를 뿌려준다
 	if( nSceneNumber == LOGIN_SCENE_FALLDOWN)

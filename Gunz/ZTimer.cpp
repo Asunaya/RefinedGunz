@@ -90,7 +90,7 @@ double ZTimer::UpdateFrame()
 		}
 		else
 		{
-			lasttime = timeGetTime();
+			lasttime = GetGlobalTimeMS();
 		}
 	}
 
@@ -106,7 +106,7 @@ double ZTimer::UpdateFrame()
 	}
 	else
 	{
-		thistime = timeGetTime();
+		thistime = GetGlobalTimeMS();
 		elapsed = thistime - lasttime;
 		lasttime = thistime;
 
@@ -121,7 +121,7 @@ double ZTimer::UpdateFrame()
 
 void ZTimer::UpdateEvents()
 {
-	m_nNowTime = timeGetTime();
+	m_nNowTime = GetGlobalTimeMS();
 	unsigned long int nDeltaTime = m_nNowTime - m_nLastTime;
 	m_nLastTime = m_nNowTime;
 

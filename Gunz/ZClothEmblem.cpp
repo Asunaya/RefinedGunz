@@ -264,12 +264,12 @@ void ZClothEmblem::update()
 			return;
 		}
 
-	DWORD currTime = timeGetTime();
+	DWORD currTime = GetGlobalTimeMS();
 	if ( mMyTime - currTime < 33 )			// 초당 30번으로 제한
 	{
 		return;
 	}
-	mMyTime = timeGetTime();
+	mMyTime = GetGlobalTimeMS();
 
  	accumulateForces();
 	varlet();
@@ -282,7 +282,7 @@ void ZClothEmblem::update()
 		mpWind->z = 0.f;
 	}
 	satisfyConstraints();
-	mWndGenerator.Update( timeGetTime() );
+	mWndGenerator.Update( GetGlobalTimeMS() );
 	mbIsInFrustrum = true; // 다음 루프에서 시뮬레이션 대상에 추가한다
 }
 

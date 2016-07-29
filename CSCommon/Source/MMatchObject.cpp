@@ -72,11 +72,11 @@ MMatchObject::MMatchObject(const MUID& uid) : MObject(uid)
 	m_bHShieldMsgRecved = false;
 	m_bHacker = false;
 
-	m_dwLastHackCheckedTime			= timeGetTime();
-	m_dwLastRecvNewHashValueTime	= timeGetTime();
+	m_dwLastHackCheckedTime			= GetGlobalTimeMS();
+	m_dwLastRecvNewHashValueTime	= GetGlobalTimeMS();
 	m_bIsRequestNewHashValue		= false;
 
-	m_dwLastSpawnTime				= timeGetTime();
+	m_dwLastSpawnTime				= GetGlobalTimeMS();
 
 	m_dwHShieldCheckCount = 0;
 

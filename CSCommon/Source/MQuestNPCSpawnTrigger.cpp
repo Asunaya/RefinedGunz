@@ -29,7 +29,7 @@ void MQuestNPCSpawnTrigger::BuildCondition(SpawnTriggerInfo& Info)
 
 bool MQuestNPCSpawnTrigger::CheckSpawnEnable(int nCurrNPCCount)
 {
-	unsigned int nNowTime = timeGetTime();
+	unsigned int nNowTime = GetGlobalTimeMS();
 
 	if (MGetTimeDistance(m_nLastTime, nNowTime) < m_Info.nSpawnTickTime) return false;
 

@@ -19,6 +19,7 @@
 #include "MBmButton.h"
 #include "MTabCtrl.h"
 #include "MPanel.h"
+#include "GlobalTypes.h"
 
 class MMainFrame : public MWidget{
 protected:
@@ -1007,7 +1008,7 @@ void MCreateSample(void)
 
 	class MFrameInfo : public MFrame{
 		int m_nRenderCount;
-		DWORD m_nPrevTime;
+		u64 m_nPrevTime;
 		int	m_nFPS;
 	protected:
 		virtual void OnDraw(MDrawContext* pDC){
@@ -1019,7 +1020,7 @@ void MCreateSample(void)
 			pDC->SetColor(MCOLOR(255,255,255));
 
 			// FPS
-			DWORD nCurrTime = timeGetTime();
+			auto nCurrTime = GetGlobalTimeMS();
 			if(nCurrTime-m_nPrevTime>1000){
 				m_nFPS = m_nRenderCount;
 				m_nPrevTime = nCurrTime;
@@ -1042,10 +1043,11 @@ void MCreateSample(void)
 		}
 	public:
 		MFrameInfo(const char* szName=NULL, MWidget* pParent=NULL, MListener* pListener=NULL)
-			: MFrame(szName, pParent, pListener){
-			m_nRenderCount = 0;
-			m_nPrevTime = timeGetTime();
-			m_nFPS = 0;
+			: MFrame(szName, pParent, pListener),
+			m_nRenderCount(0),
+			m_nPrevTime(GetGlobalTimeMS()),
+			m_nFPS(0)
+		{
 		}
 		virtual ~MFrameInfo(void){
 		}

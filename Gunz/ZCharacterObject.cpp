@@ -167,7 +167,7 @@ void ZCharacterObject::EnChantWeaponEffect(ZC_ENCHANT etype,int nLevel)
 		pEWE->SetUid( m_UID );
 		pEWE->SetAlignType(1);
 		pEWE->SetScale(vScale);
-		pEWE->Draw(timeGetTime());
+		pEWE->Draw(GetGlobalTimeMS());
 	}
 }
 
@@ -304,7 +304,7 @@ void ZCharacterObject::Draw_SetLight(rvector& vPosition)
 		Light.Range = g_CharLightList[m_iDLightType].fRange;
 
 		float lastTime	= m_fTime;
-		m_fTime			= timeGetTime();
+		m_fTime			= GetGlobalTimeMS();
 		float lap		= m_fTime - lastTime;
 		m_fLightLife	-= lap;
 

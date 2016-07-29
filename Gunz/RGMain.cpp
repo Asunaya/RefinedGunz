@@ -67,7 +67,7 @@ void RGMain::OnGameDraw()
 		}
 	}*/
 
-#ifdef _DEBUG
+#if 0
 	for (auto pair : *ZGetCharacterManager())
 	{
 		auto& Char = *pair.second;

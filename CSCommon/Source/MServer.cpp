@@ -223,7 +223,7 @@ bool MServer::OnCommand(MCommand* pCommand)
 			MUID uid;
 			if (pCommand->GetParameter(&uid, 0, MPT_UID)==false) break;
 			MCommand* pNew = new MCommand(m_CommandManager.GetCommandDescByID(MC_NET_PING), uid, m_This);
-			pNew->AddParameter(new MCommandParameterUInt(timeGetTime()));
+			pNew->AddParameter(new MCommandParameterUInt(GetGlobalTimeMS()));
 			Post(pNew);
 			return true;
 		}
@@ -248,7 +248,7 @@ bool MServer::OnCommand(MCommand* pCommand)
 			OnNetPong(pCommand->GetSenderUID(), nTimeStamp);
 
 			LOG(LOG_DEBUG, "Ping from (%u:%u) = %d", 
-				pCommand->GetSenderUID().High, pCommand->GetSenderUID().Low, timeGetTime()-nTimeStamp);
+				pCommand->GetSenderUID().High, pCommand->GetSenderUID().Low, GetGlobalTimeMS()-nTimeStamp);
 			return true;
 		}
 		break;
@@ -337,7 +337,7 @@ void MServer::OnLocalLogin(MUID CommUID, MUID PlayerUID)
 	if (pCommObj == NULL) 
 		return;
 
-	unsigned int nTimeStamp = (timeGetTime() * 103) - 234723;
+	unsigned int nTimeStamp = (GetGlobalTimeMS() * 103) - 234723;
 
 	LockCommList();
 		AddCommObject(pCommObj->GetUID(), pCommObj);

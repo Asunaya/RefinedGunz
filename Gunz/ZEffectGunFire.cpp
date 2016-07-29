@@ -9,7 +9,7 @@ ZEffectGunFire::ZEffectGunFire(ZEffectBillboardSource*	pSources[2], D3DXVECTOR3&
 {
 	m_pSources[0] = pSources[0];
 	m_pSources[1] = pSources[1];
-	m_nStartTime = timeGetTime();
+	m_nStartTime = GetGlobalTimeMS();
 	D3DXVec3Normalize(&m_Dir, &m_Dir);
 	m_nDrawMode = ZEDM_ADD;
 	m_nStartAddTime = 0;
@@ -103,7 +103,7 @@ ZEffectGunFire::Draw(unsigned long int nTime)
 
 //	ZApplication::GetGame()->m_bsp.DrawLight(&light);
 
-	if(timeGetTime() - m_nStartAddTime - m_nStartTime > GUNFIRE_LIFE_TIME) 
+	if(GetGlobalTimeMS() - m_nStartAddTime - m_nStartTime > GUNFIRE_LIFE_TIME) 
 		return false;
 	return true;
 	//return false;	// 한번만 그림
@@ -120,7 +120,7 @@ ZEffectGunFire2::ZEffectGunFire2(ZEffectBillboardSource* pSources[4], D3DXVECTOR
 	m_pSources[2] = pSources[2];
 	m_pSources[3] = pSources[3];
 
-	m_nStartTime = timeGetTime();
+	m_nStartTime = GetGlobalTimeMS();
 	D3DXVec3Normalize(&m_Dir, &m_Dir);
 	m_nDrawMode = ZEDM_ADD;
 
@@ -145,7 +145,7 @@ bool ZEffectGunFire2::Draw(unsigned long int nTime)
 	ZEffectBillboardSource*	pSources1 = NULL;
 	ZEffectBillboardSource*	pSources2 = NULL;
 
-	if(timeGetTime()-m_nStartTime > GUNFIRE_LIFE_TIME2/2) {
+	if(GetGlobalTimeMS()-m_nStartTime > GUNFIRE_LIFE_TIME2/2) {
 		pSources1 = m_pSources[1];
 		pSources2 = m_pSources[3];
 	}
@@ -190,7 +190,7 @@ bool ZEffectGunFire2::Draw(unsigned long int nTime)
 	}
 	else m_bisRendered = false;
 
-	if(timeGetTime()-m_nStartTime > GUNFIRE_LIFE_TIME2)
+	if(GetGlobalTimeMS()-m_nStartTime > GUNFIRE_LIFE_TIME2)
 		return false;
 	return true;
 }

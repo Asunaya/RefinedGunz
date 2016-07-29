@@ -226,7 +226,7 @@ void ZCombatChat::UpdateChattingBox()
 
 	if (m_pChattingOutput->GetLineCount() > 0)
 	{
-		unsigned long int nNowTime = timeGetTime();
+		unsigned long int nNowTime = GetGlobalTimeMS();
 
 #define CHAT_DELAY_TIME	5000
 		if ((nNowTime - m_nLastChattingMsgTime) > CHAT_DELAY_TIME)
@@ -339,7 +339,7 @@ void ZCombatChat::ProcessChatMsg()
 	
 	if (m_pChattingOutput->GetLineCount() >= 1)
 	{
-		m_nLastChattingMsgTime = timeGetTime();
+		m_nLastChattingMsgTime = GetGlobalTimeMS();
 	}
 }
 

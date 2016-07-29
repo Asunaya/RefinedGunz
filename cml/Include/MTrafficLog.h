@@ -57,7 +57,7 @@ public:
 		ZeroMemory(m_pTrafficLogs, sizeof(MTrafficNode) * m_nTrafficLogCount);
 	}
 	void Record(unsigned long nTrafficSum) {	// Network 전송량의 누적치를 Arg로 사용
-		unsigned long nTime = timeGetTime();
+		auto nTime = static_cast<u32>(GetGlobalTimeMS());
 		if (nTime - m_pTrafficLogs[m_nCursor].GetTimeStamp() > (unsigned)m_nSamplingInterval) {
 			if (++m_nCursor >= m_nTrafficLogCount)
 				m_nCursor = 0;

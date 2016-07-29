@@ -186,7 +186,7 @@ bool ZEquipmentListBox::OnEvent(MEvent* pEvent, MListener* pListener)
 
 	if(pEvent->nMessage==MWM_MOUSEMOVE)
 	{
-		m_dwLastMouseMove=timeGetTime();
+		m_dwLastMouseMove=GetGlobalTimeMS();
 //		GetListener()->OnCommand(this,HIDE_DESCRIPTION);
 		
 		// TODO : pEquipmentListBox::m_nOverItem 으로 대체할수 있겠다.
@@ -256,7 +256,7 @@ ZEquipmentListBox::ZEquipmentListBox(const char* szName, MWidget* pParent, MList
 //	m_pOnDropFunc = NULL;
 
 	m_nLastItem=-1;
-	m_dwLastMouseMove=timeGetTime();
+	m_dwLastMouseMove=GetGlobalTimeMS();
 	m_pDescFrame=NULL;
 
 	m_pItemMenu = NULL;

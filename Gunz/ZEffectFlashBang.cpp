@@ -222,7 +222,7 @@ void ZEffectFlashBang::Init( rvector& ExplosionPos_, rvector playerPos_, rvector
 		//g_pGame->m_CharacterManager.Draw();
 		g_pGame->m_ObjectManager.Draw();
 		//g_pGame->m_WeaponManager.Render();
-		ZGetEffectManager()->Draw(timeGetTime());
+		ZGetEffectManager()->Draw(GetGlobalTimeMS());
 
 		RGetDevice()->SetRenderTarget( 0,mpHoldBackBuffer );
 		RGetDevice()->SetDepthStencilSurface(mpHoldDepthBuffer);

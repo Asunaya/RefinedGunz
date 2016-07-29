@@ -66,7 +66,7 @@ void MAsyncProxy::Destroy()
 void MAsyncProxy::PostJob(MAsyncJob* pJob)
 {
 	m_WaitQueue.Lock();
-		pJob->SetPostTime(timeGetTime());
+		pJob->SetPostTime(GetGlobalTimeMS());
 		m_WaitQueue.AddUnsafe(pJob);	
 	m_WaitQueue.Unlock();
 
@@ -144,7 +144,7 @@ void MAsyncProxy::OnRun()
 
 				if (pJob) {
 					pJob->Run(&DatabaseMgr);
-					pJob->SetFinishTime(timeGetTime());
+					pJob->SetFinishTime(GetGlobalTimeMS());
 
 					m_ResultQueue.Lock();
 						m_ResultQueue.AddUnsafe(pJob);

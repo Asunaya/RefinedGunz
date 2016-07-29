@@ -153,7 +153,7 @@ public:
 
 
 				ZGetGameInterface()->m_bLoginTimeout = true;
-				ZGetGameInterface()->m_dwLoginTimeout = timeGetTime() + 10000;
+				ZGetGameInterface()->m_dwLoginTimeout = GetGlobalTimeMS() + 10000;
 
 				extern bool g_bConnected;
 				extern std::function<void()> g_OnConnectCallback;
@@ -1100,14 +1100,14 @@ void CharacterSelect( int nNum)
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
 
 	// 더블 클릭시 캐릭터 바로 선택
-	if ( (ZCharacterSelectView::GetSelectedCharacter() == nNum) && ((timeGetTime() - g_dwClockCharSelBtn ) <= 300))
+	if ( (ZCharacterSelectView::GetSelectedCharacter() == nNum) && ((GetGlobalTimeMS() - g_dwClockCharSelBtn ) <= 300))
 	{
 		ZApplication::GetGameInterface()->OnCharSelect();
 
 		return ;
 	}
 
-	g_dwClockCharSelBtn = timeGetTime();
+	g_dwClockCharSelBtn = GetGlobalTimeMS();
 
 	ZApplication::GetGameInterface()->ChangeSelectedChar( nNum);
 }
@@ -1388,7 +1388,7 @@ END_IMPLEMENT_LISTENER()
 BEGIN_IMPLEMENT_LISTENER(ZGetEquipmentAccountTabButtonListener, MBTN_CLK_MSG)
 	// 유져가 버튼 막 누르는 것을 방지하도록 한다.
 //	static unsigned long int st_nLastTime = 0;
-//	unsigned long int nNowTime = timeGetTime();
+//	unsigned long int nNowTime = GetGlobalTimeMS();
 #define MIN_ACCOUNT_ITEM_REQUEST_TIME		2000
 
 	ZApplication::GetGameInterface()->SelectEquipmentTab(1);

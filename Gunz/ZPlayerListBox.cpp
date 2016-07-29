@@ -727,7 +727,7 @@ void ZPlayerListBox::UpdateList(int mode)
 {
 	if (ZGetGameClient()->IsConnected() == false) return;
 
-	DWORD this_time = timeGetTime();
+	DWORD this_time = GetGlobalTimeMS();
 
 	if( this_time < g_zplayer_list_update_time + ZPLAYERLIST_UPDATE_TIME)
 		return;

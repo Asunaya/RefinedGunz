@@ -589,7 +589,7 @@ ZActor* ZActor::CreateActor(MQUEST_NPC nNPCType, float fTC, int nQL)
 
 void ZActor::PostBasicInfo()
 {
-	DWORD nNowTime = timeGetTime();
+	DWORD nNowTime = GetGlobalTimeMS();
 	if (GetInitialized() == false) return;
 
 	// 죽고나서 5초가 지나면 basicinfo를 보내지 않는다.

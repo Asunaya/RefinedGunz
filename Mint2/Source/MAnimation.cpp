@@ -9,7 +9,7 @@ void MAnimation::OnDraw(MDrawContext* pDC)
 		return;
 
 	// Get current time
-	int nCurTime = timeGetTime();
+	int nCurTime = GetGlobalTimeMS();
 
 	// Get current frame
 	int nCurFrame = GetCurrentFrame();
@@ -46,7 +46,7 @@ void MAnimation::OnDraw(MDrawContext* pDC)
 MBitmap* MAnimation::GetBitmap()
 {
 	if(m_pAniBitmap == NULL) return NULL;
-	int nCurTime = timeGetTime();
+	int nCurTime = GetGlobalTimeMS();
 	int nCurFrame;
 	if(m_nDelay!=0) nCurFrame = (nCurTime-m_nStartTime) / (m_nDelay*DELAY_CONSTANT);
 	else nCurFrame = (nCurTime-m_nStartTime) / DELAY_CONSTANT;
@@ -76,7 +76,7 @@ MAnimation::MAnimation(const char* szName, MAniBitmap* pAniBitmap, MWidget* pPar
 	m_pAniBitmap = pAniBitmap;
 	if(pAniBitmap!=NULL) m_nDelay = pAniBitmap->GetDelay();
 	else m_nDelay = 1;	// Default
-	m_nStartTime = timeGetTime();
+	m_nStartTime = GetGlobalTimeMS();
 
 	m_nPlayMode = MAPM_FORWARDONCE;
 	m_nCurrFrame = 0;
@@ -91,7 +91,7 @@ void MAnimation::SetAniBitmap(MAniBitmap* pAniBitmap)
 
 void MAnimation::InitStartTime()
 {
-	m_nStartTime = timeGetTime();
+	m_nStartTime = GetGlobalTimeMS();
 }
 
 
@@ -108,7 +108,7 @@ int MAnimation::GetCurrentFrame( void)
 		return m_nCurrFrame;
 
 	// Get current time
-	int nCurrTime = timeGetTime();
+	int nCurrTime = GetGlobalTimeMS();
 
 	// Get current frame
 	int nCurrFrame;
@@ -126,5 +126,5 @@ void MAnimation::SetCurrentFrame( int nFrame)
 	m_nCurrFrame = nFrame;
 
 	if ( nFrame < m_pAniBitmap->GetFrameCount())
-        m_nStartTime = timeGetTime() - ( nFrame * m_nDelay * DELAY_CONSTANT);
+        m_nStartTime = GetGlobalTimeMS() - ( nFrame * m_nDelay * DELAY_CONSTANT);
 }

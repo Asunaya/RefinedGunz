@@ -449,7 +449,7 @@ bool DBQuestCachingData::CheckUniqueItem( MQuestItem* pQuestItem )
 
 void DBQuestCachingData::Reset()
 {
-	m_dwLastUpdateTime	= timeGetTime();
+	m_dwLastUpdateTime	= GetGlobalTimeMS();
 	m_nPlayCount		= 0;
 	m_nShopTradeCount	= 0;
 	m_bEnableUpdate		= false;
@@ -471,7 +471,7 @@ bool DBQuestCachingData::DoUpdateDBCharQuestItemInfo()
 	if( !IsRequestUpdate() ) 
 	{
 		// 다음 업데이트를 검사를 위해서 마지막 업데이트 검사 시간을 저장해 놓음.
-		m_dwLastUpdateTime = timeGetTime();
+		m_dwLastUpdateTime = GetGlobalTimeMS();
 		return false;
 	}
 

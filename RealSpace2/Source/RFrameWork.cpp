@@ -155,7 +155,7 @@ void RFrame_Render()
 		RResetDevice(&ModeParams);
 	}
 
-	if(timeGetTime() > g_last_mouse_move_time + RTOOLTIP_GAP)
+	if(GetGlobalTimeMS() > g_last_mouse_move_time + RTOOLTIP_GAP)
 		g_tool_tip = true;
 
 	if(g_pFunctions[RF_RENDER])
@@ -264,7 +264,7 @@ LRESULT FAR PASCAL WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 
 		case WM_MOUSEMOVE:
 			{
-				g_last_mouse_move_time = timeGetTime();
+				g_last_mouse_move_time = GetGlobalTimeMS();
 				g_tool_tip = false;
 			}
 			break;

@@ -283,7 +283,7 @@ void ZStencilLight::Render()
 		light.Position		= pLS->pos;
 
 		float fPower = pLS->bAttenuation ? 
-			pLS->power * cos(float(timeGetTime()-pLS->attenuationTime)/(pLS->deadTime-pLS->attenuationTime)*.5*pi)
+			pLS->power * cos(float(GetGlobalTimeMS()-pLS->attenuationTime)/(pLS->deadTime-pLS->attenuationTime)*.5*pi)
 			: pLS->power;
 		fPower = min(1.f,max(0.f,fPower));
 
@@ -338,7 +338,7 @@ int ZStencilLight::AddLightSource( rvector& p, float power,	DWORD lastTime )
 	pNew->bAttenuation = true;
  	pNew->pos = p;
 	pNew->power = power;
-	pNew->attenuationTime = timeGetTime();
+	pNew->attenuationTime = GetGlobalTimeMS();
 	pNew->deadTime = pNew->attenuationTime + lastTime;
 	m_LightSource.insert( map<int,LightSource*>::value_type(m_id,pNew) );
 	int rid = m_id;
@@ -384,7 +384,7 @@ bool ZStencilLight::DeleteLightSource( int id, DWORD lastTime )
 		if(pLS != NULL)
 		{ 
 			pLS->bAttenuation = true;
-			pLS->attenuationTime = timeGetTime();
+			pLS->attenuationTime = GetGlobalTimeMS();
 			pLS->deadTime = pLS->attenuationTime + lastTime;
 			return true;
 		}
@@ -400,7 +400,7 @@ void ZStencilLight::Update()
 		if(pLS->bAttenuation)
 		{
 //			pLS->power *= 0.97f;
-			if(pLS->deadTime <= timeGetTime())
+			if(pLS->deadTime <= GetGlobalTimeMS())
 			{
 //				mlog("light %d deleted\n",iter->first);
 				SAFE_DELETE(pLS);

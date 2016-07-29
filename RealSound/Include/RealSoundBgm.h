@@ -9,6 +9,7 @@
 #include "RealSound.h"
 #include "RealSoundWaveFile.h"
 #include "MMTimer.h"
+#include "GlobalTypes.h"
 
 class RealSoundBgm
 {
@@ -39,8 +40,8 @@ protected:
     UINT m_cbBufSize;				// size of sound buffer in bytes
     UINT m_nBufService;				// service interval in msec
     UINT m_nDuration;				// duration of wave file
-    UINT m_nTimeStarted;			// time (in system time) playback started
-    UINT m_nTimeElapsed;			// elapsed time in msec since playback started
+    u64	 m_nTimeStarted;			// time (in system time) playback started
+    u64	 m_nTimeElapsed;			// elapsed time in msec since playback started
 
 	BOOL m_bLooped;					// Loop control
 

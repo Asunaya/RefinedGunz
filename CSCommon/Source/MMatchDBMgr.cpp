@@ -401,8 +401,8 @@ void MMatchDBMgr::LogCallback( const string& strLog )
 }
 
 
-#define _STATUS_DB_START	unsigned long int nStatusStartTime = timeGetTime();
-#define _STATUS_DB_END(nID) MGetServerStatusSingleton()->AddDBQuery(nID, timeGetTime()-nStatusStartTime);
+#define _STATUS_DB_START	unsigned long int nStatusStartTime = GetGlobalTimeMS();
+#define _STATUS_DB_END(nID) MGetServerStatusSingleton()->AddDBQuery(nID, GetGlobalTimeMS()-nStatusStartTime);
 
 bool MMatchDBMgr::GetLoginInfo(const TCHAR* szUserID, unsigned int* poutnAID, TCHAR* poutPassword, int maxlen)
 {

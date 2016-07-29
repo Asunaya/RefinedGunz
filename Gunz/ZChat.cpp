@@ -67,7 +67,7 @@ bool ZChat::CheckRepeatInput(const char* szMsg)
 	if (!_stricmp(m_nLastInputMsg, szMsg)) m_nSameMsgCount++;
 	else m_nSameMsgCount = 0;
 
-	DWORD this_time = timeGetTime();
+	DWORD this_time = GetGlobalTimeMS();
 
 	if(this_time-m_nLastInputTime > ZCHAT_CLEAR_DELAY) {//10초가 지나면 같은 메시지라고 인정안함..
 		m_nSameMsgCount = 0;
@@ -92,7 +92,7 @@ bool ZChat::Input(const char* szMsg)
 	GunzState state = ZApplication::GetGameInterface()->GetState();
 
 #ifdef _PUBLISH
-	if ((timeGetTime() - m_nLastInputTime) < ZCHAT_CHAT_DELAY)
+	if ((GetGlobalTimeMS() - m_nLastInputTime) < ZCHAT_CHAT_DELAY)
 	{
 		ZGetSoundEngine()->PlaySound("if_error");
 		return false;
@@ -377,7 +377,7 @@ bool ZChat::CheckChatFilter(const char* szMsg)
 {
 	if (m_nLastAbuseTime > 0) 
 	{
-		if ((timeGetTime() - m_nLastAbuseTime) < ZCHAT_CHAT_ABUSE_COOLTIME)
+		if ((GetGlobalTimeMS() - m_nLastAbuseTime) < ZCHAT_CHAT_ABUSE_COOLTIME)
 		{
 			char szOutput[512];
 			sprintf_safe(szOutput, 
@@ -397,7 +397,7 @@ bool ZChat::CheckChatFilter(const char* szMsg)
 		m_nAbuseCounter++;
 
 		if ( m_nAbuseCounter >= 3)			// 3번 연속 욕하면 1분간 채팅금지
-			m_nLastAbuseTime = timeGetTime();
+			m_nLastAbuseTime = GetGlobalTimeMS();
 #endif
 
 		char szOutput[512];

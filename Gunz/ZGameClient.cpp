@@ -1174,7 +1174,7 @@ bool ZGameClient::OnCommand(MCommand* pCommand)
 			if (!Peer)
 				continue;
 
-			Peer->UpdatePing(timeGetTime(), Ping.Ping);
+			Peer->UpdatePing(GetGlobalTimeMS(), Ping.Ping);
 		}
 	}
 		break;
@@ -1239,7 +1239,7 @@ bool ZGameClient::OnCommand(MCommand* pCommand)
 				MUID uid;
 				if (pCommand->GetParameter(&uid, 0, MPT_UID)==false) break;
 				MCommand* pNew = new MCommand(m_CommandManager.GetCommandDescByID(MC_NET_PING), uid, m_This);
-				pNew->AddParameter(new MCommandParameterUInt(timeGetTime()));
+				pNew->AddParameter(new MCommandParameterUInt(GetGlobalTimeMS()));
 				Post(pNew);
 				return true;
 			}
@@ -1257,7 +1257,7 @@ bool ZGameClient::OnCommand(MCommand* pCommand)
 				int nTimeStamp;
 				pCommand->GetParameter(&nTimeStamp, 0, MPT_UINT);
 
-				MClient::OutputMessage(MZMOM_LOCALREPLY, "Ping from (%u:%u) = %d", pCommand->GetSenderUID().High, pCommand->GetSenderUID().Low, timeGetTime()-nTimeStamp);
+				MClient::OutputMessage(MZMOM_LOCALREPLY, "Ping from (%u:%u) = %d", pCommand->GetSenderUID().High, pCommand->GetSenderUID().Low, GetGlobalTimeMS()-nTimeStamp);
 			}
 			break;
 

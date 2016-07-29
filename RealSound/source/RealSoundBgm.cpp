@@ -292,7 +292,7 @@ void RealSoundBgm::Play( BOOL bLoop )
 															// 있게 한다.
         if( hr != DS_OK ) _D("RealSoundBgm::Play : Fail to play\n");
 		
-		m_nTimeStarted = timeGetTime ();
+		m_nTimeStarted = GetGlobalTimeMS ();
 		m_ptimer = new MMTimer ();	// 버퍼 관리를 위하여 Multimedia Timer를 구동시킨다.
 		if (m_ptimer){
 			if( !m_ptimer->Create (m_nBufService, m_nBufService, DWORD (this), TimerCallback) ){
@@ -356,7 +356,7 @@ BOOL RealSoundBgm::ServiceBuffer (void)
     {		
         // Not reentered, proceed normally
 		// Maintain elapsed time count
-        m_nTimeElapsed = timeGetTime () - m_nTimeStarted;
+        m_nTimeElapsed = GetGlobalTimeMS () - m_nTimeStarted;
 
         // Stop if all of sound has played
         if (m_nTimeElapsed < m_nDuration)

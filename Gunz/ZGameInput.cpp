@@ -89,7 +89,7 @@ bool ZGameInput::OnEvent(MEvent* pEvent)
 
 			if ( ZGetCombatInterface()->IsShowResult())
 			{
-				if ( ((ZGetCombatInterface()->m_nReservedOutTime - timeGetTime()) / 1000) < 13)
+				if ( ((ZGetCombatInterface()->m_nReservedOutTime - GetGlobalTimeMS()) / 1000) < 13)
 				{
 					if(ZGetGameClient()->IsLadderGame())
 						ZChangeGameState(GUNZ_LOBBY);
@@ -490,11 +490,11 @@ void ZGameInput::Update(float fElapsed)
 {
 	/*
 	{
-		static DWORD dwLastTime = timeGetTime();
+		static DWORD dwLastTime = GetGlobalTimeMS();
 
-		if(timeGetTime()-dwLastTime > 10 )
+		if(GetGlobalTimeMS()-dwLastTime > 10 )
 		{
-			dwLastTime = timeGetTime();
+			dwLastTime = GetGlobalTimeMS();
 			{
 				MTextArea *pTextArea = (MTextArea*)ZGetGameInterface()->GetIDLResource()->FindWidget("CombatChatOutputTest");
 				if(pTextArea)

@@ -18,7 +18,7 @@ ZEffectMesh::ZEffectMesh(RMesh* pMesh, rvector& Pos, rvector& Velocity)
 	m_Pos = Pos;
 	m_Velocity = Velocity;
 	m_fRotateAngle = 0;
-	m_nStartTime = timeGetTime();
+	m_nStartTime = GetGlobalTimeMS();
 
 	while(1) {
 

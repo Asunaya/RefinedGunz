@@ -111,7 +111,7 @@ LPDIRECT3DTEXTURE9 RMtrl::GetTexture() {
 
 	if(m_bAniTex) {
 
-		DWORD this_time = timeGetTime();
+		DWORD this_time = GetGlobalTimeMS();
 
 		DWORD gap = (this_time - m_backup_time);
 

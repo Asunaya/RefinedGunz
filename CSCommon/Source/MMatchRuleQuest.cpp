@@ -1589,14 +1589,14 @@ void MMatchRuleQuest::CollectStartingQuestGameLogInfo()
 			m_QuestGameLogInfoMgr.AddQuestPlayer( it->second->pObject->GetUID(), it->second->pObject );
 		}
 
-		m_QuestGameLogInfoMgr.SetStartTime( timeGetTime() );
+		m_QuestGameLogInfoMgr.SetStartTime( GetGlobalTimeMS() );
 	}
 }
 
 
 void MMatchRuleQuest::CollectEndQuestGameLogInfo()
 {
-	m_QuestGameLogInfoMgr.SetEndTime( timeGetTime() );
+	m_QuestGameLogInfoMgr.SetEndTime( GetGlobalTimeMS() );
 }
 
 

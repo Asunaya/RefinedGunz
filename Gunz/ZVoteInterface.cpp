@@ -101,7 +101,7 @@ void ZVoteInterface::DrawVoteMessage(MDrawContext* pDC)		// 투표가 진행중일때 메
 		pDC->SetColor(MCOLOR(0x80ffffff));
 		TextRelative(pDC,300.f/800.f,550/600.f,ZGetGameClient()->GetVoteMessage());
 
-		if(timeGetTime()/500 % 2 == 0 ) {
+		if(GetGlobalTimeMS()/500 % 2 == 0 ) {
 
 			TextRelative(pDC,300.f/800.f,565/600.f, ZMsg(MSG_VOTE_YESNO));
 		}

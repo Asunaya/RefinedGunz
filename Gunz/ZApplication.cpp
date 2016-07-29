@@ -350,8 +350,8 @@ bool ZApplication::OnCreate(ZLoadingProgress *pLoadingProgress)
 		m_nInitialState = GUNZ_NETMARBLELOGIN;
 
 	DWORD _begin_time,_end_time;
-#define BEGIN_ { _begin_time = timeGetTime(); }
-#define END_(x) { _end_time = timeGetTime(); float f_time = (_end_time - _begin_time) / 1000.f; mlog("\n-------------------> %s : %f \n\n", x,f_time ); }
+#define BEGIN_ { _begin_time = GetGlobalTimeMS(); }
+#define END_(x) { _end_time = GetGlobalTimeMS(); float f_time = (_end_time - _begin_time) / 1000.f; mlog("\n-------------------> %s : %f \n\n", x,f_time ); }
 
 	__BP(2001,"m_SoundEngine.Create");
 
@@ -650,8 +650,8 @@ void ZApplication::OnUpdate()
 	//// ANTIHACK ////
 	{
 		static DWORD dwLastAntiHackTick = 0;
-		if (timeGetTime() - dwLastAntiHackTick > 10000) {
-			dwLastAntiHackTick = timeGetTime();
+		if (GetGlobalTimeMS() - dwLastAntiHackTick > 10000) {
+			dwLastAntiHackTick = GetGlobalTimeMS();
 			if (m_GlobalDataChecker.UpdateChecksum() == false) {
 				Exit();
 			}

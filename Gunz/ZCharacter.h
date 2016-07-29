@@ -371,7 +371,7 @@ public:
 
 	void	SetInvincibleTime(int nDuration)
 	{
-		m_dwInvincibleStartTime = timeGetTime();
+		m_dwInvincibleStartTime = GetGlobalTimeMS();
 		m_dwInvincibleDuration = nDuration;
 	}
 

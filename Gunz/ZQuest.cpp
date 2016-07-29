@@ -171,7 +171,7 @@ void ZQuest::UpdateNavMeshWeight(float fDelta)
 	if ((ZGetGame()->GetTime() - m_fLastWeightTime) >= 1.0f)
 	{
 #ifdef _DEBUG
-		unsigned long int nLastTime = timeGetTime();
+		unsigned long int nLastTime = GetGlobalTimeMS();
 #endif
 
 		RNavigationMesh* pNavMesh = ZGetGame()->GetWorld()->GetBsp()->GetNavigationMesh();		
@@ -740,7 +740,7 @@ bool ZQuest::OnQuestCombatState(MCommand* pCommand)
 
 					ZChatOutput(MCOLOR(ZCOLOR_CHAT_SYSTEM_GAME), ZMsg(MSG_GAME_OPEN_PORTAL));
 
-					m_tRemainedTime = timeGetTime() + PORTAL_MOVING_TIME;
+					m_tRemainedTime = GetGlobalTimeMS() + PORTAL_MOVING_TIME;
 					m_bIsRoundClear = true;
 				}
 			}

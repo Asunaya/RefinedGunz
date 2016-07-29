@@ -157,7 +157,7 @@ void MProfiler::BeginProfile(char* szProfileName)
 	memcpy(pProfileItem->szName, szProfileName, min(MPROFILE_ITEM_NAME_LENGTH, nLen+1));
 	pProfileItem->szName[min(MPROFILE_ITEM_NAME_LENGTH-1, nLen)] = NULL;
 
-	pProfileItem->nStartTime = timeGetTime();
+	pProfileItem->nStartTime = GetGlobalTimeMS();
 	pProfileItem->nEndTime = 0;
 
 	if(m_ProfileStack.empty()==true && m_szFirstProfileName!=NULL && strcmp(m_szFirstProfileName, szProfileName)==0){	// 한 루프가 끝나면 m_pOneLoopProfile 리셋
@@ -197,7 +197,7 @@ void MProfiler::EndProfile(char* szProfileName)
 		return;
 	}
 	//_ASSERT(strcmp(pProfileItem->szName, szProfileName)==0);	// 현재 스택 Top의 값과 같은 이름의 Profile이여야 한다.
-	pProfileItem->nEndTime = timeGetTime();
+	pProfileItem->nEndTime = GetGlobalTimeMS();
 
 	/*
 	m_ProfileLoop.SetProfile(pProfileItem->nEndTime - pProfileItem->nStartTime);

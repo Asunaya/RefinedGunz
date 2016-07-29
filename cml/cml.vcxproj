@@ -374,6 +374,7 @@
     <ClInclude Include="Include\MMatrix.h" />
     <ClInclude Include="Include\MPlane.h" />
     <ClInclude Include="Include\MQuat.h" />
+    <ClInclude Include="Include\MTime.h" />
     <ClInclude Include="Include\MultiVector.h" />
     <ClInclude Include="Include\MVector3.h" />
     <ClInclude Include="Include\seed.h" />
@@ -429,6 +430,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\MMatrix.cpp" />
+    <ClCompile Include="source\MTime.cpp" />
     <ClCompile Include="Source\MVector3.cpp" />
     <ClCompile Include="source\seed.cpp" />
     <ClCompile Include="Source\CfgFile.cpp" />

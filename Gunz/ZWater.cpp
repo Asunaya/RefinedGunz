@@ -101,7 +101,7 @@ void ZWaterList::Clear()
 
 void ZWaterList::Update()
 {
-	DWORD currentTime = timeGetTime();
+	DWORD currentTime = GetGlobalTimeMS();
 	if( (currentTime - m_dwTime) < WATER_UPDATE_INTERVAL ) return;
 	m_dwTime = currentTime;	
 
@@ -447,7 +447,7 @@ bool ZWater::RenderReflectionSurface()
 
 	if(RIsAvailUserClipPlane())
 	{
-		ZGetEffectManager()->Draw(timeGetTime());
+		ZGetEffectManager()->Draw(GetGlobalTimeMS());
 		ZGetGame()->GetWorld()->GetFlags()->Draw();
 	}
 
@@ -766,7 +766,7 @@ bool ZWater::Pick( rvector& o, rvector& d, rvector* pPos )
 
 void ZWater::Ripple( rvector& pos, int iAmplitude, float fFrequency )
 {
-	DWORD dwTime = timeGetTime();
+	DWORD dwTime = GetGlobalTimeMS();
 	for( int i = 0; i <m_nVerts; ++i )
 	{
 		float fDist = D3DXVec3Length(&(rvector(pos-m_pVerts[i])));

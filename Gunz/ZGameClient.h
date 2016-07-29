@@ -230,7 +230,7 @@ public:
 	bool GetRejectInvite()				{ return m_bRejectInvite; }
 	void SetRejectInvite(bool bVal)		{ m_bRejectInvite = bVal; }
 
-	unsigned long int GetClockCount(void) { return timeGetTime(); }		// 로컬 클럭 반환
+	unsigned long int GetClockCount(void) { return GetGlobalTimeMS(); }		// 로컬 클럭 반환
 	unsigned long int GetGlobalClockCount(void);		///< 서버와 동기된 클럭을 반환한다.
 
 	virtual void OutputMessage(const char* szMessage, MZMOMType nType=MZMDM_GENERAL);

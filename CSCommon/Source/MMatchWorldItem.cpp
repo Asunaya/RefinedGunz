@@ -76,7 +76,7 @@ void MMatchWorldItemManager::Update()
 	if (!m_bStarted) return;
 	if (m_pMatchStage == NULL) return;
 
-	unsigned long int nNowTime = timeGetTime();
+	unsigned long int nNowTime = GetGlobalTimeMS();
 	unsigned long int nDeltaTime = 0;
 
 	if (m_nLastTime != 0) nDeltaTime = nNowTime - m_nLastTime;	

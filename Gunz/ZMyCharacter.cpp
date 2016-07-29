@@ -1087,7 +1087,7 @@ void ZMyCharacter::OnShotCustom()
 	if(m_pVMesh->IsSelectWeaponGrenade()) {	//모션만 시작된다..
 		// 수류탄 던지는 특정 프레임에서 발사..
 		m_pVMesh->m_bGrenadeFire = true;
-		m_pVMesh->m_GrenadeFireTime = timeGetTime();
+		m_pVMesh->m_GrenadeFireTime = GetGlobalTimeMS();
 	}
 
 //	ZPostShot(g_pGame->GetTime(),v1, dir);

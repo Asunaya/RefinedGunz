@@ -16,7 +16,7 @@ public:
 	ZGameTimer()			{ m_nTickTime=0; m_nGlobalOffset=0; m_dwUpdateCnt=0;}
 	virtual ~ZGameTimer()	{}
 
-	void Reset()			{ m_nTickTime = timeGetTime(); m_dwUpdateCnt = 0;}
+	void Reset()			{ m_nTickTime = GetGlobalTimeMS(); m_dwUpdateCnt = 0;}
 	void UpdateTick(unsigned long nTickTime) {
 		m_nTickTime = nTickTime;
 		m_dwUpdateCnt++;

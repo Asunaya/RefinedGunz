@@ -18,6 +18,7 @@
 #include "winsock2.h"
 #include "MWidget.h"
 
+#include "MTime.h"
 #include "SafeString.h"
 
 #endif

@@ -12,7 +12,7 @@
 ZEffectLightFragment::ZEffectLightFragment(ZEffectBillboardSource* pEffectBillboardSource, rvector& Pos, rvector& Velocity)
 : ZEffectBillboard(pEffectBillboardSource)
 {
-	m_nStartTime = timeGetTime();
+	m_nStartTime = GetGlobalTimeMS();
 	m_nPrevTime = m_nStartTime;
 	m_OrigPos = m_Pos = Pos;
 	m_Velocity = Velocity;
@@ -54,7 +54,7 @@ bool ZEffectLightFragment::Draw(unsigned long int nTime)
 ZEffectLightFragment2::ZEffectLightFragment2(LPDIRECT3DTEXTURE9 pEffectBillboardTexture, rvector& Pos, rvector& Velocity)
 : ZEffectBillboard2(pEffectBillboardTexture)
 {
-	m_nStartTime = timeGetTime();
+	m_nStartTime = GetGlobalTimeMS();
 	m_nPrevTime = m_nStartTime;
 	m_OrigPos = m_Pos = Pos;
 	m_Velocity = Velocity;

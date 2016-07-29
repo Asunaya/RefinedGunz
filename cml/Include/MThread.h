@@ -4,6 +4,8 @@
 
 #include <windows.h>
 #include <MMsystem.h>
+#include "MTime.h"
+#include "GlobalTypes.h"
 
 
 class MThread {
@@ -28,16 +30,16 @@ public:
 };
 
 class MTime {
-	DWORD	m;
-	DWORD	q;
-	DWORD	a;
-	DWORD	r;
-	DWORD	seed;
+	u32	m;
+	u32	q;
+	u32	a;
+	u32	r;
+	u32	seed;
 
 public:
 	MTime() {
 		m=2147483647; q=127773; a=16807; r=2836;
-		seed = timeGetTime();
+		seed = static_cast<u32>(GetGlobalTimeMS());
 	}
 	unsigned long Random(void);
 	int MakeNumber(int nFrom, int nTo);

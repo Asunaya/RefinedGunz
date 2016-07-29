@@ -110,7 +110,7 @@ RDynamicLightManager::~RDynamicLightManager()
 void RDynamicLightManager::Update()
 {
 	float lastTime = mTime;
-	mTime = timeGetTime();
+	mTime = GetGlobalTimeMS();
 	float lap = mTime - lastTime;
 	
 	// 등록된 라이트가 없으면 그냥 반환

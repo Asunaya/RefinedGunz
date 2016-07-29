@@ -77,7 +77,7 @@ void MMatchPremiumIPCache::AddIP(DWORD dwIP, bool bPremiumIP)
 	// db 검사후 IP를 추가하는 것이니 DB가 살아있다는 증거
 	m_nDBFailedCount = 0;
 
-	MMatchPremiumIPNode node(dwIP, timeGetTime());
+	MMatchPremiumIPNode node(dwIP, GetGlobalTimeMS());
 
 	if (bPremiumIP)
 	{
@@ -106,7 +106,7 @@ void MMatchPremiumIPCache::OnDBFailed()
 void MMatchPremiumIPCache::Update()
 {
 	static DWORD tmLastUpdate = 0;
-	DWORD tmNow = timeGetTime();
+	DWORD tmNow = GetGlobalTimeMS();
 	if (tmNow - tmLastUpdate < MAX_PREMIUMIP_CACHE_TICK) {
 		return;
 	} else {

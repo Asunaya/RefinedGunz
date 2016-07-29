@@ -69,7 +69,7 @@ void ZMatch::SetRound(int nCurrRound)
 
 void ZMatch::Update(float fDelta)
 {
-	m_nNowTime = timeGetTime();
+	m_nNowTime = GetGlobalTimeMS();
 
 	switch (GetRoundState())
 	{
@@ -144,7 +144,7 @@ void ZMatch::ProcessRespawn()
 
 int ZMatch::GetRoundReadyCount(void)
 {
-	return ( READY_COUNT - (timeGetTime() - m_nStartTime) / 1000 );
+	return ( READY_COUNT - (GetGlobalTimeMS() - m_nStartTime) / 1000 );
 }
 
 
@@ -614,12 +614,12 @@ int ZMatch::GetRemainedSpawnTime()
 
 void ZMatch::SetRoundStartTime( void)
 {
-	m_dwStartTime = timeGetTime();
+	m_dwStartTime = GetGlobalTimeMS();
 }
 
 DWORD ZMatch::GetRemaindTime( void)
 {
-	return ( timeGetTime() - m_dwStartTime);
+	return ( GetGlobalTimeMS() - m_dwStartTime);
 }
 
 

@@ -1266,10 +1266,10 @@ void MMatchServer::OnRequestSpawn(const MUID& uidChar, const MVector& pos, const
 	}
 
 	// 마지막 죽었던 시간과 새로 리스폰을 요청한 시간 사이에 5초 이상의 시간이 있었는지 검사한다.
-	DWORD dwTime = timeGetTime() - pObj->GetLastSpawnTime();;
+	DWORD dwTime = GetGlobalTimeMS() - pObj->GetLastSpawnTime();;
 	if ( dwTime < 5000)
 		return;
-	pObj->SetLastSpawnTime( timeGetTime());
+	pObj->SetLastSpawnTime( GetGlobalTimeMS());
 
 
 	MMatchStage* pStage = FindStage(pObj->GetStageUID());

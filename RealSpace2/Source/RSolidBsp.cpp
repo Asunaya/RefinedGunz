@@ -176,7 +176,7 @@ void RSolidBspNode::DrawSolidPolygonNormal()
 void RSolidBspNode::DrawPos(rvector &pos)
 {
 	if(nPolygon) {
-		if((timeGetTime()/500) %2 == 0) {
+		if((GetGlobalTimeMS()/500) %2 == 0) {
 			RGetDevice()->SetFVF( D3DFVF_XYZ );
 			RGetDevice()->SetRenderState(D3DRS_ZENABLE, FALSE );
 			RGetDevice()->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
@@ -210,7 +210,7 @@ void RSolidBspNode::DrawPos(rvector &pos)
 void RSolidBspNode::DrawPlaneVertices(rplane &plane)
 {
 	if(nPolygon) {
-		if((timeGetTime()/500) %2 == 0) {
+		if((GetGlobalTimeMS()/500) %2 == 0) {
 			RGetDevice()->SetFVF( D3DFVF_XYZ );
 			RGetDevice()->SetRenderState(D3DRS_ZENABLE, FALSE );
 			RGetDevice()->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);

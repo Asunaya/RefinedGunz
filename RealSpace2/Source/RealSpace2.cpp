@@ -57,7 +57,7 @@ int	g_nVidioMemory = 0;
 
 int g_nFrameCount=0,g_nLastFrameCount=0;
 float g_fFPS=0;
-DWORD g_dwLastFPSTime=timeGetTime();
+DWORD g_dwLastFPSTime=GetGlobalTimeMS();
 
 bool		g_bTrilinear=true;
 const bool	bTripleBuffer=false;
@@ -664,7 +664,7 @@ void RFlip()
 
 	{
 		g_nFrameCount++;
-		DWORD currentTime=timeGetTime();
+		DWORD currentTime=GetGlobalTimeMS();
 		if(g_dwLastFPSTime+FPS_INTERVAL<currentTime)
 		{
 			g_fFPS=(g_nFrameCount-g_nLastFrameCount)*FPS_INTERVAL/((float)(currentTime-g_dwLastFPSTime)*(FPS_INTERVAL/1000));

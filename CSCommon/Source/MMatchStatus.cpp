@@ -37,7 +37,7 @@ bool MMatchStatus::Create(MMatchServer* pMatchServer)
 {
 	m_pMatchServer = pMatchServer;
 	m_bCreated = true;
-	m_nStartTime = timeGetTime();
+	m_nStartTime = GetGlobalTimeMS();
 
 	return true;
 }
@@ -50,7 +50,7 @@ void MMatchStatus::SaveToLogFile()
 	char szTemp[1024];
 
 	// 경과시간
-	sprintf_safe(szBuf, "============================\n경과시간 = %d초\n", (timeGetTime() - m_nStartTime) / 1000);
+	sprintf_safe(szBuf, "============================\n경과시간 = %d초\n", (GetGlobalTimeMS() - m_nStartTime) / 1000);
 	mlog(szBuf);
 
 	// 접속자수

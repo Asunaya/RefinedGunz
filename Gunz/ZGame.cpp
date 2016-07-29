@@ -309,7 +309,7 @@ void TestCreateEffect(int nEffIndex)
 			pEWE->SetUid( pCharacter->GetUID() );
 			pEWE->SetAlignType(1);
 			pEWE->SetScale(vScale);
-			pEWE->Draw(timeGetTime());
+			pEWE->Draw(GetGlobalTimeMS());
 		}
 
 		break;
@@ -731,7 +731,7 @@ void ZGame::Update(float fElapsed)
 	ZGetEffectManager()->Update(fElapsed);
 	ZGetScreenEffectManager()->UpdateEffects();
 
-	m_GameTimer.UpdateTick(timeGetTime());
+	m_GameTimer.UpdateTick(GetGlobalTimeMS());
 	m_fTime+=fElapsed;
 //	AdjustGlobalTime();
 
@@ -957,7 +957,7 @@ void ZGame::Draw()
 #endif
 
 	// 자살 확인
-	if ( m_bSuicide && ( timeGetTime() > m_dwReservedSuicideTime))
+	if ( m_bSuicide && ( GetGlobalTimeMS() > m_dwReservedSuicideTime))
 		ZGetGameClient()->RequestGameSuicide();
 
 
@@ -1048,7 +1048,7 @@ void ZGame::Draw()
 //		TestCreateEffects();
 #endif
 
-		ZGetEffectManager()->Draw(timeGetTime());
+		ZGetEffectManager()->Draw(GetGlobalTimeMS());
 
 		__EP(23);
 	}
@@ -1368,7 +1368,7 @@ void ZGame::OnReplayRun()
 		if(GetTime() < pItem->fTime)
 			return;
 
-//		mlog("curtime = %d ( %3.3f ) time = %3.3f , id %d \n",timeGetTime(),GetTime(),pItem->fTime,pItem->pCommand->GetID());
+//		mlog("curtime = %d ( %3.3f ) time = %3.3f , id %d \n",GetGlobalTimeMS(),GetTime(),pItem->fTime,pItem->pCommand->GetID());
 
 		//m_ReplayCommandList.erase(m_ReplayCommandList.begin());
 		
@@ -4464,7 +4464,7 @@ void ZGame::OnSetObserver(MUID& uid)
 
 void ZGame::OnPeerSpawn(MUID& uid, rvector& pos, rvector& dir)
 {
-	m_nSpawnTime = timeGetTime();
+	m_nSpawnTime = GetGlobalTimeMS();
 	SetSpawnRequested(false);
 
 	ZCharacter* pCharacter = m_CharacterManager.Find(uid);
@@ -5031,7 +5031,7 @@ void ZGame::PostHPInfo()
 
 void ZGame::PostBasicInfo()
 {
-	u64 nNowTime = timeGetTime();
+	u64 nNowTime = GetGlobalTimeMS();
 
 	if (m_pMyCharacter->GetInitialized() == false) return;
 
@@ -5234,8 +5234,8 @@ void ZGame::UpdateCombo(bool bShot)
 	if(!pTargetCharacter) return;
 
 	// test
-	static DWORD nLastShotTime = timeGetTime();
-	DWORD nNowTime = timeGetTime();
+	static DWORD nLastShotTime = GetGlobalTimeMS();
+	DWORD nNowTime = GetGlobalTimeMS();
 
 	if (bShot) 
 	{
@@ -5279,7 +5279,7 @@ void ZGame::CheckStylishAction(ZCharacter* pCharacter)
 
 void ZGame::OnReserveObserver()
 {
-	unsigned long int currentTime = timeGetTime();
+	unsigned long int currentTime = GetGlobalTimeMS();
 
 	if (currentTime - m_nReservedObserverTime > RESERVED_OBSERVER_TIME)
 	{
@@ -5302,7 +5302,7 @@ void ZGame::OnReserveObserver()
 void ZGame::ReserveObserver()
 {
 	m_bReserveObserver = true;
-	m_nReservedObserverTime = timeGetTime();
+	m_nReservedObserverTime = GetGlobalTimeMS();
 }
 
 void ZGame::ReleaseObserver()
@@ -5747,7 +5747,7 @@ bool ZGame::OnLoadReplay(ZReplayLoader* pLoader)
 	// This bugs out the replay when the target is an admin going into admin hiding
 	//ZGetGameInterface()->GetCombatInterface()->GetObserver()->SetTarget(g_pGame->m_pMyCharacter->GetUID());
 	g_bProfile=true;	
-	dwReplayStartTime=timeGetTime();
+	dwReplayStartTime=GetGlobalTimeMS();
 
 	ReplayIterator = m_ReplayCommandList.begin();
 	return true;
@@ -5757,7 +5757,7 @@ void ZGame::EndReplay()
 {
 	g_bProfile = false;
 
-	DWORD dwReplayEndTime=timeGetTime();
+	DWORD dwReplayEndTime=GetGlobalTimeMS();
 	
 	mlog("replay end. profile saved. playtime = %3.3f seconds , average fps = %3.3f \n",
 		float(dwReplayEndTime-dwReplayStartTime)/1000.f,
@@ -6268,7 +6268,7 @@ void ZGame::OnLocalOptainSpecialWorldItem(MCommand* pCommand)
 
 void ZGame::ReserveSuicide( void)
 {
-	m_dwReservedSuicideTime = timeGetTime() + 10000;
+	m_dwReservedSuicideTime = GetGlobalTimeMS() + 10000;
 	m_bSuicide = true;
 }
 

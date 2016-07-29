@@ -368,7 +368,7 @@ ZGameInterface::ZGameInterface(const char* szName, MWidget* pParent, MListener* 
 	m_nLocServ = 0;
 
 	m_dwHourCount = 0;
-	m_dwTimeCount = timeGetTime() + 3600000;
+	m_dwTimeCount = GetGlobalTimeMS() + 3600000;
 
 	// Lobby Bitmap
 	if ( m_pRoomListFrame != NULL)
@@ -435,8 +435,8 @@ ZGameInterface::~ZGameInterface()
 bool ZGameInterface::InitInterface(const char* szSkinName, ZLoadingProgress *pLoadingProgress)
 {
 	DWORD _begin_time,_end_time;
-#define BEGIN_ { _begin_time = timeGetTime(); }
-#define END_(x) { _end_time = timeGetTime(); float f_time = (_end_time - _begin_time) / 1000.f; mlog("%s : %f \n", x,f_time ); }
+#define BEGIN_ { _begin_time = GetGlobalTimeMS(); }
+#define END_(x) { _end_time = GetGlobalTimeMS(); float f_time = (_end_time - _begin_time) / 1000.f; mlog("%s : %f \n", x,f_time ); }
 
 
 	SetObjectTextureLevel(ZGetConfiguration()->GetVideo()->nCharTexLevel);
@@ -1238,7 +1238,7 @@ void ZGameInterface::OnLoginCreate(void)
 
 	m_bLoginTimeout = false;
 	m_nLoginState = LOGINSTATE_FADEIN;
-	m_dwLoginTimer = timeGetTime();
+	m_dwLoginTimer = GetGlobalTimeMS();
 
 	// 배경 이미지 로딩
 	if ( m_pLoginBG != NULL)
@@ -2293,7 +2293,7 @@ bool ZGameInterface::SetState(GunzState nState)
 			else
 			{
 				m_nLoginState = LOGINSTATE_LOGINCOMPLETE;
-				m_dwLoginTimer = timeGetTime() + 1000;
+				m_dwLoginTimer = GetGlobalTimeMS() + 1000;
 				return true;
 			}
 		}
@@ -2393,7 +2393,7 @@ void ZGameInterface::OnDrawStateGame(MDrawContext* pDC)
 
 			if(m_bLeaveBattleReserved)
 			{
-				int nSeconds = (m_dwLeaveBattleTime - timeGetTime() + 999 ) / 1000;
+				int nSeconds = (m_dwLeaveBattleTime - GetGlobalTimeMS() + 999 ) / 1000;
 				m_pCombatInterface->SetDrawLeaveBattle(m_bLeaveBattleReserved,nSeconds);
 			}else
 				m_pCombatInterface->SetDrawLeaveBattle(false,0);
@@ -2444,7 +2444,7 @@ void ZGameInterface::OnDrawStateLogin(MDrawContext* pDC)
 	{
 		char szMsg[ 128];
 		memset( szMsg, 0, sizeof( szMsg));
-        int nCount = ( timeGetTime() / 800) % 4;
+        int nCount = ( GetGlobalTimeMS() / 800) % 4;
 		for ( int i = 0;  i < nCount;  i++)
 			szMsg[ i] = '<';
 		sprintf_safe( szMsg, "%s %s ", szMsg, "Connecting");
@@ -2474,7 +2474,7 @@ void ZGameInterface::OnDrawStateLogin(MDrawContext* pDC)
 	}
 
 
-	DWORD dwCurrTime = timeGetTime();
+	DWORD dwCurrTime = GetGlobalTimeMS();
 
 	// Check timeout
 	if ( m_bLoginTimeout && (m_dwLoginTimeout <= dwCurrTime))
@@ -2524,7 +2524,7 @@ void ZGameInterface::OnDrawStateLogin(MDrawContext* pDC)
 	{
 		m_bLoginTimeout = false;
 
-		if ( timeGetTime() > m_dwLoginTimer)
+		if ( GetGlobalTimeMS() > m_dwLoginTimer)
 		{
 			m_nLoginState = LOGINSTATE_STANDBY;
 			pWidget->Show( true);
@@ -2535,7 +2535,7 @@ void ZGameInterface::OnDrawStateLogin(MDrawContext* pDC)
 	{
 #ifdef _LOCATOR
 		// Refresh server status info
-		if ( timeGetTime() > m_dwRefreshTime)
+		if ( GetGlobalTimeMS() > m_dwRefreshTime)
 			RequestServerStatusListInfo();
 #endif
 	}
@@ -2544,7 +2544,7 @@ void ZGameInterface::OnDrawStateLogin(MDrawContext* pDC)
 	{
 		m_bLoginTimeout = false;
 
-		if ( timeGetTime() > m_dwLoginTimer)
+		if ( GetGlobalTimeMS() > m_dwLoginTimer)
 			m_nLoginState = LOGINSTATE_FADEOUT;
 
 		if ( pConnectingLabel)
@@ -2582,7 +2582,7 @@ void ZGameInterface::OnDrawStateLobbyNStage(MDrawContext* pDC)
 {
 	ZIDLResource* pRes = ZApplication::GetGameInterface()->GetIDLResource();
 
-	DWORD dwClock = timeGetTime();
+	DWORD dwClock = GetGlobalTimeMS();
 	if ( (dwClock - m_dwFrameMoveClock) < 30)
 		return;
 	m_dwFrameMoveClock = dwClock;
@@ -2763,7 +2763,7 @@ void ZGameInterface::OnDrawStateLobbyNStage(MDrawContext* pDC)
 
 
 		// 광선 이미지 Opacity 조절
-		int nOpacity = 90.0f * ( sin( timeGetTime() * 0.003f) + 1) + 75;
+		int nOpacity = 90.0f * ( sin( GetGlobalTimeMS() * 0.003f) + 1) + 75;
 
 		MLabel* pLabel = (MLabel*)pRes->FindWidget( "Stage_SenarioName");
 		MPicture* pPicture = (MPicture*)pRes->FindWidget( "Stage_Lights0");
@@ -2815,7 +2815,7 @@ void ZGameInterface::OnDrawStateCharSelection(MDrawContext* pDC)
 		m_pCharacterSelectView->Draw();
 
 		// Draw effects(smoke, cloud)
-		ZGetEffectManager()->Draw( timeGetTime());
+		ZGetEffectManager()->Draw( GetGlobalTimeMS());
 
 		// Draw maiet logo effect
 		ZGetScreenEffectManager()->DrawEffects();
@@ -2874,7 +2874,7 @@ void ZGameInterface::OnDraw(MDrawContext *pDC)
 
 	// 청소년 자율 규제 적용안(쓰벌쓰벌쓰벌...). 1시간마다 메시지 조낸 날리는거다...
 #ifdef LOCALE_KOREA			// 한국에서만 이짓거리 한당...
-	if ( timeGetTime() >= m_dwTimeCount)
+	if ( GetGlobalTimeMS() >= m_dwTimeCount)
 	{
 		m_dwTimeCount += 3600000;
 		m_dwHourCount++;
@@ -3401,7 +3401,7 @@ bool ZGameInterface::Update(float fElapsed)
         // 임시로
 		MLabel *pLabel = (MLabel*)m_IDLResource.FindWidget("LobbyWaitingArrangedGameLabel");
 		if(pLabel) {
-			int nCount = (timeGetTime()/500)%5;
+			int nCount = (GetGlobalTimeMS()/500)%5;
 			char dots[10];
 			for(int i=0;i<nCount;i++) {
 				dots[i]='.';
@@ -3417,7 +3417,7 @@ bool ZGameInterface::Update(float fElapsed)
 	UpdateCursorEnable();
 
 	// 실제 게임에서 나가는 펑션을 부른다
-	if(g_pGame!=NULL && m_bLeaveBattleReserved && (m_dwLeaveBattleTime < timeGetTime()))
+	if(g_pGame!=NULL && m_bLeaveBattleReserved && (m_dwLeaveBattleTime < GetGlobalTimeMS()))
 		LeaveBattle();
 
 	__EP(13);
@@ -3511,7 +3511,7 @@ void ZGameInterface::Reload()
 void ZGameInterface::SaveScreenShot()
 {
 	static unsigned long int st_nLastTime = 0;
-	unsigned long int nNowTime = timeGetTime();
+	unsigned long int nNowTime = GetGlobalTimeMS();
 #define SCREENSHOT_DELAY		2000
 
 	// 2초 딜레이
@@ -3977,7 +3977,7 @@ void ZGameInterface::BringAccountItem(void)
 		{
 			// 막 누르는 것 방지
 			static unsigned long int st_LastRequestTime = 0;
-			unsigned long int nNowTime = timeGetTime();
+			unsigned long int nNowTime = GetGlobalTimeMS();
 			if ((nNowTime - st_LastRequestTime) >= 1000)
 			{
 				ZPostRequestBringAccountItem(ZGetGameClient()->GetPlayerUID(), nAIID);
@@ -5433,7 +5433,7 @@ void ZGameInterface::ReserveLeaveBattle()
 	}
 
 	m_bLeaveBattleReserved = true;
-	m_dwLeaveBattleTime = timeGetTime() + 5000;
+	m_dwLeaveBattleTime = GetGlobalTimeMS() + 5000;
 }
 
 void ZGameInterface::ShowMenu(bool bEnable)
@@ -5978,7 +5978,7 @@ string GetPeriodItemString( ZMyItemNode* pRentalNode)
 		if ( (pRentalNode->GetRentMinutePeriodRemainder() < RENT_MINUTE_PERIOD_UNLIMITED))
 		{
 			DWORD dwRemaind = pRentalNode->GetRentMinutePeriodRemainder();
-			DWORD dwRecievedClock = (timeGetTime() - pRentalNode->GetWhenReceivedClock()) / 60000;
+			DWORD dwRecievedClock = (GetGlobalTimeMS() - pRentalNode->GetWhenReceivedClock()) / 60000;
 
 			if ( dwRemaind < dwRecievedClock)
 			{
@@ -6708,7 +6708,7 @@ void ZGameInterface::OnResponseServerStatusInfoList( const int nListCount, void*
 	else
 		pServerList->SetCurrSel(-1);
 
-	m_dwRefreshTime = timeGetTime() + 10000;
+	m_dwRefreshTime = GetGlobalTimeMS() + 10000;
 }
 
 
@@ -6776,7 +6776,7 @@ void ZGameInterface::RequestServerStatusListInfo()
 		delete pCmd;
 	}
 
-	m_dwRefreshTime = timeGetTime() + 1500;
+	m_dwRefreshTime = GetGlobalTimeMS() + 1500;
 }
 
 

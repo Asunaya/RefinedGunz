@@ -369,7 +369,7 @@ void RCharCloth::update( bool bGame,rmatrix* pWorldMat_, float fDist_ )
 	updateCO();
 	updatePosition( pWorldMat_ );
 
-	DWORD currTime = timeGetTime();
+	DWORD currTime = GetGlobalTimeMS();
 	if( currTime - mTime < 10 )
 	{
 		return;

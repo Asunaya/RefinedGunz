@@ -9,7 +9,7 @@
 ZEffectSmoke::ZEffectSmoke(ZEffectBillboardSource* pEffectBillboardSource, rvector& Pos, rvector& Velocity, float fMinScale, float fMaxScale, unsigned long int nLifeTime)
 : ZEffectBillboard(pEffectBillboardSource)
 {
-	m_nStartTime = timeGetTime();
+	m_nStartTime = GetGlobalTimeMS();
 	m_OrigPos = m_Pos = Pos;
 	m_fMinScale = fMinScale;
 	m_fMaxScale = fMaxScale;
@@ -48,7 +48,7 @@ bool ZEffectSmoke::Draw(unsigned long int nTime)
 ZEffectLandingSmoke::ZEffectLandingSmoke(ZEffectBillboardSource* pEffectBillboardSource, rvector& Pos, rvector& Normal, float fMinScale, float fMaxScale, unsigned long int nLifeTime)
 : ZEffectBillboard(pEffectBillboardSource)
 {
-	m_nStartTime = timeGetTime();
+	m_nStartTime = GetGlobalTimeMS();
 	m_OrigPos = m_Pos = Pos;
 	m_fMinScale = fMinScale;
 	m_fMaxScale = fMaxScale;
@@ -126,7 +126,7 @@ bool ZEffectSmokeGrenade::Draw( unsigned long int nTime )
 ZEffectSmokeGrenade::ZEffectSmokeGrenade( ZEffectBillboardSource* pEffectBillboardSource, rvector& Pos, rvector& Velocity, float fMinScale, float fMaxScale, unsigned long int nLifeTime ) 
 : ZEffectBillboard(pEffectBillboardSource)
 {
-	m_nStartTime = timeGetTime();
+	m_nStartTime = GetGlobalTimeMS();
 	m_OrigPos = m_Pos = Pos;
 	m_fMinScale = fMinScale;
 	m_fMaxScale = fMaxScale;
@@ -149,7 +149,7 @@ ZEffectDash::ZEffectDash(ZEffectBillboardSource* pESource1,ZEffectBillboardSourc
 {
 //	ZEffectBillboard::ZEffectBillboard(pESource1);
 //	SetSource(m_pESource1);
-	m_nStartTime = timeGetTime();
+	m_nStartTime = GetGlobalTimeMS();
 	m_OrigPos = m_Pos = Pos;
 	m_nLifeTime = _DASH_LIFE_TIME;
 //	m_nDrawMode = ZEDM_ALPHAMAP;

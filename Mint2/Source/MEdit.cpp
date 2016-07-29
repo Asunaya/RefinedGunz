@@ -794,7 +794,7 @@ void MEditLook::OnTextDraw(MEdit* pEdit, MDrawContext* pDC, bool bShowLanguageTa
 		//else
 		{
 			// Caret
-			long nCurrTime = timeGetTime();
+			long nCurrTime = GetGlobalTimeMS();
 			if((nCurrTime%(MEDIT_BLINK_TIME*2))>MEDIT_BLINK_TIME){
 				//pDC->Text(r.x+nWidth-1, r.y, "|");
 //				r.x+=nCaretPosInWidget-(int)((float)pFont->GetHeight()*0.3f);

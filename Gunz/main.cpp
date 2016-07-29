@@ -375,8 +375,8 @@ RRESULT OnUpdate(void* pParam)
 #ifdef _XTRAP
 	// XTrap 주기적인 체크
 #define XTRAP_INTERVAL 5000
-	static DWORD xTrapLastTime = timeGetTime();
-	DWORD currentTime=timeGetTime();
+	static DWORD xTrapLastTime = GetGlobalTimeMS();
+	DWORD currentTime=GetGlobalTimeMS();
 	if(xTrapLastTime+XTRAP_INTERVAL<currentTime)
 	{
 		xTrapLastTime=currentTime;

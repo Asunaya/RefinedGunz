@@ -233,7 +233,7 @@ ZWorldItem *ZWorldItemManager::AddWorldItem( int nID, short nItemID,MTD_WorldIte
 		pWorldItem->SetName( pDesc->m_szDescName );
 		pWorldItem->SetModelName( pDesc->m_szModelName );
 		pWorldItem->SetType(pDesc->m_nItemType );
-		pWorldItem->m_dwStartTime = timeGetTime();
+		pWorldItem->m_dwStartTime = GetGlobalTimeMS();
 
 		if(pDesc->m_nItemType==WIT_QUEST) {
 			pWorldItem->CreateVisualMesh();
@@ -474,7 +474,7 @@ void ZWorldItemDrawer::DrawWorldItem( ZWorldItem* pWorldItem, bool Rotate )
 
 	float fVis = 1.f;
 
-	DWORD thistime = timeGetTime();
+	DWORD thistime = GetGlobalTimeMS();
 
 	if( (pWorldItem->GetType()!=WIT_CLIENT)
 		&& (pWorldItem->GetSubType() != MTD_Static) )

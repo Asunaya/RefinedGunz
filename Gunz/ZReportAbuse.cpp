@@ -34,7 +34,7 @@ ZReportAbuse::~ZReportAbuse()
 
 void ZReportAbuse::Report(const char* szReason)
 {
-	unsigned long int nNowTime = timeGetTime();
+	unsigned long int nNowTime = GetGlobalTimeMS();
 	if ((nNowTime - m_nReportTime) < REPORT_ABUSE_COOL_TIME)
 	{
 		ZChatOutput( ZMsg(MSG_119_REPORT_WAIT_ONEMINUTE) );
@@ -58,7 +58,7 @@ void ZReportAbuse::OutputString(const char* szStr)
 	free(pPureText);
 
 	m_ChatHistory[m_nChatTop].str = temp;
-	m_ChatHistory[m_nChatTop].timestamp = timeGetTime();
+	m_ChatHistory[m_nChatTop].timestamp = GetGlobalTimeMS();
 
 	m_nChatTop++;
 	if (m_nChatTop >= REPORT_MAX_HISTORY) m_nChatTop = 0;
@@ -93,7 +93,7 @@ void ZReportAbuse::SendFile()
 
 void ZReportAbuse::SaveFile()
 {
-	unsigned long int nNowTime = timeGetTime();
+	unsigned long int nNowTime = GetGlobalTimeMS();
 
 	FILE* fp = fopen(REPORT_ABUSE_FILENAME, "wt");
 	if (fp == NULL) return;

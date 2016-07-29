@@ -12,7 +12,7 @@
 ZEffectLightTracer::ZEffectLightTracer(ZEffectBillboardSource* pEffectBillboardSource, D3DXVECTOR3& Start, D3DXVECTOR3& End)
 : ZEffectBillboard(pEffectBillboardSource)
 {
-	m_nStartTime = timeGetTime();
+	m_nStartTime = GetGlobalTimeMS();
 	m_Start = Start;
 	m_End = End;
 	m_Scale.x = LIGHTTRACTER_LENGTH;

@@ -889,12 +889,12 @@ bool ZOptionInterface::SetTimer( bool b, float time /* = 0.f  */ )
 
 	if( !mbTimer )
 	{
-		mTimerTime	= timeGetTime();
+		mTimerTime	= GetGlobalTimeMS();
 		mbTimer		= true;
 		DeadTime		= time*1000;
 	}
 
-	if(( timeGetTime() - mTimerTime ) > DeadTime )
+	if(( GetGlobalTimeMS() - mTimerTime ) > DeadTime )
 	{
 		DeadTime = 0;
 		mbTimer	= false;
@@ -903,7 +903,7 @@ bool ZOptionInterface::SetTimer( bool b, float time /* = 0.f  */ )
 	else
 	{
 		char szBuf[128];
-		sprintf_safe(szBuf, "%d", min(max( (10 - (int)(( timeGetTime() - mTimerTime ) * 0.001)),0),10));
+		sprintf_safe(szBuf, "%d", min(max( (10 - (int)(( GetGlobalTimeMS() - mTimerTime ) * 0.001)),0),10));
 
 		char szText[ 128];
 		ZTransMsg( szText, MSG_BACKTOTHEPREV, 1, szBuf);

@@ -82,7 +82,7 @@ void ZRadar::OnDraw(MDrawContext* pDC)
 	if (ret == false) return;
 
 
-	unsigned long int currentTime = timeGetTime();
+	unsigned long int currentTime = GetGlobalTimeMS();
 	for (int i = 0; i < 8; i++)
 	{
 		if (m_Nodes[i].bShoted)
@@ -172,7 +172,7 @@ void ZRadar::OnAttack(rvector& pAttackerPos)
 
 	if (nIndex > 0)
 	{
-		m_Nodes[nIndex-1].nLastShotTime = timeGetTime();
+		m_Nodes[nIndex-1].nLastShotTime = GetGlobalTimeMS();
 		m_Nodes[nIndex-1].bShoted = true;
 	}
 }

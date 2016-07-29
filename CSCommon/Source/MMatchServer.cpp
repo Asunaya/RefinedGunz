@@ -586,7 +586,7 @@ bool MMatchServer::Create(int nPort)
 	// set buffer overrun error handler /GS
 	//SetSecurityErrorHandler(ReportBufferOverrun);
 
-	srand(timeGetTime());
+	srand(GetGlobalTimeMS());
 
 	m_NextUseUID.SetZero();
 	m_NextUseUID.Increase(10);	// 10 아래의 UID는 사용안함
@@ -761,7 +761,7 @@ void MMatchServer::OnRun(void)
 #endif
 	MGetServerStatusSingleton()->SetRunStatus(100);
 	// tick count
-	SetTickTime(timeGetTime());
+	SetTickTime(GetGlobalTimeMS());
 
 	// 스케쥴러 목록 업데이트.
 	if (m_pScheduler)
@@ -1032,8 +1032,8 @@ void MMatchServer::UpdateServerLog()
 #define SERVER_LOG_TICK		(60000)	// 1분 (1000 * 60)
 
 	static unsigned long int st_nElapsedTime = 0;
-	static unsigned long int nLastTime = timeGetTime();
-	unsigned long int nNowTime = timeGetTime();
+	static unsigned long int nLastTime = GetGlobalTimeMS();
+	unsigned long int nNowTime = GetGlobalTimeMS();
 
 	st_nElapsedTime += (nNowTime - nLastTime);
 
@@ -1059,8 +1059,8 @@ void MMatchServer::UpdateServerStatusDB()
 #define SERVER_STATUS_TICK		(30000)	// 30초 (1000 * 30)
 
 	static unsigned long int st_nElapsedTime = 0;
-	static unsigned long int nLastTime = timeGetTime();
-	unsigned long int nNowTime = timeGetTime();
+	static unsigned long int nLastTime = GetGlobalTimeMS();
+	unsigned long int nNowTime = GetGlobalTimeMS();
 
 	st_nElapsedTime += (nNowTime - nLastTime);
 
@@ -1877,7 +1877,7 @@ MMatchServer* MMatchServer::GetInstance(void)
 
 unsigned long int MMatchServer::GetGlobalClockCount(void)
 {
-	unsigned long int i = timeGetTime();
+	unsigned long int i = GetGlobalTimeMS();
 	return i;
 }
 
@@ -2344,7 +2344,7 @@ void MMatchServer::InsertChatDBLog(const MUID& uidPlayer, const char* szMsg)
 {
 	MMatchObject* pObj = GetObject(uidPlayer);
 	if (pObj == NULL) return;
-	unsigned long int nNowTime = timeGetTime();
+	unsigned long int nNowTime = GetGlobalTimeMS();
 
 	static int stnLogTop = 0;
 #define MAX_CHAT_LOG 1
@@ -2358,7 +2358,7 @@ void MMatchServer::InsertChatDBLog(const MUID& uidPlayer, const char* szMsg)
 
 	stChatLog[stnLogTop].nCID = pObj->GetCharInfo()->m_nCID;
 	if (strlen(szMsg) < 256) strcpy_safe(stChatLog[stnLogTop].szMsg, szMsg); else strcpy_safe(stChatLog[stnLogTop].szMsg, "");
-	stChatLog[stnLogTop].nTime = timeGetTime();
+	stChatLog[stnLogTop].nTime = GetGlobalTimeMS();
 	stnLogTop++;
 
 	// 일정 개수가 될때만 DB에 넣는다.

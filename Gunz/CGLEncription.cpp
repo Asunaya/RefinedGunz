@@ -29,7 +29,7 @@ bool CGLEncription::CreateSerialKey()
     
 
 	// Get limited time
-	DWORD dwLimitedTime = timeGetTime() + 60000;
+	DWORD dwLimitedTime = GetGlobalTimeMS() + 60000;
 	char szTime[ 20];
 	memset( szTime, 0, sizeof(szTime));
 	sprintf_safe( szTime, "%X", dwLimitedTime);
@@ -242,8 +242,8 @@ int CGLEncription::Decription( void)
 
 	// Check time
 	DWORD dwTime = atodw( szTime);
-	DWORD dwCurrTime = timeGetTime();
-	if ( (DWORD)atodw( szTime) < timeGetTime())
+	DWORD dwCurrTime = GetGlobalTimeMS();
+	if ( (DWORD)atodw( szTime) < GetGlobalTimeMS())
 	{
 		mlog( "Serialkey error : 206\n");
 		return false;
