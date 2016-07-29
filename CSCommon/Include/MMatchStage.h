@@ -97,6 +97,8 @@ private:
 
 	char					m_szFirstMasterName[MATCHOBJECT_NAME_LENGTH];
 
+	u64 LastPhysicsTick = 0;
+
 	void SetMasterUID(const MUID& uid)	{ m_StageSetting.SetMasterUID(uid);}
 	MMatchRule* CreateRule(MMATCH_GAMETYPE nGameType);
 protected:

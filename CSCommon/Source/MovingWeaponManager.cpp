@@ -84,7 +84,14 @@ void Rocket::OnCollision(MovingWeaponManager& Mgr, const v3& ColPos, const MPICK
 	constexpr auto ROCKET_KNOCKBACK_CONST = .5f;
 	auto GetOrigin = [&](const auto& Obj, auto& Origin)
 	{
-		Obj.GetPositions(nullptr, &Origin, MGetMatchServer()->GetGlobalClockCount() - Owner->GetPing() / 1000.f);
+		u64 RealTime = MGetMatchServer()->GetGlobalClockCount();
+		float CompensatedTime = 0;
+		if (&Obj == Owner)
+			CompensatedTime = RealTime / 1000.f;
+		else
+			CompensatedTime = (RealTime - Owner->GetPing()) / 1000.f;
+
+		Obj.GetPositions(nullptr, &Origin, CompensatedTime);
 	};
 
 	GrenadeExplosion(*Owner, Mgr.Stage->GetObjectList(), ColPos, ItemDesc->m_nDamage,
