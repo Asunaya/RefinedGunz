@@ -54,7 +54,8 @@ desc : 무기 사용 키 커스터마이즈 관련
 
 MImplementRTTI(ZMyCharacter, ZCharacter);
 
-ZMyCharacter::ZMyCharacter() : ZCharacter()
+#undef min
+ZMyCharacter::ZMyCharacter() : LastDamagedTime(std::numeric_limits<float>::min())
 {
 	m_fCAFactor = 1.0f;
 	m_fElapsedCAFactorTime = 0.0f;
