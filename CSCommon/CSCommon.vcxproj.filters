@@ -99,8 +99,8 @@
     <None Include="footer.html">
       <Filter>Doc</Filter>
     </None>
-    <None Include="Source\BasicInfoHistory.inl" />
     <None Include="Source\HitRegistration.inl" />
+    <None Include="Include\BasicInfoHistory.inl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\IndexPage.h">

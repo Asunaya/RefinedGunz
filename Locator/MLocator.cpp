@@ -65,8 +65,11 @@ bool MLocator::Create()
 
 	if( !GetLocatorConfig()->IsInitCompleted() )
 	{
-		if( !GetLocatorConfig()->LoadConfig() )
+		if (!GetLocatorConfig()->LoadConfig())
+		{
+			mlog("MLocator::Create - Failed to load config");
 			return false;
+		}
 	}
 		
 	if( !InitDBMgr() )

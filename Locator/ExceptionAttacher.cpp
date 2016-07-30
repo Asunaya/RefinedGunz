@@ -45,7 +45,7 @@ static bool GetRecommandLogFileName(char* pszBuf)
 
 #ifdef LOCATOR_STANDALONE
 int AFXAPI AfxWinMain(HINSTANCE hInstance, 
-					  HINSTANCE hPrevInstance,	
+					  HINSTANCE hPrevInstance,
 					  LPTSTR lpCmdLine, 
 					  int nCmdShow)
 {

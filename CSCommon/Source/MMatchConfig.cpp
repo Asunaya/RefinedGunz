@@ -215,14 +215,29 @@ bool MMatchConfig::Create()
 	rapidxml::xml_document<> doc;
 	doc.parse<0>(&File[0]);
 
+	auto FailedToFindNode = [&](const char* Name) {
+		mlog("Failed to find %s node in server.xml!\n", Name);
+	};
+
 	auto GameDirNode = doc.first_node("game_dir");
 	if (!GameDirNode)
 	{
-		mlog("Failed to find game_dir node in server.xml!\n");
+		FailedToFindNode("game_dir");
 	}
 	else
 	{
 		GameDirectory = GameDirNode->value();
+	}
+
+	auto IsMasterServerNode = doc.first_node("is_master_server");
+	if (!IsMasterServerNode)
+	{
+		FailedToFindNode("is_master_server");
+	}
+	else
+	{
+		bIsMasterServer = atoi(IsMasterServerNode->value()) != 0;
+		MLog("IsMasterServer: %s\n", bIsMasterServer ? "true" : "false");
 	}
 
 	m_bIsComplete = true;

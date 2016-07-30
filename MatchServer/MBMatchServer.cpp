@@ -391,6 +391,24 @@ ULONG MBMatchServer::HShield_AnalyzeAckMsg(unsigned long *pCrcInfo, unsigned cha
 	return 0L;
 }
 
+void MBMatchServer::InitLocator()
+{
+	if (!MGetServerConfig()->IsMasterServer())
+		return;
+
+	Log(LOG_ALL, "Creating locator...");
+
+	Locator = std::make_unique<MLocator>();
+	if (!Locator->Create())
+	{
+		Log(LOG_ALL, "Failed to create locator");
+		Locator.reset();
+		return;
+	}
+
+	Log(LOG_ALL, "Locator created!");
+}
+
 void MBMatchServer::XTrap_RandomKeyGenW(char* strKeyValue)
 {
 #ifdef _XTRAP
@@ -520,4 +538,12 @@ bool MBMatchServer::InitHShiled()
 #endif
 
 	return true;
+}
+
+void MBMatchServer::OnRun()
+{
+	if (Locator)
+		Locator->Run();
+
+	MMatchServer::OnRun();
 }

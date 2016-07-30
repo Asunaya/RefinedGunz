@@ -5,6 +5,7 @@
 #include "MMatchGlobal.h"
 #include "MMatchConfig.h"
 #include "MUtil.h"
+#include "BasicInfoHistory.inl"
 
 
 #define CYCLE_MATCHSTAGELISTUPDATE			1000

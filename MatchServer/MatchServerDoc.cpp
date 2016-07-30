@@ -118,6 +118,8 @@ BOOL CMatchServerDoc::OnNewDocument()
 		return FALSE;
 	}
 
+	m_pMatchServer->InitLocator();
+
 /*	MCommObject* pCommObjMaster = new MCommObject(m_pMatchServer);
 	pCommObjMaster->SetUID( MUID(0,1) );
 	pCommObjMaster->SetAddress("127.0.0.1", nMasterPort);

@@ -29,6 +29,8 @@ protected:
 	/// 사용자 커맨드 처리
 	virtual bool OnCommand(MCommand* pCommand);
 
+	virtual void OnRun() override;
+
 public:
 	MBMatchServer(COutputView* pView=NULL);
 	virtual void Shutdown();
@@ -120,8 +122,10 @@ public:
 
 	char	m_strFileCrcDataPath[MAX_PATH];
 
+	void InitLocator();
+
 private:
-		std::unique_ptr<MLocator> Locator;
+	std::unique_ptr<MLocator> Locator;
 };
 
 

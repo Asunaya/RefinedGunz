@@ -257,7 +257,7 @@
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <OmitFramePointers>true</OmitFramePointers>
-      <AdditionalIncludeDirectories>../CSCommon/Include;../CML/Include;../MAI/Include;../RealSpace2/Include;../RealSpace/Include;../GunzShared/;../SafeUDP/Include;../MDatabase/Include;../MCountryFilter/Include;../libsodium/include;../sdk/dx9/Include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../CSCommon/Include;../CML/Include;../MAI/Include;../RealSpace2/Include;../RealSpace/Include;../GunzShared/;../SafeUDP/Include;../MDatabase/Include;../MCountryFilter/Include;../libsodium/include;../sdk/dx9/Include/;../Locator;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_WORLDITEM_SERVER;_WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <MinimalRebuild>false</MinimalRebuild>
@@ -715,6 +715,9 @@
     <ProjectReference Include="..\CSCommon\CSCommon.vcxproj">
       <Project>{cbd109c1-1aa3-4a57-b439-9919c08faaa5}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\Locator\Locator.vcxproj">
+      <Project>{52e0f2e1-25fe-4f22-b82c-b000972d8f5a}</Project>
     </ProjectReference>
     <ProjectReference Include="..\MCountryFilter\MCountryFilter.vcxproj">
       <Project>{43faaf56-ea88-4d3f-95b7-14a0582f3290}</Project>

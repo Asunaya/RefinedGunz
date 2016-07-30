@@ -29,6 +29,7 @@
 #include "ZModule_PoisonDamage.h"
 #include "ZModule_QuestStatus.h"
 #include "ZGameConst.h"
+#include "BasicInfoHistory.inl"
 
 #include "RGMain.h"
 #include "Portal.h"

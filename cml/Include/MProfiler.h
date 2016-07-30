@@ -5,16 +5,15 @@
 
 #include <stack>
 #include <list>
-
-using namespace std;
+#include "GlobalTypes.h"
 
 #define MPROFILE_ITEM_NAME_LENGTH	64
 
 // One Profile Item
 struct MPROFILEITEM{
 	char	szName[MPROFILE_ITEM_NAME_LENGTH];
-	int		nStartTime;
-	int		nEndTime;
+	u64		nStartTime;
+	u64		nEndTime;
 };
 
 // Accumulated Profile Log
@@ -22,19 +21,19 @@ struct MPROFILELOG{
 	char	szName[MPROFILE_ITEM_NAME_LENGTH];
 	int		nCount;
 	int		nDepth;
-	int		nTotalTime;
-	int		nMaxTime;
-	int		nMinTime;
+	u64		nTotalTime;
+	u64		nMaxTime;
+	u64		nMinTime;
 };
 
 // Temporary Profile Call Stack
-class MProfileStack : public stack<MPROFILEITEM*>{
+class MProfileStack : public std::stack<MPROFILEITEM*>{
 public:
 	virtual ~MProfileStack(void);
 };
 
 // One Loop Log
-class MProfileLoop : public list<MPROFILELOG*>{
+class MProfileLoop : public std::list<MPROFILELOG*>{
 public:
 	/*
 	void AddProfile(char* szName, int nDepth);
