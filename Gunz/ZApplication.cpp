@@ -620,8 +620,6 @@ void ZApplication::ResetTimer()
 	m_Timer.ResetFrame();
 }
 
-float g_Timescale = 1.f;
-
 void ZApplication::OnUpdate()
 {
 	__BP(0,"ZApplication::OnUpdate");
@@ -630,23 +628,22 @@ void ZApplication::OnUpdate()
 	{
 		static u64 LastRealTime = timeGetTime();
 		auto CurRealTime = timeGetTime();
-		if (g_Timescale == 1.f)
+		if (Timescale == 1.f)
 		{
 			Time += CurRealTime - LastRealTime;
 		}
 		else
 		{
 			auto Delta = double(CurRealTime - LastRealTime);
-			Time += Delta * g_Timescale;
+			Time += Delta * Timescale;
 		}
 		LastRealTime = CurRealTime;
 	}();
 
-	double fElapsed;
+	auto fElapsed = ZApplication::m_Timer.UpdateFrame();
 
-	fElapsed = ZApplication::m_Timer.UpdateFrame();
-
-	fElapsed *= g_Timescale;
+	if (Timescale != 1.f)
+		fElapsed *= Timescale;
 
 	g_RGMain->OnUpdate(fElapsed);
 

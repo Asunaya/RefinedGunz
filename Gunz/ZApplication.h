@@ -64,6 +64,7 @@ private:
 	bool					m_bLaunchDevelop;			///< 개발자버전 옵션
 	bool					m_bLaunchTest;				///< 테스트버전 옵션
 	u64 Time = 0;
+	float Timescale = 1.f;
 
 	void ParseStandAloneArguments(const char* pszArgs);
 protected:
@@ -140,6 +141,8 @@ public:
 	void PreCheckArguments();
 
 	auto GetTime() const { return Time; }
+	auto GetTimescale() const { return Timescale; }
+	void SetTimescale(float f) { Timescale = f; }
 };
 
 

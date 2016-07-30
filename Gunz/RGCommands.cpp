@@ -173,9 +173,8 @@ void LoadRGCommands(ZChatCmdManager &CmdManager)
 			return;
 		}
 
-		extern float g_Timescale;
 		float NewTimescale = atof(argv[1]);
-		g_Timescale = NewTimescale;
+		ZApplication::GetInstance()->SetTimescale(NewTimescale);
 
 		ZChatOutputF("Set timescale to %f, %s.", NewTimescale, argv[1]);
 	},
