@@ -19,7 +19,6 @@ using namespace std;
 #include "MMatchAntiHack.h"
 #include "MMatchHShield.h"
 #include "GlobalTypes.h"
-#include "stuff.h"
 #include "BasicInfoHistory.h"
 #include "HitRegistration.h"
 

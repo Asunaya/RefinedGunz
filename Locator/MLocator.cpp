@@ -711,7 +711,7 @@ const int MLocator::MakeCmdPacket( char* pOutPacket, const int nMaxSize, MComman
 
 	MCommandMsg* pMsg = reinterpret_cast< MCommandMsg* >( pOutPacket );
 
-	const nCmdSize = nMaxSize - MPACKET_HEADER_SIZE;
+	const auto nCmdSize = nMaxSize - MPACKET_HEADER_SIZE;
 
 	pMsg->Buffer[ 0 ] = 0;
 	pMsg->nCheckSum = 0;

@@ -28,7 +28,6 @@
 #include <queue>
 #include <unordered_map>
 #include "LagCompensation.h"
-#include "stuff.h"
 using namespace std;
 
 class MMatchAuthBuilder;

@@ -62,8 +62,8 @@ Global
 		{52E0F2E1-25FE-4F22-B82C-B000972D8F5A}.Release|x86.Build.0 = Release|Win32
 		{8D451493-65C2-49C3-ADAE-ACB17E6B0650}.Debug_tracememory|x64.ActiveCfg = Debug_tracememory|Win32
 		{8D451493-65C2-49C3-ADAE-ACB17E6B0650}.Debug_tracememory|x64.Build.0 = Debug_tracememory|Win32
-		{8D451493-65C2-49C3-ADAE-ACB17E6B0650}.Debug_tracememory|x86.ActiveCfg = Debug_tracememory|Win32
-		{8D451493-65C2-49C3-ADAE-ACB17E6B0650}.Debug_tracememory|x86.Build.0 = Debug_tracememory|Win32
+		{8D451493-65C2-49C3-ADAE-ACB17E6B0650}.Debug_tracememory|x86.ActiveCfg = Debug|Win32
+		{8D451493-65C2-49C3-ADAE-ACB17E6B0650}.Debug_tracememory|x86.Build.0 = Debug|Win32
 		{8D451493-65C2-49C3-ADAE-ACB17E6B0650}.Debug|x64.ActiveCfg = Debug|x64
 		{8D451493-65C2-49C3-ADAE-ACB17E6B0650}.Debug|x64.Build.0 = Debug|x64
 		{8D451493-65C2-49C3-ADAE-ACB17E6B0650}.Debug|x86.ActiveCfg = Debug|Win32

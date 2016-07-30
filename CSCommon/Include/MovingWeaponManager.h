@@ -6,6 +6,7 @@
 #include "MultiVector.h"
 
 class MovingWeaponManager;
+struct MPICKINFO;
 
 struct MovingWeapon
 {

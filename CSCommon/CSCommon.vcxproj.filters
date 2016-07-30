@@ -99,6 +99,8 @@
     <None Include="footer.html">
       <Filter>Doc</Filter>
     </None>
+    <None Include="Source\BasicInfoHistory.inl" />
+    <None Include="Source\HitRegistration.inl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\IndexPage.h">
@@ -855,6 +857,7 @@
     <ClCompile Include="Include\BasicInfoHistory.cpp" />
     <ClCompile Include="Source\Physics.cpp" />
     <ClCompile Include="Source\MovingWeaponManager.cpp" />
+    <ClCompile Include="Source\HitRegistration.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="HShield\HsCryptLib.lib">

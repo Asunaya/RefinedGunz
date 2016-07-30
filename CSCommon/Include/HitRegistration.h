@@ -2,11 +2,7 @@
 
 #include "GlobalTypes.h"
 #include "MMath.h"
-#include "RTypes.h"
 #include <random>
-#include "RBspObject.h"
-
-using namespace RealSpace2;
 
 template <typename rngT>
 float RandomAngle(rngT& rng)
@@ -15,42 +11,8 @@ float RandomAngle(rngT& rng)
 	return dist(rng);
 }
 
-inline void CalcRangeShotControllability(v3& vOutDir, const v3& vSrcDir,
-	int nControllability, u32 seed, float CtrlFactor)
-{
-	v3 up(0, 0, 1);
-	v3 right;
-	D3DXMATRIX mat;
-
-	std::mt19937 rng;
-	rng.seed(seed);
-
-	float fAngle = RandomAngle(rng);
-
-	float fControl;
-	if (nControllability <= 0)
-	{
-		fControl = 0;
-	}
-	else
-	{
-		std::uniform_real_distribution<float> dist(0, nControllability * 100);
-		fControl = dist(rng);
-		fControl = fControl * CtrlFactor;
-	}
-
-	float fForce = fControl / 100000.0f;
-
-	D3DXVec3Cross(&right, &vSrcDir, &up);
-	D3DXVec3Normalize(&right, &right);
-	D3DXMatrixRotationAxis(&mat, &right, fForce);
-	D3DXVec3TransformCoord(&vOutDir, &vSrcDir, &mat);
-
-	D3DXMatrixRotationAxis(&mat, &vSrcDir, fAngle);
-	D3DXVec3TransformCoord(&vOutDir, &vOutDir, &mat);
-
-	Normalize(vOutDir);
-}
+void CalcRangeShotControllability(v3& vOutDir, const v3& vSrcDir,
+	int nControllability, u32 seed, float CtrlFactor);
 
 #define SHOTGUN_BULLET_COUNT	12
 #define SHOTGUN_DIFFUSE_RANGE	0.1f
@@ -93,75 +55,17 @@ enum ZOBJECTHITTEST {
 	ZOH_LEGS = 3
 };
 
-inline ZOBJECTHITTEST PlayerHitTest(const v3& head, const v3& foot,
-	const v3& src, const v3& dest, v3* pOutPos = nullptr)
+ZOBJECTHITTEST PlayerHitTest(const v3& head, const v3& foot,
+	const v3& src, const v3& dest, v3* pOutPos = nullptr);
+
+namespace RealSpace2
 {
-	// 적절한 시점의 위치를 얻어낼수없으면 실패..
-	rvector footpos, headpos, characterdir;
-
-	footpos = foot;
-	headpos = head;
-
-	footpos.z += 5.f;
-	headpos.z += 5.f;
-
-	rvector rootpos = (footpos + headpos)*0.5f;
-
-	// headshot 판정
-	rvector nearest = GetNearestPoint(headpos, src, dest);
-	float fDist = Magnitude(nearest - headpos);
-	float fDistToChar = Magnitude(nearest - src);
-
-	rvector ap, cp;
-
-	if (fDist < 15.f)
-	{
-		if (pOutPos) *pOutPos = nearest;
-		return ZOH_HEAD;
-	}
-	else
-	{
-		rvector dir = dest - src;
-		Normalize(dir);
-
-		// 실린더로 몸통 판정
-		rvector rootdir = (rootpos - headpos);
-		Normalize(rootdir);
-		float fDist = GetDistanceBetweenLineSegment(src, dest, headpos + 20.f*rootdir,
-			rootpos - 20.f*rootdir, &ap, &cp);
-
-		if (fDist < 30)		// 상체
-		{
-			rvector ap2cp = ap - cp;
-			float fap2cpsq = D3DXVec3LengthSq(&ap2cp);
-			float fdiff = sqrtf(30.f*30.f - fap2cpsq);
-
-			if (pOutPos) *pOutPos = ap - dir*fdiff;;
-			return ZOH_BODY;
-		}
-		else
-		{
-			float fDist = GetDistanceBetweenLineSegment(src, dest, rootpos - 20.f*rootdir,
-				footpos, &ap, &cp);
-
-			if (fDist < 30)	// 하체
-			{
-				rvector ap2cp = ap - cp;
-				float fap2cpsq = D3DXVec3LengthSq(&ap2cp);
-				float fdiff = sqrtf(30.f*30.f - fap2cpsq);
-
-				if (pOutPos) *pOutPos = ap - dir*fdiff;
-				return ZOH_LEGS;
-			}
-		}
-	}
-
-	return ZOH_NONE;
+	class RBspObject;
 }
 
 template <typename ObjectT, typename ContainerT, typename PickInfoT>
 bool PickHistory(const ObjectT* Exception, const v3& src, const v3& dest,
-	RBspObject* BspObject, PickInfoT& pickinfo, const ContainerT& Container,
+	RealSpace2::RBspObject* BspObject, PickInfoT& pickinfo, const ContainerT& Container,
 	double Time, u32 PassFlag = RM_FLAG_ADDITIVE | RM_FLAG_USEOPACITY | RM_FLAG_HIDE)
 {
 	ObjectT* HitObject = nullptr;
