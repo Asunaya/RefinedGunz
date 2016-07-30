@@ -43,7 +43,7 @@ static bool GetRecommandLogFileName(char* pszBuf)
 }
 
 
-
+#ifdef LOCATOR_STANDALONE
 int AFXAPI AfxWinMain(HINSTANCE hInstance, 
 					  HINSTANCE hPrevInstance,	
 					  LPTSTR lpCmdLine, 
@@ -128,3 +128,4 @@ InitFailure:
 #endif
 	return 0;
 }
+#endif

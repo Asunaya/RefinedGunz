@@ -222,13 +222,13 @@ void MSEHTranslator(UINT nSeCode, _EXCEPTION_POINTERS* pExcPointers)
 
 struct MPROFILEITEM {
 	char szName[256];
-	DWORD dwStartTime;
-	DWORD dwTotalTime;
+	u64 dwStartTime;
+	u64 dwTotalTime;
 	DWORD dwCalledCount;
 };
 MPROFILEITEM g_ProfileItems[MAX_PROFILE_COUNT];
 
-DWORD g_dwEnableTime;
+u64 g_dwEnableTime;
 
 void MInitProfile()
 {
@@ -258,12 +258,12 @@ void MEndProfile(int nIndex)
 
 void MSaveProfile(const char *filename)
 {
-	DWORD dwTotalTime = GetGlobalTimeMS()-g_dwEnableTime;
+	auto dwTotalTime = GetGlobalTimeMS()-g_dwEnableTime;
 
 	FILE *file = nullptr;
 	fopen_s(&file, filename, "w+");
 
-	fprintf(file," total time = %6.3f seconds \n",(float)dwTotalTime*0.001f);
+	fprintf(file," total time = %6.3f seconds \n", (float)dwTotalTime*0.001f);
 
 	fprintf(file,"id   (loop ms)  seconds     %%        calledcount   name \n");
 	fprintf(file,"=========================================================\n");
@@ -274,11 +274,13 @@ void MSaveProfile(const char *filename)
 	{
 		if(g_ProfileItems[i].dwTotalTime>0)
 		{
-			fprintf(file,"(%05d) %8.3f %8.3f ( %6.3f %% , %6u) %s \n",i,((float)g_ProfileItems[i].dwTotalTime) / cnt,
+			fprintf(file,"(%05d) %8.3f %8.3f ( %6.3f %% , %6u) %s \n",
+				i,
+				((float)g_ProfileItems[i].dwTotalTime) / cnt,
 				0.001f*(float)g_ProfileItems[i].dwTotalTime, 
-				100.f*(float)g_ProfileItems[i].dwTotalTime/(float)dwTotalTime
-				,g_ProfileItems[i].dwCalledCount
-				,g_ProfileItems[i].szName);
+				100.f*(float)g_ProfileItems[i].dwTotalTime/(float)dwTotalTime,
+				g_ProfileItems[i].dwCalledCount,
+				g_ProfileItems[i].szName);
 		}
 	}
 	fclose(file);

@@ -239,11 +239,11 @@ namespace RealSpace2
 {
 	class RAnimation;
 	class RAnimationMgr;
-	enum RWeaponMotionType;
 }
 
 enum MMatchSex;
 struct MMatchItemDesc;
+enum RWeaponMotionType;
 
 RealSpace2::RAnimationMgr* GetAnimationMgr(MMatchSex Sex);
 void SetAnimationMgr(MMatchSex Sex, RealSpace2::RAnimationMgr* AniMgr);
@@ -259,4 +259,4 @@ bool GetUpperSpine1(matrix& mat, RealSpace2::RAnimation* Ani, int Frame, float y
 v3 GetAbsHead(const v3& Origin, const v3& Dir, MMatchSex Sex,
 	ZC_STATE_LOWER LowerState, ZC_STATE_UPPER UpperState,
 	int LowerFrame, int UpperFrame,
-	RealSpace2::RWeaponMotionType MotionType, bool IsDead);
+	RWeaponMotionType MotionType, bool IsDead);

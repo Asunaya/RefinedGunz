@@ -115,13 +115,13 @@ public:
 	// 게임중 나갔을때 호출된다.
 	virtual void OnLeaveBattle(MUID& uidChar) { }		
 	/// 해당룰에서만 사용하는 커맨드는 직접 처리한다.
-	virtual void OnCommand(MCommand* pCommand) { }		
+	virtual void OnCommand(class MCommand* pCommand) { }		
 	/// 월드아이템 먹었을 경우 호출된다.
 	virtual void OnObtainWorldItem(MMatchObject* pObj, int nItemID, int* pnExtraValues) { }
 	/// Kill시 호출
 	virtual void OnGameKill(const MUID& uidAttacker, const MUID& uidVictim) { }
 	
-	virtual void OnTeam(const MUID &uidPlayer, MMatchTeam nTeam) { }
+	virtual void OnTeam(const MUID &uidPlayer, enum MMatchTeam nTeam) { }
 
 	
 	bool Run();														///< 게임틱

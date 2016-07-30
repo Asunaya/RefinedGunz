@@ -16,6 +16,8 @@
 #include "MMatchItem.h"
 #define pi D3DX_PI
 #include "AnimationStuff.h"
+#include "RMesh.h"
+#include "RBspObject.h"
 
 struct BasicInfo {
 	v3 position;
@@ -108,15 +110,12 @@ struct ZPACKEDBASICINFO {
 
 enum MMatchWeaponType;
 
-namespace RealSpace2
-{
-	typedef enum _RMeshPartsType RMeshPartsType;
-	enum RWeaponMotionType;
-}
+typedef enum _RMeshPartsType RMeshPartsType;
+enum RWeaponMotionType;
 
-RealSpace2::RWeaponMotionType WeaponTypeToMotionType(MMatchWeaponType WeaponType);
+RWeaponMotionType WeaponTypeToMotionType(MMatchWeaponType WeaponType);
 
-float GetPiercingRatio(MMatchWeaponType wtype, RealSpace2::RMeshPartsType partstype);
+float GetPiercingRatio(MMatchWeaponType wtype, RMeshPartsType partstype);
 
 enum ZDAMAGETYPE {
 	ZD_NONE = -1,
@@ -149,4 +148,12 @@ enum ZC_SHOT_SP_TYPE {
 	ZC_WEAPON_SP_ITEMKIT,	// medikit, repairkit, bulletkit µîµî
 
 	ZC_WEAPON_SP_END,
+};
+
+struct MPICKINFO {
+	class MMatchObject*	pObject;
+	RPickInfo	info;
+
+	bool bBspPicked;
+	RBSPPICKINFO bpi;
 };

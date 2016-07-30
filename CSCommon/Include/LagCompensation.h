@@ -5,8 +5,6 @@
 #include "RBspObject.h"
 #include <unordered_map>
 
-enum MMatchSex;
-
 class LagCompManager
 {
 public:

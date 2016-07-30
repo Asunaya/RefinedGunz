@@ -118,11 +118,11 @@ bool MLocatorConfig::LoadEnvConfig()
 
 	GetPrivateProfileString( "ENV", "ACCEPT_INVALID_IP", "1", szVal, 255, LOCATOR_CONFIG );
 	if( 0 == strlen(szVal) ) return false;
-	SetAcceptInvalidIP( static_cast<bool>(atoi(szVal)) );
+	SetAcceptInvalidIP( atoi(szVal) != 0 );
 
 	GetPrivateProfileString( "ENV", "TEST_SERVER", "0", szVal, 255, LOCATOR_CONFIG );
 	if( 0 == strlen(szVal) ) return false;
-	SetTestServerOnly( static_cast<bool>(atoi(szVal)) );
+	SetTestServerOnly( atoi(szVal) != 0 );
 
 	return true;
 }

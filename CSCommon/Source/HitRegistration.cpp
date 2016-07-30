@@ -39,9 +39,8 @@ void CalcRangeShotControllability(v3& vOutDir, const v3& vSrcDir,
 }
 
 ZOBJECTHITTEST PlayerHitTest(const v3& head, const v3& foot,
-	const v3& src, const v3& dest, v3* pOutPos = nullptr)
+	const v3& src, const v3& dest, v3* pOutPos)
 {
-	// 적절한 시점의 위치를 얻어낼수없으면 실패..
 	v3 footpos, headpos, characterdir;
 
 	footpos = foot;
@@ -70,7 +69,7 @@ ZOBJECTHITTEST PlayerHitTest(const v3& head, const v3& foot,
 
 	auto rootdir = (rootpos - headpos);
 	Normalize(rootdir);
-	float fDist = GetDistanceBetweenLineSegment(src, dest, headpos + 20.f*rootdir,
+	fDist = GetDistanceBetweenLineSegment(src, dest, headpos + 20.f*rootdir,
 		rootpos - 20.f*rootdir, &ap, &cp);
 
 	// Body
@@ -84,7 +83,7 @@ ZOBJECTHITTEST PlayerHitTest(const v3& head, const v3& foot,
 		return ZOH_BODY;
 	}
 
-	float fDist = GetDistanceBetweenLineSegment(src, dest, rootpos - 20.f*rootdir,
+	fDist = GetDistanceBetweenLineSegment(src, dest, rootpos - 20.f*rootdir,
 		footpos, &ap, &cp);
 
 	// Legs

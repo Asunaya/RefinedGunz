@@ -3,6 +3,8 @@
 
 #include "MMatchServer.h"
 #include "MBMatchServerConfigReloader.h"
+#include <memory>
+#include "MLocator.h"
 
 class COutputView;
 class CCommandLogView;
@@ -117,6 +119,9 @@ public:
 	virtual ULONG   HShield_AnalyzeAckMsg(unsigned long *pCrcInfo, unsigned char *pbyAckMsg, unsigned char *pbyReqInfo);
 
 	char	m_strFileCrcDataPath[MAX_PATH];
+
+private:
+		std::unique_ptr<MLocator> Locator;
 };
 
 

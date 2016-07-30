@@ -1162,14 +1162,6 @@ struct ZPACKEDSHOTINFO {
 };
 #pragma pack(pop)
 
-struct MPICKINFO {
-	class MMatchObject*	pObject;
-	RPickInfo	info;
-
-	bool bBspPicked;
-	RBSPPICKINFO bpi;
-};
-
 void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Receiver, const char * Blob, size_t BlobSize)
 {
 	auto SenderObj = GetObjectA(Sender);

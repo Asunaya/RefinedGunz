@@ -22,7 +22,7 @@ v3 GetShotgunPelletDir(const v3& dir, rngT& rng)
 {
 	std::uniform_real_distribution<float> dist(0, SHOTGUN_DIFFUSE_RANGE);
 
-	rvector r, up(0, 0, 1), right;
+	v3 r, up(0, 0, 1), right;
 	D3DXQUATERNION q;
 	D3DXMATRIX mat;
 

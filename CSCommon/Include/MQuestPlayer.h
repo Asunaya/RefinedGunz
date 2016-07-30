@@ -3,6 +3,7 @@
 
 
 #include "MMatchNPCObject.h"
+#include "MQuestItem.h"
 
 #include <map>
 using std::map;
@@ -13,7 +14,7 @@ struct RewardZItemInfo
 	int					nRentPeriodHour;
 };
 
-class MQuestRewardZItemList : public list<RewardZItemInfo>
+class MQuestRewardZItemList : public std::list<RewardZItemInfo>
 {
 };
 
