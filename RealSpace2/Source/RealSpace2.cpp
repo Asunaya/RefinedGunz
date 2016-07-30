@@ -572,7 +572,7 @@ void RResetDevice(const RMODEPARAMS *params)
 	if( hr != D3D_OK ) {
 		mlog("\nDevice reset failed: %s\n", DXGetErrorString9(hr));
 		int *a=0;
-		*a = 1;	// 반드시 체크해보자
+		*a = 1;
 	}
 
 	InitDevice();

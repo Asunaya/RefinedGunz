@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "MTime.h"
 
-unsigned long long GetGlobalTimeMS()
+extern "C" unsigned long long GetGlobalTimeMSDefault()
 {
 	return timeGetTime();
 }
@@ -9,4 +9,5 @@ unsigned long long GetGlobalTimeMS()
 float GetGlobalTime()
 {
 	return GetGlobalTimeMS() / 1000.f;
+
 }

@@ -30,9 +30,10 @@ void CreateTestGame(char *mapname, int nDummyCharacterCount, bool bShot, bool bA
 	info.nSex = MMS_FEMALE;
 	info.nHP = 100;
 	info.nAP = 100;
+	info.nLevel = 0;
 
-	for(int i=0;i<MMCIP_END;i++)
-		info.nEquipedItemDesc[i]=0;
+	std::fill(std::begin(info.nEquipedItemDesc), std::end(info.nEquipedItemDesc), 0);
+
 	//info.nEquipedItemDesc[MMCIP_MELEE] = 1;		// 구식단검
 	info.nEquipedItemDesc[MMCIP_MELEE] = 2;		// 구식장검
 	//	info.nEquipedItemDesc[MMCIP_MELEE] = 31;		// 용월랑

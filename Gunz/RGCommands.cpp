@@ -3,6 +3,7 @@
 #include "NewChat.h"
 #include "RGMain.h"
 #include "VoiceChat.h"
+#include "Extensions.h"
 
 void LoadRGCommands(ZChatCmdManager &CmdManager)
 {
@@ -164,4 +165,29 @@ void LoadRGCommands(ZChatCmdManager &CmdManager)
 		ZChatOutput("Hi! ^__^", ZChat::CMT_SYSTEM, ZChat::CL_CURRENT);
 	},
 		CCF_ALL, 0, 0, true, "/hello", "");
+
+	CmdManager.AddCommand(0, "timescale", [](const char *line, int argc, char ** const argv) {
+		if (ZApplication::GetInstance()->GetLaunchMode() != ZApplication::ZLAUNCH_MODE_STANDALONE_GAME)
+		{
+			ZChatOutput("Timescale can only be set in debug mode");
+			return;
+		}
+
+		extern float g_Timescale;
+		float NewTimescale = atof(argv[1]);
+		g_Timescale = NewTimescale;
+
+		ZChatOutputF("Set timescale to %f, %s.", NewTimescale, argv[1]);
+	},
+		CCF_ALL, 1, 1, true, "/timescale <scale>", "");
 }
+
+#ifdef TIMESCALE
+unsigned long long GetGlobalTimeMS()
+{
+	if (!ZApplication::GetInstance())
+		return timeGetTime();
+
+	return ZApplication::GetInstance()->GetTime();
+}
+#endif

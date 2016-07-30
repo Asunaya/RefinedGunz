@@ -63,6 +63,7 @@ private:
 	MDataChecker			m_GlobalDataChecker;
 	bool					m_bLaunchDevelop;			///< 개발자버전 옵션
 	bool					m_bLaunchTest;				///< 테스트버전 옵션
+	u64 Time = 0;
 
 	void ParseStandAloneArguments(const char* pszArgs);
 protected:
@@ -137,6 +138,8 @@ public:
 
 	bool InitLocale();
 	void PreCheckArguments();
+
+	auto GetTime() const { return Time; }
 };
 
 
