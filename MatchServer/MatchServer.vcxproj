@@ -257,7 +257,7 @@
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <OmitFramePointers>true</OmitFramePointers>
-      <AdditionalIncludeDirectories>../CSCommon/Include;../CML/Include;../MAI/Include;../RealSpace2/Include;../RealSpace/Include;../GunzShared/;../SafeUDP/Include;../MDatabase/Include;../MCountryFilter/Include;../libsodium/include;../sdk/dx9/Include/;../Locator;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../CSCommon/Include;../CML/Include;../MAI/Include;../RealSpace2/Include;../RealSpace/Include;../SafeUDP/Include;../MDatabase/Include;../MCountryFilter/Include;../sdk/libsodium/include;../sdk/dx9/Include/;../Locator;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_WORLDITEM_SERVER;_WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <MinimalRebuild>false</MinimalRebuild>
@@ -270,7 +270,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>../CML/Lib/zlib.lib;../libsodium/Win32/Release/v120/static/libsodium.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>../CML/Lib/zlib.lib;../sdk/libsodium/lib/static/libsodium.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>Runtime/MatchServer.exe</OutputFile>
       <AdditionalLibraryDirectories>Lib;../sdk/dx9/lib/;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>libci.lib;libc.lib;comsuppw.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>

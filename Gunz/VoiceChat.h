@@ -11,7 +11,7 @@
 #include <unordered_set>
 #include <vector>
 #include "opus.h"
-#include "../portaudio/include/portaudio.h"
+#include "portaudio.h"
 
 class VoiceChat
 {

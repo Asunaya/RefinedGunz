@@ -33,7 +33,7 @@
 #pragma comment(lib, "silk_common.lib")
 #pragma comment(lib, "silk_fixed.lib")
 #pragma comment(lib, "silk_float.lib")
-#pragma comment(lib, "../portaudio/build/msvc/Win32/Release/portaudio.lib")
+#pragma comment(lib, "portaudio.lib")
 #endif
 
 

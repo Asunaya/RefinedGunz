@@ -6,21 +6,24 @@
 #ifdef VOICECHAT
 
 template <typename SampleType = VoiceChat::SampleFormat>
-static inline unsigned long GetSampleFormat()
+unsigned long GetSampleFormat()
 {
 	static_assert(false, "Unkwown type");
 }
 
-template <> static inline unsigned long GetSampleFormat<char>()				{ return paInt8; }
-template <> static inline unsigned long GetSampleFormat<unsigned char>()	{ return paUInt8; }
-template <> static inline unsigned long GetSampleFormat<short>()			{ return paInt16; }
-template <> static inline unsigned long GetSampleFormat<int>()				{ return paInt32; }
-template <> static inline unsigned long GetSampleFormat<float>()			{ return paFloat32; }
+template <> unsigned long GetSampleFormat<char>()			{ return paInt8; }
+template <> unsigned long GetSampleFormat<unsigned char>()	{ return paUInt8; }
+template <> unsigned long GetSampleFormat<short>()			{ return paInt16; }
+template <> unsigned long GetSampleFormat<int>()			{ return paInt32; }
+template <> unsigned long GetSampleFormat<float>()			{ return paFloat32; }
 
 VoiceChat* VoiceChat::Instance = nullptr;
 
 VoiceChat::VoiceChat()
 {
+	if (Instance != nullptr)
+		throw std::runtime_error("VoiceChat multiply created");
+
 	Instance = this;
 
 #ifdef WAVEIN

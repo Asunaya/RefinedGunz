@@ -28,6 +28,7 @@ Lib_LTCG/
 cml/MatchServer/*
 cml/MatchServerLib/*
 Library*/
+!sdk/**/*
 
 # Visual Studio 2015 cache/options directory
 .vs/
