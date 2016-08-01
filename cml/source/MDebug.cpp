@@ -7,6 +7,7 @@
 #include "MPdb.h"
 #include <windows.h>
 #include <mutex>
+#include "../../sdk/dx9/Include/d3dx9.h"
 
 using namespace std;
 
@@ -66,6 +67,21 @@ void __cdecl DMLog(const char* Format, ...)
 
 	OutputDebugString(temp);
 }
+
+#ifdef _DEBUG
+void DLogMatrix(matrix& mat)
+{
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 4; j++)
+		{
+			DMLog("%f ", mat(i, j));
+		}
+
+		DMLog("\n");
+	}
+}
+#endif
 
 void __cdecl MLog(const char *pFormat,...)
 {

@@ -411,6 +411,8 @@ BOOL CALLBACK EnumLoadedModulesCallback(LPSTR pModuleName, ULONG ulModuleBase,  
     return TRUE;
 }
 
+// Disable warning about GetVersionEx deprecation
+#pragma warning(disable:4996)
 void LoadModuleSymbols(DWORD dwProcessId, HANDLE hProcess)
 {
 	OSVERSIONINFO   osver;
@@ -494,6 +496,7 @@ void LoadModuleSymbols(DWORD dwProcessId, HANDLE hProcess)
 		FreeLibrary(hInstLib) ;
 	}   
 }
+#pragma warning(default:4996)
 
 DWORD GetCrashInfo(LPEXCEPTION_POINTERS exceptionInfo, std::string& str)
 {

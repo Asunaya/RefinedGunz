@@ -68,7 +68,7 @@ struct MdlTrace
   else return false;
  */
 template< typename T >
-const int IPRangeAlgorithm<T>::BinarySearch( const DWORD dwIP, const T& tVector ) const
+const int IPRangeAlgorithm<T>::BinarySearch( const uint32_t dwIP, const T& tVector ) const
 {
 	if( 2 > tVector.size() )
 	{
@@ -89,8 +89,8 @@ const int IPRangeAlgorithm<T>::BinarySearch( const DWORD dwIP, const T& tVector 
 	size_t nTail = tVector.size() - 2; 
 	size_t nMiddle = nTail / 2;
 
-	DWORD dwIPFrom;
-	DWORD dwIPTo;
+	uint32_t dwIPFrom;
+	uint32_t dwIPTo;
 
 #ifdef _FILTER_TEST
 	MdlTrace mt;
@@ -138,7 +138,7 @@ const int IPRangeAlgorithm<T>::BinarySearch( const DWORD dwIP, const T& tVector 
 			if( m_dwMaxTraceCount > m_dwTraceCount )
 			{
 				char szBuf[ 1024 ];
-				DWORD i = 0;
+				uint32_t i = 0;
                 T::const_iterator it, end;
 				end = tVector.end();
 				for( it = tVector.begin(); it != end; ++it, ++i )
@@ -181,7 +181,7 @@ const int IPRangeAlgorithm<T>::BinarySearch( const DWORD dwIP, const T& tVector 
 
 
 template< typename T >
-const int IPRangeAlgorithm<T>::Search( const DWORD dwIP, const T& tVector ) const
+const int IPRangeAlgorithm<T>::Search( const uint32_t dwIP, const T& tVector ) const
 {
 	int i = 0;
 	T::const_iterator it, end;
@@ -197,7 +197,7 @@ const int IPRangeAlgorithm<T>::Search( const DWORD dwIP, const T& tVector ) cons
 
 
 template< typename T >
-const bool IPRangeAlgorithm<T>::CheckIsDuplicateRange( const DWORD dwIPFrom, const DWORD dwIPTo, const T& tVector ) const
+const bool IPRangeAlgorithm<T>::CheckIsDuplicateRange( const uint32_t dwIPFrom, const uint32_t dwIPTo, const T& tVector ) const
 {
 	if( -1 != BinarySearch(dwIPFrom, tVector) )
 		return true;
@@ -209,7 +209,7 @@ const bool IPRangeAlgorithm<T>::CheckIsDuplicateRange( const DWORD dwIPFrom, con
 }
 
 template< typename T >
-const bool IPRangeAlgorithm<T>::IsLast( const DWORD dwIPFrom, const T& tVector ) const
+const bool IPRangeAlgorithm<T>::IsLast( const uint32_t dwIPFrom, const T& tVector ) const
 {
 	if( tVector.empty() ) return true;
 	return tVector[ tVector.size() - 1 ]->m_dwIPTo < dwIPFrom;
@@ -223,7 +223,7 @@ void IPRangeAlgorithm<T>::SortIncrease( T& tVector )
 }
 
 template< typename T >
-const int IPRangeAlgorithm<T>::MakeEmptyBlock( const DWORD dwInsertIP, T& tVector )
+const int IPRangeAlgorithm<T>::MakeEmptyBlock( const uint32_t dwInsertIP, T& tVector )
 {
 	const int size = static_cast< int >( tVector.size() );
 	int i;
@@ -280,7 +280,7 @@ bool MCountryFilter::Create( BlockCountryCodeList& rfBlockCountryCodeList,
 }
 
 
-bool MCountryFilter::AddIPtoCountry( const DWORD dwIPFrom, const DWORD dwIPTo, const string& strCode )
+bool MCountryFilter::AddIPtoCountry( const uint32_t dwIPFrom, const uint32_t dwIPTo, const string& strCode )
 {
 	if( m_IPtoCountryAlgorithm.IsInverse(dwIPFrom, dwIPTo) )
 		return false;
@@ -311,7 +311,7 @@ bool MCountryFilter::AddIPtoCountry( const DWORD dwIPFrom, const DWORD dwIPTo, c
 
 
 // 비정상 IP만 따로 로그를 남기기 위해서.
-bool MCountryFilter::AddInvalidIP( const DWORD dwIP, const string& strIP )
+bool MCountryFilter::AddInvalidIP( const uint32_t dwIP, const string& strIP )
 {
 	pair< InvalidIPList::iterator, bool > pr;
 	pr = m_InvalidIPList.insert( InvalidIPList::value_type(dwIP, strIP) );
@@ -320,7 +320,7 @@ bool MCountryFilter::AddInvalidIP( const DWORD dwIP, const string& strIP )
 }
 
 
-bool MCountryFilter::AddCustomIP( const DWORD dwIPFrom, const DWORD dwIPTo, const bool bIsBlock, const string& strCountryCode3, const string& strComment )
+bool MCountryFilter::AddCustomIP( const uint32_t dwIPFrom, const uint32_t dwIPTo, const bool bIsBlock, const string& strCountryCode3, const string& strComment )
 {
 	if( m_CustomIPAlgorithm.IsInverse(dwIPFrom, dwIPTo) )
 		return false;
@@ -444,7 +444,7 @@ bool MCountryFilter::IsNotBlockCode( const string& strCountryCode, string& strRo
 }
 
 
-const DWORD MCountryFilter::inet_aton( const string& strIP )
+const uint32_t MCountryFilter::inet_aton( const string& strIP )
 {
 	if( strIP.empty() ) 
 		return false;
@@ -461,7 +461,7 @@ const DWORD MCountryFilter::inet_aton( const string& strIP )
 
 bool MCountryFilter::GetIPCountryCode( const string& strIP, string& strCountryCode )
 {
-	const DWORD dwIP = inet_aton( strIP );
+	const uint32_t dwIP = inet_aton( strIP );
 	if( 0 == dwIP )
 		return false;
 
@@ -494,7 +494,7 @@ bool MCountryFilter::Update( BlockCountryCodeList& rfBlockCountryCodeList,
 
 bool MCountryFilter::GetCustomIP( const string& strIP, bool& bIsBlock, string& strCountryCode3, string& strComment )
 {
-	const DWORD dwIP = inet_aton( strIP );
+	const uint32_t dwIP = inet_aton( strIP );
 	if( 0 == dwIP )
 		return false;
 	

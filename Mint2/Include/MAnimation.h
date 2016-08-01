@@ -2,6 +2,7 @@
 #define MANIMATION_H
 
 #include "MWidget.h"
+#include "GlobalTypes.h"
 
 enum MAPlayMode{
 	MAPM_FORWARDONCE,
@@ -11,7 +12,7 @@ enum MAPlayMode{
 
 class MAnimation : public MWidget{
 private:
-	unsigned int	m_nStartTime;
+	u64				m_nStartTime;
 	MAniBitmap*		m_pAniBitmap;
 public:
 	int				m_nDelay;

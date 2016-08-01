@@ -35,10 +35,10 @@ public:
 	virtual int GetAge()					{ return m_nAge; }
 	virtual int GetSex()					{ return m_nSex; }
 
-	void SetUserID(const char* pszVal)		{ strcpy(m_szUserID, pszVal); }
-	void SetUniqueID(const char* pszVal)	{ strcpy(m_szUniqueID, pszVal); }
-	void SetCertificate(const char* pszVal)	{ strcpy(m_szCertificate, pszVal); }
-	void SetName(const char* pszVal)		{ strcpy(m_szName, pszVal); }
+	void SetUserID(const char* pszVal)		{ strcpy_safe(m_szUserID, pszVal); }
+	void SetUniqueID(const char* pszVal)	{ strcpy_safe(m_szUniqueID, pszVal); }
+	void SetCertificate(const char* pszVal)	{ strcpy_safe(m_szCertificate, pszVal); }
+	void SetName(const char* pszVal)		{ strcpy_safe(m_szName, pszVal); }
 	void SetAge(int nAge)					{ m_nAge = nAge; }
 	void SetSex(int nSex)					{ m_nSex = nSex; }
 };

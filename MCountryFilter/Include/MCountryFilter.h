@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <utility>
+#include <cstdint>
 
 using std::string;
 using std::vector;
@@ -27,18 +28,18 @@ struct BlockCountryCodeInfo
 
 struct IPRange
 {
-	IPRange( const DWORD dwIPFrom, const DWORD dwIPTo ) 
+	IPRange( const uint32_t dwIPFrom, const uint32_t dwIPTo ) 
 		: m_dwIPFrom( dwIPFrom ), m_dwIPTo( dwIPTo )
 	{
 	}
 
-	DWORD m_dwIPFrom;
-	DWORD m_dwIPTo;
+	uint32_t m_dwIPFrom;
+	uint32_t m_dwIPTo;
 };
 
 struct CustomIP : public IPRange
 {
-	CustomIP( const DWORD dwIPFrom, const DWORD dwIPTo, const bool bIsBlock, const string& strCountryCode3, const string& strComment ) 
+	CustomIP( const uint32_t dwIPFrom, const uint32_t dwIPTo, const bool bIsBlock, const string& strCountryCode3, const string& strComment ) 
 		: IPRange( dwIPFrom, dwIPTo ), m_strCountryCode3( strCountryCode3 ), m_strComment( strComment ), m_bIsBlock( bIsBlock )
 	{
 	}
@@ -51,7 +52,7 @@ struct CustomIP : public IPRange
 
 struct IPtoCountry : public IPRange
 {
-	IPtoCountry( const DWORD dwIPFrom, const DWORD dwIPTo, const string& strCountryCode3 ) 
+	IPtoCountry( const uint32_t dwIPFrom, const uint32_t dwIPTo, const string& strCountryCode3 ) 
 		: IPRange( dwIPFrom, dwIPTo ), m_strCountryCode3( strCountryCode3 )
 	{
 	}
@@ -64,7 +65,7 @@ struct IPtoCountry : public IPRange
 typedef vector< BlockCountryCodeInfo* >	BlockCountryCodeList;
 typedef vector< IPtoCountry* >			IPtoCountryList;
 typedef vector< CustomIP* >				CustomIPList;
-typedef map< DWORD, string >			InvalidIPList;
+typedef map< uint32_t, string >			InvalidIPList;
 
 
 class StrICmp
@@ -99,18 +100,18 @@ class IPRangeAlgorithm
 public :
 	IPRangeAlgorithm();
 
-	const int			BinarySearch( const DWORD dwIP, const T& tVector ) const;
-	const int			Search( const DWORD dwIP, const T& tVector ) const;
-	const bool			CheckIsDuplicateRange( const DWORD dwIPFrom, const DWORD dwIPTo, const T& tVector ) const;
-	inline const bool	IsInverse( const DWORD dwIPFrom, const DWORD dwIPTo ) { return dwIPFrom > dwIPTo; }
-	const bool			IsLast( const DWORD dwIPFrom, const T& tVector ) const;
+	const int			BinarySearch( const uint32_t dwIP, const T& tVector ) const;
+	const int			Search( const uint32_t dwIP, const T& tVector ) const;
+	const bool			CheckIsDuplicateRange( const uint32_t dwIPFrom, const uint32_t dwIPTo, const T& tVector ) const;
+	inline const bool	IsInverse( const uint32_t dwIPFrom, const uint32_t dwIPTo ) { return dwIPFrom > dwIPTo; }
+	const bool			IsLast( const uint32_t dwIPFrom, const T& tVector ) const;
 	void				SortIncrease( T& tVector );
-	const int			MakeEmptyBlock( const DWORD dwInsertIP, T& tVector );
+	const int			MakeEmptyBlock( const uint32_t dwInsertIP, T& tVector );
 
 #ifdef _FILTER_TEST
 private :
-	DWORD m_dwTraceCount;
-	DWORD m_dwMaxTraceCount;
+	uint32_t m_dwTraceCount;
+	uint32_t m_dwMaxTraceCount;
 #endif
 };
 
@@ -129,8 +130,8 @@ public: // Common
 				 IPtoCountryList& rfIPtoCountryList,
 				 CustomIPList& rfCustomIPList );
 
-	DWORD GetLastUpdatedTime()						{ return m_dwLastUpdatedTime; }
-	void SetLastUpdatedTime( const DWORD dwTime )	{ m_dwLastUpdatedTime = dwTime; }
+	uint32_t GetLastUpdatedTime()						{ return m_dwLastUpdatedTime; }
+	void SetLastUpdatedTime( const uint32_t dwTime )	{ m_dwLastUpdatedTime = dwTime; }
 
 	const BlockCountryCodeList&	GetBlockCountryCodeList() const { return m_BlockCountryCodeList; }
 	const IPtoCountryList&		GetIPtoCountryList() const		{ return m_IPtoCountryList; }
@@ -141,9 +142,9 @@ public: // Common
 	void ReleaseCustomIP();
 
 public : // IPtoCountry
-	bool AddIPtoCountry( const DWORD dwIPFrom, const DWORD dwIPTo, const string& strCode );
+	bool AddIPtoCountry( const uint32_t dwIPFrom, const uint32_t dwIPTo, const string& strCode );
 	bool GetIPCountryCode( const string& strIP, string& strCountryCode );
-	bool AddInvalidIP( const DWORD dwIP, const string& strIP );
+	bool AddInvalidIP( const uint32_t dwIP, const string& strIP );
 	bool InitIPtoCountryList( IPtoCountryList& rfIPtoCountryList );
 	// IPtoCountry
 
@@ -153,13 +154,13 @@ public : // BlockCountryCode
 	// BlockCountryCode
 
 public : // CustomIP
-	bool AddCustomIP( const DWORD dwIPFrom, const DWORD dwIPTo, const bool bIsBlock, const string& strCountryCode3, const string& strComment );
+	bool AddCustomIP( const uint32_t dwIPFrom, const uint32_t dwIPTo, const bool bIsBlock, const string& strCountryCode3, const string& strComment );
 	bool GetCustomIP( const string& strIP, bool& bIsBlock, string& strCountryCode3, string& strComment );
 	bool InitCustomIPList( CustomIPList& rfCustomIPList );
 	// CustomIP
 
 private : // Common
-	const DWORD inet_aton( const string& strIP );
+	const uint32_t inet_aton( const string& strIP );
 	// Common
 
 private : // IPtoCountry
@@ -178,7 +179,7 @@ private :
 	CustomIPList			m_CustomIPList;
 	InvalidIPList			m_InvalidIPList;
 
-	DWORD					m_dwLastUpdatedTime;
+	uint32_t					m_dwLastUpdatedTime;
 
 	IPRangeAlgorithm< IPtoCountryList >	m_IPtoCountryAlgorithm;
 	IPRangeAlgorithm< CustomIPList >	m_CustomIPAlgorithm;

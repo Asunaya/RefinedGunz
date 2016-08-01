@@ -7,6 +7,8 @@
 
 #include <utility>
 #include <algorithm>
+#include "SafeString.h"
+#include "MInetUtil.h"
 using namespace std;
 
 #pragma comment( lib, "winmm.lib" )
@@ -49,7 +51,6 @@ MUDPManager::~MUDPManager()
 	DeleteCriticalSection( &m_csLock );
 }
 
-
 bool MUDPManager::Insert( const DWORD dwIPKey, const int nPort, const DWORD dwUseStartTime )
 {
 	const_iterator itFind = find( dwIPKey );
@@ -61,7 +62,9 @@ bool MUDPManager::Insert( const DWORD dwIPKey, const int nPort, const DWORD dwUs
 			in_addr addr;
 			addr.S_un.S_addr = dwIPKey;
 
-			pRecvUDPInfo->SetInfo( dwIPKey, nPort, 1, dwUseStartTime, inet_ntoa(addr) );
+			char ip[16];
+			GetIPv4String(addr, ip);
+			pRecvUDPInfo->SetInfo( dwIPKey, nPort, 1, dwUseStartTime, ip );
 
 			insert( pair<DWORD, MLocatorUDPInfo*>(dwIPKey, pRecvUDPInfo) );
 
@@ -277,7 +280,7 @@ void MUDPManager::DumpStatusInfo()
 {
 	char szDbgInfo[ 1024 ];
 
-	_snprintf( szDbgInfo, 1023, "Size:%d\n", size() );
+	sprintf_safe( szDbgInfo, "Size:%d\n", size() );
 
 	mlog( szDbgInfo );
 }
@@ -292,8 +295,11 @@ void MUDPManager::DumpUDPInfo()
 	{
 		in_addr addr;
 		addr.S_un.S_addr = It->second->GetIP();
-		_snprintf( szDbgInfo, 1023, "IP:%s, Port:%d, Count:%d\n", 
-			inet_ntoa(addr), 
+
+		char ip[16];
+		GetIPv4String(addr, ip);
+		sprintf_safe( szDbgInfo, "IP:%s, Port:%d, Count:%d\n", 
+			ip, 
 			It->second->GetPort(), 
 			It->second->GetUseCount() );
 		mlog( szDbgInfo );

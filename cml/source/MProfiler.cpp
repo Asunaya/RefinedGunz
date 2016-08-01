@@ -93,9 +93,9 @@ void MProfileLoop::SetProfile(int nTime)
 int MProfileLoop::GetTotalTime(void)
 {
 	int nMinDepth = 9999;
-	int nTotalTime = 0;
+	u64 nTotalTime = 0;
 
-	for(MProfileLoop::iterator i=begin(); i!=end(); i++){
+	for(auto i=begin(); i!=end(); i++){
 		MPROFILELOG* pLog = *i;
 		nMinDepth = min(pLog->nDepth, nMinDepth);
 	}
@@ -112,7 +112,7 @@ int MProfileLoop::GetTotalTime(void)
 		}
 	}
 
-	return nTotalTime;
+	return static_cast<int>(nTotalTime);
 }
 
 

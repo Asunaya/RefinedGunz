@@ -15,7 +15,7 @@
     <ClCompile Include="Source\MCountryFilter.cpp">
       <Filter>MCountryFilter</Filter>
     </ClCompile>
-    <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="Source\stdafx.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\MCountryFilterDBMgr.h">
@@ -24,6 +24,6 @@
     <ClInclude Include="Include\MCountryFilter.h">
       <Filter>MCountryFilter</Filter>
     </ClInclude>
-    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="Include\stdafx.h" />
   </ItemGroup>
 </Project>

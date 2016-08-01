@@ -99,33 +99,32 @@ void CCommandLogView::AddCommand(unsigned long int nGlobalClock, CCommandType t,
 
 	char temp[4096]="";
 	char szParam[1024]="";
-	//sprintf(temp, "%d: %s", nGlobalClock, pCmd->m_pCommandDesc->GetName());
-	sprintf(temp, "%s", pCmd->m_pCommandDesc->GetName());
+	sprintf_safe(temp, "%s", pCmd->m_pCommandDesc->GetName());
 	for(int i=0; i<pCmd->GetParameterCount(); i++){
 		pCmd->GetParameter(i)->GetString(szParam);
-		sprintf(temp, "%s %s(%s)", temp, pCmd->GetParameter(i)->GetClassName(), szParam);
+		sprintf_safe(temp, "%s %s(%s)", temp, pCmd->GetParameter(i)->GetClassName(), szParam);
 		
 	}
 
 	CListCtrl& theCtrl = GetListCtrl();
 
-	char szNO[32]="";
-	itoa(m_stLogCount, szNO, 10);
+	char szNO[32];
+	sprintf_safe(szNO, "%d", m_stLogCount);
 	int nItemCount = theCtrl.GetItemCount();
 
 	theCtrl.InsertItem(LVIF_TEXT|LVIF_STATE, nItemCount, szNO, 0, LVIS_SELECTED, 0, 0);
 
-	char szGlobalClock[128]="";
-	sprintf(szGlobalClock, "%d", nGlobalClock);
+	char szGlobalClock[128];
+	sprintf_safe(szGlobalClock, "%d", nGlobalClock);
 	theCtrl.SetItemText(nItemCount, 1, szGlobalClock);
 	char szType[64] = "Unknown";
-	if(t==CCT_LOCAL) strcpy(szType, "Local");
-	else if(t==CCT_SEND) strcpy(szType, "Send");
-	else if(t==CCT_RECEIVE) strcpy(szType, "Receive");
+	if(t==CCT_LOCAL) strcpy_literal(szType, "Local");
+	else if(t==CCT_SEND) strcpy_literal(szType, "Send");
+	else if(t==CCT_RECEIVE) strcpy_literal(szType, "Receive");
 	char szSenderUID[128];
-	sprintf(szSenderUID, "%u:%u", pCmd->m_Sender.High, pCmd->m_Sender.Low);
+	sprintf_safe(szSenderUID, "%u:%u", pCmd->m_Sender.High, pCmd->m_Sender.Low);
 	char szReceiverUID[128];
-	sprintf(szReceiverUID, "%u:%u", pCmd->m_Receiver.High, pCmd->m_Receiver.Low);
+	sprintf_safe(szReceiverUID, "%u:%u", pCmd->m_Receiver.High, pCmd->m_Receiver.Low);
 	theCtrl.SetItemText(nItemCount, 2, szType);
 	theCtrl.SetItemText(nItemCount, 3, szSenderUID);
 	theCtrl.SetItemText(nItemCount, 4, szReceiverUID);

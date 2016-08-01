@@ -2,6 +2,7 @@
 #define MPICTURE_H
 
 #include "MWidget.h"
+#include "GlobalTypes.h"
 
 /// Picture
 class MPicture : public MWidget{
@@ -10,7 +11,7 @@ protected:
 	int		m_iStretch;
 	int		m_iAnimType;			// 0:좌->우, 1:우->좌
 	float	m_fAnimTime;			// 애니메이션 되는 시간
-	DWORD	m_dwCurrentTime;
+	u64		m_CurrentTime;
 	bool	m_bAnim;
 	DWORD	m_DrawMode;
 

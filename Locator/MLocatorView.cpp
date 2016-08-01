@@ -109,18 +109,17 @@ void MLocatorView::UpdateView()
 			string strDeadServerIDList;
 			const int nDeadServerCount = pServerStatusMgr->GetDeadServerCount();
 
-			_snprintf( szBuf, 127, "%d", pServerStatusMgr->GetSize() );
+			sprintf_safe( szBuf, "%d", pServerStatusMgr->GetSize() );
 			lc.InsertItem( 0, szBuf );
 
-			_snprintf( szBuf, 127, "Run:%d, Dead:%d", pServerStatusMgr->GetLiveServerCount(), nDeadServerCount );
+			sprintf_safe( szBuf, "Run:%d, Dead:%d", pServerStatusMgr->GetLiveServerCount(), nDeadServerCount );
 			lc.SetItemText( 0, 1, szBuf );
 			
 			for( int i = 0; i < nDeadServerCount; ++i )
 			{
-				_snprintf( szBuf, 127, "%d,  ", pServerStatusMgr->GetDeadServerIDList()[i] );
+				sprintf_safe( szBuf, "%d,  ", pServerStatusMgr->GetDeadServerIDList()[i] );
 				strDeadServerIDList += szBuf;
 			}
-			strDeadServerIDList += "\0";
 
 			lc.SetItemText( 0, 2, strDeadServerIDList.c_str() );
 		}

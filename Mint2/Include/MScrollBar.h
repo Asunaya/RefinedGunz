@@ -1,6 +1,7 @@
 #ifndef MSCROLLBAR_H
 #define MSCROLLBAR_H
 
+#include "GlobalTypes.h"
 #include "MWidget.h"
 #include "MButton.h"
 
@@ -83,7 +84,7 @@ protected:
 	int			m_nMaxValue;
 	int			m_nValue;
 
-	int			m_nPrevThumbRefresh;
+	u64			m_nPrevThumbRefresh;
 	int			m_nThumbRefreshDelay;
 
 	bool		m_bThumbMove;

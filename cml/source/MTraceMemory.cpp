@@ -98,6 +98,8 @@ static BOOL CALLBACK EnumLoadedModulesCallback(LPSTR pModuleName, ULONG ulModule
     return TRUE;
 }
 
+// Disable warning about GetVersionEx deprecation
+#pragma warning(disable:4996)
 bool InitializeSymbols()
 {
 	DWORD dwProcessId = GetCurrentProcessId();
@@ -138,6 +140,7 @@ bool InitializeSymbols()
 	}
 	return true;
 }
+#pragma warning(default:4996)
 
 void MDumpCallStack(int lRequest);
 
