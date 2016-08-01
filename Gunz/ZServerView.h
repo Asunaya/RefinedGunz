@@ -5,15 +5,13 @@
 #include "MWidget.h"
 #include <list>
 
-using namespace RealSpace2;
-
 
 
 // ServerInfo
 struct ServerInfo
 {
-	char	szName[ 32];
-	char	szAddress[ 32];
+	char	szName[32];
+	char	szAddress[32];
 	int		nPort;
 	int		nType;
 	int		nNumOfUser;
@@ -44,14 +42,14 @@ public:
 
 
 	void ClearServerList( void);
-	bool AddServer( char* szName, char* szAddress, int nPort, int nType, int nNumOfUser, int nCapacity, bool IsLive );
+	bool AddServer( const char* szName, const char* szAddress, int nPort, int nType, int nNumOfUser, int nCapacity, bool IsLive );
 
-	const ServerInfo *GetSelectedServer();
-	const ServerInfo *GetFirstServer();
-	int GetCurrSel();
-	int GetCurrSel2()						{ return m_nSelectNum; }
+	const ServerInfo *GetSelectedServer() const;
+	const ServerInfo *GetFirstServer() const;
+	int GetCurrSel() const;
+	int GetCurrSel2() const					{ return m_nSelectNum; }
 	void SetCurrSel( int nNumber);
-	bool IsSelected()						{ return ( (GetCurrSel() > -1) ? true : false); }
+	bool IsSelected() const					{ return ( (GetCurrSel() > -1) ? true : false); }
 	void SetTextOffset( int nOffset)		{ m_nTextOffset = nOffset; }
 
 

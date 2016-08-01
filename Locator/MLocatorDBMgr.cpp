@@ -107,7 +107,7 @@ bool MLocatorDBMgr::GetServerStatus( MServerStatusMgr* pServerStatusMgr )
 				ss.SetID( rs.Field( "ServerID" ).AsInt() );
 				ss.SetType( rs.Field( "Type" ).AsChar() );
 				ss.SetCurPlayer( rs.Field( "CurrPlayer" ).AsInt() );
-				ss.SetMaxPalyer( rs.Field( "MaxPlayer" ).AsInt() );
+				ss.SetMaxPlayer( rs.Field( "MaxPlayer" ).AsInt() );
 				ss.SetLastUpdatedTime( rs.Field( "Time" ).AsString().GetBuffer() );
 				ss.SetIPString( rs.Field( "IP" ).AsString().GetBuffer() );
 				ss.SetIP( inet_addr(ss.GetIPString().c_str()) );

@@ -43,7 +43,7 @@ int	MGetLogHistoryCount();
 void __cdecl MMsg(const char *pFormat,...);
 #endif
 
-DWORD MFilterException(LPEXCEPTION_POINTERS p);
+void MFilterException(LPEXCEPTION_POINTERS p);
 
 //void MInstallSEH();	// Compile Option에 /EHa 있어야함
 

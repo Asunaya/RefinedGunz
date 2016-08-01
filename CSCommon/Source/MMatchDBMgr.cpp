@@ -1365,7 +1365,7 @@ _STATUS_DB_START
 	
 	// char szShortIP[64];
 	// MConvertCompactIP(szShortIP, szIP);
-	vector< BYTE > vIP;
+	vector< uint8_t > vIP;
 	if( !SplitStrIP(szIP, vIP) || (4 != vIP.size()) ) 
 	{
 		mlog( "MMatchDBMgr::InsertConnLog - 문자열 IP(%s)분해 실패. AID(%u)\n", 

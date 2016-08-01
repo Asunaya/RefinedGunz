@@ -148,7 +148,6 @@ public:
 
 	void SetSockAddr(SOCKADDR_IN* pAddr, int nAddrLen) { CopyMemory(&m_SockAddr, pAddr, min(sizeof(SOCKADDR_IN), nAddrLen)); }
 	SOCKADDR_IN* GetSockAddr()	{ return &m_SockAddr; }
-	char* GetIPString()			{ return inet_ntoa(m_SockAddr.sin_addr); }
 	DWORD GetIP()				{ return m_SockAddr.sin_addr.S_un.S_addr; }
 	int GetPort()				{ return ntohs(m_SockAddr.sin_port); }
 	WORD GetRawPort()			{ return m_SockAddr.sin_port; }

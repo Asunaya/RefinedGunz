@@ -6624,6 +6624,7 @@ MBitmap* ZGameInterface::GetQuestItemIcon( int nItemID, bool bSmallIcon)
 
 void ZGameInterface::OnResponseServerStatusInfoList( const int nListCount, void* pBlob )
 {
+	DMLog("OnResponseServerStatusInfoList\n");
 	ZServerView* pServerList = (ZServerView*)m_IDLResource.FindWidget( "SelectedServer");
 	if ( !pServerList)
 		return;
@@ -6661,10 +6662,19 @@ void ZGameInterface::OnResponseServerStatusInfoList( const int nListCount, void*
 				continue;
 			}
 
-			in_addr inaddr;
-			inaddr.S_un.S_addr = pss->m_dwIP;
+			const char* Addr = nullptr;
+			if (pss->m_dwIP == 0)
+			{
+				Addr = m_pLocatorList->GetIPByPos(0).c_str();
+				static_assert(std::is_lvalue_reference<decltype(m_pLocatorList->GetIPByPos(0))>::value, "Fix me");
+			}
+			else
+			{
+				in_addr inaddr;
+				inaddr.S_un.S_addr = pss->m_dwIP;
 
-			char* pszAddr = inet_ntoa( inaddr );
+				Addr = inet_ntoa(inaddr);
+			}
 
 			// pss->m_nCurPlayer;	// 현제 접속유저 수.
 			// pss->m_nMaxPlayer;	// 서버 최대 접속 가능 수.
@@ -6694,10 +6704,10 @@ void ZGameInterface::OnResponseServerStatusInfoList( const int nListCount, void*
 			else
 				continue;
 
-			pServerList->AddServer( szServName, pszAddr, pss->m_nPort, pss->m_nType, pss->m_nCurPlayer, pss->m_nMaxPlayer, pss->m_bIsLive );
-#ifdef _DEBUG
+			pServerList->AddServer( szServName, Addr, pss->m_nPort, pss->m_nType, pss->m_nCurPlayer, pss->m_nMaxPlayer, pss->m_bIsLive );
+#if 1//def _DEBUG
 			mlog( "ServerList - Name:%s, IP:%s, Port:%d, Type:%d, (%d/%d)\n",
-				szServName, pszAddr, pss->m_nPort, pss->m_nType, pss->m_nCurPlayer, pss->m_nMaxPlayer );
+				szServName, Addr, pss->m_nPort, pss->m_nType, pss->m_nCurPlayer, pss->m_nMaxPlayer );
 #endif
 		}
 	}
@@ -6726,35 +6736,9 @@ void ZGameInterface::OnResponseBlockCountryCodeIP( const char* pszBlockCountryCo
 
 void ZGameInterface::RequestServerStatusListInfo()
 {
-/*
-#ifdef _DEBUG
-	// Locator리스트 구성. 이건 xml로부터 가져옴.
-	// 서버 정보 요청.
-
-	if( 0 == m_pLocatorList ) 
-		return;
-
-	const int nSize = m_pLocatorList->GetSize();
-	for( int i = 0; i < nSize; ++i )
-	{
-		const string strIP = m_pLocatorList->GetIPByPos( i );
-
-		MCommand* pCmd = ZNewCmd( MC_REQUEST_SERVER_LIST_INFO );
-		if( 0 != pCmd )
-		{
- 			for( int i = 0; i < 3; ++i )
-			{
-				GetGameClient()->SendCommandByUDP( pCmd, const_cast<char*>(strIP.c_str()), LOCATOR_PORT );
-				Sleep( 1000 );
-			}
-		}
-		delete pCmd;
-	}
-#endif
-*/
 	ZLocatorList*	pLocatorList;
 
-	if ( ZApplication::GetInstance()->IsLaunchTest())				// 테스트 런쳐일 경우
+	if ( ZApplication::GetInstance()->IsLaunchTest())
 		pLocatorList = m_pTLocatorList;
 	else
 		pLocatorList = m_pLocatorList;
@@ -6767,7 +6751,7 @@ void ZGameInterface::RequestServerStatusListInfo()
 		return;
 
 	MCommand* pCmd = ZNewCmd( MC_REQUEST_SERVER_LIST_INFO );
-	if( 0 != pCmd )
+	if (pCmd)
 	{
 		const string strIP = pLocatorList->GetIPByPos( m_nLocServ++);
 		m_nLocServ %= pLocatorList->GetSize();

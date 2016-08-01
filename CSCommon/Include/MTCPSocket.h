@@ -216,7 +216,6 @@ public:
 
 	SocketList* GetClientList()	{ return &((MServerSocketThread*)(m_pSocketThread))->m_SocketList; }
 
-	char* GetLocalIPString()	{ return inet_ntoa(m_LocalAddress.sin_addr); }
 	DWORD GetLocalIP()			{ return m_LocalAddress.sin_addr.S_un.S_addr; }
 };
 

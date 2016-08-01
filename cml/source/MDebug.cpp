@@ -180,7 +180,7 @@ void MShowStack(DWORD* sp, int nSize)
 	mlog("\n");
 }
 
-DWORD MFilterException(LPEXCEPTION_POINTERS p)
+void MFilterException(LPEXCEPTION_POINTERS p)
 {
 	char tmpbuf[128];
 	_strtime_s(tmpbuf);
@@ -210,8 +210,6 @@ DWORD MFilterException(LPEXCEPTION_POINTERS p)
 
 	mlog(str.c_str());
 	mlog("\n");
-
-	return EXCEPTION_CONTINUE_SEARCH;
 }
 
 void MSEHTranslator(UINT nSeCode, _EXCEPTION_POINTERS* pExcPointers)

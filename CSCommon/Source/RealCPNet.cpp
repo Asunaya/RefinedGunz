@@ -14,6 +14,7 @@
 #include <time.h>
 #include "Shlwapi.h"
 #include "MCrashDump.h"
+#include "MInetUtil.h"
 
 #ifndef _PUBLISH
 	#include "MProcessController.h"
@@ -554,7 +555,13 @@ bool MRealCPNet::GetAddress(SOCKET sd, char* pszAddress, int maxlen, int* pPort)
 	m_SessionMap.Lock();
 		MRealSession* pSession = m_SessionMap.GetSessionUnsafe(sd);
 		if (pSession) {
-			strcpy_safe(pszAddress, maxlen, pSession->GetIPString());
+			in_addr addr;
+			addr.S_un.S_addr = pSession->GetIP();
+
+			char ip[16];
+			GetIPv4String(addr, ip);
+
+			strcpy_safe(pszAddress, maxlen, ip);
 			*pPort = pSession->GetPort();
 			bResult = true;
 		}

@@ -7,6 +7,7 @@
 #include "MPacketCrypter.h"
 
 #include "SafeString.h"
+#include "GlobalTypes.h"
 
 //#define _CMD_PROFILE
 
@@ -34,6 +35,7 @@ protected:
 	int						m_nPort;
 	DWORD					m_dwIP;
 	bool					m_bAllowed;
+
 public:
 	MCommObject(MCommandCommunicator* pCommunicator);
 	virtual ~MCommObject();
@@ -46,19 +48,19 @@ public:
 
 	MCommandCommunicator* GetDirectConnection()			{ return m_pDirectConnection; }
 	void SetDirectConnection(MCommandCommunicator* pDC)	{ m_pDirectConnection = pDC; }
-	DWORD GetUserContext()								{ return m_dwUserContext; }
+	DWORD GetUserContext() const						{ return m_dwUserContext; }
 	void SetUserContext(DWORD dwContext)				{ m_dwUserContext = dwContext; }
 
 	char* GetIPString()		{ return m_szIP; }
-	DWORD GetIP()			{ return m_dwIP; }
-	int GetPort()			{ return m_nPort; }
+	DWORD GetIP() const		{ return m_dwIP; }
+	int GetPort() const		{ return m_nPort; }
 	void SetAddress(const char* pszIP, int nPort) {
 		strcpy_safe(m_szIP, pszIP);
 		m_dwIP = inet_addr(m_szIP);
 		m_nPort = nPort;
 	}
-	void SetAllowed(bool bAllowed) { m_bAllowed = bAllowed; }
-	bool IsAllowed() { return m_bAllowed; }
+	void SetAllowed(bool bAllowed)	{ m_bAllowed = bAllowed; }
+	bool IsAllowed() const			{ return m_bAllowed; }
 };
 
 
@@ -147,8 +149,8 @@ public:
 	MCommandProfiler		m_CommandProfiler;
 #endif
 
-	MCommand* MCommandCommunicator::BlobToCommand(const void* Data, size_t Size);
-	MCommand * BlobToCommand(MCmdParamBlob * Blob);
+	MCommand* BlobToCommand(const void* Data, size_t Size);
+	MCommand* BlobToCommand(MCmdParamBlob * Blob);
 };
 
 MCmdParamBlob* CommandToBlob(MCommand& Command);

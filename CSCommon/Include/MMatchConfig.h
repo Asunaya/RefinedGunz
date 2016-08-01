@@ -124,6 +124,7 @@ public:
 	const char* GetGameDirectory() const { return GameDirectory.c_str(); }
 
 	bool IsMasterServer() const { return bIsMasterServer; }
+	auto GetPort() const { return 6000; }
 };
 
 inline MMatchConfig* MGetServerConfig() { return MMatchConfig::GetInstance(); }

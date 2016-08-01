@@ -17,6 +17,10 @@
 #include "MLocatorStatistics.h"
 #include "MServerStatus.h"
 #include "MLogManager.h"
+#ifndef LOCATOR_FREESTANDING
+#include "MMatchServer.h"
+#include "MMatchConfig.h"
+#endif
 
 #pragma comment( lib, "winmm.lib" )
 
@@ -42,7 +46,6 @@ MLocator::MLocator(void)
 	m_nSendCount						= 0;
 	m_nDuplicatedCount					= 0;
 	m_dwLastLocatorStatusUpdatedTime	= timeGetTime();
-	//m_pCountryCodeFilter = 0;
 	m_pCountryFilter					= 0;
 
 	m_This = GetLocatorConfig()->GetLocatorUID();
@@ -71,12 +74,14 @@ bool MLocator::Create()
 			return false;
 		}
 	}
-		
+	
+#ifdef LOCATOR_FREESTANDING
 	if( !InitDBMgr() )
 	{
 		mlog( "MLocator::Create - DB초기화 실패.\n" );
 		return false;
 	}
+#endif
 
 	if( !InitServerStatusMgr() )
 	{
@@ -90,11 +95,13 @@ bool MLocator::Create()
 		return false;
 	}
 
+#ifdef LOCATOR_FREESTANDING
 	if( !InitCountryCodeFilter() )
 	{
 		mlog( "MLocator::Create - 접속 허용 국가 코드 리스트 초기화 실패.\n" );
 		return false;
 	}
+#endif
 
 	if( !InitSafeUDP() )
 	{
@@ -352,67 +359,103 @@ void MLocator::ReleaseValidCountryCodeList()
 
 void MLocator::ReleaseCommand()
 {
-	while(MCommand* pCmd = GetCommandSafe())
+	while (MCommand* pCmd = GetCommandSafe())
 		delete pCmd;
 }
 
+bool MLocator::GetServerStatus()
+{
+#ifdef LOCATOR_FREESTANDING
+	return GetLocatorDBMgr()->GetServerStatus(GetServerStatusMgr());
+#else
+	auto& ServerStatusMgr = *GetServerStatusMgr();
+	auto& MatchServer = *MGetMatchServer();
+	auto& Config = *MGetServerConfig();
 
-void MLocator::GetDBServerStatus( const DWORD dwEventTime, const bool bIsWithoutDelayUpdate )
+	if (ServerStatusMgr.GetSize() < 1)
+	{
+		ServerStatusMgr.Insert(MServerStatus());
+
+		auto& Status = ServerStatusMgr[0];
+
+		Status.SetID(Config.GetServerID());
+		Status.SetType(4);
+		Status.SetMaxPlayer(Config.GetMaxUser());
+		Status.SetLastUpdatedTime("right meow");
+		Status.SetIPString("");
+		Status.SetIP(0);
+		Status.SetPort(Config.GetPort());
+		Status.SetServerName(Config.GetServerName());
+		Status.SetOpenState(true);
+	}
+
+	auto& Status = ServerStatusMgr[0];
+	Status.SetCurPlayer(MatchServer.GetObjects()->size());
+
+	return true;
+#endif
+}
+
+void MLocator::GetDBServerStatus(const DWORD dwEventTime, const bool bIsWithoutDelayUpdate)
 {
 	// 30초마다 DB의 ServerStatus테이블정보를 가져옴.
 
-	if( IsElapedServerStatusUpdatedTime(dwEventTime) || bIsWithoutDelayUpdate )
+	if (!(IsElapedServerStatusUpdatedTime(dwEventTime) || bIsWithoutDelayUpdate))
+		return;
+
+#ifdef LOCATOR_FREESTANDING
+	if (!GetLocatorDBMgr())
+		return;
+#endif
+
+	if (!m_pServerStatusMgr)
+		return;
+
+	if (GetServerStatus())
 	{
-		if( (0 != GetLocatorDBMgr()) && (0 != m_pServerStatusMgr) )
+		m_pServerStatusMgr->CheckDeadServerByLastUpdatedTime(GetLocatorConfig()->GetMarginOfErrorMin(),
+			m_pServerStatusMgr->CalcuMaxCmpCustomizeMin());
+		/*
+		 * ServerStatusInfo Blob은 List수가 병경되었을 경우(Blob의 size가 변경)만 다시 할당을 하고,
+		 *  그 외에는 할당된 메모리를 다시 사용함.
+		 */
+
+		if (m_nLastGetServerStatusCount != m_pServerStatusMgr->GetSize())
 		{
-			m_pServerStatusMgr->Clear();
-			if( GetLocatorDBMgr()->GetServerStatus(m_pServerStatusMgr) )
-			{
-				m_pServerStatusMgr->CheckDeadServerByLastUpdatedTime( GetLocatorConfig()->GetMarginOfErrorMin(), 
-																	  m_pServerStatusMgr->CalcuMaxCmpCustomizeMin() );
-				/*
-				 * ServerStatusInfo Blob은 List수가 병경되었을 경우(Blob의 size가 변경)만 다시 할당을 하고,
-				 *  그 외에는 할당된 메모리를 다시 사용함.
-				 */
+			MEraseBlobArray(m_vpServerStatusInfoBlob);
 
-				if( m_nLastGetServerStatusCount != m_pServerStatusMgr->GetSize() )
-				{
-					MEraseBlobArray( m_vpServerStatusInfoBlob );
-
-					m_nLastGetServerStatusCount = m_pServerStatusMgr->GetSize();
-					m_vpServerStatusInfoBlob	= MMakeBlobArray( MTD_SERVER_STATUS_INFO_SIZE, m_nLastGetServerStatusCount );
-					m_nServerStatusInfoBlobSize = MGetBlobArraySize( m_vpServerStatusInfoBlob );
-				}
-				
-				if( 0 != m_vpServerStatusInfoBlob )
-				{
-					MTD_ServerStatusInfo* pMTDss;
-					for( int i = 0; i < m_nLastGetServerStatusCount; ++i )
-					{
-						pMTDss = (MTD_ServerStatusInfo*)MGetBlobArrayElement( m_vpServerStatusInfoBlob, i );
-
-						pMTDss->m_dwIP			= (*m_pServerStatusMgr)[i].GetIP();
-						pMTDss->m_nPort			= (*m_pServerStatusMgr)[i].GetPort();
-						pMTDss->m_nServerID		= static_cast<unsigned char>( (*m_pServerStatusMgr)[i].GetID() );
-						pMTDss->m_nCurPlayer	= (*m_pServerStatusMgr)[i].GetCurPlayer();
-						pMTDss->m_nMaxPlayer	= (*m_pServerStatusMgr)[i].GetMaxPlayer();
-						pMTDss->m_nType			= (*m_pServerStatusMgr)[i].GetType();
-						pMTDss->m_bIsLive		= (*m_pServerStatusMgr)[i].IsLive();
-					}
-
-					UpdateLastServerStatusUpdatedTime( dwEventTime );
-				}
-				else
-				{
-					m_nLastGetServerStatusCount = -1;
-				}
-			}
-			else
-			{
-				mlog( "Fail to GetServerStatus\n" );
-				ASSERT( 0 && "GetServerStatus실패." );
-			}
+			m_nLastGetServerStatusCount = m_pServerStatusMgr->GetSize();
+			m_vpServerStatusInfoBlob = MMakeBlobArray(MTD_SERVER_STATUS_INFO_SIZE, m_nLastGetServerStatusCount);
+			m_nServerStatusInfoBlobSize = MGetBlobArraySize(m_vpServerStatusInfoBlob);
 		}
+
+		if (0 != m_vpServerStatusInfoBlob)
+		{
+			MTD_ServerStatusInfo* pMTDss;
+			for (int i = 0; i < m_nLastGetServerStatusCount; ++i)
+			{
+				pMTDss = (MTD_ServerStatusInfo*)MGetBlobArrayElement(m_vpServerStatusInfoBlob, i);
+
+				pMTDss->m_dwIP = (*m_pServerStatusMgr)[i].GetIP();
+				pMTDss->m_nPort = (*m_pServerStatusMgr)[i].GetPort();
+				pMTDss->m_nServerID = static_cast<unsigned char>((*m_pServerStatusMgr)[i].GetID());
+				pMTDss->m_nCurPlayer = (*m_pServerStatusMgr)[i].GetCurPlayer();
+				pMTDss->m_nMaxPlayer = (*m_pServerStatusMgr)[i].GetMaxPlayer();
+				pMTDss->m_nType = (*m_pServerStatusMgr)[i].GetType();
+				pMTDss->m_bIsLive = (*m_pServerStatusMgr)[i].IsLive();
+			}
+
+			UpdateLastServerStatusUpdatedTime(dwEventTime);
+		}
+		else
+		{
+			m_nLastGetServerStatusCount = -1;
+		}
+	}
+	else
+	{
+		mlog("Fail to GetServerStatus\n");
+		ASSERT(0 && "GetServerStatus실패.");
 	}
 }
 
@@ -650,8 +693,10 @@ void MLocator::Run()
 	GetDBServerStatus( dwEventTime );
 	FlushRecvQueue( dwEventTime );
 	UpdateUDPManager( dwEventTime );
+#ifdef LOCATOR_FREESTANDING
 	UpdateLocatorStatus( dwEventTime );
 	UpdateLocatorLog( dwEventTime );
+#endif
 	UpdateLogManager();
 }
 
@@ -903,7 +948,7 @@ void MLocator::FlushRecvQueue( const DWORD dwEventTime )
 			}
 
 			// 국가 코드 필터를 사용할시, 접속한 IP가 접속 가능한 국가인지 검사.
-			if( GetLocatorConfig()->IsUseCountryCodeFilter() )
+			if( GetLocatorConfig()->IsUseCountryCodeFilter() && GetCountryFilter() )
 			{
 				// custom ip검사후 ip country code검사.
 				if( GetCustomIP(pSendUDPInfo->GetStrIP(), strCountryCode, bIsBlock, strComment) )
@@ -940,8 +985,11 @@ void MLocator::FlushRecvQueue( const DWORD dwEventTime )
 
 				ResponseServerStatusInfoList( pSendUDPInfo->GetIP(), pSendUDPInfo->GetPort() );
 
-				GetCountryFilter()->GetIPCountryCode( pSendUDPInfo->GetStrIP(), CountryCode3 );
-				GetLocatorStatistics().IncreaseCountryStatistics( CountryCode3 );
+				if (GetCountryFilter())
+				{
+					GetCountryFilter()->GetIPCountryCode(pSendUDPInfo->GetStrIP(), CountryCode3);
+					GetLocatorStatistics().IncreaseCountryStatistics(CountryCode3);
+				}
 			}
 
 			pSendUDPInfo->IncreaseUsedCount( pSendUDPInfo->GetUseCount() );

@@ -45,7 +45,7 @@ void MServerStatus::SetLiveStatus( const bool bLiveState )
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 
-void MServerStatusMgr::Insert( MServerStatus& ss )
+void MServerStatusMgr::Insert( const MServerStatus& ss )
 {
 	m_ServerStatusVec.push_back( ss );
 }

@@ -33,7 +33,8 @@ public:
 	void IncreaseSendCount()		{ ++m_nSendCount; }
 	void IncreaseDuplicatedCount()	{ ++m_nDuplicatedCount; }
 
-	const MServerStatusMgr* GetServerStatusMgr() const { return m_pServerStatusMgr; }
+	auto* GetServerStatusMgr()		 { return m_pServerStatusMgr; }
+	auto* GetServerStatusMgr() const { return m_pServerStatusMgr; }
 
 	void DumpLocatorStatusInfo();
 	
@@ -61,7 +62,8 @@ private :
 	
 	MLocatorDBMgr* GetLocatorDBMgr() { return m_pDBMgr; }
 
-	void  GetDBServerStatus( const DWORD dwEventTime, const bool bIsWithoutDelayUpdate = false );
+	bool GetServerStatus();
+	void GetDBServerStatus( const DWORD dwEventTime, const bool bIsWithoutDelayUpdate = false );
 	const DWORD GetUpdatedServerStatusTime()		{ return m_dwLastServerStatusUpdatedTime; }
 	const DWORD GetLastUDPManagerUpdateTime()		{ return m_dwLastUDPManagerUpdateTime; }
 	const DWORD GetLastLocatorStatusUpdatedTime()	{ return m_dwLastLocatorStatusUpdatedTime; }

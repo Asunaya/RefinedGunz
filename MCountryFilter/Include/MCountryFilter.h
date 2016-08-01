@@ -185,4 +185,4 @@ private :
 	IPRangeAlgorithm< CustomIPList >	m_CustomIPAlgorithm;
 };
 
-bool SplitStrIP( const string& strIP, vector<BYTE>& vIP );
+bool SplitStrIP( const string& strIP, vector<uint8_t>& vIP );

@@ -31,7 +31,7 @@ public :
 	bool			IsLive() const				{ return m_bIsLive; }
 
 	void SetID( const int nID )									{ m_nID = nID; }
-	void SetMaxPalyer( const int nMaxPlayer )					{ m_nMaxPlayer = nMaxPlayer; }
+	void SetMaxPlayer( const int nMaxPlayer )					{ m_nMaxPlayer = nMaxPlayer; }
 	void SetCurPlayer( const int nCurPlayer )					{ m_nCurPlayer = nCurPlayer; }
 	void SetLastUpdatedTime( const string& strLastUpdatedTime ) { m_strLastUpdatedTime = strLastUpdatedTime; }
 	void SetIPString( const string& strIP )						{ m_strIP = strIP; }
@@ -80,7 +80,7 @@ typedef vector< int >			ServerIDVec;
 class MServerStatusMgr
 {
 public :
-	void		Insert( MServerStatus& ss );
+	void		Insert( const MServerStatus& ss );
 	void		Reserve( const int nSize )			{ m_ServerStatusVec.reserve( nSize ); }
 	void		Clear()								{ m_ServerStatusVec.clear(); }
 	const int	Capacity() const					{ return static_cast< int >( m_ServerStatusVec.capacity() ); }
@@ -94,7 +94,8 @@ public :
 	const int	GetDeadServerCount() const			{ return m_nDeadServerCount; }
 	const ServerIDVec& GetDeadServerIDList() const	{ return m_vDeadServerIDList; }
 
-	
+
+	MServerStatus& operator[] (const int nPos) { return m_ServerStatusVec[nPos]; }
 	const MServerStatus& operator[] ( const int nPos ) const { return m_ServerStatusVec[ nPos ]; }
 
 private :

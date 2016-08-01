@@ -229,7 +229,7 @@ void ZServerView::ClearServerList( void)
 }
 
 
-bool ZServerView::AddServer( char* szName, char* szAddress, int nPort, int nType, int nNumOfUser, int nCapacity, bool IsLive )
+bool ZServerView::AddServer( const char* szName, const char* szAddress, int nPort, int nType, int nNumOfUser, int nCapacity, bool IsLive )
 {
 	ServerInfo* pServerNode = new ServerInfo;
 	strcpy_safe( pServerNode->szName, szName);
@@ -247,12 +247,12 @@ bool ZServerView::AddServer( char* szName, char* szAddress, int nPort, int nType
 }
 
 
-const ServerInfo *ZServerView::GetSelectedServer()
+const ServerInfo *ZServerView::GetSelectedServer() const
 {
 	if ( m_nSelectNum < 0)
 		return GetFirstServer();
 
-	SERVERLIST::iterator itr = m_cServerList.begin();
+	auto itr = m_cServerList.begin();
 
 	for ( int i = 0;  i < m_nSelectNum;  i++)
 	{
@@ -265,7 +265,7 @@ const ServerInfo *ZServerView::GetSelectedServer()
 	return (*itr);
 }
 
-const ServerInfo *ZServerView::GetFirstServer()
+const ServerInfo *ZServerView::GetFirstServer() const
 {
 	auto it = m_cServerList.begin();
 	if (it == m_cServerList.end())
@@ -296,10 +296,10 @@ void ZServerView::SetCurrSel( int nNumber)
 		m_nSelectNum = -1;
 }
 
-int ZServerView::GetCurrSel()
+int ZServerView::GetCurrSel() const
 {
 	if( m_cServerList.empty() ) return -1;
-	SERVERLIST::iterator itr = m_cServerList.begin();
+	auto itr = m_cServerList.begin();
 	for ( int i = 0;  i < m_nSelectNum;  i++)
 		itr++;
 
