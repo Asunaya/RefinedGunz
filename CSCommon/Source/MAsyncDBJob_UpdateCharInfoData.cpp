@@ -3,7 +3,7 @@
 
 void MAsyncDBJob_UpdateCharInfoData::Run(void* pContext)
 {
-	MMatchDBMgr* pDBMgr = (MMatchDBMgr*)pContext;
+	auto* pDBMgr = static_cast<IDatabase*>(pContext);
 
 	if (!pDBMgr->UpdateCharInfoData(m_nCID, 
 								   m_nAddedXP, 

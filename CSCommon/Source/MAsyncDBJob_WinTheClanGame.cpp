@@ -3,7 +3,7 @@
 
 void MAsyncDBJob_WinTheClanGame::Run(void* pContext)
 {
-	MMatchDBMgr* pDBMgr = (MMatchDBMgr*)pContext;
+	auto* pDBMgr = static_cast<IDatabase*>(pContext);
 
 
 	if (!pDBMgr->WinTheClanGame(m_nWinnerCLID, 

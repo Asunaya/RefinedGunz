@@ -202,9 +202,10 @@ public:
 						MWidget* pPort = pResource->FindWidget("ServerPort");
 
 						ZPostConnect(pAddr->GetText(), atoi(pPort->GetText()));		// Debug server
+						DMLog("Connecting\n");
 					}
 					else
-						ZPostConnect(pServer->szAddress, pServer->nPort);				// Game server
+						ZPostConnect(pServer->szAddress, pServer->nPort);			// Game server
 				}
 				else
 				{
@@ -300,7 +301,17 @@ public:
 					if (!pServer)
 						return false;
 
-					ZPostConnect(pServer->szAddress, pServer->nPort);
+					if (pServer->nType == 1)
+					{
+						MWidget* pAddr = pResource->FindWidget("ServerAddress");
+						MWidget* pPort = pResource->FindWidget("ServerPort");
+
+						ZPostConnect(pAddr->GetText(), atoi(pPort->GetText()));		// Debug server
+					}
+					else
+					{
+						ZPostConnect(pServer->szAddress, pServer->nPort);			// Game server
+					}
 
 					return true;
 				};

@@ -350,7 +350,8 @@ void MQuestDropTable::ParseDropItemID(MQuestDropItem* pItem, const char* szAttrV
 			}
 			else
 			{
-				_ASSERT(0);
+				// TODO: Fix me?
+				//_ASSERT(0);
 			}
 		}
 	}

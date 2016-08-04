@@ -206,7 +206,11 @@ bool MMatchEventDescManager::Insert( const DWORD dwEventID, MMatchEventDesc* pEv
 
 const MMatchEventDesc* MMatchEventDescManager::Find( const DWORD dwEventID )
 {
-	MMatchEventDescManager::iterator itFind = find( dwEventID );
+	auto itFind = find( dwEventID );
+
+	if (itFind == end())
+		return nullptr;
+
 	return itFind->second;
 }
 

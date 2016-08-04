@@ -16,9 +16,6 @@
 #include "MQuestConst.h"
 #include "MQuestItem.h"
 
-#define SODIUM_STATIC
-#include "sodium.h"
-
 // SQL ////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -479,7 +476,7 @@ bool MMatchDBMgr::CreateAccount(const TCHAR* szUserID,
 AccountCreationResult MMatchDBMgr::CreateAccountNew(const char *szUsername, const char *szPasswordData, const char *szEmail)
 {
 	_STATUS_DB_START
-	if (!CheckOpen()) return ACR_DB_ERROR;
+	if (!CheckOpen()) return AccountCreationResult::DBError;
 
 	CODBCRecordset rs(&m_DB);
 
@@ -498,10 +495,10 @@ AccountCreationResult MMatchDBMgr::CreateAccountNew(const char *szUsername, cons
 		rs.Open(sql, CRecordset::forwardOnly, CRecordset::readOnly);
 
 		if (rs.IsOpen() == FALSE)
-			return ACR_DB_ERROR;
+			return AccountCreationResult::DBError;
 
 		if (rs.GetRecordCount() > 0)
-			return ACR_USERNAME_ALREADY_EXISTS;
+			return AccountCreationResult::UsernameAlreadyExists;
 
 		sprintf_safe(sql, "INSERT INTO Account (UserID, UGradeID, PGradeID, RegDate, Email, Age, Name) VALUES ('%s', '0', '0', GETDATE(), '%s', %d, '%s')",
 			szUsername, szEmail, 0, "");
@@ -516,7 +513,7 @@ AccountCreationResult MMatchDBMgr::CreateAccountNew(const char *szUsername, cons
 		rs.Open(sql, CRecordset::forwardOnly, CRecordset::readOnly);
 
 		if (rs.IsOpen() == FALSE || rs.GetRecordCount() <= 0 || rs.IsBOF() == TRUE)
-			return ACR_DB_ERROR;
+			return AccountCreationResult::DBError;
 
 		int AID = rs.Field("AID").AsInt();
 
@@ -529,24 +526,24 @@ AccountCreationResult MMatchDBMgr::CreateAccountNew(const char *szUsername, cons
 	catch (CDBException* e)
 	{
 		Log("MMatchDBMgr::CreateAccountNew - CDBException: %s\n", e->m_strError);
-		return ACR_DB_ERROR;
+		return AccountCreationResult::DBError;
 	}
 	catch (CException *e)
 	{
 		char szError[128];
 		e->GetErrorMessage(szError, sizeof(szError));
 		Log("MMatchDBMgr::CreateAccountNew - CException: %s\n", szError);
-		return ACR_DB_ERROR;
+		return AccountCreationResult::DBError;
 	}
 	catch (...)
 	{
 		Log("MMatchDBMgr::CreateAccountNew - Unknown exception\n");
-		return ACR_DB_ERROR;
+		return AccountCreationResult::DBError;
 	}
 
 	_STATUS_DB_END(1);
 
-	return ACR_OK;
+	return AccountCreationResult::Success;
 }
 
 bool MMatchDBMgr::BanPlayer(int nAID, const char *szReason, const time_t &UnbanTime)
@@ -569,7 +566,8 @@ bool MMatchDBMgr::BanPlayer(int nAID, const char *szReason, const time_t &UnbanT
 
 		m_DB.ExecuteSQL(sql);
 
-		sprintf_safe(sql, "INSERT INTO Blocks (AID, Type, Reason, EndDate) VALUES (%d, %d, '%s', '%s')", nAID, MMBT_BANNED, temp.c_str(), szTime);
+		sprintf_safe(sql, "INSERT INTO Blocks (AID, Type, Reason, EndDate) VALUES (%d, %d, '%s', '%s')",
+			nAID, MMBT_BANNED, temp.c_str(), szTime);
 
 		m_DB.ExecuteSQL(sql);
 	}
@@ -2968,27 +2966,27 @@ _STATUS_DB_END(57);
 }
 
 
-bool MMatchDBMgr::GetIPContryCode( const string& strIP, 
-					 DWORD& dwOutIPFrom, 
-					 DWORD& dwOutIPTo, 
-					 string& strOutCountryCode )
-{
-	_STATUS_DB_START
-
-	auto temp = m_DBFilter.Filtering(strIP);
-
-	try 
-	{
-	m_CountryFilterDBMgr.GetIPContryCode(temp.c_str(), dwOutIPFrom, dwOutIPTo, strOutCountryCode);
-	}
-	catch( CDBException* e )
-	{
-		Log( "MMatchDBMgr::GetIPContryCode - %s\n", e->m_strError );
-		return false;
-	}
-_STATUS_DB_END(58);
-	return true;
-}
+//bool MMatchDBMgr::GetIPContryCode( const string& strIP, 
+//					 DWORD& dwOutIPFrom, 
+//					 DWORD& dwOutIPTo, 
+//					 string& strOutCountryCode )
+//{
+//	_STATUS_DB_START
+//
+//	auto temp = m_DBFilter.Filtering(strIP);
+//
+//	try 
+//	{
+//	m_CountryFilterDBMgr.GetIPCountryCode(temp.c_str(), dwOutIPFrom, dwOutIPTo, strOutCountryCode);
+//	}
+//	catch( CDBException* e )
+//	{
+//		Log( "MMatchDBMgr::GetIPConutryCode - %s\n", e->m_strError );
+//		return false;
+//	}
+//_STATUS_DB_END(58);
+//	return true;
+//}
 
 
 bool MMatchDBMgr::GetBlockCountryCodeList( BlockCountryCodeList& rfBlockCountryCodeList )
@@ -3008,25 +3006,25 @@ _STATUS_DB_END(60);
 }
 
 
-bool MMatchDBMgr::GetCustomIP( const string& strIP, DWORD& dwIPFrom, DWORD& dwIPTo, bool& bIsBlock, string& strCountryCode3, string& strComment )
-{
-_STATUS_DB_START
-
-	auto temp = m_DBFilter.Filtering(strIP);
-
-	try
-	{
-	m_CountryFilterDBMgr.GetCustomIP(temp.c_str(), dwIPFrom, dwIPTo, bIsBlock, strCountryCode3, strComment);
-	}
-	catch( CDBException* e )
-	{
-		Log( "MMatchDBMgr::GetCustomIP - %s\n", e->m_strError );
-		return false;
-	}
-_STATUS_DB_END(59);
-	return true;
-
-}
+//bool MMatchDBMgr::GetCustomIP( const string& strIP, DWORD& dwIPFrom, DWORD& dwIPTo, bool& bIsBlock, string& strCountryCode3, string& strComment )
+//{
+//_STATUS_DB_START
+//
+//	auto temp = m_DBFilter.Filtering(strIP);
+//
+//	try
+//	{
+//	m_CountryFilterDBMgr.GetCustomIP(temp.c_str(), dwIPFrom, dwIPTo, bIsBlock, strCountryCode3, strComment);
+//	}
+//	catch( CDBException* e )
+//	{
+//		Log( "MMatchDBMgr::GetCustomIP - %s\n", e->m_strError );
+//		return false;
+//	}
+//_STATUS_DB_END(59);
+//	return true;
+//
+//}
 
 
 bool MMatchDBMgr::GetIPtoCountryList( IPtoCountryList& rfIPtoCountryList )

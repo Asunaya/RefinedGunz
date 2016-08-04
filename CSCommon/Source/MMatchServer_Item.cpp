@@ -35,7 +35,7 @@ bool MMatchServer::InsertCharItem(const MUID& uidPlayer, const unsigned long int
 
 	// 디비에 아이템 추가
 	unsigned long int nNewCIID = 0;
-	if (!m_MatchDBMgr.InsertCharItem(pObject->GetCharInfo()->m_nCID, nItemID, bRentItem, nRentPeriodHour, &nNewCIID))
+	if (!GetDBMgr()->InsertCharItem(pObject->GetCharInfo()->m_nCID, nItemID, bRentItem, nRentPeriodHour, &nNewCIID))
 	{
 		return false;
 	}
@@ -84,7 +84,7 @@ bool MMatchServer::BuyItem(MMatchObject* pObject, unsigned int nItemID, bool bRe
 
 
 	unsigned long int nNewCIID = 0;
-	if (!m_MatchDBMgr.BuyBountyItem(pObject->GetCharInfo()->m_nCID, pItemDesc->m_nID, nPrice, &nNewCIID))
+	if (!GetDBMgr()->BuyBountyItem(pObject->GetCharInfo()->m_nCID, pItemDesc->m_nID, nPrice, &nNewCIID))
 	{
 		MCommand* pNew = CreateCommand(MC_MATCH_RESPONSE_BUY_ITEM, MUID(0,0));
 		pNew->AddParameter(new MCmdParamInt(MERR_CANNOT_BUY_ITEM));
@@ -182,7 +182,7 @@ bool MMatchServer::ResponseSellItem(const MUID& uidPlayer, const MUID& uidItem)
 	int nCharBP = pObj->GetCharInfo()->m_nBP + nPrice;
 
 
-	if (!m_MatchDBMgr.SellBountyItem(nCID, nSelItemID, nCIID, nPrice, nCharBP))
+	if (!GetDBMgr()->SellBountyItem(nCID, nSelItemID, nCIID, nPrice, nCharBP))
 	{
 		MCommand* pNew = CreateCommand(MC_MATCH_RESPONSE_SELL_ITEM, MUID(0,0));
 		pNew->AddParameter(new MCmdParamInt(MERR_CANNOT_SELL_ITEM));
@@ -200,7 +200,7 @@ bool MMatchServer::ResponseSellItem(const MUID& uidPlayer, const MUID& uidItem)
 
 /*
 	// 디비에 바운티 더해준다
-	if (!m_MatchDBMgr.UpdateCharBP(pObj->GetCharInfo()->m_nCID, nPrice))
+	if (!GetDBMgr()->UpdateCharBP(pObj->GetCharInfo()->m_nCID, nPrice))
 	{
 		MCommand* pNew = CreateCommand(MC_MATCH_RESPONSE_SELL_ITEM, MUID(0,0));
 		pNew->AddParameter(new MCmdParamInt(MERR_CANNOT_SELL_ITEM));
@@ -216,7 +216,7 @@ bool MMatchServer::ResponseSellItem(const MUID& uidPlayer, const MUID& uidItem)
 	{
 		// RemoveCharItem 함수 이후에 pItem을 사용하면 안된다.
 		pItem = NULL;
-		m_MatchDBMgr.InsertItemPurchaseLogByBounty(nSelItemID, pObj->GetCharInfo()->m_nCID,
+		GetDBMgr()->InsertItemPurchaseLogByBounty(nSelItemID, pObj->GetCharInfo()->m_nCID,
 			nPrice, pObj->GetCharInfo()->m_nBP, MMatchDBMgr::IPT_SELL);
 	}
 	else
@@ -246,7 +246,7 @@ bool MMatchServer::RemoveCharItem(MMatchObject* pObject, MUID& uidItem)
 	if (pItem == false) return false;
 
 	// 디비에서 아이템 삭제
-	if (!m_MatchDBMgr.DeleteCharItem(pObject->GetCharInfo()->m_nCID, pItem->GetCIID()))
+	if (!GetDBMgr()->DeleteCharItem(pObject->GetCharInfo()->m_nCID, pItem->GetCIID()))
 	{
 		return false;
 	}
@@ -323,7 +323,7 @@ void MMatchServer::ResponseCharacterItemList(const MUID& uidPlayer)
 	// 이전에 디비 억세스를 안했었으면 디비에서 아이템 정보를 가져온다
 	if (!pObj->GetCharInfo()->m_ItemList.IsDoneDbAccess())
 	{
-		if (!m_MatchDBMgr.GetCharItemInfo(pObj->GetCharInfo()))
+		if (!GetDBMgr()->GetCharItemInfo(*pObj->GetCharInfo()))
 		{
 			mlog("DB Query(ResponseCharacterItemList > GetCharItemInfo) Failed\n");
 			return;
@@ -334,7 +334,7 @@ void MMatchServer::ResponseCharacterItemList(const MUID& uidPlayer)
 	{
 		if( !pObj->GetCharInfo()->m_QuestItemList.IsDoneDbAccess() )
 		{
-			if( !m_MatchDBMgr.GetCharQuestItemInfo(pObj->GetCharInfo()) )
+			if( !GetDBMgr()->GetCharQuestItemInfo(pObj->GetCharInfo()) )
 			{
 				mlog( "MMatchServer::ResponseCharacterItemList - 디비 접근 실패후 제접근 실패. 게임 진행 불가.\n" );
 				return;
@@ -424,7 +424,7 @@ void MMatchServer::ResponseAccountItemList(const MUID& uidPlayer)
 	int nExpiredItemCount = 0;
 
 	// 디비에서 AccountItem을 가져온다
-	if (!m_MatchDBMgr.GetAccountItemInfo(pObj->GetAccountInfo()->m_nAID, accountItems, &nItemCount, MAX_ACCOUNT_ITEM,
+	if (!GetDBMgr()->GetAccountItemInfo(pObj->GetAccountInfo()->m_nAID, accountItems, &nItemCount, MAX_ACCOUNT_ITEM,
 										 ExpiredItemList, &nExpiredItemCount, MAX_EXPIRED_ACCOUNT_ITEM))
 	{
 		mlog("DB Query(ResponseAccountItemList > GetAccountItemInfo) Failed\n");
@@ -439,7 +439,7 @@ void MMatchServer::ResponseAccountItemList(const MUID& uidPlayer)
 		for (int i = 0; i < nExpiredItemCount; i++)
 		{
 			// 디비에서 기간만료된 AccountItem을 지운다.
-			if (m_MatchDBMgr.DeleteExpiredAccountItem(ExpiredItemList[i].nAIID))
+			if (GetDBMgr()->DeleteExpiredAccountItem(ExpiredItemList[i].nAIID))
 			{
 				vecExpiredItemIDList.push_back(ExpiredItemList[i].nItemID);
 			}
@@ -528,23 +528,15 @@ void MMatchServer::ResponseEquipItem(const MUID& uidPlayer, const MUID& uidItem,
 	nItemCIID = pItem->GetCIID();
 	nItemID = pItem->GetDesc()->m_nID;
 
-	bool bRet = false;
-	// 디비 업데이트
-	if (!m_MatchDBMgr.UpdateEquipedItem(pCharInfo->m_nCID, parts, nItemCIID, nItemID, &bRet))
-	{
-		mlog("DB Query(ResponseEquipItem > UpdateEquipedItem) Failed\n");
-		nResult = MERR_CANNOT_EQUIP_ITEM;
-	}
-
-	if (bRet == true)
+	if (GetDBMgr()->UpdateEquipedItem(pCharInfo->m_nCID, parts, nItemCIID, nItemID))
 	{
 		pCharInfo->m_EquipedItem.SetItem(parts, pItem);
 	}
 	else
 	{
+		//mlog("DB Query(ResponseEquipItem > UpdateEquipedItem) Failed\n");
 		nResult = MERR_CANNOT_EQUIP_ITEM;
 	}
-	
 
 	// 결과를 플레이어에게 응답한다.
 	MCommand* pNew = CreateCommand(MC_MATCH_RESPONSE_EQUIP_ITEM, MUID(0,0));
@@ -591,10 +583,8 @@ void MMatchServer::ResponseTakeoffItem(const MUID& uidPlayer, const MMatchCharIt
 	{
 		pCharInfo->m_EquipedItem.Remove(parts);
 
-		bool bRet = false;
-		if (!m_MatchDBMgr.UpdateEquipedItem(pCharInfo->m_nCID, parts, 0, 0, &bRet))
+		if (!GetDBMgr()->UpdateEquipedItem(pCharInfo->m_nCID, parts, 0, 0))
 		{
-			mlog("DB Query(ResponseEquipItem > UpdateEquipedItem) Failed\n");
 			nResult = MERR_CANNOT_TAKEOFF_ITEM;
 		}
 	}
@@ -672,7 +662,7 @@ void MMatchServer::ResponseBringBackAccountItem(const MUID& uidPlayer, const MUI
 	}
 
 	// 디비에서 중앙은행으로 옮겨준다.
-	if (!m_MatchDBMgr.BringBackAccountItem(pObj->GetAccountInfo()->m_nAID, 
+	if (!GetDBMgr()->BringBackAccountItem(pObj->GetAccountInfo()->m_nAID, 
 										  pObj->GetCharInfo()->m_nCID, 
 										  pItem->GetCIID()))
 	{

@@ -551,11 +551,17 @@ bool MMatchServer::LoadChannelPreset()
 
 bool MMatchServer::InitDB()
 {
-	CString str = m_MatchDBMgr.BuildDSNString(MGetServerConfig()->GetDB_DNS(), 
+	Database.Create(MGetServerConfig()->GetDatabaseType());
+
+	if (Database.Type != DatabaseType::MSSQL)
+		return true;
+
+	auto& db = *static_cast<MSSQLDatabase*>(GetDBMgr());
+	CString str = db.BuildDSNString(MGetServerConfig()->GetDB_DNS(), 
 		                                      MGetServerConfig()->GetDB_UserName(), 
 											  MGetServerConfig()->GetDB_Password());
 
-	if (m_MatchDBMgr.Connect(str))
+	if (db.Connect(str))
 	{
 		LOG(LOG_ALL, "DBMS connected");
 	}
@@ -616,7 +622,7 @@ bool MMatchServer::Create(int nPort)
 	if(MServer::Create(nPort)==false) return false;
 
 	// 디비에 최대 접속인원 업데이트
-	m_MatchDBMgr.UpdateServerInfo(MGetServerConfig()->GetServerID(), MGetServerConfig()->GetMaxUser(),
+	GetDBMgr()->UpdateServerInfo(MGetServerConfig()->GetServerID(), MGetServerConfig()->GetMaxUser(),
 								  MGetServerConfig()->GetServerName());
 
 
@@ -700,7 +706,6 @@ void MMatchServer::Destroy(void)
 	m_Admin.Destroy();
 	m_AsyncProxy.Destroy();
 	MGetMatchShop()->Destroy();
-	m_MatchDBMgr.Disconnect();
 	m_SafeUDP.Destroy();
 	MServer::Destroy();
 
@@ -1042,7 +1047,7 @@ void MMatchServer::UpdateServerLog()
 		st_nElapsedTime = 0;
 
 		// 여기서 디비 업데이트
-		m_MatchDBMgr.InsertServerLog(MGetServerConfig()->GetServerID(), 
+		GetDBMgr()->InsertServerLog(MGetServerConfig()->GetServerID(), 
 									 (int)m_Objects.size(), (int)m_StageMap.size(), 
 									 GetBlockCount(), GetNonBlockCount() );
 		ResetBlockCount();
@@ -1073,13 +1078,16 @@ void MMatchServer::UpdateServerStatusDB()
 		if (nObjSize > MGetServerConfig()->GetMaxUser()) nObjSize = MGetServerConfig()->GetMaxUser();
 
 		static int st_ErrCounter = 0;
-		if (m_MatchDBMgr.UpdateServerStatus(MGetServerConfig()->GetServerID(), nObjSize) == false) 
+		if (GetDBMgr()->UpdateServerStatus(MGetServerConfig()->GetServerID(), nObjSize) == false) 
 		{
 			LOG(LOG_ALL, "[CRITICAL ERROR] DB Connection Lost. ");
 			//Shutdown();
 
-			m_MatchDBMgr.Disconnect();
-			InitDB();
+			if (Database.Type == DatabaseType::MSSQL)
+			{
+				static_cast<MSSQLDatabase*>(GetDBMgr())->Disconnect();
+				InitDB();
+			}
 			st_ErrCounter++;
 			if (st_ErrCounter > MAX_DB_QUERY_COUNT_OUT) 
 			{
@@ -2367,7 +2375,7 @@ void MMatchServer::InsertChatDBLog(const MUID& uidPlayer, const char* szMsg)
 		for (int i = 0; i < stnLogTop; i++)
 		{
 
-			if (!m_MatchDBMgr.InsertChatLog(stChatLog[i].nCID, stChatLog[i].szMsg, stChatLog[i].nTime))
+			if (!GetDBMgr()->InsertChatLog(stChatLog[i].nCID, stChatLog[i].szMsg, stChatLog[i].nTime))
 			{
 				LOG(LOG_ALL, "DB Query(InsertChatDBLog > InsertChatLog) Failed");
 			}
@@ -2693,7 +2701,7 @@ void MMatchServer::UpdateCharDBCachingData(MMatchObject* pObject)
 		pObject->GetCharInfo()->GetDBCachingData()->Reset();
 
 /*
-		if (m_MatchDBMgr.UpdateCharInfoData(pObject->GetCharInfo()->m_nCID,
+		if (GetDBMgr()->UpdateCharInfoData(pObject->GetCharInfo()->m_nCID,
 			nAddedXP, nAddedBP, nAddedKillCount, nAddedDeathCount))
 		{
 			pObject->GetCharInfo()->GetDBCachingData()->Reset();
@@ -2705,7 +2713,7 @@ void MMatchServer::UpdateCharDBCachingData(MMatchObject* pObject)
 
 			LOG(LOG_ALL, "[CRITICAL ERROR] DB Connection Lost. ");
 
-			m_MatchDBMgr.Disconnect();
+			GetDBMgr()->Disconnect();
 			InitDB();
 
 			st_ErrCounter++;
@@ -2785,7 +2793,8 @@ bool MMatchServer::CheckItemXML()
 		size_t pos = (*itor).second.find( ":" );
 		if( string::npos == pos ) 
 		{
-			ASSERT( 0 && "구분자를 찾지 못함. 문법오류." );
+			// TODO: Fix
+			//ASSERT( 0 && "구분자를 찾지 못함. 문법오류." );
 			continue;
 		}
 
@@ -3309,11 +3318,11 @@ const COUNT_CODE_STATUS MMatchServer::CheckIsNonBlockCountry( const MUID& CommUI
 	}	
 	else
 	{
-		DWORD dwIPFrom = 0;
-		DWORD dwIPTo = 0;
+		uint32_t dwIPFrom = 0;
+		uint32_t dwIPTo = 0;
 		
 		// IP를 포함하고 있는 범위의 정보를 DB에서 새로 가져옴.
-		if( GetDBMgr()->GetIPContryCode(strIP, dwIPFrom, dwIPTo, strCountryCode3) )
+		if( GetDBMgr()->GetIPCountryCode(strIP, dwIPFrom, dwIPTo, strCountryCode3) )
 		{
 			// 새로운 IP범위를 리스트에 추가 함.
 			if( !GetCountryFilter().AddIPtoCountry(dwIPFrom, dwIPTo, strCountryCode3) )

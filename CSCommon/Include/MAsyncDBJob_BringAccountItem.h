@@ -11,7 +11,7 @@ protected:	// Input Argument
 	int		m_nCID;
 	int		m_nAIID;
 protected:	// Output Result
-	unsigned long int	m_nNewCIID;
+	unsigned int		m_nNewCIID;
 	unsigned long int	m_nNewItemID;
 	bool				m_bIsRentItem;
 	int					m_nRentMinutePeriodRemainder;

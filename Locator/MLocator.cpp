@@ -1042,8 +1042,8 @@ bool MLocator::IsValidCountryCodeIP( const string& strIP, string& strOutCountryC
 		// 여기가지 내려오면 현제 locator에는 존제하지 않는 ip이기에 CustomIP테이블과 IPtoCountry테이블을 조회해서 
 		// 찾았을경우 업데이트 한다.
 		
-		DWORD	dwIPFrom;
-		DWORD	dwIPTo;
+		uint32_t	dwIPFrom;
+		uint32_t	dwIPTo;
 		bool	bIsBlock;
 		string	strCountryCode;
 		string	strComment;
@@ -1061,7 +1061,7 @@ bool MLocator::IsValidCountryCodeIP( const string& strIP, string& strOutCountryC
 			else
 				mlog( "Fail to add new custom ip(%s) CountryCode(%s)\n", strIP.c_str(), strCountryCode.c_str() );
 		}
-		else if( GetLocatorDBMgr()->GetIPContryCode(strIP, dwIPFrom, dwIPTo, strCountryCode) )
+		else if( GetLocatorDBMgr()->GetIPCountryCode(strIP, dwIPFrom, dwIPTo, strCountryCode) )
 		{
 			if( GetCountryFilter()->AddIPtoCountry(dwIPFrom, dwIPTo, strCountryCode) )
 			{

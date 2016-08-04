@@ -483,6 +483,9 @@
     <ClInclude Include="Include\Physics.h" />
     <ClInclude Include="Include\stuff.h" />
     <ClInclude Include="Include\MovingWeaponManager.h" />
+    <ClInclude Include="Include\MSSQLDatabase.h" />
+    <ClInclude Include="Include\IDatabase.h" />
+    <ClInclude Include="Include\SQLiteDatabase.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\MCommand.cpp">
@@ -858,6 +861,8 @@
     <ClCompile Include="Source\Physics.cpp" />
     <ClCompile Include="Source\MovingWeaponManager.cpp" />
     <ClCompile Include="Source\HitRegistration.cpp" />
+    <ClCompile Include="Source\SQLiteDatabase.cpp" />
+    <ClCompile Include="Source\MSSQLDatabase.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="HShield\HsCryptLib.lib">

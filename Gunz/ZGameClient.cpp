@@ -2308,7 +2308,8 @@ bool ZGameClient::OnCommand(MCommand* pCommand)
 
 void ZGameClient::OutputMessage(const char* szMessage, MZMOMType nType)
 {
-	OutputToConsole(szMessage);
+	DMLog("%s\n", szMessage);
+	OutputToConsole("%s", szMessage);
 	ZChatOutput(MCOLOR(0xFFFFC600), szMessage);
 }
 

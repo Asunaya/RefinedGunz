@@ -8,6 +8,7 @@ using namespace std;
 
 #include "MMatchMap.h"
 #include "MMatchGlobal.h"
+#include "IDatabase.h"
 
 
 class MMatchConfig
@@ -56,6 +57,7 @@ private:
 	
 	std::string GameDirectory = "";
 	bool bIsMasterServer = true;
+	DatabaseType DBType = DatabaseType::None;
 
 	bool				m_bIsComplete;
 
@@ -122,9 +124,11 @@ public:
 	const bool IsComplete() { return m_bIsComplete; }
 
 	const char* GetGameDirectory() const { return GameDirectory.c_str(); }
+	bool HasGameData() const { return !GameDirectory.empty(); }
 
 	bool IsMasterServer() const { return bIsMasterServer; }
 	auto GetPort() const { return 6000; }
+	auto GetDatabaseType() const { return DBType; }
 };
 
 inline MMatchConfig* MGetServerConfig() { return MMatchConfig::GetInstance(); }

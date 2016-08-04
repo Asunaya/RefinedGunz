@@ -409,6 +409,13 @@ public:
 	}
 };
 
+struct MAccountItemNode
+{
+	int					nAIID;
+	unsigned long int	nItemID;
+	int					nRentMinutePeriodRemainder;
+};
+
 
 // effect
 #define MECTOK_EFFECT		"EFFECT"

@@ -4,7 +4,7 @@
 
 void MAsyncDBJob_CharFinalize::Run(void* pContext)
 {
-	MMatchDBMgr* pDBMgr = (MMatchDBMgr*)pContext;
+	auto* pDBMgr = static_cast<IDatabase*>(pContext);
 
 	MASYNC_RESULT nResult = MASYNC_RESULT_SUCCEED;
 

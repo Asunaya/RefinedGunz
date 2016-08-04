@@ -87,10 +87,10 @@ MCountryFilterDBMgr::~MCountryFilterDBMgr()
 }
 
 
-bool MCountryFilterDBMgr::GetIPContryCode( const string& strIP, 
-									 DWORD& dwIPFrom, 
-									 DWORD& dwIPTo, 
-									 string& strCountryCode )
+bool MCountryFilterDBMgr::GetIPCountryCode( const std::string& strIP, 
+	uint32_t& dwIPFrom,
+	uint32_t& dwIPTo,
+	std::string& strCountryCode )
 {
 	if( CheckOpen() )
 	{
@@ -177,7 +177,7 @@ bool MCountryFilterDBMgr::GetIPtoCountryList( IPtoCountryList& rfIPtoCountryList
 
 	try
 	{
-		rs.Open( g_szDB_GetIPtoCountryList , CRecordset::forwardOnly, CRecordset::readOnly );
+		rs.Open(g_szDB_GetIPtoCountryList, CRecordset::forwardOnly, CRecordset::readOnly);
 	}
 	catch( ... )
 	{
@@ -212,7 +212,7 @@ bool MCountryFilterDBMgr::GetIPtoCountryList( IPtoCountryList& rfIPtoCountryList
 }
 
 
-bool MCountryFilterDBMgr::GetCustomIP( const string& strIP, DWORD& dwIPFrom, DWORD& dwIPTo, bool& bIsBlock, string& strCountryCode3, string& strComment )
+bool MCountryFilterDBMgr::GetCustomIP( const string& strIP, uint32_t& dwIPFrom, uint32_t& dwIPTo, bool& bIsBlock, string& strCountryCode3, string& strComment )
 {
 	if( !CheckOpen() ) 
 		return false;

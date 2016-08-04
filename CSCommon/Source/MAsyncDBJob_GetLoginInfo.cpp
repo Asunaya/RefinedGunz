@@ -6,7 +6,7 @@ void MAsyncDBJob_GetLoginInfo::Run(void* pContext)
 {
 	_ASSERT(m_pAccountInfo);
 
-	MMatchDBMgr* pDBMgr = (MMatchDBMgr*)pContext;
+	auto* pDBMgr = static_cast<IDatabase*>(pContext);
 
 	// 원래 계정은 넷마블에 있으므로 해당 계정이 없으면 새로 생성한다. 
 	if (!pDBMgr->GetLoginInfo(m_szUserID, &m_nAID, m_szDBPassword))

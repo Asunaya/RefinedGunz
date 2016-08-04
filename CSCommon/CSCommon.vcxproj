@@ -245,6 +245,7 @@
     <ClInclude Include="Include\AnimationStuff.h" />
     <ClInclude Include="Include\BasicInfoHistory.h" />
     <ClInclude Include="Include\HitRegistration.h" />
+    <ClInclude Include="Include\IDatabase.h" />
     <ClInclude Include="Include\IndexPage.h" />
     <ClInclude Include="Include\LagCompensation.h" />
     <ClInclude Include="Include\MCommand.h" />
@@ -254,6 +255,7 @@
     <ClInclude Include="Include\MCommandProfiler.h" />
     <ClInclude Include="Include\MGridMap.h" />
     <ClInclude Include="Include\MovingWeaponManager.h" />
+    <ClInclude Include="Include\MSSQLDatabase.h" />
     <ClInclude Include="Include\MUID.h" />
     <ClInclude Include="Include\MObject.h" />
     <ClInclude Include="Include\MObjectTypes.h" />
@@ -371,6 +373,7 @@
     <ClInclude Include="Include\MStringRes.h" />
     <ClInclude Include="HShield\HsCryptLib.h" />
     <ClInclude Include="Include\MMatchDebug.h" />
+    <ClInclude Include="Include\SQLiteDatabase.h" />
     <ClInclude Include="Include\stdafx.h" />
     <ClInclude Include="Include\stuff.h" />
     <ClInclude Include="MMatchRuleSkillmap.h" />
@@ -388,6 +391,7 @@
     <ClCompile Include="Source\MCommandProfiler.cpp" />
     <ClCompile Include="Source\MGridMap.cpp" />
     <ClCompile Include="Source\MovingWeaponManager.cpp" />
+    <ClCompile Include="Source\MSSQLDatabase.cpp" />
     <ClCompile Include="Source\MUID.cpp" />
     <ClCompile Include="Source\MObject.cpp" />
     <ClCompile Include="Source\MSharedCommandTable.cpp" />
@@ -503,6 +507,7 @@
     <ClCompile Include="Source\MNJ_DBAgentClient.cpp" />
     <ClCompile Include="Source\MBaseStringResManager.cpp" />
     <ClCompile Include="Source\MMatchStringResManager.cpp" />
+    <ClCompile Include="Source\SQLiteDatabase.cpp" />
     <ClCompile Include="Source\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

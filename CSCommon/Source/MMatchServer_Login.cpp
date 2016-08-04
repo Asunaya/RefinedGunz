@@ -78,6 +78,8 @@ void MMatchServer::OnMatchLogin(MUID CommUID, const char* szUserID, const unsign
 	if (HashLength != crypto_generichash_BYTES)
 		return;
 
+	LogF(LOG_ALL, "Login attempt from %d:%d\n", CommUID.High, CommUID.Low);
+
 	int nMapID = 0;
 
 	unsigned int nAID = 0;
@@ -99,13 +101,13 @@ void MMatchServer::OnMatchLogin(MUID CommUID, const char* szUserID, const unsign
 
 
 	// 원래 계정은 넷마블에 있으므로 해당 계정이 없으면 새로 생성한다. 
-	if (!m_MatchDBMgr.GetLoginInfo(szUserID, &nAID, szDBPassword))
+	if (!GetDBMgr()->GetLoginInfo(szUserID, &nAID, szDBPassword))
 	{
 //#ifdef _DEBUG
-//		m_MatchDBMgr.CreateAccount(szUserID, szPassword, 0, szUserID, 20, 1);
+//		GetDBMgr()->CreateAccount(szUserID, szPassword, 0, szUserID, 20, 1);
 //		strcpy_safe(szDBPassword, szPassword);
 //
-//		m_MatchDBMgr.GetLoginInfo(szUserID, &nAID, szDBPassword);
+//		GetDBMgr()->GetLoginInfo(szUserID, &nAID, szDBPassword);
 //#endif
 
 		/*MCommand* pCmd = CreateCmdMatchResponseLoginFailed(CommUID, MERR_CLIENT_WRONG_PASSWORD);
@@ -122,7 +124,7 @@ void MMatchServer::OnMatchLogin(MUID CommUID, const char* szUserID, const unsign
 	if (pCommObj)
 	{
 		// 디비에 최종 접속시간을 업데이트 한다.
-		if (!m_MatchDBMgr.UpdateLastConnDate(szUserID, pCommObj->GetIPString()))
+		if (!GetDBMgr()->UpdateLastConnDate(szUserID, pCommObj->GetIPString()))
 		{
 			mlog("DB Query(OnMatchLogin > UpdateLastConnDate) Failed");
 		}
@@ -143,14 +145,16 @@ void MMatchServer::OnMatchLogin(MUID CommUID, const char* szUserID, const unsign
 		(szDBPassword, (char *)HashedPassword, HashLength) != 0) {
 		MCommand* pCmd = CreateCmdMatchResponseLoginFailed(CommUID, MERR_CLIENT_WRONG_PASSWORD);
 		Post(pCmd);
+		return;
 	}
 
 	MMatchAccountInfo accountInfo;
-	if (!m_MatchDBMgr.GetAccountInfo(nAID, &accountInfo))
+	if (!GetDBMgr()->GetAccountInfo(nAID, &accountInfo))
 	{
 		NotifyFailedLogin(CommUID, "Failed to retrieve account information");
 		// 접속 끊어버리자
 		Disconnect(CommUID);
+		return;
 	}
 
 #ifndef _DEBUG
@@ -166,7 +170,7 @@ void MMatchServer::OnMatchLogin(MUID CommUID, const char* szUserID, const unsign
 	if ((accountInfo.m_nUGrade == MMUG_BLOCKED) || (accountInfo.m_nUGrade == MMUG_PENALTY))
 	{
 		MCommand* pCmd = CreateCmdMatchResponseLoginFailed(CommUID, MERR_CLIENT_MMUG_BLOCKED);
-		Post(pCmd);	
+		Post(pCmd);
 		return;
 	}
 
@@ -181,9 +185,10 @@ void MMatchServer::NotifyFailedLogin(const MUID& uidComm, const char *szReason)
 	Post(pCmd);
 }
 
-void MMatchServer::CreateAccount(const MUID &uidComm, const char *szUsername, const unsigned char *HashedPassword, int HashLength, const char *szEmail)
+void MMatchServer::CreateAccount(const MUID &uidComm, const char *Username,
+	const unsigned char *HashedPassword, int HashLength, const char *Email)
 {
-	if (szUsername[0] == 0)
+	if (Username[0] == 0)
 	{
 		CreateAccountResponse(uidComm, "Account creation failed: Empty username");
 		return;
@@ -195,30 +200,30 @@ void MMatchServer::CreateAccount(const MUID &uidComm, const char *szUsername, co
 		return;
 	}
 
-	char szPasswordData[crypto_pwhash_scryptsalsa208sha256_STRBYTES];
+	char PasswordData[crypto_pwhash_scryptsalsa208sha256_STRBYTES];
 
 	if (crypto_pwhash_scryptsalsa208sha256_str
-		(szPasswordData, (char *)HashedPassword, HashLength,
+		(PasswordData, (char *)HashedPassword, HashLength,
 		crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_INTERACTIVE,
 		crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_INTERACTIVE) != 0) {
 		CreateAccountResponse(uidComm, "Account creation failed: Server ran out of memory");
 		return;
 	}
 
-	auto ret = m_MatchDBMgr.CreateAccountNew(szUsername, szPasswordData, szEmail);
+	auto ret = GetDBMgr()->CreateAccountNew(Username, PasswordData, ArraySize(PasswordData), Email);
 	switch (ret)
 	{
-	case ACR_OK:
+	case AccountCreationResult::Success:
 		CreateAccountResponse(uidComm, "Account created!");
 		break;
-	case ACR_USERNAME_ALREADY_EXISTS:
+	case AccountCreationResult::UsernameAlreadyExists:
 		CreateAccountResponse(uidComm, "Account creation failed: Username already exists");
 		break;
-	case ACR_DB_ERROR:
+	case AccountCreationResult::DBError:
 		CreateAccountResponse(uidComm, "Account creation failed: Unknown database error");
 		break;
 	default:
-		CreateAccountResponse(uidComm, "Account creatIon failed: Unknown error");
+		CreateAccountResponse(uidComm, "Account creation failed: Unknown error");
 		break;
 	};
 }
@@ -456,7 +461,7 @@ bool MMatchServer::AddObjectOnMatchLogin(const MUID& uidComm,
 			// 만약 캐쉬에 없으면 직접 DB에서 찾도록 한다.
 			if (!bExistPremiumIPCache)
 			{
-				if (m_MatchDBMgr.CheckPremiumIP(pCommObj->GetIPString(), bIsPremiumIP))
+				if (GetDBMgr()->CheckPremiumIP(pCommObj->GetIPString(), bIsPremiumIP))
 				{
 					// 결과를 캐쉬에 저장
 					MPremiumIPCache()->AddIP(pCommObj->GetIP(), bIsPremiumIP);
@@ -501,7 +506,7 @@ bool MMatchServer::AddObjectOnMatchLogin(const MUID& uidComm,
 	Post(pCmd);	
 
 	// 접속 로그를 남긴다.
-	//m_MatchDBMgr.InsertConnLog(pObj->GetAccountInfo()->m_nAID, pObj->GetIPString(), pObj->GetCountryCode3() );
+	//GetDBMgr()->InsertConnLog(pObj->GetAccountInfo()->m_nAID, pObj->GetIPString(), pObj->GetCountryCode3() );
 
 	// 접속 로그
 	MAsyncDBJob_InsertConnLog* pNewJob = new MAsyncDBJob_InsertConnLog();

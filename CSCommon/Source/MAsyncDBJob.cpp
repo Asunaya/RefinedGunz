@@ -8,13 +8,16 @@
 
 void MAsyncDBJob_Test::Run(void* pContext)
 {
+	if (MGetServerConfig()->GetDatabaseType() != DatabaseType::MSSQL)
+		return;
+
 	char szLog[128];
 	sprintf_safe(szLog, "Thread=%d , MAsyncDBJob_Test BEGIN \n", GetCurrentThreadId());
 	OutputDebugString(szLog);
 
-	MMatchDBMgr* pDBMgr = (MMatchDBMgr*)pContext;
+	auto* pDBMgr = static_cast<MSSQLDatabase*>(pContext);
 
-	if (!pDBMgr->GetDatabase()->IsOpen()) {
+	if (!pDBMgr->IsOpen()) {
 		OutputDebugString("m_DB is not opened \n");
 	}
 	
@@ -57,7 +60,7 @@ void MAsyncDBJob_Test::Run(void* pContext)
 
 void MAsyncDBJob_GetAccountCharList::Run(void* pContext)
 {
-	MMatchDBMgr* pDBMgr = (MMatchDBMgr*)pContext;
+	auto* pDBMgr = static_cast<IDatabase*>(pContext);
 
 	MTD_AccountCharInfo charlist[MAX_CHAR_COUNT];
 	int nCharCount = 0;
@@ -91,7 +94,7 @@ void MAsyncDBJob_GetAccountCharList::Run(void* pContext)
 void MAsyncDBJob_GetCharInfo::Run(void* pContext)
 {
 	_ASSERT(m_pCharInfo);
-	MMatchDBMgr* pDBMgr = (MMatchDBMgr*)pContext;
+	auto* pDBMgr = static_cast<IDatabase*>(pContext);
 
 	int nWaitHourDiff;
 
@@ -135,7 +138,7 @@ void MAsyncDBJob_GetCharInfo::Run(void* pContext)
 	// 디비에서 아이템 정보를 가져온다. 
 	// 이것은 퍼포먼스 문제로 나중에 플레이어가 자기 아이템 보기 할때만 가져와야 할듯
 	m_pCharInfo->ClearItems();
-	if (!pDBMgr->GetCharItemInfo(m_pCharInfo))
+	if (!pDBMgr->GetCharItemInfo(*m_pCharInfo))
 	{
 		SetResult(MASYNC_RESULT_FAILED);
 		return;
@@ -161,7 +164,7 @@ void MAsyncDBJob_GetCharInfo::Run(void* pContext)
 
 void MAsyncDBJob_UpdateCharClanContPoint::Run(void* pContext)
 {
-	MMatchDBMgr* pDBMgr = (MMatchDBMgr*)pContext;
+	auto* pDBMgr = static_cast<IDatabase*>(pContext);
 
 
 	if (!pDBMgr->UpdateCharClanContPoint(m_nCID, m_nCLID, m_nAddedContPoint))
@@ -178,12 +181,13 @@ void MAsyncDBJob_UpdateCharClanContPoint::Run(void* pContext)
 
 void MAsyncDBJob_GetAccountCharInfo::Run(void* pContext)
 {
-	MMatchDBMgr* pDBMgr = (MMatchDBMgr*)pContext;
+	auto* pDBMgr = static_cast<IDatabase*>(pContext);
 
 	MTD_CharInfo charinfo;
 
 	if (!pDBMgr->GetAccountCharInfo(m_nAID, m_nCharNum, &charinfo))
 	{
+		MGetMatchServer()->Log(MMatchServer::LOG_ALL, "GetAccountCharInfo failed");
 		SetResult(MASYNC_RESULT_FAILED);
 		return;
 	}
@@ -208,17 +212,17 @@ void MAsyncDBJob_GetAccountCharInfo::Run(void* pContext)
 
 void MAsyncDBJob_CreateChar::Run(void* pContext)
 {
-	MMatchDBMgr* pDBMgr = (MMatchDBMgr*)pContext;
+	auto* pDBMgr = static_cast<IDatabase*>(pContext);
 
-	if (pDBMgr->CreateCharacter(&m_nResult, m_nAID, m_szCharName, m_nCharNum, 
-		m_nSex, m_nHair, m_nFace, m_nCostume))
+	m_nResult = pDBMgr->CreateCharacter(m_nAID, m_szCharName, m_nCharNum,
+		m_nSex, m_nHair, m_nFace, m_nCostume);
+
+	if (m_nResult == MOK)
 	{
 		// 생성되면 로그로 남긴다.
-		pDBMgr->InsertCharMakingLog(m_nAID, m_szCharName, MMatchDBMgr::CMT_CREATE);
-	} else {
-		if (m_nResult == MERR_UNKNOWN) {
-			SetResult(MASYNC_RESULT_FAILED);
-		}
+		pDBMgr->InsertCharMakingLog(m_nAID, m_szCharName, CharMakingType::Create);
+	} else if (m_nResult == MERR_UNKNOWN) {
+		SetResult(MASYNC_RESULT_FAILED);
 	}
 
 	// Make Result
@@ -234,12 +238,12 @@ void MAsyncDBJob_CreateChar::Run(void* pContext)
 
 void MAsyncDBJob_DeleteChar::Run(void* pContext)
 {
-	MMatchDBMgr* pDBMgr = (MMatchDBMgr*)pContext;
+	auto* pDBMgr = static_cast<IDatabase*>(pContext);
 
 	int nResult = MERR_UNKNOWN;
 	if (pDBMgr->DeleteCharacter(m_nAID, m_nCharNum, m_szCharName))
 	{
-		pDBMgr->InsertCharMakingLog(m_nAID, m_szCharName, MMatchDBMgr::CMT_DELETE);
+		pDBMgr->InsertCharMakingLog(m_nAID, m_szCharName, CharMakingType::Delete);
 		m_nDeleteResult = MOK;
 		SetResult(MASYNC_RESULT_SUCCEED);
 	}
@@ -254,7 +258,7 @@ void MAsyncDBJob_DeleteChar::Run(void* pContext)
 /////////////////////////////////////////////////////////////////////////////////////////////////
 void MAsyncDBJob_InsertGameLog::Run(void* pContext)
 {
-	MMatchDBMgr* pDBMgr = (MMatchDBMgr*)pContext;
+	auto* pDBMgr = static_cast<IDatabase*>(pContext);
 
 	pDBMgr->InsertGameLog(m_szGameName, m_szMap, 
 							m_szGameType,
@@ -289,7 +293,7 @@ bool MAsyncDBJob_InsertGameLog::Input(const char* szGameName,
 /////////////////////////////////////////////////////////////////////////////////////////////////
 void MAsyncDBJob_CreateClan::Run(void* pContext)
 {
-	MMatchDBMgr* pDBMgr = (MMatchDBMgr*)pContext;
+	auto* pDBMgr = static_cast<IDatabase*>(pContext);
 
 	if (!pDBMgr->CreateClan(m_szClanName, 
 							m_nMasterCID, 
@@ -339,7 +343,7 @@ bool MAsyncDBJob_CreateClan::Input(const TCHAR* szClanName,
 /////////////////////////////////////////////////////////////////////////////////////////////////
 void MAsyncDBJob_ExpelClanMember::Run(void* pContext)
 {
-	MMatchDBMgr* pDBMgr = (MMatchDBMgr*)pContext;
+	auto* pDBMgr = static_cast<IDatabase*>(pContext);
 
 	// 실제로 디비상에서 권한 변경
 	if (!pDBMgr->ExpelClanMember(m_nCLID, m_nClanGrade, m_szTarMember, &m_nDBResult))

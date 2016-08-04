@@ -16,13 +16,13 @@ public:
 
 	void SetDB( MDatabase* pDB ) { m_pDB = pDB; }
 
-	bool GetIPContryCode( const string& strIP, 
-						  DWORD& dwIPFrom, 
-						  DWORD& dwIPTo, 
-						  string& strCountryCode );
+	bool GetIPCountryCode( const std::string& strIP, 
+		uint32_t& dwIPFrom,
+		uint32_t& dwIPTo,
+		std::string& strCountryCode );
 	bool GetIPtoCountryList( IPtoCountryList& rfIPtoCountryList );
 	bool GetBlockCountryCodeList( BlockCountryCodeList& rfBlockCountryCodeList );
-	bool GetCustomIP( const string& strIP, DWORD& dwIPFrom, DWORD& dwIPTo, bool& bIsBlock, string& strCountryCode3, string& strComment );
+	bool GetCustomIP( const string& strIP, uint32_t& dwIPFrom, uint32_t& dwIPTo, bool& bIsBlock, string& strCountryCode3, string& strComment );
 	bool GetCustomIPList( CustomIPList& rfCustomIPList );
 
 	void ReleaseDB();

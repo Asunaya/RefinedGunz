@@ -60,7 +60,7 @@ int MMatchServer::ValidateCreateClan(const char* szClanName, MMatchObject* pMast
 
 	// 클랜 중복 검사 - 디비에서 직접 검사한다.
 	int nTempCLID = 0;
-	if (m_MatchDBMgr.GetClanIDFromName(szClanName, &nTempCLID))
+	if (GetDBMgr()->GetClanIDFromName(szClanName, &nTempCLID))
 	{
 		return MERR_EXIST_CLAN;
 	}
@@ -401,7 +401,7 @@ void MMatchServer::ResponseCloseClan(const MUID& uidClanMaster, const char* szCl
 	}
 
 	// 실제로 디비에서 폐쇄 예약
-	if (!m_MatchDBMgr.ReserveCloseClan(pMasterObject->GetCharInfo()->m_ClanInfo.m_nClanID,
+	if (!GetDBMgr()->ReserveCloseClan(pMasterObject->GetCharInfo()->m_ClanInfo.m_nClanID,
 										pMasterObject->GetCharInfo()->m_ClanInfo.m_szClanName,
 										pMasterObject->GetCharInfo()->m_nCID,
 										MGetStrLocalTime(0, 0, DAY_OF_DELETE_CLAN, 0, 0, MDT_YMD)))
@@ -501,7 +501,7 @@ void MMatchServer::ResponseAgreedJoinClan(const MUID& uidClanAdmin, const char* 
 	bool bDBRet = false;
 
 	// 실제 디비상에서 가입처리
-	if (!m_MatchDBMgr.AddClanMember(nCLID, nJoinerCID, nClanGrade, &bDBRet))
+	if (!GetDBMgr()->AddClanMember(nCLID, nJoinerCID, nClanGrade, &bDBRet))
 	{
 		RouteResponseToListener(pAdminObject, MC_MATCH_CLAN_RESPONSE_AGREED_JOIN_CLAN, MERR_CLAN_DONT_JOINED);
 		RouteResponseToListener(pJoinerObject, MC_MATCH_CLAN_RESPONSE_AGREED_JOIN_CLAN, MERR_CLAN_DONT_JOINED);
@@ -551,7 +551,7 @@ void MMatchServer::ResponseLeaveClan(const MUID& uidPlayer)
 	int nLeaverCID = pLeaverObject->GetCharInfo()->m_nCID;
 
 	// 실제로 디비상에서 탈퇴처리
-	if (!m_MatchDBMgr.RemoveClanMember(nCLID, nLeaverCID))
+	if (!GetDBMgr()->RemoveClanMember(nCLID, nLeaverCID))
 	{
 		RouteResponseToListener(pLeaverObject, MC_MATCH_CLAN_RESPONSE_LEAVE_CLAN, MERR_CLAN_CANNOT_LEAVE);
 		return;
@@ -623,7 +623,7 @@ void MMatchServer::ResponseChangeClanGrade(const MUID& uidClanMaster, const char
 	int nMemberCID = pTargetObject->GetCharInfo()->m_nCID;
 	
 	// 실제로 디비상에서 권한 변경
-	if (!m_MatchDBMgr.UpdateClanGrade(nCLID, nMemberCID, nClanGrade))
+	if (!GetDBMgr()->UpdateClanGrade(nCLID, nMemberCID, nClanGrade))
 	{
 		RouteResponseToListener(pMasterObject, MC_MATCH_CLAN_MASTER_RESPONSE_CHANGE_GRADE, MERR_CLAN_CANNOT_CHANGE_GRADE);
 		return;
@@ -674,7 +674,7 @@ void MMatchServer::ResponseExpelMember(const MUID& uidClanAdmin, const char* szM
 	sprintf_safe(szTarMember, szMember);
 
 	// 실제로 디비상에서 권한 변경
-	if (!m_MatchDBMgr.ExpelClanMember(nCLID, nClanGrade, szTarMember, &nDBRet))
+	if (!GetDBMgr()->ExpelClanMember(nCLID, nClanGrade, szTarMember, &nDBRet))
 	{
 		RouteResponseToListener(pAdminObject, MC_MATCH_CLAN_ADMIN_RESPONSE_EXPEL_MEMBER, MERR_CLAN_CANNOT_EXPEL_FOR_NO_MEMBER);
 		return;

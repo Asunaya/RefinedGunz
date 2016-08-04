@@ -8,26 +8,13 @@
 #include "MQuestConst.h"
 #include "MMatchDBFilter.h"
 #include "MCountryFilterDBMgr.h"
+#include "IDatabase.h"
 
 class MMatchCharInfo;
 class MMatchFriendInfo;
 struct MMatchAccountInfo;
 struct MTD_CharInfo;
 struct MTD_AccountCharInfo;
-
-struct MAccountItemNode
-{
-	int					nAIID;
-	unsigned long int	nItemID;
-	int					nRentMinutePeriodRemainder;
-};
-
-enum AccountCreationResult
-{
-	ACR_OK,
-	ACR_USERNAME_ALREADY_EXISTS,
-	ACR_DB_ERROR,
-};
 
 class MMatchDBMgr {
 protected:
@@ -292,10 +279,6 @@ public:
 
 	bool InsertBlockLog( const DWORD dwAID, const DWORD dwCID, const BYTE btBlockType, const string& strComment,
 		const string& strIP );
-
-	bool BeginTran();
-	bool CommitTran();
-	bool RollbackTran();
 
     // admin
 	bool AdminResetAllHackingBlock();

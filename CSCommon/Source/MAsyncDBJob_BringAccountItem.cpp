@@ -3,7 +3,7 @@
 
 void MAsyncDBJob_BringAccountItem::Run(void* pContext)
 {
-	MMatchDBMgr* pDBMgr = (MMatchDBMgr*)pContext;
+	auto* pDBMgr = static_cast<IDatabase*>(pContext);
 
 
 	if (!pDBMgr->BringAccountItem(m_nAID,

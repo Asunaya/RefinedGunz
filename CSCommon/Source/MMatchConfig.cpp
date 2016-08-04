@@ -240,6 +240,30 @@ bool MMatchConfig::Create()
 		MLog("IsMasterServer: %s\n", bIsMasterServer ? "true" : "false");
 	}
 
+	auto DBTypeNode = doc.first_node("database_type");
+	if (!DBTypeNode)
+	{
+		FailedToFindNode("database_type");
+	}
+	else
+	{
+		auto* DBTypeString = DBTypeNode->value();
+
+		if (!_stricmp(DBTypeString, "sqlite"))
+		{
+			DBType = DatabaseType::SQLite;
+		}
+		else if (!_stricmp(DBTypeString, "mssql"))
+		{
+			DBType = DatabaseType::MSSQL;
+		}
+		else
+		{
+			DBType = DatabaseType::None;
+			MLog("Unrecognized database type %s!\n", DBTypeString);
+		}
+	}
+
 	m_bIsComplete = true;
 	return m_bIsComplete;
 }

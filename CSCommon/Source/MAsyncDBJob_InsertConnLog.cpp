@@ -3,7 +3,7 @@
 
 void MAsyncDBJob_InsertConnLog::Run(void* pContext)
 {
-	MMatchDBMgr* pDBMgr = (MMatchDBMgr*)pContext;
+	auto* pDBMgr = static_cast<IDatabase*>(pContext);
 
 	pDBMgr->InsertConnLog(m_nAID, m_szIP, m_strCountryCode3);
 

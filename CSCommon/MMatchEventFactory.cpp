@@ -438,7 +438,8 @@ void MMatchEventFactoryManager::ParseEvent( MXmlElement& chrElement )
 			dwEventID = static_cast< DWORD >( atol(szAttrValue) );
 			if( NULL == MMatchEventDescManager::GetInstance().Find(dwEventID) )
 			{
-				ASSERT( 0 && "Event.xml에 없는 Event ID입니다." );
+				// TODO: Fix
+				//ASSERT( 0 && "Event.xml에 없는 Event ID입니다." );
 				mlog( "MMatchEventFactoryManager::ParseEvent - Event.xml에 없는 Event ID(%u)입니다.\n",
 					dwEventID );
 				return;

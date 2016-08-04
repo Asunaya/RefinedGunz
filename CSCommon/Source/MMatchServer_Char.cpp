@@ -317,7 +317,7 @@ bool MMatchServer::CharInitialize(const MUID& uidPlayer)
 	pCharInfo->GetTotalWeight(&nWeight, &nMaxWeight);
 	if (nWeight > nMaxWeight)
 	{
-		if (!m_MatchDBMgr.ClearAllEquipedItem(pCharInfo->m_nCID))
+		if (!GetDBMgr()->ClearAllEquipedItem(pCharInfo->m_nCID))
 		{
 			mlog("DB Query(ClearAllEquipedItem) Failed\n");
 		}
@@ -526,11 +526,11 @@ bool MMatchServer::CharFinalize(const MUID& uidPlayer)
 #endif
 */
 /*
-		if (!m_MatchDBMgr.UpdateCharPlayTime(pCharInfo->m_nCID, nPlayTime))
+		if (!GetDBMgr()->UpdateCharPlayTime(pCharInfo->m_nCID, nPlayTime))
 		{
 			mlog("DB Query(CharFinalize > UpdateCharPlayTime) Failed\n");
 		}
-		if (!m_MatchDBMgr.InsertPlayerLog(pCharInfo->m_nCID,
+		if (!GetDBMgr()->InsertPlayerLog(pCharInfo->m_nCID,
 			nPlayTime, pCharInfo->m_nConnKillCount, pCharInfo->m_nConnDeathCount,
 			pCharInfo->m_nConnXP, pCharInfo->m_nXP ))
 		{
@@ -630,12 +630,12 @@ void MMatchServer::OnFriendAdd(const MUID& uidPlayer, const char* pszName)
 
 	int nCID = pObj->GetCharInfo()->m_nCID;
 	int nFriendCID = 0;
-	if (m_MatchDBMgr.GetCharCID(pszName, &nFriendCID) == false) {
+	if (GetDBMgr()->GetCharCID(pszName, &nFriendCID) == false) {
 		NotifyMessage(uidPlayer, MATCHNOTIFY_CHARACTER_NOT_EXIST);
 		return;
 	}
 
-	if (m_MatchDBMgr.FriendAdd(nCID, nFriendCID, 0) == false) {
+	if (GetDBMgr()->FriendAdd(nCID, nFriendCID, 0) == false) {
 		mlog("DB Query(FriendAdd) Failed\n");
 		return;
 	}
@@ -658,12 +658,12 @@ void MMatchServer::OnFriendRemove(const MUID& uidPlayer, const char* pszName)
 
 	int nCID = pObj->GetCharInfo()->m_nCID;
 	int nFriendCID = 0;
-	if (m_MatchDBMgr.GetCharCID(pszName, &nFriendCID) == false) {
+	if (GetDBMgr()->GetCharCID(pszName, &nFriendCID) == false) {
 		NotifyMessage(uidPlayer, MATCHNOTIFY_CHARACTER_NOT_EXIST);
 		return;
 	}
 
-	if (m_MatchDBMgr.FriendRemove(nCID, nFriendCID) == false) {
+	if (GetDBMgr()->FriendRemove(nCID, nFriendCID) == false) {
 		mlog("DB Query(FriendRemove) Failed\n");
 		return;
 	}

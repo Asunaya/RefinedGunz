@@ -28,6 +28,8 @@
 #include <queue>
 #include <unordered_map>
 #include "LagCompensation.h"
+#include "SQLiteDatabase.h"
+#include "MSSQLDatabase.h"
 
 class MMatchAuthBuilder;
 class MMatchScheduleMgr;
@@ -54,6 +56,42 @@ enum COUNT_CODE_STATUS
 	CCS_NON,
 };
 
+struct DBVariant
+{
+	union U
+	{
+		U() {}
+		~U() {}
+		SQLiteDatabase sqlite;
+		MSSQLDatabase mssql;
+	};
+
+	DatabaseType Type;
+	U u;
+
+	// TODO: Fixfix
+	/*DBVariant(DatabaseType Type)
+		: Type(Type)*/
+	DBVariant() {}
+	void Create(DatabaseType Type)
+	{
+		this->Type = Type;
+
+		if (Type == DatabaseType::SQLite)
+			new (&u) SQLiteDatabase;
+		else
+			new (&u) MSSQLDatabase;
+	}
+	DBVariant(const DBVariant&) = delete;
+	DBVariant(DBVariant&&) = delete;
+	~DBVariant()
+	{
+		if (Type == DatabaseType::SQLite)
+			u.sqlite.~SQLiteDatabase();
+		else
+			u.mssql.~MSSQLDatabase();
+	}
+};
 
 class MMatchServer : public MServer{
 private:
@@ -92,7 +130,8 @@ protected:
 	DWORD				m_checkMemory8;
 	MSafeUDP			m_SafeUDP;
 	DWORD				m_checkMemory9;
-	MMatchDBMgr			m_MatchDBMgr;
+	DBVariant			Database;
+	
 	DWORD				m_checkMemory10;
 	MAsyncProxy			m_AsyncProxy;
 	DWORD				m_checkMemory11;
@@ -767,7 +806,7 @@ public:
 	MMatchStageMap*		GetStageMap()		{ return &m_StageMap; }
 	MMatchChannelMap*	GetChannelMap()		{ return &m_ChannelMap; }
 	MMatchClanMap*		GetClanMap()		{ return &m_ClanMap; }
-	MMatchDBMgr*		GetDBMgr()			{ return &m_MatchDBMgr; }
+	IDatabase*			GetDBMgr()			{ return reinterpret_cast<IDatabase*>(&Database.u); }
 	MMatchQuest*		GetQuest()			{ return &m_Quest; }
 	int GetClientCount()	{ return (int)m_Objects.size(); }
 	int GetAgentCount()		{ return (int)m_AgentMap.size(); }

@@ -224,7 +224,7 @@ void MMatchServer::OnResponseCharQuestItemList( const MUID& uidSender )
 	// 이전에 디비 억세스를 안했었으면 디비에서 퀘스트 아이템 정보를 가져온다
 	if( !pPlayer->GetCharInfo()->m_QuestItemList.IsDoneDbAccess() )
 	{
-		if( !m_MatchDBMgr.GetCharQuestItemInfo(pPlayer->GetCharInfo()) )
+		if( !GetDBMgr()->GetCharQuestItemInfo(pPlayer->GetCharInfo()) )
 		{
 			mlog( "DB Query(ResponseCharacterItemList > GetcharQuestItemInfo) failed\n" );
 			return;
@@ -357,7 +357,7 @@ void MMatchServer::OnResponseBuyQeustItem( const MUID& uidSender, const unsigned
 	// 디비에 바운티 더해준다
 	int nPrice = pQuestItemDesc->m_nPrice;
 
-	if (!m_MatchDBMgr.UpdateCharBP(pPlayer->GetCharInfo()->m_nCID, -nPrice))
+	if (!GetDBMgr()->UpdateCharBP(pPlayer->GetCharInfo()->m_nCID, -nPrice))
 	{
 		/*
 		MCommand* pNew = CreateCommand(MC_MATCH_RESPONSE_SELL_ITEM, MUID(0,0));
@@ -438,7 +438,7 @@ void MMatchServer::OnResponseSellQuestItem( const MUID& uidSender, const unsigne
 
 		// 디비에 바운티 더해준다
 		int nPrice = ( nCount * pQItemDesc->GetBountyValue() );
-		if (!m_MatchDBMgr.UpdateCharBP(pPlayer->GetCharInfo()->m_nCID, nPrice))
+		if (!GetDBMgr()->UpdateCharBP(pPlayer->GetCharInfo()->m_nCID, nPrice))
 		{
 			/*
 			MCommand* pNew = CreateCommand(MC_MATCH_RESPONSE_SELL_ITEM, MUID(0,0));

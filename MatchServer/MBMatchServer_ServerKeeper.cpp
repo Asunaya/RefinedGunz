@@ -16,7 +16,7 @@ void MBMatchServer::OnResponseServerStatus( const MUID& uidSender )
 
 	string strServerVer( __DATE__ );
 
-	pCmd->AddParameter( new MCmdParamInt(m_MatchDBMgr.GetDatabase()->IsOpen() ? SES_NO : SES_ERR_DB) );
+	pCmd->AddParameter( new MCmdParamInt(GetDBMgr()->IsOpen() ? SES_NO : SES_ERR_DB) );
 	pCmd->AddParameter( new MCmdParamStr(strServerVer.c_str()) );
 	pCmd->AddParameter( new MCmdParamUChar(static_cast<unsigned char>(GetAgentCount())) );
 	

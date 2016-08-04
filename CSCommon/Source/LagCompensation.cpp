@@ -11,6 +11,12 @@
 
 bool LagCompManager::Create()
 {
+	if (!MGetServerConfig()->HasGameData())
+	{
+		MGetMatchServer()->Log(MMatchServer::LOG_ALL, "game_dir is empty! Server-based netcode will be disabled.");
+		return false;
+	}
+
 	const char* path = MGetServerConfig()->GetGameDirectory();
 	g_pFileSystem = new MZFileSystem();
 	

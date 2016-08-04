@@ -47,7 +47,8 @@ void MQuestScenarioCatalogue::Insert(MQuestScenarioInfo* pScenarioInfo)
 
 	if ((nID <= 0) || (GetInfo(nID)))
 	{
-		_ASSERT(0);		// 시나리오 ID가 잘못됬다.
+		// TODO: Fix
+		//_ASSERT(0);		// 시나리오 ID가 잘못됬다.
 		delete pScenarioInfo;
 		return;
 	}

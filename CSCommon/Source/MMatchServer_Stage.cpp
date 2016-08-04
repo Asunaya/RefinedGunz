@@ -878,7 +878,7 @@ void MMatchServer::OnStageStart(const MUID& uidPlayer, const MUID& uidStage, int
 				PostAsyncJob(pJob);
 
 /*
-				m_MatchDBMgr.InsertGameLog(pStage->GetName(), g_MapDesc[nMapID].szMapName, 
+				GetDBMgr()->InsertGameLog(pStage->GetName(), g_MapDesc[nMapID].szMapName, 
 										MGetGameTypeMgr()->GetInfo(MMATCH_GAMETYPE(nGameType))->szGameTypeStr,
 										pStage->GetStageSetting()->GetRoundMax(),
 										pMaster->GetCharInfo()->m_nCID,
@@ -1665,7 +1665,7 @@ void MMatchServer::ProcessOnGameKill(MMatchStage* pStage, MMatchObject* pAttacke
 		UpdateCharDBCachingData(pAttacker);
 
 		pAttacker->GetCharInfo()->m_nLevel = nNewAttackerLevel;
-		if (!m_MatchDBMgr.UpdateCharLevel(pAttacker->GetCharInfo()->m_nCID, 
+		if (!GetDBMgr()->UpdateCharLevel(pAttacker->GetCharInfo()->m_nCID, 
 										  nNewAttackerLevel, 
 										  pAttacker->GetCharInfo()->m_nBP,
 										  pAttacker->GetCharInfo()->m_nTotalKillCount, 
@@ -1682,7 +1682,7 @@ void MMatchServer::ProcessOnGameKill(MMatchStage* pStage, MMatchObject* pAttacke
 		UpdateCharDBCachingData(pVictim);
 
 		pVictim->GetCharInfo()->m_nLevel = nNewVictimLevel;
-		if (!m_MatchDBMgr.UpdateCharLevel(pVictim->GetCharInfo()->m_nCID, 
+		if (!GetDBMgr()->UpdateCharLevel(pVictim->GetCharInfo()->m_nCID, 
 			                              nNewVictimLevel,
 										  pVictim->GetCharInfo()->m_nBP,
 										  pVictim->GetCharInfo()->m_nTotalKillCount,
@@ -1761,7 +1761,7 @@ void MMatchServer::ProcessPlayerXPBP(MMatchStage* pStage, MMatchObject* pPlayer,
 		UpdateCharDBCachingData(pPlayer);
 
 		pPlayer->GetCharInfo()->m_nLevel = nNewPlayerLevel;
-		if (!m_MatchDBMgr.UpdateCharLevel(pPlayer->GetCharInfo()->m_nCID, 
+		if (!GetDBMgr()->UpdateCharLevel(pPlayer->GetCharInfo()->m_nCID, 
 										  nNewPlayerLevel, 
 										  pPlayer->GetCharInfo()->m_nBP,
 										  pPlayer->GetCharInfo()->m_nTotalKillCount, 
@@ -1846,7 +1846,7 @@ void MMatchServer::ApplyObjectTeamBonus(MMatchObject* pObject, int nAddedExp)
 		pObject->GetCharInfo()->m_nLevel = nNewLevel;
 		nCurrLevel = nNewLevel;
 
-		if (!m_MatchDBMgr.UpdateCharLevel(pObject->GetCharInfo()->m_nCID, 
+		if (!GetDBMgr()->UpdateCharLevel(pObject->GetCharInfo()->m_nCID, 
 			                              nNewLevel,
 										  pObject->GetCharInfo()->m_nBP,
 										  pObject->GetCharInfo()->m_nTotalKillCount,
@@ -2128,7 +2128,7 @@ int MMatchServer::GetLadderTeamIDFromDB(const int nTeamTableIndex, const int* pn
 	int nTID = 0;
 	if (pnSortedCIDs[0] != 0)
 	{
-		if (!m_MatchDBMgr.GetLadderTeamID(nTeamTableIndex, pnSortedCIDs, nMemberCount, &nTID))
+		if (!GetDBMgr()->GetLadderTeamID(nTeamTableIndex, pnSortedCIDs, nMemberCount, &nTID))
 		{
 			nTID = 0;
 		}
@@ -2168,7 +2168,7 @@ void MMatchServer::SaveLadderTeamPointToDB(const int nTeamTableIndex, const int 
 		break;
 	}
 
-	if (!m_MatchDBMgr.LadderTeamWinTheGame(nTeamTableIndex, nWinnerTeamID, nLoserTeamID, bIsDrawGame,
+	if (!GetDBMgr()->LadderTeamWinTheGame(nTeamTableIndex, nWinnerTeamID, nLoserTeamID, bIsDrawGame,
 		                                   nWinnerPoint, nLoserPoint, nDrawPoint))
 	{
 		mlog("DB Query(SaveLadderTeamPointToDB) Failed\n");
@@ -2375,7 +2375,7 @@ void MMatchServer::OnEventRequestJjang(const MUID& uidAdmin, const char* pszTarg
 
 	pTargetObj->GetAccountInfo()->m_nUGrade = MMUG_STAR;
 
-	if (m_MatchDBMgr.EventJjangUpdate(pTargetObj->GetAccountInfo()->m_nAID, true)) {
+	if (GetDBMgr()->EventJjangUpdate(pTargetObj->GetAccountInfo()->m_nAID, true)) {
 		MMatchObjectCacheBuilder CacheBuilder;
 		CacheBuilder.AddObject(pTargetObj);
 		MCommand* pCmdCacheUpdate = CacheBuilder.GetResultCmd(MATCHCACHEMODE_REPLACE, this);
@@ -2407,7 +2407,7 @@ void MMatchServer::OnEventRemoveJjang(const MUID& uidAdmin, const char* pszTarge
 
 	pTargetObj->GetAccountInfo()->m_nUGrade = MMUG_FREE;
 
-	if (m_MatchDBMgr.EventJjangUpdate(pTargetObj->GetAccountInfo()->m_nAID, false)) {
+	if (GetDBMgr()->EventJjangUpdate(pTargetObj->GetAccountInfo()->m_nAID, false)) {
 		MMatchObjectCacheBuilder CacheBuilder;
 		CacheBuilder.AddObject(pTargetObj);
 		MCommand* pCmdCacheUpdate = CacheBuilder.GetResultCmd(MATCHCACHEMODE_REPLACE, this);

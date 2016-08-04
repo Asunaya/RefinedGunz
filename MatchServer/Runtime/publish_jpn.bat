@@ -1,1 +1,0 @@
-call publish.bat jpn

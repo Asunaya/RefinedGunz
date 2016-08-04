@@ -41,7 +41,7 @@ void MMatchClan::InitClanInfoFromDB()
 {
 	if (m_nCLID == 0) return;
 
-	MMatchDBMgr::MDB_ClanInfo dbClanInfo;
+	MDB_ClanInfo dbClanInfo;
 
 	if (MMatchServer::GetInstance()->GetDBMgr()->GetClanInfo(m_nCLID, &dbClanInfo))
 	{
