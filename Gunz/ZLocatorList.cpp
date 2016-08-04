@@ -1,6 +1,10 @@
 #include "StdAfx.h"
 #include ".\zlocatorlist.h"
 #include "MZFileSystem.h"
+#include "Extensions.h"
+#ifdef LOAD_LOCATOR_FROM_CONFIG_XML
+#include "ZConfiguration.h"
+#endif
 
 ZLocatorList::ZLocatorList(void)
 {
@@ -95,6 +99,7 @@ bool ZLocatorList::LoadXML( MZFileSystem* pFileSystem, const char* pszListFile )
 
 bool ZLocatorList::ParseLocatorList( MXmlElement& element )
 {
+#ifndef LOAD_LOCATOR_FROM_CONFIG_XML
 	int iCount = element.GetChildNodeCount();
 	MXmlElement chrElement;
 	char szTagName[256];
@@ -111,6 +116,10 @@ bool ZLocatorList::ParseLocatorList( MXmlElement& element )
 		}
 	}
 	return true;
+#else
+	m_LocatorIPList.push_back(ZGetConfiguration()->GetServerIP());
+	return true;
+#endif
 }
 
 bool ZLocatorList::ParseLocator( MXmlElement& element )

@@ -31,6 +31,7 @@ Library*/
 !sdk/**/*
 cml/MatchServer Debug/*
 cml/MatchServer Release/*
+MatchServer/Log
 
 # Visual Studio 2015 cache/options directory
 .vs/
