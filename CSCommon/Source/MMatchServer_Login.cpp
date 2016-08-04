@@ -78,8 +78,6 @@ void MMatchServer::OnMatchLogin(MUID CommUID, const char* szUserID, const unsign
 	if (HashLength != crypto_generichash_BYTES)
 		return;
 
-	LogF(LOG_ALL, "Login attempt from %d:%d\n", CommUID.High, CommUID.Low);
-
 	int nMapID = 0;
 
 	unsigned int nAID = 0;

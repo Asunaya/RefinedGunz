@@ -128,4 +128,6 @@ InitFailure:
 #endif
 	return 0;
 }
+#else
+void* silence_LNK4221_warning;
 #endif

@@ -1299,7 +1299,7 @@ bool MSSQLDatabase::UpdateEquipedItem(const unsigned long nCID, MMatchCharItemPa
 
 	_STATUS_DB_END(11);
 
-	return rs.Field("Ret").AsInt();
+	return rs.Field("Ret").AsInt() != 0;
 }
 
 

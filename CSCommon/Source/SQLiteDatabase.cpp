@@ -5,6 +5,7 @@
 #include "MMatchObject.h"
 #include "MErrorTable.h"
 #include "MMatchTransDataType.h"
+#include <cstdarg>
 
 template <>
 int SQLiteStatement::Get<int>(int Column)
@@ -44,7 +45,7 @@ SQLiteDatabase::SQLiteDatabase()
 		char *err_msg = nullptr;
 		auto err_code = sqlite3_exec(sqlite, sql, nullptr, nullptr, &err_msg);
 		if (err_code != SQLITE_OK && err_msg)
-			MLog("Error during database construction: error code %d, error message: %s\n", err_code, err_msg);
+			Log("Error during database construction: error code %d, error message: %s\n", err_code, err_msg);
 	};
 
 	exec("CREATE TABLE IF NOT EXISTS Login(AID integer NOT NULL, \
@@ -131,6 +132,14 @@ SQLiteDatabase::SQLiteDatabase()
 		Grade integer NOT NULL, \
 		RegDate text NOT NULL, \
 		ContPoint integer NOT NULL)");
+
+	exec("CREATE TABLE IF NOT EXISTS Friend( \
+		id integer PRIMARY KEY NOT NULL, \
+		CID integer NOT NULL, \
+		FriendCID integer NOT NULL, \
+		Type integer NOT NULL, \
+		Favorite integer NULL, \
+		DeleteFlag integer NULL)");
 }
 
 void SQLiteDatabase::HandleException(const SQLiteError & e)
@@ -138,7 +147,7 @@ void SQLiteDatabase::HandleException(const SQLiteError & e)
 	if (InTransaction)
 		RollbackTransaction();
 
-	MLog("Caught SQLiteError: error code: %d, error message: %s\n", e.GetErrorCode(), e.what());
+	Log("Caught SQLiteError: error code: %d, error message: %s\n", e.GetErrorCode(), e.what());
 }
 
 void SQLiteDatabase::BeginTransaction()
@@ -156,6 +165,17 @@ void SQLiteDatabase::CommitTransaction()
 	InTransaction = false;
 }
 
+void SQLiteDatabase::Log(const char * Format, ...)
+{
+	va_list va;
+	va_start(va, Format);
+	char buffer[512] = { 0 };
+	vsprintf_safe(buffer, Format, va);
+	va_end(va);
+
+	MGetMatchServer()->Log(MMatchServer::LOG_ALL, buffer);
+}
+
 bool SQLiteDatabase::GetLoginInfo(const char * UserID, unsigned int * outAID, char * outPassword, size_t maxlen)
 try
 {
@@ -167,7 +187,6 @@ try
 	auto AID = stmt.Get<int>();
 	auto PasswordData = stmt.Get<StringView>();
 	auto len = min(maxlen, PasswordData.Size);
-	MGetMatchServer()->LogF(MMatchServer::LOG_ALL, "Password size: %d\n", PasswordData.Size);
 	memcpy(outPassword, PasswordData.Ptr, len);
 	outPassword[len] = 0;
 	*outAID = AID;
@@ -650,7 +669,6 @@ try
 
 		MUID uidNew = MMatchItemMap::UseUID();
 		CharInfo.m_ItemList.CreateItem(uidNew, CIID, ItemDescID, IsRentItem, RentMinutePeriodRemainder);
-		MLog("Add item %d, %d:%d\n", CIID, uidNew.High, uidNew.Low);
 
 		stmt.Step();
 	}
@@ -670,7 +688,9 @@ bool SQLiteDatabase::GetAccountItemInfo(int AID, MAccountItemNode * outItemNode,
 	int * outExpiredItemCount, int MaxExpiredItemCount)
 try
 {
-	auto stmt = ExecuteSQL("SELECT AIID, ItemID, (RentHourPeriod * 60) - (DateDiff(n, RentDate, @NowTime)) AS RentPeriodRemainder \
+	auto stmt = ExecuteSQL("SELECT AIID, ItemID, \
+		(RentHourPeriod*60) - CAST((JulianDay(datetime('now')) - JulianDay(RentDate)) * 24 * 60 As Integer) \
+		 AS RentPeriodRemainder \
 		FROM AccountItem \
 		WHERE AID = ? ORDER BY AIID",
 		AID);
@@ -741,7 +761,7 @@ try
 		auto Blob = stmt.Get<StringView>();
 		if (Blob.Size != sizeof(ItemBlob))
 		{
-			MLog("SQLiteDatabase::UpdateEquipedItem - Items blob has wrong size %d, expected %d\n",
+			Log("SQLiteDatabase::UpdateEquipedItem - Items blob has wrong size %d, expected %d\n",
 				Blob.Size, sizeof(ItemBlob));
 			return false;
 		}
@@ -831,6 +851,8 @@ catch (const SQLiteError& e)
 bool SQLiteDatabase::UpdateQuestItem(int nCID, MQuestItemMap & rfQuestIteMap, MQuestMonsterBible & rfQuestMonster)
 try
 {
+	// TODO: Implement
+
 	return true;
 }
 catch (const SQLiteError& e)
@@ -1016,13 +1038,14 @@ try
 		WHERE f.CID = ? AND f.FriendCID = c.CID AND f.DeleteFlag = 0 AND f.Type = 1",
 		CID);
 
-	do
+	while (stmt.HasRow())
 	{
 		auto FriendCID = stmt.Get<int>();
 		auto Favorite = stmt.Get<int>();
 		auto Name = stmt.Get<StringView>();
 		FriendInfo->Add(FriendCID, Favorite, Name.Ptr);
-	} while (stmt.Step() != SQLITE_DONE);
+		stmt.Step();
+	};
 
 	return true;
 }
@@ -1127,7 +1150,7 @@ catch (const SQLiteError& e)
 bool SQLiteDatabase::DeleteExpiredClan(uint32_t dwCID, uint32_t dwCLID, const std::string & strDeleteName, uint32_t dwWaitHour)
 try
 {
-	// Unimplemented
+	// Unimplemented in MSSQL
 
 	return true;
 }
@@ -1140,7 +1163,7 @@ catch (const SQLiteError& e)
 bool SQLiteDatabase::SetDeleteTime(uint32_t dwMasterCID, uint32_t dwCLID, const std::string & strDeleteDate)
 try
 {
-	// Unimplemented
+	// Unimplemented in MSSQL
 
 	return true;
 }
@@ -1153,8 +1176,8 @@ catch (const SQLiteError& e)
 bool SQLiteDatabase::ReserveCloseClan(int CLID, const char * ClanName, int MasterCID, const std::string & strDeleteDate)
 try
 {
-	ExecuteSQL("UPDATE Clan SET DeleteFlag = 2 WHERE CLID = ? AND Name = ? AND MasterCID = ?", CLID, ClanName, MasterCID);
-
+	ExecuteSQL("UPDATE Clan SET DeleteFlag = 2 WHERE CLID = ? AND Name = ? AND MasterCID = ?",
+		CLID, ClanName, MasterCID);
 	return true;
 }
 catch (const SQLiteError& e)
@@ -1166,10 +1189,9 @@ catch (const SQLiteError& e)
 bool SQLiteDatabase::AddClanMember(int CLID, int JoinerCID, int ClanGrade, bool * outRet)
 try
 {
-	ExecuteSQL("INSERT INTO ClanMember(CLID, CID, Grade, RegDate) VALUES(?, ?, ?, date('now'))", CLID, JoinerCID, ClanGrade);
-
+	ExecuteSQL("INSERT INTO ClanMember(CLID, CID, Grade, RegDate) VALUES(?, ?, ?, date('now'))",
+		CLID, JoinerCID, ClanGrade);
 	*outRet = true;
-
 	return true;
 }
 catch (const SQLiteError& e)
@@ -1194,8 +1216,7 @@ catch (const SQLiteError& e)
 bool SQLiteDatabase::UpdateClanGrade(int CLID, int MemberCID, int ClanGrade)
 try
 {
-	ExecuteSQL("UPDATE ClanMember SET Grade = @NewGrade WHERE CLID = @CLID AND CID = @CID", ClanGrade, CLID, MemberCID);
-
+	ExecuteSQL("UPDATE ClanMember SET Grade = ? WHERE CLID = ? AND CID = @CID", ClanGrade, CLID, MemberCID);
 	return true;
 }
 catch (const SQLiteError& e)
@@ -1421,7 +1442,7 @@ try
 {
 	auto stmt = ExecuteSQL("SELECT Name FROM Character WHERE CID = ?", CID);
 
-	if (!stmt.HasRow())
+	if (!stmt.HasRow() || stmt.IsNull())
 		return false;
 
 	outCharName = stmt.Get<StringView>().Ptr;

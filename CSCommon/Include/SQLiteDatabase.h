@@ -519,6 +519,8 @@ private:
 	void RollbackTransaction();
 	void CommitTransaction();
 
+	void Log(const char* Format, ...);
+
 	SQLite sqlite = nullptr;
 
 	bool InTransaction = false;
