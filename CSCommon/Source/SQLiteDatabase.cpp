@@ -282,11 +282,49 @@ try
 {
 	auto stmt = ExecuteSQL("SELECT COUNT(*) AS NUM FROM Character WHERE Name = ?", NewName);
 
-	ExecuteSQL("INSERT INTO Character(AID, Name, CharNum, Level, Sex, Hair, Face, XP, BP, \
+	if (!stmt.HasRow())
+		return MERR_UNKNOWN;
+
+	if (stmt.Get<int>() > 0)
+		return MERR_CLIENT_EXIST_CHARNAME;
+
+	ExecuteSQL("INSERT INTO Character (AID, Name, CharNum, Level, Sex, Hair, Face, XP, BP, \
 		GameCount, KillCount, DeathCount, RegDate, PlayTime, DeleteFlag) \
 		Values(?, ?, ?, 1, ?, ?, ?, 0, 0, \
 		0, 0, 0, date('now'), 0, 0)",
 		AID, NewName, CharIndex, Sex, Hair, Face);
+
+	stmt = ExecuteSQL("SELECT CID FROM Character WHERE AID = ? AND CharNum = ?\n", AID, CharIndex);
+
+	if (!stmt.HasRow() || stmt.IsNull())
+	{
+		Log("SQLiteDatabase::CreateCharacter - Weirdness while creating character named %s for AID %d\n",
+			NewName, AID);
+		return false;
+	}
+
+	auto CID = stmt.Get<int>();
+
+	std::pair<int, int> Costume[] = { { MMCIP_CHEST, 21501}, { MMCIP_LEGS, 23501},
+	{ MMCIP_MELEE, 2 }, { MMCIP_PRIMARY, 5002 } };
+	ItemBlob Items;
+	for (auto& e : Items.ItemIDs)
+		e = 0;
+	for (auto& e : Items.CIIDs)
+		e = 0;
+	for (size_t i = 0; i < ArraySize(Costume); i++)
+	{
+		size_t Index = Costume[i].first;
+		auto ItemID = Costume[i].second;
+		Items.ItemIDs[Index] = ItemID;
+		ExecuteSQL("INSERT INTO CharacterItem (CID, ItemID) VALUES (?, ?)", CID, ItemID);
+		auto CIID = sqlite3_last_insert_rowid(sqlite);
+		Log("Set %d to %d!", Index, CIID);
+		Items.CIIDs[Index] = CIID;
+	}
+
+	ExecuteSQL("UPDATE Character SET Items = ? WHERE AID = ? AND CID = ?",
+		Blob{ &Items, sizeof(Items) }, AID, CID);
 
 	return MOK;
 }
@@ -515,7 +553,16 @@ try
 	if (stmt.HasRow())
 	{
 		outCharInfo->m_ClanInfo.m_nClanID = stmt.Get<int>();
-		strcpy_safe(outCharInfo->m_ClanInfo.m_szClanName, stmt.Get<StringView>().Ptr);
+		if (!stmt.IsNull())
+		{
+			strcpy_safe(outCharInfo->m_ClanInfo.m_szClanName, stmt.Get<StringView>().Ptr);
+		}
+		else
+		{
+			for (auto& e : outCharInfo->m_ClanInfo.m_szClanName)
+				e = 0;
+			stmt.NextColumn();
+		}
 		outCharInfo->m_ClanInfo.m_nGrade = static_cast<MMatchClanGrade>(stmt.Get<int>());
 		outCharInfo->m_ClanInfo.m_nContPoint = stmt.Get<int>();
 	}
