@@ -24,7 +24,9 @@ MLocatorConfig::~MLocatorConfig(void)
 
 bool MLocatorConfig::LoadConfig()
 {
+#ifdef LOCATOR_FREESTANDING
 	if( !LoadDBConfig() )	return false;
+#endif
 	if( !LoadNetConfig() )	return false;
 	if( !LoadEnvConfig() )	return false;
 
@@ -55,9 +57,11 @@ bool MLocatorConfig::LoadNetConfig()
 {
 	char szVal[ 256 ];
 
+#ifdef LOCATOR_FREESTANDING
 	GetPrivateProfileString( "NETWORK", "IP", "", szVal, 255, LOCATOR_CONFIG );
 	if( 0 == strlen(szVal) ) return false;
 	SetLocatorIP( szVal );
+#endif
 
 	GetPrivateProfileString( "NETWORK", "PORT", "", szVal, 255, LOCATOR_CONFIG );
 	if( 0 == strlen(szVal) ) return false;

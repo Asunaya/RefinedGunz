@@ -160,8 +160,8 @@ private :
 	DWORD m_nSendCount;
 	DWORD m_nDuplicatedCount;
 
-	MLocatorDBMgr*	m_pDBMgr;
-	MCountryFilter* m_pCountryFilter;
+	MLocatorDBMgr*	m_pDBMgr = nullptr;
+	MCountryFilter* m_pCountryFilter = nullptr;
 
 	void*		m_vpServerStatusInfoBlob;
 	int			m_nLastGetServerStatusCount;

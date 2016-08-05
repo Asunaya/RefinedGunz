@@ -265,9 +265,9 @@ bool MLocator::InitCountryCodeFilter()
 
 void MLocator::Destroy()
 {
-	// MCommandCommunicator::Destroy();
-
+#ifdef LOCATOR_FREESTANDING
 	ReleaseDBMgr();
+#endif
 	ReleaseSafeUDP();
 	ReleaseUDPManager();
 	ReleaseValidCountryCodeList();
