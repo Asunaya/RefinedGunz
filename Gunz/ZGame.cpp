@@ -840,7 +840,7 @@ void ZGame::CheckMyCharDead(float fElapsed)
 		}
 	}
 
-	if (ZGetGameClient()->GetMatchStageSetting()->GetNetcode() != NetcodeType::ServerBased)
+	if (ZGetGameClient()->GetMatchStageSetting()->GetNetcode() == NetcodeType::ServerBased)
 		return;
 
 	if ((m_pMyCharacter->IsDie() == false) && (m_pMyCharacter->GetHP() <= 0))

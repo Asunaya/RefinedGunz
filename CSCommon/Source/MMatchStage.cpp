@@ -726,6 +726,9 @@ void MMatchStage::OnStartGame()
 	// 게임 시작 메세지를 보낸다.
 	if (GetStageType() == MST_NORMAL)
 		MMatchServer::GetInstance()->StageLaunch(GetUID());
+
+	if (!MGetServerConfig()->HasGameData() && GetStageSetting()->GetNetcode() == NetcodeType::ServerBased)
+		GetStageSetting()->SetNetcode(NetcodeType::P2PAntilead);
 }
 
 void MMatchStage::OnFinishGame()

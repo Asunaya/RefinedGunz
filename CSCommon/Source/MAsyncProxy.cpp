@@ -134,7 +134,7 @@ void MAsyncProxy::OnRun()
 				m_WaitQueue.Unlock();
 
 				if (pJob) {
-					pJob->Run(&DatabaseMgr);
+					pJob->Run(&DatabaseMgr.u);
 					pJob->SetFinishTime(GetGlobalTimeMS());
 
 					m_ResultQueue.Lock();

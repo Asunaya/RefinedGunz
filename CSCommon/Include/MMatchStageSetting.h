@@ -172,6 +172,7 @@ public:
 	void SetStageState(STAGE_STATE nState)	{ m_nStageState = nState; }
 	void SetTeamWinThePoint(bool bValue)	{ m_StageSetting.bTeamWinThePoint = bValue; }
 	void SetAutoTeamBalancing(bool bValue)	{ m_StageSetting.bAutoTeamBalancing = bValue; }
+	void SetNetcode(NetcodeType NewNetcode) { m_StageSetting.Netcode = NewNetcode; }
 	
 	void UpdateStageSetting(MSTAGE_SETTING_NODE* pSetting);
 	void UpdateCharSetting(const MUID& uid, unsigned int nTeam, MMatchObjectStageState nStageState);
