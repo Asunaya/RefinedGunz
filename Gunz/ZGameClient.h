@@ -330,6 +330,10 @@ public:
 	bool DestroyUPnP();
 
 	int GetPingToServer() const { return PingToServer; }
+
+protected:
+	virtual void OnStopUDPTest(const MUID& uid) override;
+	virtual void OnUDPTestReply(const MUID& uid) override;
 };
 
 

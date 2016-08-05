@@ -359,8 +359,6 @@ void ZGameClient::OnChannelResponseJoin(const MUID& uidChannel, MCHANNEL_TYPE nC
 	char szText[256];
 
 	ZGetGameInterface()->GetChat()->Clear(ZChat::CL_LOBBY);
-//	wsprintf(szText, "당신은 채널 '%s'에 입장하셨습니다.", szChannelName);
-	//wsprintf(szText, "당신은 채널 '%s'에 입장하셨습니다.", szChannelName);
 	ZTransMsg( szText, MSG_LOBBY_JOIN_CHANNEL, 1, szChannelName );
 
 	ZChatOutput(szText, ZChat::CMT_SYSTEM, ZChat::CL_LOBBY);
@@ -369,7 +367,6 @@ void ZGameClient::OnChannelResponseJoin(const MUID& uidChannel, MCHANNEL_TYPE nC
 	{
 	case MSM_NORMAL_:
 		{
-//			wsprintf(szText, "레벨제한을 원치 않으시면 자유채널을 이용해 주시기 바랍니다.");
 			wsprintf( szText, 
 				ZMsg(MSG_LOBBY_LIMIT_LEVEL) );
 			ZChatOutput(szText, ZChat::CMT_SYSTEM, ZChat::CL_LOBBY);
@@ -377,7 +374,6 @@ void ZGameClient::OnChannelResponseJoin(const MUID& uidChannel, MCHANNEL_TYPE nC
 		break;
 	case MSM_LADDER:
 		{
-//			wsprintf(szText, "리그게임은 채널에 상관없이 모든사용자들과 겨루게 됩니다.");
 			wsprintf( szText, 
 				ZMsg(MSG_LOBBY_LEAGUE) );
 			ZChatOutput(szText, ZChat::CMT_SYSTEM, ZChat::CL_LOBBY);
@@ -387,22 +383,6 @@ void ZGameClient::OnChannelResponseJoin(const MUID& uidChannel, MCHANNEL_TYPE nC
 		{
 			if (nChannelType == MCHANNEL_TYPE_CLAN)
 			{
-/*
-				{
-					static bool bUsed = false;
-					if (!bUsed)
-					{
-/*						wsprintf(szText, "[공지] 당분간 공유기를 사용하시는 유저분들은 클랜전을 원활히 즐기실 수 없습니다.");
-						ZChatOutput(szText, ZChat::CMT_SYSTEM, ZChat::CL_LOBBY);
-						wsprintf(szText, "[공지] 빠른 시간내에 복구하도록 하겠습니다. 불편을 끼쳐드려 죄송합니다.");
-						ZChatOutput(szText, ZChat::CMT_SYSTEM, ZChat::CL_LOBBY);
-
-						bUsed = true;
-					}
-				}
-*/
-
-
 				ZPostRequestClanInfo(GetPlayerUID(), szChannelName);
 			}
 		}
@@ -414,14 +394,12 @@ void ZGameClient::OnChannelResponseJoin(const MUID& uidChannel, MCHANNEL_TYPE nC
 		(ZRoomListBox*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget("Lobby_StageList");
 	if (pRoomList) pRoomList->Clear();
 
-	// 
 	ZApplication::GetGameInterface()->SetRoomNoLight(1);
 
 	bool bClanBattleUI =  ((GetServerMode() == MSM_CLAN) && (nChannelType==MCHANNEL_TYPE_CLAN));
 	ZGetGameInterface()->InitClanLobbyUI(bClanBattleUI);
 
 #ifdef LIMIT_ACTIONLEAGUE
-	// 임시로 액션리그 
 	bool bActionLeague = (strstr(szChannelName,"액션")!=NULL) || (nChannelType==MCHANNEL_TYPE_USER);
 
 	ZGetGameInterface()->InitLadderUI(bActionLeague);
@@ -512,8 +490,8 @@ void ZGameClient::OnChannelResponseRule(const MUID& uidchannel, const char* pszR
 void ZGameClient::OnStageEnterBattle(const MUID& uidChar, MCmdEnterBattleParam nParam, MTD_PeerListNode* pPeerNode)
 {	
 	DMLog("ZGameClient::OnStageEnterBattle -- Netcode: %d\n", GetMatchStageSetting()->GetNetcode());
-	// 이것은 ZGame 에서 불러준다
-	if (uidChar == GetPlayerUID())		// enter한사람이 나자신일 경우
+
+	if (uidChar == GetPlayerUID())
 	{
 		if (GetMatchStageSetting()->GetNetcode() == NetcodeType::ServerBased)
 			PeerToPeer = false;
@@ -525,13 +503,9 @@ void ZGameClient::OnStageEnterBattle(const MUID& uidChar, MCmdEnterBattleParam n
 		ClientSettings.DebugOutput = ZGetConfiguration()->GetShowHitRegDebugOutput();
 		ZPostClientSettings(ClientSettings);
 
-		// 게임이 시작되면 모든 사람들의 ready를 푼다.
-		for (MStageCharSettingList::iterator itor = m_MatchStageSetting.m_CharSettingList.begin();
-			itor != m_MatchStageSetting.m_CharSettingList.end(); ++itor) 
-		{
-			MSTAGE_CHAR_SETTING_NODE* pCharNode = (*itor);
-			pCharNode->nState = MOSS_NONREADY;
-		}
+		// Unready every player
+		for (auto* CharNode : m_MatchStageSetting.m_CharSettingList)
+			CharNode->nState = MOSS_NONREADY;
 	}
 
 	if (GetMatchStageSetting()->GetNetcode() != NetcodeType::ServerBased)
@@ -540,8 +514,6 @@ void ZGameClient::OnStageEnterBattle(const MUID& uidChar, MCmdEnterBattleParam n
 
 void ZGameClient::OnStageJoin(const MUID& uidChar, const MUID& uidStage, unsigned int nRoomNo, char* szStageName)
 {
-//	SetBridgePeerFlag(false);
-
 	if (uidChar == GetPlayerUID()) {
 		JustJoinedStage = true;
 
@@ -550,7 +522,7 @@ void ZGameClient::OnStageJoin(const MUID& uidChar, const MUID& uidStage, unsigne
 		m_nRoomNo = nRoomNo;
 	
 		memset(m_szStageName, 0, sizeof(m_szStageName));
-		strcpy_safe(m_szStageName, szStageName);	// Save StageName
+		strcpy_safe(m_szStageName, szStageName); // Save StageName
 
 		unsigned int nStageNameChecksum = m_szStageName[0] + m_szStageName[1] + m_szStageName[2] + m_szStageName[3];
 		InitPeerCrypt(uidStage, nStageNameChecksum);
@@ -1128,32 +1100,6 @@ void ZGameClient::OnMatchNotify(unsigned int nMsgID)
 	}
 
 	ZChatOutput(MCOLOR(255,70,70),strMsg.data());
-
-
-	/*
-	GunzState nState = ZApplication::GetGameInterface()->GetState();
-	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
-	
-	switch(nState) {
-	case GUNZ_LOBBY:
-		{
-			MListBox* pWidget = (MListBox*)pResource->FindWidget("ChannelChattingOutput");
-			if (pWidget) pWidget->Add(strMsg.data(), MCOLOR(255,70,70));
-		}
-		break;
-	case GUNZ_STAGE:
-		{
-			MListBox* pWidget = (MListBox*)pResource->FindWidget("StageChattingOutput");
-			if (pWidget) pWidget->Add(strMsg.data(), MCOLOR(255,70,70));
-		}
-		break;
-	case GUNZ_GAME:
-		{
-			ZApplication::GetGameInterface()->OutputChatMsg(strMsg.data());
-		}
-		break;
-	};
-	*/
 }
 
 #include "ZMsgBox.h"
@@ -1172,7 +1118,7 @@ bool ZGameClient::OnCommand(MCommand* pCommand)
 		int Count = MGetBlobArrayCount(Blob);
 		for (int i = 0; i < Count; i++)
 		{
-			auto Ping = *static_cast<MTD_PingInfo*>(MGetBlobArrayElement(Blob, i));
+			auto& Ping = *static_cast<MTD_PingInfo*>(MGetBlobArrayElement(Blob, i));
 			if (Ping.UID == GetPlayerUID())
 			{
 				PingToServer = Ping.Ping;
@@ -2522,25 +2468,6 @@ void ZGameClient::Tick(void)
 			tmLastAgentPeer = nClock;
 		}
 	}
-
-	if (ZApplication::GetGameInterface()->GetState() == GUNZ_STAGE) {
-/*		if (GetCountdown() > 0) {
-			if (Countdown(nClock) == true) {
-				ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
-				MListBox* pWidget = (MListBox*)pResource->FindWidget("StageChattingOutput");
-				char szMsg[256];
-				sprintf_safe(szMsg, "    %d", GetCountdown()+1);
-				pWidget->Add(szMsg);
-			}
-		}*/
-	}
-/*
-#define CLOCK_REQUEST_ATTRIBUTE		1000	// CLOCK_REQUEST_ATTRIBUTE msec 마다 한번씩 요청
-	if(nClock-m_nPrevClockRequestAttribute>CLOCK_REQUEST_ATTRIBUTE){
-		m_nPrevClockRequestAttribute = nClock;
-		ZPOSTCMD1(MC_OBJECT_REQUEST_BASICATTR, MCommandParameterUID(g_MyChrUID));
-	}
-*/
 }
 
 void ZGameClient::OnResponseRecommandedChannel(const MUID& uidChannel)
@@ -3303,6 +3230,26 @@ bool ZGameClient::DestroyUPnP()
 	}
 
 	return true;
+}
+
+void ZGameClient::OnStopUDPTest(const MUID & uid)
+{
+	auto* Char = ZGetGame()->m_CharacterManager.Find(uid);
+	if (!Char)
+		return;
+
+	ZChatOutputF("Failed to establish direct connection to %s.", Char->GetUserNameA());
+}
+
+void ZGameClient::OnUDPTestReply(const MUID& uid)
+{
+	MMatchClient::OnUDPTestReply(uid);
+
+	auto* Char = ZGetGame()->m_CharacterManager.Find(uid);
+	if (!Char)
+		return;
+
+	ZChatOutputF("Established direct connection to %s.", Char->GetUserNameA());
 }
 
 

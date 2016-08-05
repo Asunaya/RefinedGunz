@@ -1771,9 +1771,9 @@ MMatchObject* MMatchServer::GetPlayerByAID(unsigned long int nAID)
 {
 	if (nAID == 0) return NULL;
 
-	for(MMatchObjectList::iterator i=m_Objects.begin(); i!=m_Objects.end(); i++)
+	for(auto i=m_Objects.begin(); i!=m_Objects.end(); i++)
 	{
-		MMatchObject* pObj = ((*i).second);
+		auto* pObj = i->second;
 		if (pObj->GetAccountInfo()->m_nAID == nAID)
 			return pObj;
 	}
@@ -1818,12 +1818,10 @@ void MMatchServer::Announce(MObject* pObj, char* pszMsg)
 
 void MMatchServer::AnnounceErrorMsg(const MUID& CommUID, const int nErrorCode)
 {
-	// 다음 서버 패치때 Announce대신 ErrorCode로 클라이언트에 메세지를 전송할 수 있도록 만들 예정
 }
 
 void MMatchServer::AnnounceErrorMsg(MObject* pObj, const int nErrorCode)
 {
-
 }
 
 
@@ -1831,23 +1829,9 @@ void MMatchServer::AnnounceErrorMsg(MObject* pObj, const int nErrorCode)
 
 void MMatchServer::OnBridgePeer(const MUID& uidChar, DWORD dwIP, DWORD nPort)
 {
-	MMatchObject* pObj = GetObject(uidChar);
-	if (pObj == NULL) return;
-// 임시 Debug코드 ///////
-#ifdef _DEBUG
-if (strcmp(pObj->GetAccountName(), "라온하제4")==0)
-return;
-if (strcmp(pObj->GetAccountName(), "라온하제3")==0)
-return;
-#endif
-/////////////////////////
-
-/*	if (pObj->GetBridgePeer() == false) {
-		char szMsg[128];
-		sprintf_safe(szMsg, "BridgePeer : Player[%d%d] Local(%s:%u) , Routed(%s:%u)", 
-			uidChar.High, uidChar.Low, szLocalIP, nLocalPort, szIP, nPort);
-		LOG(LOG_DEBUG, szMsg);
-	}*/
+	auto* pObj = GetObject(uidChar);
+	if (!pObj)
+		return;
 
 	in_addr addr;
 	addr.s_addr = dwIP;

@@ -480,10 +480,6 @@ void MMatchClient::OnAgentConnected(const MUID& uidAgentServer, const MUID& uidA
 	MPacketCrypterKey key;
 	MMakeSeedKey(&key, uidAgentServer, uidAlloc, 0);
 	m_AgentPacketCrypter.InitKey(&key);
-
-//	MCommand* pCmd = CreateCommand(MC_AGENT_PEER_BIND, GetAgentServerUID());
-//	pCmd->AddParameter(new MCmdParamUID(GetPlayerUID()));
-//	Post(pCmd);
 }
 
 int MMatchClient::OnResponseMatchLogin(const MUID& uidServer, int nResult, const char* szServerName,
@@ -530,10 +526,9 @@ void MMatchClient::CastStageBridgePeer(const MUID& uidChar, const MUID& uidStage
 {
 	MCommand* pCmd = new MCommand(m_CommandManager.GetCommandDescByID(MC_MATCH_BRIDGEPEER), GetServerUID(), m_This);		
 	pCmd->AddParameter(new MCommandParameterUID(uidChar));
-	pCmd->AddParameter(new MCommandParameterUInt(0));	// 수신측에서 IP로 치환됨
-	pCmd->AddParameter(new MCommandParameterUInt(0));		// 수신측에서 Port로 치환됨
+	pCmd->AddParameter(new MCommandParameterUInt(0)); // IP
+	pCmd->AddParameter(new MCommandParameterUInt(0)); // Port
 	
-	MSafeUDP* pSafeUDP = GetSafeUDP();
 	SendCommandByUDP(pCmd, GetServerIP(), GetServerPeerPort());
 
 	delete pCmd;
@@ -541,36 +536,19 @@ void MMatchClient::CastStageBridgePeer(const MUID& uidChar, const MUID& uidStage
 
 void MMatchClient::OnUDPTest(const MUID& uidChar)
 {
-	MMatchPeerInfo* pPeer = FindPeer(uidChar);
-	if (pPeer) {
+	auto* pPeer = FindPeer(uidChar);
+	if (!pPeer)
+		return;
 
-#ifdef _DEBUG
-		if ( //(strcmp("발렌타인", pPeer->CharInfo.szName)==0) ||
-			(strcmp("버드", pPeer->CharInfo.szName)==0) ||
-			(strcmp("dddd", pPeer->CharInfo.szName)==0) ||
-			(strcmp("라온하제5", pPeer->CharInfo.szName)==0) ||
-			(strcmp("라온하제6", pPeer->CharInfo.szName)==0) )
-		{
-			return;
-		}
-#endif
-
-		MCommand* pCmd = CreateCommand(MC_PEER_UDPTEST_REPLY, uidChar);
-		SendCommandByUDP(pCmd, pPeer->szIP, pPeer->nPort);
-		delete pCmd;
-	}
+	auto* pCmd = CreateCommand(MC_PEER_UDPTEST_REPLY, uidChar);
+	SendCommandByUDP(pCmd, pPeer->szIP, pPeer->nPort);
+	delete pCmd;
 }
 
 void MMatchClient::OnUDPTestReply(const MUID& uidChar)
 {
-//// UDPTEST LOG ////////////////////////////////
-#ifndef _PUBLISH
-char szLog[64];
-sprintf_safe(szLog, "[%d:%d] UDP_TEST_REPLY: from (%d:%d) \n", 
+	DMLog("[%d:%d] UDP_TEST_REPLY: from (%d:%d) \n",
 		GetPlayerUID().High, GetPlayerUID().Low, uidChar.High, uidChar.Low);
-mlog(szLog);
-#endif
-/////////////////////////////////////////////////
 
 	MMatchPeerInfo* pPeer = FindPeer(uidChar);
 	if (pPeer) {
@@ -582,17 +560,21 @@ mlog(szLog);
 void MMatchClient::UpdateUDPTestProcess()
 {
 	int nProcessCount = 0;
-	for (MMatchPeerInfoList::iterator i=m_Peers.begin(); i!=m_Peers.end(); i++) {
-		MMatchPeerInfo* pPeer = (*i).second;
+	for (auto i=m_Peers.begin(); i!=m_Peers.end(); i++) {
+		auto* pPeer = (*i).second;
 		if (pPeer->GetProcess()) {
 			pPeer->UseTestCount();
 			if (pPeer->GetTestCount() <= 0) {
 				pPeer->StopUDPTest();
 
+				OnStopUDPTest(pPeer->uidChar);
+
+#ifdef MATCHAGENT
 				MCommand* pCmd = CreateCommand(MC_MATCH_REQUEST_PEER_RELAY, GetServerUID());
 				pCmd->AddParameter(new MCmdParamUID(GetPlayerUID()));
 				pCmd->AddParameter(new MCmdParamUID(pPeer->uidChar));
 				Post(pCmd);
+#endif
 			} else {
 				nProcessCount++;
 			}
@@ -738,17 +720,26 @@ void MMatchClient::SendCommand(MCommand* pCommand)
 						if ((pPeerInfo->uidChar == MUID(0, 0)) ||
 							(pPeerInfo->uidChar != GetPlayerUID()))
 						{
+#ifdef MATCHAGENT
 							if ((pPeerInfo->GetProcess() == false) &&
 								(pPeerInfo->GetUDPTestResult() == false))
 								nTunnelingCount++;
 							else
 								SendCommandByUDP(pCommand, pPeerInfo->szIP, pPeerInfo->nPort);
+#else
+							if (!pPeerInfo->GetUDPTestResult())
+								SendCommandByMatchServerTunneling(pCommand, pPeerInfo->uidChar);
+							else
+								SendCommandByUDP(pCommand, pPeerInfo->szIP, pPeerInfo->nPort);
+#endif
 						}
 					}
 
+#ifdef MATCHAGENT
 					if (nTunnelingCount > 0) {
 						SendCommandByTunneling(pCommand);
 					}
+#endif
 				}
 				else {
 					MMatchPeerInfo* pPeerInfo = FindPeer(pCommand->GetReceiverUID());
@@ -889,39 +880,24 @@ void MMatchClient::SendCommandByTunneling(MCommand* pCommand)
 	}
 }
 
-void MMatchClient::SendCommandByMatchServerTunneling(MCommand* pCommand)
+void MMatchClient::SendCommandByMatchServerTunneling(MCommand * pCommand, const MUID & Receiver)
 {
 	//DMLog("SendCommandByMatchServerTunneling %d %d\n", GetAllowTunneling(), GetBridgePeerFlag());
 
-	if (GetBridgePeerFlag() == false) {
-		MCommand* pCmd = CreateCommand(MC_AGENT_TUNNELING_TCP, GetAgentServerUID());
-		pCmd->AddParameter(new MCmdParamUID(GetPlayerUID()));
-		pCmd->AddParameter(new MCmdParamUID(pCommand->GetReceiverUID()));
+	MCommand* pCmd = CreateCommand(MC_MATCH_P2P_COMMAND, GetServerUID());
+	pCmd->AddParameter(new MCmdParamUID(Receiver));
 
-		// Create Param : Command Blob ////
-		if (!MakeTunnelingCommandBlob(pCmd, pCommand))
-		{
-			delete pCmd; pCmd = NULL; return;
-		}
-		///////////////////////////////////
-		SendCommandToAgent(pCmd);
-		delete pCmd;	// PACKETQUEUE 만들때까지 delete 임시로 사용
+	if (!MakeSaneTunnelingCommandBlob(pCmd, pCommand))
+	{
+		delete pCmd; pCmd = NULL; return;
 	}
-	else {
-		MCommand* pCmd = CreateCommand(MC_MATCH_P2P_COMMAND, GetServerUID());
-		pCmd->AddParameter(new MCmdParamUID(pCommand->GetReceiverUID()));
 
-		if (!MakeSaneTunnelingCommandBlob(pCmd, pCommand))
-		{
-			delete pCmd; pCmd = NULL; return;
-		}
+	Post(pCmd);
+}
 
-		//MClient::SendCommand(pCmd);
-		Post(pCmd);
-		//delete pCmd;
-
-		//DMLog("SendCommandByMatchServerTunnelling %d\n", pCommand->GetID());
-	}
+void MMatchClient::SendCommandByMatchServerTunneling(MCommand* pCommand)
+{
+	SendCommandByMatchServerTunneling(pCommand, pCommand->GetReceiverUID());
 }
 
 bool MMatchClient::UDPSocketRecvEvent(DWORD dwIP, WORD wRawPort, char* pPacket, DWORD dwSize)

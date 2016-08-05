@@ -434,7 +434,7 @@ void MAsyncDBJob_InsertQuestGameLog::Run( void* pContext )
 {
 	if( MSM_TEST == MGetServerConfig()->GetServerMode() ) 
 	{
-		MMatchDBMgr* pDBMgr = reinterpret_cast< MMatchDBMgr* >( pContext );
+		IDatabase* pDBMgr = static_cast< IDatabase* >( pContext );
 
 		int nQGLID;
 

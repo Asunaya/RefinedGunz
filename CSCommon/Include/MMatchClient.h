@@ -185,14 +185,11 @@ protected:
 	virtual void SendCommand(MCommand* pCommand);
 	bool SendCommandToAgent(MCommand* pCommand);
 	void SendCommandByTunneling(MCommand* pCommand);
+	void SendCommandByMatchServerTunneling(MCommand* pCommand, const MUID& Receiver);
 	void SendCommandByMatchServerTunneling(MCommand* pCommand);
 	void ParseUDPPacket(char* pData,MPacketHeader* pPacketHeader,DWORD dwIP,unsigned int nPort);
 public:
 	void SendCommandByUDP(MCommand* pCommand, char* szIP, int nPort);
-/*
-public :
-	void SendCommandByUDP(MCommand* pCommand, char* szIP, int nPort);
-	*/
 
 public:
 	MMatchClient();
@@ -203,7 +200,6 @@ public:
 	bool GetBridgePeerFlag()			{ return m_bBridgePeerFlag; }
 	void SetBridgePeerFlag(bool bFlag)	{ m_bBridgePeerFlag = bFlag; }
 	void AddPeer(MMatchPeerInfo* pPeerInfo);
-	//bool DeletePeer(const char* szIP);
 	bool DeletePeer(const MUID uid);
 	MUID FindPeerUID(const DWORD dwIP, const int nPort);
 	MMatchPeerInfo* FindPeer(const MUID& uidChar);
@@ -213,7 +209,8 @@ public:
 	bool GetUDPTestProcess()			{ return m_bUDPTestProcess; }
 	void SetUDPTestProcess(bool bVal)	{ m_bUDPTestProcess = bVal; }
 	void UpdateUDPTestProcess();
-	void GetUDPTraffic(int* nSendTraffic, int* nRecvTraffic)	{ return m_SafeUDP.GetTraffic(nSendTraffic, nRecvTraffic); }
+	void GetUDPTraffic(int* nSendTraffic, int* nRecvTraffic)
+	{ return m_SafeUDP.GetTraffic(nSendTraffic, nRecvTraffic); }
 
 	void SetUDPPort(int nPort);
 	MUID GetServerUID() { return m_uidServer; }
@@ -262,6 +259,8 @@ public:
 	MMatchServerMode GetServerMode()	{ return m_nServerMode; }
 	const char* GetServerName()			{ return m_szServerName; }
 
+protected:
+	virtual void OnStopUDPTest(const MUID& uid) = 0;
 };
 
 /* 

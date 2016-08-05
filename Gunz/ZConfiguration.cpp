@@ -28,7 +28,7 @@ ZConfiguration::ZConfiguration()
 {
 	Init();
 
-	strcpy_safe( m_szServerIP, "0,0,0,0");
+	strcpy_safe( m_szServerIP, "127.0.0.1");
 	m_nServerPort = 6000;
 	
 	strcpy_safe( m_szBAReportAddr, "www.battlearena.com");

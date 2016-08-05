@@ -41,7 +41,7 @@ void MMatchStageSetting::SetDefault()
 	m_StageSetting.Netcode = NetcodeType::ServerBased;
 	m_StageSetting.ForceHPAP = true;
 	m_StageSetting.HP = 100;
-	m_StageSetting.AP = 100;
+	m_StageSetting.AP = 50;
 	m_StageSetting.NoFlip = true;
 	m_StageSetting.SwordsOnly = false;
 }
