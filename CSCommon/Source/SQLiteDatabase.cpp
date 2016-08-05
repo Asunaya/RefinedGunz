@@ -306,23 +306,30 @@ try
 
 	auto CID = stmt.Get<int>();
 
-	std::pair<int, int> Costume[] = { { MMCIP_CHEST, 21501}, { MMCIP_LEGS, 23501},
-	{ MMCIP_MELEE, 2 }, { MMCIP_PRIMARY, 5002 } };
+	std::pair<int, int> GenderedCostume[2][2] = { { { MMCIP_CHEST, 21001 },{ MMCIP_LEGS, 23001 }},
+	{{ MMCIP_CHEST, 21501 },{ MMCIP_LEGS, 23501 }} };
+	std::pair<int, int> UnisexCostume[] = { { MMCIP_MELEE, 2 }, { MMCIP_PRIMARY, 5002 } };
+
 	ItemBlob Items;
 	for (auto& e : Items.ItemIDs)
 		e = 0;
 	for (auto& e : Items.CIIDs)
 		e = 0;
-	for (size_t i = 0; i < ArraySize(Costume); i++)
+
+	auto SetItem = [&](auto& Parts)
 	{
-		size_t Index = Costume[i].first;
-		auto ItemID = Costume[i].second;
+		size_t Index = Parts.first;
+		auto ItemID = Parts.second;
 		Items.ItemIDs[Index] = ItemID;
 		ExecuteSQL("INSERT INTO CharacterItem (CID, ItemID) VALUES (?, ?)", CID, ItemID);
 		auto CIID = sqlite3_last_insert_rowid(sqlite);
-		Log("Set %d to %d!", Index, CIID);
 		Items.CIIDs[Index] = CIID;
-	}
+	};
+
+	for (auto& Pair : GenderedCostume[Sex])
+		SetItem(Pair);
+	for (auto& Pair : UnisexCostume)
+		SetItem(Pair);
 
 	ExecuteSQL("UPDATE Character SET Items = ? WHERE AID = ? AND CID = ?",
 		Blob{ &Items, sizeof(Items) }, AID, CID);
