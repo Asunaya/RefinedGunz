@@ -4,10 +4,8 @@
 // Purpose		: Blocking 작업을 여러 쓰레드로 나눠 Async 스럽게 굴린다.
 // Last Update	: 2004-02-04 
 
-#pragma warning(disable:4786)
-#include <list>
+#include <deque>
 #include <algorithm>
-using namespace std;
 
 
 enum MASYNC_RESULT {
@@ -46,20 +44,35 @@ public:
 	virtual void Run(void* pContext) = 0;
 };
 
-class MAsyncJobList : protected list<MAsyncJob*> {
+template <typename T>
+class MAsyncJob_Generic
+{
+public:
+	MAsyncJob_Generic(T&& fn)
+		: fn(std::forward<T>(fn))
+	{ }
+
+	virtual void Run(void*) override
+	{
+		fn();
+	}
+
+private:
+	T fn;
+};
+
+class MAsyncJobList final : private std::deque<MAsyncJob*> {
 protected:
 	CRITICAL_SECTION	m_csLock;
 public:
 	MAsyncJobList()				{ InitializeCriticalSection(&m_csLock); }
-	virtual ~MAsyncJobList()	{ DeleteCriticalSection(&m_csLock); }
+	~MAsyncJobList()	{ DeleteCriticalSection(&m_csLock); }
 
 	void Lock()		{ EnterCriticalSection(&m_csLock); }
 	void Unlock()	{ LeaveCriticalSection(&m_csLock); }
 
-	// Unsafe Methods /////////////////////////////////////////////
-	// ~Unsafe() 용도 이외엔 사용금지
-	MAsyncJobList::iterator GetBeginItorUnsafe()	{ return begin(); }
-	MAsyncJobList::iterator GetEndItorUnsafe()	{ return end(); }
+	auto GetBeginItorUnsafe()	{ return begin(); }
+	auto GetEndItorUnsafe()		{ return end(); }
 
 	void AddUnsafe(MAsyncJob* pJob) {
 		push_back(pJob);
@@ -113,6 +126,12 @@ public:
 	int GetResultQueueCount()	{ return m_ResultQueue.GetCount(); }
 
 	void PostJob(MAsyncJob* pJob);
+	template <typename T>
+	void PostJob(T&& fn)
+	{
+		auto* Job = new MAsyncJob_Generic<T>(std::forward<T>(fn));
+		PostJob(Job);
+	}
 	MAsyncJob* GetJobResult()	{
 		MAsyncJob* pJob = NULL;
 		m_ResultQueue.Lock();

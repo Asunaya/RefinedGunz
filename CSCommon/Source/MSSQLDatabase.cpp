@@ -15,6 +15,7 @@
 #include "mcrc32.h"
 #include "MQuestConst.h"
 #include "MQuestItem.h"
+#include "MMatchConfig.h"
 
 // SQL ////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -283,6 +284,20 @@ MSSQLDatabase::MSSQLDatabase()
 {
 	m_strDSNConnect = "";
 	m_DB.SetLogCallback(LogCallback);
+
+	auto str = BuildDSNString(MGetServerConfig()->GetDB_DNS(),
+		MGetServerConfig()->GetDB_UserName(),
+		MGetServerConfig()->GetDB_Password());
+
+	auto ThreadID = GetCurrentThreadId();
+	if (Connect(str))
+	{
+		MGetMatchServer()->LogF(MMatchServer::LOG_ALL, "DBMS connected @ thread ID %d", ThreadID);
+	}
+	else
+	{
+		MGetMatchServer()->LogF(MMatchServer::LOG_ALL, "DBMS failed to connect @ thread ID %d", ThreadID);
+	}
 }
 
 MSSQLDatabase::~MSSQLDatabase()
@@ -293,28 +308,11 @@ MSSQLDatabase::~MSSQLDatabase()
 bool MSSQLDatabase::CheckOpen()
 {
 	return m_DB.CheckOpen();
-
-	/*
-	bool ret = true;
-	if (!m_DB.IsOpen())
-	{
-	ret = Connect(m_strDSNConnect);
-	Log("MSSQLDatabase::CheckOpen - Database ¿Á¡¢\n");
-	}
-
-	return ret;
-	*/
 }
 
 CString MSSQLDatabase::BuildDSNString(const CString strDSN, const CString strUserName, const CString strPassword)
 {
 	return m_DB.BuildDSNString(strDSN, strUserName, strPassword);
-	/*
-	CString strDSNConnect =  _T("ODBC;DSN=") + strDSN
-	+ _T(";UID=") + strUserName
-	+ _T(";PWD=") + strPassword;
-	return strDSNConnect;
-	*/
 }
 
 bool MSSQLDatabase::Connect(CString strDSNConnect)

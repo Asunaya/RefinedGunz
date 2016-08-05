@@ -43,6 +43,8 @@
 #include "../../MatchServer/HSHIELD/AntiCpSvrFunc.h"
 #include "HitRegistration.h"
 #include "MUtil.h"
+#include "MLadderMgr.h"
+#include "MTeamGameStrategy.h"
 
 #define DEFAULT_REQUEST_UID_SIZE		4200000000	///< UID 할당 요청 기본 단위
 #define DEFAULT_REQUEST_UID_SPARE_SIZE	10000		///< UID 남은 갯수
@@ -63,7 +65,6 @@
 #define FILENAME_CHANNELRULE			"channelrule.xml"
 
 MMatchServer* MMatchServer::m_pInstance = NULL;
-//extern void RcpLog(const char *pFormat,...);
 
 ////////////////////////////////////
 void RcpLog(const char *pFormat,...)
@@ -553,23 +554,6 @@ bool MMatchServer::InitDB()
 {
 	Database.Create(MGetServerConfig()->GetDatabaseType());
 
-	if (Database.Type != DatabaseType::MSSQL)
-		return true;
-
-	auto& db = *static_cast<MSSQLDatabase*>(GetDBMgr());
-	CString str = db.BuildDSNString(MGetServerConfig()->GetDB_DNS(), 
-		                                      MGetServerConfig()->GetDB_UserName(), 
-											  MGetServerConfig()->GetDB_Password());
-
-	if (db.Connect(str))
-	{
-		LOG(LOG_ALL, "DBMS connected");
-	}
-	else
-	{
-		LOG(LOG_ALL, "Can't Connect To DBMS");
-		return false;
-	}
 	if( MGetServerConfig()->IsUseFilter() )
 	{
 		if( InitCountryFilterDB() )
@@ -583,9 +567,6 @@ bool MMatchServer::InitDB()
 	
 	return true;
 }
-
-#include "MLadderMgr.h"
-#include "MTeamGameStrategy.h"
 
 bool MMatchServer::Create(int nPort)
 {

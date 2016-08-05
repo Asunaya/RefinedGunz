@@ -155,7 +155,6 @@ void MMatchServer::OnAsyncGetLoginInfo(MAsyncJob* pJobInput)
 
 
 #ifndef _DEBUG
-	// 중복 로그인이면 이전에 있던 사람을 끊어버린다.
 	MMatchObject* pCopyObj = GetPlayerByAID(pAccountInfo->m_nAID);
 	if (pCopyObj != NULL) 
 	{
@@ -163,7 +162,6 @@ void MMatchServer::OnAsyncGetLoginInfo(MAsyncJob* pJobInput)
 	}
 #endif
 
-	// 사용정지 계정인지 확인한다.
 	if ((pAccountInfo->m_nUGrade == MMUG_BLOCKED) || (pAccountInfo->m_nUGrade == MMUG_PENALTY))
 	{
 		MCommand* pCmd = CreateCmdMatchResponseLoginFailed(CommUID, MERR_CLIENT_MMUG_BLOCKED);
@@ -179,60 +177,6 @@ void MMatchServer::OnAsyncGetLoginInfo(MAsyncJob* pJobInput)
 	{
 		delete pJob->GetAccountInfo();
 	}
-
-
-/*
-	// 할당...
-	MUID AllocUID = CommUID;
-	int nErrCode = ObjectAdd(CommUID);
-	if(nErrCode!=MOK) {
-		LOG(LOG_DEBUG, MErrStr(nErrCode) );
-	}
-
-	MMatchObject* pObj = GetObject(AllocUID);
-	if (pObj == NULL)
-	{
-		Disconnect(CommUID);
-		delete pJob->GetAccountInfo();
-		return;
-	}
-
-	pObj->AddCommListener(CommUID);
-	pObj->SetObjectType(MOT_PC);
-	memcpy(pObj->GetAccountInfo(), pAccountInfo, sizeof(MMatchAccountInfo));
-	pObj->SetFreeLoginIP(pJob->IsFreeLoginIP());
-	pObj->SetCountryCode3( pJob->GetCountryCode3() );
-
-
-	MCommObject* pCommObj = (MCommObject*)m_CommRefCache.GetRef(CommUID);
-	if (pCommObj != NULL)
-	{
-		pObj->SetPeerAddr(pCommObj->GetIP(), pCommObj->GetIPString(), pCommObj->GetPort());
-	}
-	
-	SetClientClockSynchronize(CommUID);
-
-	MCommand* pCmd = CreateCmdMatchResponseLoginOK(CommUID, AllocUID, pAccountInfo->m_szUserID, pAccountInfo->m_nUGrade, pAccountInfo->m_nPGrade);
-	Post(pCmd);	
-
-
-	// 접속 로그
-	MAsyncDBJob_InsertConnLog* pNewJob = new MAsyncDBJob_InsertConnLog();
-	pNewJob->Input(pObj->GetAccountInfo()->m_nAID, pObj->GetIPString(), pObj->GetCountryCode3() );
-	PostAsyncJob(pNewJob);
-
-#ifndef _DEBUG
-	// Client DataFile Checksum을 검사한다.
-	unsigned long nChecksum = pJob->GetChecksumPack() ^ CommUID.High ^ CommUID.Low;
-	if (nChecksum != GetItemFileChecksum()) {
-		LOG(LOG_ALL, "Invalid ZItemChecksum(%u) , UserID(%s) ", nChecksum, pObj->GetAccountInfo()->m_szUserID);
-		Disconnect(CommUID);
-	}
-#endif
-
-	delete pJob->GetAccountInfo();
-*/
-
 }
 
 void MMatchServer::OnAsyncGetAccountCharList(MAsyncJob* pJobResult)
@@ -250,7 +194,7 @@ void MMatchServer::OnAsyncGetAccountCharList(MAsyncJob* pJobResult)
 	MMatchObject* pObj = GetObject(pJob->GetUID());
 	if (pObj == NULL) return;
 	if (pJob->GetResultCommand() == NULL) return;
-	// Newbie인지 결정
+
 	pObj->CheckNewbie(pJob->GetCharMaxLevel());
 
 	RouteToListener(pObj, pJob->GetResultCommand());
@@ -290,10 +234,9 @@ void MMatchServer::OnAsyncGetCharInfo(MAsyncJob* pJobResult)
 
 	if (pObj->GetCharInfo())
 	{
-		// 이전에 캐릭이 선택되어 있었다면 캐릭끝날때 로그 남긴다
 		if (pObj->GetCharInfo()->m_nCID != 0)
 		{
-			CharFinalize(pObj->GetUID());		// 캐릭끝날때 디비 로그 등 처리
+			CharFinalize(pObj->GetUID());
 		}
 
 		pObj->FreeCharInfo();

@@ -96,26 +96,9 @@ DWORD WINAPI MAsyncProxy::WorkerThread(LPVOID pJobContext)
 
 void MAsyncProxy::OnRun()
 {
-	IDatabase& DatabaseMgr = *MGetMatchServer()->GetDBMgr();
-		
-	/*[&]()
-	{
-		if (MGetServerConfig()->GetDatabaseType() == DatabaseType::MSSQL)
-		{
-			auto& DatabaseMgr = *new MSSQLDatabase;
-
-			CString str = DatabaseMgr.BuildDSNString(MGetServerConfig()->GetDB_DNS(),
-				MGetServerConfig()->GetDB_UserName(),
-				MGetServerConfig()->GetDB_Password());
-			if (!DatabaseMgr.Connect(str))
-			{
-				char szLog[32];
-				sprintf_safe(szLog, "DBCONNECT FAILED ThreadID=%d \n", GetCurrentThreadId());
-				OutputDebugString(szLog);
-				MessageBox(NULL, szLog, "MatchServer DB Error", MB_OK);
-			}
-		}
-	};*/
+	//IDatabase& DatabaseMgr = *MGetMatchServer()->GetDBMgr();
+	DBVariant DatabaseMgr;
+	DatabaseMgr.Create(MGetServerConfig()->GetDatabaseType());
 
 	#define MASYNC_EVENTARRAY_SIZE	2
 	HANDLE EventArray[MASYNC_EVENTARRAY_SIZE];
