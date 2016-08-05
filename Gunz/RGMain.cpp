@@ -13,7 +13,7 @@
 #include "ZReplay.inl"
 #include "ZInput.h"
 
-RGMain *g_RGMain = nullptr;
+std::unique_ptr<RGMain> g_RGMain;
 
 void RGMain::OnAppCreate()
 {

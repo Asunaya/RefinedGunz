@@ -665,6 +665,12 @@ bool MMatchStage::StartGame()
 
 	BspObject = MGetMatchServer()->LagComp.GetBspObject(m_StageSetting.GetMapName());
 
+	if (!MGetServerConfig()->HasGameData() && GetStageSetting()->GetNetcode() == NetcodeType::ServerBased)
+	{
+		GetStageSetting()->SetNetcode(NetcodeType::P2PAntilead);
+		MGetMatchServer()->RouteToStage(GetUID(), MGetMatchServer()->CreateCmdResponseStageSetting(GetUID()));
+	}
+
 	return bResult;
 }
 
@@ -726,9 +732,6 @@ void MMatchStage::OnStartGame()
 	// 게임 시작 메세지를 보낸다.
 	if (GetStageType() == MST_NORMAL)
 		MMatchServer::GetInstance()->StageLaunch(GetUID());
-
-	if (!MGetServerConfig()->HasGameData() && GetStageSetting()->GetNetcode() == NetcodeType::ServerBased)
-		GetStageSetting()->SetNetcode(NetcodeType::P2PAntilead);
 }
 
 void MMatchStage::OnFinishGame()

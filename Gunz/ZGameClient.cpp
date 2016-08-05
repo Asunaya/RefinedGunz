@@ -511,7 +511,7 @@ void ZGameClient::OnChannelResponseRule(const MUID& uidchannel, const char* pszR
 
 void ZGameClient::OnStageEnterBattle(const MUID& uidChar, MCmdEnterBattleParam nParam, MTD_PeerListNode* pPeerNode)
 {	
-	//MLog("ZGameClient::OnStageEnterBattle -- Netcode: %d\n", GetMatchStageSetting()->GetNetcode());
+	DMLog("ZGameClient::OnStageEnterBattle -- Netcode: %d\n", GetMatchStageSetting()->GetNetcode());
 	// 이것은 ZGame 에서 불러준다
 	if (uidChar == GetPlayerUID())		// enter한사람이 나자신일 경우
 	{
@@ -1084,10 +1084,19 @@ void ZGameClient::OnResponseStageSetting(const MUID& uidStage, void* pStageBlob,
 	if (GetStageUID() != uidStage) return;
 	if (nStageCount <= 0 || nCharCount<=0) return;
 
+	// Stage setting
 	MSTAGE_SETTING_NODE* pNode = (MSTAGE_SETTING_NODE*)MGetBlobArrayElement(pStageBlob, 0);
+	
+	DMLog("ZGameClient::OnResponseStageSetting - Netcode = %d\n", pNode->Netcode);
+	PeerToPeer = pNode->Netcode != NetcodeType::ServerBased;
+
+	if (pNode->Netcode != NetcodeType::ServerBased
+		&& GetMatchStageSetting()->GetNetcode() == NetcodeType::ServerBased)
+		StartUDPTest(GetUID());
+
 	UpdateStageSetting(pNode, nStageState, uidMaster);
 
-	// Char Setting
+	// Character setting
 	m_MatchStageSetting.ResetCharSetting();
 	for(int i=0; i<nCharCount; i++){
 		MSTAGE_CHAR_SETTING_NODE* pCharSetting = (MSTAGE_CHAR_SETTING_NODE*)MGetBlobArrayElement(pCharBlob, i);

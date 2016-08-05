@@ -124,10 +124,7 @@ public:
 	MMatchStage();
 	virtual ~MMatchStage();
 
-	auto GetObjectList()
-	{
-		return MakePairValueAdapter(m_ObjUIDCaches);
-	}
+	auto GetObjectList() { return MakePairValueAdapter(m_ObjUIDCaches); }
 
 	bool Create(const MUID& uid, const char* pszName, bool bPrivate, const char* pszPassword);
 	void Destroy();

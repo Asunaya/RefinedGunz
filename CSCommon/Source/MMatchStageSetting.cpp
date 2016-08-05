@@ -37,6 +37,13 @@ void MMatchStageSetting::SetDefault()
 	m_StageSetting.bVoteEnabled = true;
 	m_StageSetting.bObserverEnabled = false;
 #endif
+
+	m_StageSetting.Netcode = NetcodeType::ServerBased;
+	m_StageSetting.ForceHPAP = true;
+	m_StageSetting.HP = 100;
+	m_StageSetting.AP = 100;
+	m_StageSetting.NoFlip = true;
+	m_StageSetting.SwordsOnly = false;
 }
 
 void MMatchStageSetting::SetMapName(const char* pszName)

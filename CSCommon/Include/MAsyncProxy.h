@@ -6,6 +6,8 @@
 
 #include <deque>
 #include <algorithm>
+#include <functional>
+#include <mutex>
 
 
 enum MASYNC_RESULT {
@@ -42,23 +44,6 @@ public:
 	void SetResult(MASYNC_RESULT nResult)	{ m_nResult = nResult; }
 
 	virtual void Run(void* pContext) = 0;
-};
-
-template <typename T>
-class MAsyncJob_Generic
-{
-public:
-	MAsyncJob_Generic(T&& fn)
-		: fn(std::forward<T>(fn))
-	{ }
-
-	virtual void Run(void*) override
-	{
-		fn();
-	}
-
-private:
-	T fn;
 };
 
 class MAsyncJobList final : private std::deque<MAsyncJob*> {
@@ -107,6 +92,9 @@ protected:
 	MAsyncJobList		m_WaitQueue;
 	MAsyncJobList		m_ResultQueue;
 
+	std::deque<std::function<void()>> GenericJobs;
+	std::mutex GenericJobMutex;
+
 	CRITICAL_SECTION	m_csCrashDump;
 	
 protected:
@@ -129,8 +117,8 @@ public:
 	template <typename T>
 	void PostJob(T&& fn)
 	{
-		auto* Job = new MAsyncJob_Generic<T>(std::forward<T>(fn));
-		PostJob(Job);
+		std::lock_guard<std::mutex> lock(GenericJobMutex);
+		GenericJobs.push_back(std::forward<T>(fn));
 	}
 	MAsyncJob* GetJobResult()	{
 		MAsyncJob* pJob = NULL;

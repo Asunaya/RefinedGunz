@@ -1224,7 +1224,7 @@ int PASCAL WinMain(HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline, int 
 	// StringRes먼저 로드하고 그다음에 Config을 로드한다.
 	ZGetConfiguration()->Load();
 
-	g_RGMain = new RGMain;
+	g_RGMain = std::make_unique<RGMain>();
 
 	ZStringResManager::MakeInstance();
 	if( !ZApplication::GetInstance()->InitLocale() )

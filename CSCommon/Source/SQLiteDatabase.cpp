@@ -40,7 +40,7 @@ struct ItemBlob
 SQLiteDatabase::SQLiteDatabase()
 	: sqlite("GunzDB.sq3")
 {
-	sqlite3_busy_timeout(sqlite, 1000);
+	sqlite3_busy_timeout(sqlite, 5000);
 	auto exec = [&](const char* sql)
 	{
 		char *err_msg = nullptr;

@@ -862,7 +862,8 @@ void MMatchServer::OnRun(void)
 		// Send ping list
 		for (auto Stage : MakePairValueAdapter(m_StageMap))
 		{
-			if (Stage->GetState() == STAGE_STATE_RUN)
+			if (Stage->GetState() == STAGE_STATE_RUN
+				&& Stage->GetStageSetting()->GetNetcode() == NetcodeType::ServerBased)
 			{
 				auto Command = CreateCommand(MC_MATCH_PING_LIST, MUID(0, 0));
 

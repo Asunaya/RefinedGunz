@@ -124,7 +124,7 @@ private:
 	HitboxManager m_HitboxManager;
 };
 
-extern RGMain* g_RGMain;
+extern std::unique_ptr<RGMain> g_RGMain;
 
 struct rgb
 {
