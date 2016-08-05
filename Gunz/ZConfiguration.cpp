@@ -933,8 +933,14 @@ bool ZConfiguration::SaveToFile(const char *szFileName, const char* szHeader)
 void ZConfiguration::Init()
 {
 	m_Video.bFullScreen = false;
-	m_Video.nWidth = 1024;
-	m_Video.nHeight = 768;
+	auto Width = GetSystemMetrics(SM_CXSCREEN);
+	if (Width == 0)
+		Width = 1024;
+	auto Height = GetSystemMetrics(SM_CYSCREEN);
+	if (Height == 0)
+		Height = 768;
+	m_Video.nWidth = Width;
+	m_Video.nHeight = Height;
 	m_Video.nColorBits = 32;
 	m_Video.nGamma = 255;
 	m_Video.bShader		= true;
