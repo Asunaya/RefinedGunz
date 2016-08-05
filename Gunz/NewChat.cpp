@@ -57,9 +57,11 @@ void Chat::Create(const std::string &strFont, int nFontSize){
 	Cursor.y = RGetScreenHeight() / 2;
 
 	pFont = std::make_unique<MFontR2>();
-	pFont->Create("NewChatFont", strFont.c_str(), int(float(nFontSize) / 1080 * RGetScreenHeight() + 0.5), 1, true);
+	pFont->Create("NewChatFont", strFont.c_str(),
+		int(float(nFontSize) / 1080 * RGetScreenHeight() + 0.5), 1, true);
 	pItalicFont = std::make_unique<MFontR2>();
-	pItalicFont->Create("NewChatItalicFont", strFont.c_str(), int(float(nFontSize) / 1080 * RGetScreenHeight() + 0.5), 1, true, true);
+	pItalicFont->Create("NewChatItalicFont", strFont.c_str(),
+		int(float(nFontSize) / 1080 * RGetScreenHeight() + 0.5), 1, true, true);
 
 	nFontHeight = pFont->GetHeight();
 
@@ -245,12 +247,17 @@ void Chat::Scale(double fWidthRatio, double fHeightRatio){
 	Border.y1 *= fHeightRatio;
 	Border.y2 *= fHeightRatio;
 
-	nFontSize *= fHeightRatio;
+	//nFontSize *= fHeightRatio;
 	ResetFonts();
 }
 
 void Chat::Resize(int nWidth, int nHeight)
 {
+	Border.x1 = 10;
+	Border.y1 = double(1080 - 300) / 1080 * RGetScreenHeight();
+	Border.x2 = (double)500 / 1920 * RGetScreenWidth();
+	Border.y2 = double(1080 - 100) / 1080 * RGetScreenHeight();
+
 	ResetFonts();
 }
 
@@ -1229,6 +1236,13 @@ void Chat::ResetFonts(){
 	SafeDestroy(pFont.get());
 	SafeDestroy(pItalicFont.get());
 
-	pFont->Create("NewChatFont", strFont.c_str(), int(float(nFontSize) / 1080 * RGetScreenHeight() + 0.5), 1, true);
-	pItalicFont->Create("NewChatItalicFont", strFont.c_str(), int(float(nFontSize) / 1080 * RGetScreenHeight() + 0.5), 1, true, true);
+	char buf[64];
+	sprintf_safe(buf, "Font size: %d\n", int(float(nFontSize) / 1080 * RGetScreenHeight() + 0.5));
+	OutputDebugString(buf);
+	pFont->Create("NewChatFont", strFont.c_str(),
+		int(float(nFontSize) / 1080 * RGetScreenHeight() + 0.5), 1, true);
+	pItalicFont->Create("NewChatItalicFont", strFont.c_str(),
+		int(float(nFontSize) / 1080 * RGetScreenHeight() + 0.5), 1, true, true);
+
+	nFontHeight = pFont->GetHeight();
 }

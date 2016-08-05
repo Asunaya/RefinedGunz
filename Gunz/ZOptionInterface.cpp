@@ -1373,7 +1373,8 @@ void ZOptionInterface::Resize(int w, int h)
 	ResizeWidget("MonsterBook", w, h);
 	ResizeWidget("CombatTDMInfo", w, h);
 
-	if (ZGetCombatInterface()) ZGetCombatInterface()->Resize(w, h);
+	if (ZGetCombatInterface())
+		ZGetCombatInterface()->Resize(w, h);
 
 	g_Chat.Resize(w, h);
 }
@@ -1394,7 +1395,6 @@ void ZOptionInterface::GetOldScreenResolution()
 	Mint::GetInstance()->SetWorkspaceSize(ModeParams.nWidth, ModeParams.nHeight);
 	Mint::GetInstance()->GetMainFrame()->SetSize(ModeParams.nWidth, ModeParams.nHeight);
 	Resize(ModeParams.nWidth, ModeParams.nHeight);
-	g_Chat.Scale(double(RGetScreenWidth()) / mOldScreenWidth, double(RGetScreenHeight()) / mOldScreenHeight);
 
 	D3DDISPLAYMODE ddm;
 	ddm.Width = ModeParams.nWidth;
@@ -1460,7 +1460,6 @@ bool ZOptionInterface::TestScreenResolution()
 		Mint::GetInstance()->SetWorkspaceSize(ModeParams.nWidth, ModeParams.nHeight);
 		Mint::GetInstance()->GetMainFrame()->SetSize(ModeParams.nWidth, ModeParams.nHeight);
 		Resize(ModeParams.nWidth, ModeParams.nHeight);
-		g_Chat.Scale(double(RGetScreenWidth()) / mOldScreenWidth, double(RGetScreenHeight()) / mOldScreenHeight);
 	}
 	return true;
 }
