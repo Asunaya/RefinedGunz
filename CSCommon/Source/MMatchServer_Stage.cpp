@@ -955,13 +955,13 @@ void MMatchServer::OnStageSetting(const MUID& uidPlayer, const MUID& uidStage, v
 		if (!IsAdminGrade(pObjMaster)) return;
 	}
 
+	auto* pNode = static_cast<MSTAGE_SETTING_NODE*>(MGetBlobArrayElement(pStageBlob, 0));
 
-	MSTAGE_SETTING_NODE* pNode = (MSTAGE_SETTING_NODE*)MGetBlobArrayElement(pStageBlob, 0);
+	if (!MGetServerConfig()->HasGameData() && pNode->Netcode == NetcodeType::ServerBased)
+		pNode->Netcode = NetcodeType::P2PAntilead;
 
 	if (IsSwordsOnly(pNode->nGameType) || pNode->SwordsOnly)
-	{
 		pNode->Netcode = NetcodeType::P2PLead;
-	}
 
 	MMatchStageSetting* pSetting = pStage->GetStageSetting();
 	MMatchChannel* pChannel = FindChannel(pStage->GetOwnerChannel());
