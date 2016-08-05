@@ -1,6 +1,9 @@
 #pragma once
 
 #include "IDatabase.h"
+#include "MDatabase.h"
+#include "MCountryFilterDBMgr.h"
+#include "MMatchDBFilter.h"
 
 class MSSQLDatabase final : public IDatabase
 {
@@ -133,8 +136,7 @@ public:
 	//// Clan ////
 	template<size_t size>
 	bool GetCharClan(int nCID, int* poutClanID, char(&poutClanName)[size]) {
-		return GetCharClan(nCID, poutClanID, poutClanName, size);
-	}
+		return GetCharClan(nCID, poutClanID, poutClanName, size); }
 	virtual bool GetCharClan(int nCID, int* poutClanID, char* poutClanName, int maxlen) override;
 	virtual bool GetClanIDFromName(const char* szClanName, int* poutCLID) override;
 	virtual bool CreateClan(const char* szClanName, int nMasterCID, int nMember1CID, int nMember2CID,
@@ -147,7 +149,7 @@ public:
 	virtual bool AddClanMember(int nCLID, int nJoinerCID, int nClanGrade, bool* boutRet) override;
 	virtual bool RemoveClanMember(int nCLID, int nLeaverCID) override;
 	virtual bool UpdateClanGrade(int nCLID, int nMemberCID, int nClanGrade) override;
-	virtual bool ExpelClanMember(int nCLID, int nAdminGrade, char* szMember, int* noutRet) override;
+	virtual ExpelResult ExpelClanMember(int nCLID, int nAdminGrade, const char* szMember) override;
 	virtual bool GetClanInfo(int nCLID, MDB_ClanInfo* poutClanInfo) override;
 	virtual bool UpdateCharClanContPoint(int nCID, int nCLID, int nAddedContPoint) override;
 
@@ -157,7 +159,8 @@ public:
 		int* pnoutTID) override;
 	virtual bool LadderTeamWinTheGame(int nTeamTableIndex, int nWinnerTID, int nLoserTID,
 		bool bIsDrawGame, int nWinnerPoint, int nLoserPoint, int nDrawPoint) override;
-	virtual bool GetLadderTeamMemberByCID(const int nCID, int* poutTeamID, char** ppoutCharArray, int maxlen, int nCount) override;
+	virtual bool GetLadderTeamMemberByCID(const int nCID, int* poutTeamID, char** ppoutCharArray,
+		int maxlen, int nCount) override;
 
 
 	virtual bool WinTheClanGame(int nWinnerCLID, int nLoserCLID, bool bIsDrawGame,

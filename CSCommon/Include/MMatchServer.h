@@ -1,7 +1,6 @@
  #ifndef MMATCHSERVER_H
 #define MMATCHSERVER_H
 
-#include "MMatchDBMgr.h"
 #include "winsock2.h"
 #include "MXml.h"
 #include "MServer.h"

@@ -345,8 +345,8 @@ void MAsyncDBJob_ExpelClanMember::Run(void* pContext)
 {
 	auto* pDBMgr = static_cast<IDatabase*>(pContext);
 
-	// 실제로 디비상에서 권한 변경
-	if (!pDBMgr->ExpelClanMember(m_nCLID, m_nClanGrade, m_szTarMember, &m_nDBResult))
+	DBResult = pDBMgr->ExpelClanMember(m_nCLID, m_nClanGrade, m_szTarMember);
+	if (DBResult != ExpelResult::OK)
 	{
 		SetResult(MASYNC_RESULT_FAILED);
 		return;
@@ -479,7 +479,7 @@ void MAsyncDBJob_InsertQuestGameLog::Run( void* pContext )
 				{
 					if( !pDBMgr->InsertQUniqueGameLog(nQGLID, nCID, nQIID) )
 					{
-						mlog( "MAsyncDBJob_InsertQuestGameLog::Run - 유니크 아이템 로그 저장 실패. CID:%d QIID:%d\n", 
+						mlog( "MAsyncDBJob_InsertQuestGameLog::Run - InsertQUniqueGameLog failed. CID = %d, QIID = %d\n", 
 							nCID, nQIID );
 
 						SetResult(MASYNC_RESULT_FAILED);
@@ -530,7 +530,7 @@ void MAsyncDBJob_UpdateQuestItemInfo::Run( void* pContext )
 	{
 		if( m_QuestItemList.IsDoneDbAccess() )
 		{
-			MMatchDBMgr* pDBMgr = reinterpret_cast< MMatchDBMgr* >( pContext );
+			auto* pDBMgr = static_cast<IDatabase*>( pContext );
 			if( !pDBMgr->UpdateQuestItem(m_nCID, m_QuestItemList, m_QuestMonster) )
 			{
 				SetResult( MASYNC_RESULT_FAILED );
@@ -564,7 +564,7 @@ bool MAsyncDBJob_SetBlockAccount::Input( const DWORD dwAID,
 
 void MAsyncDBJob_SetBlockAccount::Run( void* pContext )
 {
-	MMatchDBMgr* pDBMgr = reinterpret_cast< MMatchDBMgr* >( pContext );
+	auto* pDBMgr = static_cast<IDatabase*>( pContext );
 	
 	if( MMBL_ACCOUNT == m_btBlockLevel )
 	{
@@ -598,7 +598,7 @@ bool MAsyncDBJob_ResetAccountBlock::Input( const DWORD dwAID, const BYTE btBlock
 
 void MAsyncDBJob_ResetAccountBlock::Run( void* pContext )
 {
-	MMatchDBMgr* pDBMgr = reinterpret_cast< MMatchDBMgr* >( pContext );
+	auto* pDBMgr = static_cast<IDatabase*>( pContext );
 
 	if( !pDBMgr->ResetAccountBlock(m_dwAID, m_btBlockType) )
 	{

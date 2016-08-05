@@ -331,9 +331,6 @@
     <ClInclude Include="Include\MMatchDBFilter.h">
       <Filter>MatchServer\DB</Filter>
     </ClInclude>
-    <ClInclude Include="Include\MMatchDBMgr.h">
-      <Filter>MatchServer\DB</Filter>
-    </ClInclude>
     <ClInclude Include="Include\MMatchAdmin.h">
       <Filter>MatchServer\Server</Filter>
     </ClInclude>
@@ -687,9 +684,6 @@
       <Filter>MatchServer\Object</Filter>
     </ClCompile>
     <ClCompile Include="Source\MMatchDBFilter.cpp">
-      <Filter>MatchServer\DB</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\MMatchDBMgr.cpp">
       <Filter>MatchServer\DB</Filter>
     </ClCompile>
     <ClCompile Include="Source\MMatchAdmin.cpp">

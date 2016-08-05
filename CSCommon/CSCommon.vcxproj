@@ -326,7 +326,6 @@
     <ClInclude Include="Include\MMatchObjCache.h" />
     <ClInclude Include="Include\MMatchObject.h" />
     <ClInclude Include="Include\MMatchDBFilter.h" />
-    <ClInclude Include="Include\MMatchDBMgr.h" />
     <ClInclude Include="Include\MMatchAdmin.h" />
     <ClInclude Include="Include\MMatchChannel.h" />
     <ClInclude Include="Include\MMatchChatRoom.h" />
@@ -454,7 +453,6 @@
     <ClCompile Include="Source\MMatchObjCache.cpp" />
     <ClCompile Include="Source\MMatchObject.cpp" />
     <ClCompile Include="Source\MMatchDBFilter.cpp" />
-    <ClCompile Include="Source\MMatchDBMgr.cpp" />
     <ClCompile Include="Source\MMatchAdmin.cpp" />
     <ClCompile Include="Source\MMatchChannel.cpp" />
     <ClCompile Include="Source\MMatchChatRoom.cpp" />

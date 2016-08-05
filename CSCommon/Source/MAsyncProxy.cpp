@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#include "MMatchDBMgr.h"
 #include <windows.h>
 #include <Mmsystem.h>
 #include "MAsyncProxy.h"
@@ -12,12 +11,7 @@
 MAsyncProxy::MAsyncProxy()
 {
 	m_nThreadCount = 0;
-	BYTE nInitVal = -1; //(BYTE)(INVALID_HANDLE_VALUE);
-	FillMemory(m_ThreadPool, sizeof(HANDLE) * MAX_THREADPOOL_COUNT, nInitVal);
-}
-
-MAsyncProxy::~MAsyncProxy()
-{
+	std::fill(std::begin(m_ThreadPool), std::end(m_ThreadPool), INVALID_HANDLE_VALUE);
 }
 
 bool MAsyncProxy::Create(int nThreadCount)

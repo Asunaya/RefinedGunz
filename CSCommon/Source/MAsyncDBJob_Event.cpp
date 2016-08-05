@@ -17,7 +17,7 @@ bool MAsyncDBJob_ProbabiltyEventPerTime::Input( AsyncEventObjVec& vEventObj, con
 
 void MAsyncDBJob_ProbabiltyEventPerTime::Run( void* pContext )
 {
-	MMatchDBMgr* pDBMgr = reinterpret_cast< MMatchDBMgr* >( pContext );
+	auto* pDBMgr = static_cast<IDatabase*>(pContext);
 	if( 0 == pDBMgr ) 
 	{
 		SetResult(MASYNC_RESULT_FAILED);

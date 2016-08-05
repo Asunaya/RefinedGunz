@@ -288,7 +288,7 @@ rem call copy_share.bat
     </ClCompile>
     <Link>
       <AdditionalOptions>/ignore:4099 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>../CML/Lib/zlib.lib;fmodvc.lib;../sdk/libsodium/lib/static/libsodium.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>../CML/Lib/zlib.lib;fmodvc.lib;../sdk/libsodium/lib/static/libsodium.lib;legacy_stdio_definitions.lib;../sdk/sqlite/lib/Release/sqlite.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)Gunz.exe</OutputFile>
       <AdditionalLibraryDirectories>../sdk/dx9/lib;../RealSound/Lib;Lib;../sdk/opus/lib/Release;../sdk/portaudio/lib/Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>libc.lib;libci.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>

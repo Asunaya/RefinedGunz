@@ -979,11 +979,11 @@ void ZConfiguration::Init()
 	m_bOptimization = false;
 	
 	memset(m_szServerIP, 0, sizeof(m_szServerIP));
-	strcpy_safe(m_szServerIP, "0.0.0.0");
+	strcpy_safe(m_szServerIP, "127.0.0.1");
 	m_nServerPort = 6000;
 	strcpy_safe(m_szInterfaceSkinName, DEFAULT_INTERFACE_SKIN);
 
-	LoadDefaultKeySetting();	
+	LoadDefaultKeySetting();
 
 
 

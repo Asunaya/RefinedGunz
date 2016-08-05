@@ -2168,10 +2168,10 @@ bool MSSQLDatabase::UpdateClanGrade(const int nCLID, const int nMemberCID, const
 
 }
 
-bool MSSQLDatabase::ExpelClanMember(const int nCLID, const int nAdminGrade, TCHAR* szMember, int* noutRet)
+ExpelResult MSSQLDatabase::ExpelClanMember(const int nCLID, const int nAdminGrade, const char* szMember)
 {
 	_STATUS_DB_START
-		if (!CheckOpen()) return false;
+		if (!CheckOpen()) return ExpelResult::DBError;
 
 	auto temp = m_DBFilter.Filtering(szMember);
 
@@ -2179,13 +2179,6 @@ bool MSSQLDatabase::ExpelClanMember(const int nCLID, const int nAdminGrade, TCHA
 	strSQL.Format(g_szDB_EXPEL_CLAN_MEMBER, nCLID, nAdminGrade, temp.c_str());
 
 	CODBCRecordset rs(&m_DB);
-
-	enum _EXPEL_RETURN
-	{
-		ER_OK = 1,		// 성공
-		ER_NO_MEMBER = 0,		// 해당 클랜원이 없다
-		ER_WRONG_GRADE = 2		// 권한이 맞지 않다.
-	};
 
 	bool bException = false;
 	try
@@ -2197,22 +2190,34 @@ bool MSSQLDatabase::ExpelClanMember(const int nCLID, const int nAdminGrade, TCHA
 		bException = true;
 		Log("MSSQLDatabase::ExpelClanMember - %s\n", e->m_strError);
 
-		*noutRet = ER_NO_MEMBER;
-		return false;
+		return ExpelResult::DBError;
 	}
 
 	if ((rs.IsOpen() == FALSE) || (rs.GetRecordCount() <= 0) || (rs.IsBOF() == TRUE))
-	{
-		*noutRet = ER_NO_MEMBER;
-		return false;
-	}
-
-	*noutRet = rs.Field("Ret").AsInt();
-
-	/* Ret값 설명 : 1 - 성공, 0 - 해당클랜원이 없다. , 2 - 권한이 맞지 않다. */
+		return ExpelResult::NoSuchMember;
 
 	_STATUS_DB_END(40);
-	return true;
+	
+	/*
+	enum _EXPEL_RETURN
+	{
+		ER_OK = 1,
+		ER_NO_MEMBER = 0,
+		ER_WRONG_GRADE = 2
+	};
+	*/
+	ExpelResult DBReturnMap[] = { ExpelResult::NoSuchMember, ExpelResult::OK,
+		ExpelResult::TooLowGrade, ExpelResult::DBError };
+
+	auto DBReturn = rs.Field("Ret").AsInt();
+
+	if (DBReturn < 0 || DBReturn >= static_cast<int>(ArraySize(DBReturnMap)))
+	{
+		Log("MSSQLDatabase::ExpelClanMember - unknown return value %d from DB\n", DBReturn);
+		return ExpelResult::DBError;
+	}
+
+	return DBReturnMap[DBReturn];
 }
 
 

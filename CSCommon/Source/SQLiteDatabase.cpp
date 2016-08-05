@@ -1280,7 +1280,7 @@ catch (const SQLiteError& e)
 	return false;
 }
 
-bool SQLiteDatabase::ExpelClanMember(int CLID, int AdminGrade, char * MemberName, int * outRet)
+ExpelResult SQLiteDatabase::ExpelClanMember(int CLID, int AdminGrade, const char * MemberName)
 try
 {
 	auto stmt = ExecuteSQL("SELECT c.cid, cm.Grade FROM Character c, ClanMember cm \
@@ -1288,36 +1288,25 @@ try
 		CLID, MemberName);
 
 	if (!stmt.HasRow())
-	{
-		*outRet = 0;
-		return false;
-	}
+		return ExpelResult::NoSuchMember;
 
 	if (stmt.IsNull())
-	{
-		*outRet = 0;
-		return false;
-	}
+		return ExpelResult::NoSuchMember;
 
 	auto CID = stmt.Get<int>();
 	auto Grade = stmt.Get<int>();
 
 	if (Grade >= AdminGrade)
-	{
-		*outRet = 2;
-		return false;
-	}
+		return ExpelResult::TooLowGrade;
 
 	ExecuteSQL("DELETE FROM ClanMember WHERE CLID = ? AND CID = ? AND Grade != 1", CLID, CID);
 
-	*outRet = 1;
-	return true;
+	return ExpelResult::OK;
 }
 catch (const SQLiteError& e)
 {
 	HandleException(e);
-	*outRet = 3;
-	return false;
+	return ExpelResult::DBError;
 }
 
 bool SQLiteDatabase::GetClanInfo(int CLID, MDB_ClanInfo * outClanInfo)

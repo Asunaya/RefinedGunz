@@ -3,7 +3,6 @@
 #include "MMatchServer.h"
 #include "MMatchObject.h"
 #include "MSmartRefreshImpl.h"
-#include "MMatchDBMgr.h"
 #include "MDebug.h"
 #include "MMatchUtil.h"
 

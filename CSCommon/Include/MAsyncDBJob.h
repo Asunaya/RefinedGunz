@@ -312,9 +312,9 @@ protected: // Input Argument
 	char		m_szTarMember[256]; 
 
 protected:	// Output Result
-	int			m_nDBResult;
+	ExpelResult	DBResult;
 public:
-	MAsyncDBJob_ExpelClanMember()	: MAsyncJob(MASYNCJOB_EXPELCLANMEMBER), m_nDBResult(0)
+	MAsyncDBJob_ExpelClanMember()	: MAsyncJob(MASYNCJOB_EXPELCLANMEMBER), DBResult(ExpelResult::OK)
 	{
 	
 	}
@@ -322,7 +322,7 @@ public:
 	bool Input(const MUID& uidAdmin, int nCLID, int nClanGrade, const char* szTarMember);
 	virtual void Run(void* pContext);
 
-	int GetDBResult() { return m_nDBResult; }
+	auto GetDBResult() { return DBResult; }
 	const MUID& GetAdminUID() { return m_uidAdmin; }
 	const char* GetTarMember() { return m_szTarMember; }
 };

@@ -30,6 +30,14 @@ enum class CharMakingType
 	Delete,
 };
 
+enum class ExpelResult
+{
+	OK,
+	NoSuchMember,
+	TooLowGrade,
+	DBError,
+};
+
 struct MDB_ClanInfo
 {
 	int		nCLID;
@@ -188,7 +196,7 @@ public:
 	virtual bool AddClanMember(int nCLID, int nJoinerCID, int nClanGrade, bool* boutRet) = 0;
 	virtual bool RemoveClanMember(int nCLID, int nLeaverCID) = 0;
 	virtual bool UpdateClanGrade(int nCLID, int nMemberCID, int nClanGrade) = 0;
-	virtual bool ExpelClanMember(int nCLID, int nAdminGrade, char* szMember, int* noutRet) = 0;
+	virtual ExpelResult ExpelClanMember(int nCLID, int nAdminGrade, const char* szMember) = 0;
 	virtual bool GetClanInfo(int nCLID, MDB_ClanInfo* poutClanInfo) = 0;
 	virtual bool UpdateCharClanContPoint(int nCID, int nCLID, int nAddedContPoint) = 0;
 

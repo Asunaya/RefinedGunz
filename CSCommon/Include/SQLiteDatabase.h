@@ -425,7 +425,7 @@ public:
 	virtual bool AddClanMember(int nCLID, int nJoinerCID, int nClanGrade, bool* boutRet) override;
 	virtual bool RemoveClanMember(int nCLID, int nLeaverCID) override;
 	virtual bool UpdateClanGrade(int nCLID, int nMemberCID, int nClanGrade) override;
-	virtual bool ExpelClanMember(int nCLID, int nAdminGrade, char* szMember, int* noutRet) override;
+	virtual ExpelResult ExpelClanMember(int CLID, int AdminGrade, const char* Member) override;
 	virtual bool GetClanInfo(int nCLID, MDB_ClanInfo* poutClanInfo) override;
 	virtual bool UpdateCharClanContPoint(int nCID, int nCLID, int nAddedContPoint) override;
 

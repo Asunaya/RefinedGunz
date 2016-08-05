@@ -512,54 +512,35 @@ void MMatchServer::OnAsyncCreateClan(MAsyncJob* pJobResult)
 
 void MMatchServer::OnAsyncExpelClanMember(MAsyncJob* pJobResult)
 {
-	MAsyncDBJob_ExpelClanMember* pJob = (MAsyncDBJob_ExpelClanMember*)pJobResult;
+	auto* pJob = static_cast<MAsyncDBJob_ExpelClanMember*>(pJobResult);
 
 	MMatchObject* pAdminObject = GetObject(pJob->GetAdminUID());
 
-	if (pJobResult->GetResult() != MASYNC_RESULT_SUCCEED) 
-	{
-		if (IsEnabledObject(pAdminObject))
-		{
-			RouteResponseToListener(pAdminObject, MC_MATCH_CLAN_ADMIN_RESPONSE_EXPEL_MEMBER, MERR_CLAN_CANNOT_EXPEL_FOR_NO_MEMBER);
-		}
-		return;
-	}		
+	int ErrCode = MERR_UNKNOWN;
 
-	int nDBRet = pJob->GetDBResult();
-	switch (nDBRet)
+	switch (pJob->GetDBResult())
 	{
-	case MMatchDBMgr::ER_NO_MEMBER:
-		{
-			if (IsEnabledObject(pAdminObject))
-			{
-				RouteResponseToListener(pAdminObject, MC_MATCH_CLAN_ADMIN_RESPONSE_EXPEL_MEMBER, MERR_CLAN_CANNOT_EXPEL_FOR_NO_MEMBER);
-			}
-			return;
-		}
+	case ExpelResult::OK:
+		ErrCode = MERR_UNKNOWN;
 		break;
-	case MMatchDBMgr::ER_WRONG_GRADE:
-		{
-			if (IsEnabledObject(pAdminObject))
-			{
-				RouteResponseToListener(pAdminObject, MC_MATCH_CLAN_ADMIN_RESPONSE_EXPEL_MEMBER, MERR_CLAN_CANNOT_CHANGE_GRADE);
-			}
-			return;
-		}
+	case ExpelResult::NoSuchMember:
+		ErrCode = MERR_CLAN_CANNOT_EXPEL_FOR_NO_MEMBER;
 		break;
+	case ExpelResult::TooLowGrade:
+		ErrCode = MERR_CLAN_CANNOT_CHANGE_GRADE;
+		break;
+	default:
+		ErrCode = MERR_UNKNOWN;
+		return;
+	break;
 	}
 
-
-	// 만약 당사자가 접속해있으면 클랜탈퇴되었다고 알려줘야한다.
 	MMatchObject* pMemberObject = GetPlayerByName(pJob->GetTarMember());
 	if (IsEnabledObject(pMemberObject))
-	{
 		UpdateCharClanInfo(pMemberObject, 0, "", MCG_NONE);
-	}
 
 	if (IsEnabledObject(pAdminObject))
-	{
-		RouteResponseToListener(pAdminObject, MC_MATCH_CLAN_ADMIN_RESPONSE_EXPEL_MEMBER, MOK);
-	}
+		RouteResponseToListener(pAdminObject, MC_MATCH_CLAN_ADMIN_RESPONSE_EXPEL_MEMBER, ErrCode);
 }
 
 

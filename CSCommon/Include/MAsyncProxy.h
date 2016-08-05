@@ -81,7 +81,7 @@ public:
 
 #define MAX_THREADPOOL_COUNT 10
 
-class MAsyncProxy {
+class MAsyncProxy final {
 protected:
 	HANDLE				m_hEventShutdown;
 	HANDLE				m_hEventFetchJob;
@@ -106,7 +106,6 @@ protected:
 
 public:
 	MAsyncProxy();
-	virtual ~MAsyncProxy();
 	bool Create(int nThreadCount);
 	void Destroy();
 	
@@ -118,7 +117,7 @@ public:
 	void PostJob(T&& fn)
 	{
 		std::lock_guard<std::mutex> lock(GenericJobMutex);
-		GenericJobs.push_back(std::forward<T>(fn));
+		GenericJobs.emplace_back(std::forward<T>(fn));
 	}
 	MAsyncJob* GetJobResult()	{
 		MAsyncJob* pJob = NULL;

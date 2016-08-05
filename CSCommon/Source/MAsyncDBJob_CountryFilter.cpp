@@ -8,7 +8,7 @@ void MAsyncDBJob_UpdateIPtoCountryList::Run( void* pContext )
 	if( 0 == pMatchServer ) 
 		return;
 
-	MMatchDBMgr* pDBMgr = reinterpret_cast< MMatchDBMgr* >( pContext );
+	auto* pDBMgr = static_cast<IDatabase*>(pContext);
 	if( 0 == pDBMgr ) 
 		return;
 
@@ -28,7 +28,7 @@ void MAsyncDBJob_UpdateBlockCountryCodeList::Run( void* pContext )
 	if( 0 == pMatchServer ) 
 		return;
 
-	MMatchDBMgr* pDBMgr = reinterpret_cast< MMatchDBMgr* >( pContext );
+	auto* pDBMgr = static_cast<IDatabase*>(pContext);
 	if( 0 == pDBMgr ) 
 		return;
 
@@ -48,7 +48,7 @@ void MAsyncDBJob_UpdateCustomIPList::Run( void* pContext )
 	if( 0 == pMatchServer ) 
 		return;
 
-	MMatchDBMgr* pDBMgr = reinterpret_cast< MMatchDBMgr* >( pContext );
+	auto* pDBMgr = static_cast<IDatabase*>(pContext);
 	if( 0 == pDBMgr ) 
 		return;
 
