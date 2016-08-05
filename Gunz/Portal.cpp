@@ -61,37 +61,37 @@ Portal::Portal() : ValidPortals(PortalList)
 	pRectangleMesh->LockVertexBuffer(0, (void**)&pSrc);
 
 	//left bottom point
-	((D3DVERTEX*)pSrc)[0].p.x = -100;
-	((D3DVERTEX*)pSrc)[0].p.y = -150;
-	((D3DVERTEX*)pSrc)[0].p.z = 0;
+	pSrc[0].p.x = -100;
+	pSrc[0].p.y = -150;
+	pSrc[0].p.z = 0;
 
 	//left top point
-	((D3DVERTEX*)pSrc)[1].p.x = -100;
-	((D3DVERTEX*)pSrc)[1].p.y = 150;
-	((D3DVERTEX*)pSrc)[1].p.z = 0;
+	pSrc[1].p.x = -100;
+	pSrc[1].p.y = 150;
+	pSrc[1].p.z = 0;
 
 	//right top point
-	((D3DVERTEX*)pSrc)[2].p.x = 100;
-	((D3DVERTEX*)pSrc)[2].p.y = 150;
-	((D3DVERTEX*)pSrc)[2].p.z = 0;
+	pSrc[2].p.x = 100;
+	pSrc[2].p.y = 150;
+	pSrc[2].p.z = 0;
 
 	//right bottom point
-	((D3DVERTEX*)pSrc)[3].p.x = 100;
-	((D3DVERTEX*)pSrc)[3].p.y = -150;
-	((D3DVERTEX*)pSrc)[3].p.z = 0;
+	pSrc[3].p.x = 100;
+	pSrc[3].p.y = -150;
+	pSrc[3].p.z = 0;
 
 
-	((D3DVERTEX*)pSrc)[0].tu = 0;
-	((D3DVERTEX*)pSrc)[0].tv = 0;
+	pSrc[0].tu = 0;
+	pSrc[0].tv = 0;
 
-	((D3DVERTEX*)pSrc)[1].tu = 0;
-	((D3DVERTEX*)pSrc)[1].tv = 1;
+	pSrc[1].tu = 0;
+	pSrc[1].tv = 1;
 
-	((D3DVERTEX*)pSrc)[2].tu = 1;
-	((D3DVERTEX*)pSrc)[2].tv = 1;
+	pSrc[2].tu = 1;
+	pSrc[2].tv = 1;
 
-	((D3DVERTEX*)pSrc)[3].tu = 1;
-	((D3DVERTEX*)pSrc)[3].tv = 0;
+	pSrc[3].tu = 1;
+	pSrc[3].tv = 0;
 
 	pRectangleMesh->UnlockVertexBuffer();
 
@@ -397,172 +397,6 @@ void Portal::RenderWorld()
 }
 #endif
 
-//void Portal::RenderWorldStencil(const PortalContext* Contexts, size_t NumContexts)
-//{
-//	if (!bPortalSetExists)
-//		return;
-//
-//	D3DXMATRIX mOrigWorld, mOrigView, mOrigProjection;
-//	rplane OrigViewFrustum[6];
-//
-//	RGetDevice()->GetTransform(D3DTS_WORLD, &mOrigWorld);
-//	RGetDevice()->GetTransform(D3DTS_VIEW, &mOrigView);
-//	RGetDevice()->GetTransform(D3DTS_PROJECTION, &mOrigProjection);
-//
-//	memcpy(OrigViewFrustum, RViewFrustum, sizeof(OrigViewFrustum));
-//
-//	RGetDevice()->SetRenderState(D3DRS_STENCILENABLE, TRUE);
-//
-//	for (size_t ctx = 0; ctx < NumContexts; ctx++)
-//	{
-//		const auto & Context = Contexts[ctx];
-//		const auto & pair = Context.pi;
-//
-//		for (int i = 0; i < 2; i++)
-//		{
-//			if (!Context.IsVisible[i])
-//				continue;
-//
-//			RGetDevice()->Clear(0, NULL, D3DCLEAR_STENCIL, 0x00000000, 1.0f, 0);
-//
-//			if (i == 1)
-//			{
-//				RGetDevice()->SetTransform(D3DTS_VIEW, &mOrigView);
-//				RGetDevice()->SetTransform(D3DTS_PROJECTION, &mOrigProjection);
-//			}
-//
-//			// Write black texture
-//			RGetDevice()->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
-//			RGetDevice()->SetRenderState(D3DRS_ZENABLE, TRUE);
-//			RGetDevice()->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
-//			RGetDevice()->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
-//			RGetDevice()->SetRenderState(D3DRS_STENCILENABLE, FALSE);
-//
-//			RGetDevice()->SetTransform(D3DTS_WORLD, &portalinfo[i].get().matWorld);
-//
-//			RGetDevice()->SetFVF(pEdgeMesh->GetFVF());
-//			RGetDevice()->SetVertexShader(NULL);
-//			RGetDevice()->SetTexture(0, BlackTex);
-//
-//			RGetDevice()->SetMaterial(&Mat);
-//
-//			pEdgeMesh->DrawSubset(0);
-//
-//			// Write portal area to depth buffer, but not color buffer
-//			// Don't write to anywhere but the portal area
-//			RGetDevice()->SetRenderState(D3DRS_STENCILENABLE, TRUE);
-//			RGetDevice()->SetRenderState(D3DRS_STENCILREF, 0);
-//			RGetDevice()->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_NEVER);
-//			RGetDevice()->SetRenderState(D3DRS_STENCILZFAIL, D3DSTENCILOP_KEEP);
-//			RGetDevice()->SetRenderState(D3DRS_STENCILFAIL, D3DSTENCILOP_INCR);
-//			RGetDevice()->SetRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_KEEP);
-//			RGetDevice()->SetRenderState(D3DRS_COLORWRITEENABLE, 0);
-//			RGetDevice()->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
-//
-//			pEdgeMesh->DrawSubset(0);
-//
-//			RGetDevice()->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
-//			RGetDevice()->SetRenderState(D3DRS_COLORWRITEENABLE, D3DCOLORWRITEENABLE_ALPHA | D3DCOLORWRITEENABLE_RED | D3DCOLORWRITEENABLE_GREEN | D3DCOLORWRITEENABLE_BLUE);
-//			RGetDevice()->SetRenderState(D3DRS_STENCILREF, 1);
-//			RGetDevice()->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_LESSEQUAL);
-//			RGetDevice()->SetRenderState(D3DRS_STENCILZFAIL, D3DSTENCILOP_KEEP);
-//			RGetDevice()->SetRenderState(D3DRS_STENCILFAIL, D3DSTENCILOP_KEEP);
-//			RGetDevice()->SetRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_KEEP);
-//			RGetDevice()->SetRenderState(D3DRS_ZENABLE, TRUE);
-//
-//			rmatrix mView;
-//
-//			D3DXVECTOR3 pos = vCameraPos * portalinfo[i].get().matTransform,
-//				dir = vCameraDir * portalinfo[i].get().matRot;
-//
-//			D3DXVECTOR3 at = pos + dir, up = portalinfo[i].get().vUp;
-//
-//			D3DXMatrixLookAtLH(&mView, &pos, &at, &up);
-//
-//			//mView = mOrigView * portalinfo.matTransform[i];
-//
-//			RGetDevice()->SetTransform(D3DTS_VIEW, &mView);
-//
-//			rmatrix mProjection;
-//			MakeObliquelyClippingProjectionMatrix(mProjection, mView, portalinfo.vPos[!i], portalinfo.vNormal[!i]);
-//			RGetDevice()->SetTransform(D3DTS_PROJECTION, &mProjection);
-//
-//			memcpy(RViewFrustum, Context.Frusta[!i], sizeof(RViewFrustum));
-//
-//			bForceProjection = true;
-//			bDontDraw = true;
-//			ZGetGame()->Draw();
-//			bDontDraw = false;
-//			bForceProjection = false;
-//		}
-//	}
-//
-//	RGetDevice()->SetTransform(D3DTS_VIEW, &mOrigView);
-//	RGetDevice()->SetTransform(D3DTS_PROJECTION, &mOrigProjection);
-//
-//	RGetDevice()->Clear(0, NULL, D3DCLEAR_ZBUFFER, 0x00000000, 1.0f, 0.0f);
-//
-//	for (size_t ctx = 0; ctx < NumContexts; ctx++)
-//	{
-//		const auto & Context = Contexts[ctx];
-//		const auto & portalinfo = Context.pi;
-//
-//		for (int i = 0; i < 2; i++)
-//		{
-//			if (!Context.IsVisible[i])
-//				continue;
-//
-//			// Write to Z buffer
-//			RGetDevice()->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
-//			RGetDevice()->SetRenderState(D3DRS_STENCILENABLE, FALSE);
-//
-//			RGetDevice()->SetTransform(D3DTS_WORLD, &portalinfo.matWorld[i]);
-//
-//			RGetDevice()->SetFVF(pRectangleMesh->GetFVF());
-//			RGetDevice()->SetVertexShader(NULL);
-//			RGetDevice()->SetTexture(0, NULL);
-//
-//			RGetDevice()->SetRenderState(D3DRS_COLORWRITEENABLE, 0);
-//
-//			pEdgeMesh->DrawSubset(0);
-//
-//			RGetDevice()->SetRenderState(D3DRS_COLORWRITEENABLE, D3DCOLORWRITEENABLE_ALPHA | D3DCOLORWRITEENABLE_RED | D3DCOLORWRITEENABLE_GREEN | D3DCOLORWRITEENABLE_BLUE);
-//
-//			RenderEdge(portalinfo.bIsVisible, portalinfo);
-//		}
-//	}
-//
-//	RGetDevice()->SetRenderState(D3DRS_STENCILENABLE, FALSE);
-//
-//	RGetDevice()->SetTransform(D3DTS_WORLD, &mOrigWorld);
-//	RGetDevice()->SetTransform(D3DTS_VIEW, &mOrigView);
-//
-//	if (!bMakeNearProjectionMatrix)
-//	{
-//		if (bLookingThroughPortal)
-//		{
-//			rmatrix mProjection;
-//			MakeProjectionMatrix(mProjection);
-//			RGetDevice()->SetTransform(D3DTS_PROJECTION, &mProjection);
-//			bForceProjection = true; // Setting the projection again would reset the frustum
-//		}
-//		else
-//		{
-//			RGetDevice()->SetTransform(D3DTS_PROJECTION, &mOrigProjection);
-//			bForceProjection = false;
-//		}
-//	}
-//	else
-//	{
-//		rmatrix mProjection;
-//		MakeProjectionMatrix(mProjection, 0.01);
-//		RGetDevice()->SetTransform(D3DTS_PROJECTION, &mProjection);
-//		bForceProjection = true;
-//	}
-//
-//	memcpy(RViewFrustum, OrigViewFrustum, sizeof(RViewFrustum));
-//}
-
 void Portal::RenderEdge(const PortalInfo& portalinfo)
 {
 	RGetDevice()->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
@@ -731,7 +565,7 @@ void Portal::Render()
 }
 #endif
 
-void GetIntersectedScreenLine(rvector &pos, rvector &dir)
+static void GetIntersectedScreenLine(rvector &pos, rvector &dir)
 {
 	MPOINT Crosshair = ZGetCombatInterface()->GetCrosshairPoint();
 
@@ -745,12 +579,12 @@ void GetIntersectedScreenLine(rvector &pos, rvector &dir)
 	D3DXPlaneIntersectLine(&checkpos, &myplane, &pos, &checkposto);
 }
 
-//#define DEBUG
+//#define _DEBUG
 
 void Portal::OnShot()
 {
 	int n = -1;
-#ifndef DEBUG
+#ifndef _DEBUG
 	bool bLClick = !!(GetAsyncKeyState(VK_LBUTTON) & 0x8000), bRClick = !!(GetAsyncKeyState(VK_RBUTTON) & 0x8000);
 #else
 	bool bLClick = !!(GetAsyncKeyState('T') & 0x8000), bRClick = !!(GetAsyncKeyState('Y') & 0x8000);
@@ -768,6 +602,9 @@ void Portal::OnShot()
 
 	bLastLClick = bLClick;
 	bLastRClick = bRClick;
+
+	if (ZGetGameClient()->GetMatchStageSetting()->GetGameType() != MMATCH_GAMETYPE_TRAINING)
+		return;
 
 #ifndef DEBUG
 	MMatchItemDesc *pDesc = ZGetGame()->m_pMyCharacter->GetSelectItemDesc();
@@ -1644,7 +1481,8 @@ void Portal::WriteDepth(const RecursionContext& rc)
 	RGetDevice()->SetTransform(D3DTS_PROJECTION, &mOrigProjection);
 }
 
-void Portal::CreatePortal(ZCharacter *pZChar, int iPortal, const D3DXVECTOR3 &vPos, const D3DXVECTOR3 &vNormal, const D3DXVECTOR3 &vUp)
+void Portal::CreatePortal(ZCharacter *pZChar, int iPortal, const D3DXVECTOR3 &vPos,
+	const D3DXVECTOR3 &vNormal,const D3DXVECTOR3 &vUp)
 {
 	auto& portalpair = PortalList[pZChar];
 	auto& portalinfo = portalpair[iPortal];
@@ -1746,10 +1584,6 @@ static void MakeFrustum(D3DXPLANE (&Frustum)[6], D3DXMATRIX View, D3DXVECTOR3 Po
 {
 	auto ComputeViewFrustum = [&](rplane *plane, float x, float y, float z)
 	{
-		/*
-		rmatrix RView;
-		RGetDevice()->GetTransform(D3DTS_VIEW,&RView);
-		*/
 		plane->a = View._11*x + View._12*y + View._13*z;
 		plane->b = View._21*x + View._22*y + View._23*z;
 		plane->c = View._31*x + View._32*y + View._33*z;
