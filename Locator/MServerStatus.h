@@ -45,8 +45,8 @@ public :
 #ifdef _DEBUG
 	const string GetDebugString()
 	{
-		char szBuf[ 1024 ] = {0,};
-		_snprintf( szBuf, 1023, "ID:%d, CurPlayer:%d, MaxPlayer:%d, Time:%s, IP:%s(%u), Port:%d, Name:%s, IsOpened:%d\n", 
+		char szBuf[1024];
+		sprintf_safe( szBuf, "ID:%d, CurPlayer:%d, MaxPlayer:%d, Time:%s, IP:%s(%u), Port:%d, Name:%s, IsOpened:%d\n", 
 			GetID(), GetCurPlayer(), GetMaxPlayer(), GetLastUpdatedTime().c_str(), GetIPString().c_str(), GetIP(),
 			GetPort(), GetServerName().c_str(), IsOpened() );
 

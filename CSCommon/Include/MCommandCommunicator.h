@@ -56,7 +56,10 @@ public:
 	int GetPort() const		{ return m_nPort; }
 	void SetAddress(const char* pszIP, int nPort) {
 		strcpy_safe(m_szIP, pszIP);
+#pragma warning(push)
+#pragma warning(disable: 4996)
 		m_dwIP = inet_addr(m_szIP);
+#pragma warning(pop)
 		m_nPort = nPort;
 	}
 	void SetAllowed(bool bAllowed)	{ m_bAllowed = bAllowed; }

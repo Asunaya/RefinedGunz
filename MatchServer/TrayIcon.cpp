@@ -24,7 +24,7 @@ BOOL CTrayIcon::Create(CWnd* pWnd, UINT uCallbackMessage, LPCTSTR szToolTip, HIC
 	m_tnd.hIcon = icon;
 	m_tnd.uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP;
 	m_tnd.uCallbackMessage = uCallbackMessage;
-	strcpy(m_tnd.szTip, szToolTip);
+	strcpy_safe(m_tnd.szTip, szToolTip);
 
 	return Shell_NotifyIcon(NIM_ADD, &m_tnd);
 }
@@ -40,7 +40,7 @@ BOOL CTrayIcon::SetIcon(HICON hIcon)
 BOOL CTrayIcon::SetTooltipText(LPCTSTR pszTip)
 {
 	m_tnd.uFlags = NIF_TIP;
-	_tcscpy(m_tnd.szTip, pszTip);
+	strcpy_safe(m_tnd.szTip, pszTip);
 
 	return Shell_NotifyIcon(NIM_MODIFY, &m_tnd);
 }

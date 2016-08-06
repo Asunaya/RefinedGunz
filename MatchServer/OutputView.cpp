@@ -77,7 +77,7 @@ void COutputView::AddString(const char* szString, COLORREF color, bool bCarrigeR
 	c.SetSel(-1, -1);
 	CHARFORMAT cf;
 	cf.dwMask = CFM_FACE|CFM_SIZE|CFM_COLOR;
-	strcpy(cf.szFaceName, "Tahoma");
+	strcpy_safe(cf.szFaceName, "Tahoma");
 	cf.yHeight = 9*1440*1/72;	// Twip = 1/1440 inch, Font Dialog Size = 1/72 inch
 	cf.crTextColor = color;
 	cf.dwEffects = 0;
