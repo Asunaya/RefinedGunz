@@ -481,6 +481,8 @@ public:
 	virtual bool AdminResetAllHackingBlock() override;
 
 private:
+	friend class Transaction;
+
 	template <size_t size>
 	auto PrepareStatement(const char(&sql)[size])
 	{
@@ -515,7 +517,40 @@ private:
 
 	void HandleException(const SQLiteError& e);
 
-	void BeginTransaction();
+	class Transaction
+	{
+	public:
+		Transaction(SQLiteDatabase& DB) : DB(DB), Active(true) { }
+		~Transaction()
+		{
+			if (DB.InTransaction && Active)
+				DB.RollbackTransaction();
+		}
+
+		Transaction(const Transaction&) = delete;
+		Transaction operator=(const Transaction&) = delete;
+
+		Transaction(Transaction&& Src) : DB(Src.DB)
+		{
+			Move(std::move(Src));
+		}
+		Transaction operator=(Transaction&& Src)
+		{
+			Move(std::move(Src));
+		}
+
+	private:
+		void Move(Transaction&& Src)
+		{
+			Active = Src.Active;
+			Src.Active = false;
+		}
+
+		SQLiteDatabase& DB;
+		bool Active = false;
+	};
+
+	Transaction BeginTransaction();
 	void RollbackTransaction();
 	void CommitTransaction();
 

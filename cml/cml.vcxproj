@@ -154,7 +154,7 @@
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release LTCG|Win32'">Lib_LTCG\</OutDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='MatchServer Release|Win32'">MatchServerLib\</OutDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='MatchServer Debug|Win32'">MatchServerLib\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='MatchServer Debug|Win32'">MatchServerdLib\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release LTCG|Win32'">$(Configuration)\</IntDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='MatchServer Release|Win32'">$(Configuration)\</IntDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='MatchServer Debug|Win32'">$(Configuration)\</IntDir>
@@ -359,7 +359,7 @@
     </ClCompile>
     <Lib>
       <AdditionalDependencies>lib\zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>MatchServerLib\cml.lib</OutputFile>
+      <OutputFile>MatchServerdLib\cml.lib</OutputFile>
       <AdditionalLibraryDirectories>Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>

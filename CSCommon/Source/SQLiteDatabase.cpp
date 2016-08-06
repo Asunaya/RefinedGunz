@@ -151,18 +151,25 @@ void SQLiteDatabase::HandleException(const SQLiteError & e)
 	Log("Caught SQLiteError: error code: %d, error message: %s\n", e.GetErrorCode(), e.what());
 }
 
-void SQLiteDatabase::BeginTransaction()
+SQLiteDatabase::Transaction SQLiteDatabase::BeginTransaction()
 {
+	ASSERT(!InTransaction);
+	ExecuteSQL("BEGIN TRANSACTION");
 	InTransaction = true;
+	return Transaction(*this);
 }
 
 void SQLiteDatabase::RollbackTransaction()
 {
+	ASSERT(InTransaction);
+	ExecuteSQL("ROLLBACK TRANSACTION");
 	InTransaction = false;
 }
 
 void SQLiteDatabase::CommitTransaction()
 {
+	ASSERT(InTransaction);
+	ExecuteSQL("COMMIT TRANSACTION");
 	InTransaction = false;
 }
 
@@ -209,9 +216,10 @@ try
 	if (stmt.HasRow())
 		return AccountCreationResult::UsernameAlreadyExists;
 
+	auto Trans = BeginTransaction();
+
 	stmt = ExecuteSQL("INSERT INTO Account (UserID, UGradeID, PGradeID, RegDate, Email) VALUES (?, 0, 0, date('now'), ?)",
 		Username, Email);
-
 	stmt = ExecuteSQL("SELECT AID FROM Account WHERE UserID = ?",
 		Username);
 
@@ -219,9 +227,10 @@ try
 		return AccountCreationResult::DBError;
 
 	auto AID = stmt.Get<int>(0);
-
 	stmt = ExecuteSQL("INSERT INTO Login(UserID, AID, PasswordData) VALUES(?, ?, ?)",
 		Username, AID, StringView{ PasswordData, PasswordSize });
+
+	CommitTransaction();
 
 	return AccountCreationResult::Success;
 }
@@ -265,10 +274,13 @@ catch (const SQLiteError& e)
 bool SQLiteDatabase::BanPlayer(int nAID, const char* Reason, const time_t& UnbanTime)
 try
 {
-	auto stmt = ExecuteSQL("UPDATE Account SET UGradeID = ? WHERE AID = ?", MMUG_BLOCKED, nAID);
+	auto Trans = BeginTransaction();
 
+	auto stmt = ExecuteSQL("UPDATE Account SET UGradeID = ? WHERE AID = ?", MMUG_BLOCKED, nAID);
 	ExecuteSQL("INSERT INTO Blocks (AID, Type, Reason, EndDate) VALUES (?, ?, ?, ?)",
 		nAID, MMBT_BANNED, Reason, UnbanTime);
+
+	CommitTransaction();
 
 	return true;
 }
@@ -281,6 +293,7 @@ catch (const SQLiteError& e)
 int SQLiteDatabase::CreateCharacter(int AID, const char * NewName, int CharIndex, int Sex, int Hair, int Face, int Costume)
 try
 {
+
 	auto stmt = ExecuteSQL("SELECT COUNT(*) AS NUM FROM Character WHERE Name = ?", NewName);
 
 	if (!stmt.HasRow())
@@ -289,22 +302,15 @@ try
 	if (stmt.Get<int>() > 0)
 		return MERR_CLIENT_EXIST_CHARNAME;
 
+	auto Trans = BeginTransaction();
+
 	ExecuteSQL("INSERT INTO Character (AID, Name, CharNum, Level, Sex, Hair, Face, XP, BP, \
 		GameCount, KillCount, DeathCount, RegDate, PlayTime, DeleteFlag) \
 		Values(?, ?, ?, 1, ?, ?, ?, 0, 0, \
 		0, 0, 0, date('now'), 0, 0)",
 		AID, NewName, CharIndex, Sex, Hair, Face);
 
-	stmt = ExecuteSQL("SELECT CID FROM Character WHERE AID = ? AND CharNum = ?\n", AID, CharIndex);
-
-	if (!stmt.HasRow() || stmt.IsNull())
-	{
-		Log("SQLiteDatabase::CreateCharacter - Weirdness while creating character named %s for AID %d\n",
-			NewName, AID);
-		return false;
-	}
-
-	auto CID = stmt.Get<int>();
+	auto CID = sqlite3_last_insert_rowid(sqlite);
 
 	std::pair<int, int> GenderedCostume[2][2] = { { { MMCIP_CHEST, 21001 },{ MMCIP_LEGS, 23001 }},
 	{{ MMCIP_CHEST, 21501 },{ MMCIP_LEGS, 23501 }} };
@@ -333,6 +339,8 @@ try
 
 	ExecuteSQL("UPDATE Character SET Items = ? WHERE AID = ? AND CID = ?",
 		Blob{ &Items, sizeof(Items) }, AID, CID);
+
+	CommitTransaction();
 
 	return MOK;
 }
@@ -874,8 +882,12 @@ try
 	if (!stmt.HasRow() || stmt.IsNull() || stmt.Get<int>() < Price)
 		return false;
 
+	auto Trans = BeginTransaction();
+
 	ExecuteSQL("UPDATE Character SET BP = BP - ? WHERE CID = ?", Price, CID);
 	ExecuteSQL("INSERT INTO CharacterItem (CID, ItemID, RegDate) Values (?, ?, date('now'))", CID, ItemID);
+
+	CommitTransaction();
 
 	// TODO: Insert purchase log
 
@@ -1002,14 +1014,18 @@ try
 	auto RentHourPeriod = stmt.Get<int>();
 	auto Cnt = stmt.Get<int>();
 
+	auto Trans = BeginTransaction();
+
 	ExecuteSQL("DELETE FROM AccountItem WHERE AIID = ?", AIID);
 
 	ExecuteSQL("INSERT INTO CharacterItem(CID, ItemID, RegDate, RentDate, RentHourPeriod, Cnt) \
 		VALUES(?, ?, date('now'), ?, ?, ?)",
 		CID, ItemID, RentDate, RentHourPeriod, Cnt);
 
+
 	// TODO: Log
 
+	CommitTransaction();
 	return true;
 }
 catch (const SQLiteError& e)
@@ -1021,7 +1037,7 @@ catch (const SQLiteError& e)
 bool SQLiteDatabase::BringBackAccountItem(int AID, int CID, int CIID)
 try
 {
-	BeginTransaction();
+	auto Trans = BeginTransaction();
 
 	// TODO: Check that the item isn't equipped
 
@@ -1029,10 +1045,7 @@ try
 		FROM CharacterItem WHERE CIID = ? AND CID = ?", CIID, CID);
 
 	if (!stmt.HasRow())
-	{
-		RollbackTransaction();
 		return false;
-	}
 
 	auto ItemID = stmt.Get<int>();
 	auto RentDate = stmt.Get<int>();
@@ -1167,7 +1180,7 @@ try
 	if (stmt.HasRow())
 		return false;
 
-	BeginTransaction();
+	auto Trans = BeginTransaction();
 
 	ExecuteSQL("INSERT INTO Clan(Name, MasterCID, RegDate) VALUES(?, ?, date('now'))",
 		ClanName, MasterCID);
@@ -1176,10 +1189,7 @@ try
 		MasterCID);
 
 	if (!stmt.HasRow())
-	{
-		RollbackTransaction();
 		return false;
-	}
 
 	auto CLID = stmt.Get<int>();
 
@@ -1400,11 +1410,9 @@ bool SQLiteDatabase::WinTheClanGame(int WinnerCLID, int LoserCLID, bool IsDrawGa
 	try
 {
 	if (IsDrawGame)
-	{
 		return true;
-	}
 
-	BeginTransaction();
+	auto Trans = BeginTransaction();
 
 	ExecuteSQL("UPDATE Clan SET Wins = Wins + 1, Point = Point + ?1, TotalPoint = TotalPoint + ?1 WHERE CLID = ?2", WinnerPoint, WinnerCLID);
 	ExecuteSQL("UPDATE Clan SET Losses = Losses + 1, Point = max(0, Point + ?) WHERE CLID = ?", LoserPoint, LoserCLID);
@@ -1416,7 +1424,6 @@ bool SQLiteDatabase::WinTheClanGame(int WinnerCLID, int LoserCLID, bool IsDrawGa
 		MapID, GameType, WinnerMembers, LoserMembers, WinnerPoint, LoserPoint);
 
 	CommitTransaction();
-
 	return true;
 }
 catch (const SQLiteError& e)

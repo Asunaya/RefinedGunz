@@ -97,6 +97,7 @@ void MBMatchServer::Shutdown()
 
 void MBMatchServer::Log(unsigned int nLogLevel, const char* szLog)
 {
+	std::lock_guard<std::mutex> Lock(LogMutex);
 #ifdef _DEBUG
 	if (nLogLevel || LOG_DEBUG)
 	{

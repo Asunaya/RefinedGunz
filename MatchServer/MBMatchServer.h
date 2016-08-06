@@ -126,6 +126,7 @@ public:
 
 private:
 	std::unique_ptr<MLocator> Locator;
+	std::mutex LogMutex;
 };
 
 

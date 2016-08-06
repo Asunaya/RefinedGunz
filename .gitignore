@@ -25,8 +25,9 @@ bld/
 !libsodium/**/*
 lib/
 Lib_LTCG/
-cml/MatchServer/*
-cml/MatchServerLib/*
+cml/MatchServer
+cml/MatchServerLib
+cml/MatchServerdLib
 Library*/
 !sdk/**/*
 cml/MatchServer Debug/*
