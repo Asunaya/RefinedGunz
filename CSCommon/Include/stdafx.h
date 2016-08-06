@@ -14,10 +14,11 @@
 
 #define POINTER_64 __ptr64
 
-// ¿©±â´Ù include
+#ifdef MFC
 #include <afxdb.h>
 #include <afxtempl.h>
 #include <afxdtctl.h>
+#endif
 
 #include <Winsock2.h>
 #include <mswsock.h>
@@ -69,9 +70,10 @@
 #include "MMatchItem.h"
 #include "MMatchObjCache.h"
 
-#include "MMatchDebug.h"
-
 #include "SafeString.h"
 #include "GlobalTypes.h"
+
+#include <cassert>
+#define ASSERT assert
 
 #endif

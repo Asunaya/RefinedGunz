@@ -1,12 +1,14 @@
 #include "stdafx.h"
 #include "MBMatchServer.h"
+#ifdef MFC
+#include "CommandLogView.h"
 #include "MatchServerDoc.h"
 #include "OutputView.h"
-#include <atltime.h>
 #include "MatchServer.h"
+#endif
+#include <atltime.h>
 #include "MMap.h"
 #include "MErrorTable.h"
-#include "CommandLogView.h"
 #include "MDebug.h"
 #include "MMatchRule.h"
 #include "MBMatchAuth.h"

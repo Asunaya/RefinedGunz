@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#ifdef MFC
 #include "TrayIcon.h"
 
 #ifdef _DEBUG
@@ -50,3 +51,4 @@ void CTrayIcon::RemoveIcon()
 	m_tnd.uFlags = 0;
 	Shell_NotifyIcon(NIM_DELETE, &m_tnd);
 }
+#endif

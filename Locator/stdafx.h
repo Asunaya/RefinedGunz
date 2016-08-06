@@ -6,6 +6,7 @@
 
 #include "targetver.h"
 
+#ifdef MFC
 #define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS	// 일부 CString 생성자는 명시적으로 선언됩니다.
 
 // MFC의 공통 부분과 무시 가능한 경고 메시지에 대한 숨기기를 해제합니다.
@@ -20,5 +21,12 @@
 #include <afxcmn.h>			// Windows 공용 컨트롤에 대한 MFC 지원
 #endif // _AFX_NO_AFXCMN_SUPPORT
 #include <afxcview.h>
+#endif
+
+#include <WinSock2.h>
+#include <Windows.h>
+
+#include <cassert>
+#define ASSERT assert
 
 // #define _LOCATOR_TEST

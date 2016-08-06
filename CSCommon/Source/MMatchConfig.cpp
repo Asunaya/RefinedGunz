@@ -111,7 +111,7 @@ bool MMatchConfig::Create()
 	if( 0 == strlen(szKeeperIP) )
 	{
 		mlog( "server.ini - Keeper ip not setting\n" );
-		return false;
+		//return false;
 	}
 	m_strKeeperIP = szKeeperIP;
 	

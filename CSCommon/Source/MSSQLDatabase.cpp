@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#ifdef MFC
 #include "MSSQLDatabase.h"
 #include "MMatchObject.h"
 #include "afxwin.h"
@@ -3196,3 +3197,4 @@ bool MSSQLDatabase::AdminResetAllHackingBlock()
 }
 
 // √÷∞Ì 69
+#endif

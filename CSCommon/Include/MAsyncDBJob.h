@@ -1,11 +1,11 @@
 #pragma once
 
-
 #include "MAsyncProxy.h"
 #include "MUID.h"
 #include "MErrorTable.h"
 #include "MQuestItem.h"
 #include "MMatchGlobal.h"
+#include "IDatabase.h"
 
 class MCommand;
 class MMatchCharInfo;

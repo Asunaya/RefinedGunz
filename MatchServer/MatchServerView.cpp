@@ -2,6 +2,7 @@
 //
 
 #include "stdafx.h"
+#ifdef MFC
 #include "MatchServer.h"
 
 #include "MatchServerDoc.h"
@@ -104,3 +105,4 @@ void CMatchServerView::OnSetFocus(CWnd* pOldWnd)
 	// TODO: Add your message handler code here
 	GetDocument()->SetTitle("MatchServerView");
 }
+#endif

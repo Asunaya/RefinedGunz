@@ -136,7 +136,9 @@ bool MLocatorConfig::SetDBDSN( const char* pszDSN )
 {
 	if( (0 != pszDSN) && (0 < strlen(pszDSN)) ) 
 	{
+#ifdef MFC
 		m_strDBDSN = pszDSN;
+#endif
 		return true;
 	}
 	return false;
@@ -147,7 +149,9 @@ bool MLocatorConfig::SetDBUserName( const char* pszUserName )
 {
 	if( (0 != pszUserName) && (0 < strlen(pszUserName)) )
 	{
+#ifdef MFC
 		m_strDBUserName = pszUserName;
+#endif
 		return true;
 	}
 	return false;
@@ -158,7 +162,9 @@ bool MLocatorConfig::SetDBPassword( const char* pszPassword )
 {
 	if( (0 != pszPassword) && (0 < strlen(pszPassword)) )
 	{
+#ifdef MFC
 		m_strDBPassword = pszPassword;
+#endif
 		return true;
 	}
 	return false;

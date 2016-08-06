@@ -3,6 +3,8 @@
 #include "MMatchLocale.h"
 #include "MMatchConfig.h"
 #include "MMatchEventFactory.h"
+#include "MZFileSystem.h"
+#include "MBaseStringResManager.h"
 
 
 WORD MMatchEventFactoryManager::m_LoadEventSize = 0;

@@ -1,8 +1,9 @@
 #include "stdafx.h"
 #include "MMatchConfig.h"
+#include "MMatchAntiHack.h"
 
 
-list<string> MMatchAntiHack::m_ClientHashValueList;
+std::list<string> MMatchAntiHack::m_ClientHashValueList;
 
 void MMatchAntiHack::InitHashMap()
 {

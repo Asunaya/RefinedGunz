@@ -186,8 +186,9 @@
     </ClCompile>
     <Lib>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
-      <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
       <LinkTimeCodeGeneration>true</LinkTimeCodeGeneration>
+      <IgnoreSpecificDefaultLibraries>nafxcw.lib</IgnoreSpecificDefaultLibraries>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

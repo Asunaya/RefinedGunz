@@ -162,7 +162,7 @@ private :
 };
 
 
-class MMatchEventDescManager : private map< DWORD, const MMatchEventDesc* >
+class MMatchEventDescManager : private std::map< DWORD, const MMatchEventDesc* >
 {
 public :
 	MMatchEventDescManager() {}
@@ -170,8 +170,8 @@ public :
 	{
 	}
 	
-	bool LoadEventXML( MZFileSystem* pFileSystem, const string& strFileName );
-	bool LoadEventXML( const string& strFileName );
+	bool LoadEventXML( class MZFileSystem* pFileSystem, const string& strFileName );
+	bool LoadEventXML( const std::string& strFileName );
 
 	const MMatchEventDesc* Find( const DWORD dwEventID );
 

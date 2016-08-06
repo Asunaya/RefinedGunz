@@ -8,6 +8,7 @@
 #include "MXml.h"
 #include "MUtil.h"
 #include "MMatchConfig.h"
+#include "MMatchServer.h"
 
 bool LagCompManager::Create()
 {

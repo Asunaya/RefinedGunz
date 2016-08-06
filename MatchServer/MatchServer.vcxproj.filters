@@ -72,6 +72,7 @@
     <ClCompile Include="MBMatchAuth.cpp">
       <Filter>Netmarble</Filter>
     </ClCompile>
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ChildFrm.h">

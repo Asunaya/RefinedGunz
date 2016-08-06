@@ -4,10 +4,11 @@
 
 #include "targetver.h"
 
-// ¿©±â´Ù include
+#ifdef MFC
 #include <afxdb.h>
 #include <afxtempl.h>
 #include <afxdtctl.h>
+#endif
 
 #include <Winsock2.h>
 

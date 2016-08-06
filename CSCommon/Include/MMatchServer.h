@@ -62,7 +62,9 @@ struct DBVariant
 		U() {}
 		~U() {}
 		SQLiteDatabase sqlite;
+#ifdef MFC
 		MSSQLDatabase mssql;
+#endif
 	};
 
 	DatabaseType Type;
@@ -78,8 +80,10 @@ struct DBVariant
 
 		if (Type == DatabaseType::SQLite)
 			new (&u) SQLiteDatabase;
+#ifdef MFC
 		else
 			new (&u) MSSQLDatabase;
+#endif
 	}
 	DBVariant(const DBVariant&) = delete;
 	DBVariant(DBVariant&&) = delete;
@@ -87,8 +91,10 @@ struct DBVariant
 	{
 		if (Type == DatabaseType::SQLite)
 			u.sqlite.~SQLiteDatabase();
+#ifdef MFC
 		else
 			u.mssql.~MSSQLDatabase();
+#endif
 	}
 };
 

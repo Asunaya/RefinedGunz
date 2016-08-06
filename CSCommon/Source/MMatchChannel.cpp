@@ -1,12 +1,10 @@
 #include "stdafx.h"
-#include "ODBCRecordset.h"
 #include "MMatchChannel.h"
 #include "MCommand.h"
 #include "MMatchObject.h"
 #include "MMatchStage.h"
 #include <math.h>
 #include "MSmartRefreshImpl.h"
-//#include "MMatchMapSet.h"
 
 
 #define MTICK_CHANNEL_RUN					100

@@ -2,6 +2,7 @@
 //
 
 #include "stdafx.h"
+#ifdef MFC
 #include "Locator.h"
 #include "MLocatorView.h"
 #include ".\mlocatorview.h"
@@ -125,3 +126,4 @@ void MLocatorView::UpdateView()
 		}
 	}
 }
+#endif MFC

@@ -446,13 +446,13 @@ bool MCountryFilter::IsNotBlockCode( const string& strCountryCode, string& strRo
 
 const uint32_t MCountryFilter::inet_aton( const string& strIP )
 {
-	if( strIP.empty() ) 
+	if( strIP.empty() )
 		return false;
 
-	vector< BYTE > vIP;
-	if( !SplitStrIP(strIP, vIP) ) 
+	vector<uint8_t> vIP;
+	if( !SplitStrIP(strIP, vIP) )
 		return false;
-	if( 4 != vIP.size() ) 
+	if( 4 != vIP.size() )
 		return false;
 
 	return (vIP[0] * 16777216) + (vIP[1] * 65536) + (vIP[2] * 256) + vIP[3];

@@ -1,4 +1,5 @@
 #include "StdAfx.h"
+#ifdef MFC
 #include ".\mcountryfilterdbmgr.h"
 
 #include "mmsystem.h"
@@ -305,3 +306,4 @@ void MCountryFilterDBMgr::ReleaseDB()
 		delete m_pDB;
 	}
 }
+#endif

@@ -2,6 +2,7 @@
 //
 
 #include "stdafx.h"
+#ifdef MFC
 #include "MatchServer.h"
 #include "ConsoleBar.h"
 #include "MatchServerDoc.h"
@@ -311,3 +312,4 @@ void CConsoleBar::OnCbnEditupdateComboCommand()
 	m_szPrevCommandEdit = szCommand;
 	*/
 }
+#endif

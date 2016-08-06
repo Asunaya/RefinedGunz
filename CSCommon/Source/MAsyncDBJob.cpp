@@ -8,6 +8,7 @@
 
 void MAsyncDBJob_Test::Run(void* pContext)
 {
+#ifdef MFC
 	if (MGetServerConfig()->GetDatabaseType() != DatabaseType::MSSQL)
 		return;
 
@@ -56,6 +57,7 @@ void MAsyncDBJob_Test::Run(void* pContext)
 	sprintf_safe(szLog, "Thread=%d , MAsyncDBJob_Test END RecordCount=%d \n", 
 			GetCurrentThreadId(), nCount);
 	OutputDebugString(szLog);
+#endif
 }
 
 void MAsyncDBJob_GetAccountCharList::Run(void* pContext)

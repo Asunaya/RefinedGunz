@@ -2,6 +2,7 @@
 //
 
 #include "stdafx.h"
+#ifdef MFC
 #include "Locator.h"
 #include "MainFrm.h"
 
@@ -210,3 +211,4 @@ int CLocatorApp::Run()
 
 	return 0;
 }
+#endif

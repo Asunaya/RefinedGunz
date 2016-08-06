@@ -3,6 +3,7 @@
 #include "GlobalTypes.h"
 #include "MMath.h"
 #include <random>
+#include "d3dx9.h"
 
 template <typename rngT>
 float RandomAngle(rngT& rng)

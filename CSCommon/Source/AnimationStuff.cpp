@@ -7,6 +7,10 @@
 #undef pi
 #include "MMatchItem.h"
 #include <array>
+#include "RAnimationMgr.h"
+#include <cassert>
+
+using namespace RealSpace2;
 
 static RAnimationMgr* AniMgrs[2];
 
@@ -257,8 +261,8 @@ static matrix GetNodeHierarchyMatrix(RAnimation* LowerAni, RAnimation* UpperAni,
 	const RMeshPartsPosInfoType(&Hierarchy)[size],
 	float y, float tremble)
 {
-	ASSERT(LowerFrame >= 0);
-	ASSERT(UpperFrame >= 0);
+	assert(LowerFrame >= 0);
+	assert(UpperFrame >= 0);
 	matrix last_mat;
 	matrix last_mat_inv;
 	matrix mat;

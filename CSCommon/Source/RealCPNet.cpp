@@ -20,6 +20,8 @@
 	#include "MProcessController.h"
 #endif
 
+#pragma comment(lib, "Mswsock.lib")
+
 
 
 

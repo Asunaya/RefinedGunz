@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IDatabase.h"
+#ifdef MFC
 #include "MDatabase.h"
 #include "MCountryFilterDBMgr.h"
 #include "MMatchDBFilter.h"
@@ -209,8 +210,6 @@ public:
 	bool Connect(CString strDSNConnect);
 	void Disconnect();
 
-	MDatabase* GetDatabase() { return &m_DB; }
-
 private:
 	MDatabase	m_DB;
 	CString		m_strDSNConnect;
@@ -224,3 +223,4 @@ private:
 
 	bool CheckOpen();
 };
+#endif

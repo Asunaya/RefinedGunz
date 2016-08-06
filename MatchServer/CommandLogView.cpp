@@ -2,6 +2,7 @@
 //
 
 #include "stdafx.h"
+#ifdef MFC
 #include "CommandLogView.h"
 #include "MCommand.h"
 #include "MMatchGlobal.h"
@@ -144,3 +145,4 @@ void CCommandLogView::AddCommand(unsigned long int nGlobalClock, CCommandType t,
 	if (nCount > MAX_LOG_COUNT)
 		theCtrl.DeleteItem(0);
 }
+#endif

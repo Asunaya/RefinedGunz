@@ -1,6 +1,7 @@
 // ChildFrm.cpp : CChildFrame 클래스의 구현
 //
 #include "stdafx.h"
+#ifdef MFC
 #include "MatchServer.h"
 
 #include "ChildFrm.h"
@@ -73,3 +74,4 @@ void CChildFrame::OnUpdateFrameTitle(BOOL bAddToTitle)
 	}
 
 }
+#endif

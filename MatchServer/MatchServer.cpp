@@ -2,8 +2,11 @@
 //
 
 #include "stdafx.h"
+#ifdef MFC
 #include "MatchServer.h"
+#ifdef MFC
 #include "MainFrm.h"
+#endif
 
 #include <shlwapi.h>
 
@@ -431,3 +434,4 @@ void CMatchServerApp::OnEnableUpdateCustomIP( CCmdUI* pCmdUI )
 {
 	pCmdUI->Enable( MGetServerConfig()->IsUseFilter() );
 }
+#endif

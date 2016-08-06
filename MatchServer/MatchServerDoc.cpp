@@ -2,6 +2,7 @@
 //
 
 #include "stdafx.h"
+#ifdef MFC
 #include "MatchServer.h"
 
 #include "MatchServerDoc.h"
@@ -220,3 +221,4 @@ void CMatchServerDoc::OnCloseDocument()
 	CDocument::OnCloseDocument();
 
 }
+#endif

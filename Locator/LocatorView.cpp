@@ -2,6 +2,7 @@
 //
 
 #include "stdafx.h"
+#ifdef MFC
 #include "Locator.h"
 
 #include "LocatorDoc.h"
@@ -96,5 +97,4 @@ CLocatorDoc* CLocatorView::GetDocument() const // 디버그되지 않은 버전은 인라인�
 }
 #endif //_DEBUG
 
-
-// CLocatorView 메시지 처리기
+#endif

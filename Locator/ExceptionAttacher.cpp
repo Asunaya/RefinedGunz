@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#ifdef MFC
 #include "MDebug.h"
 #include "Shlwapi.h"
 #include "MCrashDump.h"
@@ -130,4 +131,5 @@ InitFailure:
 }
 #else
 void* silence_LNK4221_warning;
+#endif
 #endif

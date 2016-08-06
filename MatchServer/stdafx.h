@@ -31,6 +31,7 @@
 // MFC의 공통 부분과 무시 가능한 경고 메시지에 대한 숨기기를 해제합니다.
 #define _AFX_ALL_WARNINGS
 
+#ifdef MFC
 #include <afxwin.h>         // MFC 핵심 및 표준 구성 요소
 #include <afxext.h>         // MFC 익스텐션
 #include <afxdisp.h>        // MFC 자동화 클래스
@@ -41,6 +42,7 @@
 #endif // _AFX_NO_AFXCMN_SUPPORT
 #include <afxrich.h>
 #include <afxcview.h>
+#endif
 
 #include "winsock2.h"
 #include "windows.h"
@@ -48,6 +50,9 @@
 #include <stdio.h>
 
 #include "SafeString.h"
+
+#include <cassert>
+#define ASSERT assert
 
 #define _QUEST
 #define _QUEST_ITEM

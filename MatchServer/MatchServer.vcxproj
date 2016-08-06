@@ -28,20 +28,20 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v140</PlatformToolset>
-    <UseOfMfc>Static</UseOfMfc>
+    <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release LTCG|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v140</PlatformToolset>
-    <UseOfMfc>Static</UseOfMfc>
+    <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v140</PlatformToolset>
-    <UseOfMfc>Static</UseOfMfc>
+    <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -95,7 +95,7 @@
       <IgnoreSpecificDefaultLibraries>libci.lib;libc.lib;comsuppwd.lib;libcmt;nafxcw;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)MatchServerD.pdb</ProgramDatabaseFile>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
       <AdditionalLibraryDirectories>Lib;../sdk/dx9/lib/;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -137,7 +137,7 @@
       <AdditionalLibraryDirectories>Lib;../sdk/dx9/lib/;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>libci.lib;libc.lib;comsuppw.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX86</TargetMachine>
@@ -178,9 +178,9 @@
       <AdditionalDependencies>../CML/Lib/zlib.lib;../sdk/libsodium/lib/static/libsodium.lib;../sdk/sqlite/lib/Release/sqlite.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>Runtime/MatchServer.exe</OutputFile>
       <AdditionalLibraryDirectories>Lib;../sdk/dx9/lib/;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <IgnoreSpecificDefaultLibraries>libci.lib;libc.lib;comsuppw.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>nafxcw.lib;libc.lib;comsuppw.lib;</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX86</TargetMachine>
@@ -206,6 +206,7 @@
     <ClCompile Include="CommandLogView.cpp" />
     <ClCompile Include="ConsoleBar.cpp" />
     <ClCompile Include="ExceptionAttacher.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="MatchServer.cpp" />
     <ClCompile Include="MatchServerDoc.cpp" />

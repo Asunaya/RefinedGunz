@@ -1,15 +1,14 @@
-#ifndef _MCUSTOMCLIENT_H
-#define _MCUSTOMCLIENT_H
+#pragma once
 
+#include "MTCPSocket.h"
 
-/// 클라이언트
 class MCustomClient
 {
 private:
 
 protected:
-	MClientSocket		m_ClientSocket;			///< 클라이언트 소켓용 클래스
-	CRITICAL_SECTION	m_csRecvLock;			///< CommandQueue critical section
+	MClientSocket		m_ClientSocket;
+	CRITICAL_SECTION	m_csRecvLock;
 protected:
 	void LockRecv() { EnterCriticalSection(&m_csRecvLock); }
 	void UnlockRecv() { LeaveCriticalSection(&m_csRecvLock); }
@@ -35,13 +34,3 @@ public:
 	bool IsConnected() { return m_ClientSocket.IsActive(); }
 	MClientSocket* GetSock() { return &m_ClientSocket; }
 };
-
-
-
-
-
-
-
-
-
-#endif

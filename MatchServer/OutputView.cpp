@@ -2,6 +2,7 @@
 //
 
 #include "stdafx.h"
+#ifdef MFC
 #include "MatchServer.h"
 #include "OutputView.h"
 
@@ -139,3 +140,4 @@ int COutputView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 //	CDocument* pDoc = CView::GetDocument();
 //	if(pDoc!=NULL) pDoc->SetTitle("Output");
 //}
+#endif

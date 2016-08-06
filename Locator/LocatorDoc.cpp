@@ -2,6 +2,7 @@
 //
 
 #include "stdafx.h"
+#ifdef MFC
 #include "Locator.h"
 
 #include "LocatorDoc.h"
@@ -122,3 +123,4 @@ void CLocatorDoc::OnOutputlocatorstatusinfo()
 	if( 0 != m_pLocator )
 		m_pLocator->DumpLocatorStatusInfo();
 }
+#endif

@@ -1,5 +1,8 @@
 #include "stdafx.h"
 #include "HitRegistration.h"
+#include "RTypes.h"
+
+using namespace RealSpace2;
 
 void CalcRangeShotControllability(v3& vOutDir, const v3& vSrcDir,
 	int nControllability, u32 seed, float CtrlFactor)
@@ -20,7 +23,7 @@ void CalcRangeShotControllability(v3& vOutDir, const v3& vSrcDir,
 	}
 	else
 	{
-		std::uniform_real_distribution<float> dist(0, nControllability * 100);
+		std::uniform_real_distribution<float> dist(0, static_cast<float>(nControllability * 100));
 		fControl = dist(rng);
 		fControl = fControl * CtrlFactor;
 	}

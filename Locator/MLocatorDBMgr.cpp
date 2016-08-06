@@ -1,4 +1,5 @@
 #include "StdAfx.h"
+#ifdef MFC
 #include ".\mlocatordbmgr.h"
 #include "MDebug.h"
 #include "Winsock2.h"
@@ -208,3 +209,4 @@ bool MLocatorDBMgr::InsertLocatorLog( const int nLocatorID, const map<string, DW
 
 	return true;
 }
+#endif

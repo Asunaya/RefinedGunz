@@ -1,12 +1,14 @@
 #include "stdafx.h"
 #include "MBMatchServer.h"
+#ifdef MFC
 #include "MatchServerDoc.h"
 #include "OutputView.h"
-#include <atltime.h>
 #include "MatchServer.h"
+#include "CommandLogView.h"
+#endif
+#include <atltime.h>
 #include "MMap.h"
 #include "MErrorTable.h"
-#include "CommandLogView.h"
 #include "MDebug.h"
 #include "MMatchRule.h"
 #include "MBMatchAuth.h"
@@ -25,14 +27,12 @@
 #pragma comment ( lib, "XTrap/XCrackChk.lib")
 #endif
 
-#ifdef _DEBUG
+#if defined(_DEBUG) && defined(MFC)
 #define new DEBUG_NEW
 #endif
 
 bool MBMatchServer::OnCreate(void)
 {
-	CMatchServerApp* pApp = (CMatchServerApp*)AfxGetApp();
-
 	if( !MMatchServer::OnCreate() )
 		return false;
 
@@ -57,7 +57,7 @@ void MBMatchServer::OnDestroy(void)
 
 void MBMatchServer::OnPrepareCommand(MCommand* pCommand)
 {
-#ifdef _DEBUG
+#if defined(_DEBUG) && defined(MFC)
 #ifndef _DEBUG_PUBLISH
 	// 커맨드 로그 남기기
 	if(m_pCmdLogView==NULL) return;
@@ -81,8 +81,10 @@ void MBMatchServer::OnPrepareCommand(MCommand* pCommand)
 
 MBMatchServer::MBMatchServer(COutputView* pView)
 {
+#ifdef MFC
 	m_pView = pView;
 	m_pCmdLogView = NULL;
+#endif
 	
 	SetKeeperUID( MUID(0, 0) );
 	SetAuthBuilder(new MBMatchAuthBuilder);
@@ -91,8 +93,9 @@ MBMatchServer::MBMatchServer(COutputView* pView)
 void MBMatchServer::Shutdown()
 {
 	MMatchServer::Shutdown();
+#ifdef MFC
 	AfxGetMainWnd()->PostMessage(WM_DESTROY);
-//	AfxGetMainWnd()->DestroyWindow();
+#endif
 }
 
 void MBMatchServer::Log(unsigned int nLogLevel, const char* szLog)
@@ -118,12 +121,16 @@ void MBMatchServer::Log(unsigned int nLogLevel, const char* szLog)
 		mlog("%s", szTemp);
 	}
 
+#ifdef MFC
 	if (nLogLevel || LOG_PROG)
 	{
 		if(m_pView==NULL) return;
 		m_pView->AddString(szTime, TIME_COLOR, false);
 		m_pView->AddString(szLog, RGB(0,0,0));
 	}
+#else
+	printf("%s%s\n", static_cast<const char*>(szTime), szLog);
+#endif
 }
 
 bool MBMatchServer::InitSubTaskSchedule()

@@ -2,6 +2,7 @@
 //
 
 #include "stdafx.h"
+#ifdef MFC
 #include "Locator.h"
 
 #include "MainFrm.h"
@@ -100,3 +101,4 @@ void CMainFrame::Dump(CDumpContext& dc) const
 
 // CMainFrame 메시지 처리기
 
+#endif

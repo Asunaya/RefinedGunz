@@ -2,6 +2,7 @@
 //
 #pragma once
 
+#ifdef MFC
 #ifndef __AFXWIN_H__
 	#error PCH에서 이 파일을 포함하기 전에 'stdafx.h'를 포함하십시오.
 #endif
@@ -35,3 +36,4 @@ public:
 };
 
 extern CLocatorApp theApp;
+#endif

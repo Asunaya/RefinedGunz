@@ -18,9 +18,11 @@ public:
 	bool LoadConfig();
 
 	// DB
+#ifdef MFC
 	const CString& GetDBDSN() const			{ return m_strDBDSN; }
 	const CString& GetDBUserName() const	{ return m_strDBUserName; }
 	const CString& GetDBPassword() const	{ return m_strDBPassword; }
+#endif
 
 	// Network
 	const string& GetLocatorIP()	const { return m_strLocatorIP; }
@@ -101,9 +103,11 @@ private :
 	bool	m_bIsTestServerOnly;					// 테스트서버만 Locating
 	
 	// DB
+#ifdef MFC
 	CString m_strDBDSN;
 	CString m_strDBUserName;
 	CString m_strDBPassword;
+#endif
 
 	bool	m_bIsInitCompleted;
 };

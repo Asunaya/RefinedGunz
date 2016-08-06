@@ -1,6 +1,8 @@
 #include "StdAfx.h"
 #include ".\mlocator.h"
+#ifdef MFC
 #include "MLocatorDBMgr.h"
+#endif
 #include "CustomDefine.h"
 #include "MSafeUDP.h"
 #include "mmsystem.h"
@@ -121,6 +123,7 @@ bool MLocator::Create()
 
 bool MLocator::InitDBMgr()
 {
+#ifdef MFC
 	if( 0 != m_pDBMgr )
 		ReleaseDBMgr();
 
@@ -143,6 +146,9 @@ bool MLocator::InitDBMgr()
 	}
 
 	return false;
+#else
+	return true;
+#endif
 }
 
 
@@ -226,14 +232,8 @@ bool MLocator::InitCountryCodeFilter()
 	IPtoCountryList			ipcl;
 	BlockCountryCodeList	bcl;
 	CustomIPList			cil;
-
-	//if( !GetLocatorDBMgr()->GetIPtoCountryList(ipcl) )
-	//{
-	//	DeleteCountryFilter();
-	//	mlog( "Fail to init IPtoCountryList.\n" );
-	//	return false;
-	//}
 	
+#ifdef MFC
 	if( !GetLocatorDBMgr()->GetBlockCountryCodeList(bcl) )
 	{
 		DeleteCountryFilter();
@@ -248,13 +248,16 @@ bool MLocator::InitCountryCodeFilter()
 		return false;
 	}
 
-	const DWORD s = timeGetTime();
 	if( !GetCountryFilter()->Create(bcl, ipcl, cil) )
 	{
 		DeleteCountryFilter();
 		mlog( "Fail to Create country filter.\n" );
 		return false;
 	}
+#endif
+
+	const DWORD s = timeGetTime();
+
 	const DWORD e = timeGetTime();
 
 	const float t = (e - s)/1000.0f;
@@ -278,12 +281,14 @@ void MLocator::Destroy()
 
 void MLocator::ReleaseDBMgr()
 {
+#ifdef MFC
 	if( 0 != m_pDBMgr )
 	{
 		m_pDBMgr->Disconnect();
 		delete m_pDBMgr;
 		m_pDBMgr = 0;
 	}
+#endif
 }
 
 
@@ -832,8 +837,10 @@ void MLocator::UpdateLocatorLog( const DWORD dwEventTime )
 {
 	if( GetLocatorConfig()->GetElapsedTimeUpdateLocatorLog() < (dwEventTime - GetLocatorStatistics().GetLastUpdatedTime()) )
 	{
+#ifdef MFC
 		GetLocatorDBMgr()->InsertLocatorLog( GetLocatorConfig()->GetLocatorID(),
 			GetLocatorStatistics().GetCountryStatistics() );
+#endif
 		if( 0 != GetServerStatusMgr() )
 		{
 			GetLocatorStatistics().SetDeadServerCount( GetServerStatusMgr()->GetDeadServerCount() );
@@ -1034,14 +1041,9 @@ bool MLocator::IsValidCountryCodeIP( const string& strIP, string& strOutCountryC
 	dwStart =timeGetTime();
 #endif
 
-	// MCountryCodeFilter에 있는지 검사후 없으면 DB에서 검사.
-	// DB에서 검사한 정보는 Filter에 추가.
-	// 추가시 Key가 겹치는지 검사해야 함.
 	if( !GetCountryFilter()->GetIPCountryCode(strIP, strOutCountryCode) )
 	{
-		// 여기가지 내려오면 현제 locator에는 존제하지 않는 ip이기에 CustomIP테이블과 IPtoCountry테이블을 조회해서 
-		// 찾았을경우 업데이트 한다.
-		
+#ifdef MFC
 		uint32_t	dwIPFrom;
 		uint32_t	dwIPTo;
 		bool	bIsBlock;
@@ -1075,13 +1077,16 @@ bool MLocator::IsValidCountryCodeIP( const string& strIP, string& strOutCountryC
 				mlog( "MLocator::IsValidCountryCodeIP - DB에서 읽어온 새로운 IPCountryCode정보를 Filter에 등록하는데 실패.\n" );
 		}
 		else
+#endif
 		{
 			GetLocatorStatistics().IncreaseInvalidIPCount();
 
 			return GetLocatorConfig()->IsAcceptInvalidIP();
 		}
 
+#ifdef MFC
 		strOutCountryCode = strCountryCode;
+#endif
 
 		GetLocatorStatistics().IncreaseCountryCodeCacheHitMissCount();
 	}
@@ -1140,6 +1145,7 @@ void MLocator::UpdateLocatorStatus( const DWORD dwEventTime )
 	if( GetLocatorConfig()->GetMaxElapsedUpdateServerStatusTime() < 
 		(dwEventTime - GetLastLocatorStatusUpdatedTime()) )
 	{
+#ifdef MFC
 		if( 0 == m_pDBMgr )
 			return;
 
@@ -1151,6 +1157,7 @@ void MLocator::UpdateLocatorStatus( const DWORD dwEventTime )
 		{
 			mlog( "fail to update locator status.\n" );
 		}
+#endif
 
 		ResetRecvCount();
 		ResetSendCount();

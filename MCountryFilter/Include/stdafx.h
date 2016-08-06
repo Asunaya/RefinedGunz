@@ -11,6 +11,8 @@
 
 
 #define WIN32_LEAN_AND_MEAN		// 거의 사용되지 않는 내용은 Windows 헤더에서 제외합니다.
+
+#ifdef MFC
 #define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS	// 일부 CString 생성자는 명시적으로 선언됩니다.
 
 #ifndef VC_EXTRALEAN
@@ -19,6 +21,10 @@
 
 #include <afx.h>
 #include <afxwin.h>         // MFC 핵심 및 표준 구성 요소입니다.
+#endif
+
+#include <cassert>
+#define ASSERT assert
 
 // #define _FILTER_TEST
 

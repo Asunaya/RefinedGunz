@@ -2,6 +2,7 @@
 //
 
 #include "stdafx.h"
+#ifdef MFC
 #include "MatchServer.h"
 
 #include "MainFrm.h"
@@ -265,3 +266,4 @@ void CMainFrame::UpdateServerStatusBar()
 	m_wndStatusBar.SetPaneInfo(nIndex, ID_INDICATOR_SERVERSTATUS, SBPS_STRETCH, 200);
 	m_wndStatusBar.SetPaneText(nIndex, strStatus);
 }
+#endif

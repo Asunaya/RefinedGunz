@@ -1,6 +1,7 @@
 #include "stdafx.h"
-#include "MCommandParameter.h"
 #include <string.h>
+#include "MCommand.h"
+#include "MCommandParameter.h"
 
 bool MCommandParamConditionMinMax::Check(MCommandParameter* pCP)
 {

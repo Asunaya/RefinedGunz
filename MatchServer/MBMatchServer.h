@@ -15,8 +15,10 @@ private :
 	MBMatchServerConfigReloader m_ConfigReloader;
 
 public:
+#ifdef MFC
 	COutputView*		m_pView;
 	CCommandLogView*	m_pCmdLogView;
+#endif
 
 	MUID m_uidKeeper;
 protected:
