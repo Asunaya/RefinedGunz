@@ -72,6 +72,7 @@ struct REPLAY_STAGE_SETTING_NODE_OLD
 	bool				bTeamKillEnabled;
 	bool				bTeamWinThePoint;
 	bool				bForcedEntryEnabled;
+	char				pad;
 };
 struct REPLAY_STAGE_SETTING_NODE_V11
 {
@@ -87,7 +88,7 @@ struct REPLAY_STAGE_SETTING_NODE_V11
 	bool				bTeamKillEnabled;
 	bool				bTeamWinThePoint;
 	bool				bForcedEntryEnabled;
-	char				unk2;
+	char				pad;
 };
 
 struct REPLAY_STAGE_SETTING_NODE_FG

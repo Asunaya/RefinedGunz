@@ -143,7 +143,20 @@ inline void ZReplayLoader::GetStageSetting(REPLAY_STAGE_SETTING_NODE& ret)
 	break;
 	case SERVER::REFINED_GUNZ:
 	{
-		Read(ret);
+		if (Version.nVersion == 1)
+		{
+			REPLAY_STAGE_SETTING_NODE_RG_V1 Setting;
+			Read(Setting);
+			CopySetting(Setting);
+		}
+		else if (Version.nVersion == 2)
+		{
+			Read(ret);
+		}
+		else
+		{
+			MLog("ZReplayLoader::GetStageSetting -- Unknown RG version\n");
+		}
 	}
 	break;
 	case SERVER::FREESTYLE_GUNZ:
