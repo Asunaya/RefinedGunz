@@ -8,6 +8,8 @@ MDatabase::MDatabase(void) : m_fnLogCallback( 0 )
 
 MDatabase::~MDatabase(void)
 {
+	if (m_DB.IsOpen())
+		Disconnect();
 }
 
 

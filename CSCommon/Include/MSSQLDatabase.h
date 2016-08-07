@@ -1,10 +1,6 @@
 #pragma once
 
 #include "IDatabase.h"
-#ifdef MFC
-#include "MDatabase.h"
-#include "MCountryFilterDBMgr.h"
-#include "MMatchDBFilter.h"
 
 class MSSQLDatabase final : public IDatabase
 {
@@ -206,21 +202,10 @@ public:
 
 	virtual bool AdminResetAllHackingBlock() override;
 
-	CString BuildDSNString(const CString strDSN, const CString strUserName, const CString strPassword);
-	bool Connect(CString strDSNConnect);
-	void Disconnect();
-
 private:
-	MDatabase	m_DB;
-	CString		m_strDSNConnect;
-
-	MCountryFilterDBMgr m_CountryFilterDBMgr;
-
-	MMatchDBFilter m_DBFilter;
-
-	static void LogCallback(const string& strLog);
 	void Log(const char *pFormat, ...);
 
 	bool CheckOpen();
+
+	std::unique_ptr<class MSSQLDatabaseImpl> Impl;
 };
-#endif

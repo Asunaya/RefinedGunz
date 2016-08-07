@@ -33,6 +33,7 @@ Library*/
 cml/MatchServer Debug/*
 cml/MatchServer Release/*
 MatchServer/Log
+CsCommon/MSSQL
 
 # Visual Studio 2015 cache/options directory
 .vs/

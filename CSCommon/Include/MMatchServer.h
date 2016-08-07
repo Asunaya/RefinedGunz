@@ -62,7 +62,7 @@ struct DBVariant
 		U() {}
 		~U() {}
 		SQLiteDatabase sqlite;
-#ifdef MFC
+#ifdef MSSQL_ENABLED
 		MSSQLDatabase mssql;
 #endif
 	};
@@ -80,7 +80,7 @@ struct DBVariant
 
 		if (Type == DatabaseType::SQLite)
 			new (&u) SQLiteDatabase;
-#ifdef MFC
+#ifdef MSSQL_ENABLED
 		else
 			new (&u) MSSQLDatabase;
 #endif
@@ -91,7 +91,7 @@ struct DBVariant
 	{
 		if (Type == DatabaseType::SQLite)
 			u.sqlite.~SQLiteDatabase();
-#ifdef MFC
+#ifdef MSSQL
 		else
 			u.mssql.~MSSQLDatabase();
 #endif

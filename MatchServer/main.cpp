@@ -56,5 +56,6 @@ int main(int argc, char** argv)
 	while (true)
 	{
 		MatchServer.Run();
+		Sleep(1);
 	}
 }

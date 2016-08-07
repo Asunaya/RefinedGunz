@@ -88,6 +88,9 @@
     <Filter Include="HShield">
       <UniqueIdentifier>{d174cab3-21a4-4b86-be4d-3fdd03acbe58}</UniqueIdentifier>
     </Filter>
+    <Filter Include="MCountryFilter">
+      <UniqueIdentifier>{df4fc847-e1fe-4df0-83f1-76c1edc9f3a2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="Doxyfile">
@@ -483,6 +486,12 @@
     <ClInclude Include="Include\MSSQLDatabase.h" />
     <ClInclude Include="Include\IDatabase.h" />
     <ClInclude Include="Include\SQLiteDatabase.h" />
+    <ClInclude Include="Include\MCountryFilter.h">
+      <Filter>MCountryFilter</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\MCountryFilterDBMgr.h">
+      <Filter>MCountryFilter</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\MCommand.cpp">
@@ -857,6 +866,12 @@
     <ClCompile Include="Source\HitRegistration.cpp" />
     <ClCompile Include="Source\SQLiteDatabase.cpp" />
     <ClCompile Include="Source\MSSQLDatabase.cpp" />
+    <ClCompile Include="Source\MCountryFilter.cpp">
+      <Filter>MCountryFilter</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MCountryFilterDBMgr.cpp">
+      <Filter>MCountryFilter</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Library Include="HShield\HsCryptLib.lib">

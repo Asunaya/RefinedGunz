@@ -270,10 +270,6 @@
       <Project>{cbd109c1-1aa3-4a57-b439-9919c08faaa5}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
-    <ProjectReference Include="..\MCountryFilter\MCountryFilter.vcxproj">
-      <Project>{43faaf56-ea88-4d3f-95b7-14a0582f3290}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
     <ProjectReference Include="..\MDatabase\MDatabase.vcxproj">
       <Project>{98475fa7-bea2-42ee-9b1c-31d9684d237b}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>

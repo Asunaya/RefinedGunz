@@ -1,6 +1,11 @@
-#include "StdAfx.h"
-#ifdef MFC
+#define _WINDOWS_
+#include "stdafx.h"
+#ifdef MSSQL_ENABLED
+#undef ASSERT
+#undef _WINDOWS_
+#undef pi
 #include ".\mcountryfilterdbmgr.h"
+#include <Windows.h>
 
 #include "mmsystem.h"
 #pragma comment( lib, "winmm.lib" )

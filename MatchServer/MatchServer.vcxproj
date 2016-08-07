@@ -5,6 +5,10 @@
       <Configuration>Debug</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="MSSQL|Win32">
+      <Configuration>MSSQL</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Release LTCG|Win32">
       <Configuration>Release LTCG</Configuration>
       <Platform>Win32</Platform>
@@ -28,7 +32,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v140</PlatformToolset>
-    <UseOfMfc>false</UseOfMfc>
+    <UseOfMfc>Static</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MSSQL|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+    <UseOfMfc>Static</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release LTCG|Win32'" Label="Configuration">
@@ -48,6 +58,9 @@
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='MSSQL|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release LTCG|Win32'" Label="PropertySheets">
@@ -71,6 +84,11 @@
     <IntDir>Release\</IntDir>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MSSQL|Win32'">
+    <OutDir>Runtime\</OutDir>
+    <IntDir>Release\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release LTCG|Win32'">
     <OutDir>Runtime\</OutDir>
     <IntDir>Release\</IntDir>
@@ -90,7 +108,7 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalOptions>/NODEFAULTLIB:libc.lib /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/ignore:4099 %(AdditionalOptions)</AdditionalOptions>
       <OutputFile>$(OutDir)MatchServerD.exe</OutputFile>
       <IgnoreSpecificDefaultLibraries>libci.lib;libc.lib;comsuppwd.lib;libcmt;nafxcw;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -135,7 +153,50 @@
       <AdditionalDependencies>../CML/Lib/zlib.lib;../sdk/libsodium/lib/static/libsodium.lib;../sdk/sqlite/lib/Release/sqlite.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>Runtime/MatchServer.exe</OutputFile>
       <AdditionalLibraryDirectories>Lib;../sdk/dx9/lib/;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <IgnoreSpecificDefaultLibraries>libci.lib;libc.lib;comsuppw.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>nafxcw.lib;libc.lib;comsuppw.lib;</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <TargetMachine>MachineX86</TargetMachine>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+      <AdditionalOptions>/ignore:4099 %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
+    </Midl>
+    <PreBuildEvent>
+      <Message>공유파일을 복사합니다.</Message>
+    </PreBuildEvent>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+      <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MSSQL|Win32'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <OmitFramePointers>true</OmitFramePointers>
+      <AdditionalIncludeDirectories>../CSCommon/Include;../CML/Include;../MAI/Include;../RealSpace2/Include;../RealSpace/Include;../SafeUDP/Include;../MDatabase/Include;../MCountryFilter/Include;../sdk/libsodium/include;../sdk/dx9/Include/;../Locator;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_WORLDITEM_SERVER;NO_WARN_MBCS_MFC_DEPRECATION;MSSQL_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <MinimalRebuild>false</MinimalRebuild>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>nafxcw.lib;libcmt.lib;../CML/Lib/zlib.lib;../sdk/libsodium/lib/static/libsodium.lib;../sdk/sqlite/lib/Release/sqlite.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>Runtime/MatchServer.exe</OutputFile>
+      <AdditionalLibraryDirectories>Lib;../sdk/dx9/lib/;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>nafxcw.lib;libcmt.lib;libc.lib;comsuppw.lib;</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -178,7 +239,7 @@
       <AdditionalDependencies>../CML/Lib/zlib.lib;../sdk/libsodium/lib/static/libsodium.lib;../sdk/sqlite/lib/Release/sqlite.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>Runtime/MatchServer.exe</OutputFile>
       <AdditionalLibraryDirectories>Lib;../sdk/dx9/lib/;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <IgnoreSpecificDefaultLibraries>nafxcw.lib;libc.lib;comsuppw.lib;</IgnoreSpecificDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>libci.lib;libc.lib;comsuppw.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -215,6 +276,7 @@
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='MSSQL|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release LTCG|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="TrayIcon.cpp" />
@@ -279,10 +341,6 @@
     </ProjectReference>
     <ProjectReference Include="..\Locator\Locator.vcxproj">
       <Project>{52e0f2e1-25fe-4f22-b82c-b000972d8f5a}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\MCountryFilter\MCountryFilter.vcxproj">
-      <Project>{43faaf56-ea88-4d3f-95b7-14a0582f3290}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="..\MDatabase\MDatabase.vcxproj">
       <Project>{98475fa7-bea2-42ee-9b1c-31d9684d237b}</Project>
