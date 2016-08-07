@@ -26,7 +26,9 @@ bool UPnP::Create(WORD Port)
 
 	Destroy();
 
+#ifdef MFC
 	TRACE("UPnP: Adding port\n");
+#endif
 
 	if(!GetIp())
 	{
@@ -44,7 +46,9 @@ bool UPnP::Create(WORD Port)
 	Result = CoCreateInstance(CLSID_UPnPNAT, NULL, CLSCTX_INPROC_SERVER, IID_IUPnPNAT, (void **)&Nat);
 	if(FAILED(Result))
 	{
+#ifdef MFC
 		TRACE("UPnP: Unable to create UPnPNAT interface\n");
+#endif
 		return false;
 	}
 
@@ -55,7 +59,9 @@ bool UPnP::Create(WORD Port)
 		if(PortMappingCollection) PortMappingCollection->Release();
 		Nat->Release();
 
+#ifdef MFC
 		TRACE("UPnP: Unable to acquire a static portmapping collection\n");
+#endif
 		return false;
 	}
 
@@ -67,11 +73,15 @@ bool UPnP::Create(WORD Port)
 		PortMappingCollection->Release();
 		Nat->Release();
 
+#ifdef MFC
 		TRACE("UPnP: Unable add port\n");
+#endif
 		return false;
 	}
 
+#ifdef MFC
 	TRACE("UPnP: Port %d forwarded to %s\n", Port, m_Address);
+#endif
 
 	PortMap->Release();
 	PortMappingCollection->Release();
@@ -94,7 +104,9 @@ void  UPnP::Destroy(void)
 	Port = m_Port;
 	m_Port = 0;
 
+#ifdef MFC
 	TRACE("UPnP: Removing Port\n");
+#endif
 
 	swprintf(Protocol, L"TCP");
 
@@ -102,7 +114,9 @@ void  UPnP::Destroy(void)
 	Result = CoCreateInstance(CLSID_UPnPNAT, NULL, CLSCTX_INPROC_SERVER, IID_IUPnPNAT, (void **)&Nat);
 	if(FAILED(Result))
 	{
+#ifdef MFC
 		TRACE("UPnP: Unable to create UPnPNAT interface\n");
+#endif
 		return;
 	}
 
@@ -113,7 +127,9 @@ void  UPnP::Destroy(void)
 		if(PortMappingCollection) PortMappingCollection->Release();
 		Nat->Release();
 
+#ifdef MFC
 		TRACE("UPnP: Unable to acquire a static portmapping collection\n");
+#endif
 		return;
 	}
 
@@ -124,7 +140,9 @@ void  UPnP::Destroy(void)
 		PortMappingCollection->Release();
 		Nat->Release();
 
+#ifdef MFC
 		TRACE("UPnP: Unable to remove port\n");
+#endif
 		return;
 	}
 }
@@ -141,15 +159,21 @@ bool UPnP::GetIp(void)
 	// Get your own Ip
 	if(ret = gethostname(HostName, 256) != 0)
 	{
+#ifdef MFC
 		TRACE("UPnP: gethostname failed\n");
+#endif
 		return false;
 	}else{
+#ifdef MFC
 		TRACE("UPnP: HostName: %s\n", HostName);
+#endif
 	}
 	Host = gethostbyname(HostName);
 	if(Host == NULL)
 	{
+#ifdef MFC
 		TRACE("UPnP: gethostbyname failed\n");
+#endif
 		return false;
 	}
 	Addr.sin_addr.s_addr = ((IN_ADDR *)Host->h_addr)->s_addr;
@@ -157,13 +181,17 @@ bool UPnP::GetIp(void)
 
 	if(!Address)
 	{
+#ifdef MFC
 		TRACE("UPnP: inet_ntoa failed\n");
+#endif
 		return false;
 	}
 
 	strncpy(m_Address, Address, sizeof(m_Address) - 1);
 
+#ifdef MFC
 	TRACE("UPnP: Local Ip: %s\n", m_Address);
+#endif
 
 	return true;
 }

@@ -3208,14 +3208,18 @@ bool ZGameClient::CreateUPnP(unsigned short nUDPPort)
 	// Activate Port
 	if(m_pUPnP->Create(nUDPPort))
 	{
+#ifdef MFC
 		TRACE("UPnP: Port: %d\n", nUDPPort);
+#endif
 		mlog("%d upnp port forward initialized.\n",nUDPPort);
 		return true;
 	}
 	else
 	{
 		// Failed: Use Default Port
+#ifdef MFC
 		TRACE("UPnP: Failed to forward port\n");
+#endif
 //		Sleep(1000);
 	}
 	return false;

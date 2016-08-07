@@ -1,5 +1,12 @@
 #include "stdafx.h"
 
+#undef pi
+#include <windows.h>
+#include <wingdi.h>
+#include <mmsystem.h>
+#include <shlwapi.h>
+#include <shellapi.h>
+
 #ifdef _HSHIELD
 #include "HShield/HShield.h"
 #endif
@@ -12,11 +19,6 @@
 #include "ZPrerequisites.h"
 #include "ZConfiguration.h"
 #include "ZGameClient.h"
-#include <windows.h>
-#include <wingdi.h>
-#include <mmsystem.h>
-#include <shlwapi.h>
-#include <shellapi.h>
 
 #include "dxerr9.h"
 
@@ -52,7 +54,6 @@
 #include "RShaderMgr.h"
 #endif
 
-//#include "mempool.h"
 #include "RLenzFlare.h"
 #include "ZLocale.h"
 #include "MSysInfo.h"
