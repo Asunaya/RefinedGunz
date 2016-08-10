@@ -7,14 +7,10 @@
 #include <shlwapi.h>
 #include <shellapi.h>
 
-#ifdef _HSHIELD
-#include "HShield/HShield.h"
-#endif
-
-#ifdef _XTRAP
-#include "XTrap/XTrap.h"
-#pragma comment ( lib, "XTrap/Multy C Type/XTrapIC.lib")
-#endif
+#pragma warning(push)
+#pragma warning(disable:4091)
+#include <ShlObj.h>
+#pragma warning(pop)
 
 #include "ZPrerequisites.h"
 #include "ZConfiguration.h"
@@ -1085,8 +1081,6 @@ bool CheckFont()
 	}
 	return true;
 }
-
-#include "shlobj.h"
 
 void CheckFileAssociation()
 {

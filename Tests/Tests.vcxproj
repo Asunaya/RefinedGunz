@@ -134,9 +134,6 @@
     <ProjectReference Include="..\Gunz\Gunz.vcxproj">
       <Project>{8041eb15-6294-4bd7-a597-c2af493f6340}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\MCountryFilter\MCountryFilter.vcxproj">
-      <Project>{43faaf56-ea88-4d3f-95b7-14a0582f3290}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\MDatabase\MDatabase.vcxproj">
       <Project>{98475fa7-bea2-42ee-9b1c-31d9684d237b}</Project>
     </ProjectReference>
