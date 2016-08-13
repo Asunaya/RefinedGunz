@@ -33,7 +33,7 @@ public:
 	void IncreaseSendCount()		{ ++m_nSendCount; }
 	void IncreaseDuplicatedCount()	{ ++m_nDuplicatedCount; }
 
-	auto* GetServerStatusMgr()		 { return m_pServerStatusMgr; }
+	auto* GetServerStatusMgr()		 { return m_pServerStatusMgr; }	
 	auto* GetServerStatusMgr() const { return m_pServerStatusMgr; }
 
 	void DumpLocatorStatusInfo();

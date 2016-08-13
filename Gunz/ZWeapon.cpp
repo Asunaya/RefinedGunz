@@ -422,8 +422,8 @@ void ZWeaponItemkit::UpdatePost(DWORD dwPickPassFlag)
 		if(m_bSendMsg==false) {
 
 			if(m_uidOwner == ZGetGameClient()->GetPlayerUID()) {
-
-				ZPostRequestSpawnWorldItem(ZGetGameClient()->GetPlayerUID(), m_nWorldItemID, m_Position );
+				if (ZGetGameClient()->GetMatchStageSetting()->GetNetcode() != NetcodeType::ServerBased)
+					ZPostRequestSpawnWorldItem(ZGetGameClient()->GetPlayerUID(), m_nWorldItemID, m_Position);
 				m_PostPos = m_Position;
 			}
 
@@ -645,26 +645,11 @@ bool ZWeaponGrenade::Update(float fElapsedTime)
 
 		// 어딘가에 충돌했다
 		if(bPicked && fabsf(Magnitude(pickpos-m_Position))<fDist)
-		//*/
-
-		/*
-		RBSPPICKINFO bpi;
-		bool bPicked=ZGetGame()->GetWorld()->GetBsp()->Pick(m_Position,dir,&bpi,dwPickPassFlag);
-		if(bPicked)
-		{
-			pickpos=bpi.PickPos;
-			rplane plane=bpi.pNode->pInfo[bpi.nIndex].plane;
-			normal=rvector(plane.a,plane.b,plane.c);
-		}
-
-		if(bPicked && fabsf(Magnitude(bpi.PickPos-m_Position))<fDist)
-		*/
 		{
 			m_Position=pickpos+normal;
 			m_Velocity=GetReflectionVector(m_Velocity,normal);
-			m_Velocity*=zpi.pObject ? 0.4f : 0.8f;		// 캐릭터에 충돌하면 속도가 많이 준다
+			m_Velocity*=zpi.pObject ? 0.4f : 0.8f;
 
-			// 소리를 낸다 테스트
 			if(zpi.bBspPicked && m_nSoundCount>0) {
 				m_nSoundCount--;
 				ZGetSoundEngine()->PlaySound("we_grenade_fire",m_Position);

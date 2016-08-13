@@ -98,39 +98,47 @@ void MBMatchServer::Shutdown()
 #endif
 }
 
-void MBMatchServer::Log(unsigned int nLogLevel, const char* szLog)
+static void MBMatchServerLog(unsigned int LogLevel, const char* Msg, bool Newline)
 {
+	static std::mutex LogMutex;
 	std::lock_guard<std::mutex> Lock(LogMutex);
 #ifdef _DEBUG
-	if (nLogLevel || LOG_DEBUG)
+	if (LogLevel | MMatchServer::LOG_DEBUG)
 	{
-		OutputDebugString(szLog);
-		OutputDebugString("\n");
+		OutputDebugString(Msg);
+		if (Newline)
+			OutputDebugString("\n");
 	}
 #endif
 
 	CTime theTime = CTime::GetCurrentTime();
-	CString szTime = theTime.Format( "[%c] " );
+	CString szTime = theTime.Format("[%c] ");
 
-	if (nLogLevel || LOG_FILE)
+	if (LogLevel | MMatchServer::LOG_FILE)
 	{
 		char szTemp[1024];
 		strcpy(szTemp, szTime);
-		strcat(szTemp, szLog);
-		strcat(szTemp, "\n");
-		mlog("%s", szTemp);
+		strcat(szTemp, Msg);
+		if (Newline)
+			strcat(szTemp, "\n");
+		MLogFile(szTemp);
 	}
 
 #ifdef MFC
 	if (nLogLevel || LOG_PROG)
 	{
-		if(m_pView==NULL) return;
+		if (m_pView == NULL) return;
 		m_pView->AddString(szTime, TIME_COLOR, false);
-		m_pView->AddString(szLog, RGB(0,0,0));
+		m_pView->AddString(szLog, RGB(0, 0, 0));
 	}
 #else
-	printf("%s%s\n", static_cast<const char*>(szTime), szLog);
+	printf("%s%s%s", static_cast<const char*>(szTime), Msg, Newline ? "\n" : "");
 #endif
+}
+
+void MBMatchServer::Log(unsigned int LogLevel, const char* Msg)
+{
+	MBMatchServerLog(LogLevel, Msg, true);
 }
 
 bool MBMatchServer::InitSubTaskSchedule()
@@ -404,8 +412,6 @@ void MBMatchServer::InitLocator()
 	if (!MGetServerConfig()->IsMasterServer())
 		return;
 
-	Log(LOG_ALL, "Creating locator...");
-
 	Locator = std::make_unique<MLocator>();
 	if (!Locator->Create())
 	{
@@ -413,8 +419,8 @@ void MBMatchServer::InitLocator()
 		Locator.reset();
 		return;
 	}
-
-	Log(LOG_ALL, "Locator created!");
+	else
+		Log(LOG_ALL, "Locator created!");
 }
 
 void MBMatchServer::XTrap_RandomKeyGenW(char* strKeyValue)
@@ -554,4 +560,9 @@ void MBMatchServer::OnRun()
 		Locator->Run();
 
 	MMatchServer::OnRun();
+}
+
+void CustomLog(const char* Msg)
+{
+	MBMatchServerLog(MMatchServer::LOG_ALL & ~MMatchServer::LOG_FILE, Msg, false);
 }

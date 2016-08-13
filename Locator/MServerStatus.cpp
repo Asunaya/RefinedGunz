@@ -8,6 +8,9 @@
 
 const int MakeCustomizeMin( const string& strTime )
 {
+	if (strTime.length() < 16)
+		return -1;
+
 	int nHourConvMin;
 	int nMin;
 	char szVal[ 3 ];
@@ -53,6 +56,7 @@ void MServerStatusMgr::Insert( const MServerStatus& ss )
 
 void MServerStatusMgr::CheckDeadServerByLastUpdatedTime( const int nMarginOfErrMin, const int nCmpCustomizeMin )
 {
+#ifdef LOCATOR_FREESTANDING
 	SetLiveServerCount( 0 );
 	SetDeadServerCount( 0 );
 	ClearDeadServerIDList();
@@ -60,6 +64,7 @@ void MServerStatusMgr::CheckDeadServerByLastUpdatedTime( const int nMarginOfErrM
 	for_each( m_ServerStatusVec.begin(),
 			  m_ServerStatusVec.end(),
 			  MDeadTimeServerChecker<MServerStatus>(nMarginOfErrMin, nCmpCustomizeMin, this) );
+#endif
 }
 
 

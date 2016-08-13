@@ -973,7 +973,7 @@ bool MSSQLDatabase::DeleteCharacter(const int nAID, const int nCharIndex, const 
 		if (!CheckOpen()) return false;
 
 	CString strSQL;
-	strSQL.Format(g_szDB_DELETE_CHAR, nAID, nCharIndex, FilterSQL(szCharName));
+	strSQL.Format(g_szDB_DELETE_CHAR, nAID, nCharIndex, FilterSQL(szCharName).c_str());
 
 	CODBCRecordset rs(&Impl->m_DB);
 

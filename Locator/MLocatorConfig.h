@@ -4,7 +4,7 @@
 
 
 #ifdef _DEBUG
-	#define LOCATOR_CONFIG "./DbgLocator.ini"
+	#define LOCATOR_CONFIG "./Locator.ini"
 #else 
 	#define LOCATOR_CONFIG "./Locator.ini"
 #endif

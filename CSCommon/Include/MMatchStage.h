@@ -122,7 +122,6 @@ public:
 	unsigned long GetStartTime()	{ return m_nStartTime; }		///< 게임 시작한 시간
 public:
 	MMatchStage();
-	virtual ~MMatchStage();
 
 	auto GetObjectList() { return MakePairValueAdapter(m_ObjUIDCaches); }
 
@@ -219,10 +218,11 @@ public:
 	int GetMinPlayerLevel();	// 방에 있는 플레이어중 최소 레벨을 구한다.
 
 	bool CheckUserWasVoted( const MUID& uidPlayer );
-public:
-	// Rule에서 호출하는 함수들
+
 	void OnRoundEnd_FromTeamGame(MMatchTeam nWinnerTeam);
 	void OnInitRound();			// 라운드 시작시 Rule클래스에서 호출
+
+	void UpdateWorldItems();
 };
 
 

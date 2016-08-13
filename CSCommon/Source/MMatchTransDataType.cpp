@@ -37,7 +37,7 @@ void Make_MTDWorldItem(MTD_WorldItem* pOut, MMatchWorldItem* pWorldItem)
 	else
 		pOut->nItemSubType = MTD_Static;
 	
-	pOut->x = (short)Roundf(pWorldItem->x);
-	pOut->y = (short)Roundf(pWorldItem->y);
-	pOut->z = (short)Roundf(pWorldItem->z);
+	pOut->x = (short)Roundf(pWorldItem->Origin.x);
+	pOut->y = (short)Roundf(pWorldItem->Origin.y);
+	pOut->z = (short)Roundf(pWorldItem->Origin.z);
 }

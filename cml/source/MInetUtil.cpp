@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "Winsock2.h"
 #include "MInetUtil.h"
-#include <iostream>
 
 void MConvertCompactIP(char* szOut, int maxlen, const char* szInputDottedIP)
 {

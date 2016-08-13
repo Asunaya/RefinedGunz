@@ -55,7 +55,7 @@ bool MLocatorConfig::LoadDBConfig()
 
 bool MLocatorConfig::LoadNetConfig()
 {
-	char szVal[ 256 ];
+	char szVal[256];
 
 #ifdef LOCATOR_FREESTANDING
 	GetPrivateProfileString( "NETWORK", "IP", "", szVal, 255, LOCATOR_CONFIG );
@@ -64,69 +64,53 @@ bool MLocatorConfig::LoadNetConfig()
 #endif
 
 	GetPrivateProfileString( "NETWORK", "PORT", "", szVal, 255, LOCATOR_CONFIG );
-	if( 0 == strlen(szVal) ) return false;
-	SetLocatorPort( atoi(szVal) );
+	if (strlen(szVal) == 0)
+	{
+		MLog("MLocatorConfig::LoadNetConfig - Couldn't find port option in config\n");
+		return false;
+	}
+	SetLocatorPort(atoi(szVal));
 
 	return true;
 }
 
+static auto LoadField(const char* Field, const char* Default = "")
+{
+	char szVal[256];
+	GetPrivateProfileString("ENV", Field, Default, szVal, 255, LOCATOR_CONFIG);
+	if (strlen(szVal) == 0)
+	{
+		char err_msg[256];
+		sprintf_safe(err_msg, "Couldn't find %s option in config", Field);
+		throw std::runtime_error(err_msg);
+	}
+	return atoi(szVal);
+}
 
 bool MLocatorConfig::LoadEnvConfig()
 {
-	char szVal[ 256 ];
-	GetPrivateProfileString( "ENV", "ID", "", szVal, 255, LOCATOR_CONFIG );
-	if( 0 == strlen(szVal) ) return false;
-	SetLocatorID( atoi(szVal) );
-
-	GetPrivateProfileString( "ENV", "LOCATOR_UID_HIGH", "", szVal, 255, LOCATOR_CONFIG );
-	if( 0 == strlen(szVal) ) return false;
-	unsigned long nHighUID = static_cast< unsigned long >( atol(szVal) );
-
-	GetPrivateProfileString( "ENV", "LOCATOR_UID_LOW", "", szVal, 255, LOCATOR_CONFIG );
-	if( 0 == strlen(szVal) ) return false;
-	unsigned long nLowUID = static_cast< unsigned long >( atol(szVal) );
-
-	SetLocatorUID( MUID(nHighUID, nLowUID) );
-
-	GetPrivateProfileString( "ENV", "MAX_ELAPSED_UPDATE_SERVER_STATUS_TIME", "", szVal, 255, LOCATOR_CONFIG );
-	if( 0 == strlen(szVal) ) return false;
-	SetMaxElapsedUpdateServerSTatusTime( static_cast<unsigned long>(atol(szVal)) );
-
-	GetPrivateProfileString( "ENV", "UDP_LIVE_TIME", "", szVal, 255, LOCATOR_CONFIG );
-	if( 0 == strlen(szVal) ) return false;
-	SetUDPLiveTime( static_cast<unsigned long>(atol(szVal)) );
-
-	GetPrivateProfileString( "ENV", "MAX_FREE_RECV_COUNT_PER_LIVE_TIME", "", szVal, 255, LOCATOR_CONFIG );
-	if( 0 == strlen(szVal) ) return false;
-	SetMaxFreeUseCountPerLiveTime( atoi(szVal) );
-
-	GetPrivateProfileString( "ENV", "BLOCK_TIME", "", szVal, 255, LOCATOR_CONFIG );
-	if( 0 == strlen(szVal) ) return false;
-	SetBlockTime( static_cast<unsigned long>(atol(szVal)) );
-
-	GetPrivateProfileString( "ENV", "UPDATE_UDP_MANAGER_ELAPSED_TIME", "", szVal, 255, LOCATOR_CONFIG );
-	if( 0 == strlen(szVal) ) return false;
-	SetUpdateUDPManagerElapsedTime( static_cast<unsigned long>(atol(szVal)) );
-
-	GetPrivateProfileString( "ENV", "MARGIN_OF_ERROR_MIN", "", szVal, 255, LOCATOR_CONFIG );
-	if( 0 == strlen(szVal) ) return false;
-	SetMarginOfErrorMin( static_cast<unsigned long>(atoi(szVal)) );
-
-	GetPrivateProfileString( "ENV", "USE_COUNTRY_CODE_FILTER", "", szVal, 255, LOCATOR_CONFIG );
-	if( 0 == strlen(szVal) ) return false;
-	SetCountryCodeFilterStatus( 0 == stricmp("yes", szVal) );
-
-	GetPrivateProfileString( "ENV", "ELAPSED_TIME_UPDATE_LOCATOR_LOG", "", szVal, 255, LOCATOR_CONFIG );
-	if( 0 == strlen(szVal) ) return false;
-	SetElapsedTimeUpdateLocaorLog( static_cast<DWORD>(atoi(szVal)) );
-
-	GetPrivateProfileString( "ENV", "ACCEPT_INVALID_IP", "1", szVal, 255, LOCATOR_CONFIG );
-	if( 0 == strlen(szVal) ) return false;
-	SetAcceptInvalidIP( atoi(szVal) != 0 );
-
-	GetPrivateProfileString( "ENV", "TEST_SERVER", "0", szVal, 255, LOCATOR_CONFIG );
-	if( 0 == strlen(szVal) ) return false;
-	SetTestServerOnly( atoi(szVal) != 0 );
+	try
+	{
+		SetLocatorID(LoadField("ID"));
+		auto High = LoadField("LOCATOR_UID_HIGH");
+		auto Low = LoadField("LOCATOR_UID_LOW");
+		SetLocatorUID(MUID(High, Low));
+		SetMaxElapsedUpdateServerSTatusTime(LoadField("MAX_ELAPSED_UPDATE_SERVER_STATUS_TIME"));
+		SetUDPLiveTime(LoadField("UDP_LIVE_TIME"));
+		SetMaxFreeUseCountPerLiveTime(LoadField("MAX_FREE_RECV_COUNT_PER_LIVE_TIME"));
+		SetBlockTime(LoadField("BLOCK_TIME"));
+		SetUpdateUDPManagerElapsedTime(LoadField("UPDATE_UDP_MANAGER_ELAPSED_TIME"));
+		SetMarginOfErrorMin(LoadField("MARGIN_OF_ERROR_MIN"));
+		SetCountryCodeFilterStatus(LoadField("USE_COUNTRY_CODE_FILTER") != 0);
+		SetElapsedTimeUpdateLocaorLog(LoadField("ELAPSED_TIME_UPDATE_LOCATOR_LOG"));
+		SetAcceptInvalidIP(LoadField("ACCEPT_INVALID_IP", "1") != 0);
+		SetTestServerOnly(LoadField("TEST_SERVER", "0") != 0);
+	}
+	catch (std::runtime_error& e)
+	{
+		MLog("MLocatorConfig::LoadEnvConfig - %s\n", e.what());
+		return false;
+	}
 
 	return true;
 }

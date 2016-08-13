@@ -244,6 +244,14 @@ void MMatchObject::Tick(unsigned long int nTime)
 		MGetMatchServer()->PostHPAPInfo(*this, HP, AP);
 		LastHPAPInfoTime = nTime;
 	}
+
+	if (!BasicInfoHistory.empty())
+	{
+		// TODO: Make less ungood!
+		Origin = BasicInfoHistory.front().position;
+		Direction = BasicInfoHistory.front().direction;
+		Velocity = BasicInfoHistory.front().velocity;
+	}
 }
 
 
@@ -278,6 +286,7 @@ void MMatchObject::OnLeaveBattle()
 	SetAlive(false);
 	SetStageState(MOSS_NONREADY);
 	SetLaunchedGame(false);
+	BasicInfoHistory.clear();
 }
 
 
@@ -384,6 +393,14 @@ void MMatchObject::OnDamaged(const MMatchObject& Attacker, const v3& SrcPos,
 	{
 		MGetMatchServer()->OnGameKill(Attacker.GetUID(), GetUID());
 	}
+}
+
+void MMatchObject::Heal(int Amount)
+{
+	auto HPDiff = min(HP + Amount, MaxHP) - HP;
+	HP += HPDiff;
+	AP += Amount - HPDiff;
+	AP = min(AP, MaxAP);
 }
 
 bool MMatchObject::CheckEnableAction(MMO_ACTION nAction)

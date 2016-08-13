@@ -2,7 +2,6 @@
 #include "MAsyncHttp.h"
 #include <crtdbg.h>
 #include <shlwapi.h>
-#include<iostream>
 using namespace std;
 
 #pragma comment(lib, "shlwapi.lib")

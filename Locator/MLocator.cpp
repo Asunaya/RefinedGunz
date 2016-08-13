@@ -72,7 +72,7 @@ bool MLocator::Create()
 	{
 		if (!GetLocatorConfig()->LoadConfig())
 		{
-			mlog("MLocator::Create - Failed to load config");
+			mlog("MLocator::Create - Failed to load config\n");
 			return false;
 		}
 	}
@@ -114,8 +114,6 @@ bool MLocator::Create()
 #ifdef _DEBUG
 	InitDebug();
 #endif
-
-	mlog( "MLocator create.\n" );
 
 	return true;
 }
@@ -392,6 +390,7 @@ bool MLocator::GetServerStatus()
 		Status.SetPort(Config.GetPort());
 		Status.SetServerName(Config.GetServerName());
 		Status.SetOpenState(true);
+		Status.SetLiveStatus(true);
 	}
 
 	auto& Status = ServerStatusMgr[0];
@@ -557,14 +556,6 @@ bool MLocator::UDPSocketRecvEvent( DWORD dwIP, WORD wRawPort, char* pPacket, DWO
 {
 	if( NULL == GetMainLocator() ) return false;
 	if( sizeof(MPacketHeader) > dwSize ) return false;
-
-	// 특정 아이피의 요청이 과도하게 오는지 필터링 함.
-	// 필터링된 아이피는 블럭리스트에 등록되어 일정시간동안 요청이 무시됨.
-
-#ifdef _DEBUG
-	// dwIP = inet_addr( "222.111.150.81" );
-	dwIP = static_cast< DWORD >( rand() );
-#endif
 	
 	const DWORD dwEventTime = timeGetTime(); // Recv이벤트처리에 사용할 시간.
 

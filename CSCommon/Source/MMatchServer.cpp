@@ -625,9 +625,7 @@ bool MMatchServer::Create(int nPort)
 #endif
 
 	if(OnCreate()==false){
-//		Destroy();
 		LOG(LOG_ALL, "Match Server create FAILED (Port:%d)", nPort);
-
 		return false;
 	}
 
@@ -635,15 +633,6 @@ bool MMatchServer::Create(int nPort)
 	
 	LOG(LOG_ALL, "Match Server Created (Port:%d)", nPort);
 
-/*////////////////// RAONDEBUG DELETE THIS
-	for (int i=0; i<10; i++) {
-		MAsyncDBJob_Test* pJob=new MAsyncDBJob_Test();
-		PostAsyncJob(pJob);
-		Sleep(10);
-	}
-/////////////////*/
-
-	// 디버그용
 	g_PointerChecker[0].Init(NULL);
 	g_PointerChecker[1].Init(m_pScheduler);
 	g_PointerChecker[2].Init(m_pAuthBuilder);
@@ -661,29 +650,12 @@ void MMatchServer::Destroy(void)
 
 	GetQuest()->Destroy();
 
-	for (MMatchObjectList::iterator ObjItor = m_Objects.begin(); 
-		ObjItor != m_Objects.end(); ++ObjItor)
-	{
-		MMatchObject* pObj = (*ObjItor).second;
-		if (pObj)
-		{
-			CharFinalize(pObj->GetUID());
-		}
-	}
+	for (auto* Obj : MakePairValueAdapter(m_Objects))
+		if (Obj)
+			CharFinalize(Obj->GetUID());
 
 	m_ClanMap.Destroy();
-
-
 	m_ChannelMap.Destroy();
-/*
-	MMatchChannelMap::iterator itorChannel = m_ChannelMap.begin();
-	while(itorChannel != m_ChannelMap.end()) {
-		MUID uid = (*itorChannel).first;
-		ChannelRemove(uid, &itorChannel);
-	}
-*/
-
-
 	m_Admin.Destroy();
 	m_AsyncProxy.Destroy();
 	MGetMatchShop()->Destroy();
@@ -1370,15 +1342,16 @@ void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Recei
 			switch (Type)
 			{
 			case ZC_WEAPON_SP_ROCKET:
-			{
 				Stage->MovingWeaponMgr.AddRocket(SenderObj, ItemDesc, Pos, Dir);
-			}
-			break;
+				break;
 			case ZC_WEAPON_SP_ITEMKIT:
-			{
 				Stage->MovingWeaponMgr.AddItemKit(SenderObj, ItemDesc, Pos, Dir);
-			}
-			break;
+				break;
+			case ZC_WEAPON_SP_GRENADE:
+				auto GrenadeSpeed = 1200.f;
+				Stage->MovingWeaponMgr.AddGrenade(SenderObj, ItemDesc, Pos, Dir,
+					Dir * GrenadeSpeed + SenderObj->GetVelocity() + v3{0, 0, 300});
+				break;
 			};
 		}
 		break;

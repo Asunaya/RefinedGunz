@@ -10,11 +10,14 @@
 #include "MMatchConfig.h"
 #include "MMatchServer.h"
 
+static auto Log = [&](auto&&... Args) {
+	MGetMatchServer()->LogF(MMatchServer::LOG_ALL, std::forward<decltype(Args)>(Args)...); };
+
 bool LagCompManager::Create()
 {
 	if (!MGetServerConfig()->HasGameData())
 	{
-		MGetMatchServer()->Log(MMatchServer::LOG_ALL, "game_dir is empty! Server-based netcode will be disabled.");
+		Log("game_dir is empty! Server-based netcode will be disabled.");
 		return false;
 	}
 
@@ -23,7 +26,7 @@ bool LagCompManager::Create()
 	
 	if (!g_pFileSystem->Create(path))
 	{
-		MGetMatchServer()->LogF(MMatchServer::LOG_ALL, "g_pFileSystem->Create failed!");
+		Log("g_pFileSystem->Create failed!");
 		return false;
 	}
 
@@ -32,26 +35,21 @@ bool LagCompManager::Create()
 	ret = LoadAnimations("model/man/man01.xml", 0);
 	if (!ret)
 	{
-		MGetMatchServer()->LogF(MMatchServer::LOG_ALL, "LoadAnimations0 failed!");
+		Log("LoadAnimations0 failed!");
 		return false;
 	}
+	Log("Loaded male animations");
 
 	ret = LoadAnimations("model/woman/woman01.xml", 1);
 	if (!ret)
 	{
-		MGetMatchServer()->LogF(MMatchServer::LOG_ALL, "LoadAnimations1 failed!");
+		Log("LoadAnimations1 failed!");
 		return false;
 	}
+	Log("Loaded female animations");
 
 	SetAnimationMgr(MMS_MALE, &AniMgrs[MMS_MALE]);
 	SetAnimationMgr(MMS_FEMALE, &AniMgrs[MMS_FEMALE]);
-
-	ret = MGetMatchItemDescMgr()->ReadXml(g_pFileSystem, "system/zitem.xml");
-	if (!ret)
-	{
-		MGetMatchServer()->LogF(MMatchServer::LOG_ALL, "Falied to load zitems!");
-		return false;
-	}
 
 	for (auto& Map : g_MapDesc)
 	{
@@ -59,36 +57,35 @@ bool LagCompManager::Create()
 		sprintf_safe(Path, "maps/%s/%s.rs", Map.szMapName, Map.szMapName);
 		ret = Maps[Map.szMapName].Open(Path, RBspObject::ROF_RUNTIME, nullptr, nullptr, true);
 		if (!ret)
-		{
-			MGetMatchServer()->LogF(MMatchServer::LOG_ALL, "Falied to load map %s!", Map.szMapName);
-			return false;
-		}
+			Log("Failed to load map %s!", Map.szMapName);
+		else
+			Log("Loaded map %s", Map.szMapName);
 	}
 
 	//for (int AniIdx = 0; AniIdx < ZC_STATE_LOWER_END; AniIdx++)
 	//{
 	//	auto& AniItem = g_AnimationInfoTableLower[AniIdx];
-	//	MGetMatchServer()->LogF(MMatchServer::LOG_ALL, "%s", AniItem.Name);
+	//	Log("%s", AniItem.Name);
 	//	auto Ani = AniMgrs[0].GetAnimation(AniItem.Name);
 
 	//	if (!Ani)
 	//	{
-	//		MGetMatchServer()->LogF(MMatchServer::LOG_ALL, "Can't find animation!");
+	//		Log("Can't find animation!");
 	//		continue;
 	//	}
 
 	//	if (!Ani->m_pAniData)
 	//	{
-	//		MGetMatchServer()->LogF(MMatchServer::LOG_ALL, "Can't find ani data!");
+	//		Log("Can't find ani data!");
 	//		continue;
 	//	}
 
-	//	MGetMatchServer()->LogF(MMatchServer::LOG_ALL, "Max frame %d", Ani->m_pAniData->m_max_frame);
+	//	Log("Max frame %d", Ani->m_pAniData->m_max_frame);
 
 	//	/*for (int i = 0; i < Ani->m_pAniData->m_max_frame; i++)
 	//	{
 	//		auto v = GetHeadPosition(rvector(0, 0, 0), MMatchSex(0), ZC_STATE_LOWER(AniIdx), i);
-	//		MGetMatchServer()->LogF(MMatchServer::LOG_ALL, "Frame %d: %f, %f, %f", i, v.x, v.y, v.z);
+	//		Log("Frame %d: %f, %f, %f", i, v.x, v.y, v.z);
 	//	}*/
 	//}
 
@@ -109,11 +106,6 @@ bool LagCompManager::LoadAnimations(const char* filename, int Index)
 
 	GetPath(filename, Path);
 
-	//<--------
-
-	//	if( !XmlDoc.LoadFromFile(filename) ) 
-	//		return false;
-
 	char *buffer;
 	MZFile mzf;
 
@@ -121,7 +113,7 @@ bool LagCompManager::LoadAnimations(const char* filename, int Index)
 		if (!mzf.Open(filename, g_pFileSystem)) {
 			if (!mzf.Open(filename))
 			{
-				MGetMatchServer()->LogF(MMatchServer::LOG_ALL, "mzf.Open failed with g_pFileSystem!");
+				Log("mzf.Open failed with g_pFileSystem!");
 				return false;
 			}
 		}
@@ -129,7 +121,7 @@ bool LagCompManager::LoadAnimations(const char* filename, int Index)
 	else {
 		if (!mzf.Open(filename))
 		{
-			MGetMatchServer()->LogF(MMatchServer::LOG_ALL, "mzf.Open failed without g_pFileSystem!");
+			Log("mzf.Open failed without g_pFileSystem!");
 			return false;
 		}
 	}
@@ -141,7 +133,7 @@ bool LagCompManager::LoadAnimations(const char* filename, int Index)
 
 	if (!XmlDoc.LoadFromMemory(buffer))
 	{
-		MGetMatchServer()->LogF(MMatchServer::LOG_ALL, "XmlDoc.LoadFromMemory failed!");
+		Log("XmlDoc.LoadFromMemory failed!");
 		return false;
 	}
 
@@ -242,9 +234,9 @@ bool LagCompManager::LoadAnimations(const char* filename, int Index)
 
 				pAni->SetAnimationLoopType(MLoopType);
 
-				if (SoundFileName[0] == NULL) {//사운드가 등록되지 않았으면 에니메이션 파일 이름이 기본 사운드이름..
+				if (SoundFileName[0] == NULL) {
 					int len = (int)strlen(FileName);
-					strncpy(SoundFileName, FileName, len - 8);//.elu.ani 생략...
+					strncpy(SoundFileName, FileName, len - 8);
 					SoundFileName[len - 8] = NULL;
 
 					strcpy_safe(PathSoundFileName, "/sound/effect/");

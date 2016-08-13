@@ -419,7 +419,6 @@ rem call copy_share.bat
     <ClInclude Include="ArrayView.h" />
     <ClInclude Include="Draw.h" />
     <ClInclude Include="Extensions.h" />
-    <ClInclude Include="has_xxx.h" />
     <ClInclude Include="Hitboxes.h" />
     <ClInclude Include="NewChat.h" />
     <ClInclude Include="Portal.h" />

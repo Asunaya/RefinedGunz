@@ -13,46 +13,36 @@ struct MovingWeapon
 	v3 Pos;
 	v3 Dir;
 	v3 Vel;
+	MMatchItemDesc* ItemDesc;
+	MMatchObject* Owner;
+	MovingWeapon(const v3& Pos, const v3& Dir, const v3& Vel, MMatchItemDesc* ItemDesc, MMatchObject* Owner)
+		: Pos(Pos), Dir(Dir), Vel(Vel), ItemDesc(ItemDesc), Owner(Owner)
+	{ }
 };
 
-template <typename T>
 struct ItemKit : MovingWeapon
 {
-	MMatchItemDesc* ItemDesc;
+	using MovingWeapon::MovingWeapon;
 
-	ItemKit(const v3& Pos, const v3& Dir, const v3& Vel, MMatchItemDesc* ItemDesc)
-		: MovingWeapon({ Pos, Dir, Vel }), ItemDesc(ItemDesc)
-	{ }
-
-	void OnCollision(MovingWeaponManager& Mgr, const v3& ColPos, const MPICKINFO& mpi)
-	{
-		Vel = { 0, 0, 0 };
-	}
-
-	void Update(float Elapsed)
-	{
-	}
-};
-
-struct MedKit : ItemKit<MedKit>
-{
-	using ItemKit::ItemKit;
-
-	void OnHitPlayer(MMatchObject& Obj)
-	{
-	}
+	bool OnCollision(MovingWeaponManager& Mgr, const v3& ColPos, const v3& Normal, const MPICKINFO&);
+	bool Update(MovingWeaponManager& Mgr, float Elapsed);
 };
 
 struct Rocket : MovingWeapon
 {
-	MMatchItemDesc* ItemDesc;
-	MMatchObject* Owner;
+	using MovingWeapon::MovingWeapon;
 
-	Rocket(const v3& Pos, const v3& Dir, const v3& Vel, MMatchItemDesc* ItemDesc, MMatchObject* Owner)
-		: MovingWeapon({ Pos, Dir, Vel }), ItemDesc(ItemDesc), Owner(Owner)
-	{ }
+	bool OnCollision(MovingWeaponManager& Mgr, const v3& ColPos, const v3& Normal, const MPICKINFO&);
+};
 
-	void OnCollision(MovingWeaponManager& Mgr, const v3& ColPos, const MPICKINFO&);
+struct Grenade : MovingWeapon
+{
+	using MovingWeapon::MovingWeapon;
+
+	float Lifetime = 0.0f;
+
+	bool OnCollision(MovingWeaponManager& Mgr, const v3& ColPos, const v3& Normal, const MPICKINFO&);
+	bool Update(MovingWeaponManager& Mgr, float Elapsed);
 };
 
 class MovingWeaponManager
@@ -64,9 +54,11 @@ public:
 	void Update(float Elapsed);
 	void AddRocket(MMatchObject* Owner, MMatchItemDesc* ItemDesc, const v3& Pos, const v3& Dir);
 	void AddItemKit(MMatchObject* Owner, MMatchItemDesc* ItemDesc, const v3& Pos, const v3& Dir);
+	void AddGrenade(MMatchObject* Owner, MMatchItemDesc* ItemDesc,
+		const v3& Pos, const v3& Dir, const v3& Vel);
 
 	class MMatchStage* Stage;
 
 private:
-	MultiVector<MedKit, Rocket> Weapons;
+	MultiVector<ItemKit, Rocket, Grenade> Weapons;
 };

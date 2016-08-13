@@ -23,13 +23,8 @@ bool IsLogAvailable()
 
 void InitLog(int logmethodflags, const char* pszLogFileName)
 {
-//	int i;
 	g_nLogMethod=logmethodflags;
-/*
-	nHead=0;nTail=0;
-	for(i=0;i<MLOG_DEFAULT_HISTORY_COUNT;i++)
-		szLoghistory[i][0]=0;
-*/
+
 	if(g_nLogMethod&MLOGSTYLE_FILE)
 	{
 		GetFullPath(logfilename, sizeof(logfilename), pszLogFileName);
@@ -51,7 +46,6 @@ void __cdecl DMLog(const char* Format, ...)
 	va_start(args, Format);
 	vsprintf_safe(temp, Format, args);
 	va_end(args);
-
 
 	/*FILE *pFile = nullptr;
 	fopen_s(&pFile, logfilename, "a");
@@ -83,6 +77,21 @@ void DLogMatrix(matrix& mat)
 }
 #endif
 
+void MLogFile(const char* Msg)
+{
+	FILE *pFile = nullptr;
+	fopen_s(&pFile, logfilename, "a");
+
+	if (!pFile)
+		fopen_s(&pFile, logfilename, "w");
+
+	if (pFile == nullptr)
+		return;
+
+	fprintf(pFile, "%s", Msg);
+	fclose(pFile);
+}
+
 void __cdecl MLog(const char *pFormat,...)
 {
 	char temp[16 * 1024];
@@ -96,45 +105,17 @@ void __cdecl MLog(const char *pFormat,...)
 
 	if (g_nLogMethod & MLOGSTYLE_FILE)
 	{
-		FILE *pFile = nullptr;
-		fopen_s(&pFile, logfilename, "a");
-
-		if (!pFile)
-			fopen_s(&pFile, logfilename, "w");
-
-		if (pFile == nullptr)
-			return;
-
-		fprintf(pFile, "%s", temp);
-		fclose(pFile);
+		MLogFile(temp);
 	}
 	if (g_nLogMethod & MLOGSTYLE_DEBUGSTRING)
 	{
 		OutputDebugString(temp);
 	}
 
-	/*
-	nTail=(nTail+1)%MLOG_DEFAULT_HISTORY_COUNT;
-	if((nTail==(nHead+1)%MLOG_DEFAULT_HISTORY_COUNT)&&(szLoghistory[nTail][0]))
-		nHead=(nHead+1)%MLOG_DEFAULT_HISTORY_COUNT;
-
-	*/
+	CustomLog(temp);
 }
 
-/*
-char *MGetLogHistory(int i)
-{
-	return NULL;
-	MASSERT((i>=0)&&(i<MLOG_DEFAULT_HISTORY_COUNT));
-	return szLoghistory[(i+nHead)%MLOG_DEFAULT_HISTORY_COUNT];
-}
-
-int MGetLogHistoryCount()
-{
-	return 0;
-	return (nHead<nTail)?(nTail-nHead):MLOG_DEFAULT_HISTORY_COUNT;
-}
-*/
+extern "C" void CustomLogDefault(const char* Msg) {}
 
 #ifdef _WIN32
 #include <windows.h>

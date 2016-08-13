@@ -280,7 +280,8 @@ void ZWorldItemManager::OnOptainWorldItem(ZWorldItem* pItem)
 {
 	if( !CheckBitSet(pItem->GetSpawnTypeFlags(), WORLD_ITEM_STAND_ALINE) )
 	{
-		ZPostRequestObtainWorldItem( ZGetGameClient()->GetPlayerUID(), pItem->GetID() );
+		if (ZGetGameClient()->GetMatchStageSetting()->GetNetcode() != NetcodeType::ServerBased)
+			ZPostRequestObtainWorldItem( ZGetGameClient()->GetPlayerUID(), pItem->GetID() );
 	}
 	else
 	{

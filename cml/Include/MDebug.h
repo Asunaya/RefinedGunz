@@ -31,8 +31,13 @@ static inline void DLogMatrix(matrix& mat)
 }
 #endif
 
-void __cdecl MLog(const char *pFormat,...);
+void MLogFile(const char* Msg);
+void MLog(const char* Format,...);
 #define mlog MLog
+
+extern "C" void CustomLog(const char *Msg);
+
+#pragma comment(linker, "/alternatename:_CustomLog=_CustomLogDefault")
 
 /*
 char *MGetLogHistory(int i);

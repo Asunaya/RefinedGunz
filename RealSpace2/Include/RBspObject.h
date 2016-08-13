@@ -246,7 +246,9 @@ public:
 	} m_OpenMode;
 
 	RBspObject();
-	virtual ~RBspObject();
+	~RBspObject();
+	RBspObject(const RBspObject&) = delete;
+	RBspObject(RBspObject&&) = default;
 
 	void ClearLightmaps();
 

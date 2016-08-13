@@ -458,6 +458,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Include\GlobalTypes.h" />
+    <ClInclude Include="Include\has_xxx.h" />
     <ClInclude Include="Include\MMath.h" />
     <ClInclude Include="Include\MMatrix.h" />
     <ClInclude Include="Include\MPlane.h" />

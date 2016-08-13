@@ -48,21 +48,6 @@ public:
 		memset( buffer, 0, mzf.GetLength() + 1 );
 
 		if( !mzf.Read(buffer,mzf.GetLength()) ) return false;
-		// buffer[mzf.GetLength()] = 0; xml로드 실패 테스트 해보려고 develop에서 복새해옴. -by SungE
-
-
-		/*
-		LANGID LangID = LANG_KOREAN;			// Korean : 이거 정말 하드코딩 박기 싫었는디... 쩝... -_-;;; 
-#ifdef LOCALE_JAPAN
-		LangID = LANG_JAPANESE;					// Japanese 
-#elif  LOCALE_US
-		LangID = LANG_ENGLISH;					// International 
-#elif  LOCALE_BRAZIL
-		LangID = LANG_PORTUGUESE;				// Brazil 
-#elif  LOCALE_INDIA
-		LangID = LANG_ENGLISH;					// India 
-#endif
-		*/
 
 		mlog( "Load XML from memory : %s(0x%04X) ", pszFileName, nLangID);
 
@@ -98,7 +83,6 @@ public:
 			{
 				if(aChild.GetAttribute(&CID,m_strTOK_ATTR.c_str()))
 				{
-					// 이미 등록되어있는게 없어야 한다. ( 메시지 중복 )
 					_ASSERT( m_StringMap.find(CID)==m_StringMap.end() );
 
 					aChild.GetContents(szContents);
@@ -124,7 +108,6 @@ public:
 			return false;
 		}
 
-		// 인자가 없으면 단지 복사만 하고 끝낸다.
 		if ((argnum <= 0) || (argnum > 9))
 		{
 			strcpy_safe(poutStr, maxlen, (*itor).second.c_str());
@@ -133,8 +116,6 @@ public:
 
 		const char* argv[9] = {NULL, };
 
-		//va_list args;
-		//va_start(args, arg1);
 		argv[0] = arg1;
 
 		for (int i = 1; i < argnum; i++)

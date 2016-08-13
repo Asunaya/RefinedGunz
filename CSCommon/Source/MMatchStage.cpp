@@ -17,8 +17,7 @@
 #include "MMatchRuleDuel.h"
 #include "..\MMatchRuleSkillmap.h"
 
-//////////////////////////////////////////////////////////////////////////////////
-MMatchStage::MMatchStage() : MovingWeaponMgr(*this)
+MMatchStage::MMatchStage() : MovingWeaponMgr(*this), m_WorldItemManager(this)
 {
 	m_pRule = NULL;
 	m_nIndex = 0;
@@ -28,11 +27,6 @@ MMatchStage::MMatchStage() : MovingWeaponMgr(*this)
 	m_nAdminObjectCount = 0;
 	memset(m_Teams, 0, sizeof(m_Teams));
 }
-MMatchStage::~MMatchStage()
-{
-
-}
-
 
 bool MMatchStage::Create(const MUID& uid, const char* pszName, bool bPrivate, const char* pszPassword)
 {
@@ -53,8 +47,6 @@ bool MMatchStage::Create(const MUID& uid, const char* pszName, bool bPrivate, co
 	m_nChecksum = 0;
 	m_nLastChecksumTick = 0;
 	m_nAdminObjectCount = 0;
-	
-	m_WorldItemManager.Create(this);
 
 	SetFirstMasterName("");
 
@@ -69,8 +61,6 @@ void MMatchStage::Destroy()
 		itor = RemoveObject(uidPlayer);
 	}
 	m_ObjUIDCaches.clear();
-
-	m_WorldItemManager.Destroy();
 
 	if (m_pRule != NULL)
 	{
@@ -274,6 +264,10 @@ bool MMatchStage::CheckTick(unsigned long nClock)
 	return true;
 }
 
+void MMatchStage::UpdateWorldItems()
+{
+}
+
 void MMatchStage::Tick(unsigned long nClock)
 {
 	switch (GetState())
@@ -310,10 +304,11 @@ void MMatchStage::Tick(unsigned long nClock)
 	// STAGE_STATE_CLOSE 는 MMatchServer::StageRemove 로 처리
 	}
 
-	if (nClock - LastPhysicsTick > 10)
+	if (nClock - LastPhysicsTick >= 10)
 	{
-		MovingWeaponMgr.Update((nClock - m_nLastTick) / 1000.0);
+		MovingWeaponMgr.Update((nClock - LastPhysicsTick) / 1000.0);
 		LastPhysicsTick = nClock;
+		UpdateWorldItems();
 	}
 
 	m_VoteMgr.Tick(nClock);
@@ -844,27 +839,17 @@ void MMatchStage::SetOwnerChannel(MUID& uidOwnerChannel, int nIndex)
 void MMatchStage::ObtainWorldItem(MMatchObject* pObj, const int nItemUID)
 {
 	if (GetState() != STAGE_STATE_RUN) return;
-
-	int nItemID=0;
-	int nExtraValues[WORLDITEM_EXTRAVALUE_NUM];
-
-	if (m_WorldItemManager.Obtain(pObj, short(nItemUID), &nItemID, nExtraValues))
-	{
-		if (m_pRule)
-		{
-			m_pRule->OnObtainWorldItem(pObj, nItemID, nExtraValues);
-		}
-	}
+	m_WorldItemManager.Obtain(pObj, short(nItemUID));
 }
 
-void MMatchStage::RequestSpawnWorldItem(MMatchObject* pObj, const int nItemID, const float x, const float y, const float z)
+void MMatchStage::RequestSpawnWorldItem(MMatchObject* pObj, const int nItemID,
+	const float x, const float y, const float z)
 {
 	if (GetState() != STAGE_STATE_RUN) return;
 
-	// worlditem id가 100이상인 것만 
 	if (nItemID < 100) return;
 
-	m_WorldItemManager.SpawnDynamicItem(pObj, nItemID, x, y, z);
+	m_WorldItemManager.SpawnDynamicItem(nItemID, x, y, z);
 }
 
 void MMatchStage::SpawnServerSideWorldItem(MMatchObject* pObj, const int nItemID, 
@@ -873,7 +858,7 @@ void MMatchStage::SpawnServerSideWorldItem(MMatchObject* pObj, const int nItemID
 {
 	if (GetState() != STAGE_STATE_RUN) return;
 
-	m_WorldItemManager.SpawnDynamicItem(pObj, nItemID, x, y, z, nLifeTime, pnExtraValues );
+	m_WorldItemManager.SpawnDynamicItem(nItemID, x, y, z, nLifeTime, pnExtraValues );
 }
 
 bool MMatchStage::IsApplyTeamBonus()

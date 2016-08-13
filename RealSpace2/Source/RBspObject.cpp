@@ -1408,8 +1408,6 @@ void RecalcBoundingBox(RSBspNode *pNode)
 
 bool RBspObject::Open(const char *filename,ROpenFlag nOpenFlag,RFPROGRESSCALLBACK pfnProgressCallback, void *CallbackParam, bool PhysOnly)
 {
-	mlog("RBspObject::Open : begin %s \n",filename);
-
 	this->PhysOnly = PhysOnly;
 	m_OpenMode = nOpenFlag;
 	m_filename=filename;
@@ -1424,8 +1422,6 @@ bool RBspObject::Open(const char *filename,ROpenFlag nOpenFlag,RFPROGRESSCALLBAC
 	}
 	if(pfnProgressCallback) pfnProgressCallback(CallbackParam,.3f);
 
-	mlog("RBspObject::Open : OpenDescription\n");
-
 	if(!OpenRs(filename))
 	{
 		MLog("Error while loading %s\n",filename);
@@ -1433,15 +1429,6 @@ bool RBspObject::Open(const char *filename,ROpenFlag nOpenFlag,RFPROGRESSCALLBAC
 	}
 
 	if(pfnProgressCallback) pfnProgressCallback(CallbackParam,.6f);
-	mlog("RBspObject::Open : OpenRs \n");
-
-/*	// 봉인
-	char pathfilename[_MAX_PATH];
-	sprintf_safe(pathfilename,"%s.pat",filename);
-	if((nOpenFlag==ROF_ALL || nOpenFlag==ROF_BSPANDPATH) && !OpenPathNode(pathfilename))
-		MLog("Error while loading %s\n",pathfilename);
-*/
-
 
 	char bspname[_MAX_PATH];
 	sprintf_safe(bspname,"%s.bsp",filename);
@@ -1452,7 +1439,6 @@ bool RBspObject::Open(const char *filename,ROpenFlag nOpenFlag,RFPROGRESSCALLBAC
 	}
 
 	if(pfnProgressCallback) pfnProgressCallback(CallbackParam,.8f);
-	mlog("RBspObject::Open : OpenBsp \n");
 
 	char colfilename[_MAX_PATH];
 	sprintf_safe(colfilename,"%s.col",filename);
@@ -1462,13 +1448,10 @@ bool RBspObject::Open(const char *filename,ROpenFlag nOpenFlag,RFPROGRESSCALLBAC
 		return false;
 	}
 
-	// 퀘스트맵만 네비게이션 맵을 읽는다.
 	char navfilename[_MAX_PATH];
 	sprintf_safe(navfilename,"%s.nav",filename);
 	if(!OpenNav(navfilename))
 	{
-		//MLog("Error while loading %s\n",navfilename);
-		//return false;
 	}
 
 	if (!PhysOnly)
@@ -1502,8 +1485,6 @@ bool RBspObject::Open(const char *filename,ROpenFlag nOpenFlag,RFPROGRESSCALLBAC
 
 		UpdateIndexBuffer();
 	}
-
-	mlog("RBspObject::Open : done\n");
 
 	if(pfnProgressCallback) pfnProgressCallback(CallbackParam,1.f);
 
@@ -1623,7 +1604,6 @@ bool RBspObject::Open_MaterialList(MXmlElement *pElement)
 		itor++;
 	}
 
-	mlog("RBspObject::Open : Open_MaterialList\n");
 	return true;
 }
 
@@ -1658,7 +1638,6 @@ bool RBspObject::Open_LightList(MXmlElement *pElement)
 	}
 	llist.erase(llist.begin(),llist.end());
 
-	mlog("RBspObject::Open : Open_LightList\n");
 	return true;
 }
 
@@ -1679,8 +1658,6 @@ bool RBspObject::Open_OcclusionList(MXmlElement *pElement)
 bool RBspObject::Open_ObjectList(MXmlElement *pElement)
 {
 	int i;
-
-	mlog("RBspObject::Open_ObjectList : begin\n");
 
 	MXmlElement	aObjectNode,aChild;
 	int nCount = pElement->GetChildNodeCount();
@@ -1704,31 +1681,6 @@ bool RBspObject::Open_ObjectList(MXmlElement *pElement)
 			char fname[_MAX_PATH];
             GetPurePath(fname,m_descfilename.c_str());
 			strcat(fname,szContents);
-
-			/*
-//			if(bcheck)
-			{
-			//	m_MeshList.SetMtrlAutoLoad(true);
-				pInfo->nMeshID = m_MeshList.Add(fname);
-			//	m_MeshList.SetMtrlAutoLoad(false);
-
-				RMesh *pmesh=m_MeshList.GetFast(pInfo->nMeshID);
-
-				//mtrl 한번등록..
-				if(pmesh) {
-					pBaseMtrlMesh =	pmesh;
-					bcheck = false;
-				}
-			}
-			else {
-				pInfo->nMeshID=m_MeshList.Add(fname);
-
-				RMesh *pmesh=m_MeshList.GetFast(pInfo->nMeshID);
-
-				if(pmesh)
-					pmesh->SetBaseMtrlMesh(pBaseMtrlMesh);
-			}
-			*/
 
 			m_MeshList.SetMtrlAutoLoad(true);
 			m_MeshList.SetMapObject(true);
@@ -1771,18 +1723,9 @@ bool RBspObject::Open_ObjectList(MXmlElement *pElement)
 		}
 	}
 
-	///// objectlist 를 처리한다.
-
-	mlog("RBspObject::Open_ObjectList : size %d \n",m_ObjectList.size());
-
-
 	for(list<ROBJECTINFO*>::iterator it=m_ObjectList.begin();it!=m_ObjectList.end();it++) {
 
 		ROBJECTINFO *pInfo=*it;
-
-//		mlog("RBspObject::Open_ObjectList %d : %s \n",__cnt,pInfo->name.c_str());
-
-		// 미치는 영향이 큰 순서로 하나의 광원을 고른다.
 		float fIntensityFirst=FLT_MIN;
 
 		if(pInfo == NULL) {
@@ -1797,7 +1740,6 @@ bool RBspObject::Open_ObjectList(MXmlElement *pElement)
 			}
 		}
 
-//		mlog("RBspObject::Open_ObjectList : pInfo->pVisualMesh->CalcBox... \n");
 		pInfo->pVisualMesh->CalcBox();
 
 		rvector center = (pInfo->pVisualMesh->m_vBMax+pInfo->pVisualMesh->m_vBMin)*.5f;
@@ -1829,8 +1771,6 @@ bool RBspObject::Open_ObjectList(MXmlElement *pElement)
 			}
 		}
 	}
-
-	mlog("RBspObject::Open_ObjectList : end\n");
 
 	return true;
 }
@@ -2023,26 +1963,11 @@ bool RBspObject::OpenDescription(const char *filename)
 	return true;
 }
 
-/*
-bool RBspObject::OpenPathNode(const char *pathfilename)
-{
-	if(m_PathNodes.Open(pathfilename,m_nConvexPolygon,g_pFileSystem))
-	{
-		mlog("%d pathnodes ",m_PathNodes.size());
-		GeneratePathNodeTable();
-		return true;
-	}
-	return false;
-}
-*/
-
 bool RBspObject::OpenRs(const char *filename)
 {
 	MZFile file;
 	if(!file.Open(filename,g_pFileSystem)) 
 		return false;
-
-	mlog("RBspObject::OpenRs : file.Open \n");
 
 	RHEADER header;
 	file.Read(&header,sizeof(RHEADER));
@@ -2053,13 +1978,9 @@ bool RBspObject::OpenRs(const char *filename)
 		return false;
 	}
 
-	mlog("RBspObject::OpenRs : file.Read(&header) \n");
-
 	// read material indices
 	int nMaterial;
 	file.Read(&nMaterial,sizeof(int));
-
-	mlog("RBspObject::OpenRs : file.Read(&nMaterial) \n");
 
 	if (!PhysOnly)
 	{
@@ -2100,11 +2021,8 @@ bool RBspObject::OpenRs(const char *filename)
 	g_nCreatingPosition=0;
 	g_pLPVertices=m_pOcVertices;
 
-	mlog("RBspObject::OpenRs : Open_Nodes begin \n");
-
 	Open_Nodes(m_pOcRoot,&file);
 
-	mlog("RBspObject::OpenRs : Open_Nodes end \n");
 	return true;
 }
 
@@ -2196,13 +2114,6 @@ bool RBspObject::Open_ColNodes(RSolidBspNode *pNode,MZFile *pfile)
 	
 	pfile->Seek(nPolygon*4*sizeof(rvector),MZFile::current);
 
-	/*
-	// 읽어서 버린다
-	rvector temp;
-	for(int i=0;i<nPolygon*4;i++)
-		pfile->Read(&temp,sizeof(rvector));
-	*/
-
 #endif
 
 	return true;
@@ -2256,13 +2167,10 @@ bool SaveMemoryBmp(int x,int y,void *data,void **retmemory,int *nsize);
 
 bool RBspObject::OpenLightmap()
 {
-//	if(m_ppLightmapTextures) return true;	// 이미 로드되어있다
-
 	char lightmapinfofilename[_MAX_PATH];
 	sprintf_safe(lightmapinfofilename,"%s.lm",m_filename.c_str());
 
 	int i;
-//	int *pLightmapInfo=new int[m_nConvexPolygon];		// lightmap 에 중복이 제거된 인덱스.
 
 	MZFile file;
 	if(!file.Open(lightmapinfofilename,g_pFileSystem)) return false;
@@ -2275,16 +2183,11 @@ bool RBspObject::OpenLightmap()
 		return false;
 	}
 
-	mlog("RBspObject::OpenLightmap : file.Read(&header)\n");
-
 	int nSourcePolygon,nNodeCount;
 	
 	file.Read(&nSourcePolygon,sizeof(int));
 	file.Read(&nNodeCount,sizeof(int));
 
-//	mlog("RBspObject::OpenLightmap : nSourcePolygon = %d ,nNodeCount = %d\n",nSourcePolygon,nNodeCount);
-
-	// 같은 맵에서 생성한 라이트맵인지 확인차 저장해둔것을 확인한다.
 	if(nSourcePolygon!=m_nConvexPolygon || m_nNodeCount!=nNodeCount)
 	{
 		file.Close();
@@ -2294,11 +2197,8 @@ bool RBspObject::OpenLightmap()
 	file.Read(&m_nLightmap,sizeof(int));
 	m_ppLightmapTextures=new LPDIRECT3DTEXTURE9[m_nLightmap];
 
-	mlog("RBspObject::OpenLightmap nCount = %d\n",m_nLightmap);
 	for(i=0;i<m_nLightmap;i++)
 	{
-		mlog("RBspObject::OpenLightmap %d\n",i);
-
 		int nBmpSize;
 		file.Read(&nBmpSize,sizeof(int));
 
@@ -2320,8 +2220,6 @@ bool RBspObject::OpenLightmap()
 		delete bmpmemory;
 //		delete memory;
 	}
-
-	mlog("RBspObject::OpenLightmap : file.Read(&m_nLightmap) done\n");
 
 	// 필요없다 다음버젼에서 삭제하자.
 	for(i=0;i<m_nPolygon;i++)
@@ -2372,8 +2270,6 @@ bool RBspObject::OpenLightmap()
 	for(i=0;i<m_nPolygon;i++)
 		file.Read(&(m_pOcInfo+i)->nLightmapTexture,sizeof(int));
 
-//	mlog("RBspObject::OpenLightmap : file.Read(&(m_pOcInfo) \n");
-
 	// uv 좌표도 읽는다.
 	/*
 	if(!m_pBspRoot)
@@ -2389,11 +2285,7 @@ bool RBspObject::OpenLightmap()
 	for(i=0;i<m_nVertices;i++)
 		file.Read(&(m_pOcVertices+i)->tu2,sizeof(float)*2);
 
-//	mlog("RBspObject::OpenLightmap : file.Read(&(m_pOcVertices) \n");
-
 	file.Close();
-
-	mlog("RBspObject::OpenLightmap : end \n");
 
 	return true;
 }
@@ -4115,9 +4007,6 @@ bool RBspObject::Pick(RSBspNode *pNode, const rvector &v0, const rvector &v1)
 		for(int i=0;i<pNode->nPolygon;i++)
 		{
 			RPOLYGONINFO *pInfo = &pNode->pInfo[i];
-
-			/*MLog("Poly flags & pass flag = %X, dot = %f\n",
-				pInfo->dwFlags & g_dwPassFlag, D3DXPlaneDotCoord(&pInfo->plane, &g_PickOrigin));*/
 
 			if( (pInfo->dwFlags & g_dwPassFlag) != 0 ) continue;
 			if( D3DXPlaneDotCoord(&pInfo->plane,&g_PickOrigin)<0 ) continue;

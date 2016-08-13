@@ -436,10 +436,10 @@ protected:
 	DWORD			m_dwIP;
 	char 			m_szIP[64];
 	unsigned int	m_nPort;
-	bool			m_bFreeLoginIP;					// 인원제한 상관없이 로그인 허용된 클라이언트
+	bool			m_bFreeLoginIP;
 
-	unsigned char	m_nPlayerFlags;					// 휘발성 속성등 (MTD_PlayerFlags)
-	unsigned long	m_nUserOptionFlags;				// 귓말,초대 거부등의 옵션
+	unsigned char	m_nPlayerFlags;
+	unsigned long	m_nUserOptionFlags;
 
 	MUID			m_uidStage;
 	MUID			m_uidChatRoom;
@@ -453,40 +453,39 @@ protected:
 	MRefreshClientChannelImpl		m_RefreshClientChannelImpl;
 	MRefreshClientClanMemberImpl	m_RefreshClientClanMemberImpl;
 
-	MMatchObjectStageState	m_nStageState;	// 대기방에서의 상태정보
+	MMatchObjectStageState	m_nStageState;
 	int				m_nLadderGroupID;
-	bool			m_bLadderChallenging;	// 클랜전 상대팀 대기중인지 여부
+	bool			m_bLadderChallenging;
 
-//	bool			m_bStageMaster;	
 	bool			m_bEnterBattle;
 	bool			m_bAlive;
 	unsigned int	m_nDeadTime;
 
-	bool			m_bNewbie;				// 자신의 캐릭터들의 최고레벨이 10레벨이상이면 입문채널에 들어갈 수 없다.
-	bool			m_bForcedEntried;		// 난입한 플레이어인지 여부.
+	bool			m_bNewbie;
+	bool			m_bForcedEntried;
 	bool			m_bLaunchedGame;
 
-	unsigned int			m_nKillCount;	// 한라운드 죽인수
-	unsigned int			m_nDeathCount;	// 한라운드 죽은수
-	unsigned long int		m_nAllRoundKillCount;	// 전체 라운드의 킬수
-	unsigned long int		m_nAllRoundDeathCount;	// 전체 라운드의 데쓰수
+	unsigned int			m_nKillCount;
+	unsigned int			m_nDeathCount;
+	unsigned long int		m_nAllRoundKillCount;
+	unsigned long int		m_nAllRoundDeathCount;
 
-	bool			m_bWasCallVote;		// 한 게임 안에서 투표건의를 했는가?
+	bool			m_bWasCallVote;
 
-	bool			m_bDBFriendListRequested;		// 친구리스트 DB에 정보요청을 했는지 여부
-	unsigned long int	m_nTickLastPacketRecved;	// 최근 패킷 받은시간
+	bool			m_bDBFriendListRequested;
+	unsigned long int	m_nTickLastPacketRecved;
 	unsigned long int	m_nLastHShieldMsgRecved;
 	bool			m_bHShieldMsgRecved;
-	string				m_strCountryCode3; // filter에서 설정됨.
+	string				m_strCountryCode3;
 
 	DWORD	m_dwLastHackCheckedTime;
 	DWORD	m_dwLastRecvNewHashValueTime;
 	bool	m_bIsRequestNewHashValue;
 
-	DWORD	m_dwLastSpawnTime;				// 마지막으로 스폰 되었던 시간
+	DWORD	m_dwLastSpawnTime;
 
-	unsigned long int m_nLastPingTime;		// 퀘스트모드, 핑 보낸 시간
-	unsigned long int m_nQuestLatency;		// 퀘스트모드
+	unsigned long int m_nLastPingTime;
+	unsigned long int m_nQuestLatency;
 	
 	// This is awkward.
 	std::deque<int> Pings;
@@ -496,6 +495,10 @@ protected:
 	int HP, AP;
 
 	u64 LastHPAPInfoTime = 0;
+
+	v3 Origin;
+	v3 Direction;
+	v3 Velocity;
 
 protected:
 	void UpdateChannelListChecksum(unsigned long nChecksum)	{ m_ChannelInfo.nChannelListChecksum = nChecksum; }
@@ -687,6 +690,9 @@ public:
 	}
 
 	void GetPositions(v3* Head, v3* Foot, double Time) const;
+	auto& GetPosition() const { return Origin; }
+	auto& GetDirection() const { return Direction; }
+	auto& GetVelocity() const { return Velocity; }
 
 	BasicInfoHistoryManager BasicInfoHistory;
 
@@ -698,7 +704,7 @@ public:
 		return BasicInfoHistory.front().SelectedSlot;
 	}
 
-	ZOBJECTHITTEST HitTest(const v3& src, const v3& dest, double Time, v3* OutPos = nullptr)
+	auto HitTest(const v3& src, const v3& dest, double Time, v3* OutPos = nullptr)
 	{
 		v3 Head, Foot;
 		GetPositions(&Head, &Foot, Time);

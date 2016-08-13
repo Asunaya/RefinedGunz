@@ -79,6 +79,7 @@
     <ClInclude Include="Include\GlobalTypes.h" />
     <ClInclude Include="Include\MultiVector.h" />
     <ClInclude Include="Include\MTime.h" />
+    <ClInclude Include="Include\has_xxx.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\MMatrix.cpp">

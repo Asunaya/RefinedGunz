@@ -32,22 +32,21 @@ static bool GetLogFileName(char* pszBuf)
 
 int main(int argc, char** argv)
 {
-	{
-		char LogFileName[256];
-		GetLogFileName(LogFileName);
-		InitLog(MLOGSTYLE_DEBUGSTRING | MLOGSTYLE_FILE, LogFileName);
-	}
+	SetCurrentDirectory("./Runtime");
+
+	char LogFileName[256];
+	GetLogFileName(LogFileName);
+	InitLog(MLOGSTYLE_DEBUGSTRING | MLOGSTYLE_FILE, LogFileName);
 
 	char cwd[256];
 	GetCurrentDirectory(ArraySize(cwd), cwd);
-	printf("cwd: %s\n", cwd);
-	SetCurrentDirectory("./Runtime");
+	MLog("cwd: %s\n", cwd);
 
 	MBMatchServer MatchServer;
 
 	if (!MatchServer.Create(6000))
 	{
-		printf("MMatchServer::Create failed\n");
+		MLog("MMatchServer::Create failed\n");
 		return -1;
 	}
 

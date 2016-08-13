@@ -2563,15 +2563,6 @@ void ZGame::OnAttack(MUID& uid,int type,rvector& pos)
 
 void ZGame::OnDamage(MUID& uid,MUID& tuid,int damage)
 {
-/*
-	ZCharacter* pSender = NULL;		
-	ZCharacter* pTarget = NULL;		
-
-	pSender = m_CharacterManager.Find(uid);
-	pTarget = m_CharacterManager.Find(tuid);
-
-	pTarget->OnSimpleDamaged(NULL,damage,0.5f);
-*/
 }
 
 void ZGame::OnPeerShotSp(MUID& uid, float fShotTime, rvector& pos, rvector& dir,int type,MMatchCharItemParts sel_type)
@@ -2633,44 +2624,20 @@ void ZGame::OnPeerShotSp(MUID& uid, float fShotTime, rvector& pos, rvector& dir,
 	rvector _pos;
 
 	bool dLight = true;
-	bool bSpend = false;	// 사용하면 없어지는 아이템이다
-
-//	ZGetEffectManager()->AddHealEffect(pOwnerCharacter->GetPosition()); // test
-//	ZGetEffectManager()->AddRepireEffect(pOwnerCharacter->GetPosition());
+	bool bSpend = false;
 
 	switch(type)
 	{
 	case ZC_WEAPON_SP_GRENADE : {
-		//static RealSoundEffectSource* pSES	= ZGetSoundEngine()->GetSES("we_grenade_fire");
-		//if( pSES != NULL )
-		//{
-		//	ZGetSoundEngine()->PlaySE( pSES, pos.x, pos.y, pos.z, pOwnerCharacter == m_pMyCharacter );
-		//}
 		bSpend = true;
 
 		velocity	= pOwnerCharacter->GetVelocity()+pOwnerCharacter->m_TargetDir*1200.f;
 		velocity.z	+= 300.f;
 		m_WeaponManager.AddGrenade(pos,velocity,pOwnerCharacter);
-		//m_WeaponManager.AddFlashBang( pos - rvector(10,10,10), velocity, pOwnerCharacter );
-		//m_WeaponManager.AddSmokeGrenade( pos + rvector(10,10,10), velocity, pOwnerCharacter );
 		}break;
 
-	case ZC_WEAPON_SP_ROCKET : {
-		//static RealSoundEffectSource* pSES = ZApplication::GetSoundEngine()->GetSES("rocket_fire");
-		//static RealSoundEffectSource* pSES = ZApplication::GetSoundEngine()->GetSES("we_rocket_fire");
-		//if(pSES!=NULL) ZApplication::GetSoundEngine()->PlaySE(pSES, pos.x, pos.y, pos.z ,pOwnerCharacter==m_pMyCharacter);
-
+	case ZC_WEAPON_SP_ROCKET: {
 			m_WeaponManager.AddRocket(pos,dir,pOwnerCharacter);
-//			m_WeaponManager.AddFireBall(pos,dir,pOwnerCharacter);
-//			m_WeaponManager.AddIceMissile(pos,dir,pOwnerCharacter);
-//			m_WeaponManager.AddMagicMissile(pos,dir,pOwnerCharacter);
-
-			//if (pOwnerCharacter->m_UID == g_pGame->m_pMyCharacter->m_UID) {
-			//	ZItem* pWeapon = pOwnerCharacter->GetItems()->GetSelectedWeapon();
-			//	if ( (pWeapon->GetBulletAMagazine() <= 0) && (pWeapon->GetBullet()>0) ) {
-			//		ZPostReload();
-			//	}
-			//}
 			if(Z_VIDEO_DYNAMICLIGHT)
 				ZGetStencilLight()->AddLightSource( pos, 2.0f, 100 );
 		}break;
