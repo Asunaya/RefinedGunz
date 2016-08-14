@@ -105,28 +105,25 @@ bool ROcclusionList::Save(MXmlElement *pElement)
 	return true;
 }
 
-// bb 가 보이는지를 판정한다
-bool ROcclusionList::IsVisible(rboundingbox &bb)
+bool ROcclusionList::IsVisible(rboundingbox &bb) const
 {
-	for(ROcclusionList::iterator i=begin();i!=end();i++)
+	for(auto* poc : *this)
 	{
-		ROcclusion *poc=*i;
+		bool bVisible = false;
 
-		bool bVisible=false;
-
-		for(int j=0;j<poc->nCount+1;j++)
+		for (int j = 0; j < poc->nCount + 1; j++)
 		{
-			if(isInPlane(&bb,&poc->pPlanes[j]))
+			if (isInPlane(&bb, &poc->pPlanes[j]))
 			{
-				bVisible=true;
+				bVisible = true;
 				break;
 			}
 		}
 
-		// 하나의 occlusion 에라도 가려져있으면 더이상 볼필요없다.
-		if(!bVisible) 
+		if (!bVisible)
 			return false;
 	}
+
 	return true;
 }
 

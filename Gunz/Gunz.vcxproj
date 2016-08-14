@@ -157,6 +157,7 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <AdditionalOptions>/Zm500</AdditionalOptions>
       <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DisableSpecificWarnings>4244;4305;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <AdditionalDependencies>../CML/Lib/zlib.lib;fmodvc.lib;../sdk/libsodium/lib/static/libsodium.lib;legacy_stdio_definitions.lib;../sdk/sqlite/lib/Release/sqlite.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -192,6 +193,7 @@ rem call copy_share.bat
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <AdditionalOptions>/Zm500</AdditionalOptions>
       <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DisableSpecificWarnings>4244;4305;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <AdditionalDependencies>fmodvc.lib;../libsodium/Win32/Release/v140/static/libsodium.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -285,6 +287,7 @@ rem call copy_share.bat
       <AdditionalOptions>/Zm500 %(AdditionalOptions)</AdditionalOptions>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <FloatingPointModel>Fast</FloatingPointModel>
+      <DisableSpecificWarnings>4244;4305;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <AdditionalOptions>/ignore:4099 %(AdditionalOptions)</AdditionalOptions>
@@ -344,7 +347,7 @@ rem call copy_share.bat
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <AdditionalOptions>/Zm500 %(AdditionalOptions)</AdditionalOptions>
-      <DisableSpecificWarnings>4091;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4244;4305;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <FloatingPointModel>Fast</FloatingPointModel>
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>

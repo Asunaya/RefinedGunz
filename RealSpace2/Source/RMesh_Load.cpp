@@ -271,7 +271,7 @@ bool RMesh::SaveXml(char* fname)
 	return true;
 }
 
-void ConvertOldFaceInfo(RFaceInfo* pFInfo,RFaceInfoOld* pOldFInfo,int cnt)
+static void ConvertOldFaceInfo(RFaceInfo* pFInfo,RFaceInfoOld* pOldFInfo,int cnt)
 {
 	for(int i=0;i<cnt;i++) { 
 
@@ -284,31 +284,13 @@ void ConvertOldFaceInfo(RFaceInfo* pFInfo,RFaceInfoOld* pOldFInfo,int cnt)
 	}
 }
 
-/*
-class e_sort_str{
-public:
-	bool operator() (RMeshNode* _a,RMeshNode* _b) {
-		string a = _a->m_Name;
-		string b = _b->m_Name;
-		if( a < b )
-			return true;
-		return false;
-	}
-};
-*/
-
-bool e_sort_str(RMeshNode* _a,RMeshNode* _b) {
-//	string a = _a->m_Name;
-//	string b = _a->m_Name;
+static bool e_sort_str(RMeshNode* _a,RMeshNode* _b) {
 	if( _a->m_Name < _a->m_Name )
 		return true;
 	return false;
 }
 
-// 로딩 속도를 올리려면 맥스익스포터에서 미리해주어도 되지만 변경 사항이 있을경우
-// 익스포트를 다시해야함...
-
-int CheckEf(char* str)
+static int CheckEf(const char* str)
 {
 	if(!str) return 0;
 
@@ -327,7 +309,7 @@ int CheckEf(char* str)
 	return 0;
 }
 
-int CheckEfAlign(char* str,int& ef,int& align)
+static int CheckEfAlign(const char* str,int& ef,int& align)
 {
 	if(!str || str[0]==0)	return -1;
 
@@ -394,7 +376,7 @@ void RMesh::CheckNameToType(RMeshNode* pMeshNode)
 	pMeshNode->m_isDummy = false;
 	pMeshNode->m_isWeaponMesh = false;
 
-	char* pName = pMeshNode->GetName();
+	auto* pName = pMeshNode->GetName();
 
 #define NCMPNAME(name,n)	(_strnicmp(pName,name,n)==0)
 #define CMPNAME(name)		(_stricmp(pName,name)==0)

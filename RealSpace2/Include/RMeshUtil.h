@@ -1,12 +1,4 @@
-#ifndef _RMeshUtil_h
-#define _RMeshUtil_h
-
-//#if _MSC_VER > 1000
-//#pragma once
-//#endif // _MSC_VER > 1000
-
-#pragma warning (disable : 4244)
-#pragma warning (disable : 4305)
+#pragma once
 
 #include <list>
 #include <string>
@@ -29,11 +21,8 @@
 #ifndef USING_VERTEX_SHADER
 #define USING_VERTEX_SHADER
 #endif
-//*/
-using namespace std;
 
 /////////////////////////////////////////////////////
-// max plugins 관련 버전 관리..
 
 #define EXPORTER_MESH_VER1	0x00000011
 #define EXPORTER_MESH_VER2	0x00005001
@@ -47,7 +36,7 @@ using namespace std;
 #define EXPORTER_ANI_VER1	0x00000012
 #define EXPORTER_ANI_VER2	0x00001001
 #define EXPORTER_ANI_VER3	0x00001002
-#define EXPORTER_ANI_VER4	0x00001003	// 에니메이션의 회전값을 미리계산해서 넘김 : 로딩속도 개선
+#define EXPORTER_ANI_VER4	0x00001003
 
 #define EXPORTER_SIG		0x0107f060
 
@@ -66,16 +55,11 @@ typedef struct {
 	int		ani_type;
 } ex_ani_t;
 
-//#define _BLEND_ANIMATION 나중에 하자~
-
-// 모션 선택에 따른 기준..
-
-
 enum RWeaponMotionType {
-	eq_weapon_etc = 0,	// weapon single,double
+	eq_weapon_etc = 0,
 
 	eq_wd_katana,
-	eq_ws_pistol,		// 한손 무기는 권총뿐...
+	eq_ws_pistol,
 	eq_wd_pistol,
 	eq_wd_shotgun,
 	eq_wd_rifle,
@@ -91,40 +75,6 @@ enum RWeaponMotionType {
 
 	eq_weapon_end,
 };
-
-// 고유한 
-
-/*
-
-enum RWeaponType {
-
-	z_weapon_etc = 0,	// weapon single,double
-
-	z_wd_katana,		
-	z_ws_pistol,
-	z_wd_pistol,
-	z_wd_shotgun,
-	z_wd_machinegun,	// 5
-	z_wd_rifle,
-	z_wd_grenade,
-	z_wd_flashbang,
-	z_wd_smoke,
-	z_ws_dagger,
-	z_wd_medikit,
-	z_wd_repairkit,		// 12
-	z_wd_rlauncher,	
-	z_ws_smg,		
-	z_wd_smg,		
-	z_wd_sword,
-	z_wd_blade,			// 17
-	z_wd_dagger,
-
-	z_wd_snifer,
-
-	z_weapon_end,
-};
-
-*/
 
 /*
 
@@ -197,10 +147,6 @@ typedef enum _RMeshPartsPosInfoType {
 	eq_parts_pos_info_RToe0Nub,
 	eq_parts_pos_info_RUpperArm,
 
-	// 위치 추가 더미들
-
-//	eq_parts_pos_info_Lesser_Healing,
-//	eq_parts_pos_info_Healing,
 	eq_parts_pos_info_Effect,
 
 	eq_parts_pos_info_end
@@ -219,7 +165,7 @@ typedef enum _RMeshPartsType {
 
 	// left weapon
 
-	eq_parts_left_pistol,//왼손더미는 권총과 SMG 뿐
+	eq_parts_left_pistol,
 	eq_parts_left_smg,
 	eq_parts_left_blade,
 	eq_parts_left_dagger,
@@ -237,8 +183,6 @@ typedef enum _RMeshPartsType {
 	eq_parts_right_rlauncher,
 	eq_parts_right_sword,
 	eq_parts_right_blade,
-
-	// etc..코드로 붙여줄것들..
 
 	eq_parts_end,
 
@@ -310,7 +254,6 @@ enum RShaderBlendInput {
 };
 
 ///////////////////////////////////////////////////
-// 임시 draw util 
 
 struct	RTLVertex { 
 	D3DXVECTOR4 p;   
@@ -324,7 +267,7 @@ struct	RLVertex {
 	FLOAT tu, tv; 
 };
 
-#ifndef _MAX_EXPORT // max 와 겹침..
+#ifndef _MAX_EXPORT
 
 struct	RVertex { 
 	D3DXVECTOR3 p;   
@@ -338,8 +281,6 @@ struct RBlendVertex
 {
 	D3DXVECTOR3 p;
 	float weight1, weight2;
-//	BYTE matrixIndices;
-//	BYTE matIndex[4];
 	float matIndex[3];
 	D3DXVECTOR3 normal;
 	float tu, tv;	
@@ -379,24 +320,6 @@ class RVertexAniKey : public D3DXVECTOR3 {
 public:
 	int frame;
 };
-
-/*
-struct RRotKey {
-D3DXVECTOR3 v;
-float a;
-int	frame;
-};
-
-struct RPosKey {
-D3DXVECTOR3 v;
-int	frame;
-};
-
-struct RQuatKey {
-D3DXQUATERNION q;
-int	frame;
-};
-*/
 
 struct RFaceInfoOld {
 	int				m_point_index[3];
@@ -599,10 +522,10 @@ public:
 //////////////////////////////////////////////////////////////
 // help func
 
-void	RRot2Quat( RQuatKey& q,RRotKey& v );
-void	RQuat2Mat( D3DXMATRIX& mat, RQuatKey&q );
-int		RMatInv( D3DXMATRIX& q, const D3DXMATRIX& a );
-void	ConvertMat(rmatrix& mat1,rmatrix& mat2);
+void	RRot2Quat(RQuatKey& q, const RRotKey& v);
+void	RQuat2Mat(D3DXMATRIX& mat, const RQuatKey&q);
+int		RMatInv(D3DXMATRIX& q, const D3DXMATRIX& a);
+void	ConvertMat(rmatrix& mat1, const rmatrix& mat2);
 
 
 inline D3DXVECTOR3 operator*(const D3DXVECTOR3 &in_vec, const D3DXMATRIX &mat)
@@ -677,16 +600,16 @@ public:
 
 	void Clear();
 
-	void Add(char* str,bool line=true);
+	void Add(const char* str,bool line=true);
 	void Add(bool b,bool line=true);
 	void Add(char c,bool line=true);
 	void Add(short s,bool line=true);
-	void Add(WORD  w,bool line=true);
+	void Add(u16 w,bool line=true);
 	void Add(int i,bool line=true);
-	void Add(DWORD d,bool line=true);
+	void Add(unsigned long d,bool line=true);
 	void Add(unsigned int u, bool line = true)
 	{
-		Add((DWORD)u, line);
+		Add(static_cast<unsigned long>(u), line);
 	}
 	void Add(float f,bool line=true);
 	void Add(rvector& v,bool line=true);
@@ -716,7 +639,7 @@ public:
 
 public:
 
-	char* GetName();
+	const char* GetName() const;
 	void  SetName(const char* name);
 
 	bool  CheckName(const char* name);
@@ -724,26 +647,22 @@ public:
 
 public:
 
-	int		m_NameID;
-	string	m_Name;
+	int			m_NameID;
+	std::string	m_Name;
 };
 
-/////////////////////////////////////////////////////////////////////////
-
-#pragma warning(disable : 4996)
-
-template<class T>
-class RHashList : public list<T>
+template <class T>
+class RHashList : public std::list<T>
 {
 protected:
-	unordered_map<string,T>	m_HashMap;
-	unordered_map<int,T>		m_HashMapID;
+	std::unordered_map<std::string, T>	m_HashMap;
+	std::unordered_map<int, T>			m_HashMapID;
 public:
 	void PushBack(T pNode) {
 		push_back(pNode);
-		m_HashMap.insert(unordered_map<string,T>::value_type(string(pNode->GetName()),pNode));
-		if(pNode->m_NameID != -1)
-			m_HashMapID.insert(unordered_map<int,T>::value_type( pNode->m_NameID, pNode) );
+		m_HashMap.insert(std::unordered_map<std::string, T>::value_type(std::string(pNode->GetName()), pNode));
+		if (pNode->m_NameID != -1)
+			m_HashMapID.insert(std::unordered_map<int, T>::value_type(pNode->m_NameID, pNode));
 
 	}
 
@@ -755,20 +674,20 @@ public:
 
 	iterator Erase(iterator where) {
 
-		iterator itor = erase(where);
+		auto itor = erase(where);
 
 		if (itor != end()) {
 
-			unordered_map<string,T>::iterator unordered_map_itor = m_HashMap.find( string( (*itor)->GetName() ) );
+			auto it = m_HashMap.find(std::string((*itor)->GetName()));
 
-			if (unordered_map_itor != m_HashMap.end()) {
-				m_HashMap.erase(unordered_map_itor);
+			if (it != m_HashMap.end()) {
+				m_HashMap.erase(it);
 			}
 
-			unordered_map<int,T>::iterator unordered_map_itor_id = m_HashMapID.find( (*itor)->m_NameID );
+			auto it_id = m_HashMapID.find((*itor)->m_NameID);
 
-			if (unordered_map_itor_id != m_HashMapID.end()) {
-				m_HashMapID.erase(unordered_map_itor_id);
+			if (it_id != m_HashMapID.end()) {
+				m_HashMapID.erase(it_id);
 			}
 		}
 		return itor;
@@ -776,7 +695,7 @@ public:
 
 	T Find(const char *name) {
 
-		unordered_map<string,T>::iterator itor = m_HashMap.find( string(name) );
+		auto itor = m_HashMap.find( string(name) );
 
 		if (itor != m_HashMap.end()) {
 			return (*itor).second;
@@ -785,13 +704,11 @@ public:
 	}
 
 	T Find(int id) {
-		unordered_map<int,T>::iterator itor = m_HashMapID.find(id);
+		auto itor = m_HashMapID.find(id);
 		if (itor != m_HashMapID.end()) {
-			return (*itor).second;
+			return itor->second;
 		}
-		return NULL;
+		return nullptr;
 	}
 
 };
-
-#endif//_RMeshUtil_h

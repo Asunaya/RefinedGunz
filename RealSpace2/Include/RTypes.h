@@ -9,26 +9,12 @@
 #include "d3dx9math.h"
 #include "GlobalTypes.h"
 
-using namespace std;
-
 #include "RNameSpace.h"
 _NAMESPACE_REALSPACE2_BEGIN
 
 #define pi D3DX_PI
 
 enum rsign { NEGATIVE= -1, ZERO= 0, POSITIVE= 1 };
-
-// Enum형 type들
-/*
-enum RPIXELFORMAT {
-	RPIXELFORMAT_565 = 1,
-	RPIXELFORMAT_555 = 2,
-	RPIXELFORMAT_X888 = 3
-};
-*/
-
-// 별필요없는듯해서 그냥 d3dformat 을 쓴다
-// 쓰는 포맷은 D3DFMT_X8R8G8B8 , D3DFMT_R5G6B5 , D3DFMT_X1R5G5B5  이정도..
 
 #define RPIXELFORMAT D3DFORMAT
 

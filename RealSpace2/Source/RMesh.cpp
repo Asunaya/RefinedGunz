@@ -477,7 +477,7 @@ int RMesh::_FindMeshId(int e_name)
 	return -1;
 }
 
-int RMesh::_FindMeshId(char* name)
+int RMesh::_FindMeshId(const char* name)
 {
 	if (m_list.empty())
 		return -1;

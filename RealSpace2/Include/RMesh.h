@@ -418,7 +418,7 @@ public:
 	void DelMeshList();
 
 	int _FindMeshId(int e_name);
-	int _FindMeshId(char* name);
+	int _FindMeshId(const char* name);
 	int	 FindMeshId(RMeshNode* pNode);
 
 	int  FindMeshParentId(RMeshNode* pMeshNode);

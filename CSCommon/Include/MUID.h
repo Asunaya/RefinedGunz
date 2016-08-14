@@ -249,4 +249,17 @@ public:
 
 using MMatchObjectMap = MUIDRefCache<class MMatchObject>;
 
+namespace std
+{
+	template <>
+	class hash<MUID> : public hash<uint64_t>
+	{
+	public:
+		size_t operator()(const MUID &UID) const
+		{
+			return hash<uint64_t>::operator()(*(uint64_t *)&UID);
+		}
+	};
+}
+
 #endif

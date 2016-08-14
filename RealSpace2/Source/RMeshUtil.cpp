@@ -644,7 +644,7 @@ void RVbuffer<T>::Render()
 //
 
 
-void RRot2Quat( RQuatKey& q,RRotKey& v )
+void RRot2Quat( RQuatKey& q, const RRotKey& v )
 {
 	D3DXQUATERNION out;
 	D3DXVECTOR3 vec;
@@ -658,7 +658,7 @@ void RRot2Quat( RQuatKey& q,RRotKey& v )
 	q.x = out.x;	q.y = out.y;	q.z = out.z;	q.w = out.w;
 }
 
-void RQuat2Mat( D3DXMATRIX& mat, RQuatKey&q )
+void RQuat2Mat( D3DXMATRIX& mat, const RQuatKey&q )
 {
 	D3DXQUATERNION out;
 
@@ -675,7 +675,7 @@ int RMatInv( D3DXMATRIX& q, const D3DXMATRIX& a ) {
 	return 1;
 }
 
-void ConvertMat(rmatrix& mat1,rmatrix& mat2)
+void ConvertMat(rmatrix& mat1, const rmatrix& mat2)
 {
 	mat1 = mat2;
 
@@ -954,7 +954,7 @@ void RDebugStr::Clear() {
 	m_str.clear();
 }
 
-void RDebugStr::Add(char* str,bool line) {
+void RDebugStr::Add(const char* str,bool line) {
 
 	if(!str) return;
 
@@ -991,7 +991,7 @@ void RDebugStr::Add(short s,bool line) {
 	if(line) AddLine();
 }
 
-void RDebugStr::Add(WORD w,bool line) {
+void RDebugStr::Add(u16 w,bool line) {
 
 	sprintf_safe(m_temp,"%d",w);
 	m_str += m_temp;
@@ -1007,7 +1007,7 @@ void RDebugStr::Add(int i,bool line) {
 	if(line) AddLine();
 }
 
-void RDebugStr::Add(DWORD d,bool line) {
+void RDebugStr::Add(unsigned long d,bool line) {
 
 	sprintf_safe(m_temp,"%d",d);
 	m_str += m_temp;
@@ -1052,9 +1052,9 @@ void RDebugStr::PrintLog() {
 
 ////////////////////////////////////////////////////////////////////////
 
-char* RBaseObject::GetName()
+const char* RBaseObject::GetName() const
 {
-	return (char*)m_Name.c_str();
+	return m_Name.c_str();
 }
 
 void RBaseObject::SetName(const char* name)

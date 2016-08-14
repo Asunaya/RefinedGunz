@@ -1708,9 +1708,7 @@ void ZCharacter::OnChangeWeapon(char* WeaponModelName)
 	
 }
 
-// 디자이너 작업 때문에... Debug 모드에서만 사용~
-
-char* GetPartsNextName(RMeshPartsType ptype,RVisualMesh* pVMesh,bool bReverse)
+static const char* GetPartsNextName(RMeshPartsType ptype,RVisualMesh* pVMesh,bool bReverse)
 {
 
 	static bool bFirst = true;

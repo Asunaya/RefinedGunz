@@ -147,7 +147,7 @@ inline constexpr size_t ArraySize(T(&)[size])
 	return size;
 }
 
-static std::pair<bool, int> StringToInt(const char* String, int Radix = 10)
+inline std::pair<bool, int> StringToInt(const char* String, int Radix = 10)
 {
 	char *endptr = nullptr;
 
@@ -158,6 +158,45 @@ static std::pair<bool, int> StringToInt(const char* String, int Radix = 10)
 
 	return{ true, IntVal };
 }
+
+template <typename T>
+class D3DPtr
+{
+public:
+	T* ptr = nullptr;
+
+	D3DPtr() : ptr(nullptr) {}
+	D3DPtr(T* p) : ptr(p) {}
+	D3DPtr(const D3DPtr&) = delete;
+	D3DPtr(D3DPtr&& src) { Move(std::move(src)); }
+
+	D3DPtr<T>& operator=(const D3DPtr&) = delete;
+	D3DPtr<T>& operator=(D3DPtr&& src)
+	{
+		Move(std::move(src));
+		return *this;
+	}
+
+	~D3DPtr() { Release(); }
+
+	operator T*() const { return ptr; }
+	T* operator ->() const { return ptr; }
+	T** operator &() { return &ptr; }
+
+private:
+	void Move(D3DPtr&& src)
+	{
+		Release();
+		ptr = src.ptr;
+		src.ptr = nullptr;
+	}
+
+	void Release()
+	{
+		if (ptr)
+			ptr->Release();
+	}
+};
 
 
 

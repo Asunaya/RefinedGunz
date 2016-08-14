@@ -73,62 +73,6 @@ private:
 	int Position;
 };
 
-namespace std
-{
-	template <>
-	class hash<MUID> : public hash<uint64_t>
-	{
-	public:
-		size_t operator()(const MUID &UID) const
-		{
-			return hash<uint64_t>::operator()(*(uint64_t *)&UID);
-		}
-	};
-}
-
-template <typename T>
-class D3DPtr
-{
-public:
-	T* ptr = nullptr;
-
-	D3DPtr() : ptr(nullptr)
-	{
-	}
-
-	D3DPtr(T* p) : ptr(p)
-	{
-	}
-
-	~D3DPtr()
-	{
-		if (ptr)
-			ptr->Release();
-	}
-
-	operator T*() const
-	{
-		return ptr;
-	}
-
-	T* operator =(T* rhs)
-	{
-		ptr = rhs;
-
-		return ptr;
-	}
-
-	T* operator ->() const
-	{
-		return ptr;
-	}
-
-	T** operator &()
-	{
-		return &ptr;
-	}
-};
-
 #define STACK_ALLOC(sa_type, sa_num) static_cast<std::add_pointer<sa_type>::type>((sa_num) * sizeof(sa_type) > 5012 ? new char[sa_num * sizeof(sa_type)] : alloca(sa_num * sizeof(sa_type)))
 #define MAKE_STACK_ARRAY(msa_type, msa_num, ...) StackArray<msa_type>(STACK_ALLOC(msa_type, msa_num), msa_num, (msa_num) * sizeof(msa_type) > 5012, __VA_ARGS__)
 
