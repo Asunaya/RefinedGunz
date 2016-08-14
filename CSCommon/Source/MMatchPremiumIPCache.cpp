@@ -105,8 +105,8 @@ void MMatchPremiumIPCache::OnDBFailed()
 
 void MMatchPremiumIPCache::Update()
 {
-	static DWORD tmLastUpdate = 0;
-	DWORD tmNow = GetGlobalTimeMS();
+	static u64 tmLastUpdate = 0;
+	auto tmNow = GetGlobalTimeMS();
 	if (tmNow - tmLastUpdate < MAX_PREMIUMIP_CACHE_TICK) {
 		return;
 	} else {

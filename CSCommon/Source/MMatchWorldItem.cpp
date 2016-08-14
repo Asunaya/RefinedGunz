@@ -308,7 +308,7 @@ bool MMatchWorldItemManager::Obtain(MMatchObject* pObj, short nItemUID)
 		auto desc_it = MGetMatchWorldItemDescMgr()->find(WorldItem.nItemID);
 		if (desc_it != MGetMatchWorldItemDescMgr()->end())
 		{
-			pObj->Heal(desc_it->second->m_fAmount);
+			pObj->Heal(static_cast<int>(desc_it->second->m_fAmount));
 		}
 	}
 

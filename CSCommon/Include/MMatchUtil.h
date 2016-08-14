@@ -5,8 +5,7 @@
 #include "MPacketCrypter.h"
 #include "MUID.h"
 
-// 유틸리티 펑션들
-unsigned long int MGetTimeDistance(unsigned long int nTimeA, unsigned long int nTimeB);
+inline auto MGetTimeDistance(u64 a, u64 b) { return b - a; }
 
 class MZFileSystem;
 unsigned long MGetMemoryChecksum(char *pBuffer, int nLen);

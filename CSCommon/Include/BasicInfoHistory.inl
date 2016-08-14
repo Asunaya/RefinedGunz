@@ -29,10 +29,10 @@ bool BasicInfoHistoryManager::GetPositions(v3* OutHead, v3* OutFoot, v3* OutDir,
 		if (!LowerAni)
 			return Pos + v3(0, 0, 180);
 
-		int LowerFrame = GetFrame(*LowerAni, pre_it->lowerstate, ItemDesc, LowerFrameTime);
+		int LowerFrame = GetFrame(*LowerAni, pre_it->lowerstate, ItemDesc, static_cast<float>(LowerFrameTime));
 		int UpperFrame = 0;
 		if (HasUpperAni)
-			UpperFrame = GetFrame(*UpperAni, ZC_STATE_LOWER(0), nullptr, UpperFrameTime);
+			UpperFrame = GetFrame(*UpperAni, ZC_STATE_LOWER(0), nullptr, static_cast<float>(UpperFrameTime));
 
 		return GetAbsHead(Pos, Dir, Sex,
 			pre_it->lowerstate, pre_it->upperstate,
@@ -73,10 +73,10 @@ bool BasicInfoHistoryManager::GetPositions(v3* OutHead, v3* OutFoot, v3* OutDir,
 	if (pre_it != post_it)
 	{
 		auto t = double(Time - pre_it->RecvTime) / double(post_it->RecvTime - pre_it->RecvTime);
-		AbsPos = Lerp(pre_it->position, post_it->position, t);
-		Dir = Slerp(pre_it->direction, post_it->direction, t);
-		LowerFrameTime = Lerp(pre_it->LowerFrameTime, post_it->LowerFrameTime, t);
-		UpperFrameTime = Lerp(pre_it->UpperFrameTime, post_it->UpperFrameTime, t);
+		AbsPos = Lerp(pre_it->position, post_it->position, static_cast<float>(t));
+		Dir = Slerp(pre_it->direction, post_it->direction, static_cast<float>(t));
+		LowerFrameTime = Lerp(pre_it->LowerFrameTime, post_it->LowerFrameTime, static_cast<float>(t));
+		UpperFrameTime = Lerp(pre_it->UpperFrameTime, post_it->UpperFrameTime, static_cast<float>(t));
 	}
 	else
 	{

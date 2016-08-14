@@ -19,7 +19,7 @@
 
 #include "sodium.h"
 
-#define _STATUS_CMD_START	unsigned long int nStatusStartTime = GetGlobalTimeMS();
+#define _STATUS_CMD_START	auto nStatusStartTime = GetGlobalTimeMS();
 #define _STATUS_CMD_END		MGetServerStatusSingleton()->AddCmd(pCommand->GetID(), 0, GetGlobalTimeMS()-nStatusStartTime);
 
 bool MMatchServer::OnCommand(MCommand* pCommand)

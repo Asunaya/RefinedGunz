@@ -290,8 +290,8 @@ public:
 	RLightList *GetObjectLightList() { return &m_StaticObjectLightList; }
 	RLightList *GetSunLightList() { return &m_StaticSunLigthtList; }
 
-	auto* GetOcRootNode() { return m_pOcRoot; }
-	auto* GetRootNode() { return m_pBspRoot; }
+	RSBspNode* GetOcRootNode() { if (OcRoot.empty()) return nullptr; return OcRoot.data(); }
+	RSBspNode* GetRootNode() { if (BspRoot.empty()) return nullptr; return BspRoot.data(); }
 
 	rvector GetDimension() const;
 
@@ -374,10 +374,12 @@ private:
 	void ChooseNodes(RSBspNode *bspNode);
 	int ChooseNodes(RSBspNode *bspNode, rvector &center, float fRadius);
 
-	auto* GetLeafNode(rvector &pos) { return m_pBspRoot->GetLeafNode(pos); }
+	auto* GetLeafNode(rvector &pos) { return BspRoot[0].GetLeafNode(pos); }
 
 	bool ReadString(MZFile *pfile, char *buffer, int nBufferSize);
-	bool Open_Nodes(RSBspNode *pNode, MZFile *pfile, BSPVERTEX** Vertices);
+	// Returns number of vertices, nodes and infos read, respectively. 
+	std::tuple<ptrdiff_t, ptrdiff_t, ptrdiff_t> Open_Nodes(RSBspNode *pNode, MZFile *pfile,
+		BSPVERTEX* Vertices, RSBspNode* Node, RPOLYGONINFO* Info);
 	bool Open_ColNodes(RSolidBspNode *pNode, MZFile *pfile);
 	bool Open_MaterialList(MXmlElement *pElement);
 	bool Open_LightList(MXmlElement *pElement);
@@ -410,8 +412,10 @@ private:
 	std::vector<BSPVERTEX>	BspVertices;
 	std::vector<BSPVERTEX>	OcVertices;
 	std::vector<u16>		OcIndices;
-	RSBspNode *m_pBspRoot, *m_pOcRoot;
-	RPOLYGONINFO *m_pBspInfo, *m_pOcInfo;
+	std::vector<RSBspNode> BspRoot;
+	std::vector<RSBspNode> OcRoot;
+	std::vector<RPOLYGONINFO> BspInfo;
+	std::vector<RPOLYGONINFO> OcInfo;
 	int m_nPolygon, m_nNodeCount;
 	int m_nBspPolygon, m_nBspNodeCount, m_nBspVertices, m_nBspIndices;
 	LPDIRECT3DVERTEXBUFFER9 m_pVertexBuffer;

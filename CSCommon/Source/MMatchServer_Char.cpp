@@ -370,8 +370,8 @@ void MMatchServer::CheckExpiredItems(MMatchObject* pObj)
 		if (pCheckItem->IsRentItem())
 		{
 			// 인스턴스 생성되고나서 지난 시간
-			unsigned long int nPassTime = MGetTimeDistance(pCheckItem->GetRentItemRegTime(), GetTickTime());
-			int nPassMinuteTime = nPassTime / (1000 * 60);
+			auto nPassTime = MGetTimeDistance(pCheckItem->GetRentItemRegTime(), GetTickTime());
+			int nPassMinuteTime = static_cast<int>(nPassTime / (1000 * 60));
 
 			if ((pCheckItem->GetRentMinutePeriodRemainder()-nPassMinuteTime) <= 0)
 			{
@@ -471,12 +471,12 @@ bool MMatchServer::CharFinalize(const MUID& uidPlayer)
 	// 캐릭끝날때 로그 남긴다
 	if (pCharInfo->m_nCID != 0)
 	{
-		unsigned long int nPlayTime = 0;		// 1 = 1초
-		unsigned long int nNowTime = GetTickTime();
+		u32 nPlayTime = 0;
+		auto nNowTime = GetTickTime();
 
 		if (pCharInfo->m_nConnTime != 0)
 		{
-			nPlayTime = MGetTimeDistance(pCharInfo->m_nConnTime, nNowTime) / 1000;
+			nPlayTime = static_cast<u32>(MGetTimeDistance(pCharInfo->m_nConnTime, nNowTime) / 1000);
 		}
 
 		MAsyncDBJob_CharFinalize* pJob = new MAsyncDBJob_CharFinalize();

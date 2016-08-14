@@ -66,12 +66,12 @@ void MLadderStatistics::Save()
 #define MTIME_LADDER_STAT_SAVE_TICK		3600000			// (1000 * 60 * 60)	1½Ã°£
 
 
-void MLadderStatistics::Tick(unsigned long nTick)
+void MLadderStatistics::Tick(u64 nTick)
 {
-	if (nTick - GetLastTick() < MTIME_LADDER_STAT_SAVE_TICK)
+	if (nTick - m_nLastTick < MTIME_LADDER_STAT_SAVE_TICK)
 		return;
 	else
-		SetLastTick(nTick);
+		m_nLastTick = nTick;
 
 
 	Save();

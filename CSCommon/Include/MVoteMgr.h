@@ -1,10 +1,7 @@
-#ifndef _MVOTEMGR_H
-#define _MVOTEMGR_H
-
-//#pragma once
+#pragma once
 
 #include "MUID.h"
-using namespace std;
+
 #include <list>
 #include <map>
 
@@ -30,9 +27,9 @@ class MVoteDiscuss {
 protected:
 	MUID			m_uidStage;			// 스테이지UID
 	string			m_strDiscuss;		// 안건
-	unsigned long	m_nBeginTime;		// 발의된 시간
-	list<MUID>		m_YesVoterList;		// 찬성자
-	list<MUID>		m_NoVoterList;		// 반대자
+	u64				m_nBeginTime;		// 발의된 시간
+	std::list<MUID>		m_YesVoterList;		// 찬성자
+	std::list<MUID>		m_NoVoterList;		// 반대자
 
 public:
 	MVoteDiscuss(const MUID& uidStage);
@@ -40,7 +37,7 @@ public:
 
 	MUID GetStageUID()	{ return m_uidStage; }
 	const char* GetDiscussName()	{ return m_strDiscuss.c_str(); }
-	unsigned long GetBeginTime()	{ return m_nBeginTime; }
+	auto GetBeginTime() const	{ return m_nBeginTime; }
 	size_t GetYesVoterCount()	{ return m_YesVoterList.size(); }
 	size_t GetNoVoterCount()	{ return m_NoVoterList.size(); }
 
@@ -85,28 +82,9 @@ public:
 
 	bool CallVote(MVoteDiscuss* pDiscuss);
 	bool Vote(const MUID& uid, MVOTE nVote);
-	void Tick(unsigned long nClock);
+	void Tick(u64 nClock);
 
 	bool IsGoingOnVote() { return (0 != m_pDiscuss); }
 
 	void StopVote( const MUID& uidUser );
 };
-
-/*
-void Client()
-{
-	MVoteMgr	m_VoteMgr;
-
-	m_VoteMgr.AddVoter( MUID(0,1) );
-	m_VoteMgr.AddVoter( MUID(0,2) );
-	m_VoteMgr.AddVoter( MUID(0,3) );
-
-	m_VoteMgr.CallVote(new MVoteDiscussKick());
-
-	m_VoteMgr.Vote(MUID(0,1), MVOTE_YES);
-	m_VoteMgr.Vote(MUID(0,2), MVOTE_YES);
-	m_VoteMgr.Vote(MUID(0,3), MVOTE_NO);
-}
-*/
-
-#endif

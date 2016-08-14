@@ -75,7 +75,7 @@ public:
 	void RemoveObject(const MUID& uid);
 
 	
-	void Tick(unsigned long nClock);
+	void Tick(u64 nClock);
 	void SyncPlayerList(MMatchObject* pObj, int nCategory);
 	void InitClanInfoFromDB();			// db에서 클랜정보를 초기화한다.
 	bool CheckLifePeriod();
@@ -111,19 +111,19 @@ public:
 
 ///////////////////////////////////
 
-class MMatchClanMap : public map<int, MMatchClan*>
+class MMatchClanMap : public std::map<int, MMatchClan*>
 {
 private:
-	unsigned long	m_nLastTick;						///< 틱
-	map<std::string, MMatchClan*>	m_ClanNameMap;
+	u64	m_nLastTick;
+	std::map<std::string, MMatchClan*>	m_ClanNameMap;
 	void CreateClan(int nCLID, const char* szClanName);
 	void DestroyClan(int nCLID, MMatchClanMap::iterator* pNextItor);
-	bool CheckTick(unsigned long nClock);
+	bool CheckTick(u64 nClock);
 public:
 	MMatchClanMap();
 	virtual ~MMatchClanMap();
 	void Destroy(); 
-	void Tick(unsigned long nClock);
+	void Tick(u64 nClock);
 
 	void AddObject(const MUID& uid, MMatchObject* pObj);
 	void RemoveObject(const MUID& uid, MMatchObject* pObj);

@@ -17,7 +17,7 @@ MRefreshCategory::~MRefreshCategory()
 {
 }
 
-bool MRefreshCategory::UpdateChecksum(unsigned long nTick)
+bool MRefreshCategory::UpdateChecksum(u64 nTick)
 {
 	if (nTick > GetLastUpdateTick() + TIME_CATEGORY_UPDATE) {
 		SetLastUpdateTick(nTick);
@@ -83,7 +83,7 @@ void MSmartRefresh::AddCategory(MRefreshCategory* pCategory)
 	m_CategoryMap.insert(MRefreshCategoryMap::value_type(pCategory->GetCategory(), pCategory));
 }
 
-void MSmartRefresh::UpdateCategory(unsigned int nTick)
+void MSmartRefresh::UpdateCategory(u64 nTick)
 {
 	for (MRefreshCategoryMap::iterator i=m_CategoryMap.begin(); i!=m_CategoryMap.end(); i++) {
 		MRefreshCategory* pCategory = (*i).second;

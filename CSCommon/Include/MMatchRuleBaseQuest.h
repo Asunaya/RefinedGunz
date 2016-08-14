@@ -16,13 +16,13 @@ protected:
 	MQuestPlayerManager			m_PlayerManager;			///< 플레이어 관리자
 	bool						m_bQuestCompleted;			///< 퀘스트가 끝났는지 여부
 
-	unsigned long int			m_nLastNPCSpawnTime;		// for test
+	u64							m_nLastNPCSpawnTime;		// for test
 	int							m_nNPCSpawnCount;			///< 스폰된 NPC수
-	unsigned long int			m_nSpawnTime;				///< 마지막 NPC 스폰 시간
+	u64							m_nSpawnTime;				///< 마지막 NPC 스폰 시간
 	int							m_nFirstPlayerCount;		///< 처음 게임시작시 플레이어 수
 
-	unsigned long int			m_nLastNPCAssignCheckTime;	///< 마지막으로 NPC 재할당 체크를 한 시간
-	unsigned long int			m_nLastPingTime;			///< 마지막으로 클라이언트 핑 잰 시간
+	u64							m_nLastNPCAssignCheckTime;	///< 마지막으로 NPC 재할당 체크를 한 시간
+	u64							m_nLastPingTime;			///< 마지막으로 클라이언트 핑 잰 시간
 
 protected:
 	virtual void OnBegin();								///< 전체 게임 시작시 호출

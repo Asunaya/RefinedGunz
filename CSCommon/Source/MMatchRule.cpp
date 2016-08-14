@@ -144,7 +144,7 @@ bool MMatchRule::OnCheckBattleTimeOut(unsigned int tmTimeSpend)	// true 리턴하면
 
 bool MMatchRule::OnRun()
 {
-	DWORD nClock = MMatchServer::GetInstance()->GetGlobalClockCount();
+	auto nClock = MMatchServer::GetInstance()->GetGlobalClockCount();
 
 	switch (GetRoundState())
 	{
@@ -202,7 +202,7 @@ bool MMatchRule::OnRun()
 				// OnRoundTimeOut();
 				SetRoundState( MMATCH_ROUNDSTATE_FINISH );
 			} 
-			else if (OnCheckBattleTimeOut(nClock - GetRoundStateTimer())) 
+			else if (OnCheckBattleTimeOut(static_cast<u32>(nClock - GetRoundStateTimer()))) 
 			{
 				// Make Draw Game...
 
@@ -215,22 +215,6 @@ bool MMatchRule::OnRun()
 			}
 
 			CheckOnGameEvent();
-			
-			/*
-			int nInGamePlayer = 0;
-			for (MUIDRefCache::iterator i=GetStage()->GetObjBegin(); i!=GetStage()->GetObjEnd(); i++) 
-			{
-				MMatchObject* pObj = (MMatchObject*)(*i).second;
-				if ((pObj->GetEnterBattle() == true) || (pObj->IsLaunchedGame() == true))
-				{
-					nInGamePlayer++;
-					// 게임을 하고 있는 유저에대한 이벤트도 같이 검사를 한다. 
-					GetOnGameEventManager().CheckEventObj( pObj, nClock );
-					continue;
-				}
-			}
-			if (nInGamePlayer == 0) SetRoundState(MMATCH_ROUNDSTATE_EXIT);
-			*/
 			
 			return true;
 		}
@@ -375,7 +359,7 @@ void MMatchRule::CheckOnBeginEvent()
 	if( !GetOnBeginEventManager().Empty() )
 	{
 		MMatchObject* pObj;
-		const DWORD dwClock = MMatchServer::GetInstance()->GetGlobalClockCount();
+		auto dwClock = MMatchServer::GetInstance()->GetGlobalClockCount();
 		GetOnBeginEventManager().StartNewEvent();
 		for (auto i=GetStage()->GetObjBegin(); i!=GetStage()->GetObjEnd(); i++)
 		{
@@ -397,7 +381,7 @@ void MMatchRule::CheckOnGameEvent()
 		int nInGamePlayer = 0;
 
 		MMatchObject*	pObj = nullptr;
-		const DWORD		dwClock = MMatchServer::GetInstance()->GetGlobalClockCount();
+		auto			dwClock = MMatchServer::GetInstance()->GetGlobalClockCount();
 
 		for (auto i=GetStage()->GetObjBegin(); i!=GetStage()->GetObjEnd(); i++)
 		{
@@ -422,7 +406,7 @@ void MMatchRule::CheckOnEndEvent()
 	if( !GetOnEndEventManager().Empty() )
 	{
 		MMatchObject*	pObj;
-		const DWORD		dwClock = MMatchServer::GetInstance()->GetGlobalClockCount();
+		auto			dwClock = MMatchServer::GetInstance()->GetGlobalClockCount();
 
 		GetOnEndEventManager().StartNewEvent();
 		for (auto i=GetStage()->GetObjBegin(); i!=GetStage()->GetObjEnd(); i++)

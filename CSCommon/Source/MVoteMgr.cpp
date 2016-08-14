@@ -170,7 +170,7 @@ bool MVoteMgr::Vote(const MUID& uid, MVOTE nVote)
 	return true;
 }
 
-void MVoteMgr::Tick(unsigned long nClock)
+void MVoteMgr::Tick(u64 nClock)
 {
 	if (GetDiscuss() == NULL)
 		return;

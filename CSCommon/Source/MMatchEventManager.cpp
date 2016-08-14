@@ -73,7 +73,7 @@ void MMatchEventManager::DeleteEvent( const DWORD dwEventID )
 }
 
 
-void MMatchEventManager::CheckEventObj( MMatchObject* pObj, const DWORD dwCurTime  )
+void MMatchEventManager::CheckEventObj( MMatchObject* pObj, u64 dwCurTime  )
 {
 	if( 0 != pObj )
 	{
@@ -153,7 +153,7 @@ void MMatchEventManager::CustomCheckEventObj( const DWORD dwEventListID, const D
 		it->second->CustomCheckEventObj( pObj, pContext );
 }
 
-void MMatchEventManager::SetLastCheckTime( const DWORD dwCurTime )
+void MMatchEventManager::SetLastCheckTime( u64 dwCurTime )
 {
 	EventPtrVec::iterator it, end;
 	end = m_EventVec.end();

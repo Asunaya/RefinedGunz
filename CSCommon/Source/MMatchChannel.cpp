@@ -67,13 +67,13 @@ void MMatchChannel::Destroy()
 //	m_ObjStrCaches.clear();
 }
 
-bool MMatchChannel::CheckTick(unsigned long nClock)
+bool MMatchChannel::CheckTick(u64 nClock)
 {
 	if (nClock - m_nLastTick < MTICK_CHANNEL_RUN) return false;
 	return true;
 }
 
-void MMatchChannel::Tick(unsigned long nClock)
+void MMatchChannel::Tick(u64 nClock)
 {
 	if (IsChecksumUpdateTime(nClock))
 		UpdateChecksum(nClock);
@@ -84,7 +84,7 @@ void MMatchChannel::Tick(unsigned long nClock)
 	m_nLastTick = nClock;
 }
 
-bool MMatchChannel::IsChecksumUpdateTime(unsigned long nTick)
+bool MMatchChannel::IsChecksumUpdateTime(u64 nTick)
 {
 	if (nTick - m_nLastChecksumTick > MTICK_CHANNEL_UPDATECHECKSUM)
 		return true;
@@ -92,7 +92,7 @@ bool MMatchChannel::IsChecksumUpdateTime(unsigned long nTick)
 		return false;
 }
 
-void MMatchChannel::UpdateChecksum(unsigned long nTick)
+void MMatchChannel::UpdateChecksum(u64 nTick)
 {
 	m_nChecksum = (unsigned long)m_ObjUIDCaches.size() + m_uidChannel.Low;
 	m_nLastChecksumTick = nTick;
@@ -349,7 +349,7 @@ void MMatchChannelMap::Destroy()
 	}
 }
 
-void MMatchChannelMap::Update(unsigned long nClock)
+void MMatchChannelMap::Update(u64 nClock)
 {
 	unsigned long nChannelListChecksum = 0;
 	for(iterator itor=begin(); itor != end();)

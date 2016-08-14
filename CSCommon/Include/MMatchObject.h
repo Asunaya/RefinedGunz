@@ -1,12 +1,10 @@
-#ifndef MMATCHOBJECT_H
-#define MMATCHOBJECT_H
+#pragma once
 
 #include <vector>
 #include <map>
 #include <algorithm>
 #include <string>
 #include <deque>
-using namespace std;
 #include "MMatchItem.h"
 #include "MUID.h"
 #include "MObject.h"
@@ -22,27 +20,24 @@ using namespace std;
 #include "BasicInfoHistory.h"
 #include "HitRegistration.h"
 
-// 등급 - 이것은 디비의 UserGrade테이블과 싱크가 맞아야 한다.
 enum MMatchUserGradeID : i32
 {
-	MMUG_FREE			= 0,	// 무료 계정
-	MMUG_REGULAR		= 1,	// 정액 유저
-	MMUG_STAR			= 2,	// 스타유저(게임짱)
+	MMUG_FREE			= 0,
+	MMUG_REGULAR		= 1,
+	MMUG_STAR			= 2,
 
-	MMUG_CRIMINAL		= 100,	// 전과자
-	MMUG_WARNING_1		= 101,	// 1차 경고
-	MMUG_WARNING_2		= 102,	// 2차 경고
-	MMUG_WARNING_3		= 103,	// 3차 경고
-	MMUG_CHAT_LIMITED	= 104,  // 채팅 금지
-	MMUG_PENALTY		= 105,	// 기간 정지
+	MMUG_CRIMINAL		= 100,
+	MMUG_WARNING_1		= 101,
+	MMUG_WARNING_2		= 102,
+	MMUG_WARNING_3		= 103,
+	MMUG_CHAT_LIMITED	= 104,
+	MMUG_PENALTY		= 105,
 
-	MMUG_EVENTMASTER	= 252,	// 이벤트 진행자
-	MMUG_BLOCKED		= 253,	// 사용 정지
-	MMUG_DEVELOPER		= 254,	// 개발자
-	MMUG_ADMIN			= 255	// 관리자
+	MMUG_EVENTMASTER	= 252,
+	MMUG_BLOCKED		= 253,
+	MMUG_DEVELOPER		= 254,
+	MMUG_ADMIN			= 255
 };
-
-
 
 enum MMatchDisconnectStatus
 {
@@ -53,22 +48,17 @@ enum MMatchDisconnectStatus
 	MMDS_END,
 };
 
-
-
-// 유료이용자 권한 - 지금은 DB의 PGradeID를 읽지 않고, 단지 넷마블PC방 보너스 용도로만 사용한다.
 enum MMatchPremiumGradeID
 {
-	MMPG_FREE			= 0,	// 무료
-	MMPG_PREMIUM_IP		= 1		// 넷마블 PC방 보너스
+	MMPG_FREE			= 0,
+	MMPG_PREMIUM_IP		= 1
 };
 
-// 성별 - 이것은 디비의 성별정보와 싱크가 맞아야 한다.
 enum MMatchSex
 {
-	MMS_MALE = 0,		// 남자
-	MMS_FEMALE = 1		// 여자
+	MMS_MALE = 0,
+	MMS_FEMALE = 1
 };
-
 
 enum MMatchBlockType
 {
@@ -80,22 +70,18 @@ enum MMatchBlockType
 };
 
 
-/// 계정 정보
 struct MMatchAccountInfo
 {
 	int						m_nAID;
-	char					m_szUserID[32];			// 계정ID
-	MMatchUserGradeID		m_nUGrade;				// 등급
-	MMatchPremiumGradeID	m_nPGrade;				// 유료 이용자 권한
+	char					m_szUserID[32];
+	MMatchUserGradeID		m_nUGrade;
+	MMatchPremiumGradeID	m_nPGrade;
 	MMatchBlockType			m_BlockType;
-	SYSTEMTIME				m_EndBlockDate;	// 해킹 유저블럭이 유지되는 시간.
+	SYSTEMTIME				m_EndBlockDate;
 
-	MMatchAccountInfo() : m_nAID(-1), m_nUGrade(MMUG_FREE), m_nPGrade(MMPG_FREE)
-	{
-		m_BlockType = MMBT_NO;
-		
-		memset(m_szUserID, 0, sizeof(m_szUserID));
-	}
+	MMatchAccountInfo() : m_nAID(-1), m_nUGrade(MMUG_FREE),
+		m_nPGrade(MMPG_FREE), m_BlockType(MMBT_NO), m_szUserID()
+	{}
 };
 
 // 플레이어가 현재 위치하고 있는 곳
@@ -211,7 +197,7 @@ public:
 
 
 	unsigned long int	m_nTotalPlayTimeSec;	// 플레이 시간
-	unsigned long int	m_nConnTime;			// 접속한 시간(1초 = 1000)
+	u64					m_nConnTime;			// 접속한 시간(1초 = 1000)
 
 	unsigned long int	m_nTotalKillCount;			// 전체 킬수
 	unsigned long int	m_nTotalDeathCount;			// 전체 데쓰수
@@ -282,19 +268,16 @@ public:
 	DBCharCachingData* GetDBCachingData() { return &m_DBCachingData; }
 };
 
-class MMatchTimeSyncInfo {
+class MMatchTimeSyncInfo final {
 protected:
-	int				m_nFoulCount;
-	unsigned long	m_nLastSyncClock;
+	int				m_nFoulCount = 0;
+	u64				m_nLastSyncClock = 0;
 public:
-	MMatchTimeSyncInfo()				{ m_nFoulCount=0; m_nLastSyncClock=0; }
-	virtual ~MMatchTimeSyncInfo()		{}
-
 	int GetFoulCount()					{ return m_nFoulCount; }
 	void AddFoulCount()					{ m_nFoulCount++; }
 	void ResetFoulCount()				{ m_nFoulCount = 0; }
-	unsigned long GetLastSyncClock()	{ return m_nLastSyncClock; }
-	void Update(unsigned long nClock)	{ m_nLastSyncClock = nClock; }
+	auto GetLastSyncClock() const { return m_nLastSyncClock; }
+	void Update(u64 nClock)				{ m_nLastSyncClock = nClock; }
 };
 
 // MatchObject가 게임안에서 사용하는 변수들
@@ -318,13 +301,13 @@ public :
 
 	~MMatchDisconnStatusInfo() {}
 
-	const MMatchDisconnectStatus	GetStatus()				{ return m_DisconnStatus; }
-	const DWORD						GetLastUpdatedTime()	{ return m_dwLastDisconnStatusUpdatedTime; }
-	const DWORD						GetMsgID()				{ return m_dwMsgID; }
-	const MMatchBlockType			GetBlockType()			{ return m_BlockType; } 
-	const MMatchBlockLevel			GetBlockLevel()			{ return m_BlockLevel; }
-	const string&					GetEndDate()			{ return m_strEndDate; }
-	const string&					GetComment()			{ return m_strComment; }
+	auto GetStatus() const { return m_DisconnStatus; }
+	auto GetLastUpdatedTime() const { return m_dwLastDisconnStatusUpdatedTime; }
+	auto GetMsgID() const { return m_dwMsgID; }
+	auto GetBlockType() const { return m_BlockType; }
+	auto GetBlockLevel() const { return m_BlockLevel; }
+	auto& GetEndDate() const { return m_strEndDate; }
+	auto& GetComment() const { return m_strComment; }
 		
 	const bool	IsSendDisconnMsg()	{ return m_bIsSendDisconnMsg; }
 	void		SendCompleted()		{ m_bIsSendDisconnMsg = false; }	// MMatchServer에서 커맨드 처리를 위해서 사용...
@@ -335,7 +318,7 @@ public :
 	const bool IsUpdateDB()			{ return m_bIsUpdateDB; }
 	void UpdateDataBaseCompleted()	{ m_bIsUpdateDB = false; } // Update되면은 다음 BlockType이 설정전까진 false로 설정.
 
-	const bool IsDisconnectable( const DWORD dwTime = GetGlobalTimeMS() )
+	const bool IsDisconnectable( const u64 dwTime = GetGlobalTimeMS() )
 	{
 		if( (MMDS_DISCONNECT == GetStatus()) && (MINTERVAL_DISCONNECT_STATUS_MIN < (dwTime - m_dwDisconnSetTime)) )
 			return true;
@@ -352,14 +335,14 @@ public :
 			m_dwDisconnSetTime = (GetGlobalTimeMS() - 2000);
 		
 	}
-	void SetUpdateTime( const DWORD dwTime )				{ m_dwLastDisconnStatusUpdatedTime = dwTime; }
-	void SetMsgID( const DWORD dwMsgID )					{ m_dwMsgID = dwMsgID; }
-	void SetBlockType( const MMatchBlockType BlockType )	{ m_BlockType = BlockType; m_bIsUpdateDB = true; } // 새로운 BlockType이 설정되면 DB업데이트 준비도 같이함.
-	void SetBlockLevel( const MMatchBlockLevel BlockLevel ) { m_BlockLevel = BlockLevel; }
-	void SetEndDate( const string& strEndDate )				{ m_strEndDate = strEndDate; }
-	void SetComment( const string& strComment )				{ m_strComment = strComment; }
-	
-	void Update( const DWORD dwTime )
+	void SetUpdateTime(u64 dwTime) { m_dwLastDisconnStatusUpdatedTime = dwTime; }
+	void SetMsgID(u32 dwMsgID) { m_dwMsgID = dwMsgID; }
+	void SetBlockType(MMatchBlockType BlockType) { m_BlockType = BlockType; m_bIsUpdateDB = true; }
+	void SetBlockLevel(MMatchBlockLevel BlockLevel) { m_BlockLevel = BlockLevel; }
+	void SetEndDate(const std::string& strEndDate) { m_strEndDate = strEndDate; }
+	void SetComment(const std::string& strComment) { m_strComment = strComment; }
+
+	void Update( u64 dwTime )
 	{
 		if( (dwTime - GetLastUpdatedTime()) > MINTERVAL_DISCONNECT_STATUS_MIN ) 
 		{
@@ -375,11 +358,11 @@ private :
 
 private :
 	MMatchDisconnectStatus	m_DisconnStatus;
-	DWORD					m_dwLastDisconnStatusUpdatedTime;
-	DWORD					m_dwDisconnSetTime;
+	u64						m_dwLastDisconnStatusUpdatedTime;
+	u64						m_dwDisconnSetTime;
 	DWORD					m_dwMsgID;
 	MMatchBlockType			m_BlockType;
-	MMatchBlockLevel		m_BlockLevel;	// Level에따라 계정 블럭, 로그작업만 하는등으로 나눠짐.
+	MMatchBlockLevel		m_BlockLevel;
 	string					m_strEndDate;
 	string					m_strComment;
 	bool					m_bIsSendDisconnMsg;
@@ -396,7 +379,7 @@ struct MMatchObjectChannelInfo
 	bool			bChannelListTransfer;
 	MCHANNEL_TYPE	nChannelListType;
 	unsigned long	nChannelListChecksum;
-	int				nTimeLastChannelListTrans;
+	u64				nTimeLastChannelListTrans;
 	void Clear()
 	{
 		uidChannel = MUID(0,0);
@@ -427,7 +410,7 @@ protected:
 	MMatchDisconnStatusInfo		m_DisconnStatusInfo;// 오브젝으 접속종료 상태 정보.
 	MMatchObjectHShieldInfo		m_HSieldInfo;
 
-	bool			m_bHacker;						// 핵이 검출된 유저
+	bool			m_bHacker;
 	bool			m_bBridgePeer;
 	bool			m_bRelayPeer;
 	MUID			m_uidAgent;
@@ -447,7 +430,7 @@ protected:
 	bool			m_bStageListTransfer;
 	unsigned long	m_nStageListChecksum;
 	unsigned long	m_nStageListLastChecksum;
-	int				m_nTimeLastStageListTrans;
+	u64				m_nTimeLastStageListTrans;
 	int				m_nStageCursor;
 
 	MRefreshClientChannelImpl		m_RefreshClientChannelImpl;
@@ -459,7 +442,7 @@ protected:
 
 	bool			m_bEnterBattle;
 	bool			m_bAlive;
-	unsigned int	m_nDeadTime;
+	u64				m_nDeadTime;
 
 	bool			m_bNewbie;
 	bool			m_bForcedEntried;
@@ -473,19 +456,19 @@ protected:
 	bool			m_bWasCallVote;
 
 	bool			m_bDBFriendListRequested;
-	unsigned long int	m_nTickLastPacketRecved;
-	unsigned long int	m_nLastHShieldMsgRecved;
+	u64				m_nTickLastPacketRecved;
+	u64				m_nLastHShieldMsgRecved;
 	bool			m_bHShieldMsgRecved;
-	string				m_strCountryCode3;
+	std::string				m_strCountryCode3;
 
-	DWORD	m_dwLastHackCheckedTime;
-	DWORD	m_dwLastRecvNewHashValueTime;
+	u64		m_dwLastHackCheckedTime;
+	u64		m_dwLastRecvNewHashValueTime;
 	bool	m_bIsRequestNewHashValue;
 
-	DWORD	m_dwLastSpawnTime;
+	u64		LastSpawnTime;
 
-	unsigned long int m_nLastPingTime;
-	unsigned long int m_nQuestLatency;
+	u64 m_nLastPingTime;
+	mutable unsigned long int m_nQuestLatency;
 	
 	// This is awkward.
 	std::deque<int> Pings;
@@ -593,7 +576,7 @@ public:
 	void FreeFriendInfo();
 	void OnDead();
 	void OnKill();
-	bool IsEnabledRespawnDeathTime(unsigned int nNowTime);
+	bool IsEnabledRespawnDeathTime(u64 nNowTime) const;
 
 	void SetForcedEntry(bool bVal) { m_bForcedEntried = bVal; }
 	bool IsForcedEntried() { return m_bForcedEntried; }
@@ -607,8 +590,8 @@ public:
 	inline bool WasCallVote()						{ return m_bWasCallVote; }
 	inline void SetVoteState( const bool bState )	{ m_bWasCallVote = bState; }
 
-	inline unsigned long int	GetTickLastPacketRecved()		{ return m_nTickLastPacketRecved; }
-	inline unsigned long int	GetLastHShieldMsgRecved()		{ return m_nLastHShieldMsgRecved; }
+	inline auto	GetTickLastPacketRecved()		{ return m_nTickLastPacketRecved; }
+	inline auto	GetLastHShieldMsgRecved()		{ return m_nLastHShieldMsgRecved; }
 	inline bool				GetHShieldMsgRecved()			{ return m_bHShieldMsgRecved; }
 	inline void				SetHShieldMsgRecved(bool bSet)	{ m_bHShieldMsgRecved = bSet; }
 
@@ -622,18 +605,17 @@ public:
 		m_bIsRequestNewHashValue = false; 
 	}
 
-	DWORD GetLastSpawnTime( void)					{ return m_dwLastSpawnTime;		}
-	void SetLastSpawnTime( DWORD dwTime)			{ m_dwLastSpawnTime = dwTime;	}
+	auto GetLastSpawnTime(void) const				{ return LastSpawnTime;		}
+	void SetLastSpawnTime(u64 Time)					{ LastSpawnTime = Time;	}
 
-	inline unsigned long int	GetQuestLatency();
-	inline void					SetQuestLatency(unsigned long int l);
-	inline void					SetPingTime(unsigned long int t);
+	inline u32					GetQuestLatency() const;
+	inline void					SetQuestLatency(u64 l);
+	inline void					SetPingTime(u64 t);
 public:
-	// Ladder 관련
 	int GetLadderGroupID()			{ return m_nLadderGroupID; }
 	void SetLadderGroupID(int nID)	{ m_nLadderGroupID = nID; }
 	void SetLadderChallenging(bool bVal) { m_bLadderChallenging = bVal; }
-	bool IsLadderChallenging()			{ return m_bLadderChallenging; }		// 클랜전 상대팀 대기중인지 여부
+	bool IsLadderChallenging()			{ return m_bLadderChallenging; }
 public:
 	MMatchAccountInfo* GetAccountInfo() { return &m_AccountInfo; }
 	const MMatchAccountInfo* GetAccountInfo() const { return &m_AccountInfo; }
@@ -651,8 +633,7 @@ public:
 	MMatchDisconnStatusInfo& GetDisconnStatusInfo() { return  m_DisconnStatusInfo; }
 	MMatchObjectHShieldInfo* GetHShieldInfo()		{ return &m_HSieldInfo; }
 
-	/// 틱 처리
-	virtual void Tick(unsigned long int nTime);
+	void Tick(u64 nTime);
 
 	void OnStageJoin();
 	void OnEnterBattle();
@@ -662,7 +643,6 @@ public:
 	void SetStageCursor(int nStageCursor);
 	const MMatchObjectGameInfo* GetGameInfo() { return &m_GameInfo; }
 
-	//filter
 	void			SetCountryCode3( const string strCountryCode3 ) { m_strCountryCode3 = strCountryCode3; }
 	const string&	GetCountryCode3() const							{ return m_strCountryCode3; }
 
@@ -843,11 +823,11 @@ inline bool IsAdminGrade(MMatchObject* pObject)
 //////////////////////////////////////////////////////////////////////////
 
 
-unsigned long int MMatchObject::GetQuestLatency()
+u32 MMatchObject::GetQuestLatency() const
 {
-	unsigned long int nowTime = GetGlobalTimeMS();
+	auto nowTime = GetGlobalTimeMS();
 
-	unsigned long int ret = nowTime - m_nLastPingTime;
+	auto ret = static_cast<u32>(nowTime - m_nLastPingTime);
 
 	if (ret > m_nQuestLatency)
 		m_nQuestLatency = ret;
@@ -855,14 +835,12 @@ unsigned long int MMatchObject::GetQuestLatency()
 	return m_nQuestLatency;
 }
 
-void MMatchObject::SetQuestLatency(unsigned long int l)
+void MMatchObject::SetQuestLatency(u64 l)
 {
-	m_nQuestLatency = l - m_nLastPingTime;
+	m_nQuestLatency = static_cast<u32>(l - m_nLastPingTime);
 }
 
-void MMatchObject::SetPingTime(unsigned long int t)
+void MMatchObject::SetPingTime(u64 t)
 {
 	m_nLastPingTime = t;
 }
-
-#endif

@@ -3,7 +3,6 @@
 
 #include <list>
 #include <map>
-using namespace std;
 
 #include "MUID.h"
 
@@ -16,18 +15,16 @@ protected:
 	int				m_nTickCount;
 	bool			m_bWantBalancedMatching;
 
-	// 클랜전만 사용 -------
 	int				m_nCLID;
 	int				m_nTotalCharLevel;
 	int				m_nTotalContPoint;
-	// ---------------------
 
 
-	list<MUID>		m_uidPlayerList;
+	std::list<MUID> m_uidPlayerList;
 
-	unsigned int	m_nRegTime;
+	u64				m_nRegTime;
 public:
-	MLadderGroup(unsigned int nRegTime)
+	MLadderGroup(u64 nRegTime)
 	{ 
 		m_nType=0; m_nID=0; m_nScore=0; m_nCLID=0; m_nRegTime=nRegTime; 
 		m_nTickCount = 0;
@@ -41,15 +38,15 @@ public:
 	int GetScore()					{ return m_nScore; }
 	int GetCLID()					{ return m_nCLID; }
 	void SetCLID(int nCLID)			{ m_nCLID = nCLID; }
-	unsigned int GetRegTime()		{ return m_nRegTime; }
+	auto GetRegTime() const			{ return m_nRegTime; }
 	inline int GetCharLevel();
 	inline int GetContPoint();
 	int GetTickCount()				{ return m_nTickCount; }
 	void SetBalancedMatching(bool bValue)		{ m_bWantBalancedMatching = bValue; }
 
 	size_t GetPlayerCount()						{ return m_uidPlayerList.size(); }
-	list<MUID>::iterator GetPlayerListBegin()	{ return m_uidPlayerList.begin(); }
-	list<MUID>::iterator GetPlayerListEnd()		{ return m_uidPlayerList.end(); }
+	auto GetPlayerListBegin()					{ return m_uidPlayerList.begin(); }
+	auto GetPlayerListEnd()						{ return m_uidPlayerList.end(); }
 
 	void AddPlayer(MMatchObject* pObj) { 
 		_ASSERT(GetID());

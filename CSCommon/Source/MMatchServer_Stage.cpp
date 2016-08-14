@@ -1266,10 +1266,10 @@ void MMatchServer::OnRequestSpawn(const MUID& uidChar, const MVector& pos, const
 	}
 
 	// 마지막 죽었던 시간과 새로 리스폰을 요청한 시간 사이에 5초 이상의 시간이 있었는지 검사한다.
-	DWORD dwTime = GetGlobalTimeMS() - pObj->GetLastSpawnTime();;
-	if ( dwTime < 5000)
+	auto dwTime = GetGlobalTimeMS() - pObj->GetLastSpawnTime();;
+	if (dwTime < 5000)
 		return;
-	pObj->SetLastSpawnTime( GetGlobalTimeMS());
+	pObj->SetLastSpawnTime(GetGlobalTimeMS());
 
 
 	MMatchStage* pStage = FindStage(pObj->GetStageUID());
@@ -1311,7 +1311,7 @@ void MMatchServer::OnGameRequestTimeSync(const MUID& uidComm, unsigned long nLoc
 
 	MCommand* pCmd = CreateCommand(MC_MATCH_GAME_RESPONSE_TIMESYNC, MUID(0,0));
 	pCmd->AddParameter(new MCmdParamUInt(nLocalTimeStamp));
-	pCmd->AddParameter(new MCmdParamUInt(GetGlobalClockCount()));
+	pCmd->AddParameter(new MCmdParamUInt(static_cast<u32>(GetGlobalClockCount())));
 	RouteToListener(pObj, pCmd);
 }
 
@@ -1327,7 +1327,7 @@ void MMatchServer::OnGameReportTimeSync(const MUID& uidComm, unsigned long nLoca
 
 	//// SpeedHack Test ////
 	MMatchTimeSyncInfo* pSync = pObj->GetSyncInfo();
-	int nSyncDiff = nLocalTimeStamp - pSync->GetLastSyncClock();
+	int nSyncDiff = static_cast<int>(nLocalTimeStamp - pSync->GetLastSyncClock());
 	float fError = static_cast<float>(nSyncDiff) / static_cast<float>(MATCH_CYCLE_CHECK_SPEEDHACK);
 	if (fError > 2.f) {	
 		pSync->AddFoulCount();

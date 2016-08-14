@@ -78,12 +78,12 @@ private:
 
 	list<int>				m_BanCIDList;
 
-	unsigned long			m_nStateTimer;
-	unsigned long			m_nLastTick;
-	unsigned long			m_nChecksum;	// 목록및 정보 갱신용
-	unsigned long			m_nLastChecksumTick;
+	u64						m_nStateTimer;
+	u64						m_nLastTick;
+	unsigned long			m_nChecksum;
+	u64						m_nLastChecksumTick;
 	int						m_nAdminObjectCount;
-	unsigned long			m_nStartTime;	// 게임 시작한 시간
+	u64						m_nStartTime;
 
 	
 	MMatchStageSetting		m_StageSetting;
@@ -102,8 +102,8 @@ private:
 	void SetMasterUID(const MUID& uid)	{ m_StageSetting.SetMasterUID(uid);}
 	MMatchRule* CreateRule(MMATCH_GAMETYPE nGameType);
 protected:
-	inline bool IsChecksumUpdateTime(unsigned long nTick);
-	void UpdateChecksum(unsigned long nTick);
+	bool IsChecksumUpdateTime(u64 nTick) const;
+	void UpdateChecksum(u64 nTick);
 	void OnStartGame();
 	void OnFinishGame();
 	void OnApplyTeamBonus(MMatchTeam nTeam);
@@ -117,9 +117,9 @@ public:
 	MMatchWorldItemManager	m_WorldItemManager;
 
 	void UpdateStateTimer();
-	unsigned long GetStateTimer()	{ return m_nStateTimer; }
-	unsigned long GetChecksum()		{ return m_nChecksum; }
-	unsigned long GetStartTime()	{ return m_nStartTime; }		///< 게임 시작한 시간
+	auto GetStateTimer() const	{ return m_nStateTimer; }
+	auto GetChecksum() const { return m_nChecksum; }
+	auto GetStartTime() const { return m_nStartTime; }
 public:
 	MMatchStage();
 
@@ -129,7 +129,7 @@ public:
 	void Destroy();
 	void OnCommand(MCommand* pCommand);
 	void OnGameKill(const MUID& uidAttacker, const MUID& uidVictim);
-	bool CheckAutoTeamBalancing();	// true이면 팀원을 섞어야 한다.
+	bool CheckAutoTeamBalancing();
 	void ShuffleTeamMembers();
 
 
@@ -169,8 +169,8 @@ public:
 	STAGE_STATE GetState()		{ return m_nState; }
 	void ChangeState(STAGE_STATE nState)	{ m_nState = nState; UpdateStateTimer(); }
 
-	bool CheckTick(unsigned long nClock);
-	void Tick(unsigned long nClock);
+	bool CheckTick(u64 nClock);
+	void Tick(u64 nClock);
 
 	MMatchStageSetting* GetStageSetting() { return &m_StageSetting; }
 

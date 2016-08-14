@@ -77,7 +77,7 @@ MMatchObject::MMatchObject(const MUID& uid) : MObject(uid)
 	m_dwLastRecvNewHashValueTime	= GetGlobalTimeMS();
 	m_bIsRequestNewHashValue		= false;
 
-	m_dwLastSpawnTime				= GetGlobalTimeMS();
+	LastSpawnTime					= GetGlobalTimeMS();
 
 	m_dwHShieldCheckCount = 0;
 
@@ -160,7 +160,7 @@ void MMatchObject::SetPlace(MMatchPlace nPlace)
 	};
 }
 
-void MMatchObject::Tick(unsigned long int nTime)
+void MMatchObject::Tick(u64 nTime)
 {
 	MMatchServer* pServer = MMatchServer::GetInstance();
 
@@ -562,7 +562,7 @@ void MMatchObject::OnKill()
 	KillCount();
 }
 
-bool MMatchObject::IsEnabledRespawnDeathTime(unsigned int nNowTime)
+bool MMatchObject::IsEnabledRespawnDeathTime(u64 nNowTime) const
 {
 	if ((nNowTime - m_nDeadTime) > (RESPAWN_DELAYTIME_AFTER_DYING-500)) return true;
 	return false;

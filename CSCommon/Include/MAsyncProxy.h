@@ -21,8 +21,8 @@ class MAsyncJob {
 protected:
 	int				m_nJobID;	// Job Type ID
 
-	unsigned long	m_nPostTime;
-	unsigned long	m_nFinishTime;
+	u64	m_nPostTime;
+	u64 m_nFinishTime;
 
 	MASYNC_RESULT	m_nResult;
 
@@ -35,10 +35,10 @@ public:
 	virtual ~MAsyncJob()	{}
 
 	int GetJobID()							{ return m_nJobID; }
-	unsigned long GetPostTime()				{ return m_nPostTime; }
-	void SetPostTime(unsigned long nTime)	{ m_nPostTime = nTime; }
-	unsigned long GetFinishTime()			{ return m_nFinishTime; }
-	void SetFinishTime(unsigned long nTime)	{ m_nFinishTime = nTime; }
+	auto GetPostTime() const				{ return m_nPostTime; }
+	void SetPostTime(u64 nTime)				{ m_nPostTime = nTime; }
+	auto GetFinishTime() const				{ return m_nFinishTime; }
+	void SetFinishTime(u64 nTime)			{ m_nFinishTime = nTime; }
 
 	MASYNC_RESULT GetResult()				{ return m_nResult; }
 	void SetResult(MASYNC_RESULT nResult)	{ m_nResult = nResult; }

@@ -26,11 +26,9 @@ private:
 	_RECORD				m_ClanPointVictoriesRates[MAX_LADDER_STATISTICS_CLANPOINT];
 	_RECORD				m_ContPointVictoriesRates[MAX_LADDER_STATISTICS_CONTPOINT];
 
-	unsigned long		m_nLastTick;
+	u64		m_nLastTick;
 	void Load();
 	void Save();
-	unsigned long GetLastTick()	{ return m_nLastTick; }
-	void SetLastTick(unsigned long nTick)	{ m_nLastTick = nTick; }
 
 	void _InsertLevelRecord(int nLevelDiff, bool bMoreLevelWin);
 	void _InsertClanPointRecord(int nClanPointDiff, bool bMorePointWin);
@@ -39,7 +37,7 @@ public:
 	MLadderStatistics();
 	virtual ~MLadderStatistics();
 	void Init();
-	void Tick(unsigned long nTick);
+	void Tick(u64 nTick);
 
 
 	float GetLevelVictoriesRate(int nLevelDiff);

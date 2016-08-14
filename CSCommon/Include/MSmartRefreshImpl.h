@@ -16,7 +16,7 @@ protected:
 	MMatchChannel*	m_pChannel;
 
 protected:
-	virtual bool OnUpdateChecksum(unsigned long nTick);
+	virtual bool OnUpdateChecksum(u64 nTick) override;
 
 public:
 	MRefreshCategoryChannelImpl(MMatchChannel* pChannel, int nCategory) : MRefreshCategory(nCategory) 
@@ -49,7 +49,7 @@ protected:
 	MMatchClan*		m_pClan;
 
 protected:
-	virtual bool OnUpdateChecksum(unsigned long nTick);
+	virtual bool OnUpdateChecksum(u64 nTick) override;
 
 public:
 	MRefreshCategoryClanMemberImpl(MMatchClan* pClan, int nCategory) : MRefreshCategory(nCategory) 

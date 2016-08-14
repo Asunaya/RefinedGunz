@@ -100,14 +100,14 @@ struct DBVariant
 
 class MMatchServer : public MServer{
 private:
-	static MMatchServer*	m_pInstance;		///< 전역 인스턴스
-	unsigned long int		m_nTickTime;		///< 틱 타이머
-	inline void SetTickTime(unsigned long int nTickTime);		///< 틱 타이머 설정
+	static MMatchServer*	m_pInstance;
+	u64						m_nTickTime;
+	inline void SetTickTime(u64 nTickTime);
 
 	unsigned long		m_HSCheckCounter;
 
 protected:
-	unsigned long		m_nItemFileChecksum;	// ZItem.xml 의 변조방지 검사
+	unsigned long		m_nItemFileChecksum;
 
 	MUID				m_NextUseUID;
 	MCriticalSection	m_csUIDGenerateLock;
@@ -172,7 +172,7 @@ protected:
 
 	MMatchEventManager		m_CustomEventManager;
 
-	u32 LastPingTime = 0;
+	u64 LastPingTime = 0;
 
 public:
 	LagCompManager LagComp;
@@ -738,20 +738,16 @@ public:
 	void StandbyClanList(const MUID& uidPlayer, int nClanListStartIndex, bool bCacheUpdate);
 
 
-	/// 현재 클럭 얻어내기
-	unsigned long int GetGlobalClockCount(void);
-	/// 클라이언트에게 클럭을 맞추게 한다.
+	u64 GetGlobalClockCount();
 	void SetClientClockSynchronize(const MUID& CommUID);
-	/// Local Clock을 Global Clock으로 변환
 	static unsigned long int ConvertLocalClockToGlobalClock(unsigned long int nLocalClock, unsigned long int nLocalClockDistance);
-	/// Global Clock을 Local Clock으로 변환
 	static unsigned long int ConvertGlobalClockToLocalClock(unsigned long int nGlobalClock, unsigned long int nLocalClockDistance);
 
 	bool IsCreated() { return m_bCreated; }
-	inline unsigned long int GetTickTime();			///< 쓰레드에 안전한 틱 타이머 반환
+	inline u64 GetTickTime();
 protected:
 	void InsertChatDBLog(const MUID& uidPlayer, const char* szMsg);
-	int ValidateMakingName(const char* szCharName, int nMinLength, int nMaxLength);		// 등록가능한 이름인지 확인한다.
+	int ValidateMakingName(const char* szCharName, int nMinLength, int nMaxLength);
 
 	int ValidateStageJoin(const MUID& uidPlayer, const MUID& uidStage);
 	int ValidateChannelJoin(const MUID& uidPlayer, const MUID& uidChannel);
@@ -843,15 +839,15 @@ inline MMatchServer* MGetMatchServer()
 	return MMatchServer::GetInstance();
 }
 
-inline unsigned long int MMatchServer::GetTickTime()
+inline u64 MMatchServer::GetTickTime()
 { 
 	m_csTickTimeLock.Lock();
-	unsigned long int ret = m_nTickTime;
+	auto ret = m_nTickTime;
 	m_csTickTimeLock.Unlock();
 	return ret;
 }
 
-inline void MMatchServer::SetTickTime(unsigned long int nTickTime)
+inline void MMatchServer::SetTickTime(u64 nTickTime)
 {
 	m_csTickTimeLock.Lock();		
 	m_nTickTime = nTickTime;

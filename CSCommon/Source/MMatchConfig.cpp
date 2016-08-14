@@ -202,7 +202,7 @@ bool MMatchConfig::Create()
 
 	std::string File;
 	std::ifstream FileStream("server.xml", std::ios::in | std::ios::binary | std::ios::ate);
-	File.resize(FileStream.tellg());
+	File.resize(static_cast<size_t>(FileStream.tellg()));
 	FileStream.seekg(std::ios::beg);
 	FileStream.read(&File[0], File.size());
 

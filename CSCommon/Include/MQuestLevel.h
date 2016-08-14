@@ -117,7 +117,7 @@ private:
 	struct MQuestLevelSpawnInfo
 	{
 		int					nIndex;								///< 스폰 인덱스
-		unsigned long int	nRecentSpawnTime[MAX_SPAWN_COUNT];	///< 최근에 스폰된 시간
+		u64	nRecentSpawnTime[MAX_SPAWN_COUNT];	///< 최근에 스폰된 시간
 	};
 
 	MQuestLevelStaticInfo		m_StaticInfo;					///< 퀘스트 시작하면 변하지 않는 정보
@@ -153,11 +153,11 @@ public:
 	/// 새로 태어날 NPC의 위치를 추천한다.
 	/// @param nSpawnType		NPC의 스폰타입
 	/// @param nNowTime			현재 시간
-	int GetRecommendedSpawnPosition(MQuestNPCSpawnType nSpawnType, unsigned long int nNowTime);
+	int GetRecommendedSpawnPosition(MQuestNPCSpawnType nSpawnType, u64 nNowTime);
 	/// 지금 NPC가 스폰가능한지 확인한다.
 	/// @param nSpawnType		NPC의 스폰타입
 	/// @param nNowTime			현재 시간
-	bool IsEnableSpawnNow(MQuestNPCSpawnType nSpawnType, unsigned long int nNowTime);
+	bool IsEnableSpawnNow(MQuestNPCSpawnType nSpawnType, u64 nNowTime);
 	/// 현재 섹터에서 스폰 지역 개수를 구한다.
 	/// @param nSpawnType		NPC의 스폰타입
 	int GetSpawnPositionCount(MQuestNPCSpawnType nSpawnType);

@@ -1427,7 +1427,7 @@ bool MSSQLDatabase::InsertKillLog(const unsigned int nAttackerCID, const unsigne
 	return true;
 }
 
-bool MSSQLDatabase::InsertChatLog(const unsigned long int nCID, const char* szMsg, unsigned long int nTime)
+bool MSSQLDatabase::InsertChatLog(const unsigned long int nCID, const char* szMsg, u64 nTime)
 {
 	return true;
 

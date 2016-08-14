@@ -377,7 +377,7 @@ public:
 		int nRound, unsigned int nMasterCID,
 		int nPlayerCount, const char* szPlayers) override;
 	virtual bool InsertKillLog(unsigned int nAttackerCID, unsigned int nVictimCID) override;
-	virtual bool InsertChatLog(unsigned long int nCID, const char* szMsg, unsigned long int nTime) override;
+	virtual bool InsertChatLog(unsigned long int nCID, const char* szMsg, u64 nTime) override;
 	virtual bool InsertServerLog(int nServerID, int nPlayerCount, int nGameCount,
 		uint32_t dwBlockCount, uint32_t dwNonBlockCount) override;
 	virtual bool InsertPlayerLog(unsigned long int nCID,

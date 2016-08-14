@@ -96,7 +96,7 @@ void MMatchClan::RemoveObject(const MUID& uid)
 }
 
 
-void MMatchClan::Tick(unsigned long nClock)
+void MMatchClan::Tick(u64 nClock)
 {
 	m_nDBRefreshLifeTime += MTICK_CLAN_RUN;
 	if (m_nDBRefreshLifeTime >= MTICK_CLAN_DBREFRESH_PERIOD_LIMIT)
@@ -226,7 +226,7 @@ void MMatchClanMap::RemoveObject(const MUID& uid, MMatchObject* pObj)
 	}
 }
 
-bool MMatchClanMap::CheckTick(unsigned long nClock)
+bool MMatchClanMap::CheckTick(u64 nClock)
 {
 	if (MGetTimeDistance(m_nLastTick, nClock) < MTICK_CLAN_RUN) return false;
 
@@ -235,7 +235,7 @@ bool MMatchClanMap::CheckTick(unsigned long nClock)
 }
 
 
-void MMatchClanMap::Tick(unsigned long nClock)
+void MMatchClanMap::Tick(u64 nClock)
 {
 	if (!CheckTick(nClock)) return;
 

@@ -98,11 +98,11 @@ public :
 
 	void StartNewEvent() { m_vEventObj.clear(); }
 	void Run();
-	void CheckEventObj( MMatchObject* pObj, const DWORD dwCurTime );
+	void CheckEventObj( MMatchObject* pObj, u64 dwCurTime );
 
 	void Reset();
 
-	void SetLastCheckTime( const DWORD dwCurTime );
+	void SetLastCheckTime( u64 dwCurTime );
 
 	// 유저가 따로 초기화를 필요할때는 이것을 재정의 하면 된다.
 	// MMatchEvent클래스를 생성시에 이 함수가 호출되어 같이 검사된다.
@@ -116,11 +116,11 @@ protected :
 	MMatchEvent( const DWORD dwEventID ) : m_dwEventID ( dwEventID ), m_dwLastCheckTime( 0 ) {}
 	
 	bool CheckEventTime();
-	bool CheckElapsedTimeIsOverflow( const DWORD dwCurTime );
+	bool CheckElapsedTimeIsOverflow(u64 dwCurTime );
 	bool CheckEventPartTime();
 
 protected : 
-	virtual void OnCheckEventObj( MMatchObject* pObj, const DWORD dwCurTime ) {}
+	virtual void OnCheckEventObj( MMatchObject* pObj, u64 dwCurTime ) {}
 	virtual void OnRun() {}
 
 protected :
@@ -128,18 +128,18 @@ protected :
 	DWORD					m_dwEventID;
 	DWORD					m_dwEventType;
 	DWORD					m_dwGameType;
-	DWORD					m_dwCheckElapsedTime;
-	DWORD					m_dwLastCheckTime;
+	u64						m_dwCheckElapsedTime;
+	u64						m_dwLastCheckTime;
 	DWORD					m_dwPercent;
 	DWORD					m_dwRate;
 	float					m_fXPBonusRatio;
 	float					m_fBPBonusRatio;
 	SYSTEMTIME				m_Start;
 	SYSTEMTIME				m_End;
-	string					m_strName;
-	string					m_strAnnounce;
-	vector< MUID >			m_vEventObj;
-	vector< EventPartTime >	m_EventPartTimeVec;
+	std::string				m_strName;
+	std::string				m_strAnnounce;
+	std::vector< MUID >		m_vEventObj;
+	std::vector< EventPartTime > m_EventPartTimeVec;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

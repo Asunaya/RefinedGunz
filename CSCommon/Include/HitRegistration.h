@@ -133,7 +133,7 @@ bool PickHistory(const ObjectT* Exception, const v3& src, const v3& dest,
 
 template <typename ObjectT, typename ContainerT, typename GetOriginT>
 void GrenadeExplosion(const ObjectT& Owner, const ContainerT& Container, const v3& ExplosionPos,
-	float fDamage, float fRange, float fMinDamage, float fKnockBack, const GetOriginT& GetOrigin)
+	int Damage, float fRange, float fMinDamage, float fKnockBack, const GetOriginT& GetOrigin)
 {
 	float fDist, fDamageRange;
 
@@ -164,8 +164,10 @@ void GrenadeExplosion(const ObjectT& Owner, const ContainerT& Container, const v
 			fDamageRange = 1.f - (1.f - fMinDamage)*(max(fDist - MAX_DMG_RANGE, 0) / (fRange - MAX_DMG_RANGE));
 		}
 
-		float fActualDamage = fDamage * fDamageRange;
+		float fActualDamage = Damage * fDamageRange;
 		float fRatio = GetPiercingRatio(MWT_FRAGMENTATION, eq_parts_chest);
-		Target->OnDamaged(Owner, ExplosionPos, ZD_EXPLOSION, MWT_FRAGMENTATION, fActualDamage, fRatio);
+		Target->OnDamaged(Owner, ExplosionPos,
+			ZD_EXPLOSION, MWT_FRAGMENTATION,
+			static_cast<int>(fActualDamage), fRatio);
 	}
 }

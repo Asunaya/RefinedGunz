@@ -44,33 +44,31 @@ private :
 
 class MMatchQuestGameLogInfoManager : public map< MUID, MQuestPlayerLogInfo* >
 {
-private :
-	MQuestPlayerLogInfo* Find( const MUID& uidPlayer );
-public :
+private:
+	MQuestPlayerLogInfo* Find(const MUID& uidPlayer);
+public:
 	MMatchQuestGameLogInfoManager();
 	virtual ~MMatchQuestGameLogInfoManager();
 
-	void AddQuestPlayer( const MUID& uidPlayer, MMatchObject* pPlayer );
-	bool AddRewardQuestItemInfo( const MUID& uidPlayer, MQuestItemMap* pObtainQuestItemList );
-	bool AddRewardZItemInfo( const MUID& uidPlayer, MQuestRewardZItemList* pObtainZItemList );
+	void AddQuestPlayer(const MUID& uidPlayer, MMatchObject* pPlayer);
+	bool AddRewardQuestItemInfo(const MUID& uidPlayer, MQuestItemMap* pObtainQuestItemList);
+	bool AddRewardZItemInfo(const MUID& uidPlayer, MQuestRewardZItemList* pObtainZItemList);
 	void Clear();
 
-	void SetMasterCID( const int nMasterCID )		{ m_nMasterCID = nMasterCID; }
-	void SetStageName( const char* pszStageName );
-	void SetStartTime( const DWORD dwStartTime )	{ m_dwStartTime = dwStartTime; }
-	void SetEndTime( const DWORD dwEndTime )		{ m_dwEndTime = dwEndTime; }
-	void SetScenarioID( const int nScenarioID )		{ m_nScenarioID = nScenarioID; }
+	void SetMasterCID(int nMasterCID) { m_nMasterCID = nMasterCID; }
+	void SetStageName(const char* pszStageName);
+	void SetStartTime(u64 dwStartTime) { m_dwStartTime = dwStartTime; }
+	void SetEndTime(u64 dwEndTime) { m_dwEndTime = dwEndTime; }
+	void SetScenarioID(int nScenarioID) { m_nScenarioID = nScenarioID; }
 
 	bool PostInsertQuestGameLog();
-private :
+private:
 	int		m_nMasterCID;
 	int		m_nScenarioID;
-	DWORD	m_dwStartTime;
-	DWORD	m_dwEndTime;
-	char	m_szStageName[ 64 ];
-	int		m_nTotalRewardQItemCount;	// 하나의 퀘스트 게임동안 획득한 총 아이템 수( 일반 퀘스트 아이템 + 유니크 아이템 )
-
-	
+	u64		m_dwStartTime;
+	u64		m_dwEndTime;
+	char	m_szStageName[64];
+	int		m_nTotalRewardQItemCount;
 };
 
 #endif

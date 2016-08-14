@@ -328,7 +328,7 @@ try
 		auto ItemID = Parts.second;
 		Items.ItemIDs[Index] = ItemID;
 		ExecuteSQL("INSERT INTO CharacterItem (CID, ItemID) VALUES (?, ?)", CID, ItemID);
-		auto CIID = sqlite3_last_insert_rowid(sqlite);
+		auto CIID = static_cast<i32>(sqlite3_last_insert_rowid(sqlite));
 		Items.CIIDs[Index] = CIID;
 	};
 
@@ -968,7 +968,7 @@ bool SQLiteDatabase::InsertKillLog(unsigned int nAttackerCID, unsigned int nVict
 	return true;
 }
 
-bool SQLiteDatabase::InsertChatLog(unsigned long int nCID, const char * szMsg, unsigned long int nTime)
+bool SQLiteDatabase::InsertChatLog(unsigned long int nCID, const char * szMsg, u64 nTime)
 {
 	// TODO: Implement
 

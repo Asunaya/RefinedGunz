@@ -8,10 +8,10 @@
 
 class MMatchRuleSurvival : public MMatchRuleBaseQuest {
 protected:
-	unsigned long int			m_nRountStartTime;
+	u64							m_nRountStartTime;
 	MMatchQuestRound			m_QuestRound;
 	bool						m_bReservedNextRound;
-	unsigned long int			m_nReversedNextRoundTime;
+	u64							m_nReversedNextRoundTime;
 protected:
 	virtual void OnBegin();
 	virtual void OnEnd();

@@ -2,21 +2,6 @@
 #include "MMatchUtil.h"
 #include "MZFileSystem.h"
 
-
-unsigned long int MGetTimeDistance(unsigned long int nTimeA, unsigned long int nTimeB)
-{
-	if(nTimeB >= nTimeA)
-	{
-		return nTimeB - nTimeA;
-	}
-	else
-	{
-		return nTimeB + (UINT_MAX - nTimeA + 1);
-	}
-
-	return 0;
-}
-
 unsigned long MGetMemoryChecksum(char *pBuffer, int nLen)
 {
 	unsigned long nChecksum = 0;

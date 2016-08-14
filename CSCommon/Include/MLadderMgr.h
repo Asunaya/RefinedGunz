@@ -11,15 +11,15 @@ class MMatchObject;
 class MLadderMgr {
 protected:
 	int					m_idGenerate;
-	unsigned long		m_nLastTick;
+	u64		m_nLastTick;
 
 	MLadderGroupMap		m_WaitingMaps[MLADDERTYPE_MAX];
 	list<MLadderGroup*>	m_GroupList;
 
 	MLadderStatistics	m_Stat;
 protected:
-	unsigned long GetLastTick()	{ return m_nLastTick; }
-	void SetLastTick(unsigned long nTick)	{ m_nLastTick = nTick; }
+	auto GetLastTick()	{ return m_nLastTick; }
+	void SetLastTick(u64 nTick)	{ m_nLastTick = nTick; }
 
 	inline MLadderGroupMap* GetWaitGroupContainer(MLADDERTYPE nLadderType);
 
@@ -39,7 +39,7 @@ public:
 	bool Challenge(MLadderGroup* pGroup);
 	void CancelChallenge(int nGroupID, const char* pszCancelName);
 
-	void Tick(unsigned long nTick);
+	void Tick(u64 nTick);
 	int GenerateID()	{ return ++m_idGenerate; }	
 	int GetNeedMemberCount(MLADDERTYPE nLadderType);
 	int GetTotalGroupCount();

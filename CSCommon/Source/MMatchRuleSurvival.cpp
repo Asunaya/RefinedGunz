@@ -62,7 +62,6 @@ void MMatchRuleSurvival::ProcessRound()
 	}
 	else 
 	{
-		// 다죽이고 8초후에 새 라운드가 시작된다.
 		if ((GetGlobalTimeMS() - m_nReversedNextRoundTime) > 5000)
 		{
 			m_bReservedNextRound = false;
@@ -80,7 +79,6 @@ void MMatchRuleSurvival::QuestRoundStart()
 	m_QuestRound.Increase();
 	m_nRountStartTime = GetGlobalTimeMS();
 
-	// 월드아이템 초기화
 	m_pStage->m_WorldItemManager.OnRoundBegin();
 
 	RouteQuestRoundStart();
@@ -98,14 +96,12 @@ void MMatchRuleSurvival::RouteQuestRoundStart()
 
 bool MMatchRuleSurvival::CheckNPCSpawnEnable()
 {
-	// 테스트..
 	return false;
 
-	unsigned long int nNowTime = GetGlobalTimeMS();
+	auto nNowTime = GetGlobalTimeMS();
 
 	if (m_nNPCSpawnCount >= m_QuestRound.ClearConditionNPCCount(m_nFirstPlayerCount)) return false;
 
-	// 라운드 시작하고 3초동안은 나오지 않는다.
 	const unsigned long int NPC_SPAWN_ROUND_START_DELAY = 3000;
 	if ((nNowTime - m_nRountStartTime) <= NPC_SPAWN_ROUND_START_DELAY) return false;
 

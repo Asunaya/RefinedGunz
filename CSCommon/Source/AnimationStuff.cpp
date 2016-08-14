@@ -624,13 +624,13 @@ static float GetSpeed(ZC_STATE_LOWER LowerState, int MaxFrame, MMatchItemDesc* I
 
 		int Delay = GetSelectWeaponDelay(ItemDesc);
 
-		int Time = MaxFrame / 4.8;
+		int Time = static_cast<int>(MaxFrame / 4.8);
 
 		int AttackSpeed = Time + Delay;
 		if (AttackSpeed < 1)
 			AttackSpeed = 1;
 
-		ret = float(Time) / AttackSpeed * 4.8;
+		ret = float(Time) / AttackSpeed * 4.8f;
 	}();
 
 	return ret;
@@ -680,7 +680,7 @@ int GetFrame(RAnimation& Ani, ZC_STATE_LOWER LowerState, MMatchItemDesc* ItemDes
 	if (Time < 0)
 		Time = 0;
 
-	int Frame = Time * 1000 * GetSpeed(LowerState, Ani.GetMaxFrame(), ItemDesc);
+	int Frame = static_cast<int>(Time * 1000 * GetSpeed(LowerState, Ani.GetMaxFrame(), ItemDesc));
 
 	if (Ani.GetAnimationLoopType() == RAniLoopType_Loop)
 		Frame %= Ani.GetMaxFrame();
@@ -703,7 +703,7 @@ v3 GetAbsHead(const v3 & Origin, const v3 & Dir, MMatchSex Sex,
 	if (!LowerAni)
 		return Origin + v3(0, 0, 180);
 
-	float y = IsDead ? 0 : (Dir.z + 0.05) * 50;
+	float y = IsDead ? 0 : (Dir.z + 0.05f) * 50;
 
 	v3 Head = GetHeadPosition(LowerAni, UpperAni, LowerFrame, UpperFrame, y, 0);
 

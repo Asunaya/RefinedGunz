@@ -3,22 +3,21 @@
 
 
 #include <map>
-using namespace std;
 
 class MMatchPremiumIPNode
 {
 private:
-	DWORD	m_dwIP;
-	DWORD	m_tmTime;	// Last updated time
+	DWORD	IP;
+	u64		Time;	// Last updated time
 public:
-	MMatchPremiumIPNode(DWORD dwIP, DWORD tmTime) { m_dwIP=dwIP; m_tmTime=tmTime; }
-	DWORD GetIP()			{ return m_dwIP; }
-	void SetIP(DWORD dwIP)	{ m_dwIP = dwIP; }
-	DWORD GetTime()			{ return m_tmTime; }
-	void SetTime(DWORD tmTime)	{ m_tmTime = tmTime; }
+	MMatchPremiumIPNode(u32 IP, u64 tmTime) : IP(IP), Time(Time) {}
+	auto GetIP() const			{ return IP; }
+	void SetIP(DWORD dwIP)		{ IP = dwIP; }
+	auto GetTime() const		{ return Time; }
+	void SetTime(u64 tmTime)	{ Time = tmTime; }
 };
 
-class MMatchPremiumIPMap : public map<DWORD, MMatchPremiumIPNode>{};
+class MMatchPremiumIPMap : public std::map<DWORD, MMatchPremiumIPNode> {};
 
 class MMatchPremiumIPCache
 {

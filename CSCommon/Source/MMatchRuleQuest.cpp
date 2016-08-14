@@ -441,8 +441,7 @@ void MMatchRuleQuest::SetCombatState(MQuestCombatState nState)
 
 bool MMatchRuleQuest::CheckReadytoNewSector()
 {
-	// 일정 시간이 지나면 바로 다음 섹터로 이동한다.
-	unsigned long nNowTime = MMatchServer::GetInstance()->GetTickTime();
+	auto nNowTime = MMatchServer::GetInstance()->GetTickTime();
 	if ((nNowTime - m_nPrepareStartTime) > PORTAL_MOVING_TIME)
 	{
 		return true;
@@ -543,14 +542,12 @@ bool MMatchRuleQuest::CheckQuestCompleted()
 {
 	if (m_pQuestLevel)
 	{
-		// 너무 빨리 끝났는지 체크
-		unsigned long int nStartTime = GetStage()->GetStartTime();
-		unsigned long int nNowTime = MMatchServer::GetInstance()->GetTickTime();
+		auto nStartTime = GetStage()->GetStartTime();
+		auto nNowTime = MMatchServer::GetInstance()->GetTickTime();
 
-		// 최소한 각 섹터별 게임 시작 딜레이 * 섹터수만큼은 시간이 흘러야 게임이 끝날 수 있다고 가정함.
-		unsigned long int nCheckTime = QUEST_COMBAT_PLAY_START_DELAY * m_pQuestLevel->GetMapSectorCount();
+		auto nCheckTime = QUEST_COMBAT_PLAY_START_DELAY * m_pQuestLevel->GetMapSectorCount();
 
-		if (MGetTimeDistance(nStartTime, nNowTime) < nCheckTime) return false;
+		if (nNowTime - nStartTime < nCheckTime) return false;
 
 
 		if (m_pQuestLevel->GetMapSectorCount() == (m_pQuestLevel->GetCurrSectorIndex()+1))
@@ -567,9 +564,9 @@ bool MMatchRuleQuest::CheckQuestCompleteDelayTime()
 {
 	if ((m_pQuestLevel) && (m_pQuestLevel->GetMapSectorCount() == (m_pQuestLevel->GetCurrSectorIndex()+1)))
 	{
-		unsigned long int nNowTime = MMatchServer::GetInstance()->GetTickTime();
+		auto nNowTime = MMatchServer::GetInstance()->GetTickTime();
 		if (m_nQuestCompleteTime == 0) m_nQuestCompleteTime = nNowTime;
-		if (MGetTimeDistance(m_nQuestCompleteTime, nNowTime) > QUEST_COMPLETE_DELAY) return true;
+		if (nNowTime - m_nQuestCompleteTime > QUEST_COMPLETE_DELAY) return true;
 		return false;
 	}
 
@@ -657,9 +654,9 @@ bool MMatchRuleQuest::CheckNPCSpawnEnable()
 	if (m_pQuestLevel->GetNPCQueue()->IsEmpty()) return false;
 
 	if (m_NPCManager.GetNPCObjectCount() >= m_pQuestLevel->GetStaticInfo()->nLMT) return false;
-	unsigned long int nNowTime = MMatchServer::GetInstance()->GetTickTime();
+	auto nNowTime = MMatchServer::GetInstance()->GetTickTime();
 
-	if ((nNowTime - m_nCombatStartTime) < QUEST_COMBAT_PLAY_START_DELAY)
+	if (nNowTime - m_nCombatStartTime < QUEST_COMBAT_PLAY_START_DELAY)
 	{
 		return false;
 	}

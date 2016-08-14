@@ -184,7 +184,7 @@ void MMatchServer::OnAdminPingToAll(const MUID& uidAdmin)
 	}
 
 	MCommand* pNew = CreateCommand(MC_NET_PING, MUID(0,0));
-	pNew->AddParameter(new MCmdParamUInt(GetGlobalClockCount()));
+	pNew->AddParameter(new MCmdParamUInt(static_cast<u32>(GetGlobalClockCount())));
 	RouteToAllConnection(pNew);
 }
 

@@ -361,7 +361,7 @@ int MQuestLevel::GetSpawnPositionCount(MQuestNPCSpawnType nSpawnType)
 	return 0;
 }
 
-int MQuestLevel::GetRecommendedSpawnPosition(MQuestNPCSpawnType nSpawnType, unsigned long int nTickTime)
+int MQuestLevel::GetRecommendedSpawnPosition(MQuestNPCSpawnType nSpawnType, u64 nTickTime)
 {
 	if (m_DynamicInfo.pCurrSector)
 	{
@@ -384,7 +384,7 @@ int MQuestLevel::GetRecommendedSpawnPosition(MQuestNPCSpawnType nSpawnType, unsi
 	return 0;
 }
 
-bool MQuestLevel::IsEnableSpawnNow(MQuestNPCSpawnType nSpawnType, unsigned long int nNowTime)
+bool MQuestLevel::IsEnableSpawnNow(MQuestNPCSpawnType nSpawnType, u64 nNowTime)
 {
 	if (m_DynamicInfo.pCurrSector)
 	{

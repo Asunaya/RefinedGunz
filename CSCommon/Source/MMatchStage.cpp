@@ -69,7 +69,7 @@ void MMatchStage::Destroy()
 	}
 }
 
-bool MMatchStage::IsChecksumUpdateTime(unsigned long nTick)
+bool MMatchStage::IsChecksumUpdateTime(u64 nTick) const
 {
 	if (nTick - m_nLastChecksumTick > CYCLE_STAGE_UPDATECHECKSUM)
 		return true;
@@ -77,7 +77,7 @@ bool MMatchStage::IsChecksumUpdateTime(unsigned long nTick)
 		return false;
 }
 
-void MMatchStage::UpdateChecksum(unsigned long nTick)
+void MMatchStage::UpdateChecksum(u64 nTick)
 {
 	m_nChecksum = (m_nIndex + 
 		           GetState() + 
@@ -258,7 +258,7 @@ void MMatchStage::LeaveBattle(MMatchObject* pObj)
 	pObj->OnLeaveBattle();
 }
 
-bool MMatchStage::CheckTick(unsigned long nClock)
+bool MMatchStage::CheckTick(u64 nClock)
 {
 	if (nClock - m_nLastTick < MTICK_STAGE) return false;
 	return true;
@@ -268,7 +268,7 @@ void MMatchStage::UpdateWorldItems()
 {
 }
 
-void MMatchStage::Tick(unsigned long nClock)
+void MMatchStage::Tick(u64 nClock)
 {
 	switch (GetState())
 	{
@@ -301,12 +301,11 @@ void MMatchStage::Tick(unsigned long nClock)
 			}
 		}
 		break;
-	// STAGE_STATE_CLOSE 는 MMatchServer::StageRemove 로 처리
 	}
 
 	if (nClock - LastPhysicsTick >= 10)
 	{
-		MovingWeaponMgr.Update((nClock - LastPhysicsTick) / 1000.0);
+		MovingWeaponMgr.Update((nClock - LastPhysicsTick) / 1000.0f);
 		LastPhysicsTick = nClock;
 		UpdateWorldItems();
 	}

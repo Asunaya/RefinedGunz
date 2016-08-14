@@ -133,7 +133,7 @@ MQuestPlayerLogInfo* MMatchQuestGameLogInfoManager::Find( const MUID& uidPlayer 
 ///
 bool MMatchQuestGameLogInfoManager::PostInsertQuestGameLog()
 {
-	const int nElapsedPlayTime = (m_dwEndTime - m_dwStartTime) / 60000; // 분단위로 계산을 함.
+	auto nElapsedPlayTime = static_cast<int>((m_dwEndTime - m_dwStartTime) / 60000);
 
 	MAsyncDBJob_InsertQuestGameLog* pAsyncDbJob_InsertGameLog = new MAsyncDBJob_InsertQuestGameLog;
 	if( 0 == pAsyncDbJob_InsertGameLog )

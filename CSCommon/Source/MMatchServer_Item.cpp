@@ -383,8 +383,8 @@ void MMatchServer::ResponseCharacterItemList(const MUID& uidPlayer)
 
 		MTD_ItemNode* pItemNode = (MTD_ItemNode*)MGetBlobArrayElement(pItemArray, nIndex++);
 
-		unsigned long int nPassTime = MGetTimeDistance(pItem->GetRentItemRegTime(), GetTickTime());
-		int nPassMinuteTime = nPassTime / (1000 * 60);
+		auto nPassTime = MGetTimeDistance(pItem->GetRentItemRegTime(), GetTickTime());
+		int nPassMinuteTime = static_cast<int>(nPassTime / (1000 * 60));
 
 		int nRentMinutePeriodRemainder = RENT_MINUTE_PERIOD_UNLIMITED;
 		if (pItem->IsRentItem())

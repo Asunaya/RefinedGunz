@@ -1,5 +1,4 @@
-#ifndef _MMATCHRULEQUEST_H
-#define _MMATCHRULEQUEST_H
+#pragma once
 
 #include "MMatchRule.h"
 #include "MMatchRuleBaseQuest.h"
@@ -9,8 +8,9 @@
 #include "MQuestItem.h"
 #include "MMatchQuestGameLog.h"
 #include "MQuestNPCSpawnTrigger.h"
+#include "MQuestLevel.h"
 
-typedef pair< MUID, unsigned long int > SacrificeSlot;	// <아이템을 올려놓은 유저의 UID, 올려놓은 아이템의 ItemID.>
+typedef std::pair< MUID, unsigned long int > SacrificeSlot;
 
 class MQuestSacrificeSlot
 {
@@ -61,24 +61,8 @@ private :
 	SacrificeSlot	m_SacrificeSlot;
 };
 
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class MQuestLevel;
-
-
-class MQuestNPCSpawner
-{
-public:
-
-};
-
-/// 퀘스트 룰 클래스
 class MMatchRuleQuest : public MMatchRuleBaseQuest {
 private:
-	// 타입정의 ---------------------
-
-	/// 대기방에서 필요한 현재 스테이지의 방정보. 게임중에서는 m_pQuestLevel에 진짜값이 저장된다.
 	struct MQuestStageGameInfo
 	{
 		int				nQL;
@@ -86,28 +70,24 @@ private:
 		int				nMapsetID;
 		unsigned int	nScenarioID;
 	};
-	/// 섹터내 게임 결과
+
 	enum COMBAT_PLAY_RESULT
 	{
-		CPR_PLAYING = 0,		///< 게임 진행중
-		CPR_COMPLETE,			///< 게임 클리어
-		CPR_FAILED				///< 실패
+		CPR_PLAYING = 0,
+		CPR_COMPLETE,
+		CPR_FAILED
 	};
 
-	// 멤버변수 ---------------------
-
-	unsigned long	m_nPrepareStartTime;	///< 포탈 이동 시간 계산하기 위한 변수
-	unsigned long	m_nCombatStartTime;		///< 섹터이동하고서 새로운 전투 시작한 시간
-	unsigned long	m_nQuestCompleteTime;	///< 퀘스트 클리어때 시간
+	u64	m_nPrepareStartTime;
+	u64	m_nCombatStartTime;
+	u64	m_nQuestCompleteTime;
 
 	MQuestSacrificeSlot				m_SacrificeSlot[ MAX_SACRIFICE_SLOT_COUNT ];
-	//int								m_iScenarioState;
 	int								m_nPlayerCount;
 	MMatchQuestGameLogInfoManager	m_QuestGameLogInfoMgr;
 
-	MQuestStageGameInfo				m_StageGameInfo;	///< 대기방에서 필요한 현재 스테이지의 방정보
+	MQuestStageGameInfo				m_StageGameInfo;
 
-	// 함수 -------------------------
 	void ClearQuestLevel();
 	void MakeStageGameInfo();
 	void InitJacoSpawnTrigger();
@@ -243,6 +223,3 @@ public:
 private :
 	int CalcuOwnerQItemCount( const MUID& uidPlayer, const unsigned long nItemID );
 };
-
-
-#endif

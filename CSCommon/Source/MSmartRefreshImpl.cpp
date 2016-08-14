@@ -6,7 +6,7 @@
 
 
 //// MRefreshCategoryChannel ////
-bool MRefreshCategoryChannelImpl::OnUpdateChecksum(unsigned long nTick)
+bool MRefreshCategoryChannelImpl::OnUpdateChecksum(u64 nTick)
 {
 	unsigned long nChecksum = 0;
 	int nPage = GetCategory();
@@ -40,7 +40,7 @@ bool MRefreshClientChannelImpl::OnSync(unsigned long nChecksum)
 
 
 //// MRefreshCategoryClanMember ////
-bool MRefreshCategoryClanMemberImpl::OnUpdateChecksum(unsigned long nTick)
+bool MRefreshCategoryClanMemberImpl::OnUpdateChecksum(u64 nTick)
 {
 	MMatchClan* pClan = GetMatchClan();
 	unsigned long nChecksum = 0;

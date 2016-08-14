@@ -1,8 +1,6 @@
 #pragma once
 
-
 #include <vector>
-using namespace std;
 
 
 class MShutdownNotify {
@@ -22,15 +20,15 @@ public:
 
 class MMatchShutdown {
 protected:
-	vector<MShutdownNotify*>	m_ShutdownNotifyArray;
+	std::vector<MShutdownNotify*>	m_ShutdownNotifyArray;
 
 	bool						m_bShutdown;
 	unsigned short				m_nProgressIndex;
-	unsigned long				m_nTimeLastProgress;
+	u64							m_nTimeLastProgress;
 
-	unsigned short GetProgressIndex()		{ return m_nProgressIndex; }
-	unsigned long GetTimeLastProgress()		{ return m_nTimeLastProgress; }
-	void MMatchShutdown::SetProgress(int nIndex, unsigned long nClock);
+	unsigned short GetProgressIndex() const	{ return m_nProgressIndex; }
+	auto GetTimeLastProgress() const		{ return m_nTimeLastProgress; }
+	void MMatchShutdown::SetProgress(int nIndex, u64 nClock);
 
 public:
 	MMatchShutdown() { m_bShutdown = false; }
@@ -38,11 +36,11 @@ public:
 
 	bool LoadXML_ShutdownNotify(const char* pszFileName);
 
-	void Start(unsigned long nClock);
+	void Start(u64 nClock);
 	void Notify(int nIndex);
 	void Terminate();
 
 	bool IsShutdown()	{ return m_bShutdown; }
 
-	void OnRun(unsigned long nClock);
+	void OnRun(u64 nClock);
 };

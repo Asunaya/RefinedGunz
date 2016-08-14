@@ -25,7 +25,7 @@ class MQuestNPCSpawnTrigger
 private:
 	vector<SpawnTriggerNPCInfoNode>		m_NPCInfo;
 	SpawnTriggerInfo					m_Info;
-	unsigned int						m_nLastTime;
+	u64									m_nLastTime;
 	float								m_fRateSum;
 	vector<MQUEST_NPC>					m_NPCQueue;
 	void MakeSpawnNPCs();

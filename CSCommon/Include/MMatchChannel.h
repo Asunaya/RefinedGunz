@@ -74,22 +74,22 @@ private:
 	MChannelUserArray			m_UserArray;
 	MSmartRefresh				m_SmartRefresh;
 
-	unsigned long	m_nChecksum;	// 목록및 정보 갱신용
-	unsigned long	m_nLastChecksumTick;
+	unsigned long	m_nChecksum;
+	u64				m_nLastChecksumTick;
 
-	unsigned long	m_nLastTick;
+	u64				m_nLastTick;
 	unsigned long	m_nEmptyPeriod;
 
 	void JoinLobby(const MUID& uid, MMatchObject* pObj);
 	void LeaveLobby(const MUID& uid);
 protected:
-	inline bool IsChecksumUpdateTime(unsigned long nTick);
-	void UpdateChecksum(unsigned long nTick);
+	bool IsChecksumUpdateTime(u64 nTick);
+	void UpdateChecksum(u64 nTick);
 	unsigned long GetEmptyPeriod()	{ return m_nEmptyPeriod; }
 
 public:
-	bool CheckTick(unsigned long nClock);
-	void Tick(unsigned long nClock);
+	bool CheckTick(u64 nClock);
+	void Tick(u64 nClock);
 
 	unsigned long GetChecksum()		{ return m_nChecksum; }
 	bool CheckLifePeriod();
@@ -156,7 +156,7 @@ public:
 
 	bool Add(const char* pszChannelName, const char* pszRuleName, MUID* pAllocUID, MCHANNEL_TYPE nType=MCHANNEL_TYPE_PRESET, int nMaxPlayers=DEFAULT_CHANNEL_MAXPLAYERS, int nLevelMin=-1, int nLevelMax=-1);
 	bool Remove(const MUID& uidChannel, MMatchChannelMap::iterator* pNextItor);
-	void Update(unsigned long nClock);
+	void Update(u64 nClock);
 
 	unsigned long GetChannelListChecksum() { return m_nChecksum; }
 	int GetChannelCount(MCHANNEL_TYPE nChannelType);

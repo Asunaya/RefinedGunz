@@ -321,10 +321,10 @@ class MMatchItem : public MBaseItem
 private:
 protected:
 	MUID				m_uidItem;			
-	unsigned long int	m_nCIID;					///< DB에 들어가는 CIID
-	MMatchItemDesc*		m_pDesc;					///< 디스크립터
-	bool				m_bEquiped;					///< 장비하고 있는지 여부
-	unsigned long int	m_nRentItemRegTime;			///< 기간제 아이템일 경우 등록한 시간
+	unsigned long int	m_nCIID;
+	MMatchItemDesc*		m_pDesc;
+	bool				m_bEquiped;
+	u64					m_nRentItemRegTime;
 protected:
 	void SetDesc(MMatchItemDesc* pDesc) { m_pDesc = pDesc; }
 public:
@@ -347,8 +347,8 @@ public:
 	void Dec(int n=1) { m_nCount -= n; if (m_nCount < 0) m_nCount = 0; }
 	void SetEquiped(bool bIsEquiped) { m_bEquiped = bIsEquiped; }
 	bool IsEquiped() { return m_bEquiped; }
-	unsigned long int GetRentItemRegTime()	{ return m_nRentItemRegTime; }
-	void SetRentItemRegTime(unsigned long int nTime){ m_nRentItemRegTime = nTime; }
+	auto GetRentItemRegTime() const { return m_nRentItemRegTime; }
+	void SetRentItemRegTime(u64 nTime){ m_nRentItemRegTime = nTime; }
 
 	MMatchItemType GetItemType();
 };

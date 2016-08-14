@@ -91,25 +91,8 @@ public:
 
 	const MUID GetUID(void) const;
 
-	/// 현재 위치 설정
-//	void SetPos(rvector& Pos){ SetPos(0, 0, Pos, Pos); }
-	/// 시간에 따른 위치 지정
-//	void SetPos(unsigned long int nStartTime, unsigned long int nEndTime, rvector& StartPos, rvector& EndPos);
-	/// 패스로 지정
-//	void SetPath(MOBJECTPATH* p, int nCount);
-	/// 현재 시간의 오브젝트 위치 얻기
-//	const rvector GetPos(void){ return m_Pos; }
-	/// SpawnID 얻기 (Spawn Object 아니면 0)
-//	int GetSpawnID() { return m_nSpawnID; }
-//	void SetSpawnID(int nSpawnID) { m_nSpawnID = nSpawnID; }
-
 	void SetObjectType(MObjectType type) { m_ObjectType = type; }
 	MObjectType GetObjectType()	{ return m_ObjectType; }
-
-	virtual bool CheckDestroy(int nTime) { return false; }
-
-	/// 틱 처리
-	virtual void Tick(unsigned long int nTime)	{}
 
 	/// 현재 맵 설정
 //	void SetMap(MMap* pMap){ m_pMap = pMap; }

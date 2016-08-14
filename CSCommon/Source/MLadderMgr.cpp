@@ -287,7 +287,7 @@ unsigned long int MLadderMgr::GetTickInterval()
 }
 
 
-void MLadderMgr::Tick(unsigned long nTick)
+void MLadderMgr::Tick(u64 nTick)
 {
 	if (nTick - GetLastTick() < GetTickInterval())
 		return;

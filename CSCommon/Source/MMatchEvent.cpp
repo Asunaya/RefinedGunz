@@ -86,7 +86,7 @@ bool MMatchEvent::DoItNow( const DWORD dwCurTime )
 }
 
 
-void MMatchEvent::CheckEventObj( MMatchObject* pObj, const DWORD dwCurTime )
+void MMatchEvent::CheckEventObj( MMatchObject* pObj, u64 dwCurTime )
 {
 	if( CheckEventTime() )
 		OnCheckEventObj( pObj, dwCurTime );
@@ -107,7 +107,7 @@ bool MMatchEvent::CheckEventTime()
 }
 
 
-bool MMatchEvent::CheckElapsedTimeIsOverflow( const DWORD dwCurTime )
+bool MMatchEvent::CheckElapsedTimeIsOverflow( u64 dwCurTime )
 {
 #ifdef _DEBUG
 	if( m_dwCheckElapsedTime < (dwCurTime - m_dwLastCheckTime) )
@@ -117,7 +117,7 @@ bool MMatchEvent::CheckElapsedTimeIsOverflow( const DWORD dwCurTime )
 }
 
 
-void MMatchEvent::SetLastCheckTime( const DWORD dwCurTime ) 
+void MMatchEvent::SetLastCheckTime( u64 dwCurTime ) 
 { 
 	if( CheckElapsedTimeIsOverflow(dwCurTime) )
 		m_dwLastCheckTime = dwCurTime; 

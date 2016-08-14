@@ -389,7 +389,7 @@ void MMatchRuleBaseQuest::PostNewMonsterInfo( const MUID& uidUser, const char nM
 
 void MMatchRuleBaseQuest::ReAssignNPC()
 {
-	unsigned long int nowTime = MMatchServer::GetInstance()->GetGlobalClockCount();
+	auto nowTime = MMatchServer::GetInstance()->GetGlobalClockCount();
 
 	if (nowTime - m_nLastNPCAssignCheckTime > NPC_ASSIGN_DELAY)
 	{
@@ -417,7 +417,7 @@ void MMatchRuleBaseQuest::ReAssignNPC()
 
 void MMatchRuleBaseQuest::SendClientLatencyPing()
 {
-	unsigned long int nowTime = MMatchServer::GetInstance()->GetGlobalClockCount();
+	auto nowTime = MMatchServer::GetInstance()->GetGlobalClockCount();
 
 	if (nowTime - m_nLastPingTime > LATENCY_CHECK_DELAY)
 	{
@@ -430,7 +430,7 @@ void MMatchRuleBaseQuest::SendClientLatencyPing()
 		for (auto i=pStage->GetObjBegin(); i!=pStage->GetObjEnd(); i++)
 		{
 			MMatchObject* pObj = i->second;
-			if (pObj->GetEnterBattle() == false) continue;	// 배틀참가하고 있는 플레이어만 체크
+			if (pObj->GetEnterBattle() == false) continue;
 
 			if (pObj->m_bQuestRecvPong)
 			{
@@ -439,6 +439,6 @@ void MMatchRuleBaseQuest::SendClientLatencyPing()
 			}
 		}
 
-		MMatchServer::GetInstance()->OnQuestSendPing(pStage->GetUID(), nowTime);
+		MMatchServer::GetInstance()->OnQuestSendPing(pStage->GetUID(), static_cast<u32>(nowTime));
 	}
 }

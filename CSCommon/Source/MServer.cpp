@@ -223,7 +223,7 @@ bool MServer::OnCommand(MCommand* pCommand)
 			MUID uid;
 			if (pCommand->GetParameter(&uid, 0, MPT_UID)==false) break;
 			MCommand* pNew = new MCommand(m_CommandManager.GetCommandDescByID(MC_NET_PING), uid, m_This);
-			pNew->AddParameter(new MCommandParameterUInt(GetGlobalTimeMS()));
+			pNew->AddParameter(new MCommandParameterUInt(static_cast<u32>(GetGlobalTimeMS())));
 			Post(pNew);
 			return true;
 		}
@@ -318,7 +318,6 @@ int MServer::OnAccept(MCommObject* pCommObj)
 	return MOK;
 }
 
-// Login절차가 완성되면 Player고유의 PlayerUID사용. 임시로 생성된 AllocUID사용중
 void MServer::OnLocalLogin(MUID CommUID, MUID PlayerUID)
 {
 	MCommObject* pCommObj = NULL;
@@ -337,7 +336,7 @@ void MServer::OnLocalLogin(MUID CommUID, MUID PlayerUID)
 	if (pCommObj == NULL) 
 		return;
 
-	unsigned int nTimeStamp = (GetGlobalTimeMS() * 103) - 234723;
+	auto nTimeStamp = static_cast<unsigned int>((GetGlobalTimeMS() * 103) - 234723);
 
 	LockCommList();
 		AddCommObject(pCommObj->GetUID(), pCommObj);
@@ -345,10 +344,6 @@ void MServer::OnLocalLogin(MUID CommUID, MUID PlayerUID)
 	UnlockCommList();
 
 	int nResult = ReplyConnect(&m_This, &CommUID, nTimeStamp, pCommObj);
-
-/*	char szMsg[128];
-	sprintf_safe(szMsg, "Accept from %s:%d \n", pCommObj->GetIP(), pCommObj->GetPort());
-	LOG(LOG_DEBUG, szMsg); */
 }
 
 void MServer::Disconnect(MUID uid)

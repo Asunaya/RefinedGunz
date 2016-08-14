@@ -205,17 +205,11 @@ void CopyCharInfoDetailForTrans(MTD_CharInfo_Detail* pDest, MMatchCharInfo* pSrc
 		pDest->nDeathCount = pSrcCharInfo->m_nTotalDeathCount;
 
 
-		unsigned long int nNowTime = MMatchServer::GetInstance()->GetTickTime();
+		auto nNowTime = MMatchServer::GetInstance()->GetTickTime();
 
-		// 접속시간
-		pDest->nConnPlayTimeSec = MGetTimeDistance(pSrcCharInfo->m_nConnTime, nNowTime) / 1000;
+		pDest->nConnPlayTimeSec = static_cast<u32>((nNowTime - pSrcCharInfo->m_nConnTime) / 1000);
 		pDest->nTotalPlayTimeSec = pDest->nConnPlayTimeSec + pSrcCharInfo->m_nTotalPlayTimeSec;
 
-
-
-
-		//
-		// 아이템셋
 		for (int i = 0; i < MMCIP_END; i++)
 		{
 			if (pSrcCharInfo->m_EquipedItem.IsEmpty(MMatchCharItemParts(i)))
@@ -573,7 +567,7 @@ bool MMatchServer::Create(int nPort)
 	// set buffer overrun error handler /GS
 	//SetSecurityErrorHandler(ReportBufferOverrun);
 
-	srand(GetGlobalTimeMS());
+	srand(static_cast<unsigned int>(GetGlobalTimeMS()));
 
 	m_NextUseUID.SetZero();
 	m_NextUseUID.Increase(10);	// 10 아래의 UID는 사용안함
@@ -731,8 +725,8 @@ void MMatchServer::OnRun(void)
 	MGetServerStatusSingleton()->SetRunStatus(101);
 
 	// Update Objects
-	unsigned long int nGlobalClock = GetGlobalClockCount();
-	unsigned long int nHShieldClock = GetGlobalClockCount();
+	auto nGlobalClock = GetGlobalClockCount();
+	auto nHShieldClock = GetGlobalClockCount();
 	for(MMatchObjectList::iterator i=m_Objects.begin(); i!=m_Objects.end();){
 		MMatchObject* pObj = (*i).second;
 		pObj->Tick(nGlobalClock);
@@ -769,12 +763,7 @@ void MMatchServer::OnRun(void)
 			DisconnectObject( pObj->GetUID() );
 		}
 
-		if (pObj->CheckDestroy(nGlobalClock) == true) {
-			ObjectRemove(pObj->GetUID(), &i);
-			continue;
-		} else {
-			i++;
-		}
+		i++;
 	}
 
 	MGetServerStatusSingleton()->SetRunStatus(102);
@@ -798,21 +787,6 @@ void MMatchServer::OnRun(void)
 
 	// Update Channels
 	m_ChannelMap.Update(nGlobalClock);
-/*
-	unsigned long nChannelListChecksum = 0;
-	for(MMatchChannelMap::iterator iChannel=m_ChannelMap.begin(); iChannel!=m_ChannelMap.end();)
-	{
-		MMatchChannel* pChannel = (*iChannel).second;
-		pChannel->Tick(nGlobalClock);
-		if (pChannel->CheckLifePeriod() == false) {
-			ChannelRemove(pChannel->GetUID(), &iChannel);
-		}else {
-			iChannel++;
-		}
-		nChannelListChecksum += pChannel->GetChecksum();
-	}
-	UpdateChannelListChecksum(nChannelListChecksum);
-*/
 
 	MGetServerStatusSingleton()->SetRunStatus(104);
 
@@ -821,7 +795,7 @@ void MMatchServer::OnRun(void)
 
 	MGetServerStatusSingleton()->SetRunStatus(105);
 
-	// Update Ladders - 클랜전서버일 경우에만 실행한다.
+	// Update Ladders
 	if (MGetServerConfig()->GetServerMode() == MSM_CLAN)
 	{
 		GetLadderMgr()->Tick(nGlobalClock);
@@ -829,7 +803,8 @@ void MMatchServer::OnRun(void)
 
 	MGetServerStatusSingleton()->SetRunStatus(106);
 
-	if (nGlobalClock - LastPingTime > 500) // Ping every half second
+	// Ping all ingame players every half second
+	if (nGlobalClock - LastPingTime > 500)
 	{
 		// Send ping list
 		for (auto Stage : MakePairValueAdapter(m_StageMap))
@@ -860,7 +835,7 @@ void MMatchServer::OnRun(void)
 
 		// Ping all in-game clients
 		MCommand* pNew = CreateCommand(MC_NET_PING, MUID(0, 0));
-		pNew->AddParameter(new MCmdParamUInt(GetGlobalClockCount()));
+		pNew->AddParameter(new MCmdParamUInt(static_cast<u32>(GetGlobalClockCount())));
 		RouteToAllClientIf(pNew, [](MMatchObject& Obj) {
 			return Obj.GetPlace() == MMP_BATTLE; });
 		LastPingTime = nGlobalClock;
@@ -868,14 +843,14 @@ void MMatchServer::OnRun(void)
 
 	// Garbage Session Cleaning
 #define MINTERVAL_GARBAGE_SESSION_PING	(5 * 60 * 1000)	// 3 min
-	static unsigned long tmLastGarbageSessionCleaning = nGlobalClock;
+	static auto tmLastGarbageSessionCleaning = nGlobalClock;
 	if (nGlobalClock - tmLastGarbageSessionCleaning > MINTERVAL_GARBAGE_SESSION_PING){
 		tmLastGarbageSessionCleaning = nGlobalClock;
 
 		LOG(LOG_ALL, "ClientCount=%d, SessionCount=%d, AgentCount=%d", 
 			GetClientCount(), GetCommObjCount(), GetAgentCount());
 		MCommand* pNew = CreateCommand(MC_NET_PING, MUID(0,0));
-		pNew->AddParameter(new MCmdParamUInt(GetGlobalClockCount()));
+		pNew->AddParameter(new MCmdParamUInt(static_cast<u32>(GetGlobalClockCount())));
 		RouteToAllConnection(pNew);
 	}
 
@@ -937,25 +912,7 @@ const int MINTERVAL_HSHIELD_CLEANING_IN_LOBBY	= 3*60*1000;		// 3min 내로 HShield
 #endif
 
 	MGetServerStatusSingleton()->SetRunStatus(107);
-	/*
-	#ifdef _DEBUG
-	#define MINTERVAL_GARBAGE_SESSION_CLEANING	(3 * 60 * 1000)		// 3 min
-	#else
-	#define MINTERVAL_GARBAGE_SESSION_CLEANING	(10 * 60 * 1000)		// 10 min
-	#endif
-	// Garbage MatchObject Cleaning
-	for(MMatchObjectList::iterator i=m_Objects.begin(); i!=m_Objects.end(); i++){
-	MMatchObject* pObj = (MMatchObject*)((*i).second);
-	if (pObj->GetUID() < MUID(0,3)) continue;	// MUID로 Client인지 판별할수 있는 코드 필요함
-	if( GetTickTime() - pObj->GetTickLastPacketRecved() >= MINTERVAL_GARBAGE_SESSION_CLEANING )
-	{	// 30 min
-	LOG(LOG_ALL, "TIMEOUT CLIENT CLEANING : %s(%u%u) (ClientCount=%d, SessionCount=%d)", 
-	pObj->GetName(), pObj->GetUID().High, pObj->GetUID().Low, GetClientCount(), GetCommObjCount());
 
-	DisconnectObject(pObj->GetUID());
-	}
-	}
-	*/
 	MGetServerStatusSingleton()->SetRunStatus(108);
 
 	// Process Async Jobs
@@ -990,9 +947,9 @@ void MMatchServer::UpdateServerLog()
 
 #define SERVER_LOG_TICK		(60000)	// 1분 (1000 * 60)
 
-	static unsigned long int st_nElapsedTime = 0;
-	static unsigned long int nLastTime = GetGlobalTimeMS();
-	unsigned long int nNowTime = GetGlobalTimeMS();
+	static u64 st_nElapsedTime = 0;
+	static auto nLastTime = GetGlobalTimeMS();
+	auto nNowTime = GetGlobalTimeMS();
 
 	st_nElapsedTime += (nNowTime - nLastTime);
 
@@ -1017,9 +974,9 @@ void MMatchServer::UpdateServerStatusDB()
 
 #define SERVER_STATUS_TICK		(30000)	// 30초 (1000 * 30)
 
-	static unsigned long int st_nElapsedTime = 0;
-	static unsigned long int nLastTime = GetGlobalTimeMS();
-	unsigned long int nNowTime = GetGlobalTimeMS();
+	static u64 st_nElapsedTime = 0;
+	static auto nLastTime = GetGlobalTimeMS();
+	auto nNowTime = GetGlobalTimeMS();
 
 	st_nElapsedTime += (nNowTime - nLastTime);
 
@@ -1771,7 +1728,7 @@ MUID MMatchServer::UseUID(void)
 void MMatchServer::SetClientClockSynchronize(const MUID& CommUID)
 {
 	MCommand* pNew = new MCommand(m_CommandManager.GetCommandDescByID(MC_CLOCK_SYNCHRONIZE), CommUID, m_This);
-	pNew->AddParameter(new MCommandParameterUInt(GetGlobalClockCount()));
+	pNew->AddParameter(new MCommandParameterUInt(static_cast<u32>(GetGlobalClockCount())));
 	Post(pNew);
 }
 
@@ -1819,15 +1776,14 @@ void MMatchServer::OnBridgePeer(const MUID& uidChar, DWORD dwIP, DWORD nPort)
 	ResponseBridgePeer(uidChar, 0);
 }
 
-MMatchServer* MMatchServer::GetInstance(void)
+MMatchServer* MMatchServer::GetInstance()
 {
 	return m_pInstance;
 }
 
-unsigned long int MMatchServer::GetGlobalClockCount(void)
+u64 MMatchServer::GetGlobalClockCount()
 {
-	unsigned long int i = GetGlobalTimeMS();
-	return i;
+	return GetGlobalTimeMS();
 }
 
 unsigned long int MMatchServer::ConvertLocalClockToGlobalClock(unsigned long int nLocalClock, unsigned long int nLocalClockDistance)
@@ -2293,7 +2249,7 @@ void MMatchServer::InsertChatDBLog(const MUID& uidPlayer, const char* szMsg)
 {
 	MMatchObject* pObj = GetObject(uidPlayer);
 	if (pObj == NULL) return;
-	unsigned long int nNowTime = GetGlobalTimeMS();
+	auto nNowTime = GetGlobalTimeMS();
 
 	static int stnLogTop = 0;
 #define MAX_CHAT_LOG 1
@@ -2302,7 +2258,7 @@ void MMatchServer::InsertChatDBLog(const MUID& uidPlayer, const char* szMsg)
 	{
 		unsigned long int nCID;
 		char szMsg[256];
-		unsigned long int nTime;
+		u64 nTime;
 	} stChatLog[MAX_CHAT_LOG];
 
 	stChatLog[stnLogTop].nCID = pObj->GetCharInfo()->m_nCID;
@@ -2605,8 +2561,8 @@ void MMatchServer::OnNetPong(const MUID& CommUID, unsigned int nTimeStamp)
 {
 	MMatchObject* pObj = GetObject(CommUID);
 	if (pObj) {
-		pObj->UpdateTickLastPacketRecved();	// Last Packet Timestamp
-		pObj->AddPing(GetGlobalClockCount() - nTimeStamp);
+		pObj->UpdateTickLastPacketRecved();
+		pObj->AddPing(static_cast<int>(GetGlobalClockCount() - nTimeStamp));
 	}
 }
 
@@ -2614,7 +2570,7 @@ void MMatchServer::OnHShieldPong(const MUID& CommUID, unsigned int nTimeStamp)
 {
 	MMatchObject* pObj = GetObject(CommUID);
 	if (pObj) 
-		pObj->UpdateLastHShieldMsgRecved();	// Last Packet Timestamp
+		pObj->UpdateLastHShieldMsgRecved();
 }
 
 void MMatchServer::UpdateCharDBCachingData(MMatchObject* pObject)
@@ -3342,7 +3298,7 @@ void MMatchServer::SendHShieldReqMsg()
 {
 	//{{RouteToAllClient HShieldReqMsg
 	MCommand* pCommand = CreateCommand(MC_HSHIELD_PING, MUID(0,0));
-	pCommand->AddParameter(new MCmdParamUInt(GetGlobalClockCount()));
+	pCommand->AddParameter(new MCmdParamUInt(static_cast<u32>(GetGlobalClockCount())));
 
 
 	unsigned long HSOption = ANTICPSVR_CHECK_GAME_MEMORY;
@@ -3422,8 +3378,8 @@ void MMatchServer::PostDamage(const MUID& Target, const MUID& Attacker, ZDAMAGET
 void MMatchServer::PostHPAPInfo(const MMatchObject& Object, int HP, int AP)
 {
 	auto DeathCmd = MCommand(m_CommandManager.GetCommandDescByID(MC_PEER_HPAPINFO), MUID(0, 0), m_This);
-	DeathCmd.AddParameter(new MCmdParamFloat(HP));
-	DeathCmd.AddParameter(new MCmdParamFloat(AP));
+	DeathCmd.AddParameter(new MCmdParamFloat(static_cast<float>(HP)));
+	DeathCmd.AddParameter(new MCmdParamFloat(static_cast<float>(AP)));
 	auto P2PCmd = CreateCommand(MC_MATCH_P2P_COMMAND, MUID(0, 0));
 	P2PCmd->AddParameter(new MCmdParamUID(Object.GetUID()));
 	P2PCmd->AddParameter(CommandToBlob(DeathCmd));

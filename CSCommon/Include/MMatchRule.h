@@ -42,7 +42,7 @@ protected:
 	MMATCH_ROUNDSTATE	m_nRoundState;								///< 현재 라운드 상태
 	int					m_nRoundCount;								///< 라운드 수
 	int					m_nRoundArg;								///< 라운드의 추가 인자
-	unsigned long		m_tmRoundStateTimer;
+	u64					m_tmRoundStateTimer;
 	int					m_nLastTimeLimitAnnounce;					// 60, 30, 10 중 하나
 
 	MMatchEventManager m_OnBeginEventManager;						/// 게임을 시작할때 이벤트.
@@ -62,7 +62,7 @@ protected:
 	virtual bool OnCheckEnableBattleCondition() { return true; }	///< 게임 가능한지 체크
 	virtual bool OnCheckBattleTimeOut(unsigned int tmTimeSpend);	///< 라운드 타임아웃인지 체크
 
-	void SetRoundStateTimer(unsigned long tmTime)	{ m_tmRoundStateTimer = tmTime; }
+	void SetRoundStateTimer(u64 tmTime)	{ m_tmRoundStateTimer = tmTime; }
 	void InitRound();												///< 새로운 라운드 초기화
 	void SetRoundState(MMATCH_ROUNDSTATE nState);					///< 라운드 상태 변경
 
@@ -83,9 +83,9 @@ public:
 	virtual ~MMatchRule()			{}								///< 소멸자
 	MMatchStage* GetStage()			{ return m_pStage; }			///< 스테이지 반환
 
-	int GetRoundCount()				{ return m_nRoundCount; }		///< 총 라운드 수 반환
+	int GetRoundCount() const		{ return m_nRoundCount; }		///< 총 라운드 수 반환
 	void SetRoundCount(int nRound)	{ m_nRoundCount = nRound; }		///< 총 라운드 수 설정
-	int GetRoundArg()				{ return m_nRoundArg; }			///< 라운드 인자 반환
+	int GetRoundArg() const			{ return m_nRoundArg; }			///< 라운드 인자 반환
 	void SetRoundArg(int nArg)		{ m_nRoundArg = nArg; }			///< 라운드 인자 설정
 
 	MMatchEventManager& GetOnBeginEventManager()	{ return m_OnBeginEventManager; }
@@ -93,8 +93,8 @@ public:
 	MMatchEventManager& GetOnEndEventManager()		{ return m_OnEndEventManager; }
 
 	MMATCH_ROUNDSTATE GetRoundState()	{ return m_nRoundState; }				///< 라운드 상태 반환
-	unsigned long GetRoundStateTimer()	{ return m_tmRoundStateTimer; }
-	unsigned long GetLastTimeLimitAnnounce()	{ return m_nLastTimeLimitAnnounce; }
+	auto GetRoundStateTimer() const	{ return m_tmRoundStateTimer; }
+	auto GetLastTimeLimitAnnounce() const	{ return m_nLastTimeLimitAnnounce; }
 	void SetLastTimeLimitAnnounce(int nSeconds)	{ m_nLastTimeLimitAnnounce = nSeconds; }
 
 	virtual void* CreateRuleInfoBlob()		{ return NULL; }

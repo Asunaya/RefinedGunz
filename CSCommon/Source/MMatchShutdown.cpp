@@ -65,14 +65,14 @@ bool MMatchShutdown::LoadXML_ShutdownNotify(const char* pszFileName)
 	return true;
 }
 
-void MMatchShutdown::Start(unsigned long nClock)
+void MMatchShutdown::Start(u64 nClock)
 {
 	m_bShutdown = true;
 	m_nProgressIndex = 0;
 	m_nTimeLastProgress = nClock;
 }
 
-void MMatchShutdown::SetProgress(int nIndex, unsigned long nClock)
+void MMatchShutdown::SetProgress(int nIndex, u64 nClock)
 {
 	m_nProgressIndex = nIndex;
 	m_nTimeLastProgress = nClock;
@@ -100,7 +100,7 @@ void MMatchShutdown::Terminate()
 	pServer->Shutdown();
 }
 
-void MMatchShutdown::OnRun(unsigned long nClock)
+void MMatchShutdown::OnRun(u64 nClock)
 {
 	if (IsShutdown() == false) return;
 
