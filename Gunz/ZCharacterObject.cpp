@@ -351,43 +351,26 @@ void ZCharacterObject::Draw_SetLight(rvector& vPosition)
 		Light.Attenuation1 = 0.0f;
 		Light.Attenuation2 = 0.0f;
 	}
-//	RGetDevice()->SetLight( 0, &Light );
-//	RGetDevice()->LightEnable( 0, TRUE );
-
-//	if( RShaderMgr::mbUsingShader )
-//	{
-//		RGetShaderMgr()->setLight( 0, &Light );
-//		RGetShaderMgr()->LightEnable( 0, TRUE );
-//	}
 
 	m_pVMesh->SetLight(0,&Light,false);
 
-	// 0번 라이트 end
-
-	// 1번 라이트 begine
 	ZeroMemory( &Light, sizeof(D3DLIGHT9) );
-	RLightList* pLightList = 0;
-	RLIGHT* pLight = 0;
 	RLIGHT* pSelectedLight = 0;
 	rvector sunDir;
 	float distance;
 	float SelectedLightDistance = FLT_MAX;
-	pLightList = ZGetGame()->GetWorld()->GetBsp()->GetSunLightList();
-	int nLight = (int)pLightList->size();
 
 	Light.Specular.r = 1.f;
 	Light.Specular.g = 1.f;
 	Light.Specular.b = 1.f;
 	Light.Specular.a = 1.f;
 
-	if( nLight > 0 )
+	auto& LightList = ZGetGame()->GetWorld()->GetBsp()->GetSunLightList();
+	if(!LightList.empty())
 	{
-		// 중간에 맵 픽킹이 안되면..
-		// 해가 여러개이면? 거리로 선택..
-		for(  RLightList::iterator iter = pLightList->begin(); iter != pLightList->end(); ++iter )
+		for (auto& Light : LightList)
 		{
-			pLight	= *iter;
-			sunDir	= pLight->Position - char_pos;
+			sunDir	= Light.Position - char_pos;
 			distance	= D3DXVec3LengthSq( &sunDir );
 			D3DXVec3Normalize( &sunDir, &sunDir );
 			RBSPPICKINFO info;
@@ -401,7 +384,7 @@ void ZCharacterObject::Draw_SetLight(rvector& vPosition)
 			if( distance < SelectedLightDistance )
 			{
 				SelectedLightDistance = distance;
-				pSelectedLight = pLight;
+				pSelectedLight = &Light;
 			}
 		}
 		Light.Type       = D3DLIGHT_POINT;
@@ -417,24 +400,20 @@ void ZCharacterObject::Draw_SetLight(rvector& vPosition)
 	SelectedLightDistance = FLT_MAX ;
 	if( pSelectedLight == 0 )
 	{
-		pLightList	= ZGetGame()->GetWorld()->GetBsp()->GetObjectLightList();
-
-		// 여기 최적화가 쩜 필요하다
-		for( RLightList::iterator itor = pLightList->begin();itor != pLightList->end(); itor++ )
+		for(auto& Light : ZGetGame()->GetWorld()->GetBsp()->GetObjectLightList())
 		{
-			RLIGHT *pl = *itor;
-			float fDist = Magnitude( pl->Position-char_pos );
+			float fDist = Magnitude(Light.Position - char_pos);
 			if( SelectedLightDistance > fDist )
 			{
 				SelectedLightDistance = fDist;
-				pSelectedLight = pl;
+				pSelectedLight = &Light;
 			}
 		}
 
 		Light.Type       = D3DLIGHT_POINT;
 		Light.Attenuation1 = 0.0025f;
 
-		if( pSelectedLight != 0 )
+		if(pSelectedLight)
 		{
 			Light.Diffuse.r  = pSelectedLight->Color.x * pSelectedLight->fIntensity;
 			Light.Diffuse.g  = pSelectedLight->Color.y * pSelectedLight->fIntensity;
@@ -445,34 +424,12 @@ void ZCharacterObject::Draw_SetLight(rvector& vPosition)
 	if( pSelectedLight != NULL )
 	{			
 		Light.Position = pSelectedLight->Position;
-	//	Light.Diffuse.r  = pSelectedLight->Color.x;
-	//	Light.Diffuse.g  = pSelectedLight->Color.y;
-	//	Light.Diffuse.b  = pSelectedLight->Color.z;
 		Light.Range       = pSelectedLight->fAttnEnd;
 
 		m_pVMesh->SetLight(1,&Light,false);
-
-//		RGetDevice()->SetLight( 1, &Light );
-//		RGetDevice()->LightEnable( 1, TRUE );
-
-//		if( RShaderMgr::mbUsingShader ) 
-//		{
-//			RGetShaderMgr()->setLight( 1, &Light );
-//			RGetShaderMgr()->LightEnable( 1, TRUE );
-//			RGetShaderMgr()->setLight( 0x00cccccc );
-//		}
 	}
 	else
-	{
 		m_pVMesh->SetLight(1,NULL,false);
-
-	//	RGetDevice()->LightEnable( 1, FALSE );
-	//	if( RShaderMgr::mbUsingShader ) 
-	//	{
-	//		RGetShaderMgr()->LightEnable( 1, FALSE );
-	//	}
-	}
-	// 1번 라이트 end
 
 	RGetShaderMgr()->setAmbient( 0x00cccccc );
 	RGetDevice()->SetRenderState( D3DRS_LIGHTING, TRUE );

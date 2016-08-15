@@ -1829,7 +1829,7 @@ void RVisualMesh::SetParts(RMeshPartsType parts, RMeshNode* pMN) {
 	}
 }
 
-void RVisualMesh::SetParts(RMeshPartsType parts, char* name)
+void RVisualMesh::SetParts(RMeshPartsType parts, const char* name)
 {
 	if(parts < 0 && parts >= eq_parts_end ) 
 		return;

@@ -8,7 +8,7 @@
 template <typename rngT>
 float RandomAngle(rngT& rng)
 {
-	std::uniform_real_distribution<float> dist(0, TAU);
+	std::uniform_real_distribution<float> dist(0, static_cast<float>(TAU));
 	return dist(rng);
 }
 

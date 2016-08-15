@@ -42,7 +42,7 @@ public:
 	bool			m_bSolid;
 
 	RSolidBspNode();
-	virtual ~RSolidBspNode();
+	~RSolidBspNode();
 
 	// origin 에서 to 로 이동할때 충돌하는 모든 평면을 리턴받는다. 가장 먼저 닿는점은 아래의 GetLastColPos() 로 얻어낸다
 	bool GetColPlanes_Cylinder(RImpactPlanes *pOutList,const rvector &origin,const rvector &to,float fRadius,float fHeight);

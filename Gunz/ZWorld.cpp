@@ -31,7 +31,7 @@ void ZWorld::Update(float fDelta)
 }
 
 namespace RealSpace2 {
-extern void ComputeZPlane(rplane *plane,float z,int sign);
+void ComputeZPlane(rplane *plane,float z,int sign);
 }
 
 
@@ -42,14 +42,11 @@ void ZWorld::Draw()
  		m_pSkyBox->Render();
 	}
 
-	// farz clipping 을 위해 farz plane 을 다시 계산해준다
 	if(m_bFog) {
 		ComputeZPlane(RGetViewFrustum()+5,m_fFogFar,-1);
 	}
 
 	m_pBsp->Draw();
-
-	//RGetDynamicLightManager()->Update();
 
 	RealSpace2::g_poly_render_cnt = 0;
 
@@ -69,15 +66,15 @@ void ZWorldProgressCallBack(void *pUserParam,float fProgress)
 bool ZWorld::Create(ZLoadingProgress *pLoading )
 {
 	if(m_bCreated) return true;
-	
+
 	m_pBsp = new RBspObject;
-	if(!m_pBsp->Open(m_szBspName,RBspObject::ROF_RUNTIME,ZWorldProgressCallBack,pLoading))
+	if (!m_pBsp->Open(m_szBspName, RBspObject::ROpenMode::Runtime, ZWorldProgressCallBack, pLoading))
 	{
-		MLog("error while loading %s \n",m_szName);
+		MLog("Error while loading map %s!\n", m_szName);
 		return false;
 	}
 
-	mlog("ZGame::Create() World Create %s \n",m_szName);
+	//mlog("ZGame::Create() World Create %s \n",m_szName);
 
 	m_pBsp->OptimizeBoundingBox();
 
@@ -102,19 +99,10 @@ bool ZWorld::Create(ZLoadingProgress *pLoading )
 
 		char* object_name = (char*)object_info->name.c_str();
 
-//		m_pBsp->m_filename.c_str()
 		int len = int(strlen(m_szName)+1);
 		object_name += len;
-/*
-		while(1) {
-			if( object_name[0] == '_' ) {
-				++object_name;
-				break;
-			}
-			++object_name;
-		}
-*/
-		if( pMeshNode->m_point_color_num > 0 ) // 맵에서 칼라값을 하나 이상 갖는 놈은 깃발이다.. 현재..
+
+		if( pMeshNode->m_point_color_num > 0 )
 		{
 			ZClothEmblem* new_instance	= new ZClothEmblem;
 			new_instance->CreateFromMeshNode( pMeshNode , this );
@@ -123,16 +111,13 @@ bool ZWorld::Create(ZLoadingProgress *pLoading )
 			continue;
 		}
 
-		// Sky Box...
 		if( m_pSkyBox == NULL )
 		{
 			if( strncmp(object_name,"obj_sky_", 8) == 0  || 
 				strncmp(object_name,"obj_ef_sky", 10) == 0 )
-//			if( strncmp(object_name,"obj_sky_", 8) == 0 ) 
 			{
 				m_pSkyBox	= new ZSkyBox;
 				m_pSkyBox->Create( pMesh->m_pVisualMesh );
-//				iter = map_object_list->Delete( iter );
 				ROBJECTINFO *info=*iter;
 				delete info;
 				iter = map_object_list->erase( iter );
@@ -140,14 +125,11 @@ bool ZWorld::Create(ZLoadingProgress *pLoading )
 			}
 		}
 
-		// Water
-//		if( g_pGame->m_bReflection )
 		{
-			// 임시....
 			int nWater = 0;
 
 			if( !strncmp( object_name, "obj_water", 9 ) )	nWater = 1;
-			if( !strncmp( object_name, "obj_water2", 10 ) )	nWater = 3;//일렁임은 제거..
+			if( !strncmp( object_name, "obj_water2", 10 ) )	nWater = 3;
 			if( !strncmp( object_name, "obj_sea", 7 ) )		nWater = 2;
 
 			if( nWater ) {
@@ -160,7 +142,6 @@ bool ZWorld::Create(ZLoadingProgress *pLoading )
 			}
 
 			if(nWater)	
-//			if( !strncmp( object_name, "obj_water", 9 ) )
 			{
 				int id = object_info->nMeshID;
 
@@ -173,23 +154,19 @@ bool ZWorld::Create(ZLoadingProgress *pLoading )
 				m_waters.push_back( water_instance );
 
 					 if(nWater==1) water_instance->m_nWaterType = WaterType1;
-//				else if(nWater==2) water_instance->m_nWaterType = WaterType1;
 				else if(nWater==3) water_instance->m_nWaterType = WaterType2;
 	
 
 				if(nWater==2) 
-				{ // 물 예외 처리 가능할때 통합..
-//					water_instance->m_nWaterType = 1;//sea
-					water_instance->m_isRender = false; // 안 그리고 오브젝트로 그린다..
-					pMesh->m_LitVertexModel = true;		// 바다는 라이트 영향을 안받는다..
+				{
+					water_instance->m_isRender = false;
+					pMesh->m_LitVertexModel = true;	
 					++iter;
 				}
 				else 
 				{
 					iter = map_object_list->Delete( iter );
 				}
-
-//				iter = map_object_list->Delete( iter );
 
 				continue;
 			}
@@ -205,7 +182,7 @@ bool ZWorld::Create(ZLoadingProgress *pLoading )
 		sprintf_safe( szBuf, "%s%s/flag.xml", szMapPath, ZGetGameClient()->GetMatchStageSetting()->GetMapName());
 		m_flags.InitEnv(szBuf);
 
-		mlog("ZGame::Create() m_flags.InitEnv \n");
+		//mlog("ZGame::Create() m_flags.InitEnv \n");
 	}
 
 	m_pMapDesc = new ZMapDesc;
@@ -214,9 +191,8 @@ bool ZWorld::Create(ZLoadingProgress *pLoading )
 	sprintf_safe( szBuf, "%s%s/smoke.xml", szMapPath, ZGetGameClient()->GetMatchStageSetting()->GetMapName());
 	m_pMapDesc->LoadSmokeDesc(szBuf);
 
-	mlog("ZGame::Create() pMapDesc->LoadSmokeDesc \n");
+	//mlog("ZGame::Create() pMapDesc->LoadSmokeDesc \n");
 
-	// 맵레벨의 전역값 설정
 	FogInfo finfo = GetBsp()->GetFogInfo();
 	m_bFog = finfo.bFogEnable;
 	m_fFogNear = finfo.fNear;
@@ -241,14 +217,12 @@ void ZWorld::Destroy()
 void ZWorld::OnInvalidate()
 {
 	m_pBsp->OnInvalidate();
-//	m_waters.OnInvalidate();
 	m_flags.OnInvalidate();
 }
 
 void ZWorld::OnRestore()
 {
 	m_pBsp->OnRestore();
-//	m_waters.OnRestore();
 	m_flags.OnRestore();
 }
 

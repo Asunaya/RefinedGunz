@@ -165,7 +165,7 @@ class D3DPtr
 public:
 	T* ptr = nullptr;
 
-	D3DPtr() : ptr(nullptr) {}
+	D3DPtr() {}
 	D3DPtr(T* p) : ptr(p) {}
 	D3DPtr(const D3DPtr&) = delete;
 	D3DPtr(D3DPtr&& src) { Move(std::move(src)); }
@@ -174,6 +174,11 @@ public:
 	D3DPtr<T>& operator=(D3DPtr&& src)
 	{
 		Move(std::move(src));
+		return *this;
+	}
+	D3DPtr<T>& operator=(nullptr_t)
+	{
+		ptr = nullptr;
 		return *this;
 	}
 

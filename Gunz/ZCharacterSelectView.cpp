@@ -138,76 +138,53 @@ ZCharacterSelectView::~ZCharacterSelectView(void)
 
 void ZCharacterSelectView::DrawCharacterLight(rvector& vCharPos)
 {
-	if ((m_pBackground == NULL) || (m_pBackground->GetChurchEnd() == NULL)) return;
-
-	RLightList* pLightList = m_pBackground->GetChurchEnd()->GetObjectLightList();
-	RLIGHT* pLight = 0;
-
-	for( RLightList::iterator iter = pLightList->begin(); iter != pLightList->end(); ++iter )
-	{
-		if( iter != pLightList->end() )
-		{
-			pLight = (*iter);
-			break;
-		}
-	}
+	if (!m_pBackground || !m_pBackground->GetChurchEnd()) return;
 
 	D3DLIGHT9 light;
 
-	light.Type			= D3DLIGHT_POINT;
-	light.Ambient.r		= 0.1f;
-	light.Ambient.g		= 0.1f;
-	light.Ambient.b		= 0.1f;
-	light.Specular.r	= 1.0f;
-	light.Specular.g	= 1.0f;
-	light.Specular.b	= 1.0f;
-	light.Attenuation0	= 0.05f; 
-	light.Attenuation1	= 0.002f; 
-	light.Attenuation2	= 0.0f; 
+	light.Type = D3DLIGHT_POINT;
+	light.Ambient.r = 0.1f;
+	light.Ambient.g = 0.1f;
+	light.Ambient.b = 0.1f;
+	light.Specular.r = 1.0f;
+	light.Specular.g = 1.0f;
+	light.Specular.b = 1.0f;
+	light.Attenuation0 = 0.05f;
+	light.Attenuation1 = 0.002f;
+	light.Attenuation2 = 0.0f;
 
-	if( pLight == 0 )
+	auto& LightList = m_pBackground->GetChurchEnd()->GetObjectLightList();
+	auto* Light = LightList.empty() ? nullptr : &LightList.front();
+
+	if (Light)
 	{
-		light.Range			= 600.f;
-		light.Position		= vCharPos+rvector(-50,-100,250);
-		light.Diffuse.r		= .8f;
-		light.Diffuse.g		= .8f;
-		light.Diffuse.b		= .8f;
+		light.Range = Light->fAttnEnd;
+		light.Position.x = Light->Position.x;
+		light.Position.y = Light->Position.y;
+		light.Position.z = Light->Position.z;
+		light.Diffuse.r = Light->Color.x * Light->fIntensity;
+		light.Diffuse.g = Light->Color.y * Light->fIntensity;
+		light.Diffuse.b = Light->Color.z * Light->fIntensity;
 	}
 	else
 	{
-		light.Range			= pLight->fAttnEnd; //- pLight->fAttnStart;
-		light.Position	.x	= pLight->Position.x;
-		light.Position	.y	= pLight->Position.y;
-		light.Position	.z	= pLight->Position.z;
-		light.Diffuse.r		= pLight->Color.x * pLight->fIntensity;
-		light.Diffuse.g		= pLight->Color.y * pLight->fIntensity;
-		light.Diffuse.b		= pLight->Color.z * pLight->fIntensity;
+		light.Range = 600.f;
+		light.Position = vCharPos + rvector(-50, -100, 250);
+		light.Diffuse.r = .8f;
+		light.Diffuse.g = .8f;
+		light.Diffuse.b = .8f;
 	}
 
-	m_pVisualMesh->SetLight(0,&light,false);
+	m_pVisualMesh->SetLight(0, &light, false);
 
-	memset( &light, 0, sizeof(D3DLIGHT9)	);
+	memset(&light, 0, sizeof(D3DLIGHT9));
 	light.Attenuation1 = 0.005f;
 
-	m_pVisualMesh->SetLight(1,&light,true);
+	m_pVisualMesh->SetLight(1, &light, true);
 
-//	RGetDevice()->SetLight( 0, &light );
-//	RGetDevice()->LightEnable( 0, TRUE );
-
-//	if( RShaderMgr::mbUsingShader )
-//	{
-//		RGetShaderMgr()->setLight( 0, &light );
-//		RGetShaderMgr()->LightEnable( 0, TRUE );
-//		memset( &light, 0, sizeof(D3DLIGHT9) );
-//		light.Attenuation1 = 0.005f;
-//		RGetShaderMgr()->setLight( 1, &light );
-//		RGetShaderMgr()->LightEnable( 1, TRUE );
-//	}
-
-
-	RGetShaderMgr()->setAmbient( 0x00cccccc );
-	RGetDevice()->SetRenderState( D3DRS_LIGHTING, TRUE );
-	RGetDevice()->SetRenderState( D3DRS_AMBIENT, 0x00cccccc );
+	RGetShaderMgr()->setAmbient(0x00cccccc);
+	RGetDevice()->SetRenderState(D3DRS_LIGHTING, TRUE);
+	RGetDevice()->SetRenderState(D3DRS_AMBIENT, 0x00cccccc);
 
 }
 

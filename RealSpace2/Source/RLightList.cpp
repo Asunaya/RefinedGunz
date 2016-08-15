@@ -2,14 +2,9 @@
 #include "MXml.h"
 #include "RLightList.h"
 #include "RToken.h"
+#include "MXml.h"
 
 _NAMESPACE_REALSPACE2_BEGIN
-
-RLightList::~RLightList()
-{
-	for(iterator i=begin();i!=end();i++)
-		delete *i;
-}
 
 bool RLightList::Open(MXmlElement *pElement)
 {
@@ -24,10 +19,10 @@ bool RLightList::Open(MXmlElement *pElement)
 
 		if(_stricmp(szTagName,RTOK_LIGHT)==0)
 		{
-			RLIGHT *plight=new RLIGHT;
+			RLIGHT Light;
 			aLightNode.GetAttribute(szContents,RTOK_NAME);
-			plight->Name=szContents;
-			plight->dwFlags=0;
+			Light.Name=szContents;
+			Light.dwFlags=0;
 
 			int nChildCount=aLightNode.GetChildNodeCount();
 			for(int j=0;j<nChildCount;j++)
@@ -38,15 +33,15 @@ bool RLightList::Open(MXmlElement *pElement)
 
 	#define READVECTOR(v) sscanf(szContents,"%f %f %f",&v.x,&v.y,&v.z)
 
-				if(_stricmp(szTagName,RTOK_POSITION)==0)		READVECTOR(plight->Position); else
-				if(_stricmp(szTagName,RTOK_COLOR)==0)		READVECTOR(plight->Color); else
-				if(_stricmp(szTagName,RTOK_INTENSITY)==0)	sscanf(szContents,"%f",&plight->fIntensity); else
-				if(_stricmp(szTagName,RTOK_ATTNSTART)==0)	sscanf(szContents,"%f",&plight->fAttnStart); else
-				if(_stricmp(szTagName,RTOK_ATTNEND)==0)		sscanf(szContents,"%f",&plight->fAttnEnd); else
-				if(_stricmp(szTagName,RTOK_CASTSHADOW)==0)	plight->dwFlags|=RM_FLAG_CASTSHADOW;
+				if(_stricmp(szTagName,RTOK_POSITION)==0)		READVECTOR(Light.Position); else
+				if(_stricmp(szTagName,RTOK_COLOR)==0)		READVECTOR(Light.Color); else
+				if(_stricmp(szTagName,RTOK_INTENSITY)==0)	sscanf(szContents,"%f",&Light.fIntensity); else
+				if(_stricmp(szTagName,RTOK_ATTNSTART)==0)	sscanf(szContents,"%f",&Light.fAttnStart); else
+				if(_stricmp(szTagName,RTOK_ATTNEND)==0)		sscanf(szContents,"%f",&Light.fAttnEnd); else
+				if(_stricmp(szTagName,RTOK_CASTSHADOW)==0)	Light.dwFlags|=RM_FLAG_CASTSHADOW;
 			}
 
-			push_back(plight);
+			push_back(Light);
 		}
 	}
 	return true;
@@ -56,42 +51,41 @@ bool RLightList::Save(MXmlElement *pElement)
 {
 	MXmlElement	aLightListElement=pElement->CreateChildElement(RTOK_LIGHTLIST);
 
-	for(RLightList::iterator i=begin();i!=end();i++)
+	for(auto& Light : *this)
 	{
 		aLightListElement.AppendText("\n\t\t");
 
-		RLIGHT *plight=*i;
 		char buffer[256];
 
 		MXmlElement		aElement,aChild;
 		aElement = aLightListElement.CreateChildElement(RTOK_LIGHT);
 
-		aElement.AddAttribute(RTOK_NAME,plight->Name.c_str());
+		aElement.AddAttribute(RTOK_NAME,Light.Name.c_str());
 
 		aElement.AppendText("\n\t\t\t");
 		aChild=aElement.CreateChildElement(RTOK_POSITION);
-		aChild.SetContents(Format(buffer,plight->Position));
+		aChild.SetContents(Format(buffer,Light.Position));
 
 		aElement.AppendText("\n\t\t\t");
 		aChild=aElement.CreateChildElement(RTOK_COLOR);
-		aChild.SetContents(Format(buffer,plight->Color));
+		aChild.SetContents(Format(buffer,Light.Color));
 
 		aElement.AppendText("\n\t\t\t");
 		aChild=aElement.CreateChildElement(RTOK_INTENSITY);
-		aChild.SetContents(Format(buffer,plight->fIntensity));
+		aChild.SetContents(Format(buffer,Light.fIntensity));
 
 		aElement.AppendText("\n\t\t\t");
 		aChild=aElement.CreateChildElement(RTOK_ATTNSTART);
-		aChild.SetContents(Format(buffer,plight->fAttnStart));
+		aChild.SetContents(Format(buffer,Light.fAttnStart));
 
 		aElement.AppendText("\n\t\t\t");
 		aChild=aElement.CreateChildElement(RTOK_ATTNEND);
-		aChild.SetContents(Format(buffer,plight->fAttnEnd));
+		aChild.SetContents(Format(buffer,Light.fAttnEnd));
 
 		{
 			MXmlElement aFlagElement;
 
-			if((plight->dwFlags & RM_FLAG_CASTSHADOW) !=0)
+			if((Light.dwFlags & RM_FLAG_CASTSHADOW) !=0)
 			{
 				aElement.AppendText("\n\t\t\t");
 				aElement.CreateChildElement(RTOK_CASTSHADOW);

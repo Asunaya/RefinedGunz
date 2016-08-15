@@ -562,13 +562,13 @@ static void RotateSpine(matrix& mat, RMeshPartsPosInfoType parts, float y, float
 	switch (parts)
 	{
 	case eq_parts_pos_info_Head:
-		ratio = 0.3;
+		ratio = 0.3f;
 		break;
 	case eq_parts_pos_info_Spine1:
-		ratio = 0.6;
+		ratio = 0.6f;
 		break;
 	case eq_parts_pos_info_Spine2:
-		ratio = 0.5;
+		ratio = 0.5f;
 		break;
 	default:
 		return;
@@ -592,7 +592,7 @@ static void RotateSpine(matrix& mat, RMeshPartsPosInfoType parts, float y, float
 
 static float GetSpeed(ZC_STATE_LOWER LowerState, int MaxFrame, MMatchItemDesc* ItemDesc)
 {
-	float ret = 4.8;
+	float ret = 4.8f;
 
 	[&]()
 	{
@@ -616,7 +616,7 @@ static float GetSpeed(ZC_STATE_LOWER LowerState, int MaxFrame, MMatchItemDesc* I
 		case ZC_STATE_LOWER_JUMPATTACK:
 			break;
 		case ZC_STATE_SLASH:
-			ret *= 0.9;
+			ret *= 0.9f;
 			return;
 		default:
 			return;

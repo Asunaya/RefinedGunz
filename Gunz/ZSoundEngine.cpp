@@ -563,16 +563,18 @@ bool ZSoundEngine::Reset( HWND hwnd, bool bHWMixing )
 	m_bSoundEnable = Create(hwnd, bHWMixing);
 	if(!m_bSoundEnable)	return false;
 
-	if(g_pGame != NULL)
+	if(g_pGame)
 	{
-		list<AmbSndInfo*> aslist = ZGetGame()->GetWorld()->GetBsp()->GetAmbSndList();
-		for( list<AmbSndInfo*>::iterator iter = aslist.begin(); iter!= aslist.end(); ++iter )
+		for(auto& AS : ZGetGame()->GetWorld()->GetBsp()->GetAmbSndList())
 		{
-			AmbSndInfo* pAS = *iter;
-			if( pAS->itype & AS_AABB)
-				ZGetSoundEngine()->SetAmbientSoundBox(pAS->szSoundName, pAS->min, pAS->max, (pAS->itype&AS_2D)?true:false );
-			else if( pAS->itype & AS_SPHERE )
-				ZGetSoundEngine()->SetAmbientSoundSphere(pAS->szSoundName, pAS->center, pAS->radius, (pAS->itype&AS_2D)?true:false );
+			if(AS.itype & AS_AABB)
+				ZGetSoundEngine()->SetAmbientSoundBox(AS.szSoundName,
+					AS.min, AS.max,
+					(AS.itype&AS_2D)?true:false );
+			else if(AS.itype & AS_SPHERE )
+				ZGetSoundEngine()->SetAmbientSoundSphere(AS.szSoundName,
+					AS.center, AS.radius,
+					(AS.itype&AS_2D)?true:false );
 		}
 	}
 

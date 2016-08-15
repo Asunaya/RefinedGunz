@@ -544,9 +544,7 @@ bool ZGame::Create(MZFileSystem *pfs, ZLoadingProgress *pLoading )
 	ZGetFlashBangEffect()->SetBuffer();
 	ZGetScreenEffectManager()->SetGuageExpFromMyInfo();
 
-#ifdef _BIRDSOUND
-
-#else
+#ifndef _BIRDSOUND
 	ZGetSoundEngine()->SetEffectVolume( Z_AUDIO_EFFECT_VOLUME );
 	ZGetSoundEngine()->SetMusicVolume( Z_AUDIO_BGM_VOLUME );
 #endif
@@ -560,17 +558,17 @@ bool ZGame::Create(MZFileSystem *pfs, ZLoadingProgress *pLoading )
 	ZGetInitialLoading()->Draw( MODE_DEFAULT, 0 , true );
 
 
-#ifdef _BIRDSOUND
-
-#else
-	list<AmbSndInfo*> aslist = GetWorld()->GetBsp()->GetAmbSndList();
-	for( list<AmbSndInfo*>::iterator iter = aslist.begin(); iter!= aslist.end(); ++iter )
+#ifndef _BIRDSOUND
+	for (auto& AS : GetWorld()->GetBsp()->GetAmbSndList())
 	{
-		AmbSndInfo* pAS = *iter;
-		if( pAS->itype & AS_AABB)
-			ZGetSoundEngine()->SetAmbientSoundBox(pAS->szSoundName, pAS->min, pAS->max, (pAS->itype&AS_2D)?true:false );
-		else if( pAS->itype & AS_SPHERE )
-			ZGetSoundEngine()->SetAmbientSoundSphere(pAS->szSoundName, pAS->center, pAS->radius, (pAS->itype&AS_2D)?true:false );
+		if( AS.itype & AS_AABB)
+			ZGetSoundEngine()->SetAmbientSoundBox(AS.szSoundName,
+				AS.min, AS.max,
+				(AS.itype&AS_2D)?true:false );
+		else if( AS.itype & AS_SPHERE )
+			ZGetSoundEngine()->SetAmbientSoundSphere(AS.szSoundName,
+				AS.center, AS.radius,
+				(AS.itype&AS_2D)?true:false );
 	}
 #endif
 

@@ -1800,7 +1800,7 @@ void ZCharacter::OnChangeParts(RMeshPartsType partstype,int PartsID)
 			}
 			else {
 
-				char* Name = NULL;
+				const char* Name = nullptr;
 
 				if(MEvent::GetCtrlState()) {
 					Name = GetPartsNextName( partstype,m_pVMesh ,true);//¿Ã¿¸ø ...

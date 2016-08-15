@@ -55,7 +55,7 @@ bool LagCompManager::Create()
 	{
 		char Path[128];
 		sprintf_safe(Path, "maps/%s/%s.rs", Map.szMapName, Map.szMapName);
-		ret = Maps[Map.szMapName].Open(Path, RBspObject::ROF_RUNTIME, nullptr, nullptr, true);
+		ret = Maps[Map.szMapName].Open(Path, RBspObject::ROpenMode::Runtime, nullptr, nullptr, true);
 		if (!ret)
 			Log("Failed to load map %s!", Map.szMapName);
 		else
@@ -222,12 +222,6 @@ bool LagCompManager::LoadAnimations(const char* filename, int Index)
 			//else
 			{
 				pAni = AniMgr.Add(IDName, PathFileName, -1, nMTypeID);
-			}
-
-			// NOTE: Hack to slow down massives
-			if (!strcmp(IDName, "slash"))// || !strncmp(IDName, "jump_slash", 10))
-			{
-				pAni->PlaybackRate = 0.9;
 			}
 
 			if (pAni) {

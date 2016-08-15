@@ -5,7 +5,6 @@
 #define RPATHFINDER_H
 
 #include <list>
-using namespace std;
 
 #include "RNameSpace.h"
 #include "RTypes.h"
@@ -16,9 +15,9 @@ using namespace std;
 _NAMESPACE_REALSPACE2_BEGIN
 
 class RBspObject;
-class RSBspNode;
+struct RSBspNode;
 
-class RVECTORLIST : public list<rvector*>{
+class RVECTORLIST : public std::list<rvector*>{
 public:
 	virtual ~RVECTORLIST(void){
 		Clear();

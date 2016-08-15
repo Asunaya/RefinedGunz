@@ -159,24 +159,19 @@ void	ZClothEmblem::CreateFromMeshNode( RMeshNode* pMeshNdoe_ , ZWorld* pWorld)
 		}
 	}
 
-//	RLightList*	pLightList	= ZGetGame()->GetWorld()->GetBsp()->GetObjectLightList();
 	m_pWorld = pWorld;
-	RLightList*	pLightList	= m_pWorld->GetBsp()->GetObjectLightList();
 
 	float	minDistance = 999999;
 	float	fTemp;
-	RLIGHT	*pSelectedLight = 0;
+	RLIGHT	*pSelectedLight = nullptr;
 	
-	for(RLightList::iterator itor = pLightList->begin();
-		itor != pLightList->end(); ++itor )
+	for(auto& Light : m_pWorld->GetBsp()->GetObjectLightList())
 	{
-		RLIGHT *pLight	=	*itor;
-
-		fTemp	= D3DXVec3Length( &(pLight->Position - m_pX[0]) );
+		fTemp	= D3DXVec3Length( &(Light.Position - m_pX[0]) );
 		if( fTemp < minDistance )
 		{
 			minDistance		= fTemp;
-			pSelectedLight	= pLight;
+			pSelectedLight	= &Light;
 		}
 	}
 

@@ -24,7 +24,7 @@ struct RMATERIAL;
 class RMaterialList;
 class RDummyList;
 class RBaseTexture;
-class RSBspNode;
+struct RSBspNode;
 
 
 struct RDEBUGINFO {
@@ -35,7 +35,6 @@ struct RDEBUGINFO {
 };
 
 struct BSPVERTEX {
-
 	float x, y, z;		// world position
 	float tu1, tv1;		// texture coordinates
 	float tu2, tv2;
@@ -87,24 +86,12 @@ struct RBSPPICKINFO {
 
 class RMapObjectList : public std::list<ROBJECTINFO*> {
 public:
-	virtual ~RMapObjectList();
+	~RMapObjectList();
 
 	iterator Delete(iterator i);
 };
 
-class RDrawInfo {
-public:
-	RDrawInfo() {
-		nVertice = 0;
-		pVertices = NULL;
-		nIndicesOffset = 0;
-		nTriangleCount = 0;
-		pPlanes = NULL;
-		pUAxis = NULL;
-		pVAxis = NULL;
-
-	}
-
+struct RDrawInfo {
 	~RDrawInfo() {
 		SAFE_DELETE(pVertices);
 		SAFE_DELETE(pPlanes);
@@ -112,18 +99,17 @@ public:
 		SAFE_DELETE(pVAxis);
 	}
 
-	int				nVertice;
-	BSPVERTEX		*pVertices;
-	int				nIndicesOffset;
-	int				nTriangleCount;
-	rplane			*pPlanes;
-	rvector			*pUAxis;
-	rvector			*pVAxis;
+	int				nVertice = 0;
+	BSPVERTEX		*pVertices = nullptr;
+	int				nIndicesOffset = 0;
+	int				nTriangleCount = 0;
+	rplane			*pPlanes = nullptr;
+	rvector			*pUAxis = nullptr;
+	rvector			*pVAxis = nullptr;
 };
 
-class RSBspNode
+struct RSBspNode
 {
-public:
 	int				nPolygon;
 	RPOLYGONINFO	*pInfo;
 	RDrawInfo		*pDrawInfo;
@@ -143,7 +129,7 @@ public:
 	void DrawBoundingBox(DWORD color);
 };
 
-typedef std::list<POINT> RFREEBLOCKLIST;
+using RFREEBLOCKLIST = std::list<POINT>;
 struct RLIGHTMAPTEXTURE {
 	int nSize;
 	DWORD *data;
@@ -153,7 +139,9 @@ struct RLIGHTMAPTEXTURE {
 };
 
 struct RBSPMATERIAL : public RMATERIAL {
-	RBSPMATERIAL() { texture = NULL; }
+	RBaseTexture *texture = nullptr;
+
+	RBSPMATERIAL() = default;
 	RBSPMATERIAL(RMATERIAL *mat)
 	{
 		Ambient = mat->Ambient;
@@ -164,7 +152,14 @@ struct RBSPMATERIAL : public RMATERIAL {
 		Power = mat->Power;
 		Specular = mat->Specular;
 	};
-	RBaseTexture *texture;
+
+	~RBSPMATERIAL()
+	{
+		if (!texture)
+			return;
+
+		RDestroyBaseTexture(texture);
+	}
 };
 
 class RBspLightmapManager {
@@ -219,26 +214,25 @@ struct AmbSndInfo
 #define AS_2D		0x10
 #define AS_3D		0x20
 
-typedef bool(*RGENERATELIGHTMAPCALLBACK)(float fProgress);
+using RGENERATELIGHTMAPCALLBACK = bool(*)(float fProgress);
 
 
 
 class RBspObject
 {
 public:
-	enum ROpenFlag {
-		ROF_RUNTIME,
-		ROF_EDITOR
+	enum class ROpenMode {
+		Runtime,
+		Editor
 	} m_OpenMode;
 
 	RBspObject();
-	~RBspObject();
 	RBspObject(const RBspObject&) = delete;
 	RBspObject(RBspObject&&) = default;
 
 	void ClearLightmaps();
 
-	bool Open(const char *, ROpenFlag nOpenFlag = ROF_RUNTIME, RFPROGRESSCALLBACK pfnProgressCallback = nullptr,
+	bool Open(const char *, ROpenMode nOpenFlag = ROpenMode::Runtime, RFPROGRESSCALLBACK pfnProgressCallback = nullptr,
 		void *CallbackParam = nullptr, bool PhysOnly = false);
 
 	bool OpenDescription(const char *);
@@ -273,22 +267,18 @@ public:
 
 	DWORD GetLightmap(rvector &Pos, RSBspNode *pNode, int nIndex);
 
-	RBSPMATERIAL *GetMaterial(RSBspNode *pNode, int nIndex) { return GetMaterial(pNode->pInfo[nIndex].nMaterial); }
+	struct RBSPMATERIAL *GetMaterial(RSBspNode *pNode, int nIndex) { return GetMaterial(pNode->pInfo[nIndex].nMaterial); }
 
 	int	GetMaterialCount() const { return m_nMaterial; }
-	RBSPMATERIAL *GetMaterial(int nIndex);
+	struct RBSPMATERIAL *GetMaterial(int nIndex);
 
 	RMapObjectList	*GetMapObjectList() { return &m_ObjectList; }
 	RDummyList		*GetDummyList() { return &m_DummyList; }
-	RBaseTexture* GetBaseTexture(int n) {
-		if (n >= 0 && n < m_nMaterial)
-			return m_pMaterials[n].texture;
-		return nullptr;
-	}
+	RBaseTexture* GetBaseTexture(int n);
 
-	RLightList *GetMapLightList() { return &m_StaticMapLightList; }
-	RLightList *GetObjectLightList() { return &m_StaticObjectLightList; }
-	RLightList *GetSunLightList() { return &m_StaticSunLigthtList; }
+	RLightList& GetMapLightList() { return m_StaticMapLightList; }
+	RLightList& GetObjectLightList() { return m_StaticObjectLightList; }
+	RLightList& GetSunLightList() { return m_StaticSunLightList; }
 
 	RSBspNode* GetOcRootNode() { if (OcRoot.empty()) return nullptr; return OcRoot.data(); }
 	RSBspNode* GetRootNode() { if (BspRoot.empty()) return nullptr; return BspRoot.data(); }
@@ -336,13 +326,13 @@ public:
 	void DrawNavi_Polygon();
 	void DrawNavi_Links();
 
-	RSolidBspNode *GetColRoot() { return m_pColRoot; }
+	RSolidBspNode* GetColRoot() { return &ColRoot[0]; }
 
 	void LightMapOnOff(bool b);
 	static void SetDrawLightMap(bool b);
 
 	FogInfo GetFogInfo() { return m_FogInfo; }
-	std::list<AmbSndInfo*> GetAmbSndList() { return m_AmbSndInfoList; }
+	std::vector<AmbSndInfo>& GetAmbSndList() { return AmbSndInfoList; }
 
 	void GetNormal(int nConvexPolygon, rvector &position, rvector *normal);
 
@@ -377,10 +367,11 @@ private:
 	auto* GetLeafNode(rvector &pos) { return BspRoot[0].GetLeafNode(pos); }
 
 	bool ReadString(MZFile *pfile, char *buffer, int nBufferSize);
-	// Returns number of vertices, nodes and infos read, respectively. 
-	std::tuple<ptrdiff_t, ptrdiff_t, ptrdiff_t> Open_Nodes(RSBspNode *pNode, MZFile *pfile,
-		BSPVERTEX* Vertices, RSBspNode* Node, RPOLYGONINFO* Info);
-	bool Open_ColNodes(RSolidBspNode *pNode, MZFile *pfile);
+	// Returns number of vertices, nodes and infos read, respectively, along with the numbers of polygons created. 
+	std::array<int, 4> Open_Nodes(RSBspNode *pNode, MZFile *pfile,
+		BSPVERTEX* Vertices, RSBspNode* Node, RPOLYGONINFO* Info, int PolygonID = 0);
+	// Returns number of nodes created.
+	int Open_ColNodes(RSolidBspNode *pNode, MZFile *pfile, int Depth = 0);
 	bool Open_MaterialList(MXmlElement *pElement);
 	bool Open_LightList(MXmlElement *pElement);
 	bool Open_ObjectList(MXmlElement *pElement);
@@ -405,7 +396,7 @@ private:
 	void InvalidateDynamicLightVertexBuffer();
 	bool FlushLightVB();
 	bool LockLightVB();
-	LPDIRECT3DVERTEXBUFFER9 m_pDynLightVertexBuffer;
+	D3DPtr<IDirect3DVertexBuffer9> DynLightVertexBuffer;
 
 	static RBaseTexture *m_pShadeMap;
 
@@ -418,11 +409,11 @@ private:
 	std::vector<RPOLYGONINFO> OcInfo;
 	int m_nPolygon, m_nNodeCount;
 	int m_nBspPolygon, m_nBspNodeCount, m_nBspVertices, m_nBspIndices;
-	LPDIRECT3DVERTEXBUFFER9 m_pVertexBuffer;
-	LPDIRECT3DINDEXBUFFER9 m_pIndexBuffer;
+	D3DPtr<IDirect3DVertexBuffer9> VertexBuffer;
+	D3DPtr<IDirect3DIndexBuffer9> IndexBuffer;
 
 	int m_nMaterial;
-	RBSPMATERIAL *m_pMaterials;
+	std::vector<RBSPMATERIAL> Materials;
 
 	rplane m_localViewFrustum[6];
 
@@ -434,26 +425,26 @@ private:
 	void CalcLightmapUV(RSBspNode *pNode, int *pLightmapInfo,
 		std::vector<RLIGHTMAPTEXTURE*>& SourceLightmaps, std::vector<RBspLightmapManager>& LightmapList);
 
-	// interpolated normal
+	// Interpolated normal
 	void GetNormal(RCONVEXPOLYGONINFO *poly, rvector &position, rvector *normal, int au, int av);
 
 	int					m_nConvexPolygon, m_nConvexVertices;
-	rvector				*m_pConvexVertices;
-	rvector				*m_pConvexNormals;
-	RCONVEXPOLYGONINFO	*m_pConvexPolygons;
+	std::vector<v3> ConvexVertices;
+	std::vector<v3> ConvexNormals;
+	std::vector<RCONVEXPOLYGONINFO> ConvexPolygons;
 
 	rvector		m_AmbientLight;
 	RLightList	m_StaticMapLightList;
 	RLightList	m_StaticObjectLightList;
-	RLightList	m_StaticSunLigthtList;
+	RLightList	m_StaticSunLightList;
 
 	RMeshMgr			m_MeshList;
 	RAnimationMgr		m_AniList;
 	RMapObjectList		m_ObjectList;
 	bool				m_bNotOcclusion;
 
-	RSolidBspNode		*m_pColRoot;
-	rvector				*m_pColVertices;
+	std::vector<RSolidBspNode> ColRoot;
+	std::vector<v3> ColVertices;
 
 	RNavigationMesh		m_NavigationMesh;
 
@@ -461,7 +452,7 @@ private:
 
 	FogInfo m_FogInfo;
 
-	std::list<AmbSndInfo*>	m_AmbSndInfoList;
+	std::vector<AmbSndInfo>	AmbSndInfoList;
 
 	RDEBUGINFO			m_DebugInfo;
 };
