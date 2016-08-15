@@ -1217,30 +1217,15 @@ void ZGameInterface::OnGreeterDestroy(void)
 	ShowWidget("Greeter", false);
 
 	if ( m_pBackground)
-		m_pBackground->SetScene(LOGIN_SCENE_FALLDOWN);
+		m_pBackground->SetScene(LOGIN_SCENE_FIXEDCHAR);
 }
 
 void ZGameInterface::OnLoginCreate(void)
 {
-//	// WPE hacking protect
-//	HMODULE hMod = GetModuleHandle( "ws2_32.dll"); 
-//	FARPROC RetVal = GetProcAddress( hMod, "recv"); 
-//	if ( (BYTE)RetVal == 0xE9)
-//	{
-//		mlog( "Hacking detected");
-//
-////		MessageBox(NULL, ZMsg(MSG_HACKING_DETECTED), ZMsg( MSG_WARNING), MB_OK);
-//		ZApplication::GetGameInterface()->ShowWidget("HackWarnings", true, true);
-//
-//		ZPostDisconnect();
-//	}
-
-
 	m_bLoginTimeout = false;
 	m_nLoginState = LOGINSTATE_FADEIN;
 	m_dwLoginTimer = GetGlobalTimeMS();
 
-	// 배경 이미지 로딩
 	if ( m_pLoginBG != NULL)
 	{
 		delete m_pLoginBG;
@@ -1250,7 +1235,6 @@ void ZGameInterface::OnLoginCreate(void)
 	((MBitmapR2*)m_pLoginBG)->Create( "loginbg.png", RGetDevice(), "Interface/loadable/loginbg.jpg");
 	if ( m_pLoginBG)
 	{
-		// 읽어온 비트맵 이미지 포인터를 해당 위젯에 넘겨줘서 표시한다
 		MPicture* pPicture = (MPicture*)m_IDLResource.FindWidget( "Login_BackgrdImg");
 		if ( pPicture)
 			pPicture->SetBitmap( m_pLoginBG->GetSourceBitmap());
@@ -1268,7 +1252,6 @@ void ZGameInterface::OnLoginCreate(void)
 	((MBitmapR2*)m_pLoginPanel)->Create( "loginpanel.png", RGetDevice(), "Interface/loadable/loginpanel.tga");
 	if ( m_pLoginPanel)
 	{
-		// 읽어온 비트맵 이미지 포인터를 해당 위젯에 넘겨줘서 표시한다
 		MPicture* pPicture = (MPicture*)m_IDLResource.FindWidget( "Login_Panel");
 		if ( pPicture)
 			pPicture->SetBitmap( m_pLoginPanel->GetSourceBitmap());
@@ -1403,34 +1386,22 @@ void ZGameInterface::OnLoginCreate(void)
 	{
 		ZPostDisconnect();
 	}
-
-
-/*	// 자동접속하게하는테스트
-	m_IDLResource.FindWidget("LoginID")->SetText("dubble");
-	m_IDLResource.FindWidget("LoginPassword")->SetText("1111");
-	m_IDLResource.FindWidget("ServerAddress")->SetText("192.168.0.228");
-	ZPostConnect("192.168.0.228", 6000);	//*/
-
 }
 void ZGameInterface::OnLoginDestroy(void)
 {
 	ShowWidget("Login", false);
-	//ShowWidget("LoginFrame", false);
 
 	MWidget* pWidget = m_IDLResource.FindWidget("LoginID");
 	if(pWidget)
 	{
-		// 로긴이 성공하면 write 해야 하나.. 지금 check out 관계로 여기다 -_-;
 		ZGetApplication()->SetSystemValue("LoginID", pWidget->GetText());
 
 		if ( m_pBackground)
-			m_pBackground->SetScene(LOGIN_SCENE_FALLDOWN);
+			m_pBackground->SetScene(LOGIN_SCENE_FIXEDCHAR);
 	}
 
-	// 배경 이미지를 메모리로부터 삭제한다
 	if ( m_pLoginBG != NULL)
 	{
-		// 배경 이미지를 보여주는 위젯의 비트맵 이미지 포인터를 리셋한다
 		MPicture* pPicture = (MPicture*)m_IDLResource.FindWidget( "Login_BackgrdImg");
 		if ( pPicture)
 			pPicture->SetBitmap( NULL);
@@ -1439,10 +1410,8 @@ void ZGameInterface::OnLoginDestroy(void)
 		m_pLoginBG = NULL;
 	}
 
-	// 패널 이미지를 메모리로부터 삭제한다
 	if ( m_pLoginPanel != NULL)
 	{
-		// 패널 이미지를 보여주는 위젯의 비트맵 이미지 포인터를 리셋한다
 		MPicture* pPicture = (MPicture*)m_IDLResource.FindWidget( "Login_Panel");
 		if ( pPicture)
 			pPicture->SetBitmap( NULL);
@@ -1490,21 +1459,12 @@ void ZGameInterface::OnNetmarbleLoginDestroy(void)
 
 void ZGameInterface::OnLobbyCreate(void)
 {
-	/*if( m_pAmbSound != NULL )
-	{
-		m_pAmbSound->Stop();
-		m_pAmbSound		= NULL;
-	}
-	//*/
-	
-	// 리플레이 후에 바뀐 LevelPercent값을 원래대로 복원한다
 	if ( m_bOnEndOfReplay)
 	{
 		m_bOnEndOfReplay = false;
 		ZGetMyInfo()->SetLevelPercent( m_nLevelPercentCache);
 	}
 
-	// 리플레이 후에 바뀐 LevelPercent값을 원래대로 복원한다
 	if ( m_bOnEndOfReplay)
 	{
 		m_bOnEndOfReplay = false;
@@ -1512,7 +1472,7 @@ void ZGameInterface::OnLobbyCreate(void)
 	}
 
 	if( m_pBackground != 0 )
-		m_pBackground->Free();	// Free Memory...
+		m_pBackground->Free();
 
 	if (g_pGameClient)
 	{
@@ -1658,20 +1618,6 @@ void ZGameInterface::OnLobbyDestroy(void)
 
 void ZGameInterface::OnStageCreate(void)
 {
-//	// WPE hacking protect
-//	HMODULE hMod = GetModuleHandle( "ws2_32.dll"); 
-//	FARPROC RetVal = GetProcAddress( hMod, "recv"); 
-//	if ( ZCheckHackProcess() || (BYTE)RetVal == 0xE9)
-//	{
-//		mlog( "Hacking detected");
-//
-////		MessageBox(NULL, ZMsg(MSG_HACKING_DETECTED), ZMsg( MSG_WARNING), MB_OK);
-//		ZApplication::GetGameInterface()->ShowWidget("HackWarnings", true, true);
-//
-//		ZPostDisconnect();
-//	}
-
-
 	mlog("StageCreated\n");
 
 	if (g_pGameClient)
@@ -1687,39 +1633,10 @@ void ZGameInterface::OnStageCreate(void)
 	if ( pObserverBtn)
 		pObserverBtn->SetCheck( false);
 
-	/*
-	MListBox* pListBox  = (MListBox*)m_IDLResource.FindWidget("StageChattingOutput");
-	if (pListBox != NULL)
-	{
-		pListBox->RemoveAll();		
-	}
-	*/
-
-	//ZCharacterViewList* pCharacterViewList = NULL;
-	//pCharacterViewList = ZGetCharacterViewList(GUNZ_LOBBY);
-	//if (pCharacterViewList != NULL)
-	//{
-	//	pCharacterViewList->RemoveAll();
-	//}
-	//pCharacterViewList = ZGetCharacterViewList(GUNZ_STAGE);
-	//if (pCharacterViewList != NULL)
-	//{
-	//	pCharacterViewList->Assign(ZGetGameClient()->GetObjCacheMap());
-	//}
-
 	ZCharacterView* pCharView = (ZCharacterView*)m_IDLResource.FindWidget("Stage_Charviewer");
 	
 	if( pCharView != NULL )
 	{
-		//MMatchObjCacheMap* pObjCacheMap = ZGetGameClient()->GetObjCacheMap();
-		//for(MMatchObjCacheMap::iterator itor = pObjCacheMap->begin(); itor != pObjCacheMap->end(); ++itor)
-		//{
-		//	MMatchObjCache* pObj = (*itor).second;
-		//	if( pObj->GetUID() == ZGetMyUID() )
-		//	{
-		//		pCharView->SetCharacter( pObj->GetUID() );
-		//	}
-		//}
 		pCharView->SetCharacter( ZGetMyUID());
 	}
 
@@ -1738,17 +1655,7 @@ void ZGameInterface::OnStageCreate(void)
 		ZApplication::GetSoundEngine()->OpenMusic(BGMID_LOBBY, ZApplication::GetFileSystem());
 		ZApplication::GetSoundEngine()->PlayMusic(true);
 #endif
-/*
-#ifdef _BIRDSOUND
-	ZApplication::GetSoundEngine()->OpenMusic(BGMID_LOBBY);
-	ZApplication::GetSoundEngine()->PlayMusic();
-#else
-#ifndef _FASTDEBUG
-	ZApplication::GetSoundEngine()->OpenMusic(BGMID_LOBBY, ZApplication::GetFileSystem());
-	ZApplication::GetSoundEngine()->PlayMusic();
-#endif
-#endif
-*/
+
 	ZApplication::GetStageInterface()->OnCreate();
 }
 
@@ -1823,16 +1730,6 @@ bool ZGameInterface::OnCreate(ZLoadingProgress *pLoadingProgress)
 
 	interfaceProgress.UpdateAndDraw(1.f);
 
-	/*
-	if( !InitLocatorList(ZApplication::GetFileSystem(), "system/ZLocatorList.xml") )
-	{
-		mlog( "ZGameInterface::OnCreate: Fail InitLocatorList\n" );
-		// 로케이터를 못 읽어도 게임은 진행을 함. 
-		// return false;
-	}
-	*/
-	
-
 	mlog("ZGameInterface::OnCreate : InitInterface \n");
 
 	m_pScreenEffectManager=new ZScreenEffectManager;
@@ -1846,12 +1743,6 @@ bool ZGameInterface::OnCreate(ZLoadingProgress *pLoadingProgress)
 		return false;
 
 	mlog("ZGameInterface::OnCreate : m_pEffectManager->Create()\n");
-
-	//m_pCursorSurface=CreateImageSurface("Interface/Default/cursor.png");
-	//if( m_pCursorSurface != NULL )
-		//RGetDevice()->SetCursorProperties(0,0,m_pCursorSurface);
-
-//	ResetCursor();
 
 	SetTeenVersion(ZGetLocale()->IsTeenMode());
 
@@ -1869,9 +1760,6 @@ bool ZGameInterface::OnCreate(ZLoadingProgress *pLoadingProgress)
 
 	mlog("ZGameInterface::OnCreate : g_pGameClient->Create()\n");
 
-//	SetState(m_nInitialState);
-
-	// 상점 및 장비 초기화 설정
 	ZItemSlotView* itemSlot;
 	for(int i = 0;  i < MMCIP_END;  i++)
 	{
@@ -1880,7 +1768,6 @@ bool ZGameInterface::OnCreate(ZLoadingProgress *pLoadingProgress)
 		{
 			strcpy_safe( itemSlot->m_szItemSlotPlace, "Shop");
 
-			// 아주 저렙 하드코딩... -_-;
 			switch ( itemSlot->GetParts())
 			{
 				case MMCIP_HEAD:		itemSlot->SetText( ZMsg( MSG_WORD_HEAD));		break;
@@ -1906,7 +1793,6 @@ bool ZGameInterface::OnCreate(ZLoadingProgress *pLoadingProgress)
 		{
 			strcpy_safe( itemSlot->m_szItemSlotPlace, "Equip");
 
-			// 아주 저렙 하드코딩... -_-;
 			switch ( itemSlot->GetParts())
 			{
 				case MMCIP_HEAD:		itemSlot->SetText( ZMsg( MSG_WORD_HEAD));		break;
@@ -1932,7 +1818,6 @@ bool ZGameInterface::OnCreate(ZLoadingProgress *pLoadingProgress)
 		pItemListBox->EnableDragAndDrop( true);
 	}
 
-	// 리플레이 박스 초기화
 	MListBox* pReplayBox = (MListBox*)m_IDLResource.FindWidget( "Replay_FileList");
 	if ( pReplayBox)
 	{

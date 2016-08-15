@@ -1,5 +1,4 @@
-#ifndef ZINTERFACEBACKGROUND_H
-#define ZINTERFACEBACKGROUND_H
+#pragma once
 
 #include "RBspObject.h"
 using namespace RealSpace2;
@@ -27,8 +26,6 @@ private:
 
 	DWORD		m_dwClock;
 
-//	bool		m_bShowMaietLogo;			// Maiet logo ∫∏¿”
-
 
 protected:
 	void SetFogState( float fStart, float fEnd, unsigned long int color);
@@ -53,6 +50,3 @@ public:
 	rvector& GetCharPos() { return m_vCharPos; }
 	rvector& GetCharDir() { return m_vCharDir; }
 };
-
-
-#endif

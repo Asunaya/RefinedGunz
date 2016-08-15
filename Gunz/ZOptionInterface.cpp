@@ -16,18 +16,13 @@
 #define DEFAULT_GAMMA_SLIDER_MAX	800
 
 static	map< int, D3DDISPLAYMODE> gDisplayMode;
-#define DEFAULT_REFRESHRATE			0
-
-template< class F, class S>
-class value_equals
+auto find_ddm(const D3DDISPLAYMODE& ddm)
 {
-private:
-	S second;
-public:
-	value_equals(const S& s) : second(s) {}
-	bool operator() (pair<const F, S> elem)
-	{ return elem.second == second; }
-};
+	return std::find_if(gDisplayMode.begin(), gDisplayMode.end(),
+		[&](auto& val) { return val.second == ddm; });
+}
+
+#define DEFAULT_REFRESHRATE			0
 
 bool operator == ( D3DDISPLAYMODE lhs, D3DDISPLAYMODE rhs )
 {
@@ -42,8 +37,6 @@ ZOptionInterface::ZOptionInterface(void)
 {
 	mbTimer = false;
 
-//	mOldScreenWidth = 0;
-//	mOldScreenHeight = 0;
 	mnOldBpp = D3DFMT_A8R8G8B8;
 	mTimerTime = 0;
 
@@ -62,13 +55,7 @@ void ZOptionInterface::InitInterfaceOption(void)
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
 
 	mlog("ZOptionInterface::InitInterfaceOption\n");
-	/*
-	// Mouse Sensitivity Min/Max (Z_MOUSE_SENSITIVITY_MIN ~ Z_MOUSE_SENSITIVITY_MAX)
-	BEGIN_WIDGETLIST("MouseSensitivitySlider", pResource, MSlider*, pWidget);
-	pWidget->SetMinMax(Z_MOUSE_SENSITIVITY_MIN, Z_MOUSE_SENSITIVITY_MAX);
-	pWidget->SetValue(Z_MOUSE_SENSITIVITY);
-	END_WIDGETLIST();
-	*/
+
 	MSlider* pWidget = (MSlider*)pResource->FindWidget("MouseSensitivitySlider");
 	if(pWidget)
 	{
@@ -131,7 +118,7 @@ void ZOptionInterface::InitInterfaceOption(void)
 
 			D3DFORMAT format[2] = {
 				D3DFMT_X8R8G8B8,
-					D3DFMT_R5G6B5
+				//D3DFMT_R5G6B5
 			};
 
 			for( int i=0;i<2;i++) {
@@ -144,14 +131,11 @@ void ZOptionInterface::InitInterfaceOption(void)
 				{
 					if( REnumAdapterMode( D3DADAPTER_DEFAULT,format[i], idm,  &ddm ))
 					{
-						/*if( ddm.Width < 640 || ddm.Height < 480 || ((float)ddm.Height / (float)ddm.Width  != 0.75f)  )	// 지원하지 않는 해상도
-							continue;*/
-
 						ddm.RefreshRate = DEFAULT_REFRESHRATE;
 
 						if( ddm.Format == D3DFMT_X8R8G8B8 || ddm.Format == D3DFMT_R5G6B5 )
 						{
-							map<int, D3DDISPLAYMODE>::iterator iter_ = find_if( gDisplayMode.begin(), gDisplayMode.end(), value_equals<int, D3DDISPLAYMODE>(ddm));
+							auto iter_ = find_ddm(ddm);
 							if( iter_ == gDisplayMode.end() )
 							{
 								gDisplayMode.insert( map<int, D3DDISPLAYMODE>::value_type( dmIndex++, ddm ) );
@@ -183,7 +167,7 @@ void ZOptionInterface::InitInterfaceOption(void)
 			ddm.Height = RGetScreenHeight();
 			ddm.RefreshRate = DEFAULT_REFRESHRATE;
 			ddm.Format	= RGetPixelFormat();
-			map< int, D3DDISPLAYMODE>::iterator iter = find_if( gDisplayMode.begin(), gDisplayMode.end(), value_equals<int, D3DDISPLAYMODE>(ddm));
+			auto iter = find_ddm(ddm);
 			pWidget->SetSelIndex( iter->first );
 		}
 
@@ -997,7 +981,7 @@ void ZOptionInterface::OptimizationVideoOption()
 			ddm.Height = 480;
 			ddm.Format = D3DFMT_R5G6B5;
 			ddm.RefreshRate = DEFAULT_REFRESHRATE;
-			map<int, D3DDISPLAYMODE>::iterator iter_ = find_if( gDisplayMode.begin(), gDisplayMode.end(), value_equals<int, D3DDISPLAYMODE>(ddm));
+			map<int, D3DDISPLAYMODE>::iterator iter_ = find_ddm(ddm);
 			if( iter_ != gDisplayMode.end() )
 			{
 				int n = iter_->first;
@@ -1354,8 +1338,6 @@ bool ZOptionInterface::ResizeWidget(const char* szName, int w, int h)
 	return true;
 }
 
-#include "NewChat.h"
-
 void ZOptionInterface::Resize(int w, int h)
 {
 	ZGetGameInterface()->SetSize(w, h);
@@ -1405,7 +1387,7 @@ void ZOptionInterface::GetOldScreenResolution()
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
 	MComboBox *pWidget = (MComboBox*)pResource->FindWidget( "ScreenResolution" );
 
-	map<int, D3DDISPLAYMODE>::iterator  iter = find_if( gDisplayMode.begin(), gDisplayMode.end(), value_equals<int, D3DDISPLAYMODE>(ddm));
+	auto iter = find_ddm(ddm);
 	if( iter != gDisplayMode.end() )
 		pWidget->SetSelIndex( iter->first );
 }

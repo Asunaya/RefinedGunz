@@ -932,7 +932,7 @@ bool ZConfiguration::SaveToFile(const char *szFileName, const char* szHeader)
 
 void ZConfiguration::Init()
 {
-	m_Video.bFullScreen = false;
+	m_Video.bFullScreen = true;
 	auto Width = GetSystemMetrics(SM_CXSCREEN);
 	if (Width == 0)
 		Width = 1024;

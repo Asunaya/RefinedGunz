@@ -200,7 +200,6 @@ void ZInterfaceBackground::Draw(void)
 			if ( fSeed > 3.14)
 			{
 				m_nSceneNumber = LOGIN_SCENE_FIXEDCHAR;
-//				m_bShowMaietLogo = false;
 			}
 
 
@@ -332,7 +331,6 @@ void ZInterfaceBackground::SetScene( int nSceneNumber)
 	if ( (nSceneNumber == LOGIN_SCENE_FALLDOWN) || (nSceneNumber == LOGIN_SCENE_SELECTCHAR))
 		m_dwClock = GetGlobalTimeMS();
 
-	// 로고를 뿌려준다
 	if( nSceneNumber == LOGIN_SCENE_FALLDOWN)
 		ZGetScreenEffectManager()->AddScreenEffect( "maiet_logo");
 

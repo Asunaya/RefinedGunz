@@ -1731,11 +1731,10 @@ bool RBspObject::OpenCol(const char *filename)
 	file.Read(&nBspNodeCount, sizeof(int));
 	file.Read(&nBspPolygon, sizeof(int));
 
-	// Need one more for the root
-	ColRoot.resize(nBspNodeCount + 1);
+	ColRoot.resize(nBspNodeCount);
 	ColVertices.resize(nBspPolygon * 3);
 	auto ret = Open_ColNodes(ColRoot.data(), &file);
-	assert(nBspNodeCount > ret);
+	assert(nBspNodeCount == ret + 1);
 
 	file.Close();
 #ifndef _PUBLISH	
