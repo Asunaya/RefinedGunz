@@ -1,16 +1,10 @@
-#ifndef _MMATCHSTAGESETTING_H
-#define _MMATCHSTAGESETTING_H
+#pragma once
 
 #include <list>
-using namespace std;
 #include "MUID.h"
 #include "MMatchGlobal.h"
 #include "MMatchGameType.h"
-#include "MMatchObject.h"
 #include "MMatchMap.h"
-
-class MMatchObject;
-class MMatchStage;
 
 #define MMATCH_TEAM_MAX_COUNT		2
 
@@ -129,8 +123,8 @@ public:
 class MMatchStageSetting {
 protected:
 	MSTAGE_SETTING_NODE		m_StageSetting;
-	MUID					m_uidMaster;	// 방장
-	STAGE_STATE				m_nStageState;	// 현재 State (게임중,대기중,..)
+	MUID					m_uidMaster;
+	STAGE_STATE				m_nStageState;
 public:
 	MStageCharSettingList	m_CharSettingList;
 public:
@@ -181,18 +175,5 @@ public:
 	bool IsTeamPlay();
 	bool IsWaitforRoundEnd();
 	bool IsQuestDrived();
-	bool IsTeamWinThePoint()		{ return m_StageSetting.bTeamWinThePoint; }		///< 선승제 여부
+	bool IsTeamWinThePoint()		{ return m_StageSetting.bTeamWinThePoint; }
 };
-
-
-
-
-
-
-
-
-
-
-
-
-#endif

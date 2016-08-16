@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "MMatchItem.h"
 #include "MZFileSystem.h"
-#include "MMatchServer.h"
 #include "MBaseStringResManager.h"
 #include "MMatchUtil.h"
 
@@ -722,7 +721,7 @@ bool MMatchItemMap::CreateItem(MUID& uid, int nCIID, int nItemDescID, bool bRent
 	if (bRentItem)
 	{
 		pNewItem->SetRentItem(nRentMinutePeriodRemainder);
-		pNewItem->SetRentItemRegTime(MMatchServer::GetInstance()->GetTickTime());
+		pNewItem->SetRentItemRegTime(GetGlobalTimeMS());
 	}
 
 	insert(value_type(uid, pNewItem));

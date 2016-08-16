@@ -1,14 +1,14 @@
 #ifndef _MMATCHTRANSDATATYPE_H
 #define _MMATCHTRANSDATATYPE_H
 
-#include "MMatchRule.h"		// MMATCH_GAMETYPE, MMATCH_ROUNDSTATE, MMATCH_ROUNDRESULT 참조 -> 정리요망
+#include "MMatchGlobal.h"
+#include "MMatchItem.h"
 #include "MMatchStageSetting.h"
 #include "MMatchGameType.h"
 
 #pragma pack(push, old)
 #pragma pack(1)
 
-// 내 캐릭터 리스트 정보 - 캐릭터 선택시 사용
 struct MTD_AccountCharInfo
 {
 	char				szName[MATCHOBJECT_NAME_LENGTH];
@@ -19,7 +19,6 @@ struct MTD_AccountCharInfo
 
 struct MTD_CharInfo
 {
-	// 캐릭터 정보
 	char				szName[32];
 	char				szClanName[CLAN_NAME_LENGTH];
 	MMatchClanGrade		nClanGrade;
@@ -421,9 +420,6 @@ void Make_MTDItemNode(MTD_ItemNode* pout, MUID& uidItem, unsigned long int nItem
 void Make_MTDAccountItemNode(MTD_AccountItemNode* pout, int nAIID, unsigned long int nItemID, int nRentMinutePeriodRemainder);
 
 void Make_MTDQuestItemNode( MTD_QuestItemNode* pOut, const unsigned long int nItemID, const int nCount );
-
-struct MMatchWorldItem;
-void Make_MTDWorldItem(MTD_WorldItem* pOut, MMatchWorldItem* pWorldItem);
 
 // 경험치, 경험치 비율을 4byte로 조합
 // 상위 2바이트는 경험치, 하위 2바이트는 경험치의 퍼센트이다.

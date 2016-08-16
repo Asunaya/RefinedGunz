@@ -29,6 +29,9 @@
 
 #define MAX_REPLIER	16			// proposal 답변자는 최대 16명
 
+//
+// Clan
+//
 #define CLAN_SPONSORS_COUNT			4		// 클랜생성시 필요한 발기인 수
 #define CLAN_CREATING_NEED_BOUNTY		1000	// 클랜생성에 필요한 바운티
 #define CLAN_CREATING_NEED_LEVEL		10		// 클랜생성에 필요한 레벨
@@ -38,8 +41,19 @@
 #define MIN_CLANNAME	4				// 최소 4자이상 12자이하만 클랜 이름을 만들 수 있다.
 #define MAX_CLANNAME	12
 
+enum MMatchClanGrade : i32
+{
+	MCG_NONE = 0,
+	MCG_MASTER = 1,
+	MCG_ADMIN = 2,
 
-// 캐릭터 관련
+	MCG_MEMBER = 9,
+	MCG_END
+};
+
+//
+// Character
+//
 #define MIN_CHARNAME	4				// 최소 4자이상 12자 이하만 캐릭터 이름을 만들 수 있다.
 #define MAX_CHARNAME	16
 
@@ -47,16 +61,70 @@
 
 #define MATCH_SIMPLE_DESC_LENGTH	64
 
+enum MMatchUserGradeID : i32
+{
+	MMUG_FREE = 0,
+	MMUG_REGULAR = 1,
+	MMUG_STAR = 2,
 
-// 액션리그 관련
+	MMUG_CRIMINAL = 100,
+	MMUG_WARNING_1 = 101,
+	MMUG_WARNING_2 = 102,
+	MMUG_WARNING_3 = 103,
+	MMUG_CHAT_LIMITED = 104,
+	MMUG_PENALTY = 105,
+
+	MMUG_EVENTMASTER = 252,
+	MMUG_BLOCKED = 253,
+	MMUG_DEVELOPER = 254,
+	MMUG_ADMIN = 255
+};
+
+enum MMatchPlace
+{
+	MMP_OUTSIDE = 0,
+	MMP_LOBBY = 1,
+	MMP_STAGE = 2,
+	MMP_BATTLE = 3,
+	MMP_END
+};
+
+enum MMatchObjectStageState
+{
+	MOSS_NONREADY = 0,
+	MOSS_READY = 1,
+	MOSS_SHOP = 2,
+	MOSS_EQUIPMENT = 3,
+	MOSS_END
+};
+
+//
+// Clan war
+//
 #define ACTIONLEAGUE_TEAM_MEMBER_COUNT		4		// 액션리그는 4명이 모두 함께 게임해야된다.
 #define MAX_LADDER_TEAM_MEMBER				4		// 래더팀은 1~4명까지 만들 수 있다.
 #define MAX_CLANBATTLE_TEAM_MEMBER			8		// 클랜전은 최대 8명까지 만들 수 있다.
 
-//#define LIMIT_ACTIONLEAGUE		// 넷마블 액션리그 전용 디파인
-//#define LEAK_TEST
 #define CLAN_BATTLE					// 클랜전 개발용 디파인 - 개발이 끝나면 사라질 예정
 
+//
+// Channel
+//
+#define CHANNELNAME_LEN		64
+#define CHANNELRULE_LEN		64
+#define DEFAULT_CHANNEL_MAXPLAYERS			200
+#define DEFAULT_CHANNEL_MAXSTAGES			100
+#define MAX_CHANNEL_MAXSTAGES				500
+#define NUM_PLAYERLIST_NODE					6
+#define CHANNEL_NO_LEVEL					(-1)
+
+enum MCHANNEL_TYPE {
+	MCHANNEL_TYPE_PRESET = 0,
+	MCHANNEL_TYPE_USER = 1,
+	MCHANNEL_TYPE_PRIVATE = 2,
+	MCHANNEL_TYPE_CLAN = 3,
+	MCHANNEL_TYPE_MAX
+};
 
 
 

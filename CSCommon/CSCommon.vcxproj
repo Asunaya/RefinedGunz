@@ -328,12 +328,17 @@
     <ClInclude Include="Include\MCountryFilter.h" />
     <ClInclude Include="Include\MCountryFilterDBMgr.h" />
     <ClInclude Include="Include\MGridMap.h" />
+    <ClInclude Include="Include\MMatchGameType.h" />
+    <ClInclude Include="Include\MMatchGlobal.h" />
+    <ClInclude Include="Include\MMatchItem.h" />
+    <ClInclude Include="Include\MMatchMap.h" />
+    <ClInclude Include="Include\MMatchStageSetting.h" />
     <ClInclude Include="Include\MMatchTransDataType.h" />
+    <ClInclude Include="Include\MMatchUtil.h" />
     <ClInclude Include="Include\MUID.h" />
     <ClInclude Include="Include\MObject.h" />
     <ClInclude Include="Include\MObjectTypes.h" />
     <ClInclude Include="Include\MSharedCommandTable.h" />
-    <ClInclude Include="Include\MMaster.h" />
     <ClInclude Include="Include\MChattingFilter.h" />
     <ClInclude Include="Include\MCustomClient.h" />
     <ClInclude Include="Include\MTCPSocket.h" />
@@ -348,7 +353,6 @@
     <ClInclude Include="Include\MBaseLocale.h" />
     <ClInclude Include="Include\MLocaleDefine.h" />
     <ClInclude Include="Include\MMatchLocale.h" />
-    <ClInclude Include="Include\MNJ_DBAgentClient.h" />
     <ClInclude Include="Include\MBaseStringResManager.h" />
     <ClInclude Include="Include\MErrorTable.h" />
     <ClInclude Include="Include\MStringRes.h" />
@@ -370,11 +374,15 @@
     <ClCompile Include="Source\MCountryFilter.cpp" />
     <ClCompile Include="Source\MCountryFilterDBMgr.cpp" />
     <ClCompile Include="Source\MGridMap.cpp" />
+    <ClCompile Include="Source\MMatchGameType.cpp" />
+    <ClCompile Include="Source\MMatchGlobal.cpp" />
+    <ClCompile Include="Source\MMatchItem.cpp" />
+    <ClCompile Include="Source\MMatchStageSetting.cpp" />
     <ClCompile Include="Source\MMatchTransDataType.cpp" />
+    <ClCompile Include="Source\MMatchUtil.cpp" />
     <ClCompile Include="Source\MUID.cpp" />
     <ClCompile Include="Source\MObject.cpp" />
     <ClCompile Include="Source\MSharedCommandTable.cpp" />
-    <ClCompile Include="Source\MMaster.cpp" />
     <ClCompile Include="Source\MChattingFilter.cpp" />
     <ClCompile Include="Source\MCustomClient.cpp" />
     <ClCompile Include="Source\MTCPSocket.cpp" />
@@ -386,7 +394,6 @@
     <ClCompile Include="Source\MCommandCommunicator.cpp" />
     <ClCompile Include="Source\MXmlParser.cpp" />
     <ClCompile Include="Source\MBaseLocale.cpp" />
-    <ClCompile Include="Source\MNJ_DBAgentClient.cpp" />
     <ClCompile Include="Source\MBaseStringResManager.cpp" />
     <ClCompile Include="Source\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

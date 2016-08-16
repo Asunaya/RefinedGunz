@@ -38,10 +38,7 @@ struct BasicInfo {
 struct ZBasicInfo {
 	v3 position;
 	v3 velocity;
-	//	rvector accel;
 	v3 direction;
-	//	ZC_STATE_UPPER upperstate;
-	//	ZC_STATE_LOWER lowerstate;
 };
 
 #pragma pack(push, 1)

@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "MMatchStageSetting.h"
-#include "MMatchServer.h"
 
 MMatchStageSetting::MMatchStageSetting()
 {

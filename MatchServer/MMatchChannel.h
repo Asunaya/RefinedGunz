@@ -12,26 +12,9 @@ using namespace std;
 #include "MSmartRefresh.h"
 #include "MMatchChannelRule.h"
 
-#define CHANNELNAME_LEN		64
-#define CHANNELRULE_LEN		64
-#define DEFAULT_CHANNEL_MAXPLAYERS			200
-#define DEFAULT_CHANNEL_MAXSTAGES			100
-#define MAX_CHANNEL_MAXSTAGES				500
-#define NUM_PLAYERLIST_NODE					6
-#define CHANNEL_NO_LEVEL					(-1)
-
 class MMatchObject;
 class MMatchStage;
 class MCommand;
-
-
-enum MCHANNEL_TYPE {
-	MCHANNEL_TYPE_PRESET	= 0,		// 일반채널
-	MCHANNEL_TYPE_USER		= 1,		// 사설채널
-	MCHANNEL_TYPE_PRIVATE	= 2,		// 비밀채널 - 현재 안쓰임
-	MCHANNEL_TYPE_CLAN		= 3,		// 클랜채널
-	MCHANNEL_TYPE_MAX
-};
 
 
 // 채널 리스트 달라고 요청할때 보내는 구조체

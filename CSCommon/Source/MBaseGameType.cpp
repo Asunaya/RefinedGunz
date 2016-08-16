@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "MBaseGameType.h"
-
+#include "MMatchMap.h"
 
 #define MMATCH_GAMETYPE_DEATHMATCH_SOLO_STR		"Death Match(개인)"
 #define MMATCH_GAMETYPE_DEATHMATCH_TEAM_STR		"Death Match(단체)"

@@ -26,18 +26,3 @@ void Make_MTDQuestItemNode( MTD_QuestItemNode* pOut, const unsigned long int nIt
 	pOut->m_nItemID			= nItemID;
 	pOut->m_nCount			= nCount;
 }
-
-
-void Make_MTDWorldItem(MTD_WorldItem* pOut, MMatchWorldItem* pWorldItem)
-{
-	pOut->nUID = pWorldItem->nUID;
-	pOut->nItemID = pWorldItem->nItemID;
-	if ( (pWorldItem->nStaticSpawnIndex < 0) && (pWorldItem->nLifeTime > 0) )	
-		pOut->nItemSubType = MTD_Dynamic;
-	else
-		pOut->nItemSubType = MTD_Static;
-	
-	pOut->x = (short)Roundf(pWorldItem->Origin.x);
-	pOut->y = (short)Roundf(pWorldItem->Origin.y);
-	pOut->z = (short)Roundf(pWorldItem->Origin.z);
-}

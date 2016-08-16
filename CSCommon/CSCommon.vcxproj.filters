@@ -19,9 +19,6 @@
     <Filter Include="SharedCommand">
       <UniqueIdentifier>{2611cabc-f474-4409-98c2-570b918ccee5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Master">
-      <UniqueIdentifier>{dae35f30-02fd-42e1-aa92-3a958517f92b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Client">
       <UniqueIdentifier>{6317219b-47fb-4f2c-87c3-71b185df0f62}</UniqueIdentifier>
     </Filter>
@@ -97,9 +94,6 @@
     <ClInclude Include="Include\MSharedCommandTable.h">
       <Filter>SharedCommand</Filter>
     </ClInclude>
-    <ClInclude Include="Include\MMaster.h">
-      <Filter>Master</Filter>
-    </ClInclude>
     <ClInclude Include="Include\MChattingFilter.h">
       <Filter>Client</Filter>
     </ClInclude>
@@ -139,9 +133,6 @@
     <ClInclude Include="Include\MMatchLocale.h">
       <Filter>Locate</Filter>
     </ClInclude>
-    <ClInclude Include="Include\MNJ_DBAgentClient.h">
-      <Filter>Locate</Filter>
-    </ClInclude>
     <ClInclude Include="Include\MBaseStringResManager.h">
       <Filter>StringRes</Filter>
     </ClInclude>
@@ -168,6 +159,12 @@
       <Filter>MCountryFilter</Filter>
     </ClInclude>
     <ClInclude Include="Include\MMatchTransDataType.h" />
+    <ClInclude Include="Include\MMatchItem.h" />
+    <ClInclude Include="Include\MMatchGlobal.h" />
+    <ClInclude Include="Include\MMatchUtil.h" />
+    <ClInclude Include="Include\MMatchMap.h" />
+    <ClInclude Include="Include\MMatchStageSetting.h" />
+    <ClInclude Include="Include\MMatchGameType.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\MCommand.cpp">
@@ -196,9 +193,6 @@
     </ClCompile>
     <ClCompile Include="Source\MSharedCommandTable.cpp">
       <Filter>SharedCommand</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\MMaster.cpp">
-      <Filter>Master</Filter>
     </ClCompile>
     <ClCompile Include="Source\MChattingFilter.cpp">
       <Filter>Client</Filter>
@@ -230,9 +224,6 @@
     <ClCompile Include="Source\MBaseLocale.cpp">
       <Filter>Locate</Filter>
     </ClCompile>
-    <ClCompile Include="Source\MNJ_DBAgentClient.cpp">
-      <Filter>Locate</Filter>
-    </ClCompile>
     <ClCompile Include="Source\MBaseStringResManager.cpp">
       <Filter>StringRes</Filter>
     </ClCompile>
@@ -250,6 +241,11 @@
     </ClCompile>
     <ClCompile Include="Source\MMatchTransDataType.cpp" />
     <ClCompile Include="Source\MBaseGameType.cpp" />
+    <ClCompile Include="Source\MMatchItem.cpp" />
+    <ClCompile Include="Source\MMatchGlobal.cpp" />
+    <ClCompile Include="Source\MMatchUtil.cpp" />
+    <ClCompile Include="Source\MMatchStageSetting.cpp" />
+    <ClCompile Include="Source\MMatchGameType.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="HShield\HsCryptLib.lib">

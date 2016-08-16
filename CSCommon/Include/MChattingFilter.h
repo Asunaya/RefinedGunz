@@ -32,7 +32,7 @@ public :
 		return &ChattingFilter;
 	}
 
-	bool LoadFromFile( MZFileSystem* pfs, const char* szFileName);
+	bool LoadFromFile( class MZFileSystem* pfs, const char* szFileName);
 	bool IsValidChatting( const char* strText);
 	bool IsValidName( const char* strText);
 	const char* GetLastFilteredStr()				{ return m_szLastFilterdStr; }

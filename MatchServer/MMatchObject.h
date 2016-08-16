@@ -20,25 +20,6 @@
 #include "BasicInfoHistory.h"
 #include "HitRegistration.h"
 
-enum MMatchUserGradeID : i32
-{
-	MMUG_FREE			= 0,
-	MMUG_REGULAR		= 1,
-	MMUG_STAR			= 2,
-
-	MMUG_CRIMINAL		= 100,
-	MMUG_WARNING_1		= 101,
-	MMUG_WARNING_2		= 102,
-	MMUG_WARNING_3		= 103,
-	MMUG_CHAT_LIMITED	= 104,
-	MMUG_PENALTY		= 105,
-
-	MMUG_EVENTMASTER	= 252,
-	MMUG_BLOCKED		= 253,
-	MMUG_DEVELOPER		= 254,
-	MMUG_ADMIN			= 255
-};
-
 enum MMatchDisconnectStatus
 {
 	MMDS_CONNECTED = 1,
@@ -82,25 +63,6 @@ struct MMatchAccountInfo
 	MMatchAccountInfo() : m_nAID(-1), m_nUGrade(MMUG_FREE),
 		m_nPGrade(MMPG_FREE), m_BlockType(MMBT_NO), m_szUserID()
 	{}
-};
-
-// 플레이어가 현재 위치하고 있는 곳
-enum MMatchPlace
-{
-	MMP_OUTSIDE	= 0,
-	MMP_LOBBY = 1,
-	MMP_STAGE	= 2,
-	MMP_BATTLE	= 3,
-	MMP_END
-};
-
-enum MMatchObjectStageState
-{
-	MOSS_NONREADY	= 0,
-	MOSS_READY		= 1,
-	MOSS_SHOP		= 2,
-	MOSS_EQUIPMENT	= 3,
-	MOSS_END
 };
 
 #define DEFAULT_CHAR_HP				100

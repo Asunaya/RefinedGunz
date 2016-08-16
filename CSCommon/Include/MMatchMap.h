@@ -1,10 +1,6 @@
-#ifndef _MMATCHMAP_H
-#define _MMATCHMAP_H
-
+#pragma once
 
 #define MAPNAME_LENGTH		32
-
-
 
 enum MMATCH_MAP
 {
@@ -115,5 +111,3 @@ inline bool MIsMapOnlyDuel( const int nMapID)
 	else
 		return 0;
 }
-
-#endif

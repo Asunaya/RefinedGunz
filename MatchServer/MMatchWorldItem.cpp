@@ -125,6 +125,20 @@ void MMatchWorldItemManager::Update()
 	m_nLastTime = nNowTime;
 }
 
+static void Make_MTDWorldItem(MTD_WorldItem* pOut, MMatchWorldItem* pWorldItem)
+{
+	pOut->nUID = pWorldItem->nUID;
+	pOut->nItemID = pWorldItem->nItemID;
+	if ((pWorldItem->nStaticSpawnIndex < 0) && (pWorldItem->nLifeTime > 0))
+		pOut->nItemSubType = MTD_Dynamic;
+	else
+		pOut->nItemSubType = MTD_Static;
+
+	pOut->x = (short)Roundf(pWorldItem->Origin.x);
+	pOut->y = (short)Roundf(pWorldItem->Origin.y);
+	pOut->z = (short)Roundf(pWorldItem->Origin.z);
+}
+
 void MMatchWorldItemManager::RouteAllItems(MMatchObject* pObj)
 {
 	int nItemSize = (int)m_ItemMap.size();

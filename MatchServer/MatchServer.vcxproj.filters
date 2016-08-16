@@ -118,25 +118,13 @@
     <ClCompile Include="MMatchFriendInfo.cpp">
       <Filter>MMatchServer</Filter>
     </ClCompile>
-    <ClCompile Include="MMatchGameType.cpp">
-      <Filter>MMatchServer</Filter>
-    </ClCompile>
-    <ClCompile Include="MMatchGlobal.cpp">
-      <Filter>MMatchServer</Filter>
-    </ClCompile>
     <ClCompile Include="MMatchHShield.cpp">
-      <Filter>MMatchServer</Filter>
-    </ClCompile>
-    <ClCompile Include="MMatchItem.cpp">
       <Filter>MMatchServer</Filter>
     </ClCompile>
     <ClCompile Include="MMatchLanguageConf.cpp">
       <Filter>MMatchServer</Filter>
     </ClCompile>
     <ClCompile Include="MMatchLocale.cpp">
-      <Filter>MMatchServer</Filter>
-    </ClCompile>
-    <ClCompile Include="MMatchMap.cpp">
       <Filter>MMatchServer</Filter>
     </ClCompile>
     <ClCompile Include="MMatchMission.cpp">
@@ -250,16 +238,10 @@
     <ClCompile Include="MMatchStage.cpp">
       <Filter>MMatchServer</Filter>
     </ClCompile>
-    <ClCompile Include="MMatchStageSetting.cpp">
-      <Filter>MMatchServer</Filter>
-    </ClCompile>
     <ClCompile Include="MMatchStatus.cpp">
       <Filter>MMatchServer</Filter>
     </ClCompile>
     <ClCompile Include="MMatchStringResManager.cpp">
-      <Filter>MMatchServer</Filter>
-    </ClCompile>
-    <ClCompile Include="MMatchUtil.cpp">
       <Filter>MMatchServer</Filter>
     </ClCompile>
     <ClCompile Include="MMatchWorldItem.cpp">
@@ -300,6 +282,18 @@
     </ClCompile>
     <ClCompile Include="MQuestItem.cpp" />
     <ClCompile Include="MSmartRefreshImpl.cpp" />
+    <ClCompile Include="MClient.cpp" />
+    <ClCompile Include="MAsyncProxy.cpp" />
+    <ClCompile Include="MMatchEventFactory.cpp" />
+    <ClCompile Include="MMatchRuleSkillmap.cpp" />
+    <ClCompile Include="MMatchServer_AntiHack.cpp" />
+    <ClCompile Include="MovingWeaponManager.cpp" />
+    <ClCompile Include="MServer.cpp" />
+    <ClCompile Include="MSSQLDatabase.cpp" />
+    <ClCompile Include="SQLiteDatabase.cpp" />
+    <ClCompile Include="MNJ_DBAgentClient.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ChildFrm.h">
@@ -402,25 +396,13 @@
     <ClInclude Include="MMatchFriendInfo.h">
       <Filter>MMatchServer</Filter>
     </ClInclude>
-    <ClInclude Include="MMatchGameType.h">
-      <Filter>MMatchServer</Filter>
-    </ClInclude>
-    <ClInclude Include="MMatchGlobal.h">
-      <Filter>MMatchServer</Filter>
-    </ClInclude>
     <ClInclude Include="MMatchHShield.h">
-      <Filter>MMatchServer</Filter>
-    </ClInclude>
-    <ClInclude Include="MMatchItem.h">
       <Filter>MMatchServer</Filter>
     </ClInclude>
     <ClInclude Include="MMatchLanguageConf.h">
       <Filter>MMatchServer</Filter>
     </ClInclude>
     <ClInclude Include="MMatchLocale.h">
-      <Filter>MMatchServer</Filter>
-    </ClInclude>
-    <ClInclude Include="MMatchMap.h">
       <Filter>MMatchServer</Filter>
     </ClInclude>
     <ClInclude Include="MMatchMission.h">
@@ -498,19 +480,10 @@
     <ClInclude Include="MMatchStage.h">
       <Filter>MMatchServer</Filter>
     </ClInclude>
-    <ClInclude Include="MMatchStageSetting.h">
-      <Filter>MMatchServer</Filter>
-    </ClInclude>
     <ClInclude Include="MMatchStatus.h">
       <Filter>MMatchServer</Filter>
     </ClInclude>
     <ClInclude Include="MMatchStringResManager.h">
-      <Filter>MMatchServer</Filter>
-    </ClInclude>
-    <ClInclude Include="MMatchTypes.h">
-      <Filter>MMatchServer</Filter>
-    </ClInclude>
-    <ClInclude Include="MMatchUtil.h">
       <Filter>MMatchServer</Filter>
     </ClInclude>
     <ClInclude Include="MMatchWorldItem.h">
@@ -521,6 +494,28 @@
     </ClInclude>
     <ClInclude Include="MQuestItem.h" />
     <ClInclude Include="MSmartRefreshImpl.h" />
+    <ClInclude Include="CPSSOLib.h" />
+    <ClInclude Include="IDatabase.h" />
+    <ClInclude Include="MAsyncDBJob.h" />
+    <ClInclude Include="MAsyncDBJob_BringAccountItem.h" />
+    <ClInclude Include="MAsyncDBJob_CharFinalize.h" />
+    <ClInclude Include="MAsyncDBJob_CountryFilter.h" />
+    <ClInclude Include="MAsyncDBJob_Event.h" />
+    <ClInclude Include="MAsyncDBJob_FriendList.h" />
+    <ClInclude Include="MAsyncDBJob_GetLoginInfo.h" />
+    <ClInclude Include="MAsyncDBJob_InsertConnLog.h" />
+    <ClInclude Include="MAsyncDBJob_UpdateCharInfoData.h" />
+    <ClInclude Include="MAsyncDBJob_WinTheClanGame.h" />
+    <ClInclude Include="MAsyncProxy.h" />
+    <ClInclude Include="MClient.h" />
+    <ClInclude Include="MMatchRuleSkillmap.h" />
+    <ClInclude Include="MovingWeaponManager.h" />
+    <ClInclude Include="MServer.h" />
+    <ClInclude Include="MSSQLDatabase.h" />
+    <ClInclude Include="SQLiteDatabase.h" />
+    <ClInclude Include="MNJ_DBAgentClient.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\MatchServer.ico">

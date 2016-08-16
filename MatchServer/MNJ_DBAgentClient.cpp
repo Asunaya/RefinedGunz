@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "MNJ_DBAgentClient.h"
+#include "MErrorTable.h"
 
 MNJ_DBAgentClient::MNJ_DBAgentClient(int nGameCode, int nServerCode) 
 		: MCustomClient(), m_bConnected(false), m_nGameCode(nGameCode), m_nServerCode(nServerCode), m_nQueueTop(0)

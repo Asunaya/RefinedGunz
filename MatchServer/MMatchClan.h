@@ -9,17 +9,6 @@
 #include <list>
 using namespace std;
 
-// 클랜 등급
-enum MMatchClanGrade : i32
-{
-	MCG_NONE		= 0,		// 클랜원이 아님
-	MCG_MASTER		= 1,		// 클랜 마스터
-	MCG_ADMIN		= 2,		// 클랜 운영자
-
-	MCG_MEMBER		= 9,		// 일반 클랜원
-	MCG_END
-};
-
 // 클랜등급이 nSrcGrade가 nDstGrade보다 같거나 더 높은지 판별한다.
 inline bool IsUpperClanGrade(MMatchClanGrade nSrcGrade, MMatchClanGrade nDstGrade)
 {

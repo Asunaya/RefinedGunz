@@ -2,9 +2,8 @@
 #include "MSharedCommandTable.h"
 #include "MCommandManager.h"
 
-#include "MMatchChannel.h"
-#include "MMatchObject.h"
 #include "MMatchGlobal.h"
+#include "MMatchItem.h""
 
 void MAddSharedCommandTable(MCommandManager* pCommandManager, int nSharedType)
 {

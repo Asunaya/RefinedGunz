@@ -7,7 +7,7 @@ using std::map;
 using std::string;
 using std::pair;
 
-class MZFileSystem;
+#include "MZFileSystem.h"
 
 #define CHAR_MSG_VALUE			'$'
 
