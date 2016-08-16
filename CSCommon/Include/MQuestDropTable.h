@@ -1,7 +1,9 @@
-#ifndef _MQUESTDROPTABLE_H
-#define _MQUESTDROPTABLE_H
+#pragma once
 
 #include "MQuestConst.h"
+#include <set>
+#include <map>
+#include "SafeString.h"
 
 /// 드랍 아이템 타입
 enum MQuestDropItemType
@@ -40,7 +42,7 @@ private:
 	char					m_szName[16];
 	MQuestDropItem			m_DropItemSet[MAX_QL+1][MAX_DROPSET_RATE];
 	int						m_nTop[MAX_QL+1];
-	set<int>				m_QuestItems;			// 이 세트가 가지고 있는 퀘스트 아이템 세트 - 클라이언트가 사용하려고 만듦
+	std::set<int>				m_QuestItems;			// 이 세트가 가지고 있는 퀘스트 아이템 세트 - 클라이언트가 사용하려고 만듦
 public:
 	/// 생성자
 	MQuestDropSet()
@@ -67,15 +69,15 @@ public:
 	/// @param nQL				퀘스트 레벨
 	bool Roll(MQuestDropItem& outDropItem, int nQL);
 
-	set<int>& GetQuestItems() { return m_QuestItems; }				///< 드롭될 아이템 종류
+	std::set<int>& GetQuestItems() { return m_QuestItems; }				///< 드롭될 아이템 종류
 };
 
 
 /// 드롭 테이블 관리자 클래스
-class MQuestDropTable : public map<int, MQuestDropSet*>
+class MQuestDropTable : public std::map<int, MQuestDropSet*>
 {
 private:
-	void ParseDropSet(MXmlElement& element);
+	void ParseDropSet(class MXmlElement& element);
 	void ParseDropItemID(MQuestDropItem* pItem, const char* szAttrValue);
 public:
 	MQuestDropTable();													///< 생성자
@@ -84,7 +86,7 @@ public:
 	void Clear();
 	
 	bool ReadXml(const char* szFileName);								///< xml에서 정보를 읽는다. 
-	bool ReadXml(MZFileSystem* pFileSystem,const char* szFileName);		///< xml에서 정보를 읽는다. 
+	bool ReadXml(class MZFileSystem* pFileSystem,const char* szFileName);		///< xml에서 정보를 읽는다. 
 	/// 드롭 테이블 ID와 QL을 바탕으로 드롭될 아이템을 결정한다.
 	/// @param outDropItem		드롭될 아이템 반환값
 	/// @param nDropTableID		드롭 테이블 ID
@@ -92,5 +94,3 @@ public:
 	bool Roll(MQuestDropItem& outDropItem, int nDropTableID, int nQL);
 	MQuestDropSet* Find(int nDropTableID);								///< 드롭 아이템 셋 정보 반환
 };
-
-#endif

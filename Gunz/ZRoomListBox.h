@@ -1,14 +1,9 @@
 #pragma once
+
 #include "mwidget.h"
 #include "map"
-#include "MMatchRule.h"
-
-using namespace std;
 
 class MButton;
-//class MScrollBar;
-//class MStageListItem;
-
 
 #define SMI_MAPNAME_LENGTH		128
 #define SMI_ROOMNAME_LENGTH		128

@@ -13,12 +13,9 @@
 #include "ZApplication.h"
 #include "ZGameInterface.h"
 #include "MMatchGlobal.h"
-#include "MMatchChannel.h"
-#include "MMatchStage.h"
 #include "ZCommandTable.h"
 #include "ZPost.h"
 #include "ZPostLocal.h"
-#include "MMatchNotify.h"
 #include "ZMatch.h"
 #include "MComboBox.h"
 #include "MTextArea.h"
@@ -45,7 +42,7 @@
 #include "ZLocale.h"
 #include "ZMap.h"
 #include "UPnP.h"
-
+#include "MMatchNotify.h"
 #define SODIUM_STATIC
 #include "sodium.h"
 

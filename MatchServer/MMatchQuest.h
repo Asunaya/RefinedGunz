@@ -2,6 +2,7 @@
 #define _MMATCHQUEST_H
 
 #include "MBaseQuest.h"
+#include "MQuestScenario.h"
 
 
 /// 서버용 퀘스트 최고 관장 클래스

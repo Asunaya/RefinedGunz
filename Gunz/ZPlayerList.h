@@ -1,9 +1,7 @@
-#ifndef _ZPLAYERLIST_H
-#define _ZPLAYERLIST_H
+#pragma once
 
 #include "MUID.h"
 #include "MMatchGlobal.h"
-#include "MMatchObject.h"
 
 struct ZChannelPlayerListNode
 {
@@ -30,7 +28,3 @@ struct ZFriendListNode
 	char			szName[MATCHOBJECT_NAME_LENGTH];
 	char			szDescription[MATCH_SIMPLE_DESC_LENGTH];
 };
-
-
-
-#endif

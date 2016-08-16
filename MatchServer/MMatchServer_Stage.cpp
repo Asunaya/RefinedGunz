@@ -31,6 +31,7 @@
 #include "MMatchRuleDuel.h"
 #include "MBaseGameType.h"
 #include "MMatchUtil.h"
+#include "MMatchObjectCacheBuilder.h"
 
 static bool StageShowInfo(MMatchServer* pServer, const MUID& uidPlayer, const MUID& uidStage, char* pszChat);
 

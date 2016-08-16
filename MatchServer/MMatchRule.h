@@ -11,27 +11,6 @@
 class MMatchObject;
 class MMatchStage;
 
-
-/// 게임 라운드 상태
-enum MMATCH_ROUNDSTATE {
-	MMATCH_ROUNDSTATE_PREPARE		= 0,			///< 준비 단계
-	MMATCH_ROUNDSTATE_COUNTDOWN		= 1,			///< 플레이 카운트 
-	MMATCH_ROUNDSTATE_PLAY			= 2,			///< 게임중
-	MMATCH_ROUNDSTATE_FINISH		= 3,			///< 종료
-	MMATCH_ROUNDSTATE_EXIT			= 4,			///< 대기방으로 나감
-	MMATCH_ROUNDSTATE_FREE			= 5,			///< 게임진행에 필요한 요건이 충족되지 않은 프리모드 상태
-	MMATCH_ROUNDSTATE_FAILED		= 6,			///< 게임클리어 실패.
-	MMATCH_ROUNDSTATE_END	// Not using, just a END mark
-};
-
-enum MMATCH_ROUNDRESULT {
-	MMATCH_ROUNDRESULT_DRAW = 0,
-	MMATCH_ROUNDRESULT_REDWON,
-	MMATCH_ROUNDRESULT_BLUEWON,
-	MMATCH_ROUNDRESULT_END
-};
-
-
 ///////////////////////////////////////////////////////////////////////////////////////////////
 /// 게임 룰 기본 베이스 클래스
 class MMatchRule {

@@ -7,8 +7,6 @@
 #include "MDebug.h"
 #include "MCommandBuilder.h"
 #include "MMatchUtil.h"
-//#include "MPacketHShieldCrypter.h"
-#include "MMatchConfig.h"
 
 
 MClient* MClient::m_pInstance = NULL;

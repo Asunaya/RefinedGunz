@@ -17,17 +17,6 @@ class MMatchStage;
 class MCommand;
 
 
-// 채널 리스트 달라고 요청할때 보내는 구조체
-struct MCHANNELLISTNODE {
-	MUID			uidChannel;						// 채널 UID
-	short			nNo;							// 채널번호
-	unsigned char	nPlayers;						// 현재인원
-	short			nMaxPlayers;					// 최대인원
-	short			nLevelMin;						// 최소레벨
-	short			nLevelMax;						// 최대레벨
-	char			nChannelType;					// 채널타입
-	char			szChannelName[CHANNELNAME_LEN];	// 채널이름
-};
 
 typedef map<string, MMatchObject*>			MObjectStrMap;
 typedef map<int, MMatchStage*>				MChannelStageMap;

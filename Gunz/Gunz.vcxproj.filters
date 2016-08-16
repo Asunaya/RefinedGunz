@@ -793,6 +793,8 @@
     <ClInclude Include="RGTypes.h">
       <Filter>RGunz</Filter>
     </ClInclude>
+    <ClInclude Include="MClient.h" />
+    <ClInclude Include="MMatchClient.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ZCanvas.cpp">
@@ -1206,9 +1208,6 @@
     <ClCompile Include="ZChannelRule.cpp">
       <Filter>Interface\Game</Filter>
     </ClCompile>
-    <ClCompile Include="ZClan.cpp">
-      <Filter>Interface\Game</Filter>
-    </ClCompile>
     <ClCompile Include="ZConfiguration.cpp">
       <Filter>Interface\Game</Filter>
     </ClCompile>
@@ -1417,6 +1416,8 @@
     <ClCompile Include="VoiceChat.cpp">
       <Filter>RGunz</Filter>
     </ClCompile>
+    <ClCompile Include="MClient.cpp" />
+    <ClCompile Include="MMatchClient.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="runtime\shader\skin.vsh">

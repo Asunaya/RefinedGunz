@@ -3,6 +3,7 @@
 #include "MZFileSystem.h"
 #include "stdlib.h"
 #include "MMath.h"
+#include "MBaseStringResManager.h"
 
 MQuestNPCSpawnType MQuestNPCInfo::GetSpawnType()
 {

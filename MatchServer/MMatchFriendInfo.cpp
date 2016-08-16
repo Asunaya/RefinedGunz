@@ -1,7 +1,5 @@
 #include "stdafx.h"
 #include "MMatchFriendInfo.h"
-#include "MMatchServer.h"
-#include "MMatchChannel.h"
 
 
 MMatchFriendInfo::MMatchFriendInfo()

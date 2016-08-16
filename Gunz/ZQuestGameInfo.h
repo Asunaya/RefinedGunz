@@ -2,7 +2,6 @@
 #define _ZQUEST_GAMEINFO_H
 
 #include "MBaseQuest.h"
-#include "MQuestLevel.h"
 #include <vector>
 using namespace std;
 

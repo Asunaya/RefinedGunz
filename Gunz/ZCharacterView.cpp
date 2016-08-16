@@ -2,7 +2,6 @@
 
 #include "ZCharacterView.h"
 #include "RealSpace2.h"
-#include "MMatchObject.h"
 #include "ZApplication.h"
 #include "ZMyInfo.h"
 #include "ZGameClient.h"

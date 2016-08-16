@@ -3,6 +3,7 @@
 
 #include "MBaseQuest.h"
 #include "MQuestScenario.h"
+#include "MQuestItem.h"
 #include <vector>
 #include <map>
 #include <set>

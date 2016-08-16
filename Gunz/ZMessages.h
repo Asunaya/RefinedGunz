@@ -4,7 +4,6 @@
 #include <string>
 #include "MCommand.h"
 #include "MZFileSystem.h"
-#include "MMatchObject.h"
 
 #define ZOK										0			///< 에러없음
 #define ZERR_UNKNOWN							-1			///< 알지 못하는 에러

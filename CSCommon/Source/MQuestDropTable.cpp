@@ -3,6 +3,7 @@
 #include "MQuestItem.h"
 #include "MMath.h"
 #include "MZFileSystem.h"
+#include "MMatchItem.h"
 
 void MQuestDropSet::AddItem(MQuestDropItem* pItem, int nQL, float fRate)
 {

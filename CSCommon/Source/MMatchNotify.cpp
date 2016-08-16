@@ -3,7 +3,7 @@
 #include "MXml.h"
 #include <crtdbg.h>
 #include <map>
-
+#include "MBaseStringResManager.h"
 
 #define MESSAGES_FILE_NAME	"system/notify.xml"
 

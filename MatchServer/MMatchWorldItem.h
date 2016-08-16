@@ -8,38 +8,7 @@
 #include "GlobalTypes.h"
 #include "d3dx9.h"
 #include "MUID.h"
-
-#define WORLDITEM_EXTRAVALUE_NUM		2
-
-struct MMatchWorldItem
-{
-	unsigned short		nUID;
-	unsigned short		nItemID;
-	short				nStaticSpawnIndex;
-	v3					Origin;
-	int					nLifeTime;
-
-	union {
-		struct {
-		    int			nDropItemID;
-			int			nRentPeriodHour;
-		};
-		int				nExtraValue[WORLDITEM_EXTRAVALUE_NUM];
-	};
-};
-
-struct MMatchWorldItemSpawnInfo
-{
-	unsigned short		nItemID;
-	unsigned long int	nCoolTime;
-	unsigned long int	nElapsedTime;
-	float x;
-	float y;
-	float z;
-	bool				bExist;
-	bool				bUsed;
-};
-
+#include "MMatchWorldItemDesc.h"
 
 using MMatchWorldItemMap = std::unordered_map<unsigned short, MMatchWorldItem>;
 

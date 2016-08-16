@@ -3,15 +3,13 @@
 
 #include <list>
 #include <map>
-using namespace std;
+
 #include "MMatchGlobal.h"
 #include "MCommandCommunicator.h"
 #include "MClient.h"
 #include "MSafeUDP.h"
 #include "MMatchObjCache.h"
-#include "MMatchObject.h"
 #include "MMatchTransDataType.h"
-#include "MMatchStage.h"
 #include "MMatchGlobal.h"
 #include "MPacketCrypter.h"
 

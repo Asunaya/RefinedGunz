@@ -59,10 +59,8 @@
 #include "RAnimationMgr.h"
 #include "ZCamera.h"
 #include "Mint4R2.h"
-//#include "RParticleSystem.h"
 #include "ZItemDesc.h"
 
-#include "MObjectCharacter.h"
 #include "MMath.h"
 #include "ZQuest.h"
 #include "MMatchUtil.h"

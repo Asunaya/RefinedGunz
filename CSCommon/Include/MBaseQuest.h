@@ -6,7 +6,6 @@
 
 #include "MQuestNPC.h"
 #include "MQuestMap.h"
-#include "MQuestScenario.h"
 #include "MSurvivalMap.h"
 #include "MQuestDropTable.h"
 

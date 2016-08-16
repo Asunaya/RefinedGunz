@@ -19,37 +19,7 @@
 #include "GlobalTypes.h"
 #include "BasicInfoHistory.h"
 #include "HitRegistration.h"
-
-enum MMatchDisconnectStatus
-{
-	MMDS_CONNECTED = 1,
-	MMDS_DISCONN_WAIT,
-	MMDS_DISCONNECT,
-
-	MMDS_END,
-};
-
-enum MMatchPremiumGradeID
-{
-	MMPG_FREE			= 0,
-	MMPG_PREMIUM_IP		= 1
-};
-
-enum MMatchSex
-{
-	MMS_MALE = 0,
-	MMS_FEMALE = 1
-};
-
-enum MMatchBlockType
-{
-	MMBT_NO = 0,
-	MMBT_BANNED,
-	MMBT_MUTED,
-
-	MMBT_END,
-};
-
+#include "DBQuestCachingData.h"
 
 struct MMatchAccountInfo
 {
@@ -64,9 +34,6 @@ struct MMatchAccountInfo
 		m_nPGrade(MMPG_FREE), m_BlockType(MMBT_NO), m_szUserID()
 	{}
 };
-
-#define DEFAULT_CHAR_HP				100
-#define DEFAULT_CHAR_AP				0
 
 #define DBCACHING_REQUEST_POINT		40
 struct DBCharCachingData
@@ -673,88 +640,6 @@ public:
 
 class MMatchObjectList : public map<MUID, MMatchObject*>{};
 
-// 캐릭터 생성할때 주는 기본 아이템
-struct MINITIALCOSTUME
-{
-	// 무기
-	unsigned int nMeleeItemID;
-	unsigned int nPrimaryItemID;
-	unsigned int nSecondaryItemID;
-	unsigned int nCustom1ItemID;
-	unsigned int nCustom2ItemID;
-
-	// 장비 아이템
-	unsigned int nChestItemID;
-	unsigned int nHandsItemID;
-	unsigned int nLegsItemID;
-	unsigned int nFeetItemID;
-};
-
-#define MAX_COSTUME_TEMPLATE		6
-const MINITIALCOSTUME g_InitialCostume[MAX_COSTUME_TEMPLATE][2] = 
-{ 
-	{{1, 5001, 4001, 30301, 0,     21001, 0, 23001, 0},	{1, 5001, 4001, 30301, 0,     21501, 0, 23501, 0}},	// 건나이트
-	{{2, 5002, 0,    30301, 0,     21001, 0, 23001, 0},	{2, 5002, 0,    30301, 0,     21501, 0, 23501, 0}},	// 건파이터
-	{{1, 4005, 5001, 30401, 0,     21001, 0, 23001, 0},	{1, 4005, 5001, 30401, 0,     21501, 0, 23501, 0}},	// 애서신
-	{{2, 4001, 0,    30401, 0,     21001, 0, 23001, 0},	{2, 4001, 0,    30401, 0,     21501, 0, 23501, 0}},	// 스카우트
-	{{2, 4002, 0,    30401, 30001, 21001, 0, 23001, 0},	{2, 4002, 0,    30401, 30001, 21501, 0, 23501, 0}},	// 건프리스트
-	{{1, 4006, 0,	 30101, 30001, 21001, 0, 23001, 0},	{1, 4006, 4006, 30101, 30001, 21501, 0, 23501, 0}}	// 닥터
-};
-
-/*
-const unsigned int g_InitialHair[4][2] = 
-{
-	{10000, 10022},
-	{10001, 10023},
-	{10002, 10024},
-	{10003, 10025}
-};
-*/
-
-#define MAX_COSTUME_HAIR		5
-const string g_szHairMeshName[MAX_COSTUME_HAIR][2] = 
-{
-	{"eq_head_01", "eq_head_pony"},
-	{"eq_head_02", "eq_head_hair001"},
-	{"eq_head_08", "eq_head_hair04"},
-	{"eq_head_05", "eq_head_hair006"},
-	{"eq_head_08", "eq_head_hair002"}		// 이건 현재 사용안함 - 나중에 다른 모델로 대체해도 됨
-};
-
-#define MAX_COSTUME_FACE		20
-const string g_szFaceMeshName[MAX_COSTUME_FACE][2] = 
-{
-	{"eq_face_01", "eq_face_001"},
-	{"eq_face_02", "eq_face_002"},
-	{"eq_face_04", "eq_face_003"},
-	{"eq_face_05", "eq_face_004"},
-	{ "eq_face_a01", "eq_face_001" },
-	{ "eq_face_newface01", "eq_face_newface01" },
-	{ "eq_face_newface02", "eq_face_newface02" },
-	{ "eq_face_newface03", "eq_face_newface03" },
-	{ "eq_face_newface04", "eq_face_newface04" },
-	{ "eq_face_newface05", "eq_face_newface05" },
-	{ "eq_face_newface06", "eq_face_newface06" },
-	{ "eq_face_newface07", "eq_face_newface07" },
-	{ "eq_face_newface08", "eq_face_newface08" },
-	{ "eq_face_newface09", "eq_face_newface09" },
-	{ "eq_face_newface10", "eq_face_newface10" },
-	{ "eq_face_newface11", "eq_face_newface11" },
-	{ "eq_face_newface12", "eq_face_newface12" },
-	{ "eq_face_newface13", "eq_face_newface13" },
-	{ "eq_face_newface13", "eq_face_newface14" },
-	{ "eq_face_newface13", "eq_face_newface15" },
-};
-
-
-// MC_MATCH_STAGE_ENTERBATTLE 커맨드에서 쓰이는 파라메타
-enum MCmdEnterBattleParam
-{
-	MCEP_NORMAL = 0,
-	MCEP_FORCED = 1,		// 난입
-	MCEP_END
-};
-
 // 입을 수 있는 아이템인지 체크
 bool IsEquipableItem(unsigned long int nItemID, int nPlayerLevel, MMatchSex nPlayerSex);
 
@@ -764,17 +649,7 @@ inline bool IsEnabledObject(MMatchObject* pObject)
 	return true;
 }
 
-inline bool IsAdminGrade(MMatchUserGradeID nGrade) 
-{
-	if ((nGrade == MMUG_EVENTMASTER) || 
-		(nGrade == MMUG_ADMIN) || 
-		(nGrade == MMUG_DEVELOPER))
-		return true;
-
-	return false;
-}
-
-inline bool IsAdminGrade(MMatchObject* pObject) 
+inline bool IsAdminGrade(MMatchObject* pObject)
 {
 	if (pObject == NULL) return false;
 

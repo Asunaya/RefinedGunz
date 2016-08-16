@@ -5,7 +5,6 @@
 #include "Msg.h"
 #include "MDebug.h"
 #include "MBlobArray.h"
-#include "MMatchStage.h"
 #include "MMatchUtil.h"
 
 MMatchClient* g_pMatchClient = NULL;

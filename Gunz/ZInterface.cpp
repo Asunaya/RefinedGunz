@@ -2,7 +2,6 @@
 
 #include "ZInterface.h"
 #include "MListBox.h"
-#include "MFormulaTable.h"
 #include "MEdit.h"
 #include "ZPost.h"
 

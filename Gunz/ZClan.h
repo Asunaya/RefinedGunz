@@ -1,8 +1,6 @@
-#ifndef _ZCLAN_H
-#define _ZCLAN_H
+#pragma once
 
 #include "ZPrerequisites.h"
-#include "MMatchClan.h"
 #include "ZMessages.h"
 
 #include "ZApplication.h"
@@ -29,42 +27,3 @@ inline const char* ZGetClanGradeStr(const MMatchClanGrade nGrade)
 	}
 
 }
-
-
-class ZClan
-{
-private:
-public:
-	ZClan();
-	virtual ~ZClan();
-public:
-};
-
-
-/*
-	case ZCMD_PLAYERMENU_CLAN_INVITE:
-		ZPostRequestJoinClan(ZGetMyUID(),ZGetMyInfo()->GetClanName(),pMenu->GetTargetName());
-		return true;
-
-	case ZCMD_PLAYERMENU_CLAN_KICK:
-		ZPostRequestExpelClanMember(ZGetMyUID(),pMenu->GetTargetName());
-		return true;
-
-	case ZCMD_PLAYERMENU_CLAN_GRADE_MASTER:
-		ZPostRequestChangeClanGrade(ZGetMyUID(),pMenu->GetTargetName(),MCG_MASTER);
-		return true;
-
-	case ZCMD_PLAYERMENU_CLAN_GRADE_ADMIN:
-		ZPostRequestChangeClanGrade(ZGetMyUID(),pMenu->GetTargetName(),MCG_ADMIN);
-		return true;
-
-	case ZCMD_PLAYERMENU_CLAN_GRADE_MEMBER:
-		ZPostRequestChangeClanGrade(ZGetMyUID(),pMenu->GetTargetName(),MCG_MEMBER);
-		return true;
-
-	case ZCMD_PLAYERMENU_CLAN_LEAVE:
-		ZPostRequestLeaveClan(ZGetMyUID());
-		return true;
-*/
-
-#endif

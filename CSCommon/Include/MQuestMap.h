@@ -86,7 +86,7 @@ public:
 
 	void Clear();															///< 초기화
 	bool ReadXml(const char* szFileName);									///< xml에서 맵정보를 읽는다. (서버용)
-	bool ReadXml(MZFileSystem* pFileSystem,const char* szFileName);			///< xml에서 맵정보를 읽는다. (클라이언트용)
+	bool ReadXml(class MZFileSystem* pFileSystem,const char* szFileName);			///< xml에서 맵정보를 읽는다. (클라이언트용)
 	void DebugReport();														///< 맵정보가 제대로 구성되었는지 확인한다.
 
 	MQuestMapSectorInfo*	GetSectorInfo(int nSector);						///< 섹터 정보 반환

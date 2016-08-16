@@ -26,7 +26,6 @@
 #include "ZApplication.h"
 #include "MDebug.h"
 #include "ZMessages.h"
-#include "MMatchNotify.h"
 #include "RealSpace2.h"
 #include "Mint.h"
 #include "ZGameInterface.h"
@@ -45,6 +44,7 @@
 #include "ZReplay.h"
 #include "ZUtil.h"
 #include "ZOptionInterface.h"
+#include "MMatchNotify.h"
 
 #ifdef USING_VERTEX_SHADER
 #include "RShaderMgr.h"

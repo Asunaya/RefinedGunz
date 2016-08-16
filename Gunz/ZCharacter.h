@@ -1,21 +1,15 @@
-#ifndef _ZCHARACTER_H
-#define _ZCHARACTER_H
-
-//#pragma	once
+#pragma once
 
 #include "MRTTI.h"
 #include "ZCharacterObject.h"
-//#include "ZActor.h"
 #include "MUID.h"
 #include "RTypes.h"
 #include "RPathFinder.h"
 #include "RVisualMeshMgr.h"
 
 #include "MObjectTypes.h"
-#include "MObjectCharacter.h"
 #include "ZItem.h"
 #include "ZCharacterItem.h"
-#include "MMatchObject.h"
 #include "RCharCloth.h"
 #include "ZFile.h"
 #include "Mempool.h"
@@ -579,9 +573,6 @@ void ZChangeCharParts(RVisualMesh* pVMesh, MMatchSex nSex, int nHair, int nFace,
 void ZChangeCharWeaponMesh(RVisualMesh* pVMesh, unsigned long int nWeaponID);
 bool CheckTeenVersionMesh(RMesh** ppMesh);
 
-//////////////////////////////////////////////////////////////////////////
-//	ENUM
-//////////////////////////////////////////////////////////////////////////
 enum CHARACTER_LIGHT_TYPE
 {
 	GUN,
@@ -590,19 +581,10 @@ enum CHARACTER_LIGHT_TYPE
 	NUM_LIGHT_TYPE,
 };
 
-//////////////////////////////////////////////////////////////////////////
-//	STRUCT
-//////////////////////////////////////////////////////////////////////////
-typedef struct
+struct sCharacterLight
 {
 	int			iType;
 	float		fLife;
 	rvector		vLightColor;
 	float		fRange;
-}	sCharacterLight;
-
-
-
-
-
-#endif
+};

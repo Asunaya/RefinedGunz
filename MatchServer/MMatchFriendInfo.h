@@ -1,7 +1,4 @@
-#ifndef _MMATCHFRIENDINFO_H
-#define _MMATCHFRIENDINFO_H
-
-//#pragma once
+#pragma once
 
 
 #include <list>
@@ -38,14 +35,3 @@ public:
 	MMatchFriendNode* Find(const char* pszName);
 	void UpdateDesc();
 };
-
-#pragma pack(1)
-struct MFRIENDLISTNODE {
-	unsigned char	nState;
-	char			szName[MATCHOBJECT_NAME_LENGTH];
-	char			szDescription[MATCH_SIMPLE_DESC_LENGTH];
-};
-#pragma pack()
-
-
-#endif

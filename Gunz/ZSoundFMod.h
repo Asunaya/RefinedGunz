@@ -3,8 +3,6 @@
 #include "FMod.h"
 #include "rtypes.h"
 
-#include <unordered_map>
-
 struct FSOUND_SAMPLE;
 
 #define SOUND_DRIVER_NAME_MAX_LENGTH 32
@@ -22,20 +20,6 @@ protected:
 	FSOUND_STREAM*	m_pStream;
 	int				m_iMusicChannel;
 	bool			m_b16Bit;
-
-	struct MicFrame
-	{
-		short pcm[2880];
-	};
-
-	struct MicStuff
-	{
-		std::queue<MicFrame> Data;
-		int nSampleRate = 48000;
-		bool bStreaming = false;
-	};
-
-	std::unordered_map<FSOUND_STREAM *, MicStuff> MicStreams;
 
 	// callback
 	static signed char F_CALLBACKAPI STREAM_END_CALLBACK(FSOUND_STREAM *stream, void *buff, int len, int param);
@@ -85,11 +69,6 @@ public:
 	void SetMusicVolume( int vol );
 	void SetMusicMute( bool m );
 	bool OpenStream( void* pData, int Length );
-
-	MicStream OpenMicStream(int nSampleRate);
-	bool AddMicData(MicStream pStream, void *pData, int Length);
-	void CloseMicStream(MicStream pStream);
-	static signed char F_CALLBACKAPI MicStreamCallback(FSOUND_STREAM *stream, void *buff, int len, void *userdata);
 
 	// ETC
 	static ZSoundFMod* GetInstance();

@@ -3,7 +3,8 @@
 
 #include "MXml.h"
 #include <map>
-using namespace std;
+#include "MMatchMap.h"
+#include "d3dx9.h"
 
 #define WORLDITEM_NAME_LENGTH		256
 
@@ -52,17 +53,41 @@ public:
 	static MMatchWorldItemDescMgr* GetInstance();
 };
 
-inline MMatchWorldItemDescMgr* MGetMatchWorldItemDescMgr() 
+inline MMatchWorldItemDescMgr* MGetMatchWorldItemDescMgr()
 { 
 	return MMatchWorldItemDescMgr::GetInstance();
 }
 
+#define WORLDITEM_EXTRAVALUE_NUM		2
 
-/////////////////////////////////////////////////////////////////////////////////////
+struct MMatchWorldItem
+{
+	unsigned short		nUID;
+	unsigned short		nItemID;
+	short				nStaticSpawnIndex;
+	v3					Origin;
+	int					nLifeTime;
 
+	union {
+		struct {
+			int			nDropItemID;
+			int			nRentPeriodHour;
+		};
+		int				nExtraValue[WORLDITEM_EXTRAVALUE_NUM];
+	};
+};
 
-#include "MMatchWorldItem.h"
-#include "MMatchStage.h"
+struct MMatchWorldItemSpawnInfo
+{
+	unsigned short		nItemID;
+	unsigned long int	nCoolTime;
+	unsigned long int	nElapsedTime;
+	float x;
+	float y;
+	float z;
+	bool				bExist;
+	bool				bUsed;
+};
 
 #define MAX_WORLDITEM_SPAWN		100
 

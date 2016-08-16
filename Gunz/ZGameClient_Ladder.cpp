@@ -11,8 +11,6 @@
 #include "ZInterface.h"
 #include "ZApplication.h"
 #include "ZGameInterface.h"
-#include "MMatchChannel.h"
-#include "MMatchStage.h"
 #include "ZPost.h"
 #include "MComboBox.h"
 #include "MTextArea.h"

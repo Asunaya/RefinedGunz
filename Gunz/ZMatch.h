@@ -6,8 +6,8 @@ using namespace std;
 
 #include "ZPrerequisites.h"
 #include "MUID.h"
-#include "MMatchStage.h"
 #include "Rules.h"
+#include "MMatchGlobal.h"
 
 class ZCharacter;
 class MMatchStageSetting;

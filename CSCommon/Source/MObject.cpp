@@ -2,9 +2,6 @@
 #include "winsock2.h"
 #include "MXml.h"
 #include "MObject.h"
-#include "MMap.h"
-#include "MFormulaTable.h"
-#include "MCharacterDesc.h"
 
 IMPLEMENT_RTTI(MObject)
 

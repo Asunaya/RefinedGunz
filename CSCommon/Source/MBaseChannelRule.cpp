@@ -2,6 +2,7 @@
 #include "MBaseChannelRule.h"
 #include "MXml.h"
 #include "MZFileSystem.h"
+#include "MMatchMap.h"
 
 
 

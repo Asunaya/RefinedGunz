@@ -210,7 +210,7 @@ struct MQuestNPCGlobalAIValue
 };
 
 /// NPC 정보 관리자 클래스
-class MQuestNPCCatalogue : public map<MQUEST_NPC, MQuestNPCInfo*>
+class MQuestNPCCatalogue : public std::map<MQUEST_NPC, MQuestNPCInfo*>
 {
 private:
 	MQuestNPCGlobalAIValue			m_GlobalAIValue;
@@ -221,7 +221,7 @@ private:
 	void ParseGlobalAIValue(MXmlElement& element);
 
 	// 몬스터 도감.
-	map< int, MQUEST_NPC > m_MonsterBibleCatalogue;
+	std::map< int, MQUEST_NPC > m_MonsterBibleCatalogue;
 
 public :
 	MQuestNPCInfo* GetIndexInfo( int nIndex );
@@ -231,7 +231,7 @@ public:
 	~MQuestNPCCatalogue();													///< 소멸자
 
 	bool ReadXml(const char* szFileName);									///< xml로부터 npc정보를 읽는다.
-	bool ReadXml(MZFileSystem* pFileSystem,const char* szFileName);			///< xml로부터 npc정보를 읽는다.
+	bool ReadXml(class MZFileSystem* pFileSystem,const char* szFileName);			///< xml로부터 npc정보를 읽는다.
 	void Clear();															///< 초기화
 
 	MQuestNPCInfo* GetInfo(MQUEST_NPC nNpc);								///< NPC 정보 반환
@@ -270,10 +270,10 @@ struct MQuestNPCSetInfo
 };
 
 /// NPC Set 정보 관리자 클래스
-class MQuestNPCSetCatalogue : public map<int, MQuestNPCSetInfo*>
+class MQuestNPCSetCatalogue : public std::map<int, MQuestNPCSetInfo*>
 {
 private:
-	map<string, MQuestNPCSetInfo*>		m_NameMap;
+	std::map<string, MQuestNPCSetInfo*>		m_NameMap;
 	// 함수
 	void Clear();
 	void ParseNPCSet(MXmlElement& element);

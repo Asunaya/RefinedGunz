@@ -8,16 +8,11 @@
 
 #include "MQuestConst.h"
 #include "MDebug.h"
-#include "MQuestConst.h"
 #include "MZFileSystem.h"
 #include "MXml.h"
 #include "MSync.h"
 #include "MMatchGlobal.h"
 #include "MTime.h"
-
-
-class MMatchObject;
-
 
 #define QUEST_ITEM_FILE_NAME	"zquestitem.xml"
 
@@ -121,22 +116,10 @@ struct SimpleQuestItem
 	unsigned int		m_nCount;
 };
 
-// client와 server와의 공통된 부분.
-class MBaseQuestItem
-{
-public: 
-	MBaseQuestItem() {}
-	virtual ~MBaseQuestItem() {}
-};
-
-// server에 특화된 부분.
-// 퀘스트 아이템은 획득한 적이 있을 경우는 기본값 1을 Count에 설정을 함.
-//   그렇게이 카운트가 0이 아닌 1부터 시작을 하기에 실질적인 수량보다 1이 많음.
-//   현재 수량을 요구할시는 저장하고 있는 수량에 -1을 해서 반환을 해줘야 함.
-class MQuestItem : public MBaseQuestItem
+class MQuestItem
 {
 public:
-	MQuestItem() : MBaseQuestItem(),  m_nCount( 0 ), m_pDesc( 0 ), m_bKnown( false )
+	MQuestItem() : m_nCount( 0 ), m_pDesc( 0 ), m_bKnown( false )
 	{
 	}
 
@@ -204,69 +187,6 @@ private :
 	static MCriticalSection	m_csUIDGenerateLock;
 	bool					m_bDoneDbAccess;		// 디비에서 정보를 가져왔었는지 여부
 };
-
-
-// 유니크 아이템 획득시, 일정 시간 경과, 일정 횟수 이상 플레이.
-// 유니크 아이템 획득은 바로 DB를 업데이 시킴.
-class DBQuestCachingData
-{
-public :
-	DBQuestCachingData() : m_dwLastUpdateTime( GetGlobalTimeMS() ), m_nPlayCount( 0 ), m_bEnableUpdate( false ), m_nShopTradeCount( 0 ),
-		m_pObject( 0 ), m_nRewardCount( 0 )
-	{
-	}
-
-	~DBQuestCachingData() 
-	{
-	}
-
-	bool IsRequestUpdate()
-	{
-		if( (MAX_PLAY_COUNT < m_nPlayCount) || (MAX_ELAPSE_TIME < GetUpdaetElapse()) ||
-			(MAX_SHOP_TRADE_COUNT < m_nShopTradeCount) || (MAX_REWARD_COUNT < m_nRewardCount) ||
-			m_bEnableUpdate )
-			return m_bEnableUpdate = true;
-
-		return m_bEnableUpdate = false;
-	}
-
-	bool IsRequestUpdateWhenLogout()
-	{
-		return ( (0 < (m_nShopTradeCount + m_nRewardCount)) || m_bEnableUpdate );
-	}
-
-	void IncreasePlayCount( const int nCount = 1 );
-	void IncreaseShopTradeCount( const int nCount = 1 );
-	void IncreaseRewardCount( const int nCount = 1 );
-	bool CheckUniqueItem( MQuestItem* pQuestItem );
-	void Reset();
-	
-	u64 GetUpdaetElapse() 
-	{
-#ifdef _DEBUG
-		char szTemp[ 100 ] = {0};
-		auto t = GetGlobalTimeMS();
-		auto a = t - m_dwLastUpdateTime;
-		sprintf_safe( szTemp, "Update Elapse %d %d\n", GetGlobalTimeMS() - m_dwLastUpdateTime, a );
-		mlog( szTemp );
-#endif
-		return GetGlobalTimeMS() - m_dwLastUpdateTime; 
-	}
-
-	void SetEnableUpdateState( const bool bState )	{ m_bEnableUpdate = bState; }
-	void SetCharObject( MMatchObject* pObject )		{ m_pObject = pObject; }
-	
-	bool DoUpdateDBCharQuestItemInfo();
-
-private :
-	MMatchObject*	m_pObject;				// DB업데이트때 데이터를 가져오기 위해서 저장해 놓은 포인터.
-	u64				m_dwLastUpdateTime;		// 업데이트가 적용되면 같이 갱신됨. 
-	int				m_nPlayCount;			// 게임횟수는 게임에 들어가서 하는 모든 행동에 관계없이 완료를 해야 1번 적용됨. 
-	int				m_nShopTradeCount;		// 상점에서의 퀘스트 아이템 거래 횟수.
-	bool			m_bEnableUpdate;		// 현재 상태. 업데이트가 가능하면 true임.
-	int				m_nRewardCount;			// 현제까지 보상 받은 횟수.
-};
-
 
 inline bool IsQuestItemID(unsigned int nItemID)
 {

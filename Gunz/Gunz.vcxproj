@@ -423,6 +423,8 @@ rem call copy_share.bat
     <ClInclude Include="Draw.h" />
     <ClInclude Include="Extensions.h" />
     <ClInclude Include="Hitboxes.h" />
+    <ClInclude Include="MClient.h" />
+    <ClInclude Include="MMatchClient.h" />
     <ClInclude Include="NewChat.h" />
     <ClInclude Include="Portal.h" />
     <ClInclude Include="ReplayControl.h" />
@@ -654,6 +656,8 @@ rem call copy_share.bat
   <ItemGroup>
     <ClCompile Include="Draw.cpp" />
     <ClCompile Include="Hitboxes.cpp" />
+    <ClCompile Include="MClient.cpp" />
+    <ClCompile Include="MMatchClient.cpp" />
     <ClCompile Include="NewChat.cpp" />
     <ClCompile Include="Portal.cpp" />
     <ClCompile Include="ReplayControl.cpp" />
@@ -807,7 +811,6 @@ rem call copy_share.bat
     <ClCompile Include="ZApplication.cpp" />
     <ClCompile Include="ZCamera.cpp" />
     <ClCompile Include="ZChannelRule.cpp" />
-    <ClCompile Include="ZClan.cpp" />
     <ClCompile Include="ZConfiguration.cpp" />
     <ClCompile Include="ZGame.cpp" />
     <ClCompile Include="ZGameAction.cpp" />

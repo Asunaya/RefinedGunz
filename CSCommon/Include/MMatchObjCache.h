@@ -1,12 +1,9 @@
-#ifndef MMATCHOBJCACHE_H
-#define MMATCHOBJCACHE_H
+#pragma once
 
 #include "MMatchGlobal.h"
 #include <list>
 #include <map>
-using namespace std;
 
-#include "MMatchObject.h"
 #include "MUID.h"
 
 
@@ -85,14 +82,13 @@ public:
 	MMatchObjCacheCostume* GetCostume() { return &m_Costume; }
 };
 
-class MMatchObjCacheList : public list<MMatchObjCache*>{};
-class MMatchObjCacheMap : public map<MUID, MMatchObjCache*>{
+using MMatchObjCacheList = std::list<MMatchObjCache*>;
+class MMatchObjCacheMap : public std::map<MUID, MMatchObjCache*>{
 public:
 	void Insert(const MUID& uid, MMatchObjCache* pCache)	{	
 		insert(value_type(uid, pCache));	
 	}
 };
-
 
 enum MATCHCACHEMODE {
 	MATCHCACHEMODE_ADD = 0,
@@ -100,18 +96,3 @@ enum MATCHCACHEMODE {
 	MATCHCACHEMODE_UPDATE,		// 모두 업데이트
 	MATCHCACHEMODE_REPLACE		// 새로운 내용으로 교체
 };
-
-class MMatchObjectCacheBuilder {
-	MMatchObjCacheList	m_ObjectCacheList;
-
-public:
-	MMatchObjectCacheBuilder();
-	virtual ~MMatchObjectCacheBuilder();
-
-	void AddObject(MMatchObject* pObj);
-	void Reset();
-	MCommand* GetResultCmd(MATCHCACHEMODE nType, MCommandCommunicator* pCmdComm);
-};
-
-
-#endif

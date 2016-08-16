@@ -9,13 +9,6 @@
 #include <list>
 using namespace std;
 
-// 클랜등급이 nSrcGrade가 nDstGrade보다 같거나 더 높은지 판별한다.
-inline bool IsUpperClanGrade(MMatchClanGrade nSrcGrade, MMatchClanGrade nDstGrade)
-{
-	if ((nSrcGrade != MCG_NONE) && ((int)nSrcGrade <= (int)nDstGrade)) return true;
-	return false;
-}
-
 ///////////////////////////////////
 class MMatchObject;
 

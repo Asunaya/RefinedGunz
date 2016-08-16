@@ -20,13 +20,9 @@ _USING_NAMESPACE_REALSPACE2
 #include "RParticleSystem.h"
 
 #include "MObject.h"
-#include "MObjectCharacter.h"
-#include "MMatchObject.h"
-#include "MMatchStage.h"
 #include "MMatchItem.h"
 #include "MMatchMap.h"
 #include "MSafeUDP.h"
-#include "MGameClient.h"
 #include "MMatchTransDataType.h"
 #include "MErrorTable.h"
 #include "Config.h"

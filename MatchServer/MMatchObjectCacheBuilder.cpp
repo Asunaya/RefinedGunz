@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "MMatchObjectCacheBuilder.h"
 #include "MMatchObjCache.h"
 #include "MMatchObject.h"
 #include "MSharedCommandTable.h"
@@ -20,19 +21,19 @@ MMatchObjectCacheBuilder::~MMatchObjectCacheBuilder()
 void MMatchObjectCacheBuilder::AddObject(MMatchObject* pObj)
 {
 	MMatchObjCache* pCache = new MMatchObjCache;
-	int nItemID=0;
+	int nItemID = 0;
 	MMatchItemDesc* pItemDesc = NULL;
 
 	MMatchCharInfo* pCharInfo = pObj->GetCharInfo();
-//	_ASSERT(pCharInfo);
+	//	_ASSERT(pCharInfo);
 	if (pCharInfo == NULL)
 	{
 		delete pCache;
 		return;
 	}
 
-	pCache->SetInfo(pObj->GetUID(), pObj->GetName(), pCharInfo->m_ClanInfo.m_szClanName, 
-					pCharInfo->m_nLevel, pObj->GetAccountInfo()->m_nUGrade, pObj->GetAccountInfo()->m_nPGrade);
+	pCache->SetInfo(pObj->GetUID(), pObj->GetName(), pCharInfo->m_ClanInfo.m_szClanName,
+		pCharInfo->m_nLevel, pObj->GetAccountInfo()->m_nUGrade, pObj->GetAccountInfo()->m_nPGrade);
 	pCache->SetCLID(pObj->GetCharInfo()->m_ClanInfo.m_nClanID);
 
 	MMatchClan* pClan = MMatchServer::GetInstance()->GetClanMap()->GetClan(pObj->GetCharInfo()->m_ClanInfo.m_nClanID);
@@ -45,7 +46,7 @@ void MMatchObjectCacheBuilder::AddObject(MMatchObject* pObj)
 	pCache->GetCostume()->nHair = pObj->GetCharInfo()->m_nHair;
 	pCache->GetCostume()->nFace = pObj->GetCharInfo()->m_nFace;
 
-	for (int i=0; i < MMCIP_END; i++)
+	for (int i = 0; i < MMCIP_END; i++)
 	{
 		if (!pObj->GetCharInfo()->m_EquipedItem.IsEmpty(MMatchCharItemParts(i)))
 		{
@@ -66,7 +67,7 @@ void MMatchObjectCacheBuilder::AddObject(MMatchObject* pObj)
 void MMatchObjectCacheBuilder::Reset()
 {
 	MMatchObjCacheList::iterator itor;
-	while ( (itor = m_ObjectCacheList.begin()) != m_ObjectCacheList.end()) {
+	while ((itor = m_ObjectCacheList.begin()) != m_ObjectCacheList.end()) {
 		MMatchObjCache* pObjCache = (*itor);
 		m_ObjectCacheList.pop_front();
 		delete pObjCache;
@@ -75,18 +76,18 @@ void MMatchObjectCacheBuilder::Reset()
 
 MCommand* MMatchObjectCacheBuilder::GetResultCmd(MATCHCACHEMODE nMode, MCommandCommunicator* pCmdComm)
 {
-	MCommand* pCmd = pCmdComm->CreateCommand(MC_MATCH_OBJECT_CACHE, MUID(0,0));
+	MCommand* pCmd = pCmdComm->CreateCommand(MC_MATCH_OBJECT_CACHE, MUID(0, 0));
 	pCmd->AddParameter(new MCmdParamUChar(nMode));
 	int nCount = (int)m_ObjectCacheList.size();
 	void* pCacheArray = MMakeBlobArray(sizeof(MMatchObjCache), nCount);
-	int nIndex=0;
-	for (MMatchObjCacheList::iterator itor=m_ObjectCacheList.begin(); itor!=m_ObjectCacheList.end(); itor++) {
+	int nIndex = 0;
+	for (MMatchObjCacheList::iterator itor = m_ObjectCacheList.begin(); itor != m_ObjectCacheList.end(); itor++) {
 		MMatchObjCache* pTrgCache = (MMatchObjCache*)MGetBlobArrayElement(pCacheArray, nIndex++);
 		MMatchObjCache* pSrcCache = (*itor);
 
-		
+
 		pTrgCache->SetInfo(pSrcCache->GetUID(), pSrcCache->GetName(), pSrcCache->GetClanName(),
-						   pSrcCache->GetLevel(), pSrcCache->GetUGrade(), pSrcCache->GetPGrade());
+			pSrcCache->GetLevel(), pSrcCache->GetUGrade(), pSrcCache->GetPGrade());
 
 		pTrgCache->SetFlags(pSrcCache->GetFlags());
 		pTrgCache->SetCLID(pSrcCache->GetCLID());

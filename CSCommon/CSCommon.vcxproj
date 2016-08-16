@@ -320,6 +320,11 @@
     <ClInclude Include="Include\BasicInfoHistory.h" />
     <ClInclude Include="Include\HitRegistration.h" />
     <ClInclude Include="Include\IndexPage.h" />
+    <ClInclude Include="Include\MAgentObject.h" />
+    <ClInclude Include="Include\MBaseChannelRule.h" />
+    <ClInclude Include="Include\MBaseGameType.h" />
+    <ClInclude Include="Include\MBaseItem.h" />
+    <ClInclude Include="Include\MBaseQuest.h" />
     <ClInclude Include="Include\MCommand.h" />
     <ClInclude Include="Include\MCommandBuilder.h" />
     <ClInclude Include="Include\MCommandManager.h" />
@@ -328,13 +333,29 @@
     <ClInclude Include="Include\MCountryFilter.h" />
     <ClInclude Include="Include\MCountryFilterDBMgr.h" />
     <ClInclude Include="Include\MGridMap.h" />
+    <ClInclude Include="Include\MLadderGroup.h" />
+    <ClInclude Include="Include\MLadderStatistics.h" />
     <ClInclude Include="Include\MMatchGameType.h" />
     <ClInclude Include="Include\MMatchGlobal.h" />
     <ClInclude Include="Include\MMatchItem.h" />
     <ClInclude Include="Include\MMatchMap.h" />
+    <ClInclude Include="Include\MMatchNotify.h" />
+    <ClInclude Include="Include\MMatchObjCache.h" />
     <ClInclude Include="Include\MMatchStageSetting.h" />
+    <ClInclude Include="Include\MMatchStringResManager.h" />
     <ClInclude Include="Include\MMatchTransDataType.h" />
     <ClInclude Include="Include\MMatchUtil.h" />
+    <ClInclude Include="Include\MMatchWorldItemDesc.h" />
+    <ClInclude Include="Include\MPreHeader.h" />
+    <ClInclude Include="Include\MQuestConst.h" />
+    <ClInclude Include="Include\MQuestDropTable.h" />
+    <ClInclude Include="Include\MQuestFormula.h" />
+    <ClInclude Include="Include\MQuestItem.h" />
+    <ClInclude Include="Include\MQuestMap.h" />
+    <ClInclude Include="Include\MQuestNPC.h" />
+    <ClInclude Include="Include\MSkillDesc.h" />
+    <ClInclude Include="Include\MSkillTypes.h" />
+    <ClInclude Include="Include\MSurvivalMap.h" />
     <ClInclude Include="Include\MUID.h" />
     <ClInclude Include="Include\MObject.h" />
     <ClInclude Include="Include\MObjectTypes.h" />
@@ -357,7 +378,6 @@
     <ClInclude Include="Include\MErrorTable.h" />
     <ClInclude Include="Include\MStringRes.h" />
     <ClInclude Include="HShield\HsCryptLib.h" />
-    <ClInclude Include="Include\MMatchDebug.h" />
     <ClInclude Include="Include\stdafx.h" />
     <ClInclude Include="Include\stuff.h" />
   </ItemGroup>
@@ -365,7 +385,10 @@
     <ClCompile Include="Include\BasicInfoHistory.cpp" />
     <ClCompile Include="Source\AnimationStuff.cpp" />
     <ClCompile Include="Source\HitRegistration.cpp" />
+    <ClCompile Include="Source\MAgentObject.cpp" />
+    <ClCompile Include="Source\MBaseChannelRule.cpp" />
     <ClCompile Include="Source\MBaseGameType.cpp" />
+    <ClCompile Include="Source\MBaseQuest.cpp" />
     <ClCompile Include="Source\MCommand.cpp" />
     <ClCompile Include="Source\MCommandBuilder.cpp" />
     <ClCompile Include="Source\MCommandManager.cpp" />
@@ -374,12 +397,20 @@
     <ClCompile Include="Source\MCountryFilter.cpp" />
     <ClCompile Include="Source\MCountryFilterDBMgr.cpp" />
     <ClCompile Include="Source\MGridMap.cpp" />
+    <ClCompile Include="Source\MLadderStatistics.cpp" />
     <ClCompile Include="Source\MMatchGameType.cpp" />
-    <ClCompile Include="Source\MMatchGlobal.cpp" />
     <ClCompile Include="Source\MMatchItem.cpp" />
+    <ClCompile Include="Source\MMatchNotify.cpp" />
     <ClCompile Include="Source\MMatchStageSetting.cpp" />
     <ClCompile Include="Source\MMatchTransDataType.cpp" />
     <ClCompile Include="Source\MMatchUtil.cpp" />
+    <ClCompile Include="Source\MMatchWorldItemDesc.cpp" />
+    <ClCompile Include="Source\MQuestDropTable.cpp" />
+    <ClCompile Include="Source\MQuestFormula.cpp" />
+    <ClCompile Include="Source\MQuestItem.cpp" />
+    <ClCompile Include="Source\MQuestMap.cpp" />
+    <ClCompile Include="Source\MQuestNPC.cpp" />
+    <ClCompile Include="Source\MSurvivalMap.cpp" />
     <ClCompile Include="Source\MUID.cpp" />
     <ClCompile Include="Source\MObject.cpp" />
     <ClCompile Include="Source\MSharedCommandTable.cpp" />
@@ -397,13 +428,9 @@
     <ClCompile Include="Source\MBaseStringResManager.cpp" />
     <ClCompile Include="Source\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='MSSQL|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release LTCG|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='MSSQL|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release LTCG|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Source\stuff.cpp" />
   </ItemGroup>

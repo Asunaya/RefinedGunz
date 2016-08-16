@@ -145,26 +145,46 @@
     <ClInclude Include="HShield\HsCryptLib.h">
       <Filter>HShield</Filter>
     </ClInclude>
-    <ClInclude Include="Include\MMatchDebug.h" />
-    <ClInclude Include="Include\stdafx.h" />
-    <ClInclude Include="Include\BasicInfoHistory.h" />
-    <ClInclude Include="Include\AnimationStuff.h" />
-    <ClInclude Include="Include\HitRegistration.h" />
-    <ClInclude Include="Include\Physics.h" />
-    <ClInclude Include="Include\stuff.h" />
     <ClInclude Include="Include\MCountryFilter.h">
       <Filter>MCountryFilter</Filter>
     </ClInclude>
     <ClInclude Include="Include\MCountryFilterDBMgr.h">
       <Filter>MCountryFilter</Filter>
     </ClInclude>
-    <ClInclude Include="Include\MMatchTransDataType.h" />
-    <ClInclude Include="Include\MMatchItem.h" />
+    <ClInclude Include="Include\AnimationStuff.h" />
+    <ClInclude Include="Include\BasicInfoHistory.h" />
+    <ClInclude Include="Include\HitRegistration.h" />
+    <ClInclude Include="Include\MAgentObject.h" />
+    <ClInclude Include="Include\MBaseChannelRule.h" />
+    <ClInclude Include="Include\MBaseGameType.h" />
+    <ClInclude Include="Include\MBaseItem.h" />
+    <ClInclude Include="Include\MLadderGroup.h" />
+    <ClInclude Include="Include\MLadderStatistics.h" />
+    <ClInclude Include="Include\MMatchGameType.h" />
     <ClInclude Include="Include\MMatchGlobal.h" />
-    <ClInclude Include="Include\MMatchUtil.h" />
+    <ClInclude Include="Include\MMatchItem.h" />
     <ClInclude Include="Include\MMatchMap.h" />
     <ClInclude Include="Include\MMatchStageSetting.h" />
-    <ClInclude Include="Include\MMatchGameType.h" />
+    <ClInclude Include="Include\MMatchTransDataType.h" />
+    <ClInclude Include="Include\MMatchUtil.h" />
+    <ClInclude Include="Include\MPreHeader.h" />
+    <ClInclude Include="Include\MQuestConst.h" />
+    <ClInclude Include="Include\MQuestDropTable.h" />
+    <ClInclude Include="Include\MQuestFormula.h" />
+    <ClInclude Include="Include\MQuestItem.h" />
+    <ClInclude Include="Include\MQuestMap.h" />
+    <ClInclude Include="Include\MSkillDesc.h" />
+    <ClInclude Include="Include\MSkillTypes.h" />
+    <ClInclude Include="Include\MSurvivalMap.h" />
+    <ClInclude Include="Include\Physics.h" />
+    <ClInclude Include="Include\stdafx.h" />
+    <ClInclude Include="Include\stuff.h" />
+    <ClInclude Include="Include\MQuestNPC.h" />
+    <ClInclude Include="Include\MBaseQuest.h" />
+    <ClInclude Include="Include\MMatchNotify.h" />
+    <ClInclude Include="Include\MMatchWorldItemDesc.h" />
+    <ClInclude Include="Include\MMatchObjCache.h" />
+    <ClInclude Include="Include\MMatchStringResManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\MCommand.cpp">
@@ -227,25 +247,36 @@
     <ClCompile Include="Source\MBaseStringResManager.cpp">
       <Filter>StringRes</Filter>
     </ClCompile>
-    <ClCompile Include="Source\stdafx.cpp" />
-    <ClCompile Include="Source\AnimationStuff.cpp" />
-    <ClCompile Include="Source\stuff.cpp" />
-    <ClCompile Include="Include\BasicInfoHistory.cpp" />
-    <ClCompile Include="Source\Physics.cpp" />
-    <ClCompile Include="Source\HitRegistration.cpp" />
     <ClCompile Include="Source\MCountryFilter.cpp">
       <Filter>MCountryFilter</Filter>
     </ClCompile>
     <ClCompile Include="Source\MCountryFilterDBMgr.cpp">
       <Filter>MCountryFilter</Filter>
     </ClCompile>
-    <ClCompile Include="Source\MMatchTransDataType.cpp" />
+    <ClCompile Include="Source\AnimationStuff.cpp" />
+    <ClCompile Include="Source\HitRegistration.cpp" />
+    <ClCompile Include="Source\MAgentObject.cpp" />
+    <ClCompile Include="Source\MBaseChannelRule.cpp" />
     <ClCompile Include="Source\MBaseGameType.cpp" />
-    <ClCompile Include="Source\MMatchItem.cpp" />
-    <ClCompile Include="Source\MMatchGlobal.cpp" />
-    <ClCompile Include="Source\MMatchUtil.cpp" />
-    <ClCompile Include="Source\MMatchStageSetting.cpp" />
+    <ClCompile Include="Source\MLadderStatistics.cpp" />
     <ClCompile Include="Source\MMatchGameType.cpp" />
+    <ClCompile Include="Source\MMatchItem.cpp" />
+    <ClCompile Include="Source\MMatchStageSetting.cpp" />
+    <ClCompile Include="Source\MMatchTransDataType.cpp" />
+    <ClCompile Include="Source\MMatchUtil.cpp" />
+    <ClCompile Include="Source\MQuestDropTable.cpp" />
+    <ClCompile Include="Source\MQuestFormula.cpp" />
+    <ClCompile Include="Source\MQuestMap.cpp" />
+    <ClCompile Include="Source\MSurvivalMap.cpp" />
+    <ClCompile Include="Source\Physics.cpp" />
+    <ClCompile Include="Source\stdafx.cpp" />
+    <ClCompile Include="Source\stuff.cpp" />
+    <ClCompile Include="Include\BasicInfoHistory.cpp" />
+    <ClCompile Include="Source\MQuestNPC.cpp" />
+    <ClCompile Include="Source\MBaseQuest.cpp" />
+    <ClCompile Include="Source\MQuestItem.cpp" />
+    <ClCompile Include="Source\MMatchNotify.cpp" />
+    <ClCompile Include="Source\MMatchWorldItemDesc.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="HShield\HsCryptLib.lib">

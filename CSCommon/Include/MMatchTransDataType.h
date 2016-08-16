@@ -402,6 +402,14 @@ struct MTD_PingInfo
 	uint16_t Ping;
 };
 
+#pragma pack(1)
+struct MFRIENDLISTNODE {
+	unsigned char	nState;
+	char			szName[MATCHOBJECT_NAME_LENGTH];
+	char			szDescription[MATCH_SIMPLE_DESC_LENGTH];
+};
+#pragma pack()
+
 
 #pragma pack(pop, old)
 

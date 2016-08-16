@@ -51,6 +51,12 @@ enum MMatchClanGrade : i32
 	MCG_END
 };
 
+inline bool IsUpperClanGrade(MMatchClanGrade nSrcGrade, MMatchClanGrade nDstGrade)
+{
+	if ((nSrcGrade != MCG_NONE) && ((int)nSrcGrade <= (int)nDstGrade)) return true;
+	return false;
+}
+
 //
 // Character
 //
@@ -98,6 +104,119 @@ enum MMatchObjectStageState
 	MOSS_END
 };
 
+enum MMatchDisconnectStatus
+{
+	MMDS_CONNECTED = 1,
+	MMDS_DISCONN_WAIT,
+	MMDS_DISCONNECT,
+
+	MMDS_END,
+};
+
+enum MMatchPremiumGradeID
+{
+	MMPG_FREE = 0,
+	MMPG_PREMIUM_IP = 1
+};
+
+enum MMatchSex
+{
+	MMS_MALE = 0,
+	MMS_FEMALE = 1
+};
+
+enum MMatchBlockType
+{
+	MMBT_NO = 0,
+	MMBT_BANNED,
+	MMBT_MUTED,
+
+	MMBT_END,
+};
+
+enum MCmdEnterBattleParam
+{
+	MCEP_NORMAL = 0,
+	MCEP_FORCED = 1,
+	MCEP_END
+};
+
+#define DEFAULT_CHAR_HP				100
+#define DEFAULT_CHAR_AP				0
+
+inline bool IsAdminGrade(MMatchUserGradeID nGrade)
+{
+	if ((nGrade == MMUG_EVENTMASTER) ||
+		(nGrade == MMUG_ADMIN) ||
+		(nGrade == MMUG_DEVELOPER))
+		return true;
+
+	return false;
+}
+
+// 캐릭터 생성할때 주는 기본 아이템
+struct MINITIALCOSTUME
+{
+	// 무기
+	unsigned int nMeleeItemID;
+	unsigned int nPrimaryItemID;
+	unsigned int nSecondaryItemID;
+	unsigned int nCustom1ItemID;
+	unsigned int nCustom2ItemID;
+
+	// 장비 아이템
+	unsigned int nChestItemID;
+	unsigned int nHandsItemID;
+	unsigned int nLegsItemID;
+	unsigned int nFeetItemID;
+};
+
+#define MAX_COSTUME_TEMPLATE		6
+const MINITIALCOSTUME g_InitialCostume[MAX_COSTUME_TEMPLATE][2] =
+{
+	{ { 1, 5001, 4001, 30301, 0,     21001, 0, 23001, 0 },{ 1, 5001, 4001, 30301, 0,     21501, 0, 23501, 0 } },	// 건나이트
+	{ { 2, 5002, 0,    30301, 0,     21001, 0, 23001, 0 },{ 2, 5002, 0,    30301, 0,     21501, 0, 23501, 0 } },	// 건파이터
+	{ { 1, 4005, 5001, 30401, 0,     21001, 0, 23001, 0 },{ 1, 4005, 5001, 30401, 0,     21501, 0, 23501, 0 } },	// 애서신
+	{ { 2, 4001, 0,    30401, 0,     21001, 0, 23001, 0 },{ 2, 4001, 0,    30401, 0,     21501, 0, 23501, 0 } },	// 스카우트
+	{ { 2, 4002, 0,    30401, 30001, 21001, 0, 23001, 0 },{ 2, 4002, 0,    30401, 30001, 21501, 0, 23501, 0 } },	// 건프리스트
+	{ { 1, 4006, 0,	 30101, 30001, 21001, 0, 23001, 0 },{ 1, 4006, 4006, 30101, 30001, 21501, 0, 23501, 0 } }	// 닥터
+};
+
+#define MAX_COSTUME_HAIR		5
+const std::string g_szHairMeshName[MAX_COSTUME_HAIR][2] =
+{
+	{ "eq_head_01", "eq_head_pony" },
+	{ "eq_head_02", "eq_head_hair001" },
+	{ "eq_head_08", "eq_head_hair04" },
+	{ "eq_head_05", "eq_head_hair006" },
+	{ "eq_head_08", "eq_head_hair002" }		// 이건 현재 사용안함 - 나중에 다른 모델로 대체해도 됨
+};
+
+#define MAX_COSTUME_FACE		20
+const std::string g_szFaceMeshName[MAX_COSTUME_FACE][2] =
+{
+	{ "eq_face_01", "eq_face_001" },
+	{ "eq_face_02", "eq_face_002" },
+	{ "eq_face_04", "eq_face_003" },
+	{ "eq_face_05", "eq_face_004" },
+	{ "eq_face_a01", "eq_face_001" },
+	{ "eq_face_newface01", "eq_face_newface01" },
+	{ "eq_face_newface02", "eq_face_newface02" },
+	{ "eq_face_newface03", "eq_face_newface03" },
+	{ "eq_face_newface04", "eq_face_newface04" },
+	{ "eq_face_newface05", "eq_face_newface05" },
+	{ "eq_face_newface06", "eq_face_newface06" },
+	{ "eq_face_newface07", "eq_face_newface07" },
+	{ "eq_face_newface08", "eq_face_newface08" },
+	{ "eq_face_newface09", "eq_face_newface09" },
+	{ "eq_face_newface10", "eq_face_newface10" },
+	{ "eq_face_newface11", "eq_face_newface11" },
+	{ "eq_face_newface12", "eq_face_newface12" },
+	{ "eq_face_newface13", "eq_face_newface13" },
+	{ "eq_face_newface13", "eq_face_newface14" },
+	{ "eq_face_newface13", "eq_face_newface15" },
+};
+
 //
 // Clan war
 //
@@ -126,6 +245,37 @@ enum MCHANNEL_TYPE {
 	MCHANNEL_TYPE_MAX
 };
 
+struct MCHANNELLISTNODE {
+	MUID			uidChannel;						// 채널 UID
+	short			nNo;							// 채널번호
+	unsigned char	nPlayers;						// 현재인원
+	short			nMaxPlayers;					// 최대인원
+	short			nLevelMin;						// 최소레벨
+	short			nLevelMax;						// 최대레벨
+	char			nChannelType;					// 채널타입
+	char			szChannelName[CHANNELNAME_LEN];	// 채널이름
+};
+
+//
+// Round
+//
+enum MMATCH_ROUNDSTATE {
+	MMATCH_ROUNDSTATE_PREPARE = 0,
+	MMATCH_ROUNDSTATE_COUNTDOWN = 1,
+	MMATCH_ROUNDSTATE_PLAY = 2,
+	MMATCH_ROUNDSTATE_FINISH = 3,
+	MMATCH_ROUNDSTATE_EXIT = 4,
+	MMATCH_ROUNDSTATE_FREE = 5,
+	MMATCH_ROUNDSTATE_FAILED = 6,
+	MMATCH_ROUNDSTATE_END
+};
+
+enum MMATCH_ROUNDRESULT {
+	MMATCH_ROUNDRESULT_DRAW = 0,
+	MMATCH_ROUNDRESULT_REDWON,
+	MMATCH_ROUNDRESULT_BLUEWON,
+	MMATCH_ROUNDRESULT_END
+};
 
 
 

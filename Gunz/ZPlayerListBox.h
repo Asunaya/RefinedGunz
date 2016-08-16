@@ -3,11 +3,8 @@
 #include "map"
 #include "vector"
 #include "MUID.h"
-#include "mmatchobject.h"
 #include "ZEmblemInterface.h"
 #include "ZApplication.h"
-
-using namespace std;
 
 class MBitmap;
 class MScrollBar;
@@ -20,15 +17,6 @@ enum ePlayerState
 	PS_LOBBY,
 	PS_END,
 };
-
-/*
-struct sPlayerInfo
-{
-	int Level;
-	char szName[128];
-	int state;
-};
-*/
 
 class ZPlayerListItem : public MListItem {
 public:

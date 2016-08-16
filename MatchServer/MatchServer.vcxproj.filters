@@ -121,22 +121,13 @@
     <ClCompile Include="MMatchHShield.cpp">
       <Filter>MMatchServer</Filter>
     </ClCompile>
-    <ClCompile Include="MMatchLanguageConf.cpp">
-      <Filter>MMatchServer</Filter>
-    </ClCompile>
     <ClCompile Include="MMatchLocale.cpp">
       <Filter>MMatchServer</Filter>
     </ClCompile>
     <ClCompile Include="MMatchMission.cpp">
       <Filter>MMatchServer</Filter>
     </ClCompile>
-    <ClCompile Include="MMatchNotify.cpp">
-      <Filter>MMatchServer</Filter>
-    </ClCompile>
     <ClCompile Include="MMatchNPCObject.cpp">
-      <Filter>MMatchServer</Filter>
-    </ClCompile>
-    <ClCompile Include="MMatchObjCache.cpp">
       <Filter>MMatchServer</Filter>
     </ClCompile>
     <ClCompile Include="MMatchObject.cpp">
@@ -241,13 +232,7 @@
     <ClCompile Include="MMatchStatus.cpp">
       <Filter>MMatchServer</Filter>
     </ClCompile>
-    <ClCompile Include="MMatchStringResManager.cpp">
-      <Filter>MMatchServer</Filter>
-    </ClCompile>
     <ClCompile Include="MMatchWorldItem.cpp">
-      <Filter>MMatchServer</Filter>
-    </ClCompile>
-    <ClCompile Include="MMatchWorldItemDesc.cpp">
       <Filter>MMatchServer</Filter>
     </ClCompile>
     <ClCompile Include="MAsyncDBJob.cpp">
@@ -280,9 +265,7 @@
     <ClCompile Include="MAsyncDBJob_WinTheClanGame.cpp">
       <Filter>MMatchServer\MAsyncJob</Filter>
     </ClCompile>
-    <ClCompile Include="MQuestItem.cpp" />
     <ClCompile Include="MSmartRefreshImpl.cpp" />
-    <ClCompile Include="MClient.cpp" />
     <ClCompile Include="MAsyncProxy.cpp" />
     <ClCompile Include="MMatchEventFactory.cpp" />
     <ClCompile Include="MMatchRuleSkillmap.cpp" />
@@ -294,6 +277,20 @@
     <ClCompile Include="MNJ_DBAgentClient.cpp">
       <Filter>MMatchServer</Filter>
     </ClCompile>
+    <ClCompile Include="LagCompensation.cpp" />
+    <ClCompile Include="MQuestNPCSpawnTrigger.cpp" />
+    <ClCompile Include="MQuestPlayer.cpp" />
+    <ClCompile Include="MQuestScenario.cpp" />
+    <ClCompile Include="MSacrificeQItemTable.cpp" />
+    <ClCompile Include="MTeamGameStrategy.cpp" />
+    <ClCompile Include="MVoteDiscussImpl.cpp" />
+    <ClCompile Include="MVoteMgr.cpp" />
+    <ClCompile Include="MLadderPicker.cpp" />
+    <ClCompile Include="MQuestLevel.cpp" />
+    <ClCompile Include="MQuestLevelGenerator.cpp" />
+    <ClCompile Include="MLadderMgr.cpp" />
+    <ClCompile Include="DBQuestCachingData.cpp" />
+    <ClCompile Include="MMatchObjectCacheBuilder.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ChildFrm.h">
@@ -399,22 +396,13 @@
     <ClInclude Include="MMatchHShield.h">
       <Filter>MMatchServer</Filter>
     </ClInclude>
-    <ClInclude Include="MMatchLanguageConf.h">
-      <Filter>MMatchServer</Filter>
-    </ClInclude>
     <ClInclude Include="MMatchLocale.h">
       <Filter>MMatchServer</Filter>
     </ClInclude>
     <ClInclude Include="MMatchMission.h">
       <Filter>MMatchServer</Filter>
     </ClInclude>
-    <ClInclude Include="MMatchNotify.h">
-      <Filter>MMatchServer</Filter>
-    </ClInclude>
     <ClInclude Include="MMatchNPCObject.h">
-      <Filter>MMatchServer</Filter>
-    </ClInclude>
-    <ClInclude Include="MMatchObjCache.h">
       <Filter>MMatchServer</Filter>
     </ClInclude>
     <ClInclude Include="MMatchObject.h">
@@ -483,16 +471,9 @@
     <ClInclude Include="MMatchStatus.h">
       <Filter>MMatchServer</Filter>
     </ClInclude>
-    <ClInclude Include="MMatchStringResManager.h">
-      <Filter>MMatchServer</Filter>
-    </ClInclude>
     <ClInclude Include="MMatchWorldItem.h">
       <Filter>MMatchServer</Filter>
     </ClInclude>
-    <ClInclude Include="MMatchWorldItemDesc.h">
-      <Filter>MMatchServer</Filter>
-    </ClInclude>
-    <ClInclude Include="MQuestItem.h" />
     <ClInclude Include="MSmartRefreshImpl.h" />
     <ClInclude Include="CPSSOLib.h" />
     <ClInclude Include="IDatabase.h" />
@@ -507,7 +488,6 @@
     <ClInclude Include="MAsyncDBJob_UpdateCharInfoData.h" />
     <ClInclude Include="MAsyncDBJob_WinTheClanGame.h" />
     <ClInclude Include="MAsyncProxy.h" />
-    <ClInclude Include="MClient.h" />
     <ClInclude Include="MMatchRuleSkillmap.h" />
     <ClInclude Include="MovingWeaponManager.h" />
     <ClInclude Include="MServer.h" />
@@ -516,6 +496,21 @@
     <ClInclude Include="MNJ_DBAgentClient.h">
       <Filter>MMatchServer</Filter>
     </ClInclude>
+    <ClInclude Include="LagCompensation.h" />
+    <ClInclude Include="MMaster.h" />
+    <ClInclude Include="MQuestNPCSpawnTrigger.h" />
+    <ClInclude Include="MQuestPlayer.h" />
+    <ClInclude Include="MQuestScenario.h" />
+    <ClInclude Include="MSacrificeQItemTable.h" />
+    <ClInclude Include="MTeamGameStrategy.h" />
+    <ClInclude Include="MVoteDiscussImpl.h" />
+    <ClInclude Include="MVoteMgr.h" />
+    <ClInclude Include="MLadderPicker.h" />
+    <ClInclude Include="MQuestLevel.h" />
+    <ClInclude Include="MQuestLevelGenerator.h" />
+    <ClInclude Include="MLadderMgr.h" />
+    <ClInclude Include="DBQuestCachingData.h" />
+    <ClInclude Include="MMatchObjectCacheBuilder.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\MatchServer.ico">
