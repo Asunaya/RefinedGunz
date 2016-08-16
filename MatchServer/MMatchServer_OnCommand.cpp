@@ -16,7 +16,7 @@
 #include "MMatchStatus.h"
 #include "MMatchSchedule.h"
 #include "MTypes.h"
-
+#include "MMatchUtil.h"
 #include "sodium.h"
 
 #define _STATUS_CMD_START	auto nStatusStartTime = GetGlobalTimeMS();
@@ -35,12 +35,10 @@ _STATUS_CMD_START;
 		case MC_MATCH_LOGIN:
 			{
 				char szUserID[64];
-				//char szPassword[64];
 				int nCommandVersion = 0;
 				unsigned long nChecksumPack = 0;
 				int nVersion = -1;
 				if (pCommand->GetParameter(szUserID, 0, MPT_STR, sizeof(szUserID) )==false) break;
-				//if (pCommand->GetParameter(szPassword, 1, MPT_STR, sizeof(szPassword) )==false) break;
 
 				auto Param = static_cast<MCmdParamBlob*>(pCommand->GetParameter(1));
 				if (!Param || Param->GetType() != MPT_BLOB)

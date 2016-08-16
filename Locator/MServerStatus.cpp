@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#include "MMatchGlobal.h"
 #include "MLocatorConfig.h"
 #include "MLocatorStatistics.h"
 #include "MServerStatus.h"
@@ -70,10 +69,7 @@ void MServerStatusMgr::CheckDeadServerByLastUpdatedTime( const int nMarginOfErrM
 
 const int MServerStatusMgr::CalcuMaxCmpCustomizeMin()
 {
-	// Locator와 Server는 같은 시간대의 장소에 있기에 Locator의 시간을 가지고 서버의 마지막 어데이트 배교 시간을 구함.
-
 	SYSTEMTIME st;
-	// GetSystemTime( &st );
 	GetLocalTime( &st );
 
 	return static_cast< int >( (st.wHour * 60) + st.wMinute );

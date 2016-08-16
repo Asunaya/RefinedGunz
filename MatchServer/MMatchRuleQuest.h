@@ -9,6 +9,7 @@
 #include "MMatchQuestGameLog.h"
 #include "MQuestNPCSpawnTrigger.h"
 #include "MQuestLevel.h"
+#include "MMatchGameType.h"
 
 typedef std::pair< MUID, unsigned long int > SacrificeSlot;
 

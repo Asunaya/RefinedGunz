@@ -3,7 +3,6 @@
 
 
 
-
 MLocatorConfig* GetLocatorConfig()
 {
 	return MLocatorConfig::GetLocatorConfigInst();

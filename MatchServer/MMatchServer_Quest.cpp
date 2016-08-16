@@ -7,6 +7,8 @@
 #include "MMatchConfig.h"
 #include "MBlobArray.h"
 #include "MMatchShop.h"
+#include "MSharedCommandTable.h"
+#include "MErrorTable.h"
 
 void MMatchServer::OnRequestNPCDead(const MUID& uidSender, const MUID& uidKiller, MUID& uidNPC, MVector& pos)
 {

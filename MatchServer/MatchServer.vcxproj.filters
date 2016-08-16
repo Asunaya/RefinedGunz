@@ -16,6 +16,12 @@
     <Filter Include="HShield">
       <UniqueIdentifier>{a3ac48ed-341b-4c83-86cc-661f36ae23fb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="MMatchServer">
+      <UniqueIdentifier>{753bd4c0-e4b9-45cc-82f1-8b057a837c7b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MMatchServer\MAsyncJob">
+      <UniqueIdentifier>{8f4fa7bb-5ecc-44a7-b1bf-2a037ea47f1a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ChildFrm.cpp">
@@ -73,6 +79,227 @@
       <Filter>Netmarble</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MMatchAdmin.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchAntiHack.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchChannel.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchChannelRule.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchChatRoom.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchClan.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchConfig.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchDBFilter.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchDebug.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchEvent.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchEventManager.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchFormula.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchFriendInfo.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchGameType.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchGlobal.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchHShield.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchItem.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchLanguageConf.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchLocale.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchMap.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchMission.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchNotify.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchNPCObject.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchObjCache.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchObject.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchPremiumIPCache.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchQuest.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchQuestGameLog.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchQuestMonsterGroup.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchQuestRound.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchRule.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchRuleAssassinate.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchRuleBaseQuest.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchRuleBerserker.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchRuleDeathMatch.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchRuleDuel.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchRuleGladiator.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchRuleQuest.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchRuleSurvival.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchRuleTraining.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchSchedule.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchServer.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchServer_Admin.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchServer_Agent.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchServer_Async.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchServer_Channel.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchServer_Char.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchServer_Clan.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchServer_Item.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchServer_Ladder.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchServer_Login.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchServer_OnCommand.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchServer_Quest.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchServer_Stage.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchShop.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchShutdown.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchStage.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchStageSetting.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchStatus.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchStringResManager.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchUtil.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchWorldItem.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MMatchWorldItemDesc.cpp">
+      <Filter>MMatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="MAsyncDBJob.cpp">
+      <Filter>MMatchServer\MAsyncJob</Filter>
+    </ClCompile>
+    <ClCompile Include="MAsyncDBJob_BringAccountItem.cpp">
+      <Filter>MMatchServer\MAsyncJob</Filter>
+    </ClCompile>
+    <ClCompile Include="MAsyncDBJob_CharFinalize.cpp">
+      <Filter>MMatchServer\MAsyncJob</Filter>
+    </ClCompile>
+    <ClCompile Include="MAsyncDBJob_CountryFilter.cpp">
+      <Filter>MMatchServer\MAsyncJob</Filter>
+    </ClCompile>
+    <ClCompile Include="MAsyncDBJob_Event.cpp">
+      <Filter>MMatchServer\MAsyncJob</Filter>
+    </ClCompile>
+    <ClCompile Include="MAsyncDBJob_FriendList.cpp">
+      <Filter>MMatchServer\MAsyncJob</Filter>
+    </ClCompile>
+    <ClCompile Include="MAsyncDBJob_GetLoginInfo.cpp">
+      <Filter>MMatchServer\MAsyncJob</Filter>
+    </ClCompile>
+    <ClCompile Include="MAsyncDBJob_InsertConnLog.cpp">
+      <Filter>MMatchServer\MAsyncJob</Filter>
+    </ClCompile>
+    <ClCompile Include="MAsyncDBJob_UpdateCharInfoData.cpp">
+      <Filter>MMatchServer\MAsyncJob</Filter>
+    </ClCompile>
+    <ClCompile Include="MAsyncDBJob_WinTheClanGame.cpp">
+      <Filter>MMatchServer\MAsyncJob</Filter>
+    </ClCompile>
+    <ClCompile Include="MQuestItem.cpp" />
+    <ClCompile Include="MSmartRefreshImpl.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ChildFrm.h">
@@ -127,6 +354,173 @@
       <Filter>HShield</Filter>
     </ClInclude>
     <ClInclude Include="VersionNo.h" />
+    <ClInclude Include="MMatchAdmin.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchAgent.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchAntiHack.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchAuth.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchChannel.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchChannelRule.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchChatRoom.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchClan.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchConfig.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchDBFilter.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchDebug.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchEvent.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchEventFactory.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchEventManager.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchFormula.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchFriendInfo.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchGameType.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchGlobal.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchHShield.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchItem.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchLanguageConf.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchLocale.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchMap.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchMission.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchNotify.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchNPCObject.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchObjCache.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchObject.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchPremiumIPCache.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchQuest.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchQuestGameLog.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchQuestMonsterGroup.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchQuestRound.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchRule.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchRuleAssassinate.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchRuleBaseQuest.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchRuleBerserker.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchRuleDeathMatch.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchRuleDuel.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchRuleGladiator.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchRuleQuest.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchRuleSurvival.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchRuleTraining.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchSchedule.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchServer.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchShop.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchShutdown.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchStage.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchStageSetting.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchStatus.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchStringResManager.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchTypes.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchUtil.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchWorldItem.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MMatchWorldItemDesc.h">
+      <Filter>MMatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="MQuestItem.h" />
+    <ClInclude Include="MSmartRefreshImpl.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\MatchServer.ico">

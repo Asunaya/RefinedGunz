@@ -26,12 +26,13 @@
 #define _WIN32_IE 0x0501	// IE 5.0 이후 버전에 맞도록 적합한 값으로 변경해 주십시오.
 #endif
 
+#ifdef MFC
+
 #define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS	// 일부 CString 생성자는 명시적으로 선언됩니다.
 
 // MFC의 공통 부분과 무시 가능한 경고 메시지에 대한 숨기기를 해제합니다.
 #define _AFX_ALL_WARNINGS
 
-#ifdef MFC
 #include <afxwin.h>         // MFC 핵심 및 표준 구성 요소
 #include <afxext.h>         // MFC 익스텐션
 #include <afxdisp.h>        // MFC 자동화 클래스
@@ -44,10 +45,15 @@
 #include <afxcview.h>
 #endif
 
-#include "winsock2.h"
-#include "windows.h"
+#include <WinSock2.h>
+#include <Windows.h>
 #include <comutil.h>
 #include <stdio.h>
+
+#include "MSharedCommandTable.h"
+#include "MMatchServer.h"
+#include "MMatchStage.h"
+#include "MMatchGameType.h"
 
 #include "SafeString.h"
 

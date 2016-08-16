@@ -1,9 +1,6 @@
-#ifndef _MMATCHGAMETYPE_H
-#define _MMATCHGAMETYPE_H
+#pragma once
 
 #include "MBaseGameType.h"
-
-
 
 class MMatchGameTypeMgr : public MBaseGameTypeCatalogue
 {
@@ -13,11 +10,7 @@ public:
 	static MMatchGameTypeMgr* GetInstance();
 };
 
-
-inline MMatchGameTypeMgr* MGetGameTypeMgr() 
+inline MMatchGameTypeMgr* MGetGameTypeMgr()
 {
 	return MMatchGameTypeMgr::GetInstance();
 }
-
-
-#endif

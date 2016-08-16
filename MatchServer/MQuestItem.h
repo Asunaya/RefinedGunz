@@ -3,10 +3,10 @@
 
 #include "MUID.h"
 #include <map>
+using std::map;
 
 #include <mmsystem.h>
 
-#include "MQuestConst.h"
 #include "MDebug.h"
 #include "MQuestConst.h"
 #include "MZFileSystem.h"
@@ -76,7 +76,7 @@ struct MQuestItemDesc
 	int GetBountyValue() { return m_nPrice / 4; }
 };
 
-class MQuestItemDescManager : public std::map< int, MQuestItemDesc* >
+class MQuestItemDescManager : public map< int, MQuestItemDesc* >
 {
 public :
 	MQuestItemDescManager();

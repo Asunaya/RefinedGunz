@@ -3,6 +3,7 @@
 #include "MZFileSystem.h"
 #include "MMatchServer.h"
 #include "MBaseStringResManager.h"
+#include "MMatchUtil.h"
 
 #define DEFAULT_MELEE_WEAPON_RANGE 160
 

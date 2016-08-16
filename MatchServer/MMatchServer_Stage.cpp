@@ -29,9 +29,10 @@
 #include "MMatchRuleQuest.h"
 #include "MMatchRuleBerserker.h"
 #include "MMatchRuleDuel.h"
+#include "MBaseGameType.h"
+#include "MMatchUtil.h"
 
 static bool StageShowInfo(MMatchServer* pServer, const MUID& uidPlayer, const MUID& uidStage, char* pszChat);
-
 
 MMatchStage* MMatchServer::FindStage(const MUID& uidStage)
 {

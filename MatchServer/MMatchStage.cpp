@@ -15,7 +15,8 @@
 #include "MMatchRuleSurvival.h"
 #include "MMatchRuleBerserker.h"
 #include "MMatchRuleDuel.h"
-#include "..\MMatchRuleSkillmap.h"
+#include "MMatchRuleSkillmap.h"
+#include "MErrorTable.h"
 
 MMatchStage::MMatchStage() : MovingWeaponMgr(*this), m_WorldItemManager(this)
 {

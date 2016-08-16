@@ -97,7 +97,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>../CSCommon/Include;../CML/Include;../MAI/Include;../RealSpace2/Include;../RealSpace/Include;../SafeUDP/Include;../MDatabase/Include;../MCountryFilter/Include;../sdk/libsodium/include;../sdk/dx9/Include/;../Locator;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../CSCommon/Include;../CML/Include;../MAI/Include;../RealSpace2/Include;../RealSpace/Include;../SafeUDP/Include;../MDatabase/Include;../MCountryFilter/Include;../sdk/libsodium/include;../sdk/rapidxml/include;../sdk/dx9/Include/;../Locator;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -137,7 +137,7 @@
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <OmitFramePointers>true</OmitFramePointers>
-      <AdditionalIncludeDirectories>../CSCommon/Include;../CML/Include;../MAI/Include;../RealSpace2/Include;../RealSpace/Include;../SafeUDP/Include;../MDatabase/Include;../MCountryFilter/Include;../sdk/libsodium/include;../sdk/dx9/Include/;../Locator;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../CSCommon/Include;../CML/Include;../MAI/Include;../RealSpace2/Include;../RealSpace/Include;../SafeUDP/Include;../MDatabase/Include;../MCountryFilter/Include;../sdk/libsodium/include;../sdk/rapidxml/include;../sdk/dx9/Include/;../Locator;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_WORLDITEM_SERVER;NO_WARN_MBCS_MFC_DEPRECATION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <MinimalRebuild>false</MinimalRebuild>
@@ -180,7 +180,7 @@
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <OmitFramePointers>true</OmitFramePointers>
-      <AdditionalIncludeDirectories>../CSCommon/Include;../CML/Include;../MAI/Include;../RealSpace2/Include;../RealSpace/Include;../SafeUDP/Include;../MDatabase/Include;../MCountryFilter/Include;../sdk/libsodium/include;../sdk/dx9/Include/;../Locator;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../CSCommon/Include;../CML/Include;../MAI/Include;../RealSpace2/Include;../RealSpace/Include;../SafeUDP/Include;../MDatabase/Include;../MCountryFilter/Include;../sdk/libsodium/include;../sdk/rapidxml/include;../sdk/dx9/Include/;../Locator;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_WORLDITEM_SERVER;NO_WARN_MBCS_MFC_DEPRECATION;MSSQL_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <MinimalRebuild>false</MinimalRebuild>
@@ -223,7 +223,7 @@
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <OmitFramePointers>true</OmitFramePointers>
-      <AdditionalIncludeDirectories>../CSCommon/Include;../CML/Include;../MAI/Include;../RealSpace2/Include;../RealSpace/Include;../SafeUDP/Include;../MDatabase/Include;../MCountryFilter/Include;../sdk/libsodium/include;../sdk/dx9/Include/;../Locator;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../CSCommon/Include;../CML/Include;../MAI/Include;../RealSpace2/Include;../RealSpace/Include;../SafeUDP/Include;../MDatabase/Include;../MCountryFilter/Include;../sdk/libsodium/include;../sdk/rapidxml/include;../sdk/dx9/Include/;../Locator;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_WORLDITEM_SERVER;_WINSOCK_DEPRECATED_NO_WARNINGS;NO_WARN_MBCS_MFC_DEPRECATION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <MinimalRebuild>false</MinimalRebuild>
@@ -269,9 +269,84 @@
     <ClCompile Include="ExceptionAttacher.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainFrm.cpp" />
+    <ClCompile Include="MAsyncDBJob.cpp" />
+    <ClCompile Include="MAsyncDBJob_BringAccountItem.cpp" />
+    <ClCompile Include="MAsyncDBJob_CharFinalize.cpp" />
+    <ClCompile Include="MAsyncDBJob_CountryFilter.cpp" />
+    <ClCompile Include="MAsyncDBJob_Event.cpp" />
+    <ClCompile Include="MAsyncDBJob_FriendList.cpp" />
+    <ClCompile Include="MAsyncDBJob_GetLoginInfo.cpp" />
+    <ClCompile Include="MAsyncDBJob_InsertConnLog.cpp" />
+    <ClCompile Include="MAsyncDBJob_UpdateCharInfoData.cpp" />
+    <ClCompile Include="MAsyncDBJob_WinTheClanGame.cpp" />
     <ClCompile Include="MatchServer.cpp" />
     <ClCompile Include="MatchServerDoc.cpp" />
     <ClCompile Include="MatchServerView.cpp" />
+    <ClCompile Include="MMatchAdmin.cpp" />
+    <ClCompile Include="MMatchAntiHack.cpp" />
+    <ClCompile Include="MMatchChannel.cpp" />
+    <ClCompile Include="MMatchChannelRule.cpp" />
+    <ClCompile Include="MMatchChatRoom.cpp" />
+    <ClCompile Include="MMatchClan.cpp" />
+    <ClCompile Include="MMatchConfig.cpp" />
+    <ClCompile Include="MMatchDBFilter.cpp" />
+    <ClCompile Include="MMatchDebug.cpp" />
+    <ClCompile Include="MMatchEvent.cpp" />
+    <ClCompile Include="MMatchEventManager.cpp" />
+    <ClCompile Include="MMatchFormula.cpp" />
+    <ClCompile Include="MMatchFriendInfo.cpp" />
+    <ClCompile Include="MMatchGameType.cpp" />
+    <ClCompile Include="MMatchGlobal.cpp" />
+    <ClCompile Include="MMatchHShield.cpp" />
+    <ClCompile Include="MMatchItem.cpp" />
+    <ClCompile Include="MMatchLanguageConf.cpp" />
+    <ClCompile Include="MMatchLocale.cpp" />
+    <ClCompile Include="MMatchMap.cpp" />
+    <ClCompile Include="MMatchMission.cpp" />
+    <ClCompile Include="MMatchNotify.cpp" />
+    <ClCompile Include="MMatchNPCObject.cpp" />
+    <ClCompile Include="MMatchObjCache.cpp" />
+    <ClCompile Include="MMatchObject.cpp" />
+    <ClCompile Include="MMatchPremiumIPCache.cpp" />
+    <ClCompile Include="MMatchQuest.cpp" />
+    <ClCompile Include="MMatchQuestGameLog.cpp" />
+    <ClCompile Include="MMatchQuestMonsterGroup.cpp" />
+    <ClCompile Include="MMatchQuestRound.cpp" />
+    <ClCompile Include="MMatchRule.cpp" />
+    <ClCompile Include="MMatchRuleAssassinate.cpp" />
+    <ClCompile Include="MMatchRuleBaseQuest.cpp" />
+    <ClCompile Include="MMatchRuleBerserker.cpp" />
+    <ClCompile Include="MMatchRuleDeathMatch.cpp" />
+    <ClCompile Include="MMatchRuleDuel.cpp" />
+    <ClCompile Include="MMatchRuleGladiator.cpp" />
+    <ClCompile Include="MMatchRuleQuest.cpp" />
+    <ClCompile Include="MMatchRuleSurvival.cpp" />
+    <ClCompile Include="MMatchRuleTraining.cpp" />
+    <ClCompile Include="MMatchSchedule.cpp" />
+    <ClCompile Include="MMatchServer.cpp" />
+    <ClCompile Include="MMatchServer_Admin.cpp" />
+    <ClCompile Include="MMatchServer_Agent.cpp" />
+    <ClCompile Include="MMatchServer_Async.cpp" />
+    <ClCompile Include="MMatchServer_Channel.cpp" />
+    <ClCompile Include="MMatchServer_Char.cpp" />
+    <ClCompile Include="MMatchServer_Clan.cpp" />
+    <ClCompile Include="MMatchServer_Item.cpp" />
+    <ClCompile Include="MMatchServer_Ladder.cpp" />
+    <ClCompile Include="MMatchServer_Login.cpp" />
+    <ClCompile Include="MMatchServer_OnCommand.cpp" />
+    <ClCompile Include="MMatchServer_Quest.cpp" />
+    <ClCompile Include="MMatchServer_Stage.cpp" />
+    <ClCompile Include="MMatchShop.cpp" />
+    <ClCompile Include="MMatchShutdown.cpp" />
+    <ClCompile Include="MMatchStage.cpp" />
+    <ClCompile Include="MMatchStageSetting.cpp" />
+    <ClCompile Include="MMatchStatus.cpp" />
+    <ClCompile Include="MMatchStringResManager.cpp" />
+    <ClCompile Include="MMatchUtil.cpp" />
+    <ClCompile Include="MMatchWorldItem.cpp" />
+    <ClCompile Include="MMatchWorldItemDesc.cpp" />
+    <ClCompile Include="MQuestItem.cpp" />
+    <ClCompile Include="MSmartRefreshImpl.cpp" />
     <ClCompile Include="OutputView.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -296,6 +371,63 @@
     <ClInclude Include="MatchServer.h" />
     <ClInclude Include="MatchServerDoc.h" />
     <ClInclude Include="MatchServerView.h" />
+    <ClInclude Include="MMatchAdmin.h" />
+    <ClInclude Include="MMatchAgent.h" />
+    <ClInclude Include="MMatchAntiHack.h" />
+    <ClInclude Include="MMatchAuth.h" />
+    <ClInclude Include="MMatchChannel.h" />
+    <ClInclude Include="MMatchChannelRule.h" />
+    <ClInclude Include="MMatchChatRoom.h" />
+    <ClInclude Include="MMatchClan.h" />
+    <ClInclude Include="MMatchConfig.h" />
+    <ClInclude Include="MMatchDBFilter.h" />
+    <ClInclude Include="MMatchDebug.h" />
+    <ClInclude Include="MMatchEvent.h" />
+    <ClInclude Include="MMatchEventFactory.h" />
+    <ClInclude Include="MMatchEventManager.h" />
+    <ClInclude Include="MMatchFormula.h" />
+    <ClInclude Include="MMatchFriendInfo.h" />
+    <ClInclude Include="MMatchGameType.h" />
+    <ClInclude Include="MMatchGlobal.h" />
+    <ClInclude Include="MMatchHShield.h" />
+    <ClInclude Include="MMatchItem.h" />
+    <ClInclude Include="MMatchLanguageConf.h" />
+    <ClInclude Include="MMatchLocale.h" />
+    <ClInclude Include="MMatchMap.h" />
+    <ClInclude Include="MMatchMission.h" />
+    <ClInclude Include="MMatchNotify.h" />
+    <ClInclude Include="MMatchNPCObject.h" />
+    <ClInclude Include="MMatchObjCache.h" />
+    <ClInclude Include="MMatchObject.h" />
+    <ClInclude Include="MMatchPremiumIPCache.h" />
+    <ClInclude Include="MMatchQuest.h" />
+    <ClInclude Include="MMatchQuestGameLog.h" />
+    <ClInclude Include="MMatchQuestMonsterGroup.h" />
+    <ClInclude Include="MMatchQuestRound.h" />
+    <ClInclude Include="MMatchRule.h" />
+    <ClInclude Include="MMatchRuleAssassinate.h" />
+    <ClInclude Include="MMatchRuleBaseQuest.h" />
+    <ClInclude Include="MMatchRuleBerserker.h" />
+    <ClInclude Include="MMatchRuleDeathMatch.h" />
+    <ClInclude Include="MMatchRuleDuel.h" />
+    <ClInclude Include="MMatchRuleGladiator.h" />
+    <ClInclude Include="MMatchRuleQuest.h" />
+    <ClInclude Include="MMatchRuleSurvival.h" />
+    <ClInclude Include="MMatchRuleTraining.h" />
+    <ClInclude Include="MMatchSchedule.h" />
+    <ClInclude Include="MMatchServer.h" />
+    <ClInclude Include="MMatchShop.h" />
+    <ClInclude Include="MMatchShutdown.h" />
+    <ClInclude Include="MMatchStage.h" />
+    <ClInclude Include="MMatchStageSetting.h" />
+    <ClInclude Include="MMatchStatus.h" />
+    <ClInclude Include="MMatchStringResManager.h" />
+    <ClInclude Include="MMatchTypes.h" />
+    <ClInclude Include="MMatchUtil.h" />
+    <ClInclude Include="MMatchWorldItem.h" />
+    <ClInclude Include="MMatchWorldItemDesc.h" />
+    <ClInclude Include="MQuestItem.h" />
+    <ClInclude Include="MSmartRefreshImpl.h" />
     <ClInclude Include="OutputView.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />

@@ -1,11 +1,12 @@
 #pragma once
 
-
 #include <map>
 #include <string>
 #include <vector>
 #include <utility>
 #include <cstdint>
+
+#include "GlobalTypes.h"
 
 using std::string;
 using std::vector;

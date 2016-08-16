@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "MMatchUtil.h"
 #include "MZFileSystem.h"
+#include "MSharedCommandTable.h"
 
 unsigned long MGetMemoryChecksum(char *pBuffer, int nLen)
 {

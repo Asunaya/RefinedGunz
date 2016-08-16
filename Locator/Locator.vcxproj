@@ -145,7 +145,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Library Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\cml\Include;..\CSCommon\Include;../RealSpace2/Include;..\SafeUDP\Include;..\MDatabase\Include;..\MCountryFilter\Include;../sdk/dx9/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\cml\Include;..\CSCommon\Include;../MatchServer/;../RealSpace2/Include;..\SafeUDP\Include;..\MDatabase\Include;..\MCountryFilter\Include;../sdk/dx9/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NO_WARN_MBCS_MFC_DEPRECATION;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -176,7 +176,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Library Debug|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\cml\Include;..\CSCommon\Include;../RealSpace2/Include;..\SafeUDP\Include;..\MDatabase\Include;..\MCountryFilter\Include;../sdk/dx9/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\cml\Include;..\CSCommon\Include;../MatchServer/;../RealSpace2/Include;..\SafeUDP\Include;..\MDatabase\Include;..\MCountryFilter\Include;../sdk/dx9/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NO_WARN_MBCS_MFC_DEPRECATION;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>

@@ -52,23 +52,15 @@
 
 #include "MLocaleDefine.h"
 #include "MDebug.h"
-#include "MMatchDebug.h"
 #include "MXml.h"
 
 #include "MUID.h"
-#include "MMatchGlobal.h"
-#include "MMatchUtil.h"
 #include "MSharedCommandTable.h"
 #include "MCommand.h"
 #include "MCommandParameter.h"
 #include "MCommandCommunicator.h"
 #include "MErrorTable.h"
-#include "MServer.h"
-#include "MMatchServer.h"
-#include "MMatchClient.h"
 #include "MObject.h"
-#include "MMatchItem.h"
-#include "MMatchObjCache.h"
 
 #include "SafeString.h"
 #include "GlobalTypes.h"

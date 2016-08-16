@@ -7,8 +7,7 @@
 #include "MBlobArray.h"
 #include "MMatchConfig.h"
 #include "MMatchEventFactory.h"
-
-
+#include "MErrorTable.h"
 
 void MMatchRule::DebugTest()
 {
@@ -28,36 +27,17 @@ void MMatchRule::SetRoundState(MMATCH_ROUNDSTATE nState)
 { 
 	if (m_nRoundState == nState) return;
 
-/*#ifdef _DEBUG
-	{
-		char szTemp[256]="";
-		switch (nState)
-		{
-		case MMATCH_ROUNDSTATE_PREPARE: sprintf_safe(szTemp, "SetRoundState: PREPARE\n"); break;
-		case MMATCH_ROUNDSTATE_COUNTDOWN: sprintf_safe(szTemp, "SetRoundState: COUNTDOWN\n"); break;
-		case MMATCH_ROUNDSTATE_PLAY: sprintf_safe(szTemp, "SetRoundState: PLAY(%d)\n", m_nRoundCount); break;
-			case MMATCH_ROUNDSTATE_FINISH: sprintf_safe(szTemp, "SetRoundState: FINISH\n"); break;
-		case MMATCH_ROUNDSTATE_EXIT: sprintf_safe(szTemp, "SetRoundState: EXIT\n"); break;
-		case MMATCH_ROUNDSTATE_FREE: sprintf_safe(szTemp, "SetRoundState: FREE\n"); break;
-		case MMATCH_ROUNDSTATE_FAILED: sprintf_safe(szTemp, "SetRoundState: FAILED\n"); break;
-		}
-		OutputDebugString(szTemp);
-	}
-#endif*/
-
 	if (nState == MMATCH_ROUNDSTATE_FINISH)	OnRoundEnd();
 	else if (nState == MMATCH_ROUNDSTATE_PLAY) OnRoundBegin();
 
 	m_nRoundState = nState;
 	SetRoundStateTimer(MMatchServer::GetInstance()->GetGlobalClockCount());
 
-	// 라운드가 새로 시작되면 라운드 초기화
 	if (nState == MMATCH_ROUNDSTATE_COUNTDOWN)
 	{
 		InitRound();
 	}
 
-	// 플레이어들에게 라운드 상태 바뀌었다고 알려줌
 	MMatchServer::GetInstance()->ResponseRoundState(GetStage()->GetUID());
 
 }
@@ -88,19 +68,16 @@ void MMatchRule::OnEnd()
 }
 void MMatchRule::OnRoundBegin()
 {
-//	OutputDebugString("OnRoundBegin \n");
 }
 void MMatchRule::OnRoundEnd()
 {
-//	OutputDebugString("OnRoundEnd \n");
 }
 
 void MMatchRule::OnRoundTimeOut()
 {
-//	OutputDebugString("OnRoundTimeOut \n");
 }
 
-bool MMatchRule::OnCheckBattleTimeOut(unsigned int tmTimeSpend)	// true 리턴하면 타임아웃
+bool MMatchRule::OnCheckBattleTimeOut(unsigned int tmTimeSpend)
 {
 	int nLimitTime = GetStage()->GetStageSetting()->GetLimitTime() * 60 * 1000;
 	if (nLimitTime <= STAGESETTING_LIMITTIME_UNLIMITED) return false;
@@ -154,7 +131,6 @@ bool MMatchRule::OnRun()
 			{
 				if (OnCheckEnableBattleCondition())
 				{
-					// 게임 시작
 					SetRoundState(MMATCH_ROUNDSTATE_COUNTDOWN);
 				}
 				else

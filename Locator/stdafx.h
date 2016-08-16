@@ -29,4 +29,5 @@
 #include <cassert>
 #define ASSERT assert
 
-// #define _LOCATOR_TEST
+#include "SafeString.h"
+#include "MDebug.h"

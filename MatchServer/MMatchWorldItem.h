@@ -3,6 +3,11 @@
 #include <vector>
 #include <list>
 #include <map>
+#include <unordered_map>
+
+#include "GlobalTypes.h"
+#include "d3dx9.h"
+#include "MUID.h"
 
 #define WORLDITEM_EXTRAVALUE_NUM		2
 

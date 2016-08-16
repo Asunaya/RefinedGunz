@@ -22,8 +22,8 @@
 #include "MMatchStatus.h"
 #include "MAsyncDBJob.h"
 #include "MAsyncDBJob_BringAccountItem.h"
+#include "MMatchUtil.h"
 
-// 플레이어에게 아이템 지급
 bool MMatchServer::InsertCharItem(const MUID& uidPlayer, const unsigned long int nItemID, bool bRentItem, int nRentPeriodHour)
 {
 	MMatchObject* pObject = GetObject(uidPlayer);

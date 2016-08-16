@@ -1,10 +1,10 @@
-#ifndef _MBASEGAMETYPE_H
-#define _MBASEGAMETYPE_H
+#pragma once
 
 #include <crtdbg.h>
 #include <map>
 #include <set>
-using namespace std;
+
+#define _QUEST
 
 
 /// 게임 타입
@@ -26,21 +26,13 @@ enum MMATCH_GAMETYPE : i32
 	MMATCH_GAMETYPE_DEATHMATCH_TEAM2	=9,
 	MMATCH_GAMETYPE_DUEL = 10,
 	MMATCH_GAMETYPE_SKILLMAP = 11,
-/*
-#ifndef _CLASSIC
-	MMATCH_GAMETYPE_CLASSIC_SOLO,
-	MMATCH_GAMETYPE_CLASSIC_TEAM,
-#endif
-*/
+
 	MMATCH_GAMETYPE_MAX,
 
-	MMATCH_GAMETYPE_ALL = 100,		// event에만 사용된다.
+	MMATCH_GAMETYPE_ALL = 100,
 };
 
-
-// 디폴트 게임 타입
 const MMATCH_GAMETYPE MMATCH_GAMETYPE_DEFAULT = MMATCH_GAMETYPE_DEATHMATCH_SOLO;
-// const MMATCH_GAMETYPE MMATCH_GAMETYPE_DEFAULT = MMATCH_GAMETYPE_DEATHMATCH_TEAM2;
 
 
 struct MMatchGameTypeInfo
@@ -184,5 +176,3 @@ static bool IsSwordsOnly(MMATCH_GAMETYPE GameType)
 	return GameType == MMATCH_GAMETYPE_GLADIATOR_SOLO
 		|| GameType == MMATCH_GAMETYPE_GLADIATOR_TEAM;
 }
-
-#endif
