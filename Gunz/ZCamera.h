@@ -49,10 +49,9 @@ public:
 	void SetMaxRecoilAngleX(float fMax);
 
 	rvector GetPosition()	{ return m_Position; }
-	rvector GetCurrentDir();		// 카메라가 바라보는 방향을 얻어낸다
-	void SetPosition(rvector &pos)		{ m_Position = pos; }
-	void SetDirection(rvector& dir);
-//	rvector GetDirection()	{ return m_Direction;}
+	rvector GetCurrentDir();
+	void SetPosition(const rvector &pos)		{ m_Position = pos; }
+	void SetDirection(const rvector& dir);
 
 
 	// 카메라 흔들리는 이펙트

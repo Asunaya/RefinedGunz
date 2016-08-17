@@ -185,7 +185,7 @@ public:
 	MListBoxLook(void);
 
 	virtual void OnDraw(MListBox* pListBox, MDrawContext* pDC);
-	virtual MRECT GetClientRect(MListBox* pListBox, MRECT& r);
+	virtual MRECT GetClientRect(MListBox* pListBox, const MRECT& r);
 };
 
 typedef void (*ZCB_ONDROP)(void* pSelf, MWidget* pSender, MBitmap* pBitmap, const char* szString, const char* szItemString);

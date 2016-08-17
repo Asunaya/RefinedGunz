@@ -461,7 +461,7 @@ public:
 	const char *GetUserName()			{ return m_szUserName;	}		// 운영자는 처리됨
 	const char *GetUserAndClanName()	{ return m_szUserAndClanName; }	// 운영자는 클랜표시 안함
 	bool IsAdmin();
-	bool IsAdminHide()			{ return m_bAdminHide;	}
+	bool IsAdminHide() const		{ return m_bAdminHide;	}
 	void SetAdminHide(bool bHide) { m_bAdminHide = bHide; }
 
 	int GetHP();

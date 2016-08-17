@@ -35,7 +35,7 @@ protected:
 public:
 	virtual void OnDrawText(MButton* pButton, MRECT& r, MDrawContext* pDC);
 	virtual void OnDraw(MButton* pButton, MDrawContext* pDC);
-	virtual MRECT GetClientRect(MButton* pButton, MRECT& r);
+	virtual MRECT GetClientRect(MButton* pButton, const MRECT& r);
 	void SetWireLook(bool b) {	m_bWireLook = b;	}
 	bool GetWireLook() const{	return m_bWireLook; }
 public:

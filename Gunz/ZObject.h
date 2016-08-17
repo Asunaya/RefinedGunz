@@ -94,9 +94,9 @@ public:
 
 	// 움직임 모듈과 관계된것들
 	const rvector& GetVelocity()		{ return m_pModule_Movable->GetVelocity(); }
-	void SetVelocity(rvector& vel)		{ m_pModule_Movable->SetVelocity(vel); }
+	void SetVelocity(const rvector& vel)		{ m_pModule_Movable->SetVelocity(vel); }
 	void SetVelocity(float x,float y,float z) { SetVelocity(rvector(x,y,z)); }
-	void AddVelocity(rvector& add)		{ SetVelocity(GetVelocity()+add); }
+	void AddVelocity(const rvector& add)		{ SetVelocity(GetVelocity()+add); }
 
 	float GetDistToFloor() const				{ return m_pModule_Movable->GetDistToFloor(); }
 	float GetCollRadius() const				{ return m_Collision.fRadius; }

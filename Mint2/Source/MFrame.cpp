@@ -62,7 +62,7 @@ void MFrameLook::OnDraw(MFrame* pFrame, MDrawContext* pDC)
 	}
 }
 
-MRECT MFrameLook::GetClientRect(MFrame* pFrame, MRECT& r)
+MRECT MFrameLook::GetClientRect(MFrame* pFrame, const MRECT& r)
 {
 	int nTitleBarHeight = (pFrame->m_bTitleBar==true?MTITLEBAR_HEIGHT:0);
 	return MRECT(r.x+1, r.y + nTitleBarHeight, r.w-2, r.h - nTitleBarHeight-2);

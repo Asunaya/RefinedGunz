@@ -20,7 +20,7 @@ public:
 	virtual void OnTextDraw(MEdit* pEdit, MDrawContext* pDC, bool bShowLanguageTab);
 
 	virtual void OnDraw(MEdit* pEdit, MDrawContext* pDC, bool bShowLanguageTab = true);
-	virtual MRECT GetClientRect(MEdit* pEdit, MRECT& r);
+	virtual MRECT GetClientRect(MEdit* pEdit, const MRECT& r);
 
 	void SetCustomLook(bool b) {
 		m_bCustomLook = b;

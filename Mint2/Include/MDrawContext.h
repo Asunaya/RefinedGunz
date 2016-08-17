@@ -113,7 +113,7 @@ public:
 	virtual void Rectangle(int x, int y, int cx, int cy);
 	void Rectangle(MRECT& r);
 	virtual void FillRectangle(int x, int y, int cx, int cy) = 0;
-	void FillRectangle(MRECT& r);
+	void FillRectangle(const MRECT& r);
 
 	// Bitmap Drawing
 	void Draw(int x, int y);

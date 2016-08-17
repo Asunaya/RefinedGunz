@@ -12,6 +12,7 @@ using namespace std;
 //#define _MSXML2
 
 
+#ifdef MSVC_VER
 #ifdef _MSXML2
 	#import "msxml4.dll" named_guids no_implementation
 //	using namespace MSXML2;
@@ -37,6 +38,17 @@ using namespace std;
 	typedef MSXML::IXMLDOMParseErrorPtr				MXmlDomParseErrorPtr;
 
 //	using namespace MSXML;
+#endif
+#else
+#include "msxml.tlh"
+typedef MSXML::IXMLDOMDocumentPtr				MXmlDomDocPtr;
+typedef MSXML::IXMLDOMNodePtr					MXmlDomNodePtr;
+typedef MSXML::IXMLDOMNodeListPtr				MXmlDomNodeListPtr;
+typedef MSXML::IXMLDOMElementPtr				MXmlDomElementPtr;
+typedef MSXML::IXMLDOMProcessingInstructionPtr	MXmlDomPIPtr;
+typedef MSXML::IXMLDOMNamedNodeMapPtr			MXmlDomNamedNodeMapPtr;
+typedef MSXML::IXMLDOMTextPtr					MXmlDomTextPtr;
+typedef MSXML::IXMLDOMParseErrorPtr				MXmlDomParseErrorPtr;
 #endif
 
 class MXmlDocument;

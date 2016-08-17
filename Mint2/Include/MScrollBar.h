@@ -28,7 +28,7 @@ class MThumbLook{
 protected:
 public:
 	virtual void OnDraw(MThumb* pThumb, MDrawContext* pDC);
-	virtual MRECT GetClientRect(MThumb* pThumb, MRECT& r);
+	virtual MRECT GetClientRect(MThumb* pThumb, const MRECT& r);
 };
 
 class MArrowLook{
@@ -47,7 +47,7 @@ class MScrollBarLook{
 protected:
 public:
 	virtual void OnDraw(MScrollBar* pScrollBar, MDrawContext* pDC);
-	virtual MRECT GetClientRect(MScrollBar* pScrollBar, MRECT& r);
+	virtual MRECT GetClientRect(MScrollBar* pScrollBar, const MRECT& r);
 };
 
 

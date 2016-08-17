@@ -9,7 +9,7 @@
 
 _USING_NAMESPACE_REALSPACE2
 
-class ZCharacterManager : public map<MUID, ZCharacter*>
+class ZCharacterManager : public std::map<MUID, ZCharacter*>
 {
 private:
 	int		m_nLiveCount;

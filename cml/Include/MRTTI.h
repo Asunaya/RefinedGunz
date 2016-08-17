@@ -72,7 +72,7 @@ void* classname::DynamicCast(const MRTTI* pQueryRTTI) const \
 #define MDeclareRTTI \
 public: \
 	static const MRTTI m_stRTTI; \
-	virtual const MRTTI* GetRTTI() const { return &m_stRTTI; }
+	virtual const MRTTI* GetRTTI() const override { return &m_stRTTI; }
 
 // insert in source file of derived class of inheritance tree
 #define MImplementRTTI(classname, baseclassname) \

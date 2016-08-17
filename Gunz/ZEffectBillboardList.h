@@ -27,7 +27,10 @@ struct ZEFFECTBILLBOARDITEM : public ZEFFECTITEM , public CMemPoolSm<ZEFFECTBILL
 	int		nDir;
 };
 
-class RealSpace2::RBaseTexture;
+namespace RealSpace2
+{
+	class RBaseTexture;
+}
 
 class ZEffectBillboardList : public ZEffectBase
 {

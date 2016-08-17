@@ -16,7 +16,7 @@ void MTabCtrlLook::OnDraw(MTabCtrl* pTabCtrl, MDrawContext* pDC)
 	pDC->Rectangle(r);
 }
 
-MRECT MTabCtrlLook::GetClientRect(MTabCtrl* pTabCtrl, MRECT& r)
+MRECT MTabCtrlLook::GetClientRect(MTabCtrl* pTabCtrl, const MRECT& r)
 {
 	MRECT t = r;
 	t.EnLarge(-1);

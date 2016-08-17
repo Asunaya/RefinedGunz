@@ -120,7 +120,7 @@ enum ZC_STATE_LOWER {
 };
 
 struct ZANIMATIONINFO {
-	char *Name;
+	const char *Name;
 	bool bEnableCancel;		// 캔슬 가능한지
 	bool bLoop;				// 반복 되는 동작
 	bool bMove;				// 움직임이 포함된 애니메이션

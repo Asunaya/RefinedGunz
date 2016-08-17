@@ -101,8 +101,8 @@ public:
 	}
 	bool Translate(char* poutStr, int maxlen, const _T& code, const int argnum, const char* arg1, va_list args )
 	{
-		map<_T, string>::iterator itor = m_StringMap.find(code);
-		if(itor==m_StringMap.end()) 
+		typename map<_T, string>::iterator itor = m_StringMap.find(code);
+		if(itor==m_StringMap.end())
 		{
 			_ASSERT(0);
 			return false;
@@ -148,7 +148,7 @@ public:
 					int nParam = cur - '0' - 1;
 					if ( (nParam < argnum) && (argv[nParam] != NULL) )
 					{
-						strcat(poutStr, argv[nParam]);
+						strcat_safe(poutStr, maxlen, argv[nParam]);
 						taridx += (int)strlen(argv[nParam]);
 					}
 					else

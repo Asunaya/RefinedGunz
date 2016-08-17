@@ -419,7 +419,7 @@ void MButtonLook::OnDraw(MButton* pButton, MDrawContext* pDC)
 	}
 }
 
-MRECT MButtonLook::GetClientRect(MButton* pButton, MRECT& r)
+MRECT MButtonLook::GetClientRect(MButton* pButton, const MRECT& r)
 {
 	return r;
 }

@@ -138,7 +138,7 @@ private:
 template <typename T>
 auto MakePairValueAdapter(T&& Container)
 {
-	return PairValueAdapter<std::remove_reference<T>::type>(Container);
+	return PairValueAdapter<typename std::remove_reference<T>::type>(Container);
 }
 
 template <typename T, size_t size>

@@ -52,7 +52,7 @@ void MLabelLook::OnDraw(MLabel* pLabel, MDrawContext* pDC)
 	pDC->SetHighlightColor(PrevHCol);
 }
 
-MRECT MLabelLook::GetClientRect(MLabel* pLabel, MRECT& r)
+MRECT MLabelLook::GetClientRect(MLabel* pLabel, const MRECT& r)
 {
 	MRECT t = r;
 	t.EnLarge(-1);

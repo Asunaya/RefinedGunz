@@ -18,7 +18,7 @@ class MButton;
 class MTabCtrlLook{
 public:
 	virtual void OnDraw(MTabCtrl* pTabCtrl, MDrawContext* pDC);
-	virtual MRECT GetClientRect(MTabCtrl* pTabCtrl, MRECT& r);
+	virtual MRECT GetClientRect(MTabCtrl* pTabCtrl, const MRECT& r);
 };
 
 

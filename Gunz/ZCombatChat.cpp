@@ -5,7 +5,6 @@
 #include "ZInterfaceItem.h"
 #include "ZApplication.h"
 #include "ZInterfaceListener.h"
-//#include "MListBox.h"
 #include "ZIDLResource.h"
 #include "ZPost.h"
 #include "MChattingFilter.h"
@@ -30,10 +29,11 @@ bool ZTabPlayerList::OnShow(void)
 	RemoveAll();
 
 	// Push Target List
-	for(ZCharacterManager::iterator i=ZGetCharacterManager()->begin(); i!=ZGetCharacterManager()->end();i++)
+	for (auto i = ZGetCharacterManager()->begin(); i != ZGetCharacterManager()->end(); i++)
 	{
-		ZCharacter *pChar = i->second;
-		if(pChar->IsAdminHide()) continue;
+		ZCharacter *pChar = nullptr;// i->second;
+		if(ZGetGame()->m_pMyCharacter->IsAdminHide())
+			continue;
 		Add(pChar->GetProperty()->szName);
 	}
 
@@ -71,8 +71,8 @@ void ZTabPlayerList::OnPickPlayer()
 		m_pEditChat->AddText(pszString);
 	}
 }
-/////////////////
-
+///////////////////
+//
 class MCombatChatInputListener : public MListener{
 public:
 	virtual bool OnCommand(MWidget* pWidget, const char* szMessage){
@@ -153,7 +153,6 @@ bool ZCombatChat::Create( const char* szOutputTxtarea,bool bUsePlayerList)
 	}
 
 	m_pChattingOutput = NULL;
-//	pWidget = m_pIDLResource->FindWidget(ZIITEM_COMBAT_CHATOUTPUT);
 	pWidget = m_pIDLResource->FindWidget( szOutputTxtarea);
 	if (pWidget!=NULL)
 	{
@@ -163,8 +162,6 @@ bool ZCombatChat::Create( const char* szOutputTxtarea,bool bUsePlayerList)
 	if (m_pChattingOutput != NULL)
 	{
 		m_pChattingOutput->Clear();
-//		m_pChattingOutput->RemoveAll();
-//		m_pChattingOutput->GetScrollBar()->Show(false);
 	}
 	
 	pWidget = m_pIDLResource->FindWidget(ZIITEM_COMBAT_CHATINPUT);
@@ -240,7 +237,6 @@ void ZCombatChat::UpdateChattingBox()
 
 void ZCombatChat::EnableInput(bool bEnable, bool bToTeam)
 {
-	extern bool g_bNewChat;
 	if (g_bNewChat)
 	{
 		bEnable = false;
@@ -275,10 +271,6 @@ void ZCombatChat::EnableInput(bool bEnable, bool bToTeam)
 			if (!m_pInputEdit->IsFocus()) m_pInputEdit->SetFocus();
 		}
 	}
-	else
-	{
-//		ZApplication::GetGameInterface()->SetFocus();
-	}
 
 	m_bChatInputVisible = bEnable;
 
@@ -292,8 +284,6 @@ void ZCombatChat::EnableInput(bool bEnable, bool bToTeam)
 		ZPostPeerChatIcon(false);
 	}
 }
-
-extern bool g_bNewChat;
 
 void ZCombatChat::OutputChatMsg(const char* szMsg)
 {

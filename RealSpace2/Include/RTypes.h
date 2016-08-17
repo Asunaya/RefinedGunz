@@ -240,7 +240,8 @@ void TransformBox( rboundingbox* result, const rboundingbox& src, const rmatrix&
 
 static inline rvector GetReflectionVector(const rvector& v, const rvector& n)
 {
-	float dot = D3DXVec3Dot(&(-v), &n);
+	auto neg = -v;
+	float dot = D3DXVec3Dot(&neg, &n);
 
 	return (2 * dot)*n + v;
 }

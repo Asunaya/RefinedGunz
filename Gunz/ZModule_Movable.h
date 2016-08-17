@@ -44,7 +44,7 @@ public:
 	virtual void InitStatus();
 
 	const rvector &GetVelocity() { return m_Velocity; }
-	void SetVelocity(rvector &vel) { m_Velocity=vel; }
+	void SetVelocity(const rvector &vel) { m_Velocity=vel; }
 	void SetVelocity(float x,float y,float z) { m_Velocity=rvector(x,y,z); }
 
 	const rvector &GetLastMove() { return m_lastMove; }

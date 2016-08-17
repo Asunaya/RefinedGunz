@@ -9,7 +9,7 @@ class MFrame;
 class MFrameLook{
 public:
 	virtual void OnDraw(MFrame* pFrame, MDrawContext* pDC);
-	virtual MRECT GetClientRect(MFrame* pFrame, MRECT& r);
+	virtual MRECT GetClientRect(MFrame* pFrame, const MRECT& r);
 };
 
 struct MFrameBtn

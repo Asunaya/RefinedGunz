@@ -380,7 +380,7 @@ void MThumbLook::OnDraw(MThumb* pThumb, MDrawContext* pDC)
 	pDC->FillRectangle(pThumb->GetClientRect());
 }
 
-MRECT MThumbLook::GetClientRect(MThumb* pThumb, MRECT& r)
+MRECT MThumbLook::GetClientRect(MThumb* pThumb, const MRECT& r)
 {
 	return r;
 }
@@ -484,7 +484,7 @@ void MScrollBarLook::OnDraw(MScrollBar* pScrollBar, MDrawContext* pDC)
 	pDC->FillRectangle(r.x, r.y, r.w, r.h);
 }
 
-MRECT MScrollBarLook::GetClientRect(MScrollBar* pScrollBar, MRECT& r)
+MRECT MScrollBarLook::GetClientRect(MScrollBar* pScrollBar, const MRECT& r)
 {
 	return r;
 }

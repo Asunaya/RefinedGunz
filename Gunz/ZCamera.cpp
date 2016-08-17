@@ -336,7 +336,7 @@ void ZCamera::StopShock()
 	ZGetInput()->SetDeviceForcesXY(0,0);
 }
 
-void ZCamera::SetDirection(rvector& dir)
+void ZCamera::SetDirection(const rvector& dir)
 {
 	rvector a_dir = dir;
 	Normalize(a_dir);

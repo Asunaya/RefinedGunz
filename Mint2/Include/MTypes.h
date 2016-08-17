@@ -1,6 +1,8 @@
 #ifndef MTYPES_H
 #define MTYPES_H
 
+#include "GlobalTypes.h"
+
 /// À§Ä¡
 struct MPOINT{
 	int x, y;
@@ -23,7 +25,7 @@ public:
 		MRECT::x = x, MRECT::y = y;
 		MRECT::w = w, MRECT::h = h;
 	}
-	bool InPoint(MPOINT& p){
+	bool InPoint(const MPOINT& p){
 		if(p.x>=x && p.x<=x+w && p.y>=y && p.y<=y+h) return true;
 		return false;
 	}
@@ -71,10 +73,10 @@ public:
 		MCOLOR::r = r, MCOLOR::g = g, MCOLOR::b = b, MCOLOR::a = a;
 	}
 	MCOLOR(unsigned long int argb){
-		a = unsigned char( (argb & 0xFF000000) >> 24 );
-		r = unsigned char( (argb & 0x00FF0000) >> 16 );
-		g = unsigned char( (argb & 0x0000FF00) >> 8 );
-		b = unsigned char( (argb & 0x000000FF) );
+		a = u8( (argb & 0xFF000000) >> 24 );
+		r = u8( (argb & 0x00FF0000) >> 16 );
+		g = u8( (argb & 0x0000FF00) >> 8 );
+		b = u8( (argb & 0x000000FF) );
 	}
 	
 	unsigned long int GetARGB(void){

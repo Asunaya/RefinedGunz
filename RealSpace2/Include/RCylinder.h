@@ -48,8 +48,8 @@ public:
 	virtual ~RCylinder(void);
 };
 
-void RCylinder::setTopCentre( const rvector& in_ ) { mTopCentre = in_; mHeight = D3DXVec3Length(&(mTopCentre - mBottomCentre)); }
-void RCylinder::setBottomCentre( const rvector& in_ ) { mBottomCentre = in_; mHeight = D3DXVec3Length(&(mTopCentre - mBottomCentre)); }
+void RCylinder::setTopCentre(const rvector& in_) { mTopCentre = in_; auto temp = mTopCentre - mBottomCentre;  mHeight = D3DXVec3Length(&temp); }
+void RCylinder::setBottomCentre( const rvector& in_ ) { mBottomCentre = in_; auto temp = mTopCentre - mBottomCentre;  mHeight = D3DXVec3Length(&temp); }
 void RCylinder::setHeight( const float& in_ ) { mHeight = in_; }
 void RCylinder::setRadius( const float& in_ ) { mRadius = in_; }
 void RCylinder::setTransform( rmatrix& world_ ) { mWorld = world_; }

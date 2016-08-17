@@ -492,13 +492,13 @@ inline void ZPostRequestBringBackAccountItem(const MUID& uidChar, const MUID& ui
 inline void ZPostRequestEquipItem(const MUID& uidChar, const MUID& uidItem, const MMatchCharItemParts parts)
 {
 	ZPOSTCMD3(MC_MATCH_REQUEST_EQUIP_ITEM, MCommandParameterUID(uidChar), 
-		MCommandParameterUID(uidItem), MCommandParameterUInt(unsigned long int(parts))); 
+		MCommandParameterUID(uidItem), MCommandParameterUInt(u32(parts))); 
 }
 
 inline void ZPostRequestTakeoffItem(const MUID& uidChar, const MMatchCharItemParts parts)
 {
 	ZPOSTCMD2(MC_MATCH_REQUEST_TAKEOFF_ITEM, MCommandParameterUID(uidChar), 
-		MCommandParameterUInt(unsigned long int(parts))); 
+		MCommandParameterUInt(u32(parts))); 
 }
 
 // 다른 사람의 플레이어 정보 요청

@@ -1042,7 +1042,7 @@ void MTextAreaLook::OnDraw(MTextArea* pTextArea, MDrawContext* pDC)
 	OnTextDraw_WordWrap(pTextArea, pDC);
 }
 
-MRECT MTextAreaLook::GetClientRect(MTextArea* pTextArea, MRECT& r)
+MRECT MTextAreaLook::GetClientRect(MTextArea* pTextArea, const MRECT& r)
 {
 	return MRECT(r.x, r.y, r.w, r.h);
 }

@@ -1150,7 +1150,7 @@ bool MWidget::IsExclusive(MWidget* pWidget)
 }
 
 
-MWidget* MWidget::Find(MPOINT& p)
+MWidget* MWidget::Find(const MPOINT& p)
 {
 	if(IsVisible()==false) return NULL;
 

@@ -19,7 +19,7 @@ class MScrollBar;
 class MTextAreaLook{
 public:
 	virtual void OnDraw(MTextArea* pTextArea, MDrawContext* pDC);
-	virtual MRECT GetClientRect(MTextArea* pTextArea, MRECT& r);
+	virtual MRECT GetClientRect(MTextArea* pTextArea, const MRECT& r);
 
 private:
 	virtual void OnFrameDraw(MTextArea* pTextArea, MDrawContext* pDC);

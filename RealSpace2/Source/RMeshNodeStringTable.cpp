@@ -75,13 +75,13 @@ RMeshNodeStringTable::~RMeshNodeStringTable()
 
 }
 
-int RMeshNodeStringTable::Add(string& str,int id)
+int RMeshNodeStringTable::Add(const string& str,int id)
 {
 	m_table.insert(rmesh_node_table::value_type(str, id));
 	return 1;
 }
 
-int RMeshNodeStringTable::Get(string& str)
+int RMeshNodeStringTable::Get(const string& str)
 {
 	rmesh_node_table::iterator itor = m_table.find(str);
 	if (itor != m_table.end()) {

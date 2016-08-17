@@ -849,7 +849,7 @@ void MEditLook::OnDraw(MEdit* pEdit, MDrawContext* pDC, bool bShowLanguageTab)
 	OnTextDraw(pEdit, pDC, bShowLanguageTab);
 }
 
-MRECT MEditLook::GetClientRect(MEdit* pEdit, MRECT& r)
+MRECT MEditLook::GetClientRect(MEdit* pEdit, const MRECT& r)
 {
 	return MRECT(r.x, r.y, r.w, r.h);
 	//return MRECT(r.x, r.y, r.w-10, r.h);	// IME Indicator ¿©À¯ºÐ

@@ -11,7 +11,7 @@ class MLabel;
 class MLabelLook{
 public:
 	virtual void OnDraw(MLabel* pLabel, MDrawContext* pDC);
-	virtual MRECT GetClientRect(MLabel* pLabel, MRECT& r);
+	virtual MRECT GetClientRect(MLabel* pLabel, const MRECT& r);
 };
 
 /// Label

@@ -88,6 +88,28 @@ struct PortalContext
 	}
 };
 
+struct PortalContextPair
+{
+	PortalContextPair(typename std::unordered_map<ZCharacter *, PortalPair>::iterator it)
+		: p{ it->second[0], it->second[1] }
+	{
+		p[0].Other = &p[1];
+		p[1].Other = &p[2];
+	}
+
+	auto& operator[](size_t idx)
+	{
+		return p[idx];
+	}
+
+	auto& operator[](size_t idx) const
+	{
+		return p[idx];
+	}
+
+	PortalContext p[2];
+};
+
 struct CameraContext
 {
 	D3DXVECTOR3 Pos;
@@ -99,12 +121,10 @@ struct RecursionContext
 {
 	int Depth = 0;
 	PortalInfo* ViewingPortal;
-	ArrayView<PortalContext[2]> Portals;
+	ArrayView<PortalContextPair> Portals;
 	CameraContext Cam;
 
-	RecursionContext(int d, const ArrayView<PortalContext[2]>& p) : Depth(d), Portals(p)
-	{
-	}
+	RecursionContext(int d, const ArrayView<PortalContextPair>& p) : Depth(d), Portals(p) {}
 };
 
 class PortalDraw

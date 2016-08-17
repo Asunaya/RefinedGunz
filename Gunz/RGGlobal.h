@@ -81,11 +81,11 @@ class StackArray
 {
 public:
 	template <typename... ArgsType>
-	StackArray(T* p, size_t s, bool h, ArgsType... Args) : ptr(p), Size(s), Heap(h)
+	StackArray(T* p, size_t s, bool h, ArgsType&&... Args) : ptr(p), Size(s), Heap(h)
 	{
 		for (size_t i = 0; i < s; i++)
 		{
-			new (p + i) T(Args...);
+			new (p + i) T(std::forward<ArgsType>(Args)...);
 		}
 	}
 

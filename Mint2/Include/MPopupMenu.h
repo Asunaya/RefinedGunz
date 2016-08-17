@@ -20,7 +20,7 @@ protected:
 public:
 	MPopupMenuLook();
 	virtual void OnDraw(MPopupMenu* pPopupMenu, MDrawContext* pDC);
-	virtual MRECT GetClientRect(MPopupMenu* pPopupMenu, MRECT& r);
+	virtual MRECT GetClientRect(MPopupMenu* pPopupMenu, const MRECT& r);
 };
 
 class MMenuItem : public MWidget{

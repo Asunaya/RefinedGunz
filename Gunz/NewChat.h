@@ -1,5 +1,4 @@
 #pragma once
-#include <d3dx9.h>
 #include <vector>
 #include <string>
 #include <memory>
@@ -35,11 +34,11 @@ struct ChatLine{
 	D3DCOLOR DefaultColor;
 	std::vector<FormatSpecifier> vFormatSpecifiers;
 
-	ChatLine(unsigned long long &a, std::string &b) : Time(a), Msg(b), DefaultColor(0) { }
+	ChatLine(unsigned long long a, const std::string& b) : Time(a), Msg(b), DefaultColor(0) { }
 
 	int GetLines() const {
 		int i = 1;
-		for (std::vector<FormatSpecifier>::const_iterator it = vFormatSpecifiers.begin(); it != vFormatSpecifiers.end(); it++)
+		for (auto it = vFormatSpecifiers.begin(); it != vFormatSpecifiers.end(); it++)
 		if (it->ft == FT_WRAP || it->ft == FT_LINEBREAK)
 			i++;
 
@@ -47,7 +46,7 @@ struct ChatLine{
 	}
 
 	void ClearLineBreaks(){
-		for (std::vector<FormatSpecifier>::iterator it = vFormatSpecifiers.begin(); it != vFormatSpecifiers.end();)
+		for (auto it = vFormatSpecifiers.begin(); it != vFormatSpecifiers.end();)
 		if (it->ft == FT_WRAP)
 			it = vFormatSpecifiers.erase(it);
 		else
@@ -56,7 +55,7 @@ struct ChatLine{
 
 	int GetNumLineBreaks() const {
 		int i = 0;
-		for (std::vector<FormatSpecifier>::const_iterator it = vFormatSpecifiers.begin(); it != vFormatSpecifiers.end(); it++)
+		for (auto it = vFormatSpecifiers.begin(); it != vFormatSpecifiers.end(); it++)
 			if (it->ft == FT_WRAP)
 				i++;
 
@@ -65,7 +64,7 @@ struct ChatLine{
 
 	const FormatSpecifier *GetLineBreak(int n) const {
 		int i = 0;
-		for (std::vector<FormatSpecifier>::const_iterator it = vFormatSpecifiers.begin(); it != vFormatSpecifiers.end(); it++){
+		for (auto it = vFormatSpecifiers.begin(); it != vFormatSpecifiers.end(); it++){
 			if (it->ft == FT_WRAP || it->ft == FT_LINEBREAK){
 				if (i == n)
 					return &*it;
@@ -83,7 +82,7 @@ struct ChatLine{
 			return;
 		}
 
-		for (std::vector<FormatSpecifier>::const_reverse_iterator it = vFormatSpecifiers.crbegin(); it != vFormatSpecifiers.crend(); it++)
+		for (auto it = vFormatSpecifiers.crbegin(); it != vFormatSpecifiers.crend(); it++)
 		if (it->nStartPos < n){
 			vFormatSpecifiers.insert(it.base(), FormatSpecifier(n, FT_WRAP));
 			return;

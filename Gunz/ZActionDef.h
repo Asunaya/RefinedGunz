@@ -8,10 +8,7 @@ modified by : 정동섭 @ 2006/3/16
 #ifndef ZACTIONDEF_H
 #define ZACTIONDEF_H
 
-// 0 ~ 255
-// 코드의 효율상, Action ID는 순차적으로 증가해야 한다.
-// ZConfiguration.cpp의 초기 테이블(DefaultActionKeys)에 추가해야 한다.
-const enum
+enum
 {
 	ZACTION_FORWARD = 0,
 	ZACTION_BACK,

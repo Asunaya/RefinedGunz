@@ -189,7 +189,7 @@ void MDrawContext::SetEffect(MDrawEffect effect)
 	m_Effect = effect;
 }
 
-void MDrawContext::FillRectangle(MRECT& r)
+void MDrawContext::FillRectangle(const MRECT& r)
 {
 	FillRectangle(r.x, r.y, r.w, r.h);
 }

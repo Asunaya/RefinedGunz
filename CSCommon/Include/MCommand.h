@@ -126,7 +126,7 @@ public:
 	bool GetParameter(void* pValue, int i, MCommandParameterType t, int nBufferSize=-1) const;
 
 	MUID GetSenderUID(void){ return m_Sender; }
-	void SetSenderUID(MUID &uid) { m_Sender = uid; }
+	void SetSenderUID(const MUID &uid) { m_Sender = uid; }
 	MUID GetReceiverUID(void){ return m_Receiver; }
 
 	bool IsLocalCommand(void){ return (m_Sender==m_Receiver); }
@@ -147,7 +147,13 @@ public:
 	/// @param pPM		[in] 커맨드 매니져(MCommandDesc를 enum할 수 있다.)
 	/// @return			성공 여부
 	template <typename T = std::allocator<u8>>
-	bool SetData(const char* pData, MCommandManager* pCM, unsigned short nDataLen=USHRT_MAX, bool ReadSerial = true, T& Alloc = T());
+	bool SetData(const char* pData, MCommandManager* pCM, unsigned short nDataLen,
+		bool ReadSerial, T& Alloc);
+	bool SetData(const char* pData, MCommandManager* pCM, unsigned short nDataLen = USHRT_MAX, bool ReadSerial = true)
+	{
+		std::allocator<u8> alloc;
+		SetData(pData, pCM, nDataLen, true, alloc);
+	}
 
 	int GetSize() const;
 };
@@ -161,7 +167,8 @@ auto MakeParam(AllocT& Alloc, ArgsT&&... Args)
 }
 
 template <typename T>
-bool MCommand::SetData(const char* pData, MCommandManager* pCM, unsigned short nDataLen, bool ReadSerial, T& Alloc)
+bool MCommand::SetData(const char* pData, MCommandManager* pCM, unsigned short nDataLen,
+	bool ReadSerial, T& Alloc)
 {
 	Reset();
 

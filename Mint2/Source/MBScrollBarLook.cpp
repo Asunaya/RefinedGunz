@@ -111,7 +111,7 @@ void MBScrollBarLook::OnDraw(MScrollBar* pScrollBar, MDrawContext* pDC)
 	pDC->SetClipRect(rtemp);
 }
 
-MRECT MBScrollBarLook::GetClientRect(MScrollBar* pScrollBar, MRECT& r)
+MRECT MBScrollBarLook::GetClientRect(MScrollBar* pScrollBar, const MRECT& r)
 {
 	return r;
 	/*

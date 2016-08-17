@@ -845,7 +845,7 @@ void MListBoxLook::OnDraw(MListBox* pListBox, MDrawContext* pDC)
 //	pDC->EndFont();
 }
 
-MRECT MListBoxLook::GetClientRect(MListBox* pListBox, MRECT& r)
+MRECT MListBoxLook::GetClientRect(MListBox* pListBox, const MRECT& r)
 {
 	return MRECT(r.x+1, r.y+1,
 		(pListBox->GetScrollBar()->IsVisible()==true)?(r.w - pListBox->GetScrollBar()->GetClientRect().w-2):(r.w-2),

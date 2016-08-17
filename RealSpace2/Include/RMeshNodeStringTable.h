@@ -84,8 +84,8 @@ public:
 
 	void Destroy();
 
-	int Add(string& str,int );
-	int Get(string& str);
+	int Add(const string& str,int );
+	int Get(const string& str);
 	int Get(char* str) { return Get(string(str)); }
 
 	rmesh_node_table m_table;

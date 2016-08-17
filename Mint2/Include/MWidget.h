@@ -348,9 +348,9 @@ public:
 	MWidget* FindExclusiveDescendant(void);
 
 	/// 위치로 위젯 검색
-	MWidget* Find(int x, int y){ return Find(MPOINT(x, y)); }
+	MWidget* Find(int x, int y) { return Find(MPOINT(x, y)); }
 	/// 위치로 위젯 검색
-	MWidget* Find(MPOINT& p);
+	MWidget* Find(const MPOINT& p);
 	MWidget* FindDropAble(MPOINT& p);
 
 	/// 해당 ID의 Drag Object가 Drop가능한가?

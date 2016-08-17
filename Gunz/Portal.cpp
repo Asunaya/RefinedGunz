@@ -1629,17 +1629,13 @@ void Portal::UpdateAndRender(const RecursionContext* PrevContext)
 	auto NumContexts = PortalList.size();
 
 	auto it = PortalList.begin();
-	auto Contexts = MAKE_STACK_ARRAY(PortalContext[2], NumContexts,
-		[&](PortalContext(*p)[2], size_t pos) {
-		for (int i = 0; i < 2; i++)
-		{
-			new (&(*p)[i]) PortalContext(it->second[i]);
-			(*p)[i].Other = &(*p)[!i];
-		}
-		it++;
+	auto Contexts = MAKE_STACK_ARRAY(PortalContextPair, NumContexts,
+		[&](PortalContextPair* p, size_t pos) {
+			new (p) PortalContextPair(it);
+			it++;
 	});
 
-	RecursionContext rc(RecursionCount, { Contexts.get(), NumContexts });
+	RecursionContext rc(RecursionCount, ArrayView<PortalContextPair>{ Contexts.get(), NumContexts });
 
 	CameraContext CurCamera;
 	if (!PrevContext)

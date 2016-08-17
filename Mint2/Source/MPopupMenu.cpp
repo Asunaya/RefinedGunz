@@ -34,7 +34,7 @@ void MPopupMenuLook::OnDraw(MPopupMenu* pPopupMenu, MDrawContext* pDC)
 	}
 }
 
-MRECT MPopupMenuLook::GetClientRect(MPopupMenu* pPopupMenu, MRECT& r)
+MRECT MPopupMenuLook::GetClientRect(MPopupMenu* pPopupMenu, const MRECT& r)
 {
 	if(pPopupMenu->GetPopupMenuType()==MPMT_VERTICAL)
 		return MRECT(1, 1, r.w-2, r.h-2);

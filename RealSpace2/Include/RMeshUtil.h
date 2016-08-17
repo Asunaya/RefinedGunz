@@ -672,7 +672,7 @@ public:
 		clear();
 	}
 
-	iterator Erase(iterator where) {
+	auto Erase(typename RHashList<T>::iterator where) {
 
 		auto itor = erase(where);
 

@@ -38,7 +38,7 @@ public:
 	MBScrollBarLook(void);
 
 	virtual void OnDraw(MScrollBar* pScrollBar, MDrawContext* pDC);
-	virtual MRECT GetClientRect(MScrollBar* pScrollBar, MRECT& r);
+	virtual MRECT GetClientRect(MScrollBar* pScrollBar, const MRECT& r);
 };
 
 #endif
