@@ -482,24 +482,14 @@ bool ZOptionInterface::SaveInterfaceOption(void)
 		if(altKey!=-1)
 			ZGetInput()->RegisterActionKey(i,altKey);
 
-		// ZConfiguration으로 옵션 저장
 		ZGetConfiguration()->GetKeyboard()->ActionKeys[i].nVirtualKey = nKey;
 		ZGetConfiguration()->GetKeyboard()->ActionKeys[i].nVirtualKeyAlt = altKey;
 	}
 
-	/*
-	int nCnt[ZACTION_COUNT];
-
-	for(i=0; i<ZACTION_COUNT; i++)
-	{
-		nCnt[i] = ZGetConfiguration()->GetKeyboard()->ActionKeys[i].nVirtualKey;
-	}
-	*/
-
 	{
 		Z_VIDEO_WIDTH = RGetScreenWidth();
 		Z_VIDEO_HEIGHT	= RGetScreenHeight();
-		Z_VIDEO_FULLSCREEN	= RIsFullScreen();
+		Z_VIDEO_FULLSCREEN	= RGetFullscreenMode();
 		Z_VIDEO_BPP	= RGetPixelFormat()==D3DFMT_X8R8G8B8 ? 32:16 ;
 
 		MComboBox*	pWidget = (MComboBox*)pResource->FindWidget("CharTexLevel");
@@ -1366,7 +1356,7 @@ void ZOptionInterface::GetOldScreenResolution()
 	RMODEPARAMS ModeParams;
 	ModeParams.nWidth	= mOldScreenWidth;
 	ModeParams.nHeight	= mOldScreenHeight;
-	ModeParams.bFullScreen	= RIsFullScreen();
+	ModeParams.FullscreenMode	= RGetFullscreenMode();
 	ModeParams.PixelFormat	= mnOldBpp;
 
 	mOldScreenWidth = RGetScreenWidth();
@@ -1434,7 +1424,7 @@ bool ZOptionInterface::TestScreenResolution()
 
 		ModeParams.nWidth = ddm.Width;
 		ModeParams.nHeight = ddm.Height;
-		ModeParams.bFullScreen = RIsFullScreen();
+		ModeParams.FullscreenMode = RGetFullscreenMode();
 		ModeParams.PixelFormat = ddm.Format;
 
 		RResetDevice(&ModeParams);

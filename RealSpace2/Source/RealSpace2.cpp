@@ -4,10 +4,11 @@
 #include "RParticleSystem.h"
 #include "RFrameWork.h"
 #include "RBaseTexture.h"
-//#include "d3dxerr.h"
 #include "RMeshUtil.h"
 #include "RFont.h"
 #include "dxerr9.h"
+
+#pragma comment ( lib, "d3d9.lib" )
 
 #ifdef _HSHIELD
 #include "../../Gunz/HShield/HShield.h"
@@ -15,22 +16,21 @@
 
 _NAMESPACE_REALSPACE2_BEGIN
 
-#pragma comment ( lib, "d3d9.lib" )
-
 extern RFFUNCTION g_pFunctions[RF_ENDOFRFUNCTIONTYPE];
 
-bool g_bHardwareTNL,g_bFullScreen,g_bSupportVS,g_bAvailUserClipPlane;
-int g_nScreenWidth,g_nScreenHeight,g_nPicmip;
+bool g_bHardwareTNL, g_bSupportVS, g_bAvailUserClipPlane;
+FullscreenType g_FullscreenMode = FullscreenType::Fullscreen;
+int g_nScreenWidth, g_nScreenHeight, g_nPicmip;
 RPIXELFORMAT		g_PixelFormat;
-LPDIRECT3D9			g_pD3D=NULL;
-LPDIRECT3DDEVICE9	g_pd3dDevice=NULL;
+LPDIRECT3D9			g_pD3D = NULL;
+LPDIRECT3DDEVICE9	g_pd3dDevice = NULL;
 D3DADAPTER_IDENTIFIER9	g_DeviceID;
-D3DPRESENT_PARAMETERS	g_d3dpp; 
+D3DPRESENT_PARAMETERS	g_d3dpp;
 D3DCAPS9				g_d3dcaps;
 HWND					g_hWnd;
-MZFileSystem			*g_pFileSystem=NULL;
+MZFileSystem			*g_pFileSystem = NULL;
 RParticleSystem			g_ParticleSystem;
-HMODULE					g_hD3DLibrary=NULL;
+HMODULE					g_hD3DLibrary = NULL;
 bool g_bStencilBuffer;
 static bool DynamicResourceLoading = false;
 
@@ -38,14 +38,6 @@ bool IsDynamicResourceLoad()
 {
 	return DynamicResourceLoading;
 }
-
-// FIXED RESOLUTION 관련 ...
-//LPDIRECT3DTEXTURE9 g_lpTexture = 0;
-//LPDIRECT3DSURFACE9 g_lpSurface = 0;
-//LPDIRECT3DSURFACE9 g_lpStencil = 0;
-//LPDIRECT3DSURFACE9 g_lpSurfaceBackup = 0;
-//LPDIRECT3DSURFACE9 g_lpStencilBackup = 0;
-//bool			g_bFixedResolution = false;
 
 //Fog
 float g_fFogNear;
@@ -64,9 +56,11 @@ const bool	bTripleBuffer=false;
 bool		g_bQuery = false;
 
 D3DMULTISAMPLE_TYPE	g_MultiSample = D3DMULTISAMPLE_NONE;
+
 void RSetQuery(bool b)		{ g_bQuery = b; }
 bool RIsQuery()				{ return g_bQuery; }
-bool RIsFullScreen()		{ return g_bFullScreen; }
+bool RIsFullscreen()		{ return g_FullscreenMode == FullscreenType::Fullscreen; }
+FullscreenType	RGetFullscreenMode() { return g_FullscreenMode; }
 bool RIsHardwareTNL()		{ return g_bHardwareTNL; }
 bool RIsSupportVS()			{ return g_bSupportVS;}
 bool RIsTrilinear()			{ return g_bTrilinear; }
@@ -159,52 +153,11 @@ void RSetFileSystem(MZFileSystem *pFileSystem) { g_pFileSystem=pFileSystem; }
 
 RParticleSystem *RGetParticleSystem() { return &g_ParticleSystem; }
 
-// 초기화 & 종료
-
-/*
-#include <ddraw.h>
-
-//m_MaxAllocMem = m_pDevice->GetAvailableTextureMem();
-
-BOOL GetVidMemory(DWORD& dwTotal,DWORD& dwFree) {
-
-	LPDIRECTDRAW7 lpDD = NULL;
-	DDSCAPS2      ddsCaps2; 
-	HRESULT       hr; 
-
-	hr = DirectDrawCreateEx(NULL, (VOID**)&lpDD, IID_IDirectDraw7, NULL );
-
-	if (FAILED(hr))
-		return FALSE; 
-
-	ZeroMemory(&ddsCaps2, sizeof(ddsCaps2));
-
-	ddsCaps2.dwCaps = DDSCAPS_VIDEOMEMORY | DDSCAPS_LOCALVIDMEM; 
-
-	hr = lpDD->GetAvailableVidMem(&ddsCaps2, &dwTotal, &dwFree); 
-
-	if (FAILED(hr))
-		return FALSE;
-
-	if(lpDD)
-		lpDD->Release();
-
-	return TRUE;
-}
-*/
 static void InitDevice()
 {
 	g_pd3dDevice->SetRenderState( D3DRS_NORMALIZENORMALS, TRUE );
 	g_pd3dDevice->SetRenderState( D3DRS_LIGHTING, FALSE );
 	g_pd3dDevice->SetRenderState(D3DRS_CULLMODE  , D3DCULL_NONE );
-/*
-	g_pd3dDevice->SetTextureStageState( 0, D3DTSS_MAGFILTER , D3DTEXF_LINEAR);
-	g_pd3dDevice->SetTextureStageState( 0, D3DTSS_MINFILTER , D3DTEXF_LINEAR);
-	g_pd3dDevice->SetTextureStageState( 0, D3DTSS_MIPFILTER , g_bTrilinear ? D3DTEXF_LINEAR : D3DTEXF_NONE );
-	g_pd3dDevice->SetTextureStageState( 1, D3DTSS_MAGFILTER , D3DTEXF_LINEAR);
-	g_pd3dDevice->SetTextureStageState( 1, D3DTSS_MINFILTER , D3DTEXF_LINEAR);
-	g_pd3dDevice->SetTextureStageState( 1, D3DTSS_MIPFILTER , g_bTrilinear ? D3DTEXF_LINEAR : D3DTEXF_NONE );
-*/
 	g_pd3dDevice->SetSamplerState( 0, D3DSAMP_MAGFILTER , D3DTEXF_LINEAR);
 	g_pd3dDevice->SetSamplerState( 0, D3DSAMP_MINFILTER , D3DTEXF_LINEAR);
 	g_pd3dDevice->SetSamplerState( 0, D3DSAMP_MIPFILTER , g_bTrilinear ? D3DTEXF_LINEAR : D3DTEXF_NONE );
@@ -212,27 +165,15 @@ static void InitDevice()
 	g_pd3dDevice->SetSamplerState( 1, D3DSAMP_MINFILTER , D3DTEXF_LINEAR);
 	g_pd3dDevice->SetSamplerState( 1, D3DSAMP_MIPFILTER , g_bTrilinear ? D3DTEXF_LINEAR : D3DTEXF_NONE );
 
-//	g_pd3dDevice->SetRenderState(D3DRS_ALPHAREF, (DWORD)0x00000000);
 	g_pd3dDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_NOTEQUAL );
 
 	RSetWBuffer(true);
 
-//	g_pd3dDevice->SetRenderState(D3DRS_ZFUNC ,D3DCMP_LESSEQUAL);
-
 	float fMaxBias = -1.0f;
-//	g_pd3dDevice->SetTextureStageState( 0 ,D3DTSS_MIPMAPLODBIAS , *(unsigned long*)&fMaxBias);
-//	g_pd3dDevice->SetTextureStageState( 1 ,D3DTSS_MIPMAPLODBIAS , *(unsigned long*)&fMaxBias);
 	g_pd3dDevice->SetSamplerState( 0 ,D3DSAMP_MIPMAPLODBIAS , *(unsigned long*)&fMaxBias);
 	g_pd3dDevice->SetSamplerState( 1 ,D3DSAMP_MIPMAPLODBIAS , *(unsigned long*)&fMaxBias);
-/*
-	if(g_MultiSample)
-    	g_pd3dDevice->SetRenderState( D3DRS_MULTISAMPLEANTIALIAS , TRUE );
-	else 
-		g_pd3dDevice->SetRenderState( D3DRS_MULTISAMPLEANTIALIAS , FALSE );
-*/
-	g_nVidioMemory = g_pd3dDevice->GetAvailableTextureMem()/2;
 
-	//mlog("Video memory %f \n",g_nVidioMemory / float(1024*1024) );
+	g_nVidioMemory = g_pd3dDevice->GetAvailableTextureMem()/2;
 
 	if( D3DERR_NOTAVAILABLE == g_pd3dDevice->CreateQuery( D3DQUERYTYPE_OCCLUSION, NULL ) )
 		g_bQuery = false;
@@ -240,14 +181,6 @@ static void InitDevice()
 		g_bQuery = true;
 
 	RBeginScene();
-
-/*
-	DWORD v1,v2;
-
-	if(GetVidMemory(v1,v2)) {
-		int k=0;
-	}
-*/
 }
 
 void CheckMipFilter()
@@ -283,20 +216,6 @@ bool RInitDisplay(HWND hWnd, const RMODEPARAMS *params)
 		return false;
 	}
 
-#ifdef _HSHIELD
-	char szSysDir[MAX_PATH] = { 0, };
-	GetSystemDirectory(szSysDir, MAX_PATH);
-
-	int nRet = _AhnHS_CheckAPIHooked("d3d9.dll", "Direct3DCreate9", szSysDir);
-	if (nRet == HS_ERR_API_IS_HOOKED)
-	{
-		mlog("d3d9.dll Hooking detected. (Error code = %x)\n", nRet);
-		// Direct3D 모듈이 후킹 또는 래퍼에 의해 사용되고 있으므로 게임을 종료하면 됩니다. 
-		return false;
-	}
-#endif 
-
-	// 가능한 그래픽카드 디바이스 체크
 	if (CheckVideoAdapterSupported()==false)
 	{
 		if (RError(RERROR_INVALID_DEVICE) != R_OK) return false;
@@ -304,12 +223,9 @@ bool RInitDisplay(HWND hWnd, const RMODEPARAMS *params)
 
 	D3DCAPS9 d3dcaps;
 	g_pD3D->GetDeviceCaps(D3DADAPTER_DEFAULT , D3DDEVTYPE_HAL , &d3dcaps );
-	g_pD3D->GetDeviceCaps(D3DADAPTER_DEFAULT , D3DDEVTYPE_HAL , &g_d3dcaps );	// 캐퍼 전역변수로 저장
+	g_pD3D->GetDeviceCaps(D3DADAPTER_DEFAULT , D3DDEVTYPE_HAL , &g_d3dcaps );
 	
 	g_bHardwareTNL = (d3dcaps.DevCaps & D3DDEVCAPS_HWTRANSFORMANDLIGHT ) != 0;
-
-//	g_bTrilinear = (d3dcaps)
-//	g_bHardwareTNL = false;
 
 	g_bAvailUserClipPlane = (d3dcaps.MaxUserClipPlanes > 0 )? true : false;
 	if(d3dcaps.RasterCaps & D3DPRASTERCAPS_WFOG) mlog("WFog Enabled Device.\n");
@@ -326,38 +242,24 @@ bool RInitDisplay(HWND hWnd, const RMODEPARAMS *params)
 		}
 	}
 
-	// get screen information
+	// Get screen information
 	HRESULT hr;
 	hr=g_pD3D->GetAdapterDisplayMode( D3DADAPTER_DEFAULT, &g_d3ddm );
 	
-	g_bFullScreen = params->bFullScreen;
+	g_FullscreenMode = params->FullscreenMode;
 	g_nScreenWidth = params->nWidth;
 	g_nScreenHeight = params->nHeight;
-	g_PixelFormat = /*params->bFullScreen ? params->PixelFormat :*/ g_d3ddm.Format;
+	g_PixelFormat = g_d3ddm.Format;
 	
 	ZeroMemory( &g_d3dpp, sizeof(g_d3dpp) );
 	g_d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;
 	g_d3dpp.BackBufferWidth = params->nWidth;
 	g_d3dpp.BackBufferHeight = params->nHeight;
-	g_d3dpp.BackBufferCount = bTripleBuffer ? 2 : 1;						// or 2 ??
-	g_d3dpp.Windowed   = !params->bFullScreen;
+	g_d3dpp.BackBufferCount = bTripleBuffer ? 2 : 1;
+	g_d3dpp.Windowed = params->FullscreenMode != FullscreenType::Fullscreen;
 	g_d3dpp.BackBufferFormat = g_PixelFormat;
 	g_d3dpp.EnableAutoDepthStencil = TRUE;
-
-/*	
-	if( SUCCEEDED(g_pD3D->CheckDeviceMultiSampleType( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL , g_PixelFormat, params->bFullScreen, D3DMULTISAMPLE_4_SAMPLES, NULL ))) {
-		g_MultiSample = D3DMULTISAMPLE_4_SAMPLES;
-	}	
-	else if( SUCCEEDED(g_pD3D->CheckDeviceMultiSampleType( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL , g_PixelFormat, params->bFullScreen, D3DMULTISAMPLE_2_SAMPLES, NULL ))) {
-		g_MultiSample = D3DMULTISAMPLE_2_SAMPLES;
-	}
-	else 
-		g_MultiSample = D3DMULTISAMPLE_NONE;
-
-	mlog("sample %d \n", int(g_MultiSample));
-*/
 	g_d3dpp.MultiSampleType =  g_MultiSample;
-//	g_d3dpp.MultiSampleType =  D3DMULTISAMPLE_NONE;
 
 	g_bStencilBuffer = true;
 	if(FAILED(g_pD3D->CheckDeviceFormat(D3DADAPTER_DEFAULT,D3DDEVTYPE_HAL,D3DFMT_X8R8G8B8,D3DUSAGE_DEPTHSTENCIL,D3DRTYPE_SURFACE,D3DFMT_D24S8)) ||
@@ -376,8 +278,8 @@ bool RInitDisplay(HWND hWnd, const RMODEPARAMS *params)
 	else
 		g_d3dpp.AutoDepthStencilFormat = D3DFMT_D16;
 
-	
-	g_d3dpp.Flags=NULL;//D3DPRESENTFLAG_LOCKABLE_BACKBUFFER;
+
+	g_d3dpp.Flags = 0;
 	g_d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
 
 	DWORD BehaviorFlags = D3DCREATE_FPU_PRESERVE |
@@ -385,14 +287,6 @@ bool RInitDisplay(HWND hWnd, const RMODEPARAMS *params)
 
 	if (IsDynamicResourceLoad())
 		BehaviorFlags |= D3DCREATE_MULTITHREADED;
-
-#ifdef _MT
-//	mlog("multithread.\n");
-
-	// 이 플래그는 device 를 여러 쓰레드에서 쓸때 사용한다. 퍼포먼스 저하가 있다.
-//	BehaviorFlags|=D3DCREATE_MULTITHREADED;
-#endif
-
 
 #ifndef _NVPERFHUD
 	if( FAILED( g_pD3D->CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL,hWnd,BehaviorFlags,&g_d3dpp,&g_pd3dDevice) ) )
@@ -426,16 +320,7 @@ bool RInitDisplay(HWND hWnd, const RMODEPARAMS *params)
 
 #endif	// #ifndef _NVPERFHUD
 
-	mlog("device created.\n");
-
-	/*
-	if( FAILED( g_pD3D->GetAdapterDisplayMode( D3DADAPTER_DEFAULT, &g_d3ddm ) ) )
-		return false;
-
-	hr=g_pd3dDevice->GetDisplayMode( &g_d3ddm );
-	g_PixelFormat=g_d3ddm.Format;
-	*/
-
+	mlog("Device created\n");
 
 	RSetViewport(0,0,g_nScreenWidth,g_nScreenHeight);
 	g_pd3dDevice->Clear(0,NULL,D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER ,0x000000,1.0f ,0);
@@ -447,7 +332,7 @@ bool RInitDisplay(HWND hWnd, const RMODEPARAMS *params)
 	if(!RFontCreate())
 	{
 		RCloseDisplay();
-		mlog("can't create font\n");
+		mlog("Can't create font\n");
 		return false;
 	}
 
@@ -476,102 +361,61 @@ bool RCloseDisplay()
 	return true;
 }
 
-void RAdjustWindow(const RMODEPARAMS *pModeParams)
+void RAdjustWindow(const RMODEPARAMS* ModeParams)
 {
-	if((GetWindowLong( g_hWnd, GWL_STYLE) & WS_CHILD) !=0)
+	if ((GetWindowLong(g_hWnd, GWL_STYLE) & WS_CHILD) != 0)
 		return;
 
-	if(pModeParams->bFullScreen)
+	SetWindowLong(g_hWnd, GWL_STYLE, GetWindowStyle(*ModeParams));
+
+	if (ModeParams->FullscreenMode != FullscreenType::Fullscreen)
 	{
-		SetWindowLong( g_hWnd, GWL_STYLE, WS_POPUP /*| WS_SYSMENU*/ );
+		RECT rt = { 0, 0, ModeParams->nWidth, ModeParams->nHeight };
+		AdjustWindowRect(&rt, GetWindowLong(g_hWnd, GWL_STYLE), FALSE);
+		SetWindowPos(g_hWnd, HWND_NOTOPMOST, 0, 0, rt.right - rt.left, rt.bottom - rt.top, SWP_SHOWWINDOW);
 	}
-	else
-		SetWindowLong( g_hWnd, GWL_STYLE, WS_POPUP/* | WS_CAPTION | WS_SYSMENU*/ );
-
-	RECT rt;
-	GetClientRect(g_hWnd,&rt);
-
-	RECT winrt;
-	GetWindowRect(g_hWnd,&winrt);
-
-	MoveWindow(g_hWnd,winrt.left,winrt.top,
-		winrt.right-winrt.left+(pModeParams->nWidth-(rt.right-rt.left)),
-		winrt.bottom-winrt.top+(pModeParams->nHeight-(rt.bottom-rt.top)),FALSE);
 }
 
-// 모드전환 & 플리핑관련
-
-//void ResetFont();
+int GetWindowStyle(const RMODEPARAMS & ModeParams)
+{
+	switch (ModeParams.FullscreenMode)
+	{
+	default:
+	case FullscreenType::Fullscreen:
+		return WS_POPUP | WS_SYSMENU;
+	case FullscreenType::Borderless:
+		return WS_POPUP;
+	case FullscreenType::Windowed:
+		return WS_POPUP | WS_CAPTION | WS_SYSMENU;
+	}
+}
 
 void RResetDevice(const RMODEPARAMS *params)
 {
-	mlog("Resetting device... ");
+	mlog("Resetting device...\n");
 
 	RFrame_Invalidate();
 	RBaseTexture_Invalidate();
 
-	g_bFullScreen=params->bFullScreen;
-	g_nScreenWidth=params->nWidth;
-	g_nScreenHeight=params->nHeight;
-	g_PixelFormat = /*params->bFullScreen ? params->PixelFormat :*/ g_d3ddm.Format;		// 윈도우 모드는 원래 포맷으로
 
-	g_d3dpp.Windowed   = !params->bFullScreen;
- 	g_d3dpp.BackBufferWidth = g_nScreenWidth;
- 	g_d3dpp.BackBufferHeight = g_nScreenHeight;
+	g_FullscreenMode = params->FullscreenMode;
+	g_nScreenWidth = params->nWidth;
+	g_nScreenHeight = params->nHeight;
+	g_PixelFormat = g_d3ddm.Format;
+
+	bool Fullscreen = params->FullscreenMode == FullscreenType::Fullscreen;
+	g_d3dpp.Windowed = !Fullscreen;
+	g_d3dpp.BackBufferWidth = g_nScreenWidth;
+	g_d3dpp.BackBufferHeight = g_nScreenHeight;
 	g_d3dpp.BackBufferFormat = g_PixelFormat;
-/*
-	if( SUCCEEDED(g_pD3D->CheckDeviceMultiSampleType( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL , g_PixelFormat, params->bFullScreen, D3DMULTISAMPLE_4_SAMPLES, NULL ))) {
-		g_MultiSample = D3DMULTISAMPLE_4_SAMPLES;
-	}	
-	else if( SUCCEEDED(g_pD3D->CheckDeviceMultiSampleType( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL , g_PixelFormat, params->bFullScreen, D3DMULTISAMPLE_2_SAMPLES, NULL ))) {
-		g_MultiSample = D3DMULTISAMPLE_2_SAMPLES;
-	}
-	else 
-		g_MultiSample = D3DMULTISAMPLE_NONE;
+	g_d3dpp.MultiSampleType = g_MultiSample;
 
-	mlog("sample %d \n", int(g_MultiSample));
-*/
-	g_d3dpp.MultiSampleType =  g_MultiSample;
-//	g_d3dpp.MultiSampleType =  D3DMULTISAMPLE_NONE;
+	HRESULT hr = g_pd3dDevice->Reset(&g_d3dpp);
 
-	//if(FAILED(g_pD3D->CheckDeviceFormat(D3DADAPTER_DEFAULT,D3DDEVTYPE_HAL,D3DFMT_X8R8G8B8,D3DUSAGE_DEPTHSTENCIL,D3DRTYPE_SURFACE,D3DFMT_D24S8)) ||
-	//	FAILED(g_pD3D->CheckDeviceFormat(D3DADAPTER_DEFAULT,D3DDEVTYPE_HAL,D3DFMT_R5G6B5,D3DUSAGE_DEPTHSTENCIL,D3DRTYPE_SURFACE,D3DFMT_D24S8))) 
-	//{
-	//	mlog("Reset : Does not provide D24S8 DepthStencil Buffer Format\n");
-	//	g_bStencilBuffer = false;
-	//}
-	//else if( FAILED(g_pD3D->CheckDepthStencilMatch(D3DADAPTER_DEFAULT,D3DDEVTYPE_HAL,g_PixelFormat,g_PixelFormat,D3DFMT_D24S8)))
-	//{
-	//	mlog("Reset :  D24S8 DepthStencil Buffer Format doesn't match for current display mode\n");
-	//	g_bStencilBuffer = false;
-	//}
-	//if(g_bStencilBuffer)
-	//	g_d3dpp.AutoDepthStencilFormat = D3DFMT_D24S8;
-	//else
-	//	g_d3dpp.AutoDepthStencilFormat = D3DFMT_D16;
-
-	HRESULT hr=g_pd3dDevice->Reset(&g_d3dpp);
-
-	//LPDIRECT3DSURFACE9 pDepthStencil, pNewDepthStencil;
-	//if(!FAILED(g_pd3dDevice->GetDepthStencilSurface(&pDepthStencil)))
-	//{		
-	//	g_pd3dDevice->CreateDepthStencilSurface( g_d3dpp.BackBufferWidth, g_d3dpp.BackBufferHeight, g_bStencilBuffer?D3DFMT_D24S8:D3DFMT_D16, 
-	//		D3DMULTISAMPLE_NONE, &pNewDepthStencil);
-	//	//mlog("widht:%d,height:%d,fmt:%s\n", g_d3dpp.BackBufferWidth, g_d3dpp.BackBufferHeight, g_bStencilBuffer?"d24s8":"d16");
-	//	LPDIRECT3DSURFACE9 pBackBuffer;
-	//	g_pd3dDevice->GetRenderTarget(&pBackBuffer);
-	//	g_pd3dDevice->SetRenderTarget(pBackBuffer, pNewDepthStencil);
-	//	SAFE_RELEASE(pDepthStencil);
-	//	SAFE_RELEASE(pBackBuffer);
-	//	SAFE_RELEASE(pNewDepthStencil);
-	//}
-
-//	ResetFont();
-	
-	_ASSERT(hr==D3D_OK);
-	if( hr != D3D_OK ) {
+	_ASSERT(hr == D3D_OK);
+	if (hr != D3D_OK) {
 		mlog("\nDevice reset failed: %s\n", DXGetErrorString9(hr));
-		int *a=0;
+		int *a = 0;
 		*a = 1;
 	}
 
@@ -579,10 +423,10 @@ void RResetDevice(const RMODEPARAMS *params)
 
 	RAdjustWindow(params);
 
-	ShowWindow(g_hWnd,SW_SHOW);
+	ShowWindow(g_hWnd, SW_SHOW);
 	UpdateWindow(g_hWnd);
 
-	RSetViewport(0,0,g_nScreenWidth,g_nScreenHeight);
+	RSetViewport(0, 0, g_nScreenWidth, g_nScreenHeight);
 
 	RUpdateCamera();
 
@@ -591,7 +435,7 @@ void RResetDevice(const RMODEPARAMS *params)
 	RBaseTexture_Restore();
 	RFrame_Restore();
 
-	MLog("SUCCESS!\n");
+	MLog("... SUCCESS!\n");
 }
 
 RRESULT RIsReadyToRender()
@@ -620,26 +464,15 @@ void SetClearColor(DWORD c) {
 	g_clear_color = c;
 }
 
-//static bool g_rsbRenderStarted = false;
-
-
 bool REndScene()
 {
-//	if (g_rsbRenderStarted == false) return false;
-	
 	g_pd3dDevice->EndScene();
-//	g_rsbRenderStarted = false;
-	
 	return true;
 }
 
 bool RBeginScene()
 {
-//	if (g_rsbRenderStarted == true) return false;
-	
 	g_pd3dDevice->BeginScene();
-//	g_rsbRenderStarted = true;
-	
 	return true;
 }
 
@@ -647,48 +480,33 @@ void RFlip()
 {
 	REndScene();
 
-//	if (g_rsbRenderStarted == true) REndScene();
 	g_pd3dDevice->Present( NULL, NULL, NULL, NULL );
 
-	if(g_rsnRenderFlags && RRENDER_CLEAR_BACKBUFFER)
-	{
-		//if(g_bStencilBuffer)
-			//g_pd3dDevice->Clear(0,NULL,D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER |D3DCLEAR_STENCIL ,g_clear_color,1.0f ,0L);
-		//else
-			g_pd3dDevice->Clear(0,NULL,D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER ,g_clear_color,1.0f ,0L);
-	}
+	if (g_rsnRenderFlags && RRENDER_CLEAR_BACKBUFFER)
+		g_pd3dDevice->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, g_clear_color, 1.0f, 0L);
 	else
-		g_pd3dDevice->Clear(0,NULL,D3DCLEAR_ZBUFFER ,g_clear_color,1.0f ,0);
+		g_pd3dDevice->Clear(0, NULL, D3DCLEAR_ZBUFFER, g_clear_color, 1.0f, 0);
 
 	RBeginScene();	
 
+	g_nFrameCount++;
+	DWORD currentTime = GetGlobalTimeMS();
+	if (g_dwLastFPSTime + FPS_INTERVAL < currentTime)
 	{
-		g_nFrameCount++;
-		DWORD currentTime=GetGlobalTimeMS();
-		if(g_dwLastFPSTime+FPS_INTERVAL<currentTime)
-		{
-			g_fFPS=(g_nFrameCount-g_nLastFrameCount)*FPS_INTERVAL/((float)(currentTime-g_dwLastFPSTime)*(FPS_INTERVAL/1000));
-			g_dwLastFPSTime=currentTime;
-			g_nLastFrameCount=g_nFrameCount;
-		}
+		g_fFPS = (g_nFrameCount - g_nLastFrameCount)*FPS_INTERVAL / ((float)(currentTime - g_dwLastFPSTime)*(FPS_INTERVAL / 1000));
+		g_dwLastFPSTime = currentTime;
+		g_nLastFrameCount = g_nFrameCount;
 	}
-
-
 }
 
 void RDrawLine(rvector &v1,rvector &v2,DWORD dwColor)
 {
-/*
-	RGetDevice()->SetTexture(0,NULL);
-	RGetDevice()->SetRenderState( D3DRS_LIGHTING, FALSE );
-	RGetDevice()->SetFVF( D3DFVF_XYZ | D3DFVF_DIFFUSE );
-*/
 	struct LVERTEX {
 		float x, y, z;		// world position
 		DWORD color;
-	} ;
+	};
 
-	LVERTEX ver[2]={{v1.x,v1.y,v1.z,dwColor},{v2.x,v2.y,v2.z,dwColor}};
+	LVERTEX ver[2] = { {v1.x,v1.y,v1.z,dwColor}, {v2.x,v2.y,v2.z,dwColor} };
 
 	HRESULT hr=RGetDevice()->DrawPrimitiveUP(D3DPT_LINELIST,1,ver,sizeof(LVERTEX));
 }
@@ -700,7 +518,6 @@ rvector RGetTransformCoord(rvector &coord)
 	return ret;
 }
 
-// 메모리를 새로 할당하므로 다 쓰면 지워줘야한다.
 bool SaveMemoryBmp(int x,int y,void *data,void **retmemory,int *nsize)
 {
 	unsigned char *memory=NULL,*dest=NULL;
@@ -745,7 +562,6 @@ bool SaveMemoryBmp(int x,int y,void *data,void **retmemory,int *nsize)
 
 	int i,j;
 
-	//	unsigned char *p=(unsigned char*)data+(y-1)*(x*3);
 	DWORD *p=(DWORD*)data+(y-1)*x;
 
 	for(i=y-1;i>=0;i--)
@@ -839,7 +655,6 @@ bool SaveMemoryBmp(int x,int y,void *data,void **retmemory,int *nsize)
 	}
 #endif	// _USE_GDIPLUS
 
-// data 는 ARGB 32bit 포맷
 bool RSaveAsBmp(int x,int y,void *data,const char *szFilename)
 {
 	void *memory;
@@ -860,7 +675,6 @@ bool RSaveAsBmp(int x,int y,void *data,const char *szFilename)
 	return true;
 }
 
-// data 는 ARGB 32bit 포맷
 bool RScreenShot(int x,int y,void *data,const char *szFilename)
 {
 	char szFullFileName[_MAX_DIR];
@@ -951,14 +765,12 @@ LPDIRECT3DSURFACE9 RCreateImageSurface(const char *filename)
 	LPDIRECT3DSURFACE9 pSurface=NULL;
 	D3DXIMAGE_INFO info;
 
-//	RGetDevice()->CreateImageSurface(1,1,D3DFMT_A8R8G8B8,&pSurface);
 	RGetDevice()->CreateOffscreenPlainSurface(1,1,D3DFMT_A8R8G8B8,D3DPOOL_SCRATCH,&pSurface,NULL);
 	D3DXLoadSurfaceFromFileInMemory(pSurface,NULL,NULL,buffer,mzf.GetLength(),NULL,D3DX_FILTER_NONE,0,&info);
 	pSurface->Release();
 
 	HRESULT hr;
 	
-//	hr = RGetDevice()->CreateImageSurface(info.Width,info.Height,info.Format,&pSurface);
 	hr = RGetDevice()->CreateOffscreenPlainSurface(info.Width,info.Height,info.Format,D3DPOOL_SCRATCH,&pSurface,NULL);
 	_ASSERT(hr==D3D_OK);
 	hr = D3DXLoadSurfaceFromFileInMemory(pSurface,NULL,NULL,buffer,mzf.GetLength(),NULL,D3DX_FILTER_NONE,0,&info);
@@ -970,7 +782,6 @@ LPDIRECT3DSURFACE9 RCreateImageSurface(const char *filename)
 	return pSurface;
 }
 
-// 감마값 조절 - 기본값 = 255
 void RSetGammaRamp(unsigned short nGammaValue)
 {
 	D3DCAPS9 caps; 
@@ -1036,8 +847,8 @@ void RDrawCorn(rvector center,rvector pole,float fRadius,int nSegment)
 		rvector a=fRadius*(x*cos(fAngle)+y*sin(fAngle))+center;
 		rvector b=fRadius*(x*cos(fAngle2)+y*sin(fAngle2))+center;
 
-		RDrawLine(a,pole,0xffff0000);	// 옆면
-		RDrawLine(a,b,0xffff0000);	// 밑면
+		RDrawLine(a,pole,0xffff0000);
+		RDrawLine(a,b,0xffff0000);
 	}
 }
 
@@ -1068,7 +879,6 @@ void RDrawSphere(rvector origin,float fRadius,int nSegment, u32 Color)
 	}
 }
 
-// 나중에 화살표나 그려주면 좋겠다 -_-;
 void RDrawAxis(rvector origin,float fSize)
 {
 	RGetDevice()->SetTexture(0,NULL);
@@ -1128,87 +938,7 @@ void RSetWBuffer(bool bEnable)
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////
-//		FIXED RESOLUTION 
-//////////////////////////////////////////////////////////////////////////
-//void FixedResolutionRenderStart()
-//{
-//	if( g_lpTexture == 0 )
-//	{
-//		D3DDISPLAYMODE mode;
-//		RGetDevice()->GetDisplayMode( &mode );		
-//
-//		if(FAILED( D3DXCreateTexture( RGetDevice(), 1024, 1024, 1, D3DUSAGE_RENDERTARGET, mode.Format, D3DPOOL_DEFAULT, &g_lpTexture))
-//			&& FAILED( D3DXCreateTexture( RGetDevice(), 1024, 1024, 1, D3DUSAGE_DYNAMIC|D3DUSAGE_RENDERTARGET, mode.Format, D3DPOOL_DEFAULT, &g_lpTexture)))
-//		{
-//			mlog("Failed to Create Fixed Resolution Texture...\n");
-//		}
-//		else
-//		{
-//			g_lpTexture->GetSurfaceLevel( 0, &g_lpSurface );
-//			D3DSURFACE_DESC desc;
-//			g_lpSurface->GetDesc( &desc );
-//			RGetDevice()->CreateDepthStencilSurface( desc.Width, desc.Height, D3DFMT_D16, D3DMULTISAMPLE_NONE , &g_lpStencil );
-//		}
-//	}
-//	RGetDevice()->GetRenderTarget( &g_lpSurfaceBackup );
-//	RGetDevice()->GetDepthStencilSurface( &g_lpStencilBackup );
-//	RGetDevice()->SetRenderTarget( g_lpSurface, g_lpStencil );
-//	RGetDevice()->Clear(0,NULL,D3DCLEAR_TARGET|D3DCLEAR_ZBUFFER,0x00000000,1.0f ,0);
-//}
-//void FixedResolutionRenderEnd()
-//{
-//	RGetDevice()->SetRenderTarget( g_lpSurfaceBackup, g_lpStencilBackup );
-//	SAFE_RELEASE( g_lpSurfaceBackup );
-//	SAFE_RELEASE( g_lpStencilBackup );
-//}
-//void FixedResolutionRenderInvalidate()
-//{
-//	SAFE_RELEASE( g_lpSurface);
-//	SAFE_RELEASE( g_lpStencil);
-//	SAFE_RELEASE( g_lpTexture);
-//}
-//void FixedResolutionRenderFlip()
-//{
-//	FixedResolutionRenderEnd();
-//#define CORRECTION 0.01
-//	static RTLVertex g_DummyPlane[4] = 
-//	{
-//		{D3DXVECTOR4( 0.0f - CORRECTION, 0.0f - CORRECTION, 1.0f, 1.0f ),0xFFFFFFFF,0.0f, 0.0f},
-//		{D3DXVECTOR4( 800 + CORRECTION, 0.0f - CORRECTION, 1.0f, 1.0f ),0xFFFFFFFF,0.78125f, 0.0f},
-//		{D3DXVECTOR4( 800 + CORRECTION, 600 + CORRECTION, 1.0f, 1.0f ),0xFFFFFFFF,0.78125f, 0.5859375f},
-//		{D3DXVECTOR4( 0.0f - CORRECTION, 600 + CORRECTION, 1.0f, 1.0f ),0xFFFFFFFF,0.0f, 0.5859375f}
-//	};
-//
-//	g_DummyPlane[0].p = D3DXVECTOR4(0.0f+CORRECTION, 0.0f - CORRECTION, 0.0f, 1.0f );
-//	g_DummyPlane[1].p = D3DXVECTOR4(RGetScreenWidth()+CORRECTION, 0.0f - CORRECTION, 0.0f, 1.0f );
-//	g_DummyPlane[2].p = D3DXVECTOR4(RGetScreenWidth()+CORRECTION, RGetScreenHeight() - CORRECTION, 0.0f, 1.0f );
-//	g_DummyPlane[3].p = D3DXVECTOR4(0.0f+CORRECTION, RGetScreenHeight() - CORRECTION, 0.0f, 1.0f );
-//
-//	RGetDevice()->SetTexture( 0, g_lpTexture );
-//	RGetDevice()->SetTextureStageState( 0, D3DTSS_COLOROP, D3DTOP_SELECTARG1 );
-//	RGetDevice()->SetTextureStageState( 0,  D3DTSS_COLORARG1, D3DTA_TEXTURE );
-//	RGetDevice()->SetFVF( RTLVertexType );
-//
-//	RGetDevice()->DrawPrimitiveUP( D3DPT_TRIANGLEFAN, 2, g_DummyPlane, sizeof(RTLVertex) );
-//
-//	RFlip(true);	
-//	FixedResolutionRenderStart();
-//}
-//bool IsFixedResolution() 
-//{
-//	return g_bFixedResolution;
-//}
-//void SetFixedResolution( bool b )
-//{
-//	g_bFixedResolution = b;
-//	if( b )
-//	{
-//		FixedResolutionRenderStart();
-//	}
-//}
-
-int RGetAdapterModeCount( D3DFORMAT Format , UINT Adapter /* = D3DADAPTER_DEFAULT  */ )
+int RGetAdapterModeCount( D3DFORMAT Format , UINT Adapter )
 {
 	return g_pD3D->GetAdapterModeCount( Adapter,Format );
 }
@@ -1221,7 +951,7 @@ bool REnumAdapterMode( UINT Adapter, D3DFORMAT Format ,UINT Mode, D3DDISPLAYMODE
 	return true;
 }
 
-void RSetFog( bool bFog, float fNear /* = 0 */, float fFar/* =0 */, DWORD dwColor/* =0xFFFFFFFF  */)
+void RSetFog( bool bFog, float fNear, float fFar, DWORD dwColor)
 {
 	g_bFog = bFog;
 	g_pd3dDevice->SetRenderState(D3DRS_FOGENABLE, g_bFog );
@@ -1255,34 +985,14 @@ bool CheckVideoAdapterSupported()
 	{
 		if(ai->DeviceId==0x7125)	// 82810E
 			bSupported=false;
+	}
 
-		// intel 810 , 815  시리즈
-		//if(ai->DeviceId==0x7800 || ai->DeviceId==0x7121 || ai->DeviceId==0x7123 || ai->DeviceId==0x7125 || ai->DeviceId==0x1132)
-		//	bSupported=false;
-	}
-/*
-	if(ai->VendorId==0x1039)	// SiS 칩셋
-	{
-		bSupported=false;
-	}
-	if(ai->VendorId==0x5333) {	// Savage
-		if(ai->DeviceId==0x8a22)
-			bSupported=false;
-	}
-	if(ai->VendorId==0x10de) {	// NVidia 카드들
-		if(ai->DeviceId==0x2c || ai->DeviceId==0x2d)
-			bSupported=false;
-	}
-*/
-	if(ai->VendorId==0x121a) {	// 3dfx 카드들
+	if(ai->VendorId==0x121a) {	// 3dfx
 		bSupported=false;
 	}
 
 
 	return bSupported;
 }
-
-
-
 
 _NAMESPACE_REALSPACE2_END

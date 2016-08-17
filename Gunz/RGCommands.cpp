@@ -76,20 +76,19 @@ void LoadRGCommands(ZChatCmdManager &CmdManager)
 	}, CCF_ALL, 0, 0, true, "/spec", "");
 
 	CmdManager.AddCommand(0, "fullscreen", [](const char *line, int argc, char ** const argv){
-		ZGetConfiguration()->GetVideo()->bFullScreen = !ZGetConfiguration()->GetVideo()->bFullScreen;
+		ZGetConfiguration()->GetVideo()->FullscreenMode = static_cast<FullscreenType>(atoi(argv[1]));
 
-		RMODEPARAMS ModeParams = { RGetScreenWidth(), RGetScreenHeight(), ZGetConfiguration()->GetVideo()->bFullScreen, RGetPixelFormat() };
+		RMODEPARAMS ModeParams = { RGetScreenWidth(), RGetScreenHeight(),
+			ZGetConfiguration()->GetVideo()->FullscreenMode, RGetPixelFormat() };
 
 		RResetDevice(&ModeParams);
 
-		RAdjustWindow(&ModeParams);
-
 		ZGetConfiguration()->Save();
-	}, CCF_ALL, 0, 0, true, "/fullscreen", "");
+	}, CCF_ALL, 1, 1, true, "/fullscreen", "");
 
 	CmdManager.AddCommand(0, "setparts", [](const char *line, int argc, char ** const argv){
 		ZGetGame()->m_pMyCharacter->m_pVMesh->SetParts((RMeshPartsType)atoi(argv[1]), argv[2]);
-	}, CCF_ALL, 0, 0, true, "/fullscreen", "");
+	}, CCF_ALL, 0, 0, true, "/setparts", "");
 
 	auto Sens = [](const char *line, int argc, char ** const argv) {
 		float fSens = atof(argv[1]);

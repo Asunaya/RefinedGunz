@@ -1,12 +1,10 @@
-#ifndef _ZCONFIGURATION_H
-#define _ZCONFIGURATION_H
+#pragma once
 
 #include "MXml.h"
 #include <string>
 #include <map>
 #include "ZActionDef.h"
-
-using namespace std;
+#include "RealSpace2.h"
 
 #define FILENAME_LOCALE		"system/locale.xml"
 #define FILENAME_CONFIG		"config.xml"
@@ -25,7 +23,7 @@ struct ZSERVERNODE
 
 struct ZCONFIG_VIDEO
 {
-	bool bFullScreen;
+	FullscreenType FullscreenMode;
 	int nWidth;
 	int nHeight;
 	int nColorBits;
@@ -195,15 +193,11 @@ public:
 	char*	GetBAReportAddr()		{ return m_szBAReportAddr; }
 	char*	GetBAReportDir()		{ return m_szBAReportDir; }
 
-//	char*	GetXmlHeader()			{ return m_Locale.szXmlHeader; }
-
 	char*	GetInterfaceSkinName()	{ return m_szInterfaceSkinName; }
 	char*	GetServerIP()			{ return m_szServerIP; }
 	int		GetServerPort() const			{ return m_nServerPort; }
 	int		GetServerCount() const		{ return m_nServerCount; }
 	ZSERVERNODE	GetServerNode(int nNum) const;
-//	char*	GetDefaultFont()		{ return m_Locale.szDefaultFont; }
-//	bool	GetIMESupport()			{ return m_Locale.bIMESupport; }
 
 	bool GetViewGameChat() const			{ return m_bViewGameChat; }
 	void SetViewGameChat(bool b)	{ m_bViewGameChat = b; }
@@ -211,7 +205,7 @@ public:
 	void SetForceOptimization(bool b) {	m_bOptimization = b;}
 	bool GetForceOptimization() const {	return m_bOptimization;}
 
-	map<int,ZSERVERNODE>	m_ServerList;
+	std::map<int,ZSERVERNODE>	m_ServerList;
 
 	ZCONFIG_VIDEO* GetVideo()		{ return &m_Video; }
 	ZCONFIG_AUDIO* GetAudio()		{ return &m_Audio; }
@@ -274,7 +268,7 @@ ZConfiguration*	ZGetConfiguration();
 #define ZTOK_AUDIO				"AUDIO"
 #define ZTOK_VIDEO_WIDTH		"WIDTH"
 #define ZTOK_VIDEO_HEIGHT		"HEIGHT"
-#define ZTOK_VIDEO_FULLSCREEN	"FULLSCREEN"
+#define ZTOK_VIDEO_FULLSCREEN	"FULLSCREEN_MODE"
 #define ZTOK_VIDEO_COLORBITS	"COLORBITS"
 #define ZTOK_VIDEO_GAMMA		"GAMMA"
 #define ZTOK_VIDEO_REFLECTION	"REFLECTION"
@@ -355,7 +349,7 @@ ZConfiguration*	ZGetConfiguration();
 #define Z_VIDEO_LIGHTMAP		(ZGetConfiguration()->GetVideo()->bLightMap)
 #define Z_VIDEO_DYNAMICLIGHT	(ZGetConfiguration()->GetVideo()->bDynamicLight)
 #define Z_VIDEO_SHADER			(ZGetConfiguration()->GetVideo()->bShader)
-#define Z_VIDEO_FULLSCREEN		(ZGetConfiguration()->GetVideo()->bFullScreen )
+#define Z_VIDEO_FULLSCREEN		(ZGetConfiguration()->GetVideo()->FullscreenMode)
 #define Z_VIDEO_WIDTH			(ZGetConfiguration()->GetVideo()->nWidth )
 #define Z_VIDEO_HEIGHT			(ZGetConfiguration()->GetVideo()->nHeight )
 #define Z_VIDEO_BPP				(ZGetConfiguration()->GetVideo()->nColorBits )
@@ -382,5 +376,3 @@ ZConfiguration*	ZGetConfiguration();
 #define Z_VIDEO_EFFECT_HIGH		0
 #define Z_VIDEO_EFFECT_NORMAL	1
 #define Z_VIDEO_EFFECT_LOW		2
-
-#endif

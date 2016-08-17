@@ -15,8 +15,9 @@ class RParticleSystem;
 // 바깥에서 참조할만한 것들.
 bool	RIsActive();
 bool	RIsQuery();
-void	RSetQuery(bool b);//테스트용..
-bool	RIsFullScreen();
+void	RSetQuery(bool b);
+bool	RIsFullscreen();
+FullscreenType	RGetFullscreenMode();
 bool	RIsHardwareTNL();
 bool	RIsSupportVS();
 bool	RIsAvailUserClipPlane();
@@ -51,7 +52,8 @@ extern MZFileSystem *g_pFileSystem;
 bool RInitDisplay(HWND hWnd,const RMODEPARAMS *params);
 bool RCloseDisplay();
 void RSetFileSystem(MZFileSystem *pFileSystem);
-void RAdjustWindow(const RMODEPARAMS *pModeParams);		// 윈도우 크기를 맞춰줌
+void RAdjustWindow(const RMODEPARAMS* ModeParams);
+int GetWindowStyle(const RMODEPARAMS& ModeParams);
 
 // 디바이스 & 뷰포트 
 LPDIRECT3DDEVICE9	RGetDevice();

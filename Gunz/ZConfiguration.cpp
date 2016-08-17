@@ -413,7 +413,17 @@ bool ZConfiguration::LoadConfig(const char* szFileName)
 			childElement.GetChildContents(&m_Video.nWidth, ZTOK_VIDEO_WIDTH);
 			childElement.GetChildContents(&m_Video.nHeight, ZTOK_VIDEO_HEIGHT);
 			childElement.GetChildContents(&m_Video.nColorBits, ZTOK_VIDEO_COLORBITS);
-			childElement.GetChildContents(&m_Video.bFullScreen, ZTOK_VIDEO_FULLSCREEN);
+
+			char FullscreenMode[64];
+			childElement.GetChildContents(FullscreenMode, ZTOK_VIDEO_FULLSCREEN);
+#define READ
+			if (!_stricmp(FullscreenMode, "fullscreen"))
+				m_Video.FullscreenMode = FullscreenType::Fullscreen;
+			else if (!_stricmp(FullscreenMode, "borderless"))
+				m_Video.FullscreenMode = FullscreenType::Borderless;
+			else if (!_stricmp(FullscreenMode, "windowed"))
+				m_Video.FullscreenMode = FullscreenType::Windowed;
+
 			childElement.GetChildContents(&m_Video.nGamma, ZTOK_VIDEO_GAMMA);
 			childElement.GetChildContents(&m_Video.bReflection,	ZTOK_VIDEO_REFLECTION );
 			childElement.GetChildContents(&m_Video.bLightMap, ZTOK_VIDEO_LIGHTMAP );
@@ -547,8 +557,6 @@ bool ZConfiguration::SaveToFile(const char *szFileName, const char* szHeader)
 
 	xmlConfig.AppendChild(aRootElement);
 
-	// Check FirstTime Loading
-
 	// Server
 	{
 		MXmlElement	serverElement=aRootElement.CreateChildElement(ZTOK_SERVER);
@@ -605,8 +613,12 @@ bool ZConfiguration::SaveToFile(const char *szFileName, const char* szHeader)
 
 		parentElement.AppendText("\n\t\t");
 		aElement = parentElement.CreateChildElement(ZTOK_VIDEO_FULLSCREEN);
-		if(m_Video.bFullScreen==true) strcpy_safe(temp, "TRUE");
-		else strcpy_safe(temp, "FALSE");
+		if (m_Video.FullscreenMode == FullscreenType::Fullscreen)
+			strcpy_safe(temp, "fullscreen");
+		else if (m_Video.FullscreenMode == FullscreenType::Borderless)
+			strcpy_safe(temp, "borderless");
+		else if (m_Video.FullscreenMode == FullscreenType::Windowed)
+			strcpy_safe(temp, "windowed");
 		aElement.SetContents(temp);
 
 		parentElement.AppendText("\n\t\t");
@@ -757,6 +769,7 @@ bool ZConfiguration::SaveToFile(const char *szFileName, const char* szHeader)
 	}
 
 	aRootElement.AppendText("\n\n\t");
+
 	// Joystick
 	{
 		MXmlElement	parentElement=aRootElement.CreateChildElement(ZTOK_JOYSTICK);
@@ -772,6 +785,7 @@ bool ZConfiguration::SaveToFile(const char *szFileName, const char* szHeader)
 	}
 
 	aRootElement.AppendText("\n\n\t");
+
 	// Control
 	{
 		MXmlElement	parentElement=aRootElement.CreateChildElement(ZTOK_KEYBOARD);
@@ -795,8 +809,6 @@ bool ZConfiguration::SaveToFile(const char *szFileName, const char* szHeader)
 
 	aRootElement.AppendText("\n\n\t");
 
-	// Macro
-//	if( parentElement.FindChildNode(ZTOK_MACRO, &childElement) )
 	{
 		MXmlElement	parentElement=aRootElement.CreateChildElement(ZTOK_MACRO);
 
@@ -915,24 +927,12 @@ bool ZConfiguration::SaveToFile(const char *szFileName, const char* szHeader)
 
 	aRootElement.AppendText("\n");
 
-
-//	LANGID LangID = LANG_KOREAN;			/* Korean : 이거 정말 하드코딩 박기 싫었는디... 쩝... -_-;;; */
-//#ifdef LOCALE_JAPAN
-//	LangID = LANG_JAPANESE;					/* Japanese */
-//#elif  LOCALE_US
-//	LangID = LANG_ENGLISH;					/* International */
-//#elif  LOCALE_BRAZIL
-//	LangID = LANG_PORTUGUESE;				/* Brazil */
-//#elif  LOCALE_INDIA
-//	LangID = LANG_ENGLISH;					/* India */
-//#endif
-
 	return xmlConfig.SaveToFile(szFileName);
 }
 
 void ZConfiguration::Init()
 {
-	m_Video.bFullScreen = true;
+	m_Video.FullscreenMode = FullscreenType::Fullscreen;
 	auto Width = GetSystemMetrics(SM_CXSCREEN);
 	if (Width == 0)
 		Width = 1024;

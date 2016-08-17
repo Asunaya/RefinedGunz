@@ -60,12 +60,7 @@
 
 #include "RGMain.h"
 
-#ifdef _DEBUG
-RMODEPARAMS	g_ModeParams={640,480,false,D3DFMT_R5G6B5};
-//RMODEPARAMS	g_ModeParams={1024,768,false,RPIXELFORMAT_565};
-#else
-RMODEPARAMS	g_ModeParams={800,600,true,D3DFMT_R5G6B5};
-#endif
+RMODEPARAMS	g_ModeParams = { 800,600,FullscreenType::Fullscreen,D3DFMT_R5G6B5 };
 
 #ifndef _DEBUG
 #define SUPPORT_EXCEPTIONHANDLING
@@ -324,31 +319,10 @@ RRESULT OnDestroy(void *pParam)
 
 	mlog("main : MBitmapManager::DestroyAniBitmap()\n");
 
-	/*
-	for(list<HANDLE>::iterator i=g_FontMemHandles.begin(); i!=g_FontMemHandles.end(); i++){
-		RemoveFontMemResourceEx(*i);
-	}
-	*/
-
-	//ReleaseMemPool(RealSoundEffectPlay);
-	//UninitMemPool(RealSoundEffectPlay);
-
-	//ReleaseMemPool(RealSoundEffect);
-	//UninitMemPool(RealSoundEffect);
-
-	//ReleaseMemPool(RealSoundEffectFx);
-	//UninitMemPool(RealSoundEffectFx);
-
-	//mlog("main : UninitMemPool(RealSoundEffectFx)\n");
-
-	// 메모리풀 헤제
-	ZBasicInfoItem::Release(); // 할당되어 있는 메모리 해제
-//	ZHPInfoItem::Release();
+	ZBasicInfoItem::Release(); 
 
 	ZGetStencilLight()->Destroy();
 	LightSource::Release();
-
-//	ZStencilLight::GetInstance()->Destroy();
 
 	RBspObject::DestroyShadeMap();
 	RDestroyLenzFlare();
@@ -487,7 +461,7 @@ RRESULT OnUpdate(void* pParam)
 RRESULT OnRender(void *pParam)
 {
 	__BP(101, "main::OnRender");
-	if( !RIsActive() && RIsFullScreen() )
+	if( !RIsActive() && RIsFullscreen() )
 	{
 		__EP(101);
 		return R_NOTREADY;
@@ -654,24 +628,11 @@ RRESULT OnError(void *pParam)
 
 void SetModeParams()
 {
-#ifdef _PUBLISH
-	g_ModeParams.bFullScreen = ZGetConfiguration()->GetVideo()->bFullScreen;
-#else
-	#ifdef _DEBUG
-		g_ModeParams.bFullScreen = false;
-	#else
-		g_ModeParams.bFullScreen = ZGetConfiguration()->GetVideo()->bFullScreen;
-	#endif
-#endif
-	
+	g_ModeParams.FullscreenMode = ZGetConfiguration()->GetVideo()->FullscreenMode;
 	g_ModeParams.nWidth = ZGetConfiguration()->GetVideo()->nWidth;
 	g_ModeParams.nHeight = ZGetConfiguration()->GetVideo()->nHeight;
-	/*ZGetConfiguration()->GetVideo()->nColorBits == 32 ? 
-	g_ModeParams.PixelFormat = D3DFMT_X8R8G8B8 : g_ModeParams.PixelFormat = D3DFMT_R5G6B5 ;*/
 
 }
-
-// 느려도 관계없다~~ -.-
 
 int FindStringPos(char* str,char* word)
 {
@@ -707,8 +668,6 @@ int FindStringPos(char* str,char* word)
 
 bool FindCrashFunc(char* pName)
 {
-//	Function Name
-//	File Name 
 	if(!pName) return false;
 
 	FILE *fp;
@@ -725,13 +684,10 @@ bool FindCrashFunc(char* pName)
 
 	fclose(fp);
 
-	// 우리 쏘스에서 찾는다.
 	int posSource = FindStringPos(pBuffer,"ublish");
 	if(posSource==-1) return false;
 
 	int posA = FindStringPos(pBuffer+posSource,"Function Name");
-//	int posB = FindStringPos(pBuffer,"File Name");	
-	// filename 이 없는 경우도 있어서 이렇게 바꿨다
 	int posB = posA + FindStringPos(pBuffer+posSource+posA,"\n");
 
 	if(posA==-1) return false;
@@ -739,7 +695,6 @@ bool FindCrashFunc(char* pName)
 
 	posA += 16;
 
-//	int memsize = posB-posA-6;
 	int memsize = posB-posA;
 	memcpy(pName,&pBuffer[posA+posSource],memsize);
 
@@ -760,9 +715,8 @@ void HandleExceptionLog()
 {
 	#define ERROR_REPORT_FOLDER	"ReportError"
 
-	extern char* logfilename;	// Instance on MDebug.cpp
+	extern char* logfilename;
 
-	// ERROR_REPORT_FOLDER 존재하는지 검사하고, 없으면 생성
 	WIN32_FIND_DATA FindFileData;
 	HANDLE hFind;
 
@@ -776,16 +730,6 @@ void HandleExceptionLog()
 		FindClose(hFind);
 	}
 
-
-	// mlog.txt 를 ERROR_REPORT_FOLDER 로 복사
-
-	//acesaga_0928_911_moanus_rslog.txt
-	//USAGE_EX) BAReport app=acesaga;addr=moon.maiet.net;port=21;id=ftp;passwd=ftp@;gid=10;user=moanus;localfile=rslog.txt;remotefile=remote_rslog.txt;
-/*
-	if(ZGetCharacterManager()) {
-		ZGetCharacterManager()->OutputDebugString_CharacterState();
-	}
-*/	
 	ZGameClient* pClient = (ZGameClient*)ZGameClient::GetInstance();
 
 	char* pszCharName = NULL;
@@ -805,9 +749,6 @@ void HandleExceptionLog()
 	else { 
 		wsprintf(szPlayer, "Unknown(-1.-1)");
 	}
-
-
-//	if (pClient) {
 
 		time_t currtime;
 		time(&currtime);
@@ -854,16 +795,6 @@ LONG_PTR FAR PASCAL WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 {
 	switch (message)
 	{
-		case WM_SYSCHAR:
-			if(ZIsLaunchDevelop() && wParam==VK_RETURN)
-			{
-#ifndef _PUBLISH
-				RFrame_ToggleFullScreen();
-#endif
-				return 0;
-			}
-			break;
-
 		case WM_CREATE:
 			if (strlen(Z_LOCALE_HOMEPAGE_TITLE) > 0)
 			{

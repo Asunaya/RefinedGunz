@@ -1,8 +1,5 @@
 // types for realspace 2 . 2001-10-4 created.
-
-#ifndef __RTYPES_H
-#define __RTYPES_H
-
+#pragma once
 
 #include <string>
 #include <list>
@@ -29,10 +26,16 @@ enum RRESULT {
 	
 };
 
-// 초기화 파라미터
+enum class FullscreenType
+{
+	Fullscreen,
+	Borderless,
+	Windowed,
+};
+
 struct RMODEPARAMS {
-	int nWidth,nHeight;
-	bool bFullScreen;
+	int nWidth, nHeight;
+	FullscreenType FullscreenMode;
 	RPIXELFORMAT PixelFormat;
 };
 
@@ -255,5 +258,3 @@ static inline rvector GetReflectionVector(const rvector& v, const rvector& n)
 typedef void (*RFPROGRESSCALLBACK)(void *pUserParams,float fProgress);
 
 _NAMESPACE_REALSPACE2_END
-
-#endif

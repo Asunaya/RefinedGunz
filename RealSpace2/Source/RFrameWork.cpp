@@ -18,8 +18,6 @@ bool IsToolTipEnable() {
 
 _NAMESPACE_REALSPACE2_BEGIN
 
-//RMODEPARAMS g_ModeParams={ 640,480,false,RPIXELFORMAT_565 };
-
 extern HWND g_hWnd;
 
 bool g_bActive;
@@ -28,10 +26,6 @@ extern bool g_bFixedResolution;
 RECT g_rcWindowBounds;
 WNDPROC	g_WinProc=NULL;
 RFFUNCTION g_pFunctions[RF_ENDOFRFUNCTIONTYPE] = {NULL, };
-//LPD3DXFONT g_lpFont=NULL;
-
-//extern LPDIRECT3DTEXTURE9 g_lpTexture ;
-//extern LPDIRECT3DSURFACE9 g_lpSurface ;
 
 extern int gNumTrisRendered;
 
@@ -51,7 +45,6 @@ void RSetFunction(RFUNCTIONTYPE ft,RFFUNCTION pfunc)
 bool RIsActive()
 {
 	return GetActiveWindow()==g_hWnd;
-//	return g_bActive;
 }
 
 void RFrame_Create()
@@ -62,40 +55,12 @@ void RFrame_Create()
 	GetWindowRect(g_hWnd,&g_rcWindowBounds);
 }
 
-/*
-void RFrame_InitFont()
-{
-	LOGFONT lFont;
-	
-	ZeroMemory(&lFont, sizeof(LOGFONT));
-	lFont.lfHeight = 16;
-	lFont.lfWidth = 0;
-	lFont.lfWeight = FW_BOLD; 
-	lFont.lfCharSet = SHIFTJIS_CHARSET;
-	lFont.lfOutPrecision = OUT_DEFAULT_PRECIS;
-	lFont.lfClipPrecision = CLIP_DEFAULT_PRECIS;
-	lFont.lfQuality = PROOF_QUALITY;
-	lFont.lfPitchAndFamily = FIXED_PITCH | FF_MODERN;
-	strcpy_safe(lFont.lfFaceName, "FONTa9");
-	
-	SAFE_RELEASE(g_lpFont);
-	HRESULT hr=D3DXCreateFontIndirect(RGetDevice(), &lFont, &g_lpFont);
-	_ASSERT(hr==D3D_OK);
-	mlog("font restored.\n");
-}
-*/
-
 void RFrame_Init()
 {
-//	RFrame_InitFont();
 }
 
 void RFrame_Restore()
 {
-	//if( IsFixedResolution() )
-	//	FixedResolutionRenderStart();
-
-//	RFrame_InitFont();
 	RParticleSystem::Restore();
 	if(g_pFunctions[RF_RESTORE])
 		g_pFunctions[RF_RESTORE](NULL);
@@ -103,13 +68,6 @@ void RFrame_Restore()
 
 void RFrame_Destroy()
 {
-	//if( IsFixedResolution() )
-	//{
-	//	FixedResolutionRenderEnd();
-	//	FixedResolutionRenderInvalidate();
-	//}
-
-//	SAFE_RELEASE(g_lpFont);
 	if(g_pFunctions[RF_DESTROY])
 		g_pFunctions[RF_DESTROY](NULL);
 	RCloseDisplay();
@@ -121,14 +79,6 @@ void RFrame_Destroy()
 
 void RFrame_Invalidate()
 {
-	//if( IsFixedResolution() )
-	//{
-	//	FixedResolutionRenderEnd();
-	//	FixedResolutionRenderInvalidate();
-	//}
-//	SAFE_RELEASE(g_lpFont);
-
-//	RFontTexture::m_dwStateBlock=NULL;
 	RParticleSystem::Invalidate();
 	if(g_pFunctions[RF_INVALIDATE])
 		g_pFunctions[RF_INVALIDATE](NULL);
@@ -143,7 +93,7 @@ void RFrame_Update()
 
 void RFrame_Render()
 {
-	if (!RIsActive() && RIsFullScreen()) return;
+	if (!RIsActive() && RIsFullscreen()) return;
 
 	RRESULT isOK=RIsReadyToRender();
 	if(isOK==R_NOTREADY)
@@ -151,7 +101,7 @@ void RFrame_Render()
 	else
 	if(isOK==R_RESTORED)
 	{
-		RMODEPARAMS ModeParams={ RGetScreenWidth(),RGetScreenHeight(),RIsFullScreen(),RGetPixelFormat() };
+		RMODEPARAMS ModeParams={ RGetScreenWidth(),RGetScreenHeight(),RGetFullscreenMode(),RGetPixelFormat() };
 		RResetDevice(&ModeParams);
 	}
 
@@ -165,58 +115,10 @@ void RFrame_Render()
 	RGetDevice()->SetIndices(0);
 	RGetDevice()->SetTexture(0,NULL);
 	RGetDevice()->SetTexture(1,NULL);
-
-
-//	Draw FPS
-
-//	60fps 가 100점
-
-	/*
-	char buf[256];
-	float fMs = 1000.f/g_fFPS;
-	float fScore = 100-(fMs-(1000.f/60.f))*2;
-
-	sprintf_safe(buf, "FPS : %3.3f , %d triangles, %4.1f ms,score %4.1f 점",g_fFPS,gNumTrisRendered,fMs,fScore);
-	RECT drawRect;
-	SetRect(&drawRect, 0, 0, RGetScreenWidth(), RGetScreenHeight());
-	g_lpFont->DrawText(buf, -1, &drawRect, DT_LEFT | DT_TOP, D3DCOLOR_RGBA(255, 255, 255, 255));
-//
-*/
-
-
-/*
-	for(int i=0;i<MGetLogHistoryCount();i++)
-	{
-		drawRect.top=(i+1)*20;
-		g_lpFont->DrawText(MGetLogHistory(i), -1, &drawRect, DT_LEFT | DT_TOP, D3DCOLOR_RGBA(255, 255, 255, 255));
-	}
-
-*/
-}
-
-void RFrame_ToggleFullScreen()
-{
-	RMODEPARAMS ModeParams={ RGetScreenWidth(),RGetScreenHeight(),RIsFullScreen(),RGetPixelFormat() };
-
-	if(!ModeParams.bFullScreen)									// 윈도우 -> 풀스크린일때 저장하고..
-		GetWindowRect(g_hWnd,&g_rcWindowBounds);
-
-	ModeParams.bFullScreen=!ModeParams.bFullScreen;
-	RResetDevice(&ModeParams);
-
-	if(!ModeParams.bFullScreen)									// 풀스크린 -> 윈도우로 갈때 복구한다.
-	{
-		SetWindowPos( g_hWnd, HWND_NOTOPMOST,
-			g_rcWindowBounds.left, g_rcWindowBounds.top,
-			( g_rcWindowBounds.right - g_rcWindowBounds.left ),
-			( g_rcWindowBounds.bottom - g_rcWindowBounds.top ),
-			SWP_SHOWWINDOW );
-	}
 }
 
 LRESULT FAR PASCAL WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	
     // Handle messages
     switch (message)
     {
@@ -253,7 +155,7 @@ LRESULT FAR PASCAL WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 				if (g_pFunctions[RF_DEACTIVATE])
 					g_pFunctions[RF_DEACTIVATE](NULL);
 
-				if (RIsFullScreen()) {
+				if (RIsFullscreen()) {
 					ShowWindow(hWnd, SW_MINIMIZE);
 					UpdateWindow(hWnd);
 				}
@@ -312,13 +214,13 @@ int RMain(const char *AppName, HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR c
     wc.cbWndExtra = sizeof(DWORD);
     wc.hInstance = this_inst;
 	wc.hIcon = LoadIcon( this_inst, MAKEINTRESOURCE(nIconResID));
-    wc.hCursor = 0;//LoadCursor(NULL, IDC_ARROW);
+    wc.hCursor = 0;
     wc.hbrBackground = NULL;
     wc.lpszMenuName = NULL;
     wc.lpszClassName = "RealSpace2";
 	if(!RegisterClass(&wc)) return FALSE;
 
-	DWORD dwStyle = pModeParams->bFullScreen ? WS_POPUP /*| WS_SYSMENU*/ : WS_POPUP /*| WS_CAPTION | WS_SYSMENU*/;
+	DWORD dwStyle = GetWindowStyle(*pModeParams);
     g_hWnd = CreateWindow( "RealSpace2", AppName , dwStyle, CW_USEDEFAULT, CW_USEDEFAULT, 
 			pModeParams->nWidth, pModeParams->nHeight, NULL, NULL, this_inst , NULL );
 
@@ -327,7 +229,6 @@ int RMain(const char *AppName, HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR c
 	RAdjustWindow(pModeParams);
 
 	while(ShowCursor(FALSE)>0);
-//	ShowCursor(TRUE);	// RAONHAJE Mouse Cursor HardwareDraw
 
 	RFrame_Create();
 
@@ -338,9 +239,7 @@ int RMain(const char *AppName, HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR c
 		return -1;
 	}
 
-	//RBeginScene();
 	RGetDevice()->Clear(0 , NULL, D3DCLEAR_TARGET, 0x00000000, 1.0f, 0 );
-//	REndScene();
 	RFlip();
 
 	if(g_pFunctions[RF_CREATE])
@@ -364,8 +263,6 @@ int RMain(const char *AppName, HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR c
 		bGotMsg = PeekMessage( &msg, NULL, 0U, 0U, PM_REMOVE );
 
         if( bGotMsg ) {
-			/*if (msg.message != 512)
-				MLog("Got message %d\n", msg.message);*/
             TranslateMessage( &msg );
             DispatchMessage( &msg );
         }
@@ -375,7 +272,6 @@ int RMain(const char *AppName, HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR c
 
 			RFrame_Update();
 			RFrame_Render();
-//			Sleep(20);
 			__BP(5007,"RMain::RFlip");
 			RFlip();
 			__EP(5007);
