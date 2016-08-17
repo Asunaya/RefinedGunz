@@ -330,74 +330,60 @@ void RBspObject::SetDiffuseMap(int nMaterial)
 	}
 }
 
-bool RBspObject::Draw(RSBspNode *pNode, int nMaterial)
+template <typename T>
+static void DrawImpl(RSBspNode& Node, int Material, T&& DrawFunc)
 {
-	if (pNode->nPolygon)
-	{
-		if (pNode->nFrameCount != g_nFrameNumber) return true;
+	if (Node.nFrameCount != g_nFrameNumber)
+		return;
 
-		int nCount = pNode->pDrawInfo[nMaterial].nTriangleCount;
+	// Leaf node
+	if (Node.nPolygon)
+	{
+		int nCount = Node.pDrawInfo[Material].nTriangleCount;
 		if (nCount)
 		{
+#ifdef _DEBUG
 			g_nCall++;
 			g_nPoly += nCount;
-			HRESULT hr = RGetDevice()->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, OcVertices.size(),
-				pNode->pDrawInfo[nMaterial].nIndicesOffset, nCount);
-			return true;
+#endif
+			DrawFunc(Node, nCount);
 		}
+		return;
 	}
-	else
+
+	// Branch node
+	auto DrawNode = [&](auto Branch)
 	{
-		bool bOk = true;
-		if (pNode->m_pNegative) {
-			if (!Draw(pNode->m_pNegative, nMaterial))
-				bOk = false;
-		}
-		if (pNode->m_pPositive) {
-			if (!Draw(pNode->m_pPositive, nMaterial))
-				bOk = false;
-		}
-		return bOk;
-	}
-	return true;
+		if (Node.*Branch)
+			DrawImpl(*(Node.*Branch), Material, DrawFunc);
+	};
+
+	DrawNode(&RSBspNode::m_pPositive);
+	DrawNode(&RSBspNode::m_pNegative);
 }
 
-bool RBspObject::DrawNoTNL(RSBspNode *pNode, int nMaterial)
+void RBspObject::Draw(RSBspNode* Node, int Material)
 {
-	if (pNode->nFrameCount != g_nFrameNumber) return true;
-
-	if (pNode->nPolygon)
+	DrawImpl(*Node, Material, [&](auto& Node, auto Count)
 	{
-		int nCount = pNode->pDrawInfo[nMaterial].nTriangleCount;
-		int nIndCount = nCount * 3;
-		if (nCount)
-		{
-			g_nPoly += nCount;
+		HRESULT hr = RGetDevice()->DrawIndexedPrimitive(D3DPT_TRIANGLELIST,
+			0, 0, OcVertices.size(),
+			Node.pDrawInfo[Material].nIndicesOffset, Count);
+		assert(hr == D3D_OK);
+	});
+}
 
-			g_nCall++;
-			if (nCount)
-			{
-				int index = pNode->pDrawInfo[nMaterial].nIndicesOffset;
-				HRESULT hr = RGetDevice()->DrawIndexedPrimitiveUP(D3DPT_TRIANGLELIST, 0, pNode->pDrawInfo[nMaterial].nVertice, nCount,
-					OcIndices.data() + index, D3DFMT_INDEX16, pNode->pDrawInfo[nMaterial].pVertices, sizeof(BSPVERTEX));
-				_ASSERT(hr == D3D_OK);
-			}
-		}
-	}
-	else
+void RBspObject::DrawNoTNL(RSBspNode *pNode, int nMaterial)
+{
+	DrawImpl(*pNode, nMaterial, [&](auto& Node, int Count)
 	{
-		bool bOk = true;
-		if (pNode->m_pNegative) {
-			if (!DrawNoTNL(pNode->m_pNegative, nMaterial))
-				bOk = false;
-		}
-		if (pNode->m_pPositive) {
-			if (!DrawNoTNL(pNode->m_pPositive, nMaterial))
-				bOk = false;
-		}
-		return bOk;
-	}
-	return true;
+		int index = Node.pDrawInfo[nMaterial].nIndicesOffset;
+		HRESULT hr = RGetDevice()->DrawIndexedPrimitiveUP(D3DPT_TRIANGLELIST, 0,
+			pNode->pDrawInfo[nMaterial].nVertice, Count,
+			OcIndices.data() + index, D3DFMT_INDEX16,
+			pNode->pDrawInfo[nMaterial].pVertices, sizeof(BSPVERTEX));
+		assert(hr == D3D_OK);
+	});
 }
 
 bool RBspObject::Draw()
@@ -427,49 +413,45 @@ bool RBspObject::Draw()
 		pd3dDevice->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
 		pd3dDevice->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
 	}
+	else if (m_bShowLightmap)
+	{
+		pd3dDevice->SetSamplerState(1, D3DSAMP_MINFILTER, D3DTEXF_POINT);
+		pd3dDevice->SetSamplerState(1, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
+
+		pd3dDevice->SetRenderState(D3DRS_TEXTUREFACTOR, 0xffffffff);
+		pd3dDevice->SetTextureStageState(1, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+		pd3dDevice->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_MODULATE4X);
+		pd3dDevice->SetTextureStageState(1, D3DTSS_COLORARG2, D3DTA_TFACTOR);
+
+	}
 	else
 	{
-		if (m_bShowLightmap)
+		bool bTrilinear = RIsTrilinear();
+
+		pd3dDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+		pd3dDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+		pd3dDevice->SetSamplerState(0, D3DSAMP_MIPFILTER, bTrilinear ? D3DTEXF_LINEAR : D3DTEXF_NONE);
+		pd3dDevice->SetSamplerState(1, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+		pd3dDevice->SetSamplerState(1, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+		pd3dDevice->SetSamplerState(1, D3DSAMP_MIPFILTER, bTrilinear ? D3DTEXF_LINEAR : D3DTEXF_NONE);
+
+		pd3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+		pd3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
+		pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+		pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_DIFFUSE);
+
+		if (!m_nLightmap)
 		{
-			// lightmap 의 필터링을 끕니다 : 디버그용
-			pd3dDevice->SetSamplerState(1, D3DSAMP_MINFILTER, D3DTEXF_POINT);
-			pd3dDevice->SetSamplerState(1, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
-
-			pd3dDevice->SetRenderState(D3DRS_TEXTUREFACTOR, 0xffffffff);
-			pd3dDevice->SetTextureStageState(1, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-			pd3dDevice->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_MODULATE4X);
-			pd3dDevice->SetTextureStageState(1, D3DTSS_COLORARG2, D3DTA_TFACTOR);
-
+			pd3dDevice->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
+			pd3dDevice->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
 		}
 		else
 		{
-			bool bTrilinear = RIsTrilinear();
-
-			pd3dDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
-			pd3dDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
-			pd3dDevice->SetSamplerState(0, D3DSAMP_MIPFILTER, bTrilinear ? D3DTEXF_LINEAR : D3DTEXF_NONE);
-			pd3dDevice->SetSamplerState(1, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
-			pd3dDevice->SetSamplerState(1, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
-			pd3dDevice->SetSamplerState(1, D3DSAMP_MIPFILTER, bTrilinear ? D3DTEXF_LINEAR : D3DTEXF_NONE);
-
-			pd3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-			pd3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
-			pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
-			pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_DIFFUSE);
-
-			if (!m_nLightmap)
-			{
-				pd3dDevice->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
-				pd3dDevice->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
-			}
-			else
-			{
-				pd3dDevice->SetTextureStageState(1, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-				pd3dDevice->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_MODULATE4X);
-				pd3dDevice->SetTextureStageState(1, D3DTSS_COLORARG2, D3DTA_CURRENT);
-				pd3dDevice->SetTextureStageState(1, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
-				pd3dDevice->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
-			}
+			pd3dDevice->SetTextureStageState(1, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+			pd3dDevice->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_MODULATE4X);
+			pd3dDevice->SetTextureStageState(1, D3DTSS_COLORARG2, D3DTA_CURRENT);
+			pd3dDevice->SetTextureStageState(1, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+			pd3dDevice->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
 		}
 	}
 
@@ -573,7 +555,7 @@ bool RBspObject::Draw()
 		}
 	}
 
-	// additive 인것들은 나중에 찍는다.
+	// Additive
 
 	RGetDevice()->SetRenderState(D3DRS_ALPHABLENDENABLE, true);
 	RGetDevice()->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
@@ -623,8 +605,6 @@ bool RBspObject::Draw()
 
 	return true;
 }
-
-// 맵에 등록된 오브젝트 이외의 오브젝트 처리 ( 캐릭터 선택화면등 )
 
 void RBspObject::SetObjectLight(rvector vPos)
 {
@@ -686,12 +666,7 @@ void RBspObject::SetObjectLight(rvector vPos)
 	}
 }
 
-void RBspObject::SetCharactorLight(rvector pos)
-{
-
-}
-
-bool e_mapobject_sort_float(ROBJECTINFO* _a, ROBJECTINFO* _b) {
+static bool e_mapobject_sort_float(ROBJECTINFO* _a, ROBJECTINFO* _b) {
 	if (_a->fDist > _b->fDist)
 		return true;
 	return false;

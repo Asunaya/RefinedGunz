@@ -304,7 +304,6 @@ public:
 	void OnRestore();
 
 	void SetObjectLight(rvector pos);
-	void SetCharactorLight(rvector pos);
 
 	bool GetShadowPosition(rvector& pos_, rvector& dir_, rvector* outNormal_, rvector* outPos_);
 
@@ -352,8 +351,8 @@ private:
 	bool m_bWireframe;
 	bool m_bShowLightmap;
 
-	bool DrawNoTNL(RSBspNode *bspNode, int nMaterial);
-	bool Draw(RSBspNode *bspNode, int nMaterial);
+	void Draw(RSBspNode *bspNode, int nMaterial);
+	void DrawNoTNL(RSBspNode *bspNode, int nMaterial);
 
 	void SetDiffuseMap(int nMaterial);
 
