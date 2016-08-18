@@ -908,7 +908,7 @@ void RBspObject::ChooseNodes(RSBspNode *bspNode)
 	}
 }
 
-int RBspObject::ChooseNodes(RSBspNode *bspNode, rvector &center, float fRadius)
+int RBspObject::ChooseNodes(RSBspNode *bspNode, const rvector &center, float fRadius)
 {
 	if (bspNode == NULL) return 0;
 
@@ -1261,7 +1261,7 @@ bool RBspObject::Open_ObjectList(MXmlElement *pElement)
 
 			if (pmesh)
 			{
-				char* pName = pmesh->GetFileName();
+				auto* pName = pmesh->GetFileName();
 				while (pName[0] != '\0')
 				{
 					if (pName[0] == 'o' && pName[1] == 'b') break;

@@ -152,7 +152,7 @@ public:
 	void OnExplosionMagicNonSplash(ZWeaponMagic *pWeapon, MUID uidOwner, MUID uidTarget, rvector pos, float fKnockBack);
 	void OnReloadComplete(ZCharacter *pCharacter);
 	void OnPeerShotSp(const MUID& uid, float fShotTime, const rvector& pos, const rvector& dir,int type,MMatchCharItemParts sel_type);
-	void OnChangeWeapon(MUID& uid, MMatchCharItemParts parts);
+	void OnChangeWeapon(const MUID& uid, MMatchCharItemParts parts);
 
 	rvector GetMyCharacterFirePosition(void);
 
@@ -227,10 +227,14 @@ public:
 
 	rvector GetFloor(rvector pos,rplane *pimpactplane=NULL);
 
-	bool Pick(ZObject *pOwnerObject,rvector &origin,rvector &dir,ZPICKINFO *pickinfo,DWORD dwPassFlag=RM_FLAG_ADDITIVE | RM_FLAG_HIDE,bool bMyChar=false);
-	bool PickTo(ZObject *pOwnerObject,rvector &origin,rvector &to,ZPICKINFO *pickinfo,DWORD dwPassFlag=RM_FLAG_ADDITIVE | RM_FLAG_HIDE,bool bMyChar=false);
-	bool PickHistory(ZObject *pOwnerObject,float fTime,rvector &origin,rvector &to,ZPICKINFO *pickinfo,DWORD dwPassFlag,bool bMyChar=false);
-	bool ObjectColTest(ZObject* pOwner, rvector& origin, rvector& to, float fRadius, ZObject** poutTarget);
+	bool Pick(ZObject *pOwnerObject, const rvector &origin, const rvector &dir,ZPICKINFO *pickinfo,
+		DWORD dwPassFlag=RM_FLAG_ADDITIVE | RM_FLAG_HIDE,bool bMyChar=false);
+	bool PickTo(ZObject *pOwnerObject, const rvector &origin, const rvector &to,ZPICKINFO *pickinfo,
+		DWORD dwPassFlag=RM_FLAG_ADDITIVE | RM_FLAG_HIDE,bool bMyChar=false);
+	bool PickHistory(ZObject *pOwnerObject,float fTime, const rvector &origin, const rvector &to,
+		ZPICKINFO *pickinfo,DWORD dwPassFlag,bool bMyChar=false);
+	bool ObjectColTest(ZObject* pOwner, const rvector& origin, const rvector& to, float fRadius,
+		ZObject** poutTarget);
 
 	char* GetSndNameFromBsp(const char* szSrcSndName, RMATERIAL* pMaterial);
 

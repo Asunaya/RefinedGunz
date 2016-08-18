@@ -361,7 +361,7 @@ private:
 	bool PickShadow(RSBspNode *pNode, const rvector &v0, const rvector &v1, struct PickInfo&);
 
 	void ChooseNodes(RSBspNode *bspNode);
-	int ChooseNodes(RSBspNode *bspNode, rvector &center, float fRadius);
+	int ChooseNodes(RSBspNode *bspNode, const rvector &center, float fRadius);
 
 	auto* GetLeafNode(const rvector &pos) { return BspRoot[0].GetLeafNode(pos); }
 

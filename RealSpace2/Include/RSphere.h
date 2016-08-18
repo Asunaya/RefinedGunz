@@ -25,8 +25,8 @@ public:
 
 public:
 	bool isCollide(	CDInfo* data_, CDInfoType cdType_ );
-	inline void setSphere( rvector centre_, float radius_ );
-	void setSphere( rvector& centre_ )
+	inline void setSphere( const rvector& centre_, float radius_ );
+	void setSphere( const rvector& centre_ )
 	{
 		mCentre	= centre_;
 	}
@@ -48,10 +48,10 @@ public:
 
 public:
 	RSphere(void);
-	virtual ~RSphere(void);
+	~RSphere(void);
 };
 
-void RSphere::setSphere( rvector centre_, float radius_ )
+void RSphere::setSphere( const rvector& centre_, float radius_ )
 {
 	mCentre = centre_;
 	mRadius = radius_;

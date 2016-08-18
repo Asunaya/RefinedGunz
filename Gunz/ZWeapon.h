@@ -1,7 +1,4 @@
-#ifndef _ZWEAPON_H
-#define _ZWEAPON_H
-
-//#pragma	once
+#pragma	once
 
 #include "RTypes.h"
 #include "RMesh.h"
@@ -60,7 +57,7 @@ public:
 	ZMovingWeapon();
 	~ZMovingWeapon();
 
-	void Create(RMesh* pMesh,rvector &pos, rvector &dir,ZObject* pOwner);
+	void Create(RMesh* pMesh, const rvector &pos, const rvector &dir,ZObject* pOwner);
 
 	virtual void Explosion();
 
@@ -80,7 +77,7 @@ public:
 	ZWeaponRocket();
 	~ZWeaponRocket();
 
-	void Create(RMesh* pMesh,rvector &pos, rvector &dir,ZObject* pOwner);
+	void Create(RMesh* pMesh, const rvector &pos, const rvector &dir,ZObject* pOwner);
 	void Render();
 	void Explosion();
 	
@@ -97,7 +94,7 @@ public:
 	ZWeaponItemkit();
 	~ZWeaponItemkit();
 
-	void Create(RMesh* pMesh,rvector &pos, rvector &velocity,ZObject* pOwner);
+	void Create(RMesh* pMesh, const rvector &pos, const rvector &velocity,ZObject* pOwner);
 
 	virtual void Explosion();
 	
@@ -131,7 +128,7 @@ public:
 
 	ZWeaponGrenade() : ZMovingWeapon() { }
 
-	void Create(RMesh* pMesh,rvector &pos, rvector &velocity,ZObject* pOwner);
+	void Create(RMesh* pMesh, const rvector &pos, const rvector &velocity,ZObject* pOwner);
 
 	virtual void Explosion();
 
@@ -209,7 +206,7 @@ public:
 	void Create(RMesh* pMesh, ZSkill* pSkill, const rvector &pos, const rvector &dir,float fMagicScale, ZObject* pOwner);
 
 	void Render();
-	void Explosion(WeaponMagicExplosionType type, ZObject* pVictim,rvector& vDir);
+	void Explosion(WeaponMagicExplosionType type, ZObject* pVictim, const rvector& vDir);
 	
 	bool Update(float fElapsedTime);
 
@@ -219,6 +216,3 @@ public:
 	float	m_fStartTime;
 	float	m_fLastAddTime;
 };
-
-
-#endif

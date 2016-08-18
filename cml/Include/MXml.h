@@ -1,21 +1,13 @@
-#ifndef MXML_H
-#define MXML_H
-//#pragma once
+#pragma once
 
 #include "winsock2.h"
 #include "windows.h"
 #include <comutil.h>
 #include <stdio.h>
 #include <string>
-using namespace std;
 
-//#define _MSXML2
-
-
-#ifdef MSVC_VER
 #ifdef _MSXML2
 	#import "msxml4.dll" named_guids no_implementation
-//	using namespace MSXML2;
 
 	typedef MSXML2::IXMLDOMDocumentPtr				MXmlDomDocPtr;
 	typedef MSXML2::IXMLDOMNodePtr					MXmlDomNodePtr;
@@ -26,7 +18,11 @@ using namespace std;
 	typedef MSXML2::IXMLDOMTextPtr					MXmlDomTextPtr;
 	typedef MSXML2::IXMLDOMParseErrorPtr			MXmlDomParseErrorPtr;
 #else
+#ifdef MSVC_VER
 	#import "msxml.dll" named_guids no_implementation
+#else
+#include "msxml.tlh"
+#endif
 
 	typedef MSXML::IXMLDOMDocumentPtr				MXmlDomDocPtr;
 	typedef MSXML::IXMLDOMNodePtr					MXmlDomNodePtr;
@@ -36,19 +32,6 @@ using namespace std;
 	typedef MSXML::IXMLDOMNamedNodeMapPtr			MXmlDomNamedNodeMapPtr;
 	typedef MSXML::IXMLDOMTextPtr					MXmlDomTextPtr;
 	typedef MSXML::IXMLDOMParseErrorPtr				MXmlDomParseErrorPtr;
-
-//	using namespace MSXML;
-#endif
-#else
-#include "msxml.tlh"
-typedef MSXML::IXMLDOMDocumentPtr				MXmlDomDocPtr;
-typedef MSXML::IXMLDOMNodePtr					MXmlDomNodePtr;
-typedef MSXML::IXMLDOMNodeListPtr				MXmlDomNodeListPtr;
-typedef MSXML::IXMLDOMElementPtr				MXmlDomElementPtr;
-typedef MSXML::IXMLDOMProcessingInstructionPtr	MXmlDomPIPtr;
-typedef MSXML::IXMLDOMNamedNodeMapPtr			MXmlDomNamedNodeMapPtr;
-typedef MSXML::IXMLDOMTextPtr					MXmlDomTextPtr;
-typedef MSXML::IXMLDOMParseErrorPtr				MXmlDomParseErrorPtr;
 #endif
 
 class MXmlDocument;
@@ -150,7 +133,7 @@ public:
 	void GetContents(int* ipOutValue);
 	void GetContents(bool* bpOutValue);
 	void GetContents(float* fpOutValue);
-	void GetContents(string* pstrValue);
+	void GetContents(std::string* pstrValue);
 
 	/// Contents를 설정
 	void SetContents(const char* sStr) { MXmlNode::SetText(sStr); }
@@ -173,7 +156,7 @@ public:
 	bool GetAttribute(int* ipOutValue, const char* sAttrName, int nDefaultValue = 0);
 	bool GetAttribute(bool* bOutValue, const char* sAttrName, bool bDefaultValue = false);
 	bool GetAttribute(float* fpOutValue, const char* sAttrName, float fDefaultValue = 0.0f);
-	bool GetAttribute(string* pstrOutValue, const char* sAttrName, char* sDefaultValue = "");
+	bool GetAttribute(std::string* pstrOutValue, const char* sAttrName, char* sDefaultValue = "");
 	/// 속성을 추가한다.
 	/// @param sAttrName		[in] 속성 이름
 	/// @param sAttrText		[in] 속성값
@@ -260,5 +243,3 @@ public:
 // Utils
 #define _BSTRToAscii(s) (const char*)(_bstr_t)(s)
 BSTR _AsciiToBSTR(const char* ascii);
-
-#endif

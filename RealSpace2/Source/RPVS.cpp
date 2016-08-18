@@ -63,8 +63,7 @@ enum SIDE {
 	SIDE_BACK
 } ;
 
-// winding 을 plane 에 대해 클리핑한다. ( 평면의 m_pNegative 쪽이 잘려져 나간다 )
-RWinding *ClipWinding(RWinding *pWinding, rplane &plane)
+static RWinding *ClipWinding(RWinding *pWinding, const rplane &plane)
 {
 	SIDE sides[MAX_WINDING_POINTS];
 	float dists[MAX_WINDING_POINTS];

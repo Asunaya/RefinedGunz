@@ -28,7 +28,7 @@ void compare_and_add( node* first_, node* node_, rvector pos_ );
 //////////////////////////////////////////////////////////////////////////
 //	AddLight
 //////////////////////////////////////////////////////////////////////////
-bool RDynamicLightManager::AddLight( MAP_LIGHT_TYPE light_type_, rvector& pos_ )
+bool RDynamicLightManager::AddLight( MAP_LIGHT_TYPE light_type_, const rvector& pos_ )
 {
 	sMapLightObj temp;
 
@@ -160,7 +160,7 @@ void RDynamicLightManager::Initialize()
 //////////////////////////////////////////////////////////////////////////
 //	SetPosition
 //////////////////////////////////////////////////////////////////////////
-void RDynamicLightManager::SetPosition( rvector& pos_ )
+void RDynamicLightManager::SetPosition(const rvector& pos_ )
 {
 	mvPosition = pos_;
 }
@@ -176,7 +176,7 @@ void RDynamicLightManager::SetPosition( rvector& pos_ )
 //		2.2.	현재 보여지고 있는 폭발 라이트 우선
 //		2.3.	수명이 많이남은 라이트 우선
 //////////////////////////////////////////////////////////////////////////
-int RDynamicLightManager::SetLight( rvector pos_ )
+int RDynamicLightManager::SetLight(const rvector& pos_ )
 {
 	D3DLIGHT9	Light;
 	memset( &Light, 0, sizeof(D3DLIGHT9) );
@@ -295,7 +295,7 @@ int RDynamicLightManager::SetLight( rvector pos_ )
 	return base_slot;
 }
 
-bool RDynamicLightManager::SetLight( rvector& pos_, int lightIndex_, float maxDistance_  )
+bool RDynamicLightManager::SetLight(const rvector& pos_, int lightIndex_, float maxDistance_  )
 {
 	return true;
 }

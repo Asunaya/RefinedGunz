@@ -6,33 +6,9 @@
 #include <string.h>
 #include <string>
 #include <algorithm>
-using namespace std; 
 
-#ifdef _MSXML2
-	#import "msxml4.dll" named_guids implementation_only
-//	using namespace MSXML2;
-
-	typedef MSXML2::IXMLDOMDocumentPtr				MXmlDomDocPtr;
-	typedef MSXML2::IXMLDOMNodePtr					MXmlDomNodePtr;
-	typedef MSXML2::IXMLDOMNodeListPtr				MXmlDomNodeListPtr;
-	typedef MSXML2::IXMLDOMElementPtr				MXmlDomElementPtr;
-	typedef MSXML2::IXMLDOMProcessingInstructionPtr MXmlDomPIPtr;
-	typedef MSXML2::IXMLDOMNamedNodeMapPtr			MXmlDomNamedNodeMapPtr;
-	typedef MSXML2::IXMLDOMTextPtr					MXmlDomTextPtr;
-	typedef MSXML2::IXMLDOMParseErrorPtr			MXmlDomParseErrorPtr;
-#else
-	#import "msxml.dll" named_guids implementation_only
-
-	typedef MSXML::IXMLDOMDocumentPtr				MXmlDomDocPtr;
-	typedef MSXML::IXMLDOMNodePtr					MXmlDomNodePtr;
-	typedef MSXML::IXMLDOMNodeListPtr				MXmlDomNodeListPtr;
-	typedef MSXML::IXMLDOMElementPtr				MXmlDomElementPtr;
-	typedef MSXML::IXMLDOMProcessingInstructionPtr	MXmlDomPIPtr;
-	typedef MSXML::IXMLDOMNamedNodeMapPtr			MXmlDomNamedNodeMapPtr;
-	typedef MSXML::IXMLDOMTextPtr					MXmlDomTextPtr;
-	typedef MSXML::IXMLDOMParseErrorPtr				MXmlDomParseErrorPtr;
-
-//	using namespace MSXML;
+#ifndef MSVC_VER
+#include "msxml.tli"
 #endif
 
 BSTR _AsciiToBSTR(const char* ascii)
@@ -114,7 +90,7 @@ MXmlNode MXmlNode::GetChildNode(int iIndex)
 {
 	if (m_pDomNode)
 	{
-		return MXmlNode(m_pDomNode->childNodes->item[iIndex]);
+		return MXmlNode(m_pDomNode->childNodes->Getitem(iIndex));
 	}
 	else
 	{
@@ -148,7 +124,7 @@ bool MXmlNode::FindChildNode(const char* sNodeName, MXmlNode* pOutNode)
 
 	for (i = 0; i < iCount; i++)
 	{
-		pNode = m_pDomNode->childNodes->item[i];
+		pNode = m_pDomNode->childNodes->Getitem(i);
 		strcpy_safe(szBuf, _BSTRToAscii(pNode->nodeName));
 
 		if (!_stricmp(szBuf, sNodeName))
@@ -280,7 +256,7 @@ bool MXmlElement::GetAttribute(char* sOutText, int maxlen, const char* sAttrName
 
 	for(int i=0; i < pAttributes->length; i++)
 	{
-		 pNode = pAttributes->item[i];
+		 pNode = pAttributes->Getitem(i);
 		 
 		 if(!_stricmp(_BSTRToAscii(pNode->nodeName), sAttrName))
 		 {
@@ -392,7 +368,7 @@ int MXmlElement::GetAttributeCount()
 void MXmlElement::GetAttribute(int index, char* szoutAttrName, int maxlen1, char* szoutAttrValue, int maxlen2)
 {
 	MXmlDomNamedNodeMapPtr pAttributes = m_pDomNode->attributes;
-	MXmlDomNodePtr pNode = pAttributes->item[index];
+	MXmlDomNodePtr pNode = pAttributes->Getitem(index);
 
 	strcpy_safe(szoutAttrName, maxlen1, (_BSTRToAscii(pNode->nodeName)));
 	strcpy_safe(szoutAttrValue, maxlen2, _BSTRToAscii(pNode->text));
@@ -453,7 +429,7 @@ bool MXmlElement::SetAttribute(const char* sAttrName, char* sAttrText)
 		pAttrs = m_pDomNode->attributes;
 		for (int i = 0; i < pAttrs->length; i++)
 		{
-			pNode = pAttrs->item[i];
+			pNode = pAttrs->Getitem(i);
 			if (!_stricmp(_BSTRToAscii(pNode->nodeName), sAttrName))
 			{
 				BSTR pBSTRAttrText = _AsciiToBSTR(sAttrText);

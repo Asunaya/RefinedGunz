@@ -258,12 +258,12 @@ bool RMeshNode::SetBVertData(RBlendVertex* pBVert,int i,int j,int pv_index,int* 
 	float w1,w2;
 
 	if( point_index < 0 || point_index >= m_point_num ) {
-		mlog("Index of Vertex(Pointer) is Out of Range.. Point Index : %d, Num Vertices : %d, Mesh Node : %s \n", point_index, m_point_num, m_Name );
+		mlog("Index of Vertex(Pointer) is Out of Range.. Point Index : %d, Num Vertices : %d, Mesh Node : %s \n", point_index, m_point_num, m_Name.c_str() );
 		return false;
 	}
 
 	if( pPhysique->m_num > 3 || pPhysique->m_num <= 0 ) {
-		mlog("%s mesh %s node %d face %d point -> physique 3 개 이상\n",m_pParentMesh->GetFileName() ,m_Name,i,j);
+		mlog("%s mesh %s node %d face %d point -> physique 3 개 이상\n",m_pParentMesh->GetFileName() ,m_Name.c_str(),i,j);
 		return false;
 	}
 
@@ -511,7 +511,7 @@ void RMeshNode::ConnectToNameID()
 	int id = RGetMeshNodeStringTable()->Get( m_Name );
 	
 	if(id==-1) {//bip 가 아닌 일반 오브젝트들...
-		mlog("등록불가 파츠 %s \n",m_Name);
+		mlog("등록불가 파츠 %s \n",m_Name.c_str());
 	}
 
 	m_NameID = id;

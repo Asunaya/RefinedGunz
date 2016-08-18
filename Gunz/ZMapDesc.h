@@ -107,7 +107,7 @@ public:
 		m_fDrawBackupTime = 0.f;
 	}
 
-	bool NameCmp(string& name) {
+	bool NameCmp(const std::string& name) {
 		if(name==m_Name)
 			return true;
 		return false;
@@ -190,7 +190,7 @@ public:
 
 	// 사용하는 맵에 많아야 3-4 개니까 그냥 쓴다...
 
-	ZMapSmokeDummy* Get(string& name) {
+	ZMapSmokeDummy* Get(const std::string& name) {
 		
 		iterator it;
 

@@ -18,6 +18,7 @@
 #include "RealSpace2.h"
 #include "ZCharacter.h"
 #include "ZMyCharacter.h"
+#include "ZGameClient.h"
 
 #include "RMeshMgr.h"
 
@@ -2184,7 +2185,7 @@ void ZEffectManager::AddSwordDefenceEffect(const rvector& Target, const rvector&
 	Add(pNew);
 }
 
-void ZEffectManager::AddWaterSplashEffect( rvector& Target, rvector& Scale  )
+void ZEffectManager::AddWaterSplashEffect(const rvector& Target, const rvector& Scale  )
 {
 	rvector dir = -RealSpace2::RCameraDirection;
  	ZEffect* pNew	= new ZEffectSlash( m_pWaterSplash, Target, dir );
@@ -2819,7 +2820,7 @@ void ZEffectManager::AddGrenadeSmokeEffect(const rvector& Target ,float min,floa
 	Add( pNew );
 }
 
-void ZEffectManager::AddWorldItemEatenEffect( rvector& pos )
+void ZEffectManager::AddWorldItemEatenEffect(const rvector& pos )
 {
 	ZEffect* pNew = new ZEffectSlash(m_pWorldItemEaten, pos, RCameraDirection );
 	((ZEffectSlash*)pNew)->SetAlignType(2);
@@ -2862,7 +2863,6 @@ public:
 		}
 };
 
-#include "ZGameClient.h"
 class ZEffectIconLoopStar : public ZEffectIconLoop {
 	// 멤버를 추가하면 에러
 private:

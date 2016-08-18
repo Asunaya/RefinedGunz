@@ -115,7 +115,7 @@ private:
 	bool CreateCommandFromStream(const char* pStream, MCommand& Command)
 	{
 		std::allocator<u8> alloc;
-		CreateCommandFromStream(pStream, Command, alloc);
+		return CreateCommandFromStream(pStream, Command, alloc);
 	}
 	bool FixCommand(MCommand& Command);
 	static bool CreateCommandFromStreamVersion2(const char* pStream, MCommand& Command);

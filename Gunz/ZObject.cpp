@@ -165,7 +165,7 @@ void ZObject::OnHealing(ZObject* pOwner,int nHP,int nAP)
 
 }
 
-bool ZObject::ColTest(const rvector& p1, rvector& p2, float radius, float fTime)
+bool ZObject::ColTest(const rvector& p1, const rvector& p2, float radius, float fTime)
 {
 	rvector p, d;
 	if (GetHistory(&p, &d, fTime))

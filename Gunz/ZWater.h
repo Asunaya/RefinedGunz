@@ -49,8 +49,8 @@ protected:
 	void Render();
 	void OnInvalidate();
 	void OnRestore();
-	bool CheckSpearing( rvector& o, rvector& e, int iPower, float fArea, rvector* pPos );
-	bool Pick( rvector& o, rvector& d, rvector* pPos );
+	bool CheckSpearing(const rvector& o, const rvector& e, int iPower, float fArea, rvector* pPos );
+	bool Pick(const rvector& o, const rvector& d, rvector* pPos );
 	bool RenderReflectionSurface();
 	bool RenderUnderWater();
 	void Ripple(const rvector& pos, int iAmplitude, float fFrequency);
@@ -60,7 +60,7 @@ public:
 	~ZWater(void);
 };
 
-class ZWaterList : public list<ZWater*>
+class ZWaterList : public std::list<ZWater*>
 {
 protected:
 	DWORD	m_dwTime;

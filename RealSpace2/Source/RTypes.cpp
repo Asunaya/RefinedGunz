@@ -513,7 +513,7 @@ bool IsIntersect( rvector& line_begin_, rvector& line_dir_, rvector& center_, fl
 	return true;
 }
 
-float GetAngle(rvector &a)
+static float GetAngle(const rvector &a)
 {
 	if(a.x>=1.0f) return 0.0f;
 	if(a.x<=-1.0f) return -D3DX_PI;

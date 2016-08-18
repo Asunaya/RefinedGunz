@@ -74,12 +74,12 @@
     <ClInclude Include="Include\MXml.h" />
     <ClInclude Include="Include\MZFileSystem.h" />
     <ClInclude Include="Include\MZip.h" />
-    <ClInclude Include="Include\stdafx.h" />
     <ClInclude Include="Include\targetver.h" />
     <ClInclude Include="Include\GlobalTypes.h" />
     <ClInclude Include="Include\MultiVector.h" />
     <ClInclude Include="Include\MTime.h" />
     <ClInclude Include="Include\has_xxx.h" />
+    <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\MMatrix.cpp">
@@ -130,7 +130,7 @@
     <ClCompile Include="Source\MXml.cpp" />
     <ClCompile Include="Source\MZFileSystem.cpp" />
     <ClCompile Include="Source\MZip.cpp" />
-    <ClCompile Include="source\stdafx.cpp" />
     <ClCompile Include="source\MTime.cpp" />
+    <ClCompile Include="stdafx.cpp" />
   </ItemGroup>
 </Project>

@@ -30,9 +30,6 @@
 #include "ZRuleDuel.h"
 #include "ZInput.h"
 
-using namespace std;
-
-
 // CONSTANTS
 #define BACKGROUND_COLOR1					0xff202020
 #define BACKGROUND_COLOR2					0xff000000

@@ -1053,7 +1053,7 @@ int __stdcall AhnHS_Callback(long lCode, long lParamSize, void* pParam);
 
 DWORD g_dwMainThreadID;
 
-LONG __stdcall Filter(_EXCEPTION_POINTERS*)
+LONG __stdcall Filter(_EXCEPTION_POINTERS* p)
 {
 	return CrashExceptionDump(p, "Gunz.dmp");
 }

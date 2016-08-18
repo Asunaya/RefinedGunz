@@ -66,18 +66,8 @@ void	ZClothEmblem::CreateFromMeshNode( RMeshNode* pMeshNdoe_ , ZWorld* pWorld)
 
 	nIndices = pMeshNdoe_->m_face_num*3;
 
-	//if( bHardwareBuffer )
-	//{
-	//	SAFE_RELEASE(mIndexBuffer);
-	//	if( FAILED( RGetDevice()->CreateIndexBuffer(nIndices*sizeof(USHORT),0,D3DFMT_INDEX16,D3DPOOL_MANAGED,&mIndexBuffer)))
-	//	{
-	//		mlog( "Fail to Restore Index Buffer for Emblems..\n" );
-	//		bHardwareBuffer = false;
-	//	}
-	//}
-
 	rmatrix World;
-	rvector Pos = mpMeshNode->m_mat_base;
+	rvector Pos = GetTransPos(mpMeshNode->m_mat_base);
 	rvector Dir = rvector(0,-1,0);
 	rvector Up  = rvector(0,0,1);
 
@@ -167,7 +157,8 @@ void	ZClothEmblem::CreateFromMeshNode( RMeshNode* pMeshNdoe_ , ZWorld* pWorld)
 	
 	for(auto& Light : m_pWorld->GetBsp()->GetObjectLightList())
 	{
-		fTemp	= D3DXVec3Length( &(Light.Position - m_pX[0]) );
+		auto vec = Light.Position - m_pX[0];
+		fTemp	= D3DXVec3Length(&vec);
 		if( fTemp < minDistance )
 		{
 			minDistance		= fTemp;
@@ -621,8 +612,7 @@ void ZClothEmblem::UpdateNormal()
 			indexTemp[j]= index;
 		}
 		rvector n;
-		//D3DXVec3Cross( &n, &(*pPoint[2] - *pPoint[0]), &(*pPoint[2] - *pPoint[1]) );
-		D3DXVec3Cross( &n, &(Point[2] - Point[0]), &(Point[2] - Point[1] ));
+		CrossProduct(&n, Point[2] - Point[0], Point[2] - Point[1]);
 		D3DXVec3Normalize(&n,&n);
 
 		for( j = 0 ; j < 3; ++j )
@@ -936,7 +926,8 @@ void ZEmblemList::InitEnv( char* pFileName_ )
 				rvector dir = rvector( 0,1,0 );
 				int theta;
 				sscanf( Attribute, "%d", &theta );
-				D3DXMatrixRotationAxis( &RotMat, &rvector(0,0,1), ((float)theta*D3DX_PI/180) );
+				auto up = rvector(0, 0, 1);
+				D3DXMatrixRotationAxis( &RotMat, &up, ((float)theta*D3DX_PI/180) );
 				dir = dir*RotMat;
 				//p->SetBaseWind( dir );
 				p->GetWndGenerator()->SetWindDirection( dir );

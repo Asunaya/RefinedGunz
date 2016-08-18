@@ -121,7 +121,7 @@ public:
 	void Clear();
 
 	void DrawWorldItem( ZWorldItem* pWorldItem, bool Rotate = false );
-	void DrawEffect( ZWORLD_ITEM_EFFECT effect,  rvector& pos );
+	void DrawEffect( ZWORLD_ITEM_EFFECT effect, const rvector& pos );
 
 public:
 	~ZWorldItemDrawer();	

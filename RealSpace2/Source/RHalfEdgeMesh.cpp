@@ -18,24 +18,23 @@ _NAMESPACE_REALSPACE2_BEGIN
 struct sHEVertex
 {
 	sHEEdge*	pEdge;
-	//int			iEdge;	// index...
 	rvector		pos;
 	rvector		normal;
 	rvector		color;
 	float		tu, tv;
 	int			valence;
 
-	vector<sHEEdge*>	ReverseMap;		// Temp Variable for Construct Mesh
+	vector<sHEEdge*>	ReverseMap;
 
 	sHEVertex();
 
-	sHEVertex	operator+( sHEVertex& arg_ );
-	sHEVertex	operator-( sHEVertex& arg_ );
-	void		operator+=( sHEVertex& arg_ );
-	void		operator-=( sHEVertex& arg_ );
+	sHEVertex	operator+(const sHEVertex& arg_ );
+	sHEVertex	operator-(const sHEVertex& arg_ );
+	void		operator+=( const sHEVertex& arg_ );
+	void		operator-=(const sHEVertex& arg_ );
 };
 
-sHEVertex sHEVertex::operator+( sHEVertex& arg_ )
+sHEVertex sHEVertex::operator+(const sHEVertex& arg_ )
 {
 	sHEVertex result;
 	result.pos		= this->pos + arg_.pos;
@@ -46,7 +45,7 @@ sHEVertex sHEVertex::operator+( sHEVertex& arg_ )
 	return result;
 }
 
-sHEVertex sHEVertex::operator-( sHEVertex& arg_ )
+sHEVertex sHEVertex::operator-(const sHEVertex& arg_ )
 {
 	sHEVertex result;
 	result.pos		= this->pos - arg_.pos;
@@ -57,7 +56,7 @@ sHEVertex sHEVertex::operator-( sHEVertex& arg_ )
 	return result;
 }
 
-void	sHEVertex::operator+=( sHEVertex& arg_ )
+void	sHEVertex::operator+=(const sHEVertex& arg_ )
 {
 	this->pos	+= arg_.pos;
 	//this->color	+= arg_.color;
@@ -66,7 +65,7 @@ void	sHEVertex::operator+=( sHEVertex& arg_ )
 	this->tv	+= arg_.tv;
 }
 
-void	sHEVertex::operator-=( sHEVertex& arg_ )
+void	sHEVertex::operator-=(const sHEVertex& arg_ )
 {
 	this->pos	-= arg_.pos;
 	//this->color	-= arg_.color;
@@ -75,7 +74,7 @@ void	sHEVertex::operator-=( sHEVertex& arg_ )
 	this->tv	-= arg_.tv;
 }
 
-sHEVertex	operator*( sHEVertex arg1_, float arg2_ )
+sHEVertex	operator*(const sHEVertex& arg1_, float arg2_ )
 {
 	sHEVertex result;
 	result.pos		= arg1_.pos * arg2_;
@@ -86,7 +85,7 @@ sHEVertex	operator*( sHEVertex arg1_, float arg2_ )
 	return result;
 }
 
-sHEVertex	operator*( float arg2_, sHEVertex arg1_ )
+sHEVertex	operator*( float arg2_, const sHEVertex& arg1_ )
 {
 	sHEVertex result;
 	result.pos		= arg1_.pos * arg2_;

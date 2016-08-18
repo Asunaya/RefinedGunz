@@ -515,7 +515,7 @@ void ZWorldItemDrawer::DrawWorldItem( ZWorldItem* pWorldItem, bool Rotate )
 			DrawEffect( WORLD_ITEM_EFFECT_IDLE, pos );
 }
 
-void ZWorldItemDrawer::DrawEffect( ZWORLD_ITEM_EFFECT effect, rvector& pos )
+void ZWorldItemDrawer::DrawEffect( ZWORLD_ITEM_EFFECT effect, const rvector& pos )
 {
 	RVisualMesh* pVMesh = 0;
 	switch( effect ) 

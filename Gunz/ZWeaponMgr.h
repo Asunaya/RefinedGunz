@@ -36,20 +36,19 @@ public:
 		m_list.push_back(pWeapon);
 	}
 	void Clear();
-	void AddGrenade(rvector &pos,rvector &velocity,ZObject* pC);
-	void AddRocket(rvector &pos,rvector &dir,ZObject* pC);
-	void AddMagic(ZSkill* pSkill, const rvector &pos, const rvector &dir,ZObject* pOwner);
-	void AddFlashBang(rvector &pos,rvector &dir,ZObject* pC);
-	void AddSmokeGrenade(rvector &pos,rvector &velocity,ZObject* pC);
+	void AddGrenade(const rvector& pos,const rvector& velocity,ZObject* pC);
+	void AddRocket(const rvector& pos,const rvector& dir,ZObject* pC);
+	void AddMagic(ZSkill* pSkill, const const rvector& pos, const const rvector& dir,ZObject* pOwner);
+	void AddFlashBang(const rvector& pos,const rvector& dir,ZObject* pC);
+	void AddSmokeGrenade(const rvector& pos,const rvector& velocity,ZObject* pC);
 
-	//void AddMedikit(rvector &pos,rvector &velocity,ZObject* pC,float delay);
-	//void AddRepairkit(rvector &pos,rvector &velocity,ZObject* pC,float delay);
-	void AddKit(rvector &pos,rvector &velocity,ZCharacter* pC,float Delaytime,char *szMeshName, int nLinkedWorldItemID);
+	void AddKit(const rvector& pos, const rvector& velocity, ZCharacter* pC, float Delaytime,
+		const char *szMeshName, int nLinkedWorldItemID);
 
 	void Update();
 	void Render();
 
-	ZMovingWeapon*	UpdateWorldItem(int nItemID,rvector& pos);//월드 아이템과 보여지는 동기 맞출것들...
+	ZMovingWeapon*	UpdateWorldItem(int nItemID, const rvector& pos);//월드 아이템과 보여지는 동기 맞출것들...
 	ZWeapon*		GetWorldItem(int nItemID);
 
 	z_weapon_list m_list;

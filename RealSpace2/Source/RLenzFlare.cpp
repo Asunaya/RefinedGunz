@@ -96,7 +96,7 @@ bool RLenzFlare::Render( rvector& light_pos_, rvector& centre_, RBspObject* pbsp
 	D3DXVec3Normalize( &dir, &dir );
 	if( pbsp_->Pick( RCameraPosition, dir, &info,  RM_FLAG_ADDITIVE) )
 	{
-		if( distance > D3DXVec3LengthSq(&( RCameraPosition - info.PickPos )) )
+		if( distance > MagnitudeSq(RCameraPosition - info.PickPos) )
 		{
 			return false;
 		}
@@ -114,7 +114,7 @@ bool RLenzFlare::Render( rvector& light_pos_, rvector& centre_, RBspObject* pbsp
 	}
 	//end for test
 
-	float dist = D3DXVec3Length(&(pos - centre));
+	float dist = Magnitude(pos - centre);
 	float scale_factor = 1/dist;
 
 	pos.x = (pos.x + 1) * 0.5 * RGetScreenWidth();			// 실제 화면에서의 광원 위치

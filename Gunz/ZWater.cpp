@@ -727,7 +727,7 @@ void ZWater::OnRestore()
 {
 }
 
-bool ZWater::CheckSpearing( rvector& o, rvector& e, int iPower, float fArea, rvector* pPos )
+bool ZWater::CheckSpearing(const rvector& o, const rvector& e, int iPower, float fArea, rvector* pPos )
 {
     // test line vs AABB
 	rvector dir = e - o;
@@ -737,7 +737,7 @@ bool ZWater::CheckSpearing( rvector& o, rvector& e, int iPower, float fArea, rve
 	return Pick( o, dir, pPos );
 }
 
-bool ZWater::Pick( rvector& o, rvector& d, rvector* pPos )
+bool ZWater::Pick(const rvector& o, const rvector& d, rvector* pPos )
 {
 	if( !D3DXBoxBoundProbe( &m_BoundingBox.vmin , &m_BoundingBox.vmax, &o, &d ) )
 		return false;
@@ -769,7 +769,7 @@ void ZWater::Ripple(const rvector& pos, int iAmplitude, float fFrequency)
 	DWORD dwTime = GetGlobalTimeMS();
 	for( int i = 0; i <m_nVerts; ++i )
 	{
-		float fDist = D3DXVec3Length(&(rvector(pos-m_pVerts[i])));
+		float fDist = Magnitude(pos - m_pVerts[i]);
  		m_pVerts[i].z = m_fbaseZpos + iAmplitude*(float)sin(fDist*fFrequency +(dwTime%6280)*0.001f);
 	}
 }

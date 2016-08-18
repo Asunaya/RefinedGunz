@@ -514,7 +514,7 @@ RMesh* RMeshMgr::GetFast(int id)
 	return m_node_table[id];
 }
 
-RMesh* RMeshMgr::Get(char* name)
+RMesh* RMeshMgr::Get(const char* name)
 {
 	if(m_list.empty()) return NULL;
 
@@ -529,7 +529,7 @@ RMesh* RMeshMgr::Get(char* name)
 
 // 우선은 xml 만 지원한다.
 
-RMesh*	RMeshMgr::Load(char* name)	// 모델 set 을 메모리로 올린다.
+RMesh*	RMeshMgr::Load(const char* name)	// 모델 set 을 메모리로 올린다.
 {
 	RMesh* pMesh = Get(name);
 
@@ -550,7 +550,7 @@ RMesh*	RMeshMgr::Load(char* name)	// 모델 set 을 메모리로 올린다.
 	return pMesh;
 }
 
-void RMeshMgr::UnLoad(char* name)	// 모델 set 을 메모리에서 내린다.
+void RMeshMgr::UnLoad(const char* name)	// 모델 set 을 메모리에서 내린다.
 {
 	RMesh* pMesh = Get(name);
 

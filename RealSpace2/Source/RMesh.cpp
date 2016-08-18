@@ -224,9 +224,9 @@ bool RMesh::GetMapObject()
 }
 
 
-char* RMesh::GetFileName()
+const char* RMesh::GetFileName()
 {
-	return (char*)m_FileName.c_str();
+	return m_FileName.c_str();
 }
 
 void RMesh::SetFileName(const char* name)
@@ -299,35 +299,31 @@ void RMesh::SetSpRenderMode(int mode)
 	m_nSpRenderMode = mode;
 }
 
-bool RMesh::CmpFileName(char* name)
+bool RMesh::CmpFileName(const char* name)
 {
 	if(!name[0]) return false;
 	
-//	if(strcmp(m_name,name)==0) 
-//		return true;
 	if(m_FileName == name )
 		return true;
 	return false;
 }
 
-char* RMesh::GetName()
+const char* RMesh::GetName()
 {
-	return (char*)m_ModelName.c_str();
+	return m_ModelName.c_str();
 }
 
-void RMesh::SetName(char* name)
+void RMesh::SetName(const char* name)
 {
 	if(!name[0]) return;
 
 	m_ModelName = name;
 }
 
-bool RMesh::CmpName(char* name)
+bool RMesh::CmpName(const char* name)
 {
 	if(!name[0]) return false;
 
-//	if(strcmp(m_modelname,name)==0)
-//		return true;
 	if(m_ModelName == name )
 		return true;
 
@@ -1017,10 +1013,11 @@ void RMesh::CalcBox(D3DXMATRIX* world_mat)
 
 void RMesh::CalcNodeMatrixBBox(RMeshNode* pNode)
 {
+	auto Trans = GetTransPos(pNode->m_mat_result);
 	SubCalcBBox(
 		&m_vBBMaxNodeMatrix,
 		&m_vBBMinNodeMatrix,
-		&rvector( pNode->m_mat_result._41, pNode->m_mat_result._42, pNode->m_mat_result._43));
+		&Trans);
 }
 
 void RMesh::CalcBBox(D3DXVECTOR3* v) 

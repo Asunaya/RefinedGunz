@@ -66,14 +66,14 @@ protected:
 	int									miNumEnableLight;	//	가능한 라이트의 개수
 	
 public:
-	bool	AddLight( MAP_LIGHT_TYPE light_type_, rvector& pos_ ); 
+	bool	AddLight( MAP_LIGHT_TYPE light_type_, const rvector& pos_ );
 	void	Update();									// 수명이 다한 놈 골로 보내기
 	void	Initialize();									// 초기화
-	int		SetLight( rvector pos_ );					// pos_ : 캐릭터의 현재 위치, return 셋팅된 라이트 개수
+	int		SetLight(const rvector& pos_ );					// pos_ : 캐릭터의 현재 위치, return 셋팅된 라이트 개수
 	void	ReleaseLight();
-	void	SetPosition( rvector& pos_ );				// 캐릭터 위치 /// 맵에서만 사용
+	void	SetPosition(const rvector& pos_ );				// 캐릭터 위치 /// 맵에서만 사용
 
-	bool	SetLight( rvector& pos_, int lightIndex_, float maxDistance_ );	//
+	bool	SetLight(const rvector& pos_, int lightIndex_, float maxDistance_ );	//
 	
 	static	RDynamicLightManager* GetInstance()
 	{

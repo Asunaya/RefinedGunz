@@ -2474,15 +2474,6 @@ void ZGame::OnPeerPong(MCommand *pCommand)
 	int nPing = (GetTickTime() - nTimeStamp)/2;
     pPeer->UpdatePing(GetTickTime(), nPing);
 
-/*
-	if (pPeer->IsOpened() == false) {
-		MCommand* pCmd = ZGetGameClient()->CreateCommand(MC_PEER_OPENED, ZGetGameClient()->GetPlayerUID());
-		pCmd->AddParameter(new MCmdParamUID(pPeer->uidChar));
-		ZGetGameClient()->Post(pCmd);
-
-		pPeer->SetOpened(true);
-	}
-*/
 	#ifdef _DEBUG
 		g_nPongCount++;
 	#endif
@@ -2524,7 +2515,7 @@ void ZGame::OnPeerOpened(MCommand *pCommand)
 #endif
 }
 
-void ZGame::OnChangeWeapon(MUID& uid, MMatchCharItemParts parts)
+void ZGame::OnChangeWeapon(const MUID& uid, MMatchCharItemParts parts)
 {
 	ZCharacter* pCharacter = m_CharacterManager.Find(uid);
 //	if (uid == ZGetGameClient()->GetUID()) pCharacter = m_pMyCharacter;
@@ -2678,8 +2669,7 @@ void ZGame::OnPeerShotSp(const MUID& uid, float fShotTime, const rvector& pos, c
 	ZApplication::GetSoundEngine()->PlaySEFire(pItem->GetDesc(), pos.x, pos.y, pos.z, (pOwnerCharacter==m_pMyCharacter));
 	
 	if( dLight )
-	{
-		// 총 쏠때 라이트 추가
+	{	
 		ZCharacter* pChar;
 
 		if( ZGetConfiguration()->GetVideo()->bDynamicLight && pOwnerCharacter != NULL )	{
@@ -3568,7 +3558,8 @@ void ZGame::OnPeerShot_Range(MMatchCharItemParts sel_type, const MUID& uidOwner,
 	ZApplication::GetSoundEngine()->PlaySEFire(pDesc, Pos.x, Pos.y, Pos.z, bPlayer);
 	//if(nTargetType == ZTT_OBJECT) { ZApplication::GetSoundEngine()->PlaySERicochet(v2.x, v2.y, v2.z); }
 #define SOUND_CULL_DISTANCE 1500.0F
-	if( D3DXVec3LengthSq(&(v2 - pTargetCharacter->m_Position)) < (SOUND_CULL_DISTANCE * SOUND_CULL_DISTANCE) )
+	auto vec = v2 - pTargetCharacter->m_Position;
+	if( D3DXVec3LengthSq(&vec) < (SOUND_CULL_DISTANCE * SOUND_CULL_DISTANCE) )
 	{
 		if(nTargetType == ZTT_OBJECT) { 
 			ZGetSoundEngine()->PlaySEHitObject( v2.x, v2.y, v2.z, pickinfo.bpi ); 
@@ -4540,47 +4531,20 @@ rvector ZGame::GetFloor(rvector pos,rplane *pimpactplane)
 	return floor;
 }
 
-/*
-rvector ZGame::GetCeiling(rvector pos)
-{
-rvector ceiling=g_pGame->GetWorld()->GetBsp()->GetCeiling(pos+rvector(0,0,130),CHARACTER_RADIUS-0.1f);
-
-#ifdef ENABLE_CHARACTER_COLLISION
-for (ZCharacterManager::iterator itor = m_CharacterManager.begin();
-itor != m_CharacterManager.end(); ++itor)
-{
-ZCharacter* pCharacter = (*itor).second;
-if(pCharacter!=m_pMyCharacter && !pCharacter->IsDie() && !pCharacter->m_bBlastDrop)
-{
-rvector diff=pCharacter->m_Position-m_pMyCharacter->m_Position;
-diff.z=0;
-
-if(Magnitude(diff)<CHARACTER_RADIUS && pos.z+CHAR_COLLISION_HEIGHT<pCharacter->m_Position.z)
-{
-rvector newceiling=pCharacter->m_Position;
-if(ceiling.z<newceiling.z)
-ceiling=newceiling;
-}
-}
-}
-#endif
-
-return ceiling;
-}
-*/
-
-bool ZGame::Pick(ZObject *pOwnerObject,rvector &origin,rvector &dir,ZPICKINFO *pickinfo,DWORD dwPassFlag,bool bMyChar)
+bool ZGame::Pick(ZObject *pOwnerObject, const rvector &origin, const rvector &dir,ZPICKINFO *pickinfo,
+	DWORD dwPassFlag,bool bMyChar)
 {
 	return PickHistory(pOwnerObject,GetTime(),origin,origin+10000.f*dir,pickinfo,dwPassFlag,bMyChar);
 }
 
-bool ZGame::PickTo(ZObject *pOwnerObject,rvector &origin,rvector &to,ZPICKINFO *pickinfo,DWORD dwPassFlag,bool bMyChar)
+bool ZGame::PickTo(ZObject *pOwnerObject, const rvector &origin, const rvector &to,ZPICKINFO *pickinfo,
+	DWORD dwPassFlag,bool bMyChar)
 {
 	return PickHistory(pOwnerObject,GetTime(),origin,to,pickinfo,dwPassFlag,bMyChar);
 }
 
-// fTime 시간의 캐릭터 위치로 pick 한다.. 캐릭터는 실린더 판정.
-bool ZGame::PickHistory(ZObject *pOwnerObject,float fTime,rvector &origin,rvector &to,ZPICKINFO *pickinfo,DWORD dwPassFlag,bool bMyChar)
+bool ZGame::PickHistory(ZObject *pOwnerObject,float fTime, const rvector &origin, const rvector &to,
+	ZPICKINFO *pickinfo,DWORD dwPassFlag,bool bMyChar)
 {
 	pickinfo->pObject=NULL;
 	pickinfo->bBspPicked=false;
@@ -4668,7 +4632,7 @@ bool ZGame::PickHistory(ZObject *pOwnerObject,float fTime,rvector &origin,rvecto
 	return true;
 }
 
-bool ZGame::ObjectColTest(ZObject* pOwner, rvector& origin, rvector& to, float fRadius, ZObject** poutTarget)
+bool ZGame::ObjectColTest(ZObject* pOwner, const rvector& origin, const rvector& to, float fRadius, ZObject** poutTarget)
 {
 	// 맵에 맞는것은 체크하지 않는다.
 
@@ -4724,205 +4688,12 @@ char* ZGame::GetSndNameFromBsp(const char* szSrcSndName, RMATERIAL* pMaterial)
 	return szRealSndName;
 }
 
-/*
-void ZGame::AdjustGlobalTime()
-{
-// 카운트 다운할때만 시간을 싱크한다
-//	if(GetMatch()->GetRoundState()!=MMATCH_ROUNDSTATE_COUNTDOWN) return;
-static DWORD nLastTime = GetTickTime();
-DWORD nNowTime = GetTickTime();
-if((nNowTime - nLastTime) < 100) return;	// 100밀리세컨드마다 체크
-
-nLastTime = nNowTime;
-
-float fAverageTime=0.f;
-
-int nValidCount=0;
-
-ZCharacterManager::iterator i;
-for(i=m_CharacterManager.begin();i!=m_CharacterManager.end();i++)
-{
-ZCharacter *pCharacter=i->second;
-if(pCharacter->m_BasicHistory.size()==0) continue;		// 유효하지 않다
-
-// 캐릭터가 마지막으로 보내온 정보를 참조
-ZBasicInfoHistory::iterator infoi=pCharacter->m_BasicHistory.end();
-infoi--;
-ZBasicInfoItem *pInfo=*infoi;
-
-// 마지막 데이터 받은지 3초 이상이면 문제가 있다고 판정. 유효하지 않다
-if(GetTime()-pInfo->fReceivedTime > 3.f) continue;
-
-float fCharacterTime=pInfo->info.fSendTime+(GetTime()-pInfo->fReceivedTime);
-
-nValidCount++;
-fAverageTime+=fCharacterTime;
-}
-
-fAverageTime/=(float)nValidCount;
-fAverageTime=max(fAverageTime,0);	// 0보다 작을수는 없다.
-
-// 글로벌 시간과의 차이를 누적한다.
-for(i=m_CharacterManager.begin();i!=m_CharacterManager.end();i++)
-{
-ZCharacter *pCharacter=i->second;
-if(pCharacter->m_BasicHistory.size()==0) continue;		// 유효하지 않다
-
-ZBasicInfoHistory::iterator infoi=pCharacter->m_BasicHistory.end();
-infoi--;
-ZBasicInfoItem *pInfo=*infoi;
-float fCharacterTime=pInfo->info.fSendTime+(GetTime()-pInfo->fReceivedTime);
-
-pCharacter->m_TimeErrors[pCharacter->m_nTimeErrorCount++]=fAverageTime-fCharacterTime;
-if( TIME_ERROR_CORRECTION_PERIOD == pCharacter->m_nTimeErrorCount )
-{
-pCharacter->m_nTimeErrorCount=0;
-float fAvrTimeError=0;
-for(int j=0;j<TIME_ERROR_CORRECTION_PERIOD;j++)
-fAvrTimeError+=pCharacter->m_TimeErrors[j];
-fAvrTimeError/=(float)TIME_ERROR_CORRECTION_PERIOD;
-
-pCharacter->m_fAccumulatedTimeError+=fAvrTimeError*.5f;
-if(fabs(pCharacter->m_fAccumulatedTimeError)>10.f)
-{
-#ifndef _PUBLISH
-char szTemp[256];
-sprintf_safe(szTemp, "%s님이 스피드핵 ? %3.1f", pCharacter->GetProperty()->szName,pCharacter->m_fAccumulatedTimeError);
-ZGetGameInterface()->OutputChatMsg(MCOLOR(0xFFFF0000), szTemp);
-#endif
-
-pCharacter->m_fAccumulatedTimeError=0;
-}
-
-if(pCharacter==m_pMyCharacter)
-{
-m_fTime+=fAvrTimeError*.5f;
-}
-}
-}
-
-}
-*/
-
-// 취소
-
 void ZGame::AutoAiming()
 {
-#ifdef _PUBLISH
-	return;
-#endif
-/*
-	ZCamera* pCamera = ZGetGameInterface()->GetCamera();
-
-	rvector vMyPos = m_pMyCharacter->GetPosition();
-
-	//거리 계산하고 중간에 벽하고 충돌하는 캐릭인가 계산하고..
-
-	if(ZGetMyInfo()==NULL) 
-	return;
-
-	//	개발자나 관리자라면..
-
-	//	MMatchUserGradeID gid = MMUG_FREE;
-	//	gid = ZGetMyInfo()->GetUGradeID();
-	//	if((gid == MMUG_DEVELOPER)||(gid==MMUG_ADMIN))
-
-	//	우선 테스트 모드에서 알지5만..
-
-	if( strcmp(g_pGame->m_pMyCharacter->GetProperty()->szName,"알지5")!=0 )
-		return;
-
-	ZCharacter *pCharacter = NULL;
-	rvector pos;
-	rvector dir;
-
-	// 주변의 캐릭터 중 가까우면서 맵이 중간에 있지 않은 경우..나중에 코드 부활시..처리..
-
-	for(ZCharacterManager::iterator i = m_CharacterManager.begin();i != m_CharacterManager.end();i++) 
-	{
-		pCharacter = i->second;
-
-		if(pCharacter != m_pMyCharacter) {
-
-			if(pCharacter->IsDie()==false) {
-				pos = pCharacter->GetPosition();
-				pos.z += 140.f;
-				dir = pos - RCameraPosition;
-				Normalize(dir);
-				pCamera->SetDirection(dir);
-			}
-			else {
-				pCamera->m_bAutoAiming = false;
-			}
-		}
-	}
-*/
 }
-
-/* 
-실제 투표를 행하는 곳이다. 만약 내가 남의 데이터와 비교해서 많이 다른 데이터를 가지고 있으면
-나의 데이터를 보정해야 한다.
-
-*/
-
-/*
-void ZGame::AdjustMyData()
-{
-	for(ZCharacterManager::iterator i=m_CharacterManager.begin();i!=m_CharacterManager.end();i++)
-	{
-		ZCharacter *pCharacter=i->second;
-		pCharacter->m_fGlobalHP=0.f;
-		pCharacter->m_nReceiveHPCount=0;
-	}
-
-	for(i=m_CharacterManager.begin();i!=m_CharacterManager.end();i++)
-	{
-		ZCharacter *pCharacter=i->second;
-		if(pCharacter->m_HPHistory.size()==0) return;	// 한넘이라도 데이터가 없으면 좆치않다.
-
-		// 가장 최근의 데이터를 선택한다
-		ZHPInfoHistory::iterator hpi=pCharacter->m_HPHistory.end();
-		hpi--;
-		ZHPInfoItem *pItem=*hpi;
-
-		for(int j=0;j<pItem->nCount;j++)
-		{
-			MUID uid=pItem->pHPTable[j].muid;
-			ZCharacter *pchar=m_CharacterManager.Find(uid);
-			if(pchar)
-			{
-				pchar->m_fGlobalHP+=pItem->pHPTable[j].fHP;
-				pchar->m_nReceiveHPCount++;
-			}
-		}
-	}
-
-	for(i=m_CharacterManager.begin();i!=m_CharacterManager.end();i++)
-	{
-		ZCharacter *pCharacter=i->second;
-		// spawn 된 직후에는 투표 보류
-		if(pCharacter->m_nReceiveHPCount && (GetTime()-pCharacter->GetSpawnTime())>3.f)
-		{
-			pCharacter->m_fGlobalHP/=(float)pCharacter->m_nReceiveHPCount;
-
-			if(pCharacter==m_pMyCharacter)	// 내 캐릭터는 피를 올리지는 않는다.
-			{
-				pCharacter->SetHP(
-					min(pCharacter->GetStatus()->GetHP(),
-					(pCharacter->GetStatus()->GetHP()+pCharacter->m_fGlobalHP)/2));
-			}else							// 넘의 캐릭터는 평균값에 근접하도록 간다.
-			{
-				pCharacter->SetHP((pCharacter->GetStatus()->GetHP()+pCharacter->m_fGlobalHP)/2);
-			}
-		}
-	}
-}
-*/
 
 #define MAX_PLAYERS		64
 
-
-// 투표는 제거 되었으므로 내 피정보만 보낸다
 void ZGame::PostHPAPInfo()
 {
 	DWORD nNowTime = GetTickTime();
@@ -4941,7 +4712,6 @@ void ZGame::PostHPAPInfo()
 #endif
 }
 
-// 투표는 제거 되었으므로 내 피정보만 보낸다
 void ZGame::PostHPInfo()
 {
 	DWORD nNowTime = GetTickTime();

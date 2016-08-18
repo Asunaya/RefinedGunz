@@ -9,7 +9,7 @@
 #include "RMaterialList.h"
 #include "MDebug.h"
 
-ZEffectMesh::ZEffectMesh(RMesh* pMesh, rvector& Pos, rvector& Velocity)
+ZEffectMesh::ZEffectMesh(RMesh* pMesh, const rvector& Pos, const rvector& Velocity)
 {
 	m_VMesh.Create(pMesh);
 //	bool bRet=m_VMesh.SetAnimation("play");

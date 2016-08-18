@@ -584,8 +584,8 @@ inline rvector GetTransPos(const rmatrix& m) {
 	return rvector(m._41,m._42,m._43);
 }
 
-void draw_line(LPDIRECT3DDEVICE9 dev,D3DXVECTOR3* vec,int size,DWORD color);
-void draw_box(rmatrix* wmat , rvector& max,rvector& min,DWORD color);
+void draw_line(LPDIRECT3DDEVICE9 dev, D3DXVECTOR3* vec, int size, DWORD color);
+void draw_box(rmatrix* wmat, const rvector& max, const rvector& min, DWORD color);
 void draw_query_fill_box(rmatrix* wmat , rvector& max,rvector& min,DWORD color);
 
 void _GetModelTry(RLVertex* pVert,int size,DWORD color,int* face_num);
@@ -660,9 +660,9 @@ protected:
 public:
 	void PushBack(T pNode) {
 		push_back(pNode);
-		m_HashMap.insert(std::unordered_map<std::string, T>::value_type(std::string(pNode->GetName()), pNode));
+		m_HashMap.insert(typename std::unordered_map<std::string, T>::value_type(std::string(pNode->GetName()), pNode));
 		if (pNode->m_NameID != -1)
-			m_HashMapID.insert(std::unordered_map<int, T>::value_type(pNode->m_NameID, pNode));
+			m_HashMapID.insert(typename std::unordered_map<int, T>::value_type(pNode->m_NameID, pNode));
 
 	}
 

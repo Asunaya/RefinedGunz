@@ -20,7 +20,7 @@ protected:
 	float	m_nStartTime;
 
 public:
-	ZEffectMesh(RMesh* pMesh, rvector& Pos, rvector& Velocity );
+	ZEffectMesh(RMesh* pMesh, const rvector& Pos, const rvector& Velocity );
 	virtual bool Draw(unsigned long int nTime){ return true; };
 
 	virtual rvector GetSortPos() {

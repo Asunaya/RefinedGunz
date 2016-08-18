@@ -169,7 +169,7 @@ void RCharCloth::initialize( )
 			indexTemp[j]	= index;
 		}
 		rvector n;
-		D3DXVec3Cross( &n, &(Point[2] - Point[0]), &(Point[2] - Point[1] ));	
+		CrossProduct(&n, Point[2] - Point[0], Point[2] - Point[1]);	
 
 		for( j = 0 ; j < 3; ++j )
 		{
@@ -329,12 +329,12 @@ void RCharCloth::satisfyConstraints()
 			c = m_pConst[j];
 			if( c.refA <0 || c.refA>=m_nCntP )
 			{
-				mlog("RCharCloth_Error:: constraints reference Particle is Out of Range - ref : %d, n_particles : %d, mesh_node : %s, mesh : %s \n", c.refA, j, mpMeshNode->m_Name, mpMesh->GetFileName());
+				mlog("RCharCloth_Error:: constraints reference Particle is Out of Range - ref : %d, n_particles : %d, mesh_node : %s, mesh : %s \n", c.refA, j, mpMeshNode->m_Name.c_str(), mpMesh->GetFileName());
 				continue;
 			}
 			if( c.refB < 0 || c.refB >= m_nCntP )
 			{
-				mlog("RCharCloth_Error:: constraints reference Particle is Out of Range - ref : %d, n_particles : %d, mesh_node : %s, mesh : %s \n", c.refA, j, mpMeshNode->m_Name, mpMesh->GetFileName());
+				mlog("RCharCloth_Error:: constraints reference Particle is Out of Range - ref : %d, n_particles : %d, mesh_node : %s, mesh : %s \n", c.refA, j, mpMeshNode->m_Name.c_str(), mpMesh->GetFileName());
 				continue;
 			}
 			x1 = m_pX[c.refA];
@@ -627,7 +627,8 @@ e2SoftRender:
 
 	rmatrix rtemp;
 	dev->GetTransform( D3DTS_WORLD, &rtemp );
-	dev->SetTransform( D3DTS_WORLD ,  &( mLocalMat * mWorldMat ) );
+	auto NewWorld = mLocalMat * mWorldMat;
+	dev->SetTransform( D3DTS_WORLD ,  &NewWorld );
 
 	mpMesh->SetCharacterMtrl_ON( pMtrl,mpMeshNode,1 ,mpMeshNode->GetTColor());
 
@@ -699,7 +700,7 @@ void RCharCloth::UpdateNormal()
 			indexTemp[j]	= index;
 		}
 		rvector n;
-		D3DXVec3Cross( &n, &(Point[2] - Point[0]), &(Point[2] - Point[1] ));	
+		CrossProduct( &n, Point[2] - Point[0], Point[2] - Point[1] );	
 
 		for( j = 0 ; j < 3; ++j )
 		{

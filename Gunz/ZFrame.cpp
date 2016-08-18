@@ -43,11 +43,11 @@ void ZFrame::OnDraw(MDrawContext* pDC)
 			m_bVisible = false;
 			m_bExclusive = false;
 		}
-		SetOpacity(unsigned char(fOpacity*0xFF));
+		SetOpacity(u8(fOpacity*0xFF));
 	}
 	else{	// Show
 		fOpacity = min(float(GetGlobalTimeMS()-m_nShowTime)/(float)TRANSIENT_TIME, 1.0f);
-		SetOpacity(unsigned char(fOpacity*0xFF));
+		SetOpacity(u8(fOpacity*0xFF));
 	}
 
 	// 백그라운를 어둡게 만들고...

@@ -1,4 +1,5 @@
 #pragma once
+
 #include "MListBox.h"
 #include "map"
 #include "vector"
@@ -49,7 +50,6 @@ public:
 class ZLobbyPlayerListItem : public ZPlayerListItem{
 protected:
 	MBitmap* m_pBitmap;
-//	MBitmap* m_pBitmapEmblem;
 	unsigned int m_nClanID;
 
 public:
@@ -116,7 +116,7 @@ public:
 		return NULL;
 	}
 
-	MUID& GetUID() { return m_PlayerUID; }
+	const MUID& GetUID() { return m_PlayerUID; }
 };
 
 class ZFriendPlayerListItem : public ZPlayerListItem{
@@ -178,7 +178,7 @@ public:
 		return NULL;
 	}
 
-	MUID& GetUID() { return m_PlayerUID; }
+	const MUID& GetUID() { return m_PlayerUID; }
 	const char* GetLocation() { return m_szLocation; }
 };
 
@@ -240,7 +240,7 @@ public:
 		return NULL;
 	}
 
-	MUID& GetUID() { return m_PlayerUID; }
+	const MUID& GetUID() { return m_PlayerUID; }
 };
 
 enum eStagePlayerState
@@ -331,7 +331,7 @@ public:
 		return NULL;
 	}
 
-	MUID& GetUID() { return m_PlayerUID; }
+	const MUID& GetUID() { return m_PlayerUID; }
 };
 
 class ZPlayerListBoxLook : public MListBoxLook
@@ -395,21 +395,21 @@ public:
 //	MBitmap* GetBitmapIn() { return m_pBitmapIn; }
 
 	// mode PLAYERLISTMODE_CHANNEL
-	void AddPlayer(MUID& puid, ePlayerState state, int  nLevel,char* szName, char* szClanName, unsigned int nClanID, MMatchUserGradeID nGrade );
+	void AddPlayer(const MUID& puid, ePlayerState state, int  nLevel,char* szName, char* szClanName, unsigned int nClanID, MMatchUserGradeID nGrade );
 
 	// mode PLAYERLISTMODE_STAGE
-	void AddPlayer(MUID& puid, MMatchObjectStageState state, int nLevel, char* szName, char* szClanName, unsigned int nClanID, bool isMaster,MMatchTeam nTeam);
+	void AddPlayer(const MUID& puid, MMatchObjectStageState state, int nLevel, char* szName, char* szClanName, unsigned int nClanID, bool isMaster,MMatchTeam nTeam);
 
 	// mode PLAYERLISTMODE_CHANNEL_FRIEND, PLAYERLISTMODE_STAGE_FRIEND
 	void AddPlayer(ePlayerState state, char* szName, char* szLocation);
 
 	// mode PLAYERLISTMODE_CHANNEL_CLAN
-	void AddPlayer(MUID& puid, ePlayerState state, char* szName, int  nLevel ,MMatchClanGrade nGrade );
+	void AddPlayer(const MUID& puid, ePlayerState state, char* szName, int  nLevel ,MMatchClanGrade nGrade );
 
-	void DelPlayer(MUID& puid);
-	void UpdatePlayer(MUID& puid,MMatchObjectStageState state, char* szName, int  nLevel ,bool isMaster,MMatchTeam nTeam);
-	void UpdatePlayer(MUID& puid,MMatchObjectStageState state, bool isMaster,MMatchTeam nTeam);
-	void UpdateEmblem(MUID& puid);
+	void DelPlayer(const MUID& puid);
+	void UpdatePlayer(const MUID& puid,MMatchObjectStageState state, char* szName, int  nLevel ,bool isMaster,MMatchTeam nTeam);
+	void UpdatePlayer(const MUID& puid,MMatchObjectStageState state, bool isMaster,MMatchTeam nTeam);
+	void UpdateEmblem(const MUID& puid);
 
 	void UpdateList(int mode);
 
@@ -440,58 +440,3 @@ public:
 
 	void OnSize(int w,int h);
 };
-
-////////////////////////////////////////////////////////////////////////////////////////
-
-/*
-class ZStagePlayerListBox : public MListBox
-{
-private:
-	MBitmap*		m_pBitmap;
-
-	map< MUID, sStagePlayerInfo*>	mPlayers;
-	vector<MUID>					mPlayerOrder;
-
-	int				mSelectedPlayer;
-	int				mStartToDisplay;
-	float			m_SlotWidth;
-	float			m_SlotHeight;
-
-	int				m_nOldW;
-protected:
-
-public:
-	void SetBitmap( MBitmap* pBitmap );
-	MBitmap* GetBitmap() {	return m_pBitmap; }
-
-	void AddPlayer(MMatchObjCache* pCache);
-	void AddPlayer(MUID& puid, MMatchObjectStageState state, char* szName, int  nLevel ,bool isMaster,MMatchTeam nTeam);
-//	void AddPlayer(MUID& puid, eStagePlayerState state, char* szName, int  nLevel ,bool isMaster,int nTeam);
-	void DelPlayer(MUID& puid);
-	void UpdatePlayer(MUID& puid,eStagePlayerState state, char* szName, int  nLevel ,bool isMaster,int nTeam);
-
-	ZStagePlayerListItem* GetUID(MUID uid);
-
-	MUID	m_MyUID;
-	MUID	m_uidChannel;
-	int		m_nTotalPlayerCount;
-	int		m_nPage;
-
-	virtual bool OnEvent(MEvent* pEvent, MListener* pListener);
-
-
-	void SetWidth( float t ) { m_SlotWidth = t;	}
-	void SetHeight( float t ) { m_SlotHeight = t; }
-
-	void Resize(float x,float y);
-
-	float OnReSize();
-
-public:
-	ZStagePlayerListBox(const char* szName=NULL, MWidget* pParent=NULL, MListener* pListener=NULL);
-	virtual ~ZStagePlayerListBox(void);
-
-	DECLARE_LOOK(ZPlayerListBoxLook)
-	DECLARE_LOOK_CLIENT()
-};
-*/

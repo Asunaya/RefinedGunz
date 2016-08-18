@@ -447,7 +447,8 @@ bool ZMapDesc::LoadSmokeDesc(const char* pFileName)
 				rvector dir = rvector( 0,1,0 );
 				int theta;
 				sscanf( Attribute, "%d", &theta );
-				D3DXMatrixRotationAxis( &RotMat, &rvector(0,0,1), ((float)theta*D3DX_PI/180) );
+				auto up = rvector(0, 0, 1);
+				D3DXMatrixRotationAxis( &RotMat, &up, ((float)theta*D3DX_PI/180) );
 				dir = dir * RotMat;
 					
 				pMapSmoke->m_vDir = dir;

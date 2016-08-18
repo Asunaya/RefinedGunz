@@ -177,7 +177,6 @@
     <ClInclude Include="Include\MSkillTypes.h" />
     <ClInclude Include="Include\MSurvivalMap.h" />
     <ClInclude Include="Include\Physics.h" />
-    <ClInclude Include="Include\stdafx.h" />
     <ClInclude Include="Include\stuff.h" />
     <ClInclude Include="Include\MQuestNPC.h" />
     <ClInclude Include="Include\MBaseQuest.h" />
@@ -185,6 +184,7 @@
     <ClInclude Include="Include\MMatchWorldItemDesc.h" />
     <ClInclude Include="Include\MMatchObjCache.h" />
     <ClInclude Include="Include\MMatchStringResManager.h" />
+    <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\MCommand.cpp">
@@ -269,7 +269,6 @@
     <ClCompile Include="Source\MQuestMap.cpp" />
     <ClCompile Include="Source\MSurvivalMap.cpp" />
     <ClCompile Include="Source\Physics.cpp" />
-    <ClCompile Include="Source\stdafx.cpp" />
     <ClCompile Include="Source\stuff.cpp" />
     <ClCompile Include="Include\BasicInfoHistory.cpp" />
     <ClCompile Include="Source\MQuestNPC.cpp" />
@@ -277,6 +276,7 @@
     <ClCompile Include="Source\MQuestItem.cpp" />
     <ClCompile Include="Source\MMatchNotify.cpp" />
     <ClCompile Include="Source\MMatchWorldItemDesc.cpp" />
+    <ClCompile Include="stdafx.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="HShield\HsCryptLib.lib">

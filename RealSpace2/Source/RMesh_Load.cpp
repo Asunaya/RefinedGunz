@@ -206,7 +206,7 @@ bool RMesh::ReadXmlElement(MXmlElement* PNode,char* Path)
 	return true;
 }
 
-bool RMesh::ReadXml(char* filename)
+bool RMesh::ReadXml(const char* filename)
 {
 	MXmlDocument	XmlDoc;
 	MXmlElement		PNode,Node;
@@ -266,7 +266,7 @@ bool RMesh::ReadXml(char* filename)
 	return true;	
 }
 
-bool RMesh::SaveXml(char* fname)
+bool RMesh::SaveXml(const char* fname)
 {
 	return true;
 }
@@ -1235,7 +1235,7 @@ bool RMesh::ReadElu(const char* fname)
 // old interface
 // read + set 
 
-bool RMesh::SaveElu(char* fname)
+bool RMesh::SaveElu(const char* fname)
 {
 	return true;
 }
@@ -1419,48 +1419,25 @@ bool RMesh::CalcLocalMatrix(RMeshNode* pNode)
 		return false;
 
 	D3DXMATRIX dest,inv;
-
 	D3DXMatrixIdentity(&inv);
-
 	RMeshNode* pPN = NULL;
-
 	int id = _FindMeshId(pNode->m_Parent);
 
 	if(id != -1) {
-
 		pPN = m_data[id];
-
 		if(pPN) {
 			pNode->m_pParent = pPN;
-
-//			RMatInv(inv,pPN->m_mat_base);								// 부모 인버스 등록
 			D3DXMatrixInverse(&inv,NULL,&pPN->m_mat_base);
-/*
-			if(pPN->m_Parent[0]==0) {
-				memcpy(&pNode->m_mat_parent_inv,&inv,sizeof(D3DXMATRIX));
-			}
-			else {
-				D3DXMatrixMultiply(&inv,&pPN->m_mat_parent_inv,&inv);
-				memcpy(&pNode->m_mat_parent_inv,&inv,sizeof(D3DXMATRIX));//부모의 부모에대한 상대 인버스값
-			}
-*/
-//			if(pNode->m_WeaponDummyType != weapon_dummy_etc) { int k=0; }
-
 			D3DXMatrixMultiply(&pNode->m_mat_local,&pNode->m_mat_base,&inv);
-
 			return true;
 		}
 	}
-
-	if(pNode->m_Parent[0])
-		mlog("%s 노드의 %s 부모 못 찾음\n",pNode->m_Name,pNode->m_Parent);
 
 	return false;
 }
 
 bool RMesh::ConnectPhysiqueParent(RMeshNode* pNode)
 {
-	// 부모 연결
 	int p_num,ret,j;
 
 	if (!pNode)		return false;
@@ -1475,7 +1452,7 @@ bool RMesh::ConnectPhysiqueParent(RMeshNode* pNode)
 
 		p_num = pNode->m_physique[i].m_num;
 
-		if(p_num > MAX_PHYSIQUE_KEY)	// 최대 4개 지원
+		if(p_num > MAX_PHYSIQUE_KEY)
 			p_num = MAX_PHYSIQUE_KEY;
 
 		for(j=0;j<p_num;j++) {

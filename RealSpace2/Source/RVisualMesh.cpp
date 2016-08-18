@@ -1854,7 +1854,7 @@ void RVisualMesh::SetParts(RMeshPartsType parts, const char* name)
 
 			if (!pNode)
 			{
-				MLog("RVisualMesh::SetParts(): Failed to find parts %s\n", saved_name);
+				MLog("RVisualMesh::SetParts(): Failed to find parts %s\n", saved_name.c_str());
 				return;
 			}
 
@@ -2561,7 +2561,7 @@ rmatrix	RVisualMesh::GetBipRootMat(int frame)
 	rmatrix m;
 
 	D3DXQUATERNION q = GetBipRootRot(frame);
-	D3DXVECTOR3 v = GetBipRootRot(frame);
+	D3DXVECTOR3 v = GetBipRootPos(frame);
 
 	D3DXMatrixRotationQuaternion(&m,&q);
 

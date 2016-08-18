@@ -5,7 +5,7 @@
 
 void MSysInfoLog_CPU()
 {
-#ifdef ENV32BIT
+#if defined(MSVC_VER) && defined(ENV32BIT)
 	LARGE_INTEGER ulFreq, ulTicks, ulValue, ulStartCounter,
 		ulEAX_EDX, ulResult;
 

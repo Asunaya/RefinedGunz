@@ -83,10 +83,11 @@ bool getDistanceBetLineSegmentAndPoint( const rvector& lineStart_,
 
 	if( direction_ != NULL )
 	{
-		D3DXVec3Normalize( direction_, &( *point_ - intersection ) );
+		auto vec = *point_ - intersection;
+		D3DXVec3Normalize( direction_, &vec );
 	}
 
-	distance_ = D3DXVec3Length( &( *point_ - intersection ) );
+	distance_ = Magnitude(*point_ - intersection);
 
 	return true;
 }

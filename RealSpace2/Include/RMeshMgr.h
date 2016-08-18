@@ -46,10 +46,10 @@ public:
 //	void	Frame(int id);
 
 	RMesh*	GetFast(int id);
-	RMesh*	Get(char* name);
+	RMesh*	Get(const char* name);
 
-	RMesh*	Load(char* name);	// 모델 set 을 메모리로 올린다.
-	void	UnLoad(char* name);	// 모델 set 을 메모리에서 내린다.
+	RMesh*	Load(const char* name);	// 모델 set 을 메모리로 올린다.
+	void	UnLoad(const char* name);	// 모델 set 을 메모리에서 내린다.
 
 	void	LoadAll();
 	void	UnLoadAll();		

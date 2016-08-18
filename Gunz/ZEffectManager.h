@@ -1,9 +1,7 @@
-#ifndef ZEFFECTMANAGER_H
-#define ZEFFECTMANAGER_H
+#pragma once
 
 #include <list>
 #include <unordered_map>
-using namespace std;
 
 #include "ZItem.h"
 
@@ -92,7 +90,7 @@ public:
 	float m_fDist;
 };
 
-typedef list<ZEffect*>	ZEffectList;	// DrawMode에 따라 정렬되는 이펙트 리스트
+typedef std::list<ZEffect*>	ZEffectList;	// DrawMode에 따라 정렬되는 이펙트 리스트
 
 enum ZTargetType{
 	ZTT_CHARACTER,
@@ -347,7 +345,6 @@ public:
 	void AddSwordEnchantEffect(ZC_ENCHANT type, const const rvector& Target, DWORD start_time, float fScale = 1.0f);
 	void AddMagicEffect(const const rvector& Target, DWORD start_time, float fScale = 1.0f);
 
-//	void AddLighteningEffect(const rvector& Target);
 	void AddBlizzardEffect(const rvector& Target,int nCnt);
 	void AddMethorEffect(const const rvector& Target,int nCnt);
 
@@ -370,10 +367,6 @@ public:
 	void AddTrackMagic(const rvector& pos);
 	void AddTrackMethor(const rvector& pos);
 
-//	void AddEnchantFire(ZObject* pObj);
-//	void AddEnchantCold(ZObject* pObj);
-//	void AddEnchantPoison(ZObject* pObj);
-
 	float GetEnchantDamageObjectSIze(ZObject* pObj);
 
 	void AddEnchantFire2(ZObject* pObj);
@@ -393,8 +386,8 @@ public:
 	void AddSmokeGrenadeEffect( rvector& Target );
 	void AddGrenadeSmokeEffect(const rvector& Target ,float min,float max,float time);
 
-	void AddWaterSplashEffect( rvector& Target, rvector& Scale );
-	void AddWorldItemEatenEffect( rvector& pos );
+	void AddWaterSplashEffect(const rvector& Target, const rvector& Scale );
+	void AddWorldItemEatenEffect(const rvector& pos );
 
 	void AddCharacterIcon(ZObject* pObj,int nIcon);
 	void AddCommanderIcon(ZObject* pObj,int nTeam);
@@ -421,5 +414,3 @@ public:
 
 void SetEffectLevel(int level);
 int	 GetEffectLevel();
-
-#endif

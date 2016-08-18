@@ -60,7 +60,7 @@ void ZWeaponMgr::Clear()
 	}
 }
 
-void ZWeaponMgr::AddGrenade(rvector &pos,rvector &velocity,ZObject* pC)
+void ZWeaponMgr::AddGrenade(const rvector &pos, const rvector &velocity,ZObject* pC)
 {
 	ZWeaponGrenade* pWeapon = new ZWeaponGrenade;
 
@@ -72,7 +72,8 @@ void ZWeaponMgr::AddGrenade(rvector &pos,rvector &velocity,ZObject* pC)
 	Add(pWeapon);
 }
 
-void ZWeaponMgr::AddKit(rvector &pos,rvector &velocity,ZCharacter* pC,float Delaytime,char *szMeshName, int nLinkedWorldItemID)
+void ZWeaponMgr::AddKit(const rvector &pos, const rvector &velocity,ZCharacter* pC,float Delaytime,
+	const char *szMeshName, int nLinkedWorldItemID)
 {
 	ZWeaponItemkit* pWeapon = new ZWeaponItemkit;
 
@@ -86,7 +87,7 @@ void ZWeaponMgr::AddKit(rvector &pos,rvector &velocity,ZCharacter* pC,float Dela
 	Add(pWeapon);
 }
 
-void ZWeaponMgr::AddFlashBang( rvector &pos, rvector &velocity, ZObject* pC )
+void ZWeaponMgr::AddFlashBang(const  rvector &pos, const rvector &velocity, ZObject* pC)
 {
 	ZWeaponFlashBang* pWeapon	= new ZWeaponFlashBang;
 
@@ -101,7 +102,7 @@ void ZWeaponMgr::AddFlashBang( rvector &pos, rvector &velocity, ZObject* pC )
 	Add( pWeapon );
 }
 //*/
-void ZWeaponMgr::AddSmokeGrenade( rvector &pos,rvector &velocity,ZObject* pC )
+void ZWeaponMgr::AddSmokeGrenade(const rvector &pos, const rvector &velocity,ZObject* pC )
 {
 	ZWeaponSmokeGrenade* pWeapon	= new ZWeaponSmokeGrenade;
 
@@ -116,7 +117,7 @@ void ZWeaponMgr::AddSmokeGrenade( rvector &pos,rvector &velocity,ZObject* pC )
 	Add( pWeapon );
 }
 
-void ZWeaponMgr::AddRocket(rvector &pos,rvector &dir,ZObject* pC)
+void ZWeaponMgr::AddRocket(const rvector &pos, const rvector &dir,ZObject* pC)
 {
 	ZWeaponRocket* pWeapon = new ZWeaponRocket;
 
@@ -204,7 +205,7 @@ ZWeapon* ZWeaponMgr::GetWorldItem(int nItemID)
 	return NULL;
 }
 
-ZMovingWeapon* ZWeaponMgr::UpdateWorldItem(int nItemID,rvector& pos)
+ZMovingWeapon* ZWeaponMgr::UpdateWorldItem(int nItemID, const rvector& pos)
 {
 	z_weapon_node	node;
 

@@ -129,7 +129,7 @@ void ZStencilLight::RenderStencil()
 	m_pMesh->DrawSubset(0);
 }
 
-void ZStencilLight::RenderStencil(rvector& p, float raidus)
+void ZStencilLight::RenderStencil(const rvector& p, float raidus)
 {
 	if(m_pMesh == NULL)
 	{
@@ -311,7 +311,8 @@ void ZStencilLight::Render()
 			if(!isInViewFrustum(pLS->pos, RGetViewFrustum())) continue;
 			float radius = SLBASERADIUS*pLS->power;
 			for(int j = 0 ; j < i; ++j ) radius = radius*0.95f;
-			if(D3DXVec3LengthSq(&(pLS->pos - RCameraPosition)) < radius*radius) bInverse = true;
+			auto vec = pLS->pos - RCameraPosition;
+			if(D3DXVec3LengthSq(&vec) < radius*radius) bInverse = true;
 			RenderStencil( pLS->pos, radius );
 		}	
 		RenderLight();
@@ -319,7 +320,7 @@ void ZStencilLight::Render()
 	PostRender();
 }
 
-int ZStencilLight::AddLightSource( rvector& p, float power )
+int ZStencilLight::AddLightSource(const rvector& p, float power )
 {
 	LightSource* pNew = new LightSource;
 	pNew->bAttenuation = false;
@@ -332,7 +333,7 @@ int ZStencilLight::AddLightSource( rvector& p, float power )
 	return rid;
 }
 
-int ZStencilLight::AddLightSource( rvector& p, float power,	DWORD lastTime )
+int ZStencilLight::AddLightSource(const rvector& p, float power,	DWORD lastTime )
 {
 	LightSource* pNew = new LightSource;
 	pNew->bAttenuation = true;
@@ -347,7 +348,7 @@ int ZStencilLight::AddLightSource( rvector& p, float power,	DWORD lastTime )
 	return rid;
 }
 
-bool ZStencilLight::SetLightSourcePosition( int id, rvector& p )
+bool ZStencilLight::SetLightSourcePosition( int id, const rvector& p )
 {
 	map<int, LightSource*>::iterator iter = m_LightSource.find(id);
 	if(iter!=m_LightSource.end()) {

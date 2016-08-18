@@ -331,13 +331,13 @@ public:
 	void Destroy();
 
 
-	bool ReadXml(char* fname);
-	bool SaveXml(char* fname);
+	bool ReadXml(const char* fname);
+	bool SaveXml(const char* fname);
 
 	bool ReadXmlElement(MXmlElement* pNode,char* Path);
 
 	bool ReadElu(const char* fname);
-	bool SaveElu(char* fname);
+	bool SaveElu(const char* fname);
 
 	void RenderFrame();
 
@@ -467,13 +467,13 @@ public:
 	void SetMapObject(bool b);
 	bool GetMapObject();
 
-	char* GetFileName();
+	const char* GetFileName();
 	void  SetFileName(const char* name);
-	bool  CmpFileName(char* name);
+	bool  CmpFileName(const char* name);
 
-	char* GetName();
-	void  SetName(char* name);
-	bool  CmpName(char* name);
+	const char* GetName();
+	void  SetName(const char* name);
+	bool  CmpName(const char* name);
 
 	void GetMeshData(RMeshPartsType type,vector<RMeshNode*>& nodetable);
 	void GetPartsNode(RMeshPartsType type,vector<RMeshNode*>& nodetable);

@@ -109,7 +109,7 @@ public:
 	// 여기있는 것들은 상속받는 오브젝트에서 자신에 맞게 오버라이드해서 사용한다.
 	virtual bool IsCollideable() { return m_Collision.bCollideable; }		
 	virtual float ColTest(const rvector& pos, const rvector& vec, float radius, rplane* out=0) { return 1.0f; }
-	virtual bool ColTest(const rvector& p1, rvector& p2, float radius, float fTime);		// 원기둥을 이용하여 간단하게 구와 충돌테스트
+	virtual bool ColTest(const rvector& p1, const rvector& p2, float radius, float fTime);		// 원기둥을 이용하여 간단하게 구와 충돌테스트
 	virtual bool IsAttackable()	 { return true; }
 	virtual bool IsDie() { return false; }
 	virtual void SetDirection(const rvector& dir);

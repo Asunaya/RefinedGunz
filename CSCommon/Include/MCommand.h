@@ -152,7 +152,7 @@ public:
 	bool SetData(const char* pData, MCommandManager* pCM, unsigned short nDataLen = USHRT_MAX, bool ReadSerial = true)
 	{
 		std::allocator<u8> alloc;
-		SetData(pData, pCM, nDataLen, true, alloc);
+		return SetData(pData, pCM, nDataLen, true, alloc);
 	}
 
 	int GetSize() const;

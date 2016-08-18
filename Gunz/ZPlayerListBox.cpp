@@ -466,7 +466,7 @@ void ZPlayerListBox::OnSize(int w,int h)
 }
 
 // mode PLAYERLISTMODE_CHANNEL
-void ZPlayerListBox::AddPlayer(MUID& puid, ePlayerState state, int  nLevel,char* szName, char *szClanName, unsigned int nClanID, MMatchUserGradeID nGrade )
+void ZPlayerListBox::AddPlayer(const MUID& puid, ePlayerState state, int  nLevel,char* szName, char *szClanName, unsigned int nClanID, MMatchUserGradeID nGrade )
 {
 	if ( (int)strlen( szName) == 0)
 		return;
@@ -511,7 +511,7 @@ void ZPlayerListBox::AddPlayer(MUID& puid, ePlayerState state, int  nLevel,char*
 }
 
 // mode PLAYERLISTMODE_STAGE
-void ZPlayerListBox::AddPlayer(MUID& puid, MMatchObjectStageState state, int nLevel, char* szName, char* szClanName, unsigned int nClanID, bool isMaster, MMatchTeam nTeam)
+void ZPlayerListBox::AddPlayer(const MUID& puid, MMatchObjectStageState state, int nLevel, char* szName, char* szClanName, unsigned int nClanID, bool isMaster, MMatchTeam nTeam)
 {
 	if ( (int)strlen( szName) == 0)
 		return;
@@ -634,7 +634,7 @@ void ZPlayerListBox::AddPlayer(ePlayerState state, char* szName, char* szLocatio
 }
 
 // mode PLAYERLISTMODE_CHANNEL_CLAN
-void ZPlayerListBox::AddPlayer(MUID& puid, ePlayerState state, char* szName, int nLevel ,MMatchClanGrade nGrade )
+void ZPlayerListBox::AddPlayer(const MUID& puid, ePlayerState state, char* szName, int nLevel ,MMatchClanGrade nGrade )
 {
 	if ( (int)strlen( szName) == 0)
 		return;
@@ -678,7 +678,7 @@ void ZPlayerListBox::AddPlayer(MUID& puid, ePlayerState state, char* szName, int
 	MListBox::Add( pItem );
 }
 
-void ZPlayerListBox::DelPlayer(MUID& puid)
+void ZPlayerListBox::DelPlayer(const MUID& puid)
 {
 	ZPlayerListItem* pItem = NULL;
 
@@ -755,7 +755,7 @@ void ZPlayerListBox::UpdateList(int mode)
 }
 
 
-void ZPlayerListBox::UpdatePlayer(MUID& puid,MMatchObjectStageState state, bool isMaster,MMatchTeam nTeam)
+void ZPlayerListBox::UpdatePlayer(const MUID& puid,MMatchObjectStageState state, bool isMaster,MMatchTeam nTeam)
 {
 	ZStagePlayerListItem* pItem = (ZStagePlayerListItem*)GetUID(puid);
 
@@ -864,7 +864,7 @@ void ZPlayerListBox::UpdatePlayer(MUID& puid,MMatchObjectStageState state, bool 
 }
 
 
-void ZPlayerListBox::UpdatePlayer(MUID& puid,MMatchObjectStageState state, char* szName, int  nLevel ,bool isMaster,MMatchTeam nTeam)
+void ZPlayerListBox::UpdatePlayer(const MUID& puid,MMatchObjectStageState state, char* szName, int  nLevel ,bool isMaster,MMatchTeam nTeam)
 {
 	return;
 
@@ -1279,7 +1279,7 @@ float ZStagePlayerListBox::OnReSize()
 	return fA;
 }
 
-void ZStagePlayerListBox::DelPlayer(MUID& puid)
+void ZStagePlayerListBox::DelPlayer(const MUID& puid)
 {
 	ZStagePlayerListItem* pItem = NULL;
 
@@ -1306,7 +1306,7 @@ ZStagePlayerListItem* ZStagePlayerListBox::GetUID(MUID uid)
 	return NULL;
 }
 
-void ZStagePlayerListBox::UpdatePlayer(MUID& puid,eStagePlayerState state, char* szName, int  nLevel ,bool isMaster,int nTeam)
+void ZStagePlayerListBox::UpdatePlayer(const MUID& puid,eStagePlayerState state, char* szName, int  nLevel ,bool isMaster,int nTeam)
 {
 	ZStagePlayerListItem* pItem = GetUID(puid);
 	if(pItem) {
@@ -1358,7 +1358,7 @@ void ZStagePlayerListBox::AddPlayer(MMatchObjCache* pCache)
 	AddPlayer(pCache->GetUID(), MOSS_NONREADY,pCache->GetName(), pCache->GetLevel(),false,MMT_ALL);
 }
 
-void ZStagePlayerListBox::AddPlayer(MUID& puid, MMatchObjectStageState state, char* szName, int  nLevel ,bool isMaster,MMatchTeam nTeam)
+void ZStagePlayerListBox::AddPlayer(const MUID& puid, MMatchObjectStageState state, char* szName, int  nLevel ,bool isMaster,MMatchTeam nTeam)
 {
 	char szFileName[64] = "";
 	char szFileNameState[64] = "";

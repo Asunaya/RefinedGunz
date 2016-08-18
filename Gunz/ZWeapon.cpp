@@ -93,7 +93,7 @@ ZWeaponRocket::~ZWeaponRocket() {
 
 }
 
-void ZWeaponRocket::Create(RMesh* pMesh,rvector &pos, rvector &dir,ZObject* pOwner) {
+void ZWeaponRocket::Create(RMesh* pMesh, const rvector &pos, const rvector &dir,ZObject* pOwner) {
 
 	ZWeapon::Create(pMesh);
 
@@ -316,7 +316,7 @@ ZWeaponItemkit::~ZWeaponItemkit()
 
 }
 
-void ZWeaponItemkit::Create(RMesh* pMesh,rvector &pos, rvector &velocity,ZObject* pOwner)
+void ZWeaponItemkit::Create(RMesh* pMesh, const rvector &pos, const rvector &velocity,ZObject* pOwner)
 {
 	ZWeapon::Create(pMesh);
 
@@ -529,34 +529,11 @@ bool ZWeaponItemkit::Update(float fElapsedTime)
 
 void ZWeaponItemkit::Explosion()
 {
-	// 자신의 이펙트 그리고..
-	// 주변 유닛들에게 데미지 주는 메시지 날리고..
-	// ( 메시지 받은곳에서 주변 유닛들 체크하고.. 
-	// 죽은 유닛이 있다면 발사유닛의 킬수를 올려주기)
-
-//	rvector v = m_Position;
-//	rvector dir = -RealSpace2::RCameraDirection;
-//	ZGetEffectManager()->AddGrenadeEffect(v,dir);
-
-	// 메시지를 날리거나~
-	// 각각의 클라이언트의 무기 정보를 믿고 처리하거나~
-
-//	g_pGame->OnExplosionGrenade(m_uidOwner,v,m_fDamage,400.f,m_nTeamID);
-
-//	static RealSoundEffectSource* pSES= ZApplication::GetSoundEngine()->GetSES("we_grenade_explosion");
-//	if( pSES != NULL ) {
-//		ZApplication::GetSoundEngine()->PlaySE(pSES,v.x,v.y,v.z);
-//	}
-
-//	ZGetWorld()->GetFlags()->SetExplosion( v, EXPLOSION_EMBLEM_POWER );
 }
-
-
-////////////////////////// 수류탄
 
 MImplementRTTI(ZWeaponGrenade,ZMovingWeapon);
 
-void ZWeaponGrenade::Create(RMesh* pMesh,rvector &pos, rvector &velocity,ZObject* pOwner) {
+void ZWeaponGrenade::Create(RMesh* pMesh, const rvector &pos, const rvector &velocity,ZObject* pOwner) {
 
 	ZWeapon::Create(pMesh);
 
@@ -1260,7 +1237,7 @@ void ZWeaponMagic::Render()
 
 }
 
-void ZWeaponMagic::Explosion(WeaponMagicExplosionType type, ZObject* pVictim,rvector& vDir)
+void ZWeaponMagic::Explosion(WeaponMagicExplosionType type, ZObject* pVictim, const rvector& vDir)
 {
 	rvector v = m_Position-rvector(0,0,100.f);
 

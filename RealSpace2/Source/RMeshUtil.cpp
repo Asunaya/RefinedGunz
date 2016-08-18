@@ -785,7 +785,7 @@ void draw_query_fill_box(rmatrix* wmat , rvector& max,rvector& min,DWORD color)
 	RGetDevice()->SetRenderState( D3DRS_ZWRITEENABLE , TRUE );
 }
 
-void draw_box(rmatrix* wmat , rvector& max,rvector& min,DWORD color)
+void draw_box(rmatrix* wmat, const rvector& max, const rvector& min, DWORD color)
 {
 	RGetDevice()->SetRenderState( D3DRS_LIGHTING, FALSE );
 

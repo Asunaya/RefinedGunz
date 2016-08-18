@@ -36,7 +36,7 @@ public:
 
 	void PreRender();
 	void RenderStencil();
-	void RenderStencil(rvector& p, float radius);
+	void RenderStencil(const rvector& p, float radius);
 	void RenderLight();	
 	void PostRender();
 
@@ -47,9 +47,9 @@ public:
 	void SetPosition( const rvector& p) { m_Position = p; }
 	void SetRadius( const float r )	{ m_Radius = r; }
 	
-	int AddLightSource( rvector& p, float power );
-	int AddLightSource( rvector& p, float power, DWORD lastTime );
-	bool SetLightSourcePosition( int id, rvector& p );
+	int AddLightSource( const rvector& p, float power );
+	int AddLightSource(const rvector& p, float power, DWORD lastTime );
+	bool SetLightSourcePosition( int id, const rvector& p );
 	bool DeleteLightSource( int id );
 	bool DeleteLightSource( int id, DWORD lastTime );
 
