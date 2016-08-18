@@ -18,7 +18,7 @@ protected:
 	rvector	m_OrigPos;
 	rvector	m_Velocity;
 public:
-	ZEffectSmoke(ZEffectBillboardSource* pEffectBillboardSource, rvector& Pos, rvector& Velocity, float fMinScale, float fMaxScale, unsigned long int nLifeTime);
+	ZEffectSmoke(ZEffectBillboardSource* pEffectBillboardSource, const rvector& Pos, const rvector& Velocity, float fMinScale, float fMaxScale, unsigned long int nLifeTime);
 	virtual ~ZEffectSmoke(void);
 
 	virtual bool Draw(unsigned long int nTime);
@@ -35,7 +35,7 @@ protected:
 	rvector	m_Velocity;
 
 public:
-	ZEffectLandingSmoke(ZEffectBillboardSource* pEffectBillboardSource, rvector& Pos, rvector& Velocity, float fMinScale, float fMaxScale, unsigned long int nLifeTime);
+	ZEffectLandingSmoke(ZEffectBillboardSource* pEffectBillboardSource, const rvector& Pos, const rvector& Velocity, float fMinScale, float fMaxScale, unsigned long int nLifeTime);
 	virtual ~ZEffectLandingSmoke(void);
 
 	virtual bool Draw(unsigned long int nTime);
@@ -55,7 +55,7 @@ public:
 	virtual bool Draw( unsigned long int nTime );
 
 public:
-	ZEffectSmokeGrenade(ZEffectBillboardSource* pEffectBillboardSource, rvector& Pos, rvector& Velocity, float fMinScale, float fMaxScale, unsigned long int nLifeTime);
+	ZEffectSmokeGrenade(ZEffectBillboardSource* pEffectBillboardSource, const rvector& Pos, const rvector& Velocity, float fMinScale, float fMaxScale, unsigned long int nLifeTime);
 	virtual ~ZEffectSmokeGrenade();
 };
 

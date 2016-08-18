@@ -157,7 +157,7 @@ void ZWaterList::OnRestore()
 	Z_VIDEO_REFLECTION = SetSurface( Z_VIDEO_REFLECTION );
 }
 
-bool ZWaterList::CheckSpearing( rvector& o, rvector& e, int iPower, float fArea, bool bPlaySound /* = true  */ )
+bool ZWaterList::CheckSpearing(const rvector& o, const rvector& e, int iPower, float fArea, bool bPlaySound /* = true  */ )
 {	
 	ZWater* pWater;
 	rvector pos;
@@ -307,7 +307,7 @@ bool ZWater::SetMesh( RMeshNode* meshNode )
 	m_nFaces = meshNode->m_face_num;	
 
 	// set matrix
-	rvector offset = meshNode->m_mat_base;
+	rvector offset = GetTransPos(meshNode->m_mat_base);
 	MakeWorldMatrix(&m_worldMat, offset, rvector(0,-1,0), rvector(0,0,1));
 	m_worldMat = meshNode->m_mat_result* m_worldMat;
 
@@ -764,7 +764,7 @@ bool ZWater::Pick( rvector& o, rvector& d, rvector* pPos )
 	return false;
 }
 
-void ZWater::Ripple( rvector& pos, int iAmplitude, float fFrequency )
+void ZWater::Ripple(const rvector& pos, int iAmplitude, float fFrequency)
 {
 	DWORD dwTime = GetGlobalTimeMS();
 	for( int i = 0; i <m_nVerts; ++i )

@@ -69,7 +69,7 @@ public:
 	virtual ~ZObject();
 
 	rvector &GetPosition() { return m_Position; }
-	void SetPosition(rvector& pos);
+	void SetPosition(const rvector& pos);
 	void Draw();
 	void Update(float fDelta);
 	virtual bool Pick(int x,int y,RPickInfo* pInfo);
@@ -112,7 +112,7 @@ public:
 	virtual bool ColTest(const rvector& p1, rvector& p2, float radius, float fTime);		// 원기둥을 이용하여 간단하게 구와 충돌테스트
 	virtual bool IsAttackable()	 { return true; }
 	virtual bool IsDie() { return false; }
-	virtual void SetDirection(rvector& dir);
+	virtual void SetDirection(const rvector& dir);
 	virtual bool IsGuard()	const { return false; }
 	virtual bool IsGuardCustom() const {
 		return false;

@@ -20,7 +20,7 @@ void ZBmNumLabel::SetLabelBitmap(MBitmap* pLabelBitmap)
 	SetSize(m_pLabelBitmap->GetWidth(), m_pLabelBitmap->GetHeight());
 }
 
-void ZBmNumLabel::SetCharSize(MSIZE &size)
+void ZBmNumLabel::SetCharSize(const MSIZE &size)
 {
 	m_CharSize = size;
 	

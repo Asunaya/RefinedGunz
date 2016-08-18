@@ -51,8 +51,8 @@ public:
 	rplane GetLastColPlane() { return impactPlane; }
 
 	// origin 에서 targetpos 로 이동하는데 미끄러짐을 감안해서 targetpos 를 조절해서 리턴해준다.
-	static bool CheckWall(RSolidBspNode *pRootNode,rvector &origin,rvector &targetpos,float fRadius,float fHeight=0.f,RCOLLISIONMETHOD method=RCW_CYLINDER,int nDepth=0,rplane *pimpactplane=NULL);
-	static bool CheckWall2(RSolidBspNode *pRootNode,RImpactPlanes &impactPlanes,rvector &origin,rvector &targetpos,float fRadius,float fHeight,RCOLLISIONMETHOD method);
+	static bool CheckWall(RSolidBspNode *pRootNode, const rvector &origin, rvector &targetpos,float fRadius,float fHeight=0.f,RCOLLISIONMETHOD method=RCW_CYLINDER,int nDepth=0,rplane *pimpactplane=NULL);
+	static bool CheckWall2(RSolidBspNode *pRootNode,RImpactPlanes &impactPlanes, const rvector &origin, rvector &targetpos,float fRadius,float fHeight,RCOLLISIONMETHOD method);
 
 #ifndef _PUBLISH
 	int				nPolygon;

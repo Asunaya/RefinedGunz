@@ -2976,7 +2976,7 @@ void ZMyCharacter::InitBullet()
 }
 
 // 나 자신일 경우에는 카메라도 같이 설정한다.
-void ZMyCharacter::SetDirection(rvector& dir)
+void ZMyCharacter::SetDirection(const rvector& dir)
 {
 	ZCharacter::SetDirection(dir);
 	ZCamera* pCamera = ZApplication::GetGameInterface()->GetCamera();

@@ -431,14 +431,14 @@ bool ZCharacter::IsMoveAnimation()
 	return g_AnimationInfoTableLower[m_AniState_Lower].bMove;
 }
 
-void ZCharacter::SetAnimation(char *AnimationName,bool bEnableCancel,int time)
+void ZCharacter::SetAnimation(const char *AnimationName,bool bEnableCancel,int time)
 {
 	if (m_bInitialized == false) return;
 
 	SetAnimation(ani_mode_lower,AnimationName,bEnableCancel,time);
 }
 
-void ZCharacter::SetAnimation(RAniMode mode,char *AnimationName,bool bEnableCancel,int time)
+void ZCharacter::SetAnimation(RAniMode mode, const char *AnimationName,bool bEnableCancel,int time)
 {
 	if (m_bInitialized == false) 
 		return;
@@ -1952,7 +1952,7 @@ void ZCharacter::Revival()
 
 
 
-void ZCharacter::SetDirection(rvector& dir)
+void ZCharacter::SetDirection(const rvector& dir)
 {
 	m_Direction = dir;
 	m_DirectionLower = dir;

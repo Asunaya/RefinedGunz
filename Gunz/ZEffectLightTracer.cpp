@@ -9,7 +9,7 @@
 #define LIGHTTRACTER_WIDTH	1
 #define LIGHTTRACER_SPEED	10.0f	// cm/msec
 
-ZEffectLightTracer::ZEffectLightTracer(ZEffectBillboardSource* pEffectBillboardSource, D3DXVECTOR3& Start, D3DXVECTOR3& End)
+ZEffectLightTracer::ZEffectLightTracer(ZEffectBillboardSource* pEffectBillboardSource, const D3DXVECTOR3& Start, const D3DXVECTOR3& End)
 : ZEffectBillboard(pEffectBillboardSource)
 {
 	m_nStartTime = GetGlobalTimeMS();

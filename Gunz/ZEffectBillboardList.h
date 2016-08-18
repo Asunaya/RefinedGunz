@@ -36,7 +36,7 @@ class ZEffectBillboardList : public ZEffectBase
 {
 public:
 	ZEffectBillboardList();
-	ZEFFECTBILLBOARDITEM * Add(rvector &pos,rvector &velocity,rvector &accel,float fStartSize,float fEndSize,float fLifeTime=-1.f,DWORD color=0xffffff,bool bTrainSmoke=false);
+	ZEFFECTBILLBOARDITEM * Add(const rvector &pos, const rvector &velocity, const rvector &accel,float fStartSize,float fEndSize,float fLifeTime=-1.f,DWORD color=0xffffff,bool bTrainSmoke=false);
 
 	virtual void BeginState();
 	virtual void Update(float fElapsed);
@@ -95,7 +95,7 @@ class ZEffectBillboardTexAniList : public ZEffectBase
 {
 public:
 	ZEffectBillboardTexAniList();
-	void Add(rvector &pos,rvector& vel,int frame,float fAddTime ,float fStartSize,float fEndSize,float fLifeTime=-1.f,ZCharacter* pChar=NULL,RMeshPartsPosInfoType partstype=eq_parts_pos_info_etc);
+	void Add(const rvector &pos, const rvector& vel,int frame,float fAddTime ,float fStartSize,float fEndSize,float fLifeTime=-1.f,ZCharacter* pChar=NULL,RMeshPartsPosInfoType partstype=eq_parts_pos_info_etc);
 
 	virtual void BeginState();
 	virtual void Update(float fElapsed);

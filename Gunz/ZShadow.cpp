@@ -141,9 +141,11 @@ bool ZShadow::setMatrix( RVisualMesh& vmesh, float size_ /* = 100.f  */, RBspObj
 		return false;
 
 	// 거리 측정하여 그림자를 그려줄 것인지 결정
-	float distanceL , distanceR ;
-	distanceL = D3DXVec3LengthSq( &(footPosition[0] - floorPosition[0])) - 200;
-	distanceR = D3DXVec3LengthSq( &(footPosition[1] - floorPosition[1])) - 200;
+	float distanceL , distanceR;
+	auto vecx = footPosition[0] - floorPosition[0];
+	auto vecy = footPosition[1] - floorPosition[1];
+	distanceL = D3DXVec3LengthSq(&vecx) - 200;
+	distanceR = D3DXVec3LengthSq(&vecy) - 200;
 	//float boundarySquare = VALID_SHADOW_LENGTH * VALID_SHADOW_LENGTH;
 	
 	if( VALID_SHADOW_BOUNDARY_SQUARE >= distanceL && floorPosition[0].z < footPosition[0].z )	bLFShadow = true;

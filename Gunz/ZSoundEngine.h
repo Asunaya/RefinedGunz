@@ -226,7 +226,7 @@ public:
 	void PlaySEHitBody(float x, float y, float z);
 
 	int PlaySound(const char* Name, const rvector& pos, bool bHero=false, bool bLoop = false, DWORD dwDelay = 0 );
-	void PlaySoundElseDefault(char* Name,char* NameDefault,rvector& pos,bool bHero=false, bool bLoop = false, DWORD dwDelay = 0 );
+	void PlaySoundElseDefault(const char* Name, const char* NameDefault, const rvector& pos,bool bHero=false, bool bLoop = false, DWORD dwDelay = 0 );
 	int PlaySound(const char* Name, bool bLoop=false, DWORD dwDelay = 0 ); // only 2D sound
 	
 	bool isPlayAble(char* name);

@@ -36,7 +36,7 @@ ZEffectMesh::ZEffectMesh(RMesh* pMesh, rvector& Pos, rvector& Velocity)
 //	g_effect_empty_cartridge_cnt++;
 }
 
-ZEffectStaticMesh::ZEffectStaticMesh(RMesh* pMesh, rvector& Pos, rvector& Velocity, MUID uid )
+ZEffectStaticMesh::ZEffectStaticMesh(RMesh* pMesh, const rvector& Pos, const rvector& Velocity, MUID uid )
 : ZEffectMesh(pMesh,Pos,Velocity)
 {
 	m_uid = uid;

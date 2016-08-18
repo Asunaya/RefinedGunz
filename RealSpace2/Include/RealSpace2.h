@@ -108,10 +108,10 @@ rvector RGetIntersection(int x,int y,rplane &plane);
 bool RGetIntersection( rvector& a, rvector& b, rplane &plane, rvector* pIntersection );
 
 // 3d 좌표를 화면좌표로 transform 한다.
-rvector RGetTransformCoord(rvector &coord);
+rvector RGetTransformCoord(const rvector &coord);
 
 // 그리는것과 관련된 펑션..
-void RDrawLine(rvector &v1,rvector &v2,DWORD dwColor);
+void RDrawLine(const rvector &v1, const rvector &v2,DWORD dwColor);
 void RDrawCylinder(rvector origin,float fRadius,float fHeight,int nSegment);
 void RDrawCorn(rvector center,rvector pole,float fRadius,int nSegment);
 void RDrawSphere(rvector origin,float fRadius,int nSegment, u32 Color = 0xFFFF0000);

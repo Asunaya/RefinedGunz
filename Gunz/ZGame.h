@@ -151,7 +151,7 @@ public:
 	void OnExplosionMagic(ZWeaponMagic *pWeapon, MUID uidOwner,rvector pos,float fMinDamage,float fKnockBack,MMatchTeam nTeamID,bool bSkipNpc);
 	void OnExplosionMagicNonSplash(ZWeaponMagic *pWeapon, MUID uidOwner, MUID uidTarget, rvector pos, float fKnockBack);
 	void OnReloadComplete(ZCharacter *pCharacter);
-	void OnPeerShotSp(MUID& uid, float fShotTime, rvector& pos, rvector& dir,int type,MMatchCharItemParts sel_type);
+	void OnPeerShotSp(const MUID& uid, float fShotTime, const rvector& pos, const rvector& dir,int type,MMatchCharItemParts sel_type);
 	void OnChangeWeapon(MUID& uid, MMatchCharItemParts parts);
 
 	rvector GetMyCharacterFirePosition(void);
@@ -289,18 +289,17 @@ protected:
 	void OnPeerDead(const MUID& uidAttacker, const unsigned long int nAttackerArg, 
 					const MUID& uidVictim, const unsigned long int nVictimArg);
 	void OnReceiveTeamBonus(const MUID& uidChar, const unsigned long int nExpArg);
-	void OnPeerDie(MUID& uidVictim, MUID& uidAttacker);
+	void OnPeerDie(const MUID& uidVictim, const MUID& uidAttacker);
 	void OnPeerDieMessage(ZCharacter* pVictim, ZCharacter* pAttacker);
-	void OnChangeParts(MUID& uid,int partstype,int PartsID);
-	//void OnAssignCommander(const MUID& uidRedCommander, const MUID& uidBlueCommander);
-	void OnAttack(MUID& uid,int type,rvector& pos);
-	void OnDamage(MUID& uid,MUID& tuid,int damage);
-	void OnPeerReload(MUID& uid);
-	void OnPeerSpMotion(MUID& uid,int nMotionType);
-	void OnPeerChangeCharacter(MUID& uid);
-	void OnPeerSpawn(MUID& uid, rvector& pos, rvector& dir);
+	void OnChangeParts(const MUID& uid,int partstype,int PartsID);
+	void OnAttack(const MUID& uid,int type,rvector& pos);
+	void OnDamage(const MUID& uid, const MUID& tuid,int damage);
+	void OnPeerReload(const MUID& uid);
+	void OnPeerSpMotion(const MUID& uid,int nMotionType);
+	void OnPeerChangeCharacter(const MUID& uid);
+	void OnPeerSpawn(const MUID& uid, rvector& pos, rvector& dir);
 
-	void OnSetObserver(MUID& uid);
+	void OnSetObserver(const MUID& uid);
 	
 
 //	void OnPeerAdd();
@@ -326,7 +325,7 @@ public:
 
 	void AutoAiming();
 
-	void OnPeerShot(MUID& uid, float fShotTime, rvector& pos, rvector& to,MMatchCharItemParts sel_type);
+	void OnPeerShot(const MUID& uid, float fShotTime, rvector& pos, rvector& to,MMatchCharItemParts sel_type);
 
 	void PostSpMotion(ZC_SPMOTION_TYPE type);
 

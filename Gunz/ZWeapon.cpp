@@ -744,7 +744,8 @@ void ZWeaponFlashBang::Explosion()
 	}
 	else
 	{
-		float distMap	= D3DXVec3LengthSq( &(pick.PickPos - m_Position) );
+		auto vec = pick.PickPos - m_Position;
+		float distMap	= D3DXVec3LengthSq( &vec );
 		rvector temp = g_pGame->m_pMyCharacter->m_Position - m_Position;
 		float distChar	= D3DXVec3LengthSq( &(temp) );
 		if( distMap > distChar )

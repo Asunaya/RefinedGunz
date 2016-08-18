@@ -390,8 +390,8 @@ public:
 	void CheckDrawWeaponTrack();
 	void UpdateSpWeapon();
 
-	void SetAnimation(char *AnimationName,bool bEnableCancel,int tick);
-	void SetAnimation(RAniMode mode,char *AnimationName,bool bEnableCancel,int tick);
+	void SetAnimation(const char *AnimationName,bool bEnableCancel,int tick);
+	void SetAnimation(RAniMode mode, const char *AnimationName,bool bEnableCancel,int tick);
 
 	void SetAnimationLower(ZC_STATE_LOWER nAni);
 	void SetAnimationUpper(ZC_STATE_UPPER nAni);
@@ -442,8 +442,8 @@ public:
 	bool IsAlive() const { return !m_bDie; }
 	void ForceDie() { SetHP(0); m_bDie = true; }		// 이것은 그냥 죽은 상태로 만들기 위할때 사용
 
-	void SetAccel(rvector& accel) { m_Accel = accel; }
-	virtual void SetDirection(rvector& dir);
+	void SetAccel(const rvector& accel) { m_Accel = accel; }
+	virtual void SetDirection(const rvector& dir);
 
 	int		m_nSelectSlot;
 	ZSlot	m_Slot[ZC_SLOT_END];

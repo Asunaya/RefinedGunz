@@ -523,7 +523,7 @@ float GetAngle(rvector &a)
 		return (float)-acos(a.x);
 }
 
-float GetAngleOfVectors(rvector &ta,rvector &tb)
+float GetAngleOfVectors(const rvector &ta, const rvector &tb)
 {
 	if((ta.x==0.0f)&&(ta.y==0.0f)&&(ta.z==0.0f))return 0;
 	if((tb.x==0.0f)&&(tb.y==0.0f)&&(tb.z==0.0f))return 0;

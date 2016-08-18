@@ -1922,7 +1922,7 @@ bool RVisualMesh::SetBlendAnimation(RAnimation* pAniSet,float blend_time,bool b)
 	return SetBlendAnimation(ani_mode_lower,pAniSet,blend_time,b);
 }
 
-bool RVisualMesh::SetBlendAnimation(char* ani_name,float blend_time,bool b)
+bool RVisualMesh::SetBlendAnimation(const char* ani_name,float blend_time,bool b)
 {
 	return SetBlendAnimation(ani_mode_lower,ani_name,blend_time,b);
 }
@@ -1962,7 +1962,7 @@ bool RVisualMesh::SetBlendAnimation(RAniMode animode,RAnimation* pAniSet,float b
 	return false;
 }
 
-bool RVisualMesh::SetBlendAnimation(RAniMode animode,char* ani_name,float blend_time,bool b)
+bool RVisualMesh::SetBlendAnimation(RAniMode animode, const char* ani_name,float blend_time,bool b)
 {
 	RAnimation* pAS[2];
 
@@ -2004,7 +2004,7 @@ bool RVisualMesh::SetAnimation(RAnimation* pAniSet,bool b)
 	return SetAnimation(ani_mode_lower,pAniSet,b);
 }
 
-bool RVisualMesh::SetAnimation(char* ani_name,bool b)
+bool RVisualMesh::SetAnimation(const char* ani_name,bool b)
 {
 	return SetAnimation(ani_mode_lower,ani_name,b);
 }
@@ -2180,7 +2180,7 @@ void RVisualMesh::UpdateMotionTable()
 
 // 캐릭터 상위에서 자신의 상태와 들고 있는 무기에 따라서 에니메이션 연결해주기
 
-bool RVisualMesh::SetAnimation(RAniMode animode,char* ani_name,bool b)
+bool RVisualMesh::SetAnimation(RAniMode animode, const char* ani_name,bool b)
 {
 	if(!m_pMesh)
 		return false;
@@ -2249,7 +2249,7 @@ bool RVisualMesh::SetNextAnimation(RAnimation* pAniSet)
 	return SetNextAnimation(ani_mode_lower,pAniSet);
 }
 
-bool RVisualMesh::SetNextAnimation(char* ani_name)
+bool RVisualMesh::SetNextAnimation(const char* ani_name)
 {
 	return SetNextAnimation(ani_mode_lower,ani_name);
 }
@@ -2275,7 +2275,7 @@ bool RVisualMesh::SetNextAnimation(RAniMode animode,RAnimation* pAniSet)
 	return true;
 }
 
-bool RVisualMesh::SetNextAnimation(RAniMode animode,char* ani_name)
+bool RVisualMesh::SetNextAnimation(RAniMode animode, const char* ani_name)
 {
 	if(!m_pMesh)
 		return false;
@@ -2295,7 +2295,7 @@ bool RVisualMesh::SetReserveAnimation(RAnimation* pAniSet,int tick)
 	return SetReserveAnimation(ani_mode_lower,pAniSet,tick);
 }
 
-bool RVisualMesh::SetReserveAnimation(char* ani_name,int tick)
+bool RVisualMesh::SetReserveAnimation(const char* ani_name,int tick)
 {
 	return SetReserveAnimation(ani_mode_lower,ani_name,tick);
 }
@@ -2318,7 +2318,7 @@ bool RVisualMesh::SetReserveAnimation(RAniMode animode,RAnimation* pAniSet,int t
 	return true;
 }
 
-bool RVisualMesh::SetReserveAnimation(RAniMode animode,char* ani_name,int tick)
+bool RVisualMesh::SetReserveAnimation(RAniMode animode, const char* ani_name,int tick)
 {
 	if(!m_pMesh)
 		return false;
@@ -2586,7 +2586,7 @@ bool RVisualMesh::isOncePlayDone(RAniMode amode)
 	return false;
 }
 
-void RVisualMesh::SetScale(rvector& v)
+void RVisualMesh::SetScale(const rvector& v)
 {
 	m_vScale = v;
 	D3DXMatrixScaling(&m_ScaleMat,v.x,v.y,v.z);

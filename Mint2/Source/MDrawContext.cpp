@@ -32,7 +32,7 @@ MDrawContext::~MDrawContext()
 {
 }
 
-MCOLOR MDrawContext::SetBitmapColor( MCOLOR& color )
+MCOLOR MDrawContext::SetBitmapColor( const MCOLOR& color )
 {
 	m_BitmapColor = color;
 	return m_BitmapColor;
@@ -47,7 +47,7 @@ MCOLOR MDrawContext::GetBitmapColor()
 	return m_BitmapColor;
 }
 
-MCOLOR MDrawContext::SetColor(MCOLOR& color)
+MCOLOR MDrawContext::SetColor(const MCOLOR& color)
 {
 	MCOLOR temp = m_Color;
 	if (m_nOpacity != 0xFF)
@@ -70,7 +70,7 @@ MCOLOR MDrawContext::GetColor(void)
 	return m_Color;
 }
 
-MCOLOR MDrawContext::SetHighlightColor(MCOLOR& color)
+MCOLOR MDrawContext::SetHighlightColor(const MCOLOR& color)
 {
 	MCOLOR temp = m_HighlightColor;
 	if (m_nOpacity != 0xFF) 
@@ -93,7 +93,7 @@ MCOLOR MDrawContext::GetHighlightColor(void)
 	return m_HighlightColor;
 }
 
-MCOLOR MDrawContext::SetColorKey(MCOLOR& color)
+MCOLOR MDrawContext::SetColorKey(const MCOLOR& color)
 {
 	MCOLOR temp = m_ColorKey;
 	m_ColorKey = color;
@@ -163,7 +163,7 @@ void MDrawContext::Rectangle(int x, int y, int cx, int cy)
 	VLine(x+cx, y, cy);
 }
 
-void MDrawContext::Rectangle(MRECT& r)
+void MDrawContext::Rectangle(const MRECT& r)
 {
 	Rectangle(r.x, r.y, r.w, r.h);
 }
@@ -261,7 +261,7 @@ int MDrawContext::TextWithHighlight(int x, int y, const char* szText)
 	}
 }
 
-void MDrawContext::GetPositionOfAlignment(MPOINT* p, MRECT& r, const char* szText, MAlignmentMode am, bool bAndInclude)
+void MDrawContext::GetPositionOfAlignment(MPOINT* p, const MRECT& r, const char* szText, MAlignmentMode am, bool bAndInclude)
 {
 	if(m_pFont!=NULL){
 		int w;
@@ -294,14 +294,14 @@ void MDrawContext::GetPositionOfAlignment(MPOINT* p, MRECT& r, const char* szTex
 	}
 }
 
-int MDrawContext::Text(MRECT& r, const char* szText, MAlignmentMode am)
+int MDrawContext::Text(const MRECT& r, const char* szText, MAlignmentMode am)
 {
 	MPOINT p;
 	GetPositionOfAlignment(&p, r, szText, am);
 	return Text(p.x, p.y, szText);
 }
 
-int MDrawContext::TextWithHighlight(MRECT& r, const char* szText, MAlignmentMode am)
+int MDrawContext::TextWithHighlight(const MRECT& r, const char* szText, MAlignmentMode am)
 {
 	char szFront[MWIDGET_NAME_LENGTH];// = {0, };
 	char szBack[MWIDGET_NAME_LENGTH];// = {0, };
@@ -691,7 +691,7 @@ void MDrawContext::Draw(MRECT& r)
 	Draw(r.x, r.y, r.w, r.h);
 }
 
-void MDrawContext::Draw(MRECT& d, MRECT& s)
+void MDrawContext::Draw(const MRECT& d, const MRECT& s)
 {
 	Draw(d.x, d.y, d.w, d.h, s.x, s.y, s.w, s.h);
 }

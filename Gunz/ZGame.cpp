@@ -2536,7 +2536,7 @@ void ZGame::OnChangeWeapon(MUID& uid, MMatchCharItemParts parts)
 	}
 }
 
-void ZGame::OnChangeParts(MUID& uid,int partstype,int PartsID)
+void ZGame::OnChangeParts(const MUID& uid,int partstype,int PartsID)
 {
 	ZCharacter* pCharacter = m_CharacterManager.Find(uid);
 //	if (uid == ZGetGameClient()->GetUID()) pCharacter = m_pMyCharacter;
@@ -2546,7 +2546,7 @@ void ZGame::OnChangeParts(MUID& uid,int partstype,int PartsID)
 	}
 }
 
-void ZGame::OnAttack(MUID& uid,int type,rvector& pos)
+void ZGame::OnAttack(const MUID& uid,int type,rvector& pos)
 {
 	ZCharacter* pCharacter = m_CharacterManager.Find(uid);
 //	if (uid == ZGetGameClient()->GetUID()) pCharacter = m_pMyCharacter;
@@ -2557,11 +2557,11 @@ void ZGame::OnAttack(MUID& uid,int type,rvector& pos)
 	}
 }
 
-void ZGame::OnDamage(MUID& uid,MUID& tuid,int damage)
+void ZGame::OnDamage(const MUID& uid, const MUID& tuid,int damage)
 {
 }
 
-void ZGame::OnPeerShotSp(MUID& uid, float fShotTime, rvector& pos, rvector& dir,int type,MMatchCharItemParts sel_type)
+void ZGame::OnPeerShotSp(const MUID& uid, float fShotTime, const rvector& pos, const rvector& dir,int type,MMatchCharItemParts sel_type)
 {
 	ZCharacter* pOwnerCharacter = NULL;		// 총 쏜 사람
 
@@ -3930,7 +3930,7 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 }
 
 // shot 을 shot_range, shot_melee, shot_shotgun 으로 command 를 각각 분리하는것도 방법이 좋을듯.
-void ZGame::OnPeerShot(MUID& uid, float fShotTime, rvector& pos, rvector& to,MMatchCharItemParts sel_type)
+void ZGame::OnPeerShot(const MUID& uid, float fShotTime, rvector& pos, rvector& to,MMatchCharItemParts sel_type)
 {
 	ZCharacter* pOwnerCharacter = NULL;		// 총 쏜 사람
 
@@ -4014,7 +4014,7 @@ void ZGame::OnPeerShot(MUID& uid, float fShotTime, rvector& pos, rvector& to,MMa
 	}
 }
 
-void ZGame::OnPeerDie(MUID& uidVictim, MUID& uidAttacker)
+void ZGame::OnPeerDie(const MUID& uidVictim, const MUID& uidAttacker)
 {
 	ZCharacter* pVictim = m_CharacterManager.Find(uidVictim);
 	if (pVictim == NULL) return;
@@ -4324,7 +4324,7 @@ void ZGame::OnReloadComplete(ZCharacter *pCharacter)
 	return;
 }
 
-void ZGame::OnPeerSpMotion(MUID& uid,int nMotionType)
+void ZGame::OnPeerSpMotion(const MUID& uid,int nMotionType)
 {
 	ZCharacter* pCharacter = m_CharacterManager.Find(uid);
 
@@ -4346,7 +4346,7 @@ void ZGame::OnPeerSpMotion(MUID& uid,int nMotionType)
 	pCharacter->SetAnimationLower( zsl );
 }
 
-void ZGame::OnPeerReload(MUID& uid)
+void ZGame::OnPeerReload(const MUID& uid)
 {
 	ZCharacter* pCharacter = m_CharacterManager.Find(uid);
 	//	if (uid == ZGetGameClient()->GetUID()) pCharacter = m_pMyCharacter;
@@ -4369,7 +4369,7 @@ void ZGame::OnPeerReload(MUID& uid)
 	}
 }
 
-void ZGame::OnPeerChangeCharacter(MUID& uid)
+void ZGame::OnPeerChangeCharacter(const MUID& uid)
 {
 	ZCharacter* pCharacter = m_CharacterManager.Find(uid);
 
@@ -4380,39 +4380,7 @@ void ZGame::OnPeerChangeCharacter(MUID& uid)
 	pCharacter->TestToggleCharacter();
 }
 
-/*
-void ZGame::OnAssignCommander(const MUID& uidRedCommander, const MUID& uidBlueCommander)
-{
-	AssignCommander(uidRedCommander, uidBlueCommander);
-}
-
-void ZGame::AssignCommander(const MUID& uidRedCommander, const MUID& uidBlueCommander)
-{
-	ZCharacter* pRedChar = m_CharacterManager.Find(uidRedCommander);
-	ZCharacter* pBlueChar = m_CharacterManager.Find(uidBlueCommander);
-
-	if(pRedChar) {
-		ZGetEffectManager()->AddCommanderIcon(pRedChar,0);
-		pRedChar->m_bCommander = true;
-	}
-	if(pBlueChar) {
-		ZGetEffectManager()->AddCommanderIcon(pBlueChar,1);
-		pBlueChar->m_bCommander = true;
-	}
-
-#ifdef _DEBUG
-	//// DEBUG LOG ////
-	const char *szUnknown = "unknown";
-	char szBuf[128];
-	sprintf_safe(szBuf, "RedCMDER=%s , BlueCMDER=%s \n", 
-		pRedChar ? pRedChar->GetProperty()->szName : szUnknown , 
-		pBlueChar ? pBlueChar->GetProperty()->szName : szUnknown );
-	OutputDebugString(szBuf);
-	///////////////////
-#endif
-}
-*/
-void ZGame::OnSetObserver(MUID& uid)
+void ZGame::OnSetObserver(const MUID& uid)
 {
 	ZCharacter* pCharacter = m_CharacterManager.Find(uid);
 	if (pCharacter == NULL) return;
@@ -4425,7 +4393,7 @@ void ZGame::OnSetObserver(MUID& uid)
 	pCharacter->ForceDie();
 }
 
-void ZGame::OnPeerSpawn(MUID& uid, rvector& pos, rvector& dir)
+void ZGame::OnPeerSpawn(const MUID& uid, rvector& pos, rvector& dir)
 {
 	m_nSpawnTime = GetGlobalTimeMS();
 	SetSpawnRequested(false);

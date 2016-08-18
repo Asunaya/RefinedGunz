@@ -1226,7 +1226,7 @@ void ZEffectManager::AddLevelUpEffect(ZObject* pObj)
 	Add(pNew);
 }
 
-void ZEffectManager::AddReBirthEffect(rvector& Target)
+void ZEffectManager::AddReBirthEffect(const rvector& Target)
 {
 	ZEffect* pNew = NULL;
 
@@ -1247,7 +1247,8 @@ void ZEffectManager::AddLightFragment(rvector Target,rvector TargetNormal)
 	
 	else if( g_nEffectLevel == Z_VIDEO_EFFECT_NORMAL ) 
 	{
-		float fDistacneSQ = D3DXVec3LengthSq( &(g_pGame->m_pMyCharacter->GetPosition() - Target) );
+		auto vec = g_pGame->m_pMyCharacter->GetPosition() - Target;
+		float fDistacneSQ = D3DXVec3LengthSq(&vec);
 		if( fDistacneSQ > 640000 ) return;
 	}
 
@@ -1274,7 +1275,7 @@ void ZEffectManager::AddLightFragment(rvector Target,rvector TargetNormal)
 
 #pragma optimize ( "", off )
 
-void ZEffectManager::AddDashEffect(rvector& Target,rvector& TargetNormal,ZObject* pObj)
+void ZEffectManager::AddDashEffect(const rvector& Target, const rvector& TargetNormal,ZObject* pObj)
 {
 	// 디버깅중 : 뻗는타이밍에 pObj가 올바른지 알고싶다
 //	char szLastName[64];
@@ -1289,7 +1290,7 @@ void ZEffectManager::AddDashEffect(rvector& Target,rvector& TargetNormal,ZObject
 }
 #pragma optimize ( "", on)
 
-void ZEffectManager::AddSkillDashEffect(rvector& Target,rvector& TargetNormal,ZObject* pObj)
+void ZEffectManager::AddSkillDashEffect(const rvector& Target, const rvector& TargetNormal,ZObject* pObj)
 {
 	ZEffect* pNew = NULL;
 	pNew = new ZEffectDash(m_pDaggerUpper,Target,TargetNormal,pObj->GetUID());
@@ -1297,7 +1298,7 @@ void ZEffectManager::AddSkillDashEffect(rvector& Target,rvector& TargetNormal,ZO
 	Add(pNew);
 }
 
-void ZEffectManager::AddLandingEffect(rvector& Target, rvector& TargetNormal)
+void ZEffectManager::AddLandingEffect(const rvector& Target, const rvector& TargetNormal)
 {
 	// 옵션에 따라? 중급 이상만?
 	if(g_nEffectLevel > Z_VIDEO_EFFECT_NORMAL)//하급 이펙트라면 안 그린다..
@@ -1309,16 +1310,17 @@ void ZEffectManager::AddLandingEffect(rvector& Target, rvector& TargetNormal)
 
 	ZEffect* pNew = NULL;
 
-	Target.z += 5.f;
+	auto vec = Target;
+	vec.z += 5.f;
 
-	pNew = new ZEffectLandingSmoke(m_pEBSLanding, Target, 
+	pNew = new ZEffectLandingSmoke(m_pEBSLanding, vec, 
 		TargetNormal, LANDING_SMOKE_MIN_SCALE, LANDING_SMOKE_MAX_SCALE, LANDING_SMOKE_LIFE_TIME);
 
 	Add(pNew);
 
 }
 
-void ZEffectManager::AddBulletMark(rvector& Target, rvector& TargetNormal)
+void ZEffectManager::AddBulletMark(const rvector& Target, const rvector& TargetNormal)
 {
 	if(g_nEffectLevel > Z_VIDEO_EFFECT_NORMAL) return; // 하급은 생략~
 
@@ -1330,7 +1332,7 @@ void ZEffectManager::AddBulletMark(rvector& Target, rvector& TargetNormal)
 	Add(pNew);
 }
 
-void ZEffectManager::AddTrackMagic(rvector &pos)
+void ZEffectManager::AddTrackMagic(const rvector &pos)
 {
 	int Add = rand() % 10;
 	float fStartSize = 16 + Add;
@@ -1343,7 +1345,7 @@ void ZEffectManager::AddTrackMagic(rvector &pos)
 	m_BillBoardTexAniList[3].Add( pos, vel,frame, 0.f,fStartSize , fEndSize, fLife );
 }
 
-void ZEffectManager::AddTrackFire(rvector &pos)
+void ZEffectManager::AddTrackFire(const rvector &pos)
 {
 	int Add = rand() % 20;
 	float fStartSize = 10 + Add;
@@ -1354,7 +1356,7 @@ void ZEffectManager::AddTrackFire(rvector &pos)
 	m_BillBoardTexAniList[1].Add( pos, vel, 0, 0.f,fStartSize , fEndSize, fLife );
 }
 
-void ZEffectManager::AddTrackCold(rvector &pos)
+void ZEffectManager::AddTrackCold(const rvector &pos)
 {
 	int Add = rand() % 10;
 	float fStartSize = 8 + Add;
@@ -1367,7 +1369,7 @@ void ZEffectManager::AddTrackCold(rvector &pos)
 	m_BillBoardTexAniList[2].Add( pos, vel,frame, 0.f,fStartSize , fEndSize, fLife );
 }
 
-void ZEffectManager::AddTrackPoison(rvector &pos)
+void ZEffectManager::AddTrackPoison(const rvector &pos)
 {
 	int Add = rand() % 10;
 	float fStartSize = 10 + Add;
@@ -1383,7 +1385,7 @@ void ZEffectManager::AddTrackPoison(rvector &pos)
 	m_BillBoardTexAniList[2].Add( pos, vel,r_frame[frame],0.f, fStartSize , fEndSize, fLife );
 }
 
-void ZEffectManager::AddTrackMethor(rvector &pos)
+void ZEffectManager::AddTrackMethor(const rvector &pos)
 {
 	int Add = rand() % 60;
 	float fStartSize = 80 + Add;
@@ -1633,7 +1635,7 @@ void ZEffectManager::AddEnchantPoison(ZObject* pObj)
 
 */
 
-void ZEffectManager::AddShotgunEffect(rvector &pos,rvector &out,rvector &dir,ZObject* pChar )
+void ZEffectManager::AddShotgunEffect(const rvector &pos, const rvector &out, const rvector &dir,ZObject* pChar )
 {
 	ZEffect * pNew = NULL;
 
@@ -1682,7 +1684,7 @@ void ZEffectManager::AddShotgunEffect(rvector &pos,rvector &out,rvector &dir,ZOb
 	Add(pNew); pNew = NULL;
 }
 
-void ZEffectManager::AddShotEffect(rvector* pSource,int size, rvector& Target, rvector& TargetNormal, ZTargetType nTargetType,
+void ZEffectManager::AddShotEffect(rvector* pSource,int size, const rvector& Target, const rvector& TargetNormal, ZTargetType nTargetType,
 								   MMatchWeaponType wtype,ZObject* pObj,bool bDrawFireEffects,bool bDrawTargetEffects)
 {
 	// bDrawFireEffects : 발사되는쪽 이펙트
@@ -2061,7 +2063,7 @@ void ZEffectManager::AddLighteningEffect(rvector& Target)
 }
 */
 
-void ZEffectManager::AddMethorEffect(rvector& Target,int nCnt)
+void ZEffectManager::AddMethorEffect(const rvector& Target,int nCnt)
 {
 	ZEffect* pNew = NULL;
 
@@ -2101,7 +2103,7 @@ void ZEffectManager::AddMethorEffect(rvector& Target,int nCnt)
 */
 }
 
-void ZEffectManager::AddBlizzardEffect(rvector& Target,int nCnt)
+void ZEffectManager::AddBlizzardEffect(const rvector& Target,int nCnt)
 {
 	ZEffect* pNew = NULL;
 
@@ -2131,7 +2133,7 @@ void ZEffectManager::AddBlizzardEffect(rvector& Target,int nCnt)
 }
 
 
-void ZEffectManager::AddMagicEffectWall(int type,rvector& Target,rvector& vDir,DWORD start_time, float fScale)
+void ZEffectManager::AddMagicEffectWall(int type, const rvector& Target, const rvector& vDir,DWORD start_time, float fScale)
 {
 	ZEffect* pNew = NULL;
 
@@ -2191,7 +2193,7 @@ void ZEffectManager::AddWaterSplashEffect( rvector& Target, rvector& Scale  )
 	Add(pNew);
 }
 
-void ZEffectManager::AddRocketEffect(rvector& Target, rvector& TargetNormal)
+void ZEffectManager::AddRocketEffect(const rvector& Target, const rvector& TargetNormal)
 {
 	ZEffect* pNew = NULL;
 
@@ -2240,7 +2242,7 @@ bool ZEffectManager::RenderCheckEffectLevel()
 	return bRender;
 }
 // 중력없이 자기 방향으로만...
-void ZEffectManager::AddMapSmokeSTEffect(rvector& Target,rvector& dir,rvector& acc,rvector& acc2,DWORD scolor,DWORD delay,float fLife,float fStartScale,float fEndScale)
+void ZEffectManager::AddMapSmokeSTEffect(const rvector& Target, const rvector& dir, const rvector& acc, const rvector& acc2,DWORD scolor,DWORD delay,float fLife,float fStartScale,float fEndScale)
 {
 	if( !RenderCheckEffectLevel() )	return;
 	
@@ -2284,7 +2286,7 @@ void ZEffectManager::AddMapSmokeSTEffect(rvector& Target,rvector& dir,rvector& a
 	}
 }
 
-void ZEffectManager::AddMapSmokeTSEffect(rvector& Target,rvector& dir,rvector& acc,DWORD scolor,DWORD delay,float fLife,float fStartScale,float fEndScale)
+void ZEffectManager::AddMapSmokeTSEffect(const rvector& Target,const rvector& dir,const rvector& acc,DWORD scolor,DWORD delay,float fLife,float fStartScale,float fEndScale)
 {
 	if( !RenderCheckEffectLevel() )	return;
 
@@ -2322,7 +2324,7 @@ void ZEffectManager::AddMapSmokeTSEffect(rvector& Target,rvector& dir,rvector& a
 	m_BillboardLists[4].Add(Target,dir,_Acc, fStartScale, fEndScale, fLife ,tcolor,true);
 }
 
-void ZEffectManager::AddMapSmokeSSEffect(rvector& Target,rvector& dir,rvector& acc,DWORD scolor,DWORD delay,float fLife,float fStartScale,float fEndScale)
+void ZEffectManager::AddMapSmokeSSEffect(const rvector& Target, const rvector& dir, const rvector& acc,DWORD scolor,DWORD delay,float fLife,float fStartScale,float fEndScale)
 {
 	if( !RenderCheckEffectLevel() )	return;
 
@@ -2357,7 +2359,7 @@ void ZEffectManager::AddMapSmokeSSEffect(rvector& Target,rvector& dir,rvector& a
 	m_BillboardLists[4].Add(Target,dir,_Acc, fStartScale, fEndScale, fLife ,tcolor,false);
 }
 
-void ZEffectManager::AddRocketSmokeEffect(rvector& Target)
+void ZEffectManager::AddRocketSmokeEffect(const rvector& Target)
 {
 	bool bRender = true;
 
@@ -2388,7 +2390,7 @@ void ZEffectManager::AddRocketSmokeEffect(rvector& Target)
 	}
 }
 
-void ZEffectManager::AddGrenadeEffect(rvector& Target, rvector& TargetNormal)
+void ZEffectManager::AddGrenadeEffect(const rvector& Target, const rvector& TargetNormal)
 {
 	ZEffect* pNew = NULL;
 
@@ -2404,7 +2406,8 @@ void ZEffectManager::AddGrenadeEffect(rvector& Target, rvector& TargetNormal)
 	RBSPPICKINFO info;
 
 	if( ZGetGame()->GetWorld()->GetBsp()->Pick( Target, -up, &info ) ) {
-		distance = D3DXVec3LengthSq( &( Target - info.PickPos ) );
+		auto vec = Target - info.PickPos;
+		distance = D3DXVec3LengthSq(&vec);
 	}
 
 	if(distance < 150.f) {
@@ -2487,7 +2490,7 @@ void ZEffectManager::AddGrenadeEffect(rvector& Target, rvector& TargetNormal)
 }
 
 
-void ZEffectManager::AddBloodEffect(rvector& Target, rvector& TargetNormal)
+void ZEffectManager::AddBloodEffect(const rvector& Target, const rvector& TargetNormal)
 {
 	// 피 보류..
 	/*
@@ -2508,7 +2511,7 @@ void ZEffectManager::AddBloodEffect(rvector& Target, rvector& TargetNormal)
 	*/
 }
 
-void ZEffectManager::AddSlashEffect(rvector& Target, rvector& TargetNormal,int nType)
+void ZEffectManager::AddSlashEffect(const rvector& Target, const rvector& TargetNormal,int nType)
 {
 	ZEffect* pNew = NULL;
 
@@ -2592,7 +2595,7 @@ void ZEffectManager::AddSlashEffect(rvector& Target, rvector& TargetNormal,int n
 	}
 }
 
-void ZEffectManager::AddSwordUppercutDamageEffect(rvector& Target,MUID uidTarget,DWORD time)
+void ZEffectManager::AddSwordUppercutDamageEffect(const rvector& Target,MUID uidTarget,DWORD time)
 {
 	ZEffect* pNew = NULL;
 
@@ -2607,7 +2610,7 @@ void ZEffectManager::AddSwordUppercutDamageEffect(rvector& Target,MUID uidTarget
 	Add(pNew);
 }
 
-void ZEffectManager::AddEatBoxEffect(rvector& Target,ZObject* pObj)
+void ZEffectManager::AddEatBoxEffect(const rvector& Target,ZObject* pObj)
 {
 	ZEffect* pNew = NULL;
 
@@ -2624,7 +2627,7 @@ void ZEffectManager::AddEatBoxEffect(rvector& Target,ZObject* pObj)
 	Add(pNew);
 }
 
-void ZEffectManager::AddHealEffect(rvector& Target,ZObject* pObj)
+void ZEffectManager::AddHealEffect(const rvector& Target,ZObject* pObj)
 {
 	ZEffect* pNew = NULL;
 
@@ -2641,7 +2644,7 @@ void ZEffectManager::AddHealEffect(rvector& Target,ZObject* pObj)
 	Add(pNew);
 }
 
-void ZEffectManager::AddRepireEffect(rvector& Target,ZObject* pObj)
+void ZEffectManager::AddRepireEffect(const rvector& Target,ZObject* pObj)
 {
 	ZEffect* pNew = NULL;
 
@@ -2659,7 +2662,7 @@ void ZEffectManager::AddRepireEffect(rvector& Target,ZObject* pObj)
 	Add(pNew);
 }
 
-void ZEffectManager::AddExpanseAmmoEffect( rvector& Target,ZObject* pObj )
+void ZEffectManager::AddExpanseAmmoEffect(const rvector& Target,ZObject* pObj )
 {
 	ZEffect* pNew = NULL;
 
@@ -2673,7 +2676,7 @@ void ZEffectManager::AddExpanseAmmoEffect( rvector& Target,ZObject* pObj )
 	Add(pNew);
 }
 
-void ZEffectManager::AddSlashEffectWall(rvector& Target, rvector& TargetNormal,int nType)
+void ZEffectManager::AddSlashEffectWall(const rvector& Target, const rvector& TargetNormal,int nType)
 {
 	ZEffect* pNew = NULL;
 
@@ -2775,14 +2778,14 @@ void ZEffectManager::AddShadowEffect(rmatrix& m,DWORD _color)
 	m_ShadowList.Add(m,_color);
 }
 
-void ZEffectManager::AddSmokeEffect(rvector& Target )
+void ZEffectManager::AddSmokeEffect(const rvector& Target )
 {
 	rvector v = rvector( 0,0,0 );
 	ZEffect* pNew	= new ZEffectSmoke( m_pEBSSmokes[0], Target, v, 10, 3000, 50000 );
 	Add( pNew );
 }
 
-void ZEffectManager::AddSmokeEffect( ZEffectBillboardSource* pEffectBillboardSource,rvector& Pos, rvector& Velocity, rvector &Accel, float fMinScale, float fMaxScale, float fLifeTime )
+void ZEffectManager::AddSmokeEffect( ZEffectBillboardSource* pEffectBillboardSource, const rvector& Pos, const rvector& Velocity, const rvector &Accel, float fMinScale, float fMaxScale, float fLifeTime )
 {
 	m_BillboardLists[rand()%SMOKE_COUNT].Add(Pos,Velocity,Accel,fMinScale,fMaxScale,fLifeTime);
 }
@@ -2802,7 +2805,7 @@ void ZEffectManager::AddSmokeGrenadeEffect( rvector& Target  )
 	Add( pNew );
 }
 
-void ZEffectManager::AddGrenadeSmokeEffect( rvector& Target ,float min,float max,float time)
+void ZEffectManager::AddGrenadeSmokeEffect(const rvector& Target ,float min,float max,float time)
 {
 	rvector v;
 	

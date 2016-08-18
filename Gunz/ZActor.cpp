@@ -802,7 +802,7 @@ void ZActor::Stop(bool bWithAniStop)
 	if (bWithAniStop) m_Animation.Input(ZA_INPUT_WALK_DONE);
 }
 
-void ZActor::RotateTo(rvector& dir)
+void ZActor::RotateTo(const rvector& dir)
 {
 	SetDirection(dir);
 	m_Animation.Input(ZA_INPUT_ROTATE);

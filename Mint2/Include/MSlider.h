@@ -12,7 +12,7 @@ class MSliderThumbLook{
 protected:
 public:
 	virtual void OnDraw(MSliderThumb* pThumb, MDrawContext* pDC);
-	virtual MRECT GetClientRect(MSliderThumb* pThumb, MRECT& r);
+	virtual MRECT GetClientRect(MSliderThumb* pThumb, const MRECT& r);
 	virtual MSIZE GetDefaultSize(MSliderThumb* pThumb);
 public:
 	MSliderThumbLook(){};

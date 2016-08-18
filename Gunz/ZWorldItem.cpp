@@ -24,7 +24,7 @@ ZWorldItemManager ZWorldItemManager::msInstance;
 //////////////////////////////////////////////////////////////////////////
 //		ZWorldItem
 //////////////////////////////////////////////////////////////////////////
-void ZWorldItem::Initialize( int nID, short nItemID,MTD_WorldItemSubType SubType, ZWORLD_ITEM_STATE state, unsigned int nSpawnTypeFlags,  rvector& position, float fAmount )
+void ZWorldItem::Initialize( int nID, short nItemID,MTD_WorldItemSubType SubType, ZWORLD_ITEM_STATE state, unsigned int nSpawnTypeFlags, const rvector& position, float fAmount )
 {
 	m_nID				= nID;
 	m_nItemID			= nItemID;
@@ -209,7 +209,7 @@ bool ZWorldItemManager::ApplyWorldItem( WIL_Iterator& iter, ZCharacter* pCharact
 	return true;
 }
 
-ZWorldItem *ZWorldItemManager::AddWorldItem( int nID, short nItemID,MTD_WorldItemSubType nItemSubType,rvector& pos )
+ZWorldItem *ZWorldItemManager::AddWorldItem( int nID, short nItemID,MTD_WorldItemSubType nItemSubType, const rvector& pos )
 {
 	ZWorldItem* pWorldItem = NULL;
 
@@ -266,7 +266,8 @@ void ZWorldItemManager::update()
 			strcpy_safe(szName,pItem->GetName());
 			rvector charPos = pCharacter->m_Position;
 			rvector itemPos = pItem->GetPosition();
-			if( D3DXVec3Length( &(charPos - itemPos)) <= WORLD_ITEM_RADIUS )
+			auto vec = charPos - itemPos;
+			if( D3DXVec3Length(&vec) <= WORLD_ITEM_RADIUS )
 			{
 				OnOptainWorldItem(pItem);
 			}			

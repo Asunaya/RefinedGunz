@@ -110,8 +110,13 @@ private:
 
 	template <typename T>
 	bool GetCommandsImpl(T fn, ArrayView<u32>* WantedCommandIDs);
-	template <typename T = std::allocator<uint8_t>>
-	bool CreateCommandFromStream(const char* pStream, MCommand& Command, T& Alloc = T());
+	template <typename T = std::allocator<u8>>
+	bool CreateCommandFromStream(const char* pStream, MCommand& Command, T& Alloc);
+	bool CreateCommandFromStream(const char* pStream, MCommand& Command)
+	{
+		std::allocator<u8> alloc;
+		CreateCommandFromStream(pStream, Command, alloc);
+	}
 	bool FixCommand(MCommand& Command);
 	static bool CreateCommandFromStreamVersion2(const char* pStream, MCommand& Command);
 	static bool ParseVersion2Command(const char* pStream, MCommand* pCmd);

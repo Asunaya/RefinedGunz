@@ -261,7 +261,7 @@ rvector ZEffectAniMesh::GetSortPos()
 
 // ZEffectDash
 
-ZEffectDash::ZEffectDash(RMesh* pMesh, rvector& Pos, rvector& Dir,MUID uidTarget)
+ZEffectDash::ZEffectDash(RMesh* pMesh, const rvector& Pos, const rvector& Dir,MUID uidTarget)
 : ZEffectAniMesh(pMesh,Pos,Dir)
 {
 	m_uid = uidTarget;
@@ -295,7 +295,7 @@ bool ZEffectDash::Draw(unsigned long int nTime)
 
 // ZEffectLevelUp
 
-ZEffectLevelUp::ZEffectLevelUp(RMesh* pMesh, rvector& Pos, rvector& Dir,rvector& vAddPos,ZObject* pObj)
+ZEffectLevelUp::ZEffectLevelUp(RMesh* pMesh, const rvector& Pos, const rvector& Dir, const rvector& vAddPos,ZObject* pObj)
 : ZEffectAniMesh(pMesh,Pos,Dir)
 {
 	if(pObj)
@@ -324,7 +324,7 @@ bool ZEffectLevelUp::Draw(unsigned long int nTime)
 
 // ZEffectPartsTypePos
 
-ZEffectPartsTypePos::ZEffectPartsTypePos(RMesh* pMesh, rvector& Pos, rvector& Dir,rvector& vAddPos,ZObject* pObj)
+ZEffectPartsTypePos::ZEffectPartsTypePos(RMesh* pMesh, const rvector& Pos, const rvector& Dir, const rvector& vAddPos,ZObject* pObj)
 : ZEffectAniMesh(pMesh,Pos,Dir)
 {
 	if(pObj)
@@ -355,7 +355,7 @@ bool ZEffectPartsTypePos::Draw(unsigned long int nTime)
 
 // ZEffectWeaponEnchant
 
-ZEffectWeaponEnchant::ZEffectWeaponEnchant(RMesh* pMesh, rvector& Pos, rvector& Dir, ZObject* pObj)
+ZEffectWeaponEnchant::ZEffectWeaponEnchant(RMesh* pMesh, const rvector& Pos, const rvector& Dir, ZObject* pObj)
 : ZEffectAniMesh(pMesh,Pos,Dir)
 {
 	if(pObj)
@@ -427,7 +427,7 @@ bool ZEffectIcon::Draw(unsigned long int nTime)
 }
 
 
-ZEffectShot::ZEffectShot(RMesh* pMesh, rvector& Pos, rvector& Dir,ZObject* pObj) 
+ZEffectShot::ZEffectShot(RMesh* pMesh, const rvector& Pos, const rvector& Dir,ZObject* pObj)
 : ZEffectAniMesh(pMesh,Pos,Dir)
 {
 	m_nStartAddTime = 0;

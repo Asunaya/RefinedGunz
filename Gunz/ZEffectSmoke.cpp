@@ -6,7 +6,7 @@
 #include "Physics.h"
 #include "MDebug.h"
 
-ZEffectSmoke::ZEffectSmoke(ZEffectBillboardSource* pEffectBillboardSource, rvector& Pos, rvector& Velocity, float fMinScale, float fMaxScale, unsigned long int nLifeTime)
+ZEffectSmoke::ZEffectSmoke(ZEffectBillboardSource* pEffectBillboardSource, const rvector& Pos, const rvector& Velocity, float fMinScale, float fMaxScale, unsigned long int nLifeTime)
 : ZEffectBillboard(pEffectBillboardSource)
 {
 	m_nStartTime = GetGlobalTimeMS();
@@ -45,7 +45,7 @@ bool ZEffectSmoke::Draw(unsigned long int nTime)
 
 ///////////////////////////////////////////////////////////////
 
-ZEffectLandingSmoke::ZEffectLandingSmoke(ZEffectBillboardSource* pEffectBillboardSource, rvector& Pos, rvector& Normal, float fMinScale, float fMaxScale, unsigned long int nLifeTime)
+ZEffectLandingSmoke::ZEffectLandingSmoke(ZEffectBillboardSource* pEffectBillboardSource, const rvector& Pos, const rvector& Normal, float fMinScale, float fMaxScale, unsigned long int nLifeTime)
 : ZEffectBillboard(pEffectBillboardSource)
 {
 	m_nStartTime = GetGlobalTimeMS();
@@ -123,7 +123,7 @@ bool ZEffectSmokeGrenade::Draw( unsigned long int nTime )
 
 #define  CORRECTION 0.01
 
-ZEffectSmokeGrenade::ZEffectSmokeGrenade( ZEffectBillboardSource* pEffectBillboardSource, rvector& Pos, rvector& Velocity, float fMinScale, float fMaxScale, unsigned long int nLifeTime ) 
+ZEffectSmokeGrenade::ZEffectSmokeGrenade( ZEffectBillboardSource* pEffectBillboardSource, const rvector& Pos, const rvector& Velocity, float fMinScale, float fMaxScale, unsigned long int nLifeTime )
 : ZEffectBillboard(pEffectBillboardSource)
 {
 	m_nStartTime = GetGlobalTimeMS();

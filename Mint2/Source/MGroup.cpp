@@ -14,7 +14,7 @@ void MGroupLook::OnDraw(MGroup* pGroup, MDrawContext* pDC)
 	pDC->Text(r.x+2, r.y+2, pGroup->m_szName);
 }
 
-MRECT MGroupLook::GetClientRect(MGroup* pGroup, MRECT& r)
+MRECT MGroupLook::GetClientRect(MGroup* pGroup, const MRECT& r)
 {
 	return r;
 }

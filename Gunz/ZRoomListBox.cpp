@@ -579,7 +579,7 @@ const sMapInfo* ZRoomListBox::GetSelMapInfo()
 }
 
 
-void ZRoomListBox::SetPrivateStageUID(MUID& uidStage)
+void ZRoomListBox::SetPrivateStageUID(const MUID& uidStage)
 {
 	m_uidSelectedPrivateStageUID = uidStage;
 }

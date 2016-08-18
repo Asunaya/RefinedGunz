@@ -124,7 +124,7 @@ struct RSBspNode
 	RSBspNode();
 	virtual ~RSBspNode();
 
-	RSBspNode *GetLeafNode(rvector &pos);
+	RSBspNode *GetLeafNode(const rvector &pos);
 	void DrawWireFrame(int nFace, DWORD color);
 	void DrawBoundingBox(DWORD color);
 };
@@ -293,19 +293,19 @@ public:
 	int GetConvexPolygonCount() { return m_nConvexPolygon; }
 	int GetLightmapCount() { return m_nLightmap; }
 
-	bool CheckWall(rvector &origin, rvector &targetpos, float fRadius, float fHeight = 0.f,
+	bool CheckWall(const rvector &origin, rvector &targetpos, float fRadius, float fHeight = 0.f,
 		RCOLLISIONMETHOD method = RCW_CYLINDER, int nDepth = 0, rplane *pimpactplane = NULL);
 
-	bool CheckSolid(rvector &pos, float fRadius, float fHeight = 0.f, RCOLLISIONMETHOD method = RCW_CYLINDER);
+	bool CheckSolid(const rvector &pos, float fRadius, float fHeight = 0.f, RCOLLISIONMETHOD method = RCW_CYLINDER);
 
-	rvector GetFloor(rvector &origin, float fRadius, float fHeight, rplane *pimpactplane = NULL);
+	rvector GetFloor(const rvector &origin, float fRadius, float fHeight, rplane *pimpactplane = NULL);
 
 	void OnInvalidate();
 	void OnRestore();
 
-	void SetObjectLight(rvector pos);
+	void SetObjectLight(const rvector& pos);
 
-	bool GetShadowPosition(rvector& pos_, rvector& dir_, rvector* outNormal_, rvector* outPos_);
+	bool GetShadowPosition(const rvector& pos_, const rvector& dir_, rvector* outNormal_, rvector* outPos_);
 
 	auto* GetMeshManager() { return &m_MeshList; }
 
@@ -320,7 +320,7 @@ public:
 
 	void DrawSolid();
 	void DrawSolidNode();
-	void DrawColNodePolygon(rvector &pos);
+	void DrawColNodePolygon(const rvector &pos);
 
 	void DrawNavi_Polygon();
 	void DrawNavi_Links();
@@ -333,7 +333,7 @@ public:
 	FogInfo GetFogInfo() { return m_FogInfo; }
 	std::vector<AmbSndInfo>& GetAmbSndList() { return AmbSndInfoList; }
 
-	void GetNormal(int nConvexPolygon, rvector &position, rvector *normal);
+	void GetNormal(int nConvexPolygon, const rvector &position, rvector *normal);
 
 	static bool CreateShadeMap(const char *szShadeMap);
 	static void DestroyShadeMap();
@@ -357,13 +357,13 @@ private:
 	void SetDiffuseMap(int nMaterial);
 
 	bool Pick(RSBspNode *pNode, const rvector &v0, const rvector &v1, struct PickInfo&);
-	bool PickShadow(rvector &pos, rvector &to, RBSPPICKINFO *pOut);
-	bool PickShadow(RSBspNode *pNode, rvector &v0, rvector &v1, struct PickInfo&);
+	bool PickShadow(const rvector &pos, const rvector &to, RBSPPICKINFO *pOut);
+	bool PickShadow(RSBspNode *pNode, const rvector &v0, const rvector &v1, struct PickInfo&);
 
 	void ChooseNodes(RSBspNode *bspNode);
 	int ChooseNodes(RSBspNode *bspNode, rvector &center, float fRadius);
 
-	auto* GetLeafNode(rvector &pos) { return BspRoot[0].GetLeafNode(pos); }
+	auto* GetLeafNode(const rvector &pos) { return BspRoot[0].GetLeafNode(pos); }
 
 	bool ReadString(MZFile *pfile, char *buffer, int nBufferSize);
 	// Returns number of vertices, nodes and infos read, respectively, along with the numbers of polygons created. 
@@ -425,7 +425,7 @@ private:
 		std::vector<RLIGHTMAPTEXTURE*>& SourceLightmaps, std::vector<RBspLightmapManager>& LightmapList);
 
 	// Interpolated normal
-	void GetNormal(RCONVEXPOLYGONINFO *poly, rvector &position, rvector *normal, int au, int av);
+	void GetNormal(RCONVEXPOLYGONINFO *poly, const rvector &position, rvector *normal, int au, int av);
 
 	int					m_nConvexPolygon, m_nConvexVertices;
 	std::vector<v3> ConvexVertices;

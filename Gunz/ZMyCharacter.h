@@ -189,7 +189,7 @@ public:
 	virtual void InitStatus();
 	virtual void InitRound();
 	
-	virtual void SetDirection(rvector& dir);
+	virtual void SetDirection(const rvector& dir);
 	virtual void OnDamagedAnimation(ZObject *pAttacker,int type);
 
 	void OutputDebugString_CharacterState();

@@ -293,7 +293,7 @@ inline void ZPostStageState(const MUID& uidChar, const MUID& uidStage, MMatchObj
 	ZPOSTCMD3(MC_MATCH_STAGE_PLAYER_STATE, MCommandParameterUID(uidChar), MCommandParameterUID(uidStage), MCommandParameterInt(int(nStageState)));
 }
 
-inline void ZPostShot(float fShotTime,rvector &pos, rvector &to,int sel_type)
+inline void ZPostShot(float fShotTime, const rvector &pos, const rvector &to,int sel_type)
 {
 	ZPACKEDSHOTINFO info;
 	info.fTime=fShotTime;
@@ -306,7 +306,6 @@ inline void ZPostShot(float fShotTime,rvector &pos, rvector &to,int sel_type)
 	info.sel_type = sel_type;
 
 	ZPOSTCMD1(MC_PEER_SHOT, MCommandParameterBlob(&info,sizeof(ZPACKEDSHOTINFO)));
-//	ZPOSTCMD4(MC_PEER_SHOT, MCommandParameterFloat(fShotTime),MCommandParameterPos(vPos.x, vPos.y, vPos.z), MCommandParameterVector(vDir.x, vDir.y, vDir.z),MCommandParameterInt(sel_type));
 }
 
 inline void ZPostShotMelee(float fShotTime,rvector &pos, int nShot)
@@ -314,7 +313,7 @@ inline void ZPostShotMelee(float fShotTime,rvector &pos, int nShot)
 	ZPOSTCMD3(MC_PEER_SHOT_MELEE, MCommandParameterFloat(fShotTime),MCommandParameterPos(pos.x, pos.y, pos.z),MCommandParameterInt(nShot));
 }
 
-inline void ZPostNPCRangeShot(MUID uidOwner, float fShotTime,rvector &pos, rvector &to,int sel_type)
+inline void ZPostNPCRangeShot(MUID uidOwner, float fShotTime, const rvector &pos, const rvector &to, int sel_type)
 {
 	ZPACKEDSHOTINFO info;
 	info.fTime=fShotTime;

@@ -155,7 +155,7 @@ public:
 public:
 	void RunTo(rvector& dir);
 	void Stop(bool bWithAniStop=true);		// bWithAniStop이 false이면 애니메이션은 여전히 달리는 동작이다.
-	void RotateTo(rvector& dir);
+	void RotateTo(const rvector& dir);
 
 	virtual void OnBlast(rvector &dir);
 	virtual void OnBlastDagger(rvector &dir,rvector& pos);

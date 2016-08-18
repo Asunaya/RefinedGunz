@@ -330,7 +330,7 @@ protected:
 public:
 	MMatchItem();
 	virtual ~MMatchItem();
-	bool Create(MUID& uid, MMatchItemDesc* pDesc, int nCount = 1);
+	bool Create(const MUID& uid, MMatchItemDesc* pDesc, int nCount = 1);
 	void Destroy();
 
 	MUID GetUID() { return m_uidItem; }

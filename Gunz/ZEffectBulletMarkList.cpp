@@ -23,10 +23,11 @@ ZEffectBulletMarkList::ZEffectBulletMarkList(void)
 #define BULLETMART_CULL_DISTACNE_SQ_1 640000
 #define BULLETMART_CULL_DISTACNE_SQ_2 250000
 
-void ZEffectBulletMarkList::Add(rvector &pos,rvector &normal)
+void ZEffectBulletMarkList::Add(const rvector &pos, const rvector &normal)
 {
 	// Early Culling
-	float fDistanceSq = D3DXVec3LengthSq( &(g_pGame->m_pMyCharacter->GetPosition()-pos) );
+	auto vec = g_pGame->m_pMyCharacter->GetPosition() - pos;
+	float fDistanceSq = D3DXVec3LengthSq(&vec);
 	int nLevel = GetEffectLevel();
 	if( nLevel >= 1 && ( fDistanceSq > BULLETMART_CULL_DISTACNE_SQ_1 ) ) return;
 	if( nLevel == 2 && ( fDistanceSq > BULLETMART_CULL_DISTACNE_SQ_2 ) ) return;

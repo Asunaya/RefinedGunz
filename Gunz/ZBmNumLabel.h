@@ -22,7 +22,7 @@ public:
 	ZBmNumLabel(const char* szName=NULL, MWidget* pParent=NULL, MListener* pListener=NULL);
 
 	void SetLabelBitmap(MBitmap* pLabelBitmap);
-	void SetCharSize(MSIZE &size);
+	void SetCharSize(const MSIZE &size);
 	void SetNumber(int n,bool bAddComma = false);
 	void SetIndexOffset(int nOffset) { m_nIndexOffset = nOffset; }
 	void SetCharMargin( int* nMargin);

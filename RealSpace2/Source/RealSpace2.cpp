@@ -499,7 +499,7 @@ void RFlip()
 	}
 }
 
-void RDrawLine(rvector &v1,rvector &v2,DWORD dwColor)
+void RDrawLine(const rvector &v1, const rvector &v2,DWORD dwColor)
 {
 	struct LVERTEX {
 		float x, y, z;		// world position
@@ -511,7 +511,7 @@ void RDrawLine(rvector &v1,rvector &v2,DWORD dwColor)
 	HRESULT hr=RGetDevice()->DrawPrimitiveUP(D3DPT_LINELIST,1,ver,sizeof(LVERTEX));
 }
 
-rvector RGetTransformCoord(rvector &coord)
+rvector RGetTransformCoord(const rvector &coord)
 {
 	rvector ret;
 	D3DXVec3TransformCoord(&ret,&coord,&RViewProjectionViewport);

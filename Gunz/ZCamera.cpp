@@ -319,7 +319,7 @@ void ZCamera::SetMaxRecoilAngleX(float fMax)
 	m_fMaxRecoilAngleX = fMax;
 }
 
-void ZCamera::Shock(float fPower, float fDuration,rvector& vDir)
+void ZCamera::Shock(float fPower, float fDuration, const rvector& vDir)
 {
 	m_bShocked = true;
 

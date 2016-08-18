@@ -292,12 +292,12 @@ public:
 	void SetPosition(int x, int y);
 	/// Parent Widget의 Local 좌표계에서 Poition 지정하기
 	/// @param p		위치
-	void SetPosition(MPOINT& p);
+	void SetPosition(const MPOINT& p);
 	/// Parent Widget의 Local 좌표계에서 Initial Rect 지정하기
 	void SetInitialBounds(MRECT& r);
 	/// Parent Widget의 Local 좌표계에서 Rect 지정하기
 	/// @param r		Rectangle
-	void SetBounds(MRECT& r);
+	void SetBounds(const MRECT& r);
 	/// Parent Widget의 Local 좌표계에서 Rect 지정하기
 	/// @param x,y,w,h		Rectangle
 	void SetBounds(int x, int y, int w, int h);
@@ -317,7 +317,7 @@ public:
 
 	/// Screen 좌표계에서 Rect 얻어내기
 	/// @deprecated		전역 좌표계는 혼란을 가져오므로 로컬 좌표계 함수들로 대체, 전역 좌표를 알고 싶으면 MClientToScreen(),MScreenToClient()를 이용
-	MRECT GetScreenRect(void);
+	MRECT GetScreenRect(void) const;
 
 	/// 툴팁 스트링 지정
 	void AttachToolTip(const char* szToolTipString=NULL);
@@ -417,13 +417,13 @@ int RemoveAnd(char(&szRemovedFrontText)[size], char* cUnderLineChar, char* szRem
 int RemoveAnd(char* szRemovedFrontText, int maxlen, char* cUnderLineChar, char* szRemovedBackText, const char* szText);
 
 /// 로컬 위치를 전역 위치로 변환
-MPOINT MClientToScreen(MWidget* pWidget, MPOINT& p);
+MPOINT MClientToScreen(const MWidget* pWidget, const MPOINT& p);
 /// 전역 위치를 로컬 위치로 변환
-MPOINT MScreenToClient(MWidget* pWidget, MPOINT& p);
+MPOINT MScreenToClient(const MWidget* pWidget, const MPOINT& p);
 /// 로컬 영역을 전역 영역으로 변환
-MRECT MClientToScreen(MWidget* pWidget, MRECT& p);
+MRECT MClientToScreen(const MWidget* pWidget, const MRECT& p);
 /// 전역 영역을 로컬 영역으로 변환
-MRECT MScreenToClient(MWidget* pWidget, MRECT& p);
+MRECT MScreenToClient(const MWidget* pWidget, const MRECT& p);
 
 /// 현재 커서 위치 얻기
 MPOINT GetCursorPosition(void);

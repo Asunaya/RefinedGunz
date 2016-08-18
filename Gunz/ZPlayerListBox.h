@@ -341,7 +341,7 @@ public:
 	virtual void OnItemDraw2(MDrawContext* pDC, MRECT& r, MBitmap* pBitmap, bool bSelected, bool bFocus, int nAdjustWidth);
 	virtual void OnDraw(MListBox* pListBox, MDrawContext* pDC);
 
-	virtual MRECT GetClientRect(MListBox* pListBox, MRECT& r);
+	virtual MRECT GetClientRect(MListBox* pListBox, const MRECT& r);
 };
 
 class ZPlayerListBox : public MListBox

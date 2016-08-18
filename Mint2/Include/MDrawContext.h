@@ -70,16 +70,16 @@ public:
 	virtual ~MDrawContext(void);
 
 	// Color Setting
-	MCOLOR SetBitmapColor(MCOLOR& color);
+	MCOLOR SetBitmapColor(const MCOLOR& color);
 	MCOLOR SetBitmapColor(unsigned char r, unsigned char g, unsigned char b, unsigned char a=255);
 	MCOLOR GetBitmapColor(void);
-	MCOLOR SetColor(MCOLOR& color);
+	MCOLOR SetColor(const MCOLOR& color);
 	MCOLOR SetColor(unsigned char r, unsigned char g, unsigned char b, unsigned char a=255);
 	MCOLOR GetColor(void);
-	MCOLOR SetHighlightColor(MCOLOR& color);
+	MCOLOR SetHighlightColor(const MCOLOR& color);
 	MCOLOR SetHighlightColor(unsigned char r, unsigned char g, unsigned char b, unsigned char a=255);
 	MCOLOR GetHighlightColor(void);
-	MCOLOR SetColorKey(MCOLOR& color);
+	MCOLOR SetColorKey(const MCOLOR& color);
 	MCOLOR SetColorKey(unsigned char r, unsigned char g, unsigned char b, unsigned char a=255);
 	MCOLOR GetColorKey(void);
 
@@ -111,7 +111,7 @@ public:
 	virtual void VLine(int x, int y, int len) = 0;
 	virtual void Line(int sx, int sy, int ex, int ey) = 0;
 	virtual void Rectangle(int x, int y, int cx, int cy);
-	void Rectangle(MRECT& r);
+	void Rectangle(const MRECT& r);
 	virtual void FillRectangle(int x, int y, int cx, int cy) = 0;
 	void FillRectangle(const MRECT& r);
 
@@ -122,7 +122,7 @@ public:
 	void Draw(MPOINT &p);
 	void Draw(MRECT& r);
 	void Draw(int x, int y, MRECT& s);
-	virtual void Draw(MRECT& d, MRECT& s);
+	virtual void Draw(const MRECT& d, const MRECT& s);
 	virtual void DrawInverse( int x, int y, int w, int h );
 	virtual void DrawInverse( int x, int y, int w, int h, int sx, int sy, int sw, int sh) {};
 	virtual void DrawEx(int tx1, int ty1, int tx2, int ty2, 
@@ -147,9 +147,9 @@ public:
 	/// &를 고려하여 &부분을 하일라이팅
 	int TextWithHighlight(int x, int y, const char* szText);
 	/// 특정 텍스트의 정렬되었을때 시작 위치 얻기
-	void GetPositionOfAlignment(MPOINT* p, MRECT& r, const char* szText, MAlignmentMode am, bool bAndInclude=true);
-	int Text(MRECT& r, const char* szText, MAlignmentMode am=(MAM_HCENTER|MAM_VCENTER));
-	int TextWithHighlight(MRECT& r, const char* szText, MAlignmentMode am=(MAM_HCENTER|MAM_VCENTER));
+	void GetPositionOfAlignment(MPOINT* p, const MRECT& r, const char* szText, MAlignmentMode am, bool bAndInclude=true);
+	int Text(const MRECT& r, const char* szText, MAlignmentMode am=(MAM_HCENTER|MAM_VCENTER));
+	int TextWithHighlight(const MRECT& r, const char* szText, MAlignmentMode am=(MAM_HCENTER|MAM_VCENTER));
 
 	// Multiple Color Support
 	void TextMC(int x, int y, const char* szText);

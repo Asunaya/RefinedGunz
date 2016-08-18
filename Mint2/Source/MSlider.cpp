@@ -9,7 +9,7 @@ void MSliderThumbLook::OnDraw(MSliderThumb* pThumb, MDrawContext* pDC)
 	pDC->FillRectangle(pThumb->GetClientRect());
 }
 
-MRECT MSliderThumbLook::GetClientRect(MSliderThumb* pThumb, MRECT& r)
+MRECT MSliderThumbLook::GetClientRect(MSliderThumb* pThumb, const MRECT& r)
 {
 	return r;
 }

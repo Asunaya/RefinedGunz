@@ -112,7 +112,7 @@ public:
 	void RequestSelStageJoin();
 	void RequestSelPrivateStageJoin();
 	const sMapInfo* GetSelMapInfo();
-	void SetPrivateStageUID(MUID& uidStage);
+	void SetPrivateStageUID(const MUID& uidStage);
 public:
 	ZRoomListBox(const char* szName=NULL, MWidget* pParent=NULL, MListener* pListener=NULL);
 	virtual ~ZRoomListBox(void);

@@ -1053,15 +1053,14 @@ int __stdcall AhnHS_Callback(long lCode, long lParamSize, void* pParam);
 
 DWORD g_dwMainThreadID;
 
+LONG __stdcall Filter(_EXCEPTION_POINTERS*)
+{
+	return CrashExceptionDump(p, "Gunz.dmp");
+}
+
 int PASCAL WinMain(HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline, int cmdshow)
 {
-	//MessageBox(0, "hi", "hi", 0);
-
-	SetUnhandledExceptionFilter(static_cast<LONG(__stdcall *)(_EXCEPTION_POINTERS *)>(
-		[](_EXCEPTION_POINTERS *p) -> LONG {
-		return CrashExceptionDump(p, "Gunz.dmp");
-	}
-	));
+	SetUnhandledExceptionFilter(Filter);
 
 	_set_invalid_parameter_handler([](const wchar_t* expression,
 		const wchar_t* function,
@@ -1078,9 +1077,6 @@ int PASCAL WinMain(HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline, int 
 	MInitTraceMemory();
 #endif
 
-//	_CrtSetBreakAlloc(25483);
-
-	// Current Directory¸¦ ¸ÂÃá´Ù.
 	char szModuleFileName[_MAX_DIR] = {0,};
 	GetModuleFileName(NULL, szModuleFileName, _MAX_DIR);
 	PathRemoveFileSpec(szModuleFileName);

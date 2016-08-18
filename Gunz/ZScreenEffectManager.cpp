@@ -45,7 +45,7 @@ bool ZScreenEffect::IsDeleteTime()
 	return false;
 }
 
-bool ZScreenEffect::DrawCustom(unsigned long int nTime, rvector& vOffset, float fAngle)
+bool ZScreenEffect::DrawCustom(unsigned long int nTime, const rvector& vOffset, float fAngle)
 {
 	RGetDevice()->SetRenderState(D3DRS_ZENABLE, FALSE);
 	RGetDevice()->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);

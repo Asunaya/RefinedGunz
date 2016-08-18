@@ -199,7 +199,7 @@ float GetDistance(const rboundingbox &bb,const rvector &point);
 float GetArea(rvector &v1,rvector &v2,rvector &v3);
 
 // Returns the clockwise rotation of ta such that tb aligns with ta on xy
-float GetAngleOfVectors(rvector &ta,rvector &tb);
+float GetAngleOfVectors(const rvector &ta, const rvector &tb);
 
 // 원형보간된 vector.. a,b는 normalized 되어있어야함.
 __declspec(deprecated("Use Slerp instead.")) rvector InterpolatedVector(rvector &a,rvector &b,float x);

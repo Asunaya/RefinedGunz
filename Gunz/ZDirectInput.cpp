@@ -441,24 +441,21 @@ DWORD ZDirectInput::GetMouseBufferedData(int* pSumX,int* pSumY, ZDIBUFFER* pBuff
 		int nButton = -1;
 		pBuffer[nCount].bPressed = (didod[ i ].dwData & 0x80) ? true:false;
 
-		switch( didod[ i ].dwOfs )
+		if (didod[i].dwOfs == DIMOFS_X) { nSumX += (int)didod[i].dwData; continue; }
+		if (didod[i].dwOfs == DIMOFS_Y) { nSumY += (int)didod[i].dwData; continue; }
+		if (didod[i].dwOfs == DIMOFS_Z)
 		{
-
-		case DIMOFS_X:	nSumX+=(int)didod[ i ].dwData;continue;
-		case DIMOFS_Y:	nSumY+=(int)didod[ i ].dwData;continue;
-		case DIMOFS_Z:	
-			nButton = ((int)didod[ i ].dwData) > 0 ? 0 : 1;
+			nButton = ((int)didod[i].dwData) > 0 ? 0 : 1;
 			pBuffer[nCount].bPressed = true;
-			break;
-		case DIMOFS_BUTTON0: nButton = 2;break;
-		case DIMOFS_BUTTON1: nButton = 3;break;
-		case DIMOFS_BUTTON2: nButton = 4;break;
-		case DIMOFS_BUTTON3: nButton = 5;break;
-		case DIMOFS_BUTTON4: nButton = 6;break;
-		case DIMOFS_BUTTON5: nButton = 7;break;
-		case DIMOFS_BUTTON6: nButton = 8;break;
-		case DIMOFS_BUTTON7: nButton = 9;break;
 		}
+		else if (didod[i].dwOfs == DIMOFS_BUTTON0) nButton = 2;
+		else if (didod[i].dwOfs == DIMOFS_BUTTON1) nButton = 3;
+		else if (didod[i].dwOfs == DIMOFS_BUTTON2) nButton = 4;
+		else if (didod[i].dwOfs == DIMOFS_BUTTON3) nButton = 5;
+		else if (didod[i].dwOfs == DIMOFS_BUTTON4) nButton = 6;
+		else if (didod[i].dwOfs == DIMOFS_BUTTON5) nButton = 7;
+		else if (didod[i].dwOfs == DIMOFS_BUTTON6) nButton = 8;
+		else if (didod[i].dwOfs == DIMOFS_BUTTON7) nButton = 9;
 
 		pBuffer[nCount].nKey = nButton;
 		nCount++;

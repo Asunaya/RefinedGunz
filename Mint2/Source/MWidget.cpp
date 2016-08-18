@@ -922,12 +922,12 @@ void MWidget::SetPosition(int x, int y)
 
 }
 
-void MWidget::SetPosition(MPOINT& p)
+void MWidget::SetPosition(const MPOINT& p)
 {
 	SetPosition(p.x, p.y);
 }
 
-void MWidget::SetBounds(MRECT& r)
+void MWidget::SetBounds(const MRECT& r)
 {
 	SetBounds(r.x, r.y, r.w, r.h);
 }
@@ -1011,7 +1011,7 @@ MAlignmentMode MWidget::GetBoundsAlignment(void)
 }
 
 
-MRECT MWidget::GetScreenRect(void)
+MRECT MWidget::GetScreenRect(void) const
 {
 	if(m_pParent!=NULL){
 		MRECT sr = m_pParent->GetScreenRect();
@@ -1301,25 +1301,25 @@ int RemoveAnd(char* szRemovedFrontText, int maxlen, char* cUnderLineChar, char* 
 	return nPos;
 }
 
-MPOINT MClientToScreen(MWidget* pWidget, MPOINT& p)
+MPOINT MClientToScreen(const MWidget* pWidget, const MPOINT& p)
 {
 	MRECT r = pWidget->GetScreenRect();
 	return MPOINT(p.x+r.x, p.y+r.y);
 }
 
-MPOINT MScreenToClient(MWidget* pWidget, MPOINT& p)
+MPOINT MScreenToClient(const MWidget* pWidget, const MPOINT& p)
 {
 	MRECT r = pWidget->GetScreenRect();
 	return MPOINT(p.x-r.x, p.y-r.y);
 }
 
-MRECT MClientToScreen(MWidget* pWidget, MRECT& p)
+MRECT MClientToScreen(const MWidget* pWidget, const MRECT& p)
 {
 	MRECT r = pWidget->GetScreenRect();
 	return MRECT(p.x+r.x, p.y+r.y, p.w, p.h);
 }
 
-MRECT MScreenToClient(MWidget* pWidget, MRECT& p)
+MRECT MScreenToClient(const MWidget* pWidget, const MRECT& p)
 {
 	MRECT r = pWidget->GetScreenRect();
 	return MRECT(p.x-r.x, p.y-r.y, p.w, p.h);

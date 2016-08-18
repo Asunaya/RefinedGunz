@@ -104,7 +104,7 @@ void RSBspNode::DrawWireFrame(int nPolygon, DWORD color)
 	}
 }
 
-RSBspNode* RSBspNode::GetLeafNode(rvector &pos)
+RSBspNode* RSBspNode::GetLeafNode(const rvector &pos)
 {
 	if (nPolygon) return this;
 	if (plane.a*pos.x + plane.b*pos.y + plane.c*pos.z + plane.d>0)
@@ -606,7 +606,7 @@ bool RBspObject::Draw()
 	return true;
 }
 
-void RBspObject::SetObjectLight(rvector vPos)
+void RBspObject::SetObjectLight(const rvector& vPos)
 {
 	float fIntensityFirst = FLT_MIN;
 
@@ -792,7 +792,7 @@ void RBspObject::DrawOcclusions()
 }
 
 #ifndef _PUBLISH
-void RBspObject::DrawColNodePolygon(rvector &pos)
+void RBspObject::DrawColNodePolygon(const rvector &pos)
 {
 	ColRoot[0].DrawPos(pos);
 }
@@ -876,7 +876,7 @@ void RBspObject::DrawNavi_Links()
 }
 
 #else
-void RBspObject::DrawColNodePolygon(rvector &pos) {}
+void RBspObject::DrawColNodePolygon(const rvector &pos) {}
 void RBspObject::DrawCollision_Polygon() {}
 void RBspObject::DrawCollision_Solid() {}
 void RBspObject::DrawNavi_Polygon() {}
@@ -2136,7 +2136,7 @@ bool RBspObject::UpdateVertexBuffer()
 	return true;
 }
 
-void RBspObject::GetNormal(RCONVEXPOLYGONINFO *poly, rvector &position, rvector *normal, int au, int av)
+void RBspObject::GetNormal(RCONVEXPOLYGONINFO *poly, const rvector &position, rvector *normal, int au, int av)
 {
 	int nSelPolygon = -1, nSelEdge = -1;
 	float fMinDist = FLT_MAX;
@@ -2808,13 +2808,13 @@ void RBspObject::DrawSolidNode()
 #endif
 }
 
-bool RBspObject::CheckWall(rvector &origin, rvector &targetpos, float fRadius, float fHeight,
+bool RBspObject::CheckWall(const rvector &origin, rvector &targetpos, float fRadius, float fHeight,
 	RCOLLISIONMETHOD method, int nDepth, rplane *pimpactplane)
 {
 	return RSolidBspNode::CheckWall(ColRoot.data(), origin, targetpos, fRadius, fHeight, method, nDepth, pimpactplane);
 }
 
-bool RBspObject::CheckSolid(rvector &pos, float fRadius, float fHeight, RCOLLISIONMETHOD method)
+bool RBspObject::CheckSolid(const rvector &pos, float fRadius, float fHeight, RCOLLISIONMETHOD method)
 {
 	RImpactPlanes impactPlanes;
 	if (method == RCW_SPHERE)
@@ -2823,7 +2823,7 @@ bool RBspObject::CheckSolid(rvector &pos, float fRadius, float fHeight, RCOLLISI
 		return ColRoot[0].GetColPlanes_Cylinder(&impactPlanes, pos, pos, fRadius, fHeight);
 }
 
-rvector RBspObject::GetFloor(rvector &origin, float fRadius, float fHeight, rplane *pimpactplane)
+rvector RBspObject::GetFloor(const rvector &origin, float fRadius, float fHeight, rplane *pimpactplane)
 {
 	rvector targetpos = origin + rvector(0, 0, -10000);
 
@@ -2857,7 +2857,7 @@ bool RBspObject::IsVisible(rboundingbox &bb) const
 	return m_OcclusionList.IsVisible(bb);
 }
 
-bool RBspObject::GetShadowPosition(rvector& pos_, rvector& dir_, rvector* outNormal_, rvector* outPos_)
+bool RBspObject::GetShadowPosition(const rvector& pos_, const rvector& dir_, rvector* outNormal_, rvector* outPos_)
 {
 	RBSPPICKINFO pick_info;
 	if (!Pick(pos_, dir_, &pick_info))
@@ -2961,7 +2961,7 @@ bool RBspObject::PickOcTree(const rvector &pos, const rvector &dir, RBSPPICKINFO
 	return Pick(OcRoot.data(), pos, pi.To, pi);
 }
 
-bool RBspObject::PickShadow(rvector &pos, rvector &to, RBSPPICKINFO *pOut)
+bool RBspObject::PickShadow(const rvector &pos, const rvector &to, RBSPPICKINFO *pOut)
 {
 	if (BspRoot.empty()) return false;
 
@@ -3109,7 +3109,7 @@ bool RBspObject::Pick(RSBspNode *pNode, const rvector &v0, const rvector &v1, Pi
 	return false;
 }
 
-bool RBspObject::PickShadow(RSBspNode *pNode, rvector &v0, rvector &v1, PickInfo& pi)
+bool RBspObject::PickShadow(RSBspNode *pNode, const rvector &v0, const rvector &v1, PickInfo& pi)
 {
 	if (!pNode) return false;
 
@@ -3191,7 +3191,7 @@ bool RBspObject::PickShadow(RSBspNode *pNode, rvector &v0, rvector &v1, PickInfo
 	return false;
 }
 
-void RBspObject::GetNormal(int nConvexPolygon, rvector &position, rvector *normal)
+void RBspObject::GetNormal(int nConvexPolygon, const rvector &position, rvector *normal)
 {
 	RCONVEXPOLYGONINFO *poly = &ConvexPolygons[nConvexPolygon];
 	int au, av, ax;

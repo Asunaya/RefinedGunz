@@ -331,44 +331,44 @@ public:
 	bool RenderCheckEffectLevel();
 
 	void AddLevelUpEffect(ZObject* pObj);
-	void AddReBirthEffect(rvector& Target);
+	void AddReBirthEffect(const rvector& Target);
 
-	void AddLandingEffect(rvector& Target, rvector& TargetNormal);
-	void AddGrenadeEffect(rvector& Target, rvector& TargetNormal);
-	void AddRocketEffect(rvector& Target, rvector& TargetNormal);
-	void AddRocketSmokeEffect(rvector& Target);
+	void AddLandingEffect(const rvector& Target, const rvector& TargetNormal);
+	void AddGrenadeEffect(const rvector& Target, const rvector& TargetNormal);
+	void AddRocketEffect(const rvector& Target, const rvector& TargetNormal);
+	void AddRocketSmokeEffect(const rvector& Target);
 
-	void AddMapSmokeSSEffect(rvector& Target,rvector& dir,rvector& acc,DWORD color,DWORD delay,float fLife,float fStartScale,float fEndScale);
-	void AddMapSmokeSTEffect(rvector& Target,rvector& dir,rvector& acc,rvector& acc2,DWORD color,DWORD delay,float fLife,float fStartScale,float fEndScale);
-	void AddMapSmokeTSEffect(rvector& Target,rvector& dir,rvector& acc,DWORD color,DWORD delay,float fLife,float fStartScale,float fEndScale);
+	void AddMapSmokeSSEffect(const rvector& Target,const rvector& dir,const rvector& acc,DWORD color,DWORD delay,float fLife,float fStartScale,float fEndScale);
+	void AddMapSmokeSTEffect(const rvector& Target,const rvector& dir,const rvector& acc,const rvector& acc2,DWORD color,DWORD delay,float fLife,float fStartScale,float fEndScale);
+	void AddMapSmokeTSEffect(const rvector& Target,const rvector& dir,const rvector& acc,DWORD color,DWORD delay,float fLife,float fStartScale,float fEndScale);
 
-	void AddSwordDefenceEffect(const rvector& Target, const rvector& vDir);
+	void AddSwordDefenceEffect(const const rvector& Target, const const rvector& vDir);
 	void AddSwordWaveEffect(const MUID& UID, const rvector &Target, const rvector &Dir);
-	void AddSwordEnchantEffect(ZC_ENCHANT type, const rvector& Target, DWORD start_time, float fScale = 1.0f);
-	void AddMagicEffect(const rvector& Target, DWORD start_time, float fScale = 1.0f);
+	void AddSwordEnchantEffect(ZC_ENCHANT type, const const rvector& Target, DWORD start_time, float fScale = 1.0f);
+	void AddMagicEffect(const const rvector& Target, DWORD start_time, float fScale = 1.0f);
 
-//	void AddLighteningEffect(rvector& Target);
-	void AddBlizzardEffect(rvector& Target,int nCnt);
-	void AddMethorEffect(rvector& Target,int nCnt);
+//	void AddLighteningEffect(const rvector& Target);
+	void AddBlizzardEffect(const rvector& Target,int nCnt);
+	void AddMethorEffect(const const rvector& Target,int nCnt);
 
-	void AddMagicEffectWall(int type,rvector& Target,rvector& vDir,DWORD start_time, float fScale=1.0f);
+	void AddMagicEffectWall(int type,const rvector& Target,const rvector& vDir,DWORD start_time, float fScale=1.0f);
 
-	void AddSwordUppercutDamageEffect(rvector& Target,MUID uidTarget, DWORD time = 0 );
+	void AddSwordUppercutDamageEffect(const rvector& Target,MUID uidTarget, DWORD time = 0 );
 
-	void AddEatBoxEffect(rvector& Target,ZObject* pObj);
-	void AddHealEffect(rvector& Target,ZObject* pObj);
-	void AddRepireEffect(rvector& Target,ZObject* pObj);
-	void AddExpanseAmmoEffect(rvector& Target,ZObject* pObj);
+	void AddEatBoxEffect(const const rvector& Target,ZObject* pObj);
+	void AddHealEffect(const rvector& Target,ZObject* pObj);
+	void AddRepireEffect(const rvector& Target,ZObject* pObj);
+	void AddExpanseAmmoEffect(const rvector& Target,ZObject* pObj);
 
-	void AddBulletMark(rvector& Target, rvector& TargetNormal);
-	void AddShotEffect(rvector* pSource,int size,rvector& Target, rvector& TargetNormal, ZTargetType nTargetType,MMatchWeaponType wtype,ZObject* pObj,bool bDrawFireEffects,bool bDrawTargetEffects );
-	void AddShotgunEffect(rvector &pos,rvector &out,rvector &dir,ZObject* pObj);
+	void AddBulletMark(const rvector& Target, const rvector& TargetNormal);
+	void AddShotEffect(rvector* pSource,int size,const rvector& Target, const rvector& TargetNormal, ZTargetType nTargetType,MMatchWeaponType wtype,ZObject* pObj,bool bDrawFireEffects,bool bDrawTargetEffects );
+	void AddShotgunEffect(const rvector& pos,const rvector& out,const rvector& dir,ZObject* pObj);
 
-	void AddTrackFire(rvector &pos);
-	void AddTrackCold(rvector &pos);
-	void AddTrackPoison(rvector &pos);
-	void AddTrackMagic(rvector &pos);
-	void AddTrackMethor(rvector &pos);
+	void AddTrackFire(const rvector& pos);
+	void AddTrackCold(const rvector& pos);
+	void AddTrackPoison(const rvector& pos);
+	void AddTrackMagic(const rvector& pos);
+	void AddTrackMethor(const rvector& pos);
 
 //	void AddEnchantFire(ZObject* pObj);
 //	void AddEnchantCold(ZObject* pObj);
@@ -380,18 +380,18 @@ public:
 	void AddEnchantCold2(ZObject* pObj);
 	void AddEnchantPoison2(ZObject* pObj);
 
-	void AddBloodEffect(rvector& Target, rvector& TargetNormal);
-	void AddSlashEffect(rvector& Target, rvector& TargetNormal,int nType);
-	void AddSlashEffectWall(rvector& Target, rvector& TargetNormal,int nType);
+	void AddBloodEffect(const rvector& Target, const rvector& TargetNormal);
+	void AddSlashEffect(const rvector& Target, const rvector& TargetNormal,int nType);
+	void AddSlashEffectWall(const rvector& Target, const rvector& TargetNormal,int nType);
 	void AddLightFragment(rvector Target,rvector TargetNormal);
 
-	void AddDashEffect(rvector& Target,rvector& TargetNormal,ZObject* pObj);
-	void AddSkillDashEffect(rvector& Target,rvector& TargetNormal,ZObject* pObj);
+	void AddDashEffect(const rvector& Target,const rvector& TargetNormal,ZObject* pObj);
+	void AddSkillDashEffect(const rvector& Target,const rvector& TargetNormal,ZObject* pObj);
 
-	void AddSmokeEffect( rvector& Target );
-	void AddSmokeEffect( ZEffectBillboardSource* pEffectBillboardSource,rvector& Pos, rvector& Velocity, rvector& Accel, float fMinScale, float fMaxScale, float fLifeTime);
+	void AddSmokeEffect( const rvector& Target );
+	void AddSmokeEffect( ZEffectBillboardSource* pEffectBillboardSource, const rvector& Pos, const rvector& Velocity, const rvector& Accel, float fMinScale, float fMaxScale, float fLifeTime);
 	void AddSmokeGrenadeEffect( rvector& Target );
-	void AddGrenadeSmokeEffect( rvector& Target ,float min,float max,float time);
+	void AddGrenadeSmokeEffect(const rvector& Target ,float min,float max,float time);
 
 	void AddWaterSplashEffect( rvector& Target, rvector& Scale );
 	void AddWorldItemEatenEffect( rvector& pos );

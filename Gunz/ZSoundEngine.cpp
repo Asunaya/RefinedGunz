@@ -899,7 +899,7 @@ int ZSoundEngine::PlaySound(const char* Name, const rvector& pos, bool bHero, bo
 	return PlaySE( pFS, pos, priority, bHero, bLoop );	
 }
 
-void ZSoundEngine::PlaySoundElseDefault(char* Name,char* NameDefault,rvector& pos,bool bHero,bool bLoop, DWORD dwDelay ) 
+void ZSoundEngine::PlaySoundElseDefault(const char* Name, const char* NameDefault, const rvector& pos,bool bHero,bool bLoop, DWORD dwDelay )
 {
 	if( !m_bSoundEnable )	return;
  	if( !m_b3DSoundUpdate ) return;
@@ -1377,7 +1377,8 @@ void ZSoundEngine::SetAmbientSoundBox( char* Name, rvector& pos1, rvector& pos2,
 	m_AmbientSoundList.push_back(AS);
 	if(!b2d) 
 	{
-		float length = D3DXVec3Length(&rvector(AS.dx, AS.dy, AS.dz));
+		auto vec = rvector(AS.dx, AS.dy, AS.dz);
+		float length = D3DXVec3Length(&vec);
 		FSOUND_Sample_SetMinMaxDistance( AS.pSS->pFS, length * 0.1f, length );
 	}
 }
@@ -1483,7 +1484,8 @@ float ZSoundEngine::GetArea( rvector& Pos, AmbSound& a )
 		if( lengthsq <= sacred ) return 1;
 		return (radiussq - lengthsq)/(radiussq-sacred);
 		//*/
- 		float length = D3DXVec3Length(&(a.center - Pos));
+		auto vec = a.center - Pos;
+ 		float length = D3DXVec3Length(&vec);
 		float radius = a.radius;
 		if( length >= radius ) return -1;
 		float sacred = radius*((a.type&AS_2D)?AS_TA_ATTENUATION_RATIO_SQ:AS_TB_ATTENUATION_RATIO_SQ); // 감쇄 없는 거리
@@ -1623,7 +1625,8 @@ void ZSoundEngine::PlayNPCSound(MQUEST_NPC nNPC, MQUEST_NPC_SOUND nSound, rvecto
 // 컬링 여부 결정
 bool ZSoundEngine::CheckCulling(const char* szName, SoundSource* pSS, const rvector& vSoundPos, bool bHero, int* pnoutPriority)
 {
-	float fDistSq = D3DXVec3LengthSq(&(vSoundPos-m_ListenerPos));
+	auto vec = vSoundPos - m_ListenerPos;
+	float fDistSq = D3DXVec3LengthSq(&vec);
 
 	if(!bHero) // 2d사운드의 경우 컬링하지 않음
 	{

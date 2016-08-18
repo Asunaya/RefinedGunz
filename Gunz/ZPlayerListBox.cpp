@@ -59,7 +59,7 @@ void ZPlayerListBoxLook::OnItemDraw2(MDrawContext* pDC, MRECT& r, MBitmap* pBitm
 	pDC->SetClipRect(rtemp);
 }
 
-MRECT ZPlayerListBoxLook::GetClientRect(MListBox* pListBox, MRECT& r)
+MRECT ZPlayerListBoxLook::GetClientRect(MListBox* pListBox, const MRECT& r)
 {
 	return r;
 }

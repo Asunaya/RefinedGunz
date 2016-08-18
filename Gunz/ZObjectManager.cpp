@@ -320,9 +320,8 @@ ZObject* ZObjectManager::Pick( rvector& pos, float Radius )
 	{
 		pObject	= iter->second;
 
-		float temp =  D3DXVec3Length(&(pObject->GetPosition() - pos));
-
-		if( D3DXVec3Length(&(pObject->GetPosition() - pos)) < best_dist )
+		auto vec = pObject->GetPosition() - pos;
+		if( D3DXVec3Length(&vec) < best_dist )
 		{
 			pPickObject	= pObject;
 		}

@@ -51,7 +51,7 @@ void MPanelLook::OnDraw(MPanel* pPanel, MDrawContext* pDC)
 	if (pPanel->GetBorderStyle() == MBS_SINGLE) OnFrameDraw(pPanel, pDC);
 }
 
-MRECT MPanelLook::GetClientRect(MPanel* pLabel, MRECT& r)
+MRECT MPanelLook::GetClientRect(MPanel* pLabel, const MRECT& r)
 {
 	return r;
 }

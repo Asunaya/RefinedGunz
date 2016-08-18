@@ -237,24 +237,24 @@ public:
 	// Animation
 
 	bool SetAnimation(RAnimation* pAniSet,bool b=false);
-	bool SetAnimation(char* ani_name,bool b=false);
+	bool SetAnimation(const char* ani_name,bool b=false);
 	bool SetAnimation(RAniMode animode,RAnimation* pAniSet,bool b=false);
-	bool SetAnimation(RAniMode animode,char* ani_name,bool b=false);
+	bool SetAnimation(RAniMode animode, const char* ani_name,bool b=false);
 
 	bool SetBlendAnimation(RAnimation* pAniSet,float blend_time=0.5f,bool b=false);
-	bool SetBlendAnimation(char* ani_name,float blend_time=0.5f,bool b=false);
+	bool SetBlendAnimation(const char* ani_name,float blend_time=0.5f,bool b=false);
 	bool SetBlendAnimation(RAniMode animode,RAnimation* pAniSet,float blend_time=0.5f,bool b=false);
-	bool SetBlendAnimation(RAniMode animode,char* ani_name,float blend_time=0.5f,bool b=false);
+	bool SetBlendAnimation(RAniMode animode, const char* ani_name,float blend_time=0.5f,bool b=false);
 
 	bool SetNextAnimation(RAnimation* pAniSet);					
-	bool SetNextAnimation(char* ani_name);
+	bool SetNextAnimation(const char* ani_name);
 	bool SetNextAnimation(RAniMode animode,RAnimation* pAniSet);
-	bool SetNextAnimation(RAniMode animode,char* ani_name);
+	bool SetNextAnimation(RAniMode animode, const char* ani_name);
 
 	bool SetReserveAnimation(RAnimation* pAniSet,int tick);
-	bool SetReserveAnimation(char* ani_name,int tick);
+	bool SetReserveAnimation(const char* ani_name,int tick);
 	bool SetReserveAnimation(RAniMode animode,RAnimation* pAniSet,int tick);
-	bool SetReserveAnimation(RAniMode animode,char* ani_name,int tick);
+	bool SetReserveAnimation(RAniMode animode, const char* ani_name,int tick);
 
 	void ClearAnimation();
 	void ClearFrame();
@@ -271,7 +271,7 @@ public:
 
 	bool isOncePlayDone(RAniMode amode = ani_mode_lower);
 
-	void SetScale(rvector& v);
+	void SetScale(const rvector& v);
 	void ClearScale();
 
 	// weapon

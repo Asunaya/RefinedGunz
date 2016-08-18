@@ -53,7 +53,7 @@ protected:
 	bool Pick( rvector& o, rvector& d, rvector* pPos );
 	bool RenderReflectionSurface();
 	bool RenderUnderWater();
-	void Ripple( rvector& pos, int iAmplitude, float fFrequency );
+	void Ripple(const rvector& pos, int iAmplitude, float fFrequency);
 
 public:
 	ZWater(void);
@@ -76,7 +76,7 @@ public:
 	static void OnRestore();	
 	static bool SetSurface(bool b);
 	void Clear();
-	bool CheckSpearing( rvector& o, rvector& e, int iPower, float fArea, bool bPlaySound = true );
+	bool CheckSpearing(const rvector& o, const rvector& e, int iPower, float fArea, bool bPlaySound = true );
 	bool Pick( rvector& o, rvector& d, rvector* pPos );
 	ZWater*	Get( int iIndex );	
 

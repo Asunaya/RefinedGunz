@@ -14,7 +14,7 @@ protected:
 public:
 	
 	virtual void OnDraw(MPanel* pLabel, MDrawContext* pDC);
-	virtual MRECT GetClientRect(MPanel* pLabel, MRECT& r);
+	virtual MRECT GetClientRect(MPanel* pLabel, const MRECT& r);
 };
 
 /// Panel의 주위에 그리는 선 타입

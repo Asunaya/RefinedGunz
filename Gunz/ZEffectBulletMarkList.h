@@ -17,7 +17,7 @@ class ZEffectBulletMarkList : public ZEffectBase
 public:
 	ZEffectBulletMarkList(void);
 
-	void Add(rvector &pos,rvector &normal);
+	void Add(const rvector &pos, const rvector &normal);
 
 	virtual void BeginState();
 	virtual void Update(float fElapsed);

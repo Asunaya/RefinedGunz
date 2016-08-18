@@ -470,7 +470,7 @@ rvector checkwallorigin;
 rvector checkwalldir;
 
 // 무언가에 걸려서 1case 혹은 2case 로 오면 이 펑션으로 들어온다
-bool RSolidBspNode::CheckWall2(RSolidBspNode *pRootNode,RImpactPlanes &impactPlanes,rvector &origin,rvector &targetpos,float fRadius,float fHeight,RCOLLISIONMETHOD method)
+bool RSolidBspNode::CheckWall2(RSolidBspNode *pRootNode,RImpactPlanes &impactPlanes, const rvector &origin, rvector &targetpos,float fRadius,float fHeight,RCOLLISIONMETHOD method)
 {
 	checkwallorigin=origin;
 
@@ -622,7 +622,7 @@ bool g_bchecktest=false;
 rvector g_checkdebug;
 
 // origin 에서 targetpos 로 이동하는데 미끄러짐을 감안해서 targetpos 를 조절해서 리턴해준다.
-bool RSolidBspNode::CheckWall(RSolidBspNode *pRootNode,rvector &origin,rvector &targetpos,float fRadius,float fHeight,RCOLLISIONMETHOD method,int nDepth,rplane *pimpactplane)
+bool RSolidBspNode::CheckWall(RSolidBspNode *pRootNode, const rvector &origin,rvector &targetpos,float fRadius,float fHeight,RCOLLISIONMETHOD method,int nDepth,rplane *pimpactplane)
 {
 	checkwallorigin=origin;
 	checkwalldir=targetpos-origin;

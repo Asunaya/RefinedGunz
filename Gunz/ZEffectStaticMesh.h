@@ -51,7 +51,7 @@ class ZEffectStaticMesh : public ZEffectMesh , public CMemPoolSm<ZEffectStaticMe
 protected:
 	MUID	m_uid;
 public:
-	ZEffectStaticMesh(RMesh* pMesh, rvector& Pos, rvector& Velocity, MUID uid );
+	ZEffectStaticMesh(RMesh* pMesh, const rvector& Pos, const rvector& Velocity, MUID uid );
 	virtual bool Draw(unsigned long int nTime);
 
 };

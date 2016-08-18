@@ -25,7 +25,7 @@ public:
 	virtual bool Draw(unsigned long int nTime);
 	virtual void Update();
 	virtual bool IsDeleteTime();
-	bool DrawCustom(unsigned long int nTime, rvector& offset, float fAngle=0.0f);
+	bool DrawCustom(unsigned long int nTime, const rvector& offset, float fAngle=0.0f);
 	RealSpace2::RVisualMesh *GetVMesh() { return &m_VMesh; }
 	void SetOffset(rvector& offset) { m_Offset = offset; }
 };

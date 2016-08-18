@@ -91,7 +91,7 @@ public:
 //	ZObserverLookMode GetLookType() { return m_nLookType; }
 	ZCharacter* GetTargetCharacter() { return m_pTargetCharacter; }
 
-	void SetFreeLookTarget(rvector& tar) { m_FreeLookTarget = tar; }
+	void SetFreeLookTarget(const rvector& tar) { m_FreeLookTarget = tar; }
 	rvector* GetFreeLookTarget() { return &m_FreeLookTarget; }
 
 	void NextLookMode();

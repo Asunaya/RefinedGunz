@@ -664,7 +664,7 @@ MMatchItem::~MMatchItem()
 
 }
 
-bool MMatchItem::Create(MUID& uid, MMatchItemDesc* pDesc, int nCount)
+bool MMatchItem::Create(const MUID& uid, MMatchItemDesc* pDesc, int nCount)
 {
 	m_uidItem = uid;
 	m_nCount = nCount;

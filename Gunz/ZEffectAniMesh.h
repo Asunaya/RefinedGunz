@@ -64,13 +64,13 @@ public:
 
 class ZEffectDash : public ZEffectAniMesh , public CMemPoolSm<ZEffectDash> {
 public:
-	ZEffectDash(RMesh* pMesh, rvector& Pos, rvector& Dir,MUID uidTarget);
+	ZEffectDash(RMesh* pMesh, const rvector& Pos, const rvector& Dir,MUID uidTarget);
 	virtual bool Draw(unsigned long int nTime);
 };
 
 class ZEffectLevelUp : public ZEffectAniMesh , public CMemPoolSm<ZEffectLevelUp> {
 public:
-	ZEffectLevelUp(RMesh* pMesh, rvector& Pos, rvector& Dir,rvector& AddPos,ZObject* pObj);
+	ZEffectLevelUp(RMesh* pMesh, const rvector& Pos, const rvector& Dir, const rvector& AddPos,ZObject* pObj);
 	virtual bool Draw(unsigned long int nTime);
 
 	RMeshPartsPosInfoType m_type;
@@ -79,7 +79,7 @@ public:
 
 class ZEffectPartsTypePos : public ZEffectAniMesh , public CMemPoolSm<ZEffectPartsTypePos> {
 public:
-	ZEffectPartsTypePos(RMesh* pMesh, rvector& Pos, rvector& Dir,rvector& AddPos,ZObject* pObj);
+	ZEffectPartsTypePos(RMesh* pMesh, const rvector& Pos, const rvector& Dir, const rvector& AddPos,ZObject* pObj);
 	virtual bool Draw(unsigned long int nTime);
 
 	RMeshPartsPosInfoType m_type;
@@ -88,7 +88,7 @@ public:
 
 class ZEffectWeaponEnchant : public ZEffectAniMesh , public CMemPoolSm<ZEffectWeaponEnchant> {
 public:
-	ZEffectWeaponEnchant(RMesh* pMesh, rvector& Pos, rvector& Dir, ZObject* pObj);
+	ZEffectWeaponEnchant(RMesh* pMesh, const rvector& Pos, const rvector& Dir, ZObject* pObj);
 	virtual bool Draw(unsigned long int nTime);
 
 };
@@ -102,7 +102,7 @@ public:
 
 class ZEffectShot : public ZEffectAniMesh , public CMemPoolSm<ZEffectShot> {
 public:
-	ZEffectShot(RMesh* pMesh, rvector& Pos, rvector& Dir,ZObject* pObj);
+	ZEffectShot(RMesh* pMesh, const rvector& Pos, const rvector& Dir,ZObject* pObj);
 	virtual bool Draw(unsigned long int nTime);
 
 	void SetStartTime(DWORD _time) {

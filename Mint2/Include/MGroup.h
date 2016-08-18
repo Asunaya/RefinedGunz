@@ -8,7 +8,7 @@ class MGroup;
 class MGroupLook{
 public:
 	virtual void OnDraw(MGroup* pGroup, MDrawContext* pDC);
-	virtual MRECT GetClientRect(MGroup* pGroup, MRECT& r);
+	virtual MRECT GetClientRect(MGroup* pGroup, const MRECT& r);
 };
 
 class MGroup : public MWidget{

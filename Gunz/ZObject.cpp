@@ -27,7 +27,7 @@ ZObject::~ZObject()
 }
 
 
-void ZObject::SetPosition(rvector& pos)
+void ZObject::SetPosition(const rvector& pos)
 {
 	m_Position = pos;
 }
@@ -92,7 +92,7 @@ bool ZObject::GetHistory(rvector *pos,rvector *direction,float fTime)
 	return true;
 }
 
-void ZObject::SetDirection(rvector& dir)
+void ZObject::SetDirection(const rvector& dir)
 {
 	m_Direction = dir;
 }

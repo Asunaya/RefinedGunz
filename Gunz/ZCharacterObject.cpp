@@ -376,7 +376,8 @@ void ZCharacterObject::Draw_SetLight(rvector& vPosition)
 			RBSPPICKINFO info;
 			if( ZGetGame()->GetWorld()->GetBsp()->Pick( char_pos, sunDir, &info,RM_FLAG_ADDITIVE  ) )
 			{
-				if( distance > D3DXVec3LengthSq(&( char_pos - info.PickPos )) )
+				auto vec = char_pos - info.PickPos;
+				if( distance > D3DXVec3LengthSq(&vec) )
 				{
 					continue;
 				}

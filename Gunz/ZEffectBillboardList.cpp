@@ -191,7 +191,7 @@ ZEffectBillboardList::ZEffectBillboardList()
 	m_bUseRocketSmokeColor = false;
 }
 
-ZEFFECTBILLBOARDITEM * ZEffectBillboardList::Add(rvector &pos,rvector &velocity,rvector &accel,float fStartSize,float fEndSize,float fLifeTime,DWORD color,bool bTrainSmoke)
+ZEFFECTBILLBOARDITEM * ZEffectBillboardList::Add(const rvector &pos, const rvector &velocity, const rvector &accel,float fStartSize,float fEndSize,float fLifeTime,DWORD color,bool bTrainSmoke)
 {
 	ZEFFECTBILLBOARDITEM *pNewItem = new ZEFFECTBILLBOARDITEM;
 
@@ -551,7 +551,7 @@ ZEffectBillboardTexAniList::ZEffectBillboardTexAniList()
 	m_nRenderMode = ZEDM_ADD;
 }
 
-void ZEffectBillboardTexAniList::Add(rvector &pos, rvector& vel,int frame,float fAddTime,float fStartSize,float fEndSize,float fLifeTime,
+void ZEffectBillboardTexAniList::Add(const rvector &pos, const rvector& vel,int frame,float fAddTime,float fStartSize,float fEndSize,float fLifeTime,
 									 ZCharacter* pChar,RMeshPartsPosInfoType partstype)
 {
 	ZEFFECTBILLBOARDTEXANIITEM *pNewItem = new ZEFFECTBILLBOARDTEXANIITEM;

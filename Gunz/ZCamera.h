@@ -61,7 +61,7 @@ public:
 	float	m_fShockStartTime;
 	float	m_fShockPower,m_fShockDuration;
 
-	void Shock(float fPower, float fDuration,rvector& vDir);
+	void Shock(float fPower, float fDuration, const rvector& vDir);
 	void StopShock();
 	void Init();
 

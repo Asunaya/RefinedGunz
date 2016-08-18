@@ -87,7 +87,7 @@ public:
 
 					aChild.GetContents(szContents);
 
-					m_StringMap.insert( map<_T, string>::value_type(CID, string(szContents)) );
+					m_StringMap.insert(typename map<_T, string>::value_type(CID, string(szContents)));
 				}
 			}
 		}
@@ -178,7 +178,7 @@ public:
 
 	const char* GetStr( const _T& code )
 	{
-		map<_T, string>::iterator it = m_StringMap.find( code );
+		typename std::map<_T, string>::iterator it = m_StringMap.find( code );
 		if( m_StringMap.end() == it ){
 			// _ASSERT( 0 );			// 해당 문자열은 존재하지 않는다.
 			static char *szBlahBlah = "nomsg";
