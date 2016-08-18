@@ -173,7 +173,7 @@ void RSolidBspNode::DrawSolidPolygonNormal()
 
 }
 
-void RSolidBspNode::DrawPos(rvector &pos)
+void RSolidBspNode::DrawPos(const rvector &pos)
 {
 	if(nPolygon) {
 		if((GetGlobalTimeMS()/500) %2 == 0) {
@@ -207,7 +207,7 @@ void RSolidBspNode::DrawPos(rvector &pos)
 	}
 }
 
-void RSolidBspNode::DrawPlaneVertices(rplane &plane)
+void RSolidBspNode::DrawPlaneVertices(const rplane &plane)
 {
 	if(nPolygon) {
 		if((GetGlobalTimeMS()/500) %2 == 0) {

@@ -122,13 +122,6 @@ LRESULT FAR PASCAL WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
     // Handle messages
     switch (message)
     {
-
-#ifndef _PUBLISH
-		case WM_SYSCHAR:
-			if(wParam==VK_RETURN)
-				RFrame_ToggleFullScreen();
-			return 0;
-#endif
 		case WM_SYSCOMMAND:
 			{
 				switch (wParam)

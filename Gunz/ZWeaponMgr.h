@@ -38,7 +38,7 @@ public:
 	void Clear();
 	void AddGrenade(const rvector& pos,const rvector& velocity,ZObject* pC);
 	void AddRocket(const rvector& pos,const rvector& dir,ZObject* pC);
-	void AddMagic(ZSkill* pSkill, const const rvector& pos, const const rvector& dir,ZObject* pOwner);
+	void AddMagic(ZSkill* pSkill, const rvector& pos, const rvector& dir,ZObject* pOwner);
 	void AddFlashBang(const rvector& pos,const rvector& dir,ZObject* pC);
 	void AddSmokeGrenade(const rvector& pos,const rvector& velocity,ZObject* pC);
 

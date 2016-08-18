@@ -340,19 +340,19 @@ public:
 	void AddMapSmokeSTEffect(const rvector& Target,const rvector& dir,const rvector& acc,const rvector& acc2,DWORD color,DWORD delay,float fLife,float fStartScale,float fEndScale);
 	void AddMapSmokeTSEffect(const rvector& Target,const rvector& dir,const rvector& acc,DWORD color,DWORD delay,float fLife,float fStartScale,float fEndScale);
 
-	void AddSwordDefenceEffect(const const rvector& Target, const const rvector& vDir);
+	void AddSwordDefenceEffect(const rvector& Target, const rvector& vDir);
 	void AddSwordWaveEffect(const MUID& UID, const rvector &Target, const rvector &Dir);
-	void AddSwordEnchantEffect(ZC_ENCHANT type, const const rvector& Target, DWORD start_time, float fScale = 1.0f);
-	void AddMagicEffect(const const rvector& Target, DWORD start_time, float fScale = 1.0f);
+	void AddSwordEnchantEffect(ZC_ENCHANT type, const rvector& Target, DWORD start_time, float fScale = 1.0f);
+	void AddMagicEffect(const rvector& Target, DWORD start_time, float fScale = 1.0f);
 
 	void AddBlizzardEffect(const rvector& Target,int nCnt);
-	void AddMethorEffect(const const rvector& Target,int nCnt);
+	void AddMethorEffect(const rvector& Target,int nCnt);
 
 	void AddMagicEffectWall(int type,const rvector& Target,const rvector& vDir,DWORD start_time, float fScale=1.0f);
 
 	void AddSwordUppercutDamageEffect(const rvector& Target,MUID uidTarget, DWORD time = 0 );
 
-	void AddEatBoxEffect(const const rvector& Target,ZObject* pObj);
+	void AddEatBoxEffect(const rvector& Target,ZObject* pObj);
 	void AddHealEffect(const rvector& Target,ZObject* pObj);
 	void AddRepireEffect(const rvector& Target,ZObject* pObj);
 	void AddExpanseAmmoEffect(const rvector& Target,ZObject* pObj);

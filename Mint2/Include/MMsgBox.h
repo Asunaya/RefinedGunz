@@ -45,7 +45,6 @@ public:
 	const char* GetMessage(void);
 	virtual void SetText(const char* szText);
 	virtual const char* GetText(void);
-	void SetTextColor(MCOLOR Color) { m_pMessage->SetTextColor(Color); }
 
 #define MINT_MSGBOX	"MsgBox"
 	virtual const char* GetClassName(void){ return MINT_MSGBOX; }

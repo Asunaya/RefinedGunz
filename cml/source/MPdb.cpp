@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#include "stdafx.h"
 #include "MPdb.h"
 #include <stdio.h>
 #pragma warning(push)

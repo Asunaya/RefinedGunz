@@ -69,8 +69,8 @@ public:
 	void DrawSolidPolygonWireframe();
 	void DrawSolidPolygonNormal();
 
-	void DrawPos(rvector &pos);
-	void DrawPlaneVertices(rplane &plane);
+	void DrawPos(const rvector &pos);
+	void DrawPlaneVertices(const rplane &plane);
 	void ConstructBoundingBox();
 #endif
 };
