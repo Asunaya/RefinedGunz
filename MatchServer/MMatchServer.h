@@ -712,9 +712,8 @@ public:
 	void OnVoiceChat(const MUID& Player, unsigned char* EncodedFrame, int Length);
 
 	void OnTunnelledP2PCommand(const MUID& Sender, const MUID& Receiver, const char* Blob, size_t BlobSize);
-	//void PickHistory(MMatchObject& Exception, u32 Time, rvector &origin, rvector &to, MMatchStage& Stage, struct MPICKINFO& pickinfo);
+	void OnPeerShot(MMatchObject& SenderObj, MMatchStage& Stage, const struct ZPACKEDSHOTINFO& psi);
 
-//	void ResponseObjectUpdate(MUID& TargetUID, MObject* pObject);
 	void ResponseBridgePeer(const MUID& uidChar, int nCode);
 	void ResponseRoundState(const MUID& uidStage);
 	void ResponseRoundState(MMatchObject* pObj, const MUID& uidStage);

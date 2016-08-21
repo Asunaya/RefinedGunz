@@ -330,7 +330,10 @@ void MMatchObject::GetPositions(v3* Head, v3* Foot, double Time) const
 		return ItemDesc;
 	};
 
-	BasicInfoHistory.GetPositions(Head, Foot, nullptr, Time, GetItemDesc, m_pCharInfo->m_nSex, !IsAlive());
+	BasicInfoHistoryManager::Info Info;
+	BasicInfoHistory.GetInfo(Info, Time, GetItemDesc, m_pCharInfo->m_nSex, !IsAlive());
+	if (Head) *Head = Info.Head;
+	if (Foot) *Foot = Info.Origin;
 }
 
 void MMatchObject::SetMaxHPAP()

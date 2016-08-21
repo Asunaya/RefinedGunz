@@ -7,6 +7,186 @@
 #include "MMatchTransDataType.h"
 #include <cstdarg>
 
+
+//
+// SQLiteError
+//
+
+class SQLiteError : public std::runtime_error
+{
+public:
+	SQLiteError(int err_code) : err_code(err_code), std::runtime_error("") {}
+	SQLiteError(int err_code, const char* err_msg) : err_code(err_code), std::runtime_error(err_msg) {}
+	SQLiteError(int err_code, const std::string& err_msg) : err_code(err_code), std::runtime_error(err_msg) {}
+
+	auto GetErrorCode() const { return err_code; }
+
+private:
+	int err_code;
+};
+
+
+//
+// BindParameter
+//
+
+template <typename T, typename = void>
+struct BindFunctionMap;
+
+template <> struct BindFunctionMap<int> { static constexpr auto function = sqlite3_bind_int; };
+template <> struct BindFunctionMap<int64_t> { static constexpr auto function = sqlite3_bind_int64; };
+template <> struct BindFunctionMap<long> : BindFunctionMap<int> {};
+template <> struct BindFunctionMap<unsigned int> : BindFunctionMap<int> {};
+template <> struct BindFunctionMap<unsigned long> : BindFunctionMap<int> {};
+template <> struct BindFunctionMap<unsigned long long> : BindFunctionMap<int64_t> {};
+
+inline void BindParameter(sqlite3_stmt* stmt, int ParamNum) { }
+
+template <typename... Args, typename T>
+std::enable_if_t<!std::is_enum<T>::value> BindParameter(sqlite3_stmt* stmt, int ParamNum, T Value, Args&&... args)
+{
+	BindFunctionMap<T>::function(stmt, ParamNum, Value);
+	BindParameter(stmt, ParamNum + 1, std::forward<Args>(args)...);
+}
+
+template <typename... Args, typename T>
+std::enable_if_t<std::is_enum<T>::value> BindParameter(sqlite3_stmt* stmt, int ParamNum, T Value, Args&&... args)
+{
+	sqlite3_bind_int(stmt, ParamNum, static_cast<int>(Value));
+	BindParameter(stmt, ParamNum + 1, std::forward<Args>(args)...);
+}
+
+template <typename... Args>
+void BindParameter(sqlite3_stmt* stmt, int ParamNum, const char *Value, Args&&... args)
+{
+	sqlite3_bind_text(stmt, ParamNum, Value, -1, [](void*) {});
+	BindParameter(stmt, ParamNum + 1, std::forward<Args>(args)...);
+}
+
+struct StringView
+{
+	const char* Ptr;
+	size_t Size;
+};
+
+template <typename... Args>
+void BindParameter(sqlite3_stmt* stmt, int ParamNum, const StringView& Value, Args&&... args)
+{
+	sqlite3_bind_text(stmt, ParamNum, Value.Ptr, Value.Size, [](void*) {});
+	BindParameter(stmt, ParamNum + 1, std::forward<Args>(args)...);
+}
+
+struct Blob
+{
+	const void* Ptr;
+	size_t Size;
+};
+
+template <typename... Args>
+void BindParameter(sqlite3_stmt* stmt, int ParamNum, const Blob& Value, Args&&... args)
+{
+	sqlite3_bind_blob(stmt, ParamNum, Value.Ptr, Value.Size, [](void*) {});
+	BindParameter(stmt, ParamNum + 1, std::forward<Args>(args)...);
+}
+
+
+//
+// SQLiteStatement
+//
+
+class SQLiteStatement
+{
+public:
+	SQLiteStatement()
+		: stmt(nullptr), bHasRow(false)
+	{ }
+	SQLiteStatement(sqlite3_stmt* stmt)
+		: stmt(stmt), bHasRow(false)
+	{ }
+
+	~SQLiteStatement()
+	{
+		Reset();
+	}
+
+	SQLiteStatement(const SQLiteStatement&) = delete;
+	SQLiteStatement& operator=(const SQLiteStatement&) = delete;
+
+	SQLiteStatement(SQLiteStatement&& src)
+		: stmt(nullptr), col(0)
+	{
+		Move(std::move(src));
+	}
+	SQLiteStatement& operator=(SQLiteStatement&& src)
+	{
+		Move(std::move(src));
+		return *this;
+	}
+
+	operator sqlite3_stmt*() { return stmt; }
+
+	template <typename T>
+	T Get(int Column);
+
+	template <typename T>
+	T Get()
+	{
+		auto ret = Get<T>(col);
+		col++;
+		return ret;
+	}
+
+	template <typename T>
+	T Get(const char* ColumnName)
+	{
+		for (int i = 1; i <= Columns(); i++)
+		{
+			if (strcmp(ColumnName, sqlite3_column_name(stmt, i)))
+				continue;
+
+			return Get<T>(i);
+		}
+	}
+
+	bool IsNull(int Column)
+	{
+		return sqlite3_column_type(stmt, Column) == SQLITE_NULL;
+	}
+
+	bool IsNull() { return IsNull(col); }
+
+	sqlite3_stmt*& GetStatement() { return stmt; }
+
+	int Columns() { return sqlite3_data_count(stmt); }
+	int ExpectedColumns() { return sqlite3_column_count(stmt); }
+
+	int Step();
+
+	bool HasRow() const { return bHasRow; }
+
+	int NextColumn() { col++; return col; }
+
+private:
+	void Move(SQLiteStatement&& src)
+	{
+		Reset();
+		stmt = src.stmt;
+		col = src.col;
+		bHasRow = src.bHasRow;
+		src.stmt = nullptr;
+	}
+
+	void Reset()
+	{
+		if (stmt)
+			sqlite3_reset(stmt);
+	}
+
+	sqlite3_stmt* stmt = nullptr;
+	int col = 0;
+	bool bHasRow = false;
+};
+
 template <>
 int SQLiteStatement::Get<int>(int Column)
 {
@@ -31,20 +211,83 @@ Blob SQLiteStatement::Get<Blob>(int Column)
 	return ret;
 }
 
+int SQLiteStatement::Step()
+{
+	auto ret = sqlite3_step(stmt);
+	bHasRow = ret == SQLITE_ROW;
+	if (ret != SQLITE_ROW && ret != SQLITE_DONE)
+		throw SQLiteError(ret);
+	col = 0;
+	return ret;
+}
+
+template <size_t size>
+SQLiteDatabase::SQLiteStatementPtr SQLiteDatabase::PrepareStatement(const char(&sql)[size])
+{
+	SQLiteDatabase::SQLiteStatementPtr stmt;
+	const char* tail = nullptr;
+
+	sqlite3_stmt* temp_ptr = nullptr;
+	auto err_code = sqlite3_prepare_v2(sqlite.get(), sql, size, &temp_ptr, &tail);
+	if (err_code != SQLITE_OK)
+		throw SQLiteError(err_code, std::string("Prepare threw ") + std::to_string(err_code) + ": "
+			+ sqlite3_errmsg(sqlite.get()) + " on " + sql);
+
+	stmt = decltype(stmt)(temp_ptr);
+
+	return stmt;
+}
+
+template <size_t size, typename... Args>
+SQLiteStatement SQLiteDatabase::ExecuteSQL(const char(&sql)[size], Args&&... args)
+{
+	auto it = PreparedStatements.find(sql);
+	if (it == PreparedStatements.end())
+		it = PreparedStatements.emplace(sql, PrepareStatement(sql)).first;
+
+	auto stmt = SQLiteStatement{ it->second.get() };
+
+	BindParameter(stmt, 1, std::forward<Args>(args)...);
+	auto err_code = stmt.Step();
+	if (err_code != SQLITE_DONE && err_code != SQLITE_ROW)
+		throw SQLiteError(err_code, sqlite3_errmsg(sqlite.get()));
+
+	return stmt;
+}
+
 struct ItemBlob
 {
 	int32_t CIIDs[MMCIP_END];
 	int32_t ItemIDs[MMCIP_END];
 };
 
-SQLiteDatabase::SQLiteDatabase()
-	: sqlite("GunzDB.sq3")
+
+//
+// SQLiteDatabase definitions
+//
+
+static void OpenSQLite(sqlite3* sqlite, const char* Filename, int Timeout)
 {
-	sqlite3_busy_timeout(sqlite, 5000);
+	auto err_code = sqlite3_open(Filename, &sqlite);
+	if (err_code != SQLITE_OK)
+	{
+		auto err_msg = std::string("sqlite3_open failed: error code: ")
+			+ std::to_string(err_code) + ", error message: " + sqlite3_errmsg(sqlite);
+		MLog("%s\n", err_msg.c_str());
+		throw std::runtime_error(std::move(err_msg));
+	}
+
+	sqlite3_busy_timeout(sqlite, Timeout);
+}
+
+SQLiteDatabase::SQLiteDatabase()
+{
+	OpenSQLite(sqlite.get(), "GunzDB.sq3", 5000);
+
 	auto exec = [&](const char* sql)
 	{
 		char *err_msg = nullptr;
-		auto err_code = sqlite3_exec(sqlite, sql, nullptr, nullptr, &err_msg);
+		auto err_code = sqlite3_exec(sqlite.get(), sql, nullptr, nullptr, &err_msg);
 		if (err_code != SQLITE_OK && err_msg)
 			Log("Error during database construction: error code %d, error message: %s\n", err_code, err_msg);
 	};
@@ -153,7 +396,7 @@ void SQLiteDatabase::HandleException(const SQLiteError & e)
 
 SQLiteDatabase::Transaction SQLiteDatabase::BeginTransaction()
 {
-	ASSERT(!InTransaction);
+	assert(!InTransaction);
 	ExecuteSQL("BEGIN TRANSACTION");
 	InTransaction = true;
 	return Transaction(*this);
@@ -161,14 +404,14 @@ SQLiteDatabase::Transaction SQLiteDatabase::BeginTransaction()
 
 void SQLiteDatabase::RollbackTransaction()
 {
-	ASSERT(InTransaction);
+	assert(InTransaction);
 	ExecuteSQL("ROLLBACK TRANSACTION");
 	InTransaction = false;
 }
 
 void SQLiteDatabase::CommitTransaction()
 {
-	ASSERT(InTransaction);
+	assert(InTransaction);
 	ExecuteSQL("COMMIT TRANSACTION");
 	InTransaction = false;
 }
@@ -177,11 +420,11 @@ void SQLiteDatabase::Log(const char * Format, ...)
 {
 	va_list va;
 	va_start(va, Format);
-	char buffer[512] = { 0 };
+	char buffer[512];
 	vsprintf_safe(buffer, Format, va);
 	va_end(va);
 
-	MGetMatchServer()->Log(MMatchServer::LOG_ALL, buffer);
+	MLog("%s", buffer);
 }
 
 bool SQLiteDatabase::GetLoginInfo(const char * UserID, unsigned int * outAID, char * outPassword, size_t maxlen)
@@ -310,17 +553,13 @@ try
 		0, 0, 0, date('now'), 0, 0)",
 		AID, NewName, CharIndex, Sex, Hair, Face);
 
-	auto CID = sqlite3_last_insert_rowid(sqlite);
+	auto CID = sqlite3_last_insert_rowid(sqlite.get());
 
-	std::pair<int, int> GenderedCostume[2][2] = { { { MMCIP_CHEST, 21001 },{ MMCIP_LEGS, 23001 }},
+	std::pair<int, int> Clothes[2][2] = { { { MMCIP_CHEST, 21001 },{ MMCIP_LEGS, 23001 }},
 	{{ MMCIP_CHEST, 21501 },{ MMCIP_LEGS, 23501 }} };
-	std::pair<int, int> UnisexCostume[] = { { MMCIP_MELEE, 2 }, { MMCIP_PRIMARY, 5002 } };
+	std::pair<int, int> Weapons[] = { { MMCIP_MELEE, 2 }, { MMCIP_PRIMARY, 5002 } };
 
-	ItemBlob Items;
-	for (auto& e : Items.ItemIDs)
-		e = 0;
-	for (auto& e : Items.CIIDs)
-		e = 0;
+	ItemBlob Items{};
 
 	auto SetItem = [&](auto& Parts)
 	{
@@ -328,13 +567,13 @@ try
 		auto ItemID = Parts.second;
 		Items.ItemIDs[Index] = ItemID;
 		ExecuteSQL("INSERT INTO CharacterItem (CID, ItemID) VALUES (?, ?)", CID, ItemID);
-		auto CIID = static_cast<i32>(sqlite3_last_insert_rowid(sqlite));
+		auto CIID = static_cast<i32>(sqlite3_last_insert_rowid(sqlite.get()));
 		Items.CIIDs[Index] = CIID;
 	};
 
-	for (auto& Pair : GenderedCostume[Sex])
+	for (auto& Pair : Clothes[Sex])
 		SetItem(Pair);
-	for (auto& Pair : UnisexCostume)
+	for (auto& Pair : Weapons)
 		SetItem(Pair);
 
 	ExecuteSQL("UPDATE Character SET Items = ? WHERE AID = ? AND CID = ?",
@@ -463,8 +702,7 @@ try
 	}
 	else
 	{
-		for (auto& e : outCharInfo->szClanName)
-			e = 0;
+		std::fill(std::begin(outCharInfo->szClanName), std::end(outCharInfo->szClanName), 0);
 
 		stmt.NextColumn();
 	}
@@ -700,8 +938,6 @@ catch (const SQLiteError& e)
 	HandleException(e);
 	return false;
 }
-
-#define RENT_MINUTE_PERIOD_UNLIMITED	(525600)	// 클라이언트한테는 기간제 아이템 기간을 minute단위로 보낸다. 525600이면 무제한(1년)
 
 bool SQLiteDatabase::GetCharItemInfo(MMatchCharInfo& CharInfo)
 try
@@ -1281,7 +1517,7 @@ catch (const SQLiteError& e)
 bool SQLiteDatabase::UpdateClanGrade(int CLID, int MemberCID, int ClanGrade)
 try
 {
-	ExecuteSQL("UPDATE ClanMember SET Grade = ? WHERE CLID = ? AND CID = @CID", ClanGrade, CLID, MemberCID);
+	ExecuteSQL("UPDATE ClanMember SET Grade = ? WHERE CLID = ? AND CID = ?", ClanGrade, CLID, MemberCID);
 	return true;
 }
 catch (const SQLiteError& e)
@@ -1322,7 +1558,8 @@ catch (const SQLiteError& e)
 bool SQLiteDatabase::GetClanInfo(int CLID, MDB_ClanInfo * outClanInfo)
 try
 {
-	auto stmt = ExecuteSQL("SELECT cl.Name AS Name, cl.TotalPoint AS TotalPoint, cl.Level AS Level, cl.Ranking AS Ranking, \
+	auto stmt = ExecuteSQL("SELECT cl.Name AS Name, cl.TotalPoint AS TotalPoint, \
+		cl.Level AS Level, cl.Ranking AS Ranking, \
 		cl.Point AS Point, cl.Wins AS Wins, cl.Losses AS Losses, cl.Draws AS Draws, \
 		c.Name AS ClanMaster, \
 		(SELECT COUNT(*) FROM ClanMember WHERE CLID = ?1) AS MemberCount, \
@@ -1355,7 +1592,8 @@ catch (const SQLiteError& e)
 bool SQLiteDatabase::UpdateCharClanContPoint(int CID, int CLID, int AddedContPoint)
 try
 {
-	ExecuteSQL("UPDATE ClanMember SET ContPoint = ContPoint + ? WHERE CID = ? AND CLID = ?", AddedContPoint, CID, CLID);
+	ExecuteSQL("UPDATE ClanMember SET ContPoint = ContPoint + ? WHERE CID = ? AND CLID = ?",
+		AddedContPoint, CID, CLID);
 
 	return true;
 }
@@ -1414,9 +1652,12 @@ bool SQLiteDatabase::WinTheClanGame(int WinnerCLID, int LoserCLID, bool IsDrawGa
 
 	auto Trans = BeginTransaction();
 
-	ExecuteSQL("UPDATE Clan SET Wins = Wins + 1, Point = Point + ?1, TotalPoint = TotalPoint + ?1 WHERE CLID = ?2", WinnerPoint, WinnerCLID);
-	ExecuteSQL("UPDATE Clan SET Losses = Losses + 1, Point = max(0, Point + ?) WHERE CLID = ?", LoserPoint, LoserCLID);
-	ExecuteSQL("INSERT INTO ClanGameLog(WinnerCLID, LoserCLID, WinnerClanName, LoserClanName, RoundWins, RoundLosses, \
+	ExecuteSQL("UPDATE Clan SET Wins = Wins + 1, Point = Point + ?1, TotalPoint = TotalPoint + ?1 \
+		WHERE CLID = ?2", WinnerPoint, WinnerCLID);
+	ExecuteSQL("UPDATE Clan SET Losses = Losses + 1, Point = max(0, Point + ?) WHERE CLID = ?",
+		LoserPoint, LoserCLID);
+	ExecuteSQL("INSERT INTO ClanGameLog(WinnerCLID, LoserCLID, WinnerClanName, LoserClanName, \
+		RoundWins, RoundLosses, \
 		MapID, GameType, RegDate, WinnerMembers, LoserMembers, WinnerPoint, LoserPoint) \
 		VALUES(?, ?, ?, ?, ?, ?, \
 		?, ?, date('now'), ?, ?, ?, ?)",

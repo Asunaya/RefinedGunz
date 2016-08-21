@@ -81,8 +81,8 @@ void MMatchServer::OnMatchLogin(MUID CommUID, const char* szUserID, const unsign
 	int nMapID = 0;
 
 	unsigned int nAID = 0;
-	char szDBPassword[256] = "";
-	string strCountryCode3;
+	char szDBPassword[256]{};
+	std::string strCountryCode3;
 
 	bool bFreeLoginIP = false;
 
@@ -94,29 +94,16 @@ void MMatchServer::OnMatchLogin(MUID CommUID, const char* szUserID, const unsign
 		return;
 	}
 
-	// 프로토콜, 최대인원 체크
 	if (!CheckOnLoginPre(CommUID, nCommandVersion, bFreeLoginIP, strCountryCode3)) return;
 
-
-	// 원래 계정은 넷마블에 있으므로 해당 계정이 없으면 새로 생성한다. 
 	if (!GetDBMgr()->GetLoginInfo(szUserID, &nAID, szDBPassword))
 	{
-//#ifdef _DEBUG
-//		GetDBMgr()->CreateAccount(szUserID, szPassword, 0, szUserID, 20, 1);
-//		strcpy_safe(szDBPassword, szPassword);
-//
-//		GetDBMgr()->GetLoginInfo(szUserID, &nAID, szDBPassword);
-//#endif
-
-		/*MCommand* pCmd = CreateCmdMatchResponseLoginFailed(CommUID, MERR_CLIENT_WRONG_PASSWORD);
-		Post(pCmd);*/
 		char buf[128];
 		sprintf_safe(buf, "Couldn't find username %s", szUserID);
 		NotifyFailedLogin(CommUID, buf);
 
 		return;
 	}
-
 
 	MCommObject* pCommObj = (MCommObject*)m_CommRefCache.GetRef(CommUID);
 	if (pCommObj)
@@ -129,16 +116,6 @@ void MMatchServer::OnMatchLogin(MUID CommUID, const char* szUserID, const unsign
 
 	}
 
-
-	// 패스워드가 틀렸을 경우 처리
-	/*if (strcmp(szDBPassword, szPassword))
-	{
-		MCommand* pCmd = CreateCmdMatchResponseLoginFailed(CommUID, MERR_CLIENT_WRONG_PASSWORD);
-		Post(pCmd);	
-
-		return;
-	}*/
-
 	if (crypto_pwhash_scryptsalsa208sha256_str_verify
 		(szDBPassword, (char *)HashedPassword, HashLength) != 0) {
 		MCommand* pCmd = CreateCmdMatchResponseLoginFailed(CommUID, MERR_CLIENT_WRONG_PASSWORD);
@@ -150,13 +127,11 @@ void MMatchServer::OnMatchLogin(MUID CommUID, const char* szUserID, const unsign
 	if (!GetDBMgr()->GetAccountInfo(nAID, &accountInfo))
 	{
 		NotifyFailedLogin(CommUID, "Failed to retrieve account information");
-		// 접속 끊어버리자
 		Disconnect(CommUID);
 		return;
 	}
 
 #ifndef _DEBUG
-	// 중복 로그인이면 이전에 있던 사람을 끊어버린다.
 	MMatchObject* pCopyObj = GetPlayerByAID(accountInfo.m_nAID);
 	if (pCopyObj != NULL) 
 	{
@@ -164,7 +139,6 @@ void MMatchServer::OnMatchLogin(MUID CommUID, const char* szUserID, const unsign
 	}
 #endif
 
-	// 사용정지 계정인지 확인한다.
 	if ((accountInfo.m_nUGrade == MMUG_BLOCKED) || (accountInfo.m_nUGrade == MMUG_PENALTY))
 	{
 		MCommand* pCmd = CreateCmdMatchResponseLoginFailed(CommUID, MERR_CLIENT_MMUG_BLOCKED);
@@ -172,7 +146,6 @@ void MMatchServer::OnMatchLogin(MUID CommUID, const char* szUserID, const unsign
 		return;
 	}
 
-	// 로그인성공하여 오브젝트(MMatchObject) 생성
 	AddObjectOnMatchLogin(CommUID, &accountInfo, bFreeLoginIP, strCountryCode3, nChecksumPack);
 }
 
@@ -238,13 +211,10 @@ void MMatchServer::OnMatchLoginFromNetmarble(const MUID& CommUID, const char* sz
 	MCommObject* pCommObj = (MCommObject*)m_CommRefCache.GetRef(CommUID);
 	if (pCommObj == NULL) return;
 
-
 	bool bFreeLoginIP = false;
-	string strCountryCode3;
+	std::string strCountryCode3;
 
-	// 프로토콜, 최대인원 체크
 	if (!CheckOnLoginPre(CommUID, nCmdVersion, bFreeLoginIP, strCountryCode3)) return;
-
 
 	MMatchAuthBuilder* pAuthBuilder = GetAuthBuilder();
 	if (pAuthBuilder == NULL) {
@@ -503,34 +473,9 @@ bool MMatchServer::AddObjectOnMatchLogin(const MUID& uidComm,
 												   pObj->GetHShieldInfo()->m_pbyGuidReqMsg);
 	Post(pCmd);	
 
-	// 접속 로그를 남긴다.
-	//GetDBMgr()->InsertConnLog(pObj->GetAccountInfo()->m_nAID, pObj->GetIPString(), pObj->GetCountryCode3() );
-
-	// 접속 로그
 	MAsyncDBJob_InsertConnLog* pNewJob = new MAsyncDBJob_InsertConnLog();
 	pNewJob->Input(pObj->GetAccountInfo()->m_nAID, pObj->GetIPString(), pObj->GetCountryCode3() );
 	PostAsyncJob(pNewJob);
-
-	// Client DataFile Checksum을 검사한다.
-	// 2006.2.20 dubble. filelist checksum으로 변경
-	//unsigned long nChecksum = nChecksumPack ^ uidComm.High ^ uidComm.Low;
-	//if( MGetServerConfig()->IsUseFileCrc() && !MMatchAntiHack::CheckClientFileListCRC(nChecksum, pObj->GetUID()) && 
-	//	!MGetServerConfig()->IsDebugLoginIPList(pObj->GetIPString()) )
-	//{
-	//	LOG(LOG_ALL, "Invalid filelist crc (%u) , UserID(%s) ", nChecksum, pObj->GetAccountInfo()->m_szUserID);
-	//	pObj->SetBadFileCRCDisconnectWaitInfo();
-	//	// Disconnect(uidComm);
-	//	// return false;
-
-	//	
-	//}
-	/*
-	if (nChecksum != GetItemFileChecksum()) {
-		LOG(LOG_ALL, "Invalid ZItemChecksum(%u) , UserID(%s) ", nChecksum, pObj->GetAccountInfo()->m_szUserID);
-		Disconnect(uidComm);
-		return false;
-	}
-	*/
 
 	return true;
 }

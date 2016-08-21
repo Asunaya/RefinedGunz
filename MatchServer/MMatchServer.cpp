@@ -1124,153 +1124,8 @@ void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Recei
 		break;
 		case MC_PEER_SHOT:
 		{
-			if (!SenderObj->IsAlive())
-				return;
-
 			ZPACKEDSHOTINFO& psi = *(ZPACKEDSHOTINFO*)(Blob + 2 + 2 + 1 + 4);
-
-			v3 src = v3(psi.posx, psi.posy, psi.posz);
-			v3 dest = v3(psi.tox, psi.toy, psi.toz);
-			v3 orig_dir = dest - src;
-			Normalize(orig_dir);
-
-			//AnnounceF(Sender, "Shot! %f, %f, %f -> %f, %f, %f", src.x, src.y, src.z, dest.x, dest.y, dest.z);
-
-			auto Time = double(GetGlobalClockCount() - SenderObj->GetPing()) / 1000;
-
-			auto Slot = SenderObj->GetSelectedSlot();
-
-			auto Item = SenderObj->GetCharInfo()->m_EquipedItem.GetItem(Slot);
-			if (!Item)
-				return;
-
-			auto ItemDesc = Item->GetDesc();
-			if (!ItemDesc)
-				return;
-
-			auto Damage = ItemDesc->m_nDamage;
-
-			auto DamagePlayer = [&](auto& Obj, auto Damage, auto PiercingRatio, auto DamageType, auto WeaponType)
-			{
-				Obj.OnDamaged(*SenderObj, { 0, 0, 0 }, DamageType, WeaponType, Damage, PiercingRatio);
-			};
-
-			if (ItemDesc->m_nWeaponType == MWT_SHOTGUN)
-			{
-				struct DamageInfo
-				{
-					int Damage = 0;
-					float PiercingRatio = 0;
-					ZDAMAGETYPE DamageType;
-					MMatchWeaponType WeaponType;
-				};
-
-				auto DirGen = GetShotgunPelletDirGenerator(orig_dir, reinterpret<u32>(psi.fTime));
-
-				std::unordered_map<MMatchObject*, DamageInfo> DamageMap;
-
-				for (int i = 0; i < SHOTGUN_BULLET_COUNT; i++)
-				{
-					auto dir = DirGen();
-					auto dest = src + dir * 10000;
-
-					const u32 PassFlag = RM_FLAG_ADDITIVE | RM_FLAG_HIDE | RM_FLAG_PASSROCKET | RM_FLAG_PASSBULLET;
-
-					MPICKINFO pickinfo;
-					PickHistory(SenderObj, src, dest, Stage->BspObject,
-						pickinfo, MakePairValueAdapter(Stage->m_ObjUIDCaches), Time, PassFlag);
-
-					if (pickinfo.bBspPicked)
-					{
-						/*AnnounceF(Sender, "Server: Hit wall at %d, %d, %d",
-							(int)pickinfo.bpi.PickPos.x, (int)pickinfo.bpi.PickPos.y,
-							(int)pickinfo.bpi.PickPos.z);*/
-						continue;
-					}
-
-					if (!pickinfo.pObject)
-					{
-						if (SenderObj->ClientSettings.DebugOutput)
-							AnnounceF(Sender, "Server: No wall, no object");
-						continue;
-					}
-
-					float PiercingRatio = GetPiercingRatio(ItemDesc->m_nWeaponType, pickinfo.info.parts);
-
-					auto& item = DamageMap[pickinfo.pObject];
-
-					int NewDamage = item.Damage + Damage;
-					if (PiercingRatio != item.PiercingRatio)
-						item.PiercingRatio = (item.Damage * item.PiercingRatio + Damage * PiercingRatio)
-						/ NewDamage;
-					item.Damage += Damage;
-					auto DamageType = (pickinfo.info.parts == eq_parts_head) ? ZD_BULLET_HEADSHOT : ZD_BULLET;
-					static_assert(ZD_BULLET_HEADSHOT > ZD_BULLET, "Fix me");
-					item.DamageType = max(item.DamageType, DamageType);
-					item.WeaponType = ItemDesc->m_nWeaponType;
-				}
-
-				for (auto& item : DamageMap)
-				{
-					DamagePlayer(*item.first,
-						item.second.Damage, item.second.PiercingRatio,
-						item.second.DamageType, item.second.WeaponType);
-
-					if (SenderObj->ClientSettings.DebugOutput)
-					{
-						AnnounceF(Sender, "Server: Hit %s for %d damage",
-							item.first->GetName(), item.second.Damage);
-						v3 Head, Origin;
-						SenderObj->GetPositions(&Head, &Origin, Time);
-						AnnounceF(Sender, "Server: Head: %d, %d, %d; origin: %d, %d, %d",
-							int(Head.x), int(Head.y), int(Head.z),
-							int(Origin.x), int(Origin.y), int(Origin.z));
-					}
-				}
-			}
-			else
-			{
-				/*AnnounceF(Sender, "%s: ping = %d, abs time = %X\nHead: %f, %f, %f; foot: %f, %f, %f",
-				Obj.GetName(), Obj.GetPing(), GetGlobalClockCount() - Obj.GetPing(),
-					Head.x, Head.y, Head.z, Root.x, Root.y, Root.z);*/
-
-				const u32 PassFlag = RM_FLAG_ADDITIVE | RM_FLAG_HIDE | RM_FLAG_PASSROCKET | RM_FLAG_PASSBULLET;
-
-				MPICKINFO pickinfo;
-				PickHistory(SenderObj, src, dest, Stage->BspObject, pickinfo,
-					MakePairValueAdapter(Stage->m_ObjUIDCaches), Time, PassFlag);
-
-				if (pickinfo.bBspPicked)
-				{
-					/*AnnounceF(Sender, "Server: Hit wall at %d, %d, %d",
-						(int)pickinfo.bpi.PickPos.x, (int)pickinfo.bpi.PickPos.y,
-						(int)pickinfo.bpi.PickPos.z);*/
-					return;
-				}
-
-				if (!pickinfo.pObject)
-				{
-					if (SenderObj->ClientSettings.DebugOutput)
-						AnnounceF(Sender, "Server: No wall, no object");
-					return;
-				}
-
-				float PiercingRatio = GetPiercingRatio(ItemDesc->m_nWeaponType, pickinfo.info.parts);
-				auto DamageType = (pickinfo.info.parts == eq_parts_head) ? ZD_BULLET_HEADSHOT : ZD_BULLET;
-				auto WeaponType = ItemDesc->m_nWeaponType;
-
-				if (SenderObj->ClientSettings.DebugOutput)
-				{
-					AnnounceF(Sender, "Server: Hit %s for %d damage", pickinfo.pObject->GetName(), Damage);
-					v3 Head, Origin;
-					SenderObj->GetPositions(&Head, &Origin, Time);
-					AnnounceF(Sender, "Server: Head: %d, %d, %d; origin: %d, %d, %d",
-						int(Head.x), int(Head.y), int(Head.z),
-						int(Origin.x), int(Origin.y), int(Origin.z));
-				}
-
-				DamagePlayer(*pickinfo.pObject, Damage, PiercingRatio, DamageType, WeaponType);
-			}
+			OnPeerShot(*SenderObj, *Stage, psi);
 		}
 		break;
 		case MC_PEER_SHOT_SP:
@@ -1329,11 +1184,154 @@ void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Recei
 	//LogF(LOG_ALL, "P2P Command! Sender = %X:%X, receiver = %X:%X, command ID = %X", Sender.High, Sender.Low, Receiver.High, Receiver.Low, ID);
 }
 
+void MMatchServer::OnPeerShot(MMatchObject& SenderObj, MMatchStage& Stage, const ZPACKEDSHOTINFO& psi)
+{
+	if (!SenderObj.IsAlive())
+		return;
+
+	auto&& SenderUID = SenderObj.GetUID();
+
+	v3 src = v3(psi.posx, psi.posy, psi.posz);
+	v3 dest = v3(psi.tox, psi.toy, psi.toz);
+	v3 orig_dir = dest - src;
+	Normalize(orig_dir);
+
+	//AnnounceF(Sender, "Shot! %f, %f, %f -> %f, %f, %f", src.x, src.y, src.z, dest.x, dest.y, dest.z);
+
+	auto Time = double(GetGlobalClockCount() - SenderObj.GetPing()) / 1000;
+
+	auto Slot = SenderObj.GetSelectedSlot();
+
+	auto Item = SenderObj.GetCharInfo()->m_EquipedItem.GetItem(Slot);
+	if (!Item)
+		return;
+
+	auto ItemDesc = Item->GetDesc();
+	if (!ItemDesc)
+		return;
+
+	auto Damage = ItemDesc->m_nDamage;
+
+	auto DamagePlayer = [&](auto& Obj, auto Damage, auto PiercingRatio, auto DamageType, auto WeaponType)
+	{
+		Obj.OnDamaged(SenderObj, { 0, 0, 0 }, DamageType, WeaponType, Damage, PiercingRatio);
+	};
+
+	if (ItemDesc->m_nWeaponType == MWT_SHOTGUN)
+	{
+		struct DamageInfo
+		{
+			int Damage = 0;
+			float PiercingRatio = 0;
+			ZDAMAGETYPE DamageType;
+			MMatchWeaponType WeaponType;
+		};
+
+		auto DirGen = GetShotgunPelletDirGenerator(orig_dir, reinterpret<u32>(psi.fTime));
+
+		std::unordered_map<MMatchObject*, DamageInfo> DamageMap;
+
+		for (int i = 0; i < SHOTGUN_BULLET_COUNT; i++)
+		{
+			auto dir = DirGen();
+			auto dest = src + dir * 10000;
+
+			const u32 PassFlag = RM_FLAG_ADDITIVE | RM_FLAG_HIDE | RM_FLAG_PASSROCKET | RM_FLAG_PASSBULLET;
+
+			MPICKINFO pickinfo;
+			PickHistory(&SenderObj, src, dest, Stage.BspObject,
+				pickinfo, MakePairValueAdapter(Stage.m_ObjUIDCaches), Time, PassFlag);
+
+			if (pickinfo.bBspPicked)
+			{
+				/*AnnounceF(Sender, "Server: Hit wall at %d, %d, %d",
+				(int)pickinfo.bpi.PickPos.x, (int)pickinfo.bpi.PickPos.y,
+				(int)pickinfo.bpi.PickPos.z);*/
+				continue;
+			}
+
+			if (!pickinfo.pObject)
+			{
+				if (SenderObj.ClientSettings.DebugOutput)
+					AnnounceF(SenderUID, "Server: No wall, no object");
+				continue;
+			}
+
+			float PiercingRatio = GetPiercingRatio(ItemDesc->m_nWeaponType, pickinfo.info.parts);
+
+			auto& item = DamageMap[pickinfo.pObject];
+
+			int NewDamage = item.Damage + Damage;
+			if (PiercingRatio != item.PiercingRatio)
+				item.PiercingRatio = (item.Damage * item.PiercingRatio + Damage * PiercingRatio)
+				/ NewDamage;
+			item.Damage += Damage;
+			auto DamageType = (pickinfo.info.parts == eq_parts_head) ? ZD_BULLET_HEADSHOT : ZD_BULLET;
+			static_assert(ZD_BULLET_HEADSHOT > ZD_BULLET, "Fix me");
+			item.DamageType = max(item.DamageType, DamageType);
+			item.WeaponType = ItemDesc->m_nWeaponType;
+		}
+
+		for (auto& item : DamageMap)
+		{
+			DamagePlayer(*item.first,
+				item.second.Damage, item.second.PiercingRatio,
+				item.second.DamageType, item.second.WeaponType);
+
+			if (SenderObj.ClientSettings.DebugOutput)
+			{
+				AnnounceF(SenderUID, "Server: Hit %s for %d damage",
+					item.first->GetName(), item.second.Damage);
+				v3 Head, Origin;
+				SenderObj.GetPositions(&Head, &Origin, Time);
+				AnnounceF(SenderUID, "Server: Head: %d, %d, %d; origin: %d, %d, %d",
+					int(Head.x), int(Head.y), int(Head.z),
+					int(Origin.x), int(Origin.y), int(Origin.z));
+			}
+		}
+	}
+	else
+	{
+		const u32 PassFlag = RM_FLAG_ADDITIVE | RM_FLAG_HIDE | RM_FLAG_PASSROCKET | RM_FLAG_PASSBULLET;
+
+		MPICKINFO pickinfo;
+		PickHistory(&SenderObj, src, dest, Stage.BspObject, pickinfo,
+			MakePairValueAdapter(Stage.m_ObjUIDCaches), Time, PassFlag);
+
+		if (pickinfo.bBspPicked)
+		{
+			return;
+		}
+
+		if (!pickinfo.pObject)
+		{
+			if (SenderObj.ClientSettings.DebugOutput)
+				AnnounceF(SenderUID, "Server: No wall, no object");
+			return;
+		}
+
+		float PiercingRatio = GetPiercingRatio(ItemDesc->m_nWeaponType, pickinfo.info.parts);
+		auto DamageType = (pickinfo.info.parts == eq_parts_head) ? ZD_BULLET_HEADSHOT : ZD_BULLET;
+		auto WeaponType = ItemDesc->m_nWeaponType;
+
+		if (SenderObj.ClientSettings.DebugOutput)
+		{
+			AnnounceF(SenderUID, "Server: Hit %s for %d damage", pickinfo.pObject->GetName(), Damage);
+			v3 Head, Origin;
+			SenderObj.GetPositions(&Head, &Origin, Time);
+			AnnounceF(SenderUID, "Server: Head: %d, %d, %d; origin: %d, %d, %d",
+				int(Head.x), int(Head.y), int(Head.z),
+				int(Origin.x), int(Origin.y), int(Origin.z));
+		}
+
+		DamagePlayer(*pickinfo.pObject, Damage, PiercingRatio, DamageType, WeaponType);
+	}
+}
+
 struct stRouteListenerNode
 {
 	DWORD				nUserContext;
 	MPacketCrypterKey	CryptKey;
-	//SEED_ALG_INFO	CryptAlgInfo;
 };
 
 void MMatchServer::RouteToAllConnection(MCommand* pCommand)
