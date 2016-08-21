@@ -12,7 +12,6 @@
 #include "ZGameClient.h"
 #include "ZCombatInterface.h"
 #include "ZConsole.h"
-//#include "MActionKey.h"
 #include "ZPost.h"
 #include "ZScreenEffectManager.h"
 #include "ZMyInfo.h"
@@ -30,7 +29,6 @@ ZGameInput::ZGameInput()
 	m_pInstance = this;
 	m_bCTOff = false;
 
-	// 이것들은 실행되는 내내 m_SequenceActions안에 참조되므로 static 으로 선언되어 있다.
 	static ZKEYSEQUENCEITEM action_ftumble[]= { {true,ZACTION_FORWARD}, {false,ZACTION_FORWARD} , {true,ZACTION_FORWARD} };	// 앞 앞
 	static ZKEYSEQUENCEITEM action_btumble[]= { {true,ZACTION_BACK}, {false,ZACTION_BACK} , {true,ZACTION_BACK} };	// 뒤 뒤
 	static ZKEYSEQUENCEITEM action_rtumble[]= { {true,ZACTION_RIGHT}, {false,ZACTION_RIGHT} , {true,ZACTION_RIGHT} };
@@ -488,48 +486,6 @@ bool ZGameInput::OnEvent(MEvent* pEvent)
 
 void ZGameInput::Update(float fElapsed)
 {
-	/*
-	{
-		static DWORD dwLastTime = GetGlobalTimeMS();
-
-		if(GetGlobalTimeMS()-dwLastTime > 10 )
-		{
-			dwLastTime = GetGlobalTimeMS();
-			{
-				MTextArea *pTextArea = (MTextArea*)ZGetGameInterface()->GetIDLResource()->FindWidget("CombatChatOutputTest");
-				if(pTextArea)
-				{
-					char szbuffer[256];
-					for(int i=0;i<100;i++)
-					{
-						szbuffer[i]=rand()%255+1;
-					}
-					szbuffer[100]=0;
-					pTextArea->AddText(szbuffer);
-					if(pTextArea->GetLineCount()>10) pTextArea->DeleteFirstLine();
-				}
-
-			}
-
-			{
-				MTextArea *pTextArea = (MTextArea*)ZGetGameInterface()->GetIDLResource()->FindWidget("CombatChatOutput");
-				if(pTextArea)
-				{
-					char szbuffer[256];
-					for(int i=0;i<100;i++)
-					{
-						szbuffer[i]=rand()%255+1;
-					}
-					szbuffer[100]=0;
-					pTextArea->AddText(szbuffer);
-					if(pTextArea->GetLineCount()>10) pTextArea->DeleteFirstLine();
-				}
-			}
-		}
-	}//*/
-
-//	if(RIsActive() && !g_pGame->IsReplay())
-
 	if (OnGameInput())
 		return;
 
@@ -539,7 +495,6 @@ void ZGameInput::Update(float fElapsed)
 		ZMyCharacter* pMyCharacter = g_pGame->m_pMyCharacter;
 		if ((!pMyCharacter) || (!pMyCharacter->GetInitialized())) return;
 
-		// 커서가 없는 상태에서만 카메라및 게임입력을 받는다
 		if(!ZGetGameInterface()->IsCursorEnable())
 		{
 			{

@@ -404,7 +404,7 @@ void ZCharacterManager::InitRound()
 	}
 }
 
-int ZCharacterManager::GetCharacterIndex(MUID& uid, bool bIncludeHiddenChar)
+int ZCharacterManager::GetCharacterIndex(const MUID& uid, bool bIncludeHiddenChar)
 {
 	int nIndex = 0;
 	for(iterator i = begin(); i!=end(); i++) 

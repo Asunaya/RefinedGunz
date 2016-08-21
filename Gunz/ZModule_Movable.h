@@ -6,10 +6,6 @@
 
 class ZModule_Movable : public ZModule {
 private:
-	// 실린더의 반지름과 높이
-//	float	m_fRadius;
-//	float	m_fHeight;
-
 	float	m_fMaxSpeed;	// 최고속도
 	bool	m_bGravity;		// 중력의 영향을 받는가?
 
@@ -43,13 +39,13 @@ public:
 	virtual bool Update(float fElapsed);
 	virtual void InitStatus();
 
-	const rvector &GetVelocity() { return m_Velocity; }
+	auto& GetVelocity() const { return m_Velocity; }
 	void SetVelocity(const rvector &vel) { m_Velocity=vel; }
 	void SetVelocity(float x,float y,float z) { m_Velocity=rvector(x,y,z); }
 
-	const rvector &GetLastMove() { return m_lastMove; }
+	auto& GetLastMove() const { return m_lastMove; }
 
-	bool Move(rvector &diff);
+	bool Move(const rvector &diff);
 
 	void UpdateGravity(float fDelta);
 

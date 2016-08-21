@@ -1,5 +1,4 @@
-#ifndef __ZSCREENEFFECTMANAGER_H
-#define __ZSCREENEFFECTMANAGER_H
+#pragma once
 
 #include "ZEffectManager.h"
 #include "RMeshUtil.h"
@@ -13,9 +12,7 @@ enum ZCOMBOLEVEL {
 	ZCL_WONDERFUL
 };
 
-
-
-class ZScreenEffect : public ZEffect{	// 화면좌표계에 뿌려지는 이펙트 (UI 관련)
+class ZScreenEffect : public ZEffect{
 protected:
 	RealSpace2::RVisualMesh m_VMesh;	
 	rvector	m_Offset;
@@ -90,14 +87,6 @@ private:
 	RMesh*	m_pExpNumberEffect[10];
 
 	RMesh*	m_pPraiseEffect[ZCI_END];
-
-	/*
-	RMesh*	m_pExcellentEffect;
-	RMesh*	m_pAllkillEffect;
-	RMesh*	m_pHeadshotEffect;
-	RMesh*	m_pFantasticEffect;
-	RMesh*	m_pUnbelievableEffect;
-	*/
 
 	RMesh*	m_pGoodEffect;
 	RMesh*	m_pNiceEffect;
@@ -200,7 +189,6 @@ public:
 
 	void Add(ZEffect *pEffect);
 
-	// screen 레벨 인터페이스의 이펙트들
 	void AddScreenEffect(RMesh *pMesh,rvector offset=rvector(0,0,0)) { 
 		if(pMesh) Add(new ZScreenEffect(pMesh,offset));	
 	}
@@ -230,7 +218,7 @@ public:
 	void AddHit()				{	AddScreenEffect("hit"); }
 
 	
-	void AddPraise(int nPraise);	// Score로 날라가는 이펙트
+	void AddPraise(int nPraise);
 	void AddGood();
 	void AddNice();
 	void AddGreat();
@@ -245,13 +233,11 @@ public:
 		m_bShowEmpty = b;
 	}
 
-	void AddAlert(rvector& vVictimPos, rvector& vVictimDir, rvector& vAttackerPos);
+	void AddAlert(const rvector& vVictimPos, const rvector& vVictimDir, const rvector& vAttackerPos);
 	void AddKO(int nKills=1);
 	void SetKO(int nKills);
 
 	void ShockBossGauge(float fPower);
 
-	void UpdateDuelEffects();		// 연승
+	void UpdateDuelEffects();
 };
-
-#endif

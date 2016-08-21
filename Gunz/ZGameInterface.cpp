@@ -6240,24 +6240,6 @@ void ZGameInterface::ShowReplayDialog( bool bShow)
 
 					DWORD dwFileVersion = 0;
 					char szVersion[10] = "";
-					/*int nRead;
-					DWORD header;
-					ZFile *file = zfopen( szFullPathName);
-					if ( file)
-					{
-						nRead = zfread( &header, sizeof( header), 1, file);
-						if( (nRead != 0) && (header == GUNZ_REC_FILE_ID))
-						{
-							zfread( &dwFileVersion, sizeof( dwFileVersion), 1, file);
-							sprintf_safe( szVersion, "v%d.0", dwFileVersion);
-						}
-						else
-							strcpy_safe( szVersion, "--");
-
-						zfclose( file);
-					}
-					else
-						strcpy_safe( szVersion, "--");*/
 				
 					pListBox->Add( new ReplayListBoxItem( szName, szVersion));			// Add to listbox
 				} while ( _findnext( hFile, &c_file) == 0);

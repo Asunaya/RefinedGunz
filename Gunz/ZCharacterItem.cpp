@@ -126,8 +126,13 @@ bool ZCharacterItem::Reload()
 	return pItem->Reload();
 }
 
-
 ZItem* ZCharacterItem::GetSelectedWeapon()
+{
+	if (m_nSelectedWeapon<MMCIP_MELEE || m_nSelectedWeapon>MMCIP_CUSTOM2) return nullptr;
+	return &m_Items[(int)m_nSelectedWeapon];
+}
+
+const ZItem* ZCharacterItem::GetSelectedWeapon() const
 {
 	if(m_nSelectedWeapon<MMCIP_MELEE || m_nSelectedWeapon>MMCIP_CUSTOM2) return nullptr;
 	return &m_Items[(int)m_nSelectedWeapon]; 

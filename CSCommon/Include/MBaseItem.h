@@ -18,7 +18,7 @@ protected:
 public:
 	MBaseItem(): m_bIsRentItem(false), m_nRentMinutePeriodRemainder(RENT_MINUTE_PERIOD_UNLIMITED), m_bIsSpendingItem(false),
 					m_nCount(0) { }
-	virtual				~MBaseItem() {}
+	virtual ~MBaseItem() = default;
 	bool IsRentItem()		{ return m_bIsRentItem; }
 	bool IsSpendingItem()	{ return m_bIsSpendingItem; }
 	int GetRentMinutePeriodRemainder() { return ((IsRentItem()) ? m_nRentMinutePeriodRemainder : RENT_MINUTE_PERIOD_UNLIMITED); }

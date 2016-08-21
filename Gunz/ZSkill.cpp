@@ -428,7 +428,7 @@ bool ZSkill::IsEnable()
 }
 
 // 대상이 유효범위내에 있는지 판단한다
-bool ZSkill::CheckRange(rvector& center, ZObject *pCurrent)
+bool ZSkill::CheckRange(const rvector& center, ZObject *pCurrent)
 {
 	// 발사하는 무기는 대상이 보여야 유효하다.
 	if(m_pDesc->bHitCheck)
@@ -483,7 +483,7 @@ bool ZSkill::CheckRange(rvector& center, ZObject *pCurrent)
 	}
 }
 
-void ZSkill::PreExecute(MUID& uidTarget, rvector& targetPos )
+void ZSkill::PreExecute(const MUID& uidTarget, const rvector& targetPos )
 {
 	RMeshPartsPosInfoType type = eq_parts_pos_info_etc;
 	MUID uid = m_pOwner->GetUID();
@@ -496,7 +496,7 @@ void ZSkill::PreExecute(MUID& uidTarget, rvector& targetPos )
 	}
 }
 
-void ZSkill::LastExecute(MUID& uidTarget, rvector& targetPos )
+void ZSkill::LastExecute(const MUID& uidTarget, const rvector& targetPos )
 {
 	// 모션이 끝나고 데미지 들어갈 것들..
 	for(ZObjectManager::iterator i = ZGetObjectManager()->begin();i!=ZGetObjectManager()->end();i++) {
@@ -516,7 +516,7 @@ void ZSkill::LastExecute(MUID& uidTarget, rvector& targetPos )
 	}
 }
 
-void ZSkill::Execute(MUID& uidTarget, rvector& targetPos )
+void ZSkill::Execute(const MUID& uidTarget, const rvector& targetPos )
 {
 	m_bEnable = true;
 	m_TargetPos = targetPos;
@@ -527,7 +527,7 @@ void ZSkill::Execute(MUID& uidTarget, rvector& targetPos )
 	Use(uidTarget, targetPos);
 }
 
-void ZSkill::Use(MUID& uidTarget, rvector& targetPos)
+void ZSkill::Use(const MUID& uidTarget, const rvector& targetPos)
 {
 	m_nUseNum++;
 	m_fLastBeginTime = g_pGame->GetTime();
@@ -682,7 +682,7 @@ void ZSkill::Use(MUID& uidTarget, rvector& targetPos)
 
 }
 
-bool ZSkill::GetPartsTypePos(RMeshPartsPosInfoType& type,MUID& uid,MUID& uidTarget)
+bool ZSkill::GetPartsTypePos(RMeshPartsPosInfoType& type, MUID& uid, const MUID& uidTarget)
 {
 	if( m_pDesc->nCastingPreEffectType == ZSTP_TARGETHEAD ) {
 		type = eq_parts_pos_info_HeadNub;
@@ -712,7 +712,8 @@ bool ZSkill::GetPartsTypePos(RMeshPartsPosInfoType& type,MUID& uid,MUID& uidTarg
 	return true;
 }
 
-bool ZSkill::GetPartsTypePos(ZObject* pTargetObject, ZSKILLEFFECTTARGETPOSTYPE nSkillEffectPosType, RMeshPartsPosInfoType& type,rvector& vPos,rvector& vDir)
+bool ZSkill::GetPartsTypePos(ZObject* pTargetObject, ZSKILLEFFECTTARGETPOSTYPE nSkillEffectPosType,
+	RMeshPartsPosInfoType& type, rvector& vPos, rvector& vDir)
 {
 	if( pTargetObject && nSkillEffectPosType == ZSTP_TARGET ) {//지금 캐릭터가 있는 지형의 위치
 
@@ -783,7 +784,7 @@ bool ZSkill::IsUsable(ZObject *pTarget)	// 이 스킬을 대상에게 쓸만한지
 }
 
 
-void ZSkill::Cancel(MUID& uidTarget)
+void ZSkill::Cancel(const MUID& uidTarget)
 {
 	m_fLastBeginTime = g_pGame->GetTime();
 }
@@ -806,7 +807,7 @@ void ZSkill::Repeat()
 	Use(m_uidTarget, tarpos);
 }
 
-void ZSkill::GetMissilePosDir(rvector& outDir, rvector& outPos, rvector& TargetPos)
+void ZSkill::GetMissilePosDir(rvector& outDir, rvector& outPos, const rvector& TargetPos)
 {
 	outPos = m_pOwner->GetPosition() + rvector(0,0,m_pOwner->GetCollHeight()/2.0f);
 	outDir = m_pOwner->GetDirection();

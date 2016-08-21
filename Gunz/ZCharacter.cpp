@@ -303,24 +303,11 @@ ZCharacter::ZCharacter() : ZCharacterObject(), m_DirectionLower(1,0,0),m_Directi
 	m_nStunType = ZST_NONE;
 	m_nWallJumpDir = 0;
 
-	/*
-	m_fClimbZ = 0.f;
-
-	m_ClimbDir.x = 0.f;
-	m_ClimbDir.y = 0.f;
-	m_ClimbDir.z = 0.f;
-	*/
-
 	m_RealPositionBefore = rvector(0.f,0.f,0.f);
 	m_AnimationPositionDiff = rvector(0.f,0.f,0.f);
 
 	m_fGlobalHP = 0.f;
 	m_nReceiveHPCount = 0;
-
-	//m_FloorPlane.a = 0.f;
-	//m_FloorPlane.b = 0.f;
-	//m_FloorPlane.c = 0.f;	
-	//m_FloorPlane.d = 0.f;
 
 	m_fAttack1Ratio = 1.f;
 
@@ -332,8 +319,6 @@ ZCharacter::ZCharacter() : ZCharacterObject(), m_DirectionLower(1,0,0),m_Directi
 	m_fTimeOffset = 0;
 	m_nTimeErrorCount = 0;
 	m_fAccumulatedTimeError = 0;
-
-//	RegisterModules();
 
 	m_pModule_HPAP = new ZModule_HPAP;
 	m_pModule_Resistance = new ZModule_Resistance;
@@ -350,7 +335,6 @@ ZCharacter::ZCharacter() : ZCharacterObject(), m_DirectionLower(1,0,0),m_Directi
 	AddModule(m_pModule_PoisonDamage);
 	AddModule(m_pModule_LightningDamage);
 
-	// 퀘스트 관련 게임타입일 경우에만 QuestStatus 생성, 등록
 	if (ZGetGameTypeManager()->IsQuestDerived(ZGetGameClient()->GetMatchStageSetting()->GetGameType()))
 	{
 		m_pModule_QuestStatus = new ZModule_QuestStatus();
@@ -364,21 +348,6 @@ ZCharacter::ZCharacter() : ZCharacterObject(), m_DirectionLower(1,0,0),m_Directi
 
 	m_bChatEffect = false;
 }
-
-//void ZCharacter::RegisterModules()
-//{
-//	ZObject::RegisterModules();
-//
-//	// 모듈 등록한다
-//	RegisterModule(&m_Module_HPAP);
-//	RegisterModule(&m_Module_Movable);
-//	RegisterModule(&m_Module_Resistance);
-//
-//	RegisterModule(&m_Module_FireDamage);
-//	RegisterModule(&m_Module_ColdDamage);
-//	RegisterModule(&m_Module_PoisonDamage);
-//	RegisterModule(&m_Module_LightningDamage);
-//}
 
 ZCharacter::~ZCharacter()
 {
@@ -972,7 +941,7 @@ void ZCharacter::OnDraw()
 }
 
 
-bool ZCharacter::CheckDrawGrenade()
+bool ZCharacter::CheckDrawGrenade() const
 {
 	if(m_Items.GetSelectedWeapon()==NULL) return false;
 
@@ -986,34 +955,12 @@ bool ZCharacter::CheckDrawGrenade()
 	return false;
 }
 
-bool ZCharacter::Pick(rvector& pos,rvector& dir, RPickInfo* pInfo)
+bool ZCharacter::Pick(const rvector& pos, const rvector& dir, RPickInfo* pInfo)
 {
 	if (m_bInitialized==false) return false ;
 
 	return ZObject::Pick(pos, dir, pInfo);
 }
-
-/*
-bool ZCharacter::Pick(int x,int y,rvector* v,float* f)
-{
-	RPickInfo info;
-	bool hr = Pick(x,y,&info);
-	*v = info.vOut;
-	*f = info.t;
-	return hr;
-}
-*/
-/*
-bool ZCharacter::Pick(int x,int y,RPickInfo* pInfo) {
-
-
-	if(m_pVMesh) {
-		return m_pVMesh->Pick(x,y,pInfo);
-	}
-
-	return false;
-}
-*/
 
 #define GRAVITY_CONSTANT	2500.f			// 중력의 영향
 #define DAMAGE_VELOCITY		1700.f			// 속도가 이 이상되면 폴링데미지를 받는다.
@@ -1442,24 +1389,9 @@ void ZCharacter::UpdateVelocity(float fDelta)
 		}
 	}
 
-//	if(fSpeed>200)
-//		int k=0;
-	// 아무키도 안눌려있으면 감속한다.
-	if(IS_ZERO(Magnitude(m_Accel)) && (m_bLand && !m_bWallJump && !m_bWallJump2 && !bTumble ))
-	{
-		if( m_bBlast && m_nBlastType == 1) {
-			// 대거 대쉬 공격받은 상태라면 제외..
-//			fSpeed = 1000.f;//*fDelta*HP_SCALE;
-
-//			static char _temp[256];
-//			sprintf_safe(_temp,"speed = %f \n",fSpeed);
-//			OutputDebugString(_temp);
-
-		}
-		else {
-			fSpeed = max(fSpeed-STOP_SPEED*fDelta,0);
-		}
-	}
+	if(IS_ZERO(Magnitude(m_Accel)) && m_bLand && !m_bWallJump && !m_bWallJump2 && !bTumble
+		&& (!m_bBlast || m_nBlastType != 1))
+		fSpeed = max(fSpeed-STOP_SPEED*fDelta,0);
 
 	SetVelocity(dir.x*fSpeed, dir.y*fSpeed, GetVelocity().z);
 }
@@ -1470,138 +1402,7 @@ void ZCharacter::UpdateAnimation()
 	SetAnimationLower(ZC_STATE_LOWER_IDLE1);
 }
 
-//bool ZCharacter::Move(rvector &diff)
-//{
-//	if (m_bInitialized==false) return false;
-//	if (!IsVisible()) return false;
-//
-//#ifdef ENABLE_CHARACTER_COLLISION
 #define CHARACTER_COLLISION_DIST	70.f
-//	// 캐릭터끼리의 충돌체크를 한다.
-///*
-//	rvector dir=m_Position+diff-m_Position;
-//	//float t = ColTest(m_Position, dir, );
-//	rplane pln;
-//	//float t = SweepTest(rsphere(m_Position, 100.0f), dir, rsphere(rvector(0.0f,0.0f,0.0f), 100.0f), &pln);
-//
-//	rvector pos22 = m_Position + rvector(0.0f, 0.0f, 60.0f);
-//	rcapsule cap = rcapsule(rvector(0.0f,0.0f,0.0f), rvector(0.0f, 0.0f, 180.0f), 100.0f);
-//
-//	float t = SweepTest(rsphere(pos22, 100.0f), dir, cap, &pln);
-//	if (t < 1.0f) {
-//		return false;
-//	}
-//*/
-//	if(!IsDie())
-//	{
-//		ZObjectManager *pcm=&g_pGame->m_ObjectManager;
-//		for (ZObjectManager::iterator itor = pcm->begin(); itor != pcm->end(); ++itor)
-//		{
-//			ZObject* pObject = (*itor).second;
-//			if (pObject != this && pObject->IsCollideable())
-//			{
-//				rvector pos=pObject->m_Position;
-//				rvector dir=m_Position+diff-pos;
-//				dir.z=0;
-//				float fDist=Magnitude(dir);
-//				if(fDist<CHARACTER_COLLISION_DIST && fabs(pos.z-m_Position.z)<180.f)
-//				{
-//					// 거의 같은위치에 있는 경우.. 한쪽방향으로 밀림
-//					if(fDist<1.f)
-//					{
-//						pos.x+=1.f;
-//						dir=m_Position-pos;
-//					}
-//
-//					if(DotProduct(dir,diff)<0)	// 더 가까워지는 방향이면
-//					{
-//						Normalize(dir);
-//						rvector newthispos=pos+dir*(CHARACTER_COLLISION_DIST+1.f);
-//
-//						rvector newdiff=newthispos-m_Position;
-//						diff.x=newdiff.x;
-//						diff.y=newdiff.y;
-//
-//					}
-//				}
-//			}
-//		}
-//	}
-//#endif
-//	// 이렇게되면 195cm 정도까지 못지나간다.
-//	
-//	rvector origin,targetpos;
-//	rplane impactplane;
-//
-//	origin=m_Position+rvector(0,0,120);
-//	targetpos=origin+diff;
-//	m_bAdjusted=ZGetGame()->GetWorld()->GetBsp()->CheckWall(origin,targetpos,CHARACTER_RADIUS,60,RCW_CYLINDER,0,&impactplane);
-//
-//	/*
-//	// 지금 턱에걸려 올라가는 상황이 아니라면 턱에 걸린것인지 체크.
-//
-//	// 조건 1. 막혀서 거의 못움직이는 상태이며 거의 위아래로는 움직이지 않을때
-//
-//	if(Magnitude(GetVelocity())>0.01f)
-//	{
-//		if(!m_bClimb && 
-//			//Magnitude(targetpos-origin)<0.1f && 
-//			m_bAdjusted &&
-//			fabs(GetVelocity().z)<1.f )
-//		{
-//			// 2. 현재 딛고있는 바닥이 거의 수직인 바닥인가
-//			// 2. 현재 부딪힌 면이 거의 수직인가 !
-//			if(D3DXPlaneDotNormal(&impactplane,&rvector(0,0,1))<0.01f)
-//			{
-//				// 4. 위로 50cm 만큼 갈수있는가 ? 
-//				rvector uptest_origin=m_Position+rvector(0,0,90);
-//				rvector uptest_targetpos=uptest_origin+rvector(0,0,50);
-//				rplane testimpactplane;
-//
-//				bool bAdjust=ZGetGame()->GetWorld()->GetBsp()->CheckWall(uptest_origin,uptest_targetpos,CHARACTER_RADIUS,89,RCW_CYLINDER,0,&testimpactplane);
-//				if(!bAdjust || Magnitude(uptest_targetpos-uptest_origin)>45.f)
-//				{
-//					rvector forwardtest_origin=uptest_targetpos;
-////					rvector dir=-rvector(impactplane.a,impactplane.b,impactplane.c);
-//					rvector dir=diff;
-//					Normalize(dir);
-//					rvector forwardtest_targetpos=forwardtest_origin+30.f*dir;
-//
-//					bool bAdjust=ZGetGame()->GetWorld()->GetBsp()->CheckWall(forwardtest_origin,forwardtest_targetpos,CHARACTER_RADIUS,89,RCW_CYLINDER,0,&testimpactplane);
-//					// 3. 50cm 만큼 위에서 벽방향으로 진행하면 갈수있는가 ? 
-//					if(!bAdjust || (Magnitude(forwardtest_targetpos-forwardtest_origin)>20.f && impactplane!=testimpactplane) )
-//					{
-//						m_bClimb=true;
-//						m_ClimbDir=GetVelocity();
-//						Normalize(m_ClimbDir);
-//						m_fClimbZ=m_Position.z;
-//						m_ClimbPlane=impactplane;
-//						return m_bAdjusted;
-//					}
-//				}
-//			}
-//		}
-//	}
-//	*/
-//
-//	if(m_bAdjusted)
-//	{
-//		m_fLastAdjustedTime=g_pGame->GetTime();
-//	}
-//
-//	diff=targetpos-origin;
-//
-//	m_Position+=diff;
-////	m_RealPosition+=diff;
-////	m_RealPositionBefore+=diff;
-//
-//	return m_bAdjusted;
-//}
-
-/*
-	임시 ->	확장 필요 없으면 멤버로 옮기거나 ,
-	커질것 같으면 파일관리를 포함하는 class 만들기..
-*/
 
 #define ST_MAX_WEAPON 200
 #define ST_MAX_PARTS  200
@@ -1609,26 +1410,8 @@ void ZCharacter::UpdateAnimation()
 struct WeaponST {
 	int		id;
 	char*	name;
-	RWeaponMotionType weapontype;//무기종류
+	RWeaponMotionType weapontype;
 };
-
-// 등록 이름 , 타잎..
-/*
-WeaponST g_WeaponST[ ST_MAX_WEAPON ] = {
-//	{ 0,"w_none",	eq_weapon_etc},
-//	{ 0,"katana01",	eq_ws_pistol },
-//	{ 1,"rifle01",	eq_ws_pistol },
-	{ 0,"pistol01",	eq_ws_pistol },
-	{ 1,"pistol02",	eq_ws_pistol },
-//	{ 0,"katana01",	eq_ws_pistol },
-//	{ 1,"rifle01",	eq_ws_pistol },
-	{ 2,"katana01",	eq_wd_katana },
-	{ 3,"rifle01",	eq_wd_rifle  },
-
-};
-*/
-
-// 등록 mesh_id , 등록이름 , 모션 연결 타잎
 
 WeaponST g_WeaponST[ ST_MAX_WEAPON ] = {
 	{ 0,"pistol01",	eq_wd_katana },
@@ -1641,16 +1424,12 @@ void ZCharacter::SetTargetDir(rvector vTarget) {
 
 	Normalize(vTarget);
 	m_TargetDir = vTarget;
-//	m_dwBackUpTime = GetGlobalTimeMS();
 }
 
 // 가진 무기중에서만 선택하게 된다...
 
-void ZCharacter::OnChangeWeapon(char* WeaponModelName)
+void ZCharacter::OnChangeWeapon(const char* WeaponModelName)
 {
-	// 초기 무기가 틀려지는 문제일수도..
-	// 로딩이 안되었다면 모션은 동기화가 안된다? 유저들의 로딩속도에 따라 틀려질수도?
-
 	if(m_bInitialized==false) 
 		return;
 
@@ -1819,31 +1598,6 @@ void ZCharacter::OnChangeParts(RMeshPartsType partstype,int PartsID)
 #endif
 }
 
-
-void ZCharacter::OnAttack(int type,rvector& pos)
-{
-
-}
-
-int ZCharacter::GetHP()	{ 
-	return m_pModule_HPAP->GetHP(); 
-}
-
-int ZCharacter::GetAP()	{ 
-	return m_pModule_HPAP->GetAP(); 
-}
-
-// 모든 캐릭터의 HP/AP 의 변경은 이 평션을 통해 이루어진다
-void ZCharacter::SetHP(int nHP)
-{ 
-	m_pModule_HPAP->SetHP(nHP);
-}
-
-void ZCharacter::SetAP(int nAP)
-{ 
-	m_pModule_HPAP->SetAP(nAP); 
-}
-
 void ZCharacter::Die()
 {
 	OnDie();
@@ -1853,91 +1607,70 @@ void ZCharacter::OnDie()
 {
 	if (m_bInitialized==false) return;
 	if (!IsVisible()) return;
-/*
-	if ((GetStateLower() != ZC_STATE_LOWER_DIE1) && (GetStateLower() != ZC_STATE_LOWER_DIE2))
-	{
-		if(DotProduct(m_Direction,m_LastDamageDir)<0)
-			SetAnimationLower(ZC_STATE_LOWER_DIE1);
-		else
-			SetAnimationLower(ZC_STATE_LOWER_DIE2);
-	}
-	if (GetStateUpper() != ZC_STATE_UPPER_NONE)
-	{
-		SetAnimationUpper(ZC_STATE_UPPER_NONE);
-	}
-*/
+
 	m_bDie = true;
 	m_Collision.bCollideable = false;
 	m_bPlayDone = false;
 	
 }
 
-bool ZCharacter::GetHistory(rvector *pos, rvector *direction, float fTime)
+bool ZCharacter::GetHistory(rvector *pos, rvector *direction, float fTime, rvector* cameradir)
 {
-	if (GetVisualMesh() == NULL)
-		return false;
-
-	auto SetReturnValues = [&](const rvector& Pos, const rvector& Dir)
+	auto SetReturnValues = [&](auto& Pos, auto& Dir, auto& CameraDir)
 	{
-		if (isnan(Pos.x) || isnan(Pos.y) || isnan(Pos.z))
-			return false;
-
-		if (isnan(Dir.x) || isnan(Dir.y) || isnan(Dir.z))
-			return false;
-
 		if (pos)
 			*pos = Pos;
 		if (direction)
 			*direction = Dir;
+		if (cameradir)
+			*cameradir = CameraDir;
 
 		return true;
 	};
 
-	auto GetItemDesc = [&](MMatchCharItemParts slot)
-	{
-		return m_Items.GetDesc(slot);
-	};
-
 	if (!BasicInfoHistory.empty() && fTime >= BasicInfoHistory.front().RecvTime)
-	{
-		return SetReturnValues(m_Position, m_Direction);
-	}
+		return SetReturnValues(m_Position, m_Direction, m_Direction);
 
-	v3 Foot, Dir;
-	BasicInfoHistory.GetPositions(nullptr, &Foot, &Dir, fTime, GetItemDesc, MMS_MALE, IsDie());
+	auto GetItemDesc = [&](auto slot) {
+		return m_Items.GetDesc(slot); };
 
-	return SetReturnValues(Foot, Dir);
+	BasicInfoHistoryManager::Info Info;
+	BasicInfoHistory.GetInfo(Info, fTime, GetItemDesc, MMS_MALE, IsDie());
 
-	return false;
+	return SetReturnValues(Info.Origin, Info.Dir, Info.CameraDir);
 }
 
 void ZCharacter::GetPositions(v3* Head, v3* Foot, double Time)
 {
-	auto GetItemDesc = [&](MMatchCharItemParts slot)
-	{
-		return m_Items.GetDesc(slot);
-	};
-
-	/*if (!BasicInfoHistory.empty())
-		DMLog("%f, %f\n", Time, BasicInfoHistory.front().SentTime);*/
+	auto GetItemDesc = [&](auto slot) {
+		return m_Items.GetDesc(slot); };
 
 	if (!BasicInfoHistory.empty() && Time <= BasicInfoHistory.front().SentTime)
 	{
-		BasicInfoHistory.GetPositions(Head, Foot, nullptr, Time, GetItemDesc, m_Property.nSex, IsDie());
+		BasicInfoHistoryManager::Info Info;
+		BasicInfoHistory.GetInfo(Info, Time, GetItemDesc, m_Property.nSex, IsDie());
+		if (Head)
+			*Head = Info.Head;
+		if (Foot)
+			*Foot = Info.Origin;
 		return;
 	}
 
 	if (Head)
-		*Head = m_pVMesh->GetHeadPosition();
+	{
+		if (m_pVMesh)
+			*Head = m_pVMesh->GetHeadPosition();
+		else
+			*Head = m_Position + v3{0, 0, 180};
+	}
+
 	if (Foot)
 		*Foot = m_Position;
 }
 
-// 부활 - 이것은 게임룰에 따라 달라질 수도 있다.
 void ZCharacter::Revival()
 {
 	if (m_bInitialized==false) return;
-//	if (!IsVisible()) return;
 
 	InitStatus();
 
@@ -1960,176 +1693,11 @@ void ZCharacter::SetDirection(const rvector& dir)
 	m_TargetDir = dir;
 }
 
-/*
-void ZCharacter::SetAnimationForce(ZC_STATE nState, ZC_STATE_SUB nStateSub)
-{
-	m_State = nState;
-	m_StateSub = nStateSub;
-
-	char szName[256];
-	if (nState != ZC_STATE_IDLE)
-		strcpy_safe(szName, g_AnimationInfoSubRunTable[nStateSub].Name);
-	else strcpy_safe(szName, "idle");
-
-	SetAnimation(szName, g_AnimationInfoTable[m_State].bEnableCancel, 0);
-
-	if(m_State == ZC_STATE_ATTACK) 
-	{
-		//아래모션은 놔두고..상체만
-		SetAnimation(ani_mode_upper,"attackS",true,0);
-	}
-}
-*/
-
 void ZCharacter::OnKnockback(const rvector& dir, float fForce)
 {
-	// 남의 캐릭터는 넉백을 없앤다
 	if(IsHero())
 		ZCharacterObject::OnKnockback(dir,fForce);
 }
-
-//void ZCharacter::OnDamagedFalling(float fDamage)
-//{
-//	if (m_bInitialized==false) return;
-//
-//	m_LastAttacker = m_UID;
-//	m_LastDamageType = ZD_FALLING;
-//	m_LastDamageDir = m_Direction;
-//
-//	SetHP(GetHP() - fDamage);
-//}
-//
-//#define SPLASH_DAMAGE_RATIO	.4f		// 스플래시 데미지 관통률
-//
-//void ZCharacter::OnDamagedKatanaSplash(ZCharacter* pAttacker,float fDamageRange)
-//{
-//	if (m_bInitialized==false) return;
-//	if (!IsVisible()) return;
-//
-//	// 거리에 따라서 데미지~
-//	bool bCanAttack = g_pGame->IsAttackable(pAttacker,this);
-//
-//	if (bCanAttack) m_LastAttacker= pAttacker->m_UID;
-//	m_LastDamageType = ZD_KATANA_SPLASH;
-//	m_LastDamageDir = m_Position-pAttacker->m_Position;
-//	Normalize(m_LastDamageDir);
-//
-//	int damage = 0;
-//
-//	MMatchItemDesc* pDesc = pAttacker->GetItems()->GetSelectedWeapon()->GetDesc();
-//	if (pDesc == NULL)
-//	{
-//		_ASSERT(0);
-//		return;
-//	}
-//
-//	if (bCanAttack) {
-//
-//#define SLASH_DAMAGE	3		// 강베기데미지 = 일반공격의 x SLASH_DAMAGE
-//		damage = (int) pDesc->m_nDamage * fDamageRange * SLASH_DAMAGE;
-//
-//		OnDamage(damage, SPLASH_DAMAGE_RATIO);
-//		//SetHP(GetStatus()->nHP - damage);
-//	}
-//}
-//
-//void ZCharacter::OnDamagedGrenade(MUID uidOwner, rvector& dir, float fDamage, int nTeamID)
-//{
-//	if (m_bInitialized==false) return;
-//	if (!IsVisible()) return;
-//
-//	// 공격한 사람이 나갔어도 이미 있는 수류탄은 터져야한다
-////	if (pAttacker == NULL) return;
-//
-//	// 지금 데미지를 줄수 있는 상황인가 ?
-//	bool bCanAttack = g_pGame->GetMatch()->GetRoundState() == MMATCH_ROUNDSTATE_PLAY;
-//
-//	if (bCanAttack) {
-//
-//		m_LastAttacker= uidOwner;
-//		m_LastDamageType = ZD_EXPLOSION;
-//		m_LastDamageDir = dir;
-//
-//		ZCharacter* pOwnerCharacter = g_pGame->m_CharacterManager.Find( uidOwner );
-//
-//		bool bForce = this == pOwnerCharacter;// 자신은 팀플이라도 데미지를 입는다.
-//
-//		float fRatio = 1.0f;
-//
-////		MMatchWeaponType wtype = z_wd_grenade;//pAttacker->m_pVMesh->GetSelectWeaponType();
-//
-//		fRatio = ZItem::GetPiercingRatio( MWT_FRAGMENTATION , eq_parts_chest );//수류탄과 로켓 구분없다..
-//
-//		if(bForce || GetTeamID()!=nTeamID)
-//			OnDamage((int)fDamage,fRatio);
-//
-//		if( pOwnerCharacter == g_pGame->m_pMyCharacter )
-//			g_pGame->m_pMyCharacter->HitSound();
-//	}
-//}
-
-//void ZCharacter::OnKnockback(ZItem *pItem, rvector& pos, rvector& dir, int nHitCount)
-//{
-//	if (m_bInitialized==false) return;
-//	if (!IsVisible() || IsDie()) return;
-//
-//	float fKnockBackForce = 0.0f;
-//	bool bMelee = false;
-//	bool bKnockBackSkip = false;
-//
-//	if(nHitCount != -1) {	// Shotgun 임...
-//		if(nHitCount > 5) {	// 6발까지만 KnockBack 에 영향을 준다..
-//			bKnockBackSkip = true;
-//		}
-//	}
-//
-//	MMatchItemDesc* pDesc = pItem->GetDesc();
-//	if (pDesc->m_nType == MMIT_MELEE) {
-//		fKnockBackForce = 0.0f;
-//		bMelee = true;
-//	}
-//	else if (pDesc->m_nType == MMIT_RANGE) {
-//
-//		if (pDesc->m_pEffect != NULL)
-//		{
-//			fKnockBackForce = (float)(pDesc->m_pEffect->m_nKnockBack);
-//		}
-//		else
-//		{
-//			//_ASSERT(0);
-//			fKnockBackForce = 0.0f;
-//			fKnockBackForce = 200.0f;
-//		}
-//	}
-//	else {
-//		_ASSERT(0);
-//		return;
-//	}
-//
-//	float fRatio = 1.0f;
-//
-//	// KnockBack
-//	if (IsHero())
-//	{
-//		if(bKnockBackSkip==false) {
-//
-//			if(m_bBlast || m_bBlastFall) {	// 떠있을때 넉백
-//				rvector vKnockBackDir = dir;
-//				Normalize(vKnockBackDir);
-//				vKnockBackDir *= (fKnockBackForce * BLASTED_KNOCKBACK_RATIO);
-//				vKnockBackDir.x = vKnockBackDir.x * 0.2f;
-//				vKnockBackDir.y = vKnockBackDir.y * 0.2f;
-//				SetVelocity(vKnockBackDir);
-////				SetAccel(vKnockBackDir);
-//			} else {	// 그냥 넉백
-//				rvector vKnockBackDir = dir;
-//				Normalize(vKnockBackDir);
-//				if (bMelee) vKnockBackDir = rvector(0.0f, 0.0f, 1.0f);
-//				KnockBack(vKnockBackDir, fKnockBackForce);
-//			}
-//		}
-//	}
-//}
 
 void ZCharacter::UpdateSound()
 {
@@ -2835,14 +2403,6 @@ void ZCharacter::ChangeLowPolyModel()
 	RMesh* pLowMesh = ZGetMeshMgr()->Get(szMeshName);//원하는 모델을 붙여주기..
 
 	m_pVMesh->SetLowPolyModel(pLowMesh);
-}
-
-bool ZCharacter::IsAdmin()
-{
-	if(m_InitialInfo.nUGradeID == MMUG_DEVELOPER ||
-		m_InitialInfo.nUGradeID == MMUG_ADMIN)
-		return true;
-	return false;
 }
 
 void ZCharacter::InitProperties()
@@ -3606,6 +3166,41 @@ void ZCharacter::OnScream()
 		ZGetSoundEngine()->PlaySound("ooh_male",m_Position,IsObserverTarget());
 	else			
 		ZGetSoundEngine()->PlaySound("ooh_female",m_Position,IsObserverTarget());
+}
+
+void ZCharacter::UpdateTimeOffset(float PeerTime, float LocalTime)
+{
+	float fCurrentLocalTime = m_fTimeOffset + LocalTime;
+
+	float fTimeError = PeerTime - fCurrentLocalTime;
+	if (fabs(fTimeError)>3.f) {
+		m_fTimeOffset = PeerTime - LocalTime;
+		m_fAccumulatedTimeError = 0;
+		m_nTimeErrorCount = 0;
+	}
+	else
+	{
+		m_fAccumulatedTimeError += fTimeError;
+		m_nTimeErrorCount++;
+		if (m_nTimeErrorCount > 10) {
+			m_fTimeOffset += 0.5f * m_fAccumulatedTimeError / 10.f;
+			m_fAccumulatedTimeError = 0;
+			m_nTimeErrorCount = 0;
+		}
+	}
+
+	m_fLastReceivedTime = LocalTime;
+}
+
+void ZCharacter::SetNetPosition(const rvector & position, const rvector & velocity, const rvector & dir)
+{
+	if (Magnitude(position - m_Position) > 20.0f)
+		m_Position = position;
+	SetVelocity(velocity);
+	SetAccel(rvector(0.0f, 0.0f, 0.0f));
+
+	m_TargetDir = dir;
+	m_fLastValidTime = ZApplication::GetGame()->GetTime();
 }
 
 void ZCharacter::OnMeleeGuardSuccess()

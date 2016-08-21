@@ -4,7 +4,7 @@
 #include <deque>
 #include "AnimationStuff.h"
 
-struct BasicInfoItem : public BasicInfo
+struct BasicInfoItem : BasicInfo
 {
 	double SentTime;
 	double RecvTime;
@@ -20,10 +20,18 @@ struct BasicInfoItem : public BasicInfo
 class BasicInfoHistoryManager
 {
 public:
-	void AddBasicInfo(const BasicInfoItem& bii);
+	void AddBasicInfo(BasicInfoItem bii);
+
+	struct Info
+	{
+		v3 Head;
+		v3 Origin;
+		v3 Dir;
+		v3 CameraDir;
+	};
 
 	template <typename GetItemDescT>
-	bool GetPositions(v3* OutHead, v3* OutFoot, v3* OutDir, double Time,
+	bool GetInfo(Info& Out, double Time,
 		GetItemDescT& GetItemDesc, MMatchSex Sex, bool IsDead) const;
 	
 	bool empty() const { return BasicInfoList.empty(); }

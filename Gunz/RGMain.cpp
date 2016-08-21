@@ -205,7 +205,7 @@ std::pair<int, ZCharacter*> FindSinglePlayer(const char * NameSubstring)
 	{
 		auto Char = Item.second;
 
-		if (!strstr(Char->GetUserNameA(), NameSubstring))
+		if (!strstr(Char->GetUserName(), NameSubstring))
 			continue;
 
 		if (Found)

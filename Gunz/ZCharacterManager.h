@@ -1,5 +1,4 @@
-#ifndef _ZCHARACTERMANAGER_H
-#define _ZCHARACTERMANAGER_H
+#pragma once
 
 #include "MUID.h"
 #include "RVisualMeshMgr.h"
@@ -39,7 +38,7 @@ public:
 	/// 해당 플레이어의 순서를 구한다. - 순차검색함. 플레이어가 없으면 -1 반환
 	/// @param uid					찾는 플레이어 UID
 	/// @param bIncludeHiddenChar	admin hidden 캐릭터 포함여부
-	int GetCharacterIndex(MUID& uid, bool bIncludeHiddenChar=true);		
+	int GetCharacterIndex(const MUID& uid, bool bIncludeHiddenChar=true);		
 
 	void OutputDebugString_CharacterState();
 
@@ -54,8 +53,3 @@ public:
 
 	void InitRound();
 };
-
-
-
-
-#endif 

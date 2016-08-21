@@ -61,9 +61,8 @@ void ZCamera::Update(float fElapsed)
 	{
 		rvector position,direction;
 		position=pTargetCharacter->m_Position;
-		direction=pTargetCharacter->m_TargetDir;
+		direction=pTargetCharacter->CameraDir;
 
-		// 옵져버 모드
 		if (pCombatInterface->GetObserver()->IsVisible()) 
 		{
 			ZCharacter *pObserverTargetCharacter = pCombatInterface->GetObserver()->GetTargetCharacter();
@@ -71,16 +70,8 @@ void ZCamera::Update(float fElapsed)
 				pTargetCharacter = pObserverTargetCharacter;
 
 			if(pTargetCharacter)
-			{
-				pTargetCharacter->GetHistory(&position,&direction,g_pGame->GetTime()-pCombatInterface->GetObserver()->GetDelay());
-				//direction = m_pMyCharacter;
-
-				if (GetLookMode() == ZCAMERA_DEFAULT)
-				{
-//					direction = *pCombatInterface->GetObserver()->GetFreeLookTarget();
-				}
-				//direction = m_pMyCharacter->m_TargetDir;
-			}
+				pTargetCharacter->GetHistory(&position, nullptr,
+					g_pGame->GetTime() - pCombatInterface->GetObserver()->GetDelay(), &direction);
 		}
 		if(!pTargetCharacter) return;
 
@@ -134,17 +125,11 @@ void ZCamera::Update(float fElapsed)
 	{
 		if (pObserver->GetTargetCharacter() != NULL)
 		{
-			ZCharacter *pTargetCharacter=pObserver->GetTargetCharacter();
-			rvector a_pos;
+			ZCharacter *pTargetCharacter = pObserver->GetTargetCharacter();
 			rvector a_dir;
-			if(pTargetCharacter->GetHistory(&a_pos,&a_dir,g_pGame->GetTime()-pObserver->GetDelay()))
+			if (pTargetCharacter->GetHistory(nullptr, nullptr, g_pGame->GetTime() - pObserver->GetDelay(), &a_dir))
 			{
 				dir = a_dir;
-
-				// 방향은 다음과 같으므로 m_fAngleX 과 m_fAngleZ 를 dir 로 부터 구한다
-//				rvector(cosf(m_fCurrentAngleZ)*sinf(m_fCurrentAngleX),
-//						sinf(m_fCurrentAngleZ)*sinf(m_fCurrentAngleX),
-//						cosf(m_fCurrentAngleX));
 
 				m_fAngleX = acosf(dir.z);
 				a_dir.z = 0;

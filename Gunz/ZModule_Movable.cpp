@@ -33,7 +33,6 @@ bool ZModule_Movable::Update(float fElapsed)
 	if(!pThisObj->IsVisible()) return true;
 
 	if(m_bRestrict && g_pGame->GetTime()-m_fRestrictTime > m_fRestrictDuration) {
-		// 시간이 되었으므로 이동제한을 풀어준다
 		m_bRestrict = false;
 		m_fMoveSpeedRatio = 1.f;
 	}
@@ -43,13 +42,11 @@ bool ZModule_Movable::Update(float fElapsed)
 	return true;
 }
 
-// TODO : 충돌 범위 / 방법을 유동적으로 가져가자
-//#define COLLISION_DIST	70.f
-
-
-bool ZModule_Movable::Move(rvector &diff)
+bool ZModule_Movable::Move(const rvector &orig_diff)
 {
 	ZObject *pThisObj = MStaticCast(ZObject,m_pContainer);
+
+	auto diff = orig_diff;
 
 #ifdef PORTAL
 	if (g_pPortal->Move(pThisObj, diff))

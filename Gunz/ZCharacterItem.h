@@ -44,7 +44,8 @@ public:
 
 		return pItem->GetDesc();
 	}
-	ZItem* GetSelectedWeapon(); 
+	ZItem* GetSelectedWeapon();
+	const ZItem* GetSelectedWeapon() const;
 	MMatchCharItemParts GetSelectedWeaponParts() { return (MMatchCharItemParts)m_nSelectedWeapon; }
 
 	MMatchCharItemParts GetSelectedWeaponType() {

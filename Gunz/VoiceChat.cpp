@@ -424,7 +424,7 @@ void VoiceChat::Draw()
 
 		auto v = TopLeft + TextOffset;
 
-		g_Draw.Text(Player->GetUserNameA(), v.x, v.y);
+		g_Draw.Text(Player->GetUserName(), v.x, v.y);
 
 		D3DXVECTOR2 SpeakerIconOrigin = TopLeft + D3DXVECTOR2(RELWIDTH(10), RELHEIGHT(10));
 		D3DXVECTOR2 SpeakerIconExtents(RELWIDTH(30), RELHEIGHT(30));

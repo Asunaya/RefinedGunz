@@ -3,6 +3,8 @@
 #include "MZFileSystem.h"
 #include "MBaseStringResManager.h"
 #include "MMatchUtil.h"
+#include "MTime.h"
+#include "MDebug.h"
 
 #define DEFAULT_MELEE_WEAPON_RANGE 160
 
@@ -10,25 +12,16 @@ MUID MMatchItemMap::m_uidGenerate = MUID(0,0);
 MCriticalSection MMatchItemMap::m_csUIDGenerateLock;
 
 MMatchItemDesc::MMatchItemDesc() : m_nID(0), m_nTotalPoint(0), m_nType(MMIT_MELEE), m_nResSex(0),
-   m_nResLevel(0), m_nSlot(MMIST_NONE), m_nWeaponType(MWT_NONE), 
-   m_nWeight(0), m_nBountyPrice(0),
-   m_nDamage(0), m_nDelay(0), m_pEffect(NULL), m_nControllability(0), m_nMagazine(0),
-   m_nReloadTime(0), m_bSlugOutput(0), m_nGadgetID(0), m_nHP(0), m_nAP(0), m_nMaxWT(0), m_nSF(0),
-   m_nFR(0), m_nCR(0), m_nPR(0), m_nLR(0), m_nColor(0xFFFFFFFF), m_nImageID(0), m_nBulletImageID(0),
-   m_nMagazineImageID(0), m_nMaxBullet(0),m_nLimitSpeed(100),m_nLimitJump(0),m_nLimitTumble(0),m_nLimitWall(0),m_nEffectLevel(0),
-   m_bIsCashItem(false), m_bDuplicate( true )
-{
-	memset(m_szName, 0, sizeof(m_szName));
-	memset(m_szDesc, 0, sizeof(m_szDesc));
-	memset(m_szMeshName, 0, sizeof(m_szMeshName));
-	memset(m_szReloadSndName, 0, sizeof(m_szReloadSndName));
-	memset(m_szFireSndName, 0, sizeof(m_szFireSndName));
-	memset(m_szDryfireSndName, 0, sizeof(m_szDryfireSndName));
-
-	m_Bonus.m_fXP_SoloBonus = 0.0f;
-	m_Bonus.m_fXP_TeamBonus = 0.0f;
-	m_Bonus.m_fXP_QuestBonus = 0.0f;
-}
+m_nResLevel(0), m_nSlot(MMIST_NONE), m_nWeaponType(MWT_NONE),
+m_nWeight(0), m_nBountyPrice(0),
+m_nDamage(0), m_nDelay(0), m_pEffect(NULL), m_nControllability(0), m_nMagazine(0),
+m_nReloadTime(0), m_bSlugOutput(0), m_nGadgetID(0), m_nHP(0), m_nAP(0), m_nMaxWT(0), m_nSF(0),
+m_nFR(0), m_nCR(0), m_nPR(0), m_nLR(0), m_nColor(0xFFFFFFFF), m_nImageID(0), m_nBulletImageID(0),
+m_nMagazineImageID(0), m_nMaxBullet(0), m_nLimitSpeed(100), m_nLimitJump(0), m_nLimitTumble(0), m_nLimitWall(0),
+m_nEffectLevel(0), m_bIsCashItem(false), m_bDuplicate(true),
+m_szName(), m_szDesc(), m_szMeshName(), m_szReloadSndName(), m_szFireSndName(), m_szDryfireSndName(),
+m_Bonus()
+{}
 
 ///////////////////////////////////////////////////////////////////////////////
 // MMatchItemEffectDescMgr ////////////////////////////////////////////////////
@@ -634,8 +627,9 @@ void MMatchItemDescMgr::ParseItem(MXmlElement& element)
 	iterator tempitor = find(pNewDesc->m_nID);
 	if (tempitor != end())
 	{
-		//_ASSERT(0);		// 같은 ID의 아이템이 존재한다.
-		MLog("ZItem error: %s has identical id (%d) to %s\n", pNewDesc->m_szName, pNewDesc->m_nID, tempitor->second->m_szName);
+		//_ASSERT(0);
+		MLog("ZItem error: %s has identical id (%d) to %s\n",
+			pNewDesc->m_szName, pNewDesc->m_nID, tempitor->second->m_szName);
 		delete pNewDesc;
 		return;
 	}
@@ -655,14 +649,7 @@ MMatchItemDescMgr* MMatchItemDescMgr::GetInstance()
 ///////////////////////////////////////////////////////////////////////////////
 // MMatchItem /////////////////////////////////////////////////////////////////
 MMatchItem::MMatchItem() : MBaseItem(), m_nCIID(0), m_pDesc(NULL), m_bEquiped(false), m_nRentItemRegTime(0)
-{
-
-}
-
-MMatchItem::~MMatchItem()
-{
-
-}
+{}
 
 bool MMatchItem::Create(const MUID& uid, MMatchItemDesc* pDesc, int nCount)
 {
@@ -682,7 +669,6 @@ void MMatchItem::Destroy()
 
 MMatchItemType MMatchItem::GetItemType()
 {
-//	_ASSERT(m_pDesc != NULL);
 	if (m_pDesc == NULL) return MMIT_MELEE;
 
 	return m_pDesc->m_nType;

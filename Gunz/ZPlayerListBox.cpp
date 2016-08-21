@@ -466,7 +466,8 @@ void ZPlayerListBox::OnSize(int w,int h)
 }
 
 // mode PLAYERLISTMODE_CHANNEL
-void ZPlayerListBox::AddPlayer(const MUID& puid, ePlayerState state, int  nLevel,char* szName, char *szClanName, unsigned int nClanID, MMatchUserGradeID nGrade )
+void ZPlayerListBox::AddPlayer(const MUID& puid, ePlayerState state, int nLevel,
+	const char* szName, const char *szClanName, unsigned int nClanID, MMatchUserGradeID nGrade )
 {
 	if ( (int)strlen( szName) == 0)
 		return;
@@ -474,33 +475,20 @@ void ZPlayerListBox::AddPlayer(const MUID& puid, ePlayerState state, int  nLevel
 	char szFileName[64] = "";
 	char szLevel[64] = "";
 
-	char* szRefName = NULL;
+	const char* szRefName = nullptr;
 
 	MCOLOR _color;
 	char sp_name[256];
-	bool bSpUser = false;
+	bool bSpUser = GetUserGradeIDColor(nGrade, _color, sp_name);
 
-	if(GetUserGradeIDColor(nGrade,_color,sp_name)) {
-		sprintf_safe(szLevel, "%2d", nLevel);
-		szRefName = szName;
-		bSpUser = true;
-	}
-	else {
-		sprintf_safe(szLevel,"%2d",nLevel);
-		szRefName = szName;
-	}
+	sprintf_safe(szLevel, "%2d", nLevel);
+	szRefName = szName;
 
 	switch (state) {
-
 		case PS_FIGHT	: strcpy_safe(szFileName, "player_status_player.tga");	break;
 		case PS_WAIT	: strcpy_safe(szFileName, "player_status_game.tga");		break;
 		case PS_LOBBY	: strcpy_safe(szFileName, "player_status_lobby.tga");	break;
 	}
-
-	//// Å¬·£ ¿¥ºí·³
-	//MBitmap* pBitmapEmblem = NULL;
-	//if ( strcmp( szClanName, "") != 0)
-	//	pBitmapEmblem = ZGetEmblemInterface()->GetClanEmblem( nClanID );
 
 	ZLobbyPlayerListItem* pItem = new ZLobbyPlayerListItem(puid, MBitmapManager::Get(szFileName), nClanID, szLevel, szRefName, szClanName, state,nGrade );
 
@@ -510,8 +498,8 @@ void ZPlayerListBox::AddPlayer(const MUID& puid, ePlayerState state, int  nLevel
 	MListBox::Add( pItem );
 }
 
-// mode PLAYERLISTMODE_STAGE
-void ZPlayerListBox::AddPlayer(const MUID& puid, MMatchObjectStageState state, int nLevel, char* szName, char* szClanName, unsigned int nClanID, bool isMaster, MMatchTeam nTeam)
+void ZPlayerListBox::AddPlayer(const MUID& puid, MMatchObjectStageState state, int nLevel,
+	const char* szName, const char* szClanName, unsigned int nClanID, bool isMaster, MMatchTeam nTeam)
 {
 	if ( (int)strlen( szName) == 0)
 		return;
@@ -521,25 +509,17 @@ void ZPlayerListBox::AddPlayer(const MUID& puid, MMatchObjectStageState state, i
 	char szFileNameState[64] = "";
 	char szLevel[64] = "";
 
-	char* szRefName = NULL;
+	const char* szRefName = nullptr;
 
 	MCOLOR _color;
 	char sp_name[256];
-	bool bSpUser = false;
-
 	MMatchUserGradeID gid = MMUG_FREE;
+	bool bSpUser = GetUserInfoUID(puid, _color, sp_name, gid);
 
-	if(GetUserInfoUID(puid,_color,sp_name,gid)){
-		sprintf_safe(szLevel, "%2d", nLevel);
-		szRefName = szName;
-		bSpUser = true;
-	}
-	else {
-		sprintf_safe(szLevel,"%2d",nLevel);
-		szRefName = szName;
-	}
+	sprintf_safe(szLevel, "%2d", nLevel);
+	szRefName = szName;
 
-	MBitmap* pBitmap = NULL;
+	MBitmap* pBitmap = nullptr;
 	if(isMaster) {
 		switch (state) {
 			case MOSS_NONREADY	:

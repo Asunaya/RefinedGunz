@@ -1125,7 +1125,7 @@ void ZScreenEffectManager::DrawScoreBoard()
 	m_pScorePanel->Draw(0);
 }
 
-void ZScreenEffectManager::AddAlert(rvector& vVictimPos, rvector& vVictimDir, rvector& vAttackerPos)
+void ZScreenEffectManager::AddAlert(const rvector& vVictimPos, const rvector& vVictimDir, const rvector& vAttackerPos)
 {
 	rvector my_dir = vVictimDir;
 	rvector my_pos = vVictimPos;
@@ -1434,10 +1434,10 @@ void ZScreenEffectManager::DrawDuelEffects()
 
 	if (ZGetCombatInterface()->GetObserver()->IsVisible()) return;
 
-	if (g_pGame->m_pMyCharacter->GetKils() > 0)
+	if (g_pGame->m_pMyCharacter->GetKills() > 0)
 	{
 		char buffer[32];
-		sprintf_safe(buffer,"%d", g_pGame->m_pMyCharacter->GetKils());
+		sprintf_safe(buffer,"%d", g_pGame->m_pMyCharacter->GetKills());
 		int nCount=(int)strlen(buffer);
 
 		unsigned int nNowTime = GetGlobalTimeMS();

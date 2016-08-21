@@ -24,12 +24,12 @@ void ZRangeWeaponHitDice::BuildTargetSpeed(float fSpeed)
 	m_fTargetSpeed = fSpeed;
 }
 
-void ZRangeWeaponHitDice::BuildTargetPosition(rvector& vPosition)
+void ZRangeWeaponHitDice::BuildTargetPosition(const rvector& vPosition)
 {
 	m_TargetPosition = vPosition;
 }
 
-void ZRangeWeaponHitDice::BuildSourcePosition(rvector& vPosition)
+void ZRangeWeaponHitDice::BuildSourcePosition(const rvector& vPosition)
 {
 	m_SourcePosition = vPosition;
 }
@@ -41,8 +41,6 @@ void ZRangeWeaponHitDice::BuildGlobalFactor(float fGlobalFactor)
 
 void ZRangeWeaponHitDice::MakeHitProbability()
 {
-	// 좀더 다양하게 나오도록 보강해야 함. 지금은 단순히 GlobalFactor에만 영향을 받는다. - bird
-
 	m_fHitProbability = m_fGlobalFactor;	
 }
 

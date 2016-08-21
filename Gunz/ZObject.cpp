@@ -26,12 +26,6 @@ ZObject::~ZObject()
 	delete m_pModule_Movable;
 }
 
-
-void ZObject::SetPosition(const rvector& pos)
-{
-	m_Position = pos;
-}
-
 void ZObject::OnDraw()
 {
 }
@@ -73,22 +67,26 @@ bool ZObject::Pick(int x,int y,rvector* v,float* f)
 }
 
 
-bool ZObject::Pick(rvector& pos,rvector& dir, RPickInfo* pInfo)
+bool ZObject::Pick(const rvector& pos, const rvector& dir, RPickInfo* pInfo)
 {
 	if(m_pVMesh) 
-	{
 		return m_pVMesh->Pick(pos, dir, pInfo);
-	}
 
 	return false;
 }
 
-bool ZObject::GetHistory(rvector *pos,rvector *direction,float fTime)
+bool ZObject::GetHistory(rvector *pos, rvector *direction, float fTime, rvector* cameradir)
 {
-	if(m_pVMesh == NULL) return false;
+	if (!m_pVMesh)
+		return false;
 	
-	*pos=m_Position;
-	*direction=m_Direction;
+	if (pos)
+		*pos=m_Position;
+	if (direction)
+		*direction=m_Direction;
+	if (cameradir)
+		*cameradir = m_Direction;
+
 	return true;
 }
 

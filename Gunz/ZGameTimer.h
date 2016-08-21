@@ -1,32 +1,23 @@
-#ifndef _ZGAMETIMER_H
-#define _ZGAMETIMER_H
-
-//#pragma once
-
-
-// GT = LT+Offset (-> Offset = GT-LT)
+#pragma once
 
 class ZGameTimer {
-protected:
-	unsigned long	m_nTickTime;
-	int				m_nGlobalOffset;
 public:
-	DWORD			m_dwUpdateCnt;
-public:
-	ZGameTimer()			{ m_nTickTime=0; m_nGlobalOffset=0; m_dwUpdateCnt=0;}
-	virtual ~ZGameTimer()	{}
+	void Reset() {
+		m_nTickTime = GetGlobalTimeMS();
+		m_dwUpdateCnt = 0;
+	}
 
-	void Reset()			{ m_nTickTime = GetGlobalTimeMS(); m_dwUpdateCnt = 0;}
-	void UpdateTick(unsigned long nTickTime) {
+	void UpdateTick(u64 nTickTime) {
 		m_nTickTime = nTickTime;
 		m_dwUpdateCnt++;
 	}
-	void SetGlobalOffset(int nOffset) { 
-		m_nGlobalOffset = nOffset; 
-	}
-	unsigned long GetGlobalTick() {
-		return (m_nTickTime + m_nGlobalOffset);
-	}
-};
 
-#endif
+	void SetGlobalOffset(int nOffset) {  m_nGlobalOffset = nOffset;  }
+	auto GetGlobalTick() const { return (m_nTickTime + m_nGlobalOffset); }
+	auto GetUpdateCount() const { return m_dwUpdateCnt; }
+
+private:
+	u64	m_nTickTime = 0;
+	int	m_nGlobalOffset = 0;
+	u32 m_dwUpdateCnt = 0;
+};

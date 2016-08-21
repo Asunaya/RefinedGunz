@@ -888,7 +888,7 @@ inline void ZPostClanEmblemReady(unsigned int nCLID, char* pszEmblemURL)
 }
 
 // Quest /////////////////////////////////////////////////////////////////////////////////////////////
-inline void ZPostQuestRequestNPCDead(const MUID& uidKiller, const MUID& uidNPC, rvector& vPos)
+inline void ZPostQuestRequestNPCDead(const MUID& uidKiller, const MUID& uidNPC, const rvector& vPos)
 {
 	ZPOSTCMD3(MC_QUEST_REQUEST_NPC_DEAD, MCmdParamUID(uidKiller), MCmdParamUID(uidNPC), MCmdParamShortVector(vPos.x, vPos.y, vPos.z));
 }

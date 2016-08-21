@@ -19,11 +19,13 @@
 #include "AnimationStuff.h"
 #include "RMesh.h"
 #include "RBspObject.h"
+#include "MMatchUtil.h"
 
 struct BasicInfo {
 	v3 position;
 	v3 velocity;
 	v3 direction;
+	v3 cameradir;
 	ZC_STATE_UPPER upperstate;
 	ZC_STATE_LOWER lowerstate;
 	MMatchCharItemParts SelectedSlot;
@@ -39,6 +41,7 @@ struct ZBasicInfo {
 	v3 position;
 	v3 velocity;
 	v3 direction;
+	v3 targetdir;
 };
 
 #pragma pack(push, 1)
@@ -143,7 +146,7 @@ enum ZC_SHOT_SP_TYPE {
 
 	// item type
 
-	ZC_WEAPON_SP_ITEMKIT,	// medikit, repairkit, bulletkit µîµî
+	ZC_WEAPON_SP_ITEMKIT,	// medikit, repairkit, bulletkit
 
 	ZC_WEAPON_SP_END,
 };

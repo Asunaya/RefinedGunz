@@ -166,16 +166,12 @@ public:
 
 	bool CheckWall(rvector& Pos);
 
-//	bool CheckStamina(int v);	// 보류
-//	bool UsingStamina(int mode);
-
-//	virtual void UpdateStamina(float fTime);
 	virtual void UpdateAnimation();
 	virtual void OnUpdate(float fTime);
 
 	virtual void UpdateLimit();
 	
-	virtual void OnChangeWeapon(char* WeaponModelName);
+	virtual void OnChangeWeapon(const char* WeaponModelName) override;
 
 	void Animation_Reload();
 
@@ -198,17 +194,30 @@ public:
 	virtual bool IsGuard() const override;
 	virtual bool IsGuardCustom() const override;
 
-	void ShotBlocked();			// 칼질이 막혔을때 스턴 먹는다
+	void ShotBlocked();
 
 	void ReleaseButtonState();
 
 	void AddRecoilTarget(ZCharacter *pTarget);
 
+	virtual void OnGuardSuccess() override;
+	virtual void OnDamaged(ZObject* pAttacker, rvector srcPos,
+		ZDAMAGETYPE damageType, MMatchWeaponType weaponType,
+		float fDamage, float fPiercingRatio = 1.f, int nMeleeType = -1) override;
+	virtual void OnKnockback(const rvector& dir, float fForce) override;
+	virtual void OnMeleeGuardSuccess() override;
+
+	virtual void OnStun(float fTime) override;
+
+	bool IsDirLocked() const {
+		return m_bSkill || m_bWallJump || m_bWallJump2 || m_bWallHang ||
+			m_bTumble || m_bBlast || m_bBlastStand || m_bBlastDrop;
+	}
+
 private:
-	float m_fCAFactor;		// Controllability Factor
+	float m_fCAFactor;		// Controllability factor for weapon spread
 	float m_fElapsedCAFactorTime;
 
-	// 일정 시간 뒤에 처리해야 하는 일들이다
 	ZDELAYEDWORKLIST m_DelayedWorkList;
 
 	void OnDelayedWork(ZDELAYEDWORKITEM *pItem);
@@ -216,7 +225,6 @@ private:
 	void ProcessDelayedWork();
 
 	virtual void	OnDie();
-//	void UpdatePosition(float fDelta);	// 속도에 따라 실제 위치를 이동
 	void CalcRangeShotControllability(rvector& vOutDir, const rvector& vSrcDir, int nControllability, u32 Seed);
 	void IncreaseCAFactor();
 	float GetControllabilityFactor();
@@ -229,7 +237,6 @@ private:
 	void ProcessGadget();
 	void ProcessGuard();
 
-	//	void OnGadget_Katana(bool bFirst);
 	void OnGadget_Hanging();
 	void OnGadget_Snifer();
 
@@ -239,23 +246,13 @@ private:
 	void OnShotMelee();
 	void OnShotRange();
 
-	void Charged();				// 기 모았다
-	void EnterCharge();			// 기모으기로 들어간다
-	void Discharged();			// 기모으기 풀렸을때
-	void ChargedShot();			// 강베기
-	void JumpChargedShot();		// 공중 강베기
+	void Charged();
+	void EnterCharge();
+	void Discharged();
+	void ChargedShot();
+	void JumpChargedShot();
 
-//	bool IsCounterAttackable();		// 반격기가 나갈수 있는 타이밍인가
-
-	float GetGravityConst();		// 중력의 영향을 얼만큼 받는지..
-public:
-	virtual void OnGuardSuccess();
-	virtual void OnDamaged(ZObject* pAttacker, rvector srcPos, ZDAMAGETYPE damageType, MMatchWeaponType weaponType, float fDamage, float fPiercingRatio=1.f, int nMeleeType=-1);
-	// knockback을 적용받아야한다
-	virtual void OnKnockback(const rvector& dir, float fForce);
-	virtual void OnMeleeGuardSuccess();
-
-	virtual void OnStun(float fTime);
+	float GetGravityConst();
 };
 
 

@@ -395,10 +395,12 @@ public:
 //	MBitmap* GetBitmapIn() { return m_pBitmapIn; }
 
 	// mode PLAYERLISTMODE_CHANNEL
-	void AddPlayer(const MUID& puid, ePlayerState state, int  nLevel,char* szName, char* szClanName, unsigned int nClanID, MMatchUserGradeID nGrade );
+	void AddPlayer(const MUID& puid, ePlayerState state, int  nLevel,
+		const char* szName, const char* szClanName, unsigned int nClanID, MMatchUserGradeID nGrade);
 
 	// mode PLAYERLISTMODE_STAGE
-	void AddPlayer(const MUID& puid, MMatchObjectStageState state, int nLevel, char* szName, char* szClanName, unsigned int nClanID, bool isMaster,MMatchTeam nTeam);
+	void AddPlayer(const MUID& puid, MMatchObjectStageState state, int nLevel,
+		const char* szName, const char* szClanName, unsigned int nClanID, bool isMaster, MMatchTeam nTeam);
 
 	// mode PLAYERLISTMODE_CHANNEL_FRIEND, PLAYERLISTMODE_STAGE_FRIEND
 	void AddPlayer(ePlayerState state, char* szName, char* szLocation);

@@ -122,8 +122,6 @@ bool ZItem::isReloadable()
 	return false;
 }
 
-//////////////////////////////////////////////////
-// HP 와 AP 데미지 비율 계산 공식~
 float ZItem::GetPiercingRatio(MMatchWeaponType wtype,RMeshPartsType partstype)
 {
 	float fRatio = 0.5f;
@@ -226,7 +224,7 @@ float ZItem::GetPiercingRatio(MMatchWeaponType wtype,RMeshPartsType partstype)
 	return fRatio;
 }
 
-float ZItem::GetKnockbackForce()
+float ZItem::GetKnockbackForce() const
 {
 	float fKnockbackForce = 0.0f;
 

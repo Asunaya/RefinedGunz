@@ -329,7 +329,7 @@ protected:
 	void SetDesc(MMatchItemDesc* pDesc) { m_pDesc = pDesc; }
 public:
 	MMatchItem();
-	virtual ~MMatchItem();
+	virtual ~MMatchItem() = default;
 	bool Create(const MUID& uid, MMatchItemDesc* pDesc, int nCount = 1);
 	void Destroy();
 
@@ -339,7 +339,8 @@ public:
 	bool IsEmpty() { return (((m_pDesc == NULL) || (m_nCount <= 0)) ? true : false); }
 	void SetCIID(unsigned long int nCIID) { m_nCIID = nCIID; }
 	unsigned long int GetCIID() { return m_nCIID; }
-	MMatchItemDesc* GetDesc() { return m_pDesc; }
+	auto* GetDesc() { return m_pDesc; }
+	auto* GetDesc() const { return m_pDesc; }
 	unsigned long int GetDescID() { if (m_pDesc) return m_pDesc->m_nID; else return 0; }
 	void SetCount(int n) { m_nCount = n; }
 	int GetCount() { return m_nCount; }

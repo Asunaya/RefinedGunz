@@ -1,7 +1,4 @@
-#ifndef _ZGAME_H
-#define _ZGAME_H
-
-//#pragma once
+#pragma once
 
 #include "ZPrerequisites.h"
 
@@ -20,6 +17,7 @@
 #include "ZCharacterManager.h"
 #include "ZObjectManager.h"
 #include "ZWorld.h"
+#include "ZGameAction.h"
 
 _USING_NAMESPACE_REALSPACE2
 
@@ -50,15 +48,10 @@ enum ZGAME_READYSTATE {
 	ZGAME_READYSTATE_RUN
 };
 
-// game 에서 pick 되어져 나온 결과.. pCharacter(캐릭터) 혹은 pNode(맵)둘중에 하나의 결과만 나온다.
 struct ZPICKINFO {
-
-	// 캐릭터가 결과인 경우
-//	ZCharacter *pCharacter;
 	ZObject*	pObject;
 	RPickInfo	info;
 
-	// 맵이 결과인경우.
 	bool bBspPicked;
 	RBSPPICKINFO bpi;
 };
@@ -82,35 +75,9 @@ public:
 	}
 };
 
-class ZGame {
-protected:
-	enum ZGAME_LASTTIME
-	{
-		ZLASTTIME_HPINFO		= 0,
-		ZLASTTIME_BASICINFO,
-		ZLASTTIME_PEERPINGINFO,
-		ZLASTTIME_SYNC_REPORT,
-		ZLASTTIME_MAX
-	};
-
-//	ZWorld				*m_pWorld;
-	ZGameAction			*m_pGameAction;
-	MDataChecker		m_DataChecker;
-	ZGameTimer			m_GameTimer;
-	float				m_fTime;
-	
-	u64				m_nLastTime[ZLASTTIME_MAX];
-	
-	
-	ZGAME_READYSTATE	m_nReadyState;
-
-	ZObserverCommandList::iterator ReplayIterator;
-	float ReplayStartGameTime;
-
-	void OnPreDraw();
-	bool OnRuleCommand(MCommand* pCommand);
+class ZGame
+{
 public:
-
 	RParticles			*m_pParticles;
 
 	ZMyCharacter*		m_pMyCharacter;
@@ -125,10 +92,10 @@ public:
 	int					m_render_poly_cnt;
 
 	ZHelpScreen	m_HelpScreen;
-public:
 
+public:
 	ZGame();
-	virtual ~ZGame();
+	~ZGame();
 
 	bool Create(MZFileSystem *pfs, ZLoadingProgress *pLoading);
 
@@ -161,8 +128,6 @@ public:
 	void CheckStylishAction(ZCharacter* pCharacter);
 	void CheckCombo( ZCharacter *pOwnerCharacter , ZObject *pHitObject ,bool bPlaySound);
 	void UpdateCombo(bool bShot = false );
-	//void AssignCommander(const MUID& uidRedCommander, const MUID& uidBlueCommander);
-	//void SetGameRuleInfo(const MUID& uidRedCommander, const MUID& uidBlueCommander);
 
 	void PostBasicInfo();
 	void PostHPInfo();
@@ -184,7 +149,6 @@ public:
 	bool OnCommand(MCommand* pCommand);
 	bool OnCommand_Immediate(MCommand* pCommand);
 
-	// 녹화 & 재생
 	void ToggleRecording();
 	void StartRecording();
 	void StopRecording();
@@ -201,8 +165,6 @@ public:
 
 	void SetReplayTime(float Time);
 
-
-	// 옵저버 
 	void OnObserverRun();
 	void OnCommand_Observer(MCommand* pCommand);
 	void FlushObserverCommands();
@@ -212,16 +174,13 @@ public:
 	void ReserveObserver();
 	void ReleaseObserver();
 
-	// 외부에서 참조할만한 것들
 	ZMatch* GetMatch()				{ return &m_Match; }
 	ZMapDesc* GetMapDesc()			{ return GetWorld() ? GetWorld()->GetDesc() : NULL; }
 	ZWorld* GetWorld()				{ return ZGetWorldManager()->GetCurrent(); }
 
 	ZGameTimer* GetGameTimer()		{ return &m_GameTimer; }
-	unsigned long GetTickTime()		{ return m_GameTimer.GetGlobalTick(); }
-	float GetTime()					{ return m_fTime; }
-
-	int GetPing(MUID& uid);
+	auto GetTickTime() const		{ return m_GameTimer.GetGlobalTick(); }
+	auto GetTime() const			{ return m_fTime; }
 
 	MDataChecker* GetDataChecker()	{ return &m_DataChecker; }
 
@@ -248,10 +207,28 @@ public:
 	bool GetUserNameColor(MUID uid,MCOLOR& color,char* sp_name);
 	bool IsAttackable(ZObject *pAttacker, ZObject *pTarget);
 
+	void OnPeerShot(const MUID& uid, float fShotTime, rvector& pos, rvector& to, MMatchCharItemParts sel_type);
+
+	void PostSpMotion(ZC_SPMOTION_TYPE type);
+
+	void OnPeerShot_Melee(const MUID& uidOwner, float fShotTime);
+	void OnPeerShot_Range(MMatchCharItemParts sel_type, const MUID& uidOwner, float fShotTime,
+		rvector& pos, rvector& to, u32 seed);
+	void OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float fShotTime,
+		rvector& pos, rvector& to, u32 seed);
+
+	void OnPeerSlash(ZCharacter *pOwner, const rvector &pos, const rvector &dir, int Type);
+	void OnPeerMassive(ZCharacter *pOwner, const rvector &pos, const rvector &dir);
+
+	void ReserveSuicide();
+	bool IsReservedSuicide() { return m_bSuicide; }
+	void CancelSuicide() { m_bSuicide = false; }
+
+	ZObserverCommandList* GetReplayCommandList() { return &m_ReplayCommandList; }
+
 protected:
-	int	m_nGunzReplayNumber;	// 메시지출력을 위한 변수
+	int	m_nGunzReplayNumber;
 	ZFile *m_pReplayFile;
-//	FILE *m_pRecordingFile;
 	bool m_bReplaying;
 	bool m_bShowReplayInfo;
 
@@ -261,16 +238,16 @@ protected:
 	bool m_bSuicide;
 	DWORD m_dwReservedSuicideTime;
 
-	unsigned long int m_nReservedObserverTime;
+	u64 m_nReservedObserverTime;
 	int m_t;
-	ZMatch				m_Match;
-	unsigned long int	m_nSpawnTime;
-	bool				m_bSpawnRequested;
+	ZMatch m_Match;
+	u64	m_nSpawnTime;
+	bool m_bSpawnRequested;
 
-	ZObserverCommandList m_ObserverCommandList;		// observer 상태일때 command 를 저장해두는 곳
-	ZObserverCommandList m_ReplayCommandList;		// replay 상태일때 command 를 저장해두는 곳, 또 녹화할때 저장하는 곳.
+	ZObserverCommandList m_ObserverCommandList;
+	ZObserverCommandList m_ReplayCommandList;
 
-	ZObserverCommandList m_DelayedCommandList;		// 지연시간을 가지는 command 들이다. ex) 띄우기,칼질
+	ZObserverCommandList m_DelayedCommandList;
 
 	void CheckKillSound(ZCharacter* pAttacker);
 	
@@ -287,66 +264,68 @@ protected:
 	void OnGameResponseTimeSync(unsigned int nLocalTimeStamp, unsigned int nGlobalTimeSync);
 	void OnEventUpdateJjang(const MUID& uidChar, bool bJjang);
 
-	// 사라진듯.
-//	void OnPeerShot_Item(ZCharacter* pOwnerCharacter,float fShotTime, rvector& pos, rvector& dir,int type);
-
-	void OnPeerDead(const MUID& uidAttacker, const unsigned long int nAttackerArg, 
+	void OnPeerDead(const MUID& uidAttacker, const unsigned long int nAttackerArg,
 					const MUID& uidVictim, const unsigned long int nVictimArg);
 	void OnReceiveTeamBonus(const MUID& uidChar, const unsigned long int nExpArg);
 	void OnPeerDie(const MUID& uidVictim, const MUID& uidAttacker);
 	void OnPeerDieMessage(ZCharacter* pVictim, ZCharacter* pAttacker);
 	void OnChangeParts(const MUID& uid,int partstype,int PartsID);
-	void OnAttack(const MUID& uid,int type,rvector& pos);
 	void OnDamage(const MUID& uid, const MUID& tuid,int damage);
 	void OnPeerReload(const MUID& uid);
 	void OnPeerSpMotion(const MUID& uid,int nMotionType);
 	void OnPeerChangeCharacter(const MUID& uid);
-	void OnPeerSpawn(const MUID& uid, rvector& pos, rvector& dir);
+	void OnPeerSpawn(const MUID& uid, const rvector& pos, const rvector& dir);
 
 	void OnSetObserver(const MUID& uid);
-	
 
-//	void OnPeerAdd();
-	void OnPeerBasicInfo(MCommand *pCommand,bool bAddHistory=true,bool bUpdate=true);
+	void OnPeerBasicInfo(MCommand *pCommand, bool bAddHistory = true, bool bUpdate = true);
+	void OnPeerNewBasicInfo(MCommand *pCommand, bool bAddHistory = true, bool bUpdate = true);
 	void OnPeerHPInfo(MCommand *pCommand);
 	void OnPeerHPAPInfo(MCommand *pCommand);
 	void OnPeerPing(MCommand *pCommand);
 	void OnPeerPong(MCommand *pCommand);
 	void OnPeerOpened(MCommand *pCommand);
 	void OnPeerDash(MCommand* pCommand);
-
 		
 	bool FilterDelayedCommand(MCommand *pCommand);
 	void ProcessDelayedCommand();
 
-	// 투표는 봉인
-	//	void AdjustGlobalTime();
-	//	void AdjustMyData();
-
 	void OnLocalOptainSpecialWorldItem(MCommand* pCommand);
 	void OnResetTeamMembers(MCommand* pCommand);
-public:
 
 	void AutoAiming();
 
-	void OnPeerShot(const MUID& uid, float fShotTime, rvector& pos, rvector& to,MMatchCharItemParts sel_type);
+private:
+	void OnPreDraw();
+	bool OnRuleCommand(MCommand* pCommand);
 
-	void PostSpMotion(ZC_SPMOTION_TYPE type);
+	void PostNewBasicInfo();
 
-	// peershot이 너무 길어져서 분리
-	void OnPeerShot_Melee(const MUID& uidOwner, float fShotTime);
-	void OnPeerShot_Range(MMatchCharItemParts sel_type, const MUID& uidOwner, float fShotTime, rvector& pos, rvector& to, u32 seed);
-	void OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float fShotTime, rvector& pos, rvector& to, u32 seed);
+	ZGameAction GameAction;
+	MDataChecker m_DataChecker;
+	ZGameTimer m_GameTimer;
+	float m_fTime;
 
-	void OnPeerSlash(ZCharacter *pOwner, const rvector &pos, const rvector &dir, int Type);
-	void OnPeerMassive(ZCharacter *pOwner, const rvector &pos, const rvector &dir);
+	enum ZGAME_LASTTIME
+	{
+		ZLASTTIME_HPINFO = 0,
+		ZLASTTIME_BASICINFO,
+		ZLASTTIME_PEERPINGINFO,
+		ZLASTTIME_SYNC_REPORT,
+		ZLASTTIME_MAX
+	};
 
-    void ReserveSuicide();
-	bool IsReservedSuicide()		{ return m_bSuicide; }
-	void CancelSuicide()			{ m_bSuicide = false; }
-	ZObserverCommandList* GetReplayCommandList()  { return &m_ReplayCommandList;} 
+	u64 m_nLastTime[ZLASTTIME_MAX];
+
+	ZGAME_READYSTATE m_nReadyState;
+
+	ZObserverCommandList::iterator ReplayIterator;
+	float ReplayStartGameTime{};
+
+	ZC_STATE_LOWER LastNetLowerAni = ZC_STATE_LOWER_IDLE1;
+	ZC_STATE_UPPER LastNetUpperAni = ZC_STATE_UPPER_NONE;
+	int LastNetSlot{};
 };
-
 
 extern ZGame* g_pGame;
 extern MUID g_MyChrUID;
@@ -356,24 +335,7 @@ ZCharacterManager*	ZGetCharacterManager();
 ZObjectManager*		ZGetObjectManager();
 bool IsMyCharacter(ZObject* pObject);
 
-/*
-// Damage 계산에 필요한 사항
-#define DAMAGE_MELEE_HEAD	0.6f
-#define DAMAGE_MELEE_CHEST	0.6f
-#define DAMAGE_MELEE_HANDS	0.6f
-#define DAMAGE_MELEE_LEGS	0.6f
-#define DAMAGE_MELEE_FEET	0.6f
-
-#define DAMAGE_RANGE_HEAD	0.8f
-#define DAMAGE_RANGE_CHEST	0.5f
-#define DAMAGE_RANGE_HANDS	0.5f
-#define DAMAGE_RANGE_LEGS	0.5f
-#define DAMAGE_RANGE_FEET	0.5f
-*/
 #define MAX_COMBO 99
 
-#define PEERMOVE_TICK			100		// 0.1초 마다 이동메세지를 보낸다 (초당 10회)
-#define PEERMOVE_AGENT_TICK		100		// Agent를 통하면 초당 10번 메시지를 보낸다.
-
-
-#endif
+#define PEERMOVE_TICK			100
+#define PEERMOVE_AGENT_TICK		100

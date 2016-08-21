@@ -307,7 +307,7 @@ void ZRuleSkillmap::Draw()
 
 void ZRuleSkillmap::OnUpdate(float fDelta)
 {
-	rvector &pos = ZGetGame()->m_pMyCharacter->GetPosition();
+	auto pos = ZGetGame()->m_pMyCharacter->GetPosition();
 
 	if (CourseMgr.IsInStartZone(pos, CurrentCourseIndex))
 	{

@@ -145,7 +145,7 @@ void LoadRGCommands(ZChatCmdManager &CmdManager)
 
 		bool b = g_RGMain->MutePlayer(ret.second->GetUID());
 
-		ZChatOutputF("%s has been %s", ret.second->GetUserNameA(), b ? "muted" : "unmuted");
+		ZChatOutputF("%s has been %s", ret.second->GetUserName(), b ? "muted" : "unmuted");
 	}, CCF_ALL, 1, 1, true, "/swordcolor <AARRGGBB>", "");
 #endif
 

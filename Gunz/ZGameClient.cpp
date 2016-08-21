@@ -3239,7 +3239,7 @@ void ZGameClient::OnStopUDPTest(const MUID & uid)
 	if (!Char)
 		return;
 
-	ZChatOutputF("Failed to establish direct connection to %s.", Char->GetUserNameA());
+	ZChatOutputF("Failed to establish direct connection to %s.", Char->GetUserName());
 }
 
 void ZGameClient::OnUDPTestReply(const MUID& uid)
@@ -3250,7 +3250,7 @@ void ZGameClient::OnUDPTestReply(const MUID& uid)
 	if (!Char)
 		return;
 
-	ZChatOutputF("Established direct connection to %s.", Char->GetUserNameA());
+	ZChatOutputF("Established direct connection to %s.", Char->GetUserName());
 }
 
 

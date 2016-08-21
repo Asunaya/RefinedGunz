@@ -919,8 +919,8 @@ void ZMyCharacter::OnShotRange()
 
 		rvector vTo = pickpos;
 
-		rvector nPos = m_pVMesh->GetBipTypePosition(eq_parts_pos_info_Spine1);// 몸통에서~
-		rvector nDir = pickpos-nPos;//RealSpace2::RCameraDirection;
+		rvector nPos = m_pVMesh->GetBipTypePosition(eq_parts_pos_info_Spine1);
+		rvector nDir = pickpos-nPos;
 		Normalize(nDir);
 
 		if( skip_controllability || (vWeaponPos.z <  m_Position.z + 20.f ))
@@ -974,7 +974,7 @@ void ZMyCharacter::OnShotItem()
 
 	SetAnimationUpper(ZC_STATE_UPPER_SHOT);
 
-	int type = ZC_WEAPON_SP_ITEMKIT;//기본수류탄
+	int type = ZC_WEAPON_SP_ITEMKIT;
 
 	rvector pos = rvector(0.0f,0.0f,0.0f);
 	int sel_type = GetItems()->GetSelectedWeaponParts();
@@ -990,17 +990,14 @@ void ZMyCharacter::OnShotItem()
 
 		rvector vWeapon;
 
-//		vWeapon = m_pVMesh->GetCurrentWeaponPosition();//지금 손위치 보다는 몸통의 앞쪽...
 		vWeapon = m_Position + rvector(0,0,130) + (m_Direction * 50);
 
-		// 벽뒤로 던지는 경우가 생기면
 		rvector nPos = m_pVMesh->GetBipTypePosition(eq_parts_pos_info_Spine1);
 		rvector nDir = vWeapon - nPos;
 
 		Normalize(nDir);
 
 		RBSPPICKINFO bpi;
-		// 아래를 보면서 던지면 벽을 통과해서...
 		if(ZGetWorld()->GetBsp()->Pick(nPos,nDir,&bpi))	{
 			if(D3DXPlaneDotCoord(&(bpi.pInfo->plane),&vWeapon)<0) {
 				vWeapon = bpi.PickPos - nDir;
@@ -1016,9 +1013,6 @@ void ZMyCharacter::OnShotItem()
 
 	rvector vWeaponPos;
 	CheckWall(vWeaponPos);
-//	rvector dir = bpi.PickPos - vWeaponPos;
-
-	///////////////////////////////////////
 
 	MPOINT Cp = MPOINT(0, 0);
 	ZPICKINFO zpi;
@@ -1055,12 +1049,9 @@ void ZMyCharacter::OnShotItem()
 		}
 	}
 
-	// 필요없는?
-
 	rvector v1;
 	GetWeaponTypePos(weapon_dummy_muzzle_flash,&v1);
 
-	// 총구가 벽뒤로 파뭍혀있으면
 	if(zpi.bBspPicked && D3DXPlaneDotCoord(&(zpi.bpi.pInfo->plane),&v1)<0)
 		v1=m_Position+rvector(0,0,110);
 
@@ -1081,25 +1072,20 @@ void ZMyCharacter::OnShotCustom()
 	MMatchItemDesc* pCustomDesc = pSelectedItem->GetDesc();
 	DWORD nWeaponDelay = pCustomDesc->m_nDelay;
 
-	// 수류탄도 애니메이션이 있어야한다.
 	SetAnimationUpper(ZC_STATE_UPPER_SHOT);
 
-	if(m_pVMesh->IsSelectWeaponGrenade()) {	//모션만 시작된다..
-		// 수류탄 던지는 특정 프레임에서 발사..
+	if(m_pVMesh->IsSelectWeaponGrenade()) {
 		m_pVMesh->m_bGrenadeFire = true;
 		m_pVMesh->m_GrenadeFireTime = GetGlobalTimeMS();
 	}
-
-//	ZPostShot(g_pGame->GetTime(),v1, dir);
 }
 
 bool ZMyCharacter::CheckWall(rvector& Pos)
 {
 	rvector vWPos;
-	GetWeaponTypePos(weapon_dummy_muzzle_flash,&vWPos);//무기총구위치
+	GetWeaponTypePos(weapon_dummy_muzzle_flash,&vWPos);
 
-	// 벽뒤로 던지는 경우가 생기면
-	rvector nPos = m_pVMesh->GetBipTypePosition(eq_parts_pos_info_Spine1);// 몸통에서~
+	rvector nPos = m_pVMesh->GetBipTypePosition(eq_parts_pos_info_Spine1);
 	rvector nDir = vWPos - nPos;
 	Normalize(nDir);
 
@@ -1107,17 +1093,16 @@ bool ZMyCharacter::CheckWall(rvector& Pos)
 
 	memset(&bpi,0,sizeof(RBSPPICKINFO));
 
-	if(ZGetGame()->GetWorld()->GetBsp()->Pick(nPos,nDir,&bpi)) {//몸통에서 총구로 pick
+	if(ZGetGame()->GetWorld()->GetBsp()->Pick(nPos,nDir,&bpi)) {
 		if(bpi.pInfo) {
 			if(D3DXPlaneDotCoord(&(bpi.pInfo->plane),&vWPos) < 0) {
-				// 총구 위치 교정 : 양자화 하므로 1의 오차가 있을수 있어서 2를 곱한다
 				Pos = bpi.PickPos - 2.f*nDir; 
 				return true;
 			}
 		}
 	}
 
-	Pos = vWPos;//기본위치는 담아준다..
+	Pos = vWPos;
 
 	return false;
 }
@@ -1151,16 +1136,7 @@ void ZMyCharacter::OnShotRocket()
 
 		}
 	}
-/*
-	rvector v1;
-	GetWeaponTypePos(weapon_dummy_muzzle_flash,&v1);
 
-	// 총구가 벽뒤로 파뭍혀있으면
-	if(bpi.pInfo) {
-		if(D3DXPlaneDotCoord(&(bpi.pInfo->plane),&v1)<0)
-			v1=m_Position+rvector(0,0,110);
-	}
-*/
 	rvector vWeaponPos;
 
 	CheckWall(vWeaponPos);
@@ -1174,39 +1150,6 @@ void ZMyCharacter::OnShotRocket()
 	ZPostShotSp(g_pGame->GetTime(),vWeaponPos,dir,ZC_WEAPON_SP_ROCKET,sel_type);
 }
 
-/*
-// 오른쪽 버튼 기술
-void ZMyCharacter::OnGadget_Katana(bool bFirst)
-{
-	if(m_bSpMotion)//특수 사교 모션중이라면
-		return;
-
-	switch(m_pVMesh->m_SelectWeaponMotionType)
-	{	
-		case eq_wd_katana : 
-		case eq_wd_blade :
-		case eq_wd_sword :
-		case eq_ws_dagger:
-		case eq_wd_dagger:
-			break;	// 통과
-		default:
-			return;	// 나머진 무효
-	};
-
-	// 칼들었으면 띄우기
-	if (!m_bShot && !m_bSkill && bFirst)
-	{
-//		m_bSkill=true;
-//		m_bSkillSended=false;
-//		m_fSkillTime = g_pGame->GetTime();
-		AddDelayedWork(g_pGame->GetTime()+.16f,ZDW_UPPERCUT);
-
-		m_bTumble=false;
-	}
-}
-*/
-
-// 매달리기
 void ZMyCharacter::OnGadget_Hanging()
 {
 	switch(m_pVMesh->m_SelectWeaponMotionType)
@@ -1216,24 +1159,20 @@ void ZMyCharacter::OnGadget_Hanging()
 		case eq_wd_sword :
 		case eq_ws_dagger:
 		case eq_wd_dagger:
-			break;	// 통과
+			break;
 		default:
-			return;	// 나머진 무효
+			return;
 	};
 
-	// 이런 상태일때는 매달릴수 없다.
 	if(IsDie() || m_bWallJump || m_bGuard || m_bDrop || m_bTumble || m_bSkill ||
 		m_bBlast || m_bBlastFall || m_bBlastDrop || m_bBlastStand || m_bBlastAirmove ) return;
 
-	// 공중칼질 중일때도 안된다
 	if(m_AniState_Lower==ZC_STATE_LOWER_JUMPATTACK) return;
 
-	// 2중점프한 직후에도 안된다
 	if(m_bWallJump2 && (g_pGame->GetTime()-m_fJump2Time)<.40f) return;
 
 	m_bWallJump2=false;
 
-	// 벽에 칼 꽂는 애니메이션을 시작. 칼꽂는건 누르고있어도 가능하다.
 	if(	!m_bWallHang )
 	{
 		if( GetDistToFloor()>100.f ) {
@@ -1243,13 +1182,12 @@ void ZMyCharacter::OnGadget_Hanging()
 		}
 	} else {
 		if(g_pGame->GetTime()-m_fHangTime>.4f && !m_bHangSuccess) {
-			// 벽에 매달릴수 있는지 검사.
 			rvector pickorigin,pickto,dir;
 			rvector front=m_Direction;
 			front.z=0;
 			Normalize(front);
 			dir=front;
-			pickorigin=m_Position+rvector(0,0,210); // 찍어볼 위치
+			pickorigin=m_Position+rvector(0,0,210);
 
 			RBSPPICKINFO bpi;
 			bool bPicked=ZGetGame()->GetWorld()->GetBsp()->Pick(pickorigin,dir,&bpi);
@@ -1260,17 +1198,15 @@ void ZMyCharacter::OnGadget_Hanging()
 				rplane plane=bpi.pInfo->plane;
 				ZGetEffectManager()->AddLightFragment(bpi.PickPos,rvector(plane.a,plane.b,plane.c));
 
-#ifdef _BIRDSOUND
-
-#else
+#ifndef _BIRDSOUND
 				ZGetSoundEngine()->PlaySound("hangonwall", bpi.PickPos );
 #endif
 				SetLastThrower(MUID(0,0), 0.0f);
 			}
 			else
 				m_bHangSuccess=false;
-		}//if
-	}//else
+		}
+	}
 }
 
 void ZMyCharacter::OnGadget_Snifer()
@@ -1300,15 +1236,14 @@ void ZMyCharacter::ProcessGadget()
 	if(GetItems()->GetSelectedWeapon()==NULL) return;
 
 	if(IsDie() || m_bDrop || m_bBlast || m_bBlastDrop || m_bBlastStand) 
-		return;		// 죽거나 누워있어도 쏠수없다.
+		return;
 
 	if(m_AniState_Upper==ZC_STATE_UPPER_RELOAD || m_AniState_Upper==ZC_STATE_UPPER_LOAD) 
-		return;		// 리로드중에 쏠수없다
+		return;
 
 	bool bPressingSecondary = ZIsActionKeyPressed(ZACTION_USE_WEAPON2);
 	bool bSecondary = bPressingSecondary && !bWasPressingSecondaryLastFrame;
 
-	// 눌려지면 땅에 있을때 스킬이 발동
 	if(bSecondary && m_bLand) {
 
 		MMatchWeaponType type = MWT_NONE;
@@ -1349,8 +1284,6 @@ void ZMyCharacter::ProcessGadget()
 		return;
 	}
 
-
-	// Range타입의 무기타입마다 각각의 Gadget을 수행한다
 	if (bSecondary)
 	{
 		ZItem* pSelectedItem = GetItems()->GetSelectedWeapon();
@@ -1372,13 +1305,10 @@ void ZMyCharacter::ProcessGadget()
 	}
 
 
-	// Melee타입의 Gadget 수행
 	if (m_pVMesh)
 	{
 		if(!m_bLand)
 			OnGadget_Hanging();
-//		else
-//			OnGadget_Katana(bFirstPressed);
 	}
 	else
 	{
@@ -1435,14 +1365,10 @@ void ZMyCharacter::ProcessGuard()
 			m_bGuardStart = true;
 			m_bWallHang = false;
 			m_bJumpShot = false;
-//			mlog("1 jumpshot false\n");
 			m_fGuardStartTime = g_pGame->GetTime();
 
 			if(m_bGuardKey) m_bGuardByKey = true;
 			else			m_bGuardByKey = false;
-//			mlog("guard start %d %d \n",m_bLButtonPressed,m_bRButtonPressed);
-
-//			m_bGuardKey = false;
 
 			return;
 		}
@@ -1450,7 +1376,7 @@ void ZMyCharacter::ProcessGuard()
 	}
 }
 
-void ZMyCharacter::OnChangeWeapon(char* WeaponModelName)
+void ZMyCharacter::OnChangeWeapon(const char* WeaponModelName)
 {
 	ZCharacter::OnChangeWeapon(WeaponModelName);
 
@@ -1466,15 +1392,6 @@ void ZMyCharacter::OnChangeWeapon(char* WeaponModelName)
 	{
 		ci->OnGadgetOff();
 	}
-
-
-//	if(this==g_pGame->m_pMyCharacter) 
-//	{
-//		MakeWorldMatrix(&world,MeshPosition,m_vProxyDirection,rvector(0,0,1));
-//		m_pVMesh->SetWorldMatrix(world); 
-//		update 할때마다 등록된 worldamatrix 사용,,
-//		g_pGame->m_pMyCharacter->m_pVMesh->RenderMatrix();
-//	}
 }
 
 void str_output(string& str,int i)
@@ -1495,7 +1412,6 @@ void ZMyCharacter::OutputDebugString_CharacterState()
 
 	ZCharacter::OutputDebugString_CharacterState();
 
-//	AddText( m_bGuardTest );
 	AddText( m_fDeadTime );
 	AddText( m_fNextShotTime );
 	AddText( m_fWallJumpTime );
@@ -1513,8 +1429,6 @@ void ZMyCharacter::OutputDebugString_CharacterState()
 	AddText( m_HangPos );
 	AddText( m_bHangSuccess );
 	AddText( m_nWallJump2Dir );
-//	AddText( m_bRButtonReleased );
-//	AddText( m_bLButtonReleased );
 	AddText( m_fLastLButtonPressedTime );
 	AddText( m_bEnterCharge );
 	AddText( m_bJumpShot );
@@ -1523,8 +1437,6 @@ void ZMyCharacter::OutputDebugString_CharacterState()
 	AddText( m_nShot );
 	AddText( m_bSkill );
 
-//	AddText( m_bSkillSended );
-//	AddText( m_fSkillTime );
 	AddText( m_bSplashShot );
 	AddText( m_fSplashShotTime );
 	AddText( m_fLastShotTime );
@@ -2093,12 +2005,8 @@ void ZMyCharacter::OnUpdate(float fDelta)
 		return;
 	}
 
-//	UpdateStamina(fDelta);
-/*
-	if(m_pVMesh) {
-		m_pVMesh->SetParts(eq_parts_sunglass,"eq_sunglass01" );
-	}
-*/	
+	CameraDir = m_TargetDir;
+
 	if(m_bReserveDashAttacked) {
 		if( g_pGame->GetTime() > m_fReserveDashAttackedTime ) {
 			OnDashAttacked(m_vReserveDashAttackedDir);
@@ -2113,38 +2021,26 @@ void ZMyCharacter::OnUpdate(float fDelta)
 	
 	UpdateVelocity(fDelta);
 
-	fDelta=min(fDelta,1.f);		// 한번에 갈수있는 크기를 정해놓는다.
+	fDelta=min(fDelta,1.f);
 
-	// 공중에 왜 멈추지 ?
-//	if(IsDie() && (m_Position.z<-2500.f || (m_bLand && m_bPlayDone) )) {
-//		SetVelocity(0,0,0);
-//	}
 	if(IsDie() && ((m_bLand && m_bPlayDone) )) {
 		SetVelocity(0,0,0);
 	}
 
-	//	mlog("uid:%d state: %d ani: %s \n ",m_UID.Low,m_State,m_szCurrentAnimation);
-
 	m_bMoving = Magnitude(rvector(GetVelocity().x,GetVelocity().y,0))>.1f;
 
-//	UpdatePosition(fDelta);
-
-	// 프레임수가 너무 많이 나온다면 delta 가 너무 작아서 움직이지 않으므로 모아서 한번에 움직인다
-	const int	MAX_MOVE_FRAME = 150;	// 움직임 처리는 최대 150프레임
-	static float fAccmulatedDelta = 0.f;	// mycharacter 가 여러개가 아니라는 가정하에 static
+	const int MAX_MOVE_FRAME = 150;
+	static float fAccmulatedDelta = 0.f;
 
 	fAccmulatedDelta+=fDelta;
 
-	if(fAccmulatedDelta>(1.f/(float)MAX_MOVE_FRAME))	// 최대프레임 이상 나올때 스킵
+	if(fAccmulatedDelta>(1.f/(float)MAX_MOVE_FRAME))
 	{
-		// 실제 움직임 처리
 		m_pModule_Movable->Update(fAccmulatedDelta);
 
-		// 움직임이 미미하다면 안정성을 위해 속도를 없앤다
 		if(Magnitude(m_pModule_Movable->GetLastMove())<0.01f)
 			SetVelocity(0,0,0);
 
-		// 공중에 떠있다면 중력에 대한 영향
 		if (GetDistToFloor() > 0.1f || GetVelocity().z > 0.1f)
 		{
 			m_pModule_Movable->UpdateGravity(GetGravityConst()*fAccmulatedDelta);
@@ -2156,7 +2052,6 @@ void ZMyCharacter::OnUpdate(float fDelta)
 
 	UpdateHeight(fDelta);
 
-	// 발이 뭍혔거나 내려가야 하는데 못간경우
 	rvector diff=fDelta*GetVelocity();
 
 	bool bUp = (diff.z>0.01f);
@@ -2170,7 +2065,6 @@ void ZMyCharacter::OnUpdate(float fDelta)
 			if(GetVelocity().z<1.f && GetDistToFloor()<1.f)
 			{
 				m_bLand=true;
-				//			_ASSERT(GetVelocity().z<10.f);
 				m_bWallJump=false;
 				m_bJumpDown=false;
 				m_bJumpUp=false;
@@ -3540,25 +3434,13 @@ void ZMyCharacter::OnDamaged(ZObject* pAttacker, rvector srcPos, ZDAMAGETYPE dam
 	ZCharacter::OnDamaged(pAttacker,srcPos,damageType,weaponType,fDamage,fPiercingRatio,nMeleeType);
 	ZGetScreenEffectManager()->AddAlert(GetPosition(),m_Direction, srcPos);
 
-	// 내가 던진 수류탄/로켓
 	if(damageType==ZD_EXPLOSION)
 	{
-		//if( pAttacker==this )  // 나한테도 데미지를 준다
-		//	ZObject::OnDamaged(pAttacker,srcPos,damageType,weaponType,fDamage,fPiercingRatio,nMeleeType);
-
-		// 떨어뜨린사람 기억
 		if (GetVelocity().z > 0 && pAttacker!=NULL )
 			SetLastThrower(pAttacker->GetUID(), g_pGame->GetTime()+1.0f);
 	}
 
 	LastDamagedTime = ZGetGame()->GetTime();
-
-	//// 나락일때는 무조건 데미지 먹는다
-	//if(damageType==ZD_FALLING)
-	//{
-	//	if( pAttacker==this )  // 나한테도 데미지를 준다
-	//		ZObject::OnDamaged(pAttacker,srcPos,damageType,weaponType,fDamage,fPiercingRatio,nMeleeType);
-	//}
 }
 
 void ZMyCharacter::OnKnockback(const rvector& dir, float fForce)

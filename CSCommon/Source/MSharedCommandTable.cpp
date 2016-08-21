@@ -62,6 +62,8 @@ void MAddSharedCommandTable(MCommandManager* pCommandManager, int nSharedType)
 		P(MPT_BLOB, "Settings")
 	C(MC_MATCH_PING_LIST, "", "", MCDT_MACHINE2MACHINE)
 		P(MPT_BLOB, "Ping list")
+	C(MC_PEER_BASICINFO_RG, "", "", MCDT_PEER2PEER)
+		P(MPT_BLOB, "BasicInfo")
 
 
 	C(MC_LOCAL_INFO, "Local.Info", "Local information", MCDT_LOCAL)

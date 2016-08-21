@@ -1,5 +1,4 @@
-#ifndef _ZOBJECT_H
-#define _ZOBJECT_H
+#pragma once
 
 #include "ZPrerequisites.h"
 #include "MUID.h"
@@ -13,8 +12,6 @@
 
 #include <list>
 #include <string>
-
-using namespace std;
 
 _USING_NAMESPACE_REALSPACE2
 
@@ -52,7 +49,7 @@ protected:
 	ZObjectCollision		m_Collision;
 	virtual void OnDraw();
 	virtual void OnUpdate(float fDelta);
-	virtual void OnDie() {} // 죽을때
+	virtual void OnDie() {}
 public:
 	bool					m_bRendered;		///< 화면에 그려졌는지 여부
 
@@ -68,48 +65,46 @@ public:
 	ZObject();
 	virtual ~ZObject();
 
-	rvector &GetPosition() { return m_Position; }
-	void SetPosition(const rvector& pos);
+	auto& GetPosition() const { return m_Position; }
+	void SetPosition(const rvector& pos) { m_Position = pos; }
 	void Draw();
 	void Update(float fDelta);
 	virtual bool Pick(int x,int y,RPickInfo* pInfo);
-	virtual bool Pick(int x,int y,rvector* v,float* f);
-	virtual bool Pick(rvector& pos,rvector& dir, RPickInfo* pInfo = NULL);
-	virtual bool GetHistory(rvector *pos,rvector *direction,float fTime); // 판정/옵저버등 과거의 데이터를 얻는다
+	virtual bool Pick(int x, int y, rvector* v, float* f);
+	virtual bool Pick(const rvector& pos, const rvector& dir, RPickInfo* pInfo = nullptr);
+	virtual bool GetHistory(rvector* pos, rvector* direction, float fTime, rvector* cameradir = nullptr);
 
-	// interface
 	void SetVisualMesh(RVisualMesh* pVMesh)			{ m_pVMesh = pVMesh; }
-	RVisualMesh* GetVisualMesh()					{ return m_pVMesh; }
-	bool IsVisible()								{ return m_bVisible; }
+	auto* GetVisualMesh() const						{ return m_pVMesh; }
+	auto* GetVisualMesh()							{ return m_pVMesh; }
+	bool IsVisible() const							{ return m_bVisible; }
 	void SetVisible(bool bVisible)					{ m_bVisible = bVisible; }
-	bool GetInitialized()							{ return m_bInitialized; }
-	MUID& GetUID()									{ return m_UID; }
+	bool GetInitialized() const						{ return m_bInitialized; }
+	auto& GetUID() const							{ return m_UID; }
 	void SetUID(MUID& uid)							{ m_UID = uid; }
 	void SetSpawnTime(float fTime);
-	float GetSpawnTime()							{ return m_fSpawnTime; }
+	float GetSpawnTime() const						{ return m_fSpawnTime; }
 	void SetDeadTime(float fTime);
-	float GetDeadTime()								{ return m_fDeadTime; }
-	bool IsNPC()									{ return m_bIsNPC; }
-	const rvector& GetDirection()					{ return m_Direction; }
+	float GetDeadTime() const						{ return m_fDeadTime; }
+	bool IsNPC() const								{ return m_bIsNPC; }
+	auto& GetDirection() const						{ return m_Direction; }
 
-	// 움직임 모듈과 관계된것들
-	const rvector& GetVelocity()		{ return m_pModule_Movable->GetVelocity(); }
+	auto& GetVelocity() const					{ return m_pModule_Movable->GetVelocity(); }
 	void SetVelocity(const rvector& vel)		{ m_pModule_Movable->SetVelocity(vel); }
-	void SetVelocity(float x,float y,float z) { SetVelocity(rvector(x,y,z)); }
-	void AddVelocity(const rvector& add)		{ SetVelocity(GetVelocity()+add); }
+	void SetVelocity(float x, float y, float z) { SetVelocity(rvector(x,y,z)); }
+	void AddVelocity(const rvector& add)		{ SetVelocity(GetVelocity() + add); }
 
-	float GetDistToFloor() const				{ return m_pModule_Movable->GetDistToFloor(); }
+	float GetDistToFloor() const			{ return m_pModule_Movable->GetDistToFloor(); }
 	float GetCollRadius() const				{ return m_Collision.fRadius; }
 	float GetCollHeight() const				{ return m_Collision.fHeight; }
-	rvector GetCenterPos()				{ return m_Position + rvector(0.0f, 0.0f, m_Collision.fHeight*0.5f); }
+	rvector GetCenterPos() const			{ return m_Position + rvector(0.0f, 0.0f, m_Collision.fHeight*0.5f); }
 
-	ZCharacterItem* GetItems()		{ return &m_Items; }
+	auto* GetItems() { return &m_Items; }
+	auto* GetItems() const { return &m_Items; }
 
-public:
-	// 여기있는 것들은 상속받는 오브젝트에서 자신에 맞게 오버라이드해서 사용한다.
 	virtual bool IsCollideable() { return m_Collision.bCollideable; }		
 	virtual float ColTest(const rvector& pos, const rvector& vec, float radius, rplane* out=0) { return 1.0f; }
-	virtual bool ColTest(const rvector& p1, const rvector& p2, float radius, float fTime);		// 원기둥을 이용하여 간단하게 구와 충돌테스트
+	virtual bool ColTest(const rvector& p1, const rvector& p2, float radius, float fTime);
 	virtual bool IsAttackable()	 { return true; }
 	virtual bool IsDie() { return false; }
 	virtual void SetDirection(const rvector& dir);
@@ -119,59 +114,35 @@ public:
 	}
 	virtual MMatchTeam GetTeamID() { return MMT_ALL; }
 	
-	// 특정시점의 hit test 를 리턴해줘야 한다, pOutPos 가 있으면 hit된 위치를 리턴해줘야 한다
 	virtual ZOBJECTHITTEST HitTest(const rvector& origin, const rvector& to, float fTime, rvector *pOutPos = NULL) = 0;
 
-	// 액션에 관한 이벤트
-
-	// 장검 오른쪽 띄우기
 	virtual void OnBlast(rvector &dir)	{ }	
 	virtual void OnBlastDagger(rvector &dir,rvector& pos) { }
 
-	// 동작이나 이벤트에 관한 것들.
 	virtual void OnGuardSuccess() { }
 	virtual void OnMeleeGuardSuccess() { }
 	
-	// knockback을 적용받아야한다
 	virtual void OnKnockback(const rvector& dir, float fForce) { }
 
-	// 맞을때 몸을 떨게 한다.
-	// fValue : 강도, MaxTime : 최대시간 , nReturnMaxTime : 복귀시간
 	void Tremble(float fValue, DWORD nMaxTime, DWORD nReturnMaxTime);
 
-	// 실제로 피를 빼준다
-//	virtual void OnDamage(int damage, float fRatio = 1.0f);
-
-	// 데미지를 입었다.
-	virtual void OnDamaged(ZObject* pAttacker, rvector srcPos, ZDAMAGETYPE damageType, MMatchWeaponType weaponType, float fDamage, float fPiercingRatio=1.f, int nMeleeType=-1);
-
-	// 모션등이 변경되지 않고 피만 줄이기위해..
-	virtual void OnDamagedSkill(ZObject* pAttacker, rvector srcPos, ZDAMAGETYPE damageType, MMatchWeaponType weaponType, float fDamage, float fPiercingRatio=1.f, int nMeleeType=-1);
-
-	// 강베기를 맞았다
+	virtual void OnDamaged(ZObject* pAttacker, rvector srcPos, ZDAMAGETYPE damageType, MMatchWeaponType weaponType,
+		float fDamage, float fPiercingRatio=1.f, int nMeleeType=-1);
+	virtual void OnDamagedSkill(ZObject* pAttacker, rvector srcPos, ZDAMAGETYPE damageType, MMatchWeaponType weaponType,
+		float fDamage, float fPiercingRatio=1.f, int nMeleeType=-1);
 	virtual void OnDamagedAnimation(ZObject *pAttacker,int type) { }
-
-	// 비명을 지른다
 	virtual void OnScream() { }
-
-	// HP/AP를 회복한다
 	virtual void OnHealing(ZObject* pOwner,int nHP,int nAP);
 
 	void OnSimpleDamaged(ZObject* pAttacker, float fDamage, float fPiercingRatio);
 
-	// stun 된다.
-	virtual void OnStun(float fTime)	{ }
+	virtual void OnStun(float fTime) {}
 
 public:
-	// 땜빵을 위해 만들어논 virtual 함수 - 차차 정리하자
-	virtual bool IsRendered() { return m_bRendered; }		/// 이전 프레임에서 화면에 그렸는지 여부
+	bool IsRendered() const { return m_bRendered; }
 
 protected:
-	bool Move(rvector &diff)	{ return m_pModule_Movable->Move(diff); }
+	bool Move(const rvector &diff) { return m_pModule_Movable->Move(diff); }
 };
 
-
-/// 플레이어 오브젝트인지 여부
 bool IsPlayerObject(ZObject* pObject);
-
-#endif

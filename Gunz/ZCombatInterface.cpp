@@ -2128,7 +2128,7 @@ void ZCombatInterface::DrawScoreBoard(MDrawContext* pDC)
 		if (count)
 			strcat_safe(buf, ", ");
 
-		strcat_safe(buf, Player.GetUserNameA());
+		strcat_safe(buf, Player.GetUserName());
 		count++;
 	}
 

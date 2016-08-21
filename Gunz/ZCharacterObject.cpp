@@ -80,16 +80,13 @@ void ZCharacterObject::DrawEnchantSub(ZC_ENCHANT etype,rvector& pos)
 		ZGetEffectManager()->AddTrackCold( pos );
 	else if(etype==ZC_ENCHANT_POISON)
 		ZGetEffectManager()->AddTrackPoison( pos );
-//	else if(etype==ZC_ENCHANT_LIGHTNING)
 }
-
-// 칼들고 뛰어다닐떄..
 
 void ZCharacterObject::EnChantMovingEffect(rvector* pOutPos,int cnt,ZC_ENCHANT etype,bool bDoubleWeapon)
 {
-	int nRand = (GetEffectLevel()+1) * 3;//이펙트 옵션에 따라서..
+	int nRand = (GetEffectLevel()+1) * 3;
 
-	if( g_pGame->GetGameTimer()->m_dwUpdateCnt % nRand == 0 ) {
+	if (g_pGame->GetGameTimer()->GetUpdateCount() % nRand == 0) {
 
 		if(cnt==0) { 
 			m_pVMesh->GetWeaponPos( pOutPos ); 	
@@ -100,7 +97,7 @@ void ZCharacterObject::EnChantMovingEffect(rvector* pOutPos,int cnt,ZC_ENCHANT e
 
 		DrawEnchantSub( etype , pos );
 
-		if(bDoubleWeapon) // 양손일경우
+		if(bDoubleWeapon)
 		{
 			if(cnt==0) {
 				m_pVMesh->GetWeaponPos( &pOutPos[2] ,true);
@@ -114,7 +111,6 @@ void ZCharacterObject::EnChantMovingEffect(rvector* pOutPos,int cnt,ZC_ENCHANT e
 	}
 }
 
-// 무기 휘두를때
 void ZCharacterObject::EnChantSlashEffect(rvector* pOutPos,int cnt,ZC_ENCHANT etype,bool bDoubleWeapon)
 {
 	if(cnt==0) {
@@ -126,7 +122,7 @@ void ZCharacterObject::EnChantSlashEffect(rvector* pOutPos,int cnt,ZC_ENCHANT et
 
 	DrawEnchantSub( etype , pos );
 
-	if(bDoubleWeapon) // 양손일경우
+	if(bDoubleWeapon)
 	{
 		if(cnt==0) {
 			m_pVMesh->GetWeaponPos( &pOutPos[2] ,true);
@@ -553,7 +549,7 @@ void ZCharacterObjectHistory::EmptyHistory()
 	}
 }
 
-bool ZCharacterObjectHistory::GetHistory(rvector *pos, rvector *direction, float fTime)
+bool ZCharacterObjectHistory::GetHistory(rvector *pos, rvector *direction, float fTime, rvector* camerapos)
 {
 	if (GetVisualMesh() == NULL)
 		return false;
@@ -570,6 +566,8 @@ bool ZCharacterObjectHistory::GetHistory(rvector *pos, rvector *direction, float
 			*pos = Pos;
 		if (direction)
 			*direction = Dir;
+		if (camerapos)
+			*camerapos = Dir;
 
 		return true;
 	};

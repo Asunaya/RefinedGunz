@@ -19,15 +19,11 @@
 //////////////////////////////////////////////////////////////////////////
 //	Global
 //////////////////////////////////////////////////////////////////////////
-RVertex					g_Cloth_Buffer[MAX_NUM_CLOTH_PARTICLE*3];
-LPDIRECT3DVERTEXBUFFER9	g_hw_Buffer			= 0;
+static RVertex					g_Cloth_Buffer[MAX_NUM_CLOTH_PARTICLE*3];
+static LPDIRECT3DVERTEXBUFFER9	g_hw_Buffer			= 0;
 unsigned int			ZClothEmblem::msRef = 0;
-//USHORT					g_index_buffer[MAX_NUM_CLOTH_PARTICLE*3];
 
-namespace 
-{
-	bool bHardwareBuffer = true;
-}
+static bool bHardwareBuffer = true;
 
 struct testv
 {
@@ -67,7 +63,8 @@ void	ZClothEmblem::CreateFromMeshNode( RMeshNode* pMeshNdoe_ , ZWorld* pWorld)
 	nIndices = pMeshNdoe_->m_face_num*3;
 
 	rmatrix World;
-	rvector Pos = GetTransPos(mpMeshNode->m_mat_base);
+	// I don't know how this nonsense works but somehow it does '__'
+	rvector Pos{ mpMeshNode->m_mat_base(0, 0), mpMeshNode->m_mat_base(0, 1), mpMeshNode->m_mat_base(0, 2) };
 	rvector Dir = rvector(0,-1,0);
 	rvector Up  = rvector(0,0,1);
 
@@ -102,46 +99,25 @@ void	ZClothEmblem::CreateFromMeshNode( RMeshNode* pMeshNdoe_ , ZWorld* pWorld)
 			}
 			vecDistance = mpMeshNode->m_point_list[m_pConst[ i*3 + j ].refA] - mpMeshNode->m_point_list[m_pConst[ i*3 + j ].refB];
 			m_pConst[ i*3 + j ].restLength = D3DXVec3Length(&vecDistance);
-			
-			//g_index_buffer[i*3+j]	= (USHORT)m_pConst[i*3+j].refA;
 		}
 	}
-
-//	if( bHardwareBuffer )
-//	{
-//		void* pIndices;
-//		if(FAILED( mIndexBuffer->Lock(0,sizeof(USHORT)*nIndices,(VOID**)&pIndices,0)))
-//		{
-//			bHardwareBuffer = false;
-//			mlog("Fail to Lock Index Buffer\n");
-//		}
-//		else
-//		{
-//			memcpy( pIndices, g_index_buffer, sizeof(USHORT)*nIndices);
-//			mIndexBuffer->Unlock();
-//		}
-//		
-////		delete uIndexList;
-//	}
 
 	_ASSERT( mpMeshNode->m_point_color_num );
 
 	for( i = 0 ; i < m_nCntP; ++i )
 	{
 		m_pHolds[i]	= CLOTH_VALET_ONLY;
-		// 만약 붉은색 성분이 있으면 & Exclusive with other Attribute...
+		// Exclusive with other Attribute...
 		if( mpMeshNode->m_point_color_list[i].x != 0 )
 		{
 			m_pHolds[i]	= CLOTH_HOLD;
 		}
 		else 
 		{
-			//	만약 파란색 성분이 있으면 : 힘!
-			//if( mpMeshNode->m_point_color_list[i].z != 0 )
 			{
 				m_pHolds[i] |= CLOTH_FORCE;
 			}
-			//	만약 녹색 성분이 있으면 : 충돌!
+
 			if( mpMeshNode->m_point_color_list[i].y != 0 )
 			{
 				m_pHolds[i] |= CLOTH_COLLISION;
@@ -992,7 +968,6 @@ void ZEmblemList::InitEnv( char* pFileName_ )
 
 	for( list<ZClothEmblem*>::iterator iter = begin(); iter != end(); ++iter )
 	{
-		// 처음 몇 프레임을 계산하고 시작한다..
 		for( int i = 0 ; i < 100; ++i )
 			(*iter)->update();
 	}

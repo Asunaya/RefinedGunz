@@ -128,19 +128,19 @@ public:
 	float				fColRadius;				// 미사일류 충돌 범위 반지름
 	vector<ZSkillRepeat>		RepeatList;		// 한스킬에 여러개 발사하려고 할 때 사용
 
-	bool IsAlliedTarget() {		// 아군이 대상인가
+	bool IsAlliedTarget() {
 		if(nEffectType==ZSE_ALLIED || nEffectType==ZSE_ALLIED_AREA) return true;
 		return false;
 	}
 
-	bool IsAreaTarget() {		// 범위공격인가 ?
+	bool IsAreaTarget() {
 		if(nEffectType==ZSE_ENEMY || nEffectType==ZSE_ALLIED) return false;
 		return true;
 	}
 
-	bool IsEffectiveTo(ZObject *pTarget);	// 스킬이 쓰여지면 대상에게 효과가 있는지..
+	bool IsEffectiveTo(ZObject *pTarget);
 
-	bool CheckResist(ZObject *pCurrent,float *pfDamage);	// 내성굴림
+	bool CheckResist(ZObject *pCurrent,float *pfDamage);
 
 };
 
@@ -155,7 +155,7 @@ class ZSkill {
 private:
 	ZSkillDesc *m_pDesc;
 	float		m_fLastBeginTime;
-	float		m_fNextDamageTime;	// 다음번 데미지를 받을 시간
+	float		m_fNextDamageTime;
 	bool		m_bEnable;
 	ZObject		*m_pOwner;
 
@@ -169,30 +169,30 @@ public:
 
 	bool Init(int nID, ZObject *pOwner);
 
-	bool IsReady();	// 쿨타임을 지나 사용가능한지..
+	bool IsReady();
 	bool IsEnable();
 
 	void InitStatus();
 	bool Update(float fElapsed);
 
-	ZSkillDesc *GetDesc()	{ return m_pDesc; }
-	MUID		GetTarget()	{ return m_uidTarget; }
-	const rvector&	GetTargetPos() { return m_TargetPos; }
+	ZSkillDesc *GetDesc() { return m_pDesc; }
+	MUID		GetTarget()	const { return m_uidTarget; }
+	auto& GetTargetPos() const { return m_TargetPos; }
 
-	void Execute(MUID& uidTarget, rvector& targetPos );
-	void PreExecute(MUID& uidTarget, rvector& targetPos );
-	void LastExecute(MUID& uidTarget, rvector& targetPos );
-	void Cancel(MUID& uidTarget);
+	void Execute(const MUID& uidTarget, const rvector& targetPos );
+	void PreExecute(const MUID& uidTarget, const rvector& targetPos );
+	void LastExecute(const MUID& uidTarget, const rvector& targetPos );
+	void Cancel(const MUID& uidTarget);
 
-	bool IsUsable(ZObject *pTarget);	// (팀을고려해서)이 스킬을 대상에게 쓸만한지
+	bool IsUsable(ZObject *pTarget);
 
 protected:
 
 	bool GetPartsTypePos(ZObject* pTargetObject, ZSKILLEFFECTTARGETPOSTYPE nSkillEffectPosType, 
-						 RMeshPartsPosInfoType& type,rvector& vPos,rvector& vDir);
-	bool GetPartsTypePos(RMeshPartsPosInfoType& type,MUID& uid,MUID& uidTarget);
-	bool CheckRange(rvector& center, ZObject *pCurrent);	// 대상이 영향을 받는지 체크
-	void Use(MUID& uidTarget, rvector& targetPos);
+						 RMeshPartsPosInfoType& type, rvector& vPos, rvector& vDir);
+	bool GetPartsTypePos(RMeshPartsPosInfoType& type, MUID& uid, const MUID& uidTarget);
+	bool CheckRange(const rvector& center, ZObject *pCurrent);
+	void Use(const MUID& uidTarget, const rvector& targetPos);
 	void Repeat();
-	void GetMissilePosDir(rvector& outDir, rvector& outPos, rvector& TargetPos);
+	void GetMissilePosDir(rvector& outDir, rvector& outPos, const rvector& TargetPos);
 };

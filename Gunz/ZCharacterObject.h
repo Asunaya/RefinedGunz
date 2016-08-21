@@ -88,7 +88,7 @@ class ZCharacterObjectHistory : public ZCharacterObject
 {
 	MDeclareRTTI;
 public:
-	virtual bool GetHistory(rvector *pos, rvector *direction, float fTime) override;
+	virtual bool GetHistory(rvector *pos, rvector *direction, float fTime, rvector* camerapos = nullptr) override;
 	void EmptyHistory();
 
 	ZBasicInfoHistory	m_BasicHistory;

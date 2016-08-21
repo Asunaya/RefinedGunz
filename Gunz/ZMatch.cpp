@@ -450,7 +450,7 @@ void ZMatch::SetRoundState(MMATCH_ROUNDSTATE nRoundState, int nArg)
 					itor != g_pGame->m_CharacterManager.end(); ++itor)
 				{
 					ZCharacter* pCharacter = (*itor).second;
-					if (pCharacter->GetKils() >= GetRoundCount())
+					if (pCharacter->GetKills() >= GetRoundCount())
 					{
 						ZGetGameInterface()->FinishGame();
 						break;
