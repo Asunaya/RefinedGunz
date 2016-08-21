@@ -394,7 +394,7 @@ void MSSQLDatabaseImpl::LogCallback(const string& strLog)
 }
 
 
-#define _STATUS_DB_START	unsigned long int nStatusStartTime = GetGlobalTimeMS();
+#define _STATUS_DB_START	auto nStatusStartTime = GetGlobalTimeMS();
 #define _STATUS_DB_END(nID) MGetServerStatusSingleton()->AddDBQuery(nID, GetGlobalTimeMS()-nStatusStartTime);
 
 bool MSSQLDatabase::GetLoginInfo(const char* szUserID, unsigned int* poutnAID, char* poutPassword, size_t maxlen)

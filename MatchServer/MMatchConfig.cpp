@@ -255,7 +255,11 @@ bool MMatchConfig::Create()
 		}
 		else if (!_stricmp(DBTypeString, "mssql"))
 		{
+#ifdef MSSQL_ENABLED
 			DBType = DatabaseType::MSSQL;
+#else
+			throw std::runtime_error("database_type is set to mssql, but mssql isn't supported in this build! terminating...\n");
+#endif
 		}
 		else
 		{

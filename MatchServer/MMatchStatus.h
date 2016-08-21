@@ -48,14 +48,13 @@ public:
 		m_nCmdCount[nCmdID][1] += static_cast<u32>(nTime);
 		m_nCmdCount[nCmdID][2] = static_cast<u32>(nTime);
 	}
-	void AddDBQuery(unsigned long int nDBQueryID, unsigned long int nTime)
+	void AddDBQuery(unsigned long int nDBQueryID, u64 nTime)
 	{
 		if (nDBQueryID >= MSTATUS_MAX_DBQUERY_COUNT) return;
 
 		m_nDBQueryCount[nDBQueryID][0]++;
-		m_nDBQueryCount[nDBQueryID][1] += nTime;
-
-		m_nDBQueryCount[nDBQueryID][2] = nTime;
+		m_nDBQueryCount[nDBQueryID][1] += static_cast<u32>(nTime);
+		m_nDBQueryCount[nDBQueryID][2] = static_cast<u32>(nTime);
 	}
 	inline void SaveCmdHistory();
 	void SetRunStatus(int value) { m_nRunStatus = value; }

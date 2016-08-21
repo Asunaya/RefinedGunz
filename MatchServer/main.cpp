@@ -31,6 +31,7 @@ static bool GetLogFileName(char* pszBuf)
 }
 
 int main(int argc, char** argv)
+try
 {
 	SetCurrentDirectory("./Runtime");
 
@@ -57,4 +58,9 @@ int main(int argc, char** argv)
 		MatchServer.Run();
 		Sleep(1);
 	}
+}
+catch (std::runtime_error& e)
+{
+	MLog("Uncaught std::runtime_error: %s\n", e.what());
+	throw;
 }
