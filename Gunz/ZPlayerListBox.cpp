@@ -53,7 +53,6 @@ void ZPlayerListBoxLook::OnItemDraw2(MDrawContext* pDC, MRECT& r, MBitmap* pBitm
 	pDC->SetClipRect(rtemp2);
 
 	pDC->SetBitmap(pBitmap);
-//	pDC->Draw(r.x, r.y);
 	pDC->Draw(r, MRECT(0,0,pBitmap->GetWidth(),pBitmap->GetHeight()));
 
 	pDC->SetClipRect(rtemp);
@@ -79,13 +78,12 @@ void ZPlayerListBoxLook::OnDraw(MListBox* pListBox, MDrawContext* pDC)
 {
 	((ZPlayerListBox*)pListBox)->UpdateList(((ZPlayerListBox*)pListBox)->GetPlayerListMode());
 
-//	float fA = ((ZPlayerListBox*)pListBox)->OnReSize();
 	int newW = RGetScreenWidth();
 	float fA = GetF(newW);
 
 	m_SelectedPlaneColor = MCOLOR(180,220,180);
 
-	int nItemHeight = 23*fA;//pListBox->GetItemHeight();
+	int nItemHeight = 23*fA;
 	int nShowCount = 0;
 
 	MRECT r = pListBox->GetClientRect();
@@ -101,62 +99,15 @@ void ZPlayerListBoxLook::OnDraw(MListBox* pListBox, MDrawContext* pDC)
 		((ZPlayerListBox*)pListBox)->GetMode()==ZPlayerListBox::PLAYERLISTMODE_CHANNEL_CLAN 
 		&& !ZGetMyInfo()->IsClanJoined();
 
-	// 바탕그려주고(동환이가 삭제...)
-//	if(bShowClanCreateFrame) 
-//		pDC->SetColor(32,32,32);
-//	else
-//		pDC->SetColor(60,60,60);
-//	pDC->FillRectangle(rr.x,rr.y+1,rr.w,rr.h);
-
 	pDC->SetColor(10,10,10);
 
 	ZPlayerListBox::PLAYERLISTMODE pm = ((ZPlayerListBox*)pListBox)->GetPlayerListMode();
 
-	int nMode = 0;// 0 : lobby 1 : stage
+	int nMode = 0; // 0 : lobby 1 : stage
 
 	if( pm == ZPlayerListBox::PLAYERLISTMODE_STAGE || pm == ZPlayerListBox::PLAYERLISTMODE_STAGE_FRIEND)
 		nMode = 1;
 
-	// 테두리 그려주고
-
-	/*
-	MRECT cliprect = pDC->GetClipRect();//잠시풀어준다..
-
-	pDC->SetClipRect(0,0,RGetScreenWidth(),RGetScreenHeight());
-
-	pDC->SetColor(128,128,128);
-	pDC->Rectangle( MRECT(rr.x,rr.y,rr.w,rr.h) );
-	*/
-
-	/*
-	//오른쪽 검은색으로 그려주고
-	pDC->SetColor(0,0,0);
-	pDC->FillRectangle(MRECT(rr.x+rr.w-23*fA,rr.y+1,23*fA,rr.h-2));
-
-	// 오른쪽에 이미지 그려주고
-
-	if( ((ZPlayerListBox*)pListBox)->GetBitmap()) {
-		MBitmap* pBitmap = ((ZPlayerListBox*)pListBox)->GetBitmap();
-
-		pDC->SetBitmap(pBitmap);
-		pDC->Draw(MRECT(rr.x+rr.w-pBitmap->GetWidth()*fA,rr.y+1,pBitmap->GetWidth()*fA,pBitmap->GetHeight()*fA), 
-			MRECT(0,0,pBitmap->GetWidth(),pBitmap->GetHeight()));
-	}
-	*/
-
-//	pDC->SetClipRect(cliprect);
-
-/*	if(!bShowClanCreateFrame)
-	{
-		pDC->SetColor(0,0,0);
-		for(int i=0; i<pListBox->GetShowItemCount(); i++) {
-			MPOINT p;
-			p.x = r.x;
-			p.y = r.y+nItemHeight*i+1;
-			pDC->HLine(1,p.y+nItemHeight-1,rr.w-1);
-		}
-	}
-*/
 	MBitmap* pBaseBmp = NULL;
 
 	for(int i=pListBox->GetStartItem(); i<pListBox->GetCount(); i++) {
@@ -164,24 +115,16 @@ void ZPlayerListBoxLook::OnDraw(MListBox* pListBox, MDrawContext* pDC)
 		MPOINT p;
 		p.x = r.x;
 		p.y = r.y+nHeaderHeight+nItemHeight*nShowCount;
-//		p.x = 0;
-//		p.y = 0+nHeaderHeight+nItemHeight*nShowCount;
-
-//		mlog(" ------- p.y = %d %d \n",p.y,nItemHeight);
 
 		MListItem* pItem = pListBox->Get(i);
 		bool bSelected = pItem->m_bSelected;
-//		bool bSelected = (pListBox->IsSelected()) ? (pListBox->GetSelIndex()==i) : false;
 		bool bFocused = (pListBox->IsFocus());
 
 		int nFieldStartX = 0;
 
-//		if(bSelected && bFocused) {//선택된아이템표시
 		if(bSelected) {
-//			pDC->SetColor(109,207,246);
-//			pDC->FillRectangle(MRECT(p.x,p.y+1,r.x+r.w,nItemHeight-1));
 			pDC->SetColor(130,130,130);
-			pDC->Rectangle(MRECT(p.x+2,p.y+5,r.x+r.w-8,nItemHeight-4));		// 다시 그림(동환)
+			pDC->Rectangle(MRECT(p.x+2,p.y+5,r.x+r.w-8,nItemHeight-4));
 		}
 
 		for(int j=0; j<max(pListBox->GetFieldCount(), 1); j++){
@@ -198,26 +141,18 @@ void ZPlayerListBoxLook::OnDraw(MListBox* pListBox, MDrawContext* pDC)
 				nAdjustWidth = pListBox->GetScrollBar()->GetRect().w + pListBox->GetScrollBar()->GetRect().w/2;
 			}
 
-//			MRECT ir(p.x+nFieldStartX+4+5, p.y+4, nWidth-8, nItemHeight-8);
-//			MRECT irt(p.x+nFieldStartX+2+5, p.y+2, nWidth, nItemHeight);
-			MRECT ir(p.x+nFieldStartX+5, p.y+7, nWidth-7, nItemHeight-7);			// 다시 그림(동환)
+			MRECT ir(p.x+nFieldStartX+5, p.y+7, nWidth-7, nItemHeight-7);
 			MRECT irt(p.x+nFieldStartX, p.y+5, nWidth, nItemHeight);
 
 			const char* szText = pItem->GetString(j);
 			MBitmap* pBitmap = pItem->GetBitmap(j);
 			MCOLOR color = pItem->GetColor();
 
-			if(pBitmap!=NULL)//이미지 그리고
+			if(pBitmap!=NULL)
 				OnItemDraw2(pDC, ir, pBitmap,  bSelected, bFocused, nAdjustWidth);
 
-			if(szText!=NULL)// 텍스트 그리고
-			{
-//				if(bSelected && bFocused)
-//				if(bSelected)
-//					color = MCOLOR(0,0,0);
-
+			if(szText!=NULL)
 				OnItemDraw2(pDC, irt, szText, color, bSelected, bFocused, nAdjustWidth);
-			}
 
 			nFieldStartX += nWidth;
 			if(nFieldStartX>=r.w) break;
@@ -237,51 +172,21 @@ ZPlayerListBox::ZPlayerListBox(const char* szName, MWidget* pParent, MListener* 
 : MListBox(szName, pParent, pListener)
 {
 	LOOK_IN_CONSTRUCTOR()
-/*
-	if(strcmp(szName,"StagePlayerList_")==0) {
-		m_nMode = PLAYERLISTMODE_STAGE;
-	}
-	else 
-		m_nMode = PLAYERLISTMODE_CHANNEL;
-*/
+
 	SetVisibleHeader(false);
 
 	m_bAbsoulteTabSpacing = true;
 
-//	m_MyUID = MUID(0,0);
-//	m_uidChannel = MUID(0,0);
 	m_nTotalPlayerCount = 0;
 	m_nPage = 0;
 
 	m_bVisible = true;
 	m_bVisibleHeader = true;
 
-//	AddField(" ", 23);//icon
-//	AddField(" ",130);//name
-//	AddField(" ", 23);//icon
-//	AddField(" ", 32);//level
-
 	SetItemHeight(PLAYERLIST_ITEM_HEIGHT);
-
-//	m_pBitmap = NULL;
-//	m_pBitmapIn = NULL;
 	
 	mSelectedPlayer = 0;
 	mStartToDisplay = 0;
-//	mPlayerOrder.reserve( sizeof(MUID)*100 );
-//	m_pScrollBar = new MScrollBar( this, this );
-//	ZApplication::GetGameInterface()->GetIDLResource()->InsertWidget("PlayerListScrollBar", m_pScrollBar );
-/*
-	AddPlayer(MUID(0,0),PS_FIGHT,"알지1",11);
-	AddPlayer(MUID(0,1),PS_WAIT ,"알지2",12);
-	AddPlayer(MUID(0,2),PS_LOBBY,"알지3",13);
-	AddPlayer(MUID(0,3),PS_LOBBY,"알지4",14);
-	AddPlayer(MUID(0,4),PS_LOBBY,"알지5",15);
-	AddPlayer(MUID(0,5),PS_LOBBY,"알지6",16);
-	AddPlayer(MUID(0,6),PS_LOBBY,"알지7",17);
-	AddPlayer(MUID(0,7),PS_LOBBY,"알지8",18);
-	AddPlayer(MUID(0,8),PS_LOBBY,"알지9",19);
-*/
 	m_bAlwaysVisibleScrollbar = false;
 	m_bHideScrollBar = true;
 	m_pScrollBar->SetVisible(false);
@@ -323,10 +228,9 @@ void ZPlayerListBox::InitUI(PLAYERLISTMODE nMode)
 
 	RemoveAllField();
 
-	// 필드 개수테이블 
 	const int nFields[PLAYERLISTMODE_END] = { 5,5,2,2,4,4 }; 
 	for(int i=0;i<nFields[nMode];i++) {
-		AddField("",10);	// 일단 필드를 더해놓고 나중에 리사이즈한다
+		AddField("",10);
 	}
 	OnSize(0,0);
 
@@ -423,8 +327,7 @@ void ZPlayerListBox::OnSize(int w,int h)
 
 	m_nItemHeight = PLAYERLIST_ITEM_HEIGHT * fA;
 
-//	m_pButton->SetBounds(1,1,m_Rect.w*.8f,m_nItemHeight+1);
-	m_pButton->SetBounds(0, 0, m_Rect.w, (int)(28.0/*이미지 높이가 28이라서...*/*fA));		// 다시 그림(동환)
+	m_pButton->SetBounds(0, 0, m_Rect.w, (int)(28.0 * fA));
 
 	switch(m_nMode) {
 	case PLAYERLISTMODE_CHANNEL:
@@ -569,11 +472,6 @@ void ZPlayerListBox::AddPlayer(const MUID& puid, MMatchObjectStageState state, i
 	}
 	pBitmap = MBitmapManager::Get(szFileName);
 
-	//// 클랜 엠블럼
-	//MBitmap* pBitmapEmblem = NULL;
-	//if ( strcmp( szClanName, "") != 0)
-	//	pBitmapEmblem = ZGetEmblemInterface()->GetClanEmblem( nClanID );
-
 	ZStagePlayerListItem* pItem = new ZStagePlayerListItem(puid, pBitmap, nClanID, szRefName, szClanName, szLevel , gid );
 
 	if(bSpUser)
@@ -602,7 +500,6 @@ void ZPlayerListBox::AddPlayer(ePlayerState state, char* szName, char* szLocatio
 	if ( (int)strlen( szName) == 0)
 		return;
 
-
 	char szFileName[64] = "";
 	switch (state) {
 		case PS_FIGHT	: strcpy_safe(szFileName, "player_status_player.tga");	break;
@@ -626,7 +523,6 @@ void ZPlayerListBox::AddPlayer(const MUID& puid, ePlayerState state, char* szNam
 	char* szRefName = NULL;
 
 	MCOLOR _color = MCOLOR(240,64,64);
-//	char sp_name[256];
 	bool bSpUser = false;
 
 	switch(nGrade) {
@@ -671,8 +567,6 @@ void ZPlayerListBox::DelPlayer(const MUID& puid)
 	}
 }
 
-// 나중에 바꾸자 바쁘다.. 새벽 5:16분..
-
 ZPlayerListItem* ZPlayerListBox::GetUID(MUID uid)
 {
 	ZPlayerListItem* pItem = NULL;
@@ -696,9 +590,6 @@ const char* ZPlayerListBox::GetPlayerName( int nIndex)
 	return pItem->m_szName;
 }
 
-
-// 위치는 좀 이상하지만~
-
 static DWORD g_zplayer_list_update_time = 0;
 
 #define ZPLAYERLIST_UPDATE_TIME 2000
@@ -711,25 +602,6 @@ void ZPlayerListBox::UpdateList(int mode)
 
 	if( this_time < g_zplayer_list_update_time + ZPLAYERLIST_UPDATE_TIME)
 		return;
-
-	if(mode==PLAYERLISTMODE_CHANNEL) {
-/*		ZPlayerListBox* pWidget = (ZPlayerListBox*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget("LobbyChannelPlayerList");
-		int nPage = pWidget->m_nPage;
-		if(pWidget)
-		{
-			ZPostRequestChannelPlayerList(pWidget->m_MyUID,pWidget->m_uidChannel,nPage);
-		}*/
-	}
-	else if(mode==PLAYERLISTMODE_STAGE) {
-		// Do Nothing !!
-	}
-	else if(mode==PLAYERLISTMODE_CHANNEL_CLAN) {
-
-		// test로 여기서 업데이트할때 클랜 리스트달라고도 계~속 요청한다. 테스트끝나면 삭제요망 - by bird
-//#ifndef _PUBLISH
-//			ZPostRequestClanMemberList(ZGetGameClient()->GetPlayerUID());				
-//#endif
-	}
 
 	g_zplayer_list_update_time = this_time;
 }
@@ -802,22 +674,9 @@ void ZPlayerListBox::UpdatePlayer(const MUID& puid,MMatchObjectStageState state,
 			}
 		}
 
-/*		switch (state) {
-
-		case MOSS_NONREADY	: strcpy_safe(szFileNameState, " ");							break;
-		case MOSS_READY		: strcpy_safe(szFileNameState, "char_stat_ready.tga");		break;
-		case MOSS_SHOP		: strcpy_safe(szFileNameState, "char_stat_shop.tga");		break;
-		case MOSS_EQUIPMENT	: strcpy_safe(szFileNameState, "char_stat_equip.tga");		break;
-		}
-*/
 		pBitmap = MBitmapManager::Get(szFileName);
-//		pBitmapState = MBitmapManager::Get(szFileNameState);
 
 		pItem->m_pBitmap = pBitmap;
-//		pItem->m_pBitmapState = pBitmapState;
-//		char temp[256];
-//		sprintf_safe(temp,"UpdatePlayer (%s,%s)/%d \n",szFileName,szFileNameState,GetCount() );
-//		OutputDebugString(temp);
 	}	
 
 	ZCharacterView* pCharView = (ZCharacterView*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget("Stage_Charviewer_");
@@ -905,37 +764,11 @@ void ZPlayerListBox::UpdatePlayer(const MUID& puid,MMatchObjectStageState state,
 					break;
 			}
 		}
-/*
-		switch (state) {
 
-		case MOSS_NONREADY	: strcpy_safe(szFileNameState, " ");							break;
-		case MOSS_READY		: strcpy_safe(szFileNameState, "char_stat_ready.tga");		break;
-		case MOSS_SHOP		: strcpy_safe(szFileNameState, "char_stat_shop.tga");		break;
-		case MOSS_EQUIPMENT	: strcpy_safe(szFileNameState, "char_stat_equip.tga");		break;
-		}
-*/
 		pBitmap = MBitmapManager::Get(szFileName);
-//		pBitmapState = MBitmapManager::Get(szFileNameState);
 
 		pItem->m_pBitmap = pBitmap;
-//		pItem->m_pBitmapState = pBitmapState;
 
-		///////////////////////////////////////////////////////
-/*
-		MCOLOR _color;
-		char sp_name[256];
-
-		if(GetUserInfoUID(puid,_color,sp_name,gid)) {
-			sprintf_safe(szLevel,"Lv ---");
-			strcpy_safe(pItem->m_szLevel,szLevel);
-			strcpy_safe(pItem->m_szName,sp_name);
-		}
-		else {
-			sprintf_safe(szLevel,"Lv %2d",nLevel);
-			strcpy_safe(pItem->m_szLevel,szLevel);
-			strcpy_safe(pItem->m_szName,szName);
-		}
-*/
 		sprintf_safe(szLevel,"Lv %2d",nLevel);
 		strcpy_safe(pItem->m_szLevel,szLevel);
 		strcpy_safe(pItem->m_szName,szName);
@@ -972,7 +805,6 @@ bool ZPlayerListBox::OnCommand(MWidget* pWidget, const char* szMessage)
 	if(pWidget==m_pButton) {
 		if( strcmp(szMessage, MBTN_CLK_MSG)==0 ) {
 			switch(GetMode()) {
-				//채널안에서 로테이트
 			case PLAYERLISTMODE_CHANNEL :
 				SetMode(PLAYERLISTMODE_CHANNEL_FRIEND);
 				break;
@@ -982,20 +814,11 @@ bool ZPlayerListBox::OnCommand(MWidget* pWidget, const char* szMessage)
 			case PLAYERLISTMODE_CHANNEL_CLAN :
 				SetMode(PLAYERLISTMODE_CHANNEL);
 				break;
-				// 스테이지 안에서..
 			case PLAYERLISTMODE_STAGE :
-//				SetMode(PLAYERLISTMODE_STAGE_FRIEND);
 				break;
 			case PLAYERLISTMODE_STAGE_FRIEND :
-/*
-				if(!ZGetMyInfo()->IsClanJoined())	// 클랜이 없으면 넘어간다
-					SetMode(PLAYERLISTMODE_STAGE);
-				else
-					SetMode(PLAYERLISTMODE_STAGE_CLAN);
-*/
 				break;
 			case PLAYERLISTMODE_STAGE_CLAN :
-//				SetMode(PLAYERLISTMODE_STAGE);
 				break;
 			default:
 				SetMode(PLAYERLISTMODE_CHANNEL);
@@ -1011,19 +834,14 @@ bool ZPlayerListBox::OnCommand(MWidget* pWidget, const char* szMessage)
 			if(pItem) {
 				MUID uid = pItem->m_PlayerUID;
 
-				// 플레이어를 클릭하면 좌측의 캐릭터뷰에 해당 캐릭터 이미지가
-				// 뜨는거 막음. 아직 캐릭터 정보까지 변경 안되는 관계로...  -_-;(동환)
 				ZCharacterView* pCharView = (ZCharacterView*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget("Stage_Charviewer");
 				if(pCharView!=0) pCharView->SetCharacter( uid );
 			}
 		}
-//		ZStagePlayerListItem* pItem = (ZStagePlayerListItem*) pWidget;
 		return true;
 	}
 	else if(strcmp(szMessage, "selected2")==0) {
-		// 차후 메뉴로 수정~
 		if((GetKeyState(VK_MENU)&0x8000)!=0) {
-//			ZStagePlayerListItem* pItem = (ZStagePlayerListItem*) pWidget;
 			if(m_nSelItem != -1) {
 				ZStagePlayerListItem* pItem = (ZStagePlayerListItem*)Get(m_nSelItem);
 				if(pItem) {
@@ -1059,7 +877,7 @@ bool ZPlayerListBox::OnEvent(MEvent* pEvent, MListener* pListener)
 
 				GetUserInfoUID(pItem->GetUID(),_color,sp_name,gid);
 
-				if((gid==MMUG_DEVELOPER) || (gid==MMUG_ADMIN)) { // 개발자나 관리자라면..
+				if((gid==MMUG_DEVELOPER) || (gid==MMUG_ADMIN)) {
 					bShow = false;
 				}
 
@@ -1093,20 +911,6 @@ bool ZPlayerListBox::OnEvent(MEvent* pEvent, MListener* pListener)
 						_ASSERT("Unknown PlayerMenu Setup");
 					};
 
-					// 위치를 조절해준다
-/*					MPOINT posItem;
-					GetItemPos(&posItem, nSelItem);
-					MPOINT posMenu;
-					posMenu.x = posItem.x + GetRect().w/2;
-					posMenu.y = posItem.y + GetItemHeight()/2;
-					posMenu=MClientToScreen(this,posMenu);
-
-					if(posMenu.y+pMenu->GetRect().h > MGetWorkspaceHeight()) {
-						posMenu.y-= pMenu->GetRect().h ;
-					}
-
-					pMenu->Show(posMenu.x, posMenu.y, true);
-*/
 					MPOINT posItem;
 					posItem = pEvent->Pos;
 					MPOINT posMenu = MClientToScreen(this, posItem);
@@ -1124,8 +928,6 @@ bool ZPlayerListBox::OnEvent(MEvent* pEvent, MListener* pListener)
 		}
 	}
 
-
-	// 플레이어 정보 출력
 	else if ( pEvent->nMessage == MWM_LBUTTONDBLCLK)
 	{
 		if ( rtClient.InPoint( pEvent->Pos) == true)
@@ -1140,264 +942,8 @@ bool ZPlayerListBox::OnEvent(MEvent* pEvent, MListener* pListener)
 		}
 	}
 
-
-/*	if (GetToolTip()) {
-		if ( (GetMode() == PLAYERLISTMODE_CHANNEL_FRIEND) || (GetMode() == PLAYERLISTMODE_STAGE_FRIEND) ) {
-			if(rtClient.InPoint(pEvent->Pos)==true) {
-				int nSelItem = FindItem(pEvent->Pos);
-				if (nSelItem != -1) {
-					ZFriendPlayerListItem* pItem = (ZFriendPlayerListItem*)Get(nSelItem);
-
-					MPOINT posItem;
-					GetItemPos(&posItem, nSelItem);
-					MPOINT posToolTip;
-					posToolTip.x = GetRect().x + posItem.x + GetRect().w/2;
-					posToolTip.y = GetRect().y + posItem.y + GetItemHeight()/2;
-
-					GetToolTip()->SetPosition(posToolTip.x, posToolTip.y);
-					GetToolTip()->SetText(pItem->GetLocation());
-				} else {
-					GetToolTip()->Show(false);
-				}
-			}
-		} else {
-			GetToolTip()->Show(false);
-		}
-	}
-*/
 	return MListBox::OnEvent(pEvent, pListener);;
 }
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/*
-IMPLEMENT_LOOK(ZStagePlayerListBox, ZPlayerListBoxLook)
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-ZStagePlayerListBox::ZStagePlayerListBox(const char* szName, MWidget* pParent, MListener* pListener)
-: MListBox(szName, pParent, pListener)
-{
-	LOOK_IN_CONSTRUCTOR()
-
-	SetVisibleHeader(false);
-
-	m_bAbsoulteTabSpacing = true;
-
-	m_MyUID = MUID(0,0);
-	m_uidChannel = MUID(0,0);
-	m_nTotalPlayerCount = 0;
-	m_nPage = 0;
-
-	m_bVisible = true;
-
-	AddField(" ", 23);//icon
-	AddField(" ",130);//name
-	AddField(" ", 23);//state icon
-	AddField(" ", 32);//level
-
-	SetItemHeight(23);
-
-//	m_pBitmap = NULL;
-	m_pBitmap = MBitmapManager::Get("playerlist_tab_game.png");
-	
-	mSelectedPlayer = 0;
-	mStartToDisplay = 0;
-	mPlayerOrder.reserve( sizeof(MUID)*100 );
-//	m_pScrollBar = new MScrollBar( this, this );
-//	ZApplication::GetGameInterface()->GetIDLResource()->InsertWidget("PlayerListScrollBar", m_pScrollBar );
-
-//	AddPlayer(MUID(0,0), MOSS_READY		, "aaaaa", 10 ,true ,MMT_RED );
-//	AddPlayer(MUID(0,1), MOSS_SHOP		, "bbbbb", 11 ,false,MMT_BLUE);
-//	AddPlayer(MUID(0,2), MOSS_EQUIPMENT	, "ccccc", 12 ,false,MMT_RED );
-//	AddPlayer(MUID(0,3), MOSS_NONREADY	, "ddddd", 13 ,false,MMT_BLUE);
-
-	m_bAlwaysVisibleScrollbar = false;
-	m_bHideScrollBar = true;
-	m_pScrollBar->SetVisible(false);
-	m_pScrollBar->Enable(false);
-
-	m_pScrollBar->m_nDebugType = 3;
-	m_nDebugType = 2;
-
-	m_nOldW = RGetScreenWidth();
-}
-
-ZStagePlayerListBox::~ZStagePlayerListBox(void)
-{
-}
-
-void ZStagePlayerListBox::SetBitmap( MBitmap* pBitmap)
-{
-	m_pBitmap	= pBitmap;
-}
-
-void ZStagePlayerListBox::Resize(float x,float y)
-{
-//	OnReSize();
-}
-
-float ZStagePlayerListBox::OnReSize()
-{
-	int newW = RGetScreenWidth();
-	float fA = GetF(newW);
-
-	m_nItemHeight = 23 * fA;
-
-	MLISTFIELD* fi;
-
-	for(int i=0;i<m_Fields.GetCount();i++) {
-			
-		fi = m_Fields.Get(i);
-
-		if(i==0)		fi->nTabSize = 23 * fA;
-		else if(i==1)	fi->nTabSize = 130 * fA;
-		else if(i==2) 	fi->nTabSize = 23 * fA;
-		else if(i==3) 	fi->nTabSize = 32 * fA;
-	}
-
-	return fA;
-}
-
-void ZStagePlayerListBox::DelPlayer(const MUID& puid)
-{
-	ZStagePlayerListItem* pItem = NULL;
-
-	for(int i=0;i<GetCount();i++) {
-		pItem = (ZStagePlayerListItem*)Get(i);
-		if(pItem->m_PlayerUID==puid){
-			Remove(i);
-			return;
-		}
-	}
-}
-
-// 나중에 바꾸자 바쁘다.. 새벽 5:16분..
-
-ZStagePlayerListItem* ZStagePlayerListBox::GetUID(MUID uid)
-{
-	ZStagePlayerListItem* pItem = NULL;
-
-	for(int i=0;i<GetCount();i++) {
-		pItem = (ZStagePlayerListItem*)Get(i);
-		if(pItem->m_PlayerUID==uid)
-			return pItem;
-	}
-	return NULL;
-}
-
-void ZStagePlayerListBox::UpdatePlayer(const MUID& puid,eStagePlayerState state, char* szName, int  nLevel ,bool isMaster,int nTeam)
-{
-	ZStagePlayerListItem* pItem = GetUID(puid);
-	if(pItem) {
-
-		char szFileName[64] = "";
-		char szFileNameState[64] = "";
-		char szLevel[64];
-
-		sprintf_safe(szLevel,"Lv %2d",nLevel);
-
-		MBitmap* pBitmap = NULL;
-		MBitmap* pBitmapState = NULL;
-
-		if(isMaster) {
-				 if(nTeam == MMT_RED)	strcpy_safe(szFileName, "stg_status_master_red.tga");	
-			else if(nTeam == MMT_BLUE)	strcpy_safe(szFileName, "stg_status_master_blue.tga");	
-			else 						strcpy_safe(szFileName, "stg_status_master_normal.tga");	
-		}
-		else {
-			if(nTeam == MMT_RED)		strcpy_safe(szFileName, "stg_status_member_red.tga");	
-			else if(nTeam == MMT_BLUE)	strcpy_safe(szFileName, "stg_status_member_blue.tga");	
-			else						strcpy_safe(szFileName, " ");	
-		}
-
-		switch (state) {
-
-		case MOSS_NONREADY	: strcpy_safe(szFileNameState, " ");						break;
-		case MOSS_READY		: strcpy_safe(szFileNameState, "char_stat_ready.tga");	break;
-		case MOSS_SHOP		: strcpy_safe(szFileNameState, "char_stat_shop.tga");	break;
-		case MOSS_EQUIPMENT	: strcpy_safe(szFileNameState, "char_stat_equip.tga");	break;
-		}
-
-		pBitmap = MBitmapManager::Get(szFileName);
-		pBitmapState = MBitmapManager::Get(szFileNameState);
-
-		pItem->m_pBitmap = pBitmap;
-		pItem->m_pBitmapState = pBitmapState;
-		
-		sprintf_safe(szLevel,"Lv %2d",nLevel);
-		strcpy_safe(pItem->m_szLevel,szLevel);
-		strcpy_safe(pItem->m_szName,szName);
-	}
-}
-
-void ZStagePlayerListBox::AddPlayer(MMatchObjCache* pCache)
-{
-	if(!pCache) return;
-
-	AddPlayer(pCache->GetUID(), MOSS_NONREADY,pCache->GetName(), pCache->GetLevel(),false,MMT_ALL);
-}
-
-void ZStagePlayerListBox::AddPlayer(const MUID& puid, MMatchObjectStageState state, char* szName, int  nLevel ,bool isMaster,MMatchTeam nTeam)
-{
-	char szFileName[64] = "";
-	char szFileNameState[64] = "";
-	char szLevel[64];
-
-	sprintf_safe(szLevel,"Lv %2d",nLevel);
-
-	MBitmap* pBitmap = NULL;
-	MBitmap* pBitmapState = NULL;
-
-	if(isMaster) {
-			 if(nTeam == MMT_RED)	strcpy_safe(szFileName, "stg_status_master_red.tga");	
-		else if(nTeam == MMT_BLUE)	strcpy_safe(szFileName, "stg_status_master_blue.tga");	
-		else 						strcpy_safe(szFileName, "stg_status_master_normal.tga");	
-	}
-	else {
-		if(nTeam == MMT_RED)		strcpy_safe(szFileName, "stg_status_member_red.tga");	
-		else if(nTeam == MMT_BLUE)	strcpy_safe(szFileName, "stg_status_member_blue.tga");	
-		else						strcpy_safe(szFileName, " ");	
-	}
-
-	switch (state) {
-
-		case MOSS_NONREADY	: strcpy_safe(szFileNameState, " ");						break;
-		case MOSS_READY		: strcpy_safe(szFileNameState, "char_stat_ready.tga");	break;
-		case MOSS_SHOP		: strcpy_safe(szFileNameState, "char_stat_shop.tga");	break;
-		case MOSS_EQUIPMENT	: strcpy_safe(szFileNameState, "char_stat_equip.tga");	break;
-	}
-
-	pBitmap = MBitmapManager::Get(szFileName);
-	pBitmapState = MBitmapManager::Get(szFileNameState);
-
-//	MListBox::Add(new ZLobbyPlayerListItem(puid, pBitmap, szName, szLevel));
-	MListBox::Add(new ZStagePlayerListItem(puid, pBitmap, pBitmapState, szName, szLevel));
-}
-
-bool ZStagePlayerListBox::OnEvent(MEvent* pEvent, MListener* pListener)
-{
-	if(pEvent->nMessage==MWM_MOUSEMOVE)	{
-	}
-	else if(pEvent->nMessage==MWM_MBUTTONDOWN) {
-		int k=0;
-	}
-
-	return MListBox::OnEvent(pEvent, pListener);
-}
-*/
-/*
-void ZStagePlayerListBox::AddPlayer( MMatchObjCache* pCache )
-{
-	MUID uid = pCache->GetUID();
-
-	sPlayerInfo* pInfo = new sPlayerInfo;
-	strcpy_safe( pInfo->szName, pCache->GetName() );
-	pInfo->Level	=	pCache->GetLevel();
-
-	MListBox::Add(new ZLobbyPlayerListItem(uidItem, pIconBitmap, szName, szWeight, szSlot, szPrice));
-}
-*/
 
 MUID ZPlayerListBox::GetSelectedPlayerUID() 
 {

@@ -4,19 +4,6 @@
 #include <deque>
 #include "AnimationStuff.h"
 
-struct BasicInfoItem : BasicInfo
-{
-	double SentTime;
-	double RecvTime;
-	double LowerFrameTime;
-	double UpperFrameTime;
-
-	BasicInfoItem() = default;
-	BasicInfoItem(const BasicInfo& a, float b, float c)
-		: BasicInfo(a), SentTime(b), RecvTime(c)
-	{ }
-};
-
 class BasicInfoHistoryManager
 {
 public:

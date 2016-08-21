@@ -108,10 +108,10 @@ public:
 
 	virtual bool SimpleUpdateCharInfo(const MMatchCharInfo& CharInfo) = 0;
 
-	virtual bool UpdateCharBP(const int nCID, const int nBPInc) = 0;
+	virtual bool UpdateCharBP(int CID, int nBPInc) = 0;
 
-	virtual bool UpdateCharInfoData(const int nCID, const int nAddedXP, const int nAddedBP,
-		const int nAddedKillCount, const int nAddedDeathCount) = 0;
+	virtual bool UpdateCharInfoData(int CID, int AddedXP, int AddedBP,
+		int AddedKillCount, int AddedDeathCount) = 0;
 
 	virtual bool InsertCharItem(unsigned int nCID, int nItemDescID, bool bRentItem,
 		int nRentPeriodHour, unsigned long int* poutCIID) = 0;

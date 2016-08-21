@@ -79,16 +79,9 @@
 #include "VoiceChat.h"
 #include <random>
 #include "HitRegistration.h"
+#include "stuff.h"
 
 _USING_NAMESPACE_REALSPACE2
-
-enum class BasicInfoFlags : u8
-{
-	LongPos = 1 << 0,
-	CameraDir = 1 << 1,
-	Animations = 1 << 2,
-	SelItem = 1 << 3,
-};
 
 #define ENABLE_CHARACTER_COLLISION		// 캐릭터끼리 충돌체크 
 
@@ -2304,89 +2297,41 @@ void ZGame::OnPeerNewBasicInfo(MCommand * pCommand, bool bAddHistory, bool bUpda
 {
 	auto* Param = static_cast<MCmdParamBlob*>(pCommand->GetParameter(0));
 	auto* pbi = static_cast<u8*>(Param->GetPointer());
-	auto Flags = *pbi;
-	auto Size = 1;
-	Size += sizeof(float);
-	if (Flags & static_cast<int>(BasicInfoFlags::LongPos))
-		Size += sizeof(v3);
-	else
-		Size += sizeof(MShortVector);
-	Size += sizeof(MByteVector);
-	Size += sizeof(MShortVector);
-	if (Flags & static_cast<int>(BasicInfoFlags::CameraDir))
-		Size += sizeof(MByteVector);
-	if (Flags & static_cast<int>(BasicInfoFlags::Animations))
-		Size += sizeof(u8) * 2;
-	if (Flags & static_cast<int>(BasicInfoFlags::SelItem))
-		Size += sizeof(u8);
-
-	if (Size != Param->GetPayloadSize())
+	NewBasicInfo nbi;
+	if (!UnpackNewBasicInfo(nbi, pbi, Param->GetPayloadSize()))
 		return;
-
-	size_t Offset = 1;
-#define READ(type) [&](){ auto ret = *(type*)(pbi + Offset); Offset += sizeof(type); return ret; }()
-
-	auto PeerTime = READ(float);
-
-	BasicInfoItem bi;
-	if (Flags & static_cast<int>(BasicInfoFlags::LongPos))
-		bi.position = READ(v3);
-	else
-		bi.position = static_cast<v3>(READ(MShortVector));
-
-	bi.direction = static_cast<v3>(READ(MByteVector)) * (1.f / CHAR_MAX);
-	bi.velocity = static_cast<v3>(READ(MShortVector));
-	bool HasCameraDir = (Flags & static_cast<int>(BasicInfoFlags::CameraDir)) != 0;
-	if (HasCameraDir)
-		bi.cameradir = static_cast<v3>(READ(MByteVector)) * (1.f / CHAR_MAX);
-	else
-		bi.cameradir = bi.direction;
-	if (Flags & static_cast<int>(BasicInfoFlags::Animations))
-	{
-		bi.lowerstate = static_cast<ZC_STATE_LOWER>(READ(u8));
-		bi.upperstate = static_cast<ZC_STATE_UPPER>(READ(u8));
-	}
-	else
-	{
-		bi.lowerstate = static_cast<ZC_STATE_LOWER>(-1);
-		bi.upperstate = static_cast<ZC_STATE_UPPER>(-1);
-	}
-	if (Flags & static_cast<int>(BasicInfoFlags::SelItem))
-		bi.SelectedSlot = static_cast<MMatchCharItemParts>(READ(u8));
-	else
-		bi.SelectedSlot = static_cast<MMatchCharItemParts>(-1);
 
 	auto it = m_CharacterManager.find(pCommand->GetSenderUID());
 	if (it == m_CharacterManager.end())
 		return;
 
 	auto& Char = *it->second;
-	Char.UpdateTimeOffset(PeerTime, GetTime());
+	Char.UpdateTimeOffset(nbi.Time, GetTime());
 
 	if (bAddHistory)
 	{
-		bi.SentTime = PeerTime - Char.m_fTimeOffset;
-		bi.RecvTime = GetTime();
-		Char.BasicInfoHistory.AddBasicInfo(bi);
+		nbi.bi.SentTime = nbi.Time - Char.m_fTimeOffset;
+		nbi.bi.RecvTime = GetTime();
+		Char.BasicInfoHistory.AddBasicInfo(nbi.bi);
 	}
 
 	if (bUpdate)
 	{
 		if (!IsReplay() && Char.IsHero()) return;
 
-		Char.SetNetPosition(bi.position, bi.velocity, bi.direction);
+		Char.SetNetPosition(nbi.bi.position, nbi.bi.velocity, nbi.bi.direction);
 
-		Char.CameraDir = bi.cameradir;
+		Char.CameraDir = nbi.bi.cameradir;
 
-		if (Flags & static_cast<int>(BasicInfoFlags::Animations))
+		if (nbi.Flags & static_cast<int>(BasicInfoFlags::Animations))
 		{
-			Char.SetAnimationLower(static_cast<ZC_STATE_LOWER>(bi.lowerstate));
-			Char.SetAnimationUpper(static_cast<ZC_STATE_UPPER>(bi.upperstate));
+			Char.SetAnimationLower(static_cast<ZC_STATE_LOWER>(nbi.bi.lowerstate));
+			Char.SetAnimationUpper(static_cast<ZC_STATE_UPPER>(nbi.bi.upperstate));
 		}
 
-		if (Flags & static_cast<int>(BasicInfoFlags::SelItem)
-			&& Char.GetItems()->GetSelectedWeaponParts() != bi.SelectedSlot) {
-			Char.ChangeWeapon(static_cast<MMatchCharItemParts>(bi.SelectedSlot));
+		if (nbi.Flags & static_cast<int>(BasicInfoFlags::SelItem)
+			&& Char.GetItems()->GetSelectedWeaponParts() != nbi.bi.SelectedSlot) {
+			Char.ChangeWeapon(static_cast<MMatchCharItemParts>(nbi.bi.SelectedSlot));
 		}
 	}
 }

@@ -158,3 +158,33 @@ struct MPICKINFO {
 	bool bBspPicked;
 	RBSPPICKINFO bpi;
 };
+
+struct BasicInfoItem : BasicInfo
+{
+	double SentTime;
+	double RecvTime;
+	double LowerFrameTime;
+	double UpperFrameTime;
+
+	BasicInfoItem() = default;
+	BasicInfoItem(const BasicInfo& a, float b, float c)
+		: BasicInfo(a), SentTime(b), RecvTime(c)
+	{ }
+};
+
+struct NewBasicInfo
+{
+	u8 Flags;
+	float Time;
+	BasicInfoItem bi;
+};
+
+enum class BasicInfoFlags : u8
+{
+	LongPos = 1 << 0,
+	CameraDir = 1 << 1,
+	Animations = 1 << 2,
+	SelItem = 1 << 3,
+};
+
+bool UnpackNewBasicInfo(NewBasicInfo& nbi, const u8* pbi, size_t BlobSize);

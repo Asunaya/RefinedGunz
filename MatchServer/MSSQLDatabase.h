@@ -57,10 +57,10 @@ public:
 
 	virtual bool SimpleUpdateCharInfo(const MMatchCharInfo& CharInfo) override;
 
-	virtual bool UpdateCharBP(const int nCID, const int nBPInc) override;
+	virtual bool UpdateCharBP(int CID, int BPInc) override;
 
-	virtual bool UpdateCharInfoData(const int nCID, const int nAddedXP, const int nAddedBP,
-		const int nAddedKillCount, const int nAddedDeathCount) override;
+	virtual bool UpdateCharInfoData(int CID, int AddedXP, int AddedBP,
+		int AddedKillCount, int AddedDeathCount) override;
 
 	virtual bool InsertCharItem(unsigned int nCID, int nItemDescID, bool bRentItem,
 		int nRentPeriodHour, unsigned long int* poutCIID) override;

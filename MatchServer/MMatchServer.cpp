@@ -45,6 +45,7 @@
 #include "MUtil.h"
 #include "MLadderMgr.h"
 #include "MTeamGameStrategy.h"
+#include "stuff.h"
 
 #define DEFAULT_REQUEST_UID_SIZE		4200000000	///< UID 할당 요청 기본 단위
 #define DEFAULT_REQUEST_UID_SPARE_SIZE	10000		///< UID 남은 갯수
@@ -1099,6 +1100,15 @@ void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Recei
 
 	if (Netcode == NetcodeType::ServerBased)
 	{
+		auto TrySuicide = [&](auto Z, auto&& Sender)
+		{
+			constexpr auto DIE_CRITICAL_LINE = -2500.f;
+			if (Z <= DIE_CRITICAL_LINE)
+			{
+				OnGameKill(Sender, Sender);
+			}
+		};
+
 		switch (CommandID)
 		{
 		case MC_PEER_BASICINFO:
@@ -1113,13 +1123,23 @@ void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Recei
 			bi.RecvTime = MGetMatchServer()->GetGlobalClockCount() / 1000.0;
 			SenderObj->BasicInfoHistory.AddBasicInfo(bi);
 
-			constexpr auto DIE_CRITICAL_LINE = -2500.f;
-			if (bi.position.z <= DIE_CRITICAL_LINE)
-			{
-				OnGameKill(Sender, Sender);
-			}
+			TrySuicide(bi.position.z, Sender);
+		}
+		break;
+		case MC_PEER_BASICINFO_RG:
+		{
+			if (!SenderObj->IsAlive())
+				return;
 
-			//mlog("BasicInfo %d, %d, %d\n", pbi.posx, pbi.posy, pbi.posz);
+			NewBasicInfo nbi;
+			auto* pbi = reinterpret_cast<const u8*>(Blob + 2 + 2 + 1 + 4);
+			if (!UnpackNewBasicInfo(nbi, pbi, BlobSize))
+				return;
+			nbi.bi.SentTime = nbi.Time;
+			nbi.bi.RecvTime = MGetMatchServer()->GetGlobalClockCount() / 1000.0;
+			SenderObj->BasicInfoHistory.AddBasicInfo(nbi.bi);
+
+			TrySuicide(nbi.bi.position.z, Sender);
 		}
 		break;
 		case MC_PEER_SHOT:
