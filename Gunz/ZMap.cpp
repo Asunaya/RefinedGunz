@@ -8,10 +8,7 @@
 
 void ZGetCurrMapPath(char* outPath, int maxlen)
 {
-// 나중에 랜덤맵 구현할때까지 그냥 맵 하나만 사용
 #ifdef _QUEST
-
-
 	if (ZGetGameTypeManager()->IsQuestDerived(ZGetGameClient()->GetMatchStageSetting()->GetGameType()))
 	{
 		strcpy_safe(outPath, maxlen, PATH_QUEST_MAPS);
@@ -36,15 +33,9 @@ bool InitMaps(MWidget *pWidget)
 	MComboBox* pCombo=(MComboBox*)pWidget;
 	pCombo->RemoveAll();
 
-	// 일단 임시 하드코딩(우에엥~ ㅠ.ㅠ)
 	if ((ZGetGameClient()) && ( ZGetGameTypeManager()->IsQuestDerived(ZGetGameClient()->GetMatchStageSetting()->GetGameType())))
 	{
 		pCombo->Add( "Mansion");
-//		pCombo->Add( "Factory");
-//		pCombo->Add( "Prison");
-//		pCombo->Add( "Town");
-//		pCombo->Add( "Castle");
-//		pCombo->Add( "Dungeon");
 
 		return true;
 	}
@@ -72,22 +63,6 @@ bool InitMaps(MWidget *pWidget)
 		{
 			char drive[_MAX_DRIVE],dir[_MAX_DIR],fname[_MAX_FNAME],ext[_MAX_EXT];
 			_splitpath(szFileName,drive,dir,fname,ext);
-
-/*
-			if ((ZApplication::GetInstance()->GetLaunchMode() == ZApplication::ZLAUNCH_MODE_STANDALONE_DEVELOP) ||
-				(ZApplication::GetInstance()->GetLaunchMode() == ZApplication::ZLAUNCH_MODE_STANDALONE_QUEST) ) 
-			{
-				pCombo->Add(fname);
-			} 
-
-#ifdef _QUEST
-			// 퀘스트 모드이면 채널룰이랑 상관없다.
-			else if (ZGetGameTypeManager()->IsQuestDerived(ZGetGameClient()->GetMatchStageSetting()->GetGameType()))
-			{
-				pCombo->Add(fname);
-			}
-#endif
-*/
 
 #ifdef _DEBUG
 			pCombo->Add(fname);

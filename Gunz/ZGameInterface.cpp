@@ -930,19 +930,8 @@ bool ZGameInterface::ChangeInterfaceSkin(const char* szNewSkinName)
 	return bSuccess;
 }
 
-
-// 파츠교환과 무기장비의 임시 데이터 들....
-
-static bool g_parts[10];	// 캐릭터 장비 부착 테스트용 임시 변수
+static bool g_parts[10];
 static bool g_parts_change;
-
-//static int	g_select_weapon=0;
-//static bool g_weapon[10];
-//static bool g_weapon_change;
-
-
-
-/// OnCommand를 ZGameInterface_OnCommand.cpp로 옴김. 
 
 bool ZGameInterface::ShowWidget(const char* szName, bool bVisible, bool bModal)
 {
@@ -988,39 +977,19 @@ void ZGameInterface::SetTextWidget(const char* szName, const char* szText)
 
 bool ZGameInterface::OnGameCreate(void)
 {
-	if(ZGetConfiguration()->GetCamFix())
-		ZGetCamera()->m_fDist = CAMERA_DEFAULT_DISTANCE * RGetScreenWidth() / RGetScreenHeight() / (4.f / 3.f);
-
-//	// WPE hacking protect
-//	HMODULE hMod = GetModuleHandle( "ws2_32.dll"); 
-//	FARPROC RetVal = GetProcAddress( hMod, "recv"); 
-//	if ( (BYTE)RetVal == 0xE9)
-//	{
-//		mlog( "Hacking detected");
-//
-////		MessageBox(NULL, ZMsg(MSG_HACKING_DETECTED), ZMsg( MSG_WARNING), MB_OK);
-//		ZApplication::GetGameInterface()->ShowWidget("HackWarnings", true, true);
-//
-//		ZPostDisconnect();
-//	}
-
-
 	m_Camera.Init();
 	ClearMapThumbnail();
 
-	g_parts[6] = true;//칼을 쥐고 시작 임시..
+	g_parts[6] = true;
 
-	//DrawLoadingScreen("Now Loading...", 0.0f);
 	ZApplication::GetSoundEngine()->CloseMusic();
 
 	m_bLoading = true;
-	//m_pLoadingInterface = new ZLoading("loading", this, this);
 
 	ZLoadingProgress gameLoading("Game");
 
 	ZGetInitialLoading()->Initialize( 1, 0,0, RGetScreenWidth(), RGetScreenHeight(), 0,0, 1024, 768, true );
 
-	// 로딩 이미지 로드
 	char szFileName[256];
 	int nBitmap = rand() % 9;
 	switch ( nBitmap)
@@ -1070,11 +1039,6 @@ bool ZGameInterface::OnGameCreate(void)
 	ZGetInitialLoading()->Draw( MODE_DEFAULT, 0, true );
 #endif
 
-	//m_pLoadingInterface->OnCreate();
-
-	//m_pLoadingInterface->Progress( LOADING_BEGIN );
-	//Redraw();	// Loading Screen으로 다시 그린다.
-
 	m_pGame=new ZGame;
 	g_pGame=m_pGame;
 	if(!m_pGame->Create(ZApplication::GetFileSystem(), &gameLoading ))
@@ -1083,26 +1047,15 @@ bool ZGameInterface::OnGameCreate(void)
 		SAFE_DELETE(m_pGame);
 		g_pGame=NULL;
 		m_bLoading = false;
-		//m_pLoadingInterface->OnDestroy();
-		//delete m_pLoadingInterface; m_pLoadingInterface = NULL;
 
 		ZGetInitialLoading()->Release();
 		
 		return false;
 	}
 
-	/*
-	if(g_pGameClient->IsForcedEntry())
-		g_pGame->SetForcedEntry();
-	*/
-
 	m_pMyCharacter=(ZMyCharacter*)g_pGame->m_pMyCharacter;
 
-	
-
 	SetFocus();
-
-	//ZGetInitialLoading()->SetPercentage( 100.f );
 
 	m_pGameInput = new ZGameInput();
 

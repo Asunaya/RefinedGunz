@@ -1,14 +1,10 @@
-#ifndef _ZCAMERA_H
-#define _ZCAMERA_H
-
-//#pragma once
+#pragma once
 
 #include "RTypes.h"
 
 _USING_NAMESPACE_REALSPACE2
 
 #define CAMERA_DEFAULT_DISTANCE		290.f
-
 
 #define CAMERA_DEFAULT_ANGLEX		(pi/2.f)
 #define CAMERA_DEFAULT_ANGLEZ		(pi/4.f)
@@ -18,7 +14,6 @@ _USING_NAMESPACE_REALSPACE2
 
 #define CAMERA_DIST_MAX		1000.f
 #define CAMERA_DIST_MIN		150.f
-
 
 enum ZCAMERALOOKMODE
 {
@@ -36,66 +31,44 @@ public:
 
 	void Update(float fElapsed);
 
-	float m_fAngleX;
-	float m_fAngleZ;
-	float m_fDist;
+	bool m_bAutoAiming;
 
-	bool  m_bAutoAiming;
+	auto& GetPosition() const { return m_Position; }
+	v3 GetCurrentDir();
+	void SetPosition(const v3 &pos) { m_Position = pos; }
+	void SetDirection(const v3& dir);
 
-	rvector m_Target;				// 타겟이 최종적으로 가야할 위치.
-	rvector	m_vCameraTrackOffset;	// 카메라가 위치 잡는 캐릭터의 offset
-
-	void RecoilAngle(float fRecoilAngleX, float fRecoilAngleZ);		// 총쏠때 반동
-	void SetMaxRecoilAngleX(float fMax);
-
-	rvector GetPosition()	{ return m_Position; }
-	rvector GetCurrentDir();
-	void SetPosition(const rvector &pos)		{ m_Position = pos; }
-	void SetDirection(const rvector& dir);
-
-
-	// 카메라 흔들리는 이펙트
-	bool m_bShocked;
-	rvector m_CameraShockOffset;
-	rvector m_CameraShockVelocity;
-	float	m_fShockStartTime;
-	float	m_fShockPower,m_fShockDuration;
-
-	void Shock(float fPower, float fDuration, const rvector& vDir);
+	void Shock(float fPower, float fDuration, const v3& vDir);
 	void StopShock();
 	void Init();
 
-	ZCAMERALOOKMODE	GetLookMode()			{ return m_nLookMode; }
+	auto GetLookMode() const { return m_nLookMode; }
 	void SetLookMode(ZCAMERALOOKMODE mode);
 	void SetNextLookMode();
 
-
 private:
 	friend class Portal;
+	friend class ZGameInput;
+	friend void LoadRGCommands(class ZChatCmdManager& CmdManager);
 
-	ZCAMERALOOKMODE		m_nLookMode;
-
-	float m_fRecoilAngleX;
-	float m_fRecoilAngleZ;
-	float m_fMaxRecoilAngleX;
-
-
-	float m_fCurrentAngleX;
-	float m_fCurrentAngleZ;
-
-
-	rvector m_Position;		// 현재 카메라의 위치
-//	rvector m_Direction;	// 현재 카메라의 방향
-
-	rvector m_CurrentTarget;
-
-	bool CheckCollisionWall(float &fRealDist, rvector& pos, rvector& dir);
+	bool CheckCollisionWall(float &fRealDist, v3& pos, v3& dir);
 	void CalcMaxPayneCameraZ(float &fRealDist, float& fAddedZ, float fAngleX);
 
-public:
-	float m_fCurrentDist;
-	bool m_bCollision[4];
-	float m_fPH;
-};
+	ZCAMERALOOKMODE m_nLookMode;
 
-#endif
+	bool m_bShocked;
+	float m_fShockStartTime;
+	float m_fShockPower;
+	float m_fShockDuration;
+
+	float m_fDist;
+
+	float m_fAngleX;
+	float m_fAngleZ;
+
+	float m_fCurrentDist;
+
+	v3 m_Position;
+	v3 m_Target;
+	v3 m_CurrentTarget;
+};

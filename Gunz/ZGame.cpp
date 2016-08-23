@@ -2273,6 +2273,7 @@ void ZGame::OnPeerBasicInfo(MCommand *pCommand, bool bAddHistory, bool bUpdate)
 	{
 		BasicInfoItem bii;
 		ppbi->Unpack(bii);
+		bii.cameradir = bii.direction;
 		bii.SentTime = ppbi->fTime - pCharacter->m_fTimeOffset;
 		bii.RecvTime = GetTime();
 		pCharacter->BasicInfoHistory.AddBasicInfo(bii);

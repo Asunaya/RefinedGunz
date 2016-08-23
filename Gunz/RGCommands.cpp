@@ -6,7 +6,7 @@
 #include "Extensions.h"
 #include <cstdint>
 
-void LoadRGCommands(ZChatCmdManager &CmdManager)
+void LoadRGCommands(ZChatCmdManager& CmdManager)
 {
 	CmdManager.AddCommand(0, "fpslimit", [](const char *line, int argc, char ** const argv){
 		int nFPSLimit = atoi(argv[1]);
@@ -110,9 +110,7 @@ void LoadRGCommands(ZChatCmdManager &CmdManager)
 
 	CmdManager.AddCommand(0, "argv", [](const char *line, int argc, char ** const argv) {
 		for (int i = 0; i < argc; i++)
-		{
 			ZChatOutputF("%s", argv[i]);
-		}
 	}, CCF_ALL, ARGVNoMin, ARGVNoMax, true, "/argv", "");
 
 	CmdManager.AddCommand(0, "swordcolor", [](const char *line, int argc, char ** const argv) {

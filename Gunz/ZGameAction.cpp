@@ -7,10 +7,7 @@
 #include "ZSoundEngine.h"
 #include "ZMyCharacter.h"
 #include "ZPost.h"
-#include "ZModule_FireDamage.h"
-#include "ZModule_ColdDamage.h"
-#include "ZModule_LightningDamage.h"
-#include "ZModule_PoisonDamage.h"
+#include "ZModule_ElementalDamage.h"
 
 #define MAX_ENCHANT_DURATION	10.f
 

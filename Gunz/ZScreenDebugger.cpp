@@ -14,8 +14,6 @@
 int g_debug_tex_update_cnt;
 
 _NAMESPACE_REALSPACE2_BEGIN
-//extern int g_nCheckWallPolygons,g_nRealCheckWallPolygons;
-//extern int g_nCheckFloorPolygons,g_nRealCheckFloorPolygons;
 extern int g_nPoly,g_nCall;
 extern int g_nPickCheckPolygon,g_nRealPickCheckPolygon;
 _NAMESPACE_REALSPACE2_END
@@ -148,7 +146,7 @@ void ZScreenDebugger::DrawDebugInfo(MDrawContext *pDC)
 		return;
 	}
 
-	for (int i = 0; i < 4; i++)
+	/*for (int i = 0; i < 4; i++)
 	{
 		if (pCamera->m_bCollision[i]) sprintf_safe(buffer, "True");
 		else sprintf_safe(buffer, "False");
@@ -157,7 +155,7 @@ void ZScreenDebugger::DrawDebugInfo(MDrawContext *pDC)
 		NEXTLINE();
 	}
 	sprintf_safe(buffer, "AngleX : %3.3f , AngleZ : %3.3f , Dist : %3.3f", pCamera->m_fAngleX, pCamera->m_fAngleZ,
-		pCamera->m_fCurrentDist);
+		pCamera->m_fCurrentDist);*/
 	OUTTEXT();
 	NEXTLINE();
 	

@@ -22,10 +22,7 @@
 #include "ZModule_HPAP.h"
 #include "ZModule_Movable.h"
 #include "ZModule_Resistance.h"
-#include "ZModule_FireDamage.h"
-#include "ZModule_ColdDamage.h"
-#include "ZModule_LightningDamage.h"
-#include "ZModule_PoisonDamage.h"
+#include "ZModule_ElementalDamage.h"
 #include "ZModule_QuestStatus.h"
 #include "ZGameConst.h"
 #include "BasicInfoHistory.inl"
@@ -222,24 +219,20 @@ void ZChangeCharWeaponMesh(RVisualMesh* pVMesh, unsigned long int nWeaponID)
 ///////////////////////////////////////////////////////////////////////////////////////
 MImplementRTTI(ZCharacter, ZCharacterObject);
 
-ZCharacter::ZCharacter() : ZCharacterObject(), m_DirectionLower(1,0,0),m_DirectionUpper(1,0,0),m_TargetDir(1,0,0),m_bAdminHide(false)
-{ 
-
+ZCharacter::ZCharacter() : ZCharacterObject(),
+m_DirectionLower(1, 0, 0), m_DirectionUpper(1, 0, 0), m_TargetDir(1, 0, 0),
+m_bAdminHide(false)
+{
 	m_nMoveMode = MCMM_RUN;
 	m_nMode		= MCM_OFFENSIVE;
 	m_nState	= MCS_STAND;
 
 	m_nVMID = -1;
-//	m_fLastUpdateTime = 0.f;
 
 	m_nSelectSlot = 0;
 
-//	m_dwBackUpTime = 0;
-
-	// 충돌처리값
 	m_Collision.fRadius = CHARACTER_RADIUS-2;
 	m_Collision.fHeight = CHARACTER_HEIGHT;
-	
 
 	m_fLastKillTime = 0;
 	m_nKillsThisRound = 0;
@@ -255,7 +248,6 @@ ZCharacter::ZCharacter() : ZCharacterObject(), m_DirectionLower(1,0,0),m_Directi
 	m_bCommander = false;
 	m_bTagger = false;
 
-//	m_bAutoDir = false;
 	m_bStylishShoted = false;
 	m_bStun = false;
 
@@ -275,26 +267,17 @@ ZCharacter::ZCharacter() : ZCharacterObject(), m_DirectionLower(1,0,0),m_Directi
 	m_AniState_Upper=ZC_STATE_UPPER_NONE;
 	m_AniState_Lower=ZC_STATE_LOWER_NONE;
 
-//	m_pAnimationInfo_Lower=&g_AnimationInfoTableLower[ZC_STATE_LOWER_IDLE1];
-//	m_pAnimationInfo_Lower=&g_AnimationInfoTableUpper[ZC_STATE_UPPER_NONE];
-
 	m_pAnimationInfo_Lower=NULL;
 	m_pAnimationInfo_Upper=NULL;
 
 	m_vProxyPosition = m_vProxyDirection = rvector(0.0f,0.0f,0.0f);
 
 	for(int i=0;i<6;i++) {
-		m_t_parts[i]  = 2;//남자는 2번 코드모델이 초기모델..
+		m_t_parts[i]  = 2;
 		m_t_parts2[i] = 0;
 	}
 
 	m_fLastReceivedTime=0;
-
-	/*
-	m_fAveragePingTime=0;
-	m_fAccumulatedTimeError=0;
-	m_nTimeErrorCount=0;
-	*/
 
 	m_fLastValidTime = 0.0f;
 	m_Accel = rvector(0.0f, 0.0f, 0.0f);
@@ -320,26 +303,10 @@ ZCharacter::ZCharacter() : ZCharacterObject(), m_DirectionLower(1,0,0),m_Directi
 	m_nTimeErrorCount = 0;
 	m_fAccumulatedTimeError = 0;
 
-	m_pModule_HPAP = new ZModule_HPAP;
-	m_pModule_Resistance = new ZModule_Resistance;
-	m_pModule_FireDamage = new ZModule_FireDamage;
-	m_pModule_ColdDamage = new ZModule_ColdDamage;
-	m_pModule_PoisonDamage = new ZModule_PoisonDamage;
-	m_pModule_LightningDamage = new ZModule_LightningDamage;
-	m_pModule_QuestStatus = NULL;
-	
-	AddModule(m_pModule_HPAP);
-	AddModule(m_pModule_Resistance);
-	AddModule(m_pModule_FireDamage);
-	AddModule(m_pModule_ColdDamage);
-	AddModule(m_pModule_PoisonDamage);
-	AddModule(m_pModule_LightningDamage);
-
 	if (ZGetGameTypeManager()->IsQuestDerived(ZGetGameClient()->GetMatchStageSetting()->GetGameType()))
-	{
-		m_pModule_QuestStatus = new ZModule_QuestStatus();
-		AddModule(m_pModule_QuestStatus);
-	}
+		m_pModule_QuestStatus = AddModule<ZModule_QuestStatus>();
+	else
+		m_pModule_QuestStatus = nullptr;
 
 	m_szUserName[0]=0;
 	m_szUserAndClanName[0]=0;
@@ -351,24 +318,6 @@ ZCharacter::ZCharacter() : ZCharacterObject(), m_DirectionLower(1,0,0),m_Directi
 
 ZCharacter::~ZCharacter()
 {
-	RemoveModule(m_pModule_HPAP);
-	RemoveModule(m_pModule_Resistance);
-	RemoveModule(m_pModule_FireDamage);
-	RemoveModule(m_pModule_ColdDamage);
-	RemoveModule(m_pModule_PoisonDamage);
-	RemoveModule(m_pModule_LightningDamage);
-	RemoveModule(m_pModule_QuestStatus);
-
-	delete m_pModule_HPAP;
-	delete m_pModule_Resistance;
-	delete m_pModule_FireDamage;
-	delete m_pModule_ColdDamage;
-	delete m_pModule_PoisonDamage;
-	delete m_pModule_LightningDamage;
-	SAFE_DELETE(m_pModule_QuestStatus);
-
-	EmptyHistory();
-
 	Destroy();
 }
 
@@ -381,7 +330,6 @@ void ZCharacter::EmptyHistory()
 
 void ZCharacter::Stop()
 {
-	//SetState(ZC_STATE_IDLE);
 	SetAnimationLower(ZC_STATE_LOWER_IDLE1);
 }
 
@@ -423,9 +371,6 @@ void ZCharacter::SetAnimation(RAniMode mode, const char *AnimationName,bool bEna
 	}
 }
 
-//#define TRACE_ANIMATION
-
-// 시간 test 위한 변수
 DWORD g_dwLastAnimationTime=GetGlobalTimeMS();
 
 void ZCharacter::SetAnimationLower(ZC_STATE_LOWER nAni)
@@ -441,23 +386,13 @@ void ZCharacter::SetAnimationLower(ZC_STATE_LOWER nAni)
 		return;
 	}
 
-//	if(!m_pAnimationInfo_Lower || m_pAnimationInfo_Lower->bEnableCancel)
-//	if( m_pVMesh->m_isPlayDone || m_pAnimationInfo_Upper->bEnableCancel )
-	//{
-		m_AniState_Lower=nAni;
-		m_pAnimationInfo_Lower=&g_AnimationInfoTableLower[nAni];
-		
-		SetAnimation(ani_mode_lower,m_pAnimationInfo_Lower->Name,m_pAnimationInfo_Lower->bEnableCancel,0);
+	m_AniState_Lower = nAni;
+	m_pAnimationInfo_Lower = &g_AnimationInfoTableLower[nAni];
 
-		// 움직이는 애니메이션이 연결될때는 여기에 추가해주어야 한다
-//		if(IsMoveAnimation())
-		{
-			if(!g_AnimationInfoTableLower[nAni].bContinuos)
-				m_RealPositionBefore=rvector(0,0,0);
-		}
+	SetAnimation(ani_mode_lower, m_pAnimationInfo_Lower->Name, m_pAnimationInfo_Lower->bEnableCancel, 0);
 
-	//m_RealPositionBefore=m_RealPosition=m_Position;
-
+	if (!g_AnimationInfoTableLower[nAni].bContinuos)
+		m_RealPositionBefore = rvector(0, 0, 0);
 
 #ifdef TRACE_ANIMATION
 	{
@@ -469,9 +404,6 @@ void ZCharacter::SetAnimationLower(ZC_STATE_LOWER nAni)
 		g_dwLastAnimationTime = curtime;
 	}
 #endif
-
-//	m_pVMesh->m_nFrame[0]=0;
-	//*/
 }
 
 void ZCharacter::SetAnimationUpper(ZC_STATE_UPPER nAni)
@@ -499,22 +431,14 @@ void ZCharacter::SetAnimationUpper(ZC_STATE_UPPER nAni)
 		g_dwLastAnimationTime = curtime;
 	}
 #endif
-
-//	if(!m_pAnimationInfo_Upper || m_pAnimationInfo_Upper->bEnableCancel)
-	//if( m_AniState_Upper != ZC_STATE_UPPER_NONE )
-	//{
-	//	if( m_pVMesh->m_isPlayDone || m_pAnimationInfo_Upper->bEnableCancel )
-	//	{	
-			m_AniState_Upper=nAni;
-			m_pAnimationInfo_Upper=&g_AnimationInfoTableUpper[nAni];
-			if( m_pAnimationInfo_Upper == NULL || m_pAnimationInfo_Upper->Name == NULL )
-			{
-				mlog("Fail to Get Animation Info.. Ani Index : [%d]\n", nAni );
-				return;
-			}
-			SetAnimation(ani_mode_upper,m_pAnimationInfo_Upper->Name,m_pAnimationInfo_Upper->bEnableCancel,0);
-	//	}
-	//}
+	m_AniState_Upper=nAni;
+	m_pAnimationInfo_Upper=&g_AnimationInfoTableUpper[nAni];
+	if( m_pAnimationInfo_Upper == NULL || m_pAnimationInfo_Upper->Name == NULL )
+	{
+		mlog("Fail to Get Animation Info.. Ani Index : [%d]\n", nAni );
+		return;
+	}
+	SetAnimation(ani_mode_upper,m_pAnimationInfo_Upper->Name,m_pAnimationInfo_Upper->bEnableCancel,0);
 }
 
 void ZCharacter::UpdateLoadAnimation()
@@ -530,12 +454,7 @@ void ZCharacter::UpdateLoadAnimation()
 	}
 }
 
-
-// 모션의 감도때문에 수시로 결정
-// 하반신 카메라방향으로 보간돌리기
-// 상반신 파트 목표 벡터 설정
-
-bool CheckVec(rvector& v1,rvector& v2) {
+static bool CheckVec(rvector& v1,rvector& v2) {
 	if( fabs(v1.x - v2.x) < 0.03f )
 		if( fabs(v1.y - v2.y) < 0.03f )
 			if( fabs(v1.z - v2.z) < 0.03f )
@@ -543,27 +462,14 @@ bool CheckVec(rvector& v1,rvector& v2) {
 	return true;
 }
 
-bool g_debug_rot = false;
-
-
-// 이 펑션은 허리돌리기때문에..
 void ZCharacter::UpdateMotion(float fDelta)
 {
 	if (m_bInitialized==false) return;
-	// 점프로 모션 바꾸기 - 이전상태 백업
-	// 점프는 어떤 상태에서든 모션이바뀔수있으므로..
-	// run , idle
 
-	// 자신의 타겟방향에 캐릭터의 방향을 맞춘다..
-	if (IsDie()) { //허리 변형 없다~
-
-		m_pVMesh->m_vRotXYZ.x = 0.f;
-		m_pVMesh->m_vRotXYZ.y = 0.f;
-		m_pVMesh->m_vRotXYZ.z = 0.f;
-		
+	if (IsDie()) {
+		m_pVMesh->m_vRotXYZ = { 0, 0, 0 };
 		return;
 	}
-
 
 	if (g_Rules.IsVanillaMode())
 	{
@@ -571,11 +477,7 @@ void ZCharacter::UpdateMotion(float fDelta)
 			(m_AniState_Lower == ZC_STATE_LOWER_RUN_FORWARD) ||
 			(m_AniState_Lower == ZC_STATE_LOWER_RUN_BACK))
 		{
-
 			m_Direction = m_TargetDir;
-
-			//	m_DirectionLower = rvector(1,0,0);
-			//	m_DirectionLower = m_Direction;
 
 			rvector targetdir = m_TargetDir;
 			targetdir.z = 0;
@@ -584,31 +486,24 @@ void ZCharacter::UpdateMotion(float fDelta)
 			rvector dir = m_Accel;
 			dir.z = 0;
 
-			if (Magnitude(dir) < 10.f) {
+			if (Magnitude(dir) < 10.f)
 				dir = targetdir;
-			}
 			else
 				Normalize(dir);
 
-			// 뒤 / 뒤+왼쪽 / 뒤+오른쪽 3개에 한해서 방향을 반대로.
-			// 예를들면 뒤+왼쪽은 앞+오른쪽과 같은 발방향을 한다..
-
 			bool bInversed = false;
-			//	if(IsKeyDown('S'))
 			if (DotProduct(targetdir, dir) < -cos(D3DX_PI / 4.f) + 0.01f)
 			{
 				dir = -dir;
 				bInversed = true;
 			}
 
-			// fAngleLower 는 현재 발방향과 해야하는 발방향의 각도 차이
 			float fAngleLower = GetAngleOfVectors(dir, m_DirectionLower);
 
 			rmatrix mat;
 
 #define ROTATION_SPEED	400.f
 
-			// 일정각도 이상되면 하체를 틀어준다
 			if (fAngleLower > 5.f / 180.f*D3DX_PI)
 			{
 				D3DXMatrixRotationZ(&mat, max(-ROTATION_SPEED*fDelta / 180.f*D3DX_PI, -fAngleLower));
@@ -621,11 +516,7 @@ void ZCharacter::UpdateMotion(float fDelta)
 				m_DirectionLower = m_DirectionLower * mat;
 			}
 
-
-			// 상체가 향해야 하는 방향은 언제나 타겟방향
 			float fAngle = GetAngleOfVectors(m_TargetDir, m_DirectionLower);
-
-			// 그러나 하체와의 각도를 항상 일정각도 이하로 유지한다.
 
 			if (fAngle < -65.f / 180.f*D3DX_PI)
 			{
@@ -643,10 +534,9 @@ void ZCharacter::UpdateMotion(float fDelta)
 
 			m_pVMesh->m_vRotXYZ.x = -fAngle * 180 / D3DX_PI *.9f;
 
-			// 실제보다 약간 고개를 들어준다 :)
 			m_pVMesh->m_vRotXYZ.y = (m_TargetDir.z + 0.05f) * 50.f;
 		}
-		else // 달리기/가만있기등의 애니메이션이 아니면 허리안돌린다.
+		else
 		{
 			m_Direction = m_TargetDir;
 			m_DirectionLower = m_Direction;
@@ -667,38 +557,21 @@ void ZCharacter::UpdateMotion(float fDelta)
 	}
 }
 
-void GetDTM(bool* pDTM,int mode,bool isman)
+static void GetDTM(bool* pDTM,int mode,bool isman)
 {
-//	남자 우 좌 무 쌍
-//	여자 좌 우 좌 우
-
 	if(!pDTM) return;
-
-//  여자도 모션이 같아졌다..
-
-//	if(isman) {
 
 		     if(mode==0) { pDTM[0]=true; pDTM[1]=false; }
 		else if(mode==1) { pDTM[0]=false;pDTM[1]=true;  }
 		else if(mode==2) { pDTM[0]=false;pDTM[1]=false; }
 		else if(mode==3) { pDTM[0]=true; pDTM[1]=true;  }
-/*
-	}
-	else {
-
-		     if(mode==0) { pDTM[0]=false;pDTM[1]=true;  }
-		else if(mode==1) { pDTM[0]=true; pDTM[1]=false; }
-		else if(mode==2) { pDTM[0]=false;pDTM[1]=true;  }
-		else if(mode==3) { pDTM[0]=true; pDTM[1]=false; }
-	}
-*/
 }
 
 void ZCharacter::CheckDrawWeaponTrack()
 {
 	if(m_pVMesh==NULL) return;
 
-	bool bDrawTracks = false;//칼 궤적을 그릴것인가?
+	bool bDrawTracks = false;
 
 	if (ZGetConfiguration()->GetDrawTrails()
 #ifdef PORTAL
@@ -715,8 +588,6 @@ void ZCharacter::CheckDrawWeaponTrack()
 				(ZC_STATE_UPPER_LOAD <= m_AniState_Upper && m_AniState_Upper <= ZC_STATE_UPPER_GUARD_CANCEL))
 			{
 				if (m_AniState_Upper != ZC_STATE_UPPER_GUARD_IDLE) {
-
-					// 복귀할때는 안 그린다
 					if ((m_AniState_Lower != ZC_STATE_LOWER_ATTACK1_RET) &&
 						(m_AniState_Lower != ZC_STATE_LOWER_ATTACK2_RET) &&
 						(m_AniState_Lower != ZC_STATE_LOWER_ATTACK3_RET) &&
@@ -726,8 +597,6 @@ void ZCharacter::CheckDrawWeaponTrack()
 			}
 		}
 	}
-
-	// 이도류일 경우
 
 	bool bDTM[2];
 
@@ -751,48 +620,39 @@ void ZCharacter::CheckDrawWeaponTrack()
 
 }
 
-// 렌더링하면서 모션의 프레임 타임에 의존적인 무기의 경우
-
 void ZCharacter::UpdateSpWeapon()
 {
 	if(!m_pVMesh) return;
 
 	m_pVMesh->UpdateSpWeaponFire();
 
-	if(m_pVMesh->m_bAddGrenade) {//모두가 알고있다~
+	if(m_pVMesh->m_bAddGrenade) {
 
 		rvector vWeapon[2];
 
 		vWeapon[0] = m_pVMesh->GetCurrentWeaponPosition();
 
-		// 벽뒤로 던지는 경우가 생기면
-//		rvector nPos = m_Position + rvector(0,0,100);
-		rvector nPos = m_pVMesh->GetBipTypePosition(eq_parts_pos_info_Spine1);// m_Position + rvector(0,0,100);
+		rvector nPos = m_pVMesh->GetBipTypePosition(eq_parts_pos_info_Spine1);
 		rvector nDir = vWeapon[0] - nPos;
 
 		Normalize(nDir);
 
 		RBSPPICKINFO bpi;
-		// 아래를 보면서 던지면 벽을 통과해서...
-//		if(ZGetGame()->GetWorld()->GetBsp()->Pick(m_Position+rvector(0,0,100),m_TargetDir,&bpi))
 		if(ZGetGame()->GetWorld()->GetBsp()->Pick(nPos,nDir,&bpi))
 		{
 			if(D3DXPlaneDotCoord(&(bpi.pInfo->plane),&vWeapon[0])<0){
-//				vWeapon[0]=m_Position+rvector(0,0,140);
 				vWeapon[0] = bpi.PickPos - nDir;
-//				OutputDebugString("벽뒤로 갔다...\n");
 			}
 		}
 
-		vWeapon[1] = m_TargetDir;//rvector();//시작방향
-		vWeapon[1].z += 0.1f;//약간위쪽으로..
-//		vWeapon[2] = rvector(1,1,1);//아직사용안함
+		vWeapon[1] = m_TargetDir;
+		vWeapon[1].z += 0.1f;
 
 		Normalize(vWeapon[1]);
 
 		if(m_UID==g_pGame->m_pMyCharacter->m_UID) {
 
-			int type = ZC_WEAPON_SP_GRENADE;//기본수류탄
+			int type = ZC_WEAPON_SP_GRENADE;
 
 			RVisualMesh* pWVMesh = m_pVMesh->GetSelectWeaponVMesh();
 
@@ -1133,10 +993,10 @@ void ZCharacter::OnUpdate(float fDelta)
 	if (m_bInitialized==false) return;
 	if (!IsVisible()) return;
 
-	UpdateSpeed();// 아이템에 따른 에니메이션 속도 조절..
+	UpdateSpeed();
 
 	if(m_pVMesh) {
-		m_pVMesh->SetVisibility(1.f);//투명 버그 때문...
+		m_pVMesh->SetVisibility(1.f);  
 		m_pVMesh->Frame();
 	}
 
@@ -1159,86 +1019,71 @@ void ZCharacter::OnUpdate(float fDelta)
 		}
 	}
 
-
-	// draw에서 띄어왔다
 	rvector vRot;
 
-	// 옵저브를 하고 있을때는 모든 캐릭터가 일정시간 이전의 모습을 한다
 	ZObserver *pObserver = ZApplication::GetGameInterface()->GetCombatInterface()->GetObserver();
 	if (pObserver->IsVisible())
 	{
-		rvector _vDir;
-		if(!GetHistory(&m_vProxyPosition,&_vDir,g_pGame->GetTime()-pObserver->GetDelay()))
+		rvector dir;
+		if (!GetHistory(&m_vProxyPosition, &dir, g_pGame->GetTime() - pObserver->GetDelay()))
 			return;
 
-		//DMLog("OnUpdate: Time = %f\n", g_pGame->GetTime() - pObserver->GetDelay());
+		DMLog("ZCharacter::OnUpdate - Time = %f - %f, %f, %f\n",
+			g_pGame->GetTime() - pObserver->GetDelay(),
+			dir.x, dir.y, dir.z);
 
 		if (g_Rules.IsVanillaMode())
 		{
 			m_vProxyDirection = m_DirectionLower;
 
-			float fAngle = GetAngleOfVectors(_vDir,m_vProxyDirection);
+			float fAngle = GetAngleOfVectors(dir, m_vProxyDirection);
 
 			vRot.x = -fAngle*180/ D3DX_PI *.9f;
-			vRot.y = (_vDir.z+0.05f) * 50.f;
+			vRot.y = (dir.z+0.05f) * 50.f;
 			vRot.z = 0.f;
 
 			m_pVMesh->m_vRotXYZ = vRot;
 		}
 		else
 		{
-			m_vProxyDirection = _vDir;
-			m_DirectionLower = _vDir;
+			m_DirectionLower = dir;
+			m_vProxyDirection = dir;
 		}
 	}
 	else
 	{
 		m_vProxyPosition = m_Position;
 		m_vProxyDirection = m_DirectionLower;
-
-/*
-//		m_vProxyPosition = m_Position;
-//		m_vProxyDirection = m_DirectionLower;
-		m_Direction = m_DirectionLower;
-*/
 	}
 
 	if(IsDie()) {
-		m_vProxyDirection = m_Direction;//rvector(0,1,0);
+		m_vProxyDirection = m_Direction;
 	}
 
 	m_vProxyDirection.z = 0;
-	//m_Direction.z = 0;
 	Normalize(m_vProxyDirection);
 
-	if(m_nVMID==-1) return;		//초기화도 안된상태
+	if(m_nVMID==-1) return;	
 
 	D3DXMATRIX world;
 	MakeWorldMatrix(&world,rvector(0,0,0),m_vProxyDirection,rvector(0,0,1));
 
-	rvector MeshPosition ;
+	rvector MeshPosition;
 
-	if(IsMoveAnimation())		// 움직임이 있는 애니메이션은 위치조절을 해줘야 한다.
+	// Move origin with the animation when it moves the player (e.g. ground slash)
+	if(IsMoveAnimation())
 	{
-		// 발의 위치를 로컬 좌표계로 얻어낸다
 		rvector footposition = m_pVMesh->GetFootPosition();
 
 		rvector RealPosition = footposition * world;
 
-		// TODO : Mesh의 위치를 결정할때 어느부분을 참조하는지 일반화 할수 있으면 좋다
 		if(m_AniState_Lower==ZC_STATE_LOWER_RUN_WALL)
 		{
-			// TODO : 허리위치를 로컬 좌표계로 얻어내는 펑션을 만들어 아래부분을 간소화하자
-
-			// 머리위치를 로컬 좌표계로 얻어낸다
 			rvector headpos = rvector(0.f,0.f,0.f);
 
 			if(m_pVMesh) {
-
 				AniFrameInfo* pAniLow = m_pVMesh->GetFrameInfo(ani_mode_lower);
 				AniFrameInfo* pAniUp = m_pVMesh->GetFrameInfo(ani_mode_upper);
-//				m_pVMesh->m_pMesh->SetAnimation( m_pVMesh->m_pAniSet[0],m_pVMesh->m_pAniSet[1] );
-//				m_pVMesh->m_pMesh->SetFrame(m_pVMesh->m_nFrame[0],m_pVMesh->m_nFrame[1]);
 				m_pVMesh->m_pMesh->SetAnimation( pAniLow->m_pAniSet,pAniUp->m_pAniSet );
 				m_pVMesh->m_pMesh->SetFrame( pAniLow->m_nFrame , pAniUp->m_nFrame);
 				m_pVMesh->m_pMesh->SetMeshVis(m_pVMesh->m_fVis);
@@ -1250,24 +1095,21 @@ void ZCharacter::OnUpdate(float fDelta)
 
 				pNode = m_pVMesh->m_pMesh->FindNode(eq_parts_pos_info_Head);
 
-				if(pNode) { 
-
+				if(pNode) {
 					headpos.x = pNode->m_mat_result._41;
 					headpos.y = pNode->m_mat_result._42;
 					headpos.z = pNode->m_mat_result._43;
 				}
 			}
-			// 허리위치를 (머리+발) / 2 라고 대강 잡았다.
-			rvector rootpos = 0.5f*(footposition + headpos) * world ;
-			
-			MeshPosition = m_vProxyPosition + rvector(0,0,90) - rootpos ;
+			rvector rootpos = 0.5f*(footposition + headpos) * world;
+
+			MeshPosition = m_vProxyPosition + rvector(0, 0, 90) - rootpos;
 		}
 		else
-			MeshPosition = m_vProxyPosition - RealPosition ;
+			MeshPosition = m_vProxyPosition - RealPosition;
 
 		m_AnimationPositionDiff = footposition - m_RealPositionBefore;
 
-		// 애니메이션의 움직임을 월드의 움직임으로 변환한다
 		m_AnimationPositionDiff = m_AnimationPositionDiff * world;
 
 		m_RealPositionBefore = footposition;
@@ -1276,16 +1118,6 @@ void ZCharacter::OnUpdate(float fDelta)
 	else
 		MeshPosition = m_vProxyPosition;
 
-	/* // debug
-	if(g_pGame->m_pMyCharacter!=this)
-	{
-		mlog("animation - %d %s %d frame : pos %3.3f %3.3f %3.3f    meshpos %3.3f %3.3f %3.3f \n",m_AniState_Lower,m_pVMesh->m_pAniSet[0]->GetName(),
-			m_pVMesh->m_nFrame[0],
-			m_Position.x,m_Position.y,m_Position.z,
-			MeshPosition.x,MeshPosition.y,MeshPosition.z);
-	}
-	*/
-
 	MakeWorldMatrix(&world,MeshPosition,m_vProxyDirection,rvector(0,0,1));
 	m_pVMesh->SetWorldMatrix(world);
 
@@ -1293,8 +1125,8 @@ void ZCharacter::OnUpdate(float fDelta)
 	cpos = m_vProxyPosition - cpos;
 	float dist = Magnitude(cpos);
 
-	m_bIsLowModel = false;// (fabs(dist) > 3000.f);
-	if (m_bFallingToNarak) m_bIsLowModel = false;	// 나락으로 떨어질땐 LowModel을 쓰지 않는다.
+	m_bIsLowModel = false;
+	if (m_bFallingToNarak) m_bIsLowModel = false;
 
 	m_bDamaged = false;
 
@@ -1303,23 +1135,18 @@ void ZCharacter::OnUpdate(float fDelta)
 	if(m_bCharging && 
 		(m_AniState_Lower!=ZC_STATE_CHARGE && 
 		m_AniState_Lower!=ZC_STATE_LOWER_ATTACK1)) {
-		// 애니메이션이 다르다면 풀린것으로 간주
 		m_bCharging = false;
 	}
 
-	// 일정시간 지나면 charged 풀림
 	if(m_bCharged && g_pGame->GetTime()>m_fChargedFreeTime) {
 		m_bCharged = false;
 	}
-
-	// 모션의 프레임 타임에 의존적인 무기의 경우 
 
 	UpdateSpWeapon();
 }
 
 void ZCharacter::CheckLostConn()
 {
-	// 마지막으로 데이터를 받은지 1초가 지났으면 머리에 아이콘 띄워주자
 	if (g_pGame->GetTime()-m_fLastReceivedTime > 1.f)
 	{
 		if(!m_bLostConEffect)
@@ -1336,8 +1163,6 @@ float ZCharacter::GetMoveSpeedRatio()
 {
 	float fRatio = 1.f;
 
-	// 나중에 반지 아이템들과의 조합도 추가..
-	// update 에서 한번만 계산해 주자..
 	MMatchItemDesc* pMItemDesc = GetSelectItemDesc();
 
 	if(pMItemDesc)
@@ -1426,8 +1251,6 @@ void ZCharacter::SetTargetDir(rvector vTarget) {
 	m_TargetDir = vTarget;
 }
 
-// 가진 무기중에서만 선택하게 된다...
-
 void ZCharacter::OnChangeWeapon(const char* WeaponModelName)
 {
 	if(m_bInitialized==false) 
@@ -1447,7 +1270,7 @@ void ZCharacter::OnChangeWeapon(const char* WeaponModelName)
 
 			m_pVMesh->AddWeapon(type , pMesh);
 			m_pVMesh->SelectWeaponMotion(type);
-			UpdateLoadAnimation();//상태는 그대로지만 무기가바뀌었으니 모션파일이 바뀌어야한다..
+			UpdateLoadAnimation();
 		}
 
 		if( eq_wd_katana == type )
@@ -1874,7 +1697,7 @@ void ZCharacter::InitHPAP()
 
 	m_pModule_HPAP->SetHP(m_Property.fMaxHP);
 	m_pModule_HPAP->SetAP(m_Property.fMaxAP);
-	// HP, AP 초기화
+
 	SetHP(m_Property.fMaxHP);
 	SetAP(m_Property.fMaxAP);
 
@@ -1882,7 +1705,6 @@ void ZCharacter::InitHPAP()
 
 void ZCharacter::InitBullet()
 {
-	// 총알 초기화
 	if (!m_Items.GetItem(MMCIP_PRIMARY)->IsEmpty()) 
 	{
 		int nBullet = m_Items.GetItem(MMCIP_PRIMARY)->GetDesc()->m_nMaxBullet;
@@ -1911,15 +1733,12 @@ void ZCharacter::InitStatus()
 	InitHPAP();
 	InitBullet();
 
-
 	SetVelocity(0,0,0);
-//	m_fLastUpdateTime=g_pGame->GetTime();
 
 	m_bTagger = false;
 	m_bCommander = false;
-	m_bDie = false;		// 아직 정보가 안온 캐릭터는 잠정적으로 살았다고 생각하기로함
+	m_bDie = false;
 	m_Collision.bCollideable = true;
-//	m_bAutoDir = false;
 	m_bStylishShoted = false;
 	m_bStun = false;
 
@@ -1932,14 +1751,7 @@ void ZCharacter::InitStatus()
 	m_bSpMotion = false;
 	m_SpMotion = ZC_STATE_TAUNT;
 
-//	m_bClimb = false;
-
 	m_fLastReceivedTime=0;
-	/*
-	m_fAveragePingTime=0;
-	m_fAccumulatedTimeError=0;
-	m_nTimeErrorCount=0;
-	*/
 
 	m_fLastKillTime = 0;
 	m_nKillsThisRound = 0;
@@ -1948,25 +1760,15 @@ void ZCharacter::InitStatus()
 
 	EmptyHistory();
 
-	/*
-	for(int i=0;i<ZCI_END;i++)
-	{
-		m_fIconStartTime[i]=-HP_SCALE;
-	}
-	*/
-
-	// 죽을때 투명해졌으므로..
 	if(m_pVMesh)
 		m_pVMesh->SetVisibility(1);
 
 	m_bLostConEffect = false;
-	//m_bChatEffect	= false;
 
 	m_bCharged = false;
 	m_bCharging = false;
 	m_bFallingToNarak = false;
 
-	// AdminHide 처리
 	if(IsAdminHide()) {
 		m_bDie = true;
 		SetVisible(false);
@@ -1982,7 +1784,6 @@ void ZCharacter::InitStatus()
 	InitModuleStatus();
 }
 
-//당장 보여주기 위한걸로 사용한다..
 void ZCharacter::TestChangePartsAll()
 {
 	if( IsMan() ) {
@@ -2032,7 +1833,7 @@ void ZCharacter::OutputDebugString_CharacterState()
 
 
 	AddText( m_Property.szName );
-	AddText( m_Property.nSex );//기타생략
+	AddText( m_Property.nSex );
 
 	str.AddLine();
 
@@ -2041,7 +1842,6 @@ void ZCharacter::OutputDebugString_CharacterState()
 	AddText( GetHP() );
 	AddText( GetAP() );
 	AddText( m_Status.nLife );
-//	AddText( m_Status.nScore );
 	AddText( m_Status.nKills );
 	AddText( m_Status.nDeaths );
 	AddText( m_Status.nLoadingPercent );
@@ -2103,17 +1903,11 @@ void ZCharacter::OutputDebugString_CharacterState()
 	ELSE_IF_LD_ENUM(ZD_KATANA_SPLASH)
 	ELSE_IF_LD_ENUM(ZD_HEAL)
 	ELSE_IF_LD_ENUM(ZD_REPAIR)
-/*
-		 if(m_LastDamageType==ZD_NONE)			{	AddTextEnum(m_LastDamageType,ZD_NONE);}
-	else if(m_LastDamageType==ZD_BULLET)		{	AddTextEnum(m_LastDamageType,ZD_BULLET);}
-*/
+
 	AddText( m_LastDamageDir );
 	AddText( GetSpawnTime() );
-
-
 	AddText( m_fLastValidTime );
 	AddText( GetDistToFloor() );
-//	AddText( m_FloorPlane ); // rplane
 	AddText( m_bLand );
 	AddText( m_bWallJump );
 	AddText( m_nWallJumpDir );
@@ -2126,37 +1920,21 @@ void ZCharacter::OutputDebugString_CharacterState()
 	AddText( m_bBlastStand );
 	AddText( m_bBlastAirmove );
 	AddText( m_bSpMotion );
-//	AddText( m_SpMotion );
-
 	AddText( m_bDynamicLight );
 	AddText( m_iDLightType );
 	AddText( m_fLightLife );
 	AddText( m_vLightColor );
 	AddText( m_fTime );
 	AddText( m_bLeftShot );
-//	AddText( m_bClimb );
-// 	AddText( m_ClimbDir );
-//	AddText( m_fClimbZ );
-//	AddText( m_ClimbPlane );// rplane
-//	AddText( m_pshadow );
-//	AddText( m_pCloth );
-//	AddText( m_BasicHistory );
-//	AddText( m_HPHistory );
-
 	AddText( m_TargetDir );
 	AddText( m_Position );
 	AddText( m_Direction );
 	AddText( m_DirectionLower );
 	AddText( m_DirectionUpper );
 	AddText( m_RealPositionBefore );
-//	AddText( GetVelocity() );
 	AddText( m_Accel );
 
 	str.AddLine(1);
-
-	// 풀어서 출력~
-
-	// 상체 에니메이션 상태
 
 #define IF_Upper_ENUM(a)		if(a==m_AniState_Upper)			{ AddTextEnum(m_AniState_Upper,a); }
 #define ELSE_IF_Upper_ENUM(a)	else if(a==m_AniState_Upper)	{ AddTextEnum(m_AniState_Upper,a); }
@@ -2174,12 +1952,6 @@ void ZCharacter::OutputDebugString_CharacterState()
 	ELSE_IF_Upper_ENUM(ZC_STATE_UPPER_GUARD_BLOCK1_RET)
 	ELSE_IF_Upper_ENUM(ZC_STATE_UPPER_GUARD_BLOCK2)
 	ELSE_IF_Upper_ENUM(ZC_STATE_UPPER_GUARD_CANCEL)
-
-/*
-	 	 if(m_AniState_Upper==ZC_STATE_UPPER_NONE)				{ AddTextEnum(m_AniState_Upper,ZC_STATE_UPPER_NONE); }
-	else if(m_AniState_Upper==ZC_STATE_UPPER_SHOT)				{ AddTextEnum(m_AniState_Upper,ZC_STATE_UPPER_SHOT); }
-*/
-	// 하체 에니메이션 상태
 
 		 IF_Lower_ENUM(ZC_STATE_LOWER_NONE)
 	ELSE_IF_Lower_ENUM(ZC_STATE_LOWER_IDLE1)
@@ -2253,13 +2025,6 @@ void ZCharacter::OutputDebugString_CharacterState()
 	ELSE_IF_Lower_ENUM(ZC_STATE_CRY)
 	ELSE_IF_Lower_ENUM(ZC_STATE_DANCE)
 
-/*
-	 	 if(m_AniState_Lower==ZC_STATE_LOWER_NONE)				{ AddTextEnum(m_AniState_Lower,ZC_STATE_LOWER_NONE); }
-	else if(m_AniState_Lower==ZC_STATE_LOWER_IDLE1)				{ AddTextEnum(m_AniState_Lower,ZC_STATE_LOWER_IDLE1); }
-*/
-
-	// 위의 상태와 다를 수 있는지 조사~
-
 	if(m_pAnimationInfo_Upper) {
 		AddText(m_pAnimationInfo_Upper->Name);
 	}
@@ -2282,35 +2047,13 @@ void ZCharacter::OutputDebugString_CharacterState()
 
 	str.AddLine(1);
 
-//	AddText( m_bAdjusted );
-//	AddText( m_fLastAdjustedTime );
-
-	/*
-	AddText( m_bAutoDir );
-	AddText( m_bLeftMoving );
-	AddText( m_bRightMoving );
-
-	AddText( m_bForwardMoving );
-	*/
 	AddText( m_bBackMoving );
 	AddText( m_fLastReceivedTime );
-//	AddText( m_fLastUpdateTime );
-
-//	AddText( m_fAveragePingTime );
-//	AddText( m_nTimeErrorCount );
-//	AddText( m_TimeErrors[20] );
-//	AddText( m_fAccumulatedTimeError );
 	AddText( m_fGlobalHP );
 	AddText( m_nReceiveHPCount );
-
-//	AddText( m_dwBackUpTime );
 	AddText( m_nSelectSlot );
 
-//	AddText( m_Slot[ZC_SLOT_END] );
-
 	str.PrintLog();
-
-//	m_pVMesh 의 상태도 출력~
 
 	if(m_pVMesh) {
 		m_pVMesh->OutputDebugString_CharacterState();
@@ -2324,13 +2067,13 @@ void ZCharacter::TestToggleCharacter()
 		RMesh* pMesh = NULL;
 
 		if( strcmp(m_pVMesh->m_pMesh->GetName(),"heroman1")==0 ) {
-			pMesh = ZGetMeshMgr()->Get("herowoman1");//원하는 모델을 붙여주기..
+			pMesh = ZGetMeshMgr()->Get("herowoman1");
 			m_pVMesh->m_pMesh = pMesh;
-			m_pVMesh->ClearParts();//남녀가 틀려서.
+			m_pVMesh->ClearParts();
 			TestChangePartsAll();
 		}
 		else {
-			pMesh = ZGetMeshMgr()->Get("heroman1");//원하는 모델을 붙여주기..
+			pMesh = ZGetMeshMgr()->Get("heroman1");
 			m_pVMesh->m_pMesh = pMesh;
 			m_pVMesh->ClearParts();
 			TestChangePartsAll();
@@ -2351,7 +2094,7 @@ void ZCharacter::InitMesh()
 	{
 		strcpy_safe(szMeshName, "herowoman1");
 	}
-	pMesh = ZGetMeshMgr()->Get(szMeshName);//원하는 모델을 붙여주기..
+	pMesh = ZGetMeshMgr()->Get(szMeshName);
 
 	if(!pMesh) {
 		mlog("AddCharacter 원하는 모델을 찾을수 없음\n");
@@ -2367,17 +2110,6 @@ void ZCharacter::InitMesh()
 
 	RVisualMesh* pVMesh = g_pGame->m_VisualMeshMgr.GetFast(nVMID);
 	SetVisualMesh(pVMesh);
-
-	// low polygon model 붙여주기..
-	// 남녀구분없이
-/*
-	if (m_Property.nSex == MMS_MALE) {
-		strcpy_safe(szMeshName, "heroman_low1");
-	}
-	else {
-		strcpy_safe(szMeshName, "heroman_low2");
-	}
-*/	
 }
 
 void ZCharacter::ChangeLowPolyModel()
@@ -2400,7 +2132,7 @@ void ZCharacter::ChangeLowPolyModel()
 		strcpy_safe(szMeshName, "heroman_low2");
 	}
 
-	RMesh* pLowMesh = ZGetMeshMgr()->Get(szMeshName);//원하는 모델을 붙여주기..
+	RMesh* pLowMesh = ZGetMeshMgr()->Get(szMeshName);
 
 	m_pVMesh->SetLowPolyModel(pLowMesh);
 }
@@ -2418,7 +2150,6 @@ void ZCharacter::InitProperties()
 	m_Property.fMaxHP = pCharInfo->nHP;
 	m_Property.fMaxAP = pCharInfo->nAP;
 
-	// AP 재조정
 	float fAddedAP = DEFAULT_CHAR_AP;
 	for (int i = 0; i < MMCIP_END; i++)
 	{
@@ -2427,7 +2158,7 @@ void ZCharacter::InitProperties()
 			fAddedAP += m_Items.GetItem(MMatchCharItemParts(i))->GetDesc()->m_nAP;
 		}
 	}
-	// HP 재조정
+
 	float fAddedHP = DEFAULT_CHAR_HP;
 	for (int i = 0; i < MMCIP_END; i++)
 	{
@@ -2477,12 +2208,8 @@ bool ZCharacter::Create(const MTD_CharInfo& CharInfo)
 
 	memcpy(&m_InitialInfo, &CharInfo, sizeof(MTD_CharInfo));
 
-	// 아이템 세팅
 	for (int i = 0; i < MMCIP_END; i++)
-	{
 		m_Items.EquipItem(MMatchCharItemParts(i), CharInfo.nEquipedItemDesc[i]);
-	}
-
 
 	InitProperties();
 
@@ -2506,7 +2233,7 @@ bool ZCharacter::Create(const MTD_CharInfo& CharInfo)
 	ChangeLowPolyModel();
 
 	m_bIsLowModel = false;
-	SetVisible(true);	// 여기서 비로소 보여준다
+	SetVisible(true);
 
 	m_fAttack1Ratio = 1.f;
 
@@ -2538,8 +2265,6 @@ void ZCharacter::Destroy()
 		ZGetEmblemInterface()->DeleteClanInfo(GetClanID());
 
 	m_bInitialized = false;
-
-	DestroyShadow();
 }
 
 void ZCharacter::InitMeshParts()

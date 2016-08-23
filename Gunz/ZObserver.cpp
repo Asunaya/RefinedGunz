@@ -13,10 +13,8 @@
 #include "ZGameClient.h"
 #include "ZRuleDuel.h"
 
-//#define FREE_OBSERVER_ENABLE
+#define ZOBSERVER_DEFAULT_DELAY_TIME		0.2f
 
-
-////// QuickTarget ///////////////////////////////////
 bool ZObserverQuickTarget::ConvertKeyToIndex(char nKey, int* nIndex) 
 {
 	int nVal = nKey-'0';
@@ -26,15 +24,6 @@ bool ZObserverQuickTarget::ConvertKeyToIndex(char nKey, int* nIndex)
 	} else {
 		return false;
 	}
-}
-
-void ZObserverQuickTarget::StoreTarget(int nIndex, MUID uidChar) 
-{
-	m_arrayPlayers[nIndex] = uidChar;
-}
-MUID ZObserverQuickTarget::GetTarget(int nIndex) 
-{
-	return m_arrayPlayers[nIndex];
 }
 
 bool ZObserver::OnKeyEvent(bool bCtrl, char nKey)

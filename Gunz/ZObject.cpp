@@ -11,19 +11,12 @@ MImplementRTTI(ZObject, ZModuleContainer);
 ZObject::ZObject() : m_Position(0,0,0),m_Direction(1,0,0), m_bInitialized(false), m_UID(MUID(0,0)),
 					 m_fSpawnTime(0.0f), m_fDeadTime(0.0f), m_pVMesh(NULL), m_bVisible(false),
 					 m_bIsNPC(false)
-//					 ,m_Velocity(m_Module_Movable.m_Velocity)
 { 
 	m_Collision.bCollideable = true;
 	m_Collision.fRadius = m_Collision.fHeight = 0.0f;
 
-	m_pModule_Movable = new ZModule_Movable;
-	AddModule(m_pModule_Movable,true);
-}
-
-ZObject::~ZObject()
-{
-	RemoveModule(m_pModule_Movable);
-	delete m_pModule_Movable;
+	m_pModule_Movable = AddModule<ZModule_Movable>();
+	m_pModule_Movable->Active = true;
 }
 
 void ZObject::OnDraw()

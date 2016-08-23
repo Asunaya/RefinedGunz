@@ -1,5 +1,4 @@
-#ifndef _ZMODULE_SKILLS_H
-#define _ZMODULE_SKILLS_H
+#pragma once
 
 #include "ZModule.h"
 #include "ZModuleID.h"
@@ -7,27 +6,22 @@
 #include "ZSkill.h"
 
 class ZModule_Skills : public ZModule {
-	int			m_nSkillCount;
-    ZSkill		m_Skills[MAX_SKILL];
-
-
 public:
 	DECLARE_ID(ZMID_SKILLS)
-	
-	ZModule_Skills();
 
 	void Init(int nSkills, const int *pSkillIDs);
 
-	bool Update(float fElapsed);
+	void OnUpdate(float fElapsed);
 	void InitStatus();
 
 	int GetSkillCount();
-	ZSkill *GetSkill(int nSkill);			// 스킬을 얻어낸다.
+	ZSkill *GetSkill(int nSkill);
 
-	void PreExcute(int nSkill,MUID uidTarget,rvector targetPosition);	// 모션이 시작할때
-	void Excute(int nSkill,MUID uidTarget,rvector targetPosition);		// 실행한다
-	void LastExcute(int nSkill,MUID uidTarget,rvector targetPosition);	// 모션이 끝날떄
+	void PreExcute(int nSkill,MUID uidTarget,rvector targetPosition);
+	void Excute(int nSkill,MUID uidTarget,rvector targetPosition);
+	void LastExcute(int nSkill,MUID uidTarget,rvector targetPosition);
 
+private:
+	int			m_nSkillCount;
+	ZSkill		m_Skills[MAX_SKILL];
 };
-
-#endif

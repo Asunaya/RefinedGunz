@@ -521,12 +521,7 @@ void ZGameInput::Update(float fElapsed)
 				ZGetInput()->GetRotation(&fRotateX,&fRotateY);
 #endif
 
-				bool bRotateEnable = true;//false;
-				// TODO : 칼로 벽에 꽂았을때 프리카메라로 바꾸자
-				if( !pMyCharacter->m_bSkill && !pMyCharacter->m_bWallJump && !pMyCharacter->m_bWallJump2 && !pMyCharacter->m_bWallHang && 
-					!pMyCharacter->m_bTumble && !pMyCharacter->m_bBlast && !pMyCharacter->m_bBlastStand && !pMyCharacter->m_bBlastDrop )
-					bRotateEnable=true;
-				if (pMyCharacter->IsDie()) bRotateEnable = true;
+				bool bRotateEnable = true;//!pMyCharacter->IsDirLocked();
 
 				if (RIsActive())
 				{
@@ -534,7 +529,6 @@ void ZGameInput::Update(float fElapsed)
 
 					pCamera->m_fAngleX += fRotateY;
 					pCamera->m_fAngleZ += fRotateX;
-					// 정밀도 유지를 위해 0~2pi 로 유지
 
 					pCamera->m_fAngleZ = fmod(pCamera->m_fAngleZ,2*PI);
 					pCamera->m_fAngleX = fmod(pCamera->m_fAngleX,2*PI);
@@ -569,7 +563,6 @@ void ZGameInput::Update(float fElapsed)
 					if (pCombatInterface && !pCombatInterface->IsChat() &&
 						(pCamera->GetLookMode()==ZCAMERA_FREELOOK || pCamera->GetLookMode()==ZCAMERA_MINIMAP))
 					{
-
 						rvector right;
 						rvector forward=RCameraDirection;
 						CrossProduct(&right,rvector(0,0,1),forward);
@@ -586,7 +579,7 @@ void ZGameInput::Update(float fElapsed)
 						if(ZIsActionKeyPressed(ZACTION_USE_WEAPON)==true)			accel-=up;
 
 						rvector cameraMove = 
-							(pCamera->GetLookMode()==ZCAMERA_FREELOOK ? 1000.f : 10000.f )		// 미니맵모드는 빨리 움직임
+							(pCamera->GetLookMode()==ZCAMERA_FREELOOK ? 1000.f : 10000.f )
 							* fElapsed*accel;
 
 						rvector targetPos = pCamera->GetPosition()+cameraMove;

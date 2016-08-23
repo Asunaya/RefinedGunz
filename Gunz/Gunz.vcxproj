@@ -187,7 +187,7 @@
       <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <AdditionalOptions>/Zm500</AdditionalOptions>
+      <AdditionalOptions>/Zm500 %(AdditionalOptions)</AdditionalOptions>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DisableSpecificWarnings>4244;4305;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
@@ -223,7 +223,7 @@ rem call copy_share.bat
       <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <AdditionalOptions>/Zm500</AdditionalOptions>
+      <AdditionalOptions>/Zm500 %(AdditionalOptions)</AdditionalOptions>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DisableSpecificWarnings>4244;4305;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
@@ -378,7 +378,7 @@ rem call copy_share.bat
       <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Zm500 %(AdditionalOptions)</AdditionalOptions>
       <DisableSpecificWarnings>4244;4305;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <FloatingPointModel>Fast</FloatingPointModel>
       <WholeProgramOptimization>false</WholeProgramOptimization>
@@ -424,7 +424,7 @@ rem call copy_share.bat
       <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
       <WarningLevel>TurnOffAllWarnings</WarningLevel>
       <DebugInformationFormat>None</DebugInformationFormat>
-      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Zm500 %(AdditionalOptions)</AdditionalOptions>
       <DisableSpecificWarnings>4244;4305;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <FloatingPointModel>Fast</FloatingPointModel>
       <WholeProgramOptimization>false</WholeProgramOptimization>
@@ -566,6 +566,7 @@ rem call copy_share.bat
     <ClInclude Include="ZGameInput.h" />
     <ClInclude Include="ZInput.h" />
     <ClInclude Include="ZMiniMap.h" />
+    <ClInclude Include="ZModule_ElementalDamage.h" />
     <ClInclude Include="ZObserver.h" />
     <ClInclude Include="ZRadar.h" />
     <ClInclude Include="ZReplayStructs.h" />
@@ -659,12 +660,8 @@ rem call copy_share.bat
     <ClInclude Include="ZObjectManager.h" />
     <ClInclude Include="ZShadow.h" />
     <ClInclude Include="ZModule.h" />
-    <ClInclude Include="ZModule_ColdDamage.h" />
-    <ClInclude Include="ZModule_FireDamage.h" />
     <ClInclude Include="ZModule_HPAP.h" />
-    <ClInclude Include="ZModule_LightningDamage.h" />
     <ClInclude Include="ZModule_Movable.h" />
-    <ClInclude Include="ZModule_PoisonDamage.h" />
     <ClInclude Include="ZModule_QuestStatus.h" />
     <ClInclude Include="ZModule_Resistance.h" />
     <ClInclude Include="ZModule_Skills.h" />
@@ -805,6 +802,7 @@ rem call copy_share.bat
     <ClCompile Include="ZGameInput_Debug.cpp" />
     <ClCompile Include="ZInput.cpp" />
     <ClCompile Include="ZMiniMap.cpp" />
+    <ClCompile Include="ZModule_ElementalDamage.cpp" />
     <ClCompile Include="ZObserver.cpp" />
     <ClCompile Include="ZRadar.cpp" />
     <ClCompile Include="ZRuleSkillmap.cpp" />
@@ -894,12 +892,8 @@ rem call copy_share.bat
     <ClCompile Include="ZObjectManager.cpp" />
     <ClCompile Include="ZShadow.cpp" />
     <ClCompile Include="ZModule.cpp" />
-    <ClCompile Include="ZModule_ColdDamage.cpp" />
-    <ClCompile Include="ZModule_FireDamage.cpp" />
     <ClCompile Include="ZModule_HPAP.cpp" />
-    <ClCompile Include="ZModule_LightningDamage.cpp" />
     <ClCompile Include="ZModule_Movable.cpp" />
-    <ClCompile Include="ZModule_PoisonDamage.cpp" />
     <ClCompile Include="ZModule_QuestStatus.cpp" />
     <ClCompile Include="ZModule_Resistance.cpp" />
     <ClCompile Include="ZModule_Skills.cpp" />

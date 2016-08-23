@@ -1,32 +1,31 @@
-#ifndef _ZMODULE_MOVABLE_H
-#define _ZMODULE_MOVABLE_H
+#pragma once
 
 #include "ZModule.h"
 #include "ZModuleID.h"
 
 class ZModule_Movable : public ZModule {
 private:
-	float	m_fMaxSpeed;	// 최고속도
-	bool	m_bGravity;		// 중력의 영향을 받는가?
+	float	m_fMaxSpeed;
+	bool	m_bGravity;
 
-	float	m_fDistToFloor;	/// 바닥까지의 거리
-	rplane	m_FloorPlane;	/// 바닥 평면의 방정식
+	float	m_fDistToFloor;
+	rplane	m_FloorPlane;
 
-	rvector m_lastMove;		// 마지막으로 움직인 거리
+	rvector m_lastMove;
 
-	bool	m_bFalling;		// 낙하중이다
-	float	m_fFallHeight;	// 낙하가 시작된 시점
+	bool	m_bFalling;
+	float	m_fFallHeight;
 
-	bool	m_bLanding;		// 이번에 착지했나
-	bool	m_bAdjusted;	// 마지막 움직임이 (벽때문에) 비벼졌나
-	float	m_fLastAdjustedTime;	// 마지막으로 비빈 시간
+	bool	m_bLanding;
+	bool	m_bAdjusted;
+	float	m_fLastAdjustedTime;
 
-	rvector m_Velocity;		// 곧 private 으로 간다
+	rvector m_Velocity;
 
-	bool	m_bRestrict;		// 이동제한
-	float	m_fRestrictTime;	// 제한이 걸린 시간
-	float	m_fRestrictDuration;// 제한의 지속시간
-	float	m_fMoveSpeedRatio;	// 움직임의 느려짐 비율
+	bool	m_bRestrict;
+	float	m_fRestrictTime;
+	float	m_fRestrictDuration;
+	float	m_fMoveSpeedRatio;
 
 protected:
 	void OnAdd();
@@ -36,8 +35,8 @@ public:
 	DECLARE_ID(ZMID_MOVABLE)
 	ZModule_Movable();
 
-	virtual bool Update(float fElapsed);
-	virtual void InitStatus();
+	virtual void OnUpdate(float Elapsed) override final;
+	virtual void InitStatus() override final;
 
 	auto& GetVelocity() const { return m_Velocity; }
 	void SetVelocity(const rvector &vel) { m_Velocity=vel; }
@@ -59,14 +58,6 @@ public:
 	float GetMoveSpeedRatio() { return m_fMoveSpeedRatio; }
 	void SetMoveSpeedRatio(float fRatio, float fDuration);
 
-//	void SetCollision(float fRadius, float fHeight) { m_fRadius = fRadius; m_fHeight = fHeight; }
-	//void SetRadius(float fRadius) { m_fRadius = fRadius; }
-//	float GetRadius()			{ return m_fRadius; }
-//	float GetHeight()			{ return m_fHeight; }
-
 protected:
 	void UpdatePosition(float fDelta);
-
 };
-
-#endif

@@ -11,12 +11,14 @@
 #include "ZScreenEffectManager.h"
 #include "zshadow.h"
 #include "ZConfiguration.h"
+#include "ZModule_Resistance.h"
+#include "ZModule_ElementalDamage.h"
 
 MImplementRTTI(ZCharacterObject, ZObject);
 
 sCharacterLight	g_CharLightList[NUM_LIGHT_TYPE];
 
-ZCharacterObject::ZCharacterObject() : ZObject()
+ZCharacterObject::ZCharacterObject()
 {
 	m_pshadow = NULL;
 	m_bDynamicLight = false;
@@ -29,23 +31,19 @@ ZCharacterObject::ZCharacterObject() : ZObject()
 	m_pSoundMaterial[0] = 0;
 
 	m_bHero = false;
-	m_fTremblePower = 30.0f;		// 캐릭터 기본값
+	m_fTremblePower = 30.0f;
+
+	m_pModule_HPAP = AddModule<ZModule_HPAP>();
+	m_pModule_Resistance = AddModule<ZModule_Resistance>();
+	m_pModule_FireDamage = AddModule<ZModule_FireDamage>();
+	m_pModule_ColdDamage = AddModule<ZModule_ColdDamage>();
+	m_pModule_PoisonDamage = AddModule<ZModule_PoisonDamage>();
+	m_pModule_LightningDamage = AddModule<ZModule_LightningDamage>();
 }
 
-ZCharacterObject::~ZCharacterObject()
+void ZCharacterObject::CreateShadow()
 {
-
-}
-
-bool ZCharacterObject::CreateShadow()
-{
-	m_pshadow = new ZShadow;
-	return true;
-}
-
-void ZCharacterObject::DestroyShadow()
-{
-	SAFE_DELETE( m_pshadow );
+	m_pshadow = std::make_unique<ZShadow>();
 }
 
 bool ZCharacterObject::GetWeaponTypePos(WeaponDummyType type,rvector* pos,bool bLeft)

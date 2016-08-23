@@ -402,22 +402,10 @@
     <ClInclude Include="ZModule.h">
       <Filter>Character\Modules</Filter>
     </ClInclude>
-    <ClInclude Include="ZModule_ColdDamage.h">
-      <Filter>Character\Modules</Filter>
-    </ClInclude>
-    <ClInclude Include="ZModule_FireDamage.h">
-      <Filter>Character\Modules</Filter>
-    </ClInclude>
     <ClInclude Include="ZModule_HPAP.h">
       <Filter>Character\Modules</Filter>
     </ClInclude>
-    <ClInclude Include="ZModule_LightningDamage.h">
-      <Filter>Character\Modules</Filter>
-    </ClInclude>
     <ClInclude Include="ZModule_Movable.h">
-      <Filter>Character\Modules</Filter>
-    </ClInclude>
-    <ClInclude Include="ZModule_PoisonDamage.h">
       <Filter>Character\Modules</Filter>
     </ClInclude>
     <ClInclude Include="ZModule_QuestStatus.h">
@@ -795,6 +783,9 @@
     </ClInclude>
     <ClInclude Include="MClient.h" />
     <ClInclude Include="MMatchClient.h" />
+    <ClInclude Include="ZModule_ElementalDamage.h">
+      <Filter>Character\Modules</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ZCanvas.cpp">
@@ -1091,22 +1082,10 @@
     <ClCompile Include="ZModule.cpp">
       <Filter>Character\Modules</Filter>
     </ClCompile>
-    <ClCompile Include="ZModule_ColdDamage.cpp">
-      <Filter>Character\Modules</Filter>
-    </ClCompile>
-    <ClCompile Include="ZModule_FireDamage.cpp">
-      <Filter>Character\Modules</Filter>
-    </ClCompile>
     <ClCompile Include="ZModule_HPAP.cpp">
       <Filter>Character\Modules</Filter>
     </ClCompile>
-    <ClCompile Include="ZModule_LightningDamage.cpp">
-      <Filter>Character\Modules</Filter>
-    </ClCompile>
     <ClCompile Include="ZModule_Movable.cpp">
-      <Filter>Character\Modules</Filter>
-    </ClCompile>
-    <ClCompile Include="ZModule_PoisonDamage.cpp">
       <Filter>Character\Modules</Filter>
     </ClCompile>
     <ClCompile Include="ZModule_QuestStatus.cpp">
@@ -1418,6 +1397,7 @@
     </ClCompile>
     <ClCompile Include="MClient.cpp" />
     <ClCompile Include="MMatchClient.cpp" />
+    <ClCompile Include="ZModule_ElementalDamage.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="runtime\shader\skin.vsh">

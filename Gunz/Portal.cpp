@@ -760,13 +760,11 @@ bool Portal::Move(ZObject *pObj, D3DXVECTOR3 &diff)
 	if (DotProduct(target, ppi->vNormal) + ppi->d < 0)
 	{
 		origin = target * ppi->matTransform;
-		pObj->m_Direction *= ppi->matRot;
+		pObj->SetDirection(pObj->GetDirection() * ppi->matRot);
 		pObj->SetVelocity(pObj->GetVelocity() * ppi->matRot);
 
-		ZGetCamera()->SetDirection(ZGetCamera()->GetCurrentDir() * ppi->matRot);
-
-		ZGetGameInterface()->GetGameInput()->lastanglex = ZGetCamera()->m_fCurrentAngleX;
-		ZGetGameInterface()->GetGameInput()->lastanglez = ZGetCamera()->m_fCurrentAngleZ;
+		ZGetGameInterface()->GetGameInput()->lastanglex = ZGetCamera()->m_fAngleX;
+		ZGetGameInterface()->GetGameInput()->lastanglez = ZGetCamera()->m_fAngleZ;
 
 		RCameraPosition *= ppi->matTransform;
 		RCameraDirection *= ppi->matRot;

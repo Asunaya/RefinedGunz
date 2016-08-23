@@ -143,16 +143,6 @@ void ZSetupDataChecker_Global(MDataChecker* pDataChecker)
 void ZSetupDataChecker_Game(MDataChecker* pDataChecker)
 {
 	pDataChecker->Clear();
-
-	//// 캐릭터 HP,AP 정보 
-	ZModule_HPAP* pCharHPAP= (ZModule_HPAP*)ZApplication::GetGame()->m_pMyCharacter->GetModule(ZMID_HPAP);
-	pDataChecker->AddCheck((BYTE*)pCharHPAP->GetHPPointer(), sizeof(float));
-	pDataChecker->AddCheck((BYTE*)pCharHPAP->GetAPPointer(), sizeof(float));
-	/*
-	ZCharacterStatus* pCharStatus = ZApplication::GetGame()->m_pMyCharacter->GetCharacterStatus();
-	pDataChecker->AddCheck((BYTE*)pCharStatus->GetHPPointer(), sizeof(float));
-	pDataChecker->AddCheck((BYTE*)pCharStatus->GetAPPointer(), sizeof(float));
-	*/
 	
 	//// 캐릭터 장비 아이템 잔탄량 정보
 	ZCharacterItem* pCharItem = ZApplication::GetGame()->m_pMyCharacter->GetItems();

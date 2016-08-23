@@ -1,38 +1,30 @@
-#ifndef _ZCHARACTEROBJECT_H
-#define _ZCHARACTEROBJECT_H
+#pragma once
+
+#include <memory>
+#include <list>
 
 #include "ZObject.h"
 #include "stuff.h"
 #include "BasicInfoHistory.h"
-
-// ZCharacter 와 ZActor 가 같이쓰는것들을 모은 class ..
-
-class ZShadow;
+#include "ZShadow.h"
 
 struct ZBasicInfoItem : public CMemPoolSm<ZBasicInfoItem>
 {
 	ZBasicInfo info;
 	float	fReceivedTime;
-	float	fSendTime;			// 보낸시간 (ping으로 추정)
+	float	fSendTime;
 };
 
-class ZBasicInfoHistory : public list<ZBasicInfoItem*> {
-};
+using ZBasicInfoHistory = std::list<ZBasicInfoItem*>;
 
 
 class ZCharacterObject : public ZObject
 {
 	MDeclareRTTI;
-private:
-	float			m_fTremblePower;	///< 총에 맞을때 몸을 떠는 정도
 public:
 	ZCharacterObject();
-	virtual ~ZCharacterObject();
 
-public:
-
-	bool CreateShadow();
-	void DestroyShadow();
+	void CreateShadow();
 
 	bool GetWeaponTypePos(WeaponDummyType type,rvector* pos,bool bLeft=false);
 
@@ -58,30 +50,33 @@ public:
 	bool IsDoubleGun();
 
 	void SetHero(bool bHero = true) { m_bHero = bHero; }
-	bool IsHero() { return m_bHero; }
+	bool IsHero() const { return m_bHero; }
 
-protected:
-
-	bool	m_bHero;					///< 내가 조종하는 사람인지 여부
-
-public:
+	virtual void OnKnockback(const rvector& dir, float fForce);
+	void SetTremblePower(float fPower) { m_fTremblePower = fPower; }
 
 	char	m_pSoundMaterial[16];
+	bool	m_bLeftShot;
+	float	m_fTime;
+	int		m_iDLightType;
+	float	m_fLightLife;
+	rvector	m_vLightColor;
 
-	bool	m_bLeftShot;				// 양손 총일 경우 번갈아 가면서 번쩍..번쩍..
+	std::unique_ptr<ZShadow>	m_pshadow;
+	bool		m_bDynamicLight;
 
-	float	m_fTime;					// 시스템 시간
+	ZModule_HPAP			*m_pModule_HPAP;
+	ZModule_Resistance		*m_pModule_Resistance;
+	ZModule_FireDamage		*m_pModule_FireDamage;
+	ZModule_ColdDamage		*m_pModule_ColdDamage;
+	ZModule_PoisonDamage	*m_pModule_PoisonDamage;
+	ZModule_LightningDamage	*m_pModule_LightningDamage;
 
-	int		m_iDLightType;				// 라이트의 종류
-	float	m_fLightLife;				// 라이트 적용 시간
-	rvector	m_vLightColor;				// 라이트 색..
+protected:
+	bool	m_bHero;
 
-	ZShadow*	m_pshadow;				//그림자
-	bool		m_bDynamicLight;		// 추가적인 라이트 효과여부
-
-	// knockback을 적용받아야한다
-	virtual void OnKnockback(const rvector& dir, float fForce);
-	void SetTremblePower(float fPower)		{ m_fTremblePower = fPower; }
+private:
+	float			m_fTremblePower;
 };
 
 class ZCharacterObjectHistory : public ZCharacterObject
@@ -93,5 +88,3 @@ public:
 
 	ZBasicInfoHistory	m_BasicHistory;
 };
-
-#endif//_ZCHARACTEROBJECT_H

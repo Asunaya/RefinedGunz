@@ -6,8 +6,6 @@
 #include "ZGameConst.h"
 #include "Portal.h"
 
-// 나 이외의 캐릭터는 위치를 양자화해서 보내므로 오차가 있어서 m_fRadius 를 실제보다 2정도 줄였다
-
 ZModule_Movable::ZModule_Movable() 
 			: m_Velocity(0,0,0), m_bFalling(false), m_bLanding(false),m_bRestrict(false),
 			m_fMaxSpeed(1000.f), m_fMoveSpeedRatio(1.f)
@@ -26,20 +24,18 @@ void ZModule_Movable::InitStatus()
 	m_fMoveSpeedRatio = 1.f;
 }
 
-bool ZModule_Movable::Update(float fElapsed)
+void ZModule_Movable::OnUpdate(float Elapsed)
 {
 	ZObject *pThisObj = MStaticCast(ZObject,m_pContainer);
-	if(!pThisObj->GetInitialized()) return true;
-	if(!pThisObj->IsVisible()) return true;
+	if(!pThisObj->GetInitialized()) return;
+	if(!pThisObj->IsVisible()) return;
 
 	if(m_bRestrict && g_pGame->GetTime()-m_fRestrictTime > m_fRestrictDuration) {
 		m_bRestrict = false;
 		m_fMoveSpeedRatio = 1.f;
 	}
 
-	UpdatePosition(fElapsed);
-
-	return true;
+	UpdatePosition(Elapsed);
 }
 
 bool ZModule_Movable::Move(const rvector &orig_diff)
@@ -70,14 +66,13 @@ bool ZModule_Movable::Move(const rvector &orig_diff)
 
 			if(fDist<fCOLLISION_DIST && fabs(pos.z-pThisObj->GetPosition().z) < pObject->GetCollHeight())
 			{
-				// 거의 같은위치에 있는 경우.. 한쪽방향으로 밀림
 				if(fDist<1.f)
 				{
 					pos.x+=1.f;
 					dir=pThisObj->GetPosition()-pos;
 				}
 
-				if(DotProduct(dir,diff)<0)	// 더 가까워지는 방향이면
+				if(DotProduct(dir,diff)<0)
 				{
 					Normalize(dir);
 					rvector newthispos=pos+dir*(fCOLLISION_DIST+1.f);

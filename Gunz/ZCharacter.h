@@ -112,14 +112,7 @@ class ZCharacter : public ZCharacterObject
 {
 	MDeclareRTTI;
 protected:
-	ZModule_HPAP			*m_pModule_HPAP;
 	ZModule_QuestStatus		*m_pModule_QuestStatus;
-	ZModule_Resistance		*m_pModule_Resistance;
-	ZModule_FireDamage		*m_pModule_FireDamage;
-	ZModule_ColdDamage		*m_pModule_ColdDamage;
-	ZModule_PoisonDamage	*m_pModule_PoisonDamage;
-	ZModule_LightningDamage	*m_pModule_LightningDamage;
-	
 
 	ZCharacterProperty		m_Property;
 	ZCharacterStatus		m_Status;
@@ -301,7 +294,7 @@ public:
 	ZC_STATE_LOWER GetStateLower() const { return m_AniState_Lower; }
 	ZC_STATE_UPPER GetStateUpper() const { return m_AniState_Upper; }
 
-	bool IsUpperPlayDone()	{ return m_bPlayDone_upper; }
+	auto IsUpperPlayDone() const { return m_bPlayDone_upper; }
 
 	bool IsMoveAnimation();
 
@@ -322,8 +315,8 @@ public:
 
 	void ChangeWeapon(MMatchCharItemParts nParts);
 
-	int GetLastShotItemID() const { return m_nLastShotItemID; }
-	float GetLastShotTime() const { return m_fLastShotTime; }
+	auto GetLastShotItemID() const { return m_nLastShotItemID; }
+	auto GetLastShotTime() const { return m_fLastShotTime; }
 	bool CheckValidShotTime(int nItemID, float fTime, ZItem* pItem);
 	void UpdateValidShotTime(int nItemID, float fTime) 
 	{ 
@@ -331,8 +324,8 @@ public:
 		m_fLastShotTime = fTime;
 	}
 
-	bool IsDie() { return m_bDie; }
-	bool IsAlive() const { return !m_bDie; }
+	auto IsDie() const { return m_bDie; }
+	auto IsAlive() const { return !m_bDie; }
 	void ForceDie() { SetHP(0); m_bDie = true; }
 
 	void SetAccel(const rvector& accel) { m_Accel = accel; }

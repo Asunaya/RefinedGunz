@@ -4,10 +4,7 @@
 #include "ZApplication.h"
 #include "ZPost.h"
 #include "ZPostLocal.h"
-#include "ZModule_FireDamage.h"
-#include "ZModule_ColdDamage.h"
-#include "ZModule_LightningDamage.h"
-#include "ZModule_PoisonDamage.h"
+#include "ZModule_ElementalDamage.h"
 #include "ZModule_Skills.h"
 #include "ZWorldItem.h"
 #include "ZMapDesc.h"
@@ -15,7 +12,6 @@
 #include "ZScreenEffectManager.h"
 #include "ZInput.h"
 
-extern bool g_debug_rot;
 extern int  g_debug_render_mode;
 extern bool g_bVertex_Soft; 
 
@@ -332,14 +328,8 @@ bool ZGameInput::OnDebugEvent(MEvent* pEvent)
 				RMesh::SetTextureRenderOnOff(m_bCTOff);
 						}
 						return true;
-			case VK_F6:{
-				g_debug_rot =!g_debug_rot;
-					   }
-					   return true;
-
-
 			case VK_F7: 
-				{	// 프로파일링 시작/끝
+				{
 					extern bool g_bProfile;
 					if(g_bProfile)
 					{
@@ -352,21 +342,6 @@ bool ZGameInput::OnDebugEvent(MEvent* pEvent)
 						ZChatOutput("Profile started.");
 					}
 				}return true;
-/*
-			case VK_HOME:
-
-				if(ZGetGameInterface()->GetGame()) {
-					RFrameTime* ft = &ZGetGameInterface()->GetGame()->m_pMyCharacter->m_pVMesh->m_FrameTime;
-
-					if( ft->m_bActive ) {
-						ft->Stop();
-					}
-					else {
-						ft->Start(20,300);
-					}
-				}
-				return true;
-*/
 			case VK_NUMPAD1:
 				ZGetGameInterface()->TestChangeParts(0);
 				return true;
@@ -395,22 +370,9 @@ bool ZGameInput::OnDebugEvent(MEvent* pEvent)
 				bMusicMute = !bMusicMute;
 				ZGetSoundEngine()->SetMusicMute(bMusicMute);
 				return true;
-
-			/* 이게 뭐꼬 ? -_-
-			case VK_OEM_3:	// `
-				{
-					ZGetGameInterface()->SetCursorEnable(
-						!ZGetGameInterface()->IsCursorEnable());
-				}
-				return true;
-			*/
-
 #ifdef USING_VERTEX_SHADER
 			case 'V':
-				{
-					//RShaderMgr::shader_enabled = !RShaderMgr::shader_enabled;
-					RShaderMgr::mbUsingShader = !RShaderMgr::mbUsingShader;
-				}
+				RShaderMgr::mbUsingShader = !RShaderMgr::mbUsingShader;
 				return false;
 #endif			
 
@@ -419,7 +381,7 @@ bool ZGameInput::OnDebugEvent(MEvent* pEvent)
 		}
 		break;
 
-	} // switch
+	}
 
 	return false;
 }

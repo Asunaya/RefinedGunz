@@ -9,10 +9,7 @@
 #include "ZCharacter.h"
 #include "ZModule_HPAP.h"
 #include "ZModule_Resistance.h"
-#include "ZModule_FireDamage.h"
-#include "ZModule_ColdDamage.h"
-#include "ZModule_LightningDamage.h"
-#include "ZModule_PoisonDamage.h"
+#include "ZModule_ElementalDamage.h"
 #include "ZModule_Skills.h"
 #include "ZQuest.h"
 #include "ZInput.h"
@@ -20,7 +17,8 @@
 MImplementRTTI(ZActor, ZCharacterObjectHistory);
 
 ///////////////////////////////////////////////////////////////////////
-ZActor::ZActor() : m_nFlags(0), m_nNPCType(NPC_GOBLIN_KING), m_pNPCInfo(NULL), m_pModule_Skills(NULL), m_fSpeed(0.0f), m_pBrain(NULL)
+ZActor::ZActor() : m_nFlags(0), m_nNPCType(NPC_GOBLIN_KING), m_pNPCInfo(NULL),
+m_pModule_Skills(NULL), m_fSpeed(0.0f), m_pBrain(NULL)
 {
 	m_bIsNPC = true;		// ZObject의 false로 된 값을 true로 바꿔줌
 
@@ -51,59 +49,16 @@ ZActor::ZActor() : m_nFlags(0), m_nNPCType(NPC_GOBLIN_KING), m_pNPCInfo(NULL), m
 	m_vAddBlastVel = rvector(0.f,0.f,0.f);
 	m_fAddBlastVelTime = 0.f;
 
-//	RegisterModules();
-
-	m_pModule_HPAP = new ZModule_HPAP;
-	m_pModule_Resistance = new ZModule_Resistance;
-	m_pModule_FireDamage = new ZModule_FireDamage;
-	m_pModule_ColdDamage = new ZModule_ColdDamage;
-	m_pModule_PoisonDamage = new ZModule_PoisonDamage;
-	m_pModule_LightningDamage = new ZModule_LightningDamage;
-
-	AddModule(m_pModule_HPAP);
-	AddModule(m_pModule_Resistance);
-	AddModule(m_pModule_FireDamage);
-	AddModule(m_pModule_ColdDamage);
-	AddModule(m_pModule_PoisonDamage);
-	AddModule(m_pModule_LightningDamage);
-
 	strcpy_safe(m_szOwner,"unknown");
 
 	m_TaskManager.SetOnFinishedCallback(OnTaskFinishedCallback);
 
-
 	m_nDamageCount = 0;
 }
-
-//void ZActor::RegisterModules()
-//{
-//	ZObject::RegisterModules();
-//	RegisterModule(&m_Module_Movable);
-//}
 
 ZActor::~ZActor()
 {
 	EmptyHistory();
-	DestroyShadow();
-
-	RemoveModule(m_pModule_HPAP);
-	RemoveModule(m_pModule_Resistance);
-	RemoveModule(m_pModule_FireDamage);
-	RemoveModule(m_pModule_ColdDamage);
-	RemoveModule(m_pModule_PoisonDamage);
-	RemoveModule(m_pModule_LightningDamage);
-
-	delete m_pModule_HPAP;
-	delete m_pModule_Resistance;
-	delete m_pModule_FireDamage;
-	delete m_pModule_ColdDamage;
-	delete m_pModule_PoisonDamage;
-	delete m_pModule_LightningDamage;
-
-	if(m_pModule_Skills) {
-		RemoveModule(m_pModule_Skills);
-		delete m_pModule_Skills;
-	}
 
 	if (m_pBrain)
 	{
@@ -120,17 +75,12 @@ void ZActor::InitStatus()
 	int nMaxHP = m_pNPCInfo->nMaxHP;
 	int nMaxAP = m_pNPCInfo->nMaxAP;
 
-//	nMaxHP = (int)((float)nMaxHP * m_fTC);
-//	nMaxAP = (int)((float)nMaxAP * m_fTC);
-
-	// 기획서 변경에 따라 변경됨 - bird:20051508
 	nMaxHP = ZActor::CalcMaxHP(m_nQL, nMaxHP);
 	nMaxAP = ZActor::CalcMaxAP(m_nQL, nMaxAP);
 
 	m_pModule_HPAP->SetMaxHP(nMaxHP);
 	m_pModule_HPAP->SetMaxAP(nMaxAP);
 
-	// 치트용
 	if (ZGetQuest()->GetCheet(ZQUEST_CHEET_WEAKNPCS) == true) nMaxHP = 1;
 
 	m_pModule_HPAP->SetHP(nMaxHP);
@@ -268,8 +218,7 @@ void ZActor::InitFromNPCType(MQUEST_NPC nNPCType, float fTC, int nQL)
 	}
 
 	if(m_pNPCInfo->nSkills) {
-		m_pModule_Skills = new ZModule_Skills;
-		AddModule(m_pModule_Skills);
+		AddModule<ZModule_Skills>();
 		m_pModule_Skills->Init(m_pNPCInfo->nSkills,m_pNPCInfo->nSkillIDs);
 	}
 
@@ -280,8 +229,6 @@ void ZActor::InitFromNPCType(MQUEST_NPC nNPCType, float fTC, int nQL)
 	m_fSpeed = ZBrain::MakeSpeed(m_pNPCInfo->fSpeed);
 	SetTremblePower(m_pNPCInfo->fTremble);
 	
-
-	// 스케일 조정
 	if (m_pVMesh && m_pNPCInfo)
 	{
 		rvector scale;
@@ -677,7 +624,7 @@ bool ZActor::ProcessMotion(float fDelta)
 
 	UpdatePosition(fDelta);
 
-	if(IsActiveModule(ZMID_LIGHTNINGDAMAGE)==false) {// 라이트닝 에니메이션 루프..
+	if(IsActiveModule(ZMID_LIGHTNINGDAMAGE)==false) {
 
 		if (m_pVMesh->isOncePlayDone())
 		{

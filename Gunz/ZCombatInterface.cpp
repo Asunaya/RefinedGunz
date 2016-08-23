@@ -483,7 +483,7 @@ void ZCombatInterface::DrawTDMScore(MDrawContext* pDC)
 
 void ZCombatInterface::OnDraw(MDrawContext* pDC)
 {
-	if ( m_bShowResult)
+	if (m_bShowResult)
 		return;
 
 	ZCharacter* pCharacter = GetTargetCharacter();
@@ -506,27 +506,8 @@ void ZCombatInterface::OnDraw(MDrawContext* pDC)
 		}
 	}
 
-	// 디버그용 누가 npc를 조종하는가 보여준다
-//	DrawNPCName(pDC);
-
-//	MFont *pFont = MFontManager::Get("FONTa30");
-//	pDC->SetFont( pFont );
-//	pDC->SetColor(MCOLOR(0xFF999999));
-//	pDC->Text(100, 100, "사람살려");
-
-
-	//	DrawCharacterIcons(pDC);
-	//DrawKickPlayerList(pDC);
 	GetVoteInterface()->DrawVoteTargetlist(pDC);
 	GetVoteInterface()->DrawVoteMessage(pDC);
-
-	/*
-	ZGetScreenEffectManager()->SetGuages(
-	(float)pCharacter->GetStatus()->nHP/(float)pCharacter->GetProperty()->nMaxHP,
-	(float)pCharacter->GetStatus()->nAP/(float)pCharacter->GetProperty()->nMaxAP,
-	0.5f);
-	ZGetScreenEffectManager()->SetWeapon(pCharacter->GetVisualMesh()->m_SelectWeaponType);
-	*/
 
 	m_pWeaponScreenEffect->Draw(pDC);
 
@@ -534,39 +515,35 @@ void ZCombatInterface::OnDraw(MDrawContext* pDC)
 
 	if (!m_Observer.IsVisible())
 	{
-//		if(g_pGame&&g_pGame->GetMatch()->GetRoundState()==MMATCH_ROUNDSTATE_PLAY)
+		MFont *pFont = GetGameFont();
+
+		pDC->SetFont(pFont);
+		pDC->SetColor(MCOLOR(0xFFFFFFFF));
+
+		char buffer[256];
+
+		sprintf_safe(buffer, "%d  %s", pCharacter->GetProperty()->nLevel, pCharacter->GetProperty()->szName);
+
+		if ((ZApplication::GetGame()->GetMatch()->GetMatchType() != MMATCH_GAMETYPE_DUEL)
+			|| (!pCharacter->IsObserverTarget()))
 		{
-			MFont *pFont=GetGameFont();
-
-			pDC->SetFont(pFont);
-			pDC->SetColor(MCOLOR(0xFFFFFFFF));
-
-			char buffer[256];
-
-			sprintf_safe(buffer,"%d  %s", pCharacter->GetProperty()->nLevel, pCharacter->GetProperty()->szName);
-
-			if ( (ZApplication::GetGame()->GetMatch()->GetMatchType() != MMATCH_GAMETYPE_DUEL) || ( !pCharacter->IsObserverTarget()))
-			{
-				float fCenterVert = 0.018f - (float)pFont->GetHeight()/(float)RGetScreenHeight()/2;
-				TextRelative(pDC,100.f/800.f,fCenterVert,buffer);
-			}
-
-			TextRelative(pDC,660.f/800.f,510.f/600.f,m_szItemName);
-
-			// melee일때는 탄알수 표시를 하지 않는다.
-			if (pCharacter->GetItems()->GetSelectedWeaponParts() != MMCIP_MELEE) 
-			{
-				sprintf_safe(buffer, "%d / %d", m_nBulletAMagazine, m_nBullet);
-				TextRelative(pDC,720.f/800.f,585.f/600.f,buffer);
-			}
-
-			sprintf_safe(buffer, "%d", pCharacter->GetHP());
-			TextRelative(pDC, 160.f / 1920, 44.f / 1080, buffer);
-			sprintf_safe(buffer, "%d", pCharacter->GetAP());
-			TextRelative(pDC, 160.f / 1920, 92.f / 1080, buffer);
+			float fCenterVert = 0.018f - (float)pFont->GetHeight() / (float)RGetScreenHeight() / 2;
+			TextRelative(pDC, 100.f / 800.f, fCenterVert, buffer);
 		}
 
-		// 듀얼 모드일때(옵져버 모드 아님)
+		TextRelative(pDC, 660.f / 800.f, 510.f / 600.f, m_szItemName);
+
+		if (pCharacter->GetItems()->GetSelectedWeaponParts() != MMCIP_MELEE)
+		{
+			sprintf_safe(buffer, "%d / %d", m_nBulletAMagazine, m_nBullet);
+			TextRelative(pDC, 720.f / 800.f, 585.f / 600.f, buffer);
+		}
+
+		sprintf_safe(buffer, "%d", pCharacter->GetHP());
+		TextRelative(pDC, 160.f / 1920, 44.f / 1080, buffer);
+		sprintf_safe(buffer, "%d", pCharacter->GetAP());
+		TextRelative(pDC, 160.f / 1920, 92.f / 1080, buffer);
+
 		if ( ZApplication::GetGame()->GetMatch()->GetMatchType() == MMATCH_GAMETYPE_DUEL)
 		{
 			char	charName[ 3][ 32];
@@ -586,7 +563,8 @@ void ZCombatInterface::OnDraw(MDrawContext* pDC)
 			ZRuleDuel* pDuel = (ZRuleDuel*)ZGetGameInterface()->GetGame()->GetMatch()->GetRule();
 			if ( pDuel)
 			{
-				for (ZCharacterManager::iterator itor = ZGetCharacterManager()->begin(); itor != ZGetCharacterManager()->end(); ++itor)
+				for (ZCharacterManager::iterator itor = ZGetCharacterManager()->begin();
+					itor != ZGetCharacterManager()->end(); ++itor)
 				{
 					ZCharacter* pCharacter = (*itor).second;
 
@@ -600,14 +578,18 @@ void ZCombatInterface::OnDraw(MDrawContext* pDC)
 						}
 						else
 						{
-							sprintf_safe( charName[ 0], "%s%d  %s", ZMsg( MSG_CHARINFO_LEVELMARKER), pCharacter->GetProperty()->nLevel, pCharacter->GetUserName());
+							sprintf_safe( charName[ 0], "%s%d  %s", ZMsg( MSG_CHARINFO_LEVELMARKER),
+								pCharacter->GetProperty()->nLevel, pCharacter->GetUserName());
 
-							if ( (ZGetMyUID() == pDuel->QInfo.m_uidChampion) || (ZGetMyUID() == pDuel->QInfo.m_uidChallenger))
+							if ( (ZGetMyUID() == pDuel->QInfo.m_uidChampion)
+								|| (ZGetMyUID() == pDuel->QInfo.m_uidChallenger))
 							{
 								// Draw victory
 								int nTextWidth = pFont->GetWidth( charName[ 0]);
-								int nWidth = ZGetCombatInterface()->DrawVictory( pDC, 162, 300, pDuel->QInfo.m_nVictory, true);
-								ZGetCombatInterface()->DrawVictory( pDC, 43+nTextWidth+nWidth, 157, pDuel->QInfo.m_nVictory);
+								int nWidth = ZGetCombatInterface()->DrawVictory( pDC, 162, 300,
+									pDuel->QInfo.m_nVictory, true);
+								ZGetCombatInterface()->DrawVictory( pDC, 43+nTextWidth+nWidth, 157,
+									pDuel->QInfo.m_nVictory);
 							}
 						}
 					}
@@ -615,18 +597,21 @@ void ZCombatInterface::OnDraw(MDrawContext* pDC)
 					else if ( pCharacter->GetUID() == pDuel->QInfo.m_uidChallenger)
 					{
 						if ( ZGetMyUID() != pDuel->QInfo.m_uidChallenger)
-							sprintf_safe( charName[ 0], "%s%d  %s", ZMsg( MSG_CHARINFO_LEVELMARKER), pCharacter->GetProperty()->nLevel, pCharacter->GetUserName());
+							sprintf_safe( charName[ 0], "%s%d  %s", ZMsg( MSG_CHARINFO_LEVELMARKER),
+								pCharacter->GetProperty()->nLevel, pCharacter->GetUserName());
 
 						bIsChallengerDie = pCharacter->IsDie();
 					}
 
 					// Waiting 1
 					else if (pCharacter->GetUID() == pDuel->QInfo.m_WaitQueue[0])
-						sprintf_safe( charName[ 1], "%s%d  %s", ZMsg( MSG_CHARINFO_LEVELMARKER), pCharacter->GetProperty()->nLevel, pCharacter->GetUserName());
+						sprintf_safe( charName[ 1], "%s%d  %s", ZMsg( MSG_CHARINFO_LEVELMARKER),
+							pCharacter->GetProperty()->nLevel, pCharacter->GetUserName());
 
 					// Waiting 2
 					else if (pCharacter->GetUID() == pDuel->QInfo.m_WaitQueue[1])
-						sprintf_safe( charName[ 2], "%s%d  %s", ZMsg( MSG_CHARINFO_LEVELMARKER), pCharacter->GetProperty()->nLevel, pCharacter->GetUserName());
+						sprintf_safe( charName[ 2], "%s%d  %s", ZMsg( MSG_CHARINFO_LEVELMARKER),
+							pCharacter->GetProperty()->nLevel, pCharacter->GetUserName());
 				}
 			}
 
@@ -667,7 +652,6 @@ void ZCombatInterface::OnDraw(MDrawContext* pDC)
 			nPosY += 20;
 			pDC->Text( 80.0f*fRx, nPosY, charName[ 1]);
 			nPosY += 15;
-//			pDC->Text( 80.0f*fRx, nPosY, charName[ 2]);
 		}
 	}
 
@@ -681,14 +665,12 @@ void ZCombatInterface::OnDraw(MDrawContext* pDC)
 	else if( ZApplication::GetGame()->GetMatch()->GetRoundState() == MMATCH_ROUNDSTATE_PREPARE ) {
 
 		int cur_round = ZApplication::GetGame()->GetMatch()->GetCurrRound();
-		//		int max_round = ZApplication::GetGame()->GetMatch()->GetRoundCount();
 
 		if(cur_round == 0) {
 			m_bDrawScoreBoard = true;
 		}
 	}
 
-	// 퀘스트모드일때는 퀘스트 화면을 보여준다.
 	if (m_pQuestScreen)
 	{
 		m_pQuestScreen->OnDraw(pDC);
@@ -704,30 +686,20 @@ void ZCombatInterface::OnDraw(MDrawContext* pDC)
 		DrawScoreBoard(pDC);
 	}
 
-
-//	DrawResultBoard(pDC);
-
-	// 채팅 인풋 창을 그린다.
-
 	m_Chat.OnDraw(pDC);
 
 	DrawSoloSpawnTimeMessage(pDC);
 
-	// 크로스헤어
 	if(ZGetGameInterface()->GetCamera()->GetLookMode()==ZCAMERA_DEFAULT)
 	{
 		m_CrossHair.Draw(pDC);
 	}
 
-	//그리는 순서 때문에
 	if(g_pGame)
 		g_pGame->m_HelpScreen.DrawHelpScreen();
 
-
-	// Finish 후에 일정 시간이 경과하면 결과 화면 보여줌
-	if ( !m_bShowResult && IsFinish())
+	if (!m_bShowResult && IsFinish())
 	{
-		// 배경 음악 볼륨을 서서히 낮춤
 		float fVolume;
 		DWORD dwClock = GetGlobalTimeMS() - m_nReserveFinishTime;
 		if ( dwClock > 4000)
@@ -738,7 +710,7 @@ void ZCombatInterface::OnDraw(MDrawContext* pDC)
 		ZApplication::GetSoundEngine()->SetMusicVolume( fVolume);
 
 
-		if ( GetGlobalTimeMS() >= m_nReservedOutTime)
+		if (GetGlobalTimeMS() >= m_nReservedOutTime)
 		{
 			MWidget* pWidget = ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "Option");
 			if ( pWidget)
@@ -749,11 +721,8 @@ void ZCombatInterface::OnDraw(MDrawContext* pDC)
 			MLabel* pLabel = (MLabel*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "CombatChatInput");
 			if ( pLabel)
 				pLabel->SetText("");
-			ZApplication::GetGameInterface()->GetCombatInterface()->EnableInputChat( false);
+			ZApplication::GetGameInterface()->GetCombatInterface()->EnableInputChat(false);
 
-
-
-			// 만약 퀘스트 실패면 스테이지로 바로 넘어간다.
 			if ( ZGetGameTypeManager()->IsQuestOnly( g_pGame->GetMatch()->GetMatchType()))
 			{
 				if ( !ZGetQuest()->IsQuestComplete())
@@ -765,7 +734,6 @@ void ZCombatInterface::OnDraw(MDrawContext* pDC)
 				}
 			}
 
-			// 배경 화면에 필요한 정보를 업데이트 한다
 			GetResultInfo();
 
 			pWidget = ZGetGameInterface()->GetIDLResource()->FindWidget( "GameResult");
@@ -773,7 +741,6 @@ void ZCombatInterface::OnDraw(MDrawContext* pDC)
 				pWidget->Show( true, true);
 
 
-			// 사운드를 출력한다
 			ZApplication::GetSoundEngine()->SetMusicVolume( m_fOrgMusicVolume);
 #ifdef _BIRDSOUND
 			ZApplication::GetSoundEngine()->OpenMusic(BGMID_FIN);
@@ -788,11 +755,8 @@ void ZCombatInterface::OnDraw(MDrawContext* pDC)
 	}
 }
 
-
 int ZCombatInterface::DrawVictory( MDrawContext* pDC, int x, int y, int nWinCount, bool bGetWidth)
 {
-//	nWinCount = 99;										// for test
-
 	// Get total width
 	if ( bGetWidth)
 	{
@@ -840,7 +804,7 @@ int ZCombatInterface::DrawVictory( MDrawContext* pDC, int x, int y, int nWinCoun
 	// Draw
 	int nPosX = x * fRx;
 	int nPosY = y * fRy;
-	int nSize = 17.0f * fRx;								// 1 단위
+	int nSize = 17.0f * fRx;
 	for ( int i = 0;  i < (nWinCount % 5);  i++)
 	{
 		pDC->Draw( nPosX, nPosY, nSize, nSize, nImage, 0, 32, 32);
@@ -849,7 +813,7 @@ int ZCombatInterface::DrawVictory( MDrawContext* pDC, int x, int y, int nWinCoun
 
 	nSize = 19.0f * fRx;
 	nPosY = ( y - 2) * fRy;
-	if ( (nWinCount % 10) >= 5)								// 5 단위
+	if ( (nWinCount % 10) >= 5)
 	{
 		nPosX -= nSize * 0.2f;
 		pDC->Draw( nPosX, nPosY, nSize, nSize, nImage, 64, 32, 32);
@@ -858,7 +822,7 @@ int ZCombatInterface::DrawVictory( MDrawContext* pDC, int x, int y, int nWinCoun
 	else
 		nPosX -= nSize * 0.5f;
 
-	nSize = 22.0f * fRx;									// 10 단위
+	nSize = 22.0f * fRx;
 	nPosY = ( y - 5) * fRy;
 	for ( int i = 0;  i < (nWinCount / 10);  i++)
 	{
@@ -866,29 +830,13 @@ int ZCombatInterface::DrawVictory( MDrawContext* pDC, int x, int y, int nWinCoun
 		nPosX -= nSize * 0.5f;
 	}
 
-	// 연승 숫자 표시
-/*	if ( nWinCount >= 10)
-	{
-		pFont = MFontManager::Get( "FONTa9b");
-		pDC->SetFont( pFont);
-		pDC->SetColor( MCOLOR(0xFFFFFFFF));
-		char szVictory[ 16];
-		sprintf_safe( szVictory, "%d", nWinCount);
-		TextRelative( pDC, 0.195f, 0.01f, szVictory, true);
-	}
-*/
 	return 0;
 }
 
-
-// TODO : 이게 필요 없는듯.
-// 그리는 순서때문에 만든 펑션
 void ZCombatInterface::OnDrawCustom(MDrawContext* pDC)
 {
-	// 결과 화면 보인 이후에 일정 시간 후 자동 종료한다
 	if ( m_bShowResult)
 	{
-		// 제한시간이면 종료한다.
 		if ( GetGlobalTimeMS() > m_nReservedOutTime)
 		{
 			if(ZGetGameClient()->IsLadderGame())
@@ -899,8 +847,6 @@ void ZCombatInterface::OnDrawCustom(MDrawContext* pDC)
 			return;
 		}
 
-
-		// 숫자를 카운터한다.
 		if ( ZGetGameTypeManager()->IsQuestOnly( g_pGame->GetMatch()->GetMatchType()))
 		{
 			int nNumCount = GetGlobalTimeMS() - (m_nReservedOutTime - 15000);
@@ -933,8 +879,6 @@ void ZCombatInterface::OnDrawCustom(MDrawContext* pDC)
 			}
 		}
 
-
-		// 남은 시간을 표시한다
 		MLabel* pLabel = (MLabel*)ZGetGameInterface()->GetIDLResource()->FindWidget( "GameResult_RemaindTime");
 		if ( pLabel)
 		{
@@ -982,14 +926,12 @@ void ZCombatInterface::DrawSoloSpawnTimeMessage(MDrawContext* pDC)
 				int nRemainTime = pMatch->GetRemainedSpawnTime();
 				if ((nRemainTime > 0) && (nRemainTime <= 5))
 				{
-//					sprintf_safe(szMsg, "%d 초동안 기다려주세요!", nRemainTime);
 					char temp[ 4 ];
 					sprintf_safe( temp, "%d", nRemainTime );
 					ZTransMsg( szMsg, MSG_GAME_WAIT_N_MIN, 1, temp );
 				}
 				else if ((nRemainTime == 0) && (!g_pGame->GetSpawnRequested()))
 				{
-//					sprintf_safe(szMsg, "플레이하려면 Fire키를 눌러주세요!");
 					sprintf_safe( szMsg, 
 						ZMsg(MSG_GAME_CLICK_FIRE) );
 				}

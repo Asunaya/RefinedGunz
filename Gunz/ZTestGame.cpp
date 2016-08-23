@@ -63,11 +63,8 @@ void CreateTestGame(char *mapname, int nDummyCharacterCount, bool bShot, bool bA
 
 #ifndef _PUBLISH
 
-	// 테스트 코드
-	ZModule_Skills *pModule = new ZModule_Skills;
-	g_pGame->m_pMyCharacter->AddModule(pModule);
 	const int ids[] = { 2 };
-	pModule->Init(1,ids);
+ 	g_pGame->m_pMyCharacter->AddModule<ZModule_Skills>()->Init(1, ids);
 
 	if (nDummyCharacterCount != 0)
 	{
@@ -87,6 +84,5 @@ void CreateTestGame(char *mapname, int nDummyCharacterCount, bool bShot, bool bA
 			pChar->SetPosition(ranpos);
 		}
 	}
-#endif // #ifndef _PUBLISH
+#endif
 }
-

@@ -1,5 +1,8 @@
 #pragma once
 
+#include <list>
+#include <string>
+
 #include "ZPrerequisites.h"
 #include "MUID.h"
 #include "RTypes.h"
@@ -9,9 +12,6 @@
 #include "ZCharacterItem.h"
 #include "stuff.h"
 #include "HitRegistration.h"
-
-#include <list>
-#include <string>
 
 _USING_NAMESPACE_REALSPACE2
 
@@ -25,45 +25,42 @@ enum ZC_ENCHANT {
 	ZC_ENCHANT_END
 };
 
-/// 오브젝트 충돌에 필요한 값
 struct ZObjectCollision
 {
-	bool	bCollideable;			///< 충돌여부
-	float	fRadius;				///< 반지름
-	float	fHeight;				///< 높이
+	bool	bCollideable;
+	float	fRadius;
+	float	fHeight;
 };
 
-/// 게임상의 모든 오브젝트 부모 클래스
 class ZObject : public ZModuleContainer
 {
 	MDeclareRTTI;
 
 private:
-	bool					m_bVisible;			///< 화면에 그릴지 여부
-	float					m_fSpawnTime;		///< 태어난 시간
-	float					m_fDeadTime;		///< 죽은시간
+	bool					m_bVisible;
+	float					m_fSpawnTime;
+	float					m_fDeadTime;
 protected:
-	MUID					m_UID;				///< 서버에서 부여한 유니크 ID(중요)
-	bool					m_bIsNPC;			///< NPC인지 여부
-	bool					m_bInitialized;		///< 초기화되었는지 여부
+	MUID					m_UID;
+	bool					m_bIsNPC;
+	bool					m_bInitialized;
 	ZObjectCollision		m_Collision;
 	virtual void OnDraw();
 	virtual void OnUpdate(float fDelta);
 	virtual void OnDie() {}
 public:
-	bool					m_bRendered;		///< 화면에 그려졌는지 여부
+	bool					m_bRendered;
 
 	RVisualMesh*			m_pVMesh;
 	rvector					m_Position;
 	rvector					m_Direction;
 
-	ZModule_Movable			*m_pModule_Movable;	// 속도및 움직임을 관리하는 모듈
+	ZModule_Movable			*m_pModule_Movable;
 
-	ZCharacterItem			m_Items;			///< 장비하고 있는 아이템
+	ZCharacterItem			m_Items;
 
 public:
 	ZObject();
-	virtual ~ZObject();
 
 	auto& GetPosition() const { return m_Position; }
 	void SetPosition(const rvector& pos) { m_Position = pos; }
@@ -108,10 +105,8 @@ public:
 	virtual bool IsAttackable()	 { return true; }
 	virtual bool IsDie() { return false; }
 	virtual void SetDirection(const rvector& dir);
-	virtual bool IsGuard()	const { return false; }
-	virtual bool IsGuardCustom() const {
-		return false;
-	}
+	virtual bool IsGuard() const { return false; }
+	virtual bool IsGuardCustom() const { return false; }
 	virtual MMatchTeam GetTeamID() { return MMT_ALL; }
 	
 	virtual ZOBJECTHITTEST HitTest(const rvector& origin, const rvector& to, float fTime, rvector *pOutPos = NULL) = 0;
