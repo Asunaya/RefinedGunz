@@ -3140,8 +3140,8 @@ void ZCombatInterface::GameCheckPickCharacter()
 			}
 		}
 
-		if( ( pMyChar->m_AniState_Lower == ZC_STATE_LOWER_TUMBLE_RIGHT) || 
-			( pMyChar->m_AniState_Lower == ZC_STATE_LOWER_TUMBLE_LEFT) )
+		if( ( pMyChar->GetStateLower() == ZC_STATE_LOWER_TUMBLE_RIGHT) ||
+			( pMyChar->GetStateLower() == ZC_STATE_LOWER_TUMBLE_LEFT) )
 		{		
 			if( RCameraDirection.z < -0.3f)
 				bPick = true;

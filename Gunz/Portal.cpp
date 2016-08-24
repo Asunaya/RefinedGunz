@@ -769,14 +769,6 @@ bool Portal::Move(ZObject *pObj, D3DXVECTOR3 &diff)
 		RCameraPosition *= ppi->matTransform;
 		RCameraDirection *= ppi->matRot;
 		RUpdateCamera();
-
-		ZCharacter *pChar = MDynamicCast(ZCharacter, pObj);
-
-		if (pChar)
-		{
-			pChar->m_DirectionLower = pChar->m_Direction;
-			pChar->m_DirectionUpper = pChar->m_Direction;
-		}
 	}
 	else
 		origin = target;

@@ -306,7 +306,6 @@ void ZMatch::InitCharactersPosition()
 		}
 	}
 
-	// 쏠로일 경우나 이도저도 아니면 랜덤
 	ZMapSpawnData* pSpawnData = g_pGame->GetMapDesc()->GetSpawnManager()->GetSoloRandomData();
 	if (pSpawnData != NULL)
 	{
@@ -319,18 +318,15 @@ void ZMatch::InitCharactersPosition()
 
 void ZMatch::InitRound()
 {
-	// 시간을 0으로
 	g_pGame->InitRound();
 
 	InitCharactersPosition();
 	InitCharactersProperties();
 
-	// 월드아이템 초기화
 	ZGetWorldItemManager()->Reset();
 
-	// 맨 처음 게임시 스폰시킨다.
 	rvector pos = g_pGame->m_pMyCharacter->GetPosition();
-	rvector dir = g_pGame->m_pMyCharacter->m_DirectionLower;
+	rvector dir = g_pGame->m_pMyCharacter->GetLowerDir();
 
 	m_nRoundKills = 0;
 
@@ -342,14 +338,6 @@ void ZMatch::InitRound()
 		if (g_pGame->GetSpawnRequested() == false) {
 			if (GetMatchType() == MMATCH_GAMETYPE_DUEL)
 			{
-//				ZRuleDuel* pDuel = (ZRuleDuel*)GetRule();
-//				if (pDuel->GetQueueIdx(ZGetMyUID()) <= 1)
-//				{
-//					ZPostRequestSpawn(ZGetMyUID(), pos, dir);
-//					g_pGame->SetSpawnRequested(true);
-//				}
-//				else
-//					isObserver = true;
 				for (ZCharacterManager::iterator itor = g_pGame->m_CharacterManager.begin();
 					itor != g_pGame->m_CharacterManager.end(); ++itor)
 				{

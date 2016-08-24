@@ -87,152 +87,118 @@ bool ZGameAction::OnPeerSkill(MCommand* pCommand)
 	return true;
 }
 
-// 강베기 처리한다. 내가 맞았는지만 검사한다
-void ZGameAction::OnPeerSkill_LastShot(float fShotTime,ZCharacter *pOwnerCharacter)	// 칼 마지막 방 스플래시
+void ZGameAction::OnPeerSkill_LastShot(float fShotTime,ZCharacter *pOwnerCharacter)
 {
-	if( pOwnerCharacter == NULL ) return;
+	if (!pOwnerCharacter) return;
 	ZItem *pItem = pOwnerCharacter->GetItems()->GetItem(MMCIP_MELEE);
-	if(!pItem) return;
+	if (!pItem) return;
 
 	MMatchItemDesc* pDesc = pItem->GetDesc();
-	if(!pDesc) return;
+	if (!pDesc) return;
 
-	const float fRange = 300.f;			// 범위는 4미터
+	const float fRange = 300.f;
 
-//	if(pOwnerCharacter->m_AniState_Lower>=ZC_STATE_LOWER_ATTACK3 && pOwnerCharacter->m_AniState_Lower<=ZC_STATE_LOWER_ATTACK5)
+	fShotTime -= pOwnerCharacter->GetTimeOffset();
+
+	rvector OwnerPosition, OwnerDir;
+	if (!pOwnerCharacter->GetHistory(&OwnerPosition, &OwnerDir, fShotTime))
+		return;
+
+	rvector waveCenter = OwnerPosition;
+
+	rvector _vdir = OwnerDir;
+	_vdir.z = 0;
+
+	ZC_ENCHANT zc_en_type = pOwnerCharacter->GetEnchantType();
+
+	ZGetSoundEngine()->PlaySound(pOwnerCharacter->IsObserverTarget() ? "we_smash_2d" : "we_smash", waveCenter);
+
+	ZGetEffectManager()->AddSwordWaveEffect(pOwnerCharacter->GetUID(), waveCenter, pOwnerCharacter->GetDirection());
+
+	for (ZObjectManager::iterator itor = ZGetObjectManager()->begin();
+	itor != ZGetObjectManager()->end(); ++itor)
 	{
-		// fShotTime 이 그 캐릭터의 로컬 시간이므로 내 시간으로 변환해준다
-		fShotTime-=pOwnerCharacter->m_fTimeOffset;
+		ZObject* pTar = (*itor).second;
 
-		rvector OwnerPosition,OwnerDir;
-		if(!pOwnerCharacter->GetHistory(&OwnerPosition,&OwnerDir,fShotTime))
-			return;
+		if (pTar == NULL) continue;
+		if (pOwnerCharacter == pTar) continue;
 
+		if (pTar != g_pGame->m_pMyCharacter &&
+			(!pTar->IsNPC() || !((ZActor*)pTar)->IsMyControl())) continue;
 
-		rvector waveCenter = OwnerPosition; // 폭발의 중심
+		if (!ZGetGame()->IsAttackable(pOwnerCharacter, pTar)) continue;
 
-		rvector _vdir = OwnerDir;
-		_vdir.z = 0;
-//		Normalize(_vdir);
-//		waveCenter += _vdir * 180.f;
+		rvector TargetPosition, TargetDir;
 
-		ZC_ENCHANT zc_en_type = pOwnerCharacter->GetEnchantType();
+		if (pTar->IsDie()) continue;
 
-		// 사운드
-		ZGetSoundEngine()->PlaySound(pOwnerCharacter->IsObserverTarget() ? "we_smash_2d" : "we_smash", waveCenter );
+		if (!pTar->GetHistory(&TargetPosition, &TargetDir, fShotTime)) continue;
 
-		// 바닥의 wave 이펙트
-		{
-			ZGetEffectManager()->AddSwordWaveEffect(pOwnerCharacter->GetUID(), waveCenter, pOwnerCharacter->GetDirection());
-		}
+		rvector checkPosition = TargetPosition + rvector(0, 0, 80);
+		float fDist = Magnitude(waveCenter - checkPosition);
 
-		for (ZObjectManager::iterator itor = ZGetObjectManager()->begin();
-			itor != ZGetObjectManager()->end(); ++itor)
-		{
-			ZObject* pTar = (*itor).second;
+		if (fDist < fRange) {
 
-			if (pTar==NULL) continue;
-			if (pOwnerCharacter == pTar) continue;
+			if ((pTar) && (pTar != pOwnerCharacter)) {
 
-			if(pTar!=g_pGame->m_pMyCharacter &&	// 내 캐릭터나 내가 조종하는 npc 만 체크한다
-				(!pTar->IsNPC() || !((ZActor*)pTar)->IsMyControl())) continue;
-
-			if(!ZGetGame()->IsAttackable(pOwnerCharacter,pTar)) continue;
-			//// 팀플레이고 같은 팀이고 팀킬 불가로 되어있으면 넘어간다
-			//if(ZApplication::GetGame()->GetMatch()->IsTeamPlay() &&
-			//	pOwnerCharacter->IsTeam(pTar) && !g_pGame->GetMatch()->GetTeamKillEnabled()) return;
-
-			rvector TargetPosition,TargetDir;
-
-			if(pTar->IsDie()) continue;
-			// 적절한 위치를 얻어낼수 없으면 다음으로~
-			if( !pTar->GetHistory(&TargetPosition,&TargetDir,fShotTime)) continue;
-
-			rvector checkPosition = TargetPosition + rvector(0,0,80);
-			float fDist = Magnitude(waveCenter - checkPosition);
-
-			if (fDist < fRange) {
-
-				if ((pTar) && (pTar != pOwnerCharacter)) {
-
-					if(g_pGame->CheckWall( pOwnerCharacter,pTar )==false) // 중간에 벽이 막고 있는가?
+				if (g_pGame->CheckWall(pOwnerCharacter, pTar) == false)
+				{
+					// 막고있으면 데미지를 안받는다
+					if (pTar->IsGuard() && DotProduct(pTar->m_Direction, OwnerDir) < 0)
 					{
-						// 막고있으면 데미지를 안받는다
-						if(pTar->IsGuard() && DotProduct(pTar->m_Direction,OwnerDir)<0 )
-						{
-							rvector addVel = pTar->GetPosition() - waveCenter;
-							Normalize(addVel);
-							addVel = 500.f*addVel;
-							addVel.z = 200.f;
-							pTar->AddVelocity(addVel);
-						}else
-						{
-							rvector tpos = pTar->GetPosition();
+						rvector addVel = pTar->GetPosition() - waveCenter;
+						Normalize(addVel);
+						addVel = 500.f*addVel;
+						addVel.z = 200.f;
+						pTar->AddVelocity(addVel);
+					}
+					else
+					{
+						rvector tpos = pTar->GetPosition();
 
-							tpos.z += 130.f;
+						tpos.z += 130.f;
 
 
-							if( zc_en_type == ZC_ENCHANT_NONE ) {
+						if (zc_en_type == ZC_ENCHANT_NONE) {
 
-								ZGetEffectManager()->AddSwordUppercutDamageEffect(tpos,pTar->GetUID());
-							}
-							else {
+							ZGetEffectManager()->AddSwordUppercutDamageEffect(tpos, pTar->GetUID());
+						}
+						else {
 
-								ZGetEffectManager()->AddSwordEnchantEffect(zc_en_type,pTar->GetPosition(),20);
-							}
+							ZGetEffectManager()->AddSwordEnchantEffect(zc_en_type, pTar->GetPosition(), 20);
+						}
 
-							tpos -= pOwnerCharacter->m_Direction * 50.f;
+						tpos -= pOwnerCharacter->m_Direction * 50.f;
 
-							rvector fTarDir = pTar->GetPosition() - pOwnerCharacter->GetPosition();
-							Normalize(fTarDir);
+						rvector fTarDir = pTar->GetPosition() - pOwnerCharacter->GetPosition();
+						Normalize(fTarDir);
 
-#define MAX_DMG_RANGE	50.f	// 반경이만큼 까지는 최대 데미지를 다 먹는다
-#define MIN_DMG			0.3f	// 최소 기본 데미지는 이정도.
+#define MAX_DMG_RANGE	50.f
+#define MIN_DMG			0.3f
 
-							float fDamageRange = 1.f - (1.f-MIN_DMG)*( max(fDist-MAX_DMG_RANGE,0) / (fRange-MAX_DMG_RANGE));
-//							pTar->OnDamagedKatanaSplash( pOwnerCharacter, fDamageRange );
+						float fDamageRange = 1.f - (1.f - MIN_DMG)*(max(fDist - MAX_DMG_RANGE, 0) / (fRange - MAX_DMG_RANGE));
 
-#define SPLASH_DAMAGE_RATIO	.4f		// 스플래시 데미지 관통률
-#define SLASH_DAMAGE	3		// 강베기데미지 = 일반공격의 x SLASH_DAMAGE
-							int damage = (int) pDesc->m_nDamage * fDamageRange;
-							
-							// 인챈트 속성이 있을때는 1배 데미지만 먹는다. 2005.1.14
-							if(zc_en_type == ZC_ENCHANT_NONE)
-								damage *=  SLASH_DAMAGE;
+#define SPLASH_DAMAGE_RATIO	.4f
+#define SLASH_DAMAGE	3
+						int damage = (int)pDesc->m_nDamage * fDamageRange;
 
-							pTar->OnDamaged(pOwnerCharacter,pOwnerCharacter->GetPosition(),ZD_KATANA_SPLASH,MWT_KATANA,damage,SPLASH_DAMAGE_RATIO);
-							pTar->OnDamagedAnimation(pOwnerCharacter,SEM_WomanSlash5);
+						if (zc_en_type == ZC_ENCHANT_NONE)
+							damage *= SLASH_DAMAGE;
 
-							ZPostPeerEnchantDamage(pOwnerCharacter->GetUID(), pTar->GetUID());
+						pTar->OnDamaged(pOwnerCharacter, pOwnerCharacter->GetPosition(), ZD_KATANA_SPLASH, MWT_KATANA, damage, SPLASH_DAMAGE_RATIO);
+						pTar->OnDamagedAnimation(pOwnerCharacter, SEM_WomanSlash5);
 
-						} // 데미지를 먹는다
+						ZPostPeerEnchantDamage(pOwnerCharacter->GetUID(), pTar->GetUID());
 					}
 				}
 			}
 		}
-#define KATANA_SHOCK_RANGE		1000.f			// 10미터까지 흔들린다
-
-		float fPower= (KATANA_SHOCK_RANGE-Magnitude(g_pGame->m_pMyCharacter->GetPosition()+rvector(0,0,50) - OwnerPosition))/KATANA_SHOCK_RANGE;
-		if(fPower>0)
-			ZGetGameInterface()->GetCamera()->Shock(fPower*500.f, .5f, rvector(0.0f, 0.0f, -1.0f));
-
 	}
-	/*
-	else{
+#define KATANA_SHOCK_RANGE		1000.f
 
-#ifndef _PUBLISH
-
-		// 이거 칼질 제대로 안한넘이다. 수상하다.
-		char szTemp[256];
-		sprintf_safe(szTemp, "%s 치트 ?", pOwnerCharacter->GetProperty()->szName);
-		ZChatOutput(MCOLOR(0xFFFF0000), szTemp);
-
-		mlog("anistate %d\n",pOwnerCharacter->m_AniState_Lower);
-
-#endif//_PUBLISH
-
-	}
-	*/
+	float fPower = (KATANA_SHOCK_RANGE - Magnitude(g_pGame->m_pMyCharacter->GetPosition() + rvector(0, 0, 50) - OwnerPosition)) / KATANA_SHOCK_RANGE;
+	if (fPower > 0)
+		ZGetGameInterface()->GetCamera()->Shock(fPower*500.f, .5f, rvector(0.0f, 0.0f, -1.0f));
 }
 
 void ZGameAction::OnPeerSkill_Uppercut(ZCharacter *pOwnerCharacter)
@@ -349,7 +315,7 @@ void ZGameAction::OnPeerSkill_Uppercut(ZCharacter *pOwnerCharacter)
 
 void ZGameAction::OnPeerSkill_Dash(ZCharacter *pOwnerCharacter)
 {
-	if(pOwnerCharacter->m_AniState_Lower!=ZC_STATE_LOWER_UPPERCUT) return;
+	if(pOwnerCharacter->GetStateLower() != ZC_STATE_LOWER_UPPERCUT) return;
 
 	float fShotTime=g_pGame->GetTime();
 	rvector OwnerPosition,OwnerDir;

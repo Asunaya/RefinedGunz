@@ -551,15 +551,6 @@ bool ZBrain::CheckSkillUsable(int *pnSkill, MUID *puidTarget, rvector *pTargetPo
 
 bool ZBrain::FindTarget()
 {
-	// 지금은 단순히 가장 가까운 상대를 타깃으로 설정한다.
-	// 나중에 나를 공격한 넘, 제일 약해 보이는 넘 등을 인텔리전트하게 타게팅하도록 하자.
-	//
-	// - 제일 가까운 캐릭 공격
-	// - 피없는 캐릭 찾아서 공격
-	// - 레벨 낮은 캐릭 공격
-	// - 나를 공격한 캐릭 공격
-	// - 눈에 보이는 캐릭 공격
-
 	MUID uidTarget = MUID(0,0);
 	float fDist = FLT_MAX;
 
@@ -571,13 +562,12 @@ bool ZBrain::FindTarget()
 		ZCharacter* pCharacter = (*itor).second;
 		if (pCharacter->IsDie()) continue;
 		
-		if (g_pGame->GetTime()-pCharacter->m_fLastReceivedTime > 1.f)
-			continue;					// 핑 높은 놈은 안따라감
-
+		if (pCharacter->LostConnection())
+			continue;
 
 		if (!CheckEnableTargetting(pCharacter)) 
 		{
-			pTempCharacter = pCharacter;	// 임시 캐릭터 저장
+			pTempCharacter = pCharacter;
 			continue;
 		}
 
@@ -591,8 +581,6 @@ bool ZBrain::FindTarget()
 
 	m_uidTarget = uidTarget;
 
-
-	// 쫓아갈 애가 없으면 공격할 수 없지만 얘라도 쫓아간다.
 	if ((uidTarget == MUID(0,0)) && (pTempCharacter != NULL))
 	{
 		m_uidTarget = pTempCharacter->GetUID();
@@ -609,12 +597,10 @@ bool ZBrain::FindTarget()
 
 bool ZBrain::CheckEnableTargetting(ZCharacter* pCharacter)
 {
-	// 만약 melee공격밖에 못하면 공격할 수 없는 캐릭터는 쫓아가지 않는다.
 	unsigned long int nAttackTypes = m_pBody->GetNPCInfo()->nNPCAttackTypes;
 	if (nAttackTypes == NPC_ATTACK_MELEE)
 	{
-		// 칼 꽂고 있는 경우는 안쫓는다.
-		if ((pCharacter->m_AniState_Lower == ZC_STATE_LOWER_BIND) &&
+		if ((pCharacter->GetStateLower() == ZC_STATE_LOWER_BIND) &&
 			(IS_EQ(MagnitudeSq(pCharacter->GetVelocity()), 0.0f)) &&
 			(pCharacter->GetDistToFloor() >= m_pBody->GetCollHeight()) )
 		{
@@ -639,4 +625,3 @@ ZBrain_GoblinKing::~ZBrain_GoblinKing()
 {
 
 }
-

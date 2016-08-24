@@ -12,8 +12,6 @@ void ZNetCharacter::OnUpdate(float fDelta)
 	if (m_bInitialized == false) return;
 	if (!IsVisible()) return;
 
-	m_fLastValidTime = g_pGame->GetTime();
-
 	ZCharacter::OnUpdate(fDelta);
 
 	if (IsMoveAnimation())

@@ -89,14 +89,11 @@ bool ZModule_Movable::Move(const rvector &orig_diff)
 	rvector origin,targetpos;
 	rplane impactplane;
 
-	// 최소 120이상인 이유는 이동할 수 있는 곳의 각도가 플레이어와 같도록 하기 위함이고,
-	// 1.7142857142857143f는 플레이어의 (radius / height)값
 	float fCollUpHeight = max(120.0f, pThisObj->GetCollHeight() - pThisObj->GetCollRadius() * 1.7142857142857143f);
 
 	origin=pThisObj->GetPosition()+rvector(0,0,fCollUpHeight);
 	targetpos=origin+diff;
 
-	// 나락 이하는 맵 체크하지 않는다.
 	if (pThisObj->GetPosition().z > DIE_CRITICAL_LINE)
 	{
 		m_bAdjusted = ZGetGame()->GetWorld()->GetBsp()->CheckWall(origin,targetpos,fThisObjRadius,60,RCW_CYLINDER,0,&impactplane);
@@ -131,14 +128,12 @@ void ZModule_Movable::UpdatePosition(float fDelta)
 	bool bUp = (diff.z>0.01f);
 	bool bDownward= (diff.z<0.01f);
 
-//	rvector diff2d=rvector(diff.x,diff.y,0);
 	if(Magnitude(diff)>0.01f)
 		Move(diff);
 
 	rvector floor=g_pGame->GetFloor(pThisObj->GetPosition(),&m_FloorPlane);
 	m_fDistToFloor=pThisObj->GetPosition().z-floor.z;
 
-	// 올라가야 하는데 못올라간경우
 	if(bUp && diff.z<=0.01f) {
 		SetVelocity(GetVelocity().x,GetVelocity().y,0);
 	}

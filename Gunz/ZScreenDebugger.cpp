@@ -272,7 +272,7 @@ void ZScreenDebugger::DrawDebugInfo(MDrawContext *pDC)
 			}
 
 			sprintf_safe(buffer,"poly_cnt:%d,low_ani_state %d,%s frame : weapon type %d : down %d / %d CAFactor = %.2f",
-				g_pGame->m_render_poly_cnt,g_pGame->m_pMyCharacter->m_AniState_Lower,
+				g_pGame->m_render_poly_cnt,g_pGame->m_pMyCharacter->GetStateLower(),
 				pAniInfo[0]->m_pAniSet->GetName(),
 				pVMesh->GetSetectedWeaponMotionID() ,
 				pAniInfo[0]->m_nFrame,

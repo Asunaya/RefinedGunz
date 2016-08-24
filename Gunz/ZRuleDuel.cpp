@@ -27,7 +27,7 @@ bool ZRuleDuel::OnCommand(MCommand* pCommand)
 			if (QInfo.m_bIsRoundEnd)
 			{
 				rvector pos = g_pGame->m_pMyCharacter->GetPosition();
-				rvector dir = g_pGame->m_pMyCharacter->m_DirectionLower;
+				rvector dir = g_pGame->m_pMyCharacter->GetLowerDir();
 
 				if ((QInfo.m_uidChampion == ZGetMyUID()) || (QInfo.m_uidChallenger == ZGetMyUID()))
 				{

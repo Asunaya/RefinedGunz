@@ -1,5 +1,4 @@
 #include "stdafx.h"
-
 #include "ZApplication.h"
 #include "ZGame.h"
 #include "ZCharacter.h"
@@ -26,7 +25,6 @@
 #include "ZModule_QuestStatus.h"
 #include "ZGameConst.h"
 #include "BasicInfoHistory.inl"
-
 #include "RGMain.h"
 #include "Portal.h"
 #include "Rules.h"
@@ -38,18 +36,10 @@
 
 #define ENABLE_CHARACTER_COLLISION
 
-//#ifdef _PUBLISH
-#define ENABLE_FALLING_DAMAGE
-//#endif
-
 #define IsKeyDown(key) ((GetAsyncKeyState(key) & 0x8000)!=0)
-//////////////////////////////////////////////////////////////////////////
-//	GLOBAL
-//////////////////////////////////////////////////////////////////////////
 
-bool Enable_Cloth	= true;
+bool Enable_Cloth = true;
 
-// teen 버전은 강제로 바꿔준다~..
 bool CheckTeenVersionMesh(RMesh** ppMesh)
 {
 	RWeaponMotionType type = eq_weapon_etc;
@@ -156,7 +146,6 @@ void ChangeCharHair(RVisualMesh* pVMesh, MMatchSex nSex, int nHairIndex)
 		strcpy_safe(szMeshName, g_szHairMeshName[nHairIndex][MMS_FEMALE].c_str());
 	}
 
-	// 나중에 hair를 따로 만들어야 할듯..
 	pVMesh->SetParts(eq_parts_head, szMeshName);
 }
 
@@ -168,9 +157,8 @@ void ZChangeCharParts(RVisualMesh* pVMesh, MMatchSex nSex, int nHair, int nFace,
 		return;
 	}
 
-	ChangeEquipParts(pVMesh, pItemID);		// hair, face보다 장비를 먼저 바꿔야 한다.
+	ChangeEquipParts(pVMesh, pItemID);
 
-	// 지금은 머리아이템과 머리카락 메쉬를 서로 공유하고 있다. - 나중에 떼어놓도록 하자
 	if (pItemID[MMCIP_HEAD] == 0)
 	{
 		ChangeCharHair(pVMesh, nSex, nHair);
@@ -189,7 +177,7 @@ void ZChangeCharWeaponMesh(RVisualMesh* pVMesh, unsigned long int nWeaponID)
 			pVMesh->AddWeapon(type , NULL);
 			pVMesh->SelectWeaponMotion(type);
 
-			return;	// id가 0이면 아무것도 착용하지 않는다.
+			return;
 		}
 
 
@@ -198,7 +186,6 @@ void ZChangeCharWeaponMesh(RVisualMesh* pVMesh, unsigned long int nWeaponID)
 		
 		if (pDesc == NULL)
 		{
-//			_ASSERT(0);
 			return;
 		}
 
@@ -215,8 +202,6 @@ void ZChangeCharWeaponMesh(RVisualMesh* pVMesh, unsigned long int nWeaponID)
 
 }
 
-
-///////////////////////////////////////////////////////////////////////////////////////
 MImplementRTTI(ZCharacter, ZCharacterObject);
 
 ZCharacter::ZCharacter() : ZCharacterObject(),
@@ -270,7 +255,7 @@ m_bAdminHide(false)
 	m_pAnimationInfo_Lower=NULL;
 	m_pAnimationInfo_Upper=NULL;
 
-	m_vProxyPosition = m_vProxyDirection = rvector(0.0f,0.0f,0.0f);
+	m_vProxyPosition = { 0, 0, 0 };
 
 	for(int i=0;i<6;i++) {
 		m_t_parts[i]  = 2;
@@ -279,7 +264,6 @@ m_bAdminHide(false)
 
 	m_fLastReceivedTime=0;
 
-	m_fLastValidTime = 0.0f;
 	m_Accel = rvector(0.0f, 0.0f, 0.0f);
 	m_bRendered = false;
 
@@ -454,15 +438,7 @@ void ZCharacter::UpdateLoadAnimation()
 	}
 }
 
-static bool CheckVec(rvector& v1,rvector& v2) {
-	if( fabs(v1.x - v2.x) < 0.03f )
-		if( fabs(v1.y - v2.y) < 0.03f )
-			if( fabs(v1.z - v2.z) < 0.03f )
-				return false;
-	return true;
-}
-
-void ZCharacter::UpdateMotion(float fDelta)
+void ZCharacter::UpdateDirection(float fDelta, const v3& Direction)
 {
 	if (m_bInitialized==false) return;
 
@@ -548,11 +524,11 @@ void ZCharacter::UpdateMotion(float fDelta)
 	}
 	else
 	{
-		m_Direction = m_TargetDir;
+		m_Direction = Direction;
 		m_DirectionLower = m_Direction;
 
 		m_pVMesh->m_vRotXYZ.x = 0.f;
-		m_pVMesh->m_vRotXYZ.y = (m_TargetDir.z + 0.05f) * 50.f;
+		m_pVMesh->m_vRotXYZ.y = (Direction.z + 0.05f) * 50.f;
 		m_pVMesh->m_vRotXYZ.z = 0.f;
 	}
 }
@@ -702,12 +678,7 @@ void ZCharacter::OnDraw()
 
 	if( m_pVMesh && !Enable_Cloth )	m_pVMesh->DestroyCloth();
 
-	//////////////
-	// 광원 세팅
-
-	//#define SHOW_LIGHT_TEAPOT			// 광원에 주전자 표시
-
-	if(m_nVMID==-1)//초기화도 안된상태
+	if(m_nVMID==-1)
 	{
 		__EP(39);
 		return;
@@ -734,7 +705,6 @@ void ZCharacter::OnDraw()
 		RGetDevice()->SetTextureStageState( 0, D3DTSS_COLOROP,   D3DTOP_SELECTARG1);
 	}
 
-	// 나락에 떨어질때 맵에 포그가 깔려있으면 ZBuffer를 꺼준다. 나락 판때기에 캐릭터가 가려지기 때문
 	bool bNarakSetState = ((m_bFallingToNarak) && ((g_pGame->GetWorld()->IsFogVisible())));
 	if (bNarakSetState)
 	{
@@ -742,19 +712,14 @@ void ZCharacter::OnDraw()
 		RSetWBuffer(false);
 	}
 
-
-	///////////////////////////////////////////////////////////////////////
-	//	rvector dir = m_Direction;dir.z = 0;
-
 	CheckDrawWeaponTrack();
 
 	RGetDevice()->SetRenderState( D3DRS_LIGHTING, TRUE );
 
-	// 죽은 넘이면 투명해진다.
 	if(IsDie())
 	{
-#define TRAN_AFTER		3.f		// 이 시간 이후부터
-#define VANISH_TIME		2.f		// 이 시간동안 투명해진다
+#define TRAN_AFTER		3.f
+#define VANISH_TIME		2.f
 
 		float fOpacity = max(0.f,min(1.0f,(
 			VANISH_TIME-(g_pGame->GetTime()-GetDeadTime() - TRAN_AFTER))/VANISH_TIME));
@@ -765,8 +730,6 @@ void ZCharacter::OnDraw()
 
 	__BP(25, "ZCharacter::Draw::VisualMesh::Render");
 
-//	m_bIsLowModel = true;
-
 	UpdateEnchant();
 
 	bool bGame = g_pGame ? true : false;	
@@ -776,7 +739,7 @@ void ZCharacter::OnDraw()
 	float dist = Magnitude(cpos);
 
 	m_pVMesh->SetClothValue(bGame, fabs(dist));
-	m_pVMesh->Render(false);// m_bIsLowModel);
+	m_pVMesh->Render(false);
 
 	m_bRendered = m_pVMesh->m_bIsRender;
 
@@ -817,16 +780,16 @@ bool ZCharacter::CheckDrawGrenade() const
 
 bool ZCharacter::Pick(const rvector& pos, const rvector& dir, RPickInfo* pInfo)
 {
-	if (m_bInitialized==false) return false ;
+	if (m_bInitialized==false) return false;
 
 	return ZObject::Pick(pos, dir, pInfo);
 }
 
-#define GRAVITY_CONSTANT	2500.f			// 중력의 영향
-#define DAMAGE_VELOCITY		1700.f			// 속도가 이 이상되면 폴링데미지를 받는다.
-#define MAX_FALL_SPEED		3000.f			// 최대 낙하속도
-#define MAX_FALL_DAMAGE		50.f			// 최대 데미지
-#define BLASTED_KNOCKBACK_RATIO	3.f			// 띄워진상태에서의 Knockback을 과장(배수)
+#define GRAVITY_CONSTANT	2500.f
+#define DAMAGE_VELOCITY		1700.f
+#define MAX_FALL_SPEED		3000.f
+#define MAX_FALL_DAMAGE		50.f
+#define BLASTED_KNOCKBACK_RATIO	3.f
 
 void ZCharacter::UpdateHeight(float fDelta)
 {
@@ -834,10 +797,9 @@ void ZCharacter::UpdateHeight(float fDelta)
 
 	m_bJumpUp=(GetVelocity().z>0);
 
-	if(GetVelocity().z<0 && GetDistToFloor()>35.f)	// 계단 내려갈때 정도는 그냥 내려간다.
+	if(GetVelocity().z<0 && GetDistToFloor()>35.f)
 	{
 		if(!m_bJumpDown) {
-//			m_fFallHeight = m_Position.z;
 			m_bJumpDown=true;
 			m_bJumpUp = false;
 		}
@@ -845,27 +807,20 @@ void ZCharacter::UpdateHeight(float fDelta)
 
 	if(!m_bWallJump)
 	{
-		//if(GetVelocity().z<1.f && GetDistToFloor()<1.f)
-		//{
-		//	if(!m_bLand )
 		if(m_pModule_Movable->isLanding())
 		{
 			if(m_Position.z + 100.f < m_pModule_Movable->GetFallHeight())
 			{
-//				m_fFallHeight = m_Position.z;
-				float fSpeed=fabs(GetVelocity().z);
-				if(fSpeed>DAMAGE_VELOCITY)
+				float fSpeed = fabs(GetVelocity().z);
+				if (fSpeed > DAMAGE_VELOCITY)
 				{
-					float fDamage = MAX_FALL_DAMAGE * ( fSpeed-DAMAGE_VELOCITY) / (MAX_FALL_SPEED-DAMAGE_VELOCITY) ;
-#ifdef	ENABLE_FALLING_DAMAGE
-					//				DamagedFalling(fDamage);
-#endif
+					float fDamage = MAX_FALL_DAMAGE *
+						(fSpeed - DAMAGE_VELOCITY) / (MAX_FALL_SPEED - DAMAGE_VELOCITY);
 
 				}
 
 				RBspObject* r_map = g_pGame->GetWorld()->GetBsp();
 
-				// 점프 착지시 먼지..
 				rvector vPos = GetPosition();
 				rvector vDir = rvector(0.f,0.f,-1.f);
 				vPos.z += 50.f;
@@ -873,39 +828,26 @@ void ZCharacter::UpdateHeight(float fDelta)
 				RBSPPICKINFO pInfo;
 
 				if(r_map->Pick(vPos,vDir,&pInfo)) {
-/*
-					if( g_pGame->m_waters.CheckSpearing( vPos+rvector(0.f,0.f,200.f), pInfo.PickPos, 250, 0.3 ) )	{
-								
-
-					}
-					else {
-*/						
 					vPos = pInfo.PickPos;
 
 					vDir.x = pInfo.pInfo->plane.a;
 					vDir.y = pInfo.pInfo->plane.b;
 					vDir.z = pInfo.pInfo->plane.c;
 
-					ZGetEffectManager()->AddLandingEffect(vPos,vDir);//내부에서 옵션에 따라~
-
-					///////////////////////////////////////////////////////////
-					// 착지 sound .. 착지 시점을 정확하게 하려면 ..
+					ZGetEffectManager()->AddLandingEffect(vPos,vDir);
 
 					AniFrameInfo* pInfo = m_pVMesh->GetFrameInfo(ani_mode_lower);
-					RAniSoundInfo* pSInfo = &pInfo->m_SoundInfo;// &m_pVMesh->m_SoundInfo[0];
+					RAniSoundInfo* pSInfo = &pInfo->m_SoundInfo;
 
 					if(pSInfo->Name[0]) {
 						pSInfo->isPlay = true;
 						UpdateSound();
-//							ZApplication::GetSoundEngine()->PlaySound(pSInfo->Name,vPos.x,vPos.y,vPos.z);
 					}
-					else {//벽점프후 사운드등은 등록되어 있지 않다..
+					else {
 						strcpy_safe(pSInfo->Name,"man_jump");
 						pSInfo->isPlay = true;
 						UpdateSound();
 					}
-
-//						}
 				}
 
 			}
@@ -917,9 +859,6 @@ void ZCharacter::UpdateHeight(float fDelta)
 
 void ZCharacter::UpdateSpeed()
 {
-	//////////////////////////////////////////////////////////////////
-	// update animation speed
-
 	if(m_pVMesh==NULL)
 		return;
 
@@ -1001,9 +940,8 @@ void ZCharacter::OnUpdate(float fDelta)
 	}
 
 	UpdateSound();
-	UpdateMotion(fDelta);
 
-	if( m_pVMesh && Enable_Cloth  && m_pVMesh->isChestClothMesh() )
+	if( m_pVMesh && Enable_Cloth && m_pVMesh->isChestClothMesh() )
 	{
 		if(IsDie())
 		{
@@ -1019,10 +957,21 @@ void ZCharacter::OnUpdate(float fDelta)
 		}
 	}
 
-	rvector vRot;
+	v3 ProxyDirection;
 
-	ZObserver *pObserver = ZApplication::GetGameInterface()->GetCombatInterface()->GetObserver();
-	if (pObserver->IsVisible())
+	ZObserver *pObserver = ZGetGameInterface()->GetCombatInterface()->GetObserver();
+	if (!pObserver->IsVisible())
+	{
+		UpdateDirection(fDelta, m_TargetDir);
+		m_vProxyPosition = m_Position;
+		ProxyDirection = m_DirectionLower;
+
+		v3 dir = ProxyDirection;
+		DMLog("ZCharacter::OnUpdate - %f, %f, %f; %f, %f, %f\n",
+			dir.x, dir.y, dir.z,
+			m_TargetDir.x, m_TargetDir.y, m_TargetDir.z);
+	}
+	else
 	{
 		rvector dir;
 		if (!GetHistory(&m_vProxyPosition, &dir, g_pGame->GetTime() - pObserver->GetDelay()))
@@ -1034,10 +983,11 @@ void ZCharacter::OnUpdate(float fDelta)
 
 		if (g_Rules.IsVanillaMode())
 		{
-			m_vProxyDirection = m_DirectionLower;
+			ProxyDirection = m_DirectionLower;
 
-			float fAngle = GetAngleOfVectors(dir, m_vProxyDirection);
+			float fAngle = GetAngleOfVectors(dir, ProxyDirection);
 
+			rvector vRot;
 			vRot.x = -fAngle*180/ D3DX_PI *.9f;
 			vRot.y = (dir.z+0.05f) * 50.f;
 			vRot.z = 0.f;
@@ -1045,28 +995,22 @@ void ZCharacter::OnUpdate(float fDelta)
 			m_pVMesh->m_vRotXYZ = vRot;
 		}
 		else
-		{
-			m_DirectionLower = dir;
-			m_vProxyDirection = dir;
-		}
-	}
-	else
-	{
-		m_vProxyPosition = m_Position;
-		m_vProxyDirection = m_DirectionLower;
+			ProxyDirection = dir;
+
+		UpdateDirection(fDelta, dir);
 	}
 
 	if(IsDie()) {
-		m_vProxyDirection = m_Direction;
+		ProxyDirection = m_Direction;
 	}
 
-	m_vProxyDirection.z = 0;
-	Normalize(m_vProxyDirection);
+	ProxyDirection.z = 0;
+	Normalize(ProxyDirection);
 
-	if(m_nVMID==-1) return;	
+	if (m_nVMID == -1) return;
 
 	D3DXMATRIX world;
-	MakeWorldMatrix(&world,rvector(0,0,0),m_vProxyDirection,rvector(0,0,1));
+	MakeWorldMatrix(&world, rvector(0, 0, 0), ProxyDirection, rvector(0, 0, 1));
 
 	rvector MeshPosition;
 
@@ -1118,7 +1062,7 @@ void ZCharacter::OnUpdate(float fDelta)
 	else
 		MeshPosition = m_vProxyPosition;
 
-	MakeWorldMatrix(&world,MeshPosition,m_vProxyDirection,rvector(0,0,1));
+	MakeWorldMatrix(&world, MeshPosition, ProxyDirection, rvector(0, 0, 1));
 	m_pVMesh->SetWorldMatrix(world);
 
 	rvector cpos = ZApplication::GetGameInterface()->GetCamera()->GetPosition();
@@ -1171,8 +1115,6 @@ float ZCharacter::GetMoveSpeedRatio()
 	return m_pModule_Movable->GetMoveSpeedRatio()*fRatio;
 }
 
-
-// 감속은 mycharacter와 공통으로 쓴다
 void ZCharacter::UpdateVelocity(float fDelta)
 {
 	rvector dir=rvector(GetVelocity().x,GetVelocity().y,0);
@@ -1183,7 +1125,6 @@ void ZCharacter::UpdateVelocity(float fDelta)
 
 	float max_speed = MAX_SPEED * fRatio;
 
-	// 최대속도 이상이면 최대속도에 맞춘다..
 	if(fSpeed>max_speed)
 		fSpeed=max_speed;
 
@@ -1192,7 +1133,6 @@ void ZCharacter::UpdateVelocity(float fDelta)
 
 	if(m_bLand && !m_bWallJump && !bTumble)
 	{
-		// 달리는 속도 이상이면 빠르게 감속한다.
 		rvector forward=m_TargetDir;
 		forward.z=0;
 		Normalize(forward);
@@ -1202,7 +1142,7 @@ void ZCharacter::UpdateVelocity(float fDelta)
 		float back_speed = BACK_SPEED * fRatio;
 		float stop_formax_speed = STOP_FORMAX_SPEED * (1/fRatio);  
 
-		if(DotProduct(forward,dir)>cosf(10.f*D3DX_PI /180.f))	// 앞방향이면
+		if(DotProduct(forward,dir)>cosf(10.f*D3DX_PI /180.f))
 		{
 			if(fSpeed>run_speed)
 				fSpeed=max(fSpeed-stop_formax_speed*fDelta,run_speed);
@@ -1311,14 +1251,13 @@ void ZCharacter::OnChangeWeapon(const char* WeaponModelName)
 
 static const char* GetPartsNextName(RMeshPartsType ptype,RVisualMesh* pVMesh,bool bReverse)
 {
-
 	static bool bFirst = true;
 	static vector<RMeshNode*> g_table[6*2];
 	static int g_parts[6*2];
 
 	if(bFirst) {
 
-		RMesh* pMesh = ZGetMeshMgr()->Get("heroman1");//원하는 모델을 붙여주기..
+		RMesh* pMesh = ZGetMeshMgr()->Get("heroman1");
 
 		if(pMesh) { //man
 
@@ -1330,7 +1269,7 @@ static const char* GetPartsNextName(RMeshPartsType ptype,RVisualMesh* pVMesh,boo
 			pMesh->GetPartsNode( eq_parts_face ,g_table[5]);
 		}
 
-		pMesh = ZGetMeshMgr()->Get("herowoman1");//원하는 모델을 붙여주기..
+		pMesh = ZGetMeshMgr()->Get("herowoman1");
 		
 		if(pMesh) { //woman
 
@@ -1355,8 +1294,6 @@ static const char* GetPartsNextName(RMeshPartsType ptype,RVisualMesh* pVMesh,boo
 	else if(ptype==eq_parts_face)	mode = 5;
 	else return NULL;
 
-	// isman()
-
 	if(pVMesh) {
 		if(pVMesh->m_pMesh) {
 			if(strcmp(pVMesh->m_pMesh->GetName(),"heroman1")!=0) {
@@ -1365,7 +1302,7 @@ static const char* GetPartsNextName(RMeshPartsType ptype,RVisualMesh* pVMesh,boo
 		}
 	}
 
-	if(bReverse) { // 역순검색..
+	if(bReverse) {
 
 		g_parts[mode]--;
 
@@ -1506,8 +1443,6 @@ void ZCharacter::Revival()
 	SetAnimationLower(ZC_STATE_LOWER_IDLE1);
 }
 
-
-
 void ZCharacter::SetDirection(const rvector& dir)
 {
 	m_Direction = dir;
@@ -1526,7 +1461,6 @@ void ZCharacter::UpdateSound()
 {
 	if (m_bInitialized==false) return;
 	if(m_pVMesh) {
-
 		char szSndName[128];
 		RMATERIAL* pMaterial = NULL;
 		RBSPPICKINFO bpi;
@@ -1534,24 +1468,21 @@ void ZCharacter::UpdateSound()
 			pMaterial = ZGetGame()->GetWorld()->GetBsp()->GetMaterial(bpi.pNode, bpi.nIndex);
 		}
 
-
-		//	발자국 소리 하드코드 !    
-
 		AniFrameInfo* pInfo = m_pVMesh->GetFrameInfo(ani_mode_lower);
 
-		int nFrame = pInfo->m_nFrame;//m_pVMesh->m_nFrame[ani_mode_lower];
+		int nFrame = pInfo->m_nFrame;
 
 		int nCurrFoot = 0;
 
 #define FRAME(x) int(float(x)/30.f*4800.f)
-		if(m_AniState_Lower==ZC_STATE_LOWER_RUN_FORWARD ||	// 일반적인 걷기
+		if(m_AniState_Lower==ZC_STATE_LOWER_RUN_FORWARD ||
 			m_AniState_Lower==ZC_STATE_LOWER_RUN_BACK) {
 			
-			if(FRAME(8) < nFrame && nFrame < FRAME(18) )	// 대략 8, 18 프레임에서 소리가 난다
+			if(FRAME(8) < nFrame && nFrame < FRAME(18) )
 				nCurrFoot = 1;
 		}
 
-		if(m_AniState_Lower==ZC_STATE_LOWER_RUN_WALL_LEFT ||	// 벽달릴때
+		if(m_AniState_Lower==ZC_STATE_LOWER_RUN_WALL_LEFT ||
 			m_AniState_Lower==ZC_STATE_LOWER_RUN_WALL_RIGHT ) {
 
 			if (nFrame < FRAME(9) ) nCurrFoot = 1;
@@ -1563,7 +1494,7 @@ void ZCharacter::UpdateSound()
 			else if (nFrame < FRAME(55) ) nCurrFoot = 1;
 		}
 
-		if(m_AniState_Lower==ZC_STATE_LOWER_RUN_WALL ) {	// 앞으로 벽탈때
+		if(m_AniState_Lower==ZC_STATE_LOWER_RUN_WALL ) {
 
 			if (nFrame < FRAME(8) ) nCurrFoot = 1;
 			else if (nFrame < FRAME(16) ) nCurrFoot = 0;
@@ -1571,7 +1502,6 @@ void ZCharacter::UpdateSound()
 			else if (nFrame < FRAME(40) ) nCurrFoot = 0;
 		}
 
-		//	지금 왼발인지 오른발인지 판단하고 발이 바뀌면 소리를 낸다
 		if(m_nWhichFootSound!=nCurrFoot && pMaterial) {	
 			if(m_nWhichFootSound==0)
 			{	
@@ -1608,18 +1538,15 @@ void ZCharacter::UpdateSound()
 		pSInfoTable[0] = &pAniLow->m_SoundInfo;
 		pSInfoTable[1] = &pAniUp->m_SoundInfo;
 
-		for(int i=0;i<2;i++) {//상하
+		for(int i=0;i<2;i++) {
 
-			pSInfo = pSInfoTable[i];//&m_pVMesh->m_SoundInfo[i];
+			pSInfo = pSInfoTable[i];
 
 			if(pSInfo->isPlay) 
 			{
 				p = pSInfo->Pos;
 
-//				if(strcmp(pSInfo->Name,"fx_dash")==0)
-//					int k=0;
-
-				if(pMaterial)	// picking 성공했으면
+				if(pMaterial)
 				{
 					strcpy_safe(szSndName, g_pGame->GetSndNameFromBsp(pSInfo->Name, pMaterial));
 
@@ -1906,7 +1833,6 @@ void ZCharacter::OutputDebugString_CharacterState()
 
 	AddText( m_LastDamageDir );
 	AddText( GetSpawnTime() );
-	AddText( m_fLastValidTime );
 	AddText( GetDistToFloor() );
 	AddText( m_bLand );
 	AddText( m_bWallJump );
@@ -2273,7 +2199,7 @@ void ZCharacter::InitMeshParts()
 
 	if (m_pVMesh)
 	{
-		for (int i = 0; i < MMCIP_END;i++)
+		for (int i = 0; i < MMCIP_END; i++)
 		{
 			switch (MMatchCharItemParts(i))
 			{
@@ -2304,9 +2230,8 @@ void ZCharacter::InitMeshParts()
 			{
 				m_pVMesh->SetBaseParts(mesh_parts_type);
 			}
-		}	// for
+		}
 
-		// 머리 아이템이 없으면 머리카락이 입혀진다. 지금은 서로 메쉬를 공유함
 		if (GetItems()->GetItem(MMCIP_HEAD)->IsEmpty())
 		{
 			ChangeCharHair(m_pVMesh, m_Property.nSex, m_Property.nHair);	
@@ -2320,7 +2245,6 @@ void ZCharacter::InitMeshParts()
 	SetAnimationUpper(ZC_STATE_UPPER_NONE);
 	SetAnimationLower(ZC_STATE_LOWER_IDLE1);
 
-	// 처음에 쥐는 아이템
 	if (!g_pGame->GetMatch()->IsRuleGladiator())
 	{
 		if (!m_Items.GetItem(MMCIP_PRIMARY)->IsEmpty()) ChangeWeapon(MMCIP_PRIMARY);
@@ -2341,8 +2265,6 @@ void ZCharacter::InitMeshParts()
 
 void ZCharacter::ChangeWeapon(MMatchCharItemParts nParts)
 {
-//	_ASSERT(nParts != 7);
-
 	if(m_Items.GetSelectedWeaponParts()==nParts) return;
 
 	if( nParts < 0 || nParts > MMCIP_END )
@@ -2352,29 +2274,6 @@ void ZCharacter::ChangeWeapon(MMatchCharItemParts nParts)
 	if (m_Items.GetItem(nParts) == NULL) return;
 	if (m_Items.GetItem(nParts)->GetDesc() == NULL) return;
 
-	// 원하지 않는 무기 바꾸기 방지
-	/*
-	ZANIMATIONINFO* pAnimInfo = 0;
-	int amode = 0;
-	if( m_AniState_Upper != ZC_STATE_UPPER_NONE )
-	{
-		pAnimInfo	= m_pAnimationInfo_Upper;
-		amode	= ani_mode_upper;
-	}
-	else
-	{
-		pAnimInfo	= m_pAnimationInfo_Lower;
-		amode	= ani_mode_lower;
-	}
-	if( !pAnimInfo->bEnableCancel )
-	{
-		if( !m_pVMesh->m_isPlayDone[amode] )
-		{
-			return;
-		}
-	}
-//*/
-	// 글래디에이터일때는 총무기 사용 금지
 	if (g_pGame->GetMatch()->IsRuleGladiator() && !IsAdmin())
 	{
 		if ((nParts == MMCIP_PRIMARY) || (nParts == MMCIP_SECONDARY)) {
@@ -2424,7 +2323,6 @@ bool ZCharacter::CheckValidShotTime(int nItemID, float fTime, ZItem* pItem)
 			{
 				// continue Valid... (칼질 정확한 시간측정이 어려워 매직넘버사용.
 			} else {
-				// 불법적인 속도인경우
 #ifdef _CHECKVALIDSHOTLOG
 				sprintf_safe(szLog, "IGNORE>> [%s] (%u:%u) Interval(%0.2f) Delay(%0.2f) \n", 
 					szTime, GetUID().High, GetUID().Low, fTime - GetLastShotTime(), (float)pItem->GetDesc()->m_nDelay/1000.0f);
@@ -2456,7 +2354,6 @@ bool ZCharacter::IsObserverTarget()
 
 void ZCharacter::OnDamagedAnimation(ZObject *pAttacker,int type)
 {
-	// 칼을 맞으면 잠시 멈춘다.  누워있을때 빼고..
 	if(pAttacker==NULL)
 		return;
 
@@ -2470,23 +2367,18 @@ void ZCharacter::OnDamagedAnimation(ZObject *pAttacker,int type)
 
 		float fRatio = GetMoveSpeedRatio();
 
-		// 스턴효과 없애려 머리흔들 애니메이션 없앴다. - 버드
 		if(type==SEM_WomanSlash5 || type==SEM_ManSlash5)
 		{
 			AddVelocity( dir * MAX_SPEED * fRatio );
-			m_nStunType = ZST_SLASH;	// 머리 흔드는 애니메이션 뺐다
+			m_nStunType = ZST_SLASH;
 
 			ZCharacterObject* pCObj = MDynamicCast(ZCharacterObject, pAttacker);
 
 			if(pCObj) {
 				ZC_ENCHANT etype = pCObj->GetEnchantType();
-				if( etype == ZC_ENCHANT_LIGHTNING )//라이트닝의 경우 데미지 입은 모션..
+				if( etype == ZC_ENCHANT_LIGHTNING )
 					m_nStunType = ZST_LIGHTNING;
 			}
-
-			// 강베기로 다시 스턴을 부활 - dubble
-//			m_nStunType = 1;
-
 		} else {
 			AddVelocity( dir * RUN_SPEED * fRatio );
 			m_nStunType = (ZSTUNTYPE)((type) %2);
@@ -2498,8 +2390,6 @@ void ZCharacter::OnDamagedAnimation(ZObject *pAttacker,int type)
 	}
 }
 
-// 피어 Dead메세지에 맞춰 Dead 애니메이션을 연기 
-// - 실제로 죽는 것 판정은 서버에서 직접 받아온 메세지를 가지고 따로 처리한다
 void ZCharacter::ActDead()
 {
 	if (m_bInitialized==false)	return;
@@ -2508,7 +2398,7 @@ void ZCharacter::ActDead()
 	rvector vDir = m_LastDamageDir;
 	vDir.z = 0.f;
 	Normalize(vDir);
-	vDir.z = 0.6f;//약간위쪽으로
+	vDir.z = 0.6f;
 	Normalize(vDir);
 
 	float fForce = 1.f;
@@ -2528,19 +2418,14 @@ void ZCharacter::ActDead()
 		float dot = m_LastDamageDot;
 
 		switch(m_LastDamageWeapon) {
-
 		// melee
-
 		case MWT_DAGGER:
 		case MWT_DUAL_DAGGER: 
 		case MWT_KATANA:
 		case MWT_GREAT_SWORD:
 		case MWT_DOUBLE_KATANA:
-
 			bKnockBack = false;
-
 			break;
-
 		case MWT_PISTOL:
 		case MWT_PISTOLx2:
 		case MWT_REVOLVER:
@@ -2549,23 +2434,16 @@ void ZCharacter::ActDead()
 		case MWT_SMGx2:
 		case MWT_RIFLE:
 		case MWT_SNIFER:
-
-			// 거리가 8m보다 가까우면
 			if( m_LastDamageDistance < 800.f )
 			{
 				// 400 ~ 900
 				fForce = 300 + (1.f-(m_LastDamageDistance/800.f)) * 500.f;
-
 				bKnockBack = true;
 			}
-
 			break;
-
 		case MWT_SHOTGUN:
 		case MWT_SAWED_SHOTGUN:
 		case MWT_MACHINEGUN:
-
-			// 거리가 10m보다 가까우면
 			if( m_LastDamageDistance < 1000.f )
 			{
 				// 500 ~ 1000
@@ -2578,9 +2456,6 @@ void ZCharacter::ActDead()
 
 		case MWT_ROCKET:
 		case MWT_FRAGMENTATION:
-
-			// 날라가는 처리필요
-
 			fForce = 600.f;
 			bKnockBack = true;
 
@@ -2597,7 +2472,6 @@ void ZCharacter::ActDead()
 		}
 
 		if(bKnockBack) {
-			// zcharacter의 넉백은 없으므로..
 			ZObject::OnKnockback(vDir, fForce );
 		}
 
@@ -2612,15 +2486,12 @@ void ZCharacter::ActDead()
 			else		lower_motion = ZC_STATE_LOWER_DIE2;
 		}
 
-		// 나락 에니메이션 
 		if (GetPosition().z <= DIE_CRITICAL_LINE)
 		{
 			lower_motion = ZC_STATE_PIT;
 			m_bFallingToNarak = true;
 		}
 		SetAnimationLower(lower_motion);
-
-//		mlog("dir : %f %f %f / %d : force %f / dist %f \n",vDir.x,vDir.y,vDir.z,lower_motion,fForce,m_LastDamageDistance);
 	}
 
 	if (GetStateUpper() != ZC_STATE_UPPER_NONE )
@@ -2628,7 +2499,7 @@ void ZCharacter::ActDead()
 		SetAnimationUpper(ZC_STATE_UPPER_NONE);
 	}
 
-	// excellent 판정
+	// excellent
 #define EXCELLENT_TIME	3.0f
 	ZCharacter *pLastAttacker = ZGetCharacterManager()->Find(GetLastAttacker());
 	if(pLastAttacker && pLastAttacker!=this)
@@ -2642,14 +2513,14 @@ void ZCharacter::ActDead()
 		pLastAttacker->m_fLastKillTime=g_pGame->GetTime();		
 
 
-		// fantastic 판정
+		// fantastic
 		if(!m_bLand && GetDistToFloor()>200.f && ZApplication::GetGame()->GetMatch()->GetMatchType() != MMATCH_GAMETYPE_DUEL)
 		{
 			pLastAttacker->GetStatus()->nFantastic++;
 			pLastAttacker->AddIcon(ZCI_FANTASTIC);
 		}
 
-		// unbelievable 판정
+		// unbelievable
 		if(pLastAttacker && ZApplication::GetGame()->GetMatch()->GetMatchType() != MMATCH_GAMETYPE_DUEL)
 		{
 			pLastAttacker->m_nKillsThisRound++;
@@ -2674,22 +2545,7 @@ void ZCharacter::AddIcon(int nIcon)
 	{
 		ZGetScreenEffectManager()->AddPraise(nIcon);
 	}
-
-	/*
-	float fDelta=g_pGame->GetTime()-m_fIconStartTime[nIcon];
-	if(fDelta<CHARACTER_ICON_DELAY) return;	// 나타나 있을때 나왔으면 무시
-		
-	m_fIconStartTime[nIcon]=g_pGame->GetTime();
-	*/
 }
-/*
-float ZCharacter::GetIconStartTime(int nIcon)
-{
-	if(nIcon<0 || nIcon>=5) return -HP_SCALE;
-
-	return m_fIconStartTime[nIcon];
-}
-*/
 
 void ZCharacter::ToggleClothSimulation()
 {
@@ -2813,7 +2669,6 @@ bool ZCharacter::IsCollideable()
 
 bool ZCharacter::IsAttackable()
 {
-	// 죽어있으면 공격할 수 없다.
 	if (IsDie()) return false;
 	return true;
 }
@@ -2823,7 +2678,6 @@ float ZCharacter::ColTest(const rvector& pos, const rvector& vec, float radius, 
 	return SweepTest(rsphere(pos, radius), vec, rsphere(m_Position, CHARACTER_COLLISION_DIST), out);
 }
 
-// 방어중인가 ?
 bool ZCharacter::IsGuard() const
 {
 	return ((ZC_STATE_LOWER_GUARD_IDLE<=m_AniState_Lower && m_AniState_Lower<=ZC_STATE_LOWER_GUARD_BLOCK2) ||
@@ -2837,7 +2691,6 @@ void ZCharacter::AddMassiveEffect(const rvector &pos, const rvector &dir)
 
 void ZCharacter::InitRound()
 {
-	// 온게임넷의 요청으로 짱 아이콘을 달아준다. initround시에, 난입할때 달아준다
 	if(GetUserGrade()==MMUG_STAR) {
 		ZGetEffectManager()->AddStarEffect(this);
 	}
@@ -2860,7 +2713,6 @@ void ZCharacter::OnDamaged(ZObject* pAttacker, rvector srcPos, ZDAMAGETYPE damag
 	if (this != ZGetGame()->m_pMyCharacter)
 		return;
 
-	// 자기가 쏜 폭발 데미지 & 나락 데미지는 무조건 먹는다
 	bool bCanAttack = g_pGame->IsAttackable(pAttacker,this)
 		|| (pAttacker==this && (damageType==ZD_EXPLOSION || damageType==ZD_FALLING));
 
@@ -2876,7 +2728,6 @@ void ZCharacter::OnDamaged(ZObject* pAttacker, rvector srcPos, ZDAMAGETYPE damag
 	m_LastDamageDot = DotProduct( m_Direction,dir );
 	m_LastDamageDistance = Magnitude(GetPosition() - srcPos);
 
-	// hp, ap 계산
 	if (bCanAttack)
 		ZObject::OnDamaged(pAttacker,srcPos,damageType,weaponType,fDamage,fPiercingRatio,nMeleeType);
 
@@ -2922,10 +2773,9 @@ void ZCharacter::SetNetPosition(const rvector & position, const rvector & veloci
 	if (Magnitude(position - m_Position) > 20.0f)
 		m_Position = position;
 	SetVelocity(velocity);
-	SetAccel(rvector(0.0f, 0.0f, 0.0f));
+	SetAccel({ 0, 0, 0 });
 
 	m_TargetDir = dir;
-	m_fLastValidTime = ZApplication::GetGame()->GetTime();
 }
 
 void ZCharacter::OnMeleeGuardSuccess()

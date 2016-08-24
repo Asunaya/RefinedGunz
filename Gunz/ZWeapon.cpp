@@ -737,8 +737,8 @@ void ZWeaponFlashBang::Explosion()
 
 	if( !mbIsExplosion && mbIsLineOfSight )
 	{
-		rvector pos		= g_pGame->m_pMyCharacter->m_Position;
-		rvector dir		= g_pGame->m_pMyCharacter->m_TargetDir;
+		rvector pos		= g_pGame->m_pMyCharacter->GetPosition();
+		rvector dir		= g_pGame->m_pMyCharacter->GetTargetDir();
 		mbIsExplosion	= true;
 		CreateFlashBangEffect( m_Position, pos, dir, 10 );
 	}

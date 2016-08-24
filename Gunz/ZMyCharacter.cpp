@@ -357,7 +357,7 @@ void ZMyCharacter::ProcessInput(float fDelta)
 				if(fDotJump2right>.8f)
 					m_nWallJump2Dir=3;
 
-				if(m_AniState_Upper==ZC_STATE_UPPER_SHOT)
+				if(GetStateUpper()==ZC_STATE_UPPER_SHOT)
 					SetAnimationUpper(ZC_STATE_UPPER_NONE);
 
 			}else
@@ -432,7 +432,7 @@ void ZMyCharacter::OnShotMelee()
 	if( m_pVMesh->m_SelectWeaponMotionType==eq_wd_dagger ||
 		m_pVMesh->m_SelectWeaponMotionType==eq_ws_dagger ) { // dagger
 
-		if(m_AniState_Upper==ZC_STATE_UPPER_SHOT)
+		if(GetStateUpper() == ZC_STATE_UPPER_SHOT)
 			return;
 
 		if(m_bCharged) 
@@ -556,10 +556,11 @@ void ZMyCharacter::OnShotRange()
 		return;
 	}
 
-	if( m_AniState_Lower != ZC_STATE_LOWER_TUMBLE_FORWARD && 
-		m_AniState_Lower != ZC_STATE_LOWER_TUMBLE_BACK &&
-		m_AniState_Lower != ZC_STATE_LOWER_TUMBLE_RIGHT &&
-		m_AniState_Lower != ZC_STATE_LOWER_TUMBLE_LEFT )
+	auto Lower = GetStateLower();
+	if (Lower != ZC_STATE_LOWER_TUMBLE_FORWARD &&
+		Lower != ZC_STATE_LOWER_TUMBLE_BACK &&
+		Lower != ZC_STATE_LOWER_TUMBLE_RIGHT &&
+		Lower != ZC_STATE_LOWER_TUMBLE_LEFT)
 		SetAnimationUpper(ZC_STATE_UPPER_SHOT);
 
 	MPOINT Cp = MPOINT(0, 0);
@@ -868,7 +869,7 @@ void ZMyCharacter::OnGadget_Hanging()
 	if(IsDie() || m_bWallJump || m_bGuard || m_bDrop || m_bTumble || m_bSkill ||
 		m_bBlast || m_bBlastFall || m_bBlastDrop || m_bBlastStand || m_bBlastAirmove ) return;
 
-	if(m_AniState_Lower==ZC_STATE_LOWER_JUMPATTACK) return;
+	if(GetStateLower() == ZC_STATE_LOWER_JUMPATTACK) return;
 
 	if(m_bWallJump2 && (g_pGame->GetTime()-m_fJump2Time)<.40f) return;
 
@@ -939,7 +940,7 @@ void ZMyCharacter::ProcessGadget()
 	if(IsDie() || m_bDrop || m_bBlast || m_bBlastDrop || m_bBlastStand) 
 		return;
 
-	if(m_AniState_Upper==ZC_STATE_UPPER_RELOAD || m_AniState_Upper==ZC_STATE_UPPER_LOAD) 
+	if(GetStateUpper() == ZC_STATE_UPPER_RELOAD || GetStateUpper() == ZC_STATE_UPPER_LOAD)
 		return;
 
 	bool bPressingSecondary = ZIsActionKeyPressed(ZACTION_USE_WEAPON2);
@@ -1154,11 +1155,11 @@ void ZMyCharacter::ProcessShot()
 	if(GetItems()->GetSelectedWeapon()->GetDesc()->m_nType==MMIT_MELEE)
 	{
 		bool bJumpAttack = false;
-		if( m_AniState_Lower==ZC_STATE_LOWER_JUMPATTACK ) {
+		if(GetStateLower() == ZC_STATE_LOWER_JUMPATTACK ) {
 			bJumpAttack = true;
 		} 
-		else if( (m_AniState_Lower==ZC_STATE_LOWER_JUMP_UP) || (m_AniState_Lower==ZC_STATE_LOWER_JUMP_DOWN) ) {
-			if(m_AniState_Upper == ZC_STATE_UPPER_SHOT) {
+		else if( (GetStateLower() == ZC_STATE_LOWER_JUMP_UP) || (GetStateLower() == ZC_STATE_LOWER_JUMP_DOWN) ) {
+			if(GetStateUpper() == ZC_STATE_UPPER_SHOT) {
 				bJumpAttack = true;
 			}
 		}
@@ -1192,7 +1193,7 @@ void ZMyCharacter::ProcessShot()
 	if(IsDie() || m_bDrop || m_bBlast || m_bBlastFall || m_bBlastDrop || m_bBlastStand || m_bSpMotion)
 		return;
 
-	if(m_AniState_Upper==ZC_STATE_UPPER_RELOAD || m_AniState_Upper==ZC_STATE_UPPER_LOAD)
+	if(GetStateUpper() == ZC_STATE_UPPER_RELOAD || GetStateUpper() == ZC_STATE_UPPER_LOAD)
 		return;
 
 	int nParts = (int)GetItems()->GetSelectedWeaponParts();
@@ -1643,7 +1644,7 @@ void ZMyCharacter::OnUpdate(float fDelta)
 	if(!MEvent::IsKeyDown(VK_MENU))
 #endif
 	if (!IsDirLocked())
-		SetTargetDir( rvector(RCameraDirection.x,RCameraDirection.y,RCameraDirection.z) );
+		SetTargetDir(RCameraDirection);
 
 	float fWallJumpTime = (m_nWallJumpDir==1) ? 1.5f : 2.3f;
 	float fSecondJumpTime = (m_nWallJumpDir==1) ? 0.95f : 2.1f;
@@ -1658,25 +1659,22 @@ void ZMyCharacter::OnUpdate(float fDelta)
 		SetVelocity(GetVelocity().x,GetVelocity().y,0);
 	}
 
-	// 무엇인가에 걸려서 벽점프의 마무리 점프를 해야 할 상황인지 판단.
 	if(m_bWallJump)
 	{
 		bool bEndWallJump2=m_fWallJumpTime+fSecondJumpTime<g_pGame->GetTime() && !m_bWallJump2;
 
-		if(m_fWallJumpTime+0.3f<g_pGame->GetTime())	// 0.3초가 지나야 한다.
+		if(m_fWallJumpTime+0.3f<g_pGame->GetTime())
 		{
 			rvector dir2d=rvector(m_Direction.x,m_Direction.y,0);
 			Normalize(dir2d);
 
-			if(m_nWallJumpDir==1)									// 위방향 벽점프
+			if(m_nWallJumpDir==1)
 			{
-				// 발디딜곳이.. 있어야 하고 ( 앞방향으로 pick 해본다 )
 				RBSPPICKINFO bpi;
 				bool bPicked=ZGetGame()->GetWorld()->GetBsp()->Pick(m_Position+rvector(0,0,40),dir2d,&bpi);
 				if(!bPicked || Magnitude(bpi.PickPos-m_Position)>100)
 					bEndWallJump2|=true;
 
-				// 대략 머리위 30센티미터쯤까지는 걸리는게 없어야 한다.
 				rvector targetpos=m_Position+rvector(0,0,160);
 				bool bAdjusted=ZGetGame()->GetWorld()->GetBsp()->CheckWall(m_Position+rvector(0,0,130),targetpos,CHARACTER_RADIUS-1,50);
 				if(bAdjusted)
@@ -1687,15 +1685,13 @@ void ZMyCharacter::OnUpdate(float fDelta)
 				rvector right;
 				CrossProduct(&right,rvector(0,0,1),dir2d);
 
-				rvector dir = (m_nWallJumpDir==0) ? -right : right;		// 왼쪽 오른쪽
+				rvector dir = (m_nWallJumpDir==0) ? -right : right;
 
-				// 발 디딜곳이 있어야 하고..
 				RBSPPICKINFO bpi;
 				bool bPicked=ZGetGame()->GetWorld()->GetBsp()->Pick(m_Position,dir,&bpi);
 				if(!bPicked || Magnitude(bpi.PickPos-m_Position)>100)
 					bEndWallJump2|=true;
 
-				// 대략 1미터쯤까지는 걸리는게 없어야 한다.
 				rvector targetpos=m_Position+rvector(0,0,100)+100.f*dir2d;
 				bool bAdjusted=ZGetGame()->GetWorld()->GetBsp()->CheckWall(m_Position+rvector(0,0,100),targetpos,CHARACTER_RADIUS-1,50);
 				if(bAdjusted)
@@ -1741,7 +1737,6 @@ void ZMyCharacter::OnUpdate(float fDelta)
 	if(!m_bLButtonPressed || GetItems()->GetSelectedWeaponParts()!=MMCIP_MELEE) 
 		m_bCharging = false;
 
-	// 마지막 스플래시 칼질 딜레이
 	if(m_bSplashShot && g_pGame->GetTime()-m_fSplashShotTime>.3f)
 	{
 		m_bSplashShot=false;
@@ -1752,7 +1747,7 @@ void ZMyCharacter::OnUpdate(float fDelta)
 
 	if(pAniLow && pAniLow->m_isPlayDone) {
 		if(m_bSpMotion) {
-			if(m_AniState_Lower==m_SpMotion)
+			if(GetStateLower() == m_SpMotion)
 				m_bSpMotion = false;
 		}
 	}
@@ -1760,7 +1755,7 @@ void ZMyCharacter::OnUpdate(float fDelta)
 	bool bContinueShot = false;
 
 	if(m_bPlayDone_upper) {
-		if(m_AniState_Upper==ZC_STATE_UPPER_SHOT) 
+		if(GetStateUpper() == ZC_STATE_UPPER_SHOT)
 		{
 			int nParts = (int)GetItems()->GetSelectedWeaponParts();
 			if(nParts==MMCIP_MELEE)
@@ -1784,7 +1779,7 @@ void ZMyCharacter::OnUpdate(float fDelta)
 					ZGetGameInterface()->ChangeWeapon(ZCWT_PREV);				
 			}
 		}else
-		if(m_AniState_Upper==ZC_STATE_UPPER_RELOAD)
+		if(GetStateUpper() == ZC_STATE_UPPER_RELOAD)
 			g_pGame->OnReloadComplete(this);
 		else
 		if(m_bGuard) {
@@ -1849,7 +1844,7 @@ void ZMyCharacter::OnUpdate(float fDelta)
 
 		if(m_bCharging)
 		{
-			if(m_AniState_Upper==ZC_STATE_CHARGE)
+			if(GetStateUpper() == ZC_STATE_CHARGE)
 				Charged();
 			m_bCharging = false;
 		}
@@ -2001,7 +1996,7 @@ void ZMyCharacter::OnUpdate(float fDelta)
 		m_fDropTime=g_pGame->GetTime();
 	}
 
-	if(m_bCharging && !m_bCharged && m_AniState_Lower==ZC_STATE_CHARGE &&
+	if(m_bCharging && !m_bCharged && GetStateLower() == ZC_STATE_CHARGE &&
 		pAniLow->m_nFrame > 160*52)
 		Charged();
 
@@ -2101,7 +2096,7 @@ void ZMyCharacter::OnTumble(int nDir)
 	if(IsDie() || m_bWallJump || m_bGuard || m_bDrop || m_bWallJump2 || m_bTumble || m_bWallHang ||
 		m_bBlast || m_bBlastFall || m_bBlastDrop || m_bBlastStand || m_bBlastAirmove || 
 		m_bCharging || m_bSlash || m_bJumpSlash || m_bJumpSlashLanding ||
-		m_bStun || m_AniState_Lower == ZC_STATE_LOWER_UPPERCUT ) return;
+		m_bStun || GetStateLower() == ZC_STATE_LOWER_UPPERCUT ) return;
 
 	if(m_bLimitTumble)
 		return;
@@ -2115,7 +2110,7 @@ void ZMyCharacter::OnTumble(int nDir)
 	float fSpeed;
 	if (GetItems()->GetSelectedWeapon()!=NULL &&
 		(GetItems()->GetSelectedWeapon()->IsEmpty() == false) &&
-		GetItems()->GetSelectedWeapon()->GetDesc()->m_nType==MMIT_MELEE) 
+		GetItems()->GetSelectedWeapon()->GetDesc()->m_nType==MMIT_MELEE)
 	{
 		fSpeed=SWORD_DASH;
 
@@ -2420,10 +2415,6 @@ ZDummyCharacter::ZDummyCharacter() : ZMyCharacter()
 	m_bShotEnable = false;
 }
 
-ZDummyCharacter::~ZDummyCharacter()
-{
-
-}
 #include "Physics.h"
 
 void ZDummyCharacter::OnUpdate(float fDelta)

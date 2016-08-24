@@ -1213,7 +1213,7 @@ void ZEffectManager::AddLevelUpEffect(ZObject* pObj)
 	if(!pChar) return;
 
 	rvector Target = pChar->GetPosition();
-	rvector dir = pChar->m_DirectionLower;
+	rvector dir = pChar->GetLowerDir();
 
 	pNew = new ZEffectLevelUp(m_pLevelUpEffect[0],Target,dir,rvector(0.f,0.f,0.f),pObj);
 	((ZEffectLevelUp*)pNew)->SetAlignType(1);

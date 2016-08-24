@@ -1,5 +1,8 @@
 #pragma once
 
+#include <list>
+#include <string>
+
 #include "MRTTI.h"
 #include "ZCharacterObject.h"
 #include "MUID.h"
@@ -15,9 +18,6 @@
 #include "Mempool.h"
 
 #include "ZModule_HPAP.h"
-
-#include <list>
-#include <string>
 
 #include "ZCharacterStructs.h"
 #include "AnimationStuff.h"
@@ -111,110 +111,14 @@ class ZModule_QuestStatus;
 class ZCharacter : public ZCharacterObject
 {
 	MDeclareRTTI;
-protected:
-	ZModule_QuestStatus		*m_pModule_QuestStatus;
-
-	ZCharacterProperty		m_Property;
-	ZCharacterStatus		m_Status;
-
-	MTD_CharInfo			m_InitialInfo;
-
-	char	m_szUserName[MATCHOBJECT_NAME_LENGTH];
-	char	m_szUserAndClanName[MATCHOBJECT_NAME_LENGTH];
-
-	union {
-		struct {
-			bool	m_bAdminHide:1;
-			bool	m_bDie:1;
-			bool	m_bStylishShoted:1;
-			bool	m_bFallingToNarak:1;
-			bool	m_bStun:1;
-			bool	m_bDamaged:1;
-			
-			bool	m_bPlayDone:1;
-			bool	m_bPlayDone_upper:1;
-			bool	m_bIsLowModel:1;
-			bool	m_bTagger:1;
-
-		};
-		DWORD dwFlagsProtected;
-	};
-
-	ZSTUNTYPE	m_nStunType;
-
-	int			m_nKillsThisRound;
-	float		m_fLastKillTime;
-	ZDAMAGETYPE	m_LastDamageType;	
-	MMatchWeaponType m_LastDamageWeapon;
-	rvector		m_LastDamageDir;
-	float		m_LastDamageDot;
-	float		m_LastDamageDistance;
-
-	MUID		m_LastThrower;
-	float		m_tmLastThrowClear;
-
-	int			m_nWhichFootSound;
-
-	u64			m_dwInvincibleStartTime;
-	u32			m_dwInvincibleDuration;
-
-	void UpdateSound();
-
-	void InitMesh();
-	void InitProperties();
-
-	void CheckLostConn();
-	void OnLevelDown();
-	void OnLevelUp();
-	virtual void OnDraw() override;
-	virtual void OnDie() override;
-
 public:
+	ZCharacter();
+	virtual ~ZCharacter();
+
 	BasicInfoHistoryManager BasicInfoHistory;
 
 	virtual bool GetHistory(v3* pos, v3* direction, float fTime, v3* cameradir = nullptr) override;
 	void GetPositions(v3* Head, v3* Foot, double Time);
-
-	float m_fLastValidTime;
-
-	union {
-		struct {
-			bool	m_bLand:1;
-			bool	m_bWallJump:1;
-			bool	m_bJumpUp:1;
-			bool	m_bJumpDown:1;
-			bool	m_bWallJump2:1;
-			bool	m_bTumble:1;
-			bool	m_bBlast:1;
-			bool	m_bBlastFall:1;
-			bool	m_bBlastDrop:1;
-			bool	m_bBlastStand:1;
-			bool	m_bBlastAirmove:1;
-			bool	m_bSpMotion:1;
-			bool	m_bCommander:1;
-			bool	m_bCharging:1;
-			bool	m_bCharged:1;
-			bool	m_bLostConEffect:1;
-			bool	m_bChatEffect:1;
-			bool	m_bBackMoving:1;
-		};
-		u32 dwFlagsPublic;
-	};
-
-	float	m_fChargedFreeTime;
-	int		m_nWallJumpDir;
-	int		m_nBlastType;
-
-	ZC_STATE_LOWER	m_SpMotion;
-
-	int m_t_parts[6];
-	int m_t_parts2[6];
-	
-	
-	rvector		m_vProxyPosition, m_vProxyDirection;
-
-	ZCharacter();
-	virtual ~ZCharacter() = 0; // This is defined; it's just to make the class abstract
 
 	bool Create(const MTD_CharInfo& pCharInfo);
 	void Destroy();
@@ -225,39 +129,7 @@ public:
 
 	void Draw() { OnDraw(); }
 
-	rvector m_TargetDir;
-	rvector m_DirectionLower,m_DirectionUpper;
-	rvector m_RealPositionBefore;
-	rvector m_AnimationPositionDiff;
-	rvector m_Accel;
-
-
-	ZC_STATE_UPPER	m_AniState_Upper;
-	ZC_STATE_LOWER	m_AniState_Lower;
-	ZANIMATIONINFO *m_pAnimationInfo_Upper,*m_pAnimationInfo_Lower;
-
 	void AddIcon(int nIcon);
-
-	int		m_nVMID;
-	MMatchTeam		m_nTeamID;
-
-	MCharacterMoveMode		m_nMoveMode;
-	MCharacterMode			m_nMode;
-	MCharacterState			m_nState;
-
-	float	m_fAttack1Ratio;
-
-	float	m_fLastReceivedTime;
-
-	float	m_fTimeOffset;
-	float	m_fAccumulatedTimeError;
-	int		m_nTimeErrorCount;
-
-	float	m_fGlobalHP;
-	int		m_nReceiveHPCount;
-
-	int		m_nLastShotItemID;
-	float	m_fLastShotTime;
 
 	void SetInvincibleTime(int nDuration)
 	{
@@ -265,17 +137,17 @@ public:
 		m_dwInvincibleDuration = nDuration;
 	}
 
-	bool	isInvincible();
+	bool isInvincible();
 
 	bool IsMan();
 
-	virtual void  OnUpdate(float fDelta);
-	virtual void  UpdateSpeed();
-	virtual float GetMoveSpeedRatio();
+	virtual void OnUpdate(float fDelta) override;
+	void UpdateSpeed();
+	float GetMoveSpeedRatio();
 
-	virtual void UpdateVelocity(float fDelta);
-	virtual void UpdateHeight(float fDelta);
-	virtual void UpdateMotion(float fDelta=0.f);
+	void UpdateVelocity(float fDelta);
+	void UpdateHeight(float fDelta);
+	void UpdateDirection(float fDelta, const v3& Direction);
 	virtual void UpdateAnimation();
 
 	void UpdateLoadAnimation();
@@ -285,8 +157,8 @@ public:
 	void CheckDrawWeaponTrack();
 	void UpdateSpWeapon();
 
-	void SetAnimation(const char *AnimationName,bool bEnableCancel,int tick);
-	void SetAnimation(RAniMode mode, const char *AnimationName,bool bEnableCancel,int tick);
+	void SetAnimation(const char *AnimationName, bool bEnableCancel, int tick);
+	void SetAnimation(RAniMode mode, const char *AnimationName, bool bEnableCancel, int tick);
 
 	void SetAnimationLower(ZC_STATE_LOWER nAni);
 	void SetAnimationUpper(ZC_STATE_UPPER nAni);
@@ -361,7 +233,7 @@ public:
 
 	bool CheckDrawGrenade() const;
 
-	bool GetStylishShoted() { return m_bStylishShoted; }
+	bool GetStylishShoted() const { return m_bStylishShoted; }
 	void UpdateStylishShoted();
 	
 	MUID GetLastAttacker() const { return m_pModule_HPAP->GetLastAttacker(); }
@@ -375,7 +247,7 @@ public:
 
 	auto GetTeamID() const { return m_nTeamID; }
 	void SetTeamID(MMatchTeam nTeamID) { m_nTeamID = nTeamID; }
-	bool IsSameTeam(ZCharacter* pCharacter) 
+	bool IsSameTeam(const ZCharacter* pCharacter) const
 	{ 
 		if (pCharacter->GetTeamID() == -1) return false;
 		if (pCharacter->GetTeamID() == GetTeamID()) return true; 
@@ -395,7 +267,6 @@ public:
 	virtual void InitBullet();
 	virtual void InitStatus();
 	virtual void InitRound();
-
 
 	void TestChangePartsAll();
 	void TestToggleCharacter();
@@ -430,7 +301,6 @@ public:
 
 	void AddMassiveEffect(const rvector &pos, const rvector &dir);
 
-
 	virtual void OnDamagedAnimation(ZObject *pAttacker, int type) override;
 
 	virtual ZOBJECTHITTEST HitTest(const rvector& origin, const rvector& to,
@@ -443,10 +313,143 @@ public:
 
 	void UpdateTimeOffset(float PeerTime, float LocalTime);
 
-	// ZNetCharacter stuff
 	void SetNetPosition(const rvector& position, const rvector& velocity, const rvector& dir);
 
-	v3 CameraDir{};
+	auto& GetLowerDir() const { return m_DirectionLower; }
+	auto& GetTargetDir() const { return m_TargetDir; }
+	auto GetTimeOffset() const { return m_fTimeOffset; }
+	auto LostConnection() const { return m_bLostConEffect; }
+
+	v3 CameraDir{ 0, 0, 0 };
+
+	union {
+		struct {
+			bool	m_bLand : 1;
+			bool	m_bWallJump : 1;
+			bool	m_bJumpUp : 1;
+			bool	m_bJumpDown : 1;
+			bool	m_bWallJump2 : 1;
+			bool	m_bTumble : 1;
+			bool	m_bBlast : 1;
+			bool	m_bBlastFall : 1;
+			bool	m_bBlastDrop : 1;
+			bool	m_bBlastStand : 1;
+			bool	m_bBlastAirmove : 1;
+			bool	m_bSpMotion : 1;
+			bool	m_bCommander : 1;
+			bool	m_bCharging : 1;
+			bool	m_bCharged : 1;
+			bool	m_bLostConEffect : 1;
+			bool	m_bChatEffect : 1;
+			bool	m_bBackMoving : 1;
+		};
+		u32 dwFlagsPublic;
+	};
+
+	float m_fChargedFreeTime;
+	int m_nWallJumpDir;
+	int m_nBlastType;
+
+	ZC_STATE_LOWER	m_SpMotion;
+
+	int m_t_parts[6];
+	int m_t_parts2[6];
+
+	int m_nVMID;
+
+protected:
+	void UpdateSound();
+
+	void InitMesh();
+	void InitProperties();
+
+	void CheckLostConn();
+	void OnLevelDown();
+	void OnLevelUp();
+	virtual void OnDraw() override;
+	virtual void OnDie() override;
+
+	rvector m_Accel;
+	rvector m_AnimationPositionDiff;
+
+	rvector m_TargetDir;
+
+	ZModule_QuestStatus		*m_pModule_QuestStatus;
+
+	ZCharacterProperty		m_Property;
+	ZCharacterStatus		m_Status;
+
+	MTD_CharInfo			m_InitialInfo;
+
+	char	m_szUserName[MATCHOBJECT_NAME_LENGTH];
+	char	m_szUserAndClanName[MATCHOBJECT_NAME_LENGTH];
+
+	union {
+		struct {
+			bool	m_bAdminHide : 1;
+			bool	m_bDie : 1;
+			bool	m_bStylishShoted : 1;
+			bool	m_bFallingToNarak : 1;
+			bool	m_bStun : 1;
+			bool	m_bDamaged : 1;
+
+			bool	m_bPlayDone : 1;
+			bool	m_bPlayDone_upper : 1;
+			bool	m_bIsLowModel : 1;
+			bool	m_bTagger : 1;
+
+		};
+		DWORD dwFlagsProtected;
+	};
+
+	ZSTUNTYPE	m_nStunType;
+
+	int			m_nKillsThisRound;
+	float		m_fLastKillTime;
+	ZDAMAGETYPE	m_LastDamageType;
+	MMatchWeaponType m_LastDamageWeapon;
+	rvector		m_LastDamageDir;
+	float		m_LastDamageDot;
+	float		m_LastDamageDistance;
+
+	MUID		m_LastThrower;
+	float		m_tmLastThrowClear;
+
+	int			m_nWhichFootSound;
+
+	u64			m_dwInvincibleStartTime;
+	u32			m_dwInvincibleDuration;
+
+private:
+	// The origin of the character model.
+	v3 m_vProxyPosition{ 0, 0, 0 };
+
+	MMatchTeam		m_nTeamID;
+
+	MCharacterMoveMode		m_nMoveMode;
+	MCharacterMode			m_nMode;
+	MCharacterState			m_nState;
+
+	float	m_fAttack1Ratio;
+
+	float	m_fLastReceivedTime;
+
+	float	m_fTimeOffset;
+	float	m_fAccumulatedTimeError;
+	int		m_nTimeErrorCount;
+
+	float	m_fGlobalHP;
+	int		m_nReceiveHPCount;
+
+	int		m_nLastShotItemID;
+	float	m_fLastShotTime;
+
+	rvector m_DirectionLower, m_DirectionUpper;
+	rvector m_RealPositionBefore;
+
+	ZC_STATE_UPPER	m_AniState_Upper;
+	ZC_STATE_LOWER	m_AniState_Lower;
+	ZANIMATIONINFO *m_pAnimationInfo_Upper, *m_pAnimationInfo_Lower;
 };
 
 void ZChangeCharParts(RVisualMesh* pVMesh, MMatchSex nSex, int nHair, int nFace, unsigned long int* pItemID);

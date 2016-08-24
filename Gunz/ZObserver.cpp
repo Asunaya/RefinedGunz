@@ -172,7 +172,7 @@ void ZObserver::SetTarget(ZCharacter* pCharacter)
 	m_pTargetCharacter = pCharacter;
 	if (m_pTargetCharacter)
 	{
-		m_FreeLookTarget = m_pTargetCharacter->m_TargetDir;
+		m_FreeLookTarget = m_pTargetCharacter->GetTargetDir();
 	}
 
 	ShowInfo(true);

@@ -155,32 +155,32 @@ public:
 
 	bool CheckWall(rvector& Pos);
 
-	virtual void UpdateAnimation();
-	virtual void OnUpdate(float fTime);
+	virtual void UpdateAnimation() override final;
+	virtual void OnUpdate(float fTime) override;
 
-	virtual void UpdateLimit();
+	void UpdateLimit();
 	
 	virtual void OnChangeWeapon(const char* WeaponModelName) override;
 
 	void Animation_Reload();
 
 	void OnTumble(int nDir);
-	virtual void OnBlast(rvector &dir);
+	virtual void OnBlast(rvector &dir) override final;
 	void OnDashAttacked(rvector &dir);
 	void ReserveDashAttacked(MUID uid, float time,rvector &dir);
 
-	virtual void InitBullet();
-	virtual void InitStatus();
-	virtual void InitRound();
+	virtual void InitBullet() override final;
+	virtual void InitStatus() override final;
+	virtual void InitRound() override final;
 	
-	virtual void SetDirection(const rvector& dir);
-	virtual void OnDamagedAnimation(ZObject *pAttacker,int type);
+	virtual void SetDirection(const rvector& dir) override final;
+	virtual void OnDamagedAnimation(ZObject *pAttacker,int type) override final;
 
 	void OutputDebugString_CharacterState();
 
 	float GetCAFactor() { return m_fCAFactor; }
-	virtual bool IsGuard() const override;
-	virtual bool IsGuardCustom() const override;
+	virtual bool IsGuard() const override final;
+	virtual bool IsGuardCustom() const override final;
 
 	void ShotBlocked();
 
@@ -191,11 +191,11 @@ public:
 	virtual void OnGuardSuccess() override;
 	virtual void OnDamaged(ZObject* pAttacker, rvector srcPos,
 		ZDAMAGETYPE damageType, MMatchWeaponType weaponType,
-		float fDamage, float fPiercingRatio = 1.f, int nMeleeType = -1) override;
-	virtual void OnKnockback(const rvector& dir, float fForce) override;
-	virtual void OnMeleeGuardSuccess() override;
+		float fDamage, float fPiercingRatio = 1.f, int nMeleeType = -1) override final;
+	virtual void OnKnockback(const rvector& dir, float fForce) override final;
+	virtual void OnMeleeGuardSuccess() override final;
 
-	virtual void OnStun(float fTime) override;
+	virtual void OnStun(float fTime) override final;
 
 	bool IsDirLocked() const {
 		return (m_bSkill || m_bWallJump || m_bWallJump2 || m_bWallHang ||
@@ -213,7 +213,7 @@ private:
 	void AddDelayedWork(float fTime,ZDELAYEDWORK nWork, void *Data = 0);
 	void ProcessDelayedWork();
 
-	virtual void	OnDie();
+	virtual void OnDie() override final;
 	void CalcRangeShotControllability(rvector& vOutDir, const rvector& vSrcDir, int nControllability, u32 Seed);
 	void IncreaseCAFactor();
 	float GetControllabilityFactor();
@@ -248,6 +248,8 @@ private:
 class ZDummyCharacter : public ZMyCharacter
 {
 private:
+	virtual void OnUpdate(float fDelta) override final;
+
 	float m_fNextAniTime;
 	float m_fElapsedTime;
 
@@ -258,10 +260,8 @@ private:
 
 	bool m_bShotting;
 	bool m_bShotEnable;
-	virtual void  OnUpdate(float fDelta);
 public:
 	ZDummyCharacter();
-	virtual ~ZDummyCharacter();
 	
 	void SetShotEnable(bool bEnable) { m_bShotEnable = bEnable; }
 };
