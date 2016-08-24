@@ -4340,45 +4340,35 @@ void ZGame::PostNewBasicInfo()
 	float Time = GetTime();
 	Write(Time);
 
-	auto CheckLongPos = [&](auto&&... Vals) {
-		for (auto&& Val : { Vals... })
-		{
-			if (Val > SHRT_MAX || Val < SHRT_MIN)
-			{
-				Flags |= static_cast<int>(BasicInfoFlags::LongPos);
-				break;
-			}
-		}
-	};
-
 	auto&& Pos = m_pMyCharacter->GetPosition();
-	CheckLongPos(Pos.x, Pos.y, Pos.z);
+	for (auto&& Val : { Pos.x, Pos.y, Pos.z })
+	{
+		if (Val > SHRT_MAX || Val < SHRT_MIN)
+		{
+			Flags |= static_cast<int>(BasicInfoFlags::LongPos);
+			break;
+		}
+	}
 
 	if (Flags & static_cast<int>(BasicInfoFlags::LongPos))
 		Write(Pos);
 	else
 		Write(MShortVector(Pos));
 
-	auto&& Dir = m_pMyCharacter->GetDirection();
-	MByteVector Dir8{ Dir * CHAR_MAX };
-	Write(Dir8);
+	auto Dir = PackDirection(m_pMyCharacter->GetDirection());
+	Write(Dir);
 
 	auto Velocity = MShortVector{ m_pMyCharacter->GetVelocity() };
 	Write(Velocity);
 	
-	auto CheckVelocity = [&](auto&&... Vals) {
-		for (auto&& Val : { Vals... })
-			if (Val > SHRT_MAX || Val < SHRT_MIN)
-				return false;
-
-		return true;
-	};
-	assert(CheckVelocity(Velocity.x, Velocity.y, Velocity.z));
+	auto&& Vel = m_pMyCharacter->GetVelocity();
+	for (auto&& Val : { Vel.x, Vel.y, Vel.z })
+		assert(Val < SHRT_MAX && Val > SHRT_MIN);
 
 	if (m_pMyCharacter->IsDirLocked())
 	{
 		Flags |= static_cast<int>(BasicInfoFlags::CameraDir);
-		MByteVector CameraDir{ ZGetCamera()->GetCurrentDir() * CHAR_MAX };
+		auto CameraDir = PackDirection(RCameraDirection);
 		Write(CameraDir);
 	}
 

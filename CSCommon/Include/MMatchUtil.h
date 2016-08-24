@@ -67,12 +67,14 @@ inline short DirElementToShort(float x)
 using MByteVector = MVectorImpl<i8>;
 using MShortVector = MVectorImpl<i16>;
 
-inline v3 UnpackDirection(const MShortVector& vec)
+#pragma pack(push, 1)
+struct PackedDirection
 {
-	return v3((1.f / 32000.f) * vec);
-}
+	int8_t Yaw;
+	int8_t Pitch;
+};
+#pragma pack(pop)
 
-inline MShortVector PackDirection(const v3& src)
-{
-	return src * 32000.f;
-}
+PackedDirection PackDirection(const v3& src);
+
+v3 UnpackDirection(const PackedDirection& src);

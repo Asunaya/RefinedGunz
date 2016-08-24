@@ -1,10 +1,9 @@
 #pragma once
 
-#define POINTER_64 __ptr64
-
 #include "targetver.h"
 
 #ifdef MFC
+#define POINTER_64 __ptr64
 #include <afxdb.h>
 #include <afxtempl.h>
 #include <afxdtctl.h>

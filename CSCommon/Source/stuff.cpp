@@ -151,15 +151,19 @@ bool UnpackNewBasicInfo(NewBasicInfo& nbi, const u8* pbi, size_t BlobSize)
 	auto& Flags = nbi.Flags;
 	nbi.Flags = *pbi;
 	auto Size = 1;
+	// Time
 	Size += sizeof(float);
+	// Position
 	if (Flags & static_cast<int>(BasicInfoFlags::LongPos))
 		Size += sizeof(v3);
 	else
 		Size += sizeof(MShortVector);
-	Size += sizeof(MByteVector);
+	// Direction
+	Size += sizeof(PackedDirection);
+	// Velocity
 	Size += sizeof(MShortVector);
 	if (Flags & static_cast<int>(BasicInfoFlags::CameraDir))
-		Size += sizeof(MByteVector);
+		Size += sizeof(PackedDirection);
 	if (Flags & static_cast<int>(BasicInfoFlags::Animations))
 		Size += sizeof(u8) * 2;
 	if (Flags & static_cast<int>(BasicInfoFlags::SelItem))
@@ -180,11 +184,11 @@ bool UnpackNewBasicInfo(NewBasicInfo& nbi, const u8* pbi, size_t BlobSize)
 	else
 		bi.position = static_cast<v3>(READ(MShortVector));
 
-	bi.direction = static_cast<v3>(READ(MByteVector)) * (1.f / CHAR_MAX);
+	bi.direction = UnpackDirection(READ(PackedDirection));
 	bi.velocity = static_cast<v3>(READ(MShortVector));
 	bool HasCameraDir = (Flags & static_cast<int>(BasicInfoFlags::CameraDir)) != 0;
 	if (HasCameraDir)
-		bi.cameradir = static_cast<v3>(READ(MByteVector)) * (1.f / CHAR_MAX);
+		bi.cameradir = UnpackDirection(READ(PackedDirection));
 	else
 		bi.cameradir = bi.direction;
 	if (Flags & static_cast<int>(BasicInfoFlags::Animations))

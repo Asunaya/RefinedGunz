@@ -121,40 +121,14 @@ struct rboundingbox
 	}
 };
 
-/*
-struct rplueckercoord {
-public:
-	rplueckercoord() {}
-	rplueckercoord(const rvector &origin,const rvector &target) 
-	{	u=origin-target;CrossProduct(&v,origin,target); }
-	rvector u,v;
-	inline friend float operator * (const rplueckercoord& p1, const rplueckercoord& p2) 
-	{ return DotProduct(p1.u,p2.v)+DotProduct(p1.v,p2.u); }
-};
-*/
-
-// 벡터
-
 inline float Magnitude(const rvector &x) { return D3DXVec3Length(&x); }
 inline float MagnitudeSq(const rvector &x)	{ return D3DXVec3LengthSq(&x); }
 inline void Normalize(rvector &x) { D3DXVec3Normalize(&x,&x);}
 inline float DotProduct(const rvector &a,const rvector &b) { return D3DXVec3Dot(&a,&b); }
 inline void CrossProduct(rvector *result,const rvector &a,const rvector &b) { D3DXVec3Cross(result,&a,&b); }
 
-//void SetPlane(rplane& plane, rvector& point1, rvector& point2, rvector& point3);
+void MakeWorldMatrix(rmatrix *pOut,rvector pos,rvector dir,rvector up);
 
-// 행렬
-
-void MakeWorldMatrix(rmatrix *pOut,rvector pos,rvector dir,rvector up);			// el 모델의 world matrix 를 만든다.
-
-// 평면 
-
-// FLOAT D3DXPlaneDotCoord( CONST D3DXPLANE *pP, CONST D3DXVECTOR3 *pV);		// ax + by + cz + d  
-// FLOAT D3DXPlaneDotNormal( CONST D3DXPLANE *pP, CONST D3DXVECTOR3 *pV);		// ax + by + cz
-// D3DXPLANE* D3DXPlaneFromPoints ( D3DXPLANE *pOut, CONST D3DXVECTOR3 *pV1, CONST D3DXVECTOR3 *pV2,CONST D3DXVECTOR3 *pV3);	// Construct a plane from 3 points
-
-
-// RELEASE & DELETE 매크로 ( from dxutil.h )
 #ifndef SAFE_DELETE
 #define SAFE_DELETE(p)       { if(p) { delete (p);     (p)=NULL; } }
 #endif
@@ -175,27 +149,17 @@ void MakeWorldMatrix(rmatrix *pOut,rvector pos,rvector dir,rvector up);			// el 
 #define SIGNOF(a) ( (a)<-TOLER ? NEGATIVE : (a)>TOLER ? POSITIVE : ZERO )
 #define RANDOMFLOAT ((float)rand()/(float)RAND_MAX)
 
-// 한점에서 직선까지의 거리.. line1,line2 는 직선위의 두 점.
 float GetDistance(const rvector &position,const rvector &line1,const rvector &line2);
-// 한점에서 가장 가까운 선분위의 점
 rvector GetNearestPoint(const rvector &position,const rvector &a,const rvector &b);
-// 한점에서 선분까지의 거리
 float GetDistanceLineSegment(const rvector &position,const rvector &a,const rvector &b);
-// 선분과 선분 사이의 거리.. 선분 (a,aa) 과 선분 (c,cc)의 거리.
-float GetDistanceBetweenLineSegment(const rvector &a,const rvector &aa,const rvector &c,const rvector &cc,rvector *ap,rvector *cp);
-// 한점에서 평면까지의 거리
+float GetDistanceBetweenLineSegment(const rvector &a,const rvector &aa,const rvector &c,
+	const rvector &cc,rvector *ap,rvector *cp);
 float GetDistance(const rvector &position,const rplane &plane);
-// 선분(a,aa) 에서 평면까지의 가장 가까운 선분위의 점.
 rvector GetNearestPoint(const rvector &a,const rvector &aa,const rplane &plane);
-// 선분(a,aa) 에서 평면까지의 거리
 float GetDistance(const rvector &a,const rvector &aa,const rplane &plane);
-// 평면에서 boundingbox와의 최대거리
 float GetDistance(const rboundingbox *bb, const rplane *plane);
-// 평면에서 boundingbox와의 최소,최대거리
 void GetDistanceMinMax(rboundingbox &bb,rplane &plane,float *MinDist,float *MaxDist);
-// 한점과 boundingbox의 최소거리
 float GetDistance(const rboundingbox &bb,const rvector &point);
-// 삼각형의 면적
 float GetArea(rvector &v1,rvector &v2,rvector &v3);
 
 // Returns the clockwise rotation of ta such that tb aligns with ta on xy
@@ -204,7 +168,6 @@ float GetAngleOfVectors(const rvector &ta, const rvector &tb);
 // 원형보간된 vector.. a,b는 normalized 되어있어야함.
 __declspec(deprecated("Use Slerp instead.")) rvector InterpolatedVector(rvector &a,rvector &b,float x);
 
-//rvector Lerp(const rvector &from, const rvector &to, float t);
 rvector Slerp(const rvector &from, const rvector &to, float t);
 template <typename T>
 T Lerp(T src, T dest, float t)
@@ -218,27 +181,25 @@ bool IsInSphere(const rboundingbox &bb,const rvector &point,float radius);
 bool isInViewFrustum(const rvector &point,rplane *plane);
 bool isInViewFrustum(const rvector &point,float radius,rplane *plane);		// bounding sphere
 bool isInViewFrustum(const rboundingbox *bb, const rplane *plane);
-bool isInViewFrustum(const rvector &point1,const rvector &point2,rplane *planes);	// 선분
+bool isInViewFrustum(const rvector &point1,const rvector &point2,rplane *planes);
 bool isInViewFrustumWithZ(rboundingbox *bb,rplane *plane);
 bool isInViewFrustumwrtnPlanes(rboundingbox *bb,rplane *plane,int nplane);
 
 bool IsIntersect( const rvector& orig, const rvector& dir, rvector& v0, rvector& v1, rvector& v2, float* t);
 bool isLineIntersectBoundingBox(rvector &origin,rvector &dir,rboundingbox &bb);
 bool IsIntersect( rvector& line_begin_, rvector& line_end_, rboundingbox& box_);
-bool IsIntersect(rvector& line_begin_, rvector& line_dir_, rvector& center_, float radius_, float* dist = NULL, rvector* p = NULL );
+bool IsIntersect(rvector& line_begin_, rvector& line_dir_, rvector& center_, float radius_,
+	float* dist = nullptr, rvector* p = nullptr );
 
-// 원과 선분의 교차점 구하는 함수. dir는 normalize되어 있어야 한다
-bool IsIntersect(const rvector& orig, const rvector& dir, const rvector& center, const float radius, rvector* p = NULL);
+bool IsIntersect(const rvector& orig, const rvector& dir, const rvector& center, const float radius, rvector* p = nullptr);
 
-// 두 평면을 지나는 직선의 방정식을 구한다 
 bool GetIntersectionOfTwoPlanes(rvector *pOutDir,rvector *pOutAPoint,rplane &plane1,rplane &plane2);
 
 void MergeBoundingBox(rboundingbox *dest,rboundingbox *src);
 
-// aabb box 를 트랜스폼 한다. 더 커진다
 void TransformBox( rboundingbox* result, const rboundingbox& src, const rmatrix& matrix );
 
-static inline rvector GetReflectionVector(const rvector& v, const rvector& n)
+inline rvector GetReflectionVector(const rvector& v, const rvector& n)
 {
 	auto neg = -v;
 	float dot = D3DXVec3Dot(&neg, &n);
@@ -246,16 +207,12 @@ static inline rvector GetReflectionVector(const rvector& v, const rvector& n)
 	return (2 * dot)*n + v;
 }
 
-
-// 변환 매크로들
-
 #define FLOAT2RGB24(r, g, b) ( ( ((long)((r) * 255)) << 16) | (((long)((g) * 255)) << 8) | (long)((b) * 255))
 #define VECTOR2RGB24(v)		FLOAT2RGB24((v).x,(v).y,(v).z)
 #define BYTE2RGB24(r,g,b)	((DWORD) (((BYTE) (b)|((WORD) (g) << 8))|(((DWORD) (BYTE) (r)) << 16)))
 #define BYTE2RGB32(a,r,g,b)	((DWORD) (((BYTE) (b)|((WORD) (g) << 8))|(((DWORD) (BYTE) (r)) << 16)|(((DWORD) (BYTE) (a)) << 24)))
 #define DWORD2VECTOR(x)		rvector(float(((x)& 0xff0000) >> 16)/255.f, float(((x) & 0xff00) >> 8)/255.f,float(((x) & 0xff))/255.f)
 
-// progress 콜백 펑션타입
 typedef void (*RFPROGRESSCALLBACK)(void *pUserParams,float fProgress);
 
 _NAMESPACE_REALSPACE2_END

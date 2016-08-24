@@ -2,6 +2,9 @@
 #include "MMatchUtil.h"
 #include "MZFileSystem.h"
 #include "MSharedCommandTable.h"
+#include "RTypes.h"
+#include "MMath.h"
+#include "MDebug.h"
 
 unsigned long MGetMemoryChecksum(char *pBuffer, int nLen)
 {
@@ -69,40 +72,21 @@ void MMakeSeedKey(MPacketCrypterKey* pKey, const MUID& uidServer, const MUID& ui
 	p[15] = 5;
 }
 
-/*
-void MMakeSeedKey(BYTE Key[SEED_USER_KEY_LEN], BYTE IV[SEED_BLOCK_LEN], const MUID& uidServer, const MUID& uidClient, unsigned int nTimeStamp)
+PackedDirection PackDirection(const v3& src)
 {
-	// key
-	memset(Key, 0, sizeof(BYTE)*SEED_USER_KEY_LEN);
-	int nUIDSize = sizeof(MUID);
-
-	memcpy(Key, &nTimeStamp, sizeof(unsigned int));
-	memcpy(Key+sizeof(unsigned int), &uidServer.Low, sizeof(unsigned int));
-	memcpy(Key+nUIDSize, &uidClient, nUIDSize);
-
-	const BYTE XOR[16] = {87, 2, 91, 4, 52, 6, 1, 8, 55, 10, 18, 105, 65, 56, 15, 120};
-
-	for (int i = 0; i < SEED_USER_KEY_LEN; i++)
-	{
-		Key[i] ^= XOR[i];
-	}
-
-	// iv
-	IV[0] = 55;
-	IV[7] = 83;
-	IV[1] = 4;
-	IV[2] = 93;
-	IV[3] = 46;
-	IV[4] = 67;
-	IV[5] = 182;
-	IV[11] = 201;
-	IV[6] = 73;
-	IV[8] = 80;
-	IV[9] = 5;
-	IV[10] = 19;
-	IV[12] = 40;
-	IV[13] = 164;
-	IV[14] = 77;
-	IV[15] = 5;
+	return{ static_cast<int8_t>(atan2(src.y, src.x) * (INT8_MAX / PI)),
+		static_cast<int8_t>(src.z * INT8_MAX) };
 }
-*/
+
+v3 UnpackDirection(const PackedDirection& src)
+{
+	v3 ret;
+	auto Yaw = src.Yaw * (PI / INT8_MAX);
+	ret.x = static_cast<float>(cos(Yaw));
+	ret.y = static_cast<float>(sin(Yaw));
+	ret.z = static_cast<float>(src.Pitch) / INT8_MAX;
+	ret.x *= sqrt(1 - ret.z * ret.z);
+	ret.y *= sqrt(1 - ret.z * ret.z);
+	RealSpace2::Normalize(ret);
+	return ret;
+}
