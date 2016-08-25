@@ -2762,17 +2762,11 @@ void ZGame::OnPeerShot_Melee(const MUID& uidOwner, float fShotTime)
 				rvector vWallDir = rvector( r.a, r.b, r.c );
 				Normalize(vWallDir);
 
-//				int cm = SelectSlashEffectMotion(pOwnerCharacter);//남녀 칼 휘두르는 방향
-
 				ZGetEffectManager()->AddSlashEffectWall( bpi.PickPos - (vDir*5.f) , vWallDir ,cm);
 
 				rvector pos = bpi.PickPos;
 
 				ZGetSoundEngine()->PlaySound("blade_concrete", pos );
-
-				//test 용..
-				//					int cm = SelectSlashEffectMotion(pOwnerCharacter);//남녀 칼 휘두르는 방향
-				//					m_EffectManager.AddSlashEffect(bpi.PickPos - (vDir*5.f), -vDir,cm);
 			}
 		}
 	}
@@ -2942,7 +2936,8 @@ void ZGame::OnPeerMassive(ZCharacter *pOwner, const rvector &pos, const rvector 
 	{
 		ZObject *pVictim = it.second;
 
-		if (pOwner == m_pMyCharacter || pVictim != m_pMyCharacter)
+		if ((pOwner == m_pMyCharacter || pVictim != m_pMyCharacter)
+			&& (!pVictim->IsNPC() || !static_cast<ZActor*>(pVictim)->IsMyControl()))
 			continue;
 
 		const rvector &TargetPos = pVictim->GetPosition();
@@ -3015,8 +3010,6 @@ void ZGame::OnPeerMassive(ZCharacter *pOwner, const rvector &pos, const rvector 
 	}
 }
 
-//RBspObject* test = nullptr;
-
 void ZGame::OnPeerShot_Range(MMatchCharItemParts sel_type, const MUID& uidOwner, float fShotTime,
 	rvector& pos, rvector& to, u32 seed)
 {
@@ -3047,10 +3040,9 @@ void ZGame::OnPeerShot_Range(MMatchCharItemParts sel_type, const MUID& uidOwner,
 
 	pOwner->Tremble(8.f, 50, 30);
 	
-	bool Picked = ::PickHistory<ZCharacter>(m_pMyCharacter, pos, to, GetWorld()->GetBsp(), pickinfo,
-			MakePairValueAdapter(m_CharacterManager), fShotTime, dwPickPassFlag);
+	bool Picked = ::PickHistory(m_pMyCharacter, pos, to, GetWorld()->GetBsp(), pickinfo,
+			MakePairValueAdapter(m_ObjectManager), fShotTime, dwPickPassFlag);
 
-	//if(g_pGame->PickHistory(pOwner,fShotTime,pos,to,&pickinfo,dwPickPassFlag))
 	if (Picked)
 	{
 		if (ZGetGameClient()->GetMatchStageSetting()->GetNetcode() == NetcodeType::ServerBased
@@ -3065,18 +3057,16 @@ void ZGame::OnPeerShot_Range(MMatchCharItemParts sel_type, const MUID& uidOwner,
 		if(pickinfo.pObject)
 		{
 			ZObject *pObject = pickinfo.pObject;
-			bool bGuard = pObject->IsGuard() && (pickinfo.info.parts!=eq_parts_legs) &&		// 다리는 막을수없다
-							DotProduct(dir,pObject->GetDirection())<0;
+			bool bGuard = pObject->IsGuard() && (pickinfo.info.parts != eq_parts_legs) &&
+				DotProduct(dir, pObject->GetDirection()) < 0; // Over 90 degrees difference
 
 			if(bGuard) {
 				nTargetType = ZTT_CHARACTER_GUARD;
-				// 막았다
 				rvector t_pos = pObject->GetPosition();
 				t_pos.z += 100.f;
 				ZGetEffectManager()->AddSwordDefenceEffect(t_pos+(-dir*50.f),-dir);
 				pObject->OnGuardSuccess();
-
-			}else {
+			} else {
 				nTargetType = ZTT_CHARACTER;
 
 				ZActor* pATarget = MDynamicCast(ZActor,pickinfo.pObject);
@@ -3091,7 +3081,6 @@ void ZGame::OnPeerShot_Range(MMatchCharItemParts sel_type, const MUID& uidOwner,
 
 				if(bPushSkip) 
 				{
-//					ZGetSoundEngine()->PlaySound("fx_bullethit_mt_met");
 					rvector vPos = pOwner->GetPosition() + (pickinfo.pObject->GetPosition() - pOwner->GetPosition()) * 0.1f; 
 					ZGetSoundEngine()->PlaySound("fx_bullethit_mt_met", vPos );
 					fKnockbackForce = 1.0f;
@@ -3101,10 +3090,10 @@ void ZGame::OnPeerShot_Range(MMatchCharItemParts sel_type, const MUID& uidOwner,
 
 				float fActualDamage = CalcActualDamage(pOwner, pickinfo.pObject, (float)pDesc->m_nDamage);
 				float fRatio = pItem->GetPiercingRatio( pDesc->m_nWeaponType, pickinfo.info.parts );
-				ZDAMAGETYPE dt = (pickinfo.info.parts==eq_parts_head) ? ZD_BULLET_HEADSHOT : ZD_BULLET;
+				ZDAMAGETYPE dt = (pickinfo.info.parts == eq_parts_head) ? ZD_BULLET_HEADSHOT : ZD_BULLET;
 
 				if (ZGetGameClient()->GetMatchStageSetting()->GetNetcode() == NetcodeType::P2PLead)
-					pickinfo.pObject->OnDamaged(pOwner, pOwner->GetPosition(), dt, pDesc->m_nWeaponType, fActualDamage, fRatio );
+					pickinfo.pObject->OnDamaged(pOwner, pOwner->GetPosition(), dt, pDesc->m_nWeaponType, fActualDamage, fRatio);
 
 				if(pOwner == m_pMyCharacter) {
 					CheckCombo(m_pMyCharacter,pickinfo.pObject,!bPushSkip);
@@ -3133,7 +3122,6 @@ void ZGame::OnPeerShot_Range(MMatchCharItemParts sel_type, const MUID& uidOwner,
 				v1 = pos;
 				v2 = pickinfo.bpi.PickPos;
 
-				// 총탄 흔적
 				BulletMarkNormal.x = pickinfo.bpi.pInfo->plane.a;
 				BulletMarkNormal.y = pickinfo.bpi.pInfo->plane.b;
 				BulletMarkNormal.z = pickinfo.bpi.pInfo->plane.c;
@@ -3153,19 +3141,15 @@ void ZGame::OnPeerShot_Range(MMatchCharItemParts sel_type, const MUID& uidOwner,
 	}
 
 	bool bPlayer = false;
-	//bool b3D = (pOwnerCharacter!=m_pMyCharacter);	// 자기가 내는 사운드는 2D로 출력한다.
-	//rvector Pos = pOwnerCharacter->GetPosition();
 	rvector Pos = v1;
 	if(pOwner==m_pMyCharacter)
 	{
-
 		Pos = RCameraPosition;
 		bPlayer = true;
 	}
 
 	ZCharacter *pTargetCharacter=ZGetGameInterface()->GetCombatInterface()->GetTargetCharacter();
 	ZApplication::GetSoundEngine()->PlaySEFire(pDesc, Pos.x, Pos.y, Pos.z, bPlayer);
-	//if(nTargetType == ZTT_OBJECT) { ZApplication::GetSoundEngine()->PlaySERicochet(v2.x, v2.y, v2.z); }
 #define SOUND_CULL_DISTANCE 1500.0F
 	auto vec = v2 - pTargetCharacter->m_Position;
 	if( D3DXVec3LengthSq(&vec) < (SOUND_CULL_DISTANCE * SOUND_CULL_DISTANCE) )
@@ -3179,36 +3163,18 @@ void ZGame::OnPeerShot_Range(MMatchCharItemParts sel_type, const MUID& uidOwner,
 		}
 	}
 
-	//// 보이지 않으면 이펙트를 그릴필요는 없다 - 정확한 컬링을 요망.. by bird
-	//if(!pOwner->IsRendered()) return;
-
-
-	// 쏘는곳 반경 100cm 가 화면에 들어가는지 체크한다
 	bool bDrawFireEffects = isInViewFrustum(v1,100.f,RGetViewFrustum());
 
-	if(!isInViewFrustum(v1,v2,RGetViewFrustum()) // 쏘는곳에서 맞는곳의 라인이 보이는지..
-		&& !bDrawFireEffects) return;					// 쏘는곳에서도 그릴게 없는지..
+	if(!isInViewFrustum(v1,v2,RGetViewFrustum())
+		&& !bDrawFireEffects) return;
 
 	bool bDrawTargetEffects = isInViewFrustum(v2,100.f,RGetViewFrustum());
 
-
-
-	/////////////////////// 이후는 이펙트 추가
-
-	// 물튀는 이펙트 체크
 	GetWorld()->GetWaters()->CheckSpearing( v1, v2, 250, 0.3 );
-
-
-
-	// TODO: NPC 의 총구위치 인터페이스가 확정되면 마저 추가하자.
-//	ZCharacter *pOwnerCharacter = m_CharacterManager.Find(uidOwner);
-
 	
 	ZCharacterObject* pCOwnerObject = MDynamicCast(ZCharacterObject, pOwner);
 
 	if(pCOwnerObject) {
-
-		// 총구 화염이펙트
 		rvector pdir = v2-v1;
 		Normalize(pdir);
 
@@ -3216,7 +3182,6 @@ void ZGame::OnPeerShot_Range(MMatchCharItemParts sel_type, const MUID& uidOwner,
 
 		rvector v[6];
 
-//		size = GetWeapondummyPos(pOwnerCharacter,v);
 		if(pCOwnerObject->IsRendered())
 			size = pCOwnerObject->GetWeapondummyPos(v);
 		else
@@ -3226,15 +3191,13 @@ void ZGame::OnPeerShot_Range(MMatchCharItemParts sel_type, const MUID& uidOwner,
 			v[3] = v[4] = v[5] = v[0];
 		}
 
-
 		MMatchWeaponType wtype = pDesc->m_nWeaponType;
 
-		// Effect
 		if(bBulletMark==false) BulletMarkNormal = -pdir;
 
-		ZGetEffectManager()->AddShotEffect( v , size , v2, BulletMarkNormal, nTargetType, wtype,pCOwnerObject,bDrawFireEffects,bDrawTargetEffects);
+		ZGetEffectManager()->AddShotEffect(v, size, v2, BulletMarkNormal, nTargetType,
+			wtype, pCOwnerObject, bDrawFireEffects, bDrawTargetEffects);
 
-		// 총 쏠때 라이트 추가
 		ZCharacterObject* pChar;
 
 		if( ZGetConfiguration()->GetVideo()->bDynamicLight && pCOwnerObject != NULL )
@@ -3256,8 +3219,7 @@ void ZGame::OnPeerShot_Range(MMatchCharItemParts sel_type, const MUID& uidOwner,
 			}
 		}
 	}
-	
-	// 깃발에 힘 적용			   p
+		   
 	GetWorld()->GetFlags()->CheckSpearing( v1, v2, BULLET_SPEAR_EMBLEM_POWER );
 	if(Z_VIDEO_DYNAMICLIGHT)
 		ZGetStencilLight()->AddLightSource( v1, 2.0f, 75 );
@@ -3266,17 +3228,8 @@ void ZGame::OnPeerShot_Range(MMatchCharItemParts sel_type, const MUID& uidOwner,
 void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float fShotTime,
 	rvector& pos, rvector& to, u32 seed)
 {
-	// 내 캐릭터 혹은 내가 보고있는 캐릭터
 	ZCharacter *pTargetCharacter = ZGetGameInterface()->GetCombatInterface()->GetTargetCharacter();
 	if(!pTargetCharacter) return;
-
-	//// 디버그용 덤프
-	//{
-	//	if(strcmp("폭주천사다크",pTargetCharacter->GetProperty()->szName)==0) {
-	//		mlog("shot : %3.3f \n",fShotTime);
-	//	}
-	//}
-
 
 	MMatchItemDesc *pDesc = pItem->GetDesc();
 	if(!pDesc) { _ASSERT(false); return; }
@@ -3287,10 +3240,6 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 	bool waterSound = false;
 
 	if (pOwnerCharacter == NULL) return;
-
-	// 모든사람이 같은 random seed 를 갖도록 같은값으로 초기화 해준다
-	/*int *seed=(int*)&fShotTime;
-	srand(*seed);*/
 
 	bool bHitGuard=false,bHitBody=false,bHitGround=false,bHitEnemy=false;
 	rvector GuardPos,BodyPos,GroundPos;
@@ -3326,19 +3275,17 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 
 		memset(&pickinfo,0,sizeof(ZPICKINFO));
 
-		// 총알은 로켓이 통과하는곳도 통과한다
 		const DWORD dwPickPassFlag=RM_FLAG_ADDITIVE | RM_FLAG_HIDE | RM_FLAG_PASSROCKET | RM_FLAG_PASSBULLET;
 
 		bool Picked = ::PickHistory(pOwnerCharacter, pos, pos + 10000 * dir, GetWorld()->GetBsp(),
 			pickinfo, MakePairValueAdapter(m_CharacterManager), fShotTime, dwPickPassFlag);
 
-		//if(g_pGame->PickHistory(pOwnerCharacter,fShotTime,pos,pos+10000.f*dir,&pickinfo,dwPickPassFlag))
 		if(Picked)
 		{
 			ZObject *pObject = pickinfo.pObject;
 			if(pObject)
 			{
-				bool bGuard = pObject->IsGuard() && (pickinfo.info.parts!=eq_parts_legs) &&		// 다리는 막을수없다
+				bool bGuard = pObject->IsGuard() && (pickinfo.info.parts!=eq_parts_legs) &&
 								DotProduct(dir,pObject->GetDirection())<0;
 
 				if(bGuard) {
@@ -3363,7 +3310,6 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 					float fKnockbackForce = pItem->GetKnockbackForce() / (.5f*float(SHOTGUN_BULLET_COUNT));
 
 					if(bPushSkip) {
-//						ZGetSoundEngine()->PlaySound("fx_bullethit_mt_met");
 						rvector vPos = pOwnerCharacter->GetPosition() + (pObject->GetPosition() - pOwnerCharacter->GetPosition()) * 0.1f;
 						ZGetSoundEngine()->PlaySound("fx_bullethit_mt_met", vPos );
 						fKnockbackForce = 1.0;
@@ -3382,7 +3328,6 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 					nTargetType = ZTT_CHARACTER;
 					bHitBody=true;
 
-					// 우리편 때린것은 combo 에 포함되지 않음
 					if(!m_Match.IsTeamPlay() || (pTargetCharacter->GetTeamID()!=pObject->GetTeamID()))
 					{
 						bHitEnemy=true;
@@ -3417,7 +3362,6 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 
 			}else
 				if(pickinfo.bBspPicked)
-		//		if(pickinfo.bBspPicked || (pCharacter == pOwnerCharacter))
 				{
 					bHitGround=true;
 					nTargetType = ZTT_OBJECT;
@@ -3425,14 +3369,12 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 					v1 = pos;
 					v2 = pickinfo.bpi.PickPos;
 
-					// 총탄 흔적
 					BulletMarkNormal.x = pickinfo.bpi.pInfo->plane.a;
 					BulletMarkNormal.y = pickinfo.bpi.pInfo->plane.b;
 					BulletMarkNormal.z = pickinfo.bpi.pInfo->plane.c;
 					Normalize(BulletMarkNormal);
 					bBulletMark = true;
 
-					// 맞는곳 반경 20cm 가 화면에 들어오면 그린다
 					bool bDrawTargetEffects = isInViewFrustum(v2,20.f,RGetViewFrustum());
 					if(bDrawTargetEffects)
 						ZGetEffectManager()->AddBulletMark(v2,BulletMarkNormal);
@@ -3447,14 +3389,6 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 			v2 = pos+dir*10000.f;
 			nTargetType	= ZTT_NOTHING;
 		}
-
-//#ifdef _DEBUG
-//		if (pickinfo.bBspPicked)
-//			ZChatOutputF("Client: Hit wall at %d, %d, %d",
-//				(int)pickinfo.bpi.PickPos.x, (int)pickinfo.bpi.PickPos.y, (int)pickinfo.bpi.PickPos.z);
-//		else
-//			ZChatOutputF("Client: Hit nothing");
-//#endif
 
 		waterSound = GetWorld()->GetWaters()->CheckSpearing( v1, v2, 250, 0.3, !waterSound );
 	}
@@ -3481,17 +3415,13 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 		}
 	}
 
-	
-	/////////////////////////////////////////////////////
 	if(bHitEnemy) {
 		CheckStylishAction(pOwnerCharacter);
 		CheckCombo(pOwnerCharacter, NULL,true);
 	}
 
-
 	ZApplication::GetSoundEngine()->PlaySEFire(pItem->GetDesc(), pos.x, pos.y, pos.z, (pOwnerCharacter==m_pMyCharacter));
 
-	// 보이지 않으면 이펙트를 그릴필요는 없다
 	if(!pOwnerCharacter->IsRendered()) return;
 
 	rvector v[6];
@@ -3503,7 +3433,6 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 
 	ZGetEffectManager()->AddShotgunEffect(pos,v[1],dir,pOwnerCharacter);
 
-	// 총 쏠때 라이트 추가
 	ZCharacter* pChar;
 	if( ZGetConfiguration()->GetVideo()->bDynamicLight && pOwnerCharacter != NULL )
 	{
@@ -3524,12 +3453,10 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 		}
 	}
 
-//	m_flags.CheckSpearing( v1, v2, SHOTGUN_SPEAR_EMBLEM_POWER );
 	if(Z_VIDEO_DYNAMICLIGHT)
 		ZGetStencilLight()->AddLightSource(v1, 2.0f, 200 );
 }
 
-// shot 을 shot_range, shot_melee, shot_shotgun 으로 command 를 각각 분리하는것도 방법이 좋을듯.
 void ZGame::OnPeerShot(const MUID& uid, float fShotTime, rvector& pos, rvector& to,MMatchCharItemParts sel_type)
 {
 	ZCharacter* pOwnerCharacter = NULL;		// 총 쏜 사람
@@ -3543,47 +3470,39 @@ void ZGame::OnPeerShot(const MUID& uid, float fShotTime, rvector& pos, rvector& 
 
 	u32 seed = reinterpret<u32>(fShotTime);
 
-	// fShotTime 이 그 캐릭터의 로컬 시간이므로 내 시간으로 변환해준다
 	fShotTime-=pOwnerCharacter->GetTimeOffset();
 
 	ZItem *pItem = pOwnerCharacter->GetItems()->GetItem(sel_type);
 	if(!pItem || !pItem->GetDesc()) return;
 
-	// 비정상적인 발사속도를 무시한다.
 	if (pOwnerCharacter->CheckValidShotTime(pItem->GetDescID(), fShotTime, pItem)) {
 		pOwnerCharacter->UpdateValidShotTime(pItem->GetDescID(), fShotTime);
 	} else {
 		return;
 	}
 
-	//// 루프중 MEMORYHACK있었나 검사
 	if (uid == ZGetMyUID()) {
 		MDataChecker* pChecker = ZApplication::GetGame()->GetDataChecker();
 		MDataCheckNode* pCheckNode = pChecker->FindCheck((BYTE*)pItem->GetAMagazinePointer());
 		if (pCheckNode && (pCheckNode->UpdateChecksum()==false)) {
-			pChecker->BringError();	//// MEMORYHACK 감지. Checksum 모두중단하고 끝장낸다.
+			pChecker->BringError();
 		} else {
 			int nAMagazine = pItem->GetBulletAMagazine();
 
-			// 실제로 무기를 소비
-			if (!pItem->Shot()) return;	//// SHOT ////
+			if (!pItem->Shot()) return;
 
-			//// MEMORYHACK 없었으면 리뉴한다.
-			if (pItem->GetBulletAMagazine() < nAMagazine)	// Shot에서 총알 줄어야만 정상이다
+			if (pItem->GetBulletAMagazine() < nAMagazine)
 				pChecker->RenewCheck((BYTE*)pItem->GetAMagazinePointer(), sizeof(int));
 			else
 				if(sel_type != MMCIP_MELEE)
 					pChecker->BringError();
 		}
 	} else {
-		// 실제로 무기를 소비
 		if (!pItem->Shot()) {
-//			_ASSERT(FALSE);	// 문제가있다, 치팅 ?
-			return;	// SHOT
+			return;
 		}
 	}
 
-	// MELEE일 경우
 	if (sel_type == MMCIP_MELEE)
 	{
 		OnPeerShot_Melee(uid,fShotTime);
@@ -3623,9 +3542,8 @@ void ZGame::OnPeerDie(const MUID& uidVictim, const MUID& uidAttacker)
 
 	if (pVictim == m_pMyCharacter)	
 	{
-		pVictim->Die();		// 여기서 실제로 죽는다. 나 자신은 실제로도 여기서 죽는것 처리
+		pVictim->Die();
 
-		// 팀플시 또는 퀘스트모드시 죽으면 옵져버 모드
 		if (m_Match.IsWaitForRoundEnd())
 		{
 			if (m_CharacterManager.GetCount() > 2)
@@ -3724,7 +3642,6 @@ void ZGame::OnPeerDead(const MUID& uidAttacker, const unsigned long int nAttacke
 		if (pVictimCS->nLife > 0) pVictimCS->nLife--;
 	}
 
-	// 화면 경험치 이펙트 표시
 	if(bSuicide && (ZGetCharacterManager()->Find(uidAttacker)==g_pGame->m_pMyCharacter)) 
 	{
 		// 자살
@@ -3736,7 +3653,6 @@ void ZGame::OnPeerDead(const MUID& uidAttacker, const unsigned long int nAttacke
 	}
 	else if(ZGetCharacterManager()->Find(uidAttacker)==m_pMyCharacter) 
 	{
-		// 내가 attacker 일때
 		ZGetScreenEffectManager()->AddExpEffect(nAttackerExp);
 
 		int nExpPercent = GetExpPercentFromTransData(nAttackerArg);
@@ -3745,7 +3661,6 @@ void ZGame::OnPeerDead(const MUID& uidAttacker, const unsigned long int nAttacke
 	}
 	else if(ZGetCharacterManager()->Find(uidVictim)==m_pMyCharacter) 
 	{
-		// 내가 victim 일때
 		ZGetScreenEffectManager()->AddExpEffect(nVictimExp);
 
 		int nExpPercent = GetExpPercentFromTransData(nVictimArg);
@@ -3783,7 +3698,6 @@ void ZGame::OnReceiveTeamBonus(const MUID& uidChar, const unsigned long int nExp
 		pCharacter->GetStatus()->AddExp(nExp);
 	}
 
-	// 화면 경험치 이펙트 표시
 	if(pCharacter==m_pMyCharacter) 
 	{
 #ifdef _DEBUG
@@ -3792,9 +3706,7 @@ void ZGame::OnReceiveTeamBonus(const MUID& uidChar, const unsigned long int nExp
 		OutputDebugString(szTemp);
 #endif
 
-		// 내가 attacker 일때
 		ZGetScreenEffectManager()->AddExpEffect(nExp);
-
 		
 		int nExpPercent = GetExpPercentFromTransData(nExpArg);
 		ZGetMyInfo()->SetLevelPercent(nExpPercent);
@@ -3815,17 +3727,14 @@ void ZGame::OnPeerDieMessage(ZCharacter* pVictim, ZCharacter* pAttacker)
 	char szAttacker[256];
 	strcpy_safe(szAttacker, pAttacker ? pAttacker->GetUserAndClanName() : szAnonymous);
 
-	// 자살일 경우
-	if(pAttacker==pVictim)
+	if (pAttacker == pVictim)
 	{
 		if (pVictim == m_pMyCharacter)
 		{
 			if(m_pMyCharacter->GetLastDamageType()==ZD_EXPLOSION) {
-//				sprintf_safe(szMsg, "당신은 자신의 폭탄으로 인하여 패배 하였습니다.");
 				sprintf_safe( szMsg, ZMsg(MSG_GAME_LOSE_BY_MY_BOMB) );
 			}
 			else {
-//				sprintf_safe(szMsg, "당신은 스스로 패배하였습니다.");
 				sprintf_safe( szMsg, ZMsg(MSG_GAME_LOSE_MYSELF) );
 			}
 
@@ -3833,11 +3742,9 @@ void ZGame::OnPeerDieMessage(ZCharacter* pVictim, ZCharacter* pAttacker)
 		}
 		else
 		{
-//			sprintf_safe(szMsg, "%s님이 스스로 패배하였습니다.", szAttacker);
 			ZTransMsg( szMsg, MSG_GAME_WHO_LOSE_SELF, 1, szAttacker );
 			ZChatOutput(MCOLOR(0xFF707070), szMsg);
 
-			// Admin Grade
 			if (ZGetMyInfo()->IsAdminGrade()) {
 				MMatchObjCache* pCache = ZGetGameClient()->FindObjCache(ZGetMyUID());
 				if (pCache && pCache->CheckFlag(MTD_PlayerFlags_AdminHide))
@@ -3849,37 +3756,24 @@ void ZGame::OnPeerDieMessage(ZCharacter* pVictim, ZCharacter* pAttacker)
 				}
 			}
 		}
-
 	}
-
-	// 내가 죽였을 때
 	else if (pAttacker == m_pMyCharacter)
 	{
-//		sprintf_safe(szMsg, "당신은 %s님으로부터 승리하였습니다.", szVictim );
 		ZTransMsg( szMsg, MSG_GAME_WIN_FROM_WHO, 1, szVictim );
 		ZChatOutput(MCOLOR(0xFF80FFFF), szMsg);
 	}
-
-	// 내가 죽었을 때
 	else if (pVictim == m_pMyCharacter)
 	{
-//		sprintf_safe(szMsg, "당신은 %s님에게 패배하였습니다.", szAttacker );
-		/*ZTransMsg( szMsg, MSG_GAME_LOSE_FROM_WHO, 1, szAttacker );
-		ZChatOutput(MCOLOR(0xFFCF2020), szMsg);*/
 		ZChatOutputF("%s has defeated you. (HP: %d / %d, AP: %d / %d)",
 			pAttacker->GetProperty()->szName,
 			pAttacker->GetHP(), (int)pAttacker->GetProperty()->fMaxHP,
 			pAttacker->GetAP(), (int)pAttacker->GetProperty()->fMaxAP);
 	}
-
-	// 다른 사람이 다른 사람 죽였을때
 	else
 	{
-// 		sprintf_safe(szMsg, "%s님이 %s님으로부터 승리하였습니다.", szAttacker, szVictim );
 		ZTransMsg( szMsg, MSG_GAME_WHO_WIN_FROM_OTHER, 2, szAttacker, szVictim );
 		ZChatOutput(MCOLOR(0xFF707070), szMsg);
 		
-		// Admin Grade
 		if (ZGetMyInfo()->IsAdminGrade()) {
 			MMatchObjCache* pCache = ZGetGameClient()->FindObjCache(ZGetMyUID());
 			if (pCache && pCache->CheckFlag(MTD_PlayerFlags_AdminHide))
@@ -3897,7 +3791,6 @@ void ZGame::OnPeerDieMessage(ZCharacter* pVictim, ZCharacter* pAttacker)
 void ZGame::OnReloadComplete(ZCharacter *pCharacter)
 {
 	ZItem* pItem = pCharacter->GetItems()->GetSelectedWeapon();
-	//// 루프중 MEMORYHACK있었나 검사
 	if (pCharacter->GetUID() == ZGetMyUID() && pItem!=NULL) {
 		MDataChecker* pChecker = ZApplication::GetGame()->GetDataChecker();
 		MDataCheckNode* pCheckNodeA = pChecker->FindCheck((BYTE*)pItem->GetBulletPointer());
@@ -3905,16 +3798,15 @@ void ZGame::OnReloadComplete(ZCharacter *pCharacter)
 		if ( (pCheckNodeA && (pCheckNodeA->UpdateChecksum()==false)) ||
 		 	 (pCheckNodeB && (pCheckNodeB->UpdateChecksum()==false)) ) 
 		{
-			pChecker->BringError();	//// MEMORYHACK 감지. Checksum 모두중단하고 끝장낸다.
+			pChecker->BringError();
 		} else {
-			bool bResult = pCharacter->GetItems()->Reload();	//// RELOAD ////
+			bool bResult = pCharacter->GetItems()->Reload();
 
-			//// MEMORYHACK 없었으면 리뉴한다.
 			pChecker->RenewCheck((BYTE*)pItem->GetBulletPointer(), sizeof(int));
 			pChecker->RenewCheck((BYTE*)pItem->GetAMagazinePointer(), sizeof(int));
 		}
 	} else {
-		bool bResult = pCharacter->GetItems()->Reload();	//// RELOAD ////
+		bool bResult = pCharacter->GetItems()->Reload();
 	}
 
 	if(pCharacter==m_pMyCharacter) {
@@ -3948,20 +3840,14 @@ void ZGame::OnPeerSpMotion(const MUID& uid,int nMotionType)
 void ZGame::OnPeerReload(const MUID& uid)
 {
 	ZCharacter* pCharacter = m_CharacterManager.Find(uid);
-	//	if (uid == ZGetGameClient()->GetUID()) pCharacter = m_pMyCharacter;
 
 	if (pCharacter == NULL || pCharacter->IsDie() ) return;
 
-	// 임시.. 뭔가 상체애니메이션이 있으면 캔슬.. 리로드/샷 따위
-	//	if(pCharacter->m_pVMesh->m_pAniSet[ani_mode_upper]!=NULL) return;
-
-	// 내 캐릭터는 애니메이션이 끝날때에 실제로 리로드 시킨다.
 	if(pCharacter==m_pMyCharacter)
 		m_pMyCharacter->Animation_Reload();
 	else
 		OnReloadComplete(pCharacter);
 
-	// Sound Effect
 	if(pCharacter->GetItems()->GetSelectedWeapon()!=NULL) {
 		rvector p = pCharacter->m_Position+rvector(0,0,160.f);
 		ZApplication::GetSoundEngine()->PlaySEReload(pCharacter->GetItems()->GetSelectedWeapon()->GetDesc(), p.x, p.y, p.z, (pCharacter==m_pMyCharacter));
@@ -3971,8 +3857,6 @@ void ZGame::OnPeerReload(const MUID& uid)
 void ZGame::OnPeerChangeCharacter(const MUID& uid)
 {
 	ZCharacter* pCharacter = m_CharacterManager.Find(uid);
-
-	//	if (uid == ZGetGameClient()->GetUID()) pCharacter = m_pMyCharacter;
 
 	if (pCharacter == NULL) return;
 
@@ -4000,9 +3884,8 @@ void ZGame::OnPeerSpawn(const MUID& uid, const rvector& pos, const rvector& dir)
 	ZCharacter* pCharacter = m_CharacterManager.Find(uid);
 	if (pCharacter == NULL) return;
 
-	bool isRespawn	= ( pCharacter->IsDie() == true ) ? true : false;
+	bool isRespawn = pCharacter->IsDie();
 
-	//	dir = rvector(-1.f,0,0);
 	pCharacter->SetVisible(true);
 	pCharacter->Revival();
 	pCharacter->SetPosition(pos);
@@ -4011,11 +3894,11 @@ void ZGame::OnPeerSpawn(const MUID& uid, const rvector& pos, const rvector& dir)
 
 	ZGetEffectManager()->AddReBirthEffect(pos);
 
-	if(pCharacter==m_pMyCharacter)
+	if (pCharacter == m_pMyCharacter)
 	{
 		m_pMyCharacter->InitSpawn();
 
-		if( isRespawn )
+		if (isRespawn)
 		{
 			ZGetSoundEngine()->PlaySound("fx_respawn");
 		}
@@ -4024,7 +3907,7 @@ void ZGame::OnPeerSpawn(const MUID& uid, const rvector& pos, const rvector& dir)
 			ZGetSoundEngine()->PlaySound("fx_whoosh02");
 		}
 
-		ZGetScreenEffectManager()->ReSetHpPanel();// hppanel_ani
+		ZGetScreenEffectManager()->ReSetHpPanel();
 	}
 
 #ifndef _PUBLISH
@@ -4048,7 +3931,6 @@ void ZGame::OnPeerDash(MCommand* pCommand)
 
 	rvector pos, dir;
 	int sel_type;
-	
 
 	pos = rvector(Roundf(ppdi->posx),Roundf(ppdi->posy),Roundf(ppdi->posz));
 	dir = 1.f/32000.f * rvector(ppdi->dirx,ppdi->diry,ppdi->dirz);
@@ -4061,10 +3943,8 @@ void ZGame::OnPeerDash(MCommand* pCommand)
 
 	MMatchCharItemParts parts = (MMatchCharItemParts)sel_type;
 
-	if( parts != pCharacter->GetItems()->GetSelectedWeaponParts()) {
-		// 지금 들고 있는 무기와 보내진 무기가 틀리다면 보내진 무기로 바꿔준다..
+	if( parts != pCharacter->GetItems()->GetSelectedWeaponParts())
 		OnChangeWeapon(uid,parts);
-	}
 
 	ZGetEffectManager()->AddDashEffect(pos,dir,pCharacter);
 }
@@ -4079,12 +3959,10 @@ rvector ZGame::GetFloor(rvector pos,rplane *pimpactplane)
 	{
 		ZObject* pObject = (*itor).second;
 		if (pObject->IsCollideable())
-//		if(!pCharacter->IsDie() && !pCharacter->m_bBlastDrop)
 		{
 			rvector diff=pObject->m_Position-pos;
 			diff.z=0;
 
-			// 나중에 radius상수값으로 된것 Object의 멤버변수로 고치자
 			if(Magnitude(diff)<CHARACTER_RADIUS && pos.z>pObject->m_Position.z)
 			{
 				rvector newfloor=pObject->m_Position+rvector(0,0,pObject->GetCollHeight());
@@ -4124,13 +4002,13 @@ bool ZGame::PickHistory(ZObject *pOwnerObject,float fTime, const rvector &origin
 	pickinfo->bBspPicked=false;
 
 	RPickInfo info;
-	memset(&info,0,sizeof(RPickInfo));
+	memset(&info, 0, sizeof(RPickInfo));
 
-	ZObject *pObject=NULL;
+	ZObject *pObject = NULL;
 
 	bool bCheck = false;
 
-	float fCharacterDist=FLT_MAX;			// 캐릭터들 사이의 최소거리지점을 찾는다
+	float fCharacterDist = FLT_MAX;
 	for(ZObjectManager::iterator i=m_ObjectManager.begin();i!=m_ObjectManager.end();i++)
 	{
 		ZObject *pc=i->second;
@@ -4148,7 +4026,7 @@ bool ZGame::PickHistory(ZObject *pOwnerObject,float fTime, const rvector &origin
 			}
 		}
 
-		if( pc->IsDie() )//죽은넘이 몸빵한다고 해서~
+		if (pc->IsDie())
 			bCheck = false;
 
 
@@ -4177,14 +4055,14 @@ bool ZGame::PickHistory(ZObject *pOwnerObject,float fTime, const rvector &origin
 
 	int nCase=0;
 
-	if(pObject && bBspPicked)		// 둘다 맞았을때는 거리가 가까운쪽을 택한다.
+	if(pObject && bBspPicked)
 	{
 		if(Magnitude(info.vOut-origin)>Magnitude(bpi.PickPos-origin))
 			nCase=1;
 		else
 			nCase=2;
 	}else
-		if(bBspPicked)				// 둘중 하나만 맞았으면 맞은걸 택하면 된다.
+		if(bBspPicked)
 			nCase=1;
 		else
 			if(pObject)
@@ -4192,15 +4070,15 @@ bool ZGame::PickHistory(ZObject *pOwnerObject,float fTime, const rvector &origin
 
 	if(nCase==0) return false;
 
-	switch(nCase)
+	switch (nCase)
 	{
-	case 1 :						// 맵에 맞은경우
-		pickinfo->bBspPicked=true;
-		pickinfo->bpi=bpi;
+	case 1:
+		pickinfo->bBspPicked = true;
+		pickinfo->bpi = bpi;
 		break;
-	case 2 :						// 사람에 맞은경우.
-		pickinfo->pObject=pObject;
-		pickinfo->info=info;
+	case 2:
+		pickinfo->pObject = pObject;
+		pickinfo->info = info;
 		break;
 	}
 	return true;
@@ -4208,8 +4086,6 @@ bool ZGame::PickHistory(ZObject *pOwnerObject,float fTime, const rvector &origin
 
 bool ZGame::ObjectColTest(ZObject* pOwner, const rvector& origin, const rvector& to, float fRadius, ZObject** poutTarget)
 {
-	// 맵에 맞는것은 체크하지 않는다.
-
 	for(ZObjectManager::iterator i=m_ObjectManager.begin();i!=m_ObjectManager.end();i++)
 	{
 		ZObject *pc=i->second;
@@ -5185,18 +5061,17 @@ void ZGame::OnStageEnterBattle(MCmdEnterBattleParam nParam, MTD_PeerListNode* pP
 
 	MUID uidChar = pPeerNode->uidChar;
 
-	if (uidChar == ZGetMyUID())		// enter한사람이 나자신일 경우
+	if (uidChar == ZGetMyUID())
 	{
 		if (g_pGame->CreateMyCharacter(pPeerNode->CharInfo) == true)
 		{
-			ConfigureCharacter(uidChar, (MMatchTeam)pPeerNode->ExtendInfo.nTeam, pPeerNode->ExtendInfo.nPlayerFlags);	// Player Character 포함
+			ConfigureCharacter(uidChar, (MMatchTeam)pPeerNode->ExtendInfo.nTeam, pPeerNode->ExtendInfo.nPlayerFlags);
 		}
 	}
-	else		// enter한사람이 나 자신이 아닐경우
+	else
 	{
 		OnAddPeer(pPeerNode->uidChar, pPeerNode->dwIP, pPeerNode->nPort, pPeerNode);
 	}
-
 
 	if (nParam == MCEP_FORCED)
 	{

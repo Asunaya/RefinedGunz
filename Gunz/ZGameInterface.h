@@ -1,5 +1,4 @@
-#ifndef _ZGAMEINTERFACE_H
-#define _ZGAMEINTERFACE_H
+#pragma once
 
 #include "ZPrerequisites.h"
 #include "ZInterface.h"
@@ -11,20 +10,6 @@
 #include "ZScreenDebugger.h"
 #include "ZCombatMenu.h"
 #include "ZMyCharacter.h"
-/*
-#include "ZGame.h"
-#include "ZCharacter.h"
-#include "ZCombatInterface.h"
-#include "ZObserver.h"
-#include "ZLoading.h"
-#include "ZGameInput.h"
-#include "ZMyItemList.h"
-#include "ZMonsterBookInterface.h"
-#include "ZInitialLoading.h"
-*/
-
-// 여기에 #include 를 달기전에 꼭 그래야만하는지 다시한번 생각해보세요 +_+  - dubble
-
 
 #define LOGINSTATE_FADEIN				0
 #define LOGINSTATE_SHOWLOGINFRAME		1
@@ -60,9 +45,6 @@ public:
 
 	bool				m_bLoginTimeout;
 	DWORD				m_dwLoginTimeout;
-
-
-//	int					m_nSelectedCharacter;
 	
 protected:
 	ZScreenEffectManager *m_pScreenEffectManager;
@@ -79,47 +61,43 @@ protected:
 	ZGame*				m_pGame;
 	ZCamera				m_Camera;
 	ZChat				m_Chat;
-	ZQuest				m_Quest;					///< 퀘스트 관련들
-	ZGameTypeManager	m_GameTypeManager;			///< 게임타입 관련들
-//	ZClan				m_Clan;
+	ZQuest				m_Quest;
+	ZGameTypeManager	m_GameTypeManager;
 	ZMiniMap			*m_pMiniMap;
 	ZTips				m_Tips;
-	ZScreenDebugger		m_ScreenDebugger;			///< 화면에 나오는 디버그 화면
-	ZCombatMenu			m_CombatMenu;				///< 게임중 메뉴
+	ZScreenDebugger		m_ScreenDebugger;
+	ZCombatMenu			m_CombatMenu;
 
 	ZMyCharacter*		m_pMyCharacter;
 
 	ZMonsterBookInterface* m_pMonsterBookInterface;
-
-
 	
 	bool				m_bShowInterface;
 
-	bool				m_bCursor;					///< 커서를 사용할 수 있는 상태
+	bool				m_bCursor;
 	LPDIRECT3DSURFACE9	m_pCursorSurface;
 
 	DWORD				m_dwFrameMoveClock;
 
 	ZIDLResource		m_IDLResource;
 
-	GunzState			m_nState;			///< 현재 상태
-	bool				m_bLogin;			///< Login 되었는가?
+	GunzState			m_nState;
+	bool				m_bLogin;
 
 	bool				m_bLoading;
 	bool				m_bWaitingArrangedGame;
 
 	int					m_nSellQuestItemCount;
 
-	MBitmap				*m_pThumbnailBitmap;///< 맵 썸네일
+	MBitmap				*m_pThumbnailBitmap;
 
 	ZMsgBox*				m_pMsgBox;
 	ZMsgBox*				m_pConfirmMsgBox;
 	ZInterfaceBackground*	m_pBackground;
 	ZCharacterSelectView*	m_pCharacterSelectView;
 
-	bool				m_bOnEndOfReplay;		// 리플레이 보구나면 플레이어의 Level Percent가 바뀌기 때문에 리플레이 시작 전에
-	int					m_nLevelPercentCache;	// m_bOnEndOfReplay를 true로 셋한 다음 m_nLevelPercentCache에 현재 LevelPercent
-												// 값을 저장해 놓구서 끝나면 다시 복원한다. 좀 안좋은 구조... 방법이 없음. -_-;
+	bool				m_bOnEndOfReplay;
+	int					m_nLevelPercentCache;
 
 	unsigned long int	m_nDrawCount;
 
@@ -136,17 +114,17 @@ protected:
 	DWORD			m_dwRefreshTime;
 	int				m_nLocServ;
 
-	MBitmapR2*		m_pRoomListFrame;							// 게임방 리스트 프레임 이미지
-	MBitmapR2*		m_pBottomFrame;								// 하단 정보창 프레임 이미지
-	MBitmapR2*		m_pClanInfo;								// 클랜 정보 이미지
-	MBitmapR2*		m_pLoginBG;									// 로그인 배경 이미지
-	MBitmapR2*		m_pLoginPanel;								// 로그인 패널 이미지
+	MBitmapR2*		m_pRoomListFrame;
+	MBitmapR2*		m_pBottomFrame;
+	MBitmapR2*		m_pClanInfo;
+	MBitmapR2*		m_pLoginBG;
+	MBitmapR2*		m_pLoginPanel;
 
 	ZLocatorList*	m_pLocatorList;
 	ZLocatorList*	m_pTLocatorList;
 
-	DWORD			m_dwTimeCount;								// 게임 경과시간 카운트. 청소년 자율규제 적용안 쓰불...
-	DWORD			m_dwHourCount;								// 게임 경과시간(hour) 카운트. 청소년 자율규제 적용안 쓰불...
+	DWORD			m_dwTimeCount;
+	DWORD			m_dwHourCount;
 
 protected:
 	static bool		OnGlobalEvent(MEvent* pEvent);
@@ -162,7 +140,6 @@ protected:
 
 	void UpdateCursorEnable();
 
-//	void LoadCustomBitmap();
 	bool InitInterface(const char* szSkinName,ZLoadingProgress *pLoadingProgress = NULL);
 	bool InitInterfaceListener();
 	void FinalInterface();
@@ -214,7 +191,6 @@ protected:
 	void OnDrawStateLobbyNStage(MDrawContext* pDC);
 	void OnDrawStateCharSelection(MDrawContext* pDC);
 
-
 #ifdef _QUEST_ITEM
 	void OnResponseCharacterItemList_QuestItem( MTD_QuestItemNode* pQuestItemNode, int nQuestItemCount );
 	void OnResponseBuyQuestItem( const int nResult, const int nBP );
@@ -225,23 +201,8 @@ protected:
 	void OnResponseServerStatusInfoList( const int nListCount, void* pBlob );
 	void OnResponseBlockCountryCodeIP( const char* pszBlockCountryCode, const char* pszRoutingURL );
 
-	// locator관련.
 	void RequestServerStatusListInfo();
 
-/*
-	GUNZ_NA = 0,
-	GUNZ_GAME = 1,
-	GUNZ_LOGIN = 2,
-	GUNZ_NETMARBLELOGIN = 3,
-	GUNZ_LOBBY = 4,
-	GUNZ_STAGE = 5,
-	GUNZ_GREETER = 6,
-	GUNZ_CHARSELECTION = 7,
-	GUNZ_CHARCREATION = 8,
-	GUNZ_PREVIOUS = 10,
-	GUNZ_SHUTDOWN = 11,
-	GUNZ_BIRDTEST
-*/
 public:
 	ZGameInterface(const char* szName=NULL, MWidget* pParent=NULL, MListener* pListener=NULL);
 	~ZGameInterface();
@@ -262,18 +223,16 @@ public:
 	bool SetState(GunzState nState);
 	GunzState GetState(void){ return m_nState; }
 	
-	void UpdateBlueRedTeam(void);		// 동환이가 추가
+	void UpdateBlueRedTeam(void);
 
-	void ChangeToCharSelection(void);	///< 캐릭터 선택으로 이동
+	void ChangeToCharSelection(void);
 
 	bool ChangeInterfaceSkin(const char* szNewSkinName);
 
-	/// 해당하는 이름을 아이템으로 가진 위젯의 Visible상태를 바꾼다.
 	bool ShowWidget(const char* szName, bool bVisible, bool bModal=false);
 	void SetTextWidget(const char* szName, const char* szText);
 	void EnableWidget(const char* szName, bool bEnable);
 
-	// 나중에 지울것..우선 당장 테스트를 위해
 	void TestChangeParts(int mode);
 	void TestChangePartsAll();
 	void TestChangeWeapon(RVisualMesh* pVMesh = NULL);
@@ -283,10 +242,10 @@ public:
 	void ChangeWeapon(ZChangeWeaponType nType);
 	void Reload();
 
-	void RespawnMyCharacter();	// 혼자테스트할때 클릭하면 되살아난다.
+	void RespawnMyCharacter();
 
-	void ReserveLeaveStage();	// 스테이지에서 나갈때 일정시간 흐른뒤 나간다
-	void ReserveLeaveBattle();	// 대기방으로 나갈떄 일정시간 흐른뒤 나간다
+	void ReserveLeaveStage();
+	void ReserveLeaveBattle();
 	void FinishGame(void);
 
 	void SaveScreenShot();
@@ -308,24 +267,15 @@ public:
 
 	void OnCharSelect(void);
 
-
-	// GunzState에 따른 Create/Destroy 핸들러
 	bool OnGameCreate(void);
 	void OnGameDestroy(void);
 	void OnGameUpdate(float fElapsed);
 
-
-	// 로비 UI 설정
-//	void SetupPlayerListButton(int index=-1);
-//	void SetupPlayerListTab();
 	void OnArrangedTeamGameUI(bool bFinding);
 	void InitLadderUI(bool bLadderEnable);
 	void InitClanLobbyUI(bool bClanBattleEnable);
 	void InitChannelFrame(MCHANNEL_TYPE nChannelType);
 
-//	bool InitLocatorList( MZFileSystem* pFileSystem, const char* pszLocatorList );
-
-	// 스테이지 UI 설정
 	void SetMapThumbnail(const char* szMapName);
 	void ClearMapThumbnail();
 	void SerializeStageInterface();
@@ -336,7 +286,6 @@ public:
 
 	void SetRoomNoLight( int d );
 
-	// 상점및 장비
 	void Sell(void);
 	void SellQuestItem( void);
 	void Buy(void);
@@ -360,14 +309,10 @@ public:
 	void SellQuestItemCountDn( void);
 #endif
 
-	// 캐릭터 선택
 	void ChangeSelectedChar( int nNum);
 
-
-	// 리플레이
 	void ShowReplayDialog( bool bShow);
 	void ViewReplay( void);
-
 
 	void ShowMenu(bool bEnable);
 	void Show112Dialog(bool bShow);
@@ -376,13 +321,13 @@ public:
 	bool OpenMiniMap();
 	bool IsMiniMapEnable();
 
-	void SetupItemDescription( MMatchItemDesc* pItemDesc, const char *szTextArea1, const char *szTextArea2, const char *szTextArea3, const char *szIcon, ZMyItemNode* pRentalNode);
-	void SetupItemDescription( MQuestItemDesc* pItemDesc, const char *szTextArea1, const char *szTextArea2, const char *szTextArea3, const char *szIcon);
+	void SetupItemDescription( MMatchItemDesc* pItemDesc, const char *szTextArea1, const char *szTextArea2,
+		const char *szTextArea3, const char *szIcon, ZMyItemNode* pRentalNode);
+	void SetupItemDescription( MQuestItemDesc* pItemDesc, const char *szTextArea1, const char *szTextArea2,
+		const char *szTextArea3, const char *szIcon);
 
-	// 클랜생성이나 래더팀게임초대를 받을수 있는 상태인가 ?
 	bool IsReadyToPropose();
 
-	// 리플레이
 	void OnReplay();
 
 	void OnRequestNewHashValue( const char* szNewRandomValue );
@@ -391,11 +336,8 @@ public:
 	void OnDisconnectMsg( const DWORD dwMsgID );
 	void OnAnnounceDeleteClan( const string& strAnnounce );
 
-	// 퀘스트 아이템 아이콘 비트맵 얻기(쓰는덴 많은데 마땅히 둘데가 없어서... -_-;)
 	MBitmap* GetQuestItemIcon( int nItemID, bool bSmallIcon);
 
-
-	// 바깥에서 얻을만한 인터페이스들
 	ZScreenEffectManager* GetScreenEffectManager() { return m_pScreenEffectManager; }
 	ZEffectManager* GetEffectManager()			{ return m_pEffectManager; }
 	ZGameClient* GetGameClient(void){ return g_pGameClient; }
@@ -435,9 +377,4 @@ public:
 
 
 #define WM_CHANGE_GAMESTATE		(WM_USER + 25)
-void ZChangeGameState(GunzState state);		/// 쓰레드에 안전하기 위해서는 만듦
-
-
-//void ZLoadBitmap(const char* szDir, const char* szFilter, bool bAddDirToAliasName = false);
-
-#endif
+void ZChangeGameState(GunzState state);

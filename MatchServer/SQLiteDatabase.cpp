@@ -42,20 +42,25 @@ template <> struct BindFunctionMap<unsigned long long> : BindFunctionMap<int64_t
 
 inline void BindParameter(sqlite3_stmt* stmt, int ParamNum) { }
 
+// Enum
 template <typename... Args, typename T>
-std::enable_if_t<!std::is_enum<T>::value> BindParameter(sqlite3_stmt* stmt, int ParamNum, T Value, Args&&... args)
+std::enable_if_t<!std::is_enum<T>::value> BindParameter(sqlite3_stmt* stmt, int ParamNum,
+	T Value, Args&&... args)
 {
 	BindFunctionMap<T>::function(stmt, ParamNum, Value);
 	BindParameter(stmt, ParamNum + 1, std::forward<Args>(args)...);
 }
 
+// Non-enum
 template <typename... Args, typename T>
-std::enable_if_t<std::is_enum<T>::value> BindParameter(sqlite3_stmt* stmt, int ParamNum, T Value, Args&&... args)
+std::enable_if_t<std::is_enum<T>::value> BindParameter(sqlite3_stmt* stmt, int ParamNum,
+	T Value, Args&&... args)
 {
 	sqlite3_bind_int(stmt, ParamNum, static_cast<int>(Value));
 	BindParameter(stmt, ParamNum + 1, std::forward<Args>(args)...);
 }
 
+// Text
 template <typename... Args>
 void BindParameter(sqlite3_stmt* stmt, int ParamNum, const char *Value, Args&&... args)
 {
@@ -82,6 +87,7 @@ struct Blob
 	size_t Size;
 };
 
+// Blob
 template <typename... Args>
 void BindParameter(sqlite3_stmt* stmt, int ParamNum, const Blob& Value, Args&&... args)
 {
@@ -266,23 +272,26 @@ struct ItemBlob
 // SQLiteDatabase definitions
 //
 
-static void OpenSQLite(sqlite3* sqlite, const char* Filename, int Timeout)
+static sqlite3* OpenSQLite(const char* Filename, int Timeout)
 {
-	auto err_code = sqlite3_open(Filename, &sqlite);
+	sqlite3* ret;
+	auto err_code = sqlite3_open(Filename, &ret);
 	if (err_code != SQLITE_OK)
 	{
 		auto err_msg = std::string("sqlite3_open failed: error code: ")
-			+ std::to_string(err_code) + ", error message: " + sqlite3_errmsg(sqlite);
+			+ std::to_string(err_code) + ", error message: " + sqlite3_errmsg(ret);
 		MLog("%s\n", err_msg.c_str());
 		throw std::runtime_error(std::move(err_msg));
 	}
 
-	sqlite3_busy_timeout(sqlite, Timeout);
+	sqlite3_busy_timeout(ret, Timeout);
+
+	return ret;
 }
 
 SQLiteDatabase::SQLiteDatabase()
+	: sqlite(OpenSQLite("GunzDB.sq3", 5000))
 {
-	OpenSQLite(sqlite.get(), "GunzDB.sq3", 5000);
 
 	auto exec = [&](const char* sql)
 	{

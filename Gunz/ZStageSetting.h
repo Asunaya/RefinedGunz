@@ -9,7 +9,6 @@ public:
 	static void ShowStageSettingDialog( MSTAGE_SETTING_NODE* pStageSetting, bool bShowAll);
 	static void InitStageSettingDialog();
 	static void ApplyStageSettingDialog();
-	static void AdjustLimitTimeStageSettingDialog();
 	static void PostDataToServer();
 	static void InitStageSettingGameType();
 	static void InitStageSettingGameFromGameType();

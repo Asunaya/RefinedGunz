@@ -35,7 +35,7 @@ void MovingWeaponManager::Update(float Elapsed)
 
 		v3 pickpos;
 		MPICKINFO pi;
-		bool bPicked = PickHistory<MMatchObject>(nullptr, Obj.Pos, Obj.Pos + diff, Stage->BspObject, pi,
+		bool bPicked = PickHistory(nullptr, Obj.Pos, Obj.Pos + diff, Stage->BspObject, pi,
 			Stage->GetObjectList(), Time, PickFlag);
 		if (bPicked)
 		{

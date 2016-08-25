@@ -1405,7 +1405,7 @@ void ZCharacter::GetPositions(v3* Head, v3* Foot, double Time)
 	auto GetItemDesc = [&](auto slot) {
 		return m_Items.GetDesc(slot); };
 
-	if (!BasicInfoHistory.empty() && Time <= BasicInfoHistory.front().SentTime)
+	if (!BasicInfoHistory.empty() && Time <= BasicInfoHistory.front().RecvTime)
 	{
 		BasicInfoHistoryManager::Info Info;
 		BasicInfoHistory.GetInfo(Info, Time, GetItemDesc, m_Property.nSex, IsDie());

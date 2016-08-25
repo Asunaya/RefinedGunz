@@ -143,10 +143,10 @@ public:
 	void Stop(bool bWithAniStop=true);
 	void RotateTo(const rvector& dir);
 
-	virtual void OnBlast(rvector &dir);
-	virtual void OnBlastDagger(rvector &dir,rvector& pos);
-	virtual bool IsCollideable();
-	virtual bool IsAttackable();
+	virtual void OnBlast(rvector &dir) override;
+	virtual void OnBlastDagger(rvector &dir,rvector& pos) override;
+	virtual bool IsCollideable() override;
+	virtual bool IsAttackable() override;
 	virtual void Attack_Melee();
 	virtual void Attack_Range(rvector& dir);
 	virtual void Skill(int nSkill);
@@ -162,12 +162,13 @@ public:
 
 	virtual bool IsDie() override;
 
-	virtual MMatchTeam GetTeamID() { return MMT_BLUE; }
+	virtual MMatchTeam GetTeamID() const override { return MMT_BLUE; }
 
-	virtual void OnDamaged(ZObject* pAttacker, rvector srcPos, ZDAMAGETYPE damageType, MMatchWeaponType weaponType, float fDamage, float fPiercingRatio=1.f, int nMeleeType=-1);
+	virtual void OnDamaged(ZObject* pAttacker, rvector srcPos, ZDAMAGETYPE damageType,
+		MMatchWeaponType weaponType, float fDamage, float fPiercingRatio=1.f, int nMeleeType=-1) override;
 
-	virtual void OnKnockback(const rvector& dir, float fForce);
-	virtual void OnDie();
+	virtual void OnKnockback(const rvector& dir, float fForce) override;
+	virtual void OnDie() override;
 	virtual void OnPeerDie(MUID& uidKiller);
 
 	bool IsDieAnimationDone();
@@ -182,9 +183,6 @@ public:
 	void SetOwner(const char* szOwner) { strcpy_safe(m_szOwner,szOwner); }
 };
 
-
-
-// inline /////////////////////////////////////////////////////////////////////////////////////////
 inline void ZActor::SetFlags(unsigned int nFlags)
 {
 	if (m_nFlags != nFlags)
@@ -253,7 +251,6 @@ inline int ZActor::GetActualMaxAP()
 {
 	return ((m_pNPCInfo) ? ((int)(float)m_pNPCInfo->nMaxAP * m_fTC) : 0);
 }
-
 
 inline int ZActor::CalcMaxHP(int nQL, int nSrcHP)
 {

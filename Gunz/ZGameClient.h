@@ -44,14 +44,11 @@ private:
 	ZNetAgreementBuilder	m_AgreementBuilder;		///< 동의빌더
 	MMatchProposalMode		m_nProposalMode;
 
-	// 투표인터페이스 관련
 	bool					m_bVoteInProgress;		///< 투표가 진행중인가
 	bool					m_bCanVote;				///< 투표권이 있는가
 
-	// 클랜 앰블럼 관련
 	MEmblemMgr				m_EmblemMgr;
 
-	// 기타옵션 관련
 	bool					m_bPriorityBoost;		///< 성능최대화
 	bool					m_bRejectNormalChat;	///< 일반챗 허용
 	bool					m_bRejectTeamChat;		///< 팀챗 허용
@@ -88,11 +85,11 @@ protected:
 protected:
 	ZONCOMMANDCALLBACK*		m_fnOnCommandCallback;
 	
-	bool					m_bIsBigGlobalClock;	// 글로벌 클럭이 로컬보다 더 크면 true
-	unsigned long int		m_nClockDistance;	///< 글로벌 클럭과의 시간차
+	bool					m_bIsBigGlobalClock;
+	unsigned long int		m_nClockDistance;
 
 	MMatchStageSetting		m_MatchStageSetting;
-	bool					m_bForcedEntry;		///< 난입해서 들어가는지 여부
+	bool					m_bForcedEntry;
 protected:
 	virtual bool OnCommand(MCommand* pCommand);
 	virtual bool OnSockDisconnect(SOCKET sock);
@@ -100,18 +97,17 @@ protected:
 	virtual void OnSockError(SOCKET sock, SOCKET_ERROR_EVENT ErrorEvent, int &ErrorCode);
 	virtual int OnConnected(SOCKET sock, MUID* pTargetUID, MUID* pAllocUID, unsigned int nTimeStamp);
 	virtual void OnRegisterCommand(MCommandManager* pCommandManager);
-	virtual void OnPrepareCommand(MCommand* pCommand);	///< 커맨드를 처리하기 전에
-	virtual int OnResponseMatchLogin(const MUID& uidServer, int nResult, const char* szServerName, const MMatchServerMode nServerMode, 
-									 const char* szAccountID, const MMatchUserGradeID nUGradeID, const MMatchPremiumGradeID nPGradeID, const MUID& uidPlayer,
-									 const char* szRandomValue, unsigned char* szEncryptMsg);
+	virtual void OnPrepareCommand(MCommand* pCommand);
+	virtual int OnResponseMatchLogin(const MUID& uidServer, int nResult, const char* szServerName,
+		const MMatchServerMode nServerMode,
+		const char* szAccountID, const MMatchUserGradeID nUGradeID,
+		const MMatchPremiumGradeID nPGradeID, const MUID& uidPlayer,
+		const char* szRandomValue, unsigned char* szEncryptMsg);
 	virtual void OnBridgePeerACK(const MUID& uidChar, int nCode);
 	virtual void OnObjectCache(unsigned int nType, void* pBlob, int nCount);
 	virtual void OnAgentError(int nError);
 protected:
 	void OnMatchNotify(unsigned int nMsgID);
-//	void OnPeerList(const MUID& uidStage, void* pBlob, int nCount);
-//	void OnAddPeer(const MUID& uidChar, const char* szIP, const int nPort =				
-//		MATCHCLIENT_DEFAULT_UDP_PORT, MTD_CharInfo* pCharInfo = NULL, int nTeam = 0);
 	void OnAnnounce(unsigned int nType, char* szMsg);
 	void OnResponseResult(const int nResult);
 
@@ -126,8 +122,6 @@ protected:
 
 	void OnStageJoin(const MUID& uidChar, const MUID& uidStage, unsigned int nRoomNo, char* szStageName);
 	void OnStageLeave(const MUID& uidChar, const MUID& uidStage);
-//	void OnStageEnterBattle(const MUID& uidChar, const MUID& uidStage, MCmdEnterBattleParam nParam, MTD_PeerListNode* pPeerNode);
-//	void OnStageLeaveBattle(const MUID& uidChar, const MUID& uidStage);
 	void OnStageStart(const MUID& uidChar, const MUID& uidStage, int nCountdown);
 	void OnStageLaunch(const MUID& uidStage, const char* pszMapName);
 	void OnStageFinishGame(const MUID& uidStage);
@@ -157,13 +151,11 @@ protected:
 	void OnChatRoomInvite(char* pszSenderName, char* pszRoomName);
 	void OnChatRoomChat(char* pszChatRoomName, char* pszPlayerName, char* pszChat);
 
-	// 따라가기 음답.
 	void OnFollowResponse( const int nMsgID );
-	void OnExpiredRentItem(void* pBlob);	///< 기간제 아이템 사용 만료 통지받음
+	void OnExpiredRentItem(void* pBlob);
 
 	void OnBirdTest();
 protected:
-	// 클랜관련
 	void OnResponseCreateClan(const int nResult, const int nRequestID);
 	void OnResponseAgreedCreateClan(const int nResult);
 	void OnClanAskSponsorAgreement(const int nRequestID, const char* szClanName, MUID& uidMasterObject, const char* szMasterName);
@@ -183,7 +175,6 @@ protected:
 	void OnClanStandbyClanList(int nPrevStageCount, int nNextStageCount, void* pBlob);
 	void OnClanMemberConnected(const char* szMember);
 
-	// 동의관련
 	void OnResponseProposal(const int nResult, const MMatchProposalMode nProposalMode, const int nRequestID);
 	void OnAskAgreement(const MUID& uidProposer, 
 		                void* pMemberNamesBlob, 
@@ -200,12 +191,11 @@ protected:
 	void OnGameLevelUp(const MUID& uidChar);
 	void OnGameLevelDown(const MUID& uidChar);
 
-public:				// 젠장 -_-; 리플레이에서 이 이벤트들 처리해야 함;
+public:
 	void OnSpawnWorldItem(void* pBlob);
 	void OnObtainWorldItem(const MUID& uidChar, const int nItemUID);
 	void OnRemoveWorldItem(const int nItemUID);
 protected:
-	// Local
 	void OnLocalReport119();
 protected:
 	void OnAdminAnnounce(const char* szMsg, const ZAdminAnnounceType nType);
@@ -229,16 +219,12 @@ public:
 	bool GetRejectInvite()				{ return m_bRejectInvite; }
 	void SetRejectInvite(bool bVal)		{ m_bRejectInvite = bVal; }
 
-	unsigned long int GetClockCount(void) { return GetGlobalTimeMS(); }		// 로컬 클럭 반환
-	unsigned long int GetGlobalClockCount(void);		///< 서버와 동기된 클럭을 반환한다.
+	unsigned long int GetClockCount(void) { return GetGlobalTimeMS(); }
+	unsigned long int GetGlobalClockCount(void);
 
 	virtual void OutputMessage(const char* szMessage, MZMOMType nType=MZMDM_GENERAL);
 	
 	void SetOnCommandCallback(ZONCOMMANDCALLBACK pCallback) { m_fnOnCommandCallback = pCallback;}
-
-//	void InitializeGame();
-//	void StartGame();
-//	void FinalizeGame();
 
 	void Tick(void);
 	void Disconnect()							{ MMatchClient::Disconnect(m_Server); }
@@ -256,15 +242,12 @@ public:
 	void StopStageList();
 	void StartChannelList(MCHANNEL_TYPE nChannelType);
 	void StopChannelList();
-	//void SetChannelType(MCHANNEL_TYPE type);
 
 	const char*		GetChannelName()	{ return m_szChannel; }
 	MCHANNEL_TYPE	GetChannelType()	{ return m_CurrentChannelType; }
 	const char*		GetChannelRuleName(){ return m_szChannelRule; }
 	const char*		GetStageName()		{ return m_szStageName; }
 	int				GetStageNumber()	{ return m_nRoomNo; }
-	
-	
 	
 	const char* GetChatRoomInvited(){ return m_szChatRoomInvited; }
 	void SetChatRoomInvited(const char* pszRoomName)	{ strcpy_safe(m_szChatRoomInvited, pszRoomName); }
@@ -273,15 +256,13 @@ public:
 
 	const char* GetVoteMessage() { return m_szVoteText; }
 public:
-	// 클랜 관련
 	void AnswerSponsorAgreement(bool bAnswer);
 	void AnswerJoinerAgreement(bool bAnswer);
 	void RequestCreateClan(char* szClanName, char** ppMemberCharNames);
 
-	// 동의 관련
 	void RequestProposal(const MMatchProposalMode nProposalMode, char** ppReplierCharNames, const int nReplierCount);
 	void ReplyAgreement(bool bAgreement);
-public:	// 투표관련
+public:
 	bool IsVoteInProgress()				{ return m_bVoteInProgress;	}
 	void SetVoteInProgress(bool bVal)	{ m_bVoteInProgress = bVal; }
 	bool CanVote()						{ return m_bCanVote; }
@@ -289,18 +270,14 @@ public:	// 투표관련
 
 public:
 	void RequestGameSuicide();
-	// game 에서 불러준다
-	//void OnGameRoundState(const MUID& uidStage, int nRoundState, int nRound);
 	void OnStageEnterBattle(const MUID& uidChar, MCmdEnterBattleParam nParam, MTD_PeerListNode* pPeerNode);
 public:
-	// Validate 씨리즈
 	int ValidateRequestDeleteChar();
 public:
-	// Request 씨리즈
 	void RequestChannelJoin(const MUID& uidChannel);
 	void RequestChannelJoin(const MCHANNEL_TYPE nChannelType, char* szChannelName);
-	void RequestOnLobbyCreated();		// 로비에 들어올때 요청하는 메시지들
-	void RequestOnGameDestroyed();		// 게임이 끝났을때 요청하는 메시지들
+	void RequestOnLobbyCreated();
+	void RequestOnGameDestroyed();
 protected:
 	void OnNotifyCallVote(const char* pszDiscuss, const char* pszArg);
 	void OnNotifyVoteResult(const char* pszDiscuss, int nResult);

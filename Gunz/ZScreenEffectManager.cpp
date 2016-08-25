@@ -390,13 +390,6 @@ bool ZScreenEffectManager::Create()
 
 	BEGIN_;
 
-	//m_pQuestEffectMeshMgr = new RMeshMgr();
-	//if(m_pQuestEffectMeshMgr->LoadXmlList("interface/default/combat/screeneffects_quest.xml")==-1) {
-	//	mlog("quest combat list loding error\n");
-	//	SAFE_DELETE(m_pQuestEffectMeshMgr);
-	//	return false;
-	//}		// createquestres 에서 만든다
-
 	m_pEffectMeshMgr = new RMeshMgr;
 	if(m_pEffectMeshMgr->LoadXmlList("interface/default/combat/screeneffects.xml")==-1) {
 		mlog("combat list loding error\n");
@@ -486,20 +479,11 @@ bool ZScreenEffectManager::Create()
 	m_fGuageHP=m_fGuageAP=m_fGuageEXP=0.f;
 	m_fCurGuageHP=m_fCurGuageAP=-1.f;
 
-	//m_pKO = new ZKOEffect(m_pQuestEffectMeshMgr->Get("ko"));
-	//for (int i = 0; i < 10; i++)
-	//{
-	//	char name[64];
-	//	sprintf_safe(name, "ko%d", i);
-	//	m_pKONumberEffect[i] = new ZKOEffect(m_pQuestEffectMeshMgr->Get(name));
-	//}
-
 	m_pTDScoreBoard = new ZScreenEffect(m_pEffectMeshMgr->Get("td_scoreboard"));
 	m_pTDScoreBlink_B = new ZTDMBlinkEffect(m_pEffectMeshMgr->Get("td_scoreblink_b"));
 	m_pTDScoreBlink_R = new ZTDMBlinkEffect(m_pEffectMeshMgr->Get("td_scoreblink_r"));
 
 	CreateQuestRes();
-
 
 	END_("Screen Effect Manager Create");
 	return true;
@@ -604,21 +588,11 @@ int ZScreenEffectManager::DrawResetGuages()
 
 	_backtime = newtime;
 
-	////////////////////////////////////////////
-
-	// 하드코드 HP 게이지 !
 	if(m_pGuageTexture)
 		RGetDevice()->SetTexture(0,m_pGuageTexture->GetTexture());
 	else
 		RGetDevice()->SetTexture(0,NULL);
 
-	// hp
-/*
-	if(_hp == 1.0f )	color = D3DCOLOR_ARGB(255,  0,128,255);
-	else if(_hp > 0.7f)	color = D3DCOLOR_ARGB(255, 69,177,186);
-	else if(_hp > 0.3f)	color = D3DCOLOR_ARGB(255,231,220, 24);
-	else				color = D3DCOLOR_ARGB(255,233, 44, 22);
-*/
 	color = D3DCOLOR_ARGB(255,  0,128,255);
 
 	DrawGuage(70.f/800.f , 23.f/600.f , min(1.f,_hp) * 138.f/800.f , 13.f/600.f , 1.f ,color);
@@ -899,21 +873,6 @@ void ZScreenEffectManager::DrawEffects()
 		pEffect = *i;
 		pEffect->Draw(0);
 	}
-
-	/*
-	for( iterator i=begin(); i!=end();)
-	{
-		pEffect = *i;
-
-		if(pEffect->Draw(0)==false) {
-
-			delete pEffect;
-			i = erase(i);
-		} else {
-			i++;
-		}
-	}
-	*/
 }
 
 void ZScreenEffectManager::UpdateEffects()
@@ -944,14 +903,14 @@ void ZScreenEffectManager::UpdateEffects()
 		m_pBossHPPanel->Update();
 	}
 
-	// 스팩이면 KO랑 화살표는 그리지 않는다.
 	if(!ZGetGameInterface()->GetCombatInterface()->GetObserverMode())
 	{
-		for (int i=0; i<10; i++)
-		{
-			m_pKONumberEffect[i]->Update();
-		}
-		m_pKO->Update();
+		for (auto* p : m_pKONumberEffect)
+			if (p)
+				p->Update();
+
+		if (m_pKO)
+			m_pKO->Update();
 	}	
 }
 
@@ -1252,13 +1211,12 @@ void ZScreenEffectManager::AddRock()
 	ZApplication::GetSoundEngine()->PlayVoiceSound(VOICE_FIGHT);
 }
 
-
 bool ZScreenEffectManager::CreateQuestRes()
 {
-	_ASSERT(m_pQuestEffectMeshMgr == NULL);
-	_ASSERT(m_pBossHPPanel == NULL);
-	_ASSERT(m_pArrow == NULL);
-	_ASSERT(m_pKO == NULL);
+	assert(m_pQuestEffectMeshMgr == NULL);
+	assert(m_pBossHPPanel == NULL);
+	assert(m_pArrow == NULL);
+	assert(m_pKO == NULL);
 
 	m_nKO = 0;
 
@@ -1271,9 +1229,10 @@ bool ZScreenEffectManager::CreateQuestRes()
 
 	auto p = m_pQuestEffectMeshMgr->Get("ko");
 	if (!p)
-		return false;
+		MLog("ZScreenEffectManager::CreateQuestRes - Failed to load 'ko'\n");
+	else
+		m_pKO = new ZKOEffect(p);
 
-	m_pKO = new ZKOEffect(p);
 	for (int i = 0; i < 10; i++)
 	{
 		_ASSERT(m_pKONumberEffect[i] == NULL);
@@ -1282,22 +1241,25 @@ bool ZScreenEffectManager::CreateQuestRes()
 
 		p = m_pQuestEffectMeshMgr->Get(name);
 		if (!p)
-			return false;
+		{
+			MLog("ZScreenEffectManager::CreateQuestRes - Failed to load '%s'\n", name);
+			continue;
+		}
 
 		m_pKONumberEffect[i] = new ZKOEffect(p);
 	}
 
 	p = m_pQuestEffectMeshMgr->Get("boss_hppanel");
 	if (!p)
-		return false;
-
-	m_pBossHPPanel = new ZBossGaugeEffect(p);
+		MLog("ZScreenEffectManager::CreateQuestRes - Failed to load 'boss_hppanel'\n");
+	else
+		m_pBossHPPanel = new ZBossGaugeEffect(p);
 
 	p = m_pQuestEffectMeshMgr->Get("arrow");
 	if (!p)
-		return false;
-
-	m_pArrow = new ZScreenEffect(p);
+		MLog("ZScreenEffectManager::CreateQuestRes - Failed to load 'arrow'\n");
+	else
+		m_pArrow = new ZScreenEffect(p);
 
 	return true;
 }
@@ -1316,7 +1278,6 @@ void ZScreenEffectManager::DestroyQuestRes()
 	SAFE_DELETE(m_pQuestEffectMeshMgr);
 }
 
-
 void ZScreenEffectManager::DrawQuestEffects()
 {
 	if (!ZGetGameTypeManager()->IsQuestDerived(ZGetGameClient()->GetMatchStageSetting()->GetGameType())) return;
@@ -1326,7 +1287,6 @@ void ZScreenEffectManager::DrawQuestEffects()
 		m_pBossHPPanel->Draw(0);
 	}
 
-	// 스팩이면 KO랑 화살표는 그리지 않는다.
 	if(!ZGetGameInterface()->GetCombatInterface()->GetObserverMode())
 	{
 		DrawKO();
@@ -1376,7 +1336,6 @@ void ZScreenEffectManager::DrawKO()
 
 		if (i > 0)
 		{
-			// 프레임을 맞춘다.
 			AniFrameInfo* pInfo = m_pKONumberEffect[nIndex]->GetVMesh()->GetFrameInfo(ani_mode_lower);
 			pInfo->m_nFrame = nFirstNumberFrame;
 			
@@ -1452,7 +1411,6 @@ void ZScreenEffectManager::DrawDuelEffects()
 
 			if (i > 0)
 			{
-				// 프레임을 맞춘다.
 				AniFrameInfo* pInfo = m_pKONumberEffect[nIndex]->GetVMesh()->GetFrameInfo(ani_mode_lower);
 				pInfo->m_nFrame = nFirstNumberFrame;
 
@@ -1461,7 +1419,6 @@ void ZScreenEffectManager::DrawDuelEffects()
 			float fOffset= 40 * (float)(i-nCount+2) - 40;
 			m_pKONumberEffect[nIndex]->Update();
 			m_pKONumberEffect[nIndex]->DrawCustom(nNowTime, rvector(fOffset, 0.0f, 0.0f));
-
 
 			if (i == 0)
 			{
@@ -1477,7 +1434,6 @@ void ZScreenEffectManager::DrawDuelEffects()
 		m_pKO->Update();
 		m_pKO->Draw(nNowTime);	
 	}
-	// KO출력
 }
 
 void ZScreenEffectManager::UpdateDuelEffects()
@@ -1489,20 +1445,17 @@ void ZScreenEffectManager::UpdateDuelEffects()
 
 	ZRuleDuel* pDuel = (ZRuleDuel*)ZGetGame()->GetMatch()->GetRule();
 
-//	if (pDuel->QInfo.m_nVictory + 1 >= 3)
-	{
-		char buffer[32];
-		sprintf_safe(buffer,"%d", pDuel->QInfo.m_nVictory);
-		int nCount=(int)strlen(buffer);
+	char buffer[32];
+	sprintf_safe(buffer, "%d", pDuel->QInfo.m_nVictory);
+	int nCount = (int)strlen(buffer);
 
-		for(int i=0;i<nCount;i++)
-		{
-			char meshname[256];
-			sprintf_safe(meshname,"duel%d",buffer[i]-'0');
-			RMesh *pMesh = m_pEffectMeshMgr->Get(meshname);
-			if(pMesh)
-				Add(new ZScreenEffect(pMesh , rvector(60*(float)(i-nCount+2),0,0)));
-		}
+	for (int i = 0; i < nCount; i++)
+	{
+		char meshname[256];
+		sprintf_safe(meshname, "duel%d", buffer[i] - '0');
+		RMesh *pMesh = m_pEffectMeshMgr->Get(meshname);
+		if (pMesh)
+			Add(new ZScreenEffect(pMesh, rvector(60 * (float)(i - nCount + 2), 0, 0)));
 	}
 }
 

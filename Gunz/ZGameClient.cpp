@@ -467,7 +467,6 @@ void ZGameClient::OnChannelResponseRule(const MUID& uidchannel, const char* pszR
 
 	SetChannelRuleName(pszRuleName);
 
-	// 임시 처리?
 	MComboBox* pCombo = (MComboBox*)ZGetGameInterface()->GetIDLResource()->FindWidget("MapSelection");
 	if(pCombo != NULL)
 	{

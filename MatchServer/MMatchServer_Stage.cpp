@@ -193,12 +193,6 @@ bool MMatchServer::StageJoin(const MUID& uidPlayer, const MUID& uidStage)
 			}
 
 			pRuleQuest->OnChangeCondition();
-			//pRuleQuest->OnResponseQL_ToStage( pObj->GetStageUID() );
-			// 동환씨께서 처음 스테이지 조인시는 이전에 설정이 퀘스트로 되있어도 
-			//  처음 조인한 유저는 퀘스트 타입인지 알수가 없기에,
-			//	클라이언트가 스테이지 타입이 퀘스트인지를 인식하는 시점에서
-			//  이 정보를 요청을 하는 방향으로 수정함. - 05/04/14 by 추교성.
-			// pStage->GetRule()->OnResponseSacrificeSlotInfoToStage( uidPlayer );
 		}
 	}
 #endif
@@ -208,8 +202,6 @@ bool MMatchServer::StageJoin(const MUID& uidPlayer, const MUID& uidStage)
 	StageTeam(uidPlayer, uidStage, pObj->GetTeam());
 	StagePlayerState(uidPlayer, uidStage, pObj->GetStageState());
 
-
-	// 방송 관계자면 방장권한을 자동으로 빼앗는다. - 온게임넷 비비빅 요청
 	if (MMUG_EVENTMASTER == pObj->GetAccountInfo()->m_nUGrade) {
 		OnEventChangeMaster(pObj->GetUID());
 	}
@@ -265,7 +257,6 @@ bool MMatchServer::StageLeave(const MUID& uidPlayer, const MUID& uidStage)
 	if (bLeaverMaster) StageMaster(uidStage);
 
 #ifdef _QUEST_ITEM
-	// 유저가 스테이지에서 나간후에 QL을 다시 계산해 줘야 함.
 	if (MGetServerConfig()->GetServerMode() == MSM_TEST)
 	{
 		MSTAGE_SETTING_NODE* pNode = pStage->GetStageSetting()->GetStageSetting();
@@ -286,7 +277,6 @@ bool MMatchServer::StageLeave(const MUID& uidPlayer, const MUID& uidStage)
 
 			if( STAGE_STATE_STANDBY == pStage->GetState() )
 				pRuleQuest->OnChangeCondition();
-				//pRuleQuest->OnResponseQL_ToStage( uidStage );
 		}
 	}
 #endif
@@ -950,7 +940,6 @@ void MMatchServer::OnStageSetting(const MUID& uidPlayer, const MUID& uidStage, v
 	if (pStage->GetState() != STAGE_STATE_STANDBY) return;	// 대기상태에서만 바꿀수 있다
 	if (nStageCount <= 0) return;
 
-	// 방장이거나 운영자가 아닌데 세팅을 바꾸면 그냥 리턴
 	if (pStage->GetMasterUID() != uidPlayer)
 	{
 		MMatchObject* pObjMaster = GetObject(uidPlayer);
@@ -962,7 +951,9 @@ void MMatchServer::OnStageSetting(const MUID& uidPlayer, const MUID& uidStage, v
 	if (!MGetServerConfig()->HasGameData() && pNode->Netcode == NetcodeType::ServerBased)
 		pNode->Netcode = NetcodeType::P2PAntilead;
 
-	if (IsSwordsOnly(pNode->nGameType) || pNode->SwordsOnly)
+	if (IsSwordsOnly(pNode->nGameType)
+		|| pNode->SwordsOnly
+		|| MGetGameTypeMgr()->IsQuestDerived(pNode->nGameType))
 		pNode->Netcode = NetcodeType::P2PLead;
 
 	MMatchStageSetting* pSetting = pStage->GetStageSetting();
@@ -1011,22 +1002,18 @@ void MMatchServer::OnStageSetting(const MUID& uidPlayer, const MUID& uidStage, v
 #ifdef _QUEST
 	MMATCH_GAMETYPE nLastGameType = pSetting->GetGameType();
 
-	// 퀘스트 모드이면 무조건 난입불가, 최대인원 4명으로 세팅한다.
 	if (MGetGameTypeMgr()->IsQuestDerived(pNode->nGameType))
 	{
 		if (pNode->bForcedEntryEnabled == true) pNode->bForcedEntryEnabled = false;
 		pNode->nMaxPlayers = STAGE_QUEST_MAX_PLAYER;
 		pNode->nLimitTime = STAGESETTING_LIMITTIME_UNLIMITED;
 
-
-		// 퀘스트 서버가 아닌데 퀘스트 게임이면 솔로데스매치로 바꾼다.
 		if (!QuestTestServer())
 		{
 			pNode->nGameType = MMATCH_GAMETYPE_DEATHMATCH_SOLO;
 		}
 	}
 
-	// 퀘스트 모드였다가 다른 모드가 되면 '난입불가'를 허용으로 변경
 	if ( (nLastGameType == MMATCH_GAMETYPE_QUEST) && (pNode->nGameType != MMATCH_GAMETYPE_QUEST))
 		pNode->bForcedEntryEnabled = true;
 #endif

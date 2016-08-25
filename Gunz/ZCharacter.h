@@ -245,13 +245,13 @@ public:
 	
 	bool IsObserverTarget();
 
-	auto GetTeamID() const { return m_nTeamID; }
+	virtual MMatchTeam GetTeamID() const override { return m_nTeamID; }
 	void SetTeamID(MMatchTeam nTeamID) { m_nTeamID = nTeamID; }
 	bool IsSameTeam(const ZCharacter* pCharacter) const
 	{ 
 		if (pCharacter->GetTeamID() == -1) return false;
 		if (pCharacter->GetTeamID() == GetTeamID()) return true; 
-		return false; 
+		return false;
 	}
 	bool IsTagger() const { return m_bTagger; }
 	void SetTagger(bool bTagger) { m_bTagger = bTagger; }

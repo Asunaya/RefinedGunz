@@ -707,20 +707,13 @@ MCommandParameterBlob* MakeBlobArrayParameter(uint32_t NumBlobs)
 
 void MMatchServer::OnRun(void)
 {
-//	MGetLocale()->PostLoginInfoToDBAgent(MUID(1,1), "JM0000726991", "skarlfyd", 1);
-
-#ifdef _DEBUG
-//	Sleep(2000);
-#endif
 	MGetServerStatusSingleton()->SetRunStatus(100);
-	// tick count
+
 	SetTickTime(GetGlobalTimeMS());
 
-	// 스케쥴러 목록 업데이트.
 	if (m_pScheduler)
 		m_pScheduler->Update();
 
-	// PC방 IP캐쉬 업데이트
 	MPremiumIPCache()->Update();
 
 	MGetServerStatusSingleton()->SetRunStatus(101);
@@ -742,7 +735,7 @@ void MMatchServer::OnRun(void)
 		}
 		else if( pObj->GetDisconnStatusInfo().IsDisconnectable(nGlobalClock) )
 		{
-			// 이전에 BlockType을 설정했다면 DB update flag가 설정된다.
+			// BlockType
 			if( pObj->GetDisconnStatusInfo().IsUpdateDB() ) 
 			{
 				MAsyncDBJob_SetBlockAccount* pJob = new MAsyncDBJob_SetBlockAccount;
@@ -757,7 +750,6 @@ void MMatchServer::OnRun(void)
 
 				PostAsyncJob( pJob );
 
-				// 업데이트하면 다시 DB update flag를 무효화 함.
 				pObj->GetDisconnStatusInfo().UpdateDataBaseCompleted();
 			}
 

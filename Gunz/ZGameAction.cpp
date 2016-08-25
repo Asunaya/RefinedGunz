@@ -143,7 +143,6 @@ void ZGameAction::OnPeerSkill_LastShot(float fShotTime,ZCharacter *pOwnerCharact
 
 				if (g_pGame->CheckWall(pOwnerCharacter, pTar) == false)
 				{
-					// 막고있으면 데미지를 안받는다
 					if (pTar->IsGuard() && DotProduct(pTar->m_Direction, OwnerDir) < 0)
 					{
 						rvector addVel = pTar->GetPosition() - waveCenter;
@@ -157,7 +156,6 @@ void ZGameAction::OnPeerSkill_LastShot(float fShotTime,ZCharacter *pOwnerCharact
 						rvector tpos = pTar->GetPosition();
 
 						tpos.z += 130.f;
-
 
 						if (zc_en_type == ZC_ENCHANT_NONE) {
 
@@ -232,7 +230,7 @@ void ZGameAction::OnPeerSkill_Uppercut(ZCharacter *pOwnerCharacter)
 		rvector TargetPosition,TargetDir;
 
 		if(pTar->IsDie()) continue;
-		// 적절한 위치를 얻어낼수 없으면 다음으로~
+
 		if( !pTar->GetHistory(&TargetPosition,&TargetDir,fShotTime)) continue;
 
 		float fDist = Magnitude(OwnerPosition + OwnerDir*10.f - TargetPosition);
@@ -262,10 +260,10 @@ void ZGameAction::OnPeerSkill_Uppercut(ZCharacter *pOwnerCharacter)
 					bCheck = true;
 				}
 
-				if(g_pGame->CheckWall(pOwnerCharacter,pTar)==true) //중간에 벽이 막고 있는가?
+				if(g_pGame->CheckWall(pOwnerCharacter,pTar)==true)
 					bCheck = false;
 
-				if( bCheck) {//팀이아닌경우만
+				if( bCheck) {
 
 					rvector fTarDir = pTar->GetPosition() - (pOwnerCharacter->GetPosition() - 50.f*OwnerDir);
 					Normalize(fTarDir);

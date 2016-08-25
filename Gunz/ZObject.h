@@ -107,7 +107,7 @@ public:
 	virtual void SetDirection(const rvector& dir);
 	virtual bool IsGuard() const { return false; }
 	virtual bool IsGuardCustom() const { return false; }
-	virtual MMatchTeam GetTeamID() { return MMT_ALL; }
+	virtual MMatchTeam GetTeamID() const { return MMT_ALL; }
 	
 	virtual ZOBJECTHITTEST HitTest(const rvector& origin, const rvector& to, float fTime, rvector *pOutPos = NULL) = 0;
 

@@ -65,16 +65,17 @@ namespace RealSpace2
 	class RBspObject;
 }
 
-template <typename ObjectT, typename ContainerT, typename PickInfoT>
-bool PickHistory(const ObjectT* Exception, const v3& src, const v3& dest,
+template <typename ContainerT, typename PickInfoT>
+bool PickHistory(std::remove_reference_t<decltype(*std::declval<ContainerT>().begin())> Exception,
+	const v3& src, const v3& dest,
 	RealSpace2::RBspObject* BspObject, PickInfoT& pickinfo, const ContainerT& Container,
 	double Time, u32 PassFlag = RM_FLAG_ADDITIVE | RM_FLAG_USEOPACITY | RM_FLAG_HIDE)
 {
-	ObjectT* HitObject = nullptr;
+	decltype(Exception) HitObject = nullptr;
 	v3 HitPos;
 	pickinfo.info.t = 0;
 
-	for (auto& Obj : Container)
+	for (auto* Obj : Container)
 	{
 		if (Exception == Obj)
 			continue;
@@ -85,7 +86,7 @@ bool PickHistory(const ObjectT* Exception, const v3& src, const v3& dest,
 		if (HitParts == ZOH_NONE)
 			continue;
 
-		if (!Obj->IsAlive())
+		if (Obj->IsDie())
 			continue;
 
 		if (!HitObject || Magnitude(TempHitPos - src) < Magnitude(HitPos - src))
