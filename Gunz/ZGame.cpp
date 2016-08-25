@@ -4403,11 +4403,11 @@ void ZGame::PostBasicInfo()
 
 	if(m_pMyCharacter->IsDie() && GetTime()-m_pMyCharacter->m_fDeadTime>5.f) return;
 
-	int nMoveTick = 20;
+	int nMoveTick;
 	if (g_Rules.IsVanillaMode())
 		nMoveTick = (ZGetGameClient()->GetAllowTunneling() == false) ? PEERMOVE_TICK : PEERMOVE_AGENT_TICK;
 	else
-		nMoveTick = 20;
+		nMoveTick = BASICINFO_INTERVAL;
 
 	auto nNowTime = GetGlobalTimeMS();
 	if (nNowTime - m_nLastTime[ZLASTTIME_BASICINFO] >= nMoveTick)
