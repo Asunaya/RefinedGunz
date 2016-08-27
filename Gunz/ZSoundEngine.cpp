@@ -823,9 +823,8 @@ bool ZSoundEngine::isPlayAble(char* name)
 	return true;
 }
 
-bool ZSoundEngine::isPlayAbleMtrl(char* name)//특수목적용~
+bool ZSoundEngine::isPlayAbleMtrl(char* name)
 {
-	
 	if( !m_bSoundEnable )	return false;
 	
 	if(!name)		return false;

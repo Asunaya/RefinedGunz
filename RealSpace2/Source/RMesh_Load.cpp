@@ -47,7 +47,6 @@ bool RMesh::ReadXmlElement(MXmlElement* PNode,char* Path)
 	char SoundFileName[256];
 	char GameMotion[256];
 	char PathSoundFileName[256];
-//	char szSize[256];
 
 	RMesh* pMesh = NULL;
 
@@ -68,7 +67,6 @@ bool RMesh::ReadXmlElement(MXmlElement* PNode,char* Path)
 		if (NodeName[0] == '#') continue;
 
 		if (strcmp(NodeName, "AddBaseModel")==0) {
-
 			Node.GetAttribute(IDName, "name");
 			Node.GetAttribute(FileName, "filename");
 
@@ -91,9 +89,7 @@ bool RMesh::ReadXmlElement(MXmlElement* PNode,char* Path)
 			m_isNPCMesh = true;
 		}
 		else if(strcmp(NodeName, "MakeAnimationMap")==0) {
-
-//			Node.GetAttribute(szSize,"size");//나중에 필요하면 살리자.. 지금은 그때그때 바꾸는것이 더 귀찮다..
-			m_ani_mgr.MakeListMap( (int)eq_weapon_end );//최대모션타잎만큼 만들어준다..
+			m_ani_mgr.MakeListMap( (int)eq_weapon_end );
 		}
 		else if(strcmp(NodeName, "AddParts")==0) {
 			extern bool IsDynamicResourceLoad();
@@ -159,11 +155,9 @@ bool RMesh::ReadXmlElement(MXmlElement* PNode,char* Path)
 				MLoopType = RAniLoopType_OnceLowerBody;
 			}
 
-			//MLog("Name: %s, filename: %s, motion_type %s, motion_loop_type %s\n", IDName, FileName, MotionTypeID, MotionLoopTypeID);
-
 			int nGameMotion = atoi(GameMotion);
 
-			if( GetToolMesh() ) // 툴에서 사용되는거라면 무조건 바로 로딩~
+			if( GetToolMesh() )
 				nGameMotion = 0;
 
 			nMTypeID = atoi(MotionTypeID);
@@ -177,7 +171,7 @@ bool RMesh::ReadXmlElement(MXmlElement* PNode,char* Path)
 
 			RAnimation* pAni = NULL;
 
-			if(nGameMotion==1) { // 게임 모션은 나중에 로딩
+			if(nGameMotion==1) {
 				pAni = m_ani_mgr.AddGameLoad(IDName,PathFileName,-1,nMTypeID);
 			}
 			else {
@@ -188,9 +182,9 @@ bool RMesh::ReadXmlElement(MXmlElement* PNode,char* Path)
 
 				pAni->SetAnimationLoopType( MLoopType );
 
-				if(SoundFileName[0]==NULL) {//사운드가 등록되지 않았으면 에니메이션 파일 이름이 기본 사운드이름..
+				if(SoundFileName[0]==NULL) {
 					int len = (int) strlen(FileName);
-					strncpy(SoundFileName,FileName,len-8);//.elu.ani 생략...
+					strncpy(SoundFileName,FileName,len-8);
 					SoundFileName[len-8] = NULL;
 
 					strcpy_safe(PathSoundFileName,"/sound/effect/");
@@ -216,14 +210,9 @@ bool RMesh::ReadXml(const char* filename)
 	char Path[256];
 	Path[0] = NULL;
 
-	string BackupName = filename;//입력 받은것이 내부에서 바뀐다.
+	string BackupName = filename;
 
 	GetPath(filename,Path);
-
-	//<--------
-
-//	if( !XmlDoc.LoadFromFile(filename) ) 
-//		return false;
 
 	char *buffer;
 	MZFile mzf;
@@ -676,8 +665,6 @@ void RMesh::CheckNameToType(RMeshNode* pMeshNode)
 	int ef = 0;
 	int align = 0;
 
-	//시간날때 맵의 오브젝트 프로퍼티로 옮기자~~
-
 	CheckEfAlign(pMeshNode->GetName(),ef,align);
 
 	ef = CheckEf(pMeshNode->GetName());
@@ -688,27 +675,6 @@ void RMesh::CheckNameToType(RMeshNode* pMeshNode)
 	}
 
 	pMeshNode->m_nAlign = align;
-
-/*
-	test..
-
-	CheckEfAlign("algn0_test1",ef,align);
-	CheckEfAlign("algn1_test1",ef,align);
-
-	CheckEfAlign("ef_algn0_test1",ef,align);
-	CheckEfAlign("ef_algn1_test2",ef,align);
-
-	CheckEfAlign("map1_algn0_test2",ef,align);
-	CheckEfAlign("map2_algn1_test2",ef,align);
-
-	CheckEfAlign("map1_ef_algn0_test2",ef,align);
-	CheckEfAlign("map2_ef_algn1_test2",ef,align);
-*/
-	// 무기의 발사 위치 추가
-
-//	"muzzle_flash"		//총구화염
-//	"empty_cartridge01"	//일반탄피
-//	"empty_cartridge02"	//산탄탄피
 
 	if( NCMPNAME("muzzle_flash",12) ) {
 		pMeshNode->m_WeaponDummyType = weapon_dummy_muzzle_flash;
@@ -761,47 +727,30 @@ bool RMesh::ReadElu(const char* fname)
 		if(!mzf.Open(fname,g_pFileSystem)) {
 			if(!mzf.Open(fname)) {
 				mlog("----------> in zip ( %s ) file not found!! \n ", fname );
+				__EP(2009);
 				return false;
 			}
 		}
 	} else {
 		if(!mzf.Open(fname)) {
 			mlog("----------> %s file not found!! \n ", fname );
+			__EP(2009);
 			return false;
 		}
 	}
 
-//	buffer = new char[mzf.GetLength()+1];
-//	buffer[mzf.GetLength()] = 0;
-
-//	mzf.Read(buffer,mzf.GetLength());
-
-//	if(!XmlDoc.LoadFromMemory(buffer))
-//		return false;
-
-//	delete[] buffer;
-
-//	FILE *fp;
-//	fp  = fopen(fname, "rb");
-
-//	if(!fp) return false;
-
 	ex_hd_t t_hd;
 
 	MZF_READ(&t_hd,sizeof(ex_hd_t) );
-/*
-	if(t_hd.ver != EXPORTER_VER) {
-		mlog("%s elu file 버젼이 틀림.\n",fname);
-		return false;
-	}
-*/
+
 	if(t_hd.sig != EXPORTER_SIG) {
 		mlog("%s elu file 파일 식별 실패.\n",fname);
+		__EP(2009);
 		return false;
 	}
 	
 	int i,j,k;
-	// sub mtrl 까지 포함한 갯수
+
 	for(i=0;i<t_hd.mtrl_num;i++) {
 
 		RMtrl* node = new RMtrl;
@@ -821,8 +770,6 @@ bool RMesh::ReadElu(const char* fname)
 			if(node->m_power == 2000.f)
 				node->m_power = 0.f;
 
-//		node->m_power = 80.f;
-
 		MZF_READ(&node->m_sub_mtrl_num,4 );
 
 		if(t_hd.ver< EXPORTER_MESH_VER7) {
@@ -833,8 +780,6 @@ bool RMesh::ReadElu(const char* fname)
 			MZF_READ(&node->m_name    ,MAX_PATH_NAME_LEN );
 			MZF_READ(&node->m_opa_name,MAX_PATH_NAME_LEN );
 		}
-
-		//MLog("Mtrl name %s\n", node->m_name);
 
 		if(t_hd.ver > EXPORTER_MESH_VER2) {//ver3 부터
 			int twoside=0;
@@ -894,8 +839,6 @@ bool RMesh::ReadElu(const char* fname)
 
 		RMeshNode* pMeshNode = new RMeshNode;
 
-//		memset( pMeshNode, 0, sizeof(RMeshNode));
-//		pMeshNode->m_mtrl_id = -1;
 		D3DXMatrixIdentity(&pMeshNode->m_mat_base);
 
 		pMeshNode->m_id = m_data_num;//last id
@@ -903,13 +846,10 @@ bool RMesh::ReadElu(const char* fname)
 		pMeshNode->m_pBaseMesh = this;
 
 		MZF_READ(Name  ,MAX_NAME_LEN );
-//		MZF_READ(pMeshNode->m_Name  ,MAX_NAME_LEN );
 		MZF_READ(pMeshNode->m_Parent,MAX_NAME_LEN );
-		MZF_READ(&pMeshNode->m_mat_base,sizeof(D3DXMATRIX) );//mat
+		MZF_READ(&pMeshNode->m_mat_base,sizeof(D3DXMATRIX) );
 
 		pMeshNode->SetName( Name );
-
-		//MLog("Node name: %s, parent %s\n", pMeshNode->GetName(), pMeshNode->m_Parent);
 
 		pMeshNode->m_mat_ref = pMeshNode->m_mat_base;
 		D3DXMatrixInverse( &pMeshNode->m_mat_ref_inv , 0, &pMeshNode->m_mat_ref );
@@ -948,7 +888,6 @@ bool RMesh::ReadElu(const char* fname)
 
 			pMeshNode->m_mat_flip = flipmat;
 
-//			result_mat2 = scalepivotinv * scalemat * scalepivot;
 			pMeshNode->m_mat_etc = scalepivotinv * scalemat * scalepivot;
 
 		}
@@ -958,40 +897,13 @@ bool RMesh::ReadElu(const char* fname)
 			D3DXMatrixIdentity(&pMeshNode->m_mat_flip);
 		}
 
-		memcpy(&pMeshNode->m_mat_local,&pMeshNode->m_mat_base,sizeof(D3DXMATRIX));
+		memcpy(&pMeshNode->m_mat_local, &pMeshNode->m_mat_base, sizeof(D3DXMATRIX));
 
 		pMeshNode->m_mat_result = pMeshNode->m_mat_base;
 
 		D3DXMatrixScaling(&pMeshNode->m_mat_scale, pMeshNode->m_ap_scale.x, pMeshNode->m_ap_scale.y, pMeshNode->m_ap_scale.z);
 
 		RMatInv(pMeshNode->m_mat_inv,pMeshNode->m_mat_local);
-
-		/*if (pMeshNode->m_Name == "Bip01 Neck")
-		{
-			DMLog("Node base:\n");
-
-			for (int i = 0; i < 4; i++)
-			{
-				for (int j = 0; j < 4; j++)
-				{
-					DMLog("%f ", pMeshNode->m_mat_base(i, j));
-				}
-
-				DMLog("\n");
-			}
-
-			DMLog("Node inv:\n");
-
-			for (int i = 0; i < 4; i++)
-			{
-				for (int j = 0; j < 4; j++)
-				{
-					DMLog("%f ", pMeshNode->m_mat_inv(i, j));
-				}
-
-				DMLog("\n");
-			}
-		}*/
 
 		CheckNameToType(pMeshNode);
 
@@ -1006,8 +918,6 @@ bool RMesh::ReadElu(const char* fname)
 
 			pMeshNode->CalcLocalBBox();
 		}
-
-		//tex uv 까지 포함
 
 		MZF_READ(&pMeshNode->m_face_num,4 );
 
@@ -1137,18 +1047,9 @@ bool RMesh::ReadElu(const char* fname)
 		}
 	}
 
-	// 안경(가면) - type 도 추가되어야 함..파츠용 더미..
-	// 가방
-
-	// 더미추가 - 모델은 무기처럼 찾아서 붙이고..
-
-	//--------------------------------------------------
-
 	if( m_isCharacterMesh ) {
 
 		rmatrix _pbm;
-
-		// 썬그라스 기본장비 위치..
 
 		_pbm._11 = 0.f;
 		_pbm._12 = 1.f;
@@ -1174,30 +1075,19 @@ bool RMesh::ReadElu(const char* fname)
 
 	}
 
-	//<------------------------------------------------
-
-//	fclose (fp);
 	mzf.Close();
 
 	ConnectMatrix();
 
-	///////////////////////////////////////////
-	//mtrl list load
-
-//	char Path[256];
-//	GetPath(fname,Path);
-//	m_mtrl_list_ex.Restore(RGetDevice(),Path);
-	// map object 라면 마음대로 올리면 안됨...구분필요...
-
 	if( m_is_map_object ) {
-		ClearVoidMtrl();//연결안된 빈 mtrl 을 지운다...
+		ClearVoidMtrl();
 	}
 
 	if( m_mtrl_auto_load ) {
 		m_mtrl_list_ex.Restore(RGetDevice(),Path);
 	}
 
-	ConnectMtrl();// Mtrl 연결..
+	ConnectMtrl();
 
 	if(m_bEffectSort) {
 
@@ -1219,11 +1109,9 @@ bool RMesh::ReadElu(const char* fname)
 		}
 	}
 
-	CheckNodeAlphaMtrl();// 각노드 alpha mtrl 인가 체크..
+	CheckNodeAlphaMtrl();
 
 	MakeAllNodeVertexBuffer();
-
-//	mlog("elu file ( %s ) load... \n",fname);
 
 	__EP(2009);
 
@@ -1232,18 +1120,10 @@ bool RMesh::ReadElu(const char* fname)
 	return true;
 }
 
-// old interface
-// read + set 
-
 bool RMesh::SaveElu(const char* fname)
 {
 	return true;
 }
-
-// 더미용 모델연결.. ( 안경이나.. 가방등 )
-// 각각의 부모는 에니메이션이 연결될때마다 base matrix 가 재설정 된다.
-// 미리 local matrix 를 가지고 있다가 붙여주는 역할만하자..
-// 메시가 read 될때만 쓰이도록 되어있다..아무곳에서나 사용하려면 부모연결등에 주의해서 다시작성...
 
 bool RMesh::AddNode(char* name,char* pname,rmatrix& base_mat)
 {

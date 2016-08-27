@@ -4,14 +4,35 @@
 #include "rapidxml.hpp"
 #include <fstream>
 
-MeshManager* MeshManager::Instance = nullptr;
-
-MeshManager::MeshManager()
+TaskManager::TaskManager()
 {
-	if (Instance)
-		throw std::runtime_error("MeshManager created more than once");
+	thr = std::thread([this](){ while (true) ThreadLoop(); });
+	thr.detach();
+}
 
-	Instance = this;
+void TaskManager::Update(float Elapsed)
+{
+	std::unique_lock<std::mutex> lock(QueueMutex[1]);
+
+	while (Invokations.size())
+	{
+		Invokations.front()();
+		Invokations.pop();
+	}
+}
+
+void TaskManager::ThreadLoop()
+{
+	std::unique_lock<std::mutex> lock(QueueMutex[0]);
+	cv.wait(lock, [this]() { return Notified; });
+
+	while (Tasks.size())
+	{
+		Tasks.front()();
+		Tasks.pop();
+	}
+
+	Notified = false;
 }
 
 void MeshManager::LoadParts(std::vector<unsigned char>& File)
@@ -76,9 +97,9 @@ RMeshNode *MeshManager::Get(const char *szMeshName, const char *szNodeName)
 
 	if (allocnode != AllocatedNodes.end())
 	{
-		allocnode->second.nReferences++;
+		allocnode->second.References++;
 
-		auto meshit = MeshNodeToMeshMap.find(allocnode->second.pObj);
+		auto meshit = MeshNodeToMeshMap.find(allocnode->second.Obj);
 
 		if (meshit != MeshNodeToMeshMap.end())
 		{
@@ -86,13 +107,13 @@ RMeshNode *MeshManager::Get(const char *szMeshName, const char *szNodeName)
 
 			if (allocmesh != AllocatedMeshes.end())
 			{
-				allocmesh->second.nReferences++;
+				allocmesh->second.References++;
 			}
 		}
 
 		//MLog("Found already allocated node");
 
-		return allocnode->second.pObj;
+		return allocnode->second.Obj;
 	}
 
 	auto mapsit = PartsToEluMap.find(szMeshName);
@@ -119,8 +140,8 @@ RMeshNode *MeshManager::Get(const char *szMeshName, const char *szNodeName)
 
 	if (allocmesh != AllocatedMeshes.end())
 	{
-		pMesh = allocmesh->second.pObj;
-		allocmesh->second.nReferences++;
+		pMesh = allocmesh->second.Obj;
+		allocmesh->second.References++;
 		//MLog("Found already allocated mesh %s, ref count %d\n", pMesh->GetFileName(), allocmesh->second.nReferences);
 	}
 	else
@@ -179,9 +200,9 @@ void MeshManager::Release(RMeshNode *pNode)
 
 	if (allocnode != AllocatedNodes.end())
 	{
-		allocnode->second.nReferences--;
+		allocnode->second.References--;
 
-		if (allocnode->second.nReferences <= 0)
+		if (allocnode->second.References <= 0)
 		{
 			AllocatedNodes.erase(allocnode);
 			MeshNodeToMeshMap.erase(it);
@@ -202,21 +223,20 @@ void MeshManager::Release(RMeshNode *pNode)
 
 	if (allocmesh != AllocatedMeshes.end())
 	{
-		allocmesh->second.nReferences--;
+		allocmesh->second.References--;
 
 		//MLog("Release mesh %s: ref count %d\n", meshname->second.c_str(), allocmesh->second.nReferences);
 
-		if (allocmesh->second.nReferences <= 0)
+		if (allocmesh->second.References <= 0)
 		{
 			//MLog("Releasing mesh %s\n", allocmesh->first.c_str());//it->second->GetFileName());
 
-			allocmesh->second.pObj->ClearMtrl();
-			delete allocmesh->second.pObj;
+			allocmesh->second.Obj->ClearMtrl();
+
+			delete allocmesh->second.Obj;
 
 			AllocatedMeshes.erase(allocmesh);
 			MeshFilenames.erase(meshname);
-
-			//MLog("Released\n");
 		}
 	}
 	else
@@ -246,7 +266,8 @@ bool MeshManager::RemoveObject(void *pObj)
 	return false;
 }
 
-void MeshManager::GetAsync(const char *szMeshName, const char *szNodeName, void* Obj, std::function<void(RMeshNode*)> Callback)
+void MeshManager::GetAsync(const char *szMeshName, const char *szNodeName, void* Obj,
+	std::function<void(RMeshNode*)> Callback)
 {
 	{
 		std::lock_guard<std::mutex> lock(ObjQueueMutex);
@@ -256,15 +277,12 @@ void MeshManager::GetAsync(const char *szMeshName, const char *szNodeName, void*
 
 	std::string PersistentMesh(szMeshName), PersistentNode(szNodeName);
 
-	extern void AddTask(std::function<void()>);
-
-	AddTask([this, PersistentMesh, PersistentNode, Obj, Callback]() {
+	TaskManager::GetInstance().AddTask([this, PersistentMesh, PersistentNode, Obj, Callback]() {
 		auto ret = Get(PersistentMesh.c_str(), PersistentNode.c_str());
 
-		extern void Invoke(std::function<void()>);
-
-		Invoke([=]() {
-			// We want to make sure the object hasn't been destroyed between the GetAsync call and the invokation.
+		TaskManager::GetInstance().Invoke([=]() {
+			// We want to make sure the object hasn't been destroyed
+			// between the GetAsync call and the invokation.
 			std::lock_guard<std::mutex> lock(ObjQueueMutex);
 
 			if (RemoveObject(Obj))

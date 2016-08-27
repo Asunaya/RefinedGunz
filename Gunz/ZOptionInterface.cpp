@@ -145,9 +145,8 @@ void ZOptionInterface::InitInterfaceOption(void)
 						}
 					}
 				}
-
 			}
-			// 만약 등록된 해상도가 하나도 없을경우 강제로 등록
+
 			if( gDisplayMode.size() == 0 )
 			{
 				for( int i = 0 ; i < 10; ++i )

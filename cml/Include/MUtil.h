@@ -1,30 +1,21 @@
-#ifndef _MUTIL_H
-#define _MUTIL_H
-
+#pragma once
 
 #include <string>
 using std::string;
 
+#ifndef SAFE_DELETE
+#define SAFE_DELETE(p)       { if(p) { delete (p);     (p)=NULL; } }
+#endif
+#ifndef SAFE_DELETE_ARRAY
+#define SAFE_DELETE_ARRAY(p) { if(p) { delete[] (p);   (p)=NULL; } }
+#endif
+#ifndef SAFE_RELEASE
+#define SAFE_RELEASE(p)      { if(p) { (p)->Release(); (p)=NULL; } }
+#endif
 
-// 10진수값에 대한 집합형
 #define SetBitSet(sets, item)		(sets |= (1 << item))
 #define ClearBitSet(sets, item)		(sets &= ~(1 << item))
 #define CheckBitSet(sets, item)		(sets & (1 << item))
-
-/* 사용법
-enum Item
-{
-	Foo1 = 1,
-	Foo2 = 2,
-	FooMax
-};
-
-unsigned long int sets = 0;
-SetBitSet(sets, Foo1);
-if (CheckBitSet(sets, Foo1)) extr;
-
-*/
-
 
 enum MDateType
 {
@@ -202,7 +193,3 @@ private:
 			ptr->Release();
 	}
 };
-
-
-
-#endif

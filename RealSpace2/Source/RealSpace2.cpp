@@ -32,7 +32,7 @@ MZFileSystem			*g_pFileSystem = NULL;
 RParticleSystem			g_ParticleSystem;
 HMODULE					g_hD3DLibrary = NULL;
 bool g_bStencilBuffer;
-static bool DynamicResourceLoading = false;
+bool DynamicResourceLoading = true;
 
 bool IsDynamicResourceLoad()
 {

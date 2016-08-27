@@ -303,6 +303,6 @@
     <ClInclude Include="Include\RTypes.h" />
     <ClInclude Include="Include\RVersions.h" />
     <ClInclude Include="Include\stdafx.h" />
-    <ClInclude Include="Source\MeshManager.h" />
+    <ClInclude Include="Include\MeshManager.h" />
   </ItemGroup>
 </Project>

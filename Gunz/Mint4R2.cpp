@@ -340,38 +340,10 @@ bool MBitmapR2::Create(const char* szAliasName, LPDIRECT3DDEVICE9 pd3dDevice, co
 	m_pTexture = RCreateBaseTexture(szFileName,RTextureType_Etc,false,bUseFileSystem);
 	if(!m_pTexture) return false;
 
-//	m_Texture.Create(szFileName);
-
-	/*
-	if( FAILED(D3DXCreateTextureFromFileEx(pd3dDevice, szFileName, D3DX_DEFAULT, D3DX_DEFAULT, D3DX_DEFAULT, 0, 
-				D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_FILTER_TRIANGLE|D3DX_FILTER_MIRROR, D3DX_FILTER_TRIANGLE|D3DX_FILTER_MIRROR, 
-				0, &m_Info, NULL, &m_pTexture))) return false;
-*/
-	//if(FAILED(D3DXCreateSprite(pd3dDevice, &m_pSprite))) return false;
-
 	m_pd3dDevice = pd3dDevice;
 
 	return true;
 }
-
-/*
-bool MBitmapR2::Create(const char* szAliasName, LPDIRECT3DDEVICE9 pd3dDevice, void* pData, int nSize)
-{
-	MBitmap::Create(szAliasName);
-
-	m_Texture.Create(pData,nSize);
-
-	if( FAILED(D3DXCreateTextureFromFileInMemoryEx(pd3dDevice,(void*)pData, nSize, D3DX_DEFAULT, D3DX_DEFAULT, D3DX_DEFAULT, 0, 
-				D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_FILTER_TRIANGLE|D3DX_FILTER_MIRROR, D3DX_FILTER_TRIANGLE|D3DX_FILTER_MIRROR, 
-//				D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_FILTER_NONE, D3DX_FILTER_NONE, 
-				0, &m_Info, NULL, &m_pTexture ))) return false;
-	//if(FAILED(D3DXCreateSprite(pd3dDevice, &m_pSprite))) return false;
-
-	m_pd3dDevice = pd3dDevice;
-
-	return true;
-}
-*/
 
 void MBitmapR2::Destroy(void)
 {
@@ -380,17 +352,6 @@ void MBitmapR2::Destroy(void)
 		RDestroyBaseTexture(m_pTexture);
 		m_pTexture = NULL;
 	}
-
-
-	//SAFE_RELEASE(m_pSprite);
-//	SAFE_RELEASE(m_pTexture);
-
-/*
-	if(m_dwStateBlock!=NULL){
-		m_pd3dDevice->DeleteStateBlock(m_dwStateBlock);
-		m_dwStateBlock = NULL;
-	}
-*/
 }
 
 int MBitmapR2::GetWidth(void)

@@ -69,7 +69,7 @@ void AniFrameInfo::Frame(RAniMode amode,RVisualMesh* pVMesh)
 
 	if(m_pAniSet==NULL) return;
 
-	DWORD cur = GetGlobalTimeMS();//전역 타이머 생길때까지..
+	DWORD cur = GetGlobalTimeMS();
 
 	if(m_bChangeAnimation) {
 
@@ -79,12 +79,12 @@ void AniFrameInfo::Frame(RAniMode amode,RVisualMesh* pVMesh)
 		m_isPlayDone		= false;
 		m_isOncePlayDone	= false;
 
-		m_nFrame = m_nAddFrame;	// 모션상태는 같고 무기만 바뀐경우 때문에
+		m_nFrame = m_nAddFrame;
 
 		if(m_pAniSet->IsHaveSoundFile()) {
 			RAniSoundInfo* pSInfo = &m_SoundInfo;
 
-			if(strcmp(m_pAniSet->GetName(),"jumpD") != 0) // 임시 점프 다운은 사운드 파일 정보만 가지고 착지 시점에 play
+			if(strcmp(m_pAniSet->GetName(),"jumpD") != 0)
 				pSInfo->isPlay = true;
 
 			pSInfo->SetName( m_pAniSet->GetSoundFileName() );
@@ -96,7 +96,7 @@ void AniFrameInfo::Frame(RAniMode amode,RVisualMesh* pVMesh)
 	AnimationLoopType looptype = m_pAniSet->GetAnimationLoopType();
 	int max_frame = m_pAniSet->GetMaxFrame();
 
-	if( m_isPlayDone ) {// 1번은 play 한후..
+	if( m_isPlayDone ) {
 
 		if( m_pAniSet->GetAnimationLoopType() == RAniLoopType_Loop)
 			if( m_pAniSet->IsHaveSoundFile()) {
@@ -114,9 +114,7 @@ void AniFrameInfo::Frame(RAniMode amode,RVisualMesh* pVMesh)
 				pVMesh->SetAnimation( amode,m_pAniSetNext );
 				m_pAniSetNext = NULL;
 
-			} else 	{	//	다음번 등록이 없다면..
-				//	모션 이름으로 된것들 상태들이 정해지면 ID 로 바꾸기...
-
+			} else 	{
 				if( looptype == RAniLoopType_OnceIdle) {
 					m_nFrame = max_frame - 1;
 					m_save_time = cur;
@@ -157,7 +155,6 @@ void AniFrameInfo::Frame(RAniMode amode,RVisualMesh* pVMesh)
 		}
 	}
 
-	// 에니메이션 상태의 것을 써야함..
 	int bf = 0;
 	int ef = max_frame;
 
@@ -170,8 +167,6 @@ void AniFrameInfo::Frame(RAniMode amode,RVisualMesh* pVMesh)
 	else 
 		delta = cur - m_1frame_time;
 
-//	m_fSpeed = 2.1f;
-
 	int FrameAdvance = delta * m_fSpeed;
 
 	if (m_pAniSet->PlaybackRate != 1)
@@ -181,7 +176,6 @@ void AniFrameInfo::Frame(RAniMode amode,RVisualMesh* pVMesh)
 
 	m_nFrame += FrameAdvance;
 
-	// frame 을 나눠서 사용할 경우 대비
 	if(bf != 0) {
 		m_nFrame += bf;
 	}
@@ -198,13 +192,12 @@ void AniFrameInfo::Frame(RAniMode amode,RVisualMesh* pVMesh)
 			m_nFrame = max_frame - 1;
 		}
 		else if( looptype == RAniLoopType_Loop) {
-			// 반복 타잎일 경우
 			if(ef!=0)
 				m_nFrame %= ef;
 		}
 
-		m_isPlayDone		= true;	// loop 떄마다..
-		m_isOncePlayDone	= true; // 에니가 바뀔때까지 안변함. (1번은 플래이 되었다는걸 보장)
+		m_isPlayDone		= true;
+		m_isOncePlayDone	= true;
 		m_save_time			= cur;
 	}
 
@@ -248,23 +241,16 @@ void RFrameTime::Update() {
 		}
 	}
 
-	// 여러가지 그래프 지원..
-
 	if(m_nType==0) {
-
-		// 시간에 따라 점차증가..점차감소 +-값에 따라..
-
 		if(m_bReturn) {
-			m_fCurValue = m_fMaxValue - (((dwThisTime - m_dwStartTime)/float(m_dwEndTime-m_dwStartTime)) * m_fMaxValue);
+			m_fCurValue = m_fMaxValue
+				- (((dwThisTime - m_dwStartTime)/float(m_dwEndTime-m_dwStartTime)) * m_fMaxValue);
 		}
 		else {
 			m_fCurValue = ((dwThisTime - m_dwStartTime)/float(m_dwEndTime-m_dwStartTime)) * m_fMaxValue;
 		}
-
-
 	}
 	else if(m_nType==1) {
-
 	}
 }
 
@@ -434,7 +420,6 @@ RVisualMesh::RVisualMesh() {
 	m_bRenderMatrix = false;
 
 	m_EnchantType = REnchantType_None;
-//	m_EnchantType = REnchantType_Fire;
 
 	m_GrenadeFireTime = 0;
 
@@ -453,7 +438,7 @@ RVisualMesh::RVisualMesh() {
 	m_bClothGame = false;
 	m_fClothDist = 0.f;
 
-	m_ToonTexture	= NULL;//임시..
+	m_ToonTexture	= NULL;
 	m_bToonLighting = true;
 	m_bToonTextureRender = false;
 	m_bToonColor = 0xffffffff;
@@ -1840,7 +1825,8 @@ void RVisualMesh::SetParts(RMeshPartsType parts, const char* name)
 
 	if (IsDynamicResourceLoad())
 	{
-		GetMeshManager()->GetAsync(m_pMesh->GetName(), name, this, [this, saved_name = std::string(name), parts](RMeshNode *pNode)
+		GetMeshManager()->GetAsync(m_pMesh->GetName(), name, this,
+			[this, saved_name = std::string(name), parts](RMeshNode *pNode)
 		{
 			RMeshNode *pPreviousNode = m_pTMesh[parts];
 
@@ -1892,30 +1878,10 @@ void RVisualMesh::ClearFrame()
 	}
 }
 
-// 임시 이름으로 에니메이션 타잎 정해주기
-
-enum apm_type {
-	apm_attack1 = 1,// ani play mode -> 한번하고 idle 로 바뀜.
-	apm_attack2,	// 특수공격들..
-	apm_walk,		
-	apm_run,		// loop
-	apm_die,
-};
-
 void RVisualMesh::CheckAnimationType(RAnimation* pAniSet)
 {
 	if(!pAniSet) return;
-/*
-	if(pAniSet->NameCheck("attack")) {
-		m_play_mode =  apm_attack1;
-	}
-	else if( pAniSet->NameCheck("run") ) {
-		m_play_mode =  apm_attack1;
-	}
-*/
 }
-
-// 보류~~
 
 bool RVisualMesh::SetBlendAnimation(RAnimation* pAniSet,float blend_time,bool b)
 {
@@ -1931,8 +1897,6 @@ bool RVisualMesh::SetBlendAnimation(RAniMode animode,RAnimation* pAniSet,float b
 {
 	RAnimation* pAS[2];
 
-	// 우선 위아래 모두 테스트
-
 	AniFrameInfo* pInfo = GetFrameInfo(animode);
 
 	if( pInfo->m_bBlendAniSet==false ) {
@@ -1941,7 +1905,7 @@ bool RVisualMesh::SetBlendAnimation(RAniMode animode,RAnimation* pAniSet,float b
 		pInfo->m_fMaxBlendTime = blend_time;
 		pInfo->m_fCurrentBlendTime = 0.f;
 	}
-	else { // 이미블랜딩중이라면? 우선은 같이~
+	else {
 
 		pInfo->m_bBlendAniSet = true;
 		pInfo->m_fMaxBlendTime = blend_time;
@@ -1966,8 +1930,6 @@ bool RVisualMesh::SetBlendAnimation(RAniMode animode, const char* ani_name,float
 {
 	RAnimation* pAS[2];
 
-	// 우선 위아래 모두 테스트
-
 	AniFrameInfo* pInfo = GetFrameInfo(animode);
 
 	if( pInfo->m_bBlendAniSet==false ) {
@@ -1975,7 +1937,7 @@ bool RVisualMesh::SetBlendAnimation(RAniMode animode, const char* ani_name,float
 		pInfo->m_fMaxBlendTime = blend_time;
 		pInfo->m_fCurrentBlendTime = 0.f;
 	}
-	else { // 이미블랜딩중이라면? 우선은 같이~
+	else {
 
 		pInfo->m_bBlendAniSet = true;
 		pInfo->m_fMaxBlendTime = blend_time;
@@ -1984,8 +1946,6 @@ bool RVisualMesh::SetBlendAnimation(RAniMode animode, const char* ani_name,float
 
 	pAS[0] = GetFrameInfo( ani_mode_lower )->m_pAniSet; // lower
 	pAS[1] = GetFrameInfo( ani_mode_upper )->m_pAniSet; // upper
-
-	// 전부 옮겨야함
 
 	if( SetAnimation( animode, ani_name , b ) ) {
 
@@ -1998,7 +1958,6 @@ bool RVisualMesh::SetBlendAnimation(RAniMode animode, const char* ani_name,float
 	return false;
 }
 
-// 외부에서 직접 사용도 가능하도록..
 bool RVisualMesh::SetAnimation(RAnimation* pAniSet,bool b)
 {
 	return SetAnimation(ani_mode_lower,pAniSet,b);
@@ -2011,14 +1970,12 @@ bool RVisualMesh::SetAnimation(const char* ani_name,bool b)
 
 bool RVisualMesh::SetAnimation(RAniMode animode,RAnimation* pAniSet,bool b)
 {
-//	if(animode == ani_mode_lower)
 	if(!pAniSet) 
 		return false;
 
 	_BP("VMesh::SetAnimation");
 
 	if(pAniSet->GetAniNodeCount()==0) {
-		//의미없다.. 빈 에니메이션
 		return false;
 	}
 
@@ -2027,16 +1984,14 @@ bool RVisualMesh::SetAnimation(RAniMode animode,RAnimation* pAniSet,bool b)
 	if(pInfo==NULL) return false;
 
 	bool bChange = false;
-//	bool bChange = true;
 	bool bSaveFrame = false;
 
-	//강제..
 	if(b) { 
 		bChange = true;
 	}
 	else { 
 		if( pInfo->m_pAniSet ) {
-			if( pInfo->m_pAniSet != pAniSet) {//모델 포인터만 바뀔 수 도 있다..
+			if( pInfo->m_pAniSet != pAniSet) {
 				bChange = true;
 			}
 		}
@@ -2046,15 +2001,6 @@ bool RVisualMesh::SetAnimation(RAniMode animode,RAnimation* pAniSet,bool b)
 	}
 
 	if(bChange) {
-
-		// 프레임을 초기화하고
-		// 다음 에니메이션과
-		// 예약된 에니메이션을 초기화
-
-		// 모션은 바뀌었으나 상태가 같다면 (무기만 바꾼경우 )이전 프레임 유지
-
-		//이름이같고 모션 타입이 다르다면...
-
 		if( pInfo->m_pAniSet && pAniSet) {
 			if( strcmp( pInfo->m_pAniSet->GetName() , pAniSet->GetName() ) == 0 ) {
 				if( pInfo->m_pAniSet->m_weapon_motion_type != pAniSet->m_weapon_motion_type) {
@@ -2076,14 +2022,8 @@ bool RVisualMesh::SetAnimation(RAniMode animode,RAnimation* pAniSet,bool b)
 			pInfo->m_nAddFrame = 0;
 		}
 
-//		ClearFrame();
 		pInfo->m_bChangeAnimation = true;
 		pInfo->m_pAniSet = pAniSet;
-//		CheckAnimationType(m_pAniSet[animode]);
-
-//		자기 모델에 대한 에니메이션 테이블 작성
-
-//		UpdateMotionTable();//<-------------------
 
 		Play(animode);
 	}
@@ -2099,7 +2039,7 @@ void RVisualMesh::UpdateMotionTable()
 
 	int meshnode_cnt = m_pMesh->m_data_num;
 
-	if( m_nAniNodeTableCnt != meshnode_cnt) {//모델이 바뀔일은 없지만..
+	if( m_nAniNodeTableCnt != meshnode_cnt) {
 		if(m_pAniNodeTable) {
 			delete [] m_pAniNodeTable;
 			m_pAniNodeTable = NULL;
@@ -2115,15 +2055,11 @@ void RVisualMesh::UpdateMotionTable()
 		memset(m_pAniNodeTable,0,sizeof(RAnimationNode*)*m_nAniNodeTableCnt);
 	}
 
-	// 연결..
-
 	RAnimation* pAL = GetFrameInfo(ani_mode_lower)->m_pAniSet;
 	RAnimation* pAU = GetFrameInfo(ani_mode_upper)->m_pAniSet;
 
 	if(!pAL && !pAU) 
 		return;
-
-	// 하반신등록
 
 	RAnimationNode* pANode = NULL;
 	RMeshNode* pM = NULL;
@@ -2138,7 +2074,6 @@ void RVisualMesh::UpdateMotionTable()
 
 			pANode = pAL->GetAniNode(i);
 
-//			pid = m_pMesh->FindMeshId(pANode);
 			pid = m_pMesh->_FindMeshId(pANode->GetName());
 
 			if(pid != -1) {
@@ -2146,7 +2081,6 @@ void RVisualMesh::UpdateMotionTable()
 				RMeshNode* pM = m_pMesh->m_data[pid];
 
 				if(pM) {
-//					if(pM->m_CutPartsType == cut_parts_lower_body) 
 					m_pAniNodeTable[pid] = pANode;
 				}
 			}
@@ -2161,7 +2095,6 @@ void RVisualMesh::UpdateMotionTable()
 
 			pANode = pAU->GetAniNode(i);
 
-//			pid = m_pMesh->FindMeshId(pANode);
 			pid = m_pMesh->_FindMeshId(pANode->GetName());
 
 			if(pid != -1) {
@@ -2175,10 +2108,7 @@ void RVisualMesh::UpdateMotionTable()
 			}
 		}
 	}
-
 }
-
-// 캐릭터 상위에서 자신의 상태와 들고 있는 무기에 따라서 에니메이션 연결해주기
 
 bool RVisualMesh::SetAnimation(RAniMode animode, const char* ani_name,bool b)
 {
@@ -2192,41 +2122,32 @@ bool RVisualMesh::SetAnimation(RAniMode animode, const char* ani_name,bool b)
 	if(!ani_name) {
 		if(animode==ani_mode_upper) {
 			pAniUp->m_pAniSet = NULL;
-//			m_pAniSet[ani_mode_upper] = NULL;
 		}
 		return false;
 	}
 
-	if(ani_name[0]==0) {//이름이 없을 경우
+	if(ani_name[0]==0) {
 		if(animode==ani_mode_upper){
 			pAniUp->m_pAniSet = NULL;
-//			m_pAniSet[ani_mode_upper] = NULL;
 		}
 		return false;
 	}
 
 	int wtype = -1;
 
-	if(m_SelectWeaponMotionType!=eq_weapon_etc)//기본값이면 그냥 -1
+	if(m_SelectWeaponMotionType!=eq_weapon_etc)
 		wtype = GetSetectedWeaponMotionID();
 
 	if(animode == ani_mode_upper) {
 		if( pAniLow->m_pAniSet ) {
-			// load,reload 는 상관안함..
-			// 공격의 경우에는 idle 상태나 칼이나 수류탄인 경우만 섞어준다..
+			// load,reload
 			if(strcmp(ani_name,"attackS")==0 ) {
 
-				if(strcmp( pAniLow->m_pAniSet->GetName() ,"idle") != 0) {//idle 는 무조건..그외에는..
+				if(strcmp( pAniLow->m_pAniSet->GetName() ,"idle") != 0) {//idle
 
 					if( (wtype != eq_wd_katana) && 
 						(wtype != eq_wd_grenade) && 
 						(wtype != eq_ws_dagger) && 
-//						(wtype != eq_wd_rifle) &&
-//						(wtype != eq_wd_rlauncher) &&
-//						(wtype != eq_ws_smg) &&
-//						(wtype != eq_wd_smg) &&
-//						(wtype != eq_ws_pistol) &&
-//						(wtype != eq_wd_pistol) &&
 						(wtype != eq_wd_shotgun)
 						)
 					{
@@ -2268,8 +2189,6 @@ bool RVisualMesh::SetNextAnimation(RAniMode animode,RAnimation* pAniSet)
 
 	pInfo->m_pAniSetNext = pAniSet;
 
-//	CheckAnimationType(pInfo->m_pAniSet);
-
 	Play(animode);
 
 	return true;
@@ -2282,7 +2201,7 @@ bool RVisualMesh::SetNextAnimation(RAniMode animode, const char* ani_name)
 
 	int wtype = -1;
 
-	if(m_SelectWeaponMotionType != eq_weapon_etc)//기본값이면 그냥 -1
+	if(m_SelectWeaponMotionType != eq_weapon_etc)
 		wtype = GetSetectedWeaponMotionID();
 
 	RAnimation* pAniSet = m_pMesh->m_ani_mgr.GetAnimation(ani_name,wtype);
@@ -2311,8 +2230,6 @@ bool RVisualMesh::SetReserveAnimation(RAniMode animode,RAnimation* pAniSet,int t
 	pInfo->m_nReserveTime = GetGlobalTimeMS() + tick;
 	pInfo->m_pAniSetReserve = pAniSet;
 
-//	CheckAnimationType(m_pAniSet[animode]);
-
 	Play(animode);
 
 	return true;
@@ -2325,7 +2242,7 @@ bool RVisualMesh::SetReserveAnimation(RAniMode animode, const char* ani_name,int
 
 	int wtype = -1;
 
-	if(m_SelectWeaponMotionType!=eq_weapon_etc)//기본값이면 그냥 -1
+	if(m_SelectWeaponMotionType!=eq_weapon_etc)
 		wtype = GetSetectedWeaponMotionID();
 
 	RAnimation* pAniSet = m_pMesh->m_ani_mgr.GetAnimation(ani_name,wtype);
@@ -2345,26 +2262,7 @@ void RVisualMesh::OutputDebugString_CharacterState()
 	str.Add("//////////////////   visual mesh   ////////////////////" );
 
 	AddText(m_id);
-//	AddText(m_fSpeed[0]);
-//	AddText(m_fSpeed[1]);
 	AddText(m_nAnimationState);
-
-//	AddText(m_isOncePlayDone[ani_mode_lower]);
-//	AddText(m_isOncePlayDone[ani_mode_upper]);
-
-//	AddText(m_isPlayDone[ani_mode_lower]);
-//	AddText(m_isPlayDone[ani_mode_upper]);
-
-//	AddText(m_nFrame[ani_mode_lower]);
-//	AddText(m_nFrame[ani_mode_upper]);
-
-//	if(m_pAniSet[ani_mode_lower]) {
-//		AddText(m_pAniSet[ani_mode_lower]->m_filename);
-//	}
-
-//	if(m_pAniSet[ani_mode_upper]) {
-//		AddText(m_pAniSet[ani_mode_upper]->m_filename);
-//	}
 
 	str.PrintLog();
 }
@@ -2445,7 +2343,7 @@ rvector	RVisualMesh::GetFootPosition()
 			v.z += pNode->m_mat_result._43;
 
 			v *= .5f;
-			v.y-=12.f;	// 신발 높이 ;)
+			v.y-=12.f;
 
 			if(m_isScale) v = v * m_ScaleMat;
 		}
@@ -2521,7 +2419,6 @@ rvector	RVisualMesh::GetHeadPosition()
 	rv.y = m._42;
 	rv.z = m._43;
 
-	// 위치를 좀 조정해준다
 	rvector root=GetRootPosition()-rv;
 	Normalize(root);
 
@@ -2605,19 +2502,7 @@ void RVisualMesh::GetBBox(rvector& vMax,rvector& vMin)
 	vMax = m_vBMax;
 	vMin = m_vBMin;
 }
-/*
-RWeaponType RVisualMesh::GetSelectWeaponType() 
-{
-	RVisualMesh* pVMesh = GetSelectWeaponVMesh();
 
-	if(pVMesh) {
-		if(	pVMesh->m_pMesh ) {
-			return pVMesh->m_pMesh->GetMeshWeaponType();
-		}
-	}
-	return z_weapon_etc;
-}
-*/
 int RVisualMesh::GetSetectedWeaponMotionID() 
 {
 	return (int)m_SelectWeaponMotionType;

@@ -149,7 +149,6 @@ int	RMeshMgr::LoadXmlList(char* name,RFPROGRESSCALLBACK pfnProgressCallback, voi
 	char IDName[256];
 	char FileName[256];
 	char WeaponMotionType[256];
-//	char WeaponType[256];
 	char LitModel[256];
 	char NameSort[256];
 	char AutoLoad[256];

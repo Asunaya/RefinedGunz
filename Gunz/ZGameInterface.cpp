@@ -104,80 +104,81 @@ void ZGameInterface::LoadBitmaps(const char* szDir, ZLoadingProgress *pLoadingPr
 
 #define EXT_LEN 4
 
-	MZFileSystem *pfs=ZGetFileSystem();
+	MZFileSystem *pfs = ZGetFileSystem();
 
 	int nDirLen = (int)strlen(szDir);
 
 	int nTotalCount = 0;
-	// 개수를 세기위한 copy
-	for(int i=0; i<pfs->GetFileCount(); i++){
+
+	for (int i = 0; i < pfs->GetFileCount(); i++) {
 		const char* szFileName = pfs->GetFileName(i);
 		const MZFILEDESC* desc = pfs->GetFileDesc(i);
 		int nLen = (int)strlen(szFileName);
 
-		for(int j=0;j<sizeof(loadExts)/sizeof(loadExts[0]);j++) {
-			// 확장자가 맞으면..
-			if( nLen>EXT_LEN && _stricmp(szFileName+nLen-EXT_LEN, loadExts[j])==0 )
+		for (int j = 0; j < sizeof(loadExts) / sizeof(loadExts[0]); j++) {
+			if (nLen > EXT_LEN && _stricmp(szFileName + nLen - EXT_LEN, loadExts[j]) == 0)
 			{
 				bool bAddDirToAliasName = false;
 				bool bMatch = false;
-				// 경로가 맞아야한다
-				if(nDirLen==0 || _strnicmp(desc->m_szFileName,szDir,nDirLen)==0)
+
+				if (nDirLen == 0 || _strnicmp(desc->m_szFileName, szDir, nDirLen) == 0)
 					nTotalCount++;
 				// custom crosshair
-				if(_strnicmp(desc->m_szFileName,PATH_CUSTOM_CROSSHAIR,strlen(PATH_CUSTOM_CROSSHAIR))==0)
+				else if (_strnicmp(desc->m_szFileName, PATH_CUSTOM_CROSSHAIR, strlen(PATH_CUSTOM_CROSSHAIR)) == 0)
 					nTotalCount++;
 			}
 		}
-	} // 개수를 세기위한 카피
+	}
 
 	int nCount = 0;
-	for(int i=0; i<pfs->GetFileCount(); i++){
+	for (int i = 0; i < pfs->GetFileCount(); i++) {
 
 		const char* szFileName = pfs->GetFileName(i);
 		const MZFILEDESC* desc = pfs->GetFileDesc(i);
 		int nLen = (int)strlen(szFileName);
 
-		for(int j=0;j<sizeof(loadExts)/sizeof(loadExts[0]);j++) {
-			// 확장자가 맞으면..
-			if( nLen>EXT_LEN && _stricmp(szFileName+nLen-EXT_LEN, loadExts[j])==0 )
+		for (int j = 0; j < sizeof(loadExts) / sizeof(loadExts[0]); j++) {
+			if (nLen > EXT_LEN && _stricmp(szFileName + nLen - EXT_LEN, loadExts[j]) == 0)
 			{
 				bool bAddDirToAliasName = false;
 				bool bMatch = false;
-				// 경로가 맞아야한다
-				if(nDirLen==0 || _strnicmp(desc->m_szFileName,szDir,nDirLen)==0)
+
+				if (nDirLen == 0 || _strnicmp(desc->m_szFileName, szDir, nDirLen) == 0)
 					bMatch = true;
+
 				// custom crosshair
-				if(_strnicmp(desc->m_szFileName,PATH_CUSTOM_CROSSHAIR,strlen(PATH_CUSTOM_CROSSHAIR))==0)
+				if (_strnicmp(desc->m_szFileName, PATH_CUSTOM_CROSSHAIR, strlen(PATH_CUSTOM_CROSSHAIR)) == 0)
 				{
 					bMatch = true;
 					bAddDirToAliasName = true;
 				}
 
-				if(bMatch) {
+				if (bMatch) {
 					nCount++;
-					if(pLoadingProgress && nCount%10==0)
-						pLoadingProgress->UpdateAndDraw((float)nCount/(float)nTotalCount);
+					if (pLoadingProgress && nCount % 10 == 0)
+						pLoadingProgress->UpdateAndDraw((float)nCount / (float)nTotalCount);
 
 
 					char aliasname[256];
-					char drive[_MAX_DRIVE],dir[_MAX_DIR],fname[_MAX_FNAME],ext[_MAX_EXT];
-					_splitpath(szFileName,drive,dir,fname,ext);
+					char drive[_MAX_DRIVE], dir[_MAX_DIR], fname[_MAX_FNAME], ext[_MAX_EXT];
+					_splitpath(szFileName, drive, dir, fname, ext);
 
-					if (!bAddDirToAliasName) sprintf_safe(aliasname,"%s%s",fname,ext);
-					else sprintf_safe(aliasname, "%s%s%s", dir, fname,ext);
+					if (!bAddDirToAliasName) sprintf_safe(aliasname, "%s%s", fname, ext);
+					else sprintf_safe(aliasname, "%s%s%s", dir, fname, ext);
 
 #ifdef _PUBLISH
-					MZFile::SetReadMode( MZIPREADFLAG_ZIP | MZIPREADFLAG_MRS | MZIPREADFLAG_MRS2 | MZIPREADFLAG_FILE );
+					MZFile::SetReadMode(MZIPREADFLAG_ZIP | MZIPREADFLAG_MRS | MZIPREADFLAG_MRS2 | MZIPREADFLAG_FILE);
 #endif
+					auto MBitmapR2Create = MBeginProfile("ZGameInterface::LoadBitmaps - MBitmapR2::Create");
 					MBitmapR2* pBitmap = new MBitmapR2;
-					if(pBitmap->Create(aliasname, RGetDevice(), desc->m_szFileName)==true)
+					if (pBitmap->Create(aliasname, RGetDevice(), desc->m_szFileName) == true)
 						MBitmapManager::Add(pBitmap);
 					else
 						delete pBitmap;
+					MEndProfile(MBitmapR2Create);
 
 #ifdef _PUBLISH
-					MZFile::SetReadMode( MZIPREADFLAG_MRS2 );
+					MZFile::SetReadMode(MZIPREADFLAG_MRS2);
 #endif
 
 				}
@@ -186,34 +187,11 @@ void ZGameInterface::LoadBitmaps(const char* szDir, ZLoadingProgress *pLoadingPr
 	}
 
 	mlog("ZGameInterface::LoadBitmaps2\n");
-	//ZLoadBitmap(PATH_CUSTOM_CROSSHAIR, ".png", true);
-
 }
-
-/*
-void InitHotBar(MWidget* pHotBar)
-{
-if(pHotBar==NULL) return;
-
-#define HOTBAR_BTN_COUNT	10
-#define HOTBAR_BTN_WIDTH	32
-#define HOTBAR_SPINBTN_WIDTH	16
-MRECT HotBarClientRect = pHotBar->GetClientRect();
-MButton* pNew = new MButton("<", pHotBar, pHotBar);
-pNew->SetBounds(HotBarClientRect.x, HotBarClientRect.y, HOTBAR_SPINBTN_WIDTH, HOTBAR_SPINBTN_WIDTH);
-pNew = new MButton(">", pHotBar, pHotBar);
-pNew->SetBounds(HotBarClientRect.x, HotBarClientRect.y+HOTBAR_SPINBTN_WIDTH, HOTBAR_SPINBTN_WIDTH, HOTBAR_SPINBTN_WIDTH);
-
-for(int i=0; i<HOTBAR_BTN_COUNT; i++){
-MButton* pNew = new MHotBarButton(NULL, pHotBar, &g_HotBarButtonListener);
-pNew->SetBounds(HotBarClientRect.x+HOTBAR_SPINBTN_WIDTH+1+i*(HOTBAR_BTN_WIDTH+1), HotBarClientRect.y, HOTBAR_BTN_WIDTH, HOTBAR_BTN_WIDTH);
-}
-}
-*/
 
 void AddListItem(MListBox* pList, MBitmap* pBitmap, const char* szString, const char* szItemString)
 {
-	class MDragableListItem : public MDefaultListItem{
+	class MDragableListItem : public MDefaultListItem {
 		char m_szDragItemString[256];
 	public:
 		MDragableListItem(MBitmap* pBitmap, const char* szText, const char* szItemString)
@@ -436,7 +414,6 @@ bool ZGameInterface::InitInterface(const char* szSkinName, ZLoadingProgress *pLo
 #define BEGIN_ { _begin_time = GetGlobalTimeMS(); }
 #define END_(x) { _end_time = GetGlobalTimeMS(); float f_time = (_end_time - _begin_time) / 1000.f; mlog("%s : %f \n", x,f_time ); }
 
-
 	SetObjectTextureLevel(ZGetConfiguration()->GetVideo()->nCharTexLevel);
 	SetMapTextureLevel(ZGetConfiguration()->GetVideo()->nMapTexLevel);
 	SetEffectLevel(ZGetConfiguration()->GetVideo()->nEffectLevel);
@@ -451,42 +428,25 @@ bool ZGameInterface::InitInterface(const char* szSkinName, ZLoadingProgress *pLo
 	ZGetInterfaceSkinPath(szPath, a_szSkinName);
 	sprintf_safe(szFileName, "%s%s", szPath, FILENAME_INTERFACE_MAIN);
 
-	/*
-	BEGIN_;
-	if ((_stricmp(szSkinName, DEFAULT_INTERFACE_SKIN)) && (!IsExist(szFileName)))
-	{
-		strcpy_safe(a_szSkinName, DEFAULT_INTERFACE_SKIN);
-		ZGetInterfaceSkinPath(szPath, a_szSkinName);
-		sprintf_safe(szFileName, "%s%s", szPath, FILENAME_INTERFACE_MAIN);
-		bRet = false;
-	}
-	END_("interface skin");
-	*/
-
 	ZEmptyBitmap();
 
 	ZLoadingProgress pictureProgress("pictures",pLoadingProgress,.7f);
+	auto LoadingPictures = MBeginProfile("ZGameInterface::InitInterface - LoadBitmaps");
 	BEGIN_;
-	//ZLoadBitmap(szPath, ".png");
-	//ZLoadBitmap(szPath, ".bmp");
-	//ZLoadBitmap(szPath, ".tga");
-	////	ZLoadBitmap(szPath, ".dds");
-	//ZLoadBitmap(PATH_CUSTOM_CROSSHAIR, ".png", true);
+
 	LoadBitmaps(szPath,&pictureProgress);
 
 	END_("loading pictures");
+	MEndProfile(LoadingPictures);
 
+	auto IDLRsrc = MBeginProfile("ZGameInterface::InitInterface - MIDLResource::LoadFromFile");
 	BEGIN_;
 	if (!m_IDLResource.LoadFromFile(szFileName, this, ZGetFileSystem()))
 	{
-		// 로드 실패하면 Default로 로드
 		strcpy_safe(a_szSkinName, DEFAULT_INTERFACE_SKIN);
 		ZGetInterfaceSkinPath(szPath, a_szSkinName);
 		sprintf_safe(szFileName, "%s%s", szPath, FILENAME_INTERFACE_MAIN);
-		//ZLoadBitmap(szPath, ".png");
-		//ZLoadBitmap(szPath, ".bmp");
-		//ZLoadBitmap(szPath, ".tga");
-		//ZLoadBitmap(szPath, ".dds");
+
 		LoadBitmaps(szPath,&pictureProgress);
 
 		if (m_IDLResource.LoadFromFile(szFileName, this, ZGetFileSystem()))
@@ -504,11 +464,11 @@ bool ZGameInterface::InitInterface(const char* szSkinName, ZLoadingProgress *pLo
 		mlog("IDLResource Loading Success!!\n");
 	}
 	END_("IDL resources");
+	MEndProfile(IDLRsrc);
 
+	auto Etc = MBeginProfile("ZGameInterface::InitInterface - Etc.");
 	g_RGMain->OnInitInterface(m_IDLResource);
 
-// 다이알로그 look 세팅
-//	MBFrameLook* pFrameLook = (MBFrameLook*)m_IDLResource.FindFrameLook("Custom1FrameLook");
 	MBFrameLook* pFrameLook = (MBFrameLook*)m_IDLResource.FindFrameLook("DefaultFrameLook");
 	if (pFrameLook != NULL)
 	{
@@ -522,9 +482,6 @@ bool ZGameInterface::InitInterface(const char* szSkinName, ZLoadingProgress *pLo
 
 	ZStageSetting::InitStageSettingDialog();
 
-// EquipmentListBox 이벤트 세팅
-
-	// 상점에있는것
 	ZEquipmentListBox* pEquipmentListBox = (ZEquipmentListBox*)m_IDLResource.FindWidget("AllEquipmentList");
 	if (pEquipmentListBox)
 	{
@@ -547,7 +504,6 @@ bool ZGameInterface::InitInterface(const char* szSkinName, ZLoadingProgress *pLo
 		}
 	}
 
-	// 장비에 있는것
 	pEquipmentListBox = (ZEquipmentListBox*)m_IDLResource.FindWidget("EquipmentList");
 	if (pEquipmentListBox)
 	{
@@ -559,25 +515,18 @@ bool ZGameInterface::InitInterface(const char* szSkinName, ZLoadingProgress *pLo
 		}
 	}
 
-	// 계정에 있는것
 	pEquipmentListBox = (ZEquipmentListBox*)m_IDLResource.FindWidget("AccountItemList");
 	if (pEquipmentListBox)
 	{
-//		pEquipmentListBox->SetOnDropCallback(CharacterEquipmentItemListBoxOnDrop);
 		MWidget *pFrame=ZGetGameInterface()->GetIDLResource()->FindWidget("Equip_ItemDescriptionFrame");
 		if(pFrame) {
 			pFrame->Show(false);
 			pEquipmentListBox->SetDescriptionWidget(pFrame);
 		}
 	}
-/*
-	MPanel* pPanel = new MPanel();
-	pPanel->SetPosition(10, 10);
-	pPanel->SetSize(300, 300);
-*/
+
 	InitInterfaceListener();
 
-	// CenterMessage 가운데 정렬
 #define CENTERMESSAGE	"CenterMessage"
 	BEGIN_WIDGETLIST(CENTERMESSAGE, &m_IDLResource, MLabel*, pWidget);
 	pWidget->SetAlignment(MAM_HCENTER);
@@ -592,9 +541,10 @@ bool ZGameInterface::InitInterface(const char* szSkinName, ZLoadingProgress *pLo
 	InitMaps(m_IDLResource.FindWidget("MapSelection"));
 
 	_ASSERT(m_pPlayerMenu==NULL);
-	// Player Menu
+
 	m_pPlayerMenu = new ZPlayerMenu("PlayerMenu", this, this, MPMT_VERTICAL);
 	((MPopupMenu*)m_pPlayerMenu)->Show(false);
+	MEndProfile(Etc);
 
 	return true;
 }
@@ -1672,31 +1622,38 @@ bool ZGameInterface::OnCreate(ZLoadingProgress *pLoadingProgress)
 		return false;
 	}
 	
+	auto ZGameInterfaceInitInterface = MBeginProfile("ZGameInterface::InitInterface");
 	ZLoadingProgress interfaceProgress("interfaceSkin",pLoadingProgress,.7f);
 	if(!InitInterface(ZGetConfiguration()->GetInterfaceSkinName(),&interfaceProgress))
 	{
 		mlog("ZGameInterface::OnCreate: Failed InitInterface\n");
 		return false;
 	}
+	MEndProfile(ZGameInterfaceInitInterface);
 
 	interfaceProgress.UpdateAndDraw(1.f);
 
-	mlog("ZGameInterface::OnCreate : InitInterface \n");
+	//mlog("ZGameInterface::OnCreate : InitInterface \n");
 
+	auto ZScreenEffectManagerCreate = MBeginProfile("ZGameInterface - ZScreenEffectManager::Create");
 	m_pScreenEffectManager=new ZScreenEffectManager;
 	if(!m_pScreenEffectManager->Create()) 
 		return false;
+	MEndProfile(ZScreenEffectManagerCreate);
 
-	mlog("ZGameInterface::OnCreate : m_pScreenEffectManager->Create()\n");
+	//mlog("ZGameInterface::OnCreate : m_pScreenEffectManager->Create()\n");
 
+	auto ZEffectManagerCreate = MBeginProfile("ZGameInterface - ZEffectManager::Create");
 	m_pEffectManager = new ZEffectManager;
 	if(!m_pEffectManager->Create())
 		return false;
+	MEndProfile(ZEffectManagerCreate);
 
-	mlog("ZGameInterface::OnCreate : m_pEffectManager->Create()\n");
+	//mlog("ZGameInterface::OnCreate : m_pEffectManager->Create()\n");
 
 	SetTeenVersion(ZGetLocale()->IsTeenMode());
 
+	auto ZGameClientCreate = MBeginProfile("ZGameInterface - ZGameClient::Create");
 	int nNetworkPort = RandomNumber( ZGetConfiguration()->GetEtc()->nNetworkPort1, ZGetConfiguration()->GetEtc()->nNetworkPort2);
 	if (g_pGameClient->Create( nNetworkPort) == false) {
 		string strMsg = "Unknown Network Error";
@@ -1708,8 +1665,11 @@ bool ZGameInterface::OnCreate(ZLoadingProgress *pLoadingProgress)
 	}
 	g_pGameClient->SetOnCommandCallback(OnCommand);
 	g_pGameClient->CreateUPnP(nNetworkPort);
+	MEndProfile(ZGameClientCreate);
 
-	mlog("ZGameInterface::OnCreate : g_pGameClient->Create()\n");
+	//mlog("ZGameInterface::OnCreate : g_pGameClient->Create()\n");
+
+	auto Etc = MBeginProfile("ZGameInterface - Etc.");
 
 	ZItemSlotView* itemSlot;
 	for(int i = 0;  i < MMCIP_END;  i++)
@@ -1927,8 +1887,6 @@ bool ZGameInterface::OnCreate(ZLoadingProgress *pLoadingProgress)
 	if ( pBmNumLabel)
 		pBmNumLabel->SetCharMargin(nMargin);
 
-
-	// 매치 타입을 다시 읽어들인다.
 	ZGetGameTypeManager()->SetGameTypeStr(MMATCH_GAMETYPE_DEATHMATCH_SOLO, ZMsg(MSG_MT_DEATHMATCH_SOLO));
 	ZGetGameTypeManager()->SetGameTypeStr( MMATCH_GAMETYPE_DEATHMATCH_TEAM, ZMsg( MSG_MT_DEATHMATCH_TEAM));
 	ZGetGameTypeManager()->SetGameTypeStr( MMATCH_GAMETYPE_GLADIATOR_SOLO, ZMsg( MSG_MT_GLADIATOR_SOLO));
@@ -1972,13 +1930,10 @@ bool ZGameInterface::OnCreate(ZLoadingProgress *pLoadingProgress)
 		pCombo->SetListboxAlignment( MAM_LEFT);
 	}
 
-
 	pCombo = (MComboBox*)m_IDLResource.FindWidget( "StageType");
 	if ( pCombo)
 		pCombo->SetListboxAlignment( MAM_LEFT);
 
-
-	// 캐릭터 뷰어
 	ZCharacterView* pCharView = (ZCharacterView*)m_IDLResource.FindWidget( "EquipmentInformation");
 	if ( pCharView)
 		pCharView->EnableAutoRotate( true);
@@ -1986,6 +1941,7 @@ bool ZGameInterface::OnCreate(ZLoadingProgress *pLoadingProgress)
 	if ( pCharView)
 		pCharView->EnableAutoRotate( true);
 
+	MEndProfile(Etc);
 
 	mlog("ZGameInterface::OnCreate : done \n");
 

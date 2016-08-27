@@ -52,16 +52,13 @@ public:
 	bool isMode(unsigned long mode ) { return (m_dwReadMode & mode) ? true : false ; }
 	bool isReadAble(unsigned long mode);
 
-	// Get File Count in Zip
 	int GetFileCount(void) const;
 
-	// Get File Name by Index
 	void GetFileName(int i, char *szDest) const;
+	const char* GetFileName(int i) const;
 
-	// Get File Index by Name
 	int GetFileIndex(const char* szFileName) const;
 
-	// Get File Index by Index
 	int GetFileLength(int i) const;
 	int GetFileLength(const char* filename);
 

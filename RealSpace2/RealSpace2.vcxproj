@@ -422,6 +422,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Include\MeshManager.h" />
     <ClInclude Include="Include\RHalfEdgeMesh.h" />
     <ClInclude Include="Include\RMesh.h" />
     <ClInclude Include="INCLUDE\RMeshMgr.h" />
@@ -469,7 +470,6 @@
     <ClInclude Include="Include\RTypes.h" />
     <ClInclude Include="Include\RVersions.h" />
     <ClInclude Include="Include\stdafx.h" />
-    <ClInclude Include="Source\MeshManager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

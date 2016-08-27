@@ -39,22 +39,27 @@ extern "C" void CustomLog(const char *Msg);
 
 #pragma comment(linker, "/alternatename:_CustomLog=_CustomLogDefault")
 
-/*
-char *MGetLogHistory(int i);
-int	MGetLogHistoryCount();
-*/
-
 #ifdef _WIN32
 void __cdecl MMsg(const char *pFormat,...);
 #endif
 
 void MFilterException(LPEXCEPTION_POINTERS p);
 
-//void MInstallSEH();	// Compile Option에 /EHa 있어야함
-
 void MInitProfile();
 void MBeginProfile(int nIndex,const char *szName);
 void MEndProfile(int nIndex);
 void MSaveProfile(const char *file);
+
+struct ProfilerGuard
+{
+	ProfilerGuard() = default;
+	~ProfilerGuard();
+	ProfilerGuard(ProfilerGuard&& src) : Active(src.Active) { src.Active = false; }
+
+	bool Active = true;
+};
+
+ProfilerGuard MBeginProfile(const char *szName);
+void MEndProfile(ProfilerGuard& guard);
 
 #endif

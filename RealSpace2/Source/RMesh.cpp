@@ -459,16 +459,16 @@ int RMesh::_FindMeshId(int e_name)
 	if (m_list.empty())
 		return -1;
 
-	__BP(307, "RMesh::FindMeshId");
+	//__BP(307, "RMesh::FindMeshId");
 
 	RMeshNode* pNode = m_list.Find(e_name);
 	if (pNode != NULL)
 	{
-		__EP(307);
+		//__EP(307);
 		return pNode->m_id;
 	}
 
-	__EP(307);
+	//__EP(307);
 
 	return -1;
 }
@@ -478,16 +478,16 @@ int RMesh::_FindMeshId(const char* name)
 	if (m_list.empty())
 		return -1;
 
-	__BP(306, "RMesh::FindMeshId");
+	//__BP(306, "RMesh::FindMeshId");
 
 	RMeshNode* pNode = m_list.Find(name);
 	if (pNode != NULL)
 	{
-		__EP(306);
+		//__EP(306);
 		return pNode->m_id;
 	}
 
-	__EP(306);
+	//__EP(306);
 
 	return -1;
 }

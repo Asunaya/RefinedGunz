@@ -389,8 +389,6 @@ bool ZEffectManager::Create(void)
 
 	m_pEBSLightTracer = new ZEffectBillboardSource("SFX/gz_sfx_tracer.bmp");
 	
-//	m_pEBSBulletMark[0] = new ZEffectBillboardSource("SFX/bullet-mark01.tga");
-//	m_pEBSBulletMark[1] = new ZEffectBillboardSource("SFX/bullet-mark02.tga");
 	m_pEBSBulletMark[0] = new ZEffectBillboardSource("SFX/gz_sfx_shotgun_bulletmark01.tga");
 	m_pEBSBulletMark[1] = new ZEffectBillboardSource("SFX/gz_sfx_shotgun_bulletmark02.tga");
 	m_pEBSBulletMark[2] = new ZEffectBillboardSource("SFX/gz_effect004.tga");
@@ -419,8 +417,6 @@ bool ZEffectManager::Create(void)
 	if(m_pEffectMeshMgr->LoadXmlList("SFX/effect_list.xml")==-1) {
 		mlog("effect_list loding error\n");
 	}
-
-	// 속도를 위한 index
 
 	m_pMeshEmptyCartridges[0] = m_pEffectMeshMgr->Get("empty_cartridge1");
 	m_pMeshEmptyCartridges[1] = m_pEffectMeshMgr->Get("empty_cartridge2");
@@ -482,15 +478,12 @@ bool ZEffectManager::Create(void)
 	m_pMagicEffectWall[1]		= m_pEffectMeshMgr->Get("icemissile_wall");
 	m_pMagicEffectWall[2]		= m_pEffectMeshMgr->Get("magicmissile_wall");
 
-//	m_pRocketSmokeEffect		= m_pEffectMeshMgr->Get("rocket_smoke_effect");
 	m_pSwordUppercutEffect		= m_pEffectMeshMgr->Get("sword_uppercut_effect");
 	m_pSwordUppercutDamageEffect= m_pEffectMeshMgr->Get("sword_uppercut_damage_effect");
 	m_pFlameMG					= m_pEffectMeshMgr->Get("flame_mg");
 	m_pFlamePistol				= m_pEffectMeshMgr->Get("flame_pistol");
 	m_pFlameRifle				= m_pEffectMeshMgr->Get("flame_rifle");
 	m_pFlameShotgun				= m_pEffectMeshMgr->Get("flame_shotgun");
-
-	//m_pWaterSplash				= m_pEffectMeshMgr->Get(")
 
 	m_pLevelUpEffect[0]	= m_pEffectMeshMgr->Get("levelup");
 	m_pLevelUpEffect[1] = m_pEffectMeshMgr->Get("levelup01");

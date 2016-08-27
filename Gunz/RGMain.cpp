@@ -13,6 +13,7 @@
 #include "ZReplay.inl"
 #include "ZInput.h"
 #include <cstdint>
+#include "MeshManager.h"
 
 std::unique_ptr<RGMain> g_RGMain;
 
@@ -249,6 +250,8 @@ void RGMain::OnUpdate(double Elapsed)
 				break;
 		}
 	}
+
+	TaskManager::GetInstance().Update(Elapsed);
 }
 
 bool RGMain::OnEvent(MEvent *pEvent)
@@ -567,7 +570,8 @@ IDirect3DTexture9* HueShiftTexture(IDirect3DTexture9* Tex, float Hue)
 	Tex->GetLevelDesc(0, &Desc);
 
 	IDirect3DTexture9 *NewTex;
-	RGetDevice()->CreateTexture(Desc.Width, Desc.Height, Levels, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &NewTex, nullptr);
+	RGetDevice()->CreateTexture(Desc.Width, Desc.Height, Levels, 0,
+		D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &NewTex, nullptr);
 
 	int Level = 0;
 
@@ -581,7 +585,8 @@ IDirect3DTexture9* HueShiftTexture(IDirect3DTexture9* Tex, float Hue)
 		D3DPtr<IDirect3DSurface9> NewSurface = nullptr;
 		NewTex->GetSurfaceLevel(Level, &NewSurface.ptr);
 
-		if (FAILED(D3DXLoadSurfaceFromSurface(NewSurface, nullptr, nullptr, OrigSurface, nullptr, nullptr, D3DX_FILTER_NONE, 0)))
+		if (FAILED(D3DXLoadSurfaceFromSurface(NewSurface, nullptr, nullptr,
+			OrigSurface, nullptr, nullptr, D3DX_FILTER_NONE, 0)))
 		{
 			MLog("Failed to load surface from material\n");
 			return nullptr;
@@ -608,7 +613,10 @@ IDirect3DTexture9* HueShiftTexture(IDirect3DTexture9* Tex, float Hue)
 				hsv HSV = rgb2hsv(color);
 				HSV.h += fmod(Hue, 360.0);
 				color = hsv2rgb(HSV);
-				Pixel = (int(color.r * 2.55) << 8) | (int(color.g * 2.55) << 16) | (int(color.b * 2.55) << 24) | (Pixel & 0xFF);
+				Pixel = (int(color.r * 2.55) << 8)
+					| (int(color.g * 2.55) << 16)
+					| (int(color.b * 2.55) << 24)
+					| (Pixel & 0xFF);
 			}
 		}
 

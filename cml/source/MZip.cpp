@@ -127,7 +127,6 @@ MZip::MZip(void)
 	m_ppDir = NULL;
 	m_nDirEntries = 0;
 	m_nZipMode = ZMode_Zip;
-//	m_dwReadMode = MZIPREADFLAG_ZIP | MZIPREADFLAG_MRS | MZIPREADFLAG_MRS2 | MZIPREADFLAG_FILE;
 	m_dwReadMode = 0;
 }
 
@@ -153,11 +152,6 @@ bool MZip::isReadAble(unsigned long mode)
 bool MZip::Initialize(FILE* fp,unsigned long ReadMode)
 {
 	if(fp==NULL) return false;
-
-	// zip , mrs1 ,mrs2 를 읽어야한다..
-	// publish 면,,, zip 을 읽지 못하도록 옵션에 모드를 둔다.. 
-	// 파일에서는 읽기 불가 + zip 가능여부 + mrs1 가능여부..
-	// zip 을 읽을 필요가 있는가?
 
 	m_dwReadMode = ReadMode;
 
@@ -185,10 +179,8 @@ bool MZip::Initialize(FILE* fp,unsigned long ReadMode)
 	memset(&dh, 0, sizeof(dh));
 	fread(&dh, sizeof(dh), 1, fp);
 
-	if( m_nZipMode>=ZMode_Mrs2 )							// mrs2 이상부터 데이터 복구..
-		RecoveryChar((char*)&dh,sizeof(MZIPDIRHEADER));		// v2 이상이면..
-
-	// 데이터를 조작하는 경우.... zip , mrs1 , mrs2 모두아닐경우...
+	if( m_nZipMode>=ZMode_Mrs2 )
+		RecoveryChar((char*)&dh,sizeof(MZIPDIRHEADER));
 
 	if( dh.sig != MRS2_ZIP_CODE && dh.sig != MRS_ZIP_CODE && dh.sig != MZIPDIRHEADER::SIGNATURE ) {
 		return false;		
@@ -201,7 +193,7 @@ bool MZip::Initialize(FILE* fp,unsigned long ReadMode)
 	fread(m_pDirData, dh.dirSize, 1, fp);
 
 	if( m_nZipMode>=ZMode_Mrs2 )
-		RecoveryChar( (char*)m_pDirData , dh.dirSize );//mrs 라면 변환..
+		RecoveryChar( (char*)m_pDirData , dh.dirSize );
 
 	char *pfh = m_pDirData;
 	m_ppDir = (const MZIPDIRFILEHEADER **)(m_pDirData + dh.dirSize);
@@ -268,6 +260,11 @@ void MZip::GetFileName(int i, char *szDest) const
 	}
 }
 
+const char* MZip::GetFileName(int i) const
+{
+	return m_ppDir[i]->GetName();
+}
+
 int t_strcmp(const char* str1,const char* str2)
 {
 	int len = strlen(str1);
@@ -293,7 +290,6 @@ int MZip::GetFileIndex(const char* szFileName) const
 	char szSourceName[256];
 	for(int i=0; i<GetFileCount();i++){
 		GetFileName(i, szSourceName);
-//		if(strcmp(szFileName, szSourceName)==0) 
 		if(t_strcmp(szFileName, szSourceName)==0) 
 			return i;
 	}
@@ -370,7 +366,7 @@ bool MZip::ReadFile(int i, void* pBuffer, int nMaxSize)
 		if(h.sig!=MZIPLOCALHEADER::SIGNATURE2) 
 			return false;
 
-	fseek(m_fp, h.fnameLen + h.xtraLen, SEEK_CUR);// MRS 의경우 복구 안해 줬음..
+	fseek(m_fp, h.fnameLen + h.xtraLen, SEEK_CUR);
 
 	if(h.compression==MZIPLOCALHEADER::COMP_STORE){
 
@@ -392,7 +388,6 @@ bool MZip::ReadFile(int i, void* pBuffer, int nMaxSize)
 	z_stream stream;
 	int err;
 
-//#define min(_a, _b)	((_a<=_b)?_a:_b)
 	stream.zalloc = (alloc_func)0;
 	stream.zfree = (free_func)0;
 	stream.opaque = (voidpf)0;
@@ -500,19 +495,7 @@ bool MZip::UpgradeMrs(char* mrs_name) // Mrs To Mrs2
 	for (int i = 0; i < dh.nDirEntries; i++) {
 
 		fh = *(MZIPDIRFILEHEADER*)pTPos;
-/*
-		_fileheaderReaderSize = sizeof(fh) + fh.fnameLen + fh.xtraLen ;
 
-		fseek(fp, fh.hdrOffset, SEEK_SET);
-		fread(_fileheaderReader, _fileheaderReaderSize, 1, fp);
-
-		ConvertChar( _fileheaderReader , _fileheaderReaderSize );
-
-		fseek(fp, fh.hdrOffset, SEEK_SET);
-		fwrite(_fileheaderReader , _fileheaderReaderSize, 1, fp);
-
-		pTPos += _fileheaderReaderSize + fh.cmntLen;
-*/
 		fseek(fp, fh.hdrOffset, SEEK_SET);
 
 		fread(&h, sizeof(h), 1, fp);
@@ -604,20 +587,7 @@ bool MZip::ConvertZip(char* zip_name)
 	for (int i = 0; i < dh.nDirEntries; i++) {
 
 		fh = *(MZIPDIRFILEHEADER*)pTPos;
-/*
-		_fileheaderReaderSize = sizeof(h) + fh.fnameLen + fh.xtraLen;
 
-		fseek(fp, fh.hdrOffset, SEEK_SET);
-
-		fread(_fileheaderReader, _fileheaderReaderSize, 1, fp);
-
-		ConvertChar( _fileheaderReader , _fileheaderReaderSize );
-
-		fseek(fp, fh.hdrOffset, SEEK_SET);
-		fwrite(_fileheaderReader , _fileheaderReaderSize, 1, fp);
-
-		pTPos += _fileheaderReaderSize + fh.cmntLen;
-*/
 		fseek(fp, fh.hdrOffset, SEEK_SET);
 
 		fread(&h, sizeof(h), 1, fp);
@@ -668,8 +638,6 @@ bool MZip::ConvertZip(char* zip_name)
 
 	return true;
 }
-
-// 이전 버전 파일도 복구해야 한다..
 
 bool MZip::RecoveryMrs(FILE* fp)
 {
@@ -765,19 +733,7 @@ bool MZip::RecoveryMrs2(FILE* fp)
 	for (int i = 0; i < dh.nDirEntries; i++) {
 
 		fh = *(MZIPDIRFILEHEADER*)pTPos;
-/*
-		_fileheaderReaderSize = sizeof(fh) + fh.fnameLen + fh.xtraLen;
 
-		fseek(fp, fh.hdrOffset, SEEK_SET);
-		fread(_fileheaderReader, _fileheaderReaderSize, 1, fp);
-
-		RecoveryChar( _fileheaderReader , _fileheaderReaderSize );
-
-		fseek(fp, fh.hdrOffset, SEEK_SET);
-		fwrite(_fileheaderReader , _fileheaderReaderSize, 1, fp);
-
-		pTPos += _fileheaderReaderSize + fh.cmntLen;
-*/
 		fseek(fp, fh.hdrOffset, SEEK_SET);
 
 		fread(&h, sizeof(h), 1, fp);
@@ -962,7 +918,6 @@ void FFileList::ConvertVtf()
 	for(node = begin(); node != end(); ++node) {
 		pNode = (*node);
 
-//		ShellExecute()
 		strcpy_safe(temp, pNode->m_name);
 		len = strlen(temp);
 		temp[len-3] = 0;
@@ -970,8 +925,6 @@ void FFileList::ConvertVtf()
 
 		sprintf_safe(temp_arg,"%s %s",pNode->m_name,temp);
 		HINSTANCE hr = ShellExecute(NULL, _T("open"), _T("vtf2tga.exe"),_T(temp_arg), NULL, SW_HIDE);
-//		ShellExecute()
-//		_execl("vtf2tga.exe","%s %s",pNode->m_name,temp);
 	}
 }
 
@@ -1021,10 +974,6 @@ void FFileList::ConvertNameZip2MRes()
 	}
 }
 
-/////////////////////////////////////////////////////////////////////////////////
-
-// 지정된 경로에서 파일 리스트 얻어내기 
-
 bool GetDirList(char* path,	FFileList& pList)
 {
 	struct _finddata_t file_t;
@@ -1050,8 +999,6 @@ bool GetDirList(char* path,	FFileList& pList)
 
 	return true;
 }
-
-// 지정된 경로에서 디렉토리 리스트 얻어내기 
 
 bool GetFileList(char* path,FFileList& pList)
 {
@@ -1081,7 +1028,6 @@ bool GetFileList(char* path,FFileList& pList)
 
 bool GetFileListWin(char* path,FFileList& pList)
 {
-
 	WIN32_FIND_DATA		file_t;
 	HANDLE				hFile;
 
@@ -1106,9 +1052,6 @@ bool GetFileListWin(char* path,FFileList& pList)
 
 	return true;
 }
-
-
-// 모든 하위폴더의 원하는 파일들 검색..
 
 bool GetFindFileList(char* path,char* ext,FFileList& pList)
 {

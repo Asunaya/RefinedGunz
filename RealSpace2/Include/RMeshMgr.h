@@ -1,9 +1,4 @@
-#ifndef _RMeshMgr_h
-#define _RMeshMgr_h
-
-//#if _MSC_VER > 1000
-//#pragma once
-//#endif // _MSC_VER > 1000
+#pragma once
 
 #include "RMesh.h"
 #include <vector>
@@ -18,7 +13,6 @@ typedef r_mesh_list::iterator	r_mesh_node;
 class RMeshMgr
 {
 public:
-
 	RMeshMgr();
 	~RMeshMgr();
 
@@ -42,17 +36,14 @@ public:
 
 	void	RenderFast(int id,D3DXMATRIX* unit_mat);
 
-//	void	Frame();
-//	void	Frame(int id);
-
 	RMesh*	GetFast(int id);
 	RMesh*	Get(const char* name);
 
-	RMesh*	Load(const char* name);	// 모델 set 을 메모리로 올린다.
-	void	UnLoad(const char* name);	// 모델 set 을 메모리에서 내린다.
+	RMesh*	Load(const char* name);
+	void	UnLoad(const char* name);
 
 	void	LoadAll();
-	void	UnLoadAll();		
+	void	UnLoadAll();
 
 	void	CheckUnUsed();
 	void	UnLoadChecked();
@@ -61,7 +52,6 @@ public:
 
 	void GetPartsNode(RMeshPartsType parts,vector<RMeshNode*>& nodetable);
 	RMeshNode* GetPartsNode(const char* name);
-//	RMeshNode* GetParts(RMeshPartsType parts,char* name);
 
 	void SetMtrlAutoLoad(bool b) {
 		m_mtrl_auto_load = b;
@@ -90,5 +80,3 @@ public:
 };
 
 _NAMESPACE_REALSPACE2_END
-
-#endif//_RMeshMgr_h

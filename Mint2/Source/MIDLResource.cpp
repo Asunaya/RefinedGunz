@@ -2630,6 +2630,7 @@ MPanel* MIDLResource::GetPanel(MXmlElement& element)
 
 void MIDLResource::Parse(MXmlElement& element)
 {
+	auto MIDLResourceParse = MBeginProfile("MIDLResource::Parse");
 	char szTagName[256];
 	element.GetTagName(szTagName);
 
@@ -2761,10 +2762,6 @@ void MIDLResource::Parse(MXmlElement& element)
 	{
 		GetHotKey(element);
 	}
-/*	else if (!_stricmp(szTagName, "ACTIONKEY"))
-	{
-		GetActionKey(element);
-	}	*/
 	else if (!_stricmp(szTagName, "TEXTAREA"))
 	{
 		GetTextArea(element);
@@ -2785,12 +2782,13 @@ void MIDLResource::Parse(MXmlElement& element)
 	{
 		GetRebounds(element);
 	}
+	MEndProfile(MIDLResourceParse);
 }
 
-bool MIDLResource::LoadFromFile(const char* szFileName, MWidget* pParent,MZFileSystem *pfs)
+bool MIDLResource::LoadFromFile(const char* szFileName, MWidget* pParent, MZFileSystem *pfs)
 {
 	m_pParent = pParent;
-	if(m_pParent==NULL) m_pParent = Mint::GetInstance()->GetMainFrame();
+	if (m_pParent == NULL) m_pParent = Mint::GetInstance()->GetMainFrame();
 
 	MXmlDocument	xmlDocument;
 	MXmlElement		rootElement, childElement;
@@ -2798,31 +2796,46 @@ bool MIDLResource::LoadFromFile(const char* szFileName, MWidget* pParent,MZFileS
 
 	xmlDocument.Create();
 
-	if(!pfs)
+	if (!pfs)
 	{
-		if (!xmlDocument.LoadFromFile(szFileName)) 
+		if (!xmlDocument.LoadFromFile(szFileName))
 		{
 			xmlDocument.Destroy();
 			return false;
 		}
-	}else
+	}
+	else
 	{
+		auto FileLoading = MBeginProfile("MIDLResource::LoadFromFile - File loading from disk");
 		MZFile mzf;
-		if(!mzf.Open(szFileName,pfs))
-			return false;
-
-		char *buffer;
-		buffer=new char[mzf.GetLength()+1];
-		mzf.Read(buffer,mzf.GetLength());
-		buffer[mzf.GetLength()]=0;
-
-		if(!xmlDocument.LoadFromMemory(buffer))
+		if (!mzf.Open(szFileName, pfs))
 		{
-			delete buffer;
 			return false;
 		}
-		delete buffer;
+
+		char *buffer = nullptr;
+#if 0
+		buffer = new char[mzf.GetLength() + 1];
+		mzf.Read(buffer, mzf.GetLength());
+		buffer[mzf.GetLength()] = 0;
+#else
+		bool Cached = mzf.IsCachedData();
+		buffer = mzf.Release();
+		DMLog("Reading file %s, cached = %d\n", szFileName, Cached);
+#endif
+		MEndProfile(FileLoading);
+
+		auto Parsing = MBeginProfile("MIDLResource::LoadFromFile - MXMLDocument parsing");
+		if (!xmlDocument.LoadFromMemory(buffer))
+		{
+			if (!Cached)
+				delete buffer;
+			return false;
+		}
+		if (!Cached)
+			delete buffer;
 		mzf.Close();
+		MEndProfile(Parsing);
 	}
 
 	rootElement = xmlDocument.GetDocumentElement();
@@ -2906,11 +2919,8 @@ void MIDLResource::ClearLooks()
 	CLEAR(m_ScrollBarLookMap);
 	CLEAR(m_ArrowLookMap);
 	CLEAR(m_ThumbLookMap);
-//	CLEAR(m_SliderLookMap);
 	CLEAR(m_AniBitmapMap);
-//	CLEAR(m_WidgetMap)
 	CLEAR(m_TabCtrlLookMap);
-
 	CLEAR(m_TextAreaLookMap);
 	CLEAR(m_ButtonGroupMap);
 }

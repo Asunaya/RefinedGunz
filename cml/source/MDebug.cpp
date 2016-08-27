@@ -8,8 +8,7 @@
 #include <windows.h>
 #include <mutex>
 #include "../../sdk/dx9/Include/d3dx9.h"
-
-using namespace std;
+#include <cassert>
 
 static char logfilename[256];
 static int g_nLogMethod=MLOGSTYLE_DEBUGSTRING;
@@ -37,7 +36,7 @@ void InitLog(int logmethodflags, const char* pszLogFileName)
 	g_bLogInitialized = true;
 }
 
-void __cdecl DMLog(const char* Format, ...)
+void DMLog(const char* Format, ...)
 {
 	char temp[16 * 1024];
 
@@ -92,7 +91,7 @@ void MLogFile(const char* Msg)
 	fclose(pFile);
 }
 
-void __cdecl MLog(const char *pFormat,...)
+void MLog(const char *pFormat,...)
 {
 	char temp[16 * 1024];
 
@@ -101,7 +100,6 @@ void __cdecl MLog(const char *pFormat,...)
 	va_start(args,pFormat);
 	vsprintf_safe(temp,pFormat,args);
 	va_end(args);
-
 
 	if (g_nLogMethod & MLOGSTYLE_FILE)
 	{
@@ -204,87 +202,110 @@ void MSEHTranslator(UINT nSeCode, _EXCEPTION_POINTERS* pExcPointers)
 	_exit(3);
 }
 
-//void MInstallSEH()	// Compile Option에 /EHa 있어야함
-//{
-//	#ifndef _DEBUG
-//		_set_se_translator(MSEHTranslator);
-//	#endif
-//}
-
 #ifndef _PUBLISH
 
 #define MAX_PROFILE_COUNT	10000
 
 struct MPROFILEITEM {
-	char szName[256];
 	u64 dwStartTime;
 	u64 dwTotalTime;
 	DWORD dwCalledCount;
 };
-MPROFILEITEM g_ProfileItems[MAX_PROFILE_COUNT];
-
-u64 g_dwEnableTime;
+#include <unordered_map>
+#include <stack>
+static std::unordered_map<std::string, MPROFILEITEM> ProfileItems;
+static u64 g_dwEnableTime;
+static std::stack<std::string> Stack;
 
 void MInitProfile()
 {
-	for(int i=0;i<MAX_PROFILE_COUNT;i++)
-	{
-		g_ProfileItems[i].szName[0]=0;
-		g_ProfileItems[i].dwTotalTime=0;
-		g_ProfileItems[i].dwCalledCount=0;
-	}
 	g_dwEnableTime=GetGlobalTimeMS();
 }
 
-void MBeginProfile(int nIndex,const char *szName)
+ProfilerGuard MBeginProfile(const char * szName)
 {
-	if(g_ProfileItems[nIndex].szName[0]==0)
-		strcpy_safe(g_ProfileItems[nIndex].szName,szName);
+	std::string strName{ szName };
+	auto& ProfileItem = ProfileItems[strName];
+	ProfileItem.dwStartTime = GetGlobalTimeMS();
+	ProfileItem.dwCalledCount++;
+	Stack.push(std::move(strName));
+	return{};
+}
 
-	g_ProfileItems[nIndex].dwStartTime=GetGlobalTimeMS();
-	g_ProfileItems[nIndex].dwCalledCount++;
+void MEndProfile(ProfilerGuard& Guard)
+{
+	Guard.Active = false;
+	auto& Name = Stack.top();
+	auto& ProfileItem = ProfileItems[Name];
+	ProfileItem.dwTotalTime += GetGlobalTimeMS() - ProfileItem.dwStartTime;
+	Stack.pop();
+}
+
+void MBeginProfile(int nIndex, const char *szName)
+{
+	auto lvalue = MBeginProfile(szName);
+	lvalue.Active = false;
 }
 
 void MEndProfile(int nIndex)
 {
-	g_ProfileItems[nIndex].dwTotalTime+= 
-		GetGlobalTimeMS()-g_ProfileItems[nIndex].dwStartTime;
+	ProfilerGuard Guard;
+	MEndProfile(Guard);
 }
+
+#include <algorithm>
 
 void MSaveProfile(const char *filename)
 {
 	auto dwTotalTime = GetGlobalTimeMS()-g_dwEnableTime;
 
+	assert(Stack.empty());
+
 	FILE *file = nullptr;
-	fopen_s(&file, filename, "w+");
+	auto ret = fopen_s(&file, filename, "w+");
+	if (file == nullptr || ret != 0)
+	{
+		MLog("Failed to open file %s to save profile stats\n", filename);
+		return;
+	}
 
-	fprintf(file," total time = %6.3f seconds \n", (float)dwTotalTime*0.001f);
+	std::vector<typename decltype(ProfileItems)::iterator> vec;
+	for (auto it = ProfileItems.begin(); it != ProfileItems.end(); it++)
+		vec.emplace_back(it);
 
+	std::sort(vec.begin(), vec.end(), [&](auto&& lhs, auto&& rhs) { return lhs->second.dwTotalTime > rhs->second.dwTotalTime; });
+
+	fprintf(file," total time = %f seconds \n", (float)dwTotalTime*0.001f);
 	fprintf(file,"id   (loop ms)  seconds     %%        calledcount   name \n");
 	fprintf(file,"=========================================================\n");
 
-	float cnt = (float)g_ProfileItems[0].dwCalledCount;
-
-	for(int i=0;i<MAX_PROFILE_COUNT;i++)
+	int i = 0;
+	for (auto it : vec)
 	{
-		if(g_ProfileItems[i].dwTotalTime>0)
-		{
-			fprintf(file,"(%05d) %8.3f %8.3f ( %6.3f %% , %6u) %s \n",
-				i,
-				((float)g_ProfileItems[i].dwTotalTime) / cnt,
-				0.001f*(float)g_ProfileItems[i].dwTotalTime, 
-				100.f*(float)g_ProfileItems[i].dwTotalTime/(float)dwTotalTime,
-				g_ProfileItems[i].dwCalledCount,
-				g_ProfileItems[i].szName);
-		}
+		auto& Name = it->first;
+		auto& ProfileItem = it->second;
+		fprintf(file,"(%05d) %8.3f %8.3f ( %6.3f %% , %6u) %s \n",
+			i,
+			0.f,
+			0.001f * ProfileItem.dwTotalTime,
+			100.0f * ProfileItem.dwTotalTime / dwTotalTime,
+			ProfileItem.dwCalledCount,
+			Name.c_str());
+		i++;
 	}
 	fclose(file);
 }
-
 #else
 void MInitProfile() {}
-void MBeginProfile(int nIndex,const char *szName) {}
+void MBeginProfile(int nIndex, const char *szName) {}
 void MEndProfile(int nIndex) {}
 void MSaveProfile(const char *file) {}
-
+void MBeginProfile(const char * szName) {}
+void MEndProfile() {}
 #endif
+
+ProfilerGuard::~ProfilerGuard()
+{
+	if (Active)
+		MEndProfile(*this);
+}

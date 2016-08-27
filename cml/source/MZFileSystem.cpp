@@ -6,9 +6,9 @@
 #include "MZip.h"
 #include "FileInfo.h"
 #include "zip/zlib.h"
-
-//#define DELETE(p)       { if(p) { delete (p);     (p)=NULL; } }
-#define DELETE_ARRAY(p) { if(p) { delete[] (p);   (p)=NULL; } }
+#include "MDebug.h"
+#include "MUtil.h"
+#include <algorithm>
 
 void ReplaceBackSlashToSlash(char* szPath)
 {
@@ -90,19 +90,15 @@ bool MZFileSystem::AddItem(MZFILEDESC* pDesc)
 	char key[_MAX_PATH];
 	strcpy_safe(key, pDesc->m_szFileName);
 	_strlwr_s(key);
-	
-//	_RPT1(_CRT_WARN,"%s\n",key);
 
 	ZFLISTITOR it=m_ZFileList.find(key);
 	if(it!=m_ZFileList.end())
 	{
 		MZFILEDESC *pOld=it->second;
 
-		// 원래 있던 것보다 몇초뒤의 파일인가 ? 이전파일이면 업데이트 할 필요없다
 		double diff=difftime(dos2unixtime(pDesc->m_modTime),dos2unixtime(pOld->m_modTime));
-		if(diff<0) // 더 예전의 파일이므로 교체할 필요가 없다
+		if(diff<0)
 		{
-			// 업데이트 번호가 앞서면 실수 ?
 			int nOldPkgNum=GetUpdatePackageNumber(pOld->m_szZFileName);
 			int nNewPkgNum=GetUpdatePackageNumber(pDesc->m_szZFileName);
 			// NOTE: This is false, idk what's happening here
@@ -111,7 +107,6 @@ bool MZFileSystem::AddItem(MZFILEDESC* pDesc)
 			return false;
 		}
 
-		// 이전 데이터를 지운다
 		delete pOld;
 		m_ZFileList.erase(it);
 	}
@@ -146,7 +141,6 @@ void MZFileSystem::RefreshFileList(const char* szBasePath)
 				char szDrive[_MAX_PATH], szDir[_MAX_PATH], szFileName[_MAX_PATH], szExt[_MAX_PATH];
 				_splitpath_s(c_file.name, szDrive, szDir, szFileName, szExt);
 				
-				// zip 파일이면 안의 파일들을 더한다
 				if(_stricmp(szExt, "." DEF_EXT)==0 || _stricmp(szExt, ".zip")==0) {
 
 					char szZipFileName[_MAX_PATH],szBaseLocation[_MAX_PATH];
@@ -155,7 +149,7 @@ void MZFileSystem::RefreshFileList(const char* szBasePath)
 					GetRelativePath(szRelZipFileName, sizeof(szRelZipFileName), m_szBasePath,szZipFileName);
 					ReplaceBackSlashToSlash(szRelZipFileName);
 
-					// base directory 에 있는 업데이트로 예약된 패키지는 파일명을 폴더로 간주하지 않는다
+					// base directory
 					if(GetUpdatePackageNumber(szRelZipFileName)>0)
 					{
 						szBaseLocation[0]=0;
@@ -170,16 +164,14 @@ void MZFileSystem::RefreshFileList(const char* szBasePath)
 					if(fp==NULL) continue;
 
 					MZip zf;
-//					unsigned long dwReadMode = MZIPREADFLAG_ZIP | MZIPREADFLAG_MRS | MZIPREADFLAG_MRS2 | MZIPREADFLAG_FILE;
 
-					if(zf.Initialize(fp,MZFile::GetReadMode()))
+					if(zf.Initialize(fp, MZFile::GetReadMode()))
 					{
 						for(int i=0; i<zf.GetFileCount(); i++)
 						{
 							char szCurFileName[_MAX_PATH];
 							zf.GetFileName(i, szCurFileName);
 
-							// 디렉토리는 더할필요없다
 							char lastchar=szCurFileName[strlen(szCurFileName)-1];
 							if(lastchar!='\\' && lastchar!='/')
 							{
@@ -206,7 +198,6 @@ void MZFileSystem::RefreshFileList(const char* szBasePath)
 					// Add File Desc
 					MZFILEDESC* pDesc = new MZFILEDESC;
 
-					// 절대경로
 					char szFullPath[_MAX_PATH];
 					sprintf_safe(szFullPath, "%s%s", szBasePath, c_file.name);
 					GetRelativePath(pDesc->m_szFileName,m_szBasePath,szFullPath);
@@ -295,7 +286,6 @@ MZFileSystem::~MZFileSystem(void)
 
 void AddSlash(char *szPath, int maxlen)
 {
-	// 경로뒤에 '/'가 있도록 만든다
 	int nLength=strlen(szPath);
 	if(nLength>0 && (szPath[nLength-1]!='/' && szPath[nLength-1]!='\\'))
 		strcat_s(szPath, maxlen, "/");
@@ -316,15 +306,6 @@ bool MZFileSystem::Create(const char* szBasePath,const char* szUpdateName)
 
 	RemoveFileList();
 	RefreshFileList(m_szBasePath);
-
-	/*
-	// 일괄적으로 '\'을 '/'로 바꾼다.
-	for(ZFLISTITOR li=m_ZFileList.begin(); li!=m_ZFileList.end(); li++){
-		MZFILEDESC* pDesc = li->second;
-		ReplaceBackSlashToSlash(pDesc->m_szFileName);
-//		ReplaceBackSlashToSlash(pDesc->m_szLocation);
-	}
-	*/
 
 	m_nIndex=0;
 	m_iterator=m_ZFileList.begin();
@@ -377,11 +358,11 @@ MZFILEDESC* MZFileSystem::GetFileDesc(const char* szTarget)
 	strcpy_safe(key, szTarget);
 	_strlwr_s(key);
 
-	ZFLISTITOR found=m_ZFileList.find(key);
+	ZFLISTITOR found = m_ZFileList.find(key);
 	if(found!=m_ZFileList.end())
 		return found->second;;
 
-	return NULL;
+	return nullptr;
 }
 
 int MZFileSystem::GetFileLength(int i)
@@ -399,46 +380,85 @@ int MZFileSystem::GetFileLength(const char* szFileName)
 bool MZFileSystem::ReadFile(const char* szFileName, void* pData, int nMaxSize)
 {
 	MZFILEDESC* pDesc = GetFileDesc(szFileName);
-	if(!pDesc) return false;
+	if (!pDesc) return false;
 
-	/*
-	if(pDesc->m_szLocation[0] != NULL)//zip
-	{
-		FILE* fp = fopen(pDesc->m_szLocation, "rb");
+	FILE* fp;
+	fopen_s(&fp, pDesc->m_szFileName, "rb");
 
-		if(fp==NULL) return false;
+	if (fp == NULL) return false;
 
-		MZip z;
+	fread(pData, 1, nMaxSize, fp);
 
-		if(z.Initialize(fp) == false)
-		{
-			fclose(fp);
-			return false;
-		}
+	fclose(fp);
 
-		bool hr = z.ReadFile(pDesc->m_szFileName, pData, nMaxSize);
-
-		fclose(fp);
-
-		return hr;
-	}
-	else
-	*/
-	{
-		FILE* fp;
-		fopen_s(&fp, pDesc->m_szFileName, "rb");
-
-		if(fp==NULL) return false;
-
-		fread(pData,1,nMaxSize,fp);
-
-		fclose(fp);
-
-		return true;
-	}
+	return true;
 }
 
-unsigned long MZFile::m_dwReadMode = MZIPREADFLAG_ZIP | MZIPREADFLAG_MRS | MZIPREADFLAG_MRS2 | MZIPREADFLAG_FILE;
+int MZFileSystem::CacheArchive(const char * Filename)
+{
+#ifdef _DEBUG
+	if (std::find_if(ArchiveCache.begin(), ArchiveCache.end(),
+		[&](auto&& item) { return item.Name == Filename; }) != ArchiveCache.end())
+	{
+		MLog("Duplicate caching on file %s!\n", Filename);
+		return -1;
+	}
+#endif
+
+	ArchiveCache.emplace_back(Filename);
+	auto&& archive = ArchiveCache.back();
+	archive.Index = ArchiveIndexCounter;
+	++ArchiveIndexCounter;
+#ifdef _DEBUG
+	archive.Name = Filename;
+#endif
+
+	char FilenameWithExtension[64];
+	sprintf_safe(FilenameWithExtension, "%s.%s", Filename, DEF_EXT);
+
+	FILE* file = nullptr;
+	auto ret = fopen_s(&file, FilenameWithExtension, "rb");
+	if (!file || ret != 0)
+		return -1;
+
+	MZip Zip;
+	Zip.Initialize(file, MZIPREADFLAG_ZIP | MZIPREADFLAG_MRS | MZIPREADFLAG_MRS2 | MZIPREADFLAG_FILE);
+	auto FileCount = Zip.GetFileCount();
+	for (int i = 0; i < FileCount; i++)
+	{
+		char Name[64];
+		Zip.GetFileName(i, Name);
+		char AbsName[64];
+		sprintf_safe(AbsName, "%s/%s", Filename, Name);
+		auto Desc = GetFileDesc(AbsName);
+		if (!Desc)
+			continue;
+		auto Size = Zip.GetFileLength(i);
+		auto& p = Desc->CachedContents;
+		p = new char[Size];
+		Zip.ReadFile(i, p, Size);
+	}
+
+	DMLog("Cached %d files for archive %s\n", FileCount, Filename);
+
+	return archive.Index;
+}
+
+void MZFileSystem::ReleaseArchive(int Index)
+{
+	auto it = std::find_if(ArchiveCache.begin(), ArchiveCache.end(),
+		[&](auto&& item) { return item.Index == Index; });
+	if (it == ArchiveCache.end())
+		return;
+
+	for (auto* Desc : it->Files)
+		SAFE_DELETE_ARRAY(Desc->CachedContents);
+
+	ArchiveCache.erase(it);
+}
+
+unsigned long MZFile::m_dwReadMode =
+MZIPREADFLAG_ZIP | MZIPREADFLAG_MRS | MZIPREADFLAG_MRS2 | MZIPREADFLAG_FILE;
 
 MZFile::MZFile(void) : m_nIndexInZip(-1)
 {
@@ -453,31 +473,21 @@ MZFile::MZFile(void) : m_nIndexInZip(-1)
 
 	m_FileName[0]    = 0;
 	m_ZipFileName[0] = 0;
-
-//	m_dwReadMode = MZIPREADFLAG_ZIP | MZIPREADFLAG_MRS | MZIPREADFLAG_MRS2 | MZIPREADFLAG_FILE;
 }
 
 MZFile::~MZFile(void)
 {
 	Close();
-	DELETE_ARRAY(m_pData);
-//	delete [] m_pData;
+	ReleaseData();
 }
-
-bool MZFile::Create()
-{
-	return true;
-}
-
-#include "MDebug.h"
 
 bool MZFile::Open(const char* szFileName, MZFileSystem* pZFS)
 {
 	Close();
 
-	if(pZFS==NULL)							// 파일시스템이 없으면 그냥 파일오픈
+	if(pZFS==NULL)
 	{
-		if( isMode(MZIPREADFLAG_FILE) == false ) return false; // 그냥 파일 읽기 무시...
+		if( isMode(MZIPREADFLAG_FILE) == false ) return false;
 
 		fopen_s(&m_fp, szFileName, "rb");
 
@@ -498,12 +508,16 @@ bool MZFile::Open(const char* szFileName, MZFileSystem* pZFS)
 		MZFILEDESC* pDesc = pZFS->GetFileDesc(szFileName);
 
 		if(pDesc == NULL) 
-		{
-//			_RPT1(_CRT_WARN,"%s\n",szFileName);
 			return false;
-		}
 
-		// zip 파일 안에 있는 경우
+		if (pDesc->CachedContents)
+		{
+			CachedData = true;
+			m_pData = pDesc->CachedContents;
+			m_nFileSize = pDesc->m_iSize;
+			m_IsZipFile = true;
+			return true;
+		}
 
 		if(pDesc->m_szZFileName[0])
 		{
@@ -522,29 +536,13 @@ bool MZFile::Open(const char* szFileName, MZFileSystem* pZFS)
 			char szZipFullPath[_MAX_PATH];
 			sprintf_safe(szZipFullPath, "%s%s", pZFS->GetBasePath(), pDesc->m_szZFileName);
 
-			// 파일체크를 해야하고 zip 파일 안에 있는경우에 crc검사 한다
 			bool bFileCheck = false;
-			/*if(pZFS->GetFileCheckList())
-			{
-				unsigned int crc = pZFS->GetFileCheckList()->GetCRC32(szFileName);
-				if(crc!=pDesc->m_crc32) {
-#ifdef _DEBUG
-					char szBuffer[256];
-					sprintf_safe(szBuffer,"crc error, %s file %u , source %u \n",szFileName, m_crc32, crc);
-					OutputDebugString(szBuffer);
-#endif
-					mlog("crc error file %s file %u, source %u\n", szFileName, m_crc32, crc);
-					return false;
-				}
-				bFileCheck = true;
-			}*/
 
 			return Open(relativename,szZipFullPath,bFileCheck,pDesc->m_crc32);
 		}
 
-		if( isMode(MZIPREADFLAG_FILE) == false ) return false; // 그냥 파일 읽기 무시...
+		if( isMode(MZIPREADFLAG_FILE) == false ) return false;
 
-		// 맨 폴더에 있는경우
 		char szFullPath[_MAX_PATH];
 		sprintf_safe(szFullPath, "%s%s", pZFS->GetBasePath(), szFileName);
 
@@ -571,16 +569,16 @@ bool MZFile::Open(const char* szFileName, const char* szZipFileName, bool bFileC
 		strcpy_safe(m_ZipFileName, szZipFileName);
 	}
 
-	if(m_Zip.isReadAble(m_dwReadMode)==false) 
+	if(m_Zip.isReadAble(m_dwReadMode)==false)
 		return false;
 
 	m_nIndexInZip = m_Zip.GetFileIndex(szFileName);
 	m_crc32 = m_Zip.GetFileCRC32(m_nIndexInZip);
 	if(bFileCheck && m_crc32!=crc32) {
-		// filesystem 이 초기화 될때와 현재의 crc가 다르다!
 #ifdef _DEBUG
 		char szBuffer[256];
-		sprintf_safe(szBuffer,"crc error, modified after initialize, %s file in %s %u , source %u \n",szFileName, szZipFileName, m_crc32, crc32);
+		sprintf_safe(szBuffer, "crc error, modified after initialize, %s file in %s %u , source %u \n",
+			szFileName, szZipFileName, m_crc32, crc32);
 		OutputDebugString(szBuffer);
 #endif
 		return false;
@@ -590,9 +588,7 @@ bool MZFile::Open(const char* szFileName, const char* szZipFileName, bool bFileC
 
 	if(size==0) return false;
 
-	DELETE_ARRAY(m_pData);
-//	delete []m_pData;
-//	m_pData = NULL;
+	ReleaseData();
 
 	m_nFileSize = size;
 
@@ -603,7 +599,7 @@ bool MZFile::Open(const char* szFileName, const char* szZipFileName, bool bFileC
 	return true;
 }
 
-void MZFile::Close(void)
+void MZFile::Close()
 {
 	if(m_IsZipFile)
 	{
@@ -612,7 +608,7 @@ void MZFile::Close(void)
 			fclose(m_fp);
 			m_fp = NULL;
 		}
-		DELETE_ARRAY(m_pData);
+		ReleaseData();
 		m_IsZipFile = false;
 	}
 	else {
@@ -628,11 +624,6 @@ void MZFile::Close(void)
 
 	m_FileName[0]    = 0;
 	m_ZipFileName[0] = 0;
-}
-
-int MZFile::GetLength(void)
-{
-	return m_nFileSize;
 }
 
 bool MZFile::Seek(long off,int mode)
@@ -683,23 +674,17 @@ bool MZFile::Read(void* pBuffer, int nMaxSize)
 	{
 		if( nMaxSize > m_nFileSize - m_nPos ) return false;
 
-		// 한번에 끝까지 읽으려고 하는 시도는 메모리 할당 없이 읽어준다
-		if(nMaxSize == GetLength() && (m_nPos==0))
+		/*if(nMaxSize == GetLength() && (m_nPos==0))
 		{
-			if(!m_Zip.ReadFile(m_FileName,pBuffer,m_nFileSize))
+			if (!m_Zip.ReadFile(m_FileName, pBuffer, m_nFileSize))
 				return false;
-		}else{
-			if(m_pData == NULL)//최초로 Read 할때 할당
-			{
-				m_pData = new char[m_nFileSize+1];
-				m_pData[m_nFileSize] = 0;
-
-				if(!m_Zip.ReadFile(m_nIndexInZip,m_pData,m_nFileSize))
+		}else{*/
+			if (!m_pData)
+				if (!LoadFile())
 					return false;
-			}
-			
-			memcpy(pBuffer,(m_pData + m_nPos),nMaxSize);
-		}
+
+			memcpy(pBuffer, (m_pData + m_nPos), nMaxSize);
+		//}
 
 		m_nPos += nMaxSize;
 	}
@@ -712,30 +697,30 @@ bool MZFile::Read(void* pBuffer, int nMaxSize)
 	return true;
 }
 
-/*
-// 한번에 바로 읽어온다. 파일내의 seek 위치와는 상관이 없다
-bool MZFile::ReadAll(void* pBuffer, int nBufferSize)		
+bool MZFile::LoadFile()
 {
-	if(nBufferSize<m_nFileSize) return false;	// 버퍼가 작으면 실패
+	m_pData = new char[m_nFileSize + 1];
+	m_pData[m_nFileSize] = 0;
 
-	if(m_IsZipFile) 
-	{
-		if(!m_Zip.ReadFile(m_FileName,pBuffer,m_nFileSize))
-			return false;
-	}
-	else 
-	{
-		size_t numread = fread(pBuffer,1,m_nFileSize,m_fp);
-		if(numread!=m_nFileSize) 
-		{
-			Seek(m_nPos,MZFile::begin);
-			return false;
-		}
-	}
-	Seek(m_nPos,MZFile::begin);
-	return true;
+	return m_Zip.ReadFile(m_nIndexInZip, m_pData, m_nFileSize);
 }
-*/
+
+char* MZFile::Release()
+{
+	if (!m_pData)
+		if (!LoadFile())
+			return nullptr;
+
+	auto ret = m_pData;
+	m_pData = nullptr;
+	return ret;
+}
+
+void MZFile::ReleaseData()
+{
+	if (!CachedData)
+		SAFE_DELETE_ARRAY(m_pData);
+}
 
 bool MZFileCheckList::Open(const char *szFileName, MZFileSystem *pfs)
 {
@@ -792,18 +777,46 @@ bool MZFileCheckList::Open(const char *szFileName, MZFileSystem *pfs)
 }
 
 
-unsigned int MZFileCheckList::GetCRC32(const char *szFileName)
+unsigned int MZFileCheckList::GetCRC32(const char *szFileName) const
 {
 	char szLowerName[256];
 	strcpy_safe(szLowerName, szFileName);
 	_strlwr_s(szLowerName);
 
-	map<string,unsigned int>::iterator i;
-	i = m_fileList.find(string(szLowerName));
+	auto i = m_fileList.find(string(szLowerName));
 
 	if(i!=m_fileList.end()) {
 		return i->second;
 	}
 
 	return 0;
+}
+
+MMappedFile::MMappedFile(const char * Filename)
+{
+	auto File = CreateFile(Filename, GENERIC_READ, 0, 0, 0, 0, 0);
+	if (File == NULL)
+		return;
+
+	Size = GetFileSize(File, nullptr);
+
+	char FileMappingName[256];
+	sprintf_safe(FileMappingName, "GunzCache_%s", Filename);
+	Mapping = CreateFileMapping(File, 0, PAGE_READONLY, 0, 0, FileMappingName);
+	if (Mapping == NULL)
+		return;
+
+	View = MapViewOfFile(Mapping, FILE_MAP_READ, 0, 0, 0);
+	if (View == NULL)
+		return;
+
+	bDead = false;
+}
+
+MMappedFile::~MMappedFile()
+{
+	CloseHandle(View);
+	UnmapViewOfFile(Mapping);
+	CloseHandle(Mapping);
+	CloseHandle(File);
 }

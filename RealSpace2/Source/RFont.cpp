@@ -140,16 +140,13 @@ bool RFontTexture::UploadTexture(RCHARINFO *pCharInfo,DWORD* pBitmapBits,int w,i
 	{
 		m_LastUsedID++;
 
-		// 맨 앞에 있는 넘이 가장 오래전에 사용된 넘이다.
 		RFONTTEXTURECELLINFO *pInfo = *(m_PriorityQueue.begin());
 		pInfo->nID = m_LastUsedID;
 		pInfo->itr = m_PriorityQueue.begin();
 
-		// 실제로 텍스쳐에 업로드한다.
 		int x = pInfo->nIndex % GetCellCountX();
 		int y = pInfo->nIndex / GetCellCountX();
 
-		// 실제 픽셀의 위치
 		int _x = x*CELL_SIZE;
 		int _y = y*CELL_SIZE;
 
@@ -157,7 +154,6 @@ bool RFontTexture::UploadTexture(RCHARINFO *pCharInfo,DWORD* pBitmapBits,int w,i
 
 		hr = m_pTexture->UnlockRect(0);
 
-		// 막 사용되어진것이므로 뒤로 돌린다.
 		m_PriorityQueue.splice(m_PriorityQueue.end(),m_PriorityQueue,m_PriorityQueue.begin());
 
 		pCharInfo->nFontTextureID = pInfo->nID;
@@ -166,11 +162,6 @@ bool RFontTexture::UploadTexture(RCHARINFO *pCharInfo,DWORD* pBitmapBits,int w,i
 
 		return true;
 	}
-
-	//static int nErrorLogCount = 0;
-	//if(nErrorLogCount<100) {
-	//	mlog("upload font texture error : %s",DXGetErrorString9(hr));
-	//}
 
 	return false;
 }
@@ -261,7 +252,6 @@ bool RFontTexture::MakeFontBitmap(HFONT hFont, RCHARINFO *pInfo, const TCHAR* sz
 #endif
 
 	bool bRet = UploadTexture(pInfo,m_pBitmapBits,nWidth,CELL_SIZE);
-//	_ASSERT(bRet);
 	
 	SelectObject(m_hDC, hPrevFont);
 

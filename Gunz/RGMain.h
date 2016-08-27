@@ -120,7 +120,6 @@ private:
 #ifdef VOICECHAT
 	VoiceChat m_VoiceChat;
 #endif
-	TaskManager m_TaskManager;
 	HitboxManager m_HitboxManager;
 };
 

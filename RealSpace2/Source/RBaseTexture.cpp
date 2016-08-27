@@ -105,7 +105,7 @@ void RBaseTexture::OnInvalidate()
 
 LPDIRECT3DTEXTURE9	RBaseTexture::GetTexture()
 {
-	m_dwLastUseTime = GetGlobalTimeMS();//마지막으로 사용된 시간
+	m_dwLastUseTime = GetGlobalTimeMS();
 
 	if(m_pTex) {
 		return m_pTex;
@@ -113,7 +113,7 @@ LPDIRECT3DTEXTURE9	RBaseTexture::GetTexture()
 
 #ifndef _PUBLISH
 
-	else {//없다면..
+	else {
 	
 		OnInvalidate();
 		OnRestore();
@@ -121,30 +121,16 @@ LPDIRECT3DTEXTURE9	RBaseTexture::GetTexture()
 
 #endif
 
-/*
-	if( m_bManaged && m_pTextureFileBuffer ) {
-
-		if(SubCreateTexture()==false) {
-
-			delete [] m_pTextureFileBuffer;
-			m_pTextureFileBuffer = NULL;
-
-			return NULL;
-		}
-		else {
-			delete [] m_pTextureFileBuffer;
-			m_pTextureFileBuffer = NULL;
-		}
-	}
-*/
 	return m_pTex;
 }
 
 //////////////////////////////////////////////////////////////////////////
 
-//#define	LOAD_TEST
+#ifdef _DEBUG
+#define	LOAD_TEST
+#endif
 
-#ifdef	LOAD_TEST
+#ifdef LOAD_TEST
 
 #define __BP(i,n)	MBeginProfile(i,n);
 #define __EP(i)		MEndProfile(i);
@@ -183,34 +169,14 @@ bool RBaseTexture::SubCreateTexture()
 		return false;
 	}
 
-	if( m_nTexLevel ) { // 옵션정도에 따라~  
-
-//		기본사이즈 : 0
-//		1/2 사이즈 : 1
-//		1/4 사이즈 : 2
-//		1/8 사이즈 : 4 <- HardwareTNL을 지원하지 않는 그래픽 카드일 경우
-
-		/*
-		if( FAILED( D3DXGetImageInfoFromFileInMemory( m_pTextureFileBuffer,m_nFileSize,&m_Info) ) ) {
-			_RPT1(_CRT_WARN,"%s ---->> memory texture (re)create failure \n",m_szTextureName);
-
-			__EP(2011);
-
-			return false;
-		}
-		else {
-			Tex_w = m_Info.Width  / (m_nTexLevel*2);
-			Tex_h = m_Info.Height / (m_nTexLevel*2);
-		}
-		*/
-
+	if( m_nTexLevel ) {
 		Tex_w = m_Info.Width  / (1 << m_nTexLevel);
 		Tex_h = m_Info.Height / (1 << m_nTexLevel);
 	}
 
 	D3DFORMAT d3dformat = D3DFMT_UNKNOWN;
 
-	if(g_nTextureFormat==0) { // 16비트이면 포맷을 적절히 변환해준다
+	if(g_nTextureFormat==0) {
 		switch(m_Info.Format) {
 			case D3DFMT_A8R8G8B8 :
 				d3dformat =	 D3DFMT_A4R4G4B4;
@@ -231,18 +197,15 @@ bool RBaseTexture::SubCreateTexture()
 		}
 	}else
 		d3dformat = m_Info.Format;
-
-	// 압축텍스쳐인경우 지원하지 않으면
 	
 	if( d3dformat==D3DFMT_DXT1 || d3dformat==D3DFMT_DXT2 || d3dformat==D3DFMT_DXT3 ||
 		d3dformat==D3DFMT_DXT4 || d3dformat==D3DFMT_DXT5) 
 	{
 		if(IsCompressedTextureFormatOk(m_Info.Format)==FALSE) {
-			// 너무도 저사양이니까 무조건 16bit		
 			if( m_Info.Format == D3DFMT_DXT1 ) {
 				d3dformat = D3DFMT_R5G6B5;
 			}
-			else //alpha
+			else
 				d3dformat = D3DFMT_A4R4G4B4;
 		}
 	}
@@ -274,61 +237,60 @@ bool RBaseTexture::OnRestore(bool bManaged)
 	MZFile mzf;
 
 	m_bManaged = bManaged;
-	m_bManaged = false;//우선 예전 방식으로 돌아가자
+	m_bManaged = false;
 
-	if(m_pTextureFileBuffer == NULL) {
+	if (m_pTextureFileBuffer == NULL) {
 
-	__BP(2012,"RBaseTexture::mzf.Open");
+		__BP(2012, "RBaseTexture::mzf.Open");
 
-	MZFileSystem *pfs = m_bUseFileSystem ? g_pFileSystem : NULL;
+		MZFileSystem *pfs = m_bUseFileSystem ? g_pFileSystem : NULL;
 
 #ifdef LOAD_FROM_DDS
-	char ddstexturefile[MAX_PATH];
-	sprintf_safe(ddstexturefile,"%s.dds",m_szTextureName);
-	if(!mzf.Open(ddstexturefile,pfs))
+		char ddstexturefile[MAX_PATH];
+		sprintf_safe(ddstexturefile, "%s.dds", m_szTextureName);
+		if (!mzf.Open(ddstexturefile, pfs))
 #endif
-	{
-		if(!mzf.Open(m_szTextureName,pfs)) {
-			if(!mzf.Open(m_szTextureName)) {
-				__EP(2012);
-				__EP(2010);
-				return NULL;
+		{
+			if (!mzf.Open(m_szTextureName, pfs)) {
+				if (!mzf.Open(m_szTextureName)) {
+					__EP(2012);
+					__EP(2010);
+					return NULL;
+				}
 			}
 		}
-	}
 
-	__BP(2013,"RBaseTexture::mzf.Open : new ");
-	m_nFileSize = mzf.GetLength();
-	m_pTextureFileBuffer = new char[mzf.GetLength()];
-	__EP(2013);
+		__BP(2013, "RBaseTexture::mzf.Open : new ");
+		m_nFileSize = mzf.GetLength();
+		m_pTextureFileBuffer = new char[mzf.GetLength()];
+		__EP(2013);
 
-	__BP(2014,"RBaseTexture::mzf.Read ");
+		__BP(2014, "RBaseTexture::mzf.Read ");
 
-	if(!mzf.Read( m_pTextureFileBuffer ,mzf.GetLength() ))
-		return false;
+		if (!mzf.Read(m_pTextureFileBuffer, mzf.GetLength()))
+		{
+			__EP(2014);
+			__EP(2010);
+			return false;
+		}
 
-	__EP(2014);
-
+		__EP(2014);
 	}
 
 	__EP(2012);
 
-//	if(m_bManaged==false) {
+	if(SubCreateTexture()==false) {
 
-		if(SubCreateTexture()==false) {
+		mzf.Close();
 
-			mzf.Close();
-
-			if(m_pTextureFileBuffer) {
-				delete [] m_pTextureFileBuffer;
-				m_pTextureFileBuffer = NULL;
-			}
-			__EP(2010);
-
-			return false;
+		if(m_pTextureFileBuffer) {
+			delete [] m_pTextureFileBuffer;
+			m_pTextureFileBuffer = NULL;
 		}
-		// 나중 m_bManaged 를 위해가지고 있어야하는가?
-//	}
+		__EP(2010);
+
+		return false;
+	}
 
 	if(m_pTextureFileBuffer) {
 		delete [] m_pTextureFileBuffer;
@@ -341,8 +303,6 @@ bool RBaseTexture::OnRestore(bool bManaged)
 
 	return true;
 }
-
-// RTextureManager   나중에 커지면 파일을 분리한다
 
 RTextureManager *g_pTextureManager=NULL;
 
@@ -510,25 +470,10 @@ int RTextureManager::CalcUsedSize()
 		if( pTex && pTex->m_pTex ) {
 
 			add_size = 0;
-
-			// 메모리 차지하는 양으로 다시 추정
 			
 			add_size = Floorer2PowerSize(pTex->GetWidth()) / ( 1 << pTex->GetTexLevel() ) *
 						Floorer2PowerSize(pTex->GetHeight()) / ( 1 << pTex->GetTexLevel() ) * 
 						(g_nTextureFormat==0 ? 2 : 4) ;
-
-			/*
-			//대충추정치
-
-			if(pTex->m_nFileSize) {
-
-				 if(pTex->m_nTexLevel==0) add_size = pTex->m_nFileSize;
-			else if(pTex->m_nTexLevel==1) add_size = pTex->m_nFileSize/4;
-			else if(pTex->m_nTexLevel==2) add_size = pTex->m_nFileSize/16;
-			else if(pTex->m_nTexLevel==3) add_size = pTex->m_nFileSize/64;
-
-			}
-			*/
 
 			return_size += add_size;
 
@@ -604,12 +549,6 @@ RBaseTexture *RTextureManager::CreateBaseTextureSub(bool Mg,const char* filename
 
 	insert(value_type(texturefilename,pnew));
 
-	/*
-	char ddstexturefile[MAX_PATH];
-	sprintf_safe(ddstexturefile,"%s.dds",texturefilename);
-	D3DXSaveTextureToFile(ddstexturefile,D3DXIFF_DDS,pnew->GetTexture(),NULL);
-	*/
-
 	return pnew;
 }
 
@@ -654,8 +593,6 @@ void RDestroyBaseTexture(RBaseTexture *pTex)
 	g_pTextureManager->DestroyBaseTexture(pTex);
 }
 
-
-// framework 에서 불리는 펑션
 void RBaseTexture_Invalidate()
 {
 	_RPT0(_CRT_WARN,"begin invalidate\n");
