@@ -988,7 +988,7 @@ void ZSoundEngine::Run(void)
 	if( (currentTime - m_Time) < m_DelayTime ) return;
 	m_Time = currentTime;
 
-	MBeginProfile(31,"ZSoundEngine::Run");
+	auto ZSoundEngineRun = MBeginProfile("ZSoundEngine::Run");
 
 	if( !m_bSoundEnable )	return;
 	if( !m_b3DSoundUpdate )	return;
@@ -1011,7 +1011,6 @@ void ZSoundEngine::Run(void)
 
 		UpdateAmbSound(Pos, right);
 
-		// 지연 사운드 처리
 		for( DSLIST::iterator iter = m_DelaySoundList.begin(); iter != m_DelaySoundList.end();)
 		{
 			DelaySound DS = *iter;
@@ -1023,29 +1022,6 @@ void ZSoundEngine::Run(void)
 			}
 			++iter;
 		}
-/*
-		if( m_bEffectVolControl && !m_bEffectMute )
-		{
-			m_fEffectVolume += m_fEffectVolFactor;
-			if(m_fEffectVolume > m_fEffectVolEnd)
-			{
-				m_fEffectVolume = Z_AUDIO_EFFECT_VOLUME;
-				m_bEffectVolControl = false;
-			}
-			SetEffectVolume( m_fEffectVolume );
-		}
-		if( m_bBGMVolControl && !m_bMusicMute )
-		{
-			m_fMusicVolume += m_fBGMVolFactor;
-			if( m_fMusicVolume > m_fBGMVolEnd )
-			{
-				m_fMusicVolume = Z_AUDIO_BGM_VOLUME;
-				m_bBGMVolControl = false;
-			}
-			SetMusicVolume( m_fMusicVolume );
-		}
-//*/
-		//rvector Orientation = g_pGame->m_pMyCharacter->m_Position - RCameraPosition;
 
 		m_ListenerPos = Pos;
 		
@@ -1060,7 +1036,7 @@ void ZSoundEngine::Run(void)
 		ZGetSoundFMod()->Update();
 		MEndProfile(33);
 	}
-	MEndProfile(31);
+	MEndProfile(ZSoundEngineRun);
 }
 
 

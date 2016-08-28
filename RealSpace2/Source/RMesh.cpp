@@ -568,11 +568,6 @@ bool RMesh::ConnectAnimation(RAnimation* pAniSet)
 
 		pANode = pAniSet->GetAniNode(i);
 
-//		pid = FindMeshId(pANode->m_Name);
-//		if(pid != -1) {
-//			pANode->m_node_id = pid;
-//		}
-
 		pid = FindMeshId(pANode);
 	}
 
@@ -581,33 +576,28 @@ bool RMesh::ConnectAnimation(RAnimation* pAniSet)
 	return true;
 }
 
-// 모델단위 id 연결설정...
-// 
-
 bool RMesh::SetAnimation1Parts(RAnimation* pAniSet) {
 
-	__BP(305, "RMesh::SetAnimation1Parts");
+	auto RMeshSetAnimation1Parts = MBeginProfile("RMesh::SetAnimation1Parts");
 
 	bool bNodeHoldFrame = false;
 	bool bNodeUpdate = false;
 
-	if( m_pAniSet[1] )  // 이전에는 상위가 있었고 이번에 null 이라면 갱신필요..
+	if( m_pAniSet[1] )
 		bNodeUpdate = true;
 	
-	if(m_pAniSet[0] == pAniSet) {	// pAniSet 은 null 체크하고 같지않으니까 m_pAniSet 은 null 이 아님..
+	if(m_pAniSet[0] == pAniSet) {
 		if( pAniSet->m_isConnected ){
 			if(m_pAniSet[0]->CheckName( pAniSet->GetName() ) ) {
 				if(!bNodeUpdate) {
 					return true;
 				}
 				else {
-					bNodeHoldFrame = true;	// 같은에니메이션 상태를 유지하면서 상반신만 다시 노드연결..
+					bNodeHoldFrame = true;
 				}
 			}
 		}
 	}
-
-	// 아직연결안된거라면...
 
 	if(!pAniSet->m_isConnected) { 
 		ConnectAnimation(pAniSet);
@@ -625,9 +615,7 @@ bool RMesh::SetAnimation1Parts(RAnimation* pAniSet) {
 
 	RMeshNode* pMeshNode = NULL;
 
-	// 다르다고 판단된다면 시작..
-
-	if(!bNodeHoldFrame)//상태는 같고 하반신 노드연결만 원할경우..
+	if(!bNodeHoldFrame)
 		m_frame[0] = 0;
 
 	if(pAniSet->GetAniNodeCount() != m_data_num) {
@@ -646,7 +634,6 @@ bool RMesh::SetAnimation1Parts(RAnimation* pAniSet) {
 
 		pANode = pAniSet->GetAniNode(i);
 
-//		pid = FindMeshId(pANode->m_Name);
 		pid = FindMeshId(pANode);
 
 		if(pid != -1) {
@@ -662,35 +649,11 @@ bool RMesh::SetAnimation1Parts(RAnimation* pAniSet) {
 			}
 		}
 	}
-/*
-	// 제거 대상..
-	if( m_pVisualMesh && m_pVisualMesh->m_pAniNodeTable )
-	{
-		RAnimationNode* pAniNode = NULL;
-		RMeshNode* pMeshNode = NULL;
 
-		for(i=0;i<m_data_num;i++)
-		{
-			pANode = m_pVisualMesh->m_pAniNodeTable[i];
-			pMeshNode = m_data[i];
-
-			if( pANode && pMeshNode ) {
-
-				pMeshNode->m_pAnimationNode = pANode;
-				memcpy(&pMeshNode->m_mat_base,&pANode->m_mat_base ,sizeof(D3DXMATRIX));
-				memcpy(&pMeshNode->m_mat_local,&pMeshNode->m_mat_base,sizeof(D3DXMATRIX));
-				RMatInv(pMeshNode->m_mat_inv,pMeshNode->m_mat_local);
-			}
-		}
-
-		m_max_frame[0] = pAniSet->m_max_frame;
-
-	}
-*/
 	if(pAniSet)
 		m_max_frame[0] = pAniSet->GetMaxFrame();
 
-	__EP(305);
+	MEndProfile(RMeshSetAnimation1Parts);
 
 	return true;
 }

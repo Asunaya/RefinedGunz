@@ -61,5 +61,6 @@ struct ProfilerGuard
 
 ProfilerGuard MBeginProfile(const char *szName);
 void MEndProfile(ProfilerGuard& guard);
+void MCheckProfileCount();
 
 #endif

@@ -132,7 +132,6 @@ FSOUND_SAMPLE* ZSoundFMod::LoadWave( char* szSoundFileName, int Flag )
 
 	Buffer = new char[SoundFileLength];
 	mzf.Read( Buffer, SoundFileLength );
-//	mzf.ReadAll( Buffer, SoundFileLength );
 	mzf.Close();
 
 	FSOUND_SAMPLE* r = FSOUND_Sample_Load(FSOUND_FREE, Buffer, (Flag | FSOUND_LOADMEMORY), 0, SoundFileLength);

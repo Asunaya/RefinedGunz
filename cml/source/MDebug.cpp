@@ -229,6 +229,7 @@ ProfilerGuard MBeginProfile(const char * szName)
 	ProfileItem.dwStartTime = GetGlobalTimeMS();
 	ProfileItem.dwCalledCount++;
 	Stack.push(std::move(strName));
+	//DMLog("Push %s\n", szName);
 	return{};
 }
 
@@ -238,19 +239,45 @@ void MEndProfile(ProfilerGuard& Guard)
 	auto& Name = Stack.top();
 	auto& ProfileItem = ProfileItems[Name];
 	ProfileItem.dwTotalTime += GetGlobalTimeMS() - ProfileItem.dwStartTime;
+	//DMLog("Pop %s\n", Name.c_str());
 	Stack.pop();
 }
+
+struct Item
+{
+	int RefCount;
+	std::string Name;
+};
+std::unordered_map<int, Item> RefCounts;
 
 void MBeginProfile(int nIndex, const char *szName)
 {
 	auto lvalue = MBeginProfile(szName);
 	lvalue.Active = false;
+	auto&& item = RefCounts[nIndex];
+	item.RefCount++;
+	if (item.Name.empty())
+		item.Name = szName;
 }
 
 void MEndProfile(int nIndex)
 {
 	ProfilerGuard Guard;
 	MEndProfile(Guard);
+	auto&& item = RefCounts[nIndex];
+	item.RefCount--;
+}
+
+void MCheckProfileCount()
+{
+	for (auto&& pair : RefCounts)
+	{
+		if (pair.second.RefCount != 0)
+		{
+			DMLog("%s ref count %d!\n", pair.second.Name.c_str(), pair.second.RefCount);
+			DebugBreak();
+		}
+	}
 }
 
 #include <algorithm>
@@ -299,6 +326,7 @@ void MSaveProfile(const char *filename)
 void MInitProfile() {}
 void MBeginProfile(int nIndex, const char *szName) {}
 void MEndProfile(int nIndex) {}
+void MCheckProfileCount() {}
 void MSaveProfile(const char *file) {}
 void MBeginProfile(const char * szName) {}
 void MEndProfile() {}

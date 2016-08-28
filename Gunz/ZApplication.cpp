@@ -357,17 +357,25 @@ bool ZApplication::OnCreate(ZLoadingProgress *pLoadingProgress)
 
 	//ListSoundDevices();
 
-	if (IsDynamicResourceLoad())
+	[&]
 	{
+		if (!IsDynamicResourceLoad())
+			return;
+
+		auto Fail = [&]()
+		{
+			MLog("Failed to load parts index! Turning off dynamic resource loading\n");
+			RealSpace2::DynamicResourceLoading = false;
+		};
+
 		auto ret = ReadMZFile("system/parts_index.xml");
 		if (!ret.first)
-		{
-			MLog("Failed to load parts index!\n");
-			RealSpace2::DynamicResourceLoading = false;
-		}
-		else
-			GetMeshManager()->LoadParts(ret.second);
-	}
+			return Fail();
+
+		ret.second.emplace_back(0);
+		if (!GetMeshManager()->LoadParts(ret.second))
+			return Fail();
+	}();
 
 	__BP(2000, "ZApplication::OnCreate");
 

@@ -1119,23 +1119,12 @@ int PASCAL WinMain(HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline, int 
 
 	MSysInfoLog();
 
-//	if (CheckVideoAdapterSupported() == false)
-//		return 0;
-
 	CheckFileAssociation();
 
 	// Initialize MZFileSystem - MUpdate 
 	MRegistry::szApplicationName=APPLICATION_NAME;
 
 	g_App.InitFileSystem();
-//	mlog("CheckSum: %u \n", ZApplication::GetFileSystem()->GetTotalCRC());
-
-	//if(!InitializeMessage(ZApplication::GetFileSystem())) {
-	//	MLog("Check Messages.xml\n");
-	//	return 0;
-	//}
-
-//	넷마블 버전은 구분해야함... 넷마블 버전은 MZIPREADFLAG_MRS1 도 읽어야함...
 
 #ifdef _PUBLISH
 //	#ifndef NETMARBLE_VERSION
@@ -1143,7 +1132,6 @@ int PASCAL WinMain(HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline, int 
 //	#endif
 #endif
 
-	// StringRes먼저 로드하고 그다음에 Config을 로드한다.
 	ZGetConfiguration()->Load();
 
 	g_RGMain = std::make_unique<RGMain>();
@@ -1155,7 +1143,6 @@ int PASCAL WinMain(HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline, int 
 		return false;
 	}
 
-	// 여기서 메크로 컨버팅... 먼가 구리구리~~ -by SungE.
 	if( !ZGetConfiguration()->LateStringConvert() )
 	{
 		MLog( "main.cpp - Late string convert fail.\n" );
@@ -1165,21 +1152,6 @@ int PASCAL WinMain(HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline, int 
 	DWORD ver_major = 0;
 	DWORD ver_minor = 0;
 	TCHAR ver_letter = ' ';
-
-	// 의미없음 ... 외부에서 dll 이 없다고 먼저뜸...
-
-/*_
-	bool DXCheck = false;
-
-	if( SUCCEEDED( GetDirectXVersionViaDxDiag( &ver_major, &ver_minor, &ver_letter ) ) ) {
-		if(ver_major >= 8)
-			DXCheck = true;
-	} // 성공 못한 경우 알수없으므로 실패~
-
-	if(DXCheck==false) {
-		::MessageBox(NULL,"DirectX 8.0 이상을 설치하고 다시 실행해 주시기 바랍니다.","알림",MB_OK);
-	}
-*/
 
 	if (ZApplication::GetInstance()->ParseArguments(cmdline) == false)
 	{
@@ -1194,7 +1166,6 @@ int PASCAL WinMain(HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline, int 
 			char szMsgCertFail[128]="";
 			ZTransMsg(szMsgWarning,MSG_WARNING);
 			ZTransMsg(szMsgCertFail,MSG_REROUTE_TO_WEBSITE);
-//			MessageBox(g_hWnd, szMsgCertFail, szMsgWarning, MB_OK);
 
 			mlog(szMsgWarning);
 			mlog(" : ");
@@ -1208,29 +1179,10 @@ int PASCAL WinMain(HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline, int 
 		}
 	}
 
-//#ifdef _PUBLISH
-	//if(!CheckFileList()) {
-	//	// 종료하는것은 일단 보류
-	//	// int ret=MessageBox(NULL, "파일이 손상되었습니다.", "중요!", MB_OK);
-	//	// return 0;
-	//}
-//#endif
-
-//	if (ZCheckHackProcess() == true)
-//	{
-////		MessageBox(NULL,
-////			ZMsg(MSG_HACKING_DETECTED), ZMsg( MSG_WARNING), MB_OK);
-//		mlog(ZMsg(MSG_HACKING_DETECTED));
-//		mlog("\n");
-//		return 0;
-//	}
-
 	if(!InitializeNotify(ZApplication::GetFileSystem())) {
 		MLog("Check notify.xml\n");
 		return 0;
 	}
-
-	// font 있는가 검사..
 
 	if(CheckFont()==false) {
 		MLog("폰트가 없는 유저가 폰트 선택을 취소\n");
@@ -1249,9 +1201,8 @@ int PASCAL WinMain(HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline, int 
 
 	SetModeParams();
 
-//	while(ShowCursor(FALSE)>0);
-
-	int nReturn = RMain(APPLICATION_NAME, this_inst, prev_inst, cmdline, cmdshow, &g_ModeParams, WndProc, IDI_ICON1);
+	int nReturn = RMain(APPLICATION_NAME, this_inst, prev_inst, cmdline, cmdshow,
+		&g_ModeParams, WndProc, IDI_ICON1);
 
 #ifdef _MTRACEMEMORY
 	MShutdownTraceMemory();

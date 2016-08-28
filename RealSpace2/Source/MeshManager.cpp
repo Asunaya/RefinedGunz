@@ -35,7 +35,7 @@ void TaskManager::ThreadLoop()
 	Notified = false;
 }
 
-void MeshManager::LoadParts(std::vector<unsigned char>& File)
+bool MeshManager::LoadParts(std::vector<unsigned char>& File)
 {
 	std::list<std::string> FileList;
 
@@ -48,7 +48,7 @@ void MeshManager::LoadParts(std::vector<unsigned char>& File)
 	catch (rapidxml::parse_error &e)
 	{
 		MLog("RapidXML threw parse_error (%s) on parts_index.xml at %s\n", e.what(), e.where<char>());
-		return;
+		return false;
 	}
 
 	for (auto listnode = parts.first_node("partslisting"); listnode; listnode = listnode->next_sibling("partslisting"))
@@ -83,6 +83,8 @@ void MeshManager::LoadParts(std::vector<unsigned char>& File)
 			}
 		}
 	}
+
+	return true;
 }
 
 RMeshNode *MeshManager::Get(const char *szMeshName, const char *szNodeName)

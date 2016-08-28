@@ -270,6 +270,8 @@ int RMain(const char *AppName, HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR c
 			__EP(5007);
 
 			__EP(5006);
+
+			MCheckProfileCount();
 		}
 
 		if(!g_bActive)

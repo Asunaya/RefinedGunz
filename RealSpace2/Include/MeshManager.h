@@ -11,7 +11,7 @@ class MeshManager
 {
 public:
 	// This kills the file.
-	void LoadParts(std::vector<unsigned char>& File);
+	bool LoadParts(std::vector<unsigned char>& File);
 	RMeshNode *Get(const char *szMeshName, const char *szNodeName);
 	void GetAsync(const char *szMeshName, const char *szNodeName, void* Obj,
 		std::function<void(RMeshNode*)> Callback);

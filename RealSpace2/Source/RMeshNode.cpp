@@ -1168,10 +1168,9 @@ void RMeshNode::Render(D3DXMATRIX* pWorldMatrix)
 			RGetDevice()->SetTexture(1, nullptr);
 		}
 
-		if(bSoft)	m_vb->RenderIndexSoft(m_ib[index]);		// vertexbuffer 없이 그린다..
+		if(bSoft)	m_vb->RenderIndexSoft(m_ib[index]);
 		else 		m_vb->RenderIndexBuffer(m_ib[index]);
 
-		__EP(403);
 
 #ifdef USE_TOON_RENDER
 
