@@ -1190,10 +1190,14 @@ void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Recei
 	MCommand* pCmd = CreateCommand(MC_MATCH_P2P_COMMAND, MUID(0, 0));
 	pCmd->AddParameter(new MCmdParamUID(Sender));
 	pCmd->AddParameter(new MCmdParamBlob(Blob, BlobSize));
-
-	RouteToBattleExcept(uidStage, pCmd, Sender);
-
-	//LogF(LOG_ALL, "P2P Command! Sender = %X:%X, receiver = %X:%X, command ID = %X", Sender.High, Sender.Low, Receiver.High, Receiver.Low, ID);
+	if (Receiver == MUID{ 0, 0 })
+		RouteToBattleExcept(uidStage, pCmd, Sender);
+	else
+	{
+		auto* ReceiverObj = GetObject(Receiver);
+		if (ReceiverObj)
+			RouteToListener(ReceiverObj, pCmd);
+	}
 }
 
 void MMatchServer::OnPeerShot(MMatchObject& SenderObj, MMatchStage& Stage, const ZPACKEDSHOTINFO& psi)

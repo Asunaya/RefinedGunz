@@ -742,9 +742,14 @@ void MMatchClient::SendCommand(MCommand* pCommand)
 				else {
 					MMatchPeerInfo* pPeerInfo = FindPeer(pCommand->GetReceiverUID());
 					if (pPeerInfo) {
+#ifdef MATCHAGENT
 						if ((pPeerInfo->GetProcess() == false) &&
 							(pPeerInfo->GetUDPTestResult() == false))
 							SendCommandByTunneling(pCommand);
+#else
+						if (!pPeerInfo->GetUDPTestResult())
+							SendCommandByMatchServerTunneling(pCommand, pPeerInfo->uidChar);
+#endif
 						else
 							SendCommandByUDP(pCommand, pPeerInfo->szIP, pPeerInfo->nPort);
 					}
