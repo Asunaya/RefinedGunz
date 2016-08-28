@@ -272,8 +272,8 @@ bool MMatchClient::OnCommand(MCommand* pCommand)
 	{
 	case MC_MATCH_P2P_COMMAND:
 	{
-		if (PeerToPeer)
-			break;
+		/*if (PeerToPeer)
+			break;*/
 
 		MUID Sender;
 		if (pCommand->GetParameter(&Sender, 0, MPT_UID) == false) break;

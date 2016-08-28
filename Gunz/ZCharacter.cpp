@@ -674,7 +674,7 @@ void ZCharacter::OnDraw()
 	if (!IsVisible()) return;
 	if(IsAdminHide()) return;
 
-	__BP(39,"ZCharacter::Draw");
+	auto ZCharacterDraw = MBeginProfile("ZCharacter::Draw");
 
 	if( m_pVMesh && !Enable_Cloth )	m_pVMesh->DestroyCloth();
 
@@ -759,8 +759,7 @@ void ZCharacter::OnDraw()
 
 	__EP(25);
 
-
-	__EP(39);
+	MEndProfile(ZCharacterDraw);
 }
 
 

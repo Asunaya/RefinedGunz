@@ -154,7 +154,6 @@ void GrenadeExplosion(const ObjectT& Owner, const ContainerT& Container, const v
 		auto dir = ExplosionPos - (TargetOrigin + v3(0, 0, 80));
 		Normalize(dir);
 
-		// 몸에 직접 맞았다.
 		if (GetDistance(ExplosionPos, TargetOrigin + v3(0, 0, 50), TargetOrigin + v3(0, 0, 130)) < 50)
 		{
 			fDamageRange = 1.f;
