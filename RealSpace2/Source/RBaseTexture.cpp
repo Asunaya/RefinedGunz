@@ -4,95 +4,47 @@
 #include "MDebug.h"
 #include "MZFileSystem.h"
 
-using namespace std;
 _USING_NAMESPACE_REALSPACE2
 
 _NAMESPACE_REALSPACE2_BEGIN
+
+#define _MANAGED
+#define LOAD_FROM_DDS
 
 ///////////////////////////////////////////////////////////////////////
 
 static int g_nObjectTextureLevel = 0;
 static int g_nMapTextureLevel = 0;
-static int g_nTextureFormat = 0;	// 0 = 16 bit , 1 = 32bit
+static int g_nTextureFormat = 0; // 0 = 16 bit, 1 = 32bit
 
-void SetObjectTextureLevel(int nLevel)
-{
+void SetObjectTextureLevel(int nLevel) {
 	g_nObjectTextureLevel = nLevel == 3 ? 8 : nLevel; // Hacky uwu
 }
-
-void SetMapTextureLevel(int nLevel)
-{
+void SetMapTextureLevel(int nLevel) {
 	g_nMapTextureLevel = nLevel == 3 ? 8 : nLevel;
 }
+void SetTextureFormat(int nLevel) { g_nTextureFormat = nLevel; }
+int GetObjectTextureLevel() { return g_nObjectTextureLevel; }
+int GetMapTextureLevel() { return g_nMapTextureLevel; }
+int GetTextureFormat() { return g_nTextureFormat; }
 
-void SetTextureFormat(int nLevel)	// 0 = 16 bit , 1 = 32bit
+static int SubGetTexLevel(u32 tex_type)
 {
-	g_nTextureFormat = nLevel;
-}
+	if (tex_type == RTextureType_Etc)
+		return 0;
+	else if (tex_type == RTextureType_Map)
+		return GetMapTextureLevel();
+	else if (tex_type == RTextureType_Object)
+		return GetObjectTextureLevel();
 
-int GetObjectTextureLevel() 
-{
-	return g_nObjectTextureLevel;
-}
-
-int GetMapTextureLevel() 
-{
-	return g_nMapTextureLevel;
-}
-
-int GetTextureFormat()
-{
-	return g_nTextureFormat;
-}
-
-int SubGetTexLevel(DWORD tex_type)
-{
-	int hr = 0;
-
-	if(tex_type == RTextureType_Etc) {
-
-		hr = 0;
-
-	} else if(tex_type == RTextureType_Map ) {
-
-		hr = GetMapTextureLevel();
-
-	} else if(tex_type == RTextureType_Object ) {
-
-		hr = GetObjectTextureLevel();
-	}
-
-	return hr;
+	return 0;
 }
 
 ///////////////////////////////////////////////////////////////////////
 
-#define _MANAGED
-
-
-RBaseTexture::RBaseTexture()
-{
-	m_nRefCount=0;
-	memset(&m_Info,0,sizeof(D3DXIMAGE_INFO));
-	m_pTex = NULL;
-	m_szTextureName[0]=0;
-	m_nFileSize = 0;
-	m_pTextureFileBuffer = NULL;
-	m_bManaged = false;
-	m_nTexLevel = 0;
-	m_nTexType = RTextureType_Etc;
-	m_bUseFileSystem = true;
-}
-
-RBaseTexture::~RBaseTexture()
-{
-	Destroy();
-}
-
 void RBaseTexture::Destroy()
 {
 	OnInvalidate();
-	SAFE_DELETE_ARRAY(m_pTextureFileBuffer);
 }
 
 void RBaseTexture::OnInvalidate()
@@ -100,25 +52,18 @@ void RBaseTexture::OnInvalidate()
 	SAFE_RELEASE(m_pTex);
 }
 
-#define LOAD_FROM_DDS
-
-
-LPDIRECT3DTEXTURE9	RBaseTexture::GetTexture()
+LPDIRECT3DTEXTURE9 RBaseTexture::GetTexture()
 {
 	m_dwLastUseTime = GetGlobalTimeMS();
 
-	if(m_pTex) {
+	if (m_pTex) {
 		return m_pTex;
 	}
-
 #ifndef _PUBLISH
-
 	else {
-	
 		OnInvalidate();
 		OnRestore();
 	}
-
 #endif
 
 	return m_pTex;
@@ -131,24 +76,20 @@ LPDIRECT3DTEXTURE9	RBaseTexture::GetTexture()
 #endif
 
 #ifdef LOAD_TEST
-
 #define __BP(i,n)	MBeginProfile(i,n);
 #define __EP(i)		MEndProfile(i);
-
 #else
-
-#define __BP(i,n) ;
-#define __EP(i) ;
-
+#define __BP(i,n);
+#define __EP(i);
 #endif
 
 ///////////////////////////////////////////////////////////////////////////
 
-BOOL IsCompressedTextureFormatOk( D3DFORMAT TextureFormat );
+BOOL IsCompressedTextureFormatOk(D3DFORMAT TextureFormat);
 
-bool RBaseTexture::SubCreateTexture()
+bool RBaseTexture::SubCreateTexture(char* TextureFileBuffer)
 {
-	const D3DPOOL pool = 
+	const D3DPOOL pool =
 #ifndef _MANAGED
 		D3DPOOL_DEFAULT;
 #else
@@ -158,51 +99,52 @@ bool RBaseTexture::SubCreateTexture()
 	UINT Tex_w = D3DX_DEFAULT;
 	UINT Tex_h = D3DX_DEFAULT;
 
-	m_nTexLevel = SubGetTexLevel( m_nTexType );
+	m_nTexLevel = SubGetTexLevel(m_nTexType);
 
-	__BP(2011,"RBaseTexture::SubCreateTexture");
+	__BP(2011, "RBaseTexture::SubCreateTexture");
 
-	if( FAILED( D3DXGetImageInfoFromFileInMemory( m_pTextureFileBuffer,m_nFileSize,&m_Info) ) ) 
+	if (FAILED(D3DXGetImageInfoFromFileInMemory(TextureFileBuffer, m_nFileSize, &m_Info)))
 	{
-		_RPT1(_CRT_WARN,"%s ---->> get image info failure \n",m_szTextureName);
+		_RPT1(_CRT_WARN, "%s ---->> get image info failure \n", m_szTextureName);
 		__EP(2011);
 		return false;
 	}
 
-	if( m_nTexLevel ) {
-		Tex_w = m_Info.Width  / (1 << m_nTexLevel);
+	if (m_nTexLevel) {
+		Tex_w = m_Info.Width / (1 << m_nTexLevel);
 		Tex_h = m_Info.Height / (1 << m_nTexLevel);
 	}
 
 	D3DFORMAT d3dformat = D3DFMT_UNKNOWN;
 
-	if(g_nTextureFormat==0) {
-		switch(m_Info.Format) {
-			case D3DFMT_A8R8G8B8 :
-				d3dformat =	 D3DFMT_A4R4G4B4;
-				break;			
-			case D3DFMT_X8R8G8B8 :
-			case D3DFMT_R8G8B8 :
-				d3dformat =	 D3DFMT_R5G6B5;
-				break;
-			case D3DFMT_DXT1 :
-			case D3DFMT_DXT2 :
-			case D3DFMT_DXT3 :
-			case D3DFMT_DXT4 :
-			case D3DFMT_DXT5 :
-				d3dformat =	 m_Info.Format;
-				break;
-			default :
-				_ASSERT(FALSE);
+	if (g_nTextureFormat == 0) {
+		switch (m_Info.Format) {
+		case D3DFMT_A8R8G8B8:
+			d3dformat = D3DFMT_A4R4G4B4;
+			break;
+		case D3DFMT_X8R8G8B8:
+		case D3DFMT_R8G8B8:
+			d3dformat = D3DFMT_R5G6B5;
+			break;
+		case D3DFMT_DXT1:
+		case D3DFMT_DXT2:
+		case D3DFMT_DXT3:
+		case D3DFMT_DXT4:
+		case D3DFMT_DXT5:
+			d3dformat = m_Info.Format;
+			break;
+		default:
+			_ASSERT(FALSE);
 		}
-	}else
+	}
+	else
 		d3dformat = m_Info.Format;
-	
-	if( d3dformat==D3DFMT_DXT1 || d3dformat==D3DFMT_DXT2 || d3dformat==D3DFMT_DXT3 ||
-		d3dformat==D3DFMT_DXT4 || d3dformat==D3DFMT_DXT5) 
+
+	if (d3dformat == D3DFMT_DXT1 || d3dformat == D3DFMT_DXT2 || d3dformat == D3DFMT_DXT3 ||
+		d3dformat == D3DFMT_DXT4 || d3dformat == D3DFMT_DXT5)
 	{
-		if(IsCompressedTextureFormatOk(m_Info.Format)==FALSE) {
-			if( m_Info.Format == D3DFMT_DXT1 ) {
+		if (IsCompressedTextureFormatOk(m_Info.Format) == FALSE) {
+			if (m_Info.Format == D3DFMT_DXT1) {
 				d3dformat = D3DFMT_R5G6B5;
 			}
 			else
@@ -210,18 +152,17 @@ bool RBaseTexture::SubCreateTexture()
 		}
 	}
 
-	if( FAILED(D3DXCreateTextureFromFileInMemoryEx(
-		RGetDevice(), m_pTextureFileBuffer ,m_nFileSize, Tex_w, Tex_h,
-		m_bUseMipmap ? D3DX_DEFAULT : 1, 0, d3dformat,pool,
-		D3DX_FILTER_TRIANGLE|D3DX_FILTER_MIRROR, 
-		D3DX_FILTER_TRIANGLE|D3DX_FILTER_MIRROR, 
-		0, &m_Info, NULL, &m_pTex ))) {
-			_RPT1(_CRT_WARN,"%s ---->> memory texture (re)create failure \n",m_szTextureName);
-
-			__EP(2011);
-
-			return false;
-		}
+	if (FAILED(D3DXCreateTextureFromFileInMemoryEx(
+		RGetDevice(), TextureFileBuffer, m_nFileSize, Tex_w, Tex_h,
+		m_bUseMipmap ? D3DX_DEFAULT : 1, 0, d3dformat, pool,
+		D3DX_FILTER_TRIANGLE | D3DX_FILTER_MIRROR,
+		D3DX_FILTER_TRIANGLE | D3DX_FILTER_MIRROR,
+		0, &m_Info, NULL, &m_pTex)))
+	{
+		_RPT1(_CRT_WARN, "%s ---->> memory texture (re)create failure \n", m_szTextureName);
+		__EP(2011);
+		return false;
+	}
 
 	__EP(2011);
 
@@ -230,85 +171,50 @@ bool RBaseTexture::SubCreateTexture()
 
 bool RBaseTexture::OnRestore(bool bManaged)
 {
-	__BP(2010,"RBaseTexture::OnRestore");
+	auto RBaseTextureOnRestore = MBeginProfile("RBaseTexture::OnRestore");
 
-	_ASSERT(!m_pTex);
+	assert(!m_pTex);
 
 	MZFile mzf;
 
-	m_bManaged = bManaged;
 	m_bManaged = false;
 
-	if (m_pTextureFileBuffer == NULL) {
+	auto Open = MBeginProfile("RBaseTexture::OnRestore - MZFile::Open");
 
-		__BP(2012, "RBaseTexture::mzf.Open");
-
-		MZFileSystem *pfs = m_bUseFileSystem ? g_pFileSystem : NULL;
+	MZFileSystem *pfs = m_bUseFileSystem ? g_pFileSystem : nullptr;
 
 #ifdef LOAD_FROM_DDS
-		char ddstexturefile[MAX_PATH];
-		sprintf_safe(ddstexturefile, "%s.dds", m_szTextureName);
-		if (!mzf.Open(ddstexturefile, pfs))
+	char ddstexturefile[MAX_PATH];
+	sprintf_safe(ddstexturefile, "%s.dds", m_szTextureName);
+	if (!mzf.Open(ddstexturefile, pfs))
 #endif
-		{
-			if (!mzf.Open(m_szTextureName, pfs)) {
-				if (!mzf.Open(m_szTextureName)) {
-					__EP(2012);
-					__EP(2010);
-					return NULL;
-				}
-			}
-		}
+		if (!mzf.Open(m_szTextureName, pfs))
+			if (!mzf.Open(m_szTextureName))
+				return false;
 
-		__BP(2013, "RBaseTexture::mzf.Open : new ");
-		m_nFileSize = mzf.GetLength();
-		m_pTextureFileBuffer = new char[mzf.GetLength()];
-		__EP(2013);
-
-		__BP(2014, "RBaseTexture::mzf.Read ");
-
-		if (!mzf.Read(m_pTextureFileBuffer, mzf.GetLength()))
-		{
-			__EP(2014);
-			__EP(2010);
-			return false;
-		}
-
-		__EP(2014);
-	}
-
-	__EP(2012);
-
-	if(SubCreateTexture()==false) {
-
-		mzf.Close();
-
-		if(m_pTextureFileBuffer) {
-			delete [] m_pTextureFileBuffer;
-			m_pTextureFileBuffer = NULL;
-		}
-		__EP(2010);
-
+	auto Read = MBeginProfile("RBaseTexture::OnRestore - MZFile::Read");
+	m_nFileSize = mzf.GetLength();
+	bool Cached = mzf.IsCachedData();
+	char* TextureFileBuffer = mzf.Release();
+	if (!TextureFileBuffer)
 		return false;
-	}
+	MEndProfile(Read);
 
-	if(m_pTextureFileBuffer) {
-		delete [] m_pTextureFileBuffer;
-		m_pTextureFileBuffer = NULL;
-	}
+	auto ret = SubCreateTexture(TextureFileBuffer);
 
-	mzf.Close();
+	if (!Cached)
+		SAFE_DELETE_ARRAY(TextureFileBuffer);
 
-	__EP(2010);
+	MEndProfile(RBaseTextureOnRestore);
 
-	return true;
+	return ret;
 }
 
-RTextureManager *g_pTextureManager=NULL;
+static RTextureManager* g_pTextureManager = NULL;
 
 void RBaseTexture_Create()
 {
-	g_pTextureManager=new RTextureManager;
+	g_pTextureManager = new RTextureManager;
 }
 
 void RBaseTexture_Destory()
@@ -320,18 +226,18 @@ RTextureManager* RGetTextureManager() {
 	return g_pTextureManager;
 }
 
-RTextureManager::~RTextureManager() { 
+RTextureManager::~RTextureManager() {
 	Destroy();
-	g_pTextureManager=NULL;
+	g_pTextureManager = NULL;
 }
 
 void RTextureManager::Destroy() {
-	while(size())
+	while (size())
 	{
-		RBaseTexture *pTex=begin()->second;
-		if(pTex->m_nRefCount>0)
+		RBaseTexture *pTex = begin()->second;
+		if (pTex->m_nRefCount > 0)
 		{
-			_RPT2(_CRT_WARN," %s texture not destroyed. ( ref count = %d )\n",pTex->m_szTextureName,pTex->m_nRefCount);
+			_RPT2(_CRT_WARN, " %s texture not destroyed. ( ref count = %d )\n", pTex->m_szTextureName, pTex->m_nRefCount);
 		}
 		delete pTex;
 		erase(begin());
@@ -341,9 +247,9 @@ void RTextureManager::Destroy() {
 void RTextureManager::OnInvalidate() {
 
 #ifndef _MANAGED
-	for(iterator i=begin();i!=end();i++)
+	for (iterator i = begin(); i != end(); i++)
 	{
-		_RPT1(_CRT_WARN,"%s\n",i->second->m_szTextureName);
+		_RPT1(_CRT_WARN, "%s\n", i->second->m_szTextureName);
 		i->second->OnInvalidate();
 	}
 #endif
@@ -356,41 +262,30 @@ int RTextureManager::UpdateTexture(DWORD max_life_time)
 
 	DWORD this_time = GetGlobalTimeMS();
 	int cnt = 0;
-/*
-	int cur_size = CalcUsedSize();//파일 사이즈 단위
-	int vid_size = RGetVideoMemory();
 
-	// 자기 그래픽 카드의 최대량과 비교해서 넘는다면~
-	if(cur_size / (float)vid_size < 0.7f)
-		return 0;
-*/
-	// 리스트 하나 만들어서 시간순서대로 얻어내고... 
-	// 가장오래된것부터 하나하나 지워가면서 일정사이즈 유지하기..
-
-	for(iterator i=begin();i!=end();i++) {
+	for (iterator i = begin(); i != end(); i++) {
 		pTex = i->second;
-		if( pTex && pTex->m_bManaged && pTex->m_pTex ) {
-			// 오래된 것 순으로 필요한 만큼만 해제 넣기로 개선하기..
-			if( pTex->m_dwLastUseTime + max_life_time < this_time ) {
+		if (pTex && pTex->m_bManaged && pTex->m_pTex) {
+			if (pTex->m_dwLastUseTime + max_life_time < this_time) {
 				pTex->OnInvalidate();
 			}
 			cnt++;
 		}
 	}
 
-	return cnt;//사용중인 texture
+	return cnt;
 }
 
 void RTextureManager::OnChangeTextureLevel(DWORD flag)
 {
 	RBaseTexture* pTex = NULL;
 
-	for(iterator i=begin();i!=end();i++) {
+	for (iterator i = begin(); i != end(); i++) {
 		pTex = i->second;
-		if( pTex ) {
-			if( flag==RTextureType_All || (flag & pTex->m_nTexType) ) {
+		if (pTex) {
+			if (flag == RTextureType_All || (flag & pTex->m_nTexType)) {
 
-				if(pTex->m_pTex) {// 사용중인 텍스쳐만..
+				if (pTex->m_pTex) {
 					pTex->OnInvalidate();
 					pTex->OnRestore(pTex->m_bManaged);
 				}
@@ -406,17 +301,17 @@ int RTextureManager::PrintUsedTexture()
 	int cnt = 0;
 	int nUse = 0;
 
-	for(iterator i=begin();i!=end();i++) {
+	for (iterator i = begin(); i != end(); i++) {
 
 		pTex = i->second;
 		nUse = 0;
 
-		if( pTex ) {
+		if (pTex) {
 
-			if(pTex->m_pTex)
+			if (pTex->m_pTex)
 				nUse = 1;
-			
-			mlog("texture : %s Used %d RefCnt %d \n",pTex->m_szTextureName,nUse,pTex->m_nRefCount);
+
+			mlog("texture : %s Used %d RefCnt %d \n", pTex->m_szTextureName, nUse, pTex->m_nRefCount);
 			cnt++;
 		}
 	}
@@ -425,12 +320,12 @@ int RTextureManager::PrintUsedTexture()
 
 int RTextureManager::CalcUsedCount()
 {
-	int nCount=0;
+	int nCount = 0;
 
 	RBaseTexture* pTex = NULL;
-	for(iterator i=begin();i!=end();i++) {
+	for (iterator i = begin(); i != end(); i++) {
 		pTex = i->second;
-		if( pTex && pTex->m_pTex ) {
+		if (pTex && pTex->m_pTex) {
 			nCount++;
 		}
 	}
@@ -452,7 +347,7 @@ static int Floorer2PowerSize(int v)
 	else if (v <= 2048)	return 2048;
 	else if (v <= 4096)	return 4096;
 
-	_ASSERT(FALSE);	// Too Big!
+	assert(FALSE);	// Too Big!
 
 	return 2;
 }
@@ -465,15 +360,15 @@ int RTextureManager::CalcUsedSize()
 
 	int add_size = 0;
 
-	for(iterator i=begin();i!=end();i++) {
+	for (iterator i = begin(); i != end(); i++) {
 		pTex = i->second;
-		if( pTex && pTex->m_pTex ) {
+		if (pTex && pTex->m_pTex) {
 
 			add_size = 0;
-			
-			add_size = Floorer2PowerSize(pTex->GetWidth()) / ( 1 << pTex->GetTexLevel() ) *
-						Floorer2PowerSize(pTex->GetHeight()) / ( 1 << pTex->GetTexLevel() ) * 
-						(g_nTextureFormat==0 ? 2 : 4) ;
+
+			add_size = Floorer2PowerSize(pTex->GetWidth()) / (1 << pTex->GetTexLevel()) *
+				Floorer2PowerSize(pTex->GetHeight()) / (1 << pTex->GetTexLevel()) *
+				(g_nTextureFormat == 0 ? 2 : 4);
 
 			return_size += add_size;
 
@@ -485,7 +380,7 @@ int RTextureManager::CalcUsedSize()
 
 void RTextureManager::OnRestore() {
 #ifndef _MANAGED
-	for(iterator i=begin();i!=end();i++)
+	for (iterator i = begin(); i != end(); i++)
 	{
 		i->second->OnRestore();
 	}
@@ -493,61 +388,58 @@ void RTextureManager::OnRestore() {
 };
 
 
-RBaseTexture *RTextureManager::CreateBaseTexture(const char* filename,int tex_type,bool bUseMipmap,bool bUseFileSystem)
+RBaseTexture *RTextureManager::CreateBaseTexture(const char* filename, int tex_type, bool bUseMipmap, bool bUseFileSystem)
 {
-	return CreateBaseTextureSub(false,filename, tex_type ,bUseMipmap, bUseFileSystem);
+	return CreateBaseTextureSub(false, filename, tex_type, bUseMipmap, bUseFileSystem);
 }
 
-RBaseTexture *RTextureManager::CreateBaseTextureMg(const char* filename,int tex_type,bool bUseMipmap,bool bUseFileSystem)
+RBaseTexture *RTextureManager::CreateBaseTextureMg(const char* filename, int tex_type, bool bUseMipmap, bool bUseFileSystem)
 {
-	return CreateBaseTextureSub(true,filename, tex_type ,bUseMipmap, bUseFileSystem);
+	return CreateBaseTextureSub(true, filename, tex_type, bUseMipmap, bUseFileSystem);
 }
 
-RBaseTexture *RTextureManager::CreateBaseTextureSub(bool Mg,const char* filename,int tex_type,bool bUseMipmap,bool bUseFileSystem)
+RBaseTexture *RTextureManager::CreateBaseTextureSub(bool Mg, const char* filename, int tex_type, bool bUseMipmap, bool bUseFileSystem)
 {
-	if(filename==NULL || strlen(filename)==0) return NULL;
+	if (filename == NULL || strlen(filename) == 0) return NULL;
 
 	char texturefilename[256];
 
-	strcpy_safe(texturefilename,filename);
+	strcpy_safe(texturefilename, filename);
 	_strlwr(texturefilename);
 
-	iterator i=find(string(texturefilename));
+	iterator i = find(string(texturefilename));
 
-	if(i!=end())
+	if (i != end())
 	{
 		i->second->m_nRefCount++;
 		return i->second;
 	}
 
-	RBaseTexture *pnew=new RBaseTexture;
+	RBaseTexture *pnew = new RBaseTexture;
 	pnew->m_bUseFileSystem = bUseFileSystem;
-	pnew->m_nRefCount=1;
-	pnew->m_bUseMipmap	= bUseMipmap;
-	pnew->m_nTexType	= tex_type;
-	pnew->m_nTexLevel	= SubGetTexLevel(tex_type);
+	pnew->m_nRefCount = 1;
+	pnew->m_bUseMipmap = bUseMipmap;
+	pnew->m_nTexType = tex_type;
+	pnew->m_nTexLevel = SubGetTexLevel(tex_type);
 
-	strcpy_safe(pnew->m_szTextureName,texturefilename);
+	strcpy_safe(pnew->m_szTextureName, texturefilename);
 
 #ifndef _PUBLISH
-
-	if(Mg==false) {// .elu 계열...
-		if(!pnew->OnRestore(Mg)) {
+	if (Mg == false) {
+		if (!pnew->OnRestore(Mg)) {
 			delete pnew;
 			return NULL;
 		}
 	}
 #else 
-
-	if(!pnew->OnRestore(Mg))
+	if (!pnew->OnRestore(Mg))
 	{
 		delete pnew;
 		return NULL;
 	}
-
 #endif
 
-	insert(value_type(texturefilename,pnew));
+	insert(value_type(texturefilename, pnew));
 
 	return pnew;
 }
@@ -557,19 +449,19 @@ void RTextureManager::DestroyBaseTexture(RBaseTexture* pTex)
 	DestroyBaseTexture(pTex->m_szTextureName);
 }
 
-void RTextureManager::DestroyBaseTexture(char* szName)
+void RTextureManager::DestroyBaseTexture(const char* szName)
 {
 	char texturefilename[256];
 
-	strcpy_safe(texturefilename,szName);
+	strcpy_safe(texturefilename, szName);
 	_strlwr(texturefilename);
 
-	iterator i=find(string(texturefilename));
+	iterator i = find(texturefilename);
 
-	if(i!=end()) {
-		RBaseTexture *pTTex=i->second;
+	if (i != end()) {
+		RBaseTexture *pTTex = i->second;
 		pTTex->m_nRefCount--;
-		if(pTTex->m_nRefCount==0)
+		if (pTTex->m_nRefCount == 0)
 		{
 			delete pTTex;
 			erase(i);
@@ -577,41 +469,41 @@ void RTextureManager::DestroyBaseTexture(char* szName)
 	}
 }
 
-RBaseTexture* RCreateBaseTexture(const char* filename,DWORD tex_type,bool bUseMipmap,bool bUseFileSystem)
+RBaseTexture* RCreateBaseTexture(const char* filename, DWORD tex_type, bool bUseMipmap, bool bUseFileSystem)
 {
-	return g_pTextureManager->CreateBaseTexture(filename,tex_type,bUseMipmap,bUseFileSystem);
+	return g_pTextureManager->CreateBaseTexture(filename, tex_type, bUseMipmap, bUseFileSystem);
 }
 
-RBaseTexture* RCreateBaseTextureMg(const char* filename,DWORD tex_type,bool bUseMipmap,bool bUseFileSystem)
+RBaseTexture* RCreateBaseTextureMg(const char* filename, DWORD tex_type, bool bUseMipmap, bool bUseFileSystem)
 {
-	return g_pTextureManager->CreateBaseTextureMg(filename,tex_type,bUseMipmap,bUseFileSystem);
+	return g_pTextureManager->CreateBaseTextureMg(filename, tex_type, bUseMipmap, bUseFileSystem);
 }
 
 void RDestroyBaseTexture(RBaseTexture *pTex)
 {
-	if(g_pTextureManager==NULL || pTex==NULL) return;
+	if (g_pTextureManager == NULL || pTex == NULL) return;
 	g_pTextureManager->DestroyBaseTexture(pTex);
 }
 
 void RBaseTexture_Invalidate()
 {
-	_RPT0(_CRT_WARN,"begin invalidate\n");
+	_RPT0(_CRT_WARN, "begin invalidate\n");
 	g_pTextureManager->OnInvalidate();
-	_RPT0(_CRT_WARN,"invalidate complete\n");
+	_RPT0(_CRT_WARN, "invalidate complete\n");
 }
 
 void RBaseTexture_Restore()
 {
-	_RPT0(_CRT_WARN,"begin restore\n");
+	_RPT0(_CRT_WARN, "begin restore\n");
 	g_pTextureManager->OnRestore();
-	_RPT0(_CRT_WARN,"restore complete\n");
+	_RPT0(_CRT_WARN, "restore complete\n");
 }
 
 void RChangeBaseTextureLevel(DWORD flag)
 {
-	_RPT0(_CRT_WARN,"begin change texture level\n");
+	_RPT0(_CRT_WARN, "begin change texture level\n");
 	g_pTextureManager->OnChangeTextureLevel(flag);
-	_RPT0(_CRT_WARN,"change texture level complete\n");
+	_RPT0(_CRT_WARN, "change texture level complete\n");
 }
 
 _NAMESPACE_REALSPACE2_END

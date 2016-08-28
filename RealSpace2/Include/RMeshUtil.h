@@ -3,9 +3,7 @@
 #include <list>
 #include <string>
 #include <unordered_map>
-
 #include <D3DX9.h>
-
 #include "RTypes.h"
 
 #define DEL(p)  { if(p) { delete (p);   (p)=NULL; } }
@@ -357,15 +355,13 @@ struct RPhysiqueInfo {
 	D3DXVECTOR3 m_offset[MAX_PHYSIQUE_KEY];
 };
 
-// 버퍼생성에 실패하는 경우 soft 로 돌린다..내부적으로 알아서 돌아가도록...
-
 #define USE_VERTEX_SW 1
 #define USE_VERTEX_HW 1<<1
 
-class RIndexBuffer {
+class RIndexBuffer final {
 public:
 	RIndexBuffer();
-	virtual ~RIndexBuffer();
+	~RIndexBuffer();
 
 	void Lock();
 	void Unlock();
@@ -380,7 +376,7 @@ public:
 
 public:
 	
-	bool	m_bUseSWVertex;	// 버텍스 버퍼가 사용 불가능한 저사양 컴인가? 혹은 버텍스 에니메이션..
+	bool	m_bUseSWVertex;
 	bool	m_bUseHWVertex;
 
 	DWORD	m_dwUsage;
@@ -394,15 +390,16 @@ public:
 	LPDIRECT3DINDEXBUFFER9 m_ib;
 };
 
-class RVertexBuffer {
+class RVertexBuffer final {
 public:
 	RVertexBuffer();
-	virtual ~RVertexBuffer();
+	~RVertexBuffer();
 
 	void Init();
 	void Clear();
 
-	bool Create(char* pVertex,DWORD fvf,int VertexSize,int VertexCnt,DWORD flag,DWORD Usage=D3DUSAGE_WRITEONLY,D3DPOOL Pool=D3DPOOL_MANAGED);
+	bool Create(char* pVertex, DWORD fvf, int VertexSize, int VertexCnt,
+		DWORD flag, DWORD Usage = D3DUSAGE_WRITEONLY, D3DPOOL Pool = D3DPOOL_MANAGED);
 
 	bool Update(char* pVertex,DWORD fvf,int VertexSize,int VertexCnt);
 	bool UpdateData(char* pVertex);		
@@ -411,11 +408,9 @@ public:
 
 	bool UpdateData(D3DXVECTOR3* pVec);
 
-#ifndef _MAX_EXPORT // max 와 겹침..
-
+#ifndef _MAX_EXPORT
 	void UpdateDataLVert(RLVertex* pVert,D3DXVECTOR3* pVec,int nCnt);
 	void UpdateDataVert(RVertex* pVert,D3DXVECTOR3* pVec,int nCnt);
-
 #endif
 
 	void Lock();

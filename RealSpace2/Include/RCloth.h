@@ -22,7 +22,6 @@ typedef struct constraint {
 sConstraint;
 
 // Declare
-struct rvector;
 struct RVertex;
 
 #define	CLOTH_VALET_ONLY    0x00
