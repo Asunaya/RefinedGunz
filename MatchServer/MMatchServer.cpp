@@ -1195,9 +1195,6 @@ void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Recei
 	else
 	{
 		auto* ReceiverObj = GetObject(Receiver);
-		if (CommandID != MC_PEER_BASICINFO_RG)
-			MLog("Sending direct command ID %d from %d to %d, %d listener(s)\n",
-				CommandID, Sender.Low, Receiver.Low, ReceiverObj->m_CommListener.size());
 		if (ReceiverObj)
 			RouteToListener(ReceiverObj, pCmd);
 	}
