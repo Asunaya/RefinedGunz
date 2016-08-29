@@ -966,19 +966,12 @@ void ZCharacter::OnUpdate(float fDelta)
 		ProxyDirection = m_DirectionLower;
 
 		v3 dir = ProxyDirection;
-		DMLog("ZCharacter::OnUpdate - %f, %f, %f; %f, %f, %f\n",
-			dir.x, dir.y, dir.z,
-			m_TargetDir.x, m_TargetDir.y, m_TargetDir.z);
 	}
 	else
 	{
 		rvector dir;
 		if (!GetHistory(&m_vProxyPosition, &dir, g_pGame->GetTime() - pObserver->GetDelay()))
 			return;
-
-		DMLog("ZCharacter::OnUpdate - Time = %f - %f, %f, %f\n",
-			g_pGame->GetTime() - pObserver->GetDelay(),
-			dir.x, dir.y, dir.z);
 
 		if (g_Rules.IsVanillaMode())
 		{

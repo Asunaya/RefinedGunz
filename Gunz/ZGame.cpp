@@ -628,12 +628,12 @@ bool ZGame::CheckGameReady()
 	return false;
 }
 
-void ZGame::OnGameResponseTimeSync(unsigned int nLocalTimeStamp, unsigned int nGlobalTimeSync)
+void ZGame::OnGameResponseTimeSync(u64 nLocalTimeStamp, u64 nGlobalTimeSync)
 {
 	ZGameTimer* pTimer = GetGameTimer();
-	int nCurrentTick = pTimer->GetGlobalTick();
-	int nDelay = (nCurrentTick - nLocalTimeStamp)/2;
-	int nOffset = (int)nGlobalTimeSync - (int)nCurrentTick + nDelay;
+	auto nCurrentTick = pTimer->GetGlobalTick();
+	auto nDelay = (nCurrentTick - nLocalTimeStamp) / 2;
+	auto nOffset = nGlobalTimeSync - nCurrentTick + nDelay;
 	
 	pTimer->SetGlobalOffset(nOffset);
 
@@ -2119,11 +2119,11 @@ void ZGame::OnPeerPing(MCommand *pCommand)
 	unsigned int nTimeStamp;
 	pCommand->GetParameter(&nTimeStamp, 0, MPT_UINT);
 	
-	// PONG 으로 응답한다
 	MCommandManager* MCmdMgr = ZGetGameClient()->GetCommandManager();
 	MCommand* pCmd = new MCommand(MCmdMgr->GetCommandDescByID(MC_PEER_PONG), 
 								  pCommand->GetSenderUID(), ZGetGameClient()->GetUID());	
 	pCmd->AddParameter(new MCmdParamUInt(nTimeStamp));
+	//MLog("Posting pong with timestamp %08X, current time %08llX\n", nTimeStamp, GetTickTime());
 	ZGetGameClient()->Post(pCmd);
 }
 
@@ -2135,8 +2135,9 @@ void ZGame::OnPeerPong(MCommand *pCommand)
 
 	unsigned int nTimeStamp;
 	pCommand->GetParameter(&nTimeStamp, 0, MPT_UINT);
+	//MLog("Got pong with timestamp %08X, current time %08llX\n", nTimeStamp, GetTickTime());
 
-	int nPing = (GetTickTime() - nTimeStamp)/2;
+	auto nPing = (GetTickTime() - nTimeStamp) / 2;
     pPeer->UpdatePing(GetTickTime(), nPing);
 
 	#ifdef _DEBUG
@@ -4320,6 +4321,8 @@ void ZGame::PostPeerPingInfo()
 				MCommand* pCmd = new MCommand(MCmdMgr->GetCommandDescByID(MC_PEER_PING), 
 					pPeerInfo->uidChar, ZGetGameClient()->GetUID());	
 				pCmd->AddParameter(new MCmdParamUInt(nTimeStamp));
+				/*MLog("Posting ping with timestamp %08X, current time %016llX\n",
+					nTimeStamp, GetTickTime());*/
 				ZGetGameClient()->Post(pCmd);
 
 #ifdef _DEBUG

@@ -239,18 +239,22 @@ void MMatchObject::Tick(u64 nTime)
 
 	m_DisconnStatusInfo.Update( nTime );
 
-	if (nTime - LastHPAPInfoTime > 1000 && IsAlive())
+	auto* Stage = MGetMatchServer()->FindStage(m_uidStage);
+	if (Stage && Stage->GetStageSetting()->GetNetcode() == NetcodeType::ServerBased)
 	{
-		MGetMatchServer()->PostHPAPInfo(*this, HP, AP);
-		LastHPAPInfoTime = nTime;
-	}
+		if (nTime - LastHPAPInfoTime > 1000 && IsAlive())
+		{
+			MGetMatchServer()->PostHPAPInfo(*this, HP, AP);
+			LastHPAPInfoTime = nTime;
+		}
 
-	if (!BasicInfoHistory.empty())
-	{
-		// TODO: Make less ungood!
-		Origin = BasicInfoHistory.front().position;
-		Direction = BasicInfoHistory.front().direction;
-		Velocity = BasicInfoHistory.front().velocity;
+		if (!BasicInfoHistory.empty())
+		{
+			// TODO: Make less ungood!
+			Origin = BasicInfoHistory.front().position;
+			Direction = BasicInfoHistory.front().direction;
+			Velocity = BasicInfoHistory.front().velocity;
+		}
 	}
 }
 
@@ -342,7 +346,7 @@ void MMatchObject::SetMaxHPAP()
 	if (!CharInfo)
 		return;
 
-	auto Stage = MGetMatchServer()->FindStage(m_uidStage);
+	auto* Stage = MGetMatchServer()->FindStage(m_uidStage);
 	if (!Stage)
 		return;
 

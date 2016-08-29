@@ -317,7 +317,7 @@ bool MClient::OnSockRecv(SOCKET sock, char* pPacket, DWORD dwSize)
 	LockRecv();
 	while(MCommand* pCmd = pCmdBuilder->GetCommand()) {
 		//// LOG ////////
-		#ifdef _DEBUG
+		#if 0
 		char szBuf[64];
 		sprintf_safe(szBuf, "Recv Command(%d) , %d Bytes \n", pCmd->GetID(), dwSize);
 		OutputDebugString(szBuf);

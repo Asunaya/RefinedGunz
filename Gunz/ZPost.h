@@ -13,38 +13,6 @@
 
 #pragma pack(1)
 
-//struct ZPACKEDBASICINFO {
-//	float	fTime;
-//	short	posx,posy,posz;
-//	short	velx,vely,velz;
-//	short	dirx,diry,dirz;
-//	BYTE	upperstate;
-//	BYTE	lowerstate;
-//	BYTE	selweapon;
-//
-//	void Unpack(ZBasicInfo& bi)
-//	{
-//		bi.position = rvector(posx, posy, posz);
-//		bi.velocity = rvector(velx, vely, velz);
-//		bi.direction = 1.f / 32000.f * rvector(dirx, diry, dirz);
-//	}
-//
-//	void Pack(const ZBasicInfo& bi)
-//	{
-//		posx = bi.position.x;
-//		posy = bi.position.y;
-//		posz = bi.position.z;
-//
-//		velx = bi.velocity.x;
-//		vely = bi.velocity.y;
-//		velz = bi.velocity.z;
-//
-//		dirx = bi.direction.x * 32000;
-//		diry = bi.direction.y * 32000;
-//		dirz = bi.direction.z * 32000;
-//	}
-//};
-
 struct ZPACKEDSHOTINFO {
 	float	fTime;
 	short	posx,posy,posz;

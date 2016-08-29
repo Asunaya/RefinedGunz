@@ -180,9 +180,15 @@ MMatchClient::~MMatchClient()
 
 bool MMatchClient::Create(unsigned short nUDPPort)
 {
-	if (MCommandCommunicator::Create() == false) return false;
+	if (MCommandCommunicator::Create() == false) {
+		MLog("MCommandCommunicator::Create failed!\n");
+		return false;
+	}
 
-	if (m_SafeUDP.Create(true, nUDPPort, false) == false) return false;	// REUSEADDR OFF
+	if (m_SafeUDP.Create(true, nUDPPort, false) == false) {
+		MLog("MSafeUDP::Create failed! GetLastError() = %d\n", GetLastError());
+		return false;
+	}
 
 	m_SafeUDP.SetCustomRecvCallback(UDPSocketRecvEvent);
 	SetUDPTestProcess(false);
@@ -290,7 +296,8 @@ bool MMatchClient::OnCommand(MCommand* pCommand)
 		m_CommandManager.Post(pCmd);
 		UnlockRecv();
 
-		DMLog("Received tunnelled P2P command ID %x\n", pCmd->GetID());
+		if (pCmd->GetID() != MC_PEER_BASICINFO_RG)
+			DMLog("Received tunnelled P2P command ID %x\n", pCmd->GetID());
 	}
 	break;
 		case MC_MATCH_RESPONSE_LOGIN:
@@ -747,6 +754,9 @@ void MMatchClient::SendCommand(MCommand* pCommand)
 							(pPeerInfo->GetUDPTestResult() == false))
 							SendCommandByTunneling(pCommand);
 #else
+						if (pCommand->GetID() != MC_PEER_BASICINFO_RG)
+							DMLog("Sending direct command ID %d from %d to %d\n",
+								pCommand->GetID(), pCommand->GetSenderUID().Low, pCommand->GetReceiverUID().Low);
 						if (!pPeerInfo->GetUDPTestResult())
 							SendCommandByMatchServerTunneling(pCommand, pPeerInfo->uidChar);
 #endif

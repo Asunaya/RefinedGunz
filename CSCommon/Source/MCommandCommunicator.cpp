@@ -151,10 +151,6 @@ void MCommandCommunicator::Run(void)
 
 		OnPrepareCommand(pCommand);
 
-		/*if (pCommand->GetID() == MC_MATCH_P2P_COMMAND)
-			MLog("Run MC_MATCH_P2P_COMMAND %d %d\n", pCommand->m_pCommandDesc->IsFlag(MCDT_PEER2PEER), pCommand->m_pCommandDesc->IsFlag(MCDT_LOCAL) == true ||
-				(m_This.IsValid() && pCommand->m_Receiver == m_This));*/
-
 		if ((pCommand->m_pCommandDesc->IsFlag(MCDT_PEER2PEER)==true))
 		{
 			if (pCommand->m_Sender != m_This)

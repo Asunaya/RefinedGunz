@@ -261,7 +261,7 @@ protected:
 		MATCHCLIENT_DEFAULT_UDP_PORT, MTD_PeerListNode* pNode = NULL);
 	void OnGameRoundState(const MUID& uidStage, int nRound, int nRoundState, int nArg);
 
-	void OnGameResponseTimeSync(unsigned int nLocalTimeStamp, unsigned int nGlobalTimeSync);
+	void OnGameResponseTimeSync(u64 nLocalTimeStamp, u64 nGlobalTimeSync);
 	void OnEventUpdateJjang(const MUID& uidChar, bool bJjang);
 
 	void OnPeerDead(const MUID& uidAttacker, const unsigned long int nAttackerArg,

@@ -1125,7 +1125,7 @@ void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Recei
 
 			NewBasicInfo nbi;
 			auto* pbi = reinterpret_cast<const u8*>(Blob + 2 + 2 + 1 + 4);
-			if (!UnpackNewBasicInfo(nbi, pbi, BlobSize))
+			if (!UnpackNewBasicInfo(nbi, pbi, BlobSize - 9))
 				return;
 			nbi.bi.SentTime = nbi.Time;
 			nbi.bi.RecvTime = MGetMatchServer()->GetGlobalClockCount() / 1000.0;
@@ -1195,6 +1195,9 @@ void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Recei
 	else
 	{
 		auto* ReceiverObj = GetObject(Receiver);
+		if (CommandID != MC_PEER_BASICINFO_RG)
+			MLog("Sending direct command ID %d from %d to %d, %d listener(s)\n",
+				CommandID, Sender.Low, Receiver.Low, ReceiverObj->m_CommListener.size());
 		if (ReceiverObj)
 			RouteToListener(ReceiverObj, pCmd);
 	}

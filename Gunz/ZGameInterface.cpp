@@ -1656,11 +1656,18 @@ bool ZGameInterface::OnCreate(ZLoadingProgress *pLoadingProgress)
 	auto ZGameClientCreate = MBeginProfile("ZGameInterface - ZGameClient::Create");
 	int nNetworkPort = RandomNumber( ZGetConfiguration()->GetEtc()->nNetworkPort1, ZGetConfiguration()->GetEtc()->nNetworkPort2);
 	if (g_pGameClient->Create( nNetworkPort) == false) {
-		string strMsg = "Unknown Network Error";
-		if (GetLastError() == WSAEADDRINUSE)
+		std::string strMsg = "Unknown Network Error";
+		auto LastError = GetLastError();
+		if (LastError == WSAEADDRINUSE)
 			NotifyMessage(MATCHNOTIFY_NETWORK_PORTINUSE, &strMsg);
 		else
-			NotifyMessage(MATCHNOTIFY_NETWORK_CREATE_FAILED, &strMsg);
+		{
+			char LastErrorString[256];
+			FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM, nullptr, LastError,
+				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), LastErrorString, ArraySize(LastErrorString), nullptr);
+			strMsg.resize(256);
+			sprintf_safe(&strMsg[0], strMsg.size(), "Network error %d: %s", LastError, LastErrorString);
+		}
 		ShowMessage(strMsg.c_str());
 	}
 	g_pGameClient->SetOnCommandCallback(OnCommand);
