@@ -114,19 +114,8 @@ FSOUND_SAMPLE* ZSoundFMod::LoadWave( char* szSoundFileName, int Flag )
 
 	MZFileSystem* pFileSystem = ZApplication::GetFileSystem();
 
-	if( pFileSystem ) 
-	{
-		if( !mzf.Open( szSoundFileName, pFileSystem )) 
-		{
-			if( !mzf.Open( szSoundFileName ) )
-				return NULL;
-		}
-	} 
-	else 
-	{
-		if( !mzf.Open( szSoundFileName ))
-			return NULL;
-	}
+	if(!mzf.Open(szSoundFileName, pFileSystem))
+		return nullptr;
     
 	SoundFileLength = mzf.GetLength();
 

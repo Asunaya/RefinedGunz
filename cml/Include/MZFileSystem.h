@@ -125,6 +125,35 @@ private:
 	int ArchiveIndexCounter = 0;
 };
 
+struct MZFileBuffer
+{
+	MZFileBuffer(char* ptr, bool owned) : ptr(ptr), owned(owned) {}
+	MZFileBuffer(MZFileBuffer&& src) : ptr(src.ptr), owned(src.owned) { src.ptr = nullptr; }
+	~MZFileBuffer() { Destroy(); }
+
+	MZFileBuffer& operator =(MZFileBuffer&& src)
+	{
+		this->~MZFileBuffer();
+		new (this) MZFileBuffer{ std::move(src) };
+		return *this;
+	}
+
+	void Destroy()
+	{
+		if (owned && ptr)
+		{
+			delete[] ptr;
+			ptr = nullptr;
+		}
+	}
+
+	auto get() { return ptr; }
+
+private:
+	char* ptr = nullptr;
+	bool owned = false;
+};
+
 class MZFile final
 {
 public:
@@ -146,7 +175,7 @@ public:
 	auto GetLength(void) const { return m_nFileSize; }
 	bool Read(void* pBuffer, int nMaxSize);
 	bool LoadFile();
-	char* Release();
+	MZFileBuffer Release();
 	auto IsCachedData() const { return CachedData; }
 
 	enum SeekPos { begin = 0x0, current = 0x1, end = 0x2 };

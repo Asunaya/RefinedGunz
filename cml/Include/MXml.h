@@ -196,7 +196,7 @@ public:
 };
 
 /// XML Document 클래스.
-class MXmlDocument
+class MXmlDocument final
 {
 private:
 	bool							m_bInitialized;		///< 초기화되었는의 여부
@@ -207,12 +207,12 @@ public:
 	/// Default constructor.
 	MXmlDocument();
 	/// Default destructor.
-	virtual ~MXmlDocument();
+	~MXmlDocument();
 
 	/// 초기화. 이 함수는 이 클래스를 사용하기 전에 꼭 수행되어야 한다
-	bool				Create(void);
+	bool				Create();
 	/// 마무리.
-	bool				Destroy(void);
+	bool				Destroy();
 
 	/// XML 파일을 읽는다.
 	bool				LoadFromFile(const char* m_sFileName);

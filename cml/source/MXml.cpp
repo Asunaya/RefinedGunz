@@ -599,7 +599,7 @@ bool MXmlElement::RemoveAttribute(const char* sAttrName)
 //-----------------------------------------------------------------------------
 
 
-MXmlDocument::MXmlDocument(void)
+MXmlDocument::MXmlDocument()
 {
 	m_bInitialized = false;
 
@@ -608,14 +608,14 @@ MXmlDocument::MXmlDocument(void)
 	CoInitialize(NULL);
 }
 
-MXmlDocument::~MXmlDocument(void)
+MXmlDocument::~MXmlDocument()
 {
 	if (m_bInitialized) Destroy();
 
 	CoUninitialize();
 }
 
-bool MXmlDocument::Create(void)
+bool MXmlDocument::Create()
 {
 	// CoInitialize()를 먼저 수행하기 위해 동적으로 할당함.
 	m_ppDom = new MXmlDomDocPtr;
@@ -634,7 +634,7 @@ bool MXmlDocument::Create(void)
 	return true;
 }
 
-bool MXmlDocument::Destroy(void)
+bool MXmlDocument::Destroy()
 {
 	if (!m_bInitialized) return false;
 
@@ -651,25 +651,18 @@ bool MXmlDocument::LoadFromFile(const char* m_sFileName)
 
 	_variant_t varOut((bool)TRUE);
 	varOut = (*m_ppDom)->load((_variant_t)m_sFileName);
-	if ((bool)varOut == FALSE)
+	if (!static_cast<bool>(varOut))
 	{
 		MXmlDomParseErrorPtr errPtr = (*m_ppDom)->GetparseError();
 		_bstr_t bstrErr(errPtr->reason);
 
-		char szBuf[8192];
+		MLog("-------------------------------\n");
+		MLog("Error In Xml File(%s)\n", m_sFileName);
+		MLog("Code = 0x%x\n", errPtr->errorCode);
+		MLog("Source = Line : %ld; Char : %ld\n", errPtr->line, errPtr->linepos);
+		MLog("Error Description = %s\n", static_cast<char*>(bstrErr));
 
-		sprintf_safe(szBuf, "-------------------------------\n");
-		OutputDebugString(szBuf);
-		sprintf_safe(szBuf, "Error In Xml File(%s)\n", m_sFileName);		
-		OutputDebugString(szBuf);
-		sprintf_safe(szBuf, "Code = 0x%x\n", errPtr->errorCode);
-		OutputDebugString(szBuf);
-		sprintf_safe(szBuf, "Source = Line : %ld; Char : %ld\n", errPtr->line, errPtr->linepos);
-		OutputDebugString(szBuf);
-		sprintf_safe(szBuf, "Error Description = %s\n", (char*)bstrErr);
-		OutputDebugString(szBuf);
-
-		_ASSERT(0);
+		assert(false);
 
 		return false;
 	}
@@ -731,7 +724,7 @@ bool MXmlDocument::LoadFromMemory(char* szBuffer, LANGID lanid)
 
 
 	_bstr_t bsXML(cp);
-	if ((*m_ppDom)->loadXML(BSTR(bsXML))!= -1)
+	if ((*m_ppDom)->loadXML(BSTR(bsXML)) != -1)
 	{
 		MXmlDomParseErrorPtr errPtr = (*m_ppDom)->GetparseError();
 		_bstr_t bstrErr(errPtr->reason);

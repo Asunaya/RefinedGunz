@@ -10,6 +10,7 @@
 #include "MUtil.h"
 #include <algorithm>
 #include "defer.h"
+#include <cassert>
 
 void ReplaceBackSlashToSlash(char* szPath)
 {
@@ -516,18 +517,17 @@ bool MZFile::Open(const char* szFileName, MZFileSystem* pZFS)
 
 	if (!pZFS)
 	{
-		if (isMode(MZIPREADFLAG_FILE) == false)
+		if (!isMode(MZIPREADFLAG_FILE))
 		{
 			MLog("MZFile::Open - Was asked to read non-zipped file, but MZIPREADFLAG_FILE is not enabled\n");
+			assert(false);
 			return false;
 		}
 
 		fopen_s(&m_fp, szFileName, "rb");
-
-		if (m_fp == NULL)
+		if (!m_fp)
 		{
-			// Big spam
-			//DMLog("MZFile::Open - Failed to open non-zipped file %s\n", szFileName);
+			MLog("MZFile::Open - Failed to open non-zipped file %s\n", szFileName);
 			return false;
 		}
 
@@ -583,11 +583,9 @@ bool MZFile::Open(const char* szFileName, MZFileSystem* pZFS)
 			return Open(relativename,szZipFullPath,bFileCheck,pDesc->m_crc32);
 		}
 
-		if (isMode(MZIPREADFLAG_FILE) == false)
-		{
-			MLog("MZFile::Open - Was asked to read non-zipped file, but MZIPREADFLAG_FILE is not enabled\n");
+		// ZFileName is empty, so it's not zipped. Try to read the plain file.
+		if (!isMode(MZIPREADFLAG_FILE))
 			return false;
-		}
 
 		char szFullPath[_MAX_PATH];
 		sprintf_safe(szFullPath, "%s%s", pZFS->GetBasePath(), szFileName);
@@ -759,13 +757,13 @@ bool MZFile::LoadFile()
 	return m_Zip.ReadFile(m_nIndexInZip, m_pData, m_nFileSize);
 }
 
-char* MZFile::Release()
+MZFileBuffer MZFile::Release()
 {
 	if (!m_pData)
 		if (!LoadFile())
-			return nullptr;
+			return{ nullptr, false };
 
-	auto ret = m_pData;
+	MZFileBuffer ret{ m_pData, !IsCachedData() };
 	m_pData = nullptr;
 	return ret;
 }

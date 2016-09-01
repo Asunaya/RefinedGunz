@@ -239,8 +239,6 @@ bool RMesh::ReadXml(const char* filename)
 
 	mzf.Close();
 
-	//-------->
-
 	PNode = XmlDoc.GetDocumentElement();
 
 	if(ReadXmlElement(&PNode,Path)==false) {
@@ -315,8 +313,6 @@ static int CheckEfAlign(const char* str,int& ef,int& align)
 	ef = 0;
 	align = 0;
 
-	// 그냥 풀어쓰자..
-
 	// algn0
 	// ef_algn0
 	bool bCheck = true;
@@ -360,7 +356,6 @@ static int CheckEfAlign(const char* str,int& ef,int& align)
 void RMesh::CheckNameToType(RMeshNode* pMeshNode)
 {
 	pMeshNode->m_PartsType = eq_parts_etc;
-//	pMeshNode->m_WeaponMotionType = eq_weapon_etc;
 
 	pMeshNode->m_isDummy = false;
 	pMeshNode->m_isWeaponMesh = false;
@@ -373,15 +368,13 @@ void RMesh::CheckNameToType(RMeshNode* pMeshNode)
 
 	if(NCMPNAME("Bip",3)) {		
 		pMeshNode->m_isDummyMesh = true;
-//		pMeshNode->ConnectToNameID();//이름을 ID 로 바꾼다..
 	}
 	else if(NCMPNAME("Bone",4))		pMeshNode->m_isDummyMesh = true;
 	else if(NCMPNAME("Dummy",5)) {
 		pMeshNode->m_isDummyMesh = true;
 		pMeshNode->m_isDummy = true;
 	}
-	else if( NCMPNAME("eq_wr",5) || NCMPNAME("eq_wl",5) || NCMPNAME("eq_wd",5) ) {// 전부 소문자화~
-		// 오른손 무기 더미 종류
+	else if( NCMPNAME("eq_wr",5) || NCMPNAME("eq_wl",5) || NCMPNAME("eq_wd",5) ) {
 		if( NCMPNAME("eq_wd_katana",12) ) {
 			pMeshNode->m_isWeaponMesh = true;
 			pMeshNode->m_PartsType = eq_parts_right_katana;
@@ -456,10 +449,9 @@ void RMesh::CheckNameToType(RMeshNode* pMeshNode)
 		}
 	} 
 	else if(NCMPNAME("eq_",3) ) {
-		// 뒤쪽은 고유한 이름..
 		if(NCMPNAME("eq_head",7) )	{
 			pMeshNode->m_PartsType = eq_parts_head;
-			pMeshNode->m_AlphaSortValue = 1.f;//알파값이 있는경우 소팅우선순위
+			pMeshNode->m_AlphaSortValue = 1.f;
 		}
 		else if(NCMPNAME("eq_face",7) ) {
 			pMeshNode->m_PartsType = eq_parts_face;
@@ -467,7 +459,6 @@ void RMesh::CheckNameToType(RMeshNode* pMeshNode)
 		}
 		else if(NCMPNAME("eq_chest",8) ) {	
 			pMeshNode->m_PartsType = eq_parts_chest;
-//			pMeshNode->m_isCollisionMesh = true;
 			pMeshNode->m_AlphaSortValue = 3.f;
 		}
 		else if(NCMPNAME("eq_hands",8) ) {
@@ -487,7 +478,7 @@ void RMesh::CheckNameToType(RMeshNode* pMeshNode)
 			pMeshNode->m_AlphaSortValue = 0.5f;
 		}
 	}
-	else if(NCMPNAME("collision_",10)) {	// 충돌이나 picking 용 모델
+	else if(NCMPNAME("collision_",10)) {	// picking
 		pMeshNode->m_isCollisionMesh = true;
 		pMeshNode->m_isDummyMesh = true;
 	}
@@ -694,15 +685,13 @@ bool RMesh::ReadElu(const char* fname)
 {
 #define MZF_READ(x,y) { if(!mzf.Read((x),(y))) return false; }
 
-	__BP(2009,"RMesh::ReadElu");
+	auto RMeshReadElu = MBeginProfile("RMesh::ReadElu");
 
 	char Path[256];
 	char Name[256];
 
 	Path[0] = NULL;
 	Name[0] = NULL;
-
-	// 이펙트 모델이라면 자동으로 옵션켠다.
 
 	GetPath(fname,Path);
 
@@ -712,7 +701,7 @@ bool RMesh::ReadElu(const char* fname)
 		m_bEffectSort = true;
 		m_LitVertexModel = true;
 	}
-	else {//이펙트가 아니라면 텍스쳐 해상도 옵션의 영향을 받음.
+	else {
 		m_mtrl_list_ex.SetObjectTexture(true);
 	}
 
@@ -720,23 +709,11 @@ bool RMesh::ReadElu(const char* fname)
 
 	m_data_num = 0;
 
-//	char *buffer;
 	MZFile mzf;
 
-	if(g_pFileSystem) {
-		if(!mzf.Open(fname,g_pFileSystem)) {
-			if(!mzf.Open(fname)) {
-				mlog("----------> in zip ( %s ) file not found!! \n ", fname );
-				__EP(2009);
-				return false;
-			}
-		}
-	} else {
-		if(!mzf.Open(fname)) {
-			mlog("----------> %s file not found!! \n ", fname );
-			__EP(2009);
-			return false;
-		}
+	if(!mzf.Open(fname, g_pFileSystem)) {
+		mlog("RMesh::ReadElu - %s file not found! FS = %p\n ", fname, g_pFileSystem);
+		return false;
 	}
 
 	ex_hd_t t_hd;
@@ -744,15 +721,14 @@ bool RMesh::ReadElu(const char* fname)
 	MZF_READ(&t_hd,sizeof(ex_hd_t) );
 
 	if(t_hd.sig != EXPORTER_SIG) {
-		mlog("%s elu file 파일 식별 실패.\n",fname);
-		__EP(2009);
+		mlog("RMesh::ReadElu - %s has the wrong exporter signature - expected %08X, got %08X\n",
+			fname, EXPORTER_SIG, t_hd.sig);
 		return false;
 	}
 	
 	int i,j,k;
 
 	for(i=0;i<t_hd.mtrl_num;i++) {
-
 		RMtrl* node = new RMtrl;
 
 		MZF_READ(&node->m_mtrl_id    ,4 );
@@ -781,7 +757,7 @@ bool RMesh::ReadElu(const char* fname)
 			MZF_READ(&node->m_opa_name,MAX_PATH_NAME_LEN );
 		}
 
-		if(t_hd.ver > EXPORTER_MESH_VER2) {//ver3 부터
+		if(t_hd.ver > EXPORTER_MESH_VER2) {//ver3
 			int twoside=0;
 			MZF_READ(&twoside,sizeof(int) );
 			node->m_bTwoSided = twoside ? true : false;
@@ -793,7 +769,7 @@ bool RMesh::ReadElu(const char* fname)
 			node->m_bAdditive = additive ? true : false;
 		}
 
-		if(t_hd.ver > EXPORTER_MESH_VER7 )//ver8 부터
+		if(t_hd.ver > EXPORTER_MESH_VER7 )//ver8
 		{
 			int alpha_test = 0;
 			MZF_READ(&alpha_test,sizeof(int) );
@@ -853,17 +829,15 @@ bool RMesh::ReadElu(const char* fname)
 
 		pMeshNode->m_mat_ref = pMeshNode->m_mat_base;
 		D3DXMatrixInverse( &pMeshNode->m_mat_ref_inv , 0, &pMeshNode->m_mat_ref );
-		
-		if(t_hd.ver >= EXPORTER_MESH_VER2) {
-			MZF_READ(&pMeshNode->m_ap_scale,sizeof(D3DXVECTOR3) );//mat
+
+		if (t_hd.ver >= EXPORTER_MESH_VER2) {
+			MZF_READ(&pMeshNode->m_ap_scale, sizeof(D3DXVECTOR3));
 		}
 		else  {
 			pMeshNode->m_ap_scale.x = 1.f;
 			pMeshNode->m_ap_scale.y = 1.f;
 			pMeshNode->m_ap_scale.z = 1.f;
 		}
-
-		///////////////////////////////////////////////
 
 		if(t_hd.ver >= EXPORTER_MESH_VER4) {
 
@@ -1110,12 +1084,10 @@ bool RMesh::ReadElu(const char* fname)
 	}
 
 	CheckNodeAlphaMtrl();
-
 	MakeAllNodeVertexBuffer();
-
-	__EP(2009);
-
 	m_isMeshLoaded = true;
+
+	MEndProfile(RMeshReadElu);
 
 	return true;
 }
@@ -1129,17 +1101,17 @@ bool RMesh::AddNode(char* name,char* pname,rmatrix& base_mat)
 {
 	RMeshNode* pMeshNode = new RMeshNode;
 
-	pMeshNode->m_id = m_data_num;		// last id
+	pMeshNode->m_id = m_data_num;
 	pMeshNode->m_pParentMesh = this;
 	pMeshNode->m_pBaseMesh = this;
 
 	pMeshNode->SetName(name);
-	strcpy_safe(pMeshNode->m_Parent,pname);	// max 40
+	strcpy_safe(pMeshNode->m_Parent, pname);
 
-	pMeshNode->m_mat_base	= base_mat;	// 위치 잡아주고.. 출력된값으로..
+	pMeshNode->m_mat_base	= base_mat;
 	pMeshNode->m_mat_ref	= base_mat;
 	pMeshNode->m_mat_result = base_mat;
-	pMeshNode->m_mat_add	= base_mat; // 로컬을 유지하면서 나중에 사용..
+	pMeshNode->m_mat_add	= base_mat;
 
 	pMeshNode->m_isAddMeshNode = true;
 
@@ -1154,9 +1126,6 @@ bool RMesh::AddNode(char* name,char* pname,rmatrix& base_mat)
 	return true;
 }
 
-
-// 제거시 자신을 부모로 가지는 오브젝트에 대해서고려~
-
 bool RMesh::DelNode(RMeshNode* data) 
 {
 	return false;
@@ -1164,47 +1133,38 @@ bool RMesh::DelNode(RMeshNode* data)
 
 void RMesh::MakeAllNodeVertexBuffer()
 {
-	// 버텍스 버퍼 만들기
-
 	RMeshNode* pMeshNode=NULL;
 	DWORD flag = 0;
 
 	bool isShader = RIsSupportVS();
 
-//	if( RIsSupportVS() )
+	for( int i = 0 ; i < m_data_num; ++i )
 	{
-		for( int i = 0 ; i < m_data_num; ++i )
+		pMeshNode = m_data[i];
+
+		if(pMeshNode->m_isDummyMesh) continue;
+		if(!pMeshNode->m_point_num) continue;
+
+		if( pMeshNode->m_physique && pMeshNode->m_point_color_num == 0 && isShader) // cloth
 		{
-			pMeshNode = m_data[i];
+			pMeshNode->MakeVSVertexBuffer();
+		}
 
-			if(pMeshNode->m_isDummyMesh) continue;
-			if(!pMeshNode->m_point_num) continue;
+		if(pMeshNode->m_physique) {
+			pMeshNode->MakeNodeBuffer( USE_VERTEX_SW );
+		}
+		else {
 
-			if( pMeshNode->m_physique && pMeshNode->m_point_color_num == 0 && isShader) // cloth 몸통이 아닌.. 모델들.. + 몬스터들
-			{
-				pMeshNode->MakeVSVertexBuffer();
-			}
-
-			if(pMeshNode->m_physique) {	// 몸통... color 버텍스를 포함한것들..
-				// CreateVSVertexBuffer 는 인덱스버퍼는 생성하지 않고 여기서 생성한걸 사용한다...
-				pMeshNode->MakeNodeBuffer( USE_VERTEX_SW );
-			}
-			else { // 일반 모델들.. 버텍스 에니의 경우 sw 만 사용.. ( 버텍스 에니 연결되기전에는 식별불가 )
-
-				if(RIsHardwareTNL())	flag = USE_VERTEX_HW | USE_VERTEX_SW;
-				else 					flag = USE_VERTEX_SW;
+			if(RIsHardwareTNL())	flag = USE_VERTEX_HW | USE_VERTEX_SW;
+			else 					flag = USE_VERTEX_SW;
 					
-				pMeshNode->MakeNodeBuffer( flag ); // vertex ani 인경우만 soft 버퍼 생성..
-			}
+			pMeshNode->MakeNodeBuffer( flag ); // vertex ani 인경우만 soft 버퍼 생성..
 		}
 	}
 }
 
 void RMesh::ConnectMatrix()
 {
-	// 파츠로 등록되는 모델들은 base model 에 대해서 연결해 줘야 한다...
-	// ConnectPhysiqueParent 가 그 역할을 하고 있음..
-
 	RMeshNode* pMeshNode=NULL;
 
 	for(int i=0;i<m_data_num;i++) {
@@ -1213,30 +1173,26 @@ void RMesh::ConnectMatrix()
 
 		if(pMeshNode == NULL) continue;
 
-//		if(pMeshNode->m_point_num) {
 		if (pMeshNode->m_Parent[0] != 0) {
 			CalcLocalMatrix(pMeshNode);
 		}
-//		}
 
-		// 부모 연결
 		int t_p_num,ret,j;
 		
-		if(pMeshNode->m_physique_num) {
-		
-			for(int q=0;q<pMeshNode->m_physique_num;q++) {
+		if (pMeshNode->m_physique_num) {
+
+			for (int q = 0; q < pMeshNode->m_physique_num; q++) {
 
 				t_p_num = pMeshNode->m_physique[q].m_num;
 
-				// 최대 4개 지원
-				if(t_p_num > MAX_PHYSIQUE_KEY)	
+				if (t_p_num > MAX_PHYSIQUE_KEY)
 					t_p_num = MAX_PHYSIQUE_KEY;
 
-				for(j=0;j<t_p_num;j++) {
+				for (j = 0; j < t_p_num; j++) {
 
-					ret = _FindMeshId(&pMeshNode->m_physique[q].m_parent_name[j][0]);//로딩시만~
+					ret = _FindMeshId(&pMeshNode->m_physique[q].m_parent_name[j][0]);
 
-					if(ret != -1) {
+					if (ret != -1) {
 
 						pMeshNode->m_physique[q].m_parent_id[j] = ret;
 					}
@@ -1245,36 +1201,9 @@ void RMesh::ConnectMatrix()
 					}
 				}
 			}
-/*
-			if( pMeshNode->m_isDummyMesh==false )// 스킨정보가 있는 상태에서 모델 노드라면 BaseBoneMatrix 를 만들어준다.
-			{
-				// 사용하는 본의 갯수 - 에니메이션이 바뀌더라도 바뀌지 않는다.
-				
-				int k = t_data_use_cnt;
-
-				pMeshNode->m_BoneBaseMatrix = new RBoneBaseMatrix[t_data_use_cnt];
-
-				int pos = 0;
-
-				for(int i=0;i<m_data_num;i++)
-				{
-					if(t_data[i] != -1)
-					{
-						pMeshNode->m_BoneBaseMatrix[pos].id = i;
-						pMeshNode->m_BoneBaseMatrix[pos].mat = pMeshNode->m_mat_ref * m_data[i]->m_mat_ref_inv;
-					}
-				}
-			}
-			파츠 때문에 복잡해진다.
-*/
 		}
 
-//		if(pMeshNode->m_physique_num||p1||p2||p3)
-//			mlog("%s physique vertex %d , p1 %d , p2 %d , p3 %d\n",pMeshNode->m_Name,pMeshNode->m_physique_num,p1,p2,p3);
-
-		////////////////////////////////////////////////////
-
-		if( m_isNPCMesh ) // npc 의 손에든 무기 구분하기..
+		if( m_isNPCMesh )
 		{ 
 			int id = _FindMeshId(pMeshNode->m_Parent);
 

@@ -342,7 +342,7 @@ bool ZApplication::OnCreate(ZLoadingProgress *pLoadingProgress)
 	InitialLoading.UpdateAndDraw(0);
 
 #ifdef STARTUP_CACHE_FILES
-	__BP(1999, "Cache archives");
+	auto CacheArchives = MBeginProfile("Cache archives");
 	const char* CachedFileNames[] = { "system", "model", "sfx",
 		"interface/default", "interface/loadable", "interface/Login",
 		"sound/bgm", "sound/effect", };
@@ -350,7 +350,7 @@ bool ZApplication::OnCreate(ZLoadingProgress *pLoadingProgress)
 	int CacheIndices[NumCachedFiles];
 	for (int i = 0; i < NumCachedFiles; i++)
 		CacheIndices[i] = m_FileSystem.CacheArchive(CachedFileNames[i]);
-	__EP(1999);
+	MEndProfile(CacheArchives);
 #endif
 
 	InitialLoading.UpdateAndDraw(0.5f);

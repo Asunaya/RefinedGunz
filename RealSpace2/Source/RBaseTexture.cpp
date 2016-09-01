@@ -183,27 +183,29 @@ bool RBaseTexture::OnRestore(bool bManaged)
 
 	MZFileSystem *pfs = m_bUseFileSystem ? g_pFileSystem : nullptr;
 
+	// TODO: Fix this silly stuff. Add .dds to the filenames
+	// in the xmls if there is actually one available
 #ifdef LOAD_FROM_DDS
 	char ddstexturefile[MAX_PATH];
 	sprintf_safe(ddstexturefile, "%s.dds", m_szTextureName);
 	if (!mzf.Open(ddstexturefile, pfs))
 #endif
 		if (!mzf.Open(m_szTextureName, pfs))
-			if (!mzf.Open(m_szTextureName))
-				return false;
+			return false;
 
 	auto Read = MBeginProfile("RBaseTexture::OnRestore - MZFile::Read");
 	m_nFileSize = mzf.GetLength();
-	bool Cached = mzf.IsCachedData();
-	char* TextureFileBuffer = mzf.Release();
-	if (!TextureFileBuffer)
+	auto TextureFileBuffer = mzf.Release();
+	if (!TextureFileBuffer.get())
+	{
+		MLog("RBaseTexture::OnRestore - MZFile::Release on %s failed\n", m_szTextureName);
 		return false;
+	}
 	MEndProfile(Read);
 
-	auto ret = SubCreateTexture(TextureFileBuffer);
+	auto ret = SubCreateTexture(TextureFileBuffer.get());
 
-	if (!Cached)
-		SAFE_DELETE_ARRAY(TextureFileBuffer);
+	TextureFileBuffer.Destroy();
 
 	MEndProfile(RBaseTextureOnRestore);
 

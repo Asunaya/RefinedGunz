@@ -2813,27 +2813,20 @@ bool MIDLResource::LoadFromFile(const char* szFileName, MWidget* pParent, MZFile
 			return false;
 		}
 
-		char *buffer = nullptr;
 #if 0
-		buffer = new char[mzf.GetLength() + 1];
-		mzf.Read(buffer, mzf.GetLength());
-		buffer[mzf.GetLength()] = 0;
+		MZFileBuffer buffer{ new char[mzf.GetLength() + 1], true };
+		mzf.Read(buffer.get(), mzf.GetLength());
+		buffer.get()[mzf.GetLength()] = 0;
 #else
 		bool Cached = mzf.IsCachedData();
-		buffer = mzf.Release();
+		auto buffer = mzf.Release();
 		DMLog("Reading file %s, cached = %d\n", szFileName, Cached);
 #endif
 		MEndProfile(FileLoading);
 
 		auto Parsing = MBeginProfile("MIDLResource::LoadFromFile - MXMLDocument parsing");
-		if (!xmlDocument.LoadFromMemory(buffer))
-		{
-			if (!Cached)
-				delete buffer;
+		if (!xmlDocument.LoadFromMemory(buffer.get()))
 			return false;
-		}
-		if (!Cached)
-			delete buffer;
 		mzf.Close();
 		MEndProfile(Parsing);
 	}

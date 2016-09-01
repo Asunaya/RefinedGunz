@@ -112,42 +112,28 @@ bool MMatchItemEffectDescMgr::ReadXml(MZFileSystem* pFileSystem, const char* szF
 	MXmlDocument	xmlIniData;
 	xmlIniData.Create();
 
-	//	<-----------------
-	char *buffer;
 	MZFile mzf;
 
-	if(pFileSystem) 
+	if (!mzf.Open(szFileName, pFileSystem))
 	{
-		if(!mzf.Open(szFileName,pFileSystem)) 
-		{
-			if(!mzf.Open(szFileName)) 
-			{
-				xmlIniData.Destroy();
-				return false;
-			}
-		}
-	} 
-	else 
-	{
-		if(!mzf.Open(szFileName))
-		{
-			xmlIniData.Destroy();
-			return false;
-		}
+		MLog("MMatchItemEffectDescMgr::ReadXml - MZFile::Open on %s failed\n", szFileName);
+		return false;
 	}
 
-	buffer = new char[mzf.GetLength()+1];
-	buffer[mzf.GetLength()] = 0;
-	mzf.Read(buffer,mzf.GetLength());
+	auto buffer = mzf.Release();
+	if (!buffer.get())
+	{
+		MLog("MMatchItemEffectDescMgr::ReadXml - MZFile::Release on %s failed\n", szFileName);
+		return false;
+	}
 
-	if(!xmlIniData.LoadFromMemory(buffer))
+	if(!xmlIniData.LoadFromMemory(buffer.get()))
 	{
 		xmlIniData.Destroy();
 		return false;
 	}
-	delete[] buffer;
+	buffer.Destroy();
 	mzf.Close();
-	//	<------------------
 
 	MXmlElement rootElement, chrElement, attrElement;
 	char szTagName[256];
@@ -173,7 +159,6 @@ bool MMatchItemEffectDescMgr::ReadXml(MZFileSystem* pFileSystem, const char* szF
 
 void MMatchItemEffectDescMgr::Clear()
 {
-//	if (!empty())
 	while(!empty())
 	{
 		MMatchItemEffectDesc* pEffectDesc = (*begin()).second;

@@ -37,8 +37,6 @@ void TaskManager::ThreadLoop()
 
 bool MeshManager::LoadParts(std::vector<unsigned char>& File)
 {
-	std::list<std::string> FileList;
-
 	rapidxml::xml_document<> parts;
 
 	try
@@ -69,7 +67,6 @@ bool MeshManager::LoadParts(std::vector<unsigned char>& File)
 				continue;
 
 			const char *szFile = fileattr->value();
-			FileList.push_back(szFile);
 
 			auto attr = node->first_attribute("part");
 
