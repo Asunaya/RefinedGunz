@@ -64,7 +64,7 @@ public:
 			m_pTrafficLogs[m_nCursor].Record(nTime, nTrafficSum);
 		}
 	}
-	int GetTrafficSpeed() {
+	int GetTrafficSpeed() const {
 		unsigned long nTimeStampCurrent = m_pTrafficLogs[m_nCursor].GetTimeStamp();
 		unsigned long nTrafficCurrent = m_pTrafficLogs[m_nCursor].GetTrafficSum();
 

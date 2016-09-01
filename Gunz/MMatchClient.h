@@ -207,14 +207,14 @@ public:
 	bool GetUDPTestProcess()			{ return m_bUDPTestProcess; }
 	void SetUDPTestProcess(bool bVal)	{ m_bUDPTestProcess = bVal; }
 	void UpdateUDPTestProcess();
-	void GetUDPTraffic(int* nSendTraffic, int* nRecvTraffic)
+	void GetUDPTraffic(int* nSendTraffic, int* nRecvTraffic) const
 	{ return m_SafeUDP.GetTraffic(nSendTraffic, nRecvTraffic); }
 
 	void SetUDPPort(int nPort);
-	MUID GetServerUID() { return m_uidServer; }
-	MUID GetPlayerUID()	{ return m_uidPlayer; }
-	MUID GetChannelUID() { return m_uidChannel; }
-	MUID GetStageUID() { return m_uidStage; }
+	auto& GetServerUID() const { return m_uidServer; }
+	auto& GetPlayerUID() const { return m_uidPlayer; }
+	auto& GetChannelUID() const { return m_uidChannel; }
+	auto& GetStageUID() const { return m_uidStage; }
 	virtual MUID GetSenderUIDBySocket(SOCKET socket);
 
 

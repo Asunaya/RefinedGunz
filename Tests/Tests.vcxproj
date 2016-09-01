@@ -76,13 +76,13 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>../GunzShared/;../CSCommon/Include;../CML/Include;../MAI/Include;../RealSpace2/Include;../RealSpace/Include;../SafeUDP/Include;../MDatabase/Include;../MCountryFilter/Include;../Gunz/;../Mint2/Include/;../opus-1.1.1/include/;../libsodium/include;../sdk/dx9/Include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../Gunz/;../sdk/dx9/include;../CSCommon/Include;../SafeUDP/Include;../CML/Include;../RealSpace2/Include;../MAI/Include;../RealSpace/Include;../Mint2/Include;../RealSound/Include;../MDatabase/Include;../MCountryFilter/Include;../sdk/rapidxml/include;../sdk/libsodium/include;../sdk/opus/include;../sdk/portaudio/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PreprocessorDefinitions>_MBCS;NO_WARN_MBCS_MFC_DEPRECATION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>../sdk/dx9/lib;../RealSpace2\lib;../RealSound/Lib;Dxerr8.lib;Lib;../opus-1.1.1/win32/VS2010/Win32/Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;../libsodium/Win32/Release/v140/static/libsodium.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>../sdk/dx9/lib;../RealSound/Lib;Lib;../sdk/opus/lib/Debug;../sdk/portaudio/lib/Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>../CML/Lib/zlib.lib;../sdk/libsodium/lib/static/libsodium.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -99,10 +99,12 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>../Gunz/;../sdk/dx9/include;../CSCommon/Include;../SafeUDP/Include;../CML/Include;../RealSpace2/Include;../MAI/Include;../RealSpace/Include;../Mint2/Include;../RealSound/Include;../MDatabase/Include;../MCountryFilter/Include;../sdk/rapidxml/include;../sdk/libsodium/include;../sdk/opus/include;../sdk/portaudio/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>../sdk/dx9/lib;../RealSound/Lib;Lib;../sdk/opus/lib/Release_LTCG;../sdk/portaudio/lib/Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

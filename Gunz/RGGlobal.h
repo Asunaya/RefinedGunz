@@ -21,12 +21,12 @@ inline uint32_t XRGB(uint8_t r, uint8_t g, uint8_t b)
 
 inline int RelativeWidth(int x)
 {
-	return float(x) / 1920 * RGetScreenWidth();
+	return int(float(x) / 1920 * RGetScreenWidth());
 }
 
 inline int RelativeHeight(int y)
 {
-	return float(y) / 1080 * RGetScreenHeight();
+	return int(float(y) / 1080 * RGetScreenHeight());
 }
 
 inline int RELWIDTH(int x) { return RelativeWidth(x); }

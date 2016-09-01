@@ -849,7 +849,6 @@ void ZGameClient::OnResponseFriendList(void* pBlob, int nCount)
 		
 		if (pList) {
 			pList->AddPlayer(state, pNode->szName, pNode->szDescription);
-//			pList->AttachToolTip(new MToolTip("ToolTipTest", pList));	// 툴팁을 붙이면 BMButton이 맛감
 		} else {
 			if (ZApplication::GetGameInterface()->GetState() != GUNZ_LOBBY )
 			{
@@ -874,7 +873,7 @@ void ZGameClient::OnChannelPlayerList(int nTotalPlayerCount, int nPage, void* pB
 
 	if(nCount) {
 		pPlayerListBox->RemoveAll();
-	} else {//아무내용도 없다면~
+	} else {
 		return;
 	}
 
@@ -900,7 +899,8 @@ void ZGameClient::OnChannelPlayerList(int nTotalPlayerCount, int nPage, void* pB
 			if ((pNode->nPlayerFlags & MTD_PlayerFlags_AdminHide) == true) {
 				//  Skip on AdminHide
 			} else {
-				pPlayerListBox->AddPlayer(pNode->uidPlayer, state, pNode->nLevel, pNode->szName, pNode->szClanName, pNode->nCLID, (MMatchUserGradeID)pNode->nGrade);
+				pPlayerListBox->AddPlayer(pNode->uidPlayer, state, pNode->nLevel, pNode->szName,
+					pNode->szClanName, pNode->nCLID, (MMatchUserGradeID)pNode->nGrade);
 			}
 
 			// Emblem
@@ -2244,9 +2244,6 @@ bool ZGameClient::OnCommand(MCommand* pCommand)
 		default:
 			if (!ret)
 			{
-
-//				MClient::OutputMessage(MZMOM_LOCALREPLY, "Command(%s) handler not found", pCommand->m_pCommandDesc->GetName());
-//				return false;
 			}
 			break;
 	}
@@ -2303,14 +2300,7 @@ bool ZGameClient::OnSockDisconnect(SOCKET sock)
 
 		if (ZApplication::GetInstance()->GetLaunchMode() == ZApplication::ZLAUNCH_MODE_NETMARBLE) {	
 			ZChangeGameState(GUNZ_SHUTDOWN);
-//			ZChangeGameState(GUNZ_NETMARBLELOGIN);
 			ZPOSTCMD0(MC_NET_ONDISCONNECT);
-
-/*			ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
-			MLabel* pLabel = (MLabel*)pResource->FindWidget("NetmarbleLoginMessage");
-			pLabel->SetText(MGetErrorString(MERR_CLIENT_DISCONNECTED));
-			ZApplication::GetGameInterface()->ShowWidget("NetmarbleLogin", true);
-			ZApplication::GetGameInterface()->SetCursorEnable(true);*/
 		} else {
 			ZChangeGameState(GUNZ_LOGIN);
 			ZPOSTCMD0(MC_NET_ONDISCONNECT);
@@ -2340,11 +2330,9 @@ void ZGameClient::OnSockError(SOCKET sock, SOCKET_ERROR_EVENT ErrorEvent, int &E
 	ZPOSTCMD1(MC_NET_ONERROR, MCmdParamInt(ErrorCode));
 
 	if (ZApplication::GetInstance()->GetLaunchMode() == ZApplication::ZLAUNCH_MODE_NETMARBLE) {	
-		// 넷마블에서 로그인
 		ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
 		MLabel* pLabel = (MLabel*)pResource->FindWidget("NetmarbleLoginMessage");
 		if (pLabel) {
-//			pLabel->SetText(MGetErrorString(MERR_CLIENT_CONNECT_FAILED));
 			pLabel->SetText(
 				ZErrStr(MERR_CLIENT_CONNECT_FAILED) );
 			pLabel->Show();
@@ -2360,7 +2348,6 @@ void ZGameClient::OnSockError(SOCKET sock, SOCKET_ERROR_EVENT ErrorEvent, int &E
 
 		MLabel* pLabel = (MLabel*)pResource->FindWidget("LoginError");
 		if (pLabel) {
-//			pLabel->SetText(MGetErrorString(MERR_CLIENT_CONNECT_FAILED));
 			pLabel->SetText( ZErrStr(MERR_CLIENT_CONNECT_FAILED) );
 
 		}
@@ -2395,9 +2382,9 @@ int ZGameClient::FindListItem(MListBox* pListBox, const MUID& uid)
 	return -1;
 }
 
-unsigned long int ZGameClient::GetGlobalClockCount(void)
+u64 ZGameClient::GetGlobalClockCount() const
 {
-	unsigned long int nLocalClock = GetClockCount();
+	auto nLocalClock = GetClockCount();
 	if (m_bIsBigGlobalClock) return (nLocalClock + m_nClockDistance);
 	else return (nLocalClock - m_nClockDistance);
 }

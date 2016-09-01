@@ -136,17 +136,17 @@ public:
 	MSTAGE_CHAR_SETTING_NODE* FindCharSetting(const MUID& uid);
 
 	// Get
-	char* GetMapName()								{ return m_StageSetting.szMapName; }
-	int GetMapIndex()								{ return m_StageSetting.nMapIndex; }
-	int GetRoundMax()								{ return m_StageSetting.nRoundMax; }
-	int GetLimitTime()								{ return m_StageSetting.nLimitTime; }
-	int GetLimitLevel()								{ return m_StageSetting.nLimitLevel; }
-	MUID GetMasterUID()								{ return m_uidMaster; }
-	STAGE_STATE GetStageState()						{ return m_nStageState; }
-	MMATCH_GAMETYPE GetGameType()					{ return m_StageSetting.nGameType; }
-	int GetMaxPlayers()								{ return m_StageSetting.nMaxPlayers; }
-	bool GetForcedEntry()							{ return m_StageSetting.bForcedEntryEnabled; }
-	bool GetAutoTeamBalancing()						{ return m_StageSetting.bAutoTeamBalancing; }
+	const char* GetMapName() const { return m_StageSetting.szMapName; }
+	int GetMapIndex() const { return m_StageSetting.nMapIndex; }
+	int GetRoundMax() const { return m_StageSetting.nRoundMax; }
+	int GetLimitTime() const { return m_StageSetting.nLimitTime; }
+	int GetLimitLevel() const { return m_StageSetting.nLimitLevel; }
+	MUID GetMasterUID() const { return m_uidMaster; }
+	STAGE_STATE GetStageState() const { return m_nStageState; }
+	MMATCH_GAMETYPE GetGameType() const { return m_StageSetting.nGameType; }
+	int GetMaxPlayers() const { return m_StageSetting.nMaxPlayers; }
+	bool GetForcedEntry() const { return m_StageSetting.bForcedEntryEnabled; }
+	bool GetAutoTeamBalancing() const { return m_StageSetting.bAutoTeamBalancing; }
 	auto GetNetcode() const { return m_StageSetting.Netcode; }
 	bool IsForcedHPAP() const { return m_StageSetting.ForceHPAP; }
 	int GetForcedHP() const { return m_StageSetting.HP; }
@@ -171,9 +171,9 @@ public:
 	void UpdateStageSetting(MSTAGE_SETTING_NODE* pSetting);
 	void UpdateCharSetting(const MUID& uid, unsigned int nTeam, MMatchObjectStageState nStageState);
 
-	void ResetCharSetting()			{ m_CharSettingList.DeleteAll(); }
+	void ResetCharSetting() { m_CharSettingList.DeleteAll(); }
 	bool IsTeamPlay();
 	bool IsWaitforRoundEnd();
 	bool IsQuestDrived();
-	bool IsTeamWinThePoint()		{ return m_StageSetting.bTeamWinThePoint; }
+	bool IsTeamWinThePoint() const { return m_StageSetting.bTeamWinThePoint; }
 };

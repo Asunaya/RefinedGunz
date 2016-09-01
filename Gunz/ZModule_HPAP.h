@@ -18,14 +18,14 @@ public:
 
 	virtual void InitStatus() override;
 
-	int		GetMaxHP() const		{ return m_nMaxHP; }
-	void	SetMaxHP(int nMaxHP)	{ m_nMaxHP = nMaxHP; }
-	int		GetMaxAP() const		{ return m_nMaxAP; }
-	void	SetMaxAP(int nMaxAP)	{ m_nMaxAP = nMaxAP; }
+	auto GetMaxHP() const { return static_cast<int>(m_nMaxHP); }
+	void SetMaxHP(int nMaxHP) { m_nMaxHP = static_cast<float>(nMaxHP); }
+	auto GetMaxAP() const { return static_cast<int>(m_nMaxAP); }
+	void SetMaxAP(int nMaxAP) { m_nMaxAP = static_cast<float>(nMaxAP); }
 
-	auto GetHP() const { return fHP; }
+	auto GetHP() const { return static_cast<int>(fHP); }
 	void SetHP(int nHP);
-	auto GetAP() const { return fAP; }
+	auto GetAP() const { return static_cast<int>(fAP); }
 	void SetAP(int nAP);
 
 	bool IsFullHP() const { return GetHP() == m_nMaxHP; }

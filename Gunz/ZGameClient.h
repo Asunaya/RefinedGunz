@@ -219,19 +219,20 @@ public:
 	bool GetRejectInvite()				{ return m_bRejectInvite; }
 	void SetRejectInvite(bool bVal)		{ m_bRejectInvite = bVal; }
 
-	unsigned long int GetClockCount(void) { return GetGlobalTimeMS(); }
-	unsigned long int GetGlobalClockCount(void);
+	auto GetClockCount() const { return GetGlobalTimeMS(); }
+	u64 GetGlobalClockCount() const;
 
-	virtual void OutputMessage(const char* szMessage, MZMOMType nType=MZMDM_GENERAL);
+	virtual void OutputMessage(const char* szMessage, MZMOMType nType=MZMDM_GENERAL) override;
 	
 	void SetOnCommandCallback(ZONCOMMANDCALLBACK pCallback) { m_fnOnCommandCallback = pCallback;}
 
-	void Tick(void);
-	void Disconnect()							{ MMatchClient::Disconnect(m_Server); }
-	
-	MMatchStageSetting* GetMatchStageSetting() { return &m_MatchStageSetting; }
-	bool IsForcedEntry() { return m_bForcedEntry; }
-	bool IsLadderGame() { return m_bLadderGame; }
+	void Tick();
+	void Disconnect() { MMatchClient::Disconnect(m_Server); }
+
+	auto* GetMatchStageSetting() { return &m_MatchStageSetting; }
+	auto* GetMatchStageSetting() const { return &m_MatchStageSetting; }
+	bool IsForcedEntry() const { return m_bForcedEntry; }
+	bool IsLadderGame() const { return m_bLadderGame; }
 	void ReleaseForcedEntry();
 	void ClearStageSetting();
 public:
@@ -243,18 +244,18 @@ public:
 	void StartChannelList(MCHANNEL_TYPE nChannelType);
 	void StopChannelList();
 
-	const char*		GetChannelName()	{ return m_szChannel; }
-	MCHANNEL_TYPE	GetChannelType()	{ return m_CurrentChannelType; }
-	const char*		GetChannelRuleName(){ return m_szChannelRule; }
-	const char*		GetStageName()		{ return m_szStageName; }
-	int				GetStageNumber()	{ return m_nRoomNo; }
+	const char*		GetChannelName() const { return m_szChannel; }
+	MCHANNEL_TYPE	GetChannelType() const { return m_CurrentChannelType; }
+	const char*		GetChannelRuleName() const { return m_szChannelRule; }
+	const char*		GetStageName() const { return m_szStageName; }
+	int				GetStageNumber() const { return m_nRoomNo; }
 	
-	const char* GetChatRoomInvited(){ return m_szChatRoomInvited; }
-	void SetChatRoomInvited(const char* pszRoomName)	{ strcpy_safe(m_szChatRoomInvited, pszRoomName); }
+	const char* GetChatRoomInvited() const { return m_szChatRoomInvited; }
+	void SetChatRoomInvited(const char* pszRoomName) { strcpy_safe(m_szChatRoomInvited, pszRoomName); }
 
-	bool AmIStageMaster() { return (m_MatchStageSetting.GetMasterUID() == GetPlayerUID()); }
+	bool AmIStageMaster() const { return (m_MatchStageSetting.GetMasterUID() == GetPlayerUID()); }
 
-	const char* GetVoteMessage() { return m_szVoteText; }
+	const char* GetVoteMessage() const { return m_szVoteText; }
 public:
 	void AnswerSponsorAgreement(bool bAnswer);
 	void AnswerJoinerAgreement(bool bAnswer);

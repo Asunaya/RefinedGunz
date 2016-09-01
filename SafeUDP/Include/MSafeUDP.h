@@ -200,8 +200,8 @@ public:
 	bool PushSend(char* pszIP, int nPort, char* pPacket, DWORD dwPacketSize);
 	bool PushSend( DWORD dwIP, int nPort, char* pPacket, DWORD dwPacketSize );
 
-	int GetSendTraffic()	{ return m_SendTrafficLog.GetTrafficSpeed(); }
-	int GetRecvTraffic()	{ return m_RecvTrafficLog.GetTrafficSpeed(); }
+	int GetSendTraffic() const { return m_SendTrafficLog.GetTrafficSpeed(); }
+	int GetRecvTraffic() const { return m_RecvTrafficLog.GetTrafficSpeed(); }
 
 	// Dbg code. don't use for release mode. - by SungE.
 	int GetSendListSize() { return (int)m_SendList.size(); }
@@ -237,7 +237,7 @@ public:
 	MNetLink* FindNetLink(DWORD dwIP, WORD wRawPort);
 	MNetLink* FindNetLink(__int64 nMapKey);
 
-	void GetTraffic(int* nSendTraffic, int* nRecvTraffic) {
+	void GetTraffic(int* nSendTraffic, int* nRecvTraffic) const {
 		*nSendTraffic = m_SocketThread.GetSendTraffic();
 		*nRecvTraffic = m_SocketThread.GetRecvTraffic();
 	}
