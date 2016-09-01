@@ -43,7 +43,7 @@ bool MeshManager::LoadParts(std::vector<unsigned char>& File)
 
 	try
 	{
-		parts.parse<rapidxml::parse_declaration_node | rapidxml::parse_no_data_nodes>((char*)&File[0]);
+		parts.parse<rapidxml::parse_declaration_node | rapidxml::parse_no_data_nodes>((char*)&File[0], File.size());
 	}
 	catch (rapidxml::parse_error &e)
 	{
@@ -291,12 +291,4 @@ void MeshManager::GetAsync(const char *szMeshName, const char *szNodeName, void*
 				Callback(ret);
 		});
 	});
-}
-
-void AddTask(std::function<void()>)
-{
-}
-
-void Invoke(std::function<void()>)
-{
 }

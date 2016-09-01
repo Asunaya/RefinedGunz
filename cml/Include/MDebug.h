@@ -59,8 +59,14 @@ struct ProfilerGuard
 	bool Active = true;
 };
 
+#ifdef _DEBUG
 ProfilerGuard MBeginProfile(const char *szName);
 void MEndProfile(ProfilerGuard& guard);
 void MCheckProfileCount();
+#else
+inline char MBeginProfile(const char *szName) { return{}; }
+inline void MEndProfile(char guard) { (void)guard; }
+inline void MCheckProfileCount() {}
+#endif
 
 #endif

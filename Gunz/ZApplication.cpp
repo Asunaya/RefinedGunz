@@ -372,7 +372,6 @@ bool ZApplication::OnCreate(ZLoadingProgress *pLoadingProgress)
 		if (!ret.first)
 			return Fail();
 
-		ret.second.emplace_back(0);
 		if (!GetMeshManager()->LoadParts(ret.second))
 			return Fail();
 	}();

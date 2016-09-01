@@ -202,7 +202,7 @@ void MSEHTranslator(UINT nSeCode, _EXCEPTION_POINTERS* pExcPointers)
 	_exit(3);
 }
 
-#ifndef _PUBLISH
+#ifdef _DEBUG
 
 #define MAX_PROFILE_COUNT	10000
 
@@ -322,18 +322,15 @@ void MSaveProfile(const char *filename)
 	}
 	fclose(file);
 }
-#else
-void MInitProfile() {}
-void MBeginProfile(int nIndex, const char *szName) {}
-void MEndProfile(int nIndex) {}
-void MCheckProfileCount() {}
-void MSaveProfile(const char *file) {}
-void MBeginProfile(const char * szName) {}
-void MEndProfile() {}
-#endif
 
 ProfilerGuard::~ProfilerGuard()
 {
 	if (Active)
 		MEndProfile(*this);
 }
+#else
+void MInitProfile() {}
+void MBeginProfile(int nIndex, const char *szName) {}
+void MEndProfile(int nIndex) {}
+void MSaveProfile(const char *file) {}
+#endif

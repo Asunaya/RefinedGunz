@@ -29,8 +29,17 @@ unsigned MGetCRC32(const char *data, int nLength);
 class MMappedFile
 {
 public:
+	MMappedFile() {}
 	MMappedFile(const char* Filename);
 	~MMappedFile();
+	MMappedFile(const MMappedFile&) = delete;
+	MMappedFile(MMappedFile&&);
+	MMappedFile& operator =(MMappedFile&& src)
+	{
+		this->~MMappedFile();
+		new (this) MMappedFile(std::move(src));
+		return *this;
+	}
 
 	bool Dead() const { return bDead; }
 	auto GetPointer() const { return reinterpret_cast<const char*>(View); }
@@ -45,12 +54,16 @@ private:
 };
 #endif
 
+#define ARCHIVE_CACHE_MMAP
+
 struct Archive
 {
+#ifdef ARCHIVE_CACHE_MMAP
 	Archive(const char* Filename) : File(Filename) {}
+	MMappedFile File;
+#endif
 
 	int Index = 0;
-	MMappedFile File;
 	std::vector<MZFILEDESC*> Files;
 #ifdef _DEBUG
 	std::string Name;

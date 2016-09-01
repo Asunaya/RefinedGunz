@@ -1,8 +1,4 @@
-#ifndef _ZCHAT_CMDID_H
-#define _ZCHAT_CMDID_H
-
-
-// 채팅 커맨드 ID - chatcmds.xml 에서 사용하는 ID
+#pragma once
 
 #define CCMD_ID_HELP				1
 #define CCMD_ID_WHISPER				2
@@ -30,5 +26,3 @@
 #define CCMD_ID_INVITE_CHATROOM		24
 #define CCMD_ID_VISIT_CHATROOM		25
 #define CCMD_ID_CHAT_CHATROOM		26
-
-#endif

@@ -2,7 +2,7 @@
 #include "MXmlParser.h"
 #include "MZFileSystem.h"
 #include "MXml.h"
-
+#include "MDebug.h"
 
 bool MXmlParser::ReadXml(const char* szFileName)
 {
@@ -49,6 +49,7 @@ bool MXmlParser::ReadXml(MZFileSystem* pFileSystem, const char* szFileName)
 	if(pFileSystem) {
 		if(!mzf.Open(szFileName,pFileSystem))  {
 			if(!mzf.Open(szFileName))  {
+				DMLog("MZFile::Open with FS %p failed on %s\n", pFileSystem, szFileName);
 				xmlIniData.Destroy();
 				return false;
 			}
@@ -57,7 +58,7 @@ bool MXmlParser::ReadXml(MZFileSystem* pFileSystem, const char* szFileName)
 	else  {
 
 		if(!mzf.Open(szFileName)) {
-
+			DMLog("MZFile::Open with FS %p failed on %s\n", pFileSystem, szFileName);
 			xmlIniData.Destroy();
 			return false;
 		}

@@ -72,69 +72,69 @@ public:
 
 class ZScreenEffectManager : public ZEffectList {
 private:
-	RMeshMgr*		m_pEffectMeshMgr;
-	RMeshMgr*		m_pQuestEffectMeshMgr;
+	RMeshMgr*		m_pEffectMeshMgr{};
+	RMeshMgr*		m_pQuestEffectMeshMgr{};
 	list<ZEffectList::iterator>	m_eraseQueue;
 
-	ZCOMBOLEVEL m_CurrentComboLevel;
+	ZCOMBOLEVEL m_CurrentComboLevel{};
 
-	RMesh*	m_pHit;
-	RMesh*	m_pComboBeginEffect;
-	RMesh*	m_pComboEndEffect;
-	RMesh*	m_pComboNumberEffect[10];
-	RMesh*	m_pExpPlusEffect;
-	RMesh*	m_pExpMinusEffect;
-	RMesh*	m_pExpNumberEffect[10];
+	RMesh*	m_pHit{};
+	RMesh*	m_pComboBeginEffect{};
+	RMesh*	m_pComboEndEffect{};
+	RMesh*	m_pComboNumberEffect[10]{};
+	RMesh*	m_pExpPlusEffect{};
+	RMesh*	m_pExpMinusEffect{};
+	RMesh*	m_pExpNumberEffect[10]{};
 
-	RMesh*	m_pPraiseEffect[ZCI_END];
+	RMesh*	m_pPraiseEffect[ZCI_END]{};
 
-	RMesh*	m_pGoodEffect;
-	RMesh*	m_pNiceEffect;
-	RMesh*	m_pGreatEffect;
-	RMesh*	m_pWonderfullEffect;
+	RMesh*	m_pGoodEffect{};
+	RMesh*	m_pNiceEffect{};
+	RMesh*	m_pGreatEffect{};
+	RMesh*	m_pWonderfullEffect{};
 
-	RMesh*	m_pCoolEffect;
+	RMesh*	m_pCoolEffect{};
 
-	RMesh*	m_pAlertEffect[4];
+	RMesh*	m_pAlertEffect[4]{};
 
-	ZScreenEffect*	m_pHPPanel;
-	ZScreenEffect*	m_pScorePanel;
-	ZScreenEffect*	m_pWeaponIcons[MWT_END];
-	ZScreenEffect*	m_pSpectator;
+	ZScreenEffect*	m_pHPPanel{};
+	ZScreenEffect*	m_pScorePanel{};
+	ZScreenEffect*	m_pWeaponIcons[MWT_END]{};
+	ZScreenEffect*	m_pSpectator{};
 	
 #define COMBOEFFECTS_COUNT	5
-	ZComboEffect	*m_pComboEffects[COMBOEFFECTS_COUNT];
+	ZComboEffect	*m_pComboEffects[COMBOEFFECTS_COUNT]{};
 
-	RBaseTexture	*m_pGuageTexture;
+	RBaseTexture	*m_pGuageTexture{};
 
 	void DrawGuages();
 
-	float m_fGuageHP,m_fGuageAP,m_fGuageEXP;
-	float m_fCurGuageHP,m_fCurGuageAP;
+	float m_fGuageHP{}, m_fGuageAP{}, m_fGuageEXP{};
+	float m_fCurGuageHP{}, m_fCurGuageAP{};
 
-	bool m_bGameStart;
+	bool m_bGameStart{};
 
-	MMatchWeaponType	m_WeaponType;
-	MMatchItemDesc*		m_SelectItemDesc;
+	MMatchWeaponType	m_WeaponType{};
+	MMatchItemDesc*		m_SelectItemDesc{};
 
-	int	m_nHpReset;
+	int	m_nHpReset{};
 
-	ZScreenEffect*	m_pReload;
-	ZScreenEffect*	m_pEmpty;
+	ZScreenEffect*	m_pReload{};
+	ZScreenEffect*	m_pEmpty{};
 
-	bool m_bShowReload;
-	bool m_bShowEmpty;
+	bool m_bShowReload{};
+	bool m_bShowEmpty{};
 
 	// 퀘스트 관련
-	ZBossGaugeEffect*	m_pBossHPPanel;
-	ZScreenEffect*		m_pArrow;
-	ZKOEffect*			m_pKONumberEffect[10];
-	ZKOEffect*			m_pKO;
-	int					m_nKO;
+	ZBossGaugeEffect*	m_pBossHPPanel{};
+	ZScreenEffect*		m_pArrow{};
+	ZKOEffect*			m_pKONumberEffect[10]{};
+	ZKOEffect*			m_pKO{};
+	int					m_nKO{};
 
-	ZScreenEffect*		m_pTDScoreBoard;
-	ZTDMBlinkEffect*	m_pTDScoreBlink_R;
-	ZTDMBlinkEffect*	m_pTDScoreBlink_B;
+	ZScreenEffect*		m_pTDScoreBoard{};
+	ZTDMBlinkEffect*	m_pTDScoreBlink_R{};
+	ZTDMBlinkEffect*	m_pTDScoreBlink_B{};
 protected:
 	void DrawCombo();
 	void PlaySoundScoreFlyby();
@@ -152,7 +152,7 @@ public:
 
 	bool Create();
 	void Destroy();
-	bool CreateQuestRes();		// 퀘스트용 리소스 로드
+	bool CreateQuestRes();
 	void DestroyQuestRes();
 
 	int GetCount() { return (int)size();}

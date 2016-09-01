@@ -36,7 +36,7 @@ void CourseManager::Init()
 
 	try
 	{
-		doc.parse<rapidxml::parse_no_data_nodes>(&SkillmapData[0]);
+		doc.parse<rapidxml::parse_no_data_nodes>(&SkillmapData[0], SkillmapData.size());
 	}
 	catch (rapidxml::parse_error &e)
 	{

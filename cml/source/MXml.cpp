@@ -3,9 +3,10 @@
 #include "MLocale.h"
 #include "MZFileSystem.h"
 #include "MDebug.h"
-#include <string.h>
+#include <cstring>
 #include <string>
 #include <algorithm>
+#include <cassert>
 
 #ifndef MSVC_VER
 #include "msxml.tli"
@@ -342,7 +343,7 @@ bool MXmlElement::GetAttribute(bool* bOutValue, const char* sAttrName, bool bDef
 	return true;
 }
 
-bool MXmlElement::GetAttribute(string* pstrOutValue, const char* sAttrName, char* sDefaultValue)
+bool MXmlElement::GetAttribute(std::string* pstrOutValue, const char* sAttrName, char* sDefaultValue)
 {
 	char szTemp[256];
 	memset(szTemp, 0, 256);
@@ -578,7 +579,7 @@ void MXmlElement::GetContents(float* fpOutValue)
 
 }
 
-void MXmlElement::GetContents(string* pstrValue)
+void MXmlElement::GetContents(std::string* pstrValue)
 {
 	char sTemp[256];
 	memset(sTemp, 0, 256);
@@ -681,7 +682,7 @@ bool MXmlDocument::LoadFromMemory(char* szBuffer, LANGID lanid)
 	if (!m_bInitialized) return false;
 
 	// UTF8인지 검사한다
-	string s;
+	std::string s;
 	if ( (szBuffer[0] == (char)0xEF) && (szBuffer[1] == (char)0xBB) && (szBuffer[2] == (char)0xBF))
 		s = MLocale::ConvUTF8ToAnsi( szBuffer, lanid);		// UTF8 -> ANSI
 	else
@@ -701,6 +702,8 @@ bool MXmlDocument::LoadFromMemory(char* szBuffer, LANGID lanid)
 			if ( pos == -1)
 			{
 				s.clear();
+				MLog("MXmlDocument::LoadFromMemory - Failed to find beginning of xml declaration\n");
+				assert(false);
 				return false;
 			}
 
@@ -719,6 +722,8 @@ bool MXmlDocument::LoadFromMemory(char* szBuffer, LANGID lanid)
 		if ( pos == -1)
 		{
 			s.clear();
+			MLog("MXmlDocument::LoadFromMemory - Failed to find end of xml declaration\n");
+			assert(false);
 			return false;
 		}
 	}
@@ -731,21 +736,13 @@ bool MXmlDocument::LoadFromMemory(char* szBuffer, LANGID lanid)
 		MXmlDomParseErrorPtr errPtr = (*m_ppDom)->GetparseError();
 		_bstr_t bstrErr(errPtr->reason);
 
-		char szBuf[8192];
+		MLog("-------------------------------\n");
+		MLog("Error In Load Xml Memory\n");
+		MLog("Code = 0x%x\n", errPtr->errorCode);
+		MLog("Source = Line : %ld; Char : %ld\n", errPtr->line, errPtr->linepos);
+		MLog("Error Description = %s\n", static_cast<char*>(bstrErr));
 
-		sprintf_safe(szBuf, "-------------------------------\n");
-		OutputDebugString(szBuf);
-		sprintf_safe(szBuf, "Error In Load Xml Memory\n");		
-		OutputDebugString(szBuf);
-		sprintf_safe(szBuf, "Code = 0x%x\n", errPtr->errorCode);
-		OutputDebugString(szBuf);
-		sprintf_safe(szBuf, "Source = Line : %ld; Char : %ld\n", errPtr->line, errPtr->linepos);
-		OutputDebugString(szBuf);
-		sprintf_safe(szBuf, "Error Description = %s\n", (char*)bstrErr);
-		OutputDebugString(szBuf);
-
-		// TODO: Fix this ;w;
-		_ASSERT(0);
+		assert(false);
 
 		s.clear();
 		return false;

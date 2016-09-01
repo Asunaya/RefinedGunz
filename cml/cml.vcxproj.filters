@@ -80,6 +80,7 @@
     <ClInclude Include="Include\MTime.h" />
     <ClInclude Include="Include\has_xxx.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="defer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\MMatrix.cpp">

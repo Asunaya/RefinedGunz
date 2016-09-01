@@ -1410,6 +1410,42 @@ namespace rapidxml
 
         }
 
+		// HACK: For non-zero-terminated files
+		template<int Flags>
+		void parse(Ch *text, size_t size)
+		{
+			assert(text);
+
+			auto* end = text + size;
+
+			// Remove current contents
+			this->remove_all_nodes();
+			this->remove_all_attributes();
+
+			// Parse BOM, if any
+			parse_bom<Flags>(text);
+
+			// Parse children
+			while (1)
+			{
+				// Skip whitespace before node
+				skip<whitespace_pred, Flags>(text);
+				if (text >= end)
+					break;
+
+				// Parse and append new child
+				if (*text == Ch('<'))
+				{
+					++text;     // Skip '<'
+					if (xml_node<Ch> *node = parse_node<Flags>(text))
+						this->append_node(node);
+				}
+				else
+					RAPIDXML_PARSE_ERROR("expected <", text);
+			}
+
+		}
+
         //! Clears the document by deleting all nodes and clearing the memory pool.
         //! All nodes owned by document pool are destroyed.
         void clear()

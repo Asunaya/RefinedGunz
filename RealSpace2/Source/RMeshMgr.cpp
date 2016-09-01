@@ -104,22 +104,25 @@ int	RMeshMgr::LoadXmlList(char* name,RFPROGRESSCALLBACK pfnProgressCallback, voi
 
 	XmlDoc.Create();
 
-//	if( !XmlDoc.LoadFromFile(name) ) 
-//		return -1;
-
-//	<-----------------
-
 	char *buffer;
 	MZFile mzf;
 
 	if(g_pFileSystem) {
 		if(!mzf.Open(name,g_pFileSystem)) {
 			if(!mzf.Open(name))
+			{
+				MLog("RMeshMgr::LoadXmlList - MZFile::Open on %s failed with and without FS %p!\n",
+					name, g_pFileSystem);
 				return -1;
+			}
 		}
 	} else {
-		if(!mzf.Open(name))
+		if (!mzf.Open(name))
+		{
+			MLog("RMeshMgr::LoadXmlList - MZFile::Open on %s with FS %p failed!\n",
+				name, g_pFileSystem);
 			return -1;
+		}
 	}
 
 	buffer = new char[mzf.GetLength()+1];
@@ -127,8 +130,12 @@ int	RMeshMgr::LoadXmlList(char* name,RFPROGRESSCALLBACK pfnProgressCallback, voi
 
 	mzf.Read(buffer,mzf.GetLength());
 
-	if(!XmlDoc.LoadFromMemory(buffer))
-		return false;
+	if (!XmlDoc.LoadFromMemory(buffer))
+	{
+		MLog("RMeshMgr::LoadXmlList - MXmlDocument::LoadFromMemory on %s failed!\n",
+			name);
+		return -1;
+	}
 
 	delete[] buffer;
 
@@ -159,7 +166,6 @@ int	RMeshMgr::LoadXmlList(char* name,RFPROGRESSCALLBACK pfnProgressCallback, voi
 
 	for (int i=0; i<nCnt; i++) {
 		
-		// 콜백이 있으면 진행상황에 대한 정보를 알려준다
 		if(pfnProgressCallback)
 			pfnProgressCallback(CallbackParam,float(i)/float(nCnt));
 
@@ -181,8 +187,7 @@ int	RMeshMgr::LoadXmlList(char* name,RFPROGRESSCALLBACK pfnProgressCallback, voi
 			}
 
 			if(AddXml(FileName,IDName,bAutoLoad)==-1) {
-				mlog("%s not found\n",IDName);
-				XmlDoc.Destroy();
+				mlog("RMeshMgr::LoadXmlList - %s not found\n",IDName);
 				return -1;
 			}
 		}
@@ -191,8 +196,7 @@ int	RMeshMgr::LoadXmlList(char* name,RFPROGRESSCALLBACK pfnProgressCallback, voi
 			Node.GetAttribute(FileName, "filename");
 
 			if(Add(FileName,IDName)==-1) {
-				mlog("%s not found\n",IDName);
-				XmlDoc.Destroy();
+				mlog("RMeshMgr::LoadXmlList - %s not found\n",IDName);
 				return -1;
 			}
 		}
@@ -203,8 +207,7 @@ int	RMeshMgr::LoadXmlList(char* name,RFPROGRESSCALLBACK pfnProgressCallback, voi
 			int id = AddXml(&Node,NULL,IDName,false);
 
 			if(id==-1) {
-				mlog("%s not found\n",IDName);
-				XmlDoc.Destroy();
+				mlog("RMeshMgr::LoadXmlList - %s not found\n", IDName);
 				return -1;
 			}
 			else {
@@ -233,13 +236,10 @@ int	RMeshMgr::LoadXmlList(char* name,RFPROGRESSCALLBACK pfnProgressCallback, voi
 				if( _stricmp( NodeName, "AddWorldItemElu" ) == 0 )
 				{
 					ChildNode.GetAttribute( IDName, "name" );
-					//ChildNode.GetAttribute( FileName, "filename" );
-					//int id = Add( FileName, IDName );
 					int id = AddXml(&ChildNode, "", IDName, false );
 					if( id == -1 )
 					{
 						mlog("%s not found\n",IDName);
-						XmlDoc.Destroy();
 						return -1;
 					}
 					else
@@ -253,11 +253,9 @@ int	RMeshMgr::LoadXmlList(char* name,RFPROGRESSCALLBACK pfnProgressCallback, voi
 		else if(strcmp(NodeName, "AddEffectElu")==0) {
 
 			Node.GetAttribute(IDName, "name");
-//			Node.GetAttribute(FileName, "filename");
 			Node.GetAttribute(LitModel, "lit_model");
 			Node.GetAttribute(NameSort, "name_sort");
 
-			// alpha type 등을 지정할 수 있다..
 			int name_sort = 0;
 			int litmodel = 1;
 
@@ -269,7 +267,6 @@ int	RMeshMgr::LoadXmlList(char* name,RFPROGRESSCALLBACK pfnProgressCallback, voi
 
 			if(id==-1) {
 				mlog("%s not found\n",IDName);
-				XmlDoc.Destroy();
 				return -1;
 			}
 			else {
@@ -288,9 +285,6 @@ int	RMeshMgr::LoadXmlList(char* name,RFPROGRESSCALLBACK pfnProgressCallback, voi
 	}
 
 	__EP(2008);
-
-	XmlDoc.Destroy();
-
 	__EP(2007);
 
 	return 1;

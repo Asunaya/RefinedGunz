@@ -6,6 +6,7 @@
 #include "MDebug.h"
 #include <tchar.h>
 #include <io.h>
+#include <cassert>
 
 typedef unsigned long dword;
 typedef unsigned short word;
@@ -14,7 +15,7 @@ typedef unsigned short word;
 #define MRS2_ZIP_CODE	0x05030208
 
 #pragma pack(2)
-struct MZip::MZIPLOCALHEADER{
+struct MZIPLOCALHEADER{
 	enum{
 		SIGNATURE   = 0x04034b50,
 		SIGNATURE2  = 0x85840000,
@@ -35,7 +36,7 @@ struct MZip::MZIPLOCALHEADER{
 	word    xtraLen;          // Extra field follows filename.
 };
 
-struct MZip::MZIPDIRHEADER{
+struct MZIPDIRHEADER{
 	enum{
 		SIGNATURE = 0x06054b50,
 	};
@@ -50,7 +51,7 @@ struct MZip::MZIPDIRHEADER{
 	word    cmntLen;
 };
 
-struct MZip::MZIPDIRFILEHEADER{
+struct MZIPDIRFILEHEADER{
 	enum{
 		SIGNATURE   = 0x02014b50,
 		SIGNATURE2  = 0x05024b80,
@@ -83,8 +84,6 @@ struct MZip::MZIPDIRFILEHEADER{
 
 #pragma pack()
 
-// 여러 가지 적용하기..지금은 데이터 토글링이 됨,,, 암호롸 알고리듬 적용...
-
 void ConvertChar(char* pData,int _size)
 {
 	if(!pData) return;
@@ -103,7 +102,7 @@ void ConvertChar(char* pData,int _size)
 	}
 }
 
-void RecoveryChar(char* pData,int _size)
+static void RecoveryChar(char* pData,int _size)
 {
 	if(!pData) return;
 
@@ -119,8 +118,7 @@ void RecoveryChar(char* pData,int _size)
 	}
 }
 
-
-MZip::MZip(void)
+MZip::MZip()
 {
 	m_fp = NULL;
 	m_pDirData = NULL;
@@ -130,83 +128,101 @@ MZip::MZip(void)
 	m_dwReadMode = 0;
 }
 
-MZip::~MZip(void)
+MZip::~MZip()
 {
 	Finalize();
 }
 
 bool MZip::isReadAble(unsigned long mode)
 {
-	if(m_nZipMode == ZMode_Zip) {
-		return ( MZIPREADFLAG_ZIP & mode) ? true : false ; 	
+	if (m_nZipMode == ZMode_Zip) {
+		return (MZIPREADFLAG_ZIP & mode) != 0;
 	}
-	else if(m_nZipMode == ZMode_Mrs) {
-		return ( MZIPREADFLAG_MRS & mode) ? true : false ; 
+	else if (m_nZipMode == ZMode_Mrs) {
+		return (MZIPREADFLAG_MRS & mode) != 0;
 	}
-	else if(m_nZipMode == ZMode_Mrs2) {
-		return ( MZIPREADFLAG_MRS2 & mode) ? true : false ; 
+	else if (m_nZipMode == ZMode_Mrs2) {
+		return (MZIPREADFLAG_MRS2 & mode) != 0;
 	}
 	return false;
 }
 
-bool MZip::Initialize(FILE* fp,unsigned long ReadMode)
+bool MZip::Initialize(FILE* fp, unsigned long ReadMode)
 {
-	if(fp==NULL) return false;
+	if (fp == NULL) return false;
 
+	m_fp = fp;
 	m_dwReadMode = ReadMode;
 
-	if(isZip(fp)) {
+	return InitializeImpl();
+}
+
+bool MZip::Initialize(const char * File, size_t Size, unsigned long ReadMode)
+{
+	FileBuffer = File;
+	FileSize = Size;
+	m_fp = nullptr;
+	m_dwReadMode = ReadMode;
+
+	return InitializeImpl();
+}
+
+bool MZip::InitializeImpl()
+{
+	if (isZip()) {
 		m_nZipMode = ZMode_Zip;
-		// 플레그에서 지원하지 않으면...
-		if(isMode(MZIPREADFLAG_ZIP)==false)
+		if (!isMode(MZIPREADFLAG_ZIP))
 			return false;
 	}
-	else if(isVersion1Mrs(fp)) {
+	else if (isVersion1Mrs()) {
 		m_nZipMode = ZMode_Mrs;
-		if(isMode(MZIPREADFLAG_MRS)==false)
+		if (!isMode(MZIPREADFLAG_MRS))
 			return false;
 	}
-	else {//mrs2 이상...
+	else {
 		m_nZipMode = ZMode_Mrs2;
-		if(isMode(MZIPREADFLAG_MRS2)==false)
+		if (!isMode(MZIPREADFLAG_MRS2))
 			return false;
 	}
-	
-	MZIPDIRHEADER dh;
 
-	fseek(fp, -(int)sizeof(dh), SEEK_END);
-	long dhOffset = ftell(fp);
-	memset(&dh, 0, sizeof(dh));
-	fread(&dh, sizeof(dh), 1, fp);
+	MZIPDIRHEADER dh{};
 
-	if( m_nZipMode>=ZMode_Mrs2 )
-		RecoveryChar((char*)&dh,sizeof(MZIPDIRHEADER));
+	Seek(-static_cast<int>(sizeof(dh)), SEEK_END);
+	auto dhOffset = Tell();
+	Read(dh);
 
-	if( dh.sig != MRS2_ZIP_CODE && dh.sig != MRS_ZIP_CODE && dh.sig != MZIPDIRHEADER::SIGNATURE ) {
-		return false;		
+	if (m_nZipMode >= ZMode_Mrs2)
+		RecoveryChar(reinterpret_cast<char*>(&dh), sizeof(MZIPDIRHEADER));
+
+	if (dh.sig != MRS2_ZIP_CODE && dh.sig != MRS_ZIP_CODE && dh.sig != MZIPDIRHEADER::SIGNATURE) {
+		DMLog("MZip::InitializeImpl - Directory header signature %08X is wrong\n", dh.sig);
+		assert(false);
+		return false;
 	}
 
-	fseek(fp, dhOffset - dh.dirSize, SEEK_SET);
+	Seek(dhOffset - dh.dirSize, SEEK_SET);
 
-	m_pDirData = new char[dh.dirSize + dh.nDirEntries*sizeof(*m_ppDir)];
-	memset(m_pDirData, 0, dh.dirSize + dh.nDirEntries*sizeof(*m_ppDir));
-	fread(m_pDirData, dh.dirSize, 1, fp);
+	m_pDirData = new char[dh.dirSize + dh.nDirEntries * sizeof(*m_ppDir)];
+	memset(m_pDirData, 0, dh.dirSize + dh.nDirEntries * sizeof(*m_ppDir));
+	ReadN(m_pDirData, dh.dirSize);
 
-	if( m_nZipMode>=ZMode_Mrs2 )
-		RecoveryChar( (char*)m_pDirData , dh.dirSize );
+	if (m_nZipMode >= ZMode_Mrs2)
+		RecoveryChar((char*)m_pDirData, dh.dirSize);
 
 	char *pfh = m_pDirData;
 	m_ppDir = (const MZIPDIRFILEHEADER **)(m_pDirData + dh.dirSize);
 
-	for (int i = 0; i < dh.nDirEntries; i++){
+	for (int i = 0; i < dh.nDirEntries; i++) {
 		MZIPDIRFILEHEADER& fh = *(MZIPDIRFILEHEADER*)pfh;
 
 		m_ppDir[i] = &fh;
 
-		if(fh.sig != MZIPDIRFILEHEADER::SIGNATURE){
-			if(fh.sig != MZIPDIRFILEHEADER::SIGNATURE2) {
+		if (fh.sig != MZIPDIRFILEHEADER::SIGNATURE) {
+			if (fh.sig != MZIPDIRFILEHEADER::SIGNATURE2) {
 				delete[] m_pDirData;
 				m_pDirData = NULL;
+				DMLog("MZip::InitializeImpl - File header signature %08X is wrong\n", fh.sig);
+				assert(false);
 				return false;
 			}
 		}
@@ -215,15 +231,14 @@ bool MZip::Initialize(FILE* fp,unsigned long ReadMode)
 			pfh += sizeof(fh);
 
 			for (int j = 0; j < fh.fnameLen; j++)
-			if (pfh[j] == '/')
-			  pfh[j] = '\\';
+				if (pfh[j] == '/')
+					pfh[j] = '\\';
 
 			pfh += fh.fnameLen + fh.xtraLen + fh.cmntLen;
 		}
 	}
 
 	m_nDirEntries = dh.nDirEntries;
-	m_fp = fp;
 
 	return true;
 }
@@ -235,7 +250,11 @@ bool MZip::Finalize()
 		m_pDirData=NULL;
 	}
 
-	m_fp = NULL;
+	if (m_fp)
+	{
+		fclose(m_fp);
+		m_fp = NULL;
+	}
 	m_ppDir = NULL;
 	m_nDirEntries = 0;
 
@@ -348,16 +367,52 @@ unsigned int MZip::GetFileTime(const char* filename)
 	return GetFileCRC32(index);
 }
 
+void MZip::Seek(i64 Offset, u32 Origin)
+{
+	if (FileBuffer)
+	{
+		if (Origin == SEEK_SET)
+			Pos = Offset;
+		else if (Origin == SEEK_CUR)
+			Pos += Offset;
+		else if (Origin == SEEK_END)
+			Pos = FileSize + Offset;
+		return;
+	}
+
+	assert(m_fp);
+	fseek(m_fp, static_cast<long>(Offset), Origin);
+}
+
+i64 MZip::Tell()
+{
+	if (FileBuffer)
+		return Pos;
+
+	return ftell(m_fp);
+}
+
+void MZip::ReadN(void* Out, size_t Size)
+{
+	if (FileBuffer)
+	{
+		memcpy(Out, FileBuffer + Pos, Size);
+		Pos += Size;
+		return;
+	}
+
+	auto ret = fread(Out, Size, 1, m_fp);
+	//assert(ret == 1);
+}
 
 bool MZip::ReadFile(int i, void* pBuffer, int nMaxSize)
 {
 	if (pBuffer==NULL || i<0 || i>=m_nDirEntries)
 		return false;
 
-	fseek(m_fp, m_ppDir[i]->hdrOffset, SEEK_SET);
+	Seek(m_ppDir[i]->hdrOffset, SEEK_SET);
 	MZIPLOCALHEADER h;
-
-	fread(&h, sizeof(h), 1, m_fp);
+	Read(h);
 
 	if(m_nZipMode >= ZMode_Mrs2)
 		RecoveryChar((char*)&h,sizeof(h));
@@ -366,24 +421,30 @@ bool MZip::ReadFile(int i, void* pBuffer, int nMaxSize)
 		if(h.sig!=MZIPLOCALHEADER::SIGNATURE2) 
 			return false;
 
-	fseek(m_fp, h.fnameLen + h.xtraLen, SEEK_CUR);
+	Seek(h.fnameLen + h.xtraLen, SEEK_CUR);
 
 	if(h.compression==MZIPLOCALHEADER::COMP_STORE){
-
-		fread(pBuffer, h.cSize, 1, m_fp);
+		ReadN(pBuffer, h.cSize);
 		return true;
 	}
 	else if(h.compression!=MZIPLOCALHEADER::COMP_DEFLAT)
 		return false;
 
-	char *pData = new char[h.cSize];
-	if(pData==NULL) return false;
-
-	memset(pData, 0, h.cSize);
-
-	int pos = ftell(m_fp);
-
-	fread(pData, h.cSize, 1, m_fp);
+	// TODO: Use a stack allocator for pData in the m_fp case,
+	// and also for zlib
+	const char *pData = nullptr;
+	if (FileBuffer)
+	{
+		pData = FileBuffer + Pos;
+	}
+	else
+	{
+		auto pDataTemp = new char[h.cSize];
+		if (pDataTemp == NULL) return false;
+		//memset(pDataTemp, 0, h.cSize);
+		ReadN(pDataTemp, h.cSize);
+		pData = pDataTemp;
+	}
 
 	z_stream stream;
 	int err;
@@ -395,20 +456,24 @@ bool MZip::ReadFile(int i, void* pBuffer, int nMaxSize)
 	stream.next_in = (Bytef*)pData;
 	stream.avail_in = (uInt)h.cSize;
 	stream.next_out = (Bytef*)pBuffer;
-	stream.avail_out = min((unsigned int)nMaxSize, h.ucSize);
+	stream.avail_out = min(static_cast<unsigned int>(nMaxSize), h.ucSize);
 
 	err = inflateInit2(&stream, -MAX_WBITS);
-	if(err == Z_OK){
+	if (err == Z_OK) {
 		err = inflate(&stream, Z_FINISH);
 		inflateEnd(&stream);
-		if (err==Z_STREAM_END) err = Z_OK;
+		if (err == Z_STREAM_END) err = Z_OK;
 		inflateEnd(&stream);
 	}
 
-	delete[] pData;
+	if (m_fp)
+		delete[] pData;
 
-	if(err!=Z_OK) 
+	if (err != Z_OK)
+	{
+		DMLog("MZip::ReadFile - inflate failed with error code %d\n", err);
 		return false;
+	}
 
 	return true;
 }
@@ -422,26 +487,25 @@ bool MZip::ReadFile(const char* filename, void* pBuffer, int nMaxSize)
 	return ReadFile(index , pBuffer , nMaxSize);
 }
 
-static char _fileheaderReader[1024*16];// sizeof(fh) + fh.fnameLen + fh.xtraLen + fh.cmntLen 의 크기..대충
+static char _fileheaderReader[1024*16]; // sizeof(fh) + fh.fnameLen + fh.xtraLen + fh.cmntLen
 static int	_fileheaderReaderSize = 0;
 
 bool MZip::UpgradeMrs(char* mrs_name) // Mrs To Mrs2
 {
-	FILE* fp;
-	fopen_s(&fp, mrs_name, "rb+");
+	FILE* fp = nullptr;
+	auto ret = fopen_s(&fp, mrs_name, "rb+");
 
-	if(fp==NULL) {
-		mlog("%s 파일이 읽기 전용인지 확인하세요!~ \n",mrs_name);
+	if(!fp || ret != 0) {
+		mlog("MZip::UpgradeMrs - Failed to open %s\n", mrs_name);
 		return false;
 	}
 
-	if( isVersion1Mrs(fp)==false ) // mrs1 만...
+	if( isVersion1Mrs(fp)==false )
 	{
 		fclose(fp);
 		return false;
 	}
 
-	// 복구...
 	fseek(fp, 0, SEEK_SET);
 	int code = MZIPLOCALHEADER::SIGNATURE;
 	fwrite(&code, 4, 1, fp);
@@ -466,8 +530,6 @@ bool MZip::UpgradeMrs(char* mrs_name) // Mrs To Mrs2
 	char* pDirData = new char[dir_data_size];
 	memset(pDirData, 0, dir_data_size);
 	fread(pDirData, dir_data_size, 1, fp);
-
-	// 복구..
 
 	DWORD _sig = MZIPDIRFILEHEADER::SIGNATURE;
 
@@ -544,17 +606,16 @@ bool MZip::UpgradeMrs(char* mrs_name) // Mrs To Mrs2
 
 	fclose(fp);
 
-
 	return true;
 }
 
 bool MZip::ConvertZip(char* zip_name)
 {
-	FILE* fp;
-	fopen_s(&fp, zip_name, "rb+");
+	FILE* fp = nullptr;
+	auto ret = fopen_s(&fp, zip_name, "rb+");
 
-	if(fp==NULL) {
-		mlog("%s 파일이 읽기 전용인지 확인하세요!~ \n",zip_name);
+	if(!fp || ret != 0) {
+		mlog("MZip::ConvertZip - Failed to open %s\n", zip_name);
 		return false;
 	}
 
@@ -771,13 +832,37 @@ bool MZip::RecoveryMrs2(FILE* fp)
 	return true;
 }
 
+bool MZip::isZip()
+{
+	Seek(0, SEEK_SET);
+	DWORD sig = 0;
+	Read(sig);
+
+	if (sig == MZIPLOCALHEADER::SIGNATURE)
+		return true;
+
+	return false;
+}
+
+bool MZip::isVersion1Mrs()
+{
+	Seek(0, SEEK_SET);
+	DWORD sig = 0;
+	Read(sig);
+
+	if (sig == MZIPLOCALHEADER::SIGNATURE2)
+		return true;
+
+	return false;
+}
+
 bool MZip::isZip(FILE* fp)
 {
 	fseek(fp, 0, SEEK_SET);
 	DWORD sig = 0;
-	fread(&sig, 4, 1, fp);
+	fread(&sig, sizeof(sig), 1, fp);
 
-	if(sig == MZIPLOCALHEADER::SIGNATURE)
+	if (sig == MZIPLOCALHEADER::SIGNATURE)
 		return true;
 
 	return false;
@@ -787,9 +872,9 @@ bool MZip::isVersion1Mrs(FILE* fp)
 {
 	fseek(fp, 0, SEEK_SET);
 	DWORD sig = 0;
-	fread(&sig, 4, 1, fp);
+	fread(&sig, sizeof(sig), 1, fp);
 
-	if(sig == MZIPLOCALHEADER::SIGNATURE2)
+	if (sig == MZIPLOCALHEADER::SIGNATURE2)
 		return true;
 
 	return false;
@@ -974,7 +1059,7 @@ void FFileList::ConvertNameZip2MRes()
 	}
 }
 
-bool GetDirList(char* path,	FFileList& pList)
+bool GetDirList(const char* path, FFileList& pList)
 {
 	struct _finddata_t file_t;
 	long hFile;
@@ -1000,7 +1085,7 @@ bool GetDirList(char* path,	FFileList& pList)
 	return true;
 }
 
-bool GetFileList(char* path,FFileList& pList)
+bool GetFileList(const char* path, FFileList& pList)
 {
 	struct _finddata_t file_t;
 	long hFile;
@@ -1026,7 +1111,7 @@ bool GetFileList(char* path,FFileList& pList)
 	return true;
 }
 
-bool GetFileListWin(char* path,FFileList& pList)
+bool GetFileListWin(const char* path, FFileList& pList)
 {
 	WIN32_FIND_DATA		file_t;
 	HANDLE				hFile;
@@ -1053,9 +1138,9 @@ bool GetFileListWin(char* path,FFileList& pList)
 	return true;
 }
 
-bool GetFindFileList(char* path,char* ext,FFileList& pList)
+bool GetFindFileList(const char* path, const char* ext, FFileList& pList)
 {
-	struct _finddata_t file_t;
+	_finddata_t file_t;
 	long hFile;
 
 	FNode* pNode;
@@ -1111,9 +1196,8 @@ bool GetFindFileList(char* path,char* ext,FFileList& pList)
 	return true;
 }
 
-bool GetFindFileListWin(char* path,char* ext,FFileList& pList)
+bool GetFindFileListWin(const char* path, const char* ext, FFileList& pList)
 {
-
 	WIN32_FIND_DATA		file_t;
 	HANDLE				hFile;
 

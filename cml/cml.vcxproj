@@ -549,6 +549,7 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="defer.h" />
     <ClInclude Include="Include\GlobalTypes.h" />
     <ClInclude Include="Include\has_xxx.h" />
     <ClInclude Include="Include\MMath.h" />

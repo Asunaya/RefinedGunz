@@ -1,6 +1,4 @@
-#ifndef MZIP_H
-#define MZIP_H
-
+#pragma once
 
 /*
 
@@ -9,10 +7,9 @@
 
 */
 
-#include <stdio.h>
+#include <cstdio>
 #include <list>
-
-using namespace std;
+#include "GlobalTypes.h"
 
 #define MZIPREADFLAG_ZIP		1
 #define MZIPREADFLAG_MRS		1<<1
@@ -26,30 +23,21 @@ enum MZipMode{
 	ZMode_End
 };
 
-class MZip{
-protected:
-	struct MZIPDIRHEADER;
-	struct MZIPDIRFILEHEADER;
-	struct MZIPLOCALHEADER;
+struct MZIPDIRHEADER;
+struct MZIPDIRFILEHEADER;
+struct MZIPLOCALHEADER;
 
-protected:
-	FILE*						m_fp;			// Refered File Pointer
-	char*						m_pDirData;		// Directory Data Block
-    const MZIPDIRFILEHEADER**	m_ppDir;		// Directory File Header
-	int							m_nDirEntries;	// Number of Directory Entries
-
-	MZipMode					m_nZipMode;
-	unsigned long				m_dwReadMode;
-
+class MZip final {
 public:
-	MZip(void);
-	virtual ~MZip(void);
+	MZip();
+	~MZip();
 
-	bool Initialize(FILE* fp,unsigned long ReadMode);
+	bool Initialize(FILE* fp, unsigned long ReadMode);
+	bool Initialize(const char* File, size_t Size, unsigned long ReadMode);
 	bool Finalize();
 
-	void SetReadMode(unsigned long mode) {	m_dwReadMode = mode; }
-	bool isMode(unsigned long mode ) { return (m_dwReadMode & mode) ? true : false ; }
+	void SetReadMode(unsigned long mode) { m_dwReadMode = mode; }
+	bool isMode(unsigned long mode) const { return (m_dwReadMode & mode) ? true : false; }
 	bool isReadAble(unsigned long mode);
 
 	int GetFileCount(void) const;
@@ -74,6 +62,8 @@ public:
 	bool ReadFile(int i, void* pBuffer, int nMaxSize);
 	bool ReadFile(const char* filename, void* pBuffer, int nMaxSize);
 
+	bool isVersion1Mrs();
+	bool isZip();
 	static bool isVersion1Mrs(FILE* fp);
 	static bool isZip(FILE* fp);
 
@@ -83,10 +73,27 @@ public:
 	static bool RecoveryZip(char* zip_name);
 	static bool RecoveryMrs(FILE* fp);
 	static bool RecoveryMrs2(FILE* fp);
-};
 
-//////////////////////////////////////////////////////////////
-// mrs 관련유틸
+protected:
+	bool InitializeImpl();
+	void Seek(i64 Offset, u32 Origin);
+	i64 Tell();
+	void ReadN(void* Out, size_t Size);
+	template <typename T>
+	void Read(T& Out) { ReadN(&Out, sizeof(Out)); }
+
+	FILE*						m_fp;			// Refered File Pointer
+	char*						m_pDirData;		// Directory Data Block
+	const MZIPDIRFILEHEADER**	m_ppDir;		// Directory File Header
+	int							m_nDirEntries;	// Number of Directory Entries
+
+	MZipMode					m_nZipMode;
+	unsigned long				m_dwReadMode;
+
+	const char* FileBuffer{};
+	size_t FileSize{};
+	i64 Pos{};
+};
 
 class FNode {
 public:
@@ -94,13 +101,12 @@ public:
 	void SetName(char* str);
 
 public:
-
 	int	 m_size;
 	int	 m_offset;
 	char m_name[256];
 };
 
-class FFileList :public list<FNode*>
+class FFileList : public std::list<FNode*>
 {
 public:
 	FFileList();
@@ -120,12 +126,8 @@ public:
 	void ConvertNameZip2MRes();
 };
 
-
-bool GetDirList(char* path,	FFileList& pList);
-bool GetFileList(char* path,FFileList& pList);
-bool GetFileListWin(char* path,FFileList& pList);
-bool GetFindFileList(char* path,char* ext,FFileList& pList);
-bool GetFindFileListWin(char* path,char* ext,FFileList& pList);
-
-
-#endif
+bool GetDirList(const char* path, FFileList& pList);
+bool GetFileList(const char* path, FFileList& pList);
+bool GetFileListWin(const char* path, FFileList& pList);
+bool GetFindFileList(const char* path, const char* ext, FFileList& pList);
+bool GetFindFileListWin(const char* path, const char* ext, FFileList& pList);

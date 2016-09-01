@@ -29,5 +29,8 @@
     <ClInclude Include="downloadstatus.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="defer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
