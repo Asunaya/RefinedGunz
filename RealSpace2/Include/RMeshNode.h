@@ -1,21 +1,14 @@
-#ifndef _RMeshNode_h
-#define _RMeshNode_h
+#pragma once
 
 #include "RMeshNodeData.h"
 #include "RShaderMgr.h"
 
 _NAMESPACE_REALSPACE2_BEGIN
 
-
 //#define USE_TOON_RENDER
-
-
-///////////////////////////////////////////////////////////////
-// 사용 구조체 정의
+//#define SCALE_RMESHNODE
 
 class CIndexBufferMake;
-
-///////////////////////////////////////////////////////////////
 
 enum CalcVertexBufferBboxMode
 {
@@ -28,7 +21,6 @@ enum CalcVertexBufferBboxMode
 
 	CalcVertexBufferBboxMode_End,
 };
-
 
 class RBoneBaseMatrix
 {
@@ -48,10 +40,8 @@ class RMeshNodeInfo
 {
 public:
 	RMeshNodeInfo();
-	virtual ~ RMeshNodeInfo();
 
 public:
-
 	bool	m_isAddMeshNode;
 	bool	m_isCollisionMesh;
 	bool	m_isDummyMesh;
@@ -66,15 +56,15 @@ public:
 
 	int						m_nAlign;
 
-	CutParts				m_CutPartsType;			// 노드가 상체,하체에 속하는지 여부 타잎
-	LookAtParts				m_LookAtParts;			// 프로그램으로 노드 관리 할 특수 노드 타잎
-	WeaponDummyType			m_WeaponDummyType;		// 무기 모델에 붙는 더미들 타잎
+	CutParts				m_CutPartsType;
+	LookAtParts				m_LookAtParts;
+	WeaponDummyType			m_WeaponDummyType;
 
-	RMeshPartsType			m_PartsType;			// 모델 파츠 + 장비더미 타잎
-	RMeshPartsPosInfoType	m_PartsPosInfoType;		// 바이패드 + 더미 위치용 타잎
+	RMeshPartsType			m_PartsType;
+	RMeshPartsPosInfoType	m_PartsPosInfoType;
 
-	bool			m_bNpcWeaponMeshNode;			// NPC 의 손에 든 무기 모델인지 구분..
-	float			m_AlphaSortValue;				// 캐릭터의 알파값 파츠의 경우 소팅값..
+	bool			m_bNpcWeaponMeshNode;
+	float			m_AlphaSortValue;
 
 };
 
@@ -82,13 +72,13 @@ class RBatch
 {
 public:
 	RBatch();
-	virtual ~RBatch();
+	~RBatch();
 
-	bool CreateVertexBuffer(char* pVert,DWORD fvf,int vertexsize,int vert_num,DWORD flag);
+	bool CreateVertexBuffer(char* pVert, DWORD fvf, int vertexsize, int vert_num, DWORD flag);
 	bool UpdateVertexBuffer(char* pVert);
 	bool UpdateVertexBufferSoft(char* pVert);
 
-	bool CreateIndexBuffer(int index,WORD* pIndex,int _size);
+	bool CreateIndexBuffer(int index, WORD* pIndex, int _size);
 
 public:
 
@@ -101,68 +91,55 @@ public:
 
 };
 
-class RMeshNode :public RMeshNodeData , public RMeshNodeMtrl, public RMeshNodeInfo , public RBatch
+class RMeshNode : public RMeshNodeData, public RMeshNodeMtrl, public RMeshNodeInfo, public RBatch
 {
 public:
-
 	RMeshNode();
-	virtual ~RMeshNode();
+	~RMeshNode();
 
-	///////////////////////////////////////////
-	// animation
-
-	void ConnectToNameID();// 자기 이름으로 연결
+	void ConnectToNameID();
 	bool ConnectMtrl();
 
 	void UpdateNodeBuffer();
 	void MakeNodeBuffer(DWORD flag);
 
-	void MakeVertexBuffer(int index,bool lvert,char* pBuf,int _vsize,DWORD flag);
-	bool MakeVSVertexBuffer();// vertex update 의 역할도 겸한다..	
+	void MakeVertexBuffer(int index, bool lvert, char* pBuf, int _vsize, DWORD flag);
+	bool MakeVSVertexBuffer();
 
-	void RenderNodeVS(RMesh* pMesh,D3DXMATRIX* world_mat,ESHADER shader_ = SHADER_SKIN );
+	void RenderNodeVS(RMesh* pMesh, const D3DXMATRIX& world_mat, ESHADER shader_ = SHADER_SKIN);
 
-	void Render(D3DXMATRIX* pWorldMatrix=NULL);
+	void Render(D3DXMATRIX* pWorldMatrix = NULL);
 
-	RBoneBaseMatrix* GetBaseMatrix(int pid);		// 각정점마다 index 지정하기 싫어서
+	RBoneBaseMatrix* GetBaseMatrix(int pid);
 
 	bool isSoftRender();
 
-	void CalcVertexBuffer(D3DXMATRIX* world_mat,bool box=false);
-	bool CalcPickVertexBuffer(D3DXMATRIX* world_mat,D3DXVECTOR3* pVec);
+	void CalcVertexBuffer(const D3DXMATRIX& world_mat, bool box = false);
+	bool CalcPickVertexBuffer(const D3DXMATRIX& world_mat, D3DXVECTOR3* pVec);
 	int	 CalcVertexBuffer_VertexAni(int frame);
-	void CalcVertexBuffer_Physique(D3DXMATRIX* world_mat,int frame);
-	void CalcVertexBuffer_Tm(D3DXMATRIX* world_mat,int frame);
-	void CalcVertexBuffer_Bbox(CalcVertexBufferBboxMode nBboxMode,rmatrix& mat);
+	void CalcVertexBuffer_Physique(const D3DXMATRIX& world_mat, int frame);
+	void CalcVertexBuffer_Tm(const D3DXMATRIX& world_mat, int frame);
+	void CalcVertexBuffer_Bbox(CalcVertexBufferBboxMode nBboxMode, rmatrix& mat);
 
 	void CalcVertexNormal(D3DXMATRIX* world_mat);
 
-	void CheckAlign(rmatrix* worldmat);
-	void CheckAlignMapObject(rmatrix& hr_mat); // 맵오브젝트만..
+	void CheckAlign(const rmatrix& worldmat);
+	void CheckAlignMapObject(rmatrix& hr_mat);
 
 	float GetNodeVisValue();
 	int   GetNodeAniSetFrame();
 
 	bool isAlphaMtrlNode();
 
-	void ToonRenderSettingOnOld(RMtrl* pMtrl);// 임시,,
-	void ToonRenderSettingOn(RMtrl* pMtrl);// 임시,,
+	void ToonRenderSettingOnOld(RMtrl* pMtrl);
+	void ToonRenderSettingOn(RMtrl* pMtrl);
 	void ToonRenderSettingOff();
 
-	void ToonRenderSilhouetteSettingOn();// 임시,,
+	void ToonRenderSilhouetteSettingOn();
 	void ToonRenderSilhouetteSettingOff();
 
-private:
-
-	bool SetBVertData(RBlendVertex* pBVert,int i,int j ,int pv_index,int* DifferenceMap,int& matrixIndex);
-
-public:
-
-	///////////////////////////////////////////
-	// reference pointer
-
-	RMesh*			m_pParentMesh;	// 자신의 부모 모델 파일...
-	RMesh*			m_pBaseMesh;	// 계층형 기본 모델 파일...
+	RMesh*			m_pParentMesh;
+	RMesh*			m_pBaseMesh;
 	RMeshNode*		m_pParent;
 	RMeshNode*		m_Next;
 	RMeshNode*		m_ChildRoot;
@@ -172,11 +149,11 @@ public:
 	RBoneBaseMatrix*	m_BoneBaseMatrix;
 	int					m_nBoneBaseMatrixCnt;
 
-	int m_MatrixMap[MAX_MATRIX];			// Matrix Register와 Bone의 index를 연결하기 위한 맵
-	int m_MatrixCount;						// 쓰이는 Matrix의 갯수( 초기값 : -1 )
+	int m_MatrixMap[MAX_MATRIX]; // Matrix Register Bone index
+	int m_MatrixCount;
 
 	D3DXMATRIX		m_ModelWorldMatrix;
-	
+
 	bool			m_bConnectPhysique;
 
 #ifndef _BLEND_ANIMATION
@@ -185,8 +162,15 @@ public:
 	RAnimationNode* m_pAnimationNode[2];
 #endif
 
+#ifdef SCALE_RMESHNODE
+	void SetScale(v3 vec) { D3DXMatrixScaling(&matScale, vec.x, vec.y, vec.z); ScaleEnabled = true; }
+
+	bool ScaleEnabled = false;
+	matrix matScale;
+#endif
+
+private:
+	bool SetBVertData(RBlendVertex* pBVert, int i, int j, int pv_index, int* DifferenceMap, int& matrixIndex);
 };
 
 _NAMESPACE_REALSPACE2_END
-
-#endif//_RMeshNode_h

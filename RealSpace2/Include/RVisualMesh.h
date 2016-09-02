@@ -1,14 +1,10 @@
-#ifndef _RVisualMesh_h
-#define _RVisualMesh_h
+#pragma once
 
 #include "RVisualMeshUtil.h"
 
 class RCharCloth;
 
 _NAMESPACE_REALSPACE2_BEGIN
-
-//////////////////////////////////////////////////
-// frame 기능을 나눠주자..
 
 class RVisualMesh;
 class ROcclusionList;
@@ -44,16 +40,11 @@ public:
 	// animation blend
 
 	bool			m_bBlendAniSet;
-	float			m_fMaxBlendTime;		// n초동안~
-	float			m_fCurrentBlendTime;	// 0~1 비율
+	float			m_fMaxBlendTime;
+	float			m_fCurrentBlendTime;
 	DWORD			m_dwBackupBlendTime;
 
 };
-
-////////////////////////////////////////////////////////////////////////////
-//
-
-// 타이머는 전역타이머 받아서 쓰도록 수정하기..
 
 class RFrameTime
 {
@@ -162,8 +153,8 @@ public:
 		while( m_Query->GetData( (void*)&m_DataCnt,sizeof(DWORD),D3DGETDATA_FLUSH) == S_FALSE ) {
 			m_nSpendingTime++;
 			nCnt++;
-			if(nCnt>5000) {			// 무한루프 돌면 안되니까..
-				m_DataCnt = 1000;	// 대충 그려졌다고 본다..
+			if(nCnt>5000) {
+				m_DataCnt = 1000;
 				break;
 			}
 		}
@@ -172,11 +163,11 @@ public:
 
 	bool isNeedRender() {
 
-		if(m_Query==NULL) return true; // 무조건 그려야 한다..
+		if(m_Query==NULL) return true;
 
 		DWORD Cnt = GetRenderCount();
 
-		if( Cnt > 10 ) // 10 픽셀이상..
+		if( Cnt > 10 )
 			return true;
 		return false;
 	}
@@ -187,8 +178,6 @@ public:
 	DWORD				m_DataCnt;
 	LPDIRECT3DQUERY9	m_Query;
 };
-
-// 캐릭터와 일반모델 일관성을 유지하면서 메모리 사용량만 줄이자~
 
 class RVisualMesh {
 public:
@@ -263,7 +252,7 @@ public:
 
 	// control
 
-	void SetSpeed(float s,float s_up=4.8f); //4.8f ( 1배속 )
+	void SetSpeed(float s,float s_up=4.8f);
 
 	void Play(RAniMode amode = ani_mode_lower);
 	void Stop(RAniMode amode = ani_mode_lower);
@@ -280,9 +269,6 @@ public:
 	void RemoveWeapon(RWeaponMotionType type);
 	void RemoveAllWeapon();
 
-	// weapon motion
-
-//	RWeaponType		GetSelectWeaponType();
 	int				GetSetectedWeaponMotionID();
 	void			SelectWeaponMotion(RWeaponMotionType type);
 	RVisualMesh*	GetSelectWeaponVMesh();
@@ -296,42 +282,33 @@ public:
 
 	void	SetCheckViewFrustum(bool b);
 
-	// world matrix 포함
-
 	rmatrix GetCurrentWeaponPositionMatrix( bool right=false );
 	rvector GetCurrentWeaponPosition( bool right=false );
 
 	bool IsSelectWeaponGrenade();
 
-	// 지금 설정된 하반신 에니메이션의 특정 프레임의 위치값을 얻는다.
-
 	rvector			GetBipRootPos(int frame);
 	D3DXQUATERNION	GetBipRootRot(int frame);
 	rmatrix			GetBipRootMat(int frame);
 
-	// 현재 실제 발의 위치를 리턴. 로컬 좌표계이다.
-
 	rvector			GetFootPosition();
-
-	// 한번은 그려지고 난 다음에 의미를 갖는다.
 
 	void GetBipTypeMatrix(rmatrix *mat,RMeshPartsPosInfoType type);
 
 	void GetHeadMatrix(rmatrix *mat);
 	void GetRFootMatrix(rmatrix *mat);
 	void GetLFootMatrix(rmatrix *mat);
-	void GetRootMatrix(rmatrix *mat);		// 허리
+	void GetRootMatrix(rmatrix *mat);
 
 	rvector GetBipTypePosition(RMeshPartsPosInfoType type);
 
-	// 월드 좌표계이다
 	rvector		GetHeadPosition();
 	rvector		GetRFootPosition();
 	rvector		GetLFootPosition();
 	rvector		GetRootPosition();
 
 	void	SetVisibility(float vis)	{ m_fVis = vis; }
-	float	GetVisibility()				{ return m_fVis; }
+	float	GetVisibility() const		{ return m_fVis; }
 
 	void SetDrawGrenade(bool b)	 { m_bDrawGrenade = b; }
 
@@ -359,8 +336,6 @@ public:
 
 	void SetNPCBlendColor(D3DCOLORVALUE color) { m_NPCBlendColor = color; }
 
-	// test 용 함수 주의해서 사용하자..
-
 	void SetSpRenderMode(int mode);
 	void ClearPartInfo();
 
@@ -384,16 +359,14 @@ public:
 	void SetUVAnimation(float u,float v);
 	void ClearUvAnimation();
 
-	void UpdateWeaponDummyMatrix(RMeshNode* pMNode);// 무기 모델에 달린 더미일 경우..
-	void UpdateWeaponPartInfo(RMeshNode* pMNode);	// 무기 더미의 위치를 보관한다..
+	void UpdateWeaponDummyMatrix(RMeshNode* pMNode);
+	void UpdateWeaponPartInfo(RMeshNode* pMNode);
 
 	void OnRestore();
 	void OnInvalidate();
 
 public:
-
 	// Cloth
-
 	bool CreateCloth(RMeshNode* pMeshNode,float fAccel,int Numiter );
 	void DestroyCloth();
 
@@ -408,9 +381,6 @@ public:
 
 	void SetClothForce(D3DXVECTOR3& f);
 
-//	bool GetClothMeshNodeRender();
-//	void SetClothMeshNodeRender(bool b);
-
 	void SetClothValue(bool bGame,float fDist);
 
 private:
@@ -421,26 +391,21 @@ private:
 	RCharCloth*		m_pCloth;
 
 public:
-
 	// Light Setting
-
 	void SetLight(int index,D3DLIGHT9* light,bool ShaderOnly) {	m_LightMgr.SetLight(index,light,ShaderOnly);}
 	void UpdateLight() { m_LightMgr.UpdateLight(); }
 
 public:
-
-//	RQuery			m_RenderQuery;
-
 	bool			m_bIsNpc;
 	bool			m_bIsCharacter;
 
-	bool			m_bDrawTracksMotion[2];//모션에 따라서 좌우 그릴지 결정..
+	bool			m_bDrawTracksMotion[2];
 	bool			m_bDrawTracks;
 	bool			m_isDrawWeaponState;
 	bool			m_bDrawGrenade;
 
-	bool			m_isScale;	// 우선은 한 모델에 대해서만... 
-	rvector			m_vScale;	// 파츠마다 스케일 적용시는 테이블을 가지고 있어야함..
+	bool			m_isScale; 
+	rvector			m_vScale;
 
 	rvector			m_vTargetPos;
 	rvector			m_vRotXYZ;
@@ -449,7 +414,7 @@ public:
 	rmatrix			m_RotMat;
 
 	///////////////////////////////////////////////////////////////
-	// toon 용 임시...디자이너 툴용
+	// toon
 
 	rmatrix				m_ToonUVMat;
 	LPDIRECT3DTEXTURE9	m_ToonTexture;	
@@ -490,7 +455,7 @@ public:
 	RPartsInfo		m_WeaponPartInfo[eq_parts_end];
 	D3DXMATRIX		m_WeaponMatrixTemp;
 	D3DXMATRIX		m_WeaponDummyMatrix[ weapon_dummy_end ];
-	D3DXMATRIX		m_WeaponDummyMatrix2[ weapon_dummy_end ];//다른손..
+	D3DXMATRIX		m_WeaponDummyMatrix2[ weapon_dummy_end ];
 
 	RWeaponMotionType	m_SelectWeaponMotionType;
 
@@ -520,22 +485,4 @@ public:
 	DWORD			m_GrenadeFireTime;
 };
 
-////////////////////////////////////////////////////////
-// 일반 이펙트나 맵오브젝트 용과 캐릭터용을 구분하자..
-
-class RCharacterVisualMesh : public RVisualMesh {
-public:
-	RCharacterVisualMesh() {
-
-	}
-	~RCharacterVisualMesh() {
-
-	}
-
-public:
-
-};
-
 _NAMESPACE_REALSPACE2_END
-
-#endif//_RVisualMesh_h

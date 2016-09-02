@@ -69,11 +69,6 @@ RMeshNodeInfo::RMeshNodeInfo()
 	m_bNpcWeaponMeshNode = false;
 }
 
-RMeshNodeInfo::~RMeshNodeInfo()
-{
-
-}
-
 ///////////////////////////////////////////////////////////////////////////////////
 
 RBatch::RBatch()
@@ -184,11 +179,8 @@ RMeshNode::~RMeshNode()
 
 bool RMeshNode::ConnectMtrl()
 {
-	if(m_face_num==0)//면이 없다면 연결할 필요도 없다..
-	{
-//		mlog( "%s MeshNode mtrl 연결할 필요 없음\n" , m_Name );
+	if (m_face_num == 0)
 		return false;
-	}
 
 	RMtrlMgr* pMtrlList = NULL;
 
@@ -258,7 +250,8 @@ bool RMeshNode::SetBVertData(RBlendVertex* pBVert,int i,int j,int pv_index,int* 
 	float w1,w2;
 
 	if( point_index < 0 || point_index >= m_point_num ) {
-		mlog("Index of Vertex(Pointer) is Out of Range.. Point Index : %d, Num Vertices : %d, Mesh Node : %s \n", point_index, m_point_num, m_Name.c_str() );
+		mlog("Index of Vertex(Pointer) is Out of Range.. Point Index : %d, Num Vertices : %d, Mesh Node : %s \n",
+			point_index, m_point_num, m_Name.c_str() );
 		return false;
 	}
 
@@ -287,7 +280,7 @@ bool RMeshNode::SetBVertData(RBlendVertex* pBVert,int i,int j,int pv_index,int* 
 
 	for( int k = 0 ; k < pPhysique->m_num; ++k )
 	{
-		index = pPhysique->m_parent_id[k]; // 현재 참조하고 있는 bone의 index
+		index = pPhysique->m_parent_id[k];
 
 		if( DifferenceMap[index] == -1 )
 		{
@@ -335,24 +328,22 @@ bool RMeshNode::MakeVSVertexBuffer()
 
 	if( !RIsSupportVS() )	return false;
 
-	int i;
+	LPDIRECT3DDEVICE9 dev =	RGetDevice();
 
-	LPDIRECT3DDEVICE9 dev =	RGetDevice(); // Get Device Pointer
+	int numMatrices = 0;
+	int matrixIndex = 0;
 
-	int numMatrices = 0;				// 쓰이는 매트릭스의 갯수
-	int matrixIndex = 0;				// 쉐이더의 상수레지스터의 인덱스
-
-	int DifferenceMap[MAX_BONE];		// [ bone의 index ] => [ matrix pallette의 index ]
+	int DifferenceMap[MAX_BONE];
 
 	memset( DifferenceMap , -1, sizeof(int)*MAX_BONE );
 
 	static RBlendVertex pBVert[MAX_VERTEX];
 
-	for( i = 0 ; i < m_face_num ; ++i )	{
+	for (int i = 0; i < m_face_num; ++i) {
 
-		for( int j = 0 ; j < 3; ++j ) {
+		for (int j = 0; j < 3; ++j) {
 
-			if(!SetBVertData(pBVert,i,j, 3*i+j,DifferenceMap,matrixIndex)) 
+			if (!SetBVertData(pBVert, i, j, 3 * i + j, DifferenceMap, matrixIndex))
 				return false;
 		}
 	}
@@ -373,15 +364,13 @@ bool RMeshNode::MakeVSVertexBuffer()
 	return true;
 }
 
-void RMeshNode::RenderNodeVS(RMesh* pMesh,D3DXMATRIX* pWorldMat_,ESHADER shader_ )
+void RMeshNode::RenderNodeVS(RMesh* pMesh, const D3DXMATRIX& pWorldMat_,ESHADER shader_ )
 {
 	int i;
 
 	__BP(5009,"RMesh::RenderNodeVS");
 
 	LPDIRECT3DDEVICE9 dev = RGetDevice();
-
-	// 처음 로그인 화면에서 캐릭터 안보이는 현상
 
 	rmatrix matTemp;
 	rmatrix world;
@@ -418,11 +407,11 @@ void RMeshNode::RenderNodeVS(RMesh* pMesh,D3DXMATRIX* pWorldMat_,ESHADER shader_
 
 	if( pMesh->m_isScale ) {
 		rmatrix _scale_mat;
-		D3DXMatrixScaling(&_scale_mat,pMesh->m_vScale.x,pMesh->m_vScale.y,pMesh->m_vScale.z);
-		tworldmat = _scale_mat**pWorldMat_;
+		D3DXMatrixScaling(&_scale_mat, pMesh->m_vScale.x, pMesh->m_vScale.y, pMesh->m_vScale.z);
+		tworldmat = _scale_mat * pWorldMat_;
 	}
 	else 
-		tworldmat = *pWorldMat_;
+		tworldmat = pWorldMat_;
 
 	// set Transformation matrix
 	D3DXMatrixTranspose( &matTemp, &tworldmat );
@@ -467,9 +456,7 @@ void RMeshNode::RenderNodeVS(RMesh* pMesh,D3DXMATRIX* pWorldMat_,ESHADER shader_
 
 	__EP(5011);
 
-	//material
 	RMtrl* psMtrl;
-
 	
 	dev->SetVertexDeclaration( RGetShaderMgr()->getShaderDecl(0) );
 	dev->SetVertexShader( RGetShaderMgr()->getShader(shader_) );
@@ -510,7 +497,7 @@ void RMeshNode::ConnectToNameID()
 {
 	int id = RGetMeshNodeStringTable()->Get( m_Name );
 	
-	if(id==-1) {//bip 가 아닌 일반 오브젝트들...
+	if(id==-1) {
 		mlog("등록불가 파츠 %s \n",m_Name.c_str());
 	}
 
@@ -526,20 +513,6 @@ RBoneBaseMatrix* RMeshNode::GetBaseMatrix(int pid)
 	}
 	return NULL;
 }
-
-/*
-#define SetVertex(v,p,n,uv)						\
-		v->p = p;								\
-		v->n = n;								\
-		v->tu = uv->x;							\
-		v->tv = uv->y;							\
-
-#define SetLVertex(v,p,c,uv)					\
-		v->p = p;								\
-		v->color = c;							\
-		v->tu = uv->x;							\
-		v->tv = uv->y;							\
-*/
 
 inline void SetVertex(RVertex* v,D3DXVECTOR3& p,D3DXVECTOR3& n,D3DXVECTOR3& uv) {
 
@@ -568,8 +541,6 @@ void RMeshNode::UpdateNodeBuffer()
 
 	D3DXVECTOR3* pP = m_point_list;
 	RFaceNormalInfo* pFNL = NULL;
-
-	// soft buffer 만 업데이트.. 버텍스 에니메이션이나.. vertex_ani 중에 uv 에니가 있는가? 위치값만 있다...
 
 	if(!m_vb->m_pVert)
 		_ASSERT(0);
@@ -615,7 +586,7 @@ void RMeshNode::UpdateNodeBuffer()
 
 void RMeshNode::MakeNodeBuffer(DWORD flag)
 {
-	static char	_pVert[RVERTEX_MAX];// 34133 face
+	static char	_pVert[RVERTEX_MAX];
 	static WORD _pIndex[RVERTEX_MAX*3];
 
 	bool lvert	= m_pBaseMesh->m_LitVertexModel;
@@ -715,16 +686,12 @@ bool RMeshNode::isSoftRender()
 	return bSoft;	
 }
 
-////////////////////////////////////////////////////////////////////////////////////
 void RMeshNode::ToonRenderSettingOnOld(RMtrl* pMtrl)
 {
 	if( m_pParentMesh && m_pParentMesh->m_pVisualMesh && m_pParentMesh->m_pVisualMesh->m_ToonTexture ) {
 		
 		bool toonLighting	= m_pParentMesh->m_pVisualMesh->m_bToonLighting;
 		bool toonTexture	= m_pParentMesh->m_pVisualMesh->m_bToonTextureRender;
-
-		/////////////////////////////////////////////////////////////
-		// 컬러선택
 
 		DWORD color = 0xffffffff;
 		D3DXCOLOR  dx_color = D3DXCOLOR(1.f,1.f,1.f,1.f);
@@ -735,18 +702,18 @@ void RMeshNode::ToonRenderSettingOnOld(RMtrl* pMtrl)
 
 		if( pMtrl->GetTColor() != D3DCOLOR_COLORVALUE(0.0f,1.0f,0.0f,0.0f) ) {
 			ColorMode = 1;
-			color = pMtrl->GetTColor() | 0xff000000;	// 파츠별로 색 지정하는걸 색으로 등록.. 알파는 채워준다..
+			color = pMtrl->GetTColor() | 0xff000000;
 		}
 		else if( m_dwTFactorColor != D3DCOLOR_COLORVALUE(0.0f,1.0f,0.0f,0.0f) ) {
 			ColorMode = 2;
-			color = m_dwTFactorColor | 0xff000000;		// 파츠별로 색 지정하는걸 색으로 등록.. 알파는 채워준다..
+			color = m_dwTFactorColor | 0xff000000;
 		}
 		
 		if(ColorMode) {
 
 			BYTE a,r,g,b;
 
-			a = 255;//(color>>24)&0xff;
+			a = 255;
 			r = (color>>16)&0xff;
 			g = (color>> 8)&0xff;
 			b = (color    )&0xff;
@@ -754,26 +721,15 @@ void RMeshNode::ToonRenderSettingOnOld(RMtrl* pMtrl)
 			dx_color = D3DXCOLOR(r/255.f,g/255.f,b/255.f,a/255.f);
 		}
 
-		// Toon Type
-		// 0 일반.. 라이트 켜고 둘다 그리고..
-		// 1 라이트 끄고 둘다 그리고..
-		// 텍스쳐 바를지 끌지의 여부...
-
 		LPDIRECT3DDEVICE9 dev = RGetDevice();
 
-		if( toonLighting ) { // 툰에서의 라이트는 쓰이지 않을것 같음..
+		if( toonLighting ) {
 
 			dev->SetRenderState( D3DRS_LIGHTING , TRUE );
 
 			dev->SetTextureStageState( 0, D3DTSS_COLOROP, D3DTOP_MODULATE);
 			dev->SetTextureStageState( 0, D3DTSS_COLORARG1, D3DTA_TEXTURE );
 			dev->SetTextureStageState( 0, D3DTSS_COLORARG2, D3DTA_DIFFUSE );
-
-			// 기본상태...
-
-//			dev->SetSamplerState( 0, D3DSAMP_MAGFILTER , D3DTEXF_LINEAR);
-//			dev->SetSamplerState( 0, D3DSAMP_MINFILTER , D3DTEXF_LINEAR);
-//			dev->SetRenderState( D3DRS_SHADEMODE, D3DSHADE_GOURAUD );
 
 			SetMtrl(&dx_color,1.f);
 		}
@@ -804,36 +760,22 @@ void RMeshNode::ToonRenderSettingOnOld(RMtrl* pMtrl)
 		dev->SetTransform( D3DTS_TEXTURE0, &m_pParentMesh->m_pVisualMesh->m_ToonUVMat ); 
 		dev->SetTexture( 0, m_pParentMesh->m_pVisualMesh->m_ToonTexture );
 
-//		float fDepthBias = -0.001f;
-//		dev->SetRenderState(D3DRS_DEPTHBIAS, *(DWORD*)&fDepthBias); 
-
 		if(toonTexture) {
-
-//			dev->SetRenderState( D3DRS_TEXTUREFACTOR, color);
-
-//			dev->SetTextureStageState( 0, D3DTSS_COLOROP,   D3DTOP_BLENDTEXTUREALPHA );
-//			dev->SetTextureStageState( 0, D3DTSS_COLORARG1, D3DTA_TEXTURE );
-//			dev->SetTextureStageState( 0, D3DTSS_COLORARG2, D3DTA_TFACTOR );
-//			dev->SetTextureStageState( 0, D3DTSS_ALPHAOP,   D3DTOP_SELECTARG1 );
-//			dev->SetTextureStageState( 0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE );
-
     		dev->SetTextureStageState( 1, D3DTSS_COLORARG1, D3DTA_CURRENT );
 			dev->SetTextureStageState( 1, D3DTSS_COLORARG2, D3DTA_TEXTURE );
-//			dev->SetTextureStageState( 1, D3DTSS_COLOROP,   D3DTOP_MODULATE );
 			dev->SetTextureStageState( 1, D3DTSS_COLOROP,   D3DTOP_MODULATE4X );
 
 			dev->SetTextureStageState( 1, D3DTSS_ALPHAARG1, D3DTA_TEXTURE );
 			dev->SetTextureStageState( 1, D3DTSS_ALPHAOP,   D3DTOP_SELECTARG1 );
 
 			dev->SetTextureStageState( 1, D3DTSS_TEXCOORDINDEX, 0 );
-			dev->SetTexture( 1, pMtrl->GetTexture() ); // 1d 텍스쳐
+			dev->SetTexture( 1, pMtrl->GetTexture() );
 		}
 		else {
 
-			dev->SetTextureStageState( 1, D3DTSS_COLOROP,   D3DTOP_DISABLE );
-			dev->SetTextureStageState( 1, D3DTSS_ALPHAOP,   D3DTOP_DISABLE );
-//			dev->SetTextureStageState( 1, D3DTSS_TEXCOORDINDEX, 0 );
-			dev->SetTexture( 1, NULL ); // 1d 텍스쳐
+			dev->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
+			dev->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
+			dev->SetTexture(1, NULL);
 		}
 	}
 }
@@ -845,32 +787,25 @@ void RMeshNode::ToonRenderSettingOn(RMtrl* pMtrl)
 		bool toonLighting	= m_pParentMesh->m_pVisualMesh->m_bToonLighting;
 		bool toonTexture	= m_pParentMesh->m_pVisualMesh->m_bToonTextureRender;
 
-		/////////////////////////////////////////////////////////////
-		// 컬러선택
-
 		DWORD color = 0xffffffff;
 		D3DXCOLOR  dx_color = D3DXCOLOR(1.f,1.f,1.f,1.f);
 
 		int ColorMode = 0;
 
-		// 재질의 컬러 설정이 우선권을 갖는다...
-		// 툴에서는 모델과 재질 2곳에서 컬러 선택을 하게 되어있다..  
-		// 앞으로는 재질 단위로 컬러설정을 할것...
-
 		if( pMtrl->GetTColor() != D3DCOLOR_COLORVALUE(0.0f,1.0f,0.0f,0.0f) ) {
 			ColorMode = 1;
-			color = pMtrl->GetTColor() | 0xff000000;	// 파츠별로 색 지정하는걸 색으로 등록.. 알파는 채워준다..
+			color = pMtrl->GetTColor() | 0xff000000;
 		}
 		else if( m_dwTFactorColor != D3DCOLOR_COLORVALUE(0.0f,1.0f,0.0f,0.0f) ) {
 			ColorMode = 2;
-			color = m_dwTFactorColor | 0xff000000;		// 파츠별로 색 지정하는걸 색으로 등록.. 알파는 채워준다..
+			color = m_dwTFactorColor | 0xff000000;
 		}
 		
 		if(ColorMode) {
 
 			BYTE a,r,g,b;
 
-			a = 255;//(color>>24)&0xff;
+			a = 255;
 			r = (color>>16)&0xff;
 			g = (color>> 8)&0xff;
 			b = (color    )&0xff;
@@ -878,26 +813,15 @@ void RMeshNode::ToonRenderSettingOn(RMtrl* pMtrl)
 			dx_color = D3DXCOLOR(r/255.f,g/255.f,b/255.f,a/255.f);
 		}
 
-		// Toon Type
-		// 0 일반.. 라이트 켜고 둘다 그리고..
-		// 1 라이트 끄고 둘다 그리고..
-		// 텍스쳐 바를지 끌지의 여부...
-
 		LPDIRECT3DDEVICE9 dev = RGetDevice();
 
-		if( toonLighting ) { // 툰에서의 라이트는 쓰이지 않을것 같음..툴 테스트용...
+		if( toonLighting ) {
 
 			dev->SetRenderState( D3DRS_LIGHTING , TRUE );
 
 			dev->SetTextureStageState( 0, D3DTSS_COLOROP, D3DTOP_MODULATE);
 			dev->SetTextureStageState( 0, D3DTSS_COLORARG1, D3DTA_TEXTURE );
 			dev->SetTextureStageState( 0, D3DTSS_COLORARG2, D3DTA_DIFFUSE );
-
-			// 기본상태...
-
-//			dev->SetSamplerState( 0, D3DSAMP_MAGFILTER , D3DTEXF_LINEAR);
-//			dev->SetSamplerState( 0, D3DSAMP_MINFILTER , D3DTEXF_LINEAR);
-//			dev->SetRenderState( D3DRS_SHADEMODE, D3DSHADE_GOURAUD );
 
 			SetMtrl(&dx_color,1.f);
 		}
@@ -906,10 +830,7 @@ void RMeshNode::ToonRenderSettingOn(RMtrl* pMtrl)
 			dev->SetRenderState( D3DRS_LIGHTING , FALSE );
 			dev->SetRenderState( D3DRS_TEXTUREFACTOR, color);
 
-			// texture 와 color 를 알파 채널 비율로 섞는다...
-
 			dev->SetTextureStageState( 0, D3DTSS_COLOROP, pMtrl->m_TextureBlendMode);
-//			dev->SetTextureStageState( 0, D3DTSS_COLOROP, D3DTOP_MODULATE);
 			dev->SetTextureStageState( 0, D3DTSS_COLORARG1, D3DTA_TEXTURE );
 			dev->SetTextureStageState( 0, D3DTSS_COLORARG2, D3DTA_TFACTOR );
 
@@ -920,12 +841,8 @@ void RMeshNode::ToonRenderSettingOn(RMtrl* pMtrl)
 		dev->SetRenderState( D3DRS_ZENABLE , TRUE );
 		dev->SetRenderState( D3DRS_ZWRITEENABLE , TRUE );
 
-		// texture 의 필터링... 재질 옵션으로 빼야한다..
-
 		dev->SetSamplerState( 0, D3DSAMP_MAGFILTER , pMtrl->m_FilterType );
 		dev->SetSamplerState( 0, D3DSAMP_MINFILTER , pMtrl->m_FilterType );
-
-		// 알파채널이 0,1 이면 둘다 안그린다.. 마스크로 사용...
 
 		dev->SetRenderState( D3DRS_ALPHATESTENABLE, TRUE );
 		dev->SetRenderState( D3DRS_ALPHAREF, pMtrl->m_AlphaRefValue );
@@ -935,12 +852,7 @@ void RMeshNode::ToonRenderSettingOn(RMtrl* pMtrl)
 		dev->SetTextureStageState( 0, D3DTSS_ALPHAOP,   D3DTOP_SELECTARG1 );
 
 		dev->SetTextureStageState( 0, D3DTSS_TEXCOORDINDEX, 0 );
-		dev->SetTexture( 0, pMtrl->GetTexture() ); // 1d 텍스쳐
-
-//		float fDepthBias = -0.001f;
-//		dev->SetRenderState(D3DRS_DEPTHBIAS, *(DWORD*)&fDepthBias); 
-
-		// 글로우 효과 지원해야함...
+		dev->SetTexture( 0, pMtrl->GetTexture() );
 
 		if(toonTexture) {
 
@@ -956,40 +868,10 @@ void RMeshNode::ToonRenderSettingOn(RMtrl* pMtrl)
 
 			dev->SetTextureStageState( 1, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_COUNT2 );
 			dev->SetTextureStageState( 1, D3DTSS_TEXCOORDINDEX, D3DTSS_TCI_CAMERASPACENORMAL );
-			
-			// tool 에서 받아오는값..
-/*
-			//카메라 공간 inverse 구하기
 
-			rmatrix matInvView = RView;
-
-			matInvView._41 = 0; 
-			matInvView._42 = 0; 
-			matInvView._43 = 0; // position 무시 
-
-			D3DXMatrixTranspose( &matInvView, &matInvView );	// scale 없으므로 그냥 transpose 해줘도 됨.
-
-			rmatrix matLightDir;
-			rvector lightvec;
-
-			memset( &matLightDir, 0, sizeof(rmatrix) );
-
-			D3DXVec3Normalize(&lightvec,&-g_light_pos);
-
-			matLightDir._11 = -0.5 * lightvec.x;
-			matLightDir._21 = -0.5 * lightvec.y;
-			matLightDir._31 = -0.5 * lightvec.z;
-			matLightDir._41 = 0.5f;								// -0.5 곱하고 0.5 더하기. 
-			matLightDir._44 = 1.00f;
-
-			D3DXMatrixMultiply( &matLightDir, &matInvView, &matLightDir );
-	
-			pVMesh->m_ToonUVMat		= matLightDir;
-			pVMesh->m_ToonTexture	= g_toon_tex;	// 디자이너가 만든 Toon Texture...
-*/
 			dev->SetTransform( D3DTS_TEXTURE1, &m_pParentMesh->m_pVisualMesh->m_ToonUVMat ); 
 
-			if(pMtrl->m_pToonTexture)	// 개별적으로 지정된것이 있으면 그것 사용..
+			if(pMtrl->m_pToonTexture)
 				dev->SetTexture( 1, pMtrl->m_pToonTexture->GetTexture() );
 			else						
 				dev->SetTexture( 1, m_pParentMesh->m_pVisualMesh->m_ToonTexture );
@@ -999,7 +881,6 @@ void RMeshNode::ToonRenderSettingOn(RMtrl* pMtrl)
 
 			dev->SetTextureStageState( 1, D3DTSS_COLOROP,   D3DTOP_DISABLE );
 			dev->SetTextureStageState( 1, D3DTSS_ALPHAOP,   D3DTOP_DISABLE );
-//			dev->SetTextureStageState( 1, D3DTSS_TEXCOORDINDEX, 0 );
 			dev->SetTexture( 1, NULL ); // 1d 텍스쳐
 		}
 	}
@@ -1015,12 +896,6 @@ void RMeshNode::ToonRenderSettingOff()
 		bool toonLighting	= m_pParentMesh->m_pVisualMesh->m_bToonLighting;
 		bool toonTexture	= m_pParentMesh->m_pVisualMesh->m_bToonTextureRender;
 
-
-//		float fDepthBias = -1.0f;
-//		dev->SetRenderState(D3DRS_DEPTHBIAS, *(DWORD*)&fDepthBias); 
-
-		///////////////////////////////////////////////////////////////////////////////
-
 		if(!toonLighting)
 		{
 			dev->SetRenderState( D3DRS_SHADEMODE, D3DSHADE_GOURAUD );
@@ -1031,7 +906,7 @@ void RMeshNode::ToonRenderSettingOff()
 		if(toonTexture) {
 			dev->SetTextureStageState( 1, D3DTSS_COLOROP,   D3DTOP_DISABLE );
 			dev->SetTextureStageState( 1, D3DTSS_ALPHAOP,   D3DTOP_DISABLE );
-			dev->SetTexture( 1, NULL ); // 1d 텍스쳐
+			dev->SetTexture( 1, NULL );
 		}
 
 	}
@@ -1039,67 +914,36 @@ void RMeshNode::ToonRenderSettingOff()
 
 void RMeshNode::ToonRenderSilhouetteSettingOn()
 {
-	//////////////////////////////////////////////////////////////////////////////
-	// 실루엣 그리기..설정..
+	LPDIRECT3DDEVICE9 dev = RGetDevice();
 
-//	if( silhouette )
-	{
-		LPDIRECT3DDEVICE9 dev = RGetDevice();
+	DWORD color = 0xff111111;
+	rmatrix m, s;
 
-		DWORD color = 0xff111111;
-		rmatrix m,s;
+	dev->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
+	dev->SetRenderState(D3DRS_CULLMODE, D3DCULL_CW);
+	dev->SetRenderState(D3DRS_LIGHTING, FALSE);
 
-		dev->SetRenderState( D3DRS_ALPHABLENDENABLE , FALSE );
-		dev->SetRenderState(D3DRS_CULLMODE, D3DCULL_CW );
-		dev->SetRenderState( D3DRS_LIGHTING , FALSE );
+	dev->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
+	dev->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TFACTOR);
+	dev->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
 
-		dev->SetTextureStageState( 0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
-		dev->SetTextureStageState( 0, D3DTSS_COLORARG1, D3DTA_TFACTOR );
-		dev->SetTextureStageState( 0, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
+	dev->SetRenderState(D3DRS_TEXTUREFACTOR, color);
+	dev->SetRenderState(D3DRS_SHADEMODE, D3DSHADE_FLAT);
 
-		dev->SetRenderState( D3DRS_TEXTUREFACTOR, color);
-		dev->SetRenderState( D3DRS_SHADEMODE, D3DSHADE_FLAT );
+	dev->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
+	dev->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
 
-		dev->SetSamplerState( 0, D3DSAMP_MAGFILTER , D3DTEXF_POINT);
-		dev->SetSamplerState( 0, D3DSAMP_MINFILTER , D3DTEXF_POINT);
-
-		dev->SetTexture( 0, NULL ); // 1d 텍스쳐
-		dev->SetTexture( 1, NULL ); // 1d 텍스쳐
-
-		// scale 방식은 간단하기는하지만 pivot 이 모델의 중심이어야 한다..
-
-//		dev->SetRenderState( D3DRS_ZENABLE , FALSE );
-
-//		dev->SetRenderState( D3DRS_ZFUNC, D3DCMP_EQUAL );
-//		dev->SetRenderState( D3DRS_ZFUNC, D3DCMP_GREATEREQUAL );
-//		dev->SetRenderState( D3DRS_ZFUNC, D3DCMP_GREATER );
-//		dev->SetRenderState( D3DRS_ZFUNC, D3DCMP_LESS );
-  
-//		float fDepthBias = -0.01f;
-//		dev->SetRenderState(D3DRS_DEPTHBIAS, *(DWORD*)&fDepthBias); 
-
-//		RGetDevice()->GetTransform( D3DTS_WORLD , &m);
-//		D3DXMatrixScaling(&s,1.03f,1.03f,1.03f);
-//		m = s * m;
-//		RGetDevice()->SetTransform( D3DTS_WORLD , &m);
-
-//		엣지 리스트를 직접 그려주는 방식도 심각하게 고려해보기... 
-//			( 어차피 볼륨 쉐도우를 지원할꺼라면...)
-	}
+	dev->SetTexture(0, NULL);
+	dev->SetTexture(1, NULL);
 
 }
 
 void RMeshNode::ToonRenderSilhouetteSettingOff()
 {
-//	if( silhouette )
-	{
-		LPDIRECT3DDEVICE9 dev = RGetDevice();
+	LPDIRECT3DDEVICE9 dev = RGetDevice();
 
-		dev->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW );
-		dev->SetRenderState( D3DRS_SHADEMODE, D3DSHADE_GOURAUD );
-
-//		dev->SetRenderState( D3DRS_ZFUNC, D3DCMP_LESSEQUAL );
-	}
+	dev->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
+	dev->SetRenderState(D3DRS_SHADEMODE, D3DSHADE_GOURAUD);
 }
 
 uint32_t BlendColor = 0;
@@ -1115,7 +959,7 @@ void RMeshNode::Render(D3DXMATRIX* pWorldMatrix)
 
 	{
 	
-	if(pWorldMatrix)	RGetDevice()->SetTransform( D3DTS_WORLD, pWorldMatrix ); // 그리기가 보류된 경우,,,
+	if(pWorldMatrix)	RGetDevice()->SetTransform( D3DTS_WORLD, pWorldMatrix );
 	else				RGetDevice()->SetTransform( D3DTS_WORLD, &m_ModelWorldMatrix );
 
 	}
@@ -1218,7 +1062,7 @@ void RMeshNode::Render(D3DXMATRIX* pWorldMatrix)
 	}
 }
 
-void RMeshNode::CheckAlignMapObject(rmatrix& hr_mat) // 맵오브젝트만..
+void RMeshNode::CheckAlignMapObject(rmatrix& hr_mat)
 {
 	int align = m_nAlign;
 
@@ -1281,7 +1125,7 @@ void RMeshNode::CheckAlignMapObject(rmatrix& hr_mat) // 맵오브젝트만..
 
 		rmatrix mat;
 
-		mat = ret_mat;//pMNode->m_mat_result;
+		mat = ret_mat;
 
 		rvector right = rvector(mat._11,mat._12,mat._13);
 		rvector dir	= rvector(mat._21,mat._22,mat._23);
@@ -1309,29 +1153,17 @@ void RMeshNode::CheckAlignMapObject(rmatrix& hr_mat) // 맵오브젝트만..
 	}
 }
 
-void RMeshNode::CheckAlign(rmatrix* world_mat)
+void RMeshNode::CheckAlign(const rmatrix& world_mat)
 {
-	if (m_nAlign == 0)	return;
+	if (m_nAlign == 0) return;
 
-	if(world_mat==NULL) return;
+	if (m_pBaseMesh->m_is_map_object) return;
 
-	if(m_pBaseMesh->m_is_map_object) return;//맵 오브젝트는 따로..
+	rvector cam_dir;
 
-	rvector cam_dir;//=RCameraDirection;
-
-	// local 에서봤을때의 camera direction
-
-	//	rmatrix inv;
-	//	float fDet;
-	//	D3DXMatrixInverse(&inv,&fDet,world_mat);
-	//	D3DXVec3TransformNormal(&cam_dir,&RCameraDirection,&inv);
-
-	// 위 주석된 부분의 inverse matrix 대신 transpose matrix 를 곱해주었다.
-	// 그러나 만약 world_mat 에 scale 성분이 있다면, cam_dir의 normalize 가 필요하다.
-
-	cam_dir.x=RCameraDirection.x*world_mat->_11+RCameraDirection.y*world_mat->_12+RCameraDirection.z*world_mat->_13;
-	cam_dir.y=RCameraDirection.x*world_mat->_21+RCameraDirection.y*world_mat->_22+RCameraDirection.z*world_mat->_23;
-	cam_dir.z=RCameraDirection.x*world_mat->_31+RCameraDirection.y*world_mat->_32+RCameraDirection.z*world_mat->_33;
+	cam_dir.x = RCameraDirection.x * world_mat._11 + RCameraDirection.y * world_mat._12 + RCameraDirection.z * world_mat._13;
+	cam_dir.y = RCameraDirection.x * world_mat._21 + RCameraDirection.y * world_mat._22 + RCameraDirection.z * world_mat._23;
+	cam_dir.z = RCameraDirection.x * world_mat._31 + RCameraDirection.y * world_mat._32 + RCameraDirection.z * world_mat._33;
 
 	int align = m_nAlign;
 
@@ -1348,8 +1180,6 @@ void RMeshNode::CheckAlign(rmatrix* world_mat)
 	if(align==1) {
 
 		rmatrix mat;
-//		rmatrix base_mat = m_mat_base;
-//		rmatrix base_mat = ret_mat;//m_mat_base;
 
 		rvector right,up,vUp,vDir,vPos,vRight;
 
@@ -1364,8 +1194,6 @@ void RMeshNode::CheckAlign(rmatrix* world_mat)
 
 		D3DXVec3Cross(&up, &vDir, &right);
 		D3DXVec3Normalize(&up, &up);
-
-//		D3DXMatrixIdentity(&mat);
 
 		mat._14 = 0.f;
 		mat._24 = 0.f;
@@ -1394,7 +1222,7 @@ void RMeshNode::CheckAlign(rmatrix* world_mat)
 
 		rmatrix mat;
 
-		mat = ret_mat;//m_mat_result;
+		mat = ret_mat;
 
 		rvector right = rvector(mat._11,mat._12,mat._13);
 		rvector dir	= rvector(mat._21,mat._22,mat._23);
@@ -1435,8 +1263,8 @@ int RMeshNode::CalcVertexBuffer_VertexAni(int frame)
 
 			int nCnt = pANode->GetVecValue(frame,m_point_list);
 		}
-		else { // 버텍스수가 틀릴경우
-			mlog("vertex ani 에서 버텍스 갯수가 틀림\n");// 이런 경우가 없어야 함..
+		else {
+			mlog("vertex ani 에서 버텍스 갯수가 틀림\n");
 		}
 	}
 
@@ -1444,7 +1272,7 @@ int RMeshNode::CalcVertexBuffer_VertexAni(int frame)
 }
 
 
-void RMeshNode::CalcVertexBuffer_Physique(D3DXMATRIX* world_mat,int frame)
+void RMeshNode::CalcVertexBuffer_Physique(const D3DXMATRIX& world_mat, int frame)
 {
 	int p_num,i,j,p_id;
 	D3DXVECTOR3 _vec_all,_vec;
@@ -1475,12 +1303,6 @@ void RMeshNode::CalcVertexBuffer_Physique(D3DXMATRIX* world_mat,int frame)
 
 			_vec = m_physique[i].m_offset[j];
 
-//			_vec = pMeshNode->m_point_list[i];
-//			RBoneBaseMatrix* BoneMatrix = pMeshNode->GetBaseMatrix(p_id);
-//			if(BoneMatrix==NULL)	t_mat =  pTMP->m_mat_result;
-//			else 					t_mat =  BoneMatrix->mat * pTMP->m_mat_result;
-//			t_mat =  pMeshNode->m_mat_ref * pTMP->m_mat_ref_inv * pTMP->m_mat_result;
-
 			D3DXVec3TransformCoord(&_vec,&_vec,&t_mat);
 			_vec_all += _vec * weight;
 		}
@@ -1489,11 +1311,7 @@ void RMeshNode::CalcVertexBuffer_Physique(D3DXMATRIX* world_mat,int frame)
 	}
 }
 
-
-void RMeshNode::CalcVertexBuffer_Tm(D3DXMATRIX* world_mat,int frame)
-{
-
-}
+void RMeshNode::CalcVertexBuffer_Tm(const D3DXMATRIX& world_mat, int frame) {}
 
 void RMeshNode::CalcVertexBuffer_Bbox(CalcVertexBufferBboxMode nBboxMode,rmatrix& mat)
 {
@@ -1519,7 +1337,7 @@ void RMeshNode::CalcVertexBuffer_Bbox(CalcVertexBufferBboxMode nBboxMode,rmatrix
 		}
 }
 
-bool RMeshNode::CalcPickVertexBuffer(D3DXMATRIX* world_mat,D3DXVECTOR3* pVec)
+bool RMeshNode::CalcPickVertexBuffer(const D3DXMATRIX& world_mat, D3DXVECTOR3* pVec)
 {
 	RMesh* pMesh = m_pBaseMesh;
 
@@ -1533,7 +1351,7 @@ bool RMeshNode::CalcPickVertexBuffer(D3DXMATRIX* world_mat,D3DXVECTOR3* pVec)
 
 	if( pMesh->m_isScale ) {
 		D3DXMatrixScaling(&scale_mat, pMesh->m_vScale.x, pMesh->m_vScale.y, pMesh->m_vScale.z);
-		result_mat = result_mat * scale_mat;
+		result_mat *= scale_mat;
 	}
 
 	RAnimation* pAniSet = pMesh->GetNodeAniSet(this);
@@ -1545,14 +1363,14 @@ bool RMeshNode::CalcPickVertexBuffer(D3DXMATRIX* world_mat,D3DXVECTOR3* pVec)
 	rmatrix	ModelWorldMatrix;
 	D3DXMatrixIdentity(&ModelWorldMatrix);
 
-	if( pAniSet && (pAniSet->GetAnimationType()  == RAniType_Vertex) ) {
+	if( pAniSet && pAniSet->GetAnimationType()  == RAniType_Vertex) {
 
 		CalcVertexBuffer_VertexAni( frame );
 
 		if(pMesh->m_is_map_object)	
-			ModelWorldMatrix = scale_mat*map_rot_mat*(*world_mat);
+			ModelWorldMatrix = scale_mat * map_rot_mat * world_mat;
 		else						
-			ModelWorldMatrix = scale_mat*(*world_mat);
+			ModelWorldMatrix = scale_mat * world_mat;
 
 		nBboxMode = CalcVertexBufferBboxMode_VertexAni;
 
@@ -1561,7 +1379,7 @@ bool RMeshNode::CalcPickVertexBuffer(D3DXMATRIX* world_mat,D3DXVECTOR3* pVec)
 
 		CalcVertexBuffer_Physique(world_mat,frame);
 
-		ModelWorldMatrix = scale_mat*(*world_mat);
+		ModelWorldMatrix = scale_mat * world_mat;
 
 		nBboxMode = CalcVertexBufferBboxMode_Physique;
 
@@ -1576,7 +1394,7 @@ bool RMeshNode::CalcPickVertexBuffer(D3DXMATRIX* world_mat,D3DXVECTOR3* pVec)
 			nBboxMode = CalcVertexBufferBboxMode_TM_MapObject;
 			BBoxMatrix = ModelWorldMatrix;
 
-			ModelWorldMatrix = ModelWorldMatrix * (*world_mat);
+			ModelWorldMatrix = ModelWorldMatrix * world_mat;
 		}
 		else {
 
@@ -1584,7 +1402,7 @@ bool RMeshNode::CalcPickVertexBuffer(D3DXMATRIX* world_mat,D3DXVECTOR3* pVec)
 
 			BBoxMatrix = result_mat;
 
-			ModelWorldMatrix = result_mat * (*world_mat);
+			ModelWorldMatrix = result_mat * world_mat;
 		}
 
 	}
@@ -1596,7 +1414,7 @@ bool RMeshNode::CalcPickVertexBuffer(D3DXMATRIX* world_mat,D3DXVECTOR3* pVec)
 	return true;
 }
 
-void RMeshNode::CalcVertexBuffer(D3DXMATRIX* world_mat,bool box)
+void RMeshNode::CalcVertexBuffer(const D3DXMATRIX& world_mat, bool box)
 {
 	__BP(207,"RMesh::CalcVertexBuffer");
 
@@ -1607,14 +1425,16 @@ void RMeshNode::CalcVertexBuffer(D3DXMATRIX* world_mat,bool box)
 	CalcVertexBufferBboxMode nBboxMode = CalcVertexBufferBboxMode_None;
 	rmatrix BBoxMatrix;
 
-	LPDIRECT3DDEVICE9  dev = RGetDevice();
+	LPDIRECT3DDEVICE9 dev = RGetDevice();
 
 	D3DXMATRIX result_mat = m_mat_result;
-	D3DXMATRIX scale_mat = GetIdentityMatrix();
+	D3DXMATRIX scale_mat;
+	bool Scale = false;
 
-	if( pMesh->m_isScale ) {
+	if (pMesh->m_isScale) {
 		D3DXMatrixScaling(&scale_mat, pMesh->m_vScale.x, pMesh->m_vScale.y, pMesh->m_vScale.z);
-		result_mat = result_mat * scale_mat;
+		result_mat *= scale_mat;
+		Scale = true;
 	}
 
 	RAnimation* pAniSet = pMesh->GetNodeAniSet(this);
@@ -1624,125 +1444,68 @@ void RMeshNode::CalcVertexBuffer(D3DXMATRIX* world_mat,bool box)
 	static rmatrix map_rot_mat = RGetRotY(180) * RGetRotX(90);
 
 	rmatrix	ModelWorldMatrix;
-	D3DXMatrixIdentity(&ModelWorldMatrix);
 
-	if( pAniSet && (pAniSet->GetAnimationType()  == RAniType_Vertex) ) {
-			
-		nNeedUpdate = CalcVertexBuffer_VertexAni( frame );
+	auto SetModelWorldMatrix = [&](auto& mat)
+	{
+		if (Scale)
+			ModelWorldMatrix = scale_mat * mat;
+		else
+			ModelWorldMatrix = mat;
+	};
 
-		if(pMesh->m_is_map_object)	ModelWorldMatrix = scale_mat*map_rot_mat*(*world_mat);
-		else						ModelWorldMatrix = scale_mat*(*world_mat);
+	if (pAniSet && pAniSet->GetAnimationType() == RAniType_Vertex) {
+		nNeedUpdate = CalcVertexBuffer_VertexAni(frame);
+
+		if (pMesh->m_is_map_object)
+			SetModelWorldMatrix(map_rot_mat * world_mat);
+		else
+			SetModelWorldMatrix(world_mat);
 
 		nBboxMode = CalcVertexBufferBboxMode_VertexAni;
-
 	}
-	else if( pAniSet && m_physique_num) {
-
-		CalcVertexBuffer_Physique(world_mat,frame);
-
-		ModelWorldMatrix = scale_mat*(*world_mat);
-
+	else if (pAniSet && m_physique_num) {
+		CalcVertexBuffer_Physique(world_mat, frame);
+		SetModelWorldMatrix(world_mat);
 		nBboxMode = CalcVertexBufferBboxMode_Physique;
-		
 		nNeedUpdate = 1;
 	}
 	else {
-
-//		CalcVertexBuffer_Tm(pMeshNode,world_mat,frame,pick);
-
 		if(pMesh->m_is_map_object) { 
-
 			ModelWorldMatrix = result_mat * map_rot_mat;
 			CheckAlignMapObject(ModelWorldMatrix);
 
 			nBboxMode = CalcVertexBufferBboxMode_TM_MapObject;
 			BBoxMatrix = ModelWorldMatrix;
 
-			ModelWorldMatrix = ModelWorldMatrix * (*world_mat);
+			ModelWorldMatrix = ModelWorldMatrix * world_mat;
 		}
 		else {
-
 			nBboxMode = CalcVertexBufferBboxMode_TM_Object;
-
 			BBoxMatrix = result_mat;
-
-			ModelWorldMatrix = result_mat * (*world_mat);
+			ModelWorldMatrix = result_mat * world_mat;
 		}
-
 	}
 
-	if(box){
-		CalcVertexBuffer_Bbox(nBboxMode,BBoxMatrix);//두번곱하게됨,,불필요..
-	}
-
+	if(box)
+		CalcVertexBuffer_Bbox(nBboxMode,BBoxMatrix);
 
 	m_ModelWorldMatrix = ModelWorldMatrix;
 
 	__EP(207);
 
-	//////////////////////////////////////////////////
-	// 버퍼의 생성과 갱신
-
-	if( nNeedUpdate)
-		UpdateNodeBuffer( ); // m_point_list 에 만들어진걸 m_pVert 로 옮긴다...
+	if(nNeedUpdate)
+		UpdateNodeBuffer();
 }
-
-// 부담스러운작업.. 
-// 나중에 스키닝하는 버텍스들만 따로 재계산..
 
 void RMeshNode::CalcVertexNormal(D3DXMATRIX* world_mat)
 {
-/*
-	D3DXPLANE	plane;
-	D3DXVECTOR3	vv[3];
-
-	int i=0,j=0;
-
-	if(m_face_num) {
-
-		for(i=0;i<m_face_num;i++) {
-
-			vv[0] = g_point_list[m_face_list[i].m_point_index[0]];
-			vv[1] = g_point_list[m_face_list[i].m_point_index[1]];
-			vv[2] = g_point_list[m_face_list[i].m_point_index[2]];
-
-			D3DXPlaneFromPoints(&plane,&vv[0],&vv[1],&vv[2]);
-			D3DXPlaneNormalize(&plane,&plane);
-
-			m_face_normal[i].x = plane.a;
-			m_face_normal[i].y = plane.b;
-			m_face_normal[i].z = plane.c;
-
-		}
-	}
-
-	///////////////////////////////////////////////////
-
-	static int p_cnt[1000];
-
-	memset(p_cnt,0,sizeof(int)*1000);
-
-	for(i=0;i<m_face_num;i++) {
-		for(j=0;j<3;j++) {
-			m_point_normal_list[ m_face_list[i].m_point_index[j] ] =
-				m_point_normal_list[ m_face_list[i].m_point_index[j] ] + m_face_normal[i];
-
-			p_cnt[ m_face_list[i].m_point_index[j] ]++;
-		}
-	}
-
-	for(i=0;i<m_point_num;i++) {
-		m_point_normal_list[i] = m_point_normal_list[i] / (float)p_cnt[i];
-		D3DXVec3Normalize(&m_point_normal_list[i],&m_point_normal_list[i]);
-	}
-*/
 }
 
 int RMeshNode::GetNodeAniSetFrame()
 {
-	if( m_pBaseMesh->m_pAniSet[1] ) {				// 상반신 에니메이션이 있고
-		if(m_CutPartsType == cut_parts_upper_body) {// 이노드가 상반신 노드라면
-			return m_pBaseMesh->m_frame[1];		// 상반신 프레임을 사용,,,
+	if( m_pBaseMesh->m_pAniSet[1] ) {
+		if(m_CutPartsType == cut_parts_upper_body) {
+			return m_pBaseMesh->m_frame[1];
 		}
 	}
 	return m_pBaseMesh->m_frame[0];
@@ -1773,6 +1536,5 @@ bool RMeshNode::isAlphaMtrlNode()
 		return true;
 	return false;
 }
-
 
 _NAMESPACE_REALSPACE2_END

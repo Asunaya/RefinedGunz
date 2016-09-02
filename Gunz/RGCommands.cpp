@@ -6,6 +6,17 @@
 #include "Extensions.h"
 #include <cstdint>
 
+bool CheckDeveloperMode(const char* Name)
+{
+	if (ZApplication::GetInstance()->GetLaunchMode() != ZApplication::ZLAUNCH_MODE_STANDALONE_GAME)
+	{
+		ZChatOutputF("%s can only be used in developer mode", Name);
+		return false;
+	}
+
+	return true;
+};
+
 void LoadRGCommands(ZChatCmdManager& CmdManager)
 {
 	CmdManager.AddCommand(0, "fpslimit", [](const char *line, int argc, char ** const argv){
@@ -87,10 +98,6 @@ void LoadRGCommands(ZChatCmdManager& CmdManager)
 		ZGetConfiguration()->Save();
 	}, CCF_ALL, 1, 1, true, "/fullscreen", "");
 
-	CmdManager.AddCommand(0, "setparts", [](const char *line, int argc, char ** const argv){
-		ZGetGame()->m_pMyCharacter->m_pVMesh->SetParts((RMeshPartsType)atoi(argv[1]), argv[2]);
-	}, CCF_ALL, 0, 0, true, "/setparts", "");
-
 	auto Sens = [](const char *line, int argc, char ** const argv) {
 		float fSens = atof(argv[1]);
 
@@ -164,17 +171,65 @@ void LoadRGCommands(ZChatCmdManager& CmdManager)
 	},
 		CCF_ALL, 0, 0, true, "/hello", "");
 
-	CmdManager.AddCommand(0, "timescale", [](const char *line, int argc, char ** const argv) {
-		if (ZApplication::GetInstance()->GetLaunchMode() != ZApplication::ZLAUNCH_MODE_STANDALONE_GAME)
-		{
-			ZChatOutput("Timescale can only be set in debug mode");
+	CmdManager.AddCommand(0, "setparts", [](const char *line, int argc, char ** const argv) {
+		if (!CheckDeveloperMode("setparts"))
 			return;
-		}
+
+		ZGetGame()->m_pMyCharacter->m_pVMesh->SetParts((RMeshPartsType)atoi(argv[1]), argv[2]);
+	}, CCF_ALL, 0, 0, true, "/setparts", "");
+
+	CmdManager.AddCommand(0, "timescale", [](const char *line, int argc, char ** const argv) {
+		if (!CheckDeveloperMode("Timescale"))
+			return;
 
 		float NewTimescale = atof(argv[1]);
 		ZApplication::GetInstance()->SetTimescale(NewTimescale);
 
 		ZChatOutputF("Set timescale to %f, %s.", NewTimescale, argv[1]);
+	},
+		CCF_ALL, 1, 1, true, "/timescale <scale>", "");
+
+	CmdManager.AddCommand(0, "scale", [](const char *line, int argc, char ** const argv) {
+		if (!CheckDeveloperMode("Mesh scaling"))
+			return;
+
+		auto Scale = static_cast<float>(atof(argv[1]));
+		ZGetGame()->m_pMyCharacter->SetScale(Scale);
+		ZChatOutputF("Set visual mesh scale to %f\n", Scale);
+	},
+		CCF_ALL, 1, 1, true, "/scale", "");
+
+	CmdManager.AddCommand(0, "scalenode", [](const char *line, int argc, char ** const argv) {
+		if (!CheckDeveloperMode("Node scaling"))
+			return;
+
+#ifdef SCALE_RMESHNODE
+		auto Parts = static_cast<RMeshPartsPosInfoType>(atoi(argv[1]));//RMeshPartsType
+		auto Scale = static_cast<float>(atof(argv[2]));
+		v3 v{ Scale, Scale, Scale };
+		auto* Node = ZGetGame()->m_pMyCharacter->m_pVMesh->m_pMesh->FindNode(Parts);
+		if (!Node)
+		{
+			ZChatOutputF("Couldn't find node %d", Parts);
+			return;
+		}
+		Node->SetScale(v);
+		//ZGetGame()->m_pMyCharacter->m_pVMesh->m_pMesh->FindNode(Parts)->SetScale(v);
+		ZChatOutputF("Set visual mesh node %d scale to %f", static_cast<int>(Parts), Scale);
+#else
+		ZChatOutputF("Unsupported. Compile with SCALE_RMESHNODE defined for support.");
+#endif
+	},
+		CCF_ALL, 2, 2, true, "/scalenode", "");
+
+	CmdManager.AddCommand(0, "camdist", [](const char *line, int argc, char ** const argv) {
+		if (!CheckDeveloperMode("camdist"))
+			return;
+
+		auto val = static_cast<float>(atof(argv[1]));
+		ZGetCamera()->m_fDist = val;
+
+		ZChatOutputF("Set camdist to %f", val);
 	},
 		CCF_ALL, 1, 1, true, "/timescale <scale>", "");
 }

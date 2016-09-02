@@ -1,5 +1,4 @@
-#if !defined(AFX_RMESH_H__6FD23F3A_D138_4F55_B03F_A629D35788CB__INCLUDED_)
-#define AFX_RMESH_H__6FD23F3A_D138_4F55_B03F_A629D35788CB__INCLUDED_
+#pragma once
 
 #include <vector>
 #include <unordered_map>
@@ -12,55 +11,8 @@ class MXmlElement;
 
 _NAMESPACE_REALSPACE2_BEGIN
 
-/////////////////////////////////////////////////////////////////////
-// 각각의 캐릭터가 가지는 장비 메시 파일과 와 에니메이션 파일,
-// 머터리얼 파일등을 따로 관리한다. 통합관리 안함. 
-// ( 오브젝트 단위로 올리고 내리고 )
-
-#pragma warning(disable : 4996)
-
 typedef RHashList<RMeshNode*>			RMeshNodeHashList;
 typedef RHashList<RMeshNode*>::iterator	RMeshNodeHashList_Iter;
-
-/*
-class AniTreeNodeMgr {
-public:
-	AniTreeNodeMgr() {
-		m_AniTreeRoot = NULL;
-	}
-	~AniTreeNodeMgr() {
-	}
-
-	void AddNode(RMeshNode* pnode,RMeshNode* node) {
-
-		if(pnode==NULL){
-			if(m_AniTreeRoot==NULL) {
-				m_AniTreeRoot = node;
-				node->m_Next = NULL;
-			}
-			else {
-				node->m_Next = m_AniTreeRoot;
-				m_AniTreeRoot = node;
-			}
-		}
-		else {
-			if(pnode->m_ChildRoot==NULL) {
-				pnode->m_ChildRoot = node;
-				node->m_Next = NULL;
-			} else {
-				node->m_Next = pnode->m_ChildRoot;
-				pnode->m_ChildRoot = node;
-			}
-		}
-	}
-
-	RMeshNode* m_AniTreeRoot;
-};
-*/
-
-//////////////////////////////////////////////////////
-//
-//////////////////////////////////////////////////////
 
 class RMeshMgr;
 class RVisualMesh;
@@ -69,21 +21,15 @@ class RPickInfo;
 
 extern int g_poly_render_cnt;
 
-////////////////////////////////////////////////////////////////////////////////////
-
-///////////////////////////////////////////////////////
-
-enum {
-
+enum
+{
 	eRRenderNode_Alpha = 0,
 	eRRenderNode_Add,
 
 	eRRenderNode_End,
 };
 
-//	visual mesh
-
-class RRenderNode //: public CMemPoolSm<RRenderNode>
+class RRenderNode
 {
 public:
 	RRenderNode() {
@@ -95,7 +41,6 @@ public:
 		Set(Rmode,m,pMNode,nMtrl,begin,size,vis_alpha);
 	}
 
-	// 임시 예전것때문..
 	void Set(int Rmode,rmatrix& m,RMeshNode* pMNode,RMtrl* pMtrl,int begin,int size,float vis_alpha) {
 		m_RenderMode = Rmode;
 		m_matWorld = m;
@@ -197,8 +142,6 @@ public:
 
 };
 
-// 작동하면 메모리풀과 자체 list 를 사용한다..
-
 #define VERTEX_NODE_MAX_CNT		1000
 #define LVERTEX_NODE_MAX_CNT	1000
 
@@ -231,9 +174,6 @@ public:
 
 	RRenderNodeList	m_RenderNodeList[eRRenderNode_End];
 };
-
-// effect , weapon , character , mapobject
-// soft 라도 각자 자신의 버퍼를 가지고 있어야 한다.
 
 inline bool render_alpha_sort(RMeshNode* _a,RMeshNode* _b) 
 {
@@ -269,33 +209,11 @@ public:
 	}
 
 	void Sort(rvector vCameraPos) {
-//		for(int i=0;i<RRMT_End;i++) {
-//			m_node_list[i].sort(func);
-//		}
-//		알파만 소트..
-//		카메라와의 거리계산하고..
 		m_node_list[RRMT_Alpha].sort(render_alpha_sort);
 	}
 
-	// alpha 거리 sort 포기?
-
-	void Render() {
-		// normal,diffuse
-		// alpha
-		// add 
-/*
-		for(int i=0;i<RRMT_End;i++) {
-			m_node_list[i]
-			
-		}
-*/
-	}
-
-	void Clear() {
-		for(int i=0;i<RRMT_End;i++) {
-//			m_node_list[i].clear(func);
-		}
-	}
+	void Render() {}
+	void Clear() {}
 
 	RMeshNodeHashList m_node_list[RRMT_End];
 };
@@ -303,33 +221,22 @@ public:
 class RParticleLinkInfo
 {
 public:
-	RParticleLinkInfo() {
-
-	}
-
 	void Set(char* _name,char* _dummy_name) {
 		name = _name;
 		dummy_name = _dummy_name;
 	}
 
-public:
-	string name;
-	string dummy_name;
+	std::string name;
+	std::string dummy_name;
 };
-
-/////////////////////////////////////////////////////////////////////////////////////
-//
 
 class RMesh {
 public:
-
 	RMesh();
 	~RMesh();
-	RMesh(const RMesh& rhs);
 
 	void Init();
 	void Destroy();
-
 
 	bool ReadXml(const char* fname);
 	bool SaveXml(const char* fname);
@@ -341,32 +248,26 @@ public:
 
 	void RenderFrame();
 
-	void Render(D3DXMATRIX* world_mat,bool NoPartsChange=false);
+	void Render(const D3DXMATRIX* world_mat, bool NoPartsChange=false);
 
-//private:
-
+private:
 	void RenderFrameSingleParts();
 	void RenderFrameMultiParts();
 
 	void CalcLookAtParts(D3DXMATRIX& pAniMat,RMeshNode* pMeshNode,RVisualMesh* pVisualMesh);
-	void CalcLookAtParts2(D3DXMATRIX& pAniMat,RMeshNode* pMeshNode,RVisualMesh* pVisualMesh);
+	void CalcLookAtParts2(D3DXMATRIX& pAniMat, RMeshNode* pMeshNode, RVisualMesh* pVisualMesh);
 
-	void RenderSub(D3DXMATRIX* world_mat,bool NoPartsChange,bool RenderBuffer);
-	bool CalcParts(RMeshNode* pTMeshNode,RMeshNode* pMeshNode,bool NoPartsChange);
+	void RenderSub(const D3DXMATRIX& world_mat, bool NoPartsChange);
+	bool CalcParts(RMeshNode* pTMeshNode, RMeshNode* pMeshNode, bool NoPartsChange);
 
-	void RenderNode(RMeshNode *pMeshNode,D3DXMATRIX* world_mat);
+	void RenderNode(RMeshNode *pMeshNode, const D3DXMATRIX& world_mat);
 
 private:
-
 	bool SetAnimation1Parts(RAnimation* pAniSet);
 	bool SetAnimation2Parts(RAnimation* pAniSet,RAnimation* pAniSetUpper);
 
 public:
-
 	RAnimation* GetNodeAniSet(RMeshNode* pNode);
-
-//	static void RenderSBegin();
-//	static void RenderSEnd();
 
 	void SetLitVertexModel(bool v);
 
@@ -391,7 +292,7 @@ public:
 	void SetCharacterMtrl_OFF(RMtrl* pMtrl,float vis_alpha);
 	int  GetCharacterMtrlMode(RMtrl* pMtrl,float vis_alpha);
 
-	void ReloadAnimation();	//다시 로딩 하는것이 아니고..로딩 안된것을 읽는다..
+	void ReloadAnimation();
 
 	void SkyBoxMtrlOn();
 	void SkyBoxMtrlOff();
@@ -433,7 +334,7 @@ public:
 	void  SetFrame(int nFrame,int nFrame2 = -1);
 
 	bool AddNode(char* name,char* pname,rmatrix& base_mat);
-	bool DelNode(RMeshNode* data); // 제거시 자신을 부모로 가지는 오브젝트에 대해서 고려~
+	bool DelNode(RMeshNode* data);
 
 	bool ConnectAnimation(RAnimation* pAniSet);
 	bool ConnectMtrl();
@@ -457,8 +358,8 @@ public:
 
 public:
 
-	bool SetAnimation(RAnimation* pAniSet,RAnimation* pAniSetUpper=NULL);	//외부의 에니메이션과 연결시
-	bool SetAnimation(char* ani_name,char* ani_name_lower = NULL);			//내부의 에니메이션과 연결시
+	bool SetAnimation(RAnimation* pAniSet,RAnimation* pAniSetUpper=NULL);
+	bool SetAnimation(char* ani_name,char* ani_name_lower = NULL);
 	void ClearAnimation();
 
 	void SetMtrlAutoLoad(bool b);
@@ -482,11 +383,6 @@ public:
 	RMeshNode* GetMeshData(const char* name);
 	RMeshNode* GetPartsNode(const char* name);
 
-	// 항상쓰는것도아니니까 나중에속도가 떨어진다면 사용
-//	RMeshNode* GetPartsNode(RMeshPartsType parts,char* name);
-
-	// RVisualMesh class 로 옮기기 ( m_world_mat 내장한... )
-
 	bool Pick(int x,int y,RPickInfo* pInfo,rmatrix* world_mat=NULL);
 	bool Pick(const rvector* vInVec,RPickInfo* pInfo,rmatrix* world_mat=NULL);
 	bool Pick(const rvector& pos, const rvector& dir,RPickInfo* pInfo,rmatrix* world_mat=NULL);
@@ -500,12 +396,9 @@ public:
 
 	RPickType GetPickingType();
 
-	// 모델이 무기모델인경우 의미를 갖는다...
 	void SetMeshWeaponMotionType(RWeaponMotionType t);
 	RWeaponMotionType GetMeshWeaponMotionType();
 
-	// 맵 오브젝트의 기본 위치를 얻기 위해 사용
-	// 계층을 가지는 에니메이션이 사용되는 경우는 bbox 를 구해서 중심 위치를 사용해야함..
 	rvector GetOrgPosition();
 
 	void SetPhysiqueMeshMesh(bool b);
@@ -516,11 +409,9 @@ public:
 	void SetSpRenderMode(int mode);
 
 private:
-
-	bool CalcIntersectsTriangle(const rvector* vInVec,RPickInfo* pInfo, D3DXMATRIX* world_mat=NULL,bool fastmode=false);
-
-	void GetNodeAniMatrix(RMeshNode* pMeshNode,D3DXMATRIX& m);
-
+	bool CalcIntersectsTriangle(const rvector* vInVec, RPickInfo* pInfo,
+		D3DXMATRIX* world_mat = nullptr, bool fastmode = false);
+	void GetNodeAniMatrix(RMeshNode* pMeshNode, D3DXMATRIX& m);
 	RMeshNode* UpdateNodeAniMatrix(RMeshNode* pNode);
 
 public:
@@ -539,7 +430,6 @@ public:
 
 	RMeshNodeHashList	m_list;
 
-//	RMeshNode*			m_data[MAX_MESH_NODE_TABLE];
 	vector<RMeshNode*>	m_data;
 
 	RWeaponMotionType	m_MeshWeaponMotionType;
@@ -557,7 +447,7 @@ public:
 	D3DXVECTOR3		m_vBBMaxNodeMatrix;
 	D3DXVECTOR3		m_vBBMinNodeMatrix;
 
-	bool			m_is_use_ani_set;	//temp
+	bool			m_is_use_ani_set;
 
 	rvector			m_vAddBipCenter;
 
@@ -567,14 +457,7 @@ public:
 	RVisualMesh*	m_pVisualMesh;
 	RAnimation*		m_pAniSet[2];
 
-	/////////////////////////////////////
-	// 자신의 파츠관리 남과 공유 안함..
-
 	RMeshMgr*		m_parts_mgr;
-
-	/////////////////////////////////////
-	// 기본 mesh 에 가지고 사용. 
-	// 전역관리 해도 관계 없음
 
 	RAnimationMgr	m_ani_mgr;
 
@@ -600,7 +483,7 @@ public:
 	static bool mHardwareAccellated;
 	static unsigned int mNumMatrixConstant;
 
-	bool m_isMultiAniSet;// 에니메이션을 타잎별로 어러벌 가지고 있는 모델
+	bool m_isMultiAniSet;
 
 	int	 m_nSpRenderMode;
 
@@ -614,15 +497,10 @@ public:
 	void		SetToolSelectNodeName(char* name)	 { SetToolSelectNode(GetMeshData(name)); }
 
 private:
-
 	RMeshNode*	m_pToolSelectNode;
 
 public:
-
-public:
-
 	// util
-
 	static bool  m_bTextureRenderOnOff;
 	static bool  m_bVertexNormalOnOff;
 	static bool  m_bToolMesh;
@@ -682,6 +560,3 @@ void RenderNodeMgr_Add(rmatrix& m,RMeshNode* pMNode,int nMtrl);
 void RenderNodeMgr_Render();
 
 _NAMESPACE_REALSPACE2_END
-
-
-#endif // !defined(AFX_RMESH_H__6FD23F3A_D138_4F55_B03F_A629D35788CB__INCLUDED_)

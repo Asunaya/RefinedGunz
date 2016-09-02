@@ -66,7 +66,7 @@ void RMesh::GetNodeAniMatrix(RMeshNode* pMeshNode,D3DXMATRIX& ani_mat)
 	RAnimation* pAniSet = GetNodeAniSet(pMeshNode);
 	int frame = pMeshNode->GetNodeAniSetFrame();
 
-	AnimationType ani_type = RAniType_Bone; 
+	AnimationType ani_type = RAniType_Bone;
 
 	if(pAniSet) {
 		ani_type = pAniSet->GetAnimationType();
@@ -97,6 +97,10 @@ void RMesh::GetNodeAniMatrix(RMeshNode* pMeshNode,D3DXMATRIX& ani_mat)
 
 		if (CustomCalced)
 		{
+#ifdef SCALE_RMESHNODE
+			if (pMeshNode->ScaleEnabled)
+				ani_mat *= pMeshNode->matScale;
+#endif
 			if (pMeshNode->m_pParent)
 				ani_mat *= pMeshNode->m_pParent->m_mat_result;
 
@@ -113,12 +117,17 @@ void RMesh::GetNodeAniMatrix(RMeshNode* pMeshNode,D3DXMATRIX& ani_mat)
 	{
 		// skip	
 	} 
-	else // 기본 에니메이션이거나 연결된 에니메이션이 없을경우
+	else
 	{
 		_RGetRotAniMat(pMeshNode,frame,ani_mat);
 		_RGetPosAniMat(pMeshNode,frame,ani_mat);
 
-		CalcLookAtParts( ani_mat, pMeshNode , m_pVisualMesh );
+		CalcLookAtParts( ani_mat, pMeshNode, m_pVisualMesh );
+
+#ifdef SCALE_RMESHNODE
+		if (pMeshNode->ScaleEnabled)
+			ani_mat *= pMeshNode->matScale;
+#endif
 
 		if (pMeshNode->m_pParent) {
 			D3DXMatrixMultiply(&ani_mat,&ani_mat,&pMeshNode->m_pParent->m_mat_result);
@@ -132,8 +141,6 @@ void RMesh::_RGetAniMat(RMeshNode* pMeshNode,int frame,D3DXMATRIX& t_ani_mat)
 		mlog("_RGetAniMat() pMeshNode==NULL\n");
 		return;
 	}
-
-	// 행렬 분해 보간 , 프레임 간격간 , pos,rot,scale
 
 	RAnimationNode* pANode = pMeshNode->m_pAnimationNode;
 
@@ -158,39 +165,8 @@ void RMesh::_RGetRotAniMat(RMeshNode* pMeshNode,int frame,D3DXMATRIX& t_ani_mat)
 {
 	D3DXMATRIX buffer,Inv;
 
-	// 4개의 모션을 지원해야함..
-/*	 
-	RMesh* pMesh = pMeshNode->m_pParentMesh;
-
-	bool isAnimationBlend = false;
-
-	if( pMesh && pMesh->m_pVisualMesh ) {
-		isAnimationBlend = pMesh->m_pVisualMesh->m_isAnimationBlend;
-	}
-
-	RAnimationNode* pANode;
-	RAnimationNode* pANodeNext;
-
-	if(pMeshNode->m_CutPartsType == cut_parts_uppper_body) {
-		pANode		= pMeshNode->m_pAnimationNode[0];
-		pANodeNext	= pMeshNode->m_pAnimationNode[1];
-	}
-	else if(pMeshNode->m_CutPartsType == cut_parts_lower_body) {
-		pANode		= pMeshNode->m_pAnimationNode[2];
-		pANodeNext	= pMeshNode->m_pAnimationNode[3];
-	}
-
-	if(isAnimationBlend) {
-		q1 = pANode[frame].quat;
-		q2 = pANodeNext[0].quat;
-		d = 결정은?				//blend float 값을 m_pVisualMesh 에서 받기..
-		D3DXQuaternionSlerp(&out,&q1,&q2,d);
-	}
-*/
-	if(pMeshNode==NULL) {
-//		mlog("_RGetRotAniMat() pMeshNode==NULL\n");
+	if(pMeshNode==NULL)
 		return;
-	}
 
 	RAnimationNode* pANode = pMeshNode->m_pAnimationNode;
 
@@ -210,7 +186,7 @@ void RMesh::_RGetRotAniMat(RMeshNode* pMeshNode,int frame,D3DXMATRIX& t_ani_mat)
 
 		D3DXMatrixIdentity(&buffer);
 
-		if(m_isNPCMesh && (pMeshNode->m_WeaponDummyType != weapon_dummy_etc) ) // 총구용 더미면
+		if(m_isNPCMesh && (pMeshNode->m_WeaponDummyType != weapon_dummy_etc) )
 		{
 			memcpy(&buffer,&pMeshNode->m_mat_local,sizeof(D3DXMATRIX));
 
@@ -233,20 +209,15 @@ void RMesh::_RGetRotAniMat(RMeshNode* pMeshNode,int frame,D3DXMATRIX& t_ani_mat)
 
 void RMesh::_RGetPosAniMat(RMeshNode* pMeshNode,int frame,D3DXMATRIX& t_ani_mat)
 {
-	if(pMeshNode==NULL) {
-//		mlog("_RGetPosAniMat() pMeshNode==NULL\n");
+	if(pMeshNode==NULL)
 		return;
-	}
 
 	D3DXMATRIX buffer,Inv;
 
 	RAnimationNode* pANode = pMeshNode->m_pAnimationNode;
 
-	//////////////////////////////////////////////////////
-
 	if(pMeshNode->m_LookAtParts == lookat_parts_spine1) {
-//		if( pMeshNode->m_pParentMesh->m_pAniSet[1] ) {//자신의 원래 에니메이션의 로컬mat 를 유지한다.
-		if( m_pAniSet[1] ) {//자신의 원래 에니메이션의 로컬mat 를 유지한다.
+		if( m_pAniSet[1] ) {
 
 			t_ani_mat._41 = pMeshNode->m_spine_local_pos.x;
 			t_ani_mat._42 = pMeshNode->m_spine_local_pos.y;
@@ -276,8 +247,7 @@ void RMesh::_RGetPosAniMat(RMeshNode* pMeshNode,int frame,D3DXMATRIX& t_ani_mat)
 
 		D3DXMatrixIdentity(&buffer);
 
-//		if( pMeshNode->m_pParentMesh->m_isNPCMesh && pMeshNode->m_WeaponDummyType != weapon_dummy_etc ) // 총구용 더미면
-		if( m_isNPCMesh && pMeshNode->m_WeaponDummyType != weapon_dummy_etc ) // 총구용 더미면
+		if( m_isNPCMesh && pMeshNode->m_WeaponDummyType != weapon_dummy_etc )
 		{
 			buffer = pMeshNode->m_mat_local;
 
@@ -299,30 +269,17 @@ void RMesh::_RGetPosAniMat(RMeshNode* pMeshNode,int frame,D3DXMATRIX& t_ani_mat)
 	}
 }
 
-// 상태별 에니 파일 에서 로딩하고~ + 상태별 연결 보간 확장
-// 같은 상태의 frame 에 대해서만 보간..
-
-// 상태에서 상태로 이어지는 사이에 종료상태의 프레임 값과 
-// 시작상태의 프레임값을 가지고 2-3초간 보간하기..
-
-// 적에게 머리 방향을 맞추는 등의 간섭 에니 효과 넣기
-
-// animation_mgr 로 기능 옮기기 
-
 void MakeRotMatrix(rmatrix *pOut,rvector& pos,rvector& dir,rvector& up) 
 {
 	D3DXMatrixIdentity(pOut);
 
 	rvector right;
-	//	dir =-dir;
 	D3DXVec3Cross(&right,&up,&dir);
 	D3DXVec3Cross(&up,&dir,&right);
 
 	D3DXVec3Normalize(&up,&up);
 	D3DXVec3Normalize(&dir,&dir);
 	D3DXVec3Normalize(&right,&right);
-
-	//	dir = -dir;
 
 	pOut->_11 = right.x;
 	pOut->_12 = right.y;
@@ -507,7 +464,6 @@ rmatrix makematrix(rvector pos,rvector dir,rvector up)
 {
 	rmatrix m;
 	rvector right;
-//	D3DXVec3Cross(&right,&dir,&up);
 	D3DXVec3Cross(&right,&up,&dir);
 	D3DXVec3Normalize(&right,&right);
 
@@ -537,8 +493,6 @@ rmatrix makematrix(rvector pos,rvector dir,rvector up)
 	return m;
 }
 
-//축제한과 축각도 제한걸기
-
 void CalcNodeMatrix(RVisualMesh* pVMesh , RMeshNode* pNode ,bool upLimit)
 {
 	if( pNode==NULL ) return;
@@ -552,10 +506,6 @@ void CalcNodeMatrix(RVisualMesh* pVMesh , RMeshNode* pNode ,bool upLimit)
 
 	draw_box(&m,rvector(5,5,5),rvector(-5,-5,-5),0xff88ffff);
 
-//	m._41 = vTargetPos.x;
-//	m._42 = vTargetPos.y;
-//	m._43 = vTargetPos.z;
-
 	draw_box(&m,rvector(5,5,5),rvector(-5,-5,-5),0xff22ff22);
 
 	rvector lpos = vTargetPos;
@@ -563,7 +513,6 @@ void CalcNodeMatrix(RVisualMesh* pVMesh , RMeshNode* pNode ,bool upLimit)
 	rvector hpos = rvector(m._41,m._42,m._43);
 	rvector dir1 = rvector(m._31,m._32,m._33);
 	rvector dir2 = lpos - hpos;
-//	rvector dir2 = vTargetPos;
 
 	if(upLimit) {
 		dir1.y = 0.f;

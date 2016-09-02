@@ -670,94 +670,104 @@ void ZCharacter::OnDraw()
 {
 	m_bRendered = false;
 
-	if (m_bInitialized==false) return;
+	if (!m_bInitialized) return;
 	if (!IsVisible()) return;
-	if(IsAdminHide()) return;
+	if (IsAdminHide()) return;
 
 	auto ZCharacterDraw = MBeginProfile("ZCharacter::Draw");
 
-	if( m_pVMesh && !Enable_Cloth )	m_pVMesh->DestroyCloth();
+	if (m_pVMesh && !Enable_Cloth)
+		m_pVMesh->DestroyCloth();
 
 	if(m_nVMID==-1)
-	{
-		__EP(39);
 		return;
-	}
 
+	// Create the bounding box
 	rboundingbox bb;
-	static constexpr auto Radius = 150;
+	static constexpr auto Radius = 50;
 	static constexpr auto Height = 190;
-	bb.vmax = m_Position + rvector(Radius, Radius, Height);
-	bb.vmin = m_Position - rvector(Radius, Radius, 0);
+	bb.vmax = rvector(Radius, Radius, Height);
+	bb.vmin = rvector(-Radius, -Radius, 0);
+	auto ScaleAndTranslate = [&](auto& vec) {
+		if (Scale != 1.0f)
+			vec *= Scale;
+		vec += m_Position;
+	};
+	ScaleAndTranslate(bb.vmax);
+	ScaleAndTranslate(bb.vmin);
+
+	// Don't draw if the bounding box isn't visible
 	if (!ZGetGame()->GetWorld()->GetBsp()->IsVisible(bb)) return;
 	if (!isInViewFrustum(&bb, RGetViewFrustum())) return;
 
-	__BP(24, "ZCharacter::Draw::Light");
+	auto ZCharacterDrawLight = MBeginProfile("ZCharacter::Draw::Light");
 
-	Draw_SetLight( m_Position );
+	Draw_SetLight(m_Position);
 
-	__EP(24);
+	MEndProfile(ZCharacterDrawLight);
 
-	if( g_pGame->m_bShowWireframe ) 
+	if (g_pGame->m_bShowWireframe)
 	{
-		RGetDevice()->SetRenderState( D3DRS_LIGHTING, FALSE );
-		RGetDevice()->SetTextureStageState( 0, D3DTSS_COLORARG1, D3DTA_DIFFUSE);
-		RGetDevice()->SetTextureStageState( 0, D3DTSS_COLOROP,   D3DTOP_SELECTARG1);
+		RGetDevice()->SetRenderState(D3DRS_LIGHTING, FALSE);
+		RGetDevice()->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_DIFFUSE);
+		RGetDevice()->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
 	}
 
-	bool bNarakSetState = ((m_bFallingToNarak) && ((g_pGame->GetWorld()->IsFogVisible())));
+	// If we're falling into the abyss, disable fog
+	// and the depth buffer (pits have a black texture in the bottom)
+	bool bNarakSetState = m_bFallingToNarak && g_pGame->GetWorld()->IsFogVisible();
 	if (bNarakSetState)
 	{
-		RGetDevice()->SetRenderState(D3DRS_FOGENABLE, FALSE );
+		RGetDevice()->SetRenderState(D3DRS_FOGENABLE, FALSE);
 		RSetWBuffer(false);
 	}
 
 	CheckDrawWeaponTrack();
 
-	RGetDevice()->SetRenderState( D3DRS_LIGHTING, TRUE );
+	RGetDevice()->SetRenderState(D3DRS_LIGHTING, TRUE);
+
+	auto MaxVisibility = 1.0f;
+	// In the skillmap gamemode, all player characters
+	// that aren't the player are transparent
+	if (!m_bHero && ZGetGame()->GetMatch()->GetMatchType() == MMATCH_GAMETYPE_SKILLMAP)
+		MaxVisibility = 0.4f;
 
 	if(IsDie())
 	{
-#define TRAN_AFTER		3.f
-#define VANISH_TIME		2.f
+		// If we are dead, fade out
+		constexpr auto TRAN_AFTER = 3.0f;
+		constexpr auto VANISH_TIME = 2.0f;
 
-		float fOpacity = max(0.f,min(1.0f,(
-			VANISH_TIME-(g_pGame->GetTime()-GetDeadTime() - TRAN_AFTER))/VANISH_TIME));
+		float fOpacity = max(0.f, min(MaxVisibility, (
+			VANISH_TIME - (g_pGame->GetTime() - GetDeadTime() - TRAN_AFTER)) / VANISH_TIME));
 		m_pVMesh->SetVisibility(fOpacity);
 	}
-	else
-	if (!m_bHero) m_pVMesh->SetVisibility(ZGetGame()->GetMatch()->GetMatchType() == MMATCH_GAMETYPE_SKILLMAP ? 0.4 : 1.f);
+	else if (!m_bHero) m_pVMesh->SetVisibility(MaxVisibility);
 
-	__BP(25, "ZCharacter::Draw::VisualMesh::Render");
+	auto ZCharacterDrawVisualMeshRender = MBeginProfile("ZCharacter::Draw::VisualMesh::Render");
 
 	UpdateEnchant();
 
-	bool bGame = g_pGame ? true : false;	
-
-	rvector cpos = ZApplication::GetGameInterface()->GetCamera()->GetPosition();
+	auto cpos = ZApplication::GetGameInterface()->GetCamera()->GetPosition();
 	cpos = m_vProxyPosition - cpos;
 	float dist = Magnitude(cpos);
 
-	m_pVMesh->SetClothValue(bGame, fabs(dist));
+	m_pVMesh->SetClothValue(g_pGame != nullptr, fabs(dist));
 	m_pVMesh->Render(false);
 
 	m_bRendered = m_pVMesh->m_bIsRender;
 
 	if(m_pVMesh->m_bIsRenderWeapon && (m_pVMesh->GetVisibility() > 0.05f))
-	{
 		DrawEnchant(m_AniState_Lower,m_bCharged);
-	}
 
 #ifdef PORTAL
 	g_pPortal->DrawFakeCharacter(this);
 #endif
 	
 	if (bNarakSetState)
-	{
 		RSetWBuffer(true);
-	}
 
-	__EP(25);
+	MEndProfile(ZCharacterDrawVisualMeshRender);
 
 	MEndProfile(ZCharacterDraw);
 }
@@ -765,11 +775,11 @@ void ZCharacter::OnDraw()
 
 bool ZCharacter::CheckDrawGrenade() const
 {
-	if(m_Items.GetSelectedWeapon()==NULL) return false;
+	if (m_Items.GetSelectedWeapon() == NULL) return false;
 
-	if( m_pVMesh ) {
-		if( m_pVMesh->m_SelectWeaponMotionType==eq_wd_grenade ) {
-			if( m_Items.GetSelectedWeapon()->GetBulletAMagazine() ) {
+	if (m_pVMesh) {
+		if (m_pVMesh->m_SelectWeaponMotionType == eq_wd_grenade) {
+			if (m_Items.GetSelectedWeapon()->GetBulletAMagazine()) {
 				return true;
 			}
 		}
@@ -779,7 +789,8 @@ bool ZCharacter::CheckDrawGrenade() const
 
 bool ZCharacter::Pick(const rvector& pos, const rvector& dir, RPickInfo* pInfo)
 {
-	if (m_bInitialized==false) return false;
+	if (!m_bInitialized)
+		return false;
 
 	return ZObject::Pick(pos, dir, pInfo);
 }

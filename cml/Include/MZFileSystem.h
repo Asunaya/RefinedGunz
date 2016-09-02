@@ -31,9 +31,9 @@ class MMappedFile
 public:
 	MMappedFile() {}
 	MMappedFile(const char* Filename);
-	~MMappedFile();
 	MMappedFile(const MMappedFile&) = delete;
 	MMappedFile(MMappedFile&&);
+	~MMappedFile();
 	MMappedFile& operator =(MMappedFile&& src)
 	{
 		this->~MMappedFile();

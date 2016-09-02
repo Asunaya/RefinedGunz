@@ -208,28 +208,8 @@ void ZObjectManager::Draw()
 
 			pMyCharacter->m_bRendered = DrawObject( pMyCharacter );
 
-			pVMesh->SetSpRenderMode(0);//ÀÏ¹Ý ¸ðµå·Î ¹Ù²ãÁà¾ßÇÑ´Ù..²¿¿Á..
+			pVMesh->SetSpRenderMode(0);
 		}
-
-		///////////////////////////////////////////////////////////////////////
-		// ¿¡·¯Å×½ºÆ®¿ë...
-/*
-		float fTime=g_pGame->GetTime();
-		int nTimeMinute=fTime/60.f;
-		fTime=fmod(fTime,60.f);
-		int nTimeSecond=fTime;
-		fTime=fmod(fTime,1.f);
-
-		char szTimeMessage[256] = "";
-		sprintf_safe(szTimeMessage, "%d:%02d.%02d",nTimeMinute,nTimeSecond,int(fTime*100.f));
-
-		ZMyCharacter* pMyChar =	g_pGame->m_pMyCharacter;
-
-//		mlog("%s : %s %s \n",szTimeMessage , g_lower_string[pMyChar->m_AniState_Lower] , g_upper_string[ pMyChar->m_AniState_Upper ] );
-
-		if(pMyChar->m_AniState_Lower == ZC_STATE_LOWER_JUMPATTACK && pMyChar->m_AniState_Upper == ZC_STATE_UPPER_LOAD)
-			mlog("%s : jumpshot load error\n", szTimeMessage );
-*/
 	}
 }
 

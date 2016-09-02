@@ -42,9 +42,7 @@ void ZObject::Update(float fDelta)
 bool ZObject::Pick(int x,int y,RPickInfo* pInfo)
 {
 	if(m_pVMesh) 
-	{
 		return m_pVMesh->Pick(x,y,pInfo);
-	}
 
 	return false;
 }

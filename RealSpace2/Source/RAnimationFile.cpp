@@ -86,18 +86,9 @@ bool RAnimationFile::LoadAni(const char* filename)
 
 	MZFile mzf;
 
-	if(g_pFileSystem) {
-		if(!mzf.Open(filename,g_pFileSystem)) {
-			if(!mzf.Open(filename)) {
-				mlog("in zip : %s file not found!! \n ", filename );
-				return false;
-			}
-		}
-	} else {
-		if(!mzf.Open(filename)) {
-			mlog("%s file not found!! \n ", filename );
-			return false;
-		}
+	if (!mzf.Open(filename, g_pFileSystem)) {
+		mlog("in zip : %s file not found!! \n ", filename);
+		return false;
 	}
 
 	ex_ani_t t_hd;

@@ -320,6 +320,14 @@ public:
 	auto GetTimeOffset() const { return m_fTimeOffset; }
 	auto LostConnection() const { return m_bLostConEffect; }
 
+	auto GetScale() const { return Scale; }
+	void SetScale(float f)
+	{
+		Scale = f;
+		if (m_pVMesh)
+			m_pVMesh->SetScale({ f, f, f });
+	}
+
 	v3 CameraDir{ 0, 0, 0 };
 
 	union {
@@ -450,6 +458,8 @@ private:
 	ZC_STATE_UPPER	m_AniState_Upper;
 	ZC_STATE_LOWER	m_AniState_Lower;
 	ZANIMATIONINFO *m_pAnimationInfo_Upper, *m_pAnimationInfo_Lower;
+
+	float Scale = 1.0f;
 };
 
 void ZChangeCharParts(RVisualMesh* pVMesh, MMatchSex nSex, int nHair, int nFace, unsigned long int* pItemID);

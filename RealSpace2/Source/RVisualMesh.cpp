@@ -728,8 +728,6 @@ void RVisualMesh::Frame() {
 	}
 }
 
-//매트릭스위치들만 갱신한다.
-
 void RVisualMesh::RenderMatrix()
 {
 	m_bRenderMatrix = true;
@@ -754,84 +752,36 @@ void RVisualMesh::Render(bool low,bool render_buffer) {
 
 		rboundingbox bbox;
 
-		CalcBox(); // 최초만 계산됨.
+		CalcBox();
 
 		rboundingbox srcbox;
 
 		m_bAddGrenade = false;
 
-		/*	
-		if(m_isScale) { // 스케일이 사용된 경우만...
-			srcbox.vmax = m_vBMax * m_ScaleMat;
-			srcbox.vmin = m_vBMin * m_ScaleMat;
-		}else
-		*/
+		srcbox.vmax = m_vBMax;
+		srcbox.vmin = m_vBMin;
+
+		if (m_isScale)
 		{
-			srcbox.vmax = m_vBMax;
-			srcbox.vmin = m_vBMin;
+			srcbox.vmax = HadamardProduct(srcbox.vmax, m_vScale);
+			srcbox.vmin = HadamardProduct(srcbox.vmin, m_vScale);
 		}
 
-		TransformBox(&bbox,srcbox,m_WorldMat);
+		TransformBox(&bbox, srcbox, m_WorldMat);
 
-
-//		D3DXVec3TransformCoord(&bbox.vmin,&m_vBMax,&m_WorldMat);
-//		D3DXVec3TransformCoord(&bbox.vmax,&m_vBMin,&m_WorldMat);
-
-//		BBoxSubCalc(&bbox.vmax,&bbox.vmin);
-
-//		if( m_pMesh->m_bEffectSort ) {
-
-			if(m_fVis < 0.001f) {//죽어 있는 경우등..
+			if(m_fVis < 0.001f) {
 				m_bIsRender = false;
 				return;
 			}
 
-			if(m_bCheckViewFrustum) {//tool 이라면 false
+			if(m_bCheckViewFrustum) {
 				if(isInViewFrustumWithZ( &bbox, RGetViewFrustum()) == false) {
 					m_bIsRender = false;
 					return;
 				}
 			}
 
-//			draw_box(&GetIdentityMatrix(),bbox.vmax,bbox.vmin,0xffffFFF0);
-
-//		}
-		
-		///////////////////////////////////////////////////////////////////
-
-		// 몬스터와 캐릭터 추가하고  ( 캐릭터도 자신의 것은 체크안하고 ) 
-		//  미리계산해줄것들..
-		//	거리가 가까워서 보일거라고 판단되는것은 사용안함,, 
-		//  캐릭터나 몬스터는 기본적으로 picking 한번 해봐서 벽이 안집히면..그려주기..( 무조건 보인다는 뜻이니까 )
-		// 이펙트는? 인터페이스는 무조건 off m_bQuery 로 사용할지 여부를 visual mesh 가 가지고 있기..
-		// 
-/*
-		if( RIsQuery() ) {
-
-			m_RenderQuery.Begin();
-
-			draw_query_fill_box(&m_WorldMat,m_vBMax,m_vBMin,0x00ff0000);
-
-			m_RenderQuery.End();
-
-			// 이전프레임에 그려졌었는가?
-
-			if(m_RenderQuery.isNeedRender()==false) {
-				m_bIsRender = false;
-//				char temp[1024];
-//				sprintf_safe(temp,"%s skip query render \n ", m_pMesh->GetFileName() );
-//				OutputDebugString( temp );
-				return;
-			}
-
-
-		}
-*/
-		///////////////////////////////////////////////////////////////////
-
-		m_bIsRender = true; // 그려졌다고 표시
-
-		// 모델 부위별로 scale 먹이는것 고려..체형을 결정할 수 있게 된다..
+		m_bIsRender = true;
 
 		if(m_isScale) {		
 			m_pMesh->SetScale(m_vScale);
@@ -844,7 +794,7 @@ void RVisualMesh::Render(bool low,bool render_buffer) {
 		AniFrameInfo* pAniLow = GetFrameInfo(ani_mode_lower);
 		AniFrameInfo* pAniUp  = GetFrameInfo(ani_mode_upper);
 
-		m_FrameTime.Update(); //--------------------------------
+		m_FrameTime.Update();
 
 		if(low) {
 
@@ -854,7 +804,7 @@ void RVisualMesh::Render(bool low,bool render_buffer) {
 				m_pLowPolyMesh->SetFrame(pAniLow->m_nFrame,pAniUp->m_nFrame);
 				m_pLowPolyMesh->SetMeshVis(m_fVis);
 				m_pLowPolyMesh->SetVisualMesh(this);
-				m_pLowPolyMesh->Render(&m_WorldMat,true); // 파츠교환없이 자신만 그리기..
+				m_pLowPolyMesh->Render(&m_WorldMat,true);
 
 				m_vBMax = m_pLowPolyMesh->m_vBBMax;
 				m_vBMin = m_pLowPolyMesh->m_vBBMin;
@@ -875,38 +825,18 @@ void RVisualMesh::Render(bool low,bool render_buffer) {
 			m_pMesh->SetMeshVis(m_fVis);
 
 			m_pMesh->SetVisualMesh(this);
-/*
-			if(render_buffer)
-				m_pMesh->RenderS(&m_WorldMat, false);
-			else  */
-				m_pMesh->Render(&m_WorldMat, false);
+			m_pMesh->Render(&m_WorldMat, false);
 
 			if(m_pMesh->GetPhysiqueMesh()) { 
 				
 				m_vBMax = m_pMesh->m_vBBMaxNodeMatrix * 1.1f;
 				m_vBMin = m_pMesh->m_vBBMinNodeMatrix * 1.1f;
 			}
-			else {
-
-				// RMesh::m_max, m_min 제대로 계산되어있지 않다.
-				/*
-				if(m_pMesh->m_is_map_object) {
-					m_vBMax = m_pMesh->m_max;
-					m_vBMin = m_pMesh->m_min;
-				}
-				*/
-			}
 		}
 
 		__EP(201);
 
 		RenderWeapon();
-
-		// debug
-
-//		draw_box(&m_WorldMat,m_vBMax,m_vBMin,0xffff0000);
-//		draw_box(&m_WorldMat,rvector(5,10,5),rvector(-5,0,-5),0xffffffff);
-//		RMeshNode* pMeshNode = m_pMesh->GetMeshData("eq_chest_a001");
 	}
 }
 
@@ -916,17 +846,15 @@ bool RVisualMesh::UpdateSpWeaponFire()
 
 	if(!pAniUp) return false;
 
-	m_bGrenadeRenderOnoff = true;// 기본적으로 항상 보인다...
+	m_bGrenadeRenderOnoff = true;
 
-	if( m_bDrawGrenade ) {// 남은 양이 없다면 쥐고 있지도 않는다~
+	if( m_bDrawGrenade ) {
 
 		if(pAniUp->m_pAniSet) {
 
 			if( strcmp(pAniUp->m_pAniSet->GetName(),"attackS")==0 ) {
 
-				if( m_bGrenadeFire ) { // 발사 상태라면
-
-					// 특수무기를 던져야하는 시점
+				if( m_bGrenadeFire ) {
 
 					if( pAniUp->m_nFrame > 2 * 160 ) {
 						m_bGrenadeRenderOnoff = false;
@@ -938,8 +866,6 @@ bool RVisualMesh::UpdateSpWeaponFire()
 			}
 		}
 	}
-
-	// alt + tab 등의 비정상적인경우
 
 	if(m_bGrenadeFire) {
 
@@ -1001,7 +927,7 @@ void RVisualMesh::GetMotionInfo(int& sel_parts,int& sel_parts2,bool& bCheck,bool
 			}		
 			break;
 
-		case eq_wd_pistol://양손에 하나씩...
+		case eq_wd_pistol:
 			{
 				sel_parts  = eq_parts_right_pistol;
 				sel_parts2 = eq_parts_left_pistol;
@@ -1015,7 +941,7 @@ void RVisualMesh::GetMotionInfo(int& sel_parts,int& sel_parts2,bool& bCheck,bool
 			}
 			break;
 
-		case eq_wd_smg://양손에 하나씩...
+		case eq_wd_smg:
 			{
 				sel_parts  = eq_parts_right_smg;
 				sel_parts2 = eq_parts_left_smg;
@@ -1037,7 +963,7 @@ void RVisualMesh::GetMotionInfo(int& sel_parts,int& sel_parts2,bool& bCheck,bool
 			
 		case eq_wd_grenade:
 			{
-				if( m_bDrawGrenade ) {//남은 양이 없다면 쥐고 있지도 않는다~
+				if( m_bDrawGrenade ) {
 				
 					bRender = m_bGrenadeRenderOnoff;
 				}
@@ -1068,24 +994,10 @@ void RVisualMesh::GetMotionInfo(int& sel_parts,int& sel_parts2,bool& bCheck,bool
 
 }
 
-/*
-
-남자 ( 우 좌 무 쌍 )
-여자 ( 좌 우 좌 우 )
-
-0 무
-1 좌 
-2 우
-3 쌍
-
-*/
-
 static int g_bDrawWeaponTrack[2][4] = {
 	{2,1,0,3},
 	{1,2,1,2},
 };
-
-// 무기가 쌍칼류인 경우만..
 
 void GetRenderTrack(int isMan,int nMotion,bool& left,bool& right)
 {
@@ -1112,8 +1024,6 @@ void RVisualMesh::DrawEnchant(RVisualMesh* pVWMesh,int mode,rmatrix& m)
 		DrawEnchantPoison(pVWMesh,mode,m);
 	}
 }
-
-// 마지막으로 추가한 궤적위치를 얻어낸다..최대 4개..
 
 void RVisualMesh::SetSpRenderMode(int mode) 
 {
@@ -1160,12 +1070,9 @@ void RVisualMesh::DrawEnchantFire(RVisualMesh* pVWMesh,int mode,rmatrix& m)
 		g_toggle = true;
 	}
 
-//	if(GetGlobalTimeMS()%3==0)
 	m_FireEffectTexture.ProcessFire(1);
 
 	m_FireEffectTexture.UpdateTexture();
-
-	// 기본적으로지금무기의 bbox 로 상위로 향하는 불길을 만든다..
 
 	LPDIRECT3DDEVICE9 dev = RGetDevice();
 
@@ -1185,20 +1092,8 @@ void RVisualMesh::DrawEnchantFire(RVisualMesh* pVWMesh,int mode,rmatrix& m)
 		vpos[1] = vmin + vcenter;
 
 		vpos[0].y = vmax.y;
-		vpos[1].y = vmin.y + 35.f; // 손잡이 만큼 뺴기..
-/*
-		vpos[2] = vmax*0.25f;
-		vpos[3] = vmin*0.25f;
+		vpos[1].y = vmin.y + 35.f;
 
-		vpos[4] = vmax*0.5f;
-		vpos[5] = vmin*0.5f;
-
-		vpos[6] = vmax*0.75f;
-		vpos[7] = vmin*0.75f;
-
-		vpos[8] = vmax;
-		vpos[9] = vmin;
-*/
 		vpos[2] = vmax;
 		vpos[3] = vmin;
 
@@ -1206,33 +1101,15 @@ void RVisualMesh::DrawEnchantFire(RVisualMesh* pVWMesh,int mode,rmatrix& m)
 		D3DXVec3TransformCoord(&vpos[1],&vpos[1],&m);
 		D3DXVec3TransformCoord(&vpos[2],&vpos[2],&m);
 		D3DXVec3TransformCoord(&vpos[3],&vpos[3],&m);
-/*
-		D3DXVec3TransformCoord(&vpos[4],&vpos[4],&m);
-		D3DXVec3TransformCoord(&vpos[5],&vpos[5],&m);
-		D3DXVec3TransformCoord(&vpos[6],&vpos[6],&m);
-		D3DXVec3TransformCoord(&vpos[7],&vpos[7],&m);
-		D3DXVec3TransformCoord(&vpos[8],&vpos[8],&m);
-		D3DXVec3TransformCoord(&vpos[9],&vpos[9],&m);
-*/
+
 		static RLVertex pVert[10];
 
 		rvector add[2];
 
 		add[0] = rvector(0,0,0);
 		add[1] = add[0];
-/*
-		if(GetGlobalTimeMS()%15==0) {
 
-			add[0].x = rand()%5;
-			add[0].y = rand()%5;
-
-			add[1].x = rand()%5;
-			add[1].y = rand()%5;
-		}
-*/		
 		DWORD color = 0xaf9f9f9f;
-
-//------------------------------------
 
 		pVert[0].p = vpos[0];
 		pVert[0].color = color;
@@ -1244,60 +1121,6 @@ void RVisualMesh::DrawEnchantFire(RVisualMesh* pVWMesh,int mode,rmatrix& m)
 		pVert[1].tu = 1.0f;
 		pVert[1].tv = 0.9f;
 
-//------------------------------------
-/*
-		pVert[2].p = vpos[2];
-		pVert[2].color = color;
-		pVert[2].tu = 0.0f;
-		pVert[2].tv = 0.9f;
-
-		pVert[3].p = vpos[3];
-		pVert[3].color = color;
-		pVert[3].tu = 1.0f;
-		pVert[3].tv = 0.9f;
-
-//------------------------------------
-
-		pVert[4].p = vpos[4];
-		pVert[4].color = color;
-		pVert[4].tu = 0.0f;
-		pVert[4].tv = 0.9f;
-
-		pVert[5].p = vpos[5];
-		pVert[5].color = color;
-		pVert[5].tu = 1.0f;
-		pVert[5].tv = 0.9f;
-
-//------------------------------------
-
-		pVert[6].p = vpos[6];
-		pVert[6].color = color;
-		pVert[6].tu = 0.0f;
-		pVert[6].tv = 0.9f;
-
-		pVert[7].p = vpos[7];
-		pVert[7].color = color;
-		pVert[7].tu = 1.0f;
-		pVert[7].tv = 0.9f;
-
-//------------------------------------
-
-		pVert[8].p = vpos[8];
-		pVert[8].p.x += add[0].x;
-		pVert[8].p.y += add[0].y;
-		pVert[8].p.z += 50.f;
-		pVert[8].color = color;
-		pVert[8].tu = 0.0f;
-		pVert[8].tv = 0.0f;
-
-		pVert[9].p = vpos[9];
-		pVert[9].p.x += add[1].x;
-		pVert[9].p.y += add[1].y;
-		pVert[9].p.z += 50.f;
-		pVert[9].color = color;
-		pVert[9].tu = 1.0f;
-		pVert[9].tv = 0.0f;
-*/
 		pVert[2].p = vpos[2];
 		pVert[2].p.x += add[0].x;
 		pVert[2].p.y += add[0].y;
@@ -1314,10 +1137,6 @@ void RVisualMesh::DrawEnchantFire(RVisualMesh* pVWMesh,int mode,rmatrix& m)
 		pVert[3].tu = 1.0f;
 		pVert[3].tv = 0.0f;
 
-
-//		RDrawLine(vpos[0],vpos[1],0xff00ff00);
-//		RDrawLine(vpos[2],vpos[3],0xff00ffff);
-
 		static D3DXMATRIX _init_mat = GetIdentityMatrix();
 		dev->SetTransform( D3DTS_WORLD, &_init_mat );
 
@@ -1326,16 +1145,12 @@ void RVisualMesh::DrawEnchantFire(RVisualMesh* pVWMesh,int mode,rmatrix& m)
 		dev->SetTextureStageState( 0, D3DTSS_COLORARG2, D3DTA_DIFFUSE );
 		dev->SetTextureStageState( 0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE );
 		dev->SetTextureStageState( 0, D3DTSS_COLOROP,   D3DTOP_MODULATE );
-//		dev->SetTextureStageState( 0, D3DTSS_ALPHAOP,   D3DTOP_SELECTARG2 );
-//		dev->SetTextureStageState( 0, D3DTSS_COLOROP,   D3DTOP_MODULATE );
 		dev->SetTextureStageState( 0, D3DTSS_ALPHAOP,   D3DTOP_MODULATE );
 
 		dev->SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE );
 		dev->SetRenderState( D3DRS_ALPHABLENDENABLE, TRUE);
 		dev->SetRenderState( D3DRS_SRCBLEND,  D3DBLEND_SRCALPHA);
 		dev->SetRenderState( D3DRS_DESTBLEND, D3DBLEND_ONE);
-//		dev->SetRenderState( D3DRS_SRCBLEND,  D3DBLEND_SRCALPHA );
-//		dev->SetRenderState( D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA );
 		dev->SetRenderState( D3DRS_ALPHATESTENABLE,  TRUE );
 		dev->SetRenderState( D3DRS_ALPHAREF,         0x08 );
 		dev->SetRenderState( D3DRS_ALPHAFUNC,  D3DCMP_GREATEREQUAL );
@@ -1343,7 +1158,6 @@ void RVisualMesh::DrawEnchantFire(RVisualMesh* pVWMesh,int mode,rmatrix& m)
 		dev->SetRenderState( D3DRS_LIGHTING, FALSE );
 		dev->SetRenderState( D3DRS_ZWRITEENABLE, FALSE );
 
-//		dev->SetTexture(0, NULL);
 		dev->SetTexture(0, m_FireEffectTexture.GetTexture());
 		dev->SetFVF( RLVertexType );
 
@@ -1354,7 +1168,6 @@ void RVisualMesh::DrawEnchantFire(RVisualMesh* pVWMesh,int mode,rmatrix& m)
 		dev->SetRenderState( D3DRS_ALPHATESTENABLE,  FALSE);
 		dev->SetRenderState( D3DRS_ZWRITEENABLE, TRUE );
 		dev->SetRenderState( D3DRS_LIGHTING, TRUE );
-		
 	}
 }
 
@@ -1377,8 +1190,6 @@ void RVisualMesh::RenderWeapon()
 {
 	if( m_WeaponVisualMesh[ m_SelectWeaponMotionType ] ) {
 
-		// 부모가 특수한 알파처리라면? 무기의 궤적은 그릴 필요 없다..
-
 		bool btrack_render = true;
 
 		if(m_pMesh)
@@ -1387,9 +1198,9 @@ void RVisualMesh::RenderWeapon()
 
 		RVisualMesh* pVWMesh = m_WeaponVisualMesh[ m_SelectWeaponMotionType ];
 
-		m_LightMgr.Clone(pVWMesh);//라이트 설정 정보를 복사...
+		m_LightMgr.Clone(pVWMesh);
 		
-		bool b2hCheck = false;	// 양손인지 체크
+		bool b2hCheck = false;
 		bool bRender = true;
 
 		rmatrix m,m2;
@@ -1400,10 +1211,12 @@ void RVisualMesh::RenderWeapon()
 
 		GetMotionInfo(sel_parts,sel_parts2,b2hCheck,bRender);
 
-		m = m_WeaponPartInfo[sel_parts].mat * m_WorldMat;
+		if (!m_isScale)
+			m = m_WeaponPartInfo[sel_parts].mat * m_WorldMat;
+		else
+			m = m_WeaponPartInfo[sel_parts].mat * m_ScaleMat * m_WorldMat;
 		vis = m_WeaponPartInfo[sel_parts].vis;
-
-		// 부모가 뷰 체크 안하면 무기 더미도 안한다~
+		DLogMatrix(m_WeaponPartInfo[sel_parts].mat);
 
 		if( m_bCheckViewFrustum==false ) {
 			pVWMesh->SetCheckViewFrustum(false);
@@ -1415,26 +1228,27 @@ void RVisualMesh::RenderWeapon()
 		pVWMesh->SetWorldMatrix(m);
 
 		if( bRender && vis) {
-			pVWMesh->SetVisibility(min(m_fVis,vis)); // 자기 캐릭터와 자신의 visibility 중 더 작은것..
+			pVWMesh->SetVisibility(min(m_fVis,vis));
 			pVWMesh->Render();
 			m_bIsRenderWeapon = true;
 		}
-		else { // 위치는 쓸지도 모르니 계산해주자..ex > 수류탄을 던진경우..
-			pVWMesh->CalcBox();//최초만계산
+		else {
+			pVWMesh->CalcBox();
 			m_bIsRenderWeapon = false;
 		}
 
-		// 장비한 무기에 따라서
-
 		if(m_isScale) {
-			pVWMesh->m_WeaponDummyMatrix[weapon_dummy_muzzle_flash] = m_ScaleMat * pVWMesh->m_WeaponDummyMatrix[weapon_dummy_muzzle_flash];
-			pVWMesh->m_WeaponDummyMatrix[weapon_dummy_cartridge01]  = m_ScaleMat * pVWMesh->m_WeaponDummyMatrix[weapon_dummy_cartridge01];
-			pVWMesh->m_WeaponDummyMatrix[weapon_dummy_cartridge02]  = m_ScaleMat * pVWMesh->m_WeaponDummyMatrix[weapon_dummy_cartridge02];
+			pVWMesh->m_WeaponDummyMatrix[weapon_dummy_muzzle_flash]
+				= m_ScaleMat * pVWMesh->m_WeaponDummyMatrix[weapon_dummy_muzzle_flash];
+			pVWMesh->m_WeaponDummyMatrix[weapon_dummy_cartridge01] 
+				= m_ScaleMat * pVWMesh->m_WeaponDummyMatrix[weapon_dummy_cartridge01];
+			pVWMesh->m_WeaponDummyMatrix[weapon_dummy_cartridge02] 
+				= m_ScaleMat * pVWMesh->m_WeaponDummyMatrix[weapon_dummy_cartridge02];
 		}
 
-		m_WeaponDummyMatrix[weapon_dummy_muzzle_flash] = pVWMesh->m_WeaponDummyMatrix[weapon_dummy_muzzle_flash]*m;
-		m_WeaponDummyMatrix[weapon_dummy_cartridge01 ] = pVWMesh->m_WeaponDummyMatrix[weapon_dummy_cartridge01]*m;
-		m_WeaponDummyMatrix[weapon_dummy_cartridge02 ] = pVWMesh->m_WeaponDummyMatrix[weapon_dummy_cartridge02]*m;
+		m_WeaponDummyMatrix[weapon_dummy_muzzle_flash] *= m;
+		m_WeaponDummyMatrix[weapon_dummy_cartridge01 ] *= m;
+		m_WeaponDummyMatrix[weapon_dummy_cartridge02 ] *= m;
 
 		if(m_bRenderMatrix)
 			pVWMesh->m_bRenderMatrix = false;
@@ -1443,8 +1257,6 @@ void RVisualMesh::RenderWeapon()
 			DrawTracks(m_bDrawTracks,pVWMesh,0,m);
 			DrawEnchant(pVWMesh,0,m);
 		}
-
-		// 양손 무기의 경우
 
 		if(b2hCheck) {
 
@@ -1507,7 +1319,7 @@ void RVisualMesh::GetWeaponPos(rvector* pOut,bool bLeft)
 	 p1 = pVWMesh->m_vBMax - vcenter;
 	 p2 = pVWMesh->m_vBMin + vcenter;
 
-	 bool b2hCheck = false;	// 양손인지 체크
+	 bool b2hCheck = false;
 	 bool bRender = true;
 
 	 rmatrix m,m2;
@@ -1530,14 +1342,11 @@ void RVisualMesh::GetWeaponPos(rvector* pOut,bool bLeft)
 
 }
 
-float RVisualMesh::GetWeaponSize() 
+float RVisualMesh::GetWeaponSize()
 {
-	RVisualMesh* pVWMesh = m_WeaponVisualMesh[ m_SelectWeaponMotionType ];
-
-	if(!pVWMesh) return 0.f;
-
+	RVisualMesh* pVWMesh = m_WeaponVisualMesh[m_SelectWeaponMotionType];
+	if (!pVWMesh) return 0.f;
 	float fWeaponSize = Magnitude(pVWMesh->m_vBMin - pVWMesh->m_vBMax);
-
 	return fWeaponSize;
 }
 
@@ -1545,7 +1354,7 @@ bool RVisualMesh::IsDoubleWeapon()
 {
 	int sel_parts = 0;
 	int sel_parts2 = 0;
-	bool bCheck = false;//양손인가?
+	bool bCheck = false;
 	bool bRender = false;
 
 	GetMotionInfo(sel_parts,sel_parts2,bCheck,bRender);
@@ -1595,10 +1404,6 @@ void RVisualMesh::DrawTracks(bool draw,RVisualMesh* pVWMesh,int mode,rmatrix& m)
 	if( mode < 0 || mode > 1 )	return;
 
 	if( draw && m_bDrawTracksMotion[mode] ) {
-
-		// 칼 종류에 따라서 길이가 틀리도록 적용해보기..
-		// 이도류 , 카타나 , 대검.. 이도류의 휘어진 칼이 문제..
-
 		rvector vmax,vmin,vcenter;
 		rvector vpos[2];
 
@@ -1611,11 +1416,10 @@ void RVisualMesh::DrawTracks(bool draw,RVisualMesh* pVWMesh,int mode,rmatrix& m)
 		vpos[1] = vmin + vcenter;
 
 		vpos[0].y = vmax.y;
-		vpos[1].y = vmin.y + 35.f; // 손잡이 만큼 뺴기..
+		vpos[1].y = vmin.y + 35.f;
 
 		D3DXVec3TransformCoord(&vpos[0],&vpos[0],&m);
 		D3DXVec3TransformCoord(&vpos[1],&vpos[1],&m);
-
 		
 		static RLVertex pVert[2];
 		static DWORD color[2];
@@ -1628,22 +1432,16 @@ void RVisualMesh::DrawTracks(bool draw,RVisualMesh* pVWMesh,int mode,rmatrix& m)
 		pVert[1].p = vpos[1];
 		pVert[1].color = color[1];
 
-//		static RWeaponTracks pTracks;
-//		무기,몬스터등 여러 VisualMesh 가있으니가 사용시점에서 생성..
-
 		if(!m_pTracks[mode]) {
 			m_pTracks[mode] = new RWeaponTracks;
-			m_pTracks[mode]->Create(10);//궤적길이..
+			m_pTracks[mode]->Create(10);
 		}
 
 		m_pTracks[mode]->m_vSwordPos[0] = vpos[0];
 		m_pTracks[mode]->m_vSwordPos[1] = vpos[1];
 
-//		m_pTracks[mode]->AddVertexSpline( pVert );
 		m_pTracks[mode]->AddVertex(pVert);
 		m_pTracks[mode]->Render();
-
-//		draw_box(&m,vmax,vmin,0xff00ff00);
 
 	} else {
 		if(m_pTracks[mode]) {
@@ -1670,7 +1468,7 @@ rmatrix RVisualMesh::GetCurrentWeaponPositionMatrix(bool right)
 {
 	int sel_parts = 0;
 	int sel_parts2 = 0;
-	bool bCheck = false;//양손인가?
+	bool bCheck = false;
 	bool bRender = false;
 
 	GetMotionInfo(sel_parts,sel_parts2,bCheck,bRender);
@@ -1685,8 +1483,6 @@ rmatrix RVisualMesh::GetCurrentWeaponPositionMatrix(bool right)
 	return m;
 }
 
-// 렌더링 하기전에 사용할경우
-
 bool RVisualMesh::CalcBox()
 {
 	_BP("RVisualMesh::CalcBox");
@@ -1695,23 +1491,21 @@ bool RVisualMesh::CalcBox()
 		m_pMesh->SetVisualMesh(this);
 
 		if(m_pMesh->GetPhysiqueMesh()) {
-			// 노드단위
 			if(m_bIsRenderFirst) {
 				m_pMesh->CalcBoxNode(&m_WorldMat);
 				m_bIsRenderFirst = false;
 
-				m_vBMax = m_pMesh->m_vBBMaxNodeMatrix * 1.2f;// 20% 정도 더 크게
+				m_vBMax = m_pMesh->m_vBBMaxNodeMatrix * 1.2f;
 				m_vBMin = m_pMesh->m_vBBMinNodeMatrix * 1.2f;
 			}
 		}
 		else {
-			// 점단위
 			if(m_bIsRenderFirst) 
 			{
 				m_pMesh->CalcBox(&m_WorldMat);
 				m_bIsRenderFirst = false;
 
-				m_vBMax = m_pMesh->m_vBBMax;		
+				m_vBMax = m_pMesh->m_vBBMax;
 				m_vBMin = m_pMesh->m_vBBMin;
 			}
 		}
@@ -1728,8 +1522,6 @@ void RVisualMesh::SetPos(rvector pos,rvector dir,rvector up) {
 	m_vPos	= pos;
 	m_vDir	= dir;
 	m_vUp	= up;
-
-//	MakeWorldMatrix(&m_WorldMat,m_vPos,m_vDir,m_vUp);
 }
 
 void RVisualMesh::SetWorldMatrix(rmatrix& mat) {
@@ -1751,7 +1543,7 @@ void RVisualMesh::AddWeapon(RWeaponMotionType type,RMesh* pMesh,RAnimation* pAni
 
 	if(pAni) {
 		pVMesh->SetAnimation( ani_mode_upper , pAni );
-		pVMesh->Stop();//원하는 타이밍에 play..
+		pVMesh->Stop();
 	}
 
 	m_WeaponVisualMesh[type] = pVMesh;
@@ -1807,11 +1599,8 @@ void RVisualMesh::SetParts(RMeshPartsType parts, RMeshNode* pMN) {
 
 	if(m_pTMesh==NULL) return;
 
-//	if(m_pTMesh[parts] != pMN) 
-	{
-		m_pTMesh[parts] = pMN;
-		if(m_pMesh)	m_pMesh->ConnectPhysiqueParent(pMN);
-	}
+	m_pTMesh[parts] = pMN;
+	if(m_pMesh)	m_pMesh->ConnectPhysiqueParent(pMN);
 }
 
 void RVisualMesh::SetParts(RMeshPartsType parts, const char* name)
@@ -2357,7 +2146,7 @@ void RVisualMesh::GetBipTypeMatrix(rmatrix *mat,RMeshPartsPosInfoType type)
 	if(m_pBipMatrix) 
 	{
 		if(m_isScale) {
-			*mat = m_pBipMatrix[type]* m_ScaleMat * m_WorldMat;
+			*mat = m_pBipMatrix[type] * m_ScaleMat * m_WorldMat;
 		}
 		else  {
 			*mat = m_pBipMatrix[type] * m_WorldMat;

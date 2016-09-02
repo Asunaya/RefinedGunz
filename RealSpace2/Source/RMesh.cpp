@@ -63,35 +63,6 @@ RMesh::~RMesh()
 	Destroy();
 }
 
-// Do this sometime!! -__-
-#define COPY_MEMBER(member) member = rhs.member
-RMesh::RMesh(const RMesh& rhs)
-{
-	COPY_MEMBER(m_ParticleLinkInfo);
-	COPY_MEMBER(m_fVis);
-	COPY_MEMBER(m_isPhysiqueMesh);
-	COPY_MEMBER(m_bUnUsededCheck);
-	COPY_MEMBER(m_FileName);
-	COPY_MEMBER(m_ModelName);
-	COPY_MEMBER(m_id);
-	COPY_MEMBER(m_list);
-	COPY_MEMBER(m_data);
-	COPY_MEMBER(m_MeshWeaponMotionType);
-	COPY_MEMBER(m_PickingType);
-	COPY_MEMBER(m_data_num);
-	for (int i = 0; i < 2; i++)
-		COPY_MEMBER(m_max_frame[i]);
-	for (int i = 0; i < 2; i++)
-		COPY_MEMBER(m_frame[i]);
-	COPY_MEMBER(m_vBBMax);
-	COPY_MEMBER(m_vBBMin);
-	COPY_MEMBER(m_vBBMaxNodeMatrix);
-	COPY_MEMBER(m_vBBMinNodeMatrix);
-	COPY_MEMBER(m_is_use_ani_set);
-	COPY_MEMBER(m_vAddBipCenter);
-}
-#undef COPY_MEMBER
-
 void RMesh::Init()
 {
 	m_id			= -1;
@@ -697,18 +668,11 @@ bool RMesh::SetAnimation2Parts(RAnimation* pAniSet,RAnimation* pAniSetUpper) {
 
 	RMeshNode* pMeshNode = NULL;
 
-//	-> 더미들때문에 당연히 틀림
-//	if(pAniSet->m_ani_node_cnt != m_data_num) {
-//		mlog("RMesh::SetAnimation()  node key 갯수가 맞지 않음\n");
-//	}
-
 	for(i=0;i<m_data_num;i++) {
 		m_data[i]->m_pAnimationNode = NULL;
 	}
 
 	if( bC1 ) {
-
-		// 아직연결안된거라면...
 		if(!pAniSet->m_isConnected) {
 			ConnectAnimation(pAniSet);
 		}
@@ -855,8 +819,6 @@ void RMesh::ClearAnimation()
 	m_pAniSet[1] = NULL;
 }
 
-// 구조가 바뀌면서 보장 받을 수 없다..
-
 bool RMesh::Pick(int mx,int my,RPickInfo* pInfo,rmatrix* world_mat)
 {
 	LPDIRECT3DDEVICE9 dev = RGetDevice();
@@ -912,8 +874,6 @@ void RMesh::ClearMtrl() {
 	m_mtrl_list_ex.DelAll();
 }
 
-// 속도를 생각한 대략의 BBOX
-
 void RMesh::CalcBoxNode(D3DXMATRIX* world_mat)
 {
 	m_vBBMax = D3DXVECTOR3(-9999.f,-9999.f,-9999.f);
@@ -967,7 +927,7 @@ void RMesh::CalcBox(D3DXMATRIX* world_mat)
 
 		if(pTMeshNode->m_face_num != 0) {// 대충 점 * resultmat
 			if(world_mat)
-				pTMeshNode->CalcVertexBuffer(world_mat,true);
+				pTMeshNode->CalcVertexBuffer(*world_mat,true);
 		}
 
 		it_obj++;
@@ -1003,9 +963,6 @@ void RMesh::SubCalcBBox(D3DXVECTOR3* max,D3DXVECTOR3* min,D3DXVECTOR3* v)
 
 void RMesh::RenderBox(D3DXMATRIX* world_mat)
 {
-//	if(world_mat)
-//		RGetDevice()->SetTransform( D3DTS_WORLD, world_mat );
-
 	draw_box(world_mat,m_vBBMax,m_vBBMin,0xffffffff);
 }
 

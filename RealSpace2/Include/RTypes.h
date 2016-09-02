@@ -167,6 +167,11 @@ T Lerp(T src, T dest, float t)
 	return src * (1 - t) + dest * t;
 }
 
+inline v3 HadamardProduct(const v3& a, const v3& b)
+{
+	return{ a.x * b.x, a.y * b.y, a.z * b.z };
+}
+
 bool IsIntersect(rboundingbox *bb1,rboundingbox *bb2);
 bool isInPlane(const rboundingbox *bb, const rplane *plane);
 bool IsInSphere(const rboundingbox &bb,const rvector &point,float radius);
@@ -177,19 +182,17 @@ bool isInViewFrustum(const rvector &point1,const rvector &point2,rplane *planes)
 bool isInViewFrustumWithZ(rboundingbox *bb,rplane *plane);
 bool isInViewFrustumwrtnPlanes(rboundingbox *bb,rplane *plane,int nplane);
 
-bool IsIntersect(const rvector& orig, const rvector& dir, rvector& v0, rvector& v1, rvector& v2, float* t);
+bool IsIntersect(const rvector& orig, const rvector& dir,
+	rvector& v0, rvector& v1, rvector& v2,float* t);
 bool isLineIntersectBoundingBox(rvector &origin,rvector &dir,rboundingbox &bb);
 bool IsIntersect( rvector& line_begin_, rvector& line_end_, rboundingbox& box_);
 bool IsIntersect(rvector& line_begin_, rvector& line_dir_, rvector& center_, float radius_,
 	float* dist = nullptr, rvector* p = nullptr );
-
 bool IsIntersect(const rvector& orig, const rvector& dir, const rvector& center,
 	const float radius, rvector* p = nullptr);
-
 bool GetIntersectionOfTwoPlanes(rvector *pOutDir, rvector *pOutAPoint, rplane &plane1, rplane &plane2);
 
 void MergeBoundingBox(rboundingbox *dest, rboundingbox *src);
-
 void TransformBox(rboundingbox* result, const rboundingbox& src, const rmatrix& matrix);
 
 inline rvector GetReflectionVector(const rvector& v, const rvector& n)

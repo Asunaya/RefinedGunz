@@ -452,7 +452,7 @@ void RMeshMgr::Render()
 	r_mesh_node node;
 
 	for(node = m_list.begin(); node != m_list.end();  ++node) {
-		(*node)->Render(0,NULL);
+		(*node)->Render(nullptr, false);
 	}
 }
 

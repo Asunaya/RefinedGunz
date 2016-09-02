@@ -1,5 +1,4 @@
-#ifndef _RMeshNodeData_h
-#define _RMeshNodeData_h
+#pragma once
 
 #include "RMtrl.h"
 #include "RMeshUtil.h"
@@ -11,13 +10,11 @@ class RMesh;
 class RAnimationNode;
 class RAnimation;
 
-// 순수 모델 데이터 정보
-
 class RMeshNodeData :public RBaseObject
 {
 public:
 	RMeshNodeData();
-	virtual ~RMeshNodeData();
+	~RMeshNodeData();
 
 	// bbox
 
@@ -59,7 +56,7 @@ public:
 	// Fully transformed bone matrix -- transforms from mesh origin to the node's bone on a transformed skeleton
 	D3DXMATRIX		m_mat_result;
 
-	D3DXMATRIX		m_mat_add;			// 추가 장작된 모델..
+	D3DXMATRIX		m_mat_add;
 
 	D3DXMATRIX		m_mat_ref;
 	D3DXMATRIX		m_mat_ref_inv;
@@ -98,16 +95,13 @@ class RMeshNodeMtrl
 {
 public:
 	RMeshNodeMtrl();
-	virtual ~ RMeshNodeMtrl();
+	~RMeshNodeMtrl();
 
 	void	SetTColor(DWORD color);
 	DWORD	GetTColor();
 
 	int		GetMtrlCount();
-	RMtrl*	GetMtrl(int i=0);// MtrlTable
-
-//	void	SetLMtrl(DWORD& color,float vis_alpha);
-//	void	SetLMtrl(DWORD& color,D3DXCOLOR& mc,float vis_alpha);
+	RMtrl*	GetMtrl(int i=0);
 
 	void	SetMtrlDiffuse(RMtrl* pMtrl,float vis_alpha);
 	void	SetMtrl(RMtrl* pMtrl,float vis_alpha,bool bNpc,D3DCOLORVALUE color );
@@ -121,7 +115,4 @@ public:
 	RMtrl**			m_pMtrlTable;
 };
 
-
 _NAMESPACE_REALSPACE2_END
-
-#endif//_RMeshNodeData_h

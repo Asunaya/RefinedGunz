@@ -20,7 +20,7 @@ void InitLog(int logmethodflags=MLOGSTYLE_DEBUGSTRING, const char* pszLogFileNam
 #if defined(_DEBUG) || defined(DEBUG_FAST)
 void DMLog(const char* Format, ...);
 
-void DLogMatrix(matrix& mat);
+void DLogMatrix(const matrix& mat);
 #else
 static inline void DMLog(...)
 {

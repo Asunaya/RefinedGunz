@@ -62,7 +62,7 @@ void DMLog(const char* Format, ...)
 }
 
 #ifdef _DEBUG
-void DLogMatrix(matrix& mat)
+void DLogMatrix(const matrix& mat)
 {
 	for (int i = 0; i < 4; i++)
 	{
