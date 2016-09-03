@@ -26,9 +26,6 @@
     <ClInclude Include="md5.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="downloadstatus.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="defer.h">
       <Filter>Header Files</Filter>
     </ClInclude>

@@ -72,7 +72,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="defer.h" />
-    <ClInclude Include="downloadstatus.h" />
     <ClInclude Include="md5.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
