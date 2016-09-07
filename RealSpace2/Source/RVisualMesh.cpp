@@ -1216,7 +1216,6 @@ void RVisualMesh::RenderWeapon()
 		else
 			m = m_WeaponPartInfo[sel_parts].mat * m_ScaleMat * m_WorldMat;
 		vis = m_WeaponPartInfo[sel_parts].vis;
-		DLogMatrix(m_WeaponPartInfo[sel_parts].mat);
 
 		if( m_bCheckViewFrustum==false ) {
 			pVWMesh->SetCheckViewFrustum(false);

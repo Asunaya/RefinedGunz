@@ -286,7 +286,7 @@ void MSaveProfile(const char *filename)
 {
 	auto dwTotalTime = GetGlobalTimeMS()-g_dwEnableTime;
 
-	assert(Stack.empty());
+	//assert(Stack.empty());
 
 	FILE *file = nullptr;
 	auto ret = fopen_s(&file, filename, "w+");

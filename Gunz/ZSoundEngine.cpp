@@ -17,6 +17,8 @@
 
 _USING_NAMESPACE_REALSPACE2
 
+#define _SOUND_LOG
+
 extern ZGame* m_gGame;
 
 #define ZDEF_MINDISTANCE	300.0f						//	3m 

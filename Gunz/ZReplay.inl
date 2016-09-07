@@ -36,14 +36,18 @@ inline ReplayVersion ZReplayLoader::GetVersion()
 		u8 Something;
 		ReadAt(Something, 0x4A);
 
-		if (Version.nVersion >= 6 && Version.nVersion <= 9 && Something <= 0x01)
+		if (Version.nVersion >= 7 && Version.nVersion <= 9 && Something <= 0x01)
+		{
+			Version.Server = SERVER::FREESTYLE_GUNZ;
+		}
+		else if (Version.nVersion == 6)
 		{
 			ReadAt(Something, 0x91);
 
 			if (Something == 0x00)
 				Version.Server = SERVER::DarkGunz;
 			else
-				Version.Server = SERVER::FREESTYLE_GUNZ;
+				Version.Server = SERVER::OFFICIAL;
 		}
 		else
 		{
@@ -89,7 +93,8 @@ HAS_XXX(szStageName);
 
 template <typename T>
 typename std::enable_if<has_szStageName<T>::value>::type CopyStageName(REPLAY_STAGE_SETTING_NODE &m_StageSetting, const T &Setting) {
-	memcpy(m_StageSetting.szStageName, Setting.szStageName, min(sizeof(m_StageSetting.szStageName), sizeof(Setting.szStageName)));
+	memcpy(m_StageSetting.szStageName, Setting.szStageName,
+		min(sizeof(m_StageSetting.szStageName), sizeof(Setting.szStageName)));
 	m_StageSetting.szStageName[sizeof(m_StageSetting.szStageName) - 1] = 0;
 }
 
@@ -125,7 +130,7 @@ inline void ZReplayLoader::GetStageSetting(REPLAY_STAGE_SETTING_NODE& ret)
 	{
 	case SERVER::OFFICIAL:
 	{
-		if (Version.nVersion <= 5)
+		if (Version.nVersion <= 6)
 		{
 			REPLAY_STAGE_SETTING_NODE_OLD Setting;
 			Read(Setting);
@@ -199,6 +204,13 @@ inline std::vector<ReplayPlayerInfo> ZReplayLoader::GetCharInfo()
 
 	int nCharacterCount;
 	Read(nCharacterCount);
+
+	if (nCharacterCount > 64)
+	{
+		throw std::runtime_error{ "Replay is corrupt" };
+	}
+
+	DMLog("Char count = %d\n", nCharacterCount);
 
 	for (int i = 0; i < nCharacterCount; i++)
 	{
@@ -376,7 +388,7 @@ inline std::vector<ReplayPlayerInfo> ZReplayLoader::GetCharInfo()
 			CharInfo.nEquipedItemDesc[MMCIP_MELEE] = 2; // Rusty Sword
 		}
 
-		DMLog("Offset: %X\n", Position);
+		DMLog("Char %d name = %s\n", i, CharInfo.szName);
 
 		ret.push_back({ IsHero, CharInfo, CharState });
 	}
