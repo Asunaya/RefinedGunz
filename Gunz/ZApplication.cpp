@@ -344,7 +344,7 @@ bool ZApplication::OnCreate(ZLoadingProgress *pLoadingProgress)
 #ifdef STARTUP_CACHE_FILES
 	auto CacheArchives = MBeginProfile("Cache archives");
 	const char* CachedFileNames[] = { "system", "model", "sfx",
-		"interface/default", "interface/loadable", "interface/Login",
+		"interface/default", "interface/loadable", "interface/login",
 		"sound/bgm", "sound/effect", };
 	constexpr int NumCachedFiles = ArraySize(CachedFileNames);
 	int CacheIndices[NumCachedFiles];
