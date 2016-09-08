@@ -93,8 +93,6 @@ bool MZFileSystem::AddItem(MZFILEDESC* pDesc)
 	strcpy_safe(key, pDesc->m_szFileName);
 	_strlwr_s(key);
 
-	//DMLog("Adding file desc %s, %s\n", pDesc->m_szFileName, pDesc->m_szZFileName);
-
 	ZFLISTITOR it=m_ZFileList.find(key);
 	if(it!=m_ZFileList.end())
 	{
@@ -108,6 +106,7 @@ bool MZFileSystem::AddItem(MZFILEDESC* pDesc)
 			// NOTE: This is false, idk what's happening here
 			//_ASSERT(nOldPkgNum>nNewPkgNum);
 
+			DMLog("%s, %s existing but diff = %f\n", pDesc->m_szFileName, pDesc->m_szZFileName, diff);
 			return false;
 		}
 
@@ -300,7 +299,7 @@ bool MZFileSystem::Create(const char* szBasePath,const char* szUpdateName)
 	if(szUpdateName) {
 		char szRelative[_MAX_PATH];
 		sprintf_safe(szRelative, "%s%s", m_szBasePath, szUpdateName);
-		GetRelativePath(m_szUpdateName, sizeof(m_szUpdateName), m_szBasePath,szRelative);
+		GetRelativePath(m_szUpdateName, m_szBasePath,szRelative);
 	}
 
 	RemoveFileList();
@@ -462,6 +461,8 @@ int MZFileSystem::CacheArchive(const char * Filename)
 			DMLog("Couldn't find file desc for %s\n", AbsName);
 			continue;
 		}
+		if (strcmp(Desc->m_szZFileName, FilenameWithExtension))
+			continue;
 		auto Size = Zip.GetFileLength(i);
 		auto& p = Desc->CachedContents;
 		p = new char[Size];

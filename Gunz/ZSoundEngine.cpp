@@ -4,7 +4,6 @@
 #include "ZGame.h"
 #include "ZSoundEngine.h"
 #include "MDebug.h"
-//#include "RealSoundEffect.h"
 #include "RealSpace2.h"
 #include "MMatchItem.h"
 #include "ZConfiguration.h"
@@ -17,7 +16,9 @@
 
 _USING_NAMESPACE_REALSPACE2
 
+#ifdef _DEBUG
 #define _SOUND_LOG
+#endif
 
 extern ZGame* m_gGame;
 
