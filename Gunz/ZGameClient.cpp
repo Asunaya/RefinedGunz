@@ -1122,10 +1122,12 @@ bool ZGameClient::OnCommand(MCommand* pCommand)
 			}
 
 			auto Peer = GetPeers()->Find(Ping.UID);
-			if (!Peer)
-				continue;
+			if (Peer)
+				Peer->UpdatePing(GetGlobalTimeMS(), Ping.Ping);
 
-			Peer->UpdatePing(GetGlobalTimeMS(), Ping.Ping);
+			auto Char = ZGetCharacterManager()->Find(Ping.UID);
+			if (Char)
+				Char->Ping = Ping.Ping;
 		}
 	}
 		break;

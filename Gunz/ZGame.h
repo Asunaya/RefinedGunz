@@ -18,6 +18,7 @@
 #include "ZObjectManager.h"
 #include "ZWorld.h"
 #include "ZGameAction.h"
+#include <utility>
 
 _USING_NAMESPACE_REALSPACE2
 
@@ -73,6 +74,40 @@ public:
 			erase(begin());
 		}
 	}
+};
+
+class PingMap
+{
+public:
+	std::pair<bool, float> GetTime(u32 Timestamp) const
+	{
+		for (auto&& val : Pings)
+		{
+			if (val.Timestamp == Timestamp)
+				return{ true, val.ReplayTime };
+		}
+
+		return{ false, 0.0f };
+	}
+
+	void AddTime(u32 Timestamp, float ReplayTime)
+	{
+		Pings.emplace_back(PingInfo{ Timestamp, ReplayTime });
+
+		if (Pings.size() > 30)
+		{
+			Pings.erase(Pings.begin() + 10, Pings.end());
+		}
+	}
+
+private:
+	struct PingInfo
+	{
+		u32 Timestamp;
+		float ReplayTime;
+	};
+
+	std::vector<PingInfo> Pings;
 };
 
 class ZGame
@@ -325,6 +360,8 @@ private:
 	ZC_STATE_LOWER LastNetLowerAni = ZC_STATE_LOWER_IDLE1;
 	ZC_STATE_UPPER LastNetUpperAni = ZC_STATE_UPPER_NONE;
 	int LastNetSlot{};
+
+	PingMap Pings;
 };
 
 extern ZGame* g_pGame;

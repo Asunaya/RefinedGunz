@@ -1049,8 +1049,8 @@ extern bool g_bProfile;
 bool IsIgnoreObserverCommand(int nID)
 {
 	switch(nID) {
-		case MC_PEER_PING :
-		case MC_PEER_PONG :
+		//case MC_PEER_PING :
+		//case MC_PEER_PONG :
 		case MC_PEER_OPENED	:
 		case MC_MATCH_GAME_RESPONSE_TIMESYNC :
 			return false;
@@ -2114,35 +2114,59 @@ void ZGame::OnPeerHPAPInfo(MCommand *pCommand)
 
 void ZGame::OnPeerPing(MCommand *pCommand)
 {
-	if(m_bReplaying) return;
-
 	unsigned int nTimeStamp;
 	pCommand->GetParameter(&nTimeStamp, 0, MPT_UINT);
+
+	if (IsReplay() && pCommand->GetSenderUID() == m_pMyCharacter->GetUID())
+	{
+		Pings.AddTime(nTimeStamp, GetTime());
+		return;
+	}
 	
 	MCommandManager* MCmdMgr = ZGetGameClient()->GetCommandManager();
 	MCommand* pCmd = new MCommand(MCmdMgr->GetCommandDescByID(MC_PEER_PONG), 
 								  pCommand->GetSenderUID(), ZGetGameClient()->GetUID());	
 	pCmd->AddParameter(new MCmdParamUInt(nTimeStamp));
-	//MLog("Posting pong with timestamp %08X, current time %08llX\n", nTimeStamp, GetTickTime());
+
 	ZGetGameClient()->Post(pCmd);
 }
 
 void ZGame::OnPeerPong(MCommand *pCommand)
 {
-	MMatchPeerInfo* pPeer = ZGetGameClient()->FindPeer(pCommand->GetSenderUID());
-	if (pPeer == NULL)
-		return;
+	auto SetCharPing = [&](auto Ping)
+	{
+		auto it = m_CharacterManager.find(pCommand->GetSenderUID());
+		if (it != m_CharacterManager.end())
+			it->second->Ping = Ping;
+	};
 
 	unsigned int nTimeStamp;
 	pCommand->GetParameter(&nTimeStamp, 0, MPT_UINT);
-	//MLog("Got pong with timestamp %08X, current time %08llX\n", nTimeStamp, GetTickTime());
 
-	auto nPing = (GetTickTime() - nTimeStamp) / 2;
-    pPeer->UpdatePing(GetTickTime(), nPing);
+	if (IsReplay() && pCommand->GetSenderUID() != m_pMyCharacter->GetUID())
+	{
+		auto pair = Pings.GetTime(nTimeStamp);
+		if (!pair.first)
+			return;
+		auto PingTime = pair.second;
+		auto PongTime = GetTime();
+		auto Ping = (PongTime - PingTime) / 2 * 1000;
+		SetCharPing(Ping);
+		return;
+	}
 
-	#ifdef _DEBUG
-		g_nPongCount++;
-	#endif
+	MMatchPeerInfo* pPeer = ZGetGameClient()->FindPeer(pCommand->GetSenderUID());
+	if (!pPeer)
+		return;
+
+	auto Ping = (GetTickTime() - nTimeStamp) / 2;
+	
+	pPeer->UpdatePing(GetTickTime(), Ping);
+	SetCharPing(Ping);
+
+#ifdef _DEBUG
+	g_nPongCount++;
+#endif
 }
 
 void ZGame::OnPeerOpened(MCommand *pCommand)
@@ -2175,9 +2199,7 @@ void ZGame::OnPeerOpened(MCommand *pCommand)
 		if (pPeer->GetUDPTestResult() == false) pszNAT = "NAT";
 	}
 
-	char szBuf[64];
-	sprintf_safe(szBuf, "PEER_OPENED(%s) : %s(%d%d) \n", pszNAT, pszName, uidChar.High, uidChar.Low);
-	OutputDebugString(szBuf);
+	DMLog("PEER_OPENED(%s) : %s(%d%d) \n", pszNAT, pszName, uidChar.High, uidChar.Low);
 #endif
 }
 

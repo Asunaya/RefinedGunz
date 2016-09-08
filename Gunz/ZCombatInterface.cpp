@@ -1809,12 +1809,15 @@ void ZCombatInterface::DrawScoreBoard(MDrawContext* pDC)
 		}
 		else
 		{
-			MMatchPeerInfo* pPeer = ZGetGameClient()->FindPeer(pCharacter->GetUID());
-			if (pPeer) {
-				if (g_pGame->IsReplay())
-					nPing = 0;
-				else
+			if (!ZGetGame()->IsReplay())
+			{
+				MMatchPeerInfo* pPeer = ZGetGameClient()->FindPeer(pCharacter->GetUID());
+				if (pPeer)
 					nPing = pPeer->GetPing(ZApplication::GetGame()->GetTickTime());
+			}
+			else
+			{
+				nPing = pCharacter->Ping;
 			}
 		}
 
