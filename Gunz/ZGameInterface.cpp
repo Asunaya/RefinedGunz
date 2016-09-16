@@ -83,7 +83,6 @@ extern MCommandLogFrame* m_pLogFrame;
 
 static int g_debug_tex_update_cnt;
 
-
 void ZChangeGameState(GunzState state)
 {
 	PostMessage(g_hWnd, WM_CHANGE_GAMESTATE, int(state), 0);
@@ -124,7 +123,9 @@ void ZGameInterface::LoadBitmaps(const char* szDir, ZLoadingProgress *pLoadingPr
 				if (nDirLen == 0 || _strnicmp(desc->m_szFileName, szDir, nDirLen) == 0)
 					nTotalCount++;
 				// custom crosshair
-				else if (_strnicmp(desc->m_szFileName, PATH_CUSTOM_CROSSHAIR, strlen(PATH_CUSTOM_CROSSHAIR)) == 0)
+				else if (_strnicmp(desc->m_szFileName,
+					PATH_CUSTOM_CROSSHAIR,
+					strlen(PATH_CUSTOM_CROSSHAIR)) == 0)
 					nTotalCount++;
 			}
 		}
@@ -235,13 +236,12 @@ bool InitItemList(MWidget* pWidget)
 	if(strcmp(pWidget->GetClassName(), MINT_LISTBOX)!=0) return false;
 	MListBox* pList = (MListBox*)pWidget;
 
-	//	pList->SetViewStyle(MVS_ICON);
 	pList->SetVisibleHeader(false);
 	pList->SetItemHeight(40);
 
 	pList->AddField("Icon", 42);
 	pList->AddField("Name", 600);
-	// 테스트로 30개 넣어놓음
+
 	for (int i = 0; i < 30; i++)
 	{
 		char szName[256], szItem[256];
@@ -279,7 +279,6 @@ ZGameInterface::ZGameInterface(const char* szName, MWidget* pParent, MListener* 
 	m_nState = GUNZ_NA;
 
 	m_bCursor = true;
-	//m_bCursor = false;
 	m_bLogin = false;
 	m_bLoading = false;
 
@@ -297,7 +296,6 @@ ZGameInterface::ZGameInterface(const char* szName, MWidget* pParent, MListener* 
 
 	m_pMonsterBookInterface = new ZMonsterBookInterface();
 
-//	ZApplication::GetStageInterface()->SetMapName( MMATCH_DEFAULT_STAGESETTING_MAPNAME);
 	m_pThumbnailBitmap=NULL;
 
 	m_pCharacterSelectView = NULL;
@@ -309,9 +307,6 @@ ZGameInterface::ZGameInterface(const char* szName, MWidget* pParent, MListener* 
 	m_nDrawCount = 0;
 
 	m_bTeenVersion = true;
-//	m_pAmbSound = NULL;
-//	m_bisReserveChangeWeapon = false;
-//	m_nReserveChangeWeapon = ZCWT_MELEE;
 
 	m_pScreenEffectManager = NULL;
 	m_pEffectManager = NULL;
@@ -598,7 +593,6 @@ bool ZGameInterface::InitInterfaceListener()
 	SetListenerWidget("Lobby_Charviewer_info", ZGetLobbyCharInfoCallerButtonListener());
 	SetListenerWidget("StageBeforeBtn", ZGetLobbyPrevRoomListButtonListener());
 	SetListenerWidget("StageAfterBtn", ZGetLobbyNextRoomListPrevButtonListener());
-//	SetListenerWidget("Lobby_StageList", )
 
 	SetListenerWidget("Lobby_RoomNo1", ZGetLobbyNextRoomNoButtonListener());
 	SetListenerWidget("Lobby_RoomNo2", ZGetLobbyNextRoomNoButtonListener());
@@ -606,22 +600,9 @@ bool ZGameInterface::InitInterfaceListener()
 	SetListenerWidget("Lobby_RoomNo4", ZGetLobbyNextRoomNoButtonListener());
 	SetListenerWidget("Lobby_RoomNo5", ZGetLobbyNextRoomNoButtonListener());
 	SetListenerWidget("Lobby_RoomNo6", ZGetLobbyNextRoomNoButtonListener());
-
-	/*
-	SetListenerWidget("ChannelPlayerList_all", ZGetChannelPlayerOptionGroupAll());
-	SetListenerWidget("ChannelPlayerList_friend", ZGetChannelPlayerOptionGroupFriend());
-	SetListenerWidget("ChannelPlayerList_clan", ZGetChannelPlayerOptionGroupClan());
-
-	SetListenerWidget("LobbyPlayerListTabChannel", ZGetListenerLobbyPlayerListTabChannel());
-	SetListenerWidget("LobbyPlayerListTabFriend", ZGetListenerLobbyPlayerListTabFriend());
-	SetListenerWidget("LobbyPlayerListTabClan", ZGetListenerLobbyPlayerListTabClan());
-	*/
 	
 	SetListenerWidget("LobbyChannelPlayerListPrev", ZGetPlayerListPrevListener());
 	SetListenerWidget("LobbyChannelPlayerListNext", ZGetPlayerListNextListener());
-
-//	SetListenerWidget("StagePlayerListTabGame", ZGetListenerGamePlayerListTabGame());
-//	SetListenerWidget("StagePlayerListTabFriend", ZGetListenerGamePlayerListTabFriend());
 
 	SetListenerWidget("StagePlayerListPrev", ZGetStagePlayerListPrevListener());
 	SetListenerWidget("StagePlayerListNext", ZGetStagePlayerListNextListener());
@@ -655,15 +636,15 @@ bool ZGameInterface::InitInterfaceListener()
 	SetListenerWidget("StageChattingInput", ZGetStageChatInputListener());
 	SetListenerWidget("StageSettingCaller", ZGetStageSettingCallerListener());
 	SetListenerWidget("StageType", ZGetStageSettingStageTypeListener());
-	SetListenerWidget("StageMaxPlayer", ZGetStageSettingChangedComboboxListener());			// 동환이가 추가 : 최대인원
-	SetListenerWidget("StageRoundCount", ZGetStageSettingChangedComboboxListener());		// 동환이가 추가 : 경기횟수
-	SetListenerWidget("StageLimitTime", ZGetStageSettingChangedComboboxListener());			// 동환이가 추가 : 제한시간
-	SetListenerWidget("StageIntrude", ZGetStageSettingChangedComboboxListener());			// 동환이가 추가 : 난입허용
+	SetListenerWidget("StageMaxPlayer", ZGetStageSettingChangedComboboxListener());
+	SetListenerWidget("StageRoundCount", ZGetStageSettingChangedComboboxListener());
+	SetListenerWidget("StageLimitTime", ZGetStageSettingChangedComboboxListener());
+	SetListenerWidget("StageIntrude", ZGetStageSettingChangedComboboxListener());
 	SetListenerWidget("StageTeamRed", ZGetStageTeamRedListener());
 	SetListenerWidget("StageTeamRed2", ZGetStageTeamRedListener());
 	SetListenerWidget("StageTeamBlue", ZGetStageTeamBlueListener());
 	SetListenerWidget("StageTeamBlue2", ZGetStageTeamBlueListener());
-	SetListenerWidget("StageObserverBtn", ZGetStageObserverBtnListener());					// 동환이가 추가 : 관전 체크
+	SetListenerWidget("StageObserverBtn", ZGetStageObserverBtnListener());
 	SetListenerWidget("StageReady", ZGetStageReadyListener());
 	SetListenerWidget("StageSettingApplyBtn", ZGetStageSettingApplyBtnListener());
 	SetListenerWidget("BattleExit", ZGetBattleExitButtonListener());
@@ -673,7 +654,6 @@ bool ZGameInterface::InitInterfaceListener()
 	SetListenerWidget("MapSelect", ZGetMapSelectListener());
 
 	SetListenerWidget("MapList", ZGetStageMapListSelectionListener());
-//	SetListenerWidget("MapList_Caller", ZGetStageMapListCallerListener());
 
 	SetListenerWidget("Stage_SacrificeItemButton0", ZStageSacrificeItem0());
 	SetListenerWidget("Stage_SacrificeItemButton1", ZStageSacrificeItem1());
@@ -683,25 +663,13 @@ bool ZGameInterface::InitInterfaceListener()
 	SetListenerWidget("Stage_SacrificeItemListbox", ZGetSacrificeItemListBoxListener());
 	SetListenerWidget("MonsterBookCaller", ZGetMonsterBookCaller());
 
-	// 맵 선택
 	SetListenerWidget("MapSelection",  ZGetMapComboListener());
-
-
-	// 옵션
 	SetListenerWidget("SaveOptionButton", ZGetSaveOptionButtonListener());
 	SetListenerWidget("CancelOptionButton", ZGetCancelOptionButtonListener());
 
-	/*
-	SetListenerWidget("ShowVideoOptionGroup", ZGetShowVideoOptionGroupButtonListener());
-	SetListenerWidget("ShowAudioOptionGroup", ZGetShowAudioOptionGroupButtonListener());
-	SetListenerWidget("ShowMouseOptionGroup", ZGetShowMouseOptionGroupButtonListener());
-	SetListenerWidget("ShowKeyboardOptionGroup", ZGetShowKeyboardOptionGroupButtonListener());
-	SetListenerWidget("ShowEtcOptionGroup", ZGetShowEtcOptionGroupButtonListener());
-	*/
 	SetListenerWidget("DefaultSettingLoad", ZGetLoadDefaultKeySettingListener() );
 	SetListenerWidget("Optimization",ZSetOptimizationListener());
 
-	// 상점
 	SetListenerWidget("ShopCaller", ZGetShopCallerButtonListener());
 	SetListenerWidget("ShopClose", ZGetShopCloseButtonListener());
 
@@ -724,8 +692,6 @@ bool ZGameInterface::InitInterfaceListener()
 	SetListenerWidget("AllEquipmentListCaller", ZGetAllEquipmentListCallerButtonListener());
 	SetListenerWidget("MyAllEquipmentListCaller", ZGetMyAllEquipmentListCallerButtonListener());
 	SetListenerWidget("CashEquipmentListCaller", ZGetCashEquipmentListCallerButtonListener());
-	//	SetListenerWidget("Shop_Ask", ZGetShopAskButtonListener());
-	//	SetListenerWidget("Shop_Gift", ZGetShopGiftButtonListener());
 	SetListenerWidget("CashRecharge", ZGetShopCachRechargeButtonListener());
 	SetListenerWidget("ShopSearchFrameCaller", ZGetShopSearchCallerButtonListener());
 
@@ -740,7 +706,6 @@ bool ZGameInterface::InitInterfaceListener()
 	SetListenerWidget("Shop_EquipListFrameCloseButton", ZShopListFrameClose());
 	SetListenerWidget("Shop_EquipListFrameOpenButton",  ZShopListFrameOpen());
 
-	// 장비
 	SetListenerWidget("Equipment_CharacterTab", ZGetEquipmentCharacterTabButtonListener());
 	SetListenerWidget("Equipment_AccountTab", ZGetEquipmentAccountTabButtonListener());
 	SetListenerWidget("EquipmentList", ZGetEquipmentItemListBoxListener());
@@ -752,7 +717,6 @@ bool ZGameInterface::InitInterfaceListener()
 	SetListenerWidget("Equip_EquipListFrameCloseButton", ZEquipListFrameClose());
 	SetListenerWidget("Equipment_CharacterRotate", ZEquipmetRotateBtn());
 
-	// 캐릭터 선택 부분
 	SetListenerWidget("CS_SelectChar", ZGetSelectCharacterButtonListener());
 	SetListenerWidget("CS_SelectCharDefKey", ZGetSelectCharacterButtonListener());
 	SetListenerWidget("CS_CreateChar", ZGetShowCreateCharacterButtonListener());
@@ -765,8 +729,6 @@ bool ZGameInterface::InitInterfaceListener()
 	SetListenerWidget("ShowChar_infoGroup", ZGetShowCharInfoGroupListener());
 	SetListenerWidget("ShowEquip_InfoGroup", ZGetShowEquipInfoGroupListener());
 
-	//	SetListenerWidget("CS_CharList", ZGetSelectCharacterListBoxDBClickListener);
-	// 캐릭터 생성
 	SetListenerWidget("CC_CreateChar", ZGetCreateCharacterButtonListener());
 	SetListenerWidget("CC_Cancel", ZGetCancelCreateCharacterButtonListener());
 	SetListenerWidget("CC_Sex", ZChangeCreateCharInfoListener());
@@ -782,54 +744,42 @@ bool ZGameInterface::InitInterfaceListener()
 
 	SetListenerWidget("CS_DeleteCharButton", ZGetConfirmDeleteCharacterButtonListener());
 	SetListenerWidget("CS_CloseConfirmDeleteCharButton", ZGetCloseConfirmDeleteCharButtonListener());
-
-	// 몬스터 도감
 	SetListenerWidget("MonsterBook_PrevPageButton", ZGetMonsterInterfacePrevPage());
 	SetListenerWidget("MonsterBook_NextPageButton", ZGetMonsterInterfaceNextPage());
 	SetListenerWidget("MonsterBook_Close", ZGetMonsterInterfaceQuit());
 	SetListenerWidget("MonsterBook_Close2", ZGetMonsterInterfaceQuit());
 
-
-	// 게임 결과 화면
 	SetListenerWidget("GameResult_ButtonQuit", ZGetGameResultQuit());
 
-
-	//112
 	SetListenerWidget("112_ConfirmEdit", ZGet112ConfirmEditListener());
 	SetListenerWidget("112_ConfirmOKButton", ZGet112ConfirmOKButtonListener());
 	SetListenerWidget("112_ConfirmCancelButton", ZGet112ConfirmCancelButtonListener());
 
-
-	// 클랜
-	SetListenerWidget("ClanSponsorAgreementConfirm_OK", ZGetClanSponsorAgreementConfirm_OKButtonListener());
+	SetListenerWidget("ClanSponsorAgreementConfirm_OK",
+		ZGetClanSponsorAgreementConfirm_OKButtonListener());
 	SetListenerWidget("ClanSponsorAgreementConfirm_Cancel", ZGetClanSponsorAgreementConfirm_CancelButtonListener());
-	SetListenerWidget("ClanSponsorAgreementWait_Cancel", ZGetClanSponsorAgreementWait_CancelButtonListener());
+	SetListenerWidget("ClanSponsorAgreementWait_Cancel",
+		ZGetClanSponsorAgreementWait_CancelButtonListener());
 	SetListenerWidget("ClanJoinerAgreementConfirm_OK", ZGetClanJoinerAgreementConfirm_OKButtonListener());
 	SetListenerWidget("ClanJoinerAgreementConfirm_Cancel", ZGetClanJoinerAgreementConfirm_CancelButtonListener());
 	SetListenerWidget("ClanJoinerAgreementWait_Cancel", ZGetClanJoinerAgreementWait_CancelButtonListener());
 	
-	// 클랜 생성 다이얼로그
 	SetListenerWidget("LobbyPlayerListTabClanCreateButton", ZGetLobbyPlayerListTabClanCreateButtonListener());
 	SetListenerWidget("ClanCreateDialogOk", ZGetClanCreateDialogOk());
 	SetListenerWidget("ClanCreateDialogClose", ZGetClanCreateDialogClose());
 
 
-	// 동의 관련
 	SetListenerWidget("ProposalAgreementWait_Cancel", ZGetProposalAgreementWait_CancelButtonListener());
 	SetListenerWidget("ProposalAgreementConfirm_OK", ZGetProposalAgreementConfirm_OKButtonListener());
-	SetListenerWidget("ProposalAgreementConfirm_Cancel", ZGetProposalAgreementConfirm_CancelButtonListener());
+	SetListenerWidget("ProposalAgreementConfirm_Cancel",
+		ZGetProposalAgreementConfirm_CancelButtonListener());
 
-	// 리플레이 브라우져 관련
 	SetListenerWidget("ReplayOkButton",				ZReplayOk());
 	SetListenerWidget("ReplayCaller",				ZGetReplayCallerButtonListener());
 	SetListenerWidget("Replay_View",				ZGetReplayViewButtonListener());
 	SetListenerWidget("ReplayClose",				ZGetReplayExitButtonListener());
 	SetListenerWidget("Replay_FileList",			ZGetReplayFileListBoxListener());
 
-
-	// 선택된 캐릭터 카메라로 돌리며 보기
-
-	// 리스너 업데이트된 탭콘트롤 갱신해주기.
 	MTabCtrl *pTab = (MTabCtrl*)m_IDLResource.FindWidget("PlayerListControl");
 	if( pTab ) pTab->UpdateListeners();
 
@@ -838,15 +788,10 @@ bool ZGameInterface::InitInterfaceListener()
 
 void ZGameInterface::FinalInterface()
 {
-	// Player Menu
 	SAFE_DELETE(m_pPlayerMenu);
-
 	m_IDLResource.Clear();
-
 	mlog("m_IDLResource.Clear() End : \n");
-
 	SetCursor(NULL);
-
 	mlog("ZGameInterface::FinalInterface() End: \n");
 }
 
@@ -1017,16 +962,13 @@ bool ZGameInterface::OnGameCreate(void)
 	MWidget *pWidget = m_IDLResource.FindWidget("SkillFrame");
 	if(pWidget!=NULL) pWidget->Show(true);
 
-	// Skill List
 	InitSkillList(m_IDLResource.FindWidget("SkillList"));
 
 	pWidget = m_IDLResource.FindWidget("InventoryFrame");
 	if(pWidget!=NULL) pWidget->Show(true);
 
-	// Item List
 	InitItemList(m_IDLResource.FindWidget("ItemList"));
 
-	// 커서 사용하지 않음
 	SetCursorEnable(false);
 
 	m_bLoading = false;
@@ -1077,7 +1019,6 @@ void ZGameInterface::OnGameDestroy(void)
 	if (m_pGameInput)
 	{
 		delete m_pGameInput; m_pGameInput = NULL;
-//		Mint::GetInstance()->SetGlobalEvent(NULL);
 	}
 
 	if (m_pCombatInterface)
@@ -1182,7 +1123,6 @@ void ZGameInterface::OnLoginCreate(void)
 	if ( pPasswd)
 		pPasswd->SetText( "");
 
-	// Netmarble 에서 로긴한 경우에 Standalone Login을 요구하면 게임종료
 	if (ZApplication::GetInstance()->GetLaunchMode() == ZApplication::ZLAUNCH_MODE_NETMARBLE) {
 		mlog("Netmarble Logout \n");
 		ZApplication::Exit();
@@ -1192,8 +1132,6 @@ void ZGameInterface::OnLoginCreate(void)
 	HideAllWidgets();
 
 	ShowWidget("Login", true);
-	//ShowWidget("LoginFrame", true);
-	//BEGIN_WIDGETLIST("MaxHP", &m_IDLResource, MWidget*, pWidget);
 
 	ZServerView* pServerList = (ZServerView*)m_IDLResource.FindWidget( "SelectedServer");
 	if ( pServerList)
@@ -1229,12 +1167,12 @@ void ZGameInterface::OnLoginCreate(void)
 		if ( ZApplication::GetInstance()->IsLaunchTest())
 		{
 			if( m_pTLocatorList && (m_pTLocatorList->GetSize() > 0))
-				m_nLocServ = rand() % m_pTLocatorList->GetSize();			// 처음 시작하는 테스트 서버를 랜덤으로 선택한다.
+				m_nLocServ = rand() % m_pTLocatorList->GetSize();
 		}
 		else
 		{
 			if( m_pLocatorList && (m_pLocatorList->GetSize() > 0))
-				m_nLocServ = rand() % m_pLocatorList->GetSize();			// 처음 시작하는 서버를 랜덤으로 선택한다.
+				m_nLocServ = rand() % m_pLocatorList->GetSize();
 		}
 
 		RequestServerStatusListInfo();
@@ -1400,11 +1338,6 @@ void ZGameInterface::OnLobbyCreate(void)
 	if (pRoomList) pRoomList->Clear();
 
 	ShowWidget("Lobby_StageList", true);
-	/*
-	ShowWidget("ChannelFrame", true);
-	ShowWidget("StageListFrame", true);
-	ShowWidget("StageFrame", true);
-	*/
 
 	MPicture* pPicture = 0;
 	pPicture = (MPicture*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget("Lobby_StripBottom");
@@ -1449,29 +1382,10 @@ void ZGameInterface::OnLobbyCreate(void)
 	ZApplication::GetSoundEngine()->PlayMusic( true);
 #endif
 
-//	m_pBackground->SetScene(SCENE_TOWN);
-
-	//ZCharacterViewList* pCharacterViewList = NULL;
-	//pCharacterViewList = ZGetCharacterViewList(GUNZ_STAGE);
-	//if (pCharacterViewList != NULL)
-	//{
-	//	pCharacterViewList->RemoveAll();
-	//}
-	//pCharacterViewList = ZGetCharacterViewList(GUNZ_LOBBY);
-	//if (pCharacterViewList != NULL)
-	//{
-	//	pCharacterViewList->Assign(ZGetGameClient()->GetObjCacheMap());
-	//}
-
-//	SetupPlayerListTab();
-
 	ZPlayerListBox *pPlayerListBox = (ZPlayerListBox*)m_IDLResource.FindWidget( "LobbyChannelPlayerList" );
 	if(pPlayerListBox)
 		pPlayerListBox->SetMode(ZPlayerListBox::PLAYERLISTMODE_CHANNEL);
 
-//	InitLadderUI();
-
-	// 채팅입력에 포커스를 맞춰준다.
 	pWidget= m_IDLResource.FindWidget( "ChannelChattingInput" );
 	if(pWidget) pWidget->SetFocus();
 
@@ -1633,23 +1547,17 @@ bool ZGameInterface::OnCreate(ZLoadingProgress *pLoadingProgress)
 
 	interfaceProgress.UpdateAndDraw(1.f);
 
-	//mlog("ZGameInterface::OnCreate : InitInterface \n");
-
 	auto ZScreenEffectManagerCreate = MBeginProfile("ZGameInterface - ZScreenEffectManager::Create");
 	m_pScreenEffectManager=new ZScreenEffectManager;
 	if(!m_pScreenEffectManager->Create()) 
 		return false;
 	MEndProfile(ZScreenEffectManagerCreate);
 
-	//mlog("ZGameInterface::OnCreate : m_pScreenEffectManager->Create()\n");
-
 	auto ZEffectManagerCreate = MBeginProfile("ZGameInterface - ZEffectManager::Create");
 	m_pEffectManager = new ZEffectManager;
 	if(!m_pEffectManager->Create())
 		return false;
 	MEndProfile(ZEffectManagerCreate);
-
-	//mlog("ZGameInterface::OnCreate : m_pEffectManager->Create()\n");
 
 	SetTeenVersion(ZGetLocale()->IsTeenMode());
 
@@ -1673,8 +1581,6 @@ bool ZGameInterface::OnCreate(ZLoadingProgress *pLoadingProgress)
 	g_pGameClient->SetOnCommandCallback(OnCommand);
 	g_pGameClient->CreateUPnP(nNetworkPort);
 	MEndProfile(ZGameClientCreate);
-
-	//mlog("ZGameInterface::OnCreate : g_pGameClient->Create()\n");
 
 	auto Etc = MBeginProfile("ZGameInterface - Etc.");
 
@@ -1820,8 +1726,6 @@ bool ZGameInterface::OnCreate(ZLoadingProgress *pLoadingProgress)
 	if ( pPicture)
 		pPicture->SetOpacity(80);
 
-
-	// 희생 아이템 리스트 박스 초기화
 	MListBox* pListBox = (MListBox*)m_IDLResource.FindWidget( "Stage_SacrificeItemListbox");
 	if ( pListBox)
 	{
@@ -1835,7 +1739,6 @@ bool ZGameInterface::OnCreate(ZLoadingProgress *pLoadingProgress)
 		pListBox->SetOnDropCallback( OnDropCallbackRemoveSacrificeItem);
 	}
 
-	// 희생 아이템 슬롯 초기화
 	itemSlot = (ZItemSlotView*)m_IDLResource.FindWidget( "Stage_SacrificeItemButton0");
 	if ( itemSlot)
 	{
@@ -1849,7 +1752,6 @@ bool ZGameInterface::OnCreate(ZLoadingProgress *pLoadingProgress)
 		strcpy_safe( itemSlot->m_szItemSlotPlace, "SACRIFICE1");
 	}
 
-	// 획득 아이템 리스트 박스 초기화
 	pListBox = (MListBox*)m_IDLResource.FindWidget( "QuestResult_ItemListbox");
 	if ( pListBox)
 	{
@@ -1863,8 +1765,6 @@ bool ZGameInterface::OnCreate(ZLoadingProgress *pLoadingProgress)
 		pListBox->m_bNullFrame = true;
 	}
 
-	
-	// BmNumLabel 초기화
 	int nMargin[ BMNUM_NUMOFCHARSET] = { 15,15,15,15,15,15,15,15,15,15,8,10,8 };
 	ZBmNumLabel* pBmNumLabel = (ZBmNumLabel*)m_IDLResource.FindWidget( "Lobby_ClanInfoWinLose");
 	if ( pBmNumLabel)
@@ -1959,20 +1859,12 @@ void ZGameInterface::OnDestroy()
 {
 	mlog("ZGameInterface::OnDestroy() : begin \n");
 
-	//ZCharacterViewList* pCharViewList = (ZCharacterViewList*)m_IDLResource.FindWidget("StagePlayerList");
-	//for(list<ZMeshView*>::iterator iter = ZMeshView::msMeshViewList.begin(); iter != ZMeshView::msMeshViewList.end(); ++iter )
-	//{
-	//	ZMeshView* pmv = *iter;
-	//	if( pmv )
-	//		pmv->OnInvalidate();
-	//}
-
 	ZCharacterView* pCharView = (ZCharacterView*)m_IDLResource.FindWidget("Stage_Charviewer");
 	if(pCharView!= 0) pCharView->OnInvalidate();
 
 	SetCursorEnable(false);
 
-	SetState(GUNZ_NA);	// 현재 GunzState 종료
+	SetState(GUNZ_NA);
 
 	SAFE_DELETE(m_pThumbnailBitmap);
 
@@ -1984,7 +1876,7 @@ void ZGameInterface::OnDestroy()
 
 	mlog("SAFE_DELETE(g_pGameClient) : \n");
 
-	SAFE_DELETE(m_pLoginBG);			// 해제 안되는 경우가 있길래 -_-;
+	SAFE_DELETE(m_pLoginBG);
 
 	m_Tips.Finalize();
 	FinalInterface();
@@ -1998,28 +1890,11 @@ void ZGameInterface::OnShutdownState()
 	
 			ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
 			MLabel* pLabel = (MLabel*)pResource->FindWidget("NetmarbleLoginMessage");
-//			pLabel->SetText(MGetErrorString(MERR_CLIENT_DISCONNECTED));
 			pLabel->SetText( ZErrStr(MERR_CLIENT_DISCONNECTED) );
 			ZApplication::GetGameInterface()->ShowWidget("NetmarbleLogin", true);
 
 	mlog("ZGameInterface::OnShutdown() : done() \n");
 }
-
-/*
-void ZGameInterface::DrawLoadingScreen(const char* szMessage, float t)
-{
-	MDrawContext* pDC = Mint::GetInstance()->GetDrawContext();
-	pDC->SetColor(0, 0, 0);
-	pDC->FillRectangle(0, 0, MGetWorkspaceWidth(), MGetWorkspaceHeight());
-	pDC->SetColor(255, 255, 255);
-	pDC->Text(10, MGetWorkspaceHeight()-20, szMessage);
-	t = min(max(0, t), 1);
-	pDC->FillRectangle(0, 0, int(MGetWorkspaceWidth()*t), MGetWorkspaceHeight());
-
-	// Update Scene
-	Mint::GetInstance()->Update();
-}
-*/
 
 bool ZGameInterface::SetState(GunzState nState)
 {
@@ -2027,15 +1902,12 @@ bool ZGameInterface::SetState(GunzState nState)
 	if ((nState != GUNZ_LOGIN) && (m_nState==GUNZ_BIRDTEST)) return false;
 #endif
 
-	// 이전 위치와 현재 위치가 같으면 무시
 	if ( m_nState == nState)
 		return true;
 
 	if ( nState == GUNZ_PREVIOUS)
 		nState = m_nPreviousState;
 
-
-	// 게임을 시작(GUNZ_GAME)하기 전에 퀘스트 모드 시작 무비를 보여줄 필요가 있는지 검사
 	if ( nState == GUNZ_GAME)
 	{
 		if ( ZApplication::GetStageInterface()->IsShowStartMovieOfQuest())
@@ -2066,7 +1938,6 @@ bool ZGameInterface::SetState(GunzState nState)
 	{
 		OnCharSelectionDestroy();
 
-		// 갖고있는 퀘스트 아이템 목록 요청
 		if ( nState == GUNZ_LOBBY)
 			ZPostRequestGetCharQuestItemInfo( ZGetGameClient()->GetPlayerUID());
 	}
@@ -2120,8 +1991,6 @@ bool ZGameInterface::SetState(GunzState nState)
 }
 
 _NAMESPACE_REALSPACE2_BEGIN
-//extern int g_nCheckWallPolygons,g_nRealCheckWallPolygons;
-//extern int g_nCheckFloorPolygons,g_nRealCheckFloorPolygons;
 extern int g_nPoly,g_nCall;
 extern int g_nPickCheckPolygon,g_nRealPickCheckPolygon;
 _NAMESPACE_REALSPACE2_END
@@ -2129,57 +1998,6 @@ _NAMESPACE_REALSPACE2_END
 #ifndef _PUBLISH
 #include "fmod.h"
 #endif
-
-
-/*
-void ZGameInterface::OnUpdateGameMessage(void)
-{
-switch (ZApplication::GetGame()->GetMatch()->GetMatchState())
-{
-case ZMS_ROUND_READY:
-{
-int nRoundReadyCount = ZApplication::GetGame()->GetMatch()->GetRoundReadyCount();
-if(nRoundReadyCount<-1){
-ShowWidget(CENTERMESSAGE, false);
-return;
-}
-
-char szReadyMessage[256] = "";
-if(nRoundReadyCount>0){
-sprintf_safe(szReadyMessage, "Round %d : Start in %d", 
-ZApplication::GetGame()->GetMatch()->GetNowRound()+1, nRoundReadyCount);
-}
-else{
-strcpy_safe(szReadyMessage, "Fight");
-}
-
-ShowWidget(CENTERMESSAGE, true);
-SetTextWidget(CENTERMESSAGE, szReadyMessage);
-}
-break;
-case ZMS_ROUND_PLAYING:
-{
-ShowWidget(CENTERMESSAGE, false);
-}
-break;
-case ZMS_ROUND_FINISH:
-{
-char szReadyMessage[256] = "";
-sprintf_safe(szReadyMessage, "Finish!");
-
-ShowWidget(CENTERMESSAGE, true);
-SetTextWidget(CENTERMESSAGE, szReadyMessage);
-}
-break;
-case ZMS_GAME_FINISH:
-{
-ShowWidget(CENTERMESSAGE, false);
-}
-break;
-}
-
-}
-*/
 
 void ZGameInterface::OnDrawStateGame(MDrawContext* pDC)
 {
@@ -2202,7 +2020,6 @@ void ZGameInterface::OnDrawStateGame(MDrawContext* pDC)
 				m_pMiniMap->OnDraw(pDC);
 			}
 
-			// 그리는 순서때문에 만든 펑션
 			m_pCombatInterface->OnDrawCustom(pDC);
 
 			if (g_bNewChat)
@@ -2217,27 +2034,7 @@ void ZGameInterface::OnDrawStateGame(MDrawContext* pDC)
 }
 
 void ZGameInterface::OnDrawStateLogin(MDrawContext* pDC)
-{/*
-	if( m_pBackground!=0)
-	{
-		m_pBackground->LoadMesh();
-		m_pBackground->Draw();
-	}
-*/
-#ifndef _FASTDEBUG
-	if (m_nDrawCount == 1)
-	{
-		/*static RealSoundEffectSource* pSES = ZApplication::GetSoundEngine()->GetSES("fx_amb_wind");
-		
-		if( pSES != NULL )
-		{
-		
-			m_pAmbSound	= ZGetSoundEngine()->PlaySE( pSES, true );
-		}
-		//*/
-	}
-#endif
-
+{
 	MLabel* pConnectingLabel = (MLabel*)m_IDLResource.FindWidget( "Login_ConnectingMsg");
 	if ( pConnectingLabel)
 	{
@@ -2389,8 +2186,6 @@ void ZGameInterface::OnDrawStateLobbyNStage(MDrawContext* pDC)
 
 	if( GetState() == GUNZ_LOBBY )
 	{
-		// TODO : 이들을 draw 타임에 계속해서 할 필요는 없어보인다. 적당한 곳으로 옮기자
-
 		// Lobby
 		char buf[512];
 		// 이름
@@ -2400,7 +2195,6 @@ void ZGameInterface::OnDrawStateLobbyNStage(MDrawContext* pDC)
 			sprintf_safe( buf, "%s", ZGetMyInfo()->GetCharName() );
 			pLabel->SetText(buf);
 		}
-		// 상세정보 (동환이가 추가)
 		// Clan
 		pLabel = (MLabel*)pRes->FindWidget("Lobby_PlayerSpecClan");
 		sprintf_safe( buf, "%s : %s", ZMsg( MSG_CHARINFO_CLAN), ZGetMyInfo()->GetClanName());
@@ -2431,7 +2225,6 @@ void ZGameInterface::OnDrawStateLobbyNStage(MDrawContext* pDC)
 		sprintf_safe( buf, "%s : %d/%d", ZMsg( MSG_CHARINFO_WEIGHT), pItems->GetEquipedTotalWeight(), pItems->GetMaxWeight());
 		if (pLabel) pLabel->SetText(buf);
 
-		// 채널 정보
 		pLabel = (MLabel*)pRes->FindWidget("Lobby_ChannelName");
 		sprintf_safe( buf, "%s > %s > %s", ZGetGameClient()->GetServerName(), ZMsg( MSG_WORD_LOBBY), ZGetGameClient()->GetChannelName());
 		if (pLabel) 
@@ -2441,7 +2234,6 @@ void ZGameInterface::OnDrawStateLobbyNStage(MDrawContext* pDC)
 	// Stage
 	else if( GetState() == GUNZ_STAGE)
 	{
-		// 플레이어 정보 표시
 		char buf[512];
 		MListBox* pListBox = (MListBox*)pRes->FindWidget( "StagePlayerList_");
 		bool bShowMe = true;
@@ -2457,7 +2249,6 @@ void ZGameInterface::OnDrawStateLobbyNStage(MDrawContext* pDC)
 					bShowMe = false;
 			}
 
-			// 이름
 			MLabel* pLabel = (MLabel*)pRes->FindWidget("Stage_PlayerName");
 			if ( bShowMe)
 				sprintf_safe( buf, "%s", ZGetMyInfo()->GetCharName() );
@@ -2465,7 +2256,6 @@ void ZGameInterface::OnDrawStateLobbyNStage(MDrawContext* pDC)
 				sprintf_safe( buf, "%s", pItem->GetString( 2));
 			if (pLabel) pLabel->SetText(buf);
 
-			// 클랜
 			pLabel = (MLabel*)pRes->FindWidget("Stage_PlayerSpecClan");
 			if ( bShowMe)
 				sprintf_safe( buf, "%s : %s", ZMsg( MSG_CHARINFO_CLAN), ZGetMyInfo()->GetClanName());
@@ -2478,7 +2268,6 @@ void ZGameInterface::OnDrawStateLobbyNStage(MDrawContext* pDC)
 			}
 			if (pLabel) pLabel->SetText(buf);
 
-			// 레벨
 			pLabel = (MLabel*)pRes->FindWidget("Stage_PlayerSpecLevel");
 			if ( bShowMe)
 				sprintf_safe( buf, "%s : %d %s", ZMsg( MSG_CHARINFO_LEVEL), ZGetMyInfo()->GetLevel(), ZMsg(MSG_CHARINFO_LEVELMARKER));
@@ -2546,22 +2335,10 @@ void ZGameInterface::OnDrawStateLobbyNStage(MDrawContext* pDC)
 				pLabel->SetText(buf);
 				pLabel->Enable( bShowMe);
 			}
-
-			// Character View
-			/*if ( bShowMe)
-			{
-				ZCharacterView* pCharView = (ZCharacterView*)pRes->FindWidget( "Stage_Charviewer");
-				if ( pCharView)
-					pCharView->SetCharacter( ZGetMyUID());
-			}*/
 		}
 
-
-		// 퀘스트 모드로 시작할때 무비를 보여줌
 		ZApplication::GetStageInterface()->OnDrawStartMovieOfQuest();
 
-
-		// 광선 이미지 Opacity 조절
 		int nOpacity = 90.0f * ( sin( GetGlobalTimeMS() * 0.003f) + 1) + 75;
 
 		MLabel* pLabel = (MLabel*)pRes->FindWidget( "Stage_SenarioName");
@@ -2576,9 +2353,6 @@ void ZGameInterface::OnDrawStateLobbyNStage(MDrawContext* pDC)
 			pPicture->SetOpacity( nOpacity);
 		}
 
-
-
-		// 희생 아이템 리스트 프레임 움직임
 		MWidget* pWidget = pRes->FindWidget( "Stage_ItemListView");
 		if ( !pWidget)
 			return;
@@ -2671,8 +2445,7 @@ void ZGameInterface::OnDraw(MDrawContext *pDC)
 		break;
 	}
 
-	// 청소년 자율 규제 적용안(쓰벌쓰벌쓰벌...). 1시간마다 메시지 조낸 날리는거다...
-#ifdef LOCALE_KOREA			// 한국에서만 이짓거리 한당...
+#ifdef LOCALE_KOREA
 	if ( GetGlobalTimeMS() >= m_dwTimeCount)
 	{
 		m_dwTimeCount += 3600000;
@@ -2690,12 +2463,6 @@ void ZGameInterface::OnDraw(MDrawContext *pDC)
 	__EP(11);
 }
 
-
-
-// 임시
-
-// 남자는 2번째 코트 부터..
-
 void ZGameInterface::TestChangePartsAll() 
 {
 }
@@ -2703,8 +2470,6 @@ void ZGameInterface::TestChangePartsAll()
 void ZGameInterface::TestChangeParts(int mode) {
 
 #ifndef _PUBLISH
-	// 디자이너용... 혼자 옷갈아 입는 테스트 할때 사용한다...
-
 	RMeshPartsType ptype = eq_parts_etc;
 
  		 if(mode==0)	{ ptype = eq_parts_chest;  }
@@ -2719,7 +2484,7 @@ void ZGameInterface::TestChangeParts(int mode) {
 #endif
 
 }
-// 캐릭터 선택 윈도우가 생기면 삭제..
+
 void ZGameInterface::TestToggleCharacter()
 {
 	ZPostChangeCharacter();
@@ -2805,22 +2570,7 @@ void ZGameInterface::TestChangeWeapon(RVisualMesh* pVMesh)
 	if (nWeaponIndex >= 7) nWeaponIndex = 0;
 }
 
-/*
-bool ZGameInterface::ProcessLowLevelCommand(const char* szCommand)
-{
-if(_stricmp(szCommand, "FORWARD")==0){
-}
-else if(_stricmp(szCommand, "BACK")==0){
-}
-else if(_stricmp(szCommand, "LEFT")==0){
-}
-else if(_stricmp(szCommand, "RIGHT")==0){
-}
-return false;
-}
-*/
-
-void ZGameInterface::RespawnMyCharacter()	// 혼자테스트할때 클릭하면 되살아난다.
+void ZGameInterface::RespawnMyCharacter()
 {
 	if (ZApplication::GetGame() == NULL) return;
 
@@ -2853,8 +2603,6 @@ bool ZGameInterface::OnGlobalEvent(MEvent* pEvent)
 				{
 					ZGetConsole()->Show(!ZGetConsole()->IsVisible());
 					ZGetConsole()->SetZOrder(MZ_TOP);
-					return true;
-					//				m_pLogFrame->Show(ZGetConsole()->IsVisible());
 				}
 				break;
 			}
@@ -2925,72 +2673,23 @@ bool ZGameInterface::OnCommand(MWidget* pWidget, const char* szMessage)
 
 void ZGameInterface::ChangeParts(int key)
 {
-	//1번~6번키등록
-	/*
-	int mode = 0;
-	int type = 0;		// 나중에 여러 벌이라면 장비할 id 지정...
-
-	if(key=='1')	{ mode=0;type = 2;}
-	else if(key=='2')	{ mode=1;type = 7;}
-	else if(key=='3')	{ mode=2;type =12;}
-	else if(key=='4')	{ mode=3;type =17;}
-	else if(key=='5')	{ mode=4;type =22;}
-	else if(key=='6')	{ mode=5;type =27;}
-	else return;
-
-	g_parts[mode] = !g_parts[mode];	// 캐릭터 클래스로 옮기기
-	//	g_parts_change = true;
-
-	if(!g_parts[mode])	// 기본옷
-	type = 0;	
-
-	g_pGame->m_pMyCharacter->OnChangeParts(mode,type);
-
-	ZPostChangeParts(mode,type);
-	*/
 }
-/*
-void ZGameInterface::UpdateReserveChangeWeapon() {
 
-	if(!m_pMyCharacter) return;
-
-	if(m_bisReserveChangeWeapon) {
-		if( m_pMyCharacter->m_fNextShotTime < g_pGame->GetTime()) {
-			ChangeWeapon(m_nReserveChangeWeapon);
-			m_bisReserveChangeWeapon = false;
-		}
-	}
-}
-*/
 void ZGameInterface::ChangeWeapon(ZChangeWeaponType nType)
 {
 	ZMyCharacter* pChar = g_pGame->m_pMyCharacter;
 
 	if (pChar->m_pVMesh == NULL) return;
 
-	// 죽었으면 무시한다.
 	if (pChar->IsDie() ) return;
 
-	// 글래디에이터면 칼만써라
 	if (m_pGame->GetMatch()->IsRuleGladiator() && !pChar->IsAdmin())
 		return;
 
 
 	int nParts = -1;
 
-/*
-	if( m_bisReserveChangeWeapon ) { // 예약된상태에서 바꾸려고 하는경우 예약 취소~
-		m_bisReserveChangeWeapon = false;
-	}
-
-	if( m_pMyCharacter->m_fNextShotTime > g_pGame->GetTime()) { // 아직 바꿀수있는시간이 아니 되었으니 예약~
-
-		m_bisReserveChangeWeapon = true;
-		m_nReserveChangeWeapon = nType;
-		return;
-	}
-*/
-	bool bWheel = false;		// 휠로 작동했을때는 캔슬되지 않는다
+	bool bWheel = false;
 
 	if ((nType == ZCWT_PREV) || (nType == ZCWT_NEXT))
 	{
@@ -3000,7 +2699,6 @@ void ZGameInterface::ChangeWeapon(ZChangeWeaponType nType)
 		int nPos = -1;
 		int ItemQueue[MMCIP_END];
 
-		// 가진 아이템 목록을 만들고, 현재 들고있는 넘을 찾는다
 		for(int i=MMCIP_MELEE; i<MMCIP_END; i++)
 		{
 			if (!pChar->GetItems()->GetItem((MMatchCharItemParts)i)->IsEmpty())
@@ -3080,7 +2778,6 @@ void ZGameInterface::ChangeWeapon(ZChangeWeaponType nType)
 			break;
 		}
 
-		// 다쓴 수류탄으로 ChangeWeapon 금지
 		if ( (nParts == MMCIP_CUSTOM1) || (nParts == MMCIP_CUSTOM2) ) {
 			ZItem* pItem = pChar->GetItems()->GetItem((MMatchCharItemParts)nParts);
 			if (pItem->GetBulletAMagazine() <= 0)
@@ -3091,46 +2788,25 @@ void ZGameInterface::ChangeWeapon(ZChangeWeaponType nType)
 	if (nParts < 0) return;
 	if (pChar->GetItems()->GetSelectedWeaponParts() == nParts) return;
 
-	// 휠로 돌릴때는 취소하지 않는다
 	if(bWheel && (pChar->GetStateUpper() == ZC_STATE_UPPER_LOAD && pChar->IsUpperPlayDone() == false ))
 		return;
 
-	// 매달려있을때/쏠때/덤블링/스킬/막을때/띄워진상태는 무기교환이 안된다.
 	if (pChar->m_bWallHang || pChar->m_bShot || pChar->m_bShotReturn || pChar->m_bTumble 
 		|| pChar->m_bSkill || pChar->m_bGuard || pChar->m_bBlast || 	pChar->m_bBlastFall 
 		|| pChar->m_bBlastDrop || 	pChar->m_bBlastStand || pChar->m_bBlastAirmove
-		|| pChar->m_bSlash || pChar->m_bJumpSlash || pChar->m_bJumpSlashLanding	// 강베기 중에도 교환 안된다
-		 
-		// 샷중일때 상체애니메이션으로 판별
-		|| (pChar->GetStateUpper() == ZC_STATE_UPPER_SHOT && pChar->IsUpperPlayDone() == false )
-		
-		/*
-		// 그리고 발사하고나서 딜레이가 아직 안끝났을때
-		||  pChar->m_fNextShotTimeType[pChar->GetItems()->GetSelectedWeaponParts()] > g_pGame->GetTime() 
-		*/
-		
-		)
+		|| pChar->m_bSlash || pChar->m_bJumpSlash || pChar->m_bJumpSlashLanding
+		|| (pChar->GetStateUpper() == ZC_STATE_UPPER_SHOT && pChar->IsUpperPlayDone() == false ))
 		{
-			// 이때는 예약을 한다.	(휠포함)
 			m_bReservedWeapon = true;
 			m_ReservedWeapon = nType;
 			return;
 		}
 
-	/*
-	// 상체애니메이션이 있으면 캔슬.. 리로드/샷 따위
-	if (pChar->GetStateUpper() != ZC_STATE_UPPER_NONE) {
-		if ( (pChar->GetStateUpper() != ZC_STATE_UPPER_RELOAD) &&
-			(pChar->IsUpperPlayDone() == false) ) return;
-	}
-	*/
-
-
 	m_bReservedWeapon = false;
 	ZPostChangeWeapon(nParts);
 
 	m_pMyCharacter->m_bSpMotion = false;
-	// 내 무기는 직접 바꾼다. command를 통하면 순서가 바뀌는 경우가 있다.
+
 	m_pMyCharacter->ChangeWeapon((MMatchCharItemParts)nParts);
 }
 
@@ -3140,8 +2816,6 @@ void ZGameInterface::OnGameUpdate(float fElapsed)
 	if(m_pGame==NULL) return;
 
 	if (m_pGameInput) m_pGameInput->Update(fElapsed);
-
-//	UpdateReserveChangeWeapon();
 
 	m_pGame->Update(fElapsed);
 
@@ -3197,7 +2871,6 @@ bool ZGameInterface::Update(float fElapsed)
 	}
 
 	if(GetState()==GUNZ_LOBBY && m_bWaitingArrangedGame) {
-        // 임시로
 		MLabel *pLabel = (MLabel*)m_IDLResource.FindWidget("LobbyWaitingArrangedGameLabel");
 		if(pLabel) {
 			int nCount = (GetGlobalTimeMS()/500)%5;
@@ -3215,7 +2888,6 @@ bool ZGameInterface::Update(float fElapsed)
 
 	UpdateCursorEnable();
 
-	// 실제 게임에서 나가는 펑션을 부른다
 	if(g_pGame!=NULL && m_bLeaveBattleReserved && (m_dwLeaveBattleTime < GetGlobalTimeMS()))
 		LeaveBattle();
 
@@ -3292,7 +2964,7 @@ void ZGameInterface::Reload()
 	if(g_pGame->m_pMyCharacter->GetItems()->GetSelectedWeapon()->isReloadable()==false) return;
 
 	ZMyCharacter* pChar = g_pGame->m_pMyCharacter;
-	// 띄어진 상태에서는 장전못함..
+
 	if( pChar->m_bBlast || 
 		pChar->m_bBlastFall || 
 		pChar->m_bBlastDrop || 
@@ -3341,15 +3013,6 @@ void ZGameInterface::SaveScreenShot()
 	}
 	while( (IsExist(screenshotfilenameJPG)||(IsExist(screenshotfilenameBMP))) && nsscount<1000);
 
-	/*
-	do {
-		sprintf_safe(screenshotfilename,"Gunz%03d",nsscount++);
-		sprintf_safe(screenshotBMP, "%s.bmp", screenshotfilename);
-		sprintf_safe(screenshotJPG, "%s.jpg", screenshotfilename);
-	}
-	while( (IsExist(screenshotBMP)||(IsExist(screenshotJPG))) && nsscount<1000);
-	*/
-
 	LPBYTE data = NULL;
 	LPDIRECT3DSURFACE9 frontbuffer=NULL;
 
@@ -3385,7 +3048,6 @@ void ZGameInterface::SaveScreenShot()
 				memcpy(data+i*nWidth*4,source+pitch*i,nWidth*4);
 			}
 
-//			RScreenShot(nWidth,nHeight,data,_screenshotfilename);
 			bool bSuccess = RScreenShot(nWidth,nHeight,data, screenshotfilename);
 			if(!bSuccess) goto SCREENSHOTERROR;
 
@@ -3393,7 +3055,6 @@ void ZGameInterface::SaveScreenShot()
 			sprintf_safe(szOutputFilename,GUNZ_FOLDER SCREENSHOT_FOLDER"/Gunz%03d.jpg" , nsscount-1);
 
 			char szOutput[256];
-//			ZTranslateMessage(szOutput,MSG_SCREENSHOT_SAVED,1,szOutputFilename);
 			ZTransMsg( szOutput,MSG_SCREENSHOT_SAVED,1,szOutputFilename );
 			ZChatOutput(MCOLOR(ZCOLOR_CHAT_SYSTEM), szOutput);
 
@@ -3414,7 +3075,7 @@ SCREENSHOTERROR:
 }
 
 
-void ZGameInterface::Sell(void)
+void ZGameInterface::Sell()
 {
 	MButton* pButton = (MButton*)m_IDLResource.FindWidget( "SellConfirmCaller");
 	if ( pButton)
@@ -3449,7 +3110,7 @@ void ZGameInterface::Sell(void)
 }
 
 
-void ZGameInterface::SellQuestItem( void)
+void ZGameInterface::SellQuestItem()
 {
 	ZEquipmentListBox* pEquipmentListBox = (ZEquipmentListBox*)m_IDLResource.FindWidget( "MyAllEquipmentList");
 	if ( pEquipmentListBox)
@@ -3474,7 +3135,7 @@ void ZGameInterface::SellQuestItem( void)
 		pWidget->Show( false);
 }
 
-void ZGameInterface::SetSellQuestItemConfirmFrame( void)
+void ZGameInterface::SetSellQuestItemConfirmFrame()
 {
 	ZEquipmentListBox* pEquipmentListBox = (ZEquipmentListBox*)m_IDLResource.FindWidget( "MyAllEquipmentList");
 	if ( pEquipmentListBox)
@@ -3526,7 +3187,7 @@ void ZGameInterface::SetSellQuestItemConfirmFrame( void)
 	}
 }
 
-void ZGameInterface::OpenSellQuestItemConfirm( void)
+void ZGameInterface::OpenSellQuestItemConfirm()
 {
 	m_nSellQuestItemCount = 1;
 
@@ -3537,14 +3198,14 @@ void ZGameInterface::OpenSellQuestItemConfirm( void)
 		pWidget->Show( true, true);
 }
 
-void ZGameInterface::SellQuestItemCountUp( void)
+void ZGameInterface::SellQuestItemCountUp()
 {
 	m_nSellQuestItemCount++;
 
 	SetSellQuestItemConfirmFrame();
 }
 
-void ZGameInterface::SellQuestItemCountDn( void)
+void ZGameInterface::SellQuestItemCountDn()
 {
 	if ( m_nSellQuestItemCount > 1)
 		m_nSellQuestItemCount--;
@@ -3552,7 +3213,7 @@ void ZGameInterface::SellQuestItemCountDn( void)
 	SetSellQuestItemConfirmFrame();
 }
 
-void ZGameInterface::Buy(void)
+void ZGameInterface::Buy()
 {
 	MButton* pButton = (MButton*)m_IDLResource.FindWidget( "BuyConfirmCaller");
 	if ( pButton)
@@ -3581,7 +3242,6 @@ void ZGameInterface::Buy(void)
 		MMatchItemDesc* pItemDesc = MGetMatchItemDescMgr()->GetItemDesc( nItemID);
 
 #ifdef _QUEST_ITEM
-		// 땜빵코드.
 		if( 0 == pItemDesc )
 		{
 			MQuestItemDesc* pQuestItemDesc = GetQuestItemDescMgr().FindQItemDesc( nItemID );
@@ -3594,14 +3254,11 @@ void ZGameInterface::Buy(void)
 			return;
 		}
 #endif
-		if ( pItemDesc->IsCashItem())		// 캐쉬 아이템이면...
+		if ( pItemDesc->IsCashItem())
 		{
 			TCHAR szURL[ 256];
 			sprintf_safe( szURL, "explorer.exe \"%s\"", Z_LOCALE_CASHSHOP_URL);
 			WinExec( szURL, SW_SHOWNORMAL);
-
-//			sprintf_safe( szURL, "http://www.netmarble.net/cp_site/gunz/itemshop/common/buy_item.asp?item_idx=%d&i_class=%d&i_part=%d", 122, 0, 0);
-//			ShellExecute( g_hWnd, "open", "IEXPLORE.EXE", szURL, NULL, SW_SHOW);		// 이건 로그인 해야됨... -_-;		
 		}
 		else
 		{
@@ -3616,7 +3273,7 @@ void ZGameInterface::Buy(void)
 }
 
 
-void ZGameInterface::BuyCashItem(void)
+void ZGameInterface::BuyCashItem()
 {
 	MButton* pButton = (MButton*)m_IDLResource.FindWidget( "BuyCashConfirmCaller");
 	if ( pButton)
@@ -3632,10 +3289,9 @@ void ZGameInterface::BuyCashItem(void)
 }
 
 
-bool ZGameInterface::Equip(void)
+bool ZGameInterface::Equip()
 {
 	MUID uidItem;
-	//unsigned long int nItemIndex = 0;
 	MMatchCharItemParts parts = MMCIP_END;
 
 	ZEquipmentListBox* pListBox = (ZEquipmentListBox*)m_IDLResource.FindWidget("EquipmentList");
@@ -3799,7 +3455,6 @@ void ZGameInterface::ShowMessage(const char* szText, MListener* pCustomListenter
 
 	char text[1024] ="";
 
-	// nMessageID가 0이 아니면 메세지 뒤에 메세지 번호도 함께 출력해준다.(다른 나라 말일때 확인하기 위함)
 	if (nMessageID != 0)
 	{
 		sprintf_safe(text, "%s (M%d)", szText, nMessageID);
@@ -3853,25 +3508,19 @@ void ZGameInterface::ShowErrorMessage(const char *szMessage)
 void ZGameInterface::ChangeSelectedChar(int nNum)
 {
 	bool bRequested = false;
-	// 만약 캐릭터 정보를 안받았었으면 서버에 달라고 요청한다.
+
 	if ((!ZCharacterSelectView::m_CharInfo[nNum].m_bLoaded) && (!ZCharacterSelectView::m_CharInfo[nNum].m_bRequested))
 	{
 		ZPostAccountCharInfo(nNum);
 		GetCharacterSelectView()->UpdateInterface(nNum);
-		//ZCharacterSelectView::SetSelectedCharacter(nNum);
 		ZCharacterSelectView::m_CharInfo[nNum].m_bRequested = true;
 		bRequested = true;
 	}
 
-
-	// 캐릭터 보이기
 	if ((!bRequested) && (GetCharacterSelectView() != NULL))
 	{
 		GetCharacterSelectView()->SelectChar(nNum);
 	}
-
-
-
 }
 
 void ZGameInterface::OnCharSelectionCreate(void)
@@ -3951,13 +3600,6 @@ void ZGameInterface::OnInvalidate()
 		m_pBackground->OnInvalidate();
 	if( m_pCharacterSelectView)
 		m_pCharacterSelectView->OnInvalidate();
-	//ZCharacterViewList* pCharViewList = (ZCharacterViewList*)m_IDLResource.FindWidget("StagePlayerList");
-	//for(list<ZMeshView*>::iterator iter = ZMeshView::msMeshViewList.begin(); iter != ZMeshView::msMeshViewList.end(); ++iter )
-	//{
-	//	ZMeshView* pmv = *iter;
-	//	if( pmv )
-	//		pmv->OnInvalidate();
-	//}
 
 	if(ZGetEffectManager())
 		ZGetEffectManager()->OnInvalidate();	
@@ -3977,17 +3619,8 @@ void ZGameInterface::OnRestore()
 		m_pGame->OnRestore();
 	if(m_pBackground)
 		m_pBackground->OnRestore();
-//	ResetCursor();	
 	if( m_pCharacterSelectView)
 		m_pCharacterSelectView->OnRestore();
-	//ZCharacterViewList* pCharViewList = (ZCharacterViewList*)m_IDLResource.FindWidget("StagePlayerList");
-	//for(list<ZMeshView*>::iterator iter = ZMeshView::msMeshViewList.begin(); iter != ZMeshView::msMeshViewList.end(); ++iter )
-	//{
-	//	ZMeshView* pmv = *iter;
-	//	if( pmv )
-	//		pmv->OnRestore();
-	//}
-
 	if(ZGetEffectManager())
 		ZGetEffectManager()->OnRestore();	
 
@@ -4009,7 +3642,6 @@ void ZGameInterface::UpdateBlueRedTeam( void)
 	if ((pRedTeamBtn == NULL) || (pBlueTeamBtn == NULL) || (pRedTeamBtn2 == NULL) || (pBlueTeamBtn2 == NULL))
 		return;
 
-	// 팀플(팀전)
 	if ( m_bTeamPlay)
 	{
 		pRedTeamBtn->Show(true);
@@ -4023,7 +3655,6 @@ void ZGameInterface::UpdateBlueRedTeam( void)
 		{
 			int nR=0,nB=0;
 
-			// 위젯에서 숫자를 세온다. 좋지않다.
 			for( int i = 0;  i < pListBox->GetCount(); i++)
 			{
 				ZStagePlayerListItem *pSItem = (ZStagePlayerListItem*)pListBox->Get(i);
@@ -4035,7 +3666,6 @@ void ZGameInterface::UpdateBlueRedTeam( void)
 			ZIDLResource* pRes = ZApplication::GetGameInterface()->GetIDLResource();
 			ZBmNumLabel *pNumLabel;
 
-//			sprintf_safe(buffer,"%d",nB);
 			sprintf_safe(buffer,"%s:%d", ZMsg( MSG_WORD_BLUETEAM), nB);
 			pNumLabel = (ZBmNumLabel*)pRes->FindWidget("StageNumOfBlueTeam");
 			if ( pNumLabel)
@@ -4047,7 +3677,6 @@ void ZGameInterface::UpdateBlueRedTeam( void)
 			if ( pButton)
 				pButton->SetText( buffer);
 
-//			sprintf_safe(buffer,"%d",nR);
 			sprintf_safe(buffer,"%s:%d", ZMsg( MSG_WORD_REDTEAM), nR);
 			pNumLabel = (ZBmNumLabel*)pRes->FindWidget("StageNumOfRedTeam");
 			if ( pNumLabel)
@@ -4079,7 +3708,6 @@ void ZGameInterface::UpdateBlueRedTeam( void)
 		{
 			int nPlayerNum=0;
 
-			// 위젯에서 숫자를 세온다. 좋지않다.
 			for( int i = 0;  i < pListBox->GetCount(); i++)
 			{
 				ZStagePlayerListItem *pSItem = (ZStagePlayerListItem*)pListBox->Get(i);
@@ -4131,7 +3759,6 @@ void ZGameInterface::ShowInterface(bool bShowInterface)
 		bool bConsole=ZGetConsole()->IsVisible();
 		bool bLogFrame=m_pLogFrame->IsVisible();
 
-		//		m_pCombatInterface->Show(m_bShowInterface);
 		m_pLogFrame->Show(m_bShowInterface);
 		ZGetConsole()->Show(m_bShowInterface);
 		ShowWidget("CombatInfo1",m_bShowInterface);
@@ -4141,51 +3768,6 @@ void ZGameInterface::ShowInterface(bool bShowInterface)
 		m_pLogFrame->Show(bLogFrame);
 	}
 }
-
-/*
-void ZGameInterface::OnMoveMouse(int iDeltaX,int iDeltaY)
-{
-	bool bRotateEnable=false;
-	if(!m_pMyCharacter->m_bWallJump && !m_pMyCharacter->m_bWallJump2 && !m_pMyCharacter->m_bWallHang && 
-		!m_pMyCharacter->m_bTumble && !m_pMyCharacter->m_bBlast && !m_pMyCharacter->m_bBlastStand && !m_pMyCharacter->m_bBlastDrop )
-		bRotateEnable=true;
-
-
-	if (RIsActive())
-	{
-		static float lastanglex,lastanglez;
-		if(bRotateEnable)		{
-			float fRotateStep = 0.0005f * Z_MOUSE_SENSITIVITY*10.0f;
-			m_Camera.m_fAngleX += (iDeltaY * fRotateStep);
-			m_Camera.m_fAngleZ += (iDeltaX * fRotateStep);
-
-			m_Camera.m_fAngleX=min(CAMERA_ANGLEX_MAX,
-								max(CAMERA_ANGLEX_MIN,m_Camera.m_fAngleX));
-
-			lastanglex=m_Camera.m_fAngleX;
-			lastanglez=m_Camera.m_fAngleZ;
-		}else
-		{
-			// 각도제한이 필요하다
-
-			float fRotateStep = 0.0005f * Z_MOUSE_SENSITIVITY*10.0f;
-			m_Camera.m_fAngleX += (iDeltaY * fRotateStep);
-			m_Camera.m_fAngleZ += (iDeltaX * fRotateStep);
-
-			m_Camera.m_fAngleX=min(CAMERA_ANGLEX_MAX,max(CAMERA_ANGLEX_MIN,
-								min(lastanglex+pi/4.f,max(lastanglex-pi/4.f,m_Camera.m_fAngleX))));
-
-			_ASSERT(m_Camera.m_fAngleX>=CAMERA_ANGLEX_MIN && m_Camera.m_fAngleX<=CAMERA_ANGLEX_MAX );
-
-			m_Camera.m_fAngleZ=min(lastanglez+pi/4.f,
-								max(lastanglez-pi/4.f,m_Camera.m_fAngleZ));
-
-
-
-		}
-	}
-}
-*/
 
 void ZGameInterface::OnResponseShopItemList(unsigned long int* nItemList, int nItemCount)
 {
@@ -4253,32 +3835,6 @@ void ZGameInterface::FinishGame()
 
 void ZGameInterface::SerializeStageInterface()
 {
-	// 퀘스트 모드...  머하는 코드인지 모르겠음...  -_-;
-	// 나중에 필요없게 되면 이 함수 자체를 삭제하고 바로 OnStageInterfaceSettup으로 넘어가게...
-/*
-#ifdef _QUEST
-	ZStageSetting::InitStageSettingGameType();
-
-	if ( ZGetGameClient()->GetServerMode() == MSM_TEST)
-	{
-		// 나중에 랜덤맵 구현할때까지 그냥 맵 하나만 사용
-		MComboBox* pCBMapSelection = (MComboBox*)m_IDLResource.FindWidget( "MapSelection");
-		if ( pCBMapSelection)
-		{
-			int nSelected = pCBMapSelection->GetSelIndex();
-			pCBMapSelection->RemoveAll();
-
-			InitMaps( pCBMapSelection);
-
-			if ( nSelected >= pCBMapSelection->GetCount())
-				nSelected = pCBMapSelection->GetCount() - 1;
-
-			pCBMapSelection->SetSelIndex( nSelected);
-			pCBMapSelection->SetText( "asdfasdfa");
-		}
-	}
-#endif
-*/
 	MComboBox* pCombo = (MComboBox*)m_IDLResource.FindWidget( "MapSelection");
 	if ( pCombo)
 		InitMaps( pCombo);
@@ -4297,7 +3853,6 @@ void ZGameInterface::HideAllWidgets()
 	ShowWidget("CharSelection", false);
 	ShowWidget("CharCreation", false);
 	ShowWidget("Shop", false);
-//	ShowWidget("LobbyChannelPlayerList", false);
 
 	// dialog
 	ShowWidget("StageSettingFrame", false);
@@ -4324,30 +3879,11 @@ bool SetWidgetToolTipText(char* szWidget,const char* szToolTipText) {
 			pWidget->DetachToolTip();
 		}
 		else {
-//			pWidget->AttachToolTip(szToolTipText);
 			pWidget->AttachToolTip(new ZToolTip(szToolTipText, pWidget));
 		}
-/*
-		MToolTip* pTT =	pWidget->GetToolTip();
-		if(pTT) {
-			if(!szToolTipText[0]) {
-				pTT->AttachToolTip()
-			}
-			else {
-
-			}
-//			pTT->SetText(szToolTipText);
-			return true;
-		}
-*/
 	}
 	return false;
 }
-
-// #define CheckLine(str) 
-// 최대 200 으로잡고 -14 까지 체크 글자가 잘리지 않도록..
-
- // zmaplistbox.cpp 에도 선언되어있다..
 
 bool GetItemDescName(string& str,DWORD nItemID)
 {
@@ -4371,7 +3907,6 @@ bool GetItemDescStr(string& str,DWORD nItemID) {
 
 	if(pItemDesc==NULL) {
 		str.clear();
-//		str += " ";
 		return false;
 	}
 
@@ -4585,7 +4120,6 @@ void ZGameInterface::ShowEquipmentDialog(bool bShow)
 
 		SelectEquipmentTab(0);
 
-//		ZPostRequestGetCharQuestItemInfo( ZGetGameClient()->GetPlayerUID());
 		ZPostRequestCharacterItemList(ZGetGameClient()->GetPlayerUID());
 		ZPostStageState( ZGetGameClient()->GetPlayerUID(), ZGetGameClient()->GetStageUID(), MOSS_EQUIPMENT);
 
@@ -4698,7 +4232,6 @@ void ZGameInterface::ShowShopDialog(bool bShow)
 
 		SelectShopTab(0);
 
-//		ZPostRequestGetCharQuestItemInfo( ZGetGameClient()->GetPlayerUID());
 		ZPostRequestCharacterItemList(ZGetGameClient()->GetPlayerUID());
 	}
 	else
@@ -4786,7 +4319,6 @@ void ZGameInterface::SelectShopTab(int nTabIndex)
 {
 	ZIDLResource* pResource = GetIDLResource();
 
-	// 프리미엄 샵 - 설정되는 국가대로 하나씩 지워나간다
 #ifndef _DEBUG
 	#if defined(LOCALE_BRAZIL) || defined(LOCALE_INDIA) || defined(LOCALE_US) || defined(LOCALE_JAPAN) || defined(LOCALE_KOREA)
 	{
@@ -4849,7 +4381,7 @@ void ZGameInterface::SelectShopTab(int nTabIndex)
 	}
 	else if ( nTabIndex == 1)
 	{
-		if ( pComboBox->GetSelIndex() == 10)		// 10 = zshop_item_filter_quest  하드 코딩... -_-;
+		if ( pComboBox->GetSelIndex() == 10)
 		{
 			pButton = (MButton*)pResource->FindWidget( "SellQuestItemConfirmCaller");
 			if ( pButton)
@@ -4880,8 +4412,6 @@ void ZGameInterface::SelectShopTab(int nTabIndex)
 	if (pButton != NULL)
 		pButton->Show(nTabIndex!=2 ? true : false);
 
-
-	// 구입, 판매 라벨
 	MPicture* pPicture;
 	MBitmap* pBitmap;
 	pPicture = (MPicture*)pResource->FindWidget("Shop_FrameTabLabel1");
@@ -4894,8 +4424,6 @@ void ZGameInterface::SelectShopTab(int nTabIndex)
 	if ( pPicture)
 		pPicture->Show(nTabIndex==2 ? true : false);
 
-
-	// 프레임 탭
 	pPicture = (MPicture*)pResource->FindWidget("Shop_TabLabel");
 	if ( pPicture)
 	{
@@ -4910,8 +4438,6 @@ void ZGameInterface::SelectShopTab(int nTabIndex)
 			pPicture->SetBitmap( pBitmap);
 	}
 
-
-	// 프리미엄 샵 - 설정되는 국가대로 하나씩 지워나간다
 #ifndef _DEBUG
 	#if defined(LOCALE_BRAZIL) || defined(LOCALE_INDIA) || defined(LOCALE_US) || defined(LOCALE_JAPAN) || defined(LOCALE_KOREA)
 	{
@@ -4952,7 +4478,6 @@ void ZGameInterface::SelectEquipmentTab(int nTabIndex)
 	pWidget = pResource->FindWidget("AccountItemList");
 	if (pWidget != NULL) pWidget->Show(nTabIndex==0 ? false:true);
 
-	// 탭 버튼
 	MButton* pButton = (MButton*)pResource->FindWidget( "Equip");
 	if ( pButton)
 	{
@@ -4994,8 +4519,6 @@ void ZGameInterface::SelectEquipmentTab(int nTabIndex)
 	if (pButton)
 		pButton->Show( nTabIndex==1 ? false : true);
 
-
-	// 탭 라벨
 	MLabel* pLabel;
 	pLabel = (MLabel*)pResource->FindWidget("Equipment_FrameTabLabel1");
 	if ( pLabel)
@@ -5004,7 +4527,6 @@ void ZGameInterface::SelectEquipmentTab(int nTabIndex)
 	if ( pLabel)
 		pLabel->Show( nTabIndex==1 ? true : false);
 
-	// 탭 리스트
 	MPicture* pPicture;
 	pPicture = (MPicture*)pResource->FindWidget("Equip_ListLabel1");
 	if ( pPicture)
@@ -5013,8 +4535,6 @@ void ZGameInterface::SelectEquipmentTab(int nTabIndex)
 	if ( pPicture)
 		pPicture->Show( nTabIndex==1 ? true : false);
 
-
-	// 프레임 탭
 	pPicture = (MPicture*)pResource->FindWidget("Equip_TabLabel");
 	MBitmap* pBitmap;
 	if ( pPicture)
@@ -5028,14 +4548,12 @@ void ZGameInterface::SelectEquipmentTab(int nTabIndex)
 			pPicture->SetBitmap( pBitmap);
 	}
 
-	// 중앙은행
 	if (nTabIndex == 1)
 	{
 		ZGetMyInfo()->GetItemList()->ClearAccountItems();
 		ZGetMyInfo()->GetItemList()->SerializeAccountItem();
 	}
 
-	// 아이템 슬롯 Enable/Disable
 	for(int i = 0;  i < MMCIP_END;  i++)
 	{
 		ZItemSlotView* itemSlot = (ZItemSlotView*)m_IDLResource.FindWidget( GetItemSlotName( "Equip", i));
@@ -5095,19 +4613,19 @@ void ZGameInterface::EnableCharSelectionInterface(bool bEnable)
 void ZGameInterface::EnableLobbyInterface(bool bEnable)
 {
 
-	EnableWidget("LobbyOptionFrame", bEnable);			// 옵션 버튼
-	EnableWidget("Lobby_Charviewer_info", bEnable);		// 정보보기 버튼
-	EnableWidget("StageJoin", bEnable);					// 게임참가 버튼
-	EnableWidget("StageCreateFrameCaller", bEnable);	// 게임생성 버튼
-	EnableWidget("ShopCaller", bEnable);				// 상점 버튼
-	EnableWidget("EquipmentCaller", bEnable);			// 장비 버튼
-	EnableWidget("ReplayCaller", bEnable);				// 리플레이 버튼
-	EnableWidget("CharSelectionCaller", bEnable);		// 캐릭터 변경 버튼
-	EnableWidget("Logout", bEnable);					// 로그아웃 버튼
-	EnableWidget("QuickJoin", bEnable);					// 퀵조인 버튼
-	EnableWidget("QuickJoin2", bEnable);				// 퀵조인 버튼
-	EnableWidget("ChannelListFrameCaller", bEnable);	// 채널변경 버튼
-	EnableWidget("StageList", bEnable);					// 방리스트
+	EnableWidget("LobbyOptionFrame", bEnable);
+	EnableWidget("Lobby_Charviewer_info", bEnable);
+	EnableWidget("StageJoin", bEnable);
+	EnableWidget("StageCreateFrameCaller", bEnable);
+	EnableWidget("ShopCaller", bEnable);
+	EnableWidget("EquipmentCaller", bEnable);
+	EnableWidget("ReplayCaller", bEnable);
+	EnableWidget("CharSelectionCaller", bEnable);
+	EnableWidget("Logout", bEnable);
+	EnableWidget("QuickJoin", bEnable);
+	EnableWidget("QuickJoin2", bEnable);
+	EnableWidget("ChannelListFrameCaller", bEnable);
+	EnableWidget("StageList", bEnable);
 	EnableWidget("Lobby_StageList",bEnable);
 	EnableWidget("LobbyChannelPlayerList", bEnable);
 	EnableWidget("ChannelChattingOutput", bEnable);
@@ -5116,56 +4634,35 @@ void ZGameInterface::EnableLobbyInterface(bool bEnable)
 
 void ZGameInterface::EnableStageInterface(bool bEnable)
 {
-	EnableWidget("Stage_Charviewer_info", bEnable);		// 정보보기 버튼
+	EnableWidget("Stage_Charviewer_info", bEnable);
 	EnableWidget("StagePlayerNameInput_combo", bEnable);
-	EnableWidget("GameStart", bEnable);					// 게임시작 버튼
-	MButton* pButton = (MButton*)m_IDLResource.FindWidget("StageReady");				// 레디 버튼
+	EnableWidget("GameStart", bEnable);
+	MButton* pButton = (MButton*)m_IDLResource.FindWidget("StageReady");
 	if ( pButton)
 	{
 		pButton->Enable( bEnable);
 		pButton->SetCheck( false);
 	}
-	EnableWidget("ForcedEntryToGame", bEnable);			// 난입 버튼
-	EnableWidget("ForcedEntryToGame2", bEnable);		// 난입 버튼
-	EnableWidget("StageTeamBlue",  bEnable);			// blue팀 설정 버튼
-	EnableWidget("StageTeamBlue2", bEnable);			// blue팀 설정 버튼
-	EnableWidget("StageTeamRed",  bEnable);				// red팀 설정 버튼
-	EnableWidget("StageTeamRed2", bEnable);				// red팀 설정 버튼
-	EnableWidget("ShopCaller", bEnable);				// 상점 버튼
-	EnableWidget("EquipmentCaller", bEnable);			// 장비 버튼
-	EnableWidget("StageSettingCaller", bEnable);		// 방설정 버튼
-	EnableWidget("StageObserverBtn", bEnable);			// 관전 체크 버튼
-	EnableWidget("Lobby_StageExit", bEnable);			// 나가기 버튼
+	EnableWidget("ForcedEntryToGame", bEnable);
+	EnableWidget("ForcedEntryToGame2", bEnable);
+	EnableWidget("StageTeamBlue",  bEnable);
+	EnableWidget("StageTeamBlue2", bEnable);
+	EnableWidget("StageTeamRed",  bEnable);
+	EnableWidget("StageTeamRed2", bEnable);
+	EnableWidget("ShopCaller", bEnable);
+	EnableWidget("EquipmentCaller", bEnable);
+	EnableWidget("StageSettingCaller", bEnable);
+	EnableWidget("StageObserverBtn", bEnable);
+	EnableWidget("Lobby_StageExit", bEnable);
 
-	EnableWidget("MapSelection", bEnable);				// 맵선택 콤보박스
-	EnableWidget("StageType", bEnable);					// 게임방식 콤보박스
-	EnableWidget("StageMaxPlayer", bEnable);			// 최대인원 콤보박스
-	EnableWidget("StageRoundCount", bEnable);			// 경기횟수 콤보박스
+	EnableWidget("MapSelection", bEnable);
+	EnableWidget("StageType", bEnable);
+	EnableWidget("StageMaxPlayer", bEnable);
+	EnableWidget("StageRoundCount", bEnable);
 }
 
 void ZGameInterface::SetRoomNoLight( int d )
-{
-	/*
-	MTabCtrl *pTab = (MTabCtrl*)m_IDLResource.FindWidget("Lobby_RoomNoControl");
-	if( pTab ) 
-		pTab->SetSelIndex(d-1);
-	*/
-    
-	/*
-	for(int i=1;i<=6;i++)
-	{
-		char szBuffer[64];
-		sprintf_safe(szBuffer, "Lobby_RoomNo%d", i);
-		MButton* pButton = (MButton*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget(szBuffer);
-		if(pButton)
-		{
-			bool bCheck = (i==d);
-			pButton->SetCheck(bCheck);
-		}
-	}
-	*/
-
-	char szBuffer[64];
+{	char szBuffer[64];
 	sprintf_safe(szBuffer, "Lobby_RoomNo%d", d);
 	MButton* pButton = (MButton*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget(szBuffer);
 	if(pButton) 
@@ -5248,32 +4745,6 @@ bool ZGameInterface::IsMenuVisible()
 
 void ZGameInterface::Show112Dialog(bool bShow)
 {
-/*
-	MWidget* pWidget = m_IDLResource.FindWidget("112Confirm");
-	if(pWidget==NULL) return;
-
-	if (pWidget->IsVisible() == bShow) return;
-	pWidget->Show(bShow);
-	
-	if (bShow)
-	{
-		SetCursorEnable(true);
-
-		MEdit* pReasonEdit = (MEdit*)m_IDLResource.FindWidget("112_ConfirmEdit");
-		if (pReasonEdit)
-		{
-			pReasonEdit->SetText("");
-			pReasonEdit->SetFocus();
-		}
-	}
-	else
-	{
-		if (GetState() == GUNZ_GAME)
-		{
-			if (!IsMenuVisible()) SetCursorEnable(false);
-		}
-	}
-*/
 	MWidget* pWidget = m_IDLResource.FindWidget( "112Confirm");
 	if ( !pWidget)
 		return;
@@ -5340,62 +4811,13 @@ void ZGameInterface::RequestQuickJoin()
 
 	quick_join_param.nMapEnum = 0xFFFFFFFF;
 
-	// 트레이닝, 칼전은 뺀다.
 	quick_join_param.nModeEnum = 0;
 	SetBitSet(quick_join_param.nModeEnum, MMATCH_GAMETYPE_DEATHMATCH_SOLO);
 	SetBitSet(quick_join_param.nModeEnum, MMATCH_GAMETYPE_DEATHMATCH_TEAM);
 	SetBitSet(quick_join_param.nModeEnum, MMATCH_GAMETYPE_ASSASSINATE);
 
-
-
-
 	ZPostRequestQuickJoin(ZGetGameClient()->GetPlayerUID(), &quick_join_param);
 }
-
-/*
-// 0 = 채널 , 1 = 친구 , 2 = 클랜
-void ZGameInterface::SetupPlayerListButton(int index)
-{
-	if(index<0 || index>=3) return;
-
-	ZIDLResource *pResource = ZApplication::GetGameInterface()->GetIDLResource();
-
-	MWidget *pWidget;
-
-	pWidget = pResource->FindWidget("LobbyPlayerListTabChannel");
-	if(pWidget) pWidget->Show(index==0);
-
-	pWidget = pResource->FindWidget("LobbyPlayerListTabFriend");
-	if(pWidget) pWidget->Show(index==1);
-
-	pWidget = pResource->FindWidget("LobbyPlayerListTabClan");
-	if(pWidget) pWidget->Show(index==2);
-
-	// 클랜인데 클랜에 가입이 안되어있으면 생성 창을 보인다
-	bool bShowCreateFrame = (index==2 && !ZGetMyInfo()->IsClanJoined());
-
-	pWidget = m_IDLResource.FindWidget("LobbyPlayerListClanCreateFrame");
-	if(pWidget) pWidget->Show(bShowCreateFrame);
-	pWidget = m_IDLResource.FindWidget("LobbyChannelPlayerList");
-	if(pWidget) pWidget->Show(!bShowCreateFrame);
-}
-
-void ZGameInterface::SetupPlayerListTab()
-{
-	ZIDLResource *pResource = ZApplication::GetGameInterface()->GetIDLResource();
-	MWidget *pWidget;
-	pWidget = pResource->FindWidget("LobbyPlayerListTabClan");
-	if(!pWidget || !pWidget->IsVisible()) return;
-
-	// 클랜인데 클랜에 가입이 안되어있으면 생성 창을 보인다
-	bool bShowCreateFrame = !ZGetMyInfo()->IsClanJoined();
-
-	pWidget = m_IDLResource.FindWidget("LobbyPlayerListClanCreateFrame");
-	if(pWidget) pWidget->Show(bShowCreateFrame);
-	pWidget = m_IDLResource.FindWidget("LobbyChannelPlayerList");
-	if(pWidget) pWidget->Show(!bShowCreateFrame);
-}
-*/
 
 void ZGameInterface::InitClanLobbyUI(bool bClanBattleEnable)
 {
@@ -5412,8 +4834,6 @@ void ZGameInterface::InitClanLobbyUI(bool bClanBattleEnable)
 	if(pWidget) pWidget->Show(bClanBattleEnable);
 
 	m_CombatMenu.EnableItem(ZCombatMenu::ZCMI_BATTLE_EXIT, !bClanBattleEnable);
-//	pWidget= m_IDLResource.FindWidget( "BattleExit" );
-//	if(pWidget) pWidget->Enable(!bClanBattleEnable);
 
 	pWidget= m_IDLResource.FindWidget( "QuickJoin" );
 	if(pWidget) pWidget->Show(!bClanBattleEnable);
@@ -5466,8 +4886,6 @@ void ZGameInterface::InitLadderUI(bool bLadderEnable)
 	if(pWidget) pWidget->Show(bLadderEnable);
 
 	m_CombatMenu.EnableItem(ZCombatMenu::ZCMI_BATTLE_EXIT, !bLadderEnable);
-	//pWidget= m_IDLResource.FindWidget( "BattleExit" );
-	//if(pWidget) pWidget->Enable(!bLadderEnable);
 
 	bool bLadderServer = 
 		ZGetGameClient()->GetServerMode()==MSM_CLAN ||
@@ -5492,12 +4910,9 @@ void ZGameInterface::OnArrangedTeamGameUI(bool bFinding)
 	pWidget = m_IDLResource.FindWidget("LobbyFindClanTeam");
 	if(pWidget!=NULL) pWidget->Show(bFinding);
 
-
-	// 다음 위젯들을 enable/disable 해준다
 #define SAFE_ENABLE(x) { pWidget= m_IDLResource.FindWidget( x ); if(pWidget) pWidget->Enable(!bFinding); }
 
 	SAFE_ENABLE("LobbyChannelPlayerList");
-//	SAFE_ENABLE("LobbyPlayerListTabClanCreateButton");
 	SAFE_ENABLE("ShopCaller");
 	SAFE_ENABLE("EquipmentCaller");
 	SAFE_ENABLE("ChannelListFrameCaller");
@@ -5525,7 +4940,6 @@ bool ZGameInterface::IsReadyToPropose()
 	if(m_pMsgBox->IsVisible())
 		return false;
 
-	// TODO : 앞에 modal 창이 떠있으면 return false 하자..
 	return true;
 }
 
@@ -5591,8 +5005,6 @@ string GetItemSpecString(MMatchItemDesc* pItemDesc)
 	char temp[1024];
 	bool bAdd = false;
 
-
-	// 인첸트 아이템일 경우...
 	if ( pItemDesc->IsEnchantItem())
 	{
 		switch ( pItemDesc->m_nWeaponType)
@@ -5650,9 +5062,6 @@ string GetItemSpecString(MMatchItemDesc* pItemDesc)
 				break;
 		}
 	}
-
-
-	// 인첸트 아이템이 아닐경우...
 	else
 	{
 		if(pItemDesc->m_nMaxBullet) {
@@ -5677,14 +5086,7 @@ string GetItemSpecString(MMatchItemDesc* pItemDesc)
 			str += temp;
 			bAdd = true;
 		}
-
-//		if(pItemDesc->m_nReloadTime) {
-//			sprintf_safe(temp,"장전시간 : %d s\n",pItemDesc->m_nReloadTime);
-//			str += temp;
-//			bAdd = true;
-//		}
-
-
+		
 		// HP
 		if(pItemDesc->m_nHP) {
 			sprintf_safe(temp,"%s +%d\n", ZMsg(MSG_CHARINFO_HP), pItemDesc->m_nHP);
@@ -5810,8 +5212,6 @@ string GetPeriodItemString( ZMyItemNode* pRentalNode)
 	return str;
 }
 
-
-// 일반 아이템용
 void ZGameInterface::SetupItemDescription( MMatchItemDesc* pItemDesc, const char *szTextArea1, const char *szTextArea2, const char *szTextArea3, const char *szIcon, ZMyItemNode* pRentalNode)
 {
 	if(!pItemDesc) return;
@@ -5821,25 +5221,22 @@ void ZGameInterface::SetupItemDescription( MMatchItemDesc* pItemDesc, const char
 	MTextArea* pTextArea3 = (MTextArea*)ZGetGameInterface()->GetIDLResource()->FindWidget(szTextArea3);
 	if( pTextArea1)
 	{
-		// 장비 이름
 		pTextArea1->SetTextColor( MCOLOR(255,255,255));
 		pTextArea1->SetText( pItemDesc->m_szName);
 
-		// 제약사항
 		pTextArea1->AddText( "\n\n\n");
 		pTextArea1->AddText( GetRestrictionString(pItemDesc).c_str(), MCOLOR( 170, 170, 170));
 
-		// 기능
 		pTextArea1->AddText( "\n");
 		pTextArea1->AddText( GetItemSpecString(pItemDesc).c_str(), MCOLOR( 170, 170, 170));
 	}
-	// 기간제 표시
+
 	if( pTextArea2)
 	{
 		pTextArea2->SetTextColor( MCOLOR( 200, 0, 0));
 		pTextArea2->SetText( GetPeriodItemString( pRentalNode).c_str());
 	}
-	// 아이템 설명
+
 	if( pTextArea3)
 	{
 		pTextArea3->SetTextColor( MCOLOR( 120, 120, 120));
@@ -5849,8 +5246,6 @@ void ZGameInterface::SetupItemDescription( MMatchItemDesc* pItemDesc, const char
 	MPicture* pItemIcon = (MPicture*)ZGetGameInterface()->GetIDLResource()->FindWidget( szIcon);
 	if ( pItemIcon)
 		pItemIcon->SetBitmap( GetItemIconBitmap( pItemDesc, true));
-
-
 
 	int PrevHP = 0;
 	int PrevAP = 0;
@@ -5871,8 +5266,7 @@ void ZGameInterface::SetupItemDescription( MMatchItemDesc* pItemDesc, const char
 		PrevWeight = MyItemDesc->m_nWeight;
 		PrevMaxWeight = MyItemDesc->m_nMaxWT;
 	}();
-
-	// 으메... 하드코딩스러운거... -_-;
+;
 	char szName[ 128], szBuff[ 128];
 	strcpy_safe( szName, ((strncmp( szTextArea1, "Equip", 5) == 0) ? "Equip_MyInfo" : "Shop_MyInfo"));
 	MTextArea* pTextArea = (MTextArea*)ZGetGameInterface()->GetIDLResource()->FindWidget( szName);
@@ -5940,8 +5334,6 @@ void ZGameInterface::SetupItemDescription( MMatchItemDesc* pItemDesc, const char
 	}
 }
 
-
-// 퀘스트 용
 void ZGameInterface::SetupItemDescription( MQuestItemDesc* pItemDesc, const char *szTextArea1, const char *szTextArea2, const char *szTextArea3, const char *szIcon)
 {
 	if(!pItemDesc) return;
@@ -5951,7 +5343,6 @@ void ZGameInterface::SetupItemDescription( MQuestItemDesc* pItemDesc, const char
 	MTextArea* pTextArea3 = (MTextArea*)ZGetGameInterface()->GetIDLResource()->FindWidget(szTextArea3);
 	if( pTextArea1)
 	{
-		// 장비 이름
 		pTextArea1->SetTextColor( MCOLOR(255,255,255));
 		pTextArea1->SetText( pItemDesc->m_szQuestItemName);
 		pTextArea1->AddText( "\n");
@@ -5960,19 +5351,18 @@ void ZGameInterface::SetupItemDescription( MQuestItemDesc* pItemDesc, const char
 		pTextArea1->AddText( szText, MCOLOR( 170, 170, 170));
 		pTextArea1->AddText( "\n\n");
 
-		// 제약사항
 		if ( pItemDesc->m_bSecrifice)
 		{
 			sprintf_safe( szText, "%s %s", ZMsg( MSG_WORD_SACRIFICE), ZMsg( MSG_WORD_ITEM));
 			pTextArea1->AddText( szText, MCOLOR( 170, 170, 170));
 		}
 	}
-	// 기간제 표시
+
 	if( pTextArea2)
 	{
 		pTextArea2->SetText( "");
 	}
-	// 아이템 설명
+
 	if( pTextArea3)
 	{
 		pTextArea3->SetTextColor( MCOLOR( 120, 120, 120));
@@ -5980,12 +5370,8 @@ void ZGameInterface::SetupItemDescription( MQuestItemDesc* pItemDesc, const char
 	}
 
 	MPicture* pItemIcon = (MPicture*)ZGetGameInterface()->GetIDLResource()->FindWidget( szIcon);
-	if ( pItemIcon)
-		pItemIcon->SetBitmap( GetQuestItemIcon( pItemDesc->m_nItemID, true));
-
-
-
-
+	if (pItemIcon)
+		pItemIcon->SetBitmap( GetQuestItemIcon(pItemDesc->m_nItemID, true));
 	MTextArea* pTextArea = (MTextArea*)m_IDLResource.FindWidget("Shop_MyInfo");
 	if (pTextArea)
 	{
@@ -6061,23 +5447,8 @@ void ZGameInterface::GetBringAccountItem()
 		_ASSERT(FALSE);	// Unknown Restriction
 }
 
-
-
-// 리플레이 관련 함수들(동환이가 추가)
-
-/***********************************************************************
-  ShowReplayDialog : public
-  
-  desc : 리플레이 화면 보이기
-  arg  : true(=show) or false(=hide)
-  ret  : none
-************************************************************************/
 class ReplayListBoxItem : public MListItem
 {
-protected:
-	char		m_szName[ 128];
-	char		m_szVersion[ 10];
-
 public:
 	ReplayListBoxItem( const char* szName, const char* szVersion)
 	{
@@ -6102,25 +5473,25 @@ public:
 	{
 		return NULL;
 	}
+
+protected:
+	char		m_szName[128];
+	char		m_szVersion[10];
 };
 
 void ZGameInterface::ShowReplayDialog( bool bShow)
 {
-	if ( bShow)			// 보이기이면...
+	if ( bShow)
 	{
-		// 리플레이 화면 보이기
 		MWidget* pWidget;
 		pWidget = (MWidget*)m_IDLResource.FindWidget( "Replay");
 		if ( pWidget)
 			pWidget->Show( true, true);
 
-		// '보기'버튼 비활성화
 		pWidget = (MWidget*)m_IDLResource.FindWidget( "Replay_View");
 		if ( pWidget)
 			pWidget->Enable( false);
 
-
-		// 파일 리스트 초기화
 		MListBox* pListBox = (MListBox*)m_IDLResource.FindWidget( "Replay_FileList");
 		if ( pListBox)
 		{
@@ -6128,16 +5499,16 @@ void ZGameInterface::ShowReplayDialog( bool bShow)
 
 			// Get path name
 			TCHAR szPath[ MAX_PATH];
-			if ( GetMyDocumentsPath( szPath))		// 내문서 폴더 경로
+			if ( GetMyDocumentsPath( szPath))
 			{
-				strcat( szPath, GUNZ_FOLDER);		// Gunz 폴더 경로
-				strcat( szPath, REPLAY_FOLDER);		// Replay 폴더 경로
+				strcat( szPath, GUNZ_FOLDER);
+				strcat( szPath, REPLAY_FOLDER);
 				CreatePath( szPath );
 			}
 			TCHAR szFullPath[ MAX_PATH];
 			strcpy_safe( szFullPath, szPath);
 
-			strcat( szPath, "/*.gzr");			// 확장명 필터
+			strcat( szPath, "/*.gzr");
 
 			// Get file list
 			struct _finddata_t c_file;
@@ -6157,36 +5528,25 @@ void ZGameInterface::ShowReplayDialog( bool bShow)
 					DWORD dwFileVersion = 0;
 					char szVersion[10] = "";
 				
-					pListBox->Add( new ReplayListBoxItem( szName, szVersion));			// Add to listbox
+					pListBox->Add( new ReplayListBoxItem( szName, szVersion)); // Add to listbox
 				} while ( _findnext( hFile, &c_file) == 0);
 
 				_findclose( hFile);
 			}
 
-			pListBox->Sort();		// Sorting
+			pListBox->Sort();
 		}
 	}
-	else				// 감추기이면...
+	else
 	{
-		// 리플레이 화면 감추기
 		ShowWidget( "Replay", false);
 	}
 }
 
-/***********************************************************************
-  ViewReplay : public
-  
-  desc : 리플레이 실행
-  arg  : none
-  ret  : none
-************************************************************************/
-void ZGameInterface::ViewReplay( void)
+void ZGameInterface::ViewReplay()
 {
-	// 리플레이 다이얼로그 닫기
 	ShowReplayDialog( false);
 
-
-	// 폴더 경로-화일명 구함
 	MListBox* pListBox = (MListBox*)m_IDLResource.FindWidget( "Replay_FileList");
 	if ( !pListBox)
 		return ;
@@ -6195,10 +5555,10 @@ void ZGameInterface::ViewReplay( void)
 		return ;
 
 	TCHAR szName[ MAX_PATH];
-	if ( GetMyDocumentsPath( szName))				// 내문서 폴더 경로
+	if ( GetMyDocumentsPath( szName))
 	{
-		strcat( szName, GUNZ_FOLDER);				// Gunz 폴더 경로
-		strcat( szName, REPLAY_FOLDER);				// Replay 폴더 경로
+		strcat( szName, GUNZ_FOLDER);
+		strcat( szName, REPLAY_FOLDER);
 		strcat( szName, "/");
 		strcat( szName, pListBox->GetSelItemString());
 	}
@@ -6207,17 +5567,12 @@ void ZGameInterface::ViewReplay( void)
 	m_bOnEndOfReplay = true;
 	m_nLevelPercentCache = ZGetMyInfo()->GetLevelPercent();
 
-	// 리플레이 실행
 	if ( !CreateReplayGame( szName))
-	{
 		ZApplication::GetGameInterface()->ShowMessage( "Can't Open Replay File" );
-	}
 
-	// 옵션 메뉴의 일부 버튼 비활성화
 	m_CombatMenu.EnableItem(ZCombatMenu::ZCMI_BATTLE_EXIT, false);
 }
 
-// 장비 아이콘 드래그 앤 드롭 상태일때 장착 가능한 ItemSlot 뷰 설정하기
 void ZGameInterface::SetKindableItem( MMatchItemSlotType nSlotType)
 {
 	ZItemSlotView* itemSlot;
@@ -6272,8 +5627,6 @@ void ZGameInterface::SetKindableItem( MMatchItemSlotType nSlotType)
 	}
 }
 
-
-////////////////////////////////////////////////////////////////
 #ifdef _QUEST_ITEM
 void ZGameInterface::OnResponseCharacterItemList_QuestItem( MTD_QuestItemNode* pQuestItemNode, int nQuestItemCount )
 {
@@ -6290,24 +5643,20 @@ void ZGameInterface::OnResponseBuyQuestItem( const int nResult, const int nBP )
 {
 	if( MOK == nResult )
 	{
-		// 임시
 		ZApplication::GetGameInterface()->ShowMessage( MSG_GAME_BUYITEM );
 
 		ZGetMyInfo()->SetBP( nBP );
 	}
 	else if( MERR_TOO_MANY_ITEM == nResult )
 	{
-		// 임시.
 		ZApplication::GetGameInterface()->ShowErrorMessage( nResult );
 	}
 	else if( MERR_TOO_EXPENSIVE_BOUNTY == nResult )
 	{
-		// 임시.
 		ZApplication::GetGameInterface()->ShowErrorMessage( nResult );
 	}
 	else
 	{
-		// 정의되어있지 않음.
 		mlog( "ZGameInterface::OnCommand::MC_MATCH_RESPONSE_BUY_QUEST_ITEM - 정의되지 않은 결과처리.\n" );
 		ASSERT( 0 );				
 	}
@@ -6317,7 +5666,6 @@ void ZGameInterface::OnResponseSellQuestItem( const int nResult, const int nBP )
 {
 	if( MOK == nResult )
 	{
-		// 임시.
 		ZApplication::GetGameInterface()->ShowMessage(MSG_GAME_SELLITEM);
 
 		ZGetMyInfo()->SetBP( nBP );
@@ -6328,76 +5676,69 @@ void ZGameInterface::OnResponseSellQuestItem( const int nResult, const int nBP )
 }
 #endif
 
-
-// 퀘스트용 아이템 아이콘 화일명(하드 코딩 덩어리~  -_-;)
-// 놓을데가 없어서 일단 여기다...  -_-;
 MBitmap* ZGameInterface::GetQuestItemIcon( int nItemID, bool bSmallIcon)
 {
 	char szFileName[ 64] = "";
 	switch ( nItemID)
 	{
 		// Page
-		case 200001 :	strcpy_safe( szFileName, "slot_icon_page"); break;		// 찢겨진 13페이지
-		case 200002 :	strcpy_safe( szFileName, "slot_icon_page"); break;		// 찢겨진 25페이지
-		case 200003 :	strcpy_safe( szFileName, "slot_icon_page"); break;		// 찢겨진 41페이지
-		case 200004 :	strcpy_safe( szFileName, "slot_icon_page"); break;		// 찢겨진 65페이지
+		case 200001 :	strcpy_safe( szFileName, "slot_icon_page"); break; // 13
+		case 200002 :	strcpy_safe( szFileName, "slot_icon_page"); break; // 25
+		case 200003 :	strcpy_safe( szFileName, "slot_icon_page"); break; // 41
+		case 200004 :	strcpy_safe( szFileName, "slot_icon_page"); break; // 65
 
 		// Skull
-		case 200005 :	strcpy_safe( szFileName, "slot_icon_skull"); break;		// 작은두골
-		case 200006 :	strcpy_safe( szFileName, "slot_icon_skull"); break;		// 큰두골
-		case 200007 :	strcpy_safe( szFileName, "slot_icon_skull"); break;		// 수수께기의 두골
-		case 200008 :	strcpy_safe( szFileName, "slot_icon_skull"); break;		// 고블린의 두골
-		case 200009 :	strcpy_safe( szFileName, "slot_icon_skull"); break;		// 고블린 킹의 두골
-		case 200010 :	strcpy_safe( szFileName, "slot_icon_skull"); break;		// 거대한 유골
+		case 200005 :	strcpy_safe( szFileName, "slot_icon_skull"); break;
+		case 200006 :	strcpy_safe( szFileName, "slot_icon_skull"); break;
+		case 200007 :	strcpy_safe( szFileName, "slot_icon_skull"); break;
+		case 200008 :	strcpy_safe( szFileName, "slot_icon_skull"); break;
+		case 200009 :	strcpy_safe( szFileName, "slot_icon_skull"); break;
+		case 200010 :	strcpy_safe( szFileName, "slot_icon_skull"); break;
 
 		// Fresh
-		case 200011 :	strcpy_safe( szFileName, "slot_icon_fresh"); break;		// 날고기
-		case 200012 :	strcpy_safe( szFileName, "slot_icon_fresh"); break;		// 불고기
-		case 200013 :	strcpy_safe( szFileName, "slot_icon_fresh"); break;		// 스테이크
+		case 200011 :	strcpy_safe( szFileName, "slot_icon_fresh"); break;
+		case 200012 :	strcpy_safe( szFileName, "slot_icon_fresh"); break;
+		case 200013 :	strcpy_safe( szFileName, "slot_icon_fresh"); break;
 
 		// Ring
-		case 200014 :	strcpy_safe( szFileName, "slot_icon_ring"); break;		// 철귀걸이
-		case 200015 :	strcpy_safe( szFileName, "slot_icon_ring"); break;		// 은귀걸이
-		case 200016 :	strcpy_safe( szFileName, "slot_icon_ring"); break;		// 금귀걸이
-		case 200017 :	strcpy_safe( szFileName, "slot_icon_ring"); break;		// 플래티넘 귀걸이
+		case 200014 :	strcpy_safe( szFileName, "slot_icon_ring"); break;
+		case 200015 :	strcpy_safe( szFileName, "slot_icon_ring"); break;
+		case 200016 :	strcpy_safe( szFileName, "slot_icon_ring"); break;
+		case 200017 :	strcpy_safe( szFileName, "slot_icon_ring"); break;
 
 		// Necklace
-		case 200018 :	strcpy_safe( szFileName, "slot_icon_neck"); break;		// 크림슨의 목걸이
+		case 200018 :	strcpy_safe( szFileName, "slot_icon_neck"); break;
 
 		// Doll
-		case 200019 :	strcpy_safe( szFileName, "slot_icon_doll"); break;		// 스켈레톤 인형
-		case 200020 :	strcpy_safe( szFileName, "slot_icon_doll"); break;		// 코볼드 인형
-		case 200021 :	strcpy_safe( szFileName, "slot_icon_doll"); break;		// 고블린 인형
-		case 200022 :	strcpy_safe( szFileName, "slot_icon_doll"); break;		// 팜포우 인형
-		case 200023 :	strcpy_safe( szFileName, "slot_icon_doll"); break;		// 토끼인형
-		case 200024 :	strcpy_safe( szFileName, "slot_icon_doll"); break;		// 곰인형
-		case 200025 :	strcpy_safe( szFileName, "slot_icon_doll"); break;		// 저주 받은 곰인형
-		case 200026 :	strcpy_safe( szFileName, "slot_icon_doll"); break;		// 팜포우 아이돌
-		case 200027 :	strcpy_safe( szFileName, "slot_icon_doll"); break;		// 저주 받은 팜포우 아이돌
+		case 200019 :	strcpy_safe( szFileName, "slot_icon_doll"); break;
+		case 200020 :	strcpy_safe( szFileName, "slot_icon_doll"); break;
+		case 200021 :	strcpy_safe( szFileName, "slot_icon_doll"); break;
+		case 200022 :	strcpy_safe( szFileName, "slot_icon_doll"); break;
+		case 200023 :	strcpy_safe( szFileName, "slot_icon_doll"); break;
+		case 200024 :	strcpy_safe( szFileName, "slot_icon_doll"); break;
+		case 200025 :	strcpy_safe( szFileName, "slot_icon_doll"); break;
+		case 200026 :	strcpy_safe( szFileName, "slot_icon_doll"); break;
+		case 200027 :	strcpy_safe( szFileName, "slot_icon_doll"); break;
 
 		// Book
-		case 200028 :	strcpy_safe( szFileName, "slot_icon_book"); break;		// 악마의 사전
-		case 200029 :	strcpy_safe( szFileName, "slot_icon_book"); break;		// 스크라이더의 명부 상편
-		case 200030 :	strcpy_safe( szFileName, "slot_icon_book"); break;		// 스크라이더의 명부 하편
+		case 200028 :	strcpy_safe( szFileName, "slot_icon_book"); break;
+		case 200029 :	strcpy_safe( szFileName, "slot_icon_book"); break;
+		case 200030 :	strcpy_safe( szFileName, "slot_icon_book"); break;
 
 		// Object
-		case 200031 :	strcpy_safe( szFileName, "slot_icon_object"); break;		// 축복받은 십자가
-		case 200032 :	strcpy_safe( szFileName, "slot_icon_object"); break;		// 저주받은 십자가
-		case 200033 :	strcpy_safe( szFileName, "slot_icon_object"); break;		// 곡괭이
-		case 200034 :	strcpy_safe( szFileName, "slot_icon_object"); break;		// 말하는 돌맹이
-		case 200035 :	strcpy_safe( szFileName, "slot_icon_object"); break;		// 얼음의 결정
-		case 200036 :	strcpy_safe( szFileName, "slot_icon_object"); break;		// 부서진 기어
-		case 200037 :	strcpy_safe( szFileName, "slot_icon_object"); break;		// 고급 기어
+		case 200031 :	strcpy_safe( szFileName, "slot_icon_object"); break;
+		case 200032 :	strcpy_safe( szFileName, "slot_icon_object"); break;
+		case 200033 :	strcpy_safe( szFileName, "slot_icon_object"); break;
+		case 200034 :	strcpy_safe( szFileName, "slot_icon_object"); break;
+		case 200035 :	strcpy_safe( szFileName, "slot_icon_object"); break;
+		case 200036 :	strcpy_safe( szFileName, "slot_icon_object"); break;
+		case 200037 :	strcpy_safe( szFileName, "slot_icon_object"); break;
 
 		// Sword
-		case 200038 :	strcpy_safe( szFileName, "slot_icon_qsword"); break;		// 고블린 킹의 도끼
+		case 200038 :	strcpy_safe( szFileName, "slot_icon_qsword"); break;
 	}
 
-//	if ( bSmallIcon)
-//		strcat( szFileName, "_s");
-
-	strcat(szFileName, ".tga");
-
+	strcat_safe(szFileName, ".tga");
 
 	return MBitmapManager::Get( szFileName);
 }
@@ -6415,13 +5756,11 @@ void ZGameInterface::OnResponseServerStatusInfoList( const int nListCount, void*
 
 
 #ifdef	_DEBUG
-		pServerList->AddServer( (char*)ZMsg(MSG_SERVER_DEBUG), "", 0, 1, 0, 1000, true);			// Debug server
-//		pServerList->AddServer( "", "", 0, 0, 0, 1000, false);						// Null
+		pServerList->AddServer(ZMsg(MSG_SERVER_DEBUG), "", 0, 1, 0, 1000, true);
 #else
 		if ( ZIsLaunchDevelop())
 		{
-			pServerList->AddServer( (char*)ZMsg(MSG_SERVER_DEBUG), "", 0, 1, 0, 1000, true);			// Debug server
-//			pServerList->AddServer( "", "", 0, 0, 0, 1000, false);						// Null
+			pServerList->AddServer(ZMsg(MSG_SERVER_DEBUG), "", 0, 1, 0, 1000, true);
 		}
 #endif
 
@@ -6429,11 +5768,6 @@ void ZGameInterface::OnResponseServerStatusInfoList( const int nListCount, void*
 
 	if( (0 < nListCount) && (0 != pBlob) )
 	{
-		/*
-		 * 전송되는 ServerList는 현제 활성화되어있는 DB의 정보만 보내줌.
-		 *  전송되지 않은 ServerID는 Server가 현제 동작중이지 않는것임.
-		 */
-
 		for( int i = 0; i < nListCount; ++i )
 		{
 			MTD_ServerStatusInfo* pss = (MTD_ServerStatusInfo*)MGetBlobArrayElement( pBlob, i );
@@ -6457,18 +5791,7 @@ void ZGameInterface::OnResponseServerStatusInfoList( const int nListCount, void*
 				Addr = inet_ntoa(inaddr);
 			}
 
-			// pss->m_nCurPlayer;	// 현제 접속유저 수.
-			// pss->m_nMaxPlayer;	// 서버 최대 접속 가능 수.
-			// pss->m_nPort;		// 서버 Port.
-			// pss->m_nServerID;	// 서버 ID.
-			// pss->m_nType;		// 서버 타입.
-			// pss->m_bIsLive;		// 현제 서버가 동작하고 있는가.
-
 			char szServName[ 128 ] = {0,};
-//				if( pss->m_bIsLive )
-//					_snprintf( szServName, 127, "server%d", pss->m_nServerID );
-//				else
-//					_snprintf( szServName, 127, "server%d(dead)", pss->m_nServerID );
 
 			if ( pss->m_nType == 1)					// Debug server
 				sprintf_safe( szServName, "%s %d", ZMsg(MSG_SERVER_DEBUG), pss->m_nServerID );
@@ -6486,14 +5809,13 @@ void ZGameInterface::OnResponseServerStatusInfoList( const int nListCount, void*
 				continue;
 
 			pServerList->AddServer( szServName, Addr, pss->m_nPort, pss->m_nType, pss->m_nCurPlayer, pss->m_nMaxPlayer, pss->m_bIsLive );
-#if 1//def _DEBUG
+#ifdef _DEBUG
 			mlog( "ServerList - Name:%s, IP:%s, Port:%d, Type:%d, (%d/%d)\n",
 				szServName, Addr, pss->m_nPort, pss->m_nType, pss->m_nCurPlayer, pss->m_nMaxPlayer );
 #endif
 		}
 	}
 
-	//pServerList->SetCurrSel( nCurrSel);
 	if (nListCount)
 		pServerList->SetCurrSel(0);
 	else
@@ -6506,12 +5828,7 @@ void ZGameInterface::OnResponseServerStatusInfoList( const int nListCount, void*
 void ZGameInterface::OnResponseBlockCountryCodeIP( const char* pszBlockCountryCode, const char* pszRoutingURL )
 {
 	if( 0 != pszBlockCountryCode )
-	{
-		// 블럭된 IP의 국가를 클라이언트에 통보해줘야 함.
-		// Message에 출력 문장을 추가해야 함.
-
 		ShowMessage( pszRoutingURL );
-	}
 }
 
 
@@ -6543,28 +5860,6 @@ void ZGameInterface::RequestServerStatusListInfo()
 
 	m_dwRefreshTime = GetGlobalTimeMS() + 1500;
 }
-
-
-/*
-bool ZGameInterface::InitLocatorList( MZFileSystem* pFileSystem, const char* pszLocatorList )
-{
-	if( (0 == pszLocatorList) || (0 == strlen(pszLocatorList)) ) 
-		return false;
-
-	if( 0 == m_pLocatorList )
-	{
-		m_pLocatorList = new ZLocatorList;
-		if( 0 == m_pLocatorList )
-			return false;
-	}
-	else
-		m_pLocatorList->Clear();
-	
-	return m_pLocatorList->Init( pFileSystem, pszLocatorList );
-
-	return false;
-}
-*/
 
 void ZGameInterface::OnRequestNewHashValue( const char* szNewRandomValue )
 {
@@ -6603,20 +5898,21 @@ void ZGameInterface::OnResponseNewHashValue( const char* szNewSerialKey )
 }
 
 
-void ZGameInterface::OnDisconnectMsg( const DWORD dwMsgID )
+void ZGameInterface::OnDisconnectMsg(const DWORD dwMsgID)
 {
-	MListBox* pListBox = (MListBox*)ZGetGameInterface()->GetIDLResource()->FindWidget( "QuestResult_ItemListbox");
-	if( 0 != pListBox )
-	{
-		ShowMessage( ZErrStr(dwMsgID) );
-	}
+	auto pListBox = static_cast<MListBox*>(ZGetGameInterface()->
+		GetIDLResource()->
+		FindWidget("QuestResult_ItemListbox"));
+
+	if (0 != pListBox){
+		ShowMessage(ZErrStr(dwMsgID));}
 }
 
 
-void ZGameInterface::OnAnnounceDeleteClan( const string& strAnnounce )
+void ZGameInterface::OnAnnounceDeleteClan(const string& strAnnounce)
 {
-	char szMsg[ 128 ];
-	
-	sprintf_safe( szMsg, MGetStringResManager()->GetErrorStr(MERR_CLAN_ANNOUNCE_DELETE), strAnnounce.c_str() );
-	ShowMessage( szMsg );
+	char szMsg[128];
+
+	sprintf_safe(szMsg, MGetStringResManager()->GetErrorStr(MERR_CLAN_ANNOUNCE_DELETE), strAnnounce.c_str());
+	ShowMessage(szMsg);
 }
