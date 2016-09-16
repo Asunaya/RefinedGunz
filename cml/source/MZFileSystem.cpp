@@ -114,7 +114,7 @@ bool MZFileSystem::AddItem(MZFILEDESC* pDesc)
 		m_ZFileList.erase(it);
 	}
 
-	m_ZFileList.insert(ZFLIST::value_type(string(key), pDesc));
+	m_ZFileList.insert(ZFLIST::value_type(std::string(key), pDesc));
 	return true;
 }
 
@@ -836,7 +836,7 @@ unsigned int MZFileCheckList::GetCRC32(const char *szFileName) const
 	strcpy_safe(szLowerName, szFileName);
 	_strlwr_s(szLowerName);
 
-	auto i = m_fileList.find(string(szLowerName));
+	auto i = m_fileList.find(std::string(szLowerName));
 
 	if(i!=m_fileList.end()) {
 		return i->second;

@@ -4,7 +4,7 @@
 #include <windows.h>
 #include <mmsystem.h>
 
-const string MGetStrLocalTime( const unsigned short wYear, const unsigned short wMon, const unsigned short wDay, const unsigned short wHour, const unsigned short wMin, const MDateType DateType )
+const std::string MGetStrLocalTime( const unsigned short wYear, const unsigned short wMon, const unsigned short wDay, const unsigned short wHour, const unsigned short wMin, const MDateType DateType )
 {
 	char szBuf[ 128 ] = {0,};
 	SYSTEMTIME st;
@@ -67,5 +67,5 @@ const string MGetStrLocalTime( const unsigned short wYear, const unsigned short 
 			st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute );
 	}
 	
-	return string( szBuf );
+	return std::string( szBuf );
 }

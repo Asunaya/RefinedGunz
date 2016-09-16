@@ -84,10 +84,6 @@ void ZCamera::Update(float fElapsed)
 		if (pTargetCharacter)
 			pTargetCharacter->GetHistory(&PlayerPosition, nullptr,
 				g_pGame->GetTime() - pCombatInterface->GetObserver()->GetDelay(), &PlayerDirection);
-
-		/*DMLog("ZCamera::Update - Time = %f - %f, %f, %f\n",
-			g_pGame->GetTime() - pCombatInterface->GetObserver()->GetDelay(),
-			PlayerDirection.x, PlayerDirection.y, PlayerDirection.z);*/
 	}
 	if (!pTargetCharacter) return;
 

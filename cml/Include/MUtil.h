@@ -1,7 +1,6 @@
 #pragma once
 
 #include <string>
-using std::string;
 
 #ifndef SAFE_DELETE
 #define SAFE_DELETE(p)       { if(p) { delete (p);     (p)=NULL; } }
@@ -12,6 +11,8 @@ using std::string;
 #ifndef SAFE_RELEASE
 #define SAFE_RELEASE(p)      { if(p) { (p)->Release(); (p)=NULL; } }
 #endif
+
+#define EXPAND_VECTOR(v) v[0], v[1], v[2]
 
 #define SetBitSet(sets, item)		(sets |= (1 << item))
 #define ClearBitSet(sets, item)		(sets &= ~(1 << item))
@@ -26,7 +27,7 @@ enum MDateType
 	MDT_YMDHM,
 };
 
-const string MGetStrLocalTime( const unsigned short wYear = 0, 
+const std::string MGetStrLocalTime( const unsigned short wYear = 0, 
 							   const unsigned short wMon = 0, 
 							   const unsigned short wDay = 0, 
 							   const unsigned short wHour = 0, 

@@ -460,12 +460,9 @@ RRESULT OnUpdate(void* pParam)
 
 RRESULT OnRender(void *pParam)
 {
-	__BP(101, "main::OnRender");
-	if( !RIsActive() && RIsFullscreen() )
-	{
-		__EP(101);
+	auto mainOnRender = MBeginProfile("main::OnRender");
+	if (!RIsActive() && RIsFullscreen())
 		return R_NOTREADY;
-	}
 
 	g_App.OnDraw();
 
@@ -477,7 +474,7 @@ RRESULT OnRender(void *pParam)
 		QueryPerformanceCounter((PLARGE_INTEGER)&CurTime);
 
 		static int nFrames = 0;
-		static unsigned __int64 LastSec = 0;
+		static u64 LastSec = 0;
 
 		if (CurTime - LastSec > nTPS){
 			QueryPerformanceCounter((PLARGE_INTEGER)&LastSec);
@@ -497,49 +494,39 @@ RRESULT OnRender(void *pParam)
 		nFrames++;
 	}
 
-#ifdef _SMOOTHLOOP
-	Sleep(10);
-#endif
-
-//#ifndef _PUBLISH
-
 	if(g_pDefFont) {
-		char __buffer[256];
+		char buf[512];
+		size_t y_offset{};
+		auto PrintText = [&](const char* Format, ...)
+		{
+			va_list va;
+			va_start(va, Format);
+			vsprintf_safe(buf, Format, va);
+			va_end(va);
+			g_pDefFont->m_Font.DrawText(MGetWorkspaceWidth() - 200, y_offset, buf);
+			y_offset += 20;
+		};
 
-		sprintf_safe(__buffer, "FPS: %3.3f", g_fFPS);
-		g_pDefFont->m_Font.DrawText( MGetWorkspaceWidth()-150,0,__buffer );
+		PrintText("FPS: %3.3f", g_fFPS);
 
 #ifdef _DEBUG
 		if (ZGetGame() && ZGetGame()->m_pMyCharacter)
 		{
 			v3 pos = ZGetGame()->m_pMyCharacter->GetPosition();
-			sprintf_safe(__buffer, "Pos: %d, %d, %d", int(pos.x), int(pos.y), int(pos.z));
-			g_pDefFont->m_Font.DrawText(MGetWorkspaceWidth() - 200, 30, __buffer);
+			PrintText("Pos: %d, %d, %d", int(pos.x), int(pos.y), int(pos.z));
+			auto&& dir = ZGetGame()->m_pMyCharacter->GetDirection();
+			PrintText("Dir: %f, %f, %f", dir.x, dir.y, dir.z);
 
 			if (ZGetGame()->m_pMyCharacter->m_pVMesh)
 			{
 				pos = ZGetGame()->m_pMyCharacter->m_pVMesh->GetHeadPosition();
-				sprintf_safe(__buffer, "Head pos: %d, %d, %d", int(pos.x), int(pos.y), int(pos.z));
-				g_pDefFont->m_Font.DrawText(MGetWorkspaceWidth() - 200, 60, __buffer);
-
-				//DMLog("Head pos: %f, %f, %f\n", pos.x, pos.y, pos.z);
+				PrintText("Head pos: %d, %d, %d", int(pos.x), int(pos.y), int(pos.z));
 
 				auto lower = ZGetGame()->m_pMyCharacter->GetStateLower();
 				auto upper = ZGetGame()->m_pMyCharacter->GetStateUpper();
 
-				sprintf_safe(__buffer, "Lower ani: %s\n", g_AnimationInfoTableLower[lower].Name);
-				g_pDefFont->m_Font.DrawText(MGetWorkspaceWidth() - 200, 80, __buffer);
-				sprintf_safe(__buffer, "Upper ani: %s\n", g_AnimationInfoTableUpper[upper].Name);
-				g_pDefFont->m_Font.DrawText(MGetWorkspaceWidth() - 200, 100, __buffer);
-
-				/*auto mesh = ZGetGame()->m_pMyCharacter->m_pVMesh->m_pMesh;s
-				auto p = mesh->m_list.Find("Bip01 R Foot");
-
-				while (p)
-				{
-					DMLog("%s\n", p->GetName());
-					p = p->m_pParent;
-				}*/
+				PrintText("Lower ani: %s\n", g_AnimationInfoTableLower[lower].Name);
+				PrintText("Upper ani: %s\n", g_AnimationInfoTableUpper[upper].Name);
 			}
 		}
 #endif
@@ -547,9 +534,7 @@ RRESULT OnRender(void *pParam)
 
 	g_RGMain->OnRender();
 
-//#endif
-
-	__EP(101);
+	MEndProfile(mainOnRender);
 
 	return R_OK;
 }

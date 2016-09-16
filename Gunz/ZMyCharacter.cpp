@@ -1644,7 +1644,7 @@ void ZMyCharacter::OnUpdate(float fDelta)
 	if(!MEvent::IsKeyDown(VK_MENU))
 #endif
 	if (!IsDirLocked())
-		SetTargetDir(RCameraDirection);
+		SetTargetDir(ZGetCamera()->GetCurrentDir());
 
 	float fWallJumpTime = (m_nWallJumpDir==1) ? 1.5f : 2.3f;
 	float fSecondJumpTime = (m_nWallJumpDir==1) ? 0.95f : 2.1f;

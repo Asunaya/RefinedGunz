@@ -58,7 +58,7 @@ private:
 	bool SubCreateTexture(char* TextureFileBuffer);
 };
 
-class RTextureManager final : public std::map<string,RBaseTexture*> 
+class RTextureManager final : public std::map<std::string,RBaseTexture*> 
 {
 public:
 	~RTextureManager();
