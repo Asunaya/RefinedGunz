@@ -231,7 +231,18 @@ void LoadRGCommands(ZChatCmdManager& CmdManager)
 
 		ZChatOutputF("Set camdist to %f", val);
 	},
-		CCF_ALL, 1, 1, true, "/timescale <scale>", "");
+		CCF_ALL, 1, 1, true, "/camdist <dist>", "");
+
+	CmdManager.AddCommand(0, "vsync", [](const char *line, int argc, char ** const argv) {
+		auto val = atoi(argv[1]) != 0;
+		SetVSync(val);
+		RMODEPARAMS ModeParams = { RGetScreenWidth(), RGetScreenHeight(),
+			ZGetConfiguration()->GetVideo()->FullscreenMode, RGetPixelFormat() };
+		RResetDevice(&ModeParams);
+
+		ZChatOutputF("%s vsync", val ? "Enabled" : "Disabled");
+	},
+		CCF_ALL, 1, 1, true, "/vsync <0/1>", "");
 }
 
 #ifdef TIMESCALE

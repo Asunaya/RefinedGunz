@@ -39,6 +39,20 @@ bool IsDynamicResourceLoad()
 	return DynamicResourceLoading;
 }
 
+void SetVSync(bool b)
+{
+	if (b)
+	{
+		g_d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
+		g_d3dpp.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
+	}
+	else
+	{
+		g_d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
+		g_d3dpp.FullScreen_RefreshRateInHz = 0;
+	}
+}
+
 //Fog
 float g_fFogNear;
 float g_fFogFar;

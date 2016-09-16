@@ -31,6 +31,7 @@ int		RGetVideoMemory();
 void	RSetWBuffer(bool bEnable);
 bool	RIsStencilBuffer();
 bool IsDynamicResourceLoad();
+void SetVSync(bool b);
 
 
 int RGetAdapterModeCount(D3DFORMAT Format, UINT Adapter = D3DADAPTER_DEFAULT);
