@@ -754,9 +754,7 @@ void ZEmblemList::Draw()
 
 		if( pCurr == NULL) continue;
 
-		t_pos.x = pCurr->mWorldMat._41;
-		t_pos.y = pCurr->mWorldMat._42;
-		t_pos.z = pCurr->mWorldMat._43;
+		t_pos = GetTransPos(pCurr->mWorldMat);
 
 		t_vec = camera_pos - t_pos;
 		pCurr->m_fDist = Magnitude(t_vec);

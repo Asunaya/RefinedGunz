@@ -1,17 +1,14 @@
-#ifndef _RNAVIGATIONMESH_H
-#define _RNAVIGATIONMESH_H
+#pragma once
 
 #include "RTypes.h"
 #include "RLine.h"
 #include "RAStar.h"
 #include <vector>
 #include <list>
-using namespace std;
 
 class RNavigationNode;
 class MZFileSystem;
 
-// 네비게이션 메쉬 페이스
 struct RNavFace
 {
 	unsigned short	v1, v2, v3;
@@ -33,7 +30,7 @@ public:
 private:
 	// --- data ------------------
 	RNodeArray			m_NodeArray;
-	list<rvector>		m_WaypointList;
+	std::list<rvector>		m_WaypointList;
 
 	RAStar				m_AStar;
 	RNavigationNode*	m_pStartNode, *m_pGoalNode;
@@ -72,7 +69,7 @@ public:
 
 	RNodeArray* GetNodes()		{ return &m_NodeArray; }
 	int GetNodeCount()			{ return (int)m_NodeArray.size(); }
-	list<rvector>&	GetWaypointList() { return m_WaypointList; }
+	std::list<rvector>&	GetWaypointList() { return m_WaypointList; }
 
 	// 테스트용 ------------------
 	void Render();
@@ -111,5 +108,3 @@ inline void RNavigationMesh::SetFace(int index, RNavFace& f)
 {
 	m_faces[index] = f;
 }
-
-#endif

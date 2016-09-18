@@ -1,5 +1,4 @@
-#ifndef _RAnimationNode_h
-#define _RAnimationNode_h
+#pragma once
 
 #include "RAnimationDef.h"
 
@@ -20,7 +19,7 @@ public:
 	rmatrix			GetTMValue(int frame);
 	int 			GetVecValue(int frame,D3DXVECTOR3* pVecTable);
 
-	void ConnectToNameID();//자기이름으로 연결
+	void ConnectToNameID();
 
 public:
 
@@ -46,5 +45,3 @@ public:
 
 
 _NAMESPACE_REALSPACE2_END
-
-#endif//_RAnimationNode_h

@@ -7,6 +7,7 @@
 #include <array>
 #include "RAnimationMgr.h"
 #include <cassert>
+#include "RMath.h"
 
 using namespace RealSpace2;
 

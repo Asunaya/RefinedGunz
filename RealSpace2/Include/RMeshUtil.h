@@ -514,69 +514,30 @@ public:
 	CD3DArcBall();
 };
 
-//////////////////////////////////////////////////////////////
-// help func
-
-void	RRot2Quat(RQuatKey& q, const RRotKey& v);
-void	RQuat2Mat(D3DXMATRIX& mat, const RQuatKey&q);
-int		RMatInv(D3DXMATRIX& q, const D3DXMATRIX& a);
-void	ConvertMat(rmatrix& mat1, const rmatrix& mat2);
-
-
-inline D3DXVECTOR3 operator*(const D3DXVECTOR3 &in_vec, const D3DXMATRIX &mat)
+inline void RRot2Quat(RQuatKey& q, const RRotKey& v)
 {
-	D3DXVECTOR3 out;
+	D3DXQUATERNION out;
+	D3DXVECTOR3 vec;
 
-	FLOAT x = in_vec.x*mat._11 + in_vec.y*mat._21 + in_vec.z* mat._31 + mat._41;
-	FLOAT y = in_vec.x*mat._12 + in_vec.y*mat._22 + in_vec.z* mat._32 + mat._42;
-	FLOAT z = in_vec.x*mat._13 + in_vec.y*mat._23 + in_vec.z* mat._33 + mat._43;
-	FLOAT w = in_vec.x*mat._14 + in_vec.y*mat._24 + in_vec.z* mat._34 + mat._44;
+	vec.x = v.x;
+	vec.y = v.y;
+	vec.z = v.z;
 
-	out.x = x/w;
-	out.y = y/w;
-	out.z = z/w;
+	D3DXQuaternionRotationAxis(&out, &vec, v.w);
 
-	return out;
+	q.x = out.x;	q.y = out.y;	q.z = out.z;	q.w = out.w;
 }
 
-inline D3DXVECTOR3& operator*=(D3DXVECTOR3 &in_vec, const D3DXMATRIX &mat)
+inline void RQuat2Mat(D3DXMATRIX& mat, const RQuatKey&q)
 {
-	in_vec = in_vec * mat;
-	return in_vec;
-}
+	D3DXQUATERNION out;
 
-inline D3DXMATRIX operator~(const D3DXMATRIX &in) {
-	D3DXMATRIX out;
-	D3DXMatrixInverse(&out,0,&in);
-	return out;
-}
+	out.x = q.x;
+	out.y = q.y;
+	out.z = q.z;
+	out.w = q.w;
 
-inline rmatrix RGetRotX(float a) {
-	rmatrix mat;
-	D3DXMatrixRotationX(&mat,D3DX_PI/180.f*a);
-	return mat;
-}
-
-inline rmatrix RGetRotY(float a) {
-	rmatrix mat;
-	D3DXMatrixRotationY(&mat,D3DX_PI/180.f*a);
-	return mat;
-}
-
-inline rmatrix RGetRotZ(float a) {
-	rmatrix mat;
-	D3DXMatrixRotationZ(&mat,D3DX_PI/180.f*a);
-	return mat;
-}
-
-inline rmatrix GetIdentityMatrix() {
-	D3DXMATRIX _init_mat;
-	D3DXMatrixIdentity(&_init_mat);
-	return _init_mat;
-}
-
-inline rvector GetTransPos(const rmatrix& m) {
-	return rvector(m._41,m._42,m._43);
+	D3DXMatrixRotationQuaternion(&mat, &out);
 }
 
 void draw_line(LPDIRECT3DDEVICE9 dev, D3DXVECTOR3* vec, int size, DWORD color);

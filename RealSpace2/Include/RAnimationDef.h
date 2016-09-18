@@ -1,5 +1,4 @@
-#ifndef _RAnimationDef_h
-#define _RAnimationDef_h
+#pragma once
 
 #include "RMeshUtil.h"
 #include <vector>
@@ -19,9 +18,6 @@ enum AnimationLoopType {
 	RAniLoopType_HoldLastFrame,
 	RAniLoopType_OnceLowerBody,
 };
-
-////////////////////////////////////////////////
-// 캐릭터에 속한 에니메이션 리스트들을 관리
 
 enum AnimationFileType {
 
@@ -89,6 +85,3 @@ enum AnimationFileType {
 
 	RAniFileType_End
 };
-
-
-#endif//_RAnimationDef_h

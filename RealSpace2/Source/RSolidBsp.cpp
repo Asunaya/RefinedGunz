@@ -626,7 +626,8 @@ bool RSolidBspNode::CheckWall(RSolidBspNode *pRootNode, const rvector &origin,rv
 {
 	checkwallorigin=origin;
 	checkwalldir=targetpos-origin;
-	Normalize(checkwalldir);
+	if (checkwalldir.x || checkwalldir.y || checkwalldir.z)
+		Normalize(checkwalldir);
 
 	bool bIntersectThis;
 

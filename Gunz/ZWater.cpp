@@ -9,23 +9,20 @@
 #include "ZSoundEngine.h"
 #include "ZEffectManager.h"
 
-// struct
-typedef struct
+struct WaterVertex
 {
 	rvector p, n;
 	float tu1, tv1;
 	float tu2, tv2;
-} WaterVertex;
+};
 
-// define & constant
 #define MAXNUM_WATER_MESH_VERTEX	2000
 #define WATERVERTEX_TYPE	(D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_TEX2)
 #define WATERTEXTURE_SIZE	512
 #define WAVE_PITCH			50
-#define WATER_UPDATE_INTERVAL 30 // 초당 약 30프레임 유지
+#define WATER_UPDATE_INTERVAL 30
 const char* waterHitSoundName = "fx_bullethit_mt_wat";
 
-// global variables
 LPDIRECT3DDEVICE9		g_pDevice = g_pDevice;
 LPDIRECT3DSURFACE9		g_pSufBackBuffer = 0;
 LPDIRECT3DSURFACE9		g_pSufDepthBuffer = 0;
@@ -36,49 +33,40 @@ LPDIRECT3DVERTEXBUFFER9	g_pVBForWaterMesh = 0;
 WaterVertex				g_waterVertexBuffer[MAXNUM_WATER_MESH_VERTEX];
 RTLVertex				g_underWaterVertexBuffer[4];
 
-// ZWaterList
 ZWaterList::ZWaterList()
 {
 	OnRestore();
-	//g_pDevice = RGetDevice();
-	//if( FAILED( g_pDevice->CreateVertexBuffer( MAXNUM_WATER_MESH_VERTEX * sizeof(WaterVertex), 
-	//						D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, WATERVERTEX_TYPE, D3DPOOL_DEFAULT, &g_pVBForWaterMesh ,NULL)))
-	//{
-	//	mlog( "Fail to Create Vertex Buffer for Water Mesh\n" );
-	//	g_pVBForWaterMesh = 0;
-	//}	
-	//Z_VIDEO_REFLECTION = SetSurface( Z_VIDEO_REFLECTION );
 	m_dwTime = 0;
 
-#define TEXOFFSET 0.01f
+	constexpr auto TEXOFFSET = 0.01f;
 
-	g_underWaterVertexBuffer[0].p.x = 0.0f - TEXOFFSET;	
-	g_underWaterVertexBuffer[0].p.y = 0.0f - TEXOFFSET;	
-	g_underWaterVertexBuffer[0].p.z = 0.0f;	
+	g_underWaterVertexBuffer[0].p.x = 0.0f - TEXOFFSET;
+	g_underWaterVertexBuffer[0].p.y = 0.0f - TEXOFFSET;
+	g_underWaterVertexBuffer[0].p.z = 0.0f;
 	g_underWaterVertexBuffer[0].p.w = 1.0f;
 	g_underWaterVertexBuffer[0].color = 0x33444444;
-	g_underWaterVertexBuffer[0].tu = 0.0f;	
-	g_underWaterVertexBuffer[0].tv = 0.0f;	
-	g_underWaterVertexBuffer[1].p.x = 0.0f - TEXOFFSET;	
-	g_underWaterVertexBuffer[1].p.y = RGetScreenHeight() + TEXOFFSET;	
-	g_underWaterVertexBuffer[1].p.z = 0.0f;	
+	g_underWaterVertexBuffer[0].tu = 0.0f;
+	g_underWaterVertexBuffer[0].tv = 0.0f;
+	g_underWaterVertexBuffer[1].p.x = 0.0f - TEXOFFSET;
+	g_underWaterVertexBuffer[1].p.y = RGetScreenHeight() + TEXOFFSET;
+	g_underWaterVertexBuffer[1].p.z = 0.0f;
 	g_underWaterVertexBuffer[1].p.w = 1.0f;
 	g_underWaterVertexBuffer[1].color = 0x33444444;
-	g_underWaterVertexBuffer[1].tu = 0.0f;	
+	g_underWaterVertexBuffer[1].tu = 0.0f;
 	g_underWaterVertexBuffer[1].tv = 1.0f;
-	g_underWaterVertexBuffer[2].p.x = RGetScreenWidth() + TEXOFFSET;	
-	g_underWaterVertexBuffer[2].p.y = RGetScreenHeight() + TEXOFFSET;	
-	g_underWaterVertexBuffer[2].p.z = 0.0f;	
+	g_underWaterVertexBuffer[2].p.x = RGetScreenWidth() + TEXOFFSET;
+	g_underWaterVertexBuffer[2].p.y = RGetScreenHeight() + TEXOFFSET;
+	g_underWaterVertexBuffer[2].p.z = 0.0f;
 	g_underWaterVertexBuffer[2].p.w = 1.0f;
 	g_underWaterVertexBuffer[2].color = 0x33444444;
-	g_underWaterVertexBuffer[2].tu = 1.0f;	
+	g_underWaterVertexBuffer[2].tu = 1.0f;
 	g_underWaterVertexBuffer[2].tv = 1.0f;
-	g_underWaterVertexBuffer[3].p.x = RGetScreenWidth() + TEXOFFSET;	
-	g_underWaterVertexBuffer[3].p.y = 0.0f - TEXOFFSET;	
-	g_underWaterVertexBuffer[3].p.z = 0.0f;	
+	g_underWaterVertexBuffer[3].p.x = RGetScreenWidth() + TEXOFFSET;
+	g_underWaterVertexBuffer[3].p.y = 0.0f - TEXOFFSET;
+	g_underWaterVertexBuffer[3].p.z = 0.0f;
 	g_underWaterVertexBuffer[3].p.w = 1.0f;
 	g_underWaterVertexBuffer[3].color = 0x33444444;
-	g_underWaterVertexBuffer[3].tu = 1.0f;	
+	g_underWaterVertexBuffer[3].tu = 1.0f;
 	g_underWaterVertexBuffer[3].tv = 0.0f;
 }
 
@@ -126,11 +114,6 @@ void ZWaterList::Render()
 void ZWaterList::OnInvalidate()
 {
 	g_pDevice = NULL;
-	//for( iterator iter = begin(); iter != end(); ++iter )
-	//{
-	//	ZWater* pWater = *iter;
-	//	if(pWater!=NULL) pWater->OnInvalidate();
-	//}
 	SetSurface( false );
 	SAFE_RELEASE(g_pVBForWaterMesh);
 }
@@ -149,15 +132,11 @@ void ZWaterList::OnRestore()
 		}
 	}
 
-	//for( iterator iter = begin(); iter != end(); ++iter )
-	//{
-	//	ZWater* pWater = *iter;
-	//	if(pWater!=NULL) pWater->OnRestore();
-	//}
 	Z_VIDEO_REFLECTION = SetSurface( Z_VIDEO_REFLECTION );
 }
 
-bool ZWaterList::CheckSpearing(const rvector& o, const rvector& e, int iPower, float fArea, bool bPlaySound /* = true  */ )
+bool ZWaterList::CheckSpearing(const rvector& o, const rvector& e,
+	int iPower, float fArea, bool bPlaySound)
 {	
 	ZWater* pWater;
 	rvector pos;
@@ -307,7 +286,7 @@ bool ZWater::SetMesh( RMeshNode* meshNode )
 	m_nFaces = meshNode->m_face_num;	
 
 	// set matrix
-	rvector offset = GetTransPos(meshNode->m_mat_base);
+	rvector offset{ meshNode->m_mat_base(0, 0), meshNode->m_mat_base(0, 1), meshNode->m_mat_base(0, 2) };
 	MakeWorldMatrix(&m_worldMat, offset, rvector(0,-1,0), rvector(0,0,1));
 	m_worldMat = meshNode->m_mat_result* m_worldMat;
 

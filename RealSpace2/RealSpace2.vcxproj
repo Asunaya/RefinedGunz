@@ -363,6 +363,7 @@
   <ItemGroup>
     <ClCompile Include="Source\MeshManager.cpp" />
     <ClCompile Include="Source\RHalfEdgeMesh.cpp" />
+    <ClCompile Include="Source\RMath.cpp" />
     <ClCompile Include="Source\RMesh.cpp" />
     <ClCompile Include="source\RMesh_Frame.cpp" />
     <ClCompile Include="source\RMesh_Load.cpp" />
@@ -424,6 +425,7 @@
   <ItemGroup>
     <ClInclude Include="Include\MeshManager.h" />
     <ClInclude Include="Include\RHalfEdgeMesh.h" />
+    <ClInclude Include="Include\RMath.h" />
     <ClInclude Include="Include\RMesh.h" />
     <ClInclude Include="INCLUDE\RMeshMgr.h" />
     <ClInclude Include="Include\RMeshNode.h" />
@@ -431,6 +433,7 @@
     <ClInclude Include="Include\RMeshNodeStringTable.h" />
     <ClInclude Include="INCLUDE\RMeshUtil.h" />
     <ClInclude Include="Include\RMtrl.h" />
+    <ClInclude Include="Include\RUtil.h" />
     <ClInclude Include="Include\RVisualMesh.h" />
     <ClInclude Include="INCLUDE\RVisualMeshMgr.h" />
     <ClInclude Include="Include\RVisualMeshUtil.h" />

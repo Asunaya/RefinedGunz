@@ -127,7 +127,7 @@ void ZMyCharacter::ProcessInput(float fDelta)
 
 	static float rotatez=0.f,rotatex=9*pi/10.f;
 
-	m_Accel=rvector(0,0,0);
+	m_Accel = rvector(0,0,0);
 
 	rvector right;
 	rvector forward=RCameraDirection;
@@ -137,20 +137,31 @@ void ZMyCharacter::ProcessInput(float fDelta)
 
 	if (!IsDie() && !m_bStun && !m_bBlastDrop && !m_bBlastStand)
 	{
+		bool ButtonPressed = false;
+
 		if(!m_bWallJump && !m_bTumble && !m_bSkill && !m_bMoveLimit && 
 			!m_bBlast && !m_bBlastFall && !m_bBlastAirmove && !m_bCharging && 
 			!m_bSlash && !m_bJumpSlash && !m_bJumpSlashLanding)
 		{
-			if(ZIsActionKeyPressed(ZACTION_FORWARD)==true)	m_Accel+=forward;
-			if(ZIsActionKeyPressed(ZACTION_BACK)==true)		m_Accel-=forward;
-			if(ZIsActionKeyPressed(ZACTION_LEFT)==true)		m_Accel-=right;
-			if(ZIsActionKeyPressed(ZACTION_RIGHT)==true)	m_Accel+=right;
+			auto AddAccel = [&](auto& vec)
+			{
+				m_Accel += vec;
+				ButtonPressed = true;
+			};
+			if (ZIsActionKeyPressed(ZACTION_FORWARD) == true)
+				AddAccel(forward);
+			if (ZIsActionKeyPressed(ZACTION_BACK) == true)
+				AddAccel(-forward);
+			if (ZIsActionKeyPressed(ZACTION_RIGHT) == true)
+				AddAccel(right);
+			if (ZIsActionKeyPressed(ZACTION_LEFT) == true)
+				AddAccel(-right);
 		}
 
+		if (ButtonPressed)
+			Normalize(m_Accel);
 
 		m_bBackMoving = ZIsActionKeyPressed(ZACTION_BACK);
-
-		Normalize(m_Accel);
 
 		float fRatio = GetMoveSpeedRatio();
 

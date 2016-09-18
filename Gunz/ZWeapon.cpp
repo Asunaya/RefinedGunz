@@ -1033,16 +1033,13 @@ void ZWeaponMagic::Create(RMesh* pMesh, ZSkill* pSkill, const rvector &pos, cons
 		_ASSERT( m_SLSid == 0);
 		m_SLSid = ZGetStencilLight()->AddLightSource( m_Position, 2.0f );
 	}
-
-	//ZGetEffectManager()->AddRocketSmokeEffect(m_Position,-RealSpace2::RCameraDirection);
 }
 
-#define MAGIC_WEAPON_LIFE			10.f		// 10초 뒤에 터짐
+#define MAGIC_WEAPON_LIFE			10.f
 
 
 bool ZWeaponMagic::Update(float fElapsedTime)
 {
-	// 유도처리
 	if(m_bGuide) {
 		ZObject *pTarget = ZGetObjectManager()->GetObject(m_uidTarget);
 
@@ -1055,12 +1052,12 @@ bool ZWeaponMagic::Update(float fElapsedTime)
 
 		float fCos = DotProduct(dir,currentDir);
 		float fAngle = acos(fCos);
-		if(fAngle>0.01f) {
+		if (fAngle > 0.01f) {
 
-	#define ANGULAR_VELOCITY	0.01f		// 각속도 : 초당 회전가능한 각의 크기. (단위:라디안)
-			float fAngleDiff = min(1000.f*fElapsedTime*ANGULAR_VELOCITY,fAngle);
+#define ANGULAR_VELOCITY	0.01f
+			float fAngleDiff = min(1000.f * fElapsedTime * ANGULAR_VELOCITY, fAngle);
 
-			rvector newDir = InterpolatedVector(m_Dir,dir,fAngleDiff/fAngle);
+			rvector newDir = Slerp(m_Dir, dir, fAngleDiff / fAngle);
 			m_Dir = newDir;
 
 			m_Velocity = fCurrentSpeed * newDir;
@@ -1071,7 +1068,6 @@ bool ZWeaponMagic::Update(float fElapsedTime)
 	rvector oldPos = m_Position;
 
 	if(g_pGame->GetTime() - m_fStartTime > MAGIC_WEAPON_LIFE ) {
-		// 수류탄은 터지는 순간에 이펙트 추가.. 삭제...
 		Explosion( WMET_MAP, NULL , rvector(0,1,0));
 
 		if(Z_VIDEO_DYNAMICLIGHT && m_SLSid ) {

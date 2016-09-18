@@ -8,6 +8,7 @@
 
 #include "RNameSpace.h"
 #include "RTypes.h"
+#include "RMath.h"
 _NAMESPACE_REALSPACE2_BEGIN
 
 

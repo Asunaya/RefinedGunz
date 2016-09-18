@@ -1,5 +1,4 @@
-#ifndef _RAnimationFile_h
-#define _RAnimationFile_h
+#pragma once
 
 #include "RAnimationNode.h"
 
@@ -32,5 +31,3 @@ public:
 };
 
 _NAMESPACE_REALSPACE2_END
-
-#endif//_RAnimationFile_h

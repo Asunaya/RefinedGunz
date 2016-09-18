@@ -89,8 +89,8 @@ void CourseManager::Init()
 			if (!ret)
 				return false;
 
-			Start.Sort();
-			End.Sort();
+			Start = Sort(Start);
+			End = Sort(End);
 
 			MapInsertion.first->second.push_back({ szName, Start, End });
 
@@ -207,8 +207,9 @@ const std::string &CourseManager::GetCourseName(int CourseIndex) const
 
 int CourseManager::GetNumCourses() const
 {
-	return (int)pCurrentCourseSet->size();
+	return static_cast<int>(pCurrentCourseSet->size());
 }
+
 rvector CourseManager::GetCourseStartPos(int CourseIndex) const
 {
 	const rboundingbox &bb = pCurrentCourseSet->at(CourseIndex).Start;
@@ -226,7 +227,7 @@ bool CourseManager::IsInStartZone(const rvector &pos, int &CourseIndex) const
 
 	for (size_t i = 0; i < pCurrentCourseSet->size(); i++)
 	{
-		if (Player.Intersects(pCurrentCourseSet->at(i).Start))
+		if (Intersects(Player, pCurrentCourseSet->at(i).Start))
 		{
 			CourseIndex = i;
 
@@ -246,7 +247,7 @@ bool CourseManager::IsInEndZone(const rvector &pos, int CourseIndex) const
 	Player.vmin = pos - rvector(CHARACTER_RADIUS, CHARACTER_RADIUS, 0);
 	Player.vmax = pos + rvector(CHARACTER_RADIUS, CHARACTER_RADIUS, CHARACTER_HEIGHT);
 
-	if (Player.Intersects(pCurrentCourseSet->at(CourseIndex).End))
+	if (Intersects(Player, pCurrentCourseSet->at(CourseIndex).End))
 		return true;
 
 	return false;
@@ -260,9 +261,6 @@ void CourseManager::Draw()
 	RGetDevice()->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_CONSTANT);
 	RGetDevice()->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
 	RGetDevice()->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_CONSTANT);
-	/*RGetDevice()->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
-	RGetDevice()->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-	RGetDevice()->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);*/
 	RGetDevice()->SetTexture(0, NULL);
 	RGetDevice()->SetFVF(D3DFVF_XYZ);
 
@@ -279,10 +277,6 @@ ZRuleSkillmap::ZRuleSkillmap(ZMatch* pMatch) : ZRule(pMatch)
 	strcpy_safe(MapName, ZGetGameClient()->GetMatchStageSetting()->GetMapName());
 	strlwr(MapName);
 	CourseMgr.SetCurrentMap(MapName);
-}
-
-ZRuleSkillmap::~ZRuleSkillmap()
-{
 }
 
 void ZRuleSkillmap::OnFall()

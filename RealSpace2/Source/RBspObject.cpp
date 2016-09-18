@@ -2136,7 +2136,8 @@ bool RBspObject::UpdateVertexBuffer()
 	return true;
 }
 
-void RBspObject::GetNormal(RCONVEXPOLYGONINFO *poly, const rvector &position, rvector *normal, int au, int av)
+void RBspObject::GetNormal(RCONVEXPOLYGONINFO *poly, const rvector &position,
+	rvector *normal, int au, int av)
 {
 	int nSelPolygon = -1, nSelEdge = -1;
 	float fMinDist = FLT_MAX;
@@ -2212,7 +2213,7 @@ void RBspObject::GetNormal(RCONVEXPOLYGONINFO *poly, const rvector &position, rv
 	}
 	float t = (a[av] * x[au] - a[au] * x[av]) / f;
 
-	tem = InterpolatedVector(*n1, *n2, t);
+	tem = Slerp(*n1, *n2, t);
 
 
 	rvector inter = a + t*b;
@@ -2224,7 +2225,7 @@ void RBspObject::GetNormal(RCONVEXPOLYGONINFO *poly, const rvector &position, rv
 		else axisfors = 2;
 
 		float s = x[axisfors] / inter[axisfors];
-		*normal = InterpolatedVector(*n0, tem, s);
+		*normal = Slerp(*n0, tem, s);
 }
 
 

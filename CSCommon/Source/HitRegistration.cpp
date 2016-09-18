@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "HitRegistration.h"
-#include "RTypes.h"
+#include "RMath.h"
 
 using namespace RealSpace2;
 

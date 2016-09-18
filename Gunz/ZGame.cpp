@@ -4261,8 +4261,8 @@ void ZGame::PostNewBasicInfo()
 	Write(Velocity);
 	
 	auto&& Vel = m_pMyCharacter->GetVelocity();
-	for (auto&& Val : { Vel.x, Vel.y, Vel.z })
-		assert(Val < SHRT_MAX && Val > SHRT_MIN);
+	/*for (auto&& Val : { Vel.x, Vel.y, Vel.z })
+		assert(Val < SHRT_MAX && Val > SHRT_MIN);*/
 
 	if (m_pMyCharacter->IsDirLocked())
 	{

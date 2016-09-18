@@ -304,10 +304,6 @@ void RMesh::RenderSub(const D3DXMATRIX& world_mat, bool NoPartsChange)
 	RMeshNode* pTNodeHead = NULL;	
 	RMeshNode* pTLastModel = NULL;
 
-//	qsort( pAlphaNode, nAlphaNodeCnt, 4 , _SortAlpha );
-
-	///////////////////////////////////////////////////////////////////
-
 	for(int n=0;n<nAlphaNodeCnt;n++) {
 
 		pATMNode = pAlphaNode[n];
@@ -326,8 +322,6 @@ void RMesh::RenderSub(const D3DXMATRIX& world_mat, bool NoPartsChange)
 		RenderNode(pTNodeHead, world_mat);
 	}
 
-	///////////////////////////////////////////////////////////////////
-
 	qsort( pLastNode, nLastNodeCnt, 4 , _SortLastName );
 
 	for(int n=0;n<nLastNodeCnt;n++) {
@@ -339,10 +333,6 @@ void RMesh::RenderSub(const D3DXMATRIX& world_mat, bool NoPartsChange)
 		RenderNode(pATMNode, world_mat);
 	}
 
-
-	///////////////////////////////////////////////////////////////////
-
-
 	static D3DXMATRIX _init_mat = GetIdentityMatrix();
 
 	dev->SetTransform( D3DTS_WORLD, &_init_mat );
@@ -351,8 +341,6 @@ void RMesh::RenderSub(const D3DXMATRIX& world_mat, bool NoPartsChange)
 
 	__EP(198);
 }
-
-// billboard(aline) type 이라면 마지막 회전 매트릭스 수정 점 가공..
  
 void OutPutMatrixLog(RMesh* pMesh,RMeshNode* pNode,char* pos,char* name,rmatrix& m)
 {
@@ -383,9 +371,6 @@ void OutPutMatrixLog(RMesh* pMesh,RMeshNode* pNode,char* pos,char* name,rmatrix&
 			m._41,m._42,m._43,m._44	);
 	}
 }
-
-////////////////////////////////////////////////////////////////////////////////////
-
 
 class RIVec
 {
@@ -421,7 +406,7 @@ public:
 		Clear();
 	}
 
-	void Create(int face_num,int point_num) {//면인덱스만큼메모리할당..
+	void Create(int face_num,int point_num) {
 		
 		if(face_num) {
 
@@ -449,15 +434,10 @@ public:
 
 			int in = GetLIndex( pFace->m_point_index[k] , &pFace->m_point_tex[k] );
 
-//			SetLVertex(((RLVertex*)g_pVert)+in,g_point_list[pFace->m_point_index[k]], color, pFace->m_point_tex[ k ]);
-
 			m_pFaceIndex[i*3+k] = in;
-//			mlog("face (%d,%d) = %d \n",i,k,in);
 		}
 	}
 
-	// n번쨰 면에 대해서
-	// 중복되지 않게 3개의 점을 만들어야 한다..
 	void MakeVertex(RMeshNode* pMNode,RFaceInfo* pFace,int i)
 	{
 		int in = 0;
@@ -468,74 +448,36 @@ public:
 
 			int in = GetIndex( pFace->m_point_index[k] , &pFace->m_point_tex[k] );
 
-//			SetVertex(g_vert+in,g_point_list[pFace->m_point_index[k]], color, pFace->m_point_tex[ k ]);
-
-//			if( !g_bVertexNormalOnOff ) // tool 용
-//				SetVertex( ((RVertex*)g_pVert) +in  ,g_point_list[pFace->m_point_index[k]],pFNL->m_normal,pFace->m_point_tex[k]);
-//			else 
-//				SetVertex( ((RVertex*)g_pVert) +in  ,g_point_list[pFace->m_point_index[k]],pFNL->m_pointnormal[k],pFace->m_point_tex[k]);
-			
 			m_pFaceIndex[i*3+k] = in;
-//			mlog("face (%d,%d) = %d \n",i,k,in);
 		}
 	}
 
-	int GetLIndex(int in,rvector* puv) // 실재점이 만들어질 인덱스 넘기기..
+	int GetLIndex(int in,rvector* puv)
 	{
 		static float _uv[4];
 
 		int _size = m_pPointTable[in].m_size;
-//		int index;
 
-		if(_size) { // 이미 등록된 점이라면
-/*
-			RLVertex* pVert=(RLVertex*)g_pVert;
-
-			for(int i=0;i<_size;i++) {
-				index = m_pPointTable[in].m_Value[i];
-				GetLUV(_uv,&pVert[index],puv);
-				if(isEqualUV(_uv)) {//uv가 같으면 같은점을 사용..
-					return index;
-				}
-			}
-
-			m_pPointTable[in].Add( m_tAddPos );//마지막점을 사용
-			m_tAddPos++;
-*/
-			return m_tAddPos-1;//마지막점의 인덱스..
+		if(_size) {
+			return m_tAddPos-1;
 		}
 
-		m_pPointTable[in].Add( in ); // 새로 등록 해야하는 경우 그냥 사용..
+		m_pPointTable[in].Add( in );
 
 		return in;
 	}
 
-	int GetIndex(int in,rvector* puv) // 실재점이 만들어질 인덱스 넘기기..
+	int GetIndex(int in,rvector* puv)
 	{
 		static float _uv[4];
 
 		int _size = m_pPointTable[in].m_size;
-//		int index;
 
-		if(_size) { // 이미 등록된 점이라면
-/*
-			RVertex* pVert = (RVertex*)g_pVert;
-
-			for(int i=0;i<_size;i++) {
-				index = m_pPointTable[in].m_Value[i];
-				GetUV(_uv,&pVert[index],puv);
-				if(isEqualUV(_uv)) {//uv가 같으면 같은점을 사용..
-					return index;
-				}
-			}
-
-			m_pPointTable[in].Add( m_tAddPos );//마지막점을 사용
-			m_tAddPos++;
-*/
-			return m_tAddPos-1;//마지막점의 인덱스..
+		if(_size) {
+			return m_tAddPos-1;
 		}
 
-		m_pPointTable[in].Add( in ); // 새로 등록 해야하는 경우 그냥 사용..
+		m_pPointTable[in].Add( in );
 
 		return in;
 	}
@@ -560,9 +502,6 @@ public:
 		if(u1 == u2 )
 			if(v1 == v2 )
 				return true;
-//		if(u1 - u2 < 0.00001f)
-//			if(v1 - v2 < 0.00001f)
-//				return true;
 		return false;
 	}
 
@@ -571,7 +510,6 @@ public:
 	}
 
 	RIVec	m_pPointTable[2000];
-//	vector<int>	m_pPointTable[2000];//우선 2000개의 점까지만
 	WORD*	m_pFaceIndex;
 	
 	int		m_tAddPos;
@@ -602,7 +540,7 @@ bool RMesh::CheckOcclusion(RMeshNode *pMeshNode)
 				
 				BBoxSubCalc(&bb.vmax,&bb.vmin);
 
-				if(m_pVisualMesh->m_bCheckViewFrustum) {//tool 이라면 false
+				if(m_pVisualMesh->m_bCheckViewFrustum) {
 					if(isInViewFrustumWithZ( &bb, RGetViewFrustum()) == false) {
 						return false;
 					}
@@ -700,8 +638,6 @@ static bool find_intersects_triangle_sub(const rvector* vec, const rvector* vPoi
 
 bool RMesh::CalcIntersectsTriangle(const rvector* vInVec, RPickInfo* pInfo, D3DXMATRIX* world_mat, bool fastmode)
 {
-	//////////////////////////////////////////////////
-
 	RMeshNodeHashList_Iter it_obj =  m_list.begin();
 
 	D3DXVECTOR3 _v;
@@ -754,7 +690,6 @@ bool RMesh::CalcIntersectsTriangle(const rvector* vInVec, RPickInfo* pInfo, D3DX
 			vec[1] = pVecPick[ pPartsMeshNode->m_face_list[i].m_point_index[1] ];
 			vec[2] = pVecPick[ pPartsMeshNode->m_face_list[i].m_point_index[2] ];
 			
-			// pos , dir , vec
 			if( find_intersects_triangle_sub( vInVec , vec, &t, &u, &v ) ) {
 
 				if(t < best_t) {
@@ -763,7 +698,7 @@ bool RMesh::CalcIntersectsTriangle(const rvector* vInVec, RPickInfo* pInfo, D3DX
 					memcpy(vFindVec,vec,sizeof(rvector)*3);
 				}
 
-				if(fastmode) {	// 가장 먼저찾은것
+				if(fastmode) {
 					if(pInfo) {
 						pInfo->vOut	= vec[0] + u * ( vec[1] - vec[0] ) + v * ( vec[2] - vec[0] );
 						pInfo->t = best_t;
@@ -787,7 +722,7 @@ bool RMesh::CalcIntersectsTriangle(const rvector* vInVec, RPickInfo* pInfo, D3DX
 			rvector p,at;
 
 			at  = vInVec[0];
-			at += vInVec[1] * 10000.f;//대충 충분히 먼 거리..
+			at += vInVec[1] * 10000.f;
 
 			D3DXPlaneIntersectLine(&p,&pl,&vInVec[0],&at);
 
@@ -800,11 +735,8 @@ bool RMesh::CalcIntersectsTriangle(const rvector* vInVec, RPickInfo* pInfo, D3DX
 	return false;
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////
-
 static RRenderNodeMgr g_render_node_mgr;
 
-// 자기 자료로 그리기..
 void RRenderNode::Render()
 {
 	if(m_pNode && m_pNode->m_pParentMesh) {
@@ -846,22 +778,11 @@ int RRenderNodeMgr::Add(rmatrix& m,int mode,RMeshNode* pMNode,int nMtrl)
 
 void RRenderNodeMgr::Render()
 {
-	// sort
-
-	// normal	- name
-	// diffuse	- name
-	// alpha	- name
-	// add		- dist
-
-	// light on
-	
 	LPDIRECT3DDEVICE9 dev = RGetDevice();
 
 	for(int i=0;i<eRRenderNode_End;i++) {
 		m_RenderNodeList[i].Render();
 	}
-
-	// light off
 
 	Clear();
 }
@@ -882,18 +803,12 @@ void RenderNodeMgr_Render()
 	g_render_node_mgr.Render();
 }
 
-// temp --------------------------------------------------------------------------------
-
-//////////////////////////////////////////////////////////////
-// 모아찍기용..테스트 코드
-
 void RMeshRenderS(bool lit,int Rmode,rmatrix m,RMeshNode* pMNode,RMtrl* pMtrl,int begin,int size ,float vis_alpha);
 bool RMeshRenderSBegin();
 bool RMeshRenderSEnd();
 
 RRenderNode* GetNewRenderNode() {
 	if(g_render_cnt > RENDER_NODE_MAX-1) {
-//		mlog("g_render_buffer 를 늘려라\n");
 		return NULL;
 	}
 	g_render_node[g_render_cnt].Clear();
@@ -936,182 +851,10 @@ bool RMeshRenderSBegin()
 	g_lvert_index_pos = 0;
 
 	return true;
-}
-
-//void SetMtrl(RMtrl* pMtrl,float vis_alpha);
+};
 
 bool RMeshRenderSEnd()
 {
-/*
-	if(!g_rmesh_render_start_begin) {
-		mlog("RMeshRenderSBegin() 을 먼저 한 후 사용\n");
-		return false;
-	}
-
-	g_rmesh_render_start_begin = false;
-
-	// buffer render..
-
-	RRenderNodeList::iterator node;
-	RRenderNode* pRNode = NULL;
-	RMtrl* pBackupMtrl = NULL;
-
-	// sort
-//	for(int i=0;i<eRRenderNode_End;i++) {
-//		g_RenderNodeList[i].sort();
-//		g_RenderLNodeList[i].sort();
-//	}
-
-	LPDIRECT3DDEVICE9 dev = RGetDevice();
-
-//	dev->SetRenderState( D3DRS_NORMALIZENORMALS, TRUE );
-	dev->SetRenderState( D3DRS_CULLMODE, D3DCULL_CCW );
-//	dev->SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE );
-	dev->SetRenderState( D3DRS_ALPHABLENDENABLE, FALSE );
-	RSetWBuffer(true);
-	dev->SetRenderState( D3DRS_ZWRITEENABLE, TRUE );
-
-	for(int i=0;i<eRRenderNode_End;i++) {
-
-		dev->SetTextureStageState( 0, D3DTSS_COLORARG1, D3DTA_TEXTURE );
-		dev->SetTextureStageState( 0, D3DTSS_COLORARG2, D3DTA_DIFFUSE );
-		dev->SetTextureStageState( 0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE );
-		dev->SetTextureStageState( 0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE );
-
-		if(i == eRRenderNode_Normal) {
-			dev->SetRenderState( D3DRS_ALPHABLENDENABLE, FALSE);
-			dev->SetTextureStageState( 0, D3DTSS_COLOROP,   D3DTOP_MODULATE );
-			dev->SetTextureStageState( 0, D3DTSS_ALPHAOP,   D3DTOP_MODULATE );
-			dev->SetRenderState( D3DRS_ZWRITEENABLE, TRUE);
-
-		}
-		else if(i == eRRenderNode_Alpha) {
-
-			dev->SetRenderState( D3DRS_ALPHABLENDENABLE, TRUE );
-			dev->SetRenderState( D3DRS_SRCBLEND,  D3DBLEND_SRCALPHA );
-			dev->SetRenderState( D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA );
-			dev->SetRenderState( D3DRS_ZWRITEENABLE, TRUE);
-
-			dev->SetRenderState( D3DRS_ALPHATESTENABLE, TRUE );
-			dev->SetRenderState( D3DRS_ALPHAREF, 0x04 );
-			dev->SetRenderState( D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL );
-
-			dev->SetTextureStageState( 0, D3DTSS_COLOROP,   D3DTOP_MODULATE );//vis ani ignore
-			dev->SetTextureStageState( 0, D3DTSS_ALPHAOP,   D3DTOP_MODULATE );//light 
-		}
-		else if(i == eRRenderNode_Add) {
-
-			dev->SetRenderState( D3DRS_ALPHABLENDENABLE, TRUE);
-			dev->SetRenderState( D3DRS_SRCBLEND,  D3DBLEND_SRCALPHA);
-			dev->SetRenderState( D3DRS_DESTBLEND, D3DBLEND_ONE);
-			dev->SetRenderState( D3DRS_ZWRITEENABLE, FALSE);
-
-			dev->SetRenderState( D3DRS_ALPHATESTENABLE,  TRUE );
-			dev->SetRenderState( D3DRS_ALPHAREF,         0x04 );
-			dev->SetRenderState( D3DRS_ALPHAFUNC,  D3DCMP_GREATEREQUAL );
-
-			dev->SetTextureStageState( 0, D3DTSS_COLOROP,   D3DTOP_SELECTARG1 );//light ignore
-		//	dev->SetTextureStageState( 0, D3DTSS_COLOROP,   D3DTOP_MODULATE );
-			dev->SetTextureStageState( 0, D3DTSS_ALPHAOP,   D3DTOP_MODULATE );
-
-		}
-		else if(i == eRRenderNode_Diffuse) {
-
-//			SetMtrl(&pSMtrl->m_diffuse,GetMeshNodeVis(pMeshNode));
-
-//			dev->SetTexture( 0, NULL);
-
-//			if(GetMeshNodeVis(pMeshNode) != 1.f) {
-//				dev->SetRenderState( D3DRS_ALPHABLENDENABLE, TRUE );
-//				dev->SetRenderState( D3DRS_SRCBLEND,  D3DBLEND_SRCALPHA );
-//				dev->SetRenderState( D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA );
-//			}
-//			else {
-//				dev->SetRenderState( D3DRS_ALPHABLENDENABLE, FALSE );
-//			}
-
-//			dev->SetTextureStageState( 0, D3DTSS_COLOROP,   D3DTOP_SELECTARG2 );
-//			dev->SetTextureStageState( 0, D3DTSS_ALPHAOP,   D3DTOP_SELECTARG2 );
-
-//			dev->SetFVF( RVertexType );
-//			dev->DrawPrimitiveUP(D3DPT_TRIANGLELIST, t_face_cnt , (LPVOID) g_vert, sizeof(RVertex));
-
-//			g_poly_render_cnt += t_face_cnt;//<-----
-
-		//	SetMtrl(pSMtrl,GetMeshNodeVis(pMeshNode));
-
-//			dev->SetRenderState( D3DRS_ALPHABLENDENABLE,   FALSE );
-			dev->SetRenderState( D3DRS_ALPHABLENDENABLE,   TRUE );
-			dev->SetRenderState( D3DRS_SRCBLEND,  D3DBLEND_SRCALPHA );
-			dev->SetRenderState( D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA );
-			dev->SetRenderState( D3DRS_ZWRITEENABLE, TRUE);
-
-			dev->SetTextureStageState( 0, D3DTSS_COLOROP,   D3DTOP_BLENDTEXTUREALPHA );
-//			dev->SetTextureStageState( 0, D3DTSS_COLOROP,   D3DTOP_MODULATE );
-			dev->SetTextureStageState( 0, D3DTSS_ALPHAOP,   D3DTOP_MODULATE );//vis ignore
-		}
-
-		dev->SetRenderState( D3DRS_LIGHTING, TRUE );
-		dev->SetFVF( RVertexType );
-
-		for(node = g_RenderNodeList[i].begin(); node != g_RenderNodeList[i].end(); ) {
-			pRNode = (*node);
-
-			if(pBackupMtrl != pRNode->m_pMtrl) {//최대한 mtrl 이 같도록 정렬한다..
-				pBackupMtrl = pRNode->m_pMtrl;
-
-//				if(pBackupMtrl->m_bTwoSided) {
-//					dev->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-//				}
-
-				SetMtrl(pBackupMtrl,pRNode->m_vis_alpha);
-
-				if(g_bTextureRenderOnOff && pBackupMtrl) // debug func
-					dev->SetTexture( 0, pBackupMtrl->GetTexture());
-				else
-					dev->SetTexture( 0, NULL);
-			}
-			dev->SetTransform(D3DTS_WORLD, &pRNode->m_matWorld);
-//			dev->DrawPrimitiveUP(D3DPT_TRIANGLELIST, pRNode->m_size, (LPVOID) (g_vert_s + pRNode->m_begin) , sizeof(RVertex));
-			dev->DrawPrimitiveUP(D3DPT_TRIANGLELIST, pRNode->m_size, (LPVOID) &g_vert_s[pRNode->m_begin] , sizeof(RVertex));
-
-			g_poly_render_cnt += pRNode->m_size;
-			++node;
-		}
-
-		dev->SetRenderState( D3DRS_LIGHTING, FALSE );
-		dev->SetFVF( RLVertexType );
-
-		for(node = g_RenderLNodeList[i].begin(); node != g_RenderLNodeList[i].end(); ) {
-			pRNode = (*node);
-
-			if(pBackupMtrl != pRNode->m_pMtrl) {
-				pBackupMtrl = pRNode->m_pMtrl;
-
-//				if(pBackupMtrl->m_bTwoSided) {
-//					dev->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-//				}
-
-//				SetMtrl(pBackupMtrl,);
-
-				if(g_bTextureRenderOnOff && pBackupMtrl) // debug func
-					dev->SetTexture( 0, pBackupMtrl->GetTexture());
-				else
-					dev->SetTexture( 0, NULL);
-			}
-
-			dev->SetTransform(D3DTS_WORLD, &pRNode->m_matWorld);
-			dev->DrawPrimitiveUP(D3DPT_TRIANGLELIST, pRNode->m_size , (LPVOID) &g_lvert_s[pRNode->m_begin] , sizeof(RLVertex));
-			g_poly_render_cnt += pRNode->m_size;
-			++node;
-		}
-	}
-
-	for(int i=0;i<eRRenderNode_End;i++) {
-		g_RenderNodeList[i].clear();
-		g_RenderLNodeList[i].clear();
-	}
-*/
 	return true;
 }
 

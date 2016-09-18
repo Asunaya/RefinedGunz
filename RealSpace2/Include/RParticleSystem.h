@@ -1,15 +1,12 @@
-#ifndef _RPARTICLESYSTEM_H
-#define _RPARTICLESYSTEM_H
-
-//#pragma once
+#pragma once
 
 #include "RTypes.h"
 #include "RBaseTexture.h"
 
-_NAMESPACE_REALSPACE2_BEGIN
-
 #define DISCARD_COUNT	2048
 #define FLUSH_COUNT		512
+
+_NAMESPACE_REALSPACE2_BEGIN
 
 struct RParticle {
 	rvector position;
@@ -28,7 +25,7 @@ struct POINTVERTEX
 	static const DWORD FVF;
 };
 
-class RParticles : public list<RParticle*> {
+class RParticles : public std::list<RParticle*> {
 
 protected:
 	rvector mInitialPos;
@@ -51,7 +48,7 @@ protected:
 
 };
 
-class RParticleSystem : public list<RParticles*> {
+class RParticleSystem : public std::list<RParticles*> {
 public:
 	RParticleSystem();
 	virtual ~RParticleSystem();
@@ -75,5 +72,3 @@ public:
 
 
 _NAMESPACE_REALSPACE2_END
-
-#endif

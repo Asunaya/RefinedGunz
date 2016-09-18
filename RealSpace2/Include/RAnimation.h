@@ -1,5 +1,4 @@
-#ifndef _RAnimation_h
-#define _RAnimation_h
+#pragma once
 
 #include "RAnimationFile.h"
 
@@ -51,16 +50,16 @@ public:
 
 	RAnimationFile*		m_pAniData;
 
-	char				m_filename[256];// idle, move,
+	char				m_filename[256];
 	char				m_sound_name[256];
 
 	bool				m_bIsHaveSound;
-	bool				m_bSoundRelatedToMap;		// 맵과 연동되는 사운드인지 체크
+	bool				m_bSoundRelatedToMap;
 	int					m_sID;
 
 	int					m_NameID;
 
-	int					m_weapon_motion_type;//어떤무기모델에 대한 에니메이션그룹인가를 표시..
+	int					m_weapon_motion_type;
 	
 	bool				m_isConnected;
 	bool				m_isLoadDone;
@@ -73,5 +72,3 @@ private:
 };
 
 _NAMESPACE_REALSPACE2_END
-
-#endif//_RAnimation_h

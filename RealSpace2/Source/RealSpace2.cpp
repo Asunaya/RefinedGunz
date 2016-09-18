@@ -18,20 +18,24 @@ _NAMESPACE_REALSPACE2_BEGIN
 
 extern RFFUNCTION g_pFunctions[RF_ENDOFRFUNCTIONTYPE];
 
-bool g_bHardwareTNL, g_bSupportVS, g_bAvailUserClipPlane;
-FullscreenType g_FullscreenMode = FullscreenType::Fullscreen;
-int g_nScreenWidth, g_nScreenHeight, g_nPicmip;
-RPIXELFORMAT		g_PixelFormat;
-LPDIRECT3D9			g_pD3D = NULL;
-LPDIRECT3DDEVICE9	g_pd3dDevice = NULL;
-D3DADAPTER_IDENTIFIER9	g_DeviceID;
-D3DPRESENT_PARAMETERS	g_d3dpp;
-D3DCAPS9				g_d3dcaps;
-HWND					g_hWnd;
-MZFileSystem			*g_pFileSystem = NULL;
-RParticleSystem			g_ParticleSystem;
-HMODULE					g_hD3DLibrary = NULL;
-bool g_bStencilBuffer;
+static bool g_bHardwareTNL;
+static bool g_bSupportVS;
+static bool g_bAvailUserClipPlane;
+static FullscreenType g_FullscreenMode = FullscreenType::Fullscreen;
+static int g_nScreenWidth;
+static int g_nScreenHeight;
+static int g_nPicmip;
+static RPIXELFORMAT g_PixelFormat;
+static LPDIRECT3D9 g_pD3D;
+static LPDIRECT3DDEVICE9 g_pd3dDevice;
+static D3DADAPTER_IDENTIFIER9 g_DeviceID;
+static D3DPRESENT_PARAMETERS g_d3dpp;
+static D3DCAPS9 g_d3dcaps;
+HWND g_hWnd;
+MZFileSystem* g_pFileSystem;
+RParticleSystem	g_ParticleSystem;
+HMODULE g_hD3DLibrary;
+static bool g_bStencilBuffer;
 bool DynamicResourceLoading = true;
 
 bool IsDynamicResourceLoad()
@@ -57,13 +61,14 @@ void SetVSync(bool b)
 float g_fFogNear;
 float g_fFogFar;
 DWORD g_dwFogColor;
-bool g_bFog = false;
+bool g_bFog;
 
-int	g_nVidioMemory = 0;
+int	g_nVidioMemory;
 
-int g_nFrameCount=0,g_nLastFrameCount=0;
-float g_fFPS=0;
-DWORD g_dwLastFPSTime=GetGlobalTimeMS();
+int g_nFrameCount;
+int g_nLastFrameCount;
+float g_fFPS;
+static DWORD g_dwLastFPSTime = GetGlobalTimeMS();
 
 bool		g_bTrilinear=true;
 const bool	bTripleBuffer=false;
@@ -116,38 +121,36 @@ bool CreateDirect3D9()
 
 		if (!g_hD3DLibrary)
 		{
-			mlog("Error, could not load d3d9.dll");
+			mlog("Error: Couldn't load d3d9.dll\n");
 			return false;
 		}
 
-		typedef IDirect3D9 * (__stdcall *D3DCREATETYPE)(UINT);
-		D3DCREATETYPE d3dCreate = (D3DCREATETYPE) GetProcAddress(g_hD3DLibrary, "Direct3DCreate9");
+		using D3DCREATETYPE = IDirect3D9 * (__stdcall *)(UINT);
+		auto d3dCreate = reinterpret_cast<D3DCREATETYPE>(GetProcAddress(g_hD3DLibrary, "Direct3DCreate9"));
 
 		if (!d3dCreate)
 		{
-			mlog("Error, could not get proc adress of Direct3DCreate9.");
+			mlog("Error: Couldn't get address of Direct3DCreate9\n");
 			return false;
 		}
 
-
-		//just like pID3D = Direct3DCreate9(D3D_SDK_VERSION);
 		g_pD3D = (*d3dCreate)(D3D_SDK_VERSION);
 
 		if (!g_pD3D)
 		{
-			mlog("Error initializing D3D.");
+			mlog("Error: Direct3DCreate9 returned null\n");
 			return false;
 		}
 	}
 
-	g_pD3D->GetAdapterIdentifier(0,0,&g_DeviceID);
+	g_pD3D->GetAdapterIdentifier(0, 0, &g_DeviceID);
 
 	return true;
 }
 
 D3DADAPTER_IDENTIFIER9*	RGetAdapterID() 
 {
-	if (!g_pD3D) _ASSERT(0);
+	if (!g_pD3D) assert(false);
 	return &g_DeviceID; 
 }
 
@@ -163,7 +166,7 @@ BOOL IsCompressedTextureFormatOk( D3DFORMAT TextureFormat )
 	return SUCCEEDED( hr );
 }
 
-void RSetFileSystem(MZFileSystem *pFileSystem) { g_pFileSystem=pFileSystem; }
+void RSetFileSystem(MZFileSystem *pFileSystem) { g_pFileSystem = pFileSystem; }
 
 RParticleSystem *RGetParticleSystem() { return &g_ParticleSystem; }
 
@@ -220,7 +223,7 @@ void CheckMipFilter()
 	}
 }
 
-D3DDISPLAYMODE g_d3ddm;
+static D3DDISPLAYMODE g_d3ddm;
 
 bool RInitDisplay(HWND hWnd, const RMODEPARAMS *params)
 {
@@ -310,11 +313,9 @@ bool RInitDisplay(HWND hWnd, const RMODEPARAMS *params)
 		return false;
 	}
 #else
-	// 디폴트 세팅
 	UINT AdapterToUse = D3DADAPTER_DEFAULT;
 	D3DDEVTYPE DeviceType = D3DDEVTYPE_HAL;
 
-	// 'NVIDIA NVPerfHUD' 어댑터를 찾아보고, 있으면 디폴트 세팅 대신 그것을 사용한다.
 	for( UINT Adapter = 0; Adapter < g_pD3D->GetAdapterCount(); Adapter++ ) 
 	{    
 		D3DADAPTER_IDENTIFIER9 Identifier;    
@@ -332,7 +333,7 @@ bool RInitDisplay(HWND hWnd, const RMODEPARAMS *params)
 		return false;
 	}
 
-#endif	// #ifndef _NVPERFHUD
+#endif
 
 	mlog("Device created\n");
 
@@ -390,7 +391,7 @@ void RAdjustWindow(const RMODEPARAMS* ModeParams)
 	}
 }
 
-int GetWindowStyle(const RMODEPARAMS & ModeParams)
+u32 GetWindowStyle(const RMODEPARAMS & ModeParams)
 {
 	switch (ModeParams.FullscreenMode)
 	{
@@ -428,9 +429,10 @@ void RResetDevice(const RMODEPARAMS *params)
 
 	_ASSERT(hr == D3D_OK);
 	if (hr != D3D_OK) {
-		mlog("\nDevice reset failed: %s\n", DXGetErrorString9(hr));
-		int *a = 0;
-		*a = 1;
+		char errstr[512];
+		sprintf_safe(errstr, "Device reset failed: %s", DXGetErrorString9(hr));
+		mlog("%s\n", errstr);
+		throw std::runtime_error(errstr);
 	}
 
 	InitDevice();
@@ -600,73 +602,73 @@ bool SaveMemoryBmp(int x,int y,void *data,void **retmemory,int *nsize)
 
 
 #ifdef _USE_GDIPLUS
-	#include "unknwn.h"
-	#include "gdiplus.h"
-	using namespace Gdiplus;
+#include "unknwn.h"
+#include "gdiplus.h"
+using namespace Gdiplus;
 
-	int GetCodecClsid(const WCHAR* format, CLSID* pClsid)
-	{
-		UINT  num = 0;          // number of image encoders
-		UINT  size = 0;         // size of the image encoder array in bytes
+int GetCodecClsid(const WCHAR* format, CLSID* pClsid)
+{
+	UINT  num = 0;          // number of image encoders
+	UINT  size = 0;         // size of the image encoder array in bytes
 
-		ImageCodecInfo* pImageCodecInfo = NULL;
+	ImageCodecInfo* pImageCodecInfo = NULL;
 
-		GetImageEncodersSize(&num, &size);
-		if(size == 0)
-			return -1;  // Failure
-
-		pImageCodecInfo = (ImageCodecInfo*)(malloc(size));
-		if(pImageCodecInfo == NULL)
-			return -1;  // Failure
-
-		GetImageEncoders(num, size, pImageCodecInfo);
-
-		for(UINT j = 0; j < num; ++j)
-		{
-			if( wcscmp(pImageCodecInfo[j].MimeType, format) == 0 )
-			{
-				*pClsid = pImageCodecInfo[j].Clsid;
-				free(pImageCodecInfo);
-				return j;  // Success
-			}    
-		} // for
-
-		free(pImageCodecInfo);
+	GetImageEncodersSize(&num, &size);
+	if(size == 0)
 		return -1;  // Failure
-	} // GetCodecClsid
 
-	// data 는 ARGB 32bit 포맷
-	bool RSaveAsJpeg(int x,int y,void *data,const char *szFilename)
+	pImageCodecInfo = (ImageCodecInfo*)(malloc(size));
+	if(pImageCodecInfo == NULL)
+		return -1;  // Failure
+
+	GetImageEncoders(num, size, pImageCodecInfo);
+
+	for(UINT j = 0; j < num; ++j)
 	{
-		// Setting up RAW Data
-		BitmapData bitmapData;
-		bitmapData.Width = x,
-		bitmapData.Height = y,
-		bitmapData.Stride = 4*bitmapData.Width;
-		bitmapData.PixelFormat = PixelFormat32bppARGB; 
-		bitmapData.Scan0 = data;
-		bitmapData.Reserved = NULL;
+		if( wcscmp(pImageCodecInfo[j].MimeType, format) == 0 )
+		{
+			*pClsid = pImageCodecInfo[j].Clsid;
+			free(pImageCodecInfo);
+			return j;  // Success
+		}    
+	} // for
 
-		// Write to Bitmap
-		Rect rect(0, 0, x, y);
-		Bitmap bitmap(x, y, 4*bitmapData.Width, PixelFormat32bppARGB, (BYTE*)data);
-		bitmap.LockBits(&rect, ImageLockModeWrite|ImageLockModeUserInputBuf, PixelFormat32bppARGB, &bitmapData);
-		bitmap.UnlockBits(&bitmapData);
-		
-		// Make WFileName
-		WCHAR wstrName[256];
-		int nNameLen = strlen(szFilename)+1;
-		MultiByteToWideChar(CP_ACP, 0, szFilename, -1, wstrName, nNameLen-1);
-		wstrName[nNameLen-1] = 0;
+	free(pImageCodecInfo);
+	return -1;  // Failure
+} // GetCodecClsid
 
-		// Save Bitmap
-		CLSID  Clsid;
-		int ret = GetCodecClsid(L"image/jpeg", &Clsid);;
-		if (bitmap.Save(wstrName, &Clsid, NULL) == Ok)
-			return true;
-		else
-			return false;
-	}
+// data 는 ARGB 32bit 포맷
+bool RSaveAsJpeg(int x,int y,void *data,const char *szFilename)
+{
+	// Setting up RAW Data
+	BitmapData bitmapData;
+	bitmapData.Width = x,
+	bitmapData.Height = y,
+	bitmapData.Stride = 4*bitmapData.Width;
+	bitmapData.PixelFormat = PixelFormat32bppARGB; 
+	bitmapData.Scan0 = data;
+	bitmapData.Reserved = NULL;
+
+	// Write to Bitmap
+	Rect rect(0, 0, x, y);
+	Bitmap bitmap(x, y, 4*bitmapData.Width, PixelFormat32bppARGB, (BYTE*)data);
+	bitmap.LockBits(&rect, ImageLockModeWrite|ImageLockModeUserInputBuf, PixelFormat32bppARGB, &bitmapData);
+	bitmap.UnlockBits(&bitmapData);
+	
+	// Make WFileName
+	WCHAR wstrName[256];
+	int nNameLen = strlen(szFilename)+1;
+	MultiByteToWideChar(CP_ACP, 0, szFilename, -1, wstrName, nNameLen-1);
+	wstrName[nNameLen-1] = 0;
+
+	// Save Bitmap
+	CLSID  Clsid;
+	int ret = GetCodecClsid(L"image/jpeg", &Clsid);;
+	if (bitmap.Save(wstrName, &Clsid, NULL) == Ok)
+		return true;
+	else
+		return false;
+}
 #endif	// _USE_GDIPLUS
 
 bool RSaveAsBmp(int x,int y,void *data,const char *szFilename)

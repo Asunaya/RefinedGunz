@@ -1,10 +1,11 @@
 #pragma once
 
-#include "RTypes.h"
+#include "RMath.h"
+#include "RUtil.h"
 #include "RError.h"
 #include "MZFileSystem.h"
 
-#pragma comment(lib,"d3dx9.lib")
+#pragma comment(lib, "d3dx9.lib")
 
 #include "RNameSpace.h"
 _NAMESPACE_REALSPACE2_BEGIN
@@ -48,7 +49,7 @@ bool RInitDisplay(HWND hWnd, const RMODEPARAMS *params);
 bool RCloseDisplay();
 void RSetFileSystem(MZFileSystem *pFileSystem);
 void RAdjustWindow(const RMODEPARAMS* ModeParams);
-int GetWindowStyle(const RMODEPARAMS& ModeParams);
+u32 GetWindowStyle(const RMODEPARAMS& ModeParams);
 
 LPDIRECT3DDEVICE9	RGetDevice();
 

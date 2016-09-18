@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "RNavigationNode.h"
-#include "RTypes.h"
+#include "RMath.h"
 #include <crtdbg.h>
 
 RNavigationNode::RNavigationNode() : RAStarNode(), bSelected(false), m_nArrivalLink(0), m_nID(-1)
@@ -127,7 +127,6 @@ bool RNavigationNode::IsPointInNodeColumn(const rvector2& TestPoint) const
 	{
 		rline2d::POINT_CLASSIFICATION SideResult = m_Side[i].ClassifyPoint(TestPoint);
 
-		// 선위의 점도 삼각형 안에 있는걸로 간주한다.
 		if (SideResult != rline2d::RIGHT_SIDE)
 		{
 			InteriorCount++;
@@ -245,7 +244,7 @@ float RNavigationNode::GetSuccessorCost(RAStarNode* pSuccessor)
 	
 	float fWeight = (m_fWeight + pSuccessor->GetWeight()) / 2.0f;
 	rvector d = m_CenterPos - ((RNavigationNode*)pSuccessor)->m_CenterPos;
-	return (D3DXVec3LengthSq(&d) * fWeight);
+	return MagnitudeSq(d) * fWeight;
 }
 
 float RNavigationNode::GetHeuristicCost(RAStarNode* pGoal)
@@ -253,5 +252,5 @@ float RNavigationNode::GetHeuristicCost(RAStarNode* pGoal)
 	_ASSERT(pGoal != NULL);
 
 	rvector d = m_CenterPos - ((RNavigationNode*)pGoal)->m_CenterPos;
-	return D3DXVec3LengthSq(&d);
+	return MagnitudeSq(d);
 }

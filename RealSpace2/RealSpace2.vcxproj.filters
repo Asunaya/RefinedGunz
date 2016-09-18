@@ -172,6 +172,7 @@
     <ClCompile Include="Source\RTypes.cpp" />
     <ClCompile Include="Source\stdafx.cpp" />
     <ClCompile Include="Source\MeshManager.cpp" />
+    <ClCompile Include="Source\RMath.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\RHalfEdgeMesh.h">
@@ -304,5 +305,7 @@
     <ClInclude Include="Include\RVersions.h" />
     <ClInclude Include="Include\stdafx.h" />
     <ClInclude Include="Include\MeshManager.h" />
+    <ClInclude Include="Include\RMath.h" />
+    <ClInclude Include="Include\RUtil.h" />
   </ItemGroup>
 </Project>

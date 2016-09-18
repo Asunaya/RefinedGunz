@@ -91,19 +91,15 @@ public:
 	int			m_size;
 };
 
-class RRenderNodeList : public list<RRenderNode*>
+class RRenderNodeList : public std::list<RRenderNode*>
 {
 public:
-	RRenderNodeList() {
-
-	}
-
 	void Render() {
 
 		if(empty())
 			return;
 
-		list<RRenderNode*>::iterator node = begin();
+		std::list<RRenderNode*>::iterator node = begin();
 
 		RRenderNode* pNode;
 
@@ -122,7 +118,7 @@ public:
 
 		if(empty()) return;
 
-		list<RRenderNode*>::iterator node = begin();
+		std::list<RRenderNode*>::iterator node = begin();
 
 		RRenderNode* pNode;
 
@@ -130,14 +126,14 @@ public:
 			pNode = (*node);
 			delete pNode;
 			pNode = NULL;
-			node = erase(node);// ++node
+			node = erase(node);
 		}
 
 		clear();
 	}
 
 #ifdef _DEBUG
-	RRenderNode* m_data[1024*1000];//debug
+	RRenderNode* m_data[1024*1000];
 #endif
 
 };
@@ -547,9 +543,7 @@ public:
 };
 
 ////////////////////////////////////////////////////////////
-// help func
-
-void ConvertMat(rmatrix& mat1,rmatrix& mat2);
+// help func;
 
 bool RMeshRenderSBegin();
 bool RMeshRenderSEnd();

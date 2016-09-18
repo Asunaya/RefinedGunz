@@ -4,6 +4,7 @@
 #include <crtdbg.h>
 #include "MZFileSystem.h"
 #include "RVersions.h"
+#include "RMath.h"
 
 RNavigationMesh::RNavigationMesh()
 {

@@ -1,25 +1,16 @@
-#ifndef _RAnimationMgr_h
-#define _RAnimationMgr_h
+#pragma once
 
 #include "RAnimation.h"
 
 _NAMESPACE_REALSPACE2_BEGIN
 
-////////////////////////////////////////////////////////////////////////
-// 파일 자체는 같으면서 모션 번호만 틀린 경우..무기의 경우도 있다...
-/////////////////////////////////////////////////////////////////////////
-
 #define MAX_ANIMATION_NODE 1000
-
-///////////////////////////////////////////////////////////////
 
 typedef RHashList<RAnimationFile*>				RAnimationFileHashList;
 typedef RHashList<RAnimationFile*>::iterator	RAnimationFileHashList_Iter;
 
 typedef RHashList<RAnimation*>					RAnimationHashList;
 typedef RHashList<RAnimation*>::iterator		RAnimationHashList_Iter;
-
-//////////////////////////////////////////////////////////
 
 class RAnimationFileMgr
 {
@@ -39,13 +30,10 @@ public:
 
 inline RAnimationFileMgr* RGetAnimationFileMgr() { return RAnimationFileMgr::GetInstance(); }
 
-
 class RAnimationMgr {
 public:
 	RAnimationMgr();
-	~RAnimationMgr(); 
-
-	// 특정 모델 로드시 자동으로 불리는 에니메이션 파일 목록 지원하기
+	~RAnimationMgr();
 
 	bool LoadAnimationFileList(const char* filename) {
 		return true;
@@ -79,9 +67,7 @@ public:
 	RAnimationHashList  m_list;
 	RAnimationHashList* m_list_map;
 
-	vector<RAnimation*> m_node_table;
+	std::vector<RAnimation*> m_node_table;
 };
 
 _NAMESPACE_REALSPACE2_END
-
-#endif//_RAnimationMgr_h

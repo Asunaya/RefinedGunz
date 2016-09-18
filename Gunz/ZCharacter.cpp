@@ -1122,7 +1122,8 @@ void ZCharacter::UpdateVelocity(float fDelta)
 {
 	rvector dir=rvector(GetVelocity().x,GetVelocity().y,0);
 	float fSpeed=Magnitude(dir);
-	Normalize(dir);
+	if (fSpeed > 0)
+		Normalize(dir);
 
 	float fRatio = GetMoveSpeedRatio();
 
