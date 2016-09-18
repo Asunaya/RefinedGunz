@@ -464,7 +464,6 @@ void RVisualMesh::Destroy()
 		delete m_pTracks[0];
 		m_pTracks[0] = NULL;
 	}
-	//이도류~
 	if(m_pTracks[1]) {
 		delete m_pTracks[1];
 		m_pTracks[1] = NULL;
@@ -508,14 +507,12 @@ void RVisualMesh::Destroy()
 bool RVisualMesh::Create(RMesh* pMesh) {
 
 	m_pMesh = pMesh;
-//	D3DXMatrixIdentity(&m_WorldMat);
 
 	if (m_pMesh) {
 		m_bIsCharacter = m_pMesh->m_isCharacterMesh;
 		m_bIsNpc = m_pMesh->m_isNPCMesh;
 	}
 
-	// 캐릭터라면~
 	if( m_bIsCharacter || m_bIsNpc) {
 
 		if(m_bIsCharacter) {
@@ -538,9 +535,6 @@ bool RVisualMesh::Create(RMesh* pMesh) {
 			}
 		}
 	}
-
-//	if(RIsQuery())
-//		m_RenderQuery.Create( RGetDevice() );
 
 	return true;
 }
@@ -678,16 +672,14 @@ void RVisualMesh::Stop(RAniMode amode) {
 	}
 
 	pInfo->m_isPlayDone = false;
-//	pInfo->m_isOncePlayDone = false;
 }
 
-// 작동 안함 전역타이머가 없다면 틱을 보관해 줘야함...별로 사용할 필요가 없을것 같음..
 void RVisualMesh::Pause(RAniMode amode) {
 
 	AniFrameInfo* pInfo = GetFrameInfo(amode);
 	if( pInfo == NULL ) return;
 
-	m_nAnimationState = APState_Pause;//m_nFrame 은 유지..
+	m_nAnimationState = APState_Pause;
 
 	pInfo->m_isPlayDone = false;
 }
@@ -1527,8 +1519,6 @@ void RVisualMesh::SetWorldMatrix(rmatrix& mat) {
 	m_WorldMat = mat;
 }
 
-/////////////////////////////////////////////////////////////////////////
-
 void RVisualMesh::AddWeapon(RWeaponMotionType type,RMesh* pMesh,RAnimation* pAni)
 {
 	if((type < eq_weapon_etc)||(type > eq_weapon_end-1)) {
@@ -2210,7 +2200,7 @@ rvector	RVisualMesh::GetHeadPosition()
 	rvector root=GetRootPosition()-rv;
 	Normalize(root);
 
-	return rv;// +10.f * root;
+	return rv;
 }
 
 rvector	RVisualMesh::GetRootPosition() 
@@ -2358,7 +2348,7 @@ bool RVisualMesh::GetWeaponDummyMatrix(WeaponDummyType type,rmatrix* mat,bool bL
 			m = m_WeaponDummyMatrix[type];
 		}
 
-		if(m_bIsNpc)//npc 의경우는 scale 처리와 worldmatrix 처리가 자동으로 안 되어있다..
+		if(m_bIsNpc)
 		{
 			if(m_isScale)
 				m = m_ScaleMat * m;
@@ -2399,17 +2389,14 @@ void RVisualMesh::ClearUvAnimation()
 	m_bUVAni = false;
 }
 
-// 무기 모델에 달린 더미일 경우..
 void RVisualMesh::UpdateWeaponDummyMatrix(RMeshNode* pMeshNode)
 {
 	if(!pMeshNode) return;
 
-	if( pMeshNode->m_WeaponDummyType != weapon_dummy_etc) { // 무기에 달린 더미
+	if( pMeshNode->m_WeaponDummyType != weapon_dummy_etc) {
 		m_WeaponDummyMatrix[ pMeshNode->m_WeaponDummyType ] = pMeshNode->m_mat_result;
 	}
 }
-
-// 무기 더미의 위치값을 보관..
 
 void RVisualMesh::UpdateWeaponPartInfo(RMeshNode* pMeshNode)
 {
@@ -2436,23 +2423,17 @@ void RVisualMesh::OnRestore()
 {
 	if(m_pCloth) 
 		m_pCloth->OnRestore();
-
-//	m_RenderQuery.Create( RGetDevice() );
 }
 
 void RVisualMesh::OnInvalidate()
 {
 	if(m_pCloth) 
 		m_pCloth->OnInvalidate();
-
-//	m_RenderQuery.Destroy();
 }
-
-////////////////////////////////////////////////////////////////
 
 bool RVisualMesh::CreateCloth(RMeshNode* pMeshNode,float fAccel,int Numiter)
 {
-	DestroyCloth();// 이미 있다면 제거..
+	DestroyCloth();
 
 	m_pCloth = new RCharCloth;
 	m_pCloth->create( m_pMesh, pMeshNode );
@@ -2460,7 +2441,7 @@ bool RVisualMesh::CreateCloth(RMeshNode* pMeshNode,float fAccel,int Numiter)
 	m_pCloth->SetAccelationRatio( fAccel );
 	m_pCloth->SetNumIteration( Numiter );
 
-	pMeshNode->m_bClothMeshNodeSkip = false;//그린다..
+	pMeshNode->m_bClothMeshNodeSkip = false;
 
 	return true;
 }
@@ -2495,27 +2476,12 @@ void RVisualMesh::RenderCloth()
 	if(m_pCloth)
 		m_pCloth->render();
 }
-/*
-bool RVisualMesh::GetClothMeshNodeRender()
-{
-	if(m_pCloth&&m_pCloth->mpMeshNode)
-		return m_pCloth->mpMeshNode->m_bClothMeshNodeSkip;
-	return false;	
-}
 
-void RVisualMesh::SetClothMeshNodeRender(bool b)
-{
-	if(m_pCloth&&m_pCloth->mpMeshNode)
-		m_pCloth->mpMeshNode->m_bClothMeshNodeSkip = b;
-}
-*/
 void RVisualMesh::ChangeChestCloth(float fAccel,int Numiter  )
 {
 	RMeshNode* pMeshNode = GetParts( eq_parts_chest );
 
-	// mesh node를 검색하면서 컬러값을 가진 노드를 걸러낸다
-
-	if( pMeshNode == NULL ) // 파츠가 아닌 기본 모델에서 찾아본다..
+	if( pMeshNode == NULL )
 	{
 		int nMeshNode = m_pMesh->m_data_num;
 
@@ -2532,12 +2498,8 @@ void RVisualMesh::ChangeChestCloth(float fAccel,int Numiter  )
 		}
 	}
 
-	// 같으면 바꿀 필요 없다..
-
 	if(m_pCloth && (m_pCloth->mpMeshNode == pMeshNode) )
 		return;
-
-	// 가슴 장비 모델이 버텍스 컬러 값을 가지고 있다면...
 
 	if(pMeshNode && pMeshNode->m_point_color_num > 0 )
 	{

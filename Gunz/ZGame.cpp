@@ -3739,7 +3739,6 @@ void ZGame::OnReceiveTeamBonus(const MUID& uidChar, const unsigned long int nExp
 
 void ZGame::OnPeerDieMessage(ZCharacter* pVictim, ZCharacter* pAttacker)
 {
-	const char *testdeathnametable[ZD_END+1] = { "¿¡·¯", "ÃÑ", "Ä®", "Ãß¶ô", "Æø¹ß", "HEADSHOT", "¸¶Áö¸·Ä®Áú" };
 	char szMsg[256] = "";
 
 	const char *szAnonymous = "?¾Æ¹«°³?";

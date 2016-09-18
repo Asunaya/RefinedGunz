@@ -66,9 +66,6 @@ void DrawBoundingBox(rboundingbox *bb, DWORD color)
 
 static bool m_bisDrawLightMap = true;
 
-/////////////////////////////////////////////////////////////
-//	RSBspNode
-
 RSBspNode::RSBspNode()
 {
 	m_pPositive = m_pNegative = NULL;
@@ -100,7 +97,6 @@ void RSBspNode::DrawWireFrame(int nPolygon, DWORD color)
 	for (int i = 0; i < info->nVertices; i++)
 	{
 		RDrawLine(*info->pVertices[i].Coord(), *info->pVertices[(i + 1) % info->nVertices].Coord(), color);
-		//		RDrawLine(*pVertices[nFace*3+i%3].Coord(),*pVertices[nFace*3+(i+1)%3].Coord(),color);
 	}
 }
 
@@ -112,9 +108,6 @@ RSBspNode* RSBspNode::GetLeafNode(const rvector &pos)
 	else
 		return m_pNegative->GetLeafNode(pos);
 }
-
-/////////////////////////////////////////////////////////////
-//	RBspLightmapManager
 
 RBspLightmapManager::RBspLightmapManager()
 {
@@ -156,15 +149,15 @@ bool RBspLightmapManager::GetFreeRect(int nLevel, POINT *pt)
 {
 	if (nLevel > MAX_LEVEL_COUNT) return false;
 
-	if (!m_pFreeList[nLevel].size())		// 해당하는 크기의 빈블럭이 하나도 없으면 
+	if (!m_pFreeList[nLevel].size())
 	{
 		POINT point;
-		if (!GetFreeRect(nLevel + 1, &point))	// 윗블럭 하나를 받아온다. 만약 없으면 남는공간이 없는 것이므로 바로 끝낸다.
+		if (!GetFreeRect(nLevel + 1, &point))
 			return false;
 
 		int nSize = 1 << nLevel;
 
-		POINT newpoint;						// 받아온 윗블럭을 4등분해서 한조각을 쓰고, 나머지 세조각을 빈블럭 리스트에 넣어둔다.
+		POINT newpoint;
 
 		newpoint.x = point.x + nSize; newpoint.y = point.y;
 		m_pFreeList[nLevel].push_back(newpoint);
@@ -198,7 +191,7 @@ bool RBspLightmapManager::Add(DWORD *data, int nSize, POINT *retpoint)
 	_ASSERT(nSize == nTemp);
 
 	POINT pt;
-	if (!GetFreeRect(nLevel, &pt))		// 빈 공간이 없으면 실패
+	if (!GetFreeRect(nLevel, &pt))
 		return false;
 
 	for (int y = 0; y < nSize; y++)
@@ -331,7 +324,7 @@ void RBspObject::SetDiffuseMap(int nMaterial)
 }
 
 template <typename T>
-static void DrawImpl(RSBspNode& Node, int Material, T&& DrawFunc)
+static void DrawImpl(RSBspNode& Node, int Material, T& DrawFunc)
 {
 	if (Node.nFrameCount != g_nFrameNumber)
 		return;
@@ -472,9 +465,7 @@ bool RBspObject::Draw()
 	D3DXMatrixTranspose(&trMat, &mat);
 
 	for (int i = 0; i < 6; i++)
-	{
 		D3DXPlaneTransform(m_localViewFrustum + i, RGetViewFrustum() + i, &trMat);
-	}
 
 	_BP("ChooseNodes");
 	ChooseNodes(OcRoot.data());
@@ -935,6 +926,7 @@ bool RBspObject::ReadString(MZFile *pfile, char *buffer, int nBufferSize)
 		if (nCount >= nBufferSize)
 			return false;
 	} while ((*(buffer - 1)) != 0);
+
 	return true;
 }
 
@@ -944,17 +936,17 @@ void DeleteVoidNodes(RSBspNode *pNode)
 {
 	if (pNode->m_pPositive)
 		DeleteVoidNodes(pNode->m_pPositive);
+
 	if (pNode->m_pNegative)
 		DeleteVoidNodes(pNode->m_pNegative);
 
-	if (pNode->m_pPositive && !pNode->m_pPositive->nPolygon && !pNode->m_pPositive->m_pPositive && !pNode->m_pPositive->m_pNegative)
-	{
+	if (pNode->m_pPositive && !pNode->m_pPositive->nPolygon &&
+		!pNode->m_pPositive->m_pPositive && !pNode->m_pPositive->m_pNegative)
 		SAFE_DELETE(pNode->m_pPositive);
-	}
-	if (pNode->m_pNegative && !pNode->m_pNegative->nPolygon && !pNode->m_pNegative->m_pPositive && !pNode->m_pNegative->m_pNegative)
-	{
+
+	if (pNode->m_pNegative && !pNode->m_pNegative->nPolygon &&
+		!pNode->m_pNegative->m_pPositive && !pNode->m_pNegative->m_pNegative)
 		SAFE_DELETE(pNode->m_pNegative);
-	}
 }
 
 void RecalcBoundingBox(RSBspNode *pNode)
@@ -3309,7 +3301,7 @@ bool RBspObject::DrawLight(RSBspNode *pNode, int nMaterial)
 
 				if (fPlaneDotCoord > g_pTargetLight->Range) continue;
 
-#define BACK_FACE_DISTANCE 200.f
+				constexpr auto BACK_FACE_DISTANCE = 200.f;
 				if (fPlaneDotCoord < -BACK_FACE_DISTANCE) continue;
 				if (fPlaneDotCoord < 0) fPlaneDotCoord = -fPlaneDotCoord / BACK_FACE_DISTANCE * g_pTargetLight->Range;
 

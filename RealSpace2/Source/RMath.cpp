@@ -19,35 +19,31 @@ float GetDistance(const rboundingbox &bb, const rvector &point)
 	return Magnitude(closest - point);
 }
 
-// 한점에서 평면까지의 거리 .. normalized plane 임을 가정.
 float GetDistance(const rvector &position, const rplane &plane)
 {
-	return fabsf(D3DXPlaneDotCoord(&plane, &position));
+	return abs(DotProduct(plane, position));
 }
 
-// 선분(a,aa) 에서 평면까지의 가장 가까운 선분위의 점.
 rvector GetNearestPoint(const rvector &a, const rvector &aa, const rplane &plane)
 {
 	rvector b = aa - a;
 
-	float fDot = D3DXPlaneDotNormal(&plane, &b);
+	float fDot = DotPlaneNormal(plane, b);
 	if (IS_ZERO(fDot))
 		return a;
 
-	float t = -(plane.d + D3DXPlaneDotNormal(&plane, &a)) / fDot;
+	float t = -(plane.d + DotPlaneNormal(plane, a)) / fDot;
 	if (t<0) t = 0;
 	if (t>1) t = 1;
 
 	return a + t*b;
 }
 
-// 선분(a,aa) 에서 평면까지의 거리
 float GetDistance(const rvector &a, const rvector &aa, const rplane &plane)
 {
 	return GetDistance(GetNearestPoint(a, aa, plane), plane);
 }
 
-// 점에서 직선의 거리
 float GetDistance(const rvector &position, const rvector &line1, const rvector &line2)
 {
 	rvector a = position - line1;
@@ -57,16 +53,13 @@ float GetDistance(const rvector &position, const rvector &line1, const rvector &
 	return sqrtf(asq - powf(DotProduct(a, b), 2) / bsq);
 }
 
-// 한점에서 가장 가까운 선분위의 점
 rvector GetNearestPoint(const rvector &position, const rvector &a, const rvector &b)
 {
 	rvector dir = b - a;
 
 	float d = -DotProduct(position, dir);
-	// position을지나는 dir 을 법선으로 가지는 평면의 방정식은, x*dir.x+y*dir.y+z*dir.z+d=0 이다.
 
-	// 직선에서 position 가장 가까운 점을 a+t*dir 로 나타내면,
-	float mdir = D3DXVec3LengthSq(&dir);
+	float mdir = MagnitudeSq(dir);
 	if (mdir<0.001f) return a;
 
 	float t = -(DotProduct(a, dir) + d) / mdir;
@@ -77,28 +70,26 @@ rvector GetNearestPoint(const rvector &position, const rvector &a, const rvector
 	return a + t*dir;
 }
 
-// 한점에서 선분까지의 거리
 float GetDistanceLineSegment(const rvector &position, const rvector &a, const rvector &b)
 {
 	return Magnitude(GetNearestPoint(position, a, b) - position);
 }
 
-// 선분과 선분 사이의 거리.. 선분 (a,aa) 과 선분 (c,cc)의 거리.
-float GetDistanceBetweenLineSegment(const rvector &a, const rvector &aa, const rvector &c, const rvector &cc, rvector *ap, rvector *cp)
+float GetDistanceBetweenLineSegment(const rvector &a, const rvector &aa,
+	const rvector &c, const rvector &cc, rvector *ap, rvector *cp)
 {
 	rvector b = aa - a;
 	rvector d = cc - c;
 
-	// 두 선분에 공통 수선의 방향은 b x d
 	rvector cm;
 	CrossProduct(&cm, b, d);
 
 	float fMagnitude = Magnitude(cm);
 
-	if (fMagnitude<1)	// 두 선분이 평행하다면...
+	if (fMagnitude<1)
 	{
 
-		rvector x;	// 두 선분을 포함하는 두 직선의 차.. 이걸 구하는 방법은 점과 직선의 거리구하는법을 참조.
+		rvector x;
 
 		rvector edge = a - c;
 		float temp = DotProduct(edge, d) / Magnitude(d);
@@ -106,7 +97,7 @@ float GetDistanceBetweenLineSegment(const rvector &a, const rvector &aa, const r
 		Normalize(dir);
 		x = c + temp*dir - a;
 
-		float st0, st1;		// t=0 일때의 s 의 값, t=1 일때의 s 의 값
+		float st0, st1;
 
 		st0 = DotProduct(a + x - c, d) / DotProduct(d, d);
 		st1 = DotProduct(aa + x - c, d) / DotProduct(d, d);
@@ -150,20 +141,13 @@ float GetDistanceBetweenLineSegment(const rvector &a, const rvector &aa, const r
 		return Magnitude(*ap - *cp);
 	}
 
-	//	Normalize(cm);
 	cm /= fMagnitude;
-
-	// c, c+d, c+cm 세 점을 지나는 평면의 방정식은 rp-rc=0 ( r = d x cm , 방향은 선분의 방향과 공통수수선 방향의 crossproduct 이며 점c를 지난다.)
-	// 이 평면과 a+tb 직선의 교점에서 r(a+tb)-rc=0   ->  t=(rc-ra)/(rb)
 
 	rvector r;
 	CrossProduct(&r, d, cm);
 	Normalize(r);
 
 	float t = (DotProduct(r, c) - DotProduct(r, a)) / DotProduct(r, b);
-
-	// a, a+b, a+cm 세 점을 지나는 평면의 방정식은 rp-ra=0 ( r = b x cm , 방향은 선분의 방향과 공통수수선 방향의 crossproduct 이며 점a를 지난다.)
-	// 이 평면과 c+sd 직선의 교점에서 r(c+sd)-ra=0    ->  s=(ra-rc)/(rd)
 
 	CrossProduct(&r, b, cm);
 	Normalize(r);
@@ -180,10 +164,10 @@ float GetDistanceBetweenLineSegment(const rvector &a, const rvector &aa, const r
 	*cp = c + s*d;
 	return Magnitude(*ap - *cp);
 }
-// 두 직선의 거리는 좀더 간단함.. a+tb+k(cm)=c+sd 라고 놓고.. 양변에 cm 을 DotProduct 해주면 ok.. (cm 이 b,d 와 수직이기 때문에) k=(a-c)cm
 
 
-float GetDistance(const rboundingbox *bb, const rplane *plane)		// 평면에서 boundingbox와의 최대거리
+
+float GetDistance(const rboundingbox *bb, const rplane *plane)
 {
 	float a, b, c;
 	a = (plane->a>0) ? bb->m[1][0] : bb->m[0][0];
@@ -192,7 +176,6 @@ float GetDistance(const rboundingbox *bb, const rplane *plane)		// 평면에서 boun
 	return plane->a*a + plane->b*b + plane->c*c + plane->d;
 }
 
-// 평면에서 boundingbox와의 최소,최대거리
 void GetDistanceMinMax(rboundingbox &bb, rplane &plane, float *MinDist, float *MaxDist)
 {
 	float a, b, c, a2, b2, c2;
@@ -206,21 +189,15 @@ void GetDistanceMinMax(rboundingbox &bb, rplane &plane, float *MinDist, float *M
 	*MinDist = plane.a*a2 + plane.b*b2 + plane.c*c2 + plane.d;
 }
 
-// 삼각형의 면적
 float GetArea(rvector &v1, rvector &v2, rvector &v3)
 {
-	float a, b, c;	// 삼각형의 세변의 길이.
+	float a, b, c;
 	a = Magnitude(v1 - v2);
 	b = Magnitude(v2 - v3);
 	c = Magnitude(v3 - v1);
 
 	float p = (a + b + c) / 2;
-	return (float)sqrt(p*(p - a)*(p - b)*(p - c));
-}
-
-rvector Lerp(const rvector &from, const rvector &to, float t)
-{
-	return from * (1 - t) + to * t;
+	return sqrt(p*(p - a)*(p - b)*(p - c));
 }
 
 bool isInPlane(const rboundingbox *bb, const rplane *plane)
@@ -230,11 +207,9 @@ bool isInPlane(const rboundingbox *bb, const rplane *plane)
 
 bool IsIntersect(rboundingbox *bb1, rboundingbox *bb2)
 {
-
 	if (bb1->minx>bb2->maxx) return false;
 	if (bb1->miny>bb2->maxy) return false;
 	if (bb1->minz>bb2->maxz) return false;
-
 	if (bb2->minx>bb1->maxx) return false;
 	if (bb2->miny>bb1->maxy) return false;
 	if (bb2->minz>bb1->maxz) return false;
@@ -244,27 +219,24 @@ bool IsIntersect(rboundingbox *bb1, rboundingbox *bb2)
 
 bool IsInSphere(const rboundingbox &bb, const rvector &point, float radius)
 {
-
-	for (int i = 0; i<3; i++)				// 바운딩박스의 6면중 평행한 한쌍의 평면들에 대해
+	for (int i = 0; i<3; i++)
 	{
-		rvector nearest;				// 그 한쌍의 평면위에서스피어의 중점에 가장 가까운 점을 잡고,
+		rvector nearest;
 
 		if (fabs(bb.m[0][i] - point[i])<fabs(bb.m[1][i] - point[i]))
 			nearest[i] = bb.m[0][i];
 		else
 			nearest[i] = bb.m[1][i];
 
-		int au = (i + 1) % 3, av = (i + 2) % 3;		// (골라진 평면의 법선이 되는 축을 뺀 나머지 두 축을 잡는다)
+		int au = (i + 1) % 3, av = (i + 2) % 3;
 
 		nearest[au] = min(max(point[au], bb.m[0][au]), bb.m[1][au]);
 		nearest[av] = min(max(point[av], bb.m[0][av]), bb.m[1][av]);
 
-		if (Magnitude(nearest - point)<radius)		// 그 거리가 radius 이하이면 true..
+		if (Magnitude(nearest - point) < radius)
 			return true;
 	}
 
-
-	// 또는 중점이 이미 바운딩박스 안에 포함되어 있어도 true !
 	return (bb.minx <= point.x && bb.miny <= point.y && bb.minz <= point.z &&
 		bb.maxx >= point.x && bb.maxy >= point.y && bb.maxz >= point.z);
 }
@@ -275,15 +247,13 @@ bool isInViewFrustum(const rvector &point, rplane *plane)
 	return FN(0) && FN(1) && FN(2) && FN(3);
 }
 
-bool isInViewFrustum(const rvector &point, float radius, rplane *plane)		// bounding sphere
+bool isInViewFrustum(const rvector &point, float radius, rplane *plane)
 {
-	if ((D3DXPlaneDotCoord(&plane[0], &point)>-radius) &&
-		(D3DXPlaneDotCoord(&plane[1], &point)>-radius) &&
-		(D3DXPlaneDotCoord(&plane[2], &point)>-radius) &&
-		(D3DXPlaneDotCoord(&plane[3], &point)>-radius) &&
-		(D3DXPlaneDotCoord(&plane[5], &point)>-radius))
-		return true;
-	return false;
+	return DotProduct(plane[0], point) > -radius &&
+		DotProduct(plane[1], point) > -radius &&
+		DotProduct(plane[2], point) > -radius &&
+		DotProduct(plane[3], point) > -radius &&
+		DotProduct(plane[5], point) > -radius;
 }
 
 bool isInViewFrustum(const rboundingbox *bb, const rplane *plane)
@@ -299,13 +269,12 @@ bool isInViewFrustum(const rvector &point1, const rvector &point2, rplane *plane
 
 	for (int i = 0; i<6; i++) {
 		rplane *plane = planes + i;
-		float d1 = D3DXPlaneDotCoord(plane, &p1);
-		float d2 = D3DXPlaneDotCoord(plane, &p2);
+		float d1 = DotProduct(*plane, p1);
+		float d2 = DotProduct(*plane, p2);
 		rsign s1 = SIGNOF(d1);
 		rsign s2 = SIGNOF(d2);
 
 		if (s1 == NEGATIVE && s2 == NEGATIVE) return false;
-
 
 		if (s1*s2 == NEGATIVE) {
 			float t = d1 / (d1 - d2);
@@ -314,14 +283,13 @@ bool isInViewFrustum(const rvector &point1, const rvector &point2, rplane *plane
 				p1 = inter;
 			else
 			{
-				_ASSERT(s2 == NEGATIVE);
+				assert(s2 == NEGATIVE);
 				p2 = inter;
 			}
 		}
 	}
 
-	rvector remain = p2 - p1;
-	if (D3DXVec3LengthSq(&remain) > .01f)
+	if (MagnitudeSq(p2 - p1) > .01f)
 		return true;
 
 	return false;
@@ -338,9 +306,8 @@ bool isInViewFrustumWithZ(rboundingbox *bb, rplane *plane)
 bool isInViewFrustumwrtnPlanes(rboundingbox *bb, rplane *plane, int nplane)
 {
 	for (int i = 0; i<nplane; i++)
-	{
 		if (!isInPlane(bb, plane + i)) return false;
-	}
+
 	return true;
 }
 
@@ -368,17 +335,17 @@ bool isLineIntersectBoundingBox(rvector &origin, rvector &dir, rboundingbox &bb)
 
 void MakeWorldMatrix(rmatrix *pOut, const rvector& pos, rvector dir, rvector up)
 {
-	D3DXMatrixIdentity(pOut);
+	GetIdentityMatrix(*pOut);
 
 	rvector right;
 
-	D3DXVec3Normalize(&dir, &dir);
+	Normalize(dir);
 
-	D3DXVec3Cross(&right, &dir, &up);
-	D3DXVec3Normalize(&right, &right);
+	CrossProduct(&right, dir, up);
+	Normalize(right);
 
-	D3DXVec3Cross(&up, &right, &dir);
-	D3DXVec3Normalize(&up, &up);
+	CrossProduct(&up, right, dir);
+	Normalize(up);
 
 	pOut->_11 = right.x;
 	pOut->_12 = right.y;
@@ -400,59 +367,48 @@ void MakeWorldMatrix(rmatrix *pOut, const rvector& pos, rvector dir, rvector up)
 bool IsIntersect(rvector& line_begin_, rvector& line_end_, rboundingbox& box_)
 {
 	// transform line to box space
-	rvector box_center = (box_.vmin + box_.vmax) * 0.5;
-	rvector begin = line_begin_ - box_center;
-	rvector end = line_end_ - box_center;
+	auto box_center = (box_.vmin + box_.vmax) * 0.5;
+	auto begin = line_begin_ - box_center;
+	auto end = line_end_ - box_center;
 	float hx, hy, hz;
 	hx = (box_.maxx - box_.minx) * 0.5f;
 	hy = (box_.maxy - box_.miny) * 0.5f;
 	hz = (box_.maxz - box_.minz) * 0.5f;
 
 	// get center of line
-	rvector center = (begin + end) * 0.5f;
+	auto center = (begin + end) * 0.5f;
 
 	float wx = begin.x - center.x;
 	float lengthX = fabs(wx);
 	if (fabs(center.x)  > lengthX)
-	{
 		return false;
-	}
 
 	float wy = begin.y - center.y;
 	float lengthY = fabs(wy);
 	if (fabs(center.y)  > lengthY)
-	{
 		return false;
-	}
 
 	float wz = begin.z - center.z;
 	float lengthZ = fabs(wz);
 	if (fabs(center.z)  > lengthZ)
-	{
 		return false;
-	}
 
 	if (fabs(center.y * wz - center.z * wy) > hy * lengthZ + hz * lengthY)
-	{
 		return false;
-	}
 	if (fabs(center.x * wz - center.z * wx) > hx * lengthZ + hz * lengthX)
-	{
 		return false;
-	}
 	if (fabs(center.x * wy - center.y * wx) > hx * lengthY + hy * lengthX)
-	{
 		return false;
-	}
 
 	return true;
 }
 
-bool IsIntersect(rvector& line_begin_, rvector& line_dir_, rvector& center_, float radius_, float* dist /* = NULL */, rvector* p /* = NULL  */)
+bool IsIntersect(rvector& line_begin_, rvector& line_dir_, rvector& center_,
+	float radius_, float* dist, rvector* p)
 {
 	rvector	l = center_ - line_begin_;
-	float		s = D3DXVec3Dot(&l, &line_dir_);
-	float l_sq = D3DXVec3Dot(&l, &l);
+	float		s = DotProduct(l, line_dir_);
+	float l_sq = DotProduct(l, l);
 	float r_sq = (radius_ * radius_);
 	if (s < 0 && l_sq > r_sq)
 		return false;
@@ -464,8 +420,6 @@ bool IsIntersect(rvector& line_begin_, rvector& line_dir_, rvector& center_, flo
 	float q = sqrt(r_sq - m_sq);
 	if (l_sq > r_sq)
 		*dist = s - q;
-	//else
-	//	*dist = s + q;
 	*p = line_begin_ + (*dist) * line_dir_;
 	return true;
 }
@@ -475,21 +429,25 @@ static float GetAngle(const rvector &a)
 	if (a.x >= 1.0f) return 0.0f;
 	if (a.x <= -1.0f) return -D3DX_PI;
 	if (a.y>0)
-		return (float)acos(a.x);
+		return acos(a.x);
 	else
-		return (float)-acos(a.x);
+		return -acos(a.x);
 }
 
 float GetAngleOfVectors(const rvector &ta, const rvector &tb)
 {
-	if ((ta.x == 0.0f) && (ta.y == 0.0f) && (ta.z == 0.0f))return 0;
-	if ((tb.x == 0.0f) && (tb.y == 0.0f) && (tb.z == 0.0f))return 0;
+	if ((ta.x == 0.0f) && (ta.y == 0.0f) && (ta.z == 0.0f))
+		return 0;
+	if ((tb.x == 0.0f) && (tb.y == 0.0f) && (tb.z == 0.0f))
+		return 0;
+
 	rvector a = ta, b = tb;
 	a.z = 0; Normalize(a); b.z = 0; Normalize(b);
+
 	float aa = GetAngle(a);
 	float x, y;
-	x = (float)(b.x*cos(aa) + b.y*sin(aa));
-	y = (float)(b.x*(-sin(aa)) + b.y*cos(aa));
+	x = b.x*cos(aa) + b.y*sin(aa);
+	y = b.x*(-sin(aa)) + b.y*cos(aa);
 
 	float ret = GetAngle(rvector(x, y, 0));
 	return ret;
@@ -500,8 +458,8 @@ bool IsIntersect(const rvector& orig, const rvector& dir, const rvector& center,
 {
 	rvector center2orig = orig - center;
 	float r2 = radius*radius;
-	float tmp1 = D3DXVec3Dot(&center2orig, &dir);
-	float tmp2 = D3DXVec3Dot(&center2orig, &center2orig);
+	float tmp1 = DotProduct(center2orig, dir);
+	float tmp2 = DotProduct(center2orig, center2orig);
 	if (tmp1 < 0 && tmp2 > r2) return false;
 	float tmp3 = tmp2 - tmp1;
 	if (tmp3 > r2) return false;
@@ -549,7 +507,7 @@ void TransformBox(rboundingbox* result, const rboundingbox& src, const rmatrix& 
 	for (int i = 0; i<8; i++)
 	{
 		rvector tmp = pts[i];
-		D3DXVec3TransformCoord(&tmp, &tmp, &matrix);
+		tmp *= matrix;
 		*result = Union(*result, tmp);
 	}
 }

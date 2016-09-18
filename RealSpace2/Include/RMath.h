@@ -94,12 +94,18 @@ inline float MagnitudeSq(const rvector &x) {
 }
 inline void Normalize(rvector &x) {
 	auto MagSq = MagnitudeSq(x);
-	if (x == 0)
+	if (MagSq == 0)
 		return;
 	x *= 1.f / sqrt(MagSq);
 }
 inline float DotProduct(const rvector &a, const rvector &b) {
 	return a.x * b.x + a.y * b.y + a.z * b.z;
+}
+inline float DotProduct(const rplane& a, const rvector& b) {
+	return a.a * b.x + a.b * b.y + a.c * b.z + a.d;
+}
+inline float DotPlaneNormal(const rplane& a, const rvector& b) {
+	return a.a * b.x + a.b * b.y + a.c * b.z;
 }
 inline v3 CrossProduct(const v3& u, const v3& v) {
 	return{ u.y * v.z - u.z * v.y,
@@ -284,6 +290,41 @@ inline void RMatInv(D3DXMATRIX& q, const D3DXMATRIX& a) {
 	Inverse(q, a);
 }
 
+template <typename T>
+auto Square(const T& x) {
+	return x * x;
+}
+
+inline rmatrix RotationMatrix(const v3& axis, float angle)
+{
+	rmatrix m;
+
+	auto cosa = cos(angle);
+	auto sina = sin(angle);
+
+	m._11 = cosa + Square(axis.x) * (1 - cosa);
+	m._12 = axis.x * axis.y * (1 - cosa) + axis.z * sina;
+	m._13 = axis.x * axis.z * (1 - cosa) + axis.y * sina;
+	m._14 = 0;
+
+	m._21 = axis.y * axis.x * (1 - cosa) + axis.z * sina;
+	m._22 = cosa + Square(axis.y) * (1 - cosa);
+	m._23 = axis.y * axis.z * (1 - cosa) + axis.x * sina;
+	m._24 = 0;
+
+	m._31 = axis.z * axis.x * (1 - cosa) + axis.y * sina;
+	m._32 = axis.z * axis.y * (1 - cosa) + axis.x * sina;
+	m._33 = cosa + Square(axis.y) * (1 - cosa);
+	m._34 = 0;
+
+	m._41 = 0;
+	m._42 = 0;
+	m._43 = 0;
+	m._44 = 1;
+
+	return m;
+}
+
 inline rmatrix RGetRotX(float a) {
 	rmatrix mat;
 	D3DXMatrixRotationX(&mat, D3DX_PI / 180.f*a);
@@ -302,10 +343,18 @@ inline rmatrix RGetRotZ(float a) {
 	return mat;
 }
 
+inline void GetIdentityMatrix(rmatrix& m)
+{
+	m._11 = 1; m._12 = 0; m._13 = 0; m._14 = 0;
+	m._21 = 0; m._22 = 1; m._23 = 0; m._24 = 0;
+	m._31 = 0; m._32 = 0; m._33 = 1; m._34 = 0;
+	m._41 = 0; m._42 = 0; m._43 = 0; m._44 = 1;
+}
+
 inline rmatrix GetIdentityMatrix() {
-	D3DXMATRIX _init_mat;
-	D3DXMatrixIdentity(&_init_mat);
-	return _init_mat;
+	rmatrix m;
+	GetIdentityMatrix(m);
+	return m;
 }
 
 inline rvector GetTransPos(const rmatrix& m) {

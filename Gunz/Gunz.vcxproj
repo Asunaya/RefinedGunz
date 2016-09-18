@@ -392,6 +392,7 @@ rem call copy_share.bat
       <ExceptionHandling>Sync</ExceptionHandling>
       <MSCompatibility>true</MSCompatibility>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>../CML/Lib/zlib.lib;fmodvc.lib;../sdk/libsodium/lib/static/libsodium.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>

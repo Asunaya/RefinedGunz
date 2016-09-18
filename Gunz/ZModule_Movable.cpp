@@ -154,7 +154,6 @@ void ZModule_Movable::UpdatePosition(float fDelta)
 }
 void ZModule_Movable::SetMoveSpeedRatio(float fRatio, float fDuration) 
 { 
-	// 더 느린 제한이 있으면 무시한다
 	if(m_bRestrict && fRatio<m_fMoveSpeedRatio) return;
 
 	m_bRestrict = true;
