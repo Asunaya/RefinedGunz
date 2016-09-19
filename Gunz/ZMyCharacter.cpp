@@ -913,7 +913,7 @@ void ZMyCharacter::OnGadget_Hanging()
 #endif
 				SetLastThrower(MUID(0,0), 0.0f);
 			}
-			else
+			else 
 				m_bHangSuccess=false;
 		}
 	}

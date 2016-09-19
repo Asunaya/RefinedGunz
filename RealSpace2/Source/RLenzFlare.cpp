@@ -1,7 +1,3 @@
-
-//////////////////////////////////////////////////////////////////////////
-//	Includes
-//////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "MXml.h"
 #include "MDebug.h"
@@ -11,9 +7,6 @@
 #include "RBspObject.h"
 #include "RLenzFlare.h"
 
-//////////////////////////////////////////////////////////////////////////
-//	Define
-//////////////////////////////////////////////////////////////////////////
 #define	NUM_ELEMENT	10
 #define MAX_FLARE_ELEMENT_WIDTH		1000
 #define MAX_FLARE_ELEMENT_HEIGHT	1000
@@ -23,46 +16,11 @@ _USING_NAMESPACE_REALSPACE2
 
 _NAMESPACE_REALSPACE2_BEGIN
 
-//////////////////////////////////////////////////////////////////////////
-//	Global
-//////////////////////////////////////////////////////////////////////////
-//LPDIRECT3DVERTEXBUFFER9 RLenzFlare::msVB = 0;
-//LPDIRECT3DTEXTURE9		RLenzFlare::msTextures[MAX_NUMBER_TEXTURE];
 RBaseTexture*			RLenzFlare::msTextures[MAX_NUMBER_TEXTURE];
 sFlareElement			RLenzFlare::msElements[MAX_NUMBER_ELEMENT];
 bool					RLenzFlare::mbIsReady = FALSE;
-//int					RLenzFlare::msRef = 0;
 RLenzFlare				RLenzFlare::msInstance;
 
-//struct  ScrVertex
-//{
-//	D3DXVECTOR4 p;
-//	DWORD color;
-//};
-//
-//#define ScrVertexType (D3DFVF_XYZRHW|D3DFVF_DIFFUSE|D3DFVF_TEX1)
-//
-//static const ScrVertex[4] = 
-//{
-//	{ D3DXVECTOR4( 0.0f, 0.0f, 0.0f, 0.0f), 0xFFFFFFFF },
-//	{ D3DXVECTOR4( 0.0f, 1.0f, 0.0f, 0.0f), 0xFFFFFFFF },
-//	{ D3DXVECTOR4( 1.0f, 1.0f, 0.0f, 0.0f), 0xFFFFFFFF },
-//	{ D3DXVECTOR4( 1.0f, 0.0f, 0.0f, 0.0f), 0xFFFFFFFF },
-//};
-
-//////////////////////////////////////////////////////////////////////////
-//	Functions
-//////////////////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////////////////
-//	Render
-//	1. 광원과 중심과의 거리가 가까울수록 플레어의 크기가 커지고 알파값이 
-//		커진다
-//	2. 광원과 중심과의 거리를 구하고 그것을 엘레멘트의 수로 나누어 
-//		엘레멘트간의 간격을 구하고 엘레멘트들을 그려준다.
-//////////////////////////////////////////////////////////////////////////
 bool RLenzFlare::Render( rvector& light_pos_, rvector& centre_, RBspObject* pbsp_  ) 
 {
 	rvector rDir	= light_pos_ - centre_;
@@ -72,19 +30,12 @@ bool RLenzFlare::Render( rvector& light_pos_, rvector& centre_, RBspObject* pbsp
 		return false;
 	}
 
-	// 화면에서의 광원과 중심 위치
-	// TODO : 만약 중심이 화면의 중앙이라면 연산을 쉽게 할수 있다...
 	rmatrix view, proj;
 	RGetDevice()->GetTransform( D3DTS_VIEW, &view );
 	RGetDevice()->GetTransform( D3DTS_PROJECTION, &proj );
 	
-	rvector pos = ( light_pos_ * view * proj ) ;	// -1 ~ 1 사이 아니면 광원이 보이지 않는다
-	pos.z = 0.0f;									// 화면에서 광원이 사라졌을 경우 렌즈 플레어가 보이지 않는다.
-
-	if((pos.x < -1 || pos.x > 1) || (pos.y < -1 || pos.y > 1))
-	{
-        //return false;
-	}
+	rvector pos = ( light_pos_ * view * proj ) ;
+	pos.z = 0.0f;
 
 	float alpha = max(min(((1 - pos.x)*(1 + pos.x)+(1-pos.y)*(1+pos.y)-1.0f)*0.5f, 0.6f ), 0.0f);
 
@@ -106,20 +57,17 @@ bool RLenzFlare::Render( rvector& light_pos_, rvector& centre_, RBspObject* pbsp
     rvector centre = ( centre_ * view * proj );
 	centre.z = 0.0f;
 
-	//for test
-	//카메라 위치로 했을 경우 아주 불안함..캐릭터의 머리 부분 정도가 되야 할것 같음
 	{
 		centre.x = 0;
 		centre.y = 0;
 	}
-	//end for test
 
 	float dist = Magnitude(pos - centre);
 	float scale_factor = 1/dist;
 
-	pos.x = (pos.x + 1) * 0.5 * RGetScreenWidth();			// 실제 화면에서의 광원 위치
+	pos.x = (pos.x + 1) * 0.5 * RGetScreenWidth();
 	pos.y = (-pos.y + 1) * 0.5 * RGetScreenHeight();
-	centre.x = (centre.x + 1) * 0.5 * RGetScreenWidth();	// 실제 화면에서의 중심 위치
+	centre.x = (centre.x + 1) * 0.5 * RGetScreenWidth();
 	centre.y = (-centre.y + 1) * 0.5 * RGetScreenHeight();
 	
 	rvector temp = pos - centre;
@@ -163,15 +111,11 @@ bool RLenzFlare::Render( rvector& light_pos_, rvector& centre_, RBspObject* pbsp
 		}
 	}
 
-	//화면 뿌옇게 만들기
 	draw( 0, 0, RGetScreenWidth(), RGetScreenHeight(), alpha, 0xFFFFFFFF, -1 );
 
     return true;
 }
 
-//////////////////////////////////////////////////////////////////////////
-//	Render
-//////////////////////////////////////////////////////////////////////////
 bool	RLenzFlare::Render( rvector& centre_, RBspObject* pbsp_  )
 {
 	for( int i = 0 ; i < miNumLight; ++i )
@@ -181,9 +125,6 @@ bool	RLenzFlare::Render( rvector& centre_, RBspObject* pbsp_  )
 	return true;
 }
 
-//////////////////////////////////////////////////////////////////////////
-// SetLight
-//////////////////////////////////////////////////////////////////////////
 bool RLenzFlare::SetLight( rvector& pos_ )
 {
 	if( miNumLight >= MAX_LENZFLARE_NUMBER )
@@ -195,13 +136,9 @@ bool RLenzFlare::SetLight( rvector& pos_ )
 	return true;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//	Initialize
-//////////////////////////////////////////////////////////////////////////
 void RLenzFlare::Initialize()
 {
-	_ASSERT( miElementOrder==NULL );		// Initialize 을 두번 부른경우
+	_ASSERT( miElementOrder==NULL );
 	SAFE_DELETE_ARRAY( miElementOrder );
 
 	miElementOrder = new int[NUM_ELEMENT];
@@ -211,18 +148,10 @@ void RLenzFlare::Initialize()
 		miElementOrder[i] = i;
 	}
 }
-//////////////////////////////////////////////////////////////////////////mbIsReady
-//	Draw
-//////////////////////////////////////////////////////////////////////////
+
 bool RLenzFlare::draw( float x_, float y_,  float width_, float height_,  
 					  float alpha_,  DWORD color_, int textureIndex_ )
 {
-	//if( msVB == NULL )
-	//{
-	//	mlog("vertex buffer for lenz flare is not ready\n");
-	//	return false;
-	//}
-
 	RTLVertex vertices[4];
 
 	if( color_ > 0x00ffffff )
@@ -231,13 +160,11 @@ bool RLenzFlare::draw( float x_, float y_,  float width_, float height_,
 		color_ = color_ - alpha_value;
 	}
 
-	// vertex setup
 	vertices[0].p.x = x_; 
 	vertices[0].p.y = y_;
 	vertices[0].p.z = 0.f;
 	vertices[0].p.w = 1.0f;
 	vertices[0].color	=	D3DXCOLOR(0,0,0,alpha_);
-	//vertices[0].color	+=	color_;
 	vertices[0].color += 0x00FFFFFF;
 	vertices[0].tu	=	0.f;	
 	vertices[0].tv	=	0.f;
@@ -247,7 +174,6 @@ bool RLenzFlare::draw( float x_, float y_,  float width_, float height_,
 	vertices[1].p.z = 0.f;
 	vertices[1].p.w = 1.0f;
 	vertices[1].color	=	D3DXCOLOR(0,0,0,alpha_);
-	//vertices[1].color	+=	color_;
 	vertices[1].color += 0x00FFFFFF;
 	vertices[1].tu	=	1.f;	
 	vertices[1].tv	=	0.f;
@@ -257,7 +183,6 @@ bool RLenzFlare::draw( float x_, float y_,  float width_, float height_,
 	vertices[2].p.z = 0.f;
 	vertices[2].p.w = 1.0f;
 	vertices[2].color	=	D3DXCOLOR(0,0,0,alpha_);
-	//vertices[2].color	+=	color_;
 	vertices[2].color += 0x00FFFFFF;
 	vertices[2].tu	=	1.f;	
 	vertices[2].tv	=	1.f;
@@ -267,24 +192,9 @@ bool RLenzFlare::draw( float x_, float y_,  float width_, float height_,
 	vertices[3].p.z = 0.f;
 	vertices[3].p.w = 1.0f;
 	vertices[3].color	=	D3DXCOLOR(0,0,0,alpha_);
-	//vertices[3].color	+=	color_;
 	vertices[3].color += 0x00FFFFFF;
 	vertices[3].tu	=	0.f;	
 	vertices[3].tv	=	1.f;
-
-	// copy vertices to vertex buffer
-	//void* pVertices;
-	//if( FAILED( msVB->Lock(0, sizeof(RTLVertex)* 4, (VOID**)&pVertices, D3DLOCK_DISCARD ) ))
-	//{
-	//	return false;
-	//}
-
-	//memcpy( pVertices, vertices, sizeof(RTLVertex) * 4 );
-
-	//if( FAILED( msVB->Unlock() ) )
-	//{
-	//	return false;
-	//}
 
 	if( textureIndex_ >= 0 && msTextures[textureIndex_] != NULL )
 	{
@@ -298,7 +208,6 @@ bool RLenzFlare::draw( float x_, float y_,  float width_, float height_,
 	RGetDevice()->SetTextureStageState( 0, D3DTSS_COLORARG1, D3DTA_TEXTURE );
 	RGetDevice()->SetTextureStageState( 0, D3DTSS_COLORARG2, D3DTA_DIFFUSE );
  	RGetDevice()->SetTextureStageState( 0, D3DTSS_COLOROP, D3DTOP_MODULATE );
-	//RGetDevice()->SetTextureStageState( 0, D3DTSS_COLOROP, D3DTOP_SELECTARG2 );
 	RGetDevice()->SetTextureStageState( 0, D3DTSS_ALPHAARG1, D3DTA_DIFFUSE );
 	RGetDevice()->SetTextureStageState( 0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1 );
 
@@ -307,10 +216,7 @@ bool RLenzFlare::draw( float x_, float y_,  float width_, float height_,
 	RGetDevice()->SetRenderState( D3DRS_DESTBLEND, D3DBLEND_ONE );
 	
 	RGetDevice()->SetFVF( RTLVertexType );
-//	RGetDevice()->SetStreamSource( 0, msVB, 0, sizeof( RTLVertex ) );
-	//RGetDevice()->DrawPrimitive( D3DPT_TRIANGLEFAN, 0, 2 );
 	RGetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, vertices, sizeof(RTLVertex));
-//	RGetDevice()->SetStreamSource( 0 , NULL, 0, 0 );
 
 	RGetDevice()->SetTexture( 0, NULL );
 
@@ -319,17 +225,8 @@ bool RLenzFlare::draw( float x_, float y_,  float width_, float height_,
 	return true;
 }	
 
-//////////////////////////////////////////////////////////////////////////
-//	초기화
-//////////////////////////////////////////////////////////////////////////
 bool RLenzFlare::Create( char* filename_ )
 {
-	//if(FAILED(RGetDevice()->CreateVertexBuffer( sizeof(RTLVertex)*4, 0, RTLVertexType, D3DPOOL_MANAGED, &msVB )))
-	//{
-	//	return false;
-	//}
-
-	// xml을 읽어 플레어의 종류와 순서 그리고 엘레먼트의 수를 정한다
 	MXmlDocument	XmlDoc;
 	MXmlElement		PNode,Node;
 
@@ -384,55 +281,31 @@ bool RLenzFlare::Create( char* filename_ )
 	return true;
 }
 
-//////////////////////////////////////////////////////////////////////////
-//	Destroy
-//////////////////////////////////////////////////////////////////////////
 bool RLenzFlare::Destroy()
 {
-	//if( msRef > 0)
-	//{
-	//	mlog("Object(s) Exist..! Fail to Destroy...\n");
-	//	return false;
-	//}
-	
-	//SAFE_RELEASE( msVB );
 	for( int i = 0 ; i < MAX_NUMBER_TEXTURE; ++i )
 	{
 		RDestroyBaseTexture( msTextures[i] );
 		msTextures[i] = NULL;
-		//SAFE_DELETE( msTextures[i] );
 	}
 
 	return true;
 }
 
-//////////////////////////////////////////////////////////////////////////
-//	IsReady
-//////////////////////////////////////////////////////////////////////////
 bool RLenzFlare::IsReady()
 {
 	return mbIsReady;
 }
 
-//////////////////////////////////////////////////////////////////////////
-//	생성자 / 소멸자
-//////////////////////////////////////////////////////////////////////////
-RLenzFlare::RLenzFlare(void)
+RLenzFlare::RLenzFlare()
 {
-	//++msRef;
-//	Initialize();
 	miElementOrder=NULL;
 }
 
-RLenzFlare::~RLenzFlare(void)
+RLenzFlare::~RLenzFlare()
 {
-	//--msRef;
 	SAFE_DELETE_ARRAY( miElementOrder );
 }
-
-//////////////////////////////////////////////////////////////////////////
-//	HELPERs
-//////////////////////////////////////////////////////////////////////////
 
 bool RLenzFlare::ReadXmlElement(MXmlElement* PNode,char* Path)
 {
@@ -474,7 +347,6 @@ bool RLenzFlare::ReadXmlElement(MXmlElement* PNode,char* Path)
 					}
 					return false;
 				}
-				//D3DXCreateTextureFromFile( RGetDevice(), texture_file_name, &msTextures[index++] );
 				msTextures[index++] = RCreateBaseTexture( texture_file_name );
 			}
 		}
@@ -536,12 +408,11 @@ bool RLenzFlare::ReadXmlElement(MXmlElement* PNode,char* Path)
 	return true;
 }
 
-//	렌즈 플레어 기능을 사용하기 위해 호출
 bool	RCreateLenzFlare( char* filename_ )
 {
 	if( RReadyLenzFlare() )	
 	{
-		return true;	// 이미 사용 준비가 되어 있으면 참 반환
+		return true;
 	}
 
 	if( RLenzFlare::Create( filename_ ))
@@ -551,81 +422,24 @@ bool	RCreateLenzFlare( char* filename_ )
 	return false;
 };
 
-// 더이상 렌즈 플레어 기능을 사용하지 않음을 선언
 bool	RDestroyLenzFlare( )
 {
 	return RLenzFlare::Destroy();
 };
 
-// 렌즈 플레어가 사용 준비가 되었는지 쿼리
 bool	RReadyLenzFlare( ) 
 {
 	return RLenzFlare::IsReady();
 };
 
-// 렌즈 플레어 객체 얻어오기
-//RLenzFlare*	RGetLenzFlare( bool* result )
-//{
-//	if( !RReadyLenzFlare() )
-//	{
-//		if(result != NULL )
-//		{
-//			*result	 = false;
-//		}
-//		return NULL;
-//	}
-//	if( result != NULL )
-//	{
-//		*result = true;
-//	}
-//	return new RLenzFlare;
-//}
 
 RLenzFlare* RGetLenzFlare()
 {
 	return RLenzFlare::GetInstance();
 }
 
-// 엑수엠엘 오픈
 bool RLenzFlare::open( const char* pFileName_, MZFileSystem* pfs_ )
 {
-	//MXmlDocument	aXml;
-	//char szXmlFileName[256];
-	//sprintf_safe(szXmlFileName, "%s.xml", pFileName_);
-	//MZFile mzf;
-	//if(!mzf.Open(szXmlFileName,pfs_)) return false;
-	//char *buffer;
-	//buffer=new char[mzf.GetLength()+1];
-	//mzf.Read(buffer,mzf.GetLength());
-	//buffer[mzf.GetLength()]=0;
-	//aXml.Create();
-	//if(!aXml.LoadFromMemory(buffer))
-	//{
-	//	delete buffer;
-	//	return false;
-	//}
-	//delete buffer;
-	//char szBuf[65535];
-	//ZeroMemory(szBuf, 65535);
-	//MXmlElement aRoot;
-	//aRoot = aXml.GetDocumentElement();
-
-	////int nSpawnListCount = aRoot.GetChildNodeCount();
-
-	//for (int i=0; i<nSpawnListCount; i++)
-	//{
-	//	MXmlElement aSpawnList = aRoot.GetChildNode(i);
-	//	aSpawnList.GetTagName(szBuf);
-	//	if (szBuf[0] == '#') continue;
-
-	//	if (!_stricmp(szBuf, "DUMMYLIST")) 
-	//	{
-	//		
-	//	}
-	//}
-
-	//aXml.Destroy();
-
 	return true;
 }
 

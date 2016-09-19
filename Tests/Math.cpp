@@ -162,11 +162,13 @@ static bool TestNormalize()
 {
 	v3 v{ 100, 100, 100 };
 	auto n = Normalized(v);
-	assert(n == v3(sqrt(3) / 3, sqrt(3) / 3, sqrt(3) / 3));
+	assert(n == v3(sqrt(3.0f) / 3, sqrt(3.0f) / 3, sqrt(3.0f) / 3));
 
 	v = { 0, 0, 0 };
 	n = Normalized(v);
 	assert(n == v);
+
+	return true;
 }
 
 bool TestMath()

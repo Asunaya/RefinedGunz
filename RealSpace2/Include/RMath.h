@@ -456,13 +456,13 @@ inline bool IntersectLineSegmentPlane(v3* hit, const rplane& plane, const v3& l0
 	return true;
 }
 
-#define EPSILON 0.000001
-
 inline bool IntersectTriangle(const v3& V1, const v3& V2, const v3& V3, // Triangle points
 	const v3& Origin, const v3& Dir, // Ray origin and direction
 	float* out) // Output: Distance from origin to intersection point
 {
 	// Möller–Trumbore triangle intersection algorithm
+
+	constexpr auto EPSILON = 0.000001;
 
 	v3 e1, e2;  //Edge1, Edge2
 	v3 P, Q, T;
@@ -522,7 +522,7 @@ inline bool IntersectLineAABB(float& t,
 	float tmin = max(max(min(t1, t2), min(t3, t4)), min(t5, t6));
 	float tmax = min(min(max(t1, t2), max(t3, t4)), max(t5, t6));
 
-	// if tmax < 0, ray (line) is intersecting AABB, but whole AABB is behing us
+	// if tmax < 0, ray (line) is intersecting AABB, but whole AABB is behind us
 	if (tmax < 0)
 	{
 		t = tmax;
