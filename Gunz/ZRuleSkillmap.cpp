@@ -89,8 +89,8 @@ void CourseManager::Init()
 			if (!ret)
 				return false;
 
-			Start = Sort(Start);
-			End = Sort(End);
+			Start = Union(Start.vmin, Start.vmax);
+			End = Union(End.vmax, End.vmin);
 
 			MapInsertion.first->second.push_back({ szName, Start, End });
 

@@ -464,9 +464,9 @@ inline bool ZReplayLoader::FixCommand(MCommand& Command)
 			{
 				Transform(pos);
 
-				ppbi->posx = pos[0];
-				ppbi->posy = pos[1];
-				ppbi->posz = pos[2];
+				ppbi->posx = static_cast<short>(pos[0]);
+				ppbi->posy = static_cast<short>(pos[1]);
+				ppbi->posz = static_cast<short>(pos[2]);
 			}
 		}
 	}

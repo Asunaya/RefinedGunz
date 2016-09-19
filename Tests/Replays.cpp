@@ -13,23 +13,7 @@
 #include "RGMain.h"
 #include "ZReplay.inl"
 #include <direct.h>
-
-#undef ASSERT
-#undef assert
-
-#define ASSERT(pred) assert(pred, #pred, __FILE__, __LINE__)
-
-void assert(bool pred, const char* str, const char *File, int Line)
-{
-	if (pred)
-		return;
-
-	printf_s("%s failed!\nFile: %s\nLine: %d\n\n", str, File, Line);
-
-	system("pause");
-
-	//exit(0);
-}
+#include "TestAssert.h"
 
 struct ReplayData
 {
@@ -181,10 +165,8 @@ void SetFileInfo(std::array<ReplayFile, 3>& Files)
 	}
 }
 
-int main()
+bool TestReplays()
 {
-	InitLog();
-
 	std::array<ReplayFile, 3> Files;
 	SetFileInfo(Files);
 
@@ -236,8 +218,6 @@ int main()
 
 		ASSERT(Data.CommandStreamPos == File.CommandStreamPos);
 	}
-
-	printf("\n\n\nAll OK!\n\n");
-
-	system("pause");
+	
+	return true;
 }

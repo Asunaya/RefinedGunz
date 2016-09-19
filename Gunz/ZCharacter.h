@@ -365,7 +365,7 @@ public:
 
 	int m_nVMID;
 
-	i32 Ping{MAX_PING};
+	i32 Ping{999};
 
 protected:
 	void UpdateSound();

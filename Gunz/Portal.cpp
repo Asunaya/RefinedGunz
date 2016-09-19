@@ -1162,13 +1162,6 @@ static void MakeProjectionMatrix(D3DXMATRIX &mat, float NearZ, float FarZ)
 	D3DXMatrixPerspectiveFovLH(&mat, fovy, fAspect, NearZ, FarZ);
 }
 
-static float sgn(float a)
-{
-	if (a > 0.0F) return (1.0F);
-	if (a < 0.0F) return (-1.0F);
-	return (0.0F);
-}
-
 static void MakeObliquelyClippingProjectionMatrix(D3DXMATRIX &matProjection, const D3DXMATRIX &matView, const D3DXVECTOR3 &p, const D3DXVECTOR3 &normal)
 {
 	//MakeProjectionMatrix(matProjection);

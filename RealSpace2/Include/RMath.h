@@ -40,6 +40,7 @@ namespace detail
 	}
 }
 
+// Returns the bounding box that contains both a and b.
 inline rboundingbox Union(const rboundingbox& a, const rboundingbox& b)
 {
 	rboundingbox ret;
@@ -64,6 +65,18 @@ inline rboundingbox Union(const rboundingbox& a, const rvector& b)
 	return ret;
 }
 
+inline rboundingbox Union(const v3& a, const v3& b)
+{
+	rboundingbox ret;
+	auto set = [&](auto member, auto fn) {
+		for (size_t i = 0; i < 3; i++)
+			(ret.*member)[i] = fn(a[i], b[i]);
+	};
+	set(&rboundingbox::vmax, detail::max_<float, float>);
+	set(&rboundingbox::vmin, detail::min_<float, float>);
+	return ret;
+}
+
 inline bool Intersects(const rboundingbox& a, const rboundingbox &b)
 {
 	return a.vmin.x < b.vmax.x &&
@@ -74,36 +87,28 @@ inline bool Intersects(const rboundingbox& a, const rboundingbox &b)
 		a.vmax.z > b.vmin.z;
 }
 
-inline rboundingbox Sort(const rboundingbox& bb)
-{
-	rboundingbox ret;
-	ret.vmin.x = min(bb.vmin.x, bb.vmax.x);
-	ret.vmin.y = min(bb.vmin.y, bb.vmax.y);
-	ret.vmin.z = min(bb.vmin.z, bb.vmax.z);
-	ret.vmax.x = max(bb.vmin.x, bb.vmax.x);
-	ret.vmax.y = max(bb.vmin.y, bb.vmax.y);
-	ret.vmax.z = max(bb.vmin.z, bb.vmax.z);
-	return ret;
-}
-
 inline float Magnitude(const rvector &x) {
 	return sqrt(x.x * x.x + x.y * x.y + x.z * x.z);
 }
 inline float MagnitudeSq(const rvector &x) {
 	return x.x * x.x + x.y * x.y + x.z * x.z;
 }
+// If the input vector has a nonzero length, this function normalizes it in place.
+// Otherwise, it does nothing.
 inline void Normalize(rvector &x) {
 	auto MagSq = MagnitudeSq(x);
 	if (MagSq == 0)
 		return;
 	x *= 1.f / sqrt(MagSq);
 }
-inline float DotProduct(const rvector &a, const rvector &b) {
+inline float DotProduct(const rvector& a, const rvector& b) {
 	return a.x * b.x + a.y * b.y + a.z * b.z;
 }
+// Returns a dot (b.x, b.y, b.z, 1).
 inline float DotProduct(const rplane& a, const rvector& b) {
 	return a.a * b.x + a.b * b.y + a.c * b.z + a.d;
 }
+// Returns a dot (b.x, b.y, b.z, 0).
 inline float DotPlaneNormal(const rplane& a, const rvector& b) {
 	return a.a * b.x + a.b * b.y + a.c * b.z;
 }
@@ -134,6 +139,8 @@ float GetArea(rvector &v1, rvector &v2, rvector &v3);
 // Returns the clockwise rotation of ta such that tb aligns with ta on xy
 float GetAngleOfVectors(const rvector &ta, const rvector &tb);
 
+// Returns from spherically interpolated towards to by t.
+// t should be in the range (0, 1).
 inline rvector Slerp(const rvector &from, const rvector &to, float t)
 {
 	float angle = acos(DotProduct(from, to));
@@ -295,6 +302,12 @@ auto Square(const T& x) {
 	return x * x;
 }
 
+// Returns a matrix that rotates row vectors by
+// the given angle in radians around the given axis.
+//
+// Appears counterclockwise in a right-handed coordinate system
+// when the axis is pointing towards the observer.
+// Axis should be a unit vector. Angle should be in radians.
 inline rmatrix RotationMatrix(const v3& axis, float angle)
 {
 	rmatrix m;
@@ -303,18 +316,18 @@ inline rmatrix RotationMatrix(const v3& axis, float angle)
 	auto sina = sin(angle);
 
 	m._11 = cosa + Square(axis.x) * (1 - cosa);
-	m._12 = axis.x * axis.y * (1 - cosa) + axis.z * sina;
-	m._13 = axis.x * axis.z * (1 - cosa) + axis.y * sina;
+	m._12 = axis.y * axis.x * (1 - cosa) + axis.z * sina;
+	m._13 = axis.z * axis.x * (1 - cosa) - axis.y * sina;
 	m._14 = 0;
 
-	m._21 = axis.y * axis.x * (1 - cosa) + axis.z * sina;
+	m._21 = axis.x * axis.y * (1 - cosa) - axis.z * sina;
 	m._22 = cosa + Square(axis.y) * (1 - cosa);
-	m._23 = axis.y * axis.z * (1 - cosa) + axis.x * sina;
+	m._23 = axis.z * axis.y * (1 - cosa) + axis.x * sina;
 	m._24 = 0;
 
-	m._31 = axis.z * axis.x * (1 - cosa) + axis.y * sina;
-	m._32 = axis.z * axis.y * (1 - cosa) + axis.x * sina;
-	m._33 = cosa + Square(axis.y) * (1 - cosa);
+	m._31 = axis.x * axis.z * (1 - cosa) + axis.y * sina;
+	m._32 = axis.y * axis.z * (1 - cosa) - axis.x * sina;
+	m._33 = cosa + Square(axis.z) * (1 - cosa);
 	m._34 = 0;
 
 	m._41 = 0;
@@ -325,22 +338,21 @@ inline rmatrix RotationMatrix(const v3& axis, float angle)
 	return m;
 }
 
-inline rmatrix RGetRotX(float a) {
-	rmatrix mat;
-	D3DXMatrixRotationX(&mat, D3DX_PI / 180.f*a);
-	return mat;
+// Returns a matrix that rotates row vectors
+// around the x-axis by the given angle in degrees.
+inline rmatrix RGetRotX(float angle) {
+	auto rads = D3DX_PI / 180.f * angle;
+	return RotationMatrix({ 1, 0, 0 }, rads);
 }
 
-inline rmatrix RGetRotY(float a) {
-	rmatrix mat;
-	D3DXMatrixRotationY(&mat, D3DX_PI / 180.f*a);
-	return mat;
+inline rmatrix RGetRotY(float angle) {
+	auto rads = D3DX_PI / 180.f * angle;
+	return RotationMatrix({ 0, 1, 0 }, rads);
 }
 
-inline rmatrix RGetRotZ(float a) {
-	rmatrix mat;
-	D3DXMatrixRotationZ(&mat, D3DX_PI / 180.f*a);
-	return mat;
+inline rmatrix RGetRotZ(float angle) {
+	auto rads = D3DX_PI / 180.f * angle;
+	return RotationMatrix({ 0, 0, 1 }, rads);
 }
 
 inline void GetIdentityMatrix(rmatrix& m)
@@ -357,30 +369,70 @@ inline rmatrix GetIdentityMatrix() {
 	return m;
 }
 
+// Returns the translation a matrix applies as a vector.
 inline rvector GetTransPos(const rmatrix& m) {
 	return{ m._41, m._42, m._43 };
 }
 
-inline D3DXVECTOR3 operator*(const D3DXVECTOR3 &in_vec, const D3DXMATRIX &mat)
+inline float sgn(float a)
 {
-	D3DXVECTOR3 out;
-
-	FLOAT x = in_vec.x*mat._11 + in_vec.y*mat._21 + in_vec.z* mat._31 + mat._41;
-	FLOAT y = in_vec.x*mat._12 + in_vec.y*mat._22 + in_vec.z* mat._32 + mat._42;
-	FLOAT z = in_vec.x*mat._13 + in_vec.y*mat._23 + in_vec.z* mat._33 + mat._43;
-	FLOAT w = in_vec.x*mat._14 + in_vec.y*mat._24 + in_vec.z* mat._34 + mat._44;
-
-	out.x = x / w;
-	out.y = y / w;
-	out.z = z / w;
-
-	return out;
+	if (a > 0.0F) return (1.0F);
+	if (a < 0.0F) return (-1.0F);
+	return (0.0F);
 }
 
-inline D3DXVECTOR3& operator*=(D3DXVECTOR3 &in_vec, const D3DXMATRIX &mat)
+inline v3 GetPlaneNormal(const rplane& plane) {
+	return{ plane.a, plane.b, plane.c };
+}
+
+inline bool IntersectLineSegmentPlane(v3* hit, const rplane& plane, const v3& l0, const v3& l1)
 {
-	in_vec = in_vec * mat;
-	return in_vec;
+	auto dot1 = DotPlaneNormal(plane, l0) - plane.d;
+	auto dot2 = DotPlaneNormal(plane, l1) - plane.d;
+	if (sgn(dot1) == sgn(dot2))
+		return false;
+	else if (!hit)
+		return true;
+
+	auto l = l1 - l0;
+	Normalize(l);
+
+	auto n = GetPlaneNormal(plane);
+	auto p0 = n * plane.d;
+	auto d = DotProduct(p0 - l0, n) / DotProduct(l, n);
+
+	*hit = d * l + l0;
+	return true;
+}
+
+inline v3 Transform(const v3& v, const rmatrix& mat)
+{
+	v3 ret;
+
+	ret.x = v.x * mat._11 + v.y * mat._21 + v.z * mat._31 + mat._41;
+	ret.y = v.x * mat._12 + v.y * mat._22 + v.z * mat._32 + mat._42;
+	ret.z = v.x * mat._13 + v.y * mat._23 + v.z * mat._33 + mat._43;
+
+	return ret;
+}
+
+inline v3 TransformCoord(const v3& v, const rmatrix& mat)
+{
+	v3 ret = Transform(v, mat);
+	auto w = v.x * mat._14 + v.y * mat._24 + v.z * mat._34 + mat._44;
+	ret /= w;
+	return ret;
+}
+
+inline D3DXVECTOR3 operator*(const D3DXVECTOR3& v, const D3DXMATRIX &mat)
+{
+	return TransformCoord(v, mat);
+}
+
+inline D3DXVECTOR3& operator*=(D3DXVECTOR3& v, const D3DXMATRIX &mat)
+{
+	v = v * mat;
+	return v;
 }
 
 _NAMESPACE_REALSPACE2_END

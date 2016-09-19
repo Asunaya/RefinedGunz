@@ -35,7 +35,7 @@ public:
 	void Draw();
 
 	static constexpr int SampleRate = 48000;
-	static constexpr int FrameSize = SampleRate * 0.06; // 60 ms
+	static constexpr int FrameSize = static_cast<int>(SampleRate * 0.06); // 60 ms
 	static constexpr int NumChannels = 1;
 	typedef short SampleFormat;
 

@@ -2974,7 +2974,6 @@ bool RBspObject::PickShadow(const rvector &pos, const rvector &to, RBSPPICKINFO 
 #define PICK_TOLERENCE 0.01f
 #define PICK_SIGN(x) ( (x)<-PICK_TOLERENCE ? -1 : (x)>PICK_TOLERENCE ? 1 : 0 )
 
-// side 쪽과 v0-v1 선분이 교차하는 부분이 있으면 true 를 리턴하면서 교차부분을 w0-w1로 리턴
 static bool pick_checkplane(int side, const rplane &plane, const rvector &v0, const rvector &v1, rvector *w0, rvector *w1)
 {
 	float dotv0 = D3DXPlaneDotCoord(&plane, &v0);
@@ -3032,7 +3031,7 @@ bool RBspObject::Pick(RSBspNode *pNode, const rvector &v0, const rvector &v1, Pi
 			if ((pInfo->dwFlags & pi.PassFlag) != 0) continue;
 
 			// If the ray is coming from behind the triangle, it can't be intersecting.
-			if (D3DXPlaneDotCoord(&pInfo->plane, &pi.From) < 0) continue;
+			if (DotProduct(pInfo->plane, pi.From) < 0) continue;
 
 			// Check each triangle
 			for (int j = 0; j < pInfo->nVertices - 2; j++)
@@ -3046,7 +3045,7 @@ bool RBspObject::Pick(RSBspNode *pNode, const rvector &v0, const rvector &v1, Pi
 					rvector pos;
 					D3DXPlaneIntersectLine(&pos, &pNode->pInfo[i].plane, &pi.From, &pi.To);
 
-					if (D3DXPlaneDotCoord(&pi.Plane, &pos) >= 0)
+					if (DotProduct(pi.Plane, pos) >= 0)
 					{
 						float fDist = Magnitude(pos - pi.From);
 						if (fDist < pi.Dist)
@@ -3114,7 +3113,7 @@ bool RBspObject::PickShadow(RSBspNode *pNode, const rvector &v0, const rvector &
 			RPOLYGONINFO *pInfo = &pNode->pInfo[i];
 			if ((pInfo->dwFlags & (RM_FLAG_ADDITIVE | RM_FLAG_USEOPACITY | RM_FLAG_HIDE)) != 0 ||
 				(pInfo->dwFlags & RM_FLAG_CASTSHADOW) == 0 ||
-				(D3DXPlaneDotCoord(&pInfo->plane, &pi.From) < 0)) continue;
+				(DotProduct(pInfo->plane, pi.From) < 0)) continue;
 
 			for (int j = 0; j < pInfo->nVertices - 2; j++)
 			{
