@@ -25,8 +25,17 @@
 
 #undef pi
 
-_NAMESPACE_REALSPACE2_BEGIN
+#ifndef _PUBLISH
 
+#define __BP(i,n)	MBeginProfile(i,n);
+#define __EP(i)		MEndProfile(i);
+
+#else
+
+#define __BP(i,n) ;
+#define __EP(i) ;
+
+#endif
 
 #define TOLERENCE 0.001f
 #define SIGN(x) ( (x)<-TOLERENCE ? -1 : (x)>TOLERENCE ? 1 : 0 )
@@ -36,7 +45,9 @@ _NAMESPACE_REALSPACE2_BEGIN
 
 #define DEFAULT_BUFFER_SIZE	1000
 
-LPDIRECT3DTEXTURE9 g_pShademap = nullptr;
+_NAMESPACE_REALSPACE2_BEGIN
+
+static LPDIRECT3DTEXTURE9 g_pShademap = nullptr;
 
 int nsplitcount = 0, nleafcount = 0;
 int g_nPoly, g_nCall;
@@ -1225,10 +1236,6 @@ bool RBspObject::Open_ObjectList(MXmlElement *pElement)
 	MXmlElement	aObjectNode, aChild;
 	int nCount = pElement->GetChildNodeCount();
 
-	//	RMesh* pBaseMtrlMesh=NULL;//임시
-
-	//	bool bcheck = true;
-
 	char szTagName[256], szContents[256];
 	for (i = 0; i < nCount; i++)
 	{
@@ -1293,7 +1300,7 @@ bool RBspObject::Open_ObjectList(MXmlElement *pElement)
 
 		if (pInfo == NULL) {
 
-			mlog("RBspObject::Open_ObjectList : pInfo == NULL pVisualMesh->CalcBox 원인\n");
+			mlog("RBspObject::Open_ObjectList : pInfo == NULL pVisualMesh->CalcBox\n");
 			continue;
 		}
 		else {
@@ -1767,8 +1774,9 @@ bool RBspObject::OpenLightmap()
 			D3DX_FILTER_TRIANGLE | D3DX_FILTER_MIRROR,
 			0, NULL, NULL, &LightmapTextures[i]);
 
-		if (hr != D3D_OK) mlog("Failed to load lightmap texture! Error code = %d, error message = %s\n",
-			hr, DXGetErrorString9(hr));
+		if (FAILED(hr))
+			mlog("Failed to load lightmap texture! Error code = %d, error message = %s\n",
+				hr, DXGetErrorString9(hr));
 	}
 
 	for (int i = 0; i < m_nPolygon; i++)
@@ -2148,7 +2156,7 @@ void RBspObject::GetNormal(RCONVEXPOLYGONINFO *poly, const rvector &position,
 			rvector *c = &poly->pVertices[i + 2];
 
 
-			if (IsIntersect(position + pnormal, -pnormal, *a, *b, *c, &t))
+			if (IntersectTriangle(*a, *b, *c, position + pnormal, -pnormal, &t))
 			{
 				nSelPolygon = i;
 				nSelEdge = -1;
@@ -2177,8 +2185,6 @@ void RBspObject::GetNormal(RCONVEXPOLYGONINFO *poly, const rvector &position,
 	rvector pos;
 	if (nSelEdge != -1)
 	{
-		// 폴리곤을 벗어난 점에 대해서는 가장 가까운 edge위의 점을 선택한다
-
 		rvector *e0 = nSelEdge == 0 ? v0 : nSelEdge == 1 ? v1 : v2;
 		rvector *e1 = nSelEdge == 0 ? v1 : nSelEdge == 1 ? v2 : v0;
 
@@ -2197,7 +2203,6 @@ void RBspObject::GetNormal(RCONVEXPOLYGONINFO *poly, const rvector &position,
 	x = pos - *v0;
 
 	float f = b[au] * x[av] - b[av] * x[au];
-	//	_ASSERT(!IS_ZERO(f));
 	if (IS_ZERO(f))
 	{
 		*normal = *n0;
@@ -2220,7 +2225,7 @@ void RBspObject::GetNormal(RCONVEXPOLYGONINFO *poly, const rvector &position,
 		*normal = Slerp(*n0, tem, s);
 }
 
-
+// This whole thing is absolutely terrible but nothing is using it so whatever.
 bool RBspObject::GenerateLightmap(const char *filename, int nMaxlightmapsize, int nMinLightmapSize,
 	int nSuperSample, float fToler, RGENERATELIGHTMAPCALLBACK pProgressFn)
 {
@@ -2635,11 +2640,11 @@ void RBspObject::CalcLightmapUV(RSBspNode *pNode, int *pSourceLightmap,
 		for (i = 0; i < pNode->nPolygon; i++)
 		{
 			int is = pNode->pInfo[i].nConvexPolygon;
-			int nSI = pSourceLightmap[is];	// nSI = 조각조각 생성된 라이트맵의 원래 인덱스
+			int nSI = pSourceLightmap[is];
 
 			RCONVEXPOLYGONINFO *poly = &ConvexPolygons[is];
 
-			rboundingbox bbox;	// 바운딩박스를 찾는다..
+			rboundingbox bbox;
 
 			bbox.vmin = bbox.vmax = poly->pVertices[0];
 			for (j = 1; j < poly->nVertices; j++)
@@ -2657,27 +2662,25 @@ void RBspObject::CalcLightmapUV(RSBspNode *pNode, int *pSourceLightmap,
 
 			rvector diff = float(lightmapsize) / float(lightmapsize - 1)*(bbox.vmax - bbox.vmin);
 
-			// 1 texel 의 여유를 만든다.
 			for (k = 0; k<3; k++)
 			{
 				bbox.vmin[k] -= .5f / float(lightmapsize)*diff[k];
 				bbox.vmax[k] += .5f / float(lightmapsize)*diff[k];
 			}
 
-			int au, av, ax; // 축의 index    각각 텍스쳐에서의 u축, v축, 그리고 나머지 한축..
+			int au, av, ax;
 
 			if (fabs(poly->plane.a)>fabs(poly->plane.b) && fabs(poly->plane.a) > fabs(poly->plane.c))
-				ax = 0;   // yz 평면으로 projection	u 는 y 축에 v 는 z 축에 대응, 나머지한축 ax는 x 축
+				ax = 0; // yz
 			else if (fabs(poly->plane.b) > fabs(poly->plane.c))
-				ax = 1;	// xz 평면으로 ...
+				ax = 1;	// xz
 			else
-				ax = 2;	// xy 평면으로 ...
+				ax = 2;	// xy
 
 			au = (ax + 1) % 3;
 			av = (ax + 2) % 3;
 
 			RPOLYGONINFO *pInfo = &pNode->pInfo[i];
-			// u2,v2 lightmap 의 uv좌표를 결정한다.
 			for (j = 0; j < pInfo->nVertices; j++)
 			{
 				pInfo->pVertices[j].tu2 = ((*pInfo->pVertices[j].Coord())[au] - bbox.vmin[au]) / diff[au];
@@ -2865,7 +2868,9 @@ struct PickInfo
 {
 	v3 From;
 	v3 To;
+	float LengthSquared;
 	v3 Dir;
+	v3 InverseDir;
 	RBSPPICKINFO* Out;
 	v3 ColPos;
 	plane Plane;
@@ -2873,102 +2878,50 @@ struct PickInfo
 	u32 PassFlag;
 };
 
-#ifndef _PUBLISH
-
-#define __BP(i,n)	MBeginProfile(i,n);
-#define __EP(i)		MEndProfile(i);
-
-#else
-
-#define __BP(i,n) ;
-#define __EP(i) ;
-
-#endif
-
-bool RBspObject::Pick(const rvector &pos, const rvector &dir, RBSPPICKINFO *pOut, DWORD dwPassFlag)
+template <bool Shadow>
+bool RBspObject::Pick(std::vector<RSBspNode>& Nodes,
+	const v3& src, const v3& dest, const v3& dir,
+	u32 PassFlag, RBSPPICKINFO* Out)
 {
-	if (BspRoot.empty()) return false;
+	// I don't know how many parts of the code can input invalid
+	// directions to this function so need to leave this out and
+	// normalize for now.
+	//assert(IS_EQ(MagnitudeSq(dir), 1));
+	auto MagSq = MagnitudeSq(dir);
+	if (MagSq == 0)
+		return false;
 
-	__BP(195, "RBspObject::Pick");
+	if (Nodes.empty())
+		return false;
 
 	PickInfo pi;
-	pi.From = pos;
-	pi.To = pos + 10000.f*dir;
+	pi.From = src;
+	pi.To = dest;
 	pi.Dir = dir;
-	Normalize(pi.Dir);
-
-	pi.Out = pOut;
-	D3DXPlaneFromPointNormal(&pi.Plane, &pi.From, &pi.Dir);
+	if (!IS_EQ(MagSq, 1))
+		Normalize(pi.Dir);
+	pi.PassFlag = PassFlag;
+	pi.Out = Out;
+	
+	pi.LengthSquared = MagnitudeSq(pi.To - pi.From);
+	pi.InverseDir = 1 / dir;
+	pi.Plane = PlaneFromPointNormal(pi.From, pi.Dir);
 	pi.Dist = FLT_MAX;
 
-	pi.PassFlag = dwPassFlag;
-
-	auto ret = Pick(BspRoot.data(), pos, pi.To, pi);
-
-	__EP(195);
-
-	return ret;
+	return Pick(Nodes.data(), src, dest, pi);
 }
 
-bool RBspObject::PickTo(const rvector &pos, const rvector &to, RBSPPICKINFO *pOut, DWORD dwPassFlag)
-{
-	if (BspRoot.empty()) return false;
-
-	__BP(195, "RBspObject::Pick");
-
-	PickInfo pi;
-	pi.From = pos;
-	pi.To = to;
-	pi.Dir = to - pos;
-	Normalize(pi.Dir);
-
-	pi.Out = pOut;
-	D3DXPlaneFromPointNormal(&pi.Plane, &pi.From, &pi.Dir);
-	pi.Dist = FLT_MAX;
-
-	pi.PassFlag = dwPassFlag;
-
-	auto ret = Pick(BspRoot.data(), pos, pi.To, pi);
-
-	__EP(195);
-
-	return ret;
+bool RBspObject::Pick(const rvector &pos, const rvector &dir, RBSPPICKINFO *Out, u32 PassFlag) {
+	return Pick(BspRoot, pos, pos + dir * 10000.f, dir, PassFlag, Out);
 }
-
-bool RBspObject::PickOcTree(const rvector &pos, const rvector &dir, RBSPPICKINFO *pOut, DWORD dwPassFlag)
-{
-	if (OcRoot.empty()) return false;
-
-	PickInfo pi;
-	pi.From = pos;
-	pi.To = pos + 10000.f*dir;
-	pi.Dir = dir;
-	Normalize(pi.Dir);
-
-	pi.Out = pOut;
-	D3DXPlaneFromPointNormal(&pi.Plane, &pi.From, &pi.Dir);
-	pi.Dist = FLT_MAX;
-
-	pi.PassFlag = dwPassFlag;
-
-	return Pick(OcRoot.data(), pos, pi.To, pi);
+bool RBspObject::PickTo(const rvector &pos, const rvector &to, RBSPPICKINFO *Out, u32 PassFlag) {
+	return Pick(BspRoot, pos, to, Normalized(to - pos), PassFlag, Out);
 }
-
-bool RBspObject::PickShadow(const rvector &pos, const rvector &to, RBSPPICKINFO *pOut)
-{
-	if (BspRoot.empty()) return false;
-
-	PickInfo pi;
-	pi.From = pos;
-	pi.To = to;
-	pi.Dir = to - pos;
-	Normalize(pi.Dir);
-
-	pi.Out = pOut;
-	D3DXPlaneFromPointNormal(&pi.Plane, &pi.From, &pi.Dir);
-	pi.Dist = FLT_MAX;
-
-	return PickShadow(BspRoot.data(), pos, to, pi);
+bool RBspObject::PickOcTree(const rvector &pos, const rvector &dir, RBSPPICKINFO *Out, u32 PassFlag) {
+	return Pick(OcRoot, pos, pos + dir * 10000.f, dir, PassFlag, Out);
+}
+bool RBspObject::PickShadow(const rvector &pos, const rvector &to, RBSPPICKINFO *Out) {
+	return Pick<true>(BspRoot, pos, to, Normalized(to - pos), DefaultPassFlag, Out);
 }
 
 #define PICK_TOLERENCE 0.01f
@@ -2989,7 +2942,7 @@ static bool pick_checkplane(int side, const rplane &plane, const rvector &v0, co
 		else
 		{
 			rvector intersect;
-			if (D3DXPlaneIntersectLine(&intersect, &plane, &v0, &v1))
+			if (IntersectLineSegmentPlane(&intersect, plane, v0, v1))
 				*w1 = intersect;
 			else
 				*w1 = v1;
@@ -3005,7 +2958,7 @@ static bool pick_checkplane(int side, const rplane &plane, const rvector &v0, co
 		else
 		{
 			rvector intersect;
-			if (D3DXPlaneIntersectLine(&intersect, &plane, &v0, &v1))
+			if (IntersectLineSegmentPlane(&intersect, plane, v0, v1))
 				*w0 = intersect;
 			else
 				*w0 = v0;
@@ -3016,171 +2969,80 @@ static bool pick_checkplane(int side, const rplane &plane, const rvector &v0, co
 	return false;
 }
 
-bool RBspObject::Pick(RSBspNode *pNode, const rvector &v0, const rvector &v1, PickInfo& pi)
+template <bool Shadow>
+bool RBspObject::CheckLeafNode(RSBspNode* pNode, const v3& v0, const v3& v1, PickInfo& pi)
 {
-	if (!pNode) return false;
+	bool Picked = false;
 
-	// If it's a leaf node, check if the line intersects
-	if (pNode->nPolygon) {
-		bool bPicked = false;
+	for (int i = 0; i < pNode->nPolygon; i++)
+	{
+		RPOLYGONINFO *pInfo = &pNode->pInfo[i];
 
-		for (int i = 0; i < pNode->nPolygon; i++)
+		if ((pInfo->dwFlags & pi.PassFlag) != 0)
+			continue;
+
+		if (Shadow && (pInfo->dwFlags & RM_FLAG_CASTSHADOW) == 0)
+			continue;
+
+		// If the ray is coming from behind the triangle, it can't be intersecting.
+		if (DotProduct(pInfo->plane, pi.From) < 0)
+			continue;
+
+		// Check each triangle
+		for (int j = 0; j < pInfo->nVertices - 2; j++)
 		{
-			RPOLYGONINFO *pInfo = &pNode->pInfo[i];
-
-			if ((pInfo->dwFlags & pi.PassFlag) != 0) continue;
-
-			// If the ray is coming from behind the triangle, it can't be intersecting.
-			if (DotProduct(pInfo->plane, pi.From) < 0) continue;
-
-			// Check each triangle
-			for (int j = 0; j < pInfo->nVertices - 2; j++)
+			float TriDist;
+			if (IntersectTriangle(*pInfo->pVertices[0].Coord(),
+				*pInfo->pVertices[j + 1].Coord(),
+				*pInfo->pVertices[j + 2].Coord(),
+				pi.From, pi.Dir,
+				&TriDist) &&
+				TriDist < pi.Dist)
 			{
-				float fDist;
-				if (IsIntersect(pi.From, pi.Dir,
-					*pInfo->pVertices[0].Coord(),
-					*pInfo->pVertices[j + 1].Coord(),
-					*pInfo->pVertices[j + 2].Coord(), &fDist))
-				{
-					rvector pos;
-					D3DXPlaneIntersectLine(&pos, &pNode->pInfo[i].plane, &pi.From, &pi.To);
-
-					if (DotProduct(pi.Plane, pos) >= 0)
-					{
-						float fDist = Magnitude(pos - pi.From);
-						if (fDist < pi.Dist)
-						{
-							bPicked = true;
-							pi.Dist = fDist;
-							pi.Out->PickPos = pos;
-							pi.Out->pNode = pNode;
-							pi.Out->nIndex = i;
-							pi.Out->pInfo = &pNode->pInfo[i];
-						}
-					}
-				}
+				pi.Dist = TriDist;
+				pi.Out->PickPos = TriDist * pi.Dir + pi.From;
+				pi.Out->pNode = pNode;
+				pi.Out->nIndex = i;
+				pi.Out->pInfo = &pNode->pInfo[i];
+				Picked = true;
 			}
 		}
-
-		return bPicked;
 	}
 
-	// If it's not a leaf node, check the branches
-	rvector w0, w1;
-	bool bHit = false;
-	if (D3DXPlaneDotNormal(&pNode->plane, &pi.Dir)>0) {
-		if (pick_checkplane(-1, pNode->plane, v0, v1, &w0, &w1))
-		{
-			bHit = Pick(pNode->m_pNegative, w0, w1, pi);
-			if (bHit) return true;
-		}
-
-		if (pick_checkplane(1, pNode->plane, v0, v1, &w0, &w1))
-		{
-			bHit |= Pick(pNode->m_pPositive, w0, w1, pi);
-		}
-
-		return bHit;
-	}
-	else
-	{
-		if (pick_checkplane(1, pNode->plane, v0, v1, &w0, &w1))
-		{
-			bHit = Pick(pNode->m_pPositive, w0, w1, pi);
-			if (bHit) return true;
-		}
-
-		if (pick_checkplane(-1, pNode->plane, v0, v1, &w0, &w1))
-		{
-			bHit |= Pick(pNode->m_pNegative, w0, w1, pi);
-		}
-
-		return bHit;
-	}
-
-	return false;
+	return Picked;
 }
 
-bool RBspObject::PickShadow(RSBspNode *pNode, const rvector &v0, const rvector &v1, PickInfo& pi)
+template <bool Shadow>
+bool RBspObject::CheckBranches(RSBspNode* pNode, const v3& v0, const v3& v1, PickInfo& pi)
 {
-	if (!pNode) return false;
-
-	if (pNode->nPolygon) {
-		bool bPicked = false;
-
-		for (int i = 0; i < pNode->nPolygon; i++)
-		{
-			RPOLYGONINFO *pInfo = &pNode->pInfo[i];
-			if ((pInfo->dwFlags & (RM_FLAG_ADDITIVE | RM_FLAG_USEOPACITY | RM_FLAG_HIDE)) != 0 ||
-				(pInfo->dwFlags & RM_FLAG_CASTSHADOW) == 0 ||
-				(DotProduct(pInfo->plane, pi.From) < 0)) continue;
-
-			for (int j = 0; j < pInfo->nVertices - 2; j++)
-			{
-				float fDist;
-				if (IsIntersect(pi.From, pi.Dir,
-					*pInfo->pVertices[0].Coord(),
-					*pInfo->pVertices[j + 1].Coord(),
-					*pInfo->pVertices[j + 2].Coord(), &fDist))
-				{
-					rvector pos;
-					D3DXPlaneIntersectLine(&pos, &pInfo->plane, &pi.From, &pi.To);
-
-					if (D3DXPlaneDotCoord(&pi.Plane, &pos) >= 0)
-					{
-						float fDist = Magnitude(pos - pi.From);
-						if (fDist < pi.Dist)
-						{
-							bPicked = true;
-							pi.Dist = fDist;
-							pi.Out->PickPos = pos;
-							pi.Out->pNode = pNode;
-							pi.Out->nIndex = i;
-							pi.Out->pInfo = pInfo;
-						}
-					}
-				}
-			}
-		}
-
-		return bPicked;
-	}
-
 	rvector w0, w1;
+	float t;
+	auto CheckBranch = [&](int side, auto* branch) {
+		return IntersectLineAABB(t, pi.From, pi.Dir, pNode->bbTree, pi.InverseDir) &&
+			Square(t) < pi.LengthSquared &&
+			pick_checkplane(side, pNode->plane, v0, v1, &w0, &w1) &&
+			Pick<Shadow>(branch, w0, w1, pi);
+	};
+	auto CheckPositive = [&] { return CheckBranch(1, pNode->m_pPositive); };
+	auto CheckNegative = [&] { return CheckBranch(-1, pNode->m_pNegative); };
+
 	bool bHit = false;
-	if (D3DXPlaneDotNormal(&pNode->plane, &pi.Dir)>0) {
-		if (pick_checkplane(-1, pNode->plane, v0, v1, &w0, &w1))
-		{
-			bHit = PickShadow(pNode->m_pNegative, w0, w1, pi);
-			if (bHit) {
-				return true;
-			}
-		}
-
-		if (pick_checkplane(1, pNode->plane, v0, v1, &w0, &w1))
-		{
-			bHit |= PickShadow(pNode->m_pPositive, w0, w1, pi);
-		}
-
-		return bHit;
-	}
+	if (DotPlaneNormal(pNode->plane, pi.Dir) > 0)
+		return CheckNegative() || CheckPositive();
 	else
-	{
-		if (pick_checkplane(1, pNode->plane, v0, v1, &w0, &w1))
-		{
-			bHit = PickShadow(pNode->m_pPositive, w0, w1, pi);
-			if (bHit) return true;
-		}
+		return CheckPositive() || CheckNegative();
+}
 
-		if (pick_checkplane(-1, pNode->plane, v0, v1, &w0, &w1))
-		{
-			bHit |= PickShadow(pNode->m_pNegative, w0, w1, pi);
-		}
+template <bool Shadow>
+bool RBspObject::Pick(RSBspNode *pNode, const rvector &v0, const rvector &v1, PickInfo& pi)
+{
+	if (!pNode)
+		return false;
 
-		return bHit;
-	}
+	if (pNode->nPolygon)
+		return CheckLeafNode<Shadow>(pNode, v0, v1, pi);
 
-	return false;
+	return CheckBranches<Shadow>(pNode, v0, v1, pi);
 }
 
 void RBspObject::GetNormal(int nConvexPolygon, const rvector &position, rvector *normal)
@@ -3243,7 +3105,6 @@ void RBspObject::InvalidateDynamicLightVertexBuffer()
 	SAFE_RELEASE(DynLightVertexBuffer);
 }
 
-
 bool RBspObject::FlushLightVB()
 {
 	DynLightVertexBuffer->Unlock();
@@ -3269,8 +3130,8 @@ bool RBspObject::LockLightVB()
 	return true;
 }
 
-D3DLIGHT9 *g_pTargetLight;
-DWORD		g_dwTargetLightColor;
+D3DLIGHT9* g_pTargetLight;
+DWORD g_dwTargetLightColor;
 
 bool RBspObject::DrawLight(RSBspNode *pNode, int nMaterial)
 {
@@ -3303,7 +3164,6 @@ bool RBspObject::DrawLight(RSBspNode *pNode, int nMaterial)
 				constexpr auto BACK_FACE_DISTANCE = 200.f;
 				if (fPlaneDotCoord < -BACK_FACE_DISTANCE) continue;
 				if (fPlaneDotCoord < 0) fPlaneDotCoord = -fPlaneDotCoord / BACK_FACE_DISTANCE * g_pTargetLight->Range;
-
 
 				LIGHTBSPVERTEX *v = m_pLightVertex + m_dwLightVBBase * 3;
 

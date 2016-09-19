@@ -320,14 +320,6 @@ void MergeBoundingBox(rboundingbox *dest, rboundingbox *src)
 	}
 }
 
-bool IsIntersect(const rvector& orig, const rvector& dir,
-	rvector& v0, rvector& v1, rvector& v2, float* t)
-{
-	float u, v;
-
-	return D3DXIntersectTri(&v0, &v1, &v2, &orig, &dir, &u, &v, t) == TRUE;
-}
-
 bool isLineIntersectBoundingBox(rvector &origin, rvector &dir, rboundingbox &bb)
 {
 	return D3DXBoxBoundProbe(&bb.vmin, &bb.vmax, &origin, &dir) != FALSE;

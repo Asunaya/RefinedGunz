@@ -18,6 +18,12 @@
 #define ClearBitSet(sets, item)		(sets &= ~(1 << item))
 #define CheckBitSet(sets, item)		(sets & (1 << item))
 
+#ifdef _MSC_VER
+#define WARN_UNUSED_RESULT _Check_return_
+#else
+#define WARN_UNUSED_RESULT __attribute__((warn_unused_result))
+#endif
+
 enum MDateType
 {
 	MDT_Y = 1,

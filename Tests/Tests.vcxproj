@@ -83,6 +83,7 @@
     <Link>
       <AdditionalLibraryDirectories>../sdk/dx9/lib;../RealSound/Lib;Lib;../sdk/opus/lib/Release;../sdk/portaudio/lib/Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>../CML/Lib/zlib.lib;../sdk/libsodium/lib/static/libsodium.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4099 /ignore:4221 %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

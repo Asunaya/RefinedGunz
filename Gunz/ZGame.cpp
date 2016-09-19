@@ -3251,6 +3251,8 @@ void ZGame::OnPeerShot_Range(MMatchCharItemParts sel_type, const MUID& uidOwner,
 void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float fShotTime,
 	rvector& pos, rvector& to, u32 seed)
 {
+	if (!pOwnerCharacter) return;
+
 	ZCharacter *pTargetCharacter = ZGetGameInterface()->GetCombatInterface()->GetTargetCharacter();
 	if(!pTargetCharacter) return;
 
@@ -3260,12 +3262,10 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 #define SHOTGUN_BULLET_COUNT	12
 #define SHOTGUN_DIFFUSE_RANGE	0.1f
 
-	bool waterSound = false;
+	bool waterSound{};
 
-	if (pOwnerCharacter == NULL) return;
-
-	bool bHitGuard=false,bHitBody=false,bHitGround=false,bHitEnemy=false;
-	rvector GuardPos,BodyPos,GroundPos;
+	bool bHitGuard{}, bHitBody{}, bHitGround{}, bHitEnemy{};
+	rvector GuardPos, BodyPos, GroundPos;
 
 	rvector v1, v2;
 

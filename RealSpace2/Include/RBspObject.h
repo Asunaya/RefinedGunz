@@ -18,6 +18,9 @@ class MZFile;
 class MZFileSystem;
 class MXmlElement;
 
+#define BSP_FVF	(D3DFVF_XYZ | D3DFVF_TEX2)
+#define LIGHT_BSP_FVF	(D3DFVF_XYZ | D3DFVF_TEX2 | D3DFVF_DIFFUSE)
+
 _NAMESPACE_REALSPACE2_BEGIN
 
 struct RMATERIAL;
@@ -26,12 +29,11 @@ class RDummyList;
 class RBaseTexture;
 struct RSBspNode;
 
-
 struct RDEBUGINFO {
 	int nCall, nPolygon;
 	int nMapObjectFrustumCulled;
 	int nMapObjectOcclusionCulled;
-	RSolidBspNode		*pLastColNode;
+	RSolidBspNode* pLastColNode;
 };
 
 struct BSPVERTEX {
@@ -41,10 +43,6 @@ struct BSPVERTEX {
 
 	rvector *Coord() { return (rvector*)&x; }
 };
-
-#define BSP_FVF	(D3DFVF_XYZ | D3DFVF_TEX2)
-
-#define LIGHT_BSP_FVF	(D3DFVF_XYZ | D3DFVF_TEX2 | D3DFVF_DIFFUSE)
 
 struct RPOLYGONINFO {
 	rplane	plane;
@@ -122,7 +120,7 @@ struct RSBspNode
 	rboundingbox	bbTree;
 
 	RSBspNode();
-	virtual ~RSBspNode();
+	~RSBspNode();
 
 	RSBspNode *GetLeafNode(const rvector &pos);
 	void DrawWireFrame(int nFace, DWORD color);
@@ -130,6 +128,7 @@ struct RSBspNode
 };
 
 using RFREEBLOCKLIST = std::list<POINT>;
+
 struct RLIGHTMAPTEXTURE {
 	int nSize;
 	DWORD *data;
@@ -216,7 +215,7 @@ struct AmbSndInfo
 
 using RGENERATELIGHTMAPCALLBACK = bool(*)(float fProgress);
 
-
+struct PickInfo;
 
 class RBspObject
 {
@@ -232,7 +231,8 @@ public:
 
 	void ClearLightmaps();
 
-	bool Open(const char *, ROpenMode nOpenFlag = ROpenMode::Runtime, RFPROGRESSCALLBACK pfnProgressCallback = nullptr,
+	bool Open(const char *, ROpenMode nOpenFlag = ROpenMode::Runtime,
+		RFPROGRESSCALLBACK pfnProgressCallback = nullptr,
 		void *CallbackParam = nullptr, bool PhysOnly = false);
 
 	bool OpenDescription(const char *);
@@ -249,7 +249,6 @@ public:
 	bool Draw();
 	void DrawObjects();
 
-
 	bool DrawLight(RSBspNode *pNode, int nMaterial);
 	void DrawLight(D3DLIGHT9 *pLight);
 
@@ -261,9 +260,12 @@ public:
 	void SetShowLightmapMode(bool bShowLightmap) { m_bShowLightmap = bShowLightmap; }
 	bool GetShowLightmapMode() { return m_bShowLightmap; }
 
-	bool Pick(const rvector &pos, const rvector &dir, RBSPPICKINFO *pOut, DWORD dwPassFlag = RM_FLAG_ADDITIVE | RM_FLAG_USEOPACITY | RM_FLAG_HIDE);
-	bool PickTo(const rvector &pos, const rvector &to, RBSPPICKINFO *pOut, DWORD dwPassFlag = RM_FLAG_ADDITIVE | RM_FLAG_USEOPACITY | RM_FLAG_HIDE);
-	bool PickOcTree(const rvector &pos, const rvector &dir, RBSPPICKINFO *pOut, DWORD dwPassFlag = RM_FLAG_ADDITIVE | RM_FLAG_USEOPACITY | RM_FLAG_HIDE);
+	bool Pick(const rvector &pos, const rvector &dir, RBSPPICKINFO *pOut,
+		u32 dwPassFlag = DefaultPassFlag);
+	bool PickTo(const rvector &pos, const rvector &to, RBSPPICKINFO *pOut,
+		u32 dwPassFlag = DefaultPassFlag);;
+	bool PickOcTree(const rvector &pos, const rvector &dir, RBSPPICKINFO *pOut,
+		u32 dwPassFlag = DefaultPassFlag);
 
 	DWORD GetLightmap(rvector &Pos, RSBspNode *pNode, int nIndex);
 
@@ -356,9 +358,19 @@ private:
 
 	void SetDiffuseMap(int nMaterial);
 
-	bool Pick(RSBspNode *pNode, const rvector &v0, const rvector &v1, struct PickInfo&);
 	bool PickShadow(const rvector &pos, const rvector &to, RBSPPICKINFO *pOut);
-	bool PickShadow(RSBspNode *pNode, const rvector &v0, const rvector &v1, struct PickInfo&);
+
+	template <bool Shadow = false>
+	bool Pick(RSBspNode *pNode, const rvector &v0, const rvector &v1, PickInfo&);
+	template <bool Shadow>
+	bool CheckLeafNode(RSBspNode* pNode, const v3& v0, const v3& v1, PickInfo&);
+	template <bool Shadow>
+	bool CheckBranches(RSBspNode* pNode, const v3& v0, const v3& v1, PickInfo&);
+
+	template <bool Shadow = false>
+	bool Pick(std::vector<RSBspNode>& Nodes,
+		const v3& src, const v3& dest, const v3& dir,
+		u32 PassFlag, RBSPPICKINFO* Out);
 
 	void ChooseNodes(RSBspNode *bspNode);
 	int ChooseNodes(RSBspNode *bspNode, const rvector &center, float fRadius);
@@ -395,7 +407,10 @@ private:
 	void InvalidateDynamicLightVertexBuffer();
 	bool FlushLightVB();
 	bool LockLightVB();
+
 	D3DPtr<IDirect3DVertexBuffer9> DynLightVertexBuffer;
+
+	static constexpr u32 DefaultPassFlag = RM_FLAG_ADDITIVE | RM_FLAG_USEOPACITY | RM_FLAG_HIDE;
 
 	static RBaseTexture *m_pShadeMap;
 
@@ -427,7 +442,7 @@ private:
 	// Interpolated normal
 	void GetNormal(RCONVEXPOLYGONINFO *poly, const rvector &position, rvector *normal, int au, int av);
 
-	int					m_nConvexPolygon, m_nConvexVertices;
+	int m_nConvexPolygon, m_nConvexVertices;
 	std::vector<v3> ConvexVertices;
 	std::vector<v3> ConvexNormals;
 	std::vector<RCONVEXPOLYGONINFO> ConvexPolygons;

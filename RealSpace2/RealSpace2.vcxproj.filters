@@ -169,7 +169,6 @@
     </ClCompile>
     <ClCompile Include="Source\RealSpace2.cpp" />
     <ClCompile Include="Source\RFrameWork.cpp" />
-    <ClCompile Include="Source\RTypes.cpp" />
     <ClCompile Include="Source\stdafx.cpp" />
     <ClCompile Include="Source\MeshManager.cpp" />
     <ClCompile Include="Source\RMath.cpp" />

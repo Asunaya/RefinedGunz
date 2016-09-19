@@ -22,6 +22,46 @@
 
 _NAMESPACE_REALSPACE2_BEGIN
 
+inline v3 Transform(const v3& v, const rmatrix& mat)
+{
+	v3 ret;
+
+	ret.x = v.x * mat._11 + v.y * mat._21 + v.z * mat._31 + mat._41;
+	ret.y = v.x * mat._12 + v.y * mat._22 + v.z * mat._32 + mat._42;
+	ret.z = v.x * mat._13 + v.y * mat._23 + v.z * mat._33 + mat._43;
+
+	return ret;
+}
+
+inline v3 TransformCoord(const v3& v, const rmatrix& mat)
+{
+	v3 ret = Transform(v, mat);
+	auto w = v.x * mat._14 + v.y * mat._24 + v.z * mat._34 + mat._44;
+	ret /= w;
+	return ret;
+}
+
+// Leave the namespace so that the operators are also visible through normal lookup.
+_NAMESPACE_REALSPACE2_END
+
+inline D3DXVECTOR3 operator*(const D3DXVECTOR3& v, const D3DXMATRIX &mat)
+{
+	return _REALSPACE2::TransformCoord(v, mat);
+}
+
+inline D3DXVECTOR3& operator*=(D3DXVECTOR3& v, const D3DXMATRIX &mat)
+{
+	v = v * mat;
+	return v;
+}
+
+inline rvector operator /(float scalar, const rvector& vec)
+{
+	return{ scalar / vec.x, scalar / vec.y, scalar / vec.z };
+}
+
+_NAMESPACE_REALSPACE2_BEGIN
+
 inline rvector GetPoint(const rboundingbox& bb, int i) {
 	return rvector{ (i & 1) ? bb.vmin.x : bb.vmax.x,
 		(i & 2) ? bb.vmin.y : bb.vmax.y,
@@ -87,19 +127,34 @@ inline bool Intersects(const rboundingbox& a, const rboundingbox &b)
 		a.vmax.z > b.vmin.z;
 }
 
+// Returns the length of the input vector.
 inline float Magnitude(const rvector &x) {
 	return sqrt(x.x * x.x + x.y * x.y + x.z * x.z);
 }
+// Returns the length squared of the input vector.
 inline float MagnitudeSq(const rvector &x) {
 	return x.x * x.x + x.y * x.y + x.z * x.z;
 }
-// If the input vector has a nonzero length, this function normalizes it in place.
+
+// If the input vector has a nonzero length,
+// this function sets it to a unit vector in the same direction.
 // Otherwise, it does nothing.
-inline void Normalize(rvector &x) {
+inline void Normalize(rvector &x)
+{
 	auto MagSq = MagnitudeSq(x);
 	if (MagSq == 0)
 		return;
 	x *= 1.f / sqrt(MagSq);
+}
+
+// If the input vector has a nonzero length,
+// this function returns a unit vector in the same direction.
+// Otherwise, it returns (0, 0, 0).
+WARN_UNUSED_RESULT inline v3 Normalized(const v3& x)
+{
+	v3 ret{ x };
+	Normalize(ret);
+	return ret;
 }
 inline float DotProduct(const rvector& a, const rvector& b) {
 	return a.x * b.x + a.y * b.y + a.z * b.z;
@@ -152,13 +207,11 @@ inline rvector Slerp(const rvector &from, const rvector &to, float t)
 }
 
 template <typename T>
-T Lerp(T src, T dest, float t)
-{
+T Lerp(T src, T dest, float t) {
 	return src * (1 - t) + dest * t;
 }
 
-inline v3 HadamardProduct(const v3& a, const v3& b)
-{
+inline v3 HadamardProduct(const v3& a, const v3& b) {
 	return{ a.x * b.x, a.y * b.y, a.z * b.z };
 }
 
@@ -172,8 +225,6 @@ bool isInViewFrustum(const rvector &point1, const rvector &point2, rplane *plane
 bool isInViewFrustumWithZ(rboundingbox *bb, rplane *plane);
 bool isInViewFrustumwrtnPlanes(rboundingbox *bb, rplane *plane, int nplane);
 
-bool IsIntersect(const rvector& orig, const rvector& dir,
-	rvector& v0, rvector& v1, rvector& v2, float* t);
 bool isLineIntersectBoundingBox(rvector &origin, rvector &dir, rboundingbox &bb);
 bool IsIntersect(rvector& line_begin_, rvector& line_end_, rboundingbox& box_);
 bool IsIntersect(rvector& line_begin_, rvector& line_dir_, rvector& center_, float radius_,
@@ -387,8 +438,8 @@ inline v3 GetPlaneNormal(const rplane& plane) {
 
 inline bool IntersectLineSegmentPlane(v3* hit, const rplane& plane, const v3& l0, const v3& l1)
 {
-	auto dot1 = DotPlaneNormal(plane, l0) - plane.d;
-	auto dot2 = DotPlaneNormal(plane, l1) - plane.d;
+	auto dot1 = DotProduct(plane, l0);
+	auto dot2 = DotProduct(plane, l1);
 	if (sgn(dot1) == sgn(dot2))
 		return false;
 	else if (!hit)
@@ -398,41 +449,130 @@ inline bool IntersectLineSegmentPlane(v3* hit, const rplane& plane, const v3& l0
 	Normalize(l);
 
 	auto n = GetPlaneNormal(plane);
-	auto p0 = n * plane.d;
+	auto p0 = n * -plane.d;
 	auto d = DotProduct(p0 - l0, n) / DotProduct(l, n);
 
 	*hit = d * l + l0;
 	return true;
 }
 
-inline v3 Transform(const v3& v, const rmatrix& mat)
+#define EPSILON 0.000001
+
+inline bool IntersectTriangle(const v3& V1, const v3& V2, const v3& V3, // Triangle points
+	const v3& Origin, const v3& Dir, // Ray origin and direction
+	float* out) // Output: Distance from origin to intersection point
 {
-	v3 ret;
+	// Möller–Trumbore triangle intersection algorithm
 
-	ret.x = v.x * mat._11 + v.y * mat._21 + v.z * mat._31 + mat._41;
-	ret.y = v.x * mat._12 + v.y * mat._22 + v.z * mat._32 + mat._42;
-	ret.z = v.x * mat._13 + v.y * mat._23 + v.z * mat._33 + mat._43;
+	v3 e1, e2;  //Edge1, Edge2
+	v3 P, Q, T;
+	float det, inv_det, u, v;
+	float t;
 
-	return ret;
+	//Find vectors for two edges sharing V1
+	e1 = V2 - V1;
+	e2 = V3 - V1;
+	//Begin calculating determinant - also used to calculate u parameter
+	CrossProduct(&P, Dir, e2);
+	//if determinant is near zero, ray lies in plane of triangle or ray is parallel to plane of triangle
+	det = DotProduct(e1, P);
+	//NOT CULLING
+	if (det > -EPSILON && det < EPSILON) return false;
+	inv_det = 1.f / det;
+
+	//calculate distance from V1 to ray origin
+	T = Origin - V1;
+
+	//Calculate u parameter and test bound
+	u = DotProduct(T, P) * inv_det;
+	//The intersection lies outside of the triangle
+	if (u < 0.f || u > 1.f) return false;
+
+	//Prepare to test v parameter
+	CrossProduct(&Q, T, e1);
+
+	//Calculate V parameter and test bound
+	v = DotProduct(Dir, Q) * inv_det;
+	//The intersection lies outside of the triangle
+	if (v < 0.f || u + v  > 1.f) return false;
+
+	t = DotProduct(e2, Q) * inv_det;
+
+	if (t > EPSILON) { //ray intersection
+		*out = t;
+		return true;
+	}
+
+	// No hit, no win
+	return false;
 }
 
-inline v3 TransformCoord(const v3& v, const rmatrix& mat)
+inline bool IntersectLineAABB(float& t,
+	const v3& origin, const v3& dir,
+	const rboundingbox& bbox,
+	const v3& dirfrac)
 {
-	v3 ret = Transform(v, mat);
-	auto w = v.x * mat._14 + v.y * mat._24 + v.z * mat._34 + mat._44;
-	ret /= w;
-	return ret;
+	float t1 = (bbox.vmin.x - origin.x)*dirfrac.x;
+	float t2 = (bbox.vmax.x - origin.x)*dirfrac.x;
+	float t3 = (bbox.vmin.y - origin.y)*dirfrac.y;
+	float t4 = (bbox.vmax.y - origin.y)*dirfrac.y;
+	float t5 = (bbox.vmin.z - origin.z)*dirfrac.z;
+	float t6 = (bbox.vmax.z - origin.z)*dirfrac.z;
+
+	float tmin = max(max(min(t1, t2), min(t3, t4)), min(t5, t6));
+	float tmax = min(min(max(t1, t2), max(t3, t4)), max(t5, t6));
+
+	// if tmax < 0, ray (line) is intersecting AABB, but whole AABB is behing us
+	if (tmax < 0)
+	{
+		t = tmax;
+		return false;
+	}
+
+	// if tmin > tmax, ray doesn't intersect AABB
+	if (tmin > tmax)
+	{
+		t = tmax;
+		return false;
+	}
+
+	t = tmin;
+	return true;
 }
 
-inline D3DXVECTOR3 operator*(const D3DXVECTOR3& v, const D3DXMATRIX &mat)
+inline bool IntersectLineAABB(float& t,
+	const v3& origin, const v3& dir,
+	const rboundingbox& bbox)
 {
-	return TransformCoord(v, mat);
+	v3 dirfrac{ 1.f / dir.x, 1.f / dir.y, 1.f / dir.z };
+	return IntersectLineAABB(t, origin, dir, bbox, dirfrac);
 }
 
-inline D3DXVECTOR3& operator*=(D3DXVECTOR3& v, const D3DXMATRIX &mat)
+inline bool IntersectLineSegmentAABB(float& t,
+	const v3& l0, const v3& l1,
+	const rboundingbox& bbox,
+	const v3& InverseDir)
 {
-	v = v * mat;
-	return v;
+	auto ret = IntersectLineAABB(t, l0, Normalized(l1 - l0), bbox, InverseDir);
+	if (!ret)
+		return false;
+
+	if (Square(t) > MagnitudeSq(l1 - l0))
+		return false;
+
+	return true;
+}
+
+inline bool IntersectLineSegmentAABB(float& t,
+	const v3& l0, const v3& l1,
+	const rboundingbox& bbox)
+{
+	return IntersectLineSegmentAABB(t, l0, l1, bbox, 1.f / Normalized(l1 - l0));
+}
+
+inline rplane PlaneFromPointNormal(const v3& point, const v3& normal)
+{
+	return{ normal.x, normal.y, normal.z, -DotProduct(point, normal) };
 }
 
 _NAMESPACE_REALSPACE2_END

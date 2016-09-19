@@ -232,10 +232,9 @@ void ZMyCharacter::ProcessInput(float fDelta)
 						}
 					}
 
-					rvector right;
-					CrossProduct(&right,rvector(0,0,1),front);
+					auto right = Normalized(CrossProduct({ 0, 0, 1 }, front));
 
-					pickorigin=m_Position+rvector(0,0,150);
+					pickorigin = m_Position + rvector(0, 0, 150);
 
 					for(int i=0;i<2;i++)
 					{
@@ -286,13 +285,14 @@ void ZMyCharacter::ProcessInput(float fDelta)
 
 			rvector PickedNormal=rvector(0,0,0);
 			rvector pickorigin=m_Position+rvector(0,0,90);
-			rvector velocity = GetVelocity();
 			RBSPPICKINFO bpi;
-			bool bPicked=ZGetGame()->GetWorld()->GetBsp()->Pick(pickorigin,velocity,&bpi);
-			if(bPicked)
+			auto& Vel = GetVelocity();
+			auto VelLengthSquared = MagnitudeSq(Vel);
+			if (VelLengthSquared != 0 &&
+				ZGetGame()->GetWorld()->GetBsp()->Pick(pickorigin, Vel / sqrt(VelLengthSquared), &bpi))
 				PickedNormal=rvector(bpi.pInfo->plane.a,bpi.pInfo->plane.b,bpi.pInfo->plane.c);
 
-			float fDotJump2=DotProduct(PickedNormal,m_Direction);
+			float fDotJump2 = DotProduct(PickedNormal,m_Direction);
 			float fProjSpeed = DotProduct(PickedNormal,GetVelocity());
 			
 			rvector characterright;
@@ -311,8 +311,8 @@ void ZMyCharacter::ProcessInput(float fDelta)
 			if(m_bWallJump && !m_bWallJump2 && (m_fWallJumpTime+.4f<g_pGame->GetTime()))
 			{
  				WallJump2();
-			}else
-			if(bWallJump)
+			}
+			else if(bWallJump)
 			{
 				m_bJumpQueued=false;
 				m_bWallJump=true;
@@ -332,8 +332,8 @@ void ZMyCharacter::ProcessInput(float fDelta)
 				}
 				m_bLand=false;
 
-			}else
-			if(bJump2)
+			}
+			else if(bJump2)
 			{
 				m_bJumpQueued=false;
 
@@ -371,8 +371,8 @@ void ZMyCharacter::ProcessInput(float fDelta)
 				if(GetStateUpper()==ZC_STATE_UPPER_SHOT)
 					SetAnimationUpper(ZC_STATE_UPPER_NONE);
 
-			}else
-			if(m_bWallHang)
+			}
+			else if(m_bWallHang)
 			{
 				if(m_bHangSuccess)
 				{
@@ -400,8 +400,8 @@ void ZMyCharacter::ProcessInput(float fDelta)
 					m_bWallJump2=true;
 					m_bPlayDone=false;
 				}
-			}else
-
+			}
+			else
 #ifndef UNLIMITED_JUMP
 			if(m_bLand)
 #endif
@@ -435,7 +435,7 @@ void ZMyCharacter::ProcessInput(float fDelta)
 void ZMyCharacter::OnShotMelee()
 {
 	if(m_bSkill || m_bStun || m_bShotReturn || m_bJumpShot || m_bGuard ||
-		m_bSlash || m_bJumpSlash || m_bJumpSlashLanding ) return;		 // || m_bTumble
+		m_bSlash || m_bJumpSlash || m_bJumpSlashLanding ) return;
 
 	if(m_bShot && !m_bPlayDone)
 		return;
@@ -650,7 +650,6 @@ void ZMyCharacter::OnShotRange()
 
 		if (pSelectedItem->GetDesc() != NULL && !skip_controllability)
 		{
-			// 반동력을 계산한다
 			CalcRangeShotControllability(r, dir, pSelectedItem->GetDesc()->m_nControllability, seed);
 		}
 		else
@@ -692,7 +691,6 @@ void ZMyCharacter::OnShotItem()
 	rvector pos = rvector(0.0f,0.0f,0.0f);
 	int sel_type = GetItems()->GetSelectedWeaponParts();
 
-	// 아이템킷일 경우
 	if(pSelectedItem->GetDesc()->m_nWeaponType==MWT_MED_KIT ||
 		pSelectedItem->GetDesc()->m_nWeaponType==MWT_REPAIR_KIT ||
 		pSelectedItem->GetDesc()->m_nWeaponType==MWT_BULLET_KIT ||
@@ -732,7 +730,6 @@ void ZMyCharacter::OnShotItem()
 	rvector pickpos;
 
 	ZCombatInterface* ci=ZApplication::GetGameInterface()->GetCombatInterface();
-
 
 	if (ci) {
 
@@ -1227,7 +1224,7 @@ void ZMyCharacter::ProcessShot()
 
 	if(GetItems()->GetSelectedWeapon()->GetBulletAMagazine() <= 0 ) 
 	{
-		if( m_pVMesh->m_SelectWeaponMotionType !=  eq_wd_grenade && 
+		if( m_pVMesh->m_SelectWeaponMotionType != eq_wd_grenade && 
 			m_pVMesh->m_SelectWeaponMotionType != eq_wd_item && 
 			m_pVMesh->m_SelectWeaponMotionType != eq_wd_katana && 
 			m_pVMesh->m_SelectWeaponMotionType != eq_ws_dagger && 
