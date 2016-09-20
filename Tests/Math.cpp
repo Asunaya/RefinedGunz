@@ -4,6 +4,8 @@
 
 using namespace RealSpace2;
 
+#define TEST_COMPARE_TO_D3DX
+
 static bool TestIntersectLineSegmentPlane()
 {
 	rplane p{ 1, 0, 0, -500 };
@@ -88,9 +90,17 @@ static bool TestRotationMatrix()
 		assert(IS_EQ(vec.x, result.x) && IS_EQ(vec.y, result.y) && IS_EQ(vec.z, result.z));
 	};
 
-	rmatrix rot = RotationMatrix(axis, static_cast<float>(TAU / 4));
+	auto angle = static_cast<float>(TAU / 4);
+	rmatrix rot = RotationMatrix(axis, angle);
 	result = v * rot;
 	Check({ 0, 1, 0 });
+
+#ifdef TEST_COMPARE_TO_D3DX
+	rmatrix d3dx_mat;
+	D3DXMatrixRotationAxis(&d3dx_mat, &axis, angle);
+	auto d3dx_result = v * d3dx_mat;
+	Check(d3dx_result);
+#endif
 
 	auto inv = Inverse(rot);
 	result = result * inv;

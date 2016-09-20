@@ -7,38 +7,14 @@ using namespace RealSpace2;
 void CalcRangeShotControllability(v3& vOutDir, const v3& vSrcDir,
 	int nControllability, u32 seed, float CtrlFactor)
 {
-	v3 up(0, 0, 1);
-	v3 right;
-	D3DXMATRIX mat;
-
 	std::mt19937 rng;
 	rng.seed(seed);
 
-	float fAngle = RandomAngle(rng);
+	float MaxSpread{};
+	if (nControllability > 0)
+		MaxSpread = nControllability * CtrlFactor / 1000.f;
 
-	float fControl;
-	if (nControllability <= 0)
-	{
-		fControl = 0;
-	}
-	else
-	{
-		std::uniform_real_distribution<float> dist(0, static_cast<float>(nControllability * 100));
-		fControl = dist(rng);
-		fControl = fControl * CtrlFactor;
-	}
-
-	float fForce = fControl / 100000.0f;
-
-	D3DXVec3Cross(&right, &vSrcDir, &up);
-	D3DXVec3Normalize(&right, &right);
-	D3DXMatrixRotationAxis(&mat, &right, fForce);
-	D3DXVec3TransformCoord(&vOutDir, &vSrcDir, &mat);
-
-	D3DXMatrixRotationAxis(&mat, &vSrcDir, fAngle);
-	D3DXVec3TransformCoord(&vOutDir, &vOutDir, &mat);
-
-	Normalize(vOutDir);
+	vOutDir = GetSpreadDir(vSrcDir, MaxSpread, rng);
 }
 
 ZOBJECTHITTEST PlayerHitTest(const v3& head, const v3& foot,
@@ -79,7 +55,7 @@ ZOBJECTHITTEST PlayerHitTest(const v3& head, const v3& foot,
 	if (fDist < 30)
 	{
 		auto ap2cp = ap - cp;
-		float fap2cpsq = D3DXVec3LengthSq(&ap2cp);
+		float fap2cpsq = MagnitudeSq(ap2cp);
 		float fdiff = sqrtf(30.f*30.f - fap2cpsq);
 
 		if (pOutPos) *pOutPos = ap - dir*fdiff;
@@ -93,7 +69,7 @@ ZOBJECTHITTEST PlayerHitTest(const v3& head, const v3& foot,
 	if (fDist < 30)
 	{
 		auto ap2cp = ap - cp;
-		float fap2cpsq = D3DXVec3LengthSq(&ap2cp);
+		float fap2cpsq = MagnitudeSq(ap2cp);
 		float fdiff = sqrtf(30.f*30.f - fap2cpsq);
 
 		if (pOutPos) *pOutPos = ap - dir*fdiff;

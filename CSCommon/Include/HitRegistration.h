@@ -9,8 +9,28 @@
 template <typename rngT>
 float RandomAngle(rngT& rng)
 {
-	std::uniform_real_distribution<float> dist(0, static_cast<float>(TAU));
+	std::uniform_real_distribution<float> dist(0, TAU_FLOAT);
 	return dist(rng);
+}
+
+template <typename rngT>
+v3 GetSpreadDir(const v3& dir, float MaxSpread, rngT& rng)
+{
+	using namespace RealSpace2;
+
+	std::uniform_real_distribution<float> dist(0, MaxSpread);
+	auto Force = dist(rng);
+
+	v3 right = Normalized(CrossProduct(dir, { 0, 0, 1 }));
+	// Rotate down by the force. This controls the width of the spread.
+	rmatrix mat = RotationMatrix(right, Force);
+	v3 ret = dir * mat;
+
+	// Rotate new vector randomly around original vector
+	mat = RotationMatrix(dir, RandomAngle(rng));
+	ret *= mat;
+
+	return ret;
 }
 
 void CalcRangeShotControllability(v3& vOutDir, const v3& vSrcDir,
@@ -22,24 +42,7 @@ void CalcRangeShotControllability(v3& vOutDir, const v3& vSrcDir,
 template <typename rngT>
 v3 GetShotgunPelletDir(const v3& dir, rngT& rng)
 {
-	std::uniform_real_distribution<float> dist(0, SHOTGUN_DIFFUSE_RANGE);
-
-	v3 r, up(0, 0, 1), right;
-	D3DXQUATERNION q;
-	D3DXMATRIX mat;
-
-	float fAngle = RandomAngle(rng);
-	float fForce = dist(rng);
-
-	D3DXVec3Cross(&right, &dir, &up);
-	D3DXVec3Normalize(&right, &right);
-	D3DXMatrixRotationAxis(&mat, &right, fForce);
-	D3DXVec3TransformCoord(&r, &dir, &mat);
-
-	D3DXMatrixRotationAxis(&mat, &dir, fAngle);
-	D3DXVec3TransformCoord(&r, &r, &mat);
-
-	return r;
+	return GetSpreadDir(dir, SHOTGUN_DIFFUSE_RANGE, rng);
 }
 
 inline auto GetShotgunPelletDirGenerator(const v3& orig_dir, u32 seed)

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "MMath.h"
 #include "RTypes.h"
 #include "MUtil.h"
 #include "MDebug.h"
@@ -11,7 +12,11 @@
 #define TOLER 0.001
 #endif
 #define IS_ZERO(a) ((fabs((double)(a)) < (double) TOLER))
-#define IS_EQ(a,b) ((fabs((double)(a)-(b)) >= (double) TOLER) ? 0 : 1)
+inline bool IS_EQ(float a, float b)
+{
+	auto diff = a - b;
+	return diff < TOLER && diff > -TOLER;
+}
 #define IS_EQ3(a,b) (IS_EQ((a).x,(b).x)&&IS_EQ((a).y,(b).y)&&IS_EQ((a).z,(b).z))
 #define SIGNOF(a) ( (a)<-TOLER ? NEGATIVE : (a)>TOLER ? POSITIVE : ZERO )
 #define RANDOMFLOAT ((float)rand()/(float)RAND_MAX)
@@ -20,11 +25,19 @@
 #define VECTOR2RGB24(v)		FLOAT2RGB24((v).x,(v).y,(v).z)
 #define BYTE2RGB24(r,g,b)	((DWORD) (((BYTE) (b)|((WORD) (g) << 8))|(((DWORD) (BYTE) (r)) << 16)))
 #define BYTE2RGB32(a,r,g,b)	((DWORD) (((BYTE) (b)|((WORD) (g) << 8))|(((DWORD) (BYTE) (r)) << 16)|(((DWORD) (BYTE) (a)) << 24)))
-#define DWORD2VECTOR(x)		rvector(float(((x)& 0xff0000) >> 16)/255.f, float(((x) & 0xff00) >> 8)/255.f,float(((x) & 0xff))/255.f)
-
-#define PI_FLOAT static_cast<float>(M_PI)
+#define DWORD2VECTOR(x)		rvector(float(((x)& 0xff0000) >> 16)/255.f, float(((x) & 0xff00) >> 8)/255.f,float(((x) & 0xff))/255.f))
 
 _NAMESPACE_REALSPACE2_BEGIN
+
+inline bool Equals(float a, float b)
+{
+	return IS_EQ(a, b);
+}
+
+template <typename T>
+auto Square(const T& x) {
+	return x * x;
+}
 
 inline v3 Transform(const v3& v, const rmatrix& mat)
 {
@@ -166,18 +179,38 @@ inline bool Intersects(const rboundingbox& a, const rboundingbox &b)
 }
 
 // Returns the length of the input vector.
-inline float Magnitude(const rvector &x) {
+inline float Magnitude(const v3& x) {
 	return sqrt(x.x * x.x + x.y * x.y + x.z * x.z);
 }
 // Returns the length squared of the input vector.
-inline float MagnitudeSq(const rvector &x) {
+inline float MagnitudeSq(const v2& x) {
+	return x.x * x.x + x.y * x.y;
+}
+inline float MagnitudeSq(const v3& x) {
 	return x.x * x.x + x.y * x.y + x.z * x.z;
+}
+inline float MagnitudeSq(const v4& x) {
+	return x.x * x.x + x.y * x.y + x.z * x.z + x.w * x.w;
 }
 
 // If the input vector has a nonzero length,
 // this function sets it to a unit vector in the same direction.
 // Otherwise, it does nothing.
-inline void Normalize(rvector &x)
+inline void Normalize(v2& x)
+{
+	auto MagSq = MagnitudeSq(x);
+	if (MagSq == 0 || Equals(MagSq, 1))
+		return;
+	x *= 1.f / sqrt(MagSq);
+}
+inline void Normalize(v3& x)
+{
+	auto MagSq = MagnitudeSq(x);
+	if (MagSq == 0 || Equals(MagSq, 1))
+		return;
+	x *= 1.f / sqrt(MagSq);
+}
+inline void Normalize(v4& x)
 {
 	auto MagSq = MagnitudeSq(x);
 	if (MagSq == 0)
@@ -187,12 +220,28 @@ inline void Normalize(rvector &x)
 
 // If the input vector has a nonzero length,
 // this function returns a unit vector in the same direction.
-// Otherwise, it returns (0, 0, 0).
+// Otherwise, it returns the null vector.
+WARN_UNUSED_RESULT inline v2 Normalized(const v2& x)
+{
+	v2 ret{ x };
+	Normalize(ret);
+	return ret;
+}
 WARN_UNUSED_RESULT inline v3 Normalized(const v3& x)
 {
 	v3 ret{ x };
 	Normalize(ret);
 	return ret;
+}
+WARN_UNUSED_RESULT inline v4 Normalized(const v4& x)
+{
+	v4 ret{ x };
+	Normalize(ret);
+	return ret;
+}
+
+inline float DotProduct(const v2& a, const v2& b) {
+	return a.x * b.x + a.y * b.y;
 }
 inline float DotProduct(const rvector& a, const rvector& b) {
 	return a.x * b.x + a.y * b.y + a.z * b.z;
@@ -384,11 +433,6 @@ inline rmatrix Inverse(const rmatrix& mat)
 
 inline void RMatInv(rmatrix& q, const rmatrix& a) {
 	Inverse(q, a);
-}
-
-template <typename T>
-auto Square(const T& x) {
-	return x * x;
 }
 
 // Returns a matrix that rotates row vectors by

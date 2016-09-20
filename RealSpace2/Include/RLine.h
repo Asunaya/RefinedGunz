@@ -1,7 +1,7 @@
-#ifndef _RLINE_H
-#define _RLINE_H
+#pragma once
 
 #include "RTypes.h"
+#include "RMath.h"
 
 class rline2d
 {
@@ -63,23 +63,16 @@ public:
 	LINE_CLASSIFICATION Intersection(const rline2d& line, rvector2* pIntersectPoint=NULL)const;
 };
 
-
-// 양수이면 오른쪽, 음수이면 왼쪽
 inline float rline2d::SignedDistance(const rvector2& point) const
 {
-	rvector2 TestVector(point - start);
-	rvector2 normal = (end - start);
-
-	D3DXVec2Normalize(&TestVector, &TestVector);
-	D3DXVec2Normalize(&normal, &normal);
-
+	auto TestVector = Normalized(point - start);
+	auto normal = Normalized(end - start);
 
 	float fOldYValue = normal.y;
 	normal.y = -normal.x;
 	normal.x = fOldYValue;
 
-
-	return (D3DXVec2Dot(&TestVector, &normal));
+	return DotProduct(TestVector, normal);
 }
 
 inline rline2d::POINT_CLASSIFICATION rline2d::ClassifyPoint(const rvector2& point, float fEpsilon) const
@@ -161,8 +154,3 @@ inline rline2d::LINE_CLASSIFICATION rline2d::Intersection(const rline2d& line, r
 	return LINES_INTERSECT;
 
 }
-
-
-
-
-#endif

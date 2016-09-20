@@ -1,10 +1,9 @@
-#ifndef _MMATCHWORLDITEMDESC_H
-#define _MMATCHWORLDITEMDESC_H
+#pragma once
 
 #include "MXml.h"
 #include <map>
 #include "MMatchMap.h"
-#include "d3dx9.h"
+#include "RTypes.h"
 
 #define WORLDITEM_NAME_LENGTH		256
 
@@ -14,10 +13,10 @@ enum MMATCH_WORLD_ITEM_TYPE
 	WIT_AP			= 1,
 	WIT_BULLET		= 2,
 	WIT_HPAP		= 3,
-	WIT_CLIENT		= 4,	// 클라이언트 전용 월드아이템
+	WIT_CLIENT		= 4,
 
-	WIT_QUEST		= 5,	// 퀘스트 아이템 박스
-	WIT_BOUNTY		= 6,	// 퀘스트에서 나오는 바운티 아이템
+	WIT_QUEST		= 5,
+	WIT_BOUNTY		= 6,
 
 	WIT_END
 };
@@ -36,9 +35,7 @@ struct MMatchWorldItemDesc
 class MMatchWorldItemDescMgr;
 class MZFileSystem;
 
-
-/// 월드 아이템 타입 목록
-class MMatchWorldItemDescMgr : public map<short, MMatchWorldItemDesc*>
+class MMatchWorldItemDescMgr : public std::map<short, MMatchWorldItemDesc*>
 {
 private:
 protected:
@@ -91,7 +88,6 @@ struct MMatchWorldItemSpawnInfo
 
 #define MAX_WORLDITEM_SPAWN		100
 
-// 한 맵에서 가지고 있는 스폰정보
 struct MMatchMapsWorldItemSpawnInfoSet
 {
 	MMatchWorldItemSpawnInfo	SoloSpawnInfo[MAX_WORLDITEM_SPAWN];
@@ -100,7 +96,6 @@ struct MMatchMapsWorldItemSpawnInfoSet
 	int							m_nTeamSpawnCount;
 };
 
-// 전체 맵의 스폰정보
 class MMatchMapsWorldItemSpawnInfo
 {
 private:
@@ -119,11 +114,7 @@ public:
 	static MMatchMapsWorldItemSpawnInfo* GetInstance();
 };
 
-
-
 inline MMatchMapsWorldItemSpawnInfo* MGetMapsWorldItemSpawnInfo() 
 { 
 	return MMatchMapsWorldItemSpawnInfo::GetInstance();
 }
-
-#endif

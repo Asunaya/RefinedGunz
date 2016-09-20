@@ -26,29 +26,16 @@
 #include <windows.h>
 #include <stdlib.h>
 
-// stl
 #include <string.h>
 #include <map>
 #include <list>
 #include <vector>
 #include <algorithm>
 
-#ifndef _PUBLISH
+#define _QUEST
 
-//	#define _CLASSIC					// 클래식 모드용 디파인
-#endif
-
-#define _QUEST						// 퀘스트 개발용 디파인
-
-#define _QUEST_ITEM			// 퀘스트 아이템 개발용. by 추교성.
-
-#define _MONSTER_BIBLE	// 몬스터 도관 개발요. by 추교성. 릴리즈때문에 잠시 보류.
-
-#ifdef _DEBUG // debug에서만 동작.
-// #define _DELETE_CLAN
-// #define _BLOCK_HACKER
-#endif
-
+#define _QUEST_ITEM
+#define _MONSTER_BIBLE
 
 #include "MLocaleDefine.h"
 #include "MDebug.h"

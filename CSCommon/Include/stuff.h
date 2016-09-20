@@ -14,7 +14,8 @@
 #include "GlobalTypes.h"
 #undef pi
 #include "MMatchItem.h"
-#define pi D3DX_PI
+#include "MMath.h"
+#define pi PI_FLOAT
 #include "AnimationStuff.h"
 #include "RMesh.h"
 #include "RBspObject.h"

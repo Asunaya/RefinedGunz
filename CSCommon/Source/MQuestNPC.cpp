@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "MQuestNPC.h"
+#include "MXml.h"
 #include "MZFileSystem.h"
 #include "stdlib.h"
 #include "MMath.h"
@@ -73,9 +74,9 @@ MQuestNPCInfo* MQuestNPCCatalogue::GetPageInfo( int nPage)
 
 void MQuestNPCCatalogue::Insert(MQuestNPCInfo* pNPCInfo)
 {
-	if( 0 == pNPCInfo )
+	if (!pNPCInfo)
 	{
-		ASSERT( 0 );
+		assert(false);
 		return;
 	}
 

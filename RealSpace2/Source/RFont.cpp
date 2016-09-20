@@ -225,15 +225,15 @@ bool RFontTexture::MakeFontBitmap(HFONT hFont, RCHARINFO *pInfo, const TCHAR* sz
 		Pen pen(Color(nColorArg2), 2.0f);
 		graphics.DrawPath(&pen, &path);
 
-		SolidBrush brush(Color((ARGB)nColorArg1));
+		SolidBrush brush(Color((Gdiplus::ARGB)nColorArg1));
 		graphics.FillPath((Brush*)&brush, &path);
 	}
 	else if (nOutlineStyle == 2)	// 그림자만 포함된다. 좌측의 한픽셀 여백이 있으므로 왼쪽으로 한픽셀. 자간은 같다
 	{
-		SolidBrush  solidBrush2(Color((ARGB)nColorArg2));
+		SolidBrush  solidBrush2(Color((Gdiplus::ARGB)nColorArg2));
 		graphics.DrawString(wstrText, -1, &font, PointF(1.0f, 1.0f), pTypoFormat, &solidBrush2);
 
-		SolidBrush  solidBrush1(Color((ARGB)nColorArg1));
+		SolidBrush  solidBrush1(Color((Gdiplus::ARGB)nColorArg1));
 
 		graphics.DrawString(wstrText, -1, &font, PointF(0.0f, 0.0f), pTypoFormat, &solidBrush1);
 
