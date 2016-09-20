@@ -217,17 +217,17 @@ void ZMyCharacter::ProcessInput(float fDelta)
 						bool bPicked2=ZGetGame()->GetWorld()->GetBsp()->Pick(pickorigin+rvector(0,0,180),dir,&bpi2);
 						if(bPicked1 && bPicked2)
 						{
-							rvector backdir=-dir;
-							float fDist1=Magnitude(pickorigin+rvector(0,0,100)-bpi1.PickPos);
-							float fDist2=Magnitude(pickorigin+rvector(0,0,180)-bpi2.PickPos);
+							rvector backdir = -dir;
+							float fDist1 = Magnitude(pickorigin + rvector(0, 0, 100) - bpi1.PickPos);
+							float fDist2 = Magnitude(pickorigin + rvector(0, 0, 180) - bpi2.PickPos);
 
 							if (fDist1<120
-								&& (D3DXPlaneDotNormal(&bpi1.pInfo->plane, &backdir)>cos(10.f / 180.f*pi))
+								&& (DotPlaneNormal(bpi1.pInfo->plane, backdir)>cos(10.f / 180.f * PI_FLOAT))
 								&& fDist2<120
-								&& (D3DXPlaneDotNormal(&bpi2.pInfo->plane, &backdir)>cos(10.f / 180.f*pi)))
+								&& (DotPlaneNormal(bpi2.pInfo->plane, backdir)>cos(10.f / 180.f * PI_FLOAT)))
 							{
-								bWallJump=true;
-								nWallJumpDir=1;
+								bWallJump = true;
+								nWallJumpDir = 1;
 							}
 						}
 					}
@@ -587,17 +587,16 @@ void ZMyCharacter::OnShotRange()
 		rvector pos,dir;
 		RGetScreenLine(Cp.x,Cp.y,&pos,&dir);
 
-		rvector mypos=m_Position+rvector(0,0,100);
-		rplane myplane;
-		D3DXPlaneFromPointNormal(&myplane,&mypos,&dir);
+		rvector mypos = m_Position + rvector(0, 0, 100);
+		rplane myplane = PlaneFromPointNormal(mypos, dir);
 
-		rvector checkpos,checkposto=pos+10000.f*dir;
-		D3DXPlaneIntersectLine(&checkpos,&myplane,&pos,&checkposto);
+		rvector checkpos, checkposto = pos + 10000.f*dir;
+		IntersectLineSegmentPlane(&checkpos, myplane, pos, checkposto);
 
-		if(g_pGame->Pick(this,checkpos,dir,&zpi,RM_FLAG_ADDITIVE | RM_FLAG_HIDE | RM_FLAG_PASSBULLET))
+		if (g_pGame->Pick(this, checkpos, dir, &zpi, RM_FLAG_ADDITIVE | RM_FLAG_HIDE | RM_FLAG_PASSBULLET))
 		{
-			if(zpi.bBspPicked)
-				pickpos=zpi.bpi.PickPos;
+			if (zpi.bBspPicked)
+				pickpos = zpi.bpi.PickPos;
 			else
 				if(zpi.pObject)
 					pickpos=zpi.info.vOut;
@@ -710,7 +709,7 @@ void ZMyCharacter::OnShotItem()
 
 		RBSPPICKINFO bpi;
 		if(ZGetWorld()->GetBsp()->Pick(nPos,nDir,&bpi))	{
-			if(D3DXPlaneDotCoord(&(bpi.pInfo->plane),&vWeapon)<0) {
+			if(DotProduct(bpi.pInfo->plane, vWeapon) < 0) {
 				vWeapon = bpi.PickPos - nDir;
 			}
 		}
@@ -738,12 +737,11 @@ void ZMyCharacter::OnShotItem()
 		rvector pos,dir;
 		RGetScreenLine(Cp.x,Cp.y,&pos,&dir);
 
-		rvector mypos=m_Position+rvector(0,0,100);
-		rplane myplane;
-		D3DXPlaneFromPointNormal(&myplane,&mypos,&dir);
+		rvector mypos = m_Position + rvector(0, 0, 100);
+		rplane myplane = PlaneFromPointNormal(mypos, dir);
 
 		rvector checkpos,checkposto=pos+100000.f*dir;
-		D3DXPlaneIntersectLine(&checkpos,&myplane,&pos,&checkposto);
+		IntersectLineSegmentPlane(&checkpos, myplane, pos, checkposto);
 
 		if(g_pGame->Pick(this,checkpos,dir,&zpi))
 		{
@@ -762,7 +760,7 @@ void ZMyCharacter::OnShotItem()
 	rvector v1;
 	GetWeaponTypePos(weapon_dummy_muzzle_flash,&v1);
 
-	if(zpi.bBspPicked && D3DXPlaneDotCoord(&(zpi.bpi.pInfo->plane),&v1)<0)
+	if(zpi.bBspPicked && DotProduct(zpi.bpi.pInfo->plane, v1) < 0)
 		v1=m_Position+rvector(0,0,110);
 
 	rvector dir = pickpos - v1;
@@ -805,7 +803,7 @@ bool ZMyCharacter::CheckWall(rvector& Pos)
 
 	if(ZGetGame()->GetWorld()->GetBsp()->Pick(nPos,nDir,&bpi)) {
 		if(bpi.pInfo) {
-			if(D3DXPlaneDotCoord(&(bpi.pInfo->plane),&vWPos) < 0) {
+			if(DotProduct(bpi.pInfo->plane, vWPos) < 0) {
 				Pos = bpi.PickPos - 2.f*nDir; 
 				return true;
 			}
@@ -2537,8 +2535,8 @@ void ZMyCharacter::OnDelayedWork(ZDELAYEDWORKITEM& Item)
 
 						rvector fTarDir = pTar->GetPosition() - GetPosition();
 						Normalize(fTarDir);
-						float fDot = D3DXVec3Dot(&m_Direction, &fTarDir);
-						if (fDot>0.1 && DotProduct(m_Direction,pTar->m_Direction)<0)
+						float fDot = DotProduct(m_Direction, fTarDir);
+						if (fDot > 0.1 && DotProduct(m_Direction, pTar->m_Direction) < 0)
 						{
 							if(pTar->IsGuard()) 
 								ShotBlocked();

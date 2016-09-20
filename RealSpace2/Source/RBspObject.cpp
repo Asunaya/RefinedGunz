@@ -472,11 +472,10 @@ bool RBspObject::Draw()
 
 	m_OcclusionList.UpdateCamera(mat, RCameraPosition);
 
-	rmatrix trMat;
-	D3DXMatrixTranspose(&trMat, &mat);
+	rmatrix trMat = Transpose(mat);
 
 	for (int i = 0; i < 6; i++)
-		D3DXPlaneTransform(m_localViewFrustum + i, RGetViewFrustum() + i, &trMat);
+		m_localViewFrustum[i] = Transform(RGetViewFrustum()[i], trMat);
 
 	_BP("ChooseNodes");
 	ChooseNodes(OcRoot.data());
@@ -682,7 +681,7 @@ void RBspObject::DrawObjects()
 	RGetDevice()->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
 	RGetDevice()->SetRenderState(D3DRS_LIGHTING, TRUE);
 
-	D3DXMATRIX world;
+	rmatrix world;
 	RGetDevice()->GetTransform(D3DTS_WORLD, &world);
 
 	rvector v_add = rvector(world._41, world._42, world._43);
@@ -2237,7 +2236,6 @@ bool RBspObject::GenerateLightmap(const char *filename, int nMaxlightmapsize, in
 
 	float fMaximumArea = 0;
 
-	// 최대 면적을 가진 폴리곤을 찾는다.
 	for (i = 0; i < m_nConvexPolygon; i++)
 	{
 		fMaximumArea = max(fMaximumArea, ConvexPolygons[i].fArea);
@@ -2262,7 +2260,6 @@ bool RBspObject::GenerateLightmap(const char *filename, int nMaxlightmapsize, in
 	{
 		RCONVEXPOLYGONINFO *poly = &ConvexPolygons[i];
 
-		// progress bar 갱신한다. cancel 되었으면 나간다.
 		if (pProgressFn)
 		{
 			bool bContinue = pProgressFn((float)i / (float)m_nConvexPolygon);
@@ -2273,7 +2270,7 @@ bool RBspObject::GenerateLightmap(const char *filename, int nMaxlightmapsize, in
 			}
 		}
 
-		rboundingbox bbox;	// 바운딩박스를 찾는다..
+		rboundingbox bbox;
 
 		bbox.vmin = bbox.vmax = poly->pVertices[0];
 		for (j = 1; j < poly->nVertices; j++)
@@ -2299,7 +2296,7 @@ bool RBspObject::GenerateLightmap(const char *filename, int nMaxlightmapsize, in
 
 			rvector diff = float(lightmapsize) / float(lightmapsize - 1)*(bbox.vmax - bbox.vmin);
 
-			// 1 texel 의 여유를 만든다.
+			// 1 texel
 			for (k = 0; k<3; k++)
 			{
 				bbox.vmin[k] -= .5f / float(lightmapsize)*diff[k];
@@ -2312,9 +2309,7 @@ bool RBspObject::GenerateLightmap(const char *filename, int nMaxlightmapsize, in
 
 			rvector ambient = pMaterial->Ambient;
 
-			// 이 폴리곤에 영향을 줄만한 광원들을 가려낸다..
 			nLight = 0;
-
 
 			for (auto& Light : m_StaticMapLightList)
 			{
@@ -2322,7 +2317,6 @@ bool RBspObject::GenerateLightmap(const char *filename, int nMaxlightmapsize, in
 
 				for (int iv = 0; iv < poly->nVertices; iv++)
 				{
-					// 하나라도 빛을 받는 normal 이 있다면
 					if (DotProduct(Light.Position - poly->pVertices[iv], poly->pNormals[iv])>0) {
 						pplight[nLight++] = &Light;
 						break;
@@ -2332,14 +2326,14 @@ bool RBspObject::GenerateLightmap(const char *filename, int nMaxlightmapsize, in
 			}
 
 
-			int au, av, ax; // 축의 index    각각 텍스쳐에서의 u축, v축, 그리고 나머지 한축..
+			int au, av, ax;
 
 			if (fabs(poly->plane.a) > fabs(poly->plane.b) && fabs(poly->plane.a) > fabs(poly->plane.c))
-				ax = 0;   // yz 평면으로 projection	u 는 y 축에 v 는 z 축에 대응, 나머지한축 ax는 x 축
+				ax = 0; // yz
 			else if (fabs(poly->plane.b) > fabs(poly->plane.c))
-				ax = 1;	// xz 평면으로 ...
+				ax = 1;	// xz
 			else
-				ax = 2;	// xy 평면으로 ...
+				ax = 2;	// xy
 
 			au = (ax + 1) % 3;
 			av = (ax + 2) % 3;
@@ -2348,9 +2342,7 @@ bool RBspObject::GenerateLightmap(const char *filename, int nMaxlightmapsize, in
 			{
 				for (k = 0; k < lightmapsize; k++)		// u
 				{
-					//					lightmap[j*lightmapsize+k]=rvector(0,0,0);
 					lightmap[j*lightmapsize + k] = m_AmbientLight;
-					//ambient;
 				}
 			}
 
@@ -2391,21 +2383,20 @@ bool RBspObject::GenerateLightmap(const char *filename, int nMaxlightmapsize, in
 								if (!poi->pVisualMesh) continue;
 								float t;
 
-								rmatrix inv;
-								float det;
-								D3DXMatrixInverse(&inv, &det, &poi->pVisualMesh->m_WorldMat);
+								rmatrix inv = Inverse(poi->pVisualMesh->m_WorldMat);
 
-								rvector origin;
-								D3DXVec3TransformCoord(&origin, &plight->Position, &inv);
-								rvector target;
-								D3DXVec3TransformCoord(&target, &position, &inv);
+								rvector origin = plight->Position * inv;
+								rvector target = position * inv;
 
 								rvector dir = target - origin;
 								rvector dirorigin = position - plight->Position;
 
 								rvector vOut;
 
-								BOOL bBBTest = D3DXBoxBoundProbe(&poi->pVisualMesh->m_vBMin, &poi->pVisualMesh->m_vBMax, &origin, &dir);
+								rboundingbox bbox;
+								bbox.vmin = poi->pVisualMesh->m_vBMin;
+								bbox.vmax = poi->pVisualMesh->m_vBMax;
+								auto bBBTest = IntersectLineAABB(t, origin, dir, bbox);
 								if (bBBTest && poi->pVisualMesh->Pick(plight->Position, dirorigin, &vOut, &t))
 								{
 									rvector PickPos = plight->Position + vOut*t;
@@ -2929,8 +2920,8 @@ bool RBspObject::PickShadow(const rvector &pos, const rvector &to, RBSPPICKINFO 
 
 static bool pick_checkplane(int side, const rplane &plane, const rvector &v0, const rvector &v1, rvector *w0, rvector *w1)
 {
-	float dotv0 = D3DXPlaneDotCoord(&plane, &v0);
-	float dotv1 = D3DXPlaneDotCoord(&plane, &v1);
+	float dotv0 = DotProduct(plane, v0);
+	float dotv1 = DotProduct(plane, v1);
 
 	int signv0 = PICK_SIGN(dotv0), signv1 = PICK_SIGN(dotv1);
 

@@ -4,6 +4,8 @@
 #include "MUtil.h"
 #include "MDebug.h"
 #include <cassert>
+#define _USE_MATH_DEFINES
+#include <cmath>
 
 #ifndef TOLER
 #define TOLER 0.001
@@ -19,6 +21,8 @@
 #define BYTE2RGB24(r,g,b)	((DWORD) (((BYTE) (b)|((WORD) (g) << 8))|(((DWORD) (BYTE) (r)) << 16)))
 #define BYTE2RGB32(a,r,g,b)	((DWORD) (((BYTE) (b)|((WORD) (g) << 8))|(((DWORD) (BYTE) (r)) << 16)|(((DWORD) (BYTE) (a)) << 24)))
 #define DWORD2VECTOR(x)		rvector(float(((x)& 0xff0000) >> 16)/255.f, float(((x) & 0xff00) >> 8)/255.f,float(((x) & 0xff))/255.f)
+
+#define PI_FLOAT static_cast<float>(M_PI)
 
 _NAMESPACE_REALSPACE2_BEGIN
 
@@ -41,18 +45,52 @@ inline v3 TransformCoord(const v3& v, const rmatrix& mat)
 	return ret;
 }
 
+inline rmatrix Transpose(const rmatrix& src)
+{
+	rmatrix m;
+	for (size_t i = 0; i < 4; i++)
+		for (size_t j = 0; j < 4; j++)
+			m(i, j) = src(j, i);
+	return m;
+}
+
+inline v4 Transform(const v4& v, const rmatrix& mat)
+{
+	v4 ret;
+
+	ret.x = v.x * mat._11 + v.y * mat._21 + v.z * mat._31 + v.w * mat._41;
+	ret.y = v.x * mat._12 + v.y * mat._22 + v.z * mat._32 + v.w * mat._42;
+	ret.z = v.x * mat._13 + v.y * mat._23 + v.z * mat._33 + v.w * mat._43;
+	ret.w = v.x * mat._14 + v.y * mat._24 + v.z * mat._34 + v.w * mat._44;
+
+	return ret;
+}
+
+// Transforms plane by a transformation matrix of which mat is the inverse transpose.
+inline rplane Transform(const rplane& plane, const rmatrix& mat)
+{
+	v4 v{ plane.a, plane.b, plane.c, plane.d };
+	v = Transform(v, mat);
+	return rplane{ v.x, v.y, v.z, v.w };
+}
+
 // Leave the namespace so that the operators are also visible through normal lookup.
 _NAMESPACE_REALSPACE2_END
 
-inline D3DXVECTOR3 operator*(const D3DXVECTOR3& v, const D3DXMATRIX &mat)
+inline v3 operator *(const v3& v, const rmatrix &mat)
 {
 	return _REALSPACE2::TransformCoord(v, mat);
 }
 
-inline D3DXVECTOR3& operator*=(D3DXVECTOR3& v, const D3DXMATRIX &mat)
+inline v3& operator *=(v3& v, const rmatrix &mat)
 {
 	v = v * mat;
 	return v;
+}
+
+inline rplane operator *(const rplane& a, const rmatrix& b)
+{
+	return _REALSPACE2::Transform(a, b);
 }
 
 inline rvector operator /(float scalar, const rvector& vec)
@@ -344,7 +382,7 @@ inline rmatrix Inverse(const rmatrix& mat)
 	return ret;
 }
 
-inline void RMatInv(D3DXMATRIX& q, const D3DXMATRIX& a) {
+inline void RMatInv(rmatrix& q, const rmatrix& a) {
 	Inverse(q, a);
 }
 
@@ -392,17 +430,17 @@ inline rmatrix RotationMatrix(const v3& axis, float angle)
 // Returns a matrix that rotates row vectors
 // around the x-axis by the given angle in degrees.
 inline rmatrix RGetRotX(float angle) {
-	auto rads = D3DX_PI / 180.f * angle;
+	auto rads = PI_FLOAT / 180.f * angle;
 	return RotationMatrix({ 1, 0, 0 }, rads);
 }
 
 inline rmatrix RGetRotY(float angle) {
-	auto rads = D3DX_PI / 180.f * angle;
+	auto rads = PI_FLOAT / 180.f * angle;
 	return RotationMatrix({ 0, 1, 0 }, rads);
 }
 
 inline rmatrix RGetRotZ(float angle) {
-	auto rads = D3DX_PI / 180.f * angle;
+	auto rads = PI_FLOAT / 180.f * angle;
 	return RotationMatrix({ 0, 0, 1 }, rads);
 }
 

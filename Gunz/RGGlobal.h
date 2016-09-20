@@ -9,16 +9,6 @@ inline void cprint(...)
 static constexpr int RG_SLASH_RADIUS = 320;
 static constexpr int RG_MASSIVE_RADIUS = 280;
 
-inline uint32_t ARGB(uint8_t a, uint8_t r, uint8_t g, uint8_t b)
-{
-	return (a << 24) | (r << 16) | (g << 8) | b;
-}
-
-inline uint32_t XRGB(uint8_t r, uint8_t g, uint8_t b)
-{
-	return ARGB(0xFF, r, g, b);
-}
-
 inline int RelativeWidth(int x)
 {
 	return int(float(x) / 1920 * RGetScreenWidth());

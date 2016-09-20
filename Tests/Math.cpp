@@ -171,6 +171,27 @@ static bool TestNormalize()
 	return true;
 }
 
+static bool Equals(const rplane& a, const rplane& b)
+{
+	return IS_EQ(a.a, b.a) &&
+		IS_EQ(a.b, b.b) &&
+		IS_EQ(a.c, b.c) &&
+		IS_EQ(a.d, b.d);
+}
+
+static bool TestTransform()
+{
+	rplane p{ 1, 0, 0, -100 };
+	auto mat = RotationMatrix({ 0, 1, 0 }, static_cast<float>(TAU / 4));
+	mat._43 = -100;
+	mat = Transpose(Inverse(mat));
+	auto result = p * mat;
+	rplane expected_result{ 0, 0, -1, -200 };
+	assert(Equals(expected_result, result));
+
+	return true;
+}
+
 bool TestMath()
 {
 	auto ret = true;
@@ -182,6 +203,7 @@ bool TestMath()
 	ret &= TestIntersectLineAABB();
 	ret &= TestDotAndCross();
 	ret &= TestNormalize();
+	ret &= TestTransform();
 
 	return ret;
 }

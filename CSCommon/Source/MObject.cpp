@@ -187,30 +187,3 @@ bool MObject::IsCommListener(MUID ListenerUID)
 	}
 	return false;
 }
-
-
-/*
-
-#define ANGLE_SPEED			12.0f
-#define MOVE_SPEED			400.0f
-
-unsigned long int MGetTimeToWalk(rvector& Distance)
-{
-	float fTime = D3DXVec3Length(&Distance) / MOVE_SPEED;
-	unsigned long int nTime = (unsigned long int)(fTime*1000);
-	if(nTime==0) nTime = 1;	// Divide By Zero를 막기 위해 최소 1msec는 걸린다고 가정한다.
-	return nTime;
-}
-
-unsigned long int MGetTimeToTurn(rvector& Dir1, rvector& Dir2)
-{
-	float fDot = max(min(D3DXVec3Dot(&Dir1, &Dir2), 1.f), -1.f);
-	float fAngle = (float)acos(fDot);
-	_ASSERT(!_isnan(fAngle));
-
-	float fTime = (float)fabs(fAngle) / ANGLE_SPEED;
-	unsigned long int nTime = (unsigned long int)(fTime*1000);
-	if(nTime==0) nTime = 1;	// Divide By Zero를 막기 위해 최소 1msec는 걸린다고 가정한다.
-	return nTime;
-}
-*/

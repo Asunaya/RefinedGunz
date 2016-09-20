@@ -11,6 +11,7 @@ using rvector = D3DXVECTOR3;
 using rmatrix = D3DXMATRIX;
 using rplane = D3DXPLANE;
 using rvector2 = D3DXVECTOR2;
+using rquaternion = D3DXQUATERNION;
 using RPIXELFORMAT = D3DFORMAT;
 
 _NAMESPACE_REALSPACE2_BEGIN

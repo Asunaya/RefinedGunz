@@ -293,7 +293,7 @@ static matrix GetNodeHierarchyMatrix(RAnimation* LowerAni, RAnimation* UpperAni,
 
 		auto& cur = *Ani->m_pAniData->GetNode(nodeinfo.Name);
 
-		D3DXMatrixIdentity(&mat);
+		GetIdentityMatrix(mat);
 
 		if (Parts == eq_parts_pos_info_Spine1 && UpperAni)
 		{
@@ -355,7 +355,7 @@ static matrix LogNodeHierarchyMatrix(RAnimation* LowerAni, RAnimation* UpperAni,
 
 		auto& cur = *Ani->m_pAniData->GetNode(nodeinfo.Name);
 
-		D3DXMatrixIdentity(&mat);
+		GetIdentityMatrix(&mat);
 
 		if (Parts == eq_parts_pos_info_Spine1 && UpperAni)
 		{
@@ -404,7 +404,7 @@ bool GetNodeMatrix(matrix& mat, const char* Name, const matrix* parent_base_inv,
 		return false;
 
 	auto& cur = *Ani->m_pAniData->GetNode(nodeinfo->Name);
-	D3DXMatrixIdentity(&mat);
+	GetIdentityMatrix(mat);
 	GetAniMat(mat, cur, parent_base_inv, Frame);
 	RotateSpine(mat, nodeinfo->PosParts, y, tremble);
 	
@@ -497,21 +497,16 @@ static void GetAniMat(matrix& mat, RAnimationNode& node, const matrix* parent_ba
 
 static void GetRotAniMat(matrix& mat, RAnimationNode& node, const matrix* parent_base_inv, int frame)
 {
-	D3DXMATRIX buffer, Inv;
+	rmatrix buffer, Inv;
 
-	bool bAni = false;
-
-	if (node.m_rot_cnt)
-		bAni = true;
-
-	if (bAni) {
-		D3DXQUATERNION out = node.GetRotValue(frame);
+	if (node.m_rot_cnt) {
+		rquaternion out = node.GetRotValue(frame);
 
 		D3DXMatrixRotationQuaternion(&mat, &out);
 	}
 	else {
 
-		D3DXMatrixIdentity(&buffer);
+		GetIdentityMatrix(buffer);
 
 		buffer = node.m_mat_base;
 
@@ -525,24 +520,16 @@ static void GetRotAniMat(matrix& mat, RAnimationNode& node, const matrix* parent
 
 static void GetPosAniMat(matrix& mat, RAnimationNode& node, const matrix* parent_base_inv, int frame)
 {
-	D3DXMATRIX buffer, Inv;
+	rmatrix buffer, Inv;
 
-	bool bAni = false;
-
-	if (node.m_pos_cnt)
-	{
-		bAni = true;
-	}
-
-	if (bAni) {
+	if (node.m_pos_cnt) {
 		auto pos = node.GetPosValue(frame);
 
 		for (int i = 0; i < 3; i++)
 			mat(3, i) = pos[i];
 	}
 	else {
-
-		D3DXMatrixIdentity(&buffer);
+		GetIdentityMatrix(buffer);
 
 		buffer = node.m_mat_base;
 

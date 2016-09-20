@@ -25,7 +25,7 @@ bool RLenzFlare::Render( rvector& light_pos_, rvector& centre_, RBspObject* pbsp
 {
 	rvector rDir	= light_pos_ - centre_;
 	rvector cDir	= RCameraDirection;
-	if( D3DXVec3Dot( &rDir, &cDir )  < 0 )
+	if( DotProduct( rDir, cDir )  < 0 )
 	{
 		return false;
 	}
@@ -43,8 +43,8 @@ bool RLenzFlare::Render( rvector& light_pos_, rvector& centre_, RBspObject* pbsp
 	rvector	dir;
 	float distance;
 	dir = light_pos_ - RCameraPosition;
-	distance	= D3DXVec3LengthSq( &dir );
-	D3DXVec3Normalize( &dir, &dir );
+	distance	= MagnitudeSq( dir );
+	Normalize(dir);
 	if( pbsp_->Pick( RCameraPosition, dir, &info,  RM_FLAG_ADDITIVE) )
 	{
 		if( distance > MagnitudeSq(RCameraPosition - info.PickPos) )
@@ -164,7 +164,7 @@ bool RLenzFlare::draw( float x_, float y_,  float width_, float height_,
 	vertices[0].p.y = y_;
 	vertices[0].p.z = 0.f;
 	vertices[0].p.w = 1.0f;
-	vertices[0].color	=	D3DXCOLOR(0,0,0,alpha_);
+	vertices[0].color = RGBA(0, 0, 0, alpha_);
 	vertices[0].color += 0x00FFFFFF;
 	vertices[0].tu	=	0.f;	
 	vertices[0].tv	=	0.f;
@@ -173,7 +173,7 @@ bool RLenzFlare::draw( float x_, float y_,  float width_, float height_,
 	vertices[1].p.y = y_;
 	vertices[1].p.z = 0.f;
 	vertices[1].p.w = 1.0f;
-	vertices[1].color	=	D3DXCOLOR(0,0,0,alpha_);
+	vertices[1].color = RGBA(0, 0, 0, alpha_);
 	vertices[1].color += 0x00FFFFFF;
 	vertices[1].tu	=	1.f;	
 	vertices[1].tv	=	0.f;
@@ -182,7 +182,7 @@ bool RLenzFlare::draw( float x_, float y_,  float width_, float height_,
 	vertices[2].p.y = y_ + height_;
 	vertices[2].p.z = 0.f;
 	vertices[2].p.w = 1.0f;
-	vertices[2].color	=	D3DXCOLOR(0,0,0,alpha_);
+	vertices[2].color = RGBA(0, 0, 0, alpha_);
 	vertices[2].color += 0x00FFFFFF;
 	vertices[2].tu	=	1.f;	
 	vertices[2].tv	=	1.f;
@@ -191,7 +191,7 @@ bool RLenzFlare::draw( float x_, float y_,  float width_, float height_,
 	vertices[3].p.y = y_ + height_;
 	vertices[3].p.z = 0.f;
 	vertices[3].p.w = 1.0f;
-	vertices[3].color	=	D3DXCOLOR(0,0,0,alpha_);
+	vertices[3].color = RGBA(0, 0, 0, alpha_);;
 	vertices[3].color += 0x00FFFFFF;
 	vertices[3].tu	=	0.f;	
 	vertices[3].tv	=	1.f;

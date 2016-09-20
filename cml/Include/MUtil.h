@@ -24,6 +24,21 @@
 #define WARN_UNUSED_RESULT __attribute__((warn_unused_result))
 #endif
 
+inline uint32_t ARGB(uint8_t a, uint8_t r, uint8_t g, uint8_t b)
+{
+	return (a << 24) | (r << 16) | (g << 8) | b;
+}
+
+inline uint32_t RGBA(uint8_t r, uint8_t g, uint8_t b, uint8_t a)
+{
+	return ARGB(a, r, g, b);
+}
+
+inline uint32_t XRGB(uint8_t r, uint8_t g, uint8_t b)
+{
+	return ARGB(0xFF, r, g, b);
+}
+
 enum MDateType
 {
 	MDT_Y = 1,
