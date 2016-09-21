@@ -405,7 +405,8 @@ public:
 	void SetSpRenderMode(int mode);
 
 private:
-	bool CalcIntersectsTriangle(const rvector* vInVec, RPickInfo* pInfo,
+	bool CalcIntersectsTriangle(const v3& origin, const v3& dir, // Line origin and direction
+		RPickInfo* pInfo, // Output info
 		D3DXMATRIX* world_mat = nullptr, bool fastmode = false);
 	void GetNodeAniMatrix(RMeshNode* pMeshNode, D3DXMATRIX& m);
 	RMeshNode* UpdateNodeAniMatrix(RMeshNode* pNode);

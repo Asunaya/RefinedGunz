@@ -115,7 +115,7 @@ public:
 	bool isSoftRender();
 
 	void CalcVertexBuffer(const D3DXMATRIX& world_mat, bool box = false);
-	bool CalcPickVertexBuffer(const D3DXMATRIX& world_mat, D3DXVECTOR3* pVec);
+	bool CalcPickVertexBuffer(const D3DXMATRIX& world_mat, std::vector<rvector>& OutVecs);
 	int	 CalcVertexBuffer_VertexAni(int frame);
 	void CalcVertexBuffer_Physique(const D3DXMATRIX& world_mat, int frame);
 	void CalcVertexBuffer_Tm(const D3DXMATRIX& world_mat, int frame);

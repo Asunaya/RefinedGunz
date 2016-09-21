@@ -1337,7 +1337,7 @@ void RMeshNode::CalcVertexBuffer_Bbox(CalcVertexBufferBboxMode nBboxMode,rmatrix
 		}
 }
 
-bool RMeshNode::CalcPickVertexBuffer(const D3DXMATRIX& world_mat, D3DXVECTOR3* pVec)
+bool RMeshNode::CalcPickVertexBuffer(const D3DXMATRIX& world_mat, std::vector<rvector>& OutVecs)
 {
 	RMesh* pMesh = m_pBaseMesh;
 
@@ -1407,8 +1407,9 @@ bool RMeshNode::CalcPickVertexBuffer(const D3DXMATRIX& world_mat, D3DXVECTOR3* p
 
 	}
 
-	for(int i=0;i<m_point_num;i++) { 
-		pVec[i] = m_point_list[i] * ModelWorldMatrix;
+	OutVecs.resize(m_point_num);
+	for (int i = 0; i < m_point_num; i++) {
+		OutVecs[i] = m_point_list[i] * ModelWorldMatrix;
 	}
 
 	return true;

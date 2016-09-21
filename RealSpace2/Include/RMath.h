@@ -657,4 +657,10 @@ inline rplane PlaneFromPointNormal(const v3& point, const v3& normal)
 	return{ normal.x, normal.y, normal.z, -DotProduct(point, normal) };
 }
 
+inline rplane PlaneFromPoints(const v3& a, const v3& b, const v3& c)
+{
+	auto normal = Normalized(CrossProduct(b - a, c - a));
+	return{ EXPAND_VECTOR(normal), -DotProduct(normal, a) };
+}
+
 _NAMESPACE_REALSPACE2_END

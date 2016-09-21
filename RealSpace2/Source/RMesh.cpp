@@ -31,10 +31,7 @@
 
 #endif
 
-_USING_NAMESPACE_REALSPACE2
-
 _NAMESPACE_REALSPACE2_BEGIN
-
 
 bool			RMesh::mHardwareAccellated = false;
 unsigned int	RMesh::mNumMatrixConstant = 0;
@@ -47,11 +44,6 @@ float			RMesh::m_fSilhouetteLength = 300.f;
 int				RMesh::m_parts_mesh_loading_skip = 0;
 
 bool			RRenderNodeMgr::m_bRenderBuffer = false;
-
-
-//////////////////////////////////////////////////////////////////////////////////
-// RMesh Class
-
 
 RMesh::RMesh() 
 {
@@ -90,17 +82,14 @@ void RMesh::Init()
 
 	m_base_mtrl_mesh = NULL;
 
-	// 보통의 경우 재할당이 안일어나는 최대값을 지정..
-
-	m_data.reserve(MAX_MESH_NODE_TABLE);//기본
+	m_data.reserve(MAX_MESH_NODE_TABLE);
 
 	m_isScale = false;
 	m_vScale = rvector(1.f,1.f,1.f);
 
-//	m_PickingType = pick_collision_mesh;
 	m_PickingType = pick_real_mesh;
 	
-	m_MeshWeaponMotionType	= eq_weapon_etc;//모델이 무기모델인경우 의미를 갖는다
+	m_MeshWeaponMotionType	= eq_weapon_etc;
 
 	m_LitVertexModel	= false;
 	m_bEffectSort		= false;
@@ -301,9 +290,6 @@ bool RMesh::CmpName(const char* name)
 	return false;
 }
 
-
-///////////////////////////////////////////////////////////////////////
-
 void RMesh::GetMeshData(RMeshPartsType type,vector<RMeshNode*>& nodetable)
 {
 	RMeshNode*	pMesh = NULL;
@@ -365,8 +351,6 @@ void RMesh::GetPartsNode(RMeshPartsType type,vector<RMeshNode*>& nodetable)
 	m_parts_mgr->GetPartsNode(type,nodetable);
 }
 
-/////////////////////////////////////////////////////////////////////////////
-
 void RMesh::DelMeshList()
 {
 	if (m_list.empty())
@@ -391,9 +375,9 @@ int RMesh::FindMeshId(RAnimationNode* pANode)
 
 	bool bReConnect = false;
 
-	if(pANode->m_pConnectMesh != this)//연결된 모델이 틀리다면
+	if(pANode->m_pConnectMesh != this)
 		bReConnect = true;
-	else if( pANode->m_node_id == -1 )//모델은 있지만 초기값이면?
+	else if( pANode->m_node_id == -1 )
 		bReConnect = true;
 
 	if( bReConnect ) {
@@ -430,16 +414,9 @@ int RMesh::_FindMeshId(int e_name)
 	if (m_list.empty())
 		return -1;
 
-	//__BP(307, "RMesh::FindMeshId");
-
 	RMeshNode* pNode = m_list.Find(e_name);
 	if (pNode != NULL)
-	{
-		//__EP(307);
 		return pNode->m_id;
-	}
-
-	//__EP(307);
 
 	return -1;
 }
@@ -449,16 +426,9 @@ int RMesh::_FindMeshId(const char* name)
 	if (m_list.empty())
 		return -1;
 
-	//__BP(306, "RMesh::FindMeshId");
-
 	RMeshNode* pNode = m_list.Find(name);
 	if (pNode != NULL)
-	{
-		//__EP(306);
 		return pNode->m_id;
-	}
-
-	//__EP(306);
 
 	return -1;
 }
@@ -521,8 +491,6 @@ bool RMesh::ConnectMtrl()
 
 	return NULL;
 }
-
-// 이미 id 등록된 pAniSet으로..
 
 bool RMesh::ConnectAnimation(RAnimation* pAniSet)
 {
@@ -589,10 +557,6 @@ bool RMesh::SetAnimation1Parts(RAnimation* pAniSet) {
 	if(!bNodeHoldFrame)
 		m_frame[0] = 0;
 
-	if(pAniSet->GetAniNodeCount() != m_data_num) {
-//		mlog("RMesh::SetAnimation()  node key 갯수가 맞지 않음\n");
-	}
-
 	int i=0;
 
 	for(i=0;i<m_data_num;i++) {
@@ -628,7 +592,7 @@ bool RMesh::SetAnimation1Parts(RAnimation* pAniSet) {
 
 	return true;
 }
-// 바뀐것만 갱신해야함...수정하기...
+
 bool RMesh::SetAnimation2Parts(RAnimation* pAniSet,RAnimation* pAniSetUpper) {
 
 	__BP(304, "RMesh::SetAnimation2Parts");
@@ -695,9 +659,6 @@ bool RMesh::SetAnimation2Parts(RAnimation* pAniSet,RAnimation* pAniSetUpper) {
 		m_max_frame[1] = pAniSetUpper->GetMaxFrame();
 	}
 
-	// 서로 에니 노드 갯수를 보장받을수없으니 2번 돌림...
-
-	// 하반신 등록..
 	int node_cnt = pAniSet->GetAniNodeCount();
 
 	for(i=0;i<node_cnt;i++) {
@@ -706,7 +667,6 @@ bool RMesh::SetAnimation2Parts(RAnimation* pAniSet,RAnimation* pAniSetUpper) {
 
 		if(pANode){
 		
-//			pid = FindMeshId(pANode->m_Name);
 			pid = FindMeshId(pANode);
 
 			if(pid != -1) {
@@ -725,7 +685,6 @@ bool RMesh::SetAnimation2Parts(RAnimation* pAniSet,RAnimation* pAniSetUpper) {
 		}
 	}
 
-	// 상반신 등록..
 	node_cnt = pAniSetUpper->GetAniNodeCount();
 
 	for(i=0;i<node_cnt;i++) {
@@ -734,7 +693,6 @@ bool RMesh::SetAnimation2Parts(RAnimation* pAniSet,RAnimation* pAniSetUpper) {
 
 		if(pANode) {
 
-//			pid = FindMeshId(pANode->m_Name);
 			pid = FindMeshId(pANode);
 
 			if(pid != -1) {
@@ -747,7 +705,7 @@ bool RMesh::SetAnimation2Parts(RAnimation* pAniSet,RAnimation* pAniSetUpper) {
 						memcpy(&pM->m_mat_base,&pANode->m_mat_base ,sizeof(D3DXMATRIX));
 						memcpy(&pM->m_mat_local,&pM->m_mat_base,sizeof(D3DXMATRIX));
 						RMatInv(pM->m_mat_inv,pM->m_mat_local);
-						//spine 의 경우 더미를 대신할 자신의 원본로컬을 갖는다.
+
 						if(pM->m_LookAtParts == lookat_parts_spine1) {
 							rmatrix m,inv;
 							RAnimationNode* pANodePa = pAniSetUpper->GetNode(pM->m_Parent);
@@ -783,8 +741,6 @@ bool RMesh::SetAnimation2Parts(RAnimation* pAniSet,RAnimation* pAniSetUpper) {
 	return true;
 }
 
-// 좀더 최적화 필요........
-
 bool RMesh::SetAnimation(RAnimation* pAniSet,RAnimation* pAniSetUpper)
 {
 	if(!pAniSet) return false;
@@ -819,50 +775,36 @@ void RMesh::ClearAnimation()
 	m_pAniSet[1] = NULL;
 }
 
-bool RMesh::Pick(int mx,int my,RPickInfo* pInfo,rmatrix* world_mat)
+bool RMesh::Pick(int mx, int my, RPickInfo* pInfo, rmatrix* world_mat)
 {
-	LPDIRECT3DDEVICE9 dev = RGetDevice();
-
 	int sw = RGetScreenWidth();
 	int sh = RGetScreenHeight();
 
-	rvector pos,dir;
+	auto matProj = RProjection;
 
-	rmatrix matProj = RProjection;
+	rvector v{
+		(2.0f * mx / sw - 1) / matProj._11,
+		-(2.0f * my / sh - 1) / matProj._22,
+		1.0f };
 
-	rvector v;
+	auto InverseView = Inverse(RView);
 
-	v.x =  ( ( ( 2.0f * mx ) / sw ) - 1 ) / matProj._11;
-	v.y = -( ( ( 2.0f * my ) / sh ) - 1 ) / matProj._22;
-	v.z =  1.0f;
+	rvector dir{
+		v.x*InverseView._11 + v.y*InverseView._21 + v.z*InverseView._31,
+		v.x*InverseView._12 + v.y*InverseView._22 + v.z*InverseView._32,
+		v.x*InverseView._13 + v.y*InverseView._23 + v.z*InverseView._33 };
 
-	rmatrix m,matView = RView;
+	auto pos = GetTransPos(InverseView);
 
-	D3DXMatrixInverse( &m, NULL, &matView );
+	Normalize(dir);
 
-	dir.x  = v.x*m._11 + v.y*m._21 + v.z*m._31;
-	dir.y  = v.x*m._12 + v.y*m._22 + v.z*m._32;
-	dir.z  = v.x*m._13 + v.y*m._23 + v.z*m._33;
-
-	pos.x = m._41;
-	pos.y = m._42;
-	pos.z = m._43;
-
-	D3DXVec3Normalize(&dir,&dir);
-
-	rvector vInVec[2]; 
-
-	vInVec[0] = pos; 
-	vInVec[1] = dir;
-
-	return CalcIntersectsTriangle(vInVec, pInfo, world_mat );
+	return CalcIntersectsTriangle(pos, dir, pInfo, world_mat);
 
 }
 
 bool RMesh::Pick(const rvector& pos, const rvector& dir,RPickInfo* pInfo,rmatrix* world_mat)
 {
-	rvector v[2]; v[0] = pos; v[1] = dir;
-	return CalcIntersectsTriangle(v, pInfo, world_mat);
+	return CalcIntersectsTriangle(pos, dir, pInfo, world_mat);
 }
 
 bool RMesh::Pick(const rvector* vInVec,RPickInfo* pInfo,rmatrix* world_mat)
@@ -968,17 +910,10 @@ void RMesh::RenderBox(D3DXMATRIX* world_mat)
 
 rvector RMesh::GetOrgPosition()
 {
-	rvector v = rvector(0,0,0);
+	if (auto* pMNode = m_data[0])
+		return GetTransPos(pMNode->m_mat_base);
 
-	RMeshNode* pMNode = m_data[0];
-
-	if( pMNode ) {
-		v.x = pMNode->m_mat_base._41;
-		v.y = pMNode->m_mat_base._42;
-		v.z = pMNode->m_mat_base._43;
-	}
-	
-	return v;
+	return{ 0, 0, 0 };
 }
 
 _NAMESPACE_REALSPACE2_END

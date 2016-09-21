@@ -69,7 +69,7 @@ void AniFrameInfo::Frame(RAniMode amode,RVisualMesh* pVMesh)
 
 	if(m_pAniSet==NULL) return;
 
-	DWORD cur = GetGlobalTimeMS();
+	u32 cur = GetGlobalTimeMS();
 
 	if(m_bChangeAnimation) {
 
@@ -158,7 +158,7 @@ void AniFrameInfo::Frame(RAniMode amode,RVisualMesh* pVMesh)
 	int bf = 0;
 	int ef = max_frame;
 
-	DWORD delta;
+	u32 delta;
 
 	if( m_save_time==0 ) {
 		delta = 0;
@@ -205,7 +205,7 @@ void AniFrameInfo::Frame(RAniMode amode,RVisualMesh* pVMesh)
 }
 
 
-void RFrameTime::Start(float fMax,DWORD MaxTime,DWORD ReturnMaxTime) {
+void RFrameTime::Start(float fMax,u32 MaxTime,u32 ReturnMaxTime) {
 
 	m_fMaxValue = fMax;
 	m_dwStartTime = GetGlobalTimeMS();
@@ -228,7 +228,7 @@ void RFrameTime::Update() {
 
 	if(!m_bActive) return;
 
-	DWORD dwThisTime = GetGlobalTimeMS();
+	u32 dwThisTime = GetGlobalTimeMS();
 
 	if(dwThisTime > m_dwEndTime ) {
 
@@ -1101,7 +1101,7 @@ void RVisualMesh::DrawEnchantFire(RVisualMesh* pVWMesh,int mode,rmatrix& m)
 		add[0] = rvector(0,0,0);
 		add[1] = add[0];
 
-		DWORD color = 0xaf9f9f9f;
+		u32 color = 0xaf9f9f9f;
 
 		pVert[0].p = vpos[0];
 		pVert[0].color = color;
@@ -1178,122 +1178,90 @@ void RVisualMesh::DrawEnchantPoison(RVisualMesh* pVWMesh,int mode,rmatrix& m)
 
 }
 
-void RVisualMesh::RenderWeapon()
+void RVisualMesh::RenderWeaponSub(RVisualMesh* WeaponMesh,
+	rmatrix(RVisualMesh::* DummyMatrix)[weapon_dummy_end],
+	int sel_parts,
+	bool RenderMesh, bool RenderTracks)
 {
-	if( m_WeaponVisualMesh[ m_SelectWeaponMotionType ] ) {
+	rmatrix WeaponWorldMatrix;
+	if (!m_isScale)
+		WeaponWorldMatrix = m_WeaponPartInfo[sel_parts].mat * m_WorldMat;
+	else
+		WeaponWorldMatrix = m_WeaponPartInfo[sel_parts].mat * m_ScaleMat * m_WorldMat;
 
-		bool btrack_render = true;
+	WeaponMesh->SetWorldMatrix(WeaponWorldMatrix);
 
-		if(m_pMesh)
-			if(m_pMesh->m_nSpRenderMode==1)
-				btrack_render = false;
-
-		RVisualMesh* pVWMesh = m_WeaponVisualMesh[ m_SelectWeaponMotionType ];
-
-		m_LightMgr.Clone(pVWMesh);
-		
-		bool b2hCheck = false;
-		bool bRender = true;
-
-		rmatrix m,m2;
-		float vis,vis2;
-
-		int sel_parts = 0;
-		int sel_parts2 = 0;
-
-		GetMotionInfo(sel_parts,sel_parts2,b2hCheck,bRender);
-
-		if (!m_isScale)
-			m = m_WeaponPartInfo[sel_parts].mat * m_WorldMat;
-		else
-			m = m_WeaponPartInfo[sel_parts].mat * m_ScaleMat * m_WorldMat;
-		vis = m_WeaponPartInfo[sel_parts].vis;
-
-		if( m_bCheckViewFrustum==false ) {
-			pVWMesh->SetCheckViewFrustum(false);
-		}
-
-		if( m_bRenderMatrix )
-			pVWMesh->m_bRenderMatrix = true;
-
-		pVWMesh->SetWorldMatrix(m);
-
-		if( bRender && vis) {
-			pVWMesh->SetVisibility(min(m_fVis,vis));
-			pVWMesh->Render();
-			m_bIsRenderWeapon = true;
-		}
-		else {
-			pVWMesh->CalcBox();
-			m_bIsRenderWeapon = false;
-		}
-
-		if(m_isScale) {
-			pVWMesh->m_WeaponDummyMatrix[weapon_dummy_muzzle_flash]
-				= m_ScaleMat * pVWMesh->m_WeaponDummyMatrix[weapon_dummy_muzzle_flash];
-			pVWMesh->m_WeaponDummyMatrix[weapon_dummy_cartridge01] 
-				= m_ScaleMat * pVWMesh->m_WeaponDummyMatrix[weapon_dummy_cartridge01];
-			pVWMesh->m_WeaponDummyMatrix[weapon_dummy_cartridge02] 
-				= m_ScaleMat * pVWMesh->m_WeaponDummyMatrix[weapon_dummy_cartridge02];
-		}
-
-		m_WeaponDummyMatrix[weapon_dummy_muzzle_flash] *= m;
-		m_WeaponDummyMatrix[weapon_dummy_cartridge01 ] *= m;
-		m_WeaponDummyMatrix[weapon_dummy_cartridge02 ] *= m;
-
-		if(m_bRenderMatrix)
-			pVWMesh->m_bRenderMatrix = false;
-
-		if(btrack_render) {
-			DrawTracks(m_bDrawTracks,pVWMesh,0,m);
-			DrawEnchant(pVWMesh,0,m);
-		}
-
-		if(b2hCheck) {
-
-			m = m_WeaponPartInfo[sel_parts2].mat * m_WorldMat;
-			vis2 = m_WeaponPartInfo[sel_parts2].vis;
-
-			if( m_bRenderMatrix )
-				pVWMesh->m_bRenderMatrix = true;
-
-			pVWMesh->SetWorldMatrix(m);
-
-			if(vis2) {
-				pVWMesh->SetVisibility(min(m_fVis,vis2));
-				pVWMesh->Render();
-			}
-			else {
-				pVWMesh->CalcBox();
-			}
-
-			if(m_isScale) {
-				pVWMesh->m_WeaponDummyMatrix2[weapon_dummy_muzzle_flash] = m_ScaleMat * pVWMesh->m_WeaponDummyMatrix2[weapon_dummy_muzzle_flash];
-				pVWMesh->m_WeaponDummyMatrix2[weapon_dummy_cartridge01]  = m_ScaleMat * pVWMesh->m_WeaponDummyMatrix2[weapon_dummy_cartridge01];
-				pVWMesh->m_WeaponDummyMatrix2[weapon_dummy_cartridge02]  = m_ScaleMat * pVWMesh->m_WeaponDummyMatrix2[weapon_dummy_cartridge02];
-			}
-
-			m_WeaponDummyMatrix2[weapon_dummy_muzzle_flash] = pVWMesh->m_WeaponDummyMatrix[weapon_dummy_muzzle_flash]*m;
-			m_WeaponDummyMatrix2[weapon_dummy_cartridge01 ] = pVWMesh->m_WeaponDummyMatrix[weapon_dummy_cartridge01]*m;
-			m_WeaponDummyMatrix2[weapon_dummy_cartridge02 ] = pVWMesh->m_WeaponDummyMatrix[weapon_dummy_cartridge02]*m;
-
-			if(m_bRenderMatrix)
-				pVWMesh->m_bRenderMatrix = false;
-
-			if(btrack_render) {
-				DrawTracks(m_bDrawTracks,pVWMesh,1,m);
-				DrawEnchant(pVWMesh,0,m);
-			}
-		}
+	auto vis = m_WeaponPartInfo[sel_parts].vis;
+	if (RenderMesh && vis) {
+		WeaponMesh->SetVisibility(min(m_fVis, vis));
+		WeaponMesh->Render();
+	}
+	else {
+		WeaponMesh->CalcBox();
 	}
 
+	constexpr WeaponDummyType Dummies[] = { weapon_dummy_muzzle_flash,
+		weapon_dummy_cartridge01, weapon_dummy_cartridge02 };
+
+	for (auto Dummy : Dummies)
+	{
+		// The transformed weapon matrix in the RVisualMesh that owns the weapon
+		auto& MyMat = m_WeaponDummyMatrix[Dummy];
+		// The weapon's untransformed matrix
+		auto& WeaponMat = (WeaponMesh->*DummyMatrix)[Dummy];
+		// The left weapon's untransformed matrix
+		auto& LeftWeaponMat = WeaponMesh->m_WeaponDummyMatrix[Dummy];
+		if (m_isScale)
+			WeaponMat = m_ScaleMat * WeaponMat;
+		MyMat = LeftWeaponMat * WeaponWorldMatrix;
+	}
+
+	if (m_bRenderMatrix)
+		WeaponMesh->m_bRenderMatrix = false;
+
+	if (RenderTracks) {
+		DrawTracks(m_bDrawTracks, WeaponMesh, 0, WeaponWorldMatrix);
+		DrawEnchant(WeaponMesh, 0, WeaponWorldMatrix);
+	}
+}
+
+void RVisualMesh::RenderWeapon()
+{
+	RVisualMesh* WeaponMesh = m_WeaponVisualMesh[m_SelectWeaponMotionType];
+	if (!WeaponMesh)
+		return;
+
+	bool RenderTracks = !(m_pMesh && m_pMesh->m_nSpRenderMode == 1);
+
+	m_LightMgr.Clone(WeaponMesh);
+		
+	bool IsTwoHanded = false;
+	bool RenderMesh = true;
+	int sel_parts[2]{};
+
+	GetMotionInfo(sel_parts[0], sel_parts[1], IsTwoHanded, RenderMesh);
+
+	m_bIsRenderWeapon = RenderMesh;
+
+	if (m_bCheckViewFrustum == false)
+		WeaponMesh->SetCheckViewFrustum(false);
+
+	if (m_bRenderMatrix)
+		WeaponMesh->m_bRenderMatrix = true;
+
+	RenderWeaponSub(WeaponMesh, &RVisualMesh::m_WeaponDummyMatrix, sel_parts[0], RenderMesh, RenderTracks);
+	if (IsTwoHanded)
+		RenderWeaponSub(WeaponMesh, &RVisualMesh::m_WeaponDummyMatrix2, sel_parts[1], RenderMesh, RenderTracks);
+
+	if (m_bRenderMatrix)
+		WeaponMesh->m_bRenderMatrix = false;
 }
 
 void RVisualMesh::GetWeaponPos(rvector* pOut,bool bLeft)
 {
 	if(!pOut) return;
 
-	RVisualMesh* pVWMesh = m_WeaponVisualMesh[ m_SelectWeaponMotionType ];
+	RVisualMesh* pVWMesh = m_WeaponVisualMesh[m_SelectWeaponMotionType];
 
 	if(!pVWMesh) return;
 
@@ -1353,7 +1321,7 @@ bool RVisualMesh::IsDoubleWeapon()
 	return bCheck;
 }
 
-void RVisualMesh::GetEnChantColor(DWORD* color)
+void RVisualMesh::GetEnChantColor(u32* color)
 {
 	if(!color) return;
 
@@ -1413,7 +1381,7 @@ void RVisualMesh::DrawTracks(bool draw,RVisualMesh* pVWMesh,int mode,rmatrix& m)
 		D3DXVec3TransformCoord(&vpos[1],&vpos[1],&m);
 		
 		static RLVertex pVert[2];
-		static DWORD color[2];
+		static u32 color[2];
 
 		GetEnChantColor(color);
 

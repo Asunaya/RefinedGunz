@@ -22,12 +22,12 @@ public:
 
 	bool			m_bChangeAnimation;
 
-	DWORD			m_nReserveTime;
+	u32			m_nReserveTime;
 
 	int				m_nFrame;
 	int				m_nAddFrame;
-	DWORD			m_save_time;
-	DWORD			m_1frame_time;
+	u32			m_save_time;
+	u32			m_1frame_time;
 
 	RAnimation*		m_pAniSet;
 	RAnimation*		m_pAniSetNext;
@@ -42,7 +42,7 @@ public:
 	bool			m_bBlendAniSet;
 	float			m_fMaxBlendTime;
 	float			m_fCurrentBlendTime;
-	DWORD			m_dwBackupBlendTime;
+	u32			m_dwBackupBlendTime;
 
 };
 
@@ -67,7 +67,7 @@ public:
 	}
 
 public:
-	void Start(float fMax,DWORD MaxTime,DWORD ReturnMaxTime);
+	void Start(float fMax,u32 MaxTime,u32 ReturnMaxTime);
 	void Stop();
 
 	void Update();
@@ -83,9 +83,9 @@ public:
 	bool  m_bReturn;
 	float m_fMaxValue;
 	float m_fCurValue;
-	DWORD m_dwStartTime;
-	DWORD m_dwEndTime;
-	DWORD m_dwReturnMaxTime;
+	u32 m_dwStartTime;
+	u32 m_dwEndTime;
+	u32 m_dwReturnMaxTime;
 };
 
 #define VISUAL_LIGHT_MAX 3
@@ -143,14 +143,14 @@ public:
 		return m_Query->Issue( D3DISSUE_END );
 	}
 
-	DWORD GetRenderCount() {
+	u32 GetRenderCount() {
 
 		if(m_Query==NULL) return 0;
 
 		int nCnt = 0;
 		m_DataCnt = 0;
 
-		while( m_Query->GetData( (void*)&m_DataCnt,sizeof(DWORD),D3DGETDATA_FLUSH) == S_FALSE ) {
+		while( m_Query->GetData( (void*)&m_DataCnt,sizeof(u32),D3DGETDATA_FLUSH) == S_FALSE ) {
 			m_nSpendingTime++;
 			nCnt++;
 			if(nCnt>5000) {
@@ -165,7 +165,7 @@ public:
 
 		if(m_Query==NULL) return true;
 
-		DWORD Cnt = GetRenderCount();
+		u32 Cnt = GetRenderCount();
 
 		if( Cnt > 10 )
 			return true;
@@ -175,7 +175,7 @@ public:
 public:
 
 	int					m_nSpendingTime;
-	DWORD				m_DataCnt;
+	u32				m_DataCnt;
 	LPDIRECT3DQUERY9	m_Query;
 };
 
@@ -302,10 +302,10 @@ public:
 
 	rvector GetBipTypePosition(RMeshPartsPosInfoType type);
 
-	rvector		GetHeadPosition();
-	rvector		GetRFootPosition();
-	rvector		GetLFootPosition();
-	rvector		GetRootPosition();
+	rvector	GetHeadPosition();
+	rvector	GetRFootPosition();
+	rvector	GetLFootPosition();
+	rvector	GetRootPosition();
 
 	void	SetVisibility(float vis)	{ m_fVis = vis; }
 	float	GetVisibility() const		{ return m_fVis; }
@@ -343,12 +343,12 @@ public:
 	float GetWeaponSize();
 	bool  IsDoubleWeapon();
 
-	void GetEnChantColor(DWORD* color);
+	void GetEnChantColor(u32* color);
 	void SetEnChantType(REnchantType EnchantType) {
 		m_EnchantType = EnchantType;
 	}
 
-	void SetCustomColor(DWORD a, DWORD b) {
+	void SetCustomColor(u32 a, u32 b) {
 		CustomColor[0] = a;
 		CustomColor[1] = b;
 	}
@@ -365,8 +365,6 @@ public:
 	void OnRestore();
 	void OnInvalidate();
 
-public:
-	// Cloth
 	bool CreateCloth(RMeshNode* pMeshNode,float fAccel,int Numiter );
 	void DestroyCloth();
 
@@ -383,19 +381,11 @@ public:
 
 	void SetClothValue(bool bGame,float fDist);
 
-private:
-	DWORD CustomColor[2];
-
-	float			m_fClothDist;
-	bool			m_bClothGame;
-	RCharCloth*		m_pCloth;
-
-public:
-	// Light Setting
-	void SetLight(int index,D3DLIGHT9* light,bool ShaderOnly) {	m_LightMgr.SetLight(index,light,ShaderOnly);}
+	void SetLight(int index,D3DLIGHT9* light,bool ShaderOnly) {
+		m_LightMgr.SetLight(index,light,ShaderOnly);
+	}
 	void UpdateLight() { m_LightMgr.UpdateLight(); }
 
-public:
 	bool			m_bIsNpc;
 	bool			m_bIsCharacter;
 
@@ -420,7 +410,7 @@ public:
 	LPDIRECT3DTEXTURE9	m_ToonTexture;	
 	bool				m_bToonLighting;
 	bool				m_bToonTextureRender;
-	DWORD				m_bToonColor;
+	u32				m_bToonColor;
 
 	///////////////////////////////////////////////////////////////
 
@@ -448,14 +438,14 @@ public:
 
 	AniFrameInfo	m_FrameInfo[ani_mode_end];
 
-	D3DXVECTOR3		m_vBMax;
-	D3DXVECTOR3		m_vBMin;
+	rvector		m_vBMax;
+	rvector		m_vBMin;
 
 	RVisualMesh*	m_WeaponVisualMesh[eq_weapon_end];
 	RPartsInfo		m_WeaponPartInfo[eq_parts_end];
-	D3DXMATRIX		m_WeaponMatrixTemp;
-	D3DXMATRIX		m_WeaponDummyMatrix[ weapon_dummy_end ];
-	D3DXMATRIX		m_WeaponDummyMatrix2[ weapon_dummy_end ];
+	rmatrix		m_WeaponMatrixTemp;
+	rmatrix		m_WeaponDummyMatrix[weapon_dummy_end];
+	rmatrix		m_WeaponDummyMatrix2[weapon_dummy_end];
 
 	RWeaponMotionType	m_SelectWeaponMotionType;
 
@@ -482,7 +472,19 @@ public:
 	bool			m_bGrenadeRenderOnoff;
 	bool			m_bGrenadeFire;
 	bool			m_bAddGrenade;
-	DWORD			m_GrenadeFireTime;
+	u32			m_GrenadeFireTime;
+
+private:
+	void RenderWeaponSub(RVisualMesh* WeaponMesh,
+		rmatrix (RVisualMesh::* DummyMatrix)[weapon_dummy_end],
+		int sel_parts,
+		bool RenderMesh, bool RenderTracks);
+
+	u32 CustomColor[2]{};
+
+	float			m_fClothDist{};
+	bool			m_bClothGame{};
+	RCharCloth*		m_pCloth{};
 };
 
 _NAMESPACE_REALSPACE2_END
