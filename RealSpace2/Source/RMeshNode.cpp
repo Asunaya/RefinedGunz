@@ -284,7 +284,10 @@ bool RMeshNode::SetBVertData(RBlendVertex* pBVert,int i,int j,int pv_index,int* 
 
 		if( DifferenceMap[index] == -1 )
 		{
-			DifferenceMap[index] = 3 * matrixIndex + ANIMATION_MATRIX_BASE;
+			DifferenceMap[index] = 3 * matrixIndex;
+#ifdef USE_OLD_SKIN_VSO
+			DifferenceMap[index] += ANIMATION_MATRIX_BASE;
+#endif
 			m_MatrixMap[matrixIndex++] = index;
 		}
 

@@ -20,12 +20,10 @@ float4 Light1Specular : register(c25);
 float4 Light1Range : register(c26);
 float4 Light0Attenuation : register(c27);
 float4 Light1Attenuation : register(c28);
-#define ANIMATION_MATRIX_BASE 29
 float4 AnimationMatrices[1000] : register(c29);
 
 float3x3 Get3x3(int Index)
 {
-	Index -= ANIMATION_MATRIX_BASE;
 	float3x3 ret;
 	ret._m00_m10_m20 = (float3)AnimationMatrices[Index];
 	ret._m01_m11_m21 = (float3)AnimationMatrices[Index + 1];
@@ -35,7 +33,6 @@ float3x3 Get3x3(int Index)
 
 float4x3 Get4x3(int Index)
 {
-	Index -= ANIMATION_MATRIX_BASE;
 	float4x3 ret;
 	ret._m00_m10_m20_m30 = AnimationMatrices[Index];
 	ret._m01_m11_m21_m31 = AnimationMatrices[Index + 1];
@@ -43,21 +40,9 @@ float4x3 Get4x3(int Index)
 	return ret;
 }
 
-float4x4 Get4x4(int Index)
-{
-	Index -= ANIMATION_MATRIX_BASE;
-	float4x4 ret;
-	ret._m00_m10_m20_m30 = AnimationMatrices[Index];
-	ret._m01_m11_m21_m31 = AnimationMatrices[Index + 1];
-	ret._m02_m12_m22_m32 = AnimationMatrices[Index + 2];
-	ret._m03_m13_m23_m33 = AnimationMatrices[Index + 3];
-	return ret;
-}
-
 float4 GetLightDiffuse(float3 VertexPosition, float3 VertexNormal, 
 	float3 LightPosition, float4 Diffuse, float4 Attenuation)
 {
-
 	float3 diff = LightPosition - VertexPosition;
 	float lsq = dot(diff, diff);
 	float l = rsqrt(lsq);
@@ -69,14 +54,14 @@ float4 GetLightDiffuse(float3 VertexPosition, float3 VertexNormal,
 }
 
 void main(float4 Pos            : POSITION,
-	      float2 Weight         : BLENDWEIGHT,
-	      float3 Indices        : BLENDINDICES,
-	      float3 Normal         : NORMAL,
-	      float2 T0             : TEXCOORD0,
-	  out float4 oPos           : POSITION,
-	  out float2 oT0            : TEXCOORD0,
-	  out float4 oDiffuse       : COLOR0,
-	  out float  oFog           : FOG)
+          float2 Weight         : BLENDWEIGHT,
+          float3 Indices        : BLENDINDICES,
+          float3 Normal         : NORMAL,
+          float2 T0             : TEXCOORD0,
+      out float4 oPos           : POSITION,
+      out float2 oT0            : TEXCOORD0,
+      out float4 oDiffuse       : COLOR0,
+      out float  oFog           : FOG)
 {
 	// Compute position
 	float3 TransformedPos =
