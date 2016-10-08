@@ -44,7 +44,6 @@ static int SubGetTexLevel(u32 tex_type)
 
 void RBaseTexture::Destroy()
 {
-	OnInvalidate();
 }
 
 void RBaseTexture::OnInvalidate()
@@ -157,7 +156,7 @@ bool RBaseTexture::SubCreateTexture(char* TextureFileBuffer)
 		m_bUseMipmap ? D3DX_DEFAULT : 1, 0, d3dformat, pool,
 		D3DX_FILTER_TRIANGLE | D3DX_FILTER_MIRROR,
 		D3DX_FILTER_TRIANGLE | D3DX_FILTER_MIRROR,
-		0, &m_Info, NULL, &m_pTex)))
+		0, &m_Info, NULL, MakeWriteProxy(m_pTex))))
 	{
 		_RPT1(_CRT_WARN, "%s ---->> memory texture (re)create failure \n", m_szTextureName);
 		__EP(2011);

@@ -363,9 +363,12 @@
   <ItemGroup>
     <None Include="Doc\맵 디자인 규칙 문서.txt" />
     <None Include="doc\캐릭터 디자인 규칙 문서.txt" />
+    <None Include="Include\Renderer.inl" />
+    <None Include="Source\Globals.hlslh" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\MeshManager.cpp" />
+    <ClCompile Include="Source\Renderer.cpp" />
     <ClCompile Include="Source\RHalfEdgeMesh.cpp" />
     <ClCompile Include="Source\RMath.cpp" />
     <ClCompile Include="Source\RMesh.cpp" />
@@ -414,6 +417,7 @@
     <ClCompile Include="Source\RToken.cpp" />
     <ClCompile Include="Source\RealSpace2.cpp" />
     <ClCompile Include="Source\RFrameWork.cpp" />
+    <ClCompile Include="Source\ShaderUtil.cpp" />
     <ClCompile Include="Source\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -436,6 +440,8 @@
     <ClInclude Include="Include\RMeshNodeStringTable.h" />
     <ClInclude Include="INCLUDE\RMeshUtil.h" />
     <ClInclude Include="Include\RMtrl.h" />
+    <ClInclude Include="Include\Renderer.h" />
+    <ClInclude Include="Include\RS2.h" />
     <ClInclude Include="Include\RUtil.h" />
     <ClInclude Include="Include\RVisualMesh.h" />
     <ClInclude Include="INCLUDE\RVisualMeshMgr.h" />
@@ -475,7 +481,93 @@
     <ClInclude Include="Include\RNameSpace.h" />
     <ClInclude Include="Include\RTypes.h" />
     <ClInclude Include="Include\RVersions.h" />
+    <ClInclude Include="Include\ShaderUtil.h" />
+    <None Include="Include\ShaderGlobals.h" />
     <ClInclude Include="Include\stdafx.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Source\MergeShadowMapsPS.hlsl">
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)../../Gunz/runtime/Shader/%(Filename).cso</ObjectFileOutput>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/Tps_3_0</AdditionalOptions>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Clang Release LTCG|Win32'">$(OutDir)../../Gunz/runtime/Shader/%(Filename).cso</ObjectFileOutput>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Clang Release LTCG|Win32'">/Tps_3_0</AdditionalOptions>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release LTCG|Win32'">$(OutDir)../../Gunz/runtime/Shader/%(Filename).cso</ObjectFileOutput>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release LTCG|Win32'">/Tps_3_0</AdditionalOptions>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)../../Gunz/runtime/Shader/%(Filename).cso</ObjectFileOutput>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/Tps_3_0</AdditionalOptions>
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Source\MergeShadowMapsVS.hlsl">
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)../../Gunz/runtime/Shader/%(Filename).cso</ObjectFileOutput>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/Tvs_3_0</AdditionalOptions>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Clang Release LTCG|Win32'">$(OutDir)../../Gunz/runtime/Shader/%(Filename).cso</ObjectFileOutput>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Clang Release LTCG|Win32'">/Tvs_3_0</AdditionalOptions>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release LTCG|Win32'">$(OutDir)../../Gunz/runtime/Shader/%(Filename).cso</ObjectFileOutput>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release LTCG|Win32'">/Tvs_3_0</AdditionalOptions>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)../../Gunz/runtime/Shader/%(Filename).cso</ObjectFileOutput>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/Tvs_3_0</AdditionalOptions>
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Source\SceneDirLightPS.hlsl">
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)../../Gunz/runtime/Shader/%(Filename).cso</ObjectFileOutput>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/Tps_3_0</AdditionalOptions>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Clang Release LTCG|Win32'">$(OutDir)../../Gunz/runtime/Shader/%(Filename).cso</ObjectFileOutput>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Clang Release LTCG|Win32'">/Tps_3_0</AdditionalOptions>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release LTCG|Win32'">$(OutDir)../../Gunz/runtime/Shader/%(Filename).cso</ObjectFileOutput>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release LTCG|Win32'">/Tps_3_0</AdditionalOptions>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)../../Gunz/runtime/Shader/%(Filename).cso</ObjectFileOutput>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/Tps_3_0</AdditionalOptions>
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Source\ScenePointLightPS.hlsl">
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)../../Gunz/runtime/Shader/%(Filename).cso</ObjectFileOutput>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/Tps_3_0</AdditionalOptions>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Clang Release LTCG|Win32'">$(OutDir)../../Gunz/runtime/Shader/%(Filename).cso</ObjectFileOutput>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Clang Release LTCG|Win32'">/Tps_3_0</AdditionalOptions>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release LTCG|Win32'">$(OutDir)../../Gunz/runtime/Shader/%(Filename).cso</ObjectFileOutput>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release LTCG|Win32'">/Tps_3_0</AdditionalOptions>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)../../Gunz/runtime/Shader/%(Filename).cso</ObjectFileOutput>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/Tps_3_0</AdditionalOptions>
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Source\SceneVS.hlsl">
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)../../Gunz/runtime/Shader/%(Filename).cso</ObjectFileOutput>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/Tvs_3_0</AdditionalOptions>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Clang Release LTCG|Win32'">$(OutDir)../../Gunz/runtime/Shader/%(Filename).cso</ObjectFileOutput>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Clang Release LTCG|Win32'">/Tvs_3_0</AdditionalOptions>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release LTCG|Win32'">$(OutDir)../../Gunz/runtime/Shader/%(Filename).cso</ObjectFileOutput>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release LTCG|Win32'">/Tvs_3_0</AdditionalOptions>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)../../Gunz/runtime/Shader/%(Filename).cso</ObjectFileOutput>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/Tvs_3_0</AdditionalOptions>
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Source\ShadowPS.hlsl">
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)../../Gunz/runtime/Shader/%(Filename).cso</ObjectFileOutput>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/Tps_3_0</AdditionalOptions>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Clang Release LTCG|Win32'">$(OutDir)../../Gunz/runtime/Shader/%(Filename).cso</ObjectFileOutput>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Clang Release LTCG|Win32'">/Tps_3_0</AdditionalOptions>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release LTCG|Win32'">$(OutDir)../../Gunz/runtime/Shader/%(Filename).cso</ObjectFileOutput>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release LTCG|Win32'">/Tps_3_0</AdditionalOptions>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)../../Gunz/runtime/Shader/%(Filename).cso</ObjectFileOutput>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/Tps_3_0</AdditionalOptions>
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Source\ShadowVS.hlsl">
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)../../Gunz/runtime/Shader/%(Filename).cso</ObjectFileOutput>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/Tvs_3_0</AdditionalOptions>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Clang Release LTCG|Win32'">$(OutDir)../../Gunz/runtime/Shader/%(Filename).cso</ObjectFileOutput>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Clang Release LTCG|Win32'">/Tvs_3_0</AdditionalOptions>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release LTCG|Win32'">$(OutDir)../../Gunz/runtime/Shader/%(Filename).cso</ObjectFileOutput>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release LTCG|Win32'">/Tvs_3_0</AdditionalOptions>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)../../Gunz/runtime/Shader/%(Filename).cso</ObjectFileOutput>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/Tvs_3_0</AdditionalOptions>
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Source\skin.hlsl">
+      <FileType>Document</FileType>
+    </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

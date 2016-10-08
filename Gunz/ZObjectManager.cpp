@@ -183,13 +183,11 @@ void ZObjectManager::Draw()
 	{
 		ZObject* pObject = (*itor).second;
 		if (pObject == NULL)			continue;
-		if (pObject == pMyCharacter)	continue;		// 자신은 나중에 그린다.
+		if (pObject == pMyCharacter)	continue;
 
 		DrawObject(pObject);
 
 	}
-
-	//자신은 투명해질수도 있어서 나중에 그린다..	
 
 	if( pMyCharacter ) 
 	{ 

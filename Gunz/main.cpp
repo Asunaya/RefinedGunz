@@ -287,10 +287,6 @@ RRESULT OnDestroy(void *pParam)
 
 	mlog("main : g_DInput.Destroy()\n");
 
-	RGetShaderMgr()->Release();
-
-//	g_App.OnDestroy();
-
 	mlog("main : g_App.OnDestroy()\n");
 
 	ZGetConfiguration()->Destroy();

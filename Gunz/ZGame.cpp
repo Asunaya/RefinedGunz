@@ -85,24 +85,21 @@ _USING_NAMESPACE_REALSPACE2
 
 #define ENABLE_CHARACTER_COLLISION
 
-struct RSnowParticle : public RParticle , CMemPoolSm<RSnowParticle>
+struct RSnowParticle : public RParticle, CMemPoolSm<RSnowParticle>
 {
-	virtual bool Update(float fTimeElapsed);
+	virtual bool Update(float fTimeElapsed)
+	{
+		RParticle::Update(fTimeElapsed);
+
+		if (position.z <= -1000.0f) return false;
+		return true;
+	}
 };
-
-
-bool RSnowParticle::Update(float fTimeElapsed)
-{
-	RParticle::Update(fTimeElapsed);
-
-	if (position.z <= -1000.0f) return false;
-	return true;
-}
 
 class ZSnowTownParticleSystem
 {
 private:
-	RParticles*		m_pParticles[3];
+	RParticles* m_pParticles[3];
 	bool IsSnowTownMap()
 	{
 		if (!_strnicmp(ZGetGameClient()->GetMatchStageSetting()->GetMapName(), "snow", 4)) return true;
@@ -339,6 +336,7 @@ ZObjectManager* ZGetObjectManager()
 }
 
 ZGame::ZGame()
+	: DrawObj{ *this, D3D9Tag{} }
 {
 	g_pGame	= this;
 
@@ -417,10 +415,8 @@ bool ZGame::Create(MZFileSystem *pfs, ZLoadingProgress *pLoading )
 
 	rvector dir = GetMapDesc()->GetWaitCamDir();
 	rvector pos = GetMapDesc()->GetWaitCamPos();
-	rvector up(0,0,1);
+	rvector up{ 0, 0, 1 };
 	RSetCamera(pos, pos+dir, up);
-
-
 
 	int nModelID = -1;
 
@@ -764,7 +760,7 @@ void ZGame::CheckMyCharDead(float fElapsed)
 
 		ZPostDie(uidAttacker);
 
-		if (! ZGetGameTypeManager()->IsQuestDerived(ZGetGameClient()->GetMatchStageSetting()->GetGameType()))
+		if (!ZGetGameTypeManager()->IsQuestDerived(ZGetGameClient()->GetMatchStageSetting()->GetGameType()))
 		{
 			ZPostGameKill(uidAttacker);
 		}
@@ -775,204 +771,14 @@ void ZGame::CheckMyCharDead(float fElapsed)
 	}
 }
 
-void ZGame::OnPreDraw()
-{
-	__BP(19,"ZGame::sub1");
-
-#ifdef PORTAL
-	if(!g_pPortal->ForceProjection())
-#endif
-		RSetProjection(g_fFOV, DEFAULT_NEAR_Z, g_fFarZ);
-
-	bool bTrilinear=RIsTrilinear();
-
-	RGetDevice()->SetSamplerState( 0, D3DSAMP_MAGFILTER , D3DTEXF_LINEAR);
-	RGetDevice()->SetSamplerState( 0, D3DSAMP_MINFILTER , D3DTEXF_LINEAR);
-	RGetDevice()->SetSamplerState( 0, D3DSAMP_MIPFILTER , bTrilinear ? D3DTEXF_LINEAR : D3DTEXF_NONE );
-	RGetDevice()->SetSamplerState( 1, D3DSAMP_MAGFILTER , D3DTEXF_LINEAR);
-	RGetDevice()->SetSamplerState( 1, D3DSAMP_MINFILTER , D3DTEXF_LINEAR);
-	RGetDevice()->SetSamplerState( 1, D3DSAMP_MIPFILTER , bTrilinear ? D3DTEXF_LINEAR : D3DTEXF_NONE );
-
-	if(m_bShowWireframe ) {
-		RGetDevice()->SetRenderState( D3DRS_FILLMODE , D3DFILL_WIREFRAME );
-		RGetDevice()->SetRenderState( D3DRS_LIGHTING, FALSE );
-		GetWorld()->SetFog(false);
-	}
-	else {
-		RGetDevice()->SetRenderState( D3DRS_FILLMODE ,  D3DFILL_SOLID );
-		GetWorld()->SetFog(true);
-	}
-
-	GetWorld()->GetBsp()->SetWireframeMode(m_bShowWireframe);
-
-	rmatrix initmat;
-	D3DXMatrixIdentity(&initmat);
-	RGetDevice()->SetTransform( D3DTS_WORLD, &initmat );
-	RGetDevice()->SetRenderState(D3DRS_ALPHABLENDENABLE, false );
-	RGetDevice()->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
-	RGetDevice()->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
-	RGetDevice()->SetRenderState(D3DRS_ZWRITEENABLE, true );
-
-	LPDIRECT3DDEVICE9 pd3dDevice=RGetDevice();
-	pd3dDevice->SetTexture(0,NULL);
-	pd3dDevice->SetTexture(1,NULL);
-	pd3dDevice->SetTextureStageState( 0, D3DTSS_COLORARG1, D3DTA_TEXTURE );
-	pd3dDevice->SetTextureStageState( 0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
-	pd3dDevice->SetTextureStageState( 0, D3DTSS_COLOROP,   D3DTOP_MODULATE );
-	pd3dDevice->SetTextureStageState( 0, D3DTSS_ALPHAOP,   D3DTOP_SELECTARG2 );
-	pd3dDevice->SetTextureStageState( 0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE );
-	pd3dDevice->SetTextureStageState( 1, D3DTSS_COLOROP,   D3DTOP_DISABLE );
-	pd3dDevice->SetTextureStageState( 1, D3DTSS_ALPHAOP,   D3DTOP_DISABLE );
-	pd3dDevice->SetFVF(D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_TEX1 );
-
-	pd3dDevice->SetRenderState(D3DRS_CULLMODE  ,D3DCULL_CW);
-	pd3dDevice->SetRenderState(D3DRS_NORMALIZENORMALS , TRUE );
-
-	if(m_pMyCharacter)
-	{
-		if( ZGetConfiguration()->GetVideo()->bDynamicLight )
-		{
-			rvector pos = m_pMyCharacter->GetPosition();
-			RGetDynamicLightManager()->SetPosition( pos );
-		}
-	}
-
-	__EP(19);
-}
-
-int g_debug_render_mode = 0;
+int g_debug_render_mode;
 
 extern MDrawContextR2* g_pDC;
 
 void ZGame::Draw()
 {
-	__BP(20,"ZGame::Draw");
-
-	RRESULT isOK=RIsReadyToRender();
-
-	if(isOK==R_NOTREADY)
-	{
-		__EP(20);
-		return ;
-	}
-
-#ifdef PORTAL
-	g_pPortal->PreDraw();
-#endif
-
-	if ( m_bSuicide && ( GetGlobalTimeMS() > m_dwReservedSuicideTime))
-		ZGetGameClient()->RequestGameSuicide();
-
-
-	OnPreDraw();
-
-	rmatrix _mat;
-	RGetDevice()->GetTransform(D3DTS_WORLD, &_mat);
-
-	__BP(21,"ZGame::Draw::DrawWorld");
-	GetWorld()->Draw();
-	__EP(21);
-
-	ZMapDesc* pMapDesc = GetMapDesc();
-
-	if( pMapDesc ) {
-		pMapDesc->DrawMapDesc();
-	}
-
-	if (m_Match.GetRoundState() != MMATCH_ROUNDSTATE_PREPARE)
-	{
-		__BP(22,"ZGame::Draw::DrawCharacters");
-
-		m_ObjectManager.Draw();
-
-		__EP(22);
-
-		m_render_poly_cnt = RealSpace2::g_poly_render_cnt;
-	}
-
-	RGetDevice()->SetTransform(D3DTS_WORLD, &_mat);
-
-	ZGetWorldItemManager()->Draw(0,GetWorld()->GetWaterHeight(),GetWorld()->IsWaterMap());
-
-	m_WeaponManager.Render();
-
-	__BP(50,"ZGame::DrawObjects");
-
-	GetWorld()->GetBsp()->DrawObjects();
-
-	__EP(50);
-
-	__BP(17,"ZGame::Draw::Reflection");
-
-	GetWorld()->GetWaters()->Render();
-
-	__EP(17);
-
-	if (m_Match.GetRoundState() != MMATCH_ROUNDSTATE_PREPARE)
-	{
-		__BP(23,"ZGame::Draw::DrawWeapons and effects");
-
-		ZGetEffectManager()->Draw(GetGlobalTimeMS());
-
-		__EP(23);
-	}
-
-#ifdef _WORLD_ITEM_
-	__BP(34,"ZGame::Draw::ZGetWorldItemManager");
-
-		ZGetWorldItemManager()->Draw(1,GetWorld()->GetWaterHeight(),GetWorld()->IsWaterMap());
-
-	__EP(34);
-#endif
-
-	__BP(35,"ZGame::Draw::RGetParticleSystem");
-
-	RGetParticleSystem()->Draw();
-
-	__EP(35);
-
-	__BP(36,"ZGame::Draw::LenzFlare");
-
-	if( RReadyLenzFlare())
-	{
-		RGetLenzFlare()->Render( RCameraPosition, GetWorld()->GetBsp());
-	}
-
-#ifdef PORTAL
-	if(!g_pPortal->ForceProjection())
-#endif
-		RSetProjection(g_fFOV, DEFAULT_NEAR_Z, g_fFarZ);
-	RSetFog(FALSE);
-
-	__EP(36);
-
-	__BP(37,"ZGame::Draw::FlashBangEffect");
-
-	if( IsActivatedFlashBangEffect() )
-	{
-		ShowFlashBangEffect();
-	}
-
-	__BP(505, "ZGame::Draw::RenderStencilLight");
-	if(Z_VIDEO_DYNAMICLIGHT)
-		ZGetStencilLight()->Render();
-	__EP(505);
-
-	__EP(37);
-
-	__BP(38,"ZGame::Draw::DrawGameMessage");
-
-	m_Match.OnDrawGameMessage();
-
-	__EP(38);
-
-	__EP(20);
-
-#ifdef PORTAL
-	g_pPortal->PostDraw();
-#endif
-
-	g_RGMain->OnGameDraw();
+	DrawObj.Draw();
+	return;
 }
 
 void ZGame::DrawDebugInfo()
@@ -1008,7 +814,6 @@ void ZGame::DrawDebugInfo()
 	}
 }
 
-
 void ZGame::Draw(MDrawContextR2 &dc)
 {
 }
@@ -1042,15 +847,11 @@ void ZGame::ParseReservedWord(char* pszDest, const char* pszSrc)
 	strcpy(pszDest, szOut);
 }
 
-#include "ZMessages.h"
-
 extern bool g_bProfile;
 
 bool IsIgnoreObserverCommand(int nID)
 {
 	switch(nID) {
-		//case MC_PEER_PING :
-		//case MC_PEER_PONG :
 		case MC_PEER_OPENED	:
 		case MC_MATCH_GAME_RESPONSE_TIMESYNC :
 			return false;
@@ -1078,6 +879,7 @@ void ZGame::OnCommand_Observer(MCommand* pCommand)
 
 void ZGame::ProcessDelayedCommand()
 {
+	// TODO: Erase-remove
 	for(ZObserverCommandList::iterator i = m_DelayedCommandList.begin(); i != m_DelayedCommandList.end();i++)
 	{
 		ZObserverCommandItem *pItem = *i;
@@ -1173,8 +975,6 @@ bool ZGame::OnCommand(MCommand* pCommand)
 	return OnCommand_Immediate(pCommand);
 }
 
-// 유저 컬러
-
 bool GetUserGradeIDColor(MMatchUserGradeID gid,MCOLOR& UserNameColor,char* sp_name)
 {
 	if(gid == MMUG_DEVELOPER) 
@@ -1201,26 +1001,17 @@ bool ZGame::GetUserNameColor(MUID uid,MCOLOR& UserNameColor,char* sp_name)
 	MMatchUserGradeID gid = MMUG_FREE;
 
 	if(m_pMyCharacter->GetUID()==uid) {
-
 		if(ZGetMyInfo()) {
-
 			gid = ZGetMyInfo()->GetUGradeID();
-//			gid = MMUG_DEVELOPER;//test
-
 		} else {
-
 			mlog("ZGame::GetUserNameColor ZGetMyInfo==NULL \n");
-
 		}
 	}
 	else {
-
 		MMatchPeerInfo* pPeer = ZGetGameClient()->FindPeer(uid);
-
 		if(pPeer) {
 			 gid = pPeer->CharInfo.nUGradeID;
 		}
-		
 	}
 
 	return GetUserGradeIDColor( gid , UserNameColor ,sp_name );
@@ -1578,18 +1369,11 @@ bool ZGame::OnCommand_Immediate(MCommand* pCommand)
 
 			char sp_name[256];
 			bool bSpUser = GetUserNameColor(uid, UserNameColor, sp_name);
-/*
-			bool GetPureUserName(char* name,char* pure_name)
-			{
-				//^숫자제거
 
-			}
-*/
 			if(pChar) 
 			{
 				int nMyTeam = ZApplication::GetGame()->m_pMyCharacter->GetTeamID();
 
-				// 일반 채팅 말 일때...
 				if ( (nTeam == MMT_ALL) || (nTeam == MMT_SPECTATOR))
 				{
 					if ( !ZGetGameClient()->GetRejectNormalChat() || ( strcmp( pChar->GetUserName(), ZGetMyInfo()->GetCharName()) == 0))
@@ -1597,18 +1381,7 @@ bool ZGame::OnCommand_Immediate(MCommand* pCommand)
 						ZGetSoundEngine()->PlaySound("if_error");
 						char szTemp[sizeof(szMsg)+64];
 
-						/*if ( ZApplication::GetGame()->GetMatch()->GetMatchType() == MMATCH_GAMETYPE_DUEL)
-						{
-							if ( !m_pMyCharacter->IsDie() && pChar->IsDie())
-							{
-								ChatColor = MCOLOR(0xFF808080);
-								strcpy_safe( szMsg, "^0. . . . .");
-							}
-						}*/
-
-
 						if(bSpUser) {
-							//sprintf_safe(szTemp, "%s : %s", sp_name, szMsg);
 							sprintf_safe(szTemp, "%s: %s", pChar->GetProperty()->szName, szMsg);
 							ZChatOutput(UserNameColor, szTemp);
 						}
@@ -1619,7 +1392,6 @@ bool ZGame::OnCommand_Immediate(MCommand* pCommand)
 					}
 				}
 
-				// 팀 채팅 말 일때...
 				else if (nTeam == nMyTeam)
 				{
 					if ( (!ZGetGameClient()->IsLadderGame() && !ZGetGameClient()->GetRejectTeamChat()) ||
@@ -1664,22 +1436,6 @@ bool ZGame::OnCommand_Immediate(MCommand* pCommand)
 			}
 		}break;
 
-		/*
-		case MC_PEER_MOVE:
-		{
-
-		rvector pos, dir, velocity;
-		pCommand->GetParameter(&pos, 0, MPT_POS);
-		pCommand->GetParameter(&dir, 1, MPT_VECTOR);
-		pCommand->GetParameter(&velocity, 2, MPT_VECTOR);
-		int upper, lower;
-		pCommand->GetParameter(&upper, 3, MPT_INT);
-		pCommand->GetParameter(&lower, 4, MPT_INT);
-
-		OnPeerMove(pCommand->GetSenderUID(), pos, dir, velocity, ZC_STATE_UPPER(upper), ZC_STATE_LOWER(lower));
-		}
-		break;
-		*/
 	case MC_MATCH_OBTAIN_WORLDITEM:
 		{
 			if (!IsReplay()) break;
@@ -1730,14 +1486,13 @@ bool ZGame::OnCommand_Immediate(MCommand* pCommand)
 	case MC_PEER_SHOT:
 		{
 			MCommandParameter* pParam = pCommand->GetParameter(0);
-			if(pParam->GetType()!=MPT_BLOB) break;	// 문제가 있다
+			if(pParam->GetType()!=MPT_BLOB) break;
 
 			ZPACKEDSHOTINFO *pinfo =(ZPACKEDSHOTINFO*)pParam->GetPointer();
 
 			rvector pos = rvector(pinfo->posx,pinfo->posy,pinfo->posz);
 			rvector to = rvector(pinfo->tox,pinfo->toy,pinfo->toz);
 
-			// TODO : 시간판정을 각각해야한다
 			OnPeerShot(pCommand->GetSenderUID(), pinfo->fTime, pos, to, (MMatchCharItemParts)pinfo->sel_type);
 		}
 		break;
@@ -1765,8 +1520,6 @@ bool ZGame::OnCommand_Immediate(MCommand* pCommand)
 			pCommand->GetParameter(&type, 3, MPT_INT);
 			pCommand->GetParameter(&sel_type, 4, MPT_INT);
 
-			// fShotTime 은 무시하고..
-			//fShotTime=GetTime()-(float)GetPing(pCommand->GetSenderUID())*0.001f;
 
 			OnPeerShotSp(pCommand->GetSenderUID(), fShotTime, pos, dir,type,(MMatchCharItemParts)sel_type);
 		}
@@ -1816,18 +1569,6 @@ bool ZGame::OnCommand_Immediate(MCommand* pCommand)
 			OnReceiveTeamBonus(uidChar, nExpArg);
 		}
 		break;
-/*
-	case MC_MATCH_ASSIGN_COMMANDER:
-		{
-			MUID uidRedCommander, uidBlueCommander;
-
-			pCommand->GetParameter(&uidRedCommander, 0, MPT_UID);
-			pCommand->GetParameter(&uidBlueCommander, 1, MPT_UID);
-
-			OnAssignCommander(uidRedCommander, uidBlueCommander);
-		}
-		break;
-*/
 	case MC_PEER_SPAWN:
 		{
 			rvector pos, dir;
@@ -1902,8 +1643,6 @@ bool ZGame::OnCommand_Immediate(MCommand* pCommand)
 
 			pCommand->GetParameter(&type, 0, MPT_INT);
 			pCommand->GetParameter(&pos , 1, MPT_POS);
-
-			//OnAttack( pCommand->GetSenderUID(), type, pos);
 		}
 		break;
 
@@ -2179,7 +1918,6 @@ void ZGame::OnPeerOpened(MCommand *pCommand)
 	if (pCharacter && pCharacter->IsDie()==false) {
 		pCharacter->SetVisible(true);
 
-		// 신입 캐릭터에게 자신의 무기를 알린다...
 		ZCharacter* pMyCharacter = g_pGame->m_pMyCharacter;
 		if(pMyCharacter)
 		{
@@ -2206,10 +1944,8 @@ void ZGame::OnPeerOpened(MCommand *pCommand)
 void ZGame::OnChangeWeapon(const MUID& uid, MMatchCharItemParts parts)
 {
 	ZCharacter* pCharacter = m_CharacterManager.Find(uid);
-//	if (uid == ZGetGameClient()->GetUID()) pCharacter = m_pMyCharacter;
-//	_ASSERT(pCharacter != NULL);
 
-	if (pCharacter && pCharacter!=m_pMyCharacter)		// 내 캐릭터는 이미 바꿨다.
+	if (pCharacter && pCharacter!=m_pMyCharacter)
 	{
 		pCharacter->ChangeWeapon(parts);
 	}
@@ -2218,7 +1954,6 @@ void ZGame::OnChangeWeapon(const MUID& uid, MMatchCharItemParts parts)
 void ZGame::OnChangeParts(const MUID& uid,int partstype,int PartsID)
 {
 	ZCharacter* pCharacter = m_CharacterManager.Find(uid);
-//	if (uid == ZGetGameClient()->GetUID()) pCharacter = m_pMyCharacter;
 
 	if ( pCharacter ) {
 		pCharacter->OnChangeParts( (RMeshPartsType)partstype , PartsID );
@@ -2374,7 +2109,6 @@ bool ZGame::CheckWall(ZObject* pObj1,ZObject* pObj2)
 	if( (pObj1->GetVisualMesh()==NULL) || (pObj2->GetVisualMesh()==NULL) )
 		return false;
 
-	// 에니메이션 때문에 벽을 뚫고 들어가는 경우도 있어서..
 	rvector p1 = pObj1->GetPosition() + rvector(0.f,0.f,100.f);
 	rvector p2 = pObj2->GetPosition() + rvector(0.f,0.f,100.f);
 
@@ -2384,8 +2118,8 @@ bool ZGame::CheckWall(ZObject* pObj1,ZObject* pObj2)
 
 	ZPICKINFO pickinfo;
 
-	if( Pick( pObj1 , p1 , dir, &pickinfo ) ) {//벽이라면
-		if(pickinfo.bBspPicked)//맵이 걸린경우
+	if( Pick( pObj1 , p1 , dir, &pickinfo ) ) {
+		if(pickinfo.bBspPicked)
 			return true;
 	}
 
@@ -2410,21 +2144,16 @@ void ZGame::OnExplosionGrenade(MUID uidOwner,rvector pos,float fDamage,float fRa
 			fDist = Magnitude(pos-(pTarget->GetPosition()+rvector(0,0,80)));
 			if(fDist < fRange) {
 
-				// 두 캐릭터사이에 장애물이 없어야한다~ 
-//				if( CheckWall(pos,pTarget) == false )
 				{
-
 					rvector dir=pos-(pTarget->GetPosition()+rvector(0,0,80));
 					Normalize(dir);
 
-					// 몸에 직접 맞았다.
 					if(GetDistance(pos,pTarget->GetPosition()+rvector(0,0,50),pTarget->GetPosition()+rvector(0,0,130))<50)
 					{
 						fDamageRange = 1.f;
 					}else
 					{
-#define MAX_DMG_RANGE	50.f	// 반경이만큼 까지는 최대 데미지를 다 먹는다
-//#define MIN_DMG			0.4f	// 최소 기본 데미지는 이정도.
+#define MAX_DMG_RANGE	50.f
 
 						fDamageRange = 1.f - (1.f-fMinDamage)*( max(fDist-MAX_DMG_RANGE,0) / (fRange-MAX_DMG_RANGE));
 					}
@@ -2648,7 +2377,6 @@ int ZGame::SelectSlashEffectMotion(ZCharacter* pCharacter)
 	return SEM_None;
 }
 
-// shot 이 너무 커서 분리..
 void ZGame::OnPeerShot_Melee(const MUID& uidOwner, float fShotTime)
 {
 	ZObject *pOwner = m_ObjectManager.GetObject(uidOwner);
@@ -4502,6 +4230,7 @@ void ZGame::OnInvalidate()
 	GetWorld()->OnInvalidate();
 	ZGetFlashBangEffect()->OnInvalidate();
 	m_CharacterManager.OnInvalidate();
+	DrawObj.OnInvalidate();
 }
 
 void ZGame::OnRestore()
@@ -4509,11 +4238,11 @@ void ZGame::OnRestore()
 	GetWorld()->OnRestore();
 	ZGetFlashBangEffect()->OnRestore();
 	m_CharacterManager.OnRestore();
+	DrawObj.OnRestore();
 }
 
 void ZGame::InitRound()
 {
-//	m_fTime=0;
 	SetSpawnRequested(false);
 	ZGetGameInterface()->GetCamera()->StopShock();
 
@@ -4521,10 +4250,6 @@ void ZGame::InitRound()
 
 	ZGetEffectManager()->Clear();
 	m_WeaponManager.Clear();
-
-#ifdef _WORLD_ITEM_
-	//ZGetWorldItemManager()->Reset();
-#endif
 
 	ZGetCharacterManager()->InitRound();
 }
@@ -4537,7 +4262,6 @@ void ZGame::AddEffectRoundState(MMATCH_ROUNDSTATE nRoundState, int nArg)
 
 	case MMATCH_ROUNDSTATE_COUNTDOWN : 
 		{
-			// 이팩트 출력 - 팀플일 경우만 RoundStart이팩트 출력한다. 듀얼은 라운드 기다리지만 제외.
 			if (m_Match.IsWaitForRoundEnd() && m_Match.GetMatchType() != MMATCH_GAMETYPE_DUEL)
 			{
 				if(m_Match.GetCurrRound()+1==m_Match.GetRoundCount())
@@ -4546,7 +4270,6 @@ void ZGame::AddEffectRoundState(MMATCH_ROUNDSTATE nRoundState, int nArg)
 				}
 				else
 				{
-					// m_nCurrRound 가 0이면 1라운드이다.
 					ZGetScreenEffectManager()->AddRoundStart(m_Match.GetCurrRound()+1);
 				}
 			}
@@ -4592,13 +4315,12 @@ void ZGame::AddEffectRoundState(MMATCH_ROUNDSTATE nRoundState, int nArg)
 						MMatchTeam nMyTeam = (MMatchTeam)m_pMyCharacter->GetTeamID();
 						MMatchTeam nTeamWon = (nArg == MMATCH_ROUNDRESULT_REDWON ? MMT_RED : MMT_BLUE);
 
-						// 만약 강제로 팀이 바껴진 경우에는 반대편
 						if (ZGetMyInfo()->GetGameInfo()->bForcedChangeTeam)
 						{
 							nMyTeam = NegativeTeam(nMyTeam);
 						}
 
-						// Spectator 일경우 처리
+						// Spectator
 						if (ZGetGameInterface()->GetCombatInterface()->GetObserver()->IsVisible()) {
 							ZCharacter* pTarget = ZGetGameInterface()->GetCombatInterface()->GetObserver()->GetTargetCharacter();
 							if (pTarget)
@@ -4616,7 +4338,7 @@ void ZGame::AddEffectRoundState(MMATCH_ROUNDSTATE nRoundState, int nArg)
 
 				int nTeam = 0;
 
-				// all kill 판정
+				// all kill
 				for(int j=0;j<2;j++)
 				{
 					bool bAllKill=true;
@@ -4643,7 +4365,7 @@ void ZGame::AddEffectRoundState(MMATCH_ROUNDSTATE nRoundState, int nArg)
 							ZCharacter *pKiller = ZGetCharacterManager()->Find(pCharacter->GetLastAttacker());
 							if(pAllKillPlayer==NULL)
 							{
-								if(!pKiller || pKiller->GetTeamID()==nTeam)			// 같은편한테 죽었으면 꽝
+								if(!pKiller || pKiller->GetTeamID()==nTeam)
 								{
 									bAllKill=false;
 									break;
@@ -4652,14 +4374,14 @@ void ZGame::AddEffectRoundState(MMATCH_ROUNDSTATE nRoundState, int nArg)
 								pAllKillPlayer=pKiller;
 							}
 							else
-								if(pAllKillPlayer!=pKiller)	// 여러명이 나눠 죽였으면 꽝
+								if(pAllKillPlayer!=pKiller)
 								{
 									bAllKill=false;
 									break;
 								}
 						}else
 						{
-							bAllKill=false;											// 살아있는 넘이 있어도 꽝
+							bAllKill=false;
 							break;
 						}
 					}
@@ -4672,8 +4394,6 @@ void ZGame::AddEffectRoundState(MMATCH_ROUNDSTATE nRoundState, int nArg)
 				}
 			}
 
-
-			// 듀얼 모드일 경우
 			else if ( ZApplication::GetGame()->GetMatch()->GetMatchType() == MMATCH_GAMETYPE_DUEL)
 			{
 				ZRuleDuel* pDuel = (ZRuleDuel*)ZGetGameInterface()->GetGame()->GetMatch()->GetRule();
@@ -4681,16 +4401,12 @@ void ZGame::AddEffectRoundState(MMATCH_ROUNDSTATE nRoundState, int nArg)
 				{
 					bool bAddWin = false;
 					bool bAddLose = false;
-					int nCount = 0;				// 챔피언과 도전자 모두 게임중이였는지 체크하기 위해서...
+					int nCount = 0;
 
-
-					// 옵져버 모드일때
 					MUID uidTarget;
 					ZObserver* pObserver = ZGetGameInterface()->GetCombatInterface()->GetObserver();
 					if ( pObserver && pObserver->IsVisible())
 						uidTarget = pObserver->GetTargetCharacter()->GetUID();
-
-					// 옵져버 모드가 아닐때
 					else
 						uidTarget = m_pMyCharacter->GetUID();
 
@@ -4717,8 +4433,6 @@ void ZGame::AddEffectRoundState(MMATCH_ROUNDSTATE nRoundState, int nArg)
 									bAddLose |= true;
 							}
 
-
-							// 챔피온과 도전자 수를 모두 더해서 2가 되어야 한다
 							nCount++;
 						}
 					}
@@ -4798,7 +4512,6 @@ void ZGame::StartRecording()
 			goto RECORDING_FAIL;
 	}
 
-	// duel 모드일때 상태 추가 저장
 	if(ZGetGameClient()->GetMatchStageSetting()->GetGameType() == MMATCH_GAMETYPE_DUEL)
 	{
 		ZRuleDuel* pDuel = (ZRuleDuel*)ZGetGameInterface()->GetGame()->GetMatch()->GetRule();
@@ -4891,14 +4604,10 @@ void ZGame::StopRecording()
 		sprintf_safe(szOutputFilename, GUNZ_FOLDER REPLAY_FOLDER "/Gunz%03d." GUNZ_REC_FILE_EXT, m_nGunzReplayNumber);
 
 		char szOutput[256];
-		// ZTranslateMessage(szOutput,MSG_RECORD_SAVED,1,szOutputFilename);
 		ZTransMsg(szOutput,MSG_RECORD_SAVED,1,szOutputFilename);
 		ZChatOutput(MCOLOR(ZCOLOR_CHAT_SYSTEM), szOutput);
 	}
-
 }
-
-
 
 void ZGame::ToggleRecording()
 {
@@ -4914,7 +4623,7 @@ void ZGame::ToggleRecording()
 		StopRecording();
 }
 
-DWORD dwReplayStartTime;
+u64 ReplayStartTime;
 
 bool ZGame::OnLoadReplay(ZReplayLoader* pLoader)
 {
@@ -4927,8 +4636,8 @@ bool ZGame::OnLoadReplay(ZReplayLoader* pLoader)
 	ZGetGameInterface()->GetCombatInterface()->SetObserverMode(true);
 	// This bugs out the replay when the target is an admin going into admin hiding
 	//ZGetGameInterface()->GetCombatInterface()->GetObserver()->SetTarget(g_pGame->m_pMyCharacter->GetUID());
-	g_bProfile=true;	
-	dwReplayStartTime=GetGlobalTimeMS();
+	IF_DEBUG(g_bProfile = true;);
+	ReplayStartTime = GetGlobalTimeMS();
 
 	ReplayIterator = m_ReplayCommandList.begin();
 	return true;
@@ -4938,11 +4647,13 @@ void ZGame::EndReplay()
 {
 	g_bProfile = false;
 
-	DWORD dwReplayEndTime=GetGlobalTimeMS();
-	
+	auto ReplayEndTime = GetGlobalTimeMS();
+
+#ifdef _DEBUG
 	mlog("replay end. profile saved. playtime = %3.3f seconds , average fps = %3.3f \n",
-		float(dwReplayEndTime-dwReplayStartTime)/1000.f,
-		1000.f*g_nFrameCount/float(dwReplayEndTime-dwReplayStartTime));
+		float(ReplayEndTime - ReplayStartTime)/1000.f,
+		1000.f*g_nFrameCount/float(ReplayEndTime - ReplayStartTime));
+#endif
 
 	ZChangeGameState(GUNZ_LOBBY);
 }
@@ -5031,25 +4742,8 @@ void ZGame::RefreshCharacters()
 			{
 				if (m_Match.IsTeamPlay())
 				{
-//					pCharacter->SetVisible(true);		// RAONHAJE: PeerOpened TEST
 				}
 			}
-
-
-			/*
-			// TODO: AGENT 통한 peer들에게는 씹힌다. 수정요망.
-
-			//신입 캐릭터에게 자신의 무기를 알린다...
-
-			ZCharacter* pMyCharacter = g_pGame->m_pMyCharacter;
-			if(pMyCharacter)
-			{
-				//			if(pMyCharacter != pCharacter) { // 자신이 새로 생긴 캐릭이 아니라면
-				int nParts = g_pGame->m_pMyCharacter->GetItems()->GetSelectedWeaponParts();
-				ZPostChangeWeapon(nParts);
-				//			}
-			}
-			*/
 		}
 	}
 }
@@ -5059,7 +4753,6 @@ void ZGame::DeleteCharacter(const MUID& uid)
 	bool bObserverDel = false;
 	ZCharacter* pCharacter = ZGetCharacterManager()->Find(uid);
 
-	// 옵져버 타겟인 경우 다른 타겟으로 바꿔준다.
 	ZObserver* pObserver = ZGetGameInterface()->GetCombatInterface()->GetObserver();
 	if (pObserver->IsVisible())
 	{
@@ -5070,7 +4763,6 @@ void ZGame::DeleteCharacter(const MUID& uid)
 	}
 
 	m_CharacterManager.Delete(uid);
-
 
 	if (bObserverDel)
 	{
@@ -5140,34 +4832,18 @@ void ZGame::OnAddPeer(const MUID& uidChar, DWORD dwIP, const int nPort, MTD_Peer
 {
 	if ((ZApplication::GetGameInterface()->GetState() != GUNZ_GAME) || (g_pGame == NULL)) return;
 
-	/*
-	//// UDPTEST LOG ////////////////////////////////
-	char szLog[256];
-	sprintf_safe(szLog, "[%d:%d] ADDPEER: Char(%d:%d) IP:%s, Port:%d \n", 
-	GetPlayerUID().High, GetPlayerUID().Low, uidChar.High, uidChar.Low, szIP, nPort);
-	mlog(szLog);
-	/////////////////////////////////////////////////
-	*/
-
-	// 난입한 사람이 자기 자신이 아니면
 	if (uidChar != ZGetMyUID())
 	{
 		if (pNode == NULL)
 		{
-			/* // -_-?
-			MTD_CharInfo charinfo;
-			pCharInfo = &charinfo;
-			pCharInfo->szName[0] = 0;
-			memset(pCharInfo->nEquipedItemDesc, 0, sizeof(pCharInfo->nEquipedItemDesc));
-			*/
 			_ASSERT(0);
 		}
 
-		ZGetGameClient()->DeletePeer(uidChar);	// Delete exist info
+		ZGetGameClient()->DeletePeer(uidChar); // Delete exist info
 
 		MMatchPeerInfo* pNewPeerInfo = new MMatchPeerInfo;
 
-		if (uidChar == MUID(0,0)) pNewPeerInfo->uidChar = MUID(0, nPort);	// 로컬테스트를 위해서
+		if (uidChar == MUID(0,0)) pNewPeerInfo->uidChar = MUID(0, nPort);
 		else pNewPeerInfo->uidChar = uidChar;
 
 		pNewPeerInfo->dwIP = dwIP;
@@ -5185,7 +4861,7 @@ void ZGame::OnAddPeer(const MUID& uidChar, DWORD dwIP, const int nPort, MTD_Peer
 		RefreshCharacters();
 	}
 
-	ConfigureCharacter(uidChar, (MMatchTeam)pNode->ExtendInfo.nTeam, pNode->ExtendInfo.nPlayerFlags);	// Player Character 포함
+	ConfigureCharacter(uidChar, (MMatchTeam)pNode->ExtendInfo.nTeam, pNode->ExtendInfo.nPlayerFlags);
 }
 
 void ZGame::OnPeerList(const MUID& uidStage, void* pBlob, int nCount)
@@ -5214,7 +4890,6 @@ void ZGame::OnGameRoundState(const MUID& uidStage, int nRound, int nRoundState, 
 
 	MMATCH_ROUNDSTATE RoundState = MMATCH_ROUNDSTATE(nRoundState);
 
-	// 프리모드일경우
 	if ((RoundState == MMATCH_ROUNDSTATE_FREE) && (pMatch->GetRoundState() != RoundState))
 	{
 		pMatch->InitCharactersPosition();
@@ -5229,7 +4904,7 @@ void ZGame::OnGameRoundState(const MUID& uidStage, int nRound, int nRoundState, 
 
 	if (RoundState == MMATCH_ROUNDSTATE_FINISH)
 	{
-		ZGetMyInfo()->GetGameInfo()->InitRound();	// 제일 마지막에 불려져야 한다.
+		ZGetMyInfo()->GetGameInfo()->InitRound();
 	}
 }
 
@@ -5258,26 +4933,20 @@ bool ZGame::FilterDelayedCommand(MCommand *pCommand)
 					case ZC_SKILL_DASH			: break;
 				}
 
-				////////////////////////////////////////////////////////////////////
 				int sel_type;
 				pCommand->GetParameter(&sel_type, 2, MPT_INT);
 				MMatchCharItemParts parts = (MMatchCharItemParts)sel_type;
 				if( parts != pChar->GetItems()->GetSelectedWeaponParts()) {
-					// 지금 들고 있는 무기와 보내진 무기가 틀리다면 보내진 무기로 바꿔준다..
 					OnChangeWeapon(uid,parts);
 				}
-				////////////////////////////////////////////////////////////////////
-
-
 			}break;
 
 		case MC_PEER_SHOT:
 			{
 				MCommandParameter* pParam = pCommand->GetParameter(0);
-				if(pParam->GetType()!=MPT_BLOB) break;	// 문제가 있다
+				if(pParam->GetType()!=MPT_BLOB) break;
 				ZPACKEDSHOTINFO *pinfo =(ZPACKEDSHOTINFO*)pParam->GetPointer();
 
-				// 칼질만 딜레이가 있다
 				if(pinfo->sel_type!=MMCIP_MELEE) return false;
 
 				if(pChar!=m_pMyCharacter &&
@@ -5288,17 +4957,13 @@ bool ZGame::FilterDelayedCommand(MCommand *pCommand)
 
 				fDelayTime = .15f;
 
-				////////////////////////////////////////////////////////////////////
 				MMatchCharItemParts parts = (MMatchCharItemParts)pinfo->sel_type;
 				if( parts != pChar->GetItems()->GetSelectedWeaponParts()) {
-					// 지금 들고 있는 무기와 보내진 무기가 틀리다면 보내진 무기로 바꿔준다..
 					OnChangeWeapon(uid,parts);
 				}
-				///////////////////////////////////////////////////////////////////////////////
 			}
 			break;
 
-		// 새로 추가된 근접공격 커맨드
 		case MC_PEER_SHOT_MELEE:
 			{
 				float fShotTime;
@@ -5325,8 +4990,7 @@ bool ZGame::FilterDelayedCommand(MCommand *pCommand)
 			}
 			break;
 
-// 퀘스트 커맨드들
-		case MC_QUEST_PEER_NPC_ATTACK_MELEE :	// npc 칼질
+		case MC_QUEST_PEER_NPC_ATTACK_MELEE:
 			ZGetQuest()->OnPrePeerNPCAttackMelee(pCommand);
 			fDelayTime = .4f;
 			break;
@@ -5369,7 +5033,7 @@ void ZGame::PostSpMotion(ZC_SPMOTION_TYPE mtype)
 			type = pSItem->GetDesc()->m_nWeaponType;
 		}
 
-		if( mtype == ZC_SPMOTION_TAUNT ) // taunt 일 경우 모션이 없어서...
+		if( mtype == ZC_SPMOTION_TAUNT )
 			if( (type == MWT_MED_KIT) || 
 				(type == MWT_REPAIR_KIT) || 
 				(type == MWT_FOOD) ||
@@ -5437,21 +5101,19 @@ void ZGame::OnLocalOptainSpecialWorldItem(MCommand* pCommand)
 		{
 			if (ZGetGameClient()->GetMatchStageSetting()->GetGameType() != MMATCH_GAMETYPE_QUEST) break;
 
-			// 서버에 포탈로 이동한다고 전송
 			char nCurrSectorIndex = ZGetQuest()->GetGameInfo()->GetCurrSectorIndex();
 			ZPostQuestRequestMovetoPortal(nCurrSectorIndex);
 		}
 		break;
 	};
-}
 
+}
 
 void ZGame::ReserveSuicide( void)
 {
 	m_dwReservedSuicideTime = GetGlobalTimeMS() + 10000;
 	m_bSuicide = true;
 }
-
 
 bool ZGame::OnRuleCommand(MCommand* pCommand)
 {
@@ -5495,7 +5157,6 @@ void ZGame::OnResetTeamMembers(MCommand* pCommand)
 
 		if (pChar->GetTeamID() != ( (MMatchTeam)pDataNode->nTeam) )
 		{
-			// 만약 나자신이 팀변경이 되었으면 팀변경되었는지를 남긴다.
 			if (pDataNode->m_uidPlayer == ZGetMyUID())
 			{
 				ZGetMyInfo()->GetGameInfo()->bForcedChangeTeam = true;

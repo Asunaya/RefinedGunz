@@ -13,13 +13,16 @@ using rplane = D3DXPLANE;
 using rvector2 = D3DXVECTOR2;
 using rquaternion = D3DXQUATERNION;
 using RPIXELFORMAT = D3DFORMAT;
+using rmatrixa16 = D3DXMATRIXA16;
 
 _NAMESPACE_REALSPACE2_BEGIN
 
 // awkward, remove sometime
+#ifndef pi
 #define pi D3DX_PI
+#endif
 
-enum rsign { NEGATIVE= -1, ZERO= 0, POSITIVE= 1 };
+enum rsign { NEGATIVE = -1, ZERO = 0, POSITIVE = 1 };
 
 enum RRESULT {
 	R_UNKNOWN = -1,

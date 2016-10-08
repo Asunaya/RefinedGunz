@@ -164,6 +164,10 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release LTCG|Win32'">
     <IncludePath>$(VCClangInstallDir)include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <CustomBuildAfterTargets>
+    </CustomBuildAfterTargets>
+    <CustomBuildBeforeTargets>
+    </CustomBuildBeforeTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Clang Release LTCG|Win32'">
     <IncludePath>$(VCClangInstallDir)include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
@@ -205,11 +209,19 @@
       <AdditionalOptions>/ignore:4099 /ignore:4221 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PreBuildEvent>
-      <Message>공유 파일들을 복사합니다.</Message>
-      <Command>rem cd $(ProjectDir)\$(OutDir)
-rem call copy_share.bat
-</Command>
+      <Message>
+      </Message>
+      <Command>
+      </Command>
     </PreBuildEvent>
+    <CustomBuildStep>
+      <Command>
+      </Command>
+    </CustomBuildStep>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Library Debug|Win32'">
     <ClCompile>
@@ -240,10 +252,10 @@ rem call copy_share.bat
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
     </Link>
     <PreBuildEvent>
-      <Message>공유 파일들을 복사합니다.</Message>
-      <Command>rem cd $(ProjectDir)\$(OutDir)
-rem call copy_share.bat
-</Command>
+      <Message>
+      </Message>
+      <Command>
+      </Command>
     </PreBuildEvent>
     <Lib>
       <TargetMachine>MachineX86</TargetMachine>
@@ -413,8 +425,19 @@ rem call copy_share.bat
       <AdditionalOptions>/ignore:4099 /ignore:4221 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PreBuildEvent>
-      <Message>공유 파일들을 복사합니다.</Message>
+      <Message>
+      </Message>
     </PreBuildEvent>
+    <CustomBuildStep>
+      <Command>
+      </Command>
+      <Outputs>
+      </Outputs>
+    </CustomBuildStep>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Clang Release LTCG|Win32'">
     <ClCompile>
@@ -459,7 +482,8 @@ rem call copy_share.bat
       <AdditionalOptions>/ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PreBuildEvent>
-      <Message>공유 파일들을 복사합니다.</Message>
+      <Message>
+      </Message>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release LTCG|x64'">
@@ -568,6 +592,9 @@ rem call copy_share.bat
     <ClInclude Include="ZCombatQuestScreen.h" />
     <ClInclude Include="ZCrossHair.h" />
     <ClInclude Include="ZDirectInput.h" />
+    <ClInclude Include="ZGameDraw.h" />
+    <ClInclude Include="ZGameDrawD3D9.h" />
+    <ClInclude Include="ZGameDrawVulkan.h" />
     <ClInclude Include="ZGameInput.h" />
     <ClInclude Include="ZInput.h" />
     <ClInclude Include="ZMiniMap.h" />
@@ -803,6 +830,7 @@ rem call copy_share.bat
     <ClCompile Include="ZCombatQuestScreen.cpp" />
     <ClCompile Include="ZCrossHair.cpp" />
     <ClCompile Include="ZDirectInput.cpp" />
+    <ClCompile Include="ZGameDrawD3D9.cpp" />
     <ClCompile Include="ZGameInput.cpp" />
     <ClCompile Include="ZGameInput_Debug.cpp" />
     <ClCompile Include="ZInput.cpp" />

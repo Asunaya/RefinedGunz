@@ -36,7 +36,7 @@ public:
 	auto GetTexType() const { return m_nTexType; }
 	void SetTexType(int type) { m_nTexType = type; }
 
-	auto GetFormat() const {return m_Info.Format;}
+	auto GetFormat() const { return m_Info.Format; }
 
 	LPDIRECT3DTEXTURE9 GetTexture();
 
@@ -52,13 +52,13 @@ public:
 	DWORD	m_nTexType = RTextureType_Etc;
 
 	D3DXIMAGE_INFO m_Info{};
-	D3DPtr<IDirect3DTexture9> m_pTex{};
+	D3DPtr<IDirect3DTexture9> m_pTex;
 
 private:
 	bool SubCreateTexture(char* TextureFileBuffer);
 };
 
-class RTextureManager final : public std::map<std::string,RBaseTexture*> 
+class RTextureManager final : public std::map<std::string, RBaseTexture*> 
 {
 public:
 	~RTextureManager();

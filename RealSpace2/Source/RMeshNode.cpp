@@ -340,9 +340,7 @@ bool RMeshNode::MakeVSVertexBuffer()
 	static RBlendVertex pBVert[MAX_VERTEX];
 
 	for (int i = 0; i < m_face_num; ++i) {
-
 		for (int j = 0; j < 3; ++j) {
-
 			if (!SetBVertData(pBVert, i, j, 3 * i + j, DifferenceMap, matrixIndex))
 				return false;
 		}
@@ -457,6 +455,9 @@ void RMeshNode::RenderNodeVS(RMesh* pMesh, const D3DXMATRIX& pWorldMat_,ESHADER 
 	__EP(5011);
 
 	RMtrl* psMtrl;
+
+	D3DPtr<IDirect3DVertexShader9> PrevShader;
+	dev->GetVertexShader(MakeWriteProxy(PrevShader));
 	
 	dev->SetVertexDeclaration( RGetShaderMgr()->getShaderDecl(0) );
 	dev->SetVertexShader( RGetShaderMgr()->getShader(shader_) );
@@ -489,7 +490,7 @@ void RMeshNode::RenderNodeVS(RMesh* pMesh, const D3DXMATRIX& pWorldMat_,ESHADER 
 
 	__EP(5009);
 
-	dev->SetVertexShader( NULL );
+	dev->SetVertexShader(PrevShader.get());
 }
 
 

@@ -790,7 +790,7 @@ ZSoundEngine* ZApplication::GetSoundEngine(void)
 
 void ZApplication::OnInvalidate()
 {
-	RGetShaderMgr()->Release();
+	RGetShaderMgr()->OnInvalidate();
 	if(m_pGameInterface)
 		m_pGameInterface->OnInvalidate();
 }
@@ -801,11 +801,8 @@ void ZApplication::OnRestore()
 		m_pGameInterface->OnRestore();
 	if( ZGetConfiguration()->GetVideo()->bShader )
 	{
-		RMesh::mHardwareAccellated		= true;
-		if( !RGetShaderMgr()->SetEnable() )
-		{
-			RGetShaderMgr()->SetDisable();
-		}
+		RMesh::mHardwareAccellated = true;
+		RGetShaderMgr()->SetEnable();
 	}
 
 	g_RGMain->OnReset();

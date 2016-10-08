@@ -4,6 +4,7 @@
 #include "ZMapDesc.h"
 #include "ZSkyBox.h"
 #include "ZInitialLoading.h"
+#include "RUtil.h"
 
 ZWorld::ZWorld() : m_pBsp(NULL), m_pMapDesc(NULL), m_pSkyBox(NULL), m_nRefCount(1), m_bCreated(false)
 {
@@ -34,17 +35,17 @@ namespace RealSpace2 {
 void ComputeZPlane(rplane *plane,float z,int sign);
 }
 
-
 void ZWorld::Draw()
 {
-	if( m_pSkyBox != NULL )
-	{
- 		m_pSkyBox->Render();
-	}
+	auto Shaders = SaveAndDisableShaders();
 
-	if(m_bFog) {
-		ComputeZPlane(RGetViewFrustum()+5,m_fFogFar,-1);
-	}
+	if (m_pSkyBox)
+		m_pSkyBox->Render();
+
+	SetShaders(Shaders);
+
+	if (m_bFog)
+		ComputeZPlane(RGetViewFrustum() + 5, m_fFogFar, -1);
 
 	m_pBsp->Draw();
 

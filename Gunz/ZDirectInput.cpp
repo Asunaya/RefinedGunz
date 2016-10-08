@@ -3,12 +3,11 @@
 #include "MDebug.h"
 #include "ZDirectInput.h"
 #include <crtdbg.h>
+#include "MUtil.h"
 
 #pragma comment(lib,"dinput8.lib")
 
 #define SAMPLE_BUFFER_SIZE 32  // arbitrary number of buffer elements
-#define SAFE_DELETE(p)  { if(p) { delete (p);     (p)=NULL; } }
-#define SAFE_RELEASE(p) { if(p) { (p)->Release(); (p)=NULL; } }
 
 #undef _DONOTUSE_DINPUT_MOUSE
 

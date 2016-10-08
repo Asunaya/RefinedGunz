@@ -1,7 +1,6 @@
 #pragma once
 
 #include "RMath.h"
-#include "RUtil.h"
 #include "RError.h"
 #include "MZFileSystem.h"
 
@@ -10,7 +9,10 @@
 #include "RNameSpace.h"
 _NAMESPACE_REALSPACE2_BEGIN
 
-class RParticleSystem;
+extern int g_nFrameCount, g_nLastFrameCount;
+extern float g_fFPS;
+extern HWND	g_hWnd;
+extern MZFileSystem *g_pFileSystem;
 
 bool	RIsActive();
 bool	RIsQuery();
@@ -32,18 +34,17 @@ int		RGetVideoMemory();
 void	RSetWBuffer(bool bEnable);
 bool	RIsStencilBuffer();
 bool IsDynamicResourceLoad();
+bool SupportsVertexShaderVersion(int Major, int Minor);
+bool SupportsPixelShaderVersion(int Major, int Minor);
+int MaxStreamsSupported();
 void SetVSync(bool b);
-
+D3DFORMAT GetDepthStencilFormat();
+const D3DCAPS9& GetDeviceCaps();
 
 int RGetAdapterModeCount(D3DFORMAT Format, UINT Adapter = D3DADAPTER_DEFAULT);
 bool REnumAdapterMode(UINT Adapter, D3DFORMAT Format, UINT Mode, D3DDISPLAYMODE* pMode);
 
-RParticleSystem *RGetParticleSystem();
-
-extern int g_nFrameCount, g_nLastFrameCount;
-extern float g_fFPS;
-extern HWND	g_hWnd;
-extern MZFileSystem *g_pFileSystem;
+class RParticleSystem *RGetParticleSystem();
 
 bool RInitDisplay(HWND hWnd, const RMODEPARAMS *params);
 bool RCloseDisplay();

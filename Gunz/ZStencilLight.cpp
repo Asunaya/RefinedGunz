@@ -297,8 +297,6 @@ void ZStencilLight::Render()
 	
 	PostRender();
 	return;
-	/////////////////////////////////////////////
-	/////////////////////////////////////////////
 
 	if(m_LightSource.size()<=0) return;
 
@@ -312,7 +310,7 @@ void ZStencilLight::Render()
 			float radius = SLBASERADIUS*pLS->power;
 			for(int j = 0 ; j < i; ++j ) radius = radius*0.95f;
 			auto vec = pLS->pos - RCameraPosition;
-			if(D3DXVec3LengthSq(&vec) < radius*radius) bInverse = true;
+			if (MagnitudeSq(vec) < radius*radius) bInverse = true;
 			RenderStencil( pLS->pos, radius );
 		}	
 		RenderLight();
@@ -329,7 +327,7 @@ int ZStencilLight::AddLightSource(const rvector& p, float power )
 	m_LightSource.insert( map<int,LightSource*>::value_type(m_id,pNew) );
 	int rid = m_id;
 	m_id = m_id>=MAXLSID?1:m_id+1;
-//	mlog("light %d added\n",rid);
+	DMLog("light %d added\n", rid);
 	return rid;
 }
 
@@ -344,7 +342,7 @@ int ZStencilLight::AddLightSource(const rvector& p, float power,	DWORD lastTime 
 	m_LightSource.insert( map<int,LightSource*>::value_type(m_id,pNew) );
 	int rid = m_id;
 	m_id = m_id>=MAXLSID?1:m_id+1;
-//	mlog("light %d added\n",rid);
+	DMLog("light %d added\n", rid);
 	return rid;
 }
 
@@ -400,10 +398,9 @@ void ZStencilLight::Update()
 		LightSource* pLS = iter->second;
 		if(pLS->bAttenuation)
 		{
-//			pLS->power *= 0.97f;
 			if(pLS->deadTime <= GetGlobalTimeMS())
 			{
-//				mlog("light %d deleted\n",iter->first);
+				DMLog("light %d deleted\n",iter->first);
 				SAFE_DELETE(pLS);
 				iter = m_LightSource.erase(iter);
 				continue;

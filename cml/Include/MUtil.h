@@ -1,16 +1,39 @@
 #pragma once
 
 #include <string>
+#include <memory>
+#include "TMP.h"
 
 #ifndef SAFE_DELETE
 #define SAFE_DELETE(p)       { if(p) { delete (p);     (p)=NULL; } }
 #endif
+
 #ifndef SAFE_DELETE_ARRAY
 #define SAFE_DELETE_ARRAY(p) { if(p) { delete[] (p);   (p)=NULL; } }
 #endif
-#ifndef SAFE_RELEASE
-#define SAFE_RELEASE(p)      { if(p) { (p)->Release(); (p)=NULL; } }
+
+#ifdef SAFE_RELEASE
+#undef SAFE_RELEASE
 #endif
+template <typename T>
+inline void SafeRelease(T& ptr)
+{
+	if (!ptr)
+		return;
+	ptr->Release();
+	ptr = nullptr;
+}
+
+template <typename T>
+class D3DPtr;
+
+template <typename T>
+inline void SafeRelease(D3DPtr<T>& ptr)
+{
+	ptr = nullptr;
+}
+
+#define SAFE_RELEASE(p)      { SafeRelease(p); }
 
 #define EXPAND_VECTOR(v) v[0], v[1], v[2]
 
@@ -94,25 +117,10 @@ public:
 		return temp;
 	}
 
-	bool operator==(const ValueIterator& rhs) const
-	{
-		return it == rhs.it;
-	}
-
-	bool operator!=(const ValueIterator& rhs) const
-	{
-		return it != rhs.it;
-	}
-
-	auto& operator*()
-	{
-		return it->second;
-	}
-
-	auto& operator->()
-	{
-		return this->operator*();
-	}
+	bool operator==(const ValueIterator& rhs) const { return it == rhs.it; }
+	bool operator!=(const ValueIterator& rhs) const { return it != rhs.it; }
+	auto& operator*() { return it->second; }
+	auto& operator->() { return this->operator*(); }
 
 private:
 	ItT it;
@@ -124,41 +132,24 @@ class PairValueAdapter
 public:
 	PairValueAdapter(ContainerT& o) : Container(o) { }
 
-	auto begin()
-	{
-		return ValueIterator<typename ContainerT::iterator>(Container.begin());
-	}
-
-	auto end()
-	{
-		return ValueIterator<typename ContainerT::iterator>(Container.end());
-	}
-
-	auto begin() const
-	{
-		return ValueIterator<typename ContainerT::iterator>(Container.begin());
-	}
-
-	auto end() const
-	{
-		return ValueIterator<typename ContainerT::iterator>(Container.end());
-	}
+	auto begin() {
+		return ValueIterator<typename ContainerT::iterator>(Container.begin()); }
+	auto end() {
+		return ValueIterator<typename ContainerT::iterator>(Container.end()); }
+	auto begin() const {
+		return ValueIterator<typename ContainerT::iterator>(Container.begin()); } 
+	auto end() const {
+		return ValueIterator<typename ContainerT::iterator>(Container.end()); }
 
 private:
 	ContainerT& Container;
 };
 
 template <typename T>
-auto MakePairValueAdapter(T&& Container)
-{
-	return PairValueAdapter<typename std::remove_reference<T>::type>(Container);
-}
+auto MakePairValueAdapter(T& Container) { return PairValueAdapter<T>(Container); }
 
 template <typename T, size_t size>
-inline constexpr size_t ArraySize(T(&)[size])
-{
-	return size;
-}
+inline constexpr size_t ArraySize(T(&)[size]) { return size; }
 
 inline std::pair<bool, int> StringToInt(const char* String, int Radix = 10)
 {
@@ -176,11 +167,8 @@ template <typename T>
 class D3DPtr
 {
 public:
-	T* ptr = nullptr;
-
 	D3DPtr() {}
 	D3DPtr(T* p) : ptr(p) {}
-	D3DPtr(const D3DPtr&) = delete;
 	D3DPtr(D3DPtr&& src) { Move(std::move(src)); }
 
 	D3DPtr<T>& operator=(const D3DPtr&) = delete;
@@ -191,6 +179,7 @@ public:
 	}
 	D3DPtr<T>& operator=(nullptr_t)
 	{
+		Release();
 		ptr = nullptr;
 		return *this;
 	}
@@ -199,7 +188,9 @@ public:
 
 	operator T*() const { return ptr; }
 	T* operator ->() const { return ptr; }
-	T** operator &() { return &ptr; }
+
+	auto* get() { return ptr; }
+	auto* get() const { return ptr; }
 
 private:
 	void Move(D3DPtr&& src)
@@ -214,4 +205,27 @@ private:
 		if (ptr)
 			ptr->Release();
 	}
+
+	T* ptr{};
 };
+
+template <typename T>
+class WriteProxy
+{
+	using StoredType = get_template_argument_t<T, 0>;
+public:
+	WriteProxy(T& ptr) : ptr(ptr), temp(ptr.get()) {}
+	~WriteProxy() { ptr = temp; }
+
+	operator StoredType**() { return &temp; }
+
+private:
+	T& ptr;
+	StoredType* temp;
+};
+
+template <typename T>
+auto MakeWriteProxy(D3DPtr<T>& ptr) { return WriteProxy<D3DPtr<T>>{ptr}; }
+
+template <typename... T>
+auto MakeWriteProxy(std::unique_ptr<T...>& ptr) { return WriteProxy<std::unique_ptr<T...>>(ptr); }

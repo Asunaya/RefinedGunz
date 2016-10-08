@@ -7,12 +7,7 @@
 #include "RMeshUtil.h"
 #include "RFont.h"
 #include "dxerr9.h"
-
-#pragma comment ( lib, "d3d9.lib" )
-
-#ifdef _HSHIELD
-#include "../../Gunz/HShield/HShield.h"
-#endif
+#include "RS2.h"
 
 _NAMESPACE_REALSPACE2_BEGIN
 
@@ -37,10 +32,35 @@ RParticleSystem	g_ParticleSystem;
 HMODULE g_hD3DLibrary;
 static bool g_bStencilBuffer;
 bool DynamicResourceLoading = true;
+static std::unique_ptr<RS2> rs2;
 
-bool IsDynamicResourceLoad()
+RS2::RS2()
 {
+}
+
+void RS2::OnInvalidate()
+{
+	Render.OnInvalidate();
+}
+
+void RS2::OnRestore()
+{
+	Render.OnRestore();
+}
+
+RS2& RS2::Get() { return *rs2; }
+
+bool IsDynamicResourceLoad() {
 	return DynamicResourceLoading;
+}
+bool SupportsVertexShaderVersion(int Major, int Minor) {
+	return g_d3dcaps.VertexShaderVersion >= D3DVS_VERSION(Major, Minor);
+}
+bool SupportsPixelShaderVersion(int Major, int Minor) {
+	return g_d3dcaps.PixelShaderVersion >= D3DVS_VERSION(Major, Minor);
+}
+int MaxStreamsSupported() {
+	return g_d3dcaps.MaxStreams;
 }
 
 void SetVSync(bool b)
@@ -92,8 +112,14 @@ RPIXELFORMAT RGetPixelFormat() { return g_PixelFormat; }
 LPDIRECT3DDEVICE9	RGetDevice() { return g_pd3dDevice; }
 bool RIsStencilBuffer()		{ return g_bStencilBuffer; }
 bool CheckVideoAdapterSupported();
+D3DFORMAT GetDepthStencilFormat() { return g_d3dpp.AutoDepthStencilFormat; }
 
-unsigned long g_rsnRenderFlags = RRENDER_CLEAR_BACKBUFFER;
+const D3DCAPS9 & GetDeviceCaps()
+{
+	return g_d3dcaps;
+}
+
+static unsigned long g_rsnRenderFlags = RRENDER_CLEAR_BACKBUFFER;
 void RSetRenderFlags(unsigned long nFlags)
 {
 	g_rsnRenderFlags = nFlags;
@@ -247,9 +273,14 @@ bool RInitDisplay(HWND hWnd, const RMODEPARAMS *params)
 	g_bAvailUserClipPlane = (d3dcaps.MaxUserClipPlanes > 0 )? true : false;
 	if(d3dcaps.RasterCaps & D3DPRASTERCAPS_WFOG) mlog("WFog Enabled Device.\n");
 
-	g_bSupportVS = ( d3dcaps.VertexShaderVersion >= D3DVS_VERSION(1, 1));
+	g_bSupportVS = d3dcaps.VertexShaderVersion >= D3DVS_VERSION(1, 1);
 	
-	if(!g_bSupportVS) mlog("Vertex Shader isn't supported\n");
+	if (!g_bSupportVS)
+	{
+		mlog("Vertex shader isn't supported (expected at least 1_1, got %d_%d)\n",
+			D3DSHADER_VERSION_MAJOR(g_d3dcaps.VertexShaderVersion),
+			D3DSHADER_VERSION_MINOR(g_d3dcaps.VertexShaderVersion));
+	}
 	else
 	{
 		if( d3dcaps.MaxVertexShaderConst < 60 )
@@ -261,7 +292,7 @@ bool RInitDisplay(HWND hWnd, const RMODEPARAMS *params)
 
 	// Get screen information
 	HRESULT hr;
-	hr=g_pD3D->GetAdapterDisplayMode( D3DADAPTER_DEFAULT, &g_d3ddm );
+	hr = g_pD3D->GetAdapterDisplayMode( D3DADAPTER_DEFAULT, &g_d3ddm );
 	
 	g_FullscreenMode = params->FullscreenMode;
 	g_nScreenWidth = params->nWidth;
@@ -347,11 +378,15 @@ bool RInitDisplay(HWND hWnd, const RMODEPARAMS *params)
 	if(!RFontCreate())
 	{
 		RCloseDisplay();
-		mlog("Can't create font\n");
+		mlog("Failed to create font!\n");
 		return false;
 	}
 
 	g_hWnd=hWnd;
+
+	rs2 = std::make_unique<RS2>();
+	rs2->Render.SetNearZ(5);
+	rs2->Render.SetFarZ(100'000);
 
 	return true;
 }
@@ -411,7 +446,7 @@ void RResetDevice(const RMODEPARAMS *params)
 
 	RFrame_Invalidate();
 	RBaseTexture_Invalidate();
-
+	RS2::Get().OnInvalidate();
 
 	g_FullscreenMode = params->FullscreenMode;
 	g_nScreenWidth = params->nWidth;
@@ -427,11 +462,11 @@ void RResetDevice(const RMODEPARAMS *params)
 
 	HRESULT hr = g_pd3dDevice->Reset(&g_d3dpp);
 
-	_ASSERT(hr == D3D_OK);
 	if (hr != D3D_OK) {
 		char errstr[512];
 		sprintf_safe(errstr, "Device reset failed: %s", DXGetErrorString9(hr));
 		mlog("%s\n", errstr);
+		assert(false);
 		throw std::runtime_error(errstr);
 	}
 
@@ -448,6 +483,7 @@ void RResetDevice(const RMODEPARAMS *params)
 
 	RResetTransform();
 
+	RS2::Get().OnRestore();
 	RBaseTexture_Restore();
 	RFrame_Restore();
 

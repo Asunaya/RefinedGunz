@@ -580,10 +580,10 @@ IDirect3DTexture9* HueShiftTexture(IDirect3DTexture9* Tex, float Hue)
 		Tex->GetLevelDesc(Level, &Desc);
 
 		D3DPtr<IDirect3DSurface9> OrigSurface = nullptr;
-		Tex->GetSurfaceLevel(Level, &OrigSurface.ptr);
+		Tex->GetSurfaceLevel(Level, MakeWriteProxy(OrigSurface));
 
 		D3DPtr<IDirect3DSurface9> NewSurface = nullptr;
-		NewTex->GetSurfaceLevel(Level, &NewSurface.ptr);
+		NewTex->GetSurfaceLevel(Level, MakeWriteProxy(NewSurface));
 
 		if (FAILED(D3DXLoadSurfaceFromSurface(NewSurface, nullptr, nullptr,
 			OrigSurface, nullptr, nullptr, D3DX_FILTER_NONE, 0)))

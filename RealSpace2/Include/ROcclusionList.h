@@ -1,16 +1,10 @@
-#ifndef _ROCCLUSIONLIST_H
-#define _ROCCLUSIONLIST_H
-
-//#pragma	once
-
-class MXmlElement;
+#pragma	once
 
 #include <string>
 #include "RTypes.h"
 
-using namespace std;
-
 #include "RNameSpace.h"
+
 _NAMESPACE_REALSPACE2_BEGIN
 
 class ROcclusion {
@@ -20,26 +14,24 @@ public:
 
 	inline void CalcPlane() { D3DXPlaneFromPoints(&plane,pVertices,pVertices+1,pVertices+2); }
 
-	int nCount;				// 버텍스의 수
-	rvector *pVertices;		// 버텍스
-	rplane	*pPlanes;		// 카메라위치와 occlusion의 한변을 잇는 평면의 방정식들
-	rplane plane;			// occlusion이 있는 평면
+	int nCount;
+	rvector *pVertices;
+	rplane	*pPlanes;
+	rplane plane;
 	string	Name;
 };
 
-
-class ROcclusionList : public list<ROcclusion*> {
+// TODO: Change std::list<ROcclusion*> -> std::vector<ROcclusion>
+class ROcclusionList final : public std::list<ROcclusion*> {
 public:
-	virtual ~ROcclusionList();
-	bool Open(MXmlElement *pElement);
+	~ROcclusionList();
+
+	bool Open(class MXmlElement *pElement);
 	bool Save(MXmlElement *pElement);
 
-	void UpdateCamera(rmatrix &matWorld,rvector &cameraPos);
+	void UpdateCamera(const rmatrix &matWorld, const rvector &cameraPos);
 	bool IsVisible(rboundingbox &bb) const;
 
 };
 
 _NAMESPACE_REALSPACE2_END
-
-
-#endif

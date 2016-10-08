@@ -401,7 +401,9 @@ void VoiceChat::OnCreateDevice()
 	if (!ret.first)
 		return MLog("Failed to load speaker icon texture file\n");
 
-	auto hr = D3DXCreateTextureFromFileInMemory(RGetDevice(), ret.second.data(), ret.second.size(), &SpeakerTexture.ptr);
+	auto hr = D3DXCreateTextureFromFileInMemory(RGetDevice(),
+		ret.second.data(), ret.second.size(),
+		MakeWriteProxy(SpeakerTexture));
 
 	if (FAILED(hr))
 		return MLog("Failed to create speaker icon texture\n");

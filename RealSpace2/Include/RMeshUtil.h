@@ -238,8 +238,8 @@ enum RShaderConst {
 	LIGHT1_DIFFUSE,
 	LIGHT1_SPECULAR,
 	LIGHT1_RANGE,
-	LIGHT_ATTENUATION,
-	LIGHT_ATTENUATION1,
+	LIGHT0_ATTENUATION,
+	LIGHT1_ATTENUATION,
 	ANIMATION_MATRIX_BASE
 };
 
@@ -251,15 +251,13 @@ enum RShaderBlendInput {
 	TEXTURE_UV
 };
 
-///////////////////////////////////////////////////
-
-struct	RTLVertex { 
+struct RTLVertex { 
 	D3DXVECTOR4 p;   
 	DWORD color;     
 	FLOAT tu, tv; 
 };
 
-struct	RLVertex { 
+struct RLVertex { 
 	D3DXVECTOR3 p;   
 	DWORD color;     
 	FLOAT tu, tv; 
@@ -267,10 +265,10 @@ struct	RLVertex {
 
 #ifndef _MAX_EXPORT
 
-struct	RVertex { 
-	D3DXVECTOR3 p;   
-	D3DXVECTOR3 n;   
-	FLOAT tu, tv; 
+struct RVertex { 
+	D3DXVECTOR3 p;
+	D3DXVECTOR3 n; 
+	FLOAT tu, tv;
 };
 
 #endif
@@ -433,7 +431,7 @@ public:
 public:
 
 	bool	m_is_init;
-	bool	m_bUseSWVertex;	// 버텍스 버퍼가 사용 불가능한 저사양 컴인가? 혹은 버텍스 에니메이션..
+	bool	m_bUseSWVertex;
 	bool	m_bUseHWVertex;
 	char*	m_pVert;
 	char*	m_v;
@@ -454,9 +452,6 @@ public:
 	LPDIRECT3DVERTEXBUFFER9	m_vb;
 };
 
-///////////////////////////////////////////////////////////////////////////////
-// util
-
 inline D3DXQUATERNION* WINAPI D3DXQuaternionUnitAxisToUnitAxis2( D3DXQUATERNION *pOut, const D3DXVECTOR3 *pvFrom, const D3DXVECTOR3 *pvTo)
 {
 	D3DXVECTOR3 vAxis;
@@ -467,7 +462,6 @@ inline D3DXQUATERNION* WINAPI D3DXQuaternionUnitAxisToUnitAxis2( D3DXQUATERNION 
 	pOut->w = D3DXVec3Dot( pvFrom, pvTo );
 	return pOut;
 }
-
 
 inline D3DXQUATERNION* WINAPI D3DXQuaternionAxisToAxis( D3DXQUATERNION *pOut, const D3DXVECTOR3 *pvFrom, const D3DXVECTOR3 *pvTo)
 {

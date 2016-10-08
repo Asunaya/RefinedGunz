@@ -8,6 +8,12 @@
 
 #define MASSERT(x) _ASSERT(x)
 
+#ifndef _DEBUG
+#define IF_DEBUG(expr)
+#else
+#define IF_DEBUG(expr) do { expr } while (false)
+#endif
+
 #define MLOGSTYLE_FILE 0x0001
 #define MLOGSTYLE_DEBUGSTRING 0x0002
 

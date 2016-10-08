@@ -22,6 +22,12 @@
     <Filter Include="Util">
       <UniqueIdentifier>{672507d7-bcc6-4da0-89d1-c4c955d3d7ca}</UniqueIdentifier>
     </Filter>
+    <Filter Include="D3D9">
+      <UniqueIdentifier>{7e5f232e-450c-4729-a4e8-18887c762dcf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="D3D9\Shaders">
+      <UniqueIdentifier>{6c16a410-6c56-4524-8a1a-a3e5a0104104}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="Doc\맵 디자인 규칙 문서.txt">
@@ -29,6 +35,19 @@
     </None>
     <None Include="doc\캐릭터 디자인 규칙 문서.txt">
       <Filter>Doc</Filter>
+    </None>
+    <None Include="Include\Renderer.inl" />
+    <None Include="Source\Globals.hlslh">
+      <Filter>D3D9\Shaders</Filter>
+    </None>
+    <None Include="Source\SceneVS.hlsl">
+      <Filter>D3D9\Shaders</Filter>
+    </None>
+    <None Include="Source\ShadowVS.hlsl">
+      <Filter>D3D9\Shaders</Filter>
+    </None>
+    <None Include="Source\skin.hlsl">
+      <Filter>D3D9\Shaders</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -172,6 +191,8 @@
     <ClCompile Include="Source\stdafx.cpp" />
     <ClCompile Include="Source\MeshManager.cpp" />
     <ClCompile Include="Source\RMath.cpp" />
+    <ClCompile Include="Source\Renderer.cpp" />
+    <ClCompile Include="Source\ShaderUtil.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\RHalfEdgeMesh.h">
@@ -306,5 +327,28 @@
     <ClInclude Include="Include\MeshManager.h" />
     <ClInclude Include="Include\RMath.h" />
     <ClInclude Include="Include\RUtil.h" />
+    <ClInclude Include="Include\Renderer.h" />
+    <ClInclude Include="Include\RS2.h" />
+    <ClInclude Include="Include\ShaderGlobals.h">
+      <Filter>D3D9\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\ShaderUtil.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Source\SceneDirLightPS.hlsl">
+      <Filter>D3D9\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Source\ScenePointLightPS.hlsl">
+      <Filter>D3D9\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Source\ShadowPS.hlsl">
+      <Filter>D3D9\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Source\MergeShadowMapsPS.hlsl">
+      <Filter>D3D9\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Source\MergeShadowMapsVS.hlsl">
+      <Filter>D3D9\Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

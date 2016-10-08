@@ -13,6 +13,7 @@
 #include "ZGameInterface.h"
 #include "ZGameInput.h"
 #include "ZConfiguration.h"
+#include "Config.h"
 
 Portal *g_pPortal = nullptr;
 
@@ -25,9 +26,14 @@ static bool LineAABBIntersection(const D3DXVECTOR3 &B1, const D3DXVECTOR3 &B2, c
 static bool AABBAABBIntersection(const D3DXVECTOR3 mins1, const D3DXVECTOR3 maxs1, const D3DXVECTOR3 mins2, const D3DXVECTOR3 maxs2);
 static void MakeOrientationMatrix(D3DXMATRIX &mat, const D3DXVECTOR3 &dir, const D3DXVECTOR3 &up);
 static void MakeViewMatrix(D3DXMATRIX &mat, const D3DXVECTOR3 &pos, const D3DXVECTOR3 &dir, const D3DXVECTOR3 &up);
-static void MakeProjectionMatrix(D3DXMATRIX &mat, float NearZ = 5, float FarZ = 1000000);
 static void MakeObliquelyClippingProjectionMatrix(D3DXMATRIX &matProjection, const D3DXMATRIX &matView, const D3DXVECTOR3 &p, const D3DXVECTOR3 &normal);
 static void MakePlane(D3DXPLANE &plane, const D3DXVECTOR3 &v, const D3DXVECTOR3 &u, const D3DXVECTOR3 &origin);
+static rmatrix GetDefaultProjectionMatrix(float Near = DEFAULT_NEAR_Z, float Far = DEFAULT_FAR_Z) {
+	return PerspectiveProjectionMatrixViewport(
+		RGetScreenWidth(), RGetScreenHeight(),
+		g_fFOV,
+		Near, Far);
+}
 
 Portal::Portal() : ValidPortals(PortalList)
 {
@@ -46,8 +52,8 @@ Portal::Portal() : ValidPortals(PortalList)
 	static constexpr int NumVertices = sizeof(coords) / sizeof(coords[0]) / 2;
 
 	DWORD dwFVF = (D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_TEX1);
-	D3DXCreateMeshFVF(4, 4, D3DXMESH_MANAGED, dwFVF, RGetDevice(), &pRectangleMesh);
-	D3DXCreateMeshFVF(NumVertices - 2, NumVertices, D3DXMESH_MANAGED, dwFVF, RGetDevice(), &pEdgeMesh);
+	D3DXCreateMeshFVF(4, 4, D3DXMESH_MANAGED, dwFVF, RGetDevice(), MakeWriteProxy(pRectangleMesh));
+	D3DXCreateMeshFVF(NumVertices - 2, NumVertices, D3DXMESH_MANAGED, dwFVF, RGetDevice(), MakeWriteProxy(pEdgeMesh));
 
 	struct D3DVERTEX
 	{
@@ -141,7 +147,7 @@ Portal::Portal() : ValidPortals(PortalList)
 	g_flOnReset.AddMethod(this, &Portal::CreateTextures);
 #endif
 
-	GenerateTexture(RGetDevice(), &BlackTex.ptr, 0xFF000000);
+	GenerateTexture(RGetDevice(), MakeWriteProxy(BlackTex), 0xFF000000);
 
 	for (int i = 0; i < 2; i++)
 	{
@@ -155,7 +161,9 @@ Portal::Portal() : ValidPortals(PortalList)
 			break;
 		}
 
-		if (FAILED(D3DXCreateTextureFromFileInMemory(RGetDevice(), ret.second.data(), ret.second.size(), &PortalEdgeTex[i].ptr)))
+		if (FAILED(D3DXCreateTextureFromFileInMemory(RGetDevice(),
+			ret.second.data(), ret.second.size(),
+			MakeWriteProxy(PortalEdgeTex[i]))))
 		{
 			MLog("Failed to create portal %d texture\n", i + 1);
 			break;
@@ -407,7 +415,6 @@ void Portal::RenderEdge(const PortalInfo& portalinfo)
 	RGetDevice()->SetTransform(D3DTS_WORLD, &matWorld);
 
 	RGetDevice()->SetFVF(pRectangleMesh->GetFVF());
-	RGetDevice()->SetVertexShader(NULL);
 
 	RGetDevice()->SetRenderState(D3DRS_COLORWRITEENABLE, D3DCOLORWRITEENABLE_ALPHA | D3DCOLORWRITEENABLE_RED | D3DCOLORWRITEENABLE_GREEN | D3DCOLORWRITEENABLE_BLUE);
 	RGetDevice()->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
@@ -524,8 +531,6 @@ void Portal::Render()
 		RGetDevice()->SetRenderState(D3DRS_STENCILENABLE, FALSE);*/
 
 		RGetDevice()->SetFVF(pMesh->GetFVF());
-
-		RGetDevice()->SetVertexShader(NULL);
 
 		RGetDevice()->SetTexture(0, pTex[i]);
 		//for(int i = 1; i < 8; i++)
@@ -1047,7 +1052,7 @@ static bool LineOBBIntersection(const D3DXVECTOR3 &center, const D3DXVECTOR3 &di
 
 	MakeWorldMatrix(&mat, center, dir, up);
 
-	D3DXMatrixInverse(&imat, NULL, &mat);
+	imat = Inverse(mat);
 
 	l1 = L1 * imat;
 	l2 = L2 * imat;
@@ -1154,14 +1159,6 @@ static void MakeViewMatrix(D3DXMATRIX &mat, const D3DXVECTOR3 &pos, const D3DXVE
 	D3DXMatrixLookAtLH(&mat, &pos, &at, &up);
 }
 
-static void MakeProjectionMatrix(D3DXMATRIX &mat, float NearZ, float FarZ)
-{
-	float fAspect = float(RGetScreenWidth()) / RGetScreenHeight();
-	float fovy = atanf(tanf(g_fFOV / 2.0f) / fAspect) * 2.0f;
-
-	D3DXMatrixPerspectiveFovLH(&mat, fovy, fAspect, NearZ, FarZ);
-}
-
 static void MakeObliquelyClippingProjectionMatrix(D3DXMATRIX &matProjection, const D3DXMATRIX &matView, const D3DXVECTOR3 &p, const D3DXVECTOR3 &normal)
 {
 	//MakeProjectionMatrix(matProjection);
@@ -1190,7 +1187,7 @@ static void MakeObliquelyClippingProjectionMatrix(D3DXMATRIX &matProjection, con
 		return;
 	}*/
 	
-	MakeProjectionMatrix(matProjection);
+	matProjection = GetDefaultProjectionMatrix();
 
 	if (projClipPlane.w > 0)
 	{
@@ -1220,7 +1217,7 @@ static void MakeObliquelyClippingProjectionMatrixNVIDIA(D3DXMATRIX &matProjectio
 
 	D3DXPlaneFromPointNormal(&plane, &p, &normal);
 
-	MakeProjectionMatrix(matProjection);
+	matProjection = GetDefaultProjectionMatrix();
 
 	D3DXMATRIX WorldToProjection = matView * matProjection;
 
@@ -1333,7 +1330,6 @@ void Portal::RenderPortals(const RecursionContext& rc)
 			RGetDevice()->SetTransform(D3DTS_WORLD, &portalinfo.matWorld);
 
 			RGetDevice()->SetFVF(pEdgeMesh->GetFVF());
-			RGetDevice()->SetVertexShader(nullptr);
 			RGetDevice()->SetTexture(0, BlackTex);
 
 			RGetDevice()->SetMaterial(&Mat);
@@ -1442,7 +1438,6 @@ void Portal::WriteDepth(const RecursionContext& rc)
 			RGetDevice()->SetTransform(D3DTS_WORLD, &pi.matWorld);
 
 			RGetDevice()->SetFVF(pRectangleMesh->GetFVF());
-			RGetDevice()->SetVertexShader(nullptr);
 			RGetDevice()->SetTexture(0, nullptr);
 
 			RGetDevice()->SetRenderState(D3DRS_COLORWRITEENABLE, 0);
@@ -1755,8 +1750,7 @@ void Portal::PreDraw()
 
 	if (bMakeNearProjectionMatrix)
 	{
-		rmatrix mProjection;
-		MakeProjectionMatrix(mProjection, 0.01);
+		rmatrix mProjection = GetDefaultProjectionMatrix(0.01);
 		RGetDevice()->SetTransform(D3DTS_PROJECTION, &mProjection);
 		bForceProjection = true;
 	}
@@ -1764,8 +1758,7 @@ void Portal::PreDraw()
 	{
 		if (bLookingThroughPortal)
 		{
-			rmatrix mProjection;
-			MakeProjectionMatrix(mProjection);
+			rmatrix mProjection = GetDefaultProjectionMatrix();
 			RGetDevice()->SetTransform(D3DTS_PROJECTION, &mProjection);
 			bForceProjection = true; // Setting the projection again would reset the frustum
 		}

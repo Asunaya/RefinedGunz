@@ -22,6 +22,9 @@
 #include "RLenzFlare.h"
 #include <dxerr9.h>
 #include "RNavigationNode.h"
+#include <fstream>
+#include "ShaderGlobals.h"
+#include "RS2.h"
 
 #undef pi
 
@@ -49,10 +52,22 @@ _NAMESPACE_REALSPACE2_BEGIN
 
 static LPDIRECT3DTEXTURE9 g_pShademap = nullptr;
 
-int nsplitcount = 0, nleafcount = 0;
+static int nsplitcount, nleafcount;
+static int g_nFrameNumber;
+
+#ifdef _DEBUG
 int g_nPoly, g_nCall;
 int g_nPickCheckPolygon, g_nRealPickCheckPolygon;
-int g_nFrameNumber = 0;
+#endif
+
+struct OpenNodesState
+{
+	BSPVERTEX* Vertices;
+	RSBspNode* Node;
+	RPOLYGONINFO* Info;
+	BSPNORMALVERTEX* Normals;
+	int PolygonID;
+};
 
 void DrawBoundingBox(rboundingbox *bb, DWORD color)
 {
@@ -63,7 +78,6 @@ void DrawBoundingBox(rboundingbox *bb, DWORD color)
 
 	for (i = 0; i < 12; i++)
 	{
-
 		rvector a, b;
 		for (j = 0; j < 3; j++)
 		{
@@ -106,9 +120,7 @@ void RSBspNode::DrawWireFrame(int nPolygon, DWORD color)
 	RPOLYGONINFO *info = &pInfo[nPolygon];
 
 	for (int i = 0; i < info->nVertices; i++)
-	{
 		RDrawLine(*info->pVertices[i].Coord(), *info->pVertices[(i + 1) % info->nVertices].Coord(), color);
-	}
 }
 
 RSBspNode* RSBspNode::GetLeafNode(const rvector &pos)
@@ -239,8 +251,10 @@ RMapObjectList::iterator RMapObjectList::Delete(iterator i)
 
 ////////////////////////////
 // RBspObject
+////////////////////////////
 
-RBspObject::RBspObject()
+RBspObject::RBspObject(bool PhysOnly)
+	: PhysOnly(PhysOnly)
 {
 	m_bWireframe = false;
 	m_bShowLightmap = false;
@@ -263,6 +277,10 @@ RBspObject::RBspObject()
 	m_nConvexVertices = 0;
 
 	m_DebugInfo.pLastColNode = NULL;
+
+#ifdef SHADOW_TEST
+	RenderWithNormal = true;
+#endif
 }
 
 void RBspObject::ClearLightmaps()
@@ -328,8 +346,8 @@ void RBspObject::SetDiffuseMap(int nMaterial)
 	}
 	else
 	{
-		DWORD dwDiffuse = VECTOR2RGB24(Materials[nMaterial].Diffuse);
-		pd3dDevice->SetRenderState(D3DRS_TEXTUREFACTOR, dwDiffuse);
+		auto Diffuse = VECTOR2RGB24(Materials[nMaterial].Diffuse);
+		pd3dDevice->SetRenderState(D3DRS_TEXTUREFACTOR, Diffuse);
 		pd3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TFACTOR);
 	}
 }
@@ -337,27 +355,28 @@ void RBspObject::SetDiffuseMap(int nMaterial)
 template <typename T>
 static void DrawImpl(RSBspNode& Node, int Material, T& DrawFunc)
 {
+#if 0
 	if (Node.nFrameCount != g_nFrameNumber)
 		return;
+#endif
 
 	// Leaf node
 	if (Node.nPolygon)
 	{
-		int nCount = Node.pDrawInfo[Material].nTriangleCount;
-		if (nCount)
+		auto TriangleCount = Node.pDrawInfo[Material].nTriangleCount;
+		if (TriangleCount)
 		{
 #ifdef _DEBUG
 			g_nCall++;
-			g_nPoly += nCount;
+			g_nPoly += TriangleCount;
 #endif
-			DrawFunc(Node, nCount);
+			DrawFunc(Node, TriangleCount);
 		}
 		return;
 	}
 
 	// Branch node
-	auto DrawNode = [&](auto Branch)
-	{
+	auto DrawNode = [&](auto Branch) {
 		if (Node.*Branch)
 			DrawImpl(*(Node.*Branch), Material, DrawFunc);
 	};
@@ -370,239 +389,253 @@ void RBspObject::Draw(RSBspNode* Node, int Material)
 {
 	DrawImpl(*Node, Material, [&](auto& Node, auto Count)
 	{
-		HRESULT hr = RGetDevice()->DrawIndexedPrimitive(D3DPT_TRIANGLELIST,
+		auto hr = RGetDevice()->DrawIndexedPrimitive(
+			D3DPT_TRIANGLELIST,
 			0, 0, OcVertices.size(),
 			Node.pDrawInfo[Material].nIndicesOffset, Count);
-		assert(hr == D3D_OK);
+		assert(SUCCEEDED(hr));
 	});
 }
 
-void RBspObject::DrawNoTNL(RSBspNode *pNode, int nMaterial)
+void RBspObject::DrawNoTNL(RSBspNode *Node, int Material)
 {
-	DrawImpl(*pNode, nMaterial, [&](auto& Node, int Count)
+	DrawImpl(*Node, Material, [&](auto& Node, int Count)
 	{
-		int index = Node.pDrawInfo[nMaterial].nIndicesOffset;
-		HRESULT hr = RGetDevice()->DrawIndexedPrimitiveUP(D3DPT_TRIANGLELIST, 0,
-			pNode->pDrawInfo[nMaterial].nVertice, Count,
+		int index = Node.pDrawInfo[Material].nIndicesOffset;
+		auto hr = RGetDevice()->DrawIndexedPrimitiveUP(
+			D3DPT_TRIANGLELIST, 0,
+			Node.pDrawInfo[Material].nVertice, Count,
 			OcIndices.data() + index, D3DFMT_INDEX16,
-			pNode->pDrawInfo[nMaterial].pVertices, sizeof(BSPVERTEX));
-		assert(hr == D3D_OK);
+			Node.pDrawInfo[Material].pVertices, sizeof(BSPVERTEX));
+		assert(SUCCEEDED(hr));
 	});
+}
+
+template <u32 Flags, bool ShouldHaveFlags, bool SetAlphaTestFlags>
+void RBspObject::DrawNodes(int LoopCount)
+{
+	if (GetRenderer().IsDrawingShadows())
+		DrawNodesImpl<Flags, ShouldHaveFlags, SetAlphaTestFlags, false>(LoopCount);
+	else
+		DrawNodesImpl<Flags, ShouldHaveFlags, SetAlphaTestFlags, true>(LoopCount);
+}
+
+template <u32 Flags, bool ShouldHaveFlags, bool SetAlphaTestFlags, bool SetTextures>
+void RBspObject::DrawNodesImpl(int LoopCount)
+{
+	auto dev = RGetDevice();
+
+	for (int i = 0; i < LoopCount; i++)
+	{
+		auto MaterialIndex = i % m_nMaterial;
+		if ((Materials[MaterialIndex].dwFlags & Flags) == (ShouldHaveFlags ? Flags : 0))
+		{
+			// Cull back faces on materials that aren't two-sided
+			if ((Materials[MaterialIndex].dwFlags & RM_FLAG_TWOSIDED) == 0)
+				dev->SetRenderState(D3DRS_CULLMODE, D3DCULL_CW);
+			else
+				dev->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+
+			if (SetTextures)
+			{
+				SetDiffuseMap(MaterialIndex);
+
+				if (!LightmapTextures.empty())
+					dev->SetTexture(static_cast<DWORD>(ShaderSampler::Lightmap), LightmapTextures[i / m_nMaterial].get());
+			}
+
+			if (SetAlphaTestFlags)
+			{
+				if ((Materials[MaterialIndex].dwFlags & RM_FLAG_USEALPHATEST) != 0) {
+					dev->SetRenderState(D3DRS_ZWRITEENABLE, true);
+					dev->SetRenderState(D3DRS_ALPHAREF, (DWORD)0x80808080);
+					dev->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL);
+					dev->SetRenderState(D3DRS_ALPHATESTENABLE, true);
+
+					dev->SetRenderState(D3DRS_ALPHABLENDENABLE, false);
+					dev->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+					dev->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+					dev->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
+				}
+				else {
+					dev->SetRenderState(D3DRS_ZWRITEENABLE, false);
+					dev->SetRenderState(D3DRS_ALPHATESTENABLE, false);
+					dev->SetRenderState(D3DRS_ALPHABLENDENABLE, true);
+					dev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+					dev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+
+					dev->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+					dev->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+
+					dev->SetTextureStageState(1, D3DTSS_ALPHAARG1, D3DTA_CURRENT);
+					dev->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+				}
+			}
+
+			if (RIsHardwareTNL())
+				Draw(&OcRoot[0], i);
+			else
+				DrawNoTNL(&OcRoot[0], i);
+		}
+	}
+}
+
+static void SetWireframeStates()
+{
+	RGetDevice()->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_DIFFUSE);
+	RGetDevice()->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
+	RGetDevice()->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
+	RGetDevice()->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
+}
+
+// Shows each pixel of the lightmap on a white map
+static void SetShowLightmapStates()
+{
+	RGetDevice()->SetSamplerState(1, D3DSAMP_MINFILTER, D3DTEXF_POINT);
+	RGetDevice()->SetSamplerState(1, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
+
+	RGetDevice()->SetRenderState(D3DRS_TEXTUREFACTOR, 0xFFFFFFFF);
+	RGetDevice()->SetTextureStageState(1, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+	RGetDevice()->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_MODULATE4X);
+	RGetDevice()->SetTextureStageState(1, D3DTSS_COLORARG2, D3DTA_TFACTOR);
+}
+
+static void SetDefaultStates(bool Lightmap)
+{
+	bool Trilinear = RIsTrilinear();
+
+	RGetDevice()->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+	RGetDevice()->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+	RGetDevice()->SetSamplerState(0, D3DSAMP_MIPFILTER, Trilinear ? D3DTEXF_LINEAR : D3DTEXF_NONE);
+	RGetDevice()->SetSamplerState(1, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+	RGetDevice()->SetSamplerState(1, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+	RGetDevice()->SetSamplerState(1, D3DSAMP_MIPFILTER, Trilinear ? D3DTEXF_LINEAR : D3DTEXF_NONE);
+
+	RGetDevice()->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+	RGetDevice()->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
+	RGetDevice()->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+	RGetDevice()->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_DIFFUSE);
+
+	if (!Lightmap)
+	{
+		RGetDevice()->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
+		RGetDevice()->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
+	}
+	else
+	{
+		RGetDevice()->SetTextureStageState(1, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+		RGetDevice()->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_MODULATE4X);
+		RGetDevice()->SetTextureStageState(1, D3DTSS_COLORARG2, D3DTA_CURRENT);
+		RGetDevice()->SetTextureStageState(1, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+		RGetDevice()->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+	}
 }
 
 bool RBspObject::Draw()
 {
 	g_nFrameNumber++;
+#ifdef _DEBUG
 	g_nPoly = 0;
 	g_nCall = 0;
+#endif
 
 	if (RIsHardwareTNL() &&
 		(!VertexBuffer || !IndexBuffer)) return false;
 
-	LPDIRECT3DDEVICE9 pd3dDevice = RGetDevice();
+	auto dev = RGetDevice();
 
-	pd3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
-	pd3dDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
-	pd3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
+	// Disable alpha blending
+	dev->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
+	dev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
+	dev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
 
-	pd3dDevice->SetFVF(BSP_FVF);
+	dev->SetFVF(GetFVF());
 
-	RGetDevice()->SetStreamSource(0, VertexBuffer, 0, sizeof(BSPVERTEX));
-	RGetDevice()->SetIndices(IndexBuffer);
+	// Set vertex and index buffers
+	dev->SetStreamSource(0, VertexBuffer, 0, GetStride());
+	dev->SetIndices(IndexBuffer);
 
 	if (m_bWireframe)
-	{
-		pd3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_DIFFUSE);
-		pd3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
-		pd3dDevice->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
-		pd3dDevice->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
-	}
+		SetWireframeStates();
 	else if (m_bShowLightmap)
-	{
-		pd3dDevice->SetSamplerState(1, D3DSAMP_MINFILTER, D3DTEXF_POINT);
-		pd3dDevice->SetSamplerState(1, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
-
-		pd3dDevice->SetRenderState(D3DRS_TEXTUREFACTOR, 0xffffffff);
-		pd3dDevice->SetTextureStageState(1, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-		pd3dDevice->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_MODULATE4X);
-		pd3dDevice->SetTextureStageState(1, D3DTSS_COLORARG2, D3DTA_TFACTOR);
-
-	}
+		SetShowLightmapStates();
 	else
+		SetDefaultStates(!LightmapTextures.empty());
+
+	if (!GetRenderer().IsDrawingShadows())
 	{
-		bool bTrilinear = RIsTrilinear();
+		dev->SetTexture(0, nullptr);
+		dev->SetTexture(1, nullptr);
+	}
+	dev->SetRenderState(D3DRS_LIGHTING, FALSE);
 
-		pd3dDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
-		pd3dDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
-		pd3dDevice->SetSamplerState(0, D3DSAMP_MIPFILTER, bTrilinear ? D3DTEXF_LINEAR : D3DTEXF_NONE);
-		pd3dDevice->SetSamplerState(1, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
-		pd3dDevice->SetSamplerState(1, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
-		pd3dDevice->SetSamplerState(1, D3DSAMP_MIPFILTER, bTrilinear ? D3DTEXF_LINEAR : D3DTEXF_NONE);
+	// Disable texture stage 2
+	dev->SetTextureStageState(2, D3DTSS_COLOROP, D3DTOP_DISABLE);
+	dev->SetTextureStageState(2, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
 
-		pd3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-		pd3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
-		pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
-		pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_DIFFUSE);
+	// Update occlusion list and local view frustum
+	{
+		rmatrix World;
+		dev->GetTransform(D3DTS_WORLD, &World);
 
-		if (!m_nLightmap)
-		{
-			pd3dDevice->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
-			pd3dDevice->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
-		}
-		else
-		{
-			pd3dDevice->SetTextureStageState(1, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-			pd3dDevice->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_MODULATE4X);
-			pd3dDevice->SetTextureStageState(1, D3DTSS_COLORARG2, D3DTA_CURRENT);
-			pd3dDevice->SetTextureStageState(1, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
-			pd3dDevice->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
-		}
+		m_OcclusionList.UpdateCamera(World, RCameraPosition);
+
+		rmatrix trWorld = Transpose(World);
+
+		for (int i = 0; i < 6; i++)
+			m_localViewFrustum[i] = Transform(RGetViewFrustum()[i], trWorld);
 	}
 
-	pd3dDevice->SetTextureStageState(2, D3DTSS_COLOROP, D3DTOP_DISABLE);
-	pd3dDevice->SetTextureStageState(2, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
+	_BP("ChooseNodes"); ChooseNodes(OcRoot.data()); _EP("ChooseNodes");
 
-	pd3dDevice->SetTexture(0, NULL);
-	pd3dDevice->SetTexture(1, NULL);
-	RGetDevice()->SetRenderState(D3DRS_LIGHTING, FALSE);
-
-
-	rmatrix mat;
-	RGetDevice()->GetTransform(D3DTS_WORLD, &mat);
-
-	m_OcclusionList.UpdateCamera(mat, RCameraPosition);
-
-	rmatrix trMat = Transpose(mat);
-
-	for (int i = 0; i < 6; i++)
-		m_localViewFrustum[i] = Transform(RGetViewFrustum()[i], trMat);
-
-	_BP("ChooseNodes");
-	ChooseNodes(OcRoot.data());
-	_EP("ChooseNodes");
-
-	RGetDevice()->SetRenderState(D3DRS_ALPHABLENDENABLE, false);
-	RGetDevice()->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
-	RGetDevice()->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
+	dev->SetRenderState(D3DRS_ALPHABLENDENABLE, false);
+	dev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
+	dev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
 	RSetWBuffer(true);
-	RGetDevice()->SetRenderState(D3DRS_ZWRITEENABLE, true);
+	dev->SetRenderState(D3DRS_ZWRITEENABLE, true);
 
-	int nCount = m_nMaterial*max(1, m_nLightmap);
+	int nCount = m_nMaterial * max(1, m_nLightmap);
 
-	for (int i = 0; i < nCount; i++)
+	// Draw non-additive and non-opacity materials
+	DrawNodes<RM_FLAG_ADDITIVE | RM_FLAG_USEOPACITY, false, false>(nCount);
+
+	if (!GetRenderer().IsDrawingShadows())
 	{
-		if ((Materials[i % m_nMaterial].dwFlags & (RM_FLAG_ADDITIVE | RM_FLAG_USEOPACITY)) == 0)
-		{
-			if ((Materials[i % m_nMaterial].dwFlags & RM_FLAG_TWOSIDED) == 0)
-				RGetDevice()->SetRenderState(D3DRS_CULLMODE, D3DCULL_CW);
-			else
-				RGetDevice()->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+		// Draw materials with opacity
+		DrawNodes<RM_FLAG_USEOPACITY, true, true>(nCount);
 
-			if (!LightmapTextures.empty())
-				RGetDevice()->SetTexture(1, LightmapTextures[i / m_nMaterial]);
+		// Draw additive materials
+		dev->SetRenderState(D3DRS_ALPHABLENDENABLE, true);
+		dev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+		dev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
+		dev->SetRenderState(D3DRS_ZWRITEENABLE, false);
 
-			SetDiffuseMap(i % m_nMaterial);
-			if (RIsHardwareTNL())
-				Draw(&OcRoot[0], i);
-			else
-				DrawNoTNL(&OcRoot[0], i);
-		}
+		DrawNodes<RM_FLAG_ADDITIVE, true, false>(nCount);
 	}
 
-	// Opacity map
-	for (int i = 0; i < nCount; i++)
-	{
-		if ((Materials[i % m_nMaterial].dwFlags & RM_FLAG_USEOPACITY) == RM_FLAG_USEOPACITY)
-		{
-			if ((Materials[i % m_nMaterial].dwFlags & RM_FLAG_TWOSIDED) == 0)
-				RGetDevice()->SetRenderState(D3DRS_CULLMODE, D3DCULL_CW);
-			else
-				RGetDevice()->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+	// Disable alpha testing
+	dev->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_ALWAYS);
+	dev->SetRenderState(D3DRS_ALPHATESTENABLE, false);
+	dev->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
+	dev->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
 
-			if (!LightmapTextures.empty())
-				RGetDevice()->SetTexture(1, LightmapTextures[i / m_nMaterial]);
+	// Disable alpha blending
+	dev->SetRenderState(D3DRS_ALPHABLENDENABLE, false);
+	dev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
+	dev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
+	dev->SetRenderState(D3DRS_ZWRITEENABLE, true);
 
-			if ((Materials[i % m_nMaterial].dwFlags & RM_FLAG_USEALPHATEST) != 0) {
-				RGetDevice()->SetRenderState(D3DRS_ZWRITEENABLE, true);
-				RGetDevice()->SetRenderState(D3DRS_ALPHAREF, (DWORD)0x80808080);
-				RGetDevice()->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL);
-				RGetDevice()->SetRenderState(D3DRS_ALPHATESTENABLE, true);
-
-				RGetDevice()->SetRenderState(D3DRS_ALPHABLENDENABLE, false);
-				RGetDevice()->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
-				RGetDevice()->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
-				RGetDevice()->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
-			}
-			else {
-				RGetDevice()->SetRenderState(D3DRS_ZWRITEENABLE, false);
-				RGetDevice()->SetRenderState(D3DRS_ALPHATESTENABLE, false);
-				RGetDevice()->SetRenderState(D3DRS_ALPHABLENDENABLE, true);
-				RGetDevice()->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-				RGetDevice()->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
-
-				RGetDevice()->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
-				RGetDevice()->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
-
-				RGetDevice()->SetTextureStageState(1, D3DTSS_ALPHAARG1, D3DTA_CURRENT);
-				RGetDevice()->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
-			}
-
-
-			SetDiffuseMap(i % m_nMaterial);
-			if (RIsHardwareTNL())
-				Draw(&OcRoot[0], i);
-			else
-				DrawNoTNL(&OcRoot[0], i);
-		}
-	}
-
-	// Additive
-
-	RGetDevice()->SetRenderState(D3DRS_ALPHABLENDENABLE, true);
-	RGetDevice()->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-	RGetDevice()->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
-	RGetDevice()->SetRenderState(D3DRS_ZWRITEENABLE, false);
-
-	for (int i = 0; i < nCount; i++)
-	{
-		if ((Materials[i % m_nMaterial].dwFlags & RM_FLAG_ADDITIVE) == RM_FLAG_ADDITIVE)
-		{
-			if ((Materials[i % m_nMaterial].dwFlags & RM_FLAG_TWOSIDED) == 0)
-				RGetDevice()->SetRenderState(D3DRS_CULLMODE, D3DCULL_CW);
-			else
-				RGetDevice()->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-
-			if (!LightmapTextures.empty())
-				RGetDevice()->SetTexture(1, LightmapTextures[i / m_nMaterial]);
-
-			SetDiffuseMap(i % m_nMaterial);
-			if (RIsHardwareTNL())
-				Draw(&OcRoot[0], i);
-			else
-				DrawNoTNL(&OcRoot[0], i);
-		}
-	}
-
-	RGetDevice()->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_ALWAYS);
-	RGetDevice()->SetRenderState(D3DRS_ALPHATESTENABLE, false);
-	RGetDevice()->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
-	RGetDevice()->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
-
-	RGetDevice()->SetRenderState(D3DRS_ALPHABLENDENABLE, false);
-	RGetDevice()->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
-	RGetDevice()->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
-	RGetDevice()->SetRenderState(D3DRS_ZWRITEENABLE, true);
-
-	pd3dDevice->SetTexture(0, nullptr);
-	pd3dDevice->SetTexture(1, nullptr);
-	pd3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-	pd3dDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
-	pd3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
-	pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG2);
-	pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
-	pd3dDevice->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
-	pd3dDevice->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
-	pd3dDevice->SetFVF(D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_TEX1);
+	// Reset all textures and texture states
+	dev->SetTexture(0, nullptr);
+	dev->SetTexture(1, nullptr);
+	dev->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+	dev->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
+	dev->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
+	dev->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG2);
+	dev->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
+	dev->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
+	dev->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
+	dev->SetFVF(D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_TEX1);
 
 	return true;
 }
@@ -616,9 +649,7 @@ void RBspObject::SetObjectLight(const rvector& vPos)
 
 	RLIGHT *first = nullptr;
 
-	D3DLIGHT9 light;
-
-	ZeroMemory(&light, sizeof(D3DLIGHT9));
+	D3DLIGHT9 light{};
 
 	light.Type = D3DLIGHT_POINT;
 
@@ -667,12 +698,6 @@ void RBspObject::SetObjectLight(const rvector& vPos)
 	}
 }
 
-static bool e_mapobject_sort_float(ROBJECTINFO* _a, ROBJECTINFO* _b) {
-	if (_a->fDist > _b->fDist)
-		return true;
-	return false;
-}
-
 void RBspObject::DrawObjects()
 {
 	m_DebugInfo.nMapObjectFrustumCulled = 0;
@@ -684,9 +709,9 @@ void RBspObject::DrawObjects()
 	rmatrix world;
 	RGetDevice()->GetTransform(D3DTS_WORLD, &world);
 
-	rvector v_add = rvector(world._41, world._42, world._43);
+	rvector v_add = GetTransPos(world);
 
-	rvector camera_pos = RealSpace2::RCameraPosition;
+	rvector camera_pos = RCameraPosition;
 	rvector t_vec;
 
 	for (list<ROBJECTINFO*>::iterator i = m_ObjectList.begin(); i != m_ObjectList.end(); i++) {
@@ -695,19 +720,17 @@ void RBspObject::DrawObjects()
 		if (!pInfo->pVisualMesh) continue;
 
 		if (pInfo) {
-			t_vec = rvector(pInfo->pVisualMesh->m_WorldMat._41,
-				pInfo->pVisualMesh->m_WorldMat._42,
-				pInfo->pVisualMesh->m_WorldMat._43);
+			t_vec = GetTransPos(pInfo->pVisualMesh->m_WorldMat);
 			t_vec = camera_pos - t_vec;
 			pInfo->fDist = Magnitude(t_vec);
 		}
 	}
 
-	m_ObjectList.sort(e_mapobject_sort_float);
+	// Sort by distance
+	m_ObjectList.sort([&](auto* a, auto* b) { return a->fDist < b->fDist; });
 
-	for (list<ROBJECTINFO*>::iterator i = m_ObjectList.begin(); i != m_ObjectList.end(); i++)
+	for (auto* pInfo : m_ObjectList)
 	{
-		ROBJECTINFO *pInfo = *i;
 		if (!pInfo->pVisualMesh) continue;
 
 		rboundingbox bb;
@@ -731,8 +754,7 @@ void RBspObject::DrawObjects()
 
 		if (pInfo->pLight && bLight)
 		{
-			D3DLIGHT9 light;
-			ZeroMemory(&light, sizeof(D3DLIGHT9));
+			D3DLIGHT9 light{};
 
 			light.Type = D3DLIGHT_POINT;
 
@@ -1092,7 +1114,7 @@ bool RBspObject::CreateIndexBuffer()
 	SAFE_RELEASE(IndexBuffer);
 
 	HRESULT hr = RGetDevice()->CreateIndexBuffer(sizeof(OcIndices[0]) * OcIndices.size(), D3DUSAGE_WRITEONLY,
-		D3DFMT_INDEX16, D3DPOOL_MANAGED, &IndexBuffer, NULL);
+		D3DFMT_INDEX16, D3DPOOL_MANAGED, MakeWriteProxy(IndexBuffer), NULL);
 	if (D3D_OK != hr) {
 		mlog("CreateIndexBuffer failed\n");
 		return false;
@@ -1114,7 +1136,6 @@ bool RBspObject::UpdateIndexBuffer()
 
 	return true;
 }
-
 
 void RBspObject::OnInvalidate()
 {
@@ -1190,8 +1211,9 @@ bool RBspObject::Open_LightList(MXmlElement *pElement)
 
 	for (auto& Light : llist)
 	{
-		if (_strnicmp(Light.Name.c_str(), RTOK_MAX_OBJLIGHT, strlen(RTOK_MAX_OBJLIGHT)) == 0)
+		if (_strnicmp(Light.Name.c_str(), RTOK_MAX_OBJLIGHT, strlen(RTOK_MAX_OBJLIGHT)) == 0) {
 			m_StaticObjectLightList.push_back(Light);
+		}
 		else {
 			m_StaticMapLightList.push_back(Light);
 
@@ -1209,7 +1231,6 @@ bool RBspObject::Open_LightList(MXmlElement *pElement)
 			}
 		}
 	}
-	llist.clear();
 
 	return true;
 }
@@ -1292,11 +1313,8 @@ bool RBspObject::Open_ObjectList(MXmlElement *pElement)
 		}
 	}
 
-	for (list<ROBJECTINFO*>::iterator it = m_ObjectList.begin(); it != m_ObjectList.end(); it++) {
-
-		ROBJECTINFO *pInfo = *it;
-		float fIntensityFirst = FLT_MIN;
-
+	for (auto* pInfo : m_ObjectList)
+	{
 		if (pInfo == NULL) {
 
 			mlog("RBspObject::Open_ObjectList : pInfo == NULL pVisualMesh->CalcBox\n");
@@ -1315,6 +1333,7 @@ bool RBspObject::Open_ObjectList(MXmlElement *pElement)
 
 		auto& LightList = GetObjectLightList();
 
+		float fIntensityFirst = FLT_MIN;
 		for (auto& Light : LightList)
 		{
 			float fdistance = Magnitude(Light.Position - center);
@@ -1470,7 +1489,6 @@ bool RBspObject::Set_AmbSound(MXmlElement *pElement)
 
 bool RBspObject::OpenDescription(const char *filename)
 {
-
 	MZFile mzf;
 	if (!mzf.Open(filename, g_pFileSystem))
 		return false;
@@ -1490,13 +1508,13 @@ bool RBspObject::OpenDescription(const char *filename)
 		return false;
 	}
 
-	int iCount, i;
-	MXmlElement		aParent, aChild;
+	int iCount;
+	MXmlElement aParent, aChild;
 	aParent = aXml.GetDocumentElement();
 	iCount = aParent.GetChildNodeCount();
 
 	char szTagName[256];
-	for (i = 0; i < iCount; i++)
+	for (int i = 0; i < iCount; i++)
 	{
 		aChild = aParent.GetChildNode(i);
 		aChild.GetTagName(szTagName);
@@ -1579,18 +1597,14 @@ bool RBspObject::OpenRs(const char *filename)
 	OcInfo.resize(m_nPolygon);
 	OcVertices.resize(NumVertices);
 	OcIndices.resize(NumIndices);
+	OcNormalVertices.resize(NumVertices);
 
-	auto ret = Open_Nodes(OcRoot.data(), &file, OcVertices.data(), OcRoot.data(), OcInfo.data());
+	auto ret = Open_Nodes(OcRoot.data(), &file,
+		{ OcVertices.data(), OcRoot.data(), OcInfo.data(), RenderWithNormal ? OcNormalVertices.data() : nullptr });
 
-	int i = 0;
-	auto Check = [&](auto& vec)
-	{
-		assert(static_cast<int>(vec.size()) >= ret[i]);
-		++i;
-	};
-	Check(OcVertices);
-	Check(OcRoot);
-	Check(OcInfo);
+	assert(ret.Vertices <= OcVertices.data() + OcVertices.size());
+	assert(ret.Node <= OcRoot.data() + OcRoot.size());
+	assert(ret.Info <= OcInfo.data() + OcInfo.size());
 
 	return true;
 }
@@ -1627,17 +1641,12 @@ bool RBspObject::OpenBsp(const char *filename)
 	BspRoot.resize(m_nBspNodeCount);
 	BspInfo.resize(m_nBspPolygon);
 
-	auto ret = Open_Nodes(BspRoot.data(), &file, BspVertices.data(), BspRoot.data(), BspInfo.data());
+	auto ret = Open_Nodes(BspRoot.data(), &file,
+		{ BspVertices.data(), BspRoot.data(), BspInfo.data() });
 
-	int i = 0;
-	auto Check = [&](auto& vec)
-	{
-		assert(static_cast<int>(vec.size()) >= ret[i]);
-		++i;
-	};
-	Check(BspVertices);
-	Check(BspRoot);
-	Check(BspInfo);
+	assert(ret.Vertices <= BspVertices.data() + BspVertices.size());
+	assert(ret.Node <= BspRoot.data() + BspRoot.size());
+	assert(ret.Info <= BspInfo.data() + BspInfo.size());
 
 	file.Close();
 	return true;
@@ -1714,9 +1723,7 @@ bool RBspObject::OpenCol(const char *filename)
 	ColRoot[0].ConstructBoundingBox();
 #endif
 	return true;
-
 }
-
 
 bool RBspObject::OpenNav(const char *filename)
 {
@@ -1771,7 +1778,7 @@ bool RBspObject::OpenLightmap()
 			0, D3DFMT_UNKNOWN, D3DPOOL_MANAGED,
 			D3DX_FILTER_TRIANGLE | D3DX_FILTER_MIRROR,
 			D3DX_FILTER_TRIANGLE | D3DX_FILTER_MIRROR,
-			0, NULL, NULL, &LightmapTextures[i]);
+			0, NULL, NULL, MakeWriteProxy(LightmapTextures[i]));
 
 		if (FAILED(hr))
 			mlog("Failed to load lightmap texture! Error code = %d, error message = %s\n",
@@ -2011,10 +2018,8 @@ void RBspObject::Sort_Nodes(RSBspNode *pNode)
 	}
 }
 
-std::array<int, 4> RBspObject::Open_Nodes(RSBspNode *pNode, MZFile *pfile,
-	BSPVERTEX* Vertices, RSBspNode* Node, RPOLYGONINFO* Info, int PolygonID)
+OpenNodesState RBspObject::Open_Nodes(RSBspNode *pNode, MZFile *pfile, OpenNodesState State)
 {
-	std::tuple<BSPVERTEX*, RSBspNode*, RPOLYGONINFO*> OrigPointers{ Vertices, Node, Info };
 	int OrigPolygonID = 0;
 
 	pfile->Read(&pNode->bbTree, sizeof(rboundingbox));
@@ -2025,13 +2030,9 @@ std::array<int, 4> RBspObject::Open_Nodes(RSBspNode *pNode, MZFile *pfile,
 		bool flag;
 		pfile->Read(&flag, sizeof(bool));
 		if (!flag) return;
-		++Node;
-		pNode->*Branch = Node;
-		auto ret = Open_Nodes(pNode->*Branch, pfile, Vertices, Node, Info);
-		Vertices += ret[0];
-		Node += ret[1];
-		Info += ret[2];
-		PolygonID += ret[3];
+		++State.Node;
+		pNode->*Branch = State.Node;
+		State = Open_Nodes(pNode->*Branch, pfile, State);
 	};
 
 	Open(&RSBspNode::m_pPositive);
@@ -2041,7 +2042,7 @@ std::array<int, 4> RBspObject::Open_Nodes(RSBspNode *pNode, MZFile *pfile,
 
 	if (pNode->nPolygon)
 	{
-		pNode->pInfo = Info; Info += pNode->nPolygon;
+		pNode->pInfo = State.Info; State.Info += pNode->nPolygon;
 
 		RPOLYGONINFO *pInfo = pNode->pInfo;
 
@@ -2057,8 +2058,7 @@ std::array<int, 4> RBspObject::Open_Nodes(RSBspNode *pNode, MZFile *pfile,
 			pfile->Read(&pInfo->dwFlags, sizeof(DWORD));
 			pfile->Read(&pInfo->nVertices, sizeof(int));
 
-
-			BSPVERTEX *pVertex = pInfo->pVertices = Vertices;
+			BSPVERTEX *pVertex = pInfo->pVertices = State.Vertices;
 
 			for (int j = 0; j < pInfo->nVertices; j++)
 			{
@@ -2066,10 +2066,20 @@ std::array<int, 4> RBspObject::Open_Nodes(RSBspNode *pNode, MZFile *pfile,
 				pfile->Read(&pVertex->x, sizeof(float) * 3);
 				pfile->Read(&normal, sizeof(float) * 3);
 				pfile->Read(&pVertex->tu1, sizeof(float) * 4);
+				if (State.Normals)
+				{
+					*State.Normals = BSPNORMALVERTEX{
+						v3{pVertex->x, pVertex->y, pVertex->z},
+						normal,
+						v2{pVertex->tu1, pVertex->tv1},
+						v2{pVertex->tu2, pVertex->tv2},
+					};
+					State.Normals++;
+				}
 				pVertex++;
 			}
 
-			Vertices += pInfo->nVertices;
+			State.Vertices += pInfo->nVertices;
 
 			pfile->Read(&nor, sizeof(rvector));
 			pInfo->plane.a = nor.x;
@@ -2089,18 +2099,15 @@ std::array<int, 4> RBspObject::Open_Nodes(RSBspNode *pNode, MZFile *pfile,
 				pInfo->dwFlags |= Materials[nMaterial].dwFlags;
 			}
 			_ASSERT(pInfo->nMaterial < m_nMaterial);
-			pInfo->nPolygonID = PolygonID;
+			pInfo->nPolygonID = State.PolygonID;
 			pInfo->nLightmapTexture = 0;
 
 			pInfo++;
-			PolygonID++;
+			State.PolygonID++;
 		}
 	}
 
-	return {Vertices - std::get<0>(OrigPointers),
-		Node - std::get<1>(OrigPointers),
-		Info - std::get<2>(OrigPointers),
-		PolygonID - OrigPolygonID};
+	return State;
 }
 
 bool RBspObject::CreateVertexBuffer()
@@ -2109,8 +2116,10 @@ bool RBspObject::CreateVertexBuffer()
 
 	SAFE_RELEASE(VertexBuffer);
 
-	HRESULT hr = RGetDevice()->CreateVertexBuffer(sizeof(OcVertices[0]) * OcVertices.size(),
-		D3DUSAGE_WRITEONLY, BSP_FVF, D3DPOOL_MANAGED, &VertexBuffer, nullptr);
+	HRESULT hr = RGetDevice()->CreateVertexBuffer(GetStride() * OcVertices.size(),
+		D3DUSAGE_WRITEONLY, GetFVF(),
+		D3DPOOL_MANAGED, MakeWriteProxy(VertexBuffer),
+		nullptr);
 	_ASSERT(hr == D3D_OK);
 	if (hr != D3D_OK) return false;
 
@@ -2126,7 +2135,8 @@ bool RBspObject::UpdateVertexBuffer()
 	_ASSERT(hr == D3D_OK);
 	if (hr != D3D_OK)
 		return false;
-	memcpy(pVer, OcVertices.data(), sizeof(OcVertices[0]) * OcVertices.size());
+	auto* Src = RenderWithNormal ? static_cast<void*>(OcNormalVertices.data()) : OcVertices.data();
+	memcpy(pVer, Src, GetStride() * OcVertices.size());
 	hr = VertexBuffer->Unlock();
 	_ASSERT(hr == D3D_OK);
 	if (hr != D3D_OK)
@@ -3085,8 +3095,13 @@ LIGHTBSPVERTEX *m_pLightVertex;
 bool RBspObject::CreateDynamicLightVertexBuffer()
 {
 	InvalidateDynamicLightVertexBuffer();
-	HRESULT hr = RGetDevice()->CreateVertexBuffer(sizeof(LIGHTBSPVERTEX)*LIGHTVERTEXBUFFER_SIZE * 3,
-		D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, LIGHT_BSP_FVF, D3DPOOL_DEFAULT, &DynLightVertexBuffer, NULL);
+	HRESULT hr = RGetDevice()->CreateVertexBuffer(
+		sizeof(LIGHTBSPVERTEX) * LIGHTVERTEXBUFFER_SIZE * 3,
+		D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY,
+		LIGHT_BSP_FVF,
+		D3DPOOL_DEFAULT,
+		MakeWriteProxy(DynLightVertexBuffer),
+		nullptr);
 
 	return true;
 }
@@ -3101,7 +3116,9 @@ bool RBspObject::FlushLightVB()
 	DynLightVertexBuffer->Unlock();
 	if (m_dwLightVBBase == 0) return true;
 
+#ifdef _DEBUG
 	g_nCall++;
+#endif
 	HRESULT hr = RGetDevice()->DrawPrimitive(D3DPT_TRIANGLELIST, 0, m_dwLightVBBase);
 	_ASSERT(hr == D3D_OK);
 	return true;
@@ -3134,7 +3151,9 @@ bool RBspObject::DrawLight(RSBspNode *pNode, int nMaterial)
 		int nIndCount = nCount * 3;
 		if (nCount)
 		{
+#ifdef _DEBUG
 			g_nPoly += nCount;
+#endif
 
 			RDrawInfo *pdi = &pNode->pDrawInfo[nMaterial];
 			int index = pdi->nIndicesOffset;
@@ -3226,8 +3245,10 @@ void RBspObject::DrawLight(D3DLIGHT9 *pLight)
 		min(1.f, max(0.f, g_pTargetLight->Diffuse.g)),
 		min(1.f, max(0.f, g_pTargetLight->Diffuse.b)));
 
+#ifdef _DEBUG
 	g_nPoly = 0;
 	g_nCall = 0;
+#endif
 	g_nFrameNumber++;
 
 	int nChosen = ChooseNodes(OcRoot.data(), rvector(pLight->Position), pLight->Range);
@@ -3263,6 +3284,5 @@ void RBspObject::DrawLight(D3DLIGHT9 *pLight)
 
 	pd3dDevice->SetStreamSource(0, NULL, 0, 0);
 }
-
 
 _NAMESPACE_REALSPACE2_END

@@ -27,6 +27,18 @@ inline bool IS_EQ(float a, float b)
 #define BYTE2RGB32(a,r,g,b)	((DWORD) (((BYTE) (b)|((WORD) (g) << 8))|(((DWORD) (BYTE) (r)) << 16)|(((DWORD) (BYTE) (a)) << 24)))
 #define DWORD2VECTOR(x)		rvector(float(((x)& 0xff0000) >> 16)/255.f, float(((x) & 0xff00) >> 8)/255.f,float(((x) & 0xff))/255.f))
 
+namespace detail
+{
+	template <typename T1, typename T2>
+	constexpr auto&& max_(const T1& a, const T2& b) {
+		return a > b ? a : b;
+	}
+	template <typename T1, typename T2>
+	constexpr auto&& min_(const T1& a, const T2& b) {
+		return a > b ? b : a;
+	}
+}
+
 _NAMESPACE_REALSPACE2_BEGIN
 
 inline bool Equals(float a, float b)
@@ -34,22 +46,49 @@ inline bool Equals(float a, float b)
 	return IS_EQ(a, b);
 }
 
+inline void GetIdentityMatrix(rmatrix& m)
+{
+	m._11 = 1; m._12 = 0; m._13 = 0; m._14 = 0;
+	m._21 = 0; m._22 = 1; m._23 = 0; m._24 = 0;
+	m._31 = 0; m._32 = 0; m._33 = 1; m._34 = 0;
+	m._41 = 0; m._42 = 0; m._43 = 0; m._44 = 1;
+}
+
+inline rmatrix GetIdentityMatrix() {
+	rmatrix m;
+	GetIdentityMatrix(m);
+	return m;
+}
+
+// Returns the translation a matrix applies as a vector.
+inline rvector GetTransPos(const rmatrix& m) {
+	return{ m._41, m._42, m._43 };
+}
+
 template <typename T>
 auto Square(const T& x) {
 	return x * x;
 }
 
-inline v3 Transform(const v3& v, const rmatrix& mat)
+// Returns (v.x, v.y, v.z, 0) * mat
+inline v3 TransformNormal(const v3& v, const rmatrix& mat)
 {
 	v3 ret;
 
-	ret.x = v.x * mat._11 + v.y * mat._21 + v.z * mat._31 + mat._41;
-	ret.y = v.x * mat._12 + v.y * mat._22 + v.z * mat._32 + mat._42;
-	ret.z = v.x * mat._13 + v.y * mat._23 + v.z * mat._33 + mat._43;
+	ret.x = v.x * mat._11 + v.y * mat._21 + v.z * mat._31;
+	ret.y = v.x * mat._12 + v.y * mat._22 + v.z * mat._32;
+	ret.z = v.x * mat._13 + v.y * mat._23 + v.z * mat._33;
 
 	return ret;
 }
 
+// Returns (v.x, v.y, v.z, 1) * mat
+inline v3 Transform(const v3& v, const rmatrix& mat)
+{
+	return TransformNormal(v, mat) + GetTransPos(mat);
+}
+
+// Returns (v.x, v.y, v.z, 1) * mat projected back into w = 1
 inline v3 TransformCoord(const v3& v, const rmatrix& mat)
 {
 	v3 ret = Transform(v, mat);
@@ -79,7 +118,7 @@ inline v4 Transform(const v4& v, const rmatrix& mat)
 	return ret;
 }
 
-// Transforms plane by a transformation matrix of which mat is the inverse transpose.
+// Transforms plane by a matrix of which mat is the inverse transpose.
 inline rplane Transform(const rplane& plane, const rmatrix& mat)
 {
 	v4 v{ plane.a, plane.b, plane.c, plane.d };
@@ -106,6 +145,12 @@ inline rplane operator *(const rplane& a, const rmatrix& b)
 	return _REALSPACE2::Transform(a, b);
 }
 
+inline rplane& operator *=(rplane& a, const rmatrix& b)
+{
+	a = a * b;
+	return a;
+}
+
 inline rvector operator /(float scalar, const rvector& vec)
 {
 	return{ scalar / vec.x, scalar / vec.y, scalar / vec.z };
@@ -114,21 +159,10 @@ inline rvector operator /(float scalar, const rvector& vec)
 _NAMESPACE_REALSPACE2_BEGIN
 
 inline rvector GetPoint(const rboundingbox& bb, int i) {
-	return rvector{ (i & 1) ? bb.vmin.x : bb.vmax.x,
+	return rvector{
+		(i & 1) ? bb.vmin.x : bb.vmax.x,
 		(i & 2) ? bb.vmin.y : bb.vmax.y,
 		(i & 4) ? bb.vmin.z : bb.vmax.z };
-}
-
-namespace detail
-{
-	template <typename T1, typename T2>
-	constexpr auto&& max_(const T1& a, const T2& b) {
-		return a > b ? a : b;
-	}
-	template <typename T1, typename T2>
-	constexpr auto&& min_(const T1& a, const T2& b) {
-		return a > b ? b : a;
-	}
 }
 
 // Returns the bounding box that contains both a and b.
@@ -178,10 +212,6 @@ inline bool Intersects(const rboundingbox& a, const rboundingbox &b)
 		a.vmax.z > b.vmin.z;
 }
 
-// Returns the length of the input vector.
-inline float Magnitude(const v3& x) {
-	return sqrt(x.x * x.x + x.y * x.y + x.z * x.z);
-}
 // Returns the length squared of the input vector.
 inline float MagnitudeSq(const v2& x) {
 	return x.x * x.x + x.y * x.y;
@@ -191,6 +221,16 @@ inline float MagnitudeSq(const v3& x) {
 }
 inline float MagnitudeSq(const v4& x) {
 	return x.x * x.x + x.y * x.y + x.z * x.z + x.w * x.w;
+}
+// Returns the length of the input vector.
+inline float Magnitude(const v2& x) {
+	return sqrt(MagnitudeSq(x));
+}
+inline float Magnitude(const v3& x) {
+	return sqrt(MagnitudeSq(x));
+}
+inline float Magnitude(const v4& x) {
+	return sqrt(MagnitudeSq(x));
 }
 
 // If the input vector has a nonzero length,
@@ -488,25 +528,6 @@ inline rmatrix RGetRotZ(float angle) {
 	return RotationMatrix({ 0, 0, 1 }, rads);
 }
 
-inline void GetIdentityMatrix(rmatrix& m)
-{
-	m._11 = 1; m._12 = 0; m._13 = 0; m._14 = 0;
-	m._21 = 0; m._22 = 1; m._23 = 0; m._24 = 0;
-	m._31 = 0; m._32 = 0; m._33 = 1; m._34 = 0;
-	m._41 = 0; m._42 = 0; m._43 = 0; m._44 = 1;
-}
-
-inline rmatrix GetIdentityMatrix() {
-	rmatrix m;
-	GetIdentityMatrix(m);
-	return m;
-}
-
-// Returns the translation a matrix applies as a vector.
-inline rvector GetTransPos(const rmatrix& m) {
-	return{ m._41, m._42, m._43 };
-}
-
 inline float sgn(float a)
 {
 	if (a > 0.0F) return (1.0F);
@@ -661,6 +682,32 @@ inline rplane PlaneFromPoints(const v3& a, const v3& b, const v3& c)
 {
 	auto normal = Normalized(CrossProduct(b - a, c - a));
 	return{ EXPAND_VECTOR(normal), -DotProduct(normal, a) };
+}
+
+// TODO: Implement without D3DX
+static rmatrix ViewMatrix(const rvector& Position, const rvector& Direction, const rvector& Up)
+{
+	rmatrix mat;
+	v3 At = Position + Direction;
+	D3DXMatrixLookAtLH(&mat, &Position, &At, &Up);
+	return mat;
+}
+
+// TODO: Implement without D3DX
+static rmatrix PerspectiveProjectionMatrix(float Aspect, float FovY, float Near, float Far)
+{
+	rmatrix mat;
+	D3DXMatrixPerspectiveFovLH(&mat, FovY, Aspect, Near, Far);
+	return mat;
+}
+
+static rmatrix PerspectiveProjectionMatrixViewport(float ScreenWidth, float ScreenHeight,
+	float FOV, float Near, float Far)
+{
+	float Aspect = ScreenWidth / ScreenHeight;
+	float FovY = atan(tan(FOV / 2.0f) / Aspect) * 2.0f;
+
+	return PerspectiveProjectionMatrix(Aspect, FovY, Near, Far);
 }
 
 _NAMESPACE_REALSPACE2_END

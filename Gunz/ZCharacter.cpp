@@ -679,7 +679,7 @@ void ZCharacter::OnDraw()
 	if (m_pVMesh && !Enable_Cloth)
 		m_pVMesh->DestroyCloth();
 
-	if(m_nVMID==-1)
+	if(m_nVMID == -1)
 		return;
 
 	// Create the bounding box
@@ -1332,20 +1332,15 @@ void ZCharacter::OnChangeParts(RMeshPartsType partstype,int PartsID)
 #ifndef _PUBLISH
 	if (m_bInitialized==false) return;
 	if( m_pVMesh ) {
-
-		// 기획서에 정해진 고유한 이름이 있어야 한다..
-
 		if(partstype > eq_parts_etc && partstype < eq_parts_left_pistol) {
-		
-			if(PartsID == 0) { // clear
+			if(PartsID == 0) {
 				m_pVMesh->SetBaseParts( partstype );
 			}
 			else {
-
 				const char* Name = nullptr;
 
 				if(MEvent::GetCtrlState()) {
-					Name = GetPartsNextName( partstype,m_pVMesh ,true);//이전옷...
+					Name = GetPartsNextName( partstype,m_pVMesh ,true);
 				}
 				else {
 					Name = GetPartsNextName( partstype,m_pVMesh ,false);

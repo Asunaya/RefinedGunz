@@ -97,6 +97,12 @@
     <Filter Include="RGunz">
       <UniqueIdentifier>{b577666d-eb78-4eeb-b7e5-cebd06cc7328}</UniqueIdentifier>
     </Filter>
+    <Filter Include="D3D9">
+      <UniqueIdentifier>{970b1413-7d9d-44fe-828a-5b84d81fd674}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Vulkan">
+      <UniqueIdentifier>{c1071547-948e-4c25-b5ef-39f4d34ed3eb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ZActionDef.h">
@@ -786,6 +792,13 @@
     <ClInclude Include="ZModule_ElementalDamage.h">
       <Filter>Character\Modules</Filter>
     </ClInclude>
+    <ClInclude Include="ZGameDrawD3D9.h">
+      <Filter>D3D9</Filter>
+    </ClInclude>
+    <ClInclude Include="ZGameDraw.h" />
+    <ClInclude Include="ZGameDrawVulkan.h">
+      <Filter>Vulkan</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ZCanvas.cpp">
@@ -1398,6 +1411,9 @@
     <ClCompile Include="MClient.cpp" />
     <ClCompile Include="MMatchClient.cpp" />
     <ClCompile Include="ZModule_ElementalDamage.cpp" />
+    <ClCompile Include="ZGameDrawD3D9.cpp">
+      <Filter>D3D9</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="runtime\shader\skin.vsh">

@@ -10,7 +10,8 @@ static const int nMassiveVertices = 100;
 void HitboxManager::Create()
 {
 	static const int size = (nSlashVertices + nMassiveVertices + 2) * sizeof(Vertex);
-	if (FAILED(RGetDevice()->CreateVertexBuffer(size, 0, D3DFVF_XYZ, D3DPOOL_MANAGED, &pVB.ptr, NULL)))
+	if (FAILED(RGetDevice()->CreateVertexBuffer(size, 0, D3DFVF_XYZ,
+		D3DPOOL_MANAGED, MakeWriteProxy(pVB), NULL)))
 	{
 		MLog("HitboxManager::HitboxManager() - Failed to create vertex buffer\n");
 		return;

@@ -19,11 +19,11 @@
 #include "ZWorld.h"
 #include "ZGameAction.h"
 #include <utility>
+#include "ZGameDraw.h"
 
 _USING_NAMESPACE_REALSPACE2
 
 class MZFileSystem;
-
 class ZLoading;
 class ZGameAction;
 class ZSkyBox;
@@ -41,8 +41,6 @@ class ZGameClient;
 class ZMapDesc;
 class ZReplayLoader;
 
-
-// Game Loop 시작하기 전의 초기화및 싱크완료 검사에 쓰임
 enum ZGAME_READYSTATE {
 	ZGAME_READYSTATE_INIT,
 	ZGAME_READYSTATE_WAITSYNC,
@@ -331,7 +329,6 @@ protected:
 	void AutoAiming();
 
 private:
-	void OnPreDraw();
 	bool OnRuleCommand(MCommand* pCommand);
 
 	void PostNewBasicInfo();
@@ -362,6 +359,8 @@ private:
 	int LastNetSlot{};
 
 	PingMap Pings;
+
+	ZGameDraw DrawObj;
 };
 
 extern ZGame* g_pGame;
