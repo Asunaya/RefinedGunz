@@ -9,15 +9,14 @@ class ZModuleContainer;
 class ZModule {
 public:
 	virtual ~ZModule() = default;
-	
 	void Update(float Elapsed) { if (Active) OnUpdate(Elapsed); }
-	virtual void OnUpdate(float Elapsed) {}
-
 	virtual void InitStatus() {}
 
 	ZModuleContainer* m_pContainer;
-
 	bool Active = false;
+
+private:
+	virtual void OnUpdate(float Elapsed) {}
 };
 
 class ZModuleContainer {
@@ -60,7 +59,7 @@ private:
 	std::unordered_map<int, std::unique_ptr<ZModule>> Modules;
 };
 
-#define DECLARE_ID(_ID) static constexpr auto ID = _ID;
+#define DECLARE_ID(_ID) static constexpr int ID = _ID;
 
 class ZModule_HPAP;
 class ZModule_Movable;

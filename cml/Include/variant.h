@@ -144,13 +144,13 @@ struct variant_impl
 	void visit(fn_t&& fn) const { visit_impl<fn_t, 0, Ts...>(std::forward<fn_t>(fn)); }
 
 	template <typename T, typename = std::enable_if_t<
-		any_of<(std::is_same<detail::substitute_heap_wrapper_t<T>, Ts>::value
-			|| std::is_base_of<detail::substitute_heap_wrapper_t<T>, Ts>::value)...>::value >>
+		detail::any_of<(std::is_same<T, detail::substitute_heap_wrapper_t<Ts>>::value
+			|| std::is_base_of<T, detail::substitute_heap_wrapper_t<Ts>>::value)...>::value>>
 		auto& get_ref() { return get_ref_impl<T>(); }
 
 	template <typename T, typename = std::enable_if_t<
-		any_of<(std::is_same<T, detail::substitute_heap_wrapper_t<Ts>>::value
-			|| std::is_base_of<T, detail::substitute_heap_wrapper_t<Ts>>::value)...>::value >>
+		detail::any_of<(std::is_same<T, detail::substitute_heap_wrapper_t<Ts>>::value
+			|| std::is_base_of<T, detail::substitute_heap_wrapper_t<Ts>>::value)...>::value>>
 		auto& get_ref() const { return get_ref_impl<T>(); }
 
 	auto get_type_index() const { return type_index; }

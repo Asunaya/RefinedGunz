@@ -662,10 +662,10 @@ void RBspObject::SetObjectLight(const rvector& vPos)
 		fdistance = Magnitude(Light.Position - vPos);
 		fIntensity = (fdistance - Light.fAttnStart) / (Light.fAttnEnd - Light.fAttnStart);
 
-		fIntensity = min(max(1.0f - fIntensity, 0), 1);
+		fIntensity = min(max(1.0f - fIntensity, 0.f), 1.f);
 		fIntensity *= Light.fIntensity;
 
-		fIntensity = min(max(fIntensity, 0), 1);
+		fIntensity = min(max(fIntensity, 0.f), 1.f);
 
 		if (fIntensityFirst < fIntensity) {
 			fIntensityFirst = fIntensity;
@@ -677,13 +677,13 @@ void RBspObject::SetObjectLight(const rvector& vPos)
 	{
 		light.Position = first->Position;
 
-		light.Ambient.r = min(first->Color.x*first->fIntensity * 0.25, 1.f);
-		light.Ambient.g = min(first->Color.y*first->fIntensity * 0.25, 1.f);
-		light.Ambient.b = min(first->Color.z*first->fIntensity * 0.25, 1.f);
+		light.Ambient.r = min(first->Color.x*first->fIntensity * 0.25f, 1.f);
+		light.Ambient.g = min(first->Color.y*first->fIntensity * 0.25f, 1.f);
+		light.Ambient.b = min(first->Color.z*first->fIntensity * 0.25f, 1.f);
 
-		light.Diffuse.r = min(first->Color.x*first->fIntensity * 0.25, 1.f);
-		light.Diffuse.g = min(first->Color.y*first->fIntensity * 0.25, 1.f);
-		light.Diffuse.b = min(first->Color.z*first->fIntensity * 0.25, 1.f);
+		light.Diffuse.r = min(first->Color.x*first->fIntensity * 0.25f, 1.f);
+		light.Diffuse.g = min(first->Color.y*first->fIntensity * 0.25f, 1.f);
+		light.Diffuse.b = min(first->Color.z*first->fIntensity * 0.25f, 1.f);
 
 		light.Specular.r = 1.f;
 		light.Specular.g = 1.f;
@@ -1343,9 +1343,9 @@ bool RBspObject::Open_ObjectList(MXmlElement *pElement)
 			if (fDist == 0) fIntensity = 0;
 			else fIntensity = (fdistance - Light.fAttnStart) / (Light.fAttnEnd - Light.fAttnStart);
 
-			fIntensity = min(max(1.0f - fIntensity, 0), 1);
+			fIntensity = min(max(1.0f - fIntensity, 0.f), 1.f);
 			fIntensity *= Light.fIntensity;
-			fIntensity = min(max(fIntensity, 0), 1);
+			fIntensity = min(max(fIntensity, 0.f), 1.f);
 
 			if (fIntensityFirst < fIntensity) {
 				fIntensityFirst = fIntensity;
@@ -2466,7 +2466,7 @@ bool RBspObject::GenerateLightmap(const char *filename, int nMaxlightmapsize, in
 											rvector dpos = plight->Position - position;
 											float fdistance = Magnitude(dpos);
 											float fIntensity = (fdistance - plight->fAttnStart) / (plight->fAttnEnd - plight->fAttnStart);
-											fIntensity = min(max(1.0f - fIntensity, 0), 1);
+											fIntensity = min(max(1.0f - fIntensity, 0.f), 1.f);
 											Normalize(dpos);
 
 											rvector normal;
@@ -2474,7 +2474,7 @@ bool RBspObject::GenerateLightmap(const char *filename, int nMaxlightmapsize, in
 
 											float fDot;
 											fDot = DotProduct(dpos, normal);
-											fDot = max(0, fDot);
+											fDot = max(0.f, fDot);
 
 											tempcolor += fIntensity*plight->fIntensity*fDot*plight->Color;
 										}
@@ -2493,7 +2493,7 @@ bool RBspObject::GenerateLightmap(const char *filename, int nMaxlightmapsize, in
 								rvector dpos = plight->Position - position;
 								float fdistance = Magnitude(dpos);
 								float fIntensity = (fdistance - plight->fAttnStart) / (plight->fAttnEnd - plight->fAttnStart);
-								fIntensity = min(max(1.0f - fIntensity, 0), 1);
+								fIntensity = min(max(1.0f - fIntensity, 0.f), 1.f);
 								Normalize(dpos);
 
 								rvector normal;
@@ -2501,7 +2501,7 @@ bool RBspObject::GenerateLightmap(const char *filename, int nMaxlightmapsize, in
 
 								float fDot;
 								fDot = DotProduct(dpos, normal);
-								fDot = max(0, fDot);
+								fDot = max(0.f, fDot);
 
 								color += fIntensity*plight->fIntensity*fDot*plight->Color;
 							}
@@ -2517,9 +2517,9 @@ bool RBspObject::GenerateLightmap(const char *filename, int nMaxlightmapsize, in
 				rvector color = lightmap[j];
 
 				color *= 0.25f;
-				color.x = min(color.x, 1);
-				color.y = min(color.y, 1);
-				color.z = min(color.z, 1);
+				color.x = min(color.x, 1.f);
+				color.y = min(color.y, 1.f);
+				color.z = min(color.z, 1.f);
 				lightmap[j] = color;
 				lightmapdata[j] = ((DWORD)(color.x * 255)) << 16 | ((DWORD)(color.y * 255)) << 8 | ((DWORD)(color.z * 255));
 			}
@@ -3195,7 +3195,7 @@ bool RBspObject::DrawLight(RSBspNode *pNode, int nMaterial)
 					v[j].tu1 = -DotProduct(pdi->pUAxis[i], l) * .5 + .5;
 					v[j].tv1 = -DotProduct(pdi->pVAxis[i], l) * .5 + .5;
 
-					float fIntensity = min(1.f, max(0, 1.f - fPlaneDotCoord / g_pTargetLight->Range));
+					float fIntensity = min(1.f, max(0.f, 1.f - fPlaneDotCoord / g_pTargetLight->Range));
 
 					v[j].dwColor = DWORD(fIntensity * 255) << 24 | g_dwTargetLightColor;
 

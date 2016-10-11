@@ -187,14 +187,17 @@ ZGameClient::~ZGameClient()
 
 void ZGameClient::PriorityBoost(bool bBoost)
 {
-	if (bBoost) {
-		SetPriorityClass(GetCurrentProcess(),ABOVE_NORMAL_PRIORITY_CLASS);
+	if (bBoost)
+	{
+		SetPriorityClass(GetCurrentProcess(), ABOVE_NORMAL_PRIORITY_CLASS);
 		m_bPriorityBoost = true;
-		OutputDebugString("<<<<  BOOST ON  >>>> \n");
-	} else {
-		SetPriorityClass(GetCurrentProcess(),NORMAL_PRIORITY_CLASS);
+		OutputDebugString("<<<<  BOOST ON  >>>>\n");
+	}
+	else
+	{
+		SetPriorityClass(GetCurrentProcess(), NORMAL_PRIORITY_CLASS);
 		m_bPriorityBoost = false;
-		OutputDebugString("<<<<  BOOST OFF  >>>> \n");
+		OutputDebugString("<<<<  BOOST OFF  >>>>\n");
 	}
 }
 

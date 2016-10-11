@@ -5,12 +5,22 @@
 #include "RParticleSystem.h"
 #include "RFont.h"
 #include "RMeshUtil.h"
+#include "RS2.h"
+#include "RS2Vulkan.h"
 
 #pragma comment(lib,"winmm.lib")
 
+#ifndef _PUBLISH
+#define __BP(i,n)	MBeginProfile(i,n);
+#define __EP(i)		MEndProfile(i);
+#else
+#define __BP(i,n) ;
+#define __EP(i) ;
+#endif
+
 #define RTOOLTIP_GAP 700
-static DWORD g_last_mouse_move_time = 0;
-static bool g_tool_tip = false;
+static DWORD g_last_mouse_move_time;
+static bool g_tool_tip;
 
 bool IsToolTipEnable() {
 	return g_tool_tip;
@@ -20,31 +30,33 @@ _NAMESPACE_REALSPACE2_BEGIN
 
 extern HWND g_hWnd;
 
-bool g_bActive;
-extern bool g_bFixedResolution;
+static bool g_bActive;
 
-RECT g_rcWindowBounds;
-WNDPROC	g_WinProc=NULL;
-RFFUNCTION g_pFunctions[RF_ENDOFRFUNCTIONTYPE] = {NULL, };
+static RECT g_rcWindowBounds;
+static WNDPROC g_WinProc;
+static RFFUNCTION g_pFunctions[RF_ENDOFRFUNCTIONTYPE];
 
-extern int gNumTrisRendered;
+#ifdef _USE_GDIPLUS
+#include "unknwn.h"
+#include "gdiplus.h"
 
-#ifdef _USE_GDIPLUS		// GDI Plus 
-	#include "unknwn.h"
-	#include "gdiplus.h"
-
-	Gdiplus::GdiplusStartupInput	g_gdiplusStartupInput;
-	ULONG_PTR 						g_gdiplusToken = NULL;
+static Gdiplus::GdiplusStartupInput g_gdiplusStartupInput;
+static ULONG_PTR g_gdiplusToken;
 #endif
 
-void RSetFunction(RFUNCTIONTYPE ft,RFFUNCTION pfunc)
-{
-	g_pFunctions[ft]=pfunc;
+void RSetFunction(RFUNCTIONTYPE ft, RFFUNCTION pfunc) {
+	g_pFunctions[ft] = pfunc;
 }
 
-bool RIsActive()
+bool RIsActive() {
+	return GetActiveWindow() == g_hWnd;
+}
+
+RRESULT RFrame_Error()
 {
-	return GetActiveWindow()==g_hWnd;
+	if (!g_pFunctions[RF_ERROR])
+		return R_OK;
+	return g_pFunctions[RF_ERROR](nullptr);
 }
 
 void RFrame_Create()
@@ -52,11 +64,7 @@ void RFrame_Create()
 #ifdef _USE_GDIPLUS
 	Gdiplus::GdiplusStartup(&g_gdiplusToken, &g_gdiplusStartupInput, NULL);
 #endif
-	GetWindowRect(g_hWnd,&g_rcWindowBounds);
-}
-
-void RFrame_Init()
-{
+	GetWindowRect(g_hWnd, &g_rcWindowBounds);
 }
 
 void RFrame_Restore()
@@ -90,194 +98,204 @@ void RFrame_Update()
 		g_pFunctions[RF_UPDATE](NULL);
 }
 
+void RFrame_RenderD3D9()
+{
+	RRESULT isOK = RIsReadyToRender();
+	if (isOK == R_NOTREADY)
+		return;
+	else if (isOK == R_RESTORED)
+	{
+		RMODEPARAMS ModeParams = { RGetScreenWidth(),RGetScreenHeight(),RGetFullscreenMode(),RGetPixelFormat() };
+		RResetDevice(&ModeParams);
+	}
+
+	if (GetGlobalTimeMS() > g_last_mouse_move_time + RTOOLTIP_GAP)
+		g_tool_tip = true;
+
+	if (g_pFunctions[RF_RENDER])
+		g_pFunctions[RF_RENDER](nullptr);
+
+	RGetDevice()->SetStreamSource(0, nullptr, 0, 0);
+	RGetDevice()->SetIndices(0);
+	RGetDevice()->SetTexture(0, nullptr);
+	RGetDevice()->SetTexture(1, nullptr);
+
+	__BP(5007, "RFlip");
+	RFlip();
+	__EP(5007);
+}
+
+void RFrame_RenderVulkan()
+{
+	GetRS2().DrawStatic<RS2Vulkan>();
+}
 
 void RFrame_Render()
 {
 	if (!RIsActive() && RIsFullscreen()) return;
 
-	RRESULT isOK=RIsReadyToRender();
-	if(isOK==R_NOTREADY)
-		return;
-	else
-	if(isOK==R_RESTORED)
-	{
-		RMODEPARAMS ModeParams={ RGetScreenWidth(),RGetScreenHeight(),RGetFullscreenMode(),RGetPixelFormat() };
-		RResetDevice(&ModeParams);
-	}
+	if (GetRS2().UsingD3D9())
+		return RFrame_RenderD3D9();
 
-	if(GetGlobalTimeMS() > g_last_mouse_move_time + RTOOLTIP_GAP)
-		g_tool_tip = true;
-
-	if(g_pFunctions[RF_RENDER])
-		g_pFunctions[RF_RENDER](NULL);
-
-	RGetDevice()->SetStreamSource(0,NULL,0,0);
-	RGetDevice()->SetIndices(0);
-	RGetDevice()->SetTexture(0,NULL);
-	RGetDevice()->SetTexture(1,NULL);
+	return RFrame_RenderVulkan();
 }
 
 LRESULT FAR PASCAL WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    // Handle messages
-    switch (message)
-    {
-		case WM_SYSCOMMAND:
-			{
-				switch (wParam)
-				{
-					// Trap ALT so it doesn't pause the app
-					case SC_PREVWINDOW :
-					case SC_NEXTWINDOW :
-					case SC_KEYMENU :
-					{
-						return 0;
-					}
-					break;
-				}
-			}
-			break;
-        
-		case WM_ACTIVATEAPP:
+	// Handle messages
+	switch (message)
+	{
+	case WM_SYSCOMMAND:
+	{
+		switch (wParam)
 		{
-			if (wParam == TRUE) {
-				if (g_pFunctions[RF_ACTIVATE])
-					g_pFunctions[RF_ACTIVATE](NULL);
-				g_bActive = TRUE;
-			} else {
-				if (g_pFunctions[RF_DEACTIVATE])
-					g_pFunctions[RF_DEACTIVATE](NULL);
-
-				if (RIsFullscreen()) {
-					ShowWindow(hWnd, SW_MINIMIZE);
-					UpdateWindow(hWnd);
-				}
-				g_bActive = FALSE;
-			}
+			// Trap ALT so it doesn't pause the app
+		case SC_PREVWINDOW:
+		case SC_NEXTWINDOW:
+		case SC_KEYMENU:
+		{
+			return 0;
 		}
 		break;
-
-		case WM_MOUSEMOVE:
-			{
-				g_last_mouse_move_time = GetGlobalTimeMS();
-				g_tool_tip = false;
-			}
-			break;
-
-		case WM_CLOSE:
-		{
-			mlog("wm_close\n");
-			RFrame_Destroy();
-            PostQuitMessage(0);
 		}
-		break;
-    }
-    return g_WinProc(hWnd, message, wParam, lParam);
+	}
+	break;
+
+	case WM_ACTIVATEAPP:
+	{
+		if (wParam == TRUE) {
+			if (g_pFunctions[RF_ACTIVATE])
+				g_pFunctions[RF_ACTIVATE](NULL);
+			g_bActive = true;
+		}
+		else {
+			if (g_pFunctions[RF_DEACTIVATE])
+				g_pFunctions[RF_DEACTIVATE](NULL);
+
+			if (RIsFullscreen()) {
+				ShowWindow(hWnd, SW_MINIMIZE);
+				UpdateWindow(hWnd);
+			}
+			g_bActive = false;
+		}
+	}
+	break;
+
+	case WM_MOUSEMOVE:
+	{
+		g_last_mouse_move_time = GetGlobalTimeMS();
+		g_tool_tip = false;
+	}
+	break;
+
+	case WM_CLOSE:
+	{
+		mlog("Received WM_CLOSE, exiting\n");
+		RFrame_Destroy();
+		PostQuitMessage(0);
+	}
+	break;
+	}
+	return g_WinProc(hWnd, message, wParam, lParam);
 }
 
-#ifndef _PUBLISH
-
-#define __BP(i,n)	MBeginProfile(i,n);
-#define __EP(i)		MEndProfile(i);
-
-#else
-
-#define __BP(i,n) ;
-#define __EP(i) ;
-
-#endif
-
-//DWORD WINAPI thrUpdate(LPVOID)
-//{
-//	while (1)
-//	{
-//		RFrame_Update();
-//	}
-//}
-
-int RMain(const char *AppName, HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline, int cmdshow, RMODEPARAMS *pModeParams, WNDPROC winproc, WORD nIconResID )
+static bool RegisterWindowClass(HINSTANCE this_inst, WORD IconResID, WNDPROC WindowProc)
 {
-	g_WinProc=winproc ? winproc : DefWindowProc;
+	WNDCLASS wc;
+	wc.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
+	wc.lpfnWndProc = WindowProc;
+	wc.cbClsExtra = 0;
+	wc.cbWndExtra = sizeof(DWORD);
+	wc.hInstance = this_inst;
+	wc.hIcon = LoadIcon(this_inst, MAKEINTRESOURCE(IconResID));
+	wc.hCursor = 0;
+	wc.hbrBackground = NULL;
+	wc.lpszMenuName = NULL;
+	wc.lpszClassName = "RealSpace2";
+	return RegisterClass(&wc) != 0;
+}
 
-	// make a window
-    WNDCLASS    wc;
-    wc.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
-    wc.lpfnWndProc = WndProc;
-    wc.cbClsExtra = 0;
-    wc.cbWndExtra = sizeof(DWORD);
-    wc.hInstance = this_inst;
-	wc.hIcon = LoadIcon( this_inst, MAKEINTRESOURCE(nIconResID));
-    wc.hCursor = 0;
-    wc.hbrBackground = NULL;
-    wc.lpszMenuName = NULL;
-    wc.lpszClassName = "RealSpace2";
-	if(!RegisterClass(&wc)) return FALSE;
-
-	DWORD dwStyle = GetWindowStyle(*pModeParams);
-    g_hWnd = CreateWindow( "RealSpace2", AppName , dwStyle, CW_USEDEFAULT, CW_USEDEFAULT, 
-			pModeParams->nWidth, pModeParams->nHeight, NULL, NULL, this_inst , NULL );
-
-	// initialize realspace2
-
-	RAdjustWindow(pModeParams);
-
-	while(ShowCursor(FALSE)>0);
-
+static bool InitGraphicsAPI(const RMODEPARAMS* ModeParams, HINSTANCE inst, HWND hWnd)
+{
 	RFrame_Create();
 
-	ShowWindow(g_hWnd,SW_SHOW);
-	if(!RInitDisplay(g_hWnd,pModeParams))
+	ShowWindow(g_hWnd, SW_SHOW);
+	if (!RInitDisplay(g_hWnd, inst, ModeParams, GraphicsAPI::Vulkan))
 	{
-		mlog("can't init display\n");
-		return -1;
+		mlog("Fatal error: Failed to initialize display\n");
+		return false;
 	}
 
-	RGetDevice()->Clear(0 , NULL, D3DCLEAR_TARGET, 0x00000000, 1.0f, 0 );
-	RFlip();
+	if (GetRS2().UsingVulkan())
+		return true;
 
-	if(g_pFunctions[RF_CREATE])
+	if (g_pFunctions[RF_CREATE])
 	{
-		if(g_pFunctions[RF_CREATE](NULL)!=R_OK)
+		if (g_pFunctions[RF_CREATE](NULL) != R_OK)
 		{
 			RFrame_Destroy();
-			return -1;
+			return false;
 		}
 	}
 
-	RFrame_Init();
+	return true;
+}
 
-	//CreateThread(0, 0, thrUpdate, 0, 0, 0);
+static int RenderLoop()
+{
+	MSG msg;
 
-    BOOL bGotMsg;
-    MSG  msg;
+	do
+	{
+		auto GotMsg = PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE);
 
-    do
-    {
-		bGotMsg = PeekMessage( &msg, NULL, 0U, 0U, PM_REMOVE );
+		if (GotMsg)
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+		else
+		{
+			__BP(5006, "RMain::Run");
 
-        if( bGotMsg ) {
-            TranslateMessage( &msg );
-            DispatchMessage( &msg );
-        }
-		else {
-
-			__BP(5006,"RMain::Run");
-
-			RFrame_Update();
+			if (GetRS2().UsingD3D9())
+				RFrame_Update();
 			RFrame_Render();
-			__BP(5007,"RMain::RFlip");
-			RFlip();
-			__EP(5007);
 
 			__EP(5006);
 
 			MCheckProfileCount();
 		}
 
-		if(!g_bActive)
+		if (!g_bActive)
 			Sleep(10);
-    }while( WM_QUIT != msg.message  );
-    return (INT)msg.wParam;
+	} while (WM_QUIT != msg.message);
+
+	return static_cast<int>(msg.wParam);
+}
+
+int RMain(const char *AppName, HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline,
+	int cmdshow, RMODEPARAMS *ModeParams, WNDPROC winproc, WORD IconResID)
+{
+	g_WinProc = winproc ? winproc : DefWindowProc;
+
+	// Make a window
+	if (!RegisterWindowClass(this_inst, IconResID, WndProc))
+		return -1;
+
+	auto Style = GetWindowStyle(*ModeParams);
+	g_hWnd = CreateWindow("RealSpace2", AppName, Style, CW_USEDEFAULT, CW_USEDEFAULT,
+		ModeParams->nWidth, ModeParams->nHeight, NULL, NULL, this_inst, NULL);
+
+	RAdjustWindow(ModeParams);
+
+	while (ShowCursor(FALSE) > 0)
+		Sleep(10);
+
+	if (!InitGraphicsAPI(ModeParams, this_inst, g_hWnd))
+		return -1;
+
+	return RenderLoop();
 }
 
 _NAMESPACE_REALSPACE2_END

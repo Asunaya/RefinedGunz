@@ -4,12 +4,7 @@
 #include "ZGameDrawD3D9.h"
 #include "ZGameDrawVulkan.h"
 #include <type_traits>
-
-#define POLYVAR_METHOD(func) template <typename... Ts> \
-auto func(Ts&&... args) { visit(var, [&](auto& x) { x.func(std::forward<Ts>(args)...); }); }
-
-struct D3D9Tag {};
-struct VulkanTag {};
+#include "VariantPolymorphism.h"
 
 class ZGameDraw
 {

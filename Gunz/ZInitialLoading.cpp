@@ -11,7 +11,6 @@
 
 using namespace RealSpace2;
 
-
 struct CUSTOMVERTEX{
 	FLOAT	x, y, z, rhw;
 	FLOAT	tu, tv;

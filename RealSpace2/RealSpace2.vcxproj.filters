@@ -28,6 +28,9 @@
     <Filter Include="D3D9\Shaders">
       <UniqueIdentifier>{6c16a410-6c56-4524-8a1a-a3e5a0104104}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Vulkan">
+      <UniqueIdentifier>{906923dd-6921-46b8-bd5a-d245422a9642}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="Doc\맵 디자인 규칙 문서.txt">
@@ -49,6 +52,12 @@
     <None Include="Source\skin.hlsl">
       <Filter>D3D9\Shaders</Filter>
     </None>
+    <None Include="Include\ShaderGlobals.h" />
+    <None Include="Source\MergeShadowMapsPS.hlsl" />
+    <None Include="Source\MergeShadowMapsVS.hlsl" />
+    <None Include="Source\SceneDirLightPS.hlsl" />
+    <None Include="Source\ScenePointLightPS.hlsl" />
+    <None Include="Source\ShadowPS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\RHalfEdgeMesh.cpp">
@@ -193,6 +202,17 @@
     <ClCompile Include="Source\RMath.cpp" />
     <ClCompile Include="Source\Renderer.cpp" />
     <ClCompile Include="Source\ShaderUtil.cpp" />
+    <ClCompile Include="Source\vulkantools.cpp">
+      <Filter>Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\vulkandebug.cpp">
+      <Filter>Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\vulkan_functions.cpp">
+      <Filter>Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="Include\RS2Vulkan.cpp" />
+    <ClCompile Include="Include\RS2D3D9.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\RHalfEdgeMesh.h">
@@ -329,26 +349,36 @@
     <ClInclude Include="Include\RUtil.h" />
     <ClInclude Include="Include\Renderer.h" />
     <ClInclude Include="Include\RS2.h" />
-    <ClInclude Include="Include\ShaderGlobals.h">
-      <Filter>D3D9\Shaders</Filter>
-    </ClInclude>
     <ClInclude Include="Include\ShaderUtil.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="Source\SceneDirLightPS.hlsl">
-      <Filter>D3D9\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Source\ScenePointLightPS.hlsl">
-      <Filter>D3D9\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Source\ShadowPS.hlsl">
-      <Filter>D3D9\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Source\MergeShadowMapsPS.hlsl">
-      <Filter>D3D9\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Source\MergeShadowMapsVS.hlsl">
-      <Filter>D3D9\Shaders</Filter>
-    </FxCompile>
+    <ClInclude Include="Include\vulkanswapchain.h">
+      <Filter>Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\vulkantools.h">
+      <Filter>Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\vulkandebug.h">
+      <Filter>Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\vulkandevice.h">
+      <Filter>Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\RS2Vulkan.h">
+      <Filter>Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\VulkanTextureLoader.h">
+      <Filter>Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\vulkanbuffer.hpp">
+      <Filter>Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\vulkan_functions.h">
+      <Filter>Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\vulkan_function_list.h">
+      <Filter>Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\RS2D3D9.h">
+      <Filter>D3D9</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

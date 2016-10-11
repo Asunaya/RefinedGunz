@@ -138,7 +138,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>Include;../CML/Include;../MAI/Include;../RealSpace/Include;../sdk/dx9/include;../sdk/rapidxml/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>Include;../CML/Include;../MAI/Include;../RealSpace/Include;../sdk/dx9/include;../sdk/rapidxml/include;../sdk/vulkan;../sdk/gli;../sdk/glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;WIN32;_LIB;_USE_GDIPLUS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -191,7 +191,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>Include;../CML/Include;../MAI/Include;../RealSpace/Include;../sdk/dx9/include;../sdk/rapidxml/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>Include;../CML/Include;../MAI/Include;../RealSpace/Include;../sdk/dx9/include;../sdk/rapidxml/include;../sdk/vulkan;../sdk/gli;../sdk/glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DEBUG;WIN32;_LIB;_USE_GDIPLUS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -244,7 +244,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release LTCG|Win32'">
     <ClCompile>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>Include;../CML/Include;../MAI/Include;../RealSpace/Include;../sdk/dx9/include;../sdk/rapidxml/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>Include;../CML/Include;../MAI/Include;../RealSpace/Include;../sdk/dx9/include;../sdk/rapidxml/include;../sdk/vulkan;../sdk/gli;../sdk/glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;WIN32;_LIB;_USE_GDIPLUS;_PUBLISH;NO_WARN_MBCS_MFC_DEPRECATION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -278,7 +278,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Clang Release LTCG|Win32'">
     <ClCompile>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>Include;../CML/Include;../MAI/Include;../RealSpace/Include;../sdk/dx9/include;../sdk/rapidxml/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>Include;../CML/Include;../MAI/Include;../RealSpace/Include;../sdk/dx9/include;../sdk/rapidxml/include;../sdk/vulkan;../sdk/gli;../sdk/glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;WIN32;_LIB;_USE_GDIPLUS;_PUBLISH;NO_WARN_MBCS_MFC_DEPRECATION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -367,6 +367,8 @@
     <None Include="Source\Globals.hlslh" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Include\RS2D3D9.cpp" />
+    <ClCompile Include="Include\RS2Vulkan.cpp" />
     <ClCompile Include="Source\MeshManager.cpp" />
     <ClCompile Include="Source\Renderer.cpp" />
     <ClCompile Include="Source\RHalfEdgeMesh.cpp" />
@@ -428,6 +430,9 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Source\vulkandebug.cpp" />
+    <ClCompile Include="Source\vulkantools.cpp" />
+    <ClCompile Include="Source\vulkan_functions.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\MeshManager.h" />
@@ -442,6 +447,8 @@
     <ClInclude Include="Include\RMtrl.h" />
     <ClInclude Include="Include\Renderer.h" />
     <ClInclude Include="Include\RS2.h" />
+    <ClInclude Include="Include\RS2D3D9.h" />
+    <ClInclude Include="Include\RS2Vulkan.h" />
     <ClInclude Include="Include\RUtil.h" />
     <ClInclude Include="Include\RVisualMesh.h" />
     <ClInclude Include="INCLUDE\RVisualMeshMgr.h" />
@@ -482,6 +489,14 @@
     <ClInclude Include="Include\RTypes.h" />
     <ClInclude Include="Include\RVersions.h" />
     <ClInclude Include="Include\ShaderUtil.h" />
+    <ClInclude Include="Include\vulkanbuffer.hpp" />
+    <ClInclude Include="Include\vulkandebug.h" />
+    <ClInclude Include="Include\vulkandevice.h" />
+    <ClInclude Include="Include\vulkanswapchain.h" />
+    <ClInclude Include="Include\VulkanTextureLoader.h" />
+    <ClInclude Include="Include\vulkantools.h" />
+    <ClInclude Include="Include\vulkan_functions.h" />
+    <ClInclude Include="Include\vulkan_function_list.h" />
     <None Include="Include\ShaderGlobals.h" />
     <ClInclude Include="Include\stdafx.h" />
   </ItemGroup>

@@ -70,7 +70,7 @@ RMODEPARAMS	g_ModeParams = { 800,600,FullscreenType::Fullscreen,D3DFMT_R5G6B5 };
 RRESULT RenderScene(void *pParam);
 
 #define RD_STRING_LENGTH 512
-char cstrReleaseDate[512];// = "ReleaseDate : 12/22/2003";
+char cstrReleaseDate[512];
 
 ZApplication	g_App;
 MDrawContextR2* g_pDC = NULL;
@@ -82,8 +82,6 @@ Mint4Gunz		g_Mint;
 
 HRESULT GetDirectXVersionViaDxDiag( DWORD* pdwDirectXVersionMajor, DWORD* pdwDirectXVersionMinor, TCHAR* pcDirectXVersionLetter );
 
-
-
 void _ZChangeGameState(int nIndex)
 {
 	GunzState state = GunzState(nIndex);
@@ -93,8 +91,6 @@ void _ZChangeGameState(int nIndex)
 		ZApplication::GetGameInterface()->SetState(state);
 	}
 }
-
-//list<HANDLE>	g_FontMemHandles;
 
 RRESULT OnCreate(void *pParam)
 {
@@ -108,40 +104,10 @@ RRESULT OnCreate(void *pParam)
 	mlog("main : RGetLenzFlare()->Initialize() \n");
 
 	RBspObject::CreateShadeMap("sfx/water_splash.bmp");
-	//D3DCAPS9 caps;
-	//RGetDevice()->GetDeviceCaps( &caps );
-	//if( caps.VertexShaderVersion < D3DVS_VERSION(1, 1) )
-	//{
-	//	RGetShaderMgr()->mbUsingShader				= false;
-	//	RGetShaderMgr()->shader_enabled				= false;
-	//	mlog("main : VideoCard Dosen't support Vertex Shader...\n");
-	//}
-	//else
-	//{
-	//	mlog("main : VideoCard support Vertex Shader...\n");
-	//}
-
-//	sprintf_safe( cstrReleaseDate, "Release Date : %s", __DATE__ );
-	sprintf_safe( cstrReleaseDate, "");				// 삭제.
+	
+	sprintf_safe( cstrReleaseDate, "");
 	g_DInput.Create(g_hWnd, FALSE, FALSE);
 	g_pInput = new ZInput(&g_DInput);
-	/*
-	for(int i=0; i<ZApplication::GetFileSystem()->GetFileCount(); i++){
-		const char* szFileName = ZApplication::GetFileSystem()->GetFileName(i);
-		size_t nStrLen = strlen(szFileName);
-		if(nStrLen>3){
-			if(_stricmp(szFileName+nStrLen-3, "ttf")==0){
-				int nFileLenth = ZApplication::GetFileSystem()->GetFileLength(i);
-				char* pFileData = new char[nFileLenth];
-				ZApplication::GetFileSystem()->ReadFile(szFileName, pFileData, nFileLenth);
-				int nInstalled = 0;
-				HANDLE hFontMem = AddFontMemResourceEx(pFileData, 1, 0, &nInstalled);
-				g_FontMemHandles.insert(g_FontMemHandles.end(), hFontMem);
-				delete[] pFileData;
-			}
-		}
-	}
-	*/
 	RSetGammaRamp(Z_VIDEO_GAMMA_VALUE);
 	RSetRenderFlags(RRENDER_CLEAR_BACKBUFFER);
 
@@ -166,21 +132,12 @@ RRESULT OnCreate(void *pParam)
 	g_pDefFont = new MFontR2;
 
 	if( !g_pDefFont->Create("Default", Z_LOCALE_DEFAULT_FONT, 9, 1.0f) )
-//	if( !g_pDefFont->Create("Default", RGetDevice(), "FONTb11b", 9, 1.0f, true, false) )
-//	if( !g_pDefFont->Create("Default", RGetDevice(), "FONTb11b", 14, 1.0f, true, false) )
 	{
 		mlog("Fail to Create defualt font : MFontR2 / main.cpp.. onCreate\n" );
 		g_pDefFont->Destroy();
 		SAFE_DELETE( g_pDefFont );
 		g_pDefFont	= NULL;
 	}
-	//pDefFont->Create("Default", RGetDevice(), "FONTb11b", 10, 1.0f, true, false);
-	//pDefFont->Create("Default", RGetDevice(), "FONTb11b", 16, 1.0f, true, false, -1, 4);
-	//pDefFont->Create("Default", RGetDevice(), "-2002", 10, 1.0f, false, false, -1, 1);
-	//pDefFont->Create("Default", RGetDevice(), "HY수평선L", 12, 1.0f, false, false, -1, 2);
-
-	//MLoadDesignerMode();
-	// 기본 800x600 디자인으로 생성하고, 나중에 Resize를 화면 크기로 해준다.
 
 	g_pDC = new MDrawContextR2(RGetDevice());
 
@@ -203,15 +160,10 @@ RRESULT OnCreate(void *pParam)
 	}
 #endif
 
-//	ZGetInitialLoading()->SetPercentage( 10.0f );
-//	ZGetInitialLoading()->Draw( MODE_DEFAULT, 0 , true );
-
 	g_Mint.Initialize(800, 600, g_pDC, g_pDefFont);
 	Mint::GetInstance()->SetHWND(RealSpace2::g_hWnd);
 
 	mlog("main : g_Mint.Initialize() \n");
-
-//	ZGetConfiguration()->LoadHotKey(FILENAME_CONFIG);
 
 	ZLoadingProgress appLoading("application");
 	if(!g_App.OnCreate(&appLoading))
@@ -219,9 +171,6 @@ RRESULT OnCreate(void *pParam)
 		ZGetInitialLoading()->Release();
 		return R_ERROR_LOADING;
 	}
-
-//	ZGetInitialLoading()->SetPercentage( 50.0f );
-//	ZGetInitialLoading()->Draw( MODE_DEFAULT, 0, true );
 	
 	mlog("main : g_App.OnCreate() \n");
 
@@ -233,13 +182,9 @@ RRESULT OnCreate(void *pParam)
 	g_Mint.SetWorkspaceSize(g_ModeParams.nWidth, g_ModeParams.nHeight);
 	g_Mint.GetMainFrame()->SetSize(g_ModeParams.nWidth, g_ModeParams.nHeight);
 	ZGetOptionInterface()->Resize(g_ModeParams.nWidth, g_ModeParams.nHeight);
-
-//	ZGetInitialLoading()->SetPercentage( 80.f );
-//	ZGetInitialLoading()->Draw( MODE_DEFAULT, 0, true );
     
 	// Default Key
 	for(int i=0; i<ZACTION_COUNT; i++){
-//		g_Mint.RegisterActionKey(i, ZGetConfiguration()->GetKeyboard()->ActionKeys[i].nScanCode);
 		ZACTIONKEYDESCRIPTION& keyDesc = ZGetConfiguration()->GetKeyboard()->ActionKeys[i];
 		g_pInput->RegisterActionKey(i, keyDesc.nVirtualKey);
 		if(keyDesc.nVirtualKeyAlt!=-1)
@@ -248,12 +193,9 @@ RRESULT OnCreate(void *pParam)
 
 	g_App.SetInitialState();
 
-//	ParseParameter(g_szCmdLine);
-
 	ZGetFlashBangEffect()->SetDrawCopyScreen(true);
 
-	static const char *szDone = "Done.";
-	ZGetInitialLoading()->SetLoadingStr(szDone);
+	ZGetInitialLoading()->SetLoadingStr("Done.");
 	if( ZGetInitialLoading()->IsUseEnable() )
 	{
 #ifndef _FASTDEBUG
@@ -338,117 +280,6 @@ RRESULT OnUpdate(void* pParam)
 
 	g_App.OnUpdate();
 
-#ifndef _DEBUG
-#ifdef _XTRAP
-	// XTrap 주기적인 체크
-#define XTRAP_INTERVAL 5000
-	static DWORD xTrapLastTime = GetGlobalTimeMS();
-	DWORD currentTime=GetGlobalTimeMS();
-	if(xTrapLastTime+XTRAP_INTERVAL<currentTime)
-	{
-		xTrapLastTime=currentTime;
-
-			char szMsgBuf[500] = {
-#ifdef LOCALE_KOREA
-				"비정상적인 행위가 감지되었습니다. 게임을 종료합니다.\n"
-#else
-				"An abnormal behavior is detected. Terminating game.\n"
-#endif
-			};
-
-			///////////////////////////////////////////////////////////////////
-			// 디폴트 탐지 메시지 루틴
-
-			if (g_bApiMal			== TRUE ||
-				g_bMemoryMdl		== TRUE ||
-				g_bAutoMousMdl		== TRUE ||
-				g_bAutoKeybMdl		== TRUE ||
-				g_bMalMdl			== TRUE ||
-				g_bSpeedMdl			== TRUE ||
-				g_bFileMdl			== TRUE ||
-				g_bApiHookMdl		== TRUE ||
-				g_bDebugModMdl		== TRUE ||
-				g_bMemoryCrack		== TRUE ||
-				g_bFileCrack		== TRUE ||
-				g_bApiHookCrack		== TRUE)
-			{
-				mlog("xtrap error : ");
-				if (g_bApiMal			== TRUE) mlog("ApiMal");
-				if (g_bMemoryMdl		== TRUE) mlog("MemoryMdl");
-				if (g_bAutoMousMdl		== TRUE) mlog("AutoMousMdl");
-				if (g_bAutoKeybMdl		== TRUE) mlog("AutoKeybMdl");
-				if (g_bMalMdl			== TRUE) mlog("MalMdl");
-				if (g_bSpeedMdl			== TRUE) mlog("SpeedMdl");
-				if (g_bFileMdl			== TRUE) mlog("FileMdl");
-				if (g_bApiHookMdl		== TRUE) mlog("ApiHookMdl");
-				if (g_bDebugModMdl		== TRUE) mlog("DebugModMdl");
-				if (g_bMemoryCrack		== TRUE) mlog("MemoryCrack");
-				if (g_bFileCrack		== TRUE) mlog("FileCrack");
-				if (g_bApiHookCrack		== TRUE) mlog("ApiHookCrack");
-				mlog("\n");
-
-
-				if (ZGetGameClient()) ZGetGameClient()->Disconnect();
-//				AfxMessageBox(szMsgBuf); 
-				mlog(szMsgBuf);
-	            PostQuitMessage(0);
-				//
-				// CloseSocket and Exit Game Client
-				//
-			}
-
-			/* Version 0xA5001069 */
-			if (g_bOsMdl			== TRUE)
-			{
-				if (ZGetGameClient()) ZGetGameClient()->Disconnect();
-#ifdef LOCALE_KOREA
-//				AfxMessageBox("파일 속성에서 호환성 모드가 설정되었습니다. 설정을 해제하십시오."); 
-				mlog("파일 속성에서 호환성 모드가 설정되었습니다. 설정을 해제하십시오.\n"); 
-#else
-//				AfxMessageBox("The compatibility mode is activated in the file property. Please deactivated it."); 
-				mlog("The compatibility mode is activated in the file property. Please deactivated it.\n"); 
-#endif 
-				PostQuitMessage(0);
-				//
-				// CloseSocket and Exit Game Clinet
-				//
-			}
-
-			if (g_bPatchMdl			== TRUE)
-			{
-				if (ZGetGameClient()) ZGetGameClient()->Disconnect();
-#ifdef LOCALE_KOREA
-//				AfxMessageBox("패치 서버 접속에 문제가 있습니다. 네트워크 상황을 확인하십시오."); 
-				mlog("패치 서버 접속에 문제가 있습니다. 네트워크 상황을 확인하십시오.\n"); 
-#else
-//				AfxMessageBox("There is a trouble connecting to the patch server. Please check the network condition."); 
-				mlog("There is a trouble connecting to the patch server. Please check the network condition.\n"); 
-#endif 
-				PostQuitMessage(0);
-				//
-				// CloseSocket and Exit Game Clinet
-				//
-			}
-
-			if (g_bStartXTrap		== FALSE)
-			{
-				if (ZGetGameClient()) ZGetGameClient()->Disconnect();
-#ifdef LOCALE_KOREA
-//				AfxMessageBox("게임 보안모듈을 실행할수 없습니다."); 
-				mlog("게임 보안모듈을 실행할수 없습니다.\n"); 
-#else
-//				AfxMessageBox("Can not run the game security module."); 
-				mlog("Can not run the game security module.\n"); 
-#endif
-				PostQuitMessage(0);
-
-				//
-				// CloseSocket and Exit Game Clinet
-				//
-			}
-	}
-#endif // of xtrap
-#endif
 	__EP(100);
 
 	return R_OK;
@@ -607,7 +438,7 @@ RRESULT OnError(void *pParam)
 	return R_OK;
 }
 
-void SetModeParams()
+static void SetModeParams()
 {
 	g_ModeParams.FullscreenMode = ZGetConfiguration()->GetVideo()->FullscreenMode;
 	g_ModeParams.nWidth = ZGetConfiguration()->GetVideo()->nWidth;
@@ -615,7 +446,7 @@ void SetModeParams()
 
 }
 
-int FindStringPos(char* str,char* word)
+static int FindStringPos(char* str,char* word)
 {
 	if(!str || str[0]==0)	return -1;
 	if(!word || word[0]==0)	return -1;
@@ -819,35 +650,6 @@ LONG_PTR FAR PASCAL WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 
 	return DefWindowProc(hWnd, message, wParam, lParam);
 }
-
-/*
-class mtrl {
-public:
-
-};
-
-class node {
-public:
-	int		m_nIndex[5];
-};
-
-
-class _map{
-public:
-	mtrl* GetMtrl(node* node,int index) { return GetMtrl(node->m_nIndex[index]); }
-	mtrl* GetMtrl(int id) { return m_pIndex[id]; }
-
-	mtrl*	m_pIndex[5];
-};
-
-class game {
-public:
-	_map m_map;	
-};
-
-game _game;
-game* g_game;
-*/
 
 void ClearTrashFiles()
 {
@@ -1078,7 +880,6 @@ int PASCAL WinMain(HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline, int 
 	ClearTrashFiles();
 
 	srand((unsigned int)time(nullptr));
-
 
 	mlog("Refined Gunz version %d launched. Build date: " __DATE__ " " __TIME__ "\n", RGUNZ_VERSION);
 

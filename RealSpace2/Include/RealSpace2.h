@@ -13,6 +13,34 @@ extern int g_nFrameCount, g_nLastFrameCount;
 extern float g_fFPS;
 extern HWND	g_hWnd;
 extern MZFileSystem *g_pFileSystem;
+extern rplane RViewFrustum[6];
+
+enum class GraphicsAPI
+{
+	D3D9,
+	Vulkan,
+};
+
+enum RRENDER_FLAGS
+{
+	RRENDER_CLEAR_BACKBUFFER = 0x000001,
+};
+
+enum RFUNCTIONTYPE {
+	RF_CREATE = 0,
+	RF_DESTROY,
+	RF_RENDER,
+	RF_UPDATE,
+	RF_INVALIDATE,
+	RF_RESTORE,
+	RF_ACTIVATE,
+	RF_DEACTIVATE,
+	RF_ERROR,
+
+	RF_ENDOFRFUNCTIONTYPE
+};
+
+using RFFUNCTION = RRESULT(*)(void *Params);
 
 bool	RIsActive();
 bool	RIsQuery();
@@ -46,7 +74,7 @@ bool REnumAdapterMode(UINT Adapter, D3DFORMAT Format, UINT Mode, D3DDISPLAYMODE*
 
 class RParticleSystem *RGetParticleSystem();
 
-bool RInitDisplay(HWND hWnd, const RMODEPARAMS *params);
+bool RInitDisplay(HWND hWnd, HINSTANCE inst, const RMODEPARAMS *params, GraphicsAPI API);
 bool RCloseDisplay();
 void RSetFileSystem(MZFileSystem *pFileSystem);
 void RAdjustWindow(const RMODEPARAMS* ModeParams);
@@ -59,11 +87,6 @@ RRESULT RIsReadyToRender();
 void RFlip();
 bool REndScene();
 bool RBeginScene();
-
-enum RRENDER_FLAGS
-{
-	RRENDER_CLEAR_BACKBUFFER = 0x000001,
-};
 
 void RSetRenderFlags(unsigned long nFlags);
 unsigned long RGetRenderFlags();
@@ -113,27 +136,10 @@ LPDIRECT3DSURFACE9 RCreateImageSurface(const char *filename);
 void RSetGammaRamp(unsigned short nGammaValue = 255);
 void RSetWBuffer(bool bEnable);
 
-enum RFUNCTIONTYPE {
-	RF_CREATE = 0,
-	RF_DESTROY,
-	RF_RENDER,
-	RF_UPDATE,
-	RF_INVALIDATE,
-	RF_RESTORE,
-	RF_ACTIVATE,
-	RF_DEACTIVATE,
-	RF_ERROR,
-
-	RF_ENDOFRFUNCTIONTYPE
-};
-
-using RFFUNCTION = RRESULT(*)(void *Params);
-
 void RSetFunction(RFUNCTIONTYPE ft, RFFUNCTION pfunc);
 int RMain(const char *AppName, HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline,
 	int cmdshow, RMODEPARAMS *pModeParams, WNDPROC winproc = NULL, WORD nIconResID = NULL);
 
-extern rplane RViewFrustum[6];
 inline rplane *RGetViewFrustum()
 {
 	return RViewFrustum;

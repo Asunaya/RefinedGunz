@@ -83,6 +83,8 @@
     <ClInclude Include="Include\variant.h" />
     <ClInclude Include="Include\defer.h" />
     <ClInclude Include="Include\TMP.h" />
+    <ClInclude Include="Include\VariantPolymorphism.h" />
+    <ClInclude Include="Include\DeferredConstructionWrapper.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\MMatrix.cpp">

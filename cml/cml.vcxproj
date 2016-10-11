@@ -550,6 +550,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Include\defer.h" />
+    <ClInclude Include="Include\DeferredConstructionWrapper.h" />
     <ClInclude Include="Include\GlobalTypes.h" />
     <ClInclude Include="Include\has_xxx.h" />
     <ClInclude Include="Include\MMath.h" />
@@ -610,6 +611,7 @@
     <ClInclude Include="Include\targetver.h" />
     <ClInclude Include="Include\TMP.h" />
     <ClInclude Include="Include\variant.h" />
+    <ClInclude Include="Include\VariantPolymorphism.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
