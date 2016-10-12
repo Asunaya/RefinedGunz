@@ -1045,7 +1045,6 @@ void ZConfiguration::LoadDefaultKeySetting()
 		// 추가 by 정동섭 @ 2006/3/16
 	};
 
-	// Define된 ID와 Description의 개수가 정확히 맞아야 한다.
 	_ASSERT(ZACTION_COUNT==sizeof(DefaultActionKeys)/sizeof(ZACTIONKEYDESCRIPTION));
 
 	memcpy(m_Keyboard.ActionKeys, DefaultActionKeys, sizeof(ZACTIONKEYDESCRIPTION)*ZACTION_COUNT);

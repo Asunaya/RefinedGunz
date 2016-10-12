@@ -126,38 +126,33 @@ bool ZApplication::ParseArguments(const char* pszArgs)
 {
 	strcpy_safe(m_szCmdLine, pszArgs);
 
-	// 파라미터가 리플레이 파일명인지 확인한다
+	size_t nLength;
+
+	if(pszArgs[0]=='"') 
 	{
-		size_t nLength;
+		strcpy_safe(m_szFileName,pszArgs+1);
 
-		// 따옴표 있으면 제거한다
-		if(pszArgs[0]=='"') 
+		nLength = strlen(m_szFileName);
+		if(m_szFileName[nLength-1]=='"')
 		{
-			strcpy_safe(m_szFileName,pszArgs+1);
-
-			nLength = strlen(m_szFileName);
-			if(m_szFileName[nLength-1]=='"')
-			{
-				m_szFileName[nLength-1]=0;
-				nLength--;
-			}
-		}
-		else
-		{
-			strcpy_safe(m_szFileName,pszArgs);
-			nLength = strlen(m_szFileName);
-		}
-
-		if(_stricmp(m_szFileName+nLength-strlen(GUNZ_REC_FILE_EXT),GUNZ_REC_FILE_EXT)==0){
-			SetLaunchMode(ZLAUNCH_MODE_STANDALONE_REPLAY);
-			m_nInitialState = GUNZ_GAME;
-			ZGetLocale()->SetTeenMode(false);
-			return true;
+			m_szFileName[nLength-1]=0;
+			nLength--;
 		}
 	}
+	else
+	{
+		strcpy_safe(m_szFileName,pszArgs);
+		nLength = strlen(m_szFileName);
+	}
 
+	if(_stricmp(m_szFileName+nLength-strlen(GUNZ_REC_FILE_EXT),GUNZ_REC_FILE_EXT)==0){
+		SetLaunchMode(ZLAUNCH_MODE_STANDALONE_REPLAY);
+		m_nInitialState = GUNZ_GAME;
+		ZGetLocale()->SetTeenMode(false);
+		return true;
+	}
 
-	// '/launchdevelop' 모드
+	// TODO: Figure out whatever this affects
 	if ( pszArgs[0] == '/')
 	{
 #ifndef _PUBLISH
@@ -169,7 +164,6 @@ bool ZApplication::ParseArguments(const char* pszArgs)
 
 			return true;
 		} 
-		// '/launch' 모드
 		else if ( strstr( pszArgs, "launch") != NULL)
 		{
 			SetLaunchMode(ZLAUNCH_MODE_STANDALONE);
@@ -178,8 +172,6 @@ bool ZApplication::ParseArguments(const char* pszArgs)
 #endif
 	}
 
-	// TODO: 일본넷마블 테스트하느라 주석처리 - bird
-	// 디버그버전은 파라메타가 없어도 launch로 실행하도록 변경
 #ifndef _PUBLISH
 	{
 		SetLaunchMode(ZLAUNCH_MODE_STANDALONE_DEVELOP);
@@ -187,21 +179,6 @@ bool ZApplication::ParseArguments(const char* pszArgs)
 		return true;
 	}
 #endif
-
-
-/*	// RAON DEBUG ////////////////////////
-	ZNetmarbleAuthInfo* pMNInfo = ZNetmarbleAuthInfo::GetInstance();
-	pMNInfo->SetServerIP("192.168.0.30");
-	pMNInfo->SetServerPort(6000);
-	pMNInfo->SetAuthCookie("");
-	pMNInfo->SetDataCookie("");
-	pMNInfo->SetCpCookie("Certificate=4f3d7e1cf8d27bd0&Sex=f1553a2f8bd18a59&Name=018a1751ea0eaf54&UniID=25c1272f61aaa6ec8d769f14137cf298&Age=1489fa5ce12aeab7&UserID=e23616614f162e03");
-	pMNInfo->SetSpareParam("Age=15");
-
-	SetLaunchMode(ZLAUNCH_MODE_NETMARBLE);
-	return true;
-	//////////////////////////////////////
-	*/		
 
 	switch(ZGetLocale()->GetCountry()) {
 	case MC_JAPAN:
@@ -831,7 +808,7 @@ void ZApplication::PreCheckArguments()
 {
 	char *str;
 
-	str=strstr(m_szCmdLine,ZTOKEN_FAST_LOADING);
+	str = strstr(m_szCmdLine, ZTOKEN_FAST_LOADING);
 
 	if(str != NULL) {
 		RMesh::SetPartsMeshLoadingSkip(1);

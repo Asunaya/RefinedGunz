@@ -102,7 +102,9 @@ void RFrame_RenderD3D9()
 {
 	RRESULT isOK = RIsReadyToRender();
 	if (isOK == R_NOTREADY)
+	{
 		return;
+	}
 	else if (isOK == R_RESTORED)
 	{
 		RMODEPARAMS ModeParams = { RGetScreenWidth(),RGetScreenHeight(),RGetFullscreenMode(),RGetPixelFormat() };
@@ -215,12 +217,12 @@ static bool RegisterWindowClass(HINSTANCE this_inst, WORD IconResID, WNDPROC Win
 	return RegisterClass(&wc) != 0;
 }
 
-static bool InitGraphicsAPI(const RMODEPARAMS* ModeParams, HINSTANCE inst, HWND hWnd)
+static bool InitGraphicsAPI(const RMODEPARAMS* ModeParams, HINSTANCE inst, HWND hWnd, GraphicsAPI API)
 {
 	RFrame_Create();
 
 	ShowWindow(g_hWnd, SW_SHOW);
-	if (!RInitDisplay(g_hWnd, inst, ModeParams, GraphicsAPI::Vulkan))
+	if (!RInitDisplay(g_hWnd, inst, ModeParams, API))
 	{
 		mlog("Fatal error: Failed to initialize display\n");
 		return false;
@@ -275,7 +277,8 @@ static int RenderLoop()
 }
 
 int RMain(const char *AppName, HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline,
-	int cmdshow, RMODEPARAMS *ModeParams, WNDPROC winproc, WORD IconResID)
+	int cmdshow, RMODEPARAMS *ModeParams, WNDPROC winproc, WORD IconResID,
+	GraphicsAPI API)
 {
 	g_WinProc = winproc ? winproc : DefWindowProc;
 
@@ -292,7 +295,7 @@ int RMain(const char *AppName, HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR c
 	while (ShowCursor(FALSE) > 0)
 		Sleep(10);
 
-	if (!InitGraphicsAPI(ModeParams, this_inst, g_hWnd))
+	if (!InitGraphicsAPI(ModeParams, this_inst, g_hWnd, API))
 		return -1;
 
 	return RenderLoop();

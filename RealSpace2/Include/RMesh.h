@@ -230,6 +230,7 @@ class RMesh {
 public:
 	RMesh();
 	~RMesh();
+	RMesh(const RMesh&) = delete;
 
 	void Init();
 	void Destroy();
@@ -245,30 +246,11 @@ public:
 	void RenderFrame();
 
 	void Render(const D3DXMATRIX* world_mat, bool NoPartsChange=false);
-
-private:
-	void RenderFrameSingleParts();
-	void RenderFrameMultiParts();
-
-	void CalcLookAtParts(D3DXMATRIX& pAniMat,RMeshNode* pMeshNode,RVisualMesh* pVisualMesh);
-	void CalcLookAtParts2(D3DXMATRIX& pAniMat, RMeshNode* pMeshNode, RVisualMesh* pVisualMesh);
-
-	void RenderSub(const D3DXMATRIX& world_mat, bool NoPartsChange);
-	bool CalcParts(RMeshNode* pTMeshNode, RMeshNode* pMeshNode, bool NoPartsChange);
-
-	void RenderNode(RMeshNode *pMeshNode, const D3DXMATRIX& world_mat);
-
-private:
-	bool SetAnimation1Parts(RAnimation* pAniSet);
-	bool SetAnimation2Parts(RAnimation* pAniSet,RAnimation* pAniSetUpper);
-
-public:
 	RAnimation* GetNodeAniSet(RMeshNode* pNode);
 
 	void SetLitVertexModel(bool v);
 
 	// RenderState
-
 	void SetShaderDiffuseMap(RMtrl* pMtrl,DWORD color);
 	void SetShaderAlphaMap();
 	void SetShaderAdditiveMap();
@@ -292,8 +274,6 @@ public:
 
 	void SkyBoxMtrlOn();
 	void SkyBoxMtrlOff();
-
-public:
 
 	float GetMeshVis();
 	void  SetMeshVis(float vis);
@@ -324,7 +304,6 @@ public:
 
 	void RenderBox(D3DXMATRIX* world_mat=NULL);
 	void CalcBox(D3DXMATRIX* world_mat=NULL);
-	void CalcBoxFast(D3DXMATRIX* world_mat=NULL);
 	void CalcBoxNode(D3DXMATRIX* world_mat=NULL);
 
 	void  SetFrame(int nFrame,int nFrame2 = -1);
@@ -332,7 +311,7 @@ public:
 	bool AddNode(char* name,char* pname,rmatrix& base_mat);
 	bool DelNode(RMeshNode* data);
 
-	bool ConnectAnimation(RAnimation* pAniSet);
+	bool ConnectAnimation(RAnimation* AniSet);
 	bool ConnectMtrl();
 
 	void CheckNameToType(RMeshNode* pNode);
@@ -345,14 +324,6 @@ public:
 	void CalcNodeMatrixBBox(RMeshNode* pNode);
 	void CalcBBox(D3DXVECTOR3* v);
 	void SubCalcBBox(D3DXVECTOR3* max,D3DXVECTOR3* min,D3DXVECTOR3* v);
-
-//private:
-
-	void _RGetRotAniMat(RMeshNode* pMeshNode,int frame,D3DXMATRIX& t_ani_mat);
-	void _RGetPosAniMat(RMeshNode* pMeshNode,int frame,D3DXMATRIX& t_ani_mat);
-	void _RGetAniMat(RMeshNode* pMeshNode,int frame,D3DXMATRIX& t_ani_mat);
-
-public:
 
 	bool SetAnimation(RAnimation* pAniSet,RAnimation* pAniSetUpper=NULL);
 	bool SetAnimation(char* ani_name,char* ani_name_lower = NULL);
@@ -404,15 +375,6 @@ public:
 
 	void SetSpRenderMode(int mode);
 
-private:
-	bool CalcIntersectsTriangle(const v3& origin, const v3& dir, // Line origin and direction
-		RPickInfo* pInfo, // Output info
-		D3DXMATRIX* world_mat = nullptr, bool fastmode = false);
-	void GetNodeAniMatrix(RMeshNode* pMeshNode, D3DXMATRIX& m);
-	RMeshNode* UpdateNodeAniMatrix(RMeshNode* pNode);
-
-public:
-
 	RParticleLinkInfo	m_ParticleLinkInfo;
 
 	float	m_fVis;
@@ -427,7 +389,7 @@ public:
 
 	RMeshNodeHashList	m_list;
 
-	vector<RMeshNode*>	m_data;
+	std::vector<RMeshNode*> m_data;
 
 	RWeaponMotionType	m_MeshWeaponMotionType;
 
@@ -493,10 +455,6 @@ public:
 	RMeshNode*	GetToolSelectNode()					 { return m_pToolSelectNode;  }
 	void		SetToolSelectNodeName(char* name)	 { SetToolSelectNode(GetMeshData(name)); }
 
-private:
-	RMeshNode*	m_pToolSelectNode;
-
-public:
 	// util
 	static bool  m_bTextureRenderOnOff;
 	static bool  m_bVertexNormalOnOff;
@@ -518,6 +476,36 @@ public:
 	static void SetVertexNormalOnOff(bool b) { m_bVertexNormalOnOff = b; }
 	static bool GetVertexNormalOnOff() { return m_bVertexNormalOnOff; }
 
+private:
+	void _RGetRotAniMat(RMeshNode* pMeshNode, int frame, D3DXMATRIX& t_ani_mat);
+	void _RGetPosAniMat(RMeshNode* pMeshNode, int frame, D3DXMATRIX& t_ani_mat);
+	void _RGetAniMat(RMeshNode* pMeshNode, int frame, D3DXMATRIX& t_ani_mat);
+
+	bool CalcIntersectsTriangle(
+		const v3& origin, const v3& dir, // Line origin and direction
+		RPickInfo* pInfo, // Output info
+		D3DXMATRIX* world_mat = nullptr, bool fastmode = false);
+	void GetNodeAniMatrix(RMeshNode* pMeshNode, D3DXMATRIX& m);
+	RMeshNode* UpdateNodeAniMatrix(RMeshNode* pNode);
+
+	void RenderFrameSingleParts();
+	void RenderFrameMultiParts();
+
+	void CalcLookAtParts(D3DXMATRIX& pAniMat, RMeshNode* pMeshNode, RVisualMesh* pVisualMesh);
+	void CalcLookAtParts2(D3DXMATRIX& pAniMat, RMeshNode* pMeshNode, RVisualMesh* pVisualMesh);
+
+	void RenderSub(const D3DXMATRIX& world_mat, bool NoPartsChange);
+	bool CalcParts(RMeshNode* pTMeshNode, RMeshNode* pMeshNode, bool NoPartsChange);
+
+	void RenderNode(RMeshNode *pMeshNode, const D3DXMATRIX& world_mat);
+
+	bool SetAnimation1Parts(RAnimation* pAniSet);
+	bool SetAnimation2Parts(RAnimation* pAniSet, RAnimation* pAniSetUpper);
+	void ClearAnimationNodesBeforeChange();
+	void SetAnimationNodes(RAnimation* AniSet, size_t Index, CutParts parts);
+	void ReconnectAnimation(RAnimation* AniSet, size_t Index, bool HoldFrame = false);
+
+	RMeshNode* m_pToolSelectNode{};
 };
 
 class RPickInfo {

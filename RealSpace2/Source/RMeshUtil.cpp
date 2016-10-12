@@ -23,8 +23,6 @@ RIndexBuffer::RIndexBuffer()
 	m_dwPool	 = D3DPOOL_MANAGED;
 	m_dwLockFlag = 0;
 
-	// 용량이 얼마 안하니... 아주 저사양이 아니라면 둘다생성...
-
 	m_bUseSWVertex = false;
 	m_bUseHWVertex = false;
 }
@@ -999,14 +997,12 @@ void RBaseObject::SetName(const char* name)
 
 bool RBaseObject::CheckName(const string& name)
 {
-	if(m_Name==name)
-		return true;
-	return false;
+	return m_Name == name;
 }
 
 bool RBaseObject::CheckName(const char* name) 
 {
-	return CheckName(string(name));
+	return m_Name == name;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

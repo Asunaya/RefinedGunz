@@ -109,7 +109,7 @@ void RSetProjection(float fFov, float fAspect, float fNearZ, float fFarZ);
 
 inline rplane *RGetViewFrustum();
 void RSetViewport(int x1, int y1, int x2, int y2);
-D3DVIEWPORT9		*RGetViewport();
+D3DVIEWPORT9 *RGetViewport();
 
 void RResetTransform();
 
@@ -138,10 +138,10 @@ void RSetWBuffer(bool bEnable);
 
 void RSetFunction(RFUNCTIONTYPE ft, RFFUNCTION pfunc);
 int RMain(const char *AppName, HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline,
-	int cmdshow, RMODEPARAMS *pModeParams, WNDPROC winproc = NULL, WORD nIconResID = NULL);
+	int cmdshow, RMODEPARAMS *pModeParams, WNDPROC winproc, WORD nIconResID,
+	GraphicsAPI API);
 
-inline rplane *RGetViewFrustum()
-{
+inline rplane *RGetViewFrustum() {
 	return RViewFrustum;
 }
 

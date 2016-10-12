@@ -8,6 +8,7 @@ static bool CreateConsole(const char* Title)
 	FILE *stream{};
 	if (freopen_s(&stream, "CONOUT$", "w+", stdout) != 0) return false;
 	SetConsoleTitle(TEXT(Title));
+	return true;
 }
 
 static bool LoadGlobalVulkanFunctions()

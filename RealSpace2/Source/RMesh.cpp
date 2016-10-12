@@ -183,7 +183,6 @@ bool RMesh::GetMapObject()
 	return m_is_map_object; 
 }
 
-
 const char* RMesh::GetFileName()
 {
 	return m_FileName.c_str();
@@ -492,6 +491,7 @@ bool RMesh::ConnectMtrl()
 	return NULL;
 }
 
+// Not sure if this is necessary?
 bool RMesh::ConnectAnimation(RAnimation* pAniSet)
 {
 	if(!pAniSet) 
@@ -515,257 +515,148 @@ bool RMesh::ConnectAnimation(RAnimation* pAniSet)
 	return true;
 }
 
-bool RMesh::SetAnimation1Parts(RAnimation* pAniSet) {
+static bool NeedsReconnection(RAnimation* CurrentAniSet, RAnimation* NewAniSet)
+{
+	return !(CurrentAniSet == NewAniSet &&
+		NewAniSet->m_isConnected &&
+		CurrentAniSet->CheckName(NewAniSet->GetName()));
+}
+
+void RMesh::SetAnimationNodes(RAnimation* AniSet, size_t Index, CutParts parts)
+{
+	assert(AniSet);
+
+	m_is_use_ani_set = true;
+
+	for (size_t i{}, end = AniSet->GetAniNodeCount(); i < end; ++i)
+	{
+		auto* AnimationNode = AniSet->GetAniNode(i);
+		if (!AnimationNode)
+			continue;
+
+		auto pid = FindMeshId(AnimationNode);
+		if (pid == -1)
+			continue;
+
+		auto* MeshNode = m_data[pid];
+		if (!MeshNode)
+			continue;
+
+		if (parts != -1 && MeshNode->m_CutPartsType != parts)
+			continue;
+
+		MeshNode->m_pAnimationNode = AnimationNode;
+		MeshNode->m_mat_base = MeshNode->m_mat_local = AnimationNode->m_mat_base;
+		MeshNode->m_mat_inv = Inverse(MeshNode->m_mat_local);
+
+		if (parts == cut_parts_upper_body && MeshNode->m_LookAtParts == lookat_parts_spine1) {
+			auto* ParentAnimationNode = AniSet->GetNode(MeshNode->m_Parent);
+			auto LocalMatrix = AnimationNode->m_mat_base * Inverse(ParentAnimationNode->m_mat_base);
+			MeshNode->m_spine_local_pos = GetTransPos(LocalMatrix);
+		}
+	}
+}
+
+void RMesh::ReconnectAnimation(RAnimation* AniSet, size_t Index, bool HoldFrame)
+{
+	if (!AniSet->m_isConnected) {
+		ConnectAnimation(AniSet);
+	}
+
+	m_pAniSet[Index] = AniSet;
+	if (!HoldFrame)
+		m_frame[Index] = 0;
+
+	m_max_frame[Index] = AniSet->GetMaxFrame();
+}
+
+void RMesh::ClearAnimationNodesBeforeChange()
+{
+	m_is_use_ani_set = true;
+	for (int i = 0; i < m_data_num; i++)
+		m_data[i]->m_pAnimationNode = nullptr;
+}
+
+bool RMesh::SetAnimation1Parts(RAnimation* AniSetLower) {
 
 	auto RMeshSetAnimation1Parts = MBeginProfile("RMesh::SetAnimation1Parts");
 
-	bool bNodeHoldFrame = false;
-	bool bNodeUpdate = false;
+	bool HoldFrame{};
 
-	if( m_pAniSet[1] )
-		bNodeUpdate = true;
-	
-	if(m_pAniSet[0] == pAniSet) {
-		if( pAniSet->m_isConnected ){
-			if(m_pAniSet[0]->CheckName( pAniSet->GetName() ) ) {
-				if(!bNodeUpdate) {
-					return true;
-				}
-				else {
-					bNodeHoldFrame = true;
-				}
-			}
-		}
-	}
-
-	if(!pAniSet->m_isConnected) { 
-		ConnectAnimation(pAniSet);
-	}
-
-
-	m_pAniSet[0] = pAniSet;
-	m_pAniSet[1] = NULL;
-
-	RAnimationNode* pANode = NULL;
-
-	int pid = -1;
-
-	m_is_use_ani_set = true;
-
-	RMeshNode* pMeshNode = NULL;
-
-	if(!bNodeHoldFrame)
-		m_frame[0] = 0;
-
-	int i=0;
-
-	for(i=0;i<m_data_num;i++) {
-		m_data[i]->m_pAnimationNode = NULL;
-	}
-
-	int node_cnt = pAniSet->GetAniNodeCount();
-
-	for(i=0;i<node_cnt;i++) {
-
-		pANode = pAniSet->GetAniNode(i);
-
-		pid = FindMeshId(pANode);
-
-		if(pid != -1) {
-
-			RMeshNode* pM = m_data[pid];
-
-			if(pM) {
-
-				pM->m_pAnimationNode = pANode;
-				memcpy(&pM->m_mat_base,&pANode->m_mat_base ,sizeof(D3DXMATRIX));
-				memcpy(&pM->m_mat_local,&pM->m_mat_base,sizeof(D3DXMATRIX));
-				RMatInv(pM->m_mat_inv,pM->m_mat_local);
-			}
-		}
-	}
-
-	if(pAniSet)
-		m_max_frame[0] = pAniSet->GetMaxFrame();
-
-	MEndProfile(RMeshSetAnimation1Parts);
-
-	return true;
-}
-
-bool RMesh::SetAnimation2Parts(RAnimation* pAniSet,RAnimation* pAniSetUpper) {
-
-	__BP(304, "RMesh::SetAnimation2Parts");
-
-	int i=0;
-
-	bool bC1 = true;
-	bool bC2 = true;
-
-	if(m_pAniSet[0] == pAniSet) {	
-		if( pAniSet->m_isConnected ){
-			if( m_pAniSet[0]->CheckName( pAniSet->GetName() ) ) {
-				bC1 = false;
-			}
-		}
-	}
-
-	if(m_pAniSet[1] == pAniSetUpper) {	
-		if( pAniSetUpper->m_isConnected ){
-			if(m_pAniSet[1]->CheckName( pAniSetUpper->GetName() ) ) {
-				bC2 = false;
-			}
-		}
-	}
-
-	if( !bC1 && !bC2 )
+	if (!NeedsReconnection(m_pAniSet[0], AniSetLower))
 	{
-		__EP(304);
-		return true;
-	}
-
-	RAnimationNode* pANode = NULL;
-
-	int pid = -1;
-
-	m_is_use_ani_set = true;
-
-	RMeshNode* pMeshNode = NULL;
-
-	for(i=0;i<m_data_num;i++) {
-		m_data[i]->m_pAnimationNode = NULL;
-	}
-
-	if( bC1 ) {
-		if(!pAniSet->m_isConnected) {
-			ConnectAnimation(pAniSet);
-		}
-
-		m_pAniSet[0] = pAniSet;
-		m_frame[0] = 0;
-
-		m_max_frame[0] = pAniSet->GetMaxFrame();
-	}
-
-	if( bC2 ) {
-	
-		if(!pAniSetUpper->m_isConnected) {
-			ConnectAnimation(pAniSetUpper);
-		}
-
-		m_pAniSet[1] = pAniSetUpper;
-		m_frame[1] = 0;
-
-		m_max_frame[1] = pAniSetUpper->GetMaxFrame();
-	}
-
-	int node_cnt = pAniSet->GetAniNodeCount();
-
-	for(i=0;i<node_cnt;i++) {
-
-		pANode = pAniSet->GetAniNode(i);
-
-		if(pANode){
+		if (!m_pAniSet[1])
+			return true;
 		
-			pid = FindMeshId(pANode);
-
-			if(pid != -1) {
-
-				RMeshNode* pM = m_data[pid];
-
-				if(pM) {
-					if(pM->m_CutPartsType == cut_parts_lower_body) {
-						pM->m_pAnimationNode = pANode;
-						memcpy(&pM->m_mat_base,&pANode->m_mat_base ,sizeof(D3DXMATRIX));
-						memcpy(&pM->m_mat_local,&pM->m_mat_base,sizeof(D3DXMATRIX));
-						RMatInv(pM->m_mat_inv,pM->m_mat_local);
-					}
-				}
-			}
-		}
+		HoldFrame = true;
 	}
 
-	node_cnt = pAniSetUpper->GetAniNodeCount();
+	ClearAnimationNodesBeforeChange();
 
-	for(i=0;i<node_cnt;i++) {
+	ReconnectAnimation(AniSetLower, 0, HoldFrame);
+	SetAnimationNodes(AniSetLower, 0, static_cast<CutParts>(-1));
+	m_pAniSet[1] = nullptr;
+	
+	return true;
+}
 
-		pANode = pAniSetUpper->GetAniNode(i);
+bool RMesh::SetAnimation2Parts(RAnimation* AniSetLower, RAnimation* AniSetUpper) {
 
-		if(pANode) {
+	auto prof = MBeginProfile("RMesh::SetAnimation2Parts");
 
-			pid = FindMeshId(pANode);
+	bool r[2] = {
+		NeedsReconnection(m_pAniSet[0], AniSetLower),
+		NeedsReconnection(m_pAniSet[1], AniSetUpper)
+	};
 
-			if(pid != -1) {
+	if (!r[0] && !r[1])
+		return true;
 
-				RMeshNode* pM = m_data[pid];
+	ClearAnimationNodesBeforeChange();
 
-				if(pM) {
-					if( pM->m_CutPartsType == cut_parts_upper_body ){
-						pM->m_pAnimationNode = pANode;
-						memcpy(&pM->m_mat_base,&pANode->m_mat_base ,sizeof(D3DXMATRIX));
-						memcpy(&pM->m_mat_local,&pM->m_mat_base,sizeof(D3DXMATRIX));
-						RMatInv(pM->m_mat_inv,pM->m_mat_local);
+	if (r[0])
+		ReconnectAnimation(AniSetLower, 0);
+	if (r[1])
+		ReconnectAnimation(AniSetUpper, 1);
 
-						if(pM->m_LookAtParts == lookat_parts_spine1) {
-							rmatrix m,inv;
-							RAnimationNode* pANodePa = pAniSetUpper->GetNode(pM->m_Parent);
-							RMatInv(inv,pANodePa->m_mat_base);
+	SetAnimationNodes(AniSetLower, 0, cut_parts_lower_body);
+	SetAnimationNodes(AniSetUpper, 1, cut_parts_upper_body);
 
-							m = pANode->m_mat_base * inv;
+	RAnimationNode* RootNodes[] = { AniSetLower->GetNode("Bip01"), AniSetUpper->GetNode("Bip01") };
 
-							pM->m_spine_local_pos.x = m._41;
-							pM->m_spine_local_pos.y = m._42;
-							pM->m_spine_local_pos.z = m._43;
-						}
-					}
-				}
-			}
-		}
-	}
-
-	RAnimationNode* pANode1 = pAniSet->GetNode("Bip01");
-	RAnimationNode* pANode2 = pAniSetUpper->GetNode("Bip01");
-
-	m_vAddBipCenter.x = 0.f;
-	m_vAddBipCenter.y = 0.f;
-	m_vAddBipCenter.z = 0.f;
-
-	if( pANode1 && pANode2 ) {
-		m_vAddBipCenter.x = pANode2->m_mat_base._41 - pANode1->m_mat_base._41;
-		m_vAddBipCenter.y = pANode2->m_mat_base._42 - pANode1->m_mat_base._42;
-		m_vAddBipCenter.z = pANode2->m_mat_base._43 - pANode1->m_mat_base._43;
-	}
-
-	__EP(304);
+	if (RootNodes[0] && RootNodes[1])
+		m_vAddBipCenter = GetTransPos(RootNodes[1]->m_mat_base) - GetTransPos(RootNodes[0]->m_mat_base);
+	else
+		m_vAddBipCenter = { 0, 0, 0 };
 
 	return true;
 }
 
-bool RMesh::SetAnimation(RAnimation* pAniSet,RAnimation* pAniSetUpper)
+bool RMesh::SetAnimation(RAnimation* pAniSet, RAnimation* pAniSetUpper)
 {
-	if(!pAniSet) return false;
+	if (!pAniSet) return false;
 
-	if(pAniSetUpper)
-		return SetAnimation2Parts(pAniSet,pAniSetUpper);
+	if (pAniSetUpper)
+		return SetAnimation2Parts(pAniSet, pAniSetUpper);
 
 	return SetAnimation1Parts(pAniSet);
 }
 
-bool RMesh::SetAnimation(char* name,char* ani_name_upper) {
+bool RMesh::SetAnimation(char* name, char* ani_name_upper) {
 
-	if(m_ani_mgr.m_list.empty())
+	if (m_ani_mgr.m_list.empty())
 		return false;
 
 	RAnimation* pAniSet = NULL;
 	RAnimation* pAniSetUpper = NULL;
 
-	pAniSet = m_ani_mgr.GetAnimation(name,-1);
+	pAniSet = m_ani_mgr.GetAnimation(name, -1);
 
-	if(ani_name_upper) {
-		pAniSetUpper = m_ani_mgr.GetAnimation( ani_name_upper,-1 );
+	if (ani_name_upper) {
+		pAniSetUpper = m_ani_mgr.GetAnimation(ani_name_upper, -1);
 	}
 
-	return SetAnimation(pAniSet,pAniSetUpper);
+	return SetAnimation(pAniSet, pAniSetUpper);
 }
 
 void RMesh::ClearAnimation()
@@ -780,7 +671,7 @@ bool RMesh::Pick(int mx, int my, RPickInfo* pInfo, rmatrix* world_mat)
 	int sw = RGetScreenWidth();
 	int sh = RGetScreenHeight();
 
-	auto matProj = RProjection;
+	const auto& matProj = RProjection;
 
 	rvector v{
 		(2.0f * mx / sw - 1) / matProj._11,
@@ -789,12 +680,8 @@ bool RMesh::Pick(int mx, int my, RPickInfo* pInfo, rmatrix* world_mat)
 
 	auto InverseView = Inverse(RView);
 
-	rvector dir{
-		v.x*InverseView._11 + v.y*InverseView._21 + v.z*InverseView._31,
-		v.x*InverseView._12 + v.y*InverseView._22 + v.z*InverseView._32,
-		v.x*InverseView._13 + v.y*InverseView._23 + v.z*InverseView._33 };
-
 	auto pos = GetTransPos(InverseView);
+	auto dir = TransformNormal(v, InverseView);
 
 	Normalize(dir);
 
@@ -802,14 +689,14 @@ bool RMesh::Pick(int mx, int my, RPickInfo* pInfo, rmatrix* world_mat)
 
 }
 
-bool RMesh::Pick(const rvector& pos, const rvector& dir,RPickInfo* pInfo,rmatrix* world_mat)
+bool RMesh::Pick(const rvector& pos, const rvector& dir, RPickInfo* pInfo, rmatrix* world_mat)
 {
 	return CalcIntersectsTriangle(pos, dir, pInfo, world_mat);
 }
 
-bool RMesh::Pick(const rvector* vInVec,RPickInfo* pInfo,rmatrix* world_mat)
+bool RMesh::Pick(const rvector* vInVec, RPickInfo* pInfo, rmatrix* world_mat)
 {
-	return Pick(vInVec[0],vInVec[1], pInfo, world_mat);
+	return Pick(vInVec[0], vInVec[1], pInfo, world_mat);
 }
 
 void RMesh::ClearMtrl() {
@@ -818,29 +705,14 @@ void RMesh::ClearMtrl() {
 
 void RMesh::CalcBoxNode(D3DXMATRIX* world_mat)
 {
-	m_vBBMax = D3DXVECTOR3(-9999.f,-9999.f,-9999.f);
-	m_vBBMin = D3DXVECTOR3( 9999.f, 9999.f, 9999.f);
+	m_vBBMax = { -9999.f, -9999.f, -9999.f };
+	m_vBBMin = { 9999.f, 9999.f, 9999.f };
 
-	RMeshNodeHashList_Iter it_obj =  m_list.begin();
-
-	RMeshNode* pTMeshNode = NULL;
-
-	while (it_obj !=  m_list.end()) {
-
-		RMeshNode*	pMeshNode = (*it_obj);
-
-		CalcNodeMatrixBBox(pMeshNode);//bbox
-
-		pTMeshNode = UpdateNodeAniMatrix(pMeshNode);
-
-		it_obj++;
+	for (auto* Node : m_list)
+	{
+		CalcNodeMatrixBBox(Node);
+		UpdateNodeAniMatrix(Node);
 	}
-
-}
-
-void RMesh::CalcBoxFast(D3DXMATRIX* world_mat)
-{
-
 }
 
 void RMesh::CalcBox(D3DXMATRIX* world_mat)
@@ -849,8 +721,8 @@ void RMesh::CalcBox(D3DXMATRIX* world_mat)
 
 	RMeshNode* pTMeshNode  = NULL;
 
-	m_vBBMax = D3DXVECTOR3(-9999.f,-9999.f,-9999.f);
-	m_vBBMin = D3DXVECTOR3( 9999.f, 9999.f, 9999.f);
+	m_vBBMax = { -9999.f, -9999.f, -9999.f };
+	m_vBBMin = { 9999.f, 9999.f, 9999.f };
 
 	RMeshNodeHashList_Iter it_obj =  m_list.begin();
 
@@ -867,7 +739,7 @@ void RMesh::CalcBox(D3DXMATRIX* world_mat)
 			continue;
 		}
 
-		if(pTMeshNode->m_face_num != 0) {// ´ëÃæ Á¡ * resultmat
+		if(pTMeshNode->m_face_num != 0) {
 			if(world_mat)
 				pTMeshNode->CalcVertexBuffer(*world_mat,true);
 		}

@@ -246,7 +246,7 @@ void CheckMipFilter()
 	}
 }
 
-static bool InitD3D9(HWND hWnd, IDirect3D9* D3D, const RMODEPARAMS* params)
+static bool InitD3D9(HWND hWnd, const RMODEPARAMS* params)
 {
 	if (CreateDirect3D9() == false)
 	{
@@ -261,8 +261,8 @@ static bool InitD3D9(HWND hWnd, IDirect3D9* D3D, const RMODEPARAMS* params)
 	}
 
 	D3DCAPS9 d3dcaps;
-	D3D->GetDeviceCaps(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, &d3dcaps);
-	D3D->GetDeviceCaps(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, &g_d3dcaps);
+	g_pD3D->GetDeviceCaps(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, &d3dcaps);
+	g_pD3D->GetDeviceCaps(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, &g_d3dcaps);
 
 	g_bHardwareTNL = (d3dcaps.DevCaps & D3DDEVCAPS_HWTRANSFORMANDLIGHT) != 0;
 
@@ -380,13 +380,15 @@ static bool InitD3D9(HWND hWnd, IDirect3D9* D3D, const RMODEPARAMS* params)
 
 	RGetDevice()->Clear(0, NULL, D3DCLEAR_TARGET, 0x00000000, 1.0f, 0);
 	RFlip();
+
+	return true;
 }
 
 bool RInitDisplay(HWND hWnd, HINSTANCE inst, const RMODEPARAMS *params, GraphicsAPI API)
 {
 	if (API == GraphicsAPI::D3D9)
 	{
-		InitD3D9(hWnd, g_pD3D, params);
+		InitD3D9(hWnd, params);
 		new (rs2buf) RS2{ D3D9Tag{} };
 	}
 	else if (API == GraphicsAPI::Vulkan)
@@ -398,6 +400,7 @@ bool RInitDisplay(HWND hWnd, HINSTANCE inst, const RMODEPARAMS *params, Graphics
 	{
 		MLog("Unrecognized graphics API identifier %d\n", static_cast<int>(API));
 		assert(false);
+		return false;
 	}
 
 	return true;
@@ -472,7 +475,7 @@ void RResetDevice(const RMODEPARAMS *params)
 	g_d3dpp.BackBufferFormat = g_PixelFormat;
 	g_d3dpp.MultiSampleType = g_MultiSample;
 
-	HRESULT hr = g_pd3dDevice->Reset(&g_d3dpp);
+	auto hr = g_pd3dDevice->Reset(&g_d3dpp);
 
 	if (hr != D3D_OK) {
 		char errstr[512];
@@ -520,7 +523,7 @@ RRESULT RIsReadyToRender()
 	return R_OK;
 }
 
-#define FPS_INTERVAL	1000
+#define FPS_INTERVAL 1000
 
 static DWORD g_clear_color = 0x00000000;
 
@@ -566,7 +569,7 @@ void RFlip()
 void RDrawLine(const rvector &v1, const rvector &v2, DWORD dwColor)
 {
 	struct LVERTEX {
-		float x, y, z;		// world position
+		float x, y, z;
 		DWORD color;
 	};
 
@@ -595,7 +598,6 @@ bool SaveMemoryBmp(int x, int y, void *data, void **retmemory, int *nsize)
 
 	*nsize = nMemoryNeed;
 	*retmemory = memory;
-
 
 	dest = memory;
 	BITMAPFILEHEADER *pbmfh = (BITMAPFILEHEADER*)dest;
