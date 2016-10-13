@@ -4,7 +4,7 @@
 static bool CreateConsole(const char* Title)
 {
 	if (!AllocConsole()) return false;
-	if (!AttachConsole(GetCurrentProcessId())) return false;
+	AttachConsole(GetCurrentProcessId());
 	FILE *stream{};
 	if (freopen_s(&stream, "CONOUT$", "w+", stdout) != 0) return false;
 	SetConsoleTitle(TEXT(Title));

@@ -97,31 +97,23 @@ namespace vkTools
 		*/
 		void loadTexture(std::string filename, VkFormat format, VulkanTexture *texture, bool forceLinear = false, VkImageUsageFlags imageUsageFlags = VK_IMAGE_USAGE_SAMPLED_BIT)
 		{
-#if defined(__ANDROID__)
-			assert(assetManager != nullptr);
+			std::ifstream file{ filename, std::ios::binary | std::ios::ate };
+			size_t size = static_cast<size_t>(file.tellg());
+			std::string data;
+			data.resize(size);
+			file.seekg(std::ios::beg);
+			file.read(&data[0], size);
+			loadTexture(&data[0], size, format, texture, forceLinear, imageUsageFlags);
+		}
 
-			// Textures are stored inside the apk on Android (compressed)
-			// So they need to be loaded via the asset manager
-			AAsset* asset = AAssetManager_open(assetManager, filename.c_str(), AASSET_MODE_STREAMING);
-			assert(asset);
-			size_t size = AAsset_getLength(asset);
-			assert(size > 0);
-
-			void *textureData = malloc(size);
-			AAsset_read(asset, textureData, size);
-			AAsset_close(asset);
-
-			gli::texture2D tex2D(gli::load((const char*)textureData, size));
-
-			free(textureData);
-#else
-			gli::texture2D tex2D(gli::load(filename.c_str()));
-#endif		
+		void loadTexture(const char* Data, size_t Size, VkFormat format, VulkanTexture *texture, bool forceLinear = false, VkImageUsageFlags imageUsageFlags = VK_IMAGE_USAGE_SAMPLED_BIT)
+		{
+			gli::texture2D tex2D(gli::load(Data, Size));
 			assert(!tex2D.empty());
 
 			texture->width = static_cast<uint32_t>(tex2D[0].dimensions().x);
 			texture->height = static_cast<uint32_t>(tex2D[0].dimensions().y);
-			texture->mipLevels = static_cast<uint32_t>(tex2D.levels());
+			texture->mipLevels = 1;// static_cast<uint32_t>(tex2D.levels());
 
 			// Get device properites for the requested texture format
 			VkFormatProperties formatProperties;
@@ -189,14 +181,14 @@ namespace vkTools
 
 					bufferCopyRegions.push_back(bufferCopyRegion);
 
-					offset += static_cast<uint32_t>(tex2D[i].size());
+					offset += static_cast<uint32_t>(tex2D[i].size()) + tex2D[i].size() % 16;
 				}
 
 				// Create optimal tiled target image
 				VkImageCreateInfo imageCreateInfo = vkTools::initializers::imageCreateInfo();
 				imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
 				imageCreateInfo.format = format;
-				imageCreateInfo.mipLevels = texture->mipLevels;
+				imageCreateInfo.mipLevels = 1;// texture->mipLevels;
 				imageCreateInfo.arrayLayers = 1;
 				imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
 				imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;

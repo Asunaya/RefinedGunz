@@ -607,8 +607,9 @@ void RMeshNode::MakeNodeBuffer(DWORD flag)
 
 	int w,w2,p0,p1,p2;
 
-	if(m_face_num*3*32 > RVERTEX_MAX - 20 )
-		mlog("elu 단일 오브젝트 버텍스 갯수가 %d 개가 넘습니다\n", RVERTEX_MAX-20 );
+	if (m_face_num * 3 * sizeof(RVertex) > RVERTEX_MAX - 20)
+		mlog("RMeshNode::MakeNodeBuffer - Too many vertices! Can handle at most %d, got %d\n",
+			RVERTEX_MAX - 20, m_face_num * 3 * 32);
 
 	int sub_mtrl;
 	int face_cnt=0;		

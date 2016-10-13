@@ -12,6 +12,11 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
+namespace RealSpace2
+{
+	extern MZFileSystem* g_pFileSystem;
+};
+
 #define VK_USE_VALIDATION_LAYERS 1
 
 class RS2Vulkan
@@ -502,364 +507,115 @@ if (!name) MLog("Error loading " #name "!\n");
 		vkFreeCommandBuffers(Device, CmdPool, 1, &commandBuffer);
 	}
 	
-	void prepareVertices(bool useStagingBuffers)
-	{
-		// A note on memory management in Vulkan in general:
-		//	This is a very complex topic and while it's fine for an example application to to small individual memory allocations that is not
-		//	what should be done a real-world application, where you should allocate large chunkgs of memory at once isntead.
-
-		struct Vertex
-		{
-			float position[3];
-			float color[3];
-		};
-
-		// Setup vertices
-		std::vector<Vertex> vertexBuffer =
-		{
-			{ { 1.0f,  1.0f, 0.0f },{ 1.0f, 0.0f, 0.0f } },
-			{ { -1.0f,  1.0f, 0.0f },{ 0.0f, 1.0f, 0.0f } },
-			{ { 0.0f, -1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f } }
-		};
-		uint32_t vertexBufferSize = static_cast<uint32_t>(vertexBuffer.size()) * sizeof(Vertex);
-
-		// Setup indices
-		std::vector<uint32_t> indexBuffer = { 0, 1, 2 };
-		Indices.count = static_cast<uint32_t>(indexBuffer.size());
-		uint32_t indexBufferSize = Indices.count * sizeof(uint32_t);
-
-		VkMemoryAllocateInfo memAlloc = {};
-		memAlloc.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-		VkMemoryRequirements memReqs;
-
-		void *data;
-
-		if (useStagingBuffers)
-		{
-			// Static data like vertex and index buffer should be stored on the device memory 
-			// for optimal (and fastest) access by the GPU
-			//
-			// To achieve this we use so-called "staging buffers" :
-			// - Create a buffer that's visible to the host (and can be mapped)
-			// - Copy the data to this buffer
-			// - Create another buffer that's local on the device (VRAM) with the same size
-			// - Copy the data from the host to the device using a command buffer
-			// - Delete the host visible (staging) buffer
-			// - Use the device local buffers for rendering
-
-			struct StagingBuffer {
-				VkDeviceMemory memory;
-				VkBuffer buffer;
-			};
-
-			struct {
-				StagingBuffer vertices;
-				StagingBuffer indices;
-			} stagingBuffers;
-
-			// Vertex buffer
-			VkBufferCreateInfo vertexBufferInfo = {};
-			vertexBufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-			vertexBufferInfo.size = vertexBufferSize;
-			// Buffer is used as the copy source
-			vertexBufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-			// Create a host-visible buffer to copy the vertex data to (staging buffer)
-			VK_CHECK_RESULT(vkCreateBuffer(Device, &vertexBufferInfo, nullptr, &stagingBuffers.vertices.buffer));
-			vkGetBufferMemoryRequirements(Device, stagingBuffers.vertices.buffer, &memReqs);
-			memAlloc.allocationSize = memReqs.size;
-			// Request a host visible memory type that can be used to copy our data do
-			// Also request it to be coherent, so that writes are visible to the GPU right after unmapping the buffer
-			memAlloc.memoryTypeIndex = getMemoryTypeIndex(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-			VK_CHECK_RESULT(vkAllocateMemory(Device, &memAlloc, nullptr, &stagingBuffers.vertices.memory));
-			// Map and copy
-			VK_CHECK_RESULT(vkMapMemory(Device, stagingBuffers.vertices.memory, 0, memAlloc.allocationSize, 0, &data));
-			memcpy(data, vertexBuffer.data(), vertexBufferSize);
-			vkUnmapMemory(Device, stagingBuffers.vertices.memory);
-			VK_CHECK_RESULT(vkBindBufferMemory(Device, stagingBuffers.vertices.buffer, stagingBuffers.vertices.memory, 0));
-
-			// Create a device local buffer to which the (host local) vertex data will be copied and which will be used for rendering
-			vertexBufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
-			VK_CHECK_RESULT(vkCreateBuffer(Device, &vertexBufferInfo, nullptr, &Vertices.buffer));
-			vkGetBufferMemoryRequirements(Device, Vertices.buffer, &memReqs);
-			memAlloc.allocationSize = memReqs.size;
-			memAlloc.memoryTypeIndex = getMemoryTypeIndex(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-			VK_CHECK_RESULT(vkAllocateMemory(Device, &memAlloc, nullptr, &Vertices.memory));
-			VK_CHECK_RESULT(vkBindBufferMemory(Device, Vertices.buffer, Vertices.memory, 0));
-
-			// Index buffer
-			VkBufferCreateInfo indexbufferInfo = {};
-			indexbufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-			indexbufferInfo.size = indexBufferSize;
-			indexbufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-			// Copy index data to a buffer visible to the host (staging buffer)
-			VK_CHECK_RESULT(vkCreateBuffer(Device, &indexbufferInfo, nullptr, &stagingBuffers.indices.buffer));
-			vkGetBufferMemoryRequirements(Device, stagingBuffers.indices.buffer, &memReqs);
-			memAlloc.allocationSize = memReqs.size;
-			memAlloc.memoryTypeIndex = getMemoryTypeIndex(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-			VK_CHECK_RESULT(vkAllocateMemory(Device, &memAlloc, nullptr, &stagingBuffers.indices.memory));
-			VK_CHECK_RESULT(vkMapMemory(Device, stagingBuffers.indices.memory, 0, indexBufferSize, 0, &data));
-			memcpy(data, indexBuffer.data(), indexBufferSize);
-			vkUnmapMemory(Device, stagingBuffers.indices.memory);
-			VK_CHECK_RESULT(vkBindBufferMemory(Device, stagingBuffers.indices.buffer, stagingBuffers.indices.memory, 0));
-
-			// Create destination buffer with device only visibility
-			indexbufferInfo.usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
-			VK_CHECK_RESULT(vkCreateBuffer(Device, &indexbufferInfo, nullptr, &Indices.buffer));
-			vkGetBufferMemoryRequirements(Device, Indices.buffer, &memReqs);
-			memAlloc.allocationSize = memReqs.size;
-			memAlloc.memoryTypeIndex = getMemoryTypeIndex(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-			VK_CHECK_RESULT(vkAllocateMemory(Device, &memAlloc, nullptr, &Indices.memory));
-			VK_CHECK_RESULT(vkBindBufferMemory(Device, Indices.buffer, Indices.memory, 0));
-
-			VkCommandBufferBeginInfo cmdBufferBeginInfo = {};
-			cmdBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-			cmdBufferBeginInfo.pNext = nullptr;
-
-			// Buffer copies have to be submitted to a queue, so we need a command buffer for them
-			// Note: Some devices offer a dedicated transfer queue (with only the transfer bit set) that may be faster when doing lots of copies
-			VkCommandBuffer copyCmd = getCommandBuffer(true);
-
-			// Put buffer region copies into command buffer
-			VkBufferCopy copyRegion = {};
-
-			// Vertex buffer
-			copyRegion.size = vertexBufferSize;
-			vkCmdCopyBuffer(copyCmd, stagingBuffers.vertices.buffer, Vertices.buffer, 1, &copyRegion);
-			// Index buffer
-			copyRegion.size = indexBufferSize;
-			vkCmdCopyBuffer(copyCmd, stagingBuffers.indices.buffer, Indices.buffer, 1, &copyRegion);
-
-			// Flushing the command buffer will also submit it to the queue and uses a fence to ensure that all commands have been executed before returning
-			flushCommandBuffer(copyCmd);
-
-			// Destroy staging buffers
-			// Note: Staging buffer must not be deleted before the copies have been submitted and executed
-			vkDestroyBuffer(Device, stagingBuffers.vertices.buffer, nullptr);
-			vkFreeMemory(Device, stagingBuffers.vertices.memory, nullptr);
-			vkDestroyBuffer(Device, stagingBuffers.indices.buffer, nullptr);
-			vkFreeMemory(Device, stagingBuffers.indices.memory, nullptr);
-		}
-		else
-		{
-			// Don't use staging
-			// Create host-visible buffers only and use these for rendering. This is not advised and will usually result in lower rendering performance
-
-			// Vertex buffer
-			VkBufferCreateInfo vertexBufferInfo = {};
-			vertexBufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-			vertexBufferInfo.size = vertexBufferSize;
-			vertexBufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-
-			// Copy vertex data to a buffer visible to the host
-			VK_CHECK_RESULT(vkCreateBuffer(Device, &vertexBufferInfo, nullptr, &Vertices.buffer));
-			vkGetBufferMemoryRequirements(Device, Vertices.buffer, &memReqs);
-			memAlloc.allocationSize = memReqs.size;
-			memAlloc.memoryTypeIndex = getMemoryTypeIndex(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
-			VK_CHECK_RESULT(vkAllocateMemory(Device, &memAlloc, nullptr, &Vertices.memory));
-			VK_CHECK_RESULT(vkMapMemory(Device, Vertices.memory, 0, memAlloc.allocationSize, 0, &data));
-			memcpy(data, vertexBuffer.data(), vertexBufferSize);
-			vkUnmapMemory(Device, Vertices.memory);
-			VK_CHECK_RESULT(vkBindBufferMemory(Device, Vertices.buffer, Vertices.memory, 0));
-
-			// Index buffer
-			VkBufferCreateInfo indexbufferInfo = {};
-			indexbufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-			indexbufferInfo.size = indexBufferSize;
-			indexbufferInfo.usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
-
-			// Copy index data to a buffer visible to the host
-			VK_CHECK_RESULT(vkCreateBuffer(Device, &indexbufferInfo, nullptr, &Indices.buffer));
-			vkGetBufferMemoryRequirements(Device, Indices.buffer, &memReqs);
-			memAlloc.allocationSize = memReqs.size;
-			memAlloc.memoryTypeIndex = getMemoryTypeIndex(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
-			VK_CHECK_RESULT(vkAllocateMemory(Device, &memAlloc, nullptr, &Indices.memory));
-			VK_CHECK_RESULT(vkMapMemory(Device, Indices.memory, 0, indexBufferSize, 0, &data));
-			memcpy(data, indexBuffer.data(), indexBufferSize);
-			vkUnmapMemory(Device, Indices.memory);
-			VK_CHECK_RESULT(vkBindBufferMemory(Device, Indices.buffer, Indices.memory, 0));
-		}
-
-#define VERTEX_BUFFER_BIND_ID 0
-		// Vertex input binding
-		Vertices.inputBinding.binding = VERTEX_BUFFER_BIND_ID;
-		Vertices.inputBinding.stride = sizeof(Vertex);
-		Vertices.inputBinding.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-
-		// Inpute attribute binding describe shader attribute locations and memory layouts
-		// These match the following shader layout (see triangle.vert):
-		//	layout (location = 0) in vec3 inPos;
-		//	layout (location = 1) in vec3 inColor;
-		Vertices.inputAttributes.resize(2);
-		// Attribute location 0: Position
-		Vertices.inputAttributes[0].binding = VERTEX_BUFFER_BIND_ID;
-		Vertices.inputAttributes[0].location = 0;
-		Vertices.inputAttributes[0].format = VK_FORMAT_R32G32B32_SFLOAT;
-		Vertices.inputAttributes[0].offset = offsetof(Vertex, position);
-		// Attribute location 1: Color
-		Vertices.inputAttributes[1].binding = VERTEX_BUFFER_BIND_ID;
-		Vertices.inputAttributes[1].location = 1;
-		Vertices.inputAttributes[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-		Vertices.inputAttributes[1].offset = offsetof(Vertex, color);
-
-		// Assign to the vertex input state used for pipeline creation
-		Vertices.inputState.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-		Vertices.inputState.pNext = nullptr;
-		Vertices.inputState.flags = VK_FLAGS_NONE;
-		Vertices.inputState.vertexBindingDescriptionCount = 1;
-		Vertices.inputState.pVertexBindingDescriptions = &Vertices.inputBinding;
-		Vertices.inputState.vertexAttributeDescriptionCount = static_cast<uint32_t>(Vertices.inputAttributes.size());
-		Vertices.inputState.pVertexAttributeDescriptions = Vertices.inputAttributes.data();
-	}
-	
 	void prepareUniformBuffers()
 	{
-		// Prepare and initialize a uniform buffer block containing shader uniforms
-		// Single uniforms like in OpenGL are no longer present in Vulkan. All Shader uniforms are passed via uniform buffer blocks
-		VkMemoryRequirements memReqs;
-
-		// Vertex shader uniform buffer block
-		VkBufferCreateInfo bufferInfo = {};
-		VkMemoryAllocateInfo allocInfo = {};
-		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-		allocInfo.pNext = nullptr;
-		allocInfo.allocationSize = 0;
-		allocInfo.memoryTypeIndex = 0;
-
-		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-		bufferInfo.size = sizeof(uboVS);
-		// This buffer will be used as a uniform buffer
-		bufferInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
-
-		// Create a new buffer
-		VK_CHECK_RESULT(vkCreateBuffer(Device, &bufferInfo, nullptr, &UniformDataVS.buffer));
-		// Get memory requirements including size, alignment and memory type 
-		vkGetBufferMemoryRequirements(Device, UniformDataVS.buffer, &memReqs);
-		allocInfo.allocationSize = memReqs.size;
-		// Get the memory type index that supports host visibile memory access
-		// Most implementations offer multiple memory types and selecting the correct one to allocate memory from is crucial
-		// We also want the buffer to be host coherent so we don't have to flush (or sync after every update.
-		// Note: This may affect performance so you might not want to do this in a real world application that updates buffers on a regular base
-		allocInfo.memoryTypeIndex = getMemoryTypeIndex(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-		// Allocate memory for the uniform buffer
-		VK_CHECK_RESULT(vkAllocateMemory(Device, &allocInfo, nullptr, &(UniformDataVS.memory)));
-		// Bind memory to buffer
-		VK_CHECK_RESULT(vkBindBufferMemory(Device, UniformDataVS.buffer, UniformDataVS.memory, 0));
-
-		// Store information in the uniform's descriptor that is used by the descriptor set
-		UniformDataVS.descriptor.buffer = UniformDataVS.buffer;
-		UniformDataVS.descriptor.offset = 0;
-		UniformDataVS.descriptor.range = sizeof(uboVS);
+		VK_CHECK_RESULT(VulkanDevice->createBuffer(
+			VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+			&uniformBufferVS,
+			sizeof(uboVS),
+			&uboVS));
 
 		updateUniformBuffers();
 	}
 
 	void updateUniformBuffers()
 	{
-		// Update matrices
-		uboVS.projectionMatrix = glm::perspective(glm::radians(60.0f), (float)Width / Height, 0.1f, 256.0f);
+		constexpr auto zoom = -2.5f;
+		// Vertex shader
+		uboVS.projection = glm::perspective(glm::radians(60.0f), (float)Width / (float)Height, 0.001f, 256.0f);
+		glm::mat4 viewMatrix = glm::translate(glm::mat4(), glm::vec3(0.0f, 0.0f, zoom));
 
-		uboVS.viewMatrix = glm::translate(glm::mat4(), glm::vec3(0.0f, 0.0f, -2.5));
-
+		glm::vec3 cameraPos{ 0, 0, 0 };
 		v3 rotation{ 0, 0, 0 };
+		uboVS.model = viewMatrix * glm::translate(glm::mat4(), cameraPos);
+		uboVS.model = glm::rotate(uboVS.model, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+		uboVS.model = glm::rotate(uboVS.model, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+		uboVS.model = glm::rotate(uboVS.model, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
 
-		uboVS.modelMatrix = glm::mat4();
-		uboVS.modelMatrix = glm::rotate(uboVS.modelMatrix, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
-		uboVS.modelMatrix = glm::rotate(uboVS.modelMatrix, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
-		uboVS.modelMatrix = glm::rotate(uboVS.modelMatrix, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+		uboVS.viewPos = glm::vec4(0.0f, 0.0f, -zoom, 0.0f);
 
-		// Map uniform buffer and update it
-		uint8_t *pData;
-		VK_CHECK_RESULT(vkMapMemory(Device, UniformDataVS.memory, 0, sizeof(uboVS), 0, (void **)&pData));
-		memcpy(pData, &uboVS, sizeof(uboVS));
-		// Unmap after data has been copied
-		// Note: Since we requested a host coherent memory type for the uniform buffer, the write is instantly visible to the GPU
-		vkUnmapMemory(Device, UniformDataVS.memory);
+		VK_CHECK_RESULT(uniformBufferVS.map());
+		memcpy(uniformBufferVS.mapped, &uboVS, sizeof(uboVS));
+		uniformBufferVS.unmap();
 	}
 
 	void setupDescriptorPool()
 	{
-		// We need to tell the API the number of max. requested descriptors per type
-		VkDescriptorPoolSize typeCounts[1];
-		// This example only uses one descriptor type (uniform buffer) and only requests one descriptor of this type
-		typeCounts[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		typeCounts[0].descriptorCount = 1;
-		// For additional types you need to add new entries in the type count list
-		// E.g. for two combined image samplers :
-		// typeCounts[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		// typeCounts[1].descriptorCount = 2;
+		// Example uses one ubo and one image sampler
+		std::vector<VkDescriptorPoolSize> poolSizes =
+		{
+			vkTools::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1),
+			vkTools::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1)
+		};
 
-		// Create the global descriptor pool
-		// All descriptors used in this example are allocated from this pool
-		VkDescriptorPoolCreateInfo descriptorPoolInfo = {};
-		descriptorPoolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-		descriptorPoolInfo.pNext = nullptr;
-		descriptorPoolInfo.poolSizeCount = 1;
-		descriptorPoolInfo.pPoolSizes = typeCounts;
-		// Set the max. number of descriptor sets that can be requested from this pool (requesting beyond this limit will result in an error)
-		descriptorPoolInfo.maxSets = 1;
+		VkDescriptorPoolCreateInfo descriptorPoolInfo =
+			vkTools::initializers::descriptorPoolCreateInfo(
+				static_cast<uint32_t>(poolSizes.size()),
+				poolSizes.data(),
+				2);
 
 		VK_CHECK_RESULT(vkCreateDescriptorPool(Device, &descriptorPoolInfo, nullptr, &DescriptorPool));
 	}
 
 	void setupDescriptorSetLayout()
 	{
-		// Setup layout of descriptors used in this example
-		// Basically connects the different shader stages to descriptors for binding uniform buffers, image samplers, etc.
-		// So every shader binding should map to one descriptor set layout binding
+		std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings =
+		{
+			// Binding 0 : Vertex shader uniform buffer
+			vkTools::initializers::descriptorSetLayoutBinding(
+			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+				VK_SHADER_STAGE_VERTEX_BIT,
+				0),
+			// Binding 1 : Fragment shader image sampler
+			vkTools::initializers::descriptorSetLayoutBinding(
+				VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+				VK_SHADER_STAGE_FRAGMENT_BIT,
+				1)
+		};
 
-		// Binding 0: Uniform buffer (Vertex shader)
-		VkDescriptorSetLayoutBinding layoutBinding = {};
-		layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		layoutBinding.descriptorCount = 1;
-		layoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-		layoutBinding.pImmutableSamplers = nullptr;
-
-		VkDescriptorSetLayoutCreateInfo descriptorLayout = {};
-		descriptorLayout.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-		descriptorLayout.pNext = nullptr;
-		descriptorLayout.bindingCount = 1;
-		descriptorLayout.pBindings = &layoutBinding;
+		VkDescriptorSetLayoutCreateInfo descriptorLayout =
+			vkTools::initializers::descriptorSetLayoutCreateInfo(
+				setLayoutBindings.data(),
+				static_cast<uint32_t>(setLayoutBindings.size()));
 
 		VK_CHECK_RESULT(vkCreateDescriptorSetLayout(Device, &descriptorLayout, nullptr, &DescriptorSetLayout));
 
-		// Create the pipeline layout that is used to generate the rendering pipelines that are based on this descriptor set layout
-		// In a more complex scenario you would have different pipeline layouts for different descriptor set layouts that could be reused
-		VkPipelineLayoutCreateInfo pPipelineLayoutCreateInfo = {};
-		pPipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		pPipelineLayoutCreateInfo.pNext = nullptr;
-		pPipelineLayoutCreateInfo.setLayoutCount = 1;
-		pPipelineLayoutCreateInfo.pSetLayouts = &DescriptorSetLayout;
+		VkPipelineLayoutCreateInfo pPipelineLayoutCreateInfo =
+			vkTools::initializers::pipelineLayoutCreateInfo(
+				&DescriptorSetLayout,
+				1);
 
 		VK_CHECK_RESULT(vkCreatePipelineLayout(Device, &pPipelineLayoutCreateInfo, nullptr, &PipelineLayout));
 	}
 
 	void setupDescriptorSet()
 	{
-		// Allocate a new descriptor set from the global descriptor pool
-		VkDescriptorSetAllocateInfo allocInfo = {};
-		allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-		allocInfo.descriptorPool = DescriptorPool;
-		allocInfo.descriptorSetCount = 1;
-		allocInfo.pSetLayouts = &DescriptorSetLayout;
+		VkDescriptorSetAllocateInfo allocInfo =
+			vkTools::initializers::descriptorSetAllocateInfo(
+				DescriptorPool,
+				&DescriptorSetLayout,
+				1);
 
 		VK_CHECK_RESULT(vkAllocateDescriptorSets(Device, &allocInfo, &DescriptorSet));
 
-		// Update the descriptor set determining the shader binding points
-		// For every binding point used in a shader there needs to be one
-		// descriptor set matching that binding point
+		std::vector<VkWriteDescriptorSet> writeDescriptorSets =
+		{
+			// Binding 0 : Vertex shader uniform buffer
+			vkTools::initializers::writeDescriptorSet(
+			DescriptorSet,
+				VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+				0,
+				&uniformBufferVS.descriptor),
+			// Binding 1 : Fragment shader texture sampler
+			vkTools::initializers::writeDescriptorSet(
+				DescriptorSet,
+				VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+				1,
+				&Texture.descriptor)
+		};
 
-		VkWriteDescriptorSet writeDescriptorSet = {};
-
-		// Binding 0 : Uniform buffer
-		writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		writeDescriptorSet.dstSet = DescriptorSet;
-		writeDescriptorSet.descriptorCount = 1;
-		writeDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		writeDescriptorSet.pBufferInfo = &UniformDataVS.descriptor;
-		// Binds this uniform buffer to binding point 0
-		writeDescriptorSet.dstBinding = 0;
-
-		vkUpdateDescriptorSets(Device, 1, &writeDescriptorSet, 0, nullptr);
+		vkUpdateDescriptorSets(Device, static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, NULL);
 	}
 
 	VkPipelineShaderStageCreateInfo loadShader(std::string fileName, VkShaderStageFlagBits stage)
@@ -878,7 +634,7 @@ if (!name) MLog("Error loading " #name "!\n");
 		return shaderStage;
 	}
 
-	void preparePipelines()
+	/*void preparePipelines()
 	{
 		// Create the graphics pipeline used in this example
 		// Vulkan uses the concept of rendering pipelines to encapsulate fixed states, replacing OpenGL's complex state machine
@@ -1059,9 +815,223 @@ if (!name) MLog("Error loading " #name "!\n");
 
 			VK_CHECK_RESULT(vkEndCommandBuffer(DrawCmdBuffers[i]));
 		}
+	}*/
+	
+	struct Vertex {
+		float pos[3];
+		float uv[2];
+		float normal[3];
+	};
+
+	u32 IndexCount{};
+	vk::Buffer vertexBuffer;
+	vk::Buffer indexBuffer;
+	
+	void generateQuad()
+	{
+		// Setup vertices for a single uv-mapped quad made from two triangles
+		std::vector<Vertex> vertices =
+		{
+			{ { 1.0f,  1.0f, 0.0f },{ 1.0f, 1.0f },{ 0.0f, 0.0f, 1.0f } },
+			{ { -1.0f,  1.0f, 0.0f },{ 0.0f, 1.0f },{ 0.0f, 0.0f, 1.0f } },
+			{ { -1.0f, -1.0f, 0.0f },{ 0.0f, 0.0f },{ 0.0f, 0.0f, 1.0f } },
+			{ { 1.0f, -1.0f, 0.0f },{ 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f } }
+		};
+
+		// Setup indices
+		std::vector<uint32_t> indices = { 0,1,2, 2,3,0 };
+		IndexCount = static_cast<uint32_t>(indices.size());
+
+		// Create buffers
+		// For the sake of simplicity we won't stage the vertex data to the gpu memory
+		// Vertex buffer
+		VK_CHECK_RESULT(VulkanDevice->createBuffer(
+			VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+			&vertexBuffer,
+			vertices.size() * sizeof(Vertex),
+			vertices.data()));
+		// Index buffer
+		VK_CHECK_RESULT(VulkanDevice->createBuffer(
+			VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+			&indexBuffer,
+			indices.size() * sizeof(uint32_t),
+			indices.data()));
 	}
 
-	void Init()
+	void setupVertexDescriptions()
+	{
+		constexpr u32 VERTEX_BUFFER_BIND_ID{};
+		// Binding description
+		vertices.bindingDescriptions.resize(1);
+		vertices.bindingDescriptions[0] =
+			vkTools::initializers::vertexInputBindingDescription(
+				VERTEX_BUFFER_BIND_ID,
+				sizeof(Vertex),
+				VK_VERTEX_INPUT_RATE_VERTEX);
+
+		// Attribute descriptions
+		// Describes memory layout and shader positions
+		vertices.attributeDescriptions.resize(3);
+		// Location 0 : Position
+		vertices.attributeDescriptions[0] =
+			vkTools::initializers::vertexInputAttributeDescription(
+				VERTEX_BUFFER_BIND_ID,
+				0,
+				VK_FORMAT_R32G32B32_SFLOAT,
+				offsetof(Vertex, pos));
+		// Location 1 : Texture coordinates
+		vertices.attributeDescriptions[1] =
+			vkTools::initializers::vertexInputAttributeDescription(
+				VERTEX_BUFFER_BIND_ID,
+				1,
+				VK_FORMAT_R32G32_SFLOAT,
+				offsetof(Vertex, uv));
+		// Location 1 : Vertex normal
+		vertices.attributeDescriptions[2] =
+			vkTools::initializers::vertexInputAttributeDescription(
+				VERTEX_BUFFER_BIND_ID,
+				2,
+				VK_FORMAT_R32G32B32_SFLOAT,
+				offsetof(Vertex, normal));
+
+		vertices.inputState = vkTools::initializers::pipelineVertexInputStateCreateInfo();
+		vertices.inputState.vertexBindingDescriptionCount = static_cast<uint32_t>(vertices.bindingDescriptions.size());
+		vertices.inputState.pVertexBindingDescriptions = vertices.bindingDescriptions.data();
+		vertices.inputState.vertexAttributeDescriptionCount = static_cast<uint32_t>(vertices.attributeDescriptions.size());
+		vertices.inputState.pVertexAttributeDescriptions = vertices.attributeDescriptions.data();
+	}
+	
+	void preparePipelines()
+	{
+		VkPipelineInputAssemblyStateCreateInfo inputAssemblyState =
+			vkTools::initializers::pipelineInputAssemblyStateCreateInfo(
+				VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
+				0,
+				VK_FALSE);
+
+		VkPipelineRasterizationStateCreateInfo rasterizationState =
+			vkTools::initializers::pipelineRasterizationStateCreateInfo(
+				VK_POLYGON_MODE_FILL,
+				VK_CULL_MODE_NONE,
+				VK_FRONT_FACE_COUNTER_CLOCKWISE,
+				0);
+
+		VkPipelineColorBlendAttachmentState blendAttachmentState =
+			vkTools::initializers::pipelineColorBlendAttachmentState(
+				0xf,
+				VK_FALSE);
+
+		VkPipelineColorBlendStateCreateInfo colorBlendState =
+			vkTools::initializers::pipelineColorBlendStateCreateInfo(
+				1,
+				&blendAttachmentState);
+
+		VkPipelineDepthStencilStateCreateInfo depthStencilState =
+			vkTools::initializers::pipelineDepthStencilStateCreateInfo(
+				VK_TRUE,
+				VK_TRUE,
+				VK_COMPARE_OP_LESS_OR_EQUAL);
+
+		VkPipelineViewportStateCreateInfo viewportState =
+			vkTools::initializers::pipelineViewportStateCreateInfo(1, 1, 0);
+
+		VkPipelineMultisampleStateCreateInfo multisampleState =
+			vkTools::initializers::pipelineMultisampleStateCreateInfo(
+				VK_SAMPLE_COUNT_1_BIT,
+				0);
+
+		std::vector<VkDynamicState> dynamicStateEnables = {
+			VK_DYNAMIC_STATE_VIEWPORT,
+			VK_DYNAMIC_STATE_SCISSOR
+		};
+		VkPipelineDynamicStateCreateInfo dynamicState =
+			vkTools::initializers::pipelineDynamicStateCreateInfo(
+				dynamicStateEnables.data(),
+				static_cast<uint32_t>(dynamicStateEnables.size()),
+				0);
+
+		// Load shaders
+		std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages;
+
+		shaderStages[0] = loadShader("shader/texture.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
+		shaderStages[1] = loadShader("shader/texture.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
+
+		VkGraphicsPipelineCreateInfo pipelineCreateInfo =
+			vkTools::initializers::pipelineCreateInfo(
+				PipelineLayout,
+				RenderPass,
+				0);
+
+		pipelineCreateInfo.pVertexInputState = &vertices.inputState;
+		pipelineCreateInfo.pInputAssemblyState = &inputAssemblyState;
+		pipelineCreateInfo.pRasterizationState = &rasterizationState;
+		pipelineCreateInfo.pColorBlendState = &colorBlendState;
+		pipelineCreateInfo.pMultisampleState = &multisampleState;
+		pipelineCreateInfo.pViewportState = &viewportState;
+		pipelineCreateInfo.pDepthStencilState = &depthStencilState;
+		pipelineCreateInfo.pDynamicState = &dynamicState;
+		pipelineCreateInfo.stageCount = static_cast<uint32_t>(shaderStages.size());
+		pipelineCreateInfo.pStages = shaderStages.data();
+
+		VK_CHECK_RESULT(vkCreateGraphicsPipelines(Device, PipelineCache, 1, &pipelineCreateInfo, nullptr, &pipelines.solid));
+	}
+	
+	void buildCommandBuffers()
+	{
+		VkCommandBufferBeginInfo cmdBufInfo = vkTools::initializers::commandBufferBeginInfo();
+
+		VkClearValue clearValues[2];
+		VkClearColorValue clear{};
+		clear.int32[0] = 0xFF;
+		clear.int32[3] = 0xFF;
+		clearValues[0].color = clear;
+		clearValues[1].depthStencil = { 1.0f, 0 };
+
+		VkRenderPassBeginInfo renderPassBeginInfo = vkTools::initializers::renderPassBeginInfo();
+		renderPassBeginInfo.renderPass = RenderPass;
+		renderPassBeginInfo.renderArea.offset.x = 0;
+		renderPassBeginInfo.renderArea.offset.y = 0;
+		renderPassBeginInfo.renderArea.extent.width = Width;
+		renderPassBeginInfo.renderArea.extent.height = Height;
+		renderPassBeginInfo.clearValueCount = 2;
+		renderPassBeginInfo.pClearValues = clearValues;
+
+		for (size_t i = 0; i < DrawCmdBuffers.size(); ++i)
+		{
+			// Set target frame buffer
+			renderPassBeginInfo.framebuffer = FrameBuffers[i];
+
+			VK_CHECK_RESULT(vkBeginCommandBuffer(DrawCmdBuffers[i], &cmdBufInfo));
+
+			vkCmdBeginRenderPass(DrawCmdBuffers[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+			VkViewport viewport = vkTools::initializers::viewport((float)Width, (float)Height, 0.0f, 1.0f);
+			vkCmdSetViewport(DrawCmdBuffers[i], 0, 1, &viewport);
+
+			VkRect2D scissor = vkTools::initializers::rect2D(Width, Height, 0, 0);
+			vkCmdSetScissor(DrawCmdBuffers[i], 0, 1, &scissor);
+
+			vkCmdBindDescriptorSets(DrawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, PipelineLayout, 0, 1, &DescriptorSet, 0, NULL);
+			vkCmdBindPipeline(DrawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.solid);
+
+			constexpr u32 VERTEX_BUFFER_BIND_ID{};
+			VkDeviceSize offsets[1] = { 0 };
+			vkCmdBindVertexBuffers(DrawCmdBuffers[i], VERTEX_BUFFER_BIND_ID, 1, &vertexBuffer.buffer, offsets);
+			vkCmdBindIndexBuffer(DrawCmdBuffers[i], indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
+
+			vkCmdDrawIndexed(DrawCmdBuffers[i], IndexCount, 1, 0, 0, 0);
+
+			vkCmdEndRenderPass(DrawCmdBuffers[i]);
+
+			VK_CHECK_RESULT(vkEndCommandBuffer(DrawCmdBuffers[i]));
+		}
+	}
+
+	vk::Buffer uniformBufferVS;
+
+	void BaseInit()
 	{
 		if (VulkanDevice->enableDebugMarkers)
 		{
@@ -1080,9 +1050,19 @@ if (!name) MLog("Error loading " #name "!\n");
 		CreateSetupCommandBuffer();
 		// Create a simple texture loader class
 		TextureLoader = new vkTools::VulkanTextureLoader(VulkanDevice, Queue, CmdPool);
+	}
 
-		prepareSynchronizationPrimitives();
-		prepareVertices(VK_USE_VALIDATION_LAYERS);
+	void Init()
+	{
+		BaseInit();
+
+		MZFile File;
+		File.Open("Maps/Battle Arena/gzd_map_BA_box01.bmp.dds", g_pFileSystem);
+		auto buf = File.Release();
+		TextureLoader->loadTexture(buf.get(), File.GetLength(), VK_FORMAT_BC1_RGB_UNORM_BLOCK, &Texture);
+
+		generateQuad();
+		setupVertexDescriptions();
 		prepareUniformBuffers();
 		setupDescriptorSetLayout();
 		preparePipelines();
@@ -1091,34 +1071,30 @@ if (!name) MLog("Error loading " #name "!\n");
 		buildCommandBuffers();
 	}
 
+	void prepareFrame()
+	{
+		VK_CHECK_RESULT(SwapChain.acquireNextImage(semaphores.presentComplete, &currentBuffer));
+	}
+
+	void submitFrame()
+	{
+		VK_CHECK_RESULT(SwapChain.queuePresent(Queue, currentBuffer, semaphores.renderComplete));
+
+		VK_CHECK_RESULT(vkQueueWaitIdle(Queue));
+	}
+
 	void Draw()
 	{
-		VK_CHECK_RESULT(SwapChain.acquireNextImage(PresentCompleteSemaphore, &currentBuffer));
+		prepareFrame();
 
-		// Use a fence to wait until the command buffer has finished execution before using it again
-		VK_CHECK_RESULT(vkWaitForFences(Device, 1, &WaitFences[currentBuffer], VK_TRUE, UINT64_MAX));
-		VK_CHECK_RESULT(vkResetFences(Device, 1, &WaitFences[currentBuffer]));
+		// Command buffer to be sumitted to the queue
+		SubmitInfo.commandBufferCount = 1;
+		SubmitInfo.pCommandBuffers = &DrawCmdBuffers[currentBuffer];
 
-		// Pipeline stage at which the queue submission will wait (via pWaitSemaphores)
-		VkPipelineStageFlags waitStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		// The submit info structure specifices a command buffer queue submission batch
-		VkSubmitInfo submitInfo = {};
-		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-		submitInfo.pWaitDstStageMask = &waitStageMask;									// Pointer to the list of pipeline stages that the semaphore waits will occur at
-		submitInfo.pWaitSemaphores = &PresentCompleteSemaphore;							// Semaphore(s) to wait upon before the submitted command buffer starts executing
-		submitInfo.waitSemaphoreCount = 1;												// One wait semaphore																				
-		submitInfo.pSignalSemaphores = &RenderCompleteSemaphore;						// Semaphore(s) to be signaled when command buffers have completed
-		submitInfo.signalSemaphoreCount = 1;											// One signal semaphore
-		submitInfo.pCommandBuffers = &DrawCmdBuffers[currentBuffer];					// Command buffers(s) to execute in this batch (submission)
-		submitInfo.commandBufferCount = 1;												// One command buffer
+		// Submit to queue
+		VK_CHECK_RESULT(vkQueueSubmit(Queue, 1, &SubmitInfo, VK_NULL_HANDLE));
 
-																						// Submit to the graphics queue passing a wait fence
-		VK_CHECK_RESULT(vkQueueSubmit(Queue, 1, &submitInfo, WaitFences[currentBuffer]));
-
-		// Present the current buffer to the swap chain
-		// Pass the semaphore signaled by the command buffer submission from the submit info as the wait semaphore for swap chain presentation
-		// This ensures that the image is not presented to the windowing system until all commands have been submitted
-		VK_CHECK_RESULT(SwapChain.queuePresent(Queue, currentBuffer, RenderCompleteSemaphore));
+		submitFrame();
 	}
 
 	VkCommandBuffer CreateCommandBuffer(VkCommandBufferLevel level, bool begin)
@@ -1234,317 +1210,6 @@ if (!name) MLog("Error loading " #name "!\n");
 		}
 	}
 
-	void loadTexture(std::string fileName, VkFormat format, bool forceLinearTiling)
-	{
-		gli::texture2D tex2D(gli::load(fileName));
-
-		assert(!tex2D.empty());
-
-		VkFormatProperties formatProperties;
-
-		Texture.width = static_cast<uint32_t>(tex2D[0].dimensions().x);
-		Texture.height = static_cast<uint32_t>(tex2D[0].dimensions().y);
-		Texture.mipLevels = static_cast<uint32_t>(tex2D.levels());
-
-		// Get device properites for the requested texture format
-		vkGetPhysicalDeviceFormatProperties(PhysicalDevice, format, &formatProperties);
-
-		// Only use linear tiling if requested (and supported by the device)
-		// Support for linear tiling is mostly limited, so prefer to use
-		// optimal tiling instead
-		// On most implementations linear tiling will only support a very
-		// limited amount of formats and features (mip maps, cubemaps, arrays, etc.)
-		VkBool32 useStaging = true;
-
-		// Only use linear tiling if forced
-		if (forceLinearTiling)
-		{
-			// Don't use linear if format is not supported for (linear) shader sampling
-			useStaging = !(formatProperties.linearTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT);
-		}
-
-		VkMemoryAllocateInfo memAllocInfo = vkTools::initializers::memoryAllocateInfo();
-		VkMemoryRequirements memReqs = {};
-
-		if (useStaging)
-		{
-			// Create a host-visible staging buffer that contains the raw image data
-			VkBuffer stagingBuffer;
-			VkDeviceMemory stagingMemory;
-
-			VkBufferCreateInfo bufferCreateInfo = vkTools::initializers::bufferCreateInfo();
-			bufferCreateInfo.size = tex2D.size();
-			// This buffer is used as a transfer source for the buffer copy
-			bufferCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-			bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-
-			VK_CHECK_RESULT(vkCreateBuffer(Device, &bufferCreateInfo, nullptr, &stagingBuffer));
-
-			// Get memory requirements for the staging buffer (alignment, memory type bits)
-			vkGetBufferMemoryRequirements(Device, stagingBuffer, &memReqs);
-
-			memAllocInfo.allocationSize = memReqs.size;
-			// Get memory type index for a host visible buffer
-			memAllocInfo.memoryTypeIndex = VulkanDevice->getMemoryType(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
-
-			VK_CHECK_RESULT(vkAllocateMemory(Device, &memAllocInfo, nullptr, &stagingMemory));
-			VK_CHECK_RESULT(vkBindBufferMemory(Device, stagingBuffer, stagingMemory, 0));
-
-			// Copy texture data into staging buffer
-			uint8_t *data;
-			VK_CHECK_RESULT(vkMapMemory(Device, stagingMemory, 0, memReqs.size, 0, (void **)&data));
-			memcpy(data, tex2D.data(), tex2D.size());
-			vkUnmapMemory(Device, stagingMemory);
-
-			// Setup buffer copy regions for each mip level
-			std::vector<VkBufferImageCopy> bufferCopyRegions;
-			uint32_t offset = 0;
-
-			for (uint32_t i = 0; i < Texture.mipLevels; i++)
-			{
-				VkBufferImageCopy bufferCopyRegion = {};
-				bufferCopyRegion.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-				bufferCopyRegion.imageSubresource.mipLevel = i;
-				bufferCopyRegion.imageSubresource.baseArrayLayer = 0;
-				bufferCopyRegion.imageSubresource.layerCount = 1;
-				bufferCopyRegion.imageExtent.width = static_cast<uint32_t>(tex2D[i].dimensions().x);
-				bufferCopyRegion.imageExtent.height = static_cast<uint32_t>(tex2D[i].dimensions().y);
-				bufferCopyRegion.imageExtent.depth = 1;
-				bufferCopyRegion.bufferOffset = offset;
-
-				bufferCopyRegions.push_back(bufferCopyRegion);
-
-				offset += static_cast<uint32_t>(tex2D[i].size());
-			}
-
-			// Create optimal tiled target image
-			VkImageCreateInfo imageCreateInfo = vkTools::initializers::imageCreateInfo();
-			imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
-			imageCreateInfo.format = format;
-			imageCreateInfo.mipLevels = Texture.mipLevels;
-			imageCreateInfo.arrayLayers = 1;
-			imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-			imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-			imageCreateInfo.usage = VK_IMAGE_USAGE_SAMPLED_BIT;
-			imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-			// Set initial layout of the image to undefined
-			imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-			imageCreateInfo.extent = { Texture.width, Texture.height, 1 };
-			imageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-
-			VK_CHECK_RESULT(vkCreateImage(Device, &imageCreateInfo, nullptr, &Texture.image));
-
-			vkGetImageMemoryRequirements(Device, Texture.image, &memReqs);
-
-			memAllocInfo.allocationSize = memReqs.size;
-			memAllocInfo.memoryTypeIndex = VulkanDevice->getMemoryType(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-
-			VK_CHECK_RESULT(vkAllocateMemory(Device, &memAllocInfo, nullptr, &Texture.deviceMemory));
-			VK_CHECK_RESULT(vkBindImageMemory(Device, Texture.image, Texture.deviceMemory, 0));
-
-			VkCommandBuffer copyCmd = CreateCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
-
-			// Image barrier for optimal image
-
-			// The sub resource range describes the regions of the image we will be transition
-			VkImageSubresourceRange subresourceRange = {};
-			// Image only contains color data
-			subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-			// Start at first mip level
-			subresourceRange.baseMipLevel = 0;
-			// We will transition on all mip levels
-			subresourceRange.levelCount = Texture.mipLevels;
-			// The 2D texture only has one layer
-			subresourceRange.layerCount = 1;
-
-			// Optimal image will be used as destination for the copy, so we must transfer from our
-			// initial undefined image layout to the transfer destination layout
-			setImageLayout(
-				copyCmd,
-				Texture.image,
-				VK_IMAGE_ASPECT_COLOR_BIT,
-				VK_IMAGE_LAYOUT_UNDEFINED,
-				VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-				subresourceRange);
-
-			// Copy mip levels from staging buffer
-			vkCmdCopyBufferToImage(
-				copyCmd,
-				stagingBuffer,
-				Texture.image,
-				VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-				static_cast<uint32_t>(bufferCopyRegions.size()),
-				bufferCopyRegions.data());
-
-			// Change texture image layout to shader read after all mip levels have been copied
-			Texture.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-			setImageLayout(
-				copyCmd,
-				Texture.image,
-				VK_IMAGE_ASPECT_COLOR_BIT,
-				VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-				Texture.imageLayout,
-				subresourceRange);
-
-			flushCommandBuffer(copyCmd, Queue, true);
-
-			// Clean up staging resources
-			vkFreeMemory(Device, stagingMemory, nullptr);
-			vkDestroyBuffer(Device, stagingBuffer, nullptr);
-		}
-		else
-		{
-			// Prefer using optimal tiling, as linear tiling 
-			// may support only a small set of features 
-			// depending on implementation (e.g. no mip maps, only one layer, etc.)
-
-			VkImage mappableImage;
-			VkDeviceMemory mappableMemory;
-
-			// Load mip map level 0 to linear tiling image
-			VkImageCreateInfo imageCreateInfo = vkTools::initializers::imageCreateInfo();
-			imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
-			imageCreateInfo.format = format;
-			imageCreateInfo.mipLevels = 1;
-			imageCreateInfo.arrayLayers = 1;
-			imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-			imageCreateInfo.tiling = VK_IMAGE_TILING_LINEAR;
-			imageCreateInfo.usage = VK_IMAGE_USAGE_SAMPLED_BIT;
-			imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-			imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_PREINITIALIZED;
-			imageCreateInfo.extent = { Texture.width, Texture.height, 1 };
-			VK_CHECK_RESULT(vkCreateImage(Device, &imageCreateInfo, nullptr, &mappableImage));
-
-			// Get memory requirements for this image 
-			// like size and alignment
-			vkGetImageMemoryRequirements(Device, mappableImage, &memReqs);
-			// Set memory allocation size to required memory size
-			memAllocInfo.allocationSize = memReqs.size;
-
-			// Get memory type that can be mapped to host memory
-			memAllocInfo.memoryTypeIndex = VulkanDevice->getMemoryType(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
-
-			// Allocate host memory
-			VK_CHECK_RESULT(vkAllocateMemory(Device, &memAllocInfo, nullptr, &mappableMemory));
-
-			// Bind allocated image for use
-			VK_CHECK_RESULT(vkBindImageMemory(Device, mappableImage, mappableMemory, 0));
-
-			// Get sub resource layout
-			// Mip map count, array layer, etc.
-			VkImageSubresource subRes = {};
-			subRes.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-
-			VkSubresourceLayout subResLayout;
-			void *data;
-
-			// Get sub resources layout 
-			// Includes row pitch, size offsets, etc.
-			vkGetImageSubresourceLayout(Device, mappableImage, &subRes, &subResLayout);
-
-			// Map image memory
-			VK_CHECK_RESULT(vkMapMemory(Device, mappableMemory, 0, memReqs.size, 0, &data));
-
-			// Copy image data into memory
-			memcpy(data, tex2D[subRes.mipLevel].data(), tex2D[subRes.mipLevel].size());
-
-			vkUnmapMemory(Device, mappableMemory);
-
-			// Linear tiled images don't need to be staged
-			// and can be directly used as textures
-			Texture.image = mappableImage;
-			Texture.deviceMemory = mappableMemory;
-			Texture.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-
-			VkCommandBuffer copyCmd = CreateCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
-
-			// Setup image memory barrier transfer image to shader read layout
-
-			// The sub resource range describes the regions of the image we will be transition
-			VkImageSubresourceRange subresourceRange = {};
-			// Image only contains color data
-			subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-			// Start at first mip level
-			subresourceRange.baseMipLevel = 0;
-			// Only one mip level, most implementations won't support more for linear tiled images
-			subresourceRange.levelCount = 1;
-			// The 2D texture only has one layer
-			subresourceRange.layerCount = 1;
-
-			setImageLayout(
-				copyCmd,
-				Texture.image,
-				VK_IMAGE_ASPECT_COLOR_BIT,
-				VK_IMAGE_LAYOUT_PREINITIALIZED,
-				Texture.imageLayout,
-				subresourceRange);
-
-			flushCommandBuffer(copyCmd, Queue, true);
-		}
-
-		// Create sampler
-		// In Vulkan textures are accessed by samplers
-		// This separates all the sampling information from the 
-		// texture data
-		// This means you could have multiple sampler objects
-		// for the same texture with different settings
-		// Similar to the samplers available with OpenGL 3.3
-		VkSamplerCreateInfo sampler = vkTools::initializers::samplerCreateInfo();
-		sampler.magFilter = VK_FILTER_LINEAR;
-		sampler.minFilter = VK_FILTER_LINEAR;
-		sampler.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-		sampler.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-		sampler.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-		sampler.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-		sampler.mipLodBias = 0.0f;
-		sampler.compareOp = VK_COMPARE_OP_NEVER;
-		sampler.minLod = 0.0f;
-		// Set max level-of-detail to mip level count of the texture
-		sampler.maxLod = (useStaging) ? (float)Texture.mipLevels : 0.0f;
-		// Enable anisotropic filtering
-		// This feature is optional, so we must check if it's supported on the device
-		if (VulkanDevice->features.samplerAnisotropy)
-		{
-			// Use max. level of anisotropy for this example
-			sampler.maxAnisotropy = VulkanDevice->properties.limits.maxSamplerAnisotropy;
-			sampler.anisotropyEnable = VK_TRUE;
-		}
-		else
-		{
-			// The device does not support anisotropic filtering
-			sampler.maxAnisotropy = 1.0;
-			sampler.anisotropyEnable = VK_FALSE;
-		}
-		sampler.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
-		VK_CHECK_RESULT(vkCreateSampler(Device, &sampler, nullptr, &Texture.sampler));
-
-		// Create image view
-		// Textures are not directly accessed by the shaders and
-		// are abstracted by image views containing additional
-		// information and sub resource ranges
-		VkImageViewCreateInfo view = vkTools::initializers::imageViewCreateInfo();
-		view.image = VK_NULL_HANDLE;
-		view.viewType = VK_IMAGE_VIEW_TYPE_2D;
-		view.format = format;
-		view.components = { VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A };
-		// The subresource range describes the set of mip levels (and array layers) that can be accessed through this image view
-		// It's possible to create multiple image views for a single image referring to different (and/or overlapping) ranges of the image
-		view.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		view.subresourceRange.baseMipLevel = 0;
-		view.subresourceRange.baseArrayLayer = 0;
-		view.subresourceRange.layerCount = 1;
-		// Linear tiling usually won't support mip maps
-		// Only set mip map count if optimal tiling is used
-		view.subresourceRange.levelCount = (useStaging) ? Texture.mipLevels : 1;
-		view.image = Texture.image;
-		VK_CHECK_RESULT(vkCreateImageView(Device, &view, nullptr, &Texture.view));
-
-		// Fill image descriptor image info that can be used during the descriptor set setup
-		Texture.descriptor.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
-		Texture.descriptor.imageView = Texture.view;
-		Texture.descriptor.sampler = Texture.sampler;
-	}
-
 	bool enableValidation{};
 
 	// Vulkan instance, stores all per-application states
@@ -1606,12 +1271,10 @@ if (!name) MLog("Error loading " #name "!\n");
 	vkTools::VulkanTextureLoader *TextureLoader = nullptr;
 
 	struct {
-		VkDeviceMemory memory;															// Handle to the device memory for this buffer
-		VkBuffer buffer;																// Handle to the Vulkan buffer object that the memory is bound to
 		VkPipelineVertexInputStateCreateInfo inputState;
-		VkVertexInputBindingDescription inputBinding;
-		std::vector<VkVertexInputAttributeDescription> inputAttributes;
-	} Vertices;
+		std::vector<VkVertexInputBindingDescription> bindingDescriptions;
+		std::vector<VkVertexInputAttributeDescription> attributeDescriptions;
+	} vertices;
 
 	// Index buffer
 	struct
@@ -1640,9 +1303,10 @@ if (!name) MLog("Error loading " #name "!\n");
 	// This way we can just memcopy the ubo data to the ubo
 	// Note: You should use data types that align with the GPU in order to avoid manual padding (vec4, mat4)
 	struct {
-		glm::mat4 projectionMatrix;
-		glm::mat4 modelMatrix;
-		glm::mat4 viewMatrix;
+		glm::mat4 projection;
+		glm::mat4 model;
+		glm::vec4 viewPos;
+		float lodBias = 0.0f;
 	} uboVS;
 
 	// The pipeline layout is used by a pipline to access the descriptor sets 
@@ -1676,14 +1340,9 @@ if (!name) MLog("Error loading " #name "!\n");
 	// Used to check the completion of queue operations (e.g. command buffer execution)
 	std::vector<VkFence> WaitFences;
 
-	struct Texture {
-		VkSampler sampler;
-		VkImage image;
-		VkImageLayout imageLayout;
-		VkDeviceMemory deviceMemory;
-		VkImageView view;
-		VkDescriptorImageInfo descriptor;
-		uint32_t width, height;
-		uint32_t mipLevels;
-	} Texture;
+	vkTools::VulkanTexture Texture;
+	
+	struct {
+		VkPipeline solid;
+	} pipelines;
 };
