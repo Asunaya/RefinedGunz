@@ -1,5 +1,7 @@
 #pragma once
 
+#include "variant.h"
+
 #define POLYVAR_METHOD(func) template <typename... Ts> \
 auto func(Ts&&... args) { visit(var, [&](auto& x) { x.func(std::forward<Ts>(args)...); }); } \
 template <typename T, typename... Ts> \

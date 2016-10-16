@@ -213,6 +213,9 @@
     </ClCompile>
     <ClCompile Include="Include\RS2Vulkan.cpp" />
     <ClCompile Include="Include\RS2D3D9.cpp" />
+    <ClCompile Include="Source\RBspObjectDrawVulkan.cpp">
+      <Filter>Map</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\RHalfEdgeMesh.h">
@@ -380,5 +383,15 @@
     <ClInclude Include="Include\RS2D3D9.h">
       <Filter>D3D9</Filter>
     </ClInclude>
+    <ClInclude Include="Include\RBspObjectDraw.h">
+      <Filter>Map</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\RBspObjectDrawD3D9.h">
+      <Filter>Map</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\RBspObjectDrawVulkan.h">
+      <Filter>Map</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\VulkanMaterial.h" />
   </ItemGroup>
 </Project>

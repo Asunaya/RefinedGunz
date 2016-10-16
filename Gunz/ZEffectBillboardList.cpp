@@ -97,7 +97,7 @@ bool ZEffectShadowList::Draw()
 		if(m_dwBase >= EFFECTBASE_DISCARD_COUNT)
 			m_dwBase = 0;
 
-		DWORD dwThisNum = min( dwRemainNum , BILLBOARD_FLUSH_COUNT );
+		DWORD dwThisNum = min( dwRemainNum , static_cast<DWORD>(BILLBOARD_FLUSH_COUNT) );
 
 		dwThisNum = min( dwThisNum , EFFECTBASE_DISCARD_COUNT - m_dwBase );	
 
@@ -393,7 +393,7 @@ bool ZEffectBillboardList::Draw()
 			m_dwBase = 0;
 
 		// 갯수가 BILLBOARD_FLUSH_COUNT 를 넘어가면 BILLBOARD_FLUSH_COUNT 씩 찍는다
-		DWORD dwThisNum = min( dwRemainNum , BILLBOARD_FLUSH_COUNT );
+		DWORD dwThisNum = min( dwRemainNum , static_cast<DWORD>(BILLBOARD_FLUSH_COUNT) );
 
 		// 버퍼의 크기를 넘어가면 개수를 줄여서 크기만큼만 찍는다
 		dwThisNum = min( dwThisNum , EFFECTBASE_DISCARD_COUNT - m_dwBase );	
@@ -722,7 +722,7 @@ bool ZEffectBillboardTexAniList::Draw()
 		if(m_dwBase >= EFFECTBASE_DISCARD_COUNT)
 			m_dwBase = 0;
 
-		DWORD dwThisNum = min( dwRemainNum , BILLBOARD_FLUSH_COUNT );
+		DWORD dwThisNum = min( dwRemainNum , static_cast<DWORD>(BILLBOARD_FLUSH_COUNT) );
 
 		dwThisNum = min( dwThisNum , EFFECTBASE_DISCARD_COUNT - m_dwBase );	
 

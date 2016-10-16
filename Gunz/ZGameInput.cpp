@@ -489,138 +489,139 @@ void ZGameInput::Update(float fElapsed)
 	if (OnGameInput())
 		return;
 
-	if(RIsActive())
+	if (RIsActive())
 	{
-		ZCamera* pCamera = ZGetGameInterface()->GetCamera();
-		ZMyCharacter* pMyCharacter = g_pGame->m_pMyCharacter;
-		if ((!pMyCharacter) || (!pMyCharacter->GetInitialized())) return;
+		auto* pCamera = ZGetGameInterface()->GetCamera();
+		auto* pMyCharacter = g_pGame->m_pMyCharacter;
+		if (!pMyCharacter || !pMyCharacter->GetInitialized()) return;
 
-		if(!ZGetGameInterface()->IsCursorEnable())
+		if (!ZGetGameInterface()->IsCursorEnable())
 		{
-			{
-				float fRotateX = 0;
-				float fRotateY = 0;
+			float fRotateX = 0;
+			float fRotateY = 0;
 
 #ifdef _DONOTUSE_DINPUT_MOUSE
-				// DINPUT 을 사용하지 않는경우
-				int iDeltaX, iDeltaY;
+			int iDeltaX, iDeltaY;
 
-				POINT pt;
-				GetCursorPos(&pt);
-				ScreenToClient(g_hWnd,&pt);
-				iDeltaX = pt.x-RGetScreenWidth()/2;
-				iDeltaY = pt.y-RGetScreenHeight()/2;
+			POINT pt;
+			GetCursorPos(&pt);
+			ScreenToClient(g_hWnd, &pt);
+			iDeltaX = pt.x - RGetScreenWidth() / 2;
+			iDeltaY = pt.y - RGetScreenHeight() / 2;
 
-				float fRotateStep = 0.0005f * Z_MOUSE_SENSITIVITY*10.0f;
-				fRotateX = (iDeltaX * fRotateStep);
-				fRotateY = (iDeltaY * fRotateStep);
+			float fRotateStep = 0.0005f * Z_MOUSE_SENSITIVITY*10.0f;
+			fRotateX = (iDeltaX * fRotateStep);
+			fRotateY = (iDeltaY * fRotateStep);
 
 #else
-				// 마우스 입력 dinput 처리
-
-				ZGetInput()->GetRotation(&fRotateX,&fRotateY);
+			ZGetInput()->GetRotation(&fRotateX, &fRotateY);
 #endif
 
-				bool bRotateEnable = true;//!pMyCharacter->IsDirLocked();
+#ifdef NO_DIRECTION_LOCK
+			bool bRotateEnable = true;
+#else
+			bool bRotateEnable = !pMyCharacter->IsDirLocked();
+#endif
 
-				if (RIsActive())
+			if (RIsActive())
+			{
+				ZCamera *pCamera = ZGetGameInterface()->GetCamera();
+
+				pCamera->m_fAngleX += fRotateY;
+				pCamera->m_fAngleZ += fRotateX;
+
+				pCamera->m_fAngleZ = fmod(pCamera->m_fAngleZ, 2 * PI);
+				pCamera->m_fAngleX = fmod(pCamera->m_fAngleX, 2 * PI);
+
+				if (pCamera->GetLookMode() == ZCAMERA_MINIMAP)
 				{
-					ZCamera *pCamera = ZGetGameInterface()->GetCamera();
-
-					pCamera->m_fAngleX += fRotateY;
-					pCamera->m_fAngleZ += fRotateX;
-
-					pCamera->m_fAngleZ = fmod(pCamera->m_fAngleZ,2*PI);
-					pCamera->m_fAngleX = fmod(pCamera->m_fAngleX,2*PI);
-					
-					if(pCamera->GetLookMode()==ZCAMERA_MINIMAP) {
-						pCamera->m_fAngleX=max(D3DX_PI/2+.1f,pCamera->m_fAngleX);
-						pCamera->m_fAngleX = min(D3DX_PI - 0.1f, pCamera->m_fAngleX);
-					}else {
-						if(bRotateEnable)
-						{
-							pCamera->m_fAngleX=max(CAMERA_ANGLEX_MIN,pCamera->m_fAngleX);
-							pCamera->m_fAngleX=min(CAMERA_ANGLEX_MAX,pCamera->m_fAngleX);
-
-							lastanglex=pCamera->m_fAngleX;
-							lastanglez=pCamera->m_fAngleZ;
-						}else
-						{
-							// 각도제한이 필요하다
-							pCamera->m_fAngleX=max(CAMERA_ANGLEX_MIN,pCamera->m_fAngleX);
-							pCamera->m_fAngleX=min(CAMERA_ANGLEX_MAX,pCamera->m_fAngleX);
-
-							pCamera->m_fAngleX = max(lastanglex - D3DX_PI / 4.f, pCamera->m_fAngleX);
-							pCamera->m_fAngleX = min(lastanglex + D3DX_PI / 4.f, pCamera->m_fAngleX);
-
-							pCamera->m_fAngleZ = max(lastanglez - D3DX_PI / 4.f, pCamera->m_fAngleZ);
-							pCamera->m_fAngleZ = min(lastanglez + D3DX_PI / 4.f, pCamera->m_fAngleZ);
-
-						}
-					}
-
-					ZCombatInterface* pCombatInterface = ZGetGameInterface()->GetCombatInterface();
-					if (pCombatInterface && !pCombatInterface->IsChat() &&
-						(pCamera->GetLookMode()==ZCAMERA_FREELOOK || pCamera->GetLookMode()==ZCAMERA_MINIMAP))
+					pCamera->m_fAngleX = max(D3DX_PI / 2 + .1f, pCamera->m_fAngleX);
+					pCamera->m_fAngleX = min(D3DX_PI - 0.1f, pCamera->m_fAngleX);
+				}
+				else
+				{
+					if (bRotateEnable)
 					{
-						rvector right;
-						rvector forward=RCameraDirection;
-						CrossProduct(&right,rvector(0,0,1),forward);
-						Normalize(right);
-						const rvector up = rvector(0,0,1);
+						pCamera->m_fAngleX = max(CAMERA_ANGLEX_MIN, pCamera->m_fAngleX);
+						pCamera->m_fAngleX = min(CAMERA_ANGLEX_MAX, pCamera->m_fAngleX);
 
-						rvector accel = rvector(0,0,0);
-
-						if(ZIsActionKeyPressed(ZACTION_FORWARD)==true)	accel+=forward;
-						if(ZIsActionKeyPressed(ZACTION_BACK)==true)		accel-=forward;
-						if(ZIsActionKeyPressed(ZACTION_LEFT)==true)		accel-=right;
-						if(ZIsActionKeyPressed(ZACTION_RIGHT)==true)	accel+=right;
-						if(ZIsActionKeyPressed(ZACTION_JUMP)==true)		accel+=up;
-						if(ZIsActionKeyPressed(ZACTION_USE_WEAPON)==true)			accel-=up;
-
-						rvector cameraMove = 
-							(pCamera->GetLookMode()==ZCAMERA_FREELOOK ? 1000.f : 10000.f )
-							* fElapsed*accel;
-
-						rvector targetPos = pCamera->GetPosition()+cameraMove;
-
-						// 프리룩은 충돌체크를 한다
-						if(pCamera->GetLookMode()==ZCAMERA_FREELOOK)
-							ZGetGame()->GetWorld()->GetBsp()->CheckWall(pCamera->GetPosition(),targetPos,ZFREEOBSERVER_RADIUS,0.f,RCW_SPHERE);
-						else
-						// 미니맵은 범위내에 있는지 체크한다
-						{
-							rboundingbox *pbb = &ZGetGame()->GetWorld()->GetBsp()->GetRootNode()->bbTree;
-							targetPos.x = max(min(targetPos.x,pbb->maxx),pbb->minx);
-							targetPos.y = max(min(targetPos.y,pbb->maxy),pbb->miny);
-
-							ZMiniMap *pMinimap = ZGetGameInterface()->GetMiniMap();
-							if(pMinimap)
-								targetPos.z = max(min(targetPos.z,pMinimap->GetHeightMax()),pMinimap->GetHeightMin());
-							else
-								targetPos.z = max(min(targetPos.z,7000),2000);
-
-							
-						}
-
-						pCamera->SetPosition(targetPos);
-
+						lastanglex = pCamera->m_fAngleX;
+						lastanglez = pCamera->m_fAngleZ;
 					}
-					else if ( !g_pGame->IsReplay())
+					else
 					{
-						pMyCharacter->ProcessInput( fElapsed);
+						pCamera->m_fAngleX = max(CAMERA_ANGLEX_MIN, pCamera->m_fAngleX);
+						pCamera->m_fAngleX = min(CAMERA_ANGLEX_MAX, pCamera->m_fAngleX);
+
+						pCamera->m_fAngleX = max(lastanglex - D3DX_PI / 4.f, pCamera->m_fAngleX);
+						pCamera->m_fAngleX = min(lastanglex + D3DX_PI / 4.f, pCamera->m_fAngleX);
+
+						pCamera->m_fAngleZ = max(lastanglez - D3DX_PI / 4.f, pCamera->m_fAngleZ);
+						pCamera->m_fAngleZ = min(lastanglez + D3DX_PI / 4.f, pCamera->m_fAngleZ);
+
 					}
 				}
-			}
-			POINT pt={RGetScreenWidth()/2,RGetScreenHeight()/2};
-			ClientToScreen(g_hWnd,&pt);
-			SetCursorPos(pt.x,pt.y);
 
-			// 대쉬 키 입력 검사
+				ZCombatInterface* pCombatInterface = ZGetGameInterface()->GetCombatInterface();
+				if (pCombatInterface && !pCombatInterface->IsChat() &&
+					(pCamera->GetLookMode() == ZCAMERA_FREELOOK || pCamera->GetLookMode() == ZCAMERA_MINIMAP))
+				{
+					rvector right;
+					rvector forward = RCameraDirection;
+					CrossProduct(&right, rvector(0, 0, 1), forward);
+					Normalize(right);
+					const rvector up = rvector(0, 0, 1);
+
+					rvector accel = rvector(0, 0, 0);
+
+					if (ZIsActionKeyPressed(ZACTION_FORWARD) == true)	accel += forward;
+					if (ZIsActionKeyPressed(ZACTION_BACK) == true)		accel -= forward;
+					if (ZIsActionKeyPressed(ZACTION_LEFT) == true)		accel -= right;
+					if (ZIsActionKeyPressed(ZACTION_RIGHT) == true)	accel += right;
+					if (ZIsActionKeyPressed(ZACTION_JUMP) == true)		accel += up;
+					if (ZIsActionKeyPressed(ZACTION_USE_WEAPON) == true)			accel -= up;
+
+					auto cameraMove = (pCamera->GetLookMode() == ZCAMERA_FREELOOK ? 1000.f : 10000.f) * fElapsed * accel;
+
+					rvector targetPos = pCamera->GetPosition() + cameraMove;
+
+					if (pCamera->GetLookMode() == ZCAMERA_FREELOOK)
+					{
+						ZGetGame()->GetWorld()->GetBsp()->CheckWall(pCamera->GetPosition(),
+							targetPos, ZFREEOBSERVER_RADIUS, 0.f, RCW_SPHERE);
+					}
+					else
+					{
+						rboundingbox *pbb = &ZGetGame()->GetWorld()->GetBsp()->GetRootNode()->bbTree;
+						targetPos.x = max(min(targetPos.x, pbb->maxx), pbb->minx);
+						targetPos.y = max(min(targetPos.y, pbb->maxy), pbb->miny);
+
+						ZMiniMap *pMinimap = ZGetGameInterface()->GetMiniMap();
+						if (pMinimap)
+							targetPos.z = max(min(targetPos.z, pMinimap->GetHeightMax()), pMinimap->GetHeightMin());
+						else
+							targetPos.z = max(min(targetPos.z, 7000), 2000);
+
+
+					}
+
+					pCamera->SetPosition(targetPos);
+
+				}
+				else if (!g_pGame->IsReplay())
+				{
+					pMyCharacter->ProcessInput(fElapsed);
+				}
+			}
+			POINT pt = { RGetScreenWidth() / 2,RGetScreenHeight() / 2 };
+			ClientToScreen(g_hWnd, &pt);
+			SetCursorPos(pt.x, pt.y);
+
 			GameCheckSequenceKeyCommand();
 
-		}else
-			pMyCharacter->ReleaseButtonState();	// 메뉴가 나왔을때는 버튼이 눌리지 않은상태로 돌려놓는다
+		}
+else
+pMyCharacter->ReleaseButtonState();
 	}
 }
 
@@ -629,7 +630,6 @@ void ZGameInput::Update(float fElapsed)
 
 void ZGameInput::GameCheckSequenceKeyCommand()
 {
-	// 철지난 키 입력은 일단 제거한다.
 	while(m_ActionKeyHistory.size()>0 && (g_pGame->GetTime()-(*m_ActionKeyHistory.begin()).fTime>MAX_KEY_SEQUENCE_TIME))
 	{
 		m_ActionKeyHistory.erase(m_ActionKeyHistory.begin());
@@ -680,7 +680,7 @@ void ZGameInput::GameCheckSequenceKeyCommand()
 					m_ActionKeyHistory.erase(m_ActionKeyHistory.begin());
 				}
 
-				if(ai>=0 && ai<=3)		// 덤블링
+				if(ai>=0 && ai<=3)
 					g_pGame->m_pMyCharacter->OnTumble(ai);
 			}
 		}

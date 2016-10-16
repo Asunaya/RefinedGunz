@@ -1,25 +1,17 @@
-#ifndef __RMATERIALLIST_H
-#define __RMATERIALLIST_H
-
-//#pragma once
-
-#pragma warning(disable:4786)
+#pragma once
 
 #include <list>
 #include <string>
-
 #include "RTypes.h"
 #include "RToken.h"
-
-using namespace std;
+#include "RNameSpace.h"
 
 class MXmlElement;
 
-#include "RNameSpace.h"
 _NAMESPACE_REALSPACE2_BEGIN
 
 struct RMATERIAL {
-	string Name;
+	std::string Name;
 	rvector Diffuse;
 	rvector Ambient;
 	rvector Specular;
@@ -28,15 +20,9 @@ struct RMATERIAL {
 	DWORD dwFlags;
 };
 
-class RMaterialList : public list<RMATERIAL*> {
+class RMaterialList : public std::list<RMATERIAL*> {
 public:
 	virtual ~RMaterialList();
-	
-	/*
-	bool Save(const char *szFileName);
-	bool Open(const char *szFileName);
-	bool Open(void* pMemory,int nSize);
-	*/
 
 	bool Open(MXmlElement *pElement);
 	bool Save(MXmlElement *pElement);
@@ -46,5 +32,3 @@ private:
 };
 
 _NAMESPACE_REALSPACE2_END
-
-#endif

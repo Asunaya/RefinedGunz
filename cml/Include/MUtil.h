@@ -47,6 +47,25 @@ inline void SafeRelease(D3DPtr<T>& ptr)
 #define WARN_UNUSED_RESULT __attribute__((warn_unused_result))
 #endif
 
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
+
+template <typename T1, typename T2>
+auto min(const T1& a, const T2& b)
+{
+	return a < b ? a : b;
+}
+
+template <typename T1, typename T2>
+auto max(const T1& a, const T2& b)
+{
+	return a > b ? a : b;
+}
+
 inline uint32_t ARGB(uint8_t a, uint8_t r, uint8_t g, uint8_t b)
 {
 	return (a << 24) | (r << 16) | (g << 8) | b;

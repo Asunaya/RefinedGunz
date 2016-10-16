@@ -11,13 +11,13 @@
 #undef pi
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
+#include "RNameSpace.h"
 
-namespace RealSpace2
-{
-	extern MZFileSystem* g_pFileSystem;
-};
+_NAMESPACE_REALSPACE2_BEGIN
 
-#define VK_USE_VALIDATION_LAYERS 1
+extern MZFileSystem* g_pFileSystem;
+
+#define VK_USE_VALIDATION_LAYERS 0
 
 class RS2Vulkan
 {
@@ -229,6 +229,7 @@ if (!name) MLog("Error loading " #name "!\n");
 		// This is handled by a separate class that gets a logical device representation
 		// and encapsulates functions related to a device
 		VulkanDevice = new vk::VulkanDevice(PhysicalDevice);
+		EnabledFeatures.fillModeNonSolid = true;
 		VK_CHECK_RESULT(VulkanDevice->createLogicalDevice(EnabledFeatures));
 		Device = VulkanDevice->logicalDevice;
 		loadDeviceLevelFunctions();
@@ -1031,6 +1032,20 @@ if (!name) MLog("Error loading " #name "!\n");
 
 	vk::Buffer uniformBufferVS;
 
+	vkTools::VulkanTexture LoadTexture(const char* Filename)
+	{
+		vkTools::VulkanTexture ret;
+		MZFile File;
+		char ddsFilename[256];
+		sprintf_safe(ddsFilename, "%s.dds", Filename);
+		if (!File.Open(ddsFilename, g_pFileSystem))
+			if (!File.Open(Filename, g_pFileSystem))
+				return{};
+		auto buf = File.Release();
+		TextureLoader->loadTexture(buf.get(), File.GetLength(), VK_FORMAT_BC1_RGB_UNORM_BLOCK, &ret);
+		return ret;
+	}
+
 	void BaseInit()
 	{
 		if (VulkanDevice->enableDebugMarkers)
@@ -1056,19 +1071,16 @@ if (!name) MLog("Error loading " #name "!\n");
 	{
 		BaseInit();
 
-		MZFile File;
-		File.Open("Maps/Battle Arena/gzd_map_BA_box01.bmp.dds", g_pFileSystem);
-		auto buf = File.Release();
-		TextureLoader->loadTexture(buf.get(), File.GetLength(), VK_FORMAT_BC1_RGB_UNORM_BLOCK, &Texture);
+		Texture = LoadTexture("Maps/Battle Arena/gzd_map_BA_box01.bmp.dds");
 
-		generateQuad();
+		/*generateQuad();
 		setupVertexDescriptions();
 		prepareUniformBuffers();
 		setupDescriptorSetLayout();
 		preparePipelines();
 		setupDescriptorPool();
 		setupDescriptorSet();
-		buildCommandBuffers();
+		buildCommandBuffers();*/
 	}
 
 	void prepareFrame()
@@ -1346,3 +1358,5 @@ if (!name) MLog("Error loading " #name "!\n");
 		VkPipeline solid;
 	} pipelines;
 };
+
+_NAMESPACE_REALSPACE2_END

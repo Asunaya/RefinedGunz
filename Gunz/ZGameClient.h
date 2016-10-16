@@ -1,5 +1,4 @@
-#ifndef _ZGAMECLIENT_H
-#define _ZGAMECLIENT_H
+#pragma once
 
 #include "ZPrerequisites.h"
 #include "MMatchClient.h"
@@ -8,10 +7,9 @@
 #include "ZGame.h"
 #include "ZNetAgreementBuilder.h"
 #include "MEmblemMgr.h"
-
 #include "SafeString.h"
 
-typedef bool(ZONCOMMANDCALLBACK)(MCommand* pCommand);
+using ZONCOMMANDCALLBACK = bool(MCommand* pCommand);
 class MListBox;
 class ZCharacterViewList;
 class UPnP;
@@ -313,15 +311,12 @@ protected:
 	virtual void OnUDPTestReply(const MUID& uid) override;
 };
 
-
-
 bool ZPostCommand(MCommand* pCmd);
 MUID ZGetMyUID();	
 
 MCommand* ZNewCmd(int nID);
 
 unsigned long int ZGetClockDistance(unsigned long int nGlobalClock, unsigned long int nLocalClock);
-
 
 // Post Command Macro For Convenience
 #define ZPOSTCMD0(_ID)									{ MCommand* pC=ZNewCmd(_ID); ZPostCommand(pC); }
@@ -337,5 +332,3 @@ unsigned long int ZGetClockDistance(unsigned long int nGlobalClock, unsigned lon
 	case (message): return fn(pCommand);
 
 bool GetUserInfoUID(MUID uid,MCOLOR& _color,char* sp_name,MMatchUserGradeID& gid);
-
-#endif

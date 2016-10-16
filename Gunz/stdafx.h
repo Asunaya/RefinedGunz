@@ -69,7 +69,6 @@
 #include "RNameSpace.h"
 #include "RTypes.h"
 #include "RealSpace2.h"
-#include "RBspObject.h"
 #include "RMeshMgr.h"
 #include "RVisualMeshMgr.h"
 #include "RMaterialList.h"

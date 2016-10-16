@@ -150,8 +150,8 @@ struct MZFileBuffer
 	auto get() { return ptr; }
 
 private:
-	char* ptr = nullptr;
-	bool owned = false;
+	char* ptr{};
+	bool owned{};
 };
 
 class MZFile final

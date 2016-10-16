@@ -362,7 +362,7 @@ bool ZApplication::OnCreate(ZLoadingProgress *pLoadingProgress)
 #define MMTIMER_RESOLUTION	1
 	if (TIMERR_NOERROR == timeGetDevCaps(&tc, sizeof(TIMECAPS)))
 	{
-		m_nTimerRes = min(max(tc.wPeriodMin, MMTIMER_RESOLUTION), tc.wPeriodMax);
+		m_nTimerRes = min(max(tc.wPeriodMin, static_cast<UINT>(MMTIMER_RESOLUTION)), tc.wPeriodMax);
 		timeBeginPeriod(m_nTimerRes);
 	}
 

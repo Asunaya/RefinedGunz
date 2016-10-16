@@ -138,7 +138,7 @@ void Chat::OutputChatMsg(const char *szMsg, DWORD dwColor){
 			}
 			else if (tolower(cl.Msg.at(nPos + 1)) == '#'){
 				char buf[9];
-				int nLen = min(cl.Msg.length() - 1 - nPos - 2, 8);
+				int nLen = min(static_cast<int>(cl.Msg.length() - 1 - nPos - 2), 8);
 				strncpy(buf, cl.Msg.data() + nPos + 2, nLen);
 
 				char *pcEnd;

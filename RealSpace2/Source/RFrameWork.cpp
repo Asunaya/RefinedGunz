@@ -7,6 +7,7 @@
 #include "RMeshUtil.h"
 #include "RS2.h"
 #include "RS2Vulkan.h"
+#include "RBspObject.h"
 
 #pragma comment(lib,"winmm.lib")
 
@@ -129,7 +130,16 @@ void RFrame_RenderD3D9()
 
 void RFrame_RenderVulkan()
 {
-	GetRS2().DrawStatic<RS2Vulkan>();
+	//GetRS2().DrawStatic<RS2Vulkan>();
+	static RealSpace2::RBspObject bsp;
+	static bool b;
+	if (!b)
+	{
+		bsp.Open("Maps/Mansion/Mansion.rs");
+		b = true;
+	}
+
+	bsp.Draw();
 }
 
 void RFrame_Render()
@@ -228,9 +238,6 @@ static bool InitGraphicsAPI(const RMODEPARAMS* ModeParams, HINSTANCE inst, HWND 
 		return false;
 	}
 
-	if (GetRS2().UsingVulkan())
-		return true;
-
 	if (g_pFunctions[RF_CREATE])
 	{
 		if (g_pFunctions[RF_CREATE](NULL) != R_OK)
@@ -260,8 +267,7 @@ static int RenderLoop()
 		{
 			__BP(5006, "RMain::Run");
 
-			if (GetRS2().UsingD3D9())
-				RFrame_Update();
+			RFrame_Update();
 			RFrame_Render();
 
 			__EP(5006);

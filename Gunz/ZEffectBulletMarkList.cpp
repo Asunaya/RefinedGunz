@@ -150,23 +150,22 @@ bool ZEffectBulletMarkList::Draw()
 
 	BeginState();
 
-	HRESULT		hr;
+	HRESULT hr;
 
-	DWORD		dwRemainNum = (DWORD)size();
+	auto RemainNum = size();
 
-	iterator itr=begin();
+	iterator itr = begin();
 	
-	while(dwRemainNum)
+	while (RemainNum)
 	{
 		if(m_dwBase >= EFFECTBASE_DISCARD_COUNT)
 			m_dwBase = 0;
 
-		DWORD dwThisNum = min( dwRemainNum , BULLETMARK_FLUSH_COUNT );			// 갯수가 BULLETMARK_FLUSH_COUNT 를 넘어가면 BULLETMARK_FLUSH_COUNT 씩 찍는다
+		DWORD dwThisNum = min(RemainNum, static_cast<u32>(BULLETMARK_FLUSH_COUNT));
 
-		dwThisNum = min( dwThisNum , EFFECTBASE_DISCARD_COUNT - m_dwBase );	// 버퍼의 크기를 넘어가면 개수를 줄여서 크기만큼만 찍는다
+		dwThisNum = min(dwThisNum, EFFECTBASE_DISCARD_COUNT - m_dwBase);
 
-
-		BYTE		*pVertices;
+		BYTE *pVertices;
 		if( FAILED( hr = m_pVB->Lock( m_dwBase * sizeof(ZEFFECTCUSTOMVERTEX) * 4, dwThisNum * sizeof(ZEFFECTCUSTOMVERTEX) * 4,
 			(VOID**)&pVertices, m_dwBase ? D3DLOCK_NOOVERWRITE : D3DLOCK_DISCARD ) ) )
 		{
@@ -208,7 +207,7 @@ bool ZEffectBulletMarkList::Draw()
 			return false;
 
 		m_dwBase+=dwThisNum;
-		dwRemainNum-=dwThisNum;
+		RemainNum-=dwThisNum;
 
 	}
 

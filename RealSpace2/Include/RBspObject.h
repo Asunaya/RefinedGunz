@@ -14,14 +14,15 @@
 #include "RSolidBsp.h"
 #include "RNavigationMesh.h"
 #include "MUtil.h"
+#include "VulkanMaterial.h"
+#include "RBspObjectDraw.h"
 
 class MZFile;
 class MZFileSystem;
 class MXmlElement;
 
 #define BSP_FVF	(D3DFVF_XYZ | D3DFVF_TEX2)
-#define BSP_NORMAL_FVF (D3DFVF_XYZ  | D3DFVF_NORMAL | D3DFVF_TEX2) //D3DFVF_TEX3 \
-//D3DFVF_TEXCOORDSIZE2(0) | D3DFVF_TEXCOORDSIZE2(1) | D3DFVF_TEXCOORDSIZE3(2))
+#define BSP_NORMAL_FVF (D3DFVF_XYZ  | D3DFVF_NORMAL | D3DFVF_TEX2)
 #define LIGHT_BSP_FVF	(D3DFVF_XYZ | D3DFVF_TEX2 | D3DFVF_DIFFUSE)
 
 _NAMESPACE_REALSPACE2_BEGIN
@@ -36,7 +37,7 @@ struct RDEBUGINFO {
 	int nCall, nPolygon;
 	int nMapObjectFrustumCulled;
 	int nMapObjectOcclusionCulled;
-	RSolidBspNode* pLastColNode;
+	RSolidBspNode* pLastColNode{};
 };
 
 struct BSPVERTEX {
@@ -152,7 +153,11 @@ struct RLIGHTMAPTEXTURE {
 };
 
 struct RBSPMATERIAL : public RMATERIAL {
-	RBaseTexture *texture = nullptr;
+	union
+	{
+		RBaseTexture *texture = nullptr;
+		VulkanMaterial VkMaterial;
+	};
 
 	RBSPMATERIAL() = default;
 	RBSPMATERIAL(RMATERIAL *mat)
@@ -168,10 +173,8 @@ struct RBSPMATERIAL : public RMATERIAL {
 
 	~RBSPMATERIAL()
 	{
-		if (!texture)
-			return;
-
-		RDestroyBaseTexture(texture);
+		if (texture)
+			RDestroyBaseTexture(texture);
 	}
 };
 
@@ -363,6 +366,8 @@ public:
 	u32 GetStride() const { return RenderWithNormal ? sizeof(BSPNORMALVERTEX) : sizeof(BSPVERTEX); }
 
 private:
+	friend class RBspObjectDrawVulkan;
+
 	void Draw(RSBspNode *Node, int Material);
 	void DrawNoTNL(RSBspNode *Node, int Material);
 
@@ -458,12 +463,12 @@ private:
 	// Interpolated normal
 	void GetNormal(RCONVEXPOLYGONINFO *poly, const rvector &position, rvector *normal, int au, int av);
 
-	int m_nConvexPolygon, m_nConvexVertices;
+	int m_nConvexPolygon{}, m_nConvexVertices{};
 	std::vector<v3> ConvexVertices;
 	std::vector<v3> ConvexNormals;
 	std::vector<RCONVEXPOLYGONINFO> ConvexPolygons;
 
-	rvector		m_AmbientLight;
+	rvector		m_AmbientLight{ 0, 0, 0 };
 	RLightList	m_StaticMapLightList;
 	RLightList	m_StaticObjectLightList;
 	RLightList	m_StaticSunLightList;
@@ -471,7 +476,7 @@ private:
 	RMeshMgr			m_MeshList;
 	RAnimationMgr		m_AniList;
 	RMapObjectList		m_ObjectList;
-	bool				m_bNotOcclusion;
+	bool				m_bNotOcclusion{};
 
 	std::vector<RSolidBspNode> ColRoot;
 	std::vector<v3> ColVertices;
@@ -494,6 +499,8 @@ private:
 	bool m_bShowLightmap{};
 
 	bool RenderWithNormal{};
+
+	RBspObjectDraw DrawObj;
 };
 
 #ifdef _DEBUG

@@ -1,26 +1,19 @@
 #include "stdafx.h"
-
 #include "ZGame.h"
 #include "ZWeapon.h"
 #include "RBspObject.h"
-
 #include "ZEffectBillboard.h"
 #include "ZEffectSmoke.h"
-
 #include "ZSoundEngine.h"
 #include "ZApplication.h"
-
 #include "MDebug.h"
 #include "ZConfiguration.h"
 #include "RealSoundEffect.h"
-
 #include "ZEffectFlashBang.h"
 #include "ZPost.h"
 #include "ZStencilLight.h"
 #include "ZScreenDebugger.h"
-
 #include "Extensions.h"
-
 #include "Portal.h"
 
 #define BOUND_EPSILON	5

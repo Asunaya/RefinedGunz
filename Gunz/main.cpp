@@ -93,8 +93,17 @@ void _ZChangeGameState(int nIndex)
 	}
 }
 
+#include "RS2.h"
+
 RRESULT OnCreate(void *pParam)
 {
+	if (GetRS2().UsingVulkan())
+	{
+		g_DInput.Create(g_hWnd, FALSE, FALSE);
+		g_pInput = new ZInput(&g_DInput);
+		return R_OK;
+	}
+
 	g_App.PreCheckArguments();
 
 	g_RGMain->OnCreateDevice();
@@ -279,7 +288,44 @@ RRESULT OnUpdate(void* pParam)
 
 	g_pInput->Update();
 
-	g_App.OnUpdate();
+	if (GetRS2().UsingD3D9())
+		g_App.OnUpdate();
+	else
+	{
+		float RotX, RotY;
+		ZGetInput()->GetRotation(&RotX, &RotY);
+		static float AngleX, AngleZ;
+
+		AngleX += RotY;
+		AngleZ += RotX;
+
+		AngleZ = fmod(AngleZ, 2 * PI);
+
+		AngleX = max(CAMERA_ANGLEX_MIN, AngleX);
+		AngleX = min(CAMERA_ANGLEX_MAX, AngleX);
+		
+		RCameraDirection = {
+			cosf(AngleZ) * sinf(AngleX),
+			sinf(AngleZ) * sinf(AngleX),
+			cosf(AngleX) };
+
+		auto Forward = RCameraDirection;
+		v3 Up{ 0, 0, -1 };
+		auto Right = Normalized(CrossProduct(Forward, Up));
+
+		auto GetKey = [](auto Key) {
+			return (GetAsyncKeyState(Key) & 0x8000) != 0;
+		};
+
+		if (GetKey('W'))
+			RCameraPosition += Forward;
+		else if (GetKey('A'))
+			RCameraPosition -= Right;
+		else if (GetKey('S'))
+			RCameraPosition -= Forward;
+		else if (GetKey('D'))
+			RCameraPosition += Right;
+	}
 
 	__EP(100);
 

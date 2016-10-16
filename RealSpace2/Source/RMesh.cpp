@@ -766,13 +766,13 @@ void RMesh::SubCalcBBox(D3DXVECTOR3* max,D3DXVECTOR3* min,D3DXVECTOR3* v)
 {
 	if ( (max==NULL) || (min==NULL) || (v==NULL) ) return;
 
-	min->x = min(min->x, v->x);
-	min->y = min(min->y, v->y);
-	min->z = min(min->z, v->z);
+	min->x = ::min(min->x, v->x);
+	min->y = ::min(min->y, v->y);
+	min->z = ::min(min->z, v->z);
 
-	max->x = max(max->x, v->x);
-	max->y = max(max->y, v->y);
-	max->z = max(max->z, v->z);
+	max->x = ::max(max->x, v->x);
+	max->y = ::max(max->y, v->y);
+	max->z = ::max(max->z, v->z);
 }
 
 void RMesh::RenderBox(D3DXMATRIX* world_mat)

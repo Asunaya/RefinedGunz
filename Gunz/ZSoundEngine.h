@@ -3,6 +3,11 @@
 
 class ZLoadingProgress;
 
+namespace RealSpace2
+{
+	struct RBSPPICKINFO;
+}
+
 #ifdef _BIRDSOUND
 
 #include "RealSound2.h"
@@ -74,7 +79,6 @@ public:
 
 #include <map>
 #include <string>
-using namespace std;
 
 #pragma comment(lib, "dxguid.lib")
 

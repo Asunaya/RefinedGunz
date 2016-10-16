@@ -1,5 +1,4 @@
-#ifndef _ZPREREQUISITES_H
-#define _ZPREREQUISITES_H
+#pragma once
 
 #include "winsock2.h"
 #include "MXml.h"
@@ -11,7 +10,6 @@
 #include "RealSpace2.h"
 _USING_NAMESPACE_REALSPACE2
 
-#include "RBspObject.h"
 #include "RMeshMgr.h"
 #include "RVisualMeshMgr.h"
 #include "RMaterialList.h"
@@ -48,6 +46,4 @@ _USING_NAMESPACE_REALSPACE2
 	#define __BP(i,n) ;
 	#define __EP(i) ;
 	#define __SAVEPROFILE(i) ;
-#endif
-
 #endif

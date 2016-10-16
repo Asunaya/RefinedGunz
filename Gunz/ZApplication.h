@@ -1,8 +1,6 @@
-#ifndef _ZAPPLICATION_H
-#define _ZAPPLICATION_H
+#pragma once
 
 #include "MZFileSystem.h"
-//#include "ZGameInterface.h"
 #include "ZSoundEngine.h"
 #include "ZDirectInput.h"
 #include "MDataChecker.h"
@@ -13,7 +11,6 @@
 #include "ZSkill.h"
 #include "ZWorldManager.h"
 
-//class MMessenger;
 class ZGame;
 class ZGameClient;
 class ZGameInterface;
@@ -43,7 +40,7 @@ public:
 		ZLAUNCH_MODE_DEBUG,
 		ZLAUNCH_MODE_NETMARBLE,
 		ZLAUNCH_MODE_STANDALONE,
-		ZLAUNCH_MODE_STANDALONE_DEVELOP,		// 개발자 모드		// 곧 사라질것임
+		ZLAUNCH_MODE_STANDALONE_DEVELOP,
 		ZLAUNCH_MODE_STANDALONE_REPLAY,
 		ZLAUNCH_MODE_STANDALONE_GAME,
 		ZLAUNCH_MODE_STANDALONE_DUMMY,
@@ -53,22 +50,22 @@ public:
 
 private:
 	ZGameInterface*			m_pGameInterface;
-	GunzState				m_nInitialState;			///< 초기 상태
+	GunzState				m_nInitialState;
 	ZStageInterface*		m_pStageInterface;
 	ZOptionInterface*		m_pOptionInterface;
 	ZLAUNCH_MODE			m_nLaunchMode;
-    char					m_szFileName[_MAX_PATH];	// 리플레이 혹은 standalone 맵이름
-	char					m_szCmdLine[256];			// 초기 커맨드라인 저장
+    char					m_szFileName[_MAX_PATH];
+	char					m_szCmdLine[256];
 	UINT					m_nTimerRes;
 	MDataChecker			m_GlobalDataChecker;
-	bool					m_bLaunchDevelop;			///< 개발자버전 옵션
-	bool					m_bLaunchTest;				///< 테스트버전 옵션
+	bool					m_bLaunchDevelop;
+	bool					m_bLaunchTest;
 	u64 Time = 0;
 	float Timescale = 1.f;
 
 	void ParseStandAloneArguments(const char* pszArgs);
 protected:
-	static ZApplication*	m_pInstance;	///< Singleton Instance
+	static ZApplication*	m_pInstance;
 	static MZFileSystem		m_FileSystem;
 	static ZSoundEngine		m_SoundEngine;
 	static RMeshMgr			m_NPCMeshMgr;
@@ -76,7 +73,7 @@ protected:
 	static RMeshMgr			m_WeaponMeshMgr;
 	static ZTimer			m_Timer;
 	static ZEmblemInterface	m_EmblemInterface;
-	static ZSkillManager	m_SkillManager;				///< 스킬 매니저
+	static ZSkillManager	m_SkillManager;
 	ZWorldManager			m_WorldManager;
 	MZFileCheckList			m_fileCheckList;
 #ifdef _ZPROFILER
@@ -108,17 +105,13 @@ public:
 	void OnInvalidate();
 	void OnRestore();
 
-	static void ResetTimer();	// 첫 update 를 부르기 전에 불러준다.
+	static void ResetTimer();
 	static void Exit();
-	/// Singleton Instance
 	static ZApplication*		GetInstance(void);
-	/// Singleton Current Interface
 	static ZGameInterface*		GetGameInterface(void);
 	static ZStageInterface*		GetStageInterface(void);
 	static ZOptionInterface*	GetOptionInterface(void);
-	/// Singleton Zip File System
 	static MZFileSystem*		GetFileSystem(void);
-	/// Singleton ZGameClient
 	static ZGameClient*			GetGameClient(void);
 	static ZGame*				GetGame(void);
 	static ZTimer*				GetTimer(void);
@@ -144,6 +137,3 @@ public:
 	auto GetTimescale() const { return Timescale; }
 	void SetTimescale(float f) { Timescale = f; }
 };
-
-
-#endif

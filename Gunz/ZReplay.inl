@@ -244,7 +244,7 @@ inline std::vector<ReplayPlayerInfo> ZReplayLoader::GetCharInfo()
 			COPY_CHARINFO(nCR);
 			COPY_CHARINFO(nER);
 			COPY_CHARINFO(nWR);
-			for (size_t i = 0; i < min(MMCIP_END, ArraySize(oldinfo.nEquipedItemDesc)); i++)
+			for (size_t i = 0; i < min(static_cast<size_t>(MMCIP_END), ArraySize(oldinfo.nEquipedItemDesc)); i++)
 				COPY_CHARINFO(nEquipedItemDesc[i]);
 			COPY_CHARINFO(nUGradeID);
 		};
@@ -318,7 +318,7 @@ inline std::vector<ReplayPlayerInfo> ZReplayLoader::GetCharInfo()
 			COPY_CHARSTATE(AP);
 			COPY_CHARSTATE(Status);
 
-			for (size_t i = 0; i < min(MMCIP_END, ArraySize(src.BulletInfos)); i++)
+			for (size_t i = 0; i < min(static_cast<size_t>(MMCIP_END), ArraySize(src.BulletInfos)); i++)
 				COPY_CHARSTATE(BulletInfos[i]);
 
 			COPY_CHARSTATE(Position);

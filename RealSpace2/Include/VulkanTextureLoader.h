@@ -113,7 +113,7 @@ namespace vkTools
 
 			texture->width = static_cast<uint32_t>(tex2D[0].dimensions().x);
 			texture->height = static_cast<uint32_t>(tex2D[0].dimensions().y);
-			texture->mipLevels = 1;// static_cast<uint32_t>(tex2D.levels());
+			texture->mipLevels = static_cast<uint32_t>(tex2D.levels());
 
 			// Get device properites for the requested texture format
 			VkFormatProperties formatProperties;
@@ -188,7 +188,7 @@ namespace vkTools
 				VkImageCreateInfo imageCreateInfo = vkTools::initializers::imageCreateInfo();
 				imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
 				imageCreateInfo.format = format;
-				imageCreateInfo.mipLevels = 1;// texture->mipLevels;
+				imageCreateInfo.mipLevels = texture->mipLevels;
 				imageCreateInfo.arrayLayers = 1;
 				imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
 				imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;

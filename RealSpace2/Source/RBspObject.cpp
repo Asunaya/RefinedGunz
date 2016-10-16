@@ -89,6 +89,7 @@ void DrawBoundingBox(rboundingbox *bb, DWORD color)
 	}
 }
 
+// TODO: Remove this piece of global state
 static bool m_bisDrawLightMap = true;
 
 RSBspNode::RSBspNode()
@@ -254,29 +255,10 @@ RMapObjectList::iterator RMapObjectList::Delete(iterator i)
 ////////////////////////////
 
 RBspObject::RBspObject(bool PhysOnly)
-	: PhysOnly(PhysOnly)
+	: PhysOnly(PhysOnly), DrawObj{ VulkanTag{}, *this }
 {
-	m_bWireframe = false;
-	m_bShowLightmap = false;
-	m_AmbientLight = rvector(0, 0, 0);
-
 	m_MeshList.SetMtrlAutoLoad(true);
 	m_MeshList.SetMapObject(true);
-
-	m_nMaterial = 0;
-	m_nLightmap = 0;
-
-	m_bNotOcclusion = false;
-
-	m_nPolygon = 0;
-	m_nNodeCount = 0;
-	m_nBspPolygon = 0;
-	m_nBspNodeCount = 0;
-
-	m_nConvexPolygon = 0;
-	m_nConvexVertices = 0;
-
-	m_DebugInfo.pLastColNode = NULL;
 
 #ifdef SHADOW_TEST
 	RenderWithNormal = true;
@@ -355,7 +337,9 @@ void RBspObject::SetDiffuseMap(int nMaterial)
 template <typename T>
 static void DrawImpl(RSBspNode& Node, int Material, T& DrawFunc)
 {
-#if 0
+#ifndef SHADOW_TEST
+	// nFrameCount is updated to the current frame number
+	// only for nodes that aren't occluded.
 	if (Node.nFrameCount != g_nFrameNumber)
 		return;
 #endif
@@ -425,58 +409,60 @@ void RBspObject::DrawNodesImpl(int LoopCount)
 {
 	auto dev = RGetDevice();
 
-	for (int i = 0; i < LoopCount; i++)
+	for (int i = 1; i < LoopCount; i++)
 	{
 		auto MaterialIndex = i % m_nMaterial;
-		if ((Materials[MaterialIndex].dwFlags & Flags) == (ShouldHaveFlags ? Flags : 0))
+		if ((Materials[MaterialIndex].dwFlags & Flags) != (ShouldHaveFlags ? Flags : 0))
+			continue;
+
+		// Cull back faces on materials that aren't two-sided
+		if ((Materials[MaterialIndex].dwFlags & RM_FLAG_TWOSIDED) == 0)
+			dev->SetRenderState(D3DRS_CULLMODE, D3DCULL_CW);
+		else
+			dev->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+
+		if (SetTextures)
 		{
-			// Cull back faces on materials that aren't two-sided
-			if ((Materials[MaterialIndex].dwFlags & RM_FLAG_TWOSIDED) == 0)
-				dev->SetRenderState(D3DRS_CULLMODE, D3DCULL_CW);
-			else
-				dev->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+			SetDiffuseMap(MaterialIndex);
 
-			if (SetTextures)
-			{
-				SetDiffuseMap(MaterialIndex);
-
-				if (!LightmapTextures.empty())
-					dev->SetTexture(static_cast<DWORD>(ShaderSampler::Lightmap), LightmapTextures[i / m_nMaterial].get());
-			}
-
-			if (SetAlphaTestFlags)
-			{
-				if ((Materials[MaterialIndex].dwFlags & RM_FLAG_USEALPHATEST) != 0) {
-					dev->SetRenderState(D3DRS_ZWRITEENABLE, true);
-					dev->SetRenderState(D3DRS_ALPHAREF, (DWORD)0x80808080);
-					dev->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL);
-					dev->SetRenderState(D3DRS_ALPHATESTENABLE, true);
-
-					dev->SetRenderState(D3DRS_ALPHABLENDENABLE, false);
-					dev->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
-					dev->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
-					dev->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
-				}
-				else {
-					dev->SetRenderState(D3DRS_ZWRITEENABLE, false);
-					dev->SetRenderState(D3DRS_ALPHATESTENABLE, false);
-					dev->SetRenderState(D3DRS_ALPHABLENDENABLE, true);
-					dev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-					dev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
-
-					dev->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
-					dev->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
-
-					dev->SetTextureStageState(1, D3DTSS_ALPHAARG1, D3DTA_CURRENT);
-					dev->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
-				}
-			}
-
-			if (RIsHardwareTNL())
-				Draw(&OcRoot[0], i);
-			else
-				DrawNoTNL(&OcRoot[0], i);
+			if (!LightmapTextures.empty())
+				dev->SetTexture(static_cast<DWORD>(ShaderSampler::Lightmap), LightmapTextures[i / m_nMaterial].get());
 		}
+
+		if (SetAlphaTestFlags)
+		{
+			if ((Materials[MaterialIndex].dwFlags & RM_FLAG_USEALPHATEST) != 0) {
+				dev->SetRenderState(D3DRS_ZWRITEENABLE, true);
+				dev->SetRenderState(D3DRS_ALPHAREF, (DWORD)0x80808080);
+				dev->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL);
+				dev->SetRenderState(D3DRS_ALPHATESTENABLE, true);
+
+				dev->SetRenderState(D3DRS_ALPHABLENDENABLE, false);
+				dev->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+				dev->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+				dev->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
+			}
+			else {
+				dev->SetRenderState(D3DRS_ZWRITEENABLE, false);
+				dev->SetRenderState(D3DRS_ALPHATESTENABLE, false);
+				dev->SetRenderState(D3DRS_ALPHABLENDENABLE, true);
+				dev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+				dev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+
+				dev->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+				dev->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+
+				dev->SetTextureStageState(1, D3DTSS_ALPHAARG1, D3DTA_CURRENT);
+				dev->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+			}
+		}
+
+		if (RIsHardwareTNL())
+			Draw(&OcRoot[0], i);
+		else
+			DrawNoTNL(&OcRoot[0], i);
+
+		break;
 	}
 }
 
@@ -533,6 +519,13 @@ static void SetDefaultStates(bool Lightmap)
 
 bool RBspObject::Draw()
 {
+	if (GetRS2().UsingVulkan())
+	{
+		DrawObj.DrawStatic<RBspObjectDrawVulkan>();
+		return true;
+
+	}
+	
 	g_nFrameNumber++;
 #ifdef _DEBUG
 	g_nPoly = 0;
@@ -1068,7 +1061,7 @@ bool RBspObject::Open(const char *filename, ROpenMode nOpenFlag, RFPROGRESSCALLB
 	{
 	}
 
-	if (!PhysOnly)
+	if (!PhysOnly && GetRS2().UsingD3D9())
 	{
 		if (RIsHardwareTNL())
 		{
@@ -1082,7 +1075,7 @@ bool RBspObject::Open(const char *filename, ROpenMode nOpenFlag, RFPROGRESSCALLB
 
 	Sort_Nodes(OcRoot.data());
 
-	if (RIsHardwareTNL() && !PhysOnly)
+	if (RIsHardwareTNL() && !PhysOnly && GetRS2().UsingD3D9())
 	{
 		UpdateVertexBuffer();
 	}
@@ -1090,7 +1083,7 @@ bool RBspObject::Open(const char *filename, ROpenMode nOpenFlag, RFPROGRESSCALLB
 	CreatePolygonTable();
 
 
-	if (RIsHardwareTNL() && !PhysOnly)
+	if (RIsHardwareTNL() && !PhysOnly && GetRS2().UsingD3D9())
 	{
 		if (!CreateIndexBuffer())
 			mlog("Error while Creating IB\n");
@@ -1099,6 +1092,11 @@ bool RBspObject::Open(const char *filename, ROpenMode nOpenFlag, RFPROGRESSCALLB
 	}
 
 	if (pfnProgressCallback) pfnProgressCallback(CallbackParam, 1.f);
+
+	if (!PhysOnly && GetRS2().UsingVulkan())
+	{
+		DrawObj.InitStatic<RBspObjectDrawVulkan>();
+	}
 
 	return true;
 }
@@ -1194,7 +1192,12 @@ bool RBspObject::Open_MaterialList(MXmlElement *pElement)
 
 		if (!PhysOnly && szMapName[0])
 		{
-			Materials[i].texture = RCreateBaseTexture(szMapName, RTextureType_Map, true);
+			if (GetRS2().UsingD3D9())
+				Materials[i].texture = RCreateBaseTexture(szMapName, RTextureType_Map, true);
+			else
+			{
+				Materials[i].VkMaterial.Texture = GetRS2Vulkan().LoadTexture(szMapName);
+			}
 		}
 
 		itor++;
@@ -1251,6 +1254,7 @@ bool RBspObject::Open_OcclusionList(MXmlElement *pElement)
 
 bool RBspObject::Open_ObjectList(MXmlElement *pElement)
 {
+	return true;
 	int i;
 
 	MXmlElement	aObjectNode, aChild;
@@ -1600,7 +1604,8 @@ bool RBspObject::OpenRs(const char *filename)
 	OcNormalVertices.resize(NumVertices);
 
 	auto ret = Open_Nodes(OcRoot.data(), &file,
-		{ OcVertices.data(), OcRoot.data(), OcInfo.data(), RenderWithNormal ? OcNormalVertices.data() : nullptr });
+		{ OcVertices.data(), OcRoot.data(), OcInfo.data(),
+		RenderWithNormal ? OcNormalVertices.data() : nullptr });
 
 	assert(ret.Vertices <= OcVertices.data() + OcVertices.size());
 	assert(ret.Node <= OcRoot.data() + OcRoot.size());

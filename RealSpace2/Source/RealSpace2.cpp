@@ -393,6 +393,9 @@ bool RInitDisplay(HWND hWnd, HINSTANCE inst, const RMODEPARAMS *params, Graphics
 	}
 	else if (API == GraphicsAPI::Vulkan)
 	{
+		g_nScreenWidth = 1920;
+		g_nScreenHeight = 1080;
+		g_bHardwareTNL = true;
 		new (rs2buf) RS2{ VulkanTag{} };
 		GetRS2().CreateStatic<RS2Vulkan>(hWnd, inst);
 	}
