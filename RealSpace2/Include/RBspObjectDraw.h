@@ -15,6 +15,9 @@ public:
 	RBspObjectDraw(D3D9Tag, RBspObject& bsp) : var{ RBspObjectDrawD3D9{bsp} } {}
 	RBspObjectDraw(VulkanTag, RBspObject& bsp) : var{ RBspObjectDrawVulkan{bsp} } {}
 
+	template <typename T>
+	auto& Get() { return var.get_ref<T>(); }
+
 	POLYVAR_METHOD(Init)
 	POLYVAR_METHOD(Draw)
 

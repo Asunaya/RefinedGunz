@@ -30,7 +30,7 @@ public:
 	bool Save(MXmlElement *pElement);
 
 	void UpdateCamera(const rmatrix &matWorld, const rvector &cameraPos);
-	bool IsVisible(rboundingbox &bb) const;
+	bool IsVisible(const rboundingbox &bb) const;
 
 };
 

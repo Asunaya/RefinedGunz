@@ -105,7 +105,7 @@ bool ROcclusionList::Save(MXmlElement *pElement)
 	return true;
 }
 
-bool ROcclusionList::IsVisible(rboundingbox &bb) const
+bool ROcclusionList::IsVisible(const rboundingbox &bb) const
 {
 	for(auto* poc : *this)
 	{

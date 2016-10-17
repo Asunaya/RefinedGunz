@@ -4,7 +4,6 @@
 #include <crtdbg.h>
 #include <map>
 #include <array>
-
 #include "MXml.h"
 #include "MZFileSystem.h"
 #include "RBspObject.h"
@@ -334,6 +333,7 @@ void RBspObject::SetDiffuseMap(int nMaterial)
 	}
 }
 
+// TODO: This whole setup seems like an awful way of drawing anything. Fix.
 template <typename T>
 static void DrawImpl(RSBspNode& Node, int Material, T& DrawFunc)
 {
@@ -367,6 +367,11 @@ static void DrawImpl(RSBspNode& Node, int Material, T& DrawFunc)
 
 	DrawNode(&RSBspNode::m_pPositive);
 	DrawNode(&RSBspNode::m_pNegative);
+}
+
+void RBspObject::UpdateUBO()
+{
+	DrawObj.Get<RBspObjectDrawVulkan>().UpdateUniformBuffers();
 }
 
 void RBspObject::Draw(RSBspNode* Node, int Material)
@@ -409,6 +414,7 @@ void RBspObject::DrawNodesImpl(int LoopCount)
 {
 	auto dev = RGetDevice();
 
+	// Materials 0 is always empty, don't render
 	for (int i = 1; i < LoopCount; i++)
 	{
 		auto MaterialIndex = i % m_nMaterial;
@@ -523,7 +529,6 @@ bool RBspObject::Draw()
 	{
 		DrawObj.DrawStatic<RBspObjectDrawVulkan>();
 		return true;
-
 	}
 	
 	g_nFrameNumber++;
@@ -581,20 +586,23 @@ bool RBspObject::Draw()
 
 	_BP("ChooseNodes"); ChooseNodes(OcRoot.data()); _EP("ChooseNodes");
 
+	// Disable alpha blending
 	dev->SetRenderState(D3DRS_ALPHABLENDENABLE, false);
 	dev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
 	dev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
+
+	// Enable Z-buffer testing and writing
 	RSetWBuffer(true);
 	dev->SetRenderState(D3DRS_ZWRITEENABLE, true);
 
 	int nCount = m_nMaterial * max(1, m_nLightmap);
 
-	// Draw non-additive and non-opacity materials
+	// Draw non-additive and opaque materials
 	DrawNodes<RM_FLAG_ADDITIVE | RM_FLAG_USEOPACITY, false, false>(nCount);
 
 	if (!GetRenderer().IsDrawingShadows())
 	{
-		// Draw materials with opacity
+		// Draw transparent materials
 		DrawNodes<RM_FLAG_USEOPACITY, true, true>(nCount);
 
 		// Draw additive materials
@@ -955,9 +963,7 @@ bool RBspObject::ReadString(MZFile *pfile, char *buffer, int nBufferSize)
 	return true;
 }
 
-bool bPathOnlyLoad = false;
-
-void DeleteVoidNodes(RSBspNode *pNode)
+static void DeleteVoidNodes(RSBspNode *pNode)
 {
 	if (pNode->m_pPositive)
 		DeleteVoidNodes(pNode->m_pPositive);
@@ -974,7 +980,7 @@ void DeleteVoidNodes(RSBspNode *pNode)
 		SAFE_DELETE(pNode->m_pNegative);
 }
 
-void RecalcBoundingBox(RSBspNode *pNode)
+static void RecalcBoundingBox(RSBspNode *pNode)
 {
 	if (pNode->nPolygon)
 	{
@@ -1082,7 +1088,6 @@ bool RBspObject::Open(const char *filename, ROpenMode nOpenFlag, RFPROGRESSCALLB
 
 	CreatePolygonTable();
 
-
 	if (RIsHardwareTNL() && !PhysOnly && GetRS2().UsingD3D9())
 	{
 		if (!CreateIndexBuffer())
@@ -1113,8 +1118,8 @@ bool RBspObject::CreateIndexBuffer()
 
 	HRESULT hr = RGetDevice()->CreateIndexBuffer(sizeof(OcIndices[0]) * OcIndices.size(), D3DUSAGE_WRITEONLY,
 		D3DFMT_INDEX16, D3DPOOL_MANAGED, MakeWriteProxy(IndexBuffer), NULL);
-	if (D3D_OK != hr) {
-		mlog("CreateIndexBuffer failed\n");
+	if (FAILED(hr)) {
+		mlog("RBspObject::CreateIndexBuffer failed\n");
 		return false;
 	}
 
@@ -1125,14 +1130,18 @@ bool RBspObject::UpdateIndexBuffer()
 {
 	if (!IndexBuffer) return false;
 
-	static_assert(std::is_same<std::remove_reference_t<decltype(RBspObject::OcIndices[0])>, u16>::value, "Fix me");
-
-	u16 *pIndices = nullptr;
-	IndexBuffer->Lock(0, 0, (VOID**)&pIndices, 0);
+	void* pIndices = nullptr;
+	auto hr = IndexBuffer->Lock(0, 0, &pIndices, 0);
+	if (FAILED(hr)) goto fail;
 	memcpy(pIndices, OcIndices.data(), sizeof(OcIndices[0]) * OcIndices.size());
-	IndexBuffer->Unlock();
+	hr = IndexBuffer->Unlock();
+	if (FAILED(hr)) goto fail;
 
 	return true;
+
+fail:
+	MLog("RBspObject::UpdateIndexBuffer failed\n");
+	return false;
 }
 
 void RBspObject::OnInvalidate()
@@ -2854,7 +2863,7 @@ RBaseTexture* RBspObject::GetBaseTexture(int n) {
 	return nullptr;
 }
 
-bool RBspObject::IsVisible(rboundingbox &bb) const
+bool RBspObject::IsVisible(const rboundingbox &bb) const
 {
 	return m_OcclusionList.IsVisible(bb);
 }

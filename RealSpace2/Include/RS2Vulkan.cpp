@@ -1,5 +1,8 @@
 #include "stdafx.h"
 #include "RS2Vulkan.h"
+#include "RBspObject.h"
+
+#define VK_USE_VALIDATION_LAYERS 1
 
 static bool CreateConsole(const char* Title)
 {
@@ -61,4 +64,28 @@ bool RS2Vulkan::Create(HWND hwnd, HINSTANCE inst)
 	Init();
 
 	return true;
+}
+
+static RBspObject bsp;
+
+void RS2Vulkan::Init()
+{
+	BaseInit();
+	bsp.Open("Maps/Mansion/Mansion.rs");
+}
+
+void RS2Vulkan::Draw()
+{
+	bsp.UpdateUBO();
+
+	prepareFrame();
+
+	// Command buffer to be sumitted to the queue
+	SubmitInfo.commandBufferCount = 1;
+	SubmitInfo.pCommandBuffers = &DrawCmdBuffers[currentBuffer];
+
+	// Submit to queue
+	VK_CHECK_RESULT(vkQueueSubmit(Queue, 1, &SubmitInfo, VK_NULL_HANDLE));
+
+	submitFrame();
 }

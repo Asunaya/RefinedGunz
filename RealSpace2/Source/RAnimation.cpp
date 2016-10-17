@@ -133,7 +133,7 @@ bool RAnimation::SetSoundFileName(const char* pSoundName)
 
 bool RAnimation::CheckWeaponMotionType(int wtype) {
 
-	if(wtype == -1) // 체크가 필요 없는 경우
+	if(wtype == -1)
 		return true;
 
 	if(m_weapon_motion_type == wtype)

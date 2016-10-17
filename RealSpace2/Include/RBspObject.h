@@ -22,8 +22,8 @@ class MZFileSystem;
 class MXmlElement;
 
 #define BSP_FVF	(D3DFVF_XYZ | D3DFVF_TEX2)
-#define BSP_NORMAL_FVF (D3DFVF_XYZ  | D3DFVF_NORMAL | D3DFVF_TEX2)
-#define LIGHT_BSP_FVF	(D3DFVF_XYZ | D3DFVF_TEX2 | D3DFVF_DIFFUSE)
+#define BSP_NORMAL_FVF (D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_TEX2)
+#define LIGHT_BSP_FVF (D3DFVF_XYZ | D3DFVF_TEX2 | D3DFVF_DIFFUSE)
 
 _NAMESPACE_REALSPACE2_BEGIN
 
@@ -41,9 +41,9 @@ struct RDEBUGINFO {
 };
 
 struct BSPVERTEX {
-	float x, y, z;		// world position
-	float tu1, tv1;		// texture coordinates
-	float tu2, tv2;
+	float x, y, z;  // World position
+	float tu1, tv1; // Texture coordinates for diffuse map
+	float tu2, tv2; // Texture coordinates for lightmap
 
 	rvector *Coord() { return (rvector*)&x; }
 };
@@ -56,12 +56,12 @@ struct BSPNORMALVERTEX {
 };
 
 struct RPOLYGONINFO {
-	rplane	plane;
-	int		nMaterial;
-	int		nConvexPolygon;
-	int		nLightmapTexture;
-	int		nPolygonID;
-	DWORD	dwFlags;
+	rplane plane;
+	int	nMaterial;
+	int	nConvexPolygon;
+	int	nLightmapTexture;
+	int	nPolygonID;
+	u32 dwFlags;
 
 	BSPVERTEX *pVertices;
 	int		nVertices;
@@ -75,22 +75,22 @@ struct RCONVEXPOLYGONINFO {
 	int	nVertices;
 	int	nMaterial;
 	float fArea;
-	DWORD	dwFlags;
+	u32 dwFlags;
 };
 
 struct ROBJECTINFO {
-	string		name;
-	int			nMeshID;
-	RVisualMesh *pVisualMesh;
-	RLIGHT		*pLight;
-	float		fDist;
+	std::string name;
+	int nMeshID;
+	RVisualMesh* pVisualMesh;
+	RLIGHT* pLight;
+	float fDist;
 };
 
 struct RBSPPICKINFO {
 	RSBspNode* pNode;
 	int nIndex;
 	rvector PickPos;
-	RPOLYGONINFO	*pInfo;
+	RPOLYGONINFO* pInfo;
 };
 
 class RMapObjectList : public std::list<ROBJECTINFO*> {
@@ -260,7 +260,7 @@ public:
 
 	void OptimizeBoundingBox();
 
-	bool IsVisible(rboundingbox &bb) const;
+	bool IsVisible(const rboundingbox &bb) const;
 
 	bool Draw();
 	void DrawObjects();
@@ -291,8 +291,8 @@ public:
 	int	GetMaterialCount() const { return m_nMaterial; }
 	RBSPMATERIAL *GetMaterial(int nIndex);
 
-	RMapObjectList	*GetMapObjectList() { return &m_ObjectList; }
-	RDummyList		*GetDummyList() { return &m_DummyList; }
+	RMapObjectList* GetMapObjectList() { return &m_ObjectList; }
+	RDummyList* GetDummyList() { return &m_DummyList; }
 	RBaseTexture* GetBaseTexture(int n);
 
 	RLightList& GetMapLightList() { return m_StaticMapLightList; }
@@ -363,7 +363,9 @@ public:
 	void SetMapObjectOcclusion(bool b) { m_bNotOcclusion = b; }
 
 	u32 GetFVF() const { return RenderWithNormal ? BSP_NORMAL_FVF : BSP_FVF; }
-	u32 GetStride() const { return RenderWithNormal ? sizeof(BSPNORMALVERTEX) : sizeof(BSPVERTEX); }
+	size_t GetStride() const { return RenderWithNormal ? sizeof(BSPNORMALVERTEX) : sizeof(BSPVERTEX); }
+
+	void UpdateUBO();
 
 private:
 	friend class RBspObjectDrawVulkan;
@@ -489,7 +491,7 @@ private:
 
 	std::vector<AmbSndInfo>	AmbSndInfoList;
 
-	RDEBUGINFO			m_DebugInfo;
+	RDEBUGINFO m_DebugInfo;
 
 	bool PhysOnly{};
 

@@ -31,6 +31,7 @@
 #include "ZOptionInterface.h"
 #include "RGMain.h"
 #include "MeshManager.h"
+#include "RS2.h"
 
 #ifdef _QEUST_ITEM_DEBUG
 #include "MQuestItem.h"
@@ -449,6 +450,7 @@ bool ZApplication::OnCreate(ZLoadingProgress *pLoadingProgress)
 #endif
 	__EP(1985);
 
+	// This is really slow and doesn't seem to do anything of value
 	/*__BP(1986, "CheckSound");
 	CheckSound();
 	__EP(1986);*/
@@ -457,7 +459,7 @@ bool ZApplication::OnCreate(ZLoadingProgress *pLoadingProgress)
 
 	BEGIN_;
 
-	if(m_WeaponMeshMgr.LoadXmlList("model/weapon.xml")==-1) 
+	if(m_WeaponMeshMgr.LoadXmlList("model/weapon.xml") == -1) 
 		return false;
 
 	END_("WeaponMesh Loading");
@@ -466,7 +468,7 @@ bool ZApplication::OnCreate(ZLoadingProgress *pLoadingProgress)
 
 	__BP(2005,"Worlditem Loading");
 
-	ZLoadingProgress etcLoading("etc",pLoadingProgress,.02f);
+	ZLoadingProgress etcLoading("etc", pLoadingProgress, .02f);
 	BEGIN_;
 
 #ifdef	_WORLD_ITEM_
@@ -531,7 +533,7 @@ BirdGo:
 #ifdef _QUEST_ITEM
 	if( !GetQuestItemDescMgr().ReadXml(GetFileSystem(), FILENAME_QUESTITEM_DESC) )
 	{
-		MLog( "Error while read quest tiem descrition xml file.\n" );
+		MLog( "Error while read quest item descrition xml file.\n" );
 	}
 #endif
 
@@ -554,12 +556,6 @@ BirdGo:
 	__EP(2000);
 
 	__SAVEPROFILE("profile_loading.txt");
-
-	if (ZCheckFileHack() == true)
-	{
-		MLog("File Check Failed\n");
-		return false;
-	}
 
 	ZSetupDataChecker_Global(&m_GlobalDataChecker);
 
@@ -612,9 +608,54 @@ void ZApplication::ResetTimer()
 	m_Timer.ResetFrame();
 }
 
+static void UpdateVulkan(float ElapsedTime)
+{
+	float RotX, RotY;
+	ZGetInput()->GetRotation(&RotX, &RotY);
+	static float AngleX, AngleZ;
+
+	AngleX += RotY;
+	AngleZ += RotX;
+
+	AngleZ = fmod(AngleZ, 2 * PI);
+
+	AngleX = max(CAMERA_ANGLEX_MIN, AngleX);
+	AngleX = min(CAMERA_ANGLEX_MAX, AngleX);
+
+	RCameraDirection = {
+		cosf(AngleZ) * sinf(AngleX),
+		sinf(AngleZ) * sinf(AngleX),
+		cosf(AngleX) };
+
+	auto Forward = RCameraDirection;
+	v3 Up{ 0, 0, -1 };
+	auto Right = Normalized(CrossProduct(Forward, Up));
+
+	v3 Direction{ 0, 0, 0 };
+
+	auto GetKey = [](auto Key) {
+		return (GetAsyncKeyState(Key) & 0x8000) != 0;
+	};
+
+	if (GetKey('W'))
+		Direction += Forward;
+	if (GetKey('A'))
+		Direction += -Right;
+	if (GetKey('S'))
+		Direction += -Forward;
+	if (GetKey('D'))
+		Direction += Right;
+
+	Normalize(Direction);
+
+	auto Speed = 1000 * ElapsedTime;
+
+	RCameraPosition += Direction * Speed;
+}
+
 void ZApplication::OnUpdate()
 {
-	__BP(0,"ZApplication::OnUpdate");
+	auto prof = MBeginProfile("ZApplication::OnUpdate");
 
 	[&]
 	{
@@ -632,15 +673,21 @@ void ZApplication::OnUpdate()
 		LastRealTime = CurRealTime;
 	}();
 
-	auto fElapsed = ZApplication::m_Timer.UpdateFrame();
+	auto ElapsedTime = m_Timer.UpdateFrame();
 
 	if (Timescale != 1.f)
-		fElapsed *= Timescale;
+		ElapsedTime *= Timescale;
 
-	g_RGMain->OnUpdate(fElapsed);
+	if (GetRS2().UsingVulkan())
+	{
+		UpdateVulkan(ElapsedTime);
+		return;
+	}
+
+	g_RGMain->OnUpdate(ElapsedTime);
 
 	__BP(1,"ZApplication::OnUpdate::m_pInterface->Update");
-	if (m_pGameInterface) m_pGameInterface->Update(fElapsed);
+	if (m_pGameInterface) m_pGameInterface->Update(ElapsedTime);
 	__EP(1);
 
 	__BP(2,"ZApplication::OnUpdate::SoundEngineRun");
@@ -668,8 +715,6 @@ void ZApplication::OnUpdate()
 		if(m_pGameInterface)
 			m_pGameInterface->SaveScreenShot();
 	}
-
-	__EP(0);
 }
 
 bool g_bProfile=false;
@@ -678,34 +723,33 @@ bool g_bProfile=false;
 
 bool ZApplication::OnDraw()
 {
-	static bool currentprofile=false;
+	static bool currentprofile = false;
 	if(g_bProfile && !currentprofile)
 	{
-		currentprofile=true;
+		currentprofile = true;
         MInitProfile();
 	}
 
-	if(!g_bProfile && currentprofile)
+	if (!g_bProfile && currentprofile)
 	{
-		currentprofile=false;
+		currentprofile = false;
 		MSaveProfile(PROFILE_FILENAME);
 	}
 
+	__BP(3, "ZApplication::Draw");
 
-	__BP(3,"ZApplication::Draw");
+	__BP(4, "ZApplication::Draw::Mint::Run");
+	if (ZGetGameInterface()->GetState() != GUNZ_GAME)
+	{
+		Mint::GetInstance()->Run();
+	}
+	__EP(4);
 
-		__BP(4,"ZApplication::Draw::Mint::Run");
-			if(ZGetGameInterface()->GetState()!=GUNZ_GAME)	// 게임안에서는 막는다
-			{
-				Mint::GetInstance()->Run();
-			}
-		__EP(4);
+	__BP(5, "ZApplication::Draw::Mint::Draw");
 
-		__BP(5,"ZApplication::Draw::Mint::Draw");
+	Mint::GetInstance()->Draw();
 
-			Mint::GetInstance()->Draw();
-
-		__EP(5);
+	__EP(5);
 
 	__EP(3);
 

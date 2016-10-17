@@ -73,8 +73,8 @@ enum ZC_STATE_LOWER {
 	ZC_STATE_LOWER_ATTACK4_RET,
 	ZC_STATE_LOWER_ATTACK5,
 
-	ZC_STATE_LOWER_JUMPATTACK,			// 공중에서의 칼질.
-	ZC_STATE_LOWER_UPPERCUT,			// 띄우기
+	ZC_STATE_LOWER_JUMPATTACK,
+	ZC_STATE_LOWER_UPPERCUT,
 
 	ZC_STATE_LOWER_GUARD_START,
 	ZC_STATE_LOWER_GUARD_IDLE,
@@ -95,8 +95,6 @@ enum ZC_STATE_LOWER {
 	ZC_STATE_DAMAGE,
 	ZC_STATE_DAMAGE2,
 	ZC_STATE_DAMAGE_DOWN,
-
-	// 기타 특수모션들
 
 	ZC_STATE_TAUNT,
 	ZC_STATE_BOW,
@@ -121,119 +119,14 @@ enum ZC_STATE_LOWER {
 
 struct ZANIMATIONINFO {
 	const char *Name;
-	bool bEnableCancel;		// 캔슬 가능한지
-	bool bLoop;				// 반복 되는 동작
-	bool bMove;				// 움직임이 포함된 애니메이션
-	bool bContinuos;		// 포함된 움직임이 시작부터 연결되어있는지.
+	bool bEnableCancel;
+	bool bLoop;
+	bool bMove;
+	bool bContinuos;
 };
 
-static ZANIMATIONINFO g_AnimationInfoTableLower[ZC_STATE_LOWER_END] = {
-	{ ""				,true	,true	,false 	,false },
-
-	{ "idle"			,true	,true	,false 	,false },
-	{ "idle2"			,true	,true	,false 	,false },
-	{ "idle3"			,true	,true	,false 	,false },
-	{ "idle4"			,true	,true	,false 	,false },
-
-	{ "run"				,true	,true	,false 	,false },
-	{ "runB"			,true	,true	,false 	,false },
-	{ "runL"			,true	,true	,false 	,false },
-	{ "runR"			,true	,true	,false 	,false },
-
-	{ "jumpU"			,true	,false	,false 	,false },
-	{ "jumpD"			,true	,false	,false 	,false },
-
-	{ "die" 			,true	,false	,false 	,false },
-	{ "die2" 			,true	,false	,false 	,false },
-	{ "die3" 			,true	,false	,false 	,false },
-	{ "die4"			,true	,false	,false 	,false },
-
-	{ "runLW"			,false	,true 	,false	,false },
-	{ "runLW_down"		,false	,false	,false	,false },
-	{ "runW" 			,false	,false	,true	,false },
-	{ "runW_downF"		,false	,false	,false	,false },
-	{ "runW_downB"		,false	,false	,false	,false },
-	{ "runRW" 			,false	,true 	,false	,false },
-	{ "runRW_down"		,false	,false 	,false	,false },
-
-	{ "tumbleF"			,false	,false	,false	,false },
-	{ "tumbleB"			,false	,false	,false	,false },
-	{ "tumbleR"			,false	,false	,false	,false },
-	{ "tumbleL"			,false	,false	,false	,false },
-
-	{ "bind"			,false	,false	,false	,false },
-
-	{ "jumpwallF"		,false	,false 	,false	,false },
-	{ "jumpwallB"		,false	,false 	,false	,false },
-	{ "jumpwallL"		,false	,false 	,false	,false },
-	{ "jumpwallR"		,false	,false 	,false	,false },
-
-	{ "attack1"			,false	,false 	,true  	,false },
-	{ "attack1_ret"		,false	,false 	,true  	,true },
-	{ "attack2"			,false	,false 	,true  	,false },
-	{ "attack2_ret"		,false	,false 	,true  	,true },
-	{ "attack3"			,false	,false 	,true  	,false },
-	{ "attack3_ret"		,false	,false 	,true  	,true },
-	{ "attack4"			,false	,false 	,true  	,false },
-	{ "attack4_ret"		,false	,false 	,true  	,true },
-	{ "attack5"			,false	,false 	,true  	,false },
-
-	{ "attack_Jump"		,false	,false 	,false	,false },
-	{ "uppercut"		,false	,false 	,true	,false },
-
-	{ "guard_start"		,false	,false 	,true 	,false },
-	{ "guard_idle"		,false	,false 	,false	,false },
-	{ "guard_block1"	,false	,false 	,false	,false },
-	{ "guard_block1_ret",false	,false 	,false	,false },
-	{ "guard_block2"	,false	,false 	,false	,false },
-	{ "guard_cancel"	,false	,false 	,false	,false },
-
-	{ "blast"			,false	,false 	,false 	,false },
-	{ "blast_fall"		,false	,false 	,false 	,false },
-	{ "blast_drop"		,false	,false 	,false 	,false },
-	{ "blast_stand"		,false	,false 	,false 	,false },
-	{ "blast_airmove"	,false	,false 	,false 	,false },
-
-	{ "blast_dagger"	 ,false ,false 	,false 	,false },
-	{ "blast_drop_dagger",false ,false 	,false 	,false },
-
-	{ "damage"			,false	,false 	,false 	,false },
-	{ "damage2"			,false	,false 	,false 	,false },
-	{ "damage_down"		,false	,false 	,false 	,false },
-
-	{ "taunt"			,true	,false	,false	,false },
-	{ "bow"				,true	,false	,false	,false },
-	{ "wave"			,true	,false	,false	,false },
-	{ "laugh"			,true	,false	,false	,false },
-	{ "cry"				,true	,false	,false	,false },
-	{ "dance"			,true	,false	,false	,false },
-
-	{ "cancel"			,false	,false 	,false 	,false },
-	{ "charge"			,false	,false 	,true  	,true },
-	{ "slash"			,false	,false 	,true  	,false },
-	{ "jump_slash1"		,false	,false 	,false	,false },
-	{ "jump_slash2"		,false	,false 	,false	,false },
-
-	{ "lightning"		,false	,false 	,false	,false },
-	{ "stun"			,false	,false 	,false	,false },	// 루프되는 스턴
-
-	{ "pit"				,false	,false 	,false	,false },	// 나락에서 떨어지는 거
-};
-
-static ZANIMATIONINFO g_AnimationInfoTableUpper[ZC_STATE_UPPER_END] = {
-	{ ""				,true	,true	,false	,false },
-
-	{ "attackS"			,false	,false	,false	,false },
-	{ "reload"			,false	,false	,false	,false },
-	{ "load"			,false	,false	,false	,false },
-
-	{ "guard_start"		,false	,false 	,false	,false },
-	{ "guard_idle"		,false	,false 	,false	,false },
-	{ "guard_block1"	,false	,false 	,false	,false },
-	{ "guard_block1_ret",false	,false 	,false	,false },
-	{ "guard_block2"	,false	,false 	,false	,false },
-	{ "guard_cancel"	,false	,false 	,false	,false },
-};
+extern ZANIMATIONINFO g_AnimationInfoTableLower[ZC_STATE_LOWER_END];
+extern ZANIMATIONINFO g_AnimationInfoTableUpper[ZC_STATE_UPPER_END];
 
 namespace RealSpace2
 {

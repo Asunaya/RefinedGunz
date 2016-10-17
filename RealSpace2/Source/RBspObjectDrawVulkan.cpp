@@ -2,6 +2,8 @@
 #include "RBspObjectDrawVulkan.h"
 #include "RBspObject.h"
 #include "RS2.h"
+#include "BasicRenderVS.h"
+#include "BasicRenderFS.h"
 
 void RBspObjectDrawVulkan::CreateBuffers()
 {
@@ -28,37 +30,6 @@ void RBspObjectDrawVulkan::CreateBuffers()
 	{
 		MLog("RBspObjectDrawVulkan::Init - Failed to create index buffer\n");
 	}
-
-	float unit = 100;
-	
-	std::vector<BSPVERTEX> vertices =
-	{
-		{ unit,  unit, 0.0f , 1.0f, 1.0f , 1.0f, 1.0f  },
-		{ -unit,  unit, 0.0f , 0.0f, 1.0f , 0.0f, 1.0f },
-		{ -unit, -unit, 0.0f , 0.0f, 0.0f , 0.0f, 0.0f },
-		{ unit, -unit, 0.0f , 1.0f, 0.0f , 1.0f, 0.0f }
-	};
-
-	// Setup indices
-	std::vector<uint16_t> indices = { 0,1,2, 2,3,0 };
-	QuadIndexCount = static_cast<int>(indices.size());
-
-	// Create buffers
-	// For the sake of simplicity we won't stage the vertex data to the gpu memory
-	// Vertex buffer
-	VK_CHECK_RESULT(GetRS2Vulkan().VulkanDevice->createBuffer(
-		VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-		&QuadVertexBuffer,
-		vertices.size() * sizeof(BSPVERTEX),
-		vertices.data()));
-	// Index buffer
-	VK_CHECK_RESULT(GetRS2Vulkan().VulkanDevice->createBuffer(
-		VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-		&QuadIndexBuffer,
-		indices.size() * sizeof(uint16_t),
-		indices.data()));
 }
 
 void RBspObjectDrawVulkan::RenderNode(VkCommandBuffer CmdBuffer, RSBspNode& Node, int Material)
@@ -74,7 +45,6 @@ void RBspObjectDrawVulkan::RenderNode(VkCommandBuffer CmdBuffer, RSBspNode& Node
 			g_nPoly += TriangleCount;
 #endif
 
-			// Render from the global scene vertex buffer using the mesh index offset
 			vkCmdDrawIndexed(CmdBuffer,
 				TriangleCount * 3, 1,
 				Node.pDrawInfo[Material].nIndicesOffset, 0, 0);
@@ -110,36 +80,22 @@ void RBspObjectDrawVulkan::Render(VkCommandBuffer CmdBuffer)
 		// Set 1: Per-Material descriptor set containing bound images
 		descriptorSets[1] = Material.VkMaterial.DescriptorSet;
 
-		vkCmdBindPipeline(CmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, Pipeline);
 		vkCmdBindDescriptorSets(CmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, PipelineLayout, 0, static_cast<uint32_t>(descriptorSets.size()), descriptorSets.data(), 0, NULL);
 		
 		RenderNode(CmdBuffer, bsp.OcRoot[0], i);
-
-		//vkCmdDrawIndexed(CmdBuffer, 6, 1, 0, 0, 0);
 	}
 }
 
 void RBspObjectDrawVulkan::CreateCommandBuffers()
 {
-	// Create one command buffer for each swap chain image and reuse for rendering
-	DrawCmdBuffers.resize(GetRS2Vulkan().SwapChain.imageCount);
-
-	VkCommandBufferAllocateInfo cmdBufAllocateInfo =
-		vkTools::initializers::commandBufferAllocateInfo(
-			GetRS2Vulkan().CmdPool,
-			VK_COMMAND_BUFFER_LEVEL_PRIMARY,
-			static_cast<uint32_t>(DrawCmdBuffers.size()));
-
-	VK_CHECK_RESULT(vkAllocateCommandBuffers(GetRS2Vulkan().Device, &cmdBufAllocateInfo, DrawCmdBuffers.data()));
-
 	auto Width = RGetScreenWidth();
 	auto Height = RGetScreenHeight();
 
 	VkCommandBufferBeginInfo cmdBufInfo = vkTools::initializers::commandBufferBeginInfo();
 
 	VkClearValue clearValues[2];
-	clearValues[0].color = { { 0.025f, 0.025f, 0.5f, 1.0f } };
-	clearValues[1].depthStencil = { 1.0f, 0 };
+	clearValues[0].color = { { 0, 0, 0.5, 1 } };
+	clearValues[1].depthStencil = { 1, 0 };
 
 	VkRenderPassBeginInfo renderPassBeginInfo = vkTools::initializers::renderPassBeginInfo();
 	renderPassBeginInfo.renderPass = GetRS2Vulkan().RenderPass;
@@ -150,9 +106,9 @@ void RBspObjectDrawVulkan::CreateCommandBuffers()
 	renderPassBeginInfo.clearValueCount = 2;
 	renderPassBeginInfo.pClearValues = clearValues;
 
-	for (size_t i = 0; i < DrawCmdBuffers.size(); ++i)
+	for (size_t i = 0; i < GetRS2Vulkan().DrawCmdBuffers.size(); ++i)
 	{
-		auto CmdBuffer = DrawCmdBuffers[i];
+		auto CmdBuffer = GetRS2Vulkan().DrawCmdBuffers[i];
 
 		// Set target frame buffer
 		renderPassBeginInfo.framebuffer = GetRS2Vulkan().FrameBuffers[i];
@@ -172,37 +128,16 @@ void RBspObjectDrawVulkan::CreateCommandBuffers()
 		vkCmdBindPipeline(CmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, Pipeline);
 
 		constexpr u32 VERTEX_BUFFER_BIND_ID{};
-		VkDeviceSize offsets[1] = { 0 };
-		auto DrawNodes = [&]
-		{
-			vkCmdBindVertexBuffers(CmdBuffer, VERTEX_BUFFER_BIND_ID, 1, &VertexBuffer.buffer, offsets);
-			vkCmdBindIndexBuffer(CmdBuffer, IndexBuffer.buffer, 0, VK_INDEX_TYPE_UINT16);
+		VkDeviceSize offsets[] = { 0 };
 
-			Render(CmdBuffer);
-		};
-		DrawNodes();
+		vkCmdBindVertexBuffers(CmdBuffer, VERTEX_BUFFER_BIND_ID, 1, &VertexBuffer.buffer, offsets);
+		vkCmdBindIndexBuffer(CmdBuffer, IndexBuffer.buffer, 0, VK_INDEX_TYPE_UINT16);
 
-		auto DrawQuad = [&]{
+		Render(CmdBuffer);
 
-			vkCmdBindVertexBuffers(CmdBuffer, VERTEX_BUFFER_BIND_ID, 1, &QuadVertexBuffer.buffer, offsets);
-			vkCmdBindIndexBuffer(CmdBuffer, QuadIndexBuffer.buffer, 0, VK_INDEX_TYPE_UINT16);
+		vkCmdEndRenderPass(CmdBuffer);
 
-			VkDescriptorSet descriptorSets[2];
-			// Set 0: Scene descriptor set containing global matrices
-			descriptorSets[0] = DescriptorSet;
-			// Set 1: Per-Material descriptor set containing bound images
-			descriptorSets[1] = QuadDescriptorSet;
-
-			vkCmdBindPipeline(CmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, Pipeline);
-			vkCmdBindDescriptorSets(CmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, PipelineLayout, 0, static_cast<uint32_t>(ArraySize(descriptorSets)), descriptorSets, 0, NULL);
-
-			vkCmdDrawIndexed(CmdBuffer, QuadIndexCount, 1, 0, 0, 0);
-		};
-		//DrawQuad();
-
-		vkCmdEndRenderPass(DrawCmdBuffers[i]);
-
-		VK_CHECK_RESULT(vkEndCommandBuffer(DrawCmdBuffers[i]));
+		VK_CHECK_RESULT(vkEndCommandBuffer(CmdBuffer));
 	}
 }
 
@@ -227,7 +162,7 @@ void RBspObjectDrawVulkan::SetupVertexDescriptions()
 			0,
 			VK_FORMAT_R32G32B32_SFLOAT,
 			offsetof(BSPVERTEX, x));
-	// Location 1: Texture coordinates
+	// Location 1: Diffuse texture coordinates
 	vertices.attributeDescriptions[1] =
 		vkTools::initializers::vertexInputAttributeDescription(
 			VERTEX_BUFFER_BIND_ID,
@@ -301,8 +236,8 @@ void RBspObjectDrawVulkan::CreatePipelines()
 	// Load shaders
 	std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages;
 
-	shaderStages[0] = GetRS2Vulkan().loadShader("shader/texture.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
-	shaderStages[1] = GetRS2Vulkan().loadShader("shader/texture.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
+	shaderStages[0] = GetRS2Vulkan().loadShader(BasicRenderVS, ArraySize(BasicRenderVS), VK_SHADER_STAGE_VERTEX_BIT);
+	shaderStages[1] = GetRS2Vulkan().loadShader(BasicRenderFS, ArraySize(BasicRenderFS), VK_SHADER_STAGE_FRAGMENT_BIT);
 
 	auto pipelineCreateInfo = vkTools::initializers::pipelineCreateInfo(
 			PipelineLayout,
@@ -323,8 +258,7 @@ void RBspObjectDrawVulkan::CreatePipelines()
 	VK_CHECK_RESULT(vkCreateGraphicsPipelines(GetRS2Vulkan().Device, PipelineCache, 1, &pipelineCreateInfo,
 		nullptr, &Pipeline));
 
-	// Wire frame rendering pipeline
-	//rasterizationState.cullMode = VK_CULL_MODE_BACK_BIT;
+	// Wireframe rendering pipeline
 	blendAttachmentState.blendEnable = VK_FALSE;
 	rasterizationState.polygonMode = VK_POLYGON_MODE_LINE;
 	rasterizationState.lineWidth = 1.0f;
@@ -347,11 +281,14 @@ void RBspObjectDrawVulkan::PrepareUniformBuffers()
 void RBspObjectDrawVulkan::UpdateUniformBuffers()
 {
 	glm::vec3 cameraPos{ EXPAND_VECTOR(RCameraPosition) };
-	// Vertex shader
+
 	uboVS.projection = glm::perspective(glm::radians(60.0f),
 		(float)RGetScreenWidth() / (float)RGetScreenHeight(), 5.f, 10000.0f);
 
-	uboVS.model = glm::lookAt(cameraPos, cameraPos + glm::vec3{ EXPAND_VECTOR(RCameraDirection) }, glm::vec3{ 0, 0, -1 }),
+	uboVS.model = glm::lookAt(
+		cameraPos,
+		cameraPos + glm::vec3{ EXPAND_VECTOR(RCameraDirection) },
+		glm::vec3{ EXPAND_VECTOR(RCameraUp) }),
 
 	uboVS.viewPos = glm::vec4(cameraPos, 0.0f);
 
@@ -362,10 +299,11 @@ void RBspObjectDrawVulkan::UpdateUniformBuffers()
 
 void RBspObjectDrawVulkan::SetupDescriptorPool()
 {
-	// Example uses one ubo and one image sampler
 	std::vector<VkDescriptorPoolSize> poolSizes =
 	{
-		vkTools::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, bsp.m_nMaterial),
+		// Only need one uniform buffer
+		vkTools::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1),
+		// Need a texture descriptor for each material in the map
 		vkTools::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, bsp.m_nMaterial)
 	};
 
@@ -462,27 +400,6 @@ void RBspObjectDrawVulkan::SetupDescriptorSet()
 			static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(),
 			0, nullptr);
 	}
-
-	allocInfo = vkTools::initializers::descriptorSetAllocateInfo(
-			DescriptorPool,
-			&DescriptorSetLayouts.Material,
-			1);
-
-	VK_CHECK_RESULT(vkAllocateDescriptorSets(GetRS2Vulkan().Device, &allocInfo, &QuadDescriptorSet));
-
-	writeDescriptorSets =
-	{
-		// Binding 0: Pixel shader texture
-		vkTools::initializers::writeDescriptorSet(
-			QuadDescriptorSet,
-			VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-			0,
-			&GetRS2Vulkan().Texture.descriptor)
-	};
-
-	vkUpdateDescriptorSets(GetRS2Vulkan().Device,
-		static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(),
-		0, nullptr);
 }
 
 void RBspObjectDrawVulkan::Init()
@@ -499,16 +416,4 @@ void RBspObjectDrawVulkan::Init()
 
 void RBspObjectDrawVulkan::Draw()
 {
-	UpdateUniformBuffers();
-
-	GetRS2Vulkan().prepareFrame();
-
-	// Command buffer to be sumitted to the queue
-	GetRS2Vulkan().SubmitInfo.commandBufferCount = 1;
-	GetRS2Vulkan().SubmitInfo.pCommandBuffers = &DrawCmdBuffers[GetRS2Vulkan().currentBuffer];
-
-	// Submit to queue
-	VK_CHECK_RESULT(vkQueueSubmit(GetRS2Vulkan().Queue, 1, &GetRS2Vulkan().SubmitInfo, VK_NULL_HANDLE));
-
-	GetRS2Vulkan().submitFrame();
 }

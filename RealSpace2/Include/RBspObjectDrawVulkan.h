@@ -17,6 +17,7 @@ public:
 	
 	void Init();
 	void Draw();
+	void UpdateUniformBuffers();
 
 private:
 	RBspObject& bsp;
@@ -25,7 +26,6 @@ private:
 	void CreateBuffers();
 	void SetupVertexDescriptions();
 	void PrepareUniformBuffers();
-	void UpdateUniformBuffers();
 	void SetupDescriptorSetLayout();
 	void CreatePipelines();
 	void SetupDescriptorPool();
@@ -34,16 +34,8 @@ private:
 	void RenderNode(VkCommandBuffer CmdBuffer, struct RSBspNode& Node, int Material);
 	void CreateCommandBuffers();
 
-	std::vector<VkCommandBuffer> DrawCmdBuffers;
-
 	vk::Buffer VertexBuffer;
 	vk::Buffer IndexBuffer;
-
-	vk::Buffer QuadVertexBuffer;
-	vk::Buffer QuadIndexBuffer;
-	int QuadIndexCount{};
-	VkDescriptorSet QuadDescriptorSet;
-	VkDescriptorImageInfo QuadDescriptor;
 
 	VkPipeline Pipeline{};
 	VkPipeline WireframePipeline{};

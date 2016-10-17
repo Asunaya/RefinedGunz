@@ -103,10 +103,9 @@ void RFrame_RenderD3D9()
 {
 	RRESULT isOK = RIsReadyToRender();
 	if (isOK == R_NOTREADY)
-	{
 		return;
-	}
-	else if (isOK == R_RESTORED)
+
+	if (isOK == R_RESTORED)
 	{
 		RMODEPARAMS ModeParams = { RGetScreenWidth(),RGetScreenHeight(),RGetFullscreenMode(),RGetPixelFormat() };
 		RResetDevice(&ModeParams);
@@ -130,16 +129,7 @@ void RFrame_RenderD3D9()
 
 void RFrame_RenderVulkan()
 {
-	//GetRS2().DrawStatic<RS2Vulkan>();
-	static RealSpace2::RBspObject bsp;
-	static bool b;
-	if (!b)
-	{
-		bsp.Open("Maps/Mansion/Mansion.rs");
-		b = true;
-	}
-
-	bsp.Draw();
+	GetRS2().DrawStatic<RS2Vulkan>();
 }
 
 void RFrame_Render()

@@ -45,6 +45,7 @@
 #include "ZUtil.h"
 #include "ZOptionInterface.h"
 #include "MMatchNotify.h"
+#include "RS2.h"
 
 #ifdef USING_VERTEX_SHADER
 #include "RShaderMgr.h"
@@ -80,7 +81,6 @@ ZDirectInput	g_DInput;
 ZInput*			g_pInput = NULL;
 Mint4Gunz		g_Mint;
 
-
 HRESULT GetDirectXVersionViaDxDiag( DWORD* pdwDirectXVersionMajor, DWORD* pdwDirectXVersionMinor, TCHAR* pcDirectXVersionLetter );
 
 void _ZChangeGameState(int nIndex)
@@ -93,14 +93,13 @@ void _ZChangeGameState(int nIndex)
 	}
 }
 
-#include "RS2.h"
-
 RRESULT OnCreate(void *pParam)
 {
 	if (GetRS2().UsingVulkan())
 	{
 		g_DInput.Create(g_hWnd, FALSE, FALSE);
 		g_pInput = new ZInput(&g_DInput);
+		RCameraUp = { 0, 0, -1 };
 		return R_OK;
 	}
 
@@ -284,50 +283,10 @@ RRESULT OnDestroy(void *pParam)
 
 RRESULT OnUpdate(void* pParam)
 {
-	__BP(100, "main::OnUpdate");
+	auto prof = MBeginProfile("main::OnUpdate");
 
 	g_pInput->Update();
-
-	if (GetRS2().UsingD3D9())
-		g_App.OnUpdate();
-	else
-	{
-		float RotX, RotY;
-		ZGetInput()->GetRotation(&RotX, &RotY);
-		static float AngleX, AngleZ;
-
-		AngleX += RotY;
-		AngleZ += RotX;
-
-		AngleZ = fmod(AngleZ, 2 * PI);
-
-		AngleX = max(CAMERA_ANGLEX_MIN, AngleX);
-		AngleX = min(CAMERA_ANGLEX_MAX, AngleX);
-		
-		RCameraDirection = {
-			cosf(AngleZ) * sinf(AngleX),
-			sinf(AngleZ) * sinf(AngleX),
-			cosf(AngleX) };
-
-		auto Forward = RCameraDirection;
-		v3 Up{ 0, 0, -1 };
-		auto Right = Normalized(CrossProduct(Forward, Up));
-
-		auto GetKey = [](auto Key) {
-			return (GetAsyncKeyState(Key) & 0x8000) != 0;
-		};
-
-		if (GetKey('W'))
-			RCameraPosition += Forward;
-		else if (GetKey('A'))
-			RCameraPosition -= Right;
-		else if (GetKey('S'))
-			RCameraPosition -= Forward;
-		else if (GetKey('D'))
-			RCameraPosition += Right;
-	}
-
-	__EP(100);
+	g_App.OnUpdate();
 
 	return R_OK;
 }
@@ -435,7 +394,7 @@ RRESULT OnRestore(void *pParam)
 	return R_OK;
 }
 
-// Toggle the process priority boost whenever the window is activated and deactivated
+// Toggle the process priority boost when the window is activated or deactivated
 RRESULT OnActivate(void *pParam)
 {
 	if (ZGetGameInterface() && ZGetGameClient() && Z_ETC_BOOST)
@@ -457,36 +416,35 @@ RRESULT OnError(void *pParam)
 	switch (RGetLastError())
 	{
 	case RERROR_INVALID_DEVICE:
-		{
-			D3DADAPTER_IDENTIFIER9 *ai=RGetAdapterID();
-			char szLog[512];
-			ZTransMsg( szLog, MSG_DONOTSUPPORT_GPCARD, 1, ai->Description);
+	{
+		D3DADAPTER_IDENTIFIER9 *ai = RGetAdapterID();
+		char szLog[512];
+		ZTransMsg(szLog, MSG_DONOTSUPPORT_GPCARD, 1, ai->Description);
 
-			int ret=MessageBox(NULL, szLog, ZMsg( MSG_WARNING), MB_YESNO);
-			if(ret!=IDYES)
-				return R_UNKNOWN;
-		}
-		break;
+		int ret = MessageBox(NULL, szLog, ZMsg(MSG_WARNING), MB_YESNO);
+		if (ret != IDYES)
+			return R_UNKNOWN;
+	}
+	break;
 	case RERROR_CANNOT_CREATE_D3D:
-		{
-			ShowCursor(TRUE);
+	{
+		ShowCursor(TRUE);
 
-			char szLog[512];
-			sprintf_safe(szLog, ZMsg( MSG_DIRECTX_NOT_INSTALL));
+		auto* szLog = ZMsg(MSG_DIRECTX_NOT_INSTALL);
 
-			int ret=MessageBox(NULL, szLog, ZMsg( MSG_WARNING), MB_YESNO);
-			if(ret==IDYES)
-			{
-				ShellExecute(g_hWnd, "open", ZMsg( MSG_DIRECTX_DOWNLOAD_URL), NULL, NULL, SW_SHOWNORMAL); 
-			}
-		}
-		break;
-
-	};
+		// Tell the user that DirectX 9 is not installed, and offer to direct them to the download page.
+		int ret = MessageBox(NULL, szLog, ZMsg(MSG_WARNING), MB_YESNO);
+		// Open the DirectX 9 download page if the user pressed Yes.
+		if (ret == IDYES)
+			ShellExecute(g_hWnd, "open", ZMsg(MSG_DIRECTX_DOWNLOAD_URL), NULL, NULL, SW_SHOWNORMAL);
+	}
+	break;
+	}
 
 	return R_OK;
 }
 
+// Sets mode parameters to values retrieved from config.xml
 static void SetModeParams()
 {
 	g_ModeParams.FullscreenMode = ZGetConfiguration()->GetVideo()->FullscreenMode;
@@ -600,12 +558,13 @@ int PASCAL WinMain(HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline, int 
 	MInitTraceMemory();
 #endif
 
-	char szModuleFileName[_MAX_DIR] = {0,};
+	char szModuleFileName[_MAX_DIR]; szModuleFileName[0] = 0;
 	GetModuleFileName(NULL, szModuleFileName, _MAX_DIR);
 	PathRemoveFileSpec(szModuleFileName);
 	SetCurrentDirectory(szModuleFileName);
 
 #ifdef _PUBLISH
+	// Create a mutex so we can't run multiple clients
 	Mutex = CreateMutex(NULL, TRUE, "RGunz");
 	if (GetLastError() == ERROR_ALREADY_EXISTS)
 	{
@@ -631,11 +590,6 @@ int PASCAL WinMain(HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline, int 
 
 #ifndef _PUBLISH
 	mlog("cmdline = %s\n", cmdline);
-#endif
-
-#ifndef _LAUNCHER
-	// Don't know why this is here
-	//UpgradeMrsFile();// mrs1 이라면 mrs2로 업그래이드 한다..
 #endif
 
 	MSysInfoLog();
@@ -670,10 +624,8 @@ int PASCAL WinMain(HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline, int 
 		return false;
 	}
 
-	if (ZApplication::GetInstance()->ParseArguments(cmdline) == false)
-	{
+	if (!ZApplication::GetInstance()->ParseArguments(cmdline))
 		return 0;
-	}
 
 	GraphicsAPI GfxAPI = GraphicsAPI::D3D9;
 
