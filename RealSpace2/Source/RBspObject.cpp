@@ -91,6 +91,14 @@ void DrawBoundingBox(rboundingbox *bb, DWORD color)
 // TODO: Remove this piece of global state
 static bool m_bisDrawLightMap = true;
 
+RBSPMATERIAL::~RBSPMATERIAL()
+{
+	if (GetRS2().UsingD3D9() && texture)
+		RDestroyBaseTexture(texture);
+	else if (GetRS2().UsingVulkan())
+		DestroyVkMaterial(VkMaterial);
+}
+
 RSBspNode::RSBspNode()
 {
 	m_pPositive = m_pNegative = NULL;
@@ -266,7 +274,6 @@ RBspObject::RBspObject(bool PhysOnly)
 
 void RBspObject::ClearLightmaps()
 {
-	m_nLightmap = 0;
 	LightmapTextures.clear();
 }
 
@@ -337,7 +344,7 @@ void RBspObject::SetDiffuseMap(int nMaterial)
 template <typename T>
 static void DrawImpl(RSBspNode& Node, int Material, T& DrawFunc)
 {
-#ifndef SHADOW_TEST
+#if 0//ndef SHADOW_TEST
 	// nFrameCount is updated to the current frame number
 	// only for nodes that aren't occluded.
 	if (Node.nFrameCount != g_nFrameNumber)
@@ -414,10 +421,9 @@ void RBspObject::DrawNodesImpl(int LoopCount)
 {
 	auto dev = RGetDevice();
 
-	// Materials 0 is always empty, don't render
-	for (int i = 1; i < LoopCount; i++)
+	for (int i = 0; i < LoopCount; i++)
 	{
-		auto MaterialIndex = i % m_nMaterial;
+		auto MaterialIndex = i % Materials.size();
 		if ((Materials[MaterialIndex].dwFlags & Flags) != (ShouldHaveFlags ? Flags : 0))
 			continue;
 
@@ -432,14 +438,14 @@ void RBspObject::DrawNodesImpl(int LoopCount)
 			SetDiffuseMap(MaterialIndex);
 
 			if (!LightmapTextures.empty())
-				dev->SetTexture(static_cast<DWORD>(ShaderSampler::Lightmap), LightmapTextures[i / m_nMaterial].get());
+				dev->SetTexture(static_cast<DWORD>(ShaderSampler::Lightmap), LightmapTextures[i / Materials.size()].get());
 		}
 
 		if (SetAlphaTestFlags)
 		{
 			if ((Materials[MaterialIndex].dwFlags & RM_FLAG_USEALPHATEST) != 0) {
 				dev->SetRenderState(D3DRS_ZWRITEENABLE, true);
-				dev->SetRenderState(D3DRS_ALPHAREF, (DWORD)0x80808080);
+				dev->SetRenderState(D3DRS_ALPHAREF, 0x80808080);
 				dev->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL);
 				dev->SetRenderState(D3DRS_ALPHATESTENABLE, true);
 
@@ -467,8 +473,6 @@ void RBspObject::DrawNodesImpl(int LoopCount)
 			Draw(&OcRoot[0], i);
 		else
 			DrawNoTNL(&OcRoot[0], i);
-
-		break;
 	}
 }
 
@@ -595,7 +599,7 @@ bool RBspObject::Draw()
 	RSetWBuffer(true);
 	dev->SetRenderState(D3DRS_ZWRITEENABLE, true);
 
-	int nCount = m_nMaterial * max(1, m_nLightmap);
+	int nCount = Materials.size() * max(1u, LightmapTextures.size());
 
 	// Draw non-additive and opaque materials
 	DrawNodes<RM_FLAG_ADDITIVE | RM_FLAG_USEOPACITY, false, false>(nCount);
@@ -1018,6 +1022,14 @@ static void RecalcBoundingBox(RSBspNode *pNode)
 	}
 }
 
+struct BspCounts
+{
+	int Nodes;
+	int Polygons;
+	int Vertices;
+	int Indices;
+};
+
 bool RBspObject::Open(const char *filename, ROpenMode nOpenFlag, RFPROGRESSCALLBACK pfnProgressCallback,
 	void *CallbackParam, bool PhysOnly)
 {
@@ -1035,7 +1047,8 @@ bool RBspObject::Open(const char *filename, ROpenMode nOpenFlag, RFPROGRESSCALLB
 	}
 	if (pfnProgressCallback) pfnProgressCallback(CallbackParam, .3f);
 
-	if (!OpenRs(filename))
+	BspCounts Counts;
+	if (!OpenRs(filename, Counts))
 	{
 		MLog("Error while loading %s\n", filename);
 		return false;
@@ -1045,7 +1058,7 @@ bool RBspObject::Open(const char *filename, ROpenMode nOpenFlag, RFPROGRESSCALLB
 
 	char bspname[_MAX_PATH];
 	sprintf_safe(bspname, "%s.bsp", filename);
-	if (!OpenBsp(bspname))
+	if (!OpenBsp(bspname, Counts))
 	{
 		MLog("Error while loading %s\n", bspname);
 		return false;
@@ -1160,10 +1173,7 @@ bool RBspObject::Open_MaterialList(MXmlElement *pElement)
 	RMaterialList ml;
 	ml.Open(pElement);
 
-	m_nMaterial = ml.size();
-	m_nMaterial = m_nMaterial + 1;
-
-	Materials.resize(m_nMaterial);
+	Materials.resize(ml.size() + 1);
 
 	Materials[0].texture = NULL;
 	Materials[0].Diffuse = rvector(1, 1, 1);
@@ -1184,7 +1194,7 @@ bool RBspObject::Open_MaterialList(MXmlElement *pElement)
 	RMaterialList::iterator itor;
 	itor = ml.begin();
 
-	for (int i = 1; i < m_nMaterial; i++)
+	for (size_t i = 1; i < Materials.size(); i++)
 	{
 		RMATERIAL *mat = *itor;
 
@@ -1263,7 +1273,9 @@ bool RBspObject::Open_OcclusionList(MXmlElement *pElement)
 
 bool RBspObject::Open_ObjectList(MXmlElement *pElement)
 {
-	return true;
+	if (GetRS2().UsingVulkan())
+		return true;
+
 	int i;
 
 	MXmlElement	aObjectNode, aChild;
@@ -1556,7 +1568,7 @@ bool RBspObject::OpenDescription(const char *filename)
 	return true;
 }
 
-bool RBspObject::OpenRs(const char *filename)
+bool RBspObject::OpenRs(const char *filename, BspCounts& Counts)
 {
 	MZFile file;
 	if (!file.Open(filename, g_pFileSystem))
@@ -1577,15 +1589,15 @@ bool RBspObject::OpenRs(const char *filename)
 
 	if (!PhysOnly)
 	{
-		if (m_nMaterial - 1 != nMaterial)
+		if (Materials.size() - 1 != nMaterial)
 			return false;
 	}
 	else
 	{
-		m_nMaterial = nMaterial + 1;
+		Materials.resize(nMaterial + 1);
 	}
 
-	for (int i = 1; i < m_nMaterial; i++)
+	for (size_t i = 1; i < Materials.size(); i++)
 	{
 		char buf[256];
 		if (!ReadString(&file, buf, sizeof(buf)))
@@ -1594,20 +1606,21 @@ bool RBspObject::OpenRs(const char *filename)
 
 	Open_ConvexPolygons(&file);
 
-	file.Read(&m_nBspNodeCount, sizeof(int));
-	file.Read(&m_nBspPolygon, sizeof(int));
-	file.Read(&m_nBspVertices, sizeof(int));
-	file.Read(&m_nBspIndices, sizeof(int));
+	file.Read(&Counts.Nodes, sizeof(int));
+	file.Read(&Counts.Polygons, sizeof(int));
+	file.Read(&Counts.Vertices, sizeof(int));
+	file.Read(&Counts.Indices, sizeof(int));
 
-	file.Read(&m_nNodeCount, sizeof(int));
-	file.Read(&m_nPolygon, sizeof(int));
-	int NumVertices = 0;
+	int NodeCount{}, PolygonCount{};
+	file.Read(&NodeCount, sizeof(int));
+	file.Read(&PolygonCount, sizeof(int));
+	int NumVertices{};
 	file.Read(&NumVertices, sizeof(int));
-	int NumIndices = 0;
+	int NumIndices{};
 	file.Read(&NumIndices, sizeof(int));
 
-	OcRoot.resize(m_nNodeCount);
-	OcInfo.resize(m_nPolygon);
+	OcRoot.resize(NodeCount);
+	OcInfo.resize(PolygonCount);
 	OcVertices.resize(NumVertices);
 	OcIndices.resize(NumIndices);
 	OcNormalVertices.resize(NumVertices);
@@ -1623,7 +1636,7 @@ bool RBspObject::OpenRs(const char *filename)
 	return true;
 }
 
-bool RBspObject::OpenBsp(const char *filename)
+bool RBspObject::OpenBsp(const char *filename, const BspCounts& Counts)
 {
 	MZFile file;
 	if (!file.Open(filename, g_pFileSystem))
@@ -1644,16 +1657,17 @@ bool RBspObject::OpenBsp(const char *filename)
 	file.Read(&nBspVertices, sizeof(int));
 	file.Read(&nBspIndices, sizeof(int));
 
-	if (m_nBspNodeCount != nBspNodeCount || m_nBspPolygon != nBspPolygon ||
-		m_nBspVertices != nBspVertices || m_nBspIndices != nBspIndices)
+	if (Counts.Nodes != nBspNodeCount || Counts.Polygons != nBspPolygon ||
+		Counts.Vertices != nBspVertices || Counts.Indices != nBspIndices)
 	{
+		MLog("RBspObject::OpenBsp - Error: Counts in .rs file didn't match counts in bsp file\n");
 		file.Close();
 		return false;
 	}
 
-	BspVertices.resize(m_nBspVertices);
-	BspRoot.resize(m_nBspNodeCount);
-	BspInfo.resize(m_nBspPolygon);
+	BspVertices.resize(Counts.Vertices);
+	BspRoot.resize(Counts.Nodes);
+	BspInfo.resize(Counts.Polygons);
 
 	auto ret = Open_Nodes(BspRoot.data(), &file,
 		{ BspVertices.data(), BspRoot.data(), BspInfo.data() });
@@ -1762,22 +1776,28 @@ bool RBspObject::OpenLightmap()
 		return false;
 	}
 
-	int nSourcePolygon, nNodeCount;
-
-	file.Read(&nSourcePolygon, sizeof(int));
-	file.Read(&nNodeCount, sizeof(int));
-
-	if (nSourcePolygon != m_nConvexPolygon || m_nNodeCount != nNodeCount)
+	// Verify polygon and node counts
 	{
-		file.Close();
-		return false;
+		int nSourcePolygon{}, nNodeCount{};
+		file.Read(&nSourcePolygon, sizeof(int));
+		file.Read(&nNodeCount, sizeof(int));
+
+		if (nSourcePolygon != ConvexPolygons.size() || OcRoot.size() != nNodeCount)
+		{
+			file.Close();
+			return false;
+		}
 	}
 
-	file.Read(&m_nLightmap, sizeof(int));
-	LightmapTextures.resize(m_nLightmap);
+	// Load lightmap count and allocate memory for them
+	{
+		int nLightmap{};
+		file.Read(&nLightmap, sizeof(int));
+		LightmapTextures.resize(nLightmap);
+	}
 
 	std::vector<u8> bmpmemory;
-	for (int i = 0; i < m_nLightmap; i++)
+	for (auto& LightmapTex : LightmapTextures)
 	{
 		int nBmpSize;
 		file.Read(&nBmpSize, sizeof(int));
@@ -1792,24 +1812,27 @@ bool RBspObject::OpenLightmap()
 			0, D3DFMT_UNKNOWN, D3DPOOL_MANAGED,
 			D3DX_FILTER_TRIANGLE | D3DX_FILTER_MIRROR,
 			D3DX_FILTER_TRIANGLE | D3DX_FILTER_MIRROR,
-			0, NULL, NULL, MakeWriteProxy(LightmapTextures[i]));
+			0, NULL, NULL, MakeWriteProxy(LightmapTex));
 
 		if (FAILED(hr))
 			mlog("Failed to load lightmap texture! Error code = %d, error message = %s\n",
 				hr, DXGetErrorString9(hr));
 	}
 
-	for (int i = 0; i < m_nPolygon; i++)
+	// Read ???
+	for (int i = 0; i < GetPolygonCount(); i++)
 	{
 		int a;
 		file.Read(&a, sizeof(int));
 	}
 
-	for (int i = 0; i < m_nPolygon; i++)
-		file.Read(&OcInfo[i].nLightmapTexture, sizeof(int));
+	// Read lightmap texture indices
+	for (auto& PolygonInfo : OcInfo)
+		file.Read(&PolygonInfo.nLightmapTexture, sizeof(int));
 
-	for (size_t i = 0; i < OcVertices.size(); i++)
-		file.Read(&OcVertices[i].tu2, sizeof(float) * 2);
+	// Read lightmap texture coordiantes
+	for (auto& Vertex : OcVertices)
+		file.Read(&Vertex.tu2, sizeof(float) * 2);
 
 	file.Close();
 
@@ -1818,13 +1841,14 @@ bool RBspObject::OpenLightmap()
 
 bool RBspObject::Open_ConvexPolygons(MZFile *pfile)
 {
-	int nConvexVertices;
+	int nConvexPolygons, nConvexVertices;
 
-	pfile->Read(&m_nConvexPolygon, sizeof(int));
+	pfile->Read(&nConvexPolygons, sizeof(int));
 	pfile->Read(&nConvexVertices, sizeof(int));
 
-	if (m_OpenMode == ROpenMode::Runtime) {
-		for (int i = 0; i < m_nConvexPolygon; i++)
+	if (m_OpenMode == ROpenMode::Runtime)
+	{
+		for (int i = 0; i < nConvexPolygons; i++)
 		{
 			pfile->Seek(sizeof(int) + sizeof(DWORD) + sizeof(rplane) + sizeof(float), MZFile::current);
 
@@ -1836,14 +1860,14 @@ bool RBspObject::Open_ConvexPolygons(MZFile *pfile)
 		return true;
 	}
 
-	ConvexPolygons.resize(m_nConvexPolygon);
+	ConvexPolygons.resize(nConvexPolygons);
 	ConvexVertices.resize(nConvexVertices);
 	ConvexNormals.resize(nConvexVertices);
 
 	rvector *pLoadingVertex = ConvexVertices.data();
 	rvector *pLoadingNormal = ConvexNormals.data();
 
-	for (int i = 0; i < m_nConvexPolygon; i++)
+	for (size_t i = 0; i < ConvexPolygons.size(); i++)
 	{
 		pfile->Read(&ConvexPolygons[i].nMaterial, sizeof(int));
 		ConvexPolygons[i].nMaterial += 2;
@@ -1903,20 +1927,20 @@ void RBspObject::CreatePolygonTable(RSBspNode *pNode, u16** Indices)
 			*Indices += (pInfo->nVertices - 2) * 3;
 		}
 
-		int nCount = m_nMaterial*max(1, m_nLightmap);
+		int nCount = Materials.size() * max(1u, LightmapTextures.size());
 
 		SAFE_DELETE_ARRAY(pNode->pDrawInfo);
 		pNode->pDrawInfo = new RDrawInfo[nCount];
 
 		int lastmatind = pNode->pInfo[0].nIndicesPos;
-		int lastmat = pNode->pInfo[0].nMaterial + pNode->pInfo[0].nLightmapTexture*m_nMaterial;
+		int lastmat = pNode->pInfo[0].nMaterial + pNode->pInfo[0].nLightmapTexture * Materials.size();
 		int nTriangle = pNode->pInfo[0].nVertices - 2;
 		int lastj = 0;
 
 		for (int j = 1; j < pNode->nPolygon + 1; j++)
 		{
 			int nMatIndex = (j == pNode->nPolygon) ? -999 :
-				pNode->pInfo[j].nMaterial + pNode->pInfo[j].nLightmapTexture*m_nMaterial;
+				pNode->pInfo[j].nMaterial + pNode->pInfo[j].nLightmapTexture * Materials.size();
 
 			if (nMatIndex != lastmat)
 			{
@@ -2107,12 +2131,12 @@ OpenNodesState RBspObject::Open_Nodes(RSBspNode *pNode, MZFile *pfile, OpenNodes
 			{
 				int nMaterial = mat + 1;
 
-				if (nMaterial < 0 || nMaterial >= m_nMaterial) nMaterial = 0;
+				if (nMaterial < 0 || nMaterial >= static_cast<int>(Materials.size())) nMaterial = 0;
 
 				pInfo->nMaterial = nMaterial;
 				pInfo->dwFlags |= Materials[nMaterial].dwFlags;
 			}
-			_ASSERT(pInfo->nMaterial < m_nMaterial);
+			_ASSERT(static_cast<size_t>(pInfo->nMaterial) < Materials.size());
 			pInfo->nPolygonID = State.PolygonID;
 			pInfo->nLightmapTexture = 0;
 
@@ -2126,7 +2150,7 @@ OpenNodesState RBspObject::Open_Nodes(RSBspNode *pNode, MZFile *pfile, OpenNodes
 
 bool RBspObject::CreateVertexBuffer()
 {
-	if (m_nPolygon * 3 > 65530 || m_nPolygon == 0) return false;
+	if (OcInfo.size() * 3 > 65530 || OcInfo.size() == 0) return false;
 
 	SAFE_RELEASE(VertexBuffer);
 
@@ -2256,11 +2280,9 @@ bool RBspObject::GenerateLightmap(const char *filename, int nMaxlightmapsize, in
 
 	ClearLightmaps();
 
-	int i, j, k, l;
-
 	float fMaximumArea = 0;
 
-	for (i = 0; i < m_nConvexPolygon; i++)
+	for (size_t i = 0; i < ConvexPolygons.size(); i++)
 	{
 		fMaximumArea = max(fMaximumArea, ConvexPolygons[i].fArea);
 	}
@@ -2272,7 +2294,7 @@ bool RBspObject::GenerateLightmap(const char *filename, int nMaxlightmapsize, in
 	rvector *lightmap = new rvector[nMaxlightmapsize*nMaxlightmapsize];
 	DWORD	*lightmapdata = new DWORD[nMaxlightmapsize*nMaxlightmapsize];
 	bool *isshadow = new bool[(nMaxlightmapsize + 1)*(nMaxlightmapsize + 1)];
-	int	*pSourceLightmap = new int[m_nConvexPolygon];
+	int	*pSourceLightmap = new int[ConvexPolygons.size()];
 	std::map<DWORD, int> ConstmapTable;
 
 	std::vector<RLIGHTMAPTEXTURE*> sourcelightmaplist;
@@ -2280,13 +2302,13 @@ bool RBspObject::GenerateLightmap(const char *filename, int nMaxlightmapsize, in
 
 	RHEADER header(R_LM_ID, R_LM_VERSION);
 
-	for (i = 0; i < m_nConvexPolygon; i++)
+	for (size_t i = 0; i < ConvexPolygons.size(); i++)
 	{
 		RCONVEXPOLYGONINFO *poly = &ConvexPolygons[i];
 
 		if (pProgressFn)
 		{
-			bool bContinue = pProgressFn((float)i / (float)m_nConvexPolygon);
+			bool bContinue = pProgressFn((float)i / (float)ConvexPolygons.size());
 			if (!bContinue)
 			{
 				bReturnValue = false;
@@ -2297,9 +2319,9 @@ bool RBspObject::GenerateLightmap(const char *filename, int nMaxlightmapsize, in
 		rboundingbox bbox;
 
 		bbox.vmin = bbox.vmax = poly->pVertices[0];
-		for (j = 1; j < poly->nVertices; j++)
+		for (int j = 1; j < poly->nVertices; j++)
 		{
-			for (k = 0; k < 3; k++)
+			for (int k = 0; k < 3; k++)
 			{
 				bbox.vmin[k] = min(bbox.vmin[k], poly->pVertices[j][k]);
 				bbox.vmax[k] = max(bbox.vmax[k], poly->pVertices[j][k]);
@@ -2321,7 +2343,7 @@ bool RBspObject::GenerateLightmap(const char *filename, int nMaxlightmapsize, in
 			rvector diff = float(lightmapsize) / float(lightmapsize - 1)*(bbox.vmax - bbox.vmin);
 
 			// 1 texel
-			for (k = 0; k<3; k++)
+			for (int k = 0; k < 3; k++)
 			{
 				bbox.vmin[k] -= .5f / float(lightmapsize)*diff[k];
 				bbox.vmax[k] += .5f / float(lightmapsize)*diff[k];
@@ -2362,21 +2384,21 @@ bool RBspObject::GenerateLightmap(const char *filename, int nMaxlightmapsize, in
 			au = (ax + 1) % 3;
 			av = (ax + 2) % 3;
 
-			for (j = 0; j < lightmapsize; j++)			// v 
+			for (int j = 0; j < lightmapsize; j++)			// v 
 			{
-				for (k = 0; k < lightmapsize; k++)		// u
+				for (int k = 0; k < lightmapsize; k++)		// u
 				{
 					lightmap[j*lightmapsize + k] = m_AmbientLight;
 				}
 			}
 
-			for (l = 0; l < nLight; l++)
+			for (int l = 0; l < nLight; l++)
 			{
 				RLIGHT *plight = pplight[l];
 
-				for (j = 0; j < lightmapsize + 1; j++)			// v 
+				for (int j = 0; j < lightmapsize + 1; j++)			// v 
 				{
-					for (k = 0; k < lightmapsize + 1; k++)		// u
+					for (int k = 0; k < lightmapsize + 1; k++)		// u
 					{
 						isshadow[k*(lightmapsize + 1) + j] = false;
 						if ((plight->dwFlags & RM_FLAG_CASTSHADOW) == 0 ||
@@ -2421,7 +2443,8 @@ bool RBspObject::GenerateLightmap(const char *filename, int nMaxlightmapsize, in
 								bbox.vmin = poi->pVisualMesh->m_vBMin;
 								bbox.vmax = poi->pVisualMesh->m_vBMax;
 								auto bBBTest = IntersectLineAABB(t, origin, dir, bbox);
-								if (bBBTest && poi->pVisualMesh->Pick(plight->Position, dirorigin, &vOut, &t))
+								if (bBBTest &&
+									poi->pVisualMesh->Pick(plight->Position, dirorigin, &vOut, &t))
 								{
 									rvector PickPos = plight->Position + vOut*t;
 									isshadow[k*(lightmapsize + 1) + j] = true;
@@ -2432,9 +2455,9 @@ bool RBspObject::GenerateLightmap(const char *filename, int nMaxlightmapsize, in
 				}
 
 
-				for (j = 0; j < lightmapsize; j++)
+				for (int j = 0; j < lightmapsize; j++)
 				{
-					for (k = 0; k < lightmapsize; k++)
+					for (int k = 0; k < lightmapsize; k++)
 					{
 						rvector color = rvector(0, 0, 0);
 
@@ -2526,7 +2549,7 @@ bool RBspObject::GenerateLightmap(const char *filename, int nMaxlightmapsize, in
 				}
 			}
 
-			for (j = 0; j < lightmapsize*lightmapsize; j++)
+			for (int j = 0; j < lightmapsize*lightmapsize; j++)
 			{
 				rvector color = lightmap[j];
 
@@ -2540,7 +2563,7 @@ bool RBspObject::GenerateLightmap(const char *filename, int nMaxlightmapsize, in
 		}
 
 		bool bConstmap = true;
-		for (j = 0; j < lightmapsize*lightmapsize; j++)
+		for (int j = 0; j < lightmapsize*lightmapsize; j++)
 		{
 			if (lightmapdata[j] != lightmapdata[0])
 			{
@@ -2592,11 +2615,13 @@ bool RBspObject::GenerateLightmap(const char *filename, int nMaxlightmapsize, in
 
 	fwrite(&header, sizeof(RHEADER), 1, file);
 
-	fwrite(&m_nConvexPolygon, sizeof(int), 1, file);
-	fwrite(&m_nNodeCount, sizeof(int), 1, file);
+	auto nConvexPolygons = ConvexPolygons.size();
+	fwrite(&nConvexPolygons, sizeof(int), 1, file);
+	int NodeCount = GetNodeCount();
+	fwrite(&NodeCount, sizeof(int), 1, file);
 
-	m_nLightmap = LightmapList.size();
-	fwrite(&m_nLightmap, sizeof(int), 1, file);
+	auto nLightmap = LightmapList.size();
+	fwrite(&nLightmap, sizeof(int), 1, file);
 	for (size_t i = 0; i < LightmapList.size(); i++)
 	{
 		char lightfilename[256];
@@ -2617,10 +2642,10 @@ bool RBspObject::GenerateLightmap(const char *filename, int nMaxlightmapsize, in
 
 	Sort_Nodes(OcRoot.data());
 
-	for (int i = 0; i < m_nPolygon; i++)
+	for (int i = 0; i < GetPolygonCount(); i++)
 		fwrite(&OcInfo[i].nPolygonID, sizeof(int), 1, file);
 
-	for (int i = 0; i < m_nPolygon; i++)
+	for (int i = 0; i < GetPolygonCount(); i++)
 		fwrite(&OcInfo[i].nLightmapTexture, sizeof(int), 1, file);
 
 	for (size_t i = 0; i < OcVertices.size(); i++)
@@ -2853,12 +2878,12 @@ rvector RBspObject::GetFloor(const rvector &origin, float fRadius, float fHeight
 
 RBSPMATERIAL *RBspObject::GetMaterial(int nIndex)
 {
-	_ASSERT(nIndex < m_nMaterial);
+	assert(nIndex >= 0 && static_cast<size_t>(nIndex) < Materials.size());
 	return &Materials[nIndex];
 }
 
 RBaseTexture* RBspObject::GetBaseTexture(int n) {
-	if (n >= 0 && n < m_nMaterial)
+	if (n >= 0 && static_cast<size_t>(n) < Materials.size())
 		return Materials[n].texture;
 	return nullptr;
 }
@@ -3267,16 +3292,16 @@ void RBspObject::DrawLight(D3DLIGHT9 *pLight)
 
 	int nChosen = ChooseNodes(OcRoot.data(), rvector(pLight->Position), pLight->Range);
 
-	for (int i = 0; i < m_nMaterial; i++)
+	for (size_t i = 0; i < Materials.size(); i++)
 	{
-		if ((Materials[i % m_nMaterial].dwFlags & RM_FLAG_TWOSIDED) == 0)
+		if ((Materials[i % Materials.size()].dwFlags & RM_FLAG_TWOSIDED) == 0)
 			RGetDevice()->SetRenderState(D3DRS_CULLMODE, D3DCULL_CW);
 		else
 			RGetDevice()->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
 
-		if ((Materials[i % m_nMaterial].dwFlags & RM_FLAG_ADDITIVE) == 0)
+		if ((Materials[i % Materials.size()].dwFlags & RM_FLAG_ADDITIVE) == 0)
 		{
-			int nMaterial = i % m_nMaterial;
+			int nMaterial = i % Materials.size();
 			RBaseTexture *pTex = Materials[nMaterial].texture;
 			if (pTex)
 			{

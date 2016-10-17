@@ -171,11 +171,7 @@ struct RBSPMATERIAL : public RMATERIAL {
 		Specular = mat->Specular;
 	};
 
-	~RBSPMATERIAL()
-	{
-		if (texture)
-			RDestroyBaseTexture(texture);
-	}
+	~RBSPMATERIAL();
 };
 
 class RBspLightmapManager {
@@ -232,6 +228,7 @@ struct AmbSndInfo
 using RGENERATELIGHTMAPCALLBACK = bool(*)(float fProgress);
 
 struct PickInfo;
+struct BspCounts;
 
 class RBspObject
 {
@@ -252,8 +249,8 @@ public:
 		void *CallbackParam = nullptr, bool PhysOnly = false);
 
 	bool OpenDescription(const char *);
-	bool OpenRs(const char *);
-	bool OpenBsp(const char *);
+	bool OpenRs(const char *, BspCounts&);
+	bool OpenBsp(const char *, const BspCounts&);
 	bool OpenLightmap();
 	bool OpenCol(const char *);
 	bool OpenNav(const char *);
@@ -288,7 +285,7 @@ public:
 	RBSPMATERIAL *GetMaterial(RSBspNode *pNode, int nIndex) {
 		return GetMaterial(pNode->pInfo[nIndex].nMaterial); }
 
-	int	GetMaterialCount() const { return m_nMaterial; }
+	int	GetMaterialCount() const { return Materials.size(); }
 	RBSPMATERIAL *GetMaterial(int nIndex);
 
 	RMapObjectList* GetMapObjectList() { return &m_ObjectList; }
@@ -305,12 +302,12 @@ public:
 	rvector GetDimension() const;
 
 	int	GetVertexCount() const { return OcVertices.size(); }
-	int	GetPolygonCount() const { return m_nPolygon; }
-	int GetNodeCount() const { return m_nNodeCount; }
-	int	GetBspPolygonCount() const { return m_nBspPolygon; }
-	int GetBspNodeCount() const { return m_nBspNodeCount; }
-	int GetConvexPolygonCount() const { return m_nConvexPolygon; }
-	int GetLightmapCount() const { return m_nLightmap; }
+	int	GetPolygonCount() const { return OcInfo.size(); }
+	int GetNodeCount() const { return OcRoot.size(); }
+	int	GetBspPolygonCount() const { return BspInfo.size(); }
+	int GetBspNodeCount() const { return BspRoot.size(); }
+	int GetConvexPolygonCount() const { return ConvexPolygons.size(); }
+	int GetLightmapCount() const { return LightmapTextures.size(); }
 
 	bool CheckWall(const rvector &origin, rvector &targetpos, float fRadius, float fHeight = 0.f,
 		RCOLLISIONMETHOD method = RCW_CYLINDER, int nDepth = 0, rplane *pimpactplane = NULL);
@@ -400,7 +397,6 @@ private:
 	auto* GetLeafNode(const rvector &pos) { return BspRoot[0].GetLeafNode(pos); }
 
 	bool ReadString(MZFile *pfile, char *buffer, int nBufferSize);
-	// Returns number of vertices, nodes and infos read, respectively, along with the numbers of polygons created. 
 	struct OpenNodesState Open_Nodes(RSBspNode *pNode, MZFile *pfile, OpenNodesState State);
 	// Returns number of nodes created.
 	int Open_ColNodes(RSolidBspNode *pNode, MZFile *pfile, int Depth = 0);
@@ -435,27 +431,32 @@ private:
 
 	static RBaseTexture *m_pShadeMap;
 
-	std::vector<BSPVERTEX>	BspVertices;
-	std::vector<BSPVERTEX>	OcVertices;
+	// Vertices
+	std::vector<BSPVERTEX> BspVertices;
+	std::vector<BSPVERTEX> OcVertices;
 	std::vector<BSPNORMALVERTEX> OcNormalVertices;
-	std::vector<u16>		OcIndices;
+	// Indices
+	std::vector<u16> OcIndices;
+	// BSP nodes
 	std::vector<RSBspNode> BspRoot;
 	std::vector<RSBspNode> OcRoot;
+	// Polygon info
 	std::vector<RPOLYGONINFO> BspInfo;
 	std::vector<RPOLYGONINFO> OcInfo;
-	int m_nPolygon{}, m_nNodeCount{};
-	int m_nBspPolygon{}, m_nBspNodeCount{}, m_nBspVertices{}, m_nBspIndices{};
+	// Vertex and index buffer objects
 	D3DPtr<IDirect3DVertexBuffer9> VertexBuffer;
 	D3DPtr<IDirect3DIndexBuffer9> IndexBuffer;
 
-	int m_nMaterial{};
+	// Stores material data, i.e. the stuff drawn onto geometry.
+	// The first index is special: It's an untextured material
+	// that has only a white diffuse color. It is used for materials
+	// whose material index didn't map to a valid material.
 	std::vector<RBSPMATERIAL> Materials;
 
 	rplane m_localViewFrustum[6];
 
 	ROcclusionList m_OcclusionList;
 
-	int m_nLightmap{};
 	std::vector<D3DPtr<IDirect3DTexture9>> LightmapTextures;
 
 	void CalcLightmapUV(RSBspNode *pNode, int *pLightmapInfo,
@@ -465,7 +466,6 @@ private:
 	// Interpolated normal
 	void GetNormal(RCONVEXPOLYGONINFO *poly, const rvector &position, rvector *normal, int au, int av);
 
-	int m_nConvexPolygon{}, m_nConvexVertices{};
 	std::vector<v3> ConvexVertices;
 	std::vector<v3> ConvexNormals;
 	std::vector<RCONVEXPOLYGONINFO> ConvexPolygons;
@@ -483,9 +483,9 @@ private:
 	std::vector<RSolidBspNode> ColRoot;
 	std::vector<v3> ColVertices;
 
-	RNavigationMesh		m_NavigationMesh;
+	RNavigationMesh m_NavigationMesh;
 
-	RDummyList	m_DummyList;
+	RDummyList m_DummyList;
 
 	FogInfo m_FogInfo;
 

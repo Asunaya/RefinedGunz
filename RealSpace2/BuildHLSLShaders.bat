@@ -4,7 +4,7 @@ SET options=/O3
 
 call:CompileVSPS Shadow
 call:CompileVSPS MergeShadowMaps
-call:CompileVS skin
+call:CompileShader skin /Tvs_1_1
 goto:eof
 
 :CompileVSPS

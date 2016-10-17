@@ -64,7 +64,7 @@ void RBspObjectDrawVulkan::RenderNode(VkCommandBuffer CmdBuffer, RSBspNode& Node
 
 void RBspObjectDrawVulkan::Render(VkCommandBuffer CmdBuffer)
 {
-	for (int i = 1; i < bsp.m_nMaterial; ++i)
+	for (size_t i = 0; i < bsp.Materials.size(); ++i)
 	{
 		auto& Material = bsp.Materials[i];
 
@@ -304,14 +304,14 @@ void RBspObjectDrawVulkan::SetupDescriptorPool()
 		// Only need one uniform buffer
 		vkTools::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1),
 		// Need a texture descriptor for each material in the map
-		vkTools::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, bsp.m_nMaterial)
+		vkTools::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, bsp.Materials.size())
 	};
 
 	VkDescriptorPoolCreateInfo descriptorPoolInfo =
 		vkTools::initializers::descriptorPoolCreateInfo(
 			static_cast<uint32_t>(poolSizes.size()),
 			poolSizes.data(),
-			bsp.m_nMaterial + 1);
+			bsp.Materials.size() + 1);
 
 	VK_CHECK_RESULT(vkCreateDescriptorPool(GetRS2Vulkan().Device, &descriptorPoolInfo, nullptr, &DescriptorPool));
 }
@@ -372,7 +372,9 @@ void RBspObjectDrawVulkan::SetupDescriptorSet()
 		static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(),
 		0, nullptr);
 
-	for (int i = 1; i < bsp.m_nMaterial; ++i)
+	// Material index 0 always stores a white diffuse color and no texture,
+	// so start from 1 and don't attempt to load its texture.
+	for (size_t i = 1; i < bsp.Materials.size(); ++i)
 	{
 		auto& Material = bsp.Materials[i];
 

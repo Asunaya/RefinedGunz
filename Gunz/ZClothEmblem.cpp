@@ -7,18 +7,11 @@
 #include "RDynamicLight.h"
 #include "MDebug.h"
 
-
-//////////////////////////////////////////////////////////////////////////
-//	Define
-//////////////////////////////////////////////////////////////////////////
 #define Gravity							-7
-#define MAX_NUM_CLOTH_PARTICLE			165 //(165*3)
+#define MAX_NUM_CLOTH_PARTICLE			165
 #define LIGHT_DISTANCE					100
 #define RESERVED_SPACE					10
 
-//////////////////////////////////////////////////////////////////////////
-//	Global
-//////////////////////////////////////////////////////////////////////////
 static RVertex					g_Cloth_Buffer[MAX_NUM_CLOTH_PARTICLE*3];
 static LPDIRECT3DVERTEXBUFFER9	g_hw_Buffer			= 0;
 unsigned int			ZClothEmblem::msRef = 0;
@@ -33,9 +26,6 @@ struct testv
 
 #define testvFVF (D3DFVF_XYZ|D3DFVF_DIFFUSE)
 
-//////////////////////////////////////////////////////////////////////////
-//	CreateFromMeshNode
-//////////////////////////////////////////////////////////////////////////
 void	ZClothEmblem::CreateFromMeshNode( RMeshNode* pMeshNdoe_ , ZWorld* pWorld)
 {
 	int			i, nIndices;
@@ -162,7 +152,7 @@ void	ZClothEmblem::CreateFromMeshNode( RMeshNode* pMeshNdoe_ , ZWorld* pWorld)
 		mpLight->Range		= pSelectedLight->fAttnEnd;
 		mpLight->Attenuation1	= 0.0001f;
 	}
-	else	// 가까운 곳에 빛이 없으면 기본 라이팅 적용
+	else
 	{
 		mpLight->Type		= D3DLIGHT_DIRECTIONAL;
 		
@@ -227,7 +217,7 @@ void ZClothEmblem::update()
 		}
 
 	DWORD currTime = GetGlobalTimeMS();
-	if ( mMyTime - currTime < 33 )			// 초당 30번으로 제한
+	if ( mMyTime - currTime < 33 )
 	{
 		return;
 	}
@@ -236,7 +226,6 @@ void ZClothEmblem::update()
  	accumulateForces();
 	varlet();
 	memset( m_pForce, 0, sizeof(rvector)*m_nCntP );
-	//memset( mpWind, 0, sizeof(rvector) );
 	if(mpWind!=NULL) 
 	{
 		mpWind->x = 0.f;
@@ -245,7 +234,7 @@ void ZClothEmblem::update()
 	}
 	satisfyConstraints();
 	mWndGenerator.Update( GetGlobalTimeMS() );
-	mbIsInFrustrum = true; // 다음 루프에서 시뮬레이션 대상에 추가한다
+	mbIsInFrustrum = true;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -296,160 +285,126 @@ void ZClothEmblem::varlet()
 //	satisfyConstraints
 //////////////////////////////////////////////////////////////////////////
 void ZClothEmblem::satisfyConstraints()
-{	
+{
 	sConstraint*	c;
 	rvector*		x1;
 	rvector*		x2;
 	rvector			delta;
 	float			deltaLegth;
 	float			diff;
-	int				i,j;
+	int				i, j;
 
-//	if( mbIsInFrustrum )
+	for (i = 0; i < m_nCntIter; ++i)
 	{
-		for( i = 0 ; i < m_nCntIter; ++i )
+		for (ZCharacterManager::iterator itor = ZGetCharacterManager()->begin();
+		itor != ZGetCharacterManager()->end(); ++itor)
 		{
-			// 캐릭터와 충돌 체크
-			for (ZCharacterManager::iterator itor = ZGetCharacterManager()->begin();
-				itor != ZGetCharacterManager()->end(); ++itor)
-			{
-				ZCharacter*	pCharacter	= (*itor).second;
+			ZCharacter*	pCharacter = (*itor).second;
 
-				// 현재 화면에 보이는 캐릭터만 대상으로 체크.. 뷰프러스텀 컬링
-				if( !isInViewFrustum( pCharacter->m_Position, CHARACTER_RADIUS + 10, RGetViewFrustum() ) )
+			if (!isInViewFrustum(pCharacter->m_Position, CHARACTER_RADIUS + 10, RGetViewFrustum()))
+			{
+				continue;
+			}
+
+			if (pCharacter->IsDie() && pCharacter->m_bBlastDrop && !pCharacter->IsVisible())
+			{
+				continue;
+			}
+
+			for (j = 0; j < m_nCntP; ++j)
+			{
+				rvector	pos = pCharacter->m_Position;
+				rvector myPos = m_pX[j];
+
+				if (pos.z + 190 < myPos.z || pos.z > myPos.z)
 				{
 					continue;
 				}
-				
-				if( pCharacter->IsDie() && pCharacter->m_bBlastDrop && !pCharacter->IsVisible() )
+
+				pos.z = 0;
+				myPos.z = 0;
+
+				rvector dir = myPos - pos;
+
+				float lengthsq = D3DXVec3LengthSq(&dir);
+				if (lengthsq > CHARACTER_RADIUS*CHARACTER_RADIUS)
 				{
 					continue;
 				}
 
-				for( j = 0 ; j < m_nCntP; ++j )
-				{
- 					rvector	pos		= pCharacter->m_Position;
-					rvector myPos	= m_pX[j];
+				D3DXVec3Normalize(&dir, &dir);
 
-					if( pos.z + 190 < myPos.z || pos.z > myPos.z )
-					{
-						continue;
-					}
-					
-					pos.z	= 0;
-					myPos.z	= 0;
-
-					rvector dir		= myPos - pos;
-					
-					float lengthsq	= D3DXVec3LengthSq( &dir );
-					if( lengthsq > CHARACTER_RADIUS*CHARACTER_RADIUS )
-					{
-						continue;
-					}
-	                
-					D3DXVec3Normalize( &dir, &dir );
-
-					myPos		= pos + dir * ( CHARACTER_RADIUS );
-					m_pX[j].x		= myPos.x;
-					m_pX[j].y		= myPos.y;
-
-					//break;
-				}
+				myPos = pos + dir * (CHARACTER_RADIUS);
+				m_pX[j].x = myPos.x;
+				m_pX[j].y = myPos.y;
 			}
-		}
-
-
-		// Restriction
-		for( list<sRestriction*>::iterator itor = mRestrictionList.begin();
-			itor != mRestrictionList.end(); ++itor )
-		{
-			for( int j = 0 ; j < m_nCntP; ++j )
-			{
-				float* p		= (float*)&m_pX[j];
-				sRestriction* r = *itor;
-                
-				p += (int)r->axis; // 축결정
-				if( r->compare == COMPARE_GREATER)
-				{
-					if( *p > r->position )
-					{
-						*p = r->position;
-					}
-				}
-				else
-				{
-					if( *p < r->position -3)
-					{
-						*p = r->position;
-					}
-				}
-			}
-			
-		}
-		
-		
-
-		// Relaxation
-		for( j = 0 ; j < m_nCntC; ++j )
-		{
-			c	= &m_pConst[j];
-
-			x1	= &m_pX[ c->refA ];
-			x2	= &m_pX[ c->refB ];
-
-			delta = *x2 - *x1;
-			deltaLegth = D3DXVec3Length( &delta );
-			diff = (float) ( ( deltaLegth - c->restLength ) / (deltaLegth ));
-
-			*x1		+= delta * diff * 0.5;
-			*x2		-= delta * diff * 0.5; 
 		}
 	}
 
-	for( i = 0 ; i < m_nCntP; ++i )
+
+	// Restriction
+	for (list<sRestriction*>::iterator itor = mRestrictionList.begin();
+	itor != mRestrictionList.end(); ++itor)
 	{
-		if( m_pHolds[i] & CLOTH_HOLD )
+		for (int j = 0; j < m_nCntP; ++j)
 		{
-			m_pX[i]	= m_pOldX[i];
+			float* p = (float*)&m_pX[j];
+			sRestriction* r = *itor;
+
+			p += (int)r->axis;
+			if (r->compare == COMPARE_GREATER)
+			{
+				if (*p > r->position)
+				{
+					*p = r->position;
+				}
+			}
+			else
+			{
+				if (*p < r->position - 3)
+				{
+					*p = r->position;
+				}
+			}
+		}
+
+	}
+
+
+
+	// Relaxation
+	for (j = 0; j < m_nCntC; ++j)
+	{
+		c = &m_pConst[j];
+
+		x1 = &m_pX[c->refA];
+		x2 = &m_pX[c->refB];
+
+		delta = *x2 - *x1;
+		deltaLegth = D3DXVec3Length(&delta);
+		diff = (float)((deltaLegth - c->restLength) / (deltaLegth));
+
+		*x1 += delta * diff * 0.5;
+		*x2 -= delta * diff * 0.5;
+	}
+
+	for (i = 0; i < m_nCntP; ++i)
+	{
+		if (m_pHolds[i] & CLOTH_HOLD)
+		{
+			m_pX[i] = m_pOldX[i];
 		}
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////
-//	Render
-//////////////////////////////////////////////////////////////////////////
 void ZClothEmblem::render()
 {
- //	if( !isInViewFrustum( &mAABB, RGetViewFrustum() ) )	
-	//{
-	//	return;
-	//}
-//	if(g_pGame==NULL || !ZGetGame()->GetWorld()->GetBsp()->IsVisible(mAABB)) return;
-
 	if( !mbIsInFrustrum ) return;
 
 	int		i, index;
 
 	UpdateNormal();
 
-	//memset(g_Cloth_Buffer,0, sizeof(RVertex)*MAX_NUM_CLOTH_PARTICLE*3 );
-
-	//for( i = 0 ; i < mpMeshNode->m_point_num; ++i )
-	//{
-	//	g_Cloth_Buffer[i].p	= m_pX[i];
-	//	g_Cloth_Buffer[i].n	= m_pNormal[i];
-	//}
-
- //   for( i = 0 ; i < mpMeshNode->m_face_num; ++i )
-	//{
-	//	for( int j = 0 ; j < 3; ++j )
-	//	{
-	//		index	= mpMeshNode->m_face_list[i].m_point_index[j];
-	//		g_Cloth_Buffer[index].tu	= mpMeshNode->m_face_list[i].m_point_tex[j].x;
-	//		g_Cloth_Buffer[index].tv	= mpMeshNode->m_face_list[i].m_point_tex[j].y;
-	//		g_index_buffer[i*3+j] = index;
-	//	}
-	//}
 	for( i = 0 ; i < mpMeshNode->m_face_num; ++i )
 	{
 		for( int j = 0 ; j < 3; ++j )
@@ -459,7 +414,6 @@ void ZClothEmblem::render()
 			g_Cloth_Buffer[3*i+j].n	= m_pNormal[index];
 			g_Cloth_Buffer[3*i+j].tu = mpMeshNode->m_face_list[i].m_point_tex[j].x;
 			g_Cloth_Buffer[3*i+j].tv = mpMeshNode->m_face_list[i].m_point_tex[j].y;
-//			g_index_buffer[i*3+j] = index;
 		}
 	}
 
@@ -508,11 +462,9 @@ void ZClothEmblem::render()
 	RGetDevice()->LightEnable( 1, FALSE );
 
 	RGetDevice()->SetFVF( RVertexType );
-	//RGetDevice()->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME );
 	
 	if( bHardwareBuffer )
 	{
-		// TODO: 무조건 DISCARD 로 lock할것이 아니라, nooverwrite 로 적절히 낭비되지않도록해주자.
 		VOID* pVertex;
 		if( FAILED( g_hw_Buffer->Lock( 0,  mpMeshNode->m_point_num * 3 * sizeof(RVertex), (VOID**)&pVertex, D3DLOCK_DISCARD )))
 		{
@@ -529,44 +481,22 @@ void ZClothEmblem::render()
 		}
 
 		RGetDevice()->SetStreamSource( 0, g_hw_Buffer, 0, sizeof(RVertex) );
-		//RGetDevice()->SetIndices( mIndexBuffer);
-		//RGetDevice()->DrawIndexedPrimitive( D3DPT_TRIANGLELIST, 0, mpMeshNode->m_point_num, 0, mpMeshNode->m_face_num );
 		RGetDevice()->DrawPrimitive(D3DPT_TRIANGLELIST,0,mpMeshNode->m_face_num);
 	}
 	else
 	{
- 		//RGetDevice()->DrawIndexedPrimitiveUP( D3DPT_TRIANGLELIST, 0, mpMeshNode->m_point_num, mpMeshNode->m_face_num, g_index_buffer, D3DFMT_INDEX16, g_Cloth_Buffer, sizeof(RVertex) );
 		RGetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLELIST, mpMeshNode->m_face_num, g_Cloth_Buffer, sizeof(RVertex) );
 	}	
 
 	RGetDevice()->LightEnable( 0, FALSE );
 	RGetDevice()->LightEnable( 1, FALSE );
-	
-	//{
-	//	static testv v[1000];
-	//	for( int i = 0; i < m_nCntP; ++i )
-	//	{
-	//		v[2*i].n = m_pX[i];
-	//		v[2*i].c	= 0xffffffff;
-	//		v[2*i + 1].n = m_pX[i] + mpNormal[i] * 50.f;
-	//		v[2*i + 1].c	= 0xffffffff;
-	//	}
-	//	RGetDevice()->SetFVF( testvFVF );
-	//	RGetDevice()->DrawPrimitiveUP( D3DPT_LINELIST, m_nCntP, v, sizeof(testv) );
-	//}
 }
 
-//////////////////////////////////////////////////////////////////////////
-//	UpdateNormal
-//////////////////////////////////////////////////////////////////////////
 void ZClothEmblem::UpdateNormal()
 {
 	int	i, j, index, indexTemp[3];
-	//static rplane	planeTemp; 
-	//rvector* pPoint[3];
 	rvector Point[3];
 
-	// 초기화
 	memset( m_pNormal, 0, sizeof(rvector)*m_nCntP );
 	memset( indexTemp, 0, sizeof(int)*3 );
 
@@ -575,15 +505,13 @@ void ZClothEmblem::UpdateNormal()
 		for( j = 0 ; j < 3; ++j )
 		{
 			index		= mpMeshNode->m_face_list[i].m_point_index[j];
-			//Debug
 			if( index < 0 || index >= m_nCntP )
 			{
 				_ASSERT(FALSE);
+				// TODO: Figure out wtf this even means
 				mlog("Index of Particle is not profit to calculate...\n");
 				continue;
 			}
-			//End Debug
-			//pPoint[j]	= &m_pX[index];
 			Point[j]			= m_pX[index];
 			indexTemp[j]= index;
 		}
@@ -603,14 +531,11 @@ void ZClothEmblem::UpdateNormal()
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////
-//	SetExplosion
-//////////////////////////////////////////////////////////////////////////
 void ZClothEmblem::setExplosion( rvector& pos_, float power_ )
 {
 	rvector	dir		= m_pX[0] - pos_;
 	float lengthsq	= D3DXVec3LengthSq( &dir );
-	if( lengthsq	 > 250000 )	// 5미터 안의 것들만 영향을 받음..
+	if( lengthsq	 > 250000 )
 	{
 		return;
 	}
@@ -619,9 +544,6 @@ void ZClothEmblem::setExplosion( rvector& pos_, float power_ )
 	*mpWind	+= dir * power_ / sqrt(lengthsq) * 10;
 }
 
-//////////////////////////////////////////////////////////////////////////
-//	CheckSpearing
-//////////////////////////////////////////////////////////////////////////
 void ZClothEmblem::CheckSpearing( rvector& bullet_begin_, rvector& bullet_end_, float power_ )
 {	
 	if(mbIsInFrustrum)
@@ -674,17 +596,11 @@ void ZClothEmblem::CheckSpearing( rvector& bullet_begin_, rvector& bullet_end_, 
 	}	
 }
 
-//////////////////////////////////////////////////////////////////////////
-//	OnInvalidate
-//////////////////////////////////////////////////////////////////////////
 void ZClothEmblem::OnInvalidate()
 {
 	SAFE_RELEASE( g_hw_Buffer );
 }
 
-//////////////////////////////////////////////////////////////////////////
-//	OnRestore
-//////////////////////////////////////////////////////////////////////////
 void ZClothEmblem::OnRestore()
 {
 	if( g_hw_Buffer == 0 )
@@ -698,12 +614,8 @@ void ZClothEmblem::OnRestore()
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////
-//	생성자 / 소멸자
-//////////////////////////////////////////////////////////////////////////
 ZClothEmblem::ZClothEmblem(void)
 {
-	//setOption( 1, 0.10, 1.0f );	//	초기값
 	setOption(1, 0.15f,1.0f);
 	mpWind	= new rvector(0,0,0);
 	mpLight	= 0;
@@ -714,7 +626,6 @@ ZClothEmblem::ZClothEmblem(void)
 	m_fDist = 0.f;
 	if(msRef==0) OnRestore();
 	++msRef;
-	//mIndexBuffer = 0;
 	mbIsInFrustrum = true;
 }
 
@@ -728,7 +639,6 @@ ZClothEmblem::~ZClothEmblem(void)
 		SAFE_DELETE(p);
 		iter = mRestrictionList.erase(iter);
 	}
-	//SAFE_RELEASE(mIndexBuffer);
 	--msRef;
 	if(msRef==0) OnInvalidate();
 }
@@ -739,9 +649,6 @@ bool e_clothemblem_sort_float(ZClothEmblem* _a,ZClothEmblem* _b) {
 	return false;
 }
 
-//////////////////////////////////////////////////////////////////////////
-//	ZEmblemList
-//////////////////////////////////////////////////////////////////////////
 void ZEmblemList::Draw()
 {
 	rvector camera_pos = RealSpace2::RCameraPosition;
@@ -824,9 +731,6 @@ void ZEmblemList::CheckSpearing( rvector& bullet_begine_, rvector& bullet_end_, 
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////
-//	OnInvalidate
-//////////////////////////////////////////////////////////////////////////
 void ZEmblemList::OnInvalidate()
 {
 	if( ZClothEmblem::GetRefCount() != 0 )
@@ -836,9 +740,6 @@ void ZEmblemList::OnInvalidate()
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////
-//	OnRestore
-//////////////////////////////////////////////////////////////////////////
 void ZEmblemList::OnRestore()
 {
 	if( ZClothEmblem::GetRefCount() != 0 )
@@ -848,9 +749,6 @@ void ZEmblemList::OnRestore()
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////
-//	InitEnv
-//////////////////////////////////////////////////////////////////////////
 void ZEmblemList::InitEnv( char* pFileName_ )
 {
 	MXmlDocument	Data;
@@ -903,7 +801,6 @@ void ZEmblemList::InitEnv( char* pFileName_ )
 				auto up = rvector(0, 0, 1);
 				D3DXMatrixRotationAxis( &RotMat, &up, ((float)theta*D3DX_PI/180) );
 				dir = dir*RotMat;
-				//p->SetBaseWind( dir );
 				p->GetWndGenerator()->SetWindDirection( dir );
 			}
 

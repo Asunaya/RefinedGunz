@@ -432,6 +432,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Source\vulkandebug.cpp" />
+    <ClCompile Include="Source\VulkanMaterial.cpp" />
     <ClCompile Include="Source\vulkantools.cpp" />
     <ClCompile Include="Source\vulkan_functions.cpp" />
   </ItemGroup>

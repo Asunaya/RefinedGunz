@@ -8,3 +8,5 @@ struct VulkanMaterial
 	vkTools::VulkanTexture Texture;
 	VkDescriptorSet DescriptorSet;
 };
+
+void DestroyVkMaterial(VulkanMaterial& Material);

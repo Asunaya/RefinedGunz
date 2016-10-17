@@ -841,7 +841,7 @@ namespace vkTools
 		*
 		* @param texture Texture object whose resources are to be freed
 		*/
-		void destroyTexture(VulkanTexture texture)
+		void destroyTexture(VulkanTexture& texture)
 		{
 			vkDestroyImageView(vulkanDevice->logicalDevice, texture.view, nullptr);
 			vkDestroyImage(vulkanDevice->logicalDevice, texture.image, nullptr);
