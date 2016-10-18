@@ -1,5 +1,5 @@
 #pragma once
-#include "Extensions.h"
+#include "Config.h"
 #ifdef PORTAL
 #include "rtypes.h"
 #include "ZCharacter.h"

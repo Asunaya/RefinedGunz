@@ -14,14 +14,15 @@ class RBspObjectDrawVulkan
 {
 public:
 	RBspObjectDrawVulkan(RBspObject& bsp) : bsp(bsp) {}
+	~RBspObjectDrawVulkan();
+	RBspObjectDrawVulkan(const RBspObjectDrawVulkan&) = delete;
+	RBspObjectDrawVulkan(RBspObjectDrawVulkan&&) = default;
 	
 	void Init();
 	void Draw();
 	void UpdateUniformBuffers();
 
 private:
-	RBspObject& bsp;
-
 	// Creates and fills the vertex and index buffers
 	void CreateBuffers();
 	void SetupVertexDescriptions();
@@ -30,15 +31,29 @@ private:
 	void CreatePipelines();
 	void SetupDescriptorPool();
 	void SetupDescriptorSet();
+	template <u32 Flags, bool ShouldHaveFlags, bool SetAlphaTestFlags, bool SetTextures = true>
 	void Render(VkCommandBuffer CmdBuffer);
 	void RenderNode(VkCommandBuffer CmdBuffer, struct RSBspNode& Node, int Material);
 	void CreateCommandBuffers();
 
+	// Awkward
+	bool Initialized{};
+
+	RBspObject& bsp;
+
 	vk::Buffer VertexBuffer;
 	vk::Buffer IndexBuffer;
 
-	VkPipeline Pipeline{};
-	VkPipeline WireframePipeline{};
+	union {
+		struct {
+			VkPipeline Solid;
+			VkPipeline Transparent;
+			VkPipeline AlphaTesting;
+			VkPipeline Additive;
+			VkPipeline Wireframe;
+		};
+		VkPipeline Array[5];
+	} Pipelines;
 	VkPipelineLayout PipelineLayout{};
 	VkPipelineCache PipelineCache{};
 

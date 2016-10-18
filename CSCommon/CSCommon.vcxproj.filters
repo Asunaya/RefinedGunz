@@ -185,6 +185,7 @@
     <ClInclude Include="Include\MMatchObjCache.h" />
     <ClInclude Include="Include\MMatchStringResManager.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="Include\Config.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\MCommand.cpp">

@@ -2,7 +2,13 @@
 #include "RS2Vulkan.h"
 #include "RBspObject.h"
 
-#define VK_USE_VALIDATION_LAYERS 1
+#define VK_USE_VALIDATION_LAYERS 0
+
+static void LogError(const char* msg)
+{
+	MessageBox(0, msg, "RGunz", 0);
+	MLog(msg);
+}
 
 static bool CreateConsole(const char* Title)
 {
@@ -14,20 +20,8 @@ static bool CreateConsole(const char* Title)
 	return true;
 }
 
-static bool LoadGlobalVulkanFunctions()
+static bool LoadGlobalVulkanFunctions(HMODULE hVulkan)
 {
-	auto LogError = [&](const char* msg) {
-		MessageBox(0, msg, "RGunz", 0);
-		MLog(msg);
-	};
-
-	auto hVulkan = LoadLibrary("vulkan-1.dll");
-	if (!hVulkan)
-	{
-		LogError("Failed to load vulkan-1.dll. Make sure your driver supports Vulkan.");
-		return false;
-	}
-
 	auto LogFailedFunctionLoad = [&](const char* name) {
 		char msg[256];
 		sprintf_safe(msg, "Failed to load function %s from vulkan-1.dll.", name);
@@ -47,6 +41,8 @@ static bool LoadGlobalVulkanFunctions()
 
 RS2Vulkan::~RS2Vulkan()
 {
+	// TODO: Destroy stuff here
+	FreeLibrary(hVulkan);
 }
 
 bool RS2Vulkan::Create(HWND hwnd, HINSTANCE inst)
@@ -56,7 +52,14 @@ bool RS2Vulkan::Create(HWND hwnd, HINSTANCE inst)
 		MLog("Failed to create console\n");
 #endif
 
-	if (!LoadGlobalVulkanFunctions())
+	hVulkan = LoadLibrary("vulkan-1.dll");
+	if (!hVulkan)
+	{
+		LogError("Failed to load vulkan-1.dll. Make sure your driver supports Vulkan.");
+		return false;
+	}
+
+	if (!LoadGlobalVulkanFunctions(hVulkan))
 		return false;
 
 	InitVulkan(VK_USE_VALIDATION_LAYERS);
@@ -80,7 +83,7 @@ void RS2Vulkan::Draw()
 
 	prepareFrame();
 
-	// Command buffer to be sumitted to the queue
+	// Command buffer to be submitted to the queue
 	SubmitInfo.commandBufferCount = 1;
 	SubmitInfo.pCommandBuffers = &DrawCmdBuffers[currentBuffer];
 

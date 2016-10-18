@@ -5,5 +5,6 @@
 
 void DestroyVkMaterial(VulkanMaterial& Material)
 {
-	GetRS2Vulkan().TextureLoader->destroyTexture(Material.Texture);
+	if (Material.Texture.view != VK_NULL_HANDLE)
+		GetRS2Vulkan().TextureLoader->destroyTexture(Material.Texture);
 }

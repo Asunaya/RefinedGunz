@@ -541,10 +541,10 @@ bool RBspObject::Draw()
 	g_nCall = 0;
 #endif
 
-	if (RIsHardwareTNL() &&
-		(!VertexBuffer || !IndexBuffer)) return false;
+	// If we're using hardware rendering, both the vertex buffer and index buffer must be valid.
+	if (RIsHardwareTNL() && (!VertexBuffer || !IndexBuffer)) return false;
 
-	auto dev = RGetDevice();
+	auto* dev = RGetDevice();
 
 	// Disable alpha blending
 	dev->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
@@ -584,7 +584,7 @@ bool RBspObject::Draw()
 
 		rmatrix trWorld = Transpose(World);
 
-		for (int i = 0; i < 6; i++)
+		for (size_t i = 0; i < ArraySize(m_localViewFrustum); i++)
 			m_localViewFrustum[i] = Transform(RGetViewFrustum()[i], trWorld);
 	}
 
@@ -3056,17 +3056,19 @@ template <bool Shadow>
 bool RBspObject::CheckBranches(RSBspNode* pNode, const v3& v0, const v3& v1, PickInfo& pi)
 {
 	rvector w0, w1;
-	float t;
+	//float t;
 	auto CheckBranch = [&](int side, auto* branch) {
-		return IntersectLineAABB(t, pi.From, pi.Dir, pNode->bbTree, pi.InverseDir) &&
-			Square(t) < pi.LengthSquared &&
+		// This commented out check introduces false negatives because
+		// the bounding boxes are apparently wrong for some nodes.
+		// TODO: Fix the bounding boxes
+		return //IntersectLineAABB(t, pi.From, pi.Dir, pNode->bbTree, pi.InverseDir) &&
+			//Square(t) < pi.LengthSquared &&
 			pick_checkplane(side, pNode->plane, v0, v1, &w0, &w1) &&
 			Pick<Shadow>(branch, w0, w1, pi);
 	};
 	auto CheckPositive = [&] { return CheckBranch(1, pNode->m_pPositive); };
 	auto CheckNegative = [&] { return CheckBranch(-1, pNode->m_pNegative); };
 
-	bool bHit = false;
 	if (DotPlaneNormal(pNode->plane, pi.Dir) > 0)
 		return CheckNegative() || CheckPositive();
 	else

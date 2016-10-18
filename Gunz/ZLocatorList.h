@@ -3,31 +3,19 @@
 #include <vector>
 #include <string>
 
-using std::vector;
-using std::string;
-
-class MZFileSystem;
-
 #define LOCATOR_PORT 8900
 
-class ZLocatorList : public map< int, string >
+class ZLocatorList : public std::map<int, std::string>
 {
 public:
-	ZLocatorList(void);
-	virtual ~ZLocatorList(void);
-
 	void Clear() { m_LocatorIPList.clear(); }
-	const int GetSize() const { return static_cast< int >( m_LocatorIPList.size() ); }
-	const string& GetIPByPos( const int nPos ) { return m_LocatorIPList[ nPos ]; }
+	int GetSize() const { return static_cast<int>( m_LocatorIPList.size() ); }
+	const std::string& GetIPByPos(int nPos) const { return m_LocatorIPList[ nPos ]; };
 
-//	bool Init( MZFileSystem* pFileSystem, const char* pszListFile );
+	bool ParseLocatorList(MXmlElement& element);
 
-	bool ParseLocatorList( MXmlElement& element );
+private:
+	bool ParseLocator(MXmlElement& element);
 
-private :
-//	bool LoadXML( MZFileSystem* pFileSystem, const char* pszListFile );
-	bool ParseLocator( MXmlElement& element );
-
-private :
-	vector< string > m_LocatorIPList;
+	std::vector<std::string> m_LocatorIPList;
 };

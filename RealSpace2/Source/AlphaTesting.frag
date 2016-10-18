@@ -12,6 +12,9 @@ layout (location = 0) out vec4 outFragColor;
 void main() 
 {
 	vec4 color = texture(samplerColor, inUV, 1);
+	
+	if (color.a > 0.5)
+		discard;
 
 	outFragColor = vec4(color.rgba);
 }

@@ -5,7 +5,7 @@
 #include <mutex>
 #include <queue>
 #include <memory>
-#include "Extensions.h"
+#include "Config.h"
 #include "VoiceChat.h"
 #include "Tasks.h"
 #include "Hitboxes.h"

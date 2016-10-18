@@ -14,6 +14,8 @@ extern float g_fFPS;
 extern HWND	g_hWnd;
 extern MZFileSystem *g_pFileSystem;
 extern rplane RViewFrustum[6];
+extern rvector RCameraPosition, RCameraDirection, RCameraUp;
+extern rmatrix RView, RProjection, RViewProjection, RViewport, RViewProjectionViewport;
 
 enum class GraphicsAPI
 {
@@ -57,7 +59,7 @@ int		RGetScreenHeight();
 int		RGetPicmip();
 RPIXELFORMAT RGetPixelFormat();
 D3DADAPTER_IDENTIFIER9*	RGetAdapterID();
-void SetClearColor(DWORD c);
+void SetClearColor(u32 c);
 int		RGetVideoMemory();
 void	RSetWBuffer(bool bEnable);
 bool	RIsStencilBuffer();
@@ -80,7 +82,7 @@ void RSetFileSystem(MZFileSystem *pFileSystem);
 void RAdjustWindow(const RMODEPARAMS* ModeParams);
 u32 GetWindowStyle(const RMODEPARAMS& ModeParams);
 
-LPDIRECT3DDEVICE9	RGetDevice();
+LPDIRECT3DDEVICE9 RGetDevice();
 
 void RResetDevice(const RMODEPARAMS *params);
 RRESULT RIsReadyToRender();
@@ -97,9 +99,6 @@ bool RGetFog();
 float RGetFogNear();
 float RGetFogFar();
 DWORD RGetFogColor();
-
-extern rvector RCameraPosition, RCameraDirection, RCameraUp;
-extern rmatrix RView, RProjection, RViewProjection, RViewport, RViewProjectionViewport;
 
 void RSetCamera(const rvector &from, const rvector &at, const rvector &up);
 void RUpdateCamera();

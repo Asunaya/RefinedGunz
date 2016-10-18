@@ -584,7 +584,7 @@ static void GetIntersectedScreenLine(rvector &pos, rvector &dir)
 	D3DXPlaneIntersectLine(&checkpos, &myplane, &pos, &checkposto);
 }
 
-//#define _DEBUG
+#define _DEBUG
 
 void Portal::OnShot()
 {
@@ -608,10 +608,10 @@ void Portal::OnShot()
 	bLastLClick = bLClick;
 	bLastRClick = bRClick;
 
+#ifndef _DEBUG
 	if (ZGetGameClient()->GetMatchStageSetting()->GetGameType() != MMATCH_GAMETYPE_TRAINING)
 		return;
 
-#ifndef DEBUG
 	MMatchItemDesc *pDesc = ZGetGame()->m_pMyCharacter->GetSelectItemDesc();
 
 	if (!pDesc)

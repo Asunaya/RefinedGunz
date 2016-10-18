@@ -570,7 +570,6 @@ rem call copy_share.bat
     <ClInclude Include="..\cml\Include\SafeString.h" />
     <ClInclude Include="ArrayView.h" />
     <ClInclude Include="Draw.h" />
-    <ClInclude Include="Extensions.h" />
     <ClInclude Include="Hitboxes.h" />
     <ClInclude Include="MClient.h" />
     <ClInclude Include="MMatchClient.h" />
@@ -727,7 +726,6 @@ rem call copy_share.bat
     <ClInclude Include="ZSoundEngine.h" />
     <ClInclude Include="ZSoundFMod.h" />
     <ClInclude Include="CGLEncription.h" />
-    <ClInclude Include="Config.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="ZApplication.h" />

@@ -53,11 +53,21 @@
       <Filter>D3D9\Shaders</Filter>
     </None>
     <None Include="Include\ShaderGlobals.h" />
-    <None Include="Source\MergeShadowMapsPS.hlsl" />
-    <None Include="Source\MergeShadowMapsVS.hlsl" />
-    <None Include="Source\SceneDirLightPS.hlsl" />
-    <None Include="Source\ScenePointLightPS.hlsl" />
-    <None Include="Source\ShadowPS.hlsl" />
+    <None Include="Source\ShadowPS.hlsl">
+      <Filter>D3D9\Shaders</Filter>
+    </None>
+    <None Include="Source\MergeShadowMapsVS.hlsl">
+      <Filter>D3D9\Shaders</Filter>
+    </None>
+    <None Include="Source\MergeShadowMapsPS.hlsl">
+      <Filter>D3D9\Shaders</Filter>
+    </None>
+    <None Include="Source\SceneDirLightPS.hlsl">
+      <Filter>D3D9\Shaders</Filter>
+    </None>
+    <None Include="Source\ScenePointLightPS.hlsl">
+      <Filter>D3D9\Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\RHalfEdgeMesh.cpp">

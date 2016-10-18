@@ -3,7 +3,7 @@
 #include "NewChat.h"
 #include "RGMain.h"
 #include "VoiceChat.h"
-#include "Extensions.h"
+#include "Config.h"
 #include <cstdint>
 
 bool CheckDeveloperMode(const char* Name)

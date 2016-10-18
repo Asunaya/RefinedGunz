@@ -116,30 +116,31 @@ void ZOptionInterface::InitInterfaceOption(void)
 
 			D3DDISPLAYMODE ddm;
 
-			D3DFORMAT format[2] = {
+			D3DFORMAT Formats[] = {
 				D3DFMT_X8R8G8B8,
 				//D3DFMT_R5G6B5
 			};
 
-			for( int i=0;i<2;i++) {
+			for (auto& Format : Formats)
+			{
+				int nDM = RGetAdapterModeCount(Format);
 
-				int nDM = RGetAdapterModeCount( format[i] );
-
-				mlog("Number of Display mode : %d\n", nDM );
+				mlog("Number of display mode for format %d: %d\n", Format, nDM );
 
 				for( int idm = 0 ; idm < nDM; ++idm )
 				{
-					if( REnumAdapterMode( D3DADAPTER_DEFAULT,format[i], idm,  &ddm ))
+					if (REnumAdapterMode( D3DADAPTER_DEFAULT, Format, idm, &ddm))
 					{
 						ddm.RefreshRate = DEFAULT_REFRESHRATE;
 
-						if( ddm.Format == D3DFMT_X8R8G8B8 || ddm.Format == D3DFMT_R5G6B5 )
+						if(ddm.Format == D3DFMT_X8R8G8B8 || ddm.Format == D3DFMT_R5G6B5)
 						{
 							auto iter_ = find_ddm(ddm);
 							if( iter_ == gDisplayMode.end() )
 							{
-								gDisplayMode.insert( map<int, D3DDISPLAYMODE>::value_type( dmIndex++, ddm ) );
-								sprintf_safe( szBuf, "%d x %d %dbpp", ddm.Width, ddm.Height, ddm.Format==D3DFMT_X8R8G8B8?32:16 );
+								gDisplayMode.insert({ dmIndex++, ddm });
+								sprintf_safe(szBuf, "%d x %d %dbpp", ddm.Width, ddm.Height,
+									ddm.Format == D3DFMT_X8R8G8B8 ? 32 : 16);
 								pWidget->Add(szBuf);
 							}
 						}
@@ -147,19 +148,19 @@ void ZOptionInterface::InitInterfaceOption(void)
 				}
 			}
 
-			if( gDisplayMode.size() == 0 )
+			if (gDisplayMode.size() == 0)
 			{
-				for( int i = 0 ; i < 10; ++i )
+				for (int i = 0; i < 10; ++i)
 				{
-					ddm.Width	= widths[i/2];
-					ddm.Height	= heights[i/2];
+					ddm.Width = widths[i / 2];
+					ddm.Height = heights[i / 2];
 					ddm.RefreshRate = DEFAULT_REFRESHRATE;
-					ddm.Format	= ( ( i%2 == 1) ? D3DFMT_X8R8G8B8 : D3DFMT_R5G6B5 );
+					ddm.Format = ((i % 2 == 1) ? D3DFMT_X8R8G8B8 : D3DFMT_R5G6B5);
 
-					int bpp = (i%2 == 1)? 32 : 16;
-					gDisplayMode.insert( map<int, D3DDISPLAYMODE>::value_type(i,ddm) );
-					sprintf_safe( szBuf, "%dx%d  %d bpp", ddm.Width, ddm.Height, bpp );
-					pWidget->Add( szBuf );
+					int bpp = (i % 2 == 1) ? 32 : 16;
+					gDisplayMode.insert(map<int, D3DDISPLAYMODE>::value_type(i, ddm));
+					sprintf_safe(szBuf, "%dx%d  %d bpp", ddm.Width, ddm.Height, bpp);
+					pWidget->Add(szBuf);
 				}
 			}
 			ddm.Width = RGetScreenWidth();

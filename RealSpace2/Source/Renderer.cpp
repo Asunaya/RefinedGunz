@@ -3,6 +3,8 @@
 #include "ShaderGlobals.h"
 #include <fstream>
 #include "ShaderUtil.h"
+// Awkward
+#include "../CSCommon/Include/Config.h"
 
 // Shader object files
 #include "ShadowVS.h"
@@ -42,7 +44,7 @@ static auto* CreateVertexDeclaration(bool Normal)
 }
 
 Renderer::Renderer()
-	: LightPos{ 0, 0, 100 }
+	: LightPos{ 0, 0, 100 }, NearZ{ DEFAULT_NEAR_Z }, FarZ{ DEFAULT_FAR_Z }
 {
 	SetTransform(TransformType::World, GetIdentityMatrix());
 

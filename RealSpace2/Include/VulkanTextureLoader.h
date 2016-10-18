@@ -108,7 +108,13 @@ namespace vkTools
 
 		void loadTexture(const char* Data, size_t Size, VkFormat format, VulkanTexture *texture, bool forceLinear = false, VkImageUsageFlags imageUsageFlags = VK_IMAGE_USAGE_SAMPLED_BIT)
 		{
-			gli::texture2D tex2D(gli::load(Data, Size));
+			auto tex = gli::load(Data, Size);
+			// TODO: Move this stuff elsewhere
+			if (tex.format() == gli::FORMAT_RGB_DXT1_UNORM)
+				format = VK_FORMAT_BC1_RGBA_UNORM_BLOCK;
+			else if (tex.format() == gli::FORMAT_RGBA_DXT3_UNORM)
+				format = VK_FORMAT_BC3_UNORM_BLOCK;
+			gli::texture2D tex2D(tex);
 			assert(!tex2D.empty());
 
 			texture->width = static_cast<uint32_t>(tex2D[0].dimensions().x);

@@ -217,7 +217,7 @@ if (!name) MLog("Error loading " #name "!\n");
 			vkTools::exitFatal("Could not enumerate phyiscal devices : \n" + vkTools::errorString(err), "Fatal error");
 		}
 
-		// Note :
+		// Note:
 		// This example will always use the first physical device reported,
 		// change the vector index if you have multiple Vulkan devices installed
 		// and want to use another one
@@ -415,8 +415,10 @@ if (!name) MLog("Error loading " #name "!\n");
 		for (size_t i = 0; i < FrameBuffers.size(); i++)
 		{
 			std::array<VkImageView, 2> attachments;
-			attachments[0] = SwapChain.buffers[i].view;									// Color attachment is the view of the swapchain image			
-			attachments[1] = DepthStencil.view;											// Depth/Stencil attachment is the same for all frame buffers			
+			// Color attachment is the view of the swapchain image
+			attachments[0] = SwapChain.buffers[i].view;
+			// Depth/Stencil attachment is the same for all frame buffers
+			attachments[1] = DepthStencil.view;
 
 			VkFramebufferCreateInfo frameBufferCreateInfo = {};
 			frameBufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
@@ -781,64 +783,6 @@ if (!name) MLog("Error loading " #name "!\n");
 	// Simple texture loader
 	vkTools::VulkanTextureLoader *TextureLoader = nullptr;
 
-	struct {
-		VkPipelineVertexInputStateCreateInfo inputState;
-		std::vector<VkVertexInputBindingDescription> bindingDescriptions;
-		std::vector<VkVertexInputAttributeDescription> attributeDescriptions;
-	} vertices;
-
-	// Index buffer
-	struct
-	{
-		VkDeviceMemory memory;
-		VkBuffer buffer;
-		uint32_t count;
-	} Indices;
-
-	// Uniform block object
-	struct {
-		VkDeviceMemory memory;
-		VkBuffer buffer;
-		VkDescriptorBufferInfo descriptor;
-	}  UniformDataVS;
-
-	// For simplicity we use the same uniform block layout as in the shader:
-	//
-	//	layout(set = 0, binding = 0) uniform UBO
-	//	{
-	//		mat4 projectionMatrix;
-	//		mat4 modelMatrix;
-	//		mat4 viewMatrix;
-	//	} ubo;
-	//
-	// This way we can just memcopy the ubo data to the ubo
-	// Note: You should use data types that align with the GPU in order to avoid manual padding (vec4, mat4)
-	struct {
-		glm::mat4 projection;
-		glm::mat4 model;
-		glm::vec4 viewPos;
-		float lodBias = 0.0f;
-	} uboVS;
-
-	// The pipeline layout is used by a pipline to access the descriptor sets 
-	// It defines interface (without binding any actual data) between the shader stages used by the pipeline and the shader resources
-	// A pipeline layout can be shared among multiple pipelines as long as their interfaces match
-	VkPipelineLayout PipelineLayout;
-
-	// Pipelines (often called "pipeline state objects") are used to bake all states that affect a pipeline
-	// While in OpenGL every state can be changed at (almost) any time, Vulkan requires to layout the graphics (and compute) pipeline states upfront
-	// So for each combination of non-dynamic pipeline states you need a new pipeline (there are a few exceptions to this not discussed here)
-	// Even though this adds a new dimension of planing ahead, it's a great opportunity for performance optimizations by the driver
-	VkPipeline Pipeline;
-
-	// The descriptor set layout describes the shader binding layout (without actually referencing descriptor)
-	// Like the pipeline layout it's pretty much a blueprint and can be used with different descriptor sets as long as their layout matches
-	VkDescriptorSetLayout DescriptorSetLayout;
-
-	// The descriptor set stores the resources bound to the binding points in a shader
-	// It connects the binding points of the different shaders with the buffers and images used for those bindings
-	VkDescriptorSet DescriptorSet;
-
 	// Synchronization primitives
 	// Synchronization is an important concept of Vulkan that OpenGL mostly hid away. Getting this right is crucial to using Vulkan.
 
@@ -851,11 +795,9 @@ if (!name) MLog("Error loading " #name "!\n");
 	// Used to check the completion of queue operations (e.g. command buffer execution)
 	std::vector<VkFence> WaitFences;
 
-	vkTools::VulkanTexture Texture;
-	
-	struct {
-		VkPipeline solid;
-	} pipelines;
+private:
+	// HMODULE for the Vulkan dll
+	HMODULE hVulkan{};
 };
 
 _NAMESPACE_REALSPACE2_END

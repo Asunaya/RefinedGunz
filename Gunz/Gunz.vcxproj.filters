@@ -513,9 +513,6 @@
     <ClInclude Include="CGLEncription.h">
       <Filter>Interface\Game</Filter>
     </ClInclude>
-    <ClInclude Include="Config.h">
-      <Filter>Interface\Game</Filter>
-    </ClInclude>
     <ClInclude Include="main.h">
       <Filter>Interface\Game</Filter>
     </ClInclude>
@@ -776,9 +773,6 @@
       <Filter>Character</Filter>
     </ClInclude>
     <ClInclude Include="ArrayView.h">
-      <Filter>RGunz</Filter>
-    </ClInclude>
-    <ClInclude Include="Extensions.h">
       <Filter>RGunz</Filter>
     </ClInclude>
     <ClInclude Include="stack_allocator.hpp">

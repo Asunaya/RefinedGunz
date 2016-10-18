@@ -2,8 +2,29 @@
 #include "RBspObjectDrawVulkan.h"
 #include "RBspObject.h"
 #include "RS2.h"
+
+// Shader objects
 #include "BasicRenderVS.h"
 #include "BasicRenderFS.h"
+#include "AlphaTestingFS.h"
+
+RBspObjectDrawVulkan::~RBspObjectDrawVulkan()
+{
+	if (!Initialized)
+		return;
+
+	auto& Device = GetRS2Vulkan().Device;
+	vkDestroyDescriptorPool(Device, DescriptorPool, nullptr);
+	VertexBuffer.destroy();
+	IndexBuffer.destroy();
+	uniformBufferVS.destroy();
+
+	for (auto& Pipeline : Pipelines.Array)
+		vkDestroyPipeline(Device, Pipeline, nullptr);
+	vkDestroyPipelineLayout(Device, PipelineLayout, nullptr);
+	for (auto& Layout : DescriptorSetLayouts.Layouts)
+		vkDestroyDescriptorSetLayout(Device, Layout, nullptr);
+}
 
 void RBspObjectDrawVulkan::CreateBuffers()
 {
@@ -62,13 +83,14 @@ void RBspObjectDrawVulkan::RenderNode(VkCommandBuffer CmdBuffer, RSBspNode& Node
 	DrawNode(&RSBspNode::m_pNegative);
 }
 
+template <u32 Flags, bool ShouldHaveFlags, bool SetAlphaTestFlags, bool SetTextures>
 void RBspObjectDrawVulkan::Render(VkCommandBuffer CmdBuffer)
 {
 	for (size_t i = 0; i < bsp.Materials.size(); ++i)
 	{
 		auto& Material = bsp.Materials[i];
 
-		if (Material.dwFlags & (RM_FLAG_ADDITIVE | RM_FLAG_USEOPACITY))
+		if ((Material.dwFlags & Flags) != (ShouldHaveFlags ? Flags : 0))
 			continue;
 
 		if (Material.VkMaterial.DescriptorSet == VK_NULL_HANDLE)
@@ -81,6 +103,12 @@ void RBspObjectDrawVulkan::Render(VkCommandBuffer CmdBuffer)
 		descriptorSets[1] = Material.VkMaterial.DescriptorSet;
 
 		vkCmdBindDescriptorSets(CmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, PipelineLayout, 0, static_cast<uint32_t>(descriptorSets.size()), descriptorSets.data(), 0, NULL);
+
+		if (SetAlphaTestFlags)
+		{
+			vkCmdBindPipeline(CmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+				Material.dwFlags & RM_FLAG_USEALPHATEST ? Pipelines.AlphaTesting : Pipelines.Transparent);
+		}
 		
 		RenderNode(CmdBuffer, bsp.OcRoot[0], i);
 	}
@@ -123,17 +151,22 @@ void RBspObjectDrawVulkan::CreateCommandBuffers()
 		VkRect2D scissor = vkTools::initializers::rect2D(Width, Height, 0, 0);
 		vkCmdSetScissor(CmdBuffer, 0, 1, &scissor);
 
-		vkCmdBindDescriptorSets(CmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, PipelineLayout,
-			0, 1, &DescriptorSet, 0, NULL);
-		vkCmdBindPipeline(CmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, Pipeline);
+		// Bind the vertex and index buffers
+		{
+			constexpr u32 VERTEX_BUFFER_BIND_ID{};
+			VkDeviceSize offsets[] = { 0 };
+			vkCmdBindVertexBuffers(CmdBuffer, VERTEX_BUFFER_BIND_ID, 1, &VertexBuffer.buffer, offsets);
+			vkCmdBindIndexBuffer(CmdBuffer, IndexBuffer.buffer, 0, VK_INDEX_TYPE_UINT16);
+		}
 
-		constexpr u32 VERTEX_BUFFER_BIND_ID{};
-		VkDeviceSize offsets[] = { 0 };
+		vkCmdBindPipeline(CmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, Pipelines.Solid);
+		Render<RM_FLAG_ADDITIVE | RM_FLAG_USEOPACITY, false, false>(CmdBuffer);
 
-		vkCmdBindVertexBuffers(CmdBuffer, VERTEX_BUFFER_BIND_ID, 1, &VertexBuffer.buffer, offsets);
-		vkCmdBindIndexBuffer(CmdBuffer, IndexBuffer.buffer, 0, VK_INDEX_TYPE_UINT16);
+		vkCmdBindPipeline(CmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, Pipelines.Transparent);
+		Render<RM_FLAG_USEOPACITY, true, true>(CmdBuffer);
 
-		Render(CmdBuffer);
+		vkCmdBindPipeline(CmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, Pipelines.Additive);
+		Render<RM_FLAG_ADDITIVE, true, false>(CmdBuffer);
 
 		vkCmdEndRenderPass(CmdBuffer);
 
@@ -186,6 +219,7 @@ void RBspObjectDrawVulkan::SetupVertexDescriptions()
 
 void RBspObjectDrawVulkan::CreatePipelines()
 {
+	// Base solid pipeline
 	VkPipelineInputAssemblyStateCreateInfo inputAssemblyState =
 		vkTools::initializers::pipelineInputAssemblyStateCreateInfo(
 			VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
@@ -223,14 +257,14 @@ void RBspObjectDrawVulkan::CreatePipelines()
 			VK_SAMPLE_COUNT_1_BIT,
 			0);
 
-	std::vector<VkDynamicState> dynamicStateEnables = {
+	VkDynamicState dynamicStateEnables[] = {
 		VK_DYNAMIC_STATE_VIEWPORT,
 		VK_DYNAMIC_STATE_SCISSOR
 	};
 	VkPipelineDynamicStateCreateInfo dynamicState =
 		vkTools::initializers::pipelineDynamicStateCreateInfo(
-			dynamicStateEnables.data(),
-			static_cast<uint32_t>(dynamicStateEnables.size()),
+			dynamicStateEnables,
+			static_cast<uint32_t>(ArraySize(dynamicStateEnables)),
 			0);
 
 	// Load shaders
@@ -239,31 +273,86 @@ void RBspObjectDrawVulkan::CreatePipelines()
 	shaderStages[0] = GetRS2Vulkan().loadShader(BasicRenderVS, ArraySize(BasicRenderVS), VK_SHADER_STAGE_VERTEX_BIT);
 	shaderStages[1] = GetRS2Vulkan().loadShader(BasicRenderFS, ArraySize(BasicRenderFS), VK_SHADER_STAGE_FRAGMENT_BIT);
 
-	auto pipelineCreateInfo = vkTools::initializers::pipelineCreateInfo(
+	VkGraphicsPipelineCreateInfo PipelineCreateInfos[5];
+	for (auto& PipelineCreateInfo : PipelineCreateInfos)
+	{
+		PipelineCreateInfo = vkTools::initializers::pipelineCreateInfo(
 			PipelineLayout,
 			GetRS2Vulkan().RenderPass,
 			0);
 
-	pipelineCreateInfo.pVertexInputState = &vertices.inputState;
-	pipelineCreateInfo.pInputAssemblyState = &inputAssemblyState;
-	pipelineCreateInfo.pRasterizationState = &rasterizationState;
-	pipelineCreateInfo.pColorBlendState = &colorBlendState;
-	pipelineCreateInfo.pMultisampleState = &multisampleState;
-	pipelineCreateInfo.pViewportState = &viewportState;
-	pipelineCreateInfo.pDepthStencilState = &depthStencilState;
-	pipelineCreateInfo.pDynamicState = &dynamicState;
-	pipelineCreateInfo.stageCount = static_cast<uint32_t>(shaderStages.size());
-	pipelineCreateInfo.pStages = shaderStages.data();
+		PipelineCreateInfo.pVertexInputState = &vertices.inputState;
+		PipelineCreateInfo.pInputAssemblyState = &inputAssemblyState;
+		PipelineCreateInfo.pRasterizationState = &rasterizationState;
+		PipelineCreateInfo.pColorBlendState = &colorBlendState;
+		PipelineCreateInfo.pMultisampleState = &multisampleState;
+		PipelineCreateInfo.pViewportState = &viewportState;
+		PipelineCreateInfo.pDepthStencilState = &depthStencilState;
+		PipelineCreateInfo.pDynamicState = &dynamicState;
+		PipelineCreateInfo.stageCount = static_cast<uint32_t>(shaderStages.size());
+		PipelineCreateInfo.pStages = shaderStages.data();
+	}
 
-	VK_CHECK_RESULT(vkCreateGraphicsPipelines(GetRS2Vulkan().Device, PipelineCache, 1, &pipelineCreateInfo,
-		nullptr, &Pipeline));
+	// The first pipeline, Solid, is the base pipeline, the rest are derivatives.
+	PipelineCreateInfos[0].flags |= VK_PIPELINE_CREATE_ALLOW_DERIVATIVES_BIT;
+	for (size_t i = 1; i < ArraySize(PipelineCreateInfos); ++i)
+	{
+		PipelineCreateInfos[i].basePipelineIndex = 0;
+		PipelineCreateInfos[i].flags |= VK_PIPELINE_CREATE_DERIVATIVE_BIT;
+	}
 
-	// Wireframe rendering pipeline
-	blendAttachmentState.blendEnable = VK_FALSE;
-	rasterizationState.polygonMode = VK_POLYGON_MODE_LINE;
-	rasterizationState.lineWidth = 1.0f;
-	VK_CHECK_RESULT(vkCreateGraphicsPipelines(GetRS2Vulkan().Device, PipelineCache, 1, &pipelineCreateInfo,
-		nullptr, &WireframePipeline));
+	int Index = 1;
+	// Transparent pipeline
+	auto TransparentRasterizationState = rasterizationState;
+	TransparentRasterizationState.cullMode = VK_CULL_MODE_NONE;
+	PipelineCreateInfos[Index].pRasterizationState = &TransparentRasterizationState;
+	auto TransparentColorBlendState = colorBlendState;
+	auto TransparentBlendAttachmentState = blendAttachmentState;
+	TransparentBlendAttachmentState.blendEnable = VK_TRUE;
+	TransparentBlendAttachmentState.colorBlendOp = VK_BLEND_OP_ADD;
+	TransparentBlendAttachmentState.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+	TransparentBlendAttachmentState.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+	TransparentColorBlendState.pAttachments = &TransparentBlendAttachmentState;
+	PipelineCreateInfos[Index].pColorBlendState = &TransparentColorBlendState;
+	++Index;
+
+	// Alpha testing pipeline
+	//PipelineCreateInfos[Index] = PipelineCreateInfos[Index - 1];
+	auto AlphaTestingShaderStages = shaderStages;
+	PipelineCreateInfos[Index].pStages = AlphaTestingShaderStages.data();
+	AlphaTestingShaderStages[1] = GetRS2Vulkan().loadShader(AlphaTestingFS, ArraySize(AlphaTestingFS), VK_SHADER_STAGE_FRAGMENT_BIT);
+	++Index;
+
+	// Additive pipeline
+	auto AdditiveRasterizationState = rasterizationState;
+	AdditiveRasterizationState.cullMode = VK_CULL_MODE_NONE;
+	PipelineCreateInfos[Index].pRasterizationState = &AdditiveRasterizationState;
+	auto AdditiveColorBlendState = colorBlendState;
+	auto AdditiveBlendAttachmentState = blendAttachmentState;
+	AdditiveBlendAttachmentState.blendEnable = VK_TRUE;
+	AdditiveBlendAttachmentState.colorBlendOp = VK_BLEND_OP_ADD;
+	AdditiveBlendAttachmentState.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_COLOR;
+	AdditiveBlendAttachmentState.dstColorBlendFactor = VK_BLEND_FACTOR_ONE;
+	AdditiveColorBlendState.pAttachments = &AdditiveBlendAttachmentState;
+	PipelineCreateInfos[Index].pColorBlendState = &AdditiveColorBlendState;
+	++Index;
+
+	// Wireframe pipeline
+	auto WireframeColorBlendState = colorBlendState;
+	auto WireframeBlendAttachmentState = blendAttachmentState;
+	WireframeBlendAttachmentState.blendEnable = false;
+	WireframeColorBlendState.pAttachments = &WireframeBlendAttachmentState;
+	PipelineCreateInfos[Index].pColorBlendState = &WireframeColorBlendState;
+	auto WireframeRasterizationState = rasterizationState;
+	WireframeRasterizationState.polygonMode = VK_POLYGON_MODE_LINE;
+	WireframeRasterizationState.lineWidth = 1.0f;
+	PipelineCreateInfos[Index].pRasterizationState = &WireframeRasterizationState;
+	++Index;
+
+	VK_CHECK_RESULT(vkCreateGraphicsPipelines(
+		GetRS2Vulkan().Device, PipelineCache,
+		ArraySize(PipelineCreateInfos), PipelineCreateInfos,
+		nullptr, &Pipelines.Solid));
 }
 
 void RBspObjectDrawVulkan::PrepareUniformBuffers()
@@ -414,6 +503,8 @@ void RBspObjectDrawVulkan::Init()
 	SetupDescriptorPool();
 	SetupDescriptorSet();
 	CreateCommandBuffers();
+
+	Initialized = true;
 }
 
 void RBspObjectDrawVulkan::Draw()

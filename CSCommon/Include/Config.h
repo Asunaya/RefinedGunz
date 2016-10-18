@@ -31,3 +31,12 @@
 // Controls whether your camera direction is locked to a small 90 degree area
 // when dashing, hanging, etc. See ZMyCharacter::IsDirLocked for a full list.
 #define NO_DIRECTION_LOCK
+
+// Default field of view in radians.
+#define DEFAULT_FOV		1.22173048f		// (70.0f / 180.0f * pi)
+
+// Default distance from the camera to the near plane in the projection transform.
+#define DEFAULT_NEAR_Z	5.0f
+
+// Default distance from the camera to the far plane in the projection transform.
+#define DEFAULT_FAR_Z	100000.0f

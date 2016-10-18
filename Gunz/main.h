@@ -25,7 +25,7 @@
 
 #endif
 
-#include "Extensions.h"
+#include "Config.h"
 
 #ifdef VOICECHAT
 #pragma comment(lib, "opus.lib")

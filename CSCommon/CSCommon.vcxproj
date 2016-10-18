@@ -399,6 +399,7 @@
   <ItemGroup>
     <ClInclude Include="Include\AnimationStuff.h" />
     <ClInclude Include="Include\BasicInfoHistory.h" />
+    <ClInclude Include="Include\Config.h" />
     <ClInclude Include="Include\HitRegistration.h" />
     <ClInclude Include="Include\IndexPage.h" />
     <ClInclude Include="Include\MAgentObject.h" />

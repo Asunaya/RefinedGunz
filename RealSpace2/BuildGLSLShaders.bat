@@ -1,6 +1,7 @@
 @echo off	
 call:CompileShader BasicRender.vert BasicRenderVS
 call:CompileShader BasicRender.frag BasicRenderFS
+call:CompileShader AlphaTesting.frag AlphaTestingFS
 rm temp.spv
 goto:eof
 

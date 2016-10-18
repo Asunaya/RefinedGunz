@@ -13,7 +13,7 @@
 #include "ZPost.h"
 #include "ZStencilLight.h"
 #include "ZScreenDebugger.h"
-#include "Extensions.h"
+#include "Config.h"
 #include "Portal.h"
 
 #define BOUND_EPSILON	5
@@ -21,10 +21,10 @@
 #define MAX_ROT_VELOCITY	50
 
 
-#define ROCKET_VELOCITY			2700.f	// 2004년 9월 21일자 이전은 2500.f
-#define ROCKET_SPLASH_RANGE		350.f	// 로켓 스플래시 범위
-#define ROCKET_MINIMUM_DAMAGE	.3f		// 로켓 미니멈 데미지
-#define ROCKET_KNOCKBACK_CONST	.5f		// 로켓에 튕겨져 나가는 상수
+#define ROCKET_VELOCITY			2700.f
+#define ROCKET_SPLASH_RANGE		350.f
+#define ROCKET_MINIMUM_DAMAGE	.3f
+#define ROCKET_KNOCKBACK_CONST	.5f
 
 MImplementRootRTTI(ZWeapon);
 

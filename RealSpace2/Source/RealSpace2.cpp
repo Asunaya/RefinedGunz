@@ -8,6 +8,11 @@
 #include "RFont.h"
 #include "dxerr9.h"
 #include "RS2.h"
+#ifdef _USE_GDIPLUS
+#include "unknwn.h"
+#include "gdiplus.h"
+using namespace Gdiplus;
+#endif
 
 _NAMESPACE_REALSPACE2_BEGIN
 
@@ -26,30 +31,30 @@ static D3DPRESENT_PARAMETERS g_d3dpp;
 static D3DCAPS9 g_d3dcaps;
 HWND g_hWnd;
 MZFileSystem* g_pFileSystem;
-RParticleSystem	g_ParticleSystem;
-HMODULE g_hD3DLibrary;
+static RParticleSystem g_ParticleSystem;
+static HMODULE g_hD3DLibrary;
 static bool g_bStencilBuffer;
 bool DynamicResourceLoading = true;
 static D3DDISPLAYMODE g_d3ddm;
 
 //Fog
-float g_fFogNear;
-float g_fFogFar;
-DWORD g_dwFogColor;
-bool g_bFog;
+static float g_fFogNear;
+static float g_fFogFar;
+static u32 g_dwFogColor;
+static bool g_bFog;
 
-int	g_nVidioMemory;
+static int g_nVideoMemory;
 
 int g_nFrameCount;
 int g_nLastFrameCount;
 float g_fFPS;
 static DWORD g_dwLastFPSTime = GetGlobalTimeMS();
 
-bool		g_bTrilinear = true;
-const bool	bTripleBuffer = false;
-bool		g_bQuery = false;
+static bool g_bTrilinear = true;
+constexpr bool bTripleBuffer = false;
+static bool g_bQuery = false;
 
-D3DMULTISAMPLE_TYPE	g_MultiSample = D3DMULTISAMPLE_NONE;
+static D3DMULTISAMPLE_TYPE g_MultiSample = D3DMULTISAMPLE_NONE;
 
 alignas(RS2) char rs2buf[sizeof(RS2)];
 
@@ -99,11 +104,6 @@ FullscreenType	RGetFullscreenMode() { return g_FullscreenMode; }
 bool RIsHardwareTNL() { return g_bHardwareTNL; }
 bool RIsSupportVS() { return g_bSupportVS; }
 bool RIsTrilinear() { return g_bTrilinear; }
-int RGetApproxVMem() {
-	if (!g_pd3dDevice)
-		return 0;
-	return g_pd3dDevice->GetAvailableTextureMem()*0.5f;
-}
 bool RIsAvailUserClipPlane() { return g_bAvailUserClipPlane; }
 int RGetScreenWidth() { return g_nScreenWidth; }
 int RGetScreenHeight() { return g_nScreenHeight; }
@@ -113,21 +113,16 @@ LPDIRECT3DDEVICE9	RGetDevice() { return g_pd3dDevice; }
 bool RIsStencilBuffer() { return g_bStencilBuffer; }
 bool CheckVideoAdapterSupported();
 D3DFORMAT GetDepthStencilFormat() { return g_d3dpp.AutoDepthStencilFormat; }
-
-const D3DCAPS9 & GetDeviceCaps()
-{
-	return g_d3dcaps;
-}
-
+const D3DCAPS9 & GetDeviceCaps() { return g_d3dcaps; }
 static unsigned long g_rsnRenderFlags = RRENDER_CLEAR_BACKBUFFER;
-void RSetRenderFlags(unsigned long nFlags)
-{
-	g_rsnRenderFlags = nFlags;
-}
+void RSetRenderFlags(unsigned long nFlags) { g_rsnRenderFlags = nFlags; }
 unsigned long RGetRenderFlags() { return g_rsnRenderFlags; }
+int RGetVideoMemory() { return g_nVideoMemory; }
 
-int RGetVideoMemory() {
-	return g_nVidioMemory;
+int RGetApproxVMem() {
+	if (!g_pd3dDevice)
+		return 0;
+	return g_pd3dDevice->GetAvailableTextureMem()*0.5f;
 }
 
 HRESULT RError(int nErrCode)
@@ -157,7 +152,7 @@ bool CreateDirect3D9()
 			return false;
 		}
 
-		g_pD3D = (*d3dCreate)(D3D_SDK_VERSION);
+		g_pD3D = d3dCreate(D3D_SDK_VERSION);
 
 		if (!g_pD3D)
 		{
@@ -213,7 +208,7 @@ static void InitDevice()
 	g_pd3dDevice->SetSamplerState(0, D3DSAMP_MIPMAPLODBIAS, *(unsigned long*)&fMaxBias);
 	g_pd3dDevice->SetSamplerState(1, D3DSAMP_MIPMAPLODBIAS, *(unsigned long*)&fMaxBias);
 
-	g_nVidioMemory = g_pd3dDevice->GetAvailableTextureMem() / 2;
+	g_nVideoMemory = g_pd3dDevice->GetAvailableTextureMem() / 2;
 
 	if (D3DERR_NOTAVAILABLE == g_pd3dDevice->CreateQuery(D3DQUERYTYPE_OCCLUSION, NULL))
 		g_bQuery = false;
@@ -336,7 +331,7 @@ static bool InitD3D9(HWND hWnd, const RMODEPARAMS* params)
 	if (FAILED(g_pD3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hWnd, BehaviorFlags, &g_d3dpp, &g_pd3dDevice)))
 	{
 		SAFE_RELEASE(g_pD3D);
-		mlog("can't create device\n");
+		mlog("Failed to create Direct3D9 device\n");
 		return false;
 	}
 #else
@@ -374,7 +369,7 @@ static bool InitD3D9(HWND hWnd, const RMODEPARAMS* params)
 	if (!RFontCreate())
 	{
 		RCloseDisplay();
-		mlog("Failed to create font!\n");
+		mlog("Failed to create font\n");
 		return false;
 	}
 
@@ -528,9 +523,9 @@ RRESULT RIsReadyToRender()
 
 #define FPS_INTERVAL 1000
 
-static DWORD g_clear_color = 0x00000000;
+static u32 g_clear_color = 0x00000000;
 
-void SetClearColor(DWORD c) {
+void SetClearColor(u32 c) {
 	g_clear_color = c;
 }
 
@@ -563,7 +558,9 @@ void RFlip()
 	DWORD currentTime = GetGlobalTimeMS();
 	if (g_dwLastFPSTime + FPS_INTERVAL < currentTime)
 	{
-		g_fFPS = (g_nFrameCount - g_nLastFrameCount)*FPS_INTERVAL / ((float)(currentTime - g_dwLastFPSTime)*(FPS_INTERVAL / 1000));
+		g_fFPS = (g_nFrameCount - g_nLastFrameCount)*FPS_INTERVAL /
+			((float)(currentTime - g_dwLastFPSTime) *
+			(FPS_INTERVAL / 1000));
 		g_dwLastFPSTime = currentTime;
 		g_nLastFrameCount = g_nFrameCount;
 	}
@@ -594,7 +591,7 @@ bool SaveMemoryBmp(int x, int y, void *data, void **retmemory, int *nsize)
 
 	if (!data) return false;
 
-	int nBytesPerLine = (x * 3 + 3) / 4 * 4;		// 4 byte align
+	int nBytesPerLine = (x * 3 + 3) / 4 * 4; // 4 byte align
 	int nMemoryNeed = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + nBytesPerLine*y;
 	memory = new unsigned char[nMemoryNeed];
 	if (!memory) return false;
@@ -655,10 +652,6 @@ bool SaveMemoryBmp(int x, int y, void *data, void **retmemory, int *nsize)
 
 
 #ifdef _USE_GDIPLUS
-#include "unknwn.h"
-#include "gdiplus.h"
-using namespace Gdiplus;
-
 int GetCodecClsid(const WCHAR* format, CLSID* pClsid)
 {
 	UINT  num = 0;          // number of image encoders
