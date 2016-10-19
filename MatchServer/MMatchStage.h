@@ -2,7 +2,6 @@
 #define MMATCHSTAGE_H
 
 #include <list>
-using namespace std;
 #include "MMatchItem.h"
 #include "MMatchTransDataType.h"
 #include "MUID.h"

@@ -1,6 +1,4 @@
 #pragma once
-#ifndef _MMATCHGLOBAL_H
-#define _MMATCHGLOBAL_H
 
 #include "MBaseLocale.h"
 
@@ -427,5 +425,3 @@ inline MMatchTeam NegativeTeam(MMatchTeam nTeam)
 	else if (nTeam == MMT_BLUE) return MMT_RED;
 	return nTeam;
 }
-
-#endif

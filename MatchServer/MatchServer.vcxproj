@@ -97,7 +97,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>../CSCommon/Include;../CML/Include;../MAI/Include;../RealSpace2/Include;../RealSpace/Include;../SafeUDP/Include;../MDatabase/Include;../MCountryFilter/Include;../sdk/libsodium/include;../sdk/rapidxml/include;../sdk/dx9/Include/;../Locator;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../CSCommon/Include;../CML/Include;../MAI/Include;../RealSpace2/Include;../RealSpace/Include;../SafeUDP/Include;../MDatabase/Include;../MCountryFilter/Include;../sdk/libsodium/include;../sdk/rapidxml/include;../sdk/dx9/Include/;../Locator;../sdk;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -137,7 +137,7 @@
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <OmitFramePointers>true</OmitFramePointers>
-      <AdditionalIncludeDirectories>../CSCommon/Include;../CML/Include;../MAI/Include;../RealSpace2/Include;../RealSpace/Include;../SafeUDP/Include;../MDatabase/Include;../MCountryFilter/Include;../sdk/libsodium/include;../sdk/rapidxml/include;../sdk/dx9/Include/;../Locator;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../CSCommon/Include;../CML/Include;../MAI/Include;../RealSpace2/Include;../RealSpace/Include;../SafeUDP/Include;../MDatabase/Include;../MCountryFilter/Include;../sdk/libsodium/include;../sdk/rapidxml/include;../sdk/dx9/Include/;../Locator;../sdk;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_WORLDITEM_SERVER;NO_WARN_MBCS_MFC_DEPRECATION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <MinimalRebuild>false</MinimalRebuild>
@@ -180,7 +180,7 @@
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <OmitFramePointers>true</OmitFramePointers>
-      <AdditionalIncludeDirectories>../CSCommon/Include;../CML/Include;../MAI/Include;../RealSpace2/Include;../RealSpace/Include;../SafeUDP/Include;../MDatabase/Include;../MCountryFilter/Include;../sdk/libsodium/include;../sdk/rapidxml/include;../sdk/dx9/Include/;../Locator;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../CSCommon/Include;../CML/Include;../MAI/Include;../RealSpace2/Include;../RealSpace/Include;../SafeUDP/Include;../MDatabase/Include;../MCountryFilter/Include;../sdk/libsodium/include;../sdk/rapidxml/include;../sdk/dx9/Include/;../Locator;../sdk;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_WORLDITEM_SERVER;NO_WARN_MBCS_MFC_DEPRECATION;MSSQL_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <MinimalRebuild>false</MinimalRebuild>
@@ -223,7 +223,7 @@
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <OmitFramePointers>true</OmitFramePointers>
-      <AdditionalIncludeDirectories>../CSCommon/Include;../CML/Include;../MAI/Include;../RealSpace2/Include;../RealSpace/Include;../SafeUDP/Include;../MDatabase/Include;../MCountryFilter/Include;../sdk/libsodium/include;../sdk/rapidxml/include;../sdk/dx9/Include/;../Locator;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../CSCommon/Include;../CML/Include;../MAI/Include;../RealSpace2/Include;../RealSpace/Include;../SafeUDP/Include;../MDatabase/Include;../MCountryFilter/Include;../sdk/libsodium/include;../sdk/rapidxml/include;../sdk/dx9/Include/;../Locator;../sdk;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_WORLDITEM_SERVER;_WINSOCK_DEPRECATED_NO_WARNINGS;NO_WARN_MBCS_MFC_DEPRECATION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <MinimalRebuild>false</MinimalRebuild>

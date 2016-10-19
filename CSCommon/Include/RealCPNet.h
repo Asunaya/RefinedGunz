@@ -146,7 +146,7 @@ public:
 	void SetSocket(SOCKET sd)	{ m_sdSocket = sd; }
 	SOCKET	GetSocket()			{ return m_sdSocket; }
 
-	void SetSockAddr(SOCKADDR_IN* pAddr, int nAddrLen) { CopyMemory(&m_SockAddr, pAddr, min(sizeof(SOCKADDR_IN), nAddrLen)); }
+	void SetSockAddr(SOCKADDR_IN* pAddr, int nAddrLen) { CopyMemory(&m_SockAddr, pAddr, min(static_cast<int>(sizeof(SOCKADDR_IN)), nAddrLen)); }
 	SOCKADDR_IN* GetSockAddr()	{ return &m_SockAddr; }
 	DWORD GetIP()				{ return m_SockAddr.sin_addr.S_un.S_addr; }
 	int GetPort()				{ return ntohs(m_SockAddr.sin_port); }

@@ -1,10 +1,8 @@
-#ifndef _MMATCHCONFIG_H
-#define _MMATCHCONFIG_H
+#pragma once
 
 #include <string>
 #include <list>
 #include <set>
-using namespace std;
 
 #include "MMatchMap.h"
 #include "MMatchGlobal.h"
@@ -24,11 +22,11 @@ private:
 
 	MMatchServerMode	m_nServerMode;				///< 서버모드
 	bool				m_bRestrictionMap;			///< 맵제한이 있는지 여부 - default : false
-	set<int>			m_EnableMaps;				///< 맵제한이 있을경우 가능한 맵
-	list<string>		m_FreeLoginIPList;			///< 접속인원 무시 IP
+	std::set<int>			m_EnableMaps;				///< 맵제한이 있을경우 가능한 맵
+	std::list<std::string>		m_FreeLoginIPList;			///< 접속인원 무시 IP
 	bool				m_bCheckPremiumIP;			///< 프리미엄 IP 체크
-	string				m_strCountry;				
-	string				m_strLanguage;
+	std::string				m_strCountry;				
+	std::string				m_strLanguage;
 
 	// enabled 씨리즈 - ini에서 관리하지 않는다.
 	bool				m_bEnabledCreateLadderGame;	///< 클랜전 생성가능한지 여부
@@ -49,11 +47,11 @@ private:
 	bool				m_bIsUseFileCrc;
 
 	// debug.
-	list<string>		m_DebugLoginIPList;			///< Debug용 IP.
+	std::list<std::string>		m_DebugLoginIPList;			///< Debug용 IP.
 	bool				m_bIsDebugServer;
 
 	// keeper ip.
-	string				m_strKeeperIP;				/// Keeper와 server와의 통신에서 키퍼의 요청인지 검사하기 위해서.
+	std::string				m_strKeeperIP;				/// Keeper와 server와의 통신에서 키퍼의 요청인지 검사하기 위해서.
 	
 	std::string GameDirectory = "";
 	bool bIsMasterServer = true;
@@ -114,12 +112,12 @@ public:
 	const bool IsUseEvent() const	{ return m_bIsUseEvent; }
 	const bool IsUseFileCrc() const { return m_bIsUseFileCrc; }
 
-	bool IsKeeperIP( const string& strIP )				{ return m_strKeeperIP == strIP; }
+	bool IsKeeperIP( const std::string& strIP )				{ return m_strKeeperIP == strIP; }
 
-	const string& GetKeeperIP() { return m_strKeeperIP; }
+	const std::string& GetKeeperIP() { return m_strKeeperIP; }
 
-	const string& GetCountry()	{ return m_strCountry; }
-	const string& GetLanguage() { return m_strLanguage; }
+	const std::string& GetCountry()	{ return m_strCountry; }
+	const std::string& GetLanguage() { return m_strLanguage; }
 
 	const bool IsComplete() { return m_bIsComplete; }
 
@@ -155,5 +153,3 @@ inline bool QuestTestServer() { return (MGetServerConfig()->GetServerMode() == M
 #define SERVER_CONFIG_DEFAULT_USE_FILECRC	"0"
 
 #define SERVER_CONFIG_DEBUG_DEFAULT			"0"
-
-#endif

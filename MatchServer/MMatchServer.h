@@ -1,5 +1,4 @@
- #ifndef MMATCHSERVER_H
-#define MMATCHSERVER_H
+#pragma once
 
 #include "winsock2.h"
 #include "MXml.h"
@@ -34,9 +33,7 @@ class MMatchAuthBuilder;
 class MMatchScheduleMgr;
 class MNJ_DBAgentClient;
 
-#define MATCHSERVER_UID		MUID(0, 2)	///< MatchServer의 고유 UID(불변)
-
-// 디버그 코드들 삽입
+#define MATCHSERVER_UID		MUID(0, 2)
 #define CHECKMEMORYNUMBER	888888
 
 enum CUSTOM_IP_STATUS
@@ -863,5 +860,3 @@ bool IsExpiredBlockEndTime( const SYSTEMTIME& st );
 void _CheckValidPointer(void* pPointer1, void* pPointer2, void* pPointer3, int nState, int nValue);
 #define CheckValidPointer(A, B)		_CheckValidPointer(m_pMessengerManager, m_pScheduler, m_pAuthBuilder, A, B);CheckMemoryTest(A, B);
 #define CheckValidPointer2(A, B)	MMatchServer::GetInstance()->CheckMemoryTest(A, B);
-
-#endif
