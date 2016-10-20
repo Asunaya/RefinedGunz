@@ -1,10 +1,9 @@
-#ifndef _RLIGHTLIST_H
-#define _RLIGHTLIST_H
+#pragma once
 
 #include <string>
 #include "RTypes.h"
-
 #include "RNameSpace.h"
+#include "rapidxml.hpp"
 
 class MXmlElement;
 
@@ -12,21 +11,17 @@ _NAMESPACE_REALSPACE2_BEGIN
 
 struct RLIGHT
 {
-	string	Name;
-	rvector Color;
-	rvector Position;
-	float	fIntensity;
-	float	fAttnStart,fAttnEnd;
-	DWORD	dwFlags;
+	std::string Name;
+	v3 Color;
+	v3 Position;
+	float fIntensity;
+	float fAttnStart, fAttnEnd;
+	u32	 dwFlags;
 };
 
-class RLightList : public std::vector<RLIGHT> {
-public:
-	bool Open(MXmlElement *pElement);
+struct RLightList : public std::vector<RLIGHT> {
+	bool Open(rapidxml::xml_node<>& parent);
 	bool Save(MXmlElement *pElement);
 };
 
 _NAMESPACE_REALSPACE2_END
-
-
-#endif

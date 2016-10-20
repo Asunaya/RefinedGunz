@@ -16,7 +16,6 @@ ZInterfaceBackground::ZInterfaceBackground( void)
 
 	m_pLogin = NULL;
 	m_pMapDesc = NULL;
-//	m_bShowMaietLogo = false;
 }
 
 
@@ -44,44 +43,31 @@ void ZInterfaceBackground::LoadMesh( void)
 
 		RDummyList* pDummyList = m_pLogin->GetDummyList();
 
-		for ( RDummyList::iterator itor = pDummyList->begin();  itor != pDummyList->end();  ++itor)
+		for (auto& Dummy : *pDummyList)
 		{
-			RDummy* pDummy = *itor;
-
-			if( _stricmp( pDummy->szName.c_str(), "camera_pos 01" ) == 0 )
+			if( _stricmp( Dummy.Name.c_str(), "camera_pos 01" ) == 0 )
 			{
-				m_vCamPosSt = pDummy->Position;
-				m_vCamDirSt = pDummy->Direction;
+				m_vCamPosSt = Dummy.Position;
+				m_vCamDirSt = Dummy.Direction;
 			}
-			else if( _stricmp( pDummy->szName.c_str(), "camera_pos 02" ) == 0 )
+			else if( _stricmp( Dummy.Name.c_str(), "camera_pos 02" ) == 0 )
 			{
-				m_vCamPosEd = pDummy->Position;
-				m_vCamDirEd = pDummy->Direction;
+				m_vCamPosEd = Dummy.Position;
+				m_vCamDirEd = Dummy.Direction;
 			}
-			else if( _stricmp( pDummy->szName.c_str(), "spawn_solo_101" ) == 0 )
+			else if( _stricmp( Dummy.Name.c_str(), "spawn_solo_101" ) == 0 )
 			{
-				m_vCharPos = pDummy->Position;
-				m_vCharDir = pDummy->Direction;
+				m_vCharPos = Dummy.Position;
+				m_vCharDir = Dummy.Direction;
 			}
 		}
 
 		RMapObjectList* pMapObject = m_pLogin->GetMapObjectList();
 
-		list<ROBJECTINFO*>::iterator it;
-
-		ROBJECTINFO* pInfo = NULL;
-
-		for(it = pMapObject->begin();it!=pMapObject->end();it++ ) {
-
-			pInfo = (*it);
-
-			if(!pInfo->pVisualMesh) continue;
-
-			if(pInfo) {// 필요하면 xml 로 빼기..
-				string str = "login_obj_ef_sky02.elu";
-				if( pInfo->name == str ) {
-					pInfo->pVisualMesh->SetUVAnimation(-0.055f,0.f);
-				}
+		for (auto& ObjectInfo : *pMapObject)
+		{
+			if (ObjectInfo.pVisualMesh && ObjectInfo.name == "login_obj_ef_sky02.elu") {
+				ObjectInfo.pVisualMesh->SetUVAnimation(-0.055f, 0.f);
 			}
 		}
 			
@@ -171,15 +157,6 @@ void ZInterfaceBackground::Draw(void)
 			// Get current clock
 			DWORD dwClock = ( GetGlobalTimeMS() - m_dwClock);
 
-			/*
-			// Show maiet logo
-			if ( !m_bShowMaietLogo)
-			{
-				m_bShowMaietLogo = true;
-				ZGetScreenEffectManager()->AddScreenEffect( "maiet_logo");
-			}
-			*/
-
 			// Set fog density
 			fForgDensity = dwClock * 15.0f;
 
@@ -195,8 +172,8 @@ void ZInterfaceBackground::Draw(void)
 
 
 			// End of scroll camera
-			float fSeed = dwClock * 0.00035f;			// 카메라가 전부 다 내려오기 까지 걸리는 시간( dwClock에 곱해주는 값이
-														// 작을수록 빨리 내려옴)
+			float fSeed = dwClock * 0.00035f;
+
 			if ( fSeed > 3.14)
 			{
 				m_nSceneNumber = LOGIN_SCENE_FIXEDCHAR;
@@ -204,15 +181,11 @@ void ZInterfaceBackground::Draw(void)
 
 
 			// Move camera position & direction
-			float fGain = ( cos( fSeed) + 1.0f) / 2.0f;			// 0 < fGain < 1.0
+			float fGain = ( cos( fSeed) + 1.0f) / 2.0f;
 			vCamPos = m_vCamPosEd + ( m_vCamPosSt - m_vCamPosEd) * fGain;
 			vCamDir = m_vCamDirEd + ( m_vCamDirSt - m_vCamDirEd) * fGain;
 
-			//if (m_bShowMaietLogo)
-			//{
-			//	ZGetScreenEffectManager()->UpdateEffects();
-				ZGetScreenEffectManager()->DrawEffects();
-			//}
+			ZGetScreenEffectManager()->DrawEffects();
 
 			break;
 		}
@@ -292,12 +265,6 @@ void ZInterfaceBackground::Draw(void)
 
 	if ( m_pMapDesc)
 		m_pMapDesc->DrawMapDesc();
-
-	// Draw effects(smoke, cloud)
-//	ZGetEffectManager()->Draw( GetGlobalTimeMS());
-
-	// Draw maiet logo effect
-//	ZGetScreenEffectManager()->DrawEffects();
 }
 
 

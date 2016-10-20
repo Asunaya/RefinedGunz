@@ -87,93 +87,89 @@ bool ZWorld::Create(ZLoadingProgress *pLoading )
 	RMapObjectList* map_object_list		= m_pBsp->GetMapObjectList();
 	RMeshMgr* mesh_mgr					= m_pBsp->GetMeshManager();
 
-	for( RMapObjectList::iterator iter = map_object_list->begin(); iter != map_object_list->end(); )
+	
+	auto it = map_object_list->begin();
+	while (it != map_object_list->end())
 	{
-		ROBJECTINFO* object_info		= *iter;
-		RMesh* pMesh						= mesh_mgr->GetFast( object_info->nMeshID );
-		if( pMesh->m_data_num <= 0 )
+		ROBJECTINFO* object_info = &*it;
+		RMesh* pMesh = mesh_mgr->GetFast(object_info->nMeshID);
+		if (pMesh->m_data_num <= 0)
 		{
-			++iter;
+			++it;
 			continue;
 		}
-		RMeshNode* pMeshNode		= pMesh->m_data[0];
+		RMeshNode* pMeshNode = pMesh->m_data[0];
 
-		char* object_name = (char*)object_info->name.c_str();
+		auto* object_name = object_info->name.c_str();
 
-		int len = int(strlen(m_szName)+1);
+		int len = int(strlen(m_szName) + 1);
 		object_name += len;
 
-		if( pMeshNode->m_point_color_num > 0 )
+		if (pMeshNode->m_point_color_num > 0)
 		{
-			ZClothEmblem* new_instance	= new ZClothEmblem;
-			new_instance->CreateFromMeshNode( pMeshNode , this );
-			m_flags.Add( new_instance, object_name );
-			iter	= map_object_list->Delete( iter );
+			ZClothEmblem* new_instance = new ZClothEmblem;
+			new_instance->CreateFromMeshNode(pMeshNode, this);
+			m_flags.Add(new_instance, object_name);
+			it = map_object_list->erase(it);
 			continue;
 		}
 
-		if( m_pSkyBox == NULL )
+		if (m_pSkyBox == NULL)
 		{
-			if( strncmp(object_name,"obj_sky_", 8) == 0  || 
-				strncmp(object_name,"obj_ef_sky", 10) == 0 )
+			if (strncmp(object_name, "obj_sky_", 8) == 0 ||
+				strncmp(object_name, "obj_ef_sky", 10) == 0)
 			{
-				m_pSkyBox	= new ZSkyBox;
-				m_pSkyBox->Create( pMesh->m_pVisualMesh );
-				ROBJECTINFO *info=*iter;
-				delete info;
-				iter = map_object_list->erase( iter );
+				m_pSkyBox = new ZSkyBox;
+				m_pSkyBox->Create(pMesh->m_pVisualMesh);
+				it = map_object_list->erase(it);
 				continue;
 			}
 		}
 
+		int nWater = 0;
+
+		if (!strncmp(object_name, "obj_water", 9))	nWater = 1;
+		if (!strncmp(object_name, "obj_water2", 10))	nWater = 3;
+		if (!strncmp(object_name, "obj_sea", 7))		nWater = 2;
+
+		if (nWater) {
+			m_bWaterMap = true;
+			m_fWaterHeight = pMeshNode->m_mat_base._42;
+		}
+		else {
+			m_bWaterMap = false;
+			m_fWaterHeight = 0.f;
+		}
+
+		if(nWater)	
 		{
-			int nWater = 0;
+			int id = object_info->nMeshID;
 
-			if( !strncmp( object_name, "obj_water", 9 ) )	nWater = 1;
-			if( !strncmp( object_name, "obj_water2", 10 ) )	nWater = 3;
-			if( !strncmp( object_name, "obj_sea", 7 ) )		nWater = 2;
+			RMesh* mesh = mesh_mgr->GetFast(id);
+			RMeshNode* node = mesh->m_data[0];
 
-			if( nWater ) {
-				m_bWaterMap = true;
-				m_fWaterHeight = pMeshNode->m_mat_base._42;
-			}
-			else {
-				m_bWaterMap = false;
-				m_fWaterHeight = 0.f;
-			}
+			water_instance = new ZWater;
 
-			if(nWater)	
+			water_instance->SetMesh(node);
+			m_waters.push_back( water_instance );
+
+				 if(nWater==1) water_instance->m_nWaterType = WaterType1;
+			else if(nWater==3) water_instance->m_nWaterType = WaterType2;
+
+
+			if(nWater==2) 
 			{
-				int id = object_info->nMeshID;
-
-				RMesh* mesh = mesh_mgr->GetFast(id);
-				RMeshNode* node = mesh->m_data[0];
-
-				water_instance = new ZWater;
-
-				water_instance->SetMesh(node);
-				m_waters.push_back( water_instance );
-
-					 if(nWater==1) water_instance->m_nWaterType = WaterType1;
-				else if(nWater==3) water_instance->m_nWaterType = WaterType2;
-	
-
-				if(nWater==2) 
-				{
-					water_instance->m_isRender = false;
-					pMesh->m_LitVertexModel = true;	
-					++iter;
-				}
-				else 
-				{
-					iter = map_object_list->Delete( iter );
-				}
-
+				water_instance->m_isRender = false;
+				pMesh->m_LitVertexModel = true;	
+			}
+			else 
+			{
+				it = map_object_list->erase(it);
 				continue;
 			}
 		}
 
-		++iter;
+		++it;
 	}
 
 	char szBuf[128];

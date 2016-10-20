@@ -1,15 +1,7 @@
-#ifndef _ZCLOTHEMBLEM_H
-#define _ZCLOTHEMBLEM_H
-
-//#pragma once
+#pragma once
 
 #include "RCloth.h"
-//#include "RHalfEdgeMesh.h"
 #include "RTypes.h"
-
-//////////////////////////////////////////////////////////////////////////
-//	Struct
-//////////////////////////////////////////////////////////////////////////
 
 #define GRENADE_SPEAR_EMBLEM_POWER	1000 //2000
 #define BULLET_SPEAR_EMBLEM_POWER	1500 //3000
@@ -17,10 +9,6 @@
 #define ROCKET_SPEAR_EMBLEM_POWER	2500 //5000
 #define EXPLOSION_EMBLEM_POWER		3000 //5000
 
-
-//////////////////////////////////////////////////////////////////////////
-//	ZClothEmblem
-//////////////////////////////////////////////////////////////////////////
 enum RESTRICTION_AXIS
 {
 	AXIS_X, AXIS_Y, AXIS_Z,
@@ -56,10 +44,7 @@ protected:
 	RealSpace2::rboundingbox	mAABB;
 	list<sRestriction*> mRestrictionList;
 	DWORD		mMyTime;
-	bool		mbIsInFrustrum; // 충돌, 시뮬레이션 대상
-
-protected:
-	//LPDIRECT3DINDEXBUFFER9 mIndexBuffer;
+	bool		mbIsInFrustrum;
 
 protected:
 	virtual void	accumulateForces();
@@ -76,7 +61,7 @@ public:
 	virtual void	render();
 	virtual void	UpdateNormal();
 
-	void setOption( int nIter_, float power_, float inertia_ );	// 순서대로 반복횟수, 힘, 관성(0~1)
+	void setOption( int nIter_, float power_, float inertia_ );
 	void CreateFromMeshNode( RMeshNode* pMeshNdoe_ , ZWorld* pWorld);
 
 	void setForce( float x_, float y_, float z_ )
@@ -86,7 +71,7 @@ public:
 		mpWind->z	= z_;
 	};
 	void setExplosion( rvector& pos_, float power_ );
-	void CheckSpearing( rvector& bullet_begine_, rvector& bullet_end_, float power_ );	// 총알 뚤리는 효과
+	void CheckSpearing( rvector& bullet_begine_, rvector& bullet_end_, float power_ );
 
 	void OnInvalidate();
 	void OnRestore();
@@ -113,15 +98,11 @@ public:
 
 };
 
-
-//////////////////////////////////////////////////////////////////////////
-//	Flag List
-//////////////////////////////////////////////////////////////////////////
-class ZEmblemList : public list<ZClothEmblem*>
+class ZEmblemList : public std::list<ZClothEmblem*>
 {
 protected:
-	map<string, ZClothEmblem*> mEmblemMap;
-	map<string, ZClothEmblem*>::iterator mEmblemMapItor;
+	std::map<std::string, ZClothEmblem*> mEmblemMap;
+	std::map<std::string, ZClothEmblem*>::iterator mEmblemMapItor;
 
 public:
 	virtual ~ZEmblemList();
@@ -136,9 +117,7 @@ public:
 	void	OnInvalidate();
 	void	OnRestore();	
 	void	Clear();
-	void Add( ZClothEmblem* p_, char* pName_ );
+	void Add( ZClothEmblem* p_, const char* pName_ );
 
 	void	InitEnv( char* pFileName_ );
 };
-
-#endif

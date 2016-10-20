@@ -584,7 +584,7 @@ static void GetIntersectedScreenLine(rvector &pos, rvector &dir)
 	D3DXPlaneIntersectLine(&checkpos, &myplane, &pos, &checkposto);
 }
 
-#define _DEBUG
+//#define _DEBUG
 
 void Portal::OnShot()
 {

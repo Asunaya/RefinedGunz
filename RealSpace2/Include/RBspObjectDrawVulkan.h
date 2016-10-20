@@ -15,7 +15,6 @@ class RBspObjectDrawVulkan
 public:
 	RBspObjectDrawVulkan(RBspObject& bsp) : bsp(bsp) {}
 	~RBspObjectDrawVulkan();
-	RBspObjectDrawVulkan(const RBspObjectDrawVulkan&) = delete;
 	RBspObjectDrawVulkan(RBspObjectDrawVulkan&&) = default;
 	
 	void Init();

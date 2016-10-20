@@ -4,66 +4,52 @@
 
 _NAMESPACE_REALSPACE2_BEGIN
 
-RDummyList::~RDummyList()
+bool RDummyList::Open(rapidxml::xml_node<>& parent)
 {
-	Clear();
-}
-
-void RDummyList::Clear()
-{
-	for(iterator itor=begin();itor!=end();++itor)
-		delete *itor;
-
-	clear();
-}
-
-bool RDummyList::Open(MXmlElement *pElement)
-{
-	MXmlElement	aDummyNode,aChild;
-	int nCount = pElement->GetChildNodeCount();
-
-	char szTagName[256],szContents[256];
-	for (int i = 0; i < nCount; i++)
+	for (auto* node = parent.first_node(); node; node = node->next_sibling())
 	{
-		aDummyNode = pElement->GetChildNode(i);
-		aDummyNode.GetTagName(szTagName);
+		auto* szTagName = node->name();
+		if (!szTagName)
+			continue;
 
-		if( szTagName[0] == '#' ) continue;
+		if (szTagName[0] == '#')
+			continue;
 
-		if(_stricmp(szTagName,RTOK_DUMMY)==0)
+		if (_stricmp(szTagName, RTOK_MATERIAL) != 0)
+			continue;
+
+		auto name_attr = node->first_attribute(RTOK_NAME);
+		if (!name_attr)
+			continue;
+
+		auto* name = name_attr->value();
+		if (!name)
+			continue;
+
+		emplace_back();
+		auto& Dummy = back();
+		Dummy.Name = name;
+
+		for (auto* prop_node = node->first_node(); prop_node; prop_node = prop_node->next_sibling())
 		{
-			RDummy* pNewDummy = new RDummy;
-			aDummyNode.GetAttribute(szContents,RTOK_NAME);
-			pNewDummy->szName = szContents;
+			auto* szTagName = prop_node->name();
+			if (!szTagName)
+				continue;
+			auto* szContents = prop_node->value();
+			if (!szContents)
+				szContents = "";
 
-			int nChildCount = aDummyNode.GetChildNodeCount();
-			for(int j=0;j<nChildCount;j++)
-			{
-				aChild = aDummyNode.GetChildNode(j);
-				aChild.GetTagName(szTagName);
-				aChild.GetContents(szContents);
+			auto ReadVector = [&]() {
+				v3 vec;
+				if (sscanf(szContents, "%f %f %f", &vec.x, &vec.y, &vec.z) != 3)
+					vec = { 0, 0, 0 };
+				return vec;
+			};
 
-				if(_stricmp(szTagName,RTOK_POSITION)==0)	
-				{
-					rvector temp;
-					int nCnt = sscanf( szContents, "%f %f %f", &temp.x, &temp.y, &temp.z );
-					if (nCnt == 3)
-					{
-						pNewDummy->Position = temp;
-					}
-				}
-				else if(_stricmp(szTagName,RTOK_DIRECTION)==0)	
-				{
-					rvector temp;
-					int nCnt = sscanf( szContents, "%f %f %f", &temp.x, &temp.y, &temp.z );
-					if (nCnt == 3)
-					{
-						pNewDummy->Direction = temp;
-					}
-				}
-			}
-
-			push_back(pNewDummy);
+			if (_stricmp(szTagName, RTOK_POSITION) == 0)
+				Dummy.Position = ReadVector();
+			else if (_stricmp(szTagName, RTOK_DIRECTION) == 0)
+				Dummy.Direction = ReadVector();
 		}
 	}
 
@@ -74,25 +60,24 @@ bool RDummyList::Save(MXmlElement *pElement)
 {
 	MXmlElement	aDummyListElement = pElement->CreateChildElement(RTOK_DUMMYLIST);
 
-	for(RDummyList::iterator itor = begin(); itor != end(); ++itor)
+	for (auto& Dummy : *this)
 	{
 		aDummyListElement.AppendText("\n\t\t");
 
-		RDummy *pDummy = *itor;
 		char buffer[256];
 
-		MXmlElement		aElement,aChild;
+		MXmlElement aElement,aChild;
 		aElement = aDummyListElement.CreateChildElement(RTOK_DUMMY);
 
-		aElement.AddAttribute(RTOK_NAME,pDummy->szName.c_str());
+		aElement.AddAttribute(RTOK_NAME, Dummy.Name.c_str());
 
 		aElement.AppendText("\n\t\t\t");
 		aChild=aElement.CreateChildElement(RTOK_POSITION);
-		aChild.SetContents(Format(buffer,pDummy->Position));
+		aChild.SetContents(Format(buffer, Dummy.Position));
 
 		aElement.AppendText("\n\t\t\t");
 		aChild=aElement.CreateChildElement(RTOK_DIRECTION);
-		aChild.SetContents(Format(buffer,pDummy->Direction));
+		aChild.SetContents(Format(buffer, Dummy.Direction));
 
 		aElement.AppendText("\n\t\t");
 	}

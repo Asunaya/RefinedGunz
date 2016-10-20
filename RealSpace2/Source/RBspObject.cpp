@@ -24,6 +24,7 @@
 #include <fstream>
 #include "ShaderGlobals.h"
 #include "RS2.h"
+#include "rapidxml.hpp"
 
 #undef pi
 
@@ -239,22 +240,6 @@ bool RBspLightmapManager::Add(DWORD *data, int nSize, POINT *retpoint)
 void RBspLightmapManager::Save(const char *filename)
 {
 	RSaveAsBmp(GetSize(), GetSize(), m_pData, filename);
-}
-
-RMapObjectList::~RMapObjectList()
-{
-	while (size())
-	{
-		Delete(begin());
-	}
-}
-
-RMapObjectList::iterator RMapObjectList::Delete(iterator i)
-{
-	ROBJECTINFO *info = *i;
-	delete info->pVisualMesh;
-	delete info;
-	return erase(i);
 }
 
 ////////////////////////////
@@ -719,28 +704,25 @@ void RBspObject::DrawObjects()
 	rvector camera_pos = RCameraPosition;
 	rvector t_vec;
 
-	for (list<ROBJECTINFO*>::iterator i = m_ObjectList.begin(); i != m_ObjectList.end(); i++) {
+	for (auto& ObjectInfo : m_ObjectList)
+	{
+		if (!ObjectInfo.pVisualMesh) continue;
 
-		ROBJECTINFO *pInfo = *i;
-		if (!pInfo->pVisualMesh) continue;
-
-		if (pInfo) {
-			t_vec = GetTransPos(pInfo->pVisualMesh->m_WorldMat);
-			t_vec = camera_pos - t_vec;
-			pInfo->fDist = Magnitude(t_vec);
-		}
+		t_vec = GetTransPos(ObjectInfo.pVisualMesh->m_WorldMat);
+		t_vec = camera_pos - t_vec;
+		ObjectInfo.fDist = Magnitude(t_vec);
 	}
 
 	// Sort by distance
-	m_ObjectList.sort([&](auto* a, auto* b) { return a->fDist < b->fDist; });
+	std::sort(m_ObjectList.begin(), m_ObjectList.end(), [&](auto& a, auto& b) { return a.fDist < b.fDist; });
 
-	for (auto* pInfo : m_ObjectList)
+	for (auto& ObjectInfo : m_ObjectList)
 	{
-		if (!pInfo->pVisualMesh) continue;
+		if (!ObjectInfo.pVisualMesh) continue;
 
 		rboundingbox bb;
-		bb.vmax = pInfo->pVisualMesh->m_vBMax;
-		bb.vmin = pInfo->pVisualMesh->m_vBMin;
+		bb.vmax = ObjectInfo.pVisualMesh->m_vBMax;
+		bb.vmin = ObjectInfo.pVisualMesh->m_vBMin;
 
 		if (!m_bNotOcclusion) {
 			if (!IsVisible(bb)) {
@@ -749,15 +731,15 @@ void RBspObject::DrawObjects()
 			}
 		}
 		else {
-			pInfo->pVisualMesh->m_bCheckViewFrustum = false;
+			ObjectInfo.pVisualMesh->m_bCheckViewFrustum = false;
 		}
 
 		bool bLight = true;
 
-		if (pInfo->pVisualMesh && pInfo->pVisualMesh->m_pMesh)
-			bLight = !pInfo->pVisualMesh->m_pMesh->m_LitVertexModel;
+		if (ObjectInfo.pVisualMesh && ObjectInfo.pVisualMesh->m_pMesh)
+			bLight = !ObjectInfo.pVisualMesh->m_pMesh->m_LitVertexModel;
 
-		if (pInfo->pLight && bLight)
+		if (ObjectInfo.pLight && bLight)
 		{
 			D3DLIGHT9 light{};
 
@@ -767,26 +749,26 @@ void RBspObject::DrawObjects()
 			light.Attenuation1 = 0.0001f;
 			light.Attenuation2 = 0.f;
 
-			light.Position = pInfo->pLight->Position + v_add;
+			light.Position = ObjectInfo.pLight->Position + v_add;
 
 			rvector lightmapcolor(1, 1, 1);
 
-			light.Diffuse.r = pInfo->pLight->Color.x*pInfo->pLight->fIntensity;
-			light.Diffuse.g = pInfo->pLight->Color.y*pInfo->pLight->fIntensity;
-			light.Diffuse.b = pInfo->pLight->Color.z*pInfo->pLight->fIntensity;
+			light.Diffuse.r = ObjectInfo.pLight->Color.x*ObjectInfo.pLight->fIntensity;
+			light.Diffuse.g = ObjectInfo.pLight->Color.y*ObjectInfo.pLight->fIntensity;
+			light.Diffuse.b = ObjectInfo.pLight->Color.z*ObjectInfo.pLight->fIntensity;
 
-			light.Range = pInfo->pLight->fAttnEnd;
+			light.Range = ObjectInfo.pLight->fAttnEnd;
 
 			RGetDevice()->SetLight(0, &light);
 			RGetDevice()->LightEnable(0, TRUE);
 			RGetDevice()->LightEnable(1, FALSE);
 		}
 
-		pInfo->pVisualMesh->SetWorldMatrix(world);
-		pInfo->pVisualMesh->Frame();
-		pInfo->pVisualMesh->Render(&m_OcclusionList);
+		ObjectInfo.pVisualMesh->SetWorldMatrix(world);
+		ObjectInfo.pVisualMesh->Frame();
+		ObjectInfo.pVisualMesh->Render(&m_OcclusionList);
 
-		if (!pInfo->pVisualMesh->m_bIsRender) m_DebugInfo.nMapObjectFrustumCulled++;
+		if (!ObjectInfo.pVisualMesh->m_bIsRender) m_DebugInfo.nMapObjectFrustumCulled++;
 	}
 }
 
@@ -806,13 +788,11 @@ void RBspObject::DrawOcclusions()
 	RGetDevice()->SetRenderState(D3DRS_ZENABLE, false);
 	RGetDevice()->SetFVF(D3DFVF_XYZ | D3DFVF_DIFFUSE);
 
-	for (ROcclusionList::iterator i = m_OcclusionList.begin(); i != m_OcclusionList.end(); i++)
+	for (auto& Occlusion : m_OcclusionList)
 	{
-		ROcclusion *poc = *i;
-
-		for (int j = 0; j < poc->nCount; j++)
+		for (size_t j = 0; j < Occlusion.Vertices.size(); j++)
 		{
-			RDrawLine(poc->pVertices[j], poc->pVertices[(j + 1) % poc->nCount], 0xffff00ff);
+			RDrawLine(Occlusion.Vertices[j], Occlusion.Vertices[(j + 1) % Occlusion.Vertices.size()], 0xffff00ff);
 		}
 	}
 
@@ -1168,10 +1148,10 @@ void RBspObject::OnRestore()
 		Sort_Nodes(OcRoot.data());
 }
 
-bool RBspObject::Open_MaterialList(MXmlElement *pElement)
+bool RBspObject::Open_MaterialList(rapidxml::xml_node<>& parent)
 {
 	RMaterialList ml;
-	ml.Open(pElement);
+	ml.Open(parent);
 
 	Materials.resize(ml.size() + 1);
 
@@ -1189,23 +1169,19 @@ bool RBspObject::Open_MaterialList(MXmlElement *pElement)
 	else
 		strBase = strBase.substr(0, nPos) + "/";
 
-
-
-	RMaterialList::iterator itor;
-	itor = ml.begin();
-
-	for (size_t i = 1; i < Materials.size(); i++)
+	auto it = ml.begin();
+	for (size_t i = 1; i < Materials.size(); ++i, ++it)
 	{
-		RMATERIAL *mat = *itor;
+		RMATERIAL& mat = *it;
 
-		Materials[i].dwFlags = mat->dwFlags;
-		Materials[i].Diffuse = mat->Diffuse;
-		Materials[i].Specular = mat->Specular;
-		Materials[i].Ambient = mat->Ambient;
-		Materials[i].Name = mat->Name;
-		Materials[i].DiffuseMap = mat->DiffuseMap;
+		Materials[i].dwFlags = mat.dwFlags;
+		Materials[i].Diffuse = mat.Diffuse;
+		Materials[i].Specular = mat.Specular;
+		Materials[i].Ambient = mat.Ambient;
+		Materials[i].Name = mat.Name;
+		Materials[i].DiffuseMap = mat.DiffuseMap;
 
-		string DiffuseMapName = strBase + mat->DiffuseMap;
+		string DiffuseMapName = strBase + mat.DiffuseMap;
 		char szMapName[256];
 		GetRefineFilename(szMapName, DiffuseMapName.c_str());
 
@@ -1214,22 +1190,18 @@ bool RBspObject::Open_MaterialList(MXmlElement *pElement)
 			if (GetRS2().UsingD3D9())
 				Materials[i].texture = RCreateBaseTexture(szMapName, RTextureType_Map, true);
 			else
-			{
 				Materials[i].VkMaterial.Texture = GetRS2Vulkan().LoadTexture(szMapName);
-			}
 		}
-
-		itor++;
 	}
 
 	return true;
 }
 
 
-bool RBspObject::Open_LightList(MXmlElement *pElement)
+bool RBspObject::Open_LightList(rapidxml::xml_node<>& parent)
 {
 	RLightList llist;
-	llist.Open(pElement);
+	llist.Open(parent);
 
 	for (auto& Light : llist)
 	{
@@ -1257,104 +1229,89 @@ bool RBspObject::Open_LightList(MXmlElement *pElement)
 	return true;
 }
 
-bool RBspObject::Open_OcclusionList(MXmlElement *pElement)
+bool RBspObject::Open_OcclusionList(rapidxml::xml_node<>& parent)
 {
-	m_OcclusionList.Open(pElement);
-
-	for (ROcclusionList::iterator i = m_OcclusionList.begin(); i != m_OcclusionList.end(); i++)
-	{
-		ROcclusion *poc = *i;
-		poc->CalcPlane();
-		poc->pPlanes = new rplane[poc->nCount + 1];
-	}
+	m_OcclusionList.Open(parent);
 
 	return true;
 }
 
-bool RBspObject::Open_ObjectList(MXmlElement *pElement)
+bool RBspObject::Open_ObjectList(rapidxml::xml_node<>& parent)
 {
 	if (GetRS2().UsingVulkan())
 		return true;
 
-	int i;
-
-	MXmlElement	aObjectNode, aChild;
-	int nCount = pElement->GetChildNodeCount();
-
-	char szTagName[256], szContents[256];
-	for (i = 0; i < nCount; i++)
+	int NodeIndex{};
+	for (auto* node = parent.first_node(); node; node = node->next_sibling(), ++NodeIndex)
 	{
-		aObjectNode = pElement->GetChildNode(i);
-		aObjectNode.GetTagName(szTagName);
+		auto* szTagName = node->name();
+		if (!szTagName) continue;
 
-		if (_stricmp(szTagName, RTOK_OBJECT) == 0)
+		if (_stricmp(szTagName, RTOK_OBJECT) != 0) continue;
+
+		auto name_attr = node->first_attribute(RTOK_NAME);
+		if (!name_attr) continue;
+
+		auto* object_name = name_attr->value();
+		if (!object_name) continue;
+
+		m_ObjectList.emplace_back();
+		auto& ObjectInfo = m_ObjectList.back();
+		ObjectInfo.name = object_name;
+		ObjectInfo.pLight = nullptr;
+
+		char fname[_MAX_PATH];
+		GetPurePath(fname, m_descfilename.c_str());
+		strcat(fname, object_name);
+
+		m_MeshList.SetMtrlAutoLoad(true);
+		m_MeshList.SetMapObject(true);
+
+		ObjectInfo.nMeshID = m_MeshList.Add(fname);
+		RMesh *pmesh = m_MeshList.GetFast(ObjectInfo.nMeshID);
+
+		if (!pmesh)
 		{
-			ROBJECTINFO *pInfo = new ROBJECTINFO;
-			aObjectNode.GetAttribute(szContents, RTOK_NAME);
-			pInfo->name = szContents;
+			m_ObjectList.pop_back();
+			break;
+		}
 
-			char fname[_MAX_PATH];
-			GetPurePath(fname, m_descfilename.c_str());
-			strcat(fname, szContents);
+		auto* pName = pmesh->GetFileName();
+		while (pName[0] != '\0')
+		{
+			if (pName[0] == 'o' && pName[1] == 'b') break;
+			++pName;
+		}
 
-			m_MeshList.SetMtrlAutoLoad(true);
-			m_MeshList.SetMapObject(true);
+		if (strncmp(pName, "obj_water", 9) != 0 && strncmp(pName, "obj_flag", 8) != 0)
+		{
+			strcat(fname, ".ani");
 
-			pInfo->nMeshID = m_MeshList.Add(fname);
-			RMesh *pmesh = m_MeshList.GetFast(pInfo->nMeshID);
+			m_AniList.Add(fname, fname, NodeIndex);
+			RAnimation* pAni = m_AniList.GetAnimation(fname);
 
-			if (pmesh)
-			{
-				auto* pName = pmesh->GetFileName();
-				while (pName[0] != '\0')
-				{
-					if (pName[0] == 'o' && pName[1] == 'b') break;
-					++pName;
-				}
+			pmesh->SetAnimation(pAni);
 
-				if (strncmp(pName, "obj_water", 9) != 0 && strncmp(pName, "obj_flag", 8) != 0)
-				{
-					strcat(fname, ".ani");
-
-					m_AniList.Add(fname, fname, i);
-					RAnimation* pAni = m_AniList.GetAnimation(fname);
-
-					pmesh->SetAnimation(pAni);
-
-					pInfo->pVisualMesh = new RVisualMesh;
-					pInfo->pVisualMesh->Create(pmesh);
-					pInfo->pVisualMesh->SetAnimation(pAni);
-				}
-				else
-				{
-					pInfo->pVisualMesh = 0;
-				}
-
-				m_ObjectList.push_back(pInfo);
-				pInfo->pLight = NULL;
-			}
-			else
-				delete pInfo;
+			ObjectInfo.pVisualMesh = std::make_unique<RVisualMesh>();
+			ObjectInfo.pVisualMesh->Create(pmesh);
+			ObjectInfo.pVisualMesh->SetAnimation(pAni);
+		}
+		else
+		{
+			ObjectInfo.pVisualMesh = nullptr;
 		}
 	}
 
-	for (auto* pInfo : m_ObjectList)
+	for (auto& ObjectInfo : m_ObjectList)
 	{
-		if (pInfo == NULL) {
-
-			mlog("RBspObject::Open_ObjectList : pInfo == NULL pVisualMesh->CalcBox\n");
+		if (!ObjectInfo.pVisualMesh) {
+			mlog("RBspObject::Open_ObjectList : ObjectInfo.pVisualMesh == NULL \n");
 			continue;
 		}
-		else {
-			if (pInfo->pVisualMesh == NULL) {
-				mlog("RBspObject::Open_ObjectList : pInfo->pVisualMesh == NULL \n");
-				continue;
-			}
-		}
 
-		pInfo->pVisualMesh->CalcBox();
+		ObjectInfo.pVisualMesh->CalcBox();
 
-		rvector center = (pInfo->pVisualMesh->m_vBMax + pInfo->pVisualMesh->m_vBMin)*.5f;
+		rvector center = (ObjectInfo.pVisualMesh->m_vBMax + ObjectInfo.pVisualMesh->m_vBMin)*.5f;
 
 		auto& LightList = GetObjectLightList();
 
@@ -1374,7 +1331,7 @@ bool RBspObject::Open_ObjectList(MXmlElement *pElement)
 
 			if (fIntensityFirst < fIntensity) {
 				fIntensityFirst = fIntensity;
-				pInfo->pLight = &Light;
+				ObjectInfo.pLight = &Light;
 			}
 		}
 	}
@@ -1384,129 +1341,145 @@ bool RBspObject::Open_ObjectList(MXmlElement *pElement)
 
 bool RBspObject::Make_LenzFalreList()
 {
-	for (RDummyList::iterator itor = m_DummyList.begin(); itor != m_DummyList.end(); ++itor)
+	for (auto& Dummy : m_DummyList)
 	{
-		RDummy* pDummy = *itor;
+		if (_stricmp(Dummy.Name.c_str(), "sun_dummy") != 0)
+			continue;
 
-		if (_stricmp(pDummy->szName.c_str(), "sun_dummy") == 0)
-		{
-			if (!RGetLenzFlare()->SetLight(pDummy->Position))
-			{
-				mlog("Fail to Set LenzFlare Position...\n");
-			}
+		if (!RGetLenzFlare()->SetLight(Dummy.Position))
+			mlog("Fail to Set LenzFlare Position...\n");
 
-			return true;
-		}
+		return true;
 	}
 
 	return true;
 }
 
-bool RBspObject::Open_DummyList(MXmlElement *pElement)
+bool RBspObject::Open_DummyList(rapidxml::xml_node<>& parent)
 {
-	m_DummyList.Open(pElement);
+	m_DummyList.Open(parent);
 
 	Make_LenzFalreList();
 	return true;
 }
 
-bool RBspObject::Set_Fog(MXmlElement *pElement)
+bool RBspObject::Set_Fog(rapidxml::xml_node<>& parent)
 {
-	MXmlElement childElem;
-	DWORD dwColor = 0;
-	int color;
-	char name[8];
-
 	m_FogInfo.bFogEnable = true;
-	pElement->GetAttribute(&m_FogInfo.fNear, "min");
-	pElement->GetAttribute(&m_FogInfo.fFar, "max");
-	int nChild = pElement->GetChildNodeCount();
-	for (int i = 0; i < nChild; ++i)
+
+	auto GetFloatAttr = [&](const char* name) -> float
 	{
-		childElem = pElement->GetChildNode(i);
-		childElem.GetContents(&color);
-		childElem.GetNodeName(name);
-		if (name[0] == 'R')	dwColor |= (color << 16);
-		else if (name[0] == 'G') dwColor |= (color << 8);
-		else if (name[0] == 'B') dwColor |= (color);
+		auto* attr = parent.first_attribute("min");
+		if (!attr)
+			return 0;
+		auto* value = attr->value();
+		if (!value)
+			return 0;
+		return static_cast<float>(atof(value));
+	};
+	m_FogInfo.fNear = GetFloatAttr("min");
+	m_FogInfo.fFar = GetFloatAttr("max");
+
+	u32 color{};
+	for (auto* node = parent.first_node(); node; node = node->next_sibling())
+	{
+		auto* name = node->name();
+		if (!name)
+			continue;
+
+		auto* value = node->value();
+		if (!value)
+			continue;
+
+		auto ivalue = atoi(value);
+
+		if (name[0] == 'R')	color |= (ivalue << 16);
+		else if (name[0] == 'G') color |= (ivalue << 8);
+		else if (name[0] == 'B') color |= (ivalue);
 	}
-	m_FogInfo.dwFogColor = dwColor;
+	m_FogInfo.dwFogColor = color;
+
 	return true;
 }
 
-bool RBspObject::Set_AmbSound(MXmlElement *pElement)
+bool RBspObject::Set_AmbSound(rapidxml::xml_node<>& parent)
 {
-	MXmlElement childElem, contentElem;
-	char szBuffer[128];
-
-	int nChild = pElement->GetChildNodeCount();
-	for (int i = 0; i < nChild; ++i)
+	for (auto* node = parent.first_node(); node; node = node->next_sibling())
 	{
-		childElem = pElement->GetChildNode(i);
-		childElem.GetTagName(szBuffer);
-		if (_stricmp(szBuffer, "AMBIENTSOUND") == 0)
+		auto* node_name = node->name();
+		if (!node_name)
+			continue;
+
+		if (_stricmp(node_name, "AMBIENTSOUND") != 0)
+			continue;
+
+		AmbSndInfo asinfo;
+		asinfo.itype = 0;
+
+		auto* type_attr = node->first_attribute("type");
+		if (!type_attr)
+			continue;
+		auto* type = type_attr->value();
+		if (!type)
+			continue;
+
+		if (type[0] == 'a')
+			asinfo.itype |= AS_2D;
+		else if (type[0] == 'b')
+			asinfo.itype |= AS_3D;
+
+		if (type[1] == '0')
+			asinfo.itype |= AS_AABB;
+		else if (type[1] == '1')
+			asinfo.itype |= AS_SPHERE;
+
+		auto* filename_attr = node->first_attribute("filename");
+		if (!filename_attr) continue;
+		auto* filename = filename_attr->value();
+		if (!filename) continue;
+
+		strcpy_safe(asinfo.szSoundName, filename);
+
+		for (auto* prop_node = node->first_node(); prop_node; prop_node = prop_node->next_sibling())
 		{
-			AmbSndInfo asinfo;
-			asinfo.itype = 0;
+			char* token{};
+			auto* prop_name = prop_node->name();
+			if (!prop_name) continue;
 
+			auto* prop_value = prop_node->value();
+			if (!prop_value) continue;
+			token = strtok(prop_value, " ");
 
-			childElem.GetAttribute(szBuffer, "type");
-			if (szBuffer[0] == 'a')
-				asinfo.itype |= AS_2D;
-			else if (szBuffer[0] == 'b')
-				asinfo.itype |= AS_3D;
-
-			if (szBuffer[1] == '0')
-				asinfo.itype |= AS_AABB;
-			else if (szBuffer[1] == '1')
-				asinfo.itype |= AS_SPHERE;
-
-			childElem.GetAttribute(asinfo.szSoundName, "filename");
-
-			int nContents = childElem.GetChildNodeCount();
-			for (int j = 0; j < nContents; ++j)
+			if (_stricmp("MIN_POSITION", prop_name) == 0)
 			{
-				char* token = NULL;
-				contentElem = childElem.GetChildNode(j);
-				contentElem.GetNodeName(szBuffer);
-				if (_stricmp("MIN_POSITION", szBuffer) == 0)
-				{
-					contentElem.GetContents(szBuffer);
-					token = strtok(szBuffer, " ");
-					if (token != NULL) asinfo.min.x = atof(token);
-					token = strtok(NULL, " ");
-					if (token != NULL) asinfo.min.y = atof(token);
-					token = strtok(NULL, " ");
-					if (token != NULL) asinfo.min.z = atof(token);
-				}
-				else if (_stricmp("MAX_POSITION", szBuffer) == 0)
-				{
-					contentElem.GetContents(szBuffer);
-					token = strtok(szBuffer, " ");
-					if (token != NULL) asinfo.max.x = atof(token);
-					token = strtok(NULL, " ");
-					if (token != NULL) asinfo.max.y = atof(token);
-					token = strtok(NULL, " ");
-					if (token != NULL) asinfo.max.z = atof(token);
-				}
-				else if (_stricmp("RADIUS", szBuffer) == 0)
-				{
-					contentElem.GetContents(szBuffer);
-					asinfo.radius = atof(szBuffer);
-				}
-				else if (_stricmp("CENTER", szBuffer) == 0)
-				{
-					contentElem.GetContents(szBuffer);
-					token = strtok(szBuffer, " ");
-					if (token != NULL) asinfo.center.x = atof(token);
-					token = strtok(NULL, " ");
-					if (token != NULL) asinfo.center.y = atof(token);
-					token = strtok(NULL, " ");
-					if (token != NULL) asinfo.center.z = atof(token);
-				}
+				if (token != nullptr) asinfo.min.x = atof(token);
+				token = strtok(nullptr, " ");
+				if (token != nullptr) asinfo.min.y = atof(token);
+				token = strtok(nullptr, " ");
+				if (token != nullptr) asinfo.min.z = atof(token);
 			}
-			AmbSndInfoList.push_back(asinfo);
+			else if (_stricmp("MAX_POSITION", prop_name) == 0)
+			{
+				if (token != nullptr) asinfo.max.x = atof(token);
+				token = strtok(nullptr, " ");
+				if (token != nullptr) asinfo.max.y = atof(token);
+				token = strtok(nullptr, " ");
+				if (token != nullptr) asinfo.max.z = atof(token);
+			}
+			else if (_stricmp("RADIUS", prop_name) == 0)
+			{
+				asinfo.radius = atof(prop_value);
+			}
+			else if (_stricmp("CENTER", prop_name) == 0)
+			{
+				if (token != nullptr) asinfo.center.x = atof(token);
+				token = strtok(nullptr, " ");
+				if (token != nullptr) asinfo.center.y = atof(token);
+				token = strtok(nullptr, " ");
+				if (token != nullptr) asinfo.center.z = atof(token);
+			}
 		}
+		AmbSndInfoList.push_back(asinfo);
 	}
 
 	return true;
@@ -1520,50 +1493,71 @@ bool RBspObject::OpenDescription(const char *filename)
 
 	m_descfilename = filename;
 
-	char *buffer;
-	buffer = new char[mzf.GetLength() + 1];
-	mzf.Read(buffer, mzf.GetLength());
+	std::unique_ptr<char[]> buffer{ new char[mzf.GetLength() + 1] };
+	mzf.Read(buffer.get(), mzf.GetLength());
 	buffer[mzf.GetLength()] = 0;
 
-	MXmlDocument aXml;
-	aXml.Create();
-	if (!aXml.LoadFromMemory(buffer))
+	rapidxml::xml_document<> doc;
+	try
 	{
-		delete buffer;
-		return false;
+		doc.parse<0>(buffer.get(), mzf.GetLength());
+	}
+	catch (rapidxml::parse_error& e)
+	{
+		MLog("RBspObject::OpenDescription -- Caught rapidxml::parse_error while loading %s\n"
+			"e.what() = %s\n",
+			filename, e.what());
 	}
 
-	int iCount;
-	MXmlElement aParent, aChild;
-	aParent = aXml.GetDocumentElement();
-	iCount = aParent.GetChildNodeCount();
+	auto* xml = doc.first_node("XML");
+	if (!xml)
+		return false;
 
-	char szTagName[256];
-	for (int i = 0; i < iCount; i++)
+	auto* rsx = xml->first_node("RSX");
+	if (rsx)
+		return LoadRS3Map(*rsx);
+	else
+		return LoadRS2Map(*xml);
+}
+
+bool RBspObject::LoadRS2Map(rapidxml::xml_node<>& aParent)
+{
+	for (auto* node = aParent.first_node(); node; node = node->next_sibling())
 	{
-		aChild = aParent.GetChildNode(i);
-		aChild.GetTagName(szTagName);
+		auto* szTagName = node->name();
 		if (_stricmp(szTagName, RTOK_MATERIALLIST) == 0)
-			Open_MaterialList(&aChild);
+			Open_MaterialList(*node);
 		else if (!PhysOnly)
 		{
 			if (_stricmp(szTagName, RTOK_LIGHTLIST) == 0)
-				Open_LightList(&aChild);
+				Open_LightList(*node);
 			else if (_stricmp(szTagName, RTOK_OBJECTLIST) == 0)
-				Open_ObjectList(&aChild);
+				Open_ObjectList(*node);
 			else if (_stricmp(szTagName, RTOK_OCCLUSIONLIST) == 0)
-				Open_OcclusionList(&aChild);
+				Open_OcclusionList(*node);
 			else if (_stricmp(szTagName, RTOK_DUMMYLIST) == 0)
-				Open_DummyList(&aChild);
+				Open_DummyList(*node);
 			else if (_stricmp(szTagName, RTOK_FOG) == 0)
-				Set_Fog(&aChild);
+				Set_Fog(*node);
 			else if (_stricmp(szTagName, "AMBIENTSOUNDLIST") == 0)
-				Set_AmbSound(&aChild);
+				Set_AmbSound(*node);
 		}
 	}
 
-	delete buffer;
-	mzf.Close();
+	return true;
+}
+
+bool RBspObject::LoadRS3Map(rapidxml::xml_node<>& RsxNode)
+{
+	std::vector<std::string> Paths;
+
+	/*args.push_back(map_name->value());
+	rapidxml::xml_node<> * node_path = map_name->next_sibling("PATH");
+	while (node_path != nullptr)
+	{
+		args.push_back(node_path->value());
+		node_path = node_path->next_sibling("PATH");
+	}*/
 
 	return true;
 }
@@ -1782,7 +1776,7 @@ bool RBspObject::OpenLightmap()
 		file.Read(&nSourcePolygon, sizeof(int));
 		file.Read(&nNodeCount, sizeof(int));
 
-		if (nSourcePolygon != ConvexPolygons.size() || OcRoot.size() != nNodeCount)
+		if (nSourcePolygon != NumConvexPolygons || OcRoot.size() != nNodeCount)
 		{
 			file.Close();
 			return false;
@@ -1841,14 +1835,14 @@ bool RBspObject::OpenLightmap()
 
 bool RBspObject::Open_ConvexPolygons(MZFile *pfile)
 {
-	int nConvexPolygons, nConvexVertices;
+	int nConvexVertices;
 
-	pfile->Read(&nConvexPolygons, sizeof(int));
+	pfile->Read(&NumConvexPolygons, sizeof(int));
 	pfile->Read(&nConvexVertices, sizeof(int));
 
 	if (m_OpenMode == ROpenMode::Runtime)
 	{
-		for (int i = 0; i < nConvexPolygons; i++)
+		for (int i = 0; i < NumConvexPolygons; i++)
 		{
 			pfile->Seek(sizeof(int) + sizeof(DWORD) + sizeof(rplane) + sizeof(float), MZFile::current);
 
@@ -1860,7 +1854,7 @@ bool RBspObject::Open_ConvexPolygons(MZFile *pfile)
 		return true;
 	}
 
-	ConvexPolygons.resize(nConvexPolygons);
+	ConvexPolygons.resize(NumConvexPolygons);
 	ConvexVertices.resize(nConvexVertices);
 	ConvexNormals.resize(nConvexVertices);
 
@@ -2422,14 +2416,12 @@ bool RBspObject::GenerateLightmap(const char *filename, int nMaxlightmapsize, in
 						}
 
 						{
-							for (RMapObjectList::iterator i = m_ObjectList.begin(); i != m_ObjectList.end(); i++)
+							for (auto& ObjectInfo : m_ObjectList)
 							{
-								ROBJECTINFO *poi = *i;
-
-								if (!poi->pVisualMesh) continue;
+								if (!ObjectInfo.pVisualMesh) continue;
 								float t;
 
-								rmatrix inv = Inverse(poi->pVisualMesh->m_WorldMat);
+								rmatrix inv = Inverse(ObjectInfo.pVisualMesh->m_WorldMat);
 
 								rvector origin = plight->Position * inv;
 								rvector target = position * inv;
@@ -2440,11 +2432,11 @@ bool RBspObject::GenerateLightmap(const char *filename, int nMaxlightmapsize, in
 								rvector vOut;
 
 								rboundingbox bbox;
-								bbox.vmin = poi->pVisualMesh->m_vBMin;
-								bbox.vmax = poi->pVisualMesh->m_vBMax;
+								bbox.vmin = ObjectInfo.pVisualMesh->m_vBMin;
+								bbox.vmax = ObjectInfo.pVisualMesh->m_vBMax;
 								auto bBBTest = IntersectLineAABB(t, origin, dir, bbox);
 								if (bBBTest &&
-									poi->pVisualMesh->Pick(plight->Position, dirorigin, &vOut, &t))
+									ObjectInfo.pVisualMesh->Pick(plight->Position, dirorigin, &vOut, &t))
 								{
 									rvector PickPos = plight->Position + vOut*t;
 									isshadow[k*(lightmapsize + 1) + j] = true;

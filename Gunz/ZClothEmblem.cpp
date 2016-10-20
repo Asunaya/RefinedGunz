@@ -868,7 +868,7 @@ void ZEmblemList::InitEnv( char* pFileName_ )
 	}
 }
 
-void ZEmblemList::Add( ZClothEmblem* p_, char* pName_ )
+void ZEmblemList::Add( ZClothEmblem* p_, const char* pName_ )
 {
 	push_back( p_ );
 	mEmblemMap.insert( map<string, ZClothEmblem*>::value_type( pName_, p_ ) );

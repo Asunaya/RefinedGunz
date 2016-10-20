@@ -17,11 +17,6 @@ using rmatrixa16 = D3DXMATRIXA16;
 
 _NAMESPACE_REALSPACE2_BEGIN
 
-// awkward, remove sometime
-#ifndef pi
-#define pi D3DX_PI
-#endif
-
 enum rsign { NEGATIVE = -1, ZERO = 0, POSITIVE = 1 };
 
 enum RRESULT {

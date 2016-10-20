@@ -16,6 +16,8 @@
 #include "MUtil.h"
 #include "VulkanMaterial.h"
 #include "RBspObjectDraw.h"
+#include "rapidxml.hpp"
+#include "RVisualMesh.h"
 
 class MZFile;
 class MZFileSystem;
@@ -80,10 +82,10 @@ struct RCONVEXPOLYGONINFO {
 
 struct ROBJECTINFO {
 	std::string name;
-	int nMeshID;
-	RVisualMesh* pVisualMesh;
-	RLIGHT* pLight;
-	float fDist;
+	int nMeshID{};
+	std::unique_ptr<RVisualMesh> pVisualMesh;
+	RLIGHT* pLight{};
+	float fDist{};
 };
 
 struct RBSPPICKINFO {
@@ -93,12 +95,7 @@ struct RBSPPICKINFO {
 	RPOLYGONINFO* pInfo;
 };
 
-class RMapObjectList : public std::list<ROBJECTINFO*> {
-public:
-	~RMapObjectList();
-
-	iterator Delete(iterator i);
-};
+using RMapObjectList = std::vector<ROBJECTINFO>;
 
 struct RDrawInfo {
 	~RDrawInfo() {
@@ -367,6 +364,9 @@ public:
 private:
 	friend class RBspObjectDrawVulkan;
 
+	bool LoadRS2Map(rapidxml::xml_node<>&);
+	bool LoadRS3Map(rapidxml::xml_node<>&);
+
 	void Draw(RSBspNode *Node, int Material);
 	void DrawNoTNL(RSBspNode *Node, int Material);
 
@@ -400,15 +400,15 @@ private:
 	struct OpenNodesState Open_Nodes(RSBspNode *pNode, MZFile *pfile, OpenNodesState State);
 	// Returns number of nodes created.
 	int Open_ColNodes(RSolidBspNode *pNode, MZFile *pfile, int Depth = 0);
-	bool Open_MaterialList(MXmlElement *pElement);
-	bool Open_LightList(MXmlElement *pElement);
-	bool Open_ObjectList(MXmlElement *pElement);
-	bool Open_DummyList(MXmlElement *pElement);
+	bool Open_MaterialList(rapidxml::xml_node<>&);
+	bool Open_LightList(rapidxml::xml_node<>&);
+	bool Open_ObjectList(rapidxml::xml_node<>&);
+	bool Open_DummyList(rapidxml::xml_node<>&);
 	bool Open_ConvexPolygons(MZFile *pfile);
-	bool Open_OcclusionList(MXmlElement *pElement);
+	bool Open_OcclusionList(rapidxml::xml_node<>&);
 	bool Make_LenzFalreList();
-	bool Set_Fog(MXmlElement *pElement);
-	bool Set_AmbSound(MXmlElement *pElement);
+	bool Set_Fog(rapidxml::xml_node<>&);
+	bool Set_AmbSound(rapidxml::xml_node<>&);
 
 	void CreatePolygonTable();
 	void CreatePolygonTable(RSBspNode *pNode, u16** Indices);
@@ -451,6 +451,8 @@ private:
 	// The first index is special: It's an untextured material
 	// that has only a white diffuse color. It is used for materials
 	// whose material index didn't map to a valid material.
+	// Thus, every material index in the map file maps to
+	// the index in this array that is one higher.
 	std::vector<RBSPMATERIAL> Materials;
 
 	rplane m_localViewFrustum[6];
@@ -468,6 +470,7 @@ private:
 
 	std::vector<v3> ConvexVertices;
 	std::vector<v3> ConvexNormals;
+	int NumConvexPolygons{};
 	std::vector<RCONVEXPOLYGONINFO> ConvexPolygons;
 
 	rvector		m_AmbientLight{ 0, 0, 0 };

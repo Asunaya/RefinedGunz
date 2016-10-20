@@ -59,7 +59,7 @@ struct ZObserverCommandItem {
 	MCommand *pCommand;
 };
 
-class ZObserverCommandList : public list<ZObserverCommandItem*> {
+class ZObserverCommandList : public std::list<ZObserverCommandItem*> {
 public:
 	~ZObserverCommandList() { Destroy(); }
 	void Destroy() {
@@ -110,22 +110,6 @@ private:
 class ZGame
 {
 public:
-	RParticles			*m_pParticles;
-
-	ZMyCharacter*		m_pMyCharacter;
-	ZCharacterManager	m_CharacterManager;
-	ZObjectManager		m_ObjectManager;
-
-	RVisualMeshMgr		m_VisualMeshMgr;
-
-	ZEffectManager*		m_pEffectManager;
-	ZWeaponMgr			m_WeaponManager;
-	
-	int					m_render_poly_cnt;
-
-	ZHelpScreen	m_HelpScreen;
-
-public:
 	ZGame();
 	~ZGame();
 
@@ -144,13 +128,13 @@ public:
 
 	bool m_bShowWireframe;
 
-	void ShowReplayInfo( bool bShow);
+	void ShowReplayInfo(bool bShow);
 
-	void OnExplosionGrenade(MUID uidOwner,rvector pos,float fDamage,float fRange,float fMinDamage,float fKnockBack,MMatchTeam nTeamID);
-	void OnExplosionMagic(ZWeaponMagic *pWeapon, MUID uidOwner,rvector pos,float fMinDamage,float fKnockBack,MMatchTeam nTeamID,bool bSkipNpc);
+	void OnExplosionGrenade(MUID uidOwner, rvector pos, float fDamage, float fRange, float fMinDamage, float fKnockBack, MMatchTeam nTeamID);
+	void OnExplosionMagic(ZWeaponMagic *pWeapon, MUID uidOwner, rvector pos, float fMinDamage, float fKnockBack, MMatchTeam nTeamID, bool bSkipNpc);
 	void OnExplosionMagicNonSplash(ZWeaponMagic *pWeapon, MUID uidOwner, MUID uidTarget, rvector pos, float fKnockBack);
 	void OnReloadComplete(ZCharacter *pCharacter);
-	void OnPeerShotSp(const MUID& uid, float fShotTime, const rvector& pos, const rvector& dir,int type,MMatchCharItemParts sel_type);
+	void OnPeerShotSp(const MUID& uid, float fShotTime, const rvector& pos, const rvector& dir, int type, MMatchCharItemParts sel_type);
 	void OnChangeWeapon(const MUID& uid, MMatchCharItemParts parts);
 
 	rvector GetMyCharacterFirePosition(void);
@@ -158,8 +142,8 @@ public:
 	void CheckMyCharDead(float fElapsed);
 
 	void CheckStylishAction(ZCharacter* pCharacter);
-	void CheckCombo( ZCharacter *pOwnerCharacter , ZObject *pHitObject ,bool bPlaySound);
-	void UpdateCombo(bool bShot = false );
+	void CheckCombo(ZCharacter *pOwnerCharacter, ZObject *pHitObject, bool bPlaySound);
+	void UpdateCombo(bool bShot = false);
 
 	void PostBasicInfo();
 	void PostHPInfo();
@@ -168,7 +152,7 @@ public:
 	void PostSyncReport();
 
 	int  SelectSlashEffectMotion(ZCharacter* pCharacter);
-	bool CheckWall(ZObject* pObj1,ZObject* pObj2);
+	bool CheckWall(ZObject* pObj1, ZObject* pObj2);
 
 	void InitRound();
 	void AddEffectRoundState(MMATCH_ROUNDSTATE nRoundState, int nArg);
@@ -200,43 +184,43 @@ public:
 	void OnObserverRun();
 	void OnCommand_Observer(MCommand* pCommand);
 	void FlushObserverCommands();
-	int	GetObserverCommandListCount() const { return (int)m_ObserverCommandList.size(); }
+	int	GetObserverCommandListCount() const { return static_cast<int>(m_ObserverCommandList.size()); }
 	void ClearObserverCommandList();
 
 	void ReserveObserver();
 	void ReleaseObserver();
 
-	ZMatch* GetMatch()				{ return &m_Match; }
-	ZMapDesc* GetMapDesc()			{ return GetWorld() ? GetWorld()->GetDesc() : NULL; }
-	ZWorld* GetWorld()				{ return ZGetWorldManager()->GetCurrent(); }
+	ZMatch* GetMatch() { return &m_Match; }
+	ZMapDesc* GetMapDesc() { return GetWorld() ? GetWorld()->GetDesc() : NULL; }
+	ZWorld* GetWorld() { return ZGetWorldManager()->GetCurrent(); }
 
-	ZGameTimer* GetGameTimer()		{ return &m_GameTimer; }
-	auto GetTickTime() const		{ return m_GameTimer.GetGlobalTick(); }
-	auto GetTime() const			{ return m_fTime; }
+	ZGameTimer* GetGameTimer() { return &m_GameTimer; }
+	auto GetTickTime() const { return m_GameTimer.GetGlobalTick(); }
+	auto GetTime() const { return m_fTime; }
 
-	MDataChecker* GetDataChecker()	{ return &m_DataChecker; }
+	MDataChecker* GetDataChecker() { return &m_DataChecker; }
 
-	rvector GetFloor(rvector pos,rplane *pimpactplane=NULL);
+	rvector GetFloor(rvector pos, rplane *pimpactplane = NULL);
 
-	bool Pick(ZObject *pOwnerObject, const rvector &origin, const rvector &dir,ZPICKINFO *pickinfo,
-		DWORD dwPassFlag=RM_FLAG_ADDITIVE | RM_FLAG_HIDE,bool bMyChar=false);
-	bool PickTo(ZObject *pOwnerObject, const rvector &origin, const rvector &to,ZPICKINFO *pickinfo,
-		DWORD dwPassFlag=RM_FLAG_ADDITIVE | RM_FLAG_HIDE,bool bMyChar=false);
-	bool PickHistory(ZObject *pOwnerObject,float fTime, const rvector &origin, const rvector &to,
-		ZPICKINFO *pickinfo,DWORD dwPassFlag,bool bMyChar=false);
+	bool Pick(ZObject *pOwnerObject, const rvector &origin, const rvector &dir, ZPICKINFO *pickinfo,
+		DWORD dwPassFlag = RM_FLAG_ADDITIVE | RM_FLAG_HIDE, bool bMyChar = false);
+	bool PickTo(ZObject *pOwnerObject, const rvector &origin, const rvector &to, ZPICKINFO *pickinfo,
+		DWORD dwPassFlag = RM_FLAG_ADDITIVE | RM_FLAG_HIDE, bool bMyChar = false);
+	bool PickHistory(ZObject *pOwnerObject, float fTime, const rvector &origin, const rvector &to,
+		ZPICKINFO *pickinfo, DWORD dwPassFlag, bool bMyChar = false);
 	bool ObjectColTest(ZObject* pOwner, const rvector& origin, const rvector& to, float fRadius,
 		ZObject** poutTarget);
 
 	char* GetSndNameFromBsp(const char* szSrcSndName, RMATERIAL* pMaterial);
 
 	bool CheckGameReady();
-	ZGAME_READYSTATE GetReadyState()			{ return m_nReadyState; }
-	void SetReadyState(ZGAME_READYSTATE nState)	{ m_nReadyState = nState; }
+	ZGAME_READYSTATE GetReadyState() { return m_nReadyState; }
+	void SetReadyState(ZGAME_READYSTATE nState) { m_nReadyState = nState; }
 
-	bool GetSpawnRequested()			{ return m_bSpawnRequested; }
-	void SetSpawnRequested(bool bVal)	{ m_bSpawnRequested = bVal; }
+	bool GetSpawnRequested() { return m_bSpawnRequested; }
+	void SetSpawnRequested(bool bVal) { m_bSpawnRequested = bVal; }
 
-	bool GetUserNameColor(MUID uid,MCOLOR& color,char* sp_name);
+	bool GetUserNameColor(MUID uid, MCOLOR& color, char* sp_name);
 	bool IsAttackable(ZObject *pAttacker, ZObject *pTarget);
 
 	void OnPeerShot(const MUID& uid, float fShotTime, rvector& pos, rvector& to, MMatchCharItemParts sel_type);
@@ -257,6 +241,21 @@ public:
 	void CancelSuicide() { m_bSuicide = false; }
 
 	ZObserverCommandList* GetReplayCommandList() { return &m_ReplayCommandList; }
+
+	RParticles			*m_pParticles{};
+
+	ZMyCharacter*		m_pMyCharacter{};
+	ZCharacterManager	m_CharacterManager;
+	ZObjectManager		m_ObjectManager;
+
+	RVisualMeshMgr		m_VisualMeshMgr;
+
+	ZEffectManager*		m_pEffectManager;
+	ZWeaponMgr			m_WeaponManager;
+
+	int					m_render_poly_cnt{};
+
+	ZHelpScreen	m_HelpScreen;
 
 protected:
 	int	m_nGunzReplayNumber;

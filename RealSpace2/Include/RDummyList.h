@@ -1,62 +1,27 @@
-#ifndef _RDUMMYLIST_H
-#define _RDUMMYLIST_H
+#pragma once
 
 #include <list>
 #include <string>
-
 #include "RTypes.h"
 #include "RToken.h"
-
-using namespace std;
+#include "rapidxml.hpp"
 
 class MXmlElement;
 
 #include "RNameSpace.h"
 _NAMESPACE_REALSPACE2_BEGIN
 
-
-
-// 더미, 더미 리스트
 struct RDummy {
-	string	szName;
-	rvector Position;
-	rvector Direction;
+	std::string Name;
+	v3 Position;
+	v3 Direction;
 };
 
-class RDummyList : public list<RDummy*> 
+class RDummyList : public std::vector<RDummy>
 {
-private:
-	void Clear();
 public:
-	virtual ~RDummyList();
-
-	bool Open(MXmlElement *pElement);
+	bool Open(rapidxml::xml_node<>& parent);
 	bool Save(MXmlElement *pElement);
 };
 
-
-
-
-
-
-
-
-
-
-
-
 _NAMESPACE_REALSPACE2_END
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif

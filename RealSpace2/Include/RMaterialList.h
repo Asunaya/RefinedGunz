@@ -5,6 +5,7 @@
 #include "RTypes.h"
 #include "RToken.h"
 #include "RNameSpace.h"
+#include "rapidxml.hpp"
 
 class MXmlElement;
 
@@ -12,23 +13,18 @@ _NAMESPACE_REALSPACE2_BEGIN
 
 struct RMATERIAL {
 	std::string Name;
-	rvector Diffuse;
-	rvector Ambient;
-	rvector Specular;
+	v3 Diffuse;
+	v3 Ambient;
+	v3 Specular;
 	float Power;
-	string DiffuseMap;
-	DWORD dwFlags;
+	std::string DiffuseMap;
+	u32 dwFlags;
 };
 
-class RMaterialList : public std::list<RMATERIAL*> {
+class RMaterialList : public std::vector<RMATERIAL> {
 public:
-	virtual ~RMaterialList();
-
-	bool Open(MXmlElement *pElement);
-	bool Save(MXmlElement *pElement);
-
-private:
-	bool Open_Material(MXmlElement *pElement);
+	bool Open(rapidxml::xml_node<>&);
+	bool Save(MXmlElement*);
 };
 
 _NAMESPACE_REALSPACE2_END

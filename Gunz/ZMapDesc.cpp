@@ -310,63 +310,62 @@ bool ZMapDesc::Open(RBspObject* pBspObject)
 
 	RDummyList* pDummyList = pBspObject->GetDummyList();
 
-	for (RDummyList::iterator itor = pDummyList->begin(); itor != pDummyList->end(); ++itor)
+	for (auto& Dummy : *pDummyList)
 	{
-		RDummy* pDummy = (*itor);
-		const char* szDummyName = pDummy->szName.c_str();
+		const char* szDummyName = Dummy.Name.c_str();
 
-		if (!_strnicmp(pDummy->szName.c_str(), ZTOK_SPAWN, nSpawnTokLen))
+		if (!_strnicmp(Dummy.Name.c_str(), ZTOK_SPAWN, nSpawnTokLen))
 		{
 			char szSpawnName[256];
 			strcpy_safe(szSpawnName, szDummyName);
 
-			m_SpawnManager.AddSpawnData(szSpawnName, pDummy->Position, pDummy->Direction);
+			m_SpawnManager.AddSpawnData(szSpawnName, Dummy.Position, Dummy.Direction);
 		}
-		else if (!_strnicmp(pDummy->szName.c_str(), ZTOK_WAIT_CAMERA_POS, nWaitCamTokLen))
+		else if (!_strnicmp(Dummy.Name.c_str(), ZTOK_WAIT_CAMERA_POS, nWaitCamTokLen))
 		{
-			m_WaitCamDir = pDummy->Direction;
-			m_WaitCamPos = pDummy->Position;
+			m_WaitCamDir = Dummy.Direction;
+			m_WaitCamPos = Dummy.Position;
 		}
-		else if(!_strnicmp(pDummy->szName.c_str(), ZTOK_SMOKE_SS , nSmokeSSTokLen ))
+		else if(!_strnicmp(Dummy.Name.c_str(), ZTOK_SMOKE_SS , nSmokeSSTokLen ))
 		{
 			ZMapSmokeSS* smkSS = new ZMapSmokeSS;
 
-			smkSS->m_vPos = pDummy->Position;
-			smkSS->m_vDir = pDummy->Direction;
-			smkSS->m_Name = pDummy->szName;
+			smkSS->m_vPos = Dummy.Position;
+			smkSS->m_vDir = Dummy.Direction;
+			smkSS->m_Name = Dummy.Name;
 
 			m_SmokeDummyMgr.push_back(smkSS);
 		}
-		else if(!_strnicmp(pDummy->szName.c_str(), ZTOK_SMOKE_TS , nSmokeTSTokLen ))
+		else if(!_strnicmp(Dummy.Name.c_str(), ZTOK_SMOKE_TS , nSmokeTSTokLen ))
 		{
 			ZMapSmokeTS* smkTS = new ZMapSmokeTS;
 
-			smkTS->m_vPos = pDummy->Position;
-			smkTS->m_vDir = pDummy->Direction;
-			smkTS->m_Name = pDummy->szName;
+			smkTS->m_vPos = Dummy.Position;
+			smkTS->m_vDir = Dummy.Direction;
+			smkTS->m_Name = Dummy.Name;
 
 			m_SmokeDummyMgr.push_back(smkTS);
 		}
-		else if(!_strnicmp(pDummy->szName.c_str(), ZTOK_SMOKE_ST , nSmokeSTTokLen ))
+		else if(!_strnicmp(Dummy.Name.c_str(), ZTOK_SMOKE_ST , nSmokeSTTokLen ))
 		{
 			ZMapSmokeST* smkST = new ZMapSmokeST;
 
-			smkST->m_vPos = pDummy->Position;
-			smkST->m_vDir = pDummy->Direction;
-			smkST->m_Name = pDummy->szName;
+			smkST->m_vPos = Dummy.Position;
+			smkST->m_vDir = Dummy.Direction;
+			smkST->m_Name = Dummy.Name;
 
 			m_SmokeDummyMgr.push_back(smkST);
 		}
-		else if(!_strnicmp(pDummy->szName.c_str(), ZTOK_DUMMY_LINK , (int)strlen(ZTOK_DUMMY_LINK) ))
+		else if(!_strnicmp(Dummy.Name.c_str(), ZTOK_DUMMY_LINK , (int)strlen(ZTOK_DUMMY_LINK) ))
 		{
-			char szName[32];
-			strcpy_safe(szName, pDummy->szName.c_str());
+			char Name[32];
+			strcpy_safe(Name, Dummy.Name.c_str());
 			int idx = (int)strlen(ZTOK_DUMMY_LINK);
-			int nLinkIndex = atoi(&szName[idx]) - 1;
+			int nLinkIndex = atoi(&Name[idx]) - 1;
 			
 			if ((nLinkIndex >= 0) && (nLinkIndex < MAX_QUEST_MAP_SECTOR_COUNT))
 			{
-				m_QuestMapDesc.m_vLinks[nLinkIndex] = pDummy->Position;
+				m_QuestMapDesc.m_vLinks[nLinkIndex] = Dummy.Position;
 			}
 		}
 

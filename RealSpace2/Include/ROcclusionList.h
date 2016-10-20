@@ -2,31 +2,24 @@
 
 #include <string>
 #include "RTypes.h"
-
 #include "RNameSpace.h"
+#include "rapidxml.hpp"
 
 _NAMESPACE_REALSPACE2_BEGIN
 
 class ROcclusion {
 public:
-	ROcclusion();
-	~ROcclusion();
+	void CalcPlane();
 
-	inline void CalcPlane() { D3DXPlaneFromPoints(&plane,pVertices,pVertices+1,pVertices+2); }
-
-	int nCount;
-	rvector *pVertices;
-	rplane	*pPlanes;
+	std::vector<v3> Vertices;
+	std::unique_ptr<rplane[]> Planes;
 	rplane plane;
-	string	Name;
+	std::string Name;
 };
 
-// TODO: Change std::list<ROcclusion*> -> std::vector<ROcclusion>
-class ROcclusionList final : public std::list<ROcclusion*> {
+class ROcclusionList final : public std::vector<ROcclusion> {
 public:
-	~ROcclusionList();
-
-	bool Open(class MXmlElement *pElement);
+	bool Open(rapidxml::xml_node<>& parent);
 	bool Save(MXmlElement *pElement);
 
 	void UpdateCamera(const rmatrix &matWorld, const rvector &cameraPos);

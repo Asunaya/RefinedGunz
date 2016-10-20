@@ -700,17 +700,6 @@ void ZApplication::OnUpdate()
 
 	__EP(2);
 
-	//// ANTIHACK ////
-	{
-		static DWORD dwLastAntiHackTick = 0;
-		if (GetGlobalTimeMS() - dwLastAntiHackTick > 10000) {
-			dwLastAntiHackTick = GetGlobalTimeMS();
-			if (m_GlobalDataChecker.UpdateChecksum() == false) {
-				Exit();
-			}
-		}
-	}
-
 	if(ZIsActionKeyPressed(ZACTION_SCREENSHOT)) {
 		if(m_pGameInterface)
 			m_pGameInterface->SaveScreenShot();
@@ -841,13 +830,6 @@ void ZApplication::Exit()
 #define ZTOKEN_QUEST			"quest"
 #define ZTOKEN_FAST_LOADING		"fast"
 
-// 맵 테스트 : /launchdevelop game 맵이름
-// 더미테스트: /launchdevelop dummy 맵이름 더미숫자 이팩트출력여부
-// (ex: /launchdevelop test_a 16 1) or (ex: /launchdevelop manstion 8 0)
-// ai 테스트 : /launchdevelop 맵이름 AI숫자
-
-// 리소스 로딩전에 실행된다..
-
 void ZApplication::PreCheckArguments()
 {
 	char *str;
@@ -934,9 +916,7 @@ void ZApplication::SetInitialState()
 bool ZApplication::InitLocale()
 {
 	ZGetLocale()->Init(GetCountryID(ZGetConfiguration()->GetLocale()->strCountry.c_str()) );
-
 	ZGetStringResManager()->Init("system/", ZGetLocale()->GetLanguage(), GetFileSystem());
-
 
 	return true;
 }
@@ -950,8 +930,6 @@ void ZApplication::SetSystemValue(const char* szField, const char* szData)
 {
 	MRegistry::Write(HKEY_CURRENT_USER, szField, szData);
 }
-
-
 
 void ZApplication::InitFileSystem()
 {

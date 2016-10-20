@@ -6,71 +6,51 @@
 
 _NAMESPACE_REALSPACE2_BEGIN
 
-ROcclusion::ROcclusion()
+bool ROcclusionList::Open(rapidxml::xml_node<>& parent)
 {
-	nCount=0;
-	pVertices=NULL;
-	pPlanes=NULL;
-}
-
-ROcclusion::~ROcclusion()
-{ 
-	SAFE_DELETE(pVertices); 
-	SAFE_DELETE(pPlanes);
-}
-
-ROcclusionList::~ROcclusionList()
-{
-	for(iterator i=begin();i!=end();i++)
-		delete *i;
-}
-
-bool ROcclusionList::Open(MXmlElement *pElement)
-{
-	MXmlElement	aOcclusionNode,aChild;
-	int nCount = pElement->GetChildNodeCount();
-
-	char szTagName[256],szContents[256];
-	for (int i = 0; i < nCount; i++)
+	for (auto* node = parent.first_node(); node; node = node->next_sibling())
 	{
-		aOcclusionNode = pElement->GetChildNode(i);
-		aOcclusionNode.GetTagName(szTagName);
+		auto* szTagName = node->name();
+		if (!szTagName)
+			continue;
 
-		if(_stricmp(szTagName,RTOK_OCCLUSION)==0)
+		if (_stricmp(szTagName, RTOK_OCCLUSION) != 0)
+			continue;
+
+		auto name_attr = node->first_attribute(RTOK_NAME);
+		if (!name_attr)
+			continue;
+
+		auto* mat_name = name_attr->value();
+		if (!mat_name)
+			continue;
+
+		emplace_back();
+		auto& Occlusion = back();
+		Occlusion.Name = mat_name;
+
+		for (auto* prop_node = node->first_node(); prop_node; prop_node = prop_node->next_sibling())
 		{
-			ROcclusion *poc=new ROcclusion;
-			aOcclusionNode.GetAttribute(szContents,RTOK_NAME);
-			poc->Name=szContents;
+			auto* szTagName = prop_node->name();
+			if (!szTagName)
+				continue;
+			auto* szContents = prop_node->value();
+			if (!szContents)
+				szContents = "";
 
-			list<rvector> winding;
+			auto ReadVector = [&](auto& v) {
+				sscanf(szContents, "%f %f %f", &v.x, &v.y, &v.z);
+			};
 
-			int nChildCount=aOcclusionNode.GetChildNodeCount();
-			for(int j=0;j<nChildCount;j++)
-			{
-				aChild = aOcclusionNode.GetChildNode(j);
-				aChild.GetTagName(szTagName);
-				aChild.GetContents(szContents);
-
-	#define READVECTOR(v) sscanf(szContents,"%f %f %f",&v.x,&v.y,&v.z)
-
-				if(_stricmp(szTagName,RTOK_POSITION)==0)	{
-					rvector temp;
-					READVECTOR(temp);
-					winding.push_back(temp);
-				}
+			if (_stricmp(szTagName, RTOK_POSITION) == 0) {
+				v3 temp;
+				ReadVector(temp);
+				Occlusion.Vertices.push_back(temp);
 			}
-
-			poc->nCount=winding.size();
-			poc->pVertices=new rvector[poc->nCount];
-			list<rvector>::iterator k=winding.begin();
-			for(int j=0;j<poc->nCount;j++)
-			{
-				poc->pVertices[j]=*k;
-				k++;
-			}
-
-			push_back(poc);
 		}
+
+		Occlusion.Planes = std::unique_ptr<rplane[]>{ new rplane[Occlusion.Vertices.size() + 1] };
+		Occlusion.CalcPlane();
 	}
 	return true;
 }
@@ -79,24 +59,23 @@ bool ROcclusionList::Save(MXmlElement *pElement)
 {
 	MXmlElement	aOcclusionListElement=pElement->CreateChildElement(RTOK_OCCLUSIONLIST);
 
-	for(ROcclusionList::iterator i=begin();i!=end();i++)
+	for(auto& Occlusion : *this)
 	{
 		aOcclusionListElement.AppendText("\n\t\t");
 
-		ROcclusion *poc=*i;
 		char buffer[256];
 
-		MXmlElement		aElement,aChild;
+		MXmlElement aElement,aChild;
 		aElement = aOcclusionListElement.CreateChildElement(RTOK_OCCLUSION);
 
-		aElement.AddAttribute(RTOK_NAME,poc->Name.c_str());
+		aElement.AddAttribute(RTOK_NAME, Occlusion.Name.c_str());
 
-		for(int j=0;j<poc->nCount;j++)
+		for (size_t j = 0; j < Occlusion.Vertices.size(); j++)
 		{
 			aElement.AppendText("\n\t\t\t");
 
 			aChild=aElement.CreateChildElement(RTOK_POSITION);
-			aChild.SetContents(Format(buffer,poc->pVertices[j]));
+			aChild.SetContents(Format(buffer, Occlusion.Vertices[j]));
 		}
 
 		aElement.AppendText("\n\t\t");
@@ -107,13 +86,13 @@ bool ROcclusionList::Save(MXmlElement *pElement)
 
 bool ROcclusionList::IsVisible(const rboundingbox &bb) const
 {
-	for(auto* poc : *this)
+	for(auto& Occlusion : *this)
 	{
 		bool bVisible = false;
 
-		for (int j = 0; j < poc->nCount + 1; j++)
+		for (size_t j = 0; j < Occlusion.Vertices.size() + 1; j++)
 		{
-			if (isInPlane(&bb, &poc->pPlanes[j]))
+			if (isInPlane(&bb, &Occlusion.Planes[j]))
 			{
 				bVisible = true;
 				break;
@@ -131,28 +110,28 @@ void ROcclusionList::UpdateCamera(const rmatrix &matWorld, const rvector &camera
 {
 	rmatrix invWorld = Inverse(matWorld);
 	rvector localCameraPos = cameraPos * invWorld;
-	// We need the inverse transpose for proper plane transformations.
+	// We need the inverse transpose for proper plane transformation.
 	rmatrix trInvWorld = Transpose(invWorld);
 
-	for(auto* poc : *this)
+	for (auto& Occlusion : *this)
 	{
-		bool bm_pPositive = DotProduct(poc->plane, localCameraPos) > 0;
+		bool bm_pPositive = DotProduct(Occlusion.plane, localCameraPos) > 0;
 
-		poc->pPlanes[0] *= trInvWorld;
+		Occlusion.Planes[0] *= trInvWorld;
 
-		poc->pPlanes[0] = bm_pPositive ? poc->plane : -poc->plane;
-		for(int j=0;j<poc->nCount;j++)
+		Occlusion.Planes[0] = bm_pPositive ? Occlusion.plane : -Occlusion.plane;
+		for (size_t j = 0; j < Occlusion.Vertices.size(); j++)
 		{
-			auto& Plane = poc->pPlanes[j + 1];
-			if(bm_pPositive)
-				poc->pPlanes[j + 1]= PlaneFromPoints(
-					poc->pVertices[j],
-					poc->pVertices[(j + 1) % poc->nCount],
+			auto& Plane = Occlusion.Planes[j + 1];
+			if (bm_pPositive)
+				Occlusion.Planes[j + 1] = PlaneFromPoints(
+					Occlusion.Vertices[j],
+					Occlusion.Vertices[(j + 1) % Occlusion.Vertices.size()],
 					localCameraPos);
 			else
-				poc->pPlanes[j + 1] = PlaneFromPoints(
-					poc->pVertices[(j+1)%poc->nCount],
-					poc->pVertices[j],
+				Occlusion.Planes[j + 1] = PlaneFromPoints(
+					Occlusion.Vertices[(j + 1) % Occlusion.Vertices.size()],
+					Occlusion.Vertices[j],
 					localCameraPos);
 
 			Plane *= trInvWorld;
@@ -161,3 +140,8 @@ void ROcclusionList::UpdateCamera(const rmatrix &matWorld, const rvector &camera
 }
 
 _NAMESPACE_REALSPACE2_END
+
+void ROcclusion::CalcPlane()
+{
+	plane = PlaneFromPoints(Vertices[0], Vertices[1], Vertices[2]);
+}
