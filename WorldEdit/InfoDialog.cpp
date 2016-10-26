@@ -124,7 +124,7 @@ BOOL CInfoDialog::OnInitDialog()
 	}
 
 	string.Format("%d objects\r\n%d map lights\r\n%d object lights\r\n",
-		pBsp->GetMapObjectList()->size(),pBsp->GetMapLightList()->size(),pBsp->GetObjectLightList()->size());
+		pBsp->GetMapObjectList()->size(), pBsp->GetMapLightList().size(), pBsp->GetObjectLightList().size());
 	info+=string;
 
 	// object 관련 출력
@@ -136,8 +136,8 @@ BOOL CInfoDialog::OnInitDialog()
 
 		for(RMapObjectList::iterator i=pol->begin();i!=pol->end();i++)
 		{
-			ROBJECTINFO *poi=*i;
-			string.Format("   %d %s\r\n",nCount++,poi->name.c_str());
+			ROBJECTINFO& poi=*i;
+			string.Format("   %d %s\r\n",nCount++,poi.name.c_str());
 			info+=string;
 		}
 	}

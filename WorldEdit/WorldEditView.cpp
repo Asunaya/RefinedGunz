@@ -248,8 +248,8 @@ BOOL CWorldEditView::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD
 
 	if(ret)
 	{
-		RMODEPARAMS mparams={ 1024,768,false,D3DFMT_R5G6B5 };
-		if(!RInitDisplay(m_hWnd,&mparams))
+		RMODEPARAMS mparams = { 1024,768,FullscreenType::Windowed,D3DFMT_R5G6B5 };
+		if (!RInitDisplay(m_hWnd, nullptr, &mparams, GraphicsAPI::D3D9))
 		{
 			AfxMessageBox("Cannot Initialize 3D Engine.");
 			return false;
@@ -272,7 +272,7 @@ BOOL CWorldEditView::OnEraseBkgnd(CDC* pDC)
 
 void CWorldEditView::Resize(CSize size)
 {
-	RMODEPARAMS mparams={ size.cx,size.cy,false,D3DFMT_R5G6B5 };
+	RMODEPARAMS mparams = { size.cx,size.cy, FullscreenType::Windowed ,D3DFMT_R5G6B5 };
 	RBspObject *pbsp=GetDocument()->m_pBspObject;
 	if(pbsp) pbsp->OnInvalidate();
 	RResetDevice(&mparams);
@@ -332,7 +332,7 @@ void CWorldEditView::OnLButtonDown(UINT nFlags, CPoint point)
 	if(m_bLastAltState)		// alt 를 누른상태에서는 화면 중앙을 중심으로 회전..
 	{
 		// 화면 중앙의 점을 기준으로 회전
-		GetWorldCoordinate(&m_LastWorldPosition,CPoint(RGetScreenWidth()/2,(float)RGetScreenHeight()/2));
+		GetWorldCoordinate(&m_LastWorldPosition, CPoint(RGetScreenWidth()/2, RGetScreenHeight()/2));
 	}
 
 	if(m_EditMode==EDITMODE_PATH)
@@ -411,7 +411,7 @@ void CWorldEditView::OnResetCamera()
 	targetpos.z=0;
 	rvector sourcepos=targetpos+rvector(0,100,100);
 	RSetCamera(sourcepos,targetpos,rvector(0,0,1));
-	RSetProjection(1.f/3.f*pi,100,55000);
+	RSetProjection(1.f/3.f*PI_FLOAT,100,55000);
 
 	Invalidate();
 
@@ -475,14 +475,14 @@ void CWorldEditView::OnMouseMove(UINT nFlags, CPoint point)
 			anglex=acos(relpos.z);
 			anglez=asin(relpos.x/sin(anglex));
 			if(relpos.y<0)
-				anglez=pi-anglez;
+				anglez = PI_FLOAT - anglez;
 
 			// 회전해서..
-			anglex+=-0.01f*Diff.y;
-			anglex=min(max(anglex,0.001f),pi-0.001f);
-			anglez+=-0.01f*Diff.x;
+			anglex += -0.01f*Diff.y;
+			anglex = min(max(anglex, 0.001f), PI_FLOAT - 0.001f);
+			anglez += -0.01f*Diff.x;
 
-			relpos=length*rvector(sin(anglez)*sin(anglex),cos(anglez)*sin(anglex),cos(anglex));
+			relpos = length*rvector(sin(anglez)*sin(anglex), cos(anglez)*sin(anglex), cos(anglex));
 
 			// 카메라를 회전시킨다..
 			rvector newcamerapos=m_LastWorldPosition+relpos;
@@ -500,7 +500,7 @@ BOOL CWorldEditView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 {
 	// TODO: Add your message handler code here and/or call default
 
-	GetWorldCoordinate(&m_LastWorldPosition,CPoint(RGetScreenWidth()/2,(float)RGetScreenHeight()/2));
+	GetWorldCoordinate(&m_LastWorldPosition,CPoint(RGetScreenWidth()/2, RGetScreenHeight()/2));
 
 	rvector dir=m_LastWorldPosition-RCameraPosition;
 	Normalize(dir);

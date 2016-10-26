@@ -515,8 +515,8 @@ static void SetDefaultStates(bool Lightmap)
 
 bool RBspObject::Draw()
 {
-	DrawObj.Draw();
-	return true;
+	//DrawObj.Draw();
+	//return true;
 
 	if (GetRS2().UsingVulkan())
 	{

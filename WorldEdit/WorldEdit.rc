@@ -104,60 +104,55 @@ END
 
 IDR_MAINFRAME MENU 
 BEGIN
-    POPUP "파일(&F)"
+    POPUP "File"
     BEGIN
-        MENUITEM "열기(&O)...\tCtrl+O",         ID_FILE_OPEN
-        MENUITEM "저장(&S)\tCtrl+S",            ID_FILE_SAVE
-        MENUITEM "다른 이름으로 저장(&A)...",   ID_FILE_SAVE_AS
+        MENUITEM "Open\tCtrl+O",         ID_FILE_OPEN
+        MENUITEM "Save\tCtrl+S",            ID_FILE_SAVE
+        MENUITEM "Save as",   ID_FILE_SAVE_AS
         MENUITEM SEPARATOR
-        MENUITEM "최근 파일",                   ID_FILE_MRU_FILE1, GRAYED
+        MENUITEM "File 1",                   ID_FILE_MRU_FILE1, GRAYED
         MENUITEM SEPARATOR
-        MENUITEM "종료(&X)",                    ID_APP_EXIT
+        MENUITEM "Exit",                    ID_APP_EXIT
     END
-    POPUP "편집(&E)"
+    POPUP "Edit"
     BEGIN
-        MENUITEM "취소(&U)\tCtrl+Z",            ID_EDIT_UNDO
+        MENUITEM "Undo\tCtrl+Z",            ID_EDIT_UNDO
         MENUITEM SEPARATOR
-        MENUITEM "잘라내기(&T)\tCtrl+X",        ID_EDIT_CUT
-        MENUITEM "복사(&C)\tCtrl+C",            ID_EDIT_COPY
-        MENUITEM "붙여넣기(&P)\tCtrl+V",        ID_EDIT_PASTE
+        MENUITEM "Cut\tCtrl+X",        ID_EDIT_CUT
+        MENUITEM "Copy\tCtrl+C",            ID_EDIT_COPY
+        MENUITEM "Paste\tCtrl+V",        ID_EDIT_PASTE
     END
-    POPUP "보기(&V)"
+    POPUP "Settings"
     BEGIN
-        MENUITEM "도구 모음(&T)",               ID_VIEW_TOOLBAR
-        MENUITEM "상태 표시줄(&S)",             ID_VIEW_STATUS_BAR
+        MENUITEM "Toolbar",               ID_VIEW_TOOLBAR
+        MENUITEM "Status bar",             ID_VIEW_STATUS_BAR
         MENUITEM SEPARATOR
         MENUITEM "800 x 600",                   ID_SCREENSIZE_800
         MENUITEM "1024 x 768",                  140
         MENUITEM "1280 x 960",                  139
         MENUITEM SEPARATOR
-        MENUITEM "정보보기 (&I) \tCtrl+I",      ID_VIEWINFO
-        MENUITEM "&Bounding Box \tCtrl+B",      ID_BOUNDINGBOX, CHECKED
+        MENUITEM "View info \tCtrl+I",      ID_VIEWINFO
+        MENUITEM "&Bounding box \tCtrl+B",      ID_BOUNDINGBOX, CHECKED
         MENUITEM "&Wireframe \tCtrl+W",         ID_WIREFRAME, CHECKED
         MENUITEM "Occlu&sion \tCtrl+S",         ID_OCCLUSION, CHECKED
-        MENUITEM "Show &Lightmap\tCtrl+L",      ID_SHOWLIGHTMAP, CHECKED
-        MENUITEM "Runtime Bounding Box",        ID_RUNTIMEBOUNDINGBOX
-        MENUITEM "Show Collision",              ID_32795
+        MENUITEM "Show &lightmap\tCtrl+L",      ID_SHOWLIGHTMAP, CHECKED
+        MENUITEM "Runtime bounding box",        ID_RUNTIMEBOUNDINGBOX
+        MENUITEM "Show collision",              ID_32795
     END
-    POPUP "편집모드(&M)"
+    POPUP "Edit modes"
     BEGIN
-        MENUITEM "Object 수정\tF2",             ID_MENUITEM_MODEOBJECT
-        MENUITEM "경로 수정 모드 \tF3",         ID_MENUITEM_MODEPATH
-        MENUITEM "Trigger/Script 수정\tF4",     ID_MENUITEM_MODETRIGGER
-        MENUITEM SEPARATOR
-        MENUITEM "미리보기\tF9",                ID_MENUITEM32774
+        MENUITEM "Object\tF2",             ID_MENUITEM_MODEOBJECT
+        MENUITEM "Path\tF3",         ID_MENUITEM_MODEPATH
+        MENUITEM "Trigger/Script\tF4",     ID_MENUITEM_MODETRIGGER
     END
-    POPUP "작업"
+    POPUP "Generate stuff"
     BEGIN
-        MENUITEM "라이트맵 생성",               ID_MENUITEM_GENERATE_LIGHTMAP
-
-        MENUITEM "경로데이터 생성",             ID_MENUITEM_GENERATE_PATHDATA
-
-        MENUITEM "미리보기",                    ID_MENUITEM32776
+        MENUITEM "Generate lightmap",               ID_MENUITEM_GENERATE_LIGHTMAP
+        MENUITEM "Generate pathdata",             ID_MENUITEM_GENERATE_PATHDATA
     END
-    POPUP "도움말(&H)"
+    POPUP "Info"
     BEGIN
-        MENUITEM "WorldEdit 정보(&A)...",       ID_APP_ABOUT
+        MENUITEM "WorldEdit",       ID_APP_ABOUT
     END
 END
 

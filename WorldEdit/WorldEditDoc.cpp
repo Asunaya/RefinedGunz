@@ -111,7 +111,7 @@ BOOL CWorldEditDoc::OnOpenDocument(LPCTSTR lpszPathName)
 	SAFE_DELETE(m_pBspObject);
 
 	m_pBspObject=new RBspObject;
-	if(!m_pBspObject->Open(lpszPathName,RBspObject::ROF_EDITOR))
+	if(!m_pBspObject->Open(lpszPathName,RBspObject::ROpenMode::Editor))
 	{
 		SAFE_DELETE(m_pBspObject);
 		AfxMessageBox("파일열기에 실패하였습니다.");
@@ -137,5 +137,5 @@ bool CWorldEditDoc::ReOpen()
 	SAFE_DELETE(m_pBspObject);
 
 	m_pBspObject=new RBspObject;
-	return m_pBspObject->Open(GetPathName(),RBspObject::ROF_EDITOR);
+	return m_pBspObject->Open(GetPathName(),RBspObject::ROpenMode::Editor);
 }

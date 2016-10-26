@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 #include "RTypes.h"
 #include "RNameSpace.h"
 #include "rapidxml.hpp"

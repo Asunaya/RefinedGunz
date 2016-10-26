@@ -72,7 +72,7 @@ void RMesh::GetNodeAniMatrix(RMeshNode* pMeshNode,D3DXMATRIX& ani_mat)
 		ani_type = pAniSet->GetAnimationType();
 	}
 
-#ifdef _DEBUG
+#if 0//def _DEBUG
 	bool CustomCalced = false;
 	
 	if (m_pVisualMesh)

@@ -58,7 +58,7 @@ void CObjectDialog::Initilize()
 		const char *filename=mfs.GetFileName(i);
 		char ext[_MAX_EXT];
 		GetPureExtension(ext,filename);
-		if(stricmp(ext,".elu")==0)
+		if(_stricmp(ext,".elu")==0)
 			m_ObjectList.AddString(filename);
 	}
 }

@@ -69,7 +69,7 @@ CMainFrame::~CMainFrame()
 
 int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
-	SetTitle("WorldEdit ( build "__DATE__" "__TIME__" )");
+	SetTitle("WorldEdit ( build " __DATE__ " " __TIME__ " )");
 	lpCreateStruct->dwExStyle |= WS_EX_ACCEPTFILES;
 
 	if (CFrameWnd::OnCreate(lpCreateStruct) == -1)
@@ -271,7 +271,7 @@ void CMainFrame::OnMenuitemGenerateLightmap()
 	float fDefaultToler=fmax/250.f;
 	dialog.m_Toler.Format("%5.1f",fDefaultToler);
 
-	sprintf(lightmapfilename,"%s.lm",pDoc->GetPathName() );
+	sprintf_safe(lightmapfilename,"%s.lm", static_cast<const char*>(pDoc->GetPathName()) );
 
 	if(dialog.DoModal()==IDOK && ConfirmOverwrite(lightmapfilename))
 	{
@@ -324,12 +324,12 @@ void CMainFrame::OnMenuitemGeneratePathdata()
 	dialog.m_Toler="0.01";
 
 	char pathfilename[256];
-	sprintf(pathfilename,"%s.pat",pDoc->GetPathName() );
+	sprintf_safe(pathfilename,"%s.pat", static_cast<const char*>(pDoc->GetPathName()) );
 
 	if(dialog.DoModal()==IDOK && ConfirmOverwrite(pathfilename))
 	{
 		float fAngle=(float)atof(dialog.m_WalkableAngle);
-		fAngle=max(90.f-fAngle,0)/180.f*pi;
+		fAngle=max(90.f-fAngle,0)/180.f*PI_FLOAT;
 		float fToler=(float)atof(dialog.m_Toler);
 
 //		pDoc->m_pBspObject->GeneratePathData(pathfilename,fAngle,fToler);
