@@ -79,7 +79,7 @@ bool ZMapSpawnManager::Add(ZMapSpawnData* pMapSpawnData)
 	return true;
 }
 
-bool ZMapSpawnManager::AddSpawnData(char* szName, rvector& pos, rvector& dir)
+bool ZMapSpawnManager::AddSpawnData(const char* szName, const rvector& pos, const rvector& dir)
 {
 	ZMapSpawnData*	pSpawnData = new ZMapSpawnData;
 
@@ -182,13 +182,11 @@ void ZMapSpawnManager::ShiftBackupIndex(int index)
 ZMapSpawnData* ZMapSpawnManager::GetSoloRandomData()
 {
 	int nIndex = -1;
-	unsigned long nRandomNumber = GetGlobalTimeMS();	// rand() 는 모든 peer가 seed값이 같은 관계로 쓰지 않는다.
+	unsigned long nRandomNumber = GetGlobalTimeMS();
 
 	m_nBackUpIndexCnt = min(GetSoloCount(),MAX_BACKUP_SPAWN);
 
-	// 이전에 스폰된 위치는 피한다..
 	if(GetSoloCount() > MAX_BACKUP_SPAWN) {
-
 		int cnt = 0;
 
 		while(1) {
@@ -202,21 +200,18 @@ ZMapSpawnData* ZMapSpawnManager::GetSoloRandomData()
 
 			cnt++;
 
-			if(cnt > 1000)  { // 혹시나..
+			if(cnt > 1000)  {
 				nIndex = 0;
 				break;
 			}
 		}
 
-		// backup
 		ShiftBackupIndex(nIndex);
 	}
-	else { // 갯수가 너무 적다면 그냥 예전방식
+	else {
 		if (GetSoloCount() > 0) 
 			nIndex = nRandomNumber % GetSoloCount();
 	}
-
-//	mlog("spawn index %d \n" , nIndex);
 
 	ZMapSpawnData* pSpawnData = GetSoloData(nIndex);
 

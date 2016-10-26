@@ -243,6 +243,20 @@ void LoadRGCommands(ZChatCmdManager& CmdManager)
 		ZChatOutputF("%s vsync", val ? "Enabled" : "Disabled");
 	},
 		CCF_ALL, 1, 1, true, "/vsync <0/1>", "");
+
+	CmdManager.AddCommand(0, "freelook", [](const char *line, int argc, char ** const argv) {
+		if (!CheckDeveloperMode("freelook"))
+			return;
+
+		auto val = atoi(argv[1]) != 0;
+		if (val)
+			ZGetCamera()->SetLookMode(ZCAMERA_FREELOOK);
+		else
+			ZGetCamera()->SetLookMode(ZCAMERA_DEFAULT);
+
+		ZChatOutputF("Set freelook to %d", val);
+	},
+		CCF_ALL, 1, 1, true, "/freelook <0/1>", "");
 }
 
 #ifdef TIMESCALE

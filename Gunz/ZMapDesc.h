@@ -55,16 +55,12 @@ public:
 	~ZMapSpawnManager();
 
 	ZMapSpawnList	m_Spawns;
-
-//	ZMapSpawnList	m_SoloSpawns;
-//	ZMapSpawnList	m_TeamSpawns[MMATCH_TEAM_MAX_COUNT];
 	ZMapSpawnList	m_SpawnArray[ZMST_MAX];
 
-
-	bool AddSpawnData(char* szName, rvector& pos, rvector& dir);
+	bool AddSpawnData(const char* szName, const rvector& pos, const rvector& dir);
 	void Clear();
-	int GetCount() { return (int)m_Spawns.size(); }
-	int GetSoloCount() { return (int)m_SpawnArray[ZMST_SOLO].size(); }
+	int GetCount() const { return (int)m_Spawns.size(); }
+	int GetSoloCount() const { return (int)m_SpawnArray[ZMST_SOLO].size(); }
 	int GetTeamCount(int nTeamIndex);
 	int GetSpawnCount(ZMapSpawnType nSpawnType) { return (int)m_SpawnArray[nSpawnType].size(); }
 
@@ -78,7 +74,6 @@ public:
 	ZMapSpawnData* GetSoloRandomData();
 
 	ZMapSpawnData* GetSpawnData(ZMapSpawnType nSpawnType, int nIndex);
-//	ZMapSpawnData* GetTeamRandomData(int nTeamIndex);
 };
 
 enum ZMapSmokeType

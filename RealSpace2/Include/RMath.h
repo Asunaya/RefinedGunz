@@ -65,6 +65,12 @@ inline rvector GetTransPos(const rmatrix& m) {
 	return{ m._41, m._42, m._43 };
 }
 
+inline void SetTransPos(rmatrix& m, const v3& trans) {
+	m._41 = trans.x;
+	m._42 = trans.y;
+	m._43 = trans.z;
+}
+
 template <typename T>
 auto Square(const T& x) {
 	return x * x;

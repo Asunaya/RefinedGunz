@@ -12,31 +12,6 @@ _NAMESPACE_REALSPACE2_BEGIN
 
 /////////////////////////////////////////////////////////////////////////
 
-RAnimation::RAnimation() 
-{
-	m_pAniData		= NULL;
-
-	m_sound_name[0] = NULL;
-
-	m_NameID		 = -1;
-
-	m_weapon_motion_type = -1;
-
-	m_ani_loop_type = RAniLoopType_Loop;
-
-	m_bIsHaveSound = false;
-	m_bSoundRelatedToMap = false;
-
-	m_isConnected = false;
-
-	m_isLoadDone = false;
-}
-
-RAnimation::~RAnimation() 
-{
-
-}
-
 AnimationType RAnimation::GetAnimationType() 
 {
 	if(!m_pAniData)	return RAniType_TransForm;

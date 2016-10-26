@@ -160,20 +160,25 @@ public:
 	MZFile();
 	~MZFile();
 
-	bool Open(const char* szFileName, MZFileSystem* pZFS = NULL);
+	bool Open(const char* szFileName, MZFileSystem* pZFS = nullptr);
 	bool Open(const char* szFileName, const char* szZipFileName,
 		bool bFileCheck = false, unsigned int crc32 = 0);
 
-	bool Seek(long off,int mode);
+	bool Seek(long off, int mode = current);
+	i64 Tell() const;
 
 	void Close();
 
-	static void SetReadMode(unsigned long mode) {	m_dwReadMode = mode; }
-	static unsigned long GetReadMode(void)  { return m_dwReadMode; }
-	static bool isMode(unsigned long mode ) { return (m_dwReadMode & mode) != 0; }
+	static void SetReadMode(unsigned long mode) { m_dwReadMode = mode; }
+	static unsigned long GetReadMode() { return m_dwReadMode; }
+	static bool isMode(unsigned long mode) { return (m_dwReadMode & mode) != 0; }
 
-	auto GetLength(void) const { return m_nFileSize; }
+	auto GetLength() const { return m_nFileSize; }
 	bool Read(void* pBuffer, int nMaxSize);
+	template <typename T>
+	bool Read(T& dest) {
+		return Read(&dest, sizeof(dest));
+	}
 	bool LoadFile();
 	MZFileBuffer Release();
 	auto IsCachedData() const { return CachedData; }

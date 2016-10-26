@@ -4,6 +4,7 @@
 #include "RBspObjectDrawD3D9.h"
 #include "RBspObjectDrawVulkan.h"
 #include "RNameSpace.h"
+#include "RealSpace2.h"
 
 _NAMESPACE_REALSPACE2_BEGIN
 
@@ -12,8 +13,14 @@ class RBspObject;
 class RBspObjectDraw
 {
 public:
-	RBspObjectDraw(D3D9Tag, RBspObject& bsp) : var{ RBspObjectDrawD3D9{bsp} } {}
-	RBspObjectDraw(VulkanTag, RBspObject& bsp) : var{ RBspObjectDrawVulkan{bsp} } {}
+	RBspObjectDraw(GraphicsAPI API, RBspObject& bsp) {
+		if (API == GraphicsAPI::D3D9)
+			var = RBspObjectDrawD3D9{ bsp };
+		else if (API == GraphicsAPI::Vulkan)
+			var = RBspObjectDrawVulkan{ bsp };
+		else
+			assert(false);
+	}
 
 	template <typename T>
 	auto& Get() { return var.get_ref<T>(); }
@@ -22,7 +29,7 @@ public:
 	POLYVAR_METHOD(Draw)
 
 private:
-	variant<RBspObjectDrawD3D9, RBspObjectDrawVulkan> var;
+	variant<monostate, RBspObjectDrawD3D9, RBspObjectDrawVulkan> var;
 };
 
 _NAMESPACE_REALSPACE2_END

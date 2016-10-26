@@ -36,6 +36,7 @@ static HMODULE g_hD3DLibrary;
 static bool g_bStencilBuffer;
 bool DynamicResourceLoading = true;
 static D3DDISPLAYMODE g_d3ddm;
+static GraphicsAPI g_GraphicsAPI;
 
 //Fog
 static float g_fFogNear;
@@ -114,6 +115,10 @@ bool RIsStencilBuffer() { return g_bStencilBuffer; }
 bool CheckVideoAdapterSupported();
 D3DFORMAT GetDepthStencilFormat() { return g_d3dpp.AutoDepthStencilFormat; }
 const D3DCAPS9 & GetDeviceCaps() { return g_d3dcaps; }
+GraphicsAPI GetGraphicsAPI()
+{
+	return g_GraphicsAPI;
+}
 static unsigned long g_rsnRenderFlags = RRENDER_CLEAR_BACKBUFFER;
 void RSetRenderFlags(unsigned long nFlags) { g_rsnRenderFlags = nFlags; }
 unsigned long RGetRenderFlags() { return g_rsnRenderFlags; }
@@ -381,6 +386,8 @@ static bool InitD3D9(HWND hWnd, const RMODEPARAMS* params)
 
 bool RInitDisplay(HWND hWnd, HINSTANCE inst, const RMODEPARAMS *params, GraphicsAPI API)
 {
+	g_GraphicsAPI = API;
+
 	if (API == GraphicsAPI::D3D9)
 	{
 		InitD3D9(hWnd, params);
@@ -388,8 +395,10 @@ bool RInitDisplay(HWND hWnd, HINSTANCE inst, const RMODEPARAMS *params, Graphics
 	}
 	else if (API == GraphicsAPI::Vulkan)
 	{
-		g_nScreenWidth = 1920;
-		g_nScreenHeight = 1080;
+		g_FullscreenMode = params->FullscreenMode;
+		g_nScreenWidth = params->nWidth;
+		g_nScreenHeight = params->nHeight;
+		g_PixelFormat = g_d3ddm.Format;
 		g_bHardwareTNL = true;
 		new (rs2buf) RS2{ VulkanTag{} };
 		GetRS2().CreateStatic<RS2Vulkan>(hWnd, inst);

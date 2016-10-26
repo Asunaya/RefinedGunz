@@ -31,6 +31,9 @@
     <Filter Include="Vulkan">
       <UniqueIdentifier>{906923dd-6921-46b8-bd5a-d245422a9642}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Map\RSX">
+      <UniqueIdentifier>{d2ba506d-094c-43cf-b957-c3dbcdad28b4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="Doc\맵 디자인 규칙 문서.txt">
@@ -229,6 +232,15 @@
     <ClCompile Include="Source\VulkanMaterial.cpp">
       <Filter>Vulkan</Filter>
     </ClCompile>
+    <ClCompile Include="Include\RBspObjectDrawD3D9.cpp">
+      <Filter>Map</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\EluLoader.cpp">
+      <Filter>Map\RSX</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\XMLParser.cpp">
+      <Filter>Map\RSX</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\RHalfEdgeMesh.h">
@@ -407,6 +419,15 @@
     </ClInclude>
     <ClInclude Include="Include\VulkanMaterial.h">
       <Filter>Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\EluLoader.h">
+      <Filter>Map\RSX</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\XMLFileStructs.h">
+      <Filter>Map\RSX</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\XMLParser.h">
+      <Filter>Map\RSX</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

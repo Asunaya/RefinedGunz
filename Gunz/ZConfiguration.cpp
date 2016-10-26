@@ -87,9 +87,7 @@ bool ZConfiguration::Load()
 {
 	bool retValue;
 
-	// Config 는 외부 파일도 읽을수 있도록....외부파일들은 개별 지정해야 함..
-
-#ifdef _PUBLISH
+#if defined(_PUBLISH) && defined(ONLY_LOAD_MRS_FILES)
    		MZFile::SetReadMode( MZIPREADFLAG_ZIP | MZIPREADFLAG_MRS | MZIPREADFLAG_MRS2 | MZIPREADFLAG_FILE );
 #endif
 
@@ -108,9 +106,7 @@ bool ZConfiguration::Load()
 
 	retValue = LoadConfig(FILENAME_CONFIG);
 
-	//	넷마블 버전은 구분해야함... 넷마블 버전은 MZIPREADFLAG_MRS1 도 읽어야함...
-
-#ifdef _PUBLISH
+#if defined(_PUBLISH) && defined(ONLY_LOAD_MRS_FILES)
 		MZFile::SetReadMode( MZIPREADFLAG_MRS2 );
 #endif
 

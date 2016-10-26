@@ -240,16 +240,14 @@ void ZMatch::SoloSpawn()
 
 void ZMatch::InitCharactersPosition()
 {
-	// 팀전일 경우
 	if (IsTeamPlay())
 	{
-		int nSpawnIndex[ 2] = { 0, 0 };
+		int nSpawnIndex[] = { 0, 0 };
 
-		for (ZCharacterManager::iterator itor = g_pGame->m_CharacterManager.begin();
-			itor != g_pGame->m_CharacterManager.end(); ++itor)
+		for (auto& pair : g_pGame->m_CharacterManager)
 		{
-			ZCharacter* pCharacter = (*itor).second;
-			for (int i = 0; i < 2; i++)
+			ZCharacter* pCharacter = pair.second;
+			for (size_t i = 0; i < ArraySize(nSpawnIndex); i++)
 			{
 				if (pCharacter->GetTeamID() == MMT_RED + i)
 				{
@@ -268,37 +266,33 @@ void ZMatch::InitCharactersPosition()
 		return;
 	}
 
-	// 듀얼모드 일 경우
-	else if ( ZApplication::GetGame()->GetMatch()->GetMatchType() == MMATCH_GAMETYPE_DUEL)
+	if (ZApplication::GetGame()->GetMatch()->GetMatchType() == MMATCH_GAMETYPE_DUEL)
 	{
 		ZRuleDuel* pDuel = (ZRuleDuel*)ZGetGameInterface()->GetGame()->GetMatch()->GetRule();
-		if ( pDuel)
+		if (pDuel)
 		{
 			int nIndex = 2;
-			if ( pDuel->QInfo.m_uidChampion == ZGetMyUID())
+			if (pDuel->QInfo.m_uidChampion == ZGetMyUID())
 				nIndex = 0;
-			else if ( pDuel->QInfo.m_uidChallenger == ZGetMyUID())
+			else if (pDuel->QInfo.m_uidChallenger == ZGetMyUID())
 				nIndex = 1;
 
-			// 듀얼 전용 맵이면 맨 처음과 두번째 위치
-			if ( MIsMapOnlyDuel( ZGetGameClient()->GetMatchStageSetting()->GetMapIndex()))
+			if (MIsMapOnlyDuel(ZGetGameClient()->GetMatchStageSetting()->GetMapIndex()))
 			{
-				ZMapSpawnData* pSpawnData = g_pGame->GetMapDesc()->GetSpawnManager()->GetData( nIndex);
-				if ( pSpawnData != NULL)
-				{
-					g_pGame->m_pMyCharacter->SetPosition( pSpawnData->m_Pos);
-					g_pGame->m_pMyCharacter->SetDirection( pSpawnData->m_Dir);
-				}
-			}
-
-			// 듀얼 전용 맵이 아니면 팀전과 같은 방식
-			else
-			{
-				ZMapSpawnData* pSpawnData = g_pGame->GetMapDesc()->GetSpawnManager()->GetTeamData( nIndex, 0);
+				ZMapSpawnData* pSpawnData = g_pGame->GetMapDesc()->GetSpawnManager()->GetData(nIndex);
 				if (pSpawnData != NULL)
 				{
-					g_pGame->m_pMyCharacter->SetPosition( pSpawnData->m_Pos);
-					g_pGame->m_pMyCharacter->SetDirection( pSpawnData->m_Dir);
+					g_pGame->m_pMyCharacter->SetPosition(pSpawnData->m_Pos);
+					g_pGame->m_pMyCharacter->SetDirection(pSpawnData->m_Dir);
+				}
+			}
+			else
+			{
+				ZMapSpawnData* pSpawnData = g_pGame->GetMapDesc()->GetSpawnManager()->GetTeamData(nIndex, 0);
+				if (pSpawnData != NULL)
+				{
+					g_pGame->m_pMyCharacter->SetPosition(pSpawnData->m_Pos);
+					g_pGame->m_pMyCharacter->SetDirection(pSpawnData->m_Dir);
 				}
 			}
 
@@ -307,14 +301,17 @@ void ZMatch::InitCharactersPosition()
 	}
 
 	ZMapSpawnData* pSpawnData = g_pGame->GetMapDesc()->GetSpawnManager()->GetSoloRandomData();
-	if (pSpawnData != NULL)
+
+	v3 pos{0, 0, 100}, dir{ 1, 0, 0 };
+	if (pSpawnData)
 	{
-		g_pGame->m_pMyCharacter->SetPosition(pSpawnData->m_Pos);
-		g_pGame->m_pMyCharacter->SetDirection(pSpawnData->m_Dir);
+		pos = pSpawnData->m_Pos;
+		dir = pSpawnData->m_Dir;
 	}
+
+	g_pGame->m_pMyCharacter->SetPosition(pos);
+	g_pGame->m_pMyCharacter->SetDirection(dir);
 }
-
-
 
 void ZMatch::InitRound()
 {
@@ -354,14 +351,11 @@ void ZMatch::InitRound()
 		}
 	}
 
-//	m_nRoundKills = 0;
-
-	// AdminHide 처리
+	// AdminHide
 	MMatchObjCache* pObjCache = ZGetGameClient()->FindObjCache(ZGetMyUID());
 	if (pObjCache && pObjCache->CheckFlag(MTD_PlayerFlags_AdminHide)) {
 		ZGetGameInterface()->GetCombatInterface()->SetObserverMode(true);
 	} else {
-		// 옵져버 모드였으면 해제.
 		if (!isObserver)
 			g_pGame->ReleaseObserver();
 		else

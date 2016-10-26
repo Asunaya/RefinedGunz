@@ -509,7 +509,7 @@ void ZCamera::CalcMaxPayneCameraZ(float &fRealDist, float& fAddedZ, float fAngle
 
 void ZCamera::SetLookMode(ZCAMERALOOKMODE mode)
 {
-	if (mode == ZCAMERA_FREELOOK) {
+	/*if (mode == ZCAMERA_FREELOOK) {
 		ZObserver* pObserver = ZApplication::GetGameInterface()->GetCombatInterface()->GetObserver();
 		assert(pObserver->IsVisible() && pObserver->GetTargetCharacter() != NULL);
 
@@ -535,7 +535,7 @@ void ZCamera::SetLookMode(ZCAMERALOOKMODE mode)
 		bool bCameraInSolid2 = ZGetGame()->GetWorld()->GetBsp()->CheckSolid(GetPosition(),
 			ZFREEOBSERVER_RADIUS, 0.f, RCW_SPHERE);
 		assert(!bCameraInSolid2);
-	}
+	}*/
 
 	m_nLookMode = mode;
 

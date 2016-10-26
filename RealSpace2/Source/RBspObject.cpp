@@ -25,6 +25,7 @@
 #include "ShaderGlobals.h"
 #include "RS2.h"
 #include "rapidxml.hpp"
+#include "EluLoader.h"
 
 #undef pi
 
@@ -247,7 +248,7 @@ void RBspLightmapManager::Save(const char *filename)
 ////////////////////////////
 
 RBspObject::RBspObject(bool PhysOnly)
-	: PhysOnly(PhysOnly), DrawObj{ VulkanTag{}, *this }
+	: PhysOnly(PhysOnly), DrawObj{ GetGraphicsAPI(), *this }
 {
 	m_MeshList.SetMtrlAutoLoad(true);
 	m_MeshList.SetMapObject(true);
@@ -514,6 +515,9 @@ static void SetDefaultStates(bool Lightmap)
 
 bool RBspObject::Draw()
 {
+	DrawObj.Draw();
+	return true;
+
 	if (GetRS2().UsingVulkan())
 	{
 		DrawObj.DrawStatic<RBspObjectDrawVulkan>();
@@ -621,7 +625,7 @@ bool RBspObject::Draw()
 	dev->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
 	dev->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
 	dev->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
-	dev->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG2);
+	dev->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
 	dev->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
 	dev->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
 	dev->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
@@ -1022,74 +1026,78 @@ bool RBspObject::Open(const char *filename, ROpenMode nOpenFlag, RFPROGRESSCALLB
 
 	if (!OpenDescription(xmlname))
 	{
-		MLog("Error while loading %s\n", xmlname);
+		MLog("Error while loading description %s\n", xmlname);
 		return false;
 	}
 	if (pfnProgressCallback) pfnProgressCallback(CallbackParam, .3f);
-
-	BspCounts Counts;
-	if (!OpenRs(filename, Counts))
+	
+	if (!IsRS3Map)
 	{
-		MLog("Error while loading %s\n", filename);
-		return false;
-	}
-
-	if (pfnProgressCallback) pfnProgressCallback(CallbackParam, .6f);
-
-	char bspname[_MAX_PATH];
-	sprintf_safe(bspname, "%s.bsp", filename);
-	if (!OpenBsp(bspname, Counts))
-	{
-		MLog("Error while loading %s\n", bspname);
-		return false;
-	}
-
-	if (pfnProgressCallback) pfnProgressCallback(CallbackParam, .8f);
-
-	char colfilename[_MAX_PATH];
-	sprintf_safe(colfilename, "%s.col", filename);
-	if (!OpenCol(colfilename))
-	{
-		MLog("Error while loading %s\n", colfilename);
-		return false;
-	}
-
-	char navfilename[_MAX_PATH];
-	sprintf_safe(navfilename, "%s.nav", filename);
-	if (!OpenNav(navfilename))
-	{
-	}
-
-	if (!PhysOnly && GetRS2().UsingD3D9())
-	{
-		if (RIsHardwareTNL())
+		BspCounts Counts;
+		if (!OpenRs(filename, Counts))
 		{
-			if (!CreateVertexBuffer())
-				mlog("Error while Creating VB\n");
+			MLog("Error while loading rs %s\n", filename);
+			return false;
 		}
 
-		if (m_bisDrawLightMap)
-			OpenLightmap();
+		if (pfnProgressCallback) pfnProgressCallback(CallbackParam, .6f);
+
+		char bspname[_MAX_PATH];
+		sprintf_safe(bspname, "%s.bsp", filename);
+		if (!OpenBsp(bspname, Counts))
+		{
+			MLog("Error while loading bsp %s\n", bspname);
+			return false;
+		}
+
+		if (pfnProgressCallback) pfnProgressCallback(CallbackParam, .8f);
+
+		char colfilename[_MAX_PATH];
+		sprintf_safe(colfilename, "%s.col", filename);
+		if (!OpenCol(colfilename))
+		{
+			MLog("Error while loading col %s\n", colfilename);
+			return false;
+		}
+
+		char navfilename[_MAX_PATH];
+		sprintf_safe(navfilename, "%s.nav", filename);
+		if (!OpenNav(navfilename))
+		{
+			MLog("RBspObject::Open -- No navigation file for %s\n", filename);
+		}
+
+		if (!PhysOnly && GetRS2().UsingD3D9())
+		{
+			if (RIsHardwareTNL())
+			{
+				if (!CreateVertexBuffer())
+					mlog("Error while Creating VB\n");
+			}
+
+			if (m_bisDrawLightMap)
+				OpenLightmap();
+		}
+
+		Sort_Nodes(OcRoot.data());
+
+		if (RIsHardwareTNL() && !PhysOnly && GetRS2().UsingD3D9())
+		{
+			UpdateVertexBuffer();
+		}
+
+		CreatePolygonTable();
+
+		if (RIsHardwareTNL() && !PhysOnly && GetRS2().UsingD3D9())
+		{
+			if (!CreateIndexBuffer())
+				mlog("Error while Creating IB\n");
+
+			UpdateIndexBuffer();
+		}
+
+		if (pfnProgressCallback) pfnProgressCallback(CallbackParam, 1.f);
 	}
-
-	Sort_Nodes(OcRoot.data());
-
-	if (RIsHardwareTNL() && !PhysOnly && GetRS2().UsingD3D9())
-	{
-		UpdateVertexBuffer();
-	}
-
-	CreatePolygonTable();
-
-	if (RIsHardwareTNL() && !PhysOnly && GetRS2().UsingD3D9())
-	{
-		if (!CreateIndexBuffer())
-			mlog("Error while Creating IB\n");
-
-		UpdateIndexBuffer();
-	}
-
-	if (pfnProgressCallback) pfnProgressCallback(CallbackParam, 1.f);
 
 	if (!PhysOnly && GetRS2().UsingVulkan())
 	{
@@ -1101,6 +1109,8 @@ bool RBspObject::Open(const char *filename, ROpenMode nOpenFlag, RFPROGRESSCALLB
 
 void RBspObject::OptimizeBoundingBox()
 {
+	if (OcRoot.empty())
+		return;
 	DeleteVoidNodes(OcRoot.data());
 	RecalcBoundingBox(OcRoot.data());
 }
@@ -1485,11 +1495,16 @@ bool RBspObject::Set_AmbSound(rapidxml::xml_node<>& parent)
 	return true;
 }
 
+#define LOGERROR(msg, ...) MLog(__FUNCTION__  " -- " msg, __VA_ARGS__)
+
 bool RBspObject::OpenDescription(const char *filename)
 {
 	MZFile mzf;
 	if (!mzf.Open(filename, g_pFileSystem))
+	{
+		LOGERROR("Failed to open description file %s\n", filename);
 		return false;
+	}
 
 	m_descfilename = filename;
 
@@ -1511,9 +1526,13 @@ bool RBspObject::OpenDescription(const char *filename)
 
 	auto* xml = doc.first_node("XML");
 	if (!xml)
+	{
+		LOGERROR("No XML node in description file %s\n", filename);
 		return false;
+	}
 
 	auto* rsx = xml->first_node("RSX");
+	IsRS3Map = rsx != nullptr;
 	if (rsx)
 		return LoadRS3Map(*rsx);
 	else
@@ -1547,17 +1566,53 @@ bool RBspObject::LoadRS2Map(rapidxml::xml_node<>& aParent)
 	return true;
 }
 
-bool RBspObject::LoadRS3Map(rapidxml::xml_node<>& RsxNode)
+bool RBspObject::LoadRS3Map(rapidxml::xml_node<>& parent)
 {
-	std::vector<std::string> Paths;
-
-	/*args.push_back(map_name->value());
-	rapidxml::xml_node<> * node_path = map_name->next_sibling("PATH");
-	while (node_path != nullptr)
+	auto* map_name_node = parent.first_node("NAME");
+	if (!map_name_node)
 	{
-		args.push_back(node_path->value());
-		node_path = node_path->next_sibling("PATH");
-	}*/
+		MLog("RBspObject::LoadRS3Map -- No NAME node in RSX xml\n");
+		return false;
+	}
+	auto* map_name = map_name_node->value();
+	if (!map_name)
+	{
+		MLog("RBspObject::LoadRS3Map -- NAME node is empty\n");
+		return false;
+	}
+
+	rsx::LoaderState State;
+
+	State.Paths.emplace_back();
+
+	for (auto* node_path = map_name_node->next_sibling("PATH"); node_path; node_path = node_path->next_sibling("PATH"))
+		State.Paths.push_back(node_path->value());
+
+	auto scene = std::string{ map_name } +".scene.xml";
+	if (!rsx::loadTree(State, scene.c_str(), m_StaticObjectLightList))
+	{
+		MLog("RBspObject::LoadRS3Map -- Failed to load scene.xml");
+		return false;
+	}
+
+	auto prop = std::string{ map_name } +".prop.xml";
+	if (!rsx::loadPropTree(State, prop.c_str()))
+	{
+		MLog("RBspObject::LoadRS3Map -- Failed to load prop.xml");
+		return false;
+	}
+
+	DMLog("Objects: %d, object data num: %d, materials: %d\n",
+		State.Objects.size(), State.ObjectData.size(), State.Materials.size());
+
+	if (GetRS2().UsingD3D9())
+		DrawObj.Get<RBspObjectDrawD3D9>().Create(std::move(State));
+
+	ColRoot.emplace_back();
+	auto& Col = ColRoot.back();
+	Col.m_Plane = { 0, 0, 1, 0 };
+	Col.m_pPositive = Col.m_pNegative = nullptr;
+	Col.m_bSolid = true;
 
 	return true;
 }
@@ -1577,7 +1632,7 @@ bool RBspObject::OpenRs(const char *filename, BspCounts& Counts)
 		return false;
 	}
 
-	// read material indices
+	// Read number of materials
 	int nMaterial;
 	file.Read(&nMaterial, sizeof(int));
 

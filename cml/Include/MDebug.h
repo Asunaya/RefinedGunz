@@ -23,6 +23,8 @@ bool IsLogAvailable();
 
 void InitLog(int logmethodflags=MLOGSTYLE_DEBUGSTRING, const char* pszLogFileName="mlog.txt");
 
+void LogMatrix(const matrix& mat);
+
 #if defined(_DEBUG) || defined(DEBUG_FAST)
 void DMLog(const char* Format, ...);
 

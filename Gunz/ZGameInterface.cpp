@@ -167,7 +167,7 @@ void ZGameInterface::LoadBitmaps(const char* szDir, ZLoadingProgress *pLoadingPr
 					if (!bAddDirToAliasName) sprintf_safe(aliasname, "%s%s", fname, ext);
 					else sprintf_safe(aliasname, "%s%s%s", dir, fname, ext);
 
-#ifdef _PUBLISH
+#if defined(_PUBLISH) && defined(ONLY_LOAD_MRS_FILES)
 					MZFile::SetReadMode(MZIPREADFLAG_ZIP | MZIPREADFLAG_MRS | MZIPREADFLAG_MRS2 | MZIPREADFLAG_FILE);
 #endif
 					auto MBitmapR2Create = MBeginProfile("ZGameInterface::LoadBitmaps - MBitmapR2::Create");
@@ -178,7 +178,7 @@ void ZGameInterface::LoadBitmaps(const char* szDir, ZLoadingProgress *pLoadingPr
 						delete pBitmap;
 					MEndProfile(MBitmapR2Create);
 
-#ifdef _PUBLISH
+#if defined(_PUBLISH) && defined(ONLY_LOAD_MRS_FILES)
 					MZFile::SetReadMode(MZIPREADFLAG_MRS2);
 #endif
 

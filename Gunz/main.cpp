@@ -361,6 +361,8 @@ RRESULT OnRender(void *pParam)
 
 				PrintText("Lower ani: %s\n", g_AnimationInfoTableLower[lower].Name);
 				PrintText("Upper ani: %s\n", g_AnimationInfoTableUpper[upper].Name);
+				PrintText("Draw calls: %d\n", g_nCall);
+				PrintText("Polygons: %d\n", g_nPoly);
 			}
 		}
 #endif
@@ -601,10 +603,8 @@ int PASCAL WinMain(HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline, int 
 
 	g_App.InitFileSystem();
 
-#ifdef _PUBLISH
-//	#ifndef NETMARBLE_VERSION
-		MZFile::SetReadMode( MZIPREADFLAG_MRS2 );
-//	#endif
+#if defined(_PUBLISH) && defined(ONLY_LOAD_MRS_FILES)
+	MZFile::SetReadMode( MZIPREADFLAG_MRS2 );
 #endif
 
 	ZGetConfiguration()->Load();

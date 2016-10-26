@@ -49,10 +49,10 @@ void CreateTestGame(char *mapname, int nDummyCharacterCount, bool bShot, bool bA
 	g_pGame->CreateMyCharacter(info);
 	g_pGame->m_pMyCharacter->Revival();
 
-	rvector pos=rvector(0,0,0), dir=rvector(0,1,0);
+	v3 pos{ 0, 0, 1000 }, dir{ 0, 1, 0 };
 
 	ZMapSpawnData* pSpawnData = ZApplication::GetGame()->GetMapDesc()->GetSpawnManager()->GetSoloRandomData();
-	if (pSpawnData != NULL)
+	if (pSpawnData)
 	{
 		pos = pSpawnData->m_Pos;
 		dir = pSpawnData->m_Dir;

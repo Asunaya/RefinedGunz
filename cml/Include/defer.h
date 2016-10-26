@@ -3,14 +3,15 @@
 template <typename T>
 struct defer {
 	defer(T& fn) : fn(fn) {}
-	~defer() { execute(); }
-	defer(defer&& src) : fn{ std::move(src.fn) } { src.disarm(); }
+	~defer() { if (armed) execute(); }
+	defer(defer&& src) : fn{ std::move(src.fn) }, armed{ src.armed } { src.disarm(); }
 
-	void disarm() { fn = [] {}; }
+	void disarm() { armed = false; }
 	void execute() { fn(); }
 
 private:
 	T fn;
+	bool armed = true;
 };
 
 template <typename T>

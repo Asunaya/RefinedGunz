@@ -3,10 +3,8 @@
 #include "RMath.h"
 #include "RError.h"
 #include "MZFileSystem.h"
-
-#pragma comment(lib, "d3dx9.lib")
-
 #include "RNameSpace.h"
+#pragma comment(lib, "d3dx9.lib")
 _NAMESPACE_REALSPACE2_BEGIN
 
 extern int g_nFrameCount, g_nLastFrameCount;
@@ -70,6 +68,7 @@ int MaxStreamsSupported();
 void SetVSync(bool b);
 D3DFORMAT GetDepthStencilFormat();
 const D3DCAPS9& GetDeviceCaps();
+GraphicsAPI GetGraphicsAPI();
 
 int RGetAdapterModeCount(D3DFORMAT Format, UINT Adapter = D3DADAPTER_DEFAULT);
 bool REnumAdapterMode(UINT Adapter, D3DFORMAT Format, UINT Mode, D3DDISPLAYMODE* pMode);

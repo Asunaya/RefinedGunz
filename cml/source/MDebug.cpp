@@ -76,6 +76,19 @@ void DLogMatrix(const matrix& mat)
 }
 #endif
 
+void LogMatrix(const matrix& mat)
+{
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 4; j++)
+		{
+			MLog("%f ", mat(i, j));
+		}
+
+		MLog("\n");
+	}
+}
+
 void MLogFile(const char* Msg)
 {
 	FILE *pFile = nullptr;

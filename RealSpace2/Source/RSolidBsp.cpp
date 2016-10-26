@@ -2,7 +2,6 @@
 #include "MDebug.h"
 #include "RealSpace2.h"
 #include "RSolidBsp.h"
-#include <crtdbg.h>
 
 _USING_NAMESPACE_REALSPACE2
 
@@ -47,8 +46,6 @@ RSolidBspNode::~RSolidBspNode()
 #ifndef _PUBLISH
 void RSolidBspNode::DrawPolygon()
 {
-	//	if(!isInViewFrustum(&m_bb,RGetViewFrustum())) return;
-
 	if(nPolygon && !m_bSolid)
 		RGetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLELIST,nPolygon,pVertices,sizeof(rvector));
 
@@ -62,8 +59,6 @@ void RSolidBspNode::DrawPolygon()
 
 void RSolidBspNode::DrawPolygonWireframe()
 {
-	//	if(!isInViewFrustum(&m_bb,RGetViewFrustum())) return;
-
 	if(nPolygon && !m_bSolid)
 	{
 		rvector v[4];
@@ -86,8 +81,6 @@ void RSolidBspNode::DrawPolygonWireframe()
 
 void RSolidBspNode::DrawPolygonNormal()
 {
-	//	if(!isInViewFrustum(&m_bb,RGetViewFrustum())) return;
-
 	if(nPolygon && !m_bSolid)
 	{
 		rvector v[2];
@@ -111,8 +104,6 @@ void RSolidBspNode::DrawPolygonNormal()
 
 void RSolidBspNode::DrawSolidPolygon()
 {
-	//	if(!isInViewFrustum(&m_bb,RGetViewFrustum())) return;
-
 	if(nPolygon && m_bSolid)
 		RGetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLELIST,nPolygon,pVertices,sizeof(rvector));
 
@@ -126,8 +117,6 @@ void RSolidBspNode::DrawSolidPolygon()
 
 void RSolidBspNode::DrawSolidPolygonWireframe()
 {
-	//	if(!isInViewFrustum(&m_bb,RGetViewFrustum())) return;
-
 	if(nPolygon && m_bSolid)
 	{
 		rvector v[4];
@@ -150,8 +139,6 @@ void RSolidBspNode::DrawSolidPolygonWireframe()
 
 void RSolidBspNode::DrawSolidPolygonNormal()
 {
-	//	if(!isInViewFrustum(&m_bb,RGetViewFrustum())) return;
-
 	if(nPolygon && m_bSolid)
 	{
 		rvector v[2];
@@ -192,8 +179,6 @@ void RSolidBspNode::DrawPos(const rvector &pos)
 			float fSize=10.f;
 			RGetDevice()->SetRenderState(D3DRS_POINTSIZE,   *(DWORD*)&fSize);
 			RGetDevice()->DrawPrimitiveUP(D3DPT_POINTLIST,nPolygon*3,pVertices,sizeof(rvector));
-
-			//			float fArea=GetArea(pVertices[0],pVertices[1],pVertices[2]);
 		}
 		return;
 	}
@@ -276,22 +261,13 @@ void RSolidBspNode::ConstructBoundingBox()
 }
 #endif
 
-//////////////////////////////////////////////////////////////////////////////////////////////////
-//  여기서부터 충돌체크에 관한 부분
-
-//  solid bsp + shift plane 방법 ( 일정 두께로 띄워져서 검사 )
-//  Dynamic Plane Shifting BSP Traversal ( by Stan Melax ) 참조
-
-
 #define TOLERENCE 0.001f
 
 bool RSolidBspNode::m_bTracePath = false;
 
-// TODO : 멤버로 집어넣는다
 #define MAX_DEPTH	256
-rplane	m_SolidPlanes[MAX_DEPTH];		// 마지막 solid 노드를 이루는 평면들 (경로)
+rplane	m_SolidPlanes[MAX_DEPTH];
 
-// 평면의 m_pNegative 와 cross 되는지를 리턴
 bool IsCross(const rplane &plane,const rvector &v0,const rvector &v1,float *fParam)
 {
 #define CSIGN(x) ( (x)<-0.1? -1 : (x)>0.1? 1 : 0 )
@@ -313,7 +289,6 @@ bool IsCross(const rplane &plane,const rvector &v0,const rvector &v1,float *fPar
 				*fParam=0;
 		}else
 			if(dotv0*dotv1<=0) {
-				// 선분이 평면을 교차하는 경우
 				*fParam = ( dotv0 / ( dotv0-dotv1));
 				*fParam = min(1,*fParam);
 			}else
@@ -330,9 +305,6 @@ bool RSolidBspNode::GetColPlanes_Recurse(int nDepth)
 
 	if(!m_pPositive && !m_pNegative) {	// leaf
 		if(m_bSolid) {
-
-//			_ASSERT(nDepth<MAX_DEPTH);
-
 			bool bInSolid=true;
 			for(int i=0;i<nDepth;i++) {
 				rplane *pPlane=m_SolidPlanes+i;
@@ -342,11 +314,8 @@ bool RSolidBspNode::GetColPlanes_Recurse(int nDepth)
 					break;
 				}
 			}
-//			_ASSERT(!bInSolid);	// 이미 solid 영역 안이 있는 경우다
- 
 			rvector dir=m_ColTo-m_ColOrigin;
 
-			// solid 영역과 어느 점에서 만나는지 찾는다
 			float fMaxParam = 0;
 			for(int i=0;i<nDepth;i++) {
 				rplane *pPlane=m_SolidPlanes+i;
@@ -354,16 +323,15 @@ bool RSolidBspNode::GetColPlanes_Recurse(int nDepth)
 				float dotv0=D3DXPlaneDotCoord(pPlane,&m_ColOrigin);
 				float dotv1=D3DXPlaneDotCoord(pPlane,&m_ColTo);
 
-				// solid 영역을 이루는 평면을 따라가면 충돌이 아니다
 				if(fabs(dotv0)<0.1f && fabs(dotv1)<0.1f) {
 					m_pOutList->Add(*pPlane);
 					return false;	
 				}
 
-				if(D3DXPlaneDotNormal(pPlane,&dir)>0) continue;	// 뒷면 제거
+				if(D3DXPlaneDotNormal(pPlane,&dir)>0) continue;
 
-				if(0<dotv0 && dotv0<dotv1) continue; // solid 에서 멀어지고 있는 경우 제거
-				if(fabs(dotv0-dotv1)<0.01f) continue; // 평면과 평행하게 움직이는 경우
+				if(0<dotv0 && dotv0<dotv1) continue;
+				if(fabs(dotv0-dotv1)<0.01f) continue;
 				float fParam = ( dotv0 / ( dotv0-dotv1));
 
 				fMaxParam = max(fMaxParam,fParam);
@@ -372,14 +340,10 @@ bool RSolidBspNode::GetColPlanes_Recurse(int nDepth)
 			rvector colPos = m_ColOrigin+(m_ColTo-m_ColOrigin)*fMaxParam;
 			
 			float fDist = Magnitude(colPos-m_ColOrigin);
-/*
-			if(fDist>fImpactDist+0.1) 
-				return false;	// 더 멀리있는것들은 볼필요 없다.	// 뭔가 버그가있다 -_-;
-*/
 			int nCount=0;
 			for(int i=0;i<nDepth;i++) {
 				rplane *pPlane=m_SolidPlanes+i;
-				if(D3DXPlaneDotNormal(pPlane,&dir)>0) continue;	// 뒷면 제거
+				if(D3DXPlaneDotNormal(pPlane,&dir)>0) continue;
 				if(fabs(D3DXPlaneDotCoord(pPlane,&colPos))<0.1f) {
 					m_pOutList->Add(*pPlane);
 					if(fDist<fImpactDist)
@@ -469,7 +433,6 @@ bool RSolidBspNode::GetColPlanes_Cylinder(RImpactPlanes *pOutList,const rvector 
 rvector checkwallorigin;
 rvector checkwalldir;
 
-// 무언가에 걸려서 1case 혹은 2case 로 오면 이 펑션으로 들어온다
 bool RSolidBspNode::CheckWall2(RSolidBspNode *pRootNode,RImpactPlanes &impactPlanes, const rvector &origin, rvector &targetpos,float fRadius,float fHeight,RCOLLISIONMETHOD method)
 {
 	checkwallorigin=origin;
@@ -490,25 +453,8 @@ bool RSolidBspNode::CheckWall2(RSolidBspNode *pRootNode,RImpactPlanes &impactPla
 		bIntersectThis=pRootNode->GetColPlanes_Cylinder(&impactPlanes,origin,targetpos,fRadius,fHeight);
 
 	RImpactPlanes::iterator i;
-/*
-	// 가는방향과 상관없는 벽을 먼저 제거한다
-	rvector godir=targetpos-origin;
-	for(i=impactPlanes.begin();i!=impactPlanes.end();)
-	{
-		rplane p=*i;
-		if(D3DXPlaneDotNormal(&p,&godir)>TOLERENCE)
-		{
-			if(m_bTracePath) {
-				float fDist = D3DXPlaneDotCoord(&p,&origin);
-				mlog(" del_back{d = %3.3f [%3.3f %3.3f %3.3f %3.3f]}",fDist,p.a,p.b,p.c,p.d);
-			}
-			i=impactPlanes.erase(i)	;
-		}else
-			i++;
-	}
-*/
 
-	if(m_bTracePath) {	// 순전히 출력하는 부분
+	if(m_bTracePath) {
 		if(impactPlanes.size())
 		{
 			mlog(" :::: %d planes ",impactPlanes.size());
@@ -524,7 +470,7 @@ bool RSolidBspNode::CheckWall2(RSolidBspNode *pRootNode,RImpactPlanes &impactPla
 	if(impactPlanes.size())
 	{
 		bool bFound=false;
-		rplane simulplanes[100];	// 최대 동시에 맞닿는 면의 개수
+		rplane simulplanes[100];
 
 		rvector diff=targetpos-origin;
 		float fMinProjDist;
@@ -536,36 +482,33 @@ bool RSolidBspNode::CheckWall2(RSolidBspNode *pRootNode,RImpactPlanes &impactPla
 
 			if(plane==rplane(0,0,0,0)) 
 			{
-				_ASSERT(FALSE);	// 현재 이런경우는 발생하지 않는다.
+				_ASSERT(FALSE);
 				i=impactPlanes.erase(i);
-				continue;	// 아마도 벽속에 들어가 있을 확률이 높다
+				continue;
 			}
 
-			float fDistToOrigin = D3DXPlaneDotCoord(&plane,&origin);		// origin 에서 평면까지의 최단거리
-			float fDistToTarget = D3DXPlaneDotCoord(&plane,&targetpos);		// origin 에서 평면까지의 최단거리
+			float fDistToOrigin = D3DXPlaneDotCoord(&plane,&origin);
+			float fDistToTarget = D3DXPlaneDotCoord(&plane,&targetpos);
 
 			// 
-			if(fDistToOrigin>-.1f && fDistToTarget>-.1f )		//  진행방향과 평행한 평면은 통과
+			if(fDistToOrigin>-.1f && fDistToTarget>-.1f )
 			{
 				continue;
 			}
 
 
-			float fProjDist = -D3DXPlaneDotNormal(&plane,&diff);			// diff 가 평면의 법선으로 projection 된 길이
+			float fProjDist = -D3DXPlaneDotNormal(&plane,&diff);
 
-			if(fDistToOrigin<=0 && fDistToTarget<fDistToOrigin) { // 이미 평면의 뒤에 있는 경우이다.
+			if(fDistToOrigin<=0 && fDistToTarget<fDistToOrigin) {
 				fProjDist = 1;
 				fDistToOrigin = 0;
 			}
 
-			if(fProjDist==0) {  // 완전히 평행한경우이다.
-				// 완전히 0인 경우에는 floating point exception 이 일어난다.
+			if(fProjDist==0) {
 				fProjDist = 1;
 				fDistToOrigin = 1;
 			}
 
-			// 따라서 교차하는 지점은 origin + (fDistToOrigin/fProjDist) * diff 이다.
-			// (fDistToOrigin/fProjDist) 가 최소가 되는 평면을 찾으면 가장 먼저 맞닿는 면이다.
 			if(!bFound)
 			{
 				bFound = true;
@@ -573,8 +516,6 @@ bool RSolidBspNode::CheckWall2(RSolidBspNode *pRootNode,RImpactPlanes &impactPla
 				fMinDistToOrigin = fDistToOrigin;
 			}else
 			{
-				// 정확도를 높이기 위해 위의 나누기 대신에 이렇게 비교한다. (Gaming Programming Gems 3 권 2.2 벡터분수 참조)
-				//				if( fDistToOrigin/fProjDist < fMinDistToOrigin/fMinProjDist )
 				if( fDistToOrigin * fMinProjDist < fMinDistToOrigin * fProjDist  )
 				{
 					fMinProjDist = fProjDist;
@@ -593,13 +534,10 @@ bool RSolidBspNode::CheckWall2(RSolidBspNode *pRootNode,RImpactPlanes &impactPla
 
 		targetpos = currentorigin;
 
-		// 새 origin 에서부터의 거리가 같은 면들을 찾는다
-
 		int nSimulCount=0;
 
 		for(i=impactPlanes.begin();i!=impactPlanes.end();i++) 
 		{
-			//			if(fabs(fDist-i->first)<0.01f) { // 동시에 닿는 면이다.
 			rplane p=*i;
 			if(fabs(D3DXPlaneDotCoord(&p,&currentorigin))<0.05) {
 				simulplanes[nSimulCount++]=p;
@@ -613,15 +551,12 @@ bool RSolidBspNode::CheckWall2(RSolidBspNode *pRootNode,RImpactPlanes &impactPla
 		return true;
 	}
 
-	// 아무것도 걸리는게 없으면 그냥 리턴한다
-
 	return false;
 }
 
 bool g_bchecktest=false;
 rvector g_checkdebug;
 
-// origin 에서 targetpos 로 이동하는데 미끄러짐을 감안해서 targetpos 를 조절해서 리턴해준다.
 bool RSolidBspNode::CheckWall(RSolidBspNode *pRootNode, const rvector &origin,rvector &targetpos,float fRadius,float fHeight,RCOLLISIONMETHOD method,int nDepth,rplane *pimpactplane)
 {
 	checkwallorigin=origin;
@@ -639,48 +574,19 @@ bool RSolidBspNode::CheckWall(RSolidBspNode *pRootNode, const rvector &origin,rv
 	else
 		bIntersectThis=pRootNode->GetColPlanes_Cylinder(&impactPlanes,origin,targetpos,fRadius,fHeight);
 
-//	if(impactPlanes.size()) 
-	{
-		if(m_bTracePath) {	// 순전히 출력하는 부분
-			mlog("\n");
-			for(int i=0;i<nDepth;i++) mlog("    ");
+	if(m_bTracePath) {
+		mlog("\n");
+		for(int i=0;i<nDepth;i++) mlog("    ");
 
-			rvector dif=targetpos-origin;
-			mlog("d%d from ( %3.5f %3.5f %3.5f ) by ( %3.3f %3.3f %3.3f ) ",nDepth
-				,origin.x,origin.y,origin.z,dif.x,dif.y,dif.z);
-		}
-
-		/*
-		if(g_bchecktest)
-		{
-			_ASSERT(Magnitude(g_checkdebug-origin)<1.f);
-		}
-		g_bchecktest=false;
-		*/
+		rvector dif=targetpos-origin;
+		mlog("d%d from ( %3.5f %3.5f %3.5f ) by ( %3.3f %3.3f %3.3f ) ",nDepth
+			,origin.x,origin.y,origin.z,dif.x,dif.y,dif.z);
 	}
+
 
 	RImpactPlanes::iterator i;
 
-	/*
-	// 가는방향과 상관없는 벽을 먼저 제거한다
-	rvector godir=targetpos-origin;
-	for(i=impactPlanes.begin();i!=impactPlanes.end();)
-	{
-		rplane p=*i;
-		if(D3DXPlaneDotNormal(&p,&godir)>TOLERENCE)
-		{
-			if(m_bTracePath) {
-				float fDist = D3DXPlaneDotCoord(&p,&origin);
-				mlog(" del_back{d = %3.3f [%3.3f %3.3f %3.3f %3.3f]}",fDist,p.a,p.b,p.c,p.d);
-			}
-			i=impactPlanes.erase(i)	;
-		}else
-			i++;
-	}
-	*/
-
-
-	if(m_bTracePath) {	// 순전히 출력하는 부분
+	if(m_bTracePath) {
 		if(impactPlanes.size())
 		{
 			mlog(" :::: %d planes ",impactPlanes.size());
@@ -696,13 +602,12 @@ bool RSolidBspNode::CheckWall(RSolidBspNode *pRootNode, const rvector &origin,rv
 	if(impactPlanes.size())
 	{
 		bool bFound=false;
-		rplane simulplanes[100];	// 최대 동시에 맞닿는 면의 개수
+		rplane simulplanes[100];
 
 		rvector diff=targetpos-origin;
 		float fMinProjDist = 1.f;
 		float fMinDistToOrigin = 0.f;
 
-		// 골라내어진 평면들 중에 가장 먼저 맞닿는 평면을 골라낸다
 		for(i=impactPlanes.begin();i!=impactPlanes.end();i++)
 		{
 			rplane plane = *i;
@@ -711,24 +616,21 @@ bool RSolidBspNode::CheckWall(RSolidBspNode *pRootNode, const rvector &origin,rv
 			{
 				_ASSERT(FALSE);
 				i=impactPlanes.erase(i);
-				continue;	// 아마도 벽속에 들어가 있을 확률이 높다
+				continue;
 			}
 
-			float fProjDist = -D3DXPlaneDotNormal(&plane,&diff);			// diff 가 평면의 법선으로 projection 된 길이
-			float fDistToOrigin = D3DXPlaneDotCoord(&plane,&origin);		// origin 에서 평면까지의 최단거리
+			float fProjDist = -D3DXPlaneDotNormal(&plane,&diff);
+			float fDistToOrigin = D3DXPlaneDotCoord(&plane,&origin);
 
-			if(fDistToOrigin<=-0.1) { // 이미 평면의 뒤에 있는 경우이다.
+			if(fDistToOrigin<=-0.1) {
 				fProjDist = 1;
 				fDistToOrigin = 0;
 			}
-			if(fProjDist==0) {  // 완전히 평행한경우이다.
-				// 완전히 0인 경우에는 floating point exception 이 일어난다.
+			if(fProjDist==0) {
 				fProjDist = 1;
 				fDistToOrigin = 1;
 			}
 
-			// 따라서 교차하는 지점은 origin + (fDistToOrigin/fProjDist) * diff 이다.
-			// (fDistToOrigin/fProjDist) 가 최소가 되는 평면을 찾으면 가장 먼저 맞닿는 면이다.
 			if(!bFound)
 			{
 				bFound = true;
@@ -737,10 +639,6 @@ bool RSolidBspNode::CheckWall(RSolidBspNode *pRootNode, const rvector &origin,rv
 			}else
 			{
 				if( fDistToOrigin/fProjDist < fMinDistToOrigin/fMinProjDist )
-
-// 부호를 맟춰야 하기 때문에 보류.. (이들중 하나가 -값을 가지면 부등호의 방향이 바뀐다.)
-// 정확도를 높이기 위해 위의 나누기 대신에 이렇게 비교한다. (Gaming Programming Gems 3 권 2.2 벡터분수 참조)
-//				if( fDistToOrigin * fMinProjDist < fMinDistToOrigin * fProjDist  )
 				{
 					fMinProjDist = fProjDist;
 					fMinDistToOrigin = fDistToOrigin;
@@ -752,20 +650,17 @@ bool RSolidBspNode::CheckWall(RSolidBspNode *pRootNode, const rvector &origin,rv
 			return false;
 		}
 
-		// 가장 먼저 맞닿는 평면과의 교점을 구한다 (currentorigin)
 		float fInter = max(0.f,min(1.f,fMinDistToOrigin/fMinProjDist));
 		rvector currentorigin = origin + fInter * diff;
 
 		if(nDepth==0 && pimpactplane)
 			*pimpactplane=simulplanes[0];
 
-		// 새 origin 에서부터의 거리가 같은 면들을 찾는다
 
 		int nSimulCount=0;
 
 		for(i=impactPlanes.begin();i!=impactPlanes.end();i++) 
 		{
-			//			if(fabs(fDist-i->first)<0.01f) { // 동시에 닿는 면이다.
 			rplane p=*i;
 			if(fabs(D3DXPlaneDotCoord(&p,&currentorigin))<0.1) {
 				simulplanes[nSimulCount++]=p;
@@ -779,9 +674,6 @@ bool RSolidBspNode::CheckWall(RSolidBspNode *pRootNode, const rvector &origin,rv
 		float fBestCase=0.f;
 		rvector newtargetpos=currentorigin;
 
-		// 한 면을 타고 미끄러지는 경우가 1case 이고..
-		// 두 면의 교선을 타고 미끄러지는 경우가 2case 이다.
-
 		bool b1Case=false;
 		rplane plane1case;
 		{
@@ -789,15 +681,10 @@ bool RSolidBspNode::CheckWall(RSolidBspNode *pRootNode, const rvector &origin,rv
 			{
 				rplane plane=simulplanes[i];
 
-				// 미끄러짐.. diff 에다 평면의 법선방향으로 평면에서부터의 거리만큼 더한다
-
-				// Ni 는 평면의 법선벡터
 				rvector Ni=rvector(plane.a,plane.b,plane.c);
 
-				// targetpos 를 평면으로 수선의 발을 내린점으로 조절
 				rvector adjtargetpos =  targetpos  + Ni * -D3DXPlaneDotCoord(&plane,&targetpos);
 
-				// 직접 가본다
 				if(m_bTracePath) {
 					mlog("\n    check 1 : ");
 				}
@@ -818,14 +705,8 @@ bool RSolidBspNode::CheckWall(RSolidBspNode *pRootNode, const rvector &origin,rv
 			}
 		}
 
-//		if(!b1Case)
-
 		bool b2Case=false;
 		{
-			// 두개의 평면에 동시에 닿는 경우이다.  (같은평면인 경우는 이미 없다)
-			// 이럴때는 두개의 평면에 동시에 수직인 방향으로 진행한다.
-
-
 			rvector dif=targetpos-currentorigin;
 			for(int i=0;i<nSimulCount;i++)
 			{
@@ -838,15 +719,12 @@ bool RSolidBspNode::CheckWall(RSolidBspNode *pRootNode, const rvector &origin,rv
 						rvector aPointToTarget = targetpos-aPoint;
 						rvector adjtargetpos =  aPoint + DotProduct(dir,aPointToTarget)*dir;
 					
-
-						// 직접 가본다
 						if(m_bTracePath) {
 							mlog("\n   check 2 : ");
 						}
 						rvector checktargetpos = adjtargetpos;
 						CheckWall2(pRootNode,impactPlanes,currentorigin,checktargetpos,fRadius,fHeight,method);
 						float fDot=DotProduct(checkwalldir,checktargetpos-origin);
-						//						float fDot=DotProduct(checkwalldir,adjtargetpos-origin);
 						if(fDot>fBestCase)
 						{
 							fBestCase=fDot;
@@ -854,22 +732,6 @@ bool RSolidBspNode::CheckWall(RSolidBspNode *pRootNode, const rvector &origin,rv
 							b2Case=true;
 						}
 					}
-
-
-					/*
-					rvector dir;
-					CrossProduct(&dir,rvector(simulplanes[i].a,simulplanes[i].b,simulplanes[i].c),
-						rvector(simulplanes[j].a,simulplanes[j].b,simulplanes[j].c));
-					if(Magnitude(dir)<TOLERENCE) continue;
-					
-					Normalize(dir);
-
-					rvector prjdif=dir*DotProduct(dir,dif);
-
-					// targetpos 는 동시에 수직인 방향벡터로 수선의 발을 내린다
-					rvector adjtargetpos=currentorigin+prjdif;
-					*/
-
 				}
 			}
 		}
@@ -893,7 +755,6 @@ bool RSolidBspNode::CheckWall(RSolidBspNode *pRootNode, const rvector &origin,rv
 			return false;
 		}
 
-		// 어느방향으로도 진행이 불가능
 		if(!b2Case && !b1Case) {
 			targetpos = currentorigin;
 			if(m_bTracePath) {
@@ -926,8 +787,6 @@ bool RSolidBspNode::CheckWall(RSolidBspNode *pRootNode, const rvector &origin,rv
 		}
 		return true;
 	}
-
-	// 아무것도 걸리는게 없으면 그냥 리턴한다
 
 	return false;
 }

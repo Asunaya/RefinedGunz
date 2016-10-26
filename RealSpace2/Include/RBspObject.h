@@ -505,6 +505,8 @@ private:
 
 	bool RenderWithNormal{};
 
+	bool IsRS3Map{};
+
 	RBspObjectDraw DrawObj;
 };
 

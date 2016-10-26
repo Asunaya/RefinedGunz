@@ -686,6 +686,22 @@ void MZFile::Close()
 
 bool MZFile::Seek(long off,int mode)
 {
+	if (mode == begin)
+	{
+		if (off >= GetLength())
+			return false;
+	}
+	else if (mode == current)
+	{
+		if (m_nPos + off >= GetLength())
+			return false;
+	}
+	else if (mode == end)
+	{
+		if (GetLength() + off >= GetLength())
+			return false;
+	}
+
 	if(m_IsZipFile) {
 
 		if(mode == begin)
@@ -726,6 +742,14 @@ bool MZFile::Seek(long off,int mode)
 	return false;
 }
 
+i64 MZFile::Tell() const
+{
+	if (m_IsZipFile)
+		return m_nPos;
+
+	return ftell(m_fp);
+}
+
 bool MZFile::Read(void* pBuffer, int nMaxSize)
 {
 	if (m_IsZipFile)
@@ -755,7 +779,10 @@ bool MZFile::LoadFile()
 	m_pData = new char[m_nFileSize + 1];
 	m_pData[m_nFileSize] = 0;
 
-	return m_Zip.ReadFile(m_nIndexInZip, m_pData, m_nFileSize);
+	if (m_IsZipFile)
+		return m_Zip.ReadFile(m_nIndexInZip, m_pData, m_nFileSize);
+
+	return fread(m_pData, GetLength(), 1, m_fp) == 1;
 }
 
 MZFileBuffer MZFile::Release()

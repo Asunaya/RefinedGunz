@@ -40,3 +40,6 @@
 
 // Default distance from the camera to the far plane in the projection transform.
 #define DEFAULT_FAR_Z	100000.0f
+
+// Controls whether only MRS files will be loaded in release mode
+//#define ONLY_LOAD_MRS_FILES

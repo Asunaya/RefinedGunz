@@ -7,8 +7,7 @@ _NAMESPACE_REALSPACE2_BEGIN
 class RAnimation : public RBaseObject
 {
 public:
-	RAnimation();
-	~RAnimation();
+	RAnimation() { m_filename[0] = 0; m_sound_name[0] = 0; }
 
 	bool LoadAni(const char* filename);
 
@@ -48,27 +47,25 @@ public:
 
 public:
 
-	RAnimationFile*		m_pAniData;
+	RAnimationFile*		m_pAniData{};
 
 	char				m_filename[256];
 	char				m_sound_name[256];
 
-	bool				m_bIsHaveSound;
-	bool				m_bSoundRelatedToMap;
-	int					m_sID;
+	bool				m_bIsHaveSound{};
+	bool				m_bSoundRelatedToMap{};
+	int					m_sID = -1;
 
-	int					m_NameID;
+	int					m_NameID = -1;
 
-	int					m_weapon_motion_type;
+	int					m_weapon_motion_type = -1;
 	
-	bool				m_isConnected;
-	bool				m_isLoadDone;
-
-	float PlaybackRate = 1;
+	bool				m_isConnected{};
+	bool				m_isLoadDone{};
 
 private:
 
-	AnimationLoopType	m_ani_loop_type;
+	AnimationLoopType	m_ani_loop_type = RAniLoopType_Loop;
 };
 
 _NAMESPACE_REALSPACE2_END

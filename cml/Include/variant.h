@@ -6,6 +6,8 @@
 #include <cassert>
 #include <memory>
 
+struct monostate {};
+
 template <typename T>
 struct unique_ptr_with_copy : std::unique_ptr<T>
 {
@@ -115,16 +117,21 @@ using max_##prop##_t = typename max_##prop<Ts...>::type
 template <size_t alignment, size_t size, typename... Ts>
 struct variant_impl
 {
+	template <typename = std::enable_if_t<detail::is_part_of<monostate, Ts...>::value>>
+	variant_impl() {
+		this->construct(monostate{});
+	}
+
 	template <typename T, typename = std::enable_if_t<detail::is_part_of<T, detail::substitute_heap_wrapper_t<Ts>...>::value>>
 	variant_impl(T&& obj) {
 		this->construct(std::forward<T>(obj));
 	}
 
 	variant_impl(const variant_impl& src) {
-		src.visit([&](auto&& val) { this->construct(std::forward<decltype(val)>(val)); });
+		src.visit([&](auto&& val) { this->construct(val); });
 	}
 	variant_impl(variant_impl&& src) {
-		src.visit([&](auto&& val) { this->construct(std::forward<decltype(val)>(val)); });
+		src.visit([&](auto&& val) { this->construct(std::move(val)); });
 	}
 
 	variant_impl& operator =(const variant_impl& src) { return assign(src); }
@@ -132,16 +139,17 @@ struct variant_impl
 
 	~variant_impl()
 	{
-		visit([&](auto&& val) {
+		auto fn = [&](auto&& val) {
 			using type = std::remove_reference_t<decltype(val)>;
 			val.~type();
-		});
+		};
+		visit<decltype(fn)&, true>(fn);
 	}
 
-	template <typename fn_t>
-	void visit(fn_t&& fn) { visit_impl<fn_t, 0, Ts...>(std::forward<fn_t>(fn)); }
-	template <typename fn_t>
-	void visit(fn_t&& fn) const { visit_impl<fn_t, 0, Ts...>(std::forward<fn_t>(fn)); }
+	template <typename fn_t, bool include_monostate = false>
+	void visit(fn_t&& fn) { visit_impl<fn_t, include_monostate, 0, Ts...>(std::forward<fn_t>(fn)); }
+	template <typename fn_t, bool include_monostate = false>
+	void visit(fn_t&& fn) const { visit_impl<fn_t, include_monostate, 0, Ts...>(std::forward<fn_t>(fn)); }
 
 	template <typename T, typename = std::enable_if_t<
 		detail::any_of<(std::is_same<T, detail::substitute_heap_wrapper_t<Ts>>::value
@@ -156,7 +164,8 @@ struct variant_impl
 	auto get_type_index() const { return type_index; }
 
 	template <typename T>
-	static auto get_index_of_type() { return detail::get_index<T, detail::substitute_heap_wrapper_t<Ts>...>::value; }
+	static auto get_index_of_type() { return detail::get_index<T,
+		detail::substitute_heap_wrapper_t<Ts>...>::value; }
 
 	template <typename T>
 	auto is_type() const { return get_type_index() == get_index_of_type<T>(); }
@@ -241,24 +250,34 @@ private:
 		}
 	};
 
-	template <typename fn_t, int cur_type_index, typename cur_type, typename... rest>
-	void visit_impl(fn_t&& fn)
+	template <typename fn_t, bool include_monostate, int cur_type_index, typename cur_type, typename... rest>
+	std::enable_if_t<!std::is_same<cur_type, monostate>::value || include_monostate> visit_impl(fn_t&& fn)
 	{
 		if (cur_type_index == type_index)
 			dummy<fn_t, cur_type>::call_visitor(std::forward<fn_t>(fn), buffer);
 		else
-			visit_impl<fn_t, cur_type_index + 1, rest...>(std::forward<fn_t>(fn));
+			visit_impl<fn_t, include_monostate, cur_type_index + 1, rest...>(std::forward<fn_t>(fn));
 	}
-	template <typename fn_t, int cur_type_index>
+	template <typename fn_t, bool include_monostate, int cur_type_index, typename cur_type, typename... rest>
+	std::enable_if_t<std::is_same<cur_type, monostate>::value && !include_monostate> visit_impl(fn_t&& fn)
+	{
+		visit_impl<fn_t, include_monostate, cur_type_index + 1, rest...>(std::forward<fn_t>(fn));
+	}
+	template <typename fn_t, bool include_monostate, int cur_type_index>
 	void visit_impl(fn_t&&) { assert(false); }
 
-	template <typename fn_t, int cur_type_index, typename cur_type, typename... rest>
-	void visit_impl(fn_t&& fn) const
+	template <typename fn_t, bool include_monostate, int cur_type_index, typename cur_type, typename... rest>
+	std::enable_if_t<!std::is_same<cur_type, monostate>::value || include_monostate> visit_impl(fn_t&& fn) const
 	{
 		if (cur_type_index == type_index)
 			dummy<fn_t, const cur_type>::call_visitor(std::forward<fn_t>(fn), buffer);
 		else
-			visit_impl<fn_t, cur_type_index + 1, rest...>(std::forward<fn_t>(fn));
+			visit_impl<fn_t, include_monostate, cur_type_index + 1, rest...>(std::forward<fn_t>(fn));
+	}
+	template <typename fn_t, bool include_monostate, int cur_type_index, typename cur_type, typename... rest>
+	std::enable_if_t<std::is_same<cur_type, monostate>::value && !include_monostate> visit_impl(fn_t&& fn) const
+	{
+		visit_impl<fn_t, include_monostate, cur_type_index + 1, rest...>(std::forward<fn_t>(fn));
 	}
 	template <typename fn_t, int cur_type_index>
 	void visit_impl(fn_t&&) const { assert(false); }

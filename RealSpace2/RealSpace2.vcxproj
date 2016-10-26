@@ -367,8 +367,10 @@
     <None Include="Source\Globals.hlslh" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Include\RBspObjectDrawD3D9.cpp" />
     <ClCompile Include="Include\RS2D3D9.cpp" />
     <ClCompile Include="Include\RS2Vulkan.cpp" />
+    <ClCompile Include="Source\EluLoader.cpp" />
     <ClCompile Include="Source\MeshManager.cpp" />
     <ClCompile Include="Source\RBspObjectDrawVulkan.cpp" />
     <ClCompile Include="Source\Renderer.cpp" />
@@ -435,8 +437,10 @@
     <ClCompile Include="Source\VulkanMaterial.cpp" />
     <ClCompile Include="Source\vulkantools.cpp" />
     <ClCompile Include="Source\vulkan_functions.cpp" />
+    <ClCompile Include="Source\XMLParser.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Include\EluLoader.h" />
     <ClInclude Include="Include\MeshManager.h" />
     <ClInclude Include="Include\RBspObjectDraw.h" />
     <ClInclude Include="Include\RBspObjectDrawD3D9.h" />
@@ -503,6 +507,8 @@
     <ClInclude Include="Include\vulkantools.h" />
     <ClInclude Include="Include\vulkan_functions.h" />
     <ClInclude Include="Include\vulkan_function_list.h" />
+    <ClInclude Include="Include\XMLFileStructs.h" />
+    <ClInclude Include="Include\XMLParser.h" />
     <None Include="Include\ShaderGlobals.h" />
     <ClInclude Include="Include\stdafx.h" />
   </ItemGroup>
