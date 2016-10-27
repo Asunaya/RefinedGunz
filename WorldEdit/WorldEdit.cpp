@@ -166,7 +166,7 @@ void CWorldEditApp::OnFileOpen()
 {
 	CFileDialog FileDialog(TRUE,"rs",NULL,OFN_HIDEREADONLY,"Realspace Scene File (*.rs)|*.rs|All Files (*.*)|*.*||");
 	if(FileDialog.DoModal()==IDOK)
-		OpenDocumentFile(FileDialog.GetFileName());
+		OpenDocumentFile(FileDialog.GetPathName());
 }
 
 //void CAboutDlg::OnMouseMove(UINT nFlags, CPoint point)

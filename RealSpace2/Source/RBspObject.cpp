@@ -2308,20 +2308,20 @@ void RBspObject::GetNormal(RCONVEXPOLYGONINFO *poly, const rvector &position,
 
 	tem = Slerp(*n1, *n2, t);
 
-
 	rvector inter = a + t*b;
 
 	int axisfors;
-	if (fabs(inter.x) > fabs(inter.y) && fabs(inter.x) > fabs(inter.z)) axisfors = 0;
+	if (fabs(inter.x) > fabs(inter.y) && fabs(inter.x) > fabs(inter.z))
+		axisfors = 0;
+	else if (fabs(inter.y) > fabs(inter.z))
+		axisfors = 1;
 	else
-		if (fabs(inter.y) > fabs(inter.z)) axisfors = 1;
-		else axisfors = 2;
+		axisfors = 2;
 
-		float s = x[axisfors] / inter[axisfors];
-		*normal = Slerp(*n0, tem, s);
+	float s = x[axisfors] / inter[axisfors];
+	*normal = Slerp(*n0, tem, s);
 }
 
-// This whole thing is absolutely terrible but nothing is using it so whatever.
 bool RBspObject::GenerateLightmap(const char *filename, int nMaxlightmapsize, int nMinLightmapSize,
 	int nSuperSample, float fToler, RGENERATELIGHTMAPCALLBACK pProgressFn)
 {
@@ -2338,8 +2338,7 @@ bool RBspObject::GenerateLightmap(const char *filename, int nMaxlightmapsize, in
 
 	int nConstCount = 0;
 	int nLight;
-	RLIGHT **pplight;
-	pplight = new RLIGHT*[m_StaticMapLightList.size()];
+	RLIGHT **pplight = new RLIGHT*[m_StaticMapLightList.size()];
 	rvector *lightmap = new rvector[nMaxlightmapsize*nMaxlightmapsize];
 	DWORD	*lightmapdata = new DWORD[nMaxlightmapsize*nMaxlightmapsize];
 	bool *isshadow = new bool[(nMaxlightmapsize + 1)*(nMaxlightmapsize + 1)];
@@ -2383,7 +2382,7 @@ bool RBspObject::GenerateLightmap(const char *filename, int nMaxlightmapsize, in
 			lightmapsize = nMaxlightmapsize;
 
 			float targetarea = fMaximumArea / 4.f;
-			while (poly->fArea<targetarea && lightmapsize>nMinLightmapSize)
+			while (poly->fArea < targetarea && lightmapsize > nMinLightmapSize)
 			{
 				targetarea /= 4.f;
 				lightmapsize /= 2;
@@ -2408,7 +2407,7 @@ bool RBspObject::GenerateLightmap(const char *filename, int nMaxlightmapsize, in
 
 			for (auto& Light : m_StaticMapLightList)
 			{
-				if (GetDistance(Light.Position, poly->plane)>Light.fAttnEnd) continue;
+				if (GetDistance(Light.Position, poly->plane) > Light.fAttnEnd) continue;
 
 				for (int iv = 0; iv < poly->nVertices; iv++)
 				{
