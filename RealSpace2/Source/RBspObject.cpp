@@ -515,8 +515,8 @@ static void SetDefaultStates(bool Lightmap)
 
 bool RBspObject::Draw()
 {
-	//DrawObj.Draw();
-	//return true;
+	DrawObj.Draw();
+	return true;
 
 	if (GetRS2().UsingVulkan())
 	{
@@ -2994,7 +2994,7 @@ bool RBspObject::Pick(std::vector<RSBspNode>& Nodes,
 	pi.Plane = PlaneFromPointNormal(pi.From, pi.Dir);
 	pi.Dist = FLT_MAX;
 
-	return Pick(Nodes.data(), src, dest, pi);
+	return Pick<Shadow>(Nodes.data(), src, dest, pi);
 }
 
 bool RBspObject::Pick(const rvector &pos, const rvector &dir, RBSPPICKINFO *Out, u32 PassFlag) {

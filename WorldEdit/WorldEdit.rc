@@ -484,7 +484,7 @@ END
 STRINGTABLE 
 BEGIN
     AFX_IDS_APP_TITLE       "WorldEdit"
-    AFX_IDS_IDLEMESSAGE     "준비"
+    AFX_IDS_IDLEMESSAGE     "Idle"
 END
 
 STRINGTABLE 
@@ -499,11 +499,11 @@ END
 
 STRINGTABLE 
 BEGIN
-    ID_FILE_NEW             "새 문서를 작성합니다\n새 파일"
-    ID_FILE_OPEN            "기존 문서를 엽니다\n열기"
-    ID_FILE_CLOSE           "현재 열린 문서를 닫습니다\n닫기"
-    ID_FILE_SAVE            "현재 열린 문서를 저장합니다\n저장"
-    ID_FILE_SAVE_AS         "현재 열린 문서를 다른 이름으로 저장합니다\n다른 이름으로 저장"
+    ID_FILE_NEW             "ID_FILE_NEW"
+    ID_FILE_OPEN            "ID_FILE_OPEN"
+    ID_FILE_CLOSE           "ID_FILE_CLOSE"
+    ID_FILE_SAVE            "ID_FILE_SAVE"
+    ID_FILE_SAVE_AS         "ID_FILE_SAVE_AS"
 END
 
 STRINGTABLE 

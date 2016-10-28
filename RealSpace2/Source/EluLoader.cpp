@@ -167,14 +167,29 @@ static bool LoadSubmeshData(MZFile& file, EluMesh& mesh)
 
 	for (u32 i = 0; i < nsubmesh; ++i)
 	{
+		auto& dp = mesh.DrawProps[i];
+
 		u32 mat; V(file.Read(mat));
-		mesh.DrawProps[i].material = mat;
+		dp.material = mat;
 		u16 idx; V(file.Read(idx));
-		mesh.DrawProps[i].indexBase = idx;
+		dp.indexBase = idx;
 		u16 cnt; V(file.Read(cnt));
-		mesh.DrawProps[i].count = cnt;
-		mesh.DrawProps[i].vertexBase = 0;
+		dp.count = cnt;
+		dp.vertexBase = 0;
 		V(file.Seek(4));
+
+		if (dp.material < 0)
+		{
+			if (mesh.DrawProps.size() == 1)
+			{
+				mesh.DrawProps.clear();
+				return true;
+			}
+
+			mesh.DrawProps.erase(mesh.DrawProps.begin() + i);
+			mesh.DrawProps.resize(mesh.DrawProps.size() - 1);
+			--i;
+		}
 	}
 
 	return true;
@@ -251,7 +266,7 @@ bool loadMaterial(LoaderState& State, const char* name)
 	XMLMaterialVector xMats;
 
 	auto found = TryForEachPath(State.Paths, name, [&](auto& path) {
-		return XMLParser::parseXMLMaterial(path.c_str(), xMats);
+		return XMLParser::parseXMLMaterial(path.c_str(), xMats);	
 	});
 	if (!found)
 	{
