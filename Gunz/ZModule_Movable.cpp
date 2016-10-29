@@ -86,17 +86,22 @@ bool ZModule_Movable::Move(const rvector &orig_diff)
 		}
 	}
 
-	rvector origin,targetpos;
-	rplane impactplane;
 
 	float fCollUpHeight = max(120.0f, pThisObj->GetCollHeight() - pThisObj->GetCollRadius() * 1.7142857142857143f);
 
-	origin=pThisObj->GetPosition()+rvector(0,0,fCollUpHeight);
-	targetpos=origin+diff;
+	auto origin = pThisObj->GetPosition() + v3{ 0, 0, fCollUpHeight };
+	auto targetpos = origin + diff;
 
+	rplane impactplane;
 	if (pThisObj->GetPosition().z > DIE_CRITICAL_LINE)
 	{
-		m_bAdjusted = ZGetGame()->GetWorld()->GetBsp()->CheckWall(origin,targetpos,fThisObjRadius,60,RCW_CYLINDER,0,&impactplane);
+		if (diff == v3{ 0, 0, 0 })
+			m_bAdjusted = false;
+		else
+			m_bAdjusted = ZGetGame()->GetWorld()->GetBsp()->CheckWall(
+				origin, targetpos,
+				fThisObjRadius, 60, RCW_CYLINDER,
+				0, &impactplane);
 	}
 	else
 	{
@@ -104,11 +109,10 @@ bool ZModule_Movable::Move(const rvector &orig_diff)
 		m_bAdjusted = false;
 	}
 
-	diff=targetpos-origin;
-	pThisObj->SetPosition(targetpos-rvector(0,0,fCollUpHeight));
+	pThisObj->SetPosition(targetpos - rvector(0, 0, fCollUpHeight));
 
-	if(m_bAdjusted)
-		m_fLastAdjustedTime=g_pGame->GetTime();
+	if (m_bAdjusted)
+		m_fLastAdjustedTime = g_pGame->GetTime();
 
 	return m_bAdjusted;
 }

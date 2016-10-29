@@ -277,7 +277,6 @@ bool loadMaterial(LoaderState& State, const char* name)
 	XMLMaterialVector::iterator itor;
 	State.Materials.reserve(xMats.size());
 
-	int i{};
 	for (auto& mat : xMats)
 	{
 		EluMaterial mtl;
@@ -307,19 +306,20 @@ bool loadMaterial(LoaderState& State, const char* name)
 			};
 			if (!TryForEachPath(State.Paths, Filename, fn))
 				if (!TryForEachPath(State.Paths, Filename + ".dds", fn))
+				{
+					MLog("Failed to load texture %s!\n", Filename.c_str());
 					return false;
+				}
 			return true;
 		};
 
-		if (!LoadTexture(FLAG_DIFFUSE, mtl.tDiffuse, mat.DiffuseMap))
-			MLog("Failed to load diffuse texture %s\n", mat.DiffuseMap.c_str());
+		LoadTexture(FLAG_DIFFUSE, mtl.tDiffuse, mat.DiffuseMap);
 		LoadTexture(FLAG_NORMAL, mtl.tNormal, mat.NormalMap);
 		LoadTexture(FLAG_SPECULAR, mtl.tSpecular, mat.SpecularMap);
 		LoadTexture(FLAG_OPACITY, mtl.tOpacity, mat.OpacityMap);
 		LoadTexture(FLAG_SELFILLUM, mtl.tEmissive, mat.SelfIlluminationMap);
 
 		State.Materials.push_back(mtl);
-		++i;
 	}
 	return true;
 }
@@ -338,7 +338,7 @@ static bool LoadElu(LoaderState& State, const char* name)
 	});
 	if (!success)
 	{
-		MLog("load on %s failed\n", name);
+		MLog("LoadElu -- Failed to open elu file %s\n", name);
 		return false;
 	}
 
@@ -365,10 +365,11 @@ static bool LoadElu(LoaderState& State, const char* name)
 			DMLog("Unknown mesh version %X\n", hdr.Version);
 		}
 
-		DMLog("mesh %s %X\n", name, hdr.Version);
-
 		if (!success)
 			return false;
+
+		dest.VertexCount += Mesh.VertexCount;
+		dest.IndexCount += Mesh.IndexCount;
 	}
 
 	assert(File.Tell() == File.GetLength());
@@ -394,7 +395,8 @@ static void MakeEluObject(LoaderState& State, int DataIndex = -1)
 	State.Objects.emplace_back();
 	auto& Obj = State.Objects.back();
 	Obj.Data = DataIndex;
-	Obj.World = Data.World;
+	State.TotalVertexCount += Data.VertexCount;
+	State.TotalIndexCount += Data.IndexCount;
 }
 
 static bool load(LoaderState& State, const char * name)

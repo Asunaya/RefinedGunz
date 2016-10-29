@@ -283,7 +283,7 @@ void ZStencilLight::Render()
 		light.Position		= pLS->pos;
 
 		float fPower = pLS->bAttenuation ? 
-			pLS->power * cos(float(GetGlobalTimeMS()-pLS->attenuationTime)/(pLS->deadTime-pLS->attenuationTime)*.5*pi)
+			pLS->power * cos(float(GetGlobalTimeMS()-pLS->attenuationTime)/(pLS->deadTime-pLS->attenuationTime)*.5*PI)
 			: pLS->power;
 		fPower = min(1.f,max(0.f,fPower));
 

@@ -191,7 +191,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>Include;../CML/Include;../MAI/Include;../RealSpace/Include;../sdk/dx9/include;../sdk/rapidxml/include;../sdk;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>Include;../CML/Include;../MAI/Include;../RealSpace/Include;../sdk/dx9/include;../sdk/rapidxml/include;../sdk;../sdk/bullet/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DEBUG;WIN32;_LIB;_USE_GDIPLUS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -370,6 +370,7 @@
     <ClCompile Include="Include\RBspObjectDrawD3D9.cpp" />
     <ClCompile Include="Include\RS2D3D9.cpp" />
     <ClCompile Include="Include\RS2Vulkan.cpp" />
+    <ClCompile Include="Source\BulletCollision.cpp" />
     <ClCompile Include="Source\EluLoader.cpp" />
     <ClCompile Include="Source\MeshManager.cpp" />
     <ClCompile Include="Source\RBspObjectDrawVulkan.cpp" />
@@ -440,6 +441,8 @@
     <ClCompile Include="Source\XMLParser.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Include\BulletCollision.h" />
+    <ClInclude Include="Include\BulletCollisionLibs.h" />
     <ClInclude Include="Include\EluLoader.h" />
     <ClInclude Include="Include\MeshManager.h" />
     <ClInclude Include="Include\RBspObjectDraw.h" />

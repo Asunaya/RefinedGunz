@@ -241,6 +241,9 @@
     <ClCompile Include="Source\XMLParser.cpp">
       <Filter>Map\RSX</Filter>
     </ClCompile>
+    <ClCompile Include="Source\BulletCollision.cpp">
+      <Filter>Map\RSX</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\RHalfEdgeMesh.h">
@@ -427,6 +430,12 @@
       <Filter>Map\RSX</Filter>
     </ClInclude>
     <ClInclude Include="Include\XMLParser.h">
+      <Filter>Map\RSX</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\BulletCollision.h">
+      <Filter>Map\RSX</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\BulletCollisionLibs.h">
       <Filter>Map\RSX</Filter>
     </ClInclude>
   </ItemGroup>

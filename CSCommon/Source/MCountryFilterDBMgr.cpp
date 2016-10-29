@@ -3,7 +3,6 @@
 #ifdef MSSQL_ENABLED
 #undef ASSERT
 #undef _WINDOWS_
-#undef pi
 #include ".\mcountryfilterdbmgr.h"
 #include <Windows.h>
 

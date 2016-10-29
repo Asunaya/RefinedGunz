@@ -125,7 +125,7 @@ void ZMyCharacter::ProcessInput(float fDelta)
 		return;
 	}
 
-	static float rotatez=0.f,rotatex=9*pi/10.f;
+	static float rotatez=0.f,rotatex=9* PI_FLOAT /10.f;
 
 	m_Accel = rvector(0,0,0);
 
@@ -256,7 +256,7 @@ void ZMyCharacter::ProcessInput(float fDelta)
 							float fRatio = GetMoveSpeedRatio();
 
 							if(fDist<100.f && DotProduct(GetVelocity(),jumpdir)>RUN_SPEED * fRatio *.8f &&
-								fDot>cos(55.f/180.f*pi) && fDot<cos(25.f/180.f*pi) && DotProduct(jumpdir,dir)<0)
+								fDot>cos(55.f/180.f*PI_FLOAT) && fDot<cos(25.f/180.f*PI_FLOAT) && DotProduct(jumpdir,dir)<0)
 							{
 								rvector neworigin=pickorigin+300.f*jumpdir;
 

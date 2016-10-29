@@ -18,6 +18,7 @@
 #include "RBspObjectDraw.h"
 #include "rapidxml.hpp"
 #include "RVisualMesh.h"
+#include "BulletCollision.h"
 
 class MZFile;
 class MZFileSystem;
@@ -306,12 +307,14 @@ public:
 	int GetConvexPolygonCount() const { return ConvexPolygons.size(); }
 	int GetLightmapCount() const { return LightmapTextures.size(); }
 
+	// TODO: Make a separate output parameter
 	bool CheckWall(const rvector &origin, rvector &targetpos, float fRadius, float fHeight = 0.f,
-		RCOLLISIONMETHOD method = RCW_CYLINDER, int nDepth = 0, rplane *pimpactplane = NULL);
+		RCOLLISIONMETHOD method = RCW_CYLINDER, int nDepth = 0, rplane *pimpactplane = nullptr);
 
-	bool CheckSolid(const rvector &pos, float fRadius, float fHeight = 0.f, RCOLLISIONMETHOD method = RCW_CYLINDER);
+	bool CheckSolid(const rvector &pos, float fRadius, float fHeight = 0.f,
+		RCOLLISIONMETHOD method = RCW_CYLINDER);
 
-	rvector GetFloor(const rvector &origin, float fRadius, float fHeight, rplane *pimpactplane = NULL);
+	rvector GetFloor(const rvector &origin, float fRadius, float fHeight, rplane *pimpactplane = nullptr);
 
 	void OnInvalidate();
 	void OnRestore();
@@ -508,6 +511,7 @@ private:
 	bool IsRS3Map{};
 
 	RBspObjectDraw DrawObj;
+	std::unique_ptr<BulletCollision> Collision;
 };
 
 #ifdef _DEBUG

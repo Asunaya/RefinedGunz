@@ -69,31 +69,38 @@ struct EluMaterial
 	TextureType tEmissive;
 };
 
-// The data comprising a particular elu
+// The data comprising a particular elu.
 struct EluObjectData
 {
 	std::string Name;
-	rmatrix World;
 	std::vector<EluMesh> Meshes;
+	// Total of the vertex and index counts of each mesh this elu owns.
+	size_t VertexCount{}, IndexCount{};
+	// The beginning of the continuous range of materials this elu uses
+	// in LoaderState.Materials
 	int MaterialStart = -1;
 };
 
-// An object in the map.
-// Contains a reference to the data of the elu it uses
-// and a world transform for describing its situation in space.
+// An object in the map, comprised of an elu and the transform that situates it into world space.
 struct EluObject
 {
+	// Index into LoaderState.ObjectData to retrieve the elu it uses.
 	int Data = -1;
 	rmatrix World;
 };
 
 struct LoaderState
 {
+	// Paths the loader searches for stuff in.
 	std::vector<std::string> Paths;
 	std::vector<EluObjectData> ObjectData;
 	std::vector<EluObject> Objects;
 	std::vector<EluMaterial> Materials;
 	std::unordered_map<std::string, int> EluMap;
+	// The vertex and index counts of every single object in the map.
+	// NOTE: OBJECTS, not elus, i.e. elus have their counts
+	// multiplied by the amount of objects that use them.
+	size_t TotalVertexCount{}, TotalIndexCount{};
 };
 
 bool loadTree(LoaderState& State, const char * sceneName, std::vector<RealSpace2::RLIGHT>& Lights);

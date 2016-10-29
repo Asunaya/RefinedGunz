@@ -1,7 +1,4 @@
-#ifndef _MAIN_H
-#define _MAIN_H
-
-//#pragma once
+#pragma once
 
 #pragma warning(disable:4099)
 
@@ -39,6 +36,4 @@
 
 #pragma comment(lib,"winmm.lib")
 
-
-
-#endif
+#include "BulletCollisionLibs.h"

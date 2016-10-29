@@ -29,7 +29,7 @@ ZSkillDesc::ZSkillDesc()
 
 	nEffectStartPosType = ZSTP_NONE;
 	fEffectAreaMin = 0.0f;
-	fEffectAngle = pi / 2.0f;		// 90µµ
+	fEffectAngle = PI_FLOAT / 2.0f;		// 90µµ
 
 	bCameraShock = true;
 	fCameraPower = 1.0f;

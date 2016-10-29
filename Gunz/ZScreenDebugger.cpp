@@ -572,7 +572,7 @@ void ZScreenDebugger::OnDrawAIDebugInfo(MDrawContext *pDC)
 					MMatchItemDesc* pDesc = pItem->GetDesc();
 					float fMeleeRange = pDesc->m_nRange;
 
-					DrawDebugInfo_NPCArc(pNPC->GetPosition(), pNPC->GetDirection(), fMeleeRange, (pi/2.0f), 0xFF0000FF);
+					DrawDebugInfo_NPCArc(pNPC->GetPosition(), pNPC->GetDirection(), fMeleeRange, (PI_FLOAT / 2.0f), 0xFF0000FF);
 				}
 
 				// 근거리 스킬 범위

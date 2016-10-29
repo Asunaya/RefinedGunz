@@ -8,7 +8,6 @@
 #include "VulkanTextureLoader.h"
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#undef pi
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "RNameSpace.h"

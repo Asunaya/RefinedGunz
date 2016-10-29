@@ -1463,7 +1463,7 @@ void ZCharacter::UpdateSound()
 		char szSndName[128];
 		RMATERIAL* pMaterial = NULL;
 		RBSPPICKINFO bpi;
-		if(ZGetGame()->GetWorld()->GetBsp()->Pick(m_Position+rvector(0,0,100),rvector(0,0,-1),&bpi)) {
+		if(ZGetGame()->GetWorld()->GetBsp()->Pick(m_Position+rvector(0,0,100),rvector(0,0,-1),&bpi) && bpi.nIndex != -1) {
 			pMaterial = ZGetGame()->GetWorld()->GetBsp()->GetMaterial(bpi.pNode, bpi.nIndex);
 		}
 

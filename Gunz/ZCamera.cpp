@@ -105,8 +105,8 @@ void ZCamera::Update(float fElapsed)
 	v3 shockoffset{ 0, 0, 0 };
 	if (m_bShocked)
 	{
-		float fA = RANDOMFLOAT * 2 * pi;
-		float fB = RANDOMFLOAT * 2 * pi;
+		float fA = RANDOMFLOAT * 2 * PI_FLOAT;
+		float fB = RANDOMFLOAT * 2 * PI_FLOAT;
 		auto velocity = v3(sin(fA)*sin(fB), cos(fA)*sin(fB), cos(fB));
 
 		float fPower = (g_pGame->GetTime() - m_fShockStartTime) / m_fShockDuration;
@@ -247,7 +247,7 @@ void ZCamera::SetDirection(const rvector& dir)
 		}
 		else
 		{
-			fAngleZ = 2 * pi - fZ1;
+			fAngleZ = 2 * PI_FLOAT - fZ1;
 		}
 
 	}
@@ -328,7 +328,7 @@ bool ZCamera::CheckCollisionWall(float &fRealDist, rvector& pos, rvector& dir)
 					float fAng = GetAngleOfVectors(vv1, vv2);
 					if (fAng < 0.0f) fAng = -fAng;
 
-					if (fAng < pi)
+					if (fAng < PI_FLOAT)
 					{
 						bCollisionWall = true;
 
@@ -368,7 +368,7 @@ bool ZCamera::CheckCollisionWall(float &fRealDist, rvector& pos, rvector& dir)
 					float fAng = GetAngleOfVectors(vv1, vv2);
 					if (fAng < 0.0f) fAng = -fAng;
 
-					if (fAng < (pi / 2))
+					if (fAng < (PI_FLOAT / 2))
 					{
 						bCollisionWall = true;
 
@@ -418,7 +418,7 @@ bool ZCamera::CheckCollisionWall(float &fRealDist, rvector& pos, rvector& dir)
 					float fAng = GetAngleOfVectors(vv1, vv2);
 					if (fAng < 0.0f) fAng = -fAng;
 
-					if (fAng < (pi / 2))
+					if (fAng < (PI_FLOAT / 2))
 					{
 						float fX = fPV - fD;
 						float fY = fX * tanf(fAng);
@@ -458,7 +458,7 @@ bool ZCamera::CheckCollisionWall(float &fRealDist, rvector& pos, rvector& dir)
 					float fAng = GetAngleOfVectors(vv1, vv2);
 					if (fAng < 0.0f) fAng = -fAng;
 
-					if (fAng < (pi / 2))
+					if (fAng < (PI_FLOAT / 2))
 					{
 						float fX = fPH - fD;
 						float fY = fX * tanf(fAng);
@@ -482,25 +482,25 @@ void ZCamera::CalcMaxPayneCameraZ(float &fRealDist, float& fAddedZ, float fAngle
 
 	float fPayneDist = fRealDist;
 
-	if (fAngleX < pi / 2.f)
+	if (fAngleX < PI_FLOAT / 2.f)
 	{
-		float fOffset = (pi / 2.f - fAngleX) / (pi / 2.f);
-		float fOffset2 = 1.0f - sinf(((pi / 4.0f) * fOffset));
+		float fOffset = (PI_FLOAT / 2.f - fAngleX) / (PI_FLOAT / 2.f);
+		float fOffset2 = 1.0f - sinf(((PI_FLOAT / 4.0f) * fOffset));
 		fPayneDist = fOffset2 * (m_fDist - 80.0f) + 80.0f;
 	}
 
-	if (fAngleX > pi / 2.f)
+	if (fAngleX > PI_FLOAT / 2.f)
 	{
-		float fOffset = (fAngleX - pi / 2.f) / (pi / 2.f);
-		float fOffset2 = 1.0f - (cosf(pi + ((pi / 2.0f) * fOffset)) + 1.0f);
+		float fOffset = (fAngleX - PI_FLOAT / 2.f) / (PI_FLOAT / 2.f);
+		float fOffset2 = 1.0f - (cosf(PI_FLOAT + ((PI_FLOAT / 2.0f) * fOffset)) + 1.0f);
 		fPayneDist = fOffset2 * (m_fDist - 100.0f) + 100.0f;
 	}
 
 	if (fAngleX < 1.3f)
 	{
 		float fOffset = (1.3f - fAngleX) / 1.3f;
-		fOffset = fOffset * (pi / 2.0f);
-		float fOffset2 = 1.0f + sinf(pi + (pi / 2.0f) + fOffset);
+		fOffset = fOffset * (PI_FLOAT / 2.0f);
+		float fOffset2 = 1.0f + sinf(PI_FLOAT + (PI_FLOAT / 2.0f) + fOffset);
 		fAddedZ = fOffset * 103.0f;
 	}
 

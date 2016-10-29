@@ -4,7 +4,6 @@
 #include "ZGame.h"
 #include "ZMyCharacter.h"
 #include "ZPost.h"
-#undef pi
 #include "rapidxml.hpp"
 
 CourseManager ZRuleSkillmap::CourseMgr;

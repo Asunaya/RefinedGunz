@@ -4,7 +4,6 @@
 #include "rtypes.h"
 #include "ZCharacter.h"
 #include <unordered_map>
-#undef pi
 #include "ArrayView.h"
 
 //#define PORTAL_USE_RT_TEXTURE

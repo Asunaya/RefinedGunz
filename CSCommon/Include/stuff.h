@@ -12,10 +12,8 @@
 #include <Winsock2.h>
 
 #include "GlobalTypes.h"
-#undef pi
 #include "MMatchItem.h"
 #include "MMath.h"
-#define pi PI_FLOAT
 #include "AnimationStuff.h"
 #include "RMesh.h"
 #include "RBspObject.h"

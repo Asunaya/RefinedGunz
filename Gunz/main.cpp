@@ -1,6 +1,5 @@
 #include "stdafx.h"
 
-#undef pi
 #include <windows.h>
 #include <wingdi.h>
 #include <mmsystem.h>

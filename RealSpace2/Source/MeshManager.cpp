@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "MeshManager.h"
-#undef pi
 #include "rapidxml.hpp"
 #include <fstream>
 

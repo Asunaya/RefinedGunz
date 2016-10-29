@@ -153,8 +153,8 @@ bool ZBossGaugeEffect::Draw(unsigned long int nTime)
 
 	if (m_bShocked)
 	{
-		float fA=RandomNumber(0.0f, 1.0f)*2*pi;
-		float fB=RandomNumber(0.0f, 1.0f)*2*pi;
+		float fA=RandomNumber(0.0f, 1.0f)*2*PI_FLOAT;
+		float fB=RandomNumber(0.0f, 1.0f)*2* PI_FLOAT;
 		rvector velocity=rvector(cos(fA)*cos(fB), sin(fA)*sin(fB), 0.0f);
 
 		float fPower=(g_pGame->GetTime() - m_fShockStartTime) / fShockDuration;
@@ -1114,7 +1114,7 @@ void ZScreenEffectManager::AddAlert(const rvector& vVictimPos, const rvector& vV
 		r = -(float)(acos(cosAng1)); 
 	}
 
-	float t = (pi / 4.0f);
+	float t = (PI_FLOAT / 4.0f);
 
 	int nIndex = -1;
 	if (((r > 0) && (r < t)) || ((r <= 0) && (r > -t))) nIndex = 0;

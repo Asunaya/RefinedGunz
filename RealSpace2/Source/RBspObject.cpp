@@ -26,8 +26,7 @@
 #include "RS2.h"
 #include "rapidxml.hpp"
 #include "EluLoader.h"
-
-#undef pi
+#include "BulletCollision.h"
 
 #ifndef _PUBLISH
 
@@ -1605,14 +1604,36 @@ bool RBspObject::LoadRS3Map(rapidxml::xml_node<>& parent)
 	DMLog("Objects: %d, object data num: %d, materials: %d\n",
 		State.Objects.size(), State.ObjectData.size(), State.Materials.size());
 
+	if (Collision)
+		Collision->Clear();
+	else
+		Collision = std::make_unique<BulletCollision>();
+
+	Collision->SetTotalCounts(State.TotalVertexCount, State.TotalIndexCount);
+
+	for (auto& Object : State.Objects)
+	{
+		auto& Data = State.ObjectData[Object.Data];
+		for (auto& Mesh : Data.Meshes)
+		{
+			if (Mesh.IndexCount == 0)
+				continue;
+
+			std::vector<v3> Vertices;
+			Vertices.resize(Mesh.VertexCount);
+
+			for (size_t i{}; i < Mesh.VertexCount; ++i)
+				Vertices[i] = Mesh.Positions[i] * Mesh.World * Object.World;
+
+			Collision->AddTriangles(Vertices.data(), Vertices.size(),
+				Mesh.Indices.get(), Mesh.IndexCount);
+			DMLog("Adding %d vertices and %d indices\n", Vertices.size(), Mesh.IndexCount);
+		}
+	}
+	Collision->Build();
+
 	if (GetRS2().UsingD3D9())
 		DrawObj.Get<RBspObjectDrawD3D9>().Create(std::move(State));
-
-	ColRoot.emplace_back();
-	auto& Col = ColRoot.back();
-	Col.m_Plane = { 0, 0, 1, 0 };
-	Col.m_pPositive = Col.m_pNegative = nullptr;
-	Col.m_bSolid = true;
 
 	return true;
 }
@@ -2890,34 +2911,79 @@ void RBspObject::DrawSolidNode()
 #endif
 }
 
-bool RBspObject::CheckWall(const rvector &origin, rvector &targetpos, float fRadius, float fHeight,
-	RCOLLISIONMETHOD method, int nDepth, rplane *pimpactplane)
+bool RBspObject::CheckWall(const rvector &origin, rvector &targetpos, float Radius, float Height,
+	RCOLLISIONMETHOD method, int nDepth, rplane *impactplane)
 {
-	return RSolidBspNode::CheckWall(ColRoot.data(), origin, targetpos, fRadius, fHeight, method, nDepth, pimpactplane);
+	if (Collision)
+	{
+		auto CheckPrimitive = [&](auto& func) {
+			v3 normal;
+			auto ret = func(normal);
+			if (!ret)
+				return false;
+			targetpos += normal * 4;
+			if (impactplane)
+				*impactplane = PlaneFromPointNormal(targetpos, normal);
+			return true;
+		};
+		if (method == RCW_CYLINDER)
+			return CheckPrimitive([&](auto& normal) {
+				return Collision->CheckCylinder(origin, targetpos, Radius, Height,
+					&targetpos, &normal); });
+		if (method == RCW_SPHERE)
+			return CheckPrimitive([&](auto& normal) {
+				return Collision->CheckSphere(origin, targetpos, Radius,
+					&targetpos, &normal); });
+		assert(!"Unknown collision method");
+		return false;
+	}
+
+	return RSolidBspNode::CheckWall(ColRoot.data(), origin, targetpos,
+		Radius, Height, method, nDepth, impactplane);
 }
 
-bool RBspObject::CheckSolid(const rvector &pos, float fRadius, float fHeight, RCOLLISIONMETHOD method)
+bool RBspObject::CheckSolid(const rvector &pos, float Radius, float Height, RCOLLISIONMETHOD method)
 {
+	if (Collision)
+	{
+		if (method == RCW_CYLINDER)
+			return Collision->CheckCylinder(pos, pos, Radius, Height);
+		if (method == RCW_SPHERE)
+			return Collision->CheckSphere(pos, pos, Radius);
+		assert(!"Unknown collision method");
+		return false;
+	}
+
 	RImpactPlanes impactPlanes;
 	if (method == RCW_SPHERE)
-		return ColRoot[0].GetColPlanes_Sphere(&impactPlanes, pos, pos, fRadius);
+		return ColRoot[0].GetColPlanes_Sphere(&impactPlanes, pos, pos, Radius);
 	else
-		return ColRoot[0].GetColPlanes_Cylinder(&impactPlanes, pos, pos, fRadius, fHeight);
+		return ColRoot[0].GetColPlanes_Cylinder(&impactPlanes, pos, pos, Radius, Height);
 }
 
-rvector RBspObject::GetFloor(const rvector &origin, float fRadius, float fHeight, rplane *pimpactplane)
+rvector RBspObject::GetFloor(const rvector &origin, float Radius, float Height, rplane *impactplane)
 {
-	rvector targetpos = origin + rvector(0, 0, -10000);
+	auto targetpos = origin + rvector(0, 0, -10000);
+
+	if (Collision)
+	{
+		v3 Hit, Normal;
+		if (!Collision->CheckCylinder(origin, targetpos, Radius, Height, &Hit, &Normal))
+			Hit = targetpos;
+		if (impactplane)
+			*impactplane = PlaneFromPointNormal(Hit, Normal);
+		return Hit;
+	}
 
 	RImpactPlanes impactPlanes;
-	bool bIntersect = ColRoot[0].GetColPlanes_Cylinder(&impactPlanes, origin, targetpos, fRadius, fHeight);
+	bool bIntersect = ColRoot[0].GetColPlanes_Cylinder(&impactPlanes, origin, targetpos, Radius, Height);
 	if (!bIntersect)
 		return targetpos;
 
 	rvector floor = ColRoot[0].GetLastColPos();
-	floor.z -= fHeight;
-	if (pimpactplane)
-		*pimpactplane = ColRoot[0].GetLastColPlane();
+	floor.z -= Height;
+	if (impactplane)
+		*impactplane = ColRoot[0].GetLastColPlane();
 
 	return floor;
 }
@@ -2964,6 +3030,8 @@ struct PickInfo
 	u32 PassFlag;
 };
 
+static RPOLYGONINFO DummyPolyInfo;
+
 template <bool Shadow>
 bool RBspObject::Pick(std::vector<RSBspNode>& Nodes,
 	const v3& src, const v3& dest, const v3& dir,
@@ -2976,6 +3044,18 @@ bool RBspObject::Pick(std::vector<RSBspNode>& Nodes,
 	auto MagSq = MagnitudeSq(dir);
 	if (MagSq == 0)
 		return false;
+
+	if (Collision)
+	{
+		v3 normal;
+		if (!Collision->Pick(src, dest, &Out->PickPos, &normal))
+			return false;
+		DummyPolyInfo.plane = PlaneFromPointNormal(Out->PickPos, normal);
+		Out->pInfo = &DummyPolyInfo;
+		Out->pNode = nullptr;
+		Out->nIndex = -1;
+		return true;
+	}
 
 	if (Nodes.empty())
 		return false;

@@ -2,7 +2,6 @@
 #include "AnimationStuff.h"
 #include "MDebug.h"
 #define _WINSOCK2API_
-#undef pi
 #include "MMatchItem.h"
 #include <array>
 #include "RAnimationMgr.h"
