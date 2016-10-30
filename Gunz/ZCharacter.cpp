@@ -1458,47 +1458,48 @@ void ZCharacter::OnKnockback(const rvector& dir, float fForce)
 
 void ZCharacter::UpdateSound()
 {
-	if (m_bInitialized==false) return;
+	if (!m_bInitialized) return;
 	if(m_pVMesh) {
-		char szSndName[128];
-		RMATERIAL* pMaterial = NULL;
+		char szSndName[128]; szSndName[0] = 0;
+		RMATERIAL* pMaterial{};
 		RBSPPICKINFO bpi;
 		if(ZGetGame()->GetWorld()->GetBsp()->Pick(m_Position+rvector(0,0,100),rvector(0,0,-1),&bpi) && bpi.nIndex != -1) {
 			pMaterial = ZGetGame()->GetWorld()->GetBsp()->GetMaterial(bpi.pNode, bpi.nIndex);
 		}
 
 		AniFrameInfo* pInfo = m_pVMesh->GetFrameInfo(ani_mode_lower);
-
 		int nFrame = pInfo->m_nFrame;
-
 		int nCurrFoot = 0;
 
-#define FRAME(x) int(float(x)/30.f*4800.f)
+		auto GetFrame = [&](float x) {
+			return static_cast<int>(x / 30.f * 4800.f); 
+		};
+
 		if(m_AniState_Lower==ZC_STATE_LOWER_RUN_FORWARD ||
 			m_AniState_Lower==ZC_STATE_LOWER_RUN_BACK) {
 			
-			if(FRAME(8) < nFrame && nFrame < FRAME(18) )
+			if(GetFrame(8) < nFrame && nFrame < GetFrame(18) )
 				nCurrFoot = 1;
 		}
 
 		if(m_AniState_Lower==ZC_STATE_LOWER_RUN_WALL_LEFT ||
 			m_AniState_Lower==ZC_STATE_LOWER_RUN_WALL_RIGHT ) {
 
-			if (nFrame < FRAME(9) ) nCurrFoot = 1;
-			else if (nFrame < FRAME(17) ) nCurrFoot = 0;
-			else if (nFrame < FRAME(24) ) nCurrFoot = 1;
-			else if (nFrame < FRAME(32) ) nCurrFoot = 0;
-			else if (nFrame < FRAME(40) ) nCurrFoot = 1;
-			else if (nFrame < FRAME(48) ) nCurrFoot = 0;
-			else if (nFrame < FRAME(55) ) nCurrFoot = 1;
+			if (nFrame < GetFrame(9) ) nCurrFoot = 1;
+			else if (nFrame < GetFrame(17) ) nCurrFoot = 0;
+			else if (nFrame < GetFrame(24) ) nCurrFoot = 1;
+			else if (nFrame < GetFrame(32) ) nCurrFoot = 0;
+			else if (nFrame < GetFrame(40) ) nCurrFoot = 1;
+			else if (nFrame < GetFrame(48) ) nCurrFoot = 0;
+			else if (nFrame < GetFrame(55) ) nCurrFoot = 1;
 		}
 
 		if(m_AniState_Lower==ZC_STATE_LOWER_RUN_WALL ) {
 
-			if (nFrame < FRAME(8) ) nCurrFoot = 1;
-			else if (nFrame < FRAME(16) ) nCurrFoot = 0;
-			else if (nFrame < FRAME(26) ) nCurrFoot = 1;
-			else if (nFrame < FRAME(40) ) nCurrFoot = 0;
+			if (nFrame < GetFrame(8) ) nCurrFoot = 1;
+			else if (nFrame < GetFrame(16) ) nCurrFoot = 0;
+			else if (nFrame < GetFrame(26) ) nCurrFoot = 1;
+			else if (nFrame < GetFrame(40) ) nCurrFoot = 0;
 		}
 
 		if(m_nWhichFootSound!=nCurrFoot && pMaterial) {	

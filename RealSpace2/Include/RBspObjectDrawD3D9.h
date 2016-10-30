@@ -37,7 +37,13 @@ private:
 	rsx::LoaderState State;
 	D3DPtr<IDirect3DVertexBuffer9> VertexBuffer;
 	D3DPtr<IDirect3DIndexBuffer9> IndexBuffer;
-	std::vector<D3DPtr<IDirect3DTexture9>> DiffuseTextures;
+	struct TextureData
+	{
+		int Diffuse = -1;
+		int Opacity = -1;
+	};
+	std::vector<TextureData> Textures;
+	std::vector<D3DPtr<IDirect3DTexture9>> TextureMemory;
 	std::vector<std::pair<D3DPtr<IDirect3DVertexBuffer9>, D3DPtr<IDirect3DIndexBuffer9>>> Buffers;
 };
 

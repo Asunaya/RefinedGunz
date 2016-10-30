@@ -7,7 +7,7 @@
 #pragma warning(pop)
 #include "DeferredConstructionWrapper.h"
 
-class BulletCollision
+class alignas(16) BulletCollision
 {
 public:
 	using IndexType = u16;
@@ -23,15 +23,8 @@ public:
 	bool CheckCylinder(const v3& Src, const v3& Dest, float Radius, float Height, v3* Hit = nullptr, v3* Normal = nullptr);
 	bool CheckSphere(const v3& Src, const v3& Dest, float Radius, v3* Hit = nullptr, v3* Normal = nullptr);
 
-	void* operator new(size_t count)
-	{
-		return _aligned_malloc(count, 16);
-	}
-
-	void operator delete(void* ptr)
-	{
-		_aligned_free(ptr);
-	}
+	void* operator new(size_t count) { return _aligned_malloc(count, 16); }
+	void operator delete(void* ptr) { _aligned_free(ptr); }
 
 private:
 	// The order of these four members is important since they are constructed

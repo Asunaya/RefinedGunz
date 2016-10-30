@@ -5,10 +5,11 @@
 #include <numeric>
 
 using namespace rsx;
+using namespace RealSpace2;
 using IndexType = u32;
 
 template <typename VertexType, typename IndexType>
-bool CreateBuffers(size_t VertexCount, size_t IndexCount, u32 FVF,
+static bool CreateBuffers(size_t VertexCount, size_t IndexCount, u32 FVF,
 	std::pair<D3DPtr<IDirect3DVertexBuffer9>, D3DPtr<IDirect3DIndexBuffer9>>& p)
 {
 	auto hr = RGetDevice()->CreateVertexBuffer(VertexCount * sizeof(VertexType), 0,
@@ -69,34 +70,42 @@ void RBspObjectDrawD3D9::Create(rsx::LoaderState && srcState)
 		return;
 	}
 
-	DiffuseTextures.resize(State.Materials.size());
+	std::unordered_map<std::string, int> TexMap;
+
+	Textures.resize(State.Materials.size());
 	for (size_t i{}; i < State.Materials.size(); ++i)
 	{
 		auto& Mat = State.Materials[i];
-		auto* name = Mat.tDiffuse.c_str();
-		auto hr = D3DXCreateTextureFromFile(RGetDevice(), name, MakeWriteProxy(DiffuseTextures[i]));
-		if (FAILED(hr))
-			DMLog("Failed to load texture %s\n", name);
-	}
 
-	/*for (auto& Obj : State.Objects)
-	{
-		MLog("Data world transform:\n");
-		LogMatrix(Obj.World);
-		auto& Data = State.ObjectData[Obj.Data];
-		for (auto& Mesh : Data.Meshes)
+		auto LoadTexture = [&](auto& name) -> int
 		{
-			MLog("Mesh world transform:\n");
-			LogMatrix(Mesh.World);
-			MLog("%s mesh %s\n", Data.Name.c_str(), Mesh.Name.c_str());
-			for (size_t i{}; i < max(100, Mesh.VertexCount); ++i)
+			if (name.empty())
+				return -1;
+
 			{
-				auto Trans = Mesh.Positions[i] * Obj.World * Mesh.World;
-				MLog("Vertex %d: %f, %f, %f, transformed: %f, %f, %f\n",
-					i, EXPAND_VECTOR(Mesh.Positions[i]), EXPAND_VECTOR(Trans));
+				auto it = TexMap.find(name);
+				if (it != TexMap.end())
+					return it->second;
 			}
-		}
-	}*/
+
+			TextureMemory.emplace_back();
+			auto hr = D3DXCreateTextureFromFile(RGetDevice(), name.c_str(),
+				MakeWriteProxy(TextureMemory.back()));
+			if (FAILED(hr))
+			{
+				DMLog("Failed to load texture %s\n", name);
+				TextureMemory.pop_back();
+				return -1;
+			}
+			auto idx = TextureMemory.size() - 1;
+			TexMap.emplace(std::make_pair(name, idx));
+			return idx;
+		};
+
+		auto& Tex = Textures[i];
+		Tex.Diffuse = LoadTexture(Mat.tDiffuse);
+		Tex.Opacity = LoadTexture(Mat.tOpacity);
+	}
 
 	for (size_t i{}; i < State.ObjectData.size(); ++i)
 	{
@@ -216,24 +225,39 @@ void RBspObjectDrawD3D9::Draw()
 			auto World = Mesh.World * Object.World;
 			RGetDevice()->SetTransform(D3DTS_WORLD, &World);
 
-			int dpc{};
 			for (auto& dp : Mesh.DrawProps)
 			{
-				RGetDevice()->SetTexture(0, DiffuseTextures[Data.MaterialStart + dp.material].get());
-				//DMLog("Material index = %d\n", Data.MaterialStart + dp.material);
+				auto& Tex = Textures[Data.MaterialStart + dp.material];
 
-				/*DMLog("%d, %d, %d, %d, %d\n",
-					dpc, dp.vertexBase, Mesh.VertexCount, dp.indexBase, dp.count);*/
-				++dpc;
+				if (Tex.Diffuse == -1)
+					continue;
+
+				if (Tex.Opacity != -1)
+				{
+					//dev->SetRenderState(D3DRS_ZWRITEENABLE, false);
+					dev->SetRenderState(D3DRS_ALPHABLENDENABLE, true);
+					dev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+					dev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+					dev->SetTexture(1, TextureMemory[Tex.Opacity].get());
+					dev->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+					dev->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+					dev->SetTextureStageState(1, D3DTSS_ALPHAARG1, D3DTA_CURRENT);
+					dev->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+				}
+				else
+				{
+					dev->SetRenderState(D3DRS_ZWRITEENABLE, true);
+					dev->SetRenderState(D3DRS_ALPHABLENDENABLE, false);
+					dev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
+					dev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
+					RGetDevice()->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_DIFFUSE);
+				}
+
+				RGetDevice()->SetTexture(0, TextureMemory[Tex.Diffuse].get());
+
 				RGetDevice()->DrawIndexedPrimitive(D3DPT_TRIANGLELIST,
 					dp.vertexBase + vb, 0, Mesh.VertexCount, dp.indexBase + ib, dp.count);
 			}
-
-			/*DMLog("%s %d: %d, %d, %d\n",
-				Data.Name.c_str(), MeshIndex, Mesh.VertexCount, Mesh.IndexCount + ib, Mesh.IndexCount / 3);
-
-			RGetDevice()->DrawIndexedPrimitive(D3DPT_TRIANGLELIST,
-				0, 0, Mesh.VertexCount, Mesh.IndexCount + ib, Mesh.IndexCount / 3);*/
 
 			vb += Mesh.VertexCount;
 			ib += Mesh.IndexCount;

@@ -255,10 +255,12 @@ static bool TryForEachPath(const std::vector<std::string>& Paths,
 	return false;
 }
 
-static bool FileExists(const char *szFilePath)
+static bool FileExists(const char *filename)
 {
-	constexpr int F_OK = 0;
-	return !_access(szFilePath, F_OK);
+	struct stat s;
+	if (stat(filename, &s))
+		return false;
+	return (s.st_mode & _S_IFDIR) == 0;
 }
 
 bool loadMaterial(LoaderState& State, const char* name)
@@ -288,6 +290,9 @@ bool loadMaterial(LoaderState& State, const char* name)
 		mtl.roughness = 0.f;
 
 		auto LoadTexture = [&](auto Flag, auto& Texture, auto& Filename) {
+			if (Filename.empty())
+				return false;
+
 			auto fn = [&](auto& Path) {
 				if (!FileExists(Path.c_str()))
 					return false;
@@ -316,7 +321,9 @@ bool loadMaterial(LoaderState& State, const char* name)
 		LoadTexture(FLAG_DIFFUSE, mtl.tDiffuse, mat.DiffuseMap);
 		LoadTexture(FLAG_NORMAL, mtl.tNormal, mat.NormalMap);
 		LoadTexture(FLAG_SPECULAR, mtl.tSpecular, mat.SpecularMap);
-		LoadTexture(FLAG_OPACITY, mtl.tOpacity, mat.OpacityMap);
+		// HACK: Don't load opacity map for flags cuz it's broken
+		if (mat.Name.find("flag") == std::string::npos)
+			LoadTexture(FLAG_OPACITY, mtl.tOpacity, mat.OpacityMap);
 		LoadTexture(FLAG_SELFILLUM, mtl.tEmissive, mat.SelfIlluminationMap);
 
 		State.Materials.push_back(mtl);
@@ -401,7 +408,7 @@ static void MakeEluObject(LoaderState& State, int DataIndex = -1)
 
 static bool load(LoaderState& State, const char * name)
 {
-	// Check if we've already loaded this object
+	// Check if we've already loaded this elu and duplicate it if so
 	{
 		auto it = State.EluMap.find(name);
 		if (it != State.EluMap.end())
@@ -413,6 +420,7 @@ static bool load(LoaderState& State, const char * name)
 		}
 	}
 
+	// Load the elu
 	if (!LoadElu(State, name))
 		return false;
 
@@ -421,39 +429,11 @@ static bool load(LoaderState& State, const char * name)
 	return true;
 }
 
-static rmatrix TransMat(v3 t)
-{
-	rmatrix m;
-	m[0] = 1;  m[1] = 0;  m[2] = 0;  m[3] = t.x;
-	m[4] = 0;  m[5] = 1;  m[6] = 0;  m[7] = t.y;
-	m[8] = 0;  m[9] = 0;  m[10] = 1; m[11] = t.z;
-	m[12] = 0; m[13] = 0; m[14] = 0; m[15] = 1;
-	return m;
-}
-
-static rmatrix RotMat(v3 dir, v3 up)
-{
-	v3 x, y(dir), z(up);
-
-	x = Normalized(CrossProduct(y, z));
-
-	rmatrix m;
-	m[0] = x.x;  m[1] = y.x;  m[2] = z.x;   m[3] = 0;
-	m[4] = x.y;  m[5] = y.y;  m[6] = z.y;   m[7] = 0;
-	m[8] = x.z;  m[9] = y.z;  m[10] = z.z;  m[11] = 0;
-	m[12] = 0;   m[13] = 0;   m[14] = 0;    m[15] = 1;
-	return m;
-}
-
 static rmatrix MakeSaneWorldMatrix(const v3& pos, v3 dir, v3 up)
 {
-	rmatrix mat;
-
-	mat = GetIdentityMatrix();
-
 	if (!IS_EQ(MagnitudeSq(dir), 1))
 	{
-		MLog("dir %f\n", Magnitude(dir));
+		DMLog("dir %f\n", Magnitude(dir));
 		if (IS_EQ(MagnitudeSq(dir), 0))
 			dir = { 1, 0, 0 };
 		else
@@ -461,12 +441,14 @@ static rmatrix MakeSaneWorldMatrix(const v3& pos, v3 dir, v3 up)
 	}
 	if (!IS_EQ(MagnitudeSq(up), 1))
 	{
-		MLog("up %f\n", Magnitude(up));
+		DMLog("up %f\n", Magnitude(up));
 		if (IS_EQ(MagnitudeSq(up), 0))
 			up = { 1, 0, 0 };
 		else
 			Normalize(up);
 	}
+
+	auto mat = GetIdentityMatrix();
 
 	auto right = Normalized(CrossProduct(dir, up));
 	up = Normalized(CrossProduct(right, dir));
@@ -474,13 +456,11 @@ static rmatrix MakeSaneWorldMatrix(const v3& pos, v3 dir, v3 up)
 		right,
 		dir,
 		up };
-	/*for (size_t i{}; i < 3; ++i)
+	for (size_t i{}; i < 3; ++i)
 		for (size_t j{}; j < 3; ++j)
-			mat.m[i][j] = basis[i][j];*/
+			mat.m[i][j] = basis[i][j];
 
 	SetTransPos(mat, pos);
-
-	mat = Transpose(TransMat(pos) * RotMat(dir, up));
 
 	return mat;
 }
