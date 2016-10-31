@@ -244,6 +244,9 @@
     <ClCompile Include="Source\BulletCollision.cpp">
       <Filter>Map\RSX</Filter>
     </ClCompile>
+    <ClCompile Include="Source\LightmapGenerator.cpp">
+      <Filter>Map</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\RHalfEdgeMesh.h">
@@ -437,6 +440,9 @@
     </ClInclude>
     <ClInclude Include="Include\BulletCollisionLibs.h">
       <Filter>Map\RSX</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\LightmapGenerator.h">
+      <Filter>Map</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

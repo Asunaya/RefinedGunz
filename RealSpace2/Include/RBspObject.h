@@ -140,16 +140,6 @@ struct RSBspNode
 	void DrawBoundingBox(DWORD color);
 };
 
-using RFREEBLOCKLIST = std::list<POINT>;
-
-struct RLIGHTMAPTEXTURE {
-	int nSize;
-	DWORD *data;
-	bool bLoaded;
-	POINT position;
-	int	nLightmapIndex;
-};
-
 struct RBSPMATERIAL : public RMATERIAL {
 	union
 	{
@@ -170,33 +160,6 @@ struct RBSPMATERIAL : public RMATERIAL {
 	};
 
 	~RBSPMATERIAL();
-};
-
-class RBspLightmapManager {
-public:
-	RBspLightmapManager();
-	virtual ~RBspLightmapManager();
-
-	void Destroy();
-
-	int GetSize() { return m_nSize; }
-	DWORD *GetData() { return m_pData; }
-
-	void SetSize(int nSize) { m_nSize = nSize; }
-	void SetData(DWORD *pData) { Destroy(); m_pData = pData; }
-
-	bool Add(DWORD *data, int nSize, POINT *retpoint);
-	bool GetFreeRect(int nLevel, POINT *pt);
-
-	void Save(const char *filename);
-
-	float CalcUnused();
-	float m_fUnused;
-
-protected:
-	RFREEBLOCKLIST *m_pFreeList;
-	DWORD *m_pData;
-	int m_nSize;
 };
 
 struct FogInfo
@@ -290,9 +253,9 @@ public:
 	RDummyList* GetDummyList() { return &m_DummyList; }
 	RBaseTexture* GetBaseTexture(int n);
 
-	RLightList& GetMapLightList() { return m_StaticMapLightList; }
-	RLightList& GetObjectLightList() { return m_StaticObjectLightList; }
-	RLightList& GetSunLightList() { return m_StaticSunLightList; }
+	RLightList& GetMapLightList() { return StaticMapLightList; }
+	RLightList& GetObjectLightList() { return StaticObjectLightList; }
+	RLightList& GetSunLightList() { return StaticSunLightList; }
 
 	RSBspNode* GetOcRootNode() { return OcRoot.empty() ? nullptr : OcRoot.data(); }
 	RSBspNode* GetRootNode() { return BspRoot.empty() ? nullptr : BspRoot.data(); }
@@ -366,6 +329,7 @@ public:
 
 private:
 	friend class RBspObjectDrawVulkan;
+	friend struct LightmapGenerator;
 
 	bool LoadRS2Map(rapidxml::xml_node<>&);
 	bool LoadRS3Map(rapidxml::xml_node<>&);
@@ -464,22 +428,15 @@ private:
 
 	std::vector<D3DPtr<IDirect3DTexture9>> LightmapTextures;
 
-	void CalcLightmapUV(RSBspNode *pNode, int *pLightmapInfo,
-		std::vector<RLIGHTMAPTEXTURE*>& SourceLightmaps,
-		std::vector<RBspLightmapManager>& LightmapList);
-
-	// Interpolated normal
-	void GetNormal(RCONVEXPOLYGONINFO *poly, const rvector &position, rvector *normal, int au, int av);
-
 	std::vector<v3> ConvexVertices;
 	std::vector<v3> ConvexNormals;
 	int NumConvexPolygons{};
 	std::vector<RCONVEXPOLYGONINFO> ConvexPolygons;
 
-	rvector		m_AmbientLight{ 0, 0, 0 };
-	RLightList	m_StaticMapLightList;
-	RLightList	m_StaticObjectLightList;
-	RLightList	m_StaticSunLightList;
+	v3			AmbientLight{ 0, 0, 0 };
+	RLightList	StaticMapLightList;
+	RLightList	StaticObjectLightList;
+	RLightList	StaticSunLightList;
 
 	RMeshMgr			m_MeshList;
 	RAnimationMgr		m_AniList;

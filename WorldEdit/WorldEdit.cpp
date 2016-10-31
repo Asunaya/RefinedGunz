@@ -9,6 +9,8 @@
 #include "WorldEditDoc.h"
 #include "WorldEditView.h"
 
+#include "BulletCollisionLibs.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
