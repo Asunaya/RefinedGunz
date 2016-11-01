@@ -2773,12 +2773,14 @@ void RBspObject::GetNormal(int nConvexPolygon, const rvector &position, rvector 
 	au = (ax + 1) % 3;
 	av = (ax + 2) % 3;
 
-	::GetNormal(poly, position, normal, au, av);
+	*normal = ::GetNormal(poly, position, au, av);
 }
 
 bool RBspObject::GenerateLightmap(const char * filename, int MaxLightmapSize, int MinLightmapSize, int Supersample,
 	float Tolerance, RGENERATELIGHTMAPCALLBACK pProgressFn)
 {
+	ClearLightmaps();
+
 	LightmapGenerator Generator{ *this };
 	Generator.AmbientLight = AmbientLight;
 	Generator.filename = filename;

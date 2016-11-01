@@ -54,6 +54,8 @@ CWorldEditApp theApp;
 
 BOOL CWorldEditApp::InitInstance()
 {
+	InitLog(MLOGSTYLE_FILE | MLOGSTYLE_DEBUGSTRING);
+
 	AfxEnableControlContainer();
 
 	// Standard initialization

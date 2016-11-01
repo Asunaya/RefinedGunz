@@ -608,7 +608,8 @@ inline bool IntersectTriangle(const v3& V1, const v3& V2, const v3& V3, // Trian
 	t = DotProduct(e2, Q) * inv_det;
 
 	if (t > EPSILON) { //ray intersection
-		*out = t;
+		if (out)
+			*out = t;
 		return true;
 	}
 

@@ -11,40 +11,6 @@ _NAMESPACE_REALSPACE2_BEGIN
 
 bool SaveMemoryBmp(int x, int y, void *data, void **retmemory, int *nsize);
 
-using RFREEBLOCKLIST = std::list<POINT>;
-
-struct RLIGHTMAPTEXTURE {
-	int nSize;
-	std::unique_ptr<u32> data;
-	bool bLoaded;
-	POINT position;
-	int	nLightmapIndex;
-};
-
-class RBspLightmapManager {
-public:
-	RBspLightmapManager();
-
-	int GetSize() const { return m_nSize; }
-	auto * GetData() { return m_pData.get(); }
-
-	void SetSize(int nSize) { m_nSize = nSize; }
-	void SetData(std::unique_ptr<u32[]> pData) { m_pData = std::move(pData); }
-
-	bool Add(const u32 * data, int nSize, POINT * retpoint);
-	bool GetFreeRect(int nLevel, POINT *pt);
-
-	void Save(const char *filename);
-
-	float CalcUnused();
-	float m_fUnused;
-
-protected:
-	std::unique_ptr<RFREEBLOCKLIST[]> m_pFreeList;
-	std::unique_ptr<u32[]> m_pData;
-	int m_nSize;
-};
-
 RBspLightmapManager::RBspLightmapManager()
 	: m_pData{ new u32[MAX_LIGHTMAP_SIZE*MAX_LIGHTMAP_SIZE] },
 	m_pFreeList{ new RFREEBLOCKLIST[MAX_LEVEL_COUNT + 1] }
@@ -132,8 +98,28 @@ void RBspLightmapManager::Save(const char *filename)
 	RSaveAsBmp(GetSize(), GetSize(), m_pData.get(), filename);
 }
 
-void GetNormal(RCONVEXPOLYGONINFO *poly, const rvector &position,
-	rvector *normal, int au, int av)
+static v3 InterpolatedVector(const v3 &a, const v3 &b, float x)
+{
+	auto ab = min(max(DotProduct(a, b), -1.0f), 1.0f);
+	if (ab == 1.0f) return b;
+
+	auto theta = acos(ab);
+
+	auto theta1 = theta * x;
+	auto theta2 = theta*(1.0f - x);
+	auto costheta1 = cos(theta1);
+	auto costheta2 = cos(theta2);
+	auto u = costheta1 - ab * costheta2;
+	auto v = costheta2 - ab * costheta1;
+	auto D = (1.0f - Square(ab));
+	if (D == 0) return a;
+
+	auto vReturn = (1.0f / D*(u*a + v*b));
+	return vReturn;
+}
+
+v3 GetNormal(const RCONVEXPOLYGONINFO *poly, const rvector &position,
+	int au, int av)
 {
 	int nSelPolygon = -1, nSelEdge = -1;
 	float fMinDist = FLT_MAX;
@@ -146,12 +132,11 @@ void GetNormal(RCONVEXPOLYGONINFO *poly, const rvector &position,
 
 		for (int i = 0; i < poly->nVertices - 2; i++)
 		{
-			float t;
 			rvector *a = &poly->pVertices[0];
 			rvector *b = &poly->pVertices[i + 1];
 			rvector *c = &poly->pVertices[i + 2];
 
-			if (IntersectTriangle(*a, *b, *c, position + pnormal, -pnormal, &t))
+			if (IntersectTriangle(*a, *b, *c, position + pnormal, -pnormal, nullptr))
 			{
 				nSelPolygon = i;
 				nSelEdge = -1;
@@ -169,45 +154,40 @@ void GetNormal(RCONVEXPOLYGONINFO *poly, const rvector &position,
 		}
 	}
 
-	rvector *v0 = &poly->pVertices[0];
-	rvector *v1 = &poly->pVertices[nSelPolygon + 1];
-	rvector *v2 = &poly->pVertices[nSelPolygon + 2];
+	auto& v0 = poly->pVertices[0];
+	auto& v1 = poly->pVertices[nSelPolygon + 1];
+	auto& v2 = poly->pVertices[nSelPolygon + 2];
 
-	rvector *n0 = &poly->pNormals[0];
-	rvector *n1 = &poly->pNormals[nSelPolygon + 1];
-	rvector *n2 = &poly->pNormals[nSelPolygon + 2];
+	auto& n0 = poly->pNormals[0];
+	auto& n1 = poly->pNormals[nSelPolygon + 1];
+	auto& n2 = poly->pNormals[nSelPolygon + 2];
 
-	rvector pos;
+	v3 pos;
 	if (nSelEdge != -1)
 	{
-		rvector *e0 = nSelEdge == 0 ? v0 : nSelEdge == 1 ? v1 : v2;
-		rvector *e1 = nSelEdge == 0 ? v1 : nSelEdge == 1 ? v2 : v0;
+		auto& e0 = nSelEdge == 0 ? v0 : nSelEdge == 1 ? v1 : v2;
+		auto& e1 = nSelEdge == 0 ? v1 : nSelEdge == 1 ? v2 : v0;
 
-		rvector dir = *e1 - *e0;
-		Normalize(dir);
+		auto dir = Normalized(e1 - e0);
 
-		pos = *e0 + DotProduct(dir, position - *e0)*dir;
+		pos = e0 + DotProduct(dir, position - e0) * dir;
 	}
 	else
 		pos = position;
 
-	rvector a, b, x, tem;
-
-	a = *v1 - *v0;
-	b = *v2 - *v1;
-	x = pos - *v0;
+	auto a = v1 - v0;
+	auto b = v2 - v1;
+	auto x = pos - v0;
 
 	float f = b[au] * x[av] - b[av] * x[au];
 	if (IS_ZERO(f))
-	{
-		*normal = *n0;
-		return;
-	}
+		return n0;
+
 	float t = (a[av] * x[au] - a[au] * x[av]) / f;
 
-	tem = Slerp(*n1, *n2, t);
+	auto tem = InterpolatedVector(n1, n2, t);
 
-	rvector inter = a + t*b;
+	auto inter = a + t*b;
 
 	int axisfors;
 	if (fabs(inter.x) > fabs(inter.y) && fabs(inter.x) > fabs(inter.z))
@@ -218,20 +198,19 @@ void GetNormal(RCONVEXPOLYGONINFO *poly, const rvector &position,
 		axisfors = 2;
 
 	float s = x[axisfors] / inter[axisfors];
-	*normal = Slerp(*n0, tem, s);
+	return InterpolatedVector(n0, tem, s);
 }
 
 static void CalcLightmapUV(
 	RSBspNode * pNode,
 	const int * pSourceLightmap,
-	const std::vector<RLIGHTMAPTEXTURE*>& SourceLightmaps,
+	std::vector<RLIGHTMAPTEXTURE>& SourceLightmaps,
 	std::vector<RBspLightmapManager>& LightmapList,
 	const std::vector<RCONVEXPOLYGONINFO>& ConvexPolygons)
 {
 	if (pNode->nPolygon)
 	{
-		int i, j, k;
-		for (i = 0; i < pNode->nPolygon; i++)
+		for (int i = 0; i < pNode->nPolygon; i++)
 		{
 			int is = pNode->pInfo[i].nConvexPolygon;
 			int nSI = pSourceLightmap[is];
@@ -241,22 +220,22 @@ static void CalcLightmapUV(
 			rboundingbox bbox;
 
 			bbox.vmin = bbox.vmax = poly->pVertices[0];
-			for (j = 1; j < poly->nVertices; j++)
+			for (int j = 1; j < poly->nVertices; j++)
 			{
-				for (k = 0; k < 3; k++)
+				for (int k = 0; k < 3; k++)
 				{
 					bbox.vmin[k] = min(bbox.vmin[k], poly->pVertices[j][k]);
 					bbox.vmax[k] = max(bbox.vmax[k], poly->pVertices[j][k]);
 				}
 			}
 
-			RLIGHTMAPTEXTURE* pDestLightmap = SourceLightmaps[nSI];
+			auto& DestLightmap = SourceLightmaps[nSI];
 
-			int lightmapsize = pDestLightmap->nSize;
+			int lightmapsize = DestLightmap.nSize;
 
 			rvector diff = float(lightmapsize) / float(lightmapsize - 1)*(bbox.vmax - bbox.vmin);
 
-			for (k = 0; k<3; k++)
+			for (int k = 0; k<3; k++)
 			{
 				bbox.vmin[k] -= .5f / float(lightmapsize)*diff[k];
 				bbox.vmax[k] += .5f / float(lightmapsize)*diff[k];
@@ -275,7 +254,7 @@ static void CalcLightmapUV(
 			av = (ax + 2) % 3;
 
 			RPOLYGONINFO *pInfo = &pNode->pInfo[i];
-			for (j = 0; j < pInfo->nVertices; j++)
+			for (int j = 0; j < pInfo->nVertices; j++)
 			{
 				pInfo->pVertices[j].tu2 = ((*pInfo->pVertices[j].Coord())[au] - bbox.vmin[au]) / diff[au];
 				pInfo->pVertices[j].tv2 = ((*pInfo->pVertices[j].Coord())[av] - bbox.vmin[av]) / diff[av];
@@ -283,356 +262,370 @@ static void CalcLightmapUV(
 
 			auto* CurrentLightmap = LightmapList.size() ? &LightmapList[LightmapList.size() - 1] : NULL;
 
-			if (!pDestLightmap->bLoaded)
+			if (!DestLightmap.bLoaded)
 			{
 				POINT pt;
 
-				while (!CurrentLightmap || !CurrentLightmap->Add(pDestLightmap->data.get(), pDestLightmap->nSize, &pt))
+				while (!CurrentLightmap || !CurrentLightmap->Add(DestLightmap.data.get(), DestLightmap.nSize, &pt))
 				{
 					LightmapList.emplace_back();
 					CurrentLightmap = &LightmapList.back();
 				}
-				pDestLightmap->bLoaded = true;
-				pDestLightmap->position = pt;
-				pDestLightmap->nLightmapIndex = LightmapList.size() - 1;
+				DestLightmap.bLoaded = true;
+				DestLightmap.position = pt;
+				DestLightmap.nLightmapIndex = LightmapList.size() - 1;
 			}
 
-			pNode->pInfo[i].nLightmapTexture = pDestLightmap->nLightmapIndex;
+			pNode->pInfo[i].nLightmapTexture = DestLightmap.nLightmapIndex;
 
-			float fScaleFactor = (float)pDestLightmap->nSize / (float)CurrentLightmap->GetSize();
-			for (j = 0; j < pInfo->nVertices; j++)
+			float fScaleFactor = (float)DestLightmap.nSize / (float)CurrentLightmap->GetSize();
+			for (int j = 0; j < pInfo->nVertices; j++)
 			{
 				pInfo->pVertices[j].tu2 =
 					pInfo->pVertices[j].tu2 * fScaleFactor +
-					(float)pDestLightmap->position.x / (float)CurrentLightmap->GetSize();
+					(float)DestLightmap.position.x / (float)CurrentLightmap->GetSize();
 				pInfo->pVertices[j].tv2 =
 					pInfo->pVertices[j].tv2 * fScaleFactor +
-					(float)pDestLightmap->position.y / (float)CurrentLightmap->GetSize();
+					(float)DestLightmap.position.y / (float)CurrentLightmap->GetSize();
 			}
 		}
 	}
 
-	if (pNode->m_pPositive) CalcLightmapUV(pNode->m_pPositive, pSourceLightmap, SourceLightmaps, LightmapList, ConvexPolygons);
-	if (pNode->m_pNegative) CalcLightmapUV(pNode->m_pNegative, pSourceLightmap, SourceLightmaps, LightmapList, ConvexPolygons);
+	auto CalcNodeUV = [&](auto* node) {
+		if (node)
+			CalcLightmapUV(node,
+				pSourceLightmap, SourceLightmaps,
+				LightmapList, ConvexPolygons);
+	};
+	CalcNodeUV(pNode->m_pPositive);
+	CalcNodeUV(pNode->m_pNegative);
 }
 
-bool LightmapGenerator::Generate()
+v3 LightmapGenerator::CalcDiffuse(const rboundingbox& bbox,
+	const RCONVEXPOLYGONINFO* poly,
+	const v3& polynormal, const v3& diff,
+	const RLIGHT* plight,
+	int lightmapsize,
+	int j, int k,
+	int au, int av, int ax)
 {
-	float fMaximumArea = 0;
+	int nShadowCount = 0;
 
-	for (size_t i = 0; i < bsp.ConvexPolygons.size(); i++)
+	for (int m = 0; m < 4; m++)
 	{
-		fMaximumArea = max(fMaximumArea, bsp.ConvexPolygons[i].fArea);
+		if (isshadow[(k + m % 2)*(lightmapsize + 1) + j + m / 2])
+			nShadowCount++;
 	}
 
-	int nConstCount = 0;
-	int nLight;
-	std::unique_ptr<RLIGHT*[]> pplight{ new RLIGHT*[bsp.StaticMapLightList.size()] };
-	std::unique_ptr<rvector[]> lightmap{ new rvector[Square(MaxLightmapSize)] };
-	std::unique_ptr<u32[]> lightmapdata{ new u32[Square(MaxLightmapSize)] };
-	std::unique_ptr<bool[]> isshadow{ new bool[Square(MaxLightmapSize + 1)] };
-	std::unique_ptr<int[]> SourceLightmap{ new int[bsp.ConvexPolygons.size()] };
-	std::map<u32, int> ConstmapTable;
+	if (nShadowCount >= 4)
+		return{ 0, 0, 0 };
 
-	std::vector<RLIGHTMAPTEXTURE*> sourcelightmaplist;
-	std::vector<RBspLightmapManager> LightmapList;
+	v3 color{ 0, 0, 0 };
 
-	RHEADER header(R_LM_ID, R_LM_VERSION);
-
-	for (size_t i = 0; i < bsp.ConvexPolygons.size(); i++)
+	if (nShadowCount > 0)
 	{
-		RCONVEXPOLYGONINFO *poly = &bsp.ConvexPolygons[i];
+		v3 tempcolor{ 0, 0, 0 };
 
-		if (pProgressFn)
+		for (int m = 0; m < Supersample; m++)
 		{
-			bool bContinue = pProgressFn((float)i / (float)bsp.ConvexPolygons.size());
-			if (!bContinue)
+			for (int n = 0; n < Supersample; n++)
 			{
-				return false;
+				rvector position;
+				position[au] = bbox.vmin[au] + (((float)k + ((float)n + .5f) / (float)Supersample) / (float)lightmapsize)*diff[au];
+				position[av] = bbox.vmin[av] + (((float)j + ((float)m + .5f) / (float)Supersample) / (float)lightmapsize)*diff[av];
+				position[ax] = (-poly->plane.d - polynormal[au] * position[au] - polynormal[av] * position[av]) / polynormal[ax];
+
+				bool bShadow = false;
+
+				float fDistanceToPolygon = Magnitude(position - plight->Position);
+
+				RBSPPICKINFO bpi;
+				if (bsp.PickShadow(plight->Position, position, &bpi))
+				{
+					float fDistanceToPickPos = Magnitude(bpi.PickPos - plight->Position);
+					if (fDistanceToPolygon > fDistanceToPickPos + Tolerance)
+						bShadow = true;
+				}
+
+				if (!bShadow)
+				{
+					rvector dpos = plight->Position - position;
+					float fdistance = Magnitude(dpos);
+					float fIntensity = (fdistance - plight->fAttnStart) / (plight->fAttnEnd - plight->fAttnStart);
+					fIntensity = min(max(1.0f - fIntensity, 0.f), 1.f);
+					Normalize(dpos);
+
+					auto normal = GetNormal(poly, position, au, av);
+
+					float fDot;
+					fDot = DotProduct(dpos, normal);
+					fDot = max(0.f, fDot);
+
+					tempcolor += fIntensity*plight->fIntensity*fDot*plight->Color;
+				}
 			}
 		}
+		tempcolor *= 1.f / Square(Supersample);
+		color += tempcolor;
+	}
+	else
+	{
+		rvector position;
+		position[au] = bbox.vmin[au] + (((float)k + .5f) / (float)lightmapsize)*diff[au];
+		position[av] = bbox.vmin[av] + (((float)j + .5f) / (float)lightmapsize)*diff[av];
+		position[ax] = (-poly->plane.d - polynormal[au] * position[au] - polynormal[av] * position[av]) / polynormal[ax];
+
+		rvector dpos = plight->Position - position;
+		float fdistance = Magnitude(dpos);
+		float fIntensity = (fdistance - plight->fAttnStart) / (plight->fAttnEnd - plight->fAttnStart);
+		fIntensity = min(max(1.0f - fIntensity, 0.f), 1.f);
+		Normalize(dpos);
+
+		auto normal = GetNormal(poly, position, au, av);
+
+		//DMLog("Normal: %f, %f, %f\n", EXPAND_VECTOR(normal));
+
+		float fDot;
+		fDot = DotProduct(dpos, normal);
+		fDot = max(0.f, fDot);
+
+		color += fIntensity*plight->fIntensity*fDot*plight->Color;
+	}
+
+	return color;
+}
+
+bool LightmapGenerator::CheckShadow(const RLIGHT* plight,
+	const RCONVEXPOLYGONINFO* poly,
+	const rboundingbox& bbox,
+	const v3& pnormal, const v3& diff,
+	int lightmapsize,
+	int j, int k,
+	int au, int av, int ax)
+{
+	if ((plight->dwFlags & RM_FLAG_CASTSHADOW) == 0 ||
+		(poly->dwFlags & RM_FLAG_RECEIVESHADOW) == 0) return false;
+
+	rvector position;
+	position[au] = bbox.vmin[au] + ((float)k / (float)lightmapsize)*diff[au];
+	position[av] = bbox.vmin[av] + ((float)j / (float)lightmapsize)*diff[av];
+	position[ax] = (-poly->plane.d - pnormal[au] * position[au] - pnormal[av] * position[av]) / pnormal[ax];
+
+	float fDistanceToPolygon = Magnitude(position - plight->Position);
+
+	RBSPPICKINFO bpi;
+	if (bsp.PickShadow(plight->Position, position, &bpi))
+	{
+		float fDistanceToPickPos = Magnitude(bpi.PickPos - plight->Position);
+
+		if (fDistanceToPolygon > fDistanceToPickPos + Tolerance)
+			return true;
+	}
+
+	for (auto& ObjectInfo : bsp.m_ObjectList)
+	{
+		if (!ObjectInfo.pVisualMesh) return false;
+		float t;
+
+		rmatrix inv = Inverse(ObjectInfo.pVisualMesh->m_WorldMat);
+
+		rvector origin = plight->Position * inv;
+		rvector target = position * inv;
+
+		rvector dir = target - origin;
+		rvector dirorigin = position - plight->Position;
+
+		rvector vOut;
 
 		rboundingbox bbox;
-
-		bbox.vmin = bbox.vmax = poly->pVertices[0];
-		for (int j = 1; j < poly->nVertices; j++)
+		bbox.vmin = ObjectInfo.pVisualMesh->m_vBMin;
+		bbox.vmax = ObjectInfo.pVisualMesh->m_vBMax;
+		auto bBBTest = IntersectLineAABB(t, origin, dir, bbox);
+		if (bBBTest &&
+			ObjectInfo.pVisualMesh->Pick(plight->Position, dirorigin, &vOut, &t))
 		{
-			for (int k = 0; k < 3; k++)
-			{
-				bbox.vmin[k] = min(bbox.vmin[k], poly->pVertices[j][k]);
-				bbox.vmax[k] = max(bbox.vmax[k], poly->pVertices[j][k]);
-			}
-		}
-
-		int lightmapsize;
-
-		{
-			lightmapsize = MaxLightmapSize;
-
-			float targetarea = fMaximumArea / 4.f;
-			while (poly->fArea < targetarea && lightmapsize > MinLightmapSize)
-			{
-				targetarea /= 4.f;
-				lightmapsize /= 2;
-			}
-
-			rvector diff = float(lightmapsize) / float(lightmapsize - 1)*(bbox.vmax - bbox.vmin);
-
-			// 1 texel
-			for (int k = 0; k < 3; k++)
-			{
-				bbox.vmin[k] -= .5f / float(lightmapsize)*diff[k];
-				bbox.vmax[k] += .5f / float(lightmapsize)*diff[k];
-			}
-
-			rvector pnormal = rvector(poly->plane.a, poly->plane.b, poly->plane.c);
-
-			RBSPMATERIAL *pMaterial = &bsp.Materials[bsp.ConvexPolygons[i].nMaterial];
-
-			rvector ambient = pMaterial->Ambient;
-
-			nLight = 0;
-
-			for (auto& Light : bsp.StaticMapLightList)
-			{
-				if (GetDistance(Light.Position, poly->plane) > Light.fAttnEnd) continue;
-
-				for (int iv = 0; iv < poly->nVertices; iv++)
-				{
-					if (DotProduct(Light.Position - poly->pVertices[iv], poly->pNormals[iv])>0) {
-						pplight[nLight++] = &Light;
-						break;
-					}
-
-				}
-			}
-
-			int au, av, ax;
-
-			if (fabs(poly->plane.a) > fabs(poly->plane.b) && fabs(poly->plane.a) > fabs(poly->plane.c))
-				ax = 0; // yz
-			else if (fabs(poly->plane.b) > fabs(poly->plane.c))
-				ax = 1;	// xz
-			else
-				ax = 2;	// xy
-
-			au = (ax + 1) % 3;
-			av = (ax + 2) % 3;
-
-			for (int j = 0; j < lightmapsize; j++)			// v 
-			{
-				for (int k = 0; k < lightmapsize; k++)		// u
-				{
-					lightmap[j*lightmapsize + k] = AmbientLight;
-				}
-			}
-
-			for (int l = 0; l < nLight; l++)
-			{
-				RLIGHT *plight = pplight[l];
-
-				for (int j = 0; j < lightmapsize + 1; j++)			// v 
-				{
-					for (int k = 0; k < lightmapsize + 1; k++)		// u
-					{
-						isshadow[k*(lightmapsize + 1) + j] = false;
-						if ((plight->dwFlags & RM_FLAG_CASTSHADOW) == 0 ||
-							(poly->dwFlags & RM_FLAG_RECEIVESHADOW) == 0) continue;
-						_ASSERT(plight->dwFlags == 16);
-
-						rvector position;
-						position[au] = bbox.vmin[au] + ((float)k / (float)lightmapsize)*diff[au];
-						position[av] = bbox.vmin[av] + ((float)j / (float)lightmapsize)*diff[av];
-						position[ax] = (-poly->plane.d - pnormal[au] * position[au] - pnormal[av] * position[av]) / pnormal[ax];
-
-						float fDistanceToPolygon = Magnitude(position - plight->Position);
-
-						RBSPPICKINFO bpi;
-						if (bsp.PickShadow(plight->Position, position, &bpi))
-						{
-							float fDistanceToPickPos = Magnitude(bpi.PickPos - plight->Position);
-
-							if (fDistanceToPolygon > fDistanceToPickPos + Tolerance)
-								isshadow[k*(lightmapsize + 1) + j] = true;
-						}
-
-						for (auto& ObjectInfo : bsp.m_ObjectList)
-						{
-							if (!ObjectInfo.pVisualMesh) continue;
-							float t;
-
-							rmatrix inv = Inverse(ObjectInfo.pVisualMesh->m_WorldMat);
-
-							rvector origin = plight->Position * inv;
-							rvector target = position * inv;
-
-							rvector dir = target - origin;
-							rvector dirorigin = position - plight->Position;
-
-							rvector vOut;
-
-							rboundingbox bbox;
-							bbox.vmin = ObjectInfo.pVisualMesh->m_vBMin;
-							bbox.vmax = ObjectInfo.pVisualMesh->m_vBMax;
-							auto bBBTest = IntersectLineAABB(t, origin, dir, bbox);
-							if (bBBTest &&
-								ObjectInfo.pVisualMesh->Pick(plight->Position, dirorigin, &vOut, &t))
-							{
-								rvector PickPos = plight->Position + vOut*t;
-								isshadow[k*(lightmapsize + 1) + j] = true;
-							}
-						}
-					}
-				}
-
-
-				for (int j = 0; j < lightmapsize; j++)
-				{
-					for (int k = 0; k < lightmapsize; k++)
-					{
-						rvector color = rvector(0, 0, 0);
-
-						int nShadowCount = 0;
-
-						for (int m = 0; m < 4; m++)
-						{
-							if (isshadow[(k + m % 2)*(lightmapsize + 1) + j + m / 2])
-								nShadowCount++;
-						}
-
-
-						if (nShadowCount < 4)
-						{
-							if (nShadowCount > 0)
-							{
-								int m, n;
-								rvector tempcolor = rvector(0, 0, 0);
-
-								for (m = 0; m < Supersample; m++)
-								{
-									for (n = 0; n < Supersample; n++)
-									{
-										rvector position;
-										position[au] = bbox.vmin[au] + (((float)k + ((float)n + .5f) / (float)Supersample) / (float)lightmapsize)*diff[au];
-										position[av] = bbox.vmin[av] + (((float)j + ((float)m + .5f) / (float)Supersample) / (float)lightmapsize)*diff[av];
-										position[ax] = (-poly->plane.d - pnormal[au] * position[au] - pnormal[av] * position[av]) / pnormal[ax];
-
-										bool bShadow = false;
-
-										float fDistanceToPolygon = Magnitude(position - plight->Position);
-
-										RBSPPICKINFO bpi;
-										if (bsp.PickShadow(plight->Position, position, &bpi))
-										{
-											float fDistanceToPickPos = Magnitude(bpi.PickPos - plight->Position);
-											if (fDistanceToPolygon > fDistanceToPickPos + Tolerance)
-												bShadow = true;
-										}
-
-										if (!bShadow)
-										{
-											rvector dpos = plight->Position - position;
-											float fdistance = Magnitude(dpos);
-											float fIntensity = (fdistance - plight->fAttnStart) / (plight->fAttnEnd - plight->fAttnStart);
-											fIntensity = min(max(1.0f - fIntensity, 0.f), 1.f);
-											Normalize(dpos);
-
-											rvector normal;
-											GetNormal(poly, position, &normal, au, av);
-
-											float fDot;
-											fDot = DotProduct(dpos, normal);
-											fDot = max(0.f, fDot);
-
-											tempcolor += fIntensity*plight->fIntensity*fDot*plight->Color;
-										}
-									}
-								}
-								tempcolor *= 1.f / Square(Supersample);
-								color += tempcolor;
-							}
-							else
-							{
-								rvector position;
-								position[au] = bbox.vmin[au] + (((float)k + .5f) / (float)lightmapsize)*diff[au];
-								position[av] = bbox.vmin[av] + (((float)j + .5f) / (float)lightmapsize)*diff[av];
-								position[ax] = (-poly->plane.d - pnormal[au] * position[au] - pnormal[av] * position[av]) / pnormal[ax];
-
-								rvector dpos = plight->Position - position;
-								float fdistance = Magnitude(dpos);
-								float fIntensity = (fdistance - plight->fAttnStart) / (plight->fAttnEnd - plight->fAttnStart);
-								fIntensity = min(max(1.0f - fIntensity, 0.f), 1.f);
-								Normalize(dpos);
-
-								rvector normal;
-								GetNormal(poly, position, &normal, au, av);
-
-								float fDot;
-								fDot = DotProduct(dpos, normal);
-								fDot = max(0.f, fDot);
-
-								color += fIntensity*plight->fIntensity*fDot*plight->Color;
-							}
-						}
-
-						lightmap[j*lightmapsize + k] += color;
-					}
-				}
-			}
-
-			for (int j = 0; j < lightmapsize*lightmapsize; j++)
-			{
-				rvector color = lightmap[j];
-
-				color *= 0.25f;
-				color.x = min(color.x, 1.f);
-				color.y = min(color.y, 1.f);
-				color.z = min(color.z, 1.f);
-				lightmap[j] = color;
-				lightmapdata[j] = ((u32)(color.x * 255)) << 16 | ((u32)(color.y * 255)) << 8 | ((u32)(color.z * 255));
-			}
-		}
-
-		bool bConstmap = true;
-		for (int j = 0; j < lightmapsize*lightmapsize; j++)
-		{
-			if (lightmapdata[j] != lightmapdata[0])
-			{
-				bConstmap = false;
-				nConstCount++;
-				break;
-			}
-		}
-
-		bool bNeedInsert = true;
-		if (bConstmap)
-		{
-			lightmapsize = 2;
-
-			map<u32, int>::iterator it = ConstmapTable.find(lightmapdata[0]);
-			if (it != ConstmapTable.end())
-			{
-				SourceLightmap[i] = (*it).second;
-				bNeedInsert = false;
-			}
-		}
-
-		if (bNeedInsert)
-		{
-			int nLightmap = sourcelightmaplist.size();
-
-			SourceLightmap[i] = nLightmap;
-			if (bConstmap)
-				ConstmapTable.insert(map<u32, int>::value_type(lightmapdata[0], nLightmap));
-
-			RLIGHTMAPTEXTURE *pnew = new RLIGHTMAPTEXTURE;
-			pnew->bLoaded = false;
-			pnew->nSize = lightmapsize;
-			pnew->data = decltype(pnew->data){new u32[Square(lightmapsize)]};
-			memcpy(pnew->data.get(), lightmapdata.get(), Square(lightmapsize) * sizeof(u32));
-			sourcelightmaplist.push_back(pnew);
+			rvector PickPos = plight->Position + vOut*t;
+			return true;
 		}
 	}
+
+	return false;
+}
+
+bool LightmapGenerator::ProcessConvexPolygon(const RCONVEXPOLYGONINFO* poly,
+	int PolyIndex, int& lightmapsize)
+{
+	rboundingbox bbox;
+
+	bbox.vmin = bbox.vmax = poly->pVertices[0];
+	for (int j = 1; j < poly->nVertices; j++)
+	{
+		for (int k = 0; k < 3; k++)
+		{
+			bbox.vmin[k] = min(bbox.vmin[k], poly->pVertices[j][k]);
+			bbox.vmax[k] = max(bbox.vmax[k], poly->pVertices[j][k]);
+		}
+	}
+
+	lightmapsize = MaxLightmapSize;
+
+	float targetarea = MaximumArea / 4.f;
+	while (poly->fArea < targetarea && lightmapsize > MinLightmapSize)
+	{
+		targetarea /= 4.f;
+		lightmapsize /= 2;
+	}
+
+	rvector diff = float(lightmapsize) / float(lightmapsize - 1) * (bbox.vmax - bbox.vmin);
+
+	// 1 texel
+	for (int k = 0; k < 3; k++)
+	{
+		bbox.vmin[k] -= .5f / float(lightmapsize)*diff[k];
+		bbox.vmax[k] += .5f / float(lightmapsize)*diff[k];
+	}
+
+	rvector pnormal = rvector(poly->plane.a, poly->plane.b, poly->plane.c);
+
+	RBSPMATERIAL *pMaterial = &bsp.Materials[poly->nMaterial];
+
+	rvector ambient = pMaterial->Ambient;
+
+	LightIndex = 0;
+
+	for (auto& Light : bsp.StaticMapLightList)
+	{
+		if (GetDistance(Light.Position, poly->plane) > Light.fAttnEnd) continue;
+
+		for (int iv = 0; iv < poly->nVertices; iv++)
+		{
+			if (DotProduct(Light.Position - poly->pVertices[iv], poly->pNormals[iv])>0) {
+				pplight[LightIndex] = &Light;
+				++LightIndex;
+				break;
+			}
+
+		}
+	}
+
+	int au, av, ax;
+
+	if (fabs(poly->plane.a) > fabs(poly->plane.b) && fabs(poly->plane.a) > fabs(poly->plane.c))
+		ax = 0; // yz
+	else if (fabs(poly->plane.b) > fabs(poly->plane.c))
+		ax = 1;	// xz
+	else
+		ax = 2;	// xy
+
+	au = (ax + 1) % 3;
+	av = (ax + 2) % 3;
+
+	for (int j = 0; j < lightmapsize; j++)			// v 
+	{
+		for (int k = 0; k < lightmapsize; k++)		// u
+		{
+			lightmap[j*lightmapsize + k] = AmbientLight;
+		}
+	}
+
+	for (int l = 0; l < LightIndex; l++)
+	{
+		RLIGHT *plight = pplight[l];
+
+		for (int j = 0; j < lightmapsize + 1; j++)			// v 
+		{
+			for (int k = 0; k < lightmapsize + 1; k++)		// u
+			{
+				isshadow[k*(lightmapsize + 1) + j] = CheckShadow(plight,
+					poly,
+					bbox,
+					pnormal, diff,
+					lightmapsize,
+					j, k,
+					au, av, ax);
+			}
+		}
+
+		for (int j = 0; j < lightmapsize; j++)
+		{
+			for (int k = 0; k < lightmapsize; k++)
+			{
+				lightmap[j*lightmapsize + k] += CalcDiffuse(bbox,
+					poly,
+					pnormal, diff,
+					plight,
+					lightmapsize,
+					j, k,
+					au, av, ax);
+			}
+		}
+	}
+
+	for (int j = 0; j < Square(lightmapsize); j++)
+	{
+		auto color = lightmap[j];
+
+		color *= 0.25f;
+		color.x = min(color.x, 1.f);
+		color.y = min(color.y, 1.f);
+		color.z = min(color.z, 1.f);
+		lightmap[j] = color;
+		lightmapdata[j] =
+			((u32)(color.x * 255)) << 16 |
+			((u32)(color.y * 255)) << 8 |
+			((u32)(color.z * 255));
+	}
+
+	return true;
+}
+
+void LightmapGenerator::InsertLightmap(int lightmapsize,
+	int PolyIndex)
+{
+	bool bConstmap = true;
+	for (int j = 0; j < lightmapsize*lightmapsize; j++)
+	{
+		if (lightmapdata[j] != lightmapdata[0])
+		{
+			bConstmap = false;
+			ConstCount++;
+			break;
+		}
+	}
+
+	bool bNeedInsert = true;
+	if (bConstmap)
+	{
+		lightmapsize = 2;
+
+		auto it = ConstmapTable.find(lightmapdata[0]);
+		if (it != ConstmapTable.end())
+		{
+			SourceLightmap[PolyIndex] = (*it).second;
+			bNeedInsert = false;
+		}
+	}
+
+	if (bNeedInsert)
+	{
+		int nLightmap = sourcelightmaplist.size();
+
+		SourceLightmap[PolyIndex] = nLightmap;
+		if (bConstmap)
+			ConstmapTable.insert({ lightmapdata[0], nLightmap });
+
+		sourcelightmaplist.emplace_back();
+		auto& new_lightmap = sourcelightmaplist.back();
+		new_lightmap.bLoaded = false;
+		new_lightmap.nSize = lightmapsize;
+		new_lightmap.data = decltype(new_lightmap.data){new u32[Square(lightmapsize)]};
+		memcpy(new_lightmap.data.get(), lightmapdata.get(), Square(lightmapsize) * sizeof(u32));
+	}
+}
+
+bool LightmapGenerator::SaveToFile()
+{
+	RHEADER header(R_LM_ID, R_LM_VERSION);
 
 	auto CalcTreeUV = [&](auto* tree) {
 		CalcLightmapUV(tree, SourceLightmap.get(),
@@ -685,6 +678,45 @@ bool LightmapGenerator::Generate()
 		fwrite(&bsp.OcVertices[i].tu2, sizeof(float), 2, file);
 
 	fclose(file);
+
+	return true;
+}
+
+void LightmapGenerator::Init()
+{
+	for (size_t i = 0; i < bsp.ConvexPolygons.size(); i++)
+		MaximumArea = max(MaximumArea, bsp.ConvexPolygons[i].fArea);
+
+	pplight = std::unique_ptr<RLIGHT*[]>{ new RLIGHT*[bsp.StaticMapLightList.size()] };
+	lightmap = std::unique_ptr<rvector[]>{ new rvector[Square(MaxLightmapSize)] };
+	lightmapdata = std::unique_ptr<u32[]>{ new u32[Square(MaxLightmapSize)] };
+	isshadow = std::unique_ptr<bool[]>{ new bool[Square(MaxLightmapSize + 1)] };
+	SourceLightmap = std::unique_ptr<int[]>{ new int[bsp.ConvexPolygons.size()] };
+}
+
+bool LightmapGenerator::Generate()
+{	
+	Init();
+
+	for (size_t i = 0; i < bsp.ConvexPolygons.size(); i++)
+	{
+		if (pProgressFn && !pProgressFn((float)i / (float)bsp.ConvexPolygons.size()))
+			return false;
+
+		int lightmapsize{};
+		if (!ProcessConvexPolygon(&bsp.ConvexPolygons[i], i, lightmapsize))
+		{
+			MLog("LightmapGenerator::Generate -- ProcessConvexPolygon failed for polygon index %d\n", i);
+			return false;
+		}
+		InsertLightmap(lightmapsize, i);
+	}
+
+	if (!SaveToFile())
+	{
+		MLog("LightmapGenerator::Generate -- SaveToFile failed\n");
+		return false;
+	}
 
 	return true;
 }
