@@ -35,6 +35,7 @@ cml/MatchServer Release/*
 MatchServer/Log
 CsCommon/MSSQL
 sdk/bullet/include/**/*.cpp
+mlog.txt
 
 # Visual Studio 2015 cache/options directory
 .vs/
