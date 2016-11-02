@@ -217,9 +217,12 @@ void ZMatch::SoloSpawn()
 	else
 		pSpawnData = ZApplication::GetGame()->GetMapDesc()->GetSpawnManager()->GetSoloRandomData();
 		
-	if (pSpawnData == NULL)
+	if (!pSpawnData)
 	{
-		_ASSERT(0);
+		if (ZApplication::GetInstance()->GetLaunchMode() == ZApplication::ZLAUNCH_MODE_STANDALONE_GAME)
+			ZPostSpawn(v3{ 0, 0, 100 }, v3{ 1, 0, 0 });
+		else
+			assert(false);
 	}
 	else
 	{

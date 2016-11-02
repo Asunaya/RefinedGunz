@@ -1266,9 +1266,12 @@ bool RBspObject::Make_LenzFalreList()
 
 bool RBspObject::Open_DummyList(rapidxml::xml_node<>& parent)
 {
-	m_DummyList.Open(parent);
+	if (!m_DummyList.Open(parent))
+		return false;
 
-	Make_LenzFalreList();
+	if (!Make_LenzFalreList())
+		return false;
+
 	return true;
 }
 
@@ -1454,7 +1457,8 @@ bool RBspObject::LoadRS2Map(rapidxml::xml_node<>& aParent)
 			else if (_stricmp(szTagName, RTOK_OCCLUSIONLIST) == 0)
 				Open_OcclusionList(*node);
 			else if (_stricmp(szTagName, RTOK_DUMMYLIST) == 0)
-				Open_DummyList(*node);
+				if (!Open_DummyList(*node))
+					MLog("RBspObject::LoadRS2Map -- Failed to open dummy list\n");
 			else if (_stricmp(szTagName, RTOK_FOG) == 0)
 				Set_Fog(*node);
 			else if (_stricmp(szTagName, "AMBIENTSOUNDLIST") == 0)
@@ -1738,8 +1742,9 @@ bool RBspObject::OpenLightmap()
 	MZFile file;
 	if (!file.Open(lightmapinfofilename, g_pFileSystem)) return false;
 
+#define V(expr) if (!(expr)) return false
 	RHEADER header;
-	file.Read(&header, sizeof(RHEADER));
+	V(file.Read(&header, sizeof(RHEADER)));
 	if (header.dwID != R_LM_ID || header.dwVersion != R_LM_VERSION)
 	{
 		file.Close();
@@ -1749,8 +1754,8 @@ bool RBspObject::OpenLightmap()
 	// Verify polygon and node counts
 	{
 		int nSourcePolygon{}, nNodeCount{};
-		file.Read(&nSourcePolygon, sizeof(int));
-		file.Read(&nNodeCount, sizeof(int));
+		V(file.Read(&nSourcePolygon, sizeof(int)));
+		V(file.Read(&nNodeCount, sizeof(int)));
 
 		if (nSourcePolygon != NumConvexPolygons || OcRoot.size() != nNodeCount)
 		{
@@ -1762,7 +1767,7 @@ bool RBspObject::OpenLightmap()
 	// Load lightmap count and allocate memory for them
 	{
 		int nLightmap{};
-		file.Read(&nLightmap, sizeof(int));
+		V(file.Read(&nLightmap, sizeof(int)));
 		LightmapTextures.resize(nLightmap);
 	}
 
@@ -1770,10 +1775,10 @@ bool RBspObject::OpenLightmap()
 	for (auto& LightmapTex : LightmapTextures)
 	{
 		int nBmpSize;
-		file.Read(&nBmpSize, sizeof(int));
+		V(file.Read(&nBmpSize, sizeof(int)));
 
 		bmpmemory.resize(nBmpSize);
-		file.Read(&bmpmemory[0], nBmpSize);
+		V(file.Read(&bmpmemory[0], nBmpSize));
 
 		HRESULT hr = D3DXCreateTextureFromFileInMemoryEx(
 			RGetDevice(), &bmpmemory[0], nBmpSize,
@@ -1793,16 +1798,16 @@ bool RBspObject::OpenLightmap()
 	for (int i = 0; i < GetPolygonCount(); i++)
 	{
 		int a;
-		file.Read(&a, sizeof(int));
+		V(file.Read(&a, sizeof(int)));
 	}
 
 	// Read lightmap texture indices
 	for (auto& PolygonInfo : OcInfo)
-		file.Read(&PolygonInfo.nLightmapTexture, sizeof(int));
+		V(file.Read(&PolygonInfo.nLightmapTexture, sizeof(int)));
 
 	// Read lightmap texture coordiantes
 	for (auto& Vertex : OcVertices)
-		file.Read(&Vertex.tu2, sizeof(float) * 2);
+		V(file.Read(&Vertex.tu2, sizeof(float) * 2));
 
 	file.Close();
 

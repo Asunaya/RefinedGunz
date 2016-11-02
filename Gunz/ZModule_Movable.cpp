@@ -95,13 +95,10 @@ bool ZModule_Movable::Move(const rvector &orig_diff)
 	rplane impactplane;
 	if (pThisObj->GetPosition().z > DIE_CRITICAL_LINE)
 	{
-		if (diff == v3{ 0, 0, 0 })
-			m_bAdjusted = false;
-		else
-			m_bAdjusted = ZGetGame()->GetWorld()->GetBsp()->CheckWall(
-				origin, targetpos,
-				fThisObjRadius, 60, RCW_CYLINDER,
-				0, &impactplane);
+		m_bAdjusted = ZGetGame()->GetWorld()->GetBsp()->CheckWall(
+			origin, targetpos,
+			fThisObjRadius, 60, RCW_CYLINDER,
+			0, &impactplane);
 	}
 	else
 	{

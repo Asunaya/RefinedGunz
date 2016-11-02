@@ -726,7 +726,7 @@ void ZGame::CheckMyCharDead(float fElapsed)
 	{
 		if (ZGetGameClient()->GetMatchStageSetting()->GetGameType() == MMATCH_GAMETYPE_SKILLMAP)
 		{
-			((ZRuleSkillmap *)GetMatch()->GetRule())->OnFall();
+			static_cast<ZRuleSkillmap *>(GetMatch()->GetRule())->OnFall();
 		}
 		else
 		{

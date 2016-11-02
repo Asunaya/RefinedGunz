@@ -15,7 +15,7 @@ bool RDummyList::Open(rapidxml::xml_node<>& parent)
 		if (szTagName[0] == '#')
 			continue;
 
-		if (_stricmp(szTagName, RTOK_MATERIAL) != 0)
+		if (_stricmp(szTagName, RTOK_DUMMY) != 0)
 			continue;
 
 		auto name_attr = node->first_attribute(RTOK_NAME);

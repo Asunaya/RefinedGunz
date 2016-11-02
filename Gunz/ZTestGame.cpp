@@ -46,12 +46,14 @@ void CreateTestGame(char *mapname, int nDummyCharacterCount, bool bShot, bool bA
 	info.nEquipedItemDesc[MMCIP_CUSTOM1] = 30003;
 	info.nEquipedItemDesc[MMCIP_CUSTOM2] = 30103;
 
+	ZGetGameClient()->GetMatchStageSetting()->SetNetcode(NetcodeType::P2PLead);
+
 	g_pGame->CreateMyCharacter(info);
 	g_pGame->m_pMyCharacter->Revival();
 
 	v3 pos{ 0, 0, 1000 }, dir{ 0, 1, 0 };
 
-	ZMapSpawnData* pSpawnData = ZApplication::GetGame()->GetMapDesc()->GetSpawnManager()->GetSoloRandomData();
+	auto* pSpawnData = ZGetGame()->GetMapDesc()->GetSpawnManager()->GetSoloRandomData();
 	if (pSpawnData)
 	{
 		pos = pSpawnData->m_Pos;
