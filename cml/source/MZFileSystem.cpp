@@ -528,7 +528,7 @@ bool MZFile::Open(const char* szFileName, MZFileSystem* pZFS)
 		fopen_s(&m_fp, szFileName, "rb");
 		if (!m_fp)
 		{
-			MLog("MZFile::Open - Failed to open non-zipped file %s\n", szFileName);
+			//MLog("MZFile::Open - Failed to open non-zipped file %s\n", szFileName);
 			return false;
 		}
 

@@ -332,7 +332,7 @@ private:
 	friend struct LightmapGenerator;
 
 	bool LoadRS2Map(rapidxml::xml_node<>&);
-	bool LoadRS3Map(rapidxml::xml_node<>&);
+	bool LoadRS3Map(rapidxml::xml_node<>&, const std::string& directory);
 
 	void Draw(RSBspNode *Node, int Material);
 	void DrawNoTNL(RSBspNode *Node, int Material);

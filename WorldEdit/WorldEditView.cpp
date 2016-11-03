@@ -400,7 +400,7 @@ void CWorldEditView::OnResetCamera()
 	defaultbb.vmax=rvector(DEFAULTSIZE,DEFAULTSIZE,DEFAULTSIZE);
 	rvector size;
 
-	if(!pDoc->m_pBspObject)
+	if(!pDoc->m_pBspObject || !pDoc->m_pBspObject->GetRootNode())
 		pbb=&defaultbb;
 	else
 		pbb=&pDoc->m_pBspObject->GetRootNode()->bbTree;

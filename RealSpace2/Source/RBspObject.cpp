@@ -913,6 +913,17 @@ struct BspCounts
 	int Indices;
 };
 
+static bool CompareEnd(const char* src, size_t srclen, const char* target, size_t targetlen)
+{
+	const char* adjsrc = src + (srclen - targetlen);
+
+	for (size_t i{}; i < targetlen; ++i)
+		if (adjsrc[i] != target[i])
+			return false;
+
+	return true;
+}
+
 bool RBspObject::Open(const char *filename, ROpenMode nOpenFlag, RFPROGRESSCALLBACK pfnProgressCallback,
 	void *CallbackParam, bool PhysOnly)
 {
@@ -921,7 +932,10 @@ bool RBspObject::Open(const char *filename, ROpenMode nOpenFlag, RFPROGRESSCALLB
 	m_filename = filename;
 
 	char xmlname[_MAX_PATH];
-	sprintf_safe(xmlname, "%s.xml", filename);
+	if (!CompareEnd(filename, strlen(filename), ".xml", strlen(".xml")))
+		sprintf_safe(xmlname, "%s.xml", filename);
+	else
+		strcpy_safe(xmlname, filename);
 
 	if (!OpenDescription(xmlname))
 	{
@@ -1436,7 +1450,13 @@ bool RBspObject::OpenDescription(const char *filename)
 	auto* rsx = xml->first_node("RSX");
 	IsRS3Map = rsx != nullptr;
 	if (rsx)
-		return LoadRS3Map(*rsx);
+	{
+		std::string dir = filename;
+		auto pos = dir.find_last_of("\\/");
+		if (pos != std::string::npos)
+			dir.resize(pos + 1);
+		return LoadRS3Map(*rsx, dir);
+	}
 	else
 		return LoadRS2Map(*xml);
 }
@@ -1469,7 +1489,7 @@ bool RBspObject::LoadRS2Map(rapidxml::xml_node<>& aParent)
 	return true;
 }
 
-bool RBspObject::LoadRS3Map(rapidxml::xml_node<>& parent)
+bool RBspObject::LoadRS3Map(rapidxml::xml_node<>& parent, const std::string& directory)
 {
 	auto* map_name_node = parent.first_node("NAME");
 	if (!map_name_node)
@@ -1486,10 +1506,10 @@ bool RBspObject::LoadRS3Map(rapidxml::xml_node<>& parent)
 
 	rsx::LoaderState State;
 
-	State.Paths.emplace_back();
+	State.Paths.emplace_back(directory);
 
 	for (auto* node_path = map_name_node->next_sibling("PATH"); node_path; node_path = node_path->next_sibling("PATH"))
-		State.Paths.push_back(node_path->value());
+		State.Paths.push_back(directory + node_path->value());
 
 	auto scene = std::string{ map_name } +".scene.xml";
 	if (!rsx::loadTree(State, scene.c_str(), StaticObjectLightList))
@@ -1497,6 +1517,8 @@ bool RBspObject::LoadRS3Map(rapidxml::xml_node<>& parent)
 		MLog("RBspObject::LoadRS3Map -- Failed to load scene.xml");
 		return false;
 	}
+
+	StaticMapLightList = StaticObjectLightList;
 
 	auto prop = std::string{ map_name } +".prop.xml";
 	if (!rsx::loadPropTree(State, prop.c_str()))
@@ -1538,6 +1560,17 @@ bool RBspObject::LoadRS3Map(rapidxml::xml_node<>& parent)
 
 	if (GetRS2().UsingD3D9())
 		DrawObj.Get<RBspObjectDrawD3D9>().Create(std::move(State));
+
+	auto* dummy_list_node = parent.next_sibling("DUMMYLIST");
+	if (!dummy_list_node)
+	{
+		MLog("RBspObject::LoadRS3Map -- Couldn't find DUMMYLIST node in xml\n");
+	}
+	else
+	{
+		if (!Open_DummyList(*dummy_list_node))
+			MLog("RBspObject::LoadRS3Map -- Failed to load dummy list\n");
+	}
 
 	return true;
 }
@@ -1808,6 +1841,8 @@ bool RBspObject::OpenLightmap()
 	// Read lightmap texture coordiantes
 	for (auto& Vertex : OcVertices)
 		V(file.Read(&Vertex.tu2, sizeof(float) * 2));
+
+#undef V
 
 	file.Close();
 
