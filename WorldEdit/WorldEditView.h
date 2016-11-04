@@ -11,6 +11,8 @@
 
 #include "RTypes.h"
 #include "RBspObject.h"
+#include "GlobalTypes.h"
+#include "MTime.h"
 
 enum EDITMODE {
 	EDITMODE_OBJECT,
@@ -61,6 +63,9 @@ protected:
 	RSBspNode	*m_pSelectedNode;
 	int			m_nSelectedIndex;
 	int			m_nSelectedEdge;
+
+	bool Activated{};
+	u64 LastTime = GetGlobalTimeMS();
 
 	void GetWorldCoordinate(rvector *ret,CPoint pt);
 

@@ -12,6 +12,7 @@
 #include "RMeshMgr.h"
 #include <algorithm>
 #include "defer.h"
+#include "MTime.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -68,10 +69,43 @@ static rvector g_LastPickPos;
 #include "ProgressDialog.h"
 #include ".\worldeditview.h"
 
+static void DoMovement(float DeltaTime)
+{
+	auto GetKey = [&](auto ch) {
+		return (GetAsyncKeyState(ch) & 0x8000) != 0;
+	};
+
+	auto Forward = Normalized(RCameraDirection);
+	auto Right = Normalized(CrossProduct(Forward, { 0, 0, -1 }));
+
+	v3 dir{ 0, 0, 0 };
+
+	if (GetKey('W'))
+		dir += Forward;
+	if (GetKey('A'))
+		dir += -Right;
+	if (GetKey('S'))
+		dir += -Forward;
+	if (GetKey('D'))
+		dir += Right;
+
+	Normalize(dir);
+
+	RCameraPosition += dir * 2000 * DeltaTime;
+
+	RUpdateCamera();
+}
+
 void CWorldEditView::OnDraw(CDC* pDC)
 {
 	CWorldEditDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
+
+	auto Time = GetGlobalTimeMS();
+	DEFER(LastTime = Time;);
+
+	if (true)
+		DoMovement(min((Time - LastTime) / 1000.0f, 1.0f));
 
 	rmatrix id;
 	D3DXMatrixIdentity(&id);
