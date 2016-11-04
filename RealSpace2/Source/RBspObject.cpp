@@ -2285,7 +2285,8 @@ bool RBspObject::CheckWall(const rvector &origin, rvector &targetpos, float Radi
 			auto ret = func(normal);
 			if (!ret)
 				return false;
-			targetpos += normal * 4;
+			Normalize(normal);
+			targetpos += normal * 2.5;
 			if (impactplane)
 				*impactplane = PlaneFromPointNormal(targetpos, normal);
 			return true;

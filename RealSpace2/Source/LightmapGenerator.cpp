@@ -476,7 +476,7 @@ bool LightmapGenerator::ProcessConvexPolygon(const RCONVEXPOLYGONINFO* poly,
 		lightmapsize /= 2;
 	}
 
-	rvector diff = float(lightmapsize) / float(lightmapsize - 1) * (bbox.vmax - bbox.vmin);
+	v3 diff = float(lightmapsize) / float(lightmapsize - 1) * (bbox.vmax - bbox.vmin);
 
 	// 1 texel
 	for (int k = 0; k < 3; k++)
@@ -485,11 +485,7 @@ bool LightmapGenerator::ProcessConvexPolygon(const RCONVEXPOLYGONINFO* poly,
 		bbox.vmax[k] += .5f / float(lightmapsize)*diff[k];
 	}
 
-	rvector pnormal = rvector(poly->plane.a, poly->plane.b, poly->plane.c);
-
-	RBSPMATERIAL *pMaterial = &bsp.Materials[poly->nMaterial];
-
-	rvector ambient = pMaterial->Ambient;
+	v3 pnormal{ poly->plane.a, poly->plane.b, poly->plane.c };
 
 	LightIndex = 0;
 

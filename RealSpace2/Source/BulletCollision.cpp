@@ -82,12 +82,15 @@ void BulletCollision::Clear()
 
 template <typename T>
 static bool SetResults(const T& Result,
+	const btVector3& Src, const btVector3& Dest,
 	v3* Hit, v3* Normal)
 {
 	if (!Result.hasHit())
 		return false;
 
-	if (Hit) *Hit = v3{ Result.m_hitPointWorld };
+	btVector3 point;
+	point.setInterpolate3(Src, Dest, Result.m_closestHitFraction);
+	if (Hit) *Hit = static_cast<float*>(point);
 	if (Normal) *Normal = v3{ Result.m_hitNormalWorld };
 
 	return true;
@@ -101,7 +104,7 @@ bool BulletCollision::Pick(const v3 & Src, const v3 & Dest,
 
 	World.rayTest(btSrc, btDest, cr);
 
-	return SetResults(cr, Hit, Normal);
+	return SetResults(cr, btSrc, btDest, Hit, Normal);
 }
 
 bool BulletCollision::CheckCylinder(const v3 & Src, const v3 & Dest,
@@ -137,7 +140,7 @@ bool BulletCollision::CheckCylinder(const v3 & Src, const v3 & Dest,
 
 	World.convexSweepTest(&cylinder, tFrom, tTo, cc);
 
-	return SetResults(cc, Hit, Normal);
+	return SetResults(cc, btSrc, btDest, Hit, Normal);
 }
 
 bool BulletCollision::CheckSphere(const v3& Src, const v3& Dest,
@@ -156,5 +159,5 @@ bool BulletCollision::CheckSphere(const v3& Src, const v3& Dest,
 
 	World.convexSweepTest(&sphere, tFrom, tTo, cc);
 
-	return SetResults(cc, Hit, Normal);
+	return SetResults(cc, btSrc, btDest, Hit, Normal);
 }

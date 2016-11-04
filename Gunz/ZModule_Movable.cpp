@@ -92,13 +92,12 @@ bool ZModule_Movable::Move(const rvector &orig_diff)
 	auto origin = pThisObj->GetPosition() + v3{ 0, 0, fCollUpHeight };
 	auto targetpos = origin + diff;
 
-	rplane impactplane;
 	if (pThisObj->GetPosition().z > DIE_CRITICAL_LINE)
 	{
 		m_bAdjusted = ZGetGame()->GetWorld()->GetBsp()->CheckWall(
 			origin, targetpos,
 			fThisObjRadius, 60, RCW_CYLINDER,
-			0, &impactplane);
+			0, nullptr);
 	}
 	else
 	{
@@ -106,7 +105,7 @@ bool ZModule_Movable::Move(const rvector &orig_diff)
 		m_bAdjusted = false;
 	}
 
-	pThisObj->SetPosition(targetpos - rvector(0, 0, fCollUpHeight));
+	pThisObj->SetPosition(targetpos - v3(0, 0, fCollUpHeight));
 
 	if (m_bAdjusted)
 		m_fLastAdjustedTime = g_pGame->GetTime();
