@@ -44,7 +44,7 @@ BOOL CInfoDialog::OnInitDialog()
 
 	CMainFrame *pMainFrame=(CMainFrame*)AfxGetApp()->GetMainWnd();
 
-	RBspObject *pBsp=((CWorldEditDoc*)pMainFrame->GetActiveDocument())->m_pBspObject;
+	auto& pBsp=((CWorldEditDoc*)pMainFrame->GetActiveDocument())->m_pBspObject;
 	if(!pBsp)
 		return FALSE;
 

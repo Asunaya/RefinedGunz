@@ -20,32 +20,24 @@ enum EDITMODE {
 
 class CWorldEditView : public CView
 {
-protected: // create from serialization only
-	CWorldEditView();
+protected:
 	DECLARE_DYNCREATE(CWorldEditView)
 
-// Attributes
 public:
 	CWorldEditDoc* GetDocument();
 	EDITMODE	m_EditMode;
 
-// Operations
 public:
 
-	void Resize(CSize size);	// 윈도 크기 바꿀때.
-	void OnResetCamera();		// Reset Camera 버튼이 눌렸을때..
+	void Resize(CSize size);
+	void OnResetCamera();
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CWorldEditView)
-	public:
-	virtual void OnDraw(CDC* pDC);  // overridden to draw this view
+public:
+	virtual void OnDraw(CDC* pDC);
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
-	virtual BOOL Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext = NULL);
-	protected:
-	//}}AFX_VIRTUAL
+	virtual BOOL Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle,
+		const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext = NULL);
 
-// Implementation
 public:
 	virtual ~CWorldEditView();
 #ifdef _DEBUG
@@ -53,28 +45,27 @@ public:
 	virtual void Dump(CDumpContext& dc) const;
 #endif
 
-	bool	m_bWireframe;
-	bool	m_bDrawBoundingBox;
-	bool	m_bDrawOcclusion;
-	bool	m_bShowLightmap;
+	bool	m_bWireframe{};
+	bool	m_bDrawBoundingBox{};
+	bool	m_bDrawOcclusion{};
+	bool	m_bShowLightmap{};
 
 protected:
-	bool	m_bLastShiftState,m_bLastAltState;
-	rvector m_LastWorldPosition,m_LastCameraPosition;
-	rmatrix m_LastMatrix;
+	bool m_bLastShiftState{}, m_bLastAltState{};
+	v3 m_LastWorldPosition{ 0, 0, 0 };
+	v3 m_LastCameraPosition{ 0, 0, 0 };
+	rmatrix m_LastMatrix = GetIdentityMatrix();
 	CPoint	m_LastCursorPosition;
+	CPoint LastFrameCursorPosition;
 
 	RSBspNode	*m_pSelectedNode;
 	int			m_nSelectedIndex;
 	int			m_nSelectedEdge;
 
-	void GetWorldCoordinate(rvector *ret,CPoint pt);	// 현재 화면 pt좌표와 xy평면의 교점의 월드 좌표를 얻어낸다.
+	void GetWorldCoordinate(rvector *ret,CPoint pt);
 
-// Generated message map functions
 protected:
-	//{{AFX_MSG(CWorldEditView)
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
-	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);

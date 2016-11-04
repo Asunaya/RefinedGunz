@@ -226,7 +226,7 @@ void RBspObject::SetDiffuseMap(int nMaterial)
 template <typename T>
 static void DrawImpl(RSBspNode& Node, int Material, T& DrawFunc)
 {
-#if 0//ndef SHADOW_TEST
+#ifndef SHADOW_TEST
 	// nFrameCount is updated to the current frame number
 	// only for nodes that aren't occluded.
 	if (Node.nFrameCount != g_nFrameNumber)
@@ -2286,6 +2286,8 @@ bool RBspObject::CheckWall(const rvector &origin, rvector &targetpos, float Radi
 			if (!ret)
 				return false;
 			Normalize(normal);
+			// TODO: You get stuck in walls without this,
+			// but you bounce back and forth with it. Fix!
 			targetpos += normal * 2.5;
 			if (impactplane)
 				*impactplane = PlaneFromPointNormal(targetpos, normal);
@@ -2817,8 +2819,12 @@ void RBspObject::GetNormal(int nConvexPolygon, const rvector &position, rvector 
 	*normal = ::GetNormal(poly, position, au, av);
 }
 
-bool RBspObject::GenerateLightmap(const char * filename, int MaxLightmapSize, int MinLightmapSize, int Supersample,
-	float Tolerance, RGENERATELIGHTMAPCALLBACK pProgressFn)
+bool RBspObject::GenerateLightmap(const char * filename,
+	int MaxLightmapSize, int MinLightmapSize,
+	int Supersample,
+	float Tolerance,
+	v3 AmbientLight,
+	RGENERATELIGHTMAPCALLBACK pProgressFn)
 {
 	ClearLightmaps();
 

@@ -227,7 +227,7 @@ public:
 	void DrawLight(D3DLIGHT9 *pLight);
 
 	bool GenerateLightmap(const char *filename, int nMaxLightmapSize, int nMinLightmapSize, int nSuperSample,
-		float fToler, RGENERATELIGHTMAPCALLBACK pProgressFn = nullptr);
+		float fToler, v3 AmbientLight, RGENERATELIGHTMAPCALLBACK pProgressFn = nullptr);
 
 	void SetWireframeMode(bool bWireframe) { m_bWireframe = bWireframe; }
 	bool GetWireframeMode() { return m_bWireframe; }
@@ -398,18 +398,18 @@ private:
 
 	static RBaseTexture *m_pShadeMap;
 
-	// Vertices
+	// BSP stuff. Used for picking.
 	std::vector<BSPVERTEX> BspVertices;
+	std::vector<RSBspNode> BspRoot;
+	std::vector<RPOLYGONINFO> BspInfo;
+
+	// Rendering stuff.
 	std::vector<BSPVERTEX> OcVertices;
 	std::vector<BSPNORMALVERTEX> OcNormalVertices;
-	// Indices
 	std::vector<u16> OcIndices;
-	// BSP nodes
-	std::vector<RSBspNode> BspRoot;
 	std::vector<RSBspNode> OcRoot;
-	// Polygon info
-	std::vector<RPOLYGONINFO> BspInfo;
 	std::vector<RPOLYGONINFO> OcInfo;
+
 	// Vertex and index buffer objects
 	D3DPtr<IDirect3DVertexBuffer9> VertexBuffer;
 	D3DPtr<IDirect3DIndexBuffer9> IndexBuffer;
@@ -433,7 +433,6 @@ private:
 	int NumConvexPolygons{};
 	std::vector<RCONVEXPOLYGONINFO> ConvexPolygons;
 
-	v3			AmbientLight{ 0, 0, 0 };
 	RLightList	StaticMapLightList;
 	RLightList	StaticObjectLightList;
 	RLightList	StaticSunLightList;

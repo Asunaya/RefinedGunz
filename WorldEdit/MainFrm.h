@@ -15,22 +15,13 @@
 
 class CMainFrame : public CFrameWnd
 {
-	
-protected: // create from serialization only
+protected:
 	CMainFrame();
 	DECLARE_DYNCREATE(CMainFrame)
 
-// Attributes
-public:
-
 // Operations
 public:
-
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CMainFrame)
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
-	//}}AFX_VIRTUAL
 
 // Implementation
 public:
@@ -57,32 +48,25 @@ protected:  // control bar embedded members
 
 	bool ConfirmOverwrite(const char *filename);
 
-// Generated message map functions
 protected:
-	//{{AFX_MSG(CMainFrame)
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnMenuitemModeobject();
 	afx_msg void OnMenuitemModepath();
 	afx_msg void OnMenuitemGenerateLightmap();
-	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 public:
 
 	void Initialize();
 
-//	afx_msg void OnPaint();
 	afx_msg void OnMove(int x, int y);
 	afx_msg void OnMoving(UINT fwSide, LPRECT pRect);
 	afx_msg void OnScreensize800();
 	afx_msg void OnScreensize1280();
 	afx_msg void OnScreensize1024();
 	afx_msg void OnStnClickedMinimap();
-//	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 	afx_msg void OnMenuitemGeneratePathdata();
 	afx_msg void OnViewinfo();
 };
-
-/////////////////////////////////////////////////////////////////////////////
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.

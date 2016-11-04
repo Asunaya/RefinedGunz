@@ -135,8 +135,6 @@ void ZInput::Update()
 			OnActionKey(itr->second,bPressed);
 	}
 
-	////////////////////////////////////////////////////////
-	// 마우스 입력
 	static ZDIBUFFER mouseBuffer[256];
 	int iDeltaX, iDeltaY;
 	nCount = m_pDirectInput->GetMouseBufferedData(&iDeltaX,&iDeltaY,mouseBuffer,256);
@@ -150,7 +148,6 @@ void ZInput::Update()
 			OnActionKey(itr->second,bPressed);
 	}
 
-	// invert 마우스 적용
 	if (Z_MOUSE_INVERT)
 		iDeltaY = -iDeltaY;
 
@@ -158,46 +155,37 @@ void ZInput::Update()
 	m_fRotationDeltaX += (iDeltaX * fRotateStep);
 	m_fRotationDeltaY += (iDeltaY * fRotateStep);
 
-
-
-	////////////////////////////////////////////////////////
-	// 조이스틱 입력
 	DIJOYSTATE2 js;
 	if(m_pDirectInput->GetJoystickData(&js))
 	{
-		// 축 입력
-		int nX = js.lX;					// 아날로그 스틱
+		int nX = js.lX;
 		int nY = js.lY;
 
-		nX+= js.lZ;		// zaxis		// 두번째 아날로그 스틱
+		nX+= js.lZ;		// zaxis
 		nY+= js.lRz;	// zrotation
 
-		// 일정 값 이하는 무시
 		const int JOY_IGNORE = 100;
 		nX = (nX<-JOY_IGNORE) ? nX+JOY_IGNORE :
 				(nX>JOY_IGNORE) ? nX-JOY_IGNORE : 0;
 		nY = (nY<-JOY_IGNORE) ? nY+JOY_IGNORE :
 				(nY>JOY_IGNORE) ? nY-JOY_IGNORE : 0;
 		
-
 		float fJoyRotateStep = 0.0001f * ZGetConfiguration()->GetJoystick()->fSensitivity;
 		m_fRotationDeltaX += nX * fJoyRotateStep;
 		m_fRotationDeltaY += nY * fJoyRotateStep;
 
-
-		// pov 입력 버튼으로 변환
 		for( unsigned int i=0; i< m_pDirectInput->GetJoystickPovCount(); i++)
 		{
 			const bool dir2buttons[9][4] = {
-				{ true,false,false,false },		// 위
+				{ true,false,false,false },
 				{ true,true,false,false },
-				{ false,true,false,false },		// 오른쪽
+				{ false,true,false,false },
 				{ false,true,true,false },
-				{ false,false,true,false },		// 아래
+				{ false,false,true,false },
 				{ false,false,true,true},
-				{ false,false,false,true},		// 왼쪽
+				{ false,false,false,true},
 				{ true,false,false,true},
-				{ false,false,false,false}};	// 가운데
+				{ false,false,false,false}};
 
 			const bool *joyPOVTable;
 			DWORD dwPOV = js.rgdwPOV[i];
@@ -259,7 +247,7 @@ void ZInput::Update()
 bool ZInput::RegisterActionKey(int nActionID, ZVIRTUALKEY nKey)
 {
 	if(nActionID<0 || nActionID>=ZACTION_COUNT){
-		_ASSERT(FALSE);	// 0 ~ ZACTION_COUNT-1 사이값이여야 한다.
+		_ASSERT(FALSE);
 		return false;
 	}
 

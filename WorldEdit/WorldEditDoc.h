@@ -11,38 +11,30 @@
 
 #include "RNameSpace.h"
 #include "RBspObject.h"
+#include <memory>
 
 _USING_NAMESPACE_REALSPACE2
 
 class CWorldEditDoc : public CDocument
 {
 protected: // create from serialization only
-	CWorldEditDoc();
 	DECLARE_DYNCREATE(CWorldEditDoc)
 
 // Attributes
 public:
-	RBspObject *m_pBspObject;
+	std::unique_ptr<RBspObject> m_pBspObject;
 
-	bool m_bLastPicked;
+	bool m_bLastPicked{};
 	RBSPPICKINFO m_LastPicked;
 
 // Operations
 public:
 	bool ReOpen();
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CWorldEditDoc)
-	public:
 	virtual BOOL OnNewDocument();
 	virtual void Serialize(CArchive& ar);
 	virtual BOOL OnOpenDocument(LPCTSTR lpszPathName);
-	//}}AFX_VIRTUAL
 
-// Implementation
-public:
-	virtual ~CWorldEditDoc();
 #ifdef _DEBUG
 	virtual void AssertValid() const;
 	virtual void Dump(CDumpContext& dc) const;
@@ -50,12 +42,7 @@ public:
 
 protected:
 
-// Generated message map functions
 protected:
-	//{{AFX_MSG(CWorldEditDoc)
-		// NOTE - the ClassWizard will add and remove member functions here.
-		//    DO NOT EDIT what you see in these blocks of generated code !
-	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 public:
 	virtual void OnCloseDocument();

@@ -247,8 +247,12 @@ bool bSuccess;
 
 UINT threadFunc( LPVOID pParam )
 {
-	CWorldEditDoc *pDoc=(CWorldEditDoc*)pParam;
-	bSuccess = pDoc->m_pBspObject->GenerateLightmap(lightmapfilename,nMaxSize,nMinSize,nSuperSample,fToler,UpdateProgress);
+	auto* pDoc = static_cast<CWorldEditDoc*>(pParam);
+
+	bSuccess = pDoc->m_pBspObject->GenerateLightmap(
+		lightmapfilename, nMaxSize, nMinSize,
+		nSuperSample, fToler, { 0, 0, 0 }, UpdateProgress);
+
 	if(g_bProgress)
 		g_pDlg->OK();
 
@@ -293,21 +297,20 @@ void CMainFrame::OnMenuitemGenerateLightmap()
 		WaitForSingleObject(thread->m_hThread,INFINITE);
 
 		sndPlaySound("done.wav",SND_ASYNC);
-//		Beep(1000,100);
 
 		if(bSuccess)
 		{
 			CTime t2 = CTime::GetCurrentTime();
-			CTimeSpan ts = t2 - t1;             // Subtract 2 CTimes
-			CString s = ts.Format( "완료. Total days: %D, hours: %H, mins: %M, secs: %S" );
+			CTimeSpan ts = t2 - t1;
+			CString s = ts.Format( "Total days: %D, hours: %H, mins: %M, secs: %S" );
 
 			AfxMessageBox(s);
 		}else
 		{
-			AfxMessageBox("라이트맵 생성 실패");
+			AfxMessageBox("Failed to generate lightmap, potentially check mlog.txt for info");
 		}                        
 
-		g_nProgressCount=0;
+		g_nProgressCount = 0;
 
 		pDoc->ReOpen();
 	}
@@ -332,6 +335,7 @@ void CMainFrame::OnMenuitemGeneratePathdata()
 		fAngle=max(90.f-fAngle,0)/180.f*PI_FLOAT;
 		float fToler=(float)atof(dialog.m_Toler);
 
+		// TODO: Figure stuff out here
 //		pDoc->m_pBspObject->GeneratePathData(pathfilename,fAngle,fToler);
 	}
 }
@@ -395,28 +399,10 @@ void CMainFrame::Resize(CSize size)
 	}
 }
 
-void CMainFrame::OnScreensize800()
-{
-	// TODO: Add your command handler code here
-	Resize(CSize(800,600));
-}
-
-void CMainFrame::OnScreensize1280()
-{
-	// TODO: Add your command handler code here
-	Resize(CSize(1280,960));
-}
-
-void CMainFrame::OnScreensize1024()
-{
-	// TODO: Add your command handler code here
-	Resize(CSize(1024,768));
-
-}
-void CMainFrame::OnStnClickedMinimap()
-{
-	// TODO: Add your control notification handler code here
-}
+void CMainFrame::OnScreensize800() { Resize(CSize(800,600)); }
+void CMainFrame::OnScreensize1280() { Resize(CSize(1280,960)); }
+void CMainFrame::OnScreensize1024() { Resize(CSize(1024,768)); }
+void CMainFrame::OnStnClickedMinimap() {}
 
 void CMainFrame::Initialize()
 {

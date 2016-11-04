@@ -31,18 +31,6 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CWorldEditDoc construction/destruction
 
-CWorldEditDoc::CWorldEditDoc()
-{
-	// TODO: add one-time construction code here
-	m_pBspObject=NULL;
-	m_bLastPicked=false;
-}
-
-CWorldEditDoc::~CWorldEditDoc()
-{
-	SAFE_DELETE(m_pBspObject);
-}
-
 BOOL CWorldEditDoc::OnNewDocument()
 {
 	if (!CDocument::OnNewDocument())
@@ -93,28 +81,14 @@ BOOL CWorldEditDoc::OnOpenDocument(LPCTSTR lpszPathName)
 {
 	if (!CDocument::OnOpenDocument(lpszPathName))
 		return FALSE;
-	
-	/*
-	char rmpath[256];
-	ReplaceExtension(rmpath,lpszPathName,"rm2");
 
-	m_pMaterialList=new RMaterialList;
-	m_pMaterialList->Open(rmpath);
+	m_pBspObject.reset();
 
-	// TODO: Add your specialized creation code here
-	m_pBspObject=new RBspObject;
-	m_pBspObject->Open(lpszPathName,m_pMaterialList);
-	m_pBspObject->OpenLightmap();
-	m_pBspObject->CreateVertexBuffer();
-*/
-
-	SAFE_DELETE(m_pBspObject);
-
-	m_pBspObject=new RBspObject;
-	if(!m_pBspObject->Open(lpszPathName,RBspObject::ROpenMode::Editor))
+	m_pBspObject = std::make_unique<RBspObject>();
+	if(!m_pBspObject->Open(lpszPathName, RBspObject::ROpenMode::Editor))
 	{
-		SAFE_DELETE(m_pBspObject);
-		AfxMessageBox("파일열기에 실패하였습니다.");
+		m_pBspObject.reset();
+		AfxMessageBox("Failed to open map!");
 		return FALSE;
 	}
 
@@ -125,7 +99,7 @@ BOOL CWorldEditDoc::OnOpenDocument(LPCTSTR lpszPathName)
 void CWorldEditDoc::OnCloseDocument()
 {
 	// TODO: Add your specialized code here and/or call the base class
-	SAFE_DELETE(m_pBspObject);
+	m_pBspObject.reset();
 
 	CDocument::OnCloseDocument();
 }
@@ -134,8 +108,8 @@ bool CWorldEditDoc::ReOpen()
 {
 	m_bLastPicked=false;
 
-	SAFE_DELETE(m_pBspObject);
+	m_pBspObject.reset();
 
-	m_pBspObject=new RBspObject;
+	m_pBspObject = std::make_unique<RBspObject>();
 	return m_pBspObject->Open(GetPathName(),RBspObject::ROpenMode::Editor);
 }

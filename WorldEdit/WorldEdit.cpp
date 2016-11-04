@@ -163,29 +163,21 @@ void CWorldEditApp::OnAppAbout()
 	aboutDlg.DoModal();
 }
 
-/////////////////////////////////////////////////////////////////////////////
-// CWorldEditApp message handlers
-
 void CWorldEditApp::OnFileOpen()
 {
-	CFileDialog FileDialog(TRUE,"rs",NULL,OFN_HIDEREADONLY,"Realspace Scene File (*.rs)|*.rs|All Files (*.*)|*.*||");
+	CFileDialog FileDialog(
+		TRUE,
+		"rs",
+		NULL,
+		OFN_HIDEREADONLY,
+		"Realspace Scene File (*.rs)|*.rs|*xml|All Files (*.*)|*.*||");
+
 	if(FileDialog.DoModal()==IDOK)
 		OpenDocumentFile(FileDialog.GetPathName());
 }
 
-//void CAboutDlg::OnMouseMove(UINT nFlags, CPoint point)
-//{
-//	// TODO: Add your message handler code here and/or call default
-//
-//	CDialog::OnMouseMove(nFlags, point);
-//	
-//
-//}
-
 BOOL CWorldEditApp::OnIdle(LONG lCount)
 {
-	// TODO: Add your specialized code here and/or call the base class
-
 	m_pMainWnd->Invalidate();
 	return CWinApp::OnIdle(lCount);
 }
