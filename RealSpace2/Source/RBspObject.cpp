@@ -476,7 +476,12 @@ bool RBspObject::Draw()
 			m_localViewFrustum[i] = Transform(RGetViewFrustum()[i], trWorld);
 	}
 
-	_BP("ChooseNodes"); ChooseNodes(OcRoot.data()); _EP("ChooseNodes");
+	_BP("ChooseNodes");
+	if (m_OpenMode != ROpenMode::Editor)
+		ChooseNodes<true>(OcRoot.data());
+	else
+		ChooseNodes<false>(OcRoot.data());
+	_EP("ChooseNodes");
 
 	// Disable alpha blending
 	dev->SetRenderState(D3DRS_ALPHABLENDENABLE, false);
@@ -802,21 +807,24 @@ bool isInViewFrustumWithFarZ(rboundingbox *bb, rplane *plane)
 	return false;
 }
 
+template <bool UseOccluders>
 void RBspObject::ChooseNodes(RSBspNode *bspNode)
 {
-	if (isInViewFrustumWithFarZ(&bspNode->bbTree, m_localViewFrustum))
-	{
-		if (bspNode->nPolygon)
-		{
-			if (!IsVisible(bspNode->bbTree)) return;
-		}
+	if (!isInViewFrustumWithFarZ(&bspNode->bbTree, m_localViewFrustum))
+		return;
 
-		bspNode->nFrameCount = g_nFrameNumber;
-		if (bspNode->m_pNegative)
-			ChooseNodes(bspNode->m_pNegative);
-		if (bspNode->m_pPositive)
-			ChooseNodes(bspNode->m_pPositive);
-	}
+	// Check if the node is behind an occluder
+	// if we're not in the map editor.
+	if (UseOccluders &&
+		bspNode->nPolygon &&
+		!IsVisible(bspNode->bbTree))
+		return;
+
+	bspNode->nFrameCount = g_nFrameNumber;
+	if (bspNode->m_pNegative)
+		ChooseNodes<UseOccluders>(bspNode->m_pNegative);
+	if (bspNode->m_pPositive)
+		ChooseNodes<UseOccluders>(bspNode->m_pPositive);
 }
 
 int RBspObject::ChooseNodes(RSBspNode *bspNode, const rvector &center, float fRadius)

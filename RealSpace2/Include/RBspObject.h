@@ -358,6 +358,7 @@ private:
 		const v3& src, const v3& dest, const v3& dir,
 		u32 PassFlag, RBSPPICKINFO* Out);
 
+	template <bool UseOccluders>
 	void ChooseNodes(RSBspNode *bspNode);
 	int ChooseNodes(RSBspNode *bspNode, const rvector &center, float fRadius);
 
