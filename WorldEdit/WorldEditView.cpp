@@ -137,28 +137,6 @@ void CWorldEditView::OnDraw(CDC* pDC)
 		}
 	}
 
-	{
-
-#define GRIDCOUNT	10
-#define GRIDSPACE	(DEFAULTSIZE/GRIDCOUNT)
-
-		RGetDevice()->SetTexture(0, NULL);
-		RGetDevice()->SetRenderState(D3DRS_LIGHTING, FALSE);
-
-
-		RGetDevice()->SetFVF(D3DFVF_XYZ | D3DFVF_DIFFUSE);
-		for (int i = 0; i < GRIDCOUNT + 1; i++)
-		{
-			RDrawLine(rvector(i*GRIDSPACE, 0.f, 0), rvector(i*GRIDSPACE, DEFAULTSIZE, 0), 0xffffff);
-			RDrawLine(rvector(0.f, i*GRIDSPACE, 0), rvector(DEFAULTSIZE, i*GRIDSPACE, 0), 0xffffff);
-		}
-
-	}
-
-	RDrawLine(rvector(0, 0, 0), rvector(GRIDSPACE*.5f, 0, 0), 0xff0000);
-	RDrawLine(rvector(0, 0, 0), rvector(0, GRIDSPACE*.5f, 0), 0x00ff00);
-	RDrawLine(rvector(0, 0, 0), rvector(0, 0, GRIDSPACE*.5f), 0x0000ff);
-
 	RFlip();
 
 	Sleep(0);
