@@ -2,8 +2,6 @@
 #include <winsock2.h>
 #include "MCommandBuilder.h"
 #include "MMatchUtil.h"
-//#include "MPacketHShieldCrypter.h"
-
 
 MCommandBuilder::MCommandBuilder(MUID uidSender, MUID uidReceiver, MCommandManager*	pCmdMgr) 
 {	

@@ -11,7 +11,6 @@
 #define MSGID_REPLYCONNECT	10
 #define MSGID_RAWCOMMAND	100		// 암호화 안된 커맨드
 #define MSGID_COMMAND		101		// 암호화된 커맨드
-//#define MSGID_HSHIELDCOMMAND 102	// 핵실드 암호화된 커맨드
 
 
 
@@ -27,8 +26,7 @@ struct MPacketHeader
 	unsigned short nCheckSum;
 
 	MPacketHeader() { nMsg=MSG_COMMAND; nSize=0; nCheckSum=0; }
-	int CalcPacketSize(MPacketCrypter* pCrypter);		// 만약 암호화되어있을 경우 패킷의 크기는 이 함수로만 알 수 있다.
-														// nSize 변수에는 암호화된 값이 들어있을 수 있음
+	int CalcPacketSize(MPacketCrypter* pCrypter);
 };
 
 

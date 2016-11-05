@@ -725,7 +725,6 @@ rem call copy_share.bat
     <ClInclude Include="ZActorSound.h" />
     <ClInclude Include="ZSoundEngine.h" />
     <ClInclude Include="ZSoundFMod.h" />
-    <ClInclude Include="CGLEncription.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="ZApplication.h" />
@@ -796,7 +795,6 @@ rem call copy_share.bat
     <ClInclude Include="ZMessages.h" />
     <ClInclude Include="ZStringResManager.h" />
     <ClInclude Include="ZTips.h" />
-    <ClInclude Include="XTrap\XTrap.h" />
     <ClInclude Include="HShield\HShield.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
@@ -953,7 +951,6 @@ rem call copy_share.bat
     <ClCompile Include="ZActorSound.cpp" />
     <ClCompile Include="ZSoundEngine.cpp" />
     <ClCompile Include="ZSoundFMod.cpp" />
-    <ClCompile Include="CGLEncription.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ZApplication.cpp" />
     <ClCompile Include="ZCamera.cpp" />
@@ -1015,7 +1012,6 @@ rem call copy_share.bat
     <ClCompile Include="ZMessages.cpp" />
     <ClCompile Include="ZStringResManager.cpp" />
     <ClCompile Include="ZTips.cpp" />
-    <ClCompile Include="XTrap\XTrap.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="runtime\shader\skin.vsh" />
@@ -1038,7 +1034,6 @@ rem call copy_share.bat
   </ItemGroup>
   <ItemGroup>
     <Library Include="fmodvc.lib" />
-    <Library Include="HShield\HShield.lib" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\cml\cml.vcxproj">

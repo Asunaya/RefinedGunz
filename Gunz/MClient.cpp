@@ -244,7 +244,6 @@ int MClient::MakeCmdPacket(char* pOutPacket, int iMaxPacketSize, MPacketCrypter*
 
 	if(pCommand->m_pCommandDesc->IsFlag(MCCT_NON_ENCRYPTED))
 	{
-		// 암호화하지 않는 커맨드
 		pMsg->nMsg = MSGID_RAWCOMMAND;
 
 		nCmdSize = pCommand->GetData(pMsg->Buffer, nCmdSize);
@@ -260,36 +259,23 @@ int MClient::MakeCmdPacket(char* pOutPacket, int iMaxPacketSize, MPacketCrypter*
 			return 0;
 		}
 
-		// 암호화되는 커맨드
 		pMsg->nMsg = MSGID_COMMAND;
 
 		nCmdSize = pCommand->GetData(pMsg->Buffer, nCmdSize);
 		nPacketSize = sizeof(MPacketHeader) + nCmdSize;
 		pMsg->nSize = (unsigned short)(nPacketSize);
 
-//#ifdef _HSHIELD
-//		// 핵실드 암호화
-//		DWORD dwRet = MPacketHShieldCrypter::Encrypt((PBYTE)&pMsg->nSize, sizeof(unsigned short));
-//		if(dwRet != ERROR_SUCCESS)
-//		{
-//			mlog("MClient::MakeCmdPacket -> HShield Encrypt error. (Error code : %d)\n", dwRet);
-//			return 0;
-//		}
-//#else
-		// size 암호화
 		if (!pPacketCrypter->Encrypt((char*)&pMsg->nSize, sizeof(unsigned short)))
 		{
 			mlog("MClient::MakeCmdPacket -> Size Encrypt error\n");
 			return 0;
 		}
-//#endif
-		// 커맨드 암호화
+
 		if (!pPacketCrypter->Encrypt(pMsg->Buffer, nCmdSize))
 		{
 			mlog("MClient::MakeCmdPacket -> Cmd Encrypt error\n");
 			return 0;
 		}
-
 	}
 
 	pMsg->nCheckSum = MBuildCheckSum(pMsg, nPacketSize);

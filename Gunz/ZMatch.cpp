@@ -20,24 +20,10 @@
 #include "ZInput.h"
 
 #define READY_COUNT	5
-#define ZDELAY_AFTER_DYING		RESPAWN_DELAYTIME_AFTER_DYING		///< 죽고나서 리스폰되는 딜레이시간
+#define ZDELAY_AFTER_DYING		RESPAWN_DELAYTIME_AFTER_DYING
 #define ZDELAY_AFTER_DYING_MAX	20000	
 
-ZMatch::ZMatch() : m_pRule(NULL)
-{
-	m_pStageSetting = ZGetGameClient()->GetMatchStageSetting();
-	m_nRoundState = MMATCH_ROUNDSTATE_PREPARE;
-	m_nLastDeadTime = 0;
-	m_nNowTime = 0;
-	m_nSoloSpawnTime = -1;
-	memset(m_nTeamScore, 0, sizeof(m_nTeamScore));
-	memset(m_nTeamKillCount, 0, sizeof(m_nTeamKillCount));
-}
-
-ZMatch::~ZMatch()
-{
-
-}
+ZMatch::ZMatch() : m_pStageSetting{ ZGetGameClient()->GetMatchStageSetting() } {}
 
 bool ZMatch::Create()
 {
@@ -63,7 +49,6 @@ void ZMatch::Destroy()
 void ZMatch::SetRound(int nCurrRound)
 {
 	m_nCurrRound = nCurrRound;
-//	memset(m_nTeamKillCount, 0, sizeof(m_nTeamKillCount));
 }
 
 
@@ -73,11 +58,6 @@ void ZMatch::Update(float fDelta)
 
 	switch (GetRoundState())
 	{
-	case MMATCH_ROUNDSTATE_PREPARE:
-		{
-
-		}
-		break;
 	case MMATCH_ROUNDSTATE_COUNTDOWN:
 		{
 			if ((m_nNowTime - m_nStartTime) > ((READY_COUNT+1) * 1000))
@@ -102,7 +82,7 @@ void ZMatch::ProcessRespawn()
 #ifdef _QUEST
 	if (ZGetGameTypeManager()->IsQuestDerived(GetMatchType())) return;
 #endif
-	// 데쓰매치일 경우 죽으면 바로 살아난다.
+
 	if (!IsWaitForRoundEnd() && g_pGame->m_pMyCharacter)
 	{
 		static bool bLastDead = false;
@@ -110,12 +90,12 @@ void ZMatch::ProcessRespawn()
 		{
 			if (bLastDead == false)
 			{
-				m_nLastDeadTime = m_nNowTime;	// 죽은 시간
+				m_nLastDeadTime = m_nNowTime;
 			}
 
 			m_nSoloSpawnTime = m_nNowTime - m_nLastDeadTime;
 
-			if (m_nSoloSpawnTime >= ZDELAY_AFTER_DYING_MAX)	// 죽어서 아무것도 안누르고 있으면 15초후 리스폰
+			if (m_nSoloSpawnTime >= ZDELAY_AFTER_DYING_MAX)
 			{
 				SoloSpawn();
 			}
@@ -142,61 +122,12 @@ void ZMatch::ProcessRespawn()
 
 }
 
-int ZMatch::GetRoundReadyCount(void)
+int ZMatch::GetRoundReadyCount()
 {
 	return ( READY_COUNT - (GetGlobalTimeMS() - m_nStartTime) / 1000 );
 }
 
-
-void ZMatch::OnDrawGameMessage()
-{
-
-#ifndef _PUBLISH
-	// for debug 시간 표시
-	float fTime=g_pGame->GetTime();
-	int nTimeMinute=fTime/60.f;
-	fTime=fmod(fTime,60.f);
-	int nTimeSecond=fTime;
-	fTime=fmod(fTime,1.f);
-
-	char szTimeMessage[256] = "";
-	sprintf_safe(szTimeMessage, "%d:%02d.%02d",nTimeMinute,nTimeSecond,int(fTime*100.f));
-	ZApplication::GetGameInterface()->SetTextWidget("Time", szTimeMessage);
-#endif
-
-#define CENTERMESSAGE	"CenterMessage"
-
-	switch (GetRoundState())
-	{
-	case MMATCH_ROUNDSTATE_PREPARE:
-		{
-		}
-		break;
-	case MMATCH_ROUNDSTATE_COUNTDOWN:
-		{
-
-		}
-		break;
-	case MMATCH_ROUNDSTATE_PLAY:
-		{
-
-		}
-		break;
-	case MMATCH_ROUNDSTATE_FINISH:
-		{
-
-		}
-		break;
-	default:
-		{
-
-		}
-		break;
-	}
-
-}
-
-
+void ZMatch::OnDrawGameMessage() {}
 
 void ZMatch::SoloSpawn()
 {
@@ -375,15 +306,11 @@ void ZMatch::InitRound()
 
 void ZMatch::InitCharactersProperties()
 {
-	for (ZCharacterManager::iterator itor = g_pGame->m_CharacterManager.begin();
-		itor != g_pGame->m_CharacterManager.end(); ++itor)
+	for (auto* pCharacter : MakePairValueAdapter(g_pGame->m_CharacterManager))
 	{
-		ZCharacter* pCharacter = (*itor).second;
 		pCharacter->InitStatus();
-
 		pCharacter->SetVisible(true);
 	}
-
 }
 
 void ZMatch::SetRoundState(MMATCH_ROUNDSTATE nRoundState, int nArg)
@@ -399,23 +326,9 @@ void ZMatch::SetRoundState(MMATCH_ROUNDSTATE nRoundState, int nArg)
 
 	switch(m_nRoundState) 
 	{
-
-	case MMATCH_ROUNDSTATE_PREPARE: 
-		{
-
-		}
-		break;
 	case MMATCH_ROUNDSTATE_COUNTDOWN : 
 		{
 			InitRound();
-		}
-		break;
-	case MMATCH_ROUNDSTATE_PLAY:
-		{
-			if (!IsTeamPlay())
-			{
-
-			}
 		}
 		break;
 	case MMATCH_ROUNDSTATE_FINISH:
@@ -445,10 +358,8 @@ void ZMatch::SetRoundState(MMATCH_ROUNDSTATE nRoundState, int nArg)
 
 			if (IsTeamPlay())
 			{
-				if (nArg == MMATCH_ROUNDRESULT_DRAW)
+				if (nArg != MMATCH_ROUNDRESULT_DRAW)
 				{
-					// Do nothing...
-				} else {
 					MMatchTeam nTeamWon = (nArg == MMATCH_ROUNDRESULT_REDWON ? MMT_RED : MMT_BLUE);
 					if (nTeamWon == MMT_RED)
 						m_nTeamScore[MMT_RED]++;
@@ -456,16 +367,6 @@ void ZMatch::SetRoundState(MMATCH_ROUNDSTATE nRoundState, int nArg)
 						m_nTeamScore[MMT_BLUE]++;
 				}
 			}
-		}
-		break;
-	case MMATCH_ROUNDSTATE_EXIT:
-		{
-			
-		}
-		break;
-	case MMATCH_ROUNDSTATE_FREE:
-		{
-
 		}
 		break;
 	};
@@ -490,10 +391,7 @@ const char* ZMatch::GetTeamName(int nTeamID)
 
 int ZMatch::GetRoundCount()
 {
-//	if (IsWaitForRoundEnd())
-		return m_pStageSetting->GetStageSetting()->nRoundMax;
-
-	return 1;
+	return m_pStageSetting->GetStageSetting()->nRoundMax;
 }
 
 
@@ -534,26 +432,26 @@ void ZMatch::RespawnSolo(bool bForce)
 
 void ZMatch::OnForcedEntry(ZCharacter* pCharacter)
 {
-	if (pCharacter == NULL)
+	if (!pCharacter)
 	{
-		_ASSERT(0); return;
+		assert(false);
+		return;
 	}
-	// 난입한 플레이어가 나 자신일 경우
+
 	if (pCharacter == ZApplication::GetGame()->m_pMyCharacter)
 	{
-		// AdminHide 처리
+		// AdminHide
 		MMatchObjCache* pObjCache = ZGetGameClient()->FindObjCache(ZGetMyUID());
 		if (pObjCache && pObjCache->CheckFlag(MTD_PlayerFlags_AdminHide)) {
 			ZGetGameInterface()->GetCombatInterface()->SetObserverMode(true);
 		} else {
-			// 팀플레이면 스팩테이터
-			if (IsWaitForRoundEnd()/* && ZApplication::GetGame()->GetMatch()->GetMatchType() != MMATCH_GAMETYPE_DUEL*/)
+			if (IsWaitForRoundEnd())
 			{
 				pCharacter->SetVisible(false);
 				pCharacter->ForceDie();
 				ZApplication::GetGameInterface()->GetCombatInterface()->SetObserverMode(true);
 			}	
-			else	// 솔로일경우는 바로 스폰
+			else
 			{
 				InitRound();
 			}
@@ -561,14 +459,9 @@ void ZMatch::OnForcedEntry(ZCharacter* pCharacter)
 	}
 	else
 	{
-		// 팀플레이에 다른 플레이어가 난입하면 다음판부터 진행해야 하기때문에 캐릭터 보여주지 않음
-		// 단 FREE상태일 때에는 보여준다
 		if (IsWaitForRoundEnd() && (GetRoundState() != MMATCH_ROUNDSTATE_FREE))
 		{
-			if (pCharacter != NULL)
-			{
-				pCharacter->SetVisible(false);
-			}
+			pCharacter->SetVisible(false);
 			pCharacter->ForceDie();
 		}
 	}
@@ -596,17 +489,15 @@ int ZMatch::GetRemainedSpawnTime()
 	return nTimeSec;
 }
 
-
-void ZMatch::SetRoundStartTime( void)
+void ZMatch::SetRoundStartTime()
 {
 	m_dwStartTime = GetGlobalTimeMS();
 }
 
-DWORD ZMatch::GetRemaindTime( void)
+DWORD ZMatch::GetRemaindTime()
 {
 	return ( GetGlobalTimeMS() - m_dwStartTime);
 }
-
 
 bool ZMatch::OnCommand(MCommand* pCommand)
 {

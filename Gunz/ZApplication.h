@@ -10,6 +10,7 @@
 #include "ZStageInterface.h"
 #include "ZSkill.h"
 #include "ZWorldManager.h"
+#include <string>
 
 class ZGame;
 class ZGameClient;
@@ -54,9 +55,9 @@ private:
 	ZStageInterface*		m_pStageInterface;
 	ZOptionInterface*		m_pOptionInterface;
 	ZLAUNCH_MODE			m_nLaunchMode;
-    char					m_szFileName[_MAX_PATH];
-	char					m_szCmdLine[256];
-	UINT					m_nTimerRes;
+    std::string				m_szFileName;
+	std::string				m_szCmdLine;
+	u32						m_nTimerRes;
 	MDataChecker			m_GlobalDataChecker;
 	bool					m_bLaunchDevelop;
 	bool					m_bLaunchTest;
@@ -107,15 +108,15 @@ public:
 
 	static void ResetTimer();
 	static void Exit();
-	static ZApplication*		GetInstance(void);
-	static ZGameInterface*		GetGameInterface(void);
-	static ZStageInterface*		GetStageInterface(void);
-	static ZOptionInterface*	GetOptionInterface(void);
-	static MZFileSystem*		GetFileSystem(void);
-	static ZGameClient*			GetGameClient(void);
-	static ZGame*				GetGame(void);
-	static ZTimer*				GetTimer(void);
-	static ZSoundEngine*		GetSoundEngine(void);
+	static ZApplication*		GetInstance();
+	static ZGameInterface*		GetGameInterface();
+	static ZStageInterface*		GetStageInterface();
+	static ZOptionInterface*	GetOptionInterface();
+	static MZFileSystem*		GetFileSystem();
+	static ZGameClient*			GetGameClient();
+	static ZGame*				GetGame();
+	static ZTimer*				GetTimer();
+	static ZSoundEngine*		GetSoundEngine();
 	static RMeshMgr*			GetNpcMeshMgr()			{ return &m_NPCMeshMgr;}
 	static RMeshMgr*			GetMeshMgr()			{ return &m_MeshMgr; }
 	static RMeshMgr*			GetWeaponMeshMgr()		{ return &m_WeaponMeshMgr; }

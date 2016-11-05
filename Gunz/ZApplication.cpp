@@ -21,7 +21,6 @@
 #include "ZTestGame.h"
 #include "ZGameClient.h"
 #include "MRegistry.h"
-#include "CGLEncription.h"
 #include "ZLocale.h"
 #include "ZUtil.h"
 #include "ZStringResManager.h"
@@ -41,7 +40,7 @@
 #include "ZProfiler.h"
 #endif
 
-ZApplication*	ZApplication::m_pInstance = NULL;
+ZApplication*	ZApplication::m_pInstance;
 MZFileSystem	ZApplication::m_FileSystem;    
 ZSoundEngine	ZApplication::m_SoundEngine;
 RMeshMgr		ZApplication::m_NPCMeshMgr;
@@ -49,10 +48,9 @@ RMeshMgr		ZApplication::m_MeshMgr;
 RMeshMgr		ZApplication::m_WeaponMeshMgr;
 ZTimer			ZApplication::m_Timer;
 ZEmblemInterface	ZApplication::m_EmblemInterface;
-ZSkillManager	ZApplication::m_SkillManager;				///< 스킬 매니저
+ZSkillManager	ZApplication::m_SkillManager;
 
-MCommandLogFrame* m_pLogFrame = NULL;
-
+MCommandLogFrame* m_pLogFrame;
 
 ZApplication::ZApplication()
 	: Time(timeGetTime())
@@ -84,13 +82,9 @@ ZApplication::~ZApplication()
 	SAFE_DELETE(m_pProfiler);
 #endif
 
-//	OnDestroy();
 	m_pInstance = NULL;
-
-
 }
 
-// szBuffer 에 있는 다음 단어를 얻는다. 단 따옴표가 있으면 따옴표 안의 단어를 얻는다
 bool GetNextName(char *szBuffer, int nBufferCount, const char *szSource)
 {
 	while(*szSource==' ' || *szSource=='\t') szSource++;
@@ -125,28 +119,21 @@ bool GetNextName(char *szBuffer, int nBufferCount, const char *szSource)
 
 bool ZApplication::ParseArguments(const char* pszArgs)
 {
-	strcpy_safe(m_szCmdLine, pszArgs);
-
-	size_t nLength;
+	m_szCmdLine = pszArgs;
 
 	if(pszArgs[0]=='"') 
 	{
-		strcpy_safe(m_szFileName,pszArgs+1);
-
-		nLength = strlen(m_szFileName);
-		if(m_szFileName[nLength-1]=='"')
-		{
-			m_szFileName[nLength-1]=0;
-			nLength--;
-		}
+		m_szFileName = pszArgs + 1;
+		if (m_szFileName[m_szFileName.length() - 1] == '"')
+			m_szFileName.resize(m_szFileName.length() - 1);
 	}
 	else
 	{
-		strcpy_safe(m_szFileName,pszArgs);
-		nLength = strlen(m_szFileName);
+		m_szFileName = pszArgs;
 	}
 
-	if(_stricmp(m_szFileName+nLength-strlen(GUNZ_REC_FILE_EXT),GUNZ_REC_FILE_EXT)==0){
+	if(_stricmp(m_szFileName.c_str() + m_szFileName.length() - strlen(GUNZ_REC_FILE_EXT),
+		GUNZ_REC_FILE_EXT) == 0){
 		SetLaunchMode(ZLAUNCH_MODE_STANDALONE_REPLAY);
 		m_nInitialState = GUNZ_GAME;
 		ZGetLocale()->SetTeenMode(false);
@@ -195,34 +182,6 @@ bool ZApplication::ParseArguments(const char* pszArgs)
 			SetLaunchMode( ZLAUNCH_MODE_STANDALONE);
 			ZGetLocale()->SetTeenMode(false);
 			return true;
-			// 암호 코드 구하기
-			CGLEncription cEncription;
-			int nMode = cEncription.Decription();
-
-			// launch 모드
-			if ( nMode == GLE_LAUNCH_INTERNATIONAL)
-			{
-				SetLaunchMode( ZLAUNCH_MODE_STANDALONE);
-				ZGetLocale()->SetTeenMode(false);
-				return true;
-			}
-			// launchdevelop 모드
-			else if ( nMode == GLE_LAUNCH_DEVELOP)
-			{
-				SetLaunchMode( ZLAUNCH_MODE_STANDALONE_DEVELOP);
-				m_bLaunchDevelop = true;
-				ZGetLocale()->SetTeenMode(false);
-				return true;
-			}
-			// Test 모드
-			else if ( nMode == GLE_LAUNCH_TEST)
-			{
-				SetLaunchMode( ZLAUNCH_MODE_STANDALONE_DEVELOP);
-				m_bLaunchDevelop = true;
-				ZGetLocale()->SetTeenMode(false);
-				m_bLaunchTest = true;
-				return true;
-			}
 		}
 		break;
 	case MC_INVALID:
@@ -832,11 +791,7 @@ void ZApplication::Exit()
 
 void ZApplication::PreCheckArguments()
 {
-	char *str;
-
-	str = strstr(m_szCmdLine, ZTOKEN_FAST_LOADING);
-
-	if(str != NULL) {
+	if(strstr(m_szCmdLine.c_str(), ZTOKEN_FAST_LOADING)) {
 		RMesh::SetPartsMeshLoadingSkip(1);
 	}
 }
@@ -851,7 +806,7 @@ void ZApplication::ParseStandAloneArguments(const char* pszArgs)
 		ZApplication::GetInstance()->m_nInitialState = GUNZ_GAME;
 		if(GetNextName(buffer,sizeof(buffer),str+strlen(ZTOKEN_GAME)))
 		{
-			strcpy_safe(m_szFileName,buffer);
+			m_szFileName = buffer;
 			CreateTestGame(buffer);
 			SetLaunchMode(ZLAUNCH_MODE_STANDALONE_GAME);
 			return;
@@ -903,11 +858,11 @@ void ZApplication::ParseStandAloneArguments(const char* pszArgs)
 void ZApplication::SetInitialState()
 {
 	if(GetLaunchMode()==ZLAUNCH_MODE_STANDALONE_REPLAY) {
-		CreateReplayGame(m_szFileName);
+		CreateReplayGame(m_szFileName.c_str());
 		return;
 	}
 
-	ParseStandAloneArguments(m_szCmdLine);
+	ParseStandAloneArguments(m_szCmdLine.c_str());
 
 	ZGetGameInterface()->SetState(m_nInitialState);
 }

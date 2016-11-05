@@ -1,12 +1,11 @@
-#ifndef MINT4R2_H
-#define MINT4R2_H
+#pragma once
 
 #include "MDrawContext.h"
 #include "RFont.h"
 #include "RBaseTexture.h"
 #include <D3dx9.h>
 
-#define MINT_R2_CLASS_TYPE	0x1130		// RTTI와 같은 기능을 _DEBUG모드에서 구현하기 위한 ID
+#define MINT_R2_CLASS_TYPE	0x1130		// RTTI
 
 class MDrawContextR2 : public MDrawContext{
 protected:
@@ -40,29 +39,25 @@ private:
 
 class MBitmapR2 : public MBitmap{
 public:
-	LPDIRECT3DDEVICE9		m_pd3dDevice;		// Local Copy
-	//LPD3DXSPRITE			m_pSprite;
+	LPDIRECT3DDEVICE9		m_pd3dDevice;
 	RealSpace2::RBaseTexture *m_pTexture;
-//	LPDIRECT3DTEXTURE9		m_pTexture;
-//	int						m_nWidth;
-//	int						m_nHeight;
 
-	static	DWORD			m_dwStateBlock;
+	static	u32			m_dwStateBlock;
 
 protected:
 	void BeginState(MDrawEffect effect);
 	void EndState(void);
 
 public:
-	MBitmapR2(void);
-	virtual ~MBitmapR2(void);
+	MBitmapR2();
+	virtual ~MBitmapR2();
 
-	virtual bool Create(const char* szAliasName, LPDIRECT3DDEVICE9 pd3dDevice, const char* szFileName,bool bUseFileSystem=true);
-//	virtual bool Create(const char* szAliasName, LPDIRECT3DDEVICE9 pd3dDevice, void* pData, int nSize);
-	virtual void Destroy(void);
+	virtual bool Create(const char* szAliasName, LPDIRECT3DDEVICE9 pd3dDevice,
+		const char* szFileName, bool bUseFileSystem = true);
+	virtual void Destroy() override;
 
-	virtual int GetWidth(void);
-	virtual int GetHeight(void);
+	virtual int GetWidth() override;
+	virtual int GetHeight() override;
 
 	void CheckDrawMode(float* fuv);
 
@@ -71,8 +66,8 @@ public:
 	void DrawEx(float tx1, float ty1, float tx2, float ty2, 
 		        float tx3, float ty3, float tx4, float ty4, DWORD dwColor, MDrawEffect effect=MDE_NORMAL);
 
-	void OnLostDevice(void);
-	void OnResetDevice(void);
+	void OnLostDevice();
+	void OnResetDevice();
 };
 
 class MFontR2 : public MFont{
@@ -82,13 +77,11 @@ public:
 	_RS2::RFont	m_Font;
 public:
 	MFontR2(void);
-	virtual ~MFontR2(void);
+	virtual ~MFontR2();
 
-	virtual bool Create(const char* szAliasName, const char* szFontName, int nHeight, float fScale=1.0f, bool bBold=false, bool bItalic=false, int nOutlineStyle=0, int nCacheSize=-1, bool bAntiAlias = false, DWORD nColorArg1=0, DWORD nColorArg2=0);
-	virtual void Destroy(void);
+	virtual bool Create(const char* szAliasName, const char* szFontName, int nHeight, float fScale=1.0f, bool bBold=false, bool bItalic=false, int nOutlineStyle=0, int nCacheSize=-1, bool bAntiAlias = false, u32 nColorArg1=0, u32 nColorArg2=0);
+	virtual void Destroy();
 
-	virtual int GetHeight(void);
+	virtual int GetHeight();
 	virtual int GetWidth(const char* szText, int nSize=-1);
 };
-
-#endif

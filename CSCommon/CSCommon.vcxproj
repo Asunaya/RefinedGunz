@@ -449,7 +449,6 @@
     <ClInclude Include="Include\RealCPNet.h" />
     <ClInclude Include="Include\MPacket.h" />
     <ClInclude Include="Include\MPacketCrypter.h" />
-    <ClInclude Include="Include\MPacketHShieldCrypter.h" />
     <ClInclude Include="Include\Msg.h" />
     <ClInclude Include="Include\MCommandCommunicator.h" />
     <ClInclude Include="Include\MXmlParser.h" />
@@ -459,7 +458,6 @@
     <ClInclude Include="Include\MBaseStringResManager.h" />
     <ClInclude Include="Include\MErrorTable.h" />
     <ClInclude Include="Include\MStringRes.h" />
-    <ClInclude Include="HShield\HsCryptLib.h" />
     <ClInclude Include="Include\stuff.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
@@ -503,7 +501,6 @@
     <ClCompile Include="Source\RealCPNet.cpp" />
     <ClCompile Include="Source\MPacket.cpp" />
     <ClCompile Include="Source\MPacketCrypter.cpp" />
-    <ClCompile Include="Source\MPacketHShieldCrypter.cpp" />
     <ClCompile Include="Source\MCommandCommunicator.cpp" />
     <ClCompile Include="Source\MXmlParser.cpp" />
     <ClCompile Include="Source\MBaseLocale.cpp" />
@@ -515,9 +512,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release LTCG|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Library Include="HShield\HsCryptLib.lib" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\cml\cml.vcxproj">

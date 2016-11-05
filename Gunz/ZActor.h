@@ -25,20 +25,19 @@ _USING_NAMESPACE_REALSPACE2
 enum ZACTOR_FLAG
 {
 	AF_NONE				= 0,
-	AF_LAND				= 0x1,				// 발이 땅에 닿아 있는지 여부
-	AF_BLAST			= 0x2,				// 띄움을 당한 상태인지 여부
-	AF_MOVING			= 0x4,				// 이동여부
-	AF_DEAD				= 0x8,				// 죽었다
-	AF_REQUESTED_DEAD	= 0x10,				// 서버에 죽음 요청을 했는지 여부
-	AF_BLAST_DAGGER		= 0x20,				// 띄움을 당한 상태인지 여부	
+	AF_LAND				= 0x1,
+	AF_BLAST			= 0x2,
+	AF_MOVING			= 0x4,
+	AF_DEAD				= 0x8,
+	AF_REQUESTED_DEAD	= 0x10,
+	AF_BLAST_DAGGER		= 0x20,
 
-	AF_MY_CONTROL		= 0x100,			// 내가 컨트롤하는지 여부
+	AF_MY_CONTROL		= 0x100,
 
 
-	AF_SOUND_WOUNDED	= 0x1000,			// 한번 맞았을때 울었는지 여부
+	AF_SOUND_WOUNDED	= 0x1000,
 };
 
-// 일정 시간간격으로 NPC정보 계속 주고받는 데이터
 struct ZACTOR_BASICINFO {
 	float			fTime;
 	MUID			uidNPC;

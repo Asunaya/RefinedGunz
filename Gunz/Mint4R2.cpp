@@ -371,14 +371,13 @@ int MBitmapR2::GetHeight(void)
 
 struct CUSTOMVERTEX{
     FLOAT	x, y, z, rhw;
-    DWORD	color;
+    u32		color;
     FLOAT	tu, tv;
 };
 #define D3DFVF_CUSTOMVERTEX (D3DFVF_XYZRHW|D3DFVF_DIFFUSE|D3DFVF_TEX1)
 
-DWORD MBitmapR2::m_dwStateBlock;
+u32 MBitmapR2::m_dwStateBlock;
 
-// 현재는 state block을 사용하지 않는다.
 //#define USE_STATEBLOCK
 
 void MBitmapR2::BeginState(MDrawEffect effect)
@@ -418,19 +417,6 @@ void MBitmapR2::BeginState(MDrawEffect effect)
 
 		const bool bFiltering = false;
 
-/*
-		if(bFiltering==true){
-			m_pd3dDevice->SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR );
-			m_pd3dDevice->SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR );
-			m_pd3dDevice->SetSamplerState( 0, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR );
-		}
-		else{
-			m_pd3dDevice->SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_NONE );
-			m_pd3dDevice->SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_NONE );
-			m_pd3dDevice->SetSamplerState( 0, D3DSAMP_MIPFILTER, D3DTEXF_NONE );
-		}
-*/
-
 		m_pd3dDevice->SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR );
 		m_pd3dDevice->SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR );
 		m_pd3dDevice->SetSamplerState( 0, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR );
@@ -442,7 +428,6 @@ void MBitmapR2::BeginState(MDrawEffect effect)
 
 		m_pd3dDevice->SetRenderState( D3DRS_STENCILENABLE,    FALSE );
 		m_pd3dDevice->SetRenderState( D3DRS_CLIPPING,         TRUE );
-//		m_pd3dDevice->SetRenderState( D3DRS_EDGEANTIALIAS,    FALSE );
 		m_pd3dDevice->SetRenderState( D3DRS_CLIPPLANEENABLE,  FALSE );
 		m_pd3dDevice->SetRenderState( D3DRS_VERTEXBLEND,      FALSE );
 		m_pd3dDevice->SetRenderState( D3DRS_INDEXEDVERTEXBLENDENABLE, FALSE );
@@ -456,11 +441,8 @@ void MBitmapR2::BeginState(MDrawEffect effect)
 		m_pd3dDevice->SetTextureStageState( 0, D3DTSS_ALPHAOP,   D3DTOP_MODULATE );
 		m_pd3dDevice->SetTextureStageState( 0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE );
 		m_pd3dDevice->SetTextureStageState( 0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE );
-//		m_pd3dDevice->SetTextureStageState( 0, D3DTSS_MIPFILTER, D3DTEXF_NONE );
 		m_pd3dDevice->SetTextureStageState( 0, D3DTSS_TEXCOORDINDEX, 0 );
 		m_pd3dDevice->SetTextureStageState( 0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE );
-//		m_pd3dDevice->SetTextureStageState( 1, D3DTSS_COLOROP,   D3DTOP_DISABLE );
-//		m_pd3dDevice->SetTextureStageState( 1, D3DTSS_ALPHAOP,   D3DTOP_DISABLE );
 
 
 
@@ -493,13 +475,13 @@ void MBitmapR2::CheckDrawMode(float* fuv)
 
 		float temp[2];
 
-		if(m_DrawMode & MBM_FlipLR)	{//좌우 바꾸기
+		if(m_DrawMode & MBM_FlipLR)	{
 			_swap(fuv[0],fuv[2]);
 			_swap(fuv[1],fuv[3]);
 			_swap(fuv[4],fuv[6]);
 			_swap(fuv[5],fuv[7]);
 		}
-		if(m_DrawMode & MBM_FlipUD) {//상하 바꾸기
+		if(m_DrawMode & MBM_FlipUD) {
 			_swap(fuv[0],fuv[6]);
 			_swap(fuv[1],fuv[7]);
 			_swap(fuv[2],fuv[4]);
@@ -525,10 +507,6 @@ void MBitmapR2::CheckDrawMode(float* fuv)
 void MBitmapR2::Draw(float x, float y, float w, float h, float sx, float sy, float sw, float sh, 
 					 DWORD dwColor, MDrawEffect effect)
 {
-	/*
-	float ftw = (float)Floorer2PowerSize(m_Info.Width);
-	float fth = (float)Floorer2PowerSize(m_Info.Height);
-	*/
 	if(m_pTexture==NULL) return;
 
 	float ftw = (float)m_pTexture->GetWidth();
@@ -600,17 +578,15 @@ void MBitmapR2::DrawEx(float tx1, float ty1, float tx2, float ty2,
 	EndState();
 }
 
-void MBitmapR2::OnLostDevice(void)
+void MBitmapR2::OnLostDevice()
 {
-	//if(m_pSprite!=NULL) m_pSprite->OnLostDevice();
 }
 
-void MBitmapR2::OnResetDevice(void)
+void MBitmapR2::OnResetDevice()
 {
-	//if(m_pSprite!=NULL) m_pSprite->OnResetDevice();
 }
 
-MFontR2::MFontR2(void)
+MFontR2::MFontR2()
 {
 #ifdef _DEBUG
 	m_nTypeID = MINT_R2_CLASS_TYPE;
@@ -618,12 +594,14 @@ MFontR2::MFontR2(void)
 	m_fScale = 1.0f;
 }
 
-MFontR2::~MFontR2(void)
+MFontR2::~MFontR2()
 {
 	Destroy();
 }
 
-bool MFontR2::Create(const char* szAliasName, const char* szFontName, int nHeight, float fScale, bool bBold, bool bItalic, int nOutlineStyle, int nCacheSize, bool bAntiAlias, DWORD nColorArg1, DWORD nColorArg2)
+bool MFontR2::Create(const char* szAliasName, const char* szFontName, int nHeight,
+	float fScale, bool bBold, bool bItalic, int nOutlineStyle,
+	int nCacheSize, bool bAntiAlias, u32 nColorArg1, u32 nColorArg2)
 {
 	m_fScale = fScale;
 
@@ -636,12 +614,12 @@ bool MFontR2::Create(const char* szAliasName, const char* szFontName, int nHeigh
 	return m_Font.Create(szFontName, nHeight, bBold, bItalic, nOutlineStyle, nCacheSize, bAntiAlias, nColorArg1, nColorArg2);
 }
 
-void MFontR2::Destroy(void)
+void MFontR2::Destroy()
 {
 	m_Font.Destroy();
 }
 
-int MFontR2::GetHeight(void)
+int MFontR2::GetHeight()
 {
 	return int(m_Font.GetHeight()*m_fScale);
 }

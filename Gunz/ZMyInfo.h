@@ -1,17 +1,21 @@
-#ifndef _ZMYINFO_H
-#define _ZMYINFO_H
+#pragma once
 
 #include "ZPrerequisites.h"
 #include "ZMyItemList.h"
-#include "HShield/HShield.h"
 
-/// 시스템에서 필요한 내정보
+// HShield stuff
+// TODO: Remove
+#define SIZEOF_REQMSG		160
+#define SIZEOF_ACKMSG		56
+#define SIZEOF_GUIDREQMSG	20
+#define SIZEOF_GUIDACKMSG	20
+
 struct ZMySystemInfo
 {
-	bool			bInGameNoChat;				// 게임중 대화 가능 여부
-	char			szSerialKey[128];			// XTrap에서 쓰는 RandomValue
-	unsigned char	pbyAckMsg[SIZEOF_ACKMSG];			// HShield CRC 응답 메세지
-	unsigned char	pbyGuidAckMsg[SIZEOF_GUIDACKMSG];	// HShield GUID 응답 메세지
+	bool			bInGameNoChat;
+	char			szSerialKey[128];			// XTrap RandomValue
+	unsigned char	pbyAckMsg[SIZEOF_ACKMSG];			// HShield CRC
+	unsigned char	pbyGuidAckMsg[SIZEOF_GUIDACKMSG];	// HShield GUID
 
 	ZMySystemInfo()
 	{
@@ -22,17 +26,11 @@ struct ZMySystemInfo
 	}
 };
 
-/// 게임중에 필요한 내정보
 struct ZMyGameInfo
 {
-	bool		bForcedChangeTeam;		// 서버에서 강제로 팀이 변경되었는지 여부
+	bool bForcedChangeTeam{};
 
-	ZMyGameInfo() { Init(); }
-	void Init()
-	{
-		bForcedChangeTeam = false;
-	}
-	void InitRound()		// 라운드 시작할때 필요한 초기화
+	void InitRound()
 	{
 		bForcedChangeTeam = false;
 	}
@@ -41,29 +39,26 @@ struct ZMyGameInfo
 class ZMyInfo
 {
 private:
-	bool			m_bCreated;
+	bool			m_bCreated{};
 	ZMySystemInfo	m_MySystemInfo;
 	ZMyGameInfo		m_MyGameInfo;
 protected:
-	// 계정 정보
 	char					m_szAccountID[256];
-	MMatchUserGradeID		m_nUGradeID;
-	MMatchPremiumGradeID	m_nPGradeID;
+	MMatchUserGradeID		m_nUGradeID = MMUG_FREE;
+	MMatchPremiumGradeID	m_nPGradeID = MMPG_FREE;
 
-
-	// 캐릭터 정보
 	char			m_szCharName[MATCHOBJECT_NAME_LENGTH];
 	char			m_szClanName[CLAN_NAME_LENGTH];
-	MMatchSex		m_nSex;
-	int				m_nHair;		// 머리
-	int				m_nFace;		// 얼굴
-	int				m_nRace;
-	unsigned long int		m_nXP;
-	int						m_nBP;
-	int						m_nLevel;
-	int						m_nLevelPercent;
-	MMatchClanGrade			m_nClanGrade;
-	bool					m_bNewbie;				
+	MMatchSex		m_nSex = MMS_MALE;
+	int				m_nHair{};
+	int				m_nFace{};
+	int				m_nRace{};
+	u64				m_nXP{};
+	int				m_nBP{};
+	int				m_nLevel{};
+	int				m_nLevelPercent{};
+	MMatchClanGrade	m_nClanGrade = MCG_NONE;
+	bool			m_bNewbie{};
 
 	ZMyItemList		m_ItemList;
 
@@ -72,7 +67,7 @@ protected:
 	ZMyQuestItemMap	m_QuestItemMap;
 	ZMyQuestItemMap m_ObtainQuestItemMap;
 
-public :
+public:
 	ZMyQuestItemMap& GetQuestItemMap()			{ return m_QuestItemMap; }
 	ZMyQuestItemMap& GetObtainQuestItemMap()	{ return m_ObtainQuestItemMap; }
 #endif
@@ -84,40 +79,46 @@ public:
 	bool InitCharInfo(const char* szCharName, const char* szClanName, const MMatchClanGrade nClanGrade, const MMatchSex nSex, const int nHair, const int nFace);
 	bool InitAccountInfo(const char* szAccountID, MMatchUserGradeID nUGradeID, MMatchPremiumGradeID nPGradeID);
 	void Destroy();
-	void Serialize();		// UI 업데이트 - 여기서 내 정보에 대한 UI 업데이트를 하도록 하자.
+	void Serialize();
 
-	// get 씨리즈
 	static ZMyInfo*		GetInstance();
 	ZMyItemList*		GetItemList() { return &m_ItemList; }
 	ZMySystemInfo*		GetSystemInfo()	{ return &m_MySystemInfo; }
-	ZMyGameInfo*		GetGameInfo()	{ return &m_MyGameInfo; }
-	MMatchSex			GetSex() { return m_nSex; }
-	int					GetHair() { return m_nHair; }
-	int					GetFace() { return m_nFace; }
-	int					GetRace() { return m_nRace; }
+	ZMyGameInfo*		GetGameInfo() { return &m_MyGameInfo; }
+	MMatchSex			GetSex() const { return m_nSex; }
+	int					GetHair() const { return m_nHair; }
+	int					GetFace() const { return m_nFace; }
+	int					GetRace() const { return m_nRace; }
 	int					GetLevel() const { return m_nLevel;}
-	int					GetLevelPercent()	{ return m_nLevelPercent; }
-	const char*			GetCharName() { return m_szCharName; }
-	const char*			GetClanName() { return m_szClanName; }
-	const char*			GetAccountID()	{ return m_szAccountID; }
-	unsigned long int	GetXP() { return m_nXP; }
-	int					GetBP() { return m_nBP; }
+	int					GetLevelPercent() const { return m_nLevelPercent; }
+	const char*			GetCharName() const { return m_szCharName; }
+	const char*			GetClanName() const { return m_szClanName; }
+	const char*			GetAccountID() const { return m_szAccountID; }
+	unsigned long int	GetXP() const { return m_nXP; }
+	int					GetBP() const { return m_nBP; }
 	int					GetHP();
 	int					GetAP();
-	bool				IsNewbie()	{ return m_bNewbie; }	// 초보자인지 여부(가지고 있는 캐릭터 최고레벨이 5레벨 미만)
-	MMatchUserGradeID	GetUGradeID()		{ return m_nUGradeID; }
-	MMatchPremiumGradeID	GetPGradeID()		{ return m_nPGradeID; }
-	MMatchClanGrade		GetClanGrade()	{ return m_nClanGrade; }
-	bool				IsAdminGrade() {
-		if ( (GetUGradeID() == MMUG_EVENTMASTER) || (GetUGradeID() == MMUG_DEVELOPER) || (GetUGradeID() == MMUG_ADMIN) )
-			return true;
-		else
-			return false;
-	}
-	bool				IsPremiumIPUser() { return (m_nPGradeID == MMPG_PREMIUM_IP); }
-	bool				IsClanJoined() { return ((m_szClanName[0] == 0) ? false : true); }
+	bool				IsNewbie()	{ return m_bNewbie; }
+	MMatchUserGradeID	GetUGradeID() const	{ return m_nUGradeID; }
+	MMatchPremiumGradeID	GetPGradeID() const { return m_nPGradeID; }
+	MMatchClanGrade		GetClanGrade() const { return m_nClanGrade; }
 
-	// set 씨리즈
+	bool IsAdminGrade() const
+	{
+		switch (GetUGradeID())
+		{
+		case MMUG_EVENTMASTER:
+		case MMUG_DEVELOPER:
+		case MMUG_ADMIN:
+			return true;
+		default:
+			return false;
+		}
+	}
+
+	bool IsPremiumIPUser() const { return (m_nPGradeID == MMPG_PREMIUM_IP); }
+	bool IsClanJoined() const { return ((m_szClanName[0] == 0) ? false : true); }
+
 	void SetXP(unsigned long int nXP)			{ m_nXP = nXP; }
 	void SetBP(int nBP)							{ m_nBP = nBP; }
 	void SetLevel( int nLevel );
@@ -127,6 +128,3 @@ public:
 };
 
 inline ZMyInfo* ZGetMyInfo() { return ZMyInfo::GetInstance(); }
-
-
-#endif

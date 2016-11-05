@@ -6,7 +6,6 @@
 #include "MMatchTransDataType.h"
 #include "MMath.h"
 #include "stuff.h"
-#include "HShield\HShield.h"
 
 #include "SafeString.h"
 #include "VersionNo.h"
@@ -1017,22 +1016,22 @@ inline void ZPostRequestGetCharQuestItemInfo( const MUID& uid )
 	ZPOSTCMD1( MC_MATCH_REQUEST_CHAR_QUEST_ITEM_LIST, MCmdParamUID(uid) );
 }
 
-inline void ZPostRequestBuyQuestItem( const MUID& uid, const unsigned long int nItemID )
+inline void ZPostRequestBuyQuestItem( const MUID& uid, u64 nItemID )
 {
 	  ZPOSTCMD2( MC_MATCH_REQUEST_BUY_QUEST_ITEM, MCmdParamUID(uid), MCommandParameterInt(nItemID) );
 }
 
-inline void ZPostRequestSellQuestItem( const MUID& uid, const unsigned long int nItemID, const int nCount = 1 )
+inline void ZPostRequestSellQuestItem( const MUID& uid, u64 nItemID,  int nCount = 1 )
 {
 	ZPOSTCMD3( MC_MATCH_REQUEST_SELL_QUEST_ITEM, MCmdParamUID(uid), MCommandParameterInt(nItemID), MCommandParameterInt(nCount) );
 }
 
-inline void ZPostRequestDropSacrificeItem( const MUID& uid, const int nSlotIndex, const unsigned long int nItemID )
+inline void ZPostRequestDropSacrificeItem( const MUID& uid, int nSlotIndex, u64 nItemID )
 {
 	ZPOSTCMD3( MC_MATCH_REQUEST_DROP_SACRIFICE_ITEM, MCmdParamUID(uid), MCommandParameterInt(nSlotIndex), MCommandParameterInt(nItemID) );
 }
 
-inline void ZPostRequestCallbackSacrificeItem( const MUID& uid, const int nSlotIndex, const unsigned long int nItemID )
+inline void ZPostRequestCallbackSacrificeItem( const MUID& uid, int nSlotIndex, u64 nItemID )
 {
 	ZPOSTCMD3( MC_MATCH_REQUEST_CALLBACK_SACRIFICE_ITEM, MCmdParamUID(uid), MCommandParameterInt(nSlotIndex), MCommandParameterInt(nItemID) );
 }

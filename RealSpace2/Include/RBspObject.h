@@ -99,6 +99,8 @@ struct RBSPPICKINFO {
 using RMapObjectList = std::vector<ROBJECTINFO>;
 
 struct RDrawInfo {
+	RDrawInfo() = default;
+	RDrawInfo(RDrawInfo&& src) = delete;
 	~RDrawInfo() {
 		SAFE_DELETE(pVertices);
 		SAFE_DELETE(pPlanes);
@@ -106,17 +108,17 @@ struct RDrawInfo {
 		SAFE_DELETE(pVAxis);
 	}
 
-	int				nVertice = 0;
+	int	nVertice = 0;
 	union
 	{
-		BSPVERTEX		*pVertices = nullptr;
+		BSPVERTEX* pVertices = nullptr;
 		BSPNORMALVERTEX* pNormalVertices;
 	};
-	int				nIndicesOffset = 0;
-	int				nTriangleCount = 0;
-	rplane			*pPlanes = nullptr;
-	rvector			*pUAxis = nullptr;
-	rvector			*pVAxis = nullptr;
+	int	nIndicesOffset = 0;
+	int	nTriangleCount = 0;
+	rplane * pPlanes = nullptr;
+	rvector * pUAxis = nullptr;
+	rvector * pVAxis = nullptr;
 };
 
 struct RSBspNode

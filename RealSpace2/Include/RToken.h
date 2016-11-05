@@ -1,7 +1,4 @@
-#ifndef _RTOKEN_H
-#define _RTOKEN_H
-
-//#pragma once
+#pragma once
 
 #include "RTypes.h"
 
@@ -81,21 +78,16 @@ char *Format(char *buffer, int maxlen, const rvector &v);
 char *Format(char *buffer, int maxlen, float f);
 char *Format(char *buffer, int maxlen, DWORD dw);
 
-
-//////////////// 맵 디자인 규칙
-
-#define RTOK_MAX_OBJLIGHT		"obj_"			// object 에만 영향을 주는 광원의 이름은 이렇게 시작한다.
-#define RTOK_MAX_NOPATH			"nopath_"		// 갈수없는 곳은 이렇게 시작한다.
-#define RTOK_MAX_EXPORTOBJ		"obj_"			// elu 로 export 하는 오브젝트들은 이렇게 이름이 시작한다.. (애니메이션이 있으면 자동)
-#define RTOK_MAX_SPAWNPOINT		"spawn_"		// spawn position 임을 나타낸다. ( dummy object 로 놓아야 한다 )
-#define RTOK_MAX_PASSTHROUGH	"pass_"			// 충돌체크를 통과한다.
-#define RTOK_MAX_HIDE			"hide_"			// 이런 이름을 가진 오브젝트는 렌더링되지 않는다.
-#define RTOK_MAX_OCCLUSION		"wall_"			// 벽.. (culling을 위한 추가정보)
-#define RTOK_MAX_PASSBULLET		"passb_"		// 총알통과
-#define RTOK_MAX_PASSROCKET		"passr_"		// 로켓및 수류탄 통과
-#define RTOK_MAX_OCCLUSION		"wall_"			// 벽.. (culling을 위한 추가정보)
-#define RTOK_MAX_PARTITION		"partition_"	// 공간 분할을 위한 평면 partition_0 partition_1 ... 이런 식으로 쓴다
-#define RTOK_MAX_NAVIGATION		"hnav_"			// 인공지능 길찾기 정보 메쉬 - hide와 마찬가지로 렌더링되지 않는다.
-#define RTOK_MAX_SMOKE_SS		"smk_ss_"		// 굴뚝의 연기 더미..
-
-#endif
+#define RTOK_MAX_OBJLIGHT		"obj_"
+#define RTOK_MAX_NOPATH			"nopath_"
+#define RTOK_MAX_EXPORTOBJ		"obj_"
+#define RTOK_MAX_SPAWNPOINT		"spawn_"
+#define RTOK_MAX_PASSTHROUGH	"pass_"
+#define RTOK_MAX_HIDE			"hide_"
+#define RTOK_MAX_OCCLUSION		"wall_"
+#define RTOK_MAX_PASSBULLET		"passb_"
+#define RTOK_MAX_PASSROCKET		"passr_"
+#define RTOK_MAX_OCCLUSION		"wall_"
+#define RTOK_MAX_PARTITION		"partition_"
+#define RTOK_MAX_NAVIGATION		"hnav_"
+#define RTOK_MAX_SMOKE_SS		"smk_ss_"

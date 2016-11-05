@@ -17,8 +17,7 @@ RBspLightmapManager::RBspLightmapManager()
 {
 	m_nSize = MAX_LIGHTMAP_SIZE;
 
-	POINT p = { 0,0 };
-	m_pFreeList[MAX_LEVEL_COUNT].push_back(p);
+	m_pFreeList[MAX_LEVEL_COUNT].push_back({ 0, 0 });
 }
 
 float RBspLightmapManager::CalcUnused()
@@ -37,7 +36,7 @@ bool RBspLightmapManager::GetFreeRect(int nLevel, POINT *pt)
 {
 	if (nLevel > MAX_LEVEL_COUNT) return false;
 
-	if (!m_pFreeList[nLevel].size())
+	if (m_pFreeList[nLevel].empty())
 	{
 		POINT point;
 		if (!GetFreeRect(nLevel + 1, &point))
@@ -57,7 +56,6 @@ bool RBspLightmapManager::GetFreeRect(int nLevel, POINT *pt)
 		m_pFreeList[nLevel].push_back(newpoint);
 
 		*pt = point;
-
 	}
 	else
 	{
@@ -383,8 +381,6 @@ v3 LightmapGenerator::CalcDiffuse(const rboundingbox& bbox,
 
 		auto normal = GetNormal(poly, position, au, av);
 
-		//DMLog("Normal: %f, %f, %f\n", EXPAND_VECTOR(normal));
-
 		float fDot;
 		fDot = DotProduct(dpos, normal);
 		fDot = max(0.f, fDot);
@@ -621,7 +617,7 @@ void LightmapGenerator::InsertLightmap(int lightmapsize,
 
 bool LightmapGenerator::SaveToFile()
 {
-	RHEADER header(R_LM_ID, R_LM_VERSION);
+	RHEADER header{ R_LM_ID, R_LM_VERSION };
 
 	auto CalcTreeUV = [&](auto* tree) {
 		CalcLightmapUV(tree, SourceLightmap.get(),
@@ -631,16 +627,15 @@ bool LightmapGenerator::SaveToFile()
 	CalcTreeUV(bsp.OcRoot.data());
 
 	FILE *file = nullptr;
-	fopen_s(&file, filename, "wb+");
-	if (!file) {
+	auto ret = fopen_s(&file, filename, "wb+");
+	if (ret != 0 || !file)
 		return false;
-	}
 
 	fwrite(&header, sizeof(RHEADER), 1, file);
 
-	auto nConvexPolygons = bsp.ConvexPolygons.size();
+	u32 nConvexPolygons = bsp.ConvexPolygons.size();
 	fwrite(&nConvexPolygons, sizeof(int), 1, file);
-	int NodeCount = bsp.GetNodeCount();
+	i32 NodeCount = bsp.GetNodeCount();
 	fwrite(&NodeCount, sizeof(int), 1, file);
 
 	auto nLightmap = LightmapList.size();
@@ -680,8 +675,8 @@ bool LightmapGenerator::SaveToFile()
 
 void LightmapGenerator::Init()
 {
-	for (size_t i = 0; i < bsp.ConvexPolygons.size(); i++)
-		MaximumArea = max(MaximumArea, bsp.ConvexPolygons[i].fArea);
+	for (auto& Poly : bsp.ConvexPolygons)
+		MaximumArea = max(MaximumArea, Poly.fArea);
 
 	pplight = std::unique_ptr<RLIGHT*[]>{ new RLIGHT*[bsp.StaticMapLightList.size()] };
 	lightmap = std::unique_ptr<rvector[]>{ new rvector[Square(MaxLightmapSize)] };

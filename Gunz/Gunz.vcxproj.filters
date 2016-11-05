@@ -88,9 +88,6 @@
     <Filter Include="StringRes">
       <UniqueIdentifier>{4bf0a98d-9848-412f-87bd-b45471e3b2bc}</UniqueIdentifier>
     </Filter>
-    <Filter Include="XTrap">
-      <UniqueIdentifier>{ab55048e-7eb3-4f19-90d6-83e4e32b8949}</UniqueIdentifier>
-    </Filter>
     <Filter Include="HShield">
       <UniqueIdentifier>{ecf1dcb1-5f10-4800-9748-c0cdc27c026c}</UniqueIdentifier>
     </Filter>
@@ -510,9 +507,6 @@
     <ClInclude Include="ZSoundFMod.h">
       <Filter>Sound</Filter>
     </ClInclude>
-    <ClInclude Include="CGLEncription.h">
-      <Filter>Interface\Game</Filter>
-    </ClInclude>
     <ClInclude Include="main.h">
       <Filter>Interface\Game</Filter>
     </ClInclude>
@@ -722,9 +716,6 @@
     </ClInclude>
     <ClInclude Include="ZTips.h">
       <Filter>StringRes</Filter>
-    </ClInclude>
-    <ClInclude Include="XTrap\XTrap.h">
-      <Filter>XTrap</Filter>
     </ClInclude>
     <ClInclude Include="HShield\HShield.h">
       <Filter>HShield</Filter>
@@ -1179,9 +1170,6 @@
     <ClCompile Include="ZSoundFMod.cpp">
       <Filter>Sound</Filter>
     </ClCompile>
-    <ClCompile Include="CGLEncription.cpp">
-      <Filter>Interface\Game</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Interface\Game</Filter>
     </ClCompile>
@@ -1364,9 +1352,6 @@
     </ClCompile>
     <ClCompile Include="ZTips.cpp">
       <Filter>StringRes</Filter>
-    </ClCompile>
-    <ClCompile Include="XTrap\XTrap.cpp">
-      <Filter>XTrap</Filter>
     </ClCompile>
     <ClCompile Include="Portal.cpp">
       <Filter>RGunz</Filter>

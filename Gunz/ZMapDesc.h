@@ -1,10 +1,8 @@
-#ifndef _ZMAPDESC_H
-#define _ZMAPDESC_H
+#pragma once
 
 #include "ZPrerequisites.h"
 #include <list>
 #include <vector>
-using namespace std;
 
 #include "MXml.h"
 #include "RTypes.h"
@@ -16,7 +14,6 @@ enum ZMapSpawnType
 	ZMST_TEAM1,
 	ZMST_TEAM2,
 
-	// 퀘스트용
 	ZMST_NPC_MELEE,
 	ZMST_NPC_RANGE,
 	ZMST_NPC_BOSS,
@@ -38,8 +35,7 @@ struct ZMAPSPAWN
 	rvector dir;
 };
 
-class ZMapSpawnList : public vector<ZMapSpawnData*> { };
-
+using ZMapSpawnList = std::vector<ZMapSpawnData*>;
 
 #define MAX_BACKUP_SPAWN 5
 
@@ -183,8 +179,6 @@ public:
 		}
 	}
 
-	// 사용하는 맵에 많아야 3-4 개니까 그냥 쓴다...
-
 	ZMapSmokeDummy* Get(const std::string& name) {
 		
 		iterator it;
@@ -199,7 +193,6 @@ public:
 	}
 };
 
-// 퀘스트에서만 사용하는 맵 정보
 struct ZQuestMapDesc
 {
 	rvector	 m_vLinks[MAX_QUEST_MAP_SECTOR_COUNT];
@@ -250,19 +243,16 @@ public:
 
 	bool LoadSmokeDesc(const char* pFileName);	
 
-	void DrawSmoke();			// 연기
+	void DrawSmoke();
 
 	void DrawSmokeSS(ZMapSmokeSS* pDummy);
 	void DrawSmokeST(ZMapSmokeST* pDummy);
 	void DrawSmokeTS(ZMapSmokeTS* pDummy);
 
-	void DrawMapDesc();			// 맵에 기술된 특수 더미 오브젝트중 그려야 할것이 있는 경우
+	void DrawMapDesc();
 
 	const rvector GetWaitCamDir()		{ return m_WaitCamDir; }
 	const rvector GetWaitCamPos()		{ return m_WaitCamPos; }
 
 	rvector GetQuestSectorLink(int nIndex);
 };
-
-
-#endif

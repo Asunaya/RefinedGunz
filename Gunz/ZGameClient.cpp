@@ -92,8 +92,6 @@ bool GetUserInfoUID(MUID uid,MCOLOR& _color,char* sp_name,MMatchUserGradeID& gid
 extern MCommandLogFrame* m_pLogFrame;
 extern ZIDLResource	g_IDLResource;
 
-
-// 내 플레이어의 uid
 MUID ZGetMyUID() 
 {
 	if (!ZGetGameClient()) return MUID(0, 0);
@@ -102,7 +100,7 @@ MUID ZGetMyUID()
 
 bool ZPostCommand(MCommand* pCmd) 
 {
-	// Replay 중에는 아래 나열한 커맨드만 전송 허용
+	// Replay
 	if (ZGetGame() && ZGetGame()->IsReplay()) {
 		switch(pCmd->GetID()) {
 		case MC_CLOCK_SYNCHRONIZE:
@@ -166,12 +164,7 @@ ZGameClient::ZGameClient() : MMatchClient() , m_pUPnP(NULL)
 	m_EmblemMgr.Create();
 	m_EmblemMgr.PrepareCache();
 
-	// HShield Init
-// #ifdef _HSHIELD
-//	MPacketHShieldCrypter::Init();
-//#endif
-
-#ifdef _LOCATOR // -by 추교성. Locator에 접속해서 커맨드를 받으려면 m_This의 UID가 (0,0)이 아니어야 함.
+#ifdef _LOCATOR
 	m_This = MUID(0, 1);
 #endif
 }
@@ -228,44 +221,6 @@ int ZGameClient::OnResponseMatchLogin(const MUID& uidServer, int nResult, const 
 	if ((nResult == 0) && (nRet == MOK)) {	// Login successful
 		mlog("Login Successful. \n");
 
-#ifdef _HSHIELD
-	int dwRet = _AhnHS_MakeGuidAckMsg(pbyGuidReqMsg,        // [in]
-									  ZGetMyInfo()->GetSystemInfo()->pbyGuidAckMsg // [out]
-									 );
-	if( dwRet != ERROR_SUCCESS )
-		mlog("Making Guid Ack Msg Failed. (Error code = %x)\n", dwRet);
-
-#endif
-
-#ifdef _XTRAP
-
-	// XTrap 유져세팅
-	SetOptGameInfo(const_cast<char*>(szAccountID),const_cast<char*>(szServerName),"","",0);
-
-	char verify_hash_value[256], random_value[256], serial_key[128];
-	strcpy_safe(random_value, szRandomValue);
-
-/* LOCALE_KOREA */
-	strcpy_safe( verify_hash_value, "54ad5021c90ce0752b376df9cc91d78e");
-// #ifdef LOCALE_JAPAN
-	if( MC_JAPAN == ZGetLocale()->GetCountry() )
-		strcpy_safe( verify_hash_value, "6d01a67c720e3e04bd2b6bde48d2d8f3");
-// #endif
-// #ifdef LOCALE_US
-	if( MC_US == ZGetLocale()->GetCountry() )
-		strcpy_safe( verify_hash_value, "424fe0d16375a7818a4d4911e8ca8cbd");
-//#endif
-
-
-	// SerialKey Generation
-	CreateKF( verify_hash_value					/* Input XTrapCC Version Verify Hash Value	*/
-				, random_value					/* Input RandomKey							*/
-				, serial_key);					/* Output Generated Key						*/
-
-	strcpy_safe(ZGetMyInfo()->GetSystemInfo()->szSerialKey, serial_key);
-#endif
-
-		// 여기서 AccountCharList를 요청한다.
 		ZApplication::GetGameInterface()->ChangeToCharSelection();
 	} else {								// Login failed
 		mlog("Login Failed.(ErrCode=%d) \n", nResult);
@@ -1214,39 +1169,6 @@ bool ZGameClient::OnCommand(MCommand* pCommand)
 				pCommand->GetParameter(&nTimeStamp, 0, MPT_UINT);
 
 				MClient::OutputMessage(MZMOM_LOCALREPLY, "Ping from (%u:%u) = %d", pCommand->GetSenderUID().High, pCommand->GetSenderUID().Low, GetGlobalTimeMS()-nTimeStamp);
-			}
-			break;
-
-		case MC_HSHIELD_PING:
-			{
-				unsigned int nTimeStamp;
-
-				if(pCommand->GetParameter(&nTimeStamp, 0, MPT_UINT) == false) break;
-				
-				MCommandParameter* pParam = pCommand->GetParameter(1);
-				if(pParam->GetType() != MPT_BLOB) 	break;
-				void* pBlob = pParam->GetPointer();
-				int nCount = MGetBlobArrayCount(pBlob);
-
-				unsigned char* pReqMsg = (unsigned char*)MGetBlobArrayElement(pBlob, 0);
-				
-				DWORD dwRet = _AhnHS_MakeAckMsg(pReqMsg, ZGetMyInfo()->GetSystemInfo()->pbyAckMsg);
-
-				if(dwRet != ERROR_SUCCESS)
-					mlog("Making Ack Msg Failed. (Error code = %x)\n", dwRet);
-
-				MCommand* pNew = new MCommand(m_CommandManager.GetCommandDescByID(MC_HSHIELD_PONG), pCommand->m_Sender, m_This);
-				pNew->AddParameter(new MCommandParameterUInt(nTimeStamp));
-				void* pBlob2 = MMakeBlobArray(sizeof(unsigned char), SIZEOF_ACKMSG);
-				unsigned char* pCmdBlock = (unsigned char*)MGetBlobArrayElement(pBlob2, 0);
-				CopyMemory(pCmdBlock, ZGetMyInfo()->GetSystemInfo()->pbyAckMsg, SIZEOF_ACKMSG);
-
-				pNew->AddParameter(new MCmdParamBlob(pBlob2, MGetBlobArraySize(pBlob2)));
-//				MEraseBlobArray(pBlob);
-				MEraseBlobArray(pBlob2);
-				Post(pNew);
-				
-				return true;
 			}
 			break;
 		case ZC_CON_CONNECT:

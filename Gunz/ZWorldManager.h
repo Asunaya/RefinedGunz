@@ -3,21 +3,21 @@
 #include <vector>
 
 class ZWorld;
-class ZWorldManager : public vector<ZWorld*>
+class ZWorldManager : public std::vector<ZWorld*>
 {
 	int m_nCurrent;
-	set<ZWorld*>	m_Worlds;
+	std::set<ZWorld*>	m_Worlds;
 
 public:
-	ZWorldManager(void);
-	virtual ~ZWorldManager(void);
+	ZWorldManager();
+	virtual ~ZWorldManager();
 
 	void Destroy();
 
 	void AddWorld(const char* szMapName);
 
 	void Clear();
-	bool LoadAll(ZLoadingProgress *pLoading );
+	bool LoadAll(ZLoadingProgress *pLoading);
 
 	int GetCount() { return (int)size(); }
 

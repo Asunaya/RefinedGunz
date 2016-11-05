@@ -65,7 +65,6 @@
 #include "MPopupMenu.h"
 
 // realspace2
-#include "rtypes.h"
 #include "RNameSpace.h"
 #include "RTypes.h"
 #include "RealSpace2.h"

@@ -511,7 +511,7 @@ bool RNavigationMesh::Save(const char* szFileName)
 	if (!file) return false;
 
 	// header -------------
-	RHEADER header(R_NAV_ID, R_NAV_VERSION);
+	RHEADER header{ R_NAV_ID, R_NAV_VERSION };
 	fwrite(&header, sizeof(RHEADER), 1, file);
 
 	// vertex -------------

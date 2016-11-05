@@ -40,9 +40,6 @@
     <Filter Include="StringRes">
       <UniqueIdentifier>{e3be9540-8987-435f-91c5-ca8418c807aa}</UniqueIdentifier>
     </Filter>
-    <Filter Include="HShield">
-      <UniqueIdentifier>{d174cab3-21a4-4b86-be4d-3fdd03acbe58}</UniqueIdentifier>
-    </Filter>
     <Filter Include="MCountryFilter">
       <UniqueIdentifier>{df4fc847-e1fe-4df0-83f1-76c1edc9f3a2}</UniqueIdentifier>
     </Filter>
@@ -112,9 +109,6 @@
     <ClInclude Include="Include\MPacketCrypter.h">
       <Filter>Packet</Filter>
     </ClInclude>
-    <ClInclude Include="Include\MPacketHShieldCrypter.h">
-      <Filter>Packet</Filter>
-    </ClInclude>
     <ClInclude Include="Include\Msg.h">
       <Filter>Packet</Filter>
     </ClInclude>
@@ -141,9 +135,6 @@
     </ClInclude>
     <ClInclude Include="Include\MStringRes.h">
       <Filter>StringRes</Filter>
-    </ClInclude>
-    <ClInclude Include="HShield\HsCryptLib.h">
-      <Filter>HShield</Filter>
     </ClInclude>
     <ClInclude Include="Include\MCountryFilter.h">
       <Filter>MCountryFilter</Filter>
@@ -233,9 +224,6 @@
     <ClCompile Include="Source\MPacketCrypter.cpp">
       <Filter>Packet</Filter>
     </ClCompile>
-    <ClCompile Include="Source\MPacketHShieldCrypter.cpp">
-      <Filter>Packet</Filter>
-    </ClCompile>
     <ClCompile Include="Source\MCommandCommunicator.cpp">
       <Filter>CommandCommunicator</Filter>
     </ClCompile>
@@ -278,10 +266,5 @@
     <ClCompile Include="Source\MMatchNotify.cpp" />
     <ClCompile Include="Source\MMatchWorldItemDesc.cpp" />
     <ClCompile Include="stdafx.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <Library Include="HShield\HsCryptLib.lib">
-      <Filter>HShield</Filter>
-    </Library>
   </ItemGroup>
 </Project>
