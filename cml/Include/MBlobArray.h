@@ -1,22 +1,19 @@
-// 특정 메모리 블럭의 배열과 그 정보를 하나의 메모리 블럭에 넣기 위한 함수들
-#ifndef MBLOBARRAY_H
-#define MBLOBARRAY_H
+#pragma once
 
-/// nOneBlobSize만큼 nBlobCount갯수만큼 배열한 블럭 만들기
+// Construction and destruction
 void* MMakeBlobArray(int nOneBlobSize, int nBlobCount);
-/// 블럭 지우기
 void MEraseBlobArray(void* pBlob);
-/// 블럭에서 각 원소 얻어내기
-void* MGetBlobArrayElement(void* pBlob, int i);
-/// 블럭의 갯수 얻어내기
-int MGetBlobArrayCount(void* pBlob);
-/// 블걱 전체 사이즈 얻어내기
-int MGetBlobArraySize(void* pBlob);
-/// Array Block으로 보고 맨 처음 포인터 얻어내기
-void* MGetBlobArrayPointer(void* pBlob);
+
+const void* MGetBlobArrayElement(const void* pBlob, int i);
+inline void* MGetBlobArrayElement(void* pBlob, int i) {
+	return const_cast<void*>(MGetBlobArrayElement(static_cast<const void*>(pBlob), i)); }
+
+int MGetBlobArrayCount(const void* pBlob);
+int MGetBlobArraySize(const void* pBlob);
+
+const void* MGetBlobArrayPointer(const void* pBlob);
+inline void* MGetBlobArrayPointer(void* pBlob) {
+	return const_cast<void*>(MGetBlobArrayPointer(static_cast<const void*>(pBlob))); }
 
 size_t MGetBlobArrayInfoSize();
-
-size_t MGetBlobArrayElementSize(void* pBlob);
-
-#endif
+size_t MGetBlobArrayElementSize(const void* pBlob);

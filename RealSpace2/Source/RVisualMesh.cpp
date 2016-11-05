@@ -625,22 +625,23 @@ bool RVisualMesh::Pick(const rvector& pos, const rvector& dir,RPickInfo* pInfo)
 	return false;
 }
 
-bool RVisualMesh::Pick(const rvector& pos, const rvector& dir,rvector* v,float* t)
+bool RVisualMesh::Pick(const rvector& pos, const rvector& dir, rvector* v, float* t)
 {
-	if(m_pMesh) {
+	if (!m_pMesh)
+		return false;
 
-		if(!BBoxPickCheck(pos,dir))
-			return false;
+	if (!BBoxPickCheck(pos, dir))
+		return false;
 
-		RPickInfo info;
-		bool hr = m_pMesh->Pick(pos,dir,&info,&m_WorldMat);
+	RPickInfo info;
+	bool hr = m_pMesh->Pick(pos, dir, &info, &m_WorldMat);
 
+	if (v)
 		*v = info.vOut;
+	if (t)
 		*t = info.t;
 
-		return hr;
-	}
-	return false;
+	return hr;
 }
 
 void RVisualMesh::Play(RAniMode amode) {

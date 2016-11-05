@@ -14,50 +14,99 @@ class MListBox;
 class ZCharacterViewList;
 class UPnP;
 
-
 class ZGameClient : public MMatchClient
 {
-protected:
-	char				m_szChannel[256];
-	char				m_szChannelRule[128];
-	char				m_szStageName[256];
-	char				m_szChatRoomInvited[64];
-	unsigned int		m_nRoomNo;
-	int					m_nStageCursor;
-	bool				m_bLadderGame;
-	MCHANNEL_TYPE		m_CurrentChannelType;
-	char				m_szVoteText[256];
+public:
+	ZGameClient();
+	virtual ~ZGameClient();
+
+	void OnSpawnWorldItem(void* pBlob);
+	void OnObtainWorldItem(const MUID& uidChar, const int nItemUID);
+	void OnRemoveWorldItem(const int nItemUID);
+
+	bool CreatedStage = false;
+	MTD_ClientSettings ClientSettings;
+
+	void PriorityBoost(bool bBoost);
+	bool GetPriorityBoost() { return m_bPriorityBoost; }
+	bool GetRejectNormalChat() { return m_bRejectNormalChat; }
+	void SetRejectNormalChat(bool bVal) { m_bRejectNormalChat = bVal; }
+	bool GetRejectTeamChat() { return m_bRejectTeamChat; }
+	void SetRejectTeamChat(bool bVal) { m_bRejectTeamChat = bVal; }
+	bool GetRejectClanChat() { return m_bRejectClanChat; }
+	void SetRejectClanChat(bool bVal) { m_bRejectClanChat = bVal; }
+	bool GetRejectWhisper() { return m_bRejectWhisper; }
+	void SetRejectWhisper(bool bVal) { m_bRejectWhisper = bVal; }
+	bool GetRejectInvite() { return m_bRejectInvite; }
+	void SetRejectInvite(bool bVal) { m_bRejectInvite = bVal; }
+
+	auto GetClockCount() const { return GetGlobalTimeMS(); }
+	u64 GetGlobalClockCount() const;
+
+	virtual void OutputMessage(const char* szMessage, MZMOMType nType = MZMDM_GENERAL) override;
+
+	void SetOnCommandCallback(ZONCOMMANDCALLBACK pCallback) { m_fnOnCommandCallback = pCallback; }
+
+	void Tick();
+	void Disconnect() { MMatchClient::Disconnect(m_Server); }
+
+	auto* GetMatchStageSetting() { return &m_MatchStageSetting; }
+	auto* GetMatchStageSetting() const { return &m_MatchStageSetting; }
+	bool IsForcedEntry() const { return m_bForcedEntry; }
+	bool IsLadderGame() const { return m_bLadderGame; }
+	void ReleaseForcedEntry();
+	void ClearStageSetting();
+
+	void RequestPrevStageList();
+	void RequestNextStageList();
+	void RequestStageList(int nPage);
+	void StartStageList();
+	void StopStageList();
+	void StartChannelList(MCHANNEL_TYPE nChannelType);
+	void StopChannelList();
+
+	const char*		GetChannelName() const { return m_szChannel; }
+	MCHANNEL_TYPE	GetChannelType() const { return m_CurrentChannelType; }
+	const char*		GetChannelRuleName() const { return m_szChannelRule; }
+	const char*		GetStageName() const { return m_szStageName; }
+	int				GetStageNumber() const { return m_nRoomNo; }
+
+	const char* GetChatRoomInvited() const { return m_szChatRoomInvited; }
+	void SetChatRoomInvited(const char* pszRoomName) { strcpy_safe(m_szChatRoomInvited, pszRoomName); }
+
+	bool AmIStageMaster() const { return (m_MatchStageSetting.GetMasterUID() == GetPlayerUID()); }
+
+	const char* GetVoteMessage() const { return m_szVoteText; }
+
+	void AnswerSponsorAgreement(bool bAnswer);
+	void AnswerJoinerAgreement(bool bAnswer);
+	void RequestCreateClan(char* szClanName, char** ppMemberCharNames);
+
+	void RequestProposal(const MMatchProposalMode nProposalMode, char** ppReplierCharNames, const int nReplierCount);
+	void ReplyAgreement(bool bAgreement);
+
+	bool IsVoteInProgress() { return m_bVoteInProgress; }
+	void SetVoteInProgress(bool bVal) { m_bVoteInProgress = bVal; }
+	bool CanVote() { return m_bCanVote; }
+	void SetCanVote(bool bVal) { m_bCanVote = bVal; }
+
+	void RequestGameSuicide();
+	void OnStageEnterBattle(const MUID& uidChar, MCmdEnterBattleParam nParam, MTD_PeerListNode* pPeerNode);
+	int ValidateRequestDeleteChar();
+	void RequestChannelJoin(const MUID& uidChannel);
+	void RequestChannelJoin(const MCHANNEL_TYPE nChannelType, char* szChannelName);
+	void RequestOnLobbyCreated();
+	void RequestOnGameDestroyed();
+
+	MEmblemMgr *GetEmblemManager() { return &m_EmblemMgr; }
+
+	bool CreateUPnP(unsigned short nUDPPort);
+	bool DestroyUPnP();
+
+	int GetPingToServer() const { return PingToServer; }
 
 private:
-	unsigned long int		m_nPrevClockRequestAttribute;
-	
-	int						m_nBridgePeerCount;
-	unsigned long int		m_tmLastBridgePeer;
-
-	int						m_nCountdown;
-	unsigned long int		m_tmLastCountdown;
-
-	int						m_nRequestID;			///< 클랜 생성등에서 쓰이는 RequestID
-	MUID					m_uidRequestPlayer;		///< 클랜 생성등의 요청자 
-	ZNetAgreementBuilder	m_AgreementBuilder;		///< 동의빌더
-	MMatchProposalMode		m_nProposalMode;
-
-	bool					m_bVoteInProgress;		///< 투표가 진행중인가
-	bool					m_bCanVote;				///< 투표권이 있는가
-
-	MEmblemMgr				m_EmblemMgr;
-
-	bool					m_bPriorityBoost;		///< 성능최대화
-	bool					m_bRejectNormalChat;	///< 일반챗 허용
-	bool					m_bRejectTeamChat;		///< 팀챗 허용
-	bool					m_bRejectClanChat;		///< 클랜챗 허용
-	bool					m_bRejectWhisper;		///< 귓말허용
-	bool					m_bRejectInvite;		///< 초대허용
-
-	int PingToServer = 0;
-
-protected:
-	void SetChannelRuleName(const char* pszName)	{ strcpy_safe(m_szChannelRule, pszName); }
+	void SetChannelRuleName(const char* pszName) { strcpy_safe(m_szChannelRule, pszName); }
 	int GetBridgePeerCount()			{ return m_nBridgePeerCount; }
 	void SetBridgePeerCount(int nCount)	{ m_nBridgePeerCount = nCount; }
 	void UpdateBridgePeerTime(unsigned long int nClock)	{ m_tmLastBridgePeer = nClock; }
@@ -80,45 +129,45 @@ protected:
 
 	static int FindListItem(MListBox* pListBox, const MUID& uid);
 
-protected:
 	ZONCOMMANDCALLBACK*		m_fnOnCommandCallback;
 	
 	bool					m_bIsBigGlobalClock;
-	unsigned long int		m_nClockDistance;
+	u32						m_nClockDistance;
 
 	MMatchStageSetting		m_MatchStageSetting;
 	bool					m_bForcedEntry;
-protected:
-	virtual bool OnCommand(MCommand* pCommand);
-	virtual bool OnSockDisconnect(SOCKET sock);
-	virtual bool OnSockConnect(SOCKET sock);
-	virtual void OnSockError(SOCKET sock, SOCKET_ERROR_EVENT ErrorEvent, int &ErrorCode);
-	virtual int OnConnected(SOCKET sock, MUID* pTargetUID, MUID* pAllocUID, unsigned int nTimeStamp);
-	virtual void OnRegisterCommand(MCommandManager* pCommandManager);
-	virtual void OnPrepareCommand(MCommand* pCommand);
+
+	virtual bool OnCommand(MCommand* pCommand) override final;
+	virtual bool OnSockDisconnect(SOCKET sock) override final;
+	virtual bool OnSockConnect(SOCKET sock) override final;
+	virtual void OnSockError(SOCKET sock, SOCKET_ERROR_EVENT ErrorEvent, int &ErrorCode) override final;
+	virtual int OnConnected(SOCKET sock, MUID* pTargetUID, MUID* pAllocUID,
+		u32 nTimeStamp) override final;
+	virtual void OnRegisterCommand(MCommandManager* pCommandManager) override final;
+	virtual void OnPrepareCommand(MCommand* pCommand) override final;
 	virtual int OnResponseMatchLogin(const MUID& uidServer, int nResult, const char* szServerName,
 		const MMatchServerMode nServerMode,
 		const char* szAccountID, const MMatchUserGradeID nUGradeID,
 		const MMatchPremiumGradeID nPGradeID, const MUID& uidPlayer,
-		const char* szRandomValue, unsigned char* szEncryptMsg);
+		const char* szRandomValue, unsigned char* szEncryptMsg) override final;
 	virtual void OnBridgePeerACK(const MUID& uidChar, int nCode);
-	virtual void OnObjectCache(unsigned int nType, void* pBlob, int nCount);
-	virtual void OnAgentError(int nError);
-protected:
+	virtual void OnObjectCache(unsigned int nType, void* pBlob, int nCount) override final;
+	virtual void OnAgentError(int nError) override final;
+
 	void OnMatchNotify(unsigned int nMsgID);
 	void OnAnnounce(unsigned int nType, char* szMsg);
 	void OnResponseResult(const int nResult);
 
 	void OnChannelResponseJoin(const MUID& uidChannel, MCHANNEL_TYPE nChannelType, char* szChannelName);
-	void OnChannelChat(const MUID& uidChannel, char* szName, char* szChat,int nGrade);
+	void OnChannelChat(const MUID& uidChannel, const char* szName, const char* szChat, int nGrade);
 	void OnChannelList(void* pBlob, int nCount);
 	void OnChannelResponseRule(const MUID& uidchannel, const char* pszRuleName);
 
-	void OnLadderPrepare(const MUID& uidStage, const int nTeam);
+	void OnLadderPrepare(const MUID& uidStage, int nTeam);
 	void OnLadderLaunch(const MUID& uidStage, const char* pszMapName);
-	void OnLadderResponseChallenge(const int nResult);
+	void OnLadderResponseChallenge(int nResult);
 
-	void OnStageJoin(const MUID& uidChar, const MUID& uidStage, unsigned int nRoomNo, char* szStageName);
+	void OnStageJoin(const MUID& uidChar, const MUID& uidStage, unsigned int nRoomNo, const char* szStageName);
 	void OnStageLeave(const MUID& uidChar, const MUID& uidStage);
 	void OnStageStart(const MUID& uidChar, const MUID& uidStage, int nCountdown);
 	void OnStageLaunch(const MUID& uidStage, const char* pszMapName);
@@ -127,17 +176,18 @@ protected:
 	void OnStageTeam(const MUID& uidChar, const MUID& uidStage, unsigned int nTeam);
 	void OnStagePlayerState(const MUID& uidChar, const MUID& uidStage, MMatchObjectStageState nStageState);
 	void OnStageMaster(const MUID& uidStage, const MUID& uidChar);
-	void OnStageChat(const MUID& uidChar, const MUID& uidStage, char* szChat);
+	void OnStageChat(const MUID& uidChar, const MUID& uidStage, const char* szChat);
 	void OnStageList(int nPrevStageCount, int nNextStageCount, void* pBlob, int nCount);
 	void OnResponseFriendList(void* pBlob, int nCount);
 	void OnChannelPlayerList(int nTotalPlayerCount, int nPage, void* pBlob, int nCount);
 	void OnChannelAllPlayerList(const MUID& uidChannel, void* pBlob, int nBlobCount);
-	void OnResponseStageSetting(const MUID& uidStage, void* pStageBlob, int nStageCount, void* pCharBlob, 
-		                        int nCharCount, STAGE_STATE nStageState, const MUID& uidMaster);
+	void OnResponseStageSetting(const MUID& uidStage, const void* pStageBlob, int nStageCount,
+		const void* pCharBlob, int nCharCount, STAGE_STATE nStageState, const MUID& uidMaster);
 	void OnResponseRecommandedChannel(const MUID& uidChannel);
 	void OnResponsePeerRelay(const MUID& uidPeer);
-	void OnResponseGameInfo(const MUID& uidStage, void* pGameInfoBlob, void* pRuleInfoBlob, void* pPlayerInfoBlob);
-	void OnResponseCharInfoDetail(void* pBlob);
+	void OnResponseGameInfo(const MUID& uidStage, const void* pGameInfoBlob,
+		const void* pRuleInfoBlob, const void* pPlayerInfoBlob);
+	void OnResponseCharInfoDetail(const void* pBlob);
 
 	void OnLoadingComplete(const MUID& uidChar, int nPercent);
 	void OnForcedEntryToGame();
@@ -153,7 +203,7 @@ protected:
 	void OnExpiredRentItem(void* pBlob);
 
 	void OnBirdTest();
-protected:
+
 	void OnResponseCreateClan(const int nResult, const int nRequestID);
 	void OnResponseAgreedCreateClan(const int nResult);
 	void OnClanAskSponsorAgreement(const int nRequestID, const char* szClanName, MUID& uidMasterObject, const char* szMasterName);
@@ -173,142 +223,86 @@ protected:
 	void OnClanStandbyClanList(int nPrevStageCount, int nNextStageCount, void* pBlob);
 	void OnClanMemberConnected(const char* szMember);
 
-	void OnResponseProposal(const int nResult, const MMatchProposalMode nProposalMode, const int nRequestID);
+	void OnResponseProposal(int nResult, MMatchProposalMode nProposalMode,
+		int nRequestID);
 	void OnAskAgreement(const MUID& uidProposer, 
 		                void* pMemberNamesBlob, 
-						const MMatchProposalMode nProposalMode, 
-						const int nRequestID);
+						MMatchProposalMode nProposalMode, 
+						int nRequestID);
 	void OnReplyAgreement(const MUID& uidProposer, 
 		                  const MUID& uidChar, 
 						  const char* szReplierName, 
 						  const MMatchProposalMode nProposalMode,
-					      const int nRequestID, 
-						  const bool bAgreement);
+					      int nRequestID, 
+						  bool bAgreement);
 	void ReplyAgreement(const MUID& uidProposer, const MMatchProposalMode nProposalMode, bool bAgreement);
-protected:
+
 	void OnGameLevelUp(const MUID& uidChar);
 	void OnGameLevelDown(const MUID& uidChar);
 
-public:
-	void OnSpawnWorldItem(void* pBlob);
-	void OnObtainWorldItem(const MUID& uidChar, const int nItemUID);
-	void OnRemoveWorldItem(const int nItemUID);
-protected:
 	void OnLocalReport119();
-protected:
 	void OnAdminAnnounce(const char* szMsg, const ZAdminAnnounceType nType);
-public:
-	bool CreatedStage = false;
-	MTD_ClientSettings ClientSettings;
 
-	ZGameClient();
-	virtual ~ZGameClient();
-
-	void PriorityBoost(bool bBoost);
-	bool GetPriorityBoost()				{ return m_bPriorityBoost; }
-	bool GetRejectNormalChat()			{ return m_bRejectNormalChat; }
-	void SetRejectNormalChat(bool bVal)	{ m_bRejectNormalChat = bVal; }
-	bool GetRejectTeamChat()			{ return m_bRejectTeamChat; }
-	void SetRejectTeamChat(bool bVal)	{ m_bRejectTeamChat = bVal; }
-	bool GetRejectClanChat()			{ return m_bRejectClanChat; }
-	void SetRejectClanChat(bool bVal)	{ m_bRejectClanChat = bVal; }
-	bool GetRejectWhisper()				{ return m_bRejectWhisper; }
-	void SetRejectWhisper(bool bVal)	{ m_bRejectWhisper = bVal; }
-	bool GetRejectInvite()				{ return m_bRejectInvite; }
-	void SetRejectInvite(bool bVal)		{ m_bRejectInvite = bVal; }
-
-	auto GetClockCount() const { return GetGlobalTimeMS(); }
-	u64 GetGlobalClockCount() const;
-
-	virtual void OutputMessage(const char* szMessage, MZMOMType nType=MZMDM_GENERAL) override;
-	
-	void SetOnCommandCallback(ZONCOMMANDCALLBACK pCallback) { m_fnOnCommandCallback = pCallback;}
-
-	void Tick();
-	void Disconnect() { MMatchClient::Disconnect(m_Server); }
-
-	auto* GetMatchStageSetting() { return &m_MatchStageSetting; }
-	auto* GetMatchStageSetting() const { return &m_MatchStageSetting; }
-	bool IsForcedEntry() const { return m_bForcedEntry; }
-	bool IsLadderGame() const { return m_bLadderGame; }
-	void ReleaseForcedEntry();
-	void ClearStageSetting();
-public:
-	void RequestPrevStageList();
-	void RequestNextStageList();
-	void RequestStageList(int nPage);
-	void StartStageList();
-	void StopStageList();
-	void StartChannelList(MCHANNEL_TYPE nChannelType);
-	void StopChannelList();
-
-	const char*		GetChannelName() const { return m_szChannel; }
-	MCHANNEL_TYPE	GetChannelType() const { return m_CurrentChannelType; }
-	const char*		GetChannelRuleName() const { return m_szChannelRule; }
-	const char*		GetStageName() const { return m_szStageName; }
-	int				GetStageNumber() const { return m_nRoomNo; }
-	
-	const char* GetChatRoomInvited() const { return m_szChatRoomInvited; }
-	void SetChatRoomInvited(const char* pszRoomName) { strcpy_safe(m_szChatRoomInvited, pszRoomName); }
-
-	bool AmIStageMaster() const { return (m_MatchStageSetting.GetMasterUID() == GetPlayerUID()); }
-
-	const char* GetVoteMessage() const { return m_szVoteText; }
-public:
-	void AnswerSponsorAgreement(bool bAnswer);
-	void AnswerJoinerAgreement(bool bAnswer);
-	void RequestCreateClan(char* szClanName, char** ppMemberCharNames);
-
-	void RequestProposal(const MMatchProposalMode nProposalMode, char** ppReplierCharNames, const int nReplierCount);
-	void ReplyAgreement(bool bAgreement);
-public:
-	bool IsVoteInProgress()				{ return m_bVoteInProgress;	}
-	void SetVoteInProgress(bool bVal)	{ m_bVoteInProgress = bVal; }
-	bool CanVote()						{ return m_bCanVote; }
-	void SetCanVote(bool bVal)			{ m_bCanVote = bVal; }
-
-public:
-	void RequestGameSuicide();
-	void OnStageEnterBattle(const MUID& uidChar, MCmdEnterBattleParam nParam, MTD_PeerListNode* pPeerNode);
-public:
-	int ValidateRequestDeleteChar();
-public:
-	void RequestChannelJoin(const MUID& uidChannel);
-	void RequestChannelJoin(const MCHANNEL_TYPE nChannelType, char* szChannelName);
-	void RequestOnLobbyCreated();
-	void RequestOnGameDestroyed();
-protected:
 	void OnNotifyCallVote(const char* pszDiscuss, const char* pszArg);
 	void OnNotifyVoteResult(const char* pszDiscuss, int nResult);
 	void OnVoteAbort( const int nMsgCode );
-protected:
-	void OnBroadcastClanRenewVictories(const char* pszWinnerClanName, const char* pszLoserClanName, int nVictories);
-	void OnBroadcastClanInterruptVictories(const char* pszWinnerClanName, const char* pszLoserClanName, int nVictories);
-	void OnBroadcastDuelRenewVictories(const char* pszChampionName, const char* pszChannelName, int nRoomno, int nVictories);
-	void OnBroadcastDuelInterruptVictories(const char* pszChampionName, const char* pszInterrupterName, int nVictories);
-protected:
-	// Emblem 관련
+
+	void OnBroadcastClanRenewVictories(const char* pszWinnerClanName, const char* pszLoserClanName,
+		int nVictories);
+	void OnBroadcastClanInterruptVictories(const char* pszWinnerClanName, const char* pszLoserClanName,
+		int nVictories);
+	void OnBroadcastDuelRenewVictories(const char* pszChampionName, const char* pszChannelName,
+		int nRoomno, int nVictories);
+	void OnBroadcastDuelInterruptVictories(const char* pszChampionName, const char* pszInterrupterName,
+		int nVictories);
+
 	void ProcessEmblem(unsigned int nCLID, unsigned int nChecksum);
 	void RequestEmblemURL(unsigned int nCLID);
 	void OnClanResponseEmblemURL(unsigned int nCLID, unsigned int nEmblemChecksum, const char* szEmblemURL);
 	void OnClanEmblemReady(unsigned int nCLID, const char* szURL);
 
-public:
-	MEmblemMgr *GetEmblemManager() { return &m_EmblemMgr; }	
+	virtual void OnStopUDPTest(const MUID& uid) override final;
+	virtual void OnUDPTestReply(const MUID& uid) override final;
 
-	// UPnP
-protected:
 	UPnP *m_pUPnP;
 
-public:
-	bool CreateUPnP(unsigned short nUDPPort);
-	bool DestroyUPnP();
+	char				m_szChannel[256];
+	char				m_szChannelRule[128];
+	char				m_szStageName[256];
+	char				m_szChatRoomInvited[64];
+	unsigned int		m_nRoomNo;
+	int					m_nStageCursor;
+	bool				m_bLadderGame;
+	MCHANNEL_TYPE		m_CurrentChannelType;
+	char				m_szVoteText[256];
 
-	int GetPingToServer() const { return PingToServer; }
+	unsigned long int		m_nPrevClockRequestAttribute;
 
-protected:
-	virtual void OnStopUDPTest(const MUID& uid) override;
-	virtual void OnUDPTestReply(const MUID& uid) override;
+	int						m_nBridgePeerCount;
+	unsigned long int		m_tmLastBridgePeer;
+
+	int						m_nCountdown;
+	unsigned long int		m_tmLastCountdown;
+
+	int						m_nRequestID;
+	MUID					m_uidRequestPlayer;
+	ZNetAgreementBuilder	m_AgreementBuilder;
+	MMatchProposalMode		m_nProposalMode;
+
+	bool					m_bVoteInProgress;
+	bool					m_bCanVote;
+
+	MEmblemMgr				m_EmblemMgr;
+
+	// Priority boost = Increased Gunz process priority
+	bool					m_bPriorityBoost;
+	bool					m_bRejectNormalChat;
+	bool					m_bRejectTeamChat;
+	bool					m_bRejectClanChat;
+	bool					m_bRejectWhisper;
+	bool					m_bRejectInvite;
+
+	int PingToServer = 0;
 };
 
 bool ZPostCommand(MCommand* pCmd);

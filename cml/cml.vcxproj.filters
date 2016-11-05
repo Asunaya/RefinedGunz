@@ -85,6 +85,7 @@
     <ClInclude Include="Include\TMP.h" />
     <ClInclude Include="Include\VariantPolymorphism.h" />
     <ClInclude Include="Include\DeferredConstructionWrapper.h" />
+    <ClInclude Include="Include\ArrayView.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\MMatrix.cpp">

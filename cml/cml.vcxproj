@@ -549,6 +549,7 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Include\ArrayView.h" />
     <ClInclude Include="Include\defer.h" />
     <ClInclude Include="Include\DeferredConstructionWrapper.h" />
     <ClInclude Include="Include\GlobalTypes.h" />

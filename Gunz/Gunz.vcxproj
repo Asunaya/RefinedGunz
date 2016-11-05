@@ -568,7 +568,6 @@ rem call copy_share.bat
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\cml\Include\SafeString.h" />
-    <ClInclude Include="ArrayView.h" />
     <ClInclude Include="Draw.h" />
     <ClInclude Include="Hitboxes.h" />
     <ClInclude Include="MClient.h" />
@@ -789,13 +788,10 @@ rem call copy_share.bat
     <ClInclude Include="ZLocaleDefine.h" />
     <ClInclude Include="ZNetmarble.h" />
     <ClInclude Include="ZNetmarbleJP.h" />
-    <ClInclude Include="extern\Netmarble\NMCrypt.h" />
-    <ClInclude Include="extern\NetmarbleJP\NMCrypt.h" />
     <ClInclude Include="ZLanguageConf.h" />
     <ClInclude Include="ZMessages.h" />
     <ClInclude Include="ZStringResManager.h" />
     <ClInclude Include="ZTips.h" />
-    <ClInclude Include="HShield\HShield.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
@@ -826,6 +822,7 @@ rem call copy_share.bat
     <ClCompile Include="ZCombatQuestScreen.cpp" />
     <ClCompile Include="ZCrossHair.cpp" />
     <ClCompile Include="ZDirectInput.cpp" />
+    <ClCompile Include="ZGameClient_Command.cpp" />
     <ClCompile Include="ZGameDrawD3D9.cpp" />
     <ClCompile Include="ZGameInput.cpp" />
     <ClCompile Include="ZGameInput_Debug.cpp" />

@@ -130,11 +130,11 @@ v3 GetNormal(const RCONVEXPOLYGONINFO *poly, const rvector &position,
 
 		for (int i = 0; i < poly->nVertices - 2; i++)
 		{
-			rvector *a = &poly->pVertices[0];
-			rvector *b = &poly->pVertices[i + 1];
-			rvector *c = &poly->pVertices[i + 2];
+			const auto& a = poly->pVertices[0];
+			const auto& b = poly->pVertices[i + 1];
+			const auto& c = poly->pVertices[i + 2];
 
-			if (IntersectTriangle(*a, *b, *c, position + pnormal, -pnormal, nullptr))
+			if (IntersectTriangle(a, b, c, position + pnormal, -pnormal, nullptr))
 			{
 				nSelPolygon = i;
 				nSelEdge = -1;
@@ -142,11 +142,11 @@ v3 GetNormal(const RCONVEXPOLYGONINFO *poly, const rvector &position,
 			}
 			else
 			{
-				float dist = GetDistance(position, *a, *b);
+				float dist = GetDistance(position, a, b);
 				if (dist < fMinDist) { fMinDist = dist; nSelPolygon = i; nSelEdge = 0; }
-				dist = GetDistance(position, *b, *c);
+				dist = GetDistance(position, b, c);
 				if (dist < fMinDist) { fMinDist = dist; nSelPolygon = i; nSelEdge = 1; }
-				dist = GetDistance(position, *c, *a);
+				dist = GetDistance(position, c, a);
 				if (dist < fMinDist) { fMinDist = dist; nSelPolygon = i; nSelEdge = 2; }
 			}
 		}
@@ -421,7 +421,6 @@ bool LightmapGenerator::CheckShadow(const RLIGHT* plight,
 	for (auto& ObjectInfo : bsp.m_ObjectList)
 	{
 		if (!ObjectInfo.pVisualMesh) return false;
-		float t;
 
 		rmatrix inv = Inverse(ObjectInfo.pVisualMesh->m_WorldMat);
 
@@ -436,6 +435,8 @@ bool LightmapGenerator::CheckShadow(const RLIGHT* plight,
 		rboundingbox bbox;
 		bbox.vmin = ObjectInfo.pVisualMesh->m_vBMin;
 		bbox.vmax = ObjectInfo.pVisualMesh->m_vBMax;
+
+		float t;
 		auto bBBTest = IntersectLineAABB(t, origin, dir, bbox);
 		if (bBBTest &&
 			ObjectInfo.pVisualMesh->Pick(plight->Position, dirorigin, &vOut, &t))

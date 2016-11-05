@@ -76,20 +76,11 @@
     <Filter Include="extern">
       <UniqueIdentifier>{5df0c933-d30d-4515-9ae7-4c93cbe112da}</UniqueIdentifier>
     </Filter>
-    <Filter Include="extern\Netmarble">
-      <UniqueIdentifier>{5b82434c-a146-401d-898c-66302dff8fac}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="extern\NetmarbleJP">
-      <UniqueIdentifier>{12f73a53-3769-48eb-ac42-38c1eac9fa94}</UniqueIdentifier>
-    </Filter>
     <Filter Include="extern\lib">
       <UniqueIdentifier>{f8419ac7-d788-4758-8eea-afd25f5d8209}</UniqueIdentifier>
     </Filter>
     <Filter Include="StringRes">
       <UniqueIdentifier>{4bf0a98d-9848-412f-87bd-b45471e3b2bc}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="HShield">
-      <UniqueIdentifier>{ecf1dcb1-5f10-4800-9748-c0cdc27c026c}</UniqueIdentifier>
     </Filter>
     <Filter Include="RGunz">
       <UniqueIdentifier>{b577666d-eb78-4eeb-b7e5-cebd06cc7328}</UniqueIdentifier>
@@ -699,12 +690,6 @@
     <ClInclude Include="ZNetmarbleJP.h">
       <Filter>Locale\Auth</Filter>
     </ClInclude>
-    <ClInclude Include="extern\Netmarble\NMCrypt.h">
-      <Filter>extern\Netmarble</Filter>
-    </ClInclude>
-    <ClInclude Include="extern\NetmarbleJP\NMCrypt.h">
-      <Filter>extern\NetmarbleJP</Filter>
-    </ClInclude>
     <ClInclude Include="ZLanguageConf.h">
       <Filter>StringRes</Filter>
     </ClInclude>
@@ -716,9 +701,6 @@
     </ClInclude>
     <ClInclude Include="ZTips.h">
       <Filter>StringRes</Filter>
-    </ClInclude>
-    <ClInclude Include="HShield\HShield.h">
-      <Filter>HShield</Filter>
     </ClInclude>
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Portal.h">
@@ -762,9 +744,6 @@
     </ClInclude>
     <ClInclude Include="ZCharacterStructs.h">
       <Filter>Character</Filter>
-    </ClInclude>
-    <ClInclude Include="ArrayView.h">
-      <Filter>RGunz</Filter>
     </ClInclude>
     <ClInclude Include="stack_allocator.hpp">
       <Filter>RGunz</Filter>
@@ -1393,6 +1372,9 @@
     <ClCompile Include="ZGameDrawD3D9.cpp">
       <Filter>D3D9</Filter>
     </ClCompile>
+    <ClCompile Include="ZGameClient_Command.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="runtime\shader\skin.vsh">
@@ -1446,9 +1428,6 @@
   <ItemGroup>
     <Library Include="fmodvc.lib">
       <Filter>extern\lib</Filter>
-    </Library>
-    <Library Include="HShield\HShield.lib">
-      <Filter>HShield</Filter>
     </Library>
   </ItemGroup>
 </Project>

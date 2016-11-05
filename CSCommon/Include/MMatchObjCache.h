@@ -3,14 +3,11 @@
 #include "MMatchGlobal.h"
 #include <list>
 #include <map>
-
 #include "MUID.h"
-
 
 class MCommand;
 class MCommandCommunicator;
 class MMatchObject;
-
 
 struct MMatchObjCacheCostume
 {
@@ -28,9 +25,9 @@ protected:
 	char					m_nLevel;
 	MMatchUserGradeID		m_nUGrade;
 	MMatchPremiumGradeID	m_nPGrade;
-	unsigned char			m_nPlayerFlags;		// 플레이어 속성(운영자숨김등) - MTD_PlayerFlags 사용
-	unsigned int			m_nCLID;			// ClanID
-	unsigned int			m_nEmblemChecksum;	// Emblem Checksum
+	unsigned char			m_nPlayerFlags;
+	unsigned int			m_nCLID;
+	unsigned int			m_nEmblemChecksum;
 	MMatchObjCacheCostume	m_Costume;
 	
 public:
@@ -46,8 +43,8 @@ public:
 
 	MUID GetUID()					{ return m_uidObject; }
 
-	char* GetName()			{ return m_szName; }
-	char* GetClanName()		{ return m_szClanName; }
+	const char* GetName() const { return m_szName; }
+	const char* GetClanName() const { return m_szClanName; }
 	int GetLevel()					{ return m_nLevel; }
 	MMatchUserGradeID		GetUGrade()	{ return m_nUGrade; }
 	MMatchPremiumGradeID	GetPGrade()	{ return m_nPGrade; }
@@ -93,6 +90,6 @@ public:
 enum MATCHCACHEMODE {
 	MATCHCACHEMODE_ADD = 0,
 	MATCHCACHEMODE_REMOVE,
-	MATCHCACHEMODE_UPDATE,		// 모두 업데이트
-	MATCHCACHEMODE_REPLACE		// 새로운 내용으로 교체
+	MATCHCACHEMODE_UPDATE,
+	MATCHCACHEMODE_REPLACE
 };
