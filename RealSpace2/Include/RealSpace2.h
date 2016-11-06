@@ -1,5 +1,6 @@
 #pragma once
 
+#include "GlobalTypes.h"
 #include "RMath.h"
 #include "RError.h"
 #include "MZFileSystem.h"
@@ -11,9 +12,9 @@ extern int g_nFrameCount, g_nLastFrameCount;
 extern float g_fFPS;
 extern HWND	g_hWnd;
 extern MZFileSystem *g_pFileSystem;
-extern rplane RViewFrustum[6];
 extern rvector RCameraPosition, RCameraDirection, RCameraUp;
 extern rmatrix RView, RProjection, RViewProjection, RViewport, RViewProjectionViewport;
+extern rplane RViewFrustum[6];
 
 enum class GraphicsAPI
 {
@@ -79,6 +80,9 @@ bool RInitDisplay(HWND hWnd, HINSTANCE inst, const RMODEPARAMS *params, Graphics
 bool RCloseDisplay();
 void RSetFileSystem(MZFileSystem *pFileSystem);
 void RAdjustWindow(const RMODEPARAMS* ModeParams);
+#ifdef GetWindowStyle
+#undef GetWindowStyle
+#endif
 u32 GetWindowStyle(const RMODEPARAMS& ModeParams);
 
 LPDIRECT3DDEVICE9 RGetDevice();
@@ -93,11 +97,11 @@ void RSetRenderFlags(unsigned long nFlags);
 unsigned long RGetRenderFlags();
 
 //Fog
-void RSetFog(bool bFog, float fNear = 0, float fFar = 0, DWORD dwColor = 0xFFFFFFFF);
+void RSetFog(bool bFog, float fNear = 0, float fFar = 0, u32 dwColor = 0xFFFFFFFF);
 bool RGetFog();
 float RGetFogNear();
 float RGetFogFar();
-DWORD RGetFogColor();
+u32 RGetFogColor();
 
 void RSetCamera(const rvector &from, const rvector &at, const rvector &up);
 void RUpdateCamera();

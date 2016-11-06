@@ -309,21 +309,17 @@ bool ZGameInterface::OnCommand(MCommand* pCommand)
 				uidEquipItems[i] = *(MUID*)MGetBlobArrayElement(pEquipItemListBlob, i);
 			}
 
-
-			// 갖고 있는 아이템
 			pParam = pCommand->GetParameter(2);
 			void* pItemListBlob = pParam->GetPointer();
 			nItemCount = MGetBlobArrayCount(pItemListBlob);
-			MTD_ItemNode* pItemNodes = new MTD_ItemNode[nItemCount];
+			std::unique_ptr<MTD_ItemNode[]> pItemNodes{ new MTD_ItemNode[nItemCount] };
 
 			for (int i = 0; i < nItemCount; i++)
-			{
-				pItemNodes[i] = *(MTD_ItemNode*)MGetBlobArrayElement(pItemListBlob, i);
-			}
+				pItemNodes[i] = *reinterpret_cast<MTD_ItemNode*>(MGetBlobArrayElement(pItemListBlob, i));
 
-			ZApplication::GetGameInterface()->OnResponseCharacterItemList(uidEquipItems, pItemNodes, nItemCount);
-
-			delete[] pItemNodes;
+			ZApplication::GetGameInterface()->OnResponseCharacterItemList(uidEquipItems,
+				pItemNodes.get(),
+				nItemCount);
 		}
 		break;
 	case MC_MATCH_RESPONSE_ACCOUNT_ITEMLIST:
@@ -413,14 +409,12 @@ bool ZGameInterface::OnCommand(MCommand* pCommand)
 		break;
 	case MC_MATCH_STAGE_REQUIRE_PASSWORD:
 		{
-			// MC_MATCH_RESPONSE_STAGE_FOLLOW 대신 이 커맨드가 날라올 수도 있다.
 			MUID uidStage = MUID(0,0);
 			char szStageName[256];
 			pCommand->GetParameter(&uidStage, 0, MPT_UID);
 			pCommand->GetParameter(szStageName, 1, MPT_STR, sizeof(szStageName) );
 
-			ZRoomListBox* pRoomList;
-			pRoomList = (ZRoomListBox*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "Lobby_StageList" );
+			auto* pRoomList = (ZRoomListBox*)ZGetGameInterface()->GetIDLResource()->FindWidget( "Lobby_StageList" );
 			if ( pRoomList != NULL ) pRoomList->SetPrivateStageUID(uidStage);
 
 			ZApplication::GetGameInterface()->ShowPrivateStageJoinFrame(szStageName);
@@ -449,8 +443,6 @@ bool ZGameInterface::OnCommand(MCommand* pCommand)
 			ZGetMyInfo()->SetLevel(pCharInfo->nLevel);
 			ZGetMyInfo()->SetXP(pCharInfo->nXP);
 			ZGetMyInfo()->SetBP(pCharInfo->nBP);
-	
-			ZGetMyInfo()->Serialize();
 		}
 		break;
 	case MC_MATCH_STAGE_RESPONSE_QUICKJOIN:
@@ -473,26 +465,46 @@ bool ZGameInterface::OnCommand(MCommand* pCommand)
 		break;
 
 #ifdef _QUEST_ITEM
-		// ZQuest로 옮겨야 함.
-	case MC_MATCH_RESPONSE_CHAR_QUEST_ITEM_LIST :
+	case MC_MATCH_RESPONSE_CHAR_QUEST_ITEM_LIST:
 		{
-			MCommandParameter*	pParam			= pCommand->GetParameter(0);
-			void*				pQuestItemBlob	= pParam->GetPointer();
-			int					nQuestItemCount	= MGetBlobArrayCount( pQuestItemBlob );
-			MTD_QuestItemNode*	pQuestItemNode	= new MTD_QuestItemNode[ nQuestItemCount ];
+			MCommandParameter* pParam = pCommand->GetParameter(0);
+			if (!pParam) break;
+			void* pQuestItemBlob = pParam->GetPointer();
+			if (!pQuestItemBlob) break;
+			int	nQuestItemCount	= MGetBlobArrayCount(pQuestItemBlob);
+			if (nQuestItemCount == 0) break;
+			std::unique_ptr<MTD_QuestItemNode[]> QuestItemNodes{ new MTD_QuestItemNode[nQuestItemCount] };
 
-			for( int i = 0; i < nQuestItemCount; ++i )
+			for(int i = 0; i < nQuestItemCount; ++i)
 			{
-				pQuestItemNode[ i ] = *(reinterpret_cast<MTD_QuestItemNode*>(MGetBlobArrayElement(pQuestItemBlob, i)));
+				QuestItemNodes[i] =
+					*(reinterpret_cast<MTD_QuestItemNode*>(MGetBlobArrayElement(pQuestItemBlob, i)));
 			}
 
-			ZApplication::GetGameInterface()->OnResponseCharacterItemList_QuestItem( pQuestItemNode, nQuestItemCount );
-
-			delete [] pQuestItemNode;
+			ZGetGameInterface()->OnResponseCharacterItemList_QuestItem(QuestItemNodes.get(),
+				nQuestItemCount);
 		}
 		break;
 
-	case  MC_MATCH_RESPONSE_DROP_SACRIFICE_ITEM :
+	case MC_MATCH_RESPONSE_DROP_SACRIFICE_ITEM:
+		{
+			int		nResult;
+			MUID	uidRequester;
+			int		nSlotIndex;
+			int		nItemID;
+
+			if (!pCommand->GetParameter(&nResult, 0, MPT_INT)) return false;
+			if (!pCommand->GetParameter(&uidRequester, 1, MPT_UID)) return false;
+			if (!pCommand->GetParameter(&nSlotIndex, 2, MPT_INT)) return false;
+			if (!pCommand->GetParameter(&nItemID, 3, MPT_INT)) return false;
+
+			ZApplication::GetStageInterface()->OnResponseDropSacrificeItemOnSlot(
+				nResult, uidRequester,
+				nSlotIndex, nItemID);
+		}
+		break;
+
+	case  MC_MATCH_RESPONSE_CALLBACK_SACRIFICE_ITEM:
 		{
 			int		nResult;
 			MUID	uidRequester;
@@ -501,24 +513,6 @@ bool ZGameInterface::OnCommand(MCommand* pCommand)
 
 			pCommand->GetParameter( &nResult, 0, MPT_INT );
 			pCommand->GetParameter( &uidRequester, 1, MPT_UID );
-			// pCommand->GetParameter( &uidWasOwner, 2, MPT_UID );
-			pCommand->GetParameter( &nSlotIndex, 2, MPT_INT );
-			pCommand->GetParameter( &nItemID, 3, MPT_INT );
-
-			ZApplication::GetStageInterface()->OnResponseDropSacrificeItemOnSlot( nResult, uidRequester, nSlotIndex, nItemID );
-		}
-		break;
-
-	case  MC_MATCH_RESPONSE_CALLBACK_SACRIFICE_ITEM :
-		{
-			int		nResult;
-			MUID	uidRequester;
-			int		nSlotIndex;
-			int		nItemID;
-
-			pCommand->GetParameter( &nResult, 0, MPT_INT );
-			pCommand->GetParameter( &uidRequester, 1, MPT_UID );
-			// pCommand->GetParameter( &uidWasOwner, 2, MPT_UID );
 			pCommand->GetParameter( &nSlotIndex, 2, MPT_INT );
 			pCommand->GetParameter( &nItemID, 3, MPT_INT );
 
@@ -576,25 +570,21 @@ bool ZGameInterface::OnCommand(MCommand* pCommand)
 		break;
 
 	case MC_GAME_START_FAIL :
+	{
+		int nType;
+		int nState;
+
+		pCommand->GetParameter(&nType, 0, MPT_INT);
+		pCommand->GetParameter(&nState, 1, MPT_INT);
+
+		if (QUEST_START_FAILED_BY_SACRIFICE_SLOT == nType)
 		{
-			int nType;
-			int nState;
-
-			pCommand->GetParameter( &nType, 0, MPT_INT );
-			pCommand->GetParameter( &nState, 1, MPT_INT );
-
-			if( ALL_PLAYER_NOT_READY == nType )
-			{
-				// 모든 유저가 레디를 하지 않았음.
-			}
-			else if( QUEST_START_FAILED_BY_SACRIFICE_SLOT == nType )
-			{
-				ZApplication::GetStageInterface()->OnQuestStartFailed( nState );
-			}
-
-			// Stage UI Enable
-			ZApplication::GetStageInterface()->ChangeStageEnableReady( false);
+			ZApplication::GetStageInterface()->OnQuestStartFailed(nState);
 		}
+
+		// Stage UI Enable
+		ZApplication::GetStageInterface()->ChangeStageEnableReady(false);
+	}
 		break;
 
 	case MC_QUEST_STAGE_GAME_INFO :
@@ -657,16 +647,6 @@ bool ZGameInterface::OnCommand(MCommand* pCommand)
 		break;
 #endif
 
-	case MC_REQUEST_XTRAP_HASHVALUE :
-		{
-			char szNewRandomValue[ 256 ] = {0,};
-
-			pCommand->GetParameter( szNewRandomValue, 0, MPT_STR, 255 );
-
-			ZApplication::GetGameInterface()->OnRequestNewHashValue( szNewRandomValue );
-		}
-		break;
-
 	case MC_MATCH_DISCONNMSG :
 		{
 			DWORD dwMsgID;
@@ -685,18 +665,14 @@ bool ZGameInterface::OnCommand(MCommand* pCommand)
 		}
 		break;
 
-	default :
-		{
-			// 정의되지 않은 커맨드 처리.
+	default:
 #ifdef _DEBUG
-			mlog( "ZGameInterface::OnCommand::default (%d) - 정의되지 않은 Command처리.\n", pCommand->GetID() );
-			// ASSERT( 0 );
+		mlog("ZGameInterface::OnCommand -- Hit default case for command ID %d\n",
+			pCommand->GetID()););
 #endif
-		}
 		break;
 
 	}
-
 
 	return false;
 }

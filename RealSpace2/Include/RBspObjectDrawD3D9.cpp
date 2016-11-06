@@ -6,7 +6,7 @@
 
 using namespace rsx;
 using namespace RealSpace2;
-using IndexType = u32;
+using IndexType = u16;
 
 template <typename VertexType, typename IndexType>
 static bool CreateBuffers(size_t VertexCount, size_t IndexCount, u32 FVF,

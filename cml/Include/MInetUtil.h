@@ -1,28 +1,25 @@
-#ifndef _MINETUTIL_H
-#define _MINETUTIL_H
+#pragma once
 
 #include <string>
 #include "SafeString.h"
-
-
-/// . 있는 IP 문자열을 . 없는 IP 문자열(12바이트)로 변환
-void MConvertCompactIP(char* szOut, int maxlen, const char* szInputDottedIP);
-
+#include <WinSock2.h>
 
 template <size_t size>
-void GetLocalIP(char (&szOutIP)[size])
+bool GetLocalIP(char (&szOutIP)[size])
 {
 	char szHostName[256];
 	PHOSTENT pHostInfo;
 
-	if (gethostname(szHostName, sizeof(szHostName)) == 0)
-	{
-		if ((pHostInfo = gethostbyname(szHostName)) != NULL)
-		{
-			auto ip = inet_ntoa(*(struct in_addr *)*pHostInfo->h_addr_list);
-			strcpy_safe(szOutIP, ip);
-		}
-	}
+	if (gethostname(szHostName, sizeof(szHostName)) != 0)
+		return false;
+
+	pHostInfo = gethostbyname(szHostName);
+	if (!pHostInfo)
+		return false;
+
+	auto ip = inet_ntoa(*(struct in_addr *)*pHostInfo->h_addr_list);
+	strcpy_safe(szOutIP, ip);
+	return true;
 }
 
 template <size_t size>
@@ -35,6 +32,9 @@ void GetIPv4String(in_addr addr, char(&ip_string)[size])
 		addr.S_un.S_un_b.s_b4);
 }
 
-
-
-#endif
+inline std::string GetIPv4String(in_addr addr)
+{
+	char buf[32];
+	GetIPv4String(addr, buf);
+	return buf;
+}

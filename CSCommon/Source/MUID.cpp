@@ -23,14 +23,14 @@ MUID MUIDRefMap::Generate(void* pRef)
 
 	return m_CurrentMUID;
 }
-void* MUIDRefMap::GetRef(MUID& uid)
+void* MUIDRefMap::GetRef(const MUID& uid)
 {
 	iterator i = find(uid);
 	if(i==end()) return NULL;
 	return (*i).second;
 }
 
-void* MUIDRefMap::Remove(MUID& uid)
+void* MUIDRefMap::Remove(const MUID& uid)
 {
 	iterator i = find(uid);
 	if(i==end()) return NULL;

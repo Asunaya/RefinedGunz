@@ -110,9 +110,6 @@ private :
 	ServerIDVec		m_vDeadServerIDList;
 };
 
-
-// 업데이트 경화시간이 너무 긴 서버정보를 찾아서 Opened만 0으로 설정함.
-// 시간은 분으로 환산해서 검사함.
 template< typename T >
 class MDeadTimeServerChecker
 {
@@ -145,9 +142,9 @@ public :
 private :
 	MDeadTimeServerChecker();
 
-	int					m_nMarginOfErrorMin;	// 오차 허용치.
-	int					m_nCmpCustomizeMin;		// 검사할 기준이 되는 시간.
-	MServerStatusMgr*	m_pServerStatusMgr;		// 호출자.
+	int					m_nMarginOfErrorMin;
+	int					m_nCmpCustomizeMin;
+	MServerStatusMgr*	m_pServerStatusMgr;
 };
 
 #endif

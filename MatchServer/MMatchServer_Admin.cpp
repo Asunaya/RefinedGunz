@@ -30,10 +30,8 @@ void MMatchServer::OnAdminTerminal(const MUID& uidAdmin, const char* szText)
 	MMatchObject* pObj = GetObject(uidAdmin);
 	if (pObj == NULL) return;
 
-	// 관리자 권한을 가진 사람이 아니면 연결을 끊는다.
 	if (!IsAdminGrade(pObj))
 	{
-//		DisconnectObject(uidAdmin);		
 		return;
 	}
 
@@ -53,10 +51,8 @@ void MMatchServer::OnAdminAnnounce(const MUID& uidAdmin, const char* szChat, uns
 	MMatchObject* pObj = GetObject(uidAdmin);
 	if (pObj == NULL) return;
 
-	// 관리자 권한을 가진 사람이 아니면 연결을 끊는다.
 	if (!IsAdminGrade(pObj))
 	{
-//		DisconnectObject(uidAdmin);		
 		return;
 	}
 
@@ -77,20 +73,11 @@ void MMatchServer::OnAdminRequestServerInfo(const MUID& uidAdmin)
 	MMatchObject* pObj = GetObject(uidAdmin);
 	if (pObj == NULL) return;
 
-	// 관리자 권한을 가진 사람이 아니면 연결을 끊는다.
 	if (!IsAdminGrade(pObj))
 	{
-//		DisconnectObject(uidAdmin);		
 		return;
 	}
 
-	// 서버 정보 보여주는것 아직 안넣었음
-/*
-	MCommand* pNew = CreateCommand(MC_MATCH_ANNOUNCE, MUID(0,0));
-	pNew->AddParameter(new MCmdParamUInt(0));
-
-	RouteToListener(pObj, pNew);
-*/
 }
 void MMatchServer::OnAdminServerHalt(const MUID& uidAdmin)
 {
@@ -99,17 +86,13 @@ void MMatchServer::OnAdminServerHalt(const MUID& uidAdmin)
 
 	MMatchUserGradeID nGrade = pObj->GetAccountInfo()->m_nUGrade;
 
-	// 관리자 권한을 가진 사람이 아니면 무시.
 	if ((nGrade != MMUG_ADMIN) && (nGrade != MMUG_DEVELOPER)) return;
 
-	// Shutdown 시작
 	m_MatchShutdown.Start(GetGlobalClockCount());
 }
 
-// 서버에서 메뉴로만 쓰는 명령어..
 void MMatchServer::OnAdminServerHalt()
 {
-	// Shutdown 시작
 	m_MatchShutdown.Start(GetGlobalClockCount());
 }
 
@@ -118,10 +101,8 @@ void MMatchServer::OnAdminRequestBanPlayer(const MUID& uidAdmin, const char* szP
 	MMatchObject* pObj = GetObject(uidAdmin);
 	if (pObj == NULL) return;
 
-	// 관리자 권한을 가진 사람이 아니면 연결을 끊는다.
 	if (!IsAdminGrade(pObj))
 	{
-//		DisconnectObject(uidAdmin);		
 		return;
 	}
 
@@ -149,10 +130,8 @@ void MMatchServer::OnAdminRequestUpdateAccountUGrade(const MUID& uidAdmin, const
 	MMatchObject* pObj = GetObject(uidAdmin);
 	if (pObj == NULL) return;
 
-	// 관리자 권한을 가진 사람이 아니면 연결을 끊는다.
 	if (!IsAdminGrade(pObj))
 	{
-//		DisconnectObject(uidAdmin);		
 		return;
 	}
 
@@ -161,14 +140,6 @@ void MMatchServer::OnAdminRequestUpdateAccountUGrade(const MUID& uidAdmin, const
 	if ((strlen(szPlayer)) < 2) return;
 	MMatchObject* pTargetObj = GetPlayerByName(szPlayer);
 	if (pTargetObj == NULL) return;
-
-
-
-/*
-	MCommand* pNew = CreateCommand(MC_ADMIN_REQUEST_UPDATE_ACCOUNT_UGRADE, MUID(0,0));
-	pNew->AddParameter(new MCmdParamUInt(nRet));
-	RouteToListener(pObj, pNew);
-*/
 }
 
 void MMatchServer::OnAdminPingToAll(const MUID& uidAdmin)
@@ -176,10 +147,8 @@ void MMatchServer::OnAdminPingToAll(const MUID& uidAdmin)
 	MMatchObject* pObj = GetObject(uidAdmin);
 	if (pObj == NULL) return;
 
-	// 관리자 권한을 가진 사람이 아니면 연결을 끊는다.
 	if (!IsAdminGrade(pObj))
 	{
-//		DisconnectObject(uidAdmin);		
 		return;
 	}
 
@@ -194,10 +163,8 @@ void MMatchServer::OnAdminRequestSwitchLadderGame(const MUID& uidAdmin, const bo
 	MMatchObject* pObj = GetObject(uidAdmin);
 	if (!IsEnabledObject(pObj)) return;
 
-	// 관리자 권한을 가진 사람이 아니면 연결을 끊는다.
 	if (!IsAdminGrade(pObj))
 	{
-//		DisconnectObject(uidAdmin);		
 		return;
 	}
 
@@ -214,10 +181,8 @@ void MMatchServer::OnAdminHide(const MUID& uidAdmin)
 	MMatchObject* pObj = GetObject(uidAdmin);
 	if (!IsEnabledObject(pObj)) return;
 
-	// 관리자 권한을 가진 사람이 아니면 연결을 끊는다.
 	if (!IsAdminGrade(pObj))
 	{
-//		DisconnectObject(uidAdmin);		
 		return;
 	}
 
@@ -229,20 +194,6 @@ void MMatchServer::OnAdminHide(const MUID& uidAdmin)
 		Announce(pObj, "Now Hiding...");
 	}
 }
-
-
-void MMatchServer::XTrap_OnAdminReloadFileHash(const MUID& uidAdmin)
-{
-	MMatchObject* pObj = GetObject(uidAdmin);
-	if (!IsEnabledObject(pObj)) return;
-	if (!IsAdminGrade(pObj)) return;
-
-#ifdef _XTRAP
-	if( MGetServerConfig()->IsUseXTrap() )
-		MMatchAntiHack::InitHashMap();
-#endif
-}
-
 
 void MMatchServer::OnAdminResetAllHackingBlock( const MUID& uidAdmin )
 {

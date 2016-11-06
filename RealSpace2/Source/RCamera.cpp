@@ -7,7 +7,7 @@ rvector RCameraPosition, RCameraDirection, RCameraUp{ 0, 0, 1 };
 rmatrix RView, RProjection, RViewProjection, RViewport, RViewProjectionViewport;
 rplane RViewFrustum[6];
 static float RFov_horiz, RFov_vert, RNearZ, RFarZ;
-D3DVIEWPORT9			g_d3dViewport;
+static D3DVIEWPORT9 g_d3dViewport;
 
 void ComputeViewFrustum(rplane *plane, float x, float y, float z)
 {
@@ -53,6 +53,15 @@ void RSetCamera(const rvector &from, const rvector &at, const rvector &up)
 	RCameraDirection = at - from;
 	RCameraUp = up;
 
+	RUpdateCamera();
+}
+
+void RUpdateCamera()
+{
+	rvector at = RCameraPosition + RCameraDirection;
+	D3DXMatrixLookAtLH(&RView, &RCameraPosition, &at, &RCameraUp);
+	RGetDevice()->SetTransform(D3DTS_VIEW, &RView);
+
 	auto CheckNaN = [](auto& vec)
 	{
 		if (isnan(vec.x) || isnan(vec.y) || isnan(vec.z))
@@ -62,15 +71,6 @@ void RSetCamera(const rvector &from, const rvector &at, const rvector &up)
 	CheckNaN(RCameraPosition);
 	CheckNaN(RCameraDirection);
 	CheckNaN(RCameraUp);
-
-	RUpdateCamera();
-}
-
-void RUpdateCamera()
-{
-	rvector at = RCameraPosition + RCameraDirection;
-	D3DXMatrixLookAtLH(&RView, &RCameraPosition, &at, &RCameraUp);
-	RGetDevice()->SetTransform(D3DTS_VIEW, &RView);
 
 	UpdateViewFrustrum();
 }

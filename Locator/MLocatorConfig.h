@@ -5,7 +5,6 @@
 
 #define LOCATOR_CONFIG "./Locator.ini"
 
-
 class MLocatorConfig
 {
 public:
@@ -46,8 +45,8 @@ public:
 		return &LocatorConfig;
 	}
 
-private :
-	MLocatorConfig(void);
+private:
+	MLocatorConfig();
 
 	bool LoadDBConfig();
 	bool LoadNetConfig();
@@ -59,7 +58,7 @@ private :
 	bool SetDBPassword( const char* pszPassword );
 
 	// Network
-	void SetLocatorIP( const string& strLocatorIP )		{ m_strLocatorIP = strLocatorIP; }
+	void SetLocatorIP( const std::string& strLocatorIP )		{ m_strLocatorIP = strLocatorIP; }
 	void SetLocatorPort( const int nPort )				{ m_nLocatorPort = nPort; }
 
 	// Environment
@@ -78,25 +77,24 @@ private :
 	
 private :
 	// Network
-	string	m_strLocatorIP;
+	std::string	m_strLocatorIP;
 	int		m_nLocatorPort;
 
-	// Evironment
-	u32	m_dwID;									// DB에서 Locator를 구별하는 ID.
-	MUID	m_uidLocatorUID;
-	u32	m_dwMaxElapsedUpdateServerStatusTime;	// /ms 서버의 정보를 DB에서 가져오는 간격.
-	u32	m_dwUDPLiveTime;						// /ms UDP큐에 저장되있을수 있는 시간.
-	u32	m_dwMaxFreeUseCountPerLiveTime;			// 큐에 저장되 있는동안 받을수 있는 최대 값. 넘어서면 공격자로 취급.
-	u32	m_dwBlockTime;							// /ms Block리스트에 등록되있는 시간.
-	u32	m_dwUpdateUDPManagerElapsedTime;		// UDP큐 업데이트 간격. Recv,Send,Block큐가 모두 같이 업데이트 됨.
-	u32	m_dwMarginOfErrorMin;					// 서버정보 마지막 업데이트 시간중 가장 큰값과 비교하여 
-													//  이값이상 차이가 나면 죽은서버로 간주.
+	// Environment
+	u32	m_dwID;
+	MUID m_uidLocatorUID;
+	u32	m_dwMaxElapsedUpdateServerStatusTime;
+	u32	m_dwUDPLiveTime;
+	u32	m_dwMaxFreeUseCountPerLiveTime;
+	u32	m_dwBlockTime;
+	u32	m_dwUpdateUDPManagerElapsedTime;
+	u32	m_dwMarginOfErrorMin;
 	u32	m_dwGMTDiff;
-	bool	m_bIsUseCountryCodeFilter;				// 국가코드 필터를 사용할지 결정.
+	bool m_bIsUseCountryCodeFilter;
 	u32	m_dwElapsedTimeUpdateLocatorLog;
 
 	bool	m_bIsAcceptInvaildIP;
-	bool	m_bIsTestServerOnly;					// 테스트서버만 Locating
+	bool	m_bIsTestServerOnly;
 	
 	// DB
 #ifdef MFC

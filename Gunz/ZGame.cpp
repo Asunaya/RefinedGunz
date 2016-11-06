@@ -738,7 +738,8 @@ void ZGame::CheckMyCharDead(float fElapsed)
 				uidAttacker = ZGetMyUID();
 				pAttacker = m_pMyCharacter;
 			}
-			m_pMyCharacter->OnDamaged(pAttacker, m_pMyCharacter->GetPosition(), ZD_FALLING, MWT_NONE, m_pMyCharacter->GetHP());
+			m_pMyCharacter->OnDamaged(pAttacker, m_pMyCharacter->GetPosition(),
+				ZD_FALLING, MWT_NONE, m_pMyCharacter->GetHP());
 			ZChatOutput(ZMsg(MSG_GAME_FALL_NARAK));
 		}
 	}
@@ -838,7 +839,8 @@ void ZGame::ParseReservedWord(char* pszDest, const char* pszSrc)
 			sprintf_safe(szWord, "%d %d", m_pMyCharacter->GetUID().High, m_pMyCharacter->GetUID().Low);
 		}
 
-		strcpy(szOut+nOutOffset, szWord);	nOutOffset += (int)strlen(szWord);
+		strcpy(szOut + nOutOffset, szWord);
+		nOutOffset += (int)strlen(szWord);
 		if (*pszNext) { 
 			strcpy(szOut+nOutOffset, " ");
 			nOutOffset++;
@@ -861,38 +863,37 @@ bool IsIgnoreObserverCommand(int nID)
 
 void ZGame::OnCommand_Observer(MCommand* pCommand)
 {
-	if(!IsIgnoreObserverCommand(pCommand->GetID()))
+	if (!IsIgnoreObserverCommand(pCommand->GetID()))
 	{
 		OnCommand_Immediate(pCommand);
 		return;
 	}
 
-
-	ZObserverCommandItem *pZCommand=new ZObserverCommandItem;
-	pZCommand->pCommand=pCommand->Clone();
-	pZCommand->fTime=GetTime();
+	auto *pZCommand = new ZObserverCommandItem;
+	pZCommand->pCommand = pCommand->Clone();
+	pZCommand->fTime = GetTime();
 	m_ObserverCommandList.push_back(pZCommand);
 
-	if(pCommand->GetID()==MC_PEER_BASICINFO)
-		OnPeerBasicInfo(pCommand,true,false);
+	if (pCommand->GetID() == MC_PEER_BASICINFO)
+		OnPeerBasicInfo(pCommand, true, false);
 }
 
 void ZGame::ProcessDelayedCommand()
 {
 	// TODO: Erase-remove
-	for(ZObserverCommandList::iterator i = m_DelayedCommandList.begin(); i != m_DelayedCommandList.end();i++)
+	for (auto i = m_DelayedCommandList.begin(); i != m_DelayedCommandList.end(); ++i)
 	{
-		ZObserverCommandItem *pItem = *i;
+		auto *pItem = *i;
 
-		if(GetTime() > pItem->fTime) 
-		{
-			OnCommand_Immediate(pItem->pCommand);
-			delete pItem->pCommand;
-			delete pItem;
-			i = m_DelayedCommandList.erase(i);
-			if (i == m_DelayedCommandList.end())
-				break;
-		}
+		if (GetTime() <= pItem->fTime)
+			continue;
+
+		OnCommand_Immediate(pItem->pCommand);
+		delete pItem->pCommand;
+		delete pItem;
+		i = m_DelayedCommandList.erase(i);
+		if (i == m_DelayedCommandList.end())
+			break;
 	}
 }
 
@@ -904,7 +905,7 @@ void ZGame::OnReplayRun()
 		return;
 	}
 
-	while(ReplayIterator != m_ReplayCommandList.end())
+	while (ReplayIterator != m_ReplayCommandList.end())
 	{
 		ZObserverCommandItem *pItem = *ReplayIterator;
 
@@ -1017,11 +1018,10 @@ bool ZGame::GetUserNameColor(MUID uid,MCOLOR& UserNameColor,char* sp_name)
 	return GetUserGradeIDColor( gid , UserNameColor ,sp_name );
 }
 
-void ZTranslateCommand(MCommand* pCmd, string& strLog)
+static void ZTranslateCommand(MCommand* pCmd, std::string& strLog)
 {
 	char szBuf[256]="";
 
-	// ½Ã°£
 	unsigned long nGlobalClock = ZGetGame()->GetTickTime();
 	itoa(nGlobalClock, szBuf, 10);
 	strLog = szBuf;
@@ -1031,7 +1031,7 @@ void ZTranslateCommand(MCommand* pCmd, string& strLog)
 	strLog += pCmd->m_pCommandDesc->GetName();
 
 	// PlayerName
-	string strPlayerName;
+	std::string strPlayerName;
 	MUID uid = pCmd->GetSenderUID();
 	ZCharacter* pChar = ZGetCharacterManager()->Find(uid);
 	if (pChar)
@@ -1044,7 +1044,7 @@ void ZTranslateCommand(MCommand* pCmd, string& strLog)
 	strLog += ") ";
 
 	// Params
-	string strParams;
+	std::string strParams;
 	for(int i=0; i<pCmd->GetParameterCount(); i++){
 		char szParam[256]="";
 		pCmd->GetParameter(i)->GetString(szParam);
@@ -1055,7 +1055,7 @@ void ZTranslateCommand(MCommand* pCmd, string& strLog)
 	strLog += strParams;
 }
 
-void ZLogCommand(MCommand* pCmd)
+static void ZLogCommand(MCommand* pCmd)
 {
 	if (pCmd->GetID() == MC_AGENT_TUNNELING_UDP) {
 		return;
@@ -1206,16 +1206,11 @@ bool ZGame::OnCommand_Immediate(MCommand* pCommand)
 		u8 DamageType;
 		u8 WeaponType;
 
-		if (!pCommand->GetParameter(&Target, 0, MPT_UID))
-			break;
-		if (!pCommand->GetParameter(&Damage, 1, MPT_USHORT))
-			break;
-		if (!pCommand->GetParameter(&PiercingRatio, 2, MPT_FLOAT))
-			break;
-		if (!pCommand->GetParameter(&DamageType, 3, MPT_UCHAR))
-			break;
-		if (!pCommand->GetParameter(&WeaponType, 4, MPT_UCHAR))
-			break;
+		if (!pCommand->GetParameter(&Target, 0, MPT_UID)) break;
+		if (!pCommand->GetParameter(&Damage, 1, MPT_USHORT)) break;
+		if (!pCommand->GetParameter(&PiercingRatio, 2, MPT_FLOAT)) break;
+		if (!pCommand->GetParameter(&DamageType, 3, MPT_UCHAR)) break;
+		if (!pCommand->GetParameter(&WeaponType, 4, MPT_UCHAR)) break;
 
 		auto it = m_CharacterManager.find(Target);
 		if (it == m_CharacterManager.end())
@@ -1374,12 +1369,12 @@ bool ZGame::OnCommand_Immediate(MCommand* pCommand)
 			{
 				int nMyTeam = ZApplication::GetGame()->m_pMyCharacter->GetTeamID();
 
-				if ( (nTeam == MMT_ALL) || (nTeam == MMT_SPECTATOR))
+				if (nTeam == MMT_ALL || nTeam == MMT_SPECTATOR)
 				{
 					if ( !ZGetGameClient()->GetRejectNormalChat() || ( strcmp( pChar->GetUserName(), ZGetMyInfo()->GetCharName()) == 0))
 					{
 						ZGetSoundEngine()->PlaySound("if_error");
-						char szTemp[sizeof(szMsg)+64];
+						char szTemp[ArraySize(szMsg) + 64];
 
 						if(bSpUser) {
 							sprintf_safe(szTemp, "%s: %s", pChar->GetProperty()->szName, szMsg);
@@ -1391,7 +1386,6 @@ bool ZGame::OnCommand_Immediate(MCommand* pCommand)
 						}
 					}
 				}
-
 				else if (nTeam == nMyTeam)
 				{
 					if ( (!ZGetGameClient()->IsLadderGame() && !ZGetGameClient()->GetRejectTeamChat()) ||
@@ -1472,17 +1466,13 @@ bool ZGame::OnCommand_Immediate(MCommand* pCommand)
 			ZGetGameClient()->OnRemoveWorldItem(nItemUID);
 		}
 		break;
-
-
-
-
 	case MC_PEER_BASICINFO	: OnPeerBasicInfo(pCommand);break;
 	case MC_PEER_HPINFO		: OnPeerHPInfo(pCommand);break;
-	case MC_PEER_HPAPINFO		: OnPeerHPAPInfo(pCommand);break;
+	case MC_PEER_HPAPINFO	: OnPeerHPAPInfo(pCommand);break;
 	case MC_PEER_PING		: OnPeerPing(pCommand); break;
 	case MC_PEER_PONG		: OnPeerPong(pCommand); break;
 	case MC_PEER_OPENED		: OnPeerOpened(pCommand); break;
-	case MC_PEER_DASH	: OnPeerDash(pCommand); break;
+	case MC_PEER_DASH	    : OnPeerDash(pCommand); break;
 	case MC_PEER_SHOT:
 		{
 			MCommandParameter* pParam = pCommand->GetParameter(0);
@@ -1520,8 +1510,9 @@ bool ZGame::OnCommand_Immediate(MCommand* pCommand)
 			pCommand->GetParameter(&type, 3, MPT_INT);
 			pCommand->GetParameter(&sel_type, 4, MPT_INT);
 
-
-			OnPeerShotSp(pCommand->GetSenderUID(), fShotTime, pos, dir,type,(MMatchCharItemParts)sel_type);
+			OnPeerShotSp(pCommand->GetSenderUID(),
+				fShotTime, pos, dir,type,
+				(MMatchCharItemParts)sel_type);
 		}
 		break;
 
@@ -1663,16 +1654,6 @@ bool ZGame::OnCommand_Immediate(MCommand* pCommand)
 		}
 		break;
 
-	case MC_REQUEST_XTRAP_HASHVALUE :
-		{
-			char szNewRandomValue[ 256 ] = {0,};
-
-			pCommand->GetParameter( szNewRandomValue, 0, MPT_STR, 255 );
-
-			ZApplication::GetGameInterface()->OnRequestNewHashValue( szNewRandomValue );
-		}
-		break;
-
 	case MC_MATCH_DISCONNMSG :
 		{
 			DWORD dwMsgID;
@@ -1705,7 +1686,7 @@ bool ZGame::OnCommand_Immediate(MCommand* pCommand)
 	return true;
 }
 
-rvector ZGame::GetMyCharacterFirePosition(void)
+rvector ZGame::GetMyCharacterFirePosition()
 {
 	rvector p = g_pGame->m_pMyCharacter->GetPosition();
 	p.z += 160.f;

@@ -269,7 +269,6 @@
     <ClCompile Include="MAsyncProxy.cpp" />
     <ClCompile Include="MMatchEventFactory.cpp" />
     <ClCompile Include="MMatchRuleSkillmap.cpp" />
-    <ClCompile Include="MMatchServer_AntiHack.cpp" />
     <ClCompile Include="MovingWeaponManager.cpp" />
     <ClCompile Include="MServer.cpp" />
     <ClCompile Include="MSSQLDatabase.cpp" />

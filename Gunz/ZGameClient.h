@@ -158,7 +158,8 @@ private:
 	void OnAnnounce(unsigned int nType, char* szMsg);
 	void OnResponseResult(const int nResult);
 
-	void OnChannelResponseJoin(const MUID& uidChannel, MCHANNEL_TYPE nChannelType, char* szChannelName);
+	void OnChannelResponseJoin(const MUID& uidChannel, MCHANNEL_TYPE nChannelType,
+		const char* szChannelName);
 	void OnChannelChat(const MUID& uidChannel, const char* szName, const char* szChat, int nGrade);
 	void OnChannelList(void* pBlob, int nCount);
 	void OnChannelResponseRule(const MUID& uidchannel, const char* pszRuleName);
@@ -201,8 +202,6 @@ private:
 
 	void OnFollowResponse( const int nMsgID );
 	void OnExpiredRentItem(void* pBlob);
-
-	void OnBirdTest();
 
 	void OnResponseCreateClan(const int nResult, const int nRequestID);
 	void OnResponseAgreedCreateClan(const int nResult);

@@ -667,7 +667,6 @@
     <ClCompile Include="Source\MemPool.cpp" />
     <ClCompile Include="source\MHttpSpooler.cpp" />
     <ClCompile Include="Source\MInet.cpp" />
-    <ClCompile Include="source\MInetUtil.cpp" />
     <ClCompile Include="source\MLex.cpp" />
     <ClCompile Include="source\MLocale.cpp" />
     <ClCompile Include="source\MPageArray.cpp" />

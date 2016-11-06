@@ -1056,8 +1056,4 @@ inline void ZPostRequestMonsterBibleInfo( const MUID& uid )
 	ZPOSTCMD1( MC_MATCH_REQUEST_MONSTER_BIBLE_INFO, MCmdParamUID(uid) );
 }
 
-inline void ZPostResponseNewHashValue( const char* szNewSerialKey )
-{
-	ZPOSTCMD1( MC_RESPONSE_XTRAP_HASHVALUE, MCmdParamStr(szNewSerialKey) );
-}
 #endif

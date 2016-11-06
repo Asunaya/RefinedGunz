@@ -1,5 +1,4 @@
-#ifndef SAFEUDP_H
-#define SAFEUDP_H
+#pragma once
 
 /////////////////////////////////////////////////////////////
 //	SafeUDP.h	- SafeUDP 1.9.2
@@ -7,10 +6,8 @@
 //								    LastUpdate : 2000/07/25
 /////////////////////////////////////////////////////////////
 
-#pragma warning(disable:4786)
 #include <map>
 #include <list>
-using namespace std;
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -19,33 +16,31 @@ using namespace std;
 #include "MThread.h"
 #include "MBasePacket.h"
 #include "MTrafficLog.h"
-
+#include "MInetUtil.h"
+#include <memory>
 
 class MSafeUDP;
 
-
 // INNER CLASS //////////////////////////////////////////////////////////////////////////
 struct MSendQueueItem {
-	DWORD			dwIP;
-	WORD			wRawPort;
-	MBasePacket*	pPacket;
-	DWORD			dwPacketSize;
+	u32			dwIP;
+	u16			wRawPort;
+	MBasePacket*pPacket;
+	u32			dwPacketSize;
 };
 
 struct MACKQueueItem {
-	DWORD			dwIP;
-	WORD			wRawPort;
-	BYTE			nSafeIndex;
+	u32			dwIP;
+	u16			wRawPort;
+	u8			nSafeIndex;
 };
 
 struct MACKWaitItem {
-	MSafePacket*	pPacket;
-	DWORD			dwPacketSize;
+	std::unique_ptr<MSafePacket> pPacket;
+	u32				dwPacketSize;
 	timeval			tvFirstSent;
 	timeval			tvLastSent;
-	BYTE			nSendCount;
-	MACKWaitItem() {}
-	~MACKWaitItem() { if (pPacket) delete pPacket; }
+	u8				nSendCount;
 };
 
 // OUTER CLASS //////////////////////////////////////////////////////////////////////////
@@ -60,7 +55,7 @@ public:
 		LINKSTATE_FIN_RCVD
 	};
 
-	typedef list<MACKWaitItem*>		ACKWaitList;
+	typedef std::list<MACKWaitItem*>		ACKWaitList;
 	typedef ACKWaitList::iterator	ACKWaitListItor;
 
 private:
@@ -108,21 +103,21 @@ public:
 	MNetLink::LINKSTATE GetLinkState()	{ return m_nLinkState; }
 	static bool MakeSockAddr(char* pszIP, int nPort, sockaddr_in* pSockAddr);
 	bool SetAddress(char* pszIP, int nPort);
-	char* GetIPString()					{ return inet_ntoa(m_Address.sin_addr); }
-	DWORD GetIP()						{ return m_Address.sin_addr.S_un.S_addr; }
-	WORD GetRawPort()					{ return m_Address.sin_port; }
+	std::string GetIPString() const		{ return GetIPv4String(m_Address.sin_addr); }
+	u32 GetIP() const					{ return m_Address.sin_addr.S_un.S_addr; }
+	u16 GetRawPort()					{ return m_Address.sin_port; }
 	int GetPort()						{ return ntohs(m_Address.sin_port); }
 	sockaddr_in* GetSockAddr()			{ return &m_Address; }
-	__int64 GetMapKey();
-	static __int64 GetMapKey(sockaddr_in* pSockAddr);
+	i64 GetMapKey();
+	static i64 GetMapKey(sockaddr_in* pSockAddr);
 	timeval GetLastPacketRecvTime()		{ return m_tvLastPacketRecvTime; }
 
-	DWORD GetAuthKey()					{ return m_dwAuthKey; }
+	u32 GetAuthKey() const			{ return m_dwAuthKey; }
 	void SetUserData(void* pUserData)	{ m_pUserData = pUserData; }
-	void* GetUserData()					{ return m_pUserData; }
+	void* GetUserData() const			{ return m_pUserData; }
 };
 
-typedef map<__int64, MNetLink*>	NetLinkMap;
+typedef std::map<i64, MNetLink*>	NetLinkMap;
 typedef NetLinkMap::value_type	NetLinkType;
 typedef NetLinkMap::iterator	NetLinkItor;
 
@@ -136,9 +131,9 @@ typedef void(MGENERICRECVCALLBACK)(MNetLink* pNetLink, MBasePacket* pPacket, DWO
 class MSafeUDP;
 class MSocketThread : public MThread {
 public:
-	typedef list<MACKQueueItem*>	ACKSendList;
+	typedef std::list<MACKQueueItem*>	ACKSendList;
 	typedef ACKSendList::iterator	ACKSendListItor;
-	typedef list<MSendQueueItem*>	SendList;
+	typedef std::list<MSendQueueItem*>	SendList;
 	typedef SendList::iterator		SendListItor;
 
 private:
@@ -230,7 +225,7 @@ public:
 
 public:
 	SOCKET GetLocalSocket()		{ return m_Socket; }
-	char* GetLocalIPString()	{ return inet_ntoa(m_LocalAddress.sin_addr); }
+	std::string GetLocalIPString() { return GetIPv4String(m_LocalAddress.sin_addr); }
 	DWORD GetLocalIP()			{ return m_LocalAddress.sin_addr.S_un.S_addr; }
 	WORD GetLocalPort()			{ return m_LocalAddress.sin_port; }
 
@@ -278,6 +273,3 @@ public:
 
 
 #pragma comment(lib, "ws2_32.lib")
-
-
-#endif

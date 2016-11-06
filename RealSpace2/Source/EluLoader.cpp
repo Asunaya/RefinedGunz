@@ -533,7 +533,6 @@ bool loadTree(LoaderState& State, const char * sceneName, std::vector<RLIGHT>& L
 		dstLight.fAttnEnd = srcLight.AttEnd;
 		dstLight.fIntensity = srcLight.Intensity;
 		dstLight.Name = srcLight.Name;
-		//DMLog("Light at %f, %f, %f!\n", EXPAND_VECTOR(srcLight.Position));
 	}
 
 	DMLog("loadTree -- actor.isValid = %d\n", actor.isValid);

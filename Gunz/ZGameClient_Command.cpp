@@ -7,8 +7,7 @@
 
 bool ZGameClient::OnCommand(MCommand* pCommand)
 {
-	bool ret;
-	ret = MMatchClient::OnCommand(pCommand);
+	bool ret = MMatchClient::OnCommand(pCommand);
 
 	switch (pCommand->GetID()) {
 	case MC_MATCH_PING_LIST:
@@ -56,16 +55,8 @@ bool ZGameClient::OnCommand(MCommand* pCommand)
 		ZGetGameInterface()->ShowErrorMessage(szMessage);
 	}
 	break;
-	case MC_NET_ONDISCONNECT:
-	{
-
-	}
-	break;
-	case MC_NET_ONERROR:
-	{
-
-	}
-	break;
+	case MC_NET_ONDISCONNECT: break;
+	case MC_NET_ONERROR: break;
 	case ZC_CHANGESKIN:
 	{
 		char szSkinName[256];
@@ -172,61 +163,6 @@ bool ZGameClient::OnCommand(MCommand* pCommand)
 		m_nClockDistance = ZGetClockDistance(nGlobalClock, nLocalClock);
 	}
 	break;
-#ifdef _DEBUG
-	case ZC_TEST_SETCLIENT1:
-	{
-		char szBuf[256];
-		sprintf_safe(szBuf, "peer.setport 10000");
-		ConsoleInputEvent(szBuf);
-		sprintf_safe(szBuf, "peer.addpeer 127.0.0.1 10001");
-		ConsoleInputEvent(szBuf);
-
-		MClient::OutputMessage(MZMOM_LOCALREPLY, "Done SetClient1");
-	}
-	break;
-	case ZC_TEST_SETCLIENT2:
-	{
-		char szBuf[256];
-		sprintf_safe(szBuf, "peer.setport 10001");
-		ConsoleInputEvent(szBuf);
-		sprintf_safe(szBuf, "peer.addpeer 127.0.0.1 10000");
-		ConsoleInputEvent(szBuf);
-
-		MClient::OutputMessage(MZMOM_LOCALREPLY, "Done SetClient2");
-	}
-	break;
-	case ZC_TEST_SETCLIENTALL:
-	{
-		char szMyIP[256];
-		pCommand->GetParameter(szMyIP, 0, MPT_STR, sizeof(szMyIP));
-
-
-		char szBuf[256];
-		char szIPs[][256] = { "192.168.0.100", "192.168.0.111", "192.168.0.10",
-			"192.168.0.11", "192.168.0.16", "192.168.0.20",
-			"192.168.0.25", "192.168.0.30", "192.168.0.32",
-			"192.168.0.200", "192.168.0.15", "192.168.0.17" };
-		sprintf_safe(szBuf, "peer.setport 10000");
-		ConsoleInputEvent(szBuf);
-
-		for (int i = 0; i < 12; i++)
-		{
-			if (!strcmp(szMyIP, szIPs[i])) continue;
-			sprintf_safe(szBuf, "peer.addpeer %s 10000", szIPs[i]);
-			ConsoleInputEvent(szBuf);
-		}
-
-		MClient::OutputMessage(MZMOM_LOCALREPLY, "Done SetClient All");
-	}
-	break;
-#endif
-#ifndef _PUBLISH
-	case ZC_TEST_BIRD1:
-	{
-		OnBirdTest();
-	}
-	break;
-#endif
 	case MC_MATCH_NOTIFY:
 	{
 		unsigned int nMsgID = 0;
@@ -1112,7 +1048,6 @@ bool ZGameClient::OnCommand(MCommand* pCommand)
 	}
 
 	if (m_fnOnCommandCallback) ret = m_fnOnCommandCallback(pCommand);
-
 
 	return ret;
 }

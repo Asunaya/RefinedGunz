@@ -692,6 +692,8 @@ bool LightmapGenerator::Generate()
 
 	for (size_t i = 0; i < bsp.ConvexPolygons.size(); i++)
 	{
+		// The progress function returning false
+		// indicates that the generation needs to stop.
 		if (pProgressFn && !pProgressFn((float)i / (float)bsp.ConvexPolygons.size()))
 			return false;
 

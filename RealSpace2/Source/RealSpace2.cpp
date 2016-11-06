@@ -246,6 +246,16 @@ void CheckMipFilter()
 	}
 }
 
+static void EnumAdapters()
+{
+	for (u32 i{}; i < g_pD3D->GetAdapterCount(); ++i)
+	{
+		D3DADAPTER_IDENTIFIER9 Identifier;
+		g_pD3D->GetAdapterIdentifier(i, 0, &Identifier);
+		MLog("Adapter %d: %s\n", i, Identifier.Description);
+	}
+}
+
 static bool InitD3D9(HWND hWnd, const RMODEPARAMS* params)
 {
 	if (CreateDirect3D9() == false)
@@ -260,10 +270,9 @@ static bool InitD3D9(HWND hWnd, const RMODEPARAMS* params)
 			return false;
 	}
 
-	D3DCAPS9 d3dcaps;
-	g_pD3D->GetDeviceCaps(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, &d3dcaps);
 	g_pD3D->GetDeviceCaps(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, &g_d3dcaps);
 
+	auto& d3dcaps = g_d3dcaps;
 	g_bHardwareTNL = (d3dcaps.DevCaps & D3DDEVCAPS_HWTRANSFORMANDLIGHT) != 0;
 
 	g_bAvailUserClipPlane = (d3dcaps.MaxUserClipPlanes > 0) ? true : false;
@@ -1023,7 +1032,7 @@ bool REnumAdapterMode(UINT Adapter, D3DFORMAT Format, UINT Mode, D3DDISPLAYMODE*
 	return true;
 }
 
-void RSetFog(bool bFog, float fNear, float fFar, DWORD dwColor)
+void RSetFog(bool bFog, float fNear, float fFar, u32 dwColor)
 {
 	g_bFog = bFog;
 	g_pd3dDevice->SetRenderState(D3DRS_FOGENABLE, g_bFog);
@@ -1042,7 +1051,7 @@ void RSetFog(bool bFog, float fNear, float fFar, DWORD dwColor)
 bool RGetFog() { return g_bFog; }
 float RGetFogNear() { return g_fFogNear; }
 float RGetFogFar() { return g_fFogFar; }
-DWORD RGetFogColor() { return g_dwFogColor; }
+u32 RGetFogColor() { return g_dwFogColor; }
 
 
 bool CheckVideoAdapterSupported()

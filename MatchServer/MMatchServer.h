@@ -717,10 +717,6 @@ public:
 	void ResponsePeerList(const MUID& uidChar, const MUID& uidStage);
 	void ResponseGameInfo(const MUID& uidChar, const MUID& uidStage);
 
-	// x-trap : check client new hash value.
-	void RequestNewHashValue( const MUID& uidChar, const char* szNewRandom );
-	void OnResponeNewHashValue( const MUID& uidChar, char* szSerialKey );
-
 	void NotifyMessage(const MUID& uidChar, int nMsgID);
 
 	unsigned long GetChannelListChecksum()	{ return m_ChannelMap.GetChannelListChecksum(); }
@@ -807,17 +803,6 @@ public:
 	MMatchQuest*		GetQuest()			{ return &m_Quest; }
 	int GetClientCount()	{ return (int)m_Objects.size(); }
 	int GetAgentCount()		{ return (int)m_AgentMap.size(); }
-
-	virtual void	XTrap_RandomKeyGenW(char* strKeyValue) {}
-	virtual int		XTrap_XCrackCheckW(char* strSerialKey, char* strRandomValue, char* strHashValue) { return 0; }
-	virtual void	XTrap_OnAdminReloadFileHash(const MUID& uidAdmin);
-
-	virtual ULONG	HShield_MakeGuidReqMsg(unsigned char *pbyGuidReqMsg, unsigned char *pbyGuidReqInfo) { return 0L; }
-	virtual ULONG	HShield_AnalyzeGuidAckMsg(unsigned char *pbyGuidAckMsg, unsigned char *pbyGuidReqInfo, unsigned long **ppCrcInfo) { return 0L; }
-	virtual ULONG   HShield_MakeReqMsg(unsigned long *pCrcInfo, unsigned char *pbyReqMsg, unsigned char *pbyReqInfo, unsigned long ulOption) { return 0L; }
-	virtual ULONG   HShield_AnalyzeAckMsg(unsigned long *pCrcInfo, unsigned char *pbyAckMsg, unsigned char *pbyReqInfo) { return 0L; }
-
-	void SendHShieldReqMsg();
 
 	void PostDeath(const MMatchObject& Victim, const MMatchObject& Attacker);
 	void PostDamage(const MUID& Target, const MUID& Sender, ZDAMAGETYPE DamageType, MMatchWeaponType WeaponType,

@@ -328,15 +328,15 @@ struct ClientSettings
 
 class MMatchObject : public MObject {
 protected:
-	MMatchAccountInfo			m_AccountInfo;		// 계정 정보
-	MMatchCharInfo*				m_pCharInfo;		// 캐릭터 정보
-	MMatchFriendInfo*			m_pFriendInfo;		// 친구정보
-	MMatchPlace					m_nPlace;			// 위치 정보
-	MMatchTimeSyncInfo			m_nTimeSyncInfo;	// 스피드핵 감시	
-	MMatchObjectChannelInfo		m_ChannelInfo;		// 채널 정보
-	MMatchObjectGameInfo		m_GameInfo;			// 게임안에서의 정보
-	MMatchObjectAntiHackInfo	m_AntiHackInfo;		// XTrap에서 사용하는 것들 정보
-	MMatchDisconnStatusInfo		m_DisconnStatusInfo;// 오브젝으 접속종료 상태 정보.
+	MMatchAccountInfo			m_AccountInfo;
+	MMatchCharInfo*				m_pCharInfo;
+	MMatchFriendInfo*			m_pFriendInfo;
+	MMatchPlace					m_nPlace;
+	MMatchTimeSyncInfo			m_nTimeSyncInfo;
+	MMatchObjectChannelInfo		m_ChannelInfo;
+	MMatchObjectGameInfo		m_GameInfo;
+	MMatchObjectAntiHackInfo	m_AntiHackInfo;
+	MMatchDisconnStatusInfo		m_DisconnStatusInfo;
 	MMatchObjectHShieldInfo		m_HSieldInfo;
 
 	bool			m_bHacker;
@@ -423,8 +423,6 @@ protected:
 	}
 	void DeathCount()				{ m_nDeathCount++; m_nAllRoundDeathCount++; }
 	void KillCount()				{ m_nKillCount++; m_nAllRoundKillCount++; }
-
-	void CheckClientHashValue( const DWORD dwTime );
 public:
 	MMatchObject(const MUID& uid);
 	virtual ~MMatchObject();
@@ -575,10 +573,6 @@ public:
 
 	void			SetCountryCode3( const string strCountryCode3 ) { m_strCountryCode3 = strCountryCode3; }
 	const string&	GetCountryCode3() const							{ return m_strCountryCode3; }
-
-	void SetXTrapHackerDisconnectWaitInfo( const MMatchDisconnectStatus DisStatus = MMDS_DISCONN_WAIT );
-	void SetHShieldHackerDisconnectWaitInfo( const MMatchDisconnectStatus DisStatus = MMDS_DISCONN_WAIT );
-	void SetBadFileCRCDisconnectWaitInfo( const MMatchDisconnectStatus DisStatus = MMDS_DISCONN_WAIT );
 
 	void AddPing(int Ping)
 	{

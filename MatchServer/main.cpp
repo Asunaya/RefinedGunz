@@ -2,6 +2,8 @@
 #include "MBMatchServer.h"
 #include <Shlwapi.h>
 
+#include "BulletCollisionLibs.h"
+
 static bool GetLogFileName(char* pszBuf)
 {
 	if (PathIsDirectory("Log") == FALSE)

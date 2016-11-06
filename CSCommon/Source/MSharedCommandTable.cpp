@@ -47,7 +47,8 @@ void MAddSharedCommandTable(MCommandManager* pCommandManager, int nSharedType)
 		P(MPT_FLOAT, "PiercingRatio")
 		P(MPT_UCHAR, "DamageType")
 		P(MPT_UCHAR, "WeaponType")
-	C(MC_MATCH_P2P_COMMAND, "Match.P2PCommand", "Forwards Peer to Peer commands", MCDT_MACHINE2MACHINE | MCCT_NON_ENCRYPTED)
+	C(MC_MATCH_P2P_COMMAND, "Match.P2PCommand", "Forwards Peer to Peer commands",
+		MCDT_MACHINE2MACHINE | MCCT_NON_ENCRYPTED)
 		// Client -> Server = Receiver
 		// Server -> Client = Sender
 		P(MPT_UID, "Sender/Receiver") 
@@ -90,13 +91,6 @@ void MAddSharedCommandTable(MCommandManager* pCommandManager, int nSharedType)
 		P(MPT_UINT, "TimeStamp")
 	C(MC_NET_PONG, "Net.Pong", "Pong", MCDT_MACHINE2MACHINE | MCCT_NON_ENCRYPTED)
 		P(MPT_UINT, "TimeStamp")
-	
-	C(MC_HSHIELD_PING, "HShield.Ping", "Ping", MCDT_MACHINE2MACHINE | MCCT_HSHIELD_ENCRYPTED)
-		P(MPT_UINT, "TimeStamp")
-		P(MPT_BLOB, "CRCInfo")
-	C(MC_HSHIELD_PONG, "HShield.Pong", "Pong", MCDT_MACHINE2MACHINE | MCCT_HSHIELD_ENCRYPTED)
-		P(MPT_UINT, "TimeStamp")
-		P(MPT_BLOB, "AckMsg")
 
 	C(MC_NET_ONCONNECT, "Net.OnConnect", "On Connect", MCDT_LOCAL);
 	C(MC_NET_ONDISCONNECT, "Net.OnDisConnect", "On Disconnect", MCDT_LOCAL);
@@ -1452,11 +1446,6 @@ void MAddSharedCommandTable(MCommandManager* pCommandManager, int nSharedType)
 	C( MC_LOCAL_UPDATE_CUSTOM_IP, "MC_LOCAL_UPDAET_CUSTOM_IP", "update custom ip.", MCDT_LOCAL )
 	C( MC_LOCAL_UPDATE_ACCEPT_INVALID_IP, "MC_LOCAL_UPDATE_ACCEPT_INVALID_IP", "update accept invalid ip.", MCDT_LOCAL )
 	// filter
-
-	C( MC_REQUEST_XTRAP_HASHVALUE, "MC_REQUEST_XTRAP_HASHVALUE", "request new client hash value", MCDT_MACHINE2MACHINE )
-		P( MPT_STR, "new random value" )
-	C( MC_RESPONSE_XTRAP_HASHVALUE, "MC_RESPONSE_XTRAP_HASHVALUE", "response new client hash value", MCDT_MACHINE2MACHINE )
-		P( MPT_STR, "new hash value" )
 
 	END_CMD_DESC();
 }

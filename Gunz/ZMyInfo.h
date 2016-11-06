@@ -79,7 +79,6 @@ public:
 	bool InitCharInfo(const char* szCharName, const char* szClanName, const MMatchClanGrade nClanGrade, const MMatchSex nSex, const int nHair, const int nFace);
 	bool InitAccountInfo(const char* szAccountID, MMatchUserGradeID nUGradeID, MMatchPremiumGradeID nPGradeID);
 	void Destroy();
-	void Serialize();
 
 	static ZMyInfo*		GetInstance();
 	ZMyItemList*		GetItemList() { return &m_ItemList; }

@@ -1,5 +1,4 @@
 #include "stdafx.h"
-
 #include "ZMyInfo.h"
 
 ZMyInfo::ZMyInfo() : m_bNewbie(false), m_nPGradeID(MMPG_FREE), m_nUGradeID(MMUG_FREE)
@@ -19,9 +18,12 @@ ZMyInfo* ZMyInfo::GetInstance()
 	return &m_stMyInfo;
 }
 
-
-bool ZMyInfo::InitCharInfo(const char* szCharName, const char* szClanName, const MMatchClanGrade nClanGrade, 
-					 const MMatchSex nSex, const int nHair, const int nFace)
+bool ZMyInfo::InitCharInfo(const char* szCharName,
+	const char* szClanName,
+	MMatchClanGrade nClanGrade,
+	MMatchSex nSex,
+	int nHair,
+	int nFace)
 {
 	if (m_bCreated == true) 
 	{
@@ -63,29 +65,15 @@ void ZMyInfo::Clear()
 	m_nBP = 0;
 	m_nLevelPercent = 0;
 	m_nLevel = 0;
-	
-	
 
 	m_ItemList.Clear();
 }
-
-
-void ZMyInfo::Serialize()
-{
-	// TODO: 여기서 내 정보에 대한 UI 업데이트를 하도록 하자.
-
-
-}
-
-
 
 void ZMyInfo::SetClanInfo(const char* szClanName, const MMatchClanGrade nClanGrade)
 {
 	strcpy_safe(m_szClanName, szClanName);
 	m_nClanGrade = nClanGrade;
 }
-
-
 
 int ZMyInfo::GetHP()
 {
@@ -96,7 +84,6 @@ int ZMyInfo::GetAP()
 {
 	return (m_ItemList.GetEquipedAPModifier() + DEFAULT_CHAR_AP);
 }
-
 
 #define NEWBIE_MAX_LEVEL			5
 

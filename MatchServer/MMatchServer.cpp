@@ -3308,65 +3308,6 @@ void MMatchServer::CustomCheckEventObj( const DWORD dwEventID, MMatchObject* pOb
 	m_CustomEventManager.CustomCheckEventObj( dwEventID, pObj, pContext );
 }
 
-void MMatchServer::SendHShieldReqMsg()
-{
-	//{{RouteToAllClient HShieldReqMsg
-	MCommand* pCommand = CreateCommand(MC_HSHIELD_PING, MUID(0,0));
-	pCommand->AddParameter(new MCmdParamUInt(static_cast<u32>(GetGlobalClockCount())));
-
-
-	unsigned long HSOption = ANTICPSVR_CHECK_GAME_MEMORY;
-	m_HSCheckCounter++;
-	if(m_HSCheckCounter == 3)
-	{
-		m_HSCheckCounter = 0;
-		HSOption = ANTICPSVR_CHECK_ALL;
-	}
-
-	for(MMatchObjectList::iterator i=m_Objects.begin(); i!=m_Objects.end(); i++)
-	{
-		MMatchObject* pObj = (MMatchObject*)((*i).second);
-
-		// 이전 ReqMsg에 대한 응답(m_bHShieldMsgRecved)이 있는 클라이언트들에게만 보낸다. 그렇지 않은 경우 골치아픔. 새로 보냈는데 이전 ReqMsg에 대한 응답이 온다던가..
-		if (pObj->GetUID() < MUID(0,3) || !pObj->GetHShieldMsgRecved()) continue;	// MUID로 Client인지 판별할수 있는 코드 필요함
-
-		unsigned char* pbyReqMsg = pObj->GetHShieldInfo()->m_pbyReqMsg;
-		unsigned char* pbyReqInfo = pObj->GetHShieldInfo()->m_pbyReqInfo;
-
-		memset(pbyReqMsg, 0, sizeof(pbyReqMsg));
-		memset(pbyReqInfo, 0, sizeof(pbyReqInfo));
-
-		// 이 경우는 앞에서의 AnalyzeGuidAckMsg에서 에러가 났지만 접속이 끊기기 전에 타이머 타이밍이 맞아 이 루틴이 호출되는 경우이다.
-		// 어차피 핵 판정 났으니 여기서 빠져나간다.
-		if(!pObj->GetHShieldInfo()->m_bGuidAckPass)
-		{
-//			LOG(LOG_FILE, "%s's CrcInfo is NULL.", pObj->GetAccountName());
-			break;
-		}
-
-		DWORD dwRet = MGetMatchServer()->HShield_MakeReqMsg(pObj->GetHShieldInfo()->m_pCRCInfo, pbyReqMsg, pbyReqInfo, HSOption);
-
-		if(dwRet != ERROR_SUCCESS)
-			LOG(LOG_FILE, "@MakeReqMsg - %s Making Req Msg Failed. (Error code = 0x%x, CrcInfo Address = 0x%x)", pObj->GetAccountName(), dwRet, pObj->GetHShieldInfo()->m_pCRCInfo);
-
-		void* pBlob = MMakeBlobArray(sizeof(unsigned char), SIZEOF_REQMSG);
-		unsigned char* pCmdBlock = (unsigned char*)MGetBlobArrayElement(pBlob, 0);
-		CopyMemory(pCmdBlock, pbyReqMsg, SIZEOF_REQMSG);
-
-		pCommand->AddParameter(new MCmdParamBlob(pBlob, MGetBlobArraySize(pBlob)));
-
-		MCommand* pSendCmd = pCommand->Clone();
-		pSendCmd->m_Receiver = pObj->GetUID();
-		Post(pSendCmd);
-
-		pObj->SetHShieldMsgRecved(false);	// 새로 보냈으니 초기화해야지
-		MEraseBlobArray(pBlob);
-		pCommand->ClearParam(1);
-	}	
-
-	delete pCommand;
-}
-
 void MMatchServer::PostDeath(const MMatchObject & Victim, const MMatchObject & Attacker)
 {
 	auto DeathCmd = MCommand(m_CommandManager.GetCommandDescByID(MC_PEER_DIE), MUID(0, 0), m_This);

@@ -471,9 +471,7 @@ void ZGameClient::OnClanUpdateCharClanInfo(void* pBlob)
 	MTD_CharClanInfo* pClanInfoNode = (MTD_CharClanInfo*)MGetBlobArrayElement(pBlob, 0);
 
 	ZGetMyInfo()->SetClanInfo(pClanInfoNode->szClanName, pClanInfoNode->nGrade);
-	ZGetMyInfo()->Serialize();
 
-	// 클랜정보가 변경되었다.
 	ZPlayerListBox *pList = GetProperClanListOutput();
 	if(pList) {
 		pList->RefreshUI();

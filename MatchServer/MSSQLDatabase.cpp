@@ -1349,8 +1349,6 @@ bool MSSQLDatabase::InsertConnLog(const int nAID, const char* szIP, const string
 
 	if (0 == szIP) return false;
 
-	// char szShortIP[64];
-	// MConvertCompactIP(szShortIP, szIP);
 	vector< uint8_t > vIP;
 	if (!SplitStrIP(szIP, vIP) || (4 != vIP.size()))
 	{

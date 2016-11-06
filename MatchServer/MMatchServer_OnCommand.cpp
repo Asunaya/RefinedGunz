@@ -842,7 +842,6 @@ _STATUS_CMD_START;
 			break;
 		case MC_ADMIN_RELOAD_CLIENT_HASH:
 			{
-				XTrap_OnAdminReloadFileHash(pCommand->GetSenderUID());
 			}
 			break;
 		case MC_ADMIN_PING_TO_ALL:
@@ -1566,18 +1565,7 @@ _STATUS_CMD_START;
 
 #endif
 
-		case MC_RESPONSE_XTRAP_HASHVALUE :
-			{
-				char szNewSerialKey[ 128 ] = {0,};
-
-				pCommand->GetParameter( szNewSerialKey, 0, MPT_STR, 127 );
-
-				OnResponeNewHashValue( pCommand->GetSenderUID(), szNewSerialKey );
-			}
-			break;
-
 		default:
-//			_ASSERT(0);	// 아직 핸들러가 없다.
 			return false;
 	}
 

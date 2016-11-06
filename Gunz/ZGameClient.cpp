@@ -105,8 +105,6 @@ bool ZPostCommand(MCommand* pCmd)
 		case MC_MATCH_CHATROOM_INVITE:
 		case MC_MATCH_CHATROOM_CHAT:
 		case MC_MATCH_CLAN_MSG:
-		case MC_HSHIELD_PONG:
-		case MC_RESPONSE_XTRAP_HASHVALUE:
 			ZGetGameClient()->Post(pCmd);
 			return true;
 		default:
@@ -163,7 +161,6 @@ ZGameClient::ZGameClient() : MMatchClient(), m_pUPnP(NULL)
 #endif
 }
 
-
 ZGameClient::~ZGameClient()
 {
 	DestroyUPnP();
@@ -200,24 +197,31 @@ void ZGameClient::OnPrepareCommand(MCommand* pCommand)
 #ifndef _PUBLISH
 	m_pLogFrame->AddCommand(GetGlobalClockCount(), pCommand);
 #endif
-
 }
 
-int ZGameClient::OnResponseMatchLogin(const MUID& uidServer, int nResult, const char* szServerName, const MMatchServerMode nServerMode,
-	const char* szAccountID, const MMatchUserGradeID nUGradeID, const MMatchPremiumGradeID nPGradeID, const MUID& uidPlayer,
-	const char* szRandomValue, unsigned char* pbyGuidReqMsg)
+int ZGameClient::OnResponseMatchLogin(const MUID& uidServer,
+	int nResult,
+	const char* szServerName,
+	const MMatchServerMode nServerMode,
+	const char* szAccountID,
+	const MMatchUserGradeID nUGradeID,
+	const MMatchPremiumGradeID nPGradeID,
+	const MUID& uidPlayer,
+	const char* szRandomValue,
+	unsigned char* pbyGuidReqMsg)
 {
 	int nRet = MMatchClient::OnResponseMatchLogin(uidServer, nResult, szServerName, nServerMode,
 		szAccountID, nUGradeID, nPGradeID, uidPlayer, szRandomValue, pbyGuidReqMsg);
 
 	ZGetMyInfo()->InitAccountInfo(szAccountID, nUGradeID, nPGradeID);
 
-	if ((nResult == 0) && (nRet == MOK)) {	// Login successful
+	if (nResult == 0 && nRet == MOK) {	// Login successful
 		mlog("Login Successful. \n");
 
 		ZApplication::GetGameInterface()->ChangeToCharSelection();
 	}
-	else {								// Login failed
+	else
+	{								// Login failed
 		mlog("Login Failed.(ErrCode=%d) \n", nResult);
 
 		ZPostDisconnect();
@@ -294,7 +298,7 @@ void ZGameClient::OnObjectCache(unsigned int nType, void* pBlob, int nCount)
 }
 
 void ZGameClient::OnChannelResponseJoin(const MUID& uidChannel, MCHANNEL_TYPE nChannelType,
-	char* szChannelName)
+	const char* szChannelName)
 {
 	ZApplication::GetGameInterface()->SetState(GUNZ_LOBBY);
 
@@ -552,7 +556,7 @@ void ZGameClient::OnStageLaunch(const MUID& uidStage, const char* pszMapName)
 
 	if (ZApplication::GetGameInterface()->GetState() != GUNZ_GAME)
 	{
-		ZChangeGameState(GUNZ_GAME);		// thread safely
+		ZChangeGameState(GUNZ_GAME);
 	}
 }
 
@@ -561,7 +565,6 @@ void ZGameClient::OnStageFinishGame(const MUID& uidStage)
 	if (ZApplication::GetGameInterface()->GetState() == GUNZ_GAME)
 	{
 		ZApplication::GetGameInterface()->FinishGame();
-		//		ZChangeGameState(GUNZ_STAGE);		// thread safely
 	}
 	ZPostRequestStageSetting(ZGetGameClient()->GetStageUID());
 }
@@ -947,32 +950,38 @@ void ZGameClient::UpdateStageSetting(MSTAGE_SETTING_NODE* pSetting, STAGE_STATE 
 	if (CHECK_SETTING(Netcode, NetcodeType::ServerBased) && !CurSwordsOnly
 		&& !(LastSwordsOnly && pSetting->Netcode == NetcodeType::ServerBased))
 	{
-		sprintf_safe(buf, "Netcode%s%s", Changed ? " changed to " : ": ", GetNetcodeString(pSetting->Netcode));
+		sprintf_safe(buf, "Netcode%s%s", Changed ? " changed to " : ": ",
+			GetNetcodeString(pSetting->Netcode));
 		ZChatOutput(buf, ZChat::CMT_SYSTEM);
 	}
 	if (CHECK_SETTING(ForceHPAP, true))
 	{
-		sprintf_safe(buf, "Force HP/AP%s%s", Changed ? " changed to " : ": ", pSetting->ForceHPAP ? "true" : "false");
+		sprintf_safe(buf, "Force HP/AP%s%s", Changed ? " changed to " : ": ",
+			pSetting->ForceHPAP ? "true" : "false");
 		ZChatOutput(buf, ZChat::CMT_SYSTEM);
 	}
 	if (CHECK_SETTING(HP, 100))
 	{
-		sprintf_safe(buf, "Forced HP%s%d", Changed ? " changed to " : ": ", pSetting->HP);
+		sprintf_safe(buf, "Forced HP%s%d", Changed ? " changed to " : ": ",
+			pSetting->HP);
 		ZChatOutput(buf, ZChat::CMT_SYSTEM);
 	}
 	if (CHECK_SETTING(AP, 50))
 	{
-		sprintf_safe(buf, "Forced AP%s%d", Changed ? " changed to " : ": ", pSetting->AP);
+		sprintf_safe(buf, "Forced AP%s%d", Changed ? " changed to " : ": ",
+			pSetting->AP);
 		ZChatOutput(buf, ZChat::CMT_SYSTEM);
 	}
 	if (CHECK_SETTING(NoFlip, true))
 	{
-		sprintf_safe(buf, "No flip%s%s", Changed ? " changed to " : ": ", pSetting->NoFlip ? "true" : "false");
+		sprintf_safe(buf, "No flip%s%s", Changed ? " changed to " : ": ",
+			pSetting->NoFlip ? "true" : "false");
 		ZChatOutput(buf, ZChat::CMT_SYSTEM);
 	}
 	if (CHECK_SETTING(SwordsOnly, false))
 	{
-		sprintf_safe(buf, "Swords only%s%s", Changed ? " changed to " : ": ", pSetting->SwordsOnly ? "true" : "false");
+		sprintf_safe(buf, "Swords only%s%s", Changed ? " changed to " : ": ",
+			pSetting->SwordsOnly ? "true" : "false");
 		ZChatOutput(buf, ZChat::CMT_SYSTEM);
 	}
 
@@ -1029,8 +1038,8 @@ void ZGameClient::OnMatchNotify(unsigned int nMsgID)
 	string strMsg;
 	NotifyMessage(nMsgID, &strMsg);
 
-	if ((nMsgID == MATCHNOTIFY_GAME_SPEEDHACK) ||
-		(nMsgID == MATCHNOTIFY_GAME_MEMORYHACK))
+	if (nMsgID == MATCHNOTIFY_GAME_SPEEDHACK ||
+		nMsgID == MATCHNOTIFY_GAME_MEMORYHACK)
 	{
 		ZGetGameInterface()->ShowMessage(strMsg.c_str());
 	}
@@ -1056,18 +1065,15 @@ int ZGameClient::OnConnected(SOCKET sock, MUID* pTargetUID, MUID* pAllocUID, uns
 	int ret = MMatchClient::OnConnected(sock, pTargetUID, pAllocUID, nTimeStamp);
 
 	if (sock == m_ClientSocket.GetSocket()) {
-		if (ZApplication::GetInstance()->GetLaunchMode() == ZApplication::ZLAUNCH_MODE_NETMARBLE) {
-
+		if (ZApplication::GetInstance()->GetLaunchMode() == ZApplication::ZLAUNCH_MODE_NETMARBLE)
+		{
 			ZGetLocale()->PostLoginViaHomepage(pAllocUID);
-
 		}
-		else {
+		else
+		{
 			g_OnConnectCallback();
 			g_bConnected = true;
 		}
-	}
-	else if (sock == m_AgentSocket.GetSocket()) {
-
 	}
 
 	return ret;
@@ -1146,25 +1152,23 @@ void ZGameClient::OnSockError(SOCKET sock, SOCKET_ERROR_EVENT ErrorEvent, int &E
 }
 
 class MCharListItem : public MListItem {
-	MUID	m_uid;
-	char	m_szName[32];
+	MUID m_uid;
+	char m_szName[32];
 public:
-	MCharListItem(MUID uid, char* szName) {
-		m_uid = uid; strcpy_safe(m_szName, szName);
+	MCharListItem(const MUID& uid, const char* szName) {
+		m_uid = uid;
+		strcpy_safe(m_szName, szName);
 	}
-	virtual ~MCharListItem() {}
-	virtual const char* GetString(void) { return m_szName; }
-	MUID GetUID() { return m_uid; }
-	char* GetName() { return m_szName; }
-
-public:
-
+	virtual ~MCharListItem() override final {}
+	virtual const char* GetString() override final { return m_szName; }
+	MUID GetUID() const { return m_uid; }
+	const char* GetName() const { return m_szName; }
 };
 
 int ZGameClient::FindListItem(MListBox* pListBox, const MUID& uid)
 {
 	for (int i = 0; i < pListBox->GetCount(); i++) {
-		MCharListItem* pItem = (MCharListItem*)pListBox->Get(i);
+		auto* pItem = static_cast<MCharListItem*>(pListBox->Get(i));
 		if (pItem->GetUID() == uid) return i;
 	}
 	return -1;
@@ -1173,18 +1177,19 @@ int ZGameClient::FindListItem(MListBox* pListBox, const MUID& uid)
 u64 ZGameClient::GetGlobalClockCount() const
 {
 	auto nLocalClock = GetClockCount();
-	if (m_bIsBigGlobalClock) return (nLocalClock + m_nClockDistance);
-	else return (nLocalClock - m_nClockDistance);
+
+	if (m_bIsBigGlobalClock)
+		return (nLocalClock + m_nClockDistance);
+
+	return (nLocalClock - m_nClockDistance);
 }
 
 unsigned long int ZGetClockDistance(unsigned long int nGlobalClock, unsigned long int nLocalClock)
 {
-	if (nGlobalClock > nLocalClock) {
+	if (nGlobalClock > nLocalClock)
 		return nGlobalClock - nLocalClock;
-	}
-	else {
-		return nLocalClock + (UINT_MAX - nGlobalClock + 1);
-	}
+	
+	return nLocalClock + (UINT_MAX - nGlobalClock + 1);
 }
 
 void ZGameClient::StartBridgePeer()
@@ -1195,9 +1200,9 @@ void ZGameClient::StartBridgePeer()
 	UpdateBridgePeerTime(0);
 }
 
-void ZGameClient::Tick(void)
+void ZGameClient::Tick()
 {
-	unsigned long int nClock = GetGlobalClockCount();
+	auto nClock = GetGlobalClockCount();
 
 	m_EmblemMgr.Tick(nClock);
 
@@ -1231,7 +1236,7 @@ void ZGameClient::Tick(void)
 	}
 
 	if ((GetAgentPeerCount() > 0) && (GetAgentPeerFlag() == false)) {
-		static unsigned long tmLastAgentPeer = 0;
+		static u64 tmLastAgentPeer;
 #define CLOCK_AGENT_PEER	200
 		if (nClock - tmLastAgentPeer > CLOCK_AGENT_PEER) {
 			SetAgentPeerCount(GetAgentPeerCount() - 1);
@@ -1244,34 +1249,6 @@ void ZGameClient::Tick(void)
 void ZGameClient::OnResponseRecommandedChannel(const MUID& uidChannel)
 {
 	RequestChannelJoin(uidChannel);
-}
-
-void ZGameClient::OnBirdTest()
-{
-#ifdef _PUBLISH
-	return;
-#endif
-
-	char szText[256];
-	char szList[256]; szList[0] = '\0';
-
-
-	int nCount = (int)m_ObjCacheMap.size();
-	for (const auto* Obj : MakePairValueAdapter(m_ObjCacheMap))
-	{
-		strcat(szList, Obj->GetName());
-		strcat(szList, ", ");
-	}
-
-	sprintf_safe(szText, "BirdTest: %d, %s", nCount, szList);
-	MClient::OutputMessage(MZMOM_LOCALREPLY, szText);
-
-	ZCharacterViewList* pWidget = ZGetCharacterViewList(GUNZ_STAGE);
-	pWidget->RemoveAll();
-
-	pWidget = ZGetCharacterViewList(GUNZ_LOBBY);
-	pWidget->RemoveAll();
-
 }
 
 void ZGameClient::OnForcedEntryToGame()
@@ -1288,8 +1265,6 @@ void ZGameClient::ClearStageSetting()
 
 	m_MatchStageSetting.Clear();
 }
-
-
 
 void ZGameClient::OnLoadingComplete(const MUID& uidChar, int nPercent)
 {
@@ -1681,17 +1656,16 @@ void ZGameClient::RequestGameSuicide()
 
 void ZGameClient::OnResponseResult(const int nResult)
 {
-	if (nResult != MOK)
-	{
-		if (ZApplication::GetGameInterface()->GetState() == GUNZ_GAME)
-		{
-			ZChatOutput(MCOLOR(ZCOLOR_CHAT_SYSTEM), ZErrStr(nResult));
-		}
-		else
-		{
-			ZApplication::GetGameInterface()->ShowErrorMessage(nResult);
-		}
+	if (nResult == MOK)
+		return;
 
+	if (ZApplication::GetGameInterface()->GetState() == GUNZ_GAME)
+	{
+		ZChatOutput(MCOLOR(ZCOLOR_CHAT_SYSTEM), ZErrStr(nResult));
+	}
+	else
+	{
+		ZApplication::GetGameInterface()->ShowErrorMessage(nResult);
 	}
 }
 
@@ -1809,7 +1783,7 @@ void ZGameClient::OnFollowResponse(const int nMsgID)
 {
 	ZGetGameInterface()->GetChat()->Clear(ZChat::CL_LOBBY);
 	const char* pszMsg = ZErrStr(nMsgID);
-	if (0 == pszMsg)
+	if (!pszMsg)
 		return;
 
 	ZChatOutput(pszMsg, ZChat::CMT_SYSTEM, ZChat::CL_LOBBY);
@@ -1950,7 +1924,9 @@ void ZGameClient::OnBroadcastDuelInterruptVictories(const char* pszChampionName,
 	char szText[256];
 	char szVic[32];
 	sprintf_safe(szVic, "%d", nVictories);
-	ZTransMsg(szText, MSG_DUEL_BROADCAST_INTERRUPT_VICTORIES, 3, pszChampionName, pszInterrupterName, szVic);
+	ZTransMsg(szText,
+		MSG_DUEL_BROADCAST_INTERRUPT_VICTORIES, 3,
+		pszChampionName, pszInterrupterName, szVic);
 
 	ZChatOutput(szText, ZChat::CMT_BROADCAST);
 }

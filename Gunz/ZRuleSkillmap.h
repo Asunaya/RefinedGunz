@@ -40,7 +40,7 @@ private:
 class ZRuleSkillmap : public ZRule
 {
 public:
-	ZRuleSkillmap(ZMatch* pMatch);;
+	ZRuleSkillmap(ZMatch* pMatch);
 
 	void OnFall();
 	void Draw();

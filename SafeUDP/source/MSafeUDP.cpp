@@ -220,9 +220,9 @@ bool MNetLink::SetACKWait(MSafePacket* pPacket, DWORD dwPacketSize)
 
 	pPacket->nSafeIndex = GetNextWriteIndex();
 	MACKWaitItem* pACKWaitItem = new MACKWaitItem;
-	pACKWaitItem->pPacket = pPacket;
+	pACKWaitItem->pPacket = std::unique_ptr<MSafePacket>{ pPacket };
 	pACKWaitItem->dwPacketSize = dwPacketSize;
-	pACKWaitItem->nSendCount = 1;		// SendQueue 에 넣었지만 보냈다고 가정
+	pACKWaitItem->nSendCount = 1;		// SendQueue
 	MTime::GetTime(&pACKWaitItem->tvFirstSent);
 	MTime::GetTime(&pACKWaitItem->tvLastSent);
 	m_ACKWaitQueue.push_back(pACKWaitItem);
@@ -591,7 +591,7 @@ bool MSocketThread::SafeSendManage()
 
 			tvDiff = MTime::TimeSub(tvNow, pACKWaitItem->tvLastSent);
 			if ((tvDiff.tv_sec*1000 + tvDiff.tv_usec) > SAFEUDP_SAFE_RETRANS_TIME) {
-				PushSend(pNetLink, pACKWaitItem->pPacket, pACKWaitItem->dwPacketSize, true);
+				PushSend(pNetLink, pACKWaitItem->pPacket.get(), pACKWaitItem->dwPacketSize, true);
 				pACKWaitItem->tvLastSent = tvNow;
 				pACKWaitItem->nSendCount++;
 			}
@@ -608,7 +608,8 @@ bool MSocketThread::Recv()
 	char			RecvBuf[MAX_RECVBUF_LEN];
 	int				nRecv = 0;
 
-	while(TRUE) {
+	while (true)
+	{
 		nRecv = recvfrom(m_pSafeUDP->GetLocalSocket(), RecvBuf, MAX_RECVBUF_LEN, 0, 
 						 (struct sockaddr*)&AddrFrom, &nAddrFromLen);
 		if (nRecv != SOCKET_ERROR) {
@@ -616,13 +617,7 @@ bool MSocketThread::Recv()
 			m_RecvTrafficLog.Record(m_nTotalRecv);
 		}
 
-		if (nRecv <= 0) break;					// Stop Receive Loop
-
-/*////////////////
-char szBuf[256];
-wsprintf(szBuf, "[%s:%d] \n", inet_ntoa(AddrFrom.sin_addr), ntohs(AddrFrom.sin_port));
-OutputDebugString(szBuf);
-////////////////*/
+		if (nRecv <= 0) break;
 
 		if (m_fnCustomRecvCallback && OnCustomRecv(AddrFrom.sin_addr.S_un.S_addr, AddrFrom.sin_port, RecvBuf, nRecv) == true) {
 			continue;

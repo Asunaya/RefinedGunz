@@ -327,7 +327,6 @@
     <ClCompile Include="MMatchServer.cpp" />
     <ClCompile Include="MMatchServer_Admin.cpp" />
     <ClCompile Include="MMatchServer_Agent.cpp" />
-    <ClCompile Include="MMatchServer_AntiHack.cpp" />
     <ClCompile Include="MMatchServer_Async.cpp" />
     <ClCompile Include="MMatchServer_Channel.cpp" />
     <ClCompile Include="MMatchServer_Char.cpp" />
