@@ -13,7 +13,7 @@
 #include "gdiplus.h"
 	 using namespace Gdiplus;
 #pragma comment(lib, "gdiplus.lib")
-//#pragma comment(lib, "Gdi32.lib")
+#pragma comment(lib, "Gdi32.lib")
 #endif
 
 _NAMESPACE_REALSPACE2_BEGIN
