@@ -5,6 +5,7 @@
 #include "ZSkyBox.h"
 #include "ZInitialLoading.h"
 #include "RUtil.h"
+#include "RBspObject.h"
 
 ZWorld::ZWorld() : m_pBsp(NULL), m_pMapDesc(NULL), m_pSkyBox(NULL), m_nRefCount(1), m_bCreated(false)
 {

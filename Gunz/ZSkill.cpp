@@ -5,6 +5,7 @@
 #include "ZGame.h"
 #include "ZModule_Resistance.h"
 #include "ZChat.h"
+#include "RBspObject.h"
 
 ZSkillDesc::ZSkillDesc()
 {
@@ -29,7 +30,7 @@ ZSkillDesc::ZSkillDesc()
 
 	nEffectStartPosType = ZSTP_NONE;
 	fEffectAreaMin = 0.0f;
-	fEffectAngle = PI_FLOAT / 2.0f;		// 90도
+	fEffectAngle = PI_FLOAT / 2.0f;
 
 	bCameraShock = true;
 	fCameraPower = 1.0f;
@@ -37,9 +38,9 @@ ZSkillDesc::ZSkillDesc()
 	fCameraRange = 1500.0f;
 }
 
-bool ZSkillDesc::IsEffectiveTo(ZObject *pTarget)	// 이 스킬이 대상에게 효과가 있는지..
+bool ZSkillDesc::IsEffectiveTo(ZObject *pTarget)
 {
-	if(pTarget->IsDie()) return false;	// 죽어있는 타켓
+	if(pTarget->IsDie()) return false;
 
 	ZModule_HPAP *pModule = (ZModule_HPAP*)pTarget->GetModule(ZMID_HPAP);
 
@@ -59,11 +60,8 @@ bool ZSkillDesc::IsEffectiveTo(ZObject *pTarget)	// 이 스킬이 대상에게 효과가 있
 	return false;
 }
 
-// 저항에 성공했으면 false를 리턴
 bool ZSkillDesc::CheckResist(ZObject *pCurrent,float *pfDamage)
 {
-	// 내성굴림을 한다. 기획서의 step 4까지 온것으로 가정한다
-
 	ZModule_Resistance *pModule = (ZModule_Resistance *)pCurrent->GetModule(ZMID_RESISTANCE);
 	if(!pModule) return true;
 
@@ -136,20 +134,20 @@ bool ZSkillDesc::CheckResist(ZObject *pCurrent,float *pfDamage)
 #define ZAS_COL_RADIUS		"colradius"
 #define ZAS_KNOCKBACK		"knockback"
 
-#define ZAS_CASTINGEFFECTTYPE		"castingeffectType"		// 이펙트 적용 대상 타잎
-#define ZAS_CASTINGPREEFFECTTYPE	"castingpreeffectType"	// 이펙트 적용 대상 타잎
-#define ZAS_CASTINGEFFECTADDPOS		"castingeffectAddPos"	// 이펙트 적용 더할 위치
-#define ZAS_CASTINGEFFECT			"castingeffect"			// 이펙트 이름
-#define ZAS_CASTINGEFFECTSP			"castingeffectSp"		// 특수 이펙트 이름
-#define ZAS_CASTINGEFFECTSPCOUNT	"castingeffectSpCount"	// 특수 이펙트 갯수
-#define ZAS_CASTINGPREEFFECT		"castingpreeffect"		// 스킬 발동과 동시에 보일 이펙트
+#define ZAS_CASTINGEFFECTTYPE		"castingeffectType"
+#define ZAS_CASTINGPREEFFECTTYPE	"castingpreeffectType"
+#define ZAS_CASTINGEFFECTADDPOS		"castingeffectAddPos"
+#define ZAS_CASTINGEFFECT			"castingeffect"
+#define ZAS_CASTINGEFFECTSP			"castingeffectSp"
+#define ZAS_CASTINGEFFECTSPCOUNT	"castingeffectSpCount"
+#define ZAS_CASTINGPREEFFECT		"castingpreeffect"
 
-#define ZAS_EFFECTSTARTPOSTYPE		"effect_startpos_type"	// 스킬 발동과 동시에 보일 이펙트
+#define ZAS_EFFECTSTARTPOSTYPE		"effect_startpos_type"
 
-#define ZAS_TARGETEFFECT	 "targeteffect"			// 이펙트 이름
-#define ZAS_TRAILEFFECT		 "traileffect"			// 이펙트 이름
-#define ZAS_TRAILEFFECTTYPE	 "traileffecttype"		// 이펙트 종류
-#define ZAS_TRAILEFFECTSCALE "traileffectscale"		// 이펙트 스케일
+#define ZAS_TARGETEFFECT	 "targeteffect"
+#define ZAS_TRAILEFFECT		 "traileffect"
+#define ZAS_TRAILEFFECTTYPE	 "traileffecttype"
+#define ZAS_TRAILEFFECTSCALE "traileffectscale"
 
 #define ZAS_ANGLE					"angle"
 
@@ -715,7 +713,7 @@ bool ZSkill::GetPartsTypePos(RMeshPartsPosInfoType& type, MUID& uid, const MUID&
 bool ZSkill::GetPartsTypePos(ZObject* pTargetObject, ZSKILLEFFECTTARGETPOSTYPE nSkillEffectPosType,
 	RMeshPartsPosInfoType& type, rvector& vPos, rvector& vDir)
 {
-	if( pTargetObject && nSkillEffectPosType == ZSTP_TARGET ) {//지금 캐릭터가 있는 지형의 위치
+	if( pTargetObject && nSkillEffectPosType == ZSTP_TARGET ) {
 
 		rvector vNormal;
 		rvector vOut;

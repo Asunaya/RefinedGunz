@@ -11,6 +11,7 @@
 #include "ZGlobal.h"
 #include "ZScreenEffectManager.h"
 #include "ZInput.h"
+#include "RSolidBsp.h"
 
 extern int  g_debug_render_mode;
 extern bool g_bVertex_Soft; 
@@ -75,16 +76,10 @@ bool ZGameInput::OnDebugEvent(MEvent* pEvent)
 			case 'U': {
 
 				ZC_ENCHANT zctype;
-//				int Module = 20;
 
 				if(g_pGame && g_pGame->m_pMyCharacter ) {
 
 					zctype = g_pGame->m_pMyCharacter->GetEnchantType();
-
-//						 if(zctype==ZC_ENCHANT_FIRE)		Module = ZMID_FIREDAMAGE;
-//					else if(zctype==ZC_ENCHANT_COLD)		Module = ZMID_COLDDAMAGE;
-//					else if(zctype==ZC_ENCHANT_LIGHTNING)	Module = ZMID_LIGHTNINGDAMAGE;
-//					else if(zctype==ZC_ENCHANT_POISON)		Module = ZMID_POISONDAMAGE;
 
 					if(zctype==ZC_ENCHANT_FIRE) {
 						ZModule_FireDamage *pModule = (ZModule_FireDamage*)g_pGame->m_pMyCharacter->GetModule(ZMID_FIREDAMAGE);

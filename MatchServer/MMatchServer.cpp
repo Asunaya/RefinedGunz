@@ -46,14 +46,14 @@
 #include "MLadderMgr.h"
 #include "MTeamGameStrategy.h"
 #include "stuff.h"
+#include "MPickInfo.h"
 
-#define DEFAULT_REQUEST_UID_SIZE		4200000000	///< UID 할당 요청 기본 단위
-#define DEFAULT_REQUEST_UID_SPARE_SIZE	10000		///< UID 남은 갯수
+#define DEFAULT_REQUEST_UID_SIZE		4200000000
+#define DEFAULT_REQUEST_UID_SPARE_SIZE	10000
 #define DEFAULT_ASYNCPROXY_THREADPOOL	6
 #define MAXUSER_WEIGHT					30
 
-#define MAX_DB_QUERY_COUNT_OUT			5		// 쿼리가 5번이상 실패하면 Shutdown
-
+#define MAX_DB_QUERY_COUNT_OUT			5
 
 #define MATCHSERVER_DEFAULT_UDP_PORT	7777
 
@@ -67,8 +67,7 @@
 
 MMatchServer* MMatchServer::m_pInstance = NULL;
 
-////////////////////////////////////
-void RcpLog(const char *pFormat,...)
+static void RcpLog(const char *pFormat,...)
 {
 	char szBuf[256];
 
@@ -85,10 +84,7 @@ void RcpLog(const char *pFormat,...)
 	}
 	OutputDebugString(szBuf);
 }
-////////////////////////////////////
 
-
-/////////////////////////////////////////////////////////
 class MPointerChecker
 {
 private:
@@ -117,10 +113,6 @@ void _CheckValidPointer(void* pPointer1, void* pPointer2, void* pPointer3, int n
 	if (pPointer2 != NULL) g_PointerChecker[1].Check(pPointer2, nState, nValue);
 	if (pPointer3 != NULL) g_PointerChecker[2].Check(pPointer3, nState, nValue);
 }
-
-
-
-/////////////////////////////////////////////////////////
 
 void CopyCharInfoForTrans(MTD_CharInfo* pDest, MMatchCharInfo* pSrcCharInfo, MMatchObject* pSrcObject)
 {
@@ -291,12 +283,8 @@ MMatchServer::MMatchServer(void) : m_pScheduler( 0 )
 
 	m_pAuthBuilder = NULL;
 
-	// m_pScheduler = 0;
-
-	// 스트링 리소스는 제일 먼저 인스턴스를 생성해놔야 한다.
 	MMatchStringResManager::MakeInstance();
 
-	// 포인터 침범 디버그코드
 	m_checkMemory1 = m_checkMemory2 = m_checkMemory3 = m_checkMemory4 = m_checkMemory5 = m_checkMemory6 =
 	m_checkMemory7 = m_checkMemory8 = m_checkMemory9 = m_checkMemory10 = m_checkMemory11 = m_checkMemory12 =
 	m_checkMemory13 = m_checkMemory14 = m_checkMemory15 = m_checkMemory16 = m_checkMemory17 = m_checkMemory18 =

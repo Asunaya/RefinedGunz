@@ -46,13 +46,7 @@ enum ZGAME_READYSTATE {
 	ZGAME_READYSTATE_RUN
 };
 
-struct ZPICKINFO {
-	ZObject*	pObject;
-	RPickInfo	info;
-
-	bool bBspPicked;
-	RBSPPICKINFO bpi;
-};
+struct ZPICKINFO;
 
 struct ZObserverCommandItem {
 	float fTime;

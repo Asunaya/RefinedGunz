@@ -1,8 +1,6 @@
 #include "stdafx.h"
-//#include <afxdlgs.h>
 #include "RFont.h"
 #include <crtdbg.h>
-//#include <dxutil.h>		// Program Files\DXSDK\Samples\C++\Common\Include
 #include <mbstring.h>
 #include <tchar.h>
 #include "mDebug.h"
@@ -14,16 +12,11 @@
 #include "unknwn.h"
 #include "gdiplus.h"
 	 using namespace Gdiplus;
-#pragma comment(lib,"gdiplus.lib")
+#pragma comment(lib, "gdiplus.lib")
+//#pragma comment(lib, "Gdi32.lib")
 #endif
 
-_USING_NAMESPACE_REALSPACE2
-
 _NAMESPACE_REALSPACE2_BEGIN
-
-//#undef _USE_GDIPLUS
-
-// 모든 rfont 는 g_FontTexture 하나만을 사용한다. ( 16x16 셀로 이루어진 하나의 텍스쳐를 버퍼로 쓴다 )
 
 #define TEXTURE_SIZE	512
 #define CELL_SIZE		32
@@ -58,8 +51,6 @@ bool RFontTexture::Create()
 	}
 
 	m_LastUsedID = 0;
-
-//	memory dc 와 buffer 를 만든다
 
 	m_hDC = CreateCompatibleDC(NULL);
 
@@ -119,7 +110,7 @@ void BlitRect(BYTE* pDest, int x1,int y1,int x2,int y2,int w, int h, DWORD* pBit
 		for(int x=x1; x<x2; x++) {
 
 			DWORD dwPixel = pBitmapBits[(w * by) + (bx)];
-			if ( dwPixel & 0x00ffffff)	//색이 값이 있다면~
+			if ( dwPixel & 0x00ffffff)
 				dwPixel |= 0xff000000;
 
 			*(pDestTemp+x) = dwPixel;
@@ -166,13 +157,12 @@ bool RFontTexture::UploadTexture(RCHARINFO *pCharInfo,DWORD* pBitmapBits,int w,i
 	return false;
 }
 
-bool RFontTexture::IsNeedUpdate(int nIndex, int nID)		// 갱신되어야 하는지 검사
+bool RFontTexture::IsNeedUpdate(int nIndex, int nID)
 {
 	if(nIndex==-1) return true;
 	if(m_CellInfo[nIndex].nID == nID) {
-		// 막 사용되어진것이므로 뒤로 돌린다.
 		m_PriorityQueue.splice(m_PriorityQueue.end(),m_PriorityQueue,m_CellInfo[nIndex].itr);
-		return false;	// 갱신할 필요없다
+		return false;
 	}
 	return true;
 }
@@ -187,7 +177,6 @@ bool RFontTexture::MakeFontBitmap(HFONT hFont, RCHARINFO *pInfo, const TCHAR* sz
 	int nWidth = min(size.cx,CELL_SIZE);
 
 #ifdef _USE_GDIPLUS
-	// GDI+ Font
 	WCHAR wstrText[256];
 	int nTextLen = strlen(szText)+1;
 	MultiByteToWideChar(CP_ACP, 0, szText, -1, wstrText, nTextLen-1);
@@ -196,7 +185,6 @@ bool RFontTexture::MakeFontBitmap(HFONT hFont, RCHARINFO *pInfo, const TCHAR* sz
 	Graphics graphics(m_hDC);
 	Gdiplus::Font font(m_hDC, hFont);
 
-	//	graphics.SetTextRenderingHint(TextRenderingHintAntiAlias);
 	graphics.Clear(Color(0,0,0,0));
 
 	const StringFormat* pTypoFormat = StringFormat::GenericTypographic();
@@ -206,7 +194,7 @@ bool RFontTexture::MakeFontBitmap(HFONT hFont, RCHARINFO *pInfo, const TCHAR* sz
 		SolidBrush  solidBrush(Color(255, 255, 255, 255));
 		graphics.DrawString(wstrText, -1, &font, PointF(0.0f, 0.0f), pTypoFormat, &solidBrush);
 	}
-	else if (nOutlineStyle == 1)	// 아웃라인이 그려진다
+	else if (nOutlineStyle == 1)
 	{
 		GraphicsPath path;
 		FontFamily fontFamily;
@@ -228,7 +216,7 @@ bool RFontTexture::MakeFontBitmap(HFONT hFont, RCHARINFO *pInfo, const TCHAR* sz
 		SolidBrush brush(Color((Gdiplus::ARGB)nColorArg1));
 		graphics.FillPath((Brush*)&brush, &path);
 	}
-	else if (nOutlineStyle == 2)	// 그림자만 포함된다. 좌측의 한픽셀 여백이 있으므로 왼쪽으로 한픽셀. 자간은 같다
+	else if (nOutlineStyle == 2)
 	{
 		SolidBrush  solidBrush2(Color((Gdiplus::ARGB)nColorArg2));
 		graphics.DrawString(wstrText, -1, &font, PointF(1.0f, 1.0f), pTypoFormat, &solidBrush2);
@@ -237,7 +225,6 @@ bool RFontTexture::MakeFontBitmap(HFONT hFont, RCHARINFO *pInfo, const TCHAR* sz
 
 		graphics.DrawString(wstrText, -1, &font, PointF(0.0f, 0.0f), pTypoFormat, &solidBrush1);
 
-		// 숫자일 경우엔 자간이 좁기 때문에 1을 늘린다.
 		char chChar = (char)wstrText[0];
 		if ( (chChar >= '0') && (chChar <= '9'))
 			nWidth++;
@@ -293,7 +280,7 @@ struct FONT2DVERTEX {
 #define MAX_FONT_BUFFER 4000
 
 static	int				g_nFontCount=0;
-static	FONT2DVERTEX	g_FontVertexBuffer[4*MAX_FONT_BUFFER];//그림자까지 200자정도
+static	FONT2DVERTEX	g_FontVertexBuffer[4*MAX_FONT_BUFFER];
 static	WORD			g_FontIndexBuffer[6*MAX_FONT_BUFFER];
 
 
@@ -306,10 +293,10 @@ RFont::~RFont()
 	Destroy();
 }
 
-bool RFont::Create(const TCHAR* szFontName, int nHeight, bool bBold/* =false */, bool bItalic/* =false */, int nOutlineStyle/* =0 */, int nCacheSize, bool bAntiAlias, DWORD nColorArg1, DWORD nColorArg2)
+bool RFont::Create(const TCHAR* szFontName, int nHeight, bool bBold, bool bItalic,
+	int nOutlineStyle, int nCacheSize, bool bAntiAlias, DWORD nColorArg1, DWORD nColorArg2)
 {
 	m_nOutlineStyle = nOutlineStyle;
-//	m_nSamplingMultiplier = nSamplingMultiplier;	// 한방향 샘플링 횟수, 2이면 2*2크기를 샘플링한다.
 	HDC hDC = GetDC(g_hWnd);
 	SetMapMode(hDC, MM_TEXT);
 	nHeight = MulDiv(nHeight, GetDeviceCaps(hDC, LOGPIXELSY), 72);
@@ -364,9 +351,9 @@ bool RFont::BeginFont()
 	pDevice->SetRenderState( D3DRS_ALPHAREF,         0x08 );
 	pDevice->SetRenderState( D3DRS_ALPHAFUNC,  D3DCMP_GREATEREQUAL );
 
-	const bool bFiltering = true;
+	constexpr bool bFiltering = true;
 
-	if(bFiltering==true){
+	if(bFiltering){
 		pDevice->SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR );
 		pDevice->SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR );
 	}
@@ -381,7 +368,6 @@ bool RFont::BeginFont()
 	pDevice->SetRenderState( D3DRS_CULLMODE,   D3DCULL_NONE );
 	pDevice->SetRenderState( D3DRS_STENCILENABLE,    FALSE );
 	pDevice->SetRenderState( D3DRS_CLIPPING,         TRUE );
-//	pDevice->SetRenderState( D3DRS_EDGEANTIALIAS,    FALSE );
 	pDevice->SetRenderState( D3DRS_CLIPPLANEENABLE,  FALSE );
 	pDevice->SetRenderState( D3DRS_VERTEXBLEND,      FALSE );
 	pDevice->SetRenderState( D3DRS_INDEXEDVERTEXBLENDENABLE, FALSE );
@@ -392,7 +378,6 @@ bool RFont::BeginFont()
 	pDevice->SetTextureStageState( 0, D3DTSS_COLORARG2, D3DTA_DIFFUSE );
 
 	pDevice->SetTextureStageState( 0, D3DTSS_ALPHAOP,   D3DTOP_MODULATE );
-//	pDevice->SetTextureStageState( 0, D3DTSS_ALPHAOP,   D3DTOP_SELECTARG1 );
 	pDevice->SetTextureStageState( 0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE );
 	pDevice->SetTextureStageState( 0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE );
 
@@ -402,17 +387,7 @@ bool RFont::BeginFont()
 	pDevice->SetTextureStageState( 0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE );
 	pDevice->SetTextureStageState( 1, D3DTSS_COLOROP,   D3DTOP_DISABLE );
 	pDevice->SetTextureStageState( 1, D3DTSS_ALPHAOP,   D3DTOP_DISABLE );
-/*
-	if(pDevice->EndStateBlock(&m_dwStateBlock)!=D3D_OK) {
-		m_dwStateBlock = NULL;
-	}
-	pDevice->ApplyStateBlock(m_dwStateBlock);
 
-}
-else {
-//		m_pd3dDevice->ApplyStateBlock(m_dwStateBlock);
-}
-*/
 	RGetDevice()->SetFVF(D3DFVF_FONT2DVERTEX);
 	RGetDevice()->SetTexture(0,g_FontTexture.GetTexture());
 
@@ -445,21 +420,17 @@ bool RFont::EndFont()
 	return true;
 }
 
-void RFont::DrawText(float x, float y, const TCHAR* szText, DWORD dwColor/* =0xFFFFFFFF */, float fScale/* =1.0f */)
+void RFont::DrawText(float x, float y, const TCHAR* szText, DWORD dwColor, float fScale)
 {
 	if(szText==NULL)	return;
 	if(szText[0]==NULL) return;
 
-//	bool bPrevInFont = m_bInFont;	// 하단에서 부적절하게 사용중이다.
 	bool bPrevInFont = false;	
 
 	BeginFont();
 
 	const TCHAR* p = (const TCHAR*)szText;
 	TCHAR szChar[4];
-
-//	if(m_nAutoScale)
-//		fScale = RGetScreenWidth() / 800.f;
 
 	while(1) {
 
@@ -491,7 +462,6 @@ void RFont::DrawText(float x, float y, const TCHAR* szText, DWORD dwColor/* =0xF
 			}
 		}else
 		{
-			// 갱신할 필요가 있는지 검사
 			pInfo = i->second;
 			if(m_pFontTexture->IsNeedUpdate(pInfo->nFontTextureIndex,pInfo->nFontTextureID)) {
 				m_pFontTexture->MakeFontBitmap(m_hFont,pInfo,szChar,m_nOutlineStyle,m_ColorArg1,m_ColorArg2);
@@ -500,7 +470,6 @@ void RFont::DrawText(float x, float y, const TCHAR* szText, DWORD dwColor/* =0xF
 
 		if(pInfo != NULL) {
 
-			// 버텍스를 만들어서 버퍼에 밀어넣는다
 			static FONT2DVERTEX vertices[RFONT_VERTEXCOUNT];
 			WORD indices[6] = { 3,0,2,0,1,2 };
 			/*		0 3
@@ -508,12 +477,6 @@ void RFont::DrawText(float x, float y, const TCHAR* szText, DWORD dwColor/* =0xF
 					1 2			*/
 
 			int nWidth = min(CELL_SIZE,pInfo->nWidth);
-/*
-			vertices[0].p = D3DXVECTOR4(x,y,0,1);
-			vertices[1].p = D3DXVECTOR4(x,y+CELL_SIZE,0,1);
-			vertices[2].p = D3DXVECTOR4(x+nWidth,y+CELL_SIZE,0,1);
-			vertices[3].p = D3DXVECTOR4(x+nWidth,y,0,1);
-*/
 			int w = nWidth*fScale;
 			int h = CELL_SIZE*fScale;
 
@@ -562,18 +525,15 @@ void RFont::DrawText(float x, float y, const TCHAR* szText, DWORD dwColor/* =0xF
 		if(*pp==0)	 break;
 	}
 
-	// 이전에 BeginFont - EndFont 상태가 아니었다면 복구한다.
 	if(!bPrevInFont)
 		EndFont();
 }
 
-int RFont::GetTextWidth(const TCHAR* szText, int nSize /* =-1 */)
+int RFont::GetTextWidth(const TCHAR* szText, int nSize)
 {
 	if(nSize==0) return 0;
 	if(szText==NULL) return 0;
 	if(szText[0]==NULL) return 0;
-
-	//	return _tcslen(szText)*8;
 
 	int nWidth=0,nCount=0;
 
@@ -596,8 +556,6 @@ int RFont::GetTextWidth(const TCHAR* szText, int nSize /* =-1 */)
 			nCount+=2;
 		}
 		_ASSERT(pp-p==sizeof(TCHAR)*2 || pp-p==sizeof(TCHAR));
-
-		//		STRING2FONTTEXTURE::iterator i = m_FontMap.find(szChar);
 
 		WORD key = *(WORD*)szChar;
 

@@ -5,6 +5,7 @@
 #include "RToken.h"
 #include "ZApplication.h"
 #include "ZGame.h"
+#include "RBspObject.h"
 
 #define ZTOK_SPAWN			"spawn"
 #define ZTOK_SPAWN_SOLO		"spawn_solo"

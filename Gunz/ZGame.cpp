@@ -80,6 +80,8 @@
 #include <random>
 #include "HitRegistration.h"
 #include "stuff.h"
+#include "RBspObject.h"
+#include "ZPickInfo.h"
 
 _USING_NAMESPACE_REALSPACE2
 

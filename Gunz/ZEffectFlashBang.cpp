@@ -4,10 +4,10 @@
 #include "RealSpace2.h"
 #include "MDebug.h"
 #include "ZSoundEngine.h"
-//#include "RealSoundEffect.h"
 #include "ZEffectFlashBang.h"
 #include "ZConfiguration.h"
 #include "ZApplication.h"
+#include "RBspObject.h"
 
 using namespace RealSpace2;
 
@@ -16,13 +16,6 @@ bool ZEffectFlashBang::mbDrawCopyScreen	= false;
 
 #define CLEAR_TIME_DURATION 7
 
-//////////////////////////////////////////////////////////////////////////
-//
-//
-//	Global Interface
-//
-//
-//////////////////////////////////////////////////////////////////////////
 ZEffectFlashBang*	ZGetFlashBangEffect()
 {
 	return ZEffectFlashBang::GetInstance();
@@ -48,17 +41,6 @@ void ReleaseFlashBangEffect()
 	ZGetFlashBangEffect()->ReleaseBuffer();
 }
 
-//////////////////////////////////////////////////////////////////////////
-//
-//
-//	ZEffectFlashBang
-//
-//
-//////////////////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////////////////
-//	Define
-//////////////////////////////////////////////////////////////////////////
 #define CORRECTION			0.01f
 #define SCREEN_BLUR_TEXTURE_SIZE_WIDTH	800
 #define SCREEN_BLUR_TEXTURE_SIZE_HEIGHT	600
@@ -66,14 +48,8 @@ void ReleaseFlashBangEffect()
 #define MAX_EFFECT_VOLUMN	Z_AUDIO_EFFECT_VOLUME
 #define MIN_VOLUMN			0
 
-//////////////////////////////////////////////////////////////////////////
-//	Global
-//////////////////////////////////////////////////////////////////////////
 extern ZGame* g_pGame;
 
-//////////////////////////////////////////////////////////////////////////
-//	SetBuffer
-//////////////////////////////////////////////////////////////////////////
 void ZEffectFlashBang::SetBuffer()
 {
 	// left top
@@ -137,10 +113,8 @@ void ZEffectFlashBang::SetBuffer()
 			D3DSURFACE_DESC desc;
 			mpBlurSurface->GetDesc( &desc );
 			RGetDevice()->CreateDepthStencilSurface( desc.Width, desc.Height, D3DFMT_D16, D3DMULTISAMPLE_NONE ,0,TRUE, &mpDepthBuffer , NULL);
-			RGetDevice()->GetDepthStencilSurface( &mpHoldDepthBuffer );	// 나중에 반드시 Release해줘야 한다.. Ref 증가..!
+			RGetDevice()->GetDepthStencilSurface( &mpHoldDepthBuffer );
 		}
-
-		//mlog("---------------------------------setBuffer\n");
 	}
 
 	mbActivated		= false;
@@ -148,9 +122,6 @@ void ZEffectFlashBang::SetBuffer()
 }
 
 
-//////////////////////////////////////////////////////////////////////////
-//	ReleaseBuffer
-//////////////////////////////////////////////////////////////////////////
 void ZEffectFlashBang::ReleaseBuffer()
 {
 	End();
@@ -158,12 +129,8 @@ void ZEffectFlashBang::ReleaseBuffer()
 	SAFE_RELEASE( mpBlurTexture );
 	SAFE_RELEASE( mpDepthBuffer );
 	SAFE_RELEASE( mpHoldDepthBuffer );
-	//mlog("------------------------ReleaseBuffer\n");
 }
 
-//////////////////////////////////////////////////////////////////////////
-//	Invalidate / Restore
-//////////////////////////////////////////////////////////////////////////
 void ZEffectFlashBang::OnInvalidate()
 {
 	ReleaseBuffer();
@@ -174,12 +141,8 @@ void ZEffectFlashBang::OnRestore()
 	SetBuffer();
 }
 
-//////////////////////////////////////////////////////////////////////////
-//	Init
-//////////////////////////////////////////////////////////////////////////
 void ZEffectFlashBang::Init( rvector& ExplosionPos_, rvector playerPos_, rvector playerDir_, float Duration_  )
 {
-	// 뷰 프러스트럼 안에 있는지 체크
 	if( !isInViewFrustum( ExplosionPos_, RGetViewFrustum()) )
 	{
 		return;
@@ -187,15 +150,12 @@ void ZEffectFlashBang::Init( rvector& ExplosionPos_, rvector playerPos_, rvector
 
 	mbActivated	= true;
 	
-	// 지속시간
 	mfDuration	= Duration_;
 
-	// 세기 결정
 	rvector flashDir	= ExplosionPos_ - playerPos_;
 
 	D3DXVec3Normalize( &flashDir, &flashDir );
 
-	// 각에 따른 감소..
 	mfPower		= D3DXVec3Dot( &playerDir_, &flashDir ) * mfDuration;
 	mfStartTime	= g_pGame->GetTime();
 
@@ -204,7 +164,7 @@ void ZEffectFlashBang::Init( rvector& ExplosionPos_, rvector playerPos_, rvector
 		return;
 	}
 
-	// Blur 이미지 렌더링
+	// Blur
 	if( mpBlurSurface != 0 )
 	{
 		RGetDevice()->GetRenderTarget( 0,&mpHoldBackBuffer );
@@ -219,9 +179,7 @@ void ZEffectFlashBang::Init( rvector& ExplosionPos_, rvector playerPos_, rvector
 		RGetDevice()->SetTransform(D3DTS_VIEW, &view );
 
 		ZGetGame()->GetWorld()->GetBsp()->Draw();
-		//g_pGame->m_CharacterManager.Draw();
 		g_pGame->m_ObjectManager.Draw();
-		//g_pGame->m_WeaponManager.Render();
 		ZGetEffectManager()->Draw(GetGlobalTimeMS());
 
 		RGetDevice()->SetRenderTarget( 0,mpHoldBackBuffer );
@@ -232,9 +190,6 @@ void ZEffectFlashBang::Init( rvector& ExplosionPos_, rvector playerPos_, rvector
 
 }
 
-//////////////////////////////////////////////////////////////////////////
-//	Render
-//////////////////////////////////////////////////////////////////////////
 void ZEffectFlashBang::Render()
 {
 	if( !mbActivated )
@@ -252,7 +207,6 @@ void ZEffectFlashBang::Render()
 		if( mpBlurTexture != 0 && mbDrawCopyScreen )
 		{
 			RGetDevice()->SetTextureStageState( 0, D3DTSS_COLOROP, D3DTOP_BLENDFACTORALPHA );
-			//RGetDevice()->SetTextureStageState( 0, D3DTSS_COLOROP, D3DTOP_MODULATE4X );
 			RGetDevice()->SetTextureStageState( 0, D3DTSS_COLORARG1, D3DTA_DIFFUSE );
 			RGetDevice()->SetTextureStageState( 0, D3DTSS_COLORARG2, D3DTA_TEXTURE );
 			RGetDevice()->SetTexture( 0, mpBlurTexture );
@@ -300,9 +254,6 @@ void ZEffectFlashBang::End()
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////
-//	PlaySound
-//////////////////////////////////////////////////////////////////////////
 void ZEffectFlashBang::PlaySound()
 {
 #ifdef _BIRDSOUND
@@ -315,18 +266,11 @@ void ZEffectFlashBang::PlaySound()
 		return;
 	}
 
-	//float volumn;
 	float restDuration	= mfDuration - ( g_pGame->GetTime() - mfStartTime );
 
 #ifdef _DEBUG
  	mlog("Rest Duration : %f(%f,%f)\n", restDuration, mfStartTime, mfDuration );
 #endif
-	//volumn	= MAX_MUSIC_VOLUMN * ( 1.0f / (restDuration*restDuration) ) + MIN_VOLUMN;
-	//volumn	= max( min( MAX_MUSIC_VOLUMN, volumn ), 0.01f );
-	//ZGetSoundEngine()->SetMusicVolume( volumn );
-	//volumn	= MAX_EFFECT_VOLUMN * ( 1.0f / (restDuration*restDuration) ) + MIN_VOLUMN;
-	//volumn	= max( min( MAX_EFFECT_VOLUMN, volumn ), 0.01f );
-	//ZGetSoundEngine()->SetEffectVolume( volumn );
 
 	static int stage = 0;
 
@@ -398,9 +342,6 @@ void ZEffectFlashBang::PlaySound()
 #endif
 }
 
-//////////////////////////////////////////////////////////////////////////
-//	생성자 / 소멸자
-//////////////////////////////////////////////////////////////////////////
 ZEffectFlashBang::ZEffectFlashBang()
 {
 	mbActivated		= false;

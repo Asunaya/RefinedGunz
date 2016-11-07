@@ -45,6 +45,7 @@
 #include "ZOptionInterface.h"
 #include "MMatchNotify.h"
 #include "RS2.h"
+#include "RBspObject.h"
 
 #ifdef USING_VERTEX_SHADER
 #include "RShaderMgr.h"

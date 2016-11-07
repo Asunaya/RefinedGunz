@@ -598,6 +598,7 @@ rem call copy_share.bat
     <ClInclude Include="ZMiniMap.h" />
     <ClInclude Include="ZModule_ElementalDamage.h" />
     <ClInclude Include="ZObserver.h" />
+    <ClInclude Include="ZPickInfo.h" />
     <ClInclude Include="ZRadar.h" />
     <ClInclude Include="ZReplayStructs.h" />
     <ClInclude Include="ZRuleSkillmap.h" />

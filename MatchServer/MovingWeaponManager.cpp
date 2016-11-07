@@ -4,7 +4,7 @@
 #include "MMatchStage.h"
 #include "has_xxx.h"
 #include "MMatchWorldItemDesc.h"
-#undef pi
+#include "MPickInfo.h"
 
 HAS_XXX(Update);
 

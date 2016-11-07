@@ -1,5 +1,4 @@
 #include "stdafx.h"
-
 #include "ZGameInput.h"
 #include "ZApplication.h"
 #include "ZGameInterface.h"
@@ -17,8 +16,8 @@
 #include "ZMyInfo.h"
 #include "ZMinimap.h"
 #include "ZInput.h"
-
 #include "RGMain.h"
+#include "RBspObject.h"
 
 #undef _DONOTUSE_DINPUT_MOUSE
 
@@ -29,10 +28,22 @@ ZGameInput::ZGameInput()
 	m_pInstance = this;
 	m_bCTOff = false;
 
-	static ZKEYSEQUENCEITEM action_ftumble[]= { {true,ZACTION_FORWARD}, {false,ZACTION_FORWARD} , {true,ZACTION_FORWARD} };	// 앞 앞
-	static ZKEYSEQUENCEITEM action_btumble[]= { {true,ZACTION_BACK}, {false,ZACTION_BACK} , {true,ZACTION_BACK} };	// 뒤 뒤
-	static ZKEYSEQUENCEITEM action_rtumble[]= { {true,ZACTION_RIGHT}, {false,ZACTION_RIGHT} , {true,ZACTION_RIGHT} };
-	static ZKEYSEQUENCEITEM action_ltumble[]= { {true,ZACTION_LEFT}, {false,ZACTION_LEFT} , {true,ZACTION_LEFT} };	
+	static ZKEYSEQUENCEITEM action_ftumble[] = {
+		{true,ZACTION_FORWARD},
+		{false,ZACTION_FORWARD},
+		{true,ZACTION_FORWARD} };
+	static ZKEYSEQUENCEITEM action_btumble[] = {
+		{true,ZACTION_BACK},
+		{false,ZACTION_BACK},
+		{true,ZACTION_BACK} };
+	static ZKEYSEQUENCEITEM action_rtumble[] = {
+		{true,ZACTION_RIGHT},
+		{false,ZACTION_RIGHT},
+		{true,ZACTION_RIGHT} };
+	static ZKEYSEQUENCEITEM action_ltumble[] = {
+		{true,ZACTION_LEFT},
+		{false,ZACTION_LEFT},
+		{true,ZACTION_LEFT}};	
 
 #define ADDKEYSEQUENCE(time,x) m_SequenceActions.push_back(ZKEYSEQUENCEACTION(time,sizeof(x)/sizeof(ZKEYSEQUENCEITEM),x));
 

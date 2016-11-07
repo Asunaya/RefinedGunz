@@ -7,7 +7,6 @@
 
 #include "MErrorTable.h"
 #include "MMatchServer.h"
-#undef pi
 #include "rapidxml.hpp"
 #include <fstream>
 

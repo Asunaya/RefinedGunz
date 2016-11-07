@@ -10,9 +10,7 @@
 #include "ZGame.h"
 #include "ZScreenEffectManager.h"
 #include "ZMapDesc.h"
-
 #include "MQuestConst.h"
-
 #include "ZWorldItem.h"
 #include "ZCharacter.h"
 #include "ZCharacterManager.h"
@@ -24,6 +22,7 @@
 #include "RNavigationMesh.h"
 #include "RNavigationNode.h"
 #include "ZEquipmentListBox.h"
+#include "RBspObject.h"
 
 ZQuest::ZQuest() : MBaseQuest(), m_bLoaded(false), m_bCreatedOnce(false)
 {
@@ -166,13 +165,8 @@ void ZQuest::OnGameUpdate(float fElapsed)
 
 void ZQuest::UpdateNavMeshWeight(float fDelta)
 {
-	// NavMesh 가중치 업데이트
 	if ((ZGetGame()->GetTime() - m_fLastWeightTime) >= 1.0f)
 	{
-#ifdef _DEBUG
-		unsigned long int nLastTime = GetGlobalTimeMS();
-#endif
-
 		RNavigationMesh* pNavMesh = ZGetGame()->GetWorld()->GetBsp()->GetNavigationMesh();		
 		if (pNavMesh != NULL)
 		{
@@ -190,7 +184,6 @@ void ZQuest::UpdateNavMeshWeight(float fDelta)
 			}
 		}
 		m_fLastWeightTime = ZGetGame()->GetTime();
-
 	}
 
 }

@@ -1,7 +1,5 @@
 #include "stdafx.h"
-
 #include "ZPrerequisites.h"
-
 #include "ZEffectManager.h"
 #include "ZEffectGunFire.h"
 #include "ZEffectBulletMark.h"
@@ -11,27 +9,22 @@
 #include "ZEffectMesh.h"
 #include "ZEffectStaticMesh.h"
 #include "ZEffectAniMesh.h"
-
 #include "ZGame.h"
 #include "ZConfiguration.h"
-
 #include "RealSpace2.h"
 #include "ZCharacter.h"
 #include "ZMyCharacter.h"
 #include "ZGameClient.h"
-
 #include "RMeshMgr.h"
-
 #include <crtdbg.h>
 #include "MDebug.h"
-
 #include <dxerr9.h>
-
 #include "RGMain.h"
+#include "RBspObject.h"
 
 
 #ifndef _PUBLISH
-class ZEffectValidator : public set<ZEffect*> 
+class ZEffectValidator : public std::set<ZEffect*> 
 {
 public:
 	void Add(ZEffect* pNew) {

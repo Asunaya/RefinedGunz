@@ -6,6 +6,7 @@
 #include "ZCharacterManager.h"
 #include "ZMap.h"
 #include "ZGameClient.h"
+#include "RBspObject.h"
 
 #define ZMINIMAPTOK_PICTURE		"PICTURE"
 #define ZMINIMAPTOK_LEFTTOP		"LEFTTOP"

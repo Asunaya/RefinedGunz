@@ -3,6 +3,7 @@
 #include "ZStencilLight.h"
 #include "RealSpace2.h"
 #include "RMeshUtil.h"
+#include "RBspObject.h"
 
 #define CORRECTION		0.01
 #define SLSEGMENT		8
@@ -40,7 +41,6 @@ void ZStencilLight::Destroy()
 
 	for( map<int, LightSource*>::iterator iter = m_LightSource.begin(); iter != m_LightSource.end(); )
 	{
-//		mlog("light %d deleted\n",iter->first);
 		LightSource* pLS = iter->second;
 		SAFE_DELETE(pLS);
 		iter = m_LightSource.erase(iter);
@@ -72,20 +72,10 @@ void ZStencilLight::PreRender()
 	pd3dDevice->SetTextureStageState( 1, D3DTSS_ALPHAARG1, D3DTA_CURRENT );
 	pd3dDevice->SetTextureStageState( 1, D3DTSS_ALPHAOP,   D3DTOP_SELECTARG1);
 
-	/*
-	pd3dDevice->SetSamplerState( 1, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP );
-	pd3dDevice->SetSamplerState( 1, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP );
-    pd3dDevice->SetSamplerState( 1, D3DSAMP_MINFILTER, D3DTEXF_LINEAR );
-    pd3dDevice->SetSamplerState( 1, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR );
-	*/
-
 	pd3dDevice->SetRenderState( D3DRS_AMBIENT, 0);
-//	pd3dDevice->SetLight( 0, pLight );
-//	pd3dDevice->LightEnable( 0, TRUE );
 	pd3dDevice->LightEnable( 0, FALSE );
 	pd3dDevice->LightEnable( 1, FALSE );
 	pd3dDevice->SetRenderState( D3DRS_LIGHTING, FALSE );
-	//	pd3dDevice->SetRenderState(D3DRS_NORMALIZENORMALS, TRUE );
 
 	pd3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, true );
 	pd3dDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);

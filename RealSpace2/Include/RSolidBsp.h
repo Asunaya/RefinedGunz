@@ -18,11 +18,8 @@ enum RCOLLISIONMETHOD{
 class RSolidBspNode
 {
 public:
-	RSolidBspNode();
-	~RSolidBspNode();
-
 	bool GetColPlanes_Cylinder(RImpactPlanes *pOutList, const rvector &origin, const rvector &to, float fRadius, float fHeight);
-	bool GetColPlanes_Sphere(RImpactPlanes *pOutList,const rvector &origin,const rvector &to,float fRadius);
+	bool GetColPlanes_Sphere(RImpactPlanes *pOutList, const rvector &origin, const rvector &to, float fRadius);
 	rvector GetLastColPos() { return impact; }
 	rplane GetLastColPlane() { return impactPlane; }
 
@@ -35,13 +32,13 @@ public:
 	static bool				m_bTracePath;
 
 	rplane			m_Plane;
-	RSolidBspNode	*m_pPositive, *m_pNegative;
+	RSolidBspNode	*m_pPositive{}, *m_pNegative{};
 	bool			m_bSolid;
 
 #ifndef _PUBLISH
-	int				nPolygon;
-	rvector			*pVertices;
-	rvector			*pNormals;
+	int	nPolygon;
+	rvector* pVertices{};
+	std::unique_ptr<rvector[]> pNormals;
 
 	rboundingbox m_bb;
 

@@ -668,7 +668,7 @@ bool ZGameInterface::OnCommand(MCommand* pCommand)
 	default:
 #ifdef _DEBUG
 		mlog("ZGameInterface::OnCommand -- Hit default case for command ID %d\n",
-			pCommand->GetID()););
+			pCommand->GetID());
 #endif
 		break;
 

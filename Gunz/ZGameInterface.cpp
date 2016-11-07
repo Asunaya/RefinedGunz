@@ -1198,7 +1198,6 @@ void ZGameInterface::OnLoginCreate(void)
 			pWidget->SetText(buffer);
 	}
 
-	// ¼­¹ö IP
 	pWidget = m_IDLResource.FindWidget("ServerAddress");
 	if(pWidget)
 	{

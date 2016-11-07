@@ -1,5 +1,4 @@
 #include "stdafx.h"
-
 #include "ZGameClient.h"
 #include "ZCombatInterface.h"
 #include "ZGameInterface.h"
@@ -20,15 +19,14 @@
 #include "MemPool.h"
 #include "ZMyInfo.h"
 #include <algorithm>
-
 #include "ZApplication.h"
 #include "ZCombatQuestScreen.h"
 #include "ZBmNumLabel.h"
 #include "ZModule_QuestStatus.h"
 #include "ZLocale.h"
-
 #include "ZRuleDuel.h"
 #include "ZInput.h"
+#include "ZPickInfo.h"
 
 // CONSTANTS
 #define BACKGROUND_COLOR1					0xff202020

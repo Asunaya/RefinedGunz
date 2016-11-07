@@ -4,7 +4,6 @@ desc : 무기 사용 키 커스터마이즈 관련
 */
 
 #include "stdafx.h"
-
 #include "ZGameInterface.h"
 #include "ZMyCharacter.h"
 #include "ZSoundEngine.h"
@@ -23,6 +22,8 @@ desc : 무기 사용 키 커스터마이즈 관련
 #include "Rules.h"
 #include "HitRegistration.h"
 #include "MUtil.h"
+#include "RBspObject.h"
+#include "ZPickInfo.h"
 
 #define CHARGE_SHOT
 //#define UNLIMITED_JUMP

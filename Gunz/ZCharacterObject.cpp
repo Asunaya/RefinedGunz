@@ -13,6 +13,7 @@
 #include "ZConfiguration.h"
 #include "ZModule_Resistance.h"
 #include "ZModule_ElementalDamage.h"
+#include "RBspObject.h"
 
 MImplementRTTI(ZCharacterObject, ZObject);
 

@@ -763,6 +763,7 @@
     <ClInclude Include="ZGameDrawVulkan.h">
       <Filter>Vulkan</Filter>
     </ClInclude>
+    <ClInclude Include="ZPickInfo.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ZCanvas.cpp">

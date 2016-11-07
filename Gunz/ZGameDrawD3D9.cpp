@@ -19,6 +19,7 @@
 #include "RUtil.h"
 #include "RS2.h"
 #include "Renderer.inl"
+#include "RBspObject.h"
 
 using namespace RealSpace2;
 

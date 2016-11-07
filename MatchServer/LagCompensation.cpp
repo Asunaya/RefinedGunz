@@ -4,11 +4,11 @@
 #include "GlobalTypes.h"
 #include "RealSpace2.h"
 #include "MZFileSystem.h"
-#undef pi
 #include "MXml.h"
 #include "MUtil.h"
 #include "MMatchConfig.h"
 #include "MMatchServer.h"
+#include "RBspObject.h"
 
 static auto Log = [&](auto&&... Args) {
 	MGetMatchServer()->LogF(MMatchServer::LOG_ALL, std::forward<decltype(Args)>(Args)...); };

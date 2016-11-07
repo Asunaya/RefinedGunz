@@ -428,6 +428,7 @@
     <ClInclude Include="Include\MMatchTransDataType.h" />
     <ClInclude Include="Include\MMatchUtil.h" />
     <ClInclude Include="Include\MMatchWorldItemDesc.h" />
+    <ClInclude Include="Include\MPickInfo.h" />
     <ClInclude Include="Include\MPreHeader.h" />
     <ClInclude Include="Include\MQuestConst.h" />
     <ClInclude Include="Include\MQuestDropTable.h" />

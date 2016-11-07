@@ -26,23 +26,6 @@ float	RSolidBspNode::fImpactDist;
 rvector	RSolidBspNode::impact;
 rplane	RSolidBspNode::impactPlane;
 
-RSolidBspNode::RSolidBspNode()
-{
-	m_pPositive=NULL;
-	m_pNegative=NULL;
-#ifndef _PUBLISH
-	pVertices=NULL;
-	pNormals=NULL;
-#endif
-}
-
-RSolidBspNode::~RSolidBspNode()
-{
-#ifndef _PUBLISH
-	SAFE_DELETE(pNormals);
-#endif
-}
-
 #ifndef _PUBLISH
 void RSolidBspNode::DrawPolygon()
 {

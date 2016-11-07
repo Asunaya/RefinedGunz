@@ -5,6 +5,7 @@
 #include "ZGame.h"
 #include "ZGameConst.h"
 #include "Portal.h"
+#include "RBspObject.h"
 
 ZModule_Movable::ZModule_Movable() 
 			: m_Velocity(0,0,0), m_bFalling(false), m_bLanding(false),m_bRestrict(false),

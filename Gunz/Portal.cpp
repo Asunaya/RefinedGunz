@@ -14,6 +14,7 @@
 #include "ZGameInput.h"
 #include "ZConfiguration.h"
 #include "Config.h"
+#include "ZPickInfo.h"
 
 Portal *g_pPortal = nullptr;
 

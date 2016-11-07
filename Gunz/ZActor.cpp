@@ -13,6 +13,7 @@
 #include "ZModule_Skills.h"
 #include "ZQuest.h"
 #include "ZInput.h"
+#include "ZPickInfo.h"
 
 MImplementRTTI(ZActor, ZCharacterObjectHistory);
 
@@ -312,12 +313,10 @@ void ZActor::UpdateHeight(float fDelta)
 
 		if(m_Position.z + 100.f < m_pModule_Movable->GetFallHeight())
 		{
-//			fFallHeight = m_Position.z;
 			float fSpeed=fabs(GetVelocity().z);
 
 			RBspObject* r_map = ZGetGame()->GetWorld()->GetBsp();
 
-			// 점프 착지시 먼지..
 			rvector vPos = m_Position;
 			rvector vDir = rvector(0.f,0.f,-1.f);
 			vPos.z += 50.f;
@@ -332,7 +331,7 @@ void ZActor::UpdateHeight(float fDelta)
 				vDir.y = pInfo.pInfo->plane.b;
 				vDir.z = pInfo.pInfo->plane.c;
 
-				ZGetEffectManager()->AddLandingEffect(vPos,vDir);//내부에서 옵션에 따라~
+				ZGetEffectManager()->AddLandingEffect(vPos,vDir);
 			}
 		}
 	}

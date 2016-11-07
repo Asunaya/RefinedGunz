@@ -5,6 +5,7 @@
 #include <random>
 #include "d3dx9.h"
 #include "RTypes.h"
+#include "RMath.h"
 
 template <typename rngT>
 float RandomAngle(rngT& rng)

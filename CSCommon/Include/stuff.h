@@ -16,7 +16,6 @@
 #include "MMath.h"
 #include "AnimationStuff.h"
 #include "RMesh.h"
-#include "RBspObject.h"
 #include "MMatchUtil.h"
 
 struct BasicInfo {
@@ -147,14 +146,6 @@ enum ZC_SHOT_SP_TYPE {
 	ZC_WEAPON_SP_ITEMKIT,	// medikit, repairkit, bulletkit
 
 	ZC_WEAPON_SP_END,
-};
-
-struct MPICKINFO {
-	class MMatchObject*	pObject;
-	RPickInfo	info;
-
-	bool bBspPicked;
-	RBSPPICKINFO bpi;
 };
 
 struct BasicInfoItem : BasicInfo

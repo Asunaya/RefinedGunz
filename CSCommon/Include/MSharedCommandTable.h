@@ -468,7 +468,9 @@
 #define MC_MATCH_SCHEDULE_CLAN_SERVER_SWITCH_ON		7004
 #define MC_MATCH_SCHEDULE_STOP_SERVER				7005
 
-// Random custom commands
+//
+// 8000-8999: Random custom RGunz commands
+//
 #define MC_PEER_RG_SLASH 8000
 #define MC_PEER_RG_MASSIVE 8801
 #define MC_PEER_PORTAL 8802
@@ -615,6 +617,7 @@
 
 //
 // 50000-50999: Country-code filtering
+//
 #define MC_RESPONSE_BLOCK_COUNTRYCODE			50001
 #define MC_LOCAL_UPDATE_USE_COUNTRY_FILTER		50002
 #define MC_LOCAL_GET_DB_IP_TO_COUNTRY			50003

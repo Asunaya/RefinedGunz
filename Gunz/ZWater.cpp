@@ -8,6 +8,7 @@
 #include "RTypes.h"
 #include "ZSoundEngine.h"
 #include "ZEffectManager.h"
+#include "RBspObject.h"
 
 struct WaterVertex
 {
@@ -399,7 +400,6 @@ bool ZWater::RenderReflectionSurface()
 	g_pDevice->Clear(0,NULL,D3DCLEAR_TARGET|D3DCLEAR_ZBUFFER,0x00000000,1.0f,0.0f);
 
 	// pre render
-
 	rmatrix proj;
 	g_pDevice->GetTransform( D3DTS_PROJECTION, &proj );
 	rmatrix transform = viewMat * proj;
@@ -421,7 +421,6 @@ bool ZWater::RenderReflectionSurface()
 	}
 
 	ZGetGame()->GetWorld()->GetBsp()->Draw();
-//	g_pGame->m_WeaponManager.Render();
 	ZGetGame()->GetWorld()->GetBsp()->DrawObjects();
 
 	if(RIsAvailUserClipPlane())
@@ -436,7 +435,6 @@ bool ZWater::RenderReflectionSurface()
 	}
 
 	// Restore Render Target
-
 	g_pDevice->SetRenderTarget( 0,g_pSufBackBuffer );
 	g_pDevice->SetDepthStencilSurface(g_pSufDepthBuffer);
 

@@ -15,6 +15,8 @@
 #include "ZScreenDebugger.h"
 #include "Config.h"
 #include "Portal.h"
+#include "RBspObject.h"
+#include "ZPickInfo.h"
 
 #define BOUND_EPSILON	5
 #define LANDING_VELOCITY	20
@@ -421,7 +423,7 @@ void ZWeaponItemkit::UpdatePost(DWORD dwPickPassFlag)
 			}
 
 			m_bSendMsg = true;
-			m_fDeathTime = g_pGame->GetTime() + 2.0f;//네트웍 전송 시간고려 최대 2.0초뒤에 자동 소멸
+			m_fDeathTime = g_pGame->GetTime() + 2.0f;
 		}
 	}
 }
@@ -465,10 +467,9 @@ void ZWeaponItemkit::UpdatePos(float fElapsedTime,DWORD dwPickPassFlag)
 	{
 		m_Position = pickpos + normal;
 		m_Velocity = GetReflectionVector(m_Velocity,normal);
-		m_Velocity *= zpi.pObject ? 0.1f: 0.2f;	// 캐릭터에 충돌하면 속도가 많이 준다
+		m_Velocity *= zpi.pObject ? 0.1f: 0.2f;
 		m_Velocity *= 0.2f;
 
-		// 벽방향의 속도성분을 줄인다.
 		Normalize(normal);
 		float fAbsorb=DotProduct(normal,m_Velocity);
 		m_Velocity -= 0.1*fAbsorb*normal;
@@ -482,18 +483,14 @@ void ZWeaponItemkit::UpdatePos(float fElapsedTime,DWORD dwPickPassFlag)
 	}
 }
 
-// 땅에 닿으면 소멸~
 bool ZWeaponItemkit::Update(float fElapsedTime)
 {
 	if(m_bDeath) {
 		return false;
 	}
 
-	if(m_bSendMsg) { // 외부에서 bDeath 로만 지운다..
-//		if( g_pGame->GetTime() > m_fDeathTime ) 
-//			return false;
-//		else 
-			return true;
+	if(m_bSendMsg) {
+		return true;
 	}
 
 	if(g_pGame->GetTime() - m_fStartTime < m_fDelayTime) {
@@ -508,7 +505,7 @@ bool ZWeaponItemkit::Update(float fElapsedTime)
 
 	UpdatePos( fElapsedTime , dwPickPassFlag );
 
-	UpdatePost( dwPickPassFlag );// 땅에 닿은 경우 월드 아이템으로 등록하도록 메시지를 날리기...
+	UpdatePost( dwPickPassFlag );
 
 	rmatrix mat;
 	rvector dir = m_Velocity;

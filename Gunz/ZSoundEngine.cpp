@@ -13,6 +13,7 @@
 #include "ZSoundFMod.h"
 #include "MMath.h"
 #include "ZInitialLoading.h"
+#include "RBspObject.h"
 
 _USING_NAMESPACE_REALSPACE2
 

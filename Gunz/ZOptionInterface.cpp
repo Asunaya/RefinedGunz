@@ -7,8 +7,8 @@
 #include "ZCanvas.h"
 #include "ZInput.h"
 #include "ZRoomListBox.h"
-
 #include "NewChat.h"
+#include "RBspObject.h"
 
 #define DEFAULT_SLIDER_MAX			10000
 
@@ -202,26 +202,16 @@ void ZOptionInterface::InitInterfaceOption(void)
 		}
 
 		pWidget = (MButton*)pResource->FindWidget("LightMap");
-		if( pWidget )
+		if (pWidget)
 		{
-			//if(ZGetConfiguration()->GetVideo()->bTerrible && !RIsHardwareTNL() )
-			{
-				pWidget->SetCheck(ZGetConfiguration()->GetVideo()->bLightMap);
+			pWidget->SetCheck(ZGetConfiguration()->GetVideo()->bLightMap);
 
-				if(ZGetGame()) {
-					ZGetGame()->GetWorld()->GetBsp()->LightMapOnOff(ZGetConfiguration()->GetVideo()->bLightMap);
-				}
-				else {
-					RBspObject::SetDrawLightMap(ZGetConfiguration()->GetVideo()->bLightMap);
-				}
+			if (ZGetGame()) {
+				ZGetGame()->GetWorld()->GetBsp()->LightMapOnOff(ZGetConfiguration()->GetVideo()->bLightMap);
 			}
-			//else
-			//{
-			//	pWidget->SetCheck( true );
-			//	pWidget->Enable( false );
-			//	MLabel* label = (MLabel*)pResource->FindWidget("Lightmap Label");
-			//	if(label) label->SetTextColor( MCOLOR( 64, 64, 64 ));
-			//}
+			else {
+				RBspObject::SetDrawLightMap(ZGetConfiguration()->GetVideo()->bLightMap);
+			}
 		}
 
 		pWidget = (MButton*)pResource->FindWidget("DynamicLight");

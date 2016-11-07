@@ -6,6 +6,7 @@
 #include "RLightList.h"
 #include "RDynamicLight.h"
 #include "MDebug.h"
+#include "RBspObject.h"
 
 #define Gravity							-7
 #define MAX_NUM_CLOTH_PARTICLE			165

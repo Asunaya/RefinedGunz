@@ -7,6 +7,9 @@
 #include "ZRangeWeaponHitDice.h"
 #include "ZModule_Skills.h"
 #include "MMath.h"
+#include "RNavigationMesh.h"
+#include "RBspObject.h"
+#include "ZPickInfo.h"
 
 ZBrain* ZBrain::CreateBrain(MQUEST_NPC nNPCType)
 {
@@ -272,7 +275,6 @@ void ZBrain::OnBody_CollisionWall()
 
 void ZBrain::OnBody_OnTaskFinished(ZTASK_ID nLastID)
 {
-	// 길찾기한 길을 다 갔을때는 새로운 길찾기를 바로 하도록 세팅한다.
 	if ((nLastID == ZTID_MOVE_TO_POS) || (nLastID == ZTID_MOVE_TO_DIR) || (nLastID == ZTID_MOVE_TO_TARGET))
 	{
 		if (GetTarget())
