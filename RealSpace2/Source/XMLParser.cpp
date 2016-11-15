@@ -84,16 +84,6 @@ static int toInt(const char *str)
 	return i;
 }
 
-static unsigned int toUShort3(const char *str)
-{
-	int a, b, c;
-	a = b = c = 0;
-
-	sscanf(str, "%i %i %i", &a, &b, &c);
-	unsigned int ret = (a & 0xFF) + ((b & 0xFF) << 8) + ((c & 0xFF) << 16);
-	return ret;
-}
-
 static bool toFloat3(const char *str, float *fv)
 {
 	fv[0] = fv[1] = fv[2] = 0.0f;
@@ -102,11 +92,17 @@ static bool toFloat3(const char *str, float *fv)
 	return true;
 }
 
-static bool GetFloat3(float (&dest)[3], const char* node_name, rapidxml::xml_node<>* parent)
+static const char* GetNodeValue(const char* node_name, rapidxml::xml_node<>* parent)
 {
 	auto* node = parent->first_node(node_name);
-	if (!node) return false;
+	if (!node) return nullptr;
 	auto* value = node->value();
+	return value;
+}
+
+static bool GetFloat3(float (&dest)[3], const char* node_name, rapidxml::xml_node<>* parent)
+{
+	auto* value = GetNodeValue(node_name, parent);
 	if (!value) return false;
 	toFloat3(value, dest);
 	return true;
@@ -116,8 +112,6 @@ static bool GetFloat3XYZ(float(&dest)[3], const char* node_name, rapidxml::xml_n
 {
 	auto* node = parent->first_node(node_name);
 	if (!node) return false;
-	auto* value = node->value();
-	if (!value) return false;
 	auto Get = [&](const char* name) {
 		auto* attr = node->first_attribute(name);
 		if (!attr) return 0.0f;
@@ -125,34 +119,38 @@ static bool GetFloat3XYZ(float(&dest)[3], const char* node_name, rapidxml::xml_n
 		if (!value) return 0.0f;
 		return toFloat(value);
 	};
-	dest[0] = Get("x");
-	dest[1] = Get("y");
-	dest[2] = Get("z");
+	const char* vector_elements[] = { "x", "y", "z" };
+	for (size_t i{}; i < ArraySize(dest); ++i)
+		dest[i] = Get(vector_elements[i]);
 	return true;
 }
 
 static bool GetFloat(float& dest, const char* node_name, rapidxml::xml_node<>* parent)
 {
-	auto* node = parent->first_node(node_name);
-	if (!node) return false;
-	auto* value = node->value();
+	auto* value = GetNodeValue(node_name, parent);
 	if (!value) return false;
 	dest = toFloat(value);
 	return true;
 }
 
+static bool GetInt(int& dest, const char* node_name, rapidxml::xml_node<>* parent)
+{
+	auto* value = GetNodeValue(node_name, parent);
+	if (!value) return false;
+	auto pair = StringToInt(value);
+	if (!pair.first) return false;
+	dest = pair.second;
+	return true;
+}
+
 static bool GetUShort3(float (&dest)[3], const char* node_name, rapidxml::xml_node<>* parent)
 {
-	auto* node = parent->first_node(node_name);
-	if (!node) return false;
-	auto* value = node->value();
+	auto* value = GetNodeValue(node_name, parent);
 	if (!value) return false;
-	u32 packed_value = toUShort3(value);
-	auto UnpackByteToFloat = [](u32 value, size_t index) {
-		return ((((value) >> index * 8) & 0xFF) / 255.0f);
-	};
+	int vals[3]{};
+	if (sscanf(value, "%i %i %i", vals, vals + 1, vals + 2) != 3) return false;
 	for (size_t i{}; i < ArraySize(dest); ++i)
-		dest[i] = UnpackByteToFloat(packed_value, i);
+		dest[i] = vals[i];
 	return true;
 }
 
@@ -181,23 +179,30 @@ bool parseXMLMaterial(const char * name, std::vector<XMLMaterial> &Ret)
 		auto* TexLayer = TextureList->first_node(MAT_TEXTURELAYER_TAG);
 		while (TexLayer)
 		{
-			auto GetTexture = [&](const char* node_name, auto TextureName, u32 flag)
+			auto GetTexture = [&](const char* node_name, auto& TextureName, u32 flag)
 			{
 				auto* MapNameNode = TexLayer->first_node(node_name);
 				if (!MapNameNode) return;
 				auto* MapName = MapNameNode->value();
 				if (!MapName) return;
-				tmp.*TextureName = MapName;
+				TextureName = MapName;
 				tmp.Flag |= flag;
 			};
 			
-			GetTexture(MAT_DIFFUSEMAP_TAG, &XMLMaterial::DiffuseMap, FLAG_DIFFUSE);
-			GetTexture(MAT_NORMALMAP_TAG, &XMLMaterial::NormalMap, FLAG_NORMAL);
-			GetTexture(MAT_SPECULARMAP_TAG, &XMLMaterial::SpecularMap, FLAG_SPECULAR);
-			GetTexture(MAT_SELFILLUMINATIONMAP_TAG, &XMLMaterial::SelfIlluminationMap, FLAG_SELFILLUM);
-			GetTexture(MAT_OPACITYMAP_TAG, &XMLMaterial::OpacityMap, FLAG_OPACITY);
+			GetTexture(MAT_DIFFUSEMAP_TAG, tmp.DiffuseMap, FLAG_DIFFUSE);
+			GetTexture(MAT_NORMALMAP_TAG, tmp.NormalMap, FLAG_NORMAL);
+			GetTexture(MAT_SPECULARMAP_TAG, tmp.SpecularMap, FLAG_SPECULAR);
+			GetTexture(MAT_SELFILLUMINATIONMAP_TAG, tmp.SelfIlluminationMap, FLAG_SELFILLUM);
+			GetTexture(MAT_OPACITYMAP_TAG, tmp.OpacityMap, FLAG_OPACITY);
 
 			TexLayer = TexLayer->next_sibling(MAT_TEXTURELAYER_TAG);
+		}
+
+		tmp.TwoSided = CurMaterial->first_node("TWOSIDED") != nullptr;
+
+		if (auto* node = CurMaterial->first_node("USEALPHATEST"))
+		{
+			GetInt(tmp.AlphaTestValue, "ALPHATESTVALUE", node);
 		}
 
 		Ret.push_back(tmp);
@@ -205,7 +210,6 @@ bool parseXMLMaterial(const char * name, std::vector<XMLMaterial> &Ret)
 	}
 
 	return true;
-
 }
 
 bool parseScene(const char *name, XMLActor &actor, std::vector<XMLObject> &Ret, std::vector<XMLLight> *Ret2)
@@ -266,7 +270,7 @@ bool parseScene(const char *name, XMLActor &actor, std::vector<XMLObject> &Ret, 
 
 			Ret.push_back(tmp);
 		}
-		else if (strcmp(Object->name(), SCENE_LIGHT_TAG) == 0 && Ret2 != NULL)
+		else if (strcmp(Object->name(), SCENE_LIGHT_TAG) == 0 && Ret2 != nullptr)
 		{
 			XMLLight tmp2;
 			GetCommonProperties(tmp2);
@@ -300,7 +304,8 @@ bool parseProp(const char *name, std::vector<XMLObject> &Ret)
 
 	while (Object)
 	{
-		if (strcmp(Object->name(), PROP_SCENE_OBJECT_TAG) == 0 || strcmp(Object->name(), PROP_OBJECT_TAG) == 0)
+		if (strcmp(Object->name(), PROP_SCENE_OBJECT_TAG) == 0 ||
+			strcmp(Object->name(), PROP_OBJECT_TAG) == 0)
 		{
 			XMLObject tmp;
 			xml_node<> * Common = Object->first_node(SCENE_COMMON_TAG);

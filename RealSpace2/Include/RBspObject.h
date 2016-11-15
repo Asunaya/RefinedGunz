@@ -18,7 +18,6 @@
 #include "RBspObjectDraw.h"
 #include "rapidxml.hpp"
 #include "RVisualMesh.h"
-#include "BulletCollision.h"
 
 class MZFile;
 class MZFileSystem;
@@ -35,6 +34,7 @@ class RMaterialList;
 class RDummyList;
 class RBaseTexture;
 struct RSBspNode;
+class BulletCollision;
 
 struct RDEBUGINFO {
 	int nCall, nPolygon;
@@ -204,6 +204,7 @@ public:
 	RBspObject(bool PhysOnly = false);
 	RBspObject(const RBspObject&) = delete;
 	RBspObject(RBspObject&&) = default;
+	~RBspObject();
 
 	void ClearLightmaps();
 
@@ -401,7 +402,7 @@ private:
 
 	static RBaseTexture *m_pShadeMap;
 
-	// BSP stuff. Used for picking.
+	// BSP stuff. Used in Pick.
 	std::vector<BSPVERTEX> BspVertices;
 	std::vector<RSBspNode> BspRoot;
 	std::vector<RPOLYGONINFO> BspInfo;
@@ -425,12 +426,17 @@ private:
 	// the index in this array that is one higher.
 	std::vector<RBSPMATERIAL> Materials;
 
+	// ???
 	rplane m_localViewFrustum[6];
 
 	ROcclusionList m_OcclusionList;
 
 	std::vector<D3DPtr<IDirect3DTexture9>> LightmapTextures;
 
+	// Convex polygons.
+	// Note that these are only used for lightmap generation, and therefore
+	// the data is not actually loaded when nOpenMode == Runtime,
+	// and only NumConvexPolygons is set in that case.
 	std::vector<v3> ConvexVertices;
 	std::vector<v3> ConvexNormals;
 	int NumConvexPolygons{};
@@ -445,6 +451,9 @@ private:
 	RMapObjectList		m_ObjectList;
 	bool				m_bNotOcclusion{};
 
+	// Collision stuff.
+	// These are only used in GetFloor and CheckSolid, and
+	// not in Pick even though that is also involved in collision.
 	std::vector<RSolidBspNode> ColRoot;
 	std::vector<v3> ColVertices;
 
@@ -458,11 +467,15 @@ private:
 
 	RDEBUGINFO m_DebugInfo;
 
+	// TODO: Add this as an ROpenMode instead.
 	bool PhysOnly{};
 
 	std::string m_filename, m_descfilename;
 
 	bool m_bWireframe{};
+	// This is used in the editor to display the lightmap
+	// for e.g. debugging, it doesn't control whether
+	// the lightmap is on for normal rendering.
 	bool m_bShowLightmap{};
 
 	bool RenderWithNormal{};

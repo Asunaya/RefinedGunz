@@ -5,6 +5,7 @@
 #include <map>
 #include "ZActionDef.h"
 #include "RealSpace2.h"
+#include "SafeString.h"
 
 #define FILENAME_LOCALE		"system/locale.xml"
 #define FILENAME_CONFIG		"config.xml"
@@ -23,7 +24,7 @@ struct ZSERVERNODE
 
 struct ZCONFIG_VIDEO
 {
-	FullscreenType FullscreenMode;
+	RealSpace2::FullscreenType FullscreenMode;
 	int nWidth;
 	int nHeight;
 	int nColorBits;
@@ -40,11 +41,11 @@ struct ZCONFIG_VIDEO
 };
 
 struct ZCONFIG_AUDIO{
-	bool	bBGMEnabled;
+	bool bBGMEnabled;
 	bool bBGMMute;
-	float	fBGMVolume;
+	float fBGMVolume;
 	bool bEffectMute;
-	float	fEffectVolume;
+	float fEffectVolume;
 	bool b3DSound;
 	bool b8BitSound;
 	bool bInverse;
@@ -65,7 +66,7 @@ struct ZCONFIG_JOYSTICK{
 struct ZACTIONKEYDESCRIPTION{
 	char	szName[256];
 	int		nVirtualKey;
-	int		nVirtualKeyAlt;	// 액션당 키 2개씩 할당할수있다
+	int		nVirtualKeyAlt;
 };
 
 struct ZCONFIG_KEYBOARD{
@@ -78,7 +79,7 @@ struct ZCONFIG_MACRO
 {
 	char szMacro[ ZCONFIG_MACRO_MAX ][256];
 
-	void SetString(int i,char* str) {
+	void SetString(int i, const char* str) {
 		if(i<0 || i>ZCONFIG_MACRO_MAX-1)
 			return;
 		if(str==NULL)
@@ -94,7 +95,8 @@ struct ZCONFIG_MACRO
 	}
 };
 
-struct ZCONFIG_ETC{
+struct ZCONFIG_ETC
+{
 	int			nNetworkPort1;
 	int			nNetworkPort2;
 	bool		bBoost;
@@ -104,13 +106,12 @@ struct ZCONFIG_ETC{
 	bool		bRejectWhisper;
 	bool		bRejectInvite;
 	int			nCrossHair;
-	bool		bInGameNoChat;			// 게임중 대화 차단 여부: 게임중 채팅입력, 일반말, 귓말, 팀채팅 차단됨.
-										// 오직 클랜채팅, 채팅 명령어만 허용함.
+	bool		bInGameNoChat;
 };
 
-/// 로케일과 관련된 설정값
-struct ZCONFIG_LOCALE {
-	char		szDefaultFont[ 32];
+struct ZCONFIG_LOCALE
+{
+	char		szDefaultFont[32];
 	char		szXmlHeader[256];
 	char		szHomepageUrl[256];
 	char		szHomepageTitle[128];
@@ -118,8 +119,8 @@ struct ZCONFIG_LOCALE {
 	char		szCashShopURL[256];
 	bool		bIMESupport;
 
-	string		strCountry;
-	string		strLanguage;
+	std::string		strCountry;
+	std::string		strLanguage;
 	int			nMaxPlayers;
 };
 
@@ -161,7 +162,7 @@ private:
 
 	int nFPSLimit = 250;
 	bool bCamFix = false;
-	DWORD ChatBackgroundColor = 0x80000000;
+	u32 ChatBackgroundColor = 0x80000000;
 	bool bShowHitboxes = false;
 	bool bDynamicResourceLoad = false;
 	bool bDrawTrails = true;
@@ -190,11 +191,11 @@ public:
 
 	ZGameTypeList* GetGameTypeList()	{ return m_pGameTypeList; }
 
-	char*	GetBAReportAddr()		{ return m_szBAReportAddr; }
-	char*	GetBAReportDir()		{ return m_szBAReportDir; }
+	const char*	GetBAReportAddr() const		{ return m_szBAReportAddr; }
+	const char*	GetBAReportDir() const		{ return m_szBAReportDir; }
 
-	char*	GetInterfaceSkinName()	{ return m_szInterfaceSkinName; }
-	char*	GetServerIP()			{ return m_szServerIP; }
+	const char*	GetInterfaceSkinName() const{ return m_szInterfaceSkinName; }
+	const char*	GetServerIP() const			{ return m_szServerIP; }
 	int		GetServerPort() const			{ return m_nServerPort; }
 	int		GetServerCount() const		{ return m_nServerCount; }
 	ZSERVERNODE	GetServerNode(int nNum) const;
@@ -205,7 +206,7 @@ public:
 	void SetForceOptimization(bool b) {	m_bOptimization = b;}
 	bool GetForceOptimization() const {	return m_bOptimization;}
 
-	std::map<int,ZSERVERNODE>	m_ServerList;
+	std::map<int, ZSERVERNODE>	m_ServerList;
 
 	ZCONFIG_VIDEO* GetVideo()		{ return &m_Video; }
 	ZCONFIG_AUDIO* GetAudio()		{ return &m_Audio; }
@@ -218,20 +219,20 @@ public:
 
 	int GetFPSLimit() const { return nFPSLimit; }
 	bool GetCamFix() const { return bCamFix; }
-	D3DCOLOR GetChatBackgroundColor() const { return ChatBackgroundColor; }
+	auto GetChatBackgroundColor() const { return ChatBackgroundColor; }
 	bool GetShowHitboxes() const { return bShowHitboxes; }
 	bool GetDynamicResourceLoad() const { return bDynamicResourceLoad; }
 	bool GetDrawTrails() const { return bDrawTrails; }
 	bool GetShowHitRegDebugOutput() const { return HitRegistrationDebugOutput; }
 
-	const bool IsComplete()			{ return m_bIsComplete; }
+	bool IsComplete() const			{ return m_bIsComplete; }
 
-	const bool LateStringConvert();
+	bool LateStringConvert();
 };
-
 
 ZConfiguration*	ZGetConfiguration();
 
+// Tokens
 #define ZTOK_SERVER		"SERVER"
 #define ZTOK_IP				"IP"
 #define ZTOK_PORT			"PORT"

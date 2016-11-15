@@ -6,15 +6,19 @@
 
 using namespace rsx;
 using namespace RealSpace2;
-using IndexType = u16;
+using IndexType = u32;
+
+template <typename T> constexpr D3DFORMAT GetD3DFormat();
+template <>	constexpr D3DFORMAT GetD3DFormat<u16>() { return D3DFMT_INDEX16; }
+template <> constexpr D3DFORMAT GetD3DFormat<u32>() { return D3DFMT_INDEX32; }
 
 template <typename VertexType, typename IndexType>
 static bool CreateBuffers(size_t VertexCount, size_t IndexCount, u32 FVF,
-	std::pair<D3DPtr<IDirect3DVertexBuffer9>, D3DPtr<IDirect3DIndexBuffer9>>& p)
+	D3DPtr<IDirect3DVertexBuffer9>& vb, D3DPtr<IDirect3DIndexBuffer9>& ib)
 {
 	auto hr = RGetDevice()->CreateVertexBuffer(VertexCount * sizeof(VertexType), 0,
 		FVF, D3DPOOL_MANAGED,
-		MakeWriteProxy(p.first), nullptr);
+		MakeWriteProxy(vb), nullptr);
 	if (FAILED(hr))
 	{
 		MLog("RBspObjectDrawD3D9::Create -- Failed to create vertex buffer\n");
@@ -22,8 +26,8 @@ static bool CreateBuffers(size_t VertexCount, size_t IndexCount, u32 FVF,
 	}
 
 	hr = RGetDevice()->CreateIndexBuffer(IndexCount * sizeof(IndexType), 0,
-		D3DFMT_INDEX16, D3DPOOL_MANAGED,
-		MakeWriteProxy(p.second), nullptr);
+		GetD3DFormat<IndexType>(), D3DPOOL_MANAGED,
+		MakeWriteProxy(ib), nullptr);
 	if (FAILED(hr))
 	{
 		MLog("RBspObjectDrawD3D9::Create -- Failed to create index buffer\n");
@@ -33,43 +37,8 @@ static bool CreateBuffers(size_t VertexCount, size_t IndexCount, u32 FVF,
 	return true;
 }
 
-void RBspObjectDrawD3D9::Create(rsx::LoaderState && srcState)
+void RBspObjectDrawD3D9::CreateTextures()
 {
-	State = std::move(srcState);
-
-	auto GetMeshCount = [&](auto& data, auto Member) {
-		return std::accumulate(data.Meshes.begin(), data.Meshes.end(), 0,
-			[&](auto counter, auto& mesh) {
-				return counter + mesh.*Member; });
-	};
-
-	auto GetCount = [&](auto Member) {
-		return std::accumulate(State.ObjectData.begin(), State.ObjectData.end(), 0,
-			[&](auto counter, auto& data) {
-				return counter + GetMeshCount(data, Member); });
-	};
-
-	int TotalVertexCount = GetCount(&EluMesh::VertexCount);
-	int TotalIndexCount = GetCount(&EluMesh::IndexCount);
-
-	auto hr = RGetDevice()->CreateVertexBuffer(TotalVertexCount * sizeof(Vertex), 0,
-		GetFVF(), D3DPOOL_MANAGED,
-		MakeWriteProxy(VertexBuffer), nullptr);
-	if (FAILED(hr))
-	{
-		MLog("RBspObjectDrawD3D9::Create -- Failed to create vertex buffer\n");
-		return;
-	}
-
-	hr = RGetDevice()->CreateIndexBuffer(TotalIndexCount * sizeof(IndexType), 0,
-		D3DFMT_INDEX16, D3DPOOL_MANAGED,
-		MakeWriteProxy(IndexBuffer), nullptr);
-	if (FAILED(hr))
-	{
-		MLog("RBspObjectDrawD3D9::Create -- Failed to create index buffer\n");
-		return;
-	}
-
 	std::unordered_map<std::string, int> TexMap;
 
 	Textures.resize(State.Materials.size());
@@ -105,56 +74,171 @@ void RBspObjectDrawD3D9::Create(rsx::LoaderState && srcState)
 		auto& Tex = Textures[i];
 		Tex.Diffuse = LoadTexture(Mat.tDiffuse);
 		Tex.Opacity = LoadTexture(Mat.tOpacity);
+		Tex.AlphaTestValue = Mat.AlphaTestValue;
 	}
+}
 
-	for (size_t i{}; i < State.ObjectData.size(); ++i)
+void RBspObjectDrawD3D9::CreateBatches()
+{
+	struct DrawPropStuff
 	{
-		auto& Data = State.ObjectData[i];
-		Buffers.emplace_back();
-		auto& buf = Buffers.back();
-		auto TotesVertexCount = GetMeshCount(Data, &EluMesh::VertexCount);
-		auto TotesIndexCount = GetMeshCount(Data, &EluMesh::IndexCount);
-		DMLog("mesh %d, %s: %d, %d\n", i, Data.Name.c_str(), TotesVertexCount, TotesIndexCount);
-		if (!CreateBuffers<Vertex, IndexType>(
-			TotesVertexCount,
-			TotesIndexCount,
-			GetFVF(),
-			buf))
-		{
-			MLog("Oh no!\n");
-			return;
-		}
+		int Mesh;
+		u32 IndexBase;
+		u32 Count;
+	};
 
-		char* Verts{};
-		if (FAILED(buf.first->Lock(0, 0, reinterpret_cast<void**>(&Verts), 0)))
-		{
-			MLog("Oh no!\n");
-			return;
-		}
-		u16* Indices{};
-		if (FAILED(buf.second->Lock(0, 0, reinterpret_cast<void**>(&Indices), 0)))
-		{
-			MLog("Oh no!\n");
-			return;
-		}
+	struct MaterialStuff
+	{
+		int Data;
+		std::vector<DrawPropStuff> DrawProps;
+	};
 
-		for (auto& Mesh : Data.Meshes)
+	std::vector<MaterialStuff> Materials;
+	Materials.resize(State.Materials.size());
+
+	// Sort draw props per material
+	for (size_t DataIndex{}; DataIndex < State.ObjectData.size(); ++DataIndex)
+	{
+		auto& Data = State.ObjectData[DataIndex];
+		for (size_t MeshIndex{}; MeshIndex < Data.Meshes.size(); ++MeshIndex)
 		{
-			for (size_t j{}; j < Mesh.VertexCount; ++j)
+			auto& Mesh = Data.Meshes[MeshIndex];
+			for (auto& dp : Mesh.DrawProps)
 			{
-				auto AddVertexData = [&](auto& val) {
-					memcpy(Verts, &val, sizeof(val));
-					Verts += sizeof(val);
-				};
-				AddVertexData(Mesh.Positions[j]);
-				AddVertexData(Mesh.TexCoords[j]);
+				auto& Mat = Materials[Data.MaterialStart + dp.material];
+				Mat.Data = DataIndex;
+
+				Mat.DrawProps.push_back({
+					static_cast<int>(MeshIndex),
+					dp.indexBase,
+					dp.count });
+
 			}
-			memcpy(Indices, Mesh.Indices.get(), Mesh.IndexCount * sizeof(Mesh.Indices[0]));
-			Indices += Mesh.IndexCount;
 		}
-		buf.first->Unlock();
-		buf.second->Unlock();
 	}
+
+	if (!CreateBuffers<Vertex, IndexType>(
+		State.TotalVertexCount, State.TotalIndexCount,
+		GetFVF(), VertexBuffer, IndexBuffer))
+	{
+		MLog("RBspObjectDrawD3D9::Create -- Failed to create vertex and index buffers\n");
+		return;
+	}
+
+	DMLog("Create vertex buffer with %d vertices, index buffer with %d indices\n",
+		State.TotalVertexCount, State.TotalIndexCount);
+
+	// Lock vertex and index buffers.
+	auto Lock = [](auto& Buffer, auto*& Pointer)
+	{
+		if (FAILED(Buffer->Lock(0, 0, reinterpret_cast<void**>(&Pointer), 0)))
+		{
+			MLog("Oh no!\n");
+			return false;
+		}
+		return true;
+	};
+	char* Verts{};        if (!Lock(VertexBuffer, Verts))  return;
+	IndexType* Indices{}; if (!Lock(IndexBuffer, Indices)) return;
+
+	// Insert transformed vertices for each object into the vertex buffer
+	// and keep a list of the offset of each mesh's vertices.
+
+	// Dimensions: [Data][Object][Mesh]
+	// TODO: Change this terrible type
+	std::vector<std::vector<std::vector<int>>> MeshVertexOffsets;
+	MeshVertexOffsets.resize(State.Objects.size());
+	int CumulativeVertexBase{};
+	for (auto& pair : State.ObjectMap)
+	{
+		auto& Data = State.ObjectData[pair.first];
+		auto& DataOffsets = MeshVertexOffsets[pair.first];
+		auto ObjectIndexCount = pair.second.size();
+		DataOffsets.resize(ObjectIndexCount);
+		for (size_t ObjectListIndex{}; ObjectListIndex < ObjectIndexCount; ++ObjectListIndex)
+		{
+			auto ObjectIndex = pair.second[ObjectListIndex];
+			auto& Object = State.Objects[ObjectIndex];
+
+			auto& MeshOffsets = DataOffsets[ObjectListIndex];
+			auto MeshCount = Data.Meshes.size();
+			MeshOffsets.resize(MeshCount);
+			for (size_t MeshIndex{}; MeshIndex < MeshCount; ++MeshIndex)
+			{
+				auto& Mesh = Data.Meshes[MeshIndex];
+				MeshOffsets[MeshIndex] = CumulativeVertexBase;
+
+				for (size_t i{}; i < Mesh.VertexCount; ++i)
+				{
+					auto AddVertexData = [&](auto&& val) {
+						memcpy(Verts, &val, sizeof(val));
+						Verts += sizeof(val);
+					};
+					AddVertexData(Mesh.Positions[i] * Mesh.World * Object.World);
+					AddVertexData(Mesh.TexCoords[i]);
+				}
+				CumulativeVertexBase += Mesh.VertexCount;
+			}
+		}
+	}
+
+	// Insert indices for each object
+	MaterialBatches.resize(State.Materials.size());
+	int CumulativeIndexBase{};
+	for (size_t MaterialIndex{}; MaterialIndex < Materials.size(); ++MaterialIndex)
+	{
+		auto& Mat = Materials[MaterialIndex];
+		auto& Batch = MaterialBatches[MaterialIndex];
+
+		Batch.TriangleCount = 0;
+		Batch.VertexBase = 0;
+		Batch.IndexBase = CumulativeIndexBase;
+
+		auto& Data = State.ObjectData[Mat.Data];
+		auto& ObjectIndices = State.ObjectMap[Mat.Data];
+		assert(!ObjectIndices.empty());
+
+		DMLog("Create indices for material %d\n", MaterialIndex);
+
+		for (size_t ObjectListIndex{}; ObjectListIndex < ObjectIndices.size(); ++ObjectListIndex)
+		{
+			for (auto& dp : Mat.DrawProps)
+			{
+				for (size_t i{}; i < dp.Count; ++i)
+				{
+					for (size_t j{}; j < 3; ++j)
+					{
+						auto Index = Data.Meshes[dp.Mesh].Indices[dp.IndexBase + i * 3 + j];
+						auto VertexOffset = MeshVertexOffsets[Mat.Data][ObjectListIndex][dp.Mesh];
+						*Indices = VertexOffset + Index;
+						++Indices;
+					}
+				}
+
+				CumulativeIndexBase += dp.Count * 3;
+				Batch.TriangleCount += dp.Count;
+			}
+		}
+
+		DMLog("Batch: TriangleCount = %d, VertexBase = %d, IndexBase = %d\n",
+			Batch.TriangleCount, Batch.VertexBase, Batch.IndexBase);
+	}
+
+	DMLog("Added %d vertices, %d indices\n", CumulativeVertexBase, CumulativeIndexBase);
+
+	// Unlock vertex and index buffers.
+	VertexBuffer->Unlock();
+	IndexBuffer->Unlock();
+
+	NumNormalMaterials = MaterialBatches.size();
+}
+
+void RBspObjectDrawD3D9::Create(rsx::LoaderState && srcState)
+{
+	State = std::move(srcState);
+
+	CreateTextures();
+	CreateBatches();
 	
 	DMLog("RBspObjectDrawD3D9 created\n");
 }
@@ -198,70 +282,44 @@ void RBspObjectDrawD3D9::Draw()
 	else
 		SetWireframeStates();
 
-	// Enable Z-buffer testing and writing
+	// Enable Z-buffer testing and writing.
 	RSetWBuffer(true);
 	dev->SetRenderState(D3DRS_ZWRITEENABLE, true);
 	dev->SetRenderState(D3DRS_LIGHTING, FALSE);
 	dev->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
+	// Map triangles are clockwise, so cull counter-clockwise faces.
 	dev->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
 
-	RGetDevice()->SetFVF(GetFVF());
-	RGetDevice()->SetStreamSource(0, VertexBuffer.get(), 0, GetStride());
-	RGetDevice()->SetIndices(IndexBuffer.get());
+	dev->SetFVF(GetFVF());
+	dev->SetStreamSource(0, VertexBuffer.get(), 0, GetStride());
+	dev->SetIndices(IndexBuffer.get());
 
-	//int i{};
-	for (size_t i{}; i < State.Objects.size(); ++i)
+	// Set render states for normal materials
+	dev->SetRenderState(D3DRS_ZWRITEENABLE, true);
+	dev->SetRenderState(D3DRS_ALPHABLENDENABLE, false);
+	dev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
+	dev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
+	dev->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_DIFFUSE);
+
+	for (int i{}; i < NumNormalMaterials; ++i)
 	{
-		auto& Object = State.Objects[i];
-		int vb{}, ib{};
-		auto& buf = Buffers[Object.Data];
-		auto& Data = State.ObjectData[Object.Data];
-		RGetDevice()->SetStreamSource(0, buf.first.get(), 0, GetStride());
-		RGetDevice()->SetIndices(buf.second.get());
-		//DMLog("%d -> %d\n", i, Object.Data); ++i;
-		for (size_t MeshIndex{}; MeshIndex < Data.Meshes.size(); ++MeshIndex)
-		{
-			auto& Mesh = Data.Meshes[MeshIndex];
-			auto World = Mesh.World * Object.World;
-			RGetDevice()->SetTransform(D3DTS_WORLD, &World);
+		auto& Mat = MaterialBatches[i];
+		auto& Tex = Textures[i];
 
-			for (auto& dp : Mesh.DrawProps)
-			{
-				auto& Tex = Textures[Data.MaterialStart + dp.material];
+		if (Tex.Diffuse == -1)
+			continue;
 
-				if (Tex.Diffuse == -1)
-					continue;
+		dev->SetTexture(0, TextureMemory[Tex.Diffuse].get());
 
-				if (Tex.Opacity != -1)
-				{
-					//dev->SetRenderState(D3DRS_ZWRITEENABLE, false);
-					dev->SetRenderState(D3DRS_ALPHABLENDENABLE, true);
-					dev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-					dev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
-					dev->SetTexture(1, TextureMemory[Tex.Opacity].get());
-					dev->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
-					dev->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
-					dev->SetTextureStageState(1, D3DTSS_ALPHAARG1, D3DTA_CURRENT);
-					dev->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
-				}
-				else
-				{
-					dev->SetRenderState(D3DRS_ZWRITEENABLE, true);
-					dev->SetRenderState(D3DRS_ALPHABLENDENABLE, false);
-					dev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
-					dev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
-					RGetDevice()->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_DIFFUSE);
-				}
+		auto hr = dev->DrawIndexedPrimitive(
+			D3DPT_TRIANGLELIST,    // Primitive type
+			Mat.VertexBase,        // BaseVertexIndex
+			0,                     // MinVertexIndex
+			Mat.TriangleCount * 3, // NumVertices
+			Mat.IndexBase,         // Start index
+			Mat.TriangleCount);    // Primitive count
 
-				RGetDevice()->SetTexture(0, TextureMemory[Tex.Diffuse].get());
-
-				RGetDevice()->DrawIndexedPrimitive(D3DPT_TRIANGLELIST,
-					dp.vertexBase + vb, 0, Mesh.VertexCount, dp.indexBase + ib, dp.count);
-			}
-
-			vb += Mesh.VertexCount;
-			ib += Mesh.IndexCount;
-		}
+		assert(SUCCEEDED(hr));
 	}
 
 	// Disable alpha testing

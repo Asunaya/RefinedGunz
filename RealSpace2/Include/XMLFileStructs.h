@@ -7,7 +7,7 @@
 
 namespace rsx {
 
-#define FLAG_DIFFUSE	(1)
+#define FLAG_DIFFUSE	(1 << 0)
 #define FLAG_NORMAL		(1 << 1)
 #define FLAG_SPECULAR	(1 << 2)
 #define FLAG_OPACITY	(1 << 3)
@@ -58,14 +58,11 @@ namespace rsx {
 #define PROP_SCENE_FILE_TAG		"SceneFileName"
 #define PROP_DEFINITION_TAG		"DEFINITION"
 
-
 struct XMLActor
 {
-	bool isValid;
+	bool isValid{};
 	std::string Name, eluName;
-	XMLActor() :isValid(false) {}
 };
-
 
 struct XMLMaterial
 {
@@ -81,7 +78,10 @@ struct XMLMaterial
 		SpecularMap,
 		OpacityMap,
 		SelfIlluminationMap;
-	unsigned char Flag{};
+
+	u8 Flag{};
+	bool TwoSided{};
+	int AlphaTestValue = -1;
 };
 
 struct XMLObject

@@ -9,9 +9,9 @@ class RBspObject;
 
 struct MaterialBatch
 {
-	int MaterialIndex;
-	int NumTriangles;
-	int IndicesOffset;
+	int TriangleCount;
+	int VertexBase;
+	int IndexBase;
 };
 
 class RBspObjectDrawD3D9
@@ -30,21 +30,31 @@ private:
 		v2 Tex;
 	};
 
+	void CreateTextures();
+	void CreateBatches();
+
 	u32 GetFVF() const { return D3DFVF_XYZ | D3DFVF_TEX1; }
 	size_t GetStride() const { return sizeof(Vertex); }
 
 	RBspObject& bsp;
 	rsx::LoaderState State;
-	D3DPtr<IDirect3DVertexBuffer9> VertexBuffer;
-	D3DPtr<IDirect3DIndexBuffer9> IndexBuffer;
 	struct TextureData
 	{
 		int Diffuse = -1;
 		int Opacity = -1;
+		int AlphaTestValue = -1;
 	};
+	// Indices map to State.Materials. Contains indices into TextureMemory.
 	std::vector<TextureData> Textures;
 	std::vector<D3DPtr<IDirect3DTexture9>> TextureMemory;
-	std::vector<std::pair<D3DPtr<IDirect3DVertexBuffer9>, D3DPtr<IDirect3DIndexBuffer9>>> Buffers;
+
+	D3DPtr<IDirect3DVertexBuffer9> VertexBuffer;
+	D3DPtr<IDirect3DIndexBuffer9> IndexBuffer;
+
+	// Indices map to State.Materials.
+	std::vector<MaterialBatch> MaterialBatches;
+	int NumNormalMaterials{};
+	int NumOpacityMaterials{};
 };
 
 _NAMESPACE_REALSPACE2_END

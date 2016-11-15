@@ -69,6 +69,17 @@ void RGMain::OnGameDraw()
 		}
 	}*/
 
+	/*auto* me = ZGetGame()->m_pMyCharacter;
+	if (!me)
+		return;
+
+	RGetDevice()->SetTexture(0, NULL);
+	RGetDevice()->SetRenderState(D3DRS_LIGHTING, FALSE);
+	RGetDevice()->SetFVF(D3DFVF_XYZ | D3DFVF_DIFFUSE);
+	RGetDevice()->SetRenderState(D3DRS_ZENABLE, FALSE);
+
+	RDrawLine(me->GetPosition() + v3{ -100, 0, 100 }, me->GetPosition() + v3{ 100, 0, 100 }, 0xFFFF0000);*/
+
 #if 0
 	for (auto pair : *ZGetCharacterManager())
 	{

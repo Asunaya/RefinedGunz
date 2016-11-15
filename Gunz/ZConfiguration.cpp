@@ -1,28 +1,13 @@
 #include "stdafx.h"
-
 #include "ZConfiguration.h"
 #include "Mint.h"
 #include "ZInterface.h"
-//#include "ZGameInterface.h"
 #include "ZLocatorList.h"
 #include "ZGameTypeList.h"
 #include "ZLocale.h"
 
 ZConfiguration	g_Configuration;
 ZConfiguration* ZGetConfiguration()		{ return &g_Configuration; }
-
-
-//	LANGID LangID = LANG_KOREAN;			/* Korean */
-//#ifdef LOCALE_JAPAN
-//	LangID = LANG_JAPANESE;					/* Japanese */
-//#elif  LOCALE_US
-//	LangID = LANG_ENGLISH;					/* International */
-//#elif  LOCALE_BRAZIL
-//	LangID = LANG_PORTUGUESE;				/* Brazil */
-//#elif  LOCALE_INDIA
-//	LangID = LANG_ENGLISH;					/* India */
-//#endif
-
 
 ZConfiguration::ZConfiguration()
 {
@@ -110,13 +95,13 @@ bool ZConfiguration::Load()
 		MZFile::SetReadMode( MZIPREADFLAG_MRS2 );
 #endif
 
-	if ( !LoadSystem(FILENAME_SYSTEM))
+	if (!LoadSystem(FILENAME_SYSTEM))
 	{
 		mlog( "Cannot open %s file.\n", FILENAME_SYSTEM);
 		return false;
 	}
 
-	if ( !retValue)
+	if (!retValue)
 		return false;
 
 
@@ -134,7 +119,7 @@ bool ZConfiguration::LoadLocale(const char* szFileName)
 
 	xmlLocale.Create();
 
-	if( !mzFile.Open(szFileName, ZApplication::GetFileSystem())) 
+	if( !mzFile.Open(szFileName, ZApplication::GetFileSystem()))
 	{
 		xmlLocale.Destroy();
 		return false;
@@ -196,8 +181,8 @@ bool ZConfiguration::LoadGameTypeCfg(const char* szFileName)
 	MXmlDocument xmlIniData;
 	xmlIniData.Create();
 
-	char			*buffer;
-	MZFile			mzFile;
+	char *buffer;
+	MZFile mzFile;
 	if( !mzFile.Open(szFileName, ZApplication::GetFileSystem())) 
 	{
 		xmlIniData.Destroy();
@@ -480,25 +465,6 @@ bool ZConfiguration::LoadConfig(const char* szFileName)
 
 		if( parentElement.FindChildNode(ZTOK_MACRO, &childElement) )
 		{
-			//char buf[8][256];
-
-			//childElement.GetChildContents(buf[0], ZTOK_MACRO_F1, 255);
-			//childElement.GetChildContents(buf[1], ZTOK_MACRO_F2, 255);
-			//childElement.GetChildContents(buf[2], ZTOK_MACRO_F3, 255);
-			//childElement.GetChildContents(buf[3], ZTOK_MACRO_F4, 255);
-			//childElement.GetChildContents(buf[4], ZTOK_MACRO_F5, 255);
-			//childElement.GetChildContents(buf[5], ZTOK_MACRO_F6, 255);
-			//childElement.GetChildContents(buf[6], ZTOK_MACRO_F7, 255);
-			//childElement.GetChildContents(buf[7], ZTOK_MACRO_F8, 255);
-
-			//for (int i = 0; i < 8; i++)
-			//{
-			//	strcpy_safe(m_Macro.szMacro[i], ZGetStringResManager()->GetStringFromXml(buf[i]));
-			//}
-
-			// 여기선 읽기만 함. 
-			// string.xml을 읽은 후 다시 컨버팅 함.
-			// config.xml에 있는 lcale정보로 string.xml의 국가를 결정하기 때문에 이 부분은 바로 처리할 수 없음.
 			childElement.GetChildContents(m_Macro.szMacro[0], ZTOK_MACRO_F1, 255);
 			childElement.GetChildContents(m_Macro.szMacro[1], ZTOK_MACRO_F2, 255);
 			childElement.GetChildContents(m_Macro.szMacro[2], ZTOK_MACRO_F3, 255);
@@ -942,7 +908,8 @@ void ZConfiguration::Init()
 	m_Video.bShader		= true;
 	m_Video.bLightMap	= false;
 	m_Video.bReflection	= true;
-	m_Video.nCharTexLevel = 0;//기본 고품질
+	// 0 = high
+	m_Video.nCharTexLevel = 0;
 	m_Video.nMapTexLevel = 0;
 	m_Video.nEffectLevel = Z_VIDEO_EFFECT_HIGH;
 	m_Video.nTextureFormat = 1;
@@ -964,14 +931,8 @@ void ZConfiguration::Init()
 	m_Joystick.fSensitivity = 1.f;
 	m_Joystick.bInvert = false;
 
-	m_Macro.SetString(0,"");
-	m_Macro.SetString(1,"");
-	m_Macro.SetString(2,"");
-	m_Macro.SetString(3,"");
-	m_Macro.SetString(4,"");
-	m_Macro.SetString(5,"");
-	m_Macro.SetString(6,"");
-	m_Macro.SetString(7,"");
+	for (int i{}; i < 8; ++i)
+		m_Macro.SetString(i, "");
 
 	m_Etc.nNetworkPort1 = 7700;
 	m_Etc.nNetworkPort2 = 7800;
@@ -987,10 +948,8 @@ void ZConfiguration::Init()
 
 	LoadDefaultKeySetting();
 
-
-
-	strcpy_safe( m_Locale.szDefaultFont, "굴림");
-	strcpy_safe( m_Locale.szXmlHeader, "version=\"1.0\" encoding=\"UTF-8\"");
+	strcpy_safe(m_Locale.szDefaultFont, "Arial");
+	strcpy_safe(m_Locale.szXmlHeader, "version=\"1.0\" encoding=\"UTF-8\"");
 	m_Locale.szHomepageUrl[0] = 0;
 	m_Locale.szHomepageTitle[0] = 0;
 	strcpy_safe(m_Locale.szEmblemURL, "");
@@ -1062,7 +1021,7 @@ ZSERVERNODE ZConfiguration::GetServerNode( int nNum) const
 }
 
 
-const bool ZConfiguration::LateStringConvert()
+bool ZConfiguration::LateStringConvert()
 {
 	char buf[8][256];
 

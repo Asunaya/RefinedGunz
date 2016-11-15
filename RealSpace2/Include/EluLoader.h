@@ -28,7 +28,7 @@ struct DrawProp
 	u32 indexBase;
 	// Triangle count
 	u32 count;
-	// Index into the material vector in an EluObjectData instance
+	// Index into the material vector in its EluObjectData instance
 	int material;
 };
 
@@ -50,7 +50,7 @@ struct EluMesh
 	std::string Name;
 };
 
-using TextureType = std::string;//gli::texture;
+using TextureType = std::string;
 
 struct EluMaterial
 {
@@ -67,6 +67,8 @@ struct EluMaterial
 	TextureType tSpecular;
 	TextureType tOpacity;
 	TextureType tEmissive;
+
+	int AlphaTestValue = -1;
 };
 
 // The data comprising a particular elu.
@@ -96,7 +98,10 @@ struct LoaderState
 	std::vector<EluObjectData> ObjectData;
 	std::vector<EluObject> Objects;
 	std::vector<EluMaterial> Materials;
+	// Maps elu names to indices into ObjectData
 	std::unordered_map<std::string, int> EluMap;
+	// Maps indices into ObjectData to a list of indices into Objects
+	std::unordered_map<int, std::vector<int>> ObjectMap;
 	// The vertex and index counts of every single object in the map.
 	// NOTE: OBJECTS, not elus, i.e. elus have their counts
 	// multiplied by the amount of objects that use them.

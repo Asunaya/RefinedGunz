@@ -6,6 +6,9 @@
 #include "../sdk/bullet/include/btBulletCollisionCommon.h"
 #pragma warning(pop)
 #include "DeferredConstructionWrapper.h"
+#include "RNameSpace.h"
+
+_NAMESPACE_REALSPACE2_BEGIN
 
 class alignas(16) BulletCollision
 {
@@ -40,3 +43,5 @@ private:
 	std::vector<v3> Vertices;
 	std::vector<BulletCollision::IndexType> Indices;
 };
+
+_NAMESPACE_REALSPACE2_END

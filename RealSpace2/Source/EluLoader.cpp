@@ -286,8 +286,9 @@ bool loadMaterial(LoaderState& State, const char* name)
 		mtl.cDiffuse = { EXPAND_VECTOR(mat.diffuse), 1 };
 		mtl.cSpecular = { EXPAND_VECTOR(mat.specular), 1 };
 		mtl.cEmissive = { 0, 0, 0, 0 };
-		mtl.shininess = 0.f;
+		mtl.shininess = mat.SpecularLevel;
 		mtl.roughness = 0.f;
+		mtl.AlphaTestValue = mat.AlphaTestValue;
 
 		auto LoadTexture = [&](auto Flag, auto& Texture, auto& Filename) {
 			if (Filename.empty())
@@ -298,16 +299,6 @@ bool loadMaterial(LoaderState& State, const char* name)
 					return false;
 				Texture = Path;
 				return true;
-				/*MZFile File;
-				if (!File.Open(Path.c_str(), RealSpace2::g_pFileSystem))
-				return false;
-				auto buf = File.Release();
-				if (!buf.get())
-				return false;
-				// gli::texture doesn't have an assignment operator z__z
-				(mtl.*Texture).~texture();
-				new (&(mtl.*Texture)) gli::texture{ gli::load(buf.get(), File.GetLength()) };
-				return true;*/
 			};
 			if (!TryForEachPath(State.Paths, Filename, fn))
 				if (!TryForEachPath(State.Paths, Filename + ".dds", fn))
@@ -333,6 +324,10 @@ bool loadMaterial(LoaderState& State, const char* name)
 
 static bool LoadElu(LoaderState& State, const char* name)
 {
+	// HACK: Don't load shadowbox
+	if (strstr(name, "shadowbox") != nullptr)
+		return false;
+
 	State.ObjectData.emplace_back();
 	auto& dest = State.ObjectData.back();
 
@@ -377,6 +372,15 @@ static bool LoadElu(LoaderState& State, const char* name)
 
 		dest.VertexCount += Mesh.VertexCount;
 		dest.IndexCount += Mesh.IndexCount;
+
+		DMLog("%s mesh %s %d vert %d index\n",
+			name, Mesh.Name.c_str(), Mesh.VertexCount, Mesh.IndexCount);
+		for (size_t j{}; j < Mesh.DrawProps.size(); ++j)
+		{
+			auto& dp = Mesh.DrawProps[j];
+			DMLog("DrawProp %d: vb: %d, ib: %d, cnt: %d, mat: %d\n",
+				j, dp.vertexBase, dp.indexBase, dp.count, dp.material);
+		}
 	}
 
 	assert(File.Tell() == File.GetLength());
@@ -402,8 +406,14 @@ static void MakeEluObject(LoaderState& State, int DataIndex = -1)
 	State.Objects.emplace_back();
 	auto& Obj = State.Objects.back();
 	Obj.Data = DataIndex;
+
+	State.ObjectMap[DataIndex].push_back(State.Objects.size() - 1);
+
 	State.TotalVertexCount += Data.VertexCount;
 	State.TotalIndexCount += Data.IndexCount;
+
+	DMLog("MakeEluObject -- State.TotalVertexCount = %d, Index = %d\n",
+		State.TotalVertexCount, State.TotalIndexCount);
 }
 
 static bool load(LoaderState& State, const char * name)
@@ -431,6 +441,7 @@ static bool load(LoaderState& State, const char * name)
 
 static rmatrix MakeSaneWorldMatrix(const v3& pos, v3 dir, v3 up)
 {
+#ifdef _DEBUG
 	if (!IS_EQ(MagnitudeSq(dir), 1))
 	{
 		DMLog("dir %f\n", Magnitude(dir));
@@ -447,6 +458,7 @@ static rmatrix MakeSaneWorldMatrix(const v3& pos, v3 dir, v3 up)
 		else
 			Normalize(up);
 	}
+#endif
 
 	auto mat = GetIdentityMatrix();
 

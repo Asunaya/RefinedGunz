@@ -11,6 +11,38 @@ _NAMESPACE_REALSPACE2_BEGIN
 
 bool SaveMemoryBmp(int x, int y, void *data, void **retmemory, int *nsize);
 
+class RBspLightmapManager {
+public:
+	RBspLightmapManager();
+
+	int GetSize() const { return m_nSize; }
+	auto * GetData() { return m_pData.get(); }
+
+	void SetSize(int nSize) { m_nSize = nSize; }
+	void SetData(std::unique_ptr<u32[]> pData) { m_pData = std::move(pData); }
+
+	bool Add(const u32 * data, int nSize, POINT * retpoint);
+	bool GetFreeRect(int nLevel, POINT *pt);
+
+	void Save(const char *filename);
+
+	float CalcUnused();
+	float m_fUnused;
+
+protected:
+	std::unique_ptr<RFREEBLOCKLIST[]> m_pFreeList;
+	std::unique_ptr<u32[]> m_pData;
+	int m_nSize;
+};
+
+struct RLIGHTMAPTEXTURE {
+	int nSize;
+	std::unique_ptr<u32> data;
+	bool bLoaded;
+	POINT position;
+	int	nLightmapIndex;
+};
+
 RBspLightmapManager::RBspLightmapManager()
 	: m_pData{ new u32[MAX_LIGHTMAP_SIZE*MAX_LIGHTMAP_SIZE] },
 	m_pFreeList{ new RFREEBLOCKLIST[MAX_LEVEL_COUNT + 1] }
@@ -329,8 +361,8 @@ v3 LightmapGenerator::CalcDiffuse(const rboundingbox& bbox,
 			for (int n = 0; n < Supersample; n++)
 			{
 				rvector position;
-				position[au] = bbox.vmin[au] + (((float)k + ((float)n + .5f) / (float)Supersample) / (float)lightmapsize)*diff[au];
-				position[av] = bbox.vmin[av] + (((float)j + ((float)m + .5f) / (float)Supersample) / (float)lightmapsize)*diff[av];
+				position[au] = bbox.vmin[au] + ((k + (n + .5f) / Supersample) / lightmapsize)*diff[au];
+				position[av] = bbox.vmin[av] + ((j + (m + .5f) / Supersample) / lightmapsize)*diff[av];
 				position[ax] = (-poly->plane.d - polynormal[au] * position[au] - polynormal[av] * position[av]) / polynormal[ax];
 
 				bool bShadow = false;
@@ -714,5 +746,10 @@ bool LightmapGenerator::Generate()
 
 	return true;
 }
+
+// NOTE: Must be defined in the .cpp so that the vectors
+// don't spring an "incomplete type" error.
+LightmapGenerator::LightmapGenerator(RBspObject& bsp) : bsp{ bsp } {}
+LightmapGenerator::~LightmapGenerator() = default;
 
 _NAMESPACE_REALSPACE2_END

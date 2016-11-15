@@ -10,40 +10,9 @@ struct RLightList;
 class RBspObject;
 struct RLIGHT;
 struct RLIGHTMAPTEXTURE;
+class RBspLightmapManager;
 
 using RFREEBLOCKLIST = std::list<POINT>;
-
-class RBspLightmapManager {
-public:
-	RBspLightmapManager();
-
-	int GetSize() const { return m_nSize; }
-	auto * GetData() { return m_pData.get(); }
-
-	void SetSize(int nSize) { m_nSize = nSize; }
-	void SetData(std::unique_ptr<u32[]> pData) { m_pData = std::move(pData); }
-
-	bool Add(const u32 * data, int nSize, POINT * retpoint);
-	bool GetFreeRect(int nLevel, POINT *pt);
-
-	void Save(const char *filename);
-
-	float CalcUnused();
-	float m_fUnused;
-
-protected:
-	std::unique_ptr<RFREEBLOCKLIST[]> m_pFreeList;
-	std::unique_ptr<u32[]> m_pData;
-	int m_nSize;
-};
-
-struct RLIGHTMAPTEXTURE {
-	int nSize;
-	std::unique_ptr<u32> data;
-	bool bLoaded;
-	POINT position;
-	int	nLightmapIndex;
-};
 
 using RGENERATELIGHTMAPCALLBACK = bool(*)(float fProgress);
 
@@ -59,7 +28,8 @@ struct LightmapGenerator
 
 	RBspObject& bsp;
 
-	LightmapGenerator(RBspObject& bsp) : bsp(bsp) {}
+	LightmapGenerator(RBspObject& bsp);
+	~LightmapGenerator();
 
 	bool Generate();
 

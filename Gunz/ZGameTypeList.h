@@ -2,23 +2,18 @@
 
 #include <list>
 #include <map>
-
-using std::list;
-using std::map;
-
+#include "MXml.h"
 
 class ZGameTypeConfigData
 {
 public:
 	int		m_nValue;
-	char	m_szString[ 16];
+	char	m_szString[16];
 };
 
-typedef list< ZGameTypeConfigData* >	MGAMETYPECFGDATA;
+typedef std::list< ZGameTypeConfigData* >	MGAMETYPECFGDATA;
 
-
-
-class ZGameTypeConfig
+class ZGameTypeConfig final
 {
 public:
 	// Round
@@ -36,7 +31,7 @@ public:
 
 
 	ZGameTypeConfig();
-	virtual ~ZGameTypeConfig();
+	~ZGameTypeConfig();
 
 	MGAMETYPECFGDATA GetRoundList()			{ return m_Round; }
 	const int GetSizeOfRoundList()			{ return (int)m_Round.size(); }
@@ -51,19 +46,16 @@ public:
 	const int GetDefaultMaxPlayers()		{ return m_nDefaultMaxPlayers; }
 };
 
-typedef map< int, ZGameTypeConfig* >	MGAMETYPECFG;
+typedef std::map< int, ZGameTypeConfig* > MGAMETYPECFG;
 
-
-
-class ZGameTypeList
+class ZGameTypeList final
 {
-private :
+private:
 	MGAMETYPECFG	m_GameTypeCfg;
-
 
 public:
 	ZGameTypeList();
-	virtual ~ZGameTypeList();
+	~ZGameTypeList();
 
 	void Clear();
 
@@ -71,21 +63,7 @@ public:
 
 	ZGameTypeConfig* GetGameTypeCfg( int nGameTypeNum);
 
-/*	
-	MGAMETYPECFGDATA GetRoundList( int nGameType);
-	const int GetSizeOfRoundList( int nGameType);
-	const int GetDefaultRound( int nGameType);
-
-	MGAMETYPECFGDATA GetLimitTimeList( int nGameType);
-	const int GetSizeOfLimitTimeList( int nGameType);
-	const int GetDefaultLimitTime( int nGameType);
-
-	MGAMETYPECFGDATA GetMaxPlayersList( int nGameType);
-	const int GetSizeOfMaxPlayers( int nGameType);
-	const int GetDefaultMaxPlayers( int nGameType);
-*/
-
-private :
+private:
 	bool ParseRound( ZGameTypeConfig* pConfig, MXmlElement& element);
 	bool ParseLimitTime( ZGameTypeConfig* pConfig, MXmlElement& element);
 	bool ParseMaxPlayers( ZGameTypeConfig* pConfig, MXmlElement& element);

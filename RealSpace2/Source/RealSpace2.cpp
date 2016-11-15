@@ -225,7 +225,7 @@ static void InitDevice()
 
 void CheckMipFilter()
 {
-	LPDIRECT3DDEVICE9 pd3dDevice = RGetDevice();
+	auto pd3dDevice = RGetDevice();
 
 	pd3dDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
 	pd3dDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
@@ -238,6 +238,17 @@ void CheckMipFilter()
 	pd3dDevice->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
 	pd3dDevice->SetTextureStageState(1, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
 	pd3dDevice->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+
+	D3DPtr<IDirect3DVertexDeclaration9> DefaultVertexDeclaration;
+
+	D3DVERTEXELEMENT9 Elements[] = {
+		{ 0, 0, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0 },
+		{ 0, sizeof(float) * 3, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0 },
+		D3DDECL_END()
+	};
+
+	RGetDevice()->CreateVertexDeclaration(Elements, MakeWriteProxy(DefaultVertexDeclaration));
+	RGetDevice()->SetVertexDeclaration(DefaultVertexDeclaration.get());
 
 	DWORD dwNumPasses;
 	HRESULT hr = pd3dDevice->ValidateDevice(&dwNumPasses);

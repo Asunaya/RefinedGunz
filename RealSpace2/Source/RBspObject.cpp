@@ -154,6 +154,8 @@ RBspObject::RBspObject(bool PhysOnly)
 #endif
 }
 
+RBspObject::~RBspObject() = default;
+
 void RBspObject::ClearLightmaps()
 {
 	LightmapTextures.clear();
@@ -1723,11 +1725,11 @@ int RBspObject::Open_ColNodes(RSolidBspNode *pNode, MZFile *pfile, int Depth)
 	if (pNode->nPolygon)
 	{
 		pNode->pVertices = &ColVertices[Depth * 3];
-		pNode->pNormals = new rvector[pNode->nPolygon];
+		pNode->pNormals = std::unique_ptr<rvector[]>{ new rvector[pNode->nPolygon] };
 		for (int i = 0; i < pNode->nPolygon; i++)
 		{
 			pfile->Read(pNode->pVertices + i * 3, sizeof(rvector) * 3);
-			pfile->Read(pNode->pNormals + i, sizeof(rvector));
+			pfile->Read(pNode->pNormals.get() + i, sizeof(rvector));
 		}
 	}
 #else
@@ -1784,12 +1786,16 @@ bool RBspObject::OpenLightmap()
 	if (!file.Open(lightmapinfofilename, g_pFileSystem)) return false;
 
 #define V(expr) if (!(expr)) return false
-	RHEADER header;
-	V(file.Read(&header, sizeof(RHEADER)));
-	if (header.dwID != R_LM_ID || header.dwVersion != R_LM_VERSION)
+
+	// Read the header and verify
 	{
-		file.Close();
-		return false;
+		RHEADER header;
+		V(file.Read(&header, sizeof(RHEADER)));
+		if (header.dwID != R_LM_ID || header.dwVersion != R_LM_VERSION)
+		{
+			file.Close();
+			return false;
+		}
 	}
 
 	// Verify polygon and node counts
