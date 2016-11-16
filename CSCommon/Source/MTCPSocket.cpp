@@ -958,10 +958,8 @@ void MClientSocket::Finalize()
 	MTCPSocket::Finalize();
 }
 
-bool MClientSocket::Connect(SOCKET* pSocket, char *szIP, int nPort)
+bool MClientSocket::Connect(SOCKET* pSocket, const char *szIP, int nPort)
 {
-//	if (IsActive()) return false;
-
 	if (GetSocket() != INVALID_SOCKET)
 		CloseSocket();
 
@@ -973,9 +971,9 @@ bool MClientSocket::Connect(SOCKET* pSocket, char *szIP, int nPort)
 	DWORD dwAddr = inet_addr(szIP);
 	if (dwAddr != INADDR_NONE) {
 		memcpy(&(RemoteAddr.sin_addr), &dwAddr, 4);
-	} else {		// 연결할 host name을 입력한 경우
+	} else {
 		HOSTENT* pHost = gethostbyname(szIP);
-		if (pHost == NULL) {	// error
+		if (pHost == NULL) {
 			OutputDebugString("<TCPSOCKET_ERROR> Can't resolve hostname </TCPSOCKET_ERROR>");
 			return false;
 		}
@@ -985,7 +983,7 @@ bool MClientSocket::Connect(SOCKET* pSocket, char *szIP, int nPort)
 	sockaddr_in addr;
 
 	memset(&addr, 0, sizeof(sockaddr_in));
-	memcpy(&addr, &RemoteAddr, sizeof(sockaddr_in));	//	addr.sin_addr.S_un.S_addr = inet_addr(szIP);
+	memcpy(&addr, &RemoteAddr, sizeof(sockaddr_in));
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(nPort);
 

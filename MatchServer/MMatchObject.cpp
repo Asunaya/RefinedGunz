@@ -69,8 +69,6 @@ MMatchObject::MMatchObject(const MUID& uid) : MObject(uid)
 	m_bDBFriendListRequested = false;
 
 	m_nTickLastPacketRecved = 0;
-	m_nLastHShieldMsgRecved = 0;
-	m_bHShieldMsgRecved = false;
 	m_bHacker = false;
 
 	m_dwLastHackCheckedTime			= GetGlobalTimeMS();
@@ -78,8 +76,6 @@ MMatchObject::MMatchObject(const MUID& uid) : MObject(uid)
 	m_bIsRequestNewHashValue		= false;
 
 	LastSpawnTime					= GetGlobalTimeMS();
-
-	m_dwHShieldCheckCount = 0;
 
 	m_nLastPingTime = m_nQuestLatency = 0;
 	m_bQuestRecvPong = true;
@@ -166,7 +162,6 @@ void MMatchObject::Tick(u64 nTime)
 
 	if (CheckStageListTransfer() == true) {
 
-		// 로비에서 클랜채널에 있으면 클랜전 대기 클랜 리스트 업데이트해준다.
 		MMatchChannel* pChannel = pServer->FindChannel(GetChannelUID());
 		if ((MGetServerConfig()->GetServerMode() == MSM_CLAN) && 
 			(pChannel) && (pChannel->GetChannelType() == MCHANNEL_TYPE_CLAN))
@@ -184,7 +179,6 @@ void MMatchObject::Tick(u64 nTime)
 		}
 		else
 		{
-			// 일반적인 스테이지 리스트 업데이트
 			if ((unsigned int)(nTime - m_nTimeLastStageListTrans) > CYCLE_MATCHSTAGELISTUPDATE) {
 				unsigned long int nCurrStageListChecksum = pServer->GetStageListChecksum(m_ChannelInfo.uidChannel, 
 																		m_nStageCursor, TRANS_STAGELIST_NODE_COUNT);
@@ -231,11 +225,6 @@ void MMatchObject::Tick(u64 nTime)
 			}
 		}
 	}
-
-#ifdef _XTRAP
-	if( MGetServerConfig()->IsUseXTrap() )
-		CheckClientHashValue( nTime );
-#endif
 
 	m_DisconnStatusInfo.Update( nTime );
 
@@ -579,11 +568,4 @@ void MMatchObject::UpdateTickLastPacketRecved()
 {
 	MMatchServer* pServer = MMatchServer::GetInstance();
 	m_nTickLastPacketRecved = pServer->GetTickTime();
-}
-
-void MMatchObject::UpdateLastHShieldMsgRecved()
-{
-	MMatchServer* pServer = MMatchServer::GetInstance();
-	m_nLastHShieldMsgRecved = pServer->GetTickTime();
-	SetHShieldMsgRecved(true);
 }

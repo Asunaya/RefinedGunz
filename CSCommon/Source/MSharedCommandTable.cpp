@@ -130,14 +130,9 @@ void MAddSharedCommandTable(MCommandManager* pCommandManager, int nSharedType)
 			P(MPT_UCHAR, "UGradeID")
 			P(MPT_UCHAR, "PGradeID")
 			P(MPT_UID,	"uidPlayer")
-			P(MPT_STR,	"RandomValue")		// XTrap에서 사용하는 Random Value
-			P(MPT_BLOB,	"EncryptMsg")		// HShield에서 사용하는 암호메세지
+			P(MPT_STR,	"RandomValue")
+			P(MPT_BLOB,	"EncryptMsg")
 
-			/* ServerKeeper에서도 사용을 하기위해서 외부로 옮김. - by 추교성.
-		C(MC_MATCH_ANNOUNCE, "Match.Announce", "Announce Server Message", MCDT_MACHINE2MACHINE)
-			P(MPT_UINT, "Type")
-			P(MPT_STR, "Msg");
-			*/
 		C(MC_MATCH_RESPONSE_RESULT, "Match.Response.Result", "Response Result", MCDT_MACHINE2MACHINE)
 			P(MPT_INT, "Result")
 		C(MC_MATCH_LOGIN_NETMARBLE, "Match.LoginNetmarble", "Login from Netmarble", MCDT_MACHINE2MACHINE)

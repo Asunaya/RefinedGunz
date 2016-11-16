@@ -301,7 +301,6 @@
     <ClCompile Include="MMatchEventManager.cpp" />
     <ClCompile Include="MMatchFormula.cpp" />
     <ClCompile Include="MMatchFriendInfo.cpp" />
-    <ClCompile Include="MMatchHShield.cpp" />
     <ClCompile Include="MMatchLocale.cpp" />
     <ClCompile Include="MMatchMission.cpp" />
     <ClCompile Include="MMatchNPCObject.cpp" />
@@ -371,13 +370,11 @@
     <ClCompile Include="MBMatchServer_ServerKeeper.cpp" />
     <ClCompile Include="MBMatchServerConfigReloader.cpp" />
     <ClCompile Include="MMatchServer_Schedule.cpp" />
-    <ClCompile Include="MBMatchAuth.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ChildFrm.h" />
     <ClInclude Include="CommandLogView.h" />
     <ClInclude Include="ConsoleBar.h" />
-    <ClInclude Include="CPSSOLib.h" />
     <ClInclude Include="DBQuestCachingData.h" />
     <ClInclude Include="IDatabase.h" />
     <ClInclude Include="LagCompensation.h" />
@@ -402,7 +399,6 @@
     <ClInclude Include="MMatchAdmin.h" />
     <ClInclude Include="MMatchAgent.h" />
     <ClInclude Include="MMatchAntiHack.h" />
-    <ClInclude Include="MMatchAuth.h" />
     <ClInclude Include="MMatchChannel.h" />
     <ClInclude Include="MMatchChannelRule.h" />
     <ClInclude Include="MMatchChatRoom.h" />
@@ -415,7 +411,6 @@
     <ClInclude Include="MMatchEventManager.h" />
     <ClInclude Include="MMatchFormula.h" />
     <ClInclude Include="MMatchFriendInfo.h" />
-    <ClInclude Include="MMatchHShield.h" />
     <ClInclude Include="MMatchLocale.h" />
     <ClInclude Include="MMatchMission.h" />
     <ClInclude Include="MMatchNPCObject.h" />
@@ -465,10 +460,6 @@
     <ClInclude Include="TrayIcon.h" />
     <ClInclude Include="MBMatchServer.h" />
     <ClInclude Include="MBMatchServerConfigReloader.h" />
-    <ClInclude Include="Netmarble\CPSSOLib.h" />
-    <ClInclude Include="MBMatchAuth.h" />
-    <ClInclude Include="XTrap\XCrackChk.h" />
-    <ClInclude Include="HShield\AntiCpSvrFunc.h" />
     <ClInclude Include="VersionNo.h" />
   </ItemGroup>
   <ItemGroup>
@@ -487,11 +478,6 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <Library Include="Netmarble\CPSSOLib.lib" />
-    <Library Include="XTrap\XCrackChk.lib" />
-    <Library Include="HShield\AntiCpSvr.lib" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\cml\cml.vcxproj">

@@ -39,7 +39,7 @@ bool MMatchLocale::OnInit()
 				int nGameCode = MGetServerConfig()->GetNJDBAgentGameCode();
 				int nServerCode = MGetServerConfig()->GetServerID();
 				m_pDBAgentClient = new MNJ_DBAgentClient(nGameCode, nServerCode);
-				ConnectToDBAgent();		// 일본 넷마블판만 DBAgent에 접속한다.
+				ConnectToDBAgent();
 			}
 			break;
 
@@ -49,12 +49,6 @@ bool MMatchLocale::OnInit()
 		case MC_INDIA:
 			break;
 	}
-
-#ifdef _XTRAP
-	// XTrap Crack을 체크한다.
-	if( MGetServerConfig()->IsUseXTrap() )
-		m_bCheckAntiHackCrack = true;		
-#endif
 
 	return true;
 }

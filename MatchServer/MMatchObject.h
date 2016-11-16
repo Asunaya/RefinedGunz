@@ -15,7 +15,6 @@
 #include "MSmartRefreshImpl.h"
 #include "MQuestItem.h"
 #include "MMatchAntiHack.h"
-#include "MMatchHShield.h"
 #include "GlobalTypes.h"
 #include "BasicInfoHistory.h"
 #include "HitRegistration.h"
@@ -337,7 +336,6 @@ protected:
 	MMatchObjectGameInfo		m_GameInfo;
 	MMatchObjectAntiHackInfo	m_AntiHackInfo;
 	MMatchDisconnStatusInfo		m_DisconnStatusInfo;
-	MMatchObjectHShieldInfo		m_HSieldInfo;
 
 	bool			m_bHacker;
 	bool			m_bBridgePeer;
@@ -386,8 +384,6 @@ protected:
 
 	bool			m_bDBFriendListRequested;
 	u64				m_nTickLastPacketRecved;
-	u64				m_nLastHShieldMsgRecved;
-	bool			m_bHShieldMsgRecved;
 	std::string				m_strCountryCode3;
 
 	u64		m_dwLastHackCheckedTime;
@@ -519,13 +515,8 @@ public:
 	inline void SetVoteState( const bool bState )	{ m_bWasCallVote = bState; }
 
 	inline auto	GetTickLastPacketRecved()		{ return m_nTickLastPacketRecved; }
-	inline auto	GetLastHShieldMsgRecved()		{ return m_nLastHShieldMsgRecved; }
-	inline bool				GetHShieldMsgRecved()			{ return m_bHShieldMsgRecved; }
-	inline void				SetHShieldMsgRecved(bool bSet)	{ m_bHShieldMsgRecved = bSet; }
-
 
 	void UpdateTickLastPacketRecved();
-	void UpdateLastHShieldMsgRecved();
 
 	void SetLastRecvNewHashValueTime( const DWORD dwTime )	
 	{ 
@@ -559,7 +550,6 @@ public:
 	MMatchTimeSyncInfo* GetSyncInfo()	{ return &m_nTimeSyncInfo; }
 	MMatchObjectAntiHackInfo* GetAntiHackInfo()		{ return &m_AntiHackInfo; }
 	MMatchDisconnStatusInfo& GetDisconnStatusInfo() { return  m_DisconnStatusInfo; }
-	MMatchObjectHShieldInfo* GetHShieldInfo()		{ return &m_HSieldInfo; }
 
 	void Tick(u64 nTime);
 
@@ -627,10 +617,9 @@ public:
 		MMOA_STAGE_FOLLOW,
 		MMOA_MAX
 	};
-	bool CheckEnableAction(MMO_ACTION nAction);		// 해당 액션이 가능한지 여부 - 필요할때마다 추가한다.
+	bool CheckEnableAction(MMO_ACTION nAction);
 
 	bool m_bQuestRecvPong;
-	DWORD m_dwHShieldCheckCount;
 };
 
 class MMatchObjectList : public map<MUID, MMatchObject*>{};

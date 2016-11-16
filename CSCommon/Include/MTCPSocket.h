@@ -18,7 +18,6 @@
 #include "MCommand.h"
 #include "MTrafficLog.h"
 
-
 class MTCPSocket;
 class MServerSocket;
 class MClientSocket;
@@ -55,7 +54,6 @@ typedef bool(MSERVERRECVCALLBACK)(MSocketObj* pSocketObj, char* pPacket, DWORD d
 typedef bool(MACCEPTCALLBACK)(MSocketObj* pSocketObj);
 typedef bool(MDISCONNECTCLIENTCALLBACK)(MSocketObj* pSocketObj);
 
-/// 소켓 쓰레드
 class MTCPSocketThread : public MThread 
 {
 private:
@@ -89,7 +87,6 @@ public:
 	MSOCKETERRORCALLBACK*		m_fnSocketErrorCallback;
 };
 
-/// 클라이언트용 소켓 쓰레드
 class MClientSocketThread : public MTCPSocketThread 
 {
 private:
@@ -155,7 +152,6 @@ public:
 	MDISCONNECTCLIENTCALLBACK*	m_fnDisconnectClientCallback;
 };
 
-/// TCP 소켓 상위 클래스
 class MTCPSocket
 {
 private:
@@ -185,12 +181,11 @@ public:
 					{ m_pSocketThread->m_pCallbackContext = pCallbackContext; }
 };
 
-/// TCP 소켓 Server 클래스
 class MServerSocket: public MTCPSocket
 {
 private:
 protected:
-	sockaddr_in					m_LocalAddress;		// My IP and Port
+	sockaddr_in					m_LocalAddress;
 	virtual void Finalize();
 	virtual bool Initialize();
 	virtual bool OpenSocket(int nPort);
@@ -215,7 +210,6 @@ public:
 	DWORD GetLocalIP()			{ return m_LocalAddress.sin_addr.S_un.S_addr; }
 };
 
-/// TCP 소켓 Client 클래스
 class MClientSocket: public MTCPSocket
 {
 private:
@@ -231,15 +225,18 @@ public:
 	MClientSocket();
 	virtual ~MClientSocket();
 
-	bool Connect(SOCKET* pSocket, char* szIP, int nPort);
+	bool Connect(SOCKET* pSocket, const char* szIP, int nPort);
 	bool Disconnect();
 	bool Send(char *pPacket, DWORD dwPacketSize);
 
 	virtual bool SimpleDisconnect();
 
-	void SetRecvCallback(MCLIENTRECVCALLBACK pCallback) { ((MClientSocketThread*)(m_pSocketThread))->m_fnRecvCallback = pCallback; }
-	void SetConnectCallback(MCONNECTCALLBACK pCallback) { ((MClientSocketThread*)(m_pSocketThread))->m_fnConnectCallback = pCallback; }
-	void SetDisconnectCallback(MDISCONNECTCALLBACK pCallback) { ((MClientSocketThread*)(m_pSocketThread))->m_fnDisconnectCallback = pCallback; }
+	void SetRecvCallback(MCLIENTRECVCALLBACK pCallback) {
+		((MClientSocketThread*)(m_pSocketThread))->m_fnRecvCallback = pCallback; }
+	void SetConnectCallback(MCONNECTCALLBACK pCallback) {
+		((MClientSocketThread*)(m_pSocketThread))->m_fnConnectCallback = pCallback; }
+	void SetDisconnectCallback(MDISCONNECTCALLBACK pCallback) {
+		((MClientSocketThread*)(m_pSocketThread))->m_fnDisconnectCallback = pCallback; }
 
 	const char* GetHost()	{ return m_szHost; }
 };

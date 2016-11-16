@@ -28,67 +28,10 @@
 #include "MMatchLocale.h"
 
 
-void MMatchServer::OnRequestAccountCharList(const MUID& uidPlayer, char* szXTrapSerialKey, unsigned char* pbyGuidAckMsg)
+void MMatchServer::OnRequestAccountCharList(const MUID& uidPlayer)
 {
 	MMatchObject* pObj = GetObject(uidPlayer);
 	if (pObj == NULL) return;
-
-#ifdef _HSHIELD
-	if( MGetServerConfig()->IsUseHShield() )
-	{
-		DWORD dwRet = HShield_AnalyzeGuidAckMsg(pbyGuidAckMsg, pObj->GetHShieldInfo()->m_pbyGuidReqInfo, 
-			&pObj->GetHShieldInfo()->m_pCRCInfo);
-
-		if(dwRet!= ERROR_SUCCESS)
-		{
-			pObj->GetHShieldInfo()->m_bGuidAckPass = false;
-			LOG(LOG_FILE, "@AnalyzeGuidAckMsg - Find Hacker(%s) : (Error Code = %x)", 
-				pObj->GetAccountName(), dwRet);
-
-			MCommand* pNewCmd = CreateCommand(MC_MATCH_FIND_HACKING, MUID(0,0));
-			RouteToListener(pObj, pNewCmd);
-
-#ifndef _DEBUG
-			// 비정상적 유저이므로 캐릭터 선택할때 접속을 끊는다.
-			pObj->SetHacker(true);
-#endif
-		}
-		else
-		{
-			pObj->GetHShieldInfo()->m_bGuidAckPass = true;
-			if(pObj->GetHShieldInfo()->m_pCRCInfo == NULL)
-				mlog("%s's HShield_AnalyzeGuidAckMsg Success. but pCrcInfo is NULL...\n", pObj->GetAccountName());
-		}
-
-//		SendHShieldReqMsg();
-	}
-#endif
-
-	// XTrap Crack Check
-#ifdef _XTRAP
-	if( MGetServerConfig()->IsUseXTrap() )
-	{
-		if (!MGetLocale()->SkipCheckAntiHackCrack())
-		{
-			if( !(MGetServerConfig()->IsDebugServer() && MGetServerConfig()->IsDebugLoginIPList(pObj->GetIPString())) )
-			{
-				if (MMatchAntiHack::CrackCheck(szXTrapSerialKey, pObj->GetAntiHackInfo()->m_szRandomValue) == false)
-				{
-					mlog("Find Hacker(%s) : (RandomValue = %s , SerialKey = %s)\n", 
-						pObj->GetAccountInfo()->m_szUserID, 
-						pObj->GetAntiHackInfo()->m_szRandomValue,
-						szXTrapSerialKey);
-
-					MCommand* pNewCmd = CreateCommand(MC_MATCH_FIND_HACKING, MUID(0,0));
-					RouteToListener(pObj, pNewCmd);
-
-					// 비정상적 유저이므로 캐릭터 선택할때 접속을 끊는다.
-					pObj->SetHacker(true);
-				}
-			}
-		}
-	}
-#endif
 
 	const MMatchBlockType MBlockType = pObj->GetAccountInfo()->m_BlockType;
  	if( (MMBT_NO != MBlockType) && !IsAdminGrade(pObj) )
@@ -97,17 +40,11 @@ void MMatchServer::OnRequestAccountCharList(const MUID& uidPlayer, char* szXTrap
 
 		bool bIsEndTimeExpire = false;
 
-		// 여기서 블럭 시간 만료를 검사해 줘야 한다.
 		if( !IsExpiredBlockEndTime(pObj->GetAccountInfo()->m_EndBlockDate) )
 		{
 			if( !bIsEndTimeExpire )
 			{
 				DWORD dwMsgID = 0;
-
-				//if( (MMBT_XTRAP_HACKER == MBlockType) || (MMBT_HSHIELD_HACKER == MBlockType) )
-				//	dwMsgID = 130002;
-				//else if( MMBT_BADUSER == MBlockType )
-				//	dwMsgID =  13003;
 
 				pObj->GetDisconnStatusInfo().SetMsgID( dwMsgID );
 				pObj->GetDisconnStatusInfo().SetStatus( MMDS_DISCONN_WAIT );
@@ -116,7 +53,6 @@ void MMatchServer::OnRequestAccountCharList(const MUID& uidPlayer, char* szXTrap
 		}
 		else
 		{
-			// 기간이 만료되었으면 DB를 정상유저로 업데이트 해준다.
 			pObj->GetAccountInfo()->m_BlockType = MMBT_NO;
 
 			MAsyncDBJob_ResetAccountBlock* pResetBlockJob = new MAsyncDBJob_ResetAccountBlock;
@@ -144,8 +80,6 @@ void MMatchServer::OnRequestAccountCharList(const MUID& uidPlayer, char* szXTrap
 			return;
 		}
 
-		// 여기서 퀘스트 업데이트 진행이 되면 CharFinalize에서 중복 업데이트가 될수 있기에,
-		//  CharFinalize에서 아래 플레그가 true면 업데이트를 진행하게 해놓았음.
 		pObj->GetCharInfo()->m_QuestItemList.SetDBAccess( false );
 
 		PostAsyncJob( pQItemUpdateJob );
@@ -168,41 +102,13 @@ void MMatchServer::OnRequestAccountCharInfo(const MUID& uidPlayer, int nCharNum)
 
 void MMatchServer::OnRequestSelectChar(const MUID& uidPlayer, const int nCharIndex)
 {
-
-	// Blocked DB ////////////////////////////
-	//ResponseSelectChar(uidPlayer, nCharIndex);
-
-	
 	MMatchObject* pObj = GetObject(uidPlayer);
 	if ((pObj == NULL) || (pObj->GetAccountInfo()->m_nAID < 0)) return;
 	if ((nCharIndex < 0) || (nCharIndex >= MAX_CHAR_COUNT)) return;
 
-	// 해커이면 접속을 끊는다.
-#if defined(_XTRAP) || defined(_HSHIELD)
-	if( (MGetServerConfig()->IsUseXTrap() || MGetServerConfig()->IsUseHShield()) && pObj->IsHacker() )
-	{
-#ifdef _XTRAP
-		if( MGetServerConfig()->IsUseXTrap() )
-		{
-			pObj->SetXTrapHackerDisconnectWaitInfo();
-			return;
-		}
-#endif
-
-#ifdef _HSHIELD
-		if( MGetServerConfig()->IsUseHShield() )
-		{
-			pObj->SetHShieldHackerDisconnectWaitInfo();
-			return;
-		}
-#endif
-	}
-#endif
-
 	// Async DB //////////////////////////////
 	MAsyncDBJob_GetCharInfo* pJob=new MAsyncDBJob_GetCharInfo(uidPlayer, pObj->GetAccountInfo()->m_nAID, nCharIndex);
 	pJob->SetCharInfo(new MMatchCharInfo);
-	//pJob->SetFriendInfo(new MMatchFriendInfo);
 	PostAsyncJob(pJob);
 }
 

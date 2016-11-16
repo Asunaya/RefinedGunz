@@ -24,12 +24,12 @@
 #define SODIUM_STATIC
 #include "sodium.h"
 
-bool MMatchServer::CheckOnLoginPre(const MUID& CommUID, int nCmdVersion, bool& outbFreeIP, string& strCountryCode3)
+bool MMatchServer::CheckOnLoginPre(const MUID& CommUID, int nCmdVersion,
+	bool& outbFreeIP, std::string& strCountryCode3)
 {
 	MCommObject* pCommObj = (MCommObject*)m_CommRefCache.GetRef(CommUID);
 	if (pCommObj == NULL) return false;
 
-	// 프로토콜 버전 체크
 	if (nCmdVersion != MCOMMAND_VERSION)
 	{
 		MCommand* pCmd = CreateCmdMatchResponseLoginFailed(CommUID, MERR_COMMAND_INVALID_VERSION);
@@ -37,15 +37,13 @@ bool MMatchServer::CheckOnLoginPre(const MUID& CommUID, int nCmdVersion, bool& o
 		return false;
 	}
 
-	// free login ip를 검사하기전에 debug서버와 debug ip를 검사한다.
-	// 서버가 debug타입인지 검사.
-	if( MGetServerConfig()->IsDebugServer() && MGetServerConfig()->IsDebugLoginIPList(pCommObj->GetIPString()) )
+	if( MGetServerConfig()->IsDebugServer() &&
+		MGetServerConfig()->IsDebugLoginIPList(pCommObj->GetIPString()) )
 	{
 		outbFreeIP = true;
 		return true;
 	}
 
-	// 최대인원 체크
 	bool bFreeLoginIP = false;
 	if (MGetServerConfig()->CheckFreeLoginIPList(pCommObj->GetIPString()) == true) {
 		bFreeLoginIP = true;
@@ -108,12 +106,10 @@ void MMatchServer::OnMatchLogin(MUID CommUID, const char* szUserID, const unsign
 	MCommObject* pCommObj = (MCommObject*)m_CommRefCache.GetRef(CommUID);
 	if (pCommObj)
 	{
-		// 디비에 최종 접속시간을 업데이트 한다.
 		if (!GetDBMgr()->UpdateLastConnDate(szUserID, pCommObj->GetIPString()))
 		{
 			mlog("DB Query(OnMatchLogin > UpdateLastConnDate) Failed");
 		}
-
 	}
 
 	if (crypto_pwhash_scryptsalsa208sha256_str_verify
@@ -206,84 +202,6 @@ void MMatchServer::CreateAccountResponse(const MUID& uidComm, const char *szReas
 	Post(pCmd);
 }
 
-void MMatchServer::OnMatchLoginFromNetmarble(const MUID& CommUID, const char* szCPCookie, const char* szSpareData, int nCmdVersion, unsigned long nChecksumPack)
-{
-	MCommObject* pCommObj = (MCommObject*)m_CommRefCache.GetRef(CommUID);
-	if (pCommObj == NULL) return;
-
-	bool bFreeLoginIP = false;
-	std::string strCountryCode3;
-
-	if (!CheckOnLoginPre(CommUID, nCmdVersion, bFreeLoginIP, strCountryCode3)) return;
-
-	MMatchAuthBuilder* pAuthBuilder = GetAuthBuilder();
-	if (pAuthBuilder == NULL) {
-		LOG(LOG_ALL, "Critical Error : MatchAuthBuilder is not assigned.");
-		return;
-	}
-	MMatchAuthInfo* pAuthInfo = NULL;
-	if (pAuthBuilder->ParseAuthInfo(szCPCookie, &pAuthInfo) == false) 
-	{
-		MGetServerStatusSingleton()->SetRunStatus(5);
-
-		MCommand* pCmd = CreateCmdMatchResponseLoginFailed(CommUID, MERR_CLIENT_WRONG_PASSWORD);
-		Post(pCmd);	
-
-		LOG(LOG_ALL, "Netmarble Certification Failed");
-		return;
-	}
-
-	const char* pUserID = pAuthInfo->GetUserID();
-	const char* pUniqueID = pAuthInfo->GetUniqueID();
-	const char* pCertificate = pAuthInfo->GetCertificate();
-	const char* pName = pAuthInfo->GetName();
-	int nAge = pAuthInfo->GetAge();
-	int nSex = pAuthInfo->GetSex();
-	bool bCheckPremiumIP = MGetServerConfig()->CheckPremiumIP();
-	const char* szIP = pCommObj->GetIPString();
-	DWORD dwIP = pCommObj->GetIP();
-
-	// Async DB
-	MAsyncDBJob_GetLoginInfo* pNewJob = new MAsyncDBJob_GetLoginInfo(CommUID);
-	pNewJob->Input(new MMatchAccountInfo(), 
-					pUserID, 
-					pUniqueID, 
-					pCertificate, 
-					pName, 
-					nAge, 
-					nSex, 
-					bFreeLoginIP, 
-					nChecksumPack,
-					bCheckPremiumIP,
-					szIP,
-					dwIP,
-					strCountryCode3);
-	PostAsyncJob(pNewJob);
-
-	if (pAuthInfo)
-	{
-		delete pAuthInfo; pAuthInfo = NULL;
-	}
-}
-
-
-void MMatchServer::OnMatchLoginFromNetmarbleJP(const MUID& CommUID, const char* szLoginID, const char* szLoginPW, int nCmdVersion, unsigned long nChecksumPack)
-{
-	bool bFreeLoginIP = false;
-	string strCountryCode3;
-
-	// 프로토콜, 최대인원 체크
-	if (!CheckOnLoginPre(CommUID, nCmdVersion, bFreeLoginIP, strCountryCode3)) return;
-
-	// DBAgent에 먼저 보내고 응답을 받으면 로그인 프로세스를 진행한다.
-	if (!MGetLocale()->PostLoginInfoToDBAgent(CommUID, szLoginID, szLoginPW, bFreeLoginIP, nChecksumPack, GetClientCount()))
-	{
-		MCommand* pCmd = CreateCmdMatchResponseLoginFailed(CommUID, MERR_CLIENT_FULL_PLAYERS);
-		Post(pCmd);
-		return;
-	}
-}
-
 void MMatchServer::OnMatchLoginFromDBAgent(const MUID& CommUID, const char* szLoginID, const char* szName, int nSex, bool bFreeLoginIP, unsigned long nChecksumPack)
 {
 	MCommObject* pCommObj = (MCommObject*)m_CommRefCache.GetRef(CommUID);
@@ -293,7 +211,7 @@ void MMatchServer::OnMatchLoginFromDBAgent(const MUID& CommUID, const char* szLo
 	CheckIsValidIP( CommUID, pCommObj->GetIPString(), strCountryCode3, false );
 
 	const char* pUserID = szLoginID;
-	char szPassword[16] = "";			// 패스워드는 없다
+	char szPassword[16] = "";
 	char szCertificate[16] = "";
 	const char* pName = szName;
 	int nAge = 20;
@@ -322,7 +240,6 @@ void MMatchServer::OnMatchLoginFromDBAgent(const MUID& CommUID, const char* szLo
 
 void MMatchServer::OnMatchLoginFailedFromDBAgent(const MUID& CommUID, int nResult)
 {
-	// 프로토콜 버전 체크
 	MCommand* pCmd = CreateCmdMatchResponseLoginFailed(CommUID, nResult);
 	Post(pCmd);	
 }
@@ -332,8 +249,7 @@ MCommand* MMatchServer::CreateCmdMatchResponseLoginOK(const MUID& uidComm,
 													  const char* szUserID, 
 													  MMatchUserGradeID nUGradeID, 
 													  MMatchPremiumGradeID nPGradeID,
-													  const char* szRandomValue,
-													  const unsigned char* pbyGuidReqMsg)
+													  const char* szRandomValue)
 {
 	MCommand* pCmd = CreateCommand(MC_MATCH_RESPONSE_LOGIN, uidComm);
 	pCmd->AddParameter(new MCommandParameterInt(MOK));
@@ -345,12 +261,9 @@ MCommand* MMatchServer::CreateCmdMatchResponseLoginOK(const MUID& uidComm,
 	pCmd->AddParameter(new MCommandParameterUID(uidPlayer));
 	pCmd->AddParameter(new MCommandParameterString(szRandomValue));
 	
-	void* pBlob = MMakeBlobArray(sizeof(unsigned char), SIZEOF_GUIDREQMSG);
-	unsigned char* pCmdBlock = (unsigned char*)MGetBlobArrayElement(pBlob, 0);
-	CopyMemory(pCmdBlock, pbyGuidReqMsg, SIZEOF_GUIDREQMSG);
+	char blob[1]{};
 
-	pCmd->AddParameter(new MCommandParameterBlob(pBlob, MGetBlobArraySize(pBlob)));
-	MEraseBlobArray(pBlob);
+	pCmd->AddParameter(new MCommandParameterBlob(blob, ArraySize(blob)));
 
 	return pCmd;
 }
@@ -407,7 +320,6 @@ bool MMatchServer::AddObjectOnMatchLogin(const MUID& uidComm,
 	pObj->SetFreeLoginIP(bFreeLoginIP);
 	pObj->SetCountryCode3( strCountryCode3 );
 	pObj->UpdateTickLastPacketRecved();
-	pObj->UpdateLastHShieldMsgRecved();
 
 	if (pCommObj != NULL)
 	{
@@ -416,7 +328,6 @@ bool MMatchServer::AddObjectOnMatchLogin(const MUID& uidComm,
 	
 	SetClientClockSynchronize(uidComm);
 
-	// 프리미엄 IP를 체크한다.
 	if (MGetServerConfig()->CheckPremiumIP())
 	{
 		if (pCommObj)
@@ -426,12 +337,10 @@ bool MMatchServer::AddObjectOnMatchLogin(const MUID& uidComm,
 			
 			bExistPremiumIPCache = MPremiumIPCache()->CheckPremiumIP(pCommObj->GetIP(), bIsPremiumIP);
 
-			// 만약 캐쉬에 없으면 직접 DB에서 찾도록 한다.
 			if (!bExistPremiumIPCache)
 			{
 				if (GetDBMgr()->CheckPremiumIP(pCommObj->GetIPString(), bIsPremiumIP))
 				{
-					// 결과를 캐쉬에 저장
 					MPremiumIPCache()->AddIP(pCommObj->GetIP(), bIsPremiumIP);
 				}
 				else
@@ -445,32 +354,12 @@ bool MMatchServer::AddObjectOnMatchLogin(const MUID& uidComm,
 		}		
 	}
 
-#ifdef _HSHIELD
-	if( MGetServerConfig()->IsUseHShield() )
-	{
-		ULONG dwRet = HShield_MakeGuidReqMsg(pObj->GetHShieldInfo()->m_pbyGuidReqMsg, pObj->GetHShieldInfo()->m_pbyGuidReqInfo);
-
-		if(dwRet != ERROR_SUCCESS)
-			LOG(LOG_FILE, "@MakeGuidReqMsg - %s Making Guid Req Msg Failed. (Error code = %x)", pObj->GetAccountName(), dwRet);
-	}
-#endif
-
-#ifdef _XTRAP
-	// XTrap Random Value 생성
-	if( MGetServerConfig()->IsUseXTrap() )
-	{
-		if (!MGetLocale()->SkipCheckAntiHackCrack())
-			XTrap_RandomKeyGenW(pObj->GetAntiHackInfo()->m_szRandomValue);
-	}
-#endif
-
 	MCommand* pCmd = CreateCmdMatchResponseLoginOK(uidComm, 
 												   AllocUID, 
 												   pObj->GetAccountInfo()->m_szUserID,
 												   pObj->GetAccountInfo()->m_nUGrade,
                                                    pObj->GetAccountInfo()->m_nPGrade,
-												   pObj->GetAntiHackInfo()->m_szRandomValue,
-												   pObj->GetHShieldInfo()->m_pbyGuidReqMsg);
+												   pObj->GetAntiHackInfo()->m_szRandomValue);
 	Post(pCmd);	
 
 	MAsyncDBJob_InsertConnLog* pNewJob = new MAsyncDBJob_InsertConnLog();

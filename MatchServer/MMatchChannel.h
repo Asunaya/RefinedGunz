@@ -3,7 +3,6 @@
 
 #include <map>
 #include <list>
-using namespace std;
 
 #include "MMatchGlobal.h"
 #include "MUID.h"
@@ -16,10 +15,8 @@ class MMatchObject;
 class MMatchStage;
 class MCommand;
 
-
-
-typedef map<string, MMatchObject*>			MObjectStrMap;
-typedef map<int, MMatchStage*>				MChannelStageMap;
+typedef std::map<std::string, MMatchObject*>MObjectStrMap;
+typedef std::map<int, MMatchStage*>			MChannelStageMap;
 typedef MPageArray<MMatchObject*>			MChannelUserArray;
 
 
@@ -34,11 +31,9 @@ private:
 	int				m_nMaxStages;
 	char			m_szRuleName[CHANNELRULE_LEN];
 	MCHANNEL_RULE	m_nRuleType;
-	//bool			m_bNewbieChannel;		// 뉴비채널은 정말 초보만 들어갈 수 있다.
 
-	MMatchObjectMap	m_ObjUIDCaches;			// 채널전체 플레이어들
-	MMatchObjectMap	m_ObjUIDLobbyCaches;	// 로비에 있는 플레이어들
-//	MObjectStrMap	m_ObjStrCaches;
+	MMatchObjectMap	m_ObjUIDCaches;
+	MMatchObjectMap	m_ObjUIDLobbyCaches;
 
 	MMatchStage*	m_pStages[MAX_CHANNEL_MAXSTAGES];
 	list<int>		m_UnusedStageIndexList;
@@ -89,7 +84,6 @@ public:
 	auto GetLobbyObjBegin()	{ return m_ObjUIDLobbyCaches.begin(); }
 	auto GetLobbyObjEnd()	{ return m_ObjUIDLobbyCaches.end(); }
 
-
 	void AddObject(const MUID& uid, MMatchObject* pObj);
 	void RemoveObject(const MUID& uid);
 public:
@@ -97,10 +91,8 @@ public:
 	void RemoveStage(MMatchStage* pStage);
 	bool IsEmptyStage(int nIndex);
 	MMatchStage* GetStage(int nIndex);
-	int GetPrevStageCount(int nStageIndex);	// nStageIndex를 포함하지 않는 nStageIndex이전의 만들어진 방 개수 
-	int GetNextStageCount(int nStageIndex);	// nStageIndex를 포함하지 않는 nStageIndex이후의 만들어진 방 개수 
-	
-	//bool IsNewbieChannel()			{ return m_bNewbieChannel; }
+	int GetPrevStageCount(int nStageIndex);
+	int GetNextStageCount(int nStageIndex);
 
 public:
 	MChannelUserArray* GetUserArray()	{ return &m_UserArray; }
@@ -117,7 +109,7 @@ private:
 	map<MUID, MMatchChannel*>	m_TypesChannelMap[MCHANNEL_TYPE_MAX];
 	void Insert(const MUID& uid, MMatchChannel* pChannel)	{	insert(value_type(uid, pChannel));	}
 	MUID UseUID()				{	m_uidGenerate.Increase();	return m_uidGenerate;	}
-//	void UpdateChecksum(unsigned long nClock);
+
 public:
 	MMatchChannelMap()			{	m_uidGenerate = MUID(0,0);	m_nChecksum=0; }
 	virtual ~MMatchChannelMap()	{	}
@@ -130,7 +122,7 @@ public:
 	bool Remove(const MUID& uidChannel, MMatchChannelMap::iterator* pNextItor);
 	void Update(u64 nClock);
 
-	unsigned long GetChannelListChecksum() { return m_nChecksum; }
+	unsigned long GetChannelListChecksum() const { return m_nChecksum; }
 	int GetChannelCount(MCHANNEL_TYPE nChannelType);
 
 	map<MUID, MMatchChannel*>::iterator GetTypesChannelMapBegin(MCHANNEL_TYPE nType);

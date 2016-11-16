@@ -176,7 +176,6 @@ void MBMatchServer::OnResponseSchedule( const MUID& uidSender,
 			MCommand* pCmdSchedule = CreateCommand( MC_MATCH_SCHEDULE_ANNOUNCE_MAKE, MUID(0, 0) );
 			if( 0 != pCmdSchedule )
 			{
-				// 생성된 스케줄 커맨드는 스케줄 메니저에 등록이 된다.
 				pCmdSchedule->AddParameter( new MCmdParamStr(pszAnnounce) );
 				const bool bIsOk = AddDynamicSchedule( m_pScheduler, nType - 1, pCmdSchedule, nYear, nMonth, nDay, nHour, nMin, nCount );
 				if( !bIsOk )
@@ -186,7 +185,6 @@ void MBMatchServer::OnResponseSchedule( const MUID& uidSender,
 			}
 			else
 			{
-				// 스케줄작성이 실패했다는것을 클라이언트에 알림.
 				pCmd->AddParameter( new MCmdParamChar(false) );
 			}
 		}
@@ -206,7 +204,6 @@ void MBMatchServer::OnResponseSchedule( const MUID& uidSender,
 			}
 			else
 			{
-				// 스케줄작성이 실패했다는것을 클라이언트에 알림.
 				pCmd->AddParameter( new MCmdParamChar(false) );
 			}
 		}
@@ -236,7 +233,6 @@ void MBMatchServer::OnResponseKeeperStopServerSchedule( const MUID& uidSender, c
 {
 	OnAdminServerHalt();
 
-	// 만약 공지사항이 있을경우 공지 커맨드 생성.
 	if( (0 != pszAnnounce) && (0 < strlen(pszAnnounce)) )
 	{
 		MCommand* pCmd = CreateCommand(MC_ADMIN_ANNOUNCE, MUID(0,0));
@@ -297,42 +293,5 @@ void MBMatchServer::OnResponseReloadServerConfig( const MUID& uidSender, const s
 	else
 	{
 		bReloadOK = m_ConfigReloader.Reload( RELOAD_LIST );
-	}
-	
-	if( bReloadOK )
-	{
-	}
-	else
-	{
-	}
-}
-
-
-void MBMatchServer::OnRequestAddHashMap( const MUID& uidSender, const string& strNewHashValue )
-{
-	if( !IsKeeper(uidSender) )
-		return;
-
-	OnResponseAddHashMap( uidSender, strNewHashValue );
-}
-
-
-void MBMatchServer::OnResponseAddHashMap( const MUID& uidSender, const string& strNewHashValue )
-{
-	if( !IsKeeper(uidSender) )
-		return;
-
-	bool bRes = MMatchAntiHack::AddNewHashValue( strNewHashValue );
-	
-	MCommand* pCmd = CreateCommand( MC_RESPONSE_ADD_HASHMAP, uidSender );
-	if( 0 != pCmd )
-	{
-		if( !pCmd->AddParameter(new MCmdParamBool(bRes)) )
-		{
-			delete pCmd;
-			return;
-		}
-
-		Post( pCmd );
 	}
 }

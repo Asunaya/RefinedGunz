@@ -10,21 +10,14 @@
 #include "MErrorTable.h"
 #include "MDebug.h"
 #include "MMatchRule.h"
-#include "MBMatchAuth.h"
 #include "MDebug.h"
 #include "MMatchStatus.h"
 #include "MMatchSchedule.h"
 #include "MSharedCommandTable.h"
 #include "MMatchConfig.h"
 #include "MMatchEventFactory.h"
-#include "HShield/AntiCPSvrfunc.h"
 #include "MMatchLocale.h"
 #pragma comment(lib, "comsupp.lib")
-
-#ifdef _XTRAP
-#include "XTrap/XCrackChk.h"
-#pragma comment ( lib, "XTrap/XCrackChk.lib")
-#endif
 
 #if defined(_DEBUG) && defined(MFC)
 #define new DEBUG_NEW
@@ -45,10 +38,6 @@ bool MBMatchServer::OnCreate(void)
 
 void MBMatchServer::OnDestroy(void)
 {
-#ifdef _HSHIELD
-	if( MGetServerConfig()->IsUseHShield() )
-		_AntiCpSvr_Finalize();
-#endif
 }
 
 void MBMatchServer::OnPrepareCommand(MCommand* pCommand)
@@ -83,7 +72,6 @@ MBMatchServer::MBMatchServer(COutputView* pView)
 #endif
 	
 	SetKeeperUID( MUID(0, 0) );
-	SetAuthBuilder(new MBMatchAuthBuilder);
 }
 
 void MBMatchServer::Shutdown()
@@ -286,42 +274,6 @@ void MBMatchServer::OnViewServerStatus()
 	MGetServerStatusSingleton()->SaveToLogFile();
 }
 
-ULONG MBMatchServer::HShield_MakeGuidReqMsg(unsigned char *pbyGuidReqMsg, unsigned char *pbyGuidReqInfo)
-{
-#ifdef _HSHIELD
-	if( MGetServerConfig()->IsUseHShield() )
-		return _AntiCpSvr_MakeGuidReqMsg(pbyGuidReqMsg, pbyGuidReqInfo);
-#endif
-	return 0L;
-}
-
-ULONG MBMatchServer::HShield_AnalyzeGuidAckMsg(unsigned char *pbyGuidAckMsg, unsigned char *pbyGuidReqInfo, unsigned long **ppCrcInfo)
-{
-#ifdef _HSHIELD
-	if( MGetServerConfig()->IsUseHShield() )
-		return _AntiCpSvr_AnalyzeGuidAckMsg(pbyGuidAckMsg, pbyGuidReqInfo, ppCrcInfo);
-#endif
-	return 0L;
-}
-
-ULONG MBMatchServer::HShield_MakeReqMsg(unsigned long *pCrcInfo, unsigned char *pbyReqMsg, unsigned char *pbyReqInfo, unsigned long ulOption)
-{
-#ifdef _HSHIELD
-	if( MGetServerConfig()->IsUseHShield() )
-		return _AntiCpSvr_MakeReqMsg(pCrcInfo, pbyReqMsg, pbyReqInfo, ulOption);
-#endif
-	return 0L;
-}
-
-ULONG MBMatchServer::HShield_AnalyzeAckMsg(unsigned long *pCrcInfo, unsigned char *pbyAckMsg, unsigned char *pbyReqInfo)
-{
-#ifdef _HSHIELD
-	if( MGetServerConfig()->IsUseHShield() )
-		return _AntiCpSvr_AnalyzeAckMsg(pCrcInfo, pbyAckMsg, pbyReqInfo);
-#endif
-	return 0L;
-}
-
 void MBMatchServer::InitLocator()
 {
 	if (!MGetServerConfig()->IsMasterServer())
@@ -337,25 +289,6 @@ void MBMatchServer::InitLocator()
 	else
 		Log(LOG_ALL, "Locator created!");
 }
-
-void MBMatchServer::XTrap_RandomKeyGenW(char* strKeyValue)
-{
-#ifdef _XTRAP
-	if( MGetServerConfig()->IsUseXTrap() )
-		RandomKeyGenW(strKeyValue);
-#endif
-}
-
-
-int MBMatchServer::XTrap_XCrackCheckW(char* strSerialKey, char* strRandomValue, char* strHashValue)
-{
-#ifdef _XTRAP
-	if( MGetServerConfig()->IsUseXTrap() )
-		return XCrackCheckW(strSerialKey, strRandomValue, strHashValue);
-#endif
-	return TRUE;
-}
-
 
 bool MBMatchServer::IsKeeper( const MUID& uidKeeper )
 {
@@ -390,28 +323,6 @@ void MBMatchServer::WriteServerInfoLog()
 	sprintf_safe(szTemp, "Release Date : %s", __DATE__);
 	Log(LOG_ALL, szTemp);
 	
-#ifdef _XTRAP
-	// #define _XTRAP
-	if( MGetServerConfig()->IsUseXTrap() )
-	{
-		LOG( LOG_ALL, "X-Trap On" );
-		LOG( LOG_ALL, "HashMapSize : (%u)", MMatchAntiHack::GetHashMapSize() );
-		LOG( LOG_ALL, "X-Trap usable state : (true)" );
-	}
-	else
-		LOG( LOG_ALL, "X-Trap Off" );
-#endif
-
-#ifdef _HSHIELD
-	if( MGetServerConfig()->IsUseHShield() )
-	{
-		LOG( LOG_ALL, "Hack Shield On" );
-		LOG( LOG_ALL, "Hack Shield usable state : (true)" );
-	}
-	else
-		LOG( LOG_ALL, "Hack Shield Off" );
-#endif
-
 	if( MC_KOREA == MGetLocale()->GetCountry() )
 		LOG( LOG_ALL, "Server Country : KOREA" );
 	else if( MC_US == MGetLocale()->GetCountry() )

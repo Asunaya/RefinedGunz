@@ -384,7 +384,7 @@ MRealSession* MRealCPNet::UpdateCompletionPort(SOCKET sd, RCP_IO_OPERATION nOper
 	return pSession;
 }
 
-bool MRealCPNet::MakeSockAddr(char* pszIP, int nPort, sockaddr_in* pSockAddr)
+bool MRealCPNet::MakeSockAddr(const char* pszIP, int nPort, sockaddr_in* pSockAddr)
 {
 	sockaddr_in 	RemoteAddr;
 	memset((char*)&RemoteAddr, 0, sizeof(sockaddr_in));
@@ -426,7 +426,7 @@ bool MRealCPNet::CheckIPFloodAttack(sockaddr_in* pRemoteAddr, int* poutIPCount)
 	return bResult;
 }
 
-bool MRealCPNet::Connect(SOCKET* pSocket, char* pszAddress, int nPort)
+bool MRealCPNet::Connect(SOCKET* pSocket, const char* pszAddress, int nPort)
 {
 	SOCKET sdConnect = CreateSocket();
 	if (INVALID_SOCKET == sdConnect) {

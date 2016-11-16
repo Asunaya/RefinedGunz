@@ -40,7 +40,6 @@
 #include "MMatchEvent.h"
 #include "MMatchEventManager.h"
 #include "MMatchEventFactory.h"
-#include "../../MatchServer/HSHIELD/AntiCpSvrFunc.h"
 #include "HitRegistration.h"
 #include "MUtil.h"
 #include "MLadderMgr.h"
@@ -266,7 +265,7 @@ bool IsExpiredBlockEndTime( const SYSTEMTIME& st )
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-MMatchServer::MMatchServer(void) : m_pScheduler( 0 )
+MMatchServer::MMatchServer() : m_pScheduler( 0 )
 {
 	_ASSERT(m_pInstance==NULL);
 	m_pInstance = this;
@@ -281,65 +280,13 @@ MMatchServer::MMatchServer(void) : m_pScheduler( 0 )
 
 	m_bCreated = false;
 
-	m_pAuthBuilder = NULL;
-
 	MMatchStringResManager::MakeInstance();
-
-	m_checkMemory1 = m_checkMemory2 = m_checkMemory3 = m_checkMemory4 = m_checkMemory5 = m_checkMemory6 =
-	m_checkMemory7 = m_checkMemory8 = m_checkMemory9 = m_checkMemory10 = m_checkMemory11 = m_checkMemory12 =
-	m_checkMemory13 = m_checkMemory14 = m_checkMemory15 = m_checkMemory16 = m_checkMemory17 = m_checkMemory18 =
-	m_checkMemory19 = m_checkMemory20 = m_checkMemory21 = CHECKMEMORYNUMBER;
-
-#ifdef _HSHIELD
-	if( MGetServerConfig()->IsUseHShield() )
-		m_HSCheckCounter = 0L;
-#endif
 }
 
-static bool g_bPrintedInvalidMemory = false;
-
-void MMatchServer::CheckMemoryTest(int nState, int nValue)
+MMatchServer::~MMatchServer()
 {
-#define CHECK(n) if(m_checkMemory##n!=CHECKMEMORYNUMBER) { g_bPrintedInvalidMemory=true; mlog("***WARNING !! m_checkMemory" #n " is corrupted. State(%d), Value(%d)\n", nState, nValue); }
-
-	if (g_bPrintedInvalidMemory) return;
-
-	CHECK(1);    
-	CHECK(2);    
-	CHECK(3);    
-	CHECK(4);    
-	CHECK(5);    
-	CHECK(6);    
-	CHECK(7);    
-	CHECK(8);    
-	CHECK(9);    
-	CHECK(10);    
-	CHECK(11);    
-	CHECK(12);    
-	CHECK(13);    
-	CHECK(14);    
-	CHECK(15);    
-	CHECK(16);    
-	CHECK(17);    
-	CHECK(18);    
-	CHECK(19);    
-	CHECK(20);    
-	CHECK(21);    
-}
-
-MMatchServer::~MMatchServer(void)
-{
-	CheckMemoryTest();
-
-	if (m_pAuthBuilder) {
-		delete m_pAuthBuilder;
-		m_pAuthBuilder = NULL;
-	}
-
 	Destroy();
-
 }
-
 
 bool MMatchServer::LoadInitFile()
 {
@@ -354,8 +301,6 @@ bool MMatchServer::LoadInitFile()
 		return false;
 	}
 
-
-	// 제한맵서버일 경우 플레이가능한 맵 화면에 출력
 	if (MGetServerConfig()->IsResMap())
 	{
 		char szText[512];
@@ -387,13 +332,7 @@ bool MMatchServer::LoadInitFile()
 		Log(LOG_ALL, "Read World Item Desc Failed");
 		return false;
 	}
-/*
-	if (!MGetNPCGroupMgr()->ReadXml(FILENAME_MONSTERGROUP_DESC))
-	{
-		Log(LOG_ALL, "Read Monster Group Desc Failed");
-		return false;
-	}
-*/
+
 #ifdef _QUEST_ITEM
 	if( !GetQuestItemDescMgr().ReadXml(QUEST_ITEM_FILE_NAME) )
 	{
@@ -406,15 +345,9 @@ bool MMatchServer::LoadInitFile()
 		return false;
 	}
 #endif
-	// 클랜전 서버일 경우만 실행하는 초기화
 	if (MGetServerConfig()->GetServerMode() == MSM_CLAN)
 	{
 		GetLadderMgr()->Init();
-
-#ifdef _DEBUG
-		//GetLadderMgr()->GetStatistics()->PrintDebug();
-		
-#endif
 	}
 
 	if (!MGetMapsWorldItemSpawnInfo()->Read())
@@ -458,7 +391,6 @@ bool MMatchServer::LoadInitFile()
 
 	unsigned long nItemChecksum = MGetMZFileChecksum(FILENAME_ITEM_DESC);
 	SetItemFileChecksum(nItemChecksum);
-
 
 	if( !InitEvent() )
 	{
@@ -553,13 +485,10 @@ bool MMatchServer::InitDB()
 
 bool MMatchServer::Create(int nPort)
 {
-	// set buffer overrun error handler /GS
-	//SetSecurityErrorHandler(ReportBufferOverrun);
-
 	srand(static_cast<unsigned int>(GetGlobalTimeMS()));
 
 	m_NextUseUID.SetZero();
-	m_NextUseUID.Increase(10);	// 10 아래의 UID는 사용안함
+	m_NextUseUID.Increase(10);
 
 	SetupRCPLog(RcpLog);
 #ifdef _DEBUG
@@ -585,27 +514,18 @@ bool MMatchServer::Create(int nPort)
 
 	if(MServer::Create(nPort)==false) return false;
 
-	// 디비에 최대 접속인원 업데이트
 	GetDBMgr()->UpdateServerInfo(MGetServerConfig()->GetServerID(), MGetServerConfig()->GetMaxUser(),
 								  MGetServerConfig()->GetServerName());
 
 
-	// 서버 상태 보여주는 클래스 초기화
 	MGetServerStatusSingleton()->Create(this);
 
-	// 스케쥴러 초기화.
 	if( !InitScheduler() ){
 		LOG(LOG_ALL, "Match Server Scheduler Create FAILED" );
 		return false;
 	}
 
 	MMatchAntiHack::InitClientFileList();
-
-#ifdef _XTRAP
-	// XTrap Init
-	if( MGetServerConfig()->IsUseXTrap() )
-		MMatchAntiHack::InitHashMap();
-#endif
 
 	if(OnCreate()==false){
 		LOG(LOG_ALL, "Match Server create FAILED (Port:%d)", nPort);
@@ -618,14 +538,13 @@ bool MMatchServer::Create(int nPort)
 
 	g_PointerChecker[0].Init(NULL);
 	g_PointerChecker[1].Init(m_pScheduler);
-	g_PointerChecker[2].Init(m_pAuthBuilder);
 
 	LagComp.Create();
 
 	return true;
 }
 
-void MMatchServer::Destroy(void)
+void MMatchServer::Destroy()
 {
 	m_bCreated = false;
 
@@ -708,7 +627,6 @@ void MMatchServer::OnRun(void)
 
 	// Update Objects
 	auto nGlobalClock = GetGlobalClockCount();
-	auto nHShieldClock = GetGlobalClockCount();
 	for(MMatchObjectList::iterator i=m_Objects.begin(); i!=m_Objects.end();){
 		MMatchObject* pObj = (*i).second;
 		pObj->Tick(nGlobalClock);
@@ -839,7 +757,7 @@ void MMatchServer::OnRun(void)
 #define MINTERVAL_GARBAGE_SESSION_CLEANING	10*60*1000		// 10 min
 	for(MMatchObjectList::iterator i=m_Objects.begin(); i!=m_Objects.end(); i++){
 		MMatchObject* pObj = (MMatchObject*)((*i).second);
-		if (pObj->GetUID() < MUID(0,3)) continue;	// MUID로 Client인지 판별할수 있는 코드 필요함
+		if (pObj->GetUID() < MUID(0,3)) continue;
 		if (GetTickTime() - pObj->GetTickLastPacketRecved() >= MINTERVAL_GARBAGE_SESSION_CLEANING) {
 			LOG(LOG_PROG, "TIMEOUT CLIENT CLEANING : %s(%u%u, %s) (ClientCnt=%d, SessionCnt=%d)", 
 			pObj->GetName(), pObj->GetUID().High, pObj->GetUID().Low, pObj->GetIPString(), GetClientCount(), GetCommObjCount());
@@ -849,48 +767,6 @@ void MMatchServer::OnRun(void)
 			Disconnect(uid);			
 		}
 	}
-
-#ifdef _HSHIELD
-	if( MGetServerConfig()->IsUseHShield() )
-	{
-	// HShield Data Check
-#define MINTERVAL_HSHIELD_CHECK		1*60*1000
-		static unsigned long tmLastHShieldCleaning = nHShieldClock;
-		if (nHShieldClock - tmLastHShieldCleaning > MINTERVAL_HSHIELD_CHECK) 
-		{
-			tmLastHShieldCleaning = nHShieldClock;
-
-			SendHShieldReqMsg();
-		}
-
-
-		// 게임중일 때 즉, m_bEnterBattle이 true일 때는 최대지연시간이 2분
-		// 맵로딩중(난입 또는 게임시작)이나 로비에 있을 때는 최대지연시간이 3분
-const int MINTERVAL_HSHIELD_CLEANING_IN_BATTLE	= 2*60*1000;		// 2min 내로 HShield Ack 메세지가 안 오면 클라이언트 접속을 끊자
-const int MINTERVAL_HSHIELD_CLEANING_IN_LOBBY	= 3*60*1000;		// 3min 내로 HShield Ack 메세지가 안 오면 클라이언트 접속을 끊자
-
-		for(MMatchObjectList::iterator i=m_Objects.begin(); i!=m_Objects.end(); i++)
-		{
-			MMatchObject* pObj = (MMatchObject*)((*i).second);
-			if (pObj->GetUID() < MUID(0,3)) continue;	// MUID로 Client인지 판별할수 있는 코드 필요함
-			
-			// 최근에 받은 메세지가 2분이 넘었을 경우
-			unsigned long int tmp = GetTickTime() - pObj->GetLastHShieldMsgRecved();
-			
-			int nInterval = pObj->GetEnterBattle() ? MINTERVAL_HSHIELD_CLEANING_IN_BATTLE : MINTERVAL_HSHIELD_CLEANING_IN_LOBBY;
-			if ( tmp >= nInterval) 
-			{
-#ifndef _DEBUG
-				MUID uid = pObj->GetUID();
-				ObjectRemove(uid, &i);
-				Disconnect(uid);			
-#endif
-				LOG(LOG_FILE, "HShield Ack Msg (%d ms) delayed. (%s)", tmp, pObj->GetAccountName());
-
-			}
-		}
-	}
-#endif
 
 	MGetServerStatusSingleton()->SetRunStatus(107);
 
@@ -938,7 +814,6 @@ void MMatchServer::UpdateServerLog()
 	{
 		st_nElapsedTime = 0;
 
-		// 여기서 디비 업데이트
 		GetDBMgr()->InsertServerLog(MGetServerConfig()->GetServerID(), 
 									 (int)m_Objects.size(), (int)m_StageMap.size(), 
 									 GetBlockCount(), GetNonBlockCount() );
@@ -965,7 +840,6 @@ void MMatchServer::UpdateServerStatusDB()
 	{
 		st_nElapsedTime = 0;
 
-		// 여기서 디비 업데이트
 		int nObjSize = (int)m_Objects.size();
 		if (nObjSize > MGetServerConfig()->GetMaxUser()) nObjSize = MGetServerConfig()->GetMaxUser();
 
@@ -973,7 +847,6 @@ void MMatchServer::UpdateServerStatusDB()
 		if (GetDBMgr()->UpdateServerStatus(MGetServerConfig()->GetServerID(), nObjSize) == false) 
 		{
 			LOG(LOG_ALL, "[CRITICAL ERROR] DB Connection Lost. ");
-			//Shutdown();
 
 #ifdef MFC
 			if (Database.Type == DatabaseType::MSSQL)
@@ -1346,7 +1219,7 @@ void MMatchServer::RouteToAllConnection(MCommand* pCommand)
 	LockCommList();
 		for(auto i=m_CommRefCache.begin(); i!=m_CommRefCache.end(); i++){
 			MCommObject* pCommObj = i->second;
-			if (pCommObj->GetUID() < MUID(0,3)) continue;	// MUID로 Client인지 판별할수 있는 코드 필요함
+			if (pCommObj->GetUID() < MUID(0,3)) continue;
 
 			stRouteListenerNode* pNewNode = new stRouteListenerNode;
 			pNewNode->nUserContext = pCommObj->GetUserContext();
@@ -1407,7 +1280,7 @@ void MMatchServer::RouteToAllClient(MCommand* pCommand)
 {
 	for(MMatchObjectList::iterator i=m_Objects.begin(); i!=m_Objects.end(); i++){
 		MMatchObject* pObj = (MMatchObject*)((*i).second);
-		if (pObj->GetUID() < MUID(0,3)) continue;	// MUID로 Client인지 판별할수 있는 코드 필요함
+		if (pObj->GetUID() < MUID(0,3)) continue;
 		
 		MCommand* pSendCmd = pCommand->Clone();
 		pSendCmd->m_Receiver = pObj->GetUID();
@@ -1470,7 +1343,7 @@ void MMatchServer::RouteToStage(const MUID& uidStage, MCommand* pCommand)
 			RouteToListener(pObj, pSendCmd);
 		} else {
 			LOG(LOG_ALL, "WARNING(RouteToStage) : Not Existing Obj(%u:%u)\n", uidObj.High, uidObj.Low);
-			i=pStage->RemoveObject(uidObj);	// RAONHAJE : 방에 쓰레기UID 남는것 발견시 로그&청소
+			i=pStage->RemoveObject(uidObj);
 		}
 	}
 	delete pCommand;
@@ -2287,101 +2160,6 @@ void MMatchServer::InsertChatDBLog(const MUID& uidPlayer, const char* szMsg)
 
 int MMatchServer::ValidateMakingName(const char* szCharName, int nMinLength, int nMaxLength)
 {
-/*
-#define _MAX_NAME_TOK				100
-#define _MAX_NAME_FULLNAME			100
-
-	static string strTok[_MAX_NAME_TOK] = { "maiet", "gunz", "admin", "netmarble", "^", "\"", "'", "`", ",", " "};
-	static string strFullName[_MAX_NAME_FULLNAME] = { "maiet", "gunz"};
-
-
-	char szLwrCharName[256];
-	strcpy_safe(szLwrCharName, szCharName);
-	_strlwr(szLwrCharName);
-
-
-	int nNameLen = (int)strlen(szCharName);
-	if (nNameLen < nMinLength) return MERR_TOO_SHORT_NAME;
-	if (nNameLen > nMaxLength) return MERR_TOO_LONG_NAME;
-	
-	unsigned char c;
-
-
-	// 한글, 영문자, 숫자만 허용한다
-	for (int i = 0; i < nNameLen; i++)
-	{
-		c = (unsigned char)szCharName[i];
-		if (!( 
-			((c >= '0') && (c <= '9')) || 
-			((c >= 'A') && (c <= 'z')) || 
-			(c > 127) || (c == '[') || (c == ']') || (c == '_') || (c == '-')		// 해당 특수문자도 허용
-			
-			)
-		   )
-		{
-			return MERR_WRONG_WORD_NAME;
-		}
-	}
-
-
-	// 2바이트 문자중에 0xC9xx 또는 0xFExx , 0xA1A1, 0xA4D4인 글자는 이름에 넣을 수 없다
-	int nCur = 0;
-	while (nCur < nNameLen-1)
-	{
-		unsigned char c1 = (unsigned char)szCharName[nCur];
-		unsigned char c2 = (unsigned char)szCharName[nCur+1];
-
-		if (c1 > 127)
-		{
-			if ((c1 == 0xc9) && (c2 > 127))
-			{
-				return MERR_WRONG_WORD_NAME;
-			}
-			if ((c1 == 0xfe) && (c2 > 127))
-			{
-				return MERR_WRONG_WORD_NAME;
-			}
-			if ((c1 == 0xa1) && (c2 == 0xa1))
-			{
-				return MERR_WRONG_WORD_NAME;
-			}
-			if ((c1 == 0xa4) && (c2 == 0xd4))
-			{
-				return MERR_WRONG_WORD_NAME;
-			}
-
-			nCur += 2;
-		}
-		else
-		{
-			nCur++;
-		}
-	}
-
-
-	for (int i = 0;i < _MAX_NAME_TOK; i++)
-	{
-		if (strTok[i].size() > 0)
-		{
-			if (strstr(szLwrCharName, strTok[i].c_str()) != NULL)
-			{
-				return MERR_WRONG_WORD_NAME;
-			}
-		}
-	}
-
-	for (int i = 0; i < _MAX_NAME_FULLNAME; i++)
-	{
-		if (strFullName[i].size() > 0)
-		{
-			if (!strcmp(szLwrCharName, strFullName[i].c_str()))
-				return MERR_WRONG_WORD_NAME;
-		}
-	}
-
-	return MOK;
-*/
-
 	int nNameLen = (int)strlen(szCharName);
 
 	if (nNameLen < nMinLength)
@@ -2393,8 +2171,6 @@ int MMatchServer::ValidateMakingName(const char* szCharName, int nMinLength, int
 	return MOK;
 }
 
-
-// 플레이어가 방에 들어갈 수 있는지 검증한다.
 int MMatchServer::ValidateStageJoin(const MUID& uidPlayer, const MUID& uidStage)
 {
 	MMatchObject* pObj = GetObject(uidPlayer);
@@ -2403,19 +2179,15 @@ int MMatchServer::ValidateStageJoin(const MUID& uidPlayer, const MUID& uidStage)
 	MMatchStage* pStage = FindStage(uidStage);
 	if (pStage == NULL) return MERR_CANNOT_JOIN_STAGE;
 
-	// close상태인지 체크
 	if (pStage->GetState() == STAGE_STATE_CLOSE) return MERR_CANNOT_JOIN_STAGE;
 
-	// 운영자, 관리자면 제한없이 입장
 	if (!IsAdminGrade(pObj))
 	{
-		// 인원체크
 		if (pStage->GetStageSetting()->GetMaxPlayers() <= pStage->GetCountableObjCount())
 		{
 			return MERR_CANNOT_JOIN_STAGE_BY_MAXPLAYERS;
 		}
 
-		// 레벨체크
 		if (pStage->GetStageSetting()->GetLimitLevel() != 0)
 		{
 			int nMasterLevel, nLimitLevel;
@@ -2432,7 +2204,6 @@ int MMatchServer::ValidateStageJoin(const MUID& uidPlayer, const MUID& uidStage)
 			}
 		}
 
-		// 게임중참가
 		if ((pStage->GetStageSetting()->GetForcedEntry() == false) && 
 			(pStage->GetState() != STAGE_STATE_STANDBY))
 		{
@@ -2454,27 +2225,24 @@ int MMatchServer::ValidateChannelJoin(const MUID& uidPlayer, const MUID& uidChan
 	MMatchChannel* pChannel = FindChannel(uidChannel);
 	if (pChannel == NULL) return MERR_CANNOT_JOIN_CHANNEL;
 
-	// 개발자나 영자는 레벨에 제한없음..
 	if(!IsAdminGrade(pObj)) 
 	{
-		// 인원체크
 		if ((int)pChannel->GetObjCount() >= pChannel->GetMaxPlayers())
 		{
 			return MERR_CANNOT_JOIN_CHANNEL_BY_MAXPLAYERS;
 		}
 
-		// 레벨 하한체크
-		if ( (pChannel->GetLevelMin() > 0) && (pChannel->GetLevelMin() > pObj->GetCharInfo()->m_nLevel) )
+		if ( (pChannel->GetLevelMin() > 0) &&
+			(pChannel->GetLevelMin() > pObj->GetCharInfo()->m_nLevel) )
 		{
 			return MERR_CANNOT_JOIN_CHANNEL_BY_LEVEL;
 		}
-		// 레벨 상한체크
-		if ( (pChannel->GetLevelMax() > 0) && (pChannel->GetLevelMax() < pObj->GetCharInfo()->m_nLevel) )
+		if ( (pChannel->GetLevelMax() > 0) &&
+			(pChannel->GetLevelMax() < pObj->GetCharInfo()->m_nLevel) )
 		{
 			return MERR_CANNOT_JOIN_CHANNEL_BY_LEVEL;
 		}
 
-		// 뉴비채널 체크
 		if ((pChannel->GetRuleType() == MCHANNEL_RULE_NEWBIE) && (pObj->IsNewbie() == false)) 
 		{
 			return MERR_CANNOT_JOIN_CHANNEL_BY_NEWBIE;
@@ -2566,13 +2334,6 @@ void MMatchServer::OnNetPong(const MUID& CommUID, unsigned int nTimeStamp)
 		pObj->UpdateTickLastPacketRecved();
 		pObj->AddPing(static_cast<int>(GetGlobalClockCount() - nTimeStamp));
 	}
-}
-
-void MMatchServer::OnHShieldPong(const MUID& CommUID, unsigned int nTimeStamp)
-{
-	MMatchObject* pObj = GetObject(CommUID);
-	if (pObj) 
-		pObj->UpdateLastHShieldMsgRecved();
 }
 
 void MMatchServer::UpdateCharDBCachingData(MMatchObject* pObject)
@@ -3167,15 +2928,16 @@ bool MMatchServer::CheckIsValidIP( const MUID& CommUID, const string& strIP, str
 	return false;
 }
 
-const CUSTOM_IP_STATUS MMatchServer::CheckIsValidCustomIP( const MUID& CommUID, const string& strIP, string& strCountryCode3, const bool bUseFilter )
+CUSTOM_IP_STATUS MMatchServer::CheckIsValidCustomIP(const MUID& CommUID,
+	const std::string& strIP, std::string& strCountryCode3, const bool bUseFilter)
 {
 	string strComment;
 	bool bIsBlock = false;
 
-	if( !GetCountryFilter().GetCustomIP(strIP, bIsBlock, strCountryCode3, strComment) )
+	if (!GetCountryFilter().GetCustomIP(strIP, bIsBlock, strCountryCode3, strComment))
 		return CIS_INVALID;
 
-	if( bUseFilter && bIsBlock )
+	if (bUseFilter && bIsBlock)
 	{
 		MCommand* pCmd = CreateCommand(MC_RESPONSE_BLOCK_COUNTRYCODE, CommUID);
 		if( 0 != pCmd )
@@ -3193,7 +2955,8 @@ const CUSTOM_IP_STATUS MMatchServer::CheckIsValidCustomIP( const MUID& CommUID, 
 }
 
 
-const COUNT_CODE_STATUS MMatchServer::CheckIsNonBlockCountry( const MUID& CommUID, const string& strIP, string& strCountryCode3, const bool bUseFilter )
+COUNT_CODE_STATUS MMatchServer::CheckIsNonBlockCountry(const MUID& CommUID,
+	const std::string& strIP, std::string& strCountryCode3, const bool bUseFilter)
 {
 	if( !bUseFilter )
 		return CCS_NONBLOCK;

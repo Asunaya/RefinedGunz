@@ -86,8 +86,7 @@ protected :
 	void OnRequestDisconnectServerFromKeeper( const MUID& uidSender );
 	void OnRequestReloadServerConfig( const MUID& uidSender, const string& strFileList );
 	void OnResponseReloadServerConfig( const MUID& uidSender, const string& strFileList );
-	void OnRequestAddHashMap( const MUID& uidSender, const string& strNewHashValue );
-	void OnResponseAddHashMap( const MUID& uidSender, const string& strNewHashValue );
+	void OnRequestAddHashMapnResponseAddHashMap( const MUID& uidSender, const string& strNewHashValue );
 
 	// filter
 	void OnLocalUpdateUseCountryFilter();
@@ -100,16 +99,6 @@ protected :
 	void OnLocalUpdateAcceptInvaildIP();
 
 public:
-	// xtrap
-	virtual void	XTrap_RandomKeyGenW(char* strKeyValue);
-	virtual int		XTrap_XCrackCheckW(char* strSerialKey, char* strRandomValue, char* strHashValue);
-
-	// HShield
-	virtual ULONG	HShield_MakeGuidReqMsg(unsigned char *pbyGuidReqMsg, unsigned char *pbyGuidReqInfo);
-	virtual ULONG	HShield_AnalyzeGuidAckMsg(unsigned char *pbyGuidAckMsg, unsigned char *pbyGuidReqInfo, unsigned long **ppCrcInfo);
-	virtual ULONG   HShield_MakeReqMsg(unsigned long *pCrcInfo, unsigned char *pbyReqMsg, unsigned char *pbyReqInfo, unsigned long ulOption);
-	virtual ULONG   HShield_AnalyzeAckMsg(unsigned long *pCrcInfo, unsigned char *pbyAckMsg, unsigned char *pbyReqInfo);
-
 	char	m_strFileCrcDataPath[MAX_PATH];
 
 	void InitLocator();

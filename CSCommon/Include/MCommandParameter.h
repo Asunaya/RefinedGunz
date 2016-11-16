@@ -1,5 +1,4 @@
-#ifndef ASCOMMANDPARAMETER_H
-#define ASCOMMANDPARAMETER_H
+#pragma once
 
 #include "MUID.h"
 #include "MTypes.h"
@@ -11,7 +10,6 @@
 class MCommandParamCondition;
 class MCommandParamConditionMinMax;
 
-/// 커맨드 파라미터 타입
 enum MCommandParameterType{
 	MPT_INT		= 0,
 	MPT_UINT	= 1,
@@ -31,24 +29,19 @@ enum MCommandParameterType{
 	MPT_USHORT	= 14,
 	MPT_INT64	= 15,
 	MPT_UINT64	= 16,
-	// 숫자는 고정된 값이다. (확장은 가능하되, 수정은 불가)
 
 	MPT_SVECTOR	= 17,
 	MPT_CMD     = 18,
-	MPT_END		= 19,		///< 파라미터 타입 총 갯수
+	MPT_END		= 19,
 };
 
-#define MAX_BLOB_SIZE		(0x100000)			// 1메가바이트
+#define MAX_BLOB_SIZE		(0x100000)
 
-
-
-
-/// Command Parameter Description
 class MCommandParameterDesc{
 protected:
 	MCommandParameterType				m_nType;
 	char								m_szDescription[64];
-	vector<MCommandParamCondition*>		m_Conditions;
+	std::vector<MCommandParamCondition*>		m_Conditions;
 	void								InitializeConditions();
 public:
 	MCommandParameterDesc(MCommandParameterType nType, char* szDescription);
@@ -64,8 +57,6 @@ public:
 
 };
 
-
-/// Command Parameter Abstract Class
 class MCommandParameter{
 protected:
 	MCommandParameterType	m_nType;
@@ -75,18 +66,12 @@ public:
 
 	MCommandParameterType GetType(void){ return m_nType; }
 
-	/// 같은 파라미티 타입으로 복제
 	virtual MCommandParameter* Clone(void) = 0;
-	/// 값 얻어내기
 	virtual void GetValue(void* p) = 0;
-	/// 메모리 블럭으로 저장
 	virtual int GetData(char* pData, int nSize) = 0;
-	/// 메모리 블럭으로 지정
 	virtual int SetData(const char* pData) = 0;
-	/// 첫 포인터 얻기
 	virtual void *GetPointer(void) = 0; 
 
-	/// 타입 이름 얻기
 	virtual const char* GetClassName(void) = 0;
 
 	template<size_t size>
@@ -94,7 +79,6 @@ public:
 		GetString(szValue, size);
 	}
 	virtual void GetString(char* szValue, int maxlen) = 0;
-	/// 사이즈 얻기
 	virtual int GetSize() = 0;
 };
 
@@ -117,7 +101,6 @@ public:
 	virtual int GetSize() override { return sizeof(int); }
 };
 
-/// 양수
 class MCommandParameterUInt : public MCommandParameter, public CMemPool<MCommandParameterUInt> {
 public:
 	unsigned int		m_Value;
@@ -136,7 +119,6 @@ public:
 	virtual int GetSize() { return sizeof(unsigned int); }
 };
 
-/// 소수 파라미터
 class MCommandParameterFloat : public MCommandParameter, public CMemPool<MCommandParameterFloat> {
 public:
 	float	m_Value;
@@ -154,7 +136,6 @@ public:
 	virtual int GetSize() { return sizeof(float); }
 };
 
-/// 스트링 파라미터(65533이하의 문자)
 class MCommandParameterString : public MCommandParameter{
 public:
 	char*	m_Value;
@@ -171,8 +152,6 @@ public:
 	virtual const char* GetClassName(void) override { return "String"; }
 	virtual void GetString(char* szValue, int maxlen) override
 	{ 
-		// 이함수는 반드시 szValue버퍼의 길이가 m_Value의 길이보다 길어야 함.
-		// 중요하 부분에 사용될시는 선행검사가 먼져 이루어져야 함. - by 추교성.
 		if( 0 != szValue )
 		{
 			if( 0 != m_Value )
@@ -217,7 +196,6 @@ public:
 
 		if ((nValueSize > (USHRT_MAX - 2)) || (0 == nValueSize))
 		{
-			//ASSERT(0 && "비정상 길이의 문자.");
 			return sizeof(nValueSize);
 		}
 
@@ -231,7 +209,6 @@ private:
 	AllocT& Alloc;
 };
 
-/// 3D 벡터 파라미터
 class MCommandParameterVector : public MCommandParameter {
 public:
 	float	m_fX;
@@ -252,7 +229,6 @@ public:
 	virtual int GetSize() override { return (sizeof(float)*3); }
 };
 
-/// 3D 포지션 파라미터
 class MCommandParameterPos : public MCommandParameterVector, public CMemPool<MCommandParameterPos> {
 public:
 	MCommandParameterPos(void) : MCommandParameterVector() { m_nType=MPT_POS; }
@@ -263,7 +239,6 @@ public:
 	virtual const char* GetClassName(void) override { return "Pos"; }
 };
 
-/// 3D 디렉션 파라미터
 class MCommandParameterDir : public MCommandParameterVector, public CMemPool<MCommandParameterDir> {
 public:
 	MCommandParameterDir(void) : MCommandParameterVector() { m_nType=MPT_DIR; }
@@ -274,7 +249,6 @@ public:
 	virtual const char* GetClassName(void) override { return "Dir"; }
 };
 
-/// RGB 컬러 파라미터(나중에 Alpha값 추가될 예정)
 class MCommandParameterColor : public MCommandParameterVector, public CMemPool<MCommandParameterColor> {
 public:
 	MCommandParameterColor(void) : MCommandParameterVector() { m_nType=MPT_COLOR; }
@@ -285,7 +259,6 @@ public:
 	virtual const char* GetClassName(void) override { return "Color"; }
 };
 
-/// Bool 파라미터
 class MCommandParameterBool : public MCommandParameter, public CMemPool<MCommandParameterBool> {
 	bool	m_Value;
 public:
@@ -305,7 +278,6 @@ public:
 	virtual int GetSize() override { return sizeof(bool); }
 };
 
-/// MUID 파라미터
 class MCommandParameterUID : public MCommandParameter, public CMemPool<MCommandParameterUID> {
 public:
 	MUID	m_Value;
@@ -396,8 +368,6 @@ private:
 	AllocT& Alloc;
 };
 
-
-/// char형 파라미터
 class MCommandParameterChar : public MCommandParameter, public CMemPool<MCommandParameterChar>
 {
 public:
@@ -417,8 +387,6 @@ public:
 	virtual int GetSize() override { return sizeof(char); }
 };
 
-
-/// unsigned char형 파라미터
 class MCommandParameterUChar : public MCommandParameter, public CMemPool<MCommandParameterUChar>
 {
 public:
@@ -438,8 +406,6 @@ public:
 	virtual int GetSize() override { return sizeof(unsigned char); }
 };
 
-
-/// short형 파라미터
 class MCommandParameterShort : public MCommandParameter, public CMemPool<MCommandParameterShort>
 {
 public:
@@ -459,7 +425,6 @@ public:
 	virtual int GetSize() override { return sizeof(short); }
 };
 
-/// unsigned short형 파라미터
 class MCommandParameterUShort : public MCommandParameter, public CMemPool<MCommandParameterUShort>
 {
 public:
@@ -479,8 +444,6 @@ public:
 	virtual int GetSize() override { return sizeof(unsigned short); }
 };
 
-
-/// int64형 파라미터
 class MCommandParameterInt64 : public MCommandParameter, public CMemPool<MCommandParameterInt64>
 {
 public:
@@ -500,7 +463,6 @@ public:
 	virtual int GetSize() override { return sizeof(int64); }
 };
 
-/// unsigned int64형 파라미터
 class MCommandParameterUInt64 : public MCommandParameter, public CMemPool<MCommandParameterUInt64>
 {
 public:
@@ -520,8 +482,6 @@ public:
 	virtual int GetSize() override { return sizeof(uint64); }
 };
 
-
-/// short형 3D 벡터 파라미터
 class MCommandParameterShortVector : public MCommandParameter, public CMemPool<MCommandParameterShortVector> {
 public:
 	short	m_nX;
@@ -530,7 +490,7 @@ public:
 public:
 	MCommandParameterShortVector(void);
 	MCommandParameterShortVector(short x ,short y, short z);
-	MCommandParameterShortVector(float x ,float y, float z);	///< 내부에서 short로 변환해준다.
+	MCommandParameterShortVector(float x ,float y, float z);
 	virtual ~MCommandParameterShortVector(void) override;
 
 	virtual MCommandParameter* Clone(void) override;
@@ -616,8 +576,6 @@ static inline MCommandParameterCommand* MakeNonOwningMCmdParamCmd(const void* Da
 	return Param;
 }
 
-
-/// Command Parameter Condition Abstract Class
 class MCommandParamCondition
 {
 public:
@@ -660,9 +618,3 @@ typedef MCommandParameterUShort			MCmdParamUShort;
 typedef MCommandParameterInt64			MCmdParamInt64;
 typedef MCommandParameterUInt64			MCmdParamUInt64;
 typedef MCommandParameterShortVector	MCmdParamShortVector;
-
-
-
-
-
-#endif

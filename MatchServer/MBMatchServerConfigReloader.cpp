@@ -36,9 +36,6 @@ bool MBMatchServerZItemXmlReloadObj::OnReload()
 
 bool MBMatchServerHashmapTxtReloadObj::OnReload()
 {
-	MMatchAntiHack::ClearHashMap();
-	MMatchAntiHack::InitHashMap();
-
 	mlog( "MBMatchServerHashmapTxtReloadObj::OnReload - success reload %s\n",
 		GetFileName().c_str() );
 

@@ -10,7 +10,6 @@
 #include "MErrorTable.h"
 #include "MDebug.h"
 #include "MMatchRule.h"
-#include "MBMatchAuth.h"
 #include "MDebug.h"
 #include "MMatchStatus.h"
 #include "MMatchSchedule.h"
@@ -18,8 +17,6 @@
 #include "MMatchConfig.h"
 #include "MBlobArray.h"
 #include "MUtil.h"
-
-
 
 bool MBMatchServer::OnCommand(MCommand* pCommand)
 {
@@ -126,26 +123,19 @@ bool MBMatchServer::OnCommand(MCommand* pCommand)
 	case MC_LOCAL_UPDATE_CUSTOM_IP: OnLocalUpdateCustomIP(); break;
 	case MC_LOCAL_UPDATE_ACCEPT_INVALID_IP: OnLocalUpdateAcceptInvaildIP(); break;
 
-	case MC_REQUEST_RELOAD_CONFIG :
-		{
-			char szFileList[ 1024 ] = {0,};
+	case MC_REQUEST_RELOAD_CONFIG:
+	{
+		char szFileList[1024] = { 0, };
 
-			pCommand->GetParameter( szFileList, 0, MPT_STR, 1024 );
+		pCommand->GetParameter(szFileList, 0, MPT_STR, 1024);
 
-			OnRequestReloadServerConfig( pCommand->GetSenderUID(), szFileList );
-		}
+		OnRequestReloadServerConfig(pCommand->GetSenderUID(), szFileList);
+	}
+	break;
+
+	case MC_REQUEST_ADD_HASHMAP:
 		break;
 
-	case MC_REQUEST_ADD_HASHMAP :
-		{
-			char szNewHashValue[ 128 ] = {0,};
-
-			pCommand->GetParameter( szNewHashValue, 0, MPT_STR, 128 );
-
-			OnRequestAddHashMap( pCommand->GetSenderUID(), szNewHashValue );
-		}
-		break;
-	
 	default:
 		return false;
 	}

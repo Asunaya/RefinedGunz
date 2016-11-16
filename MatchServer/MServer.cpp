@@ -30,7 +30,7 @@ void __cdecl RCPLog(const char *pFormat,...)
 	OutputDebugString(szBuf);
 }
 
-MServer::MServer(void)
+MServer::MServer()
 {
 	SetName("NoName");	// For Debug
 #ifdef _DEBUG
@@ -38,9 +38,7 @@ MServer::MServer(void)
 #endif
 }
 
-MServer::~MServer(void)
-{
-}
+MServer::~MServer() = default;
 
 bool MServer::Create(int nPort, const bool bReuse )
 {
@@ -269,9 +267,7 @@ void MServer::OnNetPong(const MUID& CommUID, unsigned int nTimeStamp)
 
 int MServer::Connect(MCommObject* pCommObj)
 {
-	/// Connecting Operation
-	/// ...
-	DWORD nKey = 0;
+	u32 nKey = 0;
 	if (m_RealCPNet.Connect((SOCKET*)&nKey, pCommObj->GetIPString(), pCommObj->GetPort()) == false) {
 		delete pCommObj;
 		return MERR_UNKNOWN;
@@ -297,7 +293,6 @@ int MServer::ReplyConnect(MUID* pTargetUID, MUID* pAllocUID, unsigned int nTimeS
 
 int MServer::OnAccept(MCommObject* pCommObj)
 {
-	// 할당할 수 있는 UID 공간이 없다.
 	MUID AllocUID = UseUID();
 	if(AllocUID.IsInvalid()){
 		Log(LOG_DEBUG, "Communicator has not UID space to allocate your UID.");
@@ -396,7 +391,7 @@ bool MServer::SendMsgCommand(DWORD nClientKey, char* pBuf, int nSize, unsigned s
 	int nBlockSize = nSize+sizeof(MPacketHeader);
 	MCommandMsg* pMsg = (MCommandMsg*)malloc(nBlockSize);
 	pMsg->Buffer[0] = 0;
-	pMsg->nCheckSum = 0;	// CheckSum에 포함되기 때문에 먼저 초기화 
+	pMsg->nCheckSum = 0;
 	pMsg->nMsg = nMsgHeaderID;;
 	pMsg->nSize = nBlockSize;
 	int nPacketSize = nBlockSize;
@@ -408,19 +403,12 @@ bool MServer::SendMsgCommand(DWORD nClientKey, char* pBuf, int nSize, unsigned s
 	else if (nMsgHeaderID == MSGID_COMMAND)
 	{
 		if ((nSize > MAX_PACKET_SIZE) || (pCrypterKey == NULL)) return false;
-
-//#ifdef _HSHIELD
-//		// 핵실드 암호화
-//		if (MPacketHShieldCrypter::Encrypt((PBYTE)&pMsg->nSize, sizeof(unsigned short)) != ERROR_SUCCESS)
-//			return false;   
-//#else
-		// size 암호화
+		
 		if (!MPacketCrypter::Encrypt((char*)&pMsg->nSize, sizeof(unsigned short), pCrypterKey))
 			return false;
-//#endif
+
 		char SendBuf[MAX_PACKET_SIZE];
 
-		// 커맨드 암호화
 		if (!MPacketCrypter::Encrypt(pBuf, nSize, SendBuf, nSize, pCrypterKey))
 			return false;
 

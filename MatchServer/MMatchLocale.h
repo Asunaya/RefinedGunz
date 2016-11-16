@@ -10,7 +10,7 @@ class MMatchLocale : public MBaseLocale
 {
 protected:
 	virtual bool			OnInit();
-	MNJ_DBAgentClient*		m_pDBAgentClient;		///< 일본넷마블에서만 사용하는 클라이언트 소켓
+	MNJ_DBAgentClient*		m_pDBAgentClient;
 	bool					m_bCheckAntiHackCrack;
 public:
 							MMatchLocale();
@@ -24,7 +24,7 @@ public:
 												   bool				bFreeLoginIP, 
 												   unsigned long	nChecksumPack, 
 												   int				nTotalUserCount);
-	bool					SkipCheckAntiHackCrack();	///< XTrap Crack을 체크할지 여부
+	bool					SkipCheckAntiHackCrack();
 };
 
 inline MMatchLocale* MGetLocale()

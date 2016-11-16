@@ -159,22 +159,6 @@ bool MMatchConfig::Create()
 	SetAcceptInvalidIPState( atoi(szAccept) != 0 );
 
 	// environment
-	char szUseHShield[ 2 ] = {0,};
-	GetPrivateProfileString("ENVIRONMENT", "USE_HSHIELD", SERVER_CONFIG_DEFAULT_USE_HSHIELD, szUseHShield, 2, SERVER_CONFIG_FILENAME);
-	ASSERT( 0 != strlen(szUseHShield) );
-	if( 0 == _stricmp("1", szUseHShield) )
-		m_bIsUseHShield = true;
-	else
-		m_bIsUseHShield = false;
-
-	char szUseXTrap[ 2 ] = {0,};
-	GetPrivateProfileString("ENVIRONMENT", "USE_XTRAP", SERVER_CONFIG_DEFAULT_USE_XTRAP, szUseXTrap, 2, SERVER_CONFIG_FILENAME);
-	ASSERT( 0 != strlen(szUseXTrap) );
-	if( 0 == _stricmp("1", szUseXTrap) )
-		m_bIsUseXTrap = true;
-	else
-		m_bIsUseXTrap = false;
-
 	char szUseEvent[ 2 ] = {0,};
 	GetPrivateProfileString("ENVIRONMENT", "USE_EVENT", SERVER_CONFIG_DEFAULT_USE_EVENT, szUseEvent, 2, SERVER_CONFIG_FILENAME);
 	ASSERT( 0 != strlen(szUseEvent) );
@@ -190,14 +174,6 @@ bool MMatchConfig::Create()
 		m_bIsUseFileCrc = true;
 	else
 		m_bIsUseFileCrc = false;
-
-
-	if( m_bIsUseHShield && m_bIsUseXTrap )
-	{
-		ASSERT( 0 && "hackshield와 x-trap은 같이 사용할 수 없다." );
-		mlog( "server.ini - HackShield and XTrap is duplicated\n" );
-		return false;
-	}
 
 	std::string File;
 	std::ifstream FileStream("server.xml", std::ios::in | std::ios::binary | std::ios::ate);

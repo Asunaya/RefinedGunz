@@ -7,15 +7,6 @@
     <Filter Include="Server">
       <UniqueIdentifier>{ac0ee259-0595-43e7-b6f2-06e2dc081730}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Netmarble">
-      <UniqueIdentifier>{ee0f863d-09ab-4e0c-afac-bde87c38ba9e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="XTrap">
-      <UniqueIdentifier>{7aea6358-3cd5-4965-ae1f-414b296c6cd4}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="HShield">
-      <UniqueIdentifier>{a3ac48ed-341b-4c83-86cc-661f36ae23fb}</UniqueIdentifier>
-    </Filter>
     <Filter Include="MMatchServer">
       <UniqueIdentifier>{753bd4c0-e4b9-45cc-82f1-8b057a837c7b}</UniqueIdentifier>
     </Filter>
@@ -75,9 +66,6 @@
     <ClCompile Include="MMatchServer_Schedule.cpp">
       <Filter>Server</Filter>
     </ClCompile>
-    <ClCompile Include="MBMatchAuth.cpp">
-      <Filter>Netmarble</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MMatchAdmin.cpp">
       <Filter>MMatchServer</Filter>
@@ -116,9 +104,6 @@
       <Filter>MMatchServer</Filter>
     </ClCompile>
     <ClCompile Include="MMatchFriendInfo.cpp">
-      <Filter>MMatchServer</Filter>
-    </ClCompile>
-    <ClCompile Include="MMatchHShield.cpp">
       <Filter>MMatchServer</Filter>
     </ClCompile>
     <ClCompile Include="MMatchLocale.cpp">
@@ -331,18 +316,6 @@
     <ClInclude Include="MBMatchServerConfigReloader.h">
       <Filter>Server</Filter>
     </ClInclude>
-    <ClInclude Include="Netmarble\CPSSOLib.h">
-      <Filter>Netmarble</Filter>
-    </ClInclude>
-    <ClInclude Include="MBMatchAuth.h">
-      <Filter>Netmarble</Filter>
-    </ClInclude>
-    <ClInclude Include="XTrap\XCrackChk.h">
-      <Filter>XTrap</Filter>
-    </ClInclude>
-    <ClInclude Include="HShield\AntiCpSvrFunc.h">
-      <Filter>HShield</Filter>
-    </ClInclude>
     <ClInclude Include="VersionNo.h" />
     <ClInclude Include="MMatchAdmin.h">
       <Filter>MMatchServer</Filter>
@@ -351,9 +324,6 @@
       <Filter>MMatchServer</Filter>
     </ClInclude>
     <ClInclude Include="MMatchAntiHack.h">
-      <Filter>MMatchServer</Filter>
-    </ClInclude>
-    <ClInclude Include="MMatchAuth.h">
       <Filter>MMatchServer</Filter>
     </ClInclude>
     <ClInclude Include="MMatchChannel.h">
@@ -390,9 +360,6 @@
       <Filter>MMatchServer</Filter>
     </ClInclude>
     <ClInclude Include="MMatchFriendInfo.h">
-      <Filter>MMatchServer</Filter>
-    </ClInclude>
-    <ClInclude Include="MMatchHShield.h">
       <Filter>MMatchServer</Filter>
     </ClInclude>
     <ClInclude Include="MMatchLocale.h">
@@ -474,7 +441,6 @@
       <Filter>MMatchServer</Filter>
     </ClInclude>
     <ClInclude Include="MSmartRefreshImpl.h" />
-    <ClInclude Include="CPSSOLib.h" />
     <ClInclude Include="IDatabase.h" />
     <ClInclude Include="MAsyncDBJob.h" />
     <ClInclude Include="MAsyncDBJob_BringAccountItem.h" />
@@ -541,16 +507,5 @@
     <Text Include="ReadMe.txt">
       <Filter>MFCFramework</Filter>
     </Text>
-  </ItemGroup>
-  <ItemGroup>
-    <Library Include="Netmarble\CPSSOLib.lib">
-      <Filter>Netmarble</Filter>
-    </Library>
-    <Library Include="XTrap\XCrackChk.lib">
-      <Filter>XTrap</Filter>
-    </Library>
-    <Library Include="HShield\AntiCpSvr.lib">
-      <Filter>HShield</Filter>
-    </Library>
   </ItemGroup>
 </Project>

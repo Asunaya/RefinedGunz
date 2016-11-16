@@ -113,36 +113,6 @@ _STATUS_CMD_START;
 			Obj->ClientSettings = { reinterpret_cast<MTD_ClientSettings*>(BlobPtr)->DebugOutput };
 		}
 		break;
-		/*case MC_MATCH_LOGIN_NETMARBLE:
-			{
-				char szCPCookie[4096];
-				char szSpareParam[4096];
-				int nCommandVersion = 0;
-				unsigned long nChecksumPack = 0;
-				if (pCommand->GetParameter(szCPCookie, 0, MPT_STR, sizeof(szCPCookie) )==false) break;
-				if (pCommand->GetParameter(szSpareParam, 1, MPT_STR, sizeof(szSpareParam) )==false) break;
-				if (pCommand->GetParameter(&nCommandVersion, 2, MPT_INT)==false) break;
-				if (pCommand->GetParameter(&nChecksumPack, 3, MPT_UINT)==false) break;
-
-				OnMatchLoginFromNetmarble(pCommand->GetSenderUID(), 
-										szCPCookie, szSpareParam, nCommandVersion, nChecksumPack);
-			}
-			break;
-		case MC_MATCH_LOGIN_NETMARBLE_JP:
-			{
-				char szLoginID[256];
-				char szLoginPW[256];
-				int nCommandVersion = 0;
-				unsigned long nChecksumPack = 0;
-				if (pCommand->GetParameter(szLoginID,		0, MPT_STR, sizeof(szLoginID) )==false) break;
-				if (pCommand->GetParameter(szLoginPW,		1, MPT_STR, sizeof(szLoginPW) )==false) break;
-				if (pCommand->GetParameter(&nCommandVersion,2, MPT_INT)==false) break;
-				if (pCommand->GetParameter(&nChecksumPack,	3, MPT_UINT)==false) break;
-
-				OnMatchLoginFromNetmarbleJP(pCommand->GetSenderUID(), 
-										szLoginID, szLoginPW, nCommandVersion, nChecksumPack);
-			}
-			break;*/
 		case MC_MATCH_LOGIN_FROM_DBAGENT:
 			{
 				MUID CommUID;
@@ -185,11 +155,6 @@ _STATUS_CMD_START;
 				OnBridgePeer(uidChar, dwIP, nPort);
 			}
 			break;
-		/*case MC_DEBUG_TEST:
-			{
-				DebugTest();
-			}
-			break;*/
 		case MC_MATCH_REQUEST_RECOMMANDED_CHANNEL:
 			{
 				OnRequestRecommendedChannel(pCommand->GetSenderUID());
@@ -200,7 +165,6 @@ _STATUS_CMD_START;
 				MUID uidPlayer, uidChannel;
 
 				uidPlayer = pCommand->GetSenderUID();
-				//pCommand->GetParameter(&uidPlayer, 0, MPT_UID);
 				pCommand->GetParameter(&uidChannel, 1, MPT_UID);
 
 				OnRequestChannelJoin(uidPlayer, uidChannel);
@@ -212,7 +176,6 @@ _STATUS_CMD_START;
 				int nChannelType;
 				char szChannelName[256];
 
-				//pCommand->GetParameter(&uidPlayer,		0, MPT_UID);
 				pCommand->GetParameter(&nChannelType,	1, MPT_INT);
 				pCommand->GetParameter(szChannelName,	2, MPT_STR, sizeof(szChannelName) );
 
@@ -224,7 +187,6 @@ _STATUS_CMD_START;
 				MUID uidPlayer = pCommand->GetSenderUID();
 				int nChannelType;
 
-				//pCommand->GetParameter(&uidPlayer,		0, MPT_UID);
 				pCommand->GetParameter(&nChannelType,	1, MPT_INT);
 
 				OnStartChannelList(uidPlayer, nChannelType);
@@ -233,7 +195,6 @@ _STATUS_CMD_START;
 		case MC_MATCH_CHANNEL_LIST_STOP:
 			{
 				MUID uidPlayer = pCommand->GetSenderUID();
-				//pCommand->GetParameter(&uidPlayer,		0, MPT_UID);
 
 				OnStopChannelList(uidPlayer);
 			}
@@ -244,7 +205,6 @@ _STATUS_CMD_START;
 				static char szChat[1024];
 				uidPlayer = pCommand->GetSenderUID();
 
-				//pCommand->GetParameter(&uidPlayer, 0, MPT_UID);
 				pCommand->GetParameter(&uidChannel, 1, MPT_UID);
 				pCommand->GetParameter(szChat, 2, MPT_STR, sizeof(szChat) );
 
@@ -257,7 +217,6 @@ _STATUS_CMD_START;
 				MMatchTeam nTeam;
 				uidPlayer = pCommand->GetSenderUID();
 
-				//pCommand->GetParameter(&uidPlayer, 0, MPT_UID);
 				pCommand->GetParameter(&uidStage, 1, MPT_UID);
 				pCommand->GetParameter(&nTeam, 2, MPT_UINT);
 
@@ -270,7 +229,6 @@ _STATUS_CMD_START;
 				int nStageState;
 				uidPlayer = pCommand->GetSenderUID();
 
-				//pCommand->GetParameter(&uidPlayer, 0, MPT_UID);
 				pCommand->GetParameter(&uidStage, 1, MPT_UID);
 				pCommand->GetParameter(&nStageState, 2, MPT_INT);
 
@@ -299,7 +257,6 @@ _STATUS_CMD_START;
 				MUID uidPlayer, uidStage;
 				uidPlayer = pCommand->GetSenderUID();
 
-				//pCommand->GetParameter(&uidPlayer, 0, MPT_UID);
 				pCommand->GetParameter(&uidStage, 1, MPT_UID);
 
 				OnStageJoin(uidPlayer, uidStage);
@@ -311,7 +268,6 @@ _STATUS_CMD_START;
 				char szPassword[256];
 				uidPlayer = pCommand->GetSenderUID();
 
-				//pCommand->GetParameter(&uidPlayer, 0, MPT_UID);
 				pCommand->GetParameter(&uidStage, 1, MPT_UID);
 				pCommand->GetParameter(szPassword, 2, MPT_STR, sizeof(szPassword) );
 
@@ -332,7 +288,6 @@ _STATUS_CMD_START;
 				MUID uidPlayer, uidStage;
 				uidPlayer = pCommand->GetSenderUID();
 
-				//pCommand->GetParameter(&uidPlayer, 0, MPT_UID);
 				pCommand->GetParameter(&uidStage, 1, MPT_UID);
 
 				OnStageLeave(uidPlayer, uidStage);
@@ -350,7 +305,6 @@ _STATUS_CMD_START;
 				MUID uidPlayer, uidStage;
 				uidPlayer = pCommand->GetSenderUID();
 
-				//pCommand->GetParameter(&uidPlayer, 0, MPT_UID);
 				pCommand->GetParameter(&uidStage, 1, MPT_UID);
 				OnStageEnterBattle(uidPlayer, uidStage);
 			}
@@ -360,7 +314,6 @@ _STATUS_CMD_START;
 				MUID uidPlayer, uidStage;
 				uidPlayer = pCommand->GetSenderUID();
 
-				//pCommand->GetParameter(&uidPlayer, 0, MPT_UID);
 				pCommand->GetParameter(&uidStage, 1, MPT_UID);
 				OnStageLeaveBattle(uidPlayer, uidStage);
 			}
@@ -371,7 +324,6 @@ _STATUS_CMD_START;
 				int nCountdown;
 				uidPlayer = pCommand->GetSenderUID();
 
-				//pCommand->GetParameter(&uidPlayer, 0, MPT_UID);
 				pCommand->GetParameter(&uidStage, 1, MPT_UID);
 				pCommand->GetParameter(&nCountdown, 2, MPT_INT);
 
@@ -434,7 +386,6 @@ _STATUS_CMD_START;
 				static char szChat[1024];
 				uidPlayer = pCommand->GetSenderUID();
 
-				//pCommand->GetParameter(&uidPlayer, 0, MPT_UID);
 				pCommand->GetParameter(&uidStage, 1, MPT_UID);
 				pCommand->GetParameter(szChat, 2, MPT_STR, sizeof(szChat) );
 
@@ -445,7 +396,6 @@ _STATUS_CMD_START;
 			{
 				MUID uidPlayer = pCommand->GetSenderUID();
 
-				//pCommand->GetParameter(&uidPlayer, 0, MPT_UID);
 				MCommandParameter* pQuickJoinParam = pCommand->GetParameter(1);
 				if(pQuickJoinParam->GetType()!=MPT_BLOB) break;
 
@@ -480,7 +430,6 @@ _STATUS_CMD_START;
 				int nStageCursor;
 				uidPlayer = pCommand->GetSenderUID();
 
-				//pCommand->GetParameter(&uidPlayer, 0, MPT_UID);
 				pCommand->GetParameter(&uidChannel, 1, MPT_UID);
 				pCommand->GetParameter(&nStageCursor, 2, MPT_INT);
 
@@ -513,7 +462,6 @@ _STATUS_CMD_START;
 				MUID uidPlayer, uidStage;
 				uidPlayer = pCommand->GetSenderUID();
 
-				//pCommand->GetParameter(&uidPlayer, 0, MPT_UID);
 				pCommand->GetParameter(&uidStage, 1, MPT_UID);
 
 				MCommandParameter* pStageParam = pCommand->GetParameter(2);
@@ -635,7 +583,7 @@ _STATUS_CMD_START;
 
 				unsigned char* pbyGuidAckMsg = (unsigned char*)MGetBlobArrayElement(pBlob, 0);
 				
-				OnRequestAccountCharList(uidPlayer, szSerialKey, pbyGuidAckMsg);
+				OnRequestAccountCharList(uidPlayer);
 			}
 			break;
 		case MC_MATCH_REQUEST_ACCOUNT_CHARINFO:
@@ -653,7 +601,6 @@ _STATUS_CMD_START;
 				MUID uidPlayer = pCommand->GetSenderUID();
 				unsigned long int nCharIndex;
 
-				//pCommand->GetParameter(&uidPlayer, 0, MPT_UID);
 				pCommand->GetParameter(&nCharIndex, 1, MPT_UINT);
 
 				OnRequestSelectChar(uidPlayer, nCharIndex);
@@ -665,7 +612,6 @@ _STATUS_CMD_START;
 				unsigned long int nCharIndex;
 				char szCharName[256];
 
-				//pCommand->GetParameter(&uidPlayer, 0, MPT_UID);
 				pCommand->GetParameter(&nCharIndex, 1, MPT_UINT);
 				pCommand->GetParameter(szCharName, 2, MPT_STR, sizeof(szCharName) );
 
@@ -680,7 +626,6 @@ _STATUS_CMD_START;
 
 				char szCharName[128];
 
-				//pCommand->GetParameter(&uidPlayer, 0, MPT_UID);
 				pCommand->GetParameter(&nCharIndex, 1, MPT_UINT);
 				if (pCommand->GetParameter(szCharName, 2, MPT_STR, sizeof(szCharName) )==false) break;
 				pCommand->GetParameter(&nSex, 3, MPT_UINT);
@@ -704,7 +649,6 @@ _STATUS_CMD_START;
 			{
 				MUID uidPlayer = pCommand->GetSenderUID();
 				unsigned long int nItemID;
-				//pCommand->GetParameter(&uidPlayer, 0, MPT_UID);
 				pCommand->GetParameter(&nItemID, 1, MPT_UINT);
 
 				OnRequestBuyItem(uidPlayer, nItemID);
@@ -715,7 +659,6 @@ _STATUS_CMD_START;
 				MUID uidPlayer, uidItem;
 				uidPlayer = pCommand->GetSenderUID();
 
-				//pCommand->GetParameter(&uidPlayer, 0, MPT_UID);
 				pCommand->GetParameter(&uidItem, 1, MPT_UID);
 
 				OnRequestSellItem(uidPlayer, uidItem);
@@ -726,7 +669,6 @@ _STATUS_CMD_START;
 				MUID uidPlayer, uidStage;
 				uidPlayer = pCommand->GetSenderUID();
 
-				//pCommand->GetParameter(&uidPlayer, 0, MPT_UID);
 				pCommand->GetParameter(&uidStage, 1, MPT_UID);
 				
 				OnRequestForcedEntry(uidStage, uidPlayer);
@@ -886,7 +828,6 @@ _STATUS_CMD_START;
 				MUID uidPlayer = pCommand->GetSenderUID();
 				int nFirstItemIndex = 0, nItemCount = 0;
 
-				//pCommand->GetParameter(&uidPlayer, 0, MPT_UID);
 				pCommand->GetParameter(&nFirstItemIndex, 1, MPT_INT);
 				pCommand->GetParameter(&nItemCount, 2, MPT_INT);
 
@@ -897,14 +838,12 @@ _STATUS_CMD_START;
 			{
 				MUID uidPlayer = pCommand->GetSenderUID();
 
-				//pCommand->GetParameter(&uidPlayer, 0, MPT_UID);
 				OnRequestCharacterItemList(uidPlayer);
 			}
 			break;
 		case MC_MATCH_REQUEST_ACCOUNT_ITEMLIST:
 			{
 				MUID uidPlayer = pCommand->GetSenderUID();
-				//pCommand->GetParameter(&uidPlayer, 0, MPT_UID);
 				OnRequestAccountItemList(uidPlayer);
 			}
 			break;
@@ -912,7 +851,6 @@ _STATUS_CMD_START;
 			{
 				MUID uidPlayer = pCommand->GetSenderUID();
 				int nAIID;
-				//pCommand->GetParameter(&uidPlayer, 0, MPT_UID);
 				pCommand->GetParameter(&nAIID, 1, MPT_INT);
 
 				OnRequestBringAccountItem(uidPlayer, nAIID);
@@ -923,7 +861,6 @@ _STATUS_CMD_START;
 				MUID uidPlayer, uidItem;
 				uidPlayer = pCommand->GetSenderUID();
 
-				//pCommand->GetParameter(&uidPlayer, 0, MPT_UID);
 				pCommand->GetParameter(&uidItem, 1, MPT_UID);
 
 				OnRequestBringBackAccountItem(uidPlayer, uidItem);
@@ -935,7 +872,6 @@ _STATUS_CMD_START;
 				uidPlayer = pCommand->GetSenderUID();
 				unsigned long int nEquipmentSlot = 0;
 
-				//pCommand->GetParameter(&uidPlayer, 0, MPT_UID);
 				pCommand->GetParameter(&uidItem, 1, MPT_UID);
 				pCommand->GetParameter(&nEquipmentSlot, 2, MPT_UINT);
 
@@ -946,7 +882,6 @@ _STATUS_CMD_START;
 			{
 				MUID uidPlayer = pCommand->GetSenderUID();
 				unsigned long int nEquipmentSlot = 0;
-				//pCommand->GetParameter(&uidPlayer, 0, MPT_UID);
 				pCommand->GetParameter(&nEquipmentSlot, 1, MPT_UINT);
 
 				OnRequestTakeoffItem(uidPlayer, nEquipmentSlot);
@@ -955,7 +890,6 @@ _STATUS_CMD_START;
 		case MC_MATCH_REQUEST_SUICIDE:
 			{
 				MUID uidPlayer = pCommand->GetSenderUID();
-				//pCommand->GetParameter(&uidPlayer, 0, MPT_UID);
 
 				OnRequestSuicide(uidPlayer);
 			}
@@ -965,7 +899,6 @@ _STATUS_CMD_START;
 				MUID uidPlayer = pCommand->GetSenderUID();
 				int nItemUID = 0;
 
-				//pCommand->GetParameter(&uidPlayer, 0, MPT_UID);
 				pCommand->GetParameter(&nItemUID, 1, MPT_INT);
 
 				OnRequestObtainWorldItem(uidPlayer, nItemUID);
@@ -977,7 +910,6 @@ _STATUS_CMD_START;
 				int nItemID = 0;
 				rvector pos;
 
-				//pCommand->GetParameter(&uidPlayer, 0, MPT_UID);
 				pCommand->GetParameter(&nItemID, 1, MPT_INT);
 				pCommand->GetParameter(&pos, 2, MPT_POS);
 
@@ -1018,7 +950,6 @@ _STATUS_CMD_START;
 				MUID uidPlayer = pCommand->GetSenderUID();
 				char szChatRoomName[128];
 
-				//pCommand->GetParameter(&uidPlayer, 0, MPT_UID);
 				pCommand->GetParameter(szChatRoomName, 1, MPT_STR, sizeof(szChatRoomName) );
 
 				OnChatRoomCreate(uidPlayer, szChatRoomName);
@@ -1091,7 +1022,6 @@ _STATUS_CMD_START;
 		case MC_MATCH_REQUEST_COPY_TO_TESTSERVER:
 			{
 				MUID uidPlayer = pCommand->GetSenderUID();
-				//pCommand->GetParameter(&uidPlayer, 0, MPT_UID);
 				OnRequestCopyToTestServer(uidPlayer);
 			}
 			break;
@@ -1103,11 +1033,9 @@ _STATUS_CMD_START;
 				char* sncv[CLAN_SPONSORS_COUNT];
 				int nRequestID;
 
-				//pCommand->GetParameter(&uidPlayer,			0, MPT_UID);
 				pCommand->GetParameter(&nRequestID,			1, MPT_INT);
 				pCommand->GetParameter(szClanName,			2, MPT_STR, sizeof(szClanName) );
 
-				// 발기인 숫자만큼 인자를 받는다. - 4명
 				for (int i = 0; i < CLAN_SPONSORS_COUNT; i++)
 				{
 					pCommand->GetParameter(szSponsorNames[i],	3+i, MPT_STR, sizeof(szSponsorNames[i]));
@@ -1140,10 +1068,8 @@ _STATUS_CMD_START;
 				char szSponsorNames[CLAN_SPONSORS_COUNT][256];
 				char* sncv[CLAN_SPONSORS_COUNT];
 
-				//pCommand->GetParameter(&uidPlayer,			0, MPT_UID);
 				pCommand->GetParameter(szClanName,			1, MPT_STR, sizeof(szClanName) );
 
-				// 발기인 숫자만큼 인자를 받는다. - 4명
 				for (int i = 0; i < CLAN_SPONSORS_COUNT; i++)
 				{
 					pCommand->GetParameter(szSponsorNames[i],	2+i, MPT_STR, sizeof(szSponsorNames[i]) );
@@ -1205,8 +1131,6 @@ _STATUS_CMD_START;
 		case MC_MATCH_CLAN_REQUEST_LEAVE_CLAN:
 			{
 				MUID uidPlayer = pCommand->GetSenderUID();
-
-				//pCommand->GetParameter(&uidPlayer,	0, MPT_UID);
 
 				OnClanRequestLeaveClan(uidPlayer);
 			}
@@ -1274,7 +1198,6 @@ _STATUS_CMD_START;
 				unsigned long int nOptions;
 				uidPlayer = pCommand->GetSenderUID();
 
-				//pCommand->GetParameter(&uidPlayer,		0, MPT_UID);
 				pCommand->GetParameter(&uidChannel,		1, MPT_UID);
 				pCommand->GetParameter(&nPlaceFilter,	2, MPT_UINT);
 				pCommand->GetParameter(&nOptions,		3, MPT_UINT);
@@ -1449,9 +1372,6 @@ _STATUS_CMD_START;
 		case MC_QUEST_PONG:
 			{
 				MUID uidPlayer = pCommand->GetSenderUID();
-//				unsigned long int nTimeStamp;
-//				
-//				pCommand->GetParameter(&nTimeStamp, 0, MPT_UINT);
 
 				OnQuestPong(uidPlayer);
 			}
@@ -1488,7 +1408,6 @@ _STATUS_CMD_START;
 				int		nSlotIndex;
 				int		nItemID;
 
-				//pCommand->GetParameter( &uidPlayer, 0, MPT_UID );
 				pCommand->GetParameter( &nSlotIndex, 1, MPT_INT );
 				pCommand->GetParameter( &nItemID, 2, MPT_INT );
 

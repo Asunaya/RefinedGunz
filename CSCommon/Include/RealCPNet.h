@@ -257,7 +257,8 @@ friend MRealCPNet;
 };
 
 
-typedef void(RCPCALLBACK)(void* pCallbackContext, RCP_IO_OPERATION nIO, DWORD dwKey, MPacketHeader* pPacket, DWORD dwPacketLen);
+using RCPCALLBACK = void(void* pCallbackContext, RCP_IO_OPERATION nIO,
+	DWORD dwKey, MPacketHeader* pPacket, DWORD dwPacketLen);
 
 
 class MRealCPNet {
@@ -296,7 +297,7 @@ protected:
 	bool PostIOSend(SOCKET sd, char* pBuf, DWORD nBufLen);
 	void PostIORecv(SOCKET sd);
 
-	static bool MakeSockAddr(char* pszIP, int nPort, sockaddr_in* pSockAddr);
+	static bool MakeSockAddr(const char* pszIP, int nPort, sockaddr_in* pSockAddr);
 	bool CheckIPFloodAttack(sockaddr_in* pRemoteAddr, int* poutIPCount);
 
 	MRealSession* CreateSession(SOCKET sd, RCP_IO_OPERATION ClientIO);
@@ -313,7 +314,7 @@ public:
 	void SetLogLevel(int nLevel) { if (nLevel > 0) m_bVerbose = TRUE; else m_bVerbose = FALSE; }
 	void SetCallback(RCPCALLBACK* pCallback, void* pCallbackContext) { m_fnCallback = pCallback; m_pCallbackContext = pCallbackContext; }
 
-	bool Connect(SOCKET* pSocket, char* pszAddress, int nPort);
+	bool Connect(SOCKET* pSocket, const char* pszAddress, int nPort);
 	void Disconnect(SOCKET sd);
 	VOID CloseSession(MRealSession* pSession, BOOL bGraceful);
 

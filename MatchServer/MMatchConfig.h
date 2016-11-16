@@ -8,50 +8,45 @@
 #include "MMatchGlobal.h"
 #include "IDatabase.h"
 
-
 class MMatchConfig
 {
 private:
-	char				m_szDB_DNS[64];				///< DB DNS
-	char				m_szDB_UserName[64];		///< DB Username
-	char				m_szDB_Password[64];		///< DB Password
+	char				m_szDB_DNS[64];
+	char				m_szDB_UserName[64];
+	char				m_szDB_Password[64];
 
-	int					m_nMaxUser;					///< 최대 접속자
+	int					m_nMaxUser;
 	int					m_nServerID;
-	char				m_szServerName[256];		///< 서버이름
+	char				m_szServerName[256];
 
-	MMatchServerMode	m_nServerMode;				///< 서버모드
-	bool				m_bRestrictionMap;			///< 맵제한이 있는지 여부 - default : false
-	std::set<int>			m_EnableMaps;				///< 맵제한이 있을경우 가능한 맵
-	std::list<std::string>		m_FreeLoginIPList;			///< 접속인원 무시 IP
-	bool				m_bCheckPremiumIP;			///< 프리미엄 IP 체크
+	MMatchServerMode	m_nServerMode;
+	bool				m_bRestrictionMap;
+	std::set<int>			m_EnableMaps;
+	std::list<std::string>		m_FreeLoginIPList;
+	bool				m_bCheckPremiumIP;
 	std::string				m_strCountry;				
 	std::string				m_strLanguage;
 
-	// enabled 씨리즈 - ini에서 관리하지 않는다.
-	bool				m_bEnabledCreateLadderGame;	///< 클랜전 생성가능한지 여부
+	bool				m_bEnabledCreateLadderGame;
 
-	// -- 일본 넷마블 전용
 	char				m_NJ_szDBAgentIP[64];
 	int					m_NJ_nDBAgentPort;
 	int					m_NJ_nGameCode;
 
-	// filter 사용 설정.
-	bool				m_bUseFilter;				/// 필터 사용을 설정함(0:사용않함. 1:사용.)
-	bool				m_bAcceptInvalidIP;			/// 리스트에 없는 IP허용 여부.(0:허용하지 않음. 1:허용.)
+	// filter
+	bool				m_bUseFilter;
+	bool				m_bAcceptInvalidIP;
 
-	// evironment.
-	bool				m_bIsUseHShield;
-	bool				m_bIsUseXTrap;
+	// environment.
 	bool				m_bIsUseEvent;
 	bool				m_bIsUseFileCrc;
 
 	// debug.
-	std::list<std::string>		m_DebugLoginIPList;			///< Debug용 IP.
+	std::list<std::string>		m_DebugLoginIPList;
 	bool				m_bIsDebugServer;
 
 	// keeper ip.
-	std::string				m_strKeeperIP;				/// Keeper와 server와의 통신에서 키퍼의 요청인지 검사하기 위해서.
+	std::string				m_strKeeperIP;
 	
 	std::string GameDirectory = "";
 	bool bIsMasterServer = true;
@@ -83,8 +78,8 @@ public:
 	const int GetServerID()							{ return m_nServerID; }
 	const char* GetServerName()						{ return m_szServerName; }
 	const MMatchServerMode		GetServerMode()		{ return m_nServerMode; }
-	bool IsResMap()									{ return m_bRestrictionMap; }	// 맵제한이 있는지 여부
-	bool IsEnableMap(const MMATCH_MAP nMap)										// 플레이가능한 맵인지 여부
+	bool IsResMap()									{ return m_bRestrictionMap; }
+	bool IsEnableMap(const MMATCH_MAP nMap)
 	{
 		if (!m_bRestrictionMap) return true;
 		if (m_EnableMaps.find(nMap) != m_EnableMaps.end()) return true;
@@ -107,8 +102,6 @@ public:
 	void SetUseFilterState( const bool bUse )			{ m_bUseFilter = bUse; }
 	void SetAcceptInvalidIPState( const bool bAccept )	{ m_bAcceptInvalidIP = bAccept; }
 
-	const bool IsUseHShield() const	{ return m_bIsUseHShield; }
-	const bool IsUseXTrap() const	{ return m_bIsUseXTrap; }
 	const bool IsUseEvent() const	{ return m_bIsUseEvent; }
 	const bool IsUseFileCrc() const { return m_bIsUseFileCrc; }
 
@@ -147,8 +140,6 @@ inline bool QuestTestServer() { return (MGetServerConfig()->GetServerMode() == M
 #define SERVER_CONFIG_DEFAULT_NJ_DBAGENT_PORT		7500
 #define SERVER_CONFIG_DEFAULT_NJ_DBAGENT_GAMECODE	1013
 
-#define SERVER_CONFIG_DEFAULT_USE_HSHIELD	"0"
-#define SERVER_CONFIG_DEFAULT_USE_XTRAP		"0"
 #define SERVER_CONFIG_DEFAULT_USE_EVENT		"1"
 #define SERVER_CONFIG_DEFAULT_USE_FILECRC	"0"
 

@@ -324,8 +324,12 @@ bool MMatchClient::OnCommand(MCommand* pCommand)
 				int nCount = MGetBlobArrayCount(pBlob);
 				unsigned char* pbyGuidReqMsg = (unsigned char*)MGetBlobArrayElement(pBlob, 0);
 
-				OnResponseMatchLogin(pCommand->GetSenderUID(), nResult, szServerName, MMatchServerMode(nServerMode), 
-					szAccountID, MMatchUserGradeID(nUGradeID), MMatchPremiumGradeID(nPGradeID), uidPlayer,
+				OnResponseMatchLogin(
+					pCommand->GetSenderUID(),
+					nResult, szServerName,
+					MMatchServerMode(nServerMode), 
+					szAccountID, MMatchUserGradeID(nUGradeID),
+					MMatchPremiumGradeID(nPGradeID), uidPlayer,
 					szRandomValue, pbyGuidReqMsg);
 			}
 			break;
