@@ -1,18 +1,9 @@
-#ifndef MStateStackMachine_H
-#define MStateStackMachine_H
-
-// 유한 상태 머신
-
-
-#pragma warning(disable:4786)
+#pragma once
 
 #include <map>
 
-using namespace std;
-
 class MStateStackMachine;
 
-// 상태
 class MState{
 friend class MStateStackMachine;
 private:
@@ -20,15 +11,15 @@ private:
 protected:
 
 protected:
-	virtual bool OnCreate(void) = 0;
-	virtual void OnDestroy(void) = 0;
-	virtual bool OnRun(void) = 0;
+	virtual bool OnCreate() = 0;
+	virtual void OnDestroy() = 0;
+	virtual bool OnRun() = 0;
 
 	bool SetNextState(int nID);
 public:
 };
 
-typedef map<int, MState*>		MSTATEMAP;
+typedef std::map<int, MState*>	MSTATEMAP;
 typedef MSTATEMAP::iterator		MSTATEMAPITOR;
 typedef MSTATEMAP::value_type	MSTATEMAPVALTYPE;
 
@@ -39,21 +30,18 @@ protected:
 	MState*		m_pCurrState;
 	int			m_nNextState;
 public:
-	MStateStackMachine(void);
-	virtual ~MStateStackMachine(void);
+	MStateStackMachine();
+	virtual ~MStateStackMachine();
 
 	void AddState(int nID, MState* pState);
 	void DelState(int nID);
 
 	void AddActionOfState(int nActionID, int nStateID);
 
-	bool SetState(int nID);		// State 전환
-	bool SetNextState(int nID);	// 다음 OnRun() 이후 자동으로 State 전환
+	bool SetState(int nID);
+	bool SetNextState(int nID);
 
-	bool Run(void);
+	bool Run();
 };
 
-#define NULLSTATE	0			// NULL State
-
-
-#endif
+#define NULLSTATE	0

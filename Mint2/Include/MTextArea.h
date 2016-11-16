@@ -1,15 +1,11 @@
 #ifndef MTEXTAREA_H
 #define MTEXTAREA_H
 
-#pragma warning(disable:4786)
-
 #include <list>
 #include <string>
 #include "MWidget.h"
 #include "MLookNFeel.h"
 #include "MScrollBar.h"
-
-using namespace std;
 
 class MTextArea;
 class MScrollBar;
@@ -48,16 +44,15 @@ class MTextArea : public MWidget{
 	friend MTextAreaLook;
 protected:
 	bool		m_bScrollBarEnable;
-	int			m_nIndentation;		// 행이바뀔시 들여쓰는 픽셀수
+	int			m_nIndentation;
 	bool		m_bWordWrap;
 	bool		m_bColorSupport;
-	MPOINT		m_TextOffset;		// 이게 뭘까요 ?  쓰는데가 없어보이는데...
+	MPOINT		m_TextOffset;
 	bool		m_bMouseOver;
 	MCOLOR		m_TextColor;
 	int			m_nMaxLen;
 	char		m_szIMECompositionString[MIMECOMPOSITIONSTRING_LENGTH];
 	bool		m_bEditable;
-//	char*		m_pBuffer;			//Text Buffer
 	int			m_nStartLine;
 	int			m_nStartLineSkipLine;
 	
@@ -67,9 +62,8 @@ protected:
 
 	int			m_nLineHeight;
 	
-	MPOINT		m_CaretPos;		// 전체에서 캐럿 위치. y번째 라인 x번째 글자
-//	MPOINT		m_LineCaretPos;	// 한라인 안에서의 캐럿 위치
-	bool		m_bCaretFirst;	// 한라인 안에서 줄바뀜에 캐럿이 있을때 앞인지 뒤인지 플래그
+	MPOINT		m_CaretPos;
+	bool		m_bCaretFirst;
 
 	MLINELIST			m_Lines;
 	MLINELISTITERATOR	m_CurrentLine;
@@ -87,9 +81,6 @@ protected:
 	virtual void OnSetFocus(void);
 	virtual void OnReleaseFocus(void);
 	
-	// 키 입력이 들어왔을 때 키값에 따라 처리할 수 있다.
-	// true를 리턴하면 InputFilter에서 처리됐음을 의미한다.
-	// false를 리턴하면 Edit에 스트링을 추가함을 의미한다.
 	virtual bool InputFilterKey(int nKey,bool bCtrl);	// MWM_KEYDOWN
 	virtual bool InputFilterChar(int nKey);	// MWM_CHAR
 
@@ -108,17 +99,10 @@ protected:
 	void OnHome();
 	void OnEnd();
 
-// 안에서 필요한 함수들
-	
-	// nPos번째 글자가 어느 위치에 그려져야 하는지 pOut으로 리턴해준다
-	// x는 픽셀수 , y 는 라인수,bFirst는 캐럿일경우 앞/뒤플래그
 	bool GetCaretPosition(MPOINT *pOut,int nSize,const char* szText,int nPos,bool bFirst);
 
-	// MDrawTextMultiline으로 그릴때 nLine 행에 nX픽셀 위치에 몇번째 글자가 찍힐지 알려주는 펑션
 	int GetCharPosition(const char* szText,int nX,int nLine);
 
-	// 현재 캐럿의 위치가 한 라인안에서 다음줄로 wrap때문에 넘어간경우
-	// 그줄 마지막이나 다음줄 첫번째가 사실상 같은 위치이다. 이런경우인지 알아본다
 	bool IsDoubleCaretPos();	
 
 	void UpdateScrollBar(bool bAdjustStart=false);
@@ -164,7 +148,6 @@ public:
 	void SetTextColor(MCOLOR color);
 	MCOLOR GetTextColor(void);
 
-	// 모든 텍스트 내용을 지운다.
 	void Clear();
 
 	void SetText(const char *szText);
@@ -172,7 +155,6 @@ public:
 	void AddText(const char *szText,MCOLOR color);
 	void AddText(const char *szText);
 	
-	// 첫줄을 지운다
 	void DeleteFirstLine();
 
 	int GetLineHeight( void);

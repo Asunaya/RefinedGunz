@@ -444,8 +444,8 @@ bool RBspObject::Draw()
 	dev->SetFVF(GetFVF());
 
 	// Set vertex and index buffers
-	dev->SetStreamSource(0, VertexBuffer, 0, GetStride());
-	dev->SetIndices(IndexBuffer);
+	dev->SetStreamSource(0, VertexBuffer.get(), 0, GetStride());
+	dev->SetIndices(IndexBuffer.get());
 
 	if (m_bWireframe)
 		SetWireframeStates();
@@ -2767,7 +2767,7 @@ void RBspObject::DrawLight(D3DLIGHT9 *pLight)
 
 	pd3dDevice->SetTexture(0, m_pShadeMap->GetTexture());
 
-	RGetDevice()->SetStreamSource(0, DynLightVertexBuffer, 0, sizeof(LIGHTBSPVERTEX));
+	RGetDevice()->SetStreamSource(0, DynLightVertexBuffer.get(), 0, sizeof(LIGHTBSPVERTEX));
 
 	g_pTargetLight = pLight;
 	g_dwTargetLightColor = FLOAT2RGB24(

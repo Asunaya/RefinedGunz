@@ -24,8 +24,16 @@ inline void SafeRelease(T& ptr)
 	ptr = nullptr;
 }
 
+struct D3DDeleter
+{
+	void operator()(IUnknown* ptr) const
+	{
+		ptr->Release();
+	}
+};
+
 template <typename T>
-class D3DPtr;
+using D3DPtr = std::unique_ptr<T, D3DDeleter>;
 
 template <typename T>
 inline void SafeRelease(D3DPtr<T>& ptr)
@@ -100,21 +108,9 @@ const std::string MGetStrLocalTime( const unsigned short wYear = 0,
 template <typename T1, typename T2>
 T1 reinterpret(const T2& val)
 {
-	union
-	{
-		T1 T1_rep;
-		T2 T2_rep;
-	} conversion_union;
-	conversion_union.T2_rep = val;
-	return conversion_union.T1_rep;
-}
-
-template <typename T1>
-T1 reinterpret(void* val)
-{
-	T1 x;
-	memcpy(&x, val, sizeof(T1));
-	return x;
+	T1 T1_rep;
+	memcpy(&T1_rep, &val, min(sizeof(T1), sizeof(T2)));
+	return T1_rep;
 }
 
 template <typename ItT>
@@ -183,58 +179,12 @@ inline std::pair<bool, int> StringToInt(const char* String, int Radix = 10)
 }
 
 template <typename T>
-class D3DPtr
-{
-public:
-	D3DPtr() {}
-	D3DPtr(T* p) : ptr(p) {}
-	D3DPtr(D3DPtr&& src) { Move(std::move(src)); }
-
-	D3DPtr<T>& operator=(const D3DPtr&) = delete;
-	D3DPtr<T>& operator=(D3DPtr&& src)
-	{
-		Move(std::move(src));
-		return *this;
-	}
-	D3DPtr<T>& operator=(nullptr_t)
-	{
-		Release();
-		ptr = nullptr;
-		return *this;
-	}
-
-	~D3DPtr() { Release(); }
-
-	operator T*() const { return ptr; }
-	T* operator ->() const { return ptr; }
-
-	auto* get() { return ptr; }
-	auto* get() const { return ptr; }
-
-private:
-	void Move(D3DPtr&& src)
-	{
-		Release();
-		ptr = src.ptr;
-		src.ptr = nullptr;
-	}
-
-	void Release()
-	{
-		if (ptr)
-			ptr->Release();
-	}
-
-	T* ptr{};
-};
-
-template <typename T>
 class WriteProxy
 {
 	using StoredType = get_template_argument_t<T, 0>;
 public:
 	WriteProxy(T& ptr) : ptr(ptr), temp(ptr.get()) {}
-	~WriteProxy() { ptr = temp; }
+	~WriteProxy() { ptr = T{ temp }; }
 
 	operator StoredType**() { return &temp; }
 

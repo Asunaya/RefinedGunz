@@ -56,7 +56,7 @@ LPDIRECT3DTEXTURE9 RBaseTexture::GetTexture()
 	m_dwLastUseTime = GetGlobalTimeMS();
 
 	if (m_pTex) {
-		return m_pTex;
+		return m_pTex.get();
 	}
 #ifndef _PUBLISH
 	else {
@@ -65,7 +65,7 @@ LPDIRECT3DTEXTURE9 RBaseTexture::GetTexture()
 	}
 #endif
 
-	return m_pTex;
+	return m_pTex.get();
 }
 
 //////////////////////////////////////////////////////////////////////////

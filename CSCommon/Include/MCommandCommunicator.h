@@ -28,7 +28,7 @@ protected:
 	MCommandBuilder*		m_pCommandBuilder;
 	MPacketCrypter			m_PacketCrypter;
 
-	MCommandCommunicator*	m_pDirectConnection;	// 포인터 커넥션 Direction Connection
+	MCommandCommunicator*	m_pDirectConnection;
 	DWORD					m_dwUserContext;
 
 	char					m_szIP[128];

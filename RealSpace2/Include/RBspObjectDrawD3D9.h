@@ -6,19 +6,14 @@
 _NAMESPACE_REALSPACE2_BEGIN
 
 class RBspObject;
-
-struct MaterialBatch
-{
-	int TriangleCount;
-	int VertexBase;
-	int IndexBase;
-};
+struct MaterialBatch;
 
 class RBspObjectDrawD3D9
 {
 public:
-	RBspObjectDrawD3D9(RBspObject& bsp) : bsp(bsp) {}
-	RBspObjectDrawD3D9(RBspObjectDrawD3D9&&) = default;
+	RBspObjectDrawD3D9(RBspObject& bsp);
+	RBspObjectDrawD3D9(RBspObjectDrawD3D9&&);
+	~RBspObjectDrawD3D9();
 
 	void Create(rsx::LoaderState&&);
 	void Draw();
@@ -32,6 +27,12 @@ private:
 
 	void CreateTextures();
 	void CreateBatches();
+
+	void SetPrologueStates();
+	void SetEpilogueStates();
+	void RenderNormalMaterials();
+	void RenderOpacityMaterials();
+	void RenderAlphaTestMaterials();
 
 	u32 GetFVF() const { return D3DFVF_XYZ | D3DFVF_TEX1; }
 	size_t GetStride() const { return sizeof(Vertex); }
@@ -53,8 +54,13 @@ private:
 
 	// Indices map to State.Materials.
 	std::vector<MaterialBatch> MaterialBatches;
-	int NumNormalMaterials{};
-	int NumOpacityMaterials{};
+	int NormalMaterialsEnd{};
+	int OpacityMaterialsEnd{};
+	int AlphaTestMaterialsEnd{};
+
+	bool Wireframe{};
+
+	IDirect3DDevice9* dev{};
 };
 
 _NAMESPACE_REALSPACE2_END

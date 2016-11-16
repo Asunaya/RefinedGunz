@@ -4,8 +4,16 @@
 #include <algorithm>
 #include <numeric>
 
+_NAMESPACE_REALSPACE2_BEGIN
+
+struct MaterialBatch
+{
+	int TriangleCount;
+	int VertexBase;
+	int IndexBase;
+};
+
 using namespace rsx;
-using namespace RealSpace2;
 using IndexType = u32;
 
 template <typename T> constexpr D3DFORMAT GetD3DFormat();
@@ -37,6 +45,10 @@ static bool CreateBuffers(size_t VertexCount, size_t IndexCount, u32 FVF,
 	return true;
 }
 
+RBspObjectDrawD3D9::RBspObjectDrawD3D9(RBspObject& bsp) : bsp{ bsp }, dev{ RGetDevice() } {}
+RBspObjectDrawD3D9::RBspObjectDrawD3D9(RBspObjectDrawD3D9&&) = default;
+RBspObjectDrawD3D9::~RBspObjectDrawD3D9() = default;
+
 void RBspObjectDrawD3D9::CreateTextures()
 {
 	std::unordered_map<std::string, int> TexMap;
@@ -51,6 +63,7 @@ void RBspObjectDrawD3D9::CreateTextures()
 			if (name.empty())
 				return -1;
 
+			// Check if already loaded and use the same index if so.
 			{
 				auto it = TexMap.find(name);
 				if (it != TexMap.end())
@@ -230,11 +243,48 @@ void RBspObjectDrawD3D9::CreateBatches()
 	VertexBuffer->Unlock();
 	IndexBuffer->Unlock();
 
-	NumNormalMaterials = MaterialBatches.size();
+	auto NumMaterials = MaterialBatches.size();
+	NormalMaterialsEnd = OpacityMaterialsEnd = AlphaTestMaterialsEnd = NumMaterials;
+
+	// Sort materials by states.
+	for (int i{}; i < NormalMaterialsEnd; ++i)
+	{
+		if (Textures[i].Opacity == -1)
+			continue;
+
+		--NormalMaterialsEnd;
+		auto DestIndex = NormalMaterialsEnd;
+		std::swap(MaterialBatches[i], MaterialBatches[DestIndex]);
+		std::swap(Textures[i], Textures[DestIndex]);
+	}
+
+	for (auto i = NormalMaterialsEnd; i < OpacityMaterialsEnd; ++i)
+	{
+		if (Textures[i].AlphaTestValue == -1)
+			continue;
+
+		--OpacityMaterialsEnd;
+		auto DestIndex = OpacityMaterialsEnd;
+		std::swap(MaterialBatches[i], MaterialBatches[DestIndex]);
+		std::swap(Textures[i], Textures[DestIndex]);
+	}
+
+	DMLog("NormalMaterialsEnd = %d\n"
+		"OpacityMaterialsEnd = %d\n"
+		"AlphaTestMaterialsEnd = %d\n",
+		NormalMaterialsEnd, OpacityMaterialsEnd, AlphaTestMaterialsEnd);
 }
 
 void RBspObjectDrawD3D9::Create(rsx::LoaderState && srcState)
 {
+	Textures.clear();
+	TextureMemory.clear();
+	MaterialBatches.clear();
+	VertexBuffer.reset();
+	IndexBuffer.reset();
+	NormalMaterialsEnd = 0;
+	OpacityMaterialsEnd = 0;
+
 	State = std::move(srcState);
 
 	CreateTextures();
@@ -273,14 +323,102 @@ static void SetDefaultStates()
 	RGetDevice()->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
 }
 
-void RBspObjectDrawD3D9::Draw()
+static void DrawBatch(const MaterialBatch& Mat)
 {
-	auto dev = RGetDevice();
+	auto hr = RGetDevice()->DrawIndexedPrimitive(
+		D3DPT_TRIANGLELIST,    // Primitive type
+		Mat.VertexBase,        // BaseVertexIndex
+		0,                     // MinVertexIndex
+		Mat.TriangleCount * 3, // NumVertices
+		Mat.IndexBase,         // Start index
+		Mat.TriangleCount);    // Primitive count
 
-	if (true)
-		SetDefaultStates();
-	else
+	assert(SUCCEEDED(hr));
+}
+
+void RBspObjectDrawD3D9::RenderNormalMaterials()
+{
+	dev->SetRenderState(D3DRS_ZWRITEENABLE, true);
+	dev->SetRenderState(D3DRS_ALPHABLENDENABLE, false);
+	dev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
+	dev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
+	dev->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_DIFFUSE);
+
+	for (int i{}; i < NormalMaterialsEnd; ++i)
+	{
+		auto& Mat = MaterialBatches[i];
+		auto& Tex = Textures[i];
+
+		if (Tex.Diffuse == -1)
+			continue;
+
+		dev->SetTexture(0, TextureMemory[Tex.Diffuse].get());
+
+		DrawBatch(Mat);
+	}
+}
+
+void RBspObjectDrawD3D9::RenderOpacityMaterials()
+{
+	dev->SetRenderState(D3DRS_ALPHABLENDENABLE, true);
+	dev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+	dev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+	dev->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+	dev->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+	dev->SetTextureStageState(1, D3DTSS_ALPHAARG1, D3DTA_CURRENT);
+	dev->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+
+	for (int i = NormalMaterialsEnd; i < OpacityMaterialsEnd; ++i)
+	{
+		auto& Mat = MaterialBatches[i];
+		auto& Tex = Textures[i];
+
+		if (Tex.Diffuse == -1)
+			continue;
+
+		dev->SetTexture(0, TextureMemory[Tex.Diffuse].get());
+		// Tex.Opacity can't be -1 since the sorting in CreateBatches
+		// checks for that condition.
+		dev->SetTexture(1, TextureMemory[Tex.Opacity].get());
+
+		DrawBatch(Mat);
+	}
+}
+
+void RBspObjectDrawD3D9::RenderAlphaTestMaterials()
+{
+	dev->SetRenderState(D3DRS_ZWRITEENABLE, true);
+	dev->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL);
+	dev->SetRenderState(D3DRS_ALPHATESTENABLE, true);
+
+	dev->SetRenderState(D3DRS_ALPHABLENDENABLE, false);
+	dev->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+	dev->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+	dev->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
+
+	for (int i = OpacityMaterialsEnd; i < AlphaTestMaterialsEnd; ++i)
+	{
+		auto& Mat = MaterialBatches[i];
+		auto& Tex = Textures[i];
+
+		if (Tex.Diffuse == -1)
+			continue;
+
+		dev->SetTexture(0, TextureMemory[Tex.Diffuse].get());
+		dev->SetTexture(1, TextureMemory[Tex.Opacity].get());
+
+		dev->SetRenderState(D3DRS_ALPHAREF, Tex.AlphaTestValue);
+
+		DrawBatch(Mat);
+	}
+}
+
+void RBspObjectDrawD3D9::SetPrologueStates()
+{
+	if (Wireframe)
 		SetWireframeStates();
+	else
+		SetDefaultStates();
 
 	// Enable Z-buffer testing and writing.
 	RSetWBuffer(true);
@@ -293,35 +431,10 @@ void RBspObjectDrawD3D9::Draw()
 	dev->SetFVF(GetFVF());
 	dev->SetStreamSource(0, VertexBuffer.get(), 0, GetStride());
 	dev->SetIndices(IndexBuffer.get());
+}
 
-	// Set render states for normal materials
-	dev->SetRenderState(D3DRS_ZWRITEENABLE, true);
-	dev->SetRenderState(D3DRS_ALPHABLENDENABLE, false);
-	dev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
-	dev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
-	dev->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_DIFFUSE);
-
-	for (int i{}; i < NumNormalMaterials; ++i)
-	{
-		auto& Mat = MaterialBatches[i];
-		auto& Tex = Textures[i];
-
-		if (Tex.Diffuse == -1)
-			continue;
-
-		dev->SetTexture(0, TextureMemory[Tex.Diffuse].get());
-
-		auto hr = dev->DrawIndexedPrimitive(
-			D3DPT_TRIANGLELIST,    // Primitive type
-			Mat.VertexBase,        // BaseVertexIndex
-			0,                     // MinVertexIndex
-			Mat.TriangleCount * 3, // NumVertices
-			Mat.IndexBase,         // Start index
-			Mat.TriangleCount);    // Primitive count
-
-		assert(SUCCEEDED(hr));
-	}
-
+void RBspObjectDrawD3D9::SetEpilogueStates()
+{
 	// Disable alpha testing
 	dev->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_ALWAYS);
 	dev->SetRenderState(D3DRS_ALPHATESTENABLE, false);
@@ -346,3 +459,18 @@ void RBspObjectDrawD3D9::Draw()
 	dev->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
 	dev->SetFVF(D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_TEX1);
 }
+
+void RBspObjectDrawD3D9::Draw()
+{
+	SetPrologueStates();
+
+	RenderNormalMaterials();
+	if (OpacityMaterialsEnd > NormalMaterialsEnd)
+		RenderOpacityMaterials();
+	if (AlphaTestMaterialsEnd > OpacityMaterialsEnd)
+		RenderAlphaTestMaterials();
+
+	SetEpilogueStates();
+}
+
+_NAMESPACE_REALSPACE2_END

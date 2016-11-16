@@ -1,8 +1,6 @@
 #ifndef __REALSOUNDOGG_HEADER__
 #define __REALSOUNDOGG_HEADER__
 
-#pragma warning(disable:4099)
-
 #include <time.h>
 #include <math.h>
 #include <io.h>

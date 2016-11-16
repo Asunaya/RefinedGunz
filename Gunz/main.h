@@ -1,7 +1,5 @@
 #pragma once
 
-#pragma warning(disable:4099)
-
 #ifdef _DEBUG
 #pragma comment(lib,"cmld.lib")
 #pragma comment(lib,"mint2d.lib")
@@ -32,7 +30,6 @@
 #pragma comment(lib, "silk_float.lib")
 #pragma comment(lib, "portaudio.lib")
 #endif
-
 
 #pragma comment(lib,"winmm.lib")
 

@@ -1,9 +1,5 @@
 #include "stdafx.h"
 
-
-// disable warning. by dubble
-#pragma warning( disable : 4311 4312 )
-
 /*************************************************************************
  FILE       : ODBCRecordset.cpp
 

@@ -1,8 +1,6 @@
 #ifndef _MPROFILER_H
 #define _MPROFILER_H
 
-#pragma warning( disable : 4786 )
-
 #include <stack>
 #include <list>
 #include "GlobalTypes.h"
@@ -29,19 +27,14 @@ struct MPROFILELOG{
 // Temporary Profile Call Stack
 class MProfileStack : public std::stack<MPROFILEITEM*>{
 public:
-	virtual ~MProfileStack(void);
+	virtual ~MProfileStack();
 };
 
 // One Loop Log
 class MProfileLoop : public std::list<MPROFILELOG*>{
 public:
-	/*
-	void AddProfile(char* szName, int nDepth);
-	void SetProfile(int nTime);
-	*/
 	void AddProfile(MPROFILELOG* pPL);
-
-	int GetTotalTime(void);
+	int GetTotalTime();
 };
 
 
@@ -55,11 +48,11 @@ protected:
 	MProfileLoop*	m_pOneLoopProfile;
 	MProfileLoop*	m_pOneLoopProfileResult;
 
-	char*			m_szFirstProfileName;		// 맨처음 시작한 프로파일 이름 ( Depth 0 )
+	char*			m_szFirstProfileName;
 
 public:
-	MProfiler(void);
-	virtual ~MProfiler(void);
+	MProfiler();
+	virtual ~MProfiler();
 
 	void BeginProfile(char* szProfileName);
 	void EndProfile(char* szProfileName);
@@ -72,10 +65,10 @@ public:
 	void EnableOneLoopProfile(bool bEnable);
 	bool IsOneLoopProfile(void);
 	// if not enabled, return NULL
-	MProfileLoop* GetOneLoopProfile(void);
+	MProfileLoop* GetOneLoopProfile();
 
 	// Accumulated Profile Result
-	MProfileLoop* GetProfile(void);
+	MProfileLoop* GetProfile();
 };
 
 
@@ -90,7 +83,7 @@ public:
 		g_DefaultProfiler.BeginProfile(szProfileName);
 		strcpy_safe(m_szProfileName, szProfileName);
 	}
-	virtual ~MProfileInstance(void){
+	virtual ~MProfileInstance(){
 		g_DefaultProfiler.EndProfile(m_szProfileName);
 	}
 };

@@ -98,7 +98,7 @@ bool ZEffectBillboardSource::Draw(rvector &Pos, rvector &Dir, rvector &Up, rvect
 
 	RGetDevice()->SetStreamSource(0, GetCommonRectVertexBuffer(), 0, sizeof(CUSTOMVERTEX));
 	RGetDevice()->SetFVF(D3DFVF_CUSTOMVERTEX);
-	RGetDevice()->SetTexture(0, m_pTex->m_pTex);
+	RGetDevice()->SetTexture(0, m_pTex->m_pTex.get());
 	RGetDevice()->DrawPrimitive(D3DPT_TRIANGLEFAN, 0, 2);
 	RGetDevice()->SetStreamSource( 0, NULL, 0, 0 );
 

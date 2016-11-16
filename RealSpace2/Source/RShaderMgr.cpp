@@ -48,7 +48,7 @@ bool RShaderMgr::Initialize()
 	if (m_ShaderVec.size() == 0)
 	{
 		HRESULT hr;
-		LPDIRECT3DVERTEXDECLARATION9 _pVShaderDecl = NULL;
+		D3DPtr<IDirect3DVertexDeclaration9> VShaderDecl;
 
 		D3DVERTEXELEMENT9 decl[] =
 		{
@@ -61,15 +61,15 @@ bool RShaderMgr::Initialize()
 			D3DDECL_END()
 		};
 
-		if (FAILED(hr = RGetDevice()->CreateVertexDeclaration(decl, &_pVShaderDecl)))
+		if (FAILED(hr = RGetDevice()->CreateVertexDeclaration(decl, MakeWriteProxy(VShaderDecl))))
 		{
 			MLog("RShaderMgr::Initialize -- Failed to create vertex declaration\n");
 			return false;
 		}
 
-		m_ShaderDeclVec.push_back(_pVShaderDecl);
+		m_ShaderDeclVec.push_back(std::move(VShaderDecl));
 
-		auto* Shader = CreateVertexShader(skinData);
+		auto Shader = CreateVertexShader(skinData);
 		if (!Shader)
 		{
 			assert(!"Shader Compile Error");
@@ -77,7 +77,7 @@ bool RShaderMgr::Initialize()
 			return false;
 		}
 
-		m_ShaderVec.push_back(Shader);
+		m_ShaderVec.push_back(std::move(Shader));
 
 		if (m_ShaderVec.size() == 1)
 		{
@@ -96,7 +96,7 @@ LPDIRECT3DVERTEXSHADER9 RShaderMgr::getShader(int i_)
 		mlog(" Shader Critical Error \n ");
 		return nullptr;
 	}
-	return m_ShaderVec[i_];
+	return m_ShaderVec[i_].get();
 }
 
 LPDIRECT3DVERTEXDECLARATION9 RShaderMgr::getShaderDecl(int i)
@@ -107,7 +107,7 @@ LPDIRECT3DVERTEXDECLARATION9 RShaderMgr::getShaderDecl(int i)
 		mlog(" ShaderDecl Critical Error \n ");
 		return nullptr;
 	}
-	return m_ShaderDeclVec[i];
+	return m_ShaderDeclVec[i].get();
 }
 
 void RShaderMgr::setMtrl(RMtrl* pmtrl_, float fVisAlpha_)

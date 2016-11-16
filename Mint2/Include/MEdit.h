@@ -1,17 +1,12 @@
 #ifndef MEDIT_H
 #define MEDIT_H
 
-#pragma warning(disable:4786)
-
 #include "MWidget.h"
 #include <list>
 #include "MLookNFeel.h"
 
-using namespace std;
-
 class MEdit;
 
-/// Edit의 Draw 코드가 있는 클래스, 이 클래스를 상속받아서 커스텀룩을 가질 수 있다.
 class MEditLook{
 protected:
 	bool		m_bCustomLook;
@@ -30,11 +25,8 @@ public:
 	}
 };
 
-
-/// Edit
 class MEdit : public MWidget{
 protected:
-//	MPOINT		m_TextOffset;
 	bool		m_bMouseOver;
 	MCOLOR		m_TextColor;
 	int			m_nMaxLength;
@@ -46,12 +38,11 @@ protected:
 	MWidget*	m_pTabHandler;
 
 public:
-	int			m_nSelectionRange;	//< [m_nCaretPos, m_nCaretPos+m_nSelectionRange]
+	int			m_nSelectionRange;
 protected:
-	list<char*>				m_History;			///< 문자열 히스토리
-	list<char*>::iterator	m_nCurrentHistory;	///< 문자열 히스토리중 현재 문자열
+	list<char*>				m_History;
+	list<char*>::iterator	m_nCurrentHistory;
 
-	// Look & Feel
 	DECLARE_LOOK(MEditLook)
 	DECLARE_LOOK_CLIENT()
 
@@ -61,9 +52,6 @@ public:
 protected:
 	virtual bool OnEvent(MEvent* pEvent, MListener* pListener);
 	
-	/// 키 입력이 들어왔을 때 키값에 따라 처리할 수 있다.
-	/// @return	true를 리턴하면 InputFilter에서 처리됐음을 의미한다. \n
-	///			false를 리턴하면 Edit에 스트링을 추가함을 의미한다.
 	virtual bool InputFilterKey(int nKey);	// MWM_KEYDOWN
 	virtual bool InputFilterChar(int nKey);	// MWM_CHAR
 
@@ -77,10 +65,6 @@ public:
 	virtual ~MEdit();
 
 	virtual void OnHide(void);
-
-	//void SetTextOffset(MPOINT p);
-	//void SetTextColor(MCOLOR color);
-	//MCOLOR GetTextColor(void);
 
 	virtual void SetText(const char* szText);
 	virtual const char* GetText(void);
@@ -114,12 +98,12 @@ public:
 	virtual const char* GetClassName(void){ return MINT_EDIT; }
 };
 
-#define MEDIT_KEYDOWN_MSG		"keydown"	///< 키를 입력했을때
-#define MEDIT_CHAR_MSG			"char"		///< 키를 입력했을때
-#define MEDIT_ENTER_VALUE		"entered"	///< Enter키를 입력했을때
-#define MEDIT_ESC_VALUE			"esc"		///< ESC키를 입력했을때
+#define MEDIT_KEYDOWN_MSG		"keydown"
+#define MEDIT_CHAR_MSG			"char"
+#define MEDIT_ENTER_VALUE		"entered"
+#define MEDIT_ESC_VALUE			"esc"
 
 
 
-#define MEDIT_BLINK_TIME		400		///< 커서가 깜밖이는 딜레이, 단위는 mili-second
+#define MEDIT_BLINK_TIME		400
 #endif

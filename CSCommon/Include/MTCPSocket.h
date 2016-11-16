@@ -1,12 +1,9 @@
-#ifndef	MTCPSOCKET_H
-#define MTCPSOCKET_H
+#pragma once
 
-#pragma warning(disable:4786)
 #include <list>
 #include <vector>
 #include <deque>
 #include <algorithm>
-using namespace std;
 
 #include <winsock2.h>
 #include <windows.h>
@@ -32,7 +29,7 @@ struct MTCPSendQueueItem
 	DWORD			dwPacketSize;
 };
 
-typedef list<MTCPSendQueueItem*>	TCPSendList;
+typedef std::list<MTCPSendQueueItem*>	TCPSendList;
 typedef TCPSendList::iterator			TCPSendListItor;
 
 struct MSocketObj
@@ -42,7 +39,7 @@ struct MSocketObj
 	TCPSendList			sendlist;
 };
 
-typedef list<MSocketObj*>			SocketList;
+typedef std::list<MSocketObj*>			SocketList;
 typedef SocketList::iterator		SocketListItor;
 
 enum SOCKET_ERROR_EVENT {eeGeneral, eeSend, eeReceive, eeConnect, eeDisconnect, eeAccept};
@@ -122,7 +119,6 @@ public:
 	MDISCONNECTCALLBACK*	m_fnDisconnectCallback;
 };
 
-/// 서버용 소켓 쓰레드
 class MServerSocketThread : public MTCPSocketThread 
 {
 private:
@@ -165,8 +161,8 @@ class MTCPSocket
 private:
 protected:
 	bool						m_bInitialized;
-	int							m_nPort;			// 포트
-	SOCKET						m_Socket;			// My Socket
+	int							m_nPort;
+	SOCKET						m_Socket;
 	MTCPSocketThread*			m_pSocketThread;
 
 	virtual bool Initialize();
@@ -205,7 +201,7 @@ public:
 
 	bool Listen(int nPort);
 	bool Close();
-	bool Disconnect(MSocketObj* pSocketObj);		// Server에서만 사용 
+	bool Disconnect(MSocketObj* pSocketObj);
 
 	bool Send(MSocketObj* pSocketObj, char* pPacket, DWORD dwPacketSize);	
 
@@ -224,22 +220,22 @@ class MClientSocket: public MTCPSocket
 {
 private:
 protected:
-	char			m_szHost[255];		// Hpst IP
+	char			m_szHost[255];
 	virtual void Finalize();
 	virtual bool Initialize();
 	virtual bool OpenSocket();
 	virtual void CloseSocket();
 
-	virtual void SimpleCloseSocket();	// 쓰레드는 죽이지 않고, 소켓만 닫을때. - by 추교성.
+	virtual void SimpleCloseSocket();
 public:
 	MClientSocket();
 	virtual ~MClientSocket();
 
-	bool Connect(SOCKET* pSocket, char* szIP, int nPort);			// Client에서만 사용
+	bool Connect(SOCKET* pSocket, char* szIP, int nPort);
 	bool Disconnect();
 	bool Send(char *pPacket, DWORD dwPacketSize);
 
-	virtual bool SimpleDisconnect();	// -by 추교성.
+	virtual bool SimpleDisconnect();
 
 	void SetRecvCallback(MCLIENTRECVCALLBACK pCallback) { ((MClientSocketThread*)(m_pSocketThread))->m_fnRecvCallback = pCallback; }
 	void SetConnectCallback(MCONNECTCALLBACK pCallback) { ((MClientSocketThread*)(m_pSocketThread))->m_fnConnectCallback = pCallback; }
@@ -250,5 +246,3 @@ public:
 
 
 #pragma comment(lib, "ws2_32.lib")
-
-#endif

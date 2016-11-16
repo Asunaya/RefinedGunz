@@ -434,7 +434,7 @@ void Portal::RenderEdge(const PortalInfo& portalinfo)
 	RGetDevice()->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
 	RGetDevice()->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL);
 
-	RGetDevice()->SetTexture(0, PortalEdgeTex[portalinfo.Index]);
+	RGetDevice()->SetTexture(0, PortalEdgeTex[portalinfo.Index].get());
 
 	pRectangleMesh->DrawSubset(0);
 
@@ -1331,7 +1331,7 @@ void Portal::RenderPortals(const RecursionContext& rc)
 			RGetDevice()->SetTransform(D3DTS_WORLD, &portalinfo.matWorld);
 
 			RGetDevice()->SetFVF(pEdgeMesh->GetFVF());
-			RGetDevice()->SetTexture(0, BlackTex);
+			RGetDevice()->SetTexture(0, BlackTex.get());
 
 			RGetDevice()->SetMaterial(&Mat);
 

@@ -150,7 +150,7 @@ void HitboxManager::Draw()
 	RGetDevice()->SetTexture(0, NULL);
 	RGetDevice()->SetFVF(D3DFVF_XYZ);
 
-	RGetDevice()->SetStreamSource(0, pVB, 0, sizeof(Vertex));
+	RGetDevice()->SetStreamSource(0, pVB.get(), 0, sizeof(Vertex));
 
 	for (auto &it : *ZGetCharacterManager())
 	{

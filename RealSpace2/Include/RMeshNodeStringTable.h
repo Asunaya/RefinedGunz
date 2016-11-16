@@ -4,8 +4,6 @@
 #include <string>
 #include <unordered_map>
 
-#pragma warning(disable : 4996)
-
 _NAMESPACE_REALSPACE2_BEGIN
 
 enum RMeshNodeNameType
@@ -72,7 +70,7 @@ enum RMeshNodeNameType
 	RMeshNodeNameType_End
 };
 
-typedef std::unordered_map< string , int > rmesh_node_table;
+typedef std::unordered_map<std::string, int> rmesh_node_table;
 
 class RMeshNodeStringTable
 {
@@ -84,8 +82,8 @@ public:
 
 	void Destroy();
 
-	int Add(const string& str,int );
-	int Get(const string& str);
+	int Add(const std::string& str,int );
+	int Get(const std::string& str);
 	int Get(char* str) { return Get(string(str)); }
 
 	rmesh_node_table m_table;
@@ -95,4 +93,4 @@ RMeshNodeStringTable* RGetMeshNodeStringTable();
 
 _NAMESPACE_REALSPACE2_END
 
-#endif//_RMeshNodeStringTable_h
+#endif

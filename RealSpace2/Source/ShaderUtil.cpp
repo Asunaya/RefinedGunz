@@ -1,16 +1,17 @@
 #include "stdafx.h"
 #include <fstream>
 #include "RealSpace2.h"
+#include "MUtil.h"
 
 using namespace RealSpace2;
 
 _NAMESPACE_REALSPACE2_BEGIN
 
 template <typename T, typename fn_t>
-static T* CreateShader(const DWORD* Function, fn_t CreateShaderFunc)
+static D3DPtr<T> CreateShader(const DWORD* Function, fn_t CreateShaderFunc)
 {
-	T* Shader;
-	auto hr = (RGetDevice()->*CreateShaderFunc)(Function, &Shader);
+	D3DPtr<T> Shader;
+	auto hr = (RGetDevice()->*CreateShaderFunc)(Function, MakeWriteProxy(Shader));
 	if (FAILED(hr))
 	{
 		MLog("Failed to create shader! Error code = %d\n", hr);
@@ -20,14 +21,14 @@ static T* CreateShader(const DWORD* Function, fn_t CreateShaderFunc)
 	return Shader;
 }
 
-IDirect3DVertexShader9* CreateVertexShader(const BYTE* Function) {
+D3DPtr<IDirect3DVertexShader9> CreateVertexShader(const BYTE* Function) {
 	return CreateShader<IDirect3DVertexShader9>(reinterpret_cast<const DWORD*>(Function), &IDirect3DDevice9::CreateVertexShader);
 }
-IDirect3DPixelShader9* CreatePixelShader(const BYTE* Function) {
+D3DPtr<IDirect3DPixelShader9> CreatePixelShader(const BYTE* Function) {
 	return CreateShader<IDirect3DPixelShader9>(reinterpret_cast<const DWORD*>(Function), &IDirect3DDevice9::CreatePixelShader);
 }
 template <typename T, typename fn_t>
-static T* CreateShaderFromFile(const char* Filename, fn_t CreateShaderFunc)
+static D3DPtr<T> CreateShaderFromFile(const char* Filename, fn_t CreateShaderFunc)
 {
 	std::ifstream file{ Filename, std::ios::binary | std::ios::ate };
 	auto size = file.tellg();
@@ -42,10 +43,10 @@ static T* CreateShaderFromFile(const char* Filename, fn_t CreateShaderFunc)
 	return CreateShader<T>(Function, CreateShaderFunc);
 }
 
-IDirect3DVertexShader9* CreateVertexShaderFromFile(const char* Filename) {
+D3DPtr<IDirect3DVertexShader9> CreateVertexShaderFromFile(const char* Filename) {
 	return CreateShaderFromFile<IDirect3DVertexShader9>(Filename, &IDirect3DDevice9::CreateVertexShader);
 }
-IDirect3DPixelShader9* CreatePixelShaderFromFile(const char* Filename) {
+D3DPtr<IDirect3DPixelShader9> CreatePixelShaderFromFile(const char* Filename) {
 	return CreateShaderFromFile<IDirect3DPixelShader9>(Filename, &IDirect3DDevice9::CreatePixelShader);
 }
 

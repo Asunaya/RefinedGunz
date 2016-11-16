@@ -431,7 +431,7 @@ void VoiceChat::Draw()
 		D3DXVECTOR2 SpeakerIconOrigin = TopLeft + D3DXVECTOR2(RELWIDTH(10), RELHEIGHT(10));
 		D3DXVECTOR2 SpeakerIconExtents(RELWIDTH(30), RELHEIGHT(30));
 
-		g_Draw.TexturedQuad(SpeakerIconOrigin, SpeakerIconOrigin + SpeakerIconExtents, SpeakerTexture);
+		g_Draw.TexturedQuad(SpeakerIconOrigin, SpeakerIconOrigin + SpeakerIconExtents, SpeakerTexture.get());
 
 		i++;
 	};

@@ -596,8 +596,8 @@ IDirect3DTexture9* HueShiftTexture(IDirect3DTexture9* Tex, float Hue)
 		D3DPtr<IDirect3DSurface9> NewSurface = nullptr;
 		NewTex->GetSurfaceLevel(Level, MakeWriteProxy(NewSurface));
 
-		if (FAILED(D3DXLoadSurfaceFromSurface(NewSurface, nullptr, nullptr,
-			OrigSurface, nullptr, nullptr, D3DX_FILTER_NONE, 0)))
+		if (FAILED(D3DXLoadSurfaceFromSurface(NewSurface.get(), nullptr, nullptr,
+			OrigSurface.get(), nullptr, nullptr, D3DX_FILTER_NONE, 0)))
 		{
 			MLog("Failed to load surface from material\n");
 			return nullptr;

@@ -9,8 +9,6 @@
 
 _USING_NAMESPACE_REALSPACE2
 
-#pragma warning( disable : 4244 )
-
 static int Floorer2PowerSize(int v)
 {
 	if(v<=2)			return 2;
