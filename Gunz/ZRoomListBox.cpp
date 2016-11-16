@@ -30,7 +30,6 @@ ZRoomListBox::ZRoomListBox(const char* szName, MWidget* pParent, MListener* pLis
 : MWidget(szName, pParent, pListener)
 {
 	m_nPrevStageCount = m_nNextStageCount = -1;
-	//m_pMapInfo			= new sMapInfo[NUM_DISPLAY_ROOM];
 	m_iNumRoom		= 0;
 	m_RoomWidth		= 0;
 	m_RoomHeight	= 0;
@@ -45,7 +44,6 @@ ZRoomListBox::ZRoomListBox(const char* szName, MWidget* pParent, MListener* pLis
 
 ZRoomListBox::~ZRoomListBox(void)
 {
-	//SAFE_DELETE_ARRAY(m_pMapInfo);
 	for( map<string, MBitmap*>::iterator	iter = m_pMapImage.begin(); iter != m_pMapImage.end(); )
 	{
 		m_pMapImage.erase(iter++);
@@ -106,12 +104,9 @@ void ZRoomListBox::OnDraw( MDrawContext* pDC )
 			}
 		}
 
-
-		// infomation 그리기
 		char szBuf[128];
 		MRECT r;
 
-		// 방번호
  		r.x = width + m_RoomWidth*0.01f	+ pressed_reposition;
 		r.y = height + m_RoomHeight*0.1f + pressed_reposition;
 		r.w = m_RoomWidth*0.1;
@@ -127,7 +122,6 @@ void ZRoomListBox::OnDraw( MDrawContext* pDC )
 			pDC->SetColor( 181, 247, 66 );
 		pDC->Text( r, szBuf );
 
-		// 인원수
 		r.x = width + m_RoomWidth*0.01f + pressed_reposition;
 		r.y = height + m_RoomHeight*0.5f + pressed_reposition;
 		r.w = m_RoomWidth*0.1f;
@@ -142,13 +136,11 @@ void ZRoomListBox::OnDraw( MDrawContext* pDC )
 			pDC->SetColor( 181, 247, 66 );
 		pDC->Text( r, szBuf );
 
-
-		// 방 이름
 		pDC->SetFont( MFontManager::Get("FONTc8b") );
  		r.x = width + m_RoomWidth*0.12 + pressed_reposition;
- 		r.y = height /*+ m_RoomHeight*0.3*/ + pressed_reposition;
+ 		r.y = height + pressed_reposition;
   		r.w = m_RoomWidth*0.75;
-		r.h = m_RoomHeight/**0.85*/;
+		r.h = m_RoomHeight;
  		
 		MFont * pFont  = pDC->GetFont();
 		char szBufTemp[SMI_MAPNAME_LENGTH];
@@ -158,16 +150,16 @@ void ZRoomListBox::OnDraw( MDrawContext* pDC )
 		{
 			while( strLength < 29 )
 			{
-				if( m_pMapInfo[i].map_name[strLength] == '0' ) // 이름의 끝
+				if( m_pMapInfo[i].map_name[strLength] == '0' )
 					strcpy_safe( szBufTemp, m_pMapInfo[i].room_name );
 				if( ((unsigned char)m_pMapInfo[i].room_name[strLength]) > 127 )
 					strLength += 2;
 				else
 					++strLength;
 			}
-			strncpy( szBufTemp, m_pMapInfo[i].room_name, strLength*sizeof(char) );
+			strncpy_safe( szBufTemp, m_pMapInfo[i].room_name, strLength*sizeof(char) );
 			szBufTemp[strLength] = '\0';
-			strcat( szBufTemp, "..."	);
+			strcat_safe( szBufTemp, "..."	);
 
 			pDC->SetColor( 0,0,0);
 			pDC->Text( MRECT( r.x+1, r.y+1, r.w, r.h), szBufTemp, MAM_LEFT);
@@ -188,8 +180,6 @@ void ZRoomListBox::OnDraw( MDrawContext* pDC )
 			pDC->Text(r, m_pMapInfo[i].room_name, MAM_LEFT );
 		}
 
-		
-		//레벨제한
 		r.x = width + m_RoomWidth*0.75f + pressed_reposition;
 		r.y = height + pressed_reposition;
 		r.w = m_RoomWidth * 0.2f ;

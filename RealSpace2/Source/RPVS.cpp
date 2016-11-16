@@ -43,12 +43,12 @@ struct RWinding {
 
 	void Dump()
 	{
-		static char buffer[256],buffer2[256];
+		char buffer[256], buffer2[256];
 		sprintf_safe(buffer,"n = %d ",nCount);
-		for(int i=0;i<nCount;i++)
+		for (int i = 0; i < nCount; i++)
 		{
 			sprintf_safe(buffer2,"(%4.f,%4.f,%4.f) ",pVertices[i].x,pVertices[i].y,pVertices[i].z);
-			strcat(buffer,buffer2);
+			strcat_safe(buffer,buffer2);
 		}
 		OutputDebugString(buffer);
 	}

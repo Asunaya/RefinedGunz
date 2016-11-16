@@ -36,7 +36,7 @@ const char* ZGetSexStr(MMatchSex nSex, bool bShort)
 	return "";
 }
 
-void ZGetTimeStrFromSec(char* poutStr, unsigned long int nSec)
+void ZGetTimeStrFromSec(char* poutStr, size_t maxlen, u32 nSec)
 {
 	int d, h, m, s;
 
@@ -51,25 +51,21 @@ void ZGetTimeStrFromSec(char* poutStr, unsigned long int nSec)
 	
 	s = nSec;
 
-	char sztemp[64];
+	char sztemp[128];
 
 	poutStr[0] = 0;
-	if (d != 0)
-	{
-		sprintf_safe(sztemp, "%d%s ", d, ZMsg( MSG_CHARINFO_DAY));
-		strcat(poutStr, sztemp);
-	}
-	if (h != 0)
-	{
-		sprintf_safe(sztemp, "%d%s ", h, ZMsg( MSG_CHARINFO_HOUR));
-		strcat(poutStr, sztemp);
-	}
-	if (m != 0)
-	{
-		sprintf_safe(sztemp, "%d%s ", m, ZMsg( MSG_CHARINFO_MINUTE));
-		strcat(poutStr, sztemp);
-	}
-	sprintf_safe(sztemp, "%d%s", s, ZMsg( MSG_CHARINFO_SECOND));
-	strcat(poutStr, sztemp);
-}
 
+	auto append = [&](auto val, auto msgid) {
+		sprintf_safe(sztemp, "%d%s ", val, ZMsg(msgid));
+		strcat_safe(poutStr, maxlen, sztemp);
+	};
+
+	if (d != 0)
+		append(d, MSG_CHARINFO_DAY);
+	if (h != 0)
+		append(h, MSG_CHARINFO_HOUR);
+	if (m != 0)
+		append(m, MSG_CHARINFO_MINUTE);
+
+	append(s, MSG_CHARINFO_SECOND);
+}

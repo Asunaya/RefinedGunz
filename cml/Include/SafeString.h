@@ -2,30 +2,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
+#include <cassert>
 
 #pragma warning(push)
 #pragma warning(disable:4996)
-
-//template <bool b, size_t size1, size_t size2>
-//inline char* strcpy_safe_fixed_impl(char *Dest, const char* Source);
-//
-//template <size_t size1, size_t size2>
-//inline char* strcpy_safe_fixed_impl<true, size1, size2>(char* Dest, const char* Source)
-//{
-//	return strcpy(Dest, Source);
-//}
-//
-//template <size_t size1, size_t size2>
-//inline char* strcpy_safe_fixed_impl<false, size1, size2>(char (&Dest)[size1], const char (&Source)[size2])
-//{
-//	strcpy_safe(Dest, (const char*)Source);
-//}
-//
-//template <size_t size1, size_t size2>
-//inline char* strcpy_safe(char (&Dest)[size1], const char (&Source)[size2])
-//{
-//	strcpy_safe_fixed_impl<(size2 < size1)>(Dest, Source);
-//}
 
 template <bool b, size_t size1, size_t size2>
 struct strcpy_literal_dummy
@@ -50,8 +30,7 @@ inline char* strcpy_literal(char(&Dest)[size1], const char(&Source)[size2])
 	return strcpy_literal_dummy<(size2 < size1), size1, size2>::strcpy_literal_impl(Dest, Source);
 }
 
-template <size_t size>
-inline char* strcpy_safe(char(&Dest)[size], const char *Source)
+inline char* strcpy_trunc(char* Dest, size_t size, const char* Source)
 {
 	auto len = strlen(Source);
 
@@ -67,11 +46,40 @@ inline char* strcpy_safe(char(&Dest)[size], const char *Source)
 	return Dest + len;
 }
 
+template <size_t size>
+inline char* strcpy_trunc(char(&Dest)[size], const char *Source)
+{
+	return strcpy_trunc(Dest, size, Source);
+}
+
 inline char* strcpy_safe(char *Dest, size_t size, const char *Source)
 {
 	auto len = strlen(Source);
 
 	if (size - 1 < len && size > 0)
+	{
+		len = size - 1;
+		assert(false);
+	}
+
+	memcpy(Dest, Source, len);
+
+	Dest[len] = 0;
+
+	return Dest + len;
+}
+
+template <size_t size>
+inline char* strcpy_safe(char(&Dest)[size], const char *Source)
+{
+	return strcpy_safe(Dest, size, Source);
+}
+
+inline char* strncpy_safe(char *Dest, size_t size, const char *Source, size_t Count)
+{
+	auto len = Count;
+
+	if (size - 1 < len)
 	{
 		len = size - 1;
 	}
@@ -86,18 +94,7 @@ inline char* strcpy_safe(char *Dest, size_t size, const char *Source)
 template <size_t size>
 inline char* strncpy_safe(char(&Dest)[size], const char *Source, size_t Count)
 {
-	int len = Count - 1;
-
-	if (size - 1 < len)
-	{
-		len = size - 1;
-	}
-
-	memcpy(Dest, Source, len);
-
-	Dest[len] = 0;
-
-	return Dest + len;
+	return strncpy_safe(Dest, size, Source, Count);
 }
 
 template <size_t size>
@@ -203,6 +200,21 @@ template <size_t size>
 inline int vsprintf_safe(char (&Dest)[size], const char* Format, va_list va)
 {
 	return vsnprintf(Dest, size, Format, va);
+}
+
+template <size_t size>
+void itoa_safe(int val, char(&dest)[size], int radix)
+{
+	if (radix == 10)
+		sprintf_safe(dest, "%d", val);
+	else if (radix == 16)
+		sprintf_safe(dest, "%x", val);
+	else
+		assert(false);
+}
+
+inline auto strcpy_unsafe(char* a, const char* b) {
+	return strcpy(a, b);
 }
 
 #pragma warning(pop)

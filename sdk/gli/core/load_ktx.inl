@@ -137,8 +137,9 @@ namespace detail
 
 	inline texture load_ktx(char const * Filename)
 	{
-		FILE* File = std::fopen(Filename, "rb");
-		if(!File)
+		FILE* File{};
+		auto ret = fopen_s(&File, Filename, "rb");
+		if(ret != 0 || !File)
 			return texture();
 
 		long Beg = std::ftell(File);

@@ -458,9 +458,9 @@ int MMatchClient::OnConnected(SOCKET sock, MUID* pTargetUID, MUID* pAllocUID, un
 	int nAddrLen = sizeof(SOCKADDR_IN);
 	if (getsockname(m_SafeUDP.GetLocalSocket(), (SOCKADDR*)&SockAddr, &nAddrLen) == SOCKET_ERROR)
 		nErrorCode = WSAGetLastError();
-	char* pszIP = inet_ntoa(SockAddr.sin_addr);
+	auto IP = GetIPv4String(SockAddr.sin_addr);
 	unsigned int nPort = ntohs(SockAddr.sin_port);
-	mlog("UDP Address = %s:%d \n", pszIP, nPort);
+	mlog("UDP Address = %s:%d \n", IP.c_str(), nPort);
 #endif
 
 	if (sock == m_ClientSocket.GetSocket()) {
@@ -1045,7 +1045,7 @@ void MMatchClient::ParseUDPPacket(char* pData, MPacketHeader* pPacketHeader, DWO
 			unsigned short nCheckSum = MBuildCheckSum(pPacketHeader, pPacketHeader->nSize);
 			if (pPacketHeader->nCheckSum != nCheckSum) {
 				static int nLogCount = 0;
-				if (nLogCount++ < 100) {	// Log Flooding 방지
+				if (nLogCount++ < 100) {	// Log Flooding
 					mlog("MMatchClient::ParseUDPPacket() -> CHECKSUM ERROR(R=%u/C=%u)\n", 
 						pPacketHeader->nCheckSum, nCheckSum);
 				}
@@ -1065,21 +1065,18 @@ void MMatchClient::ParseUDPPacket(char* pData, MPacketHeader* pPacketHeader, DWO
 				{
 					pCmd->m_Sender = uidPeer;
 				} else {
-					// TODO: 여기 수정해야함.
 					sockaddr_in Addr;
 					Addr.sin_addr.S_un.S_addr = dwIP;
 					Addr.sin_port = nPort;
-					char* pszIP = inet_ntoa(Addr.sin_addr);
+					auto IP = GetIPv4String(Addr.sin_addr);
 
-					if (strcmp(pszIP, GetAgentIP()) == 0) 
+					if (IP == GetAgentIP()) 
 					{
 						pCmd->m_Sender = GetAgentServerUID();
 					}
 					else if( (MC_RESPONSE_SERVER_LIST_INFO == pCmd->GetID()) ||
 						(MC_RESPONSE_BLOCK_COUNTRY_CODE_IP == pCmd->GetID()) )
 					{
-						// 특별히 하는건 없음.
-						// Lcator는 Peer설정이 되지 않기때문에 여기서 따로 처리함.
 					}
 					else 
 					{
@@ -1103,7 +1100,7 @@ void MMatchClient::ParseUDPPacket(char* pData, MPacketHeader* pPacketHeader, DWO
 
 			if (pPacketHeader->nCheckSum != nCheckSum) {
 				static int nLogCount = 0;
-				if (nLogCount++ < 100) {	// Log Flooding 방지
+				if (nLogCount++ < 100) {	// Log Flooding
 					mlog("MMatchClient::ParseUDPPacket() -> CHECKSUM ERROR(R=%u/C=%u)\n", 
 						pPacketHeader->nCheckSum, nCheckSum);
 				}
@@ -1123,14 +1120,13 @@ void MMatchClient::ParseUDPPacket(char* pData, MPacketHeader* pPacketHeader, DWO
 
 				if (!pCmd->SetData(pData, &m_CommandManager))
 				{
-					// TODO: 여기 수정해야함.
 					sockaddr_in Addr;
 					Addr.sin_addr.S_un.S_addr = dwIP;
 					Addr.sin_port = nPort;
-					char* pszIP = inet_ntoa(Addr.sin_addr);
+					auto IP = GetIPv4String(Addr.sin_addr);
 
 					mlog("MMatchClient::ParseUDPPacket() -> MSGID_COMMAND SetData Error(%s:%d), size=%d\n", 
-						pszIP, nPort, nCmdSize);
+						IP.c_str(), nPort, nCmdSize);
 
 					delete pCmd; pCmd = NULL;
 					return;
@@ -1141,23 +1137,8 @@ void MMatchClient::ParseUDPPacket(char* pData, MPacketHeader* pPacketHeader, DWO
 				{
 					pCmd->m_Sender = uidPeer;
 				} else {
-					// Agent와는 암호화된 커맨드는 사용하지 않는다.
 					delete pCmd;
 					return;
-/*
-					// TODO: 여기 수정해야함.
-					sockaddr_in Addr;
-					Addr.sin_addr.S_un.S_addr = dwIP;
-					Addr.sin_port = nPort;
-					char* pszIP = inet_ntoa(Addr.sin_addr);
-
-					if (strcmp(pszIP, GetAgentIP()) == 0) {
-						pCmd->m_Sender = GetAgentServerUID();
-					}else {
-						delete pCmd; pCmd = NULL;
-						return;
-					}
-*/
 				}
 
 				pCmd->m_Receiver = m_This;
@@ -1201,10 +1182,9 @@ void MMatchClient::CastAgentPeerConnect()
 	pCmd->AddParameter(new MCommandParameterUID(GetPlayerUID()));
 	pCmd->AddParameter(new MCommandParameterString("localhost"));
 	pCmd->AddParameter(new MCommandParameterUInt(0));
-	pCmd->AddParameter(new MCommandParameterString(""));	// 수신측에서 IP로 치환됨
-	pCmd->AddParameter(new MCommandParameterUInt(0));		// 수신측에서 Port로 치환됨
+	pCmd->AddParameter(new MCommandParameterString(""));
+	pCmd->AddParameter(new MCommandParameterUInt(0));
 	
-	// MSafeUDP* pSafeUDP = GetSafeUDP();
 	SendCommandByUDP(pCmd, GetAgentIP(), GetAgentPeerPort());
 	delete pCmd;
 }
@@ -1228,8 +1208,6 @@ void MMatchClient::StartUDPTest(const MUID& uidChar)
 
 void MMatchClient::InitPeerCrypt(const MUID& uidStage, unsigned int nChecksum)
 {
-	//mlog("Init Peer Crypt (%u,%u,%u)\n", uidStage.High, uidStage.Low, nChecksum);
-
 	MPacketCrypterKey key;
 	MMakeSeedKey(&key, MUID(3465, nChecksum), uidStage, 9578234);
 

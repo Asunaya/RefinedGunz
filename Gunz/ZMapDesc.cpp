@@ -410,38 +410,35 @@ bool ZMapDesc::LoadSmokeDesc(const char* pFileName)
 
 	ZMapSmokeDummy* pMapSmoke = NULL;
 
-	char drive[_MAX_DRIVE],dir[_MAX_DIR],fname[_MAX_FNAME],ext[_MAX_EXT];
+	char drive[_MAX_DRIVE], dir[_MAX_DIR], fname[_MAX_FNAME], ext[_MAX_EXT];
 
-	for( int i = 0 ; i < iCount; ++i )
+	for (int i = 0; i < iCount; ++i)
 	{
-		child		= root.GetChildNode(i);
-		child.GetTagName( TagName );
-		if( TagName[0] == '#' )
+		child = root.GetChildNode(i);
+		child.GetTagName(TagName);
+		if (TagName[0] == '#')
 		{
 			continue;
 		}
 
-		child.GetAttribute( Attribute, "NAME" );
+		child.GetAttribute(Attribute, "NAME");
 
-		_splitpath(Attribute,drive,dir,fname,ext);
+		_splitpath_s(Attribute,drive,dir,fname,ext);
 		
-		pMapSmoke = m_SmokeDummyMgr.Get( string( fname ) );
+		pMapSmoke = m_SmokeDummyMgr.Get(fname);
 
 		if( pMapSmoke ) {
 
 			if( child.GetAttribute( Attribute, "DIRECTION" )) {
 
 				if(pMapSmoke->m_SmokeType == ZMapSmokeType_ST) {
-
-//					static rmatrix _mrot = RGetRotY(180) * RGetRotX(90);
-//					((ZMapSmokeST*)pMapSmoke)->m_vSteamDir = pMapSmoke->m_vDir * _mrot;
 					((ZMapSmokeST*)pMapSmoke)->m_vSteamDir = pMapSmoke->m_vDir;
 				}
 				
 				D3DXMATRIX RotMat;
 				rvector dir = rvector( 0,1,0 );
 				int theta;
-				sscanf( Attribute, "%d", &theta );
+				sscanf_s( Attribute, "%d", &theta );
 				auto up = rvector(0, 0, 1);
 				D3DXMatrixRotationAxis( &RotMat, &up, ((float)theta*D3DX_PI/180) );
 				dir = dir * RotMat;
@@ -452,42 +449,42 @@ bool ZMapDesc::LoadSmokeDesc(const char* pFileName)
 			if( child.GetAttribute( Attribute, "LIFE" )) {
 
 				float fLife=0.f;
-				sscanf( Attribute, "%f", &fLife );
+				sscanf_s( Attribute, "%f", &fLife );
 				pMapSmoke->m_fLife = fLife;
 			}
 
 			if( child.GetAttribute( Attribute, "TOGGLEMINTIME" )) {
 
 				float fToggleMinTime=0.f;
-				sscanf( Attribute, "%f", &fToggleMinTime );
+				sscanf_s( Attribute, "%f", &fToggleMinTime );
 				pMapSmoke->m_fToggleMinTime = fToggleMinTime;
 			}
 
 			if( child.GetAttribute( Attribute, "POWER" )) {
 
 				float power=0.f;
-				sscanf( Attribute, "%f", &power );
+				sscanf_s( Attribute, "%f", &power );
 				pMapSmoke->m_fPower = power;
 			}
 
 			if(child.GetAttribute( Attribute, "DELAY" ) ) {
 
 				int delay=0; 
-				sscanf( Attribute, "%d", &delay );
+				sscanf_s( Attribute, "%d", &delay );
 				pMapSmoke->m_nDelay = delay;
 			}
 
 			if(child.GetAttribute( Attribute, "SIZE" ) ) {
 
 				float _size=0;
-				sscanf( Attribute, "%f", &_size );
+				sscanf_s( Attribute, "%f", &_size );
 				pMapSmoke->m_fSize = _size;
 			}
 
 			if(child.GetAttribute( Attribute, "COLOR" ) ) {
 
 				int r,g,b;
-				sscanf( Attribute, "%d,%d,%d", &r,&g,&b );
+				sscanf_s( Attribute, "%d,%d,%d", &r,&g,&b );
 				pMapSmoke->m_dwColor = D3DCOLOR_ARGB(0,min(r,255),min(g,255),min(b,255));
 			}
 		}
@@ -498,7 +495,7 @@ bool ZMapDesc::LoadSmokeDesc(const char* pFileName)
 
 float ZMapDesc::GetThisTime()
 {
-	if(g_pGame)//게임중이면
+	if(g_pGame)
 		return g_pGame->GetTime();
 
 	float _time = (GetGlobalTimeMS()-m_StartTime)/1000.f;

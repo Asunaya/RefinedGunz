@@ -4,23 +4,24 @@
 
 #include "BulletCollisionLibs.h"
 
-static bool GetLogFileName(char* pszBuf)
+template <size_t size>
+static bool GetLogFileName(char (&pszBuf)[size])
 {
 	if (PathIsDirectory("Log") == FALSE)
 		CreateDirectory("Log", NULL);
 
 	time_t		tClock;
-	struct tm*	ptmTime;
+	struct tm	tmTime;
 
 	time(&tClock);
-	ptmTime = localtime(&tClock);
+	auto err = localtime_s(&tmTime, &tClock);
 
 	char szFileName[_MAX_DIR];
 
 	int nFooter = 1;
 	while (TRUE) {
-		sprintf(szFileName, "Log/MatchLog_%02d-%02d-%02d-%d.txt",
-			ptmTime->tm_year + 1900, ptmTime->tm_mon + 1, ptmTime->tm_mday, nFooter);
+		sprintf_safe(szFileName, "Log/MatchLog_%02d-%02d-%02d-%d.txt",
+			tmTime.tm_year + 1900, tmTime.tm_mon + 1, tmTime.tm_mday, nFooter);
 
 		if (PathFileExists(szFileName) == FALSE)
 			break;
@@ -28,7 +29,7 @@ static bool GetLogFileName(char* pszBuf)
 		nFooter++;
 		if (nFooter > 100) return false;
 	}
-	strcpy(pszBuf, szFileName);
+	strcpy_safe(pszBuf, szFileName);
 	return true;
 }
 

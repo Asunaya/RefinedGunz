@@ -22,13 +22,9 @@ public:
 
 	MUID m_uidKeeper;
 protected:
-	/// Create()호출시에 불리는 함수
-	virtual bool OnCreate(void);
-	/// Destroy()호출시에 불리는 함수
-	virtual void OnDestroy(void);
-	/// 커맨드를 처리하기 전에
+	virtual bool OnCreate();
+	virtual void OnDestroy();
 	virtual void OnPrepareCommand(MCommand* pCommand);
-	/// 사용자 커맨드 처리
 	virtual bool OnCommand(MCommand* pCommand);
 
 	virtual void OnRun() override;
@@ -40,16 +36,12 @@ public:
 	void OnViewServerStatus();
 
 private :
-	// 서버의 시작과 함께 등록되는 스케쥴.
 	bool InitSubTaskSchedule();
 	bool AddClanServerAnnounceSchedule();
 	bool AddClanServerSwitchDownSchedule();
 	bool AddClanServerSwitchUpSchedule();
 	
-	// 스케쥴 처리 함수.
-	// 공지사항.
 	void OnScheduleAnnounce( const char* pszAnnounce );
-	// 클랜서버 
 	void OnScheduleClanServerSwitchDown();
 	void OnScheduleClanServerSwitchUp();
 
@@ -59,7 +51,6 @@ private :
 	void WriteServerInfoLog();
 
 protected :
-	// Keeper관련.
 	bool IsKeeper( const MUID& uidKeeper );
 
 	void OnResponseServerStatus( const MUID& uidSender );
@@ -107,9 +98,6 @@ protected :
 	void OnLocalUpdateBlockCountryCode();
 	void OnLocalUpdateCustomIP();
 	void OnLocalUpdateAcceptInvaildIP();
-
-private :
-	bool InitHShiled();
 
 public:
 	// xtrap

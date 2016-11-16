@@ -444,8 +444,8 @@ public:
 	const MUID& GetAgentUID()		{ return m_uidAgent; }
 	void SetAgentUID(const MUID& uidAgent)	{ m_uidAgent = uidAgent; }
 
-	void SetPeerAddr(DWORD dwIP, char* szIP, unsigned short nPort)	{ m_dwIP=dwIP; strcpy_safe(m_szIP, szIP); m_nPort = nPort; }
-	DWORD GetIP()					{ return m_dwIP; }
+	void SetPeerAddr(DWORD dwIP, const char* szIP, unsigned short nPort)	{ m_dwIP=dwIP; strcpy_safe(m_szIP, szIP); m_nPort = nPort; }
+	DWORD GetIP() const				{ return m_dwIP; }
 	char* GetIPString()				{ return m_szIP; }
 	unsigned short GetPort()		{ return m_nPort; }
 	bool GetFreeLoginIP()			{ return m_bFreeLoginIP; }

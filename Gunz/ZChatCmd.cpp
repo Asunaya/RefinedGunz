@@ -3,15 +3,15 @@
 #include "MDebug.h"
 #include "ZMyInfo.h"
 
-void ZImplodeChatCmdArgs(char* szOut, const int argc, char **const argv, int nFirstIndex)
+void ZImplodeChatCmdArgs(char* szOut, size_t maxlen, const int argc, char **const argv, int nFirstIndex)
 {
 	szOut[0] = 0;
 
 	for (int i = nFirstIndex; i < argc; i++)
 	{
-		strcat(szOut, argv[i]);
+		strcat_safe(szOut, maxlen, argv[i]);
 
-		if (i != (argc-1)) strcat(szOut, " ");
+		if (i != (argc-1)) strcat_safe(szOut, maxlen, " ");
 	}
 }
 
@@ -178,7 +178,7 @@ void ZChatCmdManager::AddCommand(int nID, const char* szName, ZChatCmdProc* fnPr
 {
 	char szLwrName[256];
 	strcpy_safe(szLwrName, szName);
-	_strlwr(szLwrName);
+	_strlwr_s(szLwrName);
 
 	ZChatCmd* pCmd = new ZChatCmd(nID, szLwrName, flag, nMinArgs, nMaxArgs, bRepeatEnabled,szUsage, szHelp);
 	
@@ -279,12 +279,11 @@ ZChatCmd* ZChatCmdManager::GetCommandByName(const char* szName)
 {
 	char szLwrName[256];
 	strcpy_safe(szLwrName, szName);
-	_strlwr(szLwrName);
+	_strlwr_s(szLwrName);
 
 
 	char szCmdName[256] = "";
 
-	// alias에서 먼저 찾는다.
 	map<std::string, std::string>::iterator itorAlias = m_AliasMap.find(string(szLwrName));
 	if (itorAlias != m_AliasMap.end())
 	{
@@ -295,7 +294,6 @@ ZChatCmd* ZChatCmdManager::GetCommandByName(const char* szName)
 		strcpy_safe(szCmdName, szLwrName);
 	}
 
-	// 실제로 찾음
 	ZChatCmdMap::iterator pos = m_CmdMap.find(string(szCmdName));
 	if (pos != m_CmdMap.end())
 	{
@@ -321,18 +319,9 @@ ZChatCmd* ZChatCmdManager::GetCommandByID(int nID)
 
 void ZChatCmdManager::AddAlias(const char* szNewCmdName, const char* szTarCmdName)
 {
-/*
-	ZChatCmd* pCmd = GetCommandByName(szTarCmdName);
-	if (pCmd == NULL)
-	{
-		_ASSERT(0);		// 앨리어스 대상 커맨드가 존재하지 않음
-		return;
-	}
-*/
-
 	char szLwrName[256];
 	strcpy_safe(szLwrName, szNewCmdName);
-	_strlwr(szLwrName);
+	_strlwr_s(szLwrName);
 
 	m_AliasMap.insert(map<std::string, std::string>::value_type(std::string(szLwrName), std::string(szTarCmdName)));
 }

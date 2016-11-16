@@ -507,8 +507,9 @@ bool RNavigationMesh::Save(const char* szFileName)
 {
 	if (m_nVertCount <= 0) return false;
 
-	FILE* file = fopen(szFileName, "wb");
-	if (!file) return false;
+	FILE* file{};
+	auto ret = fopen_s(&file, szFileName, "wb");
+	if (ret != 0 || !file) return false;
 
 	// header -------------
 	RHEADER header{ R_NAV_ID, R_NAV_VERSION };

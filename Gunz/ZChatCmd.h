@@ -1,11 +1,9 @@
-#ifndef _ZCHATCMD_H
-#define _ZCHATCMD_H
+#pragma once
 
 #include <string>
 #include <list>
 #include <vector>
 #include <map>
-using namespace std;
 
 #define		ZCHATCMD_TEXSIZE	2048
 #define		ZCHATCMD_NAMESIZE	256
@@ -18,27 +16,25 @@ struct ZChatCmdArgvInfo
 {
 	char	*cargv[256];
 	int		cargc;
-	char	argbuf[2048];		// 실제 argv 값이 들어가는 buf
+	char	argbuf[2048];
 };
 
 class ZChatCmd;
 class ZChatCmdManager;
 
-typedef map<std::string, ZChatCmd*>	ZChatCmdMap;
+typedef std::map<std::string, ZChatCmd*>	ZChatCmdMap;
 typedef void(ZChatCmdProc)(const char* line, const int argc, char **const argv);
 
-
-/// 커맨드의 특성
 enum ZChatCmdFlag
 {
-	CCF_NONE	= 0,			// 아무데서도 커맨드를 사용할 수 없다.
-	CCF_LOBBY	= 0x01,			// 로비에서 사용
-	CCF_STAGE	= 0x02,			// 스테이지에서 사용
-	CCF_GAME	= 0x04,			// 게임안에서 사용
-	CCF_ALL		= 0x0F,			// 모든 곳에서 사용 가능
+	CCF_NONE	= 0,
+	CCF_LOBBY	= 0x01,
+	CCF_STAGE	= 0x02,
+	CCF_GAME	= 0x04,
+	CCF_ALL		= 0x0F,
 
-	CCF_TEST	= 0x40,			// 테스트 전용 명령어
-	CCF_ADMIN	= 0x80			// 관리자 전용 명령어
+	CCF_TEST	= 0x40,
+	CCF_ADMIN	= 0x80	
 };
 
 
@@ -82,12 +78,11 @@ private:
 	map<std::string, std::string>	m_AliasMap;
 	ZChatCmd* MakeArgv(const char* szLine, ZChatCmdArgvInfo* pAI);
 public:
-	/// 커맨드 입력자 특성
 	enum CmdInputFlag
 	{
-		CIF_NORMAL	= 0x1,		// 보통 사용자 
-		CIF_ADMIN	= 0x2,		// 관리자
-		CIF_TESTER	= 0x4,		// 테스트 가능자
+		CIF_NORMAL	= 0x1,
+		CIF_ADMIN	= 0x2,
+		CIF_TESTER	= 0x4,
 	};
 
 	ZChatCmdManager();
@@ -106,14 +101,17 @@ public:
 	bool IsRepeatEnabled(const char* szLine);
 	bool DoCommand(const char* szLine, ZChatCmdFlag nCurrFlag, unsigned long nInputFlag=CIF_NORMAL);
 	ZChatCmd* GetCommandByName(const char* szName);
-	ZChatCmd* GetCommandByID(int nID);			// 순차검색하므로 조금 느리다.
+	ZChatCmd* GetCommandByID(int nID);
 	ZChatCmdMap::iterator GetCmdBegin() { return m_CmdMap.begin(); }
 	ZChatCmdMap::iterator GetCmdEnd()	{ return m_CmdMap.end(); }
-	int GetCmdCount() { return (int)m_CmdMap.size(); }
+	int GetCmdCount() const { return (int)m_CmdMap.size(); }
 };
 
-// 토큰으로 나누어져있는 인자들을 하나의 문자열로 붙인다.
-void ZImplodeChatCmdArgs(char* szOut, const int argc, char **const argv, int nFirstIndex=0);
+void ZImplodeChatCmdArgs(char* szOut, size_t maxlen, int argc, char **const argv, int nFirstIndex = 0);
+template <size_t size>
+void ZImplodeChatCmdArgs(char (&szOut)[size], int argc, char **const argv, int nFirstIndex = 0) {
+	return ZImplodeChatCmdArgs(szOut, size, argc, argv, nFirstIndex);
+}
 
 
 #include "MXmlParser.h"
@@ -143,5 +141,3 @@ public:
 	void Clear();
 	_CmdStr* GetStr(int nID);
 };
-
-#endif

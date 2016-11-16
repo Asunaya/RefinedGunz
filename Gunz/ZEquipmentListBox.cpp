@@ -99,28 +99,16 @@ MBitmap* GetItemIconBitmap(MMatchItemDesc* pItemDesc, bool bSmallIcon)
 	if ( bSmallIcon) 
 	{
 		char szTemp[256];
-		if ( pItemDesc->IsCashItem())				// 캐쉬 아이템일 경우...
+		if ( pItemDesc->IsCashItem())
 		{
 			strcpy_safe( szTemp, szFileName);
-			strcat( szTemp, "_cash_S.tga");
+			strcat_safe( szTemp, "_cash_S.tga");
 
 			if ( MBitmapManager::Get( szTemp))
-				strcat( szFileName, "_cash");
+				strcat_safe( szFileName, "_cash");
 		}
-//		else if ( pItemDesc->IsQuestItem())			// 퀘스트 아이템일 경우...
-//		{
-//			strcpy_safe( szTemp, szFileName);
-//			strcat( szTemp, "_quest_S.tga");
-//
-//			if ( MBitmapManager::Get( szTemp))
-//				strcat( szFileName, "_quest");
-//		}
-
-
-//		strcat( szFileName, "_S");
 	}
 	
-	// 반지 예외 처리...  -_-;
 	if (pItemDesc->m_nSlot == MMIST_FINGER)
 	{
 		if ( bSmallIcon && pItemDesc->IsCashItem())
@@ -130,18 +118,11 @@ MBitmap* GetItemIconBitmap(MMatchItemDesc* pItemDesc, bool bSmallIcon)
 			else
 				strcpy_safe(szFileName, "slot_icon_ringS");
 		}
-//		else if ( bSmallIcon && pItemDesc->IsQuestItem())
-//		{
-//			if ( MBitmapManager::Get( "slot_icon_ring_quest_S.tga"))
-//				strcpy_safe(szFileName, "slot_icon_ring_quest_S");
-//			else
-//				strcpy_safe(szFileName, "slot_icon_ringS");
-//		}
 		else
 			strcpy_safe(szFileName, "slot_icon_ringS");
 	}
 
-	strcat(szFileName, ".tga");
+	strcat_safe(szFileName, ".tga");
 
 	MBitmap *pBitmap = MBitmapManager::Get(szFileName);
 	_ASSERT(pBitmap!=NULL);
@@ -166,16 +147,6 @@ bool ZEquipmentListBox::IsDropable(MWidget* pSender)
 	return true;
 }
 
-//bool ZEquipmentListBox::OnDrop(MWidget* pSender, MBitmap* pBitmap, const char* szString, const char* szItemString)
-//{
-//	if (m_pOnDropFunc != NULL)
-//	{
-//		m_pOnDropFunc(this, pSender, pBitmap, szString, szItemString);
-//	}
-//
-//	return true;
-//}
-
 #define SHOW_DESCRIPTION		"showdesc"
 #define HIDE_DESCRIPTION		"hidedesc"
 
@@ -187,9 +158,7 @@ bool ZEquipmentListBox::OnEvent(MEvent* pEvent, MListener* pListener)
 	if(pEvent->nMessage==MWM_MOUSEMOVE)
 	{
 		m_dwLastMouseMove=GetGlobalTimeMS();
-//		GetListener()->OnCommand(this,HIDE_DESCRIPTION);
 		
-		// TODO : pEquipmentListBox::m_nOverItem 으로 대체할수 있겠다.
 		MPOINT pt=MEvent::LatestPos;
 		pt=MScreenToClient(this,pt);
 
@@ -199,7 +168,6 @@ bool ZEquipmentListBox::OnEvent(MEvent* pEvent, MListener* pListener)
 			if (m_pDescFrame) m_pDescFrame->Show(false);
 			m_nLastItem=-1;
 		}
-//		return true;			  // 메시지를 먹어버리면 툴팁이 안나온다
 	}
 	else if(pEvent->nMessage==MWM_RBUTTONDOWN) {
 		if(rtClient.InPoint(pEvent->Pos)==true) {
@@ -215,11 +183,9 @@ bool ZEquipmentListBox::OnEvent(MEvent* pEvent, MListener* pListener)
 					pMenu->SetTargetName(pNode->GetString());
 					pMenu->SetTargetUID(pNode->GetUID());
 
-					// 아이템 설명 끄고
 					if (m_pDescFrame && m_pDescFrame->IsVisible())
 						m_pDescFrame->Show(false);
 
-					// 팝업메뉴 띄운다
 					MPOINT posItem;
 					GetItemPos(&posItem, nSelItem);
 					MPOINT posMenu;
@@ -241,19 +207,14 @@ ZEquipmentListBox::ZEquipmentListBox(const char* szName, MWidget* pParent, MList
 {
 	m_bAbsoulteTabSpacing = true;
 
-	AddField("ICON", 32);		// Icon
-	AddField("아이템", 160);	// 아이템
-	AddField("레벨", 35);		// 레벨
-//	AddField("무게", 30);
-//	AddField("슬롯", 50);
-	AddField("가격", 45);		// 가격
-//	AddField("기간", 45);		// 기간
+	AddField("ICON", 32);
+	AddField("아이템", 160);
+	AddField("레벨", 35);
+	AddField("가격", 45);
 
 	m_bVisibleHeader = true;
 
 	SetItemHeight(32);
-
-//	m_pOnDropFunc = NULL;
 
 	m_nLastItem=-1;
 	m_dwLastMouseMove=GetGlobalTimeMS();
@@ -277,19 +238,16 @@ void ZEquipmentListBox::AttachMenu(ZItemMenu* pMenu)
 }
 
 void ZEquipmentListBox::Add(const MUID& uidItem, unsigned long nItemID, MBitmap* pIconBitmap, const char* szName, const char* szLevel, const char* szPrice)
-//void ZEquipmentListBox::Add(const MUID& uidItem, MBitmap* pIconBitmap, const char* szName, const char* szWeight, const char* szSlot, const char* szPrice)
 {
 	MListBox::Add(new ZEquipmentListItem(uidItem, nItemID, pIconBitmap, szName, szLevel, szPrice));
 }
 
 void ZEquipmentListBox::Add(const MUID& uidItem, unsigned long nItemID, MBitmap* pIconBitmap, const char* szName, int nLevel,int nBountyPrice)
-//void ZEquipmentListBox::Add(const MUID& uidItem, MBitmap* pIconBitmap, const char* szName, int nWeight, MMatchItemSlotType nSlot, int nBountyPrice)
 {
 	char szBounty[64], szLevel[64];
 	
-	itoa(nLevel, szLevel, 10);
-//	strcpy_safe(szSlot, GetItemSlotTypeStr(nSlot));
-	itoa(nBountyPrice, szBounty, 10);
+	itoa_safe(nLevel, szLevel, 10);
+	itoa_safe(nBountyPrice, szBounty, 10);
 
 	Add(uidItem, nItemID, pIconBitmap, szName, szLevel, szBounty);
 }
@@ -297,13 +255,11 @@ void ZEquipmentListBox::Add(const MUID& uidItem, unsigned long nItemID, MBitmap*
 void ZEquipmentListBox::Add(const int nAIID, unsigned long nItemID, MBitmap* pIconBitmap, const char* szName, int nLevel)
 {
 	char szLevel[64];
-	itoa(nLevel, szLevel, 10);
+	itoa_safe(nLevel, szLevel, 10);
 
 	MListBox::Add(new ZEquipmentListItem(nAIID, nItemID, pIconBitmap, szName, szLevel));
 }
 
-// Listener //////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////
 void ShopPurchaseItemListBoxOnDrop(void* pSelf, MWidget* pSender, MBitmap* pBitmap, const char* szString, const char* szItemString)
 {
 
@@ -325,7 +281,6 @@ void CharacterEquipmentItemListBoxOnDrop(void* pSelf, MWidget* pSender, MBitmap*
 	ZPostRequestCharacterItemList(ZGetGameClient()->GetPlayerUID());
 }
 
-// frame 을 툴팁처럼 보이게 하기 위해 하드코딩 되어있는데, 반복을 줄일수 있겠다.
 class MShopSaleItemListBoxListener : public MListener{
 public:
 	virtual bool OnCommand(MWidget* pWidget, const char* szMessage)
@@ -344,7 +299,6 @@ public:
 				}
 			}
 
-			// 일반 아이템
 			MMatchItemDesc* pItemDesc = MGetMatchItemDescMgr()->GetItemDesc(nItemID);
 			ZMyItemNode* pItemNode = ZGetMyInfo()->GetItemList()->GetItem( pEquipmentListBox->GetSelIndex());
 			if ( pItemDesc && pItemNode)

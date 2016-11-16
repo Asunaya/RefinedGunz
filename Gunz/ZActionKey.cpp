@@ -79,8 +79,8 @@ void ZActionKey::UpdateText()
 	{
 		char szActionKeyName[128];
 		ZGetInput()->GetInputKeyName(m_nAltKey, szActionKeyName,sizeof(szActionKeyName));
-		strcat(szBuffer,"  or  ");
-		strcat(szBuffer,szActionKeyName);
+		strcat_safe(szBuffer,"  or  ");
+		strcat_safe(szBuffer,szActionKeyName);
 	}
 
 	SetText(szBuffer);
@@ -91,15 +91,15 @@ void ZActionKey::UpdateText()
 void ZActionKey::SetActionKey(int nKey)
 {
 	if(nKey==-1) return;
-	if(IsForbidKey(nKey))//등록금지키라면..
+	if(IsForbidKey(nKey))
 		return;
 
-	if(m_nKey==-1)	// 아무것도 설정이 안되어 있으면 등록
+	if(m_nKey==-1)
 	{
 		m_nKey = nKey;
-	}else if(m_nAltKey==-1 && nKey!=m_nKey)	// alt.key 가 설정이 안되어있으면 등록
+	}else if(m_nAltKey==-1 && nKey!=m_nKey)
 		m_nAltKey = nKey;
-	else if(m_nAltKey==nKey)	// 이미 있는 키이면, 나머지를 삭제
+	else if(m_nAltKey==nKey)
 	{
 		m_nKey = m_nAltKey;
 		m_nAltKey = -1;

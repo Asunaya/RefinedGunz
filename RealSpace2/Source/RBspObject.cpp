@@ -1195,7 +1195,7 @@ bool RBspObject::Open_ObjectList(rapidxml::xml_node<>& parent)
 
 		char fname[_MAX_PATH];
 		GetPurePath(fname, m_descfilename.c_str());
-		strcat(fname, object_name);
+		strcat_safe(fname, object_name);
 
 		m_MeshList.SetMtrlAutoLoad(true);
 		m_MeshList.SetMapObject(true);
@@ -1218,7 +1218,7 @@ bool RBspObject::Open_ObjectList(rapidxml::xml_node<>& parent)
 
 		if (strncmp(pName, "obj_water", 9) != 0 && strncmp(pName, "obj_flag", 8) != 0)
 		{
-			strcat(fname, ".ani");
+			strcat_safe(fname, ".ani");
 
 			m_AniList.Add(fname, fname, NodeIndex);
 			RAnimation* pAni = m_AniList.GetAnimation(fname);
@@ -1384,36 +1384,30 @@ bool RBspObject::Set_AmbSound(rapidxml::xml_node<>& parent)
 
 			auto* prop_value = prop_node->value();
 			if (!prop_value) continue;
-			token = strtok(prop_value, " ");
+
+			char* context{};
+			token = strtok_s(prop_value, " ", &context);
+
+			auto get_token = [&] {
+				token = strtok_s(nullptr, " ", &context);
+			};
+
+			auto get_vector = [&](auto& vec) {
+				if (token != nullptr) vec.x = atof(token);
+				get_token();
+				if (token != nullptr) vec.y = atof(token);
+				get_token();
+				if (token != nullptr) vec.z = atof(token);
+			};
 
 			if (_stricmp("MIN_POSITION", prop_name) == 0)
-			{
-				if (token != nullptr) asinfo.min.x = atof(token);
-				token = strtok(nullptr, " ");
-				if (token != nullptr) asinfo.min.y = atof(token);
-				token = strtok(nullptr, " ");
-				if (token != nullptr) asinfo.min.z = atof(token);
-			}
+				get_vector(asinfo.min);
 			else if (_stricmp("MAX_POSITION", prop_name) == 0)
-			{
-				if (token != nullptr) asinfo.max.x = atof(token);
-				token = strtok(nullptr, " ");
-				if (token != nullptr) asinfo.max.y = atof(token);
-				token = strtok(nullptr, " ");
-				if (token != nullptr) asinfo.max.z = atof(token);
-			}
+				get_vector(asinfo.max);
 			else if (_stricmp("RADIUS", prop_name) == 0)
-			{
 				asinfo.radius = atof(prop_value);
-			}
 			else if (_stricmp("CENTER", prop_name) == 0)
-			{
-				if (token != nullptr) asinfo.center.x = atof(token);
-				token = strtok(nullptr, " ");
-				if (token != nullptr) asinfo.center.y = atof(token);
-				token = strtok(nullptr, " ");
-				if (token != nullptr) asinfo.center.z = atof(token);
-			}
+				get_vector(asinfo.center);
 		}
 		AmbSndInfoList.push_back(asinfo);
 	}

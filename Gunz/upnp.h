@@ -1,19 +1,19 @@
 #pragma once
 
-#include "stdafx.h"
+#include "GlobalTypes.h"
 
 class UPnP
 {
 public:
-	UPnP(void);
-	~UPnP(void);
+	UPnP();
+	~UPnP();
 
-	bool Create(WORD Port);
-	void Destroy(void);
+	bool Create(u16 Port);
+	void Destroy();
 
 protected:
-	bool GetIp(void);
+	bool GetIp();
 
 	char m_Address[17];
-	WORD m_Port;
+	u16 m_Port;
 };

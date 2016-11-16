@@ -1769,9 +1769,9 @@ void MMatchServer::OnBridgePeer(const MUID& uidChar, DWORD dwIP, DWORD nPort)
 
 	in_addr addr;
 	addr.s_addr = dwIP;
-	char* pszIP = inet_ntoa(addr);
+	auto IP = GetIPv4String(addr);
 
-	pObj->SetPeerAddr(dwIP, pszIP, (unsigned short)nPort);
+	pObj->SetPeerAddr(dwIP, IP.c_str(), static_cast<unsigned short>(nPort));
 	pObj->SetBridgePeer(true);
 	pObj->SetPlayerFlag(MTD_PlayerFlags_BridgePeer, true);
 
@@ -1815,8 +1815,8 @@ void MMatchServer::DebugTest()
 
 void MMatchServer::SendCommandByUDP(MCommand* pCommand, char* szIP, int nPort)
 {
-	_ASSERT(0);	// 사용하지 않음
-	// 현재는 1024 size이상 보낼 수 없다.
+	_ASSERT(0);
+
 	const int BUF_SIZE = 1024;
 
 	char* szBuf = new char[BUF_SIZE];

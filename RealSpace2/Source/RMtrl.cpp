@@ -153,11 +153,11 @@ void RMtrl::CheckAniTexture()
 	if(m_name[0]) {
 
 		char drive[_MAX_DRIVE],dir[_MAX_DIR],fname[_MAX_FNAME],ext[_MAX_EXT];
-		_splitpath(m_name,drive,dir,fname,ext);
+		_splitpath_s(m_name,drive,dir,fname,ext);
 
 		if( _strnicmp( fname,"txa",3)==0) {
 
-			static char texname[256];
+			char texname[256];
 
 			int imax = 0;
 			int ispeed = 0;
@@ -165,7 +165,9 @@ void RMtrl::CheckAniTexture()
 			// ex> txa_10_100_test01.tga
 			// test02.tga
 
-			sscanf( fname,"txa %d %d %s",&imax,&ispeed,texname );
+			auto ret = sscanf_s(fname, "txa %d %d %s", &imax, &ispeed, texname, sizeof(texname));
+			if (ret != 3)
+				return;
 
 			m_pAniTexture = new RBaseTexture*[imax];
 
@@ -176,17 +178,17 @@ void RMtrl::CheckAniTexture()
 			int n = (int) strlen(texname);
 			
 			if(dir[0]) {
-				strcpy_safe(m_name_ani_tex,dir);
-				strncat(m_name_ani_tex,texname,n-2);
+				strcpy_safe(m_name_ani_tex, dir);
+				strncat_safe(m_name_ani_tex, texname, n - 2);
 				int pos = strlen(dir) + n - 2;
-				m_name_ani_tex[ pos ] = NULL;
+				m_name_ani_tex[pos] = NULL;
 			}
 			else {
-				strncpy(m_name_ani_tex,texname,n-2);//숫자제거
-				m_name_ani_tex[n-2] = NULL;
+				strncpy_safe(m_name_ani_tex, texname, n - 2);
+				m_name_ani_tex[n - 2] = NULL;
 			}
 
-			strcpy_safe(m_name_ani_tex_ext,ext);// ext
+			strcpy_safe(m_name_ani_tex_ext, ext);
 
 			m_nAniTexSpeed = ispeed;
 			m_nAniTexCnt =  imax;
@@ -201,8 +203,8 @@ void RMtrl::Restore(LPDIRECT3DDEVICE9 dev,char* path)
 {
 	if(m_name[0] == 0) return;
 
-	static char name[256];
-	static char name2[256];
+	char name[256];
+	char name2[256];
 
 	int level = RTextureType_Etc;
 
@@ -210,12 +212,10 @@ void RMtrl::Restore(LPDIRECT3DDEVICE9 dev,char* path)
 		level = RTextureType_Object;
 	}
 
-	// filename 에 path 가 있다면..맵 path 무시 - 맵 오브젝트 texture 같이 쓰기 위해..
-
 	bool map_path = false;
 
 	char drive[_MAX_DRIVE],dir[_MAX_DIR],fname[_MAX_FNAME],ext[_MAX_EXT];
-	_splitpath(m_name,drive,dir,fname,ext);
+	_splitpath_s(m_name,drive,dir,fname,ext);
 
 	if( dir[0] )
 		map_path = true;
@@ -223,10 +223,8 @@ void RMtrl::Restore(LPDIRECT3DDEVICE9 dev,char* path)
 	if( !map_path &&  path && path[0] ) {
 
 		if(m_bAniTex) {
-
-			// 1번..
 			strcpy_safe(name,path);
-			strcat(name,m_name);
+			strcat_safe(name,m_name);
 
 			m_pAniTexture[0] = RCreateBaseTextureMg(name,level);
 
@@ -234,16 +232,14 @@ void RMtrl::Restore(LPDIRECT3DDEVICE9 dev,char* path)
 				m_pAniTexture[0] = RCreateBaseTextureMg(m_name,level);
 			}
 
-			// 2번째부터..
-
 			strcpy_safe(name2,path);
-			strcat(name2,m_name_ani_tex);//보관..
+			strcat_safe(name2,m_name_ani_tex);
 
 			for(int i=1;i<m_nAniTexCnt;i++) {
 				sprintf_safe(name,"%s%02d%s",name2,i,m_name_ani_tex_ext);
 				m_pAniTexture[i] = RCreateBaseTextureMg(name,level);
 
-				if(m_pAniTexture[i]==NULL) {// 경로에 없을 경우 현 폴더에서 찾아보기
+				if(m_pAniTexture[i]==NULL) {
 					sprintf_safe(name,"%s%2d.%s",m_name_ani_tex,i,m_name_ani_tex_ext);
 					m_pAniTexture[i] = RCreateBaseTextureMg(name,level);
 					if(m_pAniTexture[i]==NULL)
@@ -254,12 +250,12 @@ void RMtrl::Restore(LPDIRECT3DDEVICE9 dev,char* path)
 		else {
 
 			strcpy_safe(name,path);
-			strcat(name,m_name);
+			strcat_safe(name,m_name);
 
 			m_pTexture = NULL;
 			m_pTexture = RCreateBaseTextureMg(name,level);
 
-			if(!m_pTexture)		// 경로에 없을 경우 현 폴더에서 찾아보기
+			if(!m_pTexture)
 				m_pTexture = RCreateBaseTextureMg(m_name,level);
 		}
 	} 

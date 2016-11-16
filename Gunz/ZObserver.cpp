@@ -212,7 +212,7 @@ bool ZObserver::IsVisibleSetTarget(ZCharacter* pCharacter)
 
 	if(g_pGame->IsReplay()) return true;
 
-	if(ZGetGameClient()->GetMatchStageSetting()->GetGameType() == MMATCH_GAMETYPE_DUEL)				// 듀얼일때 챔피언도 도전자도 아니면 옵저브 할 수 없다.
+	if(ZGetGameClient()->GetMatchStageSetting()->GetGameType() == MMATCH_GAMETYPE_DUEL)
 	{
 		ZRuleDuel* pDuel = (ZRuleDuel*)ZGetGameInterface()->GetGame()->GetMatch()->GetRule();
 		if (pDuel->GetQueueIdx(pCharacter->GetUID()) <= 1)
@@ -221,7 +221,6 @@ bool ZObserver::IsVisibleSetTarget(ZCharacter* pCharacter)
 			return false;
 	}
 
-	// 퀘스트 모드일때는 visible 이 아니면 포탈로 들어간것이다. 옵저브 할수없다고 간주.
 	if (ZGetGameTypeManager()->IsQuestDerived(ZGetGameClient()->GetMatchStageSetting()->GetGameType())) {
 		if(!pCharacter->IsVisible()) return false;
 	}
@@ -238,8 +237,6 @@ bool ZObserver::IsVisibleSetTarget(ZCharacter* pCharacter)
 
 }
 
-bool GetUserInfoUID(MUID uid,MCOLOR& _color,char* sp_name,MMatchUserGradeID& gid);
-
 void ZObserver::OnDraw(MDrawContext* pDC)
 {
 	if ( g_pGame->IsReplay() && !g_pGame->IsShowReplayInfo())
@@ -251,8 +248,6 @@ void ZObserver::OnDraw(MDrawContext* pDC)
 	if ( ZGetCamera()->GetLookMode() == ZCAMERA_MINIMAP)
 		return;
 
-
-	// 운영자일 경우
 	if ( ZGetMyInfo()->IsAdminGrade())
 	{
 		MFont *pFont=MFontManager::Get("FONTb11b");
@@ -260,7 +255,6 @@ void ZObserver::OnDraw(MDrawContext* pDC)
 			_ASSERT(0);
 		pDC->SetFont(pFont);
 
-		// 테두리
 		MCOLOR backgroundcolor;
 		if ( m_pTargetCharacter->GetTeamID() == MMT_RED)
 			backgroundcolor = MCOLOR(100,0,0, 150);
@@ -272,7 +266,6 @@ void ZObserver::OnDraw(MDrawContext* pDC)
 		pDC->SetColor(backgroundcolor);
 		pDC->FillRectangle( MGetWorkspaceWidth() / 2 - 170, MGetWorkspaceHeight() * (650.0f/800.0f) - 7, 340, 30);
 
-		// 텍스트
 		backgroundcolor = MCOLOR( 255,255,255, 255);
 		pDC->SetColor( backgroundcolor);
 
@@ -281,7 +274,6 @@ void ZObserver::OnDraw(MDrawContext* pDC)
 		TextRelative(pDC, 0.5f, 650.0f/800.0f, szName, true);
 	}
 
-	// 듀얼 매치일 경우엔 게이지바를 표시한다
 	else if ( ZApplication::GetGame()->GetMatch()->GetMatchType() == MMATCH_GAMETYPE_DUEL)
 	{
 		char	charName[3][100];

@@ -118,7 +118,11 @@ public:
 	void OnInvalidate();
 	void OnRestore();
 
-	void ParseReservedWord(char* pszDest, const char* pszSrc);
+	void ParseReservedWord(char* pszDest, size_t maxlen, const char* pszSrc);
+	template <size_t size>
+	void ParseReservedWord(char(&Dest)[size], const char* Src) {
+		return ParseReservedWord(Dest, size, Src);
+	}
 
 	bool m_bShowWireframe;
 
@@ -214,7 +218,11 @@ public:
 	bool GetSpawnRequested() { return m_bSpawnRequested; }
 	void SetSpawnRequested(bool bVal) { m_bSpawnRequested = bVal; }
 
-	bool GetUserNameColor(MUID uid, MCOLOR& color, char* sp_name);
+	bool GetUserNameColor(MUID uid, MCOLOR& color, char* sp_name, size_t maxlen);
+	template <size_t size>
+	bool GetUserNameColor(MUID uid, MCOLOR& color, char(&sp_name)[size]) {
+		return GetUserNameColor(uid, color, sp_name, size);
+	}
 	bool IsAttackable(ZObject *pAttacker, ZObject *pTarget);
 
 	void OnPeerShot(const MUID& uid, float fShotTime, rvector& pos, rvector& to, MMatchCharItemParts sel_type);
@@ -362,6 +370,11 @@ extern float g_fFOV;
 ZCharacterManager*	ZGetCharacterManager();
 ZObjectManager*		ZGetObjectManager();
 bool IsMyCharacter(ZObject* pObject);
+bool GetUserGradeIDColor(MMatchUserGradeID gid, MCOLOR& UserNameColor, char* sp_name, size_t maxlen);
+template <size_t size>
+bool GetUserGradeIDColor(MMatchUserGradeID gid, MCOLOR& UserNameColor, char(&sp_name)[size]) {
+	return GetUserGradeIDColor(gid, UserNameColor, sp_name, size);
+}
 
 #define MAX_COMBO 99
 

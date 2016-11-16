@@ -207,7 +207,7 @@ bool LagCompManager::LoadAnimations(const char* filename, int Index)
 
 			if (Path[0]) {
 				strcpy_safe(PathFileName, Path);
-				strcat(PathFileName, FileName);
+				strcat_safe(PathFileName, FileName);
 			}
 			else
 				strcpy_safe(PathFileName, FileName);
@@ -230,11 +230,11 @@ bool LagCompManager::LoadAnimations(const char* filename, int Index)
 
 				if (SoundFileName[0] == NULL) {
 					int len = (int)strlen(FileName);
-					strncpy(SoundFileName, FileName, len - 8);
+					strncpy_safe(SoundFileName, FileName, len - 8);
 					SoundFileName[len - 8] = NULL;
 
 					strcpy_safe(PathSoundFileName, "/sound/effect/");
-					strcat(PathSoundFileName, SoundFileName);
+					strcat_safe(PathSoundFileName, SoundFileName);
 				}
 
 				pAni->SetSoundFileName(SoundFileName);

@@ -39,7 +39,7 @@ bool RMaterialList::Open(rapidxml::xml_node<>& parent)
 				szContents = "";
 
 			auto ReadVector = [&](auto& v) {
-				sscanf(szContents, "%f %f %f", &v.x, &v.y, &v.z);
+				sscanf_s(szContents, "%f %f %f", &v.x, &v.y, &v.z);
 			};
 
 			if (_stricmp(szTagName, RTOK_AMBIENT) == 0)
@@ -51,7 +51,7 @@ bool RMaterialList::Open(rapidxml::xml_node<>& parent)
 			else if (_stricmp(szTagName, RTOK_DIFFUSEMAP) == 0)
 				Material.DiffuseMap = szContents;
 			else if (_stricmp(szTagName, RTOK_POWER) == 0)
-				sscanf(szContents, "%f", &Material.Power);
+				Material.Power = atof(szContents);
 			else if (_stricmp(szTagName, RTOK_ADDITIVE) == 0)
 				Material.dwFlags |= RM_FLAG_ADDITIVE;
 			else if (_stricmp(szTagName, RTOK_USEOPACITY) == 0)

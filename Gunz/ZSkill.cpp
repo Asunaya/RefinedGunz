@@ -272,7 +272,7 @@ bool ZSkillManager::Create()
 
 			if(szTemp[0]) {
 			
-			sscanf(szTemp,"%f %f %f",	&pNewSkill->vCastingEffectAddPos.x,
+			sscanf_s(szTemp,"%f %f %f",	&pNewSkill->vCastingEffectAddPos.x,
 										&pNewSkill->vCastingEffectAddPos.y,
 										&pNewSkill->vCastingEffectAddPos.z );
 			}
@@ -318,7 +318,7 @@ bool ZSkillManager::Create()
 						{
 							if (szAttrValue[0])
 							{
-								sscanf(szAttrValue,"%f %f %f",	&repeat.vAngle.x,
+								sscanf_s(szAttrValue,"%f %f %f",	&repeat.vAngle.x,
 														&repeat.vAngle.y,
 														&repeat.vAngle.z );
 							}

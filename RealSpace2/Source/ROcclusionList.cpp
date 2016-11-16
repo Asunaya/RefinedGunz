@@ -39,7 +39,7 @@ bool ROcclusionList::Open(rapidxml::xml_node<>& parent)
 				szContents = "";
 
 			auto ReadVector = [&](auto& v) {
-				sscanf(szContents, "%f %f %f", &v.x, &v.y, &v.z);
+				sscanf_s(szContents, "%f %f %f", &v.x, &v.y, &v.z);
 			};
 
 			if (_stricmp(szTagName, RTOK_POSITION) == 0) {

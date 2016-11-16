@@ -1726,17 +1726,20 @@ void ZReport112FromListener()
 		return;
 
 
+																			
 	__time64_t long_time;
 	_time64( &long_time);
-	const struct tm* pLocalTime = _localtime64( &long_time);
+	struct tm LocalTime;
+	auto err = _localtime64_s(&LocalTime, &long_time);
 
 	char szBuff[ 256];
-	sprintf_safe( szBuff, "%s\n%s\n%03d:%s\n%04d-%02d-%02d %02d:%02d:%02d\n",	ZGetMyInfo()->GetCharName(), pCombo1->GetSelItemString(),
-																			100+pCombo2->GetSelIndex(), pCombo2->GetSelItemString(),
-																			pLocalTime->tm_year+1900, pLocalTime->tm_mon+1, pLocalTime->tm_mday,
-																			pLocalTime->tm_hour, pLocalTime->tm_min, pLocalTime->tm_sec);
+	sprintf_safe( szBuff, "%s\n%s\n%03d:%s\n%04d-%02d-%02d %02d:%02d:%02d\n",
+		ZGetMyInfo()->GetCharName(), pCombo1->GetSelItemString(),
+		100+pCombo2->GetSelIndex(), pCombo2->GetSelItemString(),
+		LocalTime.tm_year + 1900, LocalTime.tm_mon + 1, LocalTime.tm_mday,
+		LocalTime.tm_hour, LocalTime.tm_min, LocalTime.tm_sec);
 
-	ZApplication::GetGameInterface()->GetChat()->Report112( szBuff);
+	ZApplication::GetGameInterface()->GetChat()->Report112(szBuff);
 
 
 	pWidget->Show( false);
@@ -1826,7 +1829,6 @@ BEGIN_IMPLEMENT_LISTENER(ZGetLobbyPlayerListTabClanCreateButtonListener, MBTN_CL
 	{
 		pWidget->Show(true,true);
 
-		// 창단멤버로 선택가능한 사람 리스트를 요청한다
 		unsigned long int nPlaceFilter = 0;
 		SetBitSet(nPlaceFilter, MMP_LOBBY);
 
@@ -1858,13 +1860,7 @@ BEGIN_IMPLEMENT_LISTENER(ZGetClanCreateDialogOk, MBTN_CLK_MSG)
 					nCount ++;
 				}
 			}
-			/*
-#ifdef _DEBUG
-			nCount = CLAN_SPONSORS_COUNT;
-#endif
-			*/
 
-			// 정확한 수가 맞았으면..
 			if ( nCount==CLAN_SPONSORS_COUNT)
 			{
 				MEdit *pEditClanName= (MEdit*)pResource->FindWidget("ClanCreate_ClanName");
@@ -1874,24 +1870,22 @@ BEGIN_IMPLEMENT_LISTENER(ZGetClanCreateDialogOk, MBTN_CLK_MSG)
 
 				int nNameLen = (int)strlen( pEditClanName->GetText());
 
-				if ( nNameLen <= 0)						// 이름을 이력하지 않았다.
+				if ( nNameLen <= 0)
 				{
 					ZApplication::GetGameInterface()->ShowErrorMessage( MERR_PLZ_INPUT_CHARNAME);
 					return true;
 				}
-				else if ( nNameLen < MIN_CLANNAME)		// 이름이 너무 짧다.
+				else if ( nNameLen < MIN_CLANNAME)
 				{
 					ZApplication::GetGameInterface()->ShowErrorMessage( MERR_TOO_SHORT_NAME);
 					return true;
 				}
-				else if ( nNameLen > MAX_CLANNAME)		// 이름이 제한 글자수를 넘었다.
+				else if ( nNameLen > MAX_CLANNAME)
 				{
 					ZApplication::GetGameInterface()->ShowErrorMessage( MERR_TOO_LONG_NAME);
 					return true;
 				}
 
-
-				// 유효한지 검사한다.
 				if( !MGetChattingFilter()->IsValidName(pEditClanName->GetText()) ){
 					char szMsg[ 256 ];
 					ZTransMsg( szMsg, MSG_WRONG_WORD_NAME, 1, MGetChattingFilter()->GetLastFilteredStr());
@@ -1904,12 +1898,11 @@ BEGIN_IMPLEMENT_LISTENER(ZGetClanCreateDialogOk, MBTN_CLK_MSG)
 					ZGetGameClient()->RequestCreateClan(szClanName, ppSponsors);
 				}
 			}
-			// 숫자가 모자르다
 			else
 			{
 				char szMsgBox[256];
 				char szArg[20];
-				_itoa(CLAN_SPONSORS_COUNT, szArg, 10);
+				itoa_safe(CLAN_SPONSORS_COUNT, szArg, 10);
 
 				ZTransMsg(szMsgBox, MSG_CLAN_CREATE_NEED_SOME_SPONSOR, 1, szArg);
 				ZApplication::GetGameInterface()->ShowMessage(szMsgBox, NULL, MSG_CLAN_CREATE_NEED_SOME_SPONSOR);
@@ -1927,18 +1920,13 @@ BEGIN_IMPLEMENT_LISTENER(ZGetClanCreateDialogClose, MBTN_CLK_MSG)
 	}
 END_IMPLEMENT_LISTENER();
 
-
-// 클랜 폐쇄 확인
 class ZClanCloseConfirmListener : public MListener{
 public:
 	virtual bool OnCommand(MWidget* pWidget, const char* szMessage){
 		if(MWidget::IsMsg(szMessage, MMSGBOX_YES)==true){
-
 			char szClanName[256];
 			strcpy_safe(szClanName, ZGetMyInfo()->GetClanName());
-			// 서버에 폐쇄 요청
 			ZPostRequestCloseClan(ZGetGameClient()->GetPlayerUID(), szClanName);
-		} else {
 		}
 		pWidget->Show(false);
 		return false;
@@ -1950,12 +1938,10 @@ MListener* ZGetClanCloseConfirmListenter()
 	return &g_ClanCloseConfirmListener;
 }
 
-// 클랜 탈퇴 확인
 class ZClanLeaveConfirmListener : public MListener{
 public:
 	virtual bool OnCommand(MWidget* pWidget, const char* szMessage){
 		if(MWidget::IsMsg(szMessage, MMSGBOX_YES)==true){
-			// 서버에 탈퇴 요청
 			ZPostRequestLeaveClan(ZGetMyUID());
 		} else {
 		}
@@ -1976,7 +1962,6 @@ BEGIN_IMPLEMENT_LISTENER(ZGetArrangedTeamGameListener, MBTN_CLK_MSG)
 	{
 		pWidget->Show(true,true);
 
-		// 팀플레이 선수로 선택가능한 사람 리스트를 요청한다
 		unsigned long int nPlaceFilter = 0;
 		SetBitSet(nPlaceFilter, MMP_LOBBY);
 
@@ -1990,12 +1975,6 @@ BEGIN_IMPLEMENT_LISTENER(ZGetArrangedTeamDialogOkListener, MBTN_CLK_MSG)
 	MWidget* pWidget = pResource->FindWidget("ArrangedTeamGameDialog");
 	if(pWidget!=NULL)
 		pWidget->Show(false);
-
-//	pWidget = pResource->FindWidget("LobbyFindClanTeam");
-//	if(pWidget!=NULL)
-//		pWidget->Show(true);
-
-	// 게임 초대 메시지를 발송한다
 
 	ZPlayerSelectListBox *pPlayerList = (ZPlayerSelectListBox*)pResource->FindWidget("ArrangedTeamSelect");
 	if(pPlayerList)
@@ -2023,12 +2002,10 @@ BEGIN_IMPLEMENT_LISTENER(ZGetArrangedTeamDialogOkListener, MBTN_CLK_MSG)
 		{
 		case MSM_LADDER:
 			{
-				// 적절한 수의 팀이면
 				if(0<nCount && nCount<=nMaxInviteCount) {
 					ZGetGameClient()->RequestProposal(MPROPOSAL_LADDER_INVITE, ppNames, nCount);
 				}else
 				{
-//					ZChatOutput(MCOLOR(ZCOLOR_CHAT_SYSTEM), MGetErrorString(MSG_LADDER_INVALID_COUNT));
 					ZChatOutput(MCOLOR(ZCOLOR_CHAT_SYSTEM), 
 						ZErrStr(MSG_LADDER_INVALID_COUNT) );
 				}
@@ -2046,23 +2023,19 @@ BEGIN_IMPLEMENT_LISTENER(ZGetArrangedTeamDialogOkListener, MBTN_CLK_MSG)
 					}
 				}
 
-				// 적절한 수의 팀이면
-
 				if((0<nCount) && (bRightMember))
 				{
 					ZGetGameClient()->RequestProposal(MPROPOSAL_CLAN_INVITE, ppNames, nCount);
 				} 
-#ifdef _DEBUG	// 1명테스트
+#ifdef _DEBUG
 				else if (nCount == 0)
 				{
-					// 자기 자신만일때
 					char szMember[1][MATCHOBJECT_NAME_LENGTH];
 					char* ppMember[1];
 
 					ppMember[0] = szMember[0];
 					strcpy_safe(szMember[0], ZGetMyInfo()->GetCharName());
 
-					// Balance 옵션
 					int nBalancedMatching = 0;
 					ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
 					MButton* pButton = (MButton*)pResource->FindWidget("BalancedMatchingCheckBox");
@@ -2146,17 +2119,17 @@ BEGIN_IMPLEMENT_LISTENER(ZGetPrivateChannelEnterListener, MBTN_CLK_MSG)
 	{
 		int nNameLen = (int)strlen( pEdit->GetText());
 
-		if ( nNameLen <= 0)						// 이름을 이력하지 않았다.
+		if ( nNameLen <= 0)
 		{
 			ZApplication::GetGameInterface()->ShowErrorMessage( MERR_PLZ_INPUT_CHARNAME);
 			return true;
 		}
-		else if ( nNameLen < MIN_CLANNAME)		// 이름이 너무 짧다.
+		else if ( nNameLen < MIN_CLANNAME)
 		{
 			ZApplication::GetGameInterface()->ShowErrorMessage( MERR_TOO_SHORT_NAME);
 			return true;
 		}
-		else if ( nNameLen > MAX_CLANNAME)		// 이름이 제한 글자수를 넘었다.
+		else if ( nNameLen > MAX_CLANNAME)
 		{
 			ZApplication::GetGameInterface()->ShowErrorMessage( MERR_TOO_LONG_NAME);
 			return true;

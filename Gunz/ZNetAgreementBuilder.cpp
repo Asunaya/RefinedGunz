@@ -102,18 +102,18 @@ ZNetAgreementBuilder::_BuildReplyResult ZNetAgreementBuilder::BuildReply(const c
 	return BRR_ALL_AGREED;
 }
 
-int ZNetAgreementBuilder::GetReplierNames(char** ppReplierNames, int nMaxCount)
+int ZNetAgreementBuilder::GetReplierNames(char** ppReplierNames, size_t maxlen, size_t nMaxCount)
 {
-	int nCount=0;
+	size_t nCount{};
 	for (list<ZReplier*>::iterator i=m_Replies.begin(); i!=m_Replies.end(); i++) {
 		if (nCount>=nMaxCount) break;
 
 		ZReplier* pReplier = (*i);
-		strcpy(ppReplierNames[nCount], pReplier->szCharName);
+		strcpy_safe(ppReplierNames[nCount], maxlen, pReplier->szCharName);
 
 		nCount++;
 	}
-	return nCount;
+	return static_cast<int>(nCount);
 }
 
 bool ZNetAgreementBuilder::GetRejecter(char* out, int maxlen)

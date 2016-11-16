@@ -5,6 +5,7 @@
 #include "ZMyCharacter.h"
 #include "ZPost.h"
 #include "rapidxml.hpp"
+#include <cctype>
 
 CourseManager ZRuleSkillmap::CourseMgr;
 
@@ -50,8 +51,15 @@ void CourseManager::Init()
 		if (!MapNameAttr)
 			continue;
 
-		auto MapName = MapNameAttr->value();
-		strlwr(MapName);
+		auto* MapNamePtr = MapNameAttr->value();
+		if (!MapNamePtr)
+			continue;
+		char MapName[256];
+		// Make lowercase
+		std::transform(
+			MapNamePtr, MapNamePtr + MapNameAttr->value_size(),
+			MapName,
+			tolower);
 
 		auto CourseNode = node->first_node("course");
 
@@ -72,7 +80,7 @@ void CourseManager::Init()
 				if (!attr)
 					return false;
 
-				if(sscanf(attr->value(), "%f, %f, %f", &out.x, &out.y, &out.z) != 3)
+				if(sscanf_s(attr->value(), "%f, %f, %f", &out.x, &out.y, &out.z) != 3)
 					return false;
 
 				return true;
@@ -274,7 +282,7 @@ ZRuleSkillmap::ZRuleSkillmap(ZMatch* pMatch) : ZRule(pMatch)
 {
 	char MapName[32];
 	strcpy_safe(MapName, ZGetGameClient()->GetMatchStageSetting()->GetMapName());
-	strlwr(MapName);
+	_strlwr_s(MapName);
 	CourseMgr.SetCurrentMap(MapName);
 }
 

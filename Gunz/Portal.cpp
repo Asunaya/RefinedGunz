@@ -153,7 +153,7 @@ Portal::Portal() : ValidPortals(PortalList)
 	for (int i = 0; i < 2; i++)
 	{
 		char path[128];
-		sprintf(path, "Interface/default/portal%d.png", i + 1);
+		sprintf_safe(path, "Interface/default/portal%d.png", i + 1);
 		auto ret = ReadMZFile(path);
 
 		if (!ret.first)

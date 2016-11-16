@@ -575,7 +575,11 @@ public:
 	string m_str;
 };
 
-void GetPath(const char* str,char* path);
+void GetPath(const char* str, char* path, size_t path_len);
+template <size_t size>
+void GetPath(const char* str, char(&path)[size]) {
+	return GetPath(str, path, size);
+}
 
 class RBaseObject
 {

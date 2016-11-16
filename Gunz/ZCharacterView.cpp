@@ -432,8 +432,6 @@ void ZCharacterView::OnRestore()
 		m_pTVisualMesh.m_pVisualMesh->OnRestore();
 }
 
-bool GetUserInfoUID(MUID uid,MCOLOR& _color,char* sp_name,MMatchUserGradeID& gid);
-
 void ZCharacterView::SetCharacter( MUID uid  )
 {
 	m_Info.UID = uid;
@@ -451,9 +449,9 @@ void ZCharacterView::SetCharacter( MUID uid  )
 			char sp_name[255];
 			MMatchUserGradeID gid;
 
-			if(GetUserInfoUID(m_Info.UID,_color,sp_name,gid)) {//특별한 유저인 경우
+			if(GetUserInfoUID(m_Info.UID,_color,sp_name,gid)) {
 				SetText( sp_name );
-				m_Info.nLevel = 0;//pObj->GetLevel();
+				m_Info.nLevel = 0;
 			}
 			else {
 				SetText( pObj->GetName() );

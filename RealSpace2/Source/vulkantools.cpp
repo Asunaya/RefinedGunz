@@ -310,17 +310,17 @@ namespace vkTools
 	{
 		size_t size;
 
-		FILE *fp = fopen(fileName, "rb");
-		assert(fp);
+		FILE *fp{};
+		auto ret = fopen_s(&fp, fileName, "rb");
+		assert(ret == 0 && fp);
 
 		fseek(fp, 0L, SEEK_END);
 		size = ftell(fp);
 
 		fseek(fp, 0L, SEEK_SET);
 
-		//shaderCode = malloc(size);
-		char *shaderCode = new char[size];
-		size_t retval = fread(shaderCode, size, 1, fp);
+		std::unique_ptr<char[]> shaderCode{ new char[size] };
+		size_t retval = fread(shaderCode.get(), size, 1, fp);
 		assert(retval == 1);
 		assert(size > 0);
 
@@ -331,12 +331,10 @@ namespace vkTools
 		moduleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
 		moduleCreateInfo.pNext = NULL;
 		moduleCreateInfo.codeSize = size;
-		moduleCreateInfo.pCode = (uint32_t*)shaderCode;
+		moduleCreateInfo.pCode = reinterpret_cast<uint32_t*>(shaderCode.get());
 		moduleCreateInfo.flags = 0;
 
 		VK_CHECK_RESULT(vkCreateShaderModule(device, &moduleCreateInfo, NULL, &shaderModule));
-
-		delete[] shaderCode;
 
 		return shaderModule;
 	}

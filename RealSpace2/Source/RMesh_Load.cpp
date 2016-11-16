@@ -72,7 +72,7 @@ bool RMesh::ReadXmlElement(MXmlElement* PNode,char* Path)
 
 			if(Path) {
 				strcpy_safe(PathFileName,Path);
-				strcat(PathFileName,FileName);
+				strcat_safe(PathFileName,FileName);
 			}
 			else {
 				strcpy_safe(PathFileName,FileName);
@@ -107,7 +107,7 @@ bool RMesh::ReadXmlElement(MXmlElement* PNode,char* Path)
 
 			if(Path[0]) {
 				strcpy_safe(PathFileName,Path);
-				strcat(PathFileName,FileName);
+				strcat_safe(PathFileName,FileName);
 			}
 			else 
 				strcpy_safe(PathFileName,FileName);
@@ -164,7 +164,7 @@ bool RMesh::ReadXmlElement(MXmlElement* PNode,char* Path)
 
 			if(Path[0]) {
 				strcpy_safe(PathFileName,Path);
-				strcat(PathFileName,FileName);
+				strcat_safe(PathFileName,FileName);
 			}
 			else 
 				strcpy_safe(PathFileName,FileName);
@@ -184,11 +184,11 @@ bool RMesh::ReadXmlElement(MXmlElement* PNode,char* Path)
 
 				if(SoundFileName[0]==NULL) {
 					int len = (int) strlen(FileName);
-					strncpy(SoundFileName,FileName,len-8);
+					strncpy_safe(SoundFileName,FileName,len-8);
 					SoundFileName[len-8] = NULL;
 
 					strcpy_safe(PathSoundFileName,"/sound/effect/");
-					strcat(PathSoundFileName,SoundFileName);
+					strcat_safe(PathSoundFileName,SoundFileName);
 				}
 
 				pAni->SetSoundFileName(SoundFileName);
@@ -782,7 +782,7 @@ bool RMesh::ReadElu(const char* fname)
 			int	 len = strlen(node->m_name);
 			char _temp[5];
 
-			strncpy(_temp,&node->m_name[len-4],4);
+			strcpy_trunc(_temp, &node->m_name[len - 4]);
 
 			_temp[4] = 0;
 

@@ -1,10 +1,8 @@
-#ifndef _ZNETAGREEMENTBUILDER_H
-#define _ZNETAGREEMENTBUILDER_H
+#pragma once
 
 #include "MUID.h"
 #include "MMatchGlobal.h"
 #include <list>
-using namespace std;
 
 class ZNetAgreementBuilder
 {
@@ -19,7 +17,7 @@ private:
 		bool	bAnswered;
 		bool	bAgreement;
 	};
-	list<ZReplier*>			m_Replies;
+	std::list<ZReplier*>			m_Replies;
 
 	void ClearReplies();
 	void Clear();
@@ -32,23 +30,19 @@ public:
 
 	enum _BuildReplyResult
 	{
-		BRR_WRONG_REPLY		= 0,		// 잘못온 답변
-		BRR_NOT_REPLIED_ALL	= 1,		// 아직 모두 대답하지 않았다.
-		BRR_ALL_AGREED		= 2,		// 모두 동의함.
-		BRR_DISAGREED		= 3			// 거절한 사람이 있다.
+		BRR_WRONG_REPLY		= 0,
+		BRR_NOT_REPLIED_ALL	= 1,
+		BRR_ALL_AGREED		= 2,
+		BRR_DISAGREED		= 3
 	};
 
-	ZNetAgreementBuilder::_BuildReplyResult BuildReply(const char* szReplierName, const MMatchProposalMode nProposalMode, 
-													   int nRequestID, bool bAgreement);	// 모든 동의가 다 모아지면 return true
+	ZNetAgreementBuilder::_BuildReplyResult BuildReply(const char* szReplierName,
+		const MMatchProposalMode nProposalMode, int nRequestID, bool bAgreement);
 	MMatchProposalMode GetProposalMode()	{ return m_nProposalMode; }
-	int GetReplierNames(char** ppReplierNames, int nMaxCount);	// Return값이 실제 Replier 갯수
+	int GetReplierNames(char** ppReplierNames, size_t maxlen, size_t nMaxCount);
 	template<size_t size>
 	bool GetRejecter(char(&out)[size]) {
 		return GetRejecter(out, size);
 	}
 	bool GetRejecter(char* out, int maxlen);
 };
-
-
-
-#endif

@@ -38,3 +38,18 @@ inline std::string GetIPv4String(in_addr addr)
 	GetIPv4String(addr, buf);
 	return buf;
 }
+
+inline u32 GetIPv4Number(const char* addr)
+{
+	in_addr ret;
+	auto count = sscanf_s(addr, "%hhd.%hhd.%hhd.%hhd",
+		&ret.S_un.S_un_b.s_b1,
+		&ret.S_un.S_un_b.s_b2,
+		&ret.S_un.S_un_b.s_b3,
+		&ret.S_un.S_un_b.s_b4);
+	
+	if (count != 4)
+		return INADDR_NONE;
+
+	return ret.S_un.S_addr;
+}

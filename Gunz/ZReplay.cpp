@@ -379,14 +379,13 @@ bool ZReplayLoader::ParseVersion2Command(const char* pStream, MCommand* pCmd)
 
 
 			void* pBlob = TempParams[3]->GetPointer();
-			//int nCount = MGetBlobArrayCount(pBlob);
 			REPLAY2_PeerListNode* pNode = (REPLAY2_PeerListNode*)MGetBlobArrayElement(pBlob, 0);
 
 
 			void* pNewBlob = MMakeBlobArray(sizeof(MTD_PeerListNode), 1);
 			MTD_PeerListNode* pNewNode = (MTD_PeerListNode*)MGetBlobArrayElement(pNewBlob, 0);
 			pNewNode->uidChar = pNode->uidChar;
-			pNewNode->dwIP = inet_addr(pNode->szIP);
+			pNewNode->dwIP = GetIPv4Number(pNode->szIP);
 			pNewNode->nPort = pNode->nPort;
 			memcpy(&pNewNode->CharInfo, &pNode->CharInfo, sizeof(MTD_CharInfo));
 			pNewNode->ExtendInfo.nTeam = pNode->ExtendInfo.nTeam;

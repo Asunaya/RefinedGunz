@@ -40,15 +40,25 @@ bool RLightList::Open(rapidxml::xml_node<>& parent)
 				szContents = "";
 
 			auto ReadVector = [&](auto& v) {
-				sscanf(szContents, "%f %f %f", &v.x, &v.y, &v.z);
+				sscanf_s(szContents, "%f %f %f", &v.x, &v.y, &v.z);
 			};
 
-			if (_stricmp(szTagName, RTOK_POSITION) == 0)	ReadVector(Light.Position);
-			else if (_stricmp(szTagName, RTOK_COLOR) == 0)		ReadVector(Light.Color);
-			else if (_stricmp(szTagName, RTOK_INTENSITY) == 0)	sscanf(szContents, "%f", &Light.fIntensity);
-			else if (_stricmp(szTagName, RTOK_ATTNSTART) == 0)	sscanf(szContents, "%f", &Light.fAttnStart);
-			else if (_stricmp(szTagName, RTOK_ATTNEND) == 0)		sscanf(szContents, "%f", &Light.fAttnEnd);
-			else if (_stricmp(szTagName, RTOK_CASTSHADOW) == 0)	Light.dwFlags |= RM_FLAG_CASTSHADOW;
+			auto ReadFloat = [&](auto& f) {
+				f = atof(szContents);
+			};
+
+			if (_stricmp(szTagName, RTOK_POSITION) == 0)
+				ReadVector(Light.Position);
+			else if (_stricmp(szTagName, RTOK_COLOR) == 0)
+				ReadVector(Light.Color);
+			else if (_stricmp(szTagName, RTOK_INTENSITY) == 0)
+				ReadFloat(Light.fIntensity);
+			else if (_stricmp(szTagName, RTOK_ATTNSTART) == 0)
+				ReadFloat(Light.fAttnStart);
+			else if (_stricmp(szTagName, RTOK_ATTNEND) == 0)
+				ReadFloat(Light.fAttnEnd);
+			else if (_stricmp(szTagName, RTOK_CASTSHADOW) == 0)
+				Light.dwFlags |= RM_FLAG_CASTSHADOW;
 		}
 	}
 	return true;

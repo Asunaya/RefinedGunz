@@ -23,14 +23,13 @@ ZFile::~ZFile()
 
 bool ZFile::Open(const char *szFileName,bool bWrite)
 {
-	int err;
-
 	m_bWrite = bWrite;
 
 	if(m_bWrite)
 	{
-		m_pFile = fopen(szFileName,"wb+");
-		if(!m_pFile) return false;
+		m_pFile = nullptr;
+		auto err = fopen_s(&m_pFile, szFileName, "wb+");
+		if(err != 0 || !m_pFile) return false;
 
 		m_Stream.zalloc = (alloc_func)0;
 		m_Stream.zfree = (free_func)0;
@@ -45,8 +44,9 @@ bool ZFile::Open(const char *szFileName,bool bWrite)
 	}
 	else
 	{
-		m_pFile = fopen(szFileName,"rb");
-		if(!m_pFile) return false;
+		m_pFile = nullptr;
+		auto err = fopen_s(&m_pFile, szFileName, "wb+");
+		if(err != 0 || !m_pFile) return false;
 
 		m_Stream.zalloc = (alloc_func)0;
 		m_Stream.zfree = (free_func)0;
@@ -66,7 +66,6 @@ bool ZFile::Open(const char *szFileName,bool bWrite)
 
 int ZFile::Read(void *pBuffer,int nByte)
 {
-	// 파일이 열려있고 readmode 인지 확인
 	if(!m_pFile || m_bWrite) return 0;
 
 	int err;

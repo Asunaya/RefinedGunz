@@ -155,32 +155,29 @@ void ZGameClient::OnAskAgreement(const MUID& uidProposer, void* pMemberNamesBlob
 	MTextArea* pTextEdit = (MTextArea*)pResource->FindWidget("ProposalAgreementConfirm_Textarea");
 	if (pTextEdit)
 	{
-		// 여기서 각각의 상황에 맞는 대사를 넣어줘야한다.
 		char szTemp[256] = "";
 
 		char szMembers[256] = " (";
 
 		for (int i = 0; i < nMemberCount; i++)
 		{
-			strcat(szMembers, szMemberNames[i]);
-			if (i != nMemberCount-1) strcat(szMembers, ", ");
+			strcat_safe(szMembers, szMemberNames[i]);
+			if (i != nMemberCount-1) strcat_safe(szMembers, ", ");
 		}
-		strcat(szMembers, ")");
+		strcat_safe(szMembers, ")");
 
 		switch (nProposalMode)
 		{
 		case MPROPOSAL_LADDER_INVITE:
 			{
-//				ZTransMsg(szTemp, MSG_LADDER_REPLIER_AGREEMENT_LABEL, 1, szMemberNames[0]);
 				ZTransMsg(szTemp, MSG_LADDER_REPLIER_AGREEMENT_LABEL, 1, szMemberNames[0]);
-				strcat(szTemp, szMembers);
+				strcat_safe(szTemp, szMembers);
 			}
 			break;
 		case MPROPOSAL_CLAN_INVITE:
 			{
-//				ZTransMsg(szTemp, MSG_CLANBATTLE_REPLIER_AGREEMENT_LABEL, 1, szMemberNames[0]);
 				ZTransMsg(szTemp, MSG_CLANBATTLE_REPLIER_AGREEMENT_LABEL, 1, szMemberNames[0]);
-				strcat(szTemp, szMembers);
+				strcat_safe(szTemp, szMembers);
 			}
 			break;
 		};
@@ -196,7 +193,7 @@ void ZGameClient::OnAskAgreement(const MUID& uidProposer, void* pMemberNamesBlob
 										"ProposalAgreementConfirm_Remain",
 										"ProposalAgreementConfirm",
 										OnAskReplierAgreement_OnExpire};
-		countDown.nSeconds=PROPOSAL_AGREEMENT_TIMEOUT_SEC;	// static 이므로 재설정
+		countDown.nSeconds=PROPOSAL_AGREEMENT_TIMEOUT_SEC;
 		ZApplication::GetTimer()->SetTimerEvent(0, &OnTimer_CountDown, &countDown, true);
 
 		pWidget->Show(true, true);
@@ -219,7 +216,7 @@ void ZGameClient::OnReplyAgreement(const MUID& uidProposer,
 	ZNetAgreementBuilder::_BuildReplyResult nResult;
 	nResult = m_AgreementBuilder.BuildReply(szReplierName, nProposalMode, nRequestID, bAgreement);
 
-	if (nResult == ZNetAgreementBuilder::BRR_ALL_AGREED)	// 모두 동의했을경우
+	if (nResult == ZNetAgreementBuilder::BRR_ALL_AGREED)
 	{
 		switch (nProposalMode)
 		{
@@ -231,13 +228,14 @@ void ZGameClient::OnReplyAgreement(const MUID& uidProposer,
 				for(int i=0; i<MAX_LADDER_TEAM_MEMBER; i++) {
 					ppMember[i] = szMember[i];
 				}
-				int nCount = m_AgreementBuilder.GetReplierNames(&ppMember[1], MAX_LADDER_TEAM_MEMBER-1);
+				int nCount = m_AgreementBuilder.GetReplierNames(
+					&ppMember[1],
+					ArraySize(*szMember),
+					ArraySize(ppMember) - 1);
 
-				// 자신도 넣는다.
 				strcpy_safe(szMember[0], ZGetMyInfo()->GetCharName());
 				nCount++;
 
-				// 여기서 실제로 요청
 				ZPostLadderRequestChallenge(ppMember, nCount, 0);
 			}
 			break;
@@ -249,7 +247,10 @@ void ZGameClient::OnReplyAgreement(const MUID& uidProposer,
 				for(int i=0; i<MAX_CLANBATTLE_TEAM_MEMBER; i++) {
 					ppMember[i] = szMember[i];
 				}
-				int nCount = m_AgreementBuilder.GetReplierNames(&ppMember[1], MAX_CLANBATTLE_TEAM_MEMBER-1);
+				int nCount = m_AgreementBuilder.GetReplierNames(
+					&ppMember[1],
+					ArraySize(*szMember),
+					ArraySize(ppMember) - 1);
 
 				// 자신도 넣는다.
 				strcpy_safe(szMember[0], ZGetMyInfo()->GetCharName());

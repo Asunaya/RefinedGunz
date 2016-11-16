@@ -42,7 +42,6 @@ public:
 		return MCOLOR(DEFCOLOR_MLIST_TEXT);
 	}
 
-	// 드래그 & 드롭을 했을때 전송될 스트링
 	virtual bool GetDragItem(MBitmap** ppDragBitmap, char* szDragString, char* szDragItemString){
 		return false;
 	}

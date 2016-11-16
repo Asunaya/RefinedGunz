@@ -215,10 +215,10 @@ void ZChat::Output(const char* szMsg, ZCHAT_MSG_TYPE msgtype, ZCHAT_LOC loc,MCOL
 
 	if (strlen(szMsg) < sizeof(szOutput)-2) strcpy_safe(szOutput, szMsg);
 	else {
-		_ASSERT(0);	// 채팅 버퍼가 너무 작음
-		char temp[32];strncpy(temp,szMsg,30);temp[30]=0;temp[31]=0;
+		_ASSERT(0);
+		char temp[32]; strncpy_safe(temp,szMsg,30); temp[30]=0; temp[31]=0;
 		mlog("warning : chat buffer overflow : %s\n",temp);
-		strncpy(szOutput, szMsg, sizeof(szOutput)-2);
+		strncpy_safe(szOutput, szMsg, sizeof(szOutput)-2);
 		szOutput[sizeof(szOutput)-1]=0;
 		szOutput[sizeof(szOutput)-2]=0;
 	}
@@ -274,14 +274,14 @@ void ZChat::Output(const char* szMsg, ZCHAT_MSG_TYPE msgtype, ZCHAT_LOC loc,MCOL
 			if(_color.GetARGB() == ZCOLOR_CHAT_SYSTEM )// 기본색인 경우 로비의 기본색
 				LobbyChatOutput(szOutput);
 			else 
-				LobbyChatOutput(szOutput,_color);	// 등록한색..
+				LobbyChatOutput(szOutput,_color);
 		}
 		else if (((loc == CL_CURRENT) && (state==GUNZ_STAGE)) || (loc==CL_STAGE))
 		{
-			if(_color.GetARGB() == ZCOLOR_CHAT_SYSTEM )// 기본색인 경우 스테이지의 기본색
+			if(_color.GetARGB() == ZCOLOR_CHAT_SYSTEM )
 				StageChatOutput(szOutput);
 			else 
-				StageChatOutput(szOutput,_color);	// 등록한색..
+				StageChatOutput(szOutput,_color);
 		}
 
 		m_ReportAbuse.OutputString(szMsg);
@@ -297,10 +297,10 @@ void ZChat::Output(MCOLOR color, const char* szMsg, ZCHAT_LOC loc)
 	char szOutput[512];
 	if (strlen(szMsg) < sizeof(szOutput)-2) strcpy_safe(szOutput, szMsg);
 	else {
-		_ASSERT(0);	// 채팅 버퍼가 너무 작음
-		char temp[32];strncpy(temp,szMsg,30);temp[30]=0;temp[31]=0;
+		_ASSERT(0);
+		char temp[32];strncpy_safe(temp,szMsg,30);temp[30]=0;temp[31]=0;
 		mlog("warning : chat buffer overflow : %s\n",temp);
-		strncpy(szOutput, szMsg, sizeof(szOutput)-2);
+		strncpy_safe(szOutput, szMsg, sizeof(szOutput)-2);
 		szOutput[sizeof(szOutput)-1]=0;
 		szOutput[sizeof(szOutput)-2]=0;
 	}
@@ -424,14 +424,13 @@ bool _InsertString(char* szTarget, const char* szInsert, int nPos, int nMaxTarge
 	int len = nTargetLen - nPos + 2;
 	char* temp = new char[len];
 	strcpy_safe(temp, len, szTarget+nPos);
-	strcpy(szTarget+nPos, szInsert);
-	strcpy(szTarget+nPos+nInsertLen, temp);
+	strcpy_unsafe(szTarget+nPos, szInsert);
+	strcpy_unsafe(szTarget+nPos+nInsertLen, temp);
 	delete[] temp;
 
 	return true;
 }
 
-// 채팅창에서 '/r ' 을 치면 이전에 귓말이 왔던 사람한테 바로 귓말 명령어로 변경
 void ZChat::FilterWhisperKey(MWidget* pWidget)
 {
 	char text[256];
@@ -447,12 +446,10 @@ void ZChat::FilterWhisperKey(MWidget* pWidget)
 			sprintf_safe(msg, "/%s ", pWhisperCmd->GetName());
 		}
 
-		//strcpy_safe(msg, "/귓말 ");
-
 		if (m_szWhisperLastSender[0])
 		{
-			strcat(msg, m_szWhisperLastSender);
-			strcat(msg, " ");
+			strcat_safe(msg, m_szWhisperLastSender);
+			strcat_safe(msg, " ");
 		}
 		pWidget->SetText(msg);
 	}

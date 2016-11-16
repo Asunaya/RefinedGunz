@@ -132,7 +132,7 @@ RRESULT OnCreate(void *pParam)
 	if( (hFile = _findfirst(FONT_DIR "*." FONT_EXT, &c_file )) != -1L ){
 		do{
 			strcpy_safe(szFileName, FONT_DIR);
-			strcat(szFileName, c_file.name);
+			strcat_safe(szFileName, c_file.name);
 			AddFontResource(szFileName);
 		}while( _findnext( hFile, &c_file ) == 0 );
 		_findclose(hFile);
@@ -254,7 +254,7 @@ RRESULT OnDestroy(void *pParam)
 	if( (hFile = _findfirst(FONT_DIR" *." FONT_EXT, &c_file )) != -1L ){
 		do{
 			strcpy_safe(szFileName, FONT_DIR);
-			strcat(szFileName, c_file.name);
+			strcat_safe(szFileName, c_file.name);
 			RemoveFontResource(szFileName);
 		}while( _findnext( hFile, &c_file ) == 0 );
 		_findclose(hFile);
@@ -551,7 +551,10 @@ int PASCAL WinMain(HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline, int 
 		unsigned int line,
 		uintptr_t pReserved)
 	{
-		MLog("Invalid parameter detected in function %s.\nFile: %s, line: %d.\nExpression: %s.\n", function, file, line, expression);
+		MLog("Invalid parameter detected in function %s.\n"
+			"File: %s, line: %d.\nExpression: %s.\n",
+			function, file, line, expression);
+		assert(false);
 	});
 
 	g_dwMainThreadID = GetCurrentThreadId();
@@ -586,8 +589,8 @@ int PASCAL WinMain(HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline, int 
 
 	char szDateRun[128]; szDateRun[0] = 0;
 	char szTimeRun[128]; szTimeRun[0] = 0;
-	_strdate(szDateRun);
-	_strtime(szTimeRun);
+	_strdate_s(szDateRun);
+	_strtime_s(szTimeRun);
 	mlog("Log time (%s %s)\n", szDateRun, szTimeRun);
 
 #ifndef _PUBLISH

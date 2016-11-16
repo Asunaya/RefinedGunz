@@ -72,8 +72,16 @@ public:
 	void Create();
 	void Destroy();
 
-	bool GetEmblemPath(char* pszFilePath, const char* pszURL);
-	bool GetEmblemPathByCLID(unsigned int nCLID, char* poutFilePath);
+	bool GetEmblemPath(char* pszFilePath, size_t maxlen, const char* pszURL);
+	template <size_t size>
+	auto GetEmblemPath(char(&pszFilePath)[size], const char* pszURL) {
+		return GetEmblemPath(pszFilePath, size, pszURL);
+	}
+	bool GetEmblemPathByCLID(unsigned int nCLID, char* poutFilePath, size_t maxlen);
+	template <size_t size>
+	auto GetEmblemPathByCLID(unsigned int nCLID, char(&poutFilePath)[size]) {
+		return GetEmblemPathByCLID(nCLID, poutFilePath, size);
+	}
 
 	int GetTotalRequest()	{ return m_nTotalRequest; }
 	int GetCachedRequest()	{ return m_nCachedRequest; }

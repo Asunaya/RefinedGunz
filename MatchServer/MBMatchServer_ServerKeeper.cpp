@@ -264,7 +264,6 @@ void MBMatchServer::OnResponseReloadServerConfig( const MUID& uidSender, const s
 
 	bool bReloadOK = false;
 	
-	// 파일 리스트가 없으면 로컬 파일에서 읽어 온다.
 	if( !strFileList.empty() )
 	{
 		bool bContinue = true;
@@ -277,10 +276,10 @@ void MBMatchServer::OnResponseReloadServerConfig( const MUID& uidSender, const s
 		{
 			end = strFileList.find( ",", start );
 			if( string::npos != end )
-				strncpy( szFileName, strFileList.c_str() + start, end - start );
+				strncpy_safe( szFileName, strFileList.c_str() + start, end - start );
 			else
 			{
-				strncpy( szFileName, strFileList.c_str() + start, strFileList.length() - start );
+				strncpy_safe( szFileName, strFileList.c_str() + start, strFileList.length() - start );
 				bContinue = false;
 			}
 

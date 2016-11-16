@@ -4,17 +4,17 @@
 #include "upnp.h"
 #include "NATUPnP.h"
 
-UPnP::UPnP(void)
+UPnP::UPnP()
 {
 	m_Port = 0;
 }
 
-UPnP::~UPnP(void)
+UPnP::~UPnP()
 {
 	Destroy();
 }
 
-bool UPnP::Create(WORD Port)
+bool UPnP::Create(u16 Port)
 {
 	IUPnPNAT * Nat = NULL;
 	IStaticPortMappingCollection * PortMappingCollection = NULL;
@@ -35,12 +35,11 @@ bool UPnP::Create(WORD Port)
 		return false;
 	}
 
-	mbstowcs(InternalClient, m_Address, 256);
-//	swprintf(Protocol, L"TCP");
-//	swprintf(Description, L"Torrent");
+	size_t num_chars_converted{};
+	mbstowcs_s(&num_chars_converted, InternalClient, m_Address, 256);
 
-	swprintf(Protocol, L"UDP");
-	swprintf(Description, L"Gunz");
+	wcscpy_s(Protocol, L"UDP");
+	wcscpy_s(Description, L"Gunz");
 
 	// Create IUPnPNat
 	Result = CoCreateInstance(CLSID_UPnPNAT, NULL, CLSCTX_INPROC_SERVER, IID_IUPnPNAT, (void **)&Nat);
@@ -65,7 +64,8 @@ bool UPnP::Create(WORD Port)
 		return false;
 	}
 
-	Result = PortMappingCollection->Add(Port, Protocol, Port, InternalClient, VARIANT_TRUE, Description, &PortMap);
+	Result = PortMappingCollection->Add(Port, Protocol, Port, InternalClient,
+		VARIANT_TRUE, Description, &PortMap);
 
 	if(!PortMap || FAILED(Result))
 	{
@@ -108,7 +108,7 @@ void  UPnP::Destroy(void)
 	TRACE("UPnP: Removing Port\n");
 #endif
 
-	swprintf(Protocol, L"TCP");
+	wcscpy_s(Protocol, L"TCP");
 
 	// Create IUPnPNat
 	Result = CoCreateInstance(CLSID_UPnPNAT, NULL, CLSCTX_INPROC_SERVER, IID_IUPnPNAT, (void **)&Nat);
@@ -147,11 +147,10 @@ void  UPnP::Destroy(void)
 	}
 }
 
-bool UPnP::GetIp(void)
+bool UPnP::GetIp()
 {
 	char HostName[256];
 	hostent * Host;
-	char * Address;
 	SOCKADDR_IN Addr;
 
 	int ret;
@@ -168,7 +167,10 @@ bool UPnP::GetIp(void)
 		TRACE("UPnP: HostName: %s\n", HostName);
 #endif
 	}
+#pragma warning(push)
+#pragma warning(disable: 4996)
 	Host = gethostbyname(HostName);
+#pragma warning(pop)
 	if(Host == NULL)
 	{
 #ifdef MFC
@@ -177,9 +179,10 @@ bool UPnP::GetIp(void)
 		return false;
 	}
 	Addr.sin_addr.s_addr = ((IN_ADDR *)Host->h_addr)->s_addr;
-	Address = inet_ntoa(Addr.sin_addr);
+	auto Address = GetIPv4String(Addr.sin_addr);
 
-	if(!Address)
+	// idk how this could possibly fail but w/e
+	if(Address.empty())
 	{
 #ifdef MFC
 		TRACE("UPnP: inet_ntoa failed\n");
@@ -187,7 +190,7 @@ bool UPnP::GetIp(void)
 		return false;
 	}
 
-	strncpy(m_Address, Address, sizeof(m_Address) - 1);
+	strcpy_safe(m_Address, Address.c_str());
 
 #ifdef MFC
 	TRACE("UPnP: Local Ip: %s\n", m_Address);

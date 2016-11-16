@@ -1,8 +1,9 @@
-#ifndef ZEQUIPMENTLISTBOX_H
-#define ZEQUIPMENTLISTBOX_H
+#pragma once
 
 #include "ZPrerequisites.h"
 #include "MListBox.h"
+#include "ZStringResManager.h"
+#include "SafeString.h"
 
 MBitmap* GetItemIconBitmap(MMatchItemDesc* pItemDesc, bool bSmallIcon = false);
 bool ZGetIsCashItem(unsigned long nItemID);
@@ -10,19 +11,16 @@ bool ZGetIsCashItem(unsigned long nItemID);
 class ZEquipmentListItem : public MListItem{
 protected:
 	MBitmap*			m_pBitmap;
-	int					m_nAIID;		// 중앙은행에서 사용한다
+	int					m_nAIID;
 	unsigned long		m_nItemID;
 public:
 	MUID				m_UID;
 public:
 	char	m_szName[256];
 	char	m_szLevel[256];
-//	char	m_szWeight[256];
-//	char	m_szSlot[256];
 	char	m_szPrice[256];
 public:
 
-//	ZEquipmentListItem(const MUID& uidItem, MBitmap* pBitmap, const char* szName, const char* szWeight, const char* szSlot, const char* szPrice)
 	ZEquipmentListItem(const MUID& uidItem, const unsigned long nItemID, MBitmap* pBitmap, const char* szName, const char* szLevel, const char* szPrice)
 	{
 		m_nAIID = 0;
@@ -31,8 +29,6 @@ public:
 		m_UID = uidItem;
 		strcpy_safe(m_szName, szName);
 		strcpy_safe(m_szLevel, szLevel);
-//		strcpy_safe(m_szWeight, szWeight);
-//		strcpy_safe(m_szSlot, szSlot);
 		strcpy_safe(m_szPrice, szPrice);
 	}
 	ZEquipmentListItem(const int nAIID, const unsigned long nItemID, MBitmap* pBitmap, const char* szName, const char* szLevel)
@@ -53,8 +49,6 @@ public:
 		m_pBitmap = NULL;
 		m_UID = MUID(0,0);
 		m_szName[0] = 0;
-//		m_szWeight[0] = 0;
-//		m_szSlot[0] = 0;
 		m_szLevel[0] = 0;
 		m_szPrice[0] = 0;
 	}
@@ -66,8 +60,6 @@ public:
 	{
 		if(i==1) return m_szName;
 		else if(i==2) return m_szLevel;
-//		else if(i==2) return m_szWeight;
-//		else if(i==3) return m_szSlot;
 		else if(i==3) {
 			if ( ZGetIsCashItem(GetItemID()) == true)
 			{
@@ -78,12 +70,11 @@ public:
 		}
 		return NULL;
 	}
-	virtual bool GetDragItem(MBitmap** ppDragBitmap, char* szDragString, char* szDragItemString)
+	virtual bool GetDragItem(MBitmap** ppDragBitmap, char* szDragString, char* szDragItemString) override
 	{
 		*ppDragBitmap = GetBitmap(0);
-		strcpy(szDragString, m_szName);
-		strcpy(szDragItemString, m_szName);
-
+		strcpy_unsafe(szDragString, m_szName);
+		strcpy_unsafe(szDragItemString, m_szName);
 		return true;
 	}
 	virtual MBitmap* GetBitmap(int i)
@@ -98,20 +89,17 @@ public:
 
 
 class ZItemMenu;
-//typedef void (*ZCB_ONDROP)(void* pSelf, MWidget* pSender, MBitmap* pBitmap, const char* szString, const char* szItemString);
 
 class ZEquipmentListBox : public MListBox
 {
 protected:
 	virtual bool IsDropable(MWidget* pSender);
-//	virtual bool OnDrop(MWidget* pSender, MBitmap* pBitmap, const char* szString, const char* szItemString);
 	virtual bool OnEvent(MEvent* pEvent, MListener* pListener);
 
 protected:
-//	ZCB_ONDROP			m_pOnDropFunc;
 	MWidget*			m_pDescFrame;
 protected:
-	ZItemMenu*			m_pItemMenu;	// ZEquipmentList가 Exclusive라서 Popup이 Child일때만 Show()가능하다
+	ZItemMenu*			m_pItemMenu;
 	ZItemMenu* GetItemMenu()	{ return m_pItemMenu; }
 
 public:
@@ -119,14 +107,10 @@ public:
 	virtual ~ZEquipmentListBox(void);
 	void AttachMenu(ZItemMenu* pMenu);
 
-//	void Add(const MUID& uidItem, MBitmap* pIconBitmap, const char* szName, const char* szWeight, const char* szSlot, const char* szPrice);
-//	void Add(const MUID& uidItem, MBitmap* pIconBitmap, const char* szName, int nWeight, MMatchItemSlotType nSlot, int nBountyPrice);
-
 	void Add(const MUID& uidItem, unsigned long nItemID, MBitmap* pIconBitmap, const char* szName, const char* szLevel, const char* szPrice);
 	void Add(const MUID& uidItem, unsigned long nItemID, MBitmap* pIconBitmap, const char* szName, int nLevel,int nBountyPrice);
 	void Add(const int nAIID, unsigned long nItemID, MBitmap* pIconBitmap, const char* szName, int nLevel);
 
-//	void SetOnDropCallback(ZCB_ONDROP pCallback) { m_pOnDropFunc = pCallback; }
 	void SetDescriptionWidget(MWidget *pWidget)	{ m_pDescFrame = pWidget; }
 
 public:
@@ -149,5 +133,3 @@ MListener* ZGetCashShopItemListBoxListener(void);
 MListener* ZGetShopPurchaseItemListBoxListener(void);
 MListener* ZGetEquipmentItemListBoxListener(void);
 MListener* ZGetAccountItemListBoxListener(void);
-
-#endif

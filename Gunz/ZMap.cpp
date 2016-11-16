@@ -62,7 +62,7 @@ bool InitMaps(MWidget *pWidget)
 		if( _strnicmp(desc->m_szFileName,MAPDIRECTORY,strlen(MAPDIRECTORY))==0 && nLen>nExtLen && _stricmp(szFileName+nLen-nExtLen, MAP_EXT)==0 )
 		{
 			char drive[_MAX_DRIVE],dir[_MAX_DIR],fname[_MAX_FNAME],ext[_MAX_EXT];
-			_splitpath(szFileName,drive,dir,fname,ext);
+			_splitpath_s(szFileName,drive,dir,fname,ext);
 
 #ifdef _DEBUG
 			pCombo->Add(fname);
@@ -77,8 +77,8 @@ bool InitMaps(MWidget *pWidget)
 			if (ZGetGameClient()->GetMatchStageSetting()->GetGameType() == MMATCH_GAMETYPE_SKILLMAP)
 			{
 				char lwrfname[_MAX_FNAME];
-				strcpy(lwrfname, fname);
-				strlwr(lwrfname);
+				strcpy_safe(lwrfname, fname);
+				_strlwr_s(lwrfname);
 				if (strstr(lwrfname, "skill") || !_stricmp(fname, "Superflip"))
 					pCombo->Add(fname);
 			}

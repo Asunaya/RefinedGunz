@@ -1551,7 +1551,7 @@ void ZCharacter::UpdateSound()
 					strcpy_safe(szSndName, g_pGame->GetSndNameFromBsp(pSInfo->Name, pMaterial));
 
 					int nStr = (int)strlen(szSndName);
-					strncpy(m_pSoundMaterial, szSndName + (nStr - 6), 7);
+					strncpy_safe(m_pSoundMaterial, szSndName + (nStr - 6), 7);
 
 					ZApplication::GetSoundEngine()->PlaySoundElseDefault(szSndName, pSInfo->Name, p, IsObserverTarget());
 				}
@@ -1571,7 +1571,6 @@ void ZCharacter::UpdateSound()
 		}
 	}
 
-	// TODO : onscream 으로 정리하자
 	if ( m_bDamaged && (!IsDie()) && (GetHP() < 30.f))
 	{
 		if(GetProperty()->nSex==MMS_MALE)

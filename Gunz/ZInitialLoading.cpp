@@ -380,7 +380,7 @@ void	ZInitialLoading::DrawTips()
 			char temp[512] = "";
 			while ((RGetScreenWidth()-70) > (pFont->GetWidth(temp)))
 			{
-				strcat(temp, "남");
+				strcat_safe(temp, "남");
 			}
 
 			nStripIndex = (int)strlen(temp);
@@ -395,7 +395,7 @@ void	ZInitialLoading::DrawTips()
 					nStripIndex++;
 				}
 
-                strncpy(szLine1, m_szTips, nStripIndex);
+                strncpy_safe(szLine1, m_szTips, nStripIndex);
 				strcpy_safe(szLine2, &m_szTips[nStripIndex]);
 			}
 			else
@@ -415,8 +415,6 @@ void	ZInitialLoading::DrawTips()
 			y = (int)((float)RGetScreenHeight() * fTipYRatio);
 			g_pDC->Text(x, y, m_szTips);
 
-
-			// 로딩 화면에 맞춰서 텍스트를 설정한다.(하드코딩... -_-;)
 			int nPosx, nPosy;
 			char szStr1[ 256], szStr2[ 256], szStr3[ 256];
 			switch ( m_nTipNum)

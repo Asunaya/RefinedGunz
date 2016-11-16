@@ -5,6 +5,8 @@
 #include "ZButton.h"
 #include "ZMsgBox.h"
 #include "ZActionKey.h"
+#include "Mint.h"
+#include "SafeString.h"
 
 _USING_NAMESPACE_REALSPACE2
 
@@ -12,13 +14,12 @@ class Mint4Gunz : public Mint{
 public:
 	virtual void Update(void){
 		RealSpace2::RFrame_Render();
-		//RenderScene(NULL);
 	}
 	virtual MBitmap* OpenBitmap(const char* szName){
 
 		char aliasname[256];
 		char drive[_MAX_DRIVE],dir[_MAX_DIR],fname[_MAX_FNAME],ext[_MAX_EXT];
-		_splitpath(szName,drive,dir,fname,ext);
+		_splitpath_s(szName,drive,dir,fname,ext);
 		sprintf_safe(aliasname,"%s%s",fname,ext);
 
 		MBitmapR2* pNew = new MBitmapR2;
@@ -34,7 +35,9 @@ public:
 		pNew->Create(szName, szName, nHeight);
 		return pNew;
 	}
-	virtual MWidget* NewWidget(const char* szClass, const char* szName, MWidget* pParent, MListener* pListener){
+	virtual MWidget* NewWidget(const char* szClass, const char* szName,
+		MWidget* pParent, MListener* pListener)
+	{
 		if(strcmp(szClass, MINT_BUTTON)==0) return new ZButton(szName, pParent, pListener);
 		else if( strcmp(szClass, MINT_BMBUTTON)==0) return new ZBmButton(szName, pParent, pListener);
 		else if( strcmp(szClass, MINT_MSGBOX)==0) return new ZMsgBox(szName, pParent, pListener);
@@ -46,9 +49,8 @@ public:
 
 	virtual void Draw(void){
 		Mint::Draw();
-		//		MPOINT p = MEvent::GetMousePos();
 		MPOINT p = MEvent::LatestPos;
 
-		MCursorSystem::Draw(GetDrawContext(), p.x, p.y);	// RAONHAJE Mouse Cursor SoftwareDraw
+		MCursorSystem::Draw(GetDrawContext(), p.x, p.y);
 	}
 };

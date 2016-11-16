@@ -68,17 +68,17 @@ void ZReportAbuse::SendFile()
 {
 	time_t currtime;
 	time(&currtime);
-	struct tm* pTM = localtime(&currtime);
+	struct tm TM;
+	auto err = localtime_s(&TM, &currtime);
 
 	char szPlayer[128];
 	wsprintf(szPlayer, "%s", ZGetMyInfo()->GetCharName());
 
 	char szFileName[_MAX_DIR];
 	wsprintf(szFileName, "%02d%02d_%02d%02d_%s_%s",
-			pTM->tm_mon+1, pTM->tm_mday, pTM->tm_hour, pTM->tm_min, szPlayer, "119.txt");
+			TM.tm_mon+1, TM.tm_mday, TM.tm_hour, TM.tm_min, szPlayer, "119.txt");
 
-
-	// BAReport ½ÇÇà
+	// BAReport
 	char szCmd[4048];
 	char szRemoteFileName[_MAX_DIR];
 	wsprintf(szRemoteFileName, "%s/%s/%s", ZGetConfiguration()->GetBAReportDir(), "gunz119", szFileName);
@@ -93,10 +93,11 @@ void ZReportAbuse::SendFile()
 
 void ZReportAbuse::SaveFile()
 {
-	unsigned long int nNowTime = GetGlobalTimeMS();
+	auto nNowTime = GetGlobalTimeMS();
 
-	FILE* fp = fopen(REPORT_ABUSE_FILENAME, "wt");
-	if (fp == NULL) return;
+	FILE* fp{};
+	auto err = fopen_s(&fp, REPORT_ABUSE_FILENAME, "wt");
+	if (err != 0 || fp == NULL) return;
 
 	fprintf(fp, "%s\n", m_szReason);
 

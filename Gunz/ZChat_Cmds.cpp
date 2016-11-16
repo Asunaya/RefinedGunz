@@ -238,20 +238,15 @@ void OutputCmdWrongArgument(const char* cmd)
 	OutputCmdUsage(cmd);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////
-
 void ChatCmd_Help(const char* line, const int argc, char **const argv)
 {
 	ZChatCmdManager* pCCM = ZGetGameInterface()->GetChat()->GetCmdManager();
 
 	char szBuf[1024] = "";
 
-	//////////////////////////////////////////////////////////
-
 	GunzState state = ZApplication::GetGameInterface()->GetState();
 
 	if( state==GUNZ_GAME ) {
-		// 자신의 캐릭터가 레벨이 1-10 사이인 경우만..
 		if(ZGetMyInfo()) {
 			if(ZGetMyInfo()->GetLevel() < 10) {
 				if( g_pGame ) {
@@ -287,19 +282,18 @@ void ChatCmd_Help(const char* line, const int argc, char **const argv)
 			if (pCmd->GetFlag() & CCF_ADMIN) continue;
 			if (!(pCmd->GetFlag() & nCurrFlag)) continue;
 
-			strcat(szBuf, pCmd->GetName());
+			strcat_safe(szBuf, pCmd->GetName());
 
-			if (nCnt != nCmdCount) strcat(szBuf, ", ");
+			if (nCnt != nCmdCount) strcat_safe(szBuf, ", ");
 		}
 
-		// 엄청난 하드코딩... 어쩔수 없다... -ㅇ-;
 		switch (state)
 		{
 			case GUNZ_LOBBY:
-				strcat( szBuf, "go");
+				strcat_safe( szBuf, "go");
 				break;
 			case GUNZ_STAGE:
-				strcat( szBuf, "kick");
+				strcat_safe( szBuf, "kick");
 				break;
 			case GUNZ_GAME:
 				break;

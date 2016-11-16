@@ -97,14 +97,11 @@ void ZMapListBox::Refresh(MZFileSystem* pFS)
 			nLen>nExtLen && _stricmp(szFileName+nLen-nExtLen, EXT)==0 )
 		{
 			char drive[_MAX_DRIVE],dir[_MAX_DIR],fname[_MAX_FNAME],ext[_MAX_EXT];
-			_splitpath(szFileName,drive,dir,fname,ext);
+			_splitpath_s(szFileName,drive,dir,fname,ext);
 
 			if (ZIsLaunchDevelop()) 
 			{
 				m_pListBox->Add(fname);
-//			} else {
-//				if (pRule->CheckMap(fname))
-//					m_pListBox->Add(fname);
 			}
 		}
 	}

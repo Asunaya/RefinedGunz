@@ -41,7 +41,7 @@ BOOL CALLBACK EnumDeviceObjectsCB( LPCDIDEVICEOBJECTINSTANCE lpddoi, LPVOID pvRe
 	if(nKey<0 || nKey>=KEYNAMETABLE_COUNT) return DIENUM_STOP;
 
 	szKeyNameTable[nKey] = new char[strlen(lpddoi->tszName)+2];
-	strcpy(szKeyNameTable[nKey], lpddoi->tszName);
+	strcpy_unsafe(szKeyNameTable[nKey], lpddoi->tszName);
 
 	return DIENUM_CONTINUE;
 }

@@ -70,26 +70,15 @@ xml_document<> doc; \
 auto ret = ParseXMLFile(filename, doc); \
 if (!ret.success) return false
 
-static float toFloat(const char *str)
-{
-	float r = 0;
-	sscanf(str, "%f", &r);
-	return r;
-}
-
-static int toInt(const char *str)
-{
-	int i = 0;
-	sscanf(str, "%d", &i);
-	return i;
-}
+static float toFloat(const char *str) { return atof(str); }
+static int toInt(const char *str) { return atoi(str); }
 
 static bool toFloat3(const char *str, float *fv)
 {
 	fv[0] = fv[1] = fv[2] = 0.0f;
 
-	sscanf(str, "%f %f %f", &fv[0], &fv[1], &fv[2]);
-	return true;
+	auto ret = sscanf_s(str, "%f %f %f", &fv[0], &fv[1], &fv[2]);
+	return ret == 3;
 }
 
 static const char* GetNodeValue(const char* node_name, rapidxml::xml_node<>* parent)
@@ -148,7 +137,7 @@ static bool GetUShort3(float (&dest)[3], const char* node_name, rapidxml::xml_no
 	auto* value = GetNodeValue(node_name, parent);
 	if (!value) return false;
 	int vals[3]{};
-	if (sscanf(value, "%i %i %i", vals, vals + 1, vals + 2) != 3) return false;
+	if (sscanf_s(value, "%i %i %i", vals, vals + 1, vals + 2) != 3) return false;
 	for (size_t i{}; i < ArraySize(dest); ++i)
 		dest[i] = vals[i];
 	return true;

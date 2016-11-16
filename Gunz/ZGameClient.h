@@ -308,6 +308,11 @@ bool ZPostCommand(MCommand* pCmd);
 MUID ZGetMyUID();	
 
 MCommand* ZNewCmd(int nID);
+bool GetUserInfoUID(MUID uid, MCOLOR& _color, char* sp_name, size_t maxlen, MMatchUserGradeID& gid);
+template <size_t size>
+bool GetUserInfoUID(MUID uid, MCOLOR& _color, char(&sp_name)[size], MMatchUserGradeID& gid) {
+	return GetUserInfoUID(uid, _color, sp_name, size, gid);
+}
 
 unsigned long int ZGetClockDistance(unsigned long int nGlobalClock, unsigned long int nLocalClock);
 
@@ -323,5 +328,3 @@ unsigned long int ZGetClockDistance(unsigned long int nGlobalClock, unsigned lon
 
 #define HANDLE_COMMAND(message, fn)    \
 	case (message): return fn(pCommand);
-
-bool GetUserInfoUID(MUID uid,MCOLOR& _color,char* sp_name,MMatchUserGradeID& gid);

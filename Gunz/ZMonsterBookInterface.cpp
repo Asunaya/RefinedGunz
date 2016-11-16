@@ -306,23 +306,23 @@ void ZMonsterBookInterface::DrawPage( void)
 				switch ( pMonsterInfo->nGrade)
 				{
 					case NPC_GRADE_REGULAR :
-						strcat( szGrade, ZMsg(MSG_WORD_REGULAR));
+						strcat_safe( szGrade, ZMsg(MSG_WORD_REGULAR));
 						break;
 
 					case NPC_GRADE_LEGENDARY :
-						strcat( szGrade, ZMsg(MSG_WORD_LEGENDARY));
+						strcat_safe( szGrade, ZMsg(MSG_WORD_LEGENDARY));
 						break;
 
 					case NPC_GRADE_BOSS :
-						strcat( szGrade, ZMsg(MSG_WORD_BOSS));
+						strcat_safe( szGrade, ZMsg(MSG_WORD_BOSS));
 						break;
 
 					case NPC_GRADE_ELITE :
-						strcat( szGrade, ZMsg(MSG_WORD_ELITE));
+						strcat_safe( szGrade, ZMsg(MSG_WORD_ELITE));
 						break;
 
 					case NPC_GRADE_VETERAN :
-						strcat( szGrade, ZMsg(MSG_WORD_VETERAN));
+						strcat_safe( szGrade, ZMsg(MSG_WORD_VETERAN));
 						break;
 				}
 				pLabel->SetText( szGrade);
@@ -338,8 +338,6 @@ void ZMonsterBookInterface::DrawPage( void)
 		}
 	}
 
-
-	// 해당 몬스터의 설명을 업데이트 한다
 	MTextArea* pTextArea = (MTextArea*)pResource->FindWidget( "MonsterBook_MonsterDesc");
 	if ( pTextArea)
 	{
@@ -351,9 +349,6 @@ void ZMonsterBookInterface::DrawPage( void)
 			pTextArea->AddText( "?????", MCOLOR( 0xFF321E00));
 	}
 
-
-
-	// 해당 몬스터의 HP를 업데이트 한다
 	pLabel = (MLabel*)pResource->FindWidget( "MonsterBook_MonsterHP");
 	if ( pLabel)
 	{
@@ -365,15 +360,15 @@ void ZMonsterBookInterface::DrawPage( void)
 				strcpy_safe( szHP, "HP : ");
 
 				if ( pMonsterInfo->nMaxHP > 200)
-					strcat( szHP, ZMsg(MSG_WORD_VERYHARD));
+					strcat_safe( szHP, ZMsg(MSG_WORD_VERYHARD));
 				else if ( pMonsterInfo->nMaxHP > 120)
-					strcat( szHP, ZMsg(MSG_WORD_HARD));
+					strcat_safe( szHP, ZMsg(MSG_WORD_HARD));
 				else if ( pMonsterInfo->nMaxHP > 80)
-					strcat( szHP, ZMsg(MSG_WORD_NORAML));
+					strcat_safe( szHP, ZMsg(MSG_WORD_NORAML));
 				else if ( pMonsterInfo->nMaxHP > 30)
-					strcat( szHP, ZMsg(MSG_WORD_WEAK));
+					strcat_safe( szHP, ZMsg(MSG_WORD_WEAK));
 				else
-					strcat( szHP, ZMsg(MSG_WORD_VERYWEAK));
+					strcat_safe( szHP, ZMsg(MSG_WORD_VERYWEAK));
 
 				pLabel->SetText( szHP);
 			}
@@ -384,8 +379,6 @@ void ZMonsterBookInterface::DrawPage( void)
 			pLabel->SetText( "HP : ?????");
 	}
 
-
-	// 해당 몬스터의 특수기를 업데이트 한다
 	pTextArea = (MTextArea*)pResource->FindWidget( "MonsterBook_Attacks");
 	if ( pTextArea)
 	{
@@ -407,25 +400,20 @@ void ZMonsterBookInterface::DrawPage( void)
 			pTextArea->AddText( "?????", MCOLOR( 0xFF321E00));
 	}
 
-
-	// 현재 페이지에 해당하는 몬스터 일러스트 이미지를 표시한다
 	if ( nPercentage >= 100)
 	{
 		char szFileName[ 256];
 		if ( pMonsterInfo)
-			sprintf_safe( szFileName, "monster_Illust%02d.jpg", (int)pMonsterInfo->nID);		// 몬스터의 ID값을 이용해서 파일명을 생성한다
+			sprintf_safe( szFileName, "monster_Illust%02d.jpg", (int)pMonsterInfo->nID);
 		SetIllustImage( (pMonsterInfo) ? szFileName : "");
 	}
 	else
 		DeleteIllustImage();
 
-
-	// 이전 페이지
 	MWidget* pWidget = pResource->FindWidget( "MonsterBook_PrevPageButton");
 	if ( pWidget)
 		pWidget->Show( true);
 
-	// 다음 페이지
 	pWidget = pResource->FindWidget( "MonsterBook_NextPageButton");
 	if ( pWidget)
 	{
@@ -438,20 +426,11 @@ void ZMonsterBookInterface::DrawPage( void)
 	m_bIsFirstPage = false;
 }
 
-
-/***********************************************************************
-  DrawFirstPage : protect
-  
-  desc : 첫페이지를 그린다
-  arg  : none
-  ret  : none
-************************************************************************/
 void ZMonsterBookInterface::DrawFirstPage( void)
 {
 	// Get resource pointer
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
 
-	// 배경 책 이미지를 로딩한다
 	if ( m_pBookBgImg != NULL)
 	{
 		delete m_pBookBgImg;
@@ -462,49 +441,39 @@ void ZMonsterBookInterface::DrawFirstPage( void)
 	((MBitmapR2*)m_pBookBgImg)->Create( "monsterIllust.png", RGetDevice(), "interface/MonsterIllust/book_firstbg.jpg");
 	if ( m_pBookBgImg)
 	{
-		// 읽어온 비트맵 이미지 포인터를 해당 위젯에 넘겨줘서 표시한다
 		MPicture* pPicture = (MPicture*)pResource->FindWidget( "MonsterBook_BookBG");
 		if ( pPicture)
 			pPicture->SetBitmap( m_pBookBgImg->GetSourceBitmap());
 	}
 
-	// 일러스트
 	DeleteIllustImage();
 
-	// 달성률 표시
 	DrawComplete();
 
-	// 페이지 번호
 	MLabel* pLabel = (MLabel*)pResource->FindWidget( "MonsterBook_PageNumber");
 	if ( pLabel)
 		pLabel->SetText( "");
 
-	// 몬스터의 이름
 	pLabel = (MLabel*)pResource->FindWidget( "MonsterBook_MonsterName");
 	if (pLabel)
 		pLabel->SetText( "");
 
-	// 몬스터의 등급
 	pLabel = (MLabel*)pResource->FindWidget( "MonsterBook_MonsterGrade");
 	if ( pLabel)
 		pLabel->SetText( "");
 
-	// 몬스터의 HP
 	pLabel = (MLabel*)pResource->FindWidget( "MonsterBook_MonsterHP");
 	if ( pLabel)
 		pLabel->SetText( "");
 
-	// 몬스터의 설명
 	MTextArea* pTextArea = (MTextArea*)pResource->FindWidget( "MonsterBook_MonsterDesc");
 	if ( pTextArea)
 		pTextArea->Clear();
 
-	// 몬스터의 특수기
 	pTextArea = (MTextArea*)pResource->FindWidget( "MonsterBook_Attacks");
 	if ( pTextArea)
 		pTextArea->Clear();
 
-	// 아이템 목록
 	for ( int i = 0;  i < 10;  i++)
 	{
 		char szWidgetName[ 128];
@@ -514,12 +483,10 @@ void ZMonsterBookInterface::DrawFirstPage( void)
 			pWidget->Show( false);
 	}
 
-	// 이전 페이지
 	MWidget* pWidget = pResource->FindWidget( "MonsterBook_PrevPageButton");
 	if ( pWidget)
 		pWidget->Show( false);
 
-	// 다음 페이지
 	pWidget = pResource->FindWidget( "MonsterBook_NextPageButton");
 	if ( pWidget)
 		pWidget->Show( true);
@@ -528,42 +495,25 @@ void ZMonsterBookInterface::DrawFirstPage( void)
 	m_bIsFirstPage = true;
 }
 
-
-/***********************************************************************
-  SetIllustImage : public
-  
-  desc : 현재 페이지에 해당하는 몬스터 일러스트 이미지를 표시한다
-  arg  : szFileName = 일러스트 파일 이름을 입력
-  ret  : true(=success) or false(=fail)
-************************************************************************/
 bool ZMonsterBookInterface::SetIllustImage( const char* szFileName)
 {
 	// Get resource pointer
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
 
-
-	// 일러스트 이미지 삭제
 	DeleteIllustImage();
-
 
 	// Error check
 	if ( strlen( szFileName) == 0)
 		return false;
 
-
-	// 일러스트 이미지를 읽어와서 메모리에 저장한다
 	m_pIllustImg = new MBitmapR2;
 	char szFullFileName[256];
 	sprintf_safe( szFullFileName, "interface/MonsterIllust/%s", szFileName);
 	((MBitmapR2*)m_pIllustImg)->Create( "monsterIllust.png", RGetDevice(), szFullFileName);
 
-
-	// 읽어오기 실패시
 	if ( !m_pIllustImg)
 		return false;
 
-
-	// 읽어온 비트맵 이미지 포인터를 해당 위젯에 넘겨줘서 표시한다
 	MPicture* pPicture = (MPicture*)pResource->FindWidget( "MonsterBook_MonsterIllust");
 	if ( pPicture)
 		pPicture->SetBitmap( m_pIllustImg->GetSourceBitmap());

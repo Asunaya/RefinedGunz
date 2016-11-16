@@ -103,7 +103,7 @@ bool GetNextName(char *szBuffer, int nBufferCount, const char *szSource)
 		int nCount=end-szSource-1;
 		if(nCount==0 || nCount>=nBufferCount) return false;
 
-		strncpy(szBuffer,szSource+1,nCount);
+		strncpy_safe(szBuffer, nBufferCount, szSource+1, nCount);
 		szBuffer[nCount]=0;
 	}
 	else
@@ -818,7 +818,12 @@ void ZApplication::ParseStandAloneArguments(const char* pszArgs)
 		ZApplication::GetInstance()->m_nInitialState = GUNZ_GAME;
 		char szTemp[256], szMap[256];
 		int nDummyCount = 0, nShotEnable = 0;
-		sscanf(str, "%s %s %d %d", szTemp, szMap, &nDummyCount, &nShotEnable);
+
+		sscanf_s(str, "%s %s %d %d",
+			szTemp, sizeof(szTemp),
+			szMap, sizeof(szMap),
+			&nDummyCount, &nShotEnable);
+
 		bool bShotEnable = false;
 		if (nShotEnable != 0) bShotEnable = true;
 
@@ -842,7 +847,7 @@ void ZApplication::ParseStandAloneArguments(const char* pszArgs)
 
 			ZApplication::GetInstance()->m_nInitialState = GUNZ_GAME;
 			char szTemp[256], szMap[256];
-			sscanf(str, "%s %s", szTemp, szMap);
+			sscanf_s(str, "%s %s", szTemp, sizeof(szTemp), szMap, sizeof(szMap));
 
 			ZGetGameClient()->GetMatchStageSetting()->SetGameType(MMATCH_GAMETYPE_QUEST);
 			

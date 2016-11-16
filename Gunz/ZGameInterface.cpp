@@ -162,7 +162,7 @@ void ZGameInterface::LoadBitmaps(const char* szDir, ZLoadingProgress *pLoadingPr
 
 					char aliasname[256];
 					char drive[_MAX_DRIVE], dir[_MAX_DIR], fname[_MAX_FNAME], ext[_MAX_EXT];
-					_splitpath(szFileName, drive, dir, fname, ext);
+					_splitpath_s(szFileName, drive, dir, fname, ext);
 
 					if (!bAddDirToAliasName) sprintf_safe(aliasname, "%s%s", fname, ext);
 					else sprintf_safe(aliasname, "%s%s%s", dir, fname, ext);
@@ -202,9 +202,9 @@ void AddListItem(MListBox* pList, MBitmap* pBitmap, const char* szString, const 
 			}
 			virtual bool GetDragItem(MBitmap** ppDragBitmap, char* szDragString, char* szDragItemString){
 				*ppDragBitmap = GetBitmap(0);
-				if(GetString(1)!=NULL) strcpy(szDragString, GetString(1));
+				if(GetString(1)!=NULL) strcpy_unsafe(szDragString, GetString(1));
 				else szDragString[0] = 0;
-				strcpy(szDragItemString, m_szDragItemString);
+				strcpy_unsafe(szDragItemString, m_szDragItemString);
 				return true;
 			};
 	};
@@ -1486,40 +1486,40 @@ char* GetItemSlotName( const char* szName, int nItem)
 	switch ( nItem)
 	{
 		case 0 :
-			strcat( szTemp, "_EquipmentSlot_Head");
+			strcat_safe( szTemp, "_EquipmentSlot_Head");
 			break;
 		case 1 :
-			strcat( szTemp, "_EquipmentSlot_Chest");
+			strcat_safe( szTemp, "_EquipmentSlot_Chest");
 			break;
 		case 2 :
-			strcat( szTemp, "_EquipmentSlot_Hands");
+			strcat_safe( szTemp, "_EquipmentSlot_Hands");
 			break;
 		case 3 :
-			strcat( szTemp, "_EquipmentSlot_Legs");
+			strcat_safe( szTemp, "_EquipmentSlot_Legs");
 			break;
 		case 4 :
-			strcat( szTemp, "_EquipmentSlot_Feet");
+			strcat_safe( szTemp, "_EquipmentSlot_Feet");
 			break;
 		case 5 :
-			strcat( szTemp, "_EquipmentSlot_FingerL");
+			strcat_safe( szTemp, "_EquipmentSlot_FingerL");
 			break;
 		case 6 :
-			strcat( szTemp, "_EquipmentSlot_FingerR");
+			strcat_safe( szTemp, "_EquipmentSlot_FingerR");
 			break;
 		case 7 :
-			strcat( szTemp, "_EquipmentSlot_Melee");
+			strcat_safe( szTemp, "_EquipmentSlot_Melee");
 			break;
 		case 8 :
-			strcat( szTemp, "_EquipmentSlot_Primary");
+			strcat_safe( szTemp, "_EquipmentSlot_Primary");
 			break;
 		case 9 :
-			strcat( szTemp, "_EquipmentSlot_Secondary");
+			strcat_safe( szTemp, "_EquipmentSlot_Secondary");
 			break;
 		case 10 :
-			strcat( szTemp, "_EquipmentSlot_Custom1");
+			strcat_safe( szTemp, "_EquipmentSlot_Custom1");
 			break;
 		case 11 :
-			strcat( szTemp, "_EquipmentSlot_Custom2");
+			strcat_safe( szTemp, "_EquipmentSlot_Custom2");
 			break;
 	}
 
@@ -2044,7 +2044,7 @@ void ZGameInterface::OnDrawStateLogin(MDrawContext* pDC)
 			szMsg[ i] = '<';
 		sprintf_safe( szMsg, "%s %s ", szMsg, "Connecting");
 		for ( int i = 0;  i < nCount;  i++)
-			strcat( szMsg, ">");
+			strcat_safe( szMsg, ">");
 
 		pConnectingLabel->SetText( szMsg);
 		pConnectingLabel->SetAlignment( MAM_HCENTER | MAM_VCENTER);
@@ -2998,9 +2998,9 @@ void ZGameInterface::SaveScreenShot()
 	TCHAR szPath[MAX_PATH];
 	if(GetMyDocumentsPath(szPath)) {
 		strcpy_safe(screenshotfoldername,szPath);
-		strcat(screenshotfoldername,GUNZ_FOLDER);
+		strcat_safe(screenshotfoldername,GUNZ_FOLDER);
 		CreatePath( screenshotfoldername );
-		strcat(screenshotfoldername,SCREENSHOT_FOLDER);
+		strcat_safe(screenshotfoldername,SCREENSHOT_FOLDER);
 		CreatePath( screenshotfoldername );
 	}
 
@@ -4254,13 +4254,13 @@ void ZGameInterface::SelectEquipmentFrameList( const char* szName, bool bOpen)
 	// Frame open/close background image
 	MPicture* pPicture;
 	strcpy_safe( szTemp, szName);
-	strcat( szTemp, "_BGListFrameOpen");
+	strcat_safe( szTemp, "_BGListFrameOpen");
 	pPicture = (MPicture*)pResource->FindWidget( szTemp);
 	if(pPicture != NULL)
 		pPicture->Show( bOpen);
 
 	strcpy_safe( szTemp, szName);
-	strcat( szTemp, "_BGListFrameClose");
+	strcat_safe( szTemp, "_BGListFrameClose");
 	pPicture = (MPicture*)pResource->FindWidget( szTemp);
 	if(pPicture != NULL)
 		pPicture->Show( !bOpen);
@@ -4269,13 +4269,13 @@ void ZGameInterface::SelectEquipmentFrameList( const char* szName, bool bOpen)
 	// Frame open/close image
 	MButton* pButton;
 	strcpy_safe( szTemp, szName);
-	strcat( szTemp, "_EquipListFrameCloseButton");
+	strcat_safe( szTemp, "_EquipListFrameCloseButton");
 	pButton = (MButton*)pResource->FindWidget( szTemp);
 	if ( pButton != NULL)
 		pButton->Show( bOpen);
 
 	strcpy_safe( szTemp, szName);
-	strcat( szTemp, "_EquipListFrameOpenButton");
+	strcat_safe( szTemp, "_EquipListFrameOpenButton");
 	pButton = (MButton*)pResource->FindWidget( szTemp);
 	if ( pButton != NULL)
 		pButton->Show( !bOpen);
@@ -5328,7 +5328,7 @@ void ZGameInterface::SetupItemDescription( MMatchItemDesc* pItemDesc, const char
 				PrevMaxWeight - pItemDesc->m_nMaxWT);
 		else
 			sprintf_safe(chTmp,"%d", ZGetMyInfo()->GetItemList()->GetMaxWeight());
-		strcat( szBuff, chTmp);
+		strcat_safe( szBuff, chTmp);
 		pTextArea->AddText( szBuff);
 	}
 }
@@ -5500,14 +5500,14 @@ void ZGameInterface::ShowReplayDialog( bool bShow)
 			TCHAR szPath[ MAX_PATH];
 			if ( GetMyDocumentsPath( szPath))
 			{
-				strcat( szPath, GUNZ_FOLDER);
-				strcat( szPath, REPLAY_FOLDER);
+				strcat_safe( szPath, GUNZ_FOLDER);
+				strcat_safe( szPath, REPLAY_FOLDER);
 				CreatePath( szPath );
 			}
 			TCHAR szFullPath[ MAX_PATH];
 			strcpy_safe( szFullPath, szPath);
 
-			strcat( szPath, "/*.gzr");
+			strcat_safe( szPath, "/*.gzr");
 
 			// Get file list
 			struct _finddata_t c_file;
@@ -5521,8 +5521,8 @@ void ZGameInterface::ShowReplayDialog( bool bShow)
 					strcpy_safe( szName, c_file.name);
 
 					strcpy_safe( szFullPathName, szFullPath);
-					strcat( szFullPathName, "/");
-					strcat( szFullPathName, szName);
+					strcat_safe( szFullPathName, "/");
+					strcat_safe( szFullPathName, szName);
 
 					DWORD dwFileVersion = 0;
 					char szVersion[10] = "";
@@ -5556,10 +5556,10 @@ void ZGameInterface::ViewReplay()
 	TCHAR szName[ MAX_PATH];
 	if ( GetMyDocumentsPath( szName))
 	{
-		strcat( szName, GUNZ_FOLDER);
-		strcat( szName, REPLAY_FOLDER);
-		strcat( szName, "/");
-		strcat( szName, pListBox->GetSelItemString());
+		strcat_safe( szName, GUNZ_FOLDER);
+		strcat_safe( szName, REPLAY_FOLDER);
+		strcat_safe( szName, "/");
+		strcat_safe( szName, pListBox->GetSelItemString());
 	}
 
 
@@ -5777,17 +5777,20 @@ void ZGameInterface::OnResponseServerStatusInfoList( const int nListCount, void*
 			}
 
 			const char* Addr = nullptr;
+			std::string str;
 			if (pss->m_dwIP == 0)
 			{
 				Addr = m_pLocatorList->GetIPByPos(0).c_str();
-				static_assert(std::is_lvalue_reference<decltype(m_pLocatorList->GetIPByPos(0))>::value, "Fix me");
+				static_assert(std::is_lvalue_reference<decltype(m_pLocatorList->GetIPByPos(0))>::value,
+					"Fix me");
 			}
 			else
 			{
 				in_addr inaddr;
 				inaddr.S_un.S_addr = pss->m_dwIP;
 
-				Addr = inet_ntoa(inaddr);
+				str = GetIPv4String(inaddr);
+				Addr = str.c_str();
 			}
 
 			char szServName[ 128 ] = {0,};

@@ -519,7 +519,7 @@ bool ZGame::Create(MZFileSystem *pfs, ZLoadingProgress *pLoading )
 	ZPostStageEnterBattle(ZGetGameClient()->GetPlayerUID(), ZGetGameClient()->GetStageUID());
 
 	char tmpbuf[128];
-	_strtime( tmpbuf );
+	_strtime_s(tmpbuf);
 
 	mlog("ZGame Created ( %s )\n",tmpbuf);
 
@@ -595,7 +595,7 @@ void ZGame::Destroy()
 	ZGetWorldManager()->Clear();
 
 	char tmpbuf[128];
-	_strtime( tmpbuf );
+	_strtime_s(tmpbuf);
 
 	mlog("ZGame Destroyed ( %s )\n",tmpbuf);
 }
@@ -821,7 +821,7 @@ void ZGame::Draw(MDrawContextR2 &dc)
 {
 }
 
-void ZGame::ParseReservedWord(char* pszDest, const char* pszSrc)
+void ZGame::ParseReservedWord(char* pszDest, size_t maxlen, const char* pszSrc)
 {
 	char szSrc[256];
 	char szWord[256];
@@ -841,14 +841,14 @@ void ZGame::ParseReservedWord(char* pszDest, const char* pszSrc)
 			sprintf_safe(szWord, "%d %d", m_pMyCharacter->GetUID().High, m_pMyCharacter->GetUID().Low);
 		}
 
-		strcpy(szOut + nOutOffset, szWord);
+		strcpy_safe(szOut + nOutOffset, ArraySize(szOut) - nOutOffset, szWord);
 		nOutOffset += (int)strlen(szWord);
 		if (*pszNext) { 
-			strcpy(szOut+nOutOffset, " ");
+			strcpy_safe(szOut + nOutOffset, ArraySize(szOut) - nOutOffset, " ");
 			nOutOffset++;
 		}
 	}
-	strcpy(pszDest, szOut);
+	strcpy_safe(pszDest, maxlen, szOut);
 }
 
 extern bool g_bProfile;
@@ -978,28 +978,28 @@ bool ZGame::OnCommand(MCommand* pCommand)
 	return OnCommand_Immediate(pCommand);
 }
 
-bool GetUserGradeIDColor(MMatchUserGradeID gid,MCOLOR& UserNameColor,char* sp_name)
+bool GetUserGradeIDColor(MMatchUserGradeID gid, MCOLOR& UserNameColor, char* sp_name, size_t maxlen)
 {
-	if(gid == MMUG_DEVELOPER) 
-	{ 
-		UserNameColor = MCOLOR(255, 128, 64); 
-		if(sp_name) { 
-			strcpy(sp_name,ZMsg(MSG_WORD_DEVELOPER));
+	if (gid == MMUG_DEVELOPER)
+	{
+		UserNameColor = MCOLOR(255, 128, 64);
+		if (sp_name) {
+			strcpy_safe(sp_name, maxlen, ZMsg(MSG_WORD_DEVELOPER));
 		}
-		return true; 
+		return true;
 	}
-	else if(gid == MMUG_ADMIN) {
-		UserNameColor = MCOLOR(255, 128, 64); 
-		if(sp_name) { 
-			strcpy(sp_name,ZMsg(MSG_WORD_ADMIN));
+	else if (gid == MMUG_ADMIN) {
+		UserNameColor = MCOLOR(255, 128, 64);
+		if (sp_name) {
+			strcpy_safe(sp_name, maxlen, ZMsg(MSG_WORD_ADMIN));
 		}
-		return true; 
+		return true;
 	}
 
 	return false;
 }
 
-bool ZGame::GetUserNameColor(MUID uid,MCOLOR& UserNameColor,char* sp_name)
+bool ZGame::GetUserNameColor(MUID uid, MCOLOR& UserNameColor, char* sp_name, size_t maxlen)
 {
 	MMatchUserGradeID gid = MMUG_FREE;
 
@@ -1017,7 +1017,7 @@ bool ZGame::GetUserNameColor(MUID uid,MCOLOR& UserNameColor,char* sp_name)
 		}
 	}
 
-	return GetUserGradeIDColor( gid , UserNameColor ,sp_name );
+	return GetUserGradeIDColor(gid, UserNameColor, sp_name, maxlen);
 }
 
 static void ZTranslateCommand(MCommand* pCmd, std::string& strLog)
@@ -1025,7 +1025,7 @@ static void ZTranslateCommand(MCommand* pCmd, std::string& strLog)
 	char szBuf[256]="";
 
 	unsigned long nGlobalClock = ZGetGame()->GetTickTime();
-	itoa(nGlobalClock, szBuf, 10);
+	itoa_safe(nGlobalClock, szBuf, 10);
 	strLog = szBuf;
 	strLog += ": ";
 
@@ -3859,8 +3859,8 @@ char* ZGame::GetSndNameFromBsp(const char* szSrcSndName, RMATERIAL* pMaterial)
 		(!_strnicmp(&szMaterial[nLen-ZMETERIAL_SNDNAME_LEN+1], "mt", 2)))
 	{
 		strcpy_safe(szRealSndName, szSrcSndName);
-		strcat(szRealSndName, "_");
-		strcat(szRealSndName, &szMaterial[nLen-ZMETERIAL_SNDNAME_LEN+1]);
+		strcat_safe(szRealSndName, "_");
+		strcat_safe(szRealSndName, &szMaterial[nLen-ZMETERIAL_SNDNAME_LEN+1]);
 	}
 	else
 	{
@@ -4450,9 +4450,9 @@ void ZGame::StartRecording()
 	TCHAR szPath[MAX_PATH];
 	if(GetMyDocumentsPath(szPath)) {
 		strcpy_safe(replayfoldername,szPath);
-		strcat(replayfoldername,GUNZ_FOLDER);
+		strcat_safe(replayfoldername,GUNZ_FOLDER);
 		CreatePath( replayfoldername );
-		strcat(replayfoldername,REPLAY_FOLDER);
+		strcat_safe(replayfoldername,REPLAY_FOLDER);
 		CreatePath( replayfoldername );
 	}
 
@@ -4832,8 +4832,7 @@ void ZGame::OnAddPeer(const MUID& uidChar, DWORD dwIP, const int nPort, MTD_Peer
 		pNewPeerInfo->dwIP = dwIP;
 		in_addr addr;
 		addr.s_addr = dwIP;
-		char* pszIP = inet_ntoa(addr);
-		strcpy_safe(pNewPeerInfo->szIP, pszIP);
+		strcpy_safe(pNewPeerInfo->szIP, GetIPv4String(addr).c_str());
 
 		pNewPeerInfo->nPort = nPort;
 		memcpy(&pNewPeerInfo->CharInfo, &(pNode->CharInfo), sizeof(MTD_CharInfo));

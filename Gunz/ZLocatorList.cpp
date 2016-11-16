@@ -43,7 +43,7 @@ bool ZLocatorList::ParseLocator(MXmlElement& element)
 #ifdef _DEBUG
 	char szDbgInfo[1024];
 
-	_snprintf(szDbgInfo, 1023, "Locator id:%d ip:%s\n", n, ip);
+	sprintf_safe(szDbgInfo, "Locator id:%d ip:%s\n", n, ip);
 	OutputDebugString(szDbgInfo);
 #endif	
 

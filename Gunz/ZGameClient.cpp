@@ -48,8 +48,6 @@
 #define SODIUM_STATIC
 #include "sodium.h"
 
-bool GetUserGradeIDColor(MMatchUserGradeID gid, MCOLOR& UserNameColor, char* sp_name);
-
 MCommand* ZNewCmd(int nID)
 {
 	MCommandDesc* pCmdDesc = ZGetGameClient()->GetCommandManager()->GetCommandDescByID(nID);
@@ -68,7 +66,7 @@ MCommand* ZNewCmd(int nID)
 }
 
 
-bool GetUserInfoUID(MUID uid, MCOLOR& _color, char* sp_name, MMatchUserGradeID& gid)
+bool GetUserInfoUID(MUID uid, MCOLOR& _color, char* sp_name, size_t maxlen, MMatchUserGradeID& gid)
 {
 	if (ZGetGameClient() == NULL)
 		return false;
@@ -79,7 +77,7 @@ bool GetUserInfoUID(MUID uid, MCOLOR& _color, char* sp_name, MMatchUserGradeID& 
 		gid = pObjCache->GetUGrade();
 	}
 
-	return GetUserGradeIDColor(gid, _color, sp_name);
+	return GetUserGradeIDColor(gid, _color, sp_name, maxlen);
 }
 
 
@@ -1678,7 +1676,7 @@ static void blog(const char *pFormat, ...)
 	vsprintf_safe(szBuf, pFormat, args);
 	va_end(args);
 
-	strcat(szBuf, "\n");
+	strcat_safe(szBuf, "\n");
 
 	if (ZApplication::GetGameInterface()->GetState() == GUNZ_LOBBY)
 		ZChatOutput(szBuf, ZChat::CMT_SYSTEM, ZChat::CL_LOBBY);
@@ -1839,7 +1837,7 @@ void ZGameClient::OnExpiredRentItem(void* pBlob)
 		if (pItemDesc)
 		{
 			sprintf_safe(szItemText, "[%d] %s\n", i + 1, pItemDesc->m_szName);
-			if ((strlen(szText) + strlen(szItemText)) <= 1022) strcat(szText, szItemText);
+			if ((strlen(szText) + strlen(szItemText)) <= 1022) strcat_safe(szText, szItemText);
 		}
 	}
 

@@ -788,20 +788,19 @@ void ZSoundEngine::PlaySEHitObject( float x, float y, float z, RBSPPICKINFO& inf
 	{
 		if( temp[index--] == 't' && temp[index--] == 'm' )
 		{
-			index += 4; // _mt_
+			index += 4;
 			break;
 		}
 	}
 
 	if( index <= 2 )
 	{
-		// 기본 소리 출력
 		PlaySound("fx_bullethit_mt_con", rvector(x,y,z), false, false );
 		return;
 	}
 
 	strcpy_safe(buffer, base_snd_name);
-	strncat(buffer, temp + index, size - index);
+	strncat_safe(buffer, temp + index, size - index);
 
 	PlaySoundElseDefault(buffer, "fx_bullethit_mt_con", rvector(x,y,z) );
 }
@@ -1121,7 +1120,6 @@ bool ZSoundEngine::LoadResource( char* pFileName_ ,ZLoadingProgress *pLoading )
 
 	for( int i = 0 ; i < iCount; ++i )
 	{
-		// loading 화면 갱신. 가끔 한번씩만.
 		if(pLoading && (i%10==0)) pLoading->UpdateAndDraw(float(i)/float(iCount));
 		chr		= root.GetChildNode(i);
 		chr.GetTagName( szSoundName );
@@ -1131,8 +1129,8 @@ bool ZSoundEngine::LoadResource( char* pFileName_ ,ZLoadingProgress *pLoading )
 		}
 		chr.GetAttribute( szSoundName, "NAME" );
 		strcpy_safe( szSoundFileName, SOUNDEFFECT_DIR );
-		strcat( szSoundFileName, szSoundName );
-		strcat( szSoundFileName, ".wav" );
+		strcat_safe( szSoundFileName, szSoundName );
+		strcat_safe( szSoundFileName, ".wav" );
 
 		chr.GetAttribute( &iType, "type", 0 );
 
@@ -1141,9 +1139,6 @@ bool ZSoundEngine::LoadResource( char* pFileName_ ,ZLoadingProgress *pLoading )
 
 		int flag = FSOUND_SIGNED|FSOUND_MONO;
 		
-		// 8Bits 사운드
-		//if(m_b8Bits) flag |= FSOUND_8BITS;
-		//else flag |= FSOUND_16BITS;
 		flag |= FSOUND_16BITS;
 
 		switch( iType ) 
@@ -1544,8 +1539,8 @@ bool ZSoundEngine::LoadNPCResource(MQUEST_NPC nNPC, ZLoadingProgress* pLoading)
 		char szSoundFileName[256] = "";
 		
 		strcpy_safe(szSoundFileName, SOUNDNPC_DIR);
-		strcat(szSoundFileName, pNPCInfo->szSoundName[i] );
-		strcat(szSoundFileName, ".wav" );
+		strcat_safe(szSoundFileName, pNPCInfo->szSoundName[i] );
+		strcat_safe(szSoundFileName, ".wav" );
 
 		pFS = ZGetSoundFMod()->LoadWave( szSoundFileName, flag );
 
@@ -1582,8 +1577,8 @@ void ZSoundEngine::PlayNPCSound(MQUEST_NPC nNPC, MQUEST_NPC_SOUND nSound, rvecto
 	{
 		char szSoundFileName[256] = "";
 		strcpy_safe(szSoundFileName, SOUNDNPC_DIR);
-		strcat(szSoundFileName, pNPCInfo->szSoundName[nSound] );
-		strcat(szSoundFileName, ".wav" );
+		strcat_safe(szSoundFileName, pNPCInfo->szSoundName[nSound] );
+		strcat_safe(szSoundFileName, ".wav" );
 
 
 		int nChannel = PlaySound(szSoundFileName, pos, false, false);
@@ -1601,13 +1596,12 @@ void ZSoundEngine::PlayNPCSound(MQUEST_NPC nNPC, MQUEST_NPC_SOUND nSound, rvecto
 	}
 }
 
-// 컬링 여부 결정
 bool ZSoundEngine::CheckCulling(const char* szName, SoundSource* pSS, const rvector& vSoundPos, bool bHero, int* pnoutPriority)
 {
 	auto vec = vSoundPos - m_ListenerPos;
 	float fDistSq = D3DXVec3LengthSq(&vec);
 
-	if(!bHero) // 2d사운드의 경우 컬링하지 않음
+	if(!bHero)
 	{
 		if( fDistSq > (pSS->fMaxDistance*pSS->fMaxDistance) ) 
 		{
@@ -1623,7 +1617,6 @@ bool ZSoundEngine::CheckCulling(const char* szName, SoundSource* pSS, const rvec
 
 	if ((nNowTime - pSS->nLastPlayedTime) < 10)
 	{
-		// dash만 중복컬링에서 예외....하드코딩..OTL - bird
 		if (strncmp("fx_dash", szName, 7))
 		{
 #ifdef _DEBUG

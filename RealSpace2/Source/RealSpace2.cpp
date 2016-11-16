@@ -754,9 +754,9 @@ bool RSaveAsBmp(int x, int y, void *data, const char *szFilename)
 	if (!SaveMemoryBmp(x, y, data, &memory, &nSize))
 		return false;
 
-	FILE *file;
-	file = fopen(szFilename, "wb+");
-	if (!file) return false;
+	FILE *file{};
+	auto ret = fopen_s(&file, szFilename, "wb+");
+	if (ret != 0 || !file) return false;
 
 	fwrite(memory, nSize, 1, file);
 	fclose(file);

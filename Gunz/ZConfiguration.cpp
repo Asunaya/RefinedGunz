@@ -447,7 +447,7 @@ bool ZConfiguration::LoadConfig(const char* szFileName)
 			for(int i=0; i<ZACTION_COUNT; i++){
 				char szItemName[256];
 				strcpy_safe(szItemName, m_Keyboard.ActionKeys[i].szName);
-				_strupr(szItemName);
+				_strupr_s(szItemName);
 
 				MXmlNode keyNode;
 				if (!childElement.FindChildNode(szItemName, &keyNode))
@@ -754,7 +754,7 @@ bool ZConfiguration::SaveToFile(const char *szFileName, const char* szHeader)
 		for(int i=0; i<ZACTION_COUNT; i++){
 			char szItemName[256];
 			strcpy_safe(szItemName, m_Keyboard.ActionKeys[i].szName);
-			_strupr(szItemName);
+			_strupr_s(szItemName);
 
 			if(szItemName[0]!=0){
 				parentElement.AppendText("\n\t\t");

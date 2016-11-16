@@ -1,7 +1,6 @@
 #include "StdAfx.h"
 #include "MDebug.h"
 #include "d3d9.h"
-//#include <dsound.h>
 
 void MSysInfoLog_CPU()
 {
@@ -149,41 +148,14 @@ void MSysInfoLog_Display()
 		deviceID.DriverVersion.LowPart >> 16 , deviceID.DriverVersion.LowPart & 0xffff );
 }
 
-//BOOL CALLBACK MSysInfoLog_Audio_EnumProc(LPGUID lpGUID, LPCTSTR lpszDesc, LPCTSTR lpszDrvName, LPVOID lpContext)
-//{
-//	mlog("Audio : %s %s \n",lpszDesc,lpszDrvName);
-//    return TRUE;
-//}
-//
-//void MSysInfoLog_Audio()
-//{
-//	HMODULE					hDSoundLibrary=NULL;
-//	hDSoundLibrary = LoadLibrary( "dsound.dll" );
-//	if (!hDSoundLibrary)
-//	{
-//		mlog("Error, could not load dsound.dll");
-//		return;
-//	}
-//
-//	typedef HRESULT * (__stdcall *DIRECTSOUNDENUMERATETYPE)(LPDSENUMCALLBACK  lpDSEnumCallback,LPVOID  lpContext);
-//	DIRECTSOUNDENUMERATETYPE pDirectSoundEnumerate = (DIRECTSOUNDENUMERATETYPE) GetProcAddress(hDSoundLibrary, "DirectSoundEnumerate");
-//
-//	if (!pDirectSoundEnumerate)
-//	{
-//		mlog("Error, could not get proc adress of Direct3DCreate9.");
-//		FreeLibrary(hDSoundLibrary);
-//		return;
-//	}
-//
-//	*pDirectSoundEnumerate((LPDSENUMCALLBACK)MSysInfoLog_Audio_EnumProc, NULL);
-//
-//}
-
 void MSysInfoLog_OS()
 {
 	OSVERSIONINFO os;
 	os.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+#pragma warning(push)
+#pragma warning(disable: 4996)
 	GetVersionEx(&os);
+#pragma warning(pop)
 
 	MEMORYSTATUS ms;
 	ms.dwLength = sizeof(MEMORYSTATUS);
@@ -191,10 +163,10 @@ void MSysInfoLog_OS()
 	DWORD dwPhysicalMemory;
 	dwPhysicalMemory=ms.dwTotalPhys;
 
-	char szDesc[512]="";
-	sprintf_safe(szDesc, "Windows = %d.%d Build %d , %s (%dKB) : ", os.dwMajorVersion, os.dwMinorVersion,
+	mlog("Windows = %d.%d Build %d , %s (%dKB) : ", os.dwMajorVersion, os.dwMinorVersion,
 		os.dwBuildNumber, os.szCSDVersion, (int)(dwPhysicalMemory/1024));
-	mlog(szDesc);
+
+	char szDesc[512];
 
 	if(os.dwMajorVersion==5) {
 		if(os.dwMinorVersion==0)		sprintf_safe(szDesc," Windows 2000..\n");
@@ -222,6 +194,5 @@ void MSysInfoLog()
 {
 	MSysInfoLog_CPU();
 	MSysInfoLog_Display();
-//	MSysInfoLog_Audio();
 	MSysInfoLog_OS();
 }

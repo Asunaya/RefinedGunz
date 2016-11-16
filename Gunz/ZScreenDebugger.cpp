@@ -204,33 +204,29 @@ void ZScreenDebugger::DrawDebugInfo(MDrawContext *pDC)
 	NEXTLINE();
 
 	buffer[0]=0;
-	if(g_pGame->m_pMyCharacter->m_bWallJump) strcat(buffer,"wall ");
-	if(g_pGame->m_pMyCharacter->m_bWallJump2) strcat(buffer,"wall2 ");
-	if(g_pGame->m_pMyCharacter->m_bTumble) strcat(buffer,"Tumble ");
-	if(!g_pGame->m_pMyCharacter->m_bLand) strcat(buffer,"jump ");
-	/*
-	if(g_pGame->m_pMyCharacter->m_bClimb)
-		strcat(buffer,"climbing ");
-	*/
-	if(g_pGame->m_pMyCharacter->m_bJumpQueued) strcat(buffer,"jumpq ");
+	if(g_pGame->m_pMyCharacter->m_bWallJump) strcat_safe(buffer,"wall ");
+	if(g_pGame->m_pMyCharacter->m_bWallJump2) strcat_safe(buffer,"wall2 ");
+	if(g_pGame->m_pMyCharacter->m_bTumble) strcat_safe(buffer,"Tumble ");
+	if(!g_pGame->m_pMyCharacter->m_bLand) strcat_safe(buffer,"jump ");
+	if(g_pGame->m_pMyCharacter->m_bJumpQueued) strcat_safe(buffer,"jumpq ");
 	if(g_pGame->m_pMyCharacter->m_bGuard)
 	{
-		strcat(buffer,"guard-");
+		strcat_safe(buffer,"guard-");
 		if(g_pGame->m_pMyCharacter->m_nGuardBlock)
 		{
 			char buf[256];
 			sprintf_safe(buf,"bl%d",g_pGame->m_pMyCharacter->m_nGuardBlock);
-			strcat(buffer,buf);
+			strcat_safe(buffer,buf);
 		}
-		if(g_pGame->m_pMyCharacter->m_bGuardStart) strcat(buffer,"start");
-		if(g_pGame->m_pMyCharacter->m_bGuardCancel) strcat(buffer,"cancel");
-		strcat(buffer," ");
+		if(g_pGame->m_pMyCharacter->m_bGuardStart) strcat_safe(buffer,"start");
+		if(g_pGame->m_pMyCharacter->m_bGuardCancel) strcat_safe(buffer,"cancel");
+		strcat_safe(buffer," ");
 	}
-	if(g_pGame->m_pMyCharacter->m_bWallHang) strcat(buffer,"hang ");
-	if(g_pGame->m_pMyCharacter->m_bSkill) strcat(buffer,"skill ");
-	if(g_pGame->m_pMyCharacter->m_bBlast ) strcat(buffer,"blast ");
-	if(g_pGame->m_pMyCharacter->m_bBlastFall ) strcat(buffer,"blastfall ");
-	if(g_pGame->m_pMyCharacter->m_bShot ) strcat(buffer,"shot ");
+	if(g_pGame->m_pMyCharacter->m_bWallHang) strcat_safe(buffer,"hang ");
+	if(g_pGame->m_pMyCharacter->m_bSkill) strcat_safe(buffer,"skill ");
+	if(g_pGame->m_pMyCharacter->m_bBlast ) strcat_safe(buffer,"blast ");
+	if(g_pGame->m_pMyCharacter->m_bBlastFall ) strcat_safe(buffer,"blastfall ");
+	if(g_pGame->m_pMyCharacter->m_bShot ) strcat_safe(buffer,"shot ");
 	
 	OUTTEXT();
 	NEXTLINE();

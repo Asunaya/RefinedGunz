@@ -1137,14 +1137,6 @@ void ZCombatInterface::Update()
 	m_Chat.Update();
 	m_AdminMsg.Update();
 
-
-	/*
-	if (m_pScoreBoard->IsVisible())
-	{
-		m_pScoreBoard->Update();
-	}
-	*/
-
 	if (pCharacter->GetItems()->GetSelectedWeaponParts() == MMCIP_MELEE)
 	{
 		ShowCrossHair(false);
@@ -1156,8 +1148,6 @@ void ZCombatInterface::Update()
 
 	GameCheckPickCharacter();
 }
-
-bool GetUserInfoUID(MUID uid,MCOLOR& _color,char* sp_name,MMatchUserGradeID& gid);
 
 void ZCombatInterface::SetPickTarget(bool bPick, ZCharacter* pCharacter)
 {
@@ -1538,20 +1528,18 @@ void ZCombatInterface::DrawScoreBoard(MDrawContext* pDC)
 	TextRelative(pDC,x,y,szText);
 	y-=linespace2;
 
-
-	// 두번째줄 앞 : 맵이름
    	strcpy_safe( szText, ZGetGameClient()->GetMatchStageSetting()->GetMapName());
-	if ( ZGetGameTypeManager()->IsQuestOnly(g_pGame->GetMatch()->GetMatchType()))		// 퀘스트 모드이면...
+	if ( ZGetGameTypeManager()->IsQuestOnly(g_pGame->GetMatch()->GetMatchType()))
 	{
-	   	strcpy_safe( szText, "Mansion");			// 임시 하드코딩 우에엥~ ㅠ.ㅠ
+	   	strcpy_safe( szText, "Mansion");
 		if ( ZGetQuest()->GetGameInfo()->GetQuestLevel() > 0)
 		{
-   			strcat( szText, " (");
+   			strcat_safe( szText, " (");
 
-			for ( int i = 0;  i < ZGetQuest()->GetGameInfo()->GetQuestLevel();  i++)	// 나중에 퀘스트 레벨에 맞게 표시하도록 바꾼다
-    			strcat( szText, ZMsg( MSG_WORD_QUESTLEVELMARKER));
+			for ( int i = 0;  i < ZGetQuest()->GetGameInfo()->GetQuestLevel();  i++)
+    			strcat_safe( szText, ZMsg( MSG_WORD_QUESTLEVELMARKER));
 
-   			strcat( szText, ")");
+   			strcat_safe( szText, ")");
 		}
 	}
 	TextRelative(pDC,x,y,szText);
@@ -1560,26 +1548,26 @@ void ZCombatInterface::DrawScoreBoard(MDrawContext* pDC)
 	x = 0.70f;
 	y = 0.284f;
 
-	// 보상 아이템
-	if ( ZGetGameTypeManager()->IsQuestOnly( g_pGame->GetMatch()->GetMatchType()))		// 퀘스트 모드일경우
+	if ( ZGetGameTypeManager()->IsQuestOnly( g_pGame->GetMatch()->GetMatchType()))
 	{
-		sprintf_safe( szText, "%s : %d", ZMsg( MSG_WORD_GETITEMQTY), ZGetQuest()->GetGameInfo()->GetNumOfObtainQuestItem());
+		sprintf_safe( szText, "%s : %d",
+			ZMsg( MSG_WORD_GETITEMQTY),
+			ZGetQuest()->GetGameInfo()->GetNumOfObtainQuestItem());
+
 		TextRelative( pDC, x, y, szText);
 		y -= linespace2;
 	}
 
-	// NPC 수
-	if ( ZGetGameTypeManager()->IsQuestDerived( g_pGame->GetMatch()->GetMatchType())) 	// 서바이벌, 퀘스트 모드일 경우
+	if ( ZGetGameTypeManager()->IsQuestDerived( g_pGame->GetMatch()->GetMatchType()))
 	{
 		sprintf_safe( szText, "%s : %d", ZMsg( MSG_WORD_REMAINNPC), ZGetQuest()->GetGameInfo()->GetNPCCount() - ZGetQuest()->GetGameInfo()->GetNPCKilled());
 		TextRelative( pDC, x, y, szText);
 		y -= linespace2;
 	}
 
-	// 진행도 표시
 	if ( ZApplication::GetGame()->GetMatch()->GetMatchType() == MMATCH_GAMETYPE_DUEL)
 	{
-		if ( g_pGame->GetMatch()->GetRoundState() == MMATCH_ROUNDSTATE_PLAY)				// 플레이 중이라면
+		if ( g_pGame->GetMatch()->GetRoundState() == MMATCH_ROUNDSTATE_PLAY)
 		{
 			DWORD dwTime = g_pGame->GetMatch()->GetRemaindTime();
 			DWORD dwLimitTime = ZGetGameClient()->GetMatchStageSetting()->GetStageSetting()->nLimitTime;
@@ -1607,10 +1595,9 @@ void ZCombatInterface::DrawScoreBoard(MDrawContext* pDC)
 		sprintf_safe( szText, "%s : %d", ZMsg( MSG_WORD_ENDKILL), g_pGame->GetMatch()->GetRoundCount());
 	}
 
-	// 라운드를 기다려야 하는 종류라면 라운드 표시 아니면 시간 표시
 	else if ( ZApplication::GetGame()->GetMatch()->IsWaitForRoundEnd() && !bClanGame)
 	{
-		if ( g_pGame->GetMatch()->GetRoundState() == MMATCH_ROUNDSTATE_PLAY)				// 플레이 중이라면
+		if ( g_pGame->GetMatch()->GetRoundState() == MMATCH_ROUNDSTATE_PLAY)
 		{
 			DWORD dwTime = g_pGame->GetMatch()->GetRemaindTime();
 			DWORD dwLimitTime = ZGetGameClient()->GetMatchStageSetting()->GetStageSetting()->nLimitTime;
@@ -1636,12 +1623,11 @@ void ZCombatInterface::DrawScoreBoard(MDrawContext* pDC)
 
 		sprintf_safe( szText, "%s : %d / %d %s", ZMsg( MSG_WORD_RPROGRESS), g_pGame->GetMatch()->GetCurrRound() + 1, g_pGame->GetMatch()->GetRoundCount(), ZMsg( MSG_WORD_ROUND));
 	}
-	else if ( ZGetGameTypeManager()->IsQuestDerived(g_pGame->GetMatch()->GetMatchType())) 	// 서바이벌, 퀘스트 모드일 경우
+	else if ( ZGetGameTypeManager()->IsQuestDerived(g_pGame->GetMatch()->GetMatchType()))
 		sprintf_safe( szText, "%s : %d / %d", ZMsg( MSG_WORD_RPROGRESS), ZGetQuest()->GetGameInfo()->GetCurrSectorIndex() + 1, ZGetQuest()->GetGameInfo()->GetMapSectorCount());
-	// 남은 시간 표시( 클랜전 제외)
 	else if ( !bClanGame)
 	{
-		if ( g_pGame->GetMatch()->GetRoundState() == MMATCH_ROUNDSTATE_PLAY)				// 플레이 중이라면
+		if ( g_pGame->GetMatch()->GetRoundState() == MMATCH_ROUNDSTATE_PLAY)
 		{
 			DWORD dwTime = g_pGame->GetMatch()->GetRemaindTime();
 			DWORD dwLimitTime = ZGetGameClient()->GetMatchStageSetting()->GetStageSetting()->nLimitTime;
@@ -1670,23 +1656,17 @@ void ZCombatInterface::DrawScoreBoard(MDrawContext* pDC)
 	}
 	TextRelative( pDC, x, y, szText);
 
-
-//	const float normalXPOS[6] = {0.25f, 0.46f, 0.68f, 0.77f, 0.83f, 0.92f};
-//	const float clanXPOS[6] = {0.45f, 0.25f, 0.68f, 0.77f, 0.83f, 0.92f};
 	const float normalXPOS[6] = {0.28f, 0.47f, 0.67f, 0.78f, 0.84f, 0.93f};
 	const float clanXPOS[6]   = {0.44f, 0.24f, 0.67f, 0.76f, 0.82f, 0.91f};
 	
 	const float *ITEM_XPOS = bClanGame ? clanXPOS : normalXPOS;
 
-	// player
-	// 화면의 xy 상대위치 ( 0~1 로봤을때 ) 는 0.25 , 0.361
 	y=0.343f;
-	const float fHeight=0.578f;	// 공간의 높이
+	const float fHeight=0.578f;
 
-	// 컬럼 타이틀 출력
 	char szBuff[ 25];
 	pDC->SetColor(MCOLOR(TEXT_COLOR_TITLE));
-	x = ITEM_XPOS[0];	// level, 이름
+	x = ITEM_XPOS[0];	// level
 	sprintf_safe( szBuff, "%s   %s", ZMsg(MSG_CHARINFO_LEVEL), ZMsg(MSG_CHARINFO_NAME));
 	TextRelative(pDC,x,y, szBuff);
 	x = ITEM_XPOS[1] + .02f;;	// Clan
@@ -1712,14 +1692,10 @@ void ZCombatInterface::DrawScoreBoard(MDrawContext* pDC)
 	float fTitleHeight = (float)pFont->GetHeight()*1.1f / (float)RGetScreenHeight();
 	y+=fTitleHeight;
 
-	// 그릴수있는 최대줄수 줄간격은 150%
-//	int nMaxLineCount=int((fHeight-fTitleHeight)*(float)RGetScreenHeight()/((float)pFont->GetHeight()*1.1f));
 	int nMaxLineCount = 16;
 	
-	// 한줄사이의 간격(높이)
 	float linespace=(fHeight-fTitleHeight)/(float)nMaxLineCount;
 
-	// 좌측의 클랜마크및 이름,점수
 	if(bClanGame)
 	{
 		for(int i=0;i<2;i++)
@@ -1737,7 +1713,6 @@ void ZCombatInterface::DrawScoreBoard(MDrawContext* pDC)
 			float clanx = clancenter - .5f*((float)pClanFont->GetWidth(szClanName)/(float)MGetWorkspaceWidth());
 			float clany = y + linespace * ((nTeam==MMT_RED) ? .5f : 8.5f) ;
 
-			// 아이콘 출력
 			MBitmap *pbmp = ZGetEmblemInterface()->GetClanEmblem(nClanID);
 			if(pbmp) {
 				pDC->SetBitmap(pbmp);
@@ -1753,10 +1728,8 @@ void ZCombatInterface::DrawScoreBoard(MDrawContext* pDC)
 				clany+=fIconSize+1.2*linespace;
 			}
 
-			// 팀이름 출력
 			TextRelative(pDC,clanx,clany ,szClanName);
 
-			// 점수 출력. 가운데 정렬
 			sprintf_safe(szText,"%d",g_pGame->GetMatch()->GetTeamScore(nTeam));
 			clanx = clancenter - .5f*((float)pClanFont->GetWidth(szText)/(float)MGetWorkspaceWidth());
 			clany+=1.f*linespace;
@@ -1765,8 +1738,6 @@ void ZCombatInterface::DrawScoreBoard(MDrawContext* pDC)
 		}
 	}
 
-
-	// 캐릭터 리스트
 	ZCharacterManager::iterator itor;
 	for (itor = ZGetCharacterManager()->begin();
 		itor != ZGetCharacterManager()->end(); ++itor)
@@ -1826,14 +1797,11 @@ void ZCombatInterface::DrawScoreBoard(MDrawContext* pDC)
 			m_Observer.IsVisible() && m_Observer.GetTargetCharacter()==pCharacter)
 			pItem->bMyChar = true;
 
-
-		
 		if(pCharacter->GetTeamID()==g_pGame->m_pMyCharacter->GetTeamID() && pCharacter->m_bCommander)
 			pItem->bCommander = true;
 		else
 			pItem->bCommander = false;
 
-		// 버서커모드의 버서커
 		if (g_pGame->GetMatch()->GetMatchType() == MMATCH_GAMETYPE_BERSERKER)
 		{
 			if (pCharacter->IsTagger()) pItem->bCommander = true;
@@ -1841,12 +1809,11 @@ void ZCombatInterface::DrawScoreBoard(MDrawContext* pDC)
 
 		if (g_pGame->GetMatch()->GetMatchType() == MMATCH_GAMETYPE_DUEL)
 		{
-			ZRuleDuel* pDuel = (ZRuleDuel*)g_pGame->GetMatch()->GetRule();	// 위험 -_-
+			ZRuleDuel* pDuel = (ZRuleDuel*)g_pGame->GetMatch()->GetRule();
 			pItem->nDuelQueueIdx = pDuel->GetQueueIdx(pCharacter->GetUID());
 		}
 		else
 			pItem->nDuelQueueIdx = 0;
-
 
 		// GameRoom User
 		MMatchObjCache* pCache = ZGetGameClient()->FindObjCache( pCharacter->GetUID());

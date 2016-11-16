@@ -139,7 +139,7 @@ void Chat::OutputChatMsg(const char *szMsg, DWORD dwColor){
 			else if (tolower(cl.Msg.at(nPos + 1)) == '#'){
 				char buf[9];
 				int nLen = min(static_cast<int>(cl.Msg.length() - 1 - nPos - 2), 8);
-				strncpy(buf, cl.Msg.data() + nPos + 2, nLen);
+				strncpy_safe(buf, cl.Msg.data() + nPos + 2, nLen);
 
 				char *pcEnd;
 				D3DCOLOR Color = strtoul(buf, &pcEnd, 16);
@@ -572,7 +572,9 @@ void Chat::OnUpdate(){
 			if (pFromMsg == pToMsg){
 				HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, abs(nToPos - nFromPos) + 2);
 				void *pMem = GlobalLock(hMem);
-				strncpy((char *)pMem, &pFromMsg->Msg.at(min(nFromPos, nToPos)), abs(nToPos - nFromPos) + 1);
+				strcpy_trunc(reinterpret_cast<char *>(pMem),
+					abs(nToPos - nFromPos) + 1,
+					&pFromMsg->Msg.at(min(nFromPos, nToPos)));
 				GlobalUnlock(hMem);
 
 				SetClipboardData(CF_TEXT, hMem);
@@ -1090,12 +1092,15 @@ int Chat::DrawTextWordWrap(MFontR2 *pFont, const TCHAR *szStr, const RECT &r, DW
 void Chat::DrawTextN(MFontR2 *pFont, const TCHAR *szStr, const RECT &r, DWORD dwColor, int nLen)
 {
 	const TCHAR *String;
+	std::unique_ptr<TCHAR[]> p;
+
 	if (nLen != -1)
 	{
-		TCHAR *p = new TCHAR[nLen + 1];
-		_tcsncpy(p, szStr, nLen);
+		auto size = nLen + 1;
+		p = decltype(p){new TCHAR[size]};
+		_tcsncpy_s(p.get(), size, szStr, nLen);
 		p[nLen] = 0;
-		String = p;
+		String = p.get();
 	}
 	else
 	{
@@ -1103,9 +1108,6 @@ void Chat::DrawTextN(MFontR2 *pFont, const TCHAR *szStr, const RECT &r, DWORD dw
 	}
 
 	pFont->m_Font.DrawTextA(r.left, r.top, String, dwColor);
-
-	if (nLen != -1)
-		delete[] String;
 }
 
 void Chat::DrawBorder()

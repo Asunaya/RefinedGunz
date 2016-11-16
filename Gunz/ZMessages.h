@@ -1,5 +1,4 @@
-#ifndef _ZMESSAGES_H
-#define _ZMESSAGES_H
+#pragma once
 
 #include <string>
 #include "MCommand.h"
@@ -336,47 +335,43 @@
 #define MSG_SERVER_QUEST						9385		///< Quest Server
 #define MSG_SERVER_EVENT						9386		///< Event Server
 
-	
-//매치 타입
-#define MSG_MT_DEATHMATCH_SOLO					9350		///< Death Match(개인)
-#define MSG_MT_DEATHMATCH_TEAM					9351		///< Death Match(단체)
-#define MSG_MT_GLADIATOR_SOLO					9352		///< Gladiator(개인)
-#define MSG_MT_GLADIATOR_TEAM					9353		///< Gladiator(단체)
-#define MSG_MT_ASSASSINATE						9354		///< 암살전
-#define MSG_MT_TRAINING							9355		///< 트레이닝
-#define MSG_MT_CLASSIC_SOLO						9356		///< Classic(개인)
-#define MSG_MT_CLASSIC_TEAM						9357		///< Classic(단체)
-#define MSG_MT_SURVIVAL							9358		///< 서바이벌
-#define MSG_MT_QUEST							9359		///< 퀘스트
-#define MSG_MT_BERSERKER						9360		///< 버서커
-#define MSG_MT_DEATHMATCH_TEAM2					9361		///< 무한데스매치
-#define MSG_MT_DUEL								9362		///< 듀얼
+#define MSG_MT_DEATHMATCH_SOLO					9350
+#define MSG_MT_DEATHMATCH_TEAM					9351
+#define MSG_MT_GLADIATOR_SOLO					9352
+#define MSG_MT_GLADIATOR_TEAM					9353
+#define MSG_MT_ASSASSINATE						9354
+#define MSG_MT_TRAINING							9355
+#define MSG_MT_CLASSIC_SOLO						9356
+#define MSG_MT_CLASSIC_TEAM						9357
+#define MSG_MT_SURVIVAL							9358
+#define MSG_MT_QUEST							9359
+#define MSG_MT_BERSERKER						9360
+#define MSG_MT_DEATHMATCH_TEAM2					9361
+#define MSG_MT_DUEL								9362
 
-// 추가...  -_-;
-#define MSG_REMAIND_PERIOD						9400		///< 남았습니다.
-#define MSG_JOINED_STAGE						9401		///< 당신은 방 '$1'에 입장하셨습니다.
-#define MSG_JOINED_STAGE2						9402		///< '$1'님이 방 '$2'에 입장하셨습니다.
+#define MSG_REMAIND_PERIOD						9400
+#define MSG_JOINED_STAGE						9401
+#define MSG_JOINED_STAGE2						9402
 
-#define MSG_WORD_ON								9500		///< ON
-#define MSG_WORD_OFF							9501		///< OFF
+#define MSG_WORD_ON								9500
+#define MSG_WORD_OFF							9501
 
-#define MSG_DISCONNMSG_XTRAPHACK				9601		///< X-TRAP에서 해킹 검출시 출력 메시지.
+#define MSG_DISCONNMSG_XTRAPHACK				9601
 
-/// 시스템 메시지
-#define MSG_HACKING_DETECTED					20000		///< 해킹시도 검출
-#define MSG_EXPIRED								20001		///< 기간이 만료되었습니다.
-#define MSG_SHOPMSG								20002		///< 장비 아이콘을 끌어 놓음으로써 장비를 장착하거나 해제할 수 있습니다.\n바운티 아이템은 중앙은행에 보낼 수 없습니다.
-#define MSG_DONOTSUPPORT_GPCARD					20003		///< 는 지원되지 않는 비디오카드입니다. 글자가 나오지않거나 게임진행이 불가능할수 있습니다. 계속하시겠습니까?
-#define MSG_DIRECTX_NOT_INSTALL					20004		///< 다이렉트X 9.0c이 설치되어 있지 않습니다. 다이렉트X 9.0c을 다운로드 페이지로 이동합니다.
-#define MSG_DIRECTX_DOWNLOAD_URL				20005		///< http://...
-#define MSG_CHARDELETE_ERROR					20006		///< 캐릭터를 삭제하려면 YES를 제대로 입력해주세요.
+#define MSG_HACKING_DETECTED					20000
+#define MSG_EXPIRED								20001
+#define MSG_SHOPMSG								20002
+#define MSG_DONOTSUPPORT_GPCARD					20003
+#define MSG_DIRECTX_NOT_INSTALL					20004
+#define MSG_DIRECTX_DOWNLOAD_URL				20005
+#define MSG_CHARDELETE_ERROR					20006
 
-
-// 교성이가 추가함. cserror에 있던것을 이곳으로 옮김 2005.01.12
-#define MSG_WRONG_WORD_NAME					100300		///< 입력한 이름중에 사용할수 없는 단어가 있을시 단오를 출력해줌.
+#define MSG_WRONG_WORD_NAME					100300
 
 
 const char* ZGetSexStr(MMatchSex nSex, bool bShort=false);
-void ZGetTimeStrFromSec(char* poutStr, unsigned long int nSec);
-
-#endif
+void ZGetTimeStrFromSec(char* poutStr, size_t maxlen, u32 nSec);
+template <size_t size>
+void ZGetTimeStrFromSec(char(&poutStr)[size], u32 nSec) {
+	return ZGetTimeStrFromSec(poutStr, size, nSec);
+}

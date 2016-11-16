@@ -1,5 +1,4 @@
-#ifndef MMATCHCLIENT_H
-#define MMATCHCLIENT_H
+#pragma once
 
 #include <list>
 #include <map>
@@ -260,19 +259,3 @@ public:
 protected:
 	virtual void OnStopUDPTest(const MUID& uid) = 0;
 };
-
-/* 
-로컬에서 게임 2개 띄워놓고 테스트 하는 법
-우선 ZoneServer를 띄운다.
-
-Chat창에서 각각의 게임창마다
-/con							 ,		/con
-/peer.setport 10000				 ,		/peer.setport 10001 
-/peer.addpeer 127.0.0.1 10001    ,		/peer.addpeer 127.0.0.1 10000 
-이렇게 입력하고서 테스트 해야함.
-
-왜냐하면 각 게임창마다 포트를 다르게 설정해야하기 때문..
-
-*/
-
-#endif

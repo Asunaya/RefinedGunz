@@ -406,7 +406,7 @@ RBaseTexture *RTextureManager::CreateBaseTextureSub(bool Mg, const char* filenam
 	char texturefilename[256];
 
 	strcpy_safe(texturefilename, filename);
-	_strlwr(texturefilename);
+	_strlwr_s(texturefilename);
 
 	iterator i = find(string(texturefilename));
 
@@ -455,7 +455,7 @@ void RTextureManager::DestroyBaseTexture(const char* szName)
 	char texturefilename[256];
 
 	strcpy_safe(texturefilename, szName);
-	_strlwr(texturefilename);
+	_strlwr_s(texturefilename);
 
 	iterator i = find(texturefilename);
 

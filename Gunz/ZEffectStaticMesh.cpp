@@ -12,8 +12,6 @@
 ZEffectMesh::ZEffectMesh(RMesh* pMesh, const rvector& Pos, const rvector& Velocity)
 {
 	m_VMesh.Create(pMesh);
-//	bool bRet=m_VMesh.SetAnimation("play");
-//	m_pMesh = pMesh;
 
 	m_Pos = Pos;
 	m_Velocity = Velocity;
@@ -33,7 +31,6 @@ ZEffectMesh::ZEffectMesh(RMesh* pMesh, const rvector& Pos, const rvector& Veloci
 	m_nDrawMode = ZEDM_NONE;
 
 	m_Up = rvector(0.f,0.f,1.f);
-//	g_effect_empty_cartridge_cnt++;
 }
 
 ZEffectStaticMesh::ZEffectStaticMesh(RMesh* pMesh, const rvector& Pos, const rvector& Velocity, MUID uid )
@@ -51,22 +48,13 @@ bool ZEffectStaticMesh::Draw(unsigned long int nTime)
 	if(m_VMesh.m_pMesh==NULL) 
 		return false;
 
-	////////////////////////////////////////////////////////////////////////////////////
-/*
-	static char _buffer[40];
-	sprintf_safe(_buffer,"ZEffectStaticMesh::Draw : %d \n",g_effect_empty_cartridge_cnt);
-	OutputDebugString(_buffer);
-*/
-	////////////////////////////////////////////////////////////////////////////////////
+	DWORD dwDiff = nTime - m_nStartTime;
 
-	DWORD dwDiff = nTime-m_nStartTime;
-
-	float fSec = (float)dwDiff/1000.0f;	// msec에서 sec로 변환
-	rvector Distance = ParabolicMotion(m_Velocity, fSec) * 100;	// *100은 미터에서 센티로 변환
+	float fSec = (float)dwDiff/1000.0f;
+	rvector Distance = ParabolicMotion(m_Velocity, fSec) * 100;
 	rvector Pos = m_Pos + Distance;
 	float fOpacity = (EC_LIFETIME-dwDiff)/(float)EC_LIFETIME;
 
-	//float fOpacity = 1.0f;
 	rvector Dir(1,0,0);
 	rvector Up = m_Up;
 	rmatrix World;
@@ -76,11 +64,8 @@ bool ZEffectStaticMesh::Draw(unsigned long int nTime)
 	D3DXMatrixRotationAxis(&Rotation, &m_RotationAxis, m_fRotateAngle);
 	m_fRotateAngle+=EC_ROTATION;
  	World = Rotation * World;
-//	m_pMesh->Render(&World, (Opacity<<24)+(Opacity<<16)+(Opacity<<8)+Opacity);
 
-//	m_VMesh.SetScale(m_Scale);
 	m_VMesh.SetWorldMatrix(World);
-//	m_VMesh.Frame();					// 시간은 흘러 가야 한다~
 
 	if(m_bRender) {
 		m_VMesh.Render();
@@ -94,15 +79,12 @@ bool ZEffectStaticMesh::Draw(unsigned long int nTime)
 	if( dwDiff > EC_LIFETIME )
 	{
 		ZObject* pObj = ZGetObjectManager()->GetObject(m_uid);
-		
-//		if( MIsDerivedFromClass(ZCharacterObject, pObj )==false) return false;
-//		ZCharacterObject* pCObj = (ZCharacterObject*)pObj;
 
 		ZCharacterObject* pCObj = MDynamicCast(ZCharacterObject, pObj);
 
 		if(!pCObj) return false;
 
-		if( pCObj->m_pSoundMaterial == 0 )	// 기본소리 출력
+		if( pCObj->m_pSoundMaterial == 0 )
 		{
 			ZGetSoundEngine()->PlaySound("fx_slugdrop_mt_con",Pos);
 		} 
@@ -115,7 +97,7 @@ bool ZEffectStaticMesh::Draw(unsigned long int nTime)
 			else
 			{
 				strcpy_safe( buffer, base_snd_name );
-				strcat( buffer, pCObj->m_pSoundMaterial );
+				strcat_safe( buffer, pCObj->m_pSoundMaterial );
 
 				ZGetSoundEngine()->PlaySoundElseDefault(buffer,"fx_slugdrop_mt_con",Pos);
 			}			

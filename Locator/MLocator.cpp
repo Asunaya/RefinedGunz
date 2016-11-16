@@ -574,8 +574,6 @@ bool MLocator::UDPSocketRecvEvent( DWORD dwIP, WORD wRawPort, char* pPacket, DWO
 		GetMainLocator()->IncreaseDuplicatedCount();
 		return false;
 	}
-	
-	// 여기까지 오면 새로운 UDP이므로 추가 작업을 함.
 
 	MPacketHeader* pPacketHeader = (MPacketHeader*)pPacket;
 	
@@ -600,7 +598,7 @@ void MLocator::ParseUDPPacket( char* pData, MPacketHeader* pPacketHeader, DWORD 
 			unsigned short nCheckSum = MBuildCheckSum(pPacketHeader, pPacketHeader->nSize);
 			if (pPacketHeader->nCheckSum != nCheckSum) {
 				static int nLogCount = 0;
-				if (nLogCount++ < 100) {	// Log Flooding 방지
+				if (nLogCount++ < 100) {	// Log Flooding
 					mlog("MMatchClient::ParseUDPPacket() -> CHECKSUM ERROR(R=%u/C=%u)\n", 
 						pPacketHeader->nCheckSum, nCheckSum);
 				}
@@ -610,21 +608,19 @@ void MLocator::ParseUDPPacket( char* pData, MPacketHeader* pPacketHeader, DWORD 
 				if (!pCmd->SetData(pData, &m_CommandManager))
 				{
 					char szLog[ 128 ] = {0,};
-					_snprintf( szLog, 127, "MLocator::ParseUDPPacket -> SetData Error\n" );
+					sprintf_safe( szLog, "MLocator::ParseUDPPacket -> SetData Error\n" );
 					GetLogManager().SafeInsertLog( szLog );
 					
 					delete pCmd;
 					return;
 				}
 
-				// 요청한 커맨드가 Locator에서 처리하는 건지 검사.
 				if( MC_REQUEST_SERVER_LIST_INFO == pCmd->GetID() )
 				{
-					// 정보를 보내는데 필요한 DWORD IP만 큐에 저장. - 여기까지 와야 등록이 됨.
 					if( !GetRecvUDPManager().SafeInsert(dwIP, nPort, timeGetTime()) )
 					{
 						char szLog[ 1024 ] = {0,};
-						_snprintf( szLog, 1023, "fail to insert new IP(%u,%d) Time:%s\n", 
+						sprintf_safe(szLog, "fail to insert new IP(%u,%d) Time:%s\n",
 							dwIP, nPort, MGetStrLocalTime().c_str() );
 						GetLogManager().SafeInsertLog( szLog );
 					}
@@ -634,7 +630,7 @@ void MLocator::ParseUDPPacket( char* pData, MPacketHeader* pPacketHeader, DWORD 
 					ASSERT( 0 && "현제 추가정의된 처리커맨드가 없음." );
 
 					char szLog[ 1024 ] = {0,};
-					_snprintf( szLog, 1023, "invalide command(%u) Time:%s, dwIP:%u\n", 
+					sprintf_safe(szLog, "invalide command(%u) Time:%s, dwIP:%u\n",
 						pCmd->GetID(), MGetStrLocalTime().c_str(), dwIP );
 					GetLogManager().SafeInsertLog( szLog );
 
@@ -642,8 +638,6 @@ void MLocator::ParseUDPPacket( char* pData, MPacketHeader* pPacketHeader, DWORD 
 					GetLocatorStatistics().IncreaseBlockCount();
 				}
 
-				// 현제는 서버 상태정보 리스트만 요청하는 커맨드만 처리함.
-				// MCommand는 사용하지 않음.
 				delete pCmd;
 			}
 		}
@@ -652,18 +646,17 @@ void MLocator::ParseUDPPacket( char* pData, MPacketHeader* pPacketHeader, DWORD 
 		{
 			ASSERT( 0 && "암호화 패킷 처리도 필요함." );
 			char szLog[ 1024 ] = {0,};
-			_snprintf( szLog, 1023, "encpypted command. Time:%s, dwIP:%u\n", 
+			sprintf_safe(szLog, "encpypted command. Time:%s, dwIP:%u\n", 
 				MGetStrLocalTime().c_str(), dwIP );
 			GetLogManager().SafeInsertLog( szLog );
 
-			// 계속되는 IP로그를 위해서 블럭리스트에 추가.
 			GetBlockUDPManager().SafeInsert( dwIP, nPort, timeGetTime() );
 			GetLocatorStatistics().IncreaseBlockCount();
 
 			unsigned short nCheckSum = MBuildCheckSum(pPacketHeader, pPacketHeader->nSize);
 			if (pPacketHeader->nCheckSum != nCheckSum) {
 				static int nLogCount = 0;
-				if (nLogCount++ < 100) {	// Log Flooding 방지
+				if (nLogCount++ < 100) {	// Log Flooding
 					mlog("MMatchClient::ParseUDPPacket() -> CHECKSUM ERROR(R=%u/C=%u)\n", 
 						pPacketHeader->nCheckSum, nCheckSum);
 				}
@@ -675,8 +668,7 @@ void MLocator::ParseUDPPacket( char* pData, MPacketHeader* pPacketHeader, DWORD 
 		break;
 	default:
 		{
-			// MLog("MatchClient: Parse Packet Error");
-			ASSERT( 0 && "정의도지 않은 타입." );
+			ASSERT( 0 && "Unrecognized packet" );
 		}
 		break;
 	}

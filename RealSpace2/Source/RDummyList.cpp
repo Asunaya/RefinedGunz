@@ -41,7 +41,7 @@ bool RDummyList::Open(rapidxml::xml_node<>& parent)
 
 			auto ReadVector = [&]() {
 				v3 vec;
-				if (sscanf(szContents, "%f %f %f", &vec.x, &vec.y, &vec.z) != 3)
+				if (sscanf_s(szContents, "%f %f %f", &vec.x, &vec.y, &vec.z) != 3)
 					vec = { 0, 0, 0 };
 				return vec;
 			};

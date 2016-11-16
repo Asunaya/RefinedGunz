@@ -20,12 +20,12 @@ bool MEmblemMgr::InitDefaut()
 {
 	if(GetMyDocumentsPath(m_szEmblemBaseDir)) {
 		// EmblemBaseFolder
-		strcat(m_szEmblemBaseDir, GUNZ_FOLDER);
-		strcat(m_szEmblemBaseDir, MPATH_EMBLEMFOLDER);
+		strcat_safe(m_szEmblemBaseDir, GUNZ_FOLDER);
+		strcat_safe(m_szEmblemBaseDir, MPATH_EMBLEMFOLDER);
 		
 		// EmblemDataFile
 		strcpy_safe(m_szEmblemDataFile, m_szEmblemBaseDir);
-		strcat(m_szEmblemDataFile, MPATH_EMBLEMFILE);
+		strcat_safe(m_szEmblemDataFile, MPATH_EMBLEMFILE);
 		return true;
 	} else {
 		return false;
@@ -59,13 +59,13 @@ bool MEmblemMgr::CreateCache()
 
 	if(GetMyDocumentsPath(szPath)) {
 		strcpy_safe(szEmblemPath, szPath);
-		strcat(szEmblemPath, GUNZ_FOLDER);
+		strcat_safe(szEmblemPath, GUNZ_FOLDER);
 		CreatePath(szEmblemPath);
 
-		strcat(szEmblemPath, MPATH_EMBLEMFOLDER);
+		strcat_safe(szEmblemPath, MPATH_EMBLEMFOLDER);
 		CreatePath(szEmblemPath);
 
-		strcat(szEmblemPath, MPATH_EMBLEMFILE);
+		strcat_safe(szEmblemPath, MPATH_EMBLEMFILE);
 	} else {
 		return false;
 	}
@@ -241,7 +241,7 @@ void MEmblemMgr::ClearCache()
 	}
 }
 
-bool MEmblemMgr::GetEmblemPath(char* pszFilePath, const char* pszURL)
+bool MEmblemMgr::GetEmblemPath(char* pszFilePath, size_t maxlen, const char* pszURL)
 {
 	//// Parse URL //////////////////
 	#define URLPATH_LEN	256
@@ -261,23 +261,23 @@ bool MEmblemMgr::GetEmblemPath(char* pszFilePath, const char* pszURL)
 
 	char szFullPath[_MAX_DIR];
 	strcpy_safe(szFullPath, GetEmblemBaseDir());
-	strcat(szFullPath, "/");
-	strcat(szFullPath, szFileName);
+	strcat_safe(szFullPath, "/");
+	strcat_safe(szFullPath, szFileName);
 
 	// out
-	strcpy(pszFilePath, szFullPath);
+	strcpy_safe(pszFilePath, maxlen, szFullPath);
 
 	return true;
 }
 
-bool MEmblemMgr::GetEmblemPathByCLID(unsigned int nCLID, char* poutFilePath)
+bool MEmblemMgr::GetEmblemPathByCLID(unsigned int nCLID, char* poutFilePath, size_t maxlen)
 {
 	MEmblemMap::iterator i = m_EmblemMap.find(nCLID);
 	if (i==m_EmblemMap.end())
 		return false;
 
 	MEmblemNode* pEmblem = (*i).second;
-	return GetEmblemPath(poutFilePath, pEmblem->GetURL());
+	return GetEmblemPath(poutFilePath, maxlen, pEmblem->GetURL());
 }
 
 bool MEmblemMgr::CheckEmblem(unsigned int nCLID, unsigned long nChecksum)

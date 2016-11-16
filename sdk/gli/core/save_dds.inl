@@ -129,8 +129,9 @@ namespace detail
 		if(Texture.empty())
 			return false;
 
-		FILE* File = std::fopen(Filename, "wb");
-		if(!File)
+		FILE* File{};
+		auto ret = fopen_s(&File, Filename, "wb");
+		if(ret != 0 || !File)
 			return false;
 
 		std::vector<char> Memory;

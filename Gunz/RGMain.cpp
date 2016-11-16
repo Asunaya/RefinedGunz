@@ -348,11 +348,11 @@ void RGMain::OnReplaySelected()
 		return;
 	}
 
-	strcat(Path, GUNZ_FOLDER);
-	strcat(Path, REPLAY_FOLDER);
+	strcat_safe(Path, GUNZ_FOLDER);
+	strcat_safe(Path, REPLAY_FOLDER);
 
-	strcat(Path, "/");
-	strcat(Path, SelectedReplay->GetString());
+	strcat_safe(Path, "/");
+	strcat_safe(Path, SelectedReplay->GetString());
 
 	auto PerCommand = [&](MCommand *Command, float Time)
 	{

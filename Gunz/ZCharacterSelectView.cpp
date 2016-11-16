@@ -34,26 +34,27 @@ char ZCharacterSelectView::m_szLastChar[MATCHOBJECT_NAME_LENGTH] = "";
 void ZCharacterSelectView::LoadLastChar()
 {
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
-	// last char 불러온다.
-	FILE* fp = fopen( FNAME_LASTCHAR, "rt");
-	char szName[256] = "";
-	if (fp)
-	{
-		fscanf(fp, "%s", szName);
-		fclose(fp);
-		if (szName[0] != 0)
-		{
-			for (int i = 0; i < MAX_CHAR_COUNT; i++)
-			{
-				char szWidget[256];
-				sprintf_safe( szWidget, "CharSel_Name%d", i);
-				MLabel* pLabel = (MLabel*)pResource->FindWidget( szWidget);
 
-				if ( pLabel)
-				{
-					if ( !strcmp( pLabel->GetText(), szName))
-						ZCharacterSelectView::SetSelectedCharacter(i);
-				}
+	FILE* fp{};
+	auto err = fopen_s(&fp, FNAME_LASTCHAR, "rt");
+	char szName[256]; szName[0] = 0;
+	if (err != 0 || !fp)
+		return;
+	
+	fscanf_s(fp, "%s", szName, sizeof(szName));
+	fclose(fp);
+	if (szName[0] != 0)
+	{
+		for (int i = 0; i < MAX_CHAR_COUNT; i++)
+		{
+			char szWidget[256];
+			sprintf_safe(szWidget, "CharSel_Name%d", i);
+			MLabel* pLabel = (MLabel*)pResource->FindWidget(szWidget);
+
+			if (pLabel)
+			{
+				if (!strcmp(pLabel->GetText(), szName))
+					ZCharacterSelectView::SetSelectedCharacter(i);
 			}
 		}
 	}
@@ -63,15 +64,14 @@ void ZCharacterSelectView::SetLastChar(char* szName)
 { 
 	strcpy_safe(m_szLastChar, szName); 
 
-	// 마지막 선택 캐릭 저장
-	FILE* fp = fopen(FNAME_LASTCHAR, "wt");
-	if (fp)
+	FILE* fp{};
+	auto err = fopen_s(&fp, FNAME_LASTCHAR, "wt");
+	if (err == 0 && fp)
 	{
 		fputs(szName, fp);
 		fclose(fp);
 	}
 
-	// 레지스트리도 같이 저장 - 파일을 레지스트리로 교체중..나중에 FNAME_LASTCHAR 빼자. 한달쯤 후에.. - bird
 	ZGetApplication()->SetSystemValue("LastChar", szName);
 }
 
@@ -89,7 +89,6 @@ void ZCharacterSelectView::SetSelectedCharacterFromLastChar()
 		}
 	}
 
-	// 만약 없으면 제일 처음껄로 결정
 	for (int i = 0; i < MAX_CHAR_COUNT; i++)
 	{
 		if (m_CharInfo[i].m_AccountCharInfo.szName[0] != 0)

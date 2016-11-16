@@ -908,13 +908,13 @@ bool ZOptionInterface::IsDiffNetworkPort()
 		return false;
 
 
-	if ( nNewPort1 > nNewPort2)
+	if (nNewPort1 > nNewPort2)
 	{
-		char szStr[ 25];
-		itoa( Z_ETC_NETWORKPORT1, szStr, 10);
-		pEdit1->SetText( szStr);
-		itoa( Z_ETC_NETWORKPORT2, szStr, 10);
-		pEdit2->SetText( szStr);
+		char szStr[25];
+		itoa_safe(Z_ETC_NETWORKPORT1, szStr, 10);
+		pEdit1->SetText(szStr);
+		itoa_safe(Z_ETC_NETWORKPORT2, szStr, 10);
+		pEdit2->SetText(szStr);
 
 		return false;
 	}

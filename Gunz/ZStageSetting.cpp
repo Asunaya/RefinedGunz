@@ -205,18 +205,6 @@ static bool BuildStageSetting(MSTAGE_SETTING_NODE* pOutNode)
 	BuildStageSettingItem("StageTeamBalancing", pOutNode->bAutoTeamBalancing,
 		StageSetting_TeamBalancing, STAGESETTING_FORCEDENTRY_MAX);
 
-	// 관전 허용
-//	BUILD_STAGESETTING_ITEM("StageObserver", pOutNode->bObserverEnabled,
-//							StageSetting_Observer, STAGESETTING_OBSERVER_DEFAULT);
-
-	// 투표 가능
-//	BUILD_STAGESETTING_ITEM("StageVote", pOutNode->bVoteEnabled,
-//							StageSetting_Vote, STAGESETTING_VOTE_DEFAULT);
-
-	// Write MSTAGE_SETTING_NODE
-//	pOutNode->uidStage = ZGetGameClient()->GetStageUID();
-//	strcpy_safe(pOutNode->szMapName , ZGetGameClient()->GetMatchStageSetting()->GetMapName());
-
 	if (pOutNode->nGameType == MMATCH_GAMETYPE_GLADIATOR_SOLO
 		|| pOutNode->nGameType == MMATCH_GAMETYPE_GLADIATOR_TEAM)
 	{
@@ -264,13 +252,10 @@ static bool BuildStageSetting(MSTAGE_SETTING_NODE* pOutNode)
 
 void ZStageSetting::ShowStageSettingDialog(MSTAGE_SETTING_NODE* pStageSetting, bool bShowAll)
 {
-	// bShowAll 이 true면 현재 게임 설정 데이터를 서버로 데이터 전송함
-
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
 	if (pResource == NULL) return;
 
 
-	// 게임 타입
 	{
 		MComboBox* pCB = (MComboBox*)pResource->FindWidget("StageType");
 		if (pCB)
@@ -323,13 +308,10 @@ void ZStageSetting::ShowStageSettingDialog(MSTAGE_SETTING_NODE* pStageSetting, b
 	ZGameTypeConfig* pGameTypeCfg = ZGetConfiguration()->GetGameTypeList()->GetGameTypeCfg(pStageSetting->nGameType);
 	if (pGameTypeCfg)
 	{
-		// 최대 인원
 		SHOWSTAGESETTING_LISTITEM("StageMaxPlayer", pStageSetting->nMaxPlayers, pGameTypeCfg->m_MaxPlayers, g_MapDesc[pStageSetting->nMapIndex].nMaxPlayers);
 
-		// 라운드
 		SHOWSTAGESETTING_LISTITEM("StageRoundCount", pStageSetting->nRoundMax, pGameTypeCfg->m_Round, 99999);
 
-		// 제한시간
 		SHOWSTAGESETTING_LISTITEM("StageLimitTime", pStageSetting->nLimitTime, pGameTypeCfg->m_LimitTime, 99999);
 	}
 
@@ -377,19 +359,15 @@ void ZStageSetting::ShowStageSettingDialog(MSTAGE_SETTING_NODE* pStageSetting, b
 }
 /////////////////////////////////////////////////////////////////////////////////////////
 
-	// 레벨제한
 	SHOWSTAGESETTING_ITEM("StageLevelLimit", pStageSetting->nLimitLevel,
 		STAGESETTING_LIMITLEVEL_MAX, StageSetting_LimitLevel);
 
-	// 팀킬여부
 	SHOWSTAGESETTING_ITEM("StageTeamKill", pStageSetting->bTeamKillEnabled,
 		STAGESETTING_TEAMKILL_MAX, StageSetting_TeamKill);
 
-	// 게임중참가
 	SHOWSTAGESETTING_ITEM("StageIntrude", pStageSetting->bForcedEntryEnabled,
 		STAGESETTING_FORCEDENTRY_MAX, StageSetting_ForcedEntry);
 
-	// 팀 밸런스
 	SHOWSTAGESETTING_ITEM("StageTeamBalancing", pStageSetting->bAutoTeamBalancing,
 		STAGESETTING_TEAMBALANCING_MAX, StageSetting_TeamBalancing);
 
@@ -397,15 +375,6 @@ void ZStageSetting::ShowStageSettingDialog(MSTAGE_SETTING_NODE* pStageSetting, b
 	MComboBox* pCBTeamBanlance = (MComboBox*)pResource->FindWidget("StageTeamBalancing");
 	if (pCBTeamBanlance)
 		pCBTeamBanlance->Enable(ZGetGameTypeManager()->IsTeamGame(pStageSetting->nGameType));
-
-	// 관전 허용
-//	SHOWSTAGESETTING_ITEM("StageObserver", pStageSetting->bObserverEnabled,
-//		STAGESETTING_OBSERVER_MAX, StageSetting_Observer);
-
-	// 투표 가능
-//	SHOWSTAGESETTING_ITEM("StageVote", pStageSetting->bVoteEnabled,
-//		STAGESETTING_VOTE_MAX, StageSetting_Vote);
-
 
 	auto ForceHPAP = static_cast<MButton*>(pResource->FindWidget("StageForceHPAP"));
 	if (ForceHPAP)
@@ -417,14 +386,14 @@ void ZStageSetting::ShowStageSettingDialog(MSTAGE_SETTING_NODE* pStageSetting, b
 	auto HP = static_cast<MEdit*>(pResource->FindWidget("StageHP"));
 	if (HP)
 	{
-		_itoa(pStageSetting->HP, buf, 10);
+		itoa_safe(pStageSetting->HP, buf, 10);
 		HP->SetText(buf);
 	}
 
 	auto AP = static_cast<MEdit*>(pResource->FindWidget("StageAP"));
 	if (AP)
 	{
-		_itoa(pStageSetting->AP, buf, 10);
+		itoa_safe(pStageSetting->AP, buf, 10);
 		AP->SetText(buf);
 	}
 

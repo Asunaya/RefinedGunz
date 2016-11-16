@@ -441,7 +441,7 @@ void RVertexBuffer::RenderIndexBuffer(RIndexBuffer* ib)
 	dev->DrawIndexedPrimitive(m_PrimitiveType,0, 0,m_nVertexCnt,0,ib->GetFaceCnt() );
 }
 
-void GetPath(const char* str,char* path)
+void GetPath(const char* str, char* path, size_t path_len)
 {
 	if(!str) { 
 		path[0] = NULL;
@@ -452,7 +452,7 @@ void GetPath(const char* str,char* path)
 
 	for(i=strlen(str)-1; i>=0; i--) {
 		if( (str[i]=='\\') || (str[i]=='/')) {
-			strncpy(path,str,i+1);
+			strncpy_safe(path, path_len, str, i+1);
 			path[i+1] = NULL;
 			return;
 		}

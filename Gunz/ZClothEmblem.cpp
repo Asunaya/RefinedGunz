@@ -798,7 +798,7 @@ void ZEmblemList::InitEnv( char* pFileName_ )
 				D3DXMATRIX RotMat;
 				rvector dir = rvector( 0,1,0 );
 				int theta;
-				sscanf( Attribute, "%d", &theta );
+				sscanf_s( Attribute, "%d", &theta );
 				auto up = rvector(0, 0, 1);
 				D3DXMatrixRotationAxis( &RotMat, &up, ((float)theta*D3DX_PI/180) );
 				dir = dir*RotMat;
@@ -808,7 +808,7 @@ void ZEmblemList::InitEnv( char* pFileName_ )
 			if( child.GetAttribute( Attribute, "POWER" ))
 			{
 				float power;
-				sscanf( Attribute, "%f", &power );
+				sscanf_s( Attribute, "%f", &power );
 				p->GetWndGenerator()->SetWindPower( power );
 			}
 			
@@ -829,17 +829,17 @@ void ZEmblemList::InitEnv( char* pFileName_ )
 					float fValue = 0.f;
 					if( dummy.GetAttribute( Attribute, "AXIS" ))
 					{
-						sscanf( Attribute, "%d", &iValue );
+						sscanf_s( Attribute, "%d", &iValue );
 						rest->axis	=(RESTRICTION_AXIS)iValue;
 					}				
 					if( dummy.GetAttribute( Attribute, "POSITION") )
 					{
-						sscanf( Attribute, "%f", &fValue );
+						sscanf_s( Attribute, "%f", &fValue );
 						rest->position = fValue;
 					}
 					if( dummy.GetAttribute(Attribute, "COMPARE") )
 					{
-						sscanf( Attribute, "%d", &iValue );
+						sscanf_s( Attribute, "%d", &iValue );
 						rest->compare =(RESTRICTION_COMPARE)iValue;
 					}
 					p->AddRestriction( rest );
@@ -849,12 +849,12 @@ void ZEmblemList::InitEnv( char* pFileName_ )
 					int iValue = 0;
 					if( dummy.GetAttribute( Attribute, "TYPE" ) )
 					{
-						sscanf( Attribute, "%d", &iValue );
+						sscanf_s( Attribute, "%d", &iValue );
 						p->GetWndGenerator()->SetWindType( (WIND_TYPE) iValue );
 					}
 					if( dummy.GetAttribute( Attribute, "DELAY" ))
 					{
-						sscanf( Attribute, "%d", &iValue );
+						sscanf_s( Attribute, "%d", &iValue );
 						p->GetWndGenerator()->SetDelayTime( iValue );
 					}
 				}
