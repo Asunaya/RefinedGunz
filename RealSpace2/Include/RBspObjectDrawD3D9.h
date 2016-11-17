@@ -49,7 +49,7 @@ private:
 	};
 	// Indices map to State.Materials. Contains indices into TextureMemory.
 	std::vector<TextureData> Textures;
-	std::vector<std::unique_ptr<RBaseTexture>> TextureMemory;
+	std::vector<RBaseTexturePtr> TextureMemory;
 
 	D3DPtr<IDirect3DVertexBuffer9> VertexBuffer;
 	D3DPtr<IDirect3DIndexBuffer9> IndexBuffer;

@@ -109,4 +109,12 @@ RBaseTexture* RCreateBaseTextureMg(const char* filename, DWORD nTexType = RTextu
 void RDestroyBaseTexture(RBaseTexture*);
 void RChangeBaseTextureLevel(DWORD flag);
 
+struct RBaseTextureDeleter {
+	void operator()(RBaseTexture* ptr) const {
+		RDestroyBaseTexture(ptr);
+	}
+};
+
+using RBaseTexturePtr = std::unique_ptr<RBaseTexture, RBaseTextureDeleter>;
+
 _NAMESPACE_REALSPACE2_END
