@@ -3,8 +3,8 @@
 #include "ZApplication.h"
 #include "MComboBox.h"
 #include "ZChannelRule.h"
-
 #include "ZGameClient.h"
+#include "Config.h"
 
 void ZGetCurrMapPath(char* outPath, int maxlen)
 {
@@ -28,14 +28,14 @@ void ZGetCurrMapPath(char* outPath, int maxlen)
 
 bool InitMaps(MWidget *pWidget)
 {
-	if(!pWidget) return false;
+	if (!pWidget) return false;
 
-	MComboBox* pCombo=(MComboBox*)pWidget;
+	MComboBox* pCombo = (MComboBox*)pWidget;
 	pCombo->RemoveAll();
 
-	if ((ZGetGameClient()) && ( ZGetGameTypeManager()->IsQuestDerived(ZGetGameClient()->GetMatchStageSetting()->GetGameType())))
+	if ((ZGetGameClient()) && (ZGetGameTypeManager()->IsQuestDerived(ZGetGameClient()->GetMatchStageSetting()->GetGameType())))
 	{
-		pCombo->Add( "Mansion");
+		pCombo->Add("Mansion");
 
 		return true;
 	}
@@ -46,11 +46,11 @@ bool InitMaps(MWidget *pWidget)
 		return false;
 	}
 
-	MZFileSystem *pFS=ZApplication::GetFileSystem();
+	MZFileSystem *pFS = ZApplication::GetFileSystem();
 #define MAP_EXT	".rs"
 
 	int nExtLen = (int)strlen(MAP_EXT);
-	for(int i=0; i<pFS->GetFileCount(); i++)
+	for (int i = 0; i<pFS->GetFileCount(); i++)
 	{
 		const char* szFileName = pFS->GetFileName(i);
 		const MZFILEDESC* desc = pFS->GetFileDesc(i);
@@ -59,19 +59,21 @@ bool InitMaps(MWidget *pWidget)
 		char MAPDIRECTORY[64];
 		ZGetCurrMapPath(MAPDIRECTORY);
 
-		if( _strnicmp(desc->m_szFileName,MAPDIRECTORY,strlen(MAPDIRECTORY))==0 && nLen>nExtLen && _stricmp(szFileName+nLen-nExtLen, MAP_EXT)==0 )
+		if (_strnicmp(desc->m_szFileName, MAPDIRECTORY, strlen(MAPDIRECTORY)) == 0 &&
+			nLen>nExtLen &&
+			_stricmp(szFileName + nLen - nExtLen, MAP_EXT) == 0)
 		{
-			char drive[_MAX_DRIVE],dir[_MAX_DIR],fname[_MAX_FNAME],ext[_MAX_EXT];
-			_splitpath_s(szFileName,drive,dir,fname,ext);
+			char drive[_MAX_DRIVE], dir[_MAX_DIR], fname[_MAX_FNAME], ext[_MAX_EXT];
+			_splitpath_s(szFileName, drive, dir, fname, ext);
 
-#ifdef _DEBUG
+#if defined(_DEBUG) || defined(ADD_ALL_MAPS)
 			pCombo->Add(fname);
 
 			continue;
 #endif
 
 			bool bDuelMode = false;
-			if ( ZGetGameClient() && (ZGetGameClient()->GetMatchStageSetting()->GetGameType() == MMATCH_GAMETYPE_DUEL))
+			if (ZGetGameClient() && (ZGetGameClient()->GetMatchStageSetting()->GetGameType() == MMATCH_GAMETYPE_DUEL))
 				bDuelMode = true;
 
 			if (ZGetGameClient()->GetMatchStageSetting()->GetGameType() == MMATCH_GAMETYPE_SKILLMAP)

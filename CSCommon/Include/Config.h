@@ -33,7 +33,7 @@
 #define NO_DIRECTION_LOCK
 
 // Default field of view in radians.
-#define DEFAULT_FOV		1.22173048f		// (70.0f / 180.0f * pi)
+#define DEFAULT_FOV		1.22173048f // 70 degrees in radians
 
 // Default distance from the camera to the near plane in the projection transform.
 #define DEFAULT_NEAR_Z	5.0f
@@ -43,3 +43,7 @@
 
 // Controls whether only MRS files will be loaded in release mode
 //#define ONLY_LOAD_MRS_FILES
+
+// Controls whether every map in the maps folder will be added
+// to the ingame maps list regardless of whether it's in g_MapDesc or not
+#define ADD_ALL_MAPS

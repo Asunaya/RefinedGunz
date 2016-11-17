@@ -29,18 +29,18 @@ enum MMATCH_MAP
 	MMATCH_MAP_MAX
 };
 
-#define MMATCH_MAP_COUNT	MMATCH_MAP_MAX			// 전체 맵 갯수
+#define MMATCH_MAP_COUNT	MMATCH_MAP_MAX
 
 
 const struct MMatchMapDesc
 {
-	int			nMapID;							// map id
-	char		szMapName[MAPNAME_LENGTH];		// 맵 이름
-	char		szMapImageName[MAPNAME_LENGTH];	// 맵 이미지 이름
-	char		szBannerName[MAPNAME_LENGTH];	// 베너 이름
-	float		fExpRatio;						// 경험치 습득률
-	int			nMaxPlayers;					// 최대 인원
-	bool		bOnlyDuelMap;					// 듀얼맵 전용
+	int			nMapID;
+	char		szMapName[MAPNAME_LENGTH];
+	char		szMapImageName[MAPNAME_LENGTH];
+	char		szBannerName[MAPNAME_LENGTH];
+	float		fExpRatio;
+	int			nMaxPlayers;
+	bool		bOnlyDuelMap;
 
 } g_MapDesc[MMATCH_MAP_COUNT] = 
 { 
