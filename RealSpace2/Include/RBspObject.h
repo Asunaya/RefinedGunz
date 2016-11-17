@@ -332,6 +332,7 @@ public:
 
 private:
 	friend class RBspObjectDrawVulkan;
+	friend class RBspObjectDrawD3D9;
 	friend struct LightmapGenerator;
 
 	bool LoadRS2Map(rapidxml::xml_node<>&);

@@ -1088,16 +1088,16 @@ bool RBspObject::Open_MaterialList(rapidxml::xml_node<>& parent)
 
 	Materials.resize(ml.size() + 1);
 
-	Materials[0].texture = NULL;
+	Materials[0].texture = nullptr;
 	Materials[0].Diffuse = rvector(1, 1, 1);
 	Materials[0].dwFlags = 0;
 
-	string strBase = m_filename;
-	string::size_type nPos = strBase.find_last_of("\\"), nothing = -1;
-	if (nPos == nothing)
+	std::string strBase = m_filename;
+	auto nPos = strBase.find_last_of("\\");
+	if (nPos == std::string::npos)
 		nPos = strBase.find_last_of("/");
 
-	if (nPos == nothing)
+	if (nPos == std::string::npos)
 		strBase = "";
 	else
 		strBase = strBase.substr(0, nPos) + "/";
@@ -1114,7 +1114,7 @@ bool RBspObject::Open_MaterialList(rapidxml::xml_node<>& parent)
 		Materials[i].Name = mat.Name;
 		Materials[i].DiffuseMap = mat.DiffuseMap;
 
-		string DiffuseMapName = strBase + mat.DiffuseMap;
+		std::string DiffuseMapName = strBase + mat.DiffuseMap;
 		char szMapName[256];
 		GetRefineFilename(szMapName, DiffuseMapName.c_str());
 

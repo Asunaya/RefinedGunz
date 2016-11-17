@@ -693,12 +693,12 @@ bool MZFile::Seek(long off,int mode)
 	}
 	else if (mode == current)
 	{
-		if (m_nPos + off >= GetLength())
+		if (m_nPos + off > GetLength())
 			return false;
 	}
 	else if (mode == end)
 	{
-		if (GetLength() + off >= GetLength())
+		if (GetLength() + off > GetLength())
 			return false;
 	}
 

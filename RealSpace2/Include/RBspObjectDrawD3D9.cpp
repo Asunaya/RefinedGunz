@@ -3,6 +3,7 @@
 #include "RealSpace2.h"
 #include <algorithm>
 #include <numeric>
+#include "RBspObject.h"
 
 _NAMESPACE_REALSPACE2_BEGIN
 
@@ -70,15 +71,16 @@ void RBspObjectDrawD3D9::CreateTextures()
 					return it->second;
 			}
 
-			TextureMemory.emplace_back();
-			auto hr = D3DXCreateTextureFromFile(RGetDevice(), name.c_str(),
-				MakeWriteProxy(TextureMemory.back()));
-			if (FAILED(hr))
+			auto* Tex = RCreateBaseTexture(name.c_str(), RTextureType_Map, true);
+			if (!Tex)
 			{
-				DMLog("Failed to load texture %s\n", name);
-				TextureMemory.pop_back();
+				MLog("RBspObjectDrawD3D9::CreateTextures -- Failed to load texture %s\n",
+					name.c_str());
 				return -1;
 			}
+
+			TextureMemory.emplace_back(Tex);
+
 			auto idx = TextureMemory.size() - 1;
 			TexMap.emplace(std::make_pair(name, idx));
 			return idx;
@@ -352,7 +354,7 @@ void RBspObjectDrawD3D9::RenderNormalMaterials()
 		if (Tex.Diffuse == -1)
 			continue;
 
-		dev->SetTexture(0, TextureMemory[Tex.Diffuse].get());
+		dev->SetTexture(0, GetTexture(Tex.Diffuse));
 
 		DrawBatch(Mat);
 	}
@@ -376,10 +378,10 @@ void RBspObjectDrawD3D9::RenderOpacityMaterials()
 		if (Tex.Diffuse == -1)
 			continue;
 
-		dev->SetTexture(0, TextureMemory[Tex.Diffuse].get());
+		dev->SetTexture(0, GetTexture(Tex.Diffuse));
 		// Tex.Opacity can't be -1 since the sorting in CreateBatches
 		// checks for that condition.
-		dev->SetTexture(1, TextureMemory[Tex.Opacity].get());
+		dev->SetTexture(1, GetTexture(Tex.Opacity));
 
 		DrawBatch(Mat);
 	}
@@ -404,13 +406,18 @@ void RBspObjectDrawD3D9::RenderAlphaTestMaterials()
 		if (Tex.Diffuse == -1)
 			continue;
 
-		dev->SetTexture(0, TextureMemory[Tex.Diffuse].get());
-		dev->SetTexture(1, TextureMemory[Tex.Opacity].get());
+		dev->SetTexture(0, GetTexture(Tex.Diffuse));
+		dev->SetTexture(1, GetTexture(Tex.Opacity));
 
 		dev->SetRenderState(D3DRS_ALPHAREF, Tex.AlphaTestValue);
 
 		DrawBatch(Mat);
 	}
+}
+
+LPDIRECT3DTEXTURE9 RBspObjectDrawD3D9::GetTexture(int Index)
+{
+	return TextureMemory[Index].get()->GetTexture();
 }
 
 void RBspObjectDrawD3D9::SetPrologueStates()

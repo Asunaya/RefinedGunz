@@ -59,6 +59,12 @@ void BulletCollision::Build()
 	Vertices.shrink_to_fit();
 	Indices.shrink_to_fit();
 
+	if (Triangles.getIndexedMeshArray().size() == 0)
+	{
+		MLog("BulletCollision::Build -- No triangles\n");
+		return;
+	}
+
 	Mesh.Construct(&Triangles, true, false);
 	Mesh.Get().buildOptimizedBvh();
 

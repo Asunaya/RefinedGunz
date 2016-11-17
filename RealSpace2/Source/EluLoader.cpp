@@ -257,10 +257,7 @@ static bool TryForEachPath(const std::vector<std::string>& Paths,
 
 static bool FileExists(const char *filename)
 {
-	struct stat s;
-	if (stat(filename, &s))
-		return false;
-	return (s.st_mode & _S_IFDIR) == 0;
+	return g_pFileSystem->GetFileDesc(filename) != nullptr;
 }
 
 bool loadMaterial(LoaderState& State, const char* name)
@@ -303,7 +300,7 @@ bool loadMaterial(LoaderState& State, const char* name)
 			if (!TryForEachPath(State.Paths, Filename, fn))
 				if (!TryForEachPath(State.Paths, Filename + ".dds", fn))
 				{
-					MLog("Failed to load texture %s!\n", Filename.c_str());
+					MLog("loadMaterial -- Failed to load texture %s!\n", Filename.c_str());
 					return false;
 				}
 			return true;
@@ -368,7 +365,10 @@ static bool LoadElu(LoaderState& State, const char* name)
 		}
 
 		if (!success)
+		{
+			MLog("Failed to load mesh index %d version %x for elu %s\n", i, hdr.Version, name);
 			return false;
+		}
 
 		dest.VertexCount += Mesh.VertexCount;
 		dest.IndexCount += Mesh.IndexCount;
@@ -388,7 +388,11 @@ static bool LoadElu(LoaderState& State, const char* name)
 	DMLog("%s -- Meshes.size() = %d\n", name, dest.Meshes.size());
 
 	dest.MaterialStart = State.Materials.size();
-	loadMaterial(State, (std::string{ name } +".xml").c_str());
+	if (!loadMaterial(State, (std::string{ name } +".xml").c_str()))
+	{
+		MLog("Failed to load material for elu %s\n", name);
+		return false;
+	}
 	dest.Name = name;
 
 	State.EluMap[dest.Name] = State.ObjectData.size() - 1;

@@ -34,6 +34,8 @@ private:
 	void RenderOpacityMaterials();
 	void RenderAlphaTestMaterials();
 
+	LPDIRECT3DTEXTURE9 GetTexture(int Index);
+
 	u32 GetFVF() const { return D3DFVF_XYZ | D3DFVF_TEX1; }
 	size_t GetStride() const { return sizeof(Vertex); }
 
@@ -47,7 +49,7 @@ private:
 	};
 	// Indices map to State.Materials. Contains indices into TextureMemory.
 	std::vector<TextureData> Textures;
-	std::vector<D3DPtr<IDirect3DTexture9>> TextureMemory;
+	std::vector<std::unique_ptr<RBaseTexture>> TextureMemory;
 
 	D3DPtr<IDirect3DVertexBuffer9> VertexBuffer;
 	D3DPtr<IDirect3DIndexBuffer9> IndexBuffer;

@@ -36,6 +36,7 @@ void InitLog(int logmethodflags, const char* pszLogFileName)
 	g_bLogInitialized = true;
 }
 
+#ifdef _DEBUG
 void DMLog(const char* Format, ...)
 {
 	char temp[16 * 1024];
@@ -61,7 +62,6 @@ void DMLog(const char* Format, ...)
 	OutputDebugString(temp);
 }
 
-#ifdef _DEBUG
 void DLogMatrix(const matrix& mat)
 {
 	for (int i = 0; i < 4; i++)
