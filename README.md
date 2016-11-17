@@ -38,7 +38,7 @@ Note that since Refined Gunz is based on Gunz 1.0, MSSQL database files, XMLs, e
 - Basic info update rate per second increased from 10 to 100
 - Spectator mode
 - Portals
-- Commands -- See [Docs/commands.md](Docs/commands.md)
+- Commands -- See [docs/commands.md](docs/commands.md)
 
 ##### Gladiator changes:
 - Invulnerability states removed
