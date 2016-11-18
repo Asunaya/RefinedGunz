@@ -318,7 +318,7 @@ public:
 	
 	void Update(float fElapsed);
 	void Draw(unsigned long int nTime);
-	void Draw(unsigned long int nTime,int mode,float height);// 물 알파 떄문에 임시..
+	void Draw(unsigned long int nTime,int mode,float height);
 
 	int  DeleteSameType(ZEffectAniMesh* pNew);
 

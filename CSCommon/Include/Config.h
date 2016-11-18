@@ -36,9 +36,11 @@
 #define DEFAULT_FOV		1.22173048f // 70 degrees in radians
 
 // Default distance from the camera to the near plane in the projection transform.
+// 5.0f in vanilla Gunz
 #define DEFAULT_NEAR_Z	5.0f
 
 // Default distance from the camera to the far plane in the projection transform.
+// 10000.0f in vanilla Gunz
 #define DEFAULT_FAR_Z	100000.0f
 
 // Controls whether only MRS files will be loaded in release mode
@@ -50,3 +52,8 @@
 
 // Controls whether the new ingame chat is used
 #define NEW_CHAT
+
+// Controls whether the slash decal shows up
+// immediately or 250 ms delayed.
+// It's delayed in vanilla Gunz.
+#define INSTANT_SLASH_DECAL

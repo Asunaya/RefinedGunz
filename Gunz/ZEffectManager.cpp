@@ -22,6 +22,7 @@
 #include "RGMain.h"
 #include "RBspObject.h"
 #include "hsv.h"
+#include "Config.h"
 
 #ifndef _PUBLISH
 class ZEffectValidator : public std::set<ZEffect*> 
@@ -51,13 +52,7 @@ public:
 } g_EffectValidator;
 #endif
 
-// 이펙트 디테일 레벨..옵션
-
-static int g_nEffectLevel = Z_VIDEO_EFFECT_HIGH;//최상위.. 0 : 상 1 : 중 2 : 하
-
-// 상급인경우 모두 그리고
-// 중급인경우 거리에 따라 그리고 안그리고..
-// 하급인경우 게임요소에 영향을 주는 요소가 아닌경우는 그리지도 않는다..( 착지 이펙트 같은것 )
+static int g_nEffectLevel = Z_VIDEO_EFFECT_HIGH;
 
 void SetEffectLevel(int level)
 {
@@ -98,7 +93,7 @@ public:
 
 		ZEffectAniMesh::Draw(nTime);
 
-		if( pObj->m_pVMesh->IsDoubleWeapon() ) {//이도류
+		if( pObj->m_pVMesh->IsDoubleWeapon() ) {
 
 			m = pObj->m_pVMesh->GetCurrentWeaponPositionMatrix(true);
 
@@ -128,9 +123,6 @@ public:
 
 		if( pObj ) {
 
-//			if(MIsExactlyClass(ZCharacter, pObj)==false) return false;
-//			ZCharacter* pChar = (ZCharacter*)pObj;
-
 			ZCharacter* pChar = MDynamicCast(ZCharacter, pObj);
 
 			if(!pChar) return false;
@@ -146,7 +138,7 @@ public:
 
 				ZEffectAniMesh::Draw(nTime);
 
-				if( pObj->m_pVMesh->IsDoubleWeapon() ) {//이도류
+				if (pObj->m_pVMesh->IsDoubleWeapon()) {
 					m = pObj->m_pVMesh->GetCurrentWeaponPositionMatrix(true);
 
 					m_Pos	 = rvector(m._41,m._42,m._43);
@@ -261,9 +253,6 @@ TexBlendEffect<T, T2>* MakeTexBlendEffect(T2 fn, ArgsType... args)
 	return new TexBlendEffect<T, T2>(fn, args...);
 }
 
-//////////////////////////////////////////////////////////////////////////////////
-// ZEffect
-
 ZEffect::ZEffect()
 {
 	m_nDrawMode = ZEDM_NONE;
@@ -271,9 +260,9 @@ ZEffect::ZEffect()
 
 	m_fDist = 0.f;
 
-	m_fHideDist[0] = 5000.f;//상 200M
-	m_fHideDist[1] = 3000.f;//중 100M
-	m_fHideDist[2] = 1000.f;//하  50M
+	m_fHideDist[0] = 5000.f;
+	m_fHideDist[1] = 3000.f;
+	m_fHideDist[2] = 1000.f;
 
 	m_bRender = true;
 	m_bisRendered = false;
@@ -302,9 +291,9 @@ bool ZEffect::CheckRenderAble(int level,float dist)
 
 void ZEffect::CheckWaterSkip(int mode,float height) 
 {
-	if(mode==0)	// 물속..
+	if (mode == 0)
 		m_bWaterSkip = true;
-	else		// 물위에서 그리기
+	else
 		m_bWaterSkip = false;
 }
 
@@ -337,17 +326,13 @@ rvector ZEffect::GetSortPos()
 
 void ZEffect::SetDistOption(float l0,float l1,float l2) 
 {
-	m_fHideDist[0] = l0;//상 200M
-	m_fHideDist[1] = l1;//중 100M
-	m_fHideDist[2] = l2;//하  50M
+	m_fHideDist[0] = l0;
+	m_fHideDist[1] = l1;
+	m_fHideDist[2] = l2;
 }
 
-//////////////////////////////////////////////////////////////////////////////////////
-
-// 좀 지저분하기는 하지만~
-
 bool CreateCommonRectVertexBuffer();	
-void RealeaseCommonRectVertexBuffer();	// ZEffectBillboard.cpp
+void RealeaseCommonRectVertexBuffer();
 
 ZEffectManager::ZEffectManager(void)
 {
@@ -524,14 +509,13 @@ bool ZEffectManager::Create(void)
 
 	m_pBerserkerEffect	= m_pEffectMeshMgr->Get("ef_berserker");
 
-//	m_pLighteningEffect = m_pEffectMeshMgr->Get("ef_lightening");
 	m_pBlizzardEffect = m_pEffectMeshMgr->Get("ef_blizzard");
 
 	m__skip_cnt = 0;
 	m__cnt = 0;
 	m__rendered = 0;
 
-	CreateCommonRectVertexBuffer();// ZEffectBillboard.cpp
+	CreateCommonRectVertexBuffer();
 
 	ZEffectBase::CreateBuffers();
 
@@ -557,27 +541,22 @@ bool ZEffectManager::Create(void)
 	m_BillBoardTexAniList[0].SetTile(4,4,0.25f,0.25f);
 	m_BillBoardTexAniList[1].SetTile(4,4,0.25f,0.25f);
 	m_BillBoardTexAniList[2].SetTile(4,4,0.25f,0.25f);
-	m_BillBoardTexAniList[2].m_bFixFrame = true; // frame animation 은 안한다..
+	m_BillBoardTexAniList[2].m_bFixFrame = true;
 	m_BillBoardTexAniList[3].SetTile(2,2,0.375f,0.375f);
-//	m_BillBoardTexAniList[3].m_nMaxFrame = 4;
-	m_BillBoardTexAniList[3].m_bFixFrame = true; // frame animation 은 안한다..
+	m_BillBoardTexAniList[3].m_bFixFrame = true;
 	m_BillBoardTexAniList[4].SetTile(4,4,0.25f,0.25f);
-//	m_BillBoardTexAniList[4].m_nRenderMode = ZEDM_ALPHAMAP;
 
-//	m_BillboardLists[4].m_bUseRocketSmokeColor = true;
-/*
-	for(int i=0;i<REnchantType_End;i++)
-	{
-		
-	}
-*/
 	rvector veczero = rvector(0.f,0.f,0.f);
 
 	m_pWeaponEnchant[ZC_ENCHANT_NONE]		= NULL;
-	m_pWeaponEnchant[ZC_ENCHANT_FIRE]		= new ZEffectWeaponEnchant( m_pSwordFire  ,veczero,veczero, NULL );
-	m_pWeaponEnchant[ZC_ENCHANT_COLD]		= new ZEffectWeaponEnchant( m_pSwordCold  ,veczero,veczero, NULL );
-	m_pWeaponEnchant[ZC_ENCHANT_LIGHTNING]	= new ZEffectWeaponEnchant( m_pSwordElec  ,veczero,veczero, NULL );
-	m_pWeaponEnchant[ZC_ENCHANT_POISON]		= new ZEffectWeaponEnchant( m_pSwordPoison,veczero,veczero, NULL );
+	m_pWeaponEnchant[ZC_ENCHANT_FIRE]		= new ZEffectWeaponEnchant( m_pSwordFire,
+		veczero,veczero, NULL );
+	m_pWeaponEnchant[ZC_ENCHANT_COLD]		= new ZEffectWeaponEnchant( m_pSwordCold,
+		veczero,veczero, NULL );
+	m_pWeaponEnchant[ZC_ENCHANT_LIGHTNING]	= new ZEffectWeaponEnchant( m_pSwordElec,
+		veczero, veczero, NULL);
+	m_pWeaponEnchant[ZC_ENCHANT_POISON]		= new ZEffectWeaponEnchant( m_pSwordPoison,
+		veczero, veczero, NULL);
 
 	return true;
 }
@@ -590,9 +569,7 @@ ZEffectWeaponEnchant* ZEffectManager::GetWeaponEnchant(ZC_ENCHANT type)
 	return NULL;
 }
 
-//#define _DELETE(node)
-
-ZEffectManager::~ZEffectManager(void)
+ZEffectManager::~ZEffectManager()
 {
 	Clear();
 
@@ -621,7 +598,6 @@ ZEffectManager::~ZEffectManager(void)
 	delete m_pEBSBulletMark[0];
 	delete m_pEBSBulletMark[1];
 	delete m_pEBSBulletMark[2];
-//	delete m_pEBSBulletMark[3];
 
 	for(int i=0; i<RIFLEFIRE_COUNT; i++){
 		delete m_pEBSRifleFire[i][0];
@@ -658,11 +634,10 @@ ZEffectManager::~ZEffectManager(void)
 		}
 	}
 
-	RealeaseCommonRectVertexBuffer();// ZEffectBillboard.cpp
+	RealeaseCommonRectVertexBuffer();
 
 	ZEffectBase::ReleaseBuffers();
 
-	// 메모리풀 헤제
 	ZEffectWeaponEnchant::Release();
 	ZEffectStaticMesh::Release();
 	ZEffectSlash::Release();
@@ -690,8 +665,6 @@ ZEffectManager::~ZEffectManager(void)
 	ZEffectCharged::Release();
 	ZEffectBerserkerIconLoop::Release();
 }
-
-// ZEffectAniMesh 전용...
 
 int ZEffectManager::DeleteSameType(ZEffectAniMesh* pNew)
 {
@@ -734,17 +707,6 @@ void ZEffectManager::Add(ZEffect* pNew)
 
 	rvector	water_pos;
 	rvector	src_pos = pNew->GetSortPos();
-	/*
-	if(g_pGame->m_waters.Pick( src_pos, rvector( 0,0,1), &water_pos ))
-	{
-		if( D3DXVec3Length( &( water_pos - src_pos ) ) < MAX_WATER_DEEP )
-		{
-//			mlog("water\n");
-			SAFE_DELETE(pNew);
-			return;
-		}
-	}
-	//*/
 
 	_ASSERT(pNew->GetDrawMode()<ZEDM_COUNT);
 	m_Effects[pNew->GetDrawMode()].insert(m_Effects[pNew->GetDrawMode()].end(), pNew);
@@ -795,38 +757,7 @@ bool e_effect_sort_float(ZEffect* _a,ZEffect* _b) {
 static int g_zeffectmanager_cnt = 0;
 
 #define ZEFFECT_RENDER_MAX 4000.f
-/*
-void ZWorldItemManager::Draw(int mode,float height)//임시..
-{
-	ZWorldItem* pWorldItem	= 0;
 
-	float _h = 0.f;
-
-	for( WIL_Iterator iter = mItemList.begin(); iter != mItemList.end(); ++iter )
-	{
-		pWorldItem	= iter->second;
-		if( pWorldItem->GetState() == WORLD_ITEM_VALIDATE )
-		{
-			_h = pWorldItem->GetPosition().z;
-
-			bool bDraw = false;
-
-			if(mode==0) {//물속
-				if(_h <= height) 
-					bDraw = true;
-			} else if(mode==1) {
-				if(_h > height)//물밖
-					bDraw = true;
-			}
-
-			if(bDraw)
-				mDrawer.DrawWorldItem( pWorldItem );
-		}
-	}
-}
-*/
-
-// 물 알파 떄문에 임시..
 void ZEffectManager::CheckWaterSkip(int mode,float height)
 {
 	for( int d = 0; d < ZEDM_COUNT; d++ ) {
@@ -847,10 +778,10 @@ void ZEffectManager::CheckWaterSkip(int mode,float height)
 
 void ZEffectManager::Draw(unsigned long int nTime,int mode,float height)
 {
+	// TODO: Remove
 	IDirect3DStateBlock9* pStateBlock = NULL;
 	HRESULT hr = RGetDevice()->CreateStateBlock(D3DSBT_PIXELSTATE, &pStateBlock);
 	if (hr!=D3D_OK) {
-		// 실패했다
 		static int nErrorLogCount = 0;
 		if(nErrorLogCount<100) {
 			mlog("CreateStateBlock failed : %s",DXGetErrorString9(hr));
@@ -866,9 +797,6 @@ void ZEffectManager::Draw(unsigned long int nTime,int mode,float height)
 
 	if(mode==1)
 		m_ShadowList.Draw();
-
-	/////////////////////////////////////////////////////////////////////
-	// 카메라와의 거리정렬 + 거리에 따른 렌더링 여부결정
 
 	for( int d = 0; d < ZEDM_COUNT; d++ ) {
 
@@ -888,7 +816,7 @@ void ZEffectManager::Draw(unsigned long int nTime,int mode,float height)
 				if(!pEffect->m_bWaterSkip) {
 					t_vec = camera_pos - pEffect->GetSortPos();
 					pEffect->m_fDist = Magnitude(t_vec);
-					pEffect->CheckRenderAble( g_nEffectLevel,pEffect->m_fDist );// 거리에 따라 그려질것인가를 체크
+					pEffect->CheckRenderAble( g_nEffectLevel,pEffect->m_fDist );
 				}
 				++node;
 			}
@@ -897,16 +825,12 @@ void ZEffectManager::Draw(unsigned long int nTime,int mode,float height)
 		m_Effects[d].sort(e_effect_sort_float);
 	}
 	
-
-	//////////////////////////////////////////////////////////////////////
-
 	m__skip_cnt = 0;
 	m__cnt = 0;
 	m__rendered = 0;
 
 	for(int d=0; d<ZEDM_COUNT; d++) {
 
-		// Draw Mode에 따라 스테이트 전환
 		if(d==ZEDM_NONE) {
 			RGetDevice()->SetRenderState(D3DRS_ALPHATESTENABLE,	FALSE);
 			RGetDevice()->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
@@ -989,7 +913,7 @@ void ZEffectManager::Draw(unsigned long int nTime,int mode,float height)
 
 	}
 
-	if( mode==1 ) {// 물 밖에서만 그린다..
+	if( mode==1 ) {
 
 		m_BulletMarkList.Draw();
 		m_LightFragments.Draw();
@@ -1009,15 +933,13 @@ void ZEffectManager::Draw(unsigned long int nTime)
 {
 	LPDIRECT3DDEVICE9 pDevice = RGetDevice();
 
+	// TODO: Remove
 	IDirect3DStateBlock9* pStateBlock = NULL;
 	RGetDevice()->CreateStateBlock(D3DSBT_PIXELSTATE, &pStateBlock);
 	if(pStateBlock)	pStateBlock->Capture();
 
-	// 그림자 이펙트들 먼저..
-
 	m_ShadowList.Draw();
 
-	// 기본 스테이트 세팅
 	pDevice->SetTextureStageState( 0, D3DTSS_COLORARG1, D3DTA_TEXTURE );
 	pDevice->SetTextureStageState( 0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
 	pDevice->SetTextureStageState( 0, D3DTSS_COLOROP,   D3DTOP_MODULATE );
@@ -1027,17 +949,8 @@ void ZEffectManager::Draw(unsigned long int nTime)
 	pDevice->SetTextureStageState( 1, D3DTSS_COLOROP,	D3DTOP_DISABLE );
 	pDevice->SetTextureStageState( 1, D3DTSS_ALPHAOP,   D3DTOP_DISABLE );
 
-
-	// 그리기 전에 거리 순으로 라도 정렬해 주자~
-	// 해결 안되면 폴리곤 단위로 내려가기~
-
-	// 탄피,탄흔 등은 정렬해주기..
-
 	rvector camera_pos = RealSpace2::RCameraPosition;
 	rvector t_vec;
-
-	/////////////////////////////////////////////////////////////////////
-	// 카메라와의 거리정렬 + 거리에 따른 렌더링 여부결정
 
 	for( int d = 0; d < ZEDM_COUNT; d++ ) {
 
@@ -1060,8 +973,7 @@ void ZEffectManager::Draw(unsigned long int nTime)
 				t_vec = camera_pos - pEffect->GetSortPos();
 				pEffect->m_fDist = Magnitude(t_vec);
 
-				// 좀더 테스트하고 작동 시키자~
-				pEffect->CheckRenderAble( g_nEffectLevel,pEffect->m_fDist );// 거리에 따라 그려질것인가를 체크
+				pEffect->CheckRenderAble( g_nEffectLevel,pEffect->m_fDist );
 
 				++node;
 			}
@@ -1071,15 +983,12 @@ void ZEffectManager::Draw(unsigned long int nTime)
 		m_Effects[d].sort(e_effect_sort_float);
 	}
 
-	//////////////////////////////////////////////////////////////////////
-
 	m__skip_cnt = 0;
 	m__cnt = 0;
 	m__rendered = 0;
 
 	for(int d=0; d<ZEDM_COUNT; d++) {
 
-		// Draw Mode에 따라 스테이트 전환
 		if(d==ZEDM_NONE) {
 			RGetDevice()->SetRenderState(D3DRS_ALPHATESTENABLE,	FALSE);
 			RGetDevice()->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
@@ -1154,17 +1063,9 @@ void ZEffectManager::Draw(unsigned long int nTime)
 		}
 	}
 
-	/////////////////////////////////////////////////////////
-/*
-	static char _temp[256];
-	sprintf_safe(_temp,"skip cnt : %d ,rendered :%d / %d \n", m__skip_cnt , m__rendered , m__cnt );
-	OutputDebugString(_temp);
-*/
 	m_BulletMarkList.Draw();
 
 	m_LightFragments.Draw();
-
-	// TODO: 이것들의 BeginState() 를 모을수 있다
 
 	for(int i=0;i<BILLBOARDLISTS_COUNT;i++)
 		m_BillboardLists[i].Draw();
@@ -1229,7 +1130,7 @@ void ZEffectManager::AddLightFragment(rvector Target,rvector TargetNormal)
 #define TARGET_FIREFRAGMENT_COUNT		5
 #define TARGET_FIREFRAGMENT_MAXCOUNT	16
 
-	if(g_nEffectLevel > Z_VIDEO_EFFECT_NORMAL)//하급 이펙트라면 안 그린다..
+	if(g_nEffectLevel > Z_VIDEO_EFFECT_NORMAL)
 		return;
 	
 	else if( g_nEffectLevel == Z_VIDEO_EFFECT_NORMAL ) 
@@ -1247,14 +1148,16 @@ void ZEffectManager::AddLightFragment(rvector Target,rvector TargetNormal)
 		if(DotProduct(r, TargetNormal)<0) continue;
 
 #define RANDOM_POSITION_MAXDISTANCE	3
-		rvector rp(RANDOM_POSITION_MAXDISTANCE*(rand()%200-100)/100.0f, RANDOM_POSITION_MAXDISTANCE*(rand()%200-100)/100.0f, RANDOM_POSITION_MAXDISTANCE*(rand()%200-100)/100.0f);
+
+		rvector rp(
+			RANDOM_POSITION_MAXDISTANCE*(rand()%200-100)/100.0f,
+			RANDOM_POSITION_MAXDISTANCE*(rand()%200-100)/100.0f,
+			RANDOM_POSITION_MAXDISTANCE*(rand()%200-100)/100.0f);
+
 #define LIGHTTRACER_SPEED	4.0f	// m/s
 		Normalize(r);
 
-		//기존값 : 1.0f, 1.0f by 베니
-
 		m_LightFragments.Add(Target+rp,r*LIGHTTRACER_SPEED*50.f,rvector(0,0,-500.f),1.6f,1.6f,1.2f);
-		// LifeTime의 기본값은 2.0f
 
 		nFireFragmentCount++;
 	}
@@ -1264,10 +1167,6 @@ void ZEffectManager::AddLightFragment(rvector Target,rvector TargetNormal)
 
 void ZEffectManager::AddDashEffect(const rvector& Target, const rvector& TargetNormal,ZObject* pObj)
 {
-	// 디버깅중 : 뻗는타이밍에 pObj가 올바른지 알고싶다
-//	char szLastName[64];
-//	strcpy_safe(szLastName,pObj->GetProperty()->szName);
-
 	if(!pObj->IsVisible()) return;
 
 	ZEffect* pNew = NULL;
@@ -1287,8 +1186,7 @@ void ZEffectManager::AddSkillDashEffect(const rvector& Target, const rvector& Ta
 
 void ZEffectManager::AddLandingEffect(const rvector& Target, const rvector& TargetNormal)
 {
-	// 옵션에 따라? 중급 이상만?
-	if(g_nEffectLevel > Z_VIDEO_EFFECT_NORMAL)//하급 이펙트라면 안 그린다..
+	if(g_nEffectLevel > Z_VIDEO_EFFECT_NORMAL)
 		return;
 
 #define LANDING_SMOKE_MAX_SCALE				70.0f	
@@ -1309,7 +1207,7 @@ void ZEffectManager::AddLandingEffect(const rvector& Target, const rvector& Targ
 
 void ZEffectManager::AddBulletMark(const rvector& Target, const rvector& TargetNormal)
 {
-	if(g_nEffectLevel > Z_VIDEO_EFFECT_NORMAL) return; // 하급은 생략~
+	if(g_nEffectLevel > Z_VIDEO_EFFECT_NORMAL) return;
 
 	m_BulletMarkList.Add(Target+TargetNormal,TargetNormal);
 
@@ -1324,7 +1222,7 @@ void ZEffectManager::AddTrackMagic(const rvector &pos)
 	int Add = rand() % 10;
 	float fStartSize = 16 + Add;
 	float fEndSize = 28 + Add;
-	float fLife = 1.0f;// + (1+Add) / 10.f;
+	float fLife = 1.0f;
 
 	int frame = rand()%4;
 	rvector vel = rvector(0,0,-25.f);
@@ -1337,7 +1235,7 @@ void ZEffectManager::AddTrackFire(const rvector &pos)
 	int Add = rand() % 20;
 	float fStartSize = 10 + Add;
 	float fEndSize = 20 + Add;
-	float fLife = 0.4f;// + (1+Add) / 10.f;
+	float fLife = 0.4f;
 	rvector vel = rvector(0,0,25);
 
 	m_BillBoardTexAniList[1].Add( pos, vel, 0, 0.f,fStartSize , fEndSize, fLife );
@@ -1348,7 +1246,7 @@ void ZEffectManager::AddTrackCold(const rvector &pos)
 	int Add = rand() % 10;
 	float fStartSize = 8 + Add;
 	float fEndSize = 14 + Add;
-	float fLife = 1.0f;// + (1+Add) / 10.f;
+	float fLife = 1.0f;
 
 	int frame = rand()%8;
 	rvector vel = rvector(0,0,-25.f);
@@ -1361,7 +1259,7 @@ void ZEffectManager::AddTrackPoison(const rvector &pos)
 	int Add = rand() % 10;
 	float fStartSize = 10 + Add;
 	float fEndSize = 20 + Add;
-	float fLife = 1.0f;// + (1+Add) / 10.f;
+	float fLife = 1.0f;
 
 	static int r_frame[4] = { 8,9,12,13 };
 
@@ -1383,8 +1281,6 @@ void ZEffectManager::AddTrackMethor(const rvector &pos)
 	rvector add = 50.f*rvector(RANDOMFLOAT-0.5f,RANDOMFLOAT-0.5f,RANDOMFLOAT-0.5f);
 
 	m_BillBoardTexAniList[4].Add( pos + add, vel, 0, 0.f,fStartSize , fEndSize, fLife );
-
-//	m_BillboardLists[4].SetVanishTime(2.9f);
 	
 	add = 50.f*rvector(RANDOMFLOAT-0.5f,RANDOMFLOAT-0.5f,RANDOMFLOAT-0.5f);
 	m_BillboardLists[4].Add(pos,add,rvector(0,0,0), 30.f, 120.f, 3.f );
@@ -1414,8 +1310,6 @@ rvector GetRandVec(int V)
 	return v;
 }
 
-// 이전에 선택된것 제외한 랜덤..
-
 int GetRandType(int nRand,int nEx,int nMax)
 {
 	int hr = 0;
@@ -1434,14 +1328,11 @@ int GetRandType(int nRand,int nEx,int nMax)
 
 float ZEffectManager::GetEnchantDamageObjectSIze(ZObject* pObj)
 {
-	float fSize = 1.f; // 캐릭터 기준..
+	float fSize = 1.f;
 
 	ZActor* pActor = MDynamicCast(ZActor,pObj);
 
 	if(pActor&&pActor->GetNPCInfo()) { 
-
-		// 고블린킹이 70 
-		// 몬스터 표준 35.f 정도..
 
 		fSize = pActor->GetNPCInfo()->fCollRadius / 35.f;
 		fSize *= fSize;
@@ -1471,7 +1362,7 @@ void ZEffectManager::AddEnchantFire2(ZObject* pObj)
 
 	parts_pos = pObj->m_pVMesh->GetBipTypePosition( g_EnchantEffectPartsPos[partstype] );
 
-	if( Magnitude(parts_pos) < 0.1f ) // 뼈대 못찾은 것
+	if( Magnitude(parts_pos) < 0.1f )
 		return;
 
 	pos = parts_pos - camera_dir;
@@ -1504,7 +1395,7 @@ void ZEffectManager::AddEnchantCold2(ZObject* pObj)
 
 	pos += GetRandVec(10);
 
-	int nTex = rand()%7;// ( 0 ~ 6 )
+	int nTex = rand() % 7;
 
 	m_BillBoardTexAniList[2].Add(pos,vel, nTex, 0 ,fStartSize, fEndSize, fLife );
 }
@@ -1538,97 +1429,14 @@ void ZEffectManager::AddEnchantPoison2(ZObject* pObj)
 
 	m_BillBoardTexAniList[2].Add(pos,vel, nTex, 0 ,fStartSize, fEndSize, fLife );
 }
-/*
-void ZEffectManager::AddEnchantFire(ZObject* pObj)
-{
-	// 인첸트 아이템에 당한 캐릭터의 경우... 지속시간동안 몸의 곳곳에 붙여준다..
-	// pos 는 붙어야 하는 파츠의 타잎으로 그려질때에 계산한다.
-
-
-	if(pObj==NULL) return;
-
-	int Add = 0;
-
-	float fStartSize = 10;
-	float fEndSize = 20;
-	float fLife = 1.3f;// + (1+Add) / 10.f;
-
-	rvector pos;
-	rvector vel = rvector(0,0,0);
-   
-	rvector camera_dir = RCameraDirection * 30.f;
-
-	Add = EFRand;
-	pos = pObj->m_pVMesh->GetBipTypePosition( eq_parts_pos_info_Head ) - camera_dir;
-	m_BillBoardTexAniList[0].Add(pos,vel, 0, EFRandTime,fStartSize+Add, fEndSize+Add, fLife );
-
-	Add = EFRand;
-	pos = pObj->m_pVMesh->GetBipTypePosition( eq_parts_pos_info_Spine1 ) - camera_dir;
-	m_BillBoardTexAniList[0].Add(pos,vel, 0, EFRandTime,fStartSize+Add, fEndSize+Add, fLife );
-
-	Add = EFRand;
-	pos = pObj->m_pVMesh->GetBipTypePosition( eq_parts_pos_info_Spine2 ) - camera_dir;
-	m_BillBoardTexAniList[0].Add(pos,vel, 0, EFRandTime,fStartSize+Add , fEndSize+Add, fLife );
-
-	Add = EFRand;
-	pos = pObj->m_pVMesh->GetBipTypePosition( eq_parts_pos_info_LUpperArm ) - camera_dir;
-	m_BillBoardTexAniList[0].Add(pos,vel, 0, EFRandTime,fStartSize+Add , fEndSize+Add, fLife );
-
-	Add = EFRand;
-	pos = pObj->m_pVMesh->GetBipTypePosition( eq_parts_pos_info_RUpperArm ) - camera_dir;
-	m_BillBoardTexAniList[0].Add(pos,vel, 0, EFRandTime,fStartSize+Add , fEndSize+Add, fLife );
-
-}
-
-void ZEffectManager::AddEnchantCold(ZObject* pObj)
-{
-	int Add = rand() % 20;
-	float fStartSize = 30 + Add;
-	float fEndSize = 40 + Add;
-	float fLife = 1.3f;// + (1+Add) / 10.f;
-	rvector pos = rvector(0,0,0);
-	rvector vel = rvector(0,0,0);
-
-	// cold frame 은 0-7 까지
-
-	m_BillBoardTexAniList[2].Add(pos,vel, 0, 0.1f, fStartSize , fEndSize, fLife ,pObj,eq_parts_pos_info_Head);
-	m_BillBoardTexAniList[2].Add(pos,vel, 1, 0.2f, fStartSize , fEndSize, fLife ,pObj,eq_parts_pos_info_Spine);
-	m_BillBoardTexAniList[2].Add(pos,vel, 2, 0.3f, fStartSize , fEndSize, fLife ,pObj,eq_parts_pos_info_LHand);
-	m_BillBoardTexAniList[2].Add(pos,vel, 3, 0.4f, fStartSize , fEndSize, fLife ,pObj,eq_parts_pos_info_LUpperArm);
-	m_BillBoardTexAniList[2].Add(pos,vel, 5, 0.5f, fStartSize , fEndSize, fLife ,pObj,eq_parts_pos_info_RHand);
-	m_BillBoardTexAniList[2].Add(pos,vel, 6, 0.6f, fStartSize , fEndSize, fLife ,pObj,eq_parts_pos_info_RUpperArm);
-
-}
-
-void ZEffectManager::AddEnchantPoison(ZObject* pObj)
-{
-	int Add = rand() % 20;
-	float fStartSize = 30 + Add;
-	float fEndSize = 40 + Add;
-	float fLife = 1.3f;// + (1+Add) / 10.f;
-	rvector pos = rvector(0,0,0);
-	rvector vel = rvector(0,0,0);
-
-	// poison frame 은 8,9,12,13 만..
-
-	m_BillBoardTexAniList[2].Add(pos,vel,  8, 0.1f, fStartSize , fEndSize, fLife ,pObj,eq_parts_pos_info_Head);
-	m_BillBoardTexAniList[2].Add(pos,vel,  9, 0.2f, fStartSize , fEndSize, fLife ,pObj,eq_parts_pos_info_Spine);
-	m_BillBoardTexAniList[2].Add(pos,vel, 12, 0.3f, fStartSize , fEndSize, fLife ,pObj,eq_parts_pos_info_LHand);
-	m_BillBoardTexAniList[2].Add(pos,vel, 13, 0.4f, fStartSize , fEndSize, fLife ,pObj,eq_parts_pos_info_LUpperArm);
-	m_BillBoardTexAniList[2].Add(pos,vel,  9, 0.5f, fStartSize , fEndSize, fLife ,pObj,eq_parts_pos_info_RHand);
-	m_BillBoardTexAniList[2].Add(pos,vel, 12, 0.6f, fStartSize , fEndSize, fLife ,pObj,eq_parts_pos_info_RUpperArm);
-
-}
-
-*/
 
 void ZEffectManager::AddShotgunEffect(const rvector &pos, const rvector &out, const rvector &dir,ZObject* pChar )
 {
 	ZEffect * pNew = NULL;
 
 #define SHOTGUN_SMOKE_LIFE_TIME		0.9f
-#define SHOTGUN_SMOKE_MAX_SCALE		60.0f	// 최대로 증가할 수 있는 크기 값
-#define SHOTGUN_SMOKE_MIN_SCALE		100.0f	// 최대로 증가할 수 있는 크기 값 - 일부러 꺼꾸로 만들었다(by 베니)
+#define SHOTGUN_SMOKE_MAX_SCALE		60.0f
+#define SHOTGUN_SMOKE_MIN_SCALE		100.0f
 
 	rvector _pos = pos;
 
@@ -1671,16 +1479,12 @@ void ZEffectManager::AddShotgunEffect(const rvector &pos, const rvector &out, co
 	Add(pNew); pNew = NULL;
 }
 
-void ZEffectManager::AddShotEffect(rvector* pSource,int size, const rvector& Target, const rvector& TargetNormal, ZTargetType nTargetType,
-								   MMatchWeaponType wtype,ZObject* pObj,bool bDrawFireEffects,bool bDrawTargetEffects)
+void ZEffectManager::AddShotEffect(rvector* pSource, int size, const rvector& Target,
+	const rvector& TargetNormal, ZTargetType nTargetType, MMatchWeaponType wtype, ZObject* pObj,
+	bool bDrawFireEffects, bool bDrawTargetEffects)
 {
-	// bDrawFireEffects : 발사되는쪽 이펙트
-	// bDrawTargetEffects : 맞는쪽 이펙트 그리는 여부
-
-
-
-	rvector Source  = pSource[0];//총구위치
-	rvector SourceL = pSource[3];//총구위치
+	rvector Source  = pSource[0];
+	rvector SourceL = pSource[3];
 
 	rvector right;
 	CrossProduct(&right,TargetNormal,rvector(0, 0, 1));
@@ -1689,13 +1493,11 @@ void ZEffectManager::AddShotEffect(rvector* pSource,int size, const rvector& Tar
 	rvector GTargetL = Target + right*(5+(rand()%10));
 	rvector GTargetR = Target - right*(5+(rand()%10));
 
-	// 총이 발사되는 방향
 	rvector TargetDir = Target - Source;
 	Normalize(TargetDir);
 
 	ZEffect* pNew = NULL;
 
-	// 예광탄
 	if(rand()%5==0){
 		pNew = new ZEffectLightTracer(m_pEBSLightTracer, Source, Target);
 		Add(pNew); pNew = NULL;
@@ -1703,18 +1505,17 @@ void ZEffectManager::AddShotEffect(rvector* pSource,int size, const rvector& Tar
 
 	if(bDrawFireEffects) {
 
-		// 발포 연기
-#define SMOKE_MAX_SCALE				30.0f	// 최대로 증가할 수 있는 크기 값
-#define SMOKE_MIN_SCALE				90.0f	// 최대로 증가할 수 있는 크기 값 - 일부러 꺼꾸로 만들었다(by 베니)
-#define SMOKE_LIFE_TIME				0.6f	// Smoke Life Time
-#define SMOKE_SHOTGUN_LIFE_TIME		300		// Smoke Shotgun Life Time - 쓰고 있지 않다(by 베니)
-#define SMOKE_ACCEL					rvector(0,0,50.f)	// Smoke 가속도
+#define SMOKE_MAX_SCALE				30.0f
+#define SMOKE_MIN_SCALE				90.0f
+#define SMOKE_LIFE_TIME				0.6f
+#define SMOKE_SHOTGUN_LIFE_TIME		300
+#define SMOKE_ACCEL					rvector(0,0,50.f)
 #define SMOKE_VELOCITY				110.f
 
-		if(wtype==MWT_ROCKET) {//rluncher
+		if(wtype==MWT_ROCKET) {
 			pNew = NULL;
 		} 
-		else if(wtype==MWT_MACHINEGUN) {//풍성하게~
+		else if(wtype==MWT_MACHINEGUN) {
 
 			rvector _Add;
 
@@ -1740,7 +1541,6 @@ void ZEffectManager::AddShotEffect(rvector* pSource,int size, const rvector& Tar
 			AddSmokeEffect(m_pEBSMuzzleSmoke[rand()%MUZZLESMOKE_COUNT], Source, SMOKE_VELOCITY*TargetDir,SMOKE_ACCEL, SMOKE_MIN_SCALE, SMOKE_MAX_SCALE, SMOKE_LIFE_TIME);
 		}
 
-		// 발포 화염
 		rvector _dir=rvector(0,0,1);
 
 		if(pObj) {
@@ -1786,27 +1586,19 @@ void ZEffectManager::AddShotEffect(rvector* pSource,int size, const rvector& Tar
 
 		Add(pNew); pNew = NULL;
 
-		//양손 총인 경우
+		if(size==6) {
 
-		if(size==6) {//쌍권총
-
-			rvector _dir = GTargetR-Source;//방향에 따라서 약간씩 비틀리도록
+			rvector _dir = GTargetR-Source;
 			Normalize(_dir);
 
-			// 쌍권총 발포 화염
 			pNew = new ZEffectShot(m_pFlamePistol, Source, _dir,pObj);
 			((ZEffectShot*)pNew)->SetStartTime(120);
 			((ZEffectShot*)pNew)->SetIsLeftWeapon(true);
 
 			Add(pNew); pNew = NULL;
 
-			// 쌍권총 발포 연기
 			AddSmokeEffect(m_pEBSMuzzleSmoke[rand()%MUZZLESMOKE_COUNT], Source, SMOKE_VELOCITY*TargetDir,SMOKE_ACCEL, SMOKE_MIN_SCALE, SMOKE_MAX_SCALE, SMOKE_LIFE_TIME);
 		}
-
-		// 탄피
-
-		// 하급은 생략,중급은 둘중하나,상급은 다 그리기
 
 		bool bRender = true;
 
@@ -1833,7 +1625,7 @@ void ZEffectManager::AddShotEffect(rvector* pSource,int size, const rvector& Tar
 			ZCharacterObject* pCObj = MDynamicCast(ZCharacterObject, pObj);
 			if(pCObj)
 			{
-				if(wtype!=MWT_SHOTGUN && pCObj->IsHero() )	// 샷건의 한알 한알은 탄피 생략
+				if(wtype!=MWT_SHOTGUN && pCObj->IsHero() )
 				{
 				
 		#define EM_VELOCITY		2.0f	// meter/sec
@@ -1842,10 +1634,11 @@ void ZEffectManager::AddShotEffect(rvector* pSource,int size, const rvector& Tar
 					rvector EMRandom((rand()%100)/100.0f, (rand()%100)/100.0f, (rand()%100)/100.0f);
 					EMRandom*=EM_RANDOM_SCALE;
 					rvector EMVelocity = (right+rvector(0, 0, 1)+EMRandom)* EM_VELOCITY;
-					pNew = new ZEffectStaticMesh(m_pMeshEmptyCartridges[0], pSource[1], EMVelocity, pObj->GetUID());
+					pNew = new ZEffectStaticMesh(m_pMeshEmptyCartridges[0], pSource[1],
+						EMVelocity, pObj->GetUID());
 					Add(pNew); pNew = NULL;
 
-					if(size==6) {//양손총..
+					if(size==6) {
 						rvector EMVelocityL = (-right+rvector(0, 0, 1)+EMRandom)* EM_VELOCITY;
 						pNew = new ZEffectStaticMesh(m_pMeshEmptyCartridges[0], pSource[4], EMVelocityL, pObj->GetUID() );
 						Add(pNew); pNew = NULL;
@@ -1862,11 +1655,8 @@ void ZEffectManager::AddShotEffect(rvector* pSource,int size, const rvector& Tar
 			AddLightFragment(Target,TargetNormal);
 		}
 
-		if(nTargetType==ZTT_OBJECT){	// 타겟이 맵일때
-
-			// 타겟 총탄 흔적
-
-			if(size==6) { //쌍권총류
+		if(nTargetType==ZTT_OBJECT){
+			if(size==6) {
 				AddBulletMark(GTargetL,TargetNormal);
 				AddBulletMark(GTargetR,TargetNormal);
 			}
@@ -1926,7 +1716,7 @@ void ZEffectManager::AddSwordWaveEffect(const MUID& UID, const rvector &Target, 
 {
 	ZEffectSlash* pNew = nullptr;
 
-	rvector dir = Dir;//rvector(0.f,1.f,0.f);
+	rvector dir = Dir;
 	dir.z = 0.f;
 	Normalize(dir);
 
@@ -1993,7 +1783,6 @@ void ZEffectManager::AddSwordEnchantEffect(ZC_ENCHANT type, const rvector& Targe
 	((ZEffectSlash*)pNew)->SetScale(rvector(fScale,fScale,fScale));
 	((ZEffectSlash*)pNew)->SetAlignType(1);
 	((ZEffectSlash*)pNew)->SetStartTime(start_time);
-//	((ZEffectSlash*)pNew)->SetDelayPos(pObj->m_UID);
 	Add(pNew);
 }
 
@@ -2007,24 +1796,8 @@ void ZEffectManager::AddMagicEffect(const rvector& Target,DWORD start_time, floa
 	((ZEffectSlash*)pNew)->SetScale(rvector(fScale,fScale,fScale));
 	((ZEffectSlash*)pNew)->SetAlignType(1);
 	((ZEffectSlash*)pNew)->SetStartTime(start_time);
-//	((ZEffectSlash*)pNew)->SetDelayPos(pObj->m_UID);
 	Add(pNew);
 }
-/*
-void ZEffectManager::AddLighteningEffect(rvector& Target)
-{
-	ZEffect* pNew = NULL;
-
-	rvector dir = rvector(0.f,1.f,0.f);
-
-	pNew = new ZEffectSlash(m_pLighteningEffect,Target,dir);
-
-	((ZEffectSlash*)pNew)->SetAlignType(1);
-//	((ZEffectSlash*)pNew)->SetStartTime(start_time);
-
-	Add(pNew);
-}
-*/
 
 void ZEffectManager::AddMethorEffect(const rvector& Target,int nCnt)
 {
@@ -2042,28 +1815,6 @@ void ZEffectManager::AddMethorEffect(const rvector& Target,int nCnt)
 	((ZEffectSlash*)pNew)->m_nAutoAddEffect = ZEffectAutoAddType_Methor;
 
 	Add(pNew);
-	
-	// 원하는 갯수만큼 연기를 흩어서 뿌린다..
-/*
-	for(int i=0;i<nCnt;i++) {
-
-		AddPos.x = rand() % 100;
-		AddPos.y = rand() % 100;
-		AddPos.z = 0.f;
-
-		if(rand()%2) AddPos.x = -AddPos.x;
-		if(rand()%2) AddPos.y = -AddPos.y;
-
-		AddPos = AddPos + Target;
-
-		pNew = new ZEffectSlash(m_pBlizzardEffect,AddPos,dir);
-
-		((ZEffectSlash*)pNew)->SetAlignType(1);
-		((ZEffectSlash*)pNew)->SetStartTime( i * 200 );
-
-		Add(pNew);
-	}
-*/
 }
 
 void ZEffectManager::AddBlizzardEffect(const rvector& Target,int nCnt)
@@ -2073,10 +1824,7 @@ void ZEffectManager::AddBlizzardEffect(const rvector& Target,int nCnt)
 	rvector dir = rvector(0.f,1.f,0.f);
 	rvector AddPos;
 
-	// 원하는 갯수만큼 흩어서 뿌린다..
-
-	for(int i=0;i<nCnt;i++) {
-
+	for (int i = 0; i < nCnt; i++) {
 		AddPos.x = rand() % 100;
 		AddPos.y = rand() % 100;
 		AddPos.z = 0.f;
@@ -2100,8 +1848,6 @@ void ZEffectManager::AddMagicEffectWall(int type, const rvector& Target, const r
 {
 	ZEffect* pNew = NULL;
 
-//	rvector dir = rvector(0.f,1.f,0.f);
-
 	RMesh* pMesh = NULL;
 
 		 if( type ==  0 )	pMesh = m_pMagicEffectWall[0];
@@ -2115,7 +1861,6 @@ void ZEffectManager::AddMagicEffectWall(int type, const rvector& Target, const r
 	((ZEffectSlash*)pNew)->SetScale(rvector(fScale,fScale,fScale));
 	((ZEffectSlash*)pNew)->SetAlignType(1);
 	((ZEffectSlash*)pNew)->SetStartTime(start_time);
-//	((ZEffectSlash*)pNew)->SetDelayPos(pObj->m_UID);
 	Add(pNew);
 
 }
@@ -2160,21 +1905,18 @@ void ZEffectManager::AddRocketEffect(const rvector& Target, const rvector& Targe
 {
 	ZEffect* pNew = NULL;
 
-	// 타겟 폭발 흔적
-
 	rvector vv = Target;
-	vv.z-=50;//수류탄용과 같이써서 모델 자체가 약간높음
+	vv.z -= 50;
 	pNew = new ZEffectSlash(m_pRocketEffect,vv,TargetNormal);
 	((ZEffectSlash*)pNew)->SetAlignType(1);
-	((ZEffectSlash*)pNew)->SetDistOption(29999.f,29999.f,29999.f);//다 보여준다~
+	((ZEffectSlash*)pNew)->SetDistOption(29999.f,29999.f,29999.f);
 	Add(pNew);
 
 	rvector _add;
 	float _min,_max;
 	DWORD _life;
 
-	for(int i=0;i<2;i++) {
-
+	for (int i = 0; i < 2; i++) {
 		_add.x = rand()%30;
 		_add.y = rand()%30;
 		_add.z = rand()%30;
@@ -2204,8 +1946,10 @@ bool ZEffectManager::RenderCheckEffectLevel()
 
 	return bRender;
 }
-// 중력없이 자기 방향으로만...
-void ZEffectManager::AddMapSmokeSTEffect(const rvector& Target, const rvector& dir, const rvector& acc, const rvector& acc2,DWORD scolor,DWORD delay,float fLife,float fStartScale,float fEndScale)
+
+void ZEffectManager::AddMapSmokeSTEffect(const rvector& Target, const rvector& dir,
+	const rvector& acc, const rvector& acc2,
+	DWORD scolor, DWORD delay, float fLife, float fStartScale, float fEndScale)
 {
 	if( !RenderCheckEffectLevel() )	return;
 	
@@ -2287,7 +2031,8 @@ void ZEffectManager::AddMapSmokeTSEffect(const rvector& Target,const rvector& di
 	m_BillboardLists[4].Add(Target,dir,_Acc, fStartScale, fEndScale, fLife ,tcolor,true);
 }
 
-void ZEffectManager::AddMapSmokeSSEffect(const rvector& Target, const rvector& dir, const rvector& acc,DWORD scolor,DWORD delay,float fLife,float fStartScale,float fEndScale)
+void ZEffectManager::AddMapSmokeSSEffect(const rvector& Target, const rvector& dir,
+	const rvector& acc, DWORD scolor, DWORD delay, float fLife, float fStartScale, float fEndScale)
 {
 	if( !RenderCheckEffectLevel() )	return;
 
@@ -2298,7 +2043,6 @@ void ZEffectManager::AddMapSmokeSSEffect(const rvector& Target, const rvector& d
 		0xa0a0a0
 	};
 
-	// TODO : 이걸 이펙트 레벨마다 조절을 해야할듯
 	m_BillboardLists[4].SetVanishTime(2.9f);
 
 	rvector _Acc = acc;
@@ -2343,7 +2087,6 @@ void ZEffectManager::AddRocketSmokeEffect(const rvector& Target)
 		bRender = false;
 	}
 
-	// TODO : 이걸 이펙트 레벨마다 조절을 해야할듯
 	m_BillboardLists[4].SetVanishTime(2.9f);
 	if(bRender) {
 
@@ -2357,12 +2100,9 @@ void ZEffectManager::AddGrenadeEffect(const rvector& Target, const rvector& Targ
 {
 	ZEffect* pNew = NULL;
 
-	if(g_nEffectLevel != Z_VIDEO_EFFECT_LOW) {//최하위는 처리안함
+	if(g_nEffectLevel != Z_VIDEO_EFFECT_LOW) {
 
-	// 타겟 폭발 흔적
 	rvector up = rvector(0.f,0.f,1.f);
-
-	//높낮이 위치에 따라서~
 
 	float distance = 0.f;
 
@@ -2446,39 +2186,19 @@ void ZEffectManager::AddGrenadeEffect(const rvector& Target, const rvector& Targ
 	rvector vv = Target;
 	vv.z+=50;
 	pNew = new ZEffectSlash( m_pGrenadeEffect,vv,TargetNormal );	
-	((ZEffectSlash*)pNew)->SetDistOption(29999.f,29999.f,29999.f);//다 보여준다~
+	((ZEffectSlash*)pNew)->SetDistOption(29999.f,29999.f,29999.f);
 	((ZEffectSlash*)pNew)->SetAlignType(1);
 	Add(pNew);
-
 }
 
 
 void ZEffectManager::AddBloodEffect(const rvector& Target, const rvector& TargetNormal)
 {
-	// 피 보류..
-	/*
-	ZEffect* pNew = NULL;
-
-	// 피 분출
-#define TARGET_BLOOD_MAX_SCALE2		20.0f
-#define TARGET_BLOOD_MIN_SCALE2		10.0f
-#define TARGET_BLOOD_LIFE_TIME2		200
-	//#define TARGET_BLOOD_VELOCITY		4.0f	// meter/sec
-
-	for(int i=0; i<3; i++){
-		rvector p = Target+TargetNormal*TARGET_BLOOD_MIN_SCALE2*float(i)*0.5f + rvector(fmod((float)rand(), TARGET_BLOOD_MIN_SCALE2), fmod((float)rand(), TARGET_BLOOD_MIN_SCALE2), fmod((float)rand(), TARGET_BLOOD_MIN_SCALE2));
-		float fSize = 1.0f+float(rand()%100)/100.0f;
-		AddSmokeEffect(m_pEBSBloods[rand()%BLOOD_COUNT], p, TargetNormal, TARGET_BLOOD_MIN_SCALE2*fSize, TARGET_BLOOD_MAX_SCALE2*fSize, TARGET_BLOOD_LIFE_TIME2);
-		Add(pNew);
-	}
-	*/
 }
 
 void ZEffectManager::AddSlashEffect(const rvector& Target, const rvector& TargetNormal,int nType)
 {
 	ZEffect* pNew = NULL;
-
-	// 타격 이펙트
 
 	bool _add = false;
 	bool _add_uppercut = false;
@@ -2541,15 +2261,13 @@ void ZEffectManager::AddSlashEffect(const rvector& Target, const rvector& Target
 
 	}
 
-	// 남여 칼 휘두르는 방향에 따라 이펙트 회전값 결정..
-
 	if(_add) {
 		pNew = new ZEffectSlash(m_pSwordglaze,Target,TargetNormal);	
 		((ZEffectSlash*)pNew)->SetRotationAngle(rot_angle);
 		Add(pNew);
 	}
 
-	if(_add_uppercut) {//띄우기
+	if(_add_uppercut) {
 		pNew = new ZEffectSlash(m_pSwordUppercutEffect,Target,TargetNormal);
 		((ZEffectSlash*)pNew)->SetRotationAngle(rot_angle);
 		((ZEffectSlash*)pNew)->SetScale(rvector(1.5f,1.5f,1.5f));
@@ -2562,7 +2280,7 @@ void ZEffectManager::AddSwordUppercutDamageEffect(const rvector& Target,MUID uid
 {
 	ZEffect* pNew = NULL;
 
-	rvector dir = -RealSpace2::RCameraDirection;// rvector(0.f,0.f,1.f);
+	rvector dir = -RealSpace2::RCameraDirection;
 	dir.z = 0.f;
 	pNew = new ZEffectDash(m_pSwordUppercutDamageEffect,Target,dir,uidTarget);
 	((ZEffectDash*)pNew)->SetAlignType(1);
@@ -2579,13 +2297,12 @@ void ZEffectManager::AddEatBoxEffect(const rvector& Target,ZObject* pObj)
 
 	rvector pos = Target;
 
-	rvector dir = -RealSpace2::RCameraDirection;// rvector(0.f,0.f,1.f);
+	rvector dir = -RealSpace2::RCameraDirection;
 	dir.z = 0.f;
-	pos.z -= 120.f;//땜~
+	pos.z -= 120.f;
 	pNew = new ZEffectDash(m_pEatBoxEffect,pos,dir,pObj->GetUID());
 	pNew->SetEffectType(ZET_HEAL);
 	((ZEffectDash*)pNew)->SetAlignType(1);
-	// 같은것이 있으면 이전것은 제거..
 	DeleteSameType((ZEffectAniMesh*)pNew);
 	Add(pNew);
 }
@@ -2648,7 +2365,11 @@ void ZEffectManager::AddSlashEffectWall(const rvector& Target, const rvector& Ta
 
 	int mode = 3;
 
-	DWORD startTime = 0;// 250;
+#ifdef INSTANT_SLASH_DECAL
+	u32 startTime = 0;
+#else
+	u32 startTime = 250;
+#endif
 
 #define _CASE_DEF(_c ,_rot,_rot_left,tadd,taddleft ,_stime ) case _c: rot_angle = _rot;rot_angle_left = _rot_left; _add = tadd;_add_left = taddleft; startTime = _stime; break;
 
@@ -3032,7 +2753,8 @@ void ZEffectManager::AddChargedEffect( ZObject *pObj )
 
 			rgb RGBColor = hsv2rgb(HSVColor);
 
-			uint32_t Color = 0xFF000000 | (int(RGBColor.r * 255) << 16) | (int(RGBColor.g * 255) << 8) | int(RGBColor.b * 255);
+			uint32_t Color = 0xFF000000 | (int(RGBColor.r * 255) << 16) |
+				(int(RGBColor.g * 255) << 8) | int(RGBColor.b * 255);
 
 			return Color;
 		};
@@ -3099,8 +2821,8 @@ void ZEffectManager::AddPartsPosType(const char* szName,const MUID& uidOwner,RMe
 
 	ZCharacterObject* pCObj = MDynamicCast(ZCharacterObject, pObj);
 
-	rvector pos = pCObj->GetPosition();// rvector(0,0,0);
-	rvector dir = pCObj->GetDirection();// rvector(0,0,1);
+	rvector pos = pCObj->GetPosition();
+	rvector dir = pCObj->GetDirection();
 
 	pNew = new ZEffectPartsTypePos(pMesh,(rvector&)pos,(rvector&)dir,rvector(0.f,0.f,0.f),pObj);
 	((ZEffectPartsTypePos*)pNew)->SetAlignType(1);
