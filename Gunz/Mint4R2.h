@@ -5,7 +5,7 @@
 #include "RBaseTexture.h"
 #include <D3dx9.h>
 
-#define MINT_R2_CLASS_TYPE	0x1130		// RTTI
+#define MINT_R2_CLASS_TYPE	0x1130 // RTTI
 
 class MDrawContextR2 : public MDrawContext{
 protected:
@@ -70,18 +70,21 @@ public:
 	void OnResetDevice();
 };
 
-class MFontR2 : public MFont{
+class MFontR2 : public MFont {
 public:
 	bool		m_bAntiAlias;
 	float		m_fScale;
 	_RS2::RFont	m_Font;
 public:
-	MFontR2(void);
+	MFontR2();
 	virtual ~MFontR2();
 
-	virtual bool Create(const char* szAliasName, const char* szFontName, int nHeight, float fScale=1.0f, bool bBold=false, bool bItalic=false, int nOutlineStyle=0, int nCacheSize=-1, bool bAntiAlias = false, u32 nColorArg1=0, u32 nColorArg2=0);
+	virtual bool Create(const char* szAliasName, const char* szFontName, int nHeight,
+		float fScale = 1.0f, bool bBold = false, bool bItalic = false,
+		int nOutlineStyle = 0, int nCacheSize = -1, bool bAntiAlias = false,
+		u32 nColorArg1 = 0, u32 nColorArg2 = 0);
 	virtual void Destroy();
 
 	virtual int GetHeight();
-	virtual int GetWidth(const char* szText, int nSize=-1);
+	virtual int GetWidth(const char* szText, int nSize = -1);
 };

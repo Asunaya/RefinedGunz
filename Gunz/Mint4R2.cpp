@@ -200,16 +200,10 @@ void MDrawContextR2::Draw(MBitmap *pBitmap, int x, int y, int w, int h, int sx, 
 
 	_ASSERT(pBitmap->m_nTypeID==MINT_R2_CLASS_TYPE);
 
-	// clip rect 넘어가는 것은 컬링
-
 	if(x+m_Origin.x>m_Clip.x+m_Clip.w || y+m_Origin.y>m_Clip.y+m_Clip.h || x+w+m_Origin.x<m_Clip.x || y+h+m_Origin.y<m_Clip.y) return;
 
-	//MCOLOR color(0xFF, 0xFF, 0xFF, m_nOpacity);
-
-	//pBitmap->Draw((float)x+m_Origin.x, (float)y+m_Origin.y, (float)w, (float)h, (float)sx, (float)sy, (float)sw, (float)sh, color.GetARGB(), m_Effect);
-	
 	MCOLOR color(m_BitmapColor.r,m_BitmapColor.g,m_BitmapColor.b,m_nOpacity);
-//	MCOLOR color(255,255,255,m_nOpacity);
+
 	((MBitmapR2*)pBitmap)->Draw((float)x+m_Origin.x, (float)y+m_Origin.y, (float)w, (float)h, (float)sx, (float)sy, (float)sw, (float)sh, color.GetARGB(), m_Effect);
 }
 
@@ -263,18 +257,6 @@ int MDrawContextR2::Text(int x, int y, const char* szText)
 	x += m_Origin.x;
 	y += m_Origin.y;
 
-	/*
-	bool bShadow = false;
-
-	if (pFont->m_nOutlineStyle <= 0) {	// 아웃라인폰트 아니면 그림자덧대기
-		if (m_Color.r+m_Color.g+m_Color.b > 300) {
-			bShadow = true;
-//			pFont->m_Font.DrawText((float)x+1.0f, (float)y+1.0f, szText, MINT_ARGB(m_Color.a,0,0,0), pFont->m_fScale);
-		}
-	}
-
-	pFont->m_Font.DrawText((float)x, (float)y, szText, m_Color.GetARGB(), pFont->m_fScale,bShadow,MINT_ARGB(m_Color.a,0,0,0));
-*/
 	DWORD dwColor = m_Color.GetARGB();
 	if(pFont->m_nOutlineStyle==1)
 		dwColor = 0xffffffff;
@@ -287,7 +269,6 @@ void MDrawContextR2::SetClipRect(MRECT& r)
 {
 	MDrawContext::SetClipRect(r);
 
-	// DX Clipping이 한픽셀 삑사리가 나서 보정
 	r.w+=1;
 	r.h+=1;
 
@@ -320,9 +301,7 @@ MBitmapR2::MBitmapR2(void)
 #ifdef _DEBUG
 	m_nTypeID = MINT_R2_CLASS_TYPE;
 #endif
-//	m_nWidth = m_nHeight = 0;
 	m_pd3dDevice = NULL;
-	//m_pSprite = NULL;
 	m_pTexture = NULL;
 
 	m_dwStateBlock = NULL;
@@ -378,88 +357,68 @@ struct CUSTOMVERTEX{
 
 u32 MBitmapR2::m_dwStateBlock;
 
-//#define USE_STATEBLOCK
-
 void MBitmapR2::BeginState(MDrawEffect effect)
 {
-#ifdef USE_STATEBLOCK
-//	if(m_dwStateBlock==NULL){
-//		m_pd3dDevice->BeginStateBlock();
-#endif
+	m_pd3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
 
-		m_pd3dDevice->SetRenderState( D3DRS_ALPHABLENDENABLE, TRUE);
+	switch (effect)
+	{
+	case MDE_NORMAL:
+	{
+		m_pd3dDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+		m_pd3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+	}
+	break;
+	case MDE_ADD:
+	{
+		m_pd3dDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+		m_pd3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
+	}
+	break;
+	case MDE_MULTIPLY:
+	{
+		m_pd3dDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ZERO);
+		m_pd3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_SRCCOLOR);
+	}
+	break;
 
-		switch (effect)
-		{
-		case MDE_NORMAL:
-			{
-				m_pd3dDevice->SetRenderState( D3DRS_SRCBLEND,   D3DBLEND_SRCALPHA );
-				m_pd3dDevice->SetRenderState( D3DRS_DESTBLEND,  D3DBLEND_INVSRCALPHA );
-			}
-			break;
-		case MDE_ADD:
-			{
-				m_pd3dDevice->SetRenderState( D3DRS_SRCBLEND,   D3DBLEND_SRCALPHA );
-				m_pd3dDevice->SetRenderState( D3DRS_DESTBLEND,  D3DBLEND_ONE );
-			}
-			break;
-		case MDE_MULTIPLY:
-			{
-				m_pd3dDevice->SetRenderState( D3DRS_SRCBLEND,   D3DBLEND_ZERO );
-				m_pd3dDevice->SetRenderState( D3DRS_DESTBLEND,  D3DBLEND_SRCCOLOR );
-			}
-			break;
+	}
+	m_pd3dDevice->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
+	m_pd3dDevice->SetRenderState(D3DRS_ALPHAREF, 0x08);
+	m_pd3dDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL);
 
-		}
-		m_pd3dDevice->SetRenderState( D3DRS_ALPHATESTENABLE,  FALSE );
-		m_pd3dDevice->SetRenderState( D3DRS_ALPHAREF,         0x08 );
-		m_pd3dDevice->SetRenderState( D3DRS_ALPHAFUNC,  D3DCMP_GREATEREQUAL );
+	const bool bFiltering = false;
 
-		const bool bFiltering = false;
+	m_pd3dDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+	m_pd3dDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+	m_pd3dDevice->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR);
 
-		m_pd3dDevice->SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR );
-		m_pd3dDevice->SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR );
-		m_pd3dDevice->SetSamplerState( 0, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR );
-
-		m_pd3dDevice->SetRenderState( D3DRS_LIGHTING, FALSE);
-		m_pd3dDevice->SetRenderState( D3DRS_FILLMODE,   D3DFILL_SOLID );
-		m_pd3dDevice->SetRenderState( D3DRS_CULLMODE,   D3DCULL_CCW );
+	m_pd3dDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
+	m_pd3dDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
+	m_pd3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
 
 
-		m_pd3dDevice->SetRenderState( D3DRS_STENCILENABLE,    FALSE );
-		m_pd3dDevice->SetRenderState( D3DRS_CLIPPING,         TRUE );
-		m_pd3dDevice->SetRenderState( D3DRS_CLIPPLANEENABLE,  FALSE );
-		m_pd3dDevice->SetRenderState( D3DRS_VERTEXBLEND,      FALSE );
-		m_pd3dDevice->SetRenderState( D3DRS_INDEXEDVERTEXBLENDENABLE, FALSE );
-		m_pd3dDevice->SetRenderState( D3DRS_FOGENABLE,        FALSE );
-		m_pd3dDevice->SetRenderState( D3DRS_ZWRITEENABLE,     FALSE );
+	m_pd3dDevice->SetRenderState(D3DRS_STENCILENABLE, FALSE);
+	m_pd3dDevice->SetRenderState(D3DRS_CLIPPING, TRUE);
+	m_pd3dDevice->SetRenderState(D3DRS_CLIPPLANEENABLE, FALSE);
+	m_pd3dDevice->SetRenderState(D3DRS_VERTEXBLEND, FALSE);
+	m_pd3dDevice->SetRenderState(D3DRS_INDEXEDVERTEXBLENDENABLE, FALSE);
+	m_pd3dDevice->SetRenderState(D3DRS_FOGENABLE, FALSE);
+	m_pd3dDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
 
 
-		m_pd3dDevice->SetTextureStageState( 0, D3DTSS_COLOROP,   D3DTOP_MODULATE );
-		m_pd3dDevice->SetTextureStageState( 0, D3DTSS_COLORARG1, D3DTA_TEXTURE );
-		m_pd3dDevice->SetTextureStageState( 0, D3DTSS_COLORARG2, D3DTA_DIFFUSE );
-		m_pd3dDevice->SetTextureStageState( 0, D3DTSS_ALPHAOP,   D3DTOP_MODULATE );
-		m_pd3dDevice->SetTextureStageState( 0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE );
-		m_pd3dDevice->SetTextureStageState( 0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE );
-		m_pd3dDevice->SetTextureStageState( 0, D3DTSS_TEXCOORDINDEX, 0 );
-		m_pd3dDevice->SetTextureStageState( 0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE );
-
-
-
-
-#ifdef USE_STATEBLOCK
-//	}
-//	else{
-//		m_pd3dDevice->ApplyStateBlock(m_dwStateBlock);
-//	}
-#endif
+	m_pd3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
+	m_pd3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+	m_pd3dDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
+	m_pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
+	m_pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+	m_pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
+	m_pd3dDevice->SetTextureStageState(0, D3DTSS_TEXCOORDINDEX, 0);
+	m_pd3dDevice->SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE);
 
 }
-void MBitmapR2::EndState(void)
+void MBitmapR2::EndState()
 {
-#ifdef USE_STATEBLOCK
-//	if(m_dwStateBlock==NULL) m_pd3dDevice->EndStateBlock(&m_dwStateBlock);
-#endif
 }
 
 inline void _swap(float& a,float& b) {

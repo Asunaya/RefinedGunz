@@ -194,52 +194,14 @@ void MDrawContext::FillRectangle(const MRECT& r)
 	FillRectangle(r.x, r.y, r.w, r.h);
 }
 
-/*
-int GetStrLength(MFont* pFont, char* szText, int nSize)
-{
-	char temp[256];
-	memcpy(temp, szText, nSize);
-	temp[nSize] = 0;
-
-	return pFont->GetWidth(temp);
-}
-
-int GetStrLengthOfWidth(MFont* pFont, int w, char* szText)
-{
-	int tw = pFont->GetWidth(szText);
-	float fw = w / (float)tw;
-	int nStrLen = strlen(szText);
-	int nRecStrLen = int(nStrLen * fw);
-
-	int nRecWidth = GetStrLength(pFont, szText, nRecStrLen);
-
-	if(nRecWidth>w){	// 넘치는 경우
-		do{
-			nRecStrLen--;
-			nRecWidth = GetStrLength(pFont, szText, nRecStrLen);
-		}while(nRecWidth<w || nRecStrLen==0);
-		return nRecStrLen;
-	}
-	else if(nRecWidth<w){
-		do{
-			nRecStrLen++;
-			nRecWidth = GetStrLength(pFont, szText, nRecStrLen);
-		}while(nRecWidth>=w || nRecStrLen==nStrLen);
-		return nRecStrLen-1;
-	}
-
-	return nRecStrLen;
-}
-*/
-
 int MDrawContext::TextWithHighlight(int x, int y, const char* szText)
 {
-	char szFront[MWIDGET_NAME_LENGTH];// = {0, };
-	char szBack[MWIDGET_NAME_LENGTH];// = {0, };
+	char szFront[MWIDGET_NAME_LENGTH];
+	char szBack[MWIDGET_NAME_LENGTH];
 	char cHighlight;
 
 	int nPos = RemoveAnd(szFront, sizeof(szFront), &cHighlight, szBack, szText);
-	if(nPos==-1){	// Highlight(Underline) 문자가 없을 경우
+	if(nPos==-1){	// Highlight(Underline)
 		return Text(x, y, szText);
 	}
 	else{
@@ -247,7 +209,6 @@ int MDrawContext::TextWithHighlight(int x, int y, const char* szText)
 			char temp[2] = {cHighlight, 0};
 			int nFrontWidth = m_pFont->GetWidth(szFront);
 			int nHighlightWidth = m_pFont->GetWidth(temp);
-			//int nBackWidth = m_pFont->GetWidth(szBack);
 			Text(x, y, szFront);
 			MCOLOR tmpColor = m_Color;
 			SetColor(m_HighlightColor);
@@ -256,7 +217,7 @@ int MDrawContext::TextWithHighlight(int x, int y, const char* szText)
 			return Text(x+nFrontWidth+nHighlightWidth, y, szBack);
 		}
 		else{
-			return Text(x, y, szText);		// Font가 로드되지 않았을 경우 &가 있는 상태 그대로 표현
+			return Text(x, y, szText);
 		}
 	}
 }
@@ -269,7 +230,7 @@ void MDrawContext::GetPositionOfAlignment(MPOINT* p, const MRECT& r, const char*
 		else w = m_pFont->GetWidthWithoutAmpersand(szText);
 		int h = m_pFont->GetHeight();
 
-#define DEFAULT_ALIGN_MARGIN	2	// 좌우 정렬시 좌우에 남겨질 최소의 여백
+#define DEFAULT_ALIGN_MARGIN	2
 		p->x = r.x;
 		p->y = r.y;
 		if(am&MAM_LEFT){
@@ -303,12 +264,12 @@ int MDrawContext::Text(const MRECT& r, const char* szText, MAlignmentMode am)
 
 int MDrawContext::TextWithHighlight(const MRECT& r, const char* szText, MAlignmentMode am)
 {
-	char szFront[MWIDGET_NAME_LENGTH];// = {0, };
-	char szBack[MWIDGET_NAME_LENGTH];// = {0, };
+	char szFront[MWIDGET_NAME_LENGTH];
+	char szBack[MWIDGET_NAME_LENGTH];
 	char cHighlight;
 
 	int nPos = RemoveAnd(szFront, sizeof(szFront), &cHighlight, szBack, szText);
-	if(nPos==-1){	// Highlight(Underline) 문자가 없을 경우
+	if(nPos==-1){	// Highlight(Underline)
 		return Text(r, szText, am);
 	}
 	else{
@@ -316,13 +277,11 @@ int MDrawContext::TextWithHighlight(const MRECT& r, const char* szText, MAlignme
 		char szTextWithoutAnd[MWIDGET_NAME_LENGTH];
 		RemoveAnd(szTextWithoutAnd, sizeof(szTextWithoutAnd), szText);
 		GetPositionOfAlignment(&p, r, szTextWithoutAnd, am);
-		//p.x += m_pFont->GetWidth("-");
 
 		if(m_pFont!=NULL){
 			char temp[2] = {cHighlight, 0};
 			int nFrontWidth = m_pFont->GetWidth(szFront);
 			int nHighlightWidth = m_pFont->GetWidth(temp);
-			//int nBackWidth = m_pFont->GetWidth(szBack);
 			Text(p.x, p.y, szFront);
 			MCOLOR tmpColor = m_Color;
 			SetColor(m_HighlightColor);
@@ -353,19 +312,18 @@ void MDrawContext::TextMC(MRECT& r, const char* szText, MAlignmentMode am)
 	TextMC(p.x, p.y, szText);
 }
 
-unsigned long int MMColorSet[] = {
-		0xFF808080,	//0
-		0xFFFF0000,	//1
-		0xFF00FF00,	//2
-		0xFF0000FF,	//3
-		0xFFFFFF00,	//4
-
-		0xFF800000,	//5
-		0xFF008000,	//6
-		0xFF000080,	//7
-		0xFF808000,	//8
-		0xFFFFFFFF,	//9
-	};
+u32 MMColorSet[] = {
+	0xFF808080,	// 0 - Gray
+	0xFFFF0000,	// 1 - Red
+	0xFF00FF00,	// 2 - Lime
+	0xFF0000FF,	// 3 - Blue
+	0xFFFFFF00,	// 4 - Yellow
+	0xFF800000,	// 5 - Maroon
+	0xFF008000,	// 6 - Green
+	0xFF000080,	// 7 - Navy
+	0xFF808000,	// 8 - Olive
+	0xFFFFFFFF,	// 9 - White
+};
 
 static bool TestDigit(int c)
 {
@@ -396,7 +354,6 @@ void MDrawContext::TextMC(int x, int y, const char* szText)
 		nLen = strlen(pSrc);
 
 		if(nPos + 1 < strlen(pSrc)){
-			//컬러 지정
 			if(TestDigit(pSrc[nPos+1])){
 				SetColor(MCOLOR(MMColorSet[pSrc[nPos+1] - '0']));
 				pSrc = pSrc + nPos + 2;
@@ -409,7 +366,6 @@ void MDrawContext::TextMC(int x, int y, const char* szText)
 			if(nPos+1 == nLen && TestDigit(pSrc[nPos]) == false){
 				Text(x+nOffset, y, "^");
 				nOffset += GetFont()->GetWidth("^");
-				//pSrc = pSrc + 1;
 			}
 			if(nPos == nLen && (pSrc[nPos-1] == '^')){
 				Text(x+nOffset, y, "^");
@@ -447,7 +403,6 @@ char *MDrawContext::GetPureText(const char *szText)
 		} else {
 			if(nPos+1 == nLen && TestDigit(pSrc[nPos]) == false){
 				strcat_safe(pText, pTextSize, "^");
-				//pSrc = pSrc + 1;
 			}
 			if(nPos == nLen && (pSrc[nPos-1] == '^')){
 				strcat_safe(pText, pTextSize, "^");				
@@ -462,7 +417,6 @@ char *MDrawContext::GetPureText(const char *szText)
 
 #include "MDebug.h"
 
-// 둘째줄부터 nIndentation만큼 들여쓰기를 한다, skipline만큼 윗라인을 빼고 출력한다.
 int MDrawContext::TextMultiLine(MRECT& r, const char* szText,int nLineGap,bool bAutoNextLine,int nIndentation,int nSkipLine, MPOINT* pPositions)
 {
 	bool bColorSupport=true;
@@ -488,7 +442,6 @@ int MDrawContext::TextMultiLine(MRECT& r, const char* szText,int nLineGap,bool b
 			char buffer[256];
 			if(bColorSupport) {
 
-// Text가 그려지는 포지션 정보를 채워 넣는다.
 #define FLUSHPOS(_Pos)		if(pCurrentPos!=NULL){	\
 								for(int i=0; buffer[i]!=NULL; i++){	\
 									pCurrentPos[i+szCurrent-szText].x = _Pos+pFont->GetWidth(buffer, i);	\
@@ -496,7 +449,8 @@ int MDrawContext::TextMultiLine(MRECT& r, const char* szText,int nLineGap,bool b
 								}	\
 							}
 
-#define FLUSH				if(buffer[0]) { Text(r.x+nLastX, y, buffer); FLUSHPOS(r.x+nLastX); nLastX=nX; buffer[0]=0;pcurbuf=buffer; }
+#define FLUSH				if(buffer[0]) { Text(r.x+nLastX, y, buffer); \
+											FLUSHPOS(r.x+nLastX); nLastX=nX; buffer[0]=0;pcurbuf=buffer; }
 
 				int nLastX=nX;
 
@@ -550,8 +504,8 @@ int MDrawContext::TextMultiLine(MRECT& r, const char* szText,int nLineGap,bool b
 #undef FLUSHPOS
 #undef FLUSH
 
-// TODO: TextMultiLine2를 없애고 align을 TextMultiLine에 통합한다
-int MDrawContext::TextMultiLine2( MRECT& r, const char* szText,int nLineGap,bool bAutoNextLine,MAlignmentMode am )
+int MDrawContext::TextMultiLine2(MRECT& r, const char* szText, int nLineGap,
+	bool bAutoNextLine, MAlignmentMode am)
 {
 	MFont* pFont = GetFont();
 	int nHeight = pFont->GetHeight()+nLineGap;
@@ -561,7 +515,7 @@ int MDrawContext::TextMultiLine2( MRECT& r, const char* szText,int nLineGap,bool
 	int nStrLen = strlen(szText);
 	int nX = 0;
 	int nCurrLine = 0;
-	int IncY = ( r.h	/ nLine ) ; // 세로축 증분
+	int IncY = ( r.h	/ nLine );
 
 	static constexpr auto MAX_WIDGET_LINE_LENGTH = 1024;
 	int clip = 0;
@@ -576,7 +530,7 @@ int MDrawContext::TextMultiLine2( MRECT& r, const char* szText,int nLineGap,bool
 		temp[0] = szText[i];
 		unsigned char c = temp[0];
 
-		if(c=='\n'){	// Carriage Return
+		if(c=='\n'){
 			nX = 0;
 				
 			rTemp.x	= r.x;
@@ -704,7 +658,6 @@ void MDrawContext::Draw(int x, int y, MRECT& s)
 void MDrawContext::DrawEx(int tx1, int ty1, int tx2, int ty2, 
 						  int tx3, int ty3, int tx4, int ty4)
 {
-
 }
 
 void MDrawContext::Draw(int x, int y, int w, int h, int sx, int sy, int sw, int sh)
@@ -712,7 +665,8 @@ void MDrawContext::Draw(int x, int y, int w, int h, int sx, int sy, int sw, int 
 	Draw(m_pBitmap->GetSourceBitmap(),x,y,w,h,sx+m_pBitmap->GetX(),sy+m_pBitmap->GetY(),sw,sh);
 }
 
-int MMGetLinePos(MFont *pFont,const char* szText, int nWidth, bool bAutoNextLine, bool bColorSupport, int nLine,int nIndentation)
+int MMGetLinePos(MFont *pFont,const char* szText, int nWidth, bool bAutoNextLine, bool bColorSupport,
+	int nLine, int nIndentation)
 {
 	int nInd = nIndentation >= nWidth ? 0 : nIndentation;
 
@@ -722,20 +676,20 @@ int MMGetLinePos(MFont *pFont,const char* szText, int nWidth, bool bAutoNextLine
 	int nX = 0;
 	int nCurLine = 0;
 
-	int nThisChar=0;	// 현재 글자의 시작 인덱스
+	int nThisChar=0;
 
 	for(int i=0; i<nStrLen; i++){
 
 		if(nCurLine==nLine) 
 			return nThisChar;
 
-		nThisChar = i;	// 현재 글자의 시작 인덱스
+		nThisChar = i;
 
 		char temp[3] = {0, 0, 0};
 		temp[0] = szText[i];
 		unsigned char c = temp[0];
 
-		if(c=='\n'){	// Carriage Return
+		if(c=='\n'){
 			nCurLine++;
 			nThisChar++;
 			continue;
@@ -759,7 +713,7 @@ int MMGetLinePos(MFont *pFont,const char* szText, int nWidth, bool bAutoNextLine
 			int w = pFont->GetWidth(temp);
 			if(nX+w>=nWidth){
 				nCurLine++;
-				nX = nIndentation;	// 둘째줄부터는 시작위치가 다르다.
+				nX = nIndentation;
 			}
 			nX += w;
 		}
@@ -771,7 +725,6 @@ int MMGetLinePos(MFont *pFont,const char* szText, int nWidth, bool bAutoNextLine
 	return nStrLen;
 }
 
-// 다음 줄의 시작 위치를 리턴한다
 int MMGetNextLinePos(MFont *pFont,const char* szText, int nWidth, bool bAutoNextLine, bool bColorSupport)
 {
 	return MMGetLinePos(pFont,szText,nWidth,bAutoNextLine,bColorSupport);
@@ -789,7 +742,7 @@ int MMGetWidth(MFont *pFont,const char *szText,int nSize,bool bColorSupport)
 		temp[0] = szText[i];
 		unsigned char c = temp[0];
 
-		if(c=='\n'){	// Carriage Return
+		if(c=='\n'){
 			return nX;
 		}
 
@@ -814,7 +767,8 @@ int MMGetWidth(MFont *pFont,const char *szText,int nSize,bool bColorSupport)
 	return nX;
 }
 
-int MMGetLineCount(MFont *pFont,const char* szText, int nWidth, bool bAutoNextLine, bool bColorSupport,int nIndentation)
+int MMGetLineCount(MFont *pFont, const char* szText, int nWidth,
+	bool bAutoNextLine, bool bColorSupport, int nIndentation)
 {
 	int nLine = 0;
 	int nLength = strlen(szText);
@@ -830,4 +784,3 @@ int MMGetLineCount(MFont *pFont,const char* szText, int nWidth, bool bAutoNextLi
 
 	return nLine;
 }
-

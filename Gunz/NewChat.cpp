@@ -24,21 +24,6 @@ bool g_bNewChat = true;
 bool g_bNewChat = false;
 #endif
 
-// Chat colors
-static const unsigned long MMColorSet[] = {
-	0xFF808080,	//0
-	0xFFFF0000,	//1
-	0xFF00FF00,	//2
-	0xFF0000FF,	//3
-	0xFFFFFF00,	//4
-
-	0xFF800000,	//5
-	0xFF008000,	//6
-	0xFF000080,	//7
-	0xFF808000,	//8
-	0xFFFFFFFF,	//9
-};
-
 void Chat::Create(const std::string &strFont, int nFontSize){
 	fFadeTime = 10;
 
