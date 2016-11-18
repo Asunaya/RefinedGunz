@@ -537,10 +537,12 @@ void ZCombatInterface::OnDraw(MDrawContext* pDC)
 			TextRelative(pDC, 720.f / 800.f, 585.f / 600.f, buffer);
 		}
 
+		float Ratio = float(RGetScreenWidth()) / RGetScreenHeight() / (4.0f / 3);
+
 		sprintf_safe(buffer, "%d", pCharacter->GetHP());
-		TextRelative(pDC, 160.f / 1920, 44.f / 1080, buffer);
+		TextRelative(pDC, 160.f * Ratio / 1920, 44.f / 1080, buffer);
 		sprintf_safe(buffer, "%d", pCharacter->GetAP());
-		TextRelative(pDC, 160.f / 1920, 92.f / 1080, buffer);
+		TextRelative(pDC, 160.f * Ratio / 1920, 92.f / 1080, buffer);
 
 		if ( ZApplication::GetGame()->GetMatch()->GetMatchType() == MMATCH_GAMETYPE_DUEL)
 		{

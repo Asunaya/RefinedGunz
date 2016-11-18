@@ -1,5 +1,4 @@
 #include "stdafx.h"
-
 #include "ZGame.h"
 #include "ZScreenEffectManager.h"
 #include "RealSpace2.h"
@@ -20,7 +19,6 @@ ZScreenEffect::ZScreenEffect(RMesh *pMesh,rvector offset)
 
 	m_Offset=offset;
 
-//	m_VMesh.m_bRenderInstantly = true;
 	m_VMesh.Create(pMesh);
 	m_VMesh.SetAnimation("play");
 	m_VMesh.SetCheckViewFrustum(false);
@@ -29,7 +27,6 @@ ZScreenEffect::ZScreenEffect(RMesh *pMesh,rvector offset)
 
 bool ZScreenEffect::Draw(unsigned long int nTime)
 {
-
 	return DrawCustom(nTime, m_Offset);
 }
 
@@ -58,18 +55,21 @@ bool ZScreenEffect::DrawCustom(unsigned long int nTime, const rvector& vOffset, 
 		D3DXMatrixRotationZ(&World, fAngle);
 	}
 
-	rmatrix View,Offset;
-	const rvector eye(0,0,-650),at(0,0,0),up(0,1,0);
+	rmatrix View, Offset;
+	const rvector eye(0, 0, -650), at(0, 0, 0), up(0, 1, 0);
 
 	D3DXMatrixLookAtLH(&View,&eye,&at,&up);
 	D3DXMatrixTranslation(&Offset,vOffset.x,vOffset.y,vOffset.z);
 
-	View=Offset*View;
+	auto Ratio = 4.0f / 3 / (float(RGetScreenWidth()) / RGetScreenHeight());
+	auto Scale = ScalingMatrix({ 1, Ratio, 1, 1 });
 
-	RGetDevice()->SetTransform( D3DTS_VIEW, &View );
+	View = Scale * View;
+	View = Offset * View;
+
+	RGetDevice()->SetTransform(D3DTS_VIEW, &View);
 
 	m_VMesh.SetWorldMatrix(World);
-//	m_VMesh.Frame();
 	m_VMesh.Render();
 
 	if(m_VMesh.isOncePlayDone()) {
@@ -79,14 +79,10 @@ bool ZScreenEffect::DrawCustom(unsigned long int nTime, const rvector& vOffset, 
 	return true;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////
-// ZComboEffect ///////////////////////////////////////////////////////////////////////
-
 ZComboEffect::ZComboEffect(RMesh *pMesh,rvector offset)
 :ZScreenEffect(pMesh,offset)
 {
 	bDelete=false;
-	// 최소한 이펙트 길이는 10초는 넘지않는다
 	fDeleteTime=g_pGame->GetTime()+10.f;
 }
 
@@ -95,7 +91,6 @@ void ZComboEffect::SetFrame(int nFrame)
 	AniFrameInfo* pInfo = GetVMesh()->GetFrameInfo(ani_mode_lower);
 
 	pInfo->m_nFrame =
-//		max(min(GetVMesh()->m_nFrame[0],2400),nFrame);
 		max(min(pInfo->m_nFrame,2400),nFrame);
 	fDeleteTime=g_pGame->GetTime()+10.f;
 }
@@ -115,18 +110,11 @@ void ZComboEffect::DeleteAfter(float fTime)
 	fDeleteTime=g_pGame->GetTime()+fTime;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////
-// ZBossGaugeEffect ///////////////////////////////////////////////////////////////////
-
-
 ZBossGaugeEffect::ZBossGaugeEffect(RMesh *pMesh,rvector offset)
 					:ZScreenEffect(pMesh,offset), m_bShocked(false), m_fShockStartTime(0.0f),
 					m_fShockPower(0.0f), m_fLastTime(0.0f), m_ShockOffset(0.0f, 0.0f, 0.0f), m_ShockVelocity(0.0f, 0.0f, 0.0f),
 					m_nVisualValue(-1)
-{
-
-
-}
+{}
 
 
 void ZBossGaugeEffect::Shock(float fPower)
@@ -169,11 +157,6 @@ bool ZBossGaugeEffect::Draw(unsigned long int nTime)
 			m_ShockVelocity = (RandomNumber(0.0f, 1.0f) * m_fShockPower * velocity);
 			m_ShockOffset += fElapsed * m_ShockVelocity;
 			offset = fPower * m_ShockOffset;
-/*
-			char text[256];
-			sprintf_safe(text, "%.3f, %.3f\n", offset.x, offset.y);
-			OutputDebugString(text);
-*/
 		}
 	}
 
@@ -183,7 +166,6 @@ bool ZBossGaugeEffect::Draw(unsigned long int nTime)
 
 	bool ret = ZScreenEffect::DrawCustom(0, offset);
 
-	// HP게이지
 	ZObject* pBoss = ZGetObjectManager()->GetObject(uidBoss);
 	if ((pBoss) && (pBoss->IsNPC()))
 	{
@@ -222,14 +204,7 @@ bool ZBossGaugeEffect::Draw(unsigned long int nTime)
 	return ret;
 }
 
-
-///////////////////////////////////////////////////////////////////////////////////////
-// ZKOEffect //////////////////////////////////////////////////////////////////////////
-
-ZKOEffect::ZKOEffect(RMesh* pMesh,rvector offset) : ZScreenEffect(pMesh, offset)
-{
-
-}
+ZKOEffect::ZKOEffect(RMesh* pMesh, rvector offset) : ZScreenEffect(pMesh, offset) {}
 
 void ZKOEffect::InitFrame()
 {
@@ -249,24 +224,17 @@ int ZKOEffect::GetFrame()
 	return pInfo->m_nFrame;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////
-// ZTDMBlinkEffect ////////////////////////////////////////////////////////////////////
-
-ZTDMBlinkEffect::ZTDMBlinkEffect(RMesh* pMesh,rvector offset) : ZScreenEffect(pMesh, offset)
-{
-}
+ZTDMBlinkEffect::ZTDMBlinkEffect(RMesh* pMesh, rvector offset) : ZScreenEffect(pMesh, offset) {}
 
 void ZTDMBlinkEffect::SetAnimationSpeed(int nKillsDiff)
 {
 	float speed = 4.8f;
-	if (nKillsDiff > 5)			// 젠장-_-; 하드코딩
+	if (nKillsDiff > 5)
 		speed = 9.6f;
 
 	m_VMesh.SetSpeed(speed);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////
-// ZScreenEffectManager ///////////////////////////////////////////////////////////////
 ZScreenEffectManager::ZScreenEffectManager()
 {
 
@@ -383,8 +351,7 @@ void ZScreenEffectManager::Clear()
 
 bool ZScreenEffectManager::Create()
 {
-
-	DWORD _begin_time,_end_time;
+	u64 _begin_time, _end_time;
 #define BEGIN_ { _begin_time = GetGlobalTimeMS(); }
 #define END_(x) { _end_time = GetGlobalTimeMS(); float f_time = (_end_time - _begin_time) / 1000.f; mlog("%s : %f \n", x,f_time ); }
 
@@ -407,8 +374,8 @@ bool ZScreenEffectManager::Create()
 	m_pWeaponIcons[MWT_DAGGER]			= new ZScreenEffect(m_pEffectMeshMgr->Get("ef_in_icon_dagger.elu"));
 	m_pWeaponIcons[MWT_DUAL_DAGGER]		= new ZScreenEffect(m_pEffectMeshMgr->Get("ef_in_icon_d_dagger.elu"));
 	m_pWeaponIcons[MWT_KATANA]			= new ZScreenEffect(m_pEffectMeshMgr->Get("ef_in_icon_katana.elu"));
-	m_pWeaponIcons[MWT_GREAT_SWORD]		= new ZScreenEffect(m_pEffectMeshMgr->Get("ef_in_icon_sword.elu"));//그냥 우선 같은것 사용
-	m_pWeaponIcons[MWT_DOUBLE_KATANA]	= new ZScreenEffect(m_pEffectMeshMgr->Get("ef_in_icon_blade.elu"));//그냥 우선 같은것 사용
+	m_pWeaponIcons[MWT_GREAT_SWORD]		= new ZScreenEffect(m_pEffectMeshMgr->Get("ef_in_icon_sword.elu"));
+	m_pWeaponIcons[MWT_DOUBLE_KATANA]	= new ZScreenEffect(m_pEffectMeshMgr->Get("ef_in_icon_blade.elu"));
 
 	m_pWeaponIcons[MWT_PISTOL]			= new ZScreenEffect(m_pEffectMeshMgr->Get("ef_in_icon_pistol.elu"));
 	m_pWeaponIcons[MWT_PISTOLx2]		= new ZScreenEffect(m_pEffectMeshMgr->Get("ef_in_icon_d_pistol.elu"));
@@ -432,8 +399,6 @@ bool ZScreenEffectManager::Create()
 	m_pWeaponIcons[MWT_SMOKE_GRENADE]	= new ZScreenEffect(m_pEffectMeshMgr->Get("ef_in_icon_flashbang.elu"));
 	m_pWeaponIcons[MWT_FOOD]			= new ZScreenEffect(m_pEffectMeshMgr->Get("ef_in_icon_food.elu"));
 	m_pWeaponIcons[MWT_BULLET_KIT]		= new ZScreenEffect(m_pEffectMeshMgr->Get("ef_in_icon_magazine.elu"));
-
-	
 
 	m_pHit = m_pEffectMeshMgr->Get("hit");
 	m_pComboBeginEffect = m_pEffectMeshMgr->Get("combo_begin");
@@ -598,18 +563,16 @@ int ZScreenEffectManager::DrawResetGuages()
 	DrawGuage(70.f/800.f , 23.f/600.f , min(1.f,_hp) * 138.f/800.f , 13.f/600.f , 1.f ,color);
 
 	// ap
-
 	color = D3DCOLOR_ARGB(255, 68,193, 62);
 
 	DrawGuage(84.f/800.f , 50.f/600.f , min(1.f,_ap) * 138.f/800.f , 13.f/600.f , -1.f ,color);
 
 	// exp
-
 	color = D3DCOLOR_ARGB(255,200,200,200);
 
 	DrawGuage(66.f/800.f , 70.f/600.f , min(1.f,m_fGuageEXP) * 138.f/800.f , 4.f/600.f , -1.f ,color);
 
-	if(_hp > 1.0f) // 종료
+	if(_hp > 1.0f)
 	{
 		_hp = 0.f;
 		_ap = 0.f;
@@ -630,8 +593,6 @@ void ZScreenEffectManager::DrawGuages()
 	bool render_cur_hp = false;
 	bool render_cur_ap = false;
 
-	////////////////////////////////////////////
-
 	if(m_fCurGuageHP > 1.0f)
 		m_fCurGuageHP = 1.0f;
 
@@ -640,31 +601,26 @@ void ZScreenEffectManager::DrawGuages()
 
 	if(m_fCurGuageHP > m_fGuageHP ) {
 		render_cur_hp = true;
-		m_fCurGuageHP -= 0.01f;// * (m_fCurGuageHP / m_fGuageHP);
+		m_fCurGuageHP -= 0.01f;
 	}
 	else {
 		m_fCurGuageHP = m_fGuageHP;
 	}
 
-	////////////////////////////////////////////
-
 	if(m_fCurGuageAP > m_fGuageAP ) {
 		render_cur_ap = true;
-		m_fCurGuageAP -= 0.01f;// * (m_fCurGuageAP / m_fGuageAP);
+		m_fCurGuageAP -= 0.01f;
 	}
 	else {
 		m_fCurGuageAP = m_fGuageAP;
 	}
 
-
-	// 하드코드 HP 게이지 !
 	if(m_pGuageTexture)
 		RGetDevice()->SetTexture(0,m_pGuageTexture->GetTexture());
 	else
 		RGetDevice()->SetTexture(0,NULL);
 
 	// hp
-
 	if(m_fGuageHP == 1.0f )		color = D3DCOLOR_ARGB(255,  0,128,255);
 	else if(m_fGuageHP > 0.7f)	color = D3DCOLOR_ARGB(255, 69,177,186);
 	else if(m_fGuageHP > 0.3f)	color = D3DCOLOR_ARGB(255,231,220, 24);
@@ -673,19 +629,16 @@ void ZScreenEffectManager::DrawGuages()
 	DrawGuage(70.f/800.f , 23.f/600.f , min(1.f,m_fGuageHP) * 138.f/800.f , 13.f/600.f , 1.f ,color);
 
 	// ap
-
 	color = D3DCOLOR_ARGB(255, 68,193, 62);
 
 	DrawGuage(84.f/800.f , 50.f/600.f , min(1.f,m_fGuageAP) * 138.f/800.f , 13.f/600.f , -1.f ,color);
 
 	// exp
-
 	color = D3DCOLOR_ARGB(255,200,200,200);
 
 	DrawGuage(66.f/800.f , 70.f/600.f , min(1.f,m_fGuageEXP) * 138.f/800.f , 4.f/600.f , -1.f ,color);
 
 	// alpha
-
 	RGetDevice()->SetRenderState( D3DRS_ALPHABLENDENABLE, TRUE);
 	RGetDevice()->SetRenderState( D3DRS_SRCBLEND,   D3DBLEND_SRCALPHA );
 	RGetDevice()->SetRenderState( D3DRS_DESTBLEND,  D3DBLEND_INVSRCALPHA );
@@ -718,10 +671,6 @@ void ZScreenEffectManager::Draw()
 {
 	ZCharacter *pTargetCharacter = ZGetGameInterface()->GetCombatInterface()->GetTargetCharacter();
 	if(!pTargetCharacter || !pTargetCharacter->GetInitialized()) return;
-
-	//	ZMyCharacter* pMyChar = g_pGame->m_pMyCharacter;
-	//	if (!pMyChar->GetInitialized()) return;
-
 
 	if(!ZGetGameInterface()->GetCombatInterface()->GetObserverMode())
 	{
@@ -757,34 +706,16 @@ void ZScreenEffectManager::Draw()
 			}
 		}
 
-		// 게임이 시작된후에~
-
-		//	if(m_bGameStart) {
-		//float ScrWidth = RGetScreenWidth();
-		//float ScrHeight = RGetScreenHeight();
-		//float ScrRatio = ScrHeight / ScrWidth;
-		//
-		//      if( ScrRatio  !=  0.75 )	//화면 비율이 다를 경우
-		//{
-		//	float fFactor = ((( 800.f * ScrRatio ) - 600.f ) )* 0.5f;
-		//	m_pHPPanel->DrawCustom( 0, rvector(0, fFactor, 0));
-		//}
-		//else
-
-//		if(g_pGame&&g_pGame->GetMatch()->GetRoundState()==MMATCH_ROUNDSTATE_PLAY) 
-		if ( (ZApplication::GetGame()->GetMatch()->GetMatchType() != MMATCH_GAMETYPE_DUEL) || ( !pTargetCharacter->IsObserverTarget()))
+		if (ZApplication::GetGame()->GetMatch()->GetMatchType() != MMATCH_GAMETYPE_DUEL ||
+			!pTargetCharacter->IsObserverTarget())
 		{
-//		if(g_pGame&&(g_pGame->GetReadyState()==ZGAME_READYSTATE_RUN)) {
-		
 			m_pHPPanel->Update();
 			m_pHPPanel->Draw(0);
 
 			bool bDrawGuages = false;
 
-			// 에니메이션이 끝난후에~
-
 			if(m_pHPPanel->GetVMesh())
-				if( m_pHPPanel->GetVMesh()->GetFrameInfo(ani_mode_lower)->m_isPlayDone )
+				if (m_pHPPanel->GetVMesh()->GetFrameInfo(ani_mode_lower)->m_isPlayDone)
 					bDrawGuages = true;
 
 			if(bDrawGuages) {
@@ -806,7 +737,6 @@ void ZScreenEffectManager::Draw()
 				m_pWeaponIcons[m_WeaponType]->Draw(0);
 			}
 		}
-//		}
 
 		if( m_bShowReload ) {
 			if(m_pReload)
@@ -832,7 +762,6 @@ void ZScreenEffectManager::Draw()
 	{
 		DrawEffects();
 
-		// 콤보이펙트는 직접관리해줘야한다
 		DrawCombo();
 	}
 
@@ -843,7 +772,6 @@ void ZScreenEffectManager::Draw()
 
 void ZScreenEffectManager::DrawSpectator()
 {
-	// admin 스펙은 줄이 없다
 	if(!ZGetMyInfo()->IsAdminGrade())
 	{
 		m_pSpectator->Update();
@@ -952,7 +880,6 @@ void ZScreenEffectManager::DrawCombo()
 
 			nLastDigit=i;
 
-//			nFrame = m_pComboEffects[i]->GetVMesh()->m_nFrame[0];
 			nFrame = m_pComboEffects[i]->GetVMesh()->GetFrameInfo(ani_mode_lower)->m_nFrame;
 
 			if(m_pComboEffects[i]->GetVMesh()->isOncePlayDone()) {
@@ -970,9 +897,6 @@ void ZScreenEffectManager::DrawCombo()
 		}
 	}
 
-	// 같은 타이밍에 사라지도록 하기 위해 앞의 숫자들도 
-	// 마지막 자리수의 프레임이랑 같은 프레임으로 돌려놓는다
-
 	for(int i=2;i<nLastDigit;i++) {
 		if(m_pComboEffects[i]) {
 				m_pComboEffects[i]->SetFrame(nFrame);
@@ -984,7 +908,7 @@ void ZScreenEffectManager::SetCombo(int nCombo)
 {
 	static int combonumbers[COMBOEFFECTS_COUNT]={0,};
 
-	if (nCombo > MAX_COMBO) nCombo = MAX_COMBO;		// 99 넘으면 에러난다
+	if (nCombo > MAX_COMBO) nCombo = MAX_COMBO;
 
 	ZCOMBOLEVEL thislevel;
 	if(nCombo<5) thislevel=ZCL_NONE;else
@@ -1013,8 +937,6 @@ void ZScreenEffectManager::SetCombo(int nCombo)
 
 	if(nCombo<3) return;
 
-	// 0번은 앞에 "combo" 글자가 나타나는 이펙트
-	// 1번은 사라지는 이펙트 2부터 첫번째 자리 숫자
 	if(m_pComboEffects[0]==NULL)
 	{
 		m_pComboEffects[0]=new ZComboEffect(m_pComboBeginEffect);
@@ -1032,7 +954,6 @@ void ZScreenEffectManager::SetCombo(int nCombo)
 		{
 			combonumbers[i]=ncurrent;
 
-			// 그 자리에 숫자가 이미 있으면 프레임을 뒤쪽으로 돌려 곧 사라지도록 만든다
 			if(m_pComboEffects[i+2]!=NULL)
 			{
 				RVisualMesh *pMesh=m_pComboEffects[i+2]->GetVMesh();
@@ -1048,7 +969,6 @@ void ZScreenEffectManager::SetCombo(int nCombo)
 				m_pComboEffects[i+2]->DeleteAfter(1.f);
 			}
 
-			// 숫자를 추가한다
 			m_pComboEffects[i+2]=new ZComboEffect(m_pComboNumberEffect[ncurrent],rvector(-10.f+40.f*float(i-1),0,0));
 			Add(m_pComboEffects[i+2]);
 		}
@@ -1124,7 +1044,6 @@ void ZScreenEffectManager::AddAlert(const rvector& vVictimPos, const rvector& vV
 
 	if ((nIndex >= 0) && (nIndex < 4))
 	{
-		// 만약 이미 그리고 있으면 그리지 않는다.
 		for (iterator itor = begin(); itor != end(); ++itor)
 		{
 			ZScreenEffect* pEffect = (ZScreenEffect*)(*itor);
@@ -1139,7 +1058,7 @@ void ZScreenEffectManager::AddAlert(const rvector& vVictimPos, const rvector& vV
 void ZScreenEffectManager::PlaySoundScoreFlyby()
 {
 #ifdef _BIRDSOUND
-	ZGetSoundEngine()->PlaySound("if_score_flyby");		// 아직 딜레이 적용안되어 있음 
+	ZGetSoundEngine()->PlaySound("if_score_flyby");
 #else
 	ZGetSoundEngine()->PlaySound("if_score_flyby",false, 2000);
 #endif
@@ -1464,7 +1383,7 @@ void ZScreenEffectManager::DrawTDMEffects()
 {
 	if (ZGetGameClient()->GetMatchStageSetting()->GetGameType() != MMATCH_GAMETYPE_DEATHMATCH_TEAM2) return;
 
-	unsigned int nNowTime = GetGlobalTimeMS();
+	auto nNowTime = GetGlobalTimeMS();
 
 	m_pTDScoreBoard->Update();
 	m_pTDScoreBoard->Draw(nNowTime);
@@ -1486,5 +1405,4 @@ void ZScreenEffectManager::DrawTDMEffects()
 		m_pTDScoreBlink_R->Update();
 		m_pTDScoreBlink_R->Draw(nNowTime);
 	}
-
 }

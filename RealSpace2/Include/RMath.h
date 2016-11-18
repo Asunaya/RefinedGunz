@@ -60,6 +60,17 @@ inline rmatrix GetIdentityMatrix() {
 	return m;
 }
 
+inline rmatrix ScalingMatrix(v4 scale)
+{
+	rmatrix m;
+	m._11 = scale.x; m._12 = 0;       m._13 = 0;       m._14 = 0;
+	m._21 = 0;       m._22 = scale.y; m._23 = 0;       m._24 = 0;
+	m._31 = 0;       m._32 = 0;       m._33 = scale.z; m._34 = 0;
+	m._41 = 0;       m._42 = 0;       m._43 = 0;       m._44 = scale.w;
+	return m;
+}
+
+
 // Returns the translation a matrix applies as a vector.
 inline rvector GetTransPos(const rmatrix& m) {
 	return{ m._41, m._42, m._43 };
