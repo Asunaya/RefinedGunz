@@ -47,3 +47,6 @@
 // Controls whether every map in the maps folder will be added
 // to the ingame maps list regardless of whether it's in g_MapDesc or not
 #define ADD_ALL_MAPS
+
+// Controls whether the new ingame chat is used
+#define NEW_CHAT

@@ -4813,7 +4813,7 @@ void ZGame::OnStageLeaveBattle(const MUID& uidChar, const MUID& uidStage)
 
 void ZGame::OnAddPeer(const MUID& uidChar, DWORD dwIP, const int nPort, MTD_PeerListNode* pNode)
 {
-	if ((ZApplication::GetGameInterface()->GetState() != GUNZ_GAME) || (g_pGame == NULL)) return;
+	if (ZApplication::GetGameInterface()->GetState() != GUNZ_GAME || g_pGame == NULL) return;
 
 	if (uidChar != ZGetMyUID())
 	{
@@ -4933,9 +4933,10 @@ bool ZGame::FilterDelayedCommand(MCommand *pCommand)
 
 				if(pChar!=m_pMyCharacter &&
 					( pChar->m_pVMesh->m_SelectWeaponMotionType==eq_wd_dagger ||
-					pChar->m_pVMesh->m_SelectWeaponMotionType==eq_ws_dagger )) { // dagger
-						pChar->SetAnimationUpper(ZC_STATE_UPPER_SHOT);
-					}
+					pChar->m_pVMesh->m_SelectWeaponMotionType==eq_ws_dagger )) // dagger
+				{
+					pChar->SetAnimationUpper(ZC_STATE_UPPER_SHOT);
+				}
 
 				fDelayTime = .15f;
 
@@ -4957,10 +4958,11 @@ bool ZGame::FilterDelayedCommand(MCommand *pCommand)
 				pCommand->GetParameter(&nShot, 2, MPT_INT);
 
 				if(pChar!=m_pMyCharacter &&
-					( pChar->m_pVMesh->m_SelectWeaponMotionType==eq_wd_dagger ||
-					pChar->m_pVMesh->m_SelectWeaponMotionType==eq_ws_dagger )) { // dagger
-						pChar->SetAnimationUpper(ZC_STATE_UPPER_SHOT);
-					}
+					(pChar->m_pVMesh->m_SelectWeaponMotionType == eq_wd_dagger ||
+						pChar->m_pVMesh->m_SelectWeaponMotionType == eq_ws_dagger)) // dagger
+				{
+					pChar->SetAnimationUpper(ZC_STATE_UPPER_SHOT);
+				}
 
 				fDelayTime = .1f;
 				switch(nShot) {

@@ -26,7 +26,9 @@ desc : 무기 사용 키 커스터마이즈 관련
 #include "ZPickInfo.h"
 
 #define CHARGE_SHOT
+// Ninja jumping
 //#define UNLIMITED_JUMP
+// How long you can hold a static block before it goes down
 #define GUARD_DURATION		2.f
 #define TUMBLE_DELAY_TIME	.5f
 #define AIR_MOVE			0.05f
@@ -49,10 +51,10 @@ ZMyCharacter::ZMyCharacter()
 	m_fElapsedCAFactorTime = 0.0f;
 
 #ifdef _DEBUG
-	m_bGuardTest=false;
+	m_bGuardTest = false;
 #endif
 	InitStatus();
-	m_Position=rvector(0,0,500);
+	m_Position = rvector(0, 0, 500);
 
 	InitRound();
 
@@ -60,7 +62,7 @@ ZMyCharacter::ZMyCharacter()
 	m_nTumbleDir = 0;
 	m_fHangTime = 0.f;
 	m_nWallJump2Dir = 0;
-	
+
 	m_fDropTime = 0.f;
 
 	m_bSniferMode = false;
@@ -71,9 +73,9 @@ ZMyCharacter::ZMyCharacter()
 	m_bMoveLimit = false;
 
 	m_bReserveDashAttacked = false;
-	m_vReserveDashAttackedDir = rvector(0.f,0.f,0.f);
+	m_vReserveDashAttackedDir = rvector(0.f, 0.f, 0.f);
 	m_fReserveDashAttackedTime = 0.f;
-	m_uidReserveDashAttacker = MUID(0,0);
+	m_uidReserveDashAttacker = MUID(0, 0);
 
 	m_bGuardKey = false;
 	m_bGuardByKey = false;
@@ -89,7 +91,7 @@ void ZMyCharacter::InitRound()
 {
 	ZCharacter::InitRound();
 
-	for(int i=0;i<MMCIP_END;i++)
+	for (int i = 0; i < MMCIP_END; i++)
 		m_fNextShotTimeType[i] = 0.f;
 
 	m_bReserveDashAttacked = false;
@@ -97,7 +99,7 @@ void ZMyCharacter::InitRound()
 
 void ZMyCharacter::InitSpawn()
 {
-	for(int i=0;i<MMCIP_END;i++)
+	for (int i = 0; i < MMCIP_END; i++)
 		m_fNextShotTimeType[i] = 0.f;
 
 	m_bReserveDashAttacked = false;
@@ -113,35 +115,34 @@ void ZMyCharacter::OnDraw()
 void ZMyCharacter::ProcessInput(float fDelta)
 {
 	if (ZApplication::GetGame()->GetMatch()->GetRoundState() == MMATCH_ROUNDSTATE_PREPARE) return;
-	if (m_bInitialized==false) return;
-	if ( ZGetGame()->IsReservedSuicide())
-		return;
+	if (m_bInitialized == false) return;
+	if (ZGetGame()->IsReservedSuicide()) return;
 
 	UpdateButtonState();
 
 	ZCombatInterface* pCombatInterface = ZGetGameInterface()->GetCombatInterface();
-	if (pCombatInterface && pCombatInterface->IsChat())
+	if (pCombatInterface && pCombatInterface->IsChatVisible())
 	{
 		ReleaseLButtonQueue();
 		return;
 	}
 
-	static float rotatez=0.f,rotatex=9* PI_FLOAT /10.f;
+	static float rotatez = 0.f, rotatex = 9 * PI_FLOAT / 10.f;
 
-	m_Accel = rvector(0,0,0);
+	m_Accel = rvector(0, 0, 0);
 
 	rvector right;
-	rvector forward=RCameraDirection;
-	forward.z=0;
+	rvector forward = RCameraDirection;
+	forward.z = 0;
 	Normalize(forward);
-	CrossProduct(&right,rvector(0,0,1),forward);
+	CrossProduct(&right, rvector(0, 0, 1), forward);
 
 	if (!IsDie() && !m_bStun && !m_bBlastDrop && !m_bBlastStand)
 	{
 		bool ButtonPressed = false;
 
-		if(!m_bWallJump && !m_bTumble && !m_bSkill && !m_bMoveLimit && 
-			!m_bBlast && !m_bBlastFall && !m_bBlastAirmove && !m_bCharging && 
+		if (!m_bWallJump && !m_bTumble && !m_bSkill && !m_bMoveLimit &&
+			!m_bBlast && !m_bBlastFall && !m_bBlastAirmove && !m_bCharging &&
 			!m_bSlash && !m_bJumpSlash && !m_bJumpSlashLanding)
 		{
 			auto AddAccel = [&](auto& vec)
@@ -166,66 +167,69 @@ void ZMyCharacter::ProcessInput(float fDelta)
 
 		float fRatio = GetMoveSpeedRatio();
 
-		if(!m_bLand) {
-			if( Magnitude(rvector(GetVelocity().x,GetVelocity().y,0)) < RUN_SPEED * fRatio )
-				m_Accel*=AIR_MOVE;
+		if (!m_bLand) {
+			if (Magnitude(rvector(GetVelocity().x, GetVelocity().y, 0)) < RUN_SPEED * fRatio)
+				m_Accel *= AIR_MOVE;
 			else
-				m_Accel*=0;
+				m_Accel *= 0;
 		}
 
-		bool bWallJump=false;
-		int nWallJumpDir=-1;
+		bool bWallJump = false;
+		int nWallJumpDir = -1;
 
-		if( ZIsActionKeyPressed(ZACTION_JUMP) == true )
+		if (ZIsActionKeyPressed(ZACTION_JUMP) == true)
 		{
-			if(m_bReleasedJump && !m_bLimitJump)
+			if (m_bReleasedJump && !m_bLimitJump)
 			{
-				m_fLastJumpPressedTime=g_pGame->GetTime();
-				m_bJumpQueued=true;
-				m_bWallJumpQueued=true;
-				m_bReleasedJump=false;
+				m_fLastJumpPressedTime = g_pGame->GetTime();
+				m_bJumpQueued = true;
+				m_bWallJumpQueued = true;
+				m_bReleasedJump = false;
 			}
-		}else
-			m_bReleasedJump=true;
+		}
+		else
+			m_bReleasedJump = true;
 
-		if(m_bJumpQueued && (g_pGame->GetTime()-m_fLastJumpPressedTime>JUMP_QUEUE_TIME))
-			m_bJumpQueued=false;
+		if (m_bJumpQueued && (g_pGame->GetTime() - m_fLastJumpPressedTime > JUMP_QUEUE_TIME))
+			m_bJumpQueued = false;
 
-		if(m_bJumpQueued && !m_bTumble && !m_bDrop && !m_bShot && !m_bShotReturn && !m_bSkill && 
+		if (m_bJumpQueued && !m_bTumble && !m_bDrop && !m_bShot && !m_bShotReturn && !m_bSkill &&
 			!m_bBlast && !m_bBlastFall && !m_bBlastDrop && !m_bBlastStand && !m_bBlastAirmove &&
 			!m_bSlash && !m_bJumpSlash && !m_bJumpSlashLanding)
 		{
-			if(!m_bWallJump && !m_bGuard && !m_bLimitWall)
+			if (!m_bWallJump && !m_bGuard && !m_bLimitWall)
 			{
-				if(m_bWallJumpQueued && DotProduct(GetVelocity(),m_Direction)>0 && GetVelocity().z>-10.f)
+				if (m_bWallJumpQueued && DotProduct(GetVelocity(), m_Direction) > 0 &&
+					GetVelocity().z > -10.f)
 				{
-					rvector pickorigin,pickto,dir;
-					rvector front=m_Direction;
+					rvector pickorigin, pickto, dir;
+					rvector front = m_Direction;
 					Normalize(front);
 
-					dir=front;
-					dir.z=0;
+					dir = front;
+					dir.z = 0;
 					Normalize(dir);
 
 					float fRatio = GetMoveSpeedRatio();
 
-					if(m_bLand && DotProduct(GetVelocity(),dir)>RUN_SPEED * fRatio * .8f)
+					if (m_bLand && DotProduct(GetVelocity(), dir) > RUN_SPEED * fRatio * .8f)
 					{
-						pickorigin=m_Position;
+						pickorigin = m_Position;
 
-						RBSPPICKINFO bpi1,bpi2;
-						bool bPicked1=ZGetGame()->GetWorld()->GetBsp()->Pick(pickorigin+rvector(0,0,100),dir,&bpi1);
-						bool bPicked2=ZGetGame()->GetWorld()->GetBsp()->Pick(pickorigin+rvector(0,0,180),dir,&bpi2);
-						if(bPicked1 && bPicked2)
+						RBSPPICKINFO bpi1, bpi2;
+						auto* bsp = ZGetGame()->GetWorld()->GetBsp();
+						bool bPicked1 = bsp->Pick(pickorigin + rvector(0, 0, 100), dir, &bpi1);
+						bool bPicked2 = bsp->Pick(pickorigin + rvector(0, 0, 180), dir, &bpi2);
+						if (bPicked1 && bPicked2)
 						{
 							rvector backdir = -dir;
 							float fDist1 = Magnitude(pickorigin + rvector(0, 0, 100) - bpi1.PickPos);
 							float fDist2 = Magnitude(pickorigin + rvector(0, 0, 180) - bpi2.PickPos);
 
-							if (fDist1<120
-								&& (DotPlaneNormal(bpi1.pInfo->plane, backdir)>cos(10.f / 180.f * PI_FLOAT))
-								&& fDist2<120
-								&& (DotPlaneNormal(bpi2.pInfo->plane, backdir)>cos(10.f / 180.f * PI_FLOAT)))
+							if (fDist1 < 120 &&
+								DotPlaneNormal(bpi1.pInfo->plane, backdir) > cos(10.f / 180.f * PI_FLOAT) &&
+								fDist2 < 120 &&
+								DotPlaneNormal(bpi2.pInfo->plane, backdir) > cos(10.f / 180.f * PI_FLOAT))
 							{
 								bWallJump = true;
 								nWallJumpDir = 1;
@@ -237,33 +241,36 @@ void ZMyCharacter::ProcessInput(float fDelta)
 
 					pickorigin = m_Position + rvector(0, 0, 150);
 
-					for(int i=0;i<2;i++)
+					for (int i = 0; i < 2; i++)
 					{
-						dir = (i==0) ? -right : right;
+						dir = (i == 0) ? -right : right;
 
 						RBSPPICKINFO bpi;
-						bool bPicked=ZGetGame()->GetWorld()->GetBsp()->Pick(pickorigin,dir,&bpi);
-						if(bPicked)
+						bool bPicked = ZGetGame()->GetWorld()->GetBsp()->Pick(pickorigin, dir, &bpi);
+						if (bPicked)
 						{
-							rvector backdir=-dir;
-							float fDist=Magnitude(pickorigin-bpi.PickPos);
-							rvector normal=rvector(bpi.pInfo->plane.a,bpi.pInfo->plane.b,bpi.pInfo->plane.c);
-							float fDot=DotProduct(normal,backdir);
+							rvector backdir = -dir;
+							float fDist = Magnitude(pickorigin - bpi.PickPos);
+							rvector normal = rvector(bpi.pInfo->plane.a, bpi.pInfo->plane.b, bpi.pInfo->plane.c);
+							float fDot = DotProduct(normal, backdir);
 
-							rvector wallright,jumpdir;
-							CrossProduct(&wallright,rvector(0,0,1),normal);
-							jumpdir = (i==0) ? -wallright : wallright;
+							rvector wallright, jumpdir;
+							CrossProduct(&wallright, rvector(0, 0, 1), normal);
+							jumpdir = (i == 0) ? -wallright : wallright;
 
 							float fRatio = GetMoveSpeedRatio();
 
-							if(fDist<100.f && DotProduct(GetVelocity(),jumpdir)>RUN_SPEED * fRatio *.8f &&
-								fDot>cos(55.f/180.f*PI_FLOAT) && fDot<cos(25.f/180.f*PI_FLOAT) && DotProduct(jumpdir,dir)<0)
+							if (fDist < 100.f &&
+								DotProduct(GetVelocity(), jumpdir) > RUN_SPEED * fRatio *.8f &&
+								fDot > cos(55.f / 180.f*PI_FLOAT) &&
+								fDot < cos(25.f / 180.f*PI_FLOAT) &&
+								DotProduct(jumpdir, dir) < 0)
 							{
-								rvector neworigin=pickorigin+300.f*jumpdir;
+								rvector neworigin = pickorigin + 300.f*jumpdir;
 
 								RBSPPICKINFO bpi;
-								bPicked=ZGetGame()->GetWorld()->GetBsp()->Pick(neworigin,dir,&bpi);
-								if(bPicked && fabsf(Magnitude(bpi.PickPos-neworigin)-fDist)<10)
+								bPicked = ZGetGame()->GetWorld()->GetBsp()->Pick(neworigin, dir, &bpi);
+								if (bPicked && fabsf(Magnitude(bpi.PickPos - neworigin) - fDist) < 10)
 								{
 									rvector targetpos = pickorigin + 300.f*jumpdir;
 									bool bAdjusted = ZGetGame()->GetWorld()->GetBsp()->CheckWall(pickorigin,
@@ -284,148 +291,148 @@ void ZMyCharacter::ProcessInput(float fDelta)
 				}
 			}
 
-			rvector PickedNormal=rvector(0,0,0);
-			rvector pickorigin=m_Position+rvector(0,0,90);
+			rvector PickedNormal = rvector(0, 0, 0);
+			rvector pickorigin = m_Position + rvector(0, 0, 90);
 			RBSPPICKINFO bpi;
 			auto& Vel = GetVelocity();
 			auto VelLengthSquared = MagnitudeSq(Vel);
 			if (VelLengthSquared != 0 &&
 				ZGetGame()->GetWorld()->GetBsp()->Pick(pickorigin, Vel / sqrt(VelLengthSquared), &bpi))
-				PickedNormal=rvector(bpi.pInfo->plane.a,bpi.pInfo->plane.b,bpi.pInfo->plane.c);
+				PickedNormal = rvector(bpi.pInfo->plane.a, bpi.pInfo->plane.b, bpi.pInfo->plane.c);
 
-			float fDotJump2 = DotProduct(PickedNormal,m_Direction);
-			float fProjSpeed = DotProduct(PickedNormal,GetVelocity());
-			
+			float fDotJump2 = DotProduct(PickedNormal, m_Direction);
+			float fProjSpeed = DotProduct(PickedNormal, GetVelocity());
+
 			rvector characterright;
-			CrossProduct(&characterright,m_Direction,rvector(0,0,1));
-			float fDotJump2right=DotProduct(PickedNormal,characterright);
+			CrossProduct(&characterright, m_Direction, rvector(0, 0, 1));
+			float fDotJump2right = DotProduct(PickedNormal, characterright);
 
-			bool bJump2=(g_pGame->GetTime()-m_pModule_Movable->GetAdjustedTime()<0.2f 
-				&& Magnitude(pickorigin-bpi.PickPos)<100.f
-				&& DotProduct(rvector(0,0,-1),PickedNormal)<0.1f
-				&& (fDotJump2>.8f || fDotJump2<-.8f || fDotJump2right>.8f || fDotJump2right<-.8f)
-				&& g_pGame->GetTime()-m_fJump2Time>.5f)
+			bool bJump2 = (g_pGame->GetTime() - m_pModule_Movable->GetAdjustedTime() < 0.2f
+				&& Magnitude(pickorigin - bpi.PickPos) < 100.f
+				&& DotProduct(rvector(0, 0, -1), PickedNormal) < 0.1f
+				&& (fDotJump2 > .8f || fDotJump2<-.8f || fDotJump2right>.8f || fDotJump2right<-.8f)
+				&& g_pGame->GetTime() - m_fJump2Time>.5f)
 				&& fProjSpeed < -100.f
 				&& GetDistToFloor() > 30.f
 				&& !m_bWallJump && !bWallJump && !m_bLand && !m_bGuard;
 
-			if(m_bWallJump && !m_bWallJump2 && (m_fWallJumpTime+.4f<g_pGame->GetTime()))
+			if (m_bWallJump && !m_bWallJump2 && (m_fWallJumpTime + .4f < g_pGame->GetTime()))
 			{
- 				WallJump2();
+				WallJump2();
 			}
-			else if(bWallJump)
+			else if (bWallJump)
 			{
-				m_bJumpQueued=false;
-				m_bWallJump=true;
-				m_nWallJumpDir=nWallJumpDir;
-				m_fWallJumpTime=g_pGame->GetTime();
-				m_bWallJump2=false;
+				m_bJumpQueued = false;
+				m_bWallJump = true;
+				m_nWallJumpDir = nWallJumpDir;
+				m_fWallJumpTime = g_pGame->GetTime();
+				m_bWallJump2 = false;
 				m_bWallHang = false;
 
-				if(nWallJumpDir==1)
+				if (nWallJumpDir == 1)
 				{
-					SetVelocity(0,0,0);
+					SetVelocity(0, 0, 0);
 				}
 				else
 				{
-					if(m_bLand) 
-						AddVelocity(rvector(0,0,WALL_JUMP_VELOCITY));
+					if (m_bLand)
+						AddVelocity(rvector(0, 0, WALL_JUMP_VELOCITY));
 				}
-				m_bLand=false;
+				m_bLand = false;
 
 			}
-			else if(bJump2)
+			else if (bJump2)
 			{
-				m_bJumpQueued=false;
+				m_bJumpQueued = false;
 
 				Normalize(PickedNormal);
-				float fAbsorb=DotProduct(PickedNormal,GetVelocity());
+				float fAbsorb = DotProduct(PickedNormal, GetVelocity());
 				rvector newVelocity = GetVelocity();
-				newVelocity-=fAbsorb*PickedNormal;
+				newVelocity -= fAbsorb*PickedNormal;
 
-				newVelocity*=1.1f;
+				newVelocity *= 1.1f;
 
-				newVelocity+=PickedNormal*JUMP2_WALL_VELOCITY;
-				newVelocity.z=JUMP2_VELOCITY;
+				newVelocity += PickedNormal*JUMP2_WALL_VELOCITY;
+				newVelocity.z = JUMP2_VELOCITY;
 				SetVelocity(newVelocity);
 
-				m_fJump2Time=g_pGame->GetTime();
+				m_fJump2Time = g_pGame->GetTime();
 
-				m_bLand=false;
-				m_bWallHang=false;
+				m_bLand = false;
+				m_bWallHang = false;
 
-				if(!m_bJumpShot)
-					m_bWallJump2=true;
-				m_bPlayDone=false;
-				if(fDotJump2>.8f)
-					m_nWallJump2Dir=0;
-				else 
-				if(fDotJump2<-.8f)
-					m_nWallJump2Dir=1;
+				if (!m_bJumpShot)
+					m_bWallJump2 = true;
+				m_bPlayDone = false;
+				if (fDotJump2 > .8f)
+					m_nWallJump2Dir = 0;
 				else
-				if(fDotJump2right<-.8f)
-					m_nWallJump2Dir=2;
-				else 
-				if(fDotJump2right>.8f)
-					m_nWallJump2Dir=3;
+					if (fDotJump2 < -.8f)
+						m_nWallJump2Dir = 1;
+					else
+						if (fDotJump2right < -.8f)
+							m_nWallJump2Dir = 2;
+						else
+							if (fDotJump2right > .8f)
+								m_nWallJump2Dir = 3;
 
-				if(GetStateUpper()==ZC_STATE_UPPER_SHOT)
+				if (GetStateUpper() == ZC_STATE_UPPER_SHOT)
 					SetAnimationUpper(ZC_STATE_UPPER_NONE);
 
 			}
-			else if(m_bWallHang)
+			else if (m_bWallHang)
 			{
-				if(m_bHangSuccess)
+				if (m_bHangSuccess)
 				{
-					m_bJumpQueued=false;
+					m_bJumpQueued = false;
 
-					rvector PickedNormal=-m_Direction;PickedNormal.z=0;
+					rvector PickedNormal = -m_Direction; PickedNormal.z = 0;
 
-					if(ZIsActionKeyPressed(ZACTION_FORWARD))
+					if (ZIsActionKeyPressed(ZACTION_FORWARD))
 					{
-						m_nWallJump2Dir=6;
+						m_nWallJump2Dir = 6;
 						SetVelocity(PickedNormal*50.f);
 					}
 					else
 					{
-						m_nWallJump2Dir=7;
+						m_nWallJump2Dir = 7;
 						AddVelocity(PickedNormal*300.f);
 					}
-					AddVelocity(rvector(0,0,1400));
+					AddVelocity(rvector(0, 0, 1400));
 
-					m_fJump2Time=g_pGame->GetTime();
+					m_fJump2Time = g_pGame->GetTime();
 
-					m_bLand=false;
-					m_bWallHang=false;
-					
-					m_bWallJump2=true;
-					m_bPlayDone=false;
+					m_bLand = false;
+					m_bWallHang = false;
+
+					m_bWallJump2 = true;
+					m_bPlayDone = false;
 				}
 			}
 			else
 #ifndef UNLIMITED_JUMP
-			if(m_bLand)
+				if (m_bLand)
 #endif
-			{
-				m_bJumpQueued=false;
+				{
+					m_bJumpQueued = false;
 
-				rvector right;
-				rvector forward=m_Direction;
-				CrossProduct(&right,rvector(0,0,1),forward);
+					rvector right;
+					rvector forward = m_Direction;
+					CrossProduct(&right, rvector(0, 0, 1), forward);
 
-				rvector vel=rvector(GetVelocity().x,GetVelocity().y,0);
-				float fVel=Magnitude(vel);
+					rvector vel = rvector(GetVelocity().x, GetVelocity().y, 0);
+					float fVel = Magnitude(vel);
 
-				rvector newVelocity = vel*0.5f + m_Accel*fVel*.45f + rvector(0,0,JUMP_VELOCITY);
-				SetVelocity(newVelocity);
-				m_bLand=false;
+					rvector newVelocity = vel*0.5f + m_Accel*fVel*.45f + rvector(0, 0, JUMP_VELOCITY);
+					SetVelocity(newVelocity);
+					m_bLand = false;
 
-				m_fJump2Time=g_pGame->GetTime();
-			}
+					m_fJump2Time = g_pGame->GetTime();
+				}
 		}
 	}
 
-	m_Accel*=7000.f*fDelta;
+	m_Accel *= 7000.f * fDelta;
 	AddVelocity(m_Accel);
 
 	ProcessGuard();
@@ -435,21 +442,21 @@ void ZMyCharacter::ProcessInput(float fDelta)
 
 void ZMyCharacter::OnShotMelee()
 {
-	if(m_bSkill || m_bStun || m_bShotReturn || m_bJumpShot || m_bGuard ||
-		m_bSlash || m_bJumpSlash || m_bJumpSlashLanding ) return;
+	if (m_bSkill || m_bStun || m_bShotReturn || m_bJumpShot || m_bGuard ||
+		m_bSlash || m_bJumpSlash || m_bJumpSlashLanding) return;
 
-	if(m_bShot && !m_bPlayDone)
+	if (m_bShot && !m_bPlayDone)
 		return;
 
-	if( m_pVMesh->m_SelectWeaponMotionType==eq_wd_dagger ||
-		m_pVMesh->m_SelectWeaponMotionType==eq_ws_dagger ) { // dagger
+	if (m_pVMesh->m_SelectWeaponMotionType == eq_wd_dagger ||
+		m_pVMesh->m_SelectWeaponMotionType == eq_ws_dagger) { // dagger
 
-		if(GetStateUpper() == ZC_STATE_UPPER_SHOT)
+		if (GetStateUpper() == ZC_STATE_UPPER_SHOT)
 			return;
 
-		if(m_bCharged) 
+		if (m_bCharged)
 		{
-			if(GetVelocity().z>100.f || GetDistToFloor() > 80.f)
+			if (GetVelocity().z > 100.f || GetDistToFloor() > 80.f)
 				JumpChargedShot();
 			else
 				ChargedShot();
@@ -457,37 +464,38 @@ void ZMyCharacter::OnShotMelee()
 		}
 
 		SetAnimationUpper(ZC_STATE_UPPER_SHOT);
-		m_bWallJump=false;
-		m_bWallJump2=false;
+		m_bWallJump = false;
+		m_bWallJump2 = false;
 #ifdef CHARGE_SHOT
-		m_bEnterCharge=true;
+		m_bEnterCharge = true;
 #endif
-	} else {
-		if(!m_bShot)
-			m_nShot=0;
+	}
+	else {
+		if (!m_bShot)
+			m_nShot = 0;
 
 		int nShotCount = 4;
 
-		if(m_nShot==nShotCount) {
+		if (m_nShot == nShotCount) {
 			return;
 		}
 
-		if( !m_bJumpShot && (GetVelocity().z>100.f || GetDistToFloor() > 80.f) )
+		if (!m_bJumpShot && (GetVelocity().z > 100.f || GetDistToFloor() > 80.f))
 		{
-			if(m_bCharged) 
+			if (m_bCharged)
 			{
 				JumpChargedShot();
 				return;
 			}
 
-			m_bShot=false;
-			m_bShotReturn=false;
-			m_bWallJump=false;
-			m_bWallJump2=false;
-			m_bJumpShot=true;
-			m_bPlayDone=false;
-			
-			if(IsRunWall() && IsMeleeWeapon() ) {
+			m_bShot = false;
+			m_bShotReturn = false;
+			m_bWallJump = false;
+			m_bWallJump2 = false;
+			m_bJumpShot = true;
+			m_bPlayDone = false;
+
+			if (IsRunWall() && IsMeleeWeapon()) {
 				m_nJumpShotType = 1;
 			}
 			else {
@@ -496,41 +504,43 @@ void ZMyCharacter::OnShotMelee()
 
 			m_fNextShotTimeType[MMCIP_MELEE] = g_pGame->GetTime() + 0.8f;
 
-		} else {
-			if(!m_bLand && GetDistToFloor()>20.f) {
-				if(m_nShot < 2) {
+		}
+		else {
+			if (!m_bLand && GetDistToFloor() > 20.f) {
+				if (m_nShot < 2) {
 					ReleaseLButtonQueue();
-					return;	
+					return;
 				}
 			}
 
-			if(m_bCharged) {
+			if (m_bCharged) {
 				ChargedShot();
 				return;
 			}
 
-			m_bShot=true;
-			m_bShotReturn=false;
-			m_bPlayDone=false;
+			m_bShot = true;
+			m_bShotReturn = false;
+			m_bPlayDone = false;
 
 #ifdef CHARGE_SHOT
-			if(m_nShot==0)
-				m_bEnterCharge=true;
+			if (m_nShot == 0)
+				m_bEnterCharge = true;
 #endif
 
-			m_nShot=m_nShot % nShotCount + 1;
+			m_nShot = m_nShot % nShotCount + 1;
 		}
 	}
 
-	m_bTumble=false;
+	m_bTumble = false;
 	ReleaseLButtonQueue();
 
 	int sel_type = GetItems()->GetSelectedWeaponParts();
 
-	if(m_nShot==1 && !m_bJumpShot) {
-		m_b1ShotSended=false;
-		m_f1ShotTime=g_pGame->GetTime();
-	}else {
+	if (m_nShot == 1 && !m_bJumpShot) {
+		m_b1ShotSended = false;
+		m_f1ShotTime = g_pGame->GetTime();
+	}
+	else {
 		if (g_Rules.IsVanillaMode())
 		{
 			ZPostShotMelee(g_pGame->GetTime(), m_Position, m_nShot);
@@ -538,7 +548,8 @@ void ZMyCharacter::OnShotMelee()
 		}
 		else
 		{
-			AddDelayedWork(g_pGame->GetTime() + 0.1 + max(m_nShot - 1, 0) * .05, ZDW_RG_SLASH, (void *)m_nShot);
+			AddDelayedWork(g_pGame->GetTime() + 0.1 + max(m_nShot - 1, 0) * .05,
+				ZDW_RG_SLASH, reinterpret_cast<void *>(m_nShot));
 		}
 	}
 }
@@ -552,21 +563,17 @@ void ZMyCharacter::OnShotRange()
 {
 	ZItem* pSelectedItem = GetItems()->GetSelectedWeapon();
 
-	if( pSelectedItem==NULL ) 
+	if (!pSelectedItem)
 	{
-		mlog("ZMyCharacter::OnShotRange pSelectedItem == NUL\nL");
+		mlog("ZMyCharacter::OnShotRange -- pSelectedItem is null\n");
 		return;
 	}
 
-	if ((pSelectedItem->GetDesc()->m_nWeaponType == MWT_SNIFER) && (!m_bSniferMode))
-	{
+	if (pSelectedItem->GetDesc()->m_nWeaponType == MWT_SNIFER && !m_bSniferMode)
 		return;
-	}
 
-	if (pSelectedItem->GetBulletAMagazine() <= 0) {
-		
+	if (pSelectedItem->GetBulletAMagazine() <= 0)
 		return;
-	}
 
 	auto Lower = GetStateLower();
 	if (Lower != ZC_STATE_LOWER_TUMBLE_FORWARD &&
@@ -579,14 +586,14 @@ void ZMyCharacter::OnShotRange()
 	ZPICKINFO zpi;
 	rvector pickpos;
 
-	ZCombatInterface* ci=ZApplication::GetGameInterface()->GetCombatInterface();
+	ZCombatInterface* ci = ZApplication::GetGameInterface()->GetCombatInterface();
 
-	if (ci)	{
+	if (ci) {
 
 		Cp = ci->GetCrosshairPoint();
 
-		rvector pos,dir;
-		RGetScreenLine(Cp.x,Cp.y,&pos,&dir);
+		rvector pos, dir;
+		RGetScreenLine(Cp.x, Cp.y, &pos, &dir);
 
 		rvector mypos = m_Position + rvector(0, 0, 100);
 		rplane myplane = PlaneFromPointNormal(mypos, dir);
@@ -599,12 +606,12 @@ void ZMyCharacter::OnShotRange()
 			if (zpi.bBspPicked)
 				pickpos = zpi.bpi.PickPos;
 			else
-				if(zpi.pObject)
-					pickpos=zpi.info.vOut;
+				if (zpi.pObject)
+					pickpos = zpi.info.vOut;
 		}
 		else
 		{
-			pickpos=pos+dir*10000.f;
+			pickpos = pos + dir*10000.f;
 		}
 	}
 
@@ -613,36 +620,36 @@ void ZMyCharacter::OnShotRange()
 	rvector vWeaponPos;
 	rvector dir;
 
-	if(CheckWall(vWeaponPos))
+	if (CheckWall(vWeaponPos))
 		skip_controllability = true;
 
-	dir = pickpos-vWeaponPos;
+	dir = pickpos - vWeaponPos;
 	Normalize(dir);
 
 	MMatchWeaponType wtype = MWT_NONE;
-		
-	if(pSelectedItem->GetDesc())
+
+	if (pSelectedItem->GetDesc())
 		wtype = pSelectedItem->GetDesc()->m_nWeaponType;
 
 	u32 seed = reinterpret<u32>(g_pGame->GetTime());
 
-	if( ( wtype == MWT_SHOTGUN ) || ( wtype == MWT_SAWED_SHOTGUN ) )
+	if (wtype == MWT_SHOTGUN || wtype == MWT_SAWED_SHOTGUN)
 	{
 		int sel_type = GetItems()->GetSelectedWeaponParts();
 
 		rvector vTo = pickpos;
 
 		rvector nPos = m_pVMesh->GetBipTypePosition(eq_parts_pos_info_Spine1);
-		rvector nDir = pickpos-nPos;
+		rvector nDir = pickpos - nPos;
 		Normalize(nDir);
 
-		if( skip_controllability || (vWeaponPos.z <  m_Position.z + 20.f ))
+		if (skip_controllability || (vWeaponPos.z < m_Position.z + 20.f))
 		{
 			vWeaponPos = nPos + 30.f * nDir;
 			vTo = nPos + 10000.f * nDir;
 		}
 
-		ZPostShot(g_pGame->GetTime(),vWeaponPos, vTo,sel_type);
+		ZPostShot(g_pGame->GetTime(), vWeaponPos, vTo, sel_type);
 	}
 	else
 	{
@@ -659,7 +666,7 @@ void ZMyCharacter::OnShotRange()
 
 		int sel_type = GetItems()->GetSelectedWeaponParts();
 
-		ZPostShot(g_pGame->GetTime(),vWeaponPos, vWeaponPos+10000.f*r,sel_type);
+		ZPostShot(g_pGame->GetTime(), vWeaponPos, vWeaponPos + 10000.f*r, sel_type);
 	}
 }
 
@@ -680,7 +687,7 @@ void ZMyCharacter::OnShotItem()
 {
 	ZItem* pSelectedItem = GetItems()->GetSelectedWeapon();
 
-	if (pSelectedItem==NULL || pSelectedItem->GetBulletAMagazine() <= 0) {
+	if (!pSelectedItem || pSelectedItem->GetBulletAMagazine() <= 0) {
 		return;
 	}
 
@@ -688,20 +695,20 @@ void ZMyCharacter::OnShotItem()
 
 	int type = ZC_WEAPON_SP_ITEMKIT;
 
-	rvector pos = rvector(0.0f,0.0f,0.0f);
+	rvector pos = rvector(0.0f, 0.0f, 0.0f);
 	int sel_type = GetItems()->GetSelectedWeaponParts();
 
-	if(pSelectedItem->GetDesc()->m_nWeaponType==MWT_MED_KIT ||
-		pSelectedItem->GetDesc()->m_nWeaponType==MWT_REPAIR_KIT ||
-		pSelectedItem->GetDesc()->m_nWeaponType==MWT_BULLET_KIT ||
-		  pSelectedItem->GetDesc()->m_nWeaponType==MWT_FOOD )
+	if (pSelectedItem->GetDesc()->m_nWeaponType == MWT_MED_KIT ||
+		pSelectedItem->GetDesc()->m_nWeaponType == MWT_REPAIR_KIT ||
+		pSelectedItem->GetDesc()->m_nWeaponType == MWT_BULLET_KIT ||
+		pSelectedItem->GetDesc()->m_nWeaponType == MWT_FOOD)
 	{
 		pos = m_Position + (m_Direction * 150);
 		pos.z = m_Position.z;
 
 		rvector vWeapon;
 
-		vWeapon = m_Position + rvector(0,0,130) + (m_Direction * 50);
+		vWeapon = m_Position + rvector(0, 0, 130) + (m_Direction * 50);
 
 		rvector nPos = m_pVMesh->GetBipTypePosition(eq_parts_pos_info_Spine1);
 		rvector nDir = vWeapon - nPos;
@@ -709,16 +716,16 @@ void ZMyCharacter::OnShotItem()
 		Normalize(nDir);
 
 		RBSPPICKINFO bpi;
-		if(ZGetWorld()->GetBsp()->Pick(nPos,nDir,&bpi))	{
-			if(DotProduct(bpi.pInfo->plane, vWeapon) < 0) {
+		if (ZGetWorld()->GetBsp()->Pick(nPos, nDir, &bpi)) {
+			if (DotProduct(bpi.pInfo->plane, vWeapon) < 0) {
 				vWeapon = bpi.PickPos - nDir;
 			}
 		}
 
 		pos = vWeapon;
 
-		rvector velocity = (GetVelocity() * 0.5f) + m_TargetDir*100;
-		ZPostShotSp(g_pGame->GetTime(),pos,velocity,ZC_WEAPON_SP_ITEMKIT,sel_type);
+		rvector velocity = (GetVelocity() * 0.5f) + m_TargetDir * 100;
+		ZPostShotSp(g_pGame->GetTime(), pos, velocity, ZC_WEAPON_SP_ITEMKIT, sel_type);
 		return;
 	}
 
@@ -729,52 +736,52 @@ void ZMyCharacter::OnShotItem()
 	ZPICKINFO zpi;
 	rvector pickpos;
 
-	ZCombatInterface* ci=ZApplication::GetGameInterface()->GetCombatInterface();
+	ZCombatInterface* ci = ZApplication::GetGameInterface()->GetCombatInterface();
 
 	if (ci) {
 
 		Cp = ci->GetCrosshairPoint();
 
-		rvector pos,dir;
-		RGetScreenLine(Cp.x,Cp.y,&pos,&dir);
+		rvector pos, dir;
+		RGetScreenLine(Cp.x, Cp.y, &pos, &dir);
 
 		rvector mypos = m_Position + rvector(0, 0, 100);
 		rplane myplane = PlaneFromPointNormal(mypos, dir);
 
-		rvector checkpos,checkposto=pos+100000.f*dir;
+		rvector checkpos, checkposto = pos + 100000.f*dir;
 		IntersectLineSegmentPlane(&checkpos, myplane, pos, checkposto);
 
-		if(g_pGame->Pick(this,checkpos,dir,&zpi))
+		if (g_pGame->Pick(this, checkpos, dir, &zpi))
 		{
-			if(zpi.bBspPicked)
-				pickpos=zpi.bpi.PickPos;
+			if (zpi.bBspPicked)
+				pickpos = zpi.bpi.PickPos;
 			else
-				if(zpi.pObject)
-					pickpos=zpi.info.vOut;
+				if (zpi.pObject)
+					pickpos = zpi.info.vOut;
 		}
 		else
 		{
-			pickpos=pos+dir*10000.f;
+			pickpos = pos + dir*10000.f;
 		}
 	}
 
 	rvector v1;
-	GetWeaponTypePos(weapon_dummy_muzzle_flash,&v1);
+	GetWeaponTypePos(weapon_dummy_muzzle_flash, &v1);
 
-	if(zpi.bBspPicked && DotProduct(zpi.bpi.pInfo->plane, v1) < 0)
-		v1=m_Position+rvector(0,0,110);
+	if (zpi.bBspPicked && DotProduct(zpi.bpi.pInfo->plane, v1) < 0)
+		v1 = m_Position + rvector(0, 0, 110);
 
 	rvector dir = pickpos - v1;
 
 	Normalize(dir);
-	ZPostShotSp(g_pGame->GetTime(),v1,dir,type,sel_type);
+	ZPostShotSp(g_pGame->GetTime(), v1, dir, type, sel_type);
 }
 
 void ZMyCharacter::OnShotCustom()
 {
 	ZItem* pSelectedItem = GetItems()->GetSelectedWeapon();
 
-	if (pSelectedItem==NULL || pSelectedItem->GetBulletAMagazine() <= 0) {
+	if (pSelectedItem == NULL || pSelectedItem->GetBulletAMagazine() <= 0) {
 		return;
 	}
 
@@ -783,7 +790,7 @@ void ZMyCharacter::OnShotCustom()
 
 	SetAnimationUpper(ZC_STATE_UPPER_SHOT);
 
-	if(m_pVMesh->IsSelectWeaponGrenade()) {
+	if (m_pVMesh->IsSelectWeaponGrenade()) {
 		m_pVMesh->m_bGrenadeFire = true;
 		m_pVMesh->m_GrenadeFireTime = GetGlobalTimeMS();
 	}
@@ -792,7 +799,7 @@ void ZMyCharacter::OnShotCustom()
 bool ZMyCharacter::CheckWall(rvector& Pos)
 {
 	rvector vWPos;
-	GetWeaponTypePos(weapon_dummy_muzzle_flash,&vWPos);
+	GetWeaponTypePos(weapon_dummy_muzzle_flash, &vWPos);
 
 	rvector nPos = m_pVMesh->GetBipTypePosition(eq_parts_pos_info_Spine1);
 	rvector nDir = vWPos - nPos;
@@ -800,12 +807,12 @@ bool ZMyCharacter::CheckWall(rvector& Pos)
 
 	RBSPPICKINFO bpi;
 
-	memset(&bpi,0,sizeof(RBSPPICKINFO));
+	memset(&bpi, 0, sizeof(RBSPPICKINFO));
 
-	if(ZGetGame()->GetWorld()->GetBsp()->Pick(nPos,nDir,&bpi)) {
-		if(bpi.pInfo) {
-			if(DotProduct(bpi.pInfo->plane, vWPos) < 0) {
-				Pos = bpi.PickPos - 2.f*nDir; 
+	if (ZGetGame()->GetWorld()->GetBsp()->Pick(nPos, nDir, &bpi)) {
+		if (bpi.pInfo) {
+			if (DotProduct(bpi.pInfo->plane, vWPos) < 0) {
+				Pos = bpi.PickPos - 2.f*nDir;
 				return true;
 			}
 		}
@@ -821,7 +828,7 @@ void ZMyCharacter::OnShotRocket()
 {
 	ZItem* pSelectedItem = GetItems()->GetSelectedWeapon();
 
-	if (pSelectedItem==NULL || pSelectedItem->GetBulletAMagazine() <= 0) {
+	if (pSelectedItem == NULL || pSelectedItem->GetBulletAMagazine() <= 0) {
 
 		return;
 	}
@@ -829,91 +836,88 @@ void ZMyCharacter::OnShotRocket()
 	MPOINT Cp = MPOINT(0, 0);
 	RBSPPICKINFO bpi;
 
-	memset(&bpi,0,sizeof(RBSPPICKINFO));
+	memset(&bpi, 0, sizeof(RBSPPICKINFO));
 
-	ZCombatInterface* ci=ZApplication::GetGameInterface()->GetCombatInterface();
+	ZCombatInterface* ci = ZApplication::GetGameInterface()->GetCombatInterface();
 
-	if (ci)	{
+	if (ci) {
 
 		Cp = ci->GetCrosshairPoint();
 
-		rvector pos,dir;
-		RGetScreenLine(Cp.x,Cp.y,&pos,&dir);
+		rvector pos, dir;
+		RGetScreenLine(Cp.x, Cp.y, &pos, &dir);
 
-		if(!ZGetGame()->GetWorld()->GetBsp()->Pick(pos,dir,&bpi)) {
-			bpi.PickPos=pos+dir*10000.f;
+		if (!ZGetGame()->GetWorld()->GetBsp()->Pick(pos, dir, &bpi)) {
+			bpi.PickPos = pos + dir*10000.f;
 
 		}
 	}
 
 	rvector vWeaponPos;
-
 	CheckWall(vWeaponPos);
 
 	rvector dir = bpi.PickPos - vWeaponPos;
-
 	Normalize(dir);
 
 	int sel_type = GetItems()->GetSelectedWeaponParts();
 
-	ZPostShotSp(g_pGame->GetTime(),vWeaponPos,dir,ZC_WEAPON_SP_ROCKET,sel_type);
+	ZPostShotSp(g_pGame->GetTime(), vWeaponPos, dir, ZC_WEAPON_SP_ROCKET, sel_type);
 }
 
 void ZMyCharacter::OnGadget_Hanging()
 {
-	switch(m_pVMesh->m_SelectWeaponMotionType)
-	{	
-		case eq_wd_katana : 
-		case eq_wd_blade :
-		case eq_wd_sword :
-		case eq_ws_dagger:
-		case eq_wd_dagger:
-			break;
-		default:
-			return;
+	switch (m_pVMesh->m_SelectWeaponMotionType)
+	{
+	case eq_wd_katana:
+	case eq_wd_blade:
+	case eq_wd_sword:
+	case eq_ws_dagger:
+	case eq_wd_dagger:
+		break;
+	default:
+		return;
 	};
 
-	if(IsDie() || m_bWallJump || m_bGuard || m_bDrop || m_bTumble || m_bSkill ||
-		m_bBlast || m_bBlastFall || m_bBlastDrop || m_bBlastStand || m_bBlastAirmove ) return;
+	if (IsDie() || m_bWallJump || m_bGuard || m_bDrop || m_bTumble || m_bSkill ||
+		m_bBlast || m_bBlastFall || m_bBlastDrop || m_bBlastStand || m_bBlastAirmove) return;
+	if (GetStateLower() == ZC_STATE_LOWER_JUMPATTACK) return;
+	if (m_bWallJump2 && (g_pGame->GetTime() - m_fJump2Time) < .40f) return;
 
-	if(GetStateLower() == ZC_STATE_LOWER_JUMPATTACK) return;
+	m_bWallJump2 = false;
 
-	if(m_bWallJump2 && (g_pGame->GetTime()-m_fJump2Time)<.40f) return;
-
-	m_bWallJump2=false;
-
-	if(	!m_bWallHang )
+	if (!m_bWallHang)
 	{
-		if( GetDistToFloor()>100.f ) {
-			m_fHangTime=g_pGame->GetTime();
-			m_bWallHang=true;
-			m_bHangSuccess=false;
+		if (GetDistToFloor() > 100.f) {
+			m_fHangTime = g_pGame->GetTime();
+			m_bWallHang = true;
+			m_bHangSuccess = false;
 		}
-	} else {
-		if(g_pGame->GetTime()-m_fHangTime>.4f && !m_bHangSuccess) {
-			rvector pickorigin,pickto,dir;
-			rvector front=m_Direction;
-			front.z=0;
+	}
+	else {
+		if (g_pGame->GetTime() - m_fHangTime > .4f && !m_bHangSuccess) {
+			rvector pickorigin, pickto, dir;
+			rvector front = m_Direction;
+			front.z = 0;
 			Normalize(front);
-			dir=front;
-			pickorigin=m_Position+rvector(0,0,210);
+			dir = front;
+			pickorigin = m_Position + rvector(0, 0, 210);
 
 			RBSPPICKINFO bpi;
-			bool bPicked=ZGetGame()->GetWorld()->GetBsp()->Pick(pickorigin,dir,&bpi);
+			bool bPicked = ZGetGame()->GetWorld()->GetBsp()->Pick(pickorigin, dir, &bpi);
 
-			if(bPicked && Magnitude(pickorigin-bpi.PickPos)<100.f) 
+			if (bPicked && Magnitude(pickorigin - bpi.PickPos) < 100.f)
 			{
-				m_bHangSuccess=true;
-				rplane plane=bpi.pInfo->plane;
-				ZGetEffectManager()->AddLightFragment(bpi.PickPos,rvector(plane.a,plane.b,plane.c));
+				m_bHangSuccess = true;
+				rplane plane = bpi.pInfo->plane;
+				ZGetEffectManager()->AddLightFragment(bpi.PickPos, rvector(plane.a, plane.b, plane.c));
 
 #ifndef _BIRDSOUND
-				ZGetSoundEngine()->PlaySound("hangonwall", bpi.PickPos );
+				ZGetSoundEngine()->PlaySound("hangonwall", bpi.PickPos);
 #endif
-				SetLastThrower(MUID(0,0), 0.0f);
+				SetLastThrower(MUID(0, 0), 0.0f);
 			}
-			else 
-				m_bHangSuccess=false;
+			else
+				m_bHangSuccess = false;
 		}
 	}
 }
@@ -922,7 +926,7 @@ void ZMyCharacter::OnGadget_Snifer()
 {
 	m_bSniferMode = !m_bSniferMode;
 
-	ZCombatInterface* ci=ZApplication::GetGameInterface()->GetCombatInterface();
+	ZCombatInterface* ci = ZApplication::GetGameInterface()->GetCombatInterface();
 	if (ci)
 	{
 		if (m_bSniferMode)
@@ -939,50 +943,50 @@ void ZMyCharacter::OnGadget_Snifer()
 
 void ZMyCharacter::ProcessGadget()
 {
-	if(m_bWallJump || m_bGuard || m_bStun || m_bShot || m_bSkill ||
-		m_bSlash || m_bJumpSlash || m_bJumpSlashLanding ) return;
+	if (m_bWallJump || m_bGuard || m_bStun || m_bShot || m_bSkill ||
+		m_bSlash || m_bJumpSlash || m_bJumpSlashLanding) return;
 
-	if(GetItems()->GetSelectedWeapon()==NULL) return;
+	if (GetItems()->GetSelectedWeapon() == NULL) return;
 
-	if(IsDie() || m_bDrop || m_bBlast || m_bBlastDrop || m_bBlastStand) 
+	if (IsDie() || m_bDrop || m_bBlast || m_bBlastDrop || m_bBlastStand)
 		return;
 
-	if(GetStateUpper() == ZC_STATE_UPPER_RELOAD || GetStateUpper() == ZC_STATE_UPPER_LOAD)
+	if (GetStateUpper() == ZC_STATE_UPPER_RELOAD || GetStateUpper() == ZC_STATE_UPPER_LOAD)
 		return;
 
 	bool bPressingSecondary = ZIsActionKeyPressed(ZACTION_USE_WEAPON2);
 	bool bSecondary = bPressingSecondary && !bWasPressingSecondaryLastFrame;
 
-	if(bSecondary && m_bLand) {
+	if (bSecondary && m_bLand) {
 
 		MMatchWeaponType type = MWT_NONE;
 
 		int sel_type = GetItems()->GetSelectedWeaponParts();
 		ZItem* pSItem = GetItems()->GetSelectedWeapon();
 
-		if(pSItem && pSItem->GetDesc())
+		if (pSItem && pSItem->GetDesc())
 			type = pSItem->GetDesc()->m_nWeaponType;
-		switch(type) {
-		case MWT_DAGGER :
-		case MWT_DUAL_DAGGER :
-			m_bSkill=true;
+		switch (type) {
+		case MWT_DAGGER:
+		case MWT_DUAL_DAGGER:
+			m_bSkill = true;
 			m_fSkillTime = g_pGame->GetTime();
 			m_bTumble = false;
-			AddDelayedWork(g_pGame->GetTime()+0.18f,ZDW_DASH);
+			AddDelayedWork(g_pGame->GetTime() + 0.18f, ZDW_DASH);
 			break;
-		case MWT_KATANA :
-		case MWT_DOUBLE_KATANA :
-			m_bSkill=true;
+		case MWT_KATANA:
+		case MWT_DOUBLE_KATANA:
+			m_bSkill = true;
 			m_fSkillTime = g_pGame->GetTime();
 			m_bTumble = false;
-			AddDelayedWork(g_pGame->GetTime()+0.18f,ZDW_UPPERCUT);
+			AddDelayedWork(g_pGame->GetTime() + 0.18f, ZDW_UPPERCUT);
 			break;
 		}
 	}
-	
+
 	if (!bPressingSecondary)
 	{
-		m_bWallHang=false;
+		m_bWallHang = false;
 		m_bHangSuccess = false;
 		bWasPressingSecondaryLastFrame = bPressingSecondary;
 		return;
@@ -993,25 +997,23 @@ void ZMyCharacter::ProcessGadget()
 		ZItem* pSelectedItem = GetItems()->GetSelectedWeapon();
 		if (pSelectedItem)
 		{
-			if(pSelectedItem->GetDesc()) {
+			if (pSelectedItem->GetDesc()) {
 
 				switch (pSelectedItem->GetDesc()->m_nWeaponType)
 				{
 				case MWT_SNIFER:
-					{
-						OnGadget_Snifer();
-					}
-					break;
+				{
+					OnGadget_Snifer();
 				}
-
+				break;
+				}
 			}
 		}
 	}
 
-
 	if (m_pVMesh)
 	{
-		if(!m_bLand)
+		if (!m_bLand)
 			OnGadget_Hanging();
 	}
 	else
@@ -1024,22 +1026,22 @@ void ZMyCharacter::ProcessGadget()
 
 void ZMyCharacter::ProcessGuard()
 {
-	if(IsDie() || m_bWallJump || m_bDrop || m_bWallJump2 || m_bTumble || 
+	if (IsDie() || m_bWallJump || m_bDrop || m_bWallJump2 || m_bTumble ||
 		m_bBlast || m_bBlastFall || m_bBlastDrop || m_bBlastStand || m_bBlastAirmove ||
-		m_bSlash || m_bJumpSlash || m_bJumpSlashLanding ) return;
+		m_bSlash || m_bJumpSlash || m_bJumpSlashLanding) return;
 
 	ZItem* pSItem = GetItems()->GetSelectedWeapon();
-	if(!pSItem) return;
+	if (!pSItem) return;
 
-	if (pSItem->IsEmpty() || pSItem->GetDesc()==NULL) return;
+	if (pSItem->IsEmpty() || pSItem->GetDesc() == NULL) return;
 
-	if(pSItem->GetDesc()->m_nType!=MMIT_MELEE) return;
+	if (pSItem->GetDesc()->m_nType != MMIT_MELEE) return;
 
 	MMatchWeaponType type = pSItem->GetDesc()->m_nWeaponType;
-	if(type!=MWT_KATANA && type!=MWT_DOUBLE_KATANA) return; 
+	if (type != MWT_KATANA && type != MWT_DOUBLE_KATANA) return;
 
 
-	if(m_bGuard) {
+	if (m_bGuard) {
 		ReleaseLButtonQueue();
 	}
 
@@ -1049,29 +1051,29 @@ void ZMyCharacter::ProcessGuard()
 		(m_bLButtonFirstPressed || m_bRButtonFirstPressed);
 
 	float fTime = g_pGame->GetTime();
-	bool bGuardTime = ((fTime-m_f1ShotTime)<=GUARD_TIME && m_bRButtonFirstPressed) ||
-						((fTime-m_fSkillTime)<=GUARD_TIME && m_bLButtonFirstPressed) ||
-						(m_bLButtonFirstPressed && m_bRButtonFirstPressed);
+	bool bGuardTime = ((fTime - m_f1ShotTime) <= GUARD_TIME && m_bRButtonFirstPressed) ||
+		((fTime - m_fSkillTime) <= GUARD_TIME && m_bLButtonFirstPressed) ||
+		(m_bLButtonFirstPressed && m_bRButtonFirstPressed);
 
-	if(!m_bGuard && m_bGuardKey) {
+	if (!m_bGuard && m_bGuardKey) {
 		bBothPressed = true;
 		bGuardTime = true;
 	}
 
-	if(bBothPressed)
+	if (bBothPressed)
 	{
-		if(!m_bGuard && bGuardTime)
+		if (!m_bGuard && bGuardTime)
 		{
 			m_bSkill = false;
-			m_bShot	= false;
-			m_nShot	= 0;
+			m_bShot = false;
+			m_nShot = 0;
 			m_bGuard = true;
 			m_bGuardStart = true;
 			m_bWallHang = false;
 			m_bJumpShot = false;
 			m_fGuardStartTime = g_pGame->GetTime();
 
-			if(m_bGuardKey) m_bGuardByKey = true;
+			if (m_bGuardKey) m_bGuardByKey = true;
 			else			m_bGuardByKey = false;
 
 			return;
@@ -1085,13 +1087,13 @@ void ZMyCharacter::OnChangeWeapon(const char* WeaponModelName)
 	ZCharacter::OnChangeWeapon(WeaponModelName);
 
 	ReleaseLButtonQueue();
-	m_fNextShotTime=0.f;
+	m_fNextShotTime = 0.f;
 	m_fCAFactor = GetControllabilityFactor();
 	m_fElapsedCAFactorTime = 0.0f;
 
 	m_bSniferMode = false;
 
-	ZCombatInterface* ci=ZApplication::GetGameInterface()->GetCombatInterface();
+	ZCombatInterface* ci = ZApplication::GetGameInterface()->GetCombatInterface();
 	if (ci)
 	{
 		ci->OnGadgetOff();
@@ -1106,41 +1108,41 @@ void ZMyCharacter::OutputDebugString_CharacterState()
 
 	ZCharacter::OutputDebugString_CharacterState();
 
-	AddText( m_fDeadTime );
-	AddText( m_fNextShotTime );
-	AddText( m_fWallJumpTime );
-	AddText( m_bWallHang );
-	AddText( m_bTumble );
-	AddText( m_nTumbleDir );
-	AddText( m_bMoving );
-	AddText( m_bReleasedJump );
-	AddText( m_bJumpQueued );
-	AddText( m_bWallJumpQueued );
-	AddText( m_fLastJumpPressedTime );
+	AddText(m_fDeadTime);
+	AddText(m_fNextShotTime);
+	AddText(m_fWallJumpTime);
+	AddText(m_bWallHang);
+	AddText(m_bTumble);
+	AddText(m_nTumbleDir);
+	AddText(m_bMoving);
+	AddText(m_bReleasedJump);
+	AddText(m_bJumpQueued);
+	AddText(m_bWallJumpQueued);
+	AddText(m_fLastJumpPressedTime);
 
-	AddText( m_fJump2Time );
-	AddText( m_fHangTime );
-	AddText( m_HangPos );
-	AddText( m_bHangSuccess );
-	AddText( m_nWallJump2Dir );
-	AddText( m_fLastLButtonPressedTime );
-	AddText( m_bEnterCharge );
-	AddText( m_bJumpShot );
-	AddText( m_bShot );
-	AddText( m_bShotReturn );
-	AddText( m_nShot );
-	AddText( m_bSkill );
+	AddText(m_fJump2Time);
+	AddText(m_fHangTime);
+	AddText(m_HangPos);
+	AddText(m_bHangSuccess);
+	AddText(m_nWallJump2Dir);
+	AddText(m_fLastLButtonPressedTime);
+	AddText(m_bEnterCharge);
+	AddText(m_bJumpShot);
+	AddText(m_bShot);
+	AddText(m_bShotReturn);
+	AddText(m_nShot);
+	AddText(m_bSkill);
 
-	AddText( m_bSplashShot );
-	AddText( m_fSplashShotTime );
-	AddText( m_fLastShotTime );
-	AddText( m_bGuard );
-	AddText( m_nGuardBlock );
-	AddText( m_bGuardBlock_ret );
-	AddText( m_bGuardStart );
-	AddText( m_bGuardCancel );
-	AddText( m_bDrop );
-	AddText( m_fDropTime );
+	AddText(m_bSplashShot);
+	AddText(m_fSplashShotTime);
+	AddText(m_fLastShotTime);
+	AddText(m_bGuard);
+	AddText(m_nGuardBlock);
+	AddText(m_bGuardBlock_ret);
+	AddText(m_bGuardStart);
+	AddText(m_bGuardCancel);
+	AddText(m_bDrop);
+	AddText(m_fDropTime);
 
 	str.PrintLog();
 }
@@ -1148,43 +1150,43 @@ void ZMyCharacter::OutputDebugString_CharacterState()
 void ZMyCharacter::ProcessShot()
 {
 	if (ZApplication::GetGame()->GetMatch()->GetRoundState() == MMATCH_ROUNDSTATE_PREPARE) return;
-	if (m_bInitialized==false) return;
+	if (m_bInitialized == false) return;
 	if (MEvent::GetRButtonState()) return;
 
-	if(!m_bLButtonPressed) m_bEnterCharge = false;
+	if (!m_bLButtonPressed) m_bEnterCharge = false;
 
-	if(m_bLButtonFirstPressed && (g_pGame->GetTime() - m_fLastLButtonPressedTime < SHOT_QUEUE_TIME))
+	if (m_bLButtonFirstPressed && (g_pGame->GetTime() - m_fLastLButtonPressedTime < SHOT_QUEUE_TIME))
 		m_bLButtonQueued = true;
 
-	if (GetItems()->GetSelectedWeapon()==NULL ||
+	if (GetItems()->GetSelectedWeapon() == NULL ||
 		GetItems()->GetSelectedWeapon()->IsEmpty()) return;
 
-	if(GetItems()->GetSelectedWeapon()->GetDesc()->m_nType==MMIT_MELEE)
+	if (GetItems()->GetSelectedWeapon()->GetDesc()->m_nType == MMIT_MELEE)
 	{
 		bool bJumpAttack = false;
-		if(GetStateLower() == ZC_STATE_LOWER_JUMPATTACK ) {
+		if (GetStateLower() == ZC_STATE_LOWER_JUMPATTACK) {
 			bJumpAttack = true;
-		} 
-		else if( (GetStateLower() == ZC_STATE_LOWER_JUMP_UP) || (GetStateLower() == ZC_STATE_LOWER_JUMP_DOWN) ) {
-			if(GetStateUpper() == ZC_STATE_UPPER_SHOT) {
+		}
+		else if ((GetStateLower() == ZC_STATE_LOWER_JUMP_UP) || (GetStateLower() == ZC_STATE_LOWER_JUMP_DOWN)) {
+			if (GetStateUpper() == ZC_STATE_UPPER_SHOT) {
 				bJumpAttack = true;
 			}
 		}
 
-		if(bJumpAttack) {
+		if (bJumpAttack) {
 			ReleaseLButtonQueue();
-			if(!m_bLButtonPressed)
+			if (!m_bLButtonPressed)
 				return;
 		}
 		else {
-			if(!m_bLButtonQueued) 
+			if (!m_bLButtonQueued)
 				return;
 		}
 	}
 	else
 	{
 		if (ZApplication::GetGame()->GetMatch()->IsRuleGladiator() && !IsAdmin()) return;
-		if(!m_bLButtonPressed) return;
+		if (!m_bLButtonPressed) return;
 	}
 
 	if (GetItems()->GetSelectedWeapon()->GetDesc()->m_nType != MMIT_MELEE)
@@ -1195,71 +1197,71 @@ void ZMyCharacter::ProcessShot()
 		}
 	}
 
-	if(m_bWallHang || m_bStun ) return;
+	if (m_bWallHang || m_bStun) return;
 
-	if(IsDie() || m_bDrop || m_bBlast || m_bBlastFall || m_bBlastDrop || m_bBlastStand || m_bSpMotion)
+	if (IsDie() || m_bDrop || m_bBlast || m_bBlastFall || m_bBlastDrop || m_bBlastStand || m_bSpMotion)
 		return;
 
-	if(GetStateUpper() == ZC_STATE_UPPER_RELOAD || GetStateUpper() == ZC_STATE_UPPER_LOAD)
+	if (GetStateUpper() == ZC_STATE_UPPER_RELOAD || GetStateUpper() == ZC_STATE_UPPER_LOAD)
 		return;
 
 	int nParts = (int)GetItems()->GetSelectedWeaponParts();
 
-	if(nParts<0 || nParts > MMCIP_END-1) return;
+	if (nParts<0 || nParts > MMCIP_END - 1) return;
 
-	if(GetItems()->GetSelectedWeapon()->GetDesc()->m_nType!=MMIT_MELEE)
-		if( m_fNextShotTimeType[nParts] > g_pGame->GetTime() )
+	if (GetItems()->GetSelectedWeapon()->GetDesc()->m_nType != MMIT_MELEE)
+		if (m_fNextShotTimeType[nParts] > g_pGame->GetTime())
 			return;
 
 	ZItem* pSelectedItem = GetItems()->GetSelectedWeapon();
 
-	if ((pSelectedItem==NULL) || (pSelectedItem->GetDesc() == NULL)) 
+	if ((pSelectedItem == NULL) || (pSelectedItem->GetDesc() == NULL))
 		return;
 
 	MMatchItemDesc* pRangeDesc = pSelectedItem->GetDesc();
 	DWORD nWeaponDelay = pRangeDesc->m_nDelay;
 
-	m_fNextShotTimeType[nParts] = g_pGame->GetTime()+(float)(nWeaponDelay)*0.001f;
+	m_fNextShotTimeType[nParts] = g_pGame->GetTime() + (float)(nWeaponDelay)*0.001f;
 
-	if(GetItems()->GetSelectedWeapon()->GetBulletAMagazine() <= 0 ) 
+	if (GetItems()->GetSelectedWeapon()->GetBulletAMagazine() <= 0)
 	{
-		if( m_pVMesh->m_SelectWeaponMotionType != eq_wd_grenade && 
-			m_pVMesh->m_SelectWeaponMotionType != eq_wd_item && 
-			m_pVMesh->m_SelectWeaponMotionType != eq_wd_katana && 
-			m_pVMesh->m_SelectWeaponMotionType != eq_ws_dagger && 
-			m_pVMesh->m_SelectWeaponMotionType != eq_wd_dagger && 
+		if (m_pVMesh->m_SelectWeaponMotionType != eq_wd_grenade &&
+			m_pVMesh->m_SelectWeaponMotionType != eq_wd_item &&
+			m_pVMesh->m_SelectWeaponMotionType != eq_wd_katana &&
+			m_pVMesh->m_SelectWeaponMotionType != eq_ws_dagger &&
+			m_pVMesh->m_SelectWeaponMotionType != eq_wd_dagger &&
 			m_pVMesh->m_SelectWeaponMotionType != eq_wd_sword &&
-			m_pVMesh->m_SelectWeaponMotionType != eq_wd_blade )	
+			m_pVMesh->m_SelectWeaponMotionType != eq_wd_blade)
 		{
-			if( GetItems()->GetSelectedWeapon()->GetBullet() <= 0 ) {
-				ZGetSoundEngine()->PlaySEDryFire( GetItems()->GetSelectedWeapon()->GetDesc(), 0, 0, 0, true );
+			if (GetItems()->GetSelectedWeapon()->GetBullet() <= 0) {
+				ZGetSoundEngine()->PlaySEDryFire(GetItems()->GetSelectedWeapon()->GetDesc(), 0, 0, 0, true);
 			}
 			else {
-				m_bSpMotion = false;// 특수모션은 취소.. 
-				ZPostReload();	
+				m_bSpMotion = false;
+				ZPostReload();
 			}
 		}
 	}
 
-	switch( m_pVMesh->m_SelectWeaponMotionType ) {
-		case eq_wd_grenade :
-			OnShotCustom();
-			break;
-		case eq_wd_item :
-			if (m_bLand) OnShotItem();
-			break;
-		case eq_wd_rlauncher :
-			OnShotRocket();
-			break;
-		case eq_wd_katana :
-		case eq_ws_dagger :
-		case eq_wd_dagger :
-		case eq_wd_sword :
-		case eq_wd_blade :
-			OnShotMelee();
-			break;
-		default:
-			OnShotRange();
+	switch (m_pVMesh->m_SelectWeaponMotionType) {
+	case eq_wd_grenade:
+		OnShotCustom();
+		break;
+	case eq_wd_item:
+		if (m_bLand) OnShotItem();
+		break;
+	case eq_wd_rlauncher:
+		OnShotRocket();
+		break;
+	case eq_wd_katana:
+	case eq_ws_dagger:
+	case eq_wd_dagger:
+	case eq_wd_sword:
+	case eq_wd_blade:
+		OnShotMelee();
+		break;
+	default:
+		OnShotRange();
 	}
 
 	UpdateStylishShoted();
@@ -1267,183 +1269,207 @@ void ZMyCharacter::ProcessShot()
 
 void ZMyCharacter::UpdateAnimation()
 {
-	if (m_bInitialized==false) return;
+	if (m_bInitialized == false) return;
 
 	bool bTaunt = false;
 
-	if(m_bStun)
+	if (m_bStun)
 	{
-		switch(m_nStunType) {
-		case 0 : SetAnimationLower(ZC_STATE_DAMAGE); break;
-		case 1 : SetAnimationLower(ZC_STATE_DAMAGE2); break;
-		case 2 : SetAnimationLower(ZC_STATE_DAMAGE_DOWN); break;
-		case 3 : SetAnimationLower(ZC_STATE_DAMAGE_BLOCKED); break;
-		case 4 : SetAnimationLower(ZC_STATE_DAMAGE_LIGHTNING); break;
-		case 5 : SetAnimationLower(ZC_STATE_DAMAGE_STUN); break;
-		}		
-	}else
-	if(m_bBlastAirmove)
-	{
-		SetAnimationLower(ZC_STATE_LOWER_BLAST_AIRMOVE);
-	}else
-	if(m_bBlastStand)
-	{
-		SetAnimationLower(ZC_STATE_LOWER_BLAST_STAND);
-	}else
-	if(m_bBlastFall)
-	{
-			 if(m_nBlastType==0) SetAnimationLower(ZC_STATE_LOWER_BLAST_FALL);
-		else if(m_nBlastType==1) SetAnimationLower(ZC_STATE_LOWER_BLAST_DROP_DAGGER);
-	}else
-	if(m_bBlastDrop)
-	{
-			 if(m_nBlastType==0) SetAnimationLower(ZC_STATE_LOWER_BLAST_DROP);
-		else if(m_nBlastType==1) SetAnimationLower(ZC_STATE_LOWER_BLAST_DROP_DAGGER);
-
-	}else
-	if(m_bBlast)
-	{
-			 if(m_nBlastType==0) SetAnimationLower(ZC_STATE_LOWER_BLAST);
-		else if(m_nBlastType==1) SetAnimationLower(ZC_STATE_LOWER_BLAST_DAGGER);
-
-	}else
-	if(m_bSkill)
-	{
-		SetAnimationLower(ZC_STATE_LOWER_UPPERCUT);
-	}else
-	if(m_bJumpShot)
-	{
-		SetAnimationLower(ZC_STATE_LOWER_JUMPATTACK);
-
-	}else
-	if(m_bGuard)
-	{
-		if(m_bJumpUp) SetAnimationLower(ZC_STATE_LOWER_JUMP_UP);
+		switch (m_nStunType) {
+		case 0: SetAnimationLower(ZC_STATE_DAMAGE); break;
+		case 1: SetAnimationLower(ZC_STATE_DAMAGE2); break;
+		case 2: SetAnimationLower(ZC_STATE_DAMAGE_DOWN); break;
+		case 3: SetAnimationLower(ZC_STATE_DAMAGE_BLOCKED); break;
+		case 4: SetAnimationLower(ZC_STATE_DAMAGE_LIGHTNING); break;
+		case 5: SetAnimationLower(ZC_STATE_DAMAGE_STUN); break;
+		}
+	}
+	else
+		if (m_bBlastAirmove)
+		{
+			SetAnimationLower(ZC_STATE_LOWER_BLAST_AIRMOVE);
+		}
 		else
-		if(m_bJumpDown) SetAnimationLower(ZC_STATE_LOWER_JUMP_DOWN);
-		else
-			if(m_bMoving)
+			if (m_bBlastStand)
 			{
-				if(m_bBackMoving) SetAnimationLower(ZC_STATE_LOWER_RUN_BACK);
-				else 
-					SetAnimationLower(ZC_STATE_LOWER_RUN_FORWARD);
+				SetAnimationLower(ZC_STATE_LOWER_BLAST_STAND);
 			}
 			else
-				SetAnimationLower(ZC_STATE_LOWER_IDLE1);
+				if (m_bBlastFall)
+				{
+					if (m_nBlastType == 0) SetAnimationLower(ZC_STATE_LOWER_BLAST_FALL);
+					else if (m_nBlastType == 1) SetAnimationLower(ZC_STATE_LOWER_BLAST_DROP_DAGGER);
+				}
+				else
+					if (m_bBlastDrop)
+					{
+						if (m_nBlastType == 0) SetAnimationLower(ZC_STATE_LOWER_BLAST_DROP);
+						else if (m_nBlastType == 1) SetAnimationLower(ZC_STATE_LOWER_BLAST_DROP_DAGGER);
 
-		if(m_bGuardStart)
-			SetAnimationUpper(ZC_STATE_UPPER_GUARD_START);
-		else
-		if(m_bGuardCancel)
-			SetAnimationUpper(ZC_STATE_UPPER_GUARD_CANCEL);
-		else
-		if(m_nGuardBlock)
-		{
-			switch(m_nGuardBlock) {
-			case 1 : SetAnimationUpper(ZC_STATE_UPPER_GUARD_BLOCK1);break;
-			case 2 : SetAnimationUpper(ZC_STATE_UPPER_GUARD_BLOCK2);break;
-			}
-		}else
-		if(m_bGuardBlock_ret)
-			SetAnimationUpper(ZC_STATE_UPPER_GUARD_BLOCK1_RET);
-		else
-			SetAnimationUpper(ZC_STATE_UPPER_GUARD_IDLE);
-	}else
-	if(m_bShotReturn)
-	{
-		switch(m_nShot) {
-		case 1 : SetAnimationLower(ZC_STATE_LOWER_ATTACK1_RET); break;
-		case 2 : SetAnimationLower(ZC_STATE_LOWER_ATTACK2_RET); break;
-		case 3 : SetAnimationLower(ZC_STATE_LOWER_ATTACK3_RET); break;
-		case 4 : SetAnimationLower(ZC_STATE_LOWER_ATTACK4_RET); break;
-		}
-	}else
-	if(m_bShot)
-	{
-		switch(m_nShot) {
-		case 1 : SetAnimationLower(ZC_STATE_LOWER_ATTACK1); break;
-		case 2 : SetAnimationLower(ZC_STATE_LOWER_ATTACK2); break;
-		case 3 : SetAnimationLower(ZC_STATE_LOWER_ATTACK3); break;
-		case 4 : 
-			SetAnimationLower(ZC_STATE_LOWER_ATTACK4); 
-			break;
-		case 5 : SetAnimationLower(ZC_STATE_LOWER_ATTACK5); break;
-		}
-	}else
-	if(m_bWallJump2)
-	{
-		switch(m_nWallJump2Dir) {
-		case 0 : SetAnimationLower(ZC_STATE_LOWER_JUMP_WALL_FORWARD); break;
-		case 1 : SetAnimationLower(ZC_STATE_LOWER_JUMP_WALL_BACK); break;
-		case 2 : SetAnimationLower(ZC_STATE_LOWER_JUMP_WALL_LEFT); break;
-		case 3 : SetAnimationLower(ZC_STATE_LOWER_JUMP_WALL_RIGHT); break;
-		case 4 : SetAnimationLower(ZC_STATE_LOWER_RUN_WALL_LEFT_DOWN); break;
-		case 5 : SetAnimationLower(ZC_STATE_LOWER_RUN_WALL_RIGHT_DOWN); break;
-		case 6 : SetAnimationLower(ZC_STATE_LOWER_RUN_WALL_DOWN_FORWARD); break;
-		case 7 : SetAnimationLower(ZC_STATE_LOWER_RUN_WALL_DOWN); break;
-		}
-	}else
-	if(m_bWallHang)
-	{
-		SetAnimationLower(ZC_STATE_LOWER_BIND);
-	}else
-	if(m_bTumble)
-	{
-		switch(m_nTumbleDir)
-		{
-		case 0 :SetAnimationLower(ZC_STATE_LOWER_TUMBLE_FORWARD);break;
-		case 1 :SetAnimationLower(ZC_STATE_LOWER_TUMBLE_BACK);break;
-		case 2 :SetAnimationLower(ZC_STATE_LOWER_TUMBLE_RIGHT);break;
-		case 3 :SetAnimationLower(ZC_STATE_LOWER_TUMBLE_LEFT);break;
-		}
-	}else
-	if(m_bWallJump)
-	{
-		switch(m_nWallJumpDir)
-		{
-			case 0 :SetAnimationLower(ZC_STATE_LOWER_RUN_WALL_LEFT);break;
-			case 1 :SetAnimationLower(ZC_STATE_LOWER_RUN_WALL);break;
-			case 2 :SetAnimationLower(ZC_STATE_LOWER_RUN_WALL_RIGHT);break;
-		}
-	}else 
-	if(m_bJumpSlash) {
-		SetAnimationLower(ZC_STATE_JUMP_SLASH1);
-	}else 
-	if(m_bJumpSlashLanding) {
-		SetAnimationLower(ZC_STATE_JUMP_SLASH2);
-	}else
-	if(m_bSlash) {
-		SetAnimationLower(ZC_STATE_SLASH);
-	}else
-	if(m_bJumpUp)
-	{
-		SetAnimationLower(ZC_STATE_LOWER_JUMP_UP);
-	}else
-	if(m_bJumpDown)
-	{
-		SetAnimationLower(ZC_STATE_LOWER_JUMP_DOWN);
-	}else 
-	if(m_bCharging) {
-		SetAnimationLower(ZC_STATE_CHARGE);
-	}else
-	if(m_bMoving){
+					}
+					else
+						if (m_bBlast)
+						{
+							if (m_nBlastType == 0) SetAnimationLower(ZC_STATE_LOWER_BLAST);
+							else if (m_nBlastType == 1) SetAnimationLower(ZC_STATE_LOWER_BLAST_DAGGER);
 
-		if(m_bBackMoving)
-			SetAnimationLower(ZC_STATE_LOWER_RUN_BACK);
-		else {
-			SetAnimationLower(ZC_STATE_LOWER_RUN_FORWARD);
-		}
-	}else 
-	if(m_bSpMotion) {
+						}
+						else
+							if (m_bSkill)
+							{
+								SetAnimationLower(ZC_STATE_LOWER_UPPERCUT);
+							}
+							else
+								if (m_bJumpShot)
+								{
+									SetAnimationLower(ZC_STATE_LOWER_JUMPATTACK);
 
-		SetAnimationLower(m_SpMotion);
+								}
+								else
+									if (m_bGuard)
+									{
+										if (m_bJumpUp) SetAnimationLower(ZC_STATE_LOWER_JUMP_UP);
+										else
+											if (m_bJumpDown) SetAnimationLower(ZC_STATE_LOWER_JUMP_DOWN);
+											else
+												if (m_bMoving)
+												{
+													if (m_bBackMoving) SetAnimationLower(ZC_STATE_LOWER_RUN_BACK);
+													else
+														SetAnimationLower(ZC_STATE_LOWER_RUN_FORWARD);
+												}
+												else
+													SetAnimationLower(ZC_STATE_LOWER_IDLE1);
 
-		bTaunt = true;
-	} else
-		SetAnimationLower(ZC_STATE_LOWER_IDLE1);
+										if (m_bGuardStart)
+											SetAnimationUpper(ZC_STATE_UPPER_GUARD_START);
+										else
+											if (m_bGuardCancel)
+												SetAnimationUpper(ZC_STATE_UPPER_GUARD_CANCEL);
+											else
+												if (m_nGuardBlock)
+												{
+													switch (m_nGuardBlock) {
+													case 1: SetAnimationUpper(ZC_STATE_UPPER_GUARD_BLOCK1); break;
+													case 2: SetAnimationUpper(ZC_STATE_UPPER_GUARD_BLOCK2); break;
+													}
+												}
+												else
+													if (m_bGuardBlock_ret)
+														SetAnimationUpper(ZC_STATE_UPPER_GUARD_BLOCK1_RET);
+													else
+														SetAnimationUpper(ZC_STATE_UPPER_GUARD_IDLE);
+									}
+									else
+										if (m_bShotReturn)
+										{
+											switch (m_nShot) {
+											case 1: SetAnimationLower(ZC_STATE_LOWER_ATTACK1_RET); break;
+											case 2: SetAnimationLower(ZC_STATE_LOWER_ATTACK2_RET); break;
+											case 3: SetAnimationLower(ZC_STATE_LOWER_ATTACK3_RET); break;
+											case 4: SetAnimationLower(ZC_STATE_LOWER_ATTACK4_RET); break;
+											}
+										}
+										else
+											if (m_bShot)
+											{
+												switch (m_nShot) {
+												case 1: SetAnimationLower(ZC_STATE_LOWER_ATTACK1); break;
+												case 2: SetAnimationLower(ZC_STATE_LOWER_ATTACK2); break;
+												case 3: SetAnimationLower(ZC_STATE_LOWER_ATTACK3); break;
+												case 4:
+													SetAnimationLower(ZC_STATE_LOWER_ATTACK4);
+													break;
+												case 5: SetAnimationLower(ZC_STATE_LOWER_ATTACK5); break;
+												}
+											}
+											else
+												if (m_bWallJump2)
+												{
+													switch (m_nWallJump2Dir) {
+													case 0: SetAnimationLower(ZC_STATE_LOWER_JUMP_WALL_FORWARD); break;
+													case 1: SetAnimationLower(ZC_STATE_LOWER_JUMP_WALL_BACK); break;
+													case 2: SetAnimationLower(ZC_STATE_LOWER_JUMP_WALL_LEFT); break;
+													case 3: SetAnimationLower(ZC_STATE_LOWER_JUMP_WALL_RIGHT); break;
+													case 4: SetAnimationLower(ZC_STATE_LOWER_RUN_WALL_LEFT_DOWN); break;
+													case 5: SetAnimationLower(ZC_STATE_LOWER_RUN_WALL_RIGHT_DOWN); break;
+													case 6: SetAnimationLower(ZC_STATE_LOWER_RUN_WALL_DOWN_FORWARD); break;
+													case 7: SetAnimationLower(ZC_STATE_LOWER_RUN_WALL_DOWN); break;
+													}
+												}
+												else
+													if (m_bWallHang)
+													{
+														SetAnimationLower(ZC_STATE_LOWER_BIND);
+													}
+													else
+														if (m_bTumble)
+														{
+															switch (m_nTumbleDir)
+															{
+															case 0:SetAnimationLower(ZC_STATE_LOWER_TUMBLE_FORWARD); break;
+															case 1:SetAnimationLower(ZC_STATE_LOWER_TUMBLE_BACK); break;
+															case 2:SetAnimationLower(ZC_STATE_LOWER_TUMBLE_RIGHT); break;
+															case 3:SetAnimationLower(ZC_STATE_LOWER_TUMBLE_LEFT); break;
+															}
+														}
+														else
+															if (m_bWallJump)
+															{
+																switch (m_nWallJumpDir)
+																{
+																case 0:SetAnimationLower(ZC_STATE_LOWER_RUN_WALL_LEFT); break;
+																case 1:SetAnimationLower(ZC_STATE_LOWER_RUN_WALL); break;
+																case 2:SetAnimationLower(ZC_STATE_LOWER_RUN_WALL_RIGHT); break;
+																}
+															}
+															else
+																if (m_bJumpSlash) {
+																	SetAnimationLower(ZC_STATE_JUMP_SLASH1);
+																}
+																else
+																	if (m_bJumpSlashLanding) {
+																		SetAnimationLower(ZC_STATE_JUMP_SLASH2);
+																	}
+																	else
+																		if (m_bSlash) {
+																			SetAnimationLower(ZC_STATE_SLASH);
+																		}
+																		else
+																			if (m_bJumpUp)
+																			{
+																				SetAnimationLower(ZC_STATE_LOWER_JUMP_UP);
+																			}
+																			else
+																				if (m_bJumpDown)
+																				{
+																					SetAnimationLower(ZC_STATE_LOWER_JUMP_DOWN);
+																				}
+																				else
+																					if (m_bCharging) {
+																						SetAnimationLower(ZC_STATE_CHARGE);
+																					}
+																					else
+																						if (m_bMoving) {
 
-	if(m_bSpMotion) {
-		if(!bTaunt)
+																							if (m_bBackMoving)
+																								SetAnimationLower(ZC_STATE_LOWER_RUN_BACK);
+																							else {
+																								SetAnimationLower(ZC_STATE_LOWER_RUN_FORWARD);
+																							}
+																						}
+																						else
+																							if (m_bSpMotion) {
+
+																								SetAnimationLower(m_SpMotion);
+
+																								bTaunt = true;
+																							}
+																							else
+																								SetAnimationLower(ZC_STATE_LOWER_IDLE1);
+
+	if (m_bSpMotion) {
+		if (!bTaunt)
 			m_bSpMotion = false;
 	}
 
@@ -1451,65 +1477,65 @@ void ZMyCharacter::UpdateAnimation()
 
 void ZMyCharacter::WallJump2()
 {
-	m_bWallJump2=true;
-	m_bJumpQueued=false;
-	m_bWallJump=false;
-	m_bPlayDone=false;
+	m_bWallJump2 = true;
+	m_bJumpQueued = false;
+	m_bWallJump = false;
+	m_bPlayDone = false;
 
-	rvector jump2=-rvector(m_Direction.x,m_Direction.y,0);
+	rvector jump2 = -rvector(m_Direction.x, m_Direction.y, 0);
 	Normalize(jump2);
 
-	if(m_nWallJumpDir==1)
+	if (m_nWallJumpDir == 1)
 	{
-		if(ZIsActionKeyPressed(ZACTION_FORWARD))
+		if (ZIsActionKeyPressed(ZACTION_FORWARD))
 		{
-			m_nWallJump2Dir=6;
+			m_nWallJump2Dir = 6;
 			SetVelocity(jump2*50.f);
 		}
 		else
 		{
-			m_nWallJump2Dir=7;
+			m_nWallJump2Dir = 7;
 			AddVelocity(jump2*300.f);
 		}
-		AddVelocity(rvector(0,0,1400));
-
-	}else
+		AddVelocity(rvector(0, 0, 1400));
+	}
+	else
 	{
 		float fSecondJumpSpeed = WALL_JUMP2_SIDE_VELOCITY;
 
 		rvector right;
-		CrossProduct(&right,m_Direction,rvector(0,0,1));
-		jump2= (m_nWallJumpDir==0) ? -right : right;
-		if(m_nWallJumpDir==0)
-			m_nWallJump2Dir=4;
+		CrossProduct(&right, m_Direction, rvector(0, 0, 1));
+		jump2 = (m_nWallJumpDir == 0) ? -right : right;
+		if (m_nWallJumpDir == 0)
+			m_nWallJump2Dir = 4;
 		else
-			m_nWallJump2Dir=5;
+			m_nWallJump2Dir = 5;
 
 		AddVelocity(fSecondJumpSpeed*jump2);
-		AddVelocity(rvector(0,0,1300));
+		AddVelocity(rvector(0, 0, 1300));
 	}
 
-	m_fJump2Time=g_pGame->GetTime();
+	m_fJump2Time = g_pGame->GetTime();
 }
 
 void ZMyCharacter::UpdateLimit()
 {
 	MMatchItemDesc* pDesc = GetSelectItemDesc();
 
-	m_bLimitJump	= false;
-	m_bLimitTumble	= false;
-	m_bLimitWall	= false;
+	m_bLimitJump = false;
+	m_bLimitTumble = false;
+	m_bLimitWall = false;
 
-	if(pDesc) {
-	
-		if(pDesc->m_nLimitJump)			m_bLimitJump	= true;
-		if(pDesc->m_nLimitTumble)		m_bLimitTumble	= true;
-		if(pDesc->m_nLimitWall)			m_bLimitWall	= true;
+	if (pDesc) {
+
+		if (pDesc->m_nLimitJump)			m_bLimitJump = true;
+		if (pDesc->m_nLimitTumble)		m_bLimitTumble = true;
+		if (pDesc->m_nLimitWall)			m_bLimitWall = true;
 	}
 
-	if(IsActiveModule(ZMID_COLDDAMAGE)) {
-		m_bLimitTumble	= true;
-		m_bLimitWall	= true;
+	if (IsActiveModule(ZMID_COLDDAMAGE)) {
+		m_bLimitTumble = true;
+		m_bLimitWall = true;
 	}
 }
 
@@ -1518,42 +1544,42 @@ void ZMyCharacter::UpdateButtonState()
 	bool bLButtonPressed = ZIsActionKeyPressed(ZACTION_USE_WEAPON);
 
 	m_bLButtonFirstPressed = bLButtonPressed && !m_bLButtonPressed;
-	if(m_bLButtonFirstPressed) 
-		m_fLastLButtonPressedTime=g_pGame->GetTime();
+	if (m_bLButtonFirstPressed)
+		m_fLastLButtonPressedTime = g_pGame->GetTime();
 
 	m_bLButtonPressed = bLButtonPressed;
 
 
 	bool bRButtonPressed = MEvent::GetRButtonState();
 
-	m_bRButtonFirstReleased = (m_bRButtonPressed && !bRButtonPressed);	
+	m_bRButtonFirstReleased = (m_bRButtonPressed && !bRButtonPressed);
 
 	m_bRButtonFirstPressed = bRButtonPressed && !m_bRButtonPressed;
-	if(m_bRButtonFirstPressed) 
+	if (m_bRButtonFirstPressed)
 		m_fLastRButtonPressedTime = g_pGame->GetTime();
 
 	m_bRButtonPressed = bRButtonPressed;
 
-	if(m_bLButtonQueued && (g_pGame->GetTime()-m_fLastLButtonPressedTime>SHOT_QUEUE_TIME)) {
+	if (m_bLButtonQueued && (g_pGame->GetTime() - m_fLastLButtonPressedTime > SHOT_QUEUE_TIME)) {
 		m_bLButtonQueued = false;
 	}
 }
 
 void ZMyCharacter::OnUpdate(float fDelta)
 {
-	if (m_bInitialized==false) return;
+	if (m_bInitialized == false) return;
 
 	_BP("ZMyCharacter::Update");
 
-	if(g_pGame->IsReplay()) {
+	if (g_pGame->IsReplay()) {
 		ZCharacter::OnUpdate(fDelta);
 		return;
 	}
 
 	CameraDir = m_TargetDir;
 
-	if(m_bReserveDashAttacked) {
-		if( g_pGame->GetTime() > m_fReserveDashAttackedTime ) {
+	if (m_bReserveDashAttacked) {
+		if (g_pGame->GetTime() > m_fReserveDashAttackedTime) {
 			OnDashAttacked(m_vReserveDashAttackedDir);
 			m_bReserveDashAttacked = false;
 		}
@@ -1561,35 +1587,35 @@ void ZMyCharacter::OnUpdate(float fDelta)
 
 	UpdateLimit();
 
-	if((m_bWallHang && m_bHangSuccess) || m_bShot) 
-		SetVelocity(0,0,0);
-	
+	if ((m_bWallHang && m_bHangSuccess) || m_bShot)
+		SetVelocity(0, 0, 0);
+
 	UpdateVelocity(fDelta);
 
-	fDelta=min(fDelta,1.f);
+	fDelta = min(fDelta, 1.f);
 
-	if(IsDie() && ((m_bLand && m_bPlayDone) )) {
-		SetVelocity(0,0,0);
+	if (IsDie() && ((m_bLand && m_bPlayDone))) {
+		SetVelocity(0, 0, 0);
 	}
 
-	m_bMoving = Magnitude(rvector(GetVelocity().x,GetVelocity().y,0))>.1f;
+	m_bMoving = Magnitude(rvector(GetVelocity().x, GetVelocity().y, 0)) > .1f;
 
 	const int MAX_MOVE_FRAME = 150;
 	static float fAccmulatedDelta = 0.f;
 
-	fAccmulatedDelta+=fDelta;
+	fAccmulatedDelta += fDelta;
 
-	if(fAccmulatedDelta>(1.f/(float)MAX_MOVE_FRAME))
+	if (fAccmulatedDelta > (1.f / (float)MAX_MOVE_FRAME))
 	{
 		m_pModule_Movable->OnUpdate(fAccmulatedDelta);
 
-		if(Magnitude(m_pModule_Movable->GetLastMove())<0.01f)
-			SetVelocity(0,0,0);
+		if (Magnitude(m_pModule_Movable->GetLastMove()) < 0.01f)
+			SetVelocity(0, 0, 0);
 
 		if (GetDistToFloor() > 0.1f || GetVelocity().z > 0.1f)
 		{
 			m_pModule_Movable->UpdateGravity(GetGravityConst()*fAccmulatedDelta);
-			m_bLand=false;
+			m_bLand = false;
 		}
 
 		fAccmulatedDelta = 0;
@@ -1597,123 +1623,123 @@ void ZMyCharacter::OnUpdate(float fDelta)
 
 	UpdateHeight(fDelta);
 
-	rvector diff=fDelta*GetVelocity();
+	rvector diff = fDelta*GetVelocity();
 
-	bool bUp = (diff.z>0.01f);
-	bool bDownward= (diff.z<0.01f);
+	bool bUp = (diff.z > 0.01f);
+	bool bDownward = (diff.z < 0.01f);
 
 	if ((m_Position.z > DIE_CRITICAL_LINE) &&
-		(GetDistToFloor()<0 || (bDownward && m_pModule_Movable->GetLastMove().z>=0)))
+		(GetDistToFloor() < 0 || (bDownward && m_pModule_Movable->GetLastMove().z >= 0)))
 	{
-		if(!m_bWallJump)
+		if (!m_bWallJump)
 		{
-			if(GetVelocity().z<1.f && GetDistToFloor()<1.f)
+			if (GetVelocity().z < 1.f && GetDistToFloor() < 1.f)
 			{
-				m_bLand=true;
-				m_bWallJump=false;
-				m_bJumpDown=false;
-				m_bJumpUp=false;
-				m_bWallJump2=false;
-				m_bBlastAirmove=false;
-				m_bWallHang=false;
-				
-				if(GetVelocity().z<0)
-					SetVelocity(GetVelocity().x,GetVelocity().y,0);
+				m_bLand = true;
+				m_bWallJump = false;
+				m_bJumpDown = false;
+				m_bJumpUp = false;
+				m_bWallJump2 = false;
+				m_bBlastAirmove = false;
+				m_bWallHang = false;
+
+				if (GetVelocity().z < 0)
+					SetVelocity(GetVelocity().x, GetVelocity().y, 0);
 
 				if (GetLastThrowClearTime() < g_pGame->GetTime())
-					SetLastThrower(MUID(0,0), 0.0f);
+					SetLastThrower(MUID(0, 0), 0.0f);
 			}
 		}
-	} 
+	}
 
 	UpdateCAFactor(fDelta);
 
-	if(GetDistToFloor() < 0 && !IsDie())
+	if (GetDistToFloor() < 0 && !IsDie())
 	{
-		float fAdjust=400.f*fDelta;
-		rvector diff=rvector(0,0,min(-GetDistToFloor(),fAdjust));
+		float fAdjust = 400.f*fDelta;
+		rvector diff = rvector(0, 0, min(-GetDistToFloor(), fAdjust));
 		Move(diff);
 	}
 
-	if(IsMoveAnimation())
+	if (IsMoveAnimation())
 	{
-		rvector origdiff=fDelta*GetVelocity();
+		rvector origdiff = fDelta*GetVelocity();
 
 		rvector diff = m_AnimationPositionDiff;
-		diff.z+=origdiff.z;
+		diff.z += origdiff.z;
 
-		if(GetDistToFloor()<0 && diff.z<0) diff.z=-GetDistToFloor();
+		if (GetDistToFloor() < 0 && diff.z < 0) diff.z = -GetDistToFloor();
 
 		Move(diff);
 	}
 
 #ifndef _PUBLISH
-	if(!MEvent::IsKeyDown(VK_MENU))
+	if (!MEvent::IsKeyDown(VK_MENU))
 #endif
-	if (!IsDirLocked())
-		SetTargetDir(ZGetCamera()->GetCurrentDir());
+		if (!IsDirLocked())
+			SetTargetDir(ZGetCamera()->GetCurrentDir());
 
-	float fWallJumpTime = (m_nWallJumpDir==1) ? 1.5f : 2.3f;
-	float fSecondJumpTime = (m_nWallJumpDir==1) ? 0.95f : 2.1f;
+	float fWallJumpTime = (m_nWallJumpDir == 1) ? 1.5f : 2.3f;
+	float fSecondJumpTime = (m_nWallJumpDir == 1) ? 0.95f : 2.1f;
 
-	if(m_fWallJumpTime+fWallJumpTime<g_pGame->GetTime() && m_bWallJump)
+	if (m_fWallJumpTime + fWallJumpTime < g_pGame->GetTime() && m_bWallJump)
 	{
-		m_bWallJump=false;
-		m_bLand=true;
-		m_bJumpDown=false;
-		m_bJumpUp=false;
+		m_bWallJump = false;
+		m_bLand = true;
+		m_bJumpDown = false;
+		m_bJumpUp = false;
 
-		SetVelocity(GetVelocity().x,GetVelocity().y,0);
-	}
+		SetVelocity(GetVelocity().x, GetVelocity().y, 0);
+}
 
-	if(m_bWallJump)
+	if (m_bWallJump)
 	{
-		bool bEndWallJump2=m_fWallJumpTime+fSecondJumpTime<g_pGame->GetTime() && !m_bWallJump2;
+		bool bEndWallJump2 = m_fWallJumpTime + fSecondJumpTime < g_pGame->GetTime() && !m_bWallJump2;
 
-		if(m_fWallJumpTime+0.3f<g_pGame->GetTime())
+		if (m_fWallJumpTime + 0.3f < g_pGame->GetTime())
 		{
-			rvector dir2d=rvector(m_Direction.x,m_Direction.y,0);
+			rvector dir2d = rvector(m_Direction.x, m_Direction.y, 0);
 			Normalize(dir2d);
 
-			if(m_nWallJumpDir==1)
+			if (m_nWallJumpDir == 1)
 			{
 				RBSPPICKINFO bpi;
-				bool bPicked=ZGetGame()->GetWorld()->GetBsp()->Pick(m_Position+rvector(0,0,40),dir2d,&bpi);
-				if(!bPicked || Magnitude(bpi.PickPos-m_Position)>100)
-					bEndWallJump2|=true;
+				bool bPicked = ZGetGame()->GetWorld()->GetBsp()->Pick(m_Position + rvector(0, 0, 40), dir2d, &bpi);
+				if (!bPicked || Magnitude(bpi.PickPos - m_Position)>100)
+					bEndWallJump2 |= true;
 
-				rvector targetpos=m_Position+rvector(0,0,160);
-				bool bAdjusted=ZGetGame()->GetWorld()->GetBsp()->CheckWall(m_Position+rvector(0,0,130),targetpos,CHARACTER_RADIUS-1,50);
-				if(bAdjusted)
-					bEndWallJump2|=true;
+				rvector targetpos = m_Position + rvector(0, 0, 160);
+				bool bAdjusted = ZGetGame()->GetWorld()->GetBsp()->CheckWall(m_Position + rvector(0, 0, 130), targetpos, CHARACTER_RADIUS - 1, 50);
+				if (bAdjusted)
+					bEndWallJump2 |= true;
 			}
 			else
 			{
 				rvector right;
-				CrossProduct(&right,rvector(0,0,1),dir2d);
+				CrossProduct(&right, rvector(0, 0, 1), dir2d);
 
-				rvector dir = (m_nWallJumpDir==0) ? -right : right;
+				rvector dir = (m_nWallJumpDir == 0) ? -right : right;
 
 				RBSPPICKINFO bpi;
-				bool bPicked=ZGetGame()->GetWorld()->GetBsp()->Pick(m_Position,dir,&bpi);
-				if(!bPicked || Magnitude(bpi.PickPos-m_Position)>100)
-					bEndWallJump2|=true;
+				bool bPicked = ZGetGame()->GetWorld()->GetBsp()->Pick(m_Position, dir, &bpi);
+				if (!bPicked || Magnitude(bpi.PickPos - m_Position) > 100)
+					bEndWallJump2 |= true;
 
-				rvector targetpos=m_Position+rvector(0,0,100)+100.f*dir2d;
-				bool bAdjusted=ZGetGame()->GetWorld()->GetBsp()->CheckWall(m_Position+rvector(0,0,100),targetpos,CHARACTER_RADIUS-1,50);
-				if(bAdjusted)
-					bEndWallJump2|=true;
+				rvector targetpos = m_Position + rvector(0, 0, 100) + 100.f*dir2d;
+				bool bAdjusted = ZGetGame()->GetWorld()->GetBsp()->CheckWall(m_Position + rvector(0, 0, 100), targetpos, CHARACTER_RADIUS - 1, 50);
+				if (bAdjusted)
+					bEndWallJump2 |= true;
 			}
 		}
 
-		if(bEndWallJump2)
+		if (bEndWallJump2)
 			WallJump2();
 	}
 
 	int sel_type = GetItems()->GetSelectedWeaponParts();
 
-	if(m_bShot && m_nShot==1 && !m_b1ShotSended && g_pGame->GetTime()-m_f1ShotTime>GUARD_TIME) {
-		m_b1ShotSended=true;
+	if (m_bShot && m_nShot == 1 && !m_b1ShotSended && g_pGame->GetTime() - m_f1ShotTime > GUARD_TIME) {
+		m_b1ShotSended = true;
 		if (g_Rules.IsVanillaMode())
 		{
 			ZPostShotMelee(g_pGame->GetTime(), m_Position, 1);
@@ -1725,111 +1751,112 @@ void ZMyCharacter::OnUpdate(float fDelta)
 		}
 	}
 
-	if(m_bStun && m_nStunType==ZST_LOOP && g_pGame->GetTime()>m_fStunEndTime) {
+	if (m_bStun && m_nStunType == ZST_LOOP && g_pGame->GetTime() > m_fStunEndTime) {
 		m_bStun = false;
 	}
 
-	if(
+	if (
 #ifdef _DEBUG
-		!m_bGuardTest && 
+		!m_bGuardTest &&
 #endif		
-		m_bGuard && g_pGame->GetTime()-m_fGuardStartTime>GUARD_DURATION) {
-		m_nGuardBlock=0;
-		m_bGuardStart=false;
-		m_bGuardCancel=true;
+		m_bGuard && g_pGame->GetTime() - m_fGuardStartTime > GUARD_DURATION) {
+		m_nGuardBlock = 0;
+		m_bGuardStart = false;
+		m_bGuardCancel = true;
 		m_bGuardKey = false;
 		m_bGuardByKey = false;
 	}
 
-	if(!m_bLButtonPressed || GetItems()->GetSelectedWeaponParts()!=MMCIP_MELEE) 
+	if (!m_bLButtonPressed || GetItems()->GetSelectedWeaponParts() != MMCIP_MELEE)
 		m_bCharging = false;
 
-	if(m_bSplashShot && g_pGame->GetTime()-m_fSplashShotTime>.3f)
+	if (m_bSplashShot && g_pGame->GetTime() - m_fSplashShotTime > .3f)
 	{
-		m_bSplashShot=false;
-		ZPostSkill( g_pGame->GetTime(), ZC_SKILL_SPLASHSHOT , sel_type);
+		m_bSplashShot = false;
+		ZPostSkill(g_pGame->GetTime(), ZC_SKILL_SPLASHSHOT, sel_type);
 	}
 
 	AniFrameInfo* pAniLow = m_pVMesh->GetFrameInfo(ani_mode_lower);
 
-	if(pAniLow && pAniLow->m_isPlayDone) {
-		if(m_bSpMotion) {
-			if(GetStateLower() == m_SpMotion)
+	if (pAniLow && pAniLow->m_isPlayDone) {
+		if (m_bSpMotion) {
+			if (GetStateLower() == m_SpMotion)
 				m_bSpMotion = false;
 		}
 	}
 
 	bool bContinueShot = false;
 
-	if(m_bPlayDone_upper) {
-		if(GetStateUpper() == ZC_STATE_UPPER_SHOT)
+	if (m_bPlayDone_upper) {
+		if (GetStateUpper() == ZC_STATE_UPPER_SHOT)
 		{
 			int nParts = (int)GetItems()->GetSelectedWeaponParts();
-			if(nParts==MMCIP_MELEE)
+			if (nParts == MMCIP_MELEE)
 			{
 				ZItem* pSelectedItem = GetItems()->GetSelectedWeapon();
 				_ASSERT(pSelectedItem && pSelectedItem->GetDesc());
 
-				if(pSelectedItem) {
+				if (pSelectedItem) {
 					MMatchItemDesc* pRangeDesc = pSelectedItem->GetDesc();
 					DWORD nWeaponDelay = pRangeDesc->m_nDelay;
 
-					m_fNextShotTimeType[nParts] = g_pGame->GetTime()+(float)(nWeaponDelay)*0.001f;
+					m_fNextShotTimeType[nParts] = g_pGame->GetTime() + (float)(nWeaponDelay)*0.001f;
 				}
 
-				if(m_bEnterCharge)
+				if (m_bEnterCharge)
 					EnterCharge();
 			}
-			else if ( (nParts==MMCIP_CUSTOM1) || (nParts==MMCIP_CUSTOM2) ) {	
+			else if ((nParts == MMCIP_CUSTOM1) || (nParts == MMCIP_CUSTOM2)) {
 				ZItem* pItem = GetItems()->GetSelectedWeapon();
 				if (pItem && pItem->GetBulletAMagazine() <= 0)
-					ZGetGameInterface()->ChangeWeapon(ZCWT_PREV);				
+					ZGetGameInterface()->ChangeWeapon(ZCWT_PREV);
 			}
-		}else
-		if(GetStateUpper() == ZC_STATE_UPPER_RELOAD)
-			g_pGame->OnReloadComplete(this);
-		else
-		if(m_bGuard) {
-
-			if(m_bGuardBlock_ret) {
-
-				m_bGuardBlock_ret=false;
-			} 
-			else if(m_nGuardBlock)	{
-
-				if(m_nGuardBlock<2 && g_pGame->GetTime()-m_fLastShotTime<0.2f) {
-					m_nGuardBlock++;
-					m_bPlayDone_upper=false;
-				}
-				else {
-
-					if(m_nGuardBlock==1)
-						m_bGuardBlock_ret=true;
-
-					m_bPlayDone_upper=false;
-					m_nGuardBlock=0;
-				}
-			}
-
-			m_bGuardStart=false;
-
-			if(m_bGuardCancel) {
-
-				m_bGuardCancel=false;
-				m_bGuard=false;
-
-			}
-
 		}
+		else
+			if (GetStateUpper() == ZC_STATE_UPPER_RELOAD)
+				g_pGame->OnReloadComplete(this);
+			else
+				if (m_bGuard) {
+
+					if (m_bGuardBlock_ret) {
+
+						m_bGuardBlock_ret = false;
+					}
+					else if (m_nGuardBlock) {
+
+						if (m_nGuardBlock < 2 && g_pGame->GetTime() - m_fLastShotTime < 0.2f) {
+							m_nGuardBlock++;
+							m_bPlayDone_upper = false;
+						}
+						else {
+
+							if (m_nGuardBlock == 1)
+								m_bGuardBlock_ret = true;
+
+							m_bPlayDone_upper = false;
+							m_nGuardBlock = 0;
+						}
+					}
+
+					m_bGuardStart = false;
+
+					if (m_bGuardCancel) {
+
+						m_bGuardCancel = false;
+						m_bGuard = false;
+
+					}
+
+				}
 
 		SetAnimationUpper(ZC_STATE_UPPER_NONE);
 	}
 
 	AniFrameInfo* pAniUp = m_pVMesh->GetFrameInfo(ani_mode_upper);
 
-	if(pAniUp ) {
-		if( pAniUp->m_pAniSet==NULL) {
-			SetAnimationUpper( ZC_STATE_UPPER_NONE );
+	if (pAniUp) {
+		if (pAniUp->m_pAniSet == NULL) {
+			SetAnimationUpper(ZC_STATE_UPPER_NONE);
 		}
 	}
 
@@ -1837,21 +1864,21 @@ void ZMyCharacter::OnUpdate(float fDelta)
 
 	ZItem* pSItem = GetItems()->GetSelectedWeapon();
 
-	if( pSItem && pSItem->GetDesc() ) {
+	if (pSItem && pSItem->GetDesc()) {
 		wtype = pSItem->GetDesc()->m_nWeaponType;
 	}
 
-	if(m_bPlayDone)
+	if (m_bPlayDone)
 	{
-		if(m_bWallJump) {
+		if (m_bWallJump) {
 			WallJump2();
 		}
 
-		m_bTumble=false;
+		m_bTumble = false;
 
-		if(m_bCharging)
+		if (m_bCharging)
 		{
-			if(GetStateUpper() == ZC_STATE_CHARGE)
+			if (GetStateUpper() == ZC_STATE_CHARGE)
 				Charged();
 			m_bCharging = false;
 		}
@@ -1860,52 +1887,52 @@ void ZMyCharacter::OnUpdate(float fDelta)
 
 		m_bJumpSlashLanding = false;
 
-		if(m_bJumpSlash && (m_bLand || (g_pGame->GetTime()-m_bJumpSlashTime>2.f))) {
+		if (m_bJumpSlash && (m_bLand || (g_pGame->GetTime() - m_bJumpSlashTime > 2.f))) {
 			m_bJumpSlash = false;
 			m_bJumpSlashLanding = true;
 		}
 
-		if(m_bShotReturn) {
+		if (m_bShotReturn) {
 
-			m_nShot=0;
-			m_bShotReturn=false;
-			SetVelocity(GetVelocity().x,GetVelocity().y,0);
+			m_nShot = 0;
+			m_bShotReturn = false;
+			SetVelocity(GetVelocity().x, GetVelocity().y, 0);
 			m_bMoving = false;
 		}
 
-		if(m_bShot) {
+		if (m_bShot) {
 
-			if(m_bEnterCharge) {
+			if (m_bEnterCharge) {
 
 				EnterCharge();
-			} 
-			else if(m_nShot==4) {
+			}
+			else if (m_nShot == 4) {
 
-				m_bShot			= false;
-				m_bShotReturn	= true;
-				m_bPlayDone		= false;
+				m_bShot = false;
+				m_bShotReturn = true;
+				m_bPlayDone = false;
 
-			} 
+			}
 			else {
 
-				if(m_nShot==5)
+				if (m_nShot == 5)
 				{
-					m_nShot=0;
-					m_bShot=false;
-					m_bJumpDown=false;
+					m_nShot = 0;
+					m_bShot = false;
+					m_bJumpDown = false;
 				}
 				else
 				{
-					if(!m_bLButtonQueued && m_nShot<5)
+					if (!m_bLButtonQueued && m_nShot < 5)
 					{
-						m_bShot=false;
-						m_bShotReturn=true;
+						m_bShot = false;
+						m_bShotReturn = true;
 					}
 
-					if(m_nShot==3)
-						if( m_pVMesh->m_SelectWeaponMotionType == eq_wd_sword ) {
-							m_nShot=0;
-							m_bShot=false;
+					if (m_nShot == 3)
+						if (m_pVMesh->m_SelectWeaponMotionType == eq_wd_sword) {
+							m_nShot = 0;
+							m_bShot = false;
 							m_bShotReturn = false;
 						}
 
@@ -1913,45 +1940,45 @@ void ZMyCharacter::OnUpdate(float fDelta)
 			}
 		}
 
-		if(m_bJumpShot)
+		if (m_bJumpShot)
 		{
-			m_bJumpShot=false;
+			m_bJumpShot = false;
 		}
 
-		m_bSkill=false;
-		m_bBlastStand=false;
+		m_bSkill = false;
+		m_bBlastStand = false;
 
-		if(m_bBlast)
+		if (m_bBlast)
 		{
-			m_bBlast=false;
+			m_bBlast = false;
 
-			if(g_pGame->GetTime()-m_fLastJumpPressedTime<0.5f)
-				m_bBlastAirmove=true;
+			if (g_pGame->GetTime() - m_fLastJumpPressedTime < 0.5f)
+				m_bBlastAirmove = true;
 			else
-				m_bBlastFall=true;
+				m_bBlastFall = true;
 		}
 
-		if(m_bBlastFall && !m_bDrop && m_bLand)
+		if (m_bBlastFall && !m_bDrop && m_bLand)
 		{
-			m_bDrop=true;
-			m_bBlastFall=false;
-			m_bBlastDrop=true;
-			m_fDropTime=g_pGame->GetTime();
+			m_bDrop = true;
+			m_bBlastFall = false;
+			m_bBlastDrop = true;
+			m_fDropTime = g_pGame->GetTime();
 		}
 
-		if(m_bStun && m_nStunType!=ZST_LOOP) {
-			m_bStun=false;
+		if (m_bStun && m_nStunType != ZST_LOOP) {
+			m_bStun = false;
 		}
 	}
 
 #ifdef _DEBUG
-	if(m_bGuardTest)
+	if (m_bGuardTest)
 	{
-		m_fLastShotTime=g_pGame->GetTime();
+		m_fLastShotTime = g_pGame->GetTime();
 	}
 #endif
 
-	if(m_bGuard && !m_bGuardCancel 
+	if (m_bGuard && !m_bGuardCancel
 #ifdef _DEBUG
 		&& !m_bGuardTest
 #endif
@@ -1959,17 +1986,17 @@ void ZMyCharacter::OnUpdate(float fDelta)
 
 		bool bGuardCancel = false;
 
-		if(m_bGuardByKey) {
-			if(m_bGuardKey==false)
+		if (m_bGuardByKey) {
+			if (m_bGuardKey == false)
 				bGuardCancel = true;
 		}
 		else {
-			if( (!m_bLButtonPressed || !m_bRButtonPressed) )  {
+			if ((!m_bLButtonPressed || !m_bRButtonPressed)) {
 				bGuardCancel = true;
 			}
 		}
 
-		if(bGuardCancel)
+		if (bGuardCancel)
 		{
 			m_nGuardBlock = 0;
 			m_bGuardStart = false;
@@ -1978,36 +2005,36 @@ void ZMyCharacter::OnUpdate(float fDelta)
 			m_bGuardByKey = false;
 			SetAnimationUpper(ZC_STATE_UPPER_NONE);
 		}
-	}
+		}
 
-	if(m_bGuard)
+	if (m_bGuard)
 	{
-		if(m_nGuardBlock==0 && !m_bGuardBlock_ret && g_pGame->GetTime()-m_fLastShotTime<0.2f)
+		if (m_nGuardBlock == 0 && !m_bGuardBlock_ret && g_pGame->GetTime() - m_fLastShotTime < 0.2f)
 		{
-			m_nGuardBlock=1;
+			m_nGuardBlock = 1;
 		}
 	}
 
-	if(m_bDrop && (g_pGame->GetTime()-m_fDropTime>1.f))
+	if (m_bDrop && (g_pGame->GetTime() - m_fDropTime > 1.f))
 	{
-		m_bDrop=false;
-		m_bBlastDrop=false;
-		m_bBlastStand=true;
-	}
-	
-	if(m_bBlastFall && m_bLand && pAniLow->m_nFrame > 160*15)
-	{
-		m_bDrop=true;
-		m_bBlastFall=false;
-		m_bBlastDrop=true;
-		m_fDropTime=g_pGame->GetTime();
+		m_bDrop = false;
+		m_bBlastDrop = false;
+		m_bBlastStand = true;
 	}
 
-	if(m_bCharging && !m_bCharged && GetStateLower() == ZC_STATE_CHARGE &&
-		pAniLow->m_nFrame > 160*52)
+	if (m_bBlastFall && m_bLand && pAniLow->m_nFrame > 160 * 15)
+	{
+		m_bDrop = true;
+		m_bBlastFall = false;
+		m_bBlastDrop = true;
+		m_fDropTime = g_pGame->GetTime();
+	}
+
+	if (m_bCharging && !m_bCharged && GetStateLower() == ZC_STATE_CHARGE &&
+		pAniLow->m_nFrame > 160 * 52)
 		Charged();
 
-	if(m_bJumpSlash && m_bLand && pAniLow->m_nFrame > 160*11)
+	if (m_bJumpSlash && m_bLand && pAniLow->m_nFrame > 160 * 11)
 	{
 		m_bJumpSlash = false;
 		m_bJumpSlashLanding = true;
@@ -2018,13 +2045,13 @@ void ZMyCharacter::OnUpdate(float fDelta)
 	ZCharacter::OnUpdate(fDelta);
 
 	m_bPlayDone = pAniLow->m_isPlayDone;
-	m_bPlayDone_upper= 
-		pAniUp->m_pAniSet==NULL ? false : pAniUp->m_isPlayDone;
+	m_bPlayDone_upper =
+		pAniUp->m_pAniSet == NULL ? false : pAniUp->m_isPlayDone;
 
 	ProcessDelayedWork();
 
 	_EP("ZMyCharacter::Update");
-}
+	}
 
 void ZMyCharacter::Animation_Reload()
 {
@@ -2032,7 +2059,7 @@ void ZMyCharacter::Animation_Reload()
 	SetAnimationUpper(ZC_STATE_UPPER_RELOAD);
 }
 
-void ZMyCharacter::ReserveDashAttacked(MUID uid, float time,rvector &dir)
+void ZMyCharacter::ReserveDashAttacked(MUID uid, float time, rvector &dir)
 {
 	m_uidReserveDashAttacker = uid;
 	m_bReserveDashAttacked = true;
@@ -2042,24 +2069,24 @@ void ZMyCharacter::ReserveDashAttacked(MUID uid, float time,rvector &dir)
 
 void ZMyCharacter::OnDashAttacked(rvector &dir)
 {
-	if(m_bBlast || m_bBlastDrop || m_bBlastStand || isInvincible())
+	if (m_bBlast || m_bBlastDrop || m_bBlastStand || isInvincible())
 		return;
 
-	m_bSkill=false;
-	m_bStun=false;
-	m_bShot=false;
+	m_bSkill = false;
+	m_bStun = false;
+	m_bShot = false;
 
-	m_bBlast=true;
+	m_bBlast = true;
 	m_nBlastType = 1;
 
-	AddVelocity(rvector(dir.x*2000.f,dir.y*2000.f,dir.z*2000.f));
+	AddVelocity(rvector(dir.x*2000.f, dir.y*2000.f, dir.z*2000.f));
 	Normalize(dir);
 
 	float fRatio = GetMoveSpeedRatio();
 
 	AddVelocity(dir * RUN_SPEED * fRatio);
-	
-	SetLastThrower(m_uidReserveDashAttacker, g_pGame->GetTime()+1.0f);
+
+	SetLastThrower(m_uidReserveDashAttacker, g_pGame->GetTime() + 1.0f);
 
 	m_bWallHang = false;
 	m_bHangSuccess = false;
@@ -2071,19 +2098,19 @@ void ZMyCharacter::OnDashAttacked(rvector &dir)
 
 void ZMyCharacter::OnBlast(rvector &dir)
 {
-	if(m_bBlast || m_bBlastDrop || m_bBlastStand || isInvincible())
+	if (m_bBlast || m_bBlastDrop || m_bBlastStand || isInvincible())
 		return;
 
-	m_bSkill=false;
-	m_bStun=false;
-	m_bShot=false;
+	m_bSkill = false;
+	m_bStun = false;
+	m_bShot = false;
 
-	m_bBlast=true;
+	m_bBlast = true;
 	m_nBlastType = 0;
 
 	m_bLand = false;
 
-	SetVelocity( dir * 300.f + rvector(0,0,BLAST_VELOCITY) );
+	SetVelocity(dir * 300.f + rvector(0, 0, BLAST_VELOCITY));
 
 	m_bWallHang = false;
 	m_bHangSuccess = false;
@@ -2100,40 +2127,43 @@ void ZMyCharacter::OnTumble(int nDir)
 {
 #define SWORD_DASH		1000.f
 #define GUN_DASH        900.f
-	if(IsDie() || m_bWallJump || m_bGuard || m_bDrop || m_bWallJump2 || m_bTumble || m_bWallHang ||
-		m_bBlast || m_bBlastFall || m_bBlastDrop || m_bBlastStand || m_bBlastAirmove || 
+	if (IsDie() || m_bWallJump || m_bGuard || m_bDrop || m_bWallJump2 || m_bTumble || m_bWallHang ||
+		m_bBlast || m_bBlastFall || m_bBlastDrop || m_bBlastStand || m_bBlastAirmove ||
 		m_bCharging || m_bSlash || m_bJumpSlash || m_bJumpSlashLanding ||
-		m_bStun || GetStateLower() == ZC_STATE_LOWER_UPPERCUT ) return;
+		m_bStun || GetStateLower() == ZC_STATE_LOWER_UPPERCUT) return;
 
-	if(m_bLimitTumble)
+	if (m_bLimitTumble)
 		return;
 
 	rvector right;
-	rvector forward=RCameraDirection;
-	forward.z=0;
+	rvector forward = RCameraDirection;
+	forward.z = 0;
 	Normalize(forward);
-	CrossProduct(&right,rvector(0,0,1),forward);
+	CrossProduct(&right, rvector(0, 0, 1), forward);
 
 	float fSpeed;
-	if (GetItems()->GetSelectedWeapon()!=NULL &&
+	if (GetItems()->GetSelectedWeapon() != NULL &&
 		(GetItems()->GetSelectedWeapon()->IsEmpty() == false) &&
-		GetItems()->GetSelectedWeapon()->GetDesc()->m_nType==MMIT_MELEE)
+		GetItems()->GetSelectedWeapon()->GetDesc()->m_nType == MMIT_MELEE)
 	{
-		fSpeed=SWORD_DASH;
+		fSpeed = SWORD_DASH;
 
 		rvector vPos = GetPosition();
 		rvector vDir = RealSpace2::RCameraDirection;
 		rvector vRight;
 
-		CrossProduct(&vRight,RealSpace2::RCameraUp,RealSpace2::RCameraDirection);
+		CrossProduct(&vRight, RealSpace2::RCameraUp, RealSpace2::RCameraDirection);
 
-		if(nDir==0) {
+		if (nDir == 0) {
 			vDir = -RealSpace2::RCameraDirection;
-		} else if(nDir==1) {
+		}
+		else if (nDir == 1) {
 			vDir = RealSpace2::RCameraDirection;
-		} else if(nDir==2) {
+		}
+		else if (nDir == 2) {
 			vDir = -vRight;
-		} else if(nDir==3) {
+		}
+		else if (nDir == 3) {
 			vDir = vRight;
 		}
 
@@ -2142,24 +2172,24 @@ void ZMyCharacter::OnTumble(int nDir)
 
 		int sel_type = GetItems()->GetSelectedWeaponParts();
 
-		if( !m_bWallHang && !m_bSkill && !m_bShot && !m_bShotReturn)
-			ZPostDash(vPos,vDir,sel_type);
+		if (!m_bWallHang && !m_bSkill && !m_bShot && !m_bShotReturn)
+			ZPostDash(vPos, vDir, sel_type);
 	}
 	else
 	{
-		fSpeed=GUN_DASH;
+		fSpeed = GUN_DASH;
 	}
 
-	switch(nDir)
+	switch (nDir)
 	{
-	case 0 :  SetVelocity(forward*fSpeed);break;
-	case 1 :  SetVelocity(-forward*fSpeed);break;
-	case 2 :  SetVelocity(right*fSpeed);break;
-	case 3 :  SetVelocity(-right*fSpeed);break;
+	case 0:  SetVelocity(forward*fSpeed); break;
+	case 1:  SetVelocity(-forward*fSpeed); break;
+	case 2:  SetVelocity(right*fSpeed); break;
+	case 3:  SetVelocity(-right*fSpeed); break;
 	}
 
-	m_bTumble=true;
-	m_nTumbleDir=nDir;
+	m_bTumble = true;
+	m_nTumbleDir = nDir;
 	m_bSpMotion = false;
 }
 
@@ -2168,14 +2198,14 @@ void ZMyCharacter::InitStatus()
 	m_f1ShotTime = 0;
 	m_fSkillTime = 0;
 
-	m_fDeadTime=0;
+	m_fDeadTime = 0;
 
 	m_bHero = true;
-	m_fLastJumpPressedTime=-1.f;
-	m_fJump2Time=0.f;
-	m_bWallJump2=false;
-	m_bLand=true;
-	m_bWallJump=false;
+	m_fLastJumpPressedTime = -1.f;
+	m_fJump2Time = 0.f;
+	m_bWallJump2 = false;
+	m_bLand = true;
+	m_bWallJump = false;
 	m_bJumpUp = false;
 	m_bJumpDown = false;
 	m_bWallHang = false;
@@ -2183,7 +2213,7 @@ void ZMyCharacter::InitStatus()
 	m_bTumble = false;
 	m_bShot = false;
 	m_bShotReturn = false;
-	m_nShot=0;
+	m_nShot = 0;
 	m_fLastLButtonPressedTime = -1.f;
 	ReleaseLButtonQueue();
 
@@ -2202,8 +2232,8 @@ void ZMyCharacter::InitStatus()
 	m_bGuardStart = false;
 	m_bGuardCancel = false;
 
-	m_fLastShotTime=0.f;
-	m_fNextShotTime=0.f;
+	m_fLastShotTime = 0.f;
+	m_fNextShotTime = 0.f;
 
 	m_bSlash = false;
 	m_bJumpSlash = false;
@@ -2221,22 +2251,22 @@ void ZMyCharacter::InitBullet()
 
 	MDataChecker* pChecker = ZApplication::GetGame()->GetDataChecker();
 
-	if (!m_Items.GetItem(MMCIP_PRIMARY)->IsEmpty()) 
+	if (!m_Items.GetItem(MMCIP_PRIMARY)->IsEmpty())
 	{
 		pChecker->RenewCheck((BYTE*)m_Items.GetItem(MMCIP_PRIMARY)->GetBulletPointer(), sizeof(int));
 		pChecker->RenewCheck((BYTE*)m_Items.GetItem(MMCIP_PRIMARY)->GetAMagazinePointer(), sizeof(int));
 	}
-	if (!m_Items.GetItem(MMCIP_SECONDARY)->IsEmpty()) 
+	if (!m_Items.GetItem(MMCIP_SECONDARY)->IsEmpty())
 	{
 		pChecker->RenewCheck((BYTE*)m_Items.GetItem(MMCIP_SECONDARY)->GetBulletPointer(), sizeof(int));
 		pChecker->RenewCheck((BYTE*)m_Items.GetItem(MMCIP_SECONDARY)->GetAMagazinePointer(), sizeof(int));
 	}
-	if (!m_Items.GetItem(MMCIP_CUSTOM1)->IsEmpty()) 
+	if (!m_Items.GetItem(MMCIP_CUSTOM1)->IsEmpty())
 	{
 		pChecker->RenewCheck((BYTE*)m_Items.GetItem(MMCIP_CUSTOM1)->GetBulletPointer(), sizeof(int));
 		pChecker->RenewCheck((BYTE*)m_Items.GetItem(MMCIP_CUSTOM1)->GetAMagazinePointer(), sizeof(int));
 	}
-	if (!m_Items.GetItem(MMCIP_CUSTOM2)->IsEmpty()) 
+	if (!m_Items.GetItem(MMCIP_CUSTOM2)->IsEmpty())
 	{
 		pChecker->RenewCheck((BYTE*)m_Items.GetItem(MMCIP_CUSTOM2)->GetBulletPointer(), sizeof(int));
 		pChecker->RenewCheck((BYTE*)m_Items.GetItem(MMCIP_CUSTOM2)->GetAMagazinePointer(), sizeof(int));
@@ -2250,26 +2280,26 @@ void ZMyCharacter::SetDirection(const rvector& dir)
 	pCamera->SetDirection(dir);
 }
 
-void ZMyCharacter::OnDamagedAnimation(ZObject *pAttacker,int type)
+void ZMyCharacter::OnDamagedAnimation(ZObject *pAttacker, int type)
 {
 	if (ZGetGame()->GetMatch()->GetMatchType() == MMATCH_GAMETYPE_SKILLMAP)
 		return;
 
-	ZCharacter::OnDamagedAnimation(pAttacker,type);
+	ZCharacter::OnDamagedAnimation(pAttacker, type);
 
-	m_bShot=false;
-	m_bWallHang=false;
-	m_bCharging=false;
-	m_bSkill=false;
+	m_bShot = false;
+	m_bWallHang = false;
+	m_bCharging = false;
+	m_bSkill = false;
 }
 
 void ZMyCharacter::OnDie()
 {
 	ZCharacter::OnDie();
-	m_fDeadTime=g_pGame->GetTime();
+	m_fDeadTime = g_pGame->GetTime();
 
-	m_bWallHang=false;
-	m_bWallJump=false;
+	m_bWallHang = false;
+	m_bWallJump = false;
 }
 
 #define DAMAGE_VELOCITY		1700.f
@@ -2291,8 +2321,8 @@ float ZMyCharacter::GetControllabilityFactor()
 
 	ZItem* pSItem = GetItems()->GetSelectedWeapon();
 
-	if(pSItem) {
-		if( pSItem->GetDesc() )
+	if (pSItem) {
+		if (pSItem->GetDesc())
 			wtype = pSItem->GetDesc()->m_nWeaponType;
 	}
 
@@ -2300,52 +2330,52 @@ float ZMyCharacter::GetControllabilityFactor()
 		switch (wtype)
 		{
 
-		case MWT_PISTOL: 
+		case MWT_PISTOL:
 		case MWT_PISTOLx2:
-			{
-				return CA_FACTOR_PISTOL;
-			}
-			break;
+		{
+			return CA_FACTOR_PISTOL;
+		}
+		break;
 
 		case MWT_REVOLVER:
 		case MWT_REVOLVERx2:
-			{
-				return CA_FACTOR_REVOLVER;
-			}
-			break;
+		{
+			return CA_FACTOR_REVOLVER;
+		}
+		break;
 
 		case MWT_SMG:
 		case MWT_SMGx2:
-			{
-				return CA_FACTOR_SMG;
-			}
-			break;
+		{
+			return CA_FACTOR_SMG;
+		}
+		break;
 
 		case MWT_SHOTGUN:
 		case MWT_SAWED_SHOTGUN:
-			{
-				return CA_FACTOR_SHOTGUN;
-			}
-			break;
+		{
+			return CA_FACTOR_SHOTGUN;
+		}
+		break;
 
 		case MWT_MACHINEGUN:
-			{
-				return CA_FACTOR_MACHINEGUN;
-			}
-			break;
+		{
+			return CA_FACTOR_MACHINEGUN;
+		}
+		break;
 
 		case MWT_RIFLE:
 		case MWT_SNIFER:
-			{
-				return CA_FACTOR_RIFLE;
-			}
-			break;
+		{
+			return CA_FACTOR_RIFLE;
+		}
+		break;
 
 		case MWT_ROCKET:
-			{
-				return CA_FACTOR_ROCKET;
-			}
-			break;
+		{
+			return CA_FACTOR_ROCKET;
+		}
+		break;
 		}
 	}
 
@@ -2355,7 +2385,7 @@ float ZMyCharacter::GetControllabilityFactor()
 void ZMyCharacter::UpdateCAFactor(float fDelta)
 {
 	const float fCurrWeaponCAFactor = GetControllabilityFactor();
-	bool bPressed= ZIsActionKeyPressed(ZACTION_USE_WEAPON);
+	bool bPressed = ZIsActionKeyPressed(ZACTION_USE_WEAPON);
 	if (bPressed) return;
 
 	m_fElapsedCAFactorTime += fDelta;
@@ -2379,14 +2409,14 @@ void ZMyCharacter::UpdateCAFactor(float fDelta)
 ZDummyCharacter::ZDummyCharacter() : ZMyCharacter()
 {
 	// 랜덤으로 아무거나 입도록 만든다
-	#define _DUMMY_CHARACTER_PRESET		5
-	unsigned long int nMeleePreset[_DUMMY_CHARACTER_PRESET] = {1, 11, 3, 14, 15};
-	unsigned long int nPrimaryPreset[_DUMMY_CHARACTER_PRESET] = {4010, 4013, 5004, 6004, 9001};
-	unsigned long int nSecondaryPreset[_DUMMY_CHARACTER_PRESET] = {9003, 9004, 9006, 7002, 6006};
-	unsigned long int nChestPreset[_DUMMY_CHARACTER_PRESET] = {21001, 21002, 21004, 21005, 21006};
-	unsigned long int nLegsPreset[_DUMMY_CHARACTER_PRESET] = {23001, 23005, 23002, 23004, 23003};
-	unsigned long int nHandsPreset[_DUMMY_CHARACTER_PRESET] = {22001, 22002, 22003, 22004, 22501};
-	unsigned long int nFeetPreset[_DUMMY_CHARACTER_PRESET] = {24001, 24002, 24003, 24004, 24005};
+#define _DUMMY_CHARACTER_PRESET		5
+	unsigned long int nMeleePreset[_DUMMY_CHARACTER_PRESET] = { 1, 11, 3, 14, 15 };
+	unsigned long int nPrimaryPreset[_DUMMY_CHARACTER_PRESET] = { 4010, 4013, 5004, 6004, 9001 };
+	unsigned long int nSecondaryPreset[_DUMMY_CHARACTER_PRESET] = { 9003, 9004, 9006, 7002, 6006 };
+	unsigned long int nChestPreset[_DUMMY_CHARACTER_PRESET] = { 21001, 21002, 21004, 21005, 21006 };
+	unsigned long int nLegsPreset[_DUMMY_CHARACTER_PRESET] = { 23001, 23005, 23002, 23004, 23003 };
+	unsigned long int nHandsPreset[_DUMMY_CHARACTER_PRESET] = { 22001, 22002, 22003, 22004, 22501 };
+	unsigned long int nFeetPreset[_DUMMY_CHARACTER_PRESET] = { 24001, 24002, 24003, 24004, 24005 };
 
 
 	static int m_stIndex = 0; m_stIndex++;
@@ -2395,7 +2425,7 @@ ZDummyCharacter::ZDummyCharacter() : ZMyCharacter()
 	char szTempName[128]; sprintf_safe(szTempName, "noname%d", m_stIndex); strcpy_safe(info.szName, szTempName);
 	info.nSex = 0;
 
-	for (int j=0; j < MMCIP_END; j++) info.nEquipedItemDesc[j] = 0;
+	for (int j = 0; j < MMCIP_END; j++) info.nEquipedItemDesc[j] = 0;
 	info.nEquipedItemDesc[MMCIP_MELEE] = nMeleePreset[RandomNumber(0, 4)];
 	info.nEquipedItemDesc[MMCIP_PRIMARY] = nPrimaryPreset[RandomNumber(0, 4)];
 	info.nEquipedItemDesc[MMCIP_SECONDARY] = nSecondaryPreset[RandomNumber(0, 4)];
@@ -2446,7 +2476,7 @@ void ZDummyCharacter::OnUpdate(float fDelta)
 	}
 
 
-	if (m_fShotElapsedTime >=  m_fNextShotTime)
+	if (m_fShotElapsedTime >= m_fNextShotTime)
 	{
 		m_bShotting = !m_bShotting;
 		m_fNextShotTime = RandomNumber(3.0f, 10.0f);
@@ -2458,7 +2488,7 @@ void ZDummyCharacter::OnUpdate(float fDelta)
 		if (m_fShotDelayElapsedTime >= ((float)m_Items.GetItem(MMCIP_PRIMARY)->GetDesc()->m_nDelay / 1000.0f))
 		{
 			m_Items.GetItem(MMCIP_PRIMARY)->Reload();
-			float fShotTime=g_pGame->GetTime();
+			float fShotTime = g_pGame->GetTime();
 			g_pGame->OnPeerShot(m_UID, fShotTime, m_Position, m_Direction, GetItems()->GetSelectedWeaponParts());
 			m_fShotDelayElapsedTime = 0.0f;
 		}
@@ -2492,7 +2522,7 @@ void ZMyCharacter::ProcessDelayedWork()
 			return true;
 		}
 		return false;
-	};
+};
 	m_DelayedWorkList.erase(std::remove_if(m_DelayedWorkList.begin(), m_DelayedWorkList.end(), pred), m_DelayedWorkList.end());
 }
 
@@ -2503,86 +2533,86 @@ void ZMyCharacter::AddDelayedWork(float Time, ZDELAYEDWORK Work, void *Data)
 
 void ZMyCharacter::OnDelayedWork(ZDELAYEDWORKITEM& Item)
 {
-	switch(Item.nWork) {
-	case ZDW_RECOIL :
+	switch (Item.nWork) {
+	case ZDW_RECOIL:
+	{
+		for (ZCharacterManager::iterator itor = ZGetCharacterManager()->begin();
+		itor != ZGetCharacterManager()->end(); ++itor)
 		{
-			for (ZCharacterManager::iterator itor = ZGetCharacterManager()->begin();
-				itor != ZGetCharacterManager()->end(); ++itor)
-			{
-				ZCharacter* pTar = (*itor).second;
-				if (this == pTar || pTar->IsDie()) continue;
+			ZCharacter* pTar = (*itor).second;
+			if (this == pTar || pTar->IsDie()) continue;
 
-				rvector diff = GetPosition() + m_Direction*10.f - pTar->GetPosition();
-				diff.z *= .5f;
-				float fDist = Magnitude(diff);
+			rvector diff = GetPosition() + m_Direction*10.f - pTar->GetPosition();
+			diff.z *= .5f;
+			float fDist = Magnitude(diff);
 
-				if (fDist < 200.0f) {
+			if (fDist < 200.0f) {
 
-					bool bCheck = false;
+				bool bCheck = false;
 
-					if (ZApplication::GetGame()->GetMatch()->IsTeamPlay()){
-						if( IsTeam( pTar ) == false){
-							bCheck = true;
-						}
-					}
-					else {
+				if (ZApplication::GetGame()->GetMatch()->IsTeamPlay()) {
+					if (IsTeam(pTar) == false) {
 						bCheck = true;
 					}
+				}
+				else {
+					bCheck = true;
+				}
 
-					if(g_pGame->CheckWall(this,pTar)==true)
-						bCheck = false;
+				if (g_pGame->CheckWall(this, pTar) == true)
+					bCheck = false;
 
-					if( bCheck) {
+				if (bCheck) {
 
-						rvector fTarDir = pTar->GetPosition() - GetPosition();
-						Normalize(fTarDir);
-						float fDot = DotProduct(m_Direction, fTarDir);
-						if (fDot > 0.1 && DotProduct(m_Direction, pTar->m_Direction) < 0)
-						{
-							if(pTar->IsGuard()) 
-								ShotBlocked();
-						}
+					rvector fTarDir = pTar->GetPosition() - GetPosition();
+					Normalize(fTarDir);
+					float fDot = DotProduct(m_Direction, fTarDir);
+					if (fDot > 0.1 && DotProduct(m_Direction, pTar->m_Direction) < 0)
+					{
+						if (pTar->IsGuard())
+							ShotBlocked();
 					}
 				}
 			}
 		}
-		break;
-	case ZDW_UPPERCUT :
-		if(m_bSkill) {
+	}
+	break;
+	case ZDW_UPPERCUT:
+		if (m_bSkill) {
 			MMatchWeaponType type = MWT_NONE;
 
 			int sel_type = GetItems()->GetSelectedWeaponParts();
 			ZItem* pSItem = GetItems()->GetSelectedWeapon();
 
-			if(pSItem && pSItem->GetDesc())
+			if (pSItem && pSItem->GetDesc())
 				type = pSItem->GetDesc()->m_nWeaponType;
 
-			if(type == MWT_KATANA || type == MWT_DOUBLE_KATANA ) {
-				ZPostSkill( g_pGame->GetTime(), ZC_SKILL_UPPERCUT , sel_type );
+			if (type == MWT_KATANA || type == MWT_DOUBLE_KATANA) {
+				ZPostSkill(g_pGame->GetTime(), ZC_SKILL_UPPERCUT, sel_type);
 			}
 		}
 		break;
-	case ZDW_DASH :
-		if(m_bSkill) {
+	case ZDW_DASH:
+		if (m_bSkill) {
 			MMatchWeaponType type = MWT_NONE;
 
 			int sel_type = GetItems()->GetSelectedWeaponParts();
 			ZItem* pSItem = GetItems()->GetSelectedWeapon();
 
-			if(pSItem && pSItem->GetDesc())
+			if (pSItem && pSItem->GetDesc())
 				type = pSItem->GetDesc()->m_nWeaponType;
 
-			if(type == MWT_DAGGER) {
-				ZPostSkill( g_pGame->GetTime(), ZC_SKILL_DASH , sel_type );
+			if (type == MWT_DAGGER) {
+				ZPostSkill(g_pGame->GetTime(), ZC_SKILL_DASH, sel_type);
 			}
-			else if(type == MWT_DUAL_DAGGER) {
-				ZPostSkill( g_pGame->GetTime(), ZC_SKILL_DASH , sel_type );
+			else if (type == MWT_DUAL_DAGGER) {
+				ZPostSkill(g_pGame->GetTime(), ZC_SKILL_DASH, sel_type);
 			}
 		}
 		break;
 	case ZDW_MASSIVE:
 		Discharged();
-		if(m_bSlash || m_bJumpSlash)
+		if (m_bSlash || m_bJumpSlash)
 			ZPostSkill(g_pGame->GetTime(), ZC_SKILL_SPLASHSHOT, GetItems()->GetSelectedWeaponParts());
 		break;
 	case ZDW_RG_SLASH:
@@ -2626,7 +2656,7 @@ void ZMyCharacter::OnDelayedWork(ZDELAYEDWORKITEM& Item)
 
 		ShotBlocked();
 	}
-		break;
+	break;
 	default:
 		MLog("Invalid delayed work %d\n", Item.nWork);
 		assert(false);
@@ -2640,13 +2670,13 @@ void ZMyCharacter::AddRecoilTarget(ZCharacter *pTarget)
 
 void ZMyCharacter::EnterCharge()
 {
-	if(!m_bCharging)
+	if (!m_bCharging)
 		ZPostReaction(g_pGame->GetTime(), ZR_CHARGING);
 
-	m_bShot	= false;
-	m_nShot	= 0;
+	m_bShot = false;
+	m_nShot = 0;
 	m_bCharging = true;
-	m_bPlayDone		= false;
+	m_bPlayDone = false;
 	m_bEnterCharge = false;
 }
 
@@ -2654,11 +2684,11 @@ void ZMyCharacter::ChargedShot()
 {
 	m_bSlash = true;
 	m_bTumble = false;
-	SetVelocity(0,0,0);
+	SetVelocity(0, 0, 0);
 
 	ReleaseLButtonQueue();
 
-	if(g_Rules.IsVanillaMode())
+	if (g_Rules.IsVanillaMode())
 	{
 		AddDelayedWork(g_pGame->GetTime() + 0.25f, ZDW_RECOIL);
 		AddDelayedWork(g_pGame->GetTime() + 0.3f, ZDW_MASSIVE);
@@ -2694,7 +2724,7 @@ void ZMyCharacter::JumpChargedShot()
 void ZMyCharacter::ShotBlocked()
 {
 	m_bStun = true;
-	SetVelocity(0,0,0);
+	SetVelocity(0, 0, 0);
 	m_nStunType = ZST_BLOCKED;
 	m_bShot = false;
 	m_bSlash = false;
@@ -2706,7 +2736,7 @@ void ZMyCharacter::Charged()
 	m_bCharged = true;
 	m_fChargedFreeTime = g_pGame->GetTime() + CHARGED_TIME;
 
-	ZPostReaction(CHARGED_TIME,ZR_CHARGED);
+	ZPostReaction(CHARGED_TIME, ZR_CHARGED);
 }
 
 void ZMyCharacter::OnMeleeGuardSuccess()
@@ -2716,7 +2746,7 @@ void ZMyCharacter::OnMeleeGuardSuccess()
 	m_bCharged = true;
 	m_fChargedFreeTime = g_pGame->GetTime() + COUNTER_CHARGED_TIME;
 
-	ZPostReaction(COUNTER_CHARGED_TIME,ZR_CHARGED);
+	ZPostReaction(COUNTER_CHARGED_TIME, ZR_CHARGED);
 
 	ZCharacter::OnMeleeGuardSuccess();
 }
@@ -2724,38 +2754,38 @@ void ZMyCharacter::OnMeleeGuardSuccess()
 void ZMyCharacter::Discharged()
 {
 	m_bCharged = false;
-	ZPostReaction(g_pGame->GetTime(),ZR_DISCHARGED);
+	ZPostReaction(g_pGame->GetTime(), ZR_DISCHARGED);
 }
 
 float ZMyCharacter::GetGravityConst()
 {
-	if(m_bWallHang && m_bHangSuccess) return 0;
-	if(m_bShot) return 0;
+	if (m_bWallHang && m_bHangSuccess) return 0;
+	if (m_bShot) return 0;
 
-	if(m_bBlastFall) return .7f;
+	if (m_bBlastFall) return .7f;
 
-	if(m_bWallJump)
+	if (m_bWallJump)
 	{
-		if(m_nWallJumpDir==1 || GetVelocity().z<0)
+		if (m_nWallJumpDir == 1 || GetVelocity().z < 0)
 			return 0;
 		else
 			return .1f;
 	}
 
-	if(m_bSlash)
+	if (m_bSlash)
 	{
 		MMatchItemDesc *pDesc = GetItems()->GetItem(MMCIP_MELEE)->GetDesc();
-		if(pDesc->m_nWeaponType==MWT_DOUBLE_KATANA) {
+		if (pDesc->m_nWeaponType == MWT_DOUBLE_KATANA) {
 			AniFrameInfo* pAniLow = m_pVMesh->GetFrameInfo(ani_mode_lower);
-			if( pAniLow->m_nFrame < 160*11) return 0;
+			if (pAniLow->m_nFrame < 160 * 11) return 0;
 		}
 	}
 
-	if(m_bSkill) {
+	if (m_bSkill) {
 		MMatchItemDesc *pDesc = GetItems()->GetItem(MMCIP_MELEE)->GetDesc();
-		if(pDesc->m_nWeaponType==MWT_DOUBLE_KATANA) {
+		if (pDesc->m_nWeaponType == MWT_DOUBLE_KATANA) {
 			AniFrameInfo* pAniLow = m_pVMesh->GetFrameInfo(ani_mode_lower);
-			if( pAniLow->m_nFrame < 160*20) return 0;
+			if (pAniLow->m_nFrame < 160 * 20) return 0;
 		}
 	}
 
@@ -2764,7 +2794,7 @@ float ZMyCharacter::GetGravityConst()
 
 void ZMyCharacter::OnGuardSuccess()
 {
-	m_fLastShotTime=g_pGame->GetTime();
+	m_fLastShotTime = g_pGame->GetTime();
 }
 
 void ZMyCharacter::OnDamaged(ZObject* pAttacker, rvector srcPos, ZDAMAGETYPE damageType, MMatchWeaponType weaponType, float fDamage, float fPiercingRatio, int nMeleeType)
@@ -2772,13 +2802,13 @@ void ZMyCharacter::OnDamaged(ZObject* pAttacker, rvector srcPos, ZDAMAGETYPE dam
 	if (ZGetGame()->GetMatch()->GetMatchType() == MMATCH_GAMETYPE_SKILLMAP)
 		return;
 
-	ZCharacter::OnDamaged(pAttacker,srcPos,damageType,weaponType,fDamage,fPiercingRatio,nMeleeType);
-	ZGetScreenEffectManager()->AddAlert(GetPosition(),m_Direction, srcPos);
+	ZCharacter::OnDamaged(pAttacker, srcPos, damageType, weaponType, fDamage, fPiercingRatio, nMeleeType);
+	ZGetScreenEffectManager()->AddAlert(GetPosition(), m_Direction, srcPos);
 
-	if(damageType==ZD_EXPLOSION)
+	if (damageType == ZD_EXPLOSION)
 	{
-		if (GetVelocity().z > 0 && pAttacker!=NULL )
-			SetLastThrower(pAttacker->GetUID(), g_pGame->GetTime()+1.0f);
+		if (GetVelocity().z > 0 && pAttacker != NULL)
+			SetLastThrower(pAttacker->GetUID(), g_pGame->GetTime() + 1.0f);
 	}
 
 	LastDamagedTime = ZGetGame()->GetTime();
@@ -2789,14 +2819,15 @@ void ZMyCharacter::OnKnockback(const rvector& dir, float fForce)
 	if (ZGetGame()->GetMatch()->GetMatchType() == MMATCH_GAMETYPE_SKILLMAP)
 		return;
 
-	if(m_bBlast || m_bBlastFall) {	
+	if (m_bBlast || m_bBlastFall) {
 		rvector vKnockBackDir = dir;
 		Normalize(vKnockBackDir);
 		vKnockBackDir *= (fForce * BLASTED_KNOCKBACK_RATIO);
 		vKnockBackDir.x = vKnockBackDir.x * 0.2f;
 		vKnockBackDir.y = vKnockBackDir.y * 0.2f;
 		SetVelocity(vKnockBackDir);
-	} else {
+	}
+	else {
 		ZCharacter::OnKnockback(dir, fForce);
 	}
 }

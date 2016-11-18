@@ -21,7 +21,7 @@
 #include <dxerr9.h>
 #include "RGMain.h"
 #include "RBspObject.h"
-
+#include "hsv.h"
 
 #ifndef _PUBLISH
 class ZEffectValidator : public std::set<ZEffect*> 
@@ -1875,14 +1875,13 @@ void ZEffectManager::AddShotEffect(rvector* pSource,int size, const rvector& Tar
 				AddBulletMark(Target,TargetNormal);
 			}
 
-			if(wtype != MWT_SHOTGUN) // 샷건의 한알 한알은 연기 생략
+			if(wtype != MWT_SHOTGUN)
 			{
-				// 타겟 총탄 연기
-			#define TARGET_SMOKE_MAX_SCALE		50.0f
-			#define TARGET_SMOKE_MIN_SCALE		40.0f
-			#define TARGET_SMOKE_LIFE_TIME		0.9f
-			#define TARGET_SMOKE_VELOCITY		0.2f				// meter/sec
-			#define TARGET_SMOKE_ACCEL			rvector(0,0,100.f)	// meter/sec
+#define TARGET_SMOKE_MAX_SCALE		50.0f
+#define TARGET_SMOKE_MIN_SCALE		40.0f
+#define TARGET_SMOKE_LIFE_TIME		0.9f
+#define TARGET_SMOKE_VELOCITY		0.2f				// meter/sec
+#define TARGET_SMOKE_ACCEL			rvector(0,0,100.f)	// meter/sec
 
 				int max_cnt = 0;
 
@@ -1902,46 +1901,23 @@ void ZEffectManager::AddShotEffect(rvector* pSource,int size, const rvector& Tar
 			}
 
 		}
-		else if(nTargetType==ZTT_CHARACTER){	// 타겟이 사람일때
-			// 피 분출
-		#define TARGET_BLOOD_MAX_SCALE		50.0f
-		#define TARGET_BLOOD_MIN_SCALE		20.0f
-		#define TARGET_BLOOD_LIFE_TIME		500
-		#define TARGET_BLOOD_VELOCITY		4.0f	// meter/sec
-
-			/*	// 피 보류
-			for(int i=0; i<3; i++){
-				rvector p = Target+TargetNormal*TARGET_BLOOD_MIN_SCALE*float(i)*0.5f + rvector(fmod((float)rand(), TARGET_BLOOD_MIN_SCALE), fmod((float)rand(), TARGET_BLOOD_MIN_SCALE), fmod((float)rand(), TARGET_BLOOD_MIN_SCALE));
-				float fSize = 1.0f+float(rand()%100)/100.0f;
-				AddSmokeEffect(m_pEBSBloods[rand()%BLOOD_COUNT], p, TargetNormal*TARGET_BLOOD_VELOCITY, TARGET_BLOOD_MIN_SCALE*fSize, TARGET_BLOOD_MAX_SCALE*fSize, TARGET_BLOOD_LIFE_TIME);
-				Add(pNew);
-			}
-			*/
-			
-			// low 이 아닌 거리라면..
+		else if(nTargetType==ZTT_CHARACTER){
+#define TARGET_BLOOD_MAX_SCALE		50.0f
+#define TARGET_BLOOD_MIN_SCALE		20.0f
+#define TARGET_BLOOD_LIFE_TIME		500
+#define TARGET_BLOOD_VELOCITY		4.0f	// meter/sec
 
 			static DWORD last_add_time = GetGlobalTimeMS();
 			static DWORD this_time;
 
 			this_time = GetGlobalTimeMS();
 
-			// 사람일경우 맞는 곳에 나오는 이펙트
-
 			if(rand()%3==0)
 			{
 				pNew = new ZEffectSlash(m_pRangeDamaged[rand()%6],Target,TargetNormal);	
 				((ZEffectSlash*)pNew)->SetScale(rvector(1.0f,1.0f,1.0f));
-				//		((ZEffectSlash*)pNew)->SetAlignType(1);
 				Add(pNew);
 			}
-
-			// 벽에 피 튀김
-			/*
-			for(int i=0; i<3; i++){
-				pNew = new ZEffectBulletMark(m_pEBSBloodMark[rand()%BLOODMARK_COUNT], Target+TargetNormal, TargetNormal);
-				Add(pNew);
-			}
-			*/
 		}
 	}
 }
@@ -2620,13 +2596,12 @@ void ZEffectManager::AddHealEffect(const rvector& Target,ZObject* pObj)
 
 	rvector pos = Target;
 
-	rvector dir = -RealSpace2::RCameraDirection;// rvector(0.f,0.f,1.f);
+	rvector dir = -RealSpace2::RCameraDirection;
 	dir.z = 0.f;
-	pos.z -= 120.f;//땜~
+	pos.z -= 120.f;
 	pNew = new ZEffectDash(m_pHealEffect,pos,dir,pObj->GetUID());
 	pNew->SetEffectType(ZET_HEAL);
 	((ZEffectDash*)pNew)->SetAlignType(1);
-	// 같은것이 있으면 이전것은 제거..
 	DeleteSameType((ZEffectAniMesh*)pNew);
 	Add(pNew);
 }
@@ -2637,14 +2612,12 @@ void ZEffectManager::AddRepireEffect(const rvector& Target,ZObject* pObj)
 
 	rvector pos = Target;
 
-	rvector dir = -RealSpace2::RCameraDirection;// rvector(0.f,0.f,1.f);
+	rvector dir = -RealSpace2::RCameraDirection;
 	dir.z = 0.f;
-	pos.z -= 120.f;//땜~
+	pos.z -= 120.f;
 	pNew = new ZEffectDash(m_pRepireEffect,pos,dir,pObj->GetUID());
-//	pNew->SetEffectType(ZET_REPARE);
-	pNew->SetEffectType(ZET_HEAL);//구분이 필요없어졌다~
+	pNew->SetEffectType(ZET_HEAL);
 	((ZEffectSlash*)pNew)->SetAlignType(1);
-	// 같은것이 있으면 이전것은 제거..
 	DeleteSameType((ZEffectAniMesh*)pNew);
 	Add(pNew);
 }
@@ -2788,7 +2761,7 @@ void ZEffectManager::AddSmokeGrenadeEffect( rvector& Target  )
 	v.z	= 0.f;
 	D3DXVec3Normalize( &v, &v );
 	ZEffect* pNew	= new ZEffectSmokeGrenade( m_pEBSSmokes[0], Target, v, 10, 1000, 20000 );
-	((ZEffectSmokeGrenade*)pNew)->SetDistOption(29999.f,29999.f,29999.f);//다 보여준다~
+	((ZEffectSmokeGrenade*)pNew)->SetDistOption(29999.f,29999.f,29999.f);
 	Add( pNew );
 }
 
@@ -2824,7 +2797,7 @@ void ZEffectManager::AddCharacterIcon(ZObject* pObj,int nIcon)
 	Add(pNew);
 }
 
-class ZEffectIconLoop : public ZEffectIcon { // 멤버를 추가하면 에러
+class ZEffectIconLoop : public ZEffectIcon {
 private:
 public:
 	ZEffectIconLoop(RMesh* pMesh, ZObject* pObj) 
@@ -2850,7 +2823,6 @@ public:
 };
 
 class ZEffectIconLoopStar : public ZEffectIconLoop {
-	// 멤버를 추가하면 에러
 private:
 public:
 	ZEffectIconLoopStar(RMesh* pMesh, ZObject* pObj)
@@ -2932,7 +2904,7 @@ void ZEffectManager::AddChatIcon(ZObject* pObj)
 					if( pObj->m_pVMesh ) {
 						m_Pos = pObj->GetVisualMesh()->GetHeadPosition()+rvector(0,0,60);
 
-						RGetDevice()->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);//월드아이템과의 겹칩현상발생..
+						RGetDevice()->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 
 						ZEffectAniMesh::Draw(nTime);
 
@@ -3089,13 +3061,6 @@ void ZEffectManager::AddStarEffect( ZObject *pObj )
 	((ZEffectIconLoop*)pNew)->SetAlignType(1);
 	((ZEffectIconLoop*)pNew)->m_type = eq_parts_pos_info_Spine2;
 	Add(pNew);
-/*
-	ZEffect* pNew = NULL;
-	pNew = new ZEffectIconLoop(m_pEffectMeshMgr->Get("event_ongame_jjang"),pObj, rvector(0,0,90));
-	((ZEffectIconLoop*)pNew)->SetAlignType(2);
-	((ZEffectIconLoop*)pNew)->m_type = eq_parts_pos_info_Spine1;
-	Add(pNew);
-*/
 }
 
 void ZEffectManager::Add(const char* szName,const rvector& pos, const rvector& dir,const MUID& uidOwner,int nLifeTime)
@@ -3110,7 +3075,7 @@ void ZEffectManager::Add(const char* szName,const rvector& pos, const rvector& d
 	
 	Add(pNew);
 }
-// 이름으로 특정한 함수와 연결하고 싶은경우...
+
 void ZEffectManager::AddSp(const char* szName,int nCnt,const rvector& pos, const rvector& dir,const MUID& uidOwner)
 {
 	if(_stricmp(szName,"BlizzardEffect")==0) {

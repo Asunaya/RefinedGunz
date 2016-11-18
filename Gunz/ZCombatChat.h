@@ -1,52 +1,34 @@
-#ifndef _ZCOMBATCHAT_H
-#define _ZCOMBATCHAT_H
+#pragma once
 
 #include "ZInterface.h"
 
-//class MListBox;
 class MEdit;
 class MTextArea;
 
-/////////////////
-// ZTabPlayerList
-#define ZPLB_ITEM_PICKPLAYER	"picked"
+#define ZPLB_ITEM_PICKPLAYER "picked"
+
 class ZTabPlayerList : public MListBox {
-protected:
-	MEdit*	m_pEditChat;
-
 public:
-	ZTabPlayerList(const char* szName, MWidget* pParent=NULL, MListener* pListener=NULL);
-	void SetChatControl(MEdit* pEdit)	{ m_pEditChat = pEdit; }
+	ZTabPlayerList(const char* szName, MWidget* pParent = NULL, MListener* pListener = NULL);
+	void SetChatControl(MEdit* pEdit) { m_pEditChat = pEdit; }
 
-	virtual bool OnShow(void);
-	virtual void OnHide(void);
-	virtual bool OnEvent(MEvent* pEvent, MListener* pListener);
+	virtual bool OnShow() override final;
+	virtual void OnHide() override final;
+	virtual bool OnEvent(MEvent* pEvent, MListener* pListener) override final;
 
 	void OnPickPlayer();
+
+protected:
+	MEdit* m_pEditChat{};
 };
 
 
-class ZCombatChat
+class ZCombatChat final
 {
-private:
-protected:
-	ZIDLResource*		m_pIDLResource;
-	MEdit*				m_pInputEdit;
-	ZTabPlayerList*		m_pTabPlayerList;
-	bool				m_bChatInputVisible;
-	unsigned long int	m_nLastChattingMsgTime;
-	bool				m_bTeamChat;
-	bool				m_bShowOutput;
-
-	void SetTeamChat(bool bVal)	{ m_bTeamChat = bVal; }
-	void UpdateChattingBox();
-	void ProcessChatMsg();
 public:
-	MTextArea*			m_pChattingOutput;
-
 	ZCombatChat();
-	virtual ~ZCombatChat();
-	bool Create( const char* szOutputTxtarea,bool bUsePlayerList);
+	~ZCombatChat();
+	bool Create(const char* szOutputTxtarea, bool bUsePlayerList);
 	void Destroy();
 
 	void Update();
@@ -55,19 +37,30 @@ public:
 	void OutputChatMsg(MCOLOR color, const char* szMsg);
 
 	void OnDraw(MDrawContext* pDC);
-	bool IsChat() { return m_bChatInputVisible; }
-	bool IsTeamChat()	{ return m_bTeamChat; }
-	bool IsShow()
+	bool IsChat() const { return m_bChatInputVisible; }
+	bool IsTeamChat() const { return m_bTeamChat; }
+	bool IsShow() const
 	{
-		if (m_pInputEdit == NULL) return false;
+		if (!m_pInputEdit)
+			return false;
 		return m_pInputEdit->IsVisible();
 	}
-	void SetFont( MFont* pFont);
+	void SetFont(MFont* pFont);
 
 	void ShowOutput(bool bShow);
+
+	MTextArea*			m_pChattingOutput{};
+
+protected:
+	void SetTeamChat(bool bVal) { m_bTeamChat = bVal; }
+	void UpdateChattingBox();
+	void ProcessChatMsg();
+
+	ZIDLResource*		m_pIDLResource{};
+	MEdit*				m_pInputEdit{};
+	ZTabPlayerList*		m_pTabPlayerList{};
+	bool				m_bChatInputVisible = true;
+	u32					m_nLastChattingMsgTime{};
+	bool				m_bTeamChat{};
+	bool				m_bShowOutput = true;
 };
-
-
-
-
-#endif

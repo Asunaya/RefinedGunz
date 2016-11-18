@@ -18,6 +18,7 @@
 #include "ZInput.h"
 #include "RGMain.h"
 #include "RBspObject.h"
+#include "MTextArea.h"
 
 #undef _DONOTUSE_DINPUT_MOUSE
 
@@ -109,7 +110,7 @@ bool ZGameInput::OnEvent(MEvent* pEvent)
 				}
 			}
 
-			if (pCombatInterface->IsChat())
+			if (pCombatInterface->IsChatVisible())
 			{
 				pCombatInterface->EnableInputChat(false);
 			}
@@ -120,24 +121,13 @@ bool ZGameInput::OnEvent(MEvent* pEvent)
 				return true;
 			}
 
-/*			if ((pMyCharacter) && (pMyCharacter->IsDie()))	//// 실서비스에서 스폰안되는 버그유발. 원인불명(_PUBLISH누락) 영구봉쇄.
-			{
-				// 혼자테스트할때 되살아나기
-				if(g_pGame->m_CharacterManager.size()==1)
-				{
-#ifndef _PUBLISH
-					ZGetGameInterface()->RespawnMyCharacter();
-					return true;
-#endif
-				}
-			}*/
 			if (ZGetGameInterface()->IsCursorEnable())
 				return false;
 		}
 		return true;
 	case MWM_RBUTTONDOWN:
 		{
-			if (ZGetGameInterface()->GetCombatInterface()->IsChat())
+			if (ZGetGameInterface()->GetCombatInterface()->IsChatVisible())
 			{
 				ZGetGameInterface()->GetCombatInterface()->EnableInputChat(false);
 			}
@@ -150,7 +140,7 @@ bool ZGameInput::OnEvent(MEvent* pEvent)
 		}
 		return true;
 	case MWM_MBUTTONDOWN:
-		if (ZGetGameInterface()->GetCombatInterface()->IsChat())
+		if (ZGetGameInterface()->GetCombatInterface()->IsChatVisible())
 		{
 			ZGetGameInterface()->GetCombatInterface()->EnableInputChat(false);
 		}
@@ -163,7 +153,8 @@ bool ZGameInput::OnEvent(MEvent* pEvent)
 			case ZACTION_LEFT:
 			case ZACTION_RIGHT:
 				if (m_pInstance) 
-					m_pInstance->m_ActionKeyHistory.push_back(ZACTIONKEYITEM(g_pGame->GetTime(),false,pEvent->nKey));
+					m_pInstance->m_ActionKeyHistory.push_back(
+						ZACTIONKEYITEM(g_pGame->GetTime(),false,pEvent->nKey));
 				return true;
 
 			case ZACTION_DEFENCE:
@@ -175,7 +166,7 @@ bool ZGameInput::OnEvent(MEvent* pEvent)
 			}
 		}break;
 	case MWM_ACTIONPRESSED:
-		if ( !ZGetGame()->IsReservedSuicide())		// 자살 예정인 경우 대쉬를 할수없게 막는다
+		if ( !ZGetGame()->IsReservedSuicide())
 		{
 		switch(pEvent->nKey){
 			case ZACTION_FORWARD:
@@ -184,7 +175,8 @@ bool ZGameInput::OnEvent(MEvent* pEvent)
 			case ZACTION_RIGHT:
 			case ZACTION_JUMP:
 				if (m_pInstance) 
-					m_pInstance->m_ActionKeyHistory.push_back(ZACTIONKEYITEM(g_pGame->GetTime(),true,pEvent->nKey));
+					m_pInstance->m_ActionKeyHistory.push_back(
+						ZACTIONKEYITEM(g_pGame->GetTime(),true,pEvent->nKey));
 				return true;
 			case ZACTION_MELEE_WEAPON:
 				{
@@ -241,7 +233,7 @@ bool ZGameInput::OnEvent(MEvent* pEvent)
 				}
 				return true;
 
-			case ZACTION_TAUNT:		// 틸다키
+			case ZACTION_TAUNT:
 			case ZACTION_BOW:
 			case ZACTION_WAVE:
 			case ZACTION_LAUGH:
@@ -263,7 +255,7 @@ bool ZGameInput::OnEvent(MEvent* pEvent)
 						return true;
 
 					if(g_pGame)
-						g_pGame->PostSpMotion( mtype );	// ZPostSpMotion(mtype);
+						g_pGame->PostSpMotion( mtype );
 					
 				}
 				return true;
@@ -289,7 +281,7 @@ bool ZGameInput::OnEvent(MEvent* pEvent)
 					return true;
 				}
 
-			} // switch
+			}
 		}
 		break;
 
@@ -337,19 +329,13 @@ bool ZGameInput::OnEvent(MEvent* pEvent)
 				{
 					ZApplication::GetGameInterface()->GetScreenDebugger()->SwitchDebugInfo();
 				}
-				else
-				{
-					// 애들이 어떻게 알고서 쓰길래 막음... -_-;
-//					if (pEvent->bCtrl)
-//						ZApplication::GetGameInterface()->GetScreenDebugger()->SwitchDebugInfo();
-				}
 
 				return true;
 #endif
 			case VK_RETURN:
 			case VK_OEM_2:
 				{
-					if ((pCombatInterface) && (!pCombatInterface->IsChat()) && !g_pGame->IsReplay())
+					if (pCombatInterface && !pCombatInterface->IsChatVisible() && !g_pGame->IsReplay())
 					{
 						MWidget* pWidget = ZGetGameInterface()->GetIDLResource()->FindWidget("112Confirm");
 						if (pWidget && pWidget->IsVisible()) return false;
@@ -387,7 +373,7 @@ bool ZGameInput::OnEvent(MEvent* pEvent)
 					ZGetGameInterface()->GetCombatInterface()->GetVoteInterface()->VoteInput(pEvent->nKey);
 				}
 				break;
-			case VK_ESCAPE:		// 메뉴를 부르거나 kick player를 취소한다
+			case VK_ESCAPE:
 				if (ZGetGameInterface()->GetCombatInterface()->GetVoteInterface()->GetShowTargetList()) {
 					ZGetGameInterface()->GetCombatInterface()->GetVoteInterface()->CancelVote();
 				} else {
@@ -487,13 +473,10 @@ bool ZGameInput::OnEvent(MEvent* pEvent)
 			}
 		}
 		break;
-	} // switch (message)
-
+	}
 
 	return false;
 }
-
-#include "MTextArea.h"
 
 void ZGameInput::Update(float fElapsed)
 {
@@ -574,8 +557,9 @@ void ZGameInput::Update(float fElapsed)
 				}
 
 				ZCombatInterface* pCombatInterface = ZGetGameInterface()->GetCombatInterface();
-				if (pCombatInterface && !pCombatInterface->IsChat() &&
-					(pCamera->GetLookMode() == ZCAMERA_FREELOOK || pCamera->GetLookMode() == ZCAMERA_MINIMAP))
+				if (pCombatInterface && !pCombatInterface->IsChatVisible() &&
+					(pCamera->GetLookMode() == ZCAMERA_FREELOOK ||
+						pCamera->GetLookMode() == ZCAMERA_MINIMAP))
 				{
 					rvector right;
 					rvector forward = RCameraDirection;
@@ -588,11 +572,12 @@ void ZGameInput::Update(float fElapsed)
 					if (ZIsActionKeyPressed(ZACTION_FORWARD) == true)	accel += forward;
 					if (ZIsActionKeyPressed(ZACTION_BACK) == true)		accel -= forward;
 					if (ZIsActionKeyPressed(ZACTION_LEFT) == true)		accel -= right;
-					if (ZIsActionKeyPressed(ZACTION_RIGHT) == true)	accel += right;
+					if (ZIsActionKeyPressed(ZACTION_RIGHT) == true)		accel += right;
 					if (ZIsActionKeyPressed(ZACTION_JUMP) == true)		accel += up;
-					if (ZIsActionKeyPressed(ZACTION_USE_WEAPON) == true)			accel -= up;
+					if (ZIsActionKeyPressed(ZACTION_USE_WEAPON) == true)accel -= up;
 
-					auto cameraMove = (pCamera->GetLookMode() == ZCAMERA_FREELOOK ? 1000.f : 10000.f) * fElapsed * accel;
+					auto cameraMove = (pCamera->GetLookMode() == ZCAMERA_FREELOOK ? 1000.f : 10000.f) *
+						fElapsed * accel;
 
 					rvector targetPos = pCamera->GetPosition() + cameraMove;
 
@@ -612,12 +597,9 @@ void ZGameInput::Update(float fElapsed)
 							targetPos.z = max(min(targetPos.z, pMinimap->GetHeightMax()), pMinimap->GetHeightMin());
 						else
 							targetPos.z = max(min(targetPos.z, 7000), 2000);
-
-
 					}
 
 					pCamera->SetPosition(targetPos);
-
 				}
 				else if (!g_pGame->IsReplay())
 				{
@@ -629,19 +611,17 @@ void ZGameInput::Update(float fElapsed)
 			SetCursorPos(pt.x, pt.y);
 
 			GameCheckSequenceKeyCommand();
-
 		}
-else
-pMyCharacter->ReleaseButtonState();
+else pMyCharacter->ReleaseButtonState();
 	}
 }
-
 
 #define MAX_KEY_SEQUENCE_TIME	2.f
 
 void ZGameInput::GameCheckSequenceKeyCommand()
 {
-	while(m_ActionKeyHistory.size()>0 && (g_pGame->GetTime()-(*m_ActionKeyHistory.begin()).fTime>MAX_KEY_SEQUENCE_TIME))
+	while (m_ActionKeyHistory.size() > 0 &&
+		g_pGame->GetTime() - (*m_ActionKeyHistory.begin()).fTime > MAX_KEY_SEQUENCE_TIME)
 	{
 		m_ActionKeyHistory.erase(m_ActionKeyHistory.begin());
 	}

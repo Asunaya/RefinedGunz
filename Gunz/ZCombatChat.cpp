@@ -1,5 +1,4 @@
 #include "stdafx.h"
-
 #include "ZCombatChat.h"
 #include "ZGameInterface.h"
 #include "ZInterfaceItem.h"
@@ -10,37 +9,27 @@
 #include "MChattingFilter.h"
 #include "MTextArea.h"
 #include "ZConfiguration.h"
-
 #include "NewChat.h"
 
 #define MAX_CHAT_OUTPUT_LINE 7
 
-
-/////////////////
-// ZTabPlayerList
 ZTabPlayerList::ZTabPlayerList(const char* szName, MWidget* pParent, MListener* pListener)
-: MListBox(szName, pParent, pListener)
-{
-	SetChatControl(NULL);
-}
+	: MListBox(szName, pParent, pListener) {}
 
-bool ZTabPlayerList::OnShow(void)
+bool ZTabPlayerList::OnShow()
 {
 	RemoveAll();
 
-	// Push Target List
-	for (auto i = ZGetCharacterManager()->begin(); i != ZGetCharacterManager()->end(); i++)
+	for (auto* Char : MakePairValueAdapter(*ZGetCharacterManager()))
 	{
-		ZCharacter *pChar = nullptr;// i->second;
-		if(ZGetGame()->m_pMyCharacter->IsAdminHide())
-			continue;
-		Add(pChar->GetProperty()->szName);
+		if(!Char->IsAdminHide())
+			Add(Char->GetProperty()->szName);
 	}
 
 	return true;
 }
 
-void ZTabPlayerList::OnHide(void)
+void ZTabPlayerList::OnHide()
 {
 	if (m_pEditChat)
 		m_pEditChat->SetFocus();
@@ -48,13 +37,14 @@ void ZTabPlayerList::OnHide(void)
 
 bool ZTabPlayerList::OnEvent(MEvent* pEvent, MListener* pListener)
 {
-	if(pEvent->nMessage==MWM_KEYDOWN){
+	if(pEvent->nMessage==MWM_KEYDOWN)
+	{
 		if(pEvent->nKey==VK_ESCAPE) 
 		{
 			Show(false);
 			return true;
 		}
-		else if( (pEvent->nKey==VK_TAB) || (pEvent->nKey==VK_RETURN) || (pEvent->nKey==VK_SPACE))
+		else if (pEvent->nKey == VK_TAB || pEvent->nKey == VK_RETURN || pEvent->nKey == VK_SPACE)
 		{
 			OnPickPlayer();
 			Show(false);
@@ -71,12 +61,12 @@ void ZTabPlayerList::OnPickPlayer()
 		m_pEditChat->AddText(pszString);
 	}
 }
-///////////////////
-//
-class MCombatChatInputListener : public MListener{
+
+class MCombatChatInputListener : public MListener {
 public:
-	virtual bool OnCommand(MWidget* pWidget, const char* szMessage){
-		if(MWidget::IsMsg(szMessage, MEDIT_ENTER_VALUE)==true)
+	virtual bool OnCommand(MWidget* pWidget, const char* szMessage) override final
+	{
+		if (MWidget::IsMsg(szMessage, MEDIT_ENTER_VALUE) == true)
 		{
 			if (strlen(pWidget->GetText()) >= 256) return false;
 
@@ -104,45 +94,29 @@ public:
 			}
 			return true;
 		}
-		else if(MWidget::IsMsg(szMessage, MEDIT_ESC_VALUE)==true)
+		else if (MWidget::IsMsg(szMessage, MEDIT_ESC_VALUE) == true)
 		{
 			pWidget->SetText("");
 			ZApplication::GetGameInterface()->GetCombatInterface()->EnableInputChat(false);
 		}
-		else if ((MWidget::IsMsg(szMessage, MEDIT_CHAR_MSG)==true) || (MWidget::IsMsg(szMessage, MEDIT_KEYDOWN_MSG)==true))
+		else if (MWidget::IsMsg(szMessage, MEDIT_CHAR_MSG) == true ||
+			MWidget::IsMsg(szMessage, MEDIT_KEYDOWN_MSG) == true)
 		{
 			ZApplication::GetGameInterface()->GetChat()->FilterWhisperKey(pWidget);
 		}
 
-
 		return false;
 	}
 };
-MCombatChatInputListener	g_CombatChatInputListener;
+static MCombatChatInputListener g_CombatChatInputListener;
 
-MListener* ZGetCombatChatInputListener(void)
+MListener* ZGetCombatChatInputListener()
 {
 	return &g_CombatChatInputListener;
 }
 
-
-ZCombatChat::ZCombatChat()
-{
-	m_bChatInputVisible = true;
-	m_nLastChattingMsgTime = 0;
-	m_pIDLResource = ZApplication::GetGameInterface()->GetIDLResource();
-
-	m_pChattingOutput = NULL;
-	m_pInputEdit = NULL;
-	m_pTabPlayerList = NULL;
-	m_bTeamChat = false;
-	m_bShowOutput = true;
-}
-
-ZCombatChat::~ZCombatChat()
-{
-
-}
+ZCombatChat::ZCombatChat() : m_pIDLResource{ ZApplication::GetGameInterface()->GetIDLResource() } {}
+ZCombatChat::~ZCombatChat() = default;
 
 bool ZCombatChat::Create( const char* szOutputTxtarea,bool bUsePlayerList)
 {
@@ -332,7 +306,6 @@ void ZCombatChat::ProcessChatMsg()
 		m_nLastChattingMsgTime = GetGlobalTimeMS();
 	}
 }
-
 
 void ZCombatChat::OnDraw(MDrawContext* pDC)
 {

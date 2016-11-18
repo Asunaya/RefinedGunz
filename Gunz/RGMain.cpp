@@ -14,6 +14,20 @@
 #include "ZInput.h"
 #include <cstdint>
 #include "MeshManager.h"
+#include "hsv.h"
+#include "dxerr9.h"
+
+#define DXERR(func) DXErr(func, __func__, #func)
+
+inline bool DXErr(HRESULT hr, const char* CallingFunction, const char* DXFunction)
+{
+	if (SUCCEEDED(hr))
+		return false;
+
+	MLog("In %s, %s failed -- error code: %s, description: %s\n", CallingFunction, DXFunction, DXGetErrorString9(hr), DXGetErrorDescription9(hr));
+
+	return true;
+}
 
 std::unique_ptr<RGMain> g_RGMain;
 
@@ -267,9 +281,17 @@ void RGMain::OnUpdate(double Elapsed)
 
 bool RGMain::OnEvent(MEvent *pEvent)
 {
-	g_Chat.OnEvent(pEvent);
+	if (g_bNewChat)
+		g_Chat.OnEvent(pEvent);
 
-	if (g_Chat.IsInputEnabled())
+	auto IsChatVisible = [] {
+		if (g_bNewChat)
+			return g_Chat.IsInputEnabled();
+		else
+			return ZGetCombatInterface()->IsChatVisible();
+	}();
+
+	if (IsChatVisible)
 	{
 		if (ZGetGame()->IsReplay())
 			g_ReplayControl.OnEvent(pEvent);
@@ -449,20 +471,15 @@ void RGMain::DrawReplayInfo() const
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
 
 	auto ReplayWidget = pResource->FindWidget("Replay");
-
 	if (!ReplayWidget->IsVisible())
 		return;
 
 	auto ReplayFileList = (MListBox *)pResource->FindWidget("Replay_FileList");
-
 	if (!ReplayFileList->GetSelItem())
 		return;
 
 	auto ReplayGroupWidget = pResource->FindWidget("ReplayGroup");
-
 	auto Offset = ReplayGroupWidget->GetPosition();
-
-	//MLog("Offset: %d, %d\n", Offset.x, Offset.y);
 
 	Offset.x += 310;
 	Offset.y += 50;
@@ -501,7 +518,8 @@ void RGMain::DrawReplayInfo() const
 			return;
 
 		auto Bitmap = it->second;
-		((MBitmapR2 *)Bitmap->GetSourceBitmap())->Draw(Offset.x, Offset.y, 260, 30, Bitmap->GetX(), Bitmap->GetY(), Bitmap->GetWidth(), Bitmap->GetHeight(), 0xFFFFFFFF);
+		((MBitmapR2 *)Bitmap->GetSourceBitmap())->Draw(Offset.x, Offset.y, 260, 30,
+			Bitmap->GetX(), Bitmap->GetY(), Bitmap->GetWidth(), Bitmap->GetHeight(), 0xFFFFFFFF);
 
 		Offset.y += 30;
 	}();
@@ -529,7 +547,10 @@ void RGMain::DrawReplayInfo() const
 	if(SelectedReplayInfo.StageSetting.szStageName[0])
 		Print("Stage name: %s", SelectedReplayInfo.StageSetting.szStageName);
 
-	Print("Gametype: %s", ZGetGameInterface()->GetGameTypeManager()->GetGameTypeStr(SelectedReplayInfo.StageSetting.nGameType));
+	auto* GameTypeManager = ZGetGameInterface()->GetGameTypeManager();
+	if (GameTypeManager)
+		Print("Gametype: %s",
+			GameTypeManager->GetGameTypeStr(SelectedReplayInfo.StageSetting.nGameType));
 
 	for (auto &Item : SelectedReplayInfo.PlayerInfos)
 	{
@@ -557,20 +578,6 @@ std::pair<bool, uint32_t> RGMain::GetPlayerSwordColor(const MUID& UID)
 HRESULT GenerateMassiveTexture(IDirect3DTexture9 **Tex, D3DCOLOR Color)
 {
 	return S_OK;
-}
-
-#include "dxerr9.h"
-
-#define DXERR(func) DXErr(func, __func__, #func)
-
-inline bool DXErr(HRESULT hr, const char* CallingFunction, const char* DXFunction)
-{
-	if (SUCCEEDED(hr))
-		return false;
-
-	MLog("In %s, %s failed -- error code: %s, description: %s\n", CallingFunction, DXFunction, DXGetErrorString9(hr), DXGetErrorDescription9(hr));
-
-	return true;
 }
 
 IDirect3DTexture9* HueShiftTexture(IDirect3DTexture9* Tex, float Hue)
@@ -614,7 +621,7 @@ IDirect3DTexture9* HueShiftTexture(IDirect3DTexture9* Tex, float Hue)
 
 		for (UINT j = 0; j < Desc.Height; j++)
 		{
-			for (int i = 0; i < Rect.Pitch; i += 4)
+			for (INT i = 0; i < Rect.Pitch; i += 4)
 			{
 				uint32_t& Pixel = *(uint32_t *)(PBYTE(Rect.pBits) + i + j * Rect.Pitch);
 				rgb color;

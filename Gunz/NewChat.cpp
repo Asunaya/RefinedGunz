@@ -3,6 +3,7 @@
 #include "RGMain.h"
 #include "ZCharacterManager.h"
 #include "ZInput.h"
+#include "Config.h"
 
 // Resize flags
 enum
@@ -13,10 +14,15 @@ enum
 	RESIZE_Y2 = 1 << 3,
 };
 
+// Stuff crashes if this is increased
 static constexpr int MAX_INPUT_LENGTH = 230;
 
 Chat g_Chat;
+#ifdef NEW_CHAT
 bool g_bNewChat = true;
+#else
+bool g_bNewChat = false;
+#endif
 
 // Chat colors
 static const unsigned long MMColorSet[] = {
@@ -1121,7 +1127,8 @@ void Chat::DrawBorder()
 	for (size_t i = 0; i < ArraySize(vs); i++)
 		Line(vs[i], vs[(i + 1) % ArraySize(vs)]);
 
-	Line({ float(Border.x1), float(Border.y2 - 2 - nFontHeight) }, { float(Border.x2), float(Border.y2 - 2 - nFontHeight) });
+	Line({ float(Border.x1), float(Border.y2 - 2 - nFontHeight) },
+	{ float(Border.x2), float(Border.y2 - 2 - nFontHeight) });
 }
 
 void Chat::Line(const D3DXVECTOR2 &v1, const D3DXVECTOR2 &v2, D3DCOLOR Color, float z)
