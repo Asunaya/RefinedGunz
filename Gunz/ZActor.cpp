@@ -14,14 +14,14 @@
 #include "ZQuest.h"
 #include "ZInput.h"
 #include "ZPickInfo.h"
+#include "ZScreenEffectManager.h"
 
 MImplementRTTI(ZActor, ZCharacterObjectHistory);
 
-///////////////////////////////////////////////////////////////////////
 ZActor::ZActor() : m_nFlags(0), m_nNPCType(NPC_GOBLIN_KING), m_pNPCInfo(NULL),
 m_pModule_Skills(NULL), m_fSpeed(0.0f), m_pBrain(NULL)
 {
-	m_bIsNPC = true;		// ZObject의 false로 된 값을 true로 바꿔줌
+	m_bIsNPC = true;
 
 	memset(m_nLastTime, 0, sizeof(m_nLastTime));
 
@@ -40,7 +40,6 @@ m_pModule_Skills(NULL), m_fSpeed(0.0f), m_pBrain(NULL)
 	m_fTC = 1.0f;
 	m_nQL = 0;
 
-	// flag 설정
 	SetFlag(AF_LAND, true);
 
 	m_bTestControl = false;
@@ -97,8 +96,7 @@ void ZActor::SetMyControl(bool bMyControl)
 	EmptyHistory();
 }
 
-#include "ZConfiguration.h"
-extern sCharacterLight	g_CharLightList[NUM_LIGHT_TYPE];
+extern sCharacterLight g_CharLightList[NUM_LIGHT_TYPE];
 
 bool ZActor::IsDieAnimationDone()
 {
@@ -116,12 +114,11 @@ void ZActor::OnDraw()
 
 	if( IsDieAnimationDone() )
 	{
-#define TRAN_AFTER		0.5f	// 이 시간 이후부터
-#define VANISH_TIME		1.f		// 이 시간동안 투명해진다
+#define TRAN_AFTER		0.5f
+#define VANISH_TIME		1.f
 
 		if(m_TempBackupTime==-1) m_TempBackupTime = g_pGame->GetTime();
 
-//		float fOpacity = max(0.f,min(1.0f,(	VANISH_TIME-(g_pGame->GetTime()-GetDeadTime() - TRAN_AFTER))/VANISH_TIME));
 		float fOpacity = max(0.f,min(1.0f,(	VANISH_TIME-(g_pGame->GetTime()-m_TempBackupTime - TRAN_AFTER))/VANISH_TIME));
 
 		m_pVMesh->SetVisibility(fOpacity);
@@ -133,9 +130,6 @@ void ZActor::OnDraw()
 
 	m_pVMesh->Render();
 }
-
-#include "ZActionDef.h"
-#include "MEvent.h"
 
 #define IsKeyDown(key) ((GetAsyncKeyState(key) & 0x8000)!=0)
 
@@ -249,9 +243,6 @@ void ZActor::InitFromNPCType(MQUEST_NPC nNPCType, float fTC, int nQL)
 		}
 	}
 
-
-	
-	// brain 세팅
 	m_pBrain = ZBrain::CreateBrain(nNPCType);
 	m_pBrain->Init(this);
 
@@ -263,7 +254,7 @@ void ZActor::InitMesh(char* szMeshName)
 	// for test
 	RMesh* pMesh;
 
-	pMesh = ZGetNpcMeshMgr()->Get(szMeshName);//원하는 모델을 붙여주기..
+	pMesh = ZGetNpcMeshMgr()->Get(szMeshName);
 	if(!pMesh) 
 	{
 		_ASSERT(0);
@@ -285,7 +276,6 @@ void ZActor::InitMesh(char* szMeshName)
 
 void ZActor::UpdateHeight(float fDelta)
 {
-	// 어느정도 공중에 떠있거나 위로 날아가는 중이면 land 플래그를 끈다
 	if (GetDistToFloor() > 10.f || GetVelocity().z > 0.1f)
 	{
         SetFlag(AF_LAND, false);
@@ -336,7 +326,6 @@ void ZActor::UpdateHeight(float fDelta)
 		}
 	}
 
-	// 발이 뭍혔거나 내려가야 하는데 못간경우
 	rvector diff=fDelta*GetVelocity();
 
 	bool bUp = (diff.z>0.01f);
@@ -351,10 +340,9 @@ void ZActor::UpdateHeight(float fDelta)
 		}
 	}
 
-	// 계단 같은곳에서 스르륵 올라오도록..
 	if(GetDistToFloor()<0 && !IsDie())
 	{
-		float fAdjust=400.f*fDelta;	// 초당 이만큼
+		float fAdjust=400.f*fDelta;
 		rvector diff=rvector(0,0,min(-GetDistToFloor(),fAdjust));
 		Move(diff);
 	}
@@ -362,33 +350,6 @@ void ZActor::UpdateHeight(float fDelta)
 
 void ZActor::UpdatePosition(float fDelta)
 {
-	// 실제 움직이는 부분은 module_movable 로 옮겨갔다
-
-//	if (GetDistToFloor() > 0.1f || GetVelocity().z > 0.1f)
-//	{
-//		// 중력의 영향을 받는다.
-//#define ENEMY_GRAVITY_CONSTANT		2500.f			// 중력의 영향
-//#define ENEMY_MAX_FALL_SPEED		3000.f			// 최대 낙하속도
-//
-//		float down=ENEMY_GRAVITY_CONSTANT*fDelta;
-//
-//		rvector newVelocity = GetVelocity();
-//		newVelocity.z-=down;
-//		newVelocity.z=max(GetVelocity().z,-ENEMY_MAX_FALL_SPEED);
-//		SetVelocity(newVelocity);
-//
-////		m_bJumpUp=(GetVelocity().z>0);
-//
-//
-//		// 띄워졌을때 정점에 도달
-//		if ((CheckFlag(AF_BLAST) == true) && (GetCurrAni() == ZA_EVENT_BLAST) && (GetVelocity().z < 0.0f))
-//		{
-//			m_Animation.Input(ZA_EVENT_REACH_PEAK);
-//		}
-//		
-//		SetFlag(AF_LAND, false);
-//	}
-
 	if( CheckFlag(AF_MY_CONTROL) ) 
 	{
 		if ((CheckFlag(AF_BLAST) == true) && (GetCurrAni() == ZA_ANIM_BLAST) && (GetVelocity().z < 0.0f))
@@ -409,44 +370,6 @@ void ZActor::UpdatePosition(float fDelta)
 	m_pModule_Movable->Update(fDelta);
 
 }
-
-
-
-#include "ZGame.h"
-
-
-/*
-void ZActor::Input(AI_INPUT_SET nInput)
-{
-//	AI_BEHAVIOR_STATE nNextState = AI_BEHAVIOR_STATE(m_Behavior.StateTransition(nInput));
-//	SetBehaviorState(nNextState);
-}
-*/
-
-/*
-bool ZActor::SetBehaviorState(AI_BEHAVIOR_STATE nBehaviorState)
-{
-	if (m_Behavior.GetCurrState() == nBehaviorState) return false;
-
-	OnBehaviorExit(AI_BEHAVIOR_STATE(m_Behavior.GetCurrState()));
-
-	m_Behavior.SetState(nBehaviorState);
-
-	OnBehaviorEnter(AI_BEHAVIOR_STATE(m_Behavior.GetCurrState()));
-	
-	return true;
-}
-
-void ZActor::OnBehaviorEnter(AI_BEHAVIOR_STATE nBehaviorState)
-{
-
-}
-
-void ZActor::OnBehaviorExit(AI_BEHAVIOR_STATE nBehaviorState)
-{
-
-}
-*/
 
 void ZActor::OnBlast(rvector &dir)
 {
@@ -482,7 +405,6 @@ void ZActor::OnBlastDagger(rvector &dir,rvector& pos)
 
 	SetVelocity(dir * 300.f + rvector(0,0,100.f));
 
-//	m_vAddBlastVel = dir;
 	m_vAddBlastVel = GetPosition() - pos;
 	m_vAddBlastVel.z = 0.f;
 
@@ -507,10 +429,6 @@ void ZActor::ProcessAI(float fDelta)
 
 }
 
-
-
-
-
 ZActor* ZActor::CreateActor(MQUEST_NPC nNPCType, float fTC, int nQL)
 {
 	ZActor* pNewActor=NULL;
@@ -532,13 +450,11 @@ ZActor* ZActor::CreateActor(MQUEST_NPC nNPCType, float fTC, int nQL)
 	return pNewActor;
 }
 
-
 void ZActor::PostBasicInfo()
 {
 	DWORD nNowTime = GetGlobalTimeMS();
 	if (GetInitialized() == false) return;
 
-	// 죽고나서 5초가 지나면 basicinfo를 보내지 않는다.
 	if(IsDie() && ZGetGame()->GetTime() - GetDeadTime()>5.f) return;
 	int nMoveTick = (ZGetGameClient()->GetAllowTunneling() == false) ? PEERMOVE_TICK : PEERMOVE_AGENT_TICK;
 
@@ -566,9 +482,6 @@ void ZActor::PostBasicInfo()
 
 
 		ZPOSTCMD1(MC_QUEST_PEER_NPC_BASICINFO, MCommandParameterBlob(&pbi,sizeof(ZACTOR_BASICINFO)));
-
-
-		// history 에 보관
 
 #define ACTOR_HISTROY_COUNT 100
 
@@ -646,8 +559,6 @@ void ZActor::ProcessMovement(float fDelta)
 		float fSpeed = m_fSpeed;
 		if (GetCurrAni() == ZA_ANIM_RUN) fSpeed = m_fSpeed;
 
-//		SetVelocity(m_Direction * fSpeed);
-
 		const float fAccel = 10000.f;
 
 		AddVelocity(m_Direction * fAccel * fDelta);
@@ -664,7 +575,6 @@ void ZActor::ProcessMovement(float fDelta)
 
 	if(CheckFlag(AF_BLAST_DAGGER)) {
 		float fSpeed = m_fSpeed;
-//		rvector vel = GetVelocity() * fDelta * 100;
 
 #define BLAST_DAGGER_MAX_TIME 0.8f
 
@@ -675,10 +585,8 @@ void ZActor::ProcessMovement(float fDelta)
 
 		float fPower = 400.f * fTime * fTime * fDelta * 80.f;
 
-//		m_vAddBlastVel.z -= fDelta;
-
 		if(fPower==0.f)
-			SetFlag(AF_BLAST_DAGGER,false);//힘이 다된것
+			SetFlag(AF_BLAST_DAGGER,false);
 
 		rvector vel = m_vAddBlastVel * fPower;
 
@@ -693,20 +601,18 @@ void ZActor::ProcessMovement(float fDelta)
 	}
 	else
 	{
-		// 브레이크를 걸자
 		rvector dir=rvector(GetVelocity().x,GetVelocity().y,0);
 		float fSpeed=Magnitude(dir);
 		Normalize(dir);
 
 		float fRatio = m_pModule_Movable->GetMoveSpeedRatio();
 
-		float max_speed = 600.f	* fRatio;	// TODO : max는 module_movable 을 참조하도록 한다
+		float max_speed = 600.f	* fRatio;
 
-		// 최대속도 이상이면 최대속도에 맞춘다..
 		if(fSpeed>max_speed)
 			fSpeed=max_speed;
 
-#define NPC_STOP_SPEED			2000.f			// 아무키도 안눌렀을때 감속도..
+#define NPC_STOP_SPEED			2000.f
 
 		fSpeed = max(fSpeed-NPC_STOP_SPEED*fDelta,0);
 		SetVelocity(dir.x*fSpeed, dir.y*fSpeed, GetVelocity().z);
@@ -733,7 +639,6 @@ bool ZActor::IsDie()
 	if(CheckFlag(AF_MY_CONTROL))
 		return CheckFlag(AF_DEAD); 
 
-	// 자신이 조종하는 몬스터가 아닌경우 죽었는지 알길이 없다..
 	if(m_Animation.GetCurrState() == ZA_ANIM_DIE) {
 		return true;
 	}
@@ -766,8 +671,6 @@ void ZActor::Attack_Range(rvector& dir)
 	m_Animation.Input(ZA_INPUT_ATTACK_RANGE);
 
 	SetDirection(dir);
-	// TODO 총구위치가 확정되면 고쳐야한다
-	// ' HACK Fix this function.
 	rvector pos,to;
 	pos = m_Position+rvector(0,0,100);
 	ZPostNPCRangeShot(GetUID(),g_pGame->GetTime(),pos,pos+10000.f*dir,MMCIP_PRIMARY);
@@ -804,10 +707,8 @@ void ZActor::DebugTest()
 ZOBJECTHITTEST ZActor::HitTest(const rvector& origin, const rvector& to, float fTime, rvector *pOutPos)
 {
 	rvector footpos,actor_dir;
-	// 적절한 시점의 위치를 얻어낼수없으면 실패..
 	if(!GetHistory(&footpos,&actor_dir,fTime)) return ZOH_NONE;
 
-	// ColPick가 true이면 실린더말고 직접 피킹으로 테스트
 	if (m_pNPCInfo->bColPick)
 	{
 		rvector dir = to - origin;
@@ -825,7 +726,6 @@ ZOBJECTHITTEST ZActor::HitTest(const rvector& origin, const rvector& to, float f
 			}
 			else
 			{
-				// 발은 뺐다
 				return ZOH_BODY;
 			}
 		}
@@ -835,7 +735,6 @@ ZOBJECTHITTEST ZActor::HitTest(const rvector& origin, const rvector& to, float f
 		rvector headpos = footpos;
 		if (m_pVMesh)
 		{
-			// 원래는 m_pVMesh->GetHeadPosition() 로 구해야하지만 지금은 안되므로 Height로 구한다.
 			headpos.z += m_Collision.fHeight - 5.0f;
 		}
 
@@ -853,7 +752,6 @@ ZOBJECTHITTEST ZActor::HitTest(const rvector& origin, const rvector& to, float f
 
 			if(pOutPos) *pOutPos = ap-dir*fdiff;;
 
-			//if(pOutPos)	*pOutPos = cp;
 			return ZOH_BODY;
 		}
 	}
@@ -861,19 +759,8 @@ ZOBJECTHITTEST ZActor::HitTest(const rvector& origin, const rvector& to, float f
 	return ZOH_NONE;
 }
 
-
-//void ZActor::OnDamage(int damage, float fRatio)
-//{
-//	// 내가 컨트럴하는 actor 만 damage를 준다
-//	if (CheckFlag(AF_MY_CONTROL))
-//		ZObject::OnDamage(damage,fRatio);
-//}
-
-#include "ZScreenEffectManager.h"
-
 void ZActor::OnDamaged(ZObject* pAttacker, rvector srcPos, ZDAMAGETYPE damageType, MMatchWeaponType weaponType, float fDamage, float fPiercingRatio, int nMeleeType)
 {
-	// 맞는 사운드
 	if (!CheckFlag(AF_SOUND_WOUNDED))
 	{
 		bool bMyKill = false;
@@ -888,7 +775,6 @@ void ZActor::OnDamaged(ZObject* pAttacker, rvector srcPos, ZDAMAGETYPE damageTyp
 		SetFlag(AF_SOUND_WOUNDED, true);		
 	}
 
-	// 만약 보스일 경우 보스 게이지 조정
 	if ((m_pNPCInfo->nGrade == NPC_GRADE_BOSS) || (m_pNPCInfo->nGrade == NPC_GRADE_LEGENDARY))
 	{
 		if (ZGetQuest()->GetGameInfo()->GetBoss() == GetUID())
@@ -902,14 +788,11 @@ void ZActor::OnDamaged(ZObject* pAttacker, rvector srcPos, ZDAMAGETYPE damageTyp
 		m_nDamageCount++;
 	}
 
-	//m_nDamage += (int)fDamage;
-
-
 	if(CheckFlag(AF_MY_CONTROL))
 	{
 		bool bSkipDamagedAnimation = false;
 
-		if(m_pNPCInfo->bNeverAttackCancel ) { // 공격이 취소되지 않는 속성이 있을경우...
+		if(m_pNPCInfo->bNeverAttackCancel ) {
 
 			bSkipDamagedAnimation = ZActorAnimation::IsSkippableDamagedAnimation(GetCurrAni());
 		}
@@ -924,11 +807,11 @@ void ZActor::OnDamaged(ZObject* pAttacker, rvector srcPos, ZDAMAGETYPE damageTyp
 
 				if(pCObj) {
 					ZC_ENCHANT etype = pCObj->GetEnchantType();
-					if( etype == ZC_ENCHANT_LIGHTNING )//라이트닝의 경우 데미지 입은 모션..
+					if( etype == ZC_ENCHANT_LIGHTNING )
 						bLightningDamage = true;	
 				}
 
-				if(bLightningDamage && (damageType==ZD_KATANA_SPLASH)) {//라이트닝 강베기의 경우
+				if(bLightningDamage && (damageType==ZD_KATANA_SPLASH)) {
 					m_Animation.Input(ZA_EVENT_LIGHTNING_DAMAGED);
 				}
 				else {
@@ -941,7 +824,7 @@ void ZActor::OnDamaged(ZObject* pAttacker, rvector srcPos, ZDAMAGETYPE damageTyp
 				SetVelocity(0,0,0);
 			}
 			else {
-				if( GetNPCInfo()->bNeverPushed == false)	// 원거리 공격 타격없는
+				if( GetNPCInfo()->bNeverPushed == false)
 				{
 					if (m_nDamageCount >= 5)
 					{
@@ -958,10 +841,8 @@ void ZActor::OnDamaged(ZObject* pAttacker, rvector srcPos, ZDAMAGETYPE damageTyp
 
 void ZActor::OnKnockback(const rvector& dir, float fForce)
 {
-	// 내가 컨트럴하는 actor 만 knockback을 준다
 	if(!CheckFlag(AF_MY_CONTROL)) return;
 
-	// npc 는 넉백을 약간 과장한다
 #define NPC_KNOCKBACK_FACTOR	1.0f
 
 	ZCharacterObject::OnKnockback(dir,NPC_KNOCKBACK_FACTOR*fForce);
@@ -973,7 +854,6 @@ void ZActor::CheckDead(float fDelta)
 		 
 	if (!CheckFlag(AF_DEAD))
 	{
-		// 살아있으면 HP로 죽었는지 체크
 		if(m_pModule_HPAP->GetHP()<=0) {
 			SetDeadTime(ZGetGame()->GetTime());
 			m_Animation.Input(ZA_EVENT_DEATH);
@@ -991,16 +871,12 @@ void ZActor::CheckDead(float fDelta)
 		{
 			if (ZGetGame()->GetTime()-GetDeadTime() > GetNPCInfo()->fDyingTime)
 			{
-				// 나중에 나락까지 감안하게 되면 ZGame::CheckMyCharDead와 합쳐서 모듈로 빼야한다.
 				MUID uidAttacker = GetLastAttacker();
 				if (uidAttacker == MUID(0, 0))
 				{
-					// 죽인 사람이 누군지 모르면 그냥 조종자 자신이 죽인 사람
-					//_ASSERT(0);
 					uidAttacker = ZGetGameClient()->GetPlayerUID();
 				}
 
-				// 여기서 죽었다고 보내보자
 				ZPostQuestRequestNPCDead(uidAttacker, GetUID(), GetPosition());
 				SetFlag(AF_REQUESTED_DEAD, true);
 			}
@@ -1021,8 +897,6 @@ bool ZActor::IsAttackable()
 	ZA_ANIM_STATE nAnimState = m_Animation.GetCurrState();
 	if ( (nAnimState == ZA_ANIM_IDLE) || (nAnimState == ZA_ANIM_WALK) 
 		|| (nAnimState == ZA_ANIM_RUN) 
-//		|| (nAnimState == ZA_ANIM_ATTACK_MELEE)		// 이미 공격하고 있을때는 공격하지 않는다
-//		|| (nAnimState == ZA_ANIM_ATTACK_RANGE) 
 		) return true;
 
 	return false;
@@ -1032,7 +906,6 @@ bool ZActor::IsCollideable()
 {
 	if (m_Collision.bCollideable)
 	{
-		// 죽음 애니메이션이면 충돌판정 안한다.
 		ZA_ANIM_STATE nAnimState = m_Animation.GetCurrState();
 		if (nAnimState == ZA_ANIM_DIE) return false;
 
@@ -1042,7 +915,7 @@ bool ZActor::IsCollideable()
 	return m_Collision.bCollideable;
 }
 
-bool ZActor::isThinkAble()// 길찾기와 상태변경이 불가능한 경우
+bool ZActor::isThinkAble()
 {
 	if (!CheckFlag(AF_MY_CONTROL))		return false;
 	if (CheckFlag(AF_BLAST_DAGGER))	return false;
@@ -1078,7 +951,6 @@ void ZActor::OnTaskFinished(ZTASK_ID nLastID)
 
 bool ZActor::CanSee(ZObject* pTarget)
 {
-	// 시야에 보이는지 확인
 	rvector vTargetDir = pTarget->GetPosition() - GetPosition();
 	rvector vBodyDir = GetDirection();
 	vBodyDir.z = vTargetDir.z = 0.0f;
@@ -1119,7 +991,6 @@ bool ZActor::CanAttackMelee(ZObject* pTarget, ZSkillDesc *pSkillDesc)
 		float dist = Magnitude(pTarget->m_Position - m_Position);
 		if (dist < m_pNPCInfo->fAttackRange) 
 		{
-			// 시야에 보이는지 확인
 			if (CanSee(pTarget)) return true;
 		}
 	}
@@ -1135,7 +1006,6 @@ bool ZActor::CanAttackMelee(ZObject* pTarget, ZSkillDesc *pSkillDesc)
 		float fColMaxRange = pSkillDesc->fEffectArea * 100.0f;
 		if ((fDist < fColMaxRange + pTarget->GetCollRadius()) && (fDist >= fColMinRange))
 		{
-			// 판정 각도 확인
 			rvector vTargetDir = pTarget->GetPosition() - GetPosition();
 			rvector vBodyDir = GetDirection();
 			vBodyDir.z = vTargetDir.z = 0.0f;

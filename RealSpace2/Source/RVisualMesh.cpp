@@ -7,25 +7,14 @@
 #include "RCharCloth.h"
 #include <functional>
 #include "MeshManager.h"
+#include <numeric>
 
 _USING_NAMESPACE_REALSPACE2
 
 _NAMESPACE_REALSPACE2_BEGIN
 
-/*
-#ifndef _PUBLISH
-
-#define __BP(i,n)	MBeginProfile(i,n);
-#define __EP(i)		MEndProfile(i);
-
-#else
-*/
 #define __BP(i,n) ;
 #define __EP(i) ;
-//#endif
-
-//////////////////////////////////////////////////////////////
-// AniFrameInfo : frame 기능을 나눠주자
 
 AniFrameInfo::AniFrameInfo()
 {
@@ -230,7 +219,7 @@ void RFrameTime::Update() {
 		if( m_bReturn || (m_dwReturnMaxTime==0) ) {
 			Stop();
 		}
-		else { // return
+		else {
 			Start(m_fMaxValue, m_dwReturnMaxTime , 0);
 			m_bReturn = true;
 		}
@@ -249,85 +238,78 @@ void RFrameTime::Update() {
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////////////
 RVisualLightMgr::RVisualLightMgr()
 {
-	for(int i=0;i<VISUAL_LIGHT_MAX;i++) {
-
-		m_LightEnable[i] = 0;
-	}
+	std::fill(std::begin(m_LightEnable), std::end(m_LightEnable), LightActivationType::Off);
 }
 
 int RVisualLightMgr::GetLightCount()
 {
-	int nCnt = 0;
-
-	for(int i=0;i<VISUAL_LIGHT_MAX;i++) {
-		if(m_LightEnable[i]) nCnt++;
-	}
-	return nCnt;
+	return std::accumulate(std::begin(m_LightEnable), std::end(m_LightEnable), 0,
+		[&](auto Acc, auto& Light) {
+		return Acc + static_cast<int>(Light == LightActivationType::On);
+	});
 }
 
 void RVisualLightMgr::Clone(RVisualMesh* pVMesh)
 {
 	if(!pVMesh) return;
-		 
-	for(int i=0;i<VISUAL_LIGHT_MAX;i++) 
+
+	for (int i = 0; i < VISUAL_LIGHT_MAX; i++)
 	{
+		m_LightEnable[i] = LightActivationType::Off;
 		pVMesh->m_LightMgr.m_Light[i]		= m_Light[i];
 		pVMesh->m_LightMgr.m_LightEnable[i] = m_LightEnable[i];
 	}
 }
 
-void RVisualLightMgr::SetLight(int index,D3DLIGHT9* light,bool ShaderOnly)
+void RVisualLightMgr::SetLight(int index, D3DLIGHT9* light, bool ShaderOnly)
 {
 	if(light) {
 		m_Light[index] = *light;
-		if(ShaderOnly)
-			m_LightEnable[index] = 2;
+		if (ShaderOnly)
+			m_LightEnable[index] = LightActivationType::ShaderOnly;
 		else 
-			m_LightEnable[index] = 1;
+			m_LightEnable[index] = LightActivationType::On;
 	}
 	else {
-		m_LightEnable[index] = 0;
+		m_LightEnable[index] = LightActivationType::Off;
 	}
 }
 
 void RVisualLightMgr::UpdateLight()
 {
-	for(int i=0;i<VISUAL_LIGHT_MAX;i++) {
-
-		if(m_LightEnable[i]==1) {
-
-			RGetDevice()->SetLight( i, &m_Light[i] );
-			RGetDevice()->LightEnable( i, TRUE );
-
-			if( RShaderMgr::mbUsingShader ) 
-			{
-				RGetShaderMgr()->setLight( i, &m_Light[i] );
-				RGetShaderMgr()->LightEnable( i, TRUE );
-			}
-		}
-		else if(m_LightEnable[i]==2) // shaderonly
+	for (int i = 0; i < VISUAL_LIGHT_MAX; i++)
+	{
+		if (m_LightEnable[i] == LightActivationType::On)
 		{
-			RGetDevice()->LightEnable( i, FALSE );
+			RGetDevice()->SetLight(i, &m_Light[i]);
+			RGetDevice()->LightEnable(i, TRUE);
 
-			if( RShaderMgr::mbUsingShader ) 
+			if (RShaderMgr::mbUsingShader)
 			{
-				RGetShaderMgr()->setLight( i, &m_Light[i] );
-				RGetShaderMgr()->LightEnable( i, TRUE );
+				RGetShaderMgr()->setLight(i, &m_Light[i]);
+				RGetShaderMgr()->LightEnable(i, true);
 			}
 		}
-		else {
-			RGetDevice()->LightEnable( i, FALSE );
+		else if (m_LightEnable[i] == LightActivationType::ShaderOnly)
+		{
+			RGetDevice()->LightEnable(i, FALSE);
+
+			if (RShaderMgr::mbUsingShader)
+			{
+				RGetShaderMgr()->setLight(i, &m_Light[i]);
+				RGetShaderMgr()->LightEnable(i, true);
+			}
+		}
+		else
+		{
+			RGetDevice()->LightEnable(i, FALSE);
+			if (RShaderMgr::mbUsingShader)
+				RGetShaderMgr()->LightEnable(i, false);
 		}
 	}
 }
-
-//////////////////////////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////
-// RVisualMesh
 
 RVisualMesh::RVisualMesh() {
 

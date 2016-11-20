@@ -9,7 +9,7 @@
 #include "ZEffectStaticMesh.h"
 #include "ZEffectAniMesh.h"
 #include "ZScreenEffectManager.h"
-#include "zshadow.h"
+#include "ZShadow.h"
 #include "ZConfiguration.h"
 #include "ZModule_Resistance.h"
 #include "ZModule_ElementalDamage.h"
@@ -41,6 +41,8 @@ ZCharacterObject::ZCharacterObject()
 	m_pModule_PoisonDamage = AddModule<ZModule_PoisonDamage>();
 	m_pModule_LightningDamage = AddModule<ZModule_LightningDamage>();
 }
+
+ZCharacterObject::~ZCharacterObject() = default;
 
 void ZCharacterObject::CreateShadow()
 {
@@ -138,7 +140,7 @@ void ZCharacterObject::EnChantWeaponEffect(ZC_ENCHANT etype,int nLevel)
 {
 	float fSwordSize = m_pVMesh->GetWeaponSize();
 
-	fSwordSize -= 35.f;//손잡이 크기 정도를 빼준다...
+	fSwordSize -= 35.f;
 
 	ZEffectWeaponEnchant* pEWE = NULL; 
 
@@ -146,8 +148,6 @@ void ZCharacterObject::EnChantWeaponEffect(ZC_ENCHANT etype,int nLevel)
 		pEWE = ZGetEffectManager()->GetWeaponEnchant( etype );
 
 	if(pEWE) {
-
-		//표준 사이즈는 카타나... 105 정도..
 
 		float fSIze = fSwordSize / 100.f;
 
@@ -158,7 +158,7 @@ void ZCharacterObject::EnChantWeaponEffect(ZC_ENCHANT etype,int nLevel)
 		else if(nLevel==2) fVolSize = 1.0f;
 		else			   fVolSize = 1.25f;
 
-		rvector vScale = rvector(0.7f*fSIze*fVolSize,0.7f*fSIze*fVolSize,1.1f*fSIze);// 무기의 크기에 따라서..
+		rvector vScale = rvector(0.7f*fSIze*fVolSize,0.7f*fSIze*fVolSize,1.1f*fSIze);
 		pEWE->SetUid( m_UID );
 		pEWE->SetAlignType(1);
 		pEWE->SetScale(vScale);
@@ -171,7 +171,6 @@ void ZCharacterObject::DrawEnchant(ZC_STATE_LOWER AniState_Lower,bool bCharged)
 	ZItem* pItem = GetItems()->GetSelectedWeapon();
 
 	if(!pItem || !pItem->GetDesc()) {
-//		_ASSERT(0);
 		return;
 	}
 
@@ -182,7 +181,7 @@ void ZCharacterObject::DrawEnchant(ZC_STATE_LOWER AniState_Lower,bool bCharged)
 
 	if(m_pVMesh) {
 
-		static rvector pOutPos[8];//보통 양손 최대 4개까지만 쓴다.
+		static rvector pOutPos[8];
 
 		bool bDoubleWeapon = m_pVMesh->IsDoubleWeapon();
 
@@ -197,29 +196,22 @@ void ZCharacterObject::DrawEnchant(ZC_STATE_LOWER AniState_Lower,bool bCharged)
 
 		ZC_ENCHANT etype = GetEnchantType();
 
-//		etype = ZC_ENCHANT_POISON;
-//		etype = ZC_ENCHANT_COLD;
-//		etype = ZC_ENCHANT_FIRE;
-//		etype = ZC_ENCHANT_LIGHTNING;
-
 		MMatchItemDesc* pENDesc = GetEnchantItemDesc();
 		if(pENDesc) {
 
 			int nEFLevel = pENDesc->m_nEffectLevel;
 
-	//		nEFLevel = 3;
-
-			if( (nEFLevel > 2) || ((nEFLevel > 1) && bCharged ) )			// 3은 항상보이고 2는 기모았을때 달리면서도 뿌리고 다님..
+			if( (nEFLevel > 2) || ((nEFLevel > 1) && bCharged ) )
 			{
-				EnChantMovingEffect(pOutPos,cnt,etype,bDoubleWeapon);		// 칼들고 뛰어다닐떄..
+				EnChantMovingEffect(pOutPos,cnt,etype,bDoubleWeapon);
 			}
 
-			if( bSlash )													// 칼 휘두를떄...
+			if( bSlash )
 			{ 
 				EnChantSlashEffect(pOutPos,cnt,etype,bDoubleWeapon);
 			}
 
-			if( (nEFLevel > 1) || bCharged )								// 이펙트 레벨이 1보다 크거나 기가 모인 상태라면 인첸트 이펙트
+			if( (nEFLevel > 1) || bCharged )
 			{
 				EnChantWeaponEffect(etype,nEFLevel);
 			}
@@ -240,8 +232,6 @@ MMatchItemDesc* ZCharacterObject::GetEnchantItemDesc()
 
 ZC_ENCHANT	ZCharacterObject::GetEnchantType()
 {
-//	return ZC_ENCHANT_FIRE;
-
 	MMatchItemDesc* pDesc = GetEnchantItemDesc();
 	if(pDesc)
 	{
@@ -257,25 +247,13 @@ ZC_ENCHANT	ZCharacterObject::GetEnchantType()
 	return ZC_ENCHANT_NONE;
 }
 
-void ZCharacterObject::Draw_SetLight(rvector& vPosition)
+void ZCharacterObject::SetGunLight()
 {
-	//	광원정의
-	//	0번 - ambient : 캐릭터의 기본 밝기
-	//		- diffuse : 순간적인 광원( 총류를 발사할때 적용)
-	//	1번 - ambient : 사용안함
-	//		- diffuse : 맵의 디퓨즈 라이트
-	//	specular, emit 속성은 사용안함
-
-#define CHARACTER_AMBIENT	0.0
-	D3DLIGHT9 Light;
+	constexpr auto CHARACTER_AMBIENT = 0.0;
+	D3DLIGHT9 Light{};
 	rvector pos;
-	rvector char_pos = vPosition;
-	char_pos.z += 180.f;
 
-	memset( &Light, 0, sizeof( D3DLIGHT9 ));	// 초기화
-
-	//	0번 라이트 begine
-	Light.Type		= D3DLIGHT_POINT;
+	Light.Type = D3DLIGHT_POINT;
 	Light.Ambient.r = CHARACTER_AMBIENT;
 	Light.Ambient.g = CHARACTER_AMBIENT;
 	Light.Ambient.b = CHARACTER_AMBIENT;
@@ -285,28 +263,28 @@ void ZCharacterObject::Draw_SetLight(rvector& vPosition)
 	Light.Specular.b = 1.f;
 	Light.Specular.a = 1.f;
 
-	if( ZGetConfiguration()->GetVideo()->bDynamicLight && m_bDynamicLight )
-	{			
+	if (ZGetConfiguration()->GetVideo()->bDynamicLight && m_bDynamicLight)
+	{
 		m_vLightColor.x -= 0.03f;
 		m_vLightColor.y -= 0.03f;
 		m_vLightColor.z -= 0.03f;
-		max( m_vLightColor.x, 0.0f );
-		max( m_vLightColor.y, 0.0f );
-		max( m_vLightColor.z, 0.0f );
-		Light.Diffuse.r	= m_vLightColor.x;
-		Light.Diffuse.g	= m_vLightColor.y;
-		Light.Diffuse.b	= m_vLightColor.z;
+		max(m_vLightColor.x, 0.0f);
+		max(m_vLightColor.y, 0.0f);
+		max(m_vLightColor.z, 0.0f);
+		Light.Diffuse.r = m_vLightColor.x;
+		Light.Diffuse.g = m_vLightColor.y;
+		Light.Diffuse.b = m_vLightColor.z;
 		Light.Range = g_CharLightList[m_iDLightType].fRange;
 
-		float lastTime	= m_fTime;
-		m_fTime			= GetGlobalTimeMS();
-		float lap		= m_fTime - lastTime;
-		m_fLightLife	-= lap;
+		float lastTime = m_fTime;
+		m_fTime = GetGlobalTimeMS();
+		float lap = m_fTime - lastTime;
+		m_fLightLife -= lap;
 
-		if( m_fLightLife <= 0.0f )
+		if (m_fLightLife <= 0.0f)
 		{
 			m_bDynamicLight = false;
-			m_fLightLife	= 0;
+			m_fLightLife = 0;
 		}
 	}
 	else
@@ -317,23 +295,23 @@ void ZCharacterObject::Draw_SetLight(rvector& vPosition)
 		m_vLightColor.z = 0.0f;
 	}
 
-	if( IsDoubleGun() )
+	if (IsDoubleGun())
 	{
-		if( m_bLeftShot ) GetWeaponTypePos( weapon_dummy_muzzle_flash, &pos ,true);
-		else			  GetWeaponTypePos( weapon_dummy_muzzle_flash, &pos );
+		GetWeaponTypePos(weapon_dummy_muzzle_flash, &pos, m_bLeftShot);
 
 		m_bLeftShot = !m_bLeftShot;
 	}
-	else 
+	else
 	{
-		GetWeaponTypePos( weapon_dummy_muzzle_flash, &pos );
+		GetWeaponTypePos(weapon_dummy_muzzle_flash, &pos);
 	}
-	Light.Position.x	= pos.x ;
-	Light.Position.y	= pos.y ;
-	Light.Position.z	= pos.z ;
 
-	Light.Attenuation1	= 0.05f;
-	Light.Attenuation2	= 0.001f;
+	Light.Position.x = pos.x;
+	Light.Position.y = pos.y;
+	Light.Position.z = pos.z;
+
+	Light.Attenuation1 = 0.05f;
+	Light.Attenuation2 = 0.001f;
 
 	if (IsNPC())
 	{
@@ -347,11 +325,13 @@ void ZCharacterObject::Draw_SetLight(rvector& vPosition)
 		Light.Attenuation2 = 0.0f;
 	}
 
-	m_pVMesh->SetLight(0,&Light,false);
+	m_pVMesh->SetLight(0, &Light, false);
+}
 
-	ZeroMemory( &Light, sizeof(D3DLIGHT9) );
-	RLIGHT* pSelectedLight = 0;
-	rvector sunDir;
+static RLIGHT* SetMapLight(const v3& char_pos, RVisualMesh* Mesh, int LightIndex, RLIGHT* FirstLight)
+{
+	D3DLIGHT9 Light{};
+	RLIGHT* pSelectedLight{};
 	float distance;
 	float SelectedLightDistance = FLT_MAX;
 
@@ -361,75 +341,98 @@ void ZCharacterObject::Draw_SetLight(rvector& vPosition)
 	Light.Specular.a = 1.f;
 
 	auto& LightList = ZGetGame()->GetWorld()->GetBsp()->GetSunLightList();
-	if(!LightList.empty())
+	if (!LightList.empty() && !FirstLight)
 	{
 		for (auto& Light : LightList)
 		{
-			sunDir	= Light.Position - char_pos;
-			distance	= D3DXVec3LengthSq( &sunDir );
-			D3DXVec3Normalize( &sunDir, &sunDir );
+			auto sunDir = Light.Position - char_pos;
+			distance = MagnitudeSq(sunDir);
+			Normalize(sunDir);
 			RBSPPICKINFO info;
-			if( ZGetGame()->GetWorld()->GetBsp()->Pick( char_pos, sunDir, &info,RM_FLAG_ADDITIVE  ) )
+			if (ZGetGame()->GetWorld()->GetBsp()->Pick(char_pos, sunDir, &info, RM_FLAG_ADDITIVE))
 			{
-				auto vec = char_pos - info.PickPos;
-				if( distance > D3DXVec3LengthSq(&vec) )
+				if (distance > MagnitudeSq(char_pos - info.PickPos))
 				{
 					continue;
 				}
 			}
-			if( distance < SelectedLightDistance )
+			if (distance < SelectedLightDistance)
 			{
 				SelectedLightDistance = distance;
 				pSelectedLight = &Light;
 			}
 		}
-		Light.Type       = D3DLIGHT_POINT;
-		Light.Attenuation1 = 0.00001f;	
-		if( pSelectedLight != 0 )
+		Light.Type = D3DLIGHT_POINT;
+		Light.Attenuation1 = 0.00001f;
+		if (pSelectedLight != 0)
 		{
-			Light.Diffuse.r	= pSelectedLight->Color.x * pSelectedLight->fIntensity * 0.15f;
-			Light.Diffuse.g  = pSelectedLight->Color.y * pSelectedLight->fIntensity * 0.15f;
-			Light.Diffuse.b  = pSelectedLight->Color.z * pSelectedLight->fIntensity * 0.15f;
+			Light.Diffuse.r = pSelectedLight->Color.x * pSelectedLight->fIntensity * 0.15f;
+			Light.Diffuse.g = pSelectedLight->Color.y * pSelectedLight->fIntensity * 0.15f;
+			Light.Diffuse.b = pSelectedLight->Color.z * pSelectedLight->fIntensity * 0.15f;
 		}
 	}
 
-	SelectedLightDistance = FLT_MAX ;
-	if( pSelectedLight == 0 )
+	SelectedLightDistance = FLT_MAX;
+	if (!pSelectedLight)
 	{
-		for(auto& Light : ZGetGame()->GetWorld()->GetBsp()->GetObjectLightList())
+		for (auto& Light : ZGetGame()->GetWorld()->GetBsp()->GetObjectLightList())
 		{
 			float fDist = Magnitude(Light.Position - char_pos);
-			if( SelectedLightDistance > fDist )
-			{
-				SelectedLightDistance = fDist;
-				pSelectedLight = &Light;
-			}
+			if (SelectedLightDistance <= fDist)
+				continue;
+
+			if (&Light == FirstLight)
+				continue;
+
+			SelectedLightDistance = fDist;
+			pSelectedLight = &Light;
 		}
 
-		Light.Type       = D3DLIGHT_POINT;
+		Light.Type = D3DLIGHT_POINT;
 		Light.Attenuation1 = 0.0025f;
 
-		if(pSelectedLight)
+		if (pSelectedLight)
 		{
-			Light.Diffuse.r  = pSelectedLight->Color.x * pSelectedLight->fIntensity;
-			Light.Diffuse.g  = pSelectedLight->Color.y * pSelectedLight->fIntensity;
-			Light.Diffuse.b  = pSelectedLight->Color.z * pSelectedLight->fIntensity;
+			Light.Diffuse.r = pSelectedLight->Color.x * pSelectedLight->fIntensity;
+			Light.Diffuse.g = pSelectedLight->Color.y * pSelectedLight->fIntensity;
+			Light.Diffuse.b = pSelectedLight->Color.z * pSelectedLight->fIntensity;
 		}
 	}
 
-	if( pSelectedLight != NULL )
-	{			
+	if (pSelectedLight)
+	{
 		Light.Position = pSelectedLight->Position;
-		Light.Range       = pSelectedLight->fAttnEnd;
+		Light.Range = pSelectedLight->fAttnEnd;
 
-		m_pVMesh->SetLight(1,&Light,false);
+		Mesh->SetLight(LightIndex, &Light, false);
 	}
 	else
-		m_pVMesh->SetLight(1,NULL,false);
+		Mesh->SetLight(LightIndex, nullptr, false);
 
-	RGetShaderMgr()->setAmbient( 0x00cccccc );
-	RGetDevice()->SetRenderState( D3DRS_LIGHTING, TRUE );
-	RGetDevice()->SetRenderState( D3DRS_AMBIENT, 0x00cccccc );
+	return pSelectedLight;
+}
+
+void ZCharacterObject::Draw_SetLight(const rvector& vPosition)
+{
+	if (!ZGetConfiguration()->GetVideo()->bDynamicLight)
+	{
+		m_pVMesh->SetLight(1, nullptr, false);
+		m_pVMesh->SetLight(2, nullptr, false);
+		RGetDevice()->SetRenderState(D3DRS_LIGHTING, FALSE);
+		return;
+	}
+
+	SetGunLight();
+
+	rvector char_pos = vPosition;
+	char_pos.z += 180.f;
+	auto* FirstLight = SetMapLight(char_pos, m_pVMesh, 1, nullptr);
+	if (FirstLight)
+		SetMapLight(char_pos, m_pVMesh, 2, FirstLight);
+
+	RGetShaderMgr()->setAmbient(0x00cccccc);
+	RGetDevice()->SetRenderState(D3DRS_LIGHTING, TRUE);
+	RGetDevice()->SetRenderState(D3DRS_AMBIENT, 0x00cccccc);
 }
 
 void ZCharacterObject::DrawShadow()
@@ -438,10 +441,9 @@ void ZCharacterObject::DrawShadow()
 
 	if(!m_pshadow) return;
 
-	//RGetDevice()->SetRenderState( D3DRS_LIGHTING, FALSE );
 	if(!IsDie())
 	{
-		float fSize = 100.f;//기본..
+		float fSize = 100.f;
 		
 		ZActor* pActor = MDynamicCast(ZActor,this);
 
@@ -473,13 +475,12 @@ int ZCharacterObject::GetWeapondummyPos(rvector* v )
 {
 	if(!v) return 3;
 
-	int size = 3;//기본..
+	int size = 3;
 
 	if(!GetWeaponTypePos(weapon_dummy_muzzle_flash,&v[0],false)) {	}
 	if(!GetWeaponTypePos(weapon_dummy_cartridge01,&v[1],false)) { v[1]=v[0]; }
 	if(!GetWeaponTypePos(weapon_dummy_cartridge02,&v[2],false)) { v[2]=v[0]; }
 
-	//양손총..
 	if( IsDoubleGun() ) {
 
 		size = 6;
@@ -496,7 +497,7 @@ bool ZCharacterObject::GetCurrentWeaponDirection(rvector* dir)
 {
 	if(m_pVMesh && dir) {
 
-		rmatrix* mat = &m_pVMesh->m_WeaponDummyMatrix[weapon_dummy_muzzle_flash];//총구
+		rmatrix* mat = &m_pVMesh->m_WeaponDummyMatrix[weapon_dummy_muzzle_flash];
 
 		dir->x = mat->_21;
 		dir->y = mat->_22;
@@ -514,7 +515,6 @@ void ZCharacterObject::OnKnockback(const rvector& dir, float fForce)
 {
 	AddVelocity(dir * fForce);
 
-	// 넉백 최대속도에 맞춘다
 	rvector vel = GetVelocity();
 	if (Magnitude(vel) > MAX_KNOCKBACK_VELOCITY) {
 		Normalize(vel);
@@ -522,8 +522,6 @@ void ZCharacterObject::OnKnockback(const rvector& dir, float fForce)
 		SetVelocity(vel);
 	}
 
-
-	// 타격감 - 꿈틀
 	rvector dir1 = m_Direction;
 	rvector dir2 = dir;
 	Normalize(dir2);

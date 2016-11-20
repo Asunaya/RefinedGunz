@@ -684,7 +684,7 @@ void ZCharacter::OnDraw()
 
 	// Create the bounding box
 	rboundingbox bb;
-	static constexpr auto Radius = 50;
+	static constexpr auto Radius = 100;
 	static constexpr auto Height = 190;
 	bb.vmax = rvector(Radius, Radius, Height);
 	bb.vmin = rvector(-Radius, -Radius, 0);
@@ -723,8 +723,6 @@ void ZCharacter::OnDraw()
 	}
 
 	CheckDrawWeaponTrack();
-
-	RGetDevice()->SetRenderState(D3DRS_LIGHTING, TRUE);
 
 	auto MaxVisibility = 1.0f;
 	// In the skillmap gamemode, all player characters
@@ -869,13 +867,13 @@ void ZCharacter::UpdateHeight(float fDelta)
 
 void ZCharacter::UpdateSpeed()
 {
-	if(m_pVMesh==NULL)
+	if (!m_pVMesh)
 		return;
 
 	float speed = 4.8f;
 	float speed_upper = 4.8f;
 
-	if( GetItems() && GetItems()->GetSelectedWeapon() && GetItems()->GetSelectedWeapon()->GetDesc() ) {
+	if (GetItems() && GetItems()->GetSelectedWeapon() && GetItems()->GetSelectedWeapon()->GetDesc()) {
 
 		if( GetItems()->GetSelectedWeapon()->GetDesc()->m_nType==MMIT_MELEE) {
 			if( (m_AniState_Lower == ZC_STATE_LOWER_ATTACK1)	 ||
@@ -892,29 +890,23 @@ void ZCharacter::UpdateSpeed()
 
 				MMatchItemDesc* pRangeDesc = GetItems()->GetSelectedWeapon()->GetDesc();
 
-				int  nWeaponDelay = GetSelectWeaponDelay( pRangeDesc );
+				int nWeaponDelay = GetSelectWeaponDelay(pRangeDesc);
 
-				int max_frame = 0;
+				int max_frame = m_pVMesh->GetMaxFrame(ani_mode_upper);
 
-				max_frame = m_pVMesh->GetMaxFrame(ani_mode_upper);
-
-				if(max_frame==0)
+				if (max_frame == 0)
 					max_frame = m_pVMesh->GetMaxFrame(ani_mode_lower);
 
 				if(max_frame) {
-
 					int _time = (int)(max_frame / 4.8f); 
 
 					int as = _time + nWeaponDelay;
-
 					if(as < 1)	as = 1;
 
 					float fas = 0.f;
-
 					fas = ( _time / (float)( as));
 
 					m_fAttack1Ratio = fas;
-
 					speed = 4.8f * m_fAttack1Ratio;
 				}
 

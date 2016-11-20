@@ -28,7 +28,6 @@
 #include "ZInput.h"
 #include "ZPickInfo.h"
 
-// CONSTANTS
 #define BACKGROUND_COLOR1					0xff202020
 #define BACKGROUND_COLOR2					0xff000000
 #define BACKGROUND_COLOR_MYCHAR_DEATH_MATCH	MINT_ARGB(255*40/100,140,180,255)
@@ -106,7 +105,6 @@ ZCombatInterface::ZCombatInterface(const char* szName, MWidget* pParent, MListen
 	m_nMagazine = 0;
 	memset(m_szItemName, 0, sizeof(m_szItemName));
 
-//	m_pScoreBoard = NULL;
 	m_pIDLResource = ZApplication::GetGameInterface()->GetIDLResource();
 
 	m_bMenuVisible = false;
@@ -132,8 +130,6 @@ ZCombatInterface::ZCombatInterface(const char* szName, MWidget* pParent, MListen
 	m_pResultRight = NULL;
 
 	m_pQuestScreen = NULL;
-
-//	m_bKickPlayerListVisible = false;
 
 	m_nClanIDRed = 0;
 	m_nClanIDBlue = 0;
@@ -296,14 +292,6 @@ void ZCombatInterface::OnDestroy()
 	m_Chat.Destroy();
 	m_AdminMsg.Destroy();
 
-	/*
-	if (m_pScoreBoard)
-	{
-		m_pScoreBoard->OnDestroy();
-		delete m_pScoreBoard;
-		m_pScoreBoard = NULL;
-	}
-	*/
 	m_CrossHair.Destroy();
 
 	if (m_pTargetLabel)
@@ -366,8 +354,6 @@ void ZCombatInterface::DrawNPCName(MDrawContext* pDC)
 		if(!pObject->IsNPC()) continue;
 
 		ZActor *pActor = (ZActor*)pObject;
-//		if(!pActor->CheckFlag(AF_MY_CONTROL)) continue;
-
 
 		pos = pObject->GetPosition();
 		RVisualMesh* pVMesh = pObject->m_pVMesh;
@@ -391,7 +377,6 @@ void ZCombatInterface::DrawNPCName(MDrawContext* pDC)
 			int x = screen_pos.x - pDC->GetFont()->GetWidth(pActor->m_szOwner) / 2;
 			pDC->Text(x, screen_pos.y - 12, pActor->m_szOwner);
 
-			// 마지막 정보를 받은시간이 이상하면 찍어준다
 			float fElapsedTime = g_pGame->GetTime() - pActor->m_fLastBasicInfo;
 			if(!pActor->CheckFlag(AF_MY_CONTROL) && fElapsedTime>.2f) {
 				int y= screen_pos.y;
@@ -1926,7 +1911,6 @@ void ZCombatInterface::DrawScoreBoard(MDrawContext* pDC)
 		pDC->SetColor(textcolor);
 		pDC->SetFont(pFont);
 
-		// 글자를 가운데 정렬하기 위해 ..
 		float texty= itemy + (linespace - (float)pFont->GetHeight() / (float)MGetWorkspaceHeight())*.5f;
 		x = ITEM_XPOS[0];
 		TextRelative(pDC,x,texty,pItem->szName);
@@ -1963,8 +1947,6 @@ void ZCombatInterface::DrawScoreBoard(MDrawContext* pDC)
 				MCOLOR tmpColor = pDC->GetColor();
 
 				x=ITEM_XPOS[2];
-//				sprintf_safe(szText,"%d/%d", pQuestPlayerInfo->GetHP(), pQuestPlayerInfo->GetAP());
-//				TextRelative(pDC,x,texty,szText);
 				pDC->SetColor( MCOLOR( 0x40FF0000));
 				pDC->FillRectangle( (x*MGetWorkspaceWidth()), texty*MGetWorkspaceHeight()+1, 0.08*MGetWorkspaceWidth(), 7);
 				float nValue = 0.08 * pQuestPlayerInfo->GetHP() / pQuestPlayerInfo->GetProperty()->fMaxHP;
@@ -2018,8 +2000,6 @@ void ZCombatInterface::DrawScoreBoard(MDrawContext* pDC)
 		x=ITEM_XPOS[5];
 		sprintf_safe(szText,"%d",pItem->nPing);
 		TextRelative(pDC,x,texty,szText,true);
-
-//		y+=linespace;
 	}
 
 	while(!items.empty())
@@ -2048,7 +2028,6 @@ void ZCombatInterface::DrawScoreBoard(MDrawContext* pDC)
 		TextRelative(pDC, 0.2, 0.8, buf);
 }
 
-// 팀 / 생사 / 성적이 소트의 기준이다
 bool CompareZResultBoardItem(ZResultBoardItem* a,ZResultBoardItem* b) {
 	if( a->nScore > b->nScore) return true;
 	else if( a->nScore < b->nScore) return false;
@@ -2202,10 +2181,8 @@ void AddClanResultInfoLose( const char* szName, int nScore, int nKill, int nDeat
 }
 
 
-// 결과 화면을 그린다.
 void ZCombatInterface::GetResultInfo( void)
 {
-	// Sort list
 #ifdef _DEBUG
 	m_ResultItems.push_back(new ZResultBoardItem("test01", "RED Clan",  MMT_RED,  ((rand()%80000)-5000), (rand()%100), (rand()%100)));
 	m_ResultItems.push_back(new ZResultBoardItem("test02", "RED Clan",  MMT_RED,  ((rand()%80000)-5000), (rand()%100), (rand()%100)));
@@ -2322,15 +2299,13 @@ void ZCombatInterface::GetResultInfo( void)
 	szFileName[0] = 0;
 
 	// Set player info
-	if ( ZGetGameTypeManager()->IsQuestOnly(g_pGame->GetMatch()->GetMatchType()))	// 퀘스트이면...
+	if ( ZGetGameTypeManager()->IsQuestOnly(g_pGame->GetMatch()->GetMatchType()))
 	{
-		// 초기 UI 설정
 		strcpy_safe( szFileName, "interface/loadable/rstbg_quest.jpg");
 		pWidget = ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "QuestResult");
 		if ( pWidget)
 			pWidget->Show( true);
 
-		//  경험치 및 바운티 초기화
 		ZBmNumLabel* pBmNumLabel = (ZBmNumLabel*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "QuestResult_GetPlusXP");
 		if ( pBmNumLabel)
 			pBmNumLabel->SetNumber( 0, false);
@@ -2345,9 +2320,8 @@ void ZCombatInterface::GetResultInfo( void)
 			pBmNumLabel->SetNumber( 0, false);
 	}
 
-	else if ( ZGetGameClient()->IsLadderGame())		// 클랜전이면...
+	else if ( ZGetGameClient()->IsLadderGame())
 	{
-		// 초기 UI 설정
 		strcpy_safe( szFileName, "interface/loadable/rstbg_clan.jpg");
 		pWidget = ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "ClanResult");
 		if ( pWidget)
@@ -2394,8 +2368,6 @@ void ZCombatInterface::GetResultInfo( void)
 				pLabel->Show( true);
 			}
 
-
-			// 게임방 표시 정렬
 			int nStartX = 0;
 			int nStartY = 0;
 			char szName[ 256];
@@ -2425,8 +2397,6 @@ void ZCombatInterface::GetResultInfo( void)
 			}
 		}
 
-
-		// 팀 정보 추가
 		for ( ZResultBoardList::iterator i = m_ResultItems.begin(); i != m_ResultItems.end();  i++)
 		{
 			ZResultBoardItem *pItem = *i;
@@ -2434,7 +2404,6 @@ void ZCombatInterface::GetResultInfo( void)
 			if ( (pItem->nTeam != MMT_RED) && (pItem->nTeam != MMT_BLUE))
 				continue;
 
-			// Put info
 			if ( nWinnerTeam == pItem->nTeam)
 				AddClanResultInfoWin( pItem->szName, pItem->nScore, pItem->nKills, pItem->nDeaths, pItem->bMyChar, pItem->bGameRoomUser);
 			else
@@ -2444,10 +2413,8 @@ void ZCombatInterface::GetResultInfo( void)
 
 	else
 	{
-		// 초기 UI 설정
 		if ( (ZGetLocale()->GetCountry() == MC_US) || (ZGetLocale()->GetCountry() == MC_BRAZIL) || (ZGetLocale()->GetCountry() == MC_INDIA))
 		{
-			// 인터내셔널 및 브라질 버젼 한정 옵션
 			if ( (rand() % 2))
 				strcpy_safe( szFileName, "interface/loadable/rstbg_deathmatch.jpg");
 			else
@@ -2506,8 +2473,6 @@ void ZCombatInterface::GetResultInfo( void)
 
 					pWidget->SetOpacity( 110);
 
-
-					// 좀 안좋은 위치지만...  -_-;
 					sprintf_safe( szName, "CombatResult_GameRoomImg%02d", i);
 					pWidget = ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( szName);
 					if ( pWidget)
@@ -2525,10 +2490,8 @@ void ZCombatInterface::GetResultInfo( void)
 			}
 		}
 
-
-		// 이미지 설정
 		MPicture* pPicture;
-		if ( g_pGame->GetMatch()->GetMatchType() == MMATCH_GAMETYPE_DEATHMATCH_TEAM2)		// 으아아아악
+		if ( g_pGame->GetMatch()->GetMatchType() == MMATCH_GAMETYPE_DEATHMATCH_TEAM2)
 		{
 			pPicture = (MPicture*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "CombatResult_Finish");
 			if ( pPicture)
@@ -2560,7 +2523,7 @@ void ZCombatInterface::GetResultInfo( void)
 				pPicture->Show( true);
 			}
 		}
-		else if ( ZGetGameInterface()->m_bTeamPlay)		// 팀전이면...
+		else if ( ZGetGameInterface()->m_bTeamPlay)
 		{
 			pPicture = (MPicture*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "CombatResult_Finish");
 			if ( pPicture)
@@ -2592,7 +2555,7 @@ void ZCombatInterface::GetResultInfo( void)
 				pPicture->Show( true);
 			}
 		}
-		else										// 개인전이면...
+		else
 		{
 			pPicture = (MPicture*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "CombatResult_Finish");
 			if ( pPicture)
@@ -2604,13 +2567,10 @@ void ZCombatInterface::GetResultInfo( void)
 		}
 	}
 
-
-	// 배경이미지 로딩
 	m_pResultBgImg = new MBitmapR2;
 	((MBitmapR2*)m_pResultBgImg)->Create( "resultbackground.png", RGetDevice(), szFileName);
 	if ( m_pResultBgImg != NULL)
 	{
-		// 읽어온 비트맵 이미지 포인터를 해당 위젯에 넘겨줘서 표시한다
 		MPicture* pBgImage = (MPicture*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "GameResult_Background");
 		if ( pBgImage)
 			pBgImage->SetBitmap( m_pResultBgImg->GetSourceBitmap());
@@ -2619,11 +2579,7 @@ void ZCombatInterface::GetResultInfo( void)
 
 void ZCombatInterface::DrawResultBoard(MDrawContext* pDC)
 {
-
-	// 클랜전일때 내 팀을 왼편에, 상대팀을 오른쪽에 보여준다
-
 	bool bClanGame = ZGetGameClient()->IsLadderGame();
-//	bool bClanGame = true;
 
 	if(!m_pResultPanel) return;
 
@@ -2631,14 +2587,6 @@ void ZCombatInterface::DrawResultBoard(MDrawContext* pDC)
 
 	if(m_pResultPanel_Team)
 		m_pResultPanel_Team->Draw(0);
-
-	/*
-	if(m_pResultPanel->GetVMesh()->isOncePlayDone())
-	{
-		SAFE_DELETE(m_pResultPanel);
-		return;
-	}
-	*/
 
 #define FADE_START_FRAME	20000
 
@@ -2658,7 +2606,6 @@ void ZCombatInterface::DrawResultBoard(MDrawContext* pDC)
 			}else
 				nLeft = (nRed==nBlue) ? 1 : (nRed<nBlue) ? 0 : 2;
 			
-			// 오른쪽은 왼쪽의 반대
 			nRight = 2 - nLeft;
 
 			m_pResultLeft = ZGetScreenEffectManager()->CreateScreenEffect(szEffectNames[nLeft],
@@ -2678,7 +2625,7 @@ void ZCombatInterface::DrawResultBoard(MDrawContext* pDC)
 
 	MFont *pFont=GetGameFont();
 	pDC->SetFont(pFont);
-	pFont=pDC->GetFont();	// 만약 폰트가 없으면 다시 디폴트 폰트를 얻는다
+	pFont=pDC->GetFont();
 
 	MCOLOR opacity=MCOLOR(0,0,0,255*fOpacity);
 	pDC->SetOpacity(255*fOpacity);
@@ -2690,33 +2637,13 @@ void ZCombatInterface::DrawResultBoard(MDrawContext* pDC)
 	x=0.026f;
 	y=0.107f;
 
-	const float fHeight=0.651f;	// 공간의 높이
+	const float fHeight=0.651f;
 
-	// 그릴수있는 최대줄수 줄간격은 150%
-//	int nMaxLineCount=int(fHeight*RGetScreenHeight()/((float)pFont->GetHeight()*1.5f));
 	int nMaxLineCount = 16;
 
-	// 한줄사이의 간격(높이)
 	float linespace=fHeight/(float)nMaxLineCount;
 
 	m_ResultItems.sort(CompareZResultBoardItem);
-
-	/*
-	m_ResultItems.clear();
-	g_pGame->m_pMyCharacter->SetTeamID(MMT_RED);
-	m_ResultItems.push_back(new ZResultBoardItem("test1","지옥의발차기",MMT_RED,0,0,0));
-	m_ResultItems.push_back(new ZResultBoardItem("test2","지옥의발차기",MMT_RED,0,0,0));
-	m_ResultItems.push_back(new ZResultBoardItem("test3","지옥의발차기",MMT_RED,0,0,0));
-	m_ResultItems.push_back(new ZResultBoardItem("test4","지옥의발차기",MMT_RED,0,0,0));
-	m_ResultItems.push_back(new ZResultBoardItem("test5","지옥의발차기",MMT_RED,0,0,0));
-	m_ResultItems.push_back(new ZResultBoardItem("test6","지옥의발차기",MMT_RED,0,0,0));
-	m_ResultItems.push_back(new ZResultBoardItem("test7","지옥의발차기",MMT_RED,0,0,0));
-	m_ResultItems.push_back(new ZResultBoardItem("test8","지옥의발차기",MMT_RED,0,0,0));
-	m_ResultItems.push_back(new ZResultBoardItem("test1","대략낭패",MMT_BLUE,0,0,0));
-	m_ResultItems.push_back(new ZResultBoardItem("test2","대략낭패",MMT_BLUE,0,0,0));
-	m_ResultItems.push_back(new ZResultBoardItem("test3","대략낭패",MMT_BLUE,0,0,0));
-	m_ResultItems.push_back(new ZResultBoardItem("test4","대략낭패",MMT_BLUE,0,0,0,true));
-	*/
 
 	if(bClanGame)
 	{
@@ -2725,7 +2652,6 @@ void ZCombatInterface::DrawResultBoard(MDrawContext* pDC)
 
 		y=0.387f;
 
-		// TODO : 클랜 이름및 emblem 출력은 stagesetting 혹은 match쪽에 정보가 추가되는대로 수정
 		for(ZResultBoardList::iterator i=m_ResultItems.begin();i!=m_ResultItems.end();i++)
 		{
 			ZResultBoardItem *pItem=*i;
@@ -2783,7 +2709,6 @@ void ZCombatInterface::DrawResultBoard(MDrawContext* pDC)
 				clanx = clancenter - .5f*(float)pClanFont->GetWidth(szText)/(float)MGetWorkspaceWidth();
 				TextRelative(pDC,clanx,0.2,szText);
 
-				// 칼럼표시
 				textcolor = TEXT_COLOR_TITLE;
 				textcolor.a=opacity.a;
 				pDC->SetColor(textcolor);
@@ -2808,7 +2733,6 @@ void ZCombatInterface::DrawResultBoard(MDrawContext* pDC)
 			pDC->SetColor(textcolor);
 			pDC->SetFont(pFont);
 
-			// 글자를 가운데 정렬하기 위해 ..
 			float texty= itemy + (linespace - (float)pFont->GetHeight() / (float)RGetScreenHeight())*.5f;
 			TextRelative(pDC,x,texty,pItem->szName);
 
@@ -2823,7 +2747,6 @@ void ZCombatInterface::DrawResultBoard(MDrawContext* pDC)
 		}
 	}else
 	{
-		//	int backgroundy=y*MGetWorkspaceHeight();
 		int nCount=0;
 
 		for(ZResultBoardList::iterator i=m_ResultItems.begin();i!=m_ResultItems.end();i++)
@@ -2834,18 +2757,6 @@ void ZCombatInterface::DrawResultBoard(MDrawContext* pDC)
 
 			nCount++;
 
-			/*
-			// 마지막줄이면 ... 을찍고 넘어간다
-			if(nCount==nMaxLineCount)
-			{
-			pDC->SetColor(MCOLOR(255,255,255,opacity.a));
-			x=0.50f;
-			TextRelative(pDC,x,y,".....");
-			break;
-			}
-			*/
-
-			// 배경 색깔을 결정한다
 			MCOLOR backgroundcolor= (nCount%2==0) ? BACKGROUND_COLOR1 : BACKGROUND_COLOR2;
 			if(pItem->bMyChar) backgroundcolor = 
 				(pItem->nTeam==MMT_RED) ? BACKGROUND_COLOR_MYCHAR_RED_TEAM :
@@ -2861,15 +2772,13 @@ void ZCombatInterface::DrawResultBoard(MDrawContext* pDC)
 			pDC->FillRectangle(
 				0.022f*MGetWorkspaceWidth(),y1,
 				0.960*MGetWorkspaceWidth(),y2-y1);
-			//		backgroundy=newbackgroundy;
 
-			// 글자 색깔을 결정한다.. 
 			MCOLOR textcolor= TEXT_COLOR_DEATH_MATCH ;
 
-			if(pItem->nTeam==MMT_RED)		// red
+			if(pItem->nTeam==MMT_RED)
 				textcolor=TEXT_COLOR_RED_TEAM;
 			else
-				if(pItem->nTeam==MMT_BLUE)		// blue
+				if(pItem->nTeam==MMT_BLUE)
 					textcolor=TEXT_COLOR_BLUE_TEAM;
 				else
 					if(pItem->nTeam==MMT_SPECTATOR)
@@ -2878,7 +2787,6 @@ void ZCombatInterface::DrawResultBoard(MDrawContext* pDC)
 			textcolor.a=opacity.a;
 			pDC->SetColor(textcolor);
 
-			// 글자를 가운데 정렬하기 위해 ..
 			float texty= itemy + (linespace - (float)pFont->GetHeight() / (float)RGetScreenHeight())*.5f;
 
 			x=0.025f;
@@ -2921,8 +2829,6 @@ void ZCombatInterface::DrawResultBoard(MDrawContext* pDC)
 			TextRelative(pDC,x,texty,szText);x+=iconspace;
 			sprintf_safe(szText,"%d",pItem->nHeadShot);
 			TextRelative(pDC,x,texty,szText);x+=iconspace;
-
-			//		y+=linespace;
 		}
 	}
 }
@@ -2963,10 +2869,6 @@ void ZCombatInterface::Finish()
 
 bool ZCombatInterface::IsFinish()
 {
-//	if(m_pResultPanel)
-//		return m_pResultPanel->GetVMesh()->isOncePlayDone();
-//	return false;
-
 	return m_bOnFinish;
 }
 
@@ -2978,8 +2880,6 @@ void ZCombatInterface::OnFinish()
 	m_pResultRight = NULL;
 
 	ZGetScreenEffectManager()->AddRoundFinish();
-	
-//	m_pResultPanel=ZGetScreenEffectManager()->CreateScreenEffect("ef_in_result.elu");
 
 	if(ZApplication::GetGame()->GetMatch()->IsTeamPlay() && !ZGetGameClient()->IsLadderGame())
 	{
@@ -3037,7 +2937,7 @@ void ZCombatInterface::OnFinish()
 
 	m_Observer.Show(false);
 
-	m_nReservedOutTime = GetGlobalTimeMS() + 5000;		// 5초 후에 자동 종료.
+	m_nReservedOutTime = GetGlobalTimeMS() + 5000;
 	m_bOnFinish = true;
 }
 
@@ -3103,8 +3003,8 @@ void ZCombatInterface::GameCheckPickCharacter()
 		if(pMyChar->m_pVMesh->m_vRotXYZ.y < -25.f)
 			bPick = true;
 
-		if( pMyChar->IsMan() ) { // 모델이 남자고
-			if( pMyChar->m_pVMesh->m_vRotXYZ.x < -20.f) {//오른쪽으로 이동중에
+		if( pMyChar->IsMan() ) {
+			if( pMyChar->m_pVMesh->m_vRotXYZ.x < -20.f) {
 				if( RCameraDirection.z < -0.2f)
 					bPick = true;
 			}

@@ -30,9 +30,6 @@ private:
 
 	void SetPrologueStates();
 	void SetEpilogueStates();
-	void RenderNormalMaterials();
-	void RenderOpacityMaterials();
-	void RenderAlphaTestMaterials();
 
 	LPDIRECT3DTEXTURE9 GetTexture(int Index);
 
@@ -41,15 +38,33 @@ private:
 
 	RBspObject& bsp;
 	rsx::LoaderState State;
-	struct TextureData
+	struct Material
 	{
-		int Diffuse = -1;
-		int Opacity = -1;
-		int AlphaTestValue = -1;
+		u16 Diffuse = -1;
+		u16 Opacity = -1;
+		u8 AlphaTestValue = -1;
+		bool TwoSided{};
+
+		bool HasDiffuse() const { return Diffuse != static_cast<decltype(Diffuse)>(-1); }
+		bool HasOpacity() const { return Opacity != static_cast<decltype(Opacity)>(-1); }
+		bool HasAlphaTest() const { return AlphaTestValue != static_cast<decltype(AlphaTestValue)>(-1); }
 	};
 	// Indices map to State.Materials. Contains indices into TextureMemory.
-	std::vector<TextureData> Textures;
+	std::vector<Material> Materials;
 	std::vector<RBaseTexturePtr> TextureMemory;
+
+	enum MaterialType
+	{
+		Normal,
+		Opacity,
+		AlphaTest,
+	};
+	template <MaterialType Type>
+	void SetMaterial(Material& Mat);
+	template <MaterialType Type>
+	void SetPrerenderStates();
+	template <MaterialType Type>
+	void RenderMaterials(int StartIndex, int EndIndex);
 
 	D3DPtr<IDirect3DVertexBuffer9> VertexBuffer;
 	D3DPtr<IDirect3DIndexBuffer9> IndexBuffer;

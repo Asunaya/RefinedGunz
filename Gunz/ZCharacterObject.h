@@ -6,23 +6,29 @@
 #include "ZObject.h"
 #include "stuff.h"
 #include "BasicInfoHistory.h"
-#include "ZShadow.h"
+
+class ZShadow;
+
+namespace RealSpace2
+{
+struct RLIGHT;
+}
 
 struct ZBasicInfoItem : public CMemPoolSm<ZBasicInfoItem>
 {
 	ZBasicInfo info;
-	float	fReceivedTime;
-	float	fSendTime;
+	float fReceivedTime;
+	float fSendTime;
 };
 
 using ZBasicInfoHistory = std::list<ZBasicInfoItem*>;
-
 
 class ZCharacterObject : public ZObject
 {
 	MDeclareRTTI;
 public:
 	ZCharacterObject();
+	~ZCharacterObject();
 
 	void CreateShadow();
 
@@ -44,8 +50,8 @@ public:
 	MMatchItemDesc* GetEnchantItemDesc();
 	ZC_ENCHANT	GetEnchantType();
 
-	void DrawShadow();		// Manager에서 호출한다.
-	void Draw_SetLight(rvector& vPosition);
+	void DrawShadow();
+	void Draw_SetLight(const rvector& vPosition);
 
 	bool IsDoubleGun();
 
@@ -62,8 +68,8 @@ public:
 	float	m_fLightLife;
 	rvector	m_vLightColor;
 
-	std::unique_ptr<ZShadow>	m_pshadow;
-	bool		m_bDynamicLight;
+	std::unique_ptr<ZShadow> m_pshadow;
+	bool m_bDynamicLight;
 
 	ZModule_HPAP			*m_pModule_HPAP;
 	ZModule_Resistance		*m_pModule_Resistance;
@@ -73,10 +79,12 @@ public:
 	ZModule_LightningDamage	*m_pModule_LightningDamage;
 
 protected:
-	bool	m_bHero;
+	bool m_bHero;
 
 private:
-	float			m_fTremblePower;
+	float m_fTremblePower;
+
+	void SetGunLight();
 };
 
 class ZCharacterObjectHistory : public ZCharacterObject

@@ -1,60 +1,33 @@
 #include "stdafx.h"
-
 #include "ZApplication.h"
-
 #include "ZMeshView.h"
 #include "RealSpace2.h"
 #include "RShaderMgr.h"
 #include "MColorTable.h"
 #include "mdebug.h"
 
-list<ZMeshView*> ZMeshView::msMeshViewList;
+std::list<ZMeshView*> ZMeshView::msMeshViewList;
 
 RVisualMesh* RTVisualMesh::GetVMesh(bool b)
 {
 	if(m_pVisualMesh->m_pMesh==NULL) {
 		if( bInit == false ) {
 			if(b) {
-				mlog("RTVisualMesh::GetVMesh() 초기화 되지 않은 상태에서 사용하려 한다.주의.\n");
+				mlog("RTVisualMesh::GetVMesh() -- bInit was false\n");
 			}
 		}
 	}
 	return m_pVisualMesh;
 }
 
-void ZMeshView::DrawTestScene(void)
+void ZMeshView::DrawTestScene()
 {
-	/*
-	MRECT r = GetScreenRect();
-
-	/*
-	r.x = r.y = 0;
-	r.w = 600;
-	r.h = 400;
-
-	D3DVIEWPORT9 vp;
-	vp.X = r.x;
-	vp.Y = r.y;
-	vp.Width = r.w;
-	vp.Height = r.h;
-	vp.MaxZ = 1;
-	vp.MinZ = 0;
-	RGetDevice()->SetViewport(&vp);
-	*/
-
 	RSetProjection(D3DX_PI/4, 1.0f, 1.0f, 1000.0f);
 	RSetCamera(D3DXVECTOR3(0.0f, 3.0f, -5.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, 1.0f, 0.0f));
 
 	rmatrix World;
 	D3DXMatrixIdentity(&World);
 	RGetDevice()->SetTransform(D3DTS_WORLD, &World);
-	/*
-	rvector Pos(0,0,0);
-	rvector Dir(1,0,0);
-	rvector Up(0,1,0);
-	MakeWorldMatrix(&World, Pos, Dir, Up);
-	m_pVisualMesh->Render(&World, 0xFFFFFF);
-	*/
 
 	struct CUSTOMVERTEX{
 		FLOAT x, y, z;      // The untransformed, 3D position for the vertex
@@ -71,14 +44,8 @@ void ZMeshView::DrawTestScene(void)
         {  1.0f,-1.0f, 0.0f, 0xff0000ff, },
     };
 
-	//RGetDevice()->SetRenderState( D3DRS_ALPHABLENDENABLE, FALSE);
 	RGetDevice()->SetFVF( D3DFVF_CUSTOMVERTEX );
     RGetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLELIST, 1, g_Vertices, sizeof(CUSTOMVERTEX));
-
-	/*
-	RGetDevice()->ApplyStateBlock(PrevStateBlock);
-	RGetDevice()->DeleteStateBlock(PrevStateBlock);
-	*/
 }
 
 void ZMeshView::SetLight(rvector LPos)
@@ -109,48 +76,34 @@ void ZMeshView::SetLight(rvector LPos)
 
 	light.Range      = 500.f;
 
-	m_pTVisualMesh.GetVMesh(false)->SetLight(0,&light,false);
+	m_pTVisualMesh.GetVMesh(false)->SetLight(0, &light, false);
 
-//	RGetDevice()->SetLight( 0, &light );
-//	RGetDevice()->LightEnable( 0, TRUE );
+	light.Attenuation0	= 0.f;
+	light.Attenuation1 = 0.005f;
+	light.Attenuation2 = 0.f;
 
-//	if( RShaderMgr::mbUsingShader )
-//	{
-//		RShaderMgr::getShaderMgr()->setLight( 0, &light );
-//		RGetShaderMgr()->LightEnable( 0, TRUE );
+	light.Position = LPos;
 
-		light.Attenuation0	= 0.f;
-		light.Attenuation1 = 0.005f;
-		light.Attenuation2 = 0.f;
+	light.Ambient.r = 0.0f;
+	light.Ambient.g = 0.0f;
+	light.Ambient.b = 0.0f;
 
-		light.Position = LPos;
+	light.Diffuse.r  = 0.0f;
+	light.Diffuse.g  = 0.0f;
+	light.Diffuse.b  = 0.0f;
 
-		light.Ambient.r = 0.0f;
-		light.Ambient.g = 0.0f;
-		light.Ambient.b = 0.0f;
+	light.Specular.r = 1.f;
+	light.Specular.g = 1.f;
+	light.Specular.b = 1.f;
 
-		light.Diffuse.r  = 0.0f;
-		light.Diffuse.g  = 0.0f;
-		light.Diffuse.b  = 0.0f;
+	light.Range       = 0.f;
 
-		light.Specular.r = 1.f;
-		light.Specular.g = 1.f;
-		light.Specular.b = 1.f;
-
-		light.Range       = 0.f;
-
-		m_pTVisualMesh.GetVMesh(false)->SetLight(1,&light,true);
-//		RShaderMgr::getShaderMgr()->setLight( 1, &light );
-//		RGetShaderMgr()->LightEnable( 1, TRUE );
-//	}	
+	m_pTVisualMesh.GetVMesh(false)->SetLight(1,&light,true);
 }
 
 void ZMeshView::OnDraw(MDrawContext* pDC)
 {
-	//pDC->SetColor(255, 255, 255);
 	MRECT r = GetClientRect();
-	//pDC->Rectangle(r);
-	//DrawTestScene();
 
 	if (m_bLook) MButton::OnDraw(pDC);
 
@@ -158,12 +111,6 @@ void ZMeshView::OnDraw(MDrawContext* pDC)
 		return;
 
 	m_pTVisualMesh.GetVMesh(false)->SetVisibility((float)pDC->GetOpacity()/255.f);
-
-/*
-	DWORD PrevStateBlock;
-	RGetDevice()->CreateStateBlock(D3DSBT_ALL, &PrevStateBlock);
-	RGetDevice()->CaptureStateBlock(PrevStateBlock);
-*/
 
 	// From character drawing in zgame.cpp
 	RGetDevice()->SetRenderState(D3DRS_ALPHABLENDENABLE, false );
@@ -251,18 +198,11 @@ void ZMeshView::OnDraw(MDrawContext* pDC)
 	ZGetNpcMeshMgr()->UnLoad("goblinG");
 
 #endif
-
-/*
-	RGetDevice()->ApplyStateBlock(PrevStateBlock);
-	RGetDevice()->DeleteStateBlock(PrevStateBlock);
-*/
 }
 
 ZMeshView::ZMeshView(const char* szName, MWidget* pParent, MListener* pListener)
-: MButton(szName, pParent, pListener)
+	: MButton(szName, pParent, pListener)
 {
-//	m_pTVisualMesh.SetVisualMesh(NULL);
-
 	m_fCRot = 0.f;
 	m_fDist = 150.0f;
 	m_fMaxDist = 300.0f;
@@ -293,12 +233,7 @@ ZMeshView::~ZMeshView(void)
 		}
 	}
 }
-/*
-void ZMeshView::SetMesh(RVisualMesh* pVisualMesh)
-{
-	m_pTVisualMesh.SetVisualMesh( pVisualMesh );
-}
-*/
+
 void ZMeshView::SetEnableRotateZoom(bool bEnableRotate, bool bEnableZoom)
 {
 	m_bEnableRotate = bEnableRotate;
@@ -352,10 +287,8 @@ bool ZMeshView::OnEvent(MEvent* pEvent, MListener* pListener)
 		{
 			if(m_bLButtonDown) 
 			{
-				// 좌우로 움직이면 좌우 회전
 				RotateLeft(1.5f * (st_LastPoint.x - pEvent->Pos.x));
 
-				// 상하로 움직이면
 				RotateVertical( 1.0f * (st_LastPoint.y - pEvent->Pos.y));
 			}
 		}

@@ -90,22 +90,23 @@ public:
 
 #define VISUAL_LIGHT_MAX 3
 
-class RVisualLightMgr
+enum class LightActivationType
 {
-public:
+	Off,
+	On,
+	ShaderOnly,
+};
+
+struct RVisualLightMgr
+{
 	RVisualLightMgr();
-
 	int GetLightCount();
-
-	void SetLight(int index,D3DLIGHT9* light,bool ShaderOnly);
-
+	void SetLight(int index, D3DLIGHT9* light, bool ShaderOnly);
 	void UpdateLight();
-
 	void Clone(RVisualMesh* pVMesh);
 
-public:
 	D3DLIGHT9 m_Light[VISUAL_LIGHT_MAX];
-	int		  m_LightEnable[VISUAL_LIGHT_MAX];
+	LightActivationType m_LightEnable[VISUAL_LIGHT_MAX];
 };
 
 class RQuery

@@ -286,6 +286,7 @@ bool loadMaterial(LoaderState& State, const char* name)
 		mtl.shininess = mat.SpecularLevel;
 		mtl.roughness = 0.f;
 		mtl.AlphaTestValue = mat.AlphaTestValue;
+		mtl.TwoSided = mat.TwoSided;
 
 		auto LoadTexture = [&](auto Flag, auto& Texture, auto& Filename) {
 			if (Filename.empty())

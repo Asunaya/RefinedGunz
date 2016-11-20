@@ -69,6 +69,7 @@ struct EluMaterial
 	TextureType tEmissive;
 
 	int AlphaTestValue = -1;
+	bool TwoSided{};
 };
 
 // The data comprising a particular elu.

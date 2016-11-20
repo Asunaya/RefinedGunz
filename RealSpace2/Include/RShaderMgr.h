@@ -6,7 +6,7 @@
 #include "d3dx9.h"
 #include "MUtil.h"
 
-#define MAX_LIGHT 2
+#define MAX_LIGHT 3
 #define UPDATE_LIGHT0 0x1
 #define UPDATE_LIGHT1 0x2
 #define UPDATE_MATERIAL 0x4
