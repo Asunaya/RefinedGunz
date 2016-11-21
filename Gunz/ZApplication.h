@@ -61,7 +61,7 @@ private:
 	MDataChecker			m_GlobalDataChecker;
 	bool					m_bLaunchDevelop;
 	bool					m_bLaunchTest;
-	u64 Time = 0;
+	u64 Time{};
 	float Timescale = 1.f;
 
 	void ParseStandAloneArguments(const char* pszArgs);
@@ -125,8 +125,8 @@ public:
 	ZWorldManager*				GetWorldManager()		{ return &m_WorldManager; }
 
 	__forceinline ZLAUNCH_MODE GetLaunchMode()			{ return m_nLaunchMode; }
-	__forceinline void SetLaunchMode(ZLAUNCH_MODE nMode)	{ m_nLaunchMode = nMode; }
-	__forceinline bool IsLaunchDevelop()					{ return m_bLaunchDevelop; }
+	__forceinline void SetLaunchMode(ZLAUNCH_MODE nMode){ m_nLaunchMode = nMode; }
+	__forceinline bool IsLaunchDevelop()				{ return m_bLaunchDevelop; }
 	__forceinline bool IsLaunchTest()					{ return m_bLaunchTest; }
 
 	__forceinline unsigned int GetFileListCRC()			{ return m_fileCheckList.GetCRC32(); }

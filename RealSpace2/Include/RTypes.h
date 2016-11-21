@@ -24,6 +24,7 @@ enum RRESULT {
 	R_OK = 0,
 	R_NOTREADY = 1,
 	R_RESTORED = 2,
+	R_NOFLIP,
 
 	R_ERROR_LOADING = 1000,
 };

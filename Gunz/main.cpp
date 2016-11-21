@@ -60,6 +60,7 @@
 #include "Mint4Gunz.h"
 
 #include "RGMain.h"
+#include "RGGlobal.h"
 
 RMODEPARAMS	g_ModeParams = { 800,600,FullscreenType::Fullscreen,D3DFMT_R5G6B5 };
 static HANDLE Mutex;
@@ -81,7 +82,8 @@ ZDirectInput	g_DInput;
 ZInput*			g_pInput = NULL;
 Mint4Gunz		g_Mint;
 
-HRESULT GetDirectXVersionViaDxDiag( DWORD* pdwDirectXVersionMajor, DWORD* pdwDirectXVersionMinor, TCHAR* pcDirectXVersionLetter );
+HRESULT GetDirectXVersionViaDxDiag( DWORD* pdwDirectXVersionMajor,
+	DWORD* pdwDirectXVersionMinor, TCHAR* pcDirectXVersionLetter );
 
 void _ZChangeGameState(int nIndex)
 {
@@ -281,6 +283,67 @@ RRESULT OnDestroy(void *pParam)
 	return R_OK;
 }
 
+template <typename T, int (ZConfiguration::*Getter)() const>
+struct FPSLimiter
+{
+	T Action;
+	int CurFPS{};
+	int LastFPS{};
+	u64 LastSecondTime{};
+
+	FPSLimiter(T&& Action) : Action{ std::move(Action) } {}
+
+	auto Tick()
+	{
+		auto TPS = QPF();
+		auto CurTime = QPC();
+
+		if (CurTime - LastSecondTime > TPS) {
+			LastSecondTime = QPC();
+			LastFPS = CurFPS;
+			CurFPS = 0;
+		}
+
+		auto FPSLimit = (ZGetConfiguration()->*Getter)();
+		if (FPSLimit <= 0)
+		{
+			++CurFPS;
+			return true;
+		}
+
+		double fActual = double(CurFPS) / (FPSLimit - 1);
+		double fGoal = double((CurTime - LastSecondTime) % TPS) / TPS;
+		int nSleep = int((fActual - fGoal) * 1000);
+		auto ret = Action(nSleep);
+		if (ret)
+			++CurFPS;
+		return ret;
+	}
+};
+
+template <int (ZConfiguration::*Getter)() const, typename T>
+constexpr auto MakeFPSLimiter(T&& Action)
+{
+	return FPSLimiter<T, Getter>(std::move(Action));
+}
+
+auto VisualFPSLimiter = MakeFPSLimiter<&ZConfiguration::GetVisualFPSLimit>(
+	[&](auto nSleep) {
+	return nSleep <= 0;
+});
+auto LogicalFPSLimiter = MakeFPSLimiter<&ZConfiguration::GetLogicalFPSLimit>(
+	[&](auto nSleep) {
+	if (nSleep <= 0)
+		return true;
+
+	if (nSleep > 250)
+		MLog("Large sleep %d!\n", nSleep);
+	else
+		Sleep(nSleep);
+
+	return true;
+});
+
 RRESULT OnUpdate(void* pParam)
 {
 	auto prof = MBeginProfile("main::OnUpdate");
@@ -288,10 +351,10 @@ RRESULT OnUpdate(void* pParam)
 	g_pInput->Update();
 	g_App.OnUpdate();
 
+	LogicalFPSLimiter.Tick();
+
 	return R_OK;
 }
-
-#include "RGGlobal.h"
 
 RRESULT OnRender(void *pParam)
 {
@@ -299,34 +362,10 @@ RRESULT OnRender(void *pParam)
 	if (!RIsActive() && RIsFullscreen())
 		return R_NOTREADY;
 
+	if (ZGetConfiguration()->DecoupleLogicAndRendering && !VisualFPSLimiter.Tick())
+		return R_NOFLIP;
+
 	g_App.OnDraw();
-
-	int nFPSLimit = ZGetConfiguration()->GetFPSLimit(); // Static object, FPS limit is set in ctor
-	if (nFPSLimit > 0)
-	{
-		unsigned long long TPS = QPF();
-		unsigned long long CurTime = QPC();
-
-		static int nFrames = 0;
-		static u64 LastSec = 0;
-
-		if (CurTime - LastSec > TPS){
-			QueryPerformanceCounter((PLARGE_INTEGER)&LastSec);
-			nFrames = 0;
-		}
-
-		double fActual = double(nFrames) / (nFPSLimit - 1);
-		double fGoal = double((CurTime - LastSec) % TPS) / TPS;
-		int nSleep = int((fActual - fGoal) * 1000);
-		if (nSleep > 0){
-			if (nSleep > 250)
-				MLog("Large sleep %d!\n", nSleep);
-			else
-				Sleep(nSleep);
-		}
-
-		nFrames++;
-	}
 
 	if(g_pDefFont) {
 		char buf[512];
@@ -341,7 +380,15 @@ RRESULT OnRender(void *pParam)
 			y_offset += 20;
 		};
 
-		PrintText("FPS: %3.3f", g_fFPS);
+		if (ZGetConfiguration()->DecoupleLogicAndRendering)
+		{
+			PrintText("Visual FPS: %d", VisualFPSLimiter.LastFPS);
+			PrintText("Logical FPS: %d", LogicalFPSLimiter.LastFPS);
+		}
+		else
+		{
+			PrintText("FPS: %d", LogicalFPSLimiter.LastFPS);
+		}
 
 #ifdef _DEBUG
 		if (ZGetGame() && ZGetGame()->m_pMyCharacter)

@@ -107,15 +107,21 @@ void RFrame_RenderD3D9()
 
 	if (isOK == R_RESTORED)
 	{
-		RMODEPARAMS ModeParams = { RGetScreenWidth(),RGetScreenHeight(),RGetFullscreenMode(),RGetPixelFormat() };
+		RMODEPARAMS ModeParams = {
+			RGetScreenWidth(),
+			RGetScreenHeight(),
+			RGetFullscreenMode(),
+			RGetPixelFormat()
+		};
 		RResetDevice(&ModeParams);
 	}
 
 	if (GetGlobalTimeMS() > g_last_mouse_move_time + RTOOLTIP_GAP)
 		g_tool_tip = true;
 
+	RRESULT ret{};
 	if (g_pFunctions[RF_RENDER])
-		g_pFunctions[RF_RENDER](nullptr);
+		ret = g_pFunctions[RF_RENDER](nullptr);
 
 	RGetDevice()->SetStreamSource(0, nullptr, 0, 0);
 	RGetDevice()->SetIndices(0);
@@ -123,7 +129,8 @@ void RFrame_RenderD3D9()
 	RGetDevice()->SetTexture(1, nullptr);
 
 	__BP(5007, "RFlip");
-	RFlip();
+	if (ret != R_NOFLIP)
+		RFlip();
 	__EP(5007);
 }
 

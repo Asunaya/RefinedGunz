@@ -76,7 +76,6 @@ bool ZConfiguration::Load()
    		MZFile::SetReadMode( MZIPREADFLAG_ZIP | MZIPREADFLAG_MRS | MZIPREADFLAG_MRS2 | MZIPREADFLAG_FILE );
 #endif
 
-	//ZGetLocale()->Init(DEFAULT_COUNTRY);
 	if ( !LoadLocale(FILENAME_LOCALE) )
 	{
 		mlog( "Cannot open %s file.\n", FILENAME_LOCALE);
@@ -416,7 +415,11 @@ bool ZConfiguration::LoadConfig(const char* szFileName)
 			childElement.GetChildContents(&m_Video.nTextureFormat, ZTOK_VIDEO_TEXTUREFORMAT );
 			childElement.GetChildContents(&m_Video.bTerrible, "NHARDWARETNL");
 
-			childElement.GetChildContents(&nFPSLimit, "FPSLIMIT");
+			int temp{};
+			childElement.GetChildContents(&temp, "DECOUPLELOGICANDRENDERING");
+			DecoupleLogicAndRendering = temp;
+			childElement.GetChildContents(&VisualFPSLimit, "VISUALFPSLIMIT");
+			childElement.GetChildContents(&LogicalFPSLimit, "LOGICALFPSLIMIT");
 			childElement.GetChildContents(&bCamFix, "CAMFIX");
 		}
 		if (parentElement.FindChildNode(ZTOK_AUDIO, &childElement))
@@ -486,7 +489,7 @@ bool ZConfiguration::LoadConfig(const char* szFileName)
 			childElement.GetChildContents(&m_Etc.bRejectWhisper, ZTOK_ETC_REJECT_WHISPER);
 			childElement.GetChildContents(&m_Etc.bRejectInvite, ZTOK_ETC_REJECT_INVITE);
 			childElement.GetChildContents(&m_Etc.nCrossHair, ZTOK_ETC_CROSSHAIR);
-			int temp = 0;
+			int temp{};
 			childElement.GetChildContents(&temp, "DRAWTRAILS");
 			bDrawTrails = temp != 0;
 		}
@@ -632,10 +635,15 @@ bool ZConfiguration::SaveToFile(const char *szFileName, const char* szHeader)
 		sprintf_safe(temp, "%s", m_Video.bTerrible ? "true" : "false" );
 		aElement.SetContents(temp);
 
-		parentElement.AppendText("\n\t\t");
-		aElement = parentElement.CreateChildElement("FPSLIMIT");
-		sprintf_safe(temp, "%d", nFPSLimit);
-		aElement.SetContents(temp);
+		auto Write = [&](auto* name, auto val) {
+			parentElement.AppendText("\n\t\t");
+			aElement = parentElement.CreateChildElement(name);
+			sprintf_safe(temp, "%d", val);
+			aElement.SetContents(temp);
+		};
+
+		Write("VISUALFPSLIMIT", VisualFPSLimit);
+		Write("LOGICALFPSLIMIT", LogicalFPSLimit);
 
 		parentElement.AppendText("\n\t\t");
 		aElement = parentElement.CreateChildElement("CAMFIX");

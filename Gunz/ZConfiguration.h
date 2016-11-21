@@ -129,7 +129,68 @@ class ZGameTypeList;
 class ZLocale;
 class ZChatCmdManager;
 
-class ZConfiguration {
+class ZConfiguration final {
+public:
+	ZConfiguration();
+	~ZConfiguration();
+
+	void Init();
+	void Destroy();
+	void LoadDefaultKeySetting();
+
+	bool Load();
+	bool LoadLocale(const char* szFileName);
+	bool LoadGameTypeCfg(const char* szFileName);
+	bool LoadSystem(const char* szFileName);
+	bool LoadConfig(const char* szFileName);
+	bool Save() { return Save(GetLocale()->szXmlHeader); }
+	bool Save( const char* szHeader)	{ return SaveToFile(FILENAME_CONFIG, szHeader); }
+	bool SaveToFile(const char*szFileName, const char* szHeader);
+
+	ZLocatorList* GetLocatorList()	{ return m_pLocatorList; }
+	ZLocatorList* GetTLocatorList()	{ return m_pTLocatorList; }
+
+	ZGameTypeList* GetGameTypeList()	{ return m_pGameTypeList; }
+
+	const char*	GetBAReportAddr() const		{ return m_szBAReportAddr; }
+	const char*	GetBAReportDir() const		{ return m_szBAReportDir; }
+
+	const char*	GetInterfaceSkinName() const{ return m_szInterfaceSkinName; }
+	const char*	GetServerIP() const			{ return m_szServerIP; }
+	int		GetServerPort() const			{ return m_nServerPort; }
+	int		GetServerCount() const			{ return m_nServerCount; }
+	ZSERVERNODE	GetServerNode(int nNum) const;
+
+	bool GetViewGameChat() const			{ return m_bViewGameChat; }
+	void SetViewGameChat(bool b)	{ m_bViewGameChat = b; }
+
+	void SetForceOptimization(bool b) {	m_bOptimization = b;}
+	bool GetForceOptimization() const {	return m_bOptimization;}
+
+	ZCONFIG_VIDEO* GetVideo()		{ return &m_Video; }
+	ZCONFIG_AUDIO* GetAudio()		{ return &m_Audio; }
+	ZCONFIG_MOUSE* GetMouse()		{ return &m_Mouse; }
+	ZCONFIG_KEYBOARD* GetKeyboard() { return &m_Keyboard; }
+	ZCONFIG_JOYSTICK* GetJoystick()	{ return &m_Joystick; }
+	ZCONFIG_ETC* GetEtc()			{ return &m_Etc; }
+	ZCONFIG_MACRO* GetMacro()		{ return &m_Macro; }
+	ZCONFIG_LOCALE* GetLocale()		{ return &m_Locale; }
+
+	int GetVisualFPSLimit() const { return VisualFPSLimit; }
+	int GetLogicalFPSLimit() const { return LogicalFPSLimit; }
+	bool GetCamFix() const { return bCamFix; }
+	auto GetChatBackgroundColor() const { return ChatBackgroundColor; }
+	bool GetShowHitboxes() const { return bShowHitboxes; }
+	bool GetDynamicResourceLoad() const { return bDynamicResourceLoad; }
+	bool GetDrawTrails() const { return bDrawTrails; }
+	bool GetShowHitRegDebugOutput() const { return HitRegistrationDebugOutput; }
+
+	bool IsComplete() const			{ return m_bIsComplete; }
+
+	bool LateStringConvert();
+
+	bool DecoupleLogicAndRendering{};
+
 private:
 	friend void LoadRGCommands(ZChatCmdManager &CmdManager);
 	friend class ZOptionInterface;
@@ -160,80 +221,24 @@ private:
 
 	bool				m_bIsComplete;
 
-	int nFPSLimit = 250;
-	bool bCamFix = false;
+	std::map<int, ZSERVERNODE> m_ServerList;
+
+	int VisualFPSLimit = 120;
+	int LogicalFPSLimit = 250;
+
+	bool bCamFix{};
+	// 50% transparent black
 	u32 ChatBackgroundColor = 0x80000000;
-	bool bShowHitboxes = false;
-	bool bDynamicResourceLoad = false;
+	bool bShowHitboxes{};
+	bool bDynamicResourceLoad{};
 	bool bDrawTrails = true;
-	bool HitRegistrationDebugOutput = false;
-
-protected:
-public:
-	ZConfiguration();
-	virtual ~ZConfiguration();
-
-	void Init();
-	void Destroy();
-	void LoadDefaultKeySetting();
-
-	bool Load();
-	bool LoadLocale(const char* szFileName);
-	bool LoadGameTypeCfg(const char* szFileName);
-	bool LoadSystem(const char* szFileName);
-	bool LoadConfig(const char* szFileName);
-	bool Save() { return Save(GetLocale()->szXmlHeader); }
-	bool Save( const char* szHeader)	{ return SaveToFile(FILENAME_CONFIG, szHeader); }
-	bool SaveToFile(const char*szFileName, const char* szHeader);
-
-	ZLocatorList* GetLocatorList()	{ return m_pLocatorList; }
-	ZLocatorList* GetTLocatorList()	{ return m_pTLocatorList; }
-
-	ZGameTypeList* GetGameTypeList()	{ return m_pGameTypeList; }
-
-	const char*	GetBAReportAddr() const		{ return m_szBAReportAddr; }
-	const char*	GetBAReportDir() const		{ return m_szBAReportDir; }
-
-	const char*	GetInterfaceSkinName() const{ return m_szInterfaceSkinName; }
-	const char*	GetServerIP() const			{ return m_szServerIP; }
-	int		GetServerPort() const			{ return m_nServerPort; }
-	int		GetServerCount() const		{ return m_nServerCount; }
-	ZSERVERNODE	GetServerNode(int nNum) const;
-
-	bool GetViewGameChat() const			{ return m_bViewGameChat; }
-	void SetViewGameChat(bool b)	{ m_bViewGameChat = b; }
-
-	void SetForceOptimization(bool b) {	m_bOptimization = b;}
-	bool GetForceOptimization() const {	return m_bOptimization;}
-
-	std::map<int, ZSERVERNODE>	m_ServerList;
-
-	ZCONFIG_VIDEO* GetVideo()		{ return &m_Video; }
-	ZCONFIG_AUDIO* GetAudio()		{ return &m_Audio; }
-	ZCONFIG_MOUSE* GetMouse()		{ return &m_Mouse; }
-	ZCONFIG_KEYBOARD* GetKeyboard() { return &m_Keyboard; }
-	ZCONFIG_JOYSTICK* GetJoystick()	{ return &m_Joystick; }
-	ZCONFIG_ETC* GetEtc()			{ return &m_Etc; }
-	ZCONFIG_MACRO* GetMacro()		{ return &m_Macro; }
-	ZCONFIG_LOCALE* GetLocale()		{ return &m_Locale; }
-
-	int GetFPSLimit() const { return nFPSLimit; }
-	bool GetCamFix() const { return bCamFix; }
-	auto GetChatBackgroundColor() const { return ChatBackgroundColor; }
-	bool GetShowHitboxes() const { return bShowHitboxes; }
-	bool GetDynamicResourceLoad() const { return bDynamicResourceLoad; }
-	bool GetDrawTrails() const { return bDrawTrails; }
-	bool GetShowHitRegDebugOutput() const { return HitRegistrationDebugOutput; }
-
-	bool IsComplete() const			{ return m_bIsComplete; }
-
-	bool LateStringConvert();
+	bool HitRegistrationDebugOutput{};
 };
 
 ZConfiguration*	ZGetConfiguration();
 
 // Tokens
-#define ZTOK_SERVER		"SERVER"
+#define ZTOK_SERVER			"SERVER"
 #define ZTOK_IP				"IP"
 #define ZTOK_PORT			"PORT"
 #define ZTOK_TYPE			"TYPE"

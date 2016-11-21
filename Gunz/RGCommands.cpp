@@ -19,14 +19,42 @@ bool CheckDeveloperMode(const char* Name)
 
 void LoadRGCommands(ZChatCmdManager& CmdManager)
 {
-	CmdManager.AddCommand(0, "fpslimit", [](const char *line, int argc, char ** const argv){
+	auto VisualFPSLimit = [](const char *line, int argc, char ** const argv) {
 		int nFPSLimit = atoi(argv[1]);
-		ZGetConfiguration()->nFPSLimit = nFPSLimit;
-		ZChatOutputF("FPS limit set to %d", nFPSLimit);
+		ZGetConfiguration()->VisualFPSLimit = nFPSLimit;
+		ZChatOutputF("Visual FPS limit set to %d", nFPSLimit);
 
 		ZGetConfiguration()->Save();
-	},
+	};
+
+	auto LogicalFPSLimit = [](const char *line, int argc, char ** const argv) {
+		int nFPSLimit = atoi(argv[1]);
+		ZGetConfiguration()->LogicalFPSLimit = nFPSLimit;
+		ZChatOutputF("Logical FPS limit set to %d", nFPSLimit);
+
+		ZGetConfiguration()->Save();
+	};
+
+	CmdManager.AddCommand(0, "visualfpslimit", VisualFPSLimit,
+		CCF_ALL, 1, 1, true, "/visualfpslimit <fps>", "");
+	CmdManager.AddCommand(0, "logicalfpslimit", LogicalFPSLimit,
+		CCF_ALL, 1, 1, true, "/logicalfpslimit <fps>", "");
+	CmdManager.AddCommand(0, "fpslimit", LogicalFPSLimit,
 		CCF_ALL, 1, 1, true, "/fpslimit <fps>", "");
+
+
+	CmdManager.AddCommand(0, "decouple", [](const char *line, int argc, char ** const argv) {
+		bool& val = ZGetConfiguration()->DecoupleLogicAndRendering;
+		if (argc == 1)
+			val = !val;
+		else
+			val = atoi(argv[1]) != 0;
+
+		ZGetConfiguration()->Save();
+
+		ZChatOutputF("Logic and rendering decoupling %s", val ? "enabled" : "disabled");
+	},
+		CCF_ALL, 0, 1, true, "/decouple [0/1]", "");
 
 
 	CmdManager.AddCommand(0, "camfix", [](const char *line, int argc, char ** const argv){
@@ -38,7 +66,10 @@ void LoadRGCommands(ZChatCmdManager& CmdManager)
 
 		ZGetConfiguration()->bCamFix = bCamFix;
 		if (bCamFix)
-			ZGetCamera()->m_fDist = CAMERA_DEFAULT_DISTANCE * RGetScreenWidth() / RGetScreenHeight() / (4.f / 3.f);
+		{
+			auto Ratio = float(RGetScreenWidth()) / RGetScreenHeight() / (4.0f / 3);
+			ZGetCamera()->m_fDist = CAMERA_DEFAULT_DISTANCE * Ratio;
+		}
 		else
 			ZGetCamera()->m_fDist = CAMERA_DEFAULT_DISTANCE;
 
@@ -50,7 +81,7 @@ void LoadRGCommands(ZChatCmdManager& CmdManager)
 
 
 	CmdManager.AddCommand(0, "backgroundcolor", [](const char *line, int argc, char ** const argv){
-		DWORD BackgroundColor = strtoul(argv[1], NULL, 16);
+		DWORD BackgroundColor = strtoul(argv[1], nullptr, 16);
 		g_Chat.SetBackgroundColor(BackgroundColor);
 		ZGetConfiguration()->ChatBackgroundColor = BackgroundColor;
 
