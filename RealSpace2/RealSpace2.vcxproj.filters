@@ -71,6 +71,9 @@
     <None Include="Source\ScenePointLightPS.hlsl">
       <Filter>D3D9\Shaders</Filter>
     </None>
+    <None Include="Source\Deferred.hlsl">
+      <Filter>D3D9\Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\RHalfEdgeMesh.cpp">

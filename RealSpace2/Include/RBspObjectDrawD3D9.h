@@ -19,13 +19,22 @@ public:
 	void Draw();
 
 private:
-	struct Vertex
+	struct SimpleVertex
 	{
 		v3 Pos;
 		v2 Tex;
 	};
 
+	struct LitVertex
+	{
+		v3 Pos;
+		v3 Nor;
+		v2 Tex;
+		v4 Tan;
+	};
+
 	void CreateTextures();
+	void CreateShaderStuff();
 	void CreateBatches();
 
 	void SetPrologueStates();
@@ -33,20 +42,26 @@ private:
 
 	LPDIRECT3DTEXTURE9 GetTexture(int Index);
 
-	u32 GetFVF() const { return D3DFVF_XYZ | D3DFVF_TEX1; }
-	size_t GetStride() const { return sizeof(Vertex); }
+	u32 GetFVF() const;
+	size_t GetStride() const;
 
 	RBspObject& bsp;
 	rsx::LoaderState State;
 	struct Material
 	{
 		u16 Diffuse = -1;
+		u16 Normal = -1;
+		u16 Specular = -1;
 		u16 Opacity = -1;
+		u16 Emissive = -1;
 		u8 AlphaTestValue = -1;
 		bool TwoSided{};
 
 		bool HasDiffuse() const { return Diffuse != static_cast<decltype(Diffuse)>(-1); }
+		bool HasNormal() const { return Normal != static_cast<decltype(Normal)>(-1); }
+		bool HasSpecular() const { return Specular != static_cast<decltype(Specular)>(-1); }
 		bool HasOpacity() const { return Opacity != static_cast<decltype(Opacity)>(-1); }
+		bool HasEmissive() const { return Emissive != static_cast<decltype(Emissive)>(-1); }
 		bool HasAlphaTest() const { return AlphaTestValue != static_cast<decltype(AlphaTestValue)>(-1); }
 	};
 	// Indices map to State.Materials. Contains indices into TextureMemory.
@@ -69,13 +84,16 @@ private:
 	D3DPtr<IDirect3DVertexBuffer9> VertexBuffer;
 	D3DPtr<IDirect3DIndexBuffer9> IndexBuffer;
 
+	D3DPtr<IDirect3DVertexDeclaration9> LitVertexDecl;
+
+	D3DPtr<IDirect3DVertexShader9> DeferredVS;
+	D3DPtr<IDirect3DPixelShader9> DeferredPS;
+
 	// Indices map to State.Materials.
 	std::vector<MaterialBatch> MaterialBatches;
 	int NormalMaterialsEnd{};
 	int OpacityMaterialsEnd{};
 	int AlphaTestMaterialsEnd{};
-
-	bool Wireframe{};
 
 	IDirect3DDevice9* dev{};
 };

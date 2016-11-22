@@ -87,9 +87,6 @@ void DrawBoundingBox(rboundingbox *bb, DWORD color)
 	}
 }
 
-// TODO: Remove this piece of global state
-static bool m_bisDrawLightMap = true;
-
 RBSPMATERIAL::~RBSPMATERIAL()
 {
 	if (GetRS2().UsingD3D9() && texture)
@@ -142,6 +139,8 @@ RSBspNode* RSBspNode::GetLeafNode(const rvector &pos)
 ////////////////////////////
 // RBspObject
 ////////////////////////////
+
+bool RBspObject::m_bisDrawLightMap = true;
 
 RBspObject::RBspObject(bool PhysOnly)
 	: PhysOnly(PhysOnly), DrawObj{ GetGraphicsAPI(), *this }

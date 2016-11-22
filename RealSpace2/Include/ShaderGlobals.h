@@ -2,33 +2,51 @@
 
 namespace ShaderConstant
 {
-	enum
-	{
-		WorldViewProjection = 0,
-		WorldView = 4,
-		Projection = 8,
-		LightViewProjection = 12,
-		Material = 16,
-		LightDiffuse,
-		LightAmbient,
-		CosTheta,
-		ShadowMapSize,
-		AttenuationValues,
-		World,
-		LightPos0 = 40,
-		LightDir0 = 48,
-	};
+enum
+{
+	WorldViewProjection = 0,
+	WorldView = 4,
+	Projection = 8,
+	LightViewProjection = 12,
+	Material = 16,
+	LightDiffuse,
+	LightAmbient,
+	CosTheta,
+	ShadowMapSize,
+	AttenuationValues,
+	World,
+	LightPos0 = 40,
+	LightDir0 = 48,
+};
 }
 
 namespace ShaderSampler
 {
-	enum
-	{
-		Scene,
-		Lightmap,
-		Diffuse = 3,
-		Shadow0 = 0,
-	};
+enum
+{
+	Scene,
+	Lightmap,
+	Diffuse = 3,
+	Shadow0 = 0,
+};
+}
+
+namespace DeferredShaderConstant
+{
+enum
+{
+	WorldViewProjection = 0,
+	WorldView = 4,
+	World = 8,
+	Diffuse = 12,
+	Ambient,
+	Spec,
+	SpecLevel,
+	Glossiness,
+	Opacity,
+	Near,
+	Far,
+};
 }
 
 inline void SetVSVector4(UINT Register, const v4& Vector) {

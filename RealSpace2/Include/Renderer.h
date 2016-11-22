@@ -25,6 +25,9 @@ public:
 	void SetNearZ(float f) { NearZ = f; }
 	void SetFarZ(float f) { FarZ = f; }
 
+	float GetNearZ() const { return NearZ; }
+	float GetFarZ() const { return FarZ; }
+
 	void SetAlphaBlending(bool b);
 	auto IsAlphaBlendingEnabled() const { return AlphaBlending; }
 

@@ -4,6 +4,11 @@
 #include <algorithm>
 #include <numeric>
 #include "RBspObject.h"
+#include "ShaderGlobals.h"
+#include "ShaderUtil.h"
+#include "DeferredVS.h"
+#include "DeferredPS.h"
+#include "RS2.h"
 
 _NAMESPACE_REALSPACE2_BEGIN
 
@@ -88,10 +93,36 @@ void RBspObjectDrawD3D9::CreateTextures()
 
 		auto& Mat = Materials[i];
 		Mat.Diffuse = LoadTexture(EluMat.tDiffuse);
+		Mat.Normal = LoadTexture(EluMat.tNormal);
+		Mat.Specular = LoadTexture(EluMat.tSpecular);
 		Mat.Opacity = LoadTexture(EluMat.tOpacity);
+		Mat.Emissive = LoadTexture(EluMat.tEmissive);
 		Mat.AlphaTestValue = EluMat.AlphaTestValue;
 		Mat.TwoSided = EluMat.TwoSided;
 	}
+}
+
+static D3DPtr<IDirect3DVertexDeclaration9> CreateLitVertexDecl()
+{
+	D3DVERTEXELEMENT9 Decl[] =
+	{
+		{ 0, 0,     D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0 },
+		{ 0, 3 * 4, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_NORMAL,   0 },
+		{ 0, 6 * 4, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0 },
+		{ 0, 8 * 4, D3DDECLTYPE_FLOAT4, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TANGENT,  0 },
+		D3DDECL_END()
+	};
+
+	D3DPtr<IDirect3DVertexDeclaration9> ptr;
+	RGetDevice()->CreateVertexDeclaration(Decl, MakeWriteProxy(ptr));
+	return ptr;
+}
+
+void RBspObjectDrawD3D9::CreateShaderStuff()
+{
+	LitVertexDecl = CreateLitVertexDecl();
+	DeferredVS = CreateVertexShader(DeferredVSData);
+	DeferredPS = CreatePixelShader(DeferredPSData);
 }
 
 void RBspObjectDrawD3D9::CreateBatches()
@@ -133,9 +164,23 @@ void RBspObjectDrawD3D9::CreateBatches()
 		}
 	}
 
-	if (!CreateBuffers<Vertex, IndexType>(
-		State.TotalVertexCount, State.TotalIndexCount,
-		GetFVF(), VertexBuffer, IndexBuffer))
+	const bool DynamicLights = bsp.m_bisDrawLightMap;
+
+	bool ret{};
+	if (DynamicLights)
+	{
+		ret = CreateBuffers<LitVertex, IndexType>(
+			State.TotalVertexCount, State.TotalIndexCount,
+			GetFVF(), VertexBuffer, IndexBuffer);
+	}
+	else
+	{
+		ret = CreateBuffers<SimpleVertex, IndexType>(
+			State.TotalVertexCount, State.TotalIndexCount,
+			GetFVF(), VertexBuffer, IndexBuffer);
+	}
+
+	if (!ret)
 	{
 		MLog("RBspObjectDrawD3D9::Create -- Failed to create vertex and index buffers\n");
 		return;
@@ -190,8 +235,18 @@ void RBspObjectDrawD3D9::CreateBatches()
 						memcpy(Verts, &val, sizeof(val));
 						Verts += sizeof(val);
 					};
-					AddVertexData(Mesh.Positions[i] * Mesh.World * Object.World);
-					AddVertexData(Mesh.TexCoords[i]);
+					if (!DynamicLights)
+					{
+						AddVertexData(Mesh.Positions[i] * Mesh.World * Object.World);
+						AddVertexData(Mesh.TexCoords[i]);
+					}
+					else
+					{
+						AddVertexData(Mesh.Positions[i] * Mesh.World * Object.World);
+						AddVertexData(Mesh.Normals[i]);
+						AddVertexData(Mesh.TexCoords[i]);
+						AddVertexData(Mesh.Tangents[i]);
+					}
 				}
 				CumulativeVertexBase += Mesh.VertexCount;
 			}
@@ -288,6 +343,7 @@ void RBspObjectDrawD3D9::Create(rsx::LoaderState && srcState)
 	State = std::move(srcState);
 
 	CreateTextures();
+	CreateShaderStuff();
 	CreateBatches();
 	
 	DMLog("RBspObjectDrawD3D9 created\n");
@@ -339,11 +395,23 @@ static void DrawBatch(const MaterialBatch& Mat)
 template <RBspObjectDrawD3D9::MaterialType Type>
 void RBspObjectDrawD3D9::SetMaterial(Material& Mat)
 {
-	dev->SetTexture(0, GetTexture(Mat.Diffuse));
-	if (Type > Normal)
-		dev->SetTexture(1, GetTexture(Mat.Opacity));
-	if (Type > Opacity)
-		dev->SetRenderState(D3DRS_ALPHAREF, Mat.AlphaTestValue);
+	if (!bsp.m_bisDrawLightMap)
+	{
+		dev->SetTexture(0, GetTexture(Mat.Diffuse));
+		if (Type > Normal)
+			dev->SetTexture(1, GetTexture(Mat.Opacity));
+		if (Type > Opacity)
+			dev->SetRenderState(D3DRS_ALPHAREF, Mat.AlphaTestValue);
+	}
+	else
+	{
+		int TexIndices[] = { Mat.Diffuse, Mat.Normal, Mat.Specular, Mat.Opacity, Mat.Emissive };
+		for (size_t i{}; i < ArraySize(TexIndices); ++i)
+			dev->SetTexture(i, GetTexture(TexIndices[i]));
+		SetPSFloat(DeferredShaderConstant::Opacity, Type > Normal);
+		if (Type > Opacity)
+			dev->SetRenderState(D3DRS_ALPHAREF, Mat.AlphaTestValue);
+	}
 }
 
 template <RBspObjectDrawD3D9::MaterialType Type>
@@ -412,12 +480,25 @@ void RBspObjectDrawD3D9::RenderMaterials(int StartIndex, int EndIndex)
 
 LPDIRECT3DTEXTURE9 RBspObjectDrawD3D9::GetTexture(int Index)
 {
+	if (Index == static_cast<u16>(-1))
+		return nullptr;
+
 	return TextureMemory[Index].get()->GetTexture();
+}
+
+u32 RBspObjectDrawD3D9::GetFVF() const
+{
+	return D3DFVF_XYZ | D3DFVF_TEX1;
+}
+
+size_t RBspObjectDrawD3D9::GetStride() const
+{
+	return bsp.m_bisDrawLightMap ? sizeof(LitVertex) : sizeof(SimpleVertex);
 }
 
 void RBspObjectDrawD3D9::SetPrologueStates()
 {
-	if (Wireframe)
+	if (bsp.m_bWireframe)
 		SetWireframeStates();
 	else
 		SetDefaultStates();
@@ -430,7 +511,23 @@ void RBspObjectDrawD3D9::SetPrologueStates()
 	// Map triangles are clockwise, so cull counter-clockwise faces.
 	dev->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
 
-	dev->SetFVF(GetFVF());
+	if (!bsp.m_bisDrawLightMap)
+		dev->SetFVF(GetFVF());
+	else
+	{
+		dev->SetVertexDeclaration(LitVertexDecl.get());
+		dev->SetVertexShader(DeferredVS.get());
+		dev->SetPixelShader(DeferredPS.get());
+
+		rmatrix WorldView = RView;
+		SetVSMatrix(DeferredShaderConstant::WorldView, Transpose(WorldView));
+		auto WorldViewProjection = WorldView * RProjection;
+		SetVSMatrix(DeferredShaderConstant::WorldViewProjection, Transpose(WorldViewProjection));
+
+		SetPSFloat(DeferredShaderConstant::Near, GetRenderer().GetNearZ());
+		SetPSFloat(DeferredShaderConstant::Far, GetRenderer().GetFarZ());
+	}
+
 	dev->SetStreamSource(0, VertexBuffer.get(), 0, GetStride());
 	dev->SetIndices(IndexBuffer.get());
 }
@@ -460,6 +557,10 @@ void RBspObjectDrawD3D9::SetEpilogueStates()
 	dev->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
 	dev->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
 	dev->SetFVF(D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_TEX1);
+
+	// Disable shaders
+	dev->SetVertexShader(nullptr);
+	dev->SetPixelShader(nullptr);
 }
 
 void RBspObjectDrawD3D9::Draw()

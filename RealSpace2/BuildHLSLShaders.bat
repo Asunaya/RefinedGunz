@@ -4,6 +4,7 @@ SET options=/O3
 
 call:CompileVSPS Shadow
 call:CompileVSPS MergeShadowMaps
+call:CompileSingle Deferred /Tvs_2_0 /Tps_2_0
 call:CompileShader skin /Tvs_1_1
 goto:eof
 
@@ -20,6 +21,15 @@ goto:eof
 call:CompileShader %~1 /Tps_3_0
 goto:eof
 
+:CompileSingle
+call:CompileShaderOutput %~1 %~1VS %~2 /Evs_main
+call:CompileShaderOutput %~1 %~1PS %~3 /Eps_main
+goto:eof
+
 :CompileShader
-%fxc% %~2 /FhInclude/%~1.h -Vn%~1Data Source/%~1.hlsl %options%
+call:CompileShaderOutput %~1 %~1 %~2 %~3 %~4
+goto:eof
+
+:CompileShaderOutput
+%fxc% %~3 %~4 %~5 /FhInclude/%~2.h /Vn%~2Data Source/%~1.hlsl %options%
 goto:eof

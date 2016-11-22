@@ -479,6 +479,9 @@ private:
 	// the lightmap is on for normal rendering.
 	bool m_bShowLightmap{};
 
+	// TODO: Remove this piece of global state
+	static bool m_bisDrawLightMap;
+
 	bool RenderWithNormal{};
 
 	bool IsRS3Map{};
