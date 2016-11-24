@@ -1072,12 +1072,16 @@ fail:
 void RBspObject::OnInvalidate()
 {
 	InvalidateDynamicLightVertexBuffer();
+
+	DrawObj.OnInvalidateStatic<RBspObjectDrawD3D9>();
 }
 
 void RBspObject::OnRestore()
 {
 	if (!m_bisDrawLightMap)
 		Sort_Nodes(OcRoot.data());
+
+	DrawObj.OnRestoreStatic<RBspObjectDrawD3D9>();
 }
 
 bool RBspObject::Open_MaterialList(rapidxml::xml_node<>& parent)

@@ -1,8 +1,8 @@
 float4x4 WorldViewProj : WORLDVIEWPROJECTION : register(c0);
 float4x4 WorldView : register(c4);
-float4x4 World     : register(c8);
 
 // Unused stuff
+float4x4 World     : register(c8);
 float3 Diffuse   : register(c12);
 float3 Ambient   : register(c13);
 float3 Spec      : register(c14);

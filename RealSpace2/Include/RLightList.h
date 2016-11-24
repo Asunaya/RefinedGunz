@@ -17,7 +17,7 @@ struct RLIGHT
 	v3 Position;
 	float fIntensity;
 	float fAttnStart, fAttnEnd;
-	u32	 dwFlags;
+	u32	dwFlags;
 };
 
 struct RLightList : public std::vector<RLIGHT> {

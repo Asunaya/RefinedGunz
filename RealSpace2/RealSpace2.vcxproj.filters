@@ -74,6 +74,12 @@
     <None Include="Source\Deferred.hlsl">
       <Filter>D3D9\Shaders</Filter>
     </None>
+    <None Include="Source\Lighting.hlsl">
+      <Filter>D3D9\Shaders</Filter>
+    </None>
+    <None Include="Source\DepthCopy.hlsl">
+      <Filter>D3D9\Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\RHalfEdgeMesh.cpp">
@@ -446,6 +452,9 @@
     </ClInclude>
     <ClInclude Include="Include\LightmapGenerator.h">
       <Filter>Map</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Sphere.h">
+      <Filter>Map\RSX</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

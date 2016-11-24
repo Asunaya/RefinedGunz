@@ -4,7 +4,10 @@ SET options=/O3
 
 call:CompileVSPS Shadow
 call:CompileVSPS MergeShadowMaps
-call:CompileSingle Deferred /Tvs_2_0 /Tps_2_0
+call:CompileSingle Deferred Deferred vs_main /Tvs_3_0 ps_main /Tps_3_0
+call:CompileSingle Lighting PointLight vs_point_light /Tvs_3_0 ps_point_light /Tps_3_0
+call:CompileSingle Lighting Ambient vs_ambient /Tvs_3_0 ps_ambient /Tps_3_0
+call:CompileSingle DepthCopy DepthCopy vs_main /Tvs_3_0 ps_main /Tps_3_0
 call:CompileShader skin /Tvs_1_1
 goto:eof
 
@@ -22,8 +25,8 @@ call:CompileShader %~1 /Tps_3_0
 goto:eof
 
 :CompileSingle
-call:CompileShaderOutput %~1 %~1VS %~2 /Evs_main
-call:CompileShaderOutput %~1 %~1PS %~3 /Eps_main
+call:CompileShaderOutput %~1 %~2VS /E%~3 %~4
+call:CompileShaderOutput %~1 %~2PS /E%~5 %~6
 goto:eof
 
 :CompileShader

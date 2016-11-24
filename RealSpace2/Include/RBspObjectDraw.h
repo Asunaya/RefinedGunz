@@ -27,6 +27,8 @@ public:
 
 	POLYVAR_METHOD(Init)
 	POLYVAR_METHOD(Draw)
+	POLYVAR_METHOD(OnInvalidate);
+	POLYVAR_METHOD(OnRestore);
 
 private:
 	variant<monostate, RBspObjectDrawD3D9, RBspObjectDrawVulkan> var;

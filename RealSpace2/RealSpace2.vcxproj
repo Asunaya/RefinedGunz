@@ -503,6 +503,7 @@
     <ClInclude Include="Include\RTypes.h" />
     <ClInclude Include="Include\RVersions.h" />
     <ClInclude Include="Include\ShaderUtil.h" />
+    <ClInclude Include="Include\Sphere.h" />
     <ClInclude Include="Include\vulkanbuffer.hpp" />
     <ClInclude Include="Include\vulkandebug.h" />
     <ClInclude Include="Include\vulkandevice.h" />
@@ -603,6 +604,16 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Source\Deferred.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Source\Lighting.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Source\DepthCopy.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>

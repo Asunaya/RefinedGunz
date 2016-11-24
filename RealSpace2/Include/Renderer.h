@@ -85,11 +85,11 @@ private:
 	D3DPtr<IDirect3DCubeTexture9> ShadowCubeTexture;
 	D3DPtr<IDirect3DSurface9> ShadowDepthSurface;
 	D3DPtr<IDirect3DTexture9> DiffuseMap;
-#endif
 
 	rmatrix LightProjection;
 
 	int ShadowMapSize = 1024;
+#endif
 };
 
 _NAMESPACE_REALSPACE2_END
