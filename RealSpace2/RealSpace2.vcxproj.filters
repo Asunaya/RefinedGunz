@@ -80,6 +80,9 @@
     <None Include="Source\DepthCopy.hlsl">
       <Filter>D3D9\Shaders</Filter>
     </None>
+    <None Include="Source\VisualizeLinearDepth.hlsl">
+      <Filter>D3D9\Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\RHalfEdgeMesh.cpp">

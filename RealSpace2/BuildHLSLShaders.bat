@@ -8,6 +8,7 @@ call:CompileSingle Deferred Deferred vs_main /Tvs_3_0 ps_main /Tps_3_0
 call:CompileSingle Lighting PointLight vs_point_light /Tvs_3_0 ps_point_light /Tps_3_0
 call:CompileSingle Lighting Ambient vs_ambient /Tvs_3_0 ps_ambient /Tps_3_0
 call:CompileSingle DepthCopy DepthCopy vs_main /Tvs_3_0 ps_main /Tps_3_0
+call:CompilePS VisualizeLinearDepth
 call:CompileShader skin /Tvs_1_1
 goto:eof
 

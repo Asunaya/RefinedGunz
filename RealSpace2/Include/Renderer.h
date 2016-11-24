@@ -47,6 +47,8 @@ public:
 
 	void ApplyLighting();
 
+	void SetScreenSpaceVertexDeclaration();
+
 private:
 	void CreateTextures();
 	void CreateShaders();
@@ -70,6 +72,7 @@ private:
 	v3 LightDir;
 
 	D3DPtr<IDirect3DVertexDeclaration9> VertexDeclaration;
+	D3DPtr<IDirect3DVertexDeclaration9> ScreenSpaceVertexDeclaration;
 
 #ifdef SHADOW_TEST
 	D3DPtr<IDirect3DVertexShader9> SceneVS;

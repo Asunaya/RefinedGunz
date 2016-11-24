@@ -16,6 +16,7 @@
 #include "PointLightPS.h"
 #include "DepthCopyVS.h"
 #include "DepthCopyPS.h"
+#include "VisualizeLinearDepth.h"
 
 _NAMESPACE_REALSPACE2_BEGIN
 
@@ -148,6 +149,7 @@ void RBspObjectDrawD3D9::CreateShaderStuff()
 	PointLightPS = CreatePixelShader(PointLightPSData);
 	DepthCopyVS = CreateVertexShader(DepthCopyVSData);
 	DepthCopyPS = CreatePixelShader(DepthCopyPSData);
+	VisualizeLinearDepthPS = CreatePixelShader(VisualizeLinearDepthData);
 
 	CreateRTs();
 }
@@ -359,12 +361,16 @@ void RBspObjectDrawD3D9::CreateRTs()
 	if (!UsingLighting())
 		return;
 
-	for (auto& RT : RTs)
+	for (size_t i{}; i < ArraySize(RTs); ++i)
 	{
+		auto& RT = RTs[i];
+
+		D3DFORMAT Format = i == static_cast<size_t>(RTType::LinearDepth) ? D3DFMT_R32F : D3DFMT_X8R8G8B8;
+
 		if (FAILED(dev->CreateTexture(
 			RGetScreenWidth(), RGetScreenHeight(),
-			0, D3DUSAGE_RENDERTARGET,
-			D3DFMT_X8R8G8B8,
+			1, D3DUSAGE_RENDERTARGET,
+			Format,
 			D3DPOOL_DEFAULT,
 			MakeWriteProxy(RT),
 			nullptr)))
@@ -372,7 +378,6 @@ void RBspObjectDrawD3D9::CreateRTs()
 			MLog("RBspObjectDrawD3D9::CreateShaderStuff -- Failed to create render target\n");
 		}
 	}
-
 
 	if (FAILED(RGetDevice()->CreateDepthStencilSurface(
 		RGetScreenWidth(), RGetScreenHeight(),
@@ -565,7 +570,7 @@ bool RBspObjectDrawD3D9::UsingLighting() const
 	return SupportsDynamicLighting && bsp.m_bisDrawLightMap;
 }
 
-static void DrawFullscreenQuad()
+static void DrawQuad(const v2& p1, const v2& p2)
 {
 	struct VertexType
 	{
@@ -573,13 +578,11 @@ static void DrawFullscreenQuad()
 		float u, v;
 	};
 
-	auto Width = (float)RGetScreenWidth();
-	auto Height = (float)RGetScreenHeight();
 	VertexType Vertices[] = {
-		{ 0, 0, 0, 1, 0, 0 },
-		{ 0, Height, 0, 1, 0, 1 },
-		{ Width, Height, 0, 1, 1, 1 },
-		{ Width, 0, 0, 1, 1, 0 },
+		{ p1.x, p1.y, 0, 1, 0, 0 },
+		{ p1.x, p2.y, 0, 1, 0, 1 },
+		{ p2.x, p2.y, 0, 1, 1, 1 },
+		{ p2.x, p1.y, 0, 1, 1, 0 },
 	};
 
 	RGetDevice()->SetRenderState(D3DRS_CULLMODE, D3DCULL_CW);
@@ -588,10 +591,53 @@ static void DrawFullscreenQuad()
 	RGetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, &Vertices, sizeof(VertexType));
 }
 
+static void DrawFullscreenQuad()
+{
+	auto Width = (float)RGetScreenWidth();
+	auto Height = (float)RGetScreenHeight();
+	DrawQuad({ 0, 0 }, { Width, Height });
+}
+
 static void DrawAmbient(LPDIRECT3DTEXTURE9 Ambient)
 {
 	RGetDevice()->SetTexture(0, Ambient);
 	DrawFullscreenQuad();
+}
+
+void RBspObjectDrawD3D9::ShowRTs()
+{
+	auto ShowRT = [&](auto& RT, auto&& p1, auto&& p2) {
+		D3DPtr<IDirect3DSurface9> RTSurface, BackBufferSurface;
+		RT->GetSurfaceLevel(0, MakeWriteProxy(RTSurface));
+		RGetDevice()->GetRenderTarget(0, MakeWriteProxy(BackBufferSurface));
+		RECT Rect;
+		Rect.left = p1.x;
+		Rect.top = p1.y;
+		Rect.right = p2.x;
+		Rect.bottom = p2.y;
+		RGetDevice()->StretchRect(RTSurface.get(), nullptr, BackBufferSurface.get(), &Rect, D3DTEXF_NONE);
+	};
+
+	auto ShowDepth = [&](auto& RT, auto&& p1, auto&& p2) {
+		RGetDevice()->SetTexture(0, RT.get());
+		RGetDevice()->SetPixelShader(VisualizeLinearDepthPS.get());
+		GetRenderer().SetScreenSpaceVertexDeclaration();
+		DrawQuad(p1, p2);
+
+		RGetDevice()->SetPixelShader(nullptr);
+	};
+
+	for (size_t i{}; i < ArraySize(RTs); ++i)
+	{
+		auto Width = float(RGetScreenWidth());
+		auto Height = float(RGetScreenHeight());
+		v2 p1{ Width / 2 + (i % 2) * Width / 4, Height / 2 + (i >= 2) * Height / 4 };
+		v2 p2{ p1 + v2{Width / 4, Height / 4} };
+		if (i == static_cast<size_t>(RTType::LinearDepth))
+			ShowDepth(RTs[i], p1, p2);
+		else
+			ShowRT(RTs[i], p1, p2);
+	}
 }
 
 void RBspObjectDrawD3D9::DrawLighting()
@@ -698,6 +744,16 @@ void RBspObjectDrawD3D9::DrawLighting()
 	dev->SetDepthStencilSurface(OrigDepthSurface.get());
 
 	//DepthCopy();
+
+#if 1
+	dev->SetTransform(D3DTS_VIEW, &Identity);
+	dev->SetTransform(D3DTS_PROJECTION, &Identity);
+
+	ShowRTs();
+
+	dev->SetTransform(D3DTS_VIEW, &View);
+	dev->SetTransform(D3DTS_PROJECTION, &Projection);
+#endif
 }
 
 void RBspObjectDrawD3D9::DepthCopy()

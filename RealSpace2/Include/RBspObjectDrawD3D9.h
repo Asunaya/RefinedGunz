@@ -47,6 +47,7 @@ private:
 	void SetEpilogueStates();
 	void DrawLighting();
 	void DepthCopy();
+	void ShowRTs();
 
 	LPDIRECT3DTEXTURE9 GetTexture(int Index) const;
 
@@ -101,6 +102,7 @@ private:
 	D3DPtr<IDirect3DPixelShader9> PointLightPS;
 	D3DPtr<IDirect3DVertexShader9> DepthCopyVS;
 	D3DPtr<IDirect3DPixelShader9> DepthCopyPS;
+	D3DPtr<IDirect3DPixelShader9> VisualizeLinearDepthPS;
 
 	enum class RTType
 	{

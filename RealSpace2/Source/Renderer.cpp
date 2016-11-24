@@ -43,10 +43,26 @@ static auto* CreateVertexDeclaration(bool Normal)
 	return Decl;
 }
 
+static auto CreateScreenSpaceVertexDeclaration()
+{
+	D3DPtr<IDirect3DVertexDeclaration9> Decl;
+
+	D3DVERTEXELEMENT9 Elements[] = {
+		{ 0, 0, D3DDECLTYPE_FLOAT4, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITIONT, 0 },
+		{ 0, sizeof(float) * 4, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0 },
+		D3DDECL_END()
+	};
+
+	RGetDevice()->CreateVertexDeclaration(Elements, MakeWriteProxy(Decl));
+
+	return Decl;
+}
+
 Renderer::Renderer()
 	: LightPos{ 0, 0, 100 }, NearZ{ DEFAULT_NEAR_Z }, FarZ{ DEFAULT_FAR_Z }
 {
 	SetTransform(TransformType::World, GetIdentityMatrix());
+	ScreenSpaceVertexDeclaration = CreateScreenSpaceVertexDeclaration();
 
 #ifdef SHADOW_TEST
 	CreateShaders();
@@ -69,6 +85,11 @@ Renderer::Renderer()
 
 	CanRenderWithShader = true;
 #endif
+}
+
+void Renderer::SetScreenSpaceVertexDeclaration()
+{
+	RGetDevice()->SetVertexDeclaration(ScreenSpaceVertexDeclaration.get());
 }
 
 void Renderer::CreateTextures()
