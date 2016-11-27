@@ -414,6 +414,8 @@ static RLIGHT* SetMapLight(const v3& char_pos, RVisualMesh* Mesh, int LightIndex
 
 void ZCharacterObject::Draw_SetLight(const rvector& vPosition)
 {
+	RGetDevice()->SetRenderState(D3DRS_AMBIENT, 0x00cccccc);
+
 	if (!ZGetConfiguration()->GetVideo()->bDynamicLight)
 	{
 		m_pVMesh->SetLight(1, nullptr, false);
@@ -432,7 +434,6 @@ void ZCharacterObject::Draw_SetLight(const rvector& vPosition)
 
 	RGetShaderMgr()->setAmbient(0x00cccccc);
 	RGetDevice()->SetRenderState(D3DRS_LIGHTING, TRUE);
-	RGetDevice()->SetRenderState(D3DRS_AMBIENT, 0x00cccccc);
 }
 
 void ZCharacterObject::DrawShadow()
