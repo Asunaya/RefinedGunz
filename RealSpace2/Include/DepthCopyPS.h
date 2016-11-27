@@ -31,12 +31,10 @@
     lrp r2.x, r1.x, r0.x, c0.x
     mul r0.x, r1.x, c1.x
     rcp r0.y, r2.x
-    mul r0.x, r0.y, r0.x
-    mov oC0.xyz, r0.x
-    mov oDepth, r0.x
-    mov oC0.w, c2.x
+    mul oDepth, r0.y, r0.x
+    mov oC0, c2.x
 
-// approximately 9 instruction slots used (1 texture, 8 arithmetic)
+// approximately 7 instruction slots used (1 texture, 6 arithmetic)
 #endif
 
 const BYTE DepthCopyPSData[] =
@@ -99,13 +97,9 @@ const BYTE DepthCopyPSData[] =
       0, 160,   6,   0,   0,   2, 
       0,   0,   2, 128,   2,   0, 
       0, 128,   5,   0,   0,   3, 
-      0,   0,   1, 128,   0,   0, 
+      0,   8,  15, 144,   0,   0, 
      85, 128,   0,   0,   0, 128, 
       1,   0,   0,   2,   0,   8, 
-      7, 128,   0,   0,   0, 128, 
-      1,   0,   0,   2,   0,   8, 
-     15, 144,   0,   0,   0, 128, 
-      1,   0,   0,   2,   0,   8, 
-      8, 128,   2,   0,   0, 160, 
+     15, 128,   2,   0,   0, 160, 
     255, 255,   0,   0
 };

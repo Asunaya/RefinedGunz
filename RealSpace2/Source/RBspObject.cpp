@@ -170,7 +170,8 @@ void RBspObject::LightMapOnOff(bool bDraw)
 	if (bDraw)
 	{
 		OpenLightmap();
-		Sort_Nodes(OcRoot.data());
+		if (!OcRoot.empty())
+			Sort_Nodes(OcRoot.data());
 		if (!RIsHardwareTNL())
 			CreatePolygonTable();
 		else
@@ -179,7 +180,8 @@ void RBspObject::LightMapOnOff(bool bDraw)
 	else
 	{
 		ClearLightmaps();
-		Sort_Nodes(OcRoot.data());
+		if (!OcRoot.empty())
+			Sort_Nodes(OcRoot.data());
 		if (!RIsHardwareTNL())
 			CreatePolygonTable();
 	}

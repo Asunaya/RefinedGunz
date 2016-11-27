@@ -36,6 +36,6 @@ PS_OUTPUT ps_main(in VS_OUTPUT In)
 	z = depthFromLinear(z, g_Near, g_Far);
 
 	Out.depth = z;
-	Out.color = float4(z, z, z, 1.0f);
+	Out.color = 1;
 	return Out;
 }
