@@ -85,7 +85,14 @@ PS_OUTPUT ps_point_light(in VS_OUTPUT In)
 	float3 normal = tex2D(normalTexture, texCoord).xyz * 2 - 1;
 	float NdotL = saturate(dot(normal, light_dir));
 
-	Out.Color = float4(tex2D(diffuseTexture, texCoord).xyz*g_LightColor*NdotL*att, 1.0);
+	float4 diffuse_pixel = tex2D(diffuseTexture, texCoord);
+	float specular_power = diffuse_pixel.w * 32;
+	float3 halfway = normalize(normalize(-pos) + light_dir);
+
+	float3 diffuse = diffuse_pixel.xyz*NdotL;
+	float3 specular = pow(saturate(dot(halfway, normal)), specular_power);
+
+	Out.Color = float4((diffuse + specular)*g_LightColor*att, 1.0);
 
 	return Out;
 }
