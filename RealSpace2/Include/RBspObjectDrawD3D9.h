@@ -21,6 +21,8 @@ public:
 	void Create(rsx::LoaderState&&);
 	void Draw();
 
+	bool ShowRTsEnabled{};
+
 private:
 	struct SimpleVertex
 	{

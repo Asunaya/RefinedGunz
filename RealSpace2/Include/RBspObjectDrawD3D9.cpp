@@ -709,7 +709,8 @@ void RBspObjectDrawD3D9::DrawLighting()
 	dev->SetVertexShader(nullptr);
 	dev->SetPixelShader(nullptr);
 
-	//ShowRTs();
+	if (ShowRTsEnabled)
+		ShowRTs();
 }
 
 void RBspObjectDrawD3D9::DepthCopy()

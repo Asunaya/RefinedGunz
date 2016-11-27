@@ -330,6 +330,8 @@ public:
 
 	void UpdateUBO();
 
+	RBspObjectDraw DrawObj;
+
 private:
 	friend class RBspObjectDrawVulkan;
 	friend class RBspObjectDrawD3D9;
@@ -486,7 +488,6 @@ private:
 
 	bool IsRS3Map{};
 
-	RBspObjectDraw DrawObj;
 	std::unique_ptr<BulletCollision> Collision;
 };
 

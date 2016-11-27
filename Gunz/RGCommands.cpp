@@ -4,6 +4,8 @@
 #include "RGMain.h"
 #include "VoiceChat.h"
 #include "Config.h"
+#include "RBspObject.h"
+#include "RS2.h"
 #include <cstdint>
 
 bool CheckDeveloperMode(const char* Name)
@@ -288,6 +290,23 @@ void LoadRGCommands(ZChatCmdManager& CmdManager)
 		ZChatOutputF("Set freelook to %d", val);
 	},
 		CCF_ALL, 1, 1, true, "/freelook <0/1>", "");
+
+	CmdManager.AddCommand(0, "showrts", [](const char *line, int argc, char ** const argv) {
+		if (!CheckDeveloperMode("showrts"))
+			return;
+		
+		if (!GetRS2().UsingD3D9())
+			return;
+
+		bool& val = ZGetGame()->GetWorld()->GetBsp()->DrawObj.Get<RBspObjectDrawD3D9>().ShowRTsEnabled;
+		if (argc == 1)
+			val = !val;
+		else
+			val = atoi(argv[1]) != 0;
+
+		ZChatOutputF("Set showrts to %d", val);
+	},
+		CCF_ALL, 0, 1, true, "/showrts <0/1>", "");
 }
 
 #ifdef TIMESCALE
