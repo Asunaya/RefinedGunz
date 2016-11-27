@@ -631,6 +631,14 @@ void RBspObjectDrawD3D9::ShowRTs()
 	}
 }
 
+static bool IsSphereInsideFrustum(const v3& Center, float Radius, const rplane(&Frustum)[6])
+{
+	for (auto& Plane : Frustum)
+		if (DotProduct(Center, v3{ EXPAND_VECTOR(Plane) }) + Plane.d < -Radius)
+			return false;
+	return true;
+}
+
 void RBspObjectDrawD3D9::DrawLighting()
 {
 	dev->SetRenderTarget(0, OrigRT.get());
@@ -670,6 +678,9 @@ void RBspObjectDrawD3D9::DrawLighting()
 
 	for (auto& Light : bsp.StaticMapLightList)
 	{
+		if (!IsSphereInsideFrustum(Light.Position, Light.fAttnEnd, RViewFrustum))
+			continue;
+
 		auto& pos = Light.Position * RView;
 		SetShaderVector4(LightingShaderConstant::Light, { EXPAND_VECTOR(pos), Light.fAttnEnd });
 		SetShaderVector3(LightingShaderConstant::LightColor, Light.Color);
@@ -760,9 +771,6 @@ void RBspObjectDrawD3D9::SetPrologueStates()
 			RTs[i]->GetSurfaceLevel(0, MakeWriteProxy(Surface));
 			dev->SetRenderTarget(i, Surface.get());
 		}
-
-		dev->GetDepthStencilSurface(MakeWriteProxy(OrigDepthSurface));
-		//dev->SetDepthStencilSurface(DummyDepthSurface.get());
 	}
 }
 
