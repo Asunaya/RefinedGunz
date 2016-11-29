@@ -357,6 +357,8 @@ public:
 	ZCombatMenu*	 GetCombatMenu()			{ return &m_CombatMenu; }
 	ZMonsterBookInterface* GetMonsterBookInterface()	{ return m_pMonsterBookInterface; }
 	ZGameInput *GetGameInput() const { return m_pGameInput; }
+
+	bool EnteredReplayFromLogin{};
 };
 
 

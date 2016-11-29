@@ -1924,12 +1924,7 @@ bool ZGameInterface::SetState(GunzState nState)
 	m_nPreviousState = m_nState;
 
 	if(m_nState==GUNZ_GAME) OnGameDestroy();
-	else if(m_nState==GUNZ_LOGIN)
-	{
-		MWidget* pWidget = m_IDLResource.FindWidget( "Login_BackgrdImg");
-		if ( !pWidget)
-			OnLoginDestroy();
-	}
+	else if(m_nState==GUNZ_LOGIN) OnLoginDestroy();
 	else if(m_nState==GUNZ_NETMARBLELOGIN) OnNetmarbleLoginDestroy();
 	else if(m_nState==GUNZ_LOBBY) OnLobbyDestroy();
 	else if(m_nState==GUNZ_STAGE) OnStageDestroy();
@@ -2830,9 +2825,9 @@ void ZGameInterface::OnGameUpdate(float fElapsed)
 
 void ZGameInterface::OnReplay()
 {
-	ShowWidget( "ReplayConfirm", false);
+	ShowWidget("ReplayConfirm", false);
 
-	CreateReplayGame(NULL);
+	CreateReplayGame(nullptr);
 }
 
 bool ZGameInterface::Update(float fElapsed)
@@ -4695,19 +4690,25 @@ void ZGameInterface::ShowPrivateStageJoinFrame(const char* szStageName)
 
 void ZGameInterface::LeaveBattle()
 {
+	ZGetGameInterface()->SetCursorEnable(true);
+	m_bLeaveBattleReserved = false;
+	m_bLeaveStageReserved = false;
 	ShowMenu(false);
+
+	if (EnteredReplayFromLogin)
+	{
+		SetState(GUNZ_LOGIN);
+		EnteredReplayFromLogin = false;
+		return;
+	}
 
 	ZPostStageLeaveBattle(ZGetGameClient()->GetPlayerUID(), ZGetGameClient()->GetStageUID());
 	if (m_bLeaveStageReserved) {
 		ZPostStageLeave(ZGetGameClient()->GetPlayerUID(), ZGetGameClient()->GetStageUID());
-		ZApplication::GetGameInterface()->SetState(GUNZ_LOBBY);
+		SetState(GUNZ_LOBBY);
 	} else {
-		ZApplication::GetGameInterface()->SetState(GUNZ_STAGE);
+		SetState(GUNZ_STAGE);
 	}
-
-	ZGetGameInterface()->SetCursorEnable(true);
-	m_bLeaveBattleReserved = false;
-	m_bLeaveStageReserved = false;
 }
 
 void ZGameInterface::ReserveLeaveStage()
@@ -5563,6 +5564,7 @@ void ZGameInterface::ViewReplay()
 		strcat_safe( szName, pListBox->GetSelItemString());
 	}
 
+	EnteredReplayFromLogin = GetState() == GUNZ_LOGIN;
 
 	m_bOnEndOfReplay = true;
 	m_nLevelPercentCache = ZGetMyInfo()->GetLevelPercent();
