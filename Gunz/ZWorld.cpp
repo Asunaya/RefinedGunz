@@ -110,6 +110,7 @@ bool ZWorld::Create(ZLoadingProgress *pLoading)
 				strncmp(object_name, "obj_ef_sky", 10) == 0)
 			{
 				m_pSkyBox = std::make_unique<ZSkyBox>(std::unique_ptr<RVisualMesh>{pMesh->m_pVisualMesh});
+				it->pVisualMesh.release();
 				it = map_object_list->erase(it);
 				continue;
 			}

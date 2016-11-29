@@ -6,7 +6,7 @@ using namespace RealSpace2;
 
 ZSkyBox::ZSkyBox(std::unique_ptr<RVisualMesh> VMesh) : VMesh{ std::move(VMesh) }
 {
-	VMesh->m_pMesh->mbSkyBox = true;
+	this->VMesh->m_pMesh->mbSkyBox = true;
 }
 
 ZSkyBox::~ZSkyBox() = default;
