@@ -1,28 +1,23 @@
-#ifndef _MCHATTINGFILTER_H
-#define _MCHATTINGFILTER_H
+#pragma once
 
 #include <list>
 #include <string>
 
-
-typedef list<string>				STRFILTER_MAP;
-typedef STRFILTER_MAP::iterator		STRFILTER_ITR;
-
-
+using STRFILTER_MAP = std::list<std::string>;
+using STRFILTER_ITR = STRFILTER_MAP::iterator;
 
 class MChattingFilter
 {
-private :
-	STRFILTER_MAP	m_AbuseMap;
-	STRFILTER_MAP	m_InvalidNameMap;
+private:
+	STRFILTER_MAP m_AbuseMap;
+	STRFILTER_MAP m_InvalidNameMap;
 
-	string			m_strRemoveTokSkip;
-	string			m_strRemoveTokInvalid;
+	std::string	m_strRemoveTokSkip;
+	std::string	m_strRemoveTokInvalid;
 
-	char			m_szLastFilterdStr[ 256];
+	char m_szLastFilterdStr[256];
 
-
-public :
+public:
 	MChattingFilter();
 	~MChattingFilter();
 
@@ -32,19 +27,17 @@ public :
 		return &ChattingFilter;
 	}
 
-	bool LoadFromFile( class MZFileSystem* pfs, const char* szFileName);
-	bool IsValidChatting( const char* strText);
-	bool IsValidName( const char* strText);
-	const char* GetLastFilteredStr()				{ return m_szLastFilterdStr; }
-	bool FindInvalidChar( const string& strText);
+	bool LoadFromFile(class MZFileSystem* pfs, const char* szFileName);
+	bool IsValidChatting(const char* strText);
+	bool IsValidName(const char* strText);
+	const char* GetLastFilteredStr() { return m_szLastFilterdStr; }
+	bool FindInvalidChar(const std::string& strText);
 
 protected:
-	void GetLine( char*& prfBuf, char* szType, char* szText);
-	void SkipBlock( char*& prfBuf);
-	const string PreTranslate( const string& strText);
-	bool FindInvalidWord( const string& strWord, const string& strText);
+	void GetLine(char*& prfBuf, char* szType, char* szText);
+	void SkipBlock(char*& prfBuf);
+	std::string PreTranslate(const std::string& strText);
+	bool FindInvalidWord(const std::string& strWord, const std::string& strText);
 };
 
-inline MChattingFilter* MGetChattingFilter()		{ return MChattingFilter::GetInstance(); }
-
-#endif
+inline MChattingFilter* MGetChattingFilter() { return MChattingFilter::GetInstance(); }

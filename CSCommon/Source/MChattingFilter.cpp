@@ -1,20 +1,16 @@
-#include <algorithm>
-
-
 #include "stdafx.h"
 #include "MChattingFilter.h"
 #include "MZFileSystem.h"
+#include "SafeString.h"
 
 #ifdef _DEBUG
 #include <direct.h>
 #endif
 
-
-
 MChattingFilter::MChattingFilter()
 {
-	m_strRemoveTokSkip		= "`-=\\[];'/~!@#$%^&*()_+|{}:\"<>";		// 문장에 해당 문자가 있으면 붙어있는 것으로 간주한다.(예: 거@#$기 -> 거기)
-	m_strRemoveTokInvalid	= "`\\;,.'/!%^&|:\"<>?";					// 이름에 해당 문자가 있으면 사용할 수 없다.
+	m_strRemoveTokSkip		= "`-=\\[];'/~!@#$%^&*()_+|{}:\"<>";
+	m_strRemoveTokInvalid	= "`\\;,.'/!%^&|:\"<>?";
 
 	for ( int i = 0;  i <= 32;  i++)
 	{
@@ -135,19 +131,13 @@ void MChattingFilter::SkipBlock( char*& prfBuf)
 	++prfBuf;
 }
 
-
-// 사용 가능한 채팅 말인지 검사한다.
 bool MChattingFilter::IsValidChatting( const char* szText)
 {
 	if ( szText == 0)
 		return false;
 
-	
-	// 특수 문자를 삭제한다.
-	const string str = PreTranslate( szText);
+	const std::string str = PreTranslate( szText);
 
-
-	// 금칙어가 있는지 조사한다.
 	for ( STRFILTER_ITR itr = m_AbuseMap.begin();  itr != m_AbuseMap.end();  itr++)
 	{
 		if ( FindInvalidWord( (*itr).c_str(), str))
@@ -157,35 +147,25 @@ bool MChattingFilter::IsValidChatting( const char* szText)
 	return true;
 }
 
-
-// 사용 가능한 캐릭터 이름인지 검사한다.
 bool MChattingFilter::IsValidName( const char* szText)
 {
 	if ( szText == 0)
 		return false;
 
-	
-	// 특수 문자를 삭제한다.
-	const string str = PreTranslate( szText);
+	const std::string str = PreTranslate( szText);
 
-
-	// 금칙어가 있는지 조사한다.
 	for ( STRFILTER_ITR itr = m_AbuseMap.begin();  itr != m_AbuseMap.end();  itr++)
 	{
 		if ( FindInvalidWord( (*itr).c_str(), str))
 			return false;
 	}
 
-
-	// 금칙어가 있는지 조사한다.
 	for ( STRFILTER_ITR itr = m_InvalidNameMap.begin();  itr != m_InvalidNameMap.end();  itr++)
 	{
 		if ( FindInvalidWord( (*itr).c_str(), str))
 			return false;
 	}
 
-
-	// 금지된 특수문자가 있는지 검사한다.
 	if ( FindInvalidChar( szText))
 		return false;
 
@@ -193,27 +173,12 @@ bool MChattingFilter::IsValidName( const char* szText)
 	return true;
 }
 
-
-// 특수 기호는 뺀다.
-const string MChattingFilter::PreTranslate( const string& strText)
+std::string MChattingFilter::PreTranslate( const std::string& strText)
 {
-	string str = strText;
-
-/*	string::size_type pos;
-	string::size_type posStart = 0;
-	
-	while( (pos = str.find_first_of( m_strRemoveTokSkip, posStart)) != string::npos)
-	{
-		str.erase( pos, 1);
-		posStart = pos;
-	}
-*/
-	return str;
+	return strText;
 }
 
-
-// 금칙어가 있는지 찾는다.
-bool MChattingFilter::FindInvalidWord( const string& strWord, const string& strText)
+bool MChattingFilter::FindInvalidWord( const std::string& strWord, const std::string& strText)
 {
 	size_t nWordLen = strWord.length(); 
 
@@ -234,9 +199,7 @@ bool MChattingFilter::FindInvalidWord( const string& strWord, const string& strT
 	return false;
 }
 
-
-// 금칙 문자가 있는지 찾는다.
-bool MChattingFilter::FindInvalidChar( const string& strText)
+bool MChattingFilter::FindInvalidChar( const std::string& strText)
 {
 	for ( int i = 0;  i < (int)strText.size();  i++)
 	{

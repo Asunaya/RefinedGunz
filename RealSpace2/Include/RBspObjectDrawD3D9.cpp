@@ -581,10 +581,10 @@ static void DrawQuad(const v2& p1, const v2& p2)
 	};
 
 	VertexType Vertices[] = {
-		{ p1.x - 0.5, p1.y - 0.5, 0, 1, 0, 0 },
-		{ p1.x - 0.5, p2.y - 0.5, 0, 1, 0, 1 },
-		{ p2.x - 0.5, p2.y - 0.5, 0, 1, 1, 1 },
-		{ p2.x - 0.5, p1.y - 0.5, 0, 1, 1, 0 },
+		{ p1.x - 0.5f, p1.y - 0.5f, 0, 1, 0, 0 },
+		{ p1.x - 0.5f, p2.y - 0.5f, 0, 1, 0, 1 },
+		{ p2.x - 0.5f, p2.y - 0.5f, 0, 1, 1, 1 },
+		{ p2.x - 0.5f, p1.y - 0.5f, 0, 1, 1, 0 },
 	};
 
 	RGetDevice()->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);

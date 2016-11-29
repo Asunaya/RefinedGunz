@@ -417,7 +417,7 @@ bool ZConfiguration::LoadConfig(const char* szFileName)
 
 			int temp{};
 			childElement.GetChildContents(&temp, "DECOUPLELOGICANDRENDERING");
-			DecoupleLogicAndRendering = temp;
+			DecoupleLogicAndRendering = temp != 0;
 			childElement.GetChildContents(&VisualFPSLimit, "VISUALFPSLIMIT");
 			childElement.GetChildContents(&LogicalFPSLimit, "LOGICALFPSLIMIT");
 			childElement.GetChildContents(&bCamFix, "CAMFIX");
