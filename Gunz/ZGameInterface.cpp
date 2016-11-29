@@ -776,6 +776,7 @@ bool ZGameInterface::InitInterfaceListener()
 
 	SetListenerWidget("ReplayOkButton",				ZReplayOk());
 	SetListenerWidget("ReplayCaller",				ZGetReplayCallerButtonListener());
+	SetListenerWidget("ReplayLoginCaller",			ZGetReplayCallerButtonListener());
 	SetListenerWidget("Replay_View",				ZGetReplayViewButtonListener());
 	SetListenerWidget("ReplayClose",				ZGetReplayExitButtonListener());
 	SetListenerWidget("Replay_FileList",			ZGetReplayFileListBoxListener());

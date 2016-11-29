@@ -430,7 +430,8 @@ void RGMain::OnReplaySelected()
 	try
 	{
 		ZReplayLoader Loader;
-		Loader.LoadFile(Path);
+		if (!Loader.LoadFile(Path))
+			return;
 		SelectedReplayInfo.Version = Loader.GetVersion();
 		SelectedReplayInfo.Timestamp = Loader.GetTimestamp();
 		Loader.GetStageSetting(SelectedReplayInfo.StageSetting);

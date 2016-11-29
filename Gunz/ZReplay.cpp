@@ -195,7 +195,7 @@ bool ZReplayLoader::LoadFile(const char* FileName)
 {
 	auto pair = ReadZFile(FileName);
 
-	if (!pair.first)
+	if (!pair.first || pair.second.empty())
 		return false;
 
 	InflatedFile = std::move(pair.second);
