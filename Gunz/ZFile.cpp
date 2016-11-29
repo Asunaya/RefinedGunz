@@ -45,7 +45,7 @@ bool ZFile::Open(const char *szFileName,bool bWrite)
 	else
 	{
 		m_pFile = nullptr;
-		auto err = fopen_s(&m_pFile, szFileName, "wb+");
+		auto err = fopen_s(&m_pFile, szFileName, "rb");
 		if(err != 0 || !m_pFile) return false;
 
 		m_Stream.zalloc = (alloc_func)0;
