@@ -209,7 +209,8 @@
       <DisableSpecificWarnings>4091</DisableSpecificWarnings>
     </ClCompile>
     <Lib>
-      <AdditionalDependencies>lib\zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
       <OutputFile>Lib\cmld.lib</OutputFile>
       <AdditionalLibraryDirectories>Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
@@ -266,7 +267,8 @@
       <BufferSecurityCheck>false</BufferSecurityCheck>
     </ClCompile>
     <Lib>
-      <AdditionalDependencies>lib\zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
       <OutputFile>Lib\cml.lib</OutputFile>
       <AdditionalLibraryDirectories>Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -324,7 +326,8 @@
       <DisableSpecificWarnings>4091</DisableSpecificWarnings>
     </ClCompile>
     <Lib>
-      <AdditionalDependencies>lib\zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
       <OutputFile>Lib_LTCG\cml.lib</OutputFile>
       <AdditionalLibraryDirectories>Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -358,7 +361,8 @@
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
     </ClCompile>
     <Lib>
-      <AdditionalDependencies>lib\zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
       <OutputFile>Lib_LTCG\cml.lib</OutputFile>
       <AdditionalLibraryDirectories>Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -390,7 +394,8 @@
       <DisableSpecificWarnings>4091</DisableSpecificWarnings>
     </ClCompile>
     <Lib>
-      <AdditionalDependencies>lib\zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
       <OutputFile>MatchServerLib\cml.lib</OutputFile>
       <AdditionalLibraryDirectories>Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -421,7 +426,8 @@
       <DisableSpecificWarnings>4091</DisableSpecificWarnings>
     </ClCompile>
     <Lib>
-      <AdditionalDependencies>lib\zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
       <OutputFile>MatchServerdLib\cml.lib</OutputFile>
       <AdditionalLibraryDirectories>Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SuppressStartupBanner>true</SuppressStartupBanner>

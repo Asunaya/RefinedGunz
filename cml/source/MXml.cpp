@@ -8,8 +8,14 @@
 #include <algorithm>
 #include <cassert>
 
-#ifndef MSVC_VER
+#ifndef _MSC_VER
 #include "msxml.tli"
+#endif
+
+#ifdef _MSXML2
+#import "msxml4.dll" named_guids implementation_only
+#else
+#import "msxml.dll" named_guids implementation_only
 #endif
 
 BSTR _AsciiToBSTR(const char* ascii)
