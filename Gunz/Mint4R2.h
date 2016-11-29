@@ -3,7 +3,7 @@
 #include "MDrawContext.h"
 #include "RFont.h"
 #include "RBaseTexture.h"
-#include <D3dx9.h>
+#include "d3dx9.h"
 
 #define MINT_R2_CLASS_TYPE	0x1130 // RTTI
 

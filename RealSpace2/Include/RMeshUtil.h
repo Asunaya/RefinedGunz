@@ -3,7 +3,7 @@
 #include <list>
 #include <string>
 #include <unordered_map>
-#include <D3DX9.h>
+#include "d3dx9.h"
 #include "RTypes.h"
 
 #define DEL(p)  { if(p) { delete (p);   (p)=NULL; } }

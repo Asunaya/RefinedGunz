@@ -94,7 +94,12 @@ BOOL WINAPI PIXBeginExperiment( PIXCOUNTERID id, const WCHAR* pstrApplication );
 
 //==================================================================================================
 // PIXEndFrame - This is called by PIX once per counter at the end of each frame to gather the
-//               counter value for that frame.
+//               counter value for that frame.  Note that the pointer to the return data must
+//               continue to point to valid counter data until the next call to PIXEndFrame (or
+//               PIXEndExperiment) for the same counter.  So do not set *ppReturnData to the same 
+//               pointer for multiple counters, or point to a local variable that will go out of 
+//               scope.  See the sample PIX plugin for an example of how to structure a plugin
+//               properly.
 //==================================================================================================
 BOOL WINAPI PIXEndFrame( PIXCOUNTERID id, UINT iFrame, DWORD* pdwReturnBytes, BYTE** ppReturnData );
 

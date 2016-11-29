@@ -7,7 +7,7 @@
 #include <math.h>
 
 #include "MDebug.h"
-#include "dxerr8.h"
+#include "dxerr.h"
 
 #define SAFE_RELEASE(p) { if(p) { (p)->Release(); (p)=NULL; } }
 #define OutputDebugStr(a) __noop
@@ -100,7 +100,7 @@ bool RealSoundEffect::Create(RealSound* pRealSound, WAVEFILECLASS* pWaveFile, bo
 
 		if( FAILED ( pDS->CreateSoundBuffer( &dsbd, &(m_pDSSet->m_pDSB), NULL ) ) )
 		{
-			OutputDebugStr( DXGetErrorString8( hr ));
+			OutputDebugStr( DXGetErrorString( hr ));
 			OutputDebugStr( "\n" );
 			OutputDebugStr( "Fail to Create Sound Buffer :" );
 			OutputDebugStr( DXGetErrorString8( hr ) );

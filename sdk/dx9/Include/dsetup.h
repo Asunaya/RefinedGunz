@@ -11,13 +11,6 @@
 
 #include <windows.h>      // windows stuff
 
-#ifdef _WIN32
-#define COM_NO_WINDOWS_H
-#include <objbase.h>
-#else
-#endif
-
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -41,13 +34,15 @@ extern "C" {
 #define DSETUPERR_MISSINGCAB_MANAGEDDX  -17
 #define DSETUPERR_NODOTNETFRAMEWORKINSTALLED -18
 #define DSETUPERR_CABDOWNLOADFAIL       -19
+#define DSETUPERR_DXCOMPONENTFILEINUSE  -20
+#define DSETUPERR_UNTRUSTEDCABINETFILE  -21
 
 // DSETUP flags. DirectX 5.0 apps should use these flags only.
 #define DSETUP_DDRAWDRV         0x00000008      /* install DirectDraw Drivers           */
 #define DSETUP_DSOUNDDRV        0x00000010      /* install DirectSound Drivers          */
 #define DSETUP_DXCORE           0x00010000      /* install DirectX runtime              */
 #define DSETUP_DIRECTX  (DSETUP_DXCORE|DSETUP_DDRAWDRV|DSETUP_DSOUNDDRV)
-#define DSETUP_MANAGEDDX        0x00004000      /* install managed DirectX              */
+#define DSETUP_MANAGEDDX        0x00004000      /* OBSOLETE. install managed DirectX    */
 #define DSETUP_TESTINSTALL      0x00020000      /* just test install, don't do anything */
 
 // These OBSOLETE flags are here for compatibility with pre-DX5 apps only.
@@ -78,6 +73,7 @@ extern "C" {
 #define DSETUP_CB_MSG_BEGIN_INSTALL_RUNTIME         14
 #define DSETUP_CB_MSG_PROGRESS                      18
 #define DSETUP_CB_MSG_WARNING_DISABLED_COMPONENT    19
+
 
 
 
@@ -182,18 +178,18 @@ typedef LPDIRECTXREGISTERAPP2A LPDIRECTXREGISTERAPP2;
 INT
 WINAPI
 DirectXSetupA(
-    HWND  hWnd,
-    LPSTR lpszRootPath,
-    DWORD dwFlags
+             HWND  hWnd,
+    __in_opt LPSTR lpszRootPath,
+             DWORD dwFlags
     );
 #endif //!UNICODE_ONLY
 #ifndef ANSI_ONLY
 INT
 WINAPI
 DirectXSetupW(
-    HWND   hWnd,
-    LPWSTR lpszRootPath,
-    DWORD  dwFlags
+             HWND   hWnd,
+    __in_opt LPWSTR lpszRootPath,
+             DWORD  dwFlags
     );
 #endif //!ANSI_ONLY
 #ifdef UNICODE
@@ -255,18 +251,18 @@ INT WINAPI DirectXSetupShowEULA(HWND hWndParent);
 UINT
 WINAPI
 DirectXSetupGetEULAA(
-    LPSTR lpszEULA,
-    UINT  cchEULA,
-    WORD LangID
+    __out_ecount(cchEULA) LPSTR lpszEULA,
+                          UINT  cchEULA,
+                          WORD  LangID
     );
 #endif //!UNICODE_ONLY
 #ifndef ANSI_ONLY
 UINT
 WINAPI
 DirectXSetupGetEULAW(
-    LPWSTR lpszEULA,
-    UINT   cchEULA,
-    WORD  LangID
+    __out_ecount(cchEULA) LPWSTR lpszEULA,
+                          UINT   cchEULA,
+                          WORD   LangID
     );
 #endif //!ANSI_ONLY
 #ifdef UNICODE

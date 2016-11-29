@@ -5,8 +5,8 @@
 #include <tchar.h>
 #include "mDebug.h"
 #include "mprofiler.h"
-#include "dxerr9.h"
-#pragma comment(lib, "dxerr9.lib")
+#include "dxerr.h"
+#pragma comment(lib, "dxerr.lib")
 
 #ifdef _USE_GDIPLUS
 #include "unknwn.h"

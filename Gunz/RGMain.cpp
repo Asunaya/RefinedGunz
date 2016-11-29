@@ -15,7 +15,7 @@
 #include <cstdint>
 #include "MeshManager.h"
 #include "hsv.h"
-#include "dxerr9.h"
+#include "dxerr.h"
 
 #define DXERR(func) DXErr(func, __func__, #func)
 
@@ -24,7 +24,7 @@ inline bool DXErr(HRESULT hr, const char* CallingFunction, const char* DXFunctio
 	if (SUCCEEDED(hr))
 		return false;
 
-	MLog("In %s, %s failed -- error code: %s, description: %s\n", CallingFunction, DXFunction, DXGetErrorString9(hr), DXGetErrorDescription9(hr));
+	MLog("In %s, %s failed -- error code: %s, description: %s\n", CallingFunction, DXFunction, DXGetErrorString(hr), DXGetErrorDescription(hr));
 
 	return true;
 }

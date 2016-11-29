@@ -621,7 +621,7 @@ DWORD RSMemWaveFile::GetData( BYTE*& pWaveData, DWORD dwMaxLen )
 
 // (SDK root)\samples\C++\Common\Src\dsutil.cpp
 
-//#include <dxerr9.h>
+//#include "dxerr.h"
 
 #ifndef SAFE_DELETE
 #define SAFE_DELETE(p)       { if(p) { delete (p);     (p)=NULL; } }

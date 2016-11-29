@@ -62,20 +62,34 @@
 //
 //----------------------------------------------------------------------------
 
-#define D3DX_FILTER_NONE            (1 << 0)
-#define D3DX_FILTER_POINT           (2 << 0)
-#define D3DX_FILTER_LINEAR          (3 << 0)
-#define D3DX_FILTER_TRIANGLE        (4 << 0)
-#define D3DX_FILTER_BOX             (5 << 0)
+#define D3DX_FILTER_NONE             (1 << 0)
+#define D3DX_FILTER_POINT            (2 << 0)
+#define D3DX_FILTER_LINEAR           (3 << 0)
+#define D3DX_FILTER_TRIANGLE         (4 << 0)
+#define D3DX_FILTER_BOX              (5 << 0)
 
-#define D3DX_FILTER_MIRROR_U        (1 << 16)
-#define D3DX_FILTER_MIRROR_V        (2 << 16)
-#define D3DX_FILTER_MIRROR_W        (4 << 16)
-#define D3DX_FILTER_MIRROR          (7 << 16)
-#define D3DX_FILTER_DITHER          (1 << 19)
-#define D3DX_FILTER_SRGB_IN         (1 << 20)
-#define D3DX_FILTER_SRGB_OUT        (2 << 20)
-#define D3DX_FILTER_SRGB            (3 << 20)
+#define D3DX_FILTER_MIRROR_U         (1 << 16)
+#define D3DX_FILTER_MIRROR_V         (2 << 16)
+#define D3DX_FILTER_MIRROR_W         (4 << 16)
+#define D3DX_FILTER_MIRROR           (7 << 16)
+
+#define D3DX_FILTER_DITHER           (1 << 19)
+#define D3DX_FILTER_DITHER_DIFFUSION (2 << 19)
+
+#define D3DX_FILTER_SRGB_IN          (1 << 21)
+#define D3DX_FILTER_SRGB_OUT         (2 << 21)
+#define D3DX_FILTER_SRGB             (3 << 21)
+
+
+//-----------------------------------------------------------------------------
+// D3DX_SKIP_DDS_MIP_LEVELS is used to skip mip levels when loading a DDS file:
+//-----------------------------------------------------------------------------
+
+#define D3DX_SKIP_DDS_MIP_LEVELS_MASK   0x1F
+#define D3DX_SKIP_DDS_MIP_LEVELS_SHIFT  26
+#define D3DX_SKIP_DDS_MIP_LEVELS(levels, filter) ((((levels) & D3DX_SKIP_DDS_MIP_LEVELS_MASK) << D3DX_SKIP_DDS_MIP_LEVELS_SHIFT) | ((filter) == D3DX_DEFAULT ? D3DX_FILTER_BOX : (filter)))
+
+
 
 
 //----------------------------------------------------------------------------
@@ -157,6 +171,8 @@ typedef enum _D3DXIMAGE_FILEFORMAT
     D3DXIFF_DDS         = 4,
     D3DXIFF_PPM         = 5,
     D3DXIFF_DIB         = 6,
+    D3DXIFF_HDR         = 7,       //high dynamic range formats
+    D3DXIFF_PFM         = 8,       //
     D3DXIFF_FORCE_DWORD = 0x7fffffff
 
 } D3DXIMAGE_FILEFORMAT;
@@ -558,7 +574,32 @@ HRESULT WINAPI
 #define D3DXSaveSurfaceToFile D3DXSaveSurfaceToFileA
 #endif
 
+//----------------------------------------------------------------------------
+// D3DXSaveSurfaceToFileInMemory:
+// ----------------------
+// Save a surface to a image file.
+//
+// Parameters:
+//  ppDestBuf
+//      address of pointer to d3dxbuffer for returning data bits
+//  DestFormat
+//      D3DXIMAGE_FILEFORMAT specifying file format to use when saving.
+//  pSrcSurface
+//      Source surface, containing the image to be saved
+//  pSrcPalette
+//      Source palette of 256 colors, or NULL
+//  pSrcRect
+//      Source rectangle, or NULL for the entire image
+//
+//----------------------------------------------------------------------------
 
+HRESULT WINAPI
+    D3DXSaveSurfaceToFileInMemory(
+        LPD3DXBUFFER*             ppDestBuf,
+        D3DXIMAGE_FILEFORMAT      DestFormat,
+        LPDIRECT3DSURFACE9        pSrcSurface,
+        CONST PALETTEENTRY*       pSrcPalette,
+        CONST RECT*               pSrcRect);
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -816,7 +857,32 @@ HRESULT WINAPI
 #endif
 
 
+//----------------------------------------------------------------------------
+// D3DXSaveVolumeToFileInMemory:
+// ---------------------
+// Save a volume to a image file.
+//
+// Parameters:
+//  pDestFile
+//      File name of the destination file
+//  DestFormat
+//      D3DXIMAGE_FILEFORMAT specifying file format to use when saving.
+//  pSrcVolume
+//      Source volume, containing the image to be saved
+//  pSrcPalette
+//      Source palette of 256 colors, or NULL
+//  pSrcBox
+//      Source box, or NULL for the entire volume
+//
+//----------------------------------------------------------------------------
 
+HRESULT WINAPI
+    D3DXSaveVolumeToFileInMemory(
+        LPD3DXBUFFER*             ppDestBuf,
+        D3DXIMAGE_FILEFORMAT      DestFormat,
+        LPDIRECT3DVOLUME9         pSrcVolume,
+        CONST PALETTEENTRY*       pSrcPalette,
+        CONST D3DBOX*             pSrcBox);
 
 //////////////////////////////////////////////////////////////////////////////
 // Create/Save Texture APIs //////////////////////////////////////////////////
@@ -958,15 +1024,21 @@ HRESULT WINAPI
 //  Width, Height, Depth, Size
 //      Size in pixels.  If zero or D3DX_DEFAULT, the size will be taken from 
 //      the file and rounded up to a power of two.  If D3DX_DEFAULT_NONPOW2, 
-//      the size will be not be rounded, if the device supports NONPOW2 textures.
+//      and the device supports NONPOW2 textures, the size will not be rounded.
+//      If D3DX_FROM_FILE, the size will be taken exactly as it is in the file, 
+//      and the call will fail if this violates device capabilities.
 //  MipLevels
 //      Number of mip levels.  If zero or D3DX_DEFAULT, a complete mipmap
-//      chain will be created.
+//      chain will be created.  If D3DX_FROM_FILE, the size will be taken 
+//      exactly as it is in the file, and the call will fail if this violates 
+//      device capabilities.
 //  Usage
 //      Texture usage flags
 //  Format
 //      Desired pixel format.  If D3DFMT_UNKNOWN, the format will be
-//      taken from the file.
+//      taken from the file.  If D3DFMT_FROM_FILE, the format will be taken
+//      exactly as it is in the file, and the call will fail if the device does
+//      not support the given format.
 //  Pool
 //      Memory pool to be used to create texture
 //  Filter
@@ -974,7 +1046,9 @@ HRESULT WINAPI
 //      Or D3DX_DEFAULT for D3DX_FILTER_TRIANGLE.
 //  MipFilter
 //      D3DX_FILTER flags controlling how each miplevel is filtered.
-//      Or D3DX_DEFAULT for D3DX_FILTER_BOX,
+//      Or D3DX_DEFAULT for D3DX_FILTER_BOX.
+//      Use the D3DX_SKIP_DDS_MIP_LEVELS macro to specify both a filter and the
+//      number of mip levels to skip when loading DDS files.
 //  ColorKey
 //      Color to replace with transparent black, or 0 to disable colorkey.
 //      This is always a 32-bit ARGB color, independent of the source image
@@ -989,7 +1063,6 @@ HRESULT WINAPI
 //      The texture object that will be created
 //
 //----------------------------------------------------------------------------
-
 
 // FromFile
 
@@ -1492,6 +1565,31 @@ HRESULT WINAPI
 #endif
 
 
+//----------------------------------------------------------------------------
+// D3DXSaveTextureToFileInMemory:
+// ----------------------
+// Save a texture to a file.
+//
+// Parameters:
+//  ppDestBuf
+//      address of a d3dxbuffer pointer to return the image data
+//  DestFormat
+//      D3DXIMAGE_FILEFORMAT specifying file format to use when saving.
+//  pSrcTexture
+//      Source texture, containing the image to be saved
+//  pSrcPalette
+//      Source palette of 256 colors, or NULL
+//
+//----------------------------------------------------------------------------
+
+HRESULT WINAPI
+    D3DXSaveTextureToFileInMemory(
+        LPD3DXBUFFER*             ppDestBuf,
+        D3DXIMAGE_FILEFORMAT      DestFormat,
+        LPDIRECT3DBASETEXTURE9    pSrcTexture,
+        CONST PALETTEENTRY*       pSrcPalette);
+
+
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1563,47 +1661,37 @@ HRESULT WINAPI
         LPD3DXFILL3D              pFunction,
         LPVOID                    pData);
 
-//----------------------------------------------------------------------------
+//---------------------------------------------------------------------------
 // D3DXFillTextureTX:
-// ----------------
-// Uses a TX Shader target to function to fill each texel of each mip level of a
-// given texture. The TX Shader target should be a compiled function taking 2
-// 2 paramters and returning a float4 color.
+// ------------------
+// Uses a TX Shader target to function to fill each texel of each mip level
+// of a given texture. The TX Shader target should be a compiled function 
+// taking 2 paramters and returning a float4 color.
 //
 // Paramters:
 //  pTexture, pCubeTexture, pVolumeTexture
 //      Pointer to the texture to be filled.
-//  pFunction:
-//      Pointer to the compiled function returned by D3DX
-//  pConstants
-//      Constants used by program. Should be filled by user by parsing constant
-//      Table information
-//  Constants
-//      Number of Constants   
-//-----------------------------------------------------------------------------
+//  pTextureShader
+//      Pointer to the texture shader to be used to fill in the texture
+//----------------------------------------------------------------------------
 
 HRESULT WINAPI 
     D3DXFillTextureTX(
         LPDIRECT3DTEXTURE9        pTexture,
-        CONST DWORD*              pFunction,
-        CONST D3DXVECTOR4*        pConstants,
-        UINT                      Constants);
+        LPD3DXTEXTURESHADER       pTextureShader);
 
 
 HRESULT WINAPI
     D3DXFillCubeTextureTX(
         LPDIRECT3DCUBETEXTURE9    pCubeTexture,
-        CONST DWORD*              pFunction,
-        CONST D3DXVECTOR4*        pConstants,
-        UINT                      Constants);
+        LPD3DXTEXTURESHADER       pTextureShader);
                                                 
                                                         
 HRESULT WINAPI 
     D3DXFillVolumeTextureTX(
         LPDIRECT3DVOLUMETEXTURE9  pVolumeTexture,
-        CONST DWORD*              pFunction,
-        CONST D3DXVECTOR4*        pConstants,
-        UINT                      Constants);
+        LPD3DXTEXTURESHADER       pTextureShader);
+
 
 
 //----------------------------------------------------------------------------
