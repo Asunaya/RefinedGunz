@@ -93,19 +93,19 @@ public:
 	static int GetRefCount() { return msRef;}
 
 public:
-	ZClothEmblem(void);
-	virtual ~ZClothEmblem(void);
+	ZClothEmblem();
+	virtual ~ZClothEmblem();
 
 };
 
-class ZEmblemList : public std::list<ZClothEmblem*>
+class ZEmblemList final : public std::list<ZClothEmblem*>
 {
 protected:
 	std::map<std::string, ZClothEmblem*> mEmblemMap;
 	std::map<std::string, ZClothEmblem*>::iterator mEmblemMapItor;
 
 public:
-	virtual ~ZEmblemList();
+	~ZEmblemList();
 
 public:
 	void	Update();

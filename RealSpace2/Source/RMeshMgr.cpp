@@ -1,18 +1,15 @@
 #include "stdafx.h"
 #include "MXml.h"
-
 #include <string>
-
 #include "RealSpace2.h"
-
 #include "RMeshMgr.h"
-
 #include "MZFileSystem.h"
-
 #include "MDebug.h"
 
-_USING_NAMESPACE_REALSPACE2
+#define __BP
+#define __EP
 
+_USING_NAMESPACE_REALSPACE2
 _NAMESPACE_REALSPACE2_BEGIN
 
 RMeshMgr::RMeshMgr()
@@ -23,7 +20,7 @@ RMeshMgr::RMeshMgr()
 	m_mtrl_auto_load = true;
 	m_is_map_object = false;
 
-	m_node_table.reserve(MAX_NODE_TABLE);//기본
+	m_node_table.reserve(MAX_NODE_TABLE);
 
 }
 
@@ -34,8 +31,6 @@ RMeshMgr::~RMeshMgr()
 
 int RMeshMgr::Add(char* name,char* modelname,bool namesort)
 {
-//	mlog("RMeshMgr::Add begin name = %s  ",name);
-
 	RMesh* node;
 	node = new RMesh;
 
@@ -44,11 +39,11 @@ int RMeshMgr::Add(char* name,char* modelname,bool namesort)
 		return -1;
 	}
 
-	if(namesort)//이펙트의 내부노드를 이름순으로 정렬..
+	if(namesort)
 		node->m_bEffectSort = namesort;
 
 	node->SetMtrlAutoLoad( m_mtrl_auto_load );
-	node->SetMapObject(m_is_map_object);		//특별한 지정이 없다면 world model 들을 위해..
+	node->SetMapObject(m_is_map_object);
 
 	if (!node->ReadElu(name)) {
 		mlog("elu %s file loading failure !!!\n",name);
@@ -59,41 +54,18 @@ int RMeshMgr::Add(char* name,char* modelname,bool namesort)
 		node->SetName(modelname);
 	}
 
-//	mlog("CalcBox_b");
-
 	node->CalcBox();
 
-//	mlog("CalcBox_e");
-
-//	m_node_table[m_id_last] = node;
 	m_node_table.push_back(node);
-//	node->m_u_id = u_id;
 	node->m_id = m_id_last;
 
 	if(m_id_last > MAX_NODE_TABLE)
 		mlog("MeshNode 예약 사이즈를 늘리는것이 좋겠음...\n");
 
-//	strcpy_safe(node->m_name,name);
-
 	m_list.push_back(node);
 	m_id_last++;
-//	mlog("RMeshMgr::Add end \n",name);
 	return m_id_last-1;
 }
-
-//#define	LOAD_TEST
-
-#ifdef	LOAD_TEST
-
-#define __BP(i,n)	MBeginProfile(i,n);
-#define __EP(i)		MEndProfile(i);
-
-#else
-
-#define __BP(i,n) ;
-#define __EP(i) ;
-
-#endif
 
 int	RMeshMgr::LoadXmlList(char* name,RFPROGRESSCALLBACK pfnProgressCallback, void *CallbackParam)
 {
@@ -140,8 +112,6 @@ int	RMeshMgr::LoadXmlList(char* name,RFPROGRESSCALLBACK pfnProgressCallback, voi
 	delete[] buffer;
 
 	mzf.Close();
-
-//	<------------------
 
 	char Path[256];
 	Path[0] = NULL;
@@ -295,8 +265,6 @@ int RMeshMgr::AddXml(MXmlElement* pNode,char* Path,char* modelname,bool namesort
 	RMesh* node;
 	node = new RMesh;
 
-	// 이펙트의 내부노드를 이름 순으로 정렬..로딩전에 해야함...
-
 	if(namesort)
 		node->m_bEffectSort = namesort;
 
@@ -310,7 +278,6 @@ int RMeshMgr::AddXml(MXmlElement* pNode,char* Path,char* modelname,bool namesort
 
 	node->CalcBox();
 
-//	m_node_table[m_id_last] = node;
 	m_node_table.push_back(node);
 
 	node->m_id = m_id_last;
@@ -329,7 +296,7 @@ int RMeshMgr::AddXml(char* name,char* modelname,bool AutoLoad,bool namesort)
 	RMesh* node;
 	node = new RMesh;
 
-	if(namesort)//이펙트의 내부노드를 이름순으로 정렬..로딩전에 해야함.
+	if(namesort)
 		node->m_bEffectSort = namesort;
 
 	if(AutoLoad) {
@@ -372,9 +339,6 @@ int	RMeshMgr::SaveList(char* name)
 	return 1;
 }
 
-///////////////////////////////////
-// 삭제
-
 void RMeshMgr::Del(RMesh* pMesh)
 {
 	if(m_list.empty()) return;
@@ -384,7 +348,7 @@ void RMeshMgr::Del(RMesh* pMesh)
 	for(node = m_list.begin(); node != m_list.end();) {
 
 		if((*node) == pMesh) {
-			(*node)->ClearMtrl();					//material clear
+			(*node)->ClearMtrl();
 			delete (*node);
 			node = m_list.erase(node);
 		}
@@ -401,16 +365,13 @@ void RMeshMgr::Del(int id)
 	for(node = m_list.begin(); node != m_list.end();) {
 
 		if((*node)->m_id == id) {
-			(*node)->ClearMtrl();					//material clear
+			(*node)->ClearMtrl();
 			delete (*node);
 			node = m_list.erase(node);
 		}
 		else ++node;
 	}
 }
-
-///////////////////////////////////
-// 모두제거
 
 void RMeshMgr::DelAll()
 {
@@ -420,13 +381,13 @@ void RMeshMgr::DelAll()
 
 	for(node = m_list.begin(); node != m_list.end(); ) {
 
-		(*node)->ClearMtrl();						//material clear
+		(*node)->ClearMtrl();
 		delete (*node);
 		(*node) = NULL;
-		node = m_list.erase(node);// ++node
+		node = m_list.erase(node);
 	}
 
-	m_node_table.clear();//버퍼는 남아 있다..
+	m_node_table.clear();
 
 	m_id_last = 0;
 }
@@ -441,9 +402,6 @@ void RMeshMgr::ConnectMtrl()
 		(*node)->ConnectMtrl();
 	}
 }
-
-//////////////////////////////
-// all
 
 void RMeshMgr::Render()
 {
@@ -499,8 +457,6 @@ void RMeshMgr::RenderFast(int id,D3DXMATRIX* unit_mat)
 
 RMesh* RMeshMgr::GetFast(int id)
 {
-//	_ASSERT(m_node_table[id]);
-//	if(id == -1) return NULL;
 	if(id < 0)			return NULL;
 	if(id > m_id_last)	return NULL;
 
@@ -520,9 +476,7 @@ RMesh* RMeshMgr::Get(const char* name)
 	return NULL;
 }
 
-// 우선은 xml 만 지원한다.
-
-RMesh*	RMeshMgr::Load(const char* name)	// 모델 set 을 메모리로 올린다.
+RMesh*	RMeshMgr::Load(const char* name)
 {
 	RMesh* pMesh = Get(name);
 
@@ -543,7 +497,7 @@ RMesh*	RMeshMgr::Load(const char* name)	// 모델 set 을 메모리로 올린다.
 	return pMesh;
 }
 
-void RMeshMgr::UnLoad(const char* name)	// 모델 set 을 메모리에서 내린다.
+void RMeshMgr::UnLoad(const char* name)
 {
 	RMesh* pMesh = Get(name);
 
@@ -594,8 +548,6 @@ void RMeshMgr::UnLoadAll()
 
 }
 
-// 사용안하는걸로 모두 체크
-
 void RMeshMgr::CheckUnUsed()
 {
 	r_mesh_node node;
@@ -608,7 +560,7 @@ void RMeshMgr::CheckUnUsed()
 
 void RMeshMgr::UnLoadChecked()
 {
-	vector<string> t_vec;
+	std::vector<std::string> t_vec;
 
 	r_mesh_node node;
 
@@ -652,44 +604,5 @@ RMeshNode* RMeshMgr::GetPartsNode(const char* name)
 	}
 	return NULL;
 }
-/*
-RMeshNode* RMeshMgr::GetParts(RMeshPartsType parts,char* name)
-{
-	r_mesh_node node;
-	RMesh* pMesh = NULL;
 
-	for(node = m_list.begin(); node != m_list.end(); ++node) {
-	}
-	return NULL;
-}
-
-
-void RMeshMgr::Frame()
-{
-	if(m_list.empty()) return;
-
-	r_mesh_node node;
-
-	for(node = m_list.begin(); node != m_list.end(); ++node) {
-		(*node)->Frame();
-	}
-}
-
-void RMeshMgr::Frame(int id)
-{
-	if(m_list.empty()) return;
-
-	r_mesh_node node;
-
-	for(node = m_list.begin(); node != m_list.end();) {
-
-		if((*node)->m_id == id) {
-			(*node)->Frame();
-			return;
-		}
-		else ++node;
-	}
-
-}
-*/
 _NAMESPACE_REALSPACE2_END

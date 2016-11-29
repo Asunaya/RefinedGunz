@@ -7,24 +7,13 @@
 #include "RUtil.h"
 #include "RBspObject.h"
 
-ZWorld::ZWorld() : m_pBsp(NULL), m_pMapDesc(NULL), m_pSkyBox(NULL), m_nRefCount(1), m_bCreated(false)
+ZWorld::ZWorld()
 {
-	m_szName[0]=0;
-
-	m_bFog = false;
-	m_dwFogColor = 0xFFFFFFFF;
-	m_fFogNear = 0;
-	m_fFogFar = 0;
-
-	m_bWaterMap = false;
-	m_fWaterHeight = 0.f;
-
+	m_szName[0] = 0;
+	m_szBspName[0] = 0;
 }
 
-ZWorld::~ZWorld()
-{
-	Destroy();
-}
+ZWorld::~ZWorld() = default;
 
 void ZWorld::Update(float fDelta)
 {
@@ -59,35 +48,35 @@ void ZWorld::Draw()
 	__EP(16);
 }
 
-void ZWorldProgressCallBack(void *pUserParam,float fProgress)
+static void ZWorldProgressCallBack(void *pUserParam, float fProgress)
 {
 	ZLoadingProgress *pLoadingProgress = (ZLoadingProgress*)pUserParam;
 	pLoadingProgress->UpdateAndDraw(fProgress);
 }
 
-bool ZWorld::Create(ZLoadingProgress *pLoading )
+bool ZWorld::Create(ZLoadingProgress *pLoading)
 {
-	if(m_bCreated) return true;
+	if (m_bCreated)
+	{
+		assert(false);
+		return true;
+	}
 
-	m_pBsp = new RBspObject;
+	m_pBsp = std::make_unique<RBspObject>();
 	if (!m_pBsp->Open(m_szBspName, RBspObject::ROpenMode::Runtime, ZWorldProgressCallBack, pLoading))
 	{
 		MLog("Error while loading map %s!\n", m_szName);
 		return false;
 	}
 
-	//mlog("ZGame::Create() World Create %s \n",m_szName);
-
 	m_pBsp->OptimizeBoundingBox();
 
-
-	char szMapPath[64] = "";
+	char szMapPath[64]; szMapPath[0] = 0;
 	ZGetCurrMapPath(szMapPath);
 
 	ZWater*		water_instance;
 	RMapObjectList* map_object_list		= m_pBsp->GetMapObjectList();
 	RMeshMgr* mesh_mgr					= m_pBsp->GetMeshManager();
-
 	
 	auto it = map_object_list->begin();
 	while (it != map_object_list->end())
@@ -103,7 +92,7 @@ bool ZWorld::Create(ZLoadingProgress *pLoading )
 
 		auto* object_name = object_info->name.c_str();
 
-		int len = int(strlen(m_szName) + 1);
+		auto len = strlen(m_szName) + 1;
 		object_name += len;
 
 		if (pMeshNode->m_point_color_num > 0)
@@ -120,8 +109,7 @@ bool ZWorld::Create(ZLoadingProgress *pLoading )
 			if (strncmp(object_name, "obj_sky_", 8) == 0 ||
 				strncmp(object_name, "obj_ef_sky", 10) == 0)
 			{
-				m_pSkyBox = new ZSkyBox;
-				m_pSkyBox->Create(pMesh->m_pVisualMesh);
+				m_pSkyBox = std::make_unique<ZSkyBox>(std::unique_ptr<RVisualMesh>{pMesh->m_pVisualMesh});
 				it = map_object_list->erase(it);
 				continue;
 			}
@@ -175,21 +163,19 @@ bool ZWorld::Create(ZLoadingProgress *pLoading )
 
 	char szBuf[128];
 	
-	if(  m_flags.size() > 0 )
+	if (m_flags.size() > 0)
 	{
-		sprintf_safe( szBuf, "%s%s/flag.xml", szMapPath, ZGetGameClient()->GetMatchStageSetting()->GetMapName());
+		sprintf_safe(szBuf, "%s%s/flag.xml", szMapPath,
+			ZGetGameClient()->GetMatchStageSetting()->GetMapName());
 		m_flags.InitEnv(szBuf);
-
-		//mlog("ZGame::Create() m_flags.InitEnv \n");
 	}
 
-	m_pMapDesc = new ZMapDesc;
-	m_pMapDesc->Open(m_pBsp);
+	m_pMapDesc = std::make_unique<ZMapDesc>();
+	m_pMapDesc->Open(m_pBsp.get());
 
-	sprintf_safe( szBuf, "%s%s/smoke.xml", szMapPath, ZGetGameClient()->GetMatchStageSetting()->GetMapName());
+	sprintf_safe(szBuf, "%s%s/smoke.xml", szMapPath,
+		ZGetGameClient()->GetMatchStageSetting()->GetMapName());
 	m_pMapDesc->LoadSmokeDesc(szBuf);
-
-	//mlog("ZGame::Create() pMapDesc->LoadSmokeDesc \n");
 
 	FogInfo finfo = GetBsp()->GetFogInfo();
 	m_bFog = finfo.bFogEnable;
@@ -200,16 +186,6 @@ bool ZWorld::Create(ZLoadingProgress *pLoading )
 	m_bCreated = true;
 
 	return true;
-}
-
-void ZWorld::Destroy()
-{
-	SAFE_DELETE(m_pBsp);
-	SAFE_DELETE(m_pMapDesc);
-	m_flags.Clear();
-	m_flags.OnInvalidate();
-	m_waters.Clear();
-	SAFE_DELETE(m_pSkyBox);
 }
 
 void ZWorld::OnInvalidate()
@@ -227,9 +203,9 @@ void ZWorld::OnRestore()
 void ZWorld::SetFog(bool bFog)
 {
 	if(bFog) {
-		RSetFog( m_bFog, m_fFogNear, m_fFogFar, m_dwFogColor );
+		RSetFog(m_bFog, m_fFogNear, m_fFogFar, m_dwFogColor);
 	}
 	else {
-		RSetFog( FALSE );
+		RSetFog(FALSE);
 	}
 }

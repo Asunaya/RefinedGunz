@@ -702,6 +702,7 @@ void ZEmblemList::Update()
 
 ZEmblemList::~ZEmblemList()
 {
+	OnInvalidate();
 	Clear();
 }
 

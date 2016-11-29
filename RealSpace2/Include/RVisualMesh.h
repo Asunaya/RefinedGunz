@@ -15,19 +15,19 @@ public:
 
 	void ClearFrame();
 
-	void Frame(RAniMode amode,RVisualMesh* pVMesh);
+	void Frame(RAniMode amode, RVisualMesh* pVMesh);
 
 	bool			m_isOncePlayDone;
 	bool			m_isPlayDone;
 
 	bool			m_bChangeAnimation;
 
-	u32			m_nReserveTime;
+	u32				m_nReserveTime;
 
 	int				m_nFrame;
 	int				m_nAddFrame;
-	u32			m_save_time;
-	u32			m_1frame_time;
+	u32				m_save_time;
+	u32				m_1frame_time;
 
 	RAnimation*		m_pAniSet;
 	RAnimation*		m_pAniSetNext;
@@ -38,11 +38,10 @@ public:
 	RAniSoundInfo	m_SoundInfo;
 
 	// animation blend
-
 	bool			m_bBlendAniSet;
 	float			m_fMaxBlendTime;
 	float			m_fCurrentBlendTime;
-	u32			m_dwBackupBlendTime;
+	u32				m_dwBackupBlendTime;
 
 };
 
@@ -67,7 +66,7 @@ public:
 	}
 
 public:
-	void Start(float fMax,u32 MaxTime,u32 ReturnMaxTime);
+	void Start(float fMax, u32 MaxTime, u32 ReturnMaxTime);
 	void Stop();
 
 	void Update();
@@ -114,9 +113,9 @@ class RQuery
 public:
 	RQuery() {
 
-		m_nSpendingTime=NULL;
-		m_DataCnt=NULL;
-		m_Query=NULL;
+		m_nSpendingTime = NULL;
+		m_DataCnt = NULL;
+		m_Query = NULL;
 
 	}
 
@@ -124,37 +123,37 @@ public:
 		Destroy();
 	}
 
-	HRESULT Create( LPDIRECT3DDEVICE9 dev ) { 
-		return dev->CreateQuery( D3DQUERYTYPE_OCCLUSION, &m_Query );
+	HRESULT Create(LPDIRECT3DDEVICE9 dev) {
+		return dev->CreateQuery(D3DQUERYTYPE_OCCLUSION, &m_Query);
 	}
 
 	void Destroy() {
 
-		if(m_Query) {
+		if (m_Query) {
 			m_Query->Release();
 			m_Query = NULL;
 		}
 	}
 
 	HRESULT Begin() {
-		return m_Query->Issue( D3DISSUE_BEGIN );
+		return m_Query->Issue(D3DISSUE_BEGIN);
 	}
 
 	HRESULT End() {
-		return m_Query->Issue( D3DISSUE_END );
+		return m_Query->Issue(D3DISSUE_END);
 	}
 
 	u32 GetRenderCount() {
 
-		if(m_Query==NULL) return 0;
+		if (m_Query == NULL) return 0;
 
 		int nCnt = 0;
 		m_DataCnt = 0;
 
-		while( m_Query->GetData( (void*)&m_DataCnt,sizeof(u32),D3DGETDATA_FLUSH) == S_FALSE ) {
+		while (m_Query->GetData((void*)&m_DataCnt, sizeof(u32), D3DGETDATA_FLUSH) == S_FALSE) {
 			m_nSpendingTime++;
 			nCnt++;
-			if(nCnt>5000) {
+			if (nCnt > 5000) {
 				m_DataCnt = 1000;
 				break;
 			}
@@ -164,11 +163,11 @@ public:
 
 	bool isNeedRender() {
 
-		if(m_Query==NULL) return true;
+		if (m_Query == NULL) return true;
 
 		u32 Cnt = GetRenderCount();
 
-		if( Cnt > 10 )
+		if (Cnt > 10)
 			return true;
 		return false;
 	}
@@ -182,13 +181,13 @@ public:
 
 class RVisualMesh {
 public:
-	RVisualMesh(); 
+	RVisualMesh();
 	~RVisualMesh();
 
-	bool Create(RMesh* pMesh); 
+	bool Create(RMesh* pMesh);
 	void Destroy();
 
-	bool BBoxPickCheck(int x,int y);
+	bool BBoxPickCheck(int x, int y);
 	bool BBoxPickCheck(const rvector& pos, const rvector& dir);
 
 	bool Pick(int x, int y, RPickInfo* pInfo);
@@ -202,14 +201,14 @@ public:
 	void Frame();
 
 	void Render(ROcclusionList* pOCCL);
-	void Render(bool low = false ,bool render_buffer=false);
+	void Render(bool low = false, bool render_buffer = false);
 	void RenderWeapon();
 	void RenderMatrix();
 
-	void GetMotionInfo(int& sel_parts,int& sel_parts2,bool& bCheck,bool& bRender);
+	void GetMotionInfo(int& sel_parts, int& sel_parts2, bool& bCheck, bool& bRender);
 
-	void SetPos(rvector pos,rvector dir,rvector up);
-	void SetWorldMatrix(rmatrix& mat);
+	void SetPos(rvector pos, rvector dir, rvector up);
+	void SetWorldMatrix(const rmatrix& mat);
 
 	bool CalcBox();
 
@@ -226,25 +225,25 @@ public:
 
 	// Animation
 
-	bool SetAnimation(RAnimation* pAniSet,bool b=false);
-	bool SetAnimation(const char* ani_name,bool b=false);
-	bool SetAnimation(RAniMode animode,RAnimation* pAniSet,bool b=false);
-	bool SetAnimation(RAniMode animode, const char* ani_name,bool b=false);
+	bool SetAnimation(RAnimation* pAniSet, bool b = false);
+	bool SetAnimation(const char* ani_name, bool b = false);
+	bool SetAnimation(RAniMode animode, RAnimation* pAniSet, bool b = false);
+	bool SetAnimation(RAniMode animode, const char* ani_name, bool b = false);
 
-	bool SetBlendAnimation(RAnimation* pAniSet,float blend_time=0.5f,bool b=false);
-	bool SetBlendAnimation(const char* ani_name,float blend_time=0.5f,bool b=false);
-	bool SetBlendAnimation(RAniMode animode,RAnimation* pAniSet,float blend_time=0.5f,bool b=false);
-	bool SetBlendAnimation(RAniMode animode, const char* ani_name,float blend_time=0.5f,bool b=false);
+	bool SetBlendAnimation(RAnimation* pAniSet, float blend_time = 0.5f, bool b = false);
+	bool SetBlendAnimation(const char* ani_name, float blend_time = 0.5f, bool b = false);
+	bool SetBlendAnimation(RAniMode animode, RAnimation* pAniSet, float blend_time = 0.5f, bool b = false);
+	bool SetBlendAnimation(RAniMode animode, const char* ani_name, float blend_time = 0.5f, bool b = false);
 
-	bool SetNextAnimation(RAnimation* pAniSet);					
+	bool SetNextAnimation(RAnimation* pAniSet);
 	bool SetNextAnimation(const char* ani_name);
-	bool SetNextAnimation(RAniMode animode,RAnimation* pAniSet);
+	bool SetNextAnimation(RAniMode animode, RAnimation* pAniSet);
 	bool SetNextAnimation(RAniMode animode, const char* ani_name);
 
-	bool SetReserveAnimation(RAnimation* pAniSet,int tick);
-	bool SetReserveAnimation(const char* ani_name,int tick);
-	bool SetReserveAnimation(RAniMode animode,RAnimation* pAniSet,int tick);
-	bool SetReserveAnimation(RAniMode animode, const char* ani_name,int tick);
+	bool SetReserveAnimation(RAnimation* pAniSet, int tick);
+	bool SetReserveAnimation(const char* ani_name, int tick);
+	bool SetReserveAnimation(RAniMode animode, RAnimation* pAniSet, int tick);
+	bool SetReserveAnimation(RAniMode animode, const char* ani_name, int tick);
 
 	void ClearAnimation();
 	void ClearFrame();
@@ -253,7 +252,7 @@ public:
 
 	// control
 
-	void SetSpeed(float s,float s_up=4.8f);
+	void SetSpeed(float s, float s_up = 4.8f);
 
 	void Play(RAniMode amode = ani_mode_lower);
 	void Stop(RAniMode amode = ani_mode_lower);
@@ -266,7 +265,7 @@ public:
 
 	// weapon
 
-	void AddWeapon(RWeaponMotionType type,RMesh* pVMesh,RAnimation* pAni=NULL);
+	void AddWeapon(RWeaponMotionType type, RMesh* pVMesh, RAnimation* pAni = NULL);
 	void RemoveWeapon(RWeaponMotionType type);
 	void RemoveAllWeapon();
 
@@ -283,8 +282,8 @@ public:
 
 	void	SetCheckViewFrustum(bool b);
 
-	rmatrix GetCurrentWeaponPositionMatrix( bool right=false );
-	rvector GetCurrentWeaponPosition( bool right=false );
+	rmatrix GetCurrentWeaponPositionMatrix(bool right = false);
+	rvector GetCurrentWeaponPosition(bool right = false);
 
 	bool IsSelectWeaponGrenade();
 
@@ -294,7 +293,7 @@ public:
 
 	rvector			GetFootPosition();
 
-	void GetBipTypeMatrix(rmatrix *mat,RMeshPartsPosInfoType type);
+	void GetBipTypeMatrix(rmatrix *mat, RMeshPartsPosInfoType type);
 
 	void GetHeadMatrix(rmatrix *mat);
 	void GetRFootMatrix(rmatrix *mat);
@@ -308,39 +307,39 @@ public:
 	rvector	GetLFootPosition();
 	rvector	GetRootPosition();
 
-	void	SetVisibility(float vis)	{ m_fVis = vis; }
-	float	GetVisibility() const		{ return m_fVis; }
+	void	SetVisibility(float vis) { m_fVis = vis; }
+	float	GetVisibility() const { return m_fVis; }
 
-	void SetDrawGrenade(bool b)	 { m_bDrawGrenade = b; }
+	void SetDrawGrenade(bool b) { m_bDrawGrenade = b; }
 
 	void OutputDebugString_CharacterState();
 
 	bool IsClothModel();
 
-	void DrawTracks(bool draw,RVisualMesh* pVWMesh,int mode,rmatrix& m);
+	void DrawTracks(bool draw, RVisualMesh* pVWMesh, int mode, rmatrix& m);
 
-	void DrawEnchant(RVisualMesh* pVWMesh,int mode,rmatrix& m);
+	void DrawEnchant(RVisualMesh* pVWMesh, int mode, rmatrix& m);
 
-	void DrawEnchantFire(RVisualMesh* pVWMesh,int mode,rmatrix& m);
-	void DrawEnchantCold(RVisualMesh* pVWMesh,int mode,rmatrix& m);
-	void DrawEnchantLighting(RVisualMesh* pVWMesh,int mode,rmatrix& m);
-	void DrawEnchantPoison(RVisualMesh* pVWMesh,int mode,rmatrix& m);
+	void DrawEnchantFire(RVisualMesh* pVWMesh, int mode, rmatrix& m);
+	void DrawEnchantCold(RVisualMesh* pVWMesh, int mode, rmatrix& m);
+	void DrawEnchantLighting(RVisualMesh* pVWMesh, int mode, rmatrix& m);
+	void DrawEnchantPoison(RVisualMesh* pVWMesh, int mode, rmatrix& m);
 
 	int	 GetLastWeaponTrackPos(rvector* pOutVec);
 
 	AniFrameInfo* GetFrameInfo(RAniMode mode);
 
-	void GetBBox(rvector& max,rvector& min);
+	void GetBBox(rvector& max, rvector& min);
 
-	bool GetWeaponDummyMatrix(WeaponDummyType type,rmatrix* mat,bool bLeft);
-	bool GetWeaponDummyPos(WeaponDummyType type,rvector* pos,bool bLeft);
+	bool GetWeaponDummyMatrix(WeaponDummyType type, rmatrix* mat, bool bLeft);
+	bool GetWeaponDummyPos(WeaponDummyType type, rvector* pos, bool bLeft);
 
 	void SetNPCBlendColor(D3DCOLORVALUE color) { m_NPCBlendColor = color; }
 
 	void SetSpRenderMode(int mode);
 	void ClearPartInfo();
 
-	void  GetWeaponPos(rvector* p,bool bLeft=false);
+	void  GetWeaponPos(rvector* p, bool bLeft = false);
 	float GetWeaponSize();
 	bool  IsDoubleWeapon();
 
@@ -357,7 +356,7 @@ public:
 	void UpdateMotionTable();
 	bool UpdateSpWeaponFire();
 
-	void SetUVAnimation(float u,float v);
+	void SetUVAnimation(float u, float v);
 	void ClearUvAnimation();
 
 	void UpdateWeaponDummyMatrix(RMeshNode* pMNode);
@@ -366,24 +365,24 @@ public:
 	void OnRestore();
 	void OnInvalidate();
 
-	bool CreateCloth(RMeshNode* pMeshNode,float fAccel,int Numiter );
+	bool CreateCloth(RMeshNode* pMeshNode, float fAccel, int Numiter);
 	void DestroyCloth();
 
-	void ChangeChestCloth(float fAccel,int Numiter );
+	void ChangeChestCloth(float fAccel, int Numiter);
 
 	void UpdateForce(D3DXVECTOR3& force);
 	void SetClothState(int state);
 	void UpdateCloth();
 	void RenderCloth();
 
-	bool isChestClothMesh()	{ return m_pCloth ? true:false; }
+	bool isChestClothMesh() { return m_pCloth ? true : false; }
 
 	void SetClothForce(D3DXVECTOR3& f);
 
-	void SetClothValue(bool bGame,float fDist);
+	void SetClothValue(bool bGame, float fDist);
 
-	void SetLight(int index,D3DLIGHT9* light,bool ShaderOnly) {
-		m_LightMgr.SetLight(index,light,ShaderOnly);
+	void SetLight(int index, D3DLIGHT9* light, bool ShaderOnly) {
+		m_LightMgr.SetLight(index, light, ShaderOnly);
 	}
 	void UpdateLight() { m_LightMgr.UpdateLight(); }
 
@@ -395,7 +394,7 @@ public:
 	bool			m_isDrawWeaponState;
 	bool			m_bDrawGrenade;
 
-	bool			m_isScale; 
+	bool			m_isScale;
 	rvector			m_vScale;
 
 	rvector			m_vTargetPos;
@@ -408,7 +407,7 @@ public:
 	// toon
 
 	rmatrix				m_ToonUVMat;
-	LPDIRECT3DTEXTURE9	m_ToonTexture;	
+	LPDIRECT3DTEXTURE9	m_ToonTexture;
 	bool				m_bToonLighting;
 	bool				m_bToonTextureRender;
 	u32				m_bToonColor;
@@ -477,7 +476,7 @@ public:
 
 private:
 	void RenderWeaponSub(RVisualMesh* WeaponMesh,
-		rmatrix (RVisualMesh::* DummyMatrix)[weapon_dummy_end],
+		rmatrix(RVisualMesh::* DummyMatrix)[weapon_dummy_end],
 		int sel_parts,
 		bool RenderMesh, bool RenderTracks);
 
