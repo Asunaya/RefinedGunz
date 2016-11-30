@@ -25,30 +25,26 @@
 
 _NAMESPACE_REALSPACE2_BEGIN
 
-/////////////////////////////////////////////////////////////////////
-
 RMeshNode* RMesh::UpdateNodeAniMatrix(RMeshNode* pNode)
 {
-	D3DXMATRIX ani_mat;
+	rmatrix ani_mat;
 
 	RMeshNode* pTMeshNode = NULL;
 
 	pTMeshNode = pNode;
 
-	D3DXMatrixIdentity(&ani_mat);
+	GetIdentityMatrix(ani_mat);
 
 	GetNodeAniMatrix(pNode,ani_mat);
 
-	// parts
-
-	if(m_pVisualMesh) { // 무기 모델 더미와 장비품들의 경우 처리..
+	if(m_pVisualMesh) {
 
 		pTMeshNode = m_pVisualMesh->GetParts(pNode->m_PartsType);
 
 		if( pTMeshNode==NULL ) {
 			pTMeshNode = pNode;
 		}
-		else if( pTMeshNode->m_PartsType != pNode->m_PartsType) { // 같은 장착위치가 아니면
+		else if( pTMeshNode->m_PartsType != pNode->m_PartsType) {
 			pTMeshNode = pNode;
 		}
 	}
@@ -61,7 +57,7 @@ RMeshNode* RMesh::UpdateNodeAniMatrix(RMeshNode* pNode)
 	return pTMeshNode;
 }
 
-void RMesh::GetNodeAniMatrix(RMeshNode* pMeshNode,D3DXMATRIX& ani_mat)
+void RMesh::GetNodeAniMatrix(RMeshNode* pMeshNode,rmatrix& ani_mat)
 {
 	RAnimation* pAniSet = GetNodeAniSet(pMeshNode);
 	int frame = pMeshNode->GetNodeAniSetFrame();
@@ -72,7 +68,7 @@ void RMesh::GetNodeAniMatrix(RMeshNode* pMeshNode,D3DXMATRIX& ani_mat)
 		ani_type = pAniSet->GetAnimationType();
 	}
 
-#if 0//def _DEBUG
+#if 0
 	bool CustomCalced = false;
 	
 	if (m_pVisualMesh)
@@ -130,12 +126,12 @@ void RMesh::GetNodeAniMatrix(RMeshNode* pMeshNode,D3DXMATRIX& ani_mat)
 #endif
 
 		if (pMeshNode->m_pParent) {
-			D3DXMatrixMultiply(&ani_mat,&ani_mat,&pMeshNode->m_pParent->m_mat_result);
+			ani_mat *= pMeshNode->m_pParent->m_mat_result;
 		}
 	}
 }
 
-void RMesh::_RGetAniMat(RMeshNode* pMeshNode,int frame,D3DXMATRIX& t_ani_mat)
+void RMesh::_RGetAniMat(RMeshNode* pMeshNode,int frame,rmatrix& t_ani_mat)
 {
 	if(pMeshNode==NULL) {
 		mlog("_RGetAniMat() pMeshNode==NULL\n");
@@ -161,9 +157,9 @@ void RMesh::_RGetAniMat(RMeshNode* pMeshNode,int frame,D3DXMATRIX& t_ani_mat)
 	}
 }
 
-void RMesh::_RGetRotAniMat(RMeshNode* pMeshNode,int frame,D3DXMATRIX& t_ani_mat)
+void RMesh::_RGetRotAniMat(RMeshNode* pMeshNode,int frame,rmatrix& t_ani_mat)
 {
-	D3DXMATRIX buffer,Inv;
+	rmatrix buffer,Inv;
 
 	if(pMeshNode==NULL)
 		return;
@@ -177,42 +173,38 @@ void RMesh::_RGetRotAniMat(RMeshNode* pMeshNode,int frame,D3DXMATRIX& t_ani_mat)
 			bAni = true;
 
 	if ( bAni )	{
-
-		D3DXQUATERNION out = pANode->GetRotValue(frame);
-
-		D3DXMatrixRotationQuaternion(&t_ani_mat,&out);
-
+		t_ani_mat = QuaternionToMatrix(pANode->GetRotValue(frame));
 	} else {
 
-		D3DXMatrixIdentity(&buffer);
+		GetIdentityMatrix(buffer);
 
 		if(m_isNPCMesh && (pMeshNode->m_WeaponDummyType != weapon_dummy_etc) )
 		{
-			memcpy(&buffer,&pMeshNode->m_mat_local,sizeof(D3DXMATRIX));
+			memcpy(&buffer,&pMeshNode->m_mat_local,sizeof(rmatrix));
 
 		} else  {
 
 			if(pMeshNode->m_pParent) {
 				RMatInv(Inv,pMeshNode->m_pParent->m_mat_base);
-				D3DXMatrixMultiply(&buffer,&pMeshNode->m_mat_base,&Inv);
+				buffer = pMeshNode->m_mat_base * Inv;
 			}
 			else {
-				memcpy(&buffer,&pMeshNode->m_mat_local,sizeof(D3DXMATRIX));
+				memcpy(&buffer,&pMeshNode->m_mat_local,sizeof(rmatrix));
 			}
 		}
 
-		buffer._41 = buffer._42 = buffer._43 = 0;
-		D3DXMatrixMultiply(&t_ani_mat,&t_ani_mat,&buffer);
+		SetTransPos(buffer, { 0, 0, 0 });
+		t_ani_mat *= buffer;
 
 	}
 }
 
-void RMesh::_RGetPosAniMat(RMeshNode* pMeshNode,int frame,D3DXMATRIX& t_ani_mat)
+void RMesh::_RGetPosAniMat(RMeshNode* pMeshNode,int frame,rmatrix& t_ani_mat)
 {
 	if(pMeshNode==NULL)
 		return;
 
-	D3DXMATRIX buffer,Inv;
+	rmatrix buffer,Inv;
 
 	RAnimationNode* pANode = pMeshNode->m_pAnimationNode;
 
@@ -245,7 +237,7 @@ void RMesh::_RGetPosAniMat(RMeshNode* pMeshNode,int frame,D3DXMATRIX& t_ani_mat)
 	}
 	else {
 
-		D3DXMatrixIdentity(&buffer);
+		GetIdentityMatrix(buffer);
 
 		if( m_isNPCMesh && pMeshNode->m_WeaponDummyType != weapon_dummy_etc )
 		{
@@ -271,7 +263,7 @@ void RMesh::_RGetPosAniMat(RMeshNode* pMeshNode,int frame,D3DXMATRIX& t_ani_mat)
 
 void MakeRotMatrix(rmatrix *pOut,rvector& pos,rvector& dir,rvector& up) 
 {
-	D3DXMatrixIdentity(pOut);
+	*pOut = IdentityMatrix();
 
 	rvector right;
 	D3DXVec3Cross(&right,&up,&dir);
@@ -304,7 +296,7 @@ void MakeRotMatrix(rmatrix *pOut,rvector& pos,rvector& dir,rvector& up)
 #define MAX_YA_FRONT	50.f
 #define MAX_YA_BACK		-70.f
 
-void RMesh::CalcLookAtParts(D3DXMATRIX& pAniMat,RMeshNode* pMeshNode,RVisualMesh* pVisualMesh)
+void RMesh::CalcLookAtParts(rmatrix& pAniMat,RMeshNode* pMeshNode,RVisualMesh* pVisualMesh)
 {
 	if( pMeshNode && pVisualMesh ) {
 
@@ -312,14 +304,11 @@ void RMesh::CalcLookAtParts(D3DXMATRIX& pAniMat,RMeshNode* pMeshNode,RVisualMesh
 		float add_value_npc = 0.f;
 
 		float rot_x = pVisualMesh->m_vRotXYZ.x;
-		float rot_y = pVisualMesh->m_vRotXYZ.y;		// + add_value;
+		float rot_y = pVisualMesh->m_vRotXYZ.y;
 
 		if(m_isNPCMesh) {
-			add_value_npc = add_value;				// npc 들은 spine2 가 없다..
+			add_value_npc = add_value;
 		}
-
-		// 벡터로 그냥 대입하면 .. 기존의 만들어진 에니메이션 방향이 무시된다...
-		// 최대 제한 각 설정
 
 		if(rot_x > MAX_XA_LEFT)		rot_x = MAX_XA_LEFT;
 		if(rot_x < MAX_XA_RIGHT)	rot_x = MAX_XA_RIGHT;
@@ -327,62 +316,27 @@ void RMesh::CalcLookAtParts(D3DXMATRIX& pAniMat,RMeshNode* pMeshNode,RVisualMesh
 		if(rot_y > MAX_YA_FRONT)	rot_y = MAX_YA_FRONT;
 		if(rot_y < MAX_YA_BACK)		rot_y = MAX_YA_BACK;
 
-		// 비율과 몇가지 타잎에 따라서 다르게 분기...
+		auto Rotate = [&](auto&& add, auto&& coefficient) {
+			float rot_y2 = rot_y + add;
 
-		if(pMeshNode->m_LookAtParts == lookat_parts_spine1) {
+			auto mx = RGetRotX(rot_x * coefficient);
+			auto my = RGetRotY(rot_y2 * coefficient);
 
-			//DMLog("pMeshNode->m_PartsPosInfoType = %d, add_value = %f, rot_x = %f, rot_y = %f\n", pMeshNode->m_PartsPosInfoType, add_value, rot_x, rot_y);
+			pAniMat *= mx;
+			pAniMat *= my;
+		};
 
-			rmatrix mx,my;
-
-			float rot_y2 = rot_y + add_value_npc;
-
-			mx = RGetRotX(rot_x*.6f);
-			my = RGetRotY(rot_y2*.6f);
-
-			D3DXMatrixMultiply(&pAniMat,&pAniMat,&mx);
-			D3DXMatrixMultiply(&pAniMat,&pAniMat,&my);
-		}
-
-		if(pMeshNode->m_LookAtParts == lookat_parts_spine2) {
-
-			////DMLog("pMeshNode->m_PartsPosInfoType = %d, add_value = %f, rot_x = %f, rot_y = %f\n", pMeshNode->m_PartsPosInfoType, add_value, rot_x, rot_y);
-
-			rmatrix mx,my;
-
-			float rot_y2 = rot_y + add_value;
-
-			mx = RGetRotX(rot_x*.5f);
-			my = RGetRotY(rot_y2*.5f);
-
-			D3DXMatrixMultiply(&pAniMat,&pAniMat,&mx);
-			D3DXMatrixMultiply(&pAniMat,&pAniMat,&my);
-		}
-
-		if(pMeshNode->m_LookAtParts == lookat_parts_head) {
-
-			//DMLog("pMeshNode->m_PartsPosInfoType = %d, add_value = %f, rot_x = %f, rot_y = %f\n", pMeshNode->m_PartsPosInfoType, add_value, rot_x, rot_y);
-
-			rmatrix mx,my;
-
-			float rot_y2 = rot_y + add_value*0.5f;
-
-			mx = RGetRotX(rot_x*.3f);
-			my = RGetRotY(rot_y2*.3f);
-
-			D3DXMatrixMultiply(&pAniMat,&pAniMat,&mx);
-			D3DXMatrixMultiply(&pAniMat,&pAniMat,&my);
-		}
+		if (pMeshNode->m_LookAtParts == lookat_parts_spine1) Rotate(add_value_npc, 0.6f);
+		else if (pMeshNode->m_LookAtParts == lookat_parts_spine2) Rotate(add_value, 0.5f);
+		else if (pMeshNode->m_LookAtParts == lookat_parts_head) Rotate(add_value * 0.5f, 0.3f);
 	}
 }
 
-// 회전값을 직접 등록.. 몸통과 머리 단계별 보간 없고~ 각 제한 없다..
-
-void RMesh::CalcLookAtParts2(D3DXMATRIX& pAniMat,RMeshNode* pMeshNode,RVisualMesh* pVisualMesh)
+void RMesh::CalcLookAtParts2(rmatrix& pAniMat,RMeshNode* pMeshNode,RVisualMesh* pVisualMesh)
 {
 	if( pMeshNode && pVisualMesh ) {
 
-		D3DXMATRIX* mat = NULL;
+		rmatrix* mat = NULL;
 
 		bool ch = false;
 
@@ -441,7 +395,7 @@ RAnimation* RMesh::GetNodeAniSet(RMeshNode* pNode)
 	return pAniSet;
 }
 
-void GetQuat(D3DXQUATERNION& q,rvector& dir1,rvector& dir2)
+static void GetQuat(D3DXQUATERNION& q,rvector& dir1,rvector& dir2)
 {
 	rvector axis;
 	CrossProduct(&axis,dir1,dir2);
@@ -453,26 +407,21 @@ void GetQuat(D3DXQUATERNION& q,rvector& dir1,rvector& dir2)
 	D3DXQuaternionRotationAxis(&q,&axis,rad);
 }
 
-void GetMat(rmatrix& m,rvector& dir1,rvector& dir2)
+static void GetMat(rmatrix& m, rvector& dir1, rvector& dir2)
 {
 	D3DXQUATERNION q;
-	GetQuat(q,dir1,dir2);
-	D3DXMatrixRotationQuaternion(&m,&q);
+	GetQuat(q, dir1, dir2);
+	m = QuaternionToMatrix(q);
 }
 
-rmatrix makematrix(rvector pos,rvector dir,rvector up)
+static rmatrix makematrix(rvector pos, rvector dir, rvector up)
 {
 	rmatrix m;
-	rvector right;
-	D3DXVec3Cross(&right,&up,&dir);
-	D3DXVec3Normalize(&right,&right);
+	rvector right = Normalized(CrossProduct(up, dir));
+	up = Normalized(CrossProduct(right, dir));
+	Normalize(dir);
 
-	D3DXVec3Cross(&up,&right,&dir);
-	D3DXVec3Normalize(&up,&up);
-
-	D3DXVec3Normalize(&dir,&dir);
-
-	D3DXMatrixIdentity(&m);
+	GetIdentityMatrix(m);
 
 	m._11 = right.x;
 	m._12 = right.y;
@@ -539,14 +488,14 @@ void CalcNodeMatrix(RVisualMesh* pVMesh , RMeshNode* pNode ,bool upLimit)
 
 void RMesh::RenderFrame()
 {
-	D3DXMATRIX	s;
+	rmatrix	s;
 
 	if (m_list.empty())
 		return;
 
 	RMeshNodeHashList_Iter it_obj =  m_list.begin();
 
-	if(!m_pAniSet[0]) // 연결된에니메이션이 없다면?
+	if(!m_pAniSet[0])
 		return;
 
 	RMeshNode* pHeadMeshNode = NULL;
@@ -580,7 +529,5 @@ void RMesh::SetFrame(int nFrame,int nFrame2)
 		m_frame[1] = 0;
 	}
 }
-
-
 
 _NAMESPACE_REALSPACE2_END

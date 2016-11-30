@@ -48,18 +48,16 @@ bool ZScreenEffect::DrawCustom(unsigned long int nTime, const rvector& vOffset, 
 	RGetDevice()->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
 
 	rmatrix World;
-	D3DXMatrixIdentity(&World);
+	GetIdentityMatrix(World);
 
 	if (fAngle != 0.0f)
 	{
-		D3DXMatrixRotationZ(&World, fAngle);
+		World = RGetRotZ(fAngle);
 	}
 
-	rmatrix View, Offset;
 	const rvector eye(0, 0, -650), at(0, 0, 0), up(0, 1, 0);
-
-	D3DXMatrixLookAtLH(&View,&eye,&at,&up);
-	D3DXMatrixTranslation(&Offset,vOffset.x,vOffset.y,vOffset.z);
+	auto View = ViewMatrix(eye, Normalized(at - eye), up);
+	auto Offset = TranslationMatrix(vOffset);
 
 	auto Ratio = 4.0f / 3 / (float(RGetScreenWidth()) / RGetScreenHeight());
 	auto Scale = ScalingMatrix({ 1, Ratio, 1, 1 });

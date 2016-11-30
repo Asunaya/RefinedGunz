@@ -11,7 +11,7 @@ using namespace RealSpace2;
 RCylinder::RCylinder(void)
 :mTopCentre(0,0,0),	mBottomCentre(0,0,0), mHeight(0), mRadius(0), mCylinder(0)
 {
-	D3DXMatrixIdentity(&mWorld);
+	GetIdentityMatrix(mWorld);
 }
 
 
@@ -92,21 +92,16 @@ bool getDistanceBetLineSegmentAndPoint( const rvector& lineStart_,
 	return true;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-// draw
-//////////////////////////////////////////////////////////////////////////
-
 void RCylinder::draw()
 {
 	rvector centre;
 	rmatrix tr;
 
 	rmatrix fix_rotation;
-	D3DXMatrixRotationX( &fix_rotation, D3DX_PI * 0.5 );
+	fix_rotation = RGetRotX(PI_FLOAT * 0.5f);
 
 	centre = ( mTopCentre + mBottomCentre ) * 0.5;
-	D3DXMatrixTranslation( &tr, centre.x, centre.y, centre.z + 50 );
+	tr = TranslationMatrix(centre + v3{ 0, 0, 50 });
 
     mWorld = mWorld * fix_rotation ;
 	{

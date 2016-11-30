@@ -60,8 +60,7 @@ bool ZEffectStaticMesh::Draw(unsigned long int nTime)
 	rmatrix World;
 	unsigned long int Opacity = 0xFF*fOpacity;
 	MakeWorldMatrix(&World, Pos, Dir, Up);
-	rmatrix Rotation;
-	D3DXMatrixRotationAxis(&Rotation, &m_RotationAxis, m_fRotateAngle);
+	rmatrix Rotation = RotationMatrix(m_RotationAxis, m_fRotateAngle);
 	m_fRotateAngle+=EC_ROTATION;
  	World = Rotation * World;
 

@@ -99,8 +99,8 @@ void RMesh::Init()
 
 	mbSkyBox = false;
 
-	m_vBBMax = D3DXVECTOR3(-9999.f,-9999.f,-9999.f);
-	m_vBBMin = D3DXVECTOR3( 9999.f, 9999.f, 9999.f);
+	m_vBBMax = rvector(-9999.f,-9999.f,-9999.f);
+	m_vBBMin = rvector( 9999.f, 9999.f, 9999.f);
 
 	m_vBBMaxNodeMatrix = m_vBBMax;
 	m_vBBMinNodeMatrix = m_vBBMin;
@@ -452,16 +452,16 @@ int RMesh::FindMeshIdSub(RAnimationNode* pANode)
 	return _FindMeshId(pANode->GetName());
 }
 
-void __SetPosMat(D3DXMATRIX* m1,D3DXMATRIX* m2) {
+void __SetPosMat(rmatrix* m1,rmatrix* m2) {
 
 	m1->_41 = m2->_41;
 	m1->_42 = m2->_42;
 	m1->_43 = m2->_43;
 }
 
-void __SetRotMat(D3DXMATRIX* m1,D3DXMATRIX* m2) {
+void __SetRotMat(rmatrix* m1,rmatrix* m2) {
 
-	D3DXMATRIX m;
+	rmatrix m;
 
 	m = *m1;
 	*m1 = *m2;
@@ -703,7 +703,7 @@ void RMesh::ClearMtrl() {
 	m_mtrl_list_ex.DelAll();
 }
 
-void RMesh::CalcBoxNode(D3DXMATRIX* world_mat)
+void RMesh::CalcBoxNode(rmatrix* world_mat)
 {
 	m_vBBMax = { -9999.f, -9999.f, -9999.f };
 	m_vBBMin = { 9999.f, 9999.f, 9999.f };
@@ -715,7 +715,7 @@ void RMesh::CalcBoxNode(D3DXMATRIX* world_mat)
 	}
 }
 
-void RMesh::CalcBox(D3DXMATRIX* world_mat)
+void RMesh::CalcBox(rmatrix* world_mat)
 {
 	if( m_list.empty())	return;
 
@@ -757,12 +757,12 @@ void RMesh::CalcNodeMatrixBBox(RMeshNode* pNode)
 		&Trans);
 }
 
-void RMesh::CalcBBox(D3DXVECTOR3* v) 
+void RMesh::CalcBBox(rvector* v) 
 {
 	SubCalcBBox( &m_vBBMax, &m_vBBMin, v);
 }
 
-void RMesh::SubCalcBBox(D3DXVECTOR3* max,D3DXVECTOR3* min,D3DXVECTOR3* v)
+void RMesh::SubCalcBBox(rvector* max,rvector* min,rvector* v)
 {
 	if ( (max==NULL) || (min==NULL) || (v==NULL) ) return;
 
@@ -775,7 +775,7 @@ void RMesh::SubCalcBBox(D3DXVECTOR3* max,D3DXVECTOR3* min,D3DXVECTOR3* v)
 	max->z = ::max(max->z, v->z);
 }
 
-void RMesh::RenderBox(D3DXMATRIX* world_mat)
+void RMesh::RenderBox(rmatrix* world_mat)
 {
 	draw_box(world_mat,m_vBBMax,m_vBBMin,0xffffffff);
 }

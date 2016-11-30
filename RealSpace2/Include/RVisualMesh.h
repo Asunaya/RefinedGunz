@@ -370,14 +370,14 @@ public:
 
 	void ChangeChestCloth(float fAccel, int Numiter);
 
-	void UpdateForce(D3DXVECTOR3& force);
+	void UpdateForce(rvector& force);
 	void SetClothState(int state);
 	void UpdateCloth();
 	void RenderCloth();
 
 	bool isChestClothMesh() { return m_pCloth ? true : false; }
 
-	void SetClothForce(D3DXVECTOR3& f);
+	void SetClothForce(rvector& f);
 
 	void SetClothValue(bool bGame, float fDist);
 

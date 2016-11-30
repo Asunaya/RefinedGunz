@@ -386,8 +386,7 @@ bool ZWater::RenderReflectionSurface()
 	cameraUp.z = -cameraUp.z;
 
 
-	rmatrix viewMat;
-	D3DXMatrixLookAtLH(&viewMat, &cameraPos, &cameraAt, &cameraUp);
+	auto viewMat = ViewMatrix(cameraPos, cameraDir, cameraUp);
 	g_pDevice->SetTransform(D3DTS_VIEW, &viewMat);
 
 	// Redirection Render Target
@@ -652,7 +651,7 @@ void ZWater::Render()
 
 	// set transform
 	rmatrix mat;
-	D3DXMatrixIdentity(&mat);
+	GetIdentityMatrix(mat);
 	g_pDevice->SetTransform(D3DTS_WORLD, &mat);
 
 	// render

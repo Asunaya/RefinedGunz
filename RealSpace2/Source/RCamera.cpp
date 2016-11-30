@@ -58,8 +58,7 @@ void RSetCamera(const rvector &from, const rvector &at, const rvector &up)
 
 void RUpdateCamera()
 {
-	rvector at = RCameraPosition + RCameraDirection;
-	D3DXMatrixLookAtLH(&RView, &RCameraPosition, &at, &RCameraUp);
+	RView = ViewMatrix(RCameraPosition, RCameraDirection, RCameraUp);
 	RGetDevice()->SetTransform(D3DTS_VIEW, &RView);
 
 	auto CheckNaN = [](auto& vec)
@@ -81,7 +80,7 @@ void RSetProjection(float fFov, float fAspect, float fNearZ, float fFarZ)
 	RFov_vert = atanf(tanf(RFov_horiz / 2.0f) / fAspect)*2.0f;
 	RNearZ = fNearZ; RFarZ = fFarZ;
 
-	D3DXMatrixPerspectiveFovLH(&RProjection, RFov_vert, fAspect, fNearZ, fFarZ);
+	RProjection = PerspectiveProjectionMatrix(fAspect, RFov_vert, fNearZ, fFarZ);
 	RGetDevice()->SetTransform(D3DTS_PROJECTION, &RProjection);
 
 	UpdateViewFrustrum();
@@ -95,7 +94,7 @@ void RSetProjection(float fFov, float fNearZ, float fFarZ)
 	RFov_vert = atanf(tanf(RFov_horiz / 2.0f) / fAspect)*2.0f;
 	RNearZ = fNearZ; RFarZ = fFarZ;
 
-	D3DXMatrixPerspectiveFovLH(&RProjection, RFov_vert, fAspect, fNearZ, fFarZ);
+	RProjection = PerspectiveProjectionMatrix(fAspect, RFov_vert, fNearZ, fFarZ);
 	RGetDevice()->SetTransform(D3DTS_PROJECTION, &RProjection);
 
 	UpdateViewFrustrum();
@@ -119,7 +118,7 @@ void RSetViewport(int x1, int y1, int x2, int y2)
 	float RScx = (float)RSwx + x1;
 	float RScy = (float)RSwy + y1;
 
-	D3DXMatrixIdentity(&RViewport);
+	RViewport = IdentityMatrix();
 	RViewport._11 = RSwx;
 	RViewport._22 = -RSwy;
 	RViewport._41 = RScx;

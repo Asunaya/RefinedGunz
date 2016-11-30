@@ -4,7 +4,7 @@
 #include "ZEffectGunFire.h"
 #include "RealSpace2.h"
 /*
-ZEffectGunFire::ZEffectGunFire(ZEffectBillboardSource*	pSources[2], D3DXVECTOR3& Pos, D3DXVECTOR3& Dir,ZCharacter* pChar)
+ZEffectGunFire::ZEffectGunFire(ZEffectBillboardSource*	pSources[2], rvector& Pos, rvector& Dir,ZCharacter* pChar)
 : m_Pos(Pos), m_Dir(Dir)
 {
 	m_pSources[0] = pSources[0];
@@ -66,16 +66,16 @@ ZEffectGunFire::Draw(unsigned long int nTime)
 		}
 	
 		// 총구 방향에 얼라인
-		D3DXVECTOR3 Right, Dir, Up;
+		rvector Right, Dir, Up;
 		D3DXVec3Cross(&Right, &m_Dir, &RealSpace2::RCameraDirection);
 		D3DXVec3Cross(&Dir, &m_Dir, &Right);
 		D3DXVec3Cross(&Up, &Dir, &m_Dir);
 		D3DXVec3Normalize(&Dir, &Dir);
 		D3DXVec3Normalize(&Up, &Up);
 
-		m_pSources[0]->Draw(m_Pos+m_Dir*GUNFIRE_SCALE, Dir, Up, D3DXVECTOR3(GUNFIRE_SCALE, GUNFIRE_SCALE, GUNFIRE_SCALE), 1.0f);
+		m_pSources[0]->Draw(m_Pos+m_Dir*GUNFIRE_SCALE, Dir, Up, rvector(GUNFIRE_SCALE, GUNFIRE_SCALE, GUNFIRE_SCALE), 1.0f);
 		// 카메라에 얼라인
-		m_bisRendered = m_pSources[1]->Draw(m_Pos, -RealSpace2::RCameraDirection, RealSpace2::RCameraUp, D3DXVECTOR3(GUNFIRE_SCALE, GUNFIRE_SCALE, GUNFIRE_SCALE), 1.0f);
+		m_bisRendered = m_pSources[1]->Draw(m_Pos, -RealSpace2::RCameraDirection, RealSpace2::RCameraUp, rvector(GUNFIRE_SCALE, GUNFIRE_SCALE, GUNFIRE_SCALE), 1.0f);
 	}
 	else m_bisRendered = false;
 
@@ -112,7 +112,7 @@ ZEffectGunFire::Draw(unsigned long int nTime)
 #define GUNFIRE_SCALE2		50
 #define GUNFIRE_LIFE_TIME2	60
 
-ZEffectGunFire2::ZEffectGunFire2(ZEffectBillboardSource* pSources[4], D3DXVECTOR3& Pos, D3DXVECTOR3& Dir,ZCharacter* pChar)
+ZEffectGunFire2::ZEffectGunFire2(ZEffectBillboardSource* pSources[4], rvector& Pos, rvector& Dir,ZCharacter* pChar)
 : m_Pos(Pos), m_Dir(Dir)
 {
 	m_pSources[0] = pSources[0];
@@ -177,16 +177,16 @@ bool ZEffectGunFire2::Draw(unsigned long int nTime)
 		}
 
 		// 총구 방향에 얼라인
-		D3DXVECTOR3 Right, Dir, Up;
+		rvector Right, Dir, Up;
 		D3DXVec3Cross(&Right, &m_Dir, &RealSpace2::RCameraDirection);
 		D3DXVec3Cross(&Dir, &m_Dir, &Right);
 		D3DXVec3Cross(&Up, &Dir, &m_Dir);
 		D3DXVec3Normalize(&Dir, &Dir);
 		D3DXVec3Normalize(&Up, &Up);
 
-		pSources1->Draw(m_Pos+m_Dir*GUNFIRE_SCALE2, Dir, Up, D3DXVECTOR3(GUNFIRE_SCALE2, GUNFIRE_SCALE2, GUNFIRE_SCALE2), 1.0f);
+		pSources1->Draw(m_Pos+m_Dir*GUNFIRE_SCALE2, Dir, Up, rvector(GUNFIRE_SCALE2, GUNFIRE_SCALE2, GUNFIRE_SCALE2), 1.0f);
 		// 카메라에 얼라인
-		m_bisRendered = pSources2->Draw(m_Pos, -RealSpace2::RCameraDirection, RealSpace2::RCameraUp, D3DXVECTOR3(GUNFIRE_SCALE2, GUNFIRE_SCALE2, GUNFIRE_SCALE2), 1.0f);
+		m_bisRendered = pSources2->Draw(m_Pos, -RealSpace2::RCameraDirection, RealSpace2::RCameraUp, rvector(GUNFIRE_SCALE2, GUNFIRE_SCALE2, GUNFIRE_SCALE2), 1.0f);
 	}
 	else m_bisRendered = false;
 

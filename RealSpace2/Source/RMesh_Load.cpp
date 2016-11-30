@@ -263,7 +263,7 @@ static void ConvertOldFaceInfo(RFaceInfo* pFInfo,RFaceInfoOld* pOldFInfo,int cnt
 	for(int i=0;i<cnt;i++) { 
 
 		memcpy( pFInfo[i].m_point_index,pOldFInfo[i].m_point_index,sizeof(int)*3 );
-		memcpy( pFInfo[i].m_point_tex,pOldFInfo[i].m_point_tex,sizeof(D3DXVECTOR3)*3 );
+		memcpy( pFInfo[i].m_point_tex,pOldFInfo[i].m_point_tex,sizeof(rvector)*3 );
 
 		pFInfo[i].m_mtrl_id = pOldFInfo[i].m_mtrl_id;
 		pFInfo[i].m_sg_id = 0;
@@ -807,7 +807,7 @@ bool RMesh::ReadElu(const char* fname)
 	}
 
 	bool bNeedScaleMat = false;
-	D3DXMATRIX smat;
+	rmatrix smat;
 
 	for(i=0;i<t_hd.mesh_num;i++) {
 
@@ -815,7 +815,7 @@ bool RMesh::ReadElu(const char* fname)
 
 		RMeshNode* pMeshNode = new RMeshNode;
 
-		D3DXMatrixIdentity(&pMeshNode->m_mat_base);
+		GetIdentityMatrix(pMeshNode->m_mat_base);
 
 		pMeshNode->m_id = m_data_num;//last id
 		pMeshNode->m_pParentMesh = this;
@@ -823,15 +823,15 @@ bool RMesh::ReadElu(const char* fname)
 
 		MZF_READ(Name  ,MAX_NAME_LEN );
 		MZF_READ(pMeshNode->m_Parent,MAX_NAME_LEN );
-		MZF_READ(&pMeshNode->m_mat_base,sizeof(D3DXMATRIX) );
+		MZF_READ(&pMeshNode->m_mat_base,sizeof(rmatrix) );
 
 		pMeshNode->SetName( Name );
 
 		pMeshNode->m_mat_ref = pMeshNode->m_mat_base;
-		D3DXMatrixInverse( &pMeshNode->m_mat_ref_inv , 0, &pMeshNode->m_mat_ref );
+		pMeshNode->m_mat_ref_inv = Inverse(pMeshNode->m_mat_ref);
 
 		if (t_hd.ver >= EXPORTER_MESH_VER2) {
-			MZF_READ(&pMeshNode->m_ap_scale, sizeof(D3DXVECTOR3));
+			MZF_READ(&pMeshNode->m_ap_scale, sizeof(rvector));
 		}
 		else  {
 			pMeshNode->m_ap_scale.x = 1.f;
@@ -841,24 +841,24 @@ bool RMesh::ReadElu(const char* fname)
 
 		if(t_hd.ver >= EXPORTER_MESH_VER4) {
 
-			MZF_READ(&pMeshNode->m_axis_rot,sizeof(D3DXVECTOR3) );
+			MZF_READ(&pMeshNode->m_axis_rot,sizeof(rvector) );
 			MZF_READ(&pMeshNode->m_axis_rot_angle,sizeof(float) );
 
-			MZF_READ(&pMeshNode->m_axis_scale,sizeof(D3DXVECTOR3) );
+			MZF_READ(&pMeshNode->m_axis_scale,sizeof(rvector) );
 			MZF_READ(&pMeshNode->m_axis_scale_angle,sizeof(float) );
 
-			MZF_READ(&pMeshNode->m_mat_etc,sizeof(D3DXMATRIX) );//mat
+			MZF_READ(&pMeshNode->m_mat_etc,sizeof(rmatrix) );//mat
 
-			D3DXMATRIX scalemat;
-			D3DXMATRIX scalepivot;
-			D3DXMATRIX scalepivotinv;
-			D3DXMATRIX flipmat;
+			rmatrix scalemat;
+			rmatrix scalepivot;
+			rmatrix scalepivotinv;
+			rmatrix flipmat;
 
-			D3DXMatrixScaling( &scalemat, pMeshNode->m_ap_scale.x, pMeshNode->m_ap_scale.y, pMeshNode->m_ap_scale.z );
-			D3DXMatrixRotationAxis( &scalepivot, &pMeshNode->m_axis_scale, pMeshNode->m_axis_scale_angle );
-			D3DXMatrixInverse( &scalepivotinv, NULL, &scalepivot );
+			scalemat = ScalingMatrix(pMeshNode->m_ap_scale);
+			scalepivot = RotationMatrix(pMeshNode->m_axis_scale, pMeshNode->m_axis_scale_angle);
+			scalepivotinv = Inverse(scalepivot);
 
-			D3DXMatrixIdentity(&flipmat);
+			GetIdentityMatrix(flipmat);
 
 			pMeshNode->m_mat_flip = flipmat;
 
@@ -867,15 +867,15 @@ bool RMesh::ReadElu(const char* fname)
 		}
 		else {
 
-			D3DXMatrixIdentity(&pMeshNode->m_mat_etc);
-			D3DXMatrixIdentity(&pMeshNode->m_mat_flip);
+			GetIdentityMatrix(pMeshNode->m_mat_etc);
+			GetIdentityMatrix(pMeshNode->m_mat_flip);
 		}
 
-		memcpy(&pMeshNode->m_mat_local, &pMeshNode->m_mat_base, sizeof(D3DXMATRIX));
+		memcpy(&pMeshNode->m_mat_local, &pMeshNode->m_mat_base, sizeof(rmatrix));
 
 		pMeshNode->m_mat_result = pMeshNode->m_mat_base;
 
-		D3DXMatrixScaling(&pMeshNode->m_mat_scale, pMeshNode->m_ap_scale.x, pMeshNode->m_ap_scale.y, pMeshNode->m_ap_scale.z);
+		pMeshNode->m_mat_scale = ScalingMatrix(pMeshNode->m_ap_scale);
 
 		RMatInv(pMeshNode->m_mat_inv,pMeshNode->m_mat_local);
 
@@ -885,10 +885,10 @@ bool RMesh::ReadElu(const char* fname)
 
 		if(pMeshNode->m_point_num) {
 		
-			pMeshNode->m_point_list = new D3DXVECTOR3[pMeshNode->m_point_num];
-			memset(pMeshNode->m_point_list,0,pMeshNode->m_point_num * sizeof(D3DXVECTOR3));
+			pMeshNode->m_point_list = new rvector[pMeshNode->m_point_num];
+			memset(pMeshNode->m_point_list,0,pMeshNode->m_point_num * sizeof(rvector));
 
-			MZF_READ(pMeshNode->m_point_list,sizeof(D3DXVECTOR3)*pMeshNode->m_point_num);
+			MZF_READ(pMeshNode->m_point_list,sizeof(rvector)*pMeshNode->m_point_num);
 
 			pMeshNode->CalcLocalBBox();
 		}
@@ -928,8 +928,8 @@ bool RMesh::ReadElu(const char* fname)
 			MZF_READ(&pMeshNode->m_point_color_num,4 );
 
 			if(pMeshNode->m_point_color_num) {
-				pMeshNode->m_point_color_list = new D3DXVECTOR3 [pMeshNode->m_point_color_num];
-				MZF_READ(pMeshNode->m_point_color_list,sizeof(D3DXVECTOR3)*pMeshNode->m_point_color_num);
+				pMeshNode->m_point_color_list = new rvector [pMeshNode->m_point_color_num];
+				MZF_READ(pMeshNode->m_point_color_list,sizeof(rvector)*pMeshNode->m_point_color_num);
 			}
 		}
 
@@ -957,7 +957,7 @@ bool RMesh::ReadElu(const char* fname)
 		}
 
 		D3DXPLANE	plane;
-		D3DXVECTOR3	vv[3];
+		rvector	vv[3];
 
 		if( t_hd.ver < EXPORTER_MESH_VER6 ) {
 
@@ -980,8 +980,8 @@ bool RMesh::ReadElu(const char* fname)
 
 			if(pMeshNode->m_point_num&&pMeshNode->m_point_num) 
 			{
-				D3DXVECTOR3* pPointNormal = new D3DXVECTOR3 [pMeshNode->m_point_num];
-				memset(pPointNormal,0,sizeof(D3DXVECTOR3)*pMeshNode->m_point_num);
+				rvector* pPointNormal = new rvector [pMeshNode->m_point_num];
+				memset(pPointNormal,0,sizeof(rvector)*pMeshNode->m_point_num);
 			
 
 				for(k=0;k<pMeshNode->m_face_num;k++) {
@@ -1115,7 +1115,7 @@ bool RMesh::AddNode(char* name,char* pname,rmatrix& base_mat)
 
 	pMeshNode->m_isAddMeshNode = true;
 
-	D3DXMatrixInverse( &pMeshNode->m_mat_ref_inv , 0, &pMeshNode->m_mat_ref );
+	pMeshNode->m_mat_ref_inv = Inverse(pMeshNode->m_mat_ref);
 
 	m_list.PushBack(pMeshNode);
 	m_data.push_back( pMeshNode );
@@ -1227,8 +1227,7 @@ bool RMesh::CalcLocalMatrix(RMeshNode* pNode)
 	if(!pNode) 
 		return false;
 
-	D3DXMATRIX dest,inv;
-	D3DXMatrixIdentity(&inv);
+	rmatrix dest, inv = IdentityMatrix();
 	RMeshNode* pPN = NULL;
 	int id = _FindMeshId(pNode->m_Parent);
 
@@ -1236,8 +1235,8 @@ bool RMesh::CalcLocalMatrix(RMeshNode* pNode)
 		pPN = m_data[id];
 		if(pPN) {
 			pNode->m_pParent = pPN;
-			D3DXMatrixInverse(&inv,NULL,&pPN->m_mat_base);
-			D3DXMatrixMultiply(&pNode->m_mat_local,&pNode->m_mat_base,&inv);
+			inv = Inverse(pPN->m_mat_base);
+			pNode->m_mat_local = pNode->m_mat_base * inv;
 			return true;
 		}
 	}

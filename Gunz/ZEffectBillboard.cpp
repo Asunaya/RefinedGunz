@@ -82,16 +82,16 @@ bool ZEffectBillboardSource::Draw(rvector &Pos, rvector &Dir, rvector &Up, rvect
 	rvector dir = RCameraDirection;
 
 	rmatrix mat;
-	D3DXMatrixIdentity(&mat);
+	GetIdentityMatrix(mat);
 	mat._11=right.x;mat._12=right.y;mat._13=right.z;
 	mat._21=up.x;mat._22=up.y;mat._23=up.z;
 	mat._31=dir.x;mat._32=dir.y;mat._33=dir.z;
 
-	D3DXMatrixTranslation(&matTranslation, Pos.x, Pos.y, Pos.z);
-	D3DXMatrixScaling(&matScaling, Scale.x, Scale.y, Scale.z);
+	matTranslation = TranslationMatrix(Pos);
+	matScaling = ScalingMatrix(Scale);
 
-	D3DXMatrixMultiply(&matWorld, &matScaling, &mat);
-	D3DXMatrixMultiply(&matWorld, &matWorld, &matTranslation);
+	matWorld = matScaling * mat;
+	matWorld *= matTranslation;
 	RGetDevice()->SetTransform(D3DTS_WORLD, &matWorld);
 
 	RGetDevice()->SetRenderState(D3DRS_TEXTUREFACTOR, (DWORD)((BYTE)(0xFF*fOpacity))<<24);
@@ -169,16 +169,16 @@ bool ZEffectBillboardDrawer::Draw(LPDIRECT3DTEXTURE9 pEffectBillboardTexture, rv
 	rvector dir = RCameraDirection;
 
 	rmatrix mat;
-	D3DXMatrixIdentity(&mat);
+	GetIdentityMatrix(mat);
 	mat._11=right.x;mat._12=right.y;mat._13=right.z;
 	mat._21=up.x;mat._22=up.y;mat._23=up.z;
 	mat._31=dir.x;mat._32=dir.y;mat._33=dir.z;
 
-	D3DXMatrixTranslation(&matTranslation, Pos.x, Pos.y, Pos.z);
-	D3DXMatrixScaling(&matScaling, Scale.x, Scale.y, Scale.z);
+	matTranslation = TranslationMatrix(Pos);
+	matScaling = ScalingMatrix(Scale);
 
-	D3DXMatrixMultiply(&matWorld, &matScaling, &mat);
-	D3DXMatrixMultiply(&matWorld, &matWorld, &matTranslation);
+	matWorld = matScaling * mat;
+	matWorld *= matTranslation;
 	RGetDevice()->SetTransform(D3DTS_WORLD, &matWorld);
 
 	RGetDevice()->SetRenderState(D3DRS_TEXTUREFACTOR, 0xFFFFFFFF);

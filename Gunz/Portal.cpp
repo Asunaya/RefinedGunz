@@ -18,17 +18,16 @@
 
 Portal *g_pPortal = nullptr;
 
-const D3DXVECTOR3 Portal::vDim = rvector(100, 150, 0);
+const rvector Portal::vDim = rvector(100, 150, 0);
 bool Portal::bPortalSetExists = false;
 
-static bool LineOBBIntersection(const D3DXMATRIX &matWorld, const D3DXMATRIX &matInvWorld, const D3DXVECTOR3 &extents, const D3DXVECTOR3 &L1, const D3DXVECTOR3 &L2, D3DXVECTOR3 &Hit);
-static bool LineOBBIntersection(const D3DXVECTOR3 &center, const D3DXVECTOR3 &dir, const D3DXVECTOR3 &up, const D3DXVECTOR3 &extents, const D3DXVECTOR3 &L1, const D3DXVECTOR3 &L2, D3DXVECTOR3 &Hit);
-static bool LineAABBIntersection(const D3DXVECTOR3 &B1, const D3DXVECTOR3 &B2, const D3DXVECTOR3 &L1, const D3DXVECTOR3 &L2, D3DXVECTOR3 &Hit);
-static bool AABBAABBIntersection(const D3DXVECTOR3 mins1, const D3DXVECTOR3 maxs1, const D3DXVECTOR3 mins2, const D3DXVECTOR3 maxs2);
-static void MakeOrientationMatrix(D3DXMATRIX &mat, const D3DXVECTOR3 &dir, const D3DXVECTOR3 &up);
-static void MakeViewMatrix(D3DXMATRIX &mat, const D3DXVECTOR3 &pos, const D3DXVECTOR3 &dir, const D3DXVECTOR3 &up);
-static void MakeObliquelyClippingProjectionMatrix(D3DXMATRIX &matProjection, const D3DXMATRIX &matView, const D3DXVECTOR3 &p, const D3DXVECTOR3 &normal);
-static void MakePlane(D3DXPLANE &plane, const D3DXVECTOR3 &v, const D3DXVECTOR3 &u, const D3DXVECTOR3 &origin);
+static bool LineOBBIntersection(const rmatrix &matWorld, const rmatrix &matInvWorld, const rvector &extents, const rvector &L1, const rvector &L2, rvector &Hit);
+static bool LineOBBIntersection(const rvector &center, const rvector &dir, const rvector &up, const rvector &extents, const rvector &L1, const rvector &L2, rvector &Hit);
+static bool LineAABBIntersection(const rvector &B1, const rvector &B2, const rvector &L1, const rvector &L2, rvector &Hit);
+static bool AABBAABBIntersection(const rvector mins1, const rvector maxs1, const rvector mins2, const rvector maxs2);
+static void MakeOrientationMatrix(rmatrix &mat, const rvector &dir, const rvector &up);
+static void MakeObliquelyClippingProjectionMatrix(rmatrix &matProjection, const rmatrix &matView, const rvector &p, const rvector &normal);
+static void MakePlane(D3DXPLANE &plane, const rvector &v, const rvector &u, const rvector &origin);
 static rmatrix GetDefaultProjectionMatrix(float Near = DEFAULT_NEAR_Z, float Far = DEFAULT_FAR_Z) {
 	return PerspectiveProjectionMatrixViewport(
 		RGetScreenWidth(), RGetScreenHeight(),
@@ -58,8 +57,8 @@ Portal::Portal() : ValidPortals(PortalList)
 
 	struct D3DVERTEX
 	{
-		D3DXVECTOR3 p;
-		D3DXVECTOR3 n;
+		rvector p;
+		rvector n;
 		FLOAT       tu, tv;
 	};
 
@@ -249,12 +248,12 @@ void Portal::OnResetDevice()
 {
 }
 
-void Portal::Transform(D3DXVECTOR3 &v, const PortalInfo &portalinfo)
+void Portal::Transform(rvector &v, const PortalInfo &portalinfo)
 {
 	Transform(v, v, portalinfo);
 }
 
-void Portal::Transform(D3DXVECTOR3 &vOut, const D3DXVECTOR3 &vIn, const PortalInfo &portalinfo)
+void Portal::Transform(rvector &vOut, const rvector &vIn, const PortalInfo &portalinfo)
 {
 	rvector Displacement = vIn - portalinfo.vPos;
 
@@ -263,7 +262,7 @@ void Portal::Transform(D3DXVECTOR3 &vOut, const D3DXVECTOR3 &vIn, const PortalIn
 	vOut = portalinfo.Other->vPos + Displacement;
 }
 
-void Portal::Rotate(D3DXVECTOR3 &v, const PortalInfo &portalinfo)
+void Portal::Rotate(rvector &v, const PortalInfo &portalinfo)
 {
 	v = v * portalinfo.matRot;
 }
@@ -271,7 +270,7 @@ void Portal::Rotate(D3DXVECTOR3 &v, const PortalInfo &portalinfo)
 #ifdef PORTAL_USE_RT_TEXTURE
 void Portal::RenderWorld()
 {
-	D3DXMATRIX mOrigView;
+	rmatrix mOrigView;
 
 	RGetDevice()->GetTransform(D3DTS_VIEW, &mOrigView);
 
@@ -293,11 +292,11 @@ void Portal::RenderWorld()
 
 		RGetDevice()->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, 0x00000000, 1.0f, 0.0f);
 
-		D3DXVECTOR3 pos = vPos[!i];
-		D3DXVECTOR3 camtoportal = vPos[i] - ZGetCamera()->m_Position;
+		rvector pos = vPos[!i];
+		rvector camtoportal = vPos[i] - ZGetCamera()->m_Position;
 		Normalize(camtoportal);
-		D3DXVECTOR3 a = -vNormal[i];
-		D3DXVECTOR3 b = vNormal[!i];
+		rvector a = -vNormal[i];
+		rvector b = vNormal[!i];
 
 
 		rvector Displacement = ZGetCamera()->m_Position - vPos[i];
@@ -308,12 +307,12 @@ void Portal::RenderWorld()
 		Rotate(dir, i);
 
 		/*extern bool g_bForceView;
-		extern D3DXMATRIX g_mView;*/
+		extern rmatrix g_mView;*/
 
 		pos = vPos[!i] + Displacement;
-		D3DXVECTOR3 at = pos + dir, up = vUp[!i];
+		rvector at = pos + dir, up = vUp[!i];
 
-		D3DXMatrixLookAtLH(&matView[i], &pos, &at, &up);
+		rmatrixLookAtLH(&matView[i], &pos, &at, &up);
 
 		rmatrix mProjection;
 
@@ -326,26 +325,26 @@ void Portal::RenderWorld()
 		extern rmatrix g_mProjection;
 		g_bForceProjection = true;
 
-		D3DXMatrixPerspectiveFovLH(&g_mProjection, fovy, fAspect, D3DXVec3Length(&vec) + 10.f, 30000.f);
+		rmatrixPerspectiveFovLH(&g_mProjection, fovy, fAspect, D3DXVec3Length(&vec) + 10.f, 30000.f);
 
 		/*rmatrix mView, mv, mRot, mIWorld;
 		rvector right = rvector(0.f, 1.f, 0.f);
 		mv = mOrigView * matWorld[i];
-		D3DXMatrixRotationAxis(&mRot, &right, portalinfo);
+		rmatrixRotationAxis(&mRot, &right, portalinfo);
 		mIWorld = matWorld[!i];
-		D3DXMatrixInverse(&mIWorld, NULL, &mIWorld);
+		rmatrixInverse(&mIWorld, NULL, &mIWorld);
 		mView = mv * mRot * mIWorld;*/
 
-		/*D3DXMATRIX mView, mat;
+		/*rmatrix mView, mat;
 
 		D3DXQUATERNION Rot;
 
-		D3DXVECTOR3 curportalpos = vPos[i],
+		rvector curportalpos = vPos[i],
 			curportaldir = -vNormal[i],
 			otherportalpos = vPos[!i],
 			otherportaldir = vNormal[!i];
 
-		D3DXVECTOR3 Axis;
+		rvector Axis;
 		D3DXVec3Cross(&Axis, &curportaldir, &otherportaldir);
 		D3DXVec3Normalize(&Axis, &Axis);
 		float Angle = D3DXVec3Dot(&curportaldir, &otherportaldir);
@@ -355,10 +354,10 @@ void Portal::RenderWorld()
 		Rot.z = sin(Angle / 2) * Axis.z;
 		Rot.w = cos(Angle / 2);
 
-		D3DXVECTOR3 Trans;
+		rvector Trans;
 		Trans = otherportalpos - curportalpos;
 
-		D3DXMatrixAffineTransformation(&mat, 1.f, &otherportalpos, &Rot, &Trans);
+		rmatrixAffineTransformation(&mat, 1.f, &otherportalpos, &Rot, &Trans);
 
 		mView = mOrigView * mat;*/
 
@@ -458,12 +457,12 @@ void Portal::Render()
 
 	for (int i = 0; i < 2; i++)
 	{
-		D3DXMATRIX mWorld, mView, mProjection;
+		rmatrix mWorld, mView, mProjection;
 
 		RGetDevice()->SetTransform(D3DTS_WORLD, &matWorld[i]);
 
 		/*rvector at = ZGetCamera()->m_Position + ZGetCamera()->GetCurrentDir();
-		D3DXMatrixLookAtLH(&mView, &ZGetCamera()->m_Position, &at, &vUp[i]);
+		rmatrixLookAtLH(&mView, &ZGetCamera()->m_Position, &at, &vUp[i]);
 		RGetDevice()->SetTransform(D3DTS_VIEW, &mView);*/
 
 		auto WorldToScreen = [this, i](rvector &v){
@@ -476,7 +475,7 @@ void Portal::Render()
 			float RScx = (float)RSwx + x1;
 			float RScy = (float)RSwy + y1;
 
-			D3DXMatrixIdentity(&mViewport);
+			GetIdentityMatrix(mViewport);
 			mViewport._11 = RSwx;
 			mViewport._22 = -RSwy;
 			mViewport._41 = RScx;
@@ -506,8 +505,8 @@ void Portal::Render()
 
 		/*struct D3DVERTEX
 		{
-			D3DXVECTOR3 p;
-			D3DXVECTOR3 n;
+			rvector p;
+			rvector n;
 			FLOAT       tu, tv;
 		};
 
@@ -543,7 +542,7 @@ void Portal::Render()
 	pStateBlock->Apply();
 	SAFE_RELEASE(pStateBlock);
 
-	/*D3DXMATRIX mView;
+	/*rmatrix mView;
 	RGetDevice()->GetTransform(D3DTS_VIEW, &mView);
 
 	auto DrawTextF = [](int x, int y, const char *szFmt, ...){
@@ -560,10 +559,10 @@ void Portal::Render()
 	DrawTextF(5, 200 + (g_Settings.nFontSize + 1) * itr++, "%f %f %f %f", mView._31, mView._32, mView._33, mView._34);
 	DrawTextF(5, 200 + (g_Settings.nFontSize + 1) * itr++, "%f %f %f %f", mView._41, mView._42, mView._43, mView._44);
 	
-	D3DXVECTOR3 pos = ZGetCamera()->m_Position;
-	D3DXVECTOR3 at = pos + ZGetGame()->m_pMyCharacter->GetDirection();
-	D3DXVECTOR3 up = D3DXVECTOR3(0.f, 0.f, 1.f);
-	D3DXMatrixLookAtLH(&mView, &pos, &at, &up);
+	rvector pos = ZGetCamera()->m_Position;
+	rvector at = pos + ZGetGame()->m_pMyCharacter->GetDirection();
+	rvector up = rvector(0.f, 0.f, 1.f);
+	rmatrixLookAtLH(&mView, &pos, &at, &up);
 	DrawTextF(5, 200 + (g_Settings.nFontSize + 1) * itr++, "%f %f %f %f", mView._11, mView._12, mView._13, mView._14);
 	DrawTextF(5, 200 + (g_Settings.nFontSize + 1) * itr++, "%f %f %f %f", mView._21, mView._22, mView._23, mView._24);
 	DrawTextF(5, 200 + (g_Settings.nFontSize + 1) * itr++, "%f %f %f %f", mView._31, mView._32, mView._33, mView._34);
@@ -622,23 +621,23 @@ void Portal::OnShot()
 		return;
 #endif
 	
-	D3DXVECTOR3 Pos, Dir;
+	rvector Pos, Dir;
 	GetIntersectedScreenLine(Pos, Dir);
 
 	ZPICKINFO zpi;
 	if (!ZGetGame()->Pick(ZGetGame()->m_pMyCharacter, Pos, Dir, &zpi, RM_FLAG_ADDITIVE | RM_FLAG_HIDE | RM_FLAG_PASSBULLET) || !zpi.bBspPicked)
 		return;
 
-	rvector normal = D3DXVECTOR3(zpi.bpi.pInfo->plane.a, zpi.bpi.pInfo->plane.b, zpi.bpi.pInfo->plane.c);
+	rvector normal = rvector(zpi.bpi.pInfo->plane.a, zpi.bpi.pInfo->plane.b, zpi.bpi.pInfo->plane.c);
 	rvector pos = zpi.bpi.PickPos + normal * 5;
 	rvector up = fabs(normal.z) != 1 ? rvector(0, 0, 1) : rvector(1, 0, 0);
 
 	ZPostPortal(n, pos, normal, up);
 }
 
-D3DXVECTOR3 g_v[4];
+rvector g_v[4];
 
-bool Portal::RedirectPos(D3DXVECTOR3 &from, D3DXVECTOR3 &to)
+bool Portal::RedirectPos(rvector &from, rvector &to)
 {
 	if (!bPortalSetExists)
 		return false;
@@ -652,10 +651,10 @@ bool Portal::RedirectPos(D3DXVECTOR3 &from, D3DXVECTOR3 &to)
 			auto& portalinfo = portalpair[i];
 			auto& other = portalpair[!i];
 
-			D3DXVECTOR3 dim = D3DXVECTOR3(.1f, 100.f, 150.f);
-			D3DXVECTOR3 v1 = portalinfo.vPos - dim;
-			D3DXVECTOR3 v2 = portalinfo.vPos + dim;
-			D3DXVECTOR3 hit;
+			rvector dim = rvector(.1f, 100.f, 150.f);
+			rvector v1 = portalinfo.vPos - dim;
+			rvector v2 = portalinfo.vPos + dim;
+			rvector hit;
 
 			g_v[0] = from;
 			g_v[1] = to;
@@ -669,9 +668,9 @@ bool Portal::RedirectPos(D3DXVECTOR3 &from, D3DXVECTOR3 &to)
 			if (!LinePortalIntersection(from, to, portalinfo, hit))
 				continue;
 
-			/*D3DXMATRIX mat;
+			/*rmatrix mat;
 
-			D3DXVECTOR3 right, up;
+			rvector right, up;
 
 			CrossProduct(&right, vUp[!i], dir);
 			Normalize(right);
@@ -749,7 +748,7 @@ void Portal::DrawFakeCharacter(ZCharacter *pZChar)
 	mat = oldmat;
 }
 
-bool Portal::Move(ZObject *pObj, D3DXVECTOR3 &diff)
+bool Portal::Move(ZObject *pObj, rvector &diff)
 {
 	if (!bPortalSetExists)
 		return false;
@@ -924,9 +923,9 @@ void Portal::RedirectCamera()
 	/*pZCam->m_Position = newpos;
 	pZCam->SetDirection(-newdir);*/
 
-	D3DXMATRIX mView;
+	rmatrix mView;
 
-	MakeViewMatrix(mView, newpos, newdir, D3DXVECTOR3(0, 0, 1));
+	mView = ViewMatrix(newpos, newdir, rvector(0, 0, 1));
 	RGetDevice()->SetTransform(D3DTS_VIEW, &mView);
 
 	vCameraPos = newpos;
@@ -988,7 +987,7 @@ PortalInfo* Portal::LineIntersect(const v3& l1, const v3& l2)
 	return nullptr;
 }
 
-bool Portal::CheckIntersection(const D3DXVECTOR3 &target, float fRadius, float fHeight, PortalInfo **pppi)
+bool Portal::CheckIntersection(const rvector &target, float fRadius, float fHeight, PortalInfo **pppi)
 {
 	rvector mins = target - rvector(fRadius, fRadius, 0);
 	rvector maxs = target + rvector(fRadius, fRadius, fHeight);
@@ -1017,12 +1016,12 @@ bool Portal::ZObjectPortalIntersection(const ZObject *pObj, PortalInfo **retppi)
 	return CheckIntersection(pObj->m_Position, pObj->GetCollRadius(), pObj->GetCollHeight(), retppi);
 }
 
-bool Portal::LinePortalIntersection(const D3DXVECTOR3 &L1, const D3DXVECTOR3 &L2, const PortalInfo &portalinfo, D3DXVECTOR3 &Hit)
+bool Portal::LinePortalIntersection(const rvector &L1, const rvector &L2, const PortalInfo &portalinfo, rvector &Hit)
 {
 	return LineOBBIntersection(portalinfo.matWorld, portalinfo.matInvWorld, vDim, L1, L2, Hit);
 }
 
-static bool LineOBBIntersection(const D3DXMATRIX &matWorld, const D3DXMATRIX &matInvWorld, const D3DXVECTOR3 &extents, const D3DXVECTOR3 &L1, const D3DXVECTOR3 &L2, D3DXVECTOR3 &Hit)
+static bool LineOBBIntersection(const rmatrix &matWorld, const rmatrix &matInvWorld, const rvector &extents, const rvector &L1, const rvector &L2, rvector &Hit)
 {
 	rvector mins, maxs, l1, l2;
 
@@ -1042,7 +1041,7 @@ static bool LineOBBIntersection(const D3DXMATRIX &matWorld, const D3DXMATRIX &ma
 	return true;
 }
 
-static bool LineOBBIntersection(const D3DXVECTOR3 &center, const D3DXVECTOR3 &dir, const D3DXVECTOR3 &up, const D3DXVECTOR3 &extents, const D3DXVECTOR3 &L1, const D3DXVECTOR3 &L2, D3DXVECTOR3 &Hit)
+static bool LineOBBIntersection(const rvector &center, const rvector &dir, const rvector &up, const rvector &extents, const rvector &L1, const rvector &L2, rvector &Hit)
 {
 	rvector mins, maxs, l1, l2;
 
@@ -1068,16 +1067,16 @@ static bool LineOBBIntersection(const D3DXVECTOR3 &center, const D3DXVECTOR3 &di
 	return true;
 }
 
-static bool LineAABBIntersection(const D3DXVECTOR3 &B1, const D3DXVECTOR3 &B2, const D3DXVECTOR3 &L1, const D3DXVECTOR3 &L2, D3DXVECTOR3 &Hit)
+static bool LineAABBIntersection(const rvector &B1, const rvector &B2, const rvector &L1, const rvector &L2, rvector &Hit)
 {
-	auto GetIntersection = [](float fDst1, float fDst2, const D3DXVECTOR3 &P1, const D3DXVECTOR3 &P2, D3DXVECTOR3 &Hit) -> bool {
+	auto GetIntersection = [](float fDst1, float fDst2, const rvector &P1, const rvector &P2, rvector &Hit) -> bool {
 		if ((fDst1 * fDst2) >= 0.0f) return 0;
 		if (fDst1 == fDst2) return 0;
 		Hit = P1 + (P2 - P1) * (-fDst1 / (fDst2 - fDst1));
 		return 1;
 	};
 
-	auto InBox = [](const D3DXVECTOR3 &Hit, const D3DXVECTOR3 &B1, const D3DXVECTOR3 &B2, const int Axis) -> bool {
+	auto InBox = [](const rvector &Hit, const rvector &B1, const rvector &B2, const int Axis) -> bool {
 		if (Axis == 1 && Hit.z > B1.z && Hit.z < B2.z && Hit.y > B1.y && Hit.y < B2.y) return 1;
 		if (Axis == 2 && Hit.z > B1.z && Hit.z < B2.z && Hit.x > B1.x && Hit.x < B2.x) return 1;
 		if (Axis == 3 && Hit.x > B1.x && Hit.x < B2.x && Hit.y > B1.y && Hit.y < B2.y) return 1;
@@ -1109,12 +1108,12 @@ static bool LineAABBIntersection(const D3DXVECTOR3 &B1, const D3DXVECTOR3 &B2, c
 	return false;
 }
 
-bool Portal::AABBPortalIntersection(const D3DXVECTOR3 &B1, const D3DXVECTOR3 &B2, const PortalInfo &ppi)
+bool Portal::AABBPortalIntersection(const rvector &B1, const rvector &B2, const PortalInfo &ppi)
 {
 	return AABBAABBIntersection(ppi.bb.vmin, ppi.bb.vmax, B1, B2);
 }
 
-static bool AABBAABBIntersection(const D3DXVECTOR3 mins1, const D3DXVECTOR3 maxs1, const D3DXVECTOR3 mins2, const D3DXVECTOR3 maxs2)
+static bool AABBAABBIntersection(const rvector mins1, const rvector maxs1, const rvector mins2, const rvector maxs2)
 {
 	if (mins1.x > maxs2.x)
 		return false;
@@ -1137,7 +1136,7 @@ static bool AABBAABBIntersection(const D3DXVECTOR3 mins1, const D3DXVECTOR3 maxs
 	return true;
 }
 
-static void MakeOrientationMatrix(D3DXMATRIX &mat, const D3DXVECTOR3 &dir, const D3DXVECTOR3 &up)
+static void MakeOrientationMatrix(rmatrix &mat, const rvector &dir, const rvector &up)
 {
 	rvector right, upn;
 
@@ -1147,20 +1146,13 @@ static void MakeOrientationMatrix(D3DXMATRIX &mat, const D3DXVECTOR3 &dir, const
 	D3DXVec3Cross(&upn, &right, &dir);
 	D3DXVec3Normalize(&upn, &upn);
 
-	D3DXMatrixIdentity(&mat);
+	GetIdentityMatrix(mat);
 	mat._11 = right.x; mat._12 = right.y; mat._13 = right.z;
 	mat._21 = upn.x; mat._22 = upn.y; mat._23 = upn.z;
 	mat._31 = -dir.x; mat._32 = -dir.y; mat._33 = -dir.z;
 }
 
-static void MakeViewMatrix(D3DXMATRIX &mat, const D3DXVECTOR3 &pos, const D3DXVECTOR3 &dir, const D3DXVECTOR3 &up)
-{
-	rvector at = pos + dir;
-
-	D3DXMatrixLookAtLH(&mat, &pos, &at, &up);
-}
-
-static void MakeObliquelyClippingProjectionMatrix(D3DXMATRIX &matProjection, const D3DXMATRIX &matView, const D3DXVECTOR3 &p, const D3DXVECTOR3 &normal)
+static void MakeObliquelyClippingProjectionMatrix(rmatrix &matProjection, const rmatrix &matView, const rvector &p, const rvector &normal)
 {
 	//MakeProjectionMatrix(matProjection);
 
@@ -1168,10 +1160,7 @@ static void MakeObliquelyClippingProjectionMatrix(D3DXMATRIX &matProjection, con
 
 	D3DXPlaneFromPointNormal(&plane, &p, &normal);
 
-	D3DXMATRIX WorldToView = matView;
-
-	D3DXMatrixInverse(&WorldToView, nullptr, &WorldToView);
-	D3DXMatrixTranspose(&WorldToView, &WorldToView);
+	rmatrix WorldToView = Transpose(Inverse(matView));
 
 	D3DXVECTOR4 projClipPlane;
 	v4 vectorplane{ plane };
@@ -1212,7 +1201,7 @@ static void MakeObliquelyClippingProjectionMatrix(D3DXMATRIX &matProjection, con
 	matProjection(3, 2) = c.w;
 }
 
-static void MakeObliquelyClippingProjectionMatrixNVIDIA(D3DXMATRIX &matProjection, const D3DXMATRIX &matView, const D3DXVECTOR3 &p, const D3DXVECTOR3 &normal)
+static void MakeObliquelyClippingProjectionMatrixNVIDIA(rmatrix &matProjection, const rmatrix &matView, const rvector &p, const rvector &normal)
 {
 	rplane plane;
 
@@ -1220,10 +1209,7 @@ static void MakeObliquelyClippingProjectionMatrixNVIDIA(D3DXMATRIX &matProjectio
 
 	matProjection = GetDefaultProjectionMatrix();
 
-	D3DXMATRIX WorldToProjection = matView * matProjection;
-
-	D3DXMatrixInverse(&WorldToProjection, NULL, &WorldToProjection);
-	D3DXMatrixTranspose(&WorldToProjection, &WorldToProjection);
+	rmatrix WorldToProjection = Transpose(Inverse(matView * matProjection));
 
 	D3DXVECTOR4 clipPlane(plane.a, plane.b, plane.c, plane.d);
 	D3DXVECTOR4 projClipPlane;
@@ -1240,7 +1226,7 @@ static void MakeObliquelyClippingProjectionMatrixNVIDIA(D3DXMATRIX &matProjectio
 	}
 
 	matrix mat;
-	D3DXMatrixIdentity(&mat);
+	GetIdentityMatrix(mat);
 	mat(0, 2) = projClipPlane.x;
 	mat(1, 2) = projClipPlane.y;
 	mat(2, 2) = projClipPlane.z;
@@ -1256,9 +1242,9 @@ void Portal::DeletePlayer(ZCharacter *pZChar)
 		PortalList.erase(it);
 }
 
-static void MakePlane(D3DXPLANE &plane, const D3DXVECTOR3 &v, const D3DXVECTOR3 &u, const D3DXVECTOR3 &origin)
+static void MakePlane(D3DXPLANE &plane, const rvector &v, const rvector &u, const rvector &origin)
 {
-	D3DXVECTOR3 a = v - origin, b = u - origin, normal;
+	rvector a = v - origin, b = u - origin, normal;
 	CrossProduct(&normal, a, b);
 	Normalize(normal);
 	plane.a = normal.x;
@@ -1295,7 +1281,7 @@ void Portal::Update(RecursionContext& rc)
 
 void Portal::RenderPortals(const RecursionContext& rc)
 {
-	D3DXMATRIX mOrigWorld, mOrigView, mOrigProjection;
+	rmatrix mOrigWorld, mOrigView, mOrigProjection;
 	rplane OrigViewFrustum[6];
 
 	RGetDevice()->GetTransform(D3DTS_WORLD, &mOrigWorld);
@@ -1363,12 +1349,12 @@ void Portal::RenderPortals(const RecursionContext& rc)
 
 			rmatrix mView;
 
-			D3DXVECTOR3 pos = rc.Cam.Pos * portalinfo.matTransform,
+			rvector pos = rc.Cam.Pos * portalinfo.matTransform,
 				dir = rc.Cam.Dir * portalinfo.matRot;
 
-			D3DXVECTOR3 at = pos + dir, up = portalinfo.Other->vUp;
+			rvector up = portalinfo.Other->vUp;
 
-			D3DXMatrixLookAtLH(&mView, &pos, &at, &up);
+			mView = ViewMatrix(pos, dir, up);
 
 			RGetDevice()->SetTransform(D3DTS_VIEW, &mView);
 
@@ -1417,7 +1403,7 @@ void Portal::WriteDepth(const RecursionContext& rc)
 {
 	RGetDevice()->Clear(0, nullptr, D3DCLEAR_ZBUFFER, 0x00000000, 1.0f, 0.0f);
 
-	D3DXMATRIX mOrigWorld, mOrigView, mOrigProjection;
+	rmatrix mOrigWorld, mOrigView, mOrigProjection;
 
 	RGetDevice()->GetTransform(D3DTS_WORLD, &mOrigWorld);
 	RGetDevice()->GetTransform(D3DTS_VIEW, &mOrigView);
@@ -1460,8 +1446,8 @@ void Portal::WriteDepth(const RecursionContext& rc)
 	RGetDevice()->SetTransform(D3DTS_PROJECTION, &mOrigProjection);
 }
 
-void Portal::CreatePortal(ZCharacter *pZChar, int iPortal, const D3DXVECTOR3 &vPos,
-	const D3DXVECTOR3 &vNormal,const D3DXVECTOR3 &vUp)
+void Portal::CreatePortal(ZCharacter *pZChar, int iPortal, const rvector &vPos,
+	const rvector &vNormal,const rvector &vUp)
 {
 	auto& portalpair = PortalList[pZChar];
 	auto& portalinfo = portalpair[iPortal];
@@ -1476,7 +1462,7 @@ void Portal::CreatePortal(ZCharacter *pZChar, int iPortal, const D3DXVECTOR3 &vP
 
 	rvector Pos = portalinfo.vPos;
 	rvector Dir = -portalinfo.vNormal;
-	D3DXVECTOR3 local_up,
+	rvector local_up,
 		right;
 
 	rmatrix matTranslation;
@@ -1490,16 +1476,16 @@ void Portal::CreatePortal(ZCharacter *pZChar, int iPortal, const D3DXVECTOR3 &vP
 	rvector dir = Dir;
 
 	rmatrix mat;
-	D3DXMatrixIdentity(&mat);
+	GetIdentityMatrix(mat);
 	mat._11 = right.x; mat._12 = right.y; mat._13 = right.z;
 	mat._21 = local_up.x; mat._22 = local_up.y; mat._23 = local_up.z;
 	mat._31 = -dir.x; mat._32 = -dir.y; mat._33 = -dir.z;
 
-	D3DXMatrixTranslation(&matTranslation, Pos.x, Pos.y, Pos.z);
+	matTranslation = TranslationMatrix(Pos);
 
 	portalinfo.matWorld = mat * matTranslation;
 
-	D3DXMatrixInverse(&portalinfo.matInvWorld, NULL, &portalinfo.matWorld);
+	portalinfo.matInvWorld = Inverse(portalinfo.matWorld);
 
 	for (int i = 0; i < 2; i++)
 	{
@@ -1509,12 +1495,12 @@ void Portal::CreatePortal(ZCharacter *pZChar, int iPortal, const D3DXVECTOR3 &vP
 
 		MakeOrientationMatrix(mat1, pi.vNormal, pi.vUp);
 		MakeOrientationMatrix(mat2, -pi.Other->vNormal, pi.Other->vUp);
-		D3DXMatrixInverse(&mat1, NULL, &mat1);
+		mat1 = Inverse(mat1);
 
 		pi.matRot = mat1 * mat2;
 
-		D3DXMatrixTranslation(&mat1, -pi.vPos.x, -pi.vPos.y, -pi.vPos.z);
-		D3DXMatrixTranslation(&mat2, pi.Other->vPos.x, pi.Other->vPos.y, pi.Other->vPos.z);
+		mat1 = TranslationMatrix(-pi.vPos);
+		mat2 = TranslationMatrix(pi.Other->vPos);
 
 		pi.matTransform = mat1 * pi.matRot * mat2;
 	}
@@ -1559,7 +1545,7 @@ void Portal::CreatePortal(ZCharacter *pZChar, int iPortal, const D3DXVECTOR3 &vP
 	portalinfo.Far.d = -DotProduct(normal, portalinfo.vPos - normal * 100000);
 }
 
-static void MakeFrustum(D3DXPLANE (&Frustum)[6], D3DXMATRIX View, D3DXVECTOR3 Pos, D3DXVECTOR3 Dir, float Near = 5)
+static void MakeFrustum(D3DXPLANE (&Frustum)[6], rmatrix View, rvector Pos, rvector Dir, float Near = 5)
 {
 	auto ComputeViewFrustum = [&](rplane *plane, float x, float y, float z)
 	{
@@ -1644,12 +1630,12 @@ void Portal::UpdateAndRender(const RecursionContext* PrevContext)
 
 			RGetDevice()->GetTransform(D3DTS_VIEW, &OrigView);
 
-			D3DXVECTOR3 pos = rc.Cam.Pos,
+			rvector pos = rc.Cam.Pos,
 				dir = rc.Cam.Dir;
 
-			D3DXVECTOR3 at = pos + dir, up = rc.ViewingPortal->vUp;
+			rvector up = rc.ViewingPortal->vUp;
 
-			D3DXMatrixLookAtLH(&View, &pos, &at, &up);
+			View = ViewMatrix(pos, dir, up);
 		}
 
 		Update(rc);
@@ -1679,7 +1665,7 @@ void Portal::UpdateAndRender(const RecursionContext* PrevContext)
 				v3 CamPos = rc.Cam.Pos * portal.pi.matTransform;
 
 				rmatrix world;
-				D3DXMatrixIdentity(&world);
+				GetIdentityMatrix(world);
 				RGetDevice()->SetTransform(D3DTS_WORLD, &world);
 				RGetDevice()->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
 				RGetDevice()->SetRenderState(D3DRS_LIGHTING, FALSE);

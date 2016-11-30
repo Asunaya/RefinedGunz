@@ -464,7 +464,7 @@ private:
 	float Scale = 1.0f;
 };
 
-void ZChangeCharParts(RVisualMesh* pVMesh, MMatchSex nSex, int nHair, int nFace, unsigned long int* pItemID);
+void ZChangeCharParts(RVisualMesh* pVMesh, MMatchSex nSex, int nHair, int nFace, u32* pItemID);
 void ZChangeCharWeaponMesh(RVisualMesh* pVMesh, unsigned long int nWeaponID);
 bool CheckTeenVersionMesh(RMesh** ppMesh);
 

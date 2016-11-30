@@ -57,7 +57,7 @@ static int	 g_lvert_index_pos = 0;
 
 ////////////////////////////////////////////////////////////
 
-void RMesh::Render(const D3DXMATRIX* world_mat, bool NoPartsChange)
+void RMesh::Render(const rmatrix* world_mat, bool NoPartsChange)
 {
 	RenderSub(*world_mat, NoPartsChange);
 }
@@ -89,7 +89,7 @@ bool RMesh::CalcParts(RMeshNode* pPartsMeshNode,RMeshNode* pMeshNode,bool NoPart
 #define _SORT_ALPHA_NODE_TABLE	100
 #define _SORT_LAST_NODE_TABLE	100
 
-void RMesh::RenderSub(const D3DXMATRIX& world_mat, bool NoPartsChange)
+void RMesh::RenderSub(const rmatrix& world_mat, bool NoPartsChange)
 {
 	__BP(198, "RMesh::RenderSub");
 
@@ -278,7 +278,7 @@ void RMesh::RenderSub(const D3DXMATRIX& world_mat, bool NoPartsChange)
 		if (auto* pATMNode = pLastNode[n])
 			RenderNode(pATMNode, world_mat);
 
-	static D3DXMATRIX _init_mat = GetIdentityMatrix();
+	static rmatrix _init_mat = GetIdentityMatrix();
 	dev->SetTransform( D3DTS_WORLD, &_init_mat );
 
 	__EP(500);
@@ -424,7 +424,7 @@ public:
 	int		m_tAddPos;
 };
 
-void BBoxSubCalc(D3DXVECTOR3* max,D3DXVECTOR3* min);
+void BBoxSubCalc(rvector* max,rvector* min);
 
 bool RMesh::CheckOcclusion(RMeshNode *pMeshNode)
 {
@@ -460,7 +460,7 @@ bool RMesh::CheckOcclusion(RMeshNode *pMeshNode)
 	return true;
 }
 
-void RMesh::RenderNode(RMeshNode *pMeshNode, const D3DXMATRIX& world_mat)
+void RMesh::RenderNode(RMeshNode *pMeshNode, const rmatrix& world_mat)
 {
 	if (pMeshNode->m_face_num == 0) return;
 
@@ -537,9 +537,9 @@ static bool find_intersects_triangle_sub(const rvector& orig, const rvector& dir
 	return true;
 }
 
-bool RMesh::CalcIntersectsTriangle(const v3& origin, const v3& dir, RPickInfo* pInfo, D3DXMATRIX* world_mat, bool fastmode)
+bool RMesh::CalcIntersectsTriangle(const v3& origin, const v3& dir, RPickInfo* pInfo, rmatrix* world_mat, bool fastmode)
 {
-	D3DXVECTOR3 _v;
+	rvector _v;
 
 	float best_t = 9999.f;
 

@@ -19,7 +19,7 @@ struct RParticle {
 
 struct POINTVERTEX
 {
-	D3DXVECTOR3 v;
+	rvector v;
 	D3DCOLOR    color;
 
 	static const DWORD FVF;

@@ -607,9 +607,7 @@ static void GetRotAniMat(matrix& mat, RAnimationNode& node, const matrix* parent
 	rmatrix buffer, Inv;
 
 	if (node.m_rot_cnt) {
-		rquaternion out = node.GetRotValue(frame);
-
-		D3DXMatrixRotationQuaternion(&mat, &out);
+		mat = QuaternionToMatrix(node.GetRotValue(frame));
 	}
 	else {
 

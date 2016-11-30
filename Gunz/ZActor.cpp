@@ -525,7 +525,7 @@ bool ZActor::ProcessMotion(float fDelta)
 	rvector dir = m_Direction;
 	dir.z = 0;
 
-	D3DXMATRIX world;
+	rmatrix world;
 	MakeWorldMatrix(&world,rvector(0,0,0), dir,rvector(0,0,1));
 
 	rvector MeshPosition ;

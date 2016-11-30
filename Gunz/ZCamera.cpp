@@ -293,14 +293,14 @@ bool ZCamera::CheckCollisionWall(float &fRealDist, rvector& pos, rvector& dir)
 	float fPH = (fNearZ / e);
 
 	bool bCollisionWall = false;
-	rmatrix matView;
 
 	pos2 = pos;
 	rvector tar = tarpos + (up2 * fPV);
 	rvector dir2;
 	dir2 = tar - pos2;
-	D3DXVec3Normalize(&dir2, &dir2);
-	D3DXMatrixLookAtLH(&matView, &pos2, &dir, &up2);
+	Normalize(dir2);
+	// NOTE: This was using dir as at??? Figure out why
+	auto matView = ViewMatrix(pos2, Normalized(dir - pos2), up2);
 
 	if (ZGetGame()->GetWorld()->GetBsp()->Pick(pos2, dir2, &bpi))
 	{
@@ -387,7 +387,7 @@ bool ZCamera::CheckCollisionWall(float &fRealDist, rvector& pos, rvector& dir)
 	tar = tarpos - (up2 * fPV);
 	dir2 = tar - pos2;
 	D3DXVec3Normalize(&dir2, &dir2);
-	D3DXMatrixLookAtLH(&matView, &pos2, &dir2, &up2);
+	matView = ViewMatrix(pos2, Normalized(dir2 - pos2), up2);
 
 	if (ZGetGame()->GetWorld()->GetBsp()->Pick(pos2, dir2, &bpi))
 	{

@@ -34,7 +34,7 @@ public:
 	void	Render();
 	void	Render(int id);
 
-	void	RenderFast(int id,D3DXMATRIX* unit_mat);
+	void	RenderFast(int id,rmatrix* unit_mat);
 
 	RMesh*	GetFast(int id);
 	RMesh*	Get(const char* name);

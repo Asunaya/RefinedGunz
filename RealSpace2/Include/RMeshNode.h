@@ -25,12 +25,8 @@ enum CalcVertexBufferBboxMode
 class RBoneBaseMatrix
 {
 public:
-	RBoneBaseMatrix() {
-		D3DXMatrixIdentity(&mat);
-		id = -1;
-	}
-	D3DXMATRIX	mat;
-	int			id;
+	rmatrix	mat = GetIdentityMatrix();
+	int	id = -1;
 };
 
 #define MAX_MATRIX		60
@@ -106,22 +102,22 @@ public:
 	void MakeVertexBuffer(int index, bool lvert, char* pBuf, int _vsize, DWORD flag);
 	bool MakeVSVertexBuffer();
 
-	void RenderNodeVS(RMesh* pMesh, const D3DXMATRIX& world_mat, ESHADER shader_ = SHADER_SKIN);
+	void RenderNodeVS(RMesh* pMesh, const rmatrix& world_mat, ESHADER shader_ = SHADER_SKIN);
 
-	void Render(D3DXMATRIX* pWorldMatrix = NULL);
+	void Render(rmatrix* pWorldMatrix = NULL);
 
 	RBoneBaseMatrix* GetBaseMatrix(int pid);
 
 	bool isSoftRender();
 
-	void CalcVertexBuffer(const D3DXMATRIX& world_mat, bool box = false);
-	bool CalcPickVertexBuffer(const D3DXMATRIX& world_mat, std::vector<rvector>& OutVecs);
+	void CalcVertexBuffer(const rmatrix& world_mat, bool box = false);
+	bool CalcPickVertexBuffer(const rmatrix& world_mat, std::vector<rvector>& OutVecs);
 	int	 CalcVertexBuffer_VertexAni(int frame);
-	void CalcVertexBuffer_Physique(const D3DXMATRIX& world_mat, int frame);
-	void CalcVertexBuffer_Tm(const D3DXMATRIX& world_mat, int frame);
+	void CalcVertexBuffer_Physique(const rmatrix& world_mat, int frame);
+	void CalcVertexBuffer_Tm(const rmatrix& world_mat, int frame);
 	void CalcVertexBuffer_Bbox(CalcVertexBufferBboxMode nBboxMode, rmatrix& mat);
 
-	void CalcVertexNormal(D3DXMATRIX* world_mat);
+	void CalcVertexNormal(rmatrix* world_mat);
 
 	void CheckAlign(const rmatrix& worldmat);
 	void CheckAlignMapObject(rmatrix& hr_mat);
@@ -152,7 +148,7 @@ public:
 	int m_MatrixMap[MAX_MATRIX]; // Matrix Register Bone index
 	int m_MatrixCount;
 
-	D3DXMATRIX		m_ModelWorldMatrix;
+	rmatrix		m_ModelWorldMatrix;
 
 	bool			m_bConnectPhysique;
 
@@ -163,7 +159,7 @@ public:
 #endif
 
 #ifdef SCALE_RMESHNODE
-	void SetScale(v3 vec) { D3DXMatrixScaling(&matScale, vec.x, vec.y, vec.z); ScaleEnabled = true; }
+	void SetScale(v3 vec) { rmatrixScaling(&matScale, vec.x, vec.y, vec.z); ScaleEnabled = true; }
 
 	bool ScaleEnabled = false;
 	matrix matScale;

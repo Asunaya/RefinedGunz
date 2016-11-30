@@ -1,5 +1,4 @@
-#ifndef ZCHARACTERVIEWLIST_H
-#define ZCHARACTERVIEWLIST_H
+#pragma once
 
 #include "ZPrerequisites.h"
 #include "ZMeshViewList.h"
@@ -20,9 +19,8 @@ public:
 	ZCharacterViewList(const char* szName=NULL, MWidget* pParent=NULL, MListener* pListener=NULL);
 	virtual ~ZCharacterViewList(void);
 
-	//void Add(const char* szName);
 	void Add(const MUID& uid, const char* szName, MMatchSex nSex, unsigned int nHair, unsigned int nFace, 
-		unsigned int nLevel, unsigned long int* itemids, bool bFireWall = false);
+		unsigned int nLevel, u32* itemids, bool bFireWall = false);
 	void Add(MMatchObjCache* pCache);
 
 	void Remove(const MUID& uid);
@@ -53,7 +51,6 @@ public:
 
 	void RefreshCharInfo();
 
-//	void UpdateSelectView();
 	ZCharacterView* FindSelectView(MUID uid);
 
 public:
@@ -68,8 +65,6 @@ public:
 
 
 private:
-//	ZCharacterView* m_SelectView;
-//	ZCharacterView* m_MySelectView;
 	MUID			m_MyUid;
 	MUID			m_SelectViewUID;
 
@@ -78,5 +73,3 @@ public:
 };
 
 ZCharacterViewList* ZGetCharacterViewList(GunzState nState);
-
-#endif

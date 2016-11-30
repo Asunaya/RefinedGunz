@@ -409,7 +409,6 @@
     <ClCompile Include="Source\RLightList.cpp" />
     <ClCompile Include="Source\RMaterialList.cpp" />
     <ClCompile Include="Source\ROcclusionList.cpp" />
-    <ClCompile Include="Source\RPVS.cpp" />
     <ClCompile Include="Source\RRoam.cpp" />
     <ClCompile Include="Source\RSolidBsp.cpp" />
     <ClCompile Include="Source\RAStar.cpp" />

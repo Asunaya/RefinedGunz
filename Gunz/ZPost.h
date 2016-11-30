@@ -6,7 +6,7 @@
 #include "MMatchTransDataType.h"
 #include "MMath.h"
 #include "stuff.h"
-
+#include "ZMyInfo.h"
 #include "SafeString.h"
 #include "VersionNo.h"
 

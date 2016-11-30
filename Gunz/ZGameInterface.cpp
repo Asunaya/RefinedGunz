@@ -4104,7 +4104,7 @@ void ZGameInterface::ShowEquipmentDialog(bool bShow)
 		ZMyInfo* pmi = ZGetMyInfo();
 		ZMyItemList* pil = ZGetMyInfo()->GetItemList();
 
-		unsigned long int nEquipedItemID[MMCIP_END];
+		u32 nEquipedItemID[MMCIP_END];
 
 		for (int i = 0; i < MMCIP_END; i++)
 		{

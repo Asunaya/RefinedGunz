@@ -173,9 +173,7 @@ void ZEffectFlashBang::Init( rvector& ExplosionPos_, rvector playerPos_, rvector
 
 		RGetDevice()->Clear( 0 , NULL, D3DCLEAR_TARGET|D3DCLEAR_ZBUFFER, 0x00000000, 1.0f, 0.0f );
 
-		rmatrix		view;
-		rvector		at	= RCameraPosition + RCameraDirection;
-		D3DXMatrixLookAtLH( &view, &RCameraPosition, &at, &RCameraUp);
+		auto view = ViewMatrix(RCameraPosition, RCameraDirection, RCameraUp);
 		RGetDevice()->SetTransform(D3DTS_VIEW, &view );
 
 		ZGetGame()->GetWorld()->GetBsp()->Draw();

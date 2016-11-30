@@ -94,7 +94,8 @@ bool ZCharacterViewList::OnCommand(MWidget* pWidget, const char* szMessage)
 }
 
 void ZCharacterViewList::Add(const MUID& uid, const char* szName, MMatchSex nSex, 
-		 unsigned int nHair, unsigned int nFace, unsigned int nLevel, unsigned long int* itemids, bool bFireWall)
+	unsigned int nHair, unsigned int nFace, unsigned int nLevel,
+	u32* itemids, bool bFireWall)
 {
 	if (Get(uid) != NULL)		return;
 	if (strlen(szName) <= 0)	return;
@@ -112,33 +113,24 @@ void ZCharacterViewList::Add(const MUID& uid, const char* szName, MMatchSex nSex
 
 	RecalcBounds();
 
-	/////////////////////////////////////////////////////////
-	// 내 캐릭터가 추가되는 경우 상세정보 뷰어 바꾸기
-
 	bool bMyChar = false;
 
 	if(ZGetGameClient())
 		if(ZGetGameClient()->GetPlayerUID()==uid) 
 			bMyChar = true;
 		
-	if( bMyChar ) {		//	캐릭터 장비 초기화
-
-//		m_MySelectView = pNew;
+	if( bMyChar ) {
 		m_MyUid = pNew->m_Info.UID;
 		m_SelectViewUID = pNew->m_Info.UID;
 
 		ChangeMyCharacterInfo();
 		SetSelectCharacter(pNew);
 	}
-
-	/////////////////////////////////////////////////////////
-
 }
 
 void ZCharacterViewList::Add(MMatchObjCache* pCache)
 {
-	unsigned long int nItemids[MMCIP_END];
-	memset(nItemids, 0, sizeof(nItemids));
+	u32 nItemids[MMCIP_END]{};
 
 	for (int i = 0; i < MMCIP_END; i++)
 	{
@@ -148,28 +140,7 @@ void ZCharacterViewList::Add(MMatchObjCache* pCache)
 	Add(pCache->GetUID(), pCache->GetName(), pCache->GetCostume()->nSex,
 		pCache->GetCostume()->nHair, pCache->GetCostume()->nFace, pCache->GetLevel(),
 		nItemids, !pCache->CheckFlag(MTD_PlayerFlags_BridgePeer));
-
-	/*
-	ZCharacterView* pView = pWidget->Get(pCache->GetUID());
-	if ( (pView) && (pCache->CheckFlag(MOBJCACHEFLAG_BRIDGEPEER)==false) )
-	pView->m_bFireWall = true;
-	*/
-
 }
-
-/*
-void ZCharacterViewList::UpdateSelectView()
-{
-	int index = GetChildIndex(m_SelectView);
-
-	if(index==-1) {
-
-		SetSelectCharacter(m_MySelectView);
-		m_SelectView = m_MySelectView;
-
-	}
-}
-*/
 
 ZCharacterView* ZCharacterViewList::FindSelectView(MUID uid)
 {
@@ -187,21 +158,18 @@ ZCharacterView* ZCharacterViewList::FindSelectView(MUID uid)
 	return NULL;
 }
 
-// 장비창 상점등에서 자신의 캐릭터가 변경된 경우 바뀐장비들을 갱신한다~
-// 뷰 리스트는 갱신하고 장비창과 상점창갱신 + 뷰어는 선택된것이 자신일 경우만~
-
 void ZCharacterViewList::ChangeCharacterInfo()
 {
 	ZMyInfo* pmi = ZGetMyInfo();
 
 	if(pmi==NULL) return;
 
-	ChangeMyCharacterInfo();//자신의 정보는 바꾸고~
+	ChangeMyCharacterInfo();
 
 	ZCharacterView* pCV = FindSelectView(m_SelectViewUID);
 	ZCharacterView* pMyCV = FindSelectView(m_MyUid);
 
-	if(pCV == NULL) {//없어졌다~, 내 캐릭으로 대체
+	if(pCV == NULL) {
 		SetSelectCharacter(pMyCV);
 	}
 	else if(pCV==pMyCV) {
@@ -302,14 +270,10 @@ ZCharacterView* ZCharacterViewList::GetLobbyCharShopViewer()
 	return m_pLobbyCharShopViewer;
 }
 
-// 캐릭터 장비 상태등이 바뀔경우 호출
-
 void ZCharacterViewList::RefreshCharInfo()
 {
 
 }
-
-// 자신의 캐릭터가 바뀌는 경우 : 뷰어 리스트와 장비창과 상점 갱신
 
 void ZCharacterViewList::ChangeMyCharacterInfo()
 {
@@ -320,7 +284,7 @@ void ZCharacterViewList::ChangeMyCharacterInfo()
 		pil->GetEquipedItemID(MMCIP_PRIMARY), pil->GetEquipedItemID(MMCIP_SECONDARY),
 		pil->GetEquipedItemID(MMCIP_CUSTOM1), pil->GetEquipedItemID(MMCIP_CUSTOM2));
 
-	unsigned long int nItemids[MMCIP_END];
+	u32 nItemids[MMCIP_END];
 
 	if(pmi) {
 
@@ -339,7 +303,6 @@ void ZCharacterViewList::ChangeMyCharacterInfo()
 		if(GetLobbyCharEqViewer()) {
 			GetLobbyCharEqViewer()->InitCharParts(pmi->GetSex(), pmi->GetHair(), pmi->GetFace(), nItemids);
 		}
-		// 리스트에서 자신의 정보 갱신
 
 		ZCharacterView* pMyCV = FindSelectView(m_MyUid);
 
@@ -348,9 +311,6 @@ void ZCharacterViewList::ChangeMyCharacterInfo()
 		}
 	}
 }
-
-// 다른캐릭터를 마우스 선택하는 경우 등에 호출
-// 로비와 스테이지의 캐릭터 뷰를 바꾼다..
 
 void ZCharacterViewList::ChangeLobbyCharacterView(ZCharacterView* pSelectView)
 {

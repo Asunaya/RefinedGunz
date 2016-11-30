@@ -107,10 +107,10 @@ void SetFileInfo(std::array<ReplayFile, 3>& Files)
 	Files[i].StageSetting.bForcedEntryEnabled = true;
 	Files[i].Players.resize(2);
 	Files[i].Players[0].IsHero = true;
-	strcpy(Files[i].Players[0].Info.szName, "Alwaysssss");
+	strcpy_safe(Files[i].Players[0].Info.szName, "Alwaysssss");
 	Files[i].Players[0].Info.nLevel = 1;
 	Files[i].Players[1].IsHero = false;
-	strcpy(Files[i].Players[1].Info.szName, "AMITYVILLE");
+	strcpy_safe(Files[i].Players[1].Info.szName, "AMITYVILLE");
 	Files[i].Players[0].Info.nLevel = 63;
 	Files[i].CommandStreamPos = 2250;
 	i++;
@@ -120,9 +120,9 @@ void SetFileInfo(std::array<ReplayFile, 3>& Files)
 	Files[i].StageSetting.nGameType = MMATCH_GAMETYPE_GLADIATOR_TEAM;
 	Files[i].Players.resize(2);
 	Files[i].Players[0].IsHero = true;
-	strcpy(Files[i].Players[0].Info.szName, "Rinnema");
+	strcpy_safe(Files[i].Players[0].Info.szName, "Rinnema");
 	Files[i].Players[1].IsHero = false;
-	strcpy(Files[i].Players[1].Info.szName, "bestgladna");
+	strcpy_safe(Files[i].Players[1].Info.szName, "bestgladna");
 	Files[i].CommandStreamPos = 1562;
 	i++;
 
@@ -131,16 +131,16 @@ void SetFileInfo(std::array<ReplayFile, 3>& Files)
 	Files[i].StageSetting.nGameType = MMATCH_GAMETYPE_GLADIATOR_TEAM;
 	Files[i].Players.resize(3);
 	Files[i].Players[0].IsHero = false;
-	strcpy(Files[i].Players[0].Info.szName, "Banner");
+	strcpy_safe(Files[i].Players[0].Info.szName, "Banner");
 	Files[i].Players[1].IsHero = true;
-	strcpy(Files[i].Players[1].Info.szName, "dystopiz");
+	strcpy_safe(Files[i].Players[1].Info.szName, "dystopiz");
 	Files[i].Players[2].IsHero = false;
-	strcpy(Files[i].Players[2].Info.szName, "MeetraSurik");
+	strcpy_safe(Files[i].Players[2].Info.szName, "MeetraSurik");
 	Files[i].CommandStreamPos = 2623;
 	i++;
 
 	std::string cwd(MAX_PATH, 0);
-	getcwd(&cwd[0], cwd.size());
+	_getcwd(&cwd[0], cwd.size());
 	cwd.resize(cwd.find_first_of('\0'));
 	printf("cwd: %s\n", cwd.c_str());
 	auto pos = cwd.find_last_of("\\/");

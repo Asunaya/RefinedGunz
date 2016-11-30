@@ -108,7 +108,7 @@ void RCloth::satisfyConstraints()
 			}
 
 			delta = *x2 - *x1;
-			deltaLegth = D3DXVec3Length( &delta );
+			deltaLegth = Magnitude(delta);
 			diff = (float) ( ( deltaLegth - c->restLength ) / (deltaLegth *  (w1 + w2) ));
 
 			*x1 += delta * w1 * diff;

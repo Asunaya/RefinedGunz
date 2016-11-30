@@ -181,9 +181,6 @@
     <ClCompile Include="Source\ROcclusionList.cpp">
       <Filter>Map</Filter>
     </ClCompile>
-    <ClCompile Include="Source\RPVS.cpp">
-      <Filter>Map</Filter>
-    </ClCompile>
     <ClCompile Include="Source\RRoam.cpp">
       <Filter>Map</Filter>
     </ClCompile>

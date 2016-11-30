@@ -63,7 +63,7 @@ void ZMyItemList::Clear()
 }
 
 
-unsigned long int ZMyItemList::GetEquipedItemID(MMatchCharItemParts parts)
+u32 ZMyItemList::GetEquipedItemID(MMatchCharItemParts parts)
 {
 	MITEMNODEMAP::iterator itor = m_ItemMap.find(m_uidEquipItems[(int)parts]);
 	if (itor != m_ItemMap.end())
@@ -90,7 +90,7 @@ MUID ZMyItemList::GetEquipedItemUID(MMatchCharItemParts parts)
 	}
 }
 
-unsigned long int ZMyItemList::GetItemID(int nItemIndex)
+u32 ZMyItemList::GetItemID(int nItemIndex)
 {
 	ZMyItemNode* pItemNode = GetItem(nItemIndex);
 	if (pItemNode == NULL) return 0;
@@ -98,7 +98,7 @@ unsigned long int ZMyItemList::GetItemID(int nItemIndex)
 
 }
 
-unsigned long int ZMyItemList::GetItemIDEquip(int nItemIndex)
+u32 ZMyItemList::GetItemIDEquip(int nItemIndex)
 {
 	ZMyItemNode* pItemNode = GetItemEquip(nItemIndex);
 	if (pItemNode == NULL) return 0;
@@ -289,14 +289,13 @@ void ZMyItemList::Serialize()
 	// 장비 캐릭터 뷰어
 	BEGIN_WIDGETLIST("EquipmentInformation", pResource, ZCharacterView*, pCharacterView);
 	ZMyInfo* pmi = ZGetMyInfo();
-	unsigned long int nEquipedItemID[MMCIP_END];
+	u32 nEquipedItemID[MMCIP_END];
 	for (int i = 0; i < MMCIP_END; i++)
 	{
 		nEquipedItemID[i] = GetEquipedItemID(MMatchCharItemParts(i));
 	}
 	pCharacterView->InitCharParts(pmi->GetSex(), pmi->GetHair(), pmi->GetFace(), nEquipedItemID);
-	//스테이지에서의 캐릭터룩을 바꿈..
-	ZCharacterView* pStageCharacterView = (ZCharacterView*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget("Stage_Charviewer");
+	auto* pStageCharacterView = (ZCharacterView*)ZGetGameInterface()->GetIDLResource()->FindWidget("Stage_Charviewer");
 	if(pStageCharacterView!= NULL)
 		pStageCharacterView->InitCharParts(pmi->GetSex(), pmi->GetHair(), pmi->GetFace(), nEquipedItemID);
 
@@ -304,11 +303,9 @@ void ZMyItemList::Serialize()
 
 	ZApplication::GetGameInterface()->ChangeEquipPartsToolTipAll();
 
-
-	// 상점 캐릭터 뷰어
 	BEGIN_WIDGETLIST("EquipmentInformationShop", pResource, ZCharacterView*, pCharacterView);
 	ZMyInfo* pmi = ZGetMyInfo();
-	unsigned long int nEquipedItemID[MMCIP_END];
+	u32 nEquipedItemID[MMCIP_END];
 	for (int i = 0; i < MMCIP_END; i++)
 	{
 		nEquipedItemID[i] = GetEquipedItemID(MMatchCharItemParts(i));
@@ -321,40 +318,35 @@ void ZMyItemList::SerializeAccountItem()
 {
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
 
-	// 갖고 있는 아이템 물품(인벤)
 	MListBox* pListBox = (MListBox*)pResource->FindWidget("AccountItemList");
 
-	if( pListBox )
+	if (pListBox)
 	{
-//		if ( (int)m_AccountItemMap.size() > 0)
-//		{
-			pListBox->RemoveAll();
-			m_AccountItemVector.clear();
+		pListBox->RemoveAll();
+		m_AccountItemVector.clear();
 
-			for (MACCOUNT_ITEMNODEMAP::iterator itor = m_AccountItemMap.begin();
-				itor != m_AccountItemMap.end(); ++itor)
+		for (MACCOUNT_ITEMNODEMAP::iterator itor = m_AccountItemMap.begin();
+		itor != m_AccountItemMap.end(); ++itor)
+		{
+			int nAIID = (*itor).first;
+			ZMyItemNode* pItemNode = (*itor).second;
+			u32 nItemID = pItemNode->GetItemID();
+
+			MMatchItemDesc* pItemDesc;
+			pItemDesc = MGetMatchItemDescMgr()->GetItemDesc(nItemID);
+
+			if (pItemDesc)
 			{
-				int nAIID = (*itor).first;
-				ZMyItemNode* pItemNode = (*itor).second;
-				unsigned long int nItemID = pItemNode->GetItemID();
+				((ZEquipmentListBox*)(pListBox))->Add(nAIID, nItemID, GetItemIconBitmap(pItemDesc, true),
+					pItemDesc->m_szName, pItemDesc->m_nResLevel);
 
-				MMatchItemDesc* pItemDesc;
-				pItemDesc = MGetMatchItemDescMgr()->GetItemDesc(nItemID);
-
-				if (pItemDesc)
-				{
-					((ZEquipmentListBox*)(pListBox))->Add(nAIID, nItemID, GetItemIconBitmap(pItemDesc, true), 
-						pItemDesc->m_szName, pItemDesc->m_nResLevel);
-
-					m_AccountItemVector.push_back(nItemID);
-				}
+				m_AccountItemVector.push_back(nItemID);
 			}
-
-//		}
+		}
 	}
 }
 
-void ZMyItemList::SetEquipItemID(unsigned long int* pEquipItemID)
+void ZMyItemList::SetEquipItemID(u32* pEquipItemID)
 {
 	memcpy(m_nEquipItemID, pEquipItemID, sizeof(m_nEquipItemID));
 }
@@ -379,16 +371,14 @@ void ZMyItemList::SetItemsAll(MTD_ItemNode* pItemNodes, const int nItemCount)
 		
 		bool bIsRentItem = false;
 		if ( pItemNodes[i].nRentMinutePeriodRemainder < RENT_MINUTE_PERIOD_UNLIMITED)
-			bIsRentItem = true;	// 기간제 아이템
+			bIsRentItem = true;
 
 		if (bIsRentItem  == false)
 		{
-			// 일반 아이템
 			pNewItemNode->Create(pItemNodes[i].uidItem, pItemNodes[i].nItemID);
 		}
 		else
 		{
-			// 기간제 아이템
 			pNewItemNode->Create(pItemNodes[i].uidItem, pItemNodes[i].nItemID, bIsRentItem, pItemNodes[i].nRentMinutePeriodRemainder);
 		}
 		
@@ -412,7 +402,7 @@ MUID ZMyItemList::GetItemUIDEquip(int nItemIndex)
 }
 
 
-unsigned long int ZMyItemList::GetAccountItemID(int nPos)
+u32 ZMyItemList::GetAccountItemID(int nPos)
 {
 	int nSIze = (int)m_AccountItemVector.size();
 
@@ -422,7 +412,7 @@ unsigned long int ZMyItemList::GetAccountItemID(int nPos)
 	return m_AccountItemVector[nPos];
 }
 
-unsigned long int ZMyItemList::GetItemID(const MUID& uidItem)
+u32 ZMyItemList::GetItemID(const MUID& uidItem)
 {
 	ZMyItemNode* pItemNode = GetItem(uidItem);
 	if (pItemNode == NULL) return 0;
@@ -508,7 +498,7 @@ int ZMyItemList::GetMaxWeight()
 }
 
 
-void ZMyItemList::AddAccountItem(int nAIID, unsigned long int nItemID, int nRentMinutePeriodRemainder)
+void ZMyItemList::AddAccountItem(int nAIID, u32 nItemID, int nRentMinutePeriodRemainder)
 {
 	ZMyItemNode* pItemNode = new ZMyItemNode();
 	bool bIsRentItem=false;
@@ -663,7 +653,7 @@ ZMyQuestItemMap::~ZMyQuestItemMap()
 
 
 
-bool ZMyQuestItemMap::Add( const unsigned long int nItemID, ZMyQuestItemNode* pQuestItem )
+bool ZMyQuestItemMap::Add( const u32 nItemID, ZMyQuestItemNode* pQuestItem )
 {
 	if( 0 == pQuestItem )
 		return false;
@@ -691,7 +681,7 @@ void ZMyQuestItemMap::Clear()
 }
 
 
-bool ZMyQuestItemMap::CreateQuestItem( const unsigned long int nItemID, const int nCount, MQuestItemDesc* pDesc )
+bool ZMyQuestItemMap::CreateQuestItem( const u32 nItemID, const int nCount, MQuestItemDesc* pDesc )
 {
 	if( (0 > nCount) || (0 == pDesc) )
 		return false;

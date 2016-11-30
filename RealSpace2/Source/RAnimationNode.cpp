@@ -31,7 +31,7 @@ RAnimationNode::RAnimationNode()
 
 	m_pConnectMesh = NULL;
 
-	D3DXMatrixIdentity(&m_mat_base);
+	GetIdentityMatrix(m_mat_base);
 }
 
 RAnimationNode::~RAnimationNode() 
@@ -53,22 +53,14 @@ RAnimationNode::~RAnimationNode()
 
 void RAnimationNode::ConnectToNameID()
 {
-	int id = RGetMeshNodeStringTable()->Get( m_Name );
-
-	if(id==-1) {//bip 가 아닌 일반 오브젝트들...
-
-	}
-
-	m_NameID = id;
+	m_NameID = RGetMeshNodeStringTable()->Get(m_Name);;
 }
-
-// pos ,pos+1 을 사용하니까 범위에 주의...
 
 float GetVisKey(RVisKey* pKey,int pos,int key_max,int frame)
 {
 	if(!pKey) return 1.f;
 
-	if( pos < 0 || pos >= key_max ) // 범위를 넘어서면..
+	if( pos < 0 || pos >= key_max )
 		return 1.0f;
 
 	float d = 1.f;;
@@ -115,12 +107,12 @@ float RAnimationNode::GetVisValue(int frame)
 	return GetVisKey(m_vis,key_pos,m_vis_cnt,frame);
 }
 
-D3DXQUATERNION RAnimationNode::GetRotValue(int frame)
+rquaternion RAnimationNode::GetRotValue(int frame)
 {
-	D3DXQUATERNION rq;
+	rquaternion rq;
 
 	if( m_rot_cnt==0 || m_quat==NULL ) {
-		D3DXQuaternionRotationMatrix(&rq,&m_mat_base);
+		rq = MatrixToQuaternion(m_mat_base);
 		return rq;
 	}
 
@@ -144,14 +136,14 @@ D3DXQUATERNION RAnimationNode::GetRotValue(int frame)
 
 	if (s != 0)	d = (float)(frame - m_quat[p].frame) / (float)s;
 
-	D3DXQuaternionSlerp(&rq,&m_quat[p],&m_quat[p+1],d);
+	D3DXQuaternionSlerp(&rq, &m_quat[p], &m_quat[p + 1], d);
 
 	return rq;
 }
 
-D3DXVECTOR3 RAnimationNode::GetPosValue(int frame)
+rvector RAnimationNode::GetPosValue(int frame)
 {
-	D3DXVECTOR3 v;
+	rvector v;
 
 	if( m_pos_cnt == 0 || m_pos == NULL ) {
 		return GetTransPos(m_mat_base);
@@ -185,7 +177,7 @@ D3DXVECTOR3 RAnimationNode::GetPosValue(int frame)
 	return v;
 }
 
-int	RAnimationNode::GetVecValue(int frame,D3DXVECTOR3* pVecTable)
+int	RAnimationNode::GetVecValue(int frame,rvector* pVecTable)
 {
 	DWORD dwFrame = frame;
 
@@ -199,8 +191,8 @@ int	RAnimationNode::GetVecValue(int frame,D3DXVECTOR3* pVecTable)
 
 		int vcnt = m_vertex_vcnt;
 
-		D3DXVECTOR3* v1 = m_vertex[vcnt-1];
-		memcpy(pVecTable,v1,sizeof(D3DXVECTOR3)*vcnt);
+		rvector* v1 = m_vertex[vcnt-1];
+		memcpy(pVecTable,v1,sizeof(rvector)*vcnt);
 
 		return vcnt;
 	}
@@ -213,10 +205,10 @@ int	RAnimationNode::GetVecValue(int frame,D3DXVECTOR3* pVecTable)
 
 	if (s != 0)	d = (frame - m_vertex_frame[j] )/(float)s;
 
-	D3DXVECTOR3* v1 = m_vertex[j];
-	D3DXVECTOR3* v2 = m_vertex[j+1];
+	rvector* v1 = m_vertex[j];
+	rvector* v2 = m_vertex[j+1];
 
-	D3DXVECTOR3 v;
+	rvector v;
 
 	int vcnt = m_vertex_vcnt;
 
@@ -246,12 +238,12 @@ rmatrix RAnimationNode::GetTMValue(int frame)
 /*
 	// 행렬보간은 충분한 테스트후 풀기..
 
-	D3DXMATRIX* matf;
-	D3DXMATRIX* matb;
+	rmatrix* matf;
+	rmatrix* matb;
 
-	D3DXMATRIX mat;
-	D3DXVECTOR3 vec[3];
-	D3DXVECTOR3 scale[3];
+	rmatrix mat;
+	rvector vec[3];
+	rvector scale[3];
 	D3DXQUATERNION quat[3];
 
 	int s;
@@ -261,8 +253,8 @@ rmatrix RAnimationNode::GetTMValue(int frame)
 
 	if (s != 0)	d = (float)(frame - m_mat[j].frame) / s;
 
-	matf = (D3DXMATRIX*)&m_mat[j];
-	matb = (D3DXMATRIX*)&m_mat[j+1];
+	matf = (rmatrix*)&m_mat[j];
+	matb = (rmatrix*)&m_mat[j+1];
 
 	// rot
 
@@ -271,7 +263,7 @@ rmatrix RAnimationNode::GetTMValue(int frame)
 
 	D3DXQuaternionSlerp(&quat[0],&quat[1],&quat[2],d);
 
-	D3DXMatrixRotationQuaternion(&mat,&quat[0]);
+	rmatrixRotationQuaternion(&mat,&quat[0]);
 
 	// scale
 

@@ -37,7 +37,6 @@ void ZEffectBulletMarkList::Add(const rvector &pos, const rvector &normal)
 
 	// Transform
 	rmatrix matTranslation;
-//	rmatrix matScaling
 	rmatrix matWorld;
 
 	rvector dir = normal;
@@ -46,12 +45,10 @@ void ZEffectBulletMarkList::Add(const rvector &pos, const rvector &normal)
 
 	rvector right;
 
-//	if(IS_EQ(dir.z,1.f)) up=rvector(1,0,0);
-
 	float dot = DotProduct(dir,up);
 
 	if(dot > 0.99f || dot < -0.99f)
-		up = rvector(0,1,0);// -.-;;
+		up = rvector(0,1,0);
 
 	D3DXVec3Cross(&right, &up, &dir);
 	D3DXVec3Normalize(&right, &right);
@@ -60,16 +57,14 @@ void ZEffectBulletMarkList::Add(const rvector &pos, const rvector &normal)
 	D3DXVec3Normalize(&up, &up);
 
 	rmatrix mat;
-	D3DXMatrixIdentity(&mat);
+	GetIdentityMatrix(mat);
 	mat._11=right.x;mat._12=right.y;mat._13=right.z;
 	mat._21=up.x;mat._22=up.y;mat._23=up.z;
 	mat._31=dir.x;mat._32=dir.y;mat._33=dir.z;
 
-	D3DXMatrixTranslation(&matTranslation, pos.x, pos.y, pos.z);
+	matTranslation = TranslationMatrix(pos);
 
-//	D3DXMatrixMultiply(&matWorld, &matScaling, &mat);
-//	D3DXMatrixMultiply(&matWorld, &matWorld, &matTranslation);
-	D3DXMatrixMultiply(&matWorld, &mat, &matTranslation);
+	matWorld = mat * matTranslation;
 
 
 	static ZEFFECTCUSTOMVERTEX v[] = {

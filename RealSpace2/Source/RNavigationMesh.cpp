@@ -198,9 +198,7 @@ void RNavigationMesh::Render()
 {
 	LPDIRECT3DDEVICE9 pd3dDevice=RGetDevice();
 
-	rmatrix id;
-	D3DXMatrixIdentity(&id);
-	RGetDevice()->SetTransform( D3DTS_WORLD , &id);
+	RGetDevice()->SetTransform(D3DTS_WORLD, &unmove(GetIdentityMatrix()));
 
 	pd3dDevice->SetFVF( D3DFVF_XYZ );
 	pd3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_CW );
@@ -214,22 +212,6 @@ void RNavigationMesh::Render()
 	pd3dDevice->SetTextureStageState( 1, D3DTSS_COLOROP,   D3DTOP_DISABLE );
 	pd3dDevice->SetTextureStageState( 1, D3DTSS_ALPHAOP,   D3DTOP_DISABLE );
 
-/*
-	for (RNodeArray::iterator itor = m_NodeArray.begin(); itor != m_NodeArray.end(); ++itor)
-	{
-		RNavigationNode* pNode = *itor;
-
-		if (pNode->bSelected) pd3dDevice->SetRenderState(D3DRS_TEXTUREFACTOR , 0x40FFFFFF);
-		else pd3dDevice->SetRenderState(D3DRS_TEXTUREFACTOR , 0x40FF9100);
-
-		rvector _vertices[3];
-		_vertices[0] = pNode->Vertex(0);
-		_vertices[1] = pNode->Vertex(1);
-		_vertices[2] = pNode->Vertex(2);
-
-		DrawNavFace(pd3dDevice, _vertices, 0, 1, 2);
-	}
-*/
 	RSetWBuffer(true);
 	pd3dDevice->SetRenderState(D3DRS_ZWRITEENABLE, true);
 	pd3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, false);
@@ -264,10 +246,7 @@ void RNavigationMesh::Render()
 
 void RNavigationMesh::RenderLinks()
 {
-	rmatrix id;
-	D3DXMatrixIdentity(&id);
-	RGetDevice()->SetTransform( D3DTS_WORLD , &id);
-
+	RGetDevice()->SetTransform(D3DTS_WORLD, &unmove(GetIdentityMatrix()));
 
 	LPDIRECT3DDEVICE9 pd3dDevice=RGetDevice();
 	pd3dDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);

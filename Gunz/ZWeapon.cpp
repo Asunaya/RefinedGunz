@@ -640,7 +640,7 @@ bool ZWeaponGrenade::Update(float fElapsedTime)
 	rmatrix rotmat;
 	D3DXQUATERNION q;
 	D3DXQuaternionRotationAxis(&q, &m_RotAxis, fRotSpeed *fElapsedTime);
-	D3DXMatrixRotationQuaternion(&rotmat, &q);
+	rotmat = QuaternionToMatrix(q);
 	m_Dir = m_Dir * rotmat;
 	m_Up = m_Up * rotmat;
 
@@ -660,33 +660,23 @@ bool ZWeaponGrenade::Update(float fElapsedTime)
 
 void ZWeaponGrenade::Explosion()
 {
-	// 자신의 이펙트 그리고..
-	// 주변 유닛들에게 데미지 주는 메시지 날리고..
-	// ( 메시지 받은곳에서 주변 유닛들 체크하고.. 
-	// 죽은 유닛이 있다면 발사유닛의 킬수를 올려주기)
-
 	rvector v = m_Position;
 
 	rvector dir = -RealSpace2::RCameraDirection;
 	dir.z = 0.f;
-	ZGetEffectManager()->AddGrenadeEffect(v,dir);
+	ZGetEffectManager()->AddGrenadeEffect(v, dir);
 
-	// 메시지를 날리거나~
-	// 각각의 클라이언트의 무기 정보를 믿고 처리하거나~
+	g_pGame->OnExplosionGrenade(m_uidOwner, v, m_fDamage, 400.f, .2f, 1.f, m_nTeamID);
 
-	g_pGame->OnExplosionGrenade(m_uidOwner,v,m_fDamage,400.f,.2f,1.f,m_nTeamID);
+	ZGetSoundEngine()->PlaySound("we_grenade_explosion", v);
 
-	ZGetSoundEngine()->PlaySound("we_grenade_explosion",v);
-
-	ZGetWorld()->GetFlags()->SetExplosion( v, EXPLOSION_EMBLEM_POWER );
+	ZGetWorld()->GetFlags()->SetExplosion(v, EXPLOSION_EMBLEM_POWER);
 }
 
-/////////////////////////////////////////////////////////////////////////////
+MImplementRTTI(ZWeaponFlashBang, ZWeaponGrenade);
 
-MImplementRTTI(ZWeaponFlashBang,ZWeaponGrenade);
-
-#define FLASHBANG_LIFE	3	//<<- TODO : 무기의 속성에서 받아오기
-#define FLASHBANG_DISTANCE	2000		// 20미터 까지 영향을 줌
+#define FLASHBANG_LIFE	3
+#define FLASHBANG_DISTANCE	2000
 
 void ZWeaponFlashBang::Explosion()
 {
@@ -823,21 +813,20 @@ bool	ZWeaponFlashBang::Update( float fElapsedTime )
 			m_Up	= rvector( 0, 1, 0 );
 			D3DXVec3Cross( &right, &m_Dir, &m_Up );
 			D3DXVec3Cross( &m_Dir, &right, &m_Up );
-			D3DXMatrixIdentity( &mRotMatrix );
+			GetIdentityMatrix(mRotMatrix );
 		}
 		else
 		{
 			rmatrix	Temp;
-			D3DXMatrixRotationAxis( &Temp, &m_RotAxis, mRotVelocity * 0.001 );
+			Temp = RotationMatrix(m_RotAxis, mRotVelocity * 0.001f);
 			mRotMatrix	= mRotMatrix * Temp;
 		}
 	}
 	else
 	{
-		rmatrix Temp;
-		D3DXMatrixRotationX( &Temp, mRotVelocity * 0.001 );
+		rmatrix Temp = RGetRotX(mRotVelocity * 0.001f);
 		mRotMatrix	= mRotMatrix * Temp;
-		mRotVelocity	*= 0.97;
+		mRotVelocity	*= 0.97f;
 	}
 
 	MakeWorldMatrix( &Mat, m_Position, m_Dir, m_Up );
@@ -953,21 +942,19 @@ bool ZWeaponSmokeGrenade::Update( float fElapsedTime )
 			m_Up	= rvector( 0, 1, 0 );
 			D3DXVec3Cross( &right, &m_Dir, &m_Up );
 			D3DXVec3Cross( &m_Dir, &right, &m_Up );
-			D3DXMatrixIdentity( &mRotMatrix );
+			GetIdentityMatrix(mRotMatrix );
 		}
 		else
 		{
-			rmatrix	Temp;
-			D3DXMatrixRotationAxis( &Temp, &m_RotAxis, mRotVelocity * 0.001 );
+			rmatrix	Temp = RotationMatrix(m_RotAxis, mRotVelocity * 0.001f);
 			mRotMatrix	= mRotMatrix * Temp;
 		}
 	}
 	else
 	{
-		rmatrix Temp;
-		D3DXMatrixRotationX( &Temp, mRotVelocity * 0.001 );
+		rmatrix Temp = RGetRotX(mRotVelocity * 0.001f);
 		mRotMatrix	= mRotMatrix * Temp;
- 		mRotVelocity	*= 0.97;
+ 		mRotVelocity	*= 0.97f;
 	}
 	
 	MakeWorldMatrix( &Mat, m_Position, m_Dir, m_Up );
@@ -986,8 +973,6 @@ void ZWeaponSmokeGrenade::Explosion()
 
 	ZGetSoundEngine()->PlaySound("we_gasgrenade_explosion",m_Position);
 }
-
-/////////////////////////// 마법 미사일류..
 
 void ZWeaponMagic::Create(RMesh* pMesh, ZSkill* pSkill, const rvector &pos, const rvector &dir, float fMagicScale,ZObject* pOwner) {
 

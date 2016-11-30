@@ -68,8 +68,8 @@ public:
 	void OnGameDraw();
 	void OnGameCreate();
 
-	void OnSlash(ZCharacter* Char, const D3DXVECTOR3& Pos, const D3DXVECTOR3& Dir);
-	void OnMassive(ZCharacter* Char, const D3DXVECTOR3& Pos, const D3DXVECTOR3& Dir);
+	void OnSlash(ZCharacter* Char, const rvector& Pos, const rvector& Dir);
+	void OnMassive(ZCharacter* Char, const rvector& Pos, const rvector& Dir);
 
 	void SetSwordColor(const MUID& UID, uint32_t Hue);
 

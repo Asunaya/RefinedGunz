@@ -18,7 +18,7 @@ public:
 
 	// bbox
 
-	void SubCalc(D3DXVECTOR3* v);
+	void SubCalc(rvector* v);
 	void BBoxClear();
 	void CalcLocalBBox();
 
@@ -37,29 +37,29 @@ public:
 
 	// bbox
 
-	D3DXVECTOR3		m_max;
-	D3DXVECTOR3		m_min;
+	rvector		m_max;
+	rvector		m_min;
 
 	// matrix
 
 	// Base matrix -- transforms from mesh origin to the node's bone on an untransformed skeleton
-	D3DXMATRIX		m_mat_base;
+	rmatrix		m_mat_base;
 	// Parent inverse base matrix
-	D3DXMATRIX		m_mat_parent_inv;
+	rmatrix		m_mat_parent_inv;
 	// Local matrix -- base * inverse parent base
-	D3DXMATRIX		m_mat_local;
+	rmatrix		m_mat_local;
 	// Inverse base matrix
-	D3DXMATRIX		m_mat_inv;
-	D3DXMATRIX		m_mat_etc;
-	D3DXMATRIX		m_mat_flip;
-	D3DXMATRIX		m_mat_scale;
+	rmatrix		m_mat_inv;
+	rmatrix		m_mat_etc;
+	rmatrix		m_mat_flip;
+	rmatrix		m_mat_scale;
 	// Fully transformed bone matrix -- transforms from mesh origin to the node's bone on a transformed skeleton
-	D3DXMATRIX		m_mat_result;
+	rmatrix		m_mat_result;
 
-	D3DXMATRIX		m_mat_add;
+	rmatrix		m_mat_add;
 
-	D3DXMATRIX		m_mat_ref;
-	D3DXMATRIX		m_mat_ref_inv;
+	rmatrix		m_mat_ref;
+	rmatrix		m_mat_ref_inv;
 
 	int				m_point_num;
 	int				m_face_num;
@@ -67,8 +67,8 @@ public:
 	int				m_point_normal_num;
 	int				m_point_color_num;
 
-	D3DXVECTOR3*	m_point_list;
-	D3DXVECTOR3*	m_point_color_list;
+	rvector*	m_point_list;
+	rvector*	m_point_color_list;
 
 	RFaceInfo*		m_face_list;
 	RPhysiqueInfo*	m_physique;
@@ -77,13 +77,13 @@ public:
 
 	// temp
 
-	D3DXVECTOR3		m_spine_local_pos;
-	D3DXVECTOR3		m_ap_scale;
+	rvector		m_spine_local_pos;
+	rvector		m_ap_scale;
 
-	D3DXVECTOR3		m_axis_scale;
+	rvector		m_axis_scale;
 	float			m_axis_scale_angle;
 
-	D3DXVECTOR3		m_axis_rot;
+	rvector		m_axis_rot;
 	float			m_axis_rot_angle;
 
 };

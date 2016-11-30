@@ -213,14 +213,14 @@ bool RVertexBuffer::UpdateData(char* pVertex)
 
 #ifndef _MAX_EXPORT // max 와 겹침..
 
-void RVertexBuffer::UpdateDataLVert(RLVertex* pVert,D3DXVECTOR3* pVec,int nCnt)
+void RVertexBuffer::UpdateDataLVert(RLVertex* pVert,rvector* pVec,int nCnt)
 {
 	for(int i=0;i<nCnt;i++) {
 		pVert[i].p = pVec[i];
 	}
 }
 
-void RVertexBuffer::UpdateDataVert(RVertex* pVert,D3DXVECTOR3* pVec,int nCnt)
+void RVertexBuffer::UpdateDataVert(RVertex* pVert,rvector* pVec,int nCnt)
 {
 	for(int i=0;i<nCnt;i++) {
 		pVert[i].p = pVec[i];
@@ -231,7 +231,7 @@ void RVertexBuffer::UpdateDataVert(RVertex* pVert,D3DXVECTOR3* pVec,int nCnt)
 
 // 범용처리는 아닌..
 
-bool RVertexBuffer::UpdateData(D3DXVECTOR3* pVec)
+bool RVertexBuffer::UpdateData(rvector* pVec)
 {
 	if(!m_is_init) 	return false;
 
@@ -598,21 +598,21 @@ void _draw_matrix(LPDIRECT3DDEVICE9 dev,rmatrix& mat,float size)
 	rmatrix _trotmat;
 
 	//right
-	D3DXMatrixTranslation(&_tposmat,right.x,right.y,right.z);
-	D3DXMatrixRotationZ(&_trotmat,-3.14/2.f);
+	_tposmat = TranslationMatrix(right);
+	_trotmat = RGetRotZ(-PI_FLOAT / 2);
 	_mat = _trotmat*_tposmat*_mat;
 	_draw_try(dev,_mat,size/10,0xff00ff00);
 
 	//up
 	_mat = mat;
-	D3DXMatrixTranslation(&_tposmat,up.x,up.y,up.z);
+	_tposmat = TranslationMatrix(up);
 	_mat = _tposmat*_mat;
 	_draw_try(dev,_mat,size/10,0xffff0000);
 
 	//dir
 	_mat = mat;
-	D3DXMatrixTranslation(&_tposmat,dir.x,dir.y,dir.z);
-	D3DXMatrixRotationX(&_trotmat,3.14/2.f);
+	_tposmat = TranslationMatrix(dir);
+	_trotmat = RGetRotZ(PI_FLOAT / 2);
 	_mat = _trotmat*_tposmat*_mat;
 	_draw_try(dev,_mat,size/10,0xff0000ff);
 
@@ -622,7 +622,19 @@ void _draw_matrix(LPDIRECT3DDEVICE9 dev,rmatrix& mat,float size)
 
 _USING_NAMESPACE_REALSPACE2
 
-void draw_line(LPDIRECT3DDEVICE9 dev,D3DXVECTOR3* vec,int size,DWORD color)
+void RRot2Quat(RQuatKey& q, const RRotKey& v)
+{
+	auto ret = AngleAxisToQuaternion({ EXPAND_VECTOR(v) }, v.w);
+	for (size_t i{}; i < 4; ++i)
+		q[i] = ret[i];
+}
+
+void RQuat2Mat(rmatrix& mat, const RQuatKey& q)
+{
+	mat = QuaternionToMatrix(q);
+}
+
+void draw_line(LPDIRECT3DDEVICE9 dev,rvector* vec,int size,DWORD color)
 {
 	static RLVertex t_vert[50];
 
@@ -641,7 +653,7 @@ void draw_line(LPDIRECT3DDEVICE9 dev,D3DXVECTOR3* vec,int size,DWORD color)
 
 struct	_Vertex { 
 	float x,y,z;
-//	D3DXVECTOR3 p;   
+//	rvector p;   
 	DWORD color;	// color 도 제거?
 };
 #define _VertexType			(D3DFVF_XYZ | D3DFVF_DIFFUSE)
@@ -778,10 +790,10 @@ CD3DArcBall::CD3DArcBall()
 {
 	D3DXQuaternionIdentity( &m_qDown );
 	D3DXQuaternionIdentity( &m_qNow );
-	D3DXMatrixIdentity( &m_matRotation );
-	D3DXMatrixIdentity( &m_matRotationDelta );
-	D3DXMatrixIdentity( &m_matTranslation );
-	D3DXMatrixIdentity( &m_matTranslationDelta );
+	GetIdentityMatrix(m_matRotation );
+	GetIdentityMatrix(m_matRotationDelta );
+	GetIdentityMatrix(m_matTranslation );
+	GetIdentityMatrix(m_matTranslationDelta );
 	m_bDrag = FALSE;
 	m_fRadiusTranslation = 1.0f;
 	m_bRightHanded = FALSE;
@@ -794,7 +806,7 @@ VOID CD3DArcBall::SetWindow( int iWidth, int iHeight, float fRadius )
 	m_fRadius = fRadius;
 }
 
-D3DXVECTOR3 CD3DArcBall::ScreenToVector( int sx, int sy )
+rvector CD3DArcBall::ScreenToVector( int sx, int sy )
 {
 	FLOAT x   = -(sx - m_iWidth /2) / (m_fRadius*m_iWidth /2);
 	FLOAT y   =  (sy - m_iHeight/2) / (m_fRadius*m_iHeight/2);
@@ -815,7 +827,7 @@ D3DXVECTOR3 CD3DArcBall::ScreenToVector( int sx, int sy )
 	else
 		z = sqrtf( 1.0f - mag );
 
-	return D3DXVECTOR3( x, y, z );
+	return rvector( x, y, z );
 }
 
 VOID CD3DArcBall::SetRadius( FLOAT fRadius )
@@ -828,7 +840,7 @@ LRESULT CD3DArcBall::HandleMouseMessages( HWND hWnd, UINT uMsg, WPARAM wParam, L
 	static int         iCurMouseX;      
 	static int         iCurMouseY;
 
-	static D3DXVECTOR3 s_vDown;         
+	static rvector s_vDown;         
 
 	int iMouseX = LOWORD(lParam);
 	int iMouseY = HIWORD(lParam);
@@ -853,17 +865,17 @@ LRESULT CD3DArcBall::HandleMouseMessages( HWND hWnd, UINT uMsg, WPARAM wParam, L
 	case WM_MOUSEMOVE:
 		if( MK_RBUTTON & wParam )  {
 			if( m_bDrag )  {
-				D3DXVECTOR3 vCur = ScreenToVector( iMouseX, iMouseY );
+				rvector vCur = ScreenToVector( iMouseX, iMouseY );
 				D3DXQUATERNION qAxisToAxis;
 				D3DXQuaternionAxisToAxis(&qAxisToAxis, &s_vDown, &vCur);
 				m_qNow = m_qDown;
 				m_qNow *= qAxisToAxis;
-				D3DXMatrixRotationQuaternion(&m_matRotationDelta, &qAxisToAxis);
+				m_matRotationDelta = QuaternionToMatrix(qAxisToAxis);
 			}
 			else
-				D3DXMatrixIdentity(&m_matRotationDelta);
+				GetIdentityMatrix(m_matRotationDelta);
 
-			D3DXMatrixRotationQuaternion(&m_matRotation, &m_qNow);
+			m_matRotation = QuaternionToMatrix(m_qNow);
 			m_bDrag = TRUE;
 		}
 		return TRUE;

@@ -1,6 +1,6 @@
 #pragma once
-#include <list>
-#include "d3dx9.h"
+#include <vector>
+#include "RTypes.h"
 
 class HitboxManager
 {
@@ -10,8 +10,8 @@ public:
 	void Create();
 	void Draw();
 	void Update();
-	void OnSlash(const D3DXVECTOR3 &Pos, const D3DXVECTOR3 &Dir);
-	void OnMassive(const D3DXVECTOR3 &Pos);
+	void OnSlash(const rvector &Pos, const rvector &Dir);
+	void OnMassive(const rvector &Pos);
 	void AddEnemyPositions();
 
 private:
@@ -24,12 +24,12 @@ private:
 	};
 	struct Info
 	{
-		D3DXVECTOR3 Pos, Dir;
+		rvector Pos, Dir;
 		Type type;
 		float Time;
-		D3DXMATRIX World;
+		rmatrix World;
 	};
-	std::list<Info> List;
+	std::vector<Info> List;
 
 	struct Vertex
 	{

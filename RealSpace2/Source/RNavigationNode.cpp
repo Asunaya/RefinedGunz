@@ -39,7 +39,7 @@ void RNavigationNode::ComputeNodeData()
 	m_Side[SIDE_BC].SetLine(Point2,Point3);	// line BC
 	m_Side[SIDE_CA].SetLine(Point3,Point1);	// line CA
 
-	D3DXPlaneFromPoints(&m_Plane, &m_Vertex[VERT_A], &m_Vertex[VERT_B], &m_Vertex[VERT_C]);
+	m_Plane = PlaneFromPoints(m_Vertex[VERT_A], m_Vertex[VERT_B], m_Vertex[VERT_C]);
 
 	// compute midpoint as centroid of polygon
 	m_CenterPos.x=((m_Vertex[VERT_A].x + m_Vertex[VERT_B].x + m_Vertex[VERT_C].x)/3);

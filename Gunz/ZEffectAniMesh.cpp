@@ -159,12 +159,12 @@ bool ZEffectAniMesh::Draw(unsigned long int nTime)
 
 	rmatrix Rotation;
 
-	D3DXMatrixRotationZ(&Rotation,m_fRotateAngle);
+	Rotation = RGetRotZ(m_fRotateAngle);
 	World = Rotation * World;
 
 	m_VMesh.SetScale(m_Scale);
 	m_VMesh.SetWorldMatrix(World);
-	m_VMesh.Frame();					// 시간은 흘러 가야 한다~
+	m_VMesh.Frame();
 
 	if(m_bRender){
 		m_VMesh.Render();

@@ -198,3 +198,6 @@ auto MakeWriteProxy(D3DPtr<T>& ptr) { return WriteProxy<D3DPtr<T>>{ptr}; }
 
 template <typename... T>
 auto MakeWriteProxy(std::unique_ptr<T...>& ptr) { return WriteProxy<std::unique_ptr<T...>>(ptr); }
+
+template <typename T>
+T& unmove(T&& x) { return x; }

@@ -784,9 +784,7 @@ bool RGetScreenLine(int sx, int sy, rvector *pos, rvector *dir)
 	rvector scrpoint = rvector((float)sx, (float)sy, 0.1f);
 
 	rmatrix inv;
-	float det;
-	if (D3DXMatrixInverse(&inv, &det, &RViewProjectionViewport) == NULL)
-		return false;
+	inv = Inverse(RViewProjectionViewport);
 
 	rvector worldpoint;
 	D3DXVec3TransformCoord(&worldpoint, &scrpoint, &inv);
@@ -803,8 +801,7 @@ rvector RGetIntersection(int x, int y, rplane &plane)
 	rvector scrpoint = rvector((float)x, (float)y, 0.1f);
 
 	rmatrix inv;
-	float det;
-	D3DXMatrixInverse(&inv, &det, &RViewProjectionViewport);
+	inv = Inverse(RViewProjectionViewport);
 
 	rvector worldpoint;
 	D3DXVec3TransformCoord(&worldpoint, &scrpoint, &inv);

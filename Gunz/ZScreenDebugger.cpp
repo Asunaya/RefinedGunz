@@ -81,7 +81,7 @@ void ZScreenDebugger::DrawDebugInfo(MDrawContext *pDC)
 	RGetDevice()->SetFVF( D3DFVF_XYZ | D3DFVF_DIFFUSE );
 
 	rmatrix birdinitmat;
-	D3DXMatrixIdentity(&birdinitmat);
+	GetIdentityMatrix(birdinitmat);
 	RGetDevice()->SetTransform( D3DTS_WORLD, &birdinitmat );
 	RSetCamera(RCameraPosition,RCameraDirection+RCameraPosition,rvector(0,0,1));
 	
@@ -372,7 +372,7 @@ void ZScreenDebugger::DrawDebugInfo(MDrawContext *pDC)
 	RGetDevice()->SetFVF( D3DFVF_XYZ | D3DFVF_DIFFUSE );
 
 	rmatrix initmat;
-	D3DXMatrixIdentity(&initmat);
+	GetIdentityMatrix(initmat);
 	RGetDevice()->SetTransform( D3DTS_WORLD, &initmat );
 	RSetCamera(RCameraPosition,RCameraDirection+RCameraPosition,rvector(0,0,1));
 
@@ -422,7 +422,7 @@ void ZScreenDebugger::DrawDebugInfo(MDrawContext *pDC)
 		RDrawCylinder(g_pGame->m_pMyCharacter->m_Position+rvector(0,0,120),CHARACTER_RADIUS,60,10);
 
 		rmatrix birdinitmat;
-		D3DXMatrixIdentity(&birdinitmat);
+		GetIdentityMatrix(birdinitmat);
 		RGetDevice()->SetTransform( D3DTS_WORLD, &birdinitmat );
 
 		for (ZObjectManager::iterator itor = g_pGame->m_ObjectManager.begin();
@@ -533,7 +533,7 @@ void ZScreenDebugger::OnDrawAIDebugInfo(MDrawContext *pDC)
 	RGetDevice()->SetFVF( D3DFVF_XYZ | D3DFVF_DIFFUSE );
 
 	rmatrix birdinitmat;
-	D3DXMatrixIdentity(&birdinitmat);
+	GetIdentityMatrix(birdinitmat);
 	RGetDevice()->SetTransform( D3DTS_WORLD, &birdinitmat );
 	RSetCamera(RCameraPosition,RCameraDirection+RCameraPosition,rvector(0,0,1));
 
@@ -548,7 +548,7 @@ void ZScreenDebugger::OnDrawAIDebugInfo(MDrawContext *pDC)
 		RDrawCylinder(g_pGame->m_pMyCharacter->m_Position+rvector(0,0,120),CHARACTER_RADIUS,60,10);
 
 		rmatrix birdinitmat;
-		D3DXMatrixIdentity(&birdinitmat);
+		GetIdentityMatrix(birdinitmat);
 		RGetDevice()->SetTransform( D3DTS_WORLD, &birdinitmat );
 
 		for (ZObjectManager::iterator itor = g_pGame->m_ObjectManager.begin();

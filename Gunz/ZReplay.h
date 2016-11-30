@@ -3,10 +3,9 @@
 #include "ZCharacter.h"
 #include "ZReplayStructs.h"
 #include "ArrayView.h"
-#include "RGTypes.h"
+#include "GlobalTypes.h"
 
 bool CreateReplayGame(const char *filename);
-
 
 #define GUNZ_REC_FILE_ID		0x95b1308a
 

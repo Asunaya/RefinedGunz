@@ -169,7 +169,7 @@ void ZMiniMap::OnDraw(MDrawContext* pDC)
 	// view , projection 은 이미 설정되어있다는 가정하에,
 
 	rmatrix World;
-	D3DXMatrixIdentity(&World);
+	GetIdentityMatrix(World);
 	pd3dDevice->SetTransform(D3DTS_WORLD, &World);
 
 	RUpdateCamera();
@@ -212,7 +212,7 @@ void ZMiniMap::OnDraw(MDrawContext* pDC)
 			else color = 0xff8080ff;
 
 		rmatrix World;
-		D3DXMatrixIdentity(&World);
+		GetIdentityMatrix(World);
 
 		rvector pos = pCharacter->GetPosition();
 		pos.z = (pos.z - pbb->minz ) / (pbb->maxz - pbb->minz);

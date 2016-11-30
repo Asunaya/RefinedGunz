@@ -14,7 +14,7 @@ struct MMatchObjCacheCostume
 	MMatchSex			nSex;
 	unsigned char		nHair;
 	unsigned char		nFace;
-	unsigned long int	nEquipedItemID[MMCIP_END];
+	u32					nEquipedItemID[MMCIP_END];
 };
 
 class MMatchObjCache {

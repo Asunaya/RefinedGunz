@@ -365,7 +365,7 @@ bool RMeshNode::MakeVSVertexBuffer()
 	return true;
 }
 
-void RMeshNode::RenderNodeVS(RMesh* pMesh, const D3DXMATRIX& pWorldMat_,ESHADER shader_ )
+void RMeshNode::RenderNodeVS(RMesh* pMesh, const rmatrix& pWorldMat_,ESHADER shader_ )
 {
 	int i;
 
@@ -394,7 +394,7 @@ void RMeshNode::RenderNodeVS(RMesh* pMesh, const D3DXMATRIX& pWorldMat_,ESHADER 
 	dev->GetTransform( D3DTS_VIEW, &view );
 	dev->GetTransform( D3DTS_PROJECTION, &proj );
 
-	D3DXMatrixIdentity( &matTemp );
+	GetIdentityMatrix(matTemp);
 
 	dev->SetVertexShaderConstantF( 0, (float*)&matTemp, 3 );
 
@@ -402,24 +402,22 @@ void RMeshNode::RenderNodeVS(RMesh* pMesh, const D3DXMATRIX& pWorldMat_,ESHADER 
 	{
 		matTemp =  m_mat_ref * pMesh->m_data[ m_MatrixMap[i]]->m_mat_ref_inv * pMesh->m_data[ m_MatrixMap[i]]->m_mat_result;
 
-		D3DXMatrixTranspose( &matTemp, &matTemp );
+		matTemp = Transpose(matTemp),
 		dev->SetVertexShaderConstantF( ANIMATION_MATRIX_BASE + (i)*3, (float*)&matTemp, 3);
 	}
 
 	if( pMesh->m_isScale ) {
-		rmatrix _scale_mat;
-		D3DXMatrixScaling(&_scale_mat, pMesh->m_vScale.x, pMesh->m_vScale.y, pMesh->m_vScale.z);
-		tworldmat = _scale_mat * pWorldMat_;
+		tworldmat = ScalingMatrix(pMesh->m_vScale) * pWorldMat_;
 	}
 	else 
 		tworldmat = pWorldMat_;
 
 	// set Transformation matrix
-	D3DXMatrixTranspose( &matTemp, &tworldmat );
+	matTemp = Transpose(tworldmat);
 	dev->SetVertexShaderConstantF( WORLD_MATRIX, (float*)&matTemp, 4 );
 
 	transformation = view * proj;
-	D3DXMatrixTranspose( &matTemp, &transformation );
+	matTemp = Transpose(transformation);
 	dev->SetVertexShaderConstantF( VIEW_PROJECTION_MATRIX, (float*)&matTemp, 4 );
 
 	RMtrl *pMtrl =  m_pMtrlTable[0];
@@ -518,7 +516,7 @@ RBoneBaseMatrix* RMeshNode::GetBaseMatrix(int pid)
 	return NULL;
 }
 
-inline void SetVertex(RVertex* v,D3DXVECTOR3& p,D3DXVECTOR3& n,D3DXVECTOR3& uv) {
+inline void SetVertex(RVertex* v,rvector& p,rvector& n,rvector& uv) {
 
 	v->p = p;	
 	v->n = n;
@@ -526,7 +524,7 @@ inline void SetVertex(RVertex* v,D3DXVECTOR3& p,D3DXVECTOR3& n,D3DXVECTOR3& uv) 
 	v->tv = uv.y;
 }
 
-inline void SetLVertex(RLVertex* v,D3DXVECTOR3& p,DWORD c,D3DXVECTOR3& uv) {
+inline void SetLVertex(RLVertex* v,rvector& p,DWORD c,rvector& uv) {
 
 	v->p = p;	
 	v->color = c;
@@ -543,7 +541,7 @@ void RMeshNode::UpdateNodeBuffer()
 
 	RFaceInfo* pFace = NULL;
 
-	D3DXVECTOR3* pP = m_point_list;
+	rvector* pP = m_point_list;
 	RFaceNormalInfo* pFNL = NULL;
 
 	if(!m_vb->m_pVert)
@@ -597,7 +595,7 @@ void RMeshNode::MakeNodeBuffer(DWORD flag)
 
 	RFaceInfo* pFace = NULL;
 
-	D3DXVECTOR3* pP = m_point_list;
+	rvector* pP = m_point_list;
 	RFaceNormalInfo* pFNL = NULL;
 
 	RVertex*	 pV  = (RVertex*)_pVert;
@@ -953,7 +951,7 @@ void RMeshNode::ToonRenderSilhouetteSettingOff()
 
 uint32_t BlendColor = 0;
 
-void RMeshNode::Render(D3DXMATRIX* pWorldMatrix)
+void RMeshNode::Render(rmatrix* pWorldMatrix)
 {
 	RMtrl* pMtrl = NULL;
 	RMesh* pMesh = m_pBaseMesh;
@@ -1067,6 +1065,16 @@ void RMeshNode::Render(D3DXMATRIX* pWorldMatrix)
 	}
 }
 
+auto MakeAlignScaleMatrix(const rmatrix& mat)
+{
+	v3 svec = { Magnitude(rvector(mat._11,mat._12,mat._13)),//right
+		Magnitude(rvector(mat._21,mat._22,mat._23)),//up
+		Magnitude(rvector(mat._31,mat._32,mat._33)),//dir
+	};
+
+	return ScalingMatrix(svec);
+}
+
 void RMeshNode::CheckAlignMapObject(rmatrix& hr_mat)
 {
 	int align = m_nAlign;
@@ -1075,15 +1083,11 @@ void RMeshNode::CheckAlignMapObject(rmatrix& hr_mat)
 	if( align == 0 )							return;
 
 	rvector cam_dir = RCameraDirection;
-	rmatrix ret_mat, scale_mat;
+	rmatrix ret_mat;
 
 	ret_mat = hr_mat;
 
-	float sx = Magnitude(rvector(ret_mat._11,ret_mat._12,ret_mat._13));//right
-	float sy = Magnitude(rvector(ret_mat._21,ret_mat._22,ret_mat._23));//up
-	float sz = Magnitude(rvector(ret_mat._31,ret_mat._32,ret_mat._33));//dir
-
-	D3DXMatrixScaling(&scale_mat,sx,sy,sz);
+	auto scale_mat = MakeAlignScaleMatrix(ret_mat);
 
 	if(align==1) {
 
@@ -1172,15 +1176,11 @@ void RMeshNode::CheckAlign(const rmatrix& world_mat)
 
 	int align = m_nAlign;
 
-	rmatrix ret_mat, scale_mat;
+	rmatrix ret_mat;
 
 	ret_mat = m_mat_result;
 
-	float sx = Magnitude(rvector(ret_mat._11,ret_mat._12,ret_mat._13));//right
-	float sy = Magnitude(rvector(ret_mat._21,ret_mat._22,ret_mat._23));//up
-	float sz = Magnitude(rvector(ret_mat._31,ret_mat._32,ret_mat._33));//dir
-
-	D3DXMatrixScaling(&scale_mat,sx,sy,sz);
+	auto scale_mat = MakeAlignScaleMatrix(ret_mat);
 
 	if(align==1) {
 
@@ -1277,12 +1277,12 @@ int RMeshNode::CalcVertexBuffer_VertexAni(int frame)
 }
 
 
-void RMeshNode::CalcVertexBuffer_Physique(const D3DXMATRIX& world_mat, int frame)
+void RMeshNode::CalcVertexBuffer_Physique(const rmatrix& world_mat, int frame)
 {
 	int p_num,i,j,p_id;
-	D3DXVECTOR3 _vec_all,_vec;
+	rvector _vec_all,_vec;
 	float weight;
-	D3DXMATRIX t_mat,local,basemat,inv;
+	rmatrix t_mat,local,basemat,inv;
 
 	RMeshNode* pTMP = NULL;
 
@@ -1316,7 +1316,7 @@ void RMeshNode::CalcVertexBuffer_Physique(const D3DXMATRIX& world_mat, int frame
 	}
 }
 
-void RMeshNode::CalcVertexBuffer_Tm(const D3DXMATRIX& world_mat, int frame) {}
+void RMeshNode::CalcVertexBuffer_Tm(const rmatrix& world_mat, int frame) {}
 
 void RMeshNode::CalcVertexBuffer_Bbox(CalcVertexBufferBboxMode nBboxMode,rmatrix& mat)
 {
@@ -1342,7 +1342,7 @@ void RMeshNode::CalcVertexBuffer_Bbox(CalcVertexBufferBboxMode nBboxMode,rmatrix
 		}
 }
 
-bool RMeshNode::CalcPickVertexBuffer(const D3DXMATRIX& world_mat, std::vector<rvector>& OutVecs)
+bool RMeshNode::CalcPickVertexBuffer(const rmatrix& world_mat, std::vector<rvector>& OutVecs)
 {
 	RMesh* pMesh = m_pBaseMesh;
 
@@ -1351,11 +1351,11 @@ bool RMeshNode::CalcPickVertexBuffer(const D3DXMATRIX& world_mat, std::vector<rv
 
 	LPDIRECT3DDEVICE9  dev = RGetDevice();
 
-	D3DXMATRIX result_mat = m_mat_result;
-	D3DXMATRIX scale_mat = GetIdentityMatrix();
+	rmatrix result_mat = m_mat_result;
+	rmatrix scale_mat = GetIdentityMatrix();
 
 	if( pMesh->m_isScale ) {
-		D3DXMatrixScaling(&scale_mat, pMesh->m_vScale.x, pMesh->m_vScale.y, pMesh->m_vScale.z);
+		scale_mat = ScalingMatrix(pMesh->m_vScale);
 		result_mat *= scale_mat;
 	}
 
@@ -1365,8 +1365,7 @@ bool RMeshNode::CalcPickVertexBuffer(const D3DXMATRIX& world_mat, std::vector<rv
 
 	static rmatrix map_rot_mat = RGetRotY(180) * RGetRotX(90);
 
-	rmatrix	ModelWorldMatrix;
-	D3DXMatrixIdentity(&ModelWorldMatrix);
+	rmatrix	ModelWorldMatrix = GetIdentityMatrix();
 
 	if( pAniSet && pAniSet->GetAnimationType()  == RAniType_Vertex) {
 
@@ -1420,7 +1419,7 @@ bool RMeshNode::CalcPickVertexBuffer(const D3DXMATRIX& world_mat, std::vector<rv
 	return true;
 }
 
-void RMeshNode::CalcVertexBuffer(const D3DXMATRIX& world_mat, bool box)
+void RMeshNode::CalcVertexBuffer(const rmatrix& world_mat, bool box)
 {
 	__BP(207,"RMesh::CalcVertexBuffer");
 
@@ -1433,12 +1432,12 @@ void RMeshNode::CalcVertexBuffer(const D3DXMATRIX& world_mat, bool box)
 
 	LPDIRECT3DDEVICE9 dev = RGetDevice();
 
-	D3DXMATRIX result_mat = m_mat_result;
-	D3DXMATRIX scale_mat;
+	rmatrix result_mat = m_mat_result;
+	rmatrix scale_mat;
 	bool Scale = false;
 
 	if (pMesh->m_isScale) {
-		D3DXMatrixScaling(&scale_mat, pMesh->m_vScale.x, pMesh->m_vScale.y, pMesh->m_vScale.z);
+		scale_mat = ScalingMatrix(pMesh->m_vScale);
 		result_mat *= scale_mat;
 		Scale = true;
 	}
@@ -1503,7 +1502,7 @@ void RMeshNode::CalcVertexBuffer(const D3DXMATRIX& world_mat, bool box)
 		UpdateNodeBuffer();
 }
 
-void RMeshNode::CalcVertexNormal(D3DXMATRIX* world_mat)
+void RMeshNode::CalcVertexNormal(rmatrix* world_mat)
 {
 }
 

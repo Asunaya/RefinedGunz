@@ -46,7 +46,7 @@ ZTaskResult ZTask_MoveToPos::OnRun(float fDelta)
 			fRotAngle = -fAngle;
 			m_bRotated = true;
 		}
-		D3DXMatrixRotationZ(&mat, fRotAngle);
+		mat = RGetRotZ(fRotAngle);
 
 		m_pParent->RotateTo(vBodyDir * mat);
 	}

@@ -207,7 +207,7 @@ void RWeaponTracks::Render()
 
 		MakeBuffer();
 
-		static D3DXMATRIX _init_mat = GetIdentityMatrix();
+		static rmatrix _init_mat = GetIdentityMatrix();
 		dev->SetTransform( D3DTS_WORLD, &_init_mat );
 
 		dev->SetTextureStageState( 0, D3DTSS_COLORARG2, D3DTA_DIFFUSE );

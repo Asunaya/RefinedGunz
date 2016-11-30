@@ -20,8 +20,8 @@ ZShadow::ZShadow(void)
 	// normal은 +z
 	mNormal = rvector( 0.f, 0.f, 1.f);
 
-	D3DXMatrixIdentity( &mWorldMatLF );
-	D3DXMatrixIdentity( &mWorldMatRF );
+	GetIdentityMatrix(mWorldMatLF );
+	GetIdentityMatrix(mWorldMatRF );
 
 	bLFShadow = false;
 	bRFShadow = false;
@@ -59,9 +59,7 @@ void ZShadow::draw(bool bForced)
 //////////////////////////////////////////////////////////////////////////
 rmatrix ZShadow::setSize( float size_  )
 {
-	rmatrix ScaleMatrix;
-	D3DXMatrixScaling( &ScaleMatrix, size_, size_, size_ );
-	return ScaleMatrix;
+	return ScalingMatrix(size_);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -82,8 +80,8 @@ rmatrix ZShadow::setDirection( rvector& dir_ )
 	yVector.x = 0;
 	float yTheta = D3DXVec3Dot( &mNormal, &yVector );
 
-	D3DXMatrixRotationX( &xRotMat, xtheta );
-	D3DXMatrixRotationY( &yRotMat, yTheta );
+	xRotMat = RGetRotX(xtheta);
+	yRotMat = RGetRotY(yTheta);
 
 	return xRotMat*yRotMat;
 }
@@ -156,19 +154,9 @@ bool ZShadow::setMatrix( RVisualMesh& vmesh, float size_ /* = 100.f  */, RBspObj
 	rmatrix scaleMat = setSize( size_ );
 	
 	if( bLFShadow )
-	{
-		// 왼발 위치의 floor의 normal
-		rmatrix tlanslationMat;
-		D3DXMatrixTranslation( &tlanslationMat, floorPosition[0].x, floorPosition[0].y, floorPosition[0].z + 1 );
-		mWorldMatLF = scaleMat*tlanslationMat;
-	}
+		mWorldMatLF = scaleMat * TranslationMatrix(floorPosition[0] + v3{0, 0, 1});
 	if( bRFShadow )
-	{
-		// 오른발 위치의 floor의 normal
-		rmatrix tlanslationMat;
-		D3DXMatrixTranslation( &tlanslationMat, floorPosition[1].x, floorPosition[1].y, floorPosition[1].z + 1 );
-		mWorldMatRF = scaleMat*tlanslationMat;
-	}
+		mWorldMatRF = scaleMat * TranslationMatrix(floorPosition[0] + v3{ 0, 0, 1 });
 
 	return true;
 }

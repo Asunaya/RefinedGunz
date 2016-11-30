@@ -149,7 +149,7 @@ public:
 
 	ZWeaponFlashBang::ZWeaponFlashBang() : ZWeaponGrenade(), mRotVelocity(0.0f), mbLand(false), mbIsExplosion(false)
 	{
-		D3DXMatrixIdentity( &mRotMatrix );
+		GetIdentityMatrix(mRotMatrix );
 	}
 
 
@@ -172,7 +172,7 @@ protected:
 
 	ZWeaponSmokeGrenade() : ZWeaponGrenade(), miSmokeIndex(0), mRotVelocity(0.0f), mbLand(false) 
 	{
-		D3DXMatrixIdentity( &mRotMatrix );
+		GetIdentityMatrix(mRotMatrix );
 	};
 
 	static const float mcfTrigerTimeList[NUM_SMOKE];

@@ -70,7 +70,7 @@ bool CheckTeenVersionMesh(RMesh** ppMesh)
 	return false;
 }
 
-void ChangeEquipParts(RVisualMesh* pVMesh, unsigned long int* pItemID)
+static void ChangeEquipParts(RVisualMesh* pVMesh, u32* pItemID)
 {
 	pVMesh->ClearParts();
 
@@ -149,7 +149,7 @@ void ChangeCharHair(RVisualMesh* pVMesh, MMatchSex nSex, int nHairIndex)
 	pVMesh->SetParts(eq_parts_head, szMeshName);
 }
 
-void ZChangeCharParts(RVisualMesh* pVMesh, MMatchSex nSex, int nHair, int nFace, unsigned long int* pItemID)
+void ZChangeCharParts(RVisualMesh* pVMesh, MMatchSex nSex, int nHair, int nFace, u32* pItemID)
 {
 	if (pVMesh == NULL)
 	{
@@ -482,13 +482,13 @@ void ZCharacter::UpdateDirection(float fDelta, const v3& Direction)
 
 			if (fAngleLower > 5.f / 180.f*D3DX_PI)
 			{
-				D3DXMatrixRotationZ(&mat, max(-ROTATION_SPEED*fDelta / 180.f*D3DX_PI, -fAngleLower));
+				mat = RGetRotZ(max(-ROTATION_SPEED*fDelta / 180.f*D3DX_PI, -fAngleLower));
 				m_DirectionLower = m_DirectionLower * mat;
 			}
 
 			if (fAngleLower < -5.f / 180.f*D3DX_PI)
 			{
-				D3DXMatrixRotationZ(&mat, min(ROTATION_SPEED*fDelta / 180.f*D3DX_PI, -fAngleLower));
+				mat = RGetRotZ(min(ROTATION_SPEED*fDelta / 180.f*D3DX_PI, -fAngleLower));
 				m_DirectionLower = m_DirectionLower * mat;
 			}
 
@@ -497,14 +497,14 @@ void ZCharacter::UpdateDirection(float fDelta, const v3& Direction)
 			if (fAngle < -65.f / 180.f*D3DX_PI)
 			{
 				fAngle = -65.f / 180.f*D3DX_PI;
-				D3DXMatrixRotationZ(&mat, -65.f / 180.f*D3DX_PI);
+				mat = RGetRotZ(-65.f / 180.f*D3DX_PI);
 				m_DirectionLower = m_Direction * mat;
 			}
 
 			if (fAngle >= 65.f / 180.f*D3DX_PI)
 			{
 				fAngle = 65.f / 180.f*D3DX_PI;
-				D3DXMatrixRotationZ(&mat, 65.f / 180.f*D3DX_PI);
+				mat = RGetRotZ(65.f / 180.f*D3DX_PI);
 				m_DirectionLower = m_Direction * mat;
 			}
 
@@ -1004,7 +1004,7 @@ void ZCharacter::OnUpdate(float fDelta)
 
 	if (m_nVMID == -1) return;
 
-	D3DXMATRIX world;
+	rmatrix world;
 	MakeWorldMatrix(&world, rvector(0, 0, 0), ProxyDirection, rvector(0, 0, 1));
 
 	rvector MeshPosition;

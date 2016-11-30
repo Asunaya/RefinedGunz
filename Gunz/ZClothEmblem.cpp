@@ -442,7 +442,7 @@ void ZClothEmblem::render()
 	RGetDynamicLightManager()->SetLight( m_pX[0], 1, LIGHT_DISTANCE );
 
 	rmatrix Identity;
-	D3DXMatrixIdentity( &Identity );
+	GetIdentityMatrix(Identity );
 	RGetDevice()->SetTransform( D3DTS_WORLD, &Identity );
 
 	RGetDevice()->SetRenderState( D3DRS_ALPHABLENDENABLE, TRUE );
@@ -796,12 +796,12 @@ void ZEmblemList::InitEnv( char* pFileName_ )
 			
 			if( child.GetAttribute( Attribute, "DIRECTION" ))
 			{
-				D3DXMATRIX RotMat;
+				rmatrix RotMat;
 				rvector dir = rvector( 0,1,0 );
 				int theta;
 				sscanf_s( Attribute, "%d", &theta );
 				auto up = rvector(0, 0, 1);
-				D3DXMatrixRotationAxis( &RotMat, &up, ((float)theta*D3DX_PI/180) );
+				RotMat = RotationMatrix(up, ((float)theta*PI_FLOAT/180) );
 				dir = dir*RotMat;
 				p->GetWndGenerator()->SetWindDirection( dir );
 			}

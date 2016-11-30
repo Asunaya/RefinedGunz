@@ -390,8 +390,8 @@ struct ZCharacterReplayStateImpl
 
 	BulletInfo BulletInfos[NumItems];
 
-	D3DXVECTOR3 Position;
-	D3DXVECTOR3 Direction;
+	rvector Position;
+	rvector Direction;
 
 	MMatchTeam Team;
 
@@ -470,8 +470,8 @@ struct ZCharacterReplayState_DG
 
 	char unk[8];
 
-	D3DXVECTOR3 Position;
-	D3DXVECTOR3 Direction;
+	rvector Position;
+	rvector Direction;
 
 	MMatchTeam Team;
 

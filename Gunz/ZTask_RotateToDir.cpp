@@ -23,7 +23,6 @@ ZTaskResult ZTask_RotateToDir::OnRun(float fDelta)
 
 	if (!m_bRotated)
 	{
-		// 방향이 맞지 않으면 제자리에서 회전한다.
 		rmatrix mat;
 		rvector vBodyDir = m_pParent->GetDirection();
 		float fAngle=GetAngleOfVectors(dir, vBodyDir);
@@ -36,7 +35,7 @@ ZTaskResult ZTask_RotateToDir::OnRun(float fDelta)
 			m_bRotated = true;
 			return ZTR_COMPLETED;
 		}
-		D3DXMatrixRotationZ(&mat, fRotAngle);
+		mat = RGetRotZ(fRotAngle);
 
 		m_pParent->RotateTo(vBodyDir * mat);
 	}

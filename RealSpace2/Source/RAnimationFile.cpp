@@ -139,7 +139,7 @@ bool RAnimationFile::LoadAni(const char* filename)
 			mzf.Read(&pANode->m_vertex_cnt,4 );//frame¼ö¸¸Å­
 
 			if(pANode->m_vertex_cnt) {
-				pANode->m_vertex = new D3DXVECTOR3*[pANode->m_vertex_cnt];
+				pANode->m_vertex = new rvector*[pANode->m_vertex_cnt];
 			}
 
 			mzf.Read(&vcnt,4 );
@@ -154,8 +154,8 @@ bool RAnimationFile::LoadAni(const char* filename)
 
 			for(j=0;j<pANode->m_vertex_cnt;j++) {
 
-				pANode->m_vertex[j] = new D3DXVECTOR3[vcnt];
-				mzf.Read(pANode->m_vertex[j],sizeof(D3DXVECTOR3)*vcnt);
+				pANode->m_vertex[j] = new rvector[vcnt];
+				mzf.Read(pANode->m_vertex[j],sizeof(rvector)*vcnt);
 			}
 
 			if(ver > EXPORTER_ANI_VER1) {
@@ -244,7 +244,7 @@ bool RAnimationFile::LoadAni(const char* filename)
 			pANode = m_ani_node[i];
 
 			mzf.Read(t_mesh_name  ,MAX_NAME_LEN );
-			mzf.Read(&pANode->m_mat_base,sizeof(D3DXMATRIX) );//mat
+			mzf.Read(&pANode->m_mat_base,sizeof(rmatrix) );//mat
 
 //			strcpy_safe(pANode->m_Name,t_mesh_name);
 			pANode->SetName(t_mesh_name);

@@ -1,6 +1,7 @@
 #include "TestAssert.h"
 #include "RMath.h"
 #include "MMath.h"
+#include <d3dx9.h>
 
 using namespace RealSpace2;
 
@@ -96,7 +97,7 @@ static bool TestRotationMatrix()
 	Check({ 0, 1, 0 });
 
 #ifdef TEST_COMPARE_TO_D3DX
-	rmatrix d3dx_mat;
+	D3DXMATRIX d3dx_mat;
 	D3DXMatrixRotationAxis(&d3dx_mat, &axis, angle);
 	auto d3dx_result = v * d3dx_mat;
 	Check(d3dx_result);
@@ -202,6 +203,26 @@ static bool TestTransform()
 	return true;
 }
 
+static bool TestQuaternions()
+{
+	v3 axis{ 0, 0, 1 };
+	float angle = 90;
+
+	auto reference_mat = RotationMatrix(axis, angle);
+
+	auto quat = AngleAxisToQuaternion(axis, angle);
+	auto quat_mat = QuaternionToMatrix(quat);
+
+	assert(Equals(reference_mat, quat_mat));
+
+	quat = MatrixToQuaternion(quat_mat);
+	quat_mat = QuaternionToMatrix(quat);
+
+	assert(Equals(reference_mat, quat_mat));
+
+	return true;
+}
+
 bool TestMath()
 {
 	auto ret = true;
@@ -214,6 +235,7 @@ bool TestMath()
 	ret &= TestDotAndCross();
 	ret &= TestNormalize();
 	ret &= TestTransform();
+	ret &= TestQuaternions();
 
 	return ret;
 }

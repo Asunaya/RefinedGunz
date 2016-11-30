@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include "d3dx9.h"
 #include "RTypes.h"
+#include "RMath.h"
 
 #define DEL(p)  { if(p) { delete (p);   (p)=NULL; } }
 #define DEL2(p) { if(p) { delete[] (p);   (p)=NULL; } }
@@ -258,7 +259,7 @@ struct RTLVertex {
 };
 
 struct RLVertex { 
-	D3DXVECTOR3 p;   
+	rvector p;   
 	DWORD color;     
 	FLOAT tu, tv; 
 };
@@ -266,8 +267,8 @@ struct RLVertex {
 #ifndef _MAX_EXPORT
 
 struct RVertex { 
-	D3DXVECTOR3 p;
-	D3DXVECTOR3 n; 
+	rvector p;
+	rvector n; 
 	FLOAT tu, tv;
 };
 
@@ -275,10 +276,10 @@ struct RVertex {
 
 struct RBlendVertex
 {
-	D3DXVECTOR3 p;
+	rvector p;
 	float weight1, weight2;
 	float matIndex[3];
-	D3DXVECTOR3 normal;
+	rvector normal;
 	float tu, tv;	
 };
 
@@ -287,17 +288,16 @@ struct RBlendVertex
 #define RVertexType			(D3DFVF_XYZ   |D3DFVF_NORMAL |D3DFVF_TEX1)
 #define RBLENDVERTEXTYPE	( D3DFVF_XYZB2 | D3DFVF_XYZ | D3DFVF_DIFFUSE  | D3DFVF_TEX1 | D3DFVF_NORMAL )
 
-class RPosKey : public D3DXVECTOR3 {
+class RPosKey : public rvector {
 public:
 	int	frame;
 };
 
-class RQuatKey : public D3DXQUATERNION {
+class RQuatKey : public rquaternion {
 public:
+	using rquaternion::rquaternion;
 	int	frame;
 };
-
-// 예전포멧용구조..
 
 #define RRotKey RQuatKey
 
@@ -307,32 +307,32 @@ public:
 	int frame;
 };
 
-class RTMKey : public D3DXMATRIX{
+class RTMKey : public rmatrix{
 public:
 	int frame;
 };
 
-class RVertexAniKey : public D3DXVECTOR3 {
+class RVertexAniKey : public rvector {
 public:
 	int frame;
 };
 
 struct RFaceInfoOld {
 	int				m_point_index[3];
-	D3DXVECTOR3		m_point_tex[3];
+	rvector		m_point_tex[3];
 	int				m_mtrl_id;
 };
 
 struct RFaceInfo {
 	int				m_point_index[3];
-	D3DXVECTOR3		m_point_tex[3];
+	rvector		m_point_tex[3];
 	int				m_mtrl_id;
 	int				m_sg_id;
 };
 
 struct RFaceNormalInfo {
-	D3DXVECTOR3 m_normal;
-	D3DXVECTOR3 m_pointnormal[3];
+	rvector m_normal;
+	rvector m_pointnormal[3];
 };
 
 struct RPhysiqueInfo {
@@ -350,7 +350,7 @@ struct RPhysiqueInfo {
 	int		m_parent_id[MAX_PHYSIQUE_KEY];
 	int		m_num;
 
-	D3DXVECTOR3 m_offset[MAX_PHYSIQUE_KEY];
+	rvector m_offset[MAX_PHYSIQUE_KEY];
 };
 
 #define USE_VERTEX_SW 1
@@ -404,11 +404,11 @@ public:
 	bool UpdateDataSW(char* pVertex);
 	bool UpdateDataHW(char* pVertex);
 
-	bool UpdateData(D3DXVECTOR3* pVec);
+	bool UpdateData(rvector* pVec);
 
 #ifndef _MAX_EXPORT
-	void UpdateDataLVert(RLVertex* pVert,D3DXVECTOR3* pVec,int nCnt);
-	void UpdateDataVert(RVertex* pVert,D3DXVECTOR3* pVec,int nCnt);
+	void UpdateDataLVert(RLVertex* pVert,rvector* pVec,int nCnt);
+	void UpdateDataVert(RVertex* pVert,rvector* pVec,int nCnt);
 #endif
 
 	void Lock();
@@ -452,9 +452,9 @@ public:
 	LPDIRECT3DVERTEXBUFFER9	m_vb;
 };
 
-inline D3DXQUATERNION* WINAPI D3DXQuaternionUnitAxisToUnitAxis2( D3DXQUATERNION *pOut, const D3DXVECTOR3 *pvFrom, const D3DXVECTOR3 *pvTo)
+inline D3DXQUATERNION* WINAPI D3DXQuaternionUnitAxisToUnitAxis2( D3DXQUATERNION *pOut, const rvector *pvFrom, const rvector *pvTo)
 {
-	D3DXVECTOR3 vAxis;
+	rvector vAxis;
 	D3DXVec3Cross(&vAxis, pvFrom, pvTo);    
 	pOut->x = vAxis.x;
 	pOut->y = vAxis.y;
@@ -463,12 +463,12 @@ inline D3DXQUATERNION* WINAPI D3DXQuaternionUnitAxisToUnitAxis2( D3DXQUATERNION 
 	return pOut;
 }
 
-inline D3DXQUATERNION* WINAPI D3DXQuaternionAxisToAxis( D3DXQUATERNION *pOut, const D3DXVECTOR3 *pvFrom, const D3DXVECTOR3 *pvTo)
+inline D3DXQUATERNION* WINAPI D3DXQuaternionAxisToAxis( D3DXQUATERNION *pOut, const rvector *pvFrom, const rvector *pvTo)
 {
-	D3DXVECTOR3 vA, vB;
+	rvector vA, vB;
 	D3DXVec3Normalize(&vA, pvFrom);
 	D3DXVec3Normalize(&vB, pvTo);
-	D3DXVECTOR3 vHalf(vA + vB);
+	rvector vHalf(vA + vB);
 	D3DXVec3Normalize(&vHalf, &vHalf);
 	return D3DXQuaternionUnitAxisToUnitAxis2(pOut, &vA, &vHalf);
 }
@@ -482,23 +482,23 @@ class CD3DArcBall
 
 	D3DXQUATERNION m_qDown;					
 	D3DXQUATERNION m_qNow;					
-	D3DXMATRIX     m_matRotation;			
-	D3DXMATRIX     m_matRotationDelta;		
-	D3DXMATRIX     m_matTranslation;		
-	D3DXMATRIX     m_matTranslationDelta;	
+	rmatrix     m_matRotation;			
+	rmatrix     m_matRotationDelta;		
+	rmatrix     m_matTranslation;		
+	rmatrix     m_matTranslationDelta;	
 	BOOL           m_bDrag;					
 	BOOL           m_bRightHanded;			
 
-	D3DXVECTOR3 ScreenToVector( int sx, int sy );
+	rvector ScreenToVector( int sx, int sy );
 
 public:
 
 	LRESULT     HandleMouseMessages( HWND, UINT, WPARAM, LPARAM );
 
-	D3DXMATRIX* GetRotationMatrix()         { return &m_matRotation; }
-	D3DXMATRIX* GetRotationDeltaMatrix()    { return &m_matRotationDelta; }
-	D3DXMATRIX* GetTranslationMatrix()      { return &m_matTranslation; }
-	D3DXMATRIX* GetTranslationDeltaMatrix() { return &m_matTranslationDelta; }
+	rmatrix* GetRotationMatrix()         { return &m_matRotation; }
+	rmatrix* GetRotationDeltaMatrix()    { return &m_matRotationDelta; }
+	rmatrix* GetTranslationMatrix()      { return &m_matTranslation; }
+	rmatrix* GetTranslationDeltaMatrix() { return &m_matTranslationDelta; }
 	BOOL        IsBeingDragged()            { return m_bDrag; }
 
 	VOID        SetRadius( FLOAT fRadius );
@@ -508,33 +508,10 @@ public:
 	CD3DArcBall();
 };
 
-inline void RRot2Quat(RQuatKey& q, const RRotKey& v)
-{
-	D3DXQUATERNION out;
-	D3DXVECTOR3 vec;
+void RRot2Quat(RQuatKey& q, const RRotKey& v);
+void RQuat2Mat(rmatrix& mat, const RQuatKey& q);
 
-	vec.x = v.x;
-	vec.y = v.y;
-	vec.z = v.z;
-
-	D3DXQuaternionRotationAxis(&out, &vec, v.w);
-
-	q.x = out.x;	q.y = out.y;	q.z = out.z;	q.w = out.w;
-}
-
-inline void RQuat2Mat(D3DXMATRIX& mat, const RQuatKey&q)
-{
-	D3DXQUATERNION out;
-
-	out.x = q.x;
-	out.y = q.y;
-	out.z = q.z;
-	out.w = q.w;
-
-	D3DXMatrixRotationQuaternion(&mat, &out);
-}
-
-void draw_line(LPDIRECT3DDEVICE9 dev, D3DXVECTOR3* vec, int size, DWORD color);
+void draw_line(LPDIRECT3DDEVICE9 dev, rvector* vec, int size, DWORD color);
 void draw_box(rmatrix* wmat, const rvector& max, const rvector& min, DWORD color);
 void draw_query_fill_box(rmatrix* wmat , rvector& max,rvector& min,DWORD color);
 

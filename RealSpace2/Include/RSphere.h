@@ -55,12 +55,12 @@ void RSphere::setSphere( const rvector& centre_, float radius_ )
 {
 	mCentre = centre_;
 	mRadius = radius_;
-	D3DXMatrixTranslation( &mWorld, centre_.x, centre_.y + 100, centre_.z );
+	mWorld = TranslationMatrix(centre_ + v3{ 0, 100, 0 });
 }
 
 void RSphere::setTransform( rmatrix& world_ )
 {
-	D3DXMatrixTranslation( &mWorld, mCentre.x, mCentre.y, mCentre.z );
+	mWorld = TranslationMatrix(mCentre);
 	mWorld *= world_;
 }
 

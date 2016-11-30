@@ -14,16 +14,16 @@ public:
 
 	float GetVisValue(int frame);
 
-	D3DXQUATERNION	GetRotValue(int frame);
-	D3DXVECTOR3		GetPosValue(int frame);
+	rquaternion GetRotValue(int frame);
+	rvector		GetPosValue(int frame);
 	rmatrix			GetTMValue(int frame);
-	int 			GetVecValue(int frame,D3DXVECTOR3* pVecTable);
+	int 			GetVecValue(int frame, rvector* pVecTable);
 
 	void ConnectToNameID();
 
 public:
 
-	D3DXMATRIX		m_mat_base;
+	rmatrix			m_mat_base;
 	int				m_node_id;
 	RMesh*			m_pConnectMesh;
 
@@ -40,7 +40,7 @@ public:
 	int				m_vertex_cnt;
 	int				m_vertex_vcnt;
 	DWORD*			m_vertex_frame;
-	D3DXVECTOR3**	m_vertex;
+	rvector**		m_vertex;
 };
 
 

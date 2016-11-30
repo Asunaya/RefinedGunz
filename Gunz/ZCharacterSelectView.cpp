@@ -390,7 +390,6 @@ void ZCharacterSelectView::SelectChar(int nSelectIndex)
 				m_CharInfo[nSelectIndex].m_CharInfo.nHair, m_CharInfo[nSelectIndex].m_CharInfo.nFace, 
 				m_CharInfo[nSelectIndex].m_CharInfo.nEquipedItemDesc);
 
-			// 무기
 			if( m_pVisualMesh ) 
 			{
 				RWeaponMotionType type = eq_weapon_etc;
@@ -518,7 +517,6 @@ void ZCharacterSelectView::OnChangedCharCostume()
 	if (m_pVisualMesh == NULL) return;
 
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
-//	MListBox* pListBox = (MListBox*)pResource->FindWidget("CS_CharList");
 	MComboBox* pSexCB, *pHairCB, *pFaceCB, *pCostumeCB;
 	pSexCB = (MComboBox*)pResource->FindWidget("CC_Sex");
 	pHairCB = (MComboBox*)pResource->FindWidget("CC_Hair");
@@ -526,7 +524,6 @@ void ZCharacterSelectView::OnChangedCharCostume()
 	pCostumeCB = (MComboBox*)pResource->FindWidget("CC_Costume");
 
 	if ((pSexCB != NULL) && (pHairCB!=NULL) && (pFaceCB!=NULL) && (pCostumeCB!=NULL) )
-//		&&(pListBox != NULL) )
 	{
 		MMatchSex nSex = MMatchSex(pSexCB->GetSelIndex());
 
@@ -544,18 +541,13 @@ void ZCharacterSelectView::OnChangedCharCostume()
 		int nHairIndex = pHairCB->GetSelIndex();
 		int nFaceIndex = pFaceCB->GetSelIndex();
 
-		unsigned long int nItemID[MMCIP_END];
-		memset(nItemID, 0, sizeof(nItemID));
+		u32 nItemID[MMCIP_END]{};
 
-		// 헤어
-//		nItemID[MMCIP_HEAD] = g_InitialHair[nHairIndex][(int)(nSex)];
-		nItemID[MMCIP_HEAD] = 0;
-
-		// 코스츔
 		nItemID[MMCIP_MELEE] = g_InitialCostume[nCostumeIndex][(int)(nSex)].nMeleeItemID;
 		nItemID[MMCIP_PRIMARY] = g_InitialCostume[nCostumeIndex][(int)(nSex)].nPrimaryItemID;
 		nItemID[MMCIP_SECONDARY] = g_InitialCostume[nCostumeIndex][(int)(nSex)].nSecondaryItemID;
 		nItemID[MMCIP_CUSTOM1] = g_InitialCostume[nCostumeIndex][(int)(nSex)].nCustom1ItemID;
+		nItemID[MMCIP_HEAD] = 0;
 		nItemID[MMCIP_CHEST] = g_InitialCostume[nCostumeIndex][(int)(nSex)].nChestItemID;
 		nItemID[MMCIP_HANDS] = g_InitialCostume[nCostumeIndex][(int)(nSex)].nHandsItemID;
 		nItemID[MMCIP_LEGS] = g_InitialCostume[nCostumeIndex][(int)(nSex)].nLegsItemID;
@@ -580,14 +572,10 @@ void ZCharacterSelectView::UpdateInterface(int nSelIndex)
 
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
 
-	// ui 업데이트
-
-	// 초기화
 	char szName[256];
 	MWidget* pWidget;
 	MLabel* pLabel;
 
-	// 위치 재정렬
 	for ( int i = 0; i < MAX_CHAR_COUNT; i++)
 	{
 		sprintf_safe( szName, "CharSel_Name%d", i);
@@ -595,9 +583,9 @@ void ZCharacterSelectView::UpdateInterface(int nSelIndex)
 		if ( pLabel)
 		{
 			if ( i == nSelIndex)
-				pLabel->SetTextColor( MCOLOR(0xFFFFFFFF));		// 흰색
+				pLabel->SetTextColor( MCOLOR(0xFFFFFFFF));
 			else
-				pLabel->SetTextColor( MCOLOR(0xFF606060));		// 회색
+				pLabel->SetTextColor( MCOLOR(0xFF606060));
 		}
 
 		sprintf_safe( szName, "CharSel_Level%d", i);
@@ -605,9 +593,9 @@ void ZCharacterSelectView::UpdateInterface(int nSelIndex)
 		if ( pLabel)
 		{
 			if ( i == nSelIndex)
-				pLabel->SetTextColor( MCOLOR(0xFFFFFFFF));		// 흰색
+				pLabel->SetTextColor( MCOLOR(0xFFFFFFFF));
 			else
-				pLabel->SetTextColor( MCOLOR(0xFF606060));		// 회색
+				pLabel->SetTextColor( MCOLOR(0xFF606060));
 		}
 
 		sprintf_safe( szName, "CharSel_ClanName%d", i);
@@ -615,9 +603,9 @@ void ZCharacterSelectView::UpdateInterface(int nSelIndex)
 		if ( pLabel)
 		{
 			if ( i == nSelIndex)
-				pLabel->SetTextColor( MCOLOR(0xFFFFFFFF));		// 흰색
+				pLabel->SetTextColor( MCOLOR(0xFFFFFFFF));
 			else
-				pLabel->SetTextColor( MCOLOR(0xFF606060));		// 회색
+				pLabel->SetTextColor( MCOLOR(0xFF606060));
 		}
 	}
 
@@ -712,13 +700,11 @@ void ZCharacterSelectView::OnReceivedAccountCharInfo(void* pCharListBlob)
 			ZCharacterSelectView::m_CharInfo[nIndex].m_CharInfo.nHP = DEFAULT_CHAR_HP;
 			ZCharacterSelectView::m_CharInfo[nIndex].m_CharInfo.nAP = DEFAULT_CHAR_AP;
 
-			// 아이템 속성값 적용
 			for (int k = 0; k < MMCIP_END; k++)
 			{
 				MMatchItemDesc* pItemDesc = MGetMatchItemDescMgr()->GetItemDesc(ZCharacterSelectView::m_CharInfo[nIndex].m_CharInfo.nEquipedItemDesc[k]);
 				if (pItemDesc)
 				{
-					// 지금은 HP와 AP만 적용중
 					ZCharacterSelectView::m_CharInfo[nIndex].m_CharInfo.nHP += pItemDesc->m_nHP;
 					ZCharacterSelectView::m_CharInfo[nIndex].m_CharInfo.nAP += pItemDesc->m_nAP;
 				}

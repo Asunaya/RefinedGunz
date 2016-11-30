@@ -300,7 +300,6 @@ bool ZSkillManager::Create()
 				chrElement.GetTagName(szTagName);
 				if (szTagName[0] == '#') continue;
 
-				// REPEAT 태그 --------------------
 				if (!_stricmp(szTagName, "REPEAT"))
 				{
 					int nAttrCount = chrElement.GetAttributeCount();
@@ -360,10 +359,13 @@ ZSkill::~ZSkill()
 bool ZSkill::Init(int nID, ZObject *pOwner)
 {
 	ZSkillManager::iterator itr = ZGetApplication()->GetSkillManager()->find(nID);
-	if(itr==ZGetApplication()->GetSkillManager()->end()) return false;
+	if (itr == ZGetApplication()->GetSkillManager()->end()) return false;
 
 	m_pDesc = itr->second;
 	m_pOwner = pOwner;
+
+	if (!m_pDesc || !m_pOwner)
+		return false;
 	
 	InitStatus();
 	return true;
@@ -372,11 +374,11 @@ bool ZSkill::Init(int nID, ZObject *pOwner)
 void ZSkill::InitStatus()
 {
 	m_bEnable = false;
-	m_fLastBeginTime = g_pGame->GetTime() - .001f * m_pDesc->nDelay;		
+	m_fLastBeginTime = g_pGame->GetTime() - .001f * m_pDesc->nDelay;
 	m_nUseNum = 0;
 }
 
-#define DAMAGE_DELAY	1.f			// 데미지 주는 간격
+#define DAMAGE_DELAY	1.f
 
 bool ZSkill::Update(float fElapsed)
 {
@@ -400,7 +402,7 @@ bool ZSkill::Update(float fElapsed)
 
 		for(ZObjectManager::iterator i = ZGetObjectManager()->begin();i!=ZGetObjectManager()->end();i++) {
 			ZObject *pTarget = i->second;
-			if(pTarget->IsDie()) continue;	// 죽은npc 는 제외
+			if(pTarget->IsDie()) continue;
 			float fDamage = m_pDesc->nModDoT;
 			if(CheckRange(pTarget->GetPosition(),pTarget) && m_pDesc->CheckResist(pTarget,&fDamage)) {
 				if(g_pGame->IsAttackable(m_pOwner,pTarget)) {
@@ -425,10 +427,8 @@ bool ZSkill::IsEnable()
 	return m_bEnable;
 }
 
-// 대상이 유효범위내에 있는지 판단한다
 bool ZSkill::CheckRange(const rvector& center, ZObject *pCurrent)
 {
-	// 발사하는 무기는 대상이 보여야 유효하다.
 	if(m_pDesc->bHitCheck)
 	{
 		if (MIsDerivedFromClass(ZActor, m_pOwner))
@@ -447,7 +447,6 @@ bool ZSkill::CheckRange(const rvector& center, ZObject *pCurrent)
 			return false;
 		case ZSE_ALLIED :
 			if(m_pOwner->GetTeamID()==pCurrent->GetTeamID()) return true;
-			//if(m_uidTarget==pCurrent->GetUID()) return true;
 			return false;
 		case ZSE_SLASH_AREA :
 			{
@@ -496,10 +495,9 @@ void ZSkill::PreExecute(const MUID& uidTarget, const rvector& targetPos )
 
 void ZSkill::LastExecute(const MUID& uidTarget, const rvector& targetPos )
 {
-	// 모션이 끝나고 데미지 들어갈 것들..
 	for(ZObjectManager::iterator i = ZGetObjectManager()->begin();i!=ZGetObjectManager()->end();i++) {
 		ZObject *pTarget = i->second;
-		if(pTarget->IsDie()) continue;	// 죽은npc 는 제외
+		if(pTarget->IsDie()) continue;
 		float fDamage = m_pDesc->nModLastDamage;
 		if(CheckRange(pTarget->GetPosition(),pTarget) && m_pDesc->CheckResist(pTarget,&fDamage)) {
 			if(g_pGame->IsAttackable(m_pOwner,pTarget)) {
@@ -521,7 +519,6 @@ void ZSkill::Execute(const MUID& uidTarget, const rvector& targetPos )
 	m_uidTarget = uidTarget;
 	m_nUseNum = 0;
 
-	// 스킬 사용
 	Use(uidTarget, targetPos);
 }
 
@@ -534,7 +531,6 @@ void ZSkill::Use(const MUID& uidTarget, const rvector& targetPos)
 	if (pTargetObject == NULL)
 		return;
 
-	// 발사 되는 무기이다
 	if ( m_pDesc->bHitCheck)
 	{
 		rvector vMissilePos, vMissileDir;
@@ -553,11 +549,8 @@ void ZSkill::Use(const MUID& uidTarget, const rvector& targetPos)
 			m_RepeatUTimer.Init( repeat.fDelay);
 		}
 	}
-	
-	// 발사되는 무기가 아니다.
 	else
 	{
-		// 카메라 효과
 		if ( m_pDesc->bCameraShock)
 		{
 			ZCharacter *pTargetCharacter=ZGetGameInterface()->GetCombatInterface()->GetTargetCharacter();
@@ -575,17 +568,13 @@ void ZSkill::Use(const MUID& uidTarget, const rvector& targetPos)
 		{
 			ZObject *pObject = i->second;
 
-			// 죽은npc 는 제외
 			if(pObject->IsDie())
 				continue;
 
 			float fDamage = m_pDesc->nModDamage;
 
-			//if ( CheckRange( pObject->GetPosition(),pObject) && m_pDesc->CheckResist( pObject, &fDamage))
 			if ( CheckRange( pTargetObject->GetPosition(), pObject) && m_pDesc->CheckResist( pObject, &fDamage))
 			{
-				
-				// 데미지를준다
 				if ( g_pGame->IsAttackable( m_pOwner, pObject))
 				{
 					if ( fDamage && (uidTarget == pObject->GetUID()))
@@ -597,7 +586,6 @@ void ZSkill::Use(const MUID& uidTarget, const rvector& targetPos)
 						pObject->OnHealing( m_pOwner, m_pDesc->nModHeal, m_pDesc->nModRepair);
 				}
 
-				// root 속성 (못움직인다)
 				if ( m_pDesc->bModRoot)
 				{
 					if ( pObject)
@@ -610,7 +598,6 @@ void ZSkill::Use(const MUID& uidTarget, const rvector& targetPos)
 					}
 				}
 
-				// knockback
 				if ( m_pDesc->fModKnockback != 0.0f)
 				{
 					if ( pObject)
@@ -624,8 +611,6 @@ void ZSkill::Use(const MUID& uidTarget, const rvector& targetPos)
 		}
 	}
 
-
-	// slow 등 속도를 줄이는것
 	if ( m_pDesc->nModSpeed<100)
 	{
 		if ( pTargetObject)
@@ -636,8 +621,6 @@ void ZSkill::Use(const MUID& uidTarget, const rvector& targetPos)
 		}
 	}
 
-
-	// 위치를 보정해 준다..
 	rvector vPos = m_pOwner->GetPosition();
 	rvector vDir = m_pOwner->GetDirection();
 
@@ -773,7 +756,7 @@ bool ZSkill::GetPartsTypePos(ZObject* pTargetObject, ZSKILLEFFECTTARGETPOSTYPE n
 	return true;
 }
 
-bool ZSkill::IsUsable(ZObject *pTarget)	// 이 스킬을 대상에게 쓸만한지
+bool ZSkill::IsUsable(ZObject *pTarget)
 {
 	if (m_pDesc->IsEffectiveTo(pTarget) && CheckRange(pTarget->GetPosition(),pTarget))
 		return true;
@@ -794,10 +777,9 @@ void ZSkill::Repeat()
 	ZSkillRepeat repeat = m_pDesc->RepeatList[m_nUseNum-1];
 
 	rmatrix rotmat;
-	D3DXMatrixIdentity( &rotmat );
-	D3DXMatrixRotationX(&rotmat, repeat.vAngle.x);
-	D3DXMatrixRotationY(&rotmat, repeat.vAngle.y);
-	D3DXMatrixRotationZ(&rotmat, repeat.vAngle.z);
+	GetIdentityMatrix(rotmat);
+
+	rotmat = RGetRotZ(repeat.vAngle.z);
 	rvector dir = vMissileDir * rotmat;
 
 	rvector tarpos = vMissilePos + (500.0f * dir);

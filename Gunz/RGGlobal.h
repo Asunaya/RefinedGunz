@@ -1,10 +1,6 @@
 #pragma once
 
-#include "RGTypes.h"
-
-inline void cprint(...)
-{
-}
+inline void cprint(...) {}
 
 static constexpr int RG_SLASH_RADIUS = 320;
 static constexpr int RG_MASSIVE_RADIUS = 280;

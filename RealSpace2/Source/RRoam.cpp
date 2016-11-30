@@ -424,33 +424,8 @@ void Patch::Tessellate()
 //
 void Patch::Render()
 {
-	/*
-	// Store old matrix
-	glPushMatrix();
-	
-	// Translate the patch to the proper world coordinates
-	glTranslatef( (GLfloat)m_WorldX, 0, (GLfloat)m_WorldY );
-	glBegin(GL_TRIANGLES);
-		
-		RecursRender (	&m_BaseLeft,
-			0,				PATCH_SIZE,
-			PATCH_SIZE,		0,
-			0,				0);
-		
-		RecursRender(	&m_BaseRight,
-			PATCH_SIZE,		0,
-			0,				PATCH_SIZE,
-			PATCH_SIZE,		PATCH_SIZE);
-	
-	glEnd();
-	
-	// Restore the matrix
-	glPopMatrix();
-	*/
-//		glTranslatef( (GLfloat)m_WorldX, 0, (GLfloat)m_WorldY );
-
-	rmatrix id;
-	RGetDevice()->SetTransform(D3DTS_WORLD,D3DXMatrixTranslation(&id,(float)m_WorldX,(float)m_WorldY,0));
+	RGetDevice()->SetTransform(D3DTS_WORLD,
+		&unmove(TranslationMatrix({static_cast<float>(m_WorldX), static_cast<float>(m_WorldY), 0 })));
 
 #ifdef USEVB
 	Landscape::m_nIndicies=0;

@@ -675,12 +675,12 @@ void RGMain::OnGameCreate()
 	g_Rules.OnGameCreate();
 }
 
-void RGMain::OnSlash(ZCharacter * Char, const D3DXVECTOR3 & Pos, const D3DXVECTOR3 & Dir)
+void RGMain::OnSlash(ZCharacter * Char, const rvector & Pos, const rvector & Dir)
 {
 	m_HitboxManager.OnSlash(Pos, Dir);
 }
 
-void RGMain::OnMassive(ZCharacter * Char, const D3DXVECTOR3 & Pos, const D3DXVECTOR3 & Dir)
+void RGMain::OnMassive(ZCharacter * Char, const rvector & Pos, const rvector & Dir)
 {
 	m_HitboxManager.OnMassive(Pos);
 }

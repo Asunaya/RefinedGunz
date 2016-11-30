@@ -1,5 +1,4 @@
-#ifndef ZCHARACTERVIEW_H
-#define ZCHARACTERVIEW_H
+#pragma once
 
 #include "ZPrerequisites.h"
 #include "ZMeshView.h"
@@ -24,7 +23,6 @@ struct ZCharacterViewInfo
 
 	MMatchTeam	nTeam;
 	MMatchObjectStageState		nStageState;
-//	bool		bReady;
 	bool		bMaster;
 	bool		bFireWall;
 	bool		bNAT;
@@ -38,10 +36,10 @@ public:
 	ZMeshView*			m_pItemMeshView[MMCIP_END];
 protected:
 	bool				m_bVisibleEquipment;
-	MMatchCharItemParts	m_nVisualWeaponParts;	// 갖고 있는 무기중 보여주는 무기 파츠
+	MMatchCharItemParts	m_nVisualWeaponParts;
 
 	bool				m_bAutoRotate;
-	DWORD				m_dwTime;				// 회전 시간
+	u32					m_dwTime;
 	
 protected:
 	void		 RepositionItemSlots(void);
@@ -59,7 +57,7 @@ public:
 
 	void InitCharParts(ZCharacterView* pCharView, MMatchCharItemParts nVisualWeaponParts = MMCIP_PRIMARY);
 	void InitCharParts(MMatchSex nSex, unsigned int nHair, unsigned int nFace, 
-				       unsigned long int* nEquipItemIDs, MMatchCharItemParts nVisualWeaponParts = MMCIP_PRIMARY);
+				       u32* nEquipItemIDs, MMatchCharItemParts nVisualWeaponParts = MMCIP_PRIMARY);
 	void SetParts(MMatchCharItemParts nParts, unsigned int nItemID);
 	void ChangeVisualWeaponParts(MMatchCharItemParts nVisualWeaponParts);
 
@@ -82,7 +80,3 @@ public:
 unsigned long int GetVisualWeaponID(unsigned long int nMeleeItemID, unsigned long int nPrimaryItemID,
 									unsigned long int nSecondaryItemID, unsigned long int nCustom1ItemID,
 									unsigned long int nCustom2ItemID);
-
-
-
-#endif

@@ -74,7 +74,7 @@ void HitboxManager::Create()
 	}
 }
 
-void HitboxManager::OnSlash(const D3DXVECTOR3 &Pos, const D3DXVECTOR3 &Dir)
+void HitboxManager::OnSlash(const rvector &Pos, const rvector &Dir)
 {
 	return;
 
@@ -89,13 +89,13 @@ void HitboxManager::OnSlash(const D3DXVECTOR3 &Pos, const D3DXVECTOR3 &Dir)
 	Normalize(i.Dir);
 	i.type = SLASH;
 	i.Time = ZGetGame()->GetTime();
-	MakeWorldMatrix(&i.World, i.Pos, i.Dir, D3DXVECTOR3(0, 0, 1));
+	MakeWorldMatrix(&i.World, i.Pos, i.Dir, rvector(0, 0, 1));
 	List.push_back(i);
 
 	AddEnemyPositions();
 }
 
-void HitboxManager::OnMassive(const D3DXVECTOR3 &Pos)
+void HitboxManager::OnMassive(const rvector &Pos)
 {
 	return;
 
@@ -105,10 +105,10 @@ void HitboxManager::OnMassive(const D3DXVECTOR3 &Pos)
 	Info i;
 	i.Pos = Pos;
 	i.Pos.z += 10;
-	i.Dir = D3DXVECTOR3(1, 0, 0);
+	i.Dir = rvector(1, 0, 0);
 	i.type = MASSIVE;
 	i.Time = ZGetGame()->GetTime();
-	D3DXMatrixTranslation(&i.World, i.Pos.x, i.Pos.y, i.Pos.z);
+	i.World = TranslationMatrix(i.Pos);
 	List.push_back(i);
 
 	AddEnemyPositions();
@@ -124,7 +124,7 @@ void HitboxManager::AddEnemyPositions()
 		i.Pos = pChar->GetPosition();
 		i.type = POS;
 		i.Time = ZGetGame()->GetTime();
-		D3DXMatrixTranslation(&i.World, i.Pos.x, i.Pos.y, i.Pos.z);
+		i.World = TranslationMatrix(i.Pos);
 		List.push_back(i);
 	}
 }

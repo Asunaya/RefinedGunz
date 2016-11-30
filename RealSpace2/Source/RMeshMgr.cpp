@@ -446,7 +446,7 @@ void RMeshMgr::Render(int id)
 	}
 }
 
-void RMeshMgr::RenderFast(int id,D3DXMATRIX* unit_mat)
+void RMeshMgr::RenderFast(int id,rmatrix* unit_mat)
 {
 	if(m_list.empty()) return;
 

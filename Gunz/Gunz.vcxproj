@@ -577,7 +577,6 @@ rem call copy_share.bat
     <ClInclude Include="ReplayControl.h" />
     <ClInclude Include="RGGlobal.h" />
     <ClInclude Include="RGMain.h" />
-    <ClInclude Include="RGTypes.h" />
     <ClInclude Include="Rules.h" />
     <ClInclude Include="stack_allocator.hpp" />
     <ClInclude Include="Tasks.h" />

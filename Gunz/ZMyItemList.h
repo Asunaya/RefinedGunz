@@ -1,5 +1,4 @@
-#ifndef _ZITEMLIST_H
-#define _ZITEMLIST_H
+#pragma once
 
 #include "ZPrerequisites.h"
 #include "MMatchItem.h"
@@ -7,23 +6,20 @@
 #include "MQuestItem.h"
 #include <list>
 #include <map>
-using namespace std;
-
 
 class ZMyItemNode : public MBaseItem
 {
 protected:
-	unsigned long int		m_nItemID;
-	MUID					m_UID;
-	DWORD					m_dwWhenReceivedClock;
+	u32		m_nItemID;
+	MUID	m_UID;
+	u64		m_dwWhenReceivedClock;
 
 public:
-	
 	ZMyItemNode() : MBaseItem(), m_nItemID(0), m_UID(MUID(0,0)) { }
 
 	virtual	~ZMyItemNode() { }
-	void Create(MUID& uidItem, unsigned long int nItemID, 
-				bool bIsRentItem=false, int nRentMinutePeriodRemainder=RENT_MINUTE_PERIOD_UNLIMITED)
+	void Create(MUID& uidItem, u32 nItemID, bool bIsRentItem = false,
+		int nRentMinutePeriodRemainder = RENT_MINUTE_PERIOD_UNLIMITED)
 	{
 		m_UID = uidItem;
 		m_nItemID = nItemID;
@@ -31,34 +27,30 @@ public:
 		m_nRentMinutePeriodRemainder = nRentMinutePeriodRemainder;
 		m_dwWhenReceivedClock = GetGlobalTimeMS();
 	}
-	void Create(unsigned long int nItemID, 
-				bool bIsRentItem=false, int nRentMinutePeriodRemainder=RENT_MINUTE_PERIOD_UNLIMITED)
+	void Create(u32 nItemID, bool bIsRentItem = false,
+		int nRentMinutePeriodRemainder = RENT_MINUTE_PERIOD_UNLIMITED)
 	{
 		m_nItemID = nItemID;
 		m_bIsRentItem = bIsRentItem;
 		m_nRentMinutePeriodRemainder = nRentMinutePeriodRemainder;
 		m_dwWhenReceivedClock = GetGlobalTimeMS();
 	}
-	DWORD GetWhenReceivedClock()
-	{
-		return m_dwWhenReceivedClock;
-	}
+	auto GetWhenReceivedClock() const { return m_dwWhenReceivedClock; }
 
-	unsigned long int GetItemID()	{ return m_nItemID; }
+	auto GetItemID() const { return m_nItemID; }
 	MUID& GetUID()					{ return m_UID; }
 
 };
 
-typedef map<MUID, ZMyItemNode*> MITEMNODEMAP;
-typedef map<int, ZMyItemNode*> MACCOUNT_ITEMNODEMAP;
+typedef std::map<MUID, ZMyItemNode*> MITEMNODEMAP;
+typedef std::map<int, ZMyItemNode*> MACCOUNT_ITEMNODEMAP;
 
-#ifdef _QUEST_ITEM
 #define MAX_ZQUEST_ITEM_COUNT 99
 #define MIN_ZQUEST_ITEM_COUNT 0
 
 class ZMyQuestItemNode
 {
-public :
+public:
 	ZMyQuestItemNode() : m_nCount( 0 ), m_nItemID( 0 )
 	{
 	}
@@ -67,7 +59,7 @@ public :
 	{
 	}
 
-	unsigned long int	GetItemID()	{ return m_nItemID; }
+	u32	GetItemID()	{ return m_nItemID; }
 	int					GetCount()	{ return m_nCount; }
 	MQuestItemDesc*		GetDesc()	{ return m_pDesc; }
 
@@ -86,11 +78,11 @@ public :
 			m_nCount = MIN_ZQUEST_ITEM_COUNT;
 	}
 
-	void SetItemID( const unsigned long int nItemID )	{ m_nItemID = nItemID; }
+	void SetItemID( const u32 nItemID )	{ m_nItemID = nItemID; }
 	void SetCount( const int nCount )					{ m_nCount = nCount; }
 	void SetDesc( MQuestItemDesc* pDesc )				{ m_pDesc = pDesc; }
 
-	void Create( const unsigned long int nItemID, const int nCount, MQuestItemDesc* pDesc )
+	void Create( const u32 nItemID, const int nCount, MQuestItemDesc* pDesc )
 	{
 		m_nItemID	= nItemID;
 		m_nCount	= nCount;
@@ -98,25 +90,25 @@ public :
 	}
 
 public :
-	unsigned long int	m_nItemID;
+	u32	m_nItemID;
 	int					m_nCount;
 	MQuestItemDesc*		m_pDesc;
 };
 
 
-class ZMyQuestItemMap : public map< unsigned long int, ZMyQuestItemNode* >
+class ZMyQuestItemMap : public std::map< u32, ZMyQuestItemNode* >
 {
 public :
 	ZMyQuestItemMap();
 	~ZMyQuestItemMap();
 	
-	bool Add( const unsigned long int nItemID, ZMyQuestItemNode* pQuestItem );
+	bool Add( const u32 nItemID, ZMyQuestItemNode* pQuestItem );
 
-	bool CreateQuestItem( const unsigned long int nItemID, const int nCount, MQuestItemDesc* pDesc );
+	bool CreateQuestItem( const u32 nItemID, const int nCount, MQuestItemDesc* pDesc );
 
 	void Clear();
 
-	ZMyQuestItemNode* Find( const unsigned long int nItemID )
+	ZMyQuestItemNode* Find( const u32 nItemID )
 	{
 		ZMyQuestItemMap::iterator It;
 		It = find( nItemID );
@@ -131,13 +123,8 @@ public :
 private :
 
 };
-#endif
 
-typedef map<unsigned long int, ZMyQuestItemNode*> MQUESTITEMNODEMAP;
-/*
-typedef map<MUID, unsigned long int> MITEMNODEMAP;
-typedef map<int, unsigned long int> MACCOUNT_ITEMNODEMAP;
-*/
+typedef std::map<u32, ZMyQuestItemNode*> MQUESTITEMNODEMAP;
 
 enum ITEM_EQUIP_PARTS
 {
@@ -161,14 +148,13 @@ private:
 protected:
 	bool							m_bCreated;
 	MUID							m_uidEquipItems[MMCIP_END];
-	unsigned long int				m_nEquipItemID[MMCIP_END];
+	u32				m_nEquipItemID[MMCIP_END];
 	MITEMNODEMAP					m_ItemMap;
-	vector<MUID>					m_ItemIndexVectorEquip;
-	vector<MUID>					m_ItemIndexVector;
+	std::vector<MUID>					m_ItemIndexVectorEquip;
+	std::vector<MUID>					m_ItemIndexVector;
 
-	// Account Item 관련
 	MACCOUNT_ITEMNODEMAP			m_AccountItemMap;
-	vector<int>						m_AccountItemVector;
+	std::vector<int>						m_AccountItemVector;
 
 	void ClearItemMap();
 	void ClearAccountItemMap();
@@ -176,7 +162,6 @@ protected:
 
 #ifdef _QUEST_ITEM
 protected :
-	// quest item.
 	ZMyQuestItemMap	m_QuestItemMap;
 
 public :
@@ -205,11 +190,11 @@ public:
 
 	void GetNamedComp( int nItemID, char* szBmpWidgetName, char* szBmpName, char* szLabelWidgetName);
 
-	unsigned long int GetItemID(int nItemIndex);
-	unsigned long int GetItemIDEquip(int nItemIndex);
-	unsigned long int GetItemID(const MUID& uidItem);
-	unsigned long int GetAccountItemID(int nPos);
-	unsigned long int GetEquipedItemID(MMatchCharItemParts parts);
+	u32 GetItemID(int nItemIndex);
+	u32 GetItemIDEquip(int nItemIndex);
+	u32 GetItemID(const MUID& uidItem);
+	u32 GetAccountItemID(int nPos);
+	u32 GetEquipedItemID(MMatchCharItemParts parts);
 
 	ZMyItemNode* GetItem(int nItemIndex);
 	ZMyItemNode* GetItemEquip(int nItemIndex);
@@ -220,7 +205,7 @@ public:
 
 	MUID GetEquipedItemUID(MMatchCharItemParts parts);
 	void SetEquipItemsAll(MUID* pnEquipItems);
-	void SetEquipItemID(unsigned long int* pEquipItemID);
+	void SetEquipItemID(u32* pEquipItemID);
 	void SetItemsAll(MTD_ItemNode* pItemNodes, const int nItemCount);
 	bool IsCreated() { return m_bCreated; }
 
@@ -228,15 +213,12 @@ public:
 	MUID GetItemUIDEquip(int nItemIndex);
 
 	void Serialize();
-	void SerializeAccountItem();		// 창고 인터페이스를 동기화한다
+	void SerializeAccountItem();
 	int GetEquipedTotalWeight();
 	int GetEquipedHPModifier();
 	int GetEquipedAPModifier();
 	int GetMaxWeight();
 
-	// AccountItem 관련
-	void AddAccountItem(int nAIID, unsigned long int nItemID, int nRentMinutePeriodRemainder=RENT_MINUTE_PERIOD_UNLIMITED);
+	void AddAccountItem(int nAIID, u32 nItemID, int nRentMinutePeriodRemainder=RENT_MINUTE_PERIOD_UNLIMITED);
 	void ClearAccountItems();
 };
-
-#endif

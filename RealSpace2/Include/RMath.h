@@ -46,6 +46,16 @@ inline bool Equals(float a, float b)
 	return IS_EQ(a, b);
 }
 
+inline bool Equals(const rmatrix& a, const rmatrix& b)
+{
+	for (size_t i{}; i < 4; ++i)
+		for (size_t j{}; j < 4; ++j)
+			if (!IS_EQ(a(i, j), b(i, j)))
+				return false;
+
+	return true;
+}
+
 inline void GetIdentityMatrix(rmatrix& m)
 {
 	m._11 = 1; m._12 = 0; m._13 = 0; m._14 = 0;
@@ -60,7 +70,9 @@ inline rmatrix GetIdentityMatrix() {
 	return m;
 }
 
-inline rmatrix ScalingMatrix(v4 scale)
+inline rmatrix IdentityMatrix() { return GetIdentityMatrix(); }
+
+inline rmatrix ScalingMatrix(const v4& scale)
 {
 	rmatrix m;
 	m._11 = scale.x; m._12 = 0;       m._13 = 0;       m._14 = 0;
@@ -70,6 +82,15 @@ inline rmatrix ScalingMatrix(v4 scale)
 	return m;
 }
 
+inline rmatrix ScalingMatrix(const v3& scale)
+{
+	return ScalingMatrix({ EXPAND_VECTOR(scale), 1 });
+}
+
+inline rmatrix ScalingMatrix(float scale)
+{
+	return ScalingMatrix({ scale, scale, scale });
+}
 
 // Returns the translation a matrix applies as a vector.
 inline rvector GetTransPos(const rmatrix& m) {
@@ -545,6 +566,58 @@ inline rmatrix RGetRotZ(float angle) {
 	return RotationMatrix({ 0, 0, 1 }, rads);
 }
 
+inline rmatrix QuaternionToMatrix(const rquaternion& q)
+{
+	return {
+		1.0f - 2.0f*q.y*q.y - 2.0f*q.z*q.z, 2.0f*q.x*q.y - 2.0f*q.z*q.w, 2.0f*q.x*q.z + 2.0f*q.y*q.w, 0.0f,
+		2.0f*q.x*q.y + 2.0f*q.z*q.w, 1.0f - 2.0f*q.x*q.x - 2.0f*q.z*q.z, 2.0f*q.y*q.z - 2.0f*q.x*q.w, 0.0f,
+		2.0f*q.x*q.z - 2.0f*q.y*q.w, 2.0f*q.y*q.z + 2.0f*q.x*q.w, 1.0f - 2.0f*q.x*q.x - 2.0f*q.y*q.y, 0.0f,
+		0.0f, 0.0f, 0.0f, 1.0f };
+}
+
+inline rquaternion MatrixToQuaternion(const rmatrix& m)
+{
+	rquaternion ret;
+	ret.w = sqrt(1.0f + m._11 + m._22 + m._33) / 2.0f;
+	auto w4 = (4.0f * ret.w);
+	ret.x = (m._32 - m._23) / w4;
+	ret.y = (m._13 - m._31) / w4;
+	ret.z = (m._21 - m._12) / w4;
+	return ret;
+}
+
+inline rquaternion Slerp(const rquaternion& a, const rquaternion& b, float t)
+{
+	auto clamp = [&](auto&& val, auto&& minval, auto&& maxval) {
+		return max(minval, min(maxval, val));
+	};
+	auto omega = clamp(
+		a[0] * b[0] +
+		a[1] * b[1] +
+		a[2] * b[2] +
+		a[3] * b[3],
+		-1, 1);
+
+	if (IS_ZERO(omega))
+		omega = 0.000001f;
+
+	auto som = sin(omega);
+	auto st0 = sin((1 - t) * omega) / som;
+	auto st1 = sin(t - omega) / som;
+
+	return{
+		a[0] * st0 + b[0] * st1,
+		a[1] * st0 + b[1] * st1,
+		a[2] * st0 + b[2] * st1,
+		a[3] * st0 + b[3] * st1 };
+}
+
+inline rquaternion AngleAxisToQuaternion(const v3& Axis, float Angle)
+{
+	// TODO: Make less stupid
+	return MatrixToQuaternion(RotationMatrix(Axis, Angle));
+}
+
 inline float sgn(float a)
 {
 	if (a > 0.0F) return (1.0F);
@@ -702,30 +775,49 @@ inline rplane PlaneFromPoints(const v3& a, const v3& b, const v3& c)
 	return{ EXPAND_VECTOR(normal), -DotProduct(normal, a) };
 }
 
-// TODO: Implement without D3DX
-static rmatrix ViewMatrix(const rvector& Position, const rvector& Direction, const rvector& Up)
+inline rmatrix ViewMatrix(const rvector& Position, const rvector& Direction, const rvector& Up)
 {
-	rmatrix mat;
-	v3 At = Position + Direction;
-	D3DXMatrixLookAtLH(&mat, &Position, &At, &Up);
-	return mat;
+	auto z = Normalized(Direction);
+	auto x = Normalized(CrossProduct(Up, z));
+	auto y = CrossProduct(z, x);
+
+#define VIEWMATRIX_ROW(e) x.e, y.e, z.e, 0
+
+	return{
+		VIEWMATRIX_ROW(x),
+		VIEWMATRIX_ROW(y),
+		VIEWMATRIX_ROW(z),
+		-DotProduct(x, Position), -DotProduct(y, Position), -DotProduct(z, Position), 1 };
+
+#undef VIEWMATRIX_ROW
 }
 
-// TODO: Implement without D3DX
-static rmatrix PerspectiveProjectionMatrix(float Aspect, float FovY, float Near, float Far)
+inline rmatrix PerspectiveProjectionMatrix(float AspectRatio, float FovY, float Near, float Far)
 {
-	rmatrix mat;
-	D3DXMatrixPerspectiveFovLH(&mat, FovY, Aspect, Near, Far);
-	return mat;
+	auto yScale = 1.0f / tan(FovY / 2);
+	auto xScale = yScale / AspectRatio;
+
+	return{
+		xScale, 0, 0, 0,
+		0, yScale, 0, 0,
+		0, 0, Far / (Far - Near), 1,
+		0, 0, -Near*Far / (Far - Near), 0 };
 }
 
-static rmatrix PerspectiveProjectionMatrixViewport(float ScreenWidth, float ScreenHeight,
+inline rmatrix PerspectiveProjectionMatrixViewport(float ScreenWidth, float ScreenHeight,
 	float FOV, float Near, float Far)
 {
 	float Aspect = ScreenWidth / ScreenHeight;
 	float FovY = atan(tan(FOV / 2.0f) / Aspect) * 2.0f;
 
 	return PerspectiveProjectionMatrix(Aspect, FovY, Near, Far);
+}
+
+inline rmatrix TranslationMatrix(const v3& Trans)
+{
+	rmatrix mat = GetIdentityMatrix();
+	SetTransPos(mat, Trans);
+	return mat;
 }
 
 _NAMESPACE_REALSPACE2_END

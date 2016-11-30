@@ -9,7 +9,7 @@
 #define LIGHTTRACTER_WIDTH	1
 #define LIGHTTRACER_SPEED	10.0f	// cm/msec
 
-ZEffectLightTracer::ZEffectLightTracer(ZEffectBillboardSource* pEffectBillboardSource, const D3DXVECTOR3& Start, const D3DXVECTOR3& End)
+ZEffectLightTracer::ZEffectLightTracer(ZEffectBillboardSource* pEffectBillboardSource, const rvector& Start, const rvector& End)
 : ZEffectBillboard(pEffectBillboardSource)
 {
 	m_nStartTime = GetGlobalTimeMS();
@@ -35,7 +35,7 @@ bool ZEffectLightTracer::Draw(unsigned long int nTime)
 {
 	DWORD dwDiff = nTime-m_nStartTime;
 
-	D3DXVECTOR3 right;
+	rvector right;
 	D3DXVec3Cross(&right, &m_LightTracerDir, &RealSpace2::RCameraDirection);
 	D3DXVec3Cross(&m_Normal, &m_LightTracerDir, &right);
 	D3DXVec3Cross(&m_Up, &m_Normal, &m_LightTracerDir);

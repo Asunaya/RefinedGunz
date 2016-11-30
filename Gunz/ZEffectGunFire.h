@@ -10,8 +10,8 @@ class ZEffectGunFire : public ZEffect{
 protected:
 	unsigned long int m_nStartTime;
 	ZEffectBillboardSource*	m_pSources[2];
-	D3DXVECTOR3	m_Pos;
-	D3DXVECTOR3	m_Dir;
+	rvector	m_Pos;
+	rvector	m_Dir;
 
 	float	m_nStartAddTime;
 
@@ -21,7 +21,7 @@ protected:
 	bool		m_isLeftWeapon;
 
 public:
-	ZEffectGunFire(ZEffectBillboardSource*	pSources[2], D3DXVECTOR3& Pos, D3DXVECTOR3& Dir,ZCharacter* pChar);
+	ZEffectGunFire(ZEffectBillboardSource*	pSources[2], rvector& Pos, rvector& Dir,ZCharacter* pChar);
 	virtual ~ZEffectGunFire(void);
 
 	virtual bool Draw(unsigned long int nTime);
@@ -46,15 +46,15 @@ protected:
 	unsigned long int m_nStartTime;
 	ZEffectBillboardSource*	m_pSources[4];
 
-	D3DXVECTOR3	m_Pos;
-	D3DXVECTOR3	m_Dir;
+	rvector	m_Pos;
+	rvector	m_Dir;
 
 	bool		m_isMovingPos;
 	MUID		m_uid;
 	bool		m_isLeftWeapon;
 
 public:
-	ZEffectGunFire2(ZEffectBillboardSource*	pSources[4], D3DXVECTOR3& Pos, D3DXVECTOR3& Dir,ZCharacter* pChar);
+	ZEffectGunFire2(ZEffectBillboardSource*	pSources[4], rvector& Pos, rvector& Dir,ZCharacter* pChar);
 	virtual ~ZEffectGunFire2(void);
 
 	virtual bool Draw(unsigned long int nTime);

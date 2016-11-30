@@ -28,19 +28,19 @@ RMeshNodeData::RMeshNodeData()
 	m_axis_rot = rvector(0.f,0.f,0.f);
 	m_axis_rot_angle = 0.f;
 
-	D3DXMatrixIdentity(&m_mat_base);
-	D3DXMatrixIdentity(&m_mat_parent_inv);
-	D3DXMatrixIdentity(&m_mat_local);
-	D3DXMatrixIdentity(&m_mat_inv);
-	D3DXMatrixIdentity(&m_mat_etc);
-	D3DXMatrixIdentity(&m_mat_flip);
-	D3DXMatrixIdentity(&m_mat_scale);
-	D3DXMatrixIdentity(&m_mat_result);
+	GetIdentityMatrix(m_mat_base);
+	GetIdentityMatrix(m_mat_parent_inv);
+	GetIdentityMatrix(m_mat_local);
+	GetIdentityMatrix(m_mat_inv);
+	GetIdentityMatrix(m_mat_etc);
+	GetIdentityMatrix(m_mat_flip);
+	GetIdentityMatrix(m_mat_scale);
+	GetIdentityMatrix(m_mat_result);
 
-	D3DXMatrixIdentity(&m_mat_add);
+	GetIdentityMatrix(m_mat_add);
 
-	D3DXMatrixIdentity(&m_mat_ref);
-	D3DXMatrixIdentity(&m_mat_ref_inv);
+	GetIdentityMatrix(m_mat_ref);
+	GetIdentityMatrix(m_mat_ref_inv);
 
 	m_point_list		= NULL;
 	m_face_normal_list	= NULL;
@@ -88,7 +88,7 @@ void RMeshNodeData::BBoxClear()
 	m_max = rvector(-999.f,-999.f,-999.f);
 }
 
-void RMeshNodeData::SubCalc(D3DXVECTOR3* v)
+void RMeshNodeData::SubCalc(rvector* v)
 {
 	if(v==NULL) return;
 

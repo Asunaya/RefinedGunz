@@ -22,12 +22,10 @@ RVisualMesh* RTVisualMesh::GetVMesh(bool b)
 
 void ZMeshView::DrawTestScene()
 {
-	RSetProjection(D3DX_PI/4, 1.0f, 1.0f, 1000.0f);
-	RSetCamera(D3DXVECTOR3(0.0f, 3.0f, -5.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, 1.0f, 0.0f));
+	RSetProjection(PI_FLOAT/4, 1.0f, 1.0f, 1000.0f);
+	RSetCamera(rvector(0.0f, 3.0f, -5.0f), rvector(0.0f, 0.0f, 0.0f), rvector(0.0f, 1.0f, 0.0f));
 
-	rmatrix World;
-	D3DXMatrixIdentity(&World);
-	RGetDevice()->SetTransform(D3DTS_WORLD, &World);
+	RGetDevice()->SetTransform(D3DTS_WORLD, &unmove(GetIdentityMatrix()));
 
 	struct CUSTOMVERTEX{
 		FLOAT x, y, z;      // The untransformed, 3D position for the vertex
@@ -147,12 +145,9 @@ void ZMeshView::OnDraw(MDrawContext* pDC)
 	RSetWBuffer(true);
 	RGetDevice()->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
 
-	D3DXMATRIX View;
-	D3DXMatrixLookAtLH(&View, &m_Eye, &m_At, &m_Up);
-	RGetDevice()->SetTransform(D3DTS_VIEW, &View);
+	RGetDevice()->SetTransform(D3DTS_VIEW, &unmove(ViewMatrix(m_Eye, Normalized(m_At - m_Eye), m_Up)));
 
-	D3DXMATRIX Proj;
-	D3DXMatrixPerspectiveFovLH(&Proj, D3DX_PI/4, r.w/float(r.h>0?r.h:1), 10.0f, 1000.0f);
+	auto Proj = PerspectiveProjectionMatrix(r.w / float(r.h > 0 ? r.h : 1), PI_FLOAT / 4, 10, 1000);
 	RGetDevice()->SetTransform(D3DTS_PROJECTION, &Proj);
 
 	SetLight( rvector(50.f,200.f,-100.f) );

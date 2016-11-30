@@ -12,12 +12,12 @@ class ZEffectLightTracer : public ZEffectBillboard , public CMemPoolSm<ZEffectLi
 protected:
 	unsigned long int m_nStartTime;
 
-	D3DXVECTOR3	m_LightTracerDir;
-	D3DXVECTOR3	m_Start, m_End;
+	rvector	m_LightTracerDir;
+	rvector	m_Start, m_End;
 	float		m_fLength;
 
 public:
-	ZEffectLightTracer(ZEffectBillboardSource* pEffectBillboardSource, const D3DXVECTOR3& Start, const D3DXVECTOR3& End);
+	ZEffectLightTracer(ZEffectBillboardSource* pEffectBillboardSource, const rvector& Start, const rvector& End);
 	virtual ~ZEffectLightTracer(void);
 
 	virtual bool Draw(unsigned long int nTime);

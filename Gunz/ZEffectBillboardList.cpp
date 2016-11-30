@@ -137,10 +137,10 @@ bool ZEffectShadowList::Draw()
 
 			// 좋은코드는 아니지만 버텍스 카피를 줄이기위해 타입캐스팅했다.
 
-			D3DXVec3TransformCoord((D3DXVECTOR3*)&v[0].x,sv  ,&p->worldmat);
-			D3DXVec3TransformCoord((D3DXVECTOR3*)&v[1].x,sv+1,&p->worldmat);
-			D3DXVec3TransformCoord((D3DXVECTOR3*)&v[2].x,sv+2,&p->worldmat);
-			D3DXVec3TransformCoord((D3DXVECTOR3*)&v[3].x,sv+3,&p->worldmat);
+			D3DXVec3TransformCoord((rvector*)&v[0].x,sv  ,&p->worldmat);
+			D3DXVec3TransformCoord((rvector*)&v[1].x,sv+1,&p->worldmat);
+			D3DXVec3TransformCoord((rvector*)&v[2].x,sv+2,&p->worldmat);
+			D3DXVec3TransformCoord((rvector*)&v[3].x,sv+3,&p->worldmat);
 
 			v[0].color=v[1].color=v[2].color=v[3].color=p->dwColor;
 
@@ -392,10 +392,8 @@ bool ZEffectBillboardList::Draw()
 		if(m_dwBase >= EFFECTBASE_DISCARD_COUNT)
 			m_dwBase = 0;
 
-		// 갯수가 BILLBOARD_FLUSH_COUNT 를 넘어가면 BILLBOARD_FLUSH_COUNT 씩 찍는다
 		DWORD dwThisNum = min( dwRemainNum , static_cast<DWORD>(BILLBOARD_FLUSH_COUNT) );
 
-		// 버퍼의 크기를 넘어가면 개수를 줄여서 크기만큼만 찍는다
 		dwThisNum = min( dwThisNum , EFFECTBASE_DISCARD_COUNT - m_dwBase );	
 
 
@@ -436,14 +434,12 @@ bool ZEffectBillboardList::Draw()
 			D3DXVec3Normalize(&up, &up);
 
 			rmatrix mat;
-			D3DXMatrixIdentity(&mat);
+			GetIdentityMatrix(mat);
 			mat._11=right.x;mat._12=right.y;mat._13=right.z;
 			mat._21=up.x;mat._22=up.y;mat._23=up.z;
 			mat._31=dir.x;mat._32=dir.y;mat._33=dir.z;
 
 			rvector pos=p->position;
-
-//			float fScale=p->fStartSize * p->fOpacity + p->fEndSize * (1.f - p->fOpacity);
 
 			float fInt = min(1,max(0,(p->fLifeTime - p->fElapsedTime)/p->fLifeTime));
 
@@ -472,12 +468,11 @@ bool ZEffectBillboardList::Draw()
 				fScale = p->fCurScale;
 			}
 
-			D3DXMatrixScaling(&matScaling,fScale*m_Scale.x,fScale*m_Scale.y,fScale*m_Scale.z);
-			D3DXMatrixTranslation(&matTranslation, pos.x, pos.y, pos.z);
+			matScaling = ScalingMatrix(fScale * m_Scale);
+			matTranslation = TranslationMatrix(pos);
 
-			D3DXMatrixMultiply(&matWorld, &matScaling, &mat);
-			D3DXMatrixMultiply(&matWorld, &matWorld, &matTranslation);
-			//		D3DXMatrixMultiply(&matWorld, &mat, &matTranslation);
+			matWorld = matScaling * mat;
+			matWorld *= matTranslation;
 
 			DWORD color = ((DWORD)(p->fOpacity * 255))<<24 | p->dwColor;
 
@@ -490,11 +485,10 @@ bool ZEffectBillboardList::Draw()
 
 			static const rvector sv[4] = { rvector(-1,-1,0) , rvector(-1,1,0) , rvector(1,1,0) , rvector(1,-1,0) };
 
-			// 좋은코드는 아니지만 버텍스 카피를 줄이기위해 타입캐스팅했다.
-			D3DXVec3TransformCoord((D3DXVECTOR3*)&v[0].x,sv+0,&matWorld);
-			D3DXVec3TransformCoord((D3DXVECTOR3*)&v[1].x,sv+1,&matWorld);
-			D3DXVec3TransformCoord((D3DXVECTOR3*)&v[2].x,sv+2,&matWorld);
-			D3DXVec3TransformCoord((D3DXVECTOR3*)&v[3].x,sv+3,&matWorld);
+			D3DXVec3TransformCoord((rvector*)&v[0].x,sv+0,&matWorld);
+			D3DXVec3TransformCoord((rvector*)&v[1].x,sv+1,&matWorld);
+			D3DXVec3TransformCoord((rvector*)&v[2].x,sv+2,&matWorld);
+			D3DXVec3TransformCoord((rvector*)&v[3].x,sv+3,&matWorld);
 			v[0].color=v[1].color=v[2].color=v[3].color=color;
 
 			memcpy(pVertices,v,sizeof(ZEFFECTCUSTOMVERTEX)*4);
@@ -530,12 +524,9 @@ bool ZEffectBillboardList::Draw()
 	return true;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-
 ZEffectBillboardTexAniList::ZEffectBillboardTexAniList()
 {
-	m_nMaxFrame = 16;// 128*128 texture 32*32 size 16개.. 우선은 고정으로 한다.
+	m_nMaxFrame = 16;// 128*128 texture 32*32 size 16
 	m_fSpeed = 0.f;
 
 	for(int i=0;i<8;i++)
@@ -786,7 +777,7 @@ bool ZEffectBillboardTexAniList::Draw()
 			D3DXVec3Normalize(&up, &up);
 
 			rmatrix mat;
-			D3DXMatrixIdentity(&mat);
+			GetIdentityMatrix(mat);
 			mat._11=right.x;mat._12=right.y;mat._13=right.z;
 			mat._21=up.x;mat._22=up.y;mat._23=up.z;
 			mat._31=dir.x;mat._32=dir.y;mat._33=dir.z;
@@ -798,11 +789,11 @@ bool ZEffectBillboardTexAniList::Draw()
 			float fInt = min(1,max(0,(p->fLifeTime - p->fElapsedTime)/p->fLifeTime));
 			float fScale=p->fStartSize * fInt + p->fEndSize * (1.f - fInt);
 
-			D3DXMatrixScaling(&matScaling,fScale*m_Scale.x,fScale*m_Scale.y,fScale*m_Scale.z);
-			D3DXMatrixTranslation(&matTranslation, pos.x, pos.y, pos.z);
+			matScaling = ScalingMatrix(fScale * m_Scale);
+			matTranslation = TranslationMatrix(pos);
 
-			D3DXMatrixMultiply(&matWorld, &matScaling, &mat);
-			D3DXMatrixMultiply(&matWorld, &matWorld, &matTranslation);
+			matWorld = matScaling * mat;
+			matWorld *= matTranslation;
 
 			DWORD color = ((DWORD)(p->fOpacity * 255))<<24 | p->dwColor;
 
@@ -826,11 +817,10 @@ bool ZEffectBillboardTexAniList::Draw()
 			v[3].tu = m_fUV[6];
 			v[3].tv = m_fUV[7];
 
-			// 좋은코드는 아니지만 버텍스 카피를 줄이기위해 타입캐스팅했다.
-			D3DXVec3TransformCoord((D3DXVECTOR3*)&v[0].x,sv+0,&matWorld);
-			D3DXVec3TransformCoord((D3DXVECTOR3*)&v[1].x,sv+1,&matWorld);
-			D3DXVec3TransformCoord((D3DXVECTOR3*)&v[2].x,sv+2,&matWorld);
-			D3DXVec3TransformCoord((D3DXVECTOR3*)&v[3].x,sv+3,&matWorld);
+			D3DXVec3TransformCoord((rvector*)&v[0].x,sv+0,&matWorld);
+			D3DXVec3TransformCoord((rvector*)&v[1].x,sv+1,&matWorld);
+			D3DXVec3TransformCoord((rvector*)&v[2].x,sv+2,&matWorld);
+			D3DXVec3TransformCoord((rvector*)&v[3].x,sv+3,&matWorld);
 			v[0].color=v[1].color=v[2].color=v[3].color=color;
 
 			memcpy(pVertices,v,sizeof(ZEFFECTCUSTOMVERTEX)*4);

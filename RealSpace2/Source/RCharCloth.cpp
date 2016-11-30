@@ -28,13 +28,13 @@ namespace
 bool IsIntersect( rvector& o, rvector& d, rvector& dir, rvector& c, float r, rvector& normal, rvector* intersect )
 {		
 	rvector ddir = c-d;
-	float d_sq = D3DXVec3LengthSq(&ddir);
+	float d_sq = MagnitudeSq(ddir);
 	float r_sq = r * r;
 	if( d_sq > r_sq ) return false;	// 최종 목적지가 원의 바깥쪽이면 상관없음
 
 	rvector ldir = c-o;
-	float s = D3DXVec3Dot(&ldir, &dir);
-	float l_sq = D3DXVec3LengthSq( &ldir );
+	float s = DotProduct(ldir, dir);
+	float l_sq = MagnitudeSq(ldir);
 
 	float m_sq = l_sq - s*s;
 	if( m_sq > r_sq ) 
@@ -43,7 +43,7 @@ bool IsIntersect( rvector& o, rvector& d, rvector& dir, rvector& c, float r, rve
 	float q = sqrt( r_sq - m_sq );
 
 	float t;
-	if( D3DXVec3Dot( &normal, &dir) < 0 )  t = s-q;
+	if(DotProduct(normal, dir) < 0 )  t = s-q;
 	else t = s + q;
 	*intersect = o + dir*t;
 
@@ -97,7 +97,7 @@ void RCharCloth::initialize( )
 		if( strcmp( pmesh->GetName(), "Bip01" ) == 0 )
 		{
 			mLocalMat = pmesh->m_mat_result;
-			D3DXMatrixInverse( &mLocalInv, 0, &mLocalMat );
+			mLocalInv = Inverse(mLocalMat);
 			mBips[BIPS01]	= pmesh;
 		}
 		else if( strcmp( pmesh->GetName(), "Bip01 L Thigh" ) == 0 )
@@ -179,7 +179,7 @@ void RCharCloth::initialize( )
 	}
 
 	for( i = 0 ; i < m_nCntP; ++i )
-		D3DXVec3Normalize( &mpInitNormal[i], &mpInitNormal[i] );
+		Normalize(mpInitNormal[i]);
 
 	m_AccelationRatio	= 1.0f;
 	m_fTimeStep			= 0.06 ;
@@ -311,8 +311,7 @@ void RCharCloth::satisfyConstraints()
 				{
 					if( CLOTH_COLLISION & m_pHolds[j] )
 					{
-						rvector dir = m_pX[j] - m_pOldX[j];
-						D3DXVec3Normalize(&dir, &dir);
+						rvector dir = Normalized(m_pX[j] - m_pOldX[j]);
 						if(IsIntersect(m_pOldX[j], m_pX[j], dir ,mSphere[k].mCentre, mSphere[k].mRadius, m_pNormal[j], &intersection ))
 						{
 							m_pX[j] = intersection;
@@ -346,7 +345,7 @@ void RCharCloth::satisfyConstraints()
 				continue;
 			delta = x2 - x1;
 
-			deltaLegth = D3DXVec3Length( &delta );
+			deltaLegth = Magnitude(delta);
 			if( deltaLegth == 0 )
 				diff = 0;
 			else
@@ -429,7 +428,7 @@ void RCharCloth::updatePosition( rmatrix* pWorldMat_ )
 	}
 
 	mWorldMat = *pWorldMat_;
-	D3DXMatrixInverse( &mWorldInv, 0, &mWorldMat);
+	mWorldInv = Inverse(mWorldMat);
 	mInitParticle = false;
 }
 
@@ -468,8 +467,6 @@ void RCharCloth::create( RMesh* pMesh_, RMeshNode* pMeshNode_ )
 
 	memset( m_pConst, 0, sizeof(sConstraint)*m_nCntC);
 
-	//unsigned short* TempIndexBuf = new unsigned short[mpMeshNode->m_face_num*3];
-
 	for( i = 0 ; i < mpMeshNode->m_face_num; ++i )
 	{
 		for( int j = 0 ; j < 3; ++j )
@@ -484,18 +481,14 @@ void RCharCloth::create( RMesh* pMesh_, RMeshNode* pMeshNode_ )
 				m_pConst[ i*3 + j ].refB = mpMeshNode->m_face_list[i].m_point_index[j+1];
 			}
 			vecDistance = mpMeshNode->m_point_list[m_pConst[ i*3 + j ].refA] - mpMeshNode->m_point_list[m_pConst[ i*3 + j ].refB];
-			m_pConst[ i*3 + j ].restLength = D3DXVec3Length(&vecDistance);
+			m_pConst[ i*3 + j ].restLength = Magnitude(vecDistance);
 
 		}
 	}
 
 	UpdateNormal();
 
-	// Render Vertex setup
 	m_nNumVertices = 3 * mpMeshNode->m_face_num;
-	//gVertices	= new RVertex[ m_nNumVertices ];
-
-	// Vertex Buffer Setup)
 
 	initialize( );
 
@@ -505,15 +498,10 @@ void RCharCloth::create( RMesh* pMesh_, RMeshNode* pMeshNode_ )
 }
 
 
-//////////////////////////////////////////////////////////////////////////
-//	update Collision Object
-//	이 함수는 반드시 RMesh의 RenderFrame함수가 불려진 이후에 불려져야 한다
-//	RMesh 의 Render함수에서 RenderSub함수 불러준 후에 이 함수를 호출한다
-//////////////////////////////////////////////////////////////////////////
 void RCharCloth::updateCO()
 {
 	mLocalMat = mBips[BIPS01]->m_mat_result;
-	D3DXMatrixInverse( &mLocalInv, 0, &mLocalMat );
+	mLocalInv = Inverse(mLocalMat);
 
 	// Fastest Version.. NO MORE THAN THIS!!
 	{
@@ -561,11 +549,9 @@ void RCharCloth::setForce( rvector& force_ )
 	}
 	else
 	{
-		D3DXVECTOR4 vec;
-		rmatrix mat = mWorldInv * mLocalInv ;
-		mat._41 = mat._42 = mat._43 = 0;
-		D3DXVec3Transform(&vec, &force_, &mat );
-		mForceField = rvector( vec.x, vec.y, vec.z );
+		rmatrix mat = mWorldInv * mLocalInv;
+		SetTransPos(mat, { 0, 0, 0 });
+		mForceField = Transform(force_, mat);
 	}
 }
 
@@ -576,10 +562,9 @@ _USING_NAMESPACE_REALSPACE2;
 //////////////////////////////////////////////////////////////////////////
 void RCharCloth::render()
 {     
-	//	bHarewareBuffer = true;
 	int i;
 
-	LPDIRECT3DDEVICE9 dev =	RGetDevice(); // Get Device Pointer
+	LPDIRECT3DDEVICE9 dev =	RGetDevice();
 
 	UpdateNormal();
 
@@ -587,7 +572,7 @@ void RCharCloth::render()
 	RMtrl* pMtrl = pMtrlMgr->Get_s(mpMeshNode->m_mtrl_id,-1);
 	int num_mtrl = pMtrl->m_sub_mtrl_num;
 
-	int point_index;		// 현재 버텍스의 인덱스
+	int point_index;
 
 	for( i = 0 ; i < mpMeshNode->m_face_num ; ++i )
 	{
@@ -603,7 +588,6 @@ void RCharCloth::render()
 
 	if( bHarewareBuffer && gpClothVertexBuffer)
 	{
-		//// Copy Begin
 		void *Buffer;
 		if( FAILED( gpClothVertexBuffer->Lock( 0, sizeof(RVertex) * mpMeshNode->m_face_num * 3, (VOID**)&Buffer, D3DLOCK_DISCARD )))
 		{
@@ -613,11 +597,9 @@ void RCharCloth::render()
 			mlog("Fail to lock of Vertex Buffer\n");
 			goto e2SoftRender;
 		}
-		//memcpy( Buffer, gVertices, sizeof(RVertex) * m_nCntP );
 		memcpy( Buffer, gVertices, sizeof(RVertex) * mpMeshNode->m_face_num * 3 );
 
 		gpClothVertexBuffer->Unlock();
-		// Copy End
 	}
 e2SoftRender:
 	prerender();
@@ -715,7 +697,7 @@ void RCharCloth::UpdateNormal()
 
 	for( i = 0 ; i < m_nCntP; ++i )
 	{
-		D3DXVec3Normalize( &m_pNormal[i], &m_pNormal[i] );
+		Normalize(m_pNormal[i]);
 	}
 }
 

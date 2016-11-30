@@ -335,7 +335,7 @@ void ZBrain::DebugTest()
 		RGetDevice()->SetFVF( D3DFVF_XYZ | D3DFVF_DIFFUSE );
 
 		rmatrix birdinitmat;
-		D3DXMatrixIdentity(&birdinitmat);
+		GetIdentityMatrix(birdinitmat);
 		RGetDevice()->SetTransform( D3DTS_WORLD, &birdinitmat );
 
 
@@ -397,7 +397,7 @@ void ZBrain::DrawDebugPath()
 		RGetDevice()->SetFVF( D3DFVF_XYZ | D3DFVF_DIFFUSE );
 
 		rmatrix birdinitmat;
-		D3DXMatrixIdentity(&birdinitmat);
+		GetIdentityMatrix(birdinitmat);
 		RGetDevice()->SetTransform( D3DTS_WORLD, &birdinitmat );
 
 		RDrawLine(rvector(0,0,0), rvector(0,0,100), 0xFFFFFF00);

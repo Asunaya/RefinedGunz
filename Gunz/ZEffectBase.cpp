@@ -84,7 +84,7 @@ void ZEffectBase::OnInvalidate()
 void ZEffectBase::BeginState()
 {
 	rmatrix id;
-	D3DXMatrixIdentity(&id);
+	GetIdentityMatrix(id);
 
 	LPDIRECT3DDEVICE9 pDevice = RGetDevice();
 

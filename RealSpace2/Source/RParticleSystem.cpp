@@ -103,9 +103,9 @@ bool RParticles::Draw()
 	for(iterator i=begin();i!=end();i++)
 	{
 		RParticle*   pParticle=*i;
-		D3DXVECTOR3 vPos(pParticle->position);
+		rvector vPos(pParticle->position);
 
-		D3DXVECTOR3 vVel(pParticle->velocity);
+		rvector vVel(pParticle->velocity);
 		FLOAT       fLength = Magnitude(vVel);
 		UINT        dwSteps;
 
@@ -257,7 +257,7 @@ void RParticleSystem::BeginState()
 
 	// 월드매트릭스 초기화
 	rmatrix World;
-	D3DXMatrixIdentity(&World);
+	GetIdentityMatrix(World);
 	RGetDevice()->SetTransform(D3DTS_WORLD, &World);
 }
 
@@ -352,9 +352,9 @@ bool ZWaterSplash::Draw()
 	for( iterator i = begin(); i != end(); ++i ) 
 	{
 		RParticle*		pParticle	= *i;
-		D3DXVECTOR3		vPos(pParticle->position);
+		rvector		vPos(pParticle->position);
 
-		D3DXVECTOR3 vVel(pParticle->velocity);
+		rvector vVel(pParticle->velocity);
 		FLOAT       fLength = Magnitude(vVel);
 		UINT        dwSteps;
 

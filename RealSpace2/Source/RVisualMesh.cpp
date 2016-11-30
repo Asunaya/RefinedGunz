@@ -344,8 +344,8 @@ RVisualMesh::RVisualMesh() {
 
 	for(int i=0;i<weapon_dummy_end;i++) {
 
-		D3DXMatrixIdentity(&m_WeaponDummyMatrix[i]);
-		D3DXMatrixIdentity(&m_WeaponDummyMatrix2[i]);
+		m_WeaponDummyMatrix[i] = IdentityMatrix();
+		m_WeaponDummyMatrix2[i] = IdentityMatrix();
 	}
 	
 	m_SelectWeaponMotionType = eq_weapon_etc;
@@ -354,13 +354,13 @@ RVisualMesh::RVisualMesh() {
 
 	m_vTargetPos = rvector(0.f,0.f,0.f);
 
-	D3DXMatrixIdentity(&m_ToonUVMat);
+	m_ToonUVMat = IdentityMatrix();
 
-	D3DXMatrixIdentity(&m_RotMat);
+	m_RotMat = IdentityMatrix();
 
-	D3DXMatrixIdentity( &m_UpperRotMat );
+	m_UpperRotMat = IdentityMatrix();;
 
-	D3DXMatrixScaling(&m_ScaleMat,1.f,1.f,1.f);
+	m_ScaleMat = IdentityMatrix();
 	
 	m_pTracks[0] = NULL;
 	m_pTracks[1] = NULL;
@@ -382,7 +382,7 @@ RVisualMesh::RVisualMesh() {
 	m_vDir = rvector(0.f,0.f,0.f);
 	m_vUp = rvector(0.f,0.f,0.f);
 
-	D3DXMatrixIdentity( &m_WorldMat );
+	m_WorldMat = IdentityMatrix();
 
 	m_bIsCharacter = false;
 	m_bIsNpc = false;
@@ -508,7 +508,7 @@ bool RVisualMesh::Create(RMesh* pMesh) {
 			m_pBipMatrix = new rmatrix [eq_parts_pos_info_end];
 
 			for(int i=0;i<eq_parts_pos_info_end;i++){
-				D3DXMatrixIdentity( &m_pBipMatrix[i] );
+				m_pBipMatrix[i] = IdentityMatrix();
 			}
 		}
 	}
@@ -535,7 +535,7 @@ bool RVisualMesh::BBoxPickCheck(int mx,int my)
 
 	rmatrix m,matView = RView;
 
-	D3DXMatrixInverse( &m, NULL, &matView );
+	m = Inverse(matView);
 
 	dir.x  = v.x*m._11 + v.y*m._21 + v.z*m._31;
 	dir.y  = v.x*m._12 + v.y*m._22 + v.z*m._32;
@@ -550,7 +550,7 @@ bool RVisualMesh::BBoxPickCheck(int mx,int my)
 	return BBoxPickCheck(pos,dir);
 }
 
-void BBoxSubCalc(D3DXVECTOR3* max,D3DXVECTOR3* min)
+void BBoxSubCalc(rvector* max,rvector* min)
 {
 	float t;
 
@@ -1107,7 +1107,7 @@ void RVisualMesh::DrawEnchantFire(RVisualMesh* pVWMesh,int mode,rmatrix& m)
 		pVert[3].tu = 1.0f;
 		pVert[3].tv = 0.0f;
 
-		static D3DXMATRIX _init_mat = GetIdentityMatrix();
+		static rmatrix _init_mat = GetIdentityMatrix();
 		dev->SetTransform( D3DTS_WORLD, &_init_mat );
 
 		dev->SetTextureStageState( 0, D3DTSS_COLORARG1, D3DTA_TEXTURE );
@@ -2179,16 +2179,11 @@ D3DXQUATERNION RVisualMesh::GetBipRootRot(int frame)
 
 rmatrix	RVisualMesh::GetBipRootMat(int frame)
 {
-	rmatrix m;
-
 	D3DXQUATERNION q = GetBipRootRot(frame);
-	D3DXVECTOR3 v = GetBipRootPos(frame);
+	rvector v = GetBipRootPos(frame);
 
-	D3DXMatrixRotationQuaternion(&m,&q);
-
-	m._41 = v.x;
-	m._42 = v.y;
-	m._43 = v.z;
+	auto m = QuaternionToMatrix(q);
+	SetTransPos(m, v);
 
 	return m;
 }
@@ -2210,14 +2205,14 @@ bool RVisualMesh::isOncePlayDone(RAniMode amode)
 void RVisualMesh::SetScale(const rvector& v)
 {
 	m_vScale = v;
-	D3DXMatrixScaling(&m_ScaleMat,v.x,v.y,v.z);
+	m_ScaleMat = ScalingMatrix(v),
 	m_isScale = true;
 }
 
 void RVisualMesh::ClearScale() 
 {
 	m_vScale = rvector(1.f,1.f,1.f);
-	D3DXMatrixScaling(&m_ScaleMat,1.f,1.f,1.f);
+	m_ScaleMat = IdentityMatrix();
 	m_isScale = false;
 }
 
@@ -2404,7 +2399,7 @@ void RVisualMesh::SetClothState(int state)
 	}
 }
 
-void RVisualMesh::UpdateForce(D3DXVECTOR3& force)
+void RVisualMesh::UpdateForce(rvector& force)
 {
 	if(m_pCloth) {
 		m_pCloth->setForce(force);
@@ -2456,7 +2451,7 @@ void RVisualMesh::ChangeChestCloth(float fAccel,int Numiter  )
 	}
 }
 
-void RVisualMesh::SetClothForce(D3DXVECTOR3& f)	
+void RVisualMesh::SetClothForce(rvector& f)	
 { 
 	if(m_pCloth) 
 		m_pCloth->setForce( f ); 

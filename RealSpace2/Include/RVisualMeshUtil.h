@@ -161,7 +161,7 @@ class RPartsInfo
 {
 public:
 	void Init() {
-		D3DXMatrixIdentity(&mat);
+		GetIdentityMatrix(mat);
 		vis = 1.f;
 		isUpdate = false;
 	}

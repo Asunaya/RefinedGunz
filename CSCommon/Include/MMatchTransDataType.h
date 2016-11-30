@@ -41,23 +41,18 @@ struct MTD_CharInfo
 	unsigned short		nER;
 	unsigned short		nWR;
 
-	// 아이템 정보
-	unsigned long int	nEquipedItemDesc[MMCIP_END];
+	u32					nEquipedItemDesc[MMCIP_END];
 
-	// account 의 정보
 	MMatchUserGradeID	nUGradeID;
 
-	// ClanCLID
 	unsigned int		nClanCLID;
 };
 
-// 내 캐릭터 정보의 추가 정보
 struct MTD_MyExtraCharInfo
 {
-	char	nLevelPercent;		///< 현재 경험치 습득 퍼센트
+	char	nLevelPercent;
 };
 
-// 현재 사용하지 않는다.
 struct MTD_SimpleCharInfo
 {
 	char				szName[32];

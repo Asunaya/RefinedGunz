@@ -147,25 +147,15 @@ bool ZGameInterface::OnCommand(MCommand* pCommand)
 				void* pCharBlob = pParam->GetPointer();
 				MTD_CharInfo* pCharInfo = (MTD_CharInfo*)MGetBlobArrayElement(pCharBlob, 0);
 
-				// 마지막 선택 캐릭 저장
 				ZCharacterSelectView::SetLastChar(pCharInfo->szName);
 
-
-				// 내정보 저장
-				ZGetMyInfo()->InitCharInfo(pCharInfo->szName, pCharInfo->szClanName, pCharInfo->nClanGrade, (MMatchSex)pCharInfo->nSex, 
+				ZGetMyInfo()->InitCharInfo(pCharInfo->szName, pCharInfo->szClanName,
+					pCharInfo->nClanGrade, (MMatchSex)pCharInfo->nSex, 
 					                 (int)pCharInfo->nHair, (int)pCharInfo->nFace);
 				ZGetMyInfo()->GetItemList()->SetEquipItemID(pCharInfo->nEquipedItemDesc);
 				ZGetMyInfo()->SetBP(pCharInfo->nBP);
 				ZGetMyInfo()->SetXP((int)pCharInfo->nXP);
 				ZGetMyInfo()->SetLevel((int)pCharInfo->nLevel);
-
-#ifdef _XTRAP
-				char szServerName[256];
-				strcpy_safe( szServerName, ZGetGameClient()->GetServerName());
-
-				// XTrap 유져세팅
-				SetOptGameInfo(const_cast<char*>(ZGetMyInfo()->GetAccountID()),szServerName,pCharInfo->szName,"",pCharInfo->nLevel);
-#endif
 
 				pParam = pCommand->GetParameter(2);
 				if (pParam->GetType()!=MPT_BLOB)
@@ -187,7 +177,6 @@ bool ZGameInterface::OnCommand(MCommand* pCommand)
 				}
 				else
 				{
-					// 클랜전 서버에서 클랜에 가입되어있을 경우 추천채널 요청하지않고, 바로 클랜채널로 접속시도
 					ZPostChannelRequestJoinFromChannelName(ZGetGameClient()->GetPlayerUID(), 
 						MCHANNEL_TYPE_CLAN, ZGetMyInfo()->GetClanName());
 				}
@@ -205,7 +194,6 @@ bool ZGameInterface::OnCommand(MCommand* pCommand)
 			{
 				ZCharacterSelectView::SetLastChar(szCharName);
 
-				// 여기서 내 캐릭터 정보 받아와야 한다.
 				ZApplication::GetGameInterface()->ChangeToCharSelection();
 			}
 			else 

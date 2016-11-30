@@ -63,7 +63,7 @@ public:
 
 	void Clear() {
 
-		D3DXMatrixIdentity(&m_matWorld);
+		GetIdentityMatrix(m_matWorld);
 		m_pNode = NULL;
 		m_nMtrl = 0;
 		m_pMtrl = NULL;
@@ -245,7 +245,7 @@ public:
 
 	void RenderFrame();
 
-	void Render(const D3DXMATRIX* world_mat, bool NoPartsChange=false);
+	void Render(const rmatrix* world_mat, bool NoPartsChange=false);
 	RAnimation* GetNodeAniSet(RMeshNode* pNode);
 
 	void SetLitVertexModel(bool v);
@@ -302,9 +302,9 @@ public:
 	int  FindMeshId(RAnimationNode* pANode);
 	int  FindMeshIdSub(RAnimationNode* pANode);
 
-	void RenderBox(D3DXMATRIX* world_mat=NULL);
-	void CalcBox(D3DXMATRIX* world_mat=NULL);
-	void CalcBoxNode(D3DXMATRIX* world_mat=NULL);
+	void RenderBox(rmatrix* world_mat=NULL);
+	void CalcBox(rmatrix* world_mat=NULL);
+	void CalcBoxNode(rmatrix* world_mat=NULL);
 
 	void  SetFrame(int nFrame,int nFrame2 = -1);
 
@@ -322,8 +322,8 @@ public:
 	bool CheckOcclusion( RMeshNode *pMeshNode );
 
 	void CalcNodeMatrixBBox(RMeshNode* pNode);
-	void CalcBBox(D3DXVECTOR3* v);
-	void SubCalcBBox(D3DXVECTOR3* max,D3DXVECTOR3* min,D3DXVECTOR3* v);
+	void CalcBBox(rvector* v);
+	void SubCalcBBox(rvector* max,rvector* min,rvector* v);
 
 	bool SetAnimation(RAnimation* pAniSet,RAnimation* pAniSetUpper=NULL);
 	bool SetAnimation(char* ani_name,char* ani_name_lower = NULL);
@@ -400,11 +400,11 @@ public:
 	int				m_max_frame[2];
 	int				m_frame[2];
 
-	D3DXVECTOR3		m_vBBMax;
-	D3DXVECTOR3		m_vBBMin;
+	rvector		m_vBBMax;
+	rvector		m_vBBMin;
 
-	D3DXVECTOR3		m_vBBMaxNodeMatrix;
-	D3DXVECTOR3		m_vBBMinNodeMatrix;
+	rvector		m_vBBMaxNodeMatrix;
+	rvector		m_vBBMinNodeMatrix;
 
 	bool			m_is_use_ani_set;
 
@@ -477,27 +477,27 @@ public:
 	static bool GetVertexNormalOnOff() { return m_bVertexNormalOnOff; }
 
 private:
-	void _RGetRotAniMat(RMeshNode* pMeshNode, int frame, D3DXMATRIX& t_ani_mat);
-	void _RGetPosAniMat(RMeshNode* pMeshNode, int frame, D3DXMATRIX& t_ani_mat);
-	void _RGetAniMat(RMeshNode* pMeshNode, int frame, D3DXMATRIX& t_ani_mat);
+	void _RGetRotAniMat(RMeshNode* pMeshNode, int frame, rmatrix& t_ani_mat);
+	void _RGetPosAniMat(RMeshNode* pMeshNode, int frame, rmatrix& t_ani_mat);
+	void _RGetAniMat(RMeshNode* pMeshNode, int frame, rmatrix& t_ani_mat);
 
 	bool CalcIntersectsTriangle(
 		const v3& origin, const v3& dir, // Line origin and direction
 		RPickInfo* pInfo, // Output info
-		D3DXMATRIX* world_mat = nullptr, bool fastmode = false);
-	void GetNodeAniMatrix(RMeshNode* pMeshNode, D3DXMATRIX& m);
+		rmatrix* world_mat = nullptr, bool fastmode = false);
+	void GetNodeAniMatrix(RMeshNode* pMeshNode, rmatrix& m);
 	RMeshNode* UpdateNodeAniMatrix(RMeshNode* pNode);
 
 	void RenderFrameSingleParts();
 	void RenderFrameMultiParts();
 
-	void CalcLookAtParts(D3DXMATRIX& pAniMat, RMeshNode* pMeshNode, RVisualMesh* pVisualMesh);
-	void CalcLookAtParts2(D3DXMATRIX& pAniMat, RMeshNode* pMeshNode, RVisualMesh* pVisualMesh);
+	void CalcLookAtParts(rmatrix& pAniMat, RMeshNode* pMeshNode, RVisualMesh* pVisualMesh);
+	void CalcLookAtParts2(rmatrix& pAniMat, RMeshNode* pMeshNode, RVisualMesh* pVisualMesh);
 
-	void RenderSub(const D3DXMATRIX& world_mat, bool NoPartsChange);
+	void RenderSub(const rmatrix& world_mat, bool NoPartsChange);
 	bool CalcParts(RMeshNode* pTMeshNode, RMeshNode* pMeshNode, bool NoPartsChange);
 
-	void RenderNode(RMeshNode *pMeshNode, const D3DXMATRIX& world_mat);
+	void RenderNode(RMeshNode *pMeshNode, const rmatrix& world_mat);
 
 	bool SetAnimation1Parts(RAnimation* pAniSet);
 	bool SetAnimation2Parts(RAnimation* pAniSet, RAnimation* pAniSetUpper);

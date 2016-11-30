@@ -82,7 +82,7 @@ void ZStencilLight::PreRender()
 	pd3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
 
 	rmatrix World;
-	D3DXMatrixIdentity(&World);
+	GetIdentityMatrix(World);
 	RGetDevice()->SetTransform(D3DTS_WORLD, &World);
 }
 
@@ -100,7 +100,7 @@ void ZStencilLight::RenderStencil()
 
 	// update world matrix
 	rmatrix world;
-	D3DXMatrixIdentity(&world);
+	GetIdentityMatrix(world);
 	world._11 = m_Radius;
 	world._22 = m_Radius;
 	world._33 = m_Radius;
@@ -132,7 +132,7 @@ void ZStencilLight::RenderStencil(const rvector& p, float raidus)
 
 	// update world matrix
 	rmatrix world;
-	D3DXMatrixIdentity(&world);
+	GetIdentityMatrix(world);
 	world._11 = raidus;
 	world._22 = raidus;
 	world._33 = raidus;

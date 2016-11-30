@@ -41,7 +41,7 @@ void RMesh::SetMtrlUvAni_ON()
 	if( m_pVisualMesh && m_pVisualMesh->m_bUVAni) { // on
 
 		rmatrix mat;
-		D3DXMatrixIdentity(&mat);
+		GetIdentityMatrix(mat);
 
 		float add_t = GetGlobalTimeMS() / 1000.f;
 

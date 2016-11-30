@@ -273,7 +273,7 @@ void ZCharacterView::InitCharParts(ZCharacterView* pCharView, MMatchCharItemPart
 {
 	if(pCharView) {
 
-		unsigned long int itemids[MMCIP_END];
+		u32 itemids[MMCIP_END];
 		for (int i = 0; i < MMCIP_END; i++) itemids[i] = pCharView->m_ItemSlots[i].m_nItemID;
 
 		InitCharParts(pCharView->m_Info.nSex, pCharView->m_Info.nHair, pCharView->m_Info.nFace,
@@ -282,7 +282,7 @@ void ZCharacterView::InitCharParts(ZCharacterView* pCharView, MMatchCharItemPart
 }
 
 void ZCharacterView::InitCharParts(MMatchSex nSex, unsigned int nHair, unsigned int nFace, 
-				   unsigned long int* nEquipItemIDs, MMatchCharItemParts nVisualWeaponParts)
+				   u32* nEquipItemIDs, MMatchCharItemParts nVisualWeaponParts)
 {
 	RMesh* pMesh = NULL;
 	if (nSex == MMS_MALE)
@@ -299,7 +299,6 @@ void ZCharacterView::InitCharParts(MMatchSex nSex, unsigned int nHair, unsigned 
 		m_pTVisualMesh.GetVMesh()->Create(pMesh);
 	}
 
-	// 정보 저장
 	m_Info.nSex = nSex;
 	m_Info.nHair = nHair;
 	m_Info.nFace = nFace;
@@ -327,7 +326,6 @@ void ZCharacterView::InitCharParts(MMatchSex nSex, unsigned int nHair, unsigned 
 		ZChangeCharParts( m_pTVisualMesh.GetVMesh() , nSex, nHair, nFace, nEquipItemIDs );
 		ZChangeCharWeaponMesh( m_pTVisualMesh.GetVMesh(), nWeaponID);
 
-		//들고 있는 무기에 따라서 연결..
 		m_pTVisualMesh.GetVMesh()->SetAnimation("login_idle");
 		m_pTVisualMesh.GetVMesh()->SetCheckViewFrustum(false);
 	}
@@ -345,12 +343,10 @@ void ZCharacterView::SetParts(MMatchCharItemParts nParts, unsigned int nItemID)
 	if (pItemDesc == NULL) return;
 	if (IsSuitableItemSlot(pItemDesc->m_nSlot, nParts) == false) return;
 
-	// 성별 제한 조건만 체크한다.
 	if (pItemDesc->m_nResSex != -1)
 	{
 		if (pItemDesc->m_nResSex != int(ZGetMyInfo()->GetSex())) return;
 	}
-
 
 	m_ItemSlots[nParts].m_nItemID = nItemID;
 
@@ -360,7 +356,7 @@ void ZCharacterView::SetParts(MMatchCharItemParts nParts, unsigned int nItemID)
 	}
 	else
 	{
-		unsigned long int itemids[MMCIP_END];
+		u32 itemids[MMCIP_END];
 		for (int i = 0; i < MMCIP_END; i++) itemids[i] = m_ItemSlots[i].m_nItemID;
 		ZChangeCharParts(m_pTVisualMesh.GetVMesh(), m_Info.nSex, m_Info.nHair, m_Info.nFace, itemids);
 	}
@@ -408,7 +404,7 @@ void ZCharacterView::SetSelectMyCharacter()
 		pil->GetEquipedItemID(MMCIP_PRIMARY), pil->GetEquipedItemID(MMCIP_SECONDARY),
 		pil->GetEquipedItemID(MMCIP_CUSTOM1), pil->GetEquipedItemID(MMCIP_CUSTOM2));
 
-	unsigned long int nItemids[MMCIP_END];
+	u32 nItemids[MMCIP_END];
 
 	if(pmi) 
 	{

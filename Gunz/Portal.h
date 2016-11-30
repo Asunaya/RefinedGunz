@@ -10,13 +10,12 @@
 
 struct PortalInfo
 {
-	D3DXVECTOR3 vPos, vNormal, vUp, vOBB;
+	rvector vPos, vNormal, vUp, vOBB;
 	float d;
-	D3DXMATRIX matWorld, matInvWorld, matView, matRot, matTransform;
-	//D3DXPLANE Frustum[6];
-	D3DXPLANE Near;
-	D3DXPLANE Far;
-	D3DXVECTOR3 topright, topleft, bottomright, bottomleft;
+	rmatrix matWorld, matInvWorld, matView, matRot, matTransform;
+	rplane Near;
+	rplane Far;
+	rvector topright, topleft, bottomright, bottomleft;
 	rboundingbox bb;
 	bool bSet;
 	int Index;
@@ -111,9 +110,9 @@ struct PortalContextPair
 
 struct CameraContext
 {
-	D3DXVECTOR3 Pos;
-	D3DXVECTOR3 Dir;
-	D3DXPLANE Frustum[6];
+	rvector Pos;
+	rvector Dir;
+	rplane Frustum[6];
 };
 
 struct RecursionContext
@@ -221,19 +220,19 @@ public:
 	void OnResetDevice();
 
 	void OnShot();
-	bool RedirectPos(D3DXVECTOR3 &from, D3DXVECTOR3 &to);
+	bool RedirectPos(rvector &from, rvector &to);
 
 	void DeletePlayer(ZCharacter *pZChar);
 
 	void DrawFakeCharacter(ZCharacter *pZChar);
 
-	bool Move(ZObject *pObj, D3DXVECTOR3 &diff);
+	bool Move(ZObject *pObj, rvector &diff);
 	bool Move(ZMovingWeapon& Obj, v3& diff);
 
 	void PreDraw();
 	void PostDraw();
 
-	void CreatePortal(ZCharacter *pZChar, int iPortal, const D3DXVECTOR3 &vPos, const D3DXVECTOR3 &vNormal, const D3DXVECTOR3 &vUp);
+	void CreatePortal(ZCharacter *pZChar, int iPortal, const rvector &vPos, const rvector &vNormal, const rvector &vUp);
 
 	bool ForceProjection() const
 	{
@@ -274,12 +273,12 @@ private:
 
 	static bool bPortalSetExists;
 
-	D3DXVECTOR3 vCameraPos, vCameraDir;
+	rvector vCameraPos, vCameraDir;
 
 	bool bLastLClick;
 	bool bLastRClick;
 
-	static const D3DXVECTOR3 vDim;
+	static const rvector vDim;
 
 	bool bDontDraw;
 	bool bDontDrawChar;
@@ -314,15 +313,15 @@ private:
 	void RedirectCamera();
 
 	bool ZObjectPortalIntersection(const ZObject *pObj, PortalInfo **retppi);
-	bool LinePortalIntersection(const D3DXVECTOR3 &L1, const D3DXVECTOR3 &L2, const PortalInfo &ppi, D3DXVECTOR3 &Hit);
-	bool AABBPortalIntersection(const D3DXVECTOR3 &B1, const D3DXVECTOR3 &B2, const PortalInfo &ppi);
+	bool LinePortalIntersection(const rvector &L1, const rvector &L2, const PortalInfo &ppi, rvector &Hit);
+	bool AABBPortalIntersection(const rvector &B1, const rvector &B2, const PortalInfo &ppi);
 
 	PortalInfo* LineIntersect(const v3& l1, const v3& l2);
-	bool CheckIntersection(const D3DXVECTOR3 &target, float fRadius, float fHeight, PortalInfo **retppi);
+	bool CheckIntersection(const rvector &target, float fRadius, float fHeight, PortalInfo **retppi);
 
-	void Transform(D3DXVECTOR3 &v, const PortalInfo &ppi);
-	void Transform(D3DXVECTOR3 &vOut, const D3DXVECTOR3 &vIn, const PortalInfo &ppi);
-	void Rotate(D3DXVECTOR3 &v, const PortalInfo &ppi);
+	void Transform(rvector &v, const PortalInfo &ppi);
+	void Transform(rvector &vOut, const rvector &vIn, const PortalInfo &ppi);
+	void Rotate(rvector &v, const PortalInfo &ppi);
 
 	template <typename T>
 	void ForEachPortal(T fn)
