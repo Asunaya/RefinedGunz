@@ -17,8 +17,9 @@
 	typedef MSXML2::IXMLDOMNamedNodeMapPtr			MXmlDomNamedNodeMapPtr;
 	typedef MSXML2::IXMLDOMTextPtr					MXmlDomTextPtr;
 	typedef MSXML2::IXMLDOMParseErrorPtr			MXmlDomParseErrorPtr;
+
 #else
-#ifdef MSVC_VER
+#ifdef _MSC_VER
 	#import "msxml.dll" named_guids no_implementation
 #else
 #include "msxml.tlh"

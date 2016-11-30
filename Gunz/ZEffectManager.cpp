@@ -18,7 +18,7 @@
 #include "RMeshMgr.h"
 #include <crtdbg.h>
 #include "MDebug.h"
-#include <dxerr9.h>
+#include "dxerr.h"
 #include "RGMain.h"
 #include "RBspObject.h"
 #include "hsv.h"
@@ -784,7 +784,7 @@ void ZEffectManager::Draw(unsigned long int nTime,int mode,float height)
 	if (hr!=D3D_OK) {
 		static int nErrorLogCount = 0;
 		if(nErrorLogCount<100) {
-			mlog("CreateStateBlock failed : %s",DXGetErrorString9(hr));
+			mlog("CreateStateBlock failed : %s",DXGetErrorString(hr));
 		}
 	}
 

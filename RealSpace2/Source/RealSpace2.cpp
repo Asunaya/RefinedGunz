@@ -6,7 +6,7 @@
 #include "RBaseTexture.h"
 #include "RMeshUtil.h"
 #include "RFont.h"
-#include "dxerr9.h"
+#include "dxerr.h"
 #include "RS2.h"
 #ifdef _USE_GDIPLUS
 #include "unknwn.h"
@@ -506,7 +506,7 @@ void RResetDevice(const RMODEPARAMS *params)
 
 	if (hr != D3D_OK) {
 		char errstr[512];
-		sprintf_safe(errstr, "Device reset failed: %s", DXGetErrorString9(hr));
+		sprintf_safe(errstr, "Device reset failed: %s", DXGetErrorString(hr));
 		mlog("%s\n", errstr);
 		assert(false);
 		throw std::runtime_error{ errstr };

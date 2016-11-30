@@ -10,47 +10,42 @@
 #ifndef __D3DX9ANIM_H__
 #define __D3DX9ANIM_H__
 
-// {ADE2C06D-3747-4b9f-A514-3440B8284980}
-DEFINE_GUID(IID_ID3DXInterpolator, 
-0xade2c06d, 0x3747, 0x4b9f, 0xa5, 0x14, 0x34, 0x40, 0xb8, 0x28, 0x49, 0x80);
-
-// {6CAA71F8-0972-4cdb-A55B-43B968997515}
-DEFINE_GUID(IID_ID3DXKeyFrameInterpolator, 
-0x6caa71f8, 0x972, 0x4cdb, 0xa5, 0x5b, 0x43, 0xb9, 0x68, 0x99, 0x75, 0x15);
-
-// {54B569AC-0AEF-473e-9704-3FEF317F64AB}
+// {698CFB3F-9289-4d95-9A57-33A94B5A65F9}
 DEFINE_GUID(IID_ID3DXAnimationSet, 
-0x54b569ac, 0xaef, 0x473e, 0x97, 0x4, 0x3f, 0xef, 0x31, 0x7f, 0x64, 0xab);
+0x698cfb3f, 0x9289, 0x4d95, 0x9a, 0x57, 0x33, 0xa9, 0x4b, 0x5a, 0x65, 0xf9);
 
-// {3A714D34-FF61-421e-909F-639F38356708}
+// {FA4E8E3A-9786-407d-8B4C-5995893764AF}
+DEFINE_GUID(IID_ID3DXKeyframedAnimationSet, 
+0xfa4e8e3a, 0x9786, 0x407d, 0x8b, 0x4c, 0x59, 0x95, 0x89, 0x37, 0x64, 0xaf);
+
+// {6CC2480D-3808-4739-9F88-DE49FACD8D4C}
+DEFINE_GUID(IID_ID3DXCompressedAnimationSet, 
+0x6cc2480d, 0x3808, 0x4739, 0x9f, 0x88, 0xde, 0x49, 0xfa, 0xcd, 0x8d, 0x4c);
+
+// {AC8948EC-F86D-43e2-96DE-31FC35F96D9E}
 DEFINE_GUID(IID_ID3DXAnimationController, 
-0x3a714d34, 0xff61, 0x421e, 0x90, 0x9f, 0x63, 0x9f, 0x38, 0x35, 0x67, 0x8);
+0xac8948ec, 0xf86d, 0x43e2, 0x96, 0xde, 0x31, 0xfc, 0x35, 0xf9, 0x6d, 0x9e);
 
-
-typedef struct ID3DXInterpolator *LPD3DXINTERPOLATOR;
-typedef struct ID3DXKeyFrameInterpolator *LPD3DXKEYFRAMEINTERPOLATOR;
-typedef struct ID3DXAnimationSet *LPD3DXANIMATIONSET;
-typedef struct ID3DXAnimationController *LPD3DXANIMATIONCONTROLLER;
-
-typedef struct ID3DXAllocateHierarchy *LPD3DXALLOCATEHIERARCHY;
-typedef struct ID3DXLoadUserData *LPD3DXLOADUSERDATA;
-typedef struct ID3DXSaveUserData *LPD3DXSAVEUSERDATA;
 
 //----------------------------------------------------------------------------
-// This enum defines the type of mesh data present in a MeshData structure
+// D3DXMESHDATATYPE:
+// -----------------
+// This enum defines the type of mesh data present in a MeshData structure.
 //----------------------------------------------------------------------------
 typedef enum _D3DXMESHDATATYPE {
-    D3DXMESHTYPE_MESH      = 0x001,     // normal ID3DXMesh data
-    D3DXMESHTYPE_PMESH     = 0x002,     // Progressive Mesh - ID3DXPMesh
-    D3DXMESHTYPE_PATCHMESH = 0x003,     // Patch MEsh - ID3DXPatchMesh
+    D3DXMESHTYPE_MESH      = 0x001,             // Normal ID3DXMesh data
+    D3DXMESHTYPE_PMESH     = 0x002,             // Progressive Mesh - ID3DXPMesh
+    D3DXMESHTYPE_PATCHMESH = 0x003,             // Patch Mesh - ID3DXPatchMesh
 
-    D3DXMESHTYPE_FORCE_DWORD    = 0x7fffffff, /* force 32-bit size enum */
+    D3DXMESHTYPE_FORCE_DWORD    = 0x7fffffff,   /* force 32-bit size enum */
 } D3DXMESHDATATYPE;
 
 //----------------------------------------------------------------------------
+// D3DXMESHDATA:
+// -------------
 // This struct encapsulates a the mesh data that can be present in a mesh 
-//   container.  The supported mesh types are pMesh, pPMesh, pPatchMesh
-//   The valid way to access this is determined by the MeshType enum
+// container.  The supported mesh types are pMesh, pPMesh, pPatchMesh.
+// The valid way to access this is determined by the Type enum.
 //----------------------------------------------------------------------------
 typedef struct _D3DXMESHDATA
 {
@@ -63,13 +58,14 @@ typedef struct _D3DXMESHDATA
         LPD3DXPMESH             pPMesh;
         LPD3DXPATCHMESH         pPatchMesh;
     };
-
 } D3DXMESHDATA, *LPD3DXMESHDATA;
 
 //----------------------------------------------------------------------------
+// D3DXMESHCONTAINER:
+// ------------------
 // This struct encapsulates a mesh object in a transformation frame
 // hierarchy. The app can derive from this structure to add other app specific
-// data to this
+// data to this.
 //----------------------------------------------------------------------------
 typedef struct _D3DXMESHCONTAINER
 {
@@ -88,6 +84,8 @@ typedef struct _D3DXMESHCONTAINER
 } D3DXMESHCONTAINER, *LPD3DXMESHCONTAINER;
 
 //----------------------------------------------------------------------------
+// D3DXFRAME:
+// ----------
 // This struct is the encapsulates a transform frame in a transformation frame
 // hierarchy. The app can derive from this structure to add other app specific
 // data to this
@@ -103,17 +101,20 @@ typedef struct _D3DXFRAME
     struct _D3DXFRAME       *pFrameFirstChild;
 } D3DXFRAME, *LPD3DXFRAME;
 
-#undef INTERFACE
-#define INTERFACE ID3DXAllocateHierarchy
 
 //----------------------------------------------------------------------------
+// ID3DXAllocateHierarchy:
+// -----------------------
 // This interface is implemented by the application to allocate/free frame and
 // mesh container objects. Methods on this are called during loading and
 // destroying frame hierarchies
 //----------------------------------------------------------------------------
-//////////////////////////////////////////////////////////////////////////////
-// ID3DXAllocateHierarchy ////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
+typedef interface ID3DXAllocateHierarchy ID3DXAllocateHierarchy;
+typedef interface ID3DXAllocateHierarchy *LPD3DXALLOCATEHIERARCHY;
+
+#undef INTERFACE
+#define INTERFACE ID3DXAllocateHierarchy
+
 DECLARE_INTERFACE(ID3DXAllocateHierarchy)
 {
     // ID3DXAllocateHierarchy
@@ -127,7 +128,7 @@ DECLARE_INTERFACE(ID3DXAllocateHierarchy)
 	//  Name
 	//		Name of the frame to be created
 	//	ppNewFrame
-	//		Returns returns the created frame object
+	//		Returns the created frame object
 	//
 	//------------------------------------------------------------------------
     STDMETHOD(CreateFrame)(THIS_ LPCSTR Name, 
@@ -164,10 +165,15 @@ DECLARE_INTERFACE(ID3DXAllocateHierarchy)
 	//		Array of matrices, one for each bone in the skinned mesh.
 	//
 	//------------------------------------------------------------------------
-    STDMETHOD(CreateMeshContainer)(THIS_ LPCSTR Name, LPD3DXMESHDATA pMeshData, 
-                            LPD3DXMATERIAL pMaterials, LPD3DXEFFECTINSTANCE pEffectInstances, DWORD NumMaterials, 
-                            DWORD *pAdjacency, LPD3DXSKININFO pSkinInfo, 
-                            LPD3DXMESHCONTAINER *ppNewMeshContainer) PURE;
+    STDMETHOD(CreateMeshContainer)(THIS_ 
+        LPCSTR Name, 
+        CONST D3DXMESHDATA *pMeshData, 
+        CONST D3DXMATERIAL *pMaterials, 
+        CONST D3DXEFFECTINSTANCE *pEffectInstances, 
+        DWORD NumMaterials, 
+        CONST DWORD *pAdjacency, 
+        LPD3DXSKININFO pSkinInfo, 
+        LPD3DXMESHCONTAINER *ppNewMeshContainer) PURE;
 
 	//------------------------------------------------------------------------
 	// DestroyFrame:
@@ -195,50 +201,573 @@ DECLARE_INTERFACE(ID3DXAllocateHierarchy)
 };
 
 //----------------------------------------------------------------------------
+// ID3DXLoadUserData:
+// ------------------
 // This interface is implemented by the application to load user data in a .X file
-//   When user data is found, these callbacks will be used to allow the application
-//   to load the data
+// When user data is found, these callbacks will be used to allow the application
+// to load the data.
 //----------------------------------------------------------------------------
-//////////////////////////////////////////////////////////////////////////////
-// ID3DXLoadUserData ////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
+typedef interface ID3DXLoadUserData ID3DXLoadUserData;
+typedef interface ID3DXLoadUserData *LPD3DXLOADUSERDATA;
+
+#undef INTERFACE
+#define INTERFACE ID3DXLoadUserData
+
 DECLARE_INTERFACE(ID3DXLoadUserData)
 {
-    STDMETHOD(LoadTopLevelData)(LPDIRECTXFILEDATA pXofChildData) PURE;
+    STDMETHOD(LoadTopLevelData)(LPD3DXFILEDATA pXofChildData) PURE;
                             
     STDMETHOD(LoadFrameChildData)(LPD3DXFRAME pFrame, 
-                            LPDIRECTXFILEDATA pXofChildData) PURE;
+                            LPD3DXFILEDATA pXofChildData) PURE;
                             
     STDMETHOD(LoadMeshChildData)(LPD3DXMESHCONTAINER pMeshContainer, 
-                            LPDIRECTXFILEDATA pXofChildData) PURE;                            
+                            LPD3DXFILEDATA pXofChildData) PURE;                            
 };
 
 //----------------------------------------------------------------------------
+// ID3DXSaveUserData:
+// ------------------
 // This interface is implemented by the application to save user data in a .X file
-//   The callbacks are called for all data saved.  The user can then add any
-//   child data objects to the object provided to the callback
+// The callbacks are called for all data saved.  The user can then add any
+// child data objects to the object provided to the callback.
 //----------------------------------------------------------------------------
-//////////////////////////////////////////////////////////////////////////////
-// ID3DXSaveUserData /////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
+typedef interface ID3DXSaveUserData ID3DXSaveUserData;
+typedef interface ID3DXSaveUserData *LPD3DXSAVEUSERDATA;
+
+#undef INTERFACE
+#define INTERFACE ID3DXSaveUserData
+
 DECLARE_INTERFACE(ID3DXSaveUserData)
 {
-    STDMETHOD(AddFrameChildData)(LPD3DXFRAME pFrame, 
-                            LPDIRECTXFILESAVEOBJECT pXofSave, 
-                            LPDIRECTXFILEDATA pXofFrameData) PURE;
+    STDMETHOD(AddFrameChildData)(CONST D3DXFRAME *pFrame, 
+                            LPD3DXFILESAVEOBJECT pXofSave, 
+                            LPD3DXFILESAVEDATA pXofFrameData) PURE;
                             
-    STDMETHOD(AddMeshChildData)(LPD3DXMESHCONTAINER pMeshContainer, 
-                            LPDIRECTXFILESAVEOBJECT pXofSave, 
-                            LPDIRECTXFILEDATA pXofMeshData) PURE;
+    STDMETHOD(AddMeshChildData)(CONST D3DXMESHCONTAINER *pMeshContainer, 
+                            LPD3DXFILESAVEOBJECT pXofSave, 
+                            LPD3DXFILESAVEDATA pXofMeshData) PURE;
                             
     // NOTE: this is called once per Save.  All top level objects should be added using the 
     //    provided interface.  One call adds objects before the frame hierarchy, the other after
-    STDMETHOD(AddTopLevelDataObjectsPre)(LPDIRECTXFILESAVEOBJECT pXofSave) PURE; 
-    STDMETHOD(AddTopLevelDataObjectsPost)(LPDIRECTXFILESAVEOBJECT pXofSave) PURE;                             
+    STDMETHOD(AddTopLevelDataObjectsPre)(LPD3DXFILESAVEOBJECT pXofSave) PURE; 
+    STDMETHOD(AddTopLevelDataObjectsPost)(LPD3DXFILESAVEOBJECT pXofSave) PURE;                             
 
     // callbacks for the user to register and then save templates to the XFile
-    STDMETHOD(RegisterTemplates)(LPDIRECTXFILE pXFileApi) PURE;                             
-    STDMETHOD(SaveTemplates)(LPDIRECTXFILESAVEOBJECT pXofSave) PURE;                             
+    STDMETHOD(RegisterTemplates)(LPD3DXFILE pXFileApi) PURE;                             
+    STDMETHOD(SaveTemplates)(LPD3DXFILESAVEOBJECT pXofSave) PURE;                             
+};
+
+
+//----------------------------------------------------------------------------
+// D3DXCALLBACK_SEARCH_FLAGS:
+// --------------------------
+// Flags that can be passed into ID3DXAnimationSet::GetCallback. 
+//----------------------------------------------------------------------------
+typedef enum _D3DXCALLBACK_SEARCH_FLAGS
+{
+    D3DXCALLBACK_SEARCH_EXCLUDING_INITIAL_POSITION = 0x01,  // exclude callbacks at the initial position from the search
+    D3DXCALLBACK_SEARCH_BEHIND_INITIAL_POSITION    = 0x02,  // reverse the callback search direction
+
+    D3DXCALLBACK_SEARCH_FORCE_DWORD                = 0x7fffffff,
+} D3DXCALLBACK_SEARCH_FLAGS;
+
+//----------------------------------------------------------------------------
+// ID3DXAnimationSet:
+// ------------------
+// This interface implements an animation set.
+//----------------------------------------------------------------------------
+typedef interface ID3DXAnimationSet ID3DXAnimationSet;
+typedef interface ID3DXAnimationSet *LPD3DXANIMATIONSET;
+
+#undef INTERFACE
+#define INTERFACE ID3DXAnimationSet
+
+DECLARE_INTERFACE_(ID3DXAnimationSet, IUnknown)
+{
+    // IUnknown
+    STDMETHOD(QueryInterface)(THIS_ REFIID iid, LPVOID *ppv) PURE;
+    STDMETHOD_(ULONG, AddRef)(THIS) PURE;
+    STDMETHOD_(ULONG, Release)(THIS) PURE;
+
+    // Name
+    STDMETHOD_(LPCSTR, GetName)(THIS) PURE;
+
+    // Period
+    STDMETHOD_(DOUBLE, GetPeriod)(THIS) PURE;
+    STDMETHOD_(DOUBLE, GetPeriodicPosition)(THIS_ DOUBLE Position) PURE;    // Maps position into animation period
+
+    // Animation names
+    STDMETHOD_(UINT, GetNumAnimations)(THIS) PURE;
+    STDMETHOD(GetAnimationNameByIndex)(THIS_ UINT Index, LPCSTR *ppName) PURE;
+    STDMETHOD(GetAnimationIndexByName)(THIS_ LPCSTR pName, UINT *pIndex) PURE;
+
+    // SRT
+    STDMETHOD(GetSRT)(THIS_ 
+        DOUBLE PeriodicPosition,            // Position mapped to period (use GetPeriodicPosition)
+        UINT Animation,                     // Animation index
+        D3DXVECTOR3 *pScale,                // Returns the scale
+        D3DXQUATERNION *pRotation,          // Returns the rotation as a quaternion
+        D3DXVECTOR3 *pTranslation) PURE;    // Returns the translation
+
+    // Callbacks
+    STDMETHOD(GetCallback)(THIS_ 
+        DOUBLE Position,                    // Position from which to find callbacks
+        DWORD Flags,                        // Callback search flags
+        DOUBLE *pCallbackPosition,          // Returns the position of the callback
+        LPVOID *ppCallbackData) PURE;       // Returns the callback data pointer
+};
+
+
+//----------------------------------------------------------------------------
+// D3DXPLAYBACK_TYPE:
+// ------------------
+// This enum defines the type of animation set loop modes.
+//----------------------------------------------------------------------------
+typedef enum _D3DXPLAYBACK_TYPE
+{
+    D3DXPLAY_LOOP          = 0,
+    D3DXPLAY_ONCE          = 1,
+    D3DXPLAY_PINGPONG      = 2,
+
+    D3DXPLAY_FORCE_DWORD   = 0x7fffffff, /* force 32-bit size enum */
+} D3DXPLAYBACK_TYPE;
+
+
+//----------------------------------------------------------------------------
+// D3DXKEY_VECTOR3:
+// ----------------
+// This structure describes a vector key for use in keyframe animation.
+// It specifies a vector Value at a given Time. This is used for scale and
+// translation keys.
+//----------------------------------------------------------------------------
+typedef struct _D3DXKEY_VECTOR3
+{
+    FLOAT Time;
+    D3DXVECTOR3 Value;
+} D3DXKEY_VECTOR3, *LPD3DXKEY_VECTOR3;
+
+
+//----------------------------------------------------------------------------
+// D3DXKEY_QUATERNION:
+// -------------------
+// This structure describes a quaternion key for use in keyframe animation.
+// It specifies a quaternion Value at a given Time. This is used for rotation
+// keys.
+//----------------------------------------------------------------------------
+typedef struct _D3DXKEY_QUATERNION
+{
+    FLOAT Time;
+    D3DXQUATERNION Value;
+} D3DXKEY_QUATERNION, *LPD3DXKEY_QUATERNION;
+
+
+//----------------------------------------------------------------------------
+// D3DXKEY_CALLBACK:
+// -----------------
+// This structure describes an callback key for use in keyframe animation.
+// It specifies a pointer to user data at a given Time. 
+//----------------------------------------------------------------------------
+typedef struct _D3DXKEY_CALLBACK
+{
+    FLOAT Time;
+    LPVOID pCallbackData;
+} D3DXKEY_CALLBACK, *LPD3DXKEY_CALLBACK;
+
+
+//----------------------------------------------------------------------------
+// D3DXCOMPRESSION_FLAGS:
+// ----------------------
+// Flags that can be passed into ID3DXKeyframedAnimationSet::Compress. 
+//----------------------------------------------------------------------------
+typedef enum _D3DXCOMPRESSION_FLAGS
+{
+    D3DXCOMPRESS_DEFAULT     = 0x00,
+
+    D3DXCOMPRESS_FORCE_DWORD = 0x7fffffff,
+} D3DXCOMPRESSION_FLAGS;
+
+
+//----------------------------------------------------------------------------
+// ID3DXKeyframedAnimationSet:
+// ---------------------------
+// This interface implements a compressable keyframed animation set.
+//----------------------------------------------------------------------------
+typedef interface ID3DXKeyframedAnimationSet ID3DXKeyframedAnimationSet;
+typedef interface ID3DXKeyframedAnimationSet *LPD3DXKEYFRAMEDANIMATIONSET;
+
+#undef INTERFACE
+#define INTERFACE ID3DXKeyframedAnimationSet
+
+DECLARE_INTERFACE_(ID3DXKeyframedAnimationSet, ID3DXAnimationSet)
+{
+    // ID3DXAnimationSet
+    STDMETHOD(QueryInterface)(THIS_ REFIID iid, LPVOID *ppv) PURE;
+    STDMETHOD_(ULONG, AddRef)(THIS) PURE;
+    STDMETHOD_(ULONG, Release)(THIS) PURE;
+
+    // Name
+    STDMETHOD_(LPCSTR, GetName)(THIS) PURE;
+
+    // Period
+    STDMETHOD_(DOUBLE, GetPeriod)(THIS) PURE;
+    STDMETHOD_(DOUBLE, GetPeriodicPosition)(THIS_ DOUBLE Position) PURE;    // Maps position into animation period
+
+    // Animation names
+    STDMETHOD_(UINT, GetNumAnimations)(THIS) PURE;
+    STDMETHOD(GetAnimationNameByIndex)(THIS_ UINT Index, LPCSTR *ppName) PURE;
+    STDMETHOD(GetAnimationIndexByName)(THIS_ LPCSTR pName, UINT *pIndex) PURE;
+
+    // SRT
+    STDMETHOD(GetSRT)(THIS_ 
+        DOUBLE PeriodicPosition,            // Position mapped to period (use GetPeriodicPosition)
+        UINT Animation,                     // Animation index
+        D3DXVECTOR3 *pScale,                // Returns the scale
+        D3DXQUATERNION *pRotation,          // Returns the rotation as a quaternion
+        D3DXVECTOR3 *pTranslation) PURE;    // Returns the translation
+
+    // Callbacks
+    STDMETHOD(GetCallback)(THIS_ 
+        DOUBLE Position,                    // Position from which to find callbacks
+        DWORD Flags,                        // Callback search flags
+        DOUBLE *pCallbackPosition,          // Returns the position of the callback
+        LPVOID *ppCallbackData) PURE;       // Returns the callback data pointer
+
+    // Playback
+    STDMETHOD_(D3DXPLAYBACK_TYPE, GetPlaybackType)(THIS) PURE;
+    STDMETHOD_(DOUBLE, GetSourceTicksPerSecond)(THIS) PURE;
+
+    // Scale keys
+    STDMETHOD_(UINT, GetNumScaleKeys)(THIS_ UINT Animation) PURE;
+	STDMETHOD(GetScaleKeys)(THIS_ UINT Animation, LPD3DXKEY_VECTOR3 pScaleKeys) PURE;
+	STDMETHOD(GetScaleKey)(THIS_ UINT Animation, UINT Key, LPD3DXKEY_VECTOR3 pScaleKey) PURE;
+	STDMETHOD(SetScaleKey)(THIS_ UINT Animation, UINT Key, LPD3DXKEY_VECTOR3 pScaleKey) PURE;
+
+    // Rotation keys
+    STDMETHOD_(UINT, GetNumRotationKeys)(THIS_ UINT Animation) PURE;
+	STDMETHOD(GetRotationKeys)(THIS_ UINT Animation, LPD3DXKEY_QUATERNION pRotationKeys) PURE;
+	STDMETHOD(GetRotationKey)(THIS_ UINT Animation, UINT Key, LPD3DXKEY_QUATERNION pRotationKey) PURE;
+	STDMETHOD(SetRotationKey)(THIS_ UINT Animation, UINT Key, LPD3DXKEY_QUATERNION pRotationKey) PURE;
+
+    // Translation keys
+    STDMETHOD_(UINT, GetNumTranslationKeys)(THIS_ UINT Animation) PURE;
+	STDMETHOD(GetTranslationKeys)(THIS_ UINT Animation, LPD3DXKEY_VECTOR3 pTranslationKeys) PURE;
+	STDMETHOD(GetTranslationKey)(THIS_ UINT Animation, UINT Key, LPD3DXKEY_VECTOR3 pTranslationKey) PURE;
+	STDMETHOD(SetTranslationKey)(THIS_ UINT Animation, UINT Key, LPD3DXKEY_VECTOR3 pTranslationKey) PURE;
+
+    // Callback keys
+    STDMETHOD_(UINT, GetNumCallbackKeys)(THIS) PURE;
+	STDMETHOD(GetCallbackKeys)(THIS_ LPD3DXKEY_CALLBACK pCallbackKeys) PURE;
+	STDMETHOD(GetCallbackKey)(THIS_ UINT Key, LPD3DXKEY_CALLBACK pCallbackKey) PURE;
+	STDMETHOD(SetCallbackKey)(THIS_ UINT Key, LPD3DXKEY_CALLBACK pCallbackKey) PURE;
+
+	// Key removal methods. These are slow, and should not be used once the animation starts playing
+	STDMETHOD(UnregisterScaleKey)(THIS_ UINT Animation, UINT Key) PURE;
+	STDMETHOD(UnregisterRotationKey)(THIS_ UINT Animation, UINT Key) PURE;
+	STDMETHOD(UnregisterTranslationKey)(THIS_ UINT Animation, UINT Key) PURE;
+
+    // One-time animaton SRT keyframe registration
+    STDMETHOD(RegisterAnimationSRTKeys)(THIS_ 
+        LPCSTR pName,                                   // Animation name
+        UINT NumScaleKeys,                              // Number of scale keys
+        UINT NumRotationKeys,                           // Number of rotation keys
+        UINT NumTranslationKeys,                        // Number of translation keys
+        CONST D3DXKEY_VECTOR3 *pScaleKeys,              // Array of scale keys
+        CONST D3DXKEY_QUATERNION *pRotationKeys,        // Array of rotation keys
+        CONST D3DXKEY_VECTOR3 *pTranslationKeys,		// Array of translation keys
+		DWORD *pAnimationIndex) PURE;					// Returns the animation index 
+
+    // Compression
+    STDMETHOD(Compress)(THIS_ 
+        DWORD Flags,                            // Compression flags (use D3DXCOMPRESS_STRONG for better results)
+        FLOAT Lossiness,                        // Compression loss ratio in the [0, 1] range
+        LPD3DXFRAME pHierarchy,                 // Frame hierarchy (optional)
+        LPD3DXBUFFER *ppCompressedData) PURE;   // Returns the compressed animation set
+
+    STDMETHOD(UnregisterAnimation)(THIS_ UINT Index) PURE;
+};
+
+
+//----------------------------------------------------------------------------
+// ID3DXCompressedAnimationSet:
+// ----------------------------
+// This interface implements a compressed keyframed animation set.
+//----------------------------------------------------------------------------
+typedef interface ID3DXCompressedAnimationSet ID3DXCompressedAnimationSet;
+typedef interface ID3DXCompressedAnimationSet *LPD3DXCOMPRESSEDANIMATIONSET;
+
+#undef INTERFACE
+#define INTERFACE ID3DXCompressedAnimationSet
+
+DECLARE_INTERFACE_(ID3DXCompressedAnimationSet, ID3DXAnimationSet)
+{
+    // ID3DXAnimationSet
+    STDMETHOD(QueryInterface)(THIS_ REFIID iid, LPVOID *ppv) PURE;
+    STDMETHOD_(ULONG, AddRef)(THIS) PURE;
+    STDMETHOD_(ULONG, Release)(THIS) PURE;
+
+    // Name
+    STDMETHOD_(LPCSTR, GetName)(THIS) PURE;
+
+    // Period
+    STDMETHOD_(DOUBLE, GetPeriod)(THIS) PURE;
+    STDMETHOD_(DOUBLE, GetPeriodicPosition)(THIS_ DOUBLE Position) PURE;    // Maps position into animation period
+
+    // Animation names
+    STDMETHOD_(UINT, GetNumAnimations)(THIS) PURE;
+    STDMETHOD(GetAnimationNameByIndex)(THIS_ UINT Index, LPCSTR *ppName) PURE;
+    STDMETHOD(GetAnimationIndexByName)(THIS_ LPCSTR pName, UINT *pIndex) PURE;
+
+    // SRT
+    STDMETHOD(GetSRT)(THIS_ 
+        DOUBLE PeriodicPosition,            // Position mapped to period (use GetPeriodicPosition)
+        UINT Animation,                     // Animation index
+        D3DXVECTOR3 *pScale,                // Returns the scale
+        D3DXQUATERNION *pRotation,          // Returns the rotation as a quaternion
+        D3DXVECTOR3 *pTranslation) PURE;    // Returns the translation
+
+    // Callbacks
+    STDMETHOD(GetCallback)(THIS_ 
+        DOUBLE Position,                    // Position from which to find callbacks
+        DWORD Flags,                        // Callback search flags
+        DOUBLE *pCallbackPosition,          // Returns the position of the callback
+        LPVOID *ppCallbackData) PURE;       // Returns the callback data pointer
+
+    // Playback
+    STDMETHOD_(D3DXPLAYBACK_TYPE, GetPlaybackType)(THIS) PURE;
+    STDMETHOD_(DOUBLE, GetSourceTicksPerSecond)(THIS) PURE;
+
+    // Scale keys
+    STDMETHOD(GetCompressedData)(THIS_ LPD3DXBUFFER *ppCompressedData) PURE;
+
+    // Callback keys
+    STDMETHOD_(UINT, GetNumCallbackKeys)(THIS) PURE;
+    STDMETHOD(GetCallbackKeys)(THIS_ LPD3DXKEY_CALLBACK pCallbackKeys) PURE;
+};
+
+
+//----------------------------------------------------------------------------
+// D3DXPRIORITY_TYPE:
+// ------------------
+// This enum defines the type of priority group that a track can be assigned to.
+//----------------------------------------------------------------------------
+typedef enum _D3DXPRIORITY_TYPE {
+    D3DXPRIORITY_LOW         = 0,           // This track should be blended with all low priority tracks before mixed with the high priority result
+    D3DXPRIORITY_HIGH        = 1,           // This track should be blended with all high priority tracks before mixed with the low priority result
+
+    D3DXPRIORITY_FORCE_DWORD = 0x7fffffff,  /* force 32-bit size enum */
+} D3DXPRIORITY_TYPE;
+
+//----------------------------------------------------------------------------
+// D3DXTRACK_DESC:
+// ---------------
+// This structure describes the mixing information of an animation track. 
+// The mixing information consists of the current position, speed, and blending 
+// weight for the track.  The Flags field also specifies whether the track is 
+// low or high priority.  Tracks with the same priority are blended together
+// and then the two resulting values are blended using the priority blend factor.
+// A track also has an animation set (stored separately) associated with it.  
+//----------------------------------------------------------------------------
+typedef struct _D3DXTRACK_DESC
+{
+    D3DXPRIORITY_TYPE   Priority;
+    FLOAT               Weight;
+    FLOAT               Speed;
+    DOUBLE              Position;
+    BOOL                Enable;
+} D3DXTRACK_DESC, *LPD3DXTRACK_DESC;
+
+//----------------------------------------------------------------------------
+// D3DXEVENT_TYPE:
+// ---------------
+// This enum defines the type of events keyable via the animation controller.
+//----------------------------------------------------------------------------
+typedef enum _D3DXEVENT_TYPE
+{
+    D3DXEVENT_TRACKSPEED    = 0,
+    D3DXEVENT_TRACKWEIGHT   = 1,
+    D3DXEVENT_TRACKPOSITION = 2,
+    D3DXEVENT_TRACKENABLE   = 3,
+    D3DXEVENT_PRIORITYBLEND = 4,
+
+    D3DXEVENT_FORCE_DWORD   = 0x7fffffff, /* force 32-bit size enum */
+} D3DXEVENT_TYPE;
+
+//----------------------------------------------------------------------------
+// D3DXTRANSITION_TYPE:
+// --------------------
+// This enum defines the type of transtion performed on a event that 
+// transitions from one value to another.
+//----------------------------------------------------------------------------
+typedef enum _D3DXTRANSITION_TYPE {
+    D3DXTRANSITION_LINEAR        = 0x000,     // Linear transition from one value to the next
+    D3DXTRANSITION_EASEINEASEOUT = 0x001,     // Ease-In Ease-Out spline transtion from one value to the next
+
+    D3DXTRANSITION_FORCE_DWORD   = 0x7fffffff, /* force 32-bit size enum */
+} D3DXTRANSITION_TYPE;
+
+//----------------------------------------------------------------------------
+// D3DXEVENT_DESC:
+// ---------------
+// This structure describes a animation controller event.
+// It gives the event's type, track (if the event is a track event), global 
+// start time, duration, transition method, and target value.
+//----------------------------------------------------------------------------
+typedef struct _D3DXEVENT_DESC
+{
+    D3DXEVENT_TYPE      Type;
+    UINT                Track;
+    DOUBLE              StartTime;
+    DOUBLE              Duration;
+    D3DXTRANSITION_TYPE Transition;
+    union
+    {
+        FLOAT           Weight;
+        FLOAT           Speed;
+        DOUBLE          Position;
+        BOOL            Enable;
+    };
+} D3DXEVENT_DESC, *LPD3DXEVENT_DESC;
+
+//----------------------------------------------------------------------------
+// D3DXEVENTHANDLE:
+// ----------------
+// Handle values used to efficiently reference animation controller events.
+//----------------------------------------------------------------------------
+typedef DWORD D3DXEVENTHANDLE;
+typedef D3DXEVENTHANDLE *LPD3DXEVENTHANDLE;
+
+
+//----------------------------------------------------------------------------
+// ID3DXAnimationCallbackHandler:
+// ------------------------------
+// This interface is intended to be implemented by the application, and can
+// be used to handle callbacks in animation sets generated when 
+// ID3DXAnimationController::AdvanceTime() is called.  
+//----------------------------------------------------------------------------
+typedef interface ID3DXAnimationCallbackHandler ID3DXAnimationCallbackHandler;
+typedef interface ID3DXAnimationCallbackHandler *LPD3DXANIMATIONCALLBACKHANDLER;
+
+#undef INTERFACE
+#define INTERFACE ID3DXAnimationCallbackHandler
+
+DECLARE_INTERFACE(ID3DXAnimationCallbackHandler)
+{
+    //----------------------------------------------------------------------------
+    // ID3DXAnimationCallbackHandler::HandleCallback:
+    // ----------------------------------------------
+    // This method gets called when a callback occurs for an animation set in one
+    // of the tracks during the ID3DXAnimationController::AdvanceTime() call.  
+    //
+    // Parameters:
+    //  Track
+    //      Index of the track on which the callback occured.
+    //  pCallbackData
+    //      Pointer to user owned callback data.
+    //
+    //----------------------------------------------------------------------------
+    STDMETHOD(HandleCallback)(THIS_ UINT Track, LPVOID pCallbackData) PURE; 
+};
+
+
+//----------------------------------------------------------------------------
+// ID3DXAnimationController:
+// -------------------------
+// This interface implements the main animation functionality. It connects
+// animation sets with the transform frames that are being animated. Allows
+// mixing multiple animations for blended animations or for transistions
+// It adds also has methods to modify blending parameters over time to 
+// enable smooth transistions and other effects.
+//----------------------------------------------------------------------------
+typedef interface ID3DXAnimationController ID3DXAnimationController;
+typedef interface ID3DXAnimationController *LPD3DXANIMATIONCONTROLLER;
+
+#undef INTERFACE
+#define INTERFACE ID3DXAnimationController
+
+DECLARE_INTERFACE_(ID3DXAnimationController, IUnknown)
+{
+    // IUnknown
+    STDMETHOD(QueryInterface)(THIS_ REFIID iid, LPVOID *ppv) PURE;
+    STDMETHOD_(ULONG, AddRef)(THIS) PURE;
+    STDMETHOD_(ULONG, Release)(THIS) PURE;
+
+    // Max sizes
+    STDMETHOD_(UINT, GetMaxNumAnimationOutputs)(THIS) PURE;
+    STDMETHOD_(UINT, GetMaxNumAnimationSets)(THIS) PURE;
+    STDMETHOD_(UINT, GetMaxNumTracks)(THIS) PURE;
+    STDMETHOD_(UINT, GetMaxNumEvents)(THIS) PURE;
+
+    // Animation output registration
+    STDMETHOD(RegisterAnimationOutput)(THIS_ 
+        LPCSTR pName, 
+        D3DXMATRIX *pMatrix, 
+        D3DXVECTOR3 *pScale, 
+        D3DXQUATERNION *pRotation, 
+        D3DXVECTOR3 *pTranslation) PURE;
+
+    // Animation set registration
+    STDMETHOD(RegisterAnimationSet)(THIS_ LPD3DXANIMATIONSET pAnimSet) PURE;
+    STDMETHOD(UnregisterAnimationSet)(THIS_ LPD3DXANIMATIONSET pAnimSet) PURE;
+
+    STDMETHOD_(UINT, GetNumAnimationSets)(THIS) PURE;
+    STDMETHOD(GetAnimationSet)(THIS_ UINT Index, LPD3DXANIMATIONSET *ppAnimationSet) PURE;
+    STDMETHOD(GetAnimationSetByName)(THIS_ LPCSTR szName, LPD3DXANIMATIONSET *ppAnimationSet) PURE;
+
+    // Global time
+    STDMETHOD(AdvanceTime)(THIS_ DOUBLE TimeDelta, LPD3DXANIMATIONCALLBACKHANDLER pCallbackHandler) PURE;
+    STDMETHOD(ResetTime)(THIS) PURE;
+    STDMETHOD_(DOUBLE, GetTime)(THIS) PURE;
+
+    // Tracks
+    STDMETHOD(SetTrackAnimationSet)(THIS_ UINT Track, LPD3DXANIMATIONSET pAnimSet) PURE;
+    STDMETHOD(GetTrackAnimationSet)(THIS_ UINT Track, LPD3DXANIMATIONSET *ppAnimSet) PURE;
+
+    STDMETHOD(SetTrackPriority)(THIS_ UINT Track, D3DXPRIORITY_TYPE Priority) PURE;
+
+    STDMETHOD(SetTrackSpeed)(THIS_ UINT Track, FLOAT Speed) PURE;
+    STDMETHOD(SetTrackWeight)(THIS_ UINT Track, FLOAT Weight) PURE;
+    STDMETHOD(SetTrackPosition)(THIS_ UINT Track, DOUBLE Position) PURE;
+    STDMETHOD(SetTrackEnable)(THIS_ UINT Track, BOOL Enable) PURE;
+
+    STDMETHOD(SetTrackDesc)(THIS_ UINT Track, LPD3DXTRACK_DESC pDesc) PURE;
+    STDMETHOD(GetTrackDesc)(THIS_ UINT Track, LPD3DXTRACK_DESC pDesc) PURE;
+
+    // Priority blending
+    STDMETHOD(SetPriorityBlend)(THIS_ FLOAT BlendWeight) PURE;
+    STDMETHOD_(FLOAT, GetPriorityBlend)(THIS) PURE;
+
+    // Event keying
+    STDMETHOD_(D3DXEVENTHANDLE, KeyTrackSpeed)(THIS_ UINT Track, FLOAT NewSpeed, DOUBLE StartTime, DOUBLE Duration, D3DXTRANSITION_TYPE Transition) PURE;
+    STDMETHOD_(D3DXEVENTHANDLE, KeyTrackWeight)(THIS_ UINT Track, FLOAT NewWeight, DOUBLE StartTime, DOUBLE Duration, D3DXTRANSITION_TYPE Transition) PURE;
+    STDMETHOD_(D3DXEVENTHANDLE, KeyTrackPosition)(THIS_ UINT Track, DOUBLE NewPosition, DOUBLE StartTime) PURE;
+    STDMETHOD_(D3DXEVENTHANDLE, KeyTrackEnable)(THIS_ UINT Track, BOOL NewEnable, DOUBLE StartTime) PURE;
+
+    STDMETHOD_(D3DXEVENTHANDLE, KeyPriorityBlend)(THIS_ FLOAT NewBlendWeight, DOUBLE StartTime, DOUBLE Duration, D3DXTRANSITION_TYPE Transition) PURE;
+
+    // Event unkeying
+    STDMETHOD(UnkeyEvent)(THIS_ D3DXEVENTHANDLE hEvent) PURE;
+
+    STDMETHOD(UnkeyAllTrackEvents)(THIS_ UINT Track) PURE;
+    STDMETHOD(UnkeyAllPriorityBlends)(THIS) PURE;
+
+    // Event enumeration
+    STDMETHOD_(D3DXEVENTHANDLE, GetCurrentTrackEvent)(THIS_ UINT Track, D3DXEVENT_TYPE EventType) PURE;
+    STDMETHOD_(D3DXEVENTHANDLE, GetCurrentPriorityBlend)(THIS) PURE;
+
+    STDMETHOD_(D3DXEVENTHANDLE, GetUpcomingTrackEvent)(THIS_ UINT Track, D3DXEVENTHANDLE hEvent) PURE;
+    STDMETHOD_(D3DXEVENTHANDLE, GetUpcomingPriorityBlend)(THIS_ D3DXEVENTHANDLE hEvent) PURE;
+
+    STDMETHOD(ValidateEvent)(THIS_ D3DXEVENTHANDLE hEvent) PURE;
+
+    STDMETHOD(GetEventDesc)(THIS_ D3DXEVENTHANDLE hEvent, LPD3DXEVENT_DESC pDesc) PURE;
+
+    // Cloning
+    STDMETHOD(CloneAnimationController)(THIS_ 
+        UINT MaxNumAnimationOutputs, 
+        UINT MaxNumAnimationSets, 
+        UINT MaxNumTracks, 
+        UINT MaxNumEvents, 
+        LPD3DXANIMATIONCONTROLLER *ppAnimController) PURE;
 };
 
 #ifdef __cplusplus
@@ -270,26 +799,28 @@ extern "C" {
 //
 //----------------------------------------------------------------------------
 HRESULT WINAPI 
-    D3DXLoadMeshHierarchyFromXA(
-        LPCSTR Filename,
-        DWORD MeshOptions,
-        LPDIRECT3DDEVICE9 pD3DDevice,
-        LPD3DXALLOCATEHIERARCHY pAlloc,
-        LPD3DXLOADUSERDATA pUserDataLoader, 
-        LPD3DXFRAME *ppFrameHierarchy,
-        LPD3DXANIMATIONCONTROLLER *ppAnimController
-);
+D3DXLoadMeshHierarchyFromXA
+    (
+    LPCSTR Filename,
+    DWORD MeshOptions,
+    LPDIRECT3DDEVICE9 pD3DDevice,
+    LPD3DXALLOCATEHIERARCHY pAlloc,
+    LPD3DXLOADUSERDATA pUserDataLoader, 
+    LPD3DXFRAME *ppFrameHierarchy,
+    LPD3DXANIMATIONCONTROLLER *ppAnimController
+    );
 
 HRESULT WINAPI 
-    D3DXLoadMeshHierarchyFromXW(
-        LPCWSTR Filename,
-        DWORD MeshOptions,
-        LPDIRECT3DDEVICE9 pD3DDevice,
-        LPD3DXALLOCATEHIERARCHY pAlloc,
-        LPD3DXLOADUSERDATA pUserDataLoader, 
-        LPD3DXFRAME *ppFrameHierarchy,
-        LPD3DXANIMATIONCONTROLLER *ppAnimController
-);
+D3DXLoadMeshHierarchyFromXW
+    (
+    LPCWSTR Filename,
+    DWORD MeshOptions,
+    LPDIRECT3DDEVICE9 pD3DDevice,
+    LPD3DXALLOCATEHIERARCHY pAlloc,
+    LPD3DXLOADUSERDATA pUserDataLoader, 
+    LPD3DXFRAME *ppFrameHierarchy,
+    LPD3DXANIMATIONCONTROLLER *ppAnimController
+    );
 
 #ifdef UNICODE
 #define D3DXLoadMeshHierarchyFromX D3DXLoadMeshHierarchyFromXW
@@ -298,20 +829,21 @@ HRESULT WINAPI
 #endif
 
 HRESULT WINAPI 
-    D3DXLoadMeshHierarchyFromXInMemory(
-        LPCVOID Memory,
-        DWORD SizeOfMemory,
-        DWORD MeshOptions,
-        LPDIRECT3DDEVICE9 pD3DDevice,
-        LPD3DXALLOCATEHIERARCHY pAlloc,
-        LPD3DXLOADUSERDATA pUserDataLoader, 
-        LPD3DXFRAME *ppFrameHierarchy,
-        LPD3DXANIMATIONCONTROLLER *ppAnimController
-);
+D3DXLoadMeshHierarchyFromXInMemory
+    (
+    LPCVOID Memory,
+    DWORD SizeOfMemory,
+    DWORD MeshOptions,
+    LPDIRECT3DDEVICE9 pD3DDevice,
+    LPD3DXALLOCATEHIERARCHY pAlloc,
+    LPD3DXLOADUSERDATA pUserDataLoader, 
+    LPD3DXFRAME *ppFrameHierarchy,
+    LPD3DXANIMATIONCONTROLLER *ppAnimController
+    );
 
 //----------------------------------------------------------------------------
 // D3DXSaveMeshHierarchyToFile:
-// ---------------------------
+// ----------------------------
 // Creates a .X file and saves the mesh hierarchy and corresponding animations
 // in it
 //
@@ -323,29 +855,31 @@ HRESULT WINAPI
 //  pFrameRoot
 //      Root node of the hierarchy to be saved
 //  pAnimController
-//      The animation mixer whose animation sets are to be stored
+//      The animation controller whose animation sets are to be stored
 //  pUserDataSaver
 //      Application provided interface to allow adding of user data to
 //        data objects saved to .X file
 //
 //----------------------------------------------------------------------------
 HRESULT WINAPI 
-    D3DXSaveMeshHierarchyToFileA(
-        LPCSTR Filename,
-        DWORD XFormat,
-        LPD3DXFRAME pFrameRoot, 
-        LPD3DXANIMATIONCONTROLLER pAnimMixer,
-        LPD3DXSAVEUSERDATA pUserDataSaver
-);
+D3DXSaveMeshHierarchyToFileA
+    (
+    LPCSTR Filename,
+    DWORD XFormat,
+    CONST D3DXFRAME *pFrameRoot, 
+    LPD3DXANIMATIONCONTROLLER pAnimcontroller,
+    LPD3DXSAVEUSERDATA pUserDataSaver
+    );
 
 HRESULT WINAPI 
-    D3DXSaveMeshHierarchyToFileW(
-        LPCWSTR Filename,
-        DWORD XFormat,
-        LPD3DXFRAME pFrameRoot, 
-        LPD3DXANIMATIONCONTROLLER pAnimMixer,
-        LPD3DXSAVEUSERDATA pUserDataSaver
-);
+D3DXSaveMeshHierarchyToFileW
+    (
+    LPCWSTR Filename,
+    DWORD XFormat,
+    CONST D3DXFRAME *pFrameRoot, 
+    LPD3DXANIMATIONCONTROLLER pAnimController,
+    LPD3DXSAVEUSERDATA pUserDataSaver
+    );
 
 #ifdef UNICODE
 #define D3DXSaveMeshHierarchyToFile D3DXSaveMeshHierarchyToFileW
@@ -366,10 +900,11 @@ HRESULT WINAPI
 //
 //----------------------------------------------------------------------------
 HRESULT WINAPI
-    D3DXFrameDestroy(
-        LPD3DXFRAME pFrameRoot,
-        LPD3DXALLOCATEHIERARCHY pAlloc
-);
+D3DXFrameDestroy
+    (
+    LPD3DXFRAME pFrameRoot,
+    LPD3DXALLOCATEHIERARCHY pAlloc
+    );
 
 //----------------------------------------------------------------------------
 // D3DXFrameAppendChild:
@@ -384,10 +919,11 @@ HRESULT WINAPI
 //
 //----------------------------------------------------------------------------
 HRESULT WINAPI 
-    D3DXFrameAppendChild(
-        LPD3DXFRAME pFrameParent,
-        LPD3DXFRAME pFrameChild
-);
+D3DXFrameAppendChild
+    (
+    LPD3DXFRAME pFrameParent,
+    CONST D3DXFRAME *pFrameChild
+    );
 
 //----------------------------------------------------------------------------
 // D3DXFrameFind:
@@ -402,29 +938,31 @@ HRESULT WINAPI
 //
 //----------------------------------------------------------------------------
 LPD3DXFRAME WINAPI 
-    D3DXFrameFind(
-        LPD3DXFRAME pFrameRoot,
-        LPCSTR Name
-);
+D3DXFrameFind
+    (
+    CONST D3DXFRAME *pFrameRoot,
+    LPCSTR Name
+    );
 
 //----------------------------------------------------------------------------
 // D3DXFrameRegisterNamedMatrices:
-// --------------------------
+// -------------------------------
 // Finds all frames that have non-null names and registers each of those frame
-// matrices to the given animation mixer
+// matrices to the given animation controller
 //
 // Parameters:
 //	pFrameRoot
 //		Pointer to the root node
-//	pAnimMixer
-//		Pointer to the animation mixer where the matrices are registered
+//	pAnimController
+//		Pointer to the animation controller where the matrices are registered
 //
 //----------------------------------------------------------------------------
 HRESULT WINAPI
-    D3DXFrameRegisterNamedMatrices(
-        LPD3DXFRAME pFrameRoot,
-        LPD3DXANIMATIONCONTROLLER pAnimMixer
-);
+D3DXFrameRegisterNamedMatrices
+    (
+    LPD3DXFRAME pFrameRoot,
+    LPD3DXANIMATIONCONTROLLER pAnimController
+    );
 
 //----------------------------------------------------------------------------
 // D3DXFrameNumNamedMatrices:
@@ -439,14 +977,15 @@ HRESULT WINAPI
 //
 //----------------------------------------------------------------------------
 UINT WINAPI
-    D3DXFrameNumNamedMatrices(
-        LPD3DXFRAME pFrameRoot
-);
+D3DXFrameNumNamedMatrices
+    (
+    CONST D3DXFRAME *pFrameRoot
+    );
 
 //----------------------------------------------------------------------------
 // D3DXFrameCalculateBoundingSphere:
 // ---------------------------------
-// Computes the bounding sphere of all the meshes in the frame hierarchy
+// Computes the bounding sphere of all the meshes in the frame hierarchy.
 //
 // Parameters:
 //	pFrameRoot
@@ -458,339 +997,113 @@ UINT WINAPI
 //
 //----------------------------------------------------------------------------
 HRESULT WINAPI
-    D3DXFrameCalculateBoundingSphere(
-        LPD3DXFRAME pFrameRoot, 
-        LPD3DXVECTOR3 pObjectCenter, 
-        FLOAT *pObjectRadius
-);
-
-#ifdef __cplusplus
-}
-#endif //__cplusplus
-
-#undef INTERFACE
-#define INTERFACE ID3DXInterpolator
-
-//----------------------------------------------------------------------------
-// This interface defines a SRT (scale/rotate/translate) interpolator. This
-// is an abstract interface. ID3DXKeyFrameInterpolator inherits from this.
-// An application can implement this for custom SRT interpolator
-//----------------------------------------------------------------------------
-//////////////////////////////////////////////////////////////////////////////
-// ID3DXInterpolator /////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-DECLARE_INTERFACE_(ID3DXInterpolator, IUnknown)
-{
-    // IUnknown
-    STDMETHOD(QueryInterface)(THIS_ REFIID iid, LPVOID *ppv) PURE;
-    STDMETHOD_(ULONG, AddRef)(THIS) PURE;
-    STDMETHOD_(ULONG, Release)(THIS) PURE;
-
-    // ID3DXInterpolator
-    STDMETHOD_(LPCSTR, GetName)(THIS) PURE;
-    STDMETHOD_(DOUBLE, GetPeriod)(THIS) PURE;
-
-	//----------------------------------------------------------------------------
-	// GetSRT:
-	// -------
-	// Returns the scale, rotation and translation at a given time
-	//
-	// Parameters:
-	//	Time
-	//		Time at which the interpolator should be queried
-	//	pScale
-	//		Returns the scale vector
-	//	pRotate
-	//		Returns the rotation qaternion
-	//	pTranslate
-	//		Returns the translate vector
-	//
-	//----------------------------------------------------------------------------
-    STDMETHOD(GetSRT)(THIS_ DOUBLE Time, D3DXVECTOR3 *pScale, D3DXQUATERNION *pRotate, D3DXVECTOR3 *pTranslate) PURE;
-    STDMETHOD(GetLastSRT)(THIS_ D3DXVECTOR3 *pScale, D3DXQUATERNION *pRotate, D3DXVECTOR3 *pTranslate) PURE;
-};
-
-
+D3DXFrameCalculateBoundingSphere
+    (
+    CONST D3DXFRAME *pFrameRoot,       
+    LPD3DXVECTOR3 pObjectCenter,  
+    FLOAT *pObjectRadius          
+    );
 
 
 //----------------------------------------------------------------------------
-// This structure describes a vector key for use in keyframe animation.
-// It specifies a vector Value at a given Time. This is used for scale and
-// translation keys
-//----------------------------------------------------------------------------
-typedef struct _D3DXKEY_VECTOR3
-{
-    FLOAT Time;
-    D3DXVECTOR3 Value;
-} D3DXKEY_VECTOR3, *LPD3DXKEY_VECTOR3;
-
-
-//----------------------------------------------------------------------------
-// This structure describes a quaternion key for use in keyframe animation.
-// It specifies a quaternion Value at a given Time. This is used for rotation
-// keys
-//----------------------------------------------------------------------------
-typedef struct _D3DXKEY_QUATERNION
-{
-    FLOAT Time;
-    D3DXQUATERNION Value;
-} D3DXKEY_QUATERNION, *LPD3DXKEY_QUATERNION;
-
-
-#undef INTERFACE
-#define INTERFACE ID3DXKeyFrameInterpolator
-
-//----------------------------------------------------------------------------
-// This interface implements an SRT (scale/rotate/translate) interpolator
-// It takes a scattered set of keys and interpolates the transform for any
-// given time
-//----------------------------------------------------------------------------
-//////////////////////////////////////////////////////////////////////////////
-// ID3DXKeyFrameInterpolator /////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-DECLARE_INTERFACE_(ID3DXKeyFrameInterpolator, ID3DXInterpolator)
-{
-    // IUnknown
-    STDMETHOD(QueryInterface)(THIS_ REFIID iid, LPVOID *ppv) PURE;
-    STDMETHOD_(ULONG, AddRef)(THIS) PURE;
-    STDMETHOD_(ULONG, Release)(THIS) PURE;
-
-    // ID3DXInterpolator
-    STDMETHOD_(LPCSTR, GetName)(THIS) PURE;
-    STDMETHOD_(DOUBLE, GetPeriod)(THIS) PURE;
-
-    STDMETHOD(GetSRT)(THIS_ DOUBLE Time, D3DXVECTOR3 *pScale, D3DXQUATERNION *pRotate, D3DXVECTOR3 *pTranslate) PURE;
-    STDMETHOD(GetLastSRT)(THIS_ D3DXVECTOR3 *pScale, D3DXQUATERNION *pRotate, D3DXVECTOR3 *pTranslate) PURE;
-
-    // ID3DXKeyFrameInterpolator
-    STDMETHOD_(UINT, GetNumScaleKeys)(THIS) PURE;
-    STDMETHOD(GetScaleKeys)(THIS_ LPD3DXKEY_VECTOR3 pKeys) PURE;
-
-    STDMETHOD_(UINT, GetNumRotationKeys)(THIS) PURE;
-    STDMETHOD(GetRotationKeys)(THIS_ LPD3DXKEY_QUATERNION pKeys) PURE;
-
-    STDMETHOD_(UINT, GetNumTranslationKeys)(THIS) PURE;
-    STDMETHOD(GetTranslationKeys)(THIS_ LPD3DXKEY_VECTOR3 pKeys) PURE;
-
-    // the value passed to D3DXCreateKeyFrameInterpolator to scale from the times in LPD3DXKEY_VECTOR3 to global/anim time.
-    STDMETHOD_(DOUBLE, GetSourceTicksPerSecond)(THIS) PURE;
-};
-
-
-
-//----------------------------------------------------------------------------
-// This interface implements an set of interpolators. The set consists of
-// interpolators for many nodes for the same animation. 
-//----------------------------------------------------------------------------
-//////////////////////////////////////////////////////////////////////////////
-// ID3DXAnimationSet /////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-DECLARE_INTERFACE_(ID3DXAnimationSet, IUnknown)
-{
-    // IUnknown
-    STDMETHOD(QueryInterface)(THIS_ REFIID iid, LPVOID *ppv) PURE;
-    STDMETHOD_(ULONG, AddRef)(THIS) PURE;
-    STDMETHOD_(ULONG, Release)(THIS) PURE;
-
-    // ID3DXAnimationSet
-    STDMETHOD_(LPCSTR, GetName)(THIS) PURE;
-    STDMETHOD_(DOUBLE, GetPeriod)(THIS) PURE;
-
-    STDMETHOD_(UINT, GetNumInterpolators)(THIS) PURE;
-    STDMETHOD(GetInterpolatorByIndex)(THIS_ UINT Index, LPD3DXINTERPOLATOR *ppInterpolator) PURE;
-    STDMETHOD(GetInterpolatorByName)(THIS_ LPCSTR pName, LPD3DXINTERPOLATOR *ppInterpolator) PURE;
-};
-
-//----------------------------------------------------------------------------
-// This structure describes an animation track. A track is a combination
-//  of an animation set (stored separately) and mixing information.
-//  the mixing information consists of the current position, speed, and blending
-//  weight for the track.  The Flags field also specifies whether the track
-//  is low or high priority.  Tracks with the same priority are blended together
-//  and then the two resulting values are blended using the priority blend factor.
-//----------------------------------------------------------------------------
-typedef struct _D3DXTRACK_DESC
-{
-    DWORD Flags;
-    FLOAT Weight;
-    FLOAT Speed;
-    BOOL  Enable;
-    DOUBLE AnimTime;
-} D3DXTRACK_DESC, *LPD3DXTRACK_DESC;
-
-//----------------------------------------------------------------------------
-// This enum defines the type of transtion performed on a event that transitions from one value to another
-//----------------------------------------------------------------------------
-typedef enum _D3DXTRACKFLAG {
-    D3DXTF_LOWPRIORITY            = 0x000,     // This track should be blended with all low priority tracks before mixed with the high priority result
-    D3DXTF_HIGHPRIORITY           = 0x001,     // This track should be blended with all high priority tracks before mixed with the low priority result
-
-    D3DXTF_FORCE_DWORD    = 0x7fffffff, /* force 32-bit size enum */
-} D3DXTRACKFLAG;
-
-
-//----------------------------------------------------------------------------
-// This interface implements the main animation functionality. It connects
-// animation sets with the transform frames that are being animated. Allows
-// mixing multiple animations for blended animations or for transistions
-// It adds also has methods to modify blending parameters over time to 
-// enable smooth transistions and other effects.
-//----------------------------------------------------------------------------
-
-
-//----------------------------------------------------------------------------
-// This enum defines the type of transtion performed on a event that transitions from one value to another
-//----------------------------------------------------------------------------
-typedef enum _D3DXTRANSITIONTYPE {
-    D3DXTRANSITION_LINEAR            = 0x000,     // Linear transition from one value to the next
-    D3DXTRANSITION_EASEINEASEOUT     = 0x001,     // Ease-In Ease-Out spline transtion from one value to the next
-
-    D3DXTRANSITION_FORCE_DWORD    = 0x7fffffff, /* force 32-bit size enum */
-} D3DXTRANSITIONTYPE;
-
-
-//////////////////////////////////////////////////////////////////////////////
-// ID3DXAnimationController //////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-DECLARE_INTERFACE_(ID3DXAnimationController, IUnknown)
-{
-  // IUnknown
-    STDMETHOD(QueryInterface)(THIS_ REFIID iid, LPVOID *ppv) PURE;
-    STDMETHOD_(ULONG, AddRef)(THIS) PURE;
-    STDMETHOD_(ULONG, Release)(THIS) PURE;
-
-  // mixing functionality
-    // register outputs of SetTime
-    STDMETHOD(RegisterMatrix)(THIS_ LPCSTR Name, D3DXMATRIX *pMatrix) PURE;
-
-
-    // AnimationSets
-    STDMETHOD_(UINT, GetNumAnimationSets)(THIS) PURE;
-    STDMETHOD(GetAnimationSet)(THIS_ DWORD iAnimationSet, LPD3DXANIMATIONSET *ppAnimSet) PURE;
-
-    STDMETHOD(RegisterAnimationSet)(THIS_ LPD3DXANIMATIONSET pAnimSet) PURE;
-    STDMETHOD(UnregisterAnimationSet)(THIS_ LPD3DXANIMATIONSET pAnimSet) PURE;
-
-
-    // Tracks
-    STDMETHOD_(UINT, GetMaxNumTracks)(THIS) PURE;
-    STDMETHOD(GetTrackDesc)(THIS_ DWORD Track, D3DXTRACK_DESC *pDesc) PURE;
-    STDMETHOD(SetTrackDesc)(THIS_ DWORD Track, D3DXTRACK_DESC *pDesc) PURE;
-    
-    STDMETHOD(GetTrackAnimationSet)(THIS_ DWORD Track, LPD3DXANIMATIONSET *ppAnimSet) PURE;
-    STDMETHOD(SetTrackAnimationSet)(THIS_ DWORD Track, LPD3DXANIMATIONSET pAnimSet) PURE;
-
-    // Individual track field access
-    STDMETHOD(SetTrackSpeed)(THIS_ DWORD Track, FLOAT Speed) PURE;
-    STDMETHOD(SetTrackWeight)(THIS_ DWORD Track, FLOAT Weight) PURE;
-    STDMETHOD(SetTrackAnimTime)(THIS_ DWORD Track, DOUBLE AnimTime) PURE;
-    STDMETHOD(SetTrackEnable)(THIS_ DWORD Track, BOOL Enable) PURE;
-
-    // Time
-    STDMETHOD_(DOUBLE, GetTime)(THIS) PURE;
-    STDMETHOD(SetTime)(THIS_ DOUBLE Time) PURE;
-
-    STDMETHOD(CloneAnimationController)(THIS_ UINT MaxNumMatrices, UINT MaxNumAnimationSets, UINT MaxNumTracks, UINT MaxNumEvents, LPD3DXANIMATIONCONTROLLER *ppAnimController) PURE;
-
-    STDMETHOD_(UINT, GetMaxNumMatrices)(THIS) PURE;
-    STDMETHOD_(UINT, GetMaxNumEvents)(THIS) PURE;
-    STDMETHOD_(UINT, GetMaxNumAnimationSets)(THIS) PURE;
-
-  // Sequencing abilities
-    STDMETHOD(KeyTrackSpeed)(THIS_ DWORD Track, FLOAT NewSpeed, DOUBLE StartTime, DOUBLE Duration, DWORD Method) PURE;
-    STDMETHOD(KeyTrackWeight)(THIS_ DWORD Track, FLOAT NewWeight, DOUBLE StartTime, DOUBLE Duration, DWORD Method) PURE;
-    STDMETHOD(KeyTrackAnimTime)(THIS_ DWORD Track, DOUBLE NewAnimTime, DOUBLE StartTime) PURE;
-    STDMETHOD(KeyTrackEnable)(THIS_ DWORD Track, BOOL NewEnable, DOUBLE StartTime) PURE;
-
-    // this functions sets the blend weight to be used to blend high and low priority tracks together.
-    //  NOTE: this has no effect unless there are active animations on tracks for a given matrix that have both high and low results
-    STDMETHOD_(FLOAT, GetPriorityBlend)(THIS) PURE;
-    STDMETHOD(SetPriorityBlend)(THIS_ FLOAT BlendWeight) PURE;
-
-    STDMETHOD(KeyPriorityBlend)(THIS_ FLOAT NewBlendWeight, DOUBLE StartTime, DOUBLE Duration, DWORD Method) PURE;
-};
-
-#ifdef __cplusplus
-extern "C" {
-#endif //__cplusplus
-
-//----------------------------------------------------------------------------
-// D3DXCreateKeyFrameInterpolator:
-// -------------------------------
-// Creates a SRT key frame interpolator object from the given set of keys
-//
+// D3DXCreateKeyframedAnimationSet:
+// --------------------------------
+// This function creates a compressable keyframed animations set interface.
+// 
 // Parameters:
-//	ScaleKeys
-//		Array of scale key vectors
-//	NumScaleKeys
-//		Num elements in ScaleKeys array
-//	RotationKeys
-//		Array of rotation key quternions
-//	NumRotationKeys
-//		Num elements in RotationKeys array
-//	TranslateKeys
-//		Array of translation key vectors
-//	NumTranslateKeys
-//		Num elements in TranslateKeys array
-//	ScaleInputTimeBy
-//		All key times are scaled by this factor
-//	ppNewInterpolator
-//		Returns the keyframe interpolator interface
-//
-//----------------------------------------------------------------------------
-HRESULT WINAPI
-D3DXCreateKeyFrameInterpolator(LPCSTR Name, 
-                            LPD3DXKEY_VECTOR3    ScaleKeys,     UINT NumScaleKeys,
-                            LPD3DXKEY_QUATERNION RotationKeys,  UINT NumRotationKeys,
-                            LPD3DXKEY_VECTOR3    TranslateKeys, UINT NumTranslateKeys,
-                            DOUBLE ScaleInputTimeBy, LPD3DXKEYFRAMEINTERPOLATOR *ppNewInterpolator);
-
-//----------------------------------------------------------------------------
-// D3DXCreateAnimationSet:
-// -----------------------
-// Creates an animtions set interface given a set of interpolators
-//
-// Parameters:
-//	Name
-//		Name of the animation set
-//	pInterpolators
-//		Array of interpolators
-//	NumInterpolators
-//		Num elements in the pInterpolators array
-//	ppAnimSet
-//		Returns the animation set interface
-//
+//  pName
+//      Name of the animation set
+//  TicksPerSecond
+//      Number of keyframe ticks that elapse per second
+//  Playback
+//      Playback mode of keyframe looping
+//  NumAnimations
+//      Number of SRT animations
+//  NumCallbackKeys
+//      Number of callback keys
+//  pCallbackKeys
+//      Array of callback keys
+//  ppAnimationSet
+//      Returns the animation set interface
+// 
 //-----------------------------------------------------------------------------		
 HRESULT WINAPI
-D3DXCreateAnimationSet(LPCSTR Name, 
-                            LPD3DXINTERPOLATOR *ppInterpolators, UINT NumInterpolators,
-                            LPD3DXANIMATIONSET *ppAnimSet);
+D3DXCreateKeyframedAnimationSet
+    (
+    LPCSTR pName,                               
+    DOUBLE TicksPerSecond,
+    D3DXPLAYBACK_TYPE Playback,
+    UINT NumAnimations,                         
+    UINT NumCallbackKeys,                       
+    CONST D3DXKEY_CALLBACK *pCallbackKeys,           
+    LPD3DXKEYFRAMEDANIMATIONSET *ppAnimationSet 
+    );
+
+
+//----------------------------------------------------------------------------
+// D3DXCreateCompressedAnimationSet:
+// --------------------------------
+// This function creates a compressed animations set interface from 
+// compressed data.
+// 
+// Parameters:
+//  pName
+//      Name of the animation set
+//  TicksPerSecond
+//      Number of keyframe ticks that elapse per second
+//  Playback
+//      Playback mode of keyframe looping
+//  pCompressedData
+//      Compressed animation SRT data
+//  NumCallbackKeys
+//      Number of callback keys
+//  pCallbackKeys
+//      Array of callback keys
+//  ppAnimationSet
+//      Returns the animation set interface
+// 
+//-----------------------------------------------------------------------------		
+HRESULT WINAPI
+D3DXCreateCompressedAnimationSet
+    (
+    LPCSTR pName,                               
+    DOUBLE TicksPerSecond,
+    D3DXPLAYBACK_TYPE Playback,
+    LPD3DXBUFFER pCompressedData,                         
+    UINT NumCallbackKeys,                       
+    CONST D3DXKEY_CALLBACK *pCallbackKeys,           
+    LPD3DXCOMPRESSEDANIMATIONSET *ppAnimationSet 
+    );
+
 
 //----------------------------------------------------------------------------
 // D3DXCreateAnimationController:
-// -------------------------
-// Creates an animtion mixer object
+// ------------------------------
+// This function creates an animation controller object.
 //
 // Parameters:
-//	MaxNumMatrices
-//		The upper limit for the number of matrices that can be animated by the
-//		the object
-//	MaxNumAnimationSets
-//		The upper limit of the number of animation sets that can be played by
-//		the object
-//	MaxNumTracks
-//		The upper limit of the number of animation sets that can be blended at
-//		any time.
-//	MaxNumEvents
-//		The upper limit of the number of outstanding events that can be
-//		scheduled at once.
-//	ppAnimController
-//		Returns the animation controller interface
+//  MaxNumMatrices
+//      Maximum number of matrices that can be animated
+//  MaxNumAnimationSets
+//      Maximum number of animation sets that can be played
+//  MaxNumTracks
+//      Maximum number of animation sets that can be blended
+//  MaxNumEvents
+//      Maximum number of outstanding events that can be scheduled at any given time
+//  ppAnimController
+//      Returns the animation controller interface
 //
 //-----------------------------------------------------------------------------		
 HRESULT WINAPI
-D3DXCreateAnimationController(UINT MaxNumMatrices, UINT MaxNumAnimationSets, UINT MaxNumTracks, UINT MaxNumEvents,
-                                 LPD3DXANIMATIONCONTROLLER *ppAnimController);
+D3DXCreateAnimationController
+    (
+    UINT MaxNumMatrices,                       
+    UINT MaxNumAnimationSets,                  
+    UINT MaxNumTracks,                         
+    UINT MaxNumEvents,                         
+    LPD3DXANIMATIONCONTROLLER *ppAnimController
+    );
+
 
 #ifdef __cplusplus
 }

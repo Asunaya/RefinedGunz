@@ -19,7 +19,7 @@
 #include "MProfiler.h"
 #include "RShaderMgr.h"
 #include "RLenzFlare.h"
-#include <dxerr9.h>
+#include "dxerr.h"
 #include "RNavigationNode.h"
 #include <fstream>
 #include "ShaderGlobals.h"
@@ -1837,7 +1837,7 @@ bool RBspObject::OpenLightmap()
 
 		if (FAILED(hr))
 			mlog("Failed to load lightmap texture! Error code = %d, error message = %s\n",
-				hr, DXGetErrorString9(hr));
+				hr, DXGetErrorString(hr));
 	}
 
 	// Read ???

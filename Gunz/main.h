@@ -7,7 +7,7 @@
 #pragma comment(lib,"RealSpace2d.lib")
 #pragma comment(lib,"CSCommonD.lib")
 #pragma comment(lib,"SafeUDPd.lib")
-#pragma comment(lib, "dxerr9.lib")
+#pragma comment(lib, "dxerr.lib")
 
 #else
 #pragma comment(lib,"cml.lib")
@@ -16,7 +16,7 @@
 #pragma comment(lib,"RealSpace2.lib")
 #pragma comment(lib,"CSCommon.lib")
 #pragma comment(lib,"SafeUDP.lib")
-#pragma comment(lib, "dxerr9.lib")
+#pragma comment(lib, "dxerr.lib")
 
 #endif
 
