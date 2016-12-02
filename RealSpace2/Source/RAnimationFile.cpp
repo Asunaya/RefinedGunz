@@ -12,9 +12,6 @@ _NAMESPACE_REALSPACE2_BEGIN
 
 RAnimationFile::RAnimationFile()
 {
-//	m_filename[0]	= 0;
-//	m_NameID		= -1;
-
 	m_ani_node		= NULL;
 	m_ani_node_cnt	= 0;
 	m_ani_type		= RAniType_Bone;
@@ -39,7 +36,7 @@ RAnimationFile::~RAnimationFile()
 
 	DecRef();
 
-	if(m_nRefCount != 0) {//누수..
+	if(m_nRefCount != 0) {
 
 	}
 }
@@ -52,22 +49,7 @@ void RAnimationFile::AddRef()
 void RAnimationFile::DecRef()
 {
 	m_nRefCount--;
-
-	if(m_nRefCount==0) {//지워야 할까?
-
-	}
 }
-
-/*
-char* RAnimationFile::GetName() {
-	return m_filename;
-}
-
-void RAnimationFile::SetName(char* name) {
-	if(!name) return;
-	strcpy_safe( m_filename , name );
-}
-*/
 
 RAnimationNode* RAnimationFile::GetNode(const char* name)
 {
@@ -94,10 +76,6 @@ bool RAnimationFile::LoadAni(const char* filename)
 	ex_ani_t t_hd;
 
 	mzf.Read(&t_hd,sizeof(ex_ani_t));
-
-	// 0,2 은 공통 본과 tm 계층에니
-	// 1 는 버텍스
-	// 3 은 메트릭스 샘플링
 
 	DWORD ver = t_hd.ver;
 
@@ -131,12 +109,9 @@ bool RAnimationFile::LoadAni(const char* filename)
 			pANode = m_ani_node[i];
 
 			mzf.Read(t_mesh_name ,MAX_NAME_LEN );
-//			strcpy_safe(pANode->m_Name,t_mesh_name);
 			pANode->SetName(t_mesh_name);
 
-			//			pANode->ConnectToNameID();
-
-			mzf.Read(&pANode->m_vertex_cnt,4 );//frame수만큼
+			mzf.Read(&pANode->m_vertex_cnt,4 );
 
 			if(pANode->m_vertex_cnt) {
 				pANode->m_vertex = new rvector*[pANode->m_vertex_cnt];
@@ -174,8 +149,6 @@ bool RAnimationFile::LoadAni(const char* filename)
 
 		int cnt = 0;
 
-		// 더미노드가 섞여있는 경우가 있다..
-
 		for(i=0;i<m_ani_node_cnt;i++) {
 
 			cnt = m_ani_node[i]->m_vertex_cnt;
@@ -196,9 +169,7 @@ bool RAnimationFile::LoadAni(const char* filename)
 			pANode = m_ani_node[i];
 
 			mzf.Read(t_mesh_name ,MAX_NAME_LEN );
-//			strcpy_safe(pANode->m_Name,t_mesh_name);
 			pANode->SetName(t_mesh_name);
-			//			pANode->ConnectToNameID();
 
 			mzf.Read(&pANode->m_mat_cnt,4 );
 			pANode->m_mat = new RTMKey[pANode->m_mat_cnt];
@@ -217,12 +188,10 @@ bool RAnimationFile::LoadAni(const char* filename)
 					}
 				}
 			}
-			pANode->m_mat_base = pANode->m_mat[0];//.m;
+			pANode->m_mat_base = pANode->m_mat[0];
 		}
 
 		int cnt = 0;
-
-		// 더미노드가 섞여있는 경우가 있다..
 
 		for(int i=0;i<m_ani_node_cnt;i++) {
 
@@ -244,31 +213,12 @@ bool RAnimationFile::LoadAni(const char* filename)
 			pANode = m_ani_node[i];
 
 			mzf.Read(t_mesh_name  ,MAX_NAME_LEN );
-			mzf.Read(&pANode->m_mat_base,sizeof(rmatrix) );//mat
-
-//			strcpy_safe(pANode->m_Name,t_mesh_name);
+			mzf.Read(&pANode->m_mat_base,sizeof(rmatrix) );
 			pANode->SetName(t_mesh_name);
-
-			/*if (pANode->m_Name == "Bip01 Neck")
-			{
-				DMLog("Animation base:\n");
-
-				for (int i = 0; i < 4; i++)
-				{
-					for (int j = 0; j < 4; j++)
-					{
-						DMLog("%f ", pANode->m_mat_base(i, j));
-					}
-
-					DMLog("\n");
-				}
-			}*/
 
 			if(strcmp(pANode->GetName(),"Bip01")==0) {
 				m_pBipRootNode = pANode;
 			}
-
-			//			pANode->ConnectToNameID();
 
 			int pos_key_num = 0;
 			int rot_key_num = 0;
@@ -350,7 +300,6 @@ bool RAnimationFile::LoadAni(const char* filename)
 		m_max_frame = vis_max_frame;
 	}
 
-	//	fclose (fp);
 	mzf.Close();
 
 	return true;

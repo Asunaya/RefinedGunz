@@ -1,7 +1,10 @@
-#include "TestAssert.h"
 #include "RMath.h"
 #include "MMath.h"
 #include <d3dx9.h>
+#define GLM_GTC_quaternion 
+#include "../sdk/glm/gtc/quaternion.hpp"
+#include "../sdk/glm/gtx/quaternion.hpp"
+#include "TestAssert.h"
 
 using namespace RealSpace2;
 
@@ -203,24 +206,82 @@ static bool TestTransform()
 	return true;
 }
 
-static bool TestQuaternions()
+v3 operator *(const v3& vec, const rquaternion& quat) {
+	v3 quat_vec{ EXPAND_VECTOR(quat) };
+	auto uv = CrossProduct(quat_vec, vec);
+	auto uuv = CrossProduct(quat_vec, uv);
+	return vec + ((uv * quat.w) + uuv) * 2;
+}
+
+static bool TestQuaternionAxisAngle(const v3& axis, float angle)
 {
-	v3 axis{ 0, 0, 1 };
-	float angle = 90;
+	auto test_vec = Normalized(v3{ 1, 1, 1 });
+	auto ref_mat = RotationMatrix(axis, angle);
 
-	auto reference_mat = RotationMatrix(axis, angle);
-
-	auto quat = AngleAxisToQuaternion(axis, angle);
+	auto quat = Normalized(AngleAxisToQuaternion(axis, angle));
 	auto quat_mat = QuaternionToMatrix(quat);
 
-	assert(Equals(reference_mat, quat_mat));
+	auto expected = test_vec * ref_mat;
+	auto actual = test_vec * quat_mat;
+
+	LogMatrix(quat_mat);
+	assert(Equals(expected, actual));
+
+	D3DXQUATERNION d3dx_quat;
+
+	D3DXQuaternionRotationAxis(&d3dx_quat, &axis, angle);
+	expected = test_vec * d3dx_quat;
+	actual = test_vec * quat;
+
+	assert(Equals(expected, actual));
 
 	quat = MatrixToQuaternion(quat_mat);
-	quat_mat = QuaternionToMatrix(quat);
+	auto norm_quat = Normalized(quat);
+	quat_mat = QuaternionToMatrix(norm_quat);
 
-	assert(Equals(reference_mat, quat_mat));
+	expected = test_vec * ref_mat;
+	actual = test_vec * quat_mat;
+
+	assert(Equals(expected, actual));
+
+	D3DXMATRIX d3dx_mat;
+
+	D3DXMatrixRotationAxis(&d3dx_mat, &axis, angle);
+	assert(Equals(d3dx_mat, quat_mat));
+	assert(Equals(d3dx_mat, ref_mat));
+
+	D3DXMatrixRotationQuaternion(&d3dx_mat, &norm_quat);
+
+	LogMatrix(d3dx_mat);
+	LogMatrix(quat_mat);
+	assert(Equals(d3dx_mat, quat_mat));
 
 	return true;
+}
+
+static bool TestQuaternions()
+{
+	auto ret = true;
+
+	auto TestAxisAngle = [&](const v3& axis, float angle) {
+		ret &= TestQuaternionAxisAngle(Normalized(axis), angle);
+	};
+
+	for (int i = 1; i < 16; ++i)
+	{
+		auto Test = [&](const v3& axis) {
+			TestAxisAngle(axis, TAU_FLOAT / i);
+		};
+
+		Test({ 1, 0, 0 });
+		Test({ 0, 1, 0 });
+		Test({ 0, 0, 1 });
+		Test({ 1, 1, 0 });
+		Test({ 1, 1, 1 });
+		Test({ 1, 0.5, 0.333f });
+	}
+
+	return ret;
 }
 
 bool TestMath()

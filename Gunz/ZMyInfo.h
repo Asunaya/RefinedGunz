@@ -93,7 +93,7 @@ public:
 	const char*			GetCharName() const { return m_szCharName; }
 	const char*			GetClanName() const { return m_szClanName; }
 	const char*			GetAccountID() const { return m_szAccountID; }
-	unsigned long int	GetXP() const { return m_nXP; }
+	auto				GetXP() const { return m_nXP; }
 	int					GetBP() const { return m_nBP; }
 	int					GetHP();
 	int					GetAP();

@@ -113,6 +113,8 @@ T1 reinterpret(const T2& val)
 	return T1_rep;
 }
 
+void reinterpret(void*) = delete;
+
 template <typename ItT>
 class ValueIterator
 {

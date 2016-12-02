@@ -1,24 +1,13 @@
 #include "stdafx.h"
 #include "RMesh.h"
 #include "RAnimationMgr.h"
-
 #include "RealSpace2.h"
-
 #include "MDebug.h"
 
-//#include "MZFileSystem.h"
-
 _USING_NAMESPACE_REALSPACE2
-
 _NAMESPACE_REALSPACE2_BEGIN
 
-/////////////////////////////////////////////////////////////////////
-
-RAnimationFileMgr::RAnimationFileMgr()
-{
-
-}
-
+RAnimationFileMgr::RAnimationFileMgr() = default;
 RAnimationFileMgr::~RAnimationFileMgr()
 {
 	Destroy();
@@ -27,8 +16,6 @@ RAnimationFileMgr::~RAnimationFileMgr()
 void RAnimationFileMgr::Destroy()
 {
 	RAnimationFileHashList_Iter  node;
-
-//	mlog("에니메이션 파일 제거 size %d \n",m_list.size() );
 
 	for(node = m_list.begin(); node != m_list.end(); ) {
 		delete (*node);
@@ -50,11 +37,8 @@ RAnimationFile* RAnimationFileMgr::Add(const char* filename)
 
 	if( pFile ) {
 		pFile->AddRef();
-//		mlog("에니메이션 파일 중복사용 %s ref_cnt %d \n",filename,pFile->m_nRefCount);
 		return pFile;
 	}
-
-//	mlog("에니메이션 파일 생성 %s %d \n",filename,m_list.size());
 
 	pFile = new RAnimationFile;
 
@@ -72,13 +56,8 @@ RAnimationFile* RAnimationFileMgr::Get(const char* filename)
 	return m_list.Find(filename);
 }
 
-/////////////////////////////////////////////////////////////////////
-
 RAnimationMgr::RAnimationMgr() {
 	m_id_last = 0;
-//	m_node_table.reserve(MAX_ANIMATION_NODE);//기본
-//	for(int i=0;i<MAX_ANIMATION_NODE;i++)
-//		m_node_table[i] = NULL;
 	m_list_map = NULL;
 	m_list_map_size = 0;
 }
@@ -92,7 +71,7 @@ RAnimation* RAnimationMgr::AddAnimationFile(const char* name, const char* filena
 
 	RAnimation* node = new RAnimation;
 
-	if(notload) {//나중에 load
+	if(notload) {
 		node->SetLoadDone(false);
 	}
 	else {
@@ -111,7 +90,6 @@ RAnimation* RAnimationMgr::AddAnimationFile(const char* name, const char* filena
 	node->SetWeaponMotionType(MotionTypeID);
 
 	m_node_table.push_back(node);
-//	m_node_table[m_id_last] = node;
 	m_id_last++;
 
 	if(m_id_last > MAX_ANIMATION_NODE)
@@ -145,9 +123,6 @@ void RAnimationMgr::DelAll() {
 		m_list_map_size = 0;
 	}
 
-//	if(m_list.size())
-//		mlog("ranimationmgr::del_all size = %d \n ",m_list.size() );
-
 	for(node = m_list.begin(); node != m_list.end(); ) {
 		delete (*node);
 		node = m_list.erase(node);
@@ -156,7 +131,7 @@ void RAnimationMgr::DelAll() {
 	m_list.Clear();
 
 	if(!m_node_table.empty())
-		m_node_table.clear();//버퍼는 남아 있다..
+		m_node_table.clear();
 
 	m_id_last = 0;
 }
@@ -181,7 +156,7 @@ void RAnimationMgr::ReloadAll()
 
 void RAnimationMgr::MakeListMap(int size)
 {
-	if(m_list_map)//클리어하기전에는 못만듬..
+	if(m_list_map)
 		return;
 
 	if( size > 100 ) {

@@ -7,9 +7,6 @@ _USING_NAMESPACE_REALSPACE2
 
 _NAMESPACE_REALSPACE2_BEGIN
 
-//////////////////////////////////////////////////////////////////////////////////
-// RMeshNodeData Class
-
 RMeshNodeData::RMeshNodeData() 
 {
 	m_id = -1;
@@ -25,7 +22,7 @@ RMeshNodeData::RMeshNodeData()
 	m_axis_scale = rvector(0.f,0.f,0.f);
 	m_axis_scale_angle = 0.f;
 
-	m_axis_rot = rvector(0.f,0.f,0.f);
+	m_axis_rot = rvector(0.f,0.f,1.f);
 	m_axis_rot_angle = 0.f;
 
 	GetIdentityMatrix(m_mat_base);
@@ -44,10 +41,8 @@ RMeshNodeData::RMeshNodeData()
 
 	m_point_list		= NULL;
 	m_face_normal_list	= NULL;
-//	m_point_normal_list = NULL;
 	m_point_color_list	= NULL;
 	m_face_list			= NULL;
-//	m_face_normal		= NULL;
 	m_physique			= NULL;
 
 	m_point_num			= 0;
@@ -65,7 +60,6 @@ RMeshNodeData::~RMeshNodeData()
 {
 	if(m_point_num) {
 		DEL2(m_point_list);
-//		DEL2(m_point_normal_list);
 	}
 
 	if( m_point_color_num ) {
@@ -111,14 +105,9 @@ void RMeshNodeData::CalcLocalBBox()
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-// mtrl
-
 RMeshNodeMtrl::RMeshNodeMtrl()
 {
-//	m_dwTFactorColor = D3DCOLOR_COLORVALUE(1.0f,0.0f,0.0f,1.0f);
-	m_dwTFactorColor = D3DCOLOR_COLORVALUE(0.0f,1.0f,0.0f,0.0f);	//	완전 녹색..색이 없다는걸 의미
-//	m_dwTFactorColor = 0xff808080;
+	m_dwTFactorColor = D3DCOLOR_COLORVALUE(0.0f,1.0f,0.0f,0.0f);
 	m_pMtrlTable = NULL;
 	m_nMtrlCnt = 0;
 }
@@ -154,18 +143,6 @@ RMtrl* RMeshNodeMtrl::GetMtrl(int i)
 
 	return NULL;
 }
-/*
-void RMeshNodeMtrl::SetLMtrl(DWORD& color,float vis_alpha) 
-{
-	color = D3DCOLOR_COLORVALUE(1.0f,1.0f,1.0f,vis_alpha);
-}
-
-void RMeshNodeMtrl::SetLMtrl(DWORD& color,D3DXCOLOR& mc,float vis_alpha) 
-{
-	color = D3DCOLOR_COLORVALUE( mc.r, mc.g, mc.b,vis_alpha);
-}
-*/
-// 아직 안쓴다.
 
 void RMeshNodeMtrl::SetMtrlDiffuse(RMtrl* pMtrl,float vis_alpha)
 {
@@ -245,18 +222,6 @@ void RMeshNodeMtrl::SetMtrl(RMtrl* pMtrl,float vis_alpha,bool bNpc,D3DCOLORVALUE
 		mtrl.Ambient.g = color.g/2.f;
 		mtrl.Ambient.b = color.b/2.f;
 		mtrl.Ambient.a = 1.0f;
-
-/*
-		mtrl.Diffuse.r = 0.5f;
-		mtrl.Diffuse.g = 0.5f;
-		mtrl.Diffuse.b = 0.5f;
-		mtrl.Diffuse.a = 1.0f;
-	
-		mtrl.Ambient.r = 0.35f;
-		mtrl.Ambient.g = 0.35f;
-		mtrl.Ambient.b = 0.35f;
-		mtrl.Ambient.a = 1.0f;
-*/
 	}
 
 	mtrl.Specular.r = 0.5f;
@@ -321,7 +286,5 @@ void RMeshNodeMtrl::SetMtrl(D3DXCOLOR* c,float vis_alpha)
 		RGetShaderMgr()->setMtrl( *c, vis_alpha );
 	}
 }
-
-
 
 _NAMESPACE_REALSPACE2_END

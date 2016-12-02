@@ -27,18 +27,13 @@ _NAMESPACE_REALSPACE2_BEGIN
 
 RMeshNode* RMesh::UpdateNodeAniMatrix(RMeshNode* pNode)
 {
-	rmatrix ani_mat;
+	RMeshNode* pTMeshNode = pNode;
 
-	RMeshNode* pTMeshNode = NULL;
+	auto ani_mat = GetIdentityMatrix();
 
-	pTMeshNode = pNode;
-
-	GetIdentityMatrix(ani_mat);
-
-	GetNodeAniMatrix(pNode,ani_mat);
+	GetNodeAniMatrix(pNode, ani_mat);
 
 	if(m_pVisualMesh) {
-
 		pTMeshNode = m_pVisualMesh->GetParts(pNode->m_PartsType);
 
 		if( pTMeshNode==NULL ) {
@@ -174,6 +169,7 @@ void RMesh::_RGetRotAniMat(RMeshNode* pMeshNode,int frame,rmatrix& t_ani_mat)
 
 	if ( bAni )	{
 		t_ani_mat = QuaternionToMatrix(pANode->GetRotValue(frame));
+		//D3DXMatrixRotationQuaternion(&t_ani_mat, &pANode->GetRotValue(frame));
 	} else {
 
 		GetIdentityMatrix(buffer);
@@ -185,8 +181,9 @@ void RMesh::_RGetRotAniMat(RMeshNode* pMeshNode,int frame,rmatrix& t_ani_mat)
 		} else  {
 
 			if(pMeshNode->m_pParent) {
-				RMatInv(Inv,pMeshNode->m_pParent->m_mat_base);
+				RMatInv(Inv, pMeshNode->m_pParent->m_mat_base);
 				buffer = pMeshNode->m_mat_base * Inv;
+				//D3DXMatrixMultiply(&buffer, &pMeshNode->m_mat_base, &Inv);
 			}
 			else {
 				memcpy(&buffer,&pMeshNode->m_mat_local,sizeof(rmatrix));
@@ -195,7 +192,8 @@ void RMesh::_RGetRotAniMat(RMeshNode* pMeshNode,int frame,rmatrix& t_ani_mat)
 
 		SetTransPos(buffer, { 0, 0, 0 });
 		t_ani_mat *= buffer;
-
+		//buffer._41 = buffer._42 = buffer._43 = 0;
+		//D3DXMatrixMultiply(&t_ani_mat, &t_ani_mat, &buffer);
 	}
 }
 
@@ -259,35 +257,6 @@ void RMesh::_RGetPosAniMat(RMeshNode* pMeshNode,int frame,rmatrix& t_ani_mat)
 		t_ani_mat._43 = buffer._43;
 
 	}
-}
-
-void MakeRotMatrix(rmatrix *pOut,rvector& pos,rvector& dir,rvector& up) 
-{
-	*pOut = IdentityMatrix();
-
-	rvector right;
-	D3DXVec3Cross(&right,&up,&dir);
-	D3DXVec3Cross(&up,&dir,&right);
-
-	D3DXVec3Normalize(&up,&up);
-	D3DXVec3Normalize(&dir,&dir);
-	D3DXVec3Normalize(&right,&right);
-
-	pOut->_11 = right.x;
-	pOut->_12 = right.y;
-	pOut->_13 = right.z;
-
-	pOut->_21 = up.x;
-	pOut->_22 = up.y;
-	pOut->_23 = up.z;
-
-	pOut->_31 = dir.x;
-	pOut->_32 = dir.y;
-	pOut->_33 = dir.z;
-
-	pOut->_41 = pos.x;
-	pOut->_42 = pos.y;
-	pOut->_43 = pos.z;
 }
 
 #define MAX_XA_LEFT		90.f
@@ -442,7 +411,7 @@ static rmatrix makematrix(rvector pos, rvector dir, rvector up)
 	return m;
 }
 
-void CalcNodeMatrix(RVisualMesh* pVMesh , RMeshNode* pNode ,bool upLimit)
+static void CalcNodeMatrix(RVisualMesh* pVMesh , RMeshNode* pNode ,bool upLimit)
 {
 	if( pNode==NULL ) return;
 

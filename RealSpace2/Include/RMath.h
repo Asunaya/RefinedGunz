@@ -46,13 +46,31 @@ inline bool Equals(float a, float b)
 	return IS_EQ(a, b);
 }
 
+inline bool Equals(const v3& a, const v3& b)
+{
+	for (size_t i{}; i < 3; ++i)
+		if (!Equals(a[i], b[i]))
+			return false;
+
+	return true;
+}
+
 inline bool Equals(const rmatrix& a, const rmatrix& b)
 {
 	for (size_t i{}; i < 4; ++i)
 		for (size_t j{}; j < 4; ++j)
-			if (!IS_EQ(a(i, j), b(i, j)))
+			if (!Equals(a(i, j), b(i, j)))
 				return false;
 
+	return true;
+}
+
+inline bool Equals(const rquaternion& a, const rquaternion& b)
+{
+	for (size_t i{}; i < 4; ++i)
+		if (!Equals(a[i], b[i]))
+			return false;
+	
 	return true;
 }
 
@@ -164,6 +182,11 @@ inline rplane Transform(const rplane& plane, const rmatrix& mat)
 	return rplane{ v.x, v.y, v.z, v.w };
 }
 
+inline float Trace(const rmatrix& mat)
+{
+	return mat._11 + mat._22 + mat._33 + mat._44;
+}
+
 // Leave the namespace so that the operators are also visible through normal lookup.
 _NAMESPACE_REALSPACE2_END
 
@@ -260,6 +283,9 @@ inline float MagnitudeSq(const v3& x) {
 inline float MagnitudeSq(const v4& x) {
 	return x.x * x.x + x.y * x.y + x.z * x.z + x.w * x.w;
 }
+inline float MagnitudeSq(const rquaternion& x) {
+	return x.x * x.x + x.y * x.y + x.z * x.z + x.w * x.w;
+}
 // Returns the length of the input vector.
 inline float Magnitude(const v2& x) {
 	return sqrt(MagnitudeSq(x));
@@ -270,50 +296,29 @@ inline float Magnitude(const v3& x) {
 inline float Magnitude(const v4& x) {
 	return sqrt(MagnitudeSq(x));
 }
+inline float Magnitude(const rquaternion& x) {
+	return sqrt(MagnitudeSq(x));
+}
 
 // If the input vector has a nonzero length,
 // this function sets it to a unit vector in the same direction.
 // Otherwise, it does nothing.
-inline void Normalize(v2& x)
+template <typename T>
+void Normalize(T& x)
 {
 	auto MagSq = MagnitudeSq(x);
 	if (MagSq == 0 || Equals(MagSq, 1))
-		return;
-	x *= 1.f / sqrt(MagSq);
-}
-inline void Normalize(v3& x)
-{
-	auto MagSq = MagnitudeSq(x);
-	if (MagSq == 0 || Equals(MagSq, 1))
-		return;
-	x *= 1.f / sqrt(MagSq);
-}
-inline void Normalize(v4& x)
-{
-	auto MagSq = MagnitudeSq(x);
-	if (MagSq == 0)
 		return;
 	x *= 1.f / sqrt(MagSq);
 }
 
-// If the input vector has a nonzero length,
-// this function returns a unit vector in the same direction.
-// Otherwise, it returns the null vector.
-WARN_UNUSED_RESULT inline v2 Normalized(const v2& x)
+// If the input object has a nonzero length,
+// this function returns a unit object in the same direction.
+// Otherwise, it returns the null object.
+template <typename T>
+WARN_UNUSED_RESULT T Normalized(const T& x)
 {
-	v2 ret{ x };
-	Normalize(ret);
-	return ret;
-}
-WARN_UNUSED_RESULT inline v3 Normalized(const v3& x)
-{
-	v3 ret{ x };
-	Normalize(ret);
-	return ret;
-}
-WARN_UNUSED_RESULT inline v4 Normalized(const v4& x)
-{
-	v4 ret{ x };
+	T ret = x;
 	Normalize(ret);
 	return ret;
 }
@@ -323,6 +328,9 @@ inline float DotProduct(const v2& a, const v2& b) {
 }
 inline float DotProduct(const rvector& a, const rvector& b) {
 	return a.x * b.x + a.y * b.y + a.z * b.z;
+}
+inline float DotProduct(const v4& a, const v4& b) {
+	return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
 }
 // Returns a dot (b.x, b.y, b.z, 1).
 inline float DotProduct(const rplane& a, const rvector& b) {
@@ -339,6 +347,10 @@ inline v3 CrossProduct(const v3& u, const v3& v) {
 }
 inline void CrossProduct(rvector *result, const rvector &a, const rvector &b) {
 	*result = CrossProduct(a, b);
+}
+
+inline float DotProduct(const rquaternion& a, const rquaternion& b) {
+	return DotProduct(static_cast<v4>(a), static_cast<v4>(b));
 }
 
 void MakeWorldMatrix(rmatrix *pOut, const rvector& pos, rvector dir, rvector up);
@@ -360,10 +372,14 @@ float GetArea(rvector &v1, rvector &v2, rvector &v3);
 float GetAngleOfVectors(const rvector &ta, const rvector &tb);
 
 // Returns from spherically interpolated towards to by t.
-// t should be in the range (0, 1).
-inline rvector Slerp(const rvector &from, const rvector &to, float t)
+// from and to should be unit length, t should be in the range (0, 1).
+template <typename T>
+inline auto Slerp(const T& from, const T& to, float t)
 {
-	float angle = acos(DotProduct(from, to));
+	auto clamp = [&](auto&& val, auto&& minval, auto&& maxval) {
+		return max(minval, min(maxval, val));
+	};
+	float angle = acos(clamp(DotProduct(from, to), -1, 1));
 	float sin1 = sin((1 - t) * angle);
 	float sin2 = sin(t * angle);
 	float sinangle = sin(angle);
@@ -569,53 +585,75 @@ inline rmatrix RGetRotZ(float angle) {
 inline rmatrix QuaternionToMatrix(const rquaternion& q)
 {
 	return {
-		1.0f - 2.0f*q.y*q.y - 2.0f*q.z*q.z, 2.0f*q.x*q.y - 2.0f*q.z*q.w, 2.0f*q.x*q.z + 2.0f*q.y*q.w, 0.0f,
-		2.0f*q.x*q.y + 2.0f*q.z*q.w, 1.0f - 2.0f*q.x*q.x - 2.0f*q.z*q.z, 2.0f*q.y*q.z - 2.0f*q.x*q.w, 0.0f,
-		2.0f*q.x*q.z - 2.0f*q.y*q.w, 2.0f*q.y*q.z + 2.0f*q.x*q.w, 1.0f - 2.0f*q.x*q.x - 2.0f*q.y*q.y, 0.0f,
+		1.0f - 2.0f*q.y*q.y - 2.0f*q.z*q.z, 2.0f*q.x*q.y + 2.0f*q.z*q.w, 2.0f*q.x*q.z - 2.0f*q.y*q.w, 0.0f,
+		2.0f*q.x*q.y - 2.0f*q.z*q.w, 1.0f - 2.0f*q.x*q.x - 2.0f*q.z*q.z, 2.0f*q.y*q.z + 2.0f*q.x*q.w, 0.0f,
+		2.0f*q.x*q.z + 2.0f*q.y*q.w, 2.0f*q.y*q.z - 2.0f*q.x*q.w, 1.0f - 2.0f*q.x*q.x - 2.0f*q.y*q.y, 0.0f,
 		0.0f, 0.0f, 0.0f, 1.0f };
 }
 
-inline rquaternion MatrixToQuaternion(const rmatrix& m)
+inline rquaternion MatrixToQuaternion(const rmatrix& mat)
 {
-	rquaternion ret;
-	ret.w = sqrt(1.0f + m._11 + m._22 + m._33) / 2.0f;
-	auto w4 = (4.0f * ret.w);
-	ret.x = (m._32 - m._23) / w4;
-	ret.y = (m._13 - m._31) / w4;
-	ret.z = (m._21 - m._12) / w4;
-	return ret;
-}
+	auto fourXSquaredMinus1 = mat(0, 0) - mat(1, 1) - mat(2, 2);
+	auto fourYSquaredMinus1 = mat(1, 1) - mat(0, 0) - mat(2, 2);
+	auto fourZSquaredMinus1 = mat(2, 2) - mat(0, 0) - mat(1, 1);
+	auto fourWSquaredMinus1 = mat(0, 0) + mat(1, 1) + mat(2, 2);
 
-inline rquaternion Slerp(const rquaternion& a, const rquaternion& b, float t)
-{
-	auto clamp = [&](auto&& val, auto&& minval, auto&& maxval) {
-		return max(minval, min(maxval, val));
-	};
-	auto omega = clamp(
-		a[0] * b[0] +
-		a[1] * b[1] +
-		a[2] * b[2] +
-		a[3] * b[3],
-		-1, 1);
+	int biggestIndex = 0;
+	auto fourBiggestSquaredMinus1 = fourWSquaredMinus1;
+	if (fourXSquaredMinus1 > fourBiggestSquaredMinus1)
+	{
+		fourBiggestSquaredMinus1 = fourXSquaredMinus1;
+		biggestIndex = 1;
+	}
+	if (fourYSquaredMinus1 > fourBiggestSquaredMinus1)
+	{
+		fourBiggestSquaredMinus1 = fourYSquaredMinus1;
+		biggestIndex = 2;
+	}
+	if (fourZSquaredMinus1 > fourBiggestSquaredMinus1)
+	{
+		fourBiggestSquaredMinus1 = fourZSquaredMinus1;
+		biggestIndex = 3;
+	}
 
-	if (IS_ZERO(omega))
-		omega = 0.000001f;
+	auto biggestVal = sqrt(fourBiggestSquaredMinus1 + 1) * 0.5f;
+	auto mult = 0.25f / biggestVal;
 
-	auto som = sin(omega);
-	auto st0 = sin((1 - t) * omega) / som;
-	auto st1 = sin(t - omega) / som;
-
-	return{
-		a[0] * st0 + b[0] * st1,
-		a[1] * st0 + b[1] * st1,
-		a[2] * st0 + b[2] * st1,
-		a[3] * st0 + b[3] * st1 };
+	rquaternion Result;
+	switch (biggestIndex)
+	{
+	case 0:
+		Result.w = biggestVal;
+		Result.x = (mat(1, 2) - mat(2, 1)) * mult;
+		Result.y = (mat(2, 0) - mat(0, 2)) * mult;
+		Result.z = (mat(0, 1) - mat(1, 0)) * mult;
+		break;
+	case 1:
+		Result.w = (mat(1, 2) - mat(2, 1)) * mult;
+		Result.x = biggestVal;
+		Result.y = (mat(0, 1) + mat(1, 0)) * mult;
+		Result.z = (mat(2, 0) + mat(0, 2)) * mult;
+		break;
+	case 2:
+		Result.w = (mat(2, 0) - mat(0, 2)) * mult;
+		Result.x = (mat(0, 1) + mat(1, 0)) * mult;
+		Result.y = biggestVal;
+		Result.z = (mat(1, 2) + mat(2, 1)) * mult;
+		break;
+	case 3:
+		Result.w = (mat(0, 1) - mat(1, 0)) * mult;
+		Result.x = (mat(2, 0) + mat(0, 2)) * mult;
+		Result.y = (mat(1, 2) + mat(2, 1)) * mult;
+		Result.z = biggestVal;
+		break;
+	}
+	return Result;
 }
 
 inline rquaternion AngleAxisToQuaternion(const v3& Axis, float Angle)
 {
-	// TODO: Make less stupid
-	return MatrixToQuaternion(RotationMatrix(Axis, Angle));
+	auto xyz = Axis * sin(Angle / 2);
+	return{ EXPAND_VECTOR(xyz), cos(Angle / 2) };
 }
 
 inline float sgn(float a)

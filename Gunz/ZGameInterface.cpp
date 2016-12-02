@@ -1651,7 +1651,6 @@ bool ZGameInterface::OnCreate(ZLoadingProgress *pLoadingProgress)
 		pReplayBox->AddField( "VERSION", 70);
 	}
 
-
 	// Setting Configuration about ZGameClient
 	if (Z_ETC_BOOST && RIsActive())
 		g_pGameClient->PriorityBoost(true);
@@ -1800,8 +1799,6 @@ bool ZGameInterface::OnCreate(ZLoadingProgress *pLoadingProgress)
 	ZGetGameTypeManager()->SetGameTypeStr( MMATCH_GAMETYPE_GLADIATOR_TEAM, ZMsg( MSG_MT_GLADIATOR_TEAM));
 	ZGetGameTypeManager()->SetGameTypeStr( MMATCH_GAMETYPE_ASSASSINATE, ZMsg( MSG_MT_ASSASSINATE));
 	ZGetGameTypeManager()->SetGameTypeStr(MMATCH_GAMETYPE_TRAINING, ZMsg(MSG_MT_TRAINING));
-//	ZGetGameTypeManager()->SetGameTypeStr( MMATCH_GAMETYPE_CLASSIC_SOLO, ZMsg( MSG_MT_CLASSIC_SOLO));
-//	ZGetGameTypeManager()->SetGameTypeStr( MMATCH_GAMETYPE_CLASSIC_TEAM, ZMsg( MSG_MT_CLASSIC_TEAM));
 	ZGetGameTypeManager()->SetGameTypeStr( MMATCH_GAMETYPE_SURVIVAL, ZMsg( MSG_MT_SURVIVAL));
 	ZGetGameTypeManager()->SetGameTypeStr( MMATCH_GAMETYPE_QUEST, ZMsg( MSG_MT_QUEST));
 	ZGetGameTypeManager()->SetGameTypeStr(MMATCH_GAMETYPE_BERSERKER, ZMsg(MSG_MT_BERSERKER));
@@ -2183,7 +2180,6 @@ void ZGameInterface::OnDrawStateLobbyNStage(MDrawContext* pDC)
 	{
 		// Lobby
 		char buf[512];
-		// 이름
 		MLabel* pLabel = (MLabel*)pRes->FindWidget("Lobby_PlayerName");
 		if (pLabel)
 		{
@@ -2322,9 +2318,10 @@ void ZGameInterface::OnDrawStateLobbyNStage(MDrawContext* pDC)
 			pLabel = (MLabel*)pRes->FindWidget("Stage_PlayerSpecWT");
 			ZMyItemList* pItems= ZGetMyInfo()->GetItemList();
 			if ( bShowMe)
-				sprintf_safe( buf, "%s : %d/%d", ZMsg( MSG_CHARINFO_WEIGHT), pItems->GetEquipedTotalWeight(), pItems->GetMaxWeight());
+				sprintf_safe(buf, "%s : %d/%d", ZMsg(MSG_CHARINFO_WEIGHT),
+					pItems->GetEquipedTotalWeight(), pItems->GetMaxWeight());
 			else
-				sprintf_safe( buf, "%s : -", ZMsg( MSG_CHARINFO_WEIGHT));
+				sprintf_safe(buf, "%s : -", ZMsg(MSG_CHARINFO_WEIGHT));
 			if (pLabel)
 			{
 				pLabel->SetText(buf);
@@ -2549,7 +2546,6 @@ void ZGameInterface::TestChangeWeapon(RVisualMesh* pVMesh)
 			ZChangeCharWeaponMesh(pVMesh, nItemID);
 			pVMesh->SetAnimation("login_intro");
 			pVMesh->GetFrameInfo(ani_mode_lower)->m_nFrame = 0;
-//			pVMesh->m_nFrame[ani_mode_lower] = 0;
 		}
 	}
 	else if (GetState() == GUNZ_LOBBY)
@@ -2619,14 +2615,7 @@ bool ZGameInterface::OnDebugEvent(MEvent* pEvent, MListener* pListener)
 				return true;
 			case VK_NUMPAD8:
 				{
-					if (GetState() == GUNZ_CHARSELECTION)
-					{
-						if (m_pCharacterSelectView != NULL)
-						{
-//							TestChangeWeapon(m_pCharacterSelectView->GetVisualMesh());
-						}
-					}
-					else if (GetState() == GUNZ_LOBBY)
+					if (GetState() == GUNZ_LOBBY)
 					{
 						if (ZGetCharacterViewList(GUNZ_LOBBY) != NULL)
 						{
@@ -3425,7 +3414,6 @@ void ZGameInterface::BringAccountItem(void)
 		const int nAIID =  pListItem->GetAIID();
 		if (nAIID != 0)
 		{
-			// 막 누르는 것 방지
 			static unsigned long int st_LastRequestTime = 0;
 			unsigned long int nNowTime = GetGlobalTimeMS();
 			if ((nNowTime - st_LastRequestTime) >= 1000)
@@ -3518,7 +3506,7 @@ void ZGameInterface::ChangeSelectedChar(int nNum)
 	}
 }
 
-void ZGameInterface::OnCharSelectionCreate(void)
+void ZGameInterface::OnCharSelectionCreate()
 {
 	ZApplication::GetSoundEngine()->OpenMusic( BGMID_INTRO, ZApplication::GetFileSystem());
 
@@ -3545,7 +3533,7 @@ void ZGameInterface::OnCharSelectionCreate(void)
 	}
 }
 
-void ZGameInterface::OnCharSelect(void)
+void ZGameInterface::OnCharSelect()
 {
 	m_pCharacterSelectView->SelectMyCharacter();
 	EnableCharSelectionInterface( false);
@@ -3554,13 +3542,13 @@ void ZGameInterface::OnCharSelect(void)
 		m_pBackground->SetScene( LOGIN_SCENE_SELECTCHAR);
 }
 
-void ZGameInterface::OnCharSelectionDestroy(void)
+void ZGameInterface::OnCharSelectionDestroy()
 {
 	ShowWidget("CharSelection", false);
 	if (m_pCharacterSelectView!=NULL) SAFE_DELETE(m_pCharacterSelectView);
 }
 
-void ZGameInterface::OnCharCreationCreate(void)
+void ZGameInterface::OnCharCreationCreate()
 {
 	ShowWidget("CharSelection", false);
 	ShowWidget("CharCreation", true);
@@ -3572,7 +3560,7 @@ void ZGameInterface::OnCharCreationCreate(void)
 	m_pCharacterSelectView->OnChangedCharCostume();
 }
 
-void ZGameInterface::OnCharCreationDestroy(void)
+void ZGameInterface::OnCharCreationDestroy()
 {
 	ShowWidget("CharCreation", false);
 	ShowWidget("CharSelection", true);
@@ -3580,10 +3568,10 @@ void ZGameInterface::OnCharCreationDestroy(void)
 	if (m_pCharacterSelectView!=NULL) SAFE_DELETE(m_pCharacterSelectView);
 }
 
-void ZGameInterface::ChangeToCharSelection(void)
+void ZGameInterface::ChangeToCharSelection()
 {
 	ZCharacterSelectView::ClearCharInfo();
-	ZPostAccountCharList(ZGetMyInfo()->GetSystemInfo()->szSerialKey, ZGetMyInfo()->GetSystemInfo()->pbyGuidAckMsg);		// 캐릭터 리스트 요청
+	ZPostAccountCharList(ZGetMyInfo()->GetSystemInfo()->szSerialKey, ZGetMyInfo()->GetSystemInfo()->pbyGuidAckMsg);
 }
 
 void ZGameInterface::OnInvalidate()
@@ -4085,15 +4073,17 @@ void ZGameInterface::ShowEquipmentDialog(bool bShow)
 			char buf[ 256];
 			if ( ZApplication::GetGameInterface()->GetState() == GUNZ_STAGE)
 			{
-				pButton->Show( false);
-				sprintf_safe( buf, "%s > %s > %s", ZGetGameClient()->GetServerName(), ZMsg( MSG_WORD_STAGE), ZMsg( MSG_WORD_EQUIPMENT));
-				pLabel->SetText( buf);
+				pButton->Show(false);
+				sprintf_safe(buf, "%s > %s > %s", ZGetGameClient()->GetServerName(), ZMsg(MSG_WORD_STAGE),
+					ZMsg(MSG_WORD_EQUIPMENT));
+				pLabel->SetText(buf);
 			}
 			else
 			{
-				pButton->Show( true);
-				sprintf_safe( buf, "%s > %s > %s", ZGetGameClient()->GetServerName(), ZMsg( MSG_WORD_LOBBY), ZMsg( MSG_WORD_EQUIPMENT));
-				pLabel->SetText( buf);
+				pButton->Show(true);
+				sprintf_safe(buf, "%s > %s > %s", ZGetGameClient()->GetServerName(), ZMsg(MSG_WORD_LOBBY),
+					ZMsg(MSG_WORD_EQUIPMENT));
+				pLabel->SetText(buf);
 			}
 		}
 

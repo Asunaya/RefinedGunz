@@ -1,13 +1,9 @@
 #include "stdafx.h"
 #include "RAnimationNode.h"
-
 #include "RealSpace2.h"
 
 _USING_NAMESPACE_REALSPACE2
-
 _NAMESPACE_REALSPACE2_BEGIN
-
-////////////////////////////////////////////////////////////////////
 
 RAnimationNode::RAnimationNode() 
 {
@@ -112,7 +108,8 @@ rquaternion RAnimationNode::GetRotValue(int frame)
 	rquaternion rq;
 
 	if( m_rot_cnt==0 || m_quat==NULL ) {
-		rq = MatrixToQuaternion(m_mat_base);
+		//rq = MatrixToQuaternion(m_mat_base);
+		D3DXQuaternionRotationMatrix(&rq, &m_mat_base);
 		return rq;
 	}
 
@@ -235,60 +232,6 @@ rmatrix RAnimationNode::GetTMValue(int frame)
 	if(j) j--;
 
 	return m_mat[j];
-/*
-	// 행렬보간은 충분한 테스트후 풀기..
-
-	rmatrix* matf;
-	rmatrix* matb;
-
-	rmatrix mat;
-	rvector vec[3];
-	rvector scale[3];
-	D3DXQUATERNION quat[3];
-
-	int s;
-	float d = 1.f;
-
-	s = (m_mat[j+1].frame - m_mat[j].frame );
-
-	if (s != 0)	d = (float)(frame - m_mat[j].frame) / s;
-
-	matf = (rmatrix*)&m_mat[j];
-	matb = (rmatrix*)&m_mat[j+1];
-
-	// rot
-
-	D3DXQuaternionRotationMatrix(&quat[1],matf);
-	D3DXQuaternionRotationMatrix(&quat[2],matb);
-
-	D3DXQuaternionSlerp(&quat[0],&quat[1],&quat[2],d);
-
-	rmatrixRotationQuaternion(&mat,&quat[0]);
-
-	// scale
-
-	mat._11 = matf->_11+(matb->_11 - matf->_11) * d;
-	mat._22 = matf->_22+(matb->_22 - matf->_22) * d;
-	mat._33 = matf->_33+(matb->_33 - matf->_33) * d;
-
-	// pos
-
-	vec[1].x = matf->_41;
-	vec[1].y = matf->_42;
-	vec[1].z = matf->_43;
-
-	vec[2].x = matb->_41;
-	vec[2].y = matb->_42;
-	vec[2].z = matb->_43;
-
-	D3DXVec3Lerp(&vec[0],&vec[1],&vec[2],d);
-
-	mat._41 = vec[0].x;
-	mat._42 = vec[0].y;
-	mat._43 = vec[0].z;
-
-	return *matf;
-*/
 }
 
 _NAMESPACE_REALSPACE2_END
