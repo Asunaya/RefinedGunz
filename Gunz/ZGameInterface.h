@@ -148,26 +148,23 @@ protected:
 
 	void LeaveBattle();
 
-	void OnGreeterCreate(void);
-	void OnGreeterDestroy(void);
+	void OnGreeterCreate();
+	void OnGreeterDestroy();
 
-	void OnLoginCreate(void);
-	void OnLoginDestroy(void);
+	void OnLoginCreate();
+	void OnLoginDestroy();
 
-	void OnNetmarbleLoginCreate(void);
-	void OnNetmarbleLoginDestroy(void);
+	void OnLobbyCreate();
+	void OnLobbyDestroy();
 
-	void OnLobbyCreate(void);
-	void OnLobbyDestroy(void);
+	void OnStageCreate();
+	void OnStageDestroy();
 
-	void OnStageCreate(void);
-	void OnStageDestroy(void);
+	void OnCharSelectionCreate();
+	void OnCharSelectionDestroy();
 
-	void OnCharSelectionCreate(void);
-	void OnCharSelectionDestroy(void);
-
-	void OnCharCreationCreate(void);
-	void OnCharCreationDestroy(void);
+	void OnCharCreationCreate();
+	void OnCharCreationDestroy();
 
 	void OnShutdownState();
 
@@ -179,7 +176,7 @@ protected:
 	void OnBirdTestCommand(MCommand* pCmd);
 #endif
 
-	void OnUpdateGameMessage(void);
+	void OnUpdateGameMessage();
 
 	void HideAllWidgets();
 
@@ -221,11 +218,11 @@ public:
 	bool IsCursorEnable() { return m_bCursor; }
 
 	bool SetState(GunzState nState);
-	GunzState GetState(void){ return m_nState; }
+	GunzState GetState(){ return m_nState; }
 	
-	void UpdateBlueRedTeam(void);
+	void UpdateBlueRedTeam();
 
-	void ChangeToCharSelection(void);
+	void ChangeToCharSelection();
 
 	bool ChangeInterfaceSkin(const char* szNewSkinName);
 
@@ -265,10 +262,10 @@ public:
 	void ChangeEquipPartsToolTipAll();
 	void ClearEquipPartsToolTipAll( const char* szName);
 
-	void OnCharSelect(void);
+	void OnCharSelect();
 
-	bool OnGameCreate(void);
-	void OnGameDestroy(void);
+	bool OnGameCreate();
+	void OnGameDestroy();
 	void OnGameUpdate(float fElapsed);
 
 	void OnArrangedTeamGameUI(bool bFinding);
@@ -284,15 +281,15 @@ public:
 	void EnableStageInterface(bool bEnable);
 	void ShowPrivateStageJoinFrame(const char* szStageName);
 
-	void SetRoomNoLight( int d );
+	void SetRoomNoLight(int d);
 
-	void Sell(void);
-	void SellQuestItem( void);
-	void Buy(void);
-	void BuyCashItem(void);
+	void Sell();
+	void SellQuestItem();
+	void Buy();
+	void BuyCashItem();
 	int CheckRestrictBringAccountItem();
-	void BringAccountItem(void);
-	bool Equip(void);
+	void BringAccountItem();
+	bool Equip();
 	bool Equip(MMatchCharItemParts parts, MUID& uidItem);
 	void RequestQuickJoin();
 	void GetBringAccountItem();
@@ -304,15 +301,15 @@ public:
 	void EnableCharSelectionInterface(bool bEnable);
 	void SetKindableItem( MMatchItemSlotType nSlotType);
 #ifdef _QUEST_ITEM
-	void OpenSellQuestItemConfirm( void);
-	void SellQuestItemCountUp( void);
-	void SellQuestItemCountDn( void);
+	void OpenSellQuestItemConfirm();
+	void SellQuestItemCountUp();
+	void SellQuestItemCountDn();
 #endif
 
-	void ChangeSelectedChar( int nNum);
+	void ChangeSelectedChar(int nNum);
 
-	void ShowReplayDialog( bool bShow);
-	void ViewReplay( void);
+	void ShowReplayDialog(bool bShow);
+	void ViewReplay();
 
 	void ShowMenu(bool bEnable);
 	void Show112Dialog(bool bShow);
@@ -340,13 +337,13 @@ public:
 
 	ZScreenEffectManager* GetScreenEffectManager() { return m_pScreenEffectManager; }
 	ZEffectManager* GetEffectManager()			{ return m_pEffectManager; }
-	ZGameClient* GetGameClient(void){ return g_pGameClient; }
-	ZGame* GetGame(void){ return g_pGame; }
-	ZCombatInterface* GetCombatInterface(void) { return m_pCombatInterface; }
+	ZGameClient* GetGameClient(){ return g_pGameClient; }
+	ZGame* GetGame(){ return g_pGame; }
+	ZCombatInterface* GetCombatInterface() { return m_pCombatInterface; }
 	ZCharacterSelectView* GetCharacterSelectView() { return m_pCharacterSelectView; }
 	ZCharacter*	GetMyCharacter()				{ return (ZCharacter*)m_pMyCharacter; }
 	ZCamera* GetCamera()						{ return &m_Camera; }
-	ZIDLResource* GetIDLResource(void)			{ return &m_IDLResource; }
+	ZIDLResource* GetIDLResource()			{ return &m_IDLResource; }
 	ZChat* GetChat()							{ return &m_Chat; }
 	ZPlayerMenu* GetPlayerMenu()				{ return m_pPlayerMenu; }
 	ZMiniMap*	GetMiniMap()					{ return m_pMiniMap; }
@@ -360,7 +357,6 @@ public:
 
 	bool EnteredReplayFromLogin{};
 };
-
 
 #define BEGIN_WIDGETLIST(_ITEM, _IDLRESPTR, _CLASS, _INSTANCE)								\
 {																							\
@@ -379,4 +375,5 @@ public:
 
 
 #define WM_CHANGE_GAMESTATE		(WM_USER + 25)
+
 void ZChangeGameState(GunzState state);

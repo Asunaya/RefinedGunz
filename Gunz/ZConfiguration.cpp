@@ -4,7 +4,6 @@
 #include "ZInterface.h"
 #include "ZLocatorList.h"
 #include "ZGameTypeList.h"
-#include "ZLocale.h"
 
 ZConfiguration	g_Configuration;
 ZConfiguration* ZGetConfiguration()		{ return &g_Configuration; }

@@ -7,6 +7,7 @@
 #include <string>
 #include <algorithm>
 #include <cassert>
+#include "MUtil.h"
 
 #ifndef _MSC_VER
 #include "msxml.tli"
@@ -623,12 +624,9 @@ MXmlDocument::~MXmlDocument()
 
 bool MXmlDocument::Create()
 {
-	// CoInitialize()를 먼저 수행하기 위해 동적으로 할당함.
 	m_ppDom = new MXmlDomDocPtr;
 
-
 	MXmlDomDocPtr pDom(MSXML::CLSID_DOMDocument);
-
 
 	(*m_ppDom) = pDom;
 
@@ -644,7 +642,7 @@ bool MXmlDocument::Destroy()
 {
 	if (!m_bInitialized) return false;
 
-	delete m_ppDom;	m_ppDom = NULL;
+	SAFE_DELETE(m_ppDom);
 
 	m_bInitialized = false;
 
@@ -680,25 +678,19 @@ bool MXmlDocument::LoadFromMemory(char* szBuffer, LANGID lanid)
 {
 	if (!m_bInitialized) return false;
 
-	// UTF8인지 검사한다
-	std::string s;
-	if ( (szBuffer[0] == (char)0xEF) && (szBuffer[1] == (char)0xBB) && (szBuffer[2] == (char)0xBF))
-		s = MLocale::ConvUTF8ToAnsi( szBuffer, lanid);		// UTF8 -> ANSI
-	else
-		s = szBuffer;										// ANSI
+	// TODO: Remove this copy
+	std::string s = szBuffer;
 
-
-	// XML 내용의 시작을 찾는다
-	int pos = s.find( "<XML>");								// <XML>
-	if ( pos == -1)
+	int pos = s.find("<XML>");
+	if (pos == std::string::npos)
 	{
-		pos = s.find( "<xml>");								// <xml>
-		
-		if ( pos == -1)
+		pos = s.find("<xml>");
+
+		if (pos == std::string::npos)
 		{
-			pos = s.find( "?>");							// ?>
-	
-			if ( pos == -1)
+			pos = s.find("?>");
+
+			if (pos == std::string::npos)
 			{
 				s.clear();
 				MLog("MXmlDocument::LoadFromMemory - Failed to find beginning of xml declaration\n");
@@ -709,16 +701,14 @@ bool MXmlDocument::LoadFromMemory(char* szBuffer, LANGID lanid)
 			pos += 2;
 		}
 	}
-	char* cp = &s[pos];
+	const char* cp = &s[pos];
 
-
-	// XML 내용의 끝을 찾는다
-	pos = s.find( "</XML>");
-	if ( pos == -1)
+	pos = s.find("</XML>");
+	if (pos == std::string::npos)
 	{
-		pos = s.find( "</xml>");
-		
-		if ( pos == -1)
+		pos = s.find("</xml>");
+
+		if (pos == std::string::npos)
 		{
 			s.clear();
 			MLog("MXmlDocument::LoadFromMemory - Failed to find end of xml declaration\n");
@@ -726,28 +716,25 @@ bool MXmlDocument::LoadFromMemory(char* szBuffer, LANGID lanid)
 			return false;
 		}
 	}
-	s[pos+6] = '\0';
+	s[pos + 6] = 0;
 
-
-	_bstr_t bsXML(cp);
+	_bstr_t bsXML{ cp };
 	if ((*m_ppDom)->loadXML(BSTR(bsXML)) != -1)
 	{
 		MXmlDomParseErrorPtr errPtr = (*m_ppDom)->GetparseError();
 		_bstr_t bstrErr(errPtr->reason);
 
 		MLog("-------------------------------\n");
-		MLog("Error In Load Xml Memory\n");
+		MLog("MXmlDocument::LoadFromMemory -- Error parsing XML file\n");
 		MLog("Code = 0x%x\n", errPtr->errorCode);
-		MLog("Source = Line : %ld; Char : %ld\n", errPtr->line, errPtr->linepos);
-		MLog("Error Description = %s\n", static_cast<char*>(bstrErr));
+		MLog("Source = Line: %ld; char: %ld\n", errPtr->line, errPtr->linepos);
+		MLog("Error description = %s\n", static_cast<char*>(bstrErr));
 
 		assert(false);
 
-		s.clear();
 		return false;
 	}
 
-	s.clear();
 	return true;
 }
 

@@ -20,7 +20,6 @@
 #include "ZCharacterView.h"
 #include "MDebug.h"
 #include "ZScreenEffectManager.h"
-#include "ZNetmarble.h"
 #include "ZRoomListBox.h"
 #include "ZPlayerListBox.h"
 #include "ZChat.h"

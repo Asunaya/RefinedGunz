@@ -1,24 +1,18 @@
-#ifndef _MSTRINGRES_H
-#define _MSTRINGRES_H
+#pragma once
 
 #include <map>
 #include <string>
-using std::map;
-using std::string;
-using std::pair;
-
 #include "MZFileSystem.h"
 
 #define CHAR_MSG_VALUE			'$'
-
 
 template<class _T>
 class MStringRes
 {
 private:
-	map<_T, string>		m_StringMap;
-	string				m_strTOK_TAG;
-	string				m_strTOK_ATTR;
+	std::map<_T, std::string>		m_StringMap;
+	std::string				m_strTOK_TAG;
+	std::string				m_strTOK_ATTR;
 public:
 	MStringRes( const char* pszTOK_TAG = "STR", const char* pszTOK_ATTR = "id" )
 		: m_strTOK_TAG( pszTOK_TAG ), m_strTOK_ATTR( pszTOK_ATTR )
@@ -122,7 +116,6 @@ public:
 		{
 			argv[i] = va_arg(args, const char*);
 		}
-		//va_end(args);
 
 		bool bPercent=false;
 
@@ -130,8 +123,6 @@ public:
 		poutStr[taridx] = 0;
 		string formatstring = (*itor).second;
 		
-
-		// 인자 파싱
 		for(size_t j=0;j<formatstring.size();j++)
 		{
 			char cur=formatstring[j];
@@ -153,7 +144,7 @@ public:
 					}
 					else
 					{
-						_ASSERT(0);		// xml의 인자 설정이 잘못되었거나, 함수호출시 가변인자가 부족하다.
+						_ASSERT(0);	
 					}
 				}
 
@@ -178,9 +169,8 @@ public:
 
 	const char* GetStr( const _T& code )
 	{
-		typename std::map<_T, string>::iterator it = m_StringMap.find( code );
+		typename std::map<_T, std::string>::iterator it = m_StringMap.find( code );
 		if( m_StringMap.end() == it ){
-			// _ASSERT( 0 );			// 해당 문자열은 존재하지 않는다.
 			static char *szBlahBlah = "nomsg";
 			return szBlahBlah;
 		}
@@ -188,11 +178,3 @@ public:
 		return it->second.c_str();
 	}
 };
-
-
-
-
-
-
-
-#endif

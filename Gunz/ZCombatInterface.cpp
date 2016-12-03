@@ -23,7 +23,6 @@
 #include "ZCombatQuestScreen.h"
 #include "ZBmNumLabel.h"
 #include "ZModule_QuestStatus.h"
-#include "ZLocale.h"
 #include "ZRuleDuel.h"
 #include "ZInput.h"
 #include "ZPickInfo.h"
@@ -2413,15 +2412,10 @@ void ZCombatInterface::GetResultInfo( void)
 
 	else
 	{
-		if ( (ZGetLocale()->GetCountry() == MC_US) || (ZGetLocale()->GetCountry() == MC_BRAZIL) || (ZGetLocale()->GetCountry() == MC_INDIA))
-		{
-			if ( (rand() % 2))
-				strcpy_safe( szFileName, "interface/loadable/rstbg_deathmatch.jpg");
-			else
-				strcpy_safe( szFileName, "interface/loadable/rstbg_clan.jpg");
-		}
+		if (rand() % 2)
+			strcpy_safe(szFileName, "interface/loadable/rstbg_deathmatch.jpg");
 		else
-			strcpy_safe( szFileName, "interface/loadable/rstbg_deathmatch.jpg");
+			strcpy_safe(szFileName, "interface/loadable/rstbg_clan.jpg");
 
 		pWidget = ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "CombatResult");
 		if ( pWidget)

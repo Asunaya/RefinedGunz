@@ -34,14 +34,14 @@
     <Filter Include="Util">
       <UniqueIdentifier>{cd1573a2-d0f2-49d2-988e-64949e521aeb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Locate">
-      <UniqueIdentifier>{c7f6a2c5-ab95-42fa-9089-b4918035ac34}</UniqueIdentifier>
-    </Filter>
     <Filter Include="StringRes">
       <UniqueIdentifier>{e3be9540-8987-435f-91c5-ca8418c807aa}</UniqueIdentifier>
     </Filter>
     <Filter Include="MCountryFilter">
       <UniqueIdentifier>{df4fc847-e1fe-4df0-83f1-76c1edc9f3a2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Locale">
+      <UniqueIdentifier>{c7f6a2c5-ab95-42fa-9089-b4918035ac34}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -119,13 +119,7 @@
       <Filter>Util</Filter>
     </ClInclude>
     <ClInclude Include="Include\MBaseLocale.h">
-      <Filter>Locate</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\MLocaleDefine.h">
-      <Filter>Locate</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\MMatchLocale.h">
-      <Filter>Locate</Filter>
+      <Filter>Locale</Filter>
     </ClInclude>
     <ClInclude Include="Include\MBaseStringResManager.h">
       <Filter>StringRes</Filter>
@@ -232,7 +226,7 @@
       <Filter>Util</Filter>
     </ClCompile>
     <ClCompile Include="Source\MBaseLocale.cpp">
-      <Filter>Locate</Filter>
+      <Filter>Locale</Filter>
     </ClCompile>
     <ClCompile Include="Source\MBaseStringResManager.cpp">
       <Filter>StringRes</Filter>

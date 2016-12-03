@@ -52,7 +52,6 @@
 #endif
 
 #include "RLenzFlare.h"
-#include "ZLocale.h"
 #include "MSysInfo.h"
 
 #include "MTraceMemory.h"
@@ -155,14 +154,7 @@ RRESULT OnCreate(void *pParam)
 #ifndef _FASTDEBUG
 	if( ZGetInitialLoading()->IsUseEnable() )
 	{
-		if( ZGetLocale()->IsTeenMode() )
-		{
-			ZGetInitialLoading()->AddBitmap( 0, "Interface/Default/LOADING/loading_teen.jpg" );
-		}
-		else
-		{
-			ZGetInitialLoading()->AddBitmap( 0, "Interface/Default/LOADING/loading_adult.jpg" );
-		}
+		ZGetInitialLoading()->AddBitmap( 0, "Interface/Default/LOADING/loading_adult.jpg" );
 		ZGetInitialLoading()->AddBitmapBar( "Interface/Default/LOADING/loading.bmp" );
 		ZGetInitialLoading()->SetText( g_pDefFont, 10, 30, cstrReleaseDate );
 

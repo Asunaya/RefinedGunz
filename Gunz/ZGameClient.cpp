@@ -23,7 +23,6 @@
 #include "ZCharacterView.h"
 #include "MDebug.h"
 #include "ZScreenEffectManager.h"
-#include "ZNetmarble.h"
 #include "ZRoomListBox.h"
 #include "ZPlayerListBox.h"
 #include "ZChat.h"
@@ -39,7 +38,6 @@
 #include "ZCharacterSelectView.h"
 #include "ZChannelListItem.h"
 #include "ZCombatInterface.h"
-#include "ZLocale.h"
 #include "ZMap.h"
 #include "UPnP.h"
 #include "MMatchNotify.h"
@@ -1063,15 +1061,8 @@ int ZGameClient::OnConnected(SOCKET sock, MUID* pTargetUID, MUID* pAllocUID, uns
 	int ret = MMatchClient::OnConnected(sock, pTargetUID, pAllocUID, nTimeStamp);
 
 	if (sock == m_ClientSocket.GetSocket()) {
-		if (ZApplication::GetInstance()->GetLaunchMode() == ZApplication::ZLAUNCH_MODE_NETMARBLE)
-		{
-			ZGetLocale()->PostLoginViaHomepage(pAllocUID);
-		}
-		else
-		{
-			g_OnConnectCallback();
-			g_bConnected = true;
-		}
+		g_OnConnectCallback();
+		g_bConnected = true;
 	}
 
 	return ret;

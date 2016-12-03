@@ -454,8 +454,6 @@
     <ClInclude Include="Include\MCommandCommunicator.h" />
     <ClInclude Include="Include\MXmlParser.h" />
     <ClInclude Include="Include\MBaseLocale.h" />
-    <ClInclude Include="Include\MLocaleDefine.h" />
-    <ClInclude Include="Include\MMatchLocale.h" />
     <ClInclude Include="Include\MBaseStringResManager.h" />
     <ClInclude Include="Include\MErrorTable.h" />
     <ClInclude Include="Include\MStringRes.h" />

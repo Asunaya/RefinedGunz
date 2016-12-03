@@ -37,7 +37,6 @@
 #define _QUEST_ITEM
 #define _MONSTER_BIBLE
 
-#include "MLocaleDefine.h"
 #include "MDebug.h"
 #include "MXml.h"
 

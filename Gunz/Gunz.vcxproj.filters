@@ -67,12 +67,6 @@
     <Filter Include="Network\UPNP">
       <UniqueIdentifier>{d95fdb27-a454-479b-b52f-9f76f7fe2bb9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Locale">
-      <UniqueIdentifier>{1010b3bb-7217-47a1-ae62-f6a3607fae48}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Locale\Auth">
-      <UniqueIdentifier>{6132884a-c64a-43b2-a154-f467817ca957}</UniqueIdentifier>
-    </Filter>
     <Filter Include="extern">
       <UniqueIdentifier>{5df0c933-d30d-4515-9ae7-4c93cbe112da}</UniqueIdentifier>
     </Filter>
@@ -674,21 +668,6 @@
     </ClInclude>
     <ClInclude Include="upnp.h">
       <Filter>Network\UPNP</Filter>
-    </ClInclude>
-    <ClInclude Include="ZBaseAuthInfo.h">
-      <Filter>Locale</Filter>
-    </ClInclude>
-    <ClInclude Include="ZLocale.h">
-      <Filter>Locale</Filter>
-    </ClInclude>
-    <ClInclude Include="ZLocaleDefine.h">
-      <Filter>Locale</Filter>
-    </ClInclude>
-    <ClInclude Include="ZNetmarble.h">
-      <Filter>Locale\Auth</Filter>
-    </ClInclude>
-    <ClInclude Include="ZNetmarbleJP.h">
-      <Filter>Locale\Auth</Filter>
     </ClInclude>
     <ClInclude Include="ZLanguageConf.h">
       <Filter>StringRes</Filter>
@@ -1305,18 +1284,6 @@
     </ClCompile>
     <ClCompile Include="upnp.cpp">
       <Filter>Network\UPNP</Filter>
-    </ClCompile>
-    <ClCompile Include="ZBaseAuthInfo.cpp">
-      <Filter>Locale</Filter>
-    </ClCompile>
-    <ClCompile Include="ZLocale.cpp">
-      <Filter>Locale</Filter>
-    </ClCompile>
-    <ClCompile Include="ZNetmarble.cpp">
-      <Filter>Locale\Auth</Filter>
-    </ClCompile>
-    <ClCompile Include="ZNetmarbleJP.cpp">
-      <Filter>Locale\Auth</Filter>
     </ClCompile>
     <ClCompile Include="ZLanguageConf.cpp">
       <Filter>StringRes</Filter>

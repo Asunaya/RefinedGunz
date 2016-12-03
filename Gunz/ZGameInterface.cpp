@@ -61,7 +61,6 @@
 #include "ZReplay.h"
 #include "MFileDialog.h"
 #include "ZServerView.h"
-#include "ZLocale.h"
 
 #include "ZLocatorList.h"
 #include "ZSecurity.h"
@@ -87,7 +86,6 @@ void ZChangeGameState(GunzState state)
 {
 	PostMessage(g_hWnd, WM_CHANGE_GAMESTATE, int(state), 0);
 }
-
 
 void ZEmptyBitmap()
 {
@@ -1260,43 +1258,7 @@ void ZGameInterface::OnLoginDestroy(void)
 	}
 }
 
-#include "ZNetmarble.h"
-void ZGameInterface::OnNetmarbleLoginCreate(void)
-{
-	if ( m_pBackground)
-	{
-		m_pBackground->LoadMesh();
-		m_pBackground->SetScene(LOGIN_SCENE_FIXEDSKY);
-	}
-
-	ZApplication::GetSoundEngine()->StopMusic();
-	ZApplication::GetSoundEngine()->OpenMusic( BGMID_INTRO, ZApplication::GetFileSystem());
-
-	if (g_pGameClient->IsConnected())
-	{
-		ZPostDisconnect();
-	}
-
-	HideAllWidgets();
-	ShowWidget("NetmarbleLogin", true);
-
-	ZBaseAuthInfo* pAuthInfo = ZGetLocale()->GetAuthInfo();
-	if (pAuthInfo)
-	{
-		mlog("Connect to Netmarble GunzServer(IP:%s , Port:%d) \n", pAuthInfo->GetServerIP(), pAuthInfo->GetServerPort());
-		ZPostConnect(pAuthInfo->GetServerIP(), pAuthInfo->GetServerPort());
-	}
-	else _ASSERT(0);
-}
-
-void ZGameInterface::OnNetmarbleLoginDestroy(void)
-{
-		if ( m_pBackground)
-			m_pBackground->SetScene(LOGIN_SCENE_FALLDOWN);
-}
-
-
-void ZGameInterface::OnLobbyCreate(void)
+void ZGameInterface::OnLobbyCreate()
 {
 	if ( m_bOnEndOfReplay)
 	{
@@ -1531,7 +1493,7 @@ bool ZGameInterface::OnCreate(ZLoadingProgress *pLoadingProgress)
 {
 	g_pGameClient = new ZGameClient();
 
-	if(!m_Tips.Initialize(ZApplication::GetFileSystem(), ZGetLocale()->GetLanguage())) {
+	if(!m_Tips.Initialize(ZApplication::GetFileSystem(), ML_INVALID)) {
 		mlog("Check tips.xml\n");
 		return false;
 	}
@@ -1559,7 +1521,7 @@ bool ZGameInterface::OnCreate(ZLoadingProgress *pLoadingProgress)
 		return false;
 	MEndProfile(ZEffectManagerCreate);
 
-	SetTeenVersion(ZGetLocale()->IsTeenMode());
+	SetTeenVersion(false);
 
 	auto ZGameClientCreate = MBeginProfile("ZGameInterface - ZGameClient::Create");
 	int nNetworkPort = RandomNumber( ZGetConfiguration()->GetEtc()->nNetworkPort1, ZGetConfiguration()->GetEtc()->nNetworkPort2);
@@ -1922,7 +1884,6 @@ bool ZGameInterface::SetState(GunzState nState)
 
 	if(m_nState==GUNZ_GAME) OnGameDestroy();
 	else if(m_nState==GUNZ_LOGIN) OnLoginDestroy();
-	else if(m_nState==GUNZ_NETMARBLELOGIN) OnNetmarbleLoginDestroy();
 	else if(m_nState==GUNZ_LOBBY) OnLobbyDestroy();
 	else if(m_nState==GUNZ_STAGE) OnStageDestroy();
 	else if(m_nState==GUNZ_GREETER) OnGreeterDestroy();
@@ -1941,7 +1902,6 @@ bool ZGameInterface::SetState(GunzState nState)
 	bool bStateChanged = true;
 	if(nState==GUNZ_GAME) bStateChanged = OnGameCreate();
 	else if(nState==GUNZ_LOGIN) OnLoginCreate();
-	else if(nState==GUNZ_NETMARBLELOGIN) OnNetmarbleLoginCreate();
 	else if(nState==GUNZ_LOBBY)	OnLobbyCreate();
 	else if(nState==GUNZ_STAGE) OnStageCreate();
 	else if(nState==GUNZ_GREETER) OnGreeterCreate();

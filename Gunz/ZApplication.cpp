@@ -12,7 +12,6 @@
 #include "ZConfiguration.h"
 #include "MProfiler.h"
 #include "MChattingFilter.h"
-#include "ZNetmarble.h"
 #include "ZInitialLoading.h"
 #include "ZWorldItem.h"
 #include "MMatchWorlditemdesc.h"
@@ -21,7 +20,6 @@
 #include "ZTestGame.h"
 #include "ZGameClient.h"
 #include "MRegistry.h"
-#include "ZLocale.h"
 #include "ZUtil.h"
 #include "ZStringResManager.h"
 #include "ZFile.h"
@@ -136,7 +134,6 @@ bool ZApplication::ParseArguments(const char* pszArgs)
 		GUNZ_REC_FILE_EXT) == 0){
 		SetLaunchMode(ZLAUNCH_MODE_STANDALONE_REPLAY);
 		m_nInitialState = GUNZ_GAME;
-		ZGetLocale()->SetTeenMode(false);
 		return true;
 	}
 
@@ -148,7 +145,6 @@ bool ZApplication::ParseArguments(const char* pszArgs)
 		{
 			SetLaunchMode( ZLAUNCH_MODE_STANDALONE_DEVELOP);
 			m_bLaunchDevelop = true;
-			ZGetLocale()->SetTeenMode( false);
 
 			return true;
 		} 
@@ -168,30 +164,7 @@ bool ZApplication::ParseArguments(const char* pszArgs)
 	}
 #endif
 
-	switch(ZGetLocale()->GetCountry()) {
-	case MC_JAPAN:
-	case MC_KOREA:
-		{
-			return ZGetLocale()->ParseArguments(pszArgs);
-		}
-		break;
-	case MC_US:
-	case MC_BRAZIL:
-	case MC_INDIA:
-		{
-			SetLaunchMode( ZLAUNCH_MODE_STANDALONE);
-			ZGetLocale()->SetTeenMode(false);
-			return true;
-		}
-		break;
-	case MC_INVALID:
-	default:
-		{
-			mlog("Invalid Locale \n");
-			return false;
-		}
-		break;
-	};
+	SetLaunchMode(ZLAUNCH_MODE_STANDALONE);
 
 	return false;
 }
@@ -875,8 +848,7 @@ void ZApplication::SetInitialState()
 
 bool ZApplication::InitLocale()
 {
-	ZGetLocale()->Init(GetCountryID(ZGetConfiguration()->GetLocale()->strCountry.c_str()) );
-	ZGetStringResManager()->Init("system/", ZGetLocale()->GetLanguage(), GetFileSystem());
+	ZGetStringResManager()->Init("system/", 0, GetFileSystem());
 
 	return true;
 }

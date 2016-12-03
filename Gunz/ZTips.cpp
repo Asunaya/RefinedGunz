@@ -27,17 +27,6 @@ bool ZTips::Initialize(MZFileSystem* pfs, const MLanguage LangID )
 	mzf.Read(buffer,mzf.GetLength());
 	buffer[mzf.GetLength()]=0;
 
-//	LANGID LangID = LANG_KOREAN;			/* Korean : 이거 정말 하드코딩 박기 싫었는디... 쩝... -_-;;; */
-//#ifdef LOCALE_JAPAN
-//	LangID = LANG_JAPANESE;					/* Japanese */
-//#elif  LOCALE_US
-//	LangID = LANG_ENGLISH;					/* International */
-//#elif  LOCALE_BRAZIL
-//	LangID = LANG_PORTUGUESE;				/* Brazil */
-//#elif  LOCALE_INDIA
-//	LangID = LANG_ENGLISH;					/* India */
-//#endif
-
 	mlog( "Load XML from memory : %s(0x%04X)", FILENAME_TIPS, LangID);
 
 	MXmlDocument aXml;

@@ -21,8 +21,6 @@ bool MBaseLocale::Init(MCountry nCountry)
 	return m_bIsComplete;
 }
 
-
-// 국가값을 바탕으로 언어 세팅 - 이것은 국가가 추가될때마다 새로 넣어줘야 한다.
 void MBaseLocale::InitLanguageFromCountry()
 {
 	switch (m_nCountry)
@@ -34,14 +32,12 @@ void MBaseLocale::InitLanguageFromCountry()
 	case MC_INDIA:		m_nLanguage = ML_INDIA;			break;
 	default:
 		{
-			// 해당 국가 없음 - 추가해주세요.
 			_ASSERT(0);
 		}
 	};
 }
 
-
-const MCountry GetCountryID( const char* pCountry )
+MCountry GetCountryID( const char* pCountry )
 {
 	ASSERT( (0 != pCountry) && (0 < strlen(pCountry)) );
 
@@ -62,8 +58,7 @@ const MCountry GetCountryID( const char* pCountry )
 	return MC_INVALID;
 }
 
-
-const MLanguage GetLanguageID( const char* pLanguage )
+MLanguage GetLanguageID( const char* pLanguage )
 {
 	ASSERT( (0 != pLanguage) && (0 < strlen(pLanguage)) );
 

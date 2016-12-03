@@ -783,11 +783,6 @@ rem call copy_share.bat
     <ClInclude Include="ZSecurity.h" />
     <ClInclude Include="NATUPnP.h" />
     <ClInclude Include="upnp.h" />
-    <ClInclude Include="ZBaseAuthInfo.h" />
-    <ClInclude Include="ZLocale.h" />
-    <ClInclude Include="ZLocaleDefine.h" />
-    <ClInclude Include="ZNetmarble.h" />
-    <ClInclude Include="ZNetmarbleJP.h" />
     <ClInclude Include="ZLanguageConf.h" />
     <ClInclude Include="ZMessages.h" />
     <ClInclude Include="ZStringResManager.h" />
@@ -1001,10 +996,6 @@ rem call copy_share.bat
     <ClCompile Include="ZPostLocal.cpp" />
     <ClCompile Include="ZSecurity.cpp" />
     <ClCompile Include="upnp.cpp" />
-    <ClCompile Include="ZBaseAuthInfo.cpp" />
-    <ClCompile Include="ZLocale.cpp" />
-    <ClCompile Include="ZNetmarble.cpp" />
-    <ClCompile Include="ZNetmarbleJP.cpp" />
     <ClCompile Include="ZLanguageConf.cpp" />
     <ClCompile Include="ZMessages.cpp" />
     <ClCompile Include="ZStringResManager.cpp" />

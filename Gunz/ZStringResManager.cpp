@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "ZStringResManager.h"
 #include "ZConfiguration.h"
-#include "ZLocale.h"
 
 void ZStringResManager::MakeInstance()
 {
@@ -9,25 +8,16 @@ void ZStringResManager::MakeInstance()
 	m_pInstance = new ZStringResManager();
 }
 
-
-ZStringResManager::ZStringResManager() : MBaseStringResManager()
-{
-
-}
-
-ZStringResManager::~ZStringResManager()
-{
-
-}
+ZStringResManager::ZStringResManager() = default;
+ZStringResManager::~ZStringResManager() = default;
 
 bool ZStringResManager::OnInit()
 {
-	// messages
 	string strFileName = m_strPath + FILENAME_MESSAGES;
 
-	if( ZGetConfiguration()->IsComplete() && ZGetLocale()->bIsComplete() )
+	if (ZGetConfiguration()->IsComplete())
 	{
-		if (!m_Messages.Initialize(strFileName.c_str(), ZGetLocale()->GetLanguage(), m_pFS))
+		if (!m_Messages.Initialize(strFileName.c_str(), 0, m_pFS))
 		{
 			_ASSERT(0);
 			mlog("Error!! - Messages Initalize Failed\n");
