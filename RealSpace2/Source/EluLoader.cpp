@@ -310,9 +310,7 @@ bool loadMaterial(LoaderState& State, const char* name)
 		LoadTexture(FLAG_DIFFUSE, mtl.tDiffuse, mat.DiffuseMap);
 		LoadTexture(FLAG_NORMAL, mtl.tNormal, mat.NormalMap);
 		LoadTexture(FLAG_SPECULAR, mtl.tSpecular, mat.SpecularMap);
-		// HACK: Don't load opacity map for flags cuz it's broken
-		if (mat.Name.find("flag") == std::string::npos)
-			LoadTexture(FLAG_OPACITY, mtl.tOpacity, mat.OpacityMap);
+		LoadTexture(FLAG_OPACITY, mtl.tOpacity, mat.OpacityMap);
 		LoadTexture(FLAG_SELFILLUM, mtl.tEmissive, mat.SelfIlluminationMap);
 
 		State.Materials.push_back(mtl);
