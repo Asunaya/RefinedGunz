@@ -260,6 +260,7 @@
     <ClCompile Include="Source\rvector.cpp" />
     <ClCompile Include="Source\rmatrix.cpp" />
     <ClCompile Include="Source\ColorTypes.cpp" />
+    <ClCompile Include="Source\TextureLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\RHalfEdgeMesh.h">
@@ -466,5 +467,6 @@
     <ClInclude Include="Include\rquaternion.h" />
     <ClInclude Include="Include\LogMatrix.h" />
     <ClInclude Include="Include\ColorTypes.h" />
+    <ClInclude Include="Include\TextureLoader.h" />
   </ItemGroup>
 </Project>

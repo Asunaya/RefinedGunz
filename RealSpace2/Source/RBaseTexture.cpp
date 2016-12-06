@@ -3,6 +3,7 @@
 #include "RBaseTexture.h"
 #include "MDebug.h"
 #include "MZFileSystem.h"
+#include "TextureLoader.h"
 
 _USING_NAMESPACE_REALSPACE2
 
@@ -93,6 +94,19 @@ bool RBaseTexture::SubCreateTexture(char* TextureFileBuffer)
 		D3DPOOL_MANAGED;
 #endif
 
+#ifndef D3DX
+	m_pTex = LoadTexture(TextureFileBuffer, m_nFileSize,
+		1.0f / (1 << m_nTexLevel),
+		m_Info, strrchr(m_szTextureName, '.'));
+
+	if (!m_pTex)
+	{
+		MLog("RBaseTexture -- Failed to create texture %s\n",
+			m_szTextureName);
+		return false;
+	}
+	return true;
+#else
 	UINT Tex_w = D3DX_DEFAULT;
 	UINT Tex_h = D3DX_DEFAULT;
 
@@ -161,9 +175,10 @@ bool RBaseTexture::SubCreateTexture(char* TextureFileBuffer)
 		return false;
 	}
 
-	__EP(2011);
+	__EP(2011)
 
 	return true;
+#endif
 }
 
 bool RBaseTexture::OnRestore(bool bManaged)

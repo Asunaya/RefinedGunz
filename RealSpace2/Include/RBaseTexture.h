@@ -6,6 +6,7 @@
 #include <algorithm>
 #include "MUtil.h"
 #include "RNameSpace.h"
+#include "TextureLoader.h"
 
 _NAMESPACE_REALSPACE2_BEGIN
 
@@ -26,7 +27,6 @@ public:
 
 	auto GetWidth() const { return m_Info.Width; }
 	auto GetHeight() const { return m_Info.Height; }
-	auto GetDepth() const { return m_Info.Depth; }
 	auto GetMipLevels() const { return m_Info.MipLevels; }
 
 	auto GetTexLevel() const { return m_nTexLevel; }
@@ -40,7 +40,7 @@ public:
 	LPDIRECT3DTEXTURE9 GetTexture();
 
 	bool	m_bManaged{};
-	DWORD	m_dwLastUseTime{};
+	u32		m_dwLastUseTime{};
 	int		m_nFileSize{};
 	char	m_szTextureName[256];
 	int		m_nRefCount{};
@@ -48,9 +48,9 @@ public:
 	bool	m_bUseFileSystem = true;
 
 	int		m_nTexLevel{};
-	DWORD	m_nTexType = RTextureType_Etc;
+	u32		m_nTexType = RTextureType_Etc;
 
-	D3DXIMAGE_INFO m_Info{};
+	TextureInfo m_Info{};
 	D3DPtr<IDirect3DTexture9> m_pTex;
 
 private:
