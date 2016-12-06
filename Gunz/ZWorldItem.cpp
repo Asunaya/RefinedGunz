@@ -247,9 +247,6 @@ ZWorldItem *ZWorldItemManager::AddWorldItem( int nID, short nItemID,MTD_WorldIte
 	return pWorldItem;
 }
 
-// TODO 디버깅 중이다
-#pragma optimize( "", off )
-
 #define  WORLD_ITEM_RADIUS		100.f
 void ZWorldItemManager::update()
 {
@@ -257,9 +254,8 @@ void ZWorldItemManager::update()
 	
 	if( pCharacter==NULL||pCharacter->IsDie() ) return; 
 	
-	for( WIL_Iterator iter = mItemList.begin(); iter != mItemList.end();)
+	for(auto* pItem : MakePairValueAdapter(mItemList))
 	{
-		ZWorldItem* pItem = iter->second;
 		if( pItem->GetState() == WORLD_ITEM_VALIDATE )
 		{
 			char szName[64];
@@ -267,15 +263,13 @@ void ZWorldItemManager::update()
 			rvector charPos = pCharacter->m_Position;
 			rvector itemPos = pItem->GetPosition();
 			auto vec = charPos - itemPos;
-			if( D3DXVec3Length(&vec) <= WORLD_ITEM_RADIUS )
+			if (Magnitude(vec) <= WORLD_ITEM_RADIUS)
 			{
 				OnOptainWorldItem(pItem);
 			}			
 		}
-		++iter;
 	}
 }
-#pragma optimize( "", on )
 
 void ZWorldItemManager::OnOptainWorldItem(ZWorldItem* pItem)
 {

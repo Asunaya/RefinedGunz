@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include "RMath.h"
+#include <d3dx9.h>
+#include <cmath>
 
 _NAMESPACE_REALSPACE2_BEGIN
 
@@ -205,6 +207,58 @@ bool isInPlane(const rboundingbox *bb, const rplane *plane)
 	return (GetDistance(bb, plane) >= 0);
 }
 
+template <typename T>
+static auto SlerpImpl(const T& from, const T& to, float t)
+{
+	auto clamp = [&](auto&& val, auto&& minval, auto&& maxval) {
+		return max(minval, min(maxval, val));
+	};
+	auto costheta = clamp(DotProduct(from, to), -1, 1);
+
+	if (costheta > 0.999999)
+		return Lerp(from, to, t);
+
+	auto angle = acos(costheta);
+
+	return (sin((1 - t) * angle) * from + sin(t * angle) * to) / sin(angle);
+}
+
+v3 Slerp(const v3& from, const v3& to, float t) { return SlerpImpl(from, to, t); }
+v2 Slerp(const v2& from, const v2& to, float t) { return SlerpImpl(from, to, t); }
+v4 Slerp(const v4& from, const v4& to, float t) { return SlerpImpl(from, to, t); }
+
+rquaternion Slerp(const rquaternion& from, const rquaternion& to, float t)
+{
+	auto clamp = [&](auto&& val, auto&& minval, auto&& maxval) {
+		return max(minval, min(maxval, val));
+	};
+
+
+	auto temp = 1.0f - t;
+	auto costheta = DotProduct(from, to);
+
+	if (costheta < 0.0f)
+	{
+		t = -t;
+		costheta = -costheta;
+	}
+
+	if (costheta < 0.999f)
+	{
+		auto theta = acos(costheta);
+
+		temp = sin(theta * temp) / sinf(theta);
+		t = sin(theta * t) / sinf(theta);
+	}
+
+	return{
+		temp * from.x + t * to.x,
+		temp * from.y + t * to.y,
+		temp * from.z + t * to.z,
+		temp * from.w + t * to.w,
+	};
+}
+
 bool IsIntersect(rboundingbox *bb1, rboundingbox *bb2)
 {
 	if (bb1->minx>bb2->maxx) return false;
@@ -322,8 +376,7 @@ void MergeBoundingBox(rboundingbox *dest, rboundingbox *src)
 
 bool isLineIntersectBoundingBox(rvector &origin, rvector &dir, rboundingbox &bb)
 {
-	float t;
-	return IntersectLineAABB(t, origin, dir, bb);
+	return IntersectLineAABB(origin, dir, bb);
 }
 
 void MakeWorldMatrix(rmatrix *pOut, const rvector& pos, rvector dir, rvector up)
@@ -491,18 +544,51 @@ bool GetIntersectionOfTwoPlanes(rvector *pOutDir, rvector *pOutAPoint, rplane &p
 void TransformBox(rboundingbox* result, const rboundingbox& src, const rmatrix& matrix)
 {
 	rvector pts[8];
-	for (int i = 0; i<8; i++)
+	for (int i = 0; i < 8; i++)
 		pts[i] = GetPoint(src, i);
 
 	result->vmin = rvector(3.3e33f, 3.3e33f, 3.3e33f);
 	result->vmax = rvector(-3.3e33f, -3.3e33f, -3.3e33f);
 
-	for (int i = 0; i<8; i++)
+	for (int i = 0; i < 8; i++)
 	{
 		rvector tmp = pts[i];
 		tmp *= matrix;
 		*result = Union(*result, tmp);
 	}
+}
+
+v3 CatmullRomSpline(const v3& V0, const v3& V1, const v3& V2, const v3& V3, float s)
+{
+	D3DXVECTOR3 v[4] = { {EXPAND_VECTOR(V0)}, {EXPAND_VECTOR(V1)},{ EXPAND_VECTOR(V2)},{ EXPAND_VECTOR(V3)} };
+	D3DXVECTOR3 Out;
+	D3DXVec3CatmullRom(&Out, v, v + 1, v + 2, v + 3, s);
+	return v3{ Out.x, Out.y, Out.z };
+}
+
+bool isnan(const v3& vec) {
+	return std::isnan(vec.x) || std::isnan(vec.y) || std::isnan(vec.z);
+}
+bool isinf(const v3& vec) {
+	return std::isinf(vec.x) || std::isinf(vec.y) || std::isinf(vec.z);
+}
+
+bool isnan(const rmatrix & mat)
+{
+	for (size_t i{}; i < 4; ++i)
+		for (size_t j{}; j < 4; ++j)
+			if (std::isnan(mat(i, j)))
+				return true;
+	return false;
+}
+
+bool isinf(const rmatrix & mat)
+{
+	for (size_t i{}; i < 4; ++i)
+		for (size_t j{}; j < 4; ++j)
+			if (std::isinf(mat(i, j)))
+				return true;
+	return false;
 }
 
 _NAMESPACE_REALSPACE2_END

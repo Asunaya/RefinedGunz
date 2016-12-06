@@ -163,7 +163,7 @@ void HitboxManager::Draw()
 
 		MakeWorldMatrix(&mat, Char.GetPosition(), HDir, rvector(0, 0, 1));
 
-		RGetDevice()->SetTransform(D3DTS_WORLD, &mat);
+		RSetTransform(D3DTS_WORLD, mat);
 
 		RGetDevice()->SetTextureStageState(0, D3DTSS_CONSTANT, 0x20FF0000);
 

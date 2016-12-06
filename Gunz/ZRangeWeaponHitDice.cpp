@@ -86,7 +86,7 @@ rvector ZRangeWeaponHitDice::ReturnShotDir()
 	tar.y += fRandY;
 
 	MakeWorldMatrix(&mat, m_TargetPosition, modelDir, rvector(0,0,1));
-	D3DXVec3TransformCoord(&tar, &tar, &mat);
+	tar = TransformCoord(tar, mat);
 
 	rvector dir = tar - m_SourcePosition;
 	Normalize(dir);

@@ -293,11 +293,9 @@ bool ZWater::SetMesh( RMeshNode* meshNode )
 
 	// transform world space
 	m_pVerts = new rvector[m_nVerts];
-	D3DXVECTOR4 rVec;
 	for( int i = 0 ; i < m_nVerts; ++i )
 	{
-		D3DXVec3Transform( &rVec, &meshNode->m_point_list[i], &m_worldMat );
-		m_pVerts[i] = (rvector)rVec;
+		m_pVerts[i] = Transform(meshNode->m_point_list[i], m_worldMat);
 	}
 	m_pFaces = new RFaceInfo[m_nFaces];
 	for( int i = 0;i <m_nFaces;++i)
@@ -309,7 +307,6 @@ bool ZWater::SetMesh( RMeshNode* meshNode )
 	m_fbaseZpos = m_pVerts[0].z;	
 
 	// set Bounding Box..
-	// 물결의 고저가 WAVE_PITCH 를 넘지 않는다는 가정..
 	m_BoundingBox.minx	= m_BoundingBox.miny	= m_BoundingBox.minz	= 9999999;
 	m_BoundingBox.maxx	= m_BoundingBox.maxy	= m_BoundingBox.maxz	= -9999999;
 	for(int i = 0; i < m_nVerts; ++i)
@@ -372,8 +369,7 @@ bool ZWater::RenderReflectionSurface()
 {
 	if(g_pSufReflection == NULL || g_pSufRefDepthBuffer == NULL ) return false;
 
-	rmatrix viewOrg;
-	g_pDevice->GetTransform(D3DTS_VIEW, &viewOrg);
+	rmatrix viewOrg = RGetTransform(D3DTS_VIEW);
 
 	// Set Camera Position.. 
 
@@ -387,7 +383,7 @@ bool ZWater::RenderReflectionSurface()
 
 
 	auto viewMat = ViewMatrix(cameraPos, cameraDir, cameraUp);
-	g_pDevice->SetTransform(D3DTS_VIEW, &viewMat);
+	RSetTransform(D3DTS_VIEW, viewMat);
 
 	// Redirection Render Target
  	g_pDevice->GetRenderTarget( 0 , &g_pSufBackBuffer );
@@ -399,8 +395,7 @@ bool ZWater::RenderReflectionSurface()
 	g_pDevice->Clear(0,NULL,D3DCLEAR_TARGET|D3DCLEAR_ZBUFFER,0x00000000,1.0f,0.0f);
 
 	// pre render
-	rmatrix proj;
-	g_pDevice->GetTransform( D3DTS_PROJECTION, &proj );
+	rmatrix proj = RGetTransform(D3DTS_PROJECTION);
 	rmatrix transform = viewMat * proj;
 
 	for( int i=0; i<m_nVerts; ++i )
@@ -437,7 +432,7 @@ bool ZWater::RenderReflectionSurface()
 	g_pDevice->SetRenderTarget( 0,g_pSufBackBuffer );
 	g_pDevice->SetDepthStencilSurface(g_pSufDepthBuffer);
 
-	g_pDevice->SetTransform( D3DTS_VIEW, &viewOrg );
+	RSetTransform(D3DTS_VIEW, viewOrg);
 	SAFE_RELEASE(g_pSufBackBuffer);
 	SAFE_RELEASE(g_pSufDepthBuffer);
 	
@@ -454,8 +449,6 @@ bool ZWater::RenderUnderWater()
 	g_underWaterVertexBuffer[2].tu += 0.001f;
 	g_underWaterVertexBuffer[3].p.x = RGetScreenWidth();
 	g_underWaterVertexBuffer[3].tu += 0.001f;
-
-//	g_pDevice->SetTexture(0, g_pTexReflection );
 
 	g_pDevice->SetTextureStageState( 0, D3DTSS_COLORARG1, D3DTA_TEXTURE );
 	g_pDevice->SetTextureStageState( 0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
@@ -652,39 +645,13 @@ void ZWater::Render()
 	// set transform
 	rmatrix mat;
 	GetIdentityMatrix(mat);
-	g_pDevice->SetTransform(D3DTS_WORLD, &mat);
+	RSetTransform(D3DTS_WORLD, mat);
 
 	// render
 	g_pDevice->SetStreamSource( 0, g_pVBForWaterMesh, 0,sizeof(WaterVertex) );
 	g_pDevice->SetIndices( m_pIndexBuffer );
 	g_pDevice->SetFVF( WATERVERTEX_TYPE );
 	g_pDevice->DrawIndexedPrimitive( D3DPT_TRIANGLELIST,0, 0, m_nVerts, 0, m_nFaces);
-
- 	// under water ... 그리기 희철씨가 별 필요 없다고 함..
-/*
- 	if( RCameraPosition.z < m_fbaseZpos )
-	{
-		rvector vPos;
-		rvector VCPos = RCameraPosition;
-
-		if( Pick( VCPos , VCPos + rvector(0,0,300) , &vPos ) ) {
-
-			RBSPPICKINFO pickinfo;
-
-			if( ZGetGame()->GetWorld()->GetBsp()->Pick( RCameraPosition, rvector(0,0,1), &pickinfo ) ) 
-			{
-				if( pickinfo.PickPos.z > m_fbaseZpos )
-					RenderUnderWater();
-			}
-			else
-				RenderUnderWater();
-
-			OutputDebugString("RenderUnderWater\n");
-		}
-	}
-*/
-//	MakeBuffer();
-//	RenderBuffer();
 }
 
 void ZWater::Update()
@@ -706,16 +673,14 @@ void ZWater::OnRestore()
 bool ZWater::CheckSpearing(const rvector& o, const rvector& e, int iPower, float fArea, rvector* pPos )
 {
     // test line vs AABB
-	rvector dir = e - o;
-	D3DXVec3Normalize( &dir, &dir );
+	rvector dir = Normalized(e - o);
 
-	rvector intersect;
 	return Pick( o, dir, pPos );
 }
 
 bool ZWater::Pick(const rvector& o, const rvector& d, rvector* pPos )
 {
-	if( !D3DXBoxBoundProbe( &m_BoundingBox.vmin , &m_BoundingBox.vmax, &o, &d ) )
+	if (!IntersectLineSegmentAABB(o, d, m_BoundingBox))
 		return false;
 	
 	// line vs triangle test 
@@ -731,9 +696,9 @@ bool ZWater::Pick(const rvector& o, const rvector& d, rvector* pPos )
 			v[j]	= &m_pVerts[index[j]];
 		}
 
-		if( D3DXIntersectTri( v[0], v[1], v[2], &o, &d, &uvt.x, &uvt.y, &uvt.z ) ) 
+		if (IntersectTriangle(*v[0], *v[1], *v[2], o, d, nullptr, &uvt.x, &uvt.y))
 		{
-			*pPos	= *v[0] + uvt.x * ( *v[1] - *v[0] ) + uvt.y * ( *v[2] - *v[0] );
+			*pPos = *v[0] + uvt.x * (*v[1] - *v[0]) + uvt.y * (*v[2] - *v[0]);
 			return true;
 		}
 	}	

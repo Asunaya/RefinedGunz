@@ -17,7 +17,7 @@ _USING_NAMESPACE_REALSPACE2
 #define ZEFFECTBASE_D3DFVF	 (D3DFVF_XYZ|D3DFVF_DIFFUSE|D3DFVF_TEX1)
 
 struct ZEFFECTCUSTOMVERTEX {
-	float	x, y, z;
+	v3 pos;
 	DWORD	color;
 	float	tu, tv;
 };

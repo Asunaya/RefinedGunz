@@ -384,17 +384,15 @@ void ZWeaponItemkit::UpdateFirstPos()
 
 				vWeapon[0] = pC->m_pVMesh->GetCurrentWeaponPosition();
 
-				// 벽뒤로 던지는 경우가 생기면
 				rvector nPos = pC->m_pVMesh->GetBipTypePosition(eq_parts_pos_info_Spine1);
 				rvector nDir = vWeapon[0] - nPos;
 
 				Normalize(nDir);
 
 				RBSPPICKINFO bpi;
-				// 아래를 보면서 던지면 벽을 통과해서...
 				if(ZGetWorld()->GetBsp()->Pick(nPos,nDir,&bpi))
 				{
-					if(D3DXPlaneDotCoord(&(bpi.pInfo->plane),&vWeapon[0])<0) {
+					if (DotProduct(bpi.pInfo->plane, vWeapon[0]) < 0) {
 						vWeapon[0] = bpi.PickPos - nDir;
 					}
 				}
@@ -622,7 +620,6 @@ bool ZWeaponGrenade::Update(float fElapsedTime)
 				ZGetSoundEngine()->PlaySound("we_grenade_fire",m_Position);
 			}
 
-			// 벽방향의 속도성분을 줄인다.
 			Normalize(normal);
 			float fAbsorb=DotProduct(normal,m_Velocity);
 			m_Velocity-=0.5*fAbsorb*normal;
@@ -638,8 +635,7 @@ bool ZWeaponGrenade::Update(float fElapsedTime)
 	float fRotSpeed=Magnitude(m_Velocity)*0.04f;
 
 	rmatrix rotmat;
-	D3DXQUATERNION q;
-	D3DXQuaternionRotationAxis(&q, &m_RotAxis, fRotSpeed *fElapsedTime);
+	auto q = AngleAxisToQuaternion(m_RotAxis, fRotSpeed * fElapsedTime);
 	rotmat = QuaternionToMatrix(q);
 	m_Dir = m_Dir * rotmat;
 	m_Up = m_Up * rotmat;
@@ -680,31 +676,31 @@ MImplementRTTI(ZWeaponFlashBang, ZWeaponGrenade);
 
 void ZWeaponFlashBang::Explosion()
 {
-	rvector dir		= RCameraPosition - m_Position;
-	float dist		= Magnitude( dir );
-	D3DXVec3Normalize( &dir, &dir );
+	rvector dir = RCameraPosition - m_Position;
+	float dist = Magnitude(dir);
+	Normalize(dir);
 	RBSPPICKINFO pick;
 
-	if( dist > FLASHBANG_DISTANCE )	// 거리 밖에서는 영향을 주지 못함
+	if (dist > FLASHBANG_DISTANCE)
 	{
 		return;
 	}
 
-	if( g_pGame->m_pMyCharacter->IsDie() )	// 옵저버 모드에서는 영향을 받지 않음
+	if (g_pGame->m_pMyCharacter->IsDie())
 	{
 		return;
 	}
 
-	if( !ZGetGame()->GetWorld()->GetBsp()->Pick( m_Position, dir, &pick ) )
+	if (!ZGetGame()->GetWorld()->GetBsp()->Pick(m_Position, dir, &pick))
 	{
-		mbIsLineOfSight	= true;
+		mbIsLineOfSight = true;
 	}
 	else
 	{
 		auto vec = pick.PickPos - m_Position;
-		float distMap	= D3DXVec3LengthSq( &vec );
+		float distMap	= MagnitudeSq(vec);
 		rvector temp = g_pGame->m_pMyCharacter->m_Position - m_Position;
-		float distChar	= D3DXVec3LengthSq( &(temp) );
+		float distChar	= MagnitudeSq(temp);
 		if( distMap > distChar )
 		{
 			mbIsLineOfSight	= true;
@@ -809,10 +805,9 @@ bool	ZWeaponFlashBang::Update( float fElapsedTime )
 		if( Magnitude(m_Velocity) < LANDING_VELOCITY )
 		{
 			mbLand	= true;
-			rvector	right;
 			m_Up	= rvector( 0, 1, 0 );
-			D3DXVec3Cross( &right, &m_Dir, &m_Up );
-			D3DXVec3Cross( &m_Dir, &right, &m_Up );
+			auto right = CrossProduct(m_Dir, m_Up);
+			m_Dir = CrossProduct(right, m_Up);
 			GetIdentityMatrix(mRotMatrix );
 		}
 		else
@@ -938,11 +933,10 @@ bool ZWeaponSmokeGrenade::Update( float fElapsedTime )
 		if( Magnitude(m_Velocity) < LANDING_VELOCITY )
 		{
 			mbLand	= true;
-			rvector	right;
 			m_Up	= rvector( 0, 1, 0 );
-			D3DXVec3Cross( &right, &m_Dir, &m_Up );
-			D3DXVec3Cross( &m_Dir, &right, &m_Up );
-			GetIdentityMatrix(mRotMatrix );
+			auto right = CrossProduct(m_Dir, m_Up);
+			m_Dir = CrossProduct(right, m_Up);
+			GetIdentityMatrix(mRotMatrix);
 		}
 		else
 		{

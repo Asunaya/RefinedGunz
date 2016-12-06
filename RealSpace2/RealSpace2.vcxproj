@@ -378,6 +378,7 @@
     <ClCompile Include="Source\Renderer.cpp" />
     <ClCompile Include="Source\RHalfEdgeMesh.cpp" />
     <ClCompile Include="Source\RMath.cpp" />
+    <ClCompile Include="Source\rmatrix.cpp" />
     <ClCompile Include="Source\RMesh.cpp" />
     <ClCompile Include="source\RMesh_Frame.cpp" />
     <ClCompile Include="source\RMesh_Load.cpp" />
@@ -389,6 +390,8 @@
     <ClCompile Include="Source\RMeshNodeStringTable.cpp" />
     <ClCompile Include="source\RMeshUtil.cpp" />
     <ClCompile Include="Source\RMtrl.cpp" />
+    <ClCompile Include="Source\rquaternion.cpp" />
+    <ClCompile Include="Source\rvector.cpp" />
     <ClCompile Include="source\RVisualMesh.cpp" />
     <ClCompile Include="source\RVisualMeshMgr.cpp" />
     <ClCompile Include="source\RVisualMeshUtil.cpp" />
@@ -445,12 +448,14 @@
     <ClInclude Include="Include\BulletCollisionLibs.h" />
     <ClInclude Include="Include\EluLoader.h" />
     <ClInclude Include="Include\LightmapGenerator.h" />
+    <ClInclude Include="Include\LogMatrix.h" />
     <ClInclude Include="Include\MeshManager.h" />
     <ClInclude Include="Include\RBspObjectDraw.h" />
     <ClInclude Include="Include\RBspObjectDrawD3D9.h" />
     <ClInclude Include="Include\RBspObjectDrawVulkan.h" />
     <ClInclude Include="Include\RHalfEdgeMesh.h" />
     <ClInclude Include="Include\RMath.h" />
+    <ClInclude Include="Include\rmatrix.h" />
     <ClInclude Include="Include\RMesh.h" />
     <ClInclude Include="INCLUDE\RMeshMgr.h" />
     <ClInclude Include="Include\RMeshNode.h" />
@@ -459,10 +464,13 @@
     <ClInclude Include="INCLUDE\RMeshUtil.h" />
     <ClInclude Include="Include\RMtrl.h" />
     <ClInclude Include="Include\Renderer.h" />
+    <ClInclude Include="Include\rplane.h" />
+    <ClInclude Include="Include\rquaternion.h" />
     <ClInclude Include="Include\RS2.h" />
     <ClInclude Include="Include\RS2D3D9.h" />
     <ClInclude Include="Include\RS2Vulkan.h" />
     <ClInclude Include="Include\RUtil.h" />
+    <ClInclude Include="Include\rvector.h" />
     <ClInclude Include="Include\RVisualMesh.h" />
     <ClInclude Include="INCLUDE\RVisualMeshMgr.h" />
     <ClInclude Include="Include\RVisualMeshUtil.h" />

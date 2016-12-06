@@ -393,39 +393,9 @@ void RHEMesh::GetSubdivisionMesh(	RMeshNode* pMeshNode_, eSubdivisionType eType_
 
 	for( i = 0 ; i < miNumVertices; ++i )
 	{
-		D3DXVec3Normalize( &mVertices[index].normal, &mVertices[index].normal );
+		Normalize(mVertices[index].normal);
 	}
 
-	// Pair Edge Find
-	/*
-	for( i = 0 ; i < miNumVertices; ++i )
-	{
-		peTemp		= mVertices[i].pEdge;
-		for( j = 0; j < 3; ++j )
-		{
-			//peTemp	= &mEdges[ 3*i + j ];
-			if( peTemp->pPair != NULL )
-			{
-				continue;
-			}
-
-			pvTemp	= peTemp->pVertex;
-
-			pvDestTemp = peTemp->pNext->pVertex;
-
-			for( k = 0 ; k < (int)pvDestTemp->ReverseMap.size(); ++k )
-			{
-				peDestTemp = pvDestTemp->ReverseMap[k];
-				if( peDestTemp->pNext->pVertex == pvTemp )
-				{
-					peTemp->pPair	= peDestTemp;
-					peDestTemp->pPair	= peTemp;
-				}
-			}
-			peTemp	= peTemp->pNext;
-		}
-	}
-	//*/
 	for( i = 0 ; i < miNumEdges; ++i )
 	{
 		peTemp	= &mEdges[i];

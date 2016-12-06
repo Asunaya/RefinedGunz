@@ -146,9 +146,9 @@ v3 GetHeadPosition(RealSpace2::RAnimation* LowerAni, RealSpace2::RAnimation* Upp
 v3 GetFootPosition(RealSpace2::RAnimation* LowerAni, int Frame);
 int GetSelectWeaponDelay(MMatchItemDesc* pSelectItemDesc);
 int GetFrame(RealSpace2::RAnimation& Ani, ZC_STATE_LOWER LowerState, MMatchItemDesc* ItemDesc, float Time);
-bool GetNodeMatrix(matrix& mat, const char* Name, const matrix* parent_base_inv,
+bool GetNodeMatrix(rmatrix& mat, const char* Name, const rmatrix* parent_base_inv,
 	RealSpace2::RAnimation* Ani, int Frame, float y, float tremble);
-bool GetUpperSpine1(matrix& mat, RealSpace2::RAnimation* Ani, int Frame, float y, float tremble);
+bool GetUpperSpine1(rmatrix& mat, RealSpace2::RAnimation* Ani, int Frame, float y, float tremble);
 v3 GetAbsHead(const v3& Origin, const v3& Dir, MMatchSex Sex,
 	ZC_STATE_LOWER LowerState, ZC_STATE_UPPER UpperState,
 	int LowerFrame, int UpperFrame,

@@ -254,11 +254,9 @@ void RParticleSystem::BeginState()
 	pd3dDevice->SetStreamSource( 0, RParticleSystem::m_pVB, 0, sizeof(POINTVERTEX) );
 	pd3dDevice->SetFVF( POINTVERTEX::FVF );
 
-
-	// 월드매트릭스 초기화
 	rmatrix World;
 	GetIdentityMatrix(World);
-	RGetDevice()->SetTransform(D3DTS_WORLD, &World);
+	RSetTransform(D3DTS_WORLD, World);
 }
 
 void RParticleSystem::EndState()
@@ -270,8 +268,6 @@ void RParticleSystem::EndState()
 	pd3dDevice->SetRenderState( D3DRS_ZWRITEENABLE, TRUE);
 	pd3dDevice->SetRenderState( D3DRS_SHADEMODE, D3DSHADE_GOURAUD );
 
-	// 이렇게 해줘야 RParticleSystem::m_pVB 의 ref count 가 줄어든다..
-	// 아니면 release 불가..
 	pd3dDevice->SetStreamSource( 0, NULL , 0, 0 );	
 }
 

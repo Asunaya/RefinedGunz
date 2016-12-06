@@ -191,16 +191,16 @@ private:
 	void DrawBorder();
 
 	void Line(float x1, float y1, float x2, float y2, D3DCOLOR Color = CHAT_DEFAULT_INTERFACE_COLOR, float z = 0) {
-		Line(D3DXVECTOR2(x1, y1), D3DXVECTOR2(x2, y2), Color, z);
+		Line(v2(x1, y1), v2(x2, y2), Color, z);
 	}
-	void Line(const D3DXVECTOR2 &v1, const D3DXVECTOR2 &v2, D3DCOLOR Color = CHAT_DEFAULT_INTERFACE_COLOR, float z = 0);
+	void Line(const v2 &v1, const v2 &v2, D3DCOLOR Color = CHAT_DEFAULT_INTERFACE_COLOR, float z = 0);
 	void Quad(float x1, float y1, float x2, float y2, D3DCOLOR Color = CHAT_DEFAULT_INTERFACE_COLOR) {
-		Quad(D3DXVECTOR2(x1, y1), D3DXVECTOR2(x2, y2), Color);
+		Quad(v2(x1, y1), v2(x2, y2), Color);
 	}
 	void Quad(const D3DRECT &r, D3DCOLOR Color = CHAT_DEFAULT_INTERFACE_COLOR, float z = 0) {
-		Quad(D3DXVECTOR2(r.x1, r.y1), D3DXVECTOR2(r.x2, r.y2), Color, z);
+		Quad(v2(r.x1, r.y1), v2(r.x2, r.y2), Color, z);
 	}
-	void Quad(const D3DXVECTOR2 &v1, const D3DXVECTOR2 &v2, D3DCOLOR Color = CHAT_DEFAULT_INTERFACE_COLOR, float z = 0);
+	void Quad(const v2 &v1, const v2 &v2, D3DCOLOR Color = CHAT_DEFAULT_INTERFACE_COLOR, float z = 0);
 
 	std::vector<ScreenSpaceVertex> Lines;
 	std::vector<ScreenSpaceVertex> Triangles;

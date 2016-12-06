@@ -488,11 +488,7 @@ private:
 	void GetNodeAniMatrix(RMeshNode* pMeshNode, rmatrix& m);
 	RMeshNode* UpdateNodeAniMatrix(RMeshNode* pNode);
 
-	void RenderFrameSingleParts();
-	void RenderFrameMultiParts();
-
 	void CalcLookAtParts(rmatrix& pAniMat, RMeshNode* pMeshNode, RVisualMesh* pVisualMesh);
-	void CalcLookAtParts2(rmatrix& pAniMat, RMeshNode* pMeshNode, RVisualMesh* pVisualMesh);
 
 	void RenderSub(const rmatrix& world_mat, bool NoPartsChange);
 	bool CalcParts(RMeshNode* pTMeshNode, RMeshNode* pMeshNode, bool NoPartsChange);

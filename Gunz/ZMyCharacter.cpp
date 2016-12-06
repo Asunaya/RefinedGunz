@@ -202,7 +202,7 @@ void ZMyCharacter::ProcessInput(float fDelta)
 				if (m_bWallJumpQueued && DotProduct(GetVelocity(), m_Direction) > 0 &&
 					GetVelocity().z > -10.f)
 				{
-					rvector pickorigin, pickto, dir;
+					rvector pickorigin, dir;
 					rvector front = m_Direction;
 					Normalize(front);
 
@@ -895,7 +895,7 @@ void ZMyCharacter::OnGadget_Hanging()
 	}
 	else {
 		if (g_pGame->GetTime() - m_fHangTime > .4f && !m_bHangSuccess) {
-			rvector pickorigin, pickto, dir;
+			rvector pickorigin, dir;
 			rvector front = m_Direction;
 			front.z = 0;
 			Normalize(front);

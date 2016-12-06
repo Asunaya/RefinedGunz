@@ -22,8 +22,8 @@ ZEffectLightTracer::ZEffectLightTracer(ZEffectBillboardSource* pEffectBillboardS
 	m_nDrawMode = ZEDM_ADD;
 
 	m_LightTracerDir = m_End-m_Start;
-	m_fLength = D3DXVec3Length(&m_LightTracerDir);
-	D3DXVec3Normalize(&m_LightTracerDir, &m_LightTracerDir);
+	m_fLength = Magnitude(m_LightTracerDir);
+	Normalize(m_LightTracerDir);
 
 	m_Pos = m_Start;
 }
@@ -35,11 +35,9 @@ bool ZEffectLightTracer::Draw(unsigned long int nTime)
 {
 	DWORD dwDiff = nTime-m_nStartTime;
 
-	rvector right;
-	D3DXVec3Cross(&right, &m_LightTracerDir, &RealSpace2::RCameraDirection);
-	D3DXVec3Cross(&m_Normal, &m_LightTracerDir, &right);
-	D3DXVec3Cross(&m_Up, &m_Normal, &m_LightTracerDir);
-	// 잘못된 수식, 수정 필요
+	rvector right = CrossProduct(m_LightTracerDir, RCameraDirection);
+	m_Normal = CrossProduct(m_LightTracerDir, right);
+	m_Up = CrossProduct(m_Normal, m_LightTracerDir);
 	m_Pos += (m_LightTracerDir*LIGHTTRACER_SPEED*(float)dwDiff);
 	m_fLength -= (LIGHTTRACER_SPEED*dwDiff);
 

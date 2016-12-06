@@ -260,6 +260,7 @@ bool RAnimationFile::LoadAni(const char* filename)
 					if(ver > EXPORTER_ANI_VER3) {
 
 						mzf.Read(&pANode->m_quat[j],sizeof(RQuatKey) );
+						static_assert(sizeof(RQuatKey) == 20, "Wrong RQuatKey size");
 
 					} else {// old
 

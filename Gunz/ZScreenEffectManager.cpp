@@ -65,7 +65,7 @@ bool ZScreenEffect::DrawCustom(unsigned long int nTime, const rvector& vOffset, 
 	View = Scale * View;
 	View = Offset * View;
 
-	RGetDevice()->SetTransform(D3DTS_VIEW, &View);
+	RSetTransform(D3DTS_VIEW, View);
 
 	m_VMesh.SetWorldMatrix(World);
 	m_VMesh.Render();

@@ -21,22 +21,12 @@
 
 bool IsLogAvailable();
 
-void InitLog(int logmethodflags=MLOGSTYLE_DEBUGSTRING, const char* pszLogFileName="mlog.txt");
-
-void LogMatrix(const matrix& mat);
+void InitLog(int logmethodflags = MLOGSTYLE_DEBUGSTRING, const char* pszLogFileName = "mlog.txt");
 
 #if defined(_DEBUG) || defined(DEBUG_FAST)
 void DMLog(const char* Format, ...);
-
-void DLogMatrix(const matrix& mat);
 #else
-static inline void DMLog(...)
-{
-}
-
-static inline void DLogMatrix(matrix& mat)
-{
-}
+static inline void DMLog(...) {}
 #endif
 
 void MLogFile(const char* Msg);

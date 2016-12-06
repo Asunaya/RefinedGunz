@@ -122,10 +122,10 @@ bool ZEffectShadowList::Draw()
 			ZEFFECTSHADOWITEM *p = (ZEFFECTSHADOWITEM*)*itr;
 
 			static ZEFFECTCUSTOMVERTEX v[] = {
-				{-0.5f, -0.5f, 0.f, 0xFFFFFFFF, 0.f, 0.f},
-				{ 0.5f, -0.5f, 0.f, 0xFFFFFFFF, 1.f, 0.f},
-				{-0.5f,  0.5f, 0.f, 0xFFFFFFFF, 0.f, 1.f},
-				{ 0.5f,  0.5f, 0.f, 0xFFFFFFFF, 1.f, 1.f},
+				{{-0.5f, -0.5f, 0.f}, 0xFFFFFFFF, 0.f, 0.f },
+				{{ 0.5f, -0.5f, 0.f}, 0xFFFFFFFF, 1.f, 0.f },
+				{{-0.5f,  0.5f, 0.f}, 0xFFFFFFFF, 0.f, 1.f},
+				{{ 0.5f,  0.5f, 0.f}, 0xFFFFFFFF, 1.f, 1.f},
 			};
 
 			static rvector sv[4] = { 
@@ -135,16 +135,12 @@ bool ZEffectShadowList::Draw()
 				rvector( 0.5f, 0.5f , 0.f) ,
 			};
 
-			// 좋은코드는 아니지만 버텍스 카피를 줄이기위해 타입캐스팅했다.
+			for (size_t i{}; i < 4; ++i)
+				v[i].pos = TransformCoord(sv[i], p->worldmat);
 
-			D3DXVec3TransformCoord((rvector*)&v[0].x,sv  ,&p->worldmat);
-			D3DXVec3TransformCoord((rvector*)&v[1].x,sv+1,&p->worldmat);
-			D3DXVec3TransformCoord((rvector*)&v[2].x,sv+2,&p->worldmat);
-			D3DXVec3TransformCoord((rvector*)&v[3].x,sv+3,&p->worldmat);
+			v[0].color = v[1].color = v[2].color = v[3].color = p->dwColor;
 
-			v[0].color=v[1].color=v[2].color=v[3].color=p->dwColor;
-
-			memcpy(pVertices,v,sizeof(ZEFFECTCUSTOMVERTEX)*4);
+			memcpy(pVertices, v, sizeof(ZEFFECTCUSTOMVERTEX) * 4);
 
 			pVertices+=sizeof(ZEFFECTCUSTOMVERTEX)*4;
 
@@ -166,7 +162,6 @@ bool ZEffectShadowList::Draw()
 		m_pIB->Unlock();
 
 		if(FAILED( hr = RGetDevice()->DrawIndexedPrimitive(D3DPT_TRIANGLELIST,0,m_dwBase*4,dwThisNum*4,m_dwBase*6,dwThisNum*2) ))
-//		if(FAILED( hr = RGetDevice()->DrawIndexedPrimitive(D3DPT_TRIANGLESTRIP,0,m_dwBase*4,dwThisNum*4,m_dwBase*6,dwThisNum*2) ))
 			return false;
 
 		m_dwBase+=dwThisNum;
@@ -296,7 +291,7 @@ void ZEffectBillboardList::Update(float fElapsed)
 			p->position+=fElapsed*p->velocity;
 		}
 
-		if( m_bUseRocketSmokeColor ) {//로켓의 경우 색을 바꿔준다..
+		if( m_bUseRocketSmokeColor ) {
 
 			float as = (p->fElapsedTime / p->fLifeTime);
 			float sas = 0.f;
@@ -305,38 +300,38 @@ void ZEffectBillboardList::Update(float fElapsed)
 			rvector color2;
 			rvector col;
 
-			if(as < 0.05f) { // 진행률 5%
+			if(as < 0.05f) {
 
 				sas = as / 0.05f;
 
-				color1=rvector(0.7f,0.5f,0.4f);//빨강
-				color2=rvector(0.6f,0.5f,0.4f);//주황
-				D3DXVec3Lerp(&col,&color1,&color2,sas);
+				color1 = rvector(0.7f, 0.5f, 0.4f);
+				color2 = rvector(0.6f, 0.5f, 0.4f);
+				col = Lerp(color1, color2, sas);
 
-				p->dwColor = _D3DRGBA(col.x,col.y,col.z ,0.f);// 0xf8f814;//노랑
+				p->dwColor = _D3DRGBA(col.x,col.y,col.z ,0.f);
 			}
-			else if(as < 0.1f)	{// 진행률 10%
+			else if(as < 0.1f)	{
 
 				sas = (as-0.05f) / 0.05f;
 
-				color1=rvector(0.6f,0.5f,0.4f);//주황
-				color2=rvector(0.55f,0.55f,0.45f);//노랑
-				D3DXVec3Lerp(&col,&color1,&color2,sas);
+				color1=rvector(0.6f,0.5f,0.4f);
+				color2=rvector(0.55f,0.55f,0.45f);
+				col = Lerp(color1, color2, sas);
 
-				p->dwColor = _D3DRGBA(col.x,col.y,col.z ,0.f);// 0xf8f814;//노랑
+				p->dwColor = _D3DRGBA(col.x,col.y,col.z ,0.f);
 			}
 			else if(as < 0.15f){
 				sas = (as-0.1f) / 0.05f;
 
-				color1=rvector(0.55f,0.55f,0.45f);//노랑
-				color2=rvector(0.5f,0.5f,0.5f);//회색
-				D3DXVec3Lerp(&col,&color1,&color2,sas);
+				color1=rvector(0.55f,0.55f,0.45f);
+				color2=rvector(0.5f,0.5f,0.5f);
+				col = Lerp(color1, color2, sas);
 
-				p->dwColor = _D3DRGBA(col.x,col.y,col.z ,0.f);// 0xf8f814;//노랑
+				p->dwColor = _D3DRGBA(col.x,col.y,col.z ,0.f);
 			}
 			else {
 				col=rvector(0.5f,0.5f,0.5f);//회색
-				p->dwColor = _D3DRGBA(col.x,col.y,col.z ,0.f);// 0xf8f814;//노랑
+				p->dwColor = _D3DRGBA(col.x,col.y,col.z ,0.f);
 			}
 		}
 		i++;
@@ -427,11 +422,8 @@ bool ZEffectBillboardList::Draw()
 
 			if(IS_EQ(dir.z,1.f)) up=rvector(1,0,0);
 
-			D3DXVec3Cross(&right, &up, &dir);
-			D3DXVec3Normalize(&right, &right);
-
-			D3DXVec3Cross(&up, &right, &dir);
-			D3DXVec3Normalize(&up, &up);
+			right = Normalized(CrossProduct(up, dir));
+			up = Normalized(CrossProduct(right, dir));
 
 			rmatrix mat;
 			GetIdentityMatrix(mat);
@@ -477,18 +469,17 @@ bool ZEffectBillboardList::Draw()
 			DWORD color = ((DWORD)(p->fOpacity * 255))<<24 | p->dwColor;
 
 			static ZEFFECTCUSTOMVERTEX v[] = {
-				{-1, -1, 0, 0xFFFFFFFF, 1, 0},
-				{-1,  1, 0, 0xFFFFFFFF, 1, 1},
-				{ 1,  1, 0, 0xFFFFFFFF, 0, 1},
-				{ 1, -1, 0, 0xFFFFFFFF, 0, 0},
+				{{-1, -1, 0}, 0xFFFFFFFF, 1, 0 },
+				{{-1,  1, 0}, 0xFFFFFFFF, 1, 1 },
+				{{ 1,  1, 0 }, 0xFFFFFFFF, 0, 1},
+				{ { 1, -1, 0}, 0xFFFFFFFF, 0, 0 },
 			};
 
 			static const rvector sv[4] = { rvector(-1,-1,0) , rvector(-1,1,0) , rvector(1,1,0) , rvector(1,-1,0) };
 
-			D3DXVec3TransformCoord((rvector*)&v[0].x,sv+0,&matWorld);
-			D3DXVec3TransformCoord((rvector*)&v[1].x,sv+1,&matWorld);
-			D3DXVec3TransformCoord((rvector*)&v[2].x,sv+2,&matWorld);
-			D3DXVec3TransformCoord((rvector*)&v[3].x,sv+3,&matWorld);
+			for (size_t i{}; i < 4; ++i)
+				v[i].pos = TransformCoord(sv[i], matWorld);
+
 			v[0].color=v[1].color=v[2].color=v[3].color=color;
 
 			memcpy(pVertices,v,sizeof(ZEFFECTCUSTOMVERTEX)*4);
@@ -749,7 +740,7 @@ bool ZEffectBillboardTexAniList::Draw()
 
 			if( pChar ) {
 				if( pChar->m_pVMesh ) {
-					if( pChar->m_pVMesh->m_bIsRender==false) {//부모가 안그려졌으면 skip...
+					if( pChar->m_pVMesh->m_bIsRender==false) {
 						itr++;
 						continue;
 					}
@@ -765,26 +756,21 @@ bool ZEffectBillboardTexAniList::Draw()
 
 			rvector dir = p->normal;
 
-			rvector up=p->up;
+			rvector up = p->up;
 			rvector right;
 
-			if(IS_EQ(dir.z,1.f)) up=rvector(1,0,0);
+			if (IS_EQ(dir.z, 1.f)) up = rvector(1, 0, 0);
 
-			D3DXVec3Cross(&right, &up, &dir);
-			D3DXVec3Normalize(&right, &right);
-
-			D3DXVec3Cross(&up, &right, &dir);
-			D3DXVec3Normalize(&up, &up);
+			right = Normalized(CrossProduct(up, dir));
+			up = Normalized(CrossProduct(right, dir));
 
 			rmatrix mat;
 			GetIdentityMatrix(mat);
-			mat._11=right.x;mat._12=right.y;mat._13=right.z;
-			mat._21=up.x;mat._22=up.y;mat._23=up.z;
-			mat._31=dir.x;mat._32=dir.y;mat._33=dir.z;
+			mat._11 = right.x; mat._12 = right.y; mat._13 = right.z;
+			mat._21 = up.x; mat._22 = up.y; mat._23 = up.z;
+			mat._31 = dir.x; mat._32 = dir.y; mat._33 = dir.z;
 
-			rvector pos=p->position;
-
-//			float fScale=p->fStartSize * p->fOpacity + p->fEndSize * (1.f - p->fOpacity);
+			rvector pos = p->position;
 
 			float fInt = min(1,max(0,(p->fLifeTime - p->fElapsedTime)/p->fLifeTime));
 			float fScale=p->fStartSize * fInt + p->fEndSize * (1.f - fInt);
@@ -798,10 +784,10 @@ bool ZEffectBillboardTexAniList::Draw()
 			DWORD color = ((DWORD)(p->fOpacity * 255))<<24 | p->dwColor;
 
 			static ZEFFECTCUSTOMVERTEX v[] = {
-				{-1, -1, 0, 0xFFFFFFFF, 1, 0},
-				{-1,  1, 0, 0xFFFFFFFF, 1, 1},
-				{ 1,  1, 0, 0xFFFFFFFF, 0, 1},
-				{ 1, -1, 0, 0xFFFFFFFF, 0, 0},
+				{{-1, -1, 0}, 0xFFFFFFFF, 1, 0 },
+				{{-1,  1, 0}, 0xFFFFFFFF, 1, 1},
+				{{ 1,  1, 0}, 0xFFFFFFFF, 0, 1},
+				{{ 1, -1, 0}, 0xFFFFFFFF, 0, 0},
 			};
 
 			static rvector sv[4] = { rvector(-1,-1,0) , rvector(-1,1,0) , rvector(1,1,0) , rvector(1,-1,0) };
@@ -817,10 +803,9 @@ bool ZEffectBillboardTexAniList::Draw()
 			v[3].tu = m_fUV[6];
 			v[3].tv = m_fUV[7];
 
-			D3DXVec3TransformCoord((rvector*)&v[0].x,sv+0,&matWorld);
-			D3DXVec3TransformCoord((rvector*)&v[1].x,sv+1,&matWorld);
-			D3DXVec3TransformCoord((rvector*)&v[2].x,sv+2,&matWorld);
-			D3DXVec3TransformCoord((rvector*)&v[3].x,sv+3,&matWorld);
+			for (size_t i{}; i < 4; ++i)
+				v[i].pos = TransformCoord(sv[i], matWorld);
+
 			v[0].color=v[1].color=v[2].color=v[3].color=color;
 
 			memcpy(pVertices,v,sizeof(ZEFFECTCUSTOMVERTEX)*4);
@@ -852,7 +837,7 @@ bool ZEffectBillboardTexAniList::Draw()
 	RGetDevice()->SetIndices(NULL);
 
 	if(ZGetWorld()) {
-		ZGetWorld()->SetFog(true);// 게임 설정에 따라서
+		ZGetWorld()->SetFog(true);
 	}
 
 	EndState();

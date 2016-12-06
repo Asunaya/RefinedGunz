@@ -608,9 +608,9 @@ e2SoftRender:
 		mpMesh->m_pVisualMesh->UpdateLight();
 
 	rmatrix rtemp;
-	dev->GetTransform( D3DTS_WORLD, &rtemp );
+	dev->GetTransform(D3DTS_WORLD, static_cast<D3DMATRIX*>(rtemp));
 	auto NewWorld = mLocalMat * mWorldMat;
-	dev->SetTransform( D3DTS_WORLD ,  &NewWorld );
+	dev->SetTransform(D3DTS_WORLD, static_cast<D3DMATRIX*>(NewWorld));
 
 	mpMesh->SetCharacterMtrl_ON( pMtrl,mpMeshNode,1 ,mpMeshNode->GetTColor());
 
@@ -648,7 +648,7 @@ e2SoftRender:
 #endif
 
 	mpMesh->SetCharacterMtrl_OFF( pMtrl, 1 );
-	dev->SetTransform( D3DTS_WORLD, &rtemp );
+	dev->SetTransform(D3DTS_WORLD, static_cast<D3DMATRIX*>(rtemp));
 
 	postrender();
 

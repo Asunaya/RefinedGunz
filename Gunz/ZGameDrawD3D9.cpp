@@ -65,7 +65,7 @@ static void SetStatesPreDraw(ZGame& Game)
 	Game.GetWorld()->GetBsp()->SetWireframeMode(Game.m_bShowWireframe);
 
 	auto Identity = GetIdentityMatrix();
-	RGetDevice()->SetTransform(D3DTS_WORLD, &Identity);
+	RSetTransform(D3DTS_WORLD, Identity);
 	RGetDevice()->SetRenderState(D3DRS_ALPHABLENDENABLE, false);
 	RGetDevice()->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
 	RGetDevice()->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
@@ -126,8 +126,7 @@ void ZGameDrawD3D9::DrawScene()
 
 	{
 		// Save the world matrix because, apparently, something in this block mutates it.
-		rmatrix OrigWorld;
-		RGetDevice()->GetTransform(D3DTS_WORLD, &OrigWorld);
+		rmatrix OrigWorld = RGetTransform(D3DTS_WORLD);
 
 		if (RenderWithShader)
 			RS2::Get().Render.SetDynamicLights(true);
@@ -149,7 +148,7 @@ void ZGameDrawD3D9::DrawScene()
 			IF_DEBUG(Game.m_render_poly_cnt = RealSpace2::g_poly_render_cnt;);
 		}
 
-		RGetDevice()->SetTransform(D3DTS_WORLD, &OrigWorld);
+		RSetTransform(D3DTS_WORLD, OrigWorld);
 	}
 
 	// Draw world items, such as medkits on the ground and HP, AP, and ammo spawns.

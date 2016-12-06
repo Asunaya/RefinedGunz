@@ -468,8 +468,7 @@ bool RBspObject::Draw()
 
 	// Update occlusion list and local view frustum
 	{
-		rmatrix World;
-		dev->GetTransform(D3DTS_WORLD, &World);
+		rmatrix World = RGetTransform(D3DTS_WORLD);
 
 		m_OcclusionList.UpdateCamera(World, RCameraPosition);
 
@@ -607,8 +606,7 @@ void RBspObject::DrawObjects()
 	RGetDevice()->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
 	RGetDevice()->SetRenderState(D3DRS_LIGHTING, TRUE);
 
-	rmatrix world;
-	RGetDevice()->GetTransform(D3DTS_WORLD, &world);
+	rmatrix world = RGetTransform(D3DTS_WORLD);
 
 	rvector v_add = GetTransPos(world);
 
@@ -2112,8 +2110,6 @@ OpenNodesState RBspObject::Open_Nodes(RSBspNode *pNode, MZFile *pfile, OpenNodes
 		{
 			int mat;
 
-			rvector c1, c2, c3, nor;
-
 			pfile->Read(&mat, sizeof(int));
 			pfile->Read(&pInfo->nConvexPolygon, sizeof(int));
 			pfile->Read(&pInfo->dwFlags, sizeof(DWORD));
@@ -2142,6 +2138,7 @@ OpenNodesState RBspObject::Open_Nodes(RSBspNode *pNode, MZFile *pfile, OpenNodes
 
 			State.Vertices += pInfo->nVertices;
 
+			v3 nor;
 			pfile->Read(&nor, sizeof(rvector));
 			pInfo->plane.a = nor.x;
 			pInfo->plane.b = nor.y;
@@ -2405,7 +2402,7 @@ struct PickInfo
 	v3 InverseDir;
 	RBSPPICKINFO* Out;
 	v3 ColPos;
-	plane Plane;
+	rplane Plane;
 	float Dist;
 	u32 PassFlag;
 };

@@ -166,7 +166,7 @@ void RSolidBspNode::DrawPos(const rvector &pos)
 		return;
 	}
 
-	if(D3DXPlaneDotCoord(&m_Plane,&pos)<0) {
+	if (DotProduct(m_Plane, pos) < 0) {
 		if(m_pNegative)
 			m_pNegative->DrawPos(pos);
 	}else {
@@ -193,7 +193,7 @@ void RSolidBspNode::DrawPlaneVertices(const rplane &plane)
 			RGetDevice()->SetRenderState(D3DRS_POINTSIZE,   *(DWORD*)&fSize);
 			for(int i=0;i<nPolygon*3;i++)
 			{
-				if(fabs(D3DXPlaneDotCoord(&plane,pVertices+i))<5.f)
+				if (abs(DotProduct(plane, pVertices[i])) < 5.f)
 					RGetDevice()->DrawPrimitiveUP(D3DPT_POINTLIST,1,pVertices+i,sizeof(rvector));
 			}
 		}
@@ -254,14 +254,14 @@ rplane	m_SolidPlanes[MAX_DEPTH];
 bool IsCross(const rplane &plane,const rvector &v0,const rvector &v1,float *fParam)
 {
 #define CSIGN(x) ( (x)<-0.1? -1 : (x)>0.1? 1 : 0 )
-	float dotv0=D3DXPlaneDotCoord(&plane,&v0);
-	float dotv1=D3DXPlaneDotCoord(&plane,&v1);
+	float dotv0 = DotProduct(plane, v0);
+	float dotv1 = DotProduct(plane, v1);
 	int signv0=CSIGN(dotv0),signv1=CSIGN(dotv1);
 
 	if (signv0==1 && signv1==1) return false;
 
 	rvector dir=v1-v0;
-	if(D3DXPlaneDotNormal(&plane,&dir)>0) {
+	if (DotPlaneNormal(plane, dir) > 0) {
 		*fParam=-1;
 	}else
 		if(signv0==0) {
@@ -291,7 +291,7 @@ bool RSolidBspNode::GetColPlanes_Recurse(int nDepth)
 			bool bInSolid=true;
 			for(int i=0;i<nDepth;i++) {
 				rplane *pPlane=m_SolidPlanes+i;
-				float dotv0=D3DXPlaneDotCoord(pPlane,&m_ColOrigin);
+				float dotv0 = DotProduct(*pPlane, m_ColOrigin);
 				if(dotv0>-0.1f) {
 					bInSolid=false;
 					break;
@@ -303,15 +303,15 @@ bool RSolidBspNode::GetColPlanes_Recurse(int nDepth)
 			for(int i=0;i<nDepth;i++) {
 				rplane *pPlane=m_SolidPlanes+i;
 
-				float dotv0=D3DXPlaneDotCoord(pPlane,&m_ColOrigin);
-				float dotv1=D3DXPlaneDotCoord(pPlane,&m_ColTo);
+				float dotv0 = DotProduct(*pPlane, m_ColOrigin);
+				float dotv1 = DotProduct(*pPlane, m_ColTo);
 
 				if(fabs(dotv0)<0.1f && fabs(dotv1)<0.1f) {
 					m_pOutList->Add(*pPlane);
 					return false;	
 				}
 
-				if(D3DXPlaneDotNormal(pPlane,&dir)>0) continue;
+				if (DotPlaneNormal(*pPlane, dir) > 0) continue;
 
 				if(0<dotv0 && dotv0<dotv1) continue;
 				if(fabs(dotv0-dotv1)<0.01f) continue;
@@ -326,8 +326,8 @@ bool RSolidBspNode::GetColPlanes_Recurse(int nDepth)
 			int nCount=0;
 			for(int i=0;i<nDepth;i++) {
 				rplane *pPlane=m_SolidPlanes+i;
-				if(D3DXPlaneDotNormal(pPlane,&dir)>0) continue;
-				if(fabs(D3DXPlaneDotCoord(pPlane,&colPos))<0.1f) {
+				if (DotPlaneNormal(*pPlane, dir)>0) continue;
+				if (abs(DotProduct(*pPlane, colPos)) < 0.1f) {
 					m_pOutList->Add(*pPlane);
 					if(fDist<fImpactDist)
 					{
@@ -353,7 +353,7 @@ bool RSolidBspNode::GetColPlanes_Recurse(int nDepth)
 		Normalize(rimpoint);
 		rimpoint= rimpoint*m_fColRadius;
 		rimpoint.z +=  (m_Plane.c < 0 ) ? m_fColHeight : -m_fColHeight;
-		fShift=-D3DXPlaneDotNormal(&m_Plane,&rimpoint);
+		fShift = -DotPlaneNormal(m_Plane, rimpoint);
 	}else
 	{
 		fShift=m_fColRadius;
@@ -420,7 +420,7 @@ bool RSolidBspNode::CheckWall2(RSolidBspNode *pRootNode,RImpactPlanes &impactPla
 {
 	checkwallorigin=origin;
 
-	if(m_bTracePath) {	// 순전히 출력하는 부분
+	if(m_bTracePath) {
 		rvector dif=targetpos-origin;
 		mlog(" from ( %3.5f %3.5f %3.5f ) by ( %3.3f %3.3f %3.3f ) "
 			,origin.x,origin.y,origin.z,dif.x,dif.y,dif.z);
@@ -444,7 +444,7 @@ bool RSolidBspNode::CheckWall2(RSolidBspNode *pRootNode,RImpactPlanes &impactPla
 			for(RImpactPlanes::iterator i=impactPlanes.begin();i!=impactPlanes.end();i++)
 			{
 				rplane p=*i;
-				float fDist = D3DXPlaneDotCoord(&p,&origin);
+				float fDist = DotProduct(p, origin);
 				mlog(" d = %3.3f [%3.3f %3.3f %3.3f %3.3f] ",fDist,p.a,p.b,p.c,p.d);
 			}
 		}
@@ -470,17 +470,16 @@ bool RSolidBspNode::CheckWall2(RSolidBspNode *pRootNode,RImpactPlanes &impactPla
 				continue;
 			}
 
-			float fDistToOrigin = D3DXPlaneDotCoord(&plane,&origin);
-			float fDistToTarget = D3DXPlaneDotCoord(&plane,&targetpos);
+			float fDistToOrigin = DotProduct(plane, origin);
+			float fDistToTarget = DotProduct(plane, targetpos);
 
-			// 
 			if(fDistToOrigin>-.1f && fDistToTarget>-.1f )
 			{
 				continue;
 			}
 
 
-			float fProjDist = -D3DXPlaneDotNormal(&plane,&diff);
+			float fProjDist = -DotPlaneNormal(plane, diff);
 
 			if(fDistToOrigin<=0 && fDistToTarget<fDistToOrigin) {
 				fProjDist = 1;
@@ -522,7 +521,7 @@ bool RSolidBspNode::CheckWall2(RSolidBspNode *pRootNode,RImpactPlanes &impactPla
 		for(i=impactPlanes.begin();i!=impactPlanes.end();i++) 
 		{
 			rplane p=*i;
-			if(fabs(D3DXPlaneDotCoord(&p,&currentorigin))<0.05) {
+			if (abs(DotProduct(p, currentorigin)) < 0.05) {
 				simulplanes[nSimulCount++]=p;
 			}
 		}
@@ -576,7 +575,7 @@ bool RSolidBspNode::CheckWall(RSolidBspNode *pRootNode, const rvector &origin,rv
 			for(RImpactPlanes::iterator i=impactPlanes.begin();i!=impactPlanes.end();i++)
 			{
 				rplane p=*i;
-				float fDist = D3DXPlaneDotCoord(&p,&origin);
+				float fDist = DotProduct(p, origin);
 				mlog(" d = %3.3f [%3.3f %3.3f %3.3f %3.3f] ",fDist,p.a,p.b,p.c,p.d);
 			}
 		}
@@ -602,8 +601,8 @@ bool RSolidBspNode::CheckWall(RSolidBspNode *pRootNode, const rvector &origin,rv
 				continue;
 			}
 
-			float fProjDist = -D3DXPlaneDotNormal(&plane,&diff);
-			float fDistToOrigin = D3DXPlaneDotCoord(&plane,&origin);
+			float fProjDist = -DotPlaneNormal(plane, diff);
+			float fDistToOrigin = DotProduct(plane, origin);
 
 			if(fDistToOrigin<=-0.1) {
 				fProjDist = 1;
@@ -645,7 +644,7 @@ bool RSolidBspNode::CheckWall(RSolidBspNode *pRootNode, const rvector &origin,rv
 		for(i=impactPlanes.begin();i!=impactPlanes.end();i++) 
 		{
 			rplane p=*i;
-			if(fabs(D3DXPlaneDotCoord(&p,&currentorigin))<0.1) {
+			if (abs(DotProduct(p, currentorigin)) < 0.1) {
 				simulplanes[nSimulCount++]=p;
 			}
 		}
@@ -666,14 +665,14 @@ bool RSolidBspNode::CheckWall(RSolidBspNode *pRootNode, const rvector &origin,rv
 
 				rvector Ni=rvector(plane.a,plane.b,plane.c);
 
-				rvector adjtargetpos =  targetpos  + Ni * -D3DXPlaneDotCoord(&plane,&targetpos);
+				rvector adjtargetpos = targetpos + Ni * -DotProduct(plane, targetpos);
 
 				if(m_bTracePath) {
 					mlog("\n    check 1 : ");
 				}
 				rvector checktargetpos = adjtargetpos;
-				CheckWall2(pRootNode,impactPlanes,currentorigin,checktargetpos,fRadius,fHeight,method);
-				float fDot=DotProduct(checkwalldir,checktargetpos-origin);
+				CheckWall2(pRootNode, impactPlanes, currentorigin, checktargetpos, fRadius, fHeight, method);
+				float fDot = DotProduct(checkwalldir, checktargetpos - origin);
 				if(m_bTracePath) {
 					mlog("dot = %3.3f ",fDot);
 				}
@@ -754,7 +753,7 @@ bool RSolidBspNode::CheckWall(RSolidBspNode *pRootNode, const rvector &origin,rv
 		for(i=impactPlanes.begin();i!=impactPlanes.end();i++)
 		{
 			rplane plane = *i;
-			float fDist = D3DXPlaneDotCoord(&plane,&newtargetpos);
+			float fDist = DotProduct(plane, newtargetpos);
 			if(fDist<-0.05) {
 				targetpos = checktargetpos;
 				if(m_bTracePath) {

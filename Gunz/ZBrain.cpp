@@ -336,7 +336,7 @@ void ZBrain::DebugTest()
 
 		rmatrix birdinitmat;
 		GetIdentityMatrix(birdinitmat);
-		RGetDevice()->SetTransform( D3DTS_WORLD, &birdinitmat );
+		RSetTransform(D3DTS_WORLD, birdinitmat);
 
 
 		rvector v1, v2;
@@ -346,17 +346,6 @@ void ZBrain::DebugTest()
 		v2.z=0.0f;
 		RDrawLine(v1, v2, 0xFFFFFF00);
 
-//		OutputDebugString("=========\n");
-//		OutputDebugVector("dir", dir);
-//		OutputDebugVector("pos", m_pBody->GetPosition());
-
-//		char num[64];
-
-
-//		int nCnt=0;
-//		sprintf_safe(num, "%d", ++nCnt);
-//		OutputDebugVector(num, v1);
-
 		while (itorNext != m_WayPointList.end())
 		{
 			v1 = (*itor);
@@ -365,15 +354,9 @@ void ZBrain::DebugTest()
 			v2.z=0.0f;
 			RDrawLine(v1, v2, 0xFFFFFF00);
 
-//			sprintf_safe(num, "%d", ++nCnt);
-//			OutputDebugVector(num, v1);
-
 			++itor;
 			++itorNext;
 		}
-//		sprintf_safe(num, "%d", ++nCnt);
-//		OutputDebugVector(num, v2);
-
 	}
 	RGetDevice()->SetRenderState( D3DRS_ZWRITEENABLE, TRUE );
 
@@ -398,7 +381,7 @@ void ZBrain::DrawDebugPath()
 
 		rmatrix birdinitmat;
 		GetIdentityMatrix(birdinitmat);
-		RGetDevice()->SetTransform( D3DTS_WORLD, &birdinitmat );
+		RSetTransform(D3DTS_WORLD, birdinitmat);
 
 		RDrawLine(rvector(0,0,0), rvector(0,0,100), 0xFFFFFF00);
 	}

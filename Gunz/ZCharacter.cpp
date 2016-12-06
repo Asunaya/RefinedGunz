@@ -616,7 +616,7 @@ void ZCharacter::UpdateSpWeapon()
 		RBSPPICKINFO bpi;
 		if(ZGetGame()->GetWorld()->GetBsp()->Pick(nPos,nDir,&bpi))
 		{
-			if(D3DXPlaneDotCoord(&(bpi.pInfo->plane),&vWeapon[0])<0){
+			if (DotProduct(bpi.pInfo->plane, vWeapon[0]) < 0) {
 				vWeapon[0] = bpi.PickPos - nDir;
 			}
 		}

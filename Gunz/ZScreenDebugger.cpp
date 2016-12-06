@@ -82,8 +82,8 @@ void ZScreenDebugger::DrawDebugInfo(MDrawContext *pDC)
 
 	rmatrix birdinitmat;
 	GetIdentityMatrix(birdinitmat);
-	RGetDevice()->SetTransform( D3DTS_WORLD, &birdinitmat );
-	RSetCamera(RCameraPosition,RCameraDirection+RCameraPosition,rvector(0,0,1));
+	RSetTransform(D3DTS_WORLD, birdinitmat);
+	RSetCamera(RCameraPosition, RCameraDirection + RCameraPosition, rvector(0, 0, 1));
 	
 	RDrawLine(rvector(0.0f,0.0f,0.0f), rvector(100.0f,0.0f,0.0f), 0xFFFF0000);
 	RDrawLine(rvector(0.0f,0.0f,0.0f), rvector(0.0f,100.0f,0.0f), 0xFF00FF00);
@@ -373,7 +373,7 @@ void ZScreenDebugger::DrawDebugInfo(MDrawContext *pDC)
 
 	rmatrix initmat;
 	GetIdentityMatrix(initmat);
-	RGetDevice()->SetTransform( D3DTS_WORLD, &initmat );
+	RSetTransform( D3DTS_WORLD, initmat );
 	RSetCamera(RCameraPosition,RCameraDirection+RCameraPosition,rvector(0,0,1));
 
 	if(ZApplication::GetGameInterface()->IsCursorEnable())
@@ -418,12 +418,11 @@ void ZScreenDebugger::DrawDebugInfo(MDrawContext *pDC)
 
 
 	{
-		// 캐릭터 충돌체크
 		RDrawCylinder(g_pGame->m_pMyCharacter->m_Position+rvector(0,0,120),CHARACTER_RADIUS,60,10);
 
 		rmatrix birdinitmat;
 		GetIdentityMatrix(birdinitmat);
-		RGetDevice()->SetTransform( D3DTS_WORLD, &birdinitmat );
+		RSetTransform(D3DTS_WORLD, birdinitmat);
 
 		for (ZObjectManager::iterator itor = g_pGame->m_ObjectManager.begin();
 			itor != g_pGame->m_ObjectManager.end(); ++itor)
@@ -431,7 +430,8 @@ void ZScreenDebugger::DrawDebugInfo(MDrawContext *pDC)
 			ZObject* pNPC = (*itor).second;
 			if(pNPC->IsNPC())
 			{
-				RDrawCylinder(pNPC->GetPosition()+rvector(0,0,pNPC->GetCollHeight()/2.0f),pNPC->GetCollRadius(),pNPC->GetCollHeight()/2.0f,10);
+				RDrawCylinder(pNPC->GetPosition() + rvector(0, 0, pNPC->GetCollHeight() / 2.0f),
+					pNPC->GetCollRadius(), pNPC->GetCollHeight() / 2.0f, 10);
 
 				ZItem *pItem = pNPC->GetItems()->GetItem(MMCIP_MELEE);
 				if(pItem)
@@ -534,22 +534,19 @@ void ZScreenDebugger::OnDrawAIDebugInfo(MDrawContext *pDC)
 
 	rmatrix birdinitmat;
 	GetIdentityMatrix(birdinitmat);
-	RGetDevice()->SetTransform( D3DTS_WORLD, &birdinitmat );
+	RSetTransform(D3DTS_WORLD, birdinitmat);
 	RSetCamera(RCameraPosition,RCameraDirection+RCameraPosition,rvector(0,0,1));
 
 	ZGetGame()->GetWorld()->GetBsp()->DrawNavi_Polygon();
-//	ZGetGame()->GetWorld()->GetBsp()->DrawNavi_Links();
 
 	ZObjectManager *pcm=&g_pGame->m_ObjectManager;
 
-
-	// 충돌체크
 	{
 		RDrawCylinder(g_pGame->m_pMyCharacter->m_Position+rvector(0,0,120),CHARACTER_RADIUS,60,10);
 
 		rmatrix birdinitmat;
 		GetIdentityMatrix(birdinitmat);
-		RGetDevice()->SetTransform( D3DTS_WORLD, &birdinitmat );
+		RSetTransform(D3DTS_WORLD, birdinitmat);
 
 		for (ZObjectManager::iterator itor = g_pGame->m_ObjectManager.begin();
 			itor != g_pGame->m_ObjectManager.end(); ++itor)
@@ -558,10 +555,9 @@ void ZScreenDebugger::OnDrawAIDebugInfo(MDrawContext *pDC)
 			if(pObj->IsNPC())
 			{
 				ZActor* pNPC = (ZActor*)pObj;
-				// 충돌체크
-				RDrawCylinder(pNPC->GetPosition()+rvector(0,0,pNPC->GetCollHeight()/2.0f),pNPC->GetCollRadius(),pNPC->GetCollHeight()/2.0f,30);
+				RDrawCylinder(pNPC->GetPosition() + rvector(0, 0, pNPC->GetCollHeight() / 2.0f),
+					pNPC->GetCollRadius(), pNPC->GetCollHeight() / 2.0f, 30);
 
-				// 근거리 범위
 				ZItem *pItem = pNPC->GetItems()->GetItem(MMCIP_MELEE);
 				if(pItem)
 				{
@@ -571,7 +567,6 @@ void ZScreenDebugger::OnDrawAIDebugInfo(MDrawContext *pDC)
 					DrawDebugInfo_NPCArc(pNPC->GetPosition(), pNPC->GetDirection(), fMeleeRange, (PI_FLOAT / 2.0f), 0xFF0000FF);
 				}
 
-				// 근거리 스킬 범위
 				if(pNPC->GetNPCInfo()->nNPCAttackTypes & NPC_ATTACK_MAGIC)
 				{
 					ZModule_Skills *pmod = (ZModule_Skills *)pNPC->GetModule(ZMID_SKILLS);

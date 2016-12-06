@@ -185,7 +185,7 @@ int RDynamicLightManager::SetLight(const rvector& pos_ )
 			
 			for( int i = 0 ; i < 6; ++i )
 			{
-				decisionTest = D3DXPlaneDotCoord( &frustum[i], &pCurr->vPos );
+				decisionTest = DotProduct(frustum[i], pCurr->vPos);
 				if( decisionTest < 0 )
 				{
 					bCull = true;

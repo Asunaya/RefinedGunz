@@ -71,13 +71,8 @@ bool ZEffectBillboardSource::Draw(rvector &Pos, rvector &Dir, rvector &Up, rvect
 	// Transform
 	rmatrix matTranslation, matScaling, matWorld;
 
-	rvector right;
-	D3DXVec3Cross(&right, &Up, &Dir);
-	D3DXVec3Normalize(&right, &right);
-
-	rvector up;
-	D3DXVec3Cross(&up, &right, &Dir);
-	D3DXVec3Normalize(&up, &up);
+	auto right = Normalized(CrossProduct(Up, Dir));
+	auto up = Normalized(CrossProduct(right, Dir));
 
 	rvector dir = RCameraDirection;
 
@@ -92,7 +87,7 @@ bool ZEffectBillboardSource::Draw(rvector &Pos, rvector &Dir, rvector &Up, rvect
 
 	matWorld = matScaling * mat;
 	matWorld *= matTranslation;
-	RGetDevice()->SetTransform(D3DTS_WORLD, &matWorld);
+	RSetTransform(D3DTS_WORLD, matWorld);
 
 	RGetDevice()->SetRenderState(D3DRS_TEXTUREFACTOR, (DWORD)((BYTE)(0xFF*fOpacity))<<24);
 
@@ -150,7 +145,8 @@ void ZEffectBillboardDrawer::Create(void)
 	m_bCreate = true;
 }
 
-bool ZEffectBillboardDrawer::Draw(LPDIRECT3DTEXTURE9 pEffectBillboardTexture, rvector &Pos, rvector &Dir, rvector &Up, rvector &Scale, float fOpacity)
+bool ZEffectBillboardDrawer::Draw(LPDIRECT3DTEXTURE9 pEffectBillboardTexture, rvector &Pos,
+	rvector &Dir, rvector &Up, rvector &Scale, float fOpacity)
 {
 	if(isInViewFrustum( Pos, RGetViewFrustum())==false) {
 		return false;
@@ -158,13 +154,8 @@ bool ZEffectBillboardDrawer::Draw(LPDIRECT3DTEXTURE9 pEffectBillboardTexture, rv
 
 	rmatrix matTranslation, matScaling, matWorld;
 
-	rvector right;
-	D3DXVec3Cross(&right, &Up, &Dir);
-	D3DXVec3Normalize(&right, &right);
-
-	rvector up;
-	D3DXVec3Cross(&up, &right, &Dir);
-	D3DXVec3Normalize(&up, &up);
+	auto right = Normalized(CrossProduct(Up, Dir));
+	auto up = Normalized(CrossProduct(right, Dir));
 
 	rvector dir = RCameraDirection;
 
@@ -179,7 +170,7 @@ bool ZEffectBillboardDrawer::Draw(LPDIRECT3DTEXTURE9 pEffectBillboardTexture, rv
 
 	matWorld = matScaling * mat;
 	matWorld *= matTranslation;
-	RGetDevice()->SetTransform(D3DTS_WORLD, &matWorld);
+	RSetTransform(D3DTS_WORLD, matWorld);
 
 	RGetDevice()->SetRenderState(D3DRS_TEXTUREFACTOR, 0xFFFFFFFF);
 

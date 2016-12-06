@@ -256,6 +256,9 @@
     <ClCompile Include="Source\LightmapGenerator.cpp">
       <Filter>Map</Filter>
     </ClCompile>
+    <ClCompile Include="Source\rquaternion.cpp" />
+    <ClCompile Include="Source\rvector.cpp" />
+    <ClCompile Include="Source\rmatrix.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\RHalfEdgeMesh.h">
@@ -456,5 +459,10 @@
     <ClInclude Include="Include\Sphere.h">
       <Filter>Map\RSX</Filter>
     </ClInclude>
+    <ClInclude Include="Include\rvector.h" />
+    <ClInclude Include="Include\rmatrix.h" />
+    <ClInclude Include="Include\rplane.h" />
+    <ClInclude Include="Include\rquaternion.h" />
+    <ClInclude Include="Include\LogMatrix.h" />
   </ItemGroup>
 </Project>

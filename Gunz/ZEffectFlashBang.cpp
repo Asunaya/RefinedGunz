@@ -152,12 +152,10 @@ void ZEffectFlashBang::Init( rvector& ExplosionPos_, rvector playerPos_, rvector
 	
 	mfDuration	= Duration_;
 
-	rvector flashDir	= ExplosionPos_ - playerPos_;
+	rvector flashDir = Normalized(ExplosionPos_ - playerPos_);
 
-	D3DXVec3Normalize( &flashDir, &flashDir );
-
-	mfPower		= D3DXVec3Dot( &playerDir_, &flashDir ) * mfDuration;
-	mfStartTime	= g_pGame->GetTime();
+	mfPower = DotProduct(playerDir_, flashDir) * mfDuration;
+	mfStartTime = g_pGame->GetTime();
 
 	if( !mbDrawCopyScreen )
 	{
@@ -174,7 +172,7 @@ void ZEffectFlashBang::Init( rvector& ExplosionPos_, rvector playerPos_, rvector
 		RGetDevice()->Clear( 0 , NULL, D3DCLEAR_TARGET|D3DCLEAR_ZBUFFER, 0x00000000, 1.0f, 0.0f );
 
 		auto view = ViewMatrix(RCameraPosition, RCameraDirection, RCameraUp);
-		RGetDevice()->SetTransform(D3DTS_VIEW, &view );
+		RSetTransform(D3DTS_VIEW, view);
 
 		ZGetGame()->GetWorld()->GetBsp()->Draw();
 		g_pGame->m_ObjectManager.Draw();

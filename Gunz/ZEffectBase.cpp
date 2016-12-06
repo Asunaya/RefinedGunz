@@ -88,7 +88,7 @@ void ZEffectBase::BeginState()
 
 	LPDIRECT3DDEVICE9 pDevice = RGetDevice();
 
-	pDevice->SetTransform(D3DTS_WORLD, &id);
+	RSetTransform(D3DTS_WORLD, id);
 	pDevice->SetStreamSource(0,m_pVB,0,sizeof(ZEFFECTCUSTOMVERTEX));
 	pDevice->SetIndices(m_pIB);
 	pDevice->SetFVF(ZEFFECTBASE_D3DFVF);

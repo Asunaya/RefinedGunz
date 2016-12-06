@@ -545,9 +545,9 @@ bool RVisualMesh::BBoxPickCheck(int mx,int my)
 	pos.y = m._42;
 	pos.z = m._43;
 
-	D3DXVec3Normalize(&dir,&dir);
+	Normalize(dir);
 
-	return BBoxPickCheck(pos,dir);
+	return BBoxPickCheck(pos, dir);
 }
 
 void BBoxSubCalc(rvector* max,rvector* min)
@@ -565,12 +565,12 @@ bool RVisualMesh::BBoxPickCheck(const rvector& pos, const rvector& dir)
 
 	CalcBox();
 
-	D3DXVec3TransformCoord(&min,&m_vBMax,&m_WorldMat);
-	D3DXVec3TransformCoord(&max,&m_vBMin,&m_WorldMat);
+	min = TransformCoord(m_vBMax, m_WorldMat);
+	max = TransformCoord(m_vBMin, m_WorldMat);
 
 	BBoxSubCalc(&max,&min);
 
-	return D3DXBoxBoundProbe(&min,&max,&pos,&dir) ? true : false;
+	return IntersectLineAABB(pos, dir, { min, max });
 }
 
 bool RVisualMesh::Pick(int x,int y,RPickInfo* pInfo)
@@ -739,17 +739,17 @@ void RVisualMesh::Render(bool low,bool render_buffer) {
 
 		TransformBox(&bbox, srcbox, m_WorldMat);
 
-			if(m_fVis < 0.001f) {
+		if (m_fVis < 0.001f) {
+			m_bIsRender = false;
+			return;
+		}
+
+		if (m_bCheckViewFrustum) {
+			if (isInViewFrustumWithZ(&bbox, RGetViewFrustum()) == false) {
 				m_bIsRender = false;
 				return;
 			}
-
-			if(m_bCheckViewFrustum) {
-				if(isInViewFrustumWithZ( &bbox, RGetViewFrustum()) == false) {
-					m_bIsRender = false;
-					return;
-				}
-			}
+		}
 
 		m_bIsRender = true;
 
@@ -1067,10 +1067,8 @@ void RVisualMesh::DrawEnchantFire(RVisualMesh* pVWMesh,int mode,rmatrix& m)
 		vpos[2] = vmax;
 		vpos[3] = vmin;
 
-		D3DXVec3TransformCoord(&vpos[0],&vpos[0],&m);
-		D3DXVec3TransformCoord(&vpos[1],&vpos[1],&m);
-		D3DXVec3TransformCoord(&vpos[2],&vpos[2],&m);
-		D3DXVec3TransformCoord(&vpos[3],&vpos[3],&m);
+		for (size_t i{}; i < 4; ++i)
+			vpos[i] = TransformCoord(vpos[i], m);
 
 		static RLVertex pVert[10];
 
@@ -1108,7 +1106,7 @@ void RVisualMesh::DrawEnchantFire(RVisualMesh* pVWMesh,int mode,rmatrix& m)
 		pVert[3].tv = 0.0f;
 
 		static rmatrix _init_mat = GetIdentityMatrix();
-		dev->SetTransform( D3DTS_WORLD, &_init_mat );
+		dev->SetTransform(D3DTS_WORLD, static_cast<D3DMATRIX*>(_init_mat));
 
 		dev->SetTextureStageState( 0, D3DTSS_COLORARG1, D3DTA_TEXTURE );
 		dev->SetTextureStageState( 0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE );
@@ -1259,24 +1257,23 @@ void RVisualMesh::GetWeaponPos(rvector* pOut,bool bLeft)
 	 bool b2hCheck = false;
 	 bool bRender = true;
 
-	 rmatrix m,m2;
+	 rmatrix m;
 
 	 int sel_parts = 0;
 	 int sel_parts2 = 0;
 
-	 GetMotionInfo(sel_parts,sel_parts2,b2hCheck,bRender);
+	 GetMotionInfo(sel_parts, sel_parts2, b2hCheck, bRender);
 
-	 if(bLeft)
-		m = m_WeaponPartInfo[sel_parts2].mat * m_WorldMat;
-	 else	
-		m = m_WeaponPartInfo[sel_parts].mat * m_WorldMat;
+	 if (bLeft)
+		 m = m_WeaponPartInfo[sel_parts2].mat * m_WorldMat;
+	 else
+		 m = m_WeaponPartInfo[sel_parts].mat * m_WorldMat;
 
-	D3DXVec3TransformCoord(&p1,&p1,&m);
-	D3DXVec3TransformCoord(&p2,&p2,&m);
+	 p1 = TransformCoord(p1, m);
+	 p2 = TransformCoord(p2, m);
 
-	pOut[0] = p1;
-	pOut[1] = p2;
-
+	 pOut[0] = p1;
+	 pOut[1] = p2;
 }
 
 float RVisualMesh::GetWeaponSize()
@@ -1355,8 +1352,8 @@ void RVisualMesh::DrawTracks(bool draw,RVisualMesh* pVWMesh,int mode,rmatrix& m)
 		vpos[0].y = vmax.y;
 		vpos[1].y = vmin.y + 35.f;
 
-		D3DXVec3TransformCoord(&vpos[0],&vpos[0],&m);
-		D3DXVec3TransformCoord(&vpos[1],&vpos[1],&m);
+		for (auto& p : vpos)
+			p = TransformCoord(p, m);
 		
 		static RLVertex pVert[2];
 		static u32 color[2];
@@ -2135,31 +2132,16 @@ rvector RVisualMesh::GetLFootPosition()
 
 rvector	RVisualMesh::GetHeadPosition() 
 {
-	rvector rv;
 	rmatrix m;
 	GetHeadMatrix(&m);
-
-	rv.x = m._41;
-	rv.y = m._42;
-	rv.z = m._43;
-
-	rvector root=GetRootPosition()-rv;
-	Normalize(root);
-
-	return rv;
+	return GetTransPos(m);
 }
 
 rvector	RVisualMesh::GetRootPosition() 
 {
-	rvector rv;
 	rmatrix m;
 	GetRootMatrix(&m);
-
-	rv.x = m._41;
-	rv.y = m._42;
-	rv.z = m._43;
-
-	return rv;
+	return GetTransPos(m);
 }
 
 D3DXQUATERNION RVisualMesh::GetBipRootRot(int frame)

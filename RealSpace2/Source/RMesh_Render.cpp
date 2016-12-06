@@ -95,8 +95,6 @@ void RMesh::RenderSub(const rmatrix& world_mat, bool NoPartsChange)
 
 	LPDIRECT3DDEVICE9 dev = RGetDevice();
 
-	rmatrix buffer, Inv;
-
 	m_vBBMax = { -9999.f, -9999.f, -9999.f };
 	m_vBBMin = { 9999.f, 9999.f, 9999.f };
 
@@ -279,7 +277,7 @@ void RMesh::RenderSub(const rmatrix& world_mat, bool NoPartsChange)
 			RenderNode(pATMNode, world_mat);
 
 	static rmatrix _init_mat = GetIdentityMatrix();
-	dev->SetTransform( D3DTS_WORLD, &_init_mat );
+	dev->SetTransform(D3DTS_WORLD, static_cast<const D3DMATRIX*>(_init_mat));
 
 	__EP(500);
 
@@ -539,8 +537,6 @@ static bool find_intersects_triangle_sub(const rvector& orig, const rvector& dir
 
 bool RMesh::CalcIntersectsTriangle(const v3& origin, const v3& dir, RPickInfo* pInfo, rmatrix* world_mat, bool fastmode)
 {
-	rvector _v;
-
 	float best_t = 9999.f;
 
 	RMeshNode* pFindMeshNode = NULL;
@@ -549,8 +545,6 @@ bool RMesh::CalcIntersectsTriangle(const v3& origin, const v3& dir, RPickInfo* p
 	rvector		vFindVec[3];
 	
 	bool  bFind = false;
-
-	rmatrix result_mat;
 
 	for (auto* pMeshNode : m_list)
 	{

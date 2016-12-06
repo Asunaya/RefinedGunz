@@ -149,8 +149,10 @@ inline v3 TransformCoord(const v3& v, const rmatrix& mat)
 {
 	v3 ret = Transform(v, mat);
 	auto w = v.x * mat._14 + v.y * mat._24 + v.z * mat._34 + mat._44;
-	ret /= w;
-	return ret;
+	if (w)
+		return ret / w;
+
+	return{ 0, 0, 0 };
 }
 
 inline rmatrix Transpose(const rmatrix& src)
@@ -210,11 +212,6 @@ inline rplane& operator *=(rplane& a, const rmatrix& b)
 {
 	a = a * b;
 	return a;
-}
-
-inline rvector operator /(float scalar, const rvector& vec)
-{
-	return{ scalar / vec.x, scalar / vec.y, scalar / vec.z };
 }
 
 _NAMESPACE_REALSPACE2_BEGIN
@@ -312,6 +309,12 @@ void Normalize(T& x)
 	x *= 1.f / sqrt(MagSq);
 }
 
+inline void Normalize(rplane& plane) {
+	v3 Normal{ plane.a, plane.b, plane.c };
+	Normalize(Normal);
+	plane = { EXPAND_VECTOR(Normal), plane.d };
+}
+
 // If the input object has a nonzero length,
 // this function returns a unit object in the same direction.
 // Otherwise, it returns the null object.
@@ -350,7 +353,7 @@ inline void CrossProduct(rvector *result, const rvector &a, const rvector &b) {
 }
 
 inline float DotProduct(const rquaternion& a, const rquaternion& b) {
-	return DotProduct(static_cast<v4>(a), static_cast<v4>(b));
+	return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
 }
 
 void MakeWorldMatrix(rmatrix *pOut, const rvector& pos, rvector dir, rvector up);
@@ -371,25 +374,20 @@ float GetArea(rvector &v1, rvector &v2, rvector &v3);
 // Returns the clockwise rotation of ta such that tb aligns with ta on xy
 float GetAngleOfVectors(const rvector &ta, const rvector &tb);
 
-// Returns from spherically interpolated towards to by t.
-// from and to should be unit length, t should be in the range (0, 1).
 template <typename T>
-inline auto Slerp(const T& from, const T& to, float t)
-{
-	auto clamp = [&](auto&& val, auto&& minval, auto&& maxval) {
-		return max(minval, min(maxval, val));
-	};
-	float angle = acos(clamp(DotProduct(from, to), -1, 1));
-	float sin1 = sin((1 - t) * angle);
-	float sin2 = sin(t * angle);
-	float sinangle = sin(angle);
-
-	return sin1 / sinangle * from + sin2 / sinangle * to;
+auto Lerp(T src, T dest, float t) {
+	return src * (1 - t) + dest * t;
 }
 
-template <typename T>
-T Lerp(T src, T dest, float t) {
-	return src * (1 - t) + dest * t;
+// Returns from spherically interpolated towards to by t.
+// from and to should be unit length, t should be in the range (0, 1).
+v3 Slerp(const v3& from, const v3& to, float t);
+v2 Slerp(const v2& from, const v2& to, float t);
+v4 Slerp(const v4& from, const v4& to, float t);
+rquaternion Slerp(const rquaternion& from, const rquaternion& to, float t);
+
+inline rquaternion HadamardProduct(const rquaternion& a, const rquaternion& b) {
+	return{ a.x * b.x, a.y * b.y, a.z * b.z, a.w * b.w };
 }
 
 inline v3 HadamardProduct(const v3& a, const v3& b) {
@@ -689,7 +687,8 @@ inline bool IntersectLineSegmentPlane(v3* hit, const rplane& plane, const v3& l0
 
 inline bool IntersectTriangle(const v3& V1, const v3& V2, const v3& V3, // Triangle points
 	const v3& Origin, const v3& Dir, // Ray origin and direction
-	float* out) // Output: Distance from origin to intersection point
+	float* out = nullptr, // Output: Distance from origin to intersection point
+	float* u_out = nullptr, float* v_out = nullptr)
 {
 	// Möller–Trumbore triangle intersection algorithm
 
@@ -732,6 +731,10 @@ inline bool IntersectTriangle(const v3& V1, const v3& V2, const v3& V3, // Trian
 	if (t > EPSILON) { //ray intersection
 		if (out)
 			*out = t;
+		if (u_out)
+			*u_out = u;
+		if (v_out)
+			*v_out = v;
 		return true;
 	}
 
@@ -739,10 +742,11 @@ inline bool IntersectTriangle(const v3& V1, const v3& V2, const v3& V3, // Trian
 	return false;
 }
 
-inline bool IntersectLineAABB(float& t,
+inline bool IntersectLineAABB(
 	const v3& origin, const v3& dir,
 	const rboundingbox& bbox,
-	const v3& dirfrac)
+	const v3& dirfrac,
+	float* t = nullptr)
 {
 	float t1 = (bbox.vmin.x - origin.x)*dirfrac.x;
 	float t2 = (bbox.vmax.x - origin.x)*dirfrac.x;
@@ -757,49 +761,55 @@ inline bool IntersectLineAABB(float& t,
 	// if tmax < 0, ray (line) is intersecting AABB, but whole AABB is behind us
 	if (tmax < 0)
 	{
-		t = tmax;
+		if (t) *t = tmax;
 		return false;
 	}
 
 	// if tmin > tmax, ray doesn't intersect AABB
 	if (tmin > tmax)
 	{
-		t = tmax;
+		if (t) *t = tmax;
 		return false;
 	}
 
-	t = tmin;
+	if (t) *t = tmin;
 	return true;
 }
 
-inline bool IntersectLineAABB(float& t,
+inline bool IntersectLineAABB(
 	const v3& origin, const v3& dir,
-	const rboundingbox& bbox)
+	const rboundingbox& bbox,
+	float* t = nullptr)
 {
 	v3 dirfrac{ 1.f / dir.x, 1.f / dir.y, 1.f / dir.z };
-	return IntersectLineAABB(t, origin, dir, bbox, dirfrac);
+	return IntersectLineAABB(origin, dir, bbox, dirfrac, t);
 }
 
-inline bool IntersectLineSegmentAABB(float& t,
+inline bool IntersectLineSegmentAABB(
 	const v3& l0, const v3& l1,
 	const rboundingbox& bbox,
-	const v3& InverseDir)
+	const v3& InverseDir,
+	float* t = nullptr)
 {
-	auto ret = IntersectLineAABB(t, l0, Normalized(l1 - l0), bbox, InverseDir);
+	float lt;
+	auto ret = IntersectLineAABB(l0, Normalized(l1 - l0), bbox, InverseDir, &lt);
 	if (!ret)
 		return false;
 
-	if (Square(t) > MagnitudeSq(l1 - l0))
+	if (t) *t = lt;
+
+	if (Square(lt) > MagnitudeSq(l1 - l0))
 		return false;
 
 	return true;
 }
 
-inline bool IntersectLineSegmentAABB(float& t,
+inline bool IntersectLineSegmentAABB(
 	const v3& l0, const v3& l1,
-	const rboundingbox& bbox)
+	const rboundingbox& bbox,
+	float* t = nullptr)
 {
-	return IntersectLineSegmentAABB(t, l0, l1, bbox, 1.f / Normalized(l1 - l0));
+	return IntersectLineSegmentAABB(l0, l1, bbox, 1.f / Normalized(l1 - l0), t);
 }
 
 inline rplane PlaneFromPointNormal(const v3& point, const v3& normal)
@@ -857,5 +867,12 @@ inline rmatrix TranslationMatrix(const v3& Trans)
 	SetTransPos(mat, Trans);
 	return mat;
 }
+
+v3 CatmullRomSpline(const v3& v0, const v3& v1, const v3& v2, const v3& v3, float s);
+
+bool isnan(const v3& vec);
+bool isinf(const v3& vec);
+bool isnan(const rmatrix& mat);
+bool isinf(const rmatrix& mat);
 
 _NAMESPACE_REALSPACE2_END

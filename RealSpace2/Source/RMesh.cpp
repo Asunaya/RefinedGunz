@@ -759,7 +759,7 @@ void RMesh::CalcNodeMatrixBBox(RMeshNode* pNode)
 
 void RMesh::CalcBBox(rvector* v) 
 {
-	SubCalcBBox( &m_vBBMax, &m_vBBMin, v);
+	SubCalcBBox(&m_vBBMax, &m_vBBMin, v);
 }
 
 void RMesh::SubCalcBBox(rvector* max,rvector* min,rvector* v)

@@ -14,7 +14,6 @@
 
 #define POINTER_64 __ptr64
 
-// ¿©±â´Ù include
 #include <winsock2.h>
 #include <crtdbg.h>
 #include <mbstring.h>
@@ -26,7 +25,8 @@
 #include <string>
 #include <list>
 
-#include "d3dx9math.h"
+#include <d3d9.h>
+#include <d3dx9math.h>
 
 #include "MDebug.h"
 #include "MZFileSystem.h"

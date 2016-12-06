@@ -103,19 +103,22 @@ float RAnimationNode::GetVisValue(int frame)
 	return GetVisKey(m_vis,key_pos,m_vis_cnt,frame);
 }
 
+inline v3 operator *(const v3& vec, const rquaternion& quat) {
+	v3 quat_vec{ EXPAND_VECTOR(quat) };
+	auto uv = CrossProduct(quat_vec, vec);
+	auto uuv = CrossProduct(quat_vec, uv);
+	return vec + ((uv * quat.w) + uuv) * 2;
+}
+
 rquaternion RAnimationNode::GetRotValue(int frame)
 {
-	rquaternion rq;
-
-	if( m_rot_cnt==0 || m_quat==NULL ) {
-		//rq = MatrixToQuaternion(m_mat_base);
-		D3DXQuaternionRotationMatrix(&rq, &m_mat_base);
-		return rq;
+	if (m_rot_cnt == 0 || m_quat == NULL) {
+		return MatrixToQuaternion(m_mat_base);
 	}
 
 	int p;
-	for (p=0;p<m_rot_cnt;p++) {
-		if ( m_quat[p].frame > frame) {
+	for (p = 0; p < m_rot_cnt; p++) {
+		if (m_quat[p].frame > frame) {
 			break;
 		}
 	}
@@ -124,7 +127,8 @@ rquaternion RAnimationNode::GetRotValue(int frame)
 		return m_quat[m_rot_cnt-1];
 	}
 
-	if(p)	p--;
+	if(p)
+		p--;
 
 	int s;
 	float d = 1.f;
@@ -133,42 +137,38 @@ rquaternion RAnimationNode::GetRotValue(int frame)
 
 	if (s != 0)	d = (float)(frame - m_quat[p].frame) / (float)s;
 
-	D3DXQuaternionSlerp(&rq, &m_quat[p], &m_quat[p + 1], d);
-
-	return rq;
+	return Slerp(m_quat[p], m_quat[p + 1], d);
 }
 
 rvector RAnimationNode::GetPosValue(int frame)
 {
 	rvector v;
 
-	if( m_pos_cnt == 0 || m_pos == NULL ) {
+	if (m_pos_cnt == 0 || m_pos == NULL) {
 		return GetTransPos(m_mat_base);
 	}
 
 	int p;
-	for (p=0;p<m_pos_cnt;p++)	{
-		if ( m_pos[p].frame > frame ) {
+	for (p = 0; p < m_pos_cnt; p++) {
+		if (m_pos[p].frame > frame) {
 			break;
 		}
 	}
 
-	if(p >= m_pos_cnt) {
-		return m_pos[m_pos_cnt-1];
+	if (p >= m_pos_cnt) {
+		return m_pos[m_pos_cnt - 1];
 	}
 
-	if(p) p--;
+	if (p) p--;
 
-	int s = (m_pos[p+1].frame - m_pos[p].frame );//tick
+	int s = (m_pos[p + 1].frame - m_pos[p].frame);
 
 	float d = 1.f;
 
-	if (s!=0)	d = (float)(frame%s)/(float)s;
+	if (s != 0)	d = (float)(frame%s) / (float)s;
+	v = m_pos[p] - m_pos[p + 1];
 
-	v = m_pos[p] - m_pos[p+1];
-
-	if (v.x==0.f && v.y==0.f && v.z==0.f) d = 0;
-
+	if (v.x == 0.f && v.y == 0.f && v.z == 0.f) d = 0;
 	v = m_pos[p] - v * d;
 
 	return v;
@@ -210,7 +210,7 @@ int	RAnimationNode::GetVecValue(int frame,rvector* pVecTable)
 	int vcnt = m_vertex_vcnt;
 
 	for(int k=0;k<vcnt;k++) {
-		D3DXVec3Lerp(&v,&v1[k],&v2[k], d);
+		v = Lerp(v1[k], v2[k], d);
 		pVecTable[k] = v;
 	}
 
@@ -229,7 +229,8 @@ rmatrix RAnimationNode::GetTMValue(int frame)
 		return m_mat[m_mat_cnt-1];
 	}
 
-	if(j) j--;
+	if(j)
+		j--;
 
 	return m_mat[j];
 }

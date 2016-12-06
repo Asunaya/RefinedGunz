@@ -519,7 +519,7 @@ void _draw_try(LPDIRECT3DDEVICE9 dev,rmatrix& mat,float size,DWORD color)
 
 	_GetModelTry(t_grid_vert,size,color,&face_num);
 
-	dev->SetTransform( D3DTS_WORLD, &mat );
+	dev->SetTransform(D3DTS_WORLD, static_cast<const D3DMATRIX*>(mat));
 	dev->SetTexture(0, NULL);
 	dev->SetFVF( RLVertexType );
 
@@ -535,7 +535,7 @@ void _draw_matrix(LPDIRECT3DDEVICE9 dev,rmatrix& mat,float size)
 	rvector up	  = rvector(0,1,0)*size;
 	rvector dir   = rvector(0,0,1)*size;
 
-	dev->SetTransform( D3DTS_WORLD, &mat );
+	dev->SetTransform(D3DTS_WORLD, static_cast<const D3DMATRIX*>(mat));
 	dev->SetTexture(0, NULL);
 	dev->SetFVF( RLVertexType );
 
@@ -653,35 +653,12 @@ void draw_line(LPDIRECT3DDEVICE9 dev,rvector* vec,int size,DWORD color)
 
 struct	_Vertex { 
 	float x,y,z;
-//	rvector p;   
-	DWORD color;	// color 도 제거?
+	DWORD color;
 };
 #define _VertexType			(D3DFVF_XYZ | D3DFVF_DIFFUSE)
 
 void draw_query_fill_box(rmatrix* wmat , rvector& max,rvector& min,DWORD color)
 {
-	// 컬러 채우기 끄고..
-	// z write 끄고..
-	// flat shade
-	// light false
-	// texture Null .. 어지간한건 모두 끄고..
-/*
-	   5 ----   6
-	   /    / |
-	1  ----	2 |
-	  |	   |  | 7
-	  |	   | /
-	0  ----	3
-	
-*/
-
-//	D3DRS_ANTIALIASEDLINEENABLE
-//  D3DRS_MULTISAMPLEANTIALIAS 안티알리어스.. 점을 찍을때 주변점과의 관계를 생각해서 픽셀의 색을 변경하는것.. 간단함..	타겟버퍼에 플레그 설정함,../
-
-//	D3DRS_COLORVERTEX
-//	D3DRS_DIFFUSEMATERIALSOURCE
-//	D3DRS_COLORWRITEENABLE		   D3DCAPS9 구조체의 PrimitiveMiscCaps 멤버로 D3DPMISCCAPS_COLORWRITEENABLE 능력 비트가 설정되어 있는 경우에 이용할 수 있다. 이 렌더링 스테이트는, 클리어 처리에는 영향을 주지 않는다
-
 	static _Vertex _vert[8];
 
 	_vert[0].x = min.x;	_vert[0].y = min.y;	_vert[0].z = min.z; _vert[0].color = color;
@@ -693,7 +670,7 @@ void draw_query_fill_box(rmatrix* wmat , rvector& max,rvector& min,DWORD color)
 	_vert[6].x = max.x;	_vert[6].y = max.y;	_vert[6].z = max.z;	_vert[6].color = color;
 	_vert[7].x = max.x;	_vert[7].y = min.y;	_vert[7].z = max.z;	_vert[7].color = color;
 
-	static WORD	_index[36] =  {
+	static WORD	_index[36] = {
 		0,1,3 ,
 		1,2,3 ,
 		3,2,7 ,
@@ -705,15 +682,12 @@ void draw_query_fill_box(rmatrix* wmat , rvector& max,rvector& min,DWORD color)
 		1,5,2 ,
 		5,6,2 ,
 		4,0,7 ,
-		0,3,7  
+		0,3,7
 	};
 
 	RGetDevice()->SetRenderState( D3DRS_LIGHTING, FALSE );
 
-//	rmatrix savemat;
-	
-//	RGetDevice()->GetTransform( D3DTS_WORLD, &savemat );
-	RGetDevice()->SetTransform( D3DTS_WORLD, wmat );
+	RGetDevice()->SetTransform(D3DTS_WORLD, static_cast<const D3DMATRIX*>(*wmat));
 	RGetDevice()->SetRenderState( D3DRS_SHADEMODE, D3DSHADE_FLAT );
 	RGetDevice()->SetRenderState( D3DRS_ALPHABLENDENABLE, FALSE );
 	RGetDevice()->SetRenderState( D3DRS_ZWRITEENABLE , FALSE );
@@ -724,8 +698,6 @@ void draw_query_fill_box(rmatrix* wmat , rvector& max,rvector& min,DWORD color)
 	RGetDevice()->DrawIndexedPrimitiveUP(D3DPT_TRIANGLELIST,0,
 		8, 12, _index, D3DFMT_INDEX16, (LPVOID)_vert,sizeof(_Vertex));
 
-//	RGetDevice()->SetTransform( D3DTS_WORLD, &savemat );
-//	RGetDevice()->SetRenderState( D3DRS_LIGHTING, TRUE );
 	RGetDevice()->SetRenderState( D3DRS_SHADEMODE, D3DSHADE_GOURAUD );
 	RGetDevice()->SetRenderState( D3DRS_ZWRITEENABLE , TRUE );
 }
@@ -735,7 +707,6 @@ void draw_box(rmatrix* wmat, const rvector& max, const rvector& min, DWORD color
 	RGetDevice()->SetRenderState( D3DRS_LIGHTING, FALSE );
 
 	rvector t_vec_d[24];
-//	int		t_index[100];	//인덱스 방식으로 나중에 개량
 	rvector t_vec[8];
 
 	t_vec[0].x = min.x;	t_vec[0].y = min.y;	t_vec[0].z = min.z;
@@ -762,25 +733,15 @@ void draw_box(rmatrix* wmat, const rvector& max, const rvector& min, DWORD color
 	t_vec_d[20] = t_vec[6];	t_vec_d[21] = t_vec[7];
 	t_vec_d[22] = t_vec[7];	t_vec_d[23] = t_vec[4];
 
-	// render mode	처리
-	// pos			처리
-/*
-	if(wmat) {
-		for(int i=0;i<24;i++) {
-//			t_vec_d[i] = t_vec_d[i] * (*wmat);
-			D3DXVec3TransformCoord(&t_vec_d[i],&t_vec_d[i],wmat);
-		}
-	}
-*/
 	rmatrix savemat;
 
-	RGetDevice()->GetTransform( D3DTS_WORLD, &savemat );
+	RGetDevice()->GetTransform(D3DTS_WORLD, static_cast<D3DMATRIX*>(savemat));
 
-	RGetDevice()->SetTransform( D3DTS_WORLD, wmat );
+	RGetDevice()->SetTransform(D3DTS_WORLD, static_cast<const D3DMATRIX*>(*wmat));
 
 	draw_line(RGetDevice(),t_vec_d,24,color);
 
-	RGetDevice()->SetTransform( D3DTS_WORLD, &savemat );
+	RGetDevice()->SetTransform(D3DTS_WORLD, static_cast<const D3DMATRIX*>(savemat));
 
 	RGetDevice()->SetRenderState( D3DRS_LIGHTING, TRUE );
 
@@ -883,8 +844,6 @@ LRESULT CD3DArcBall::HandleMouseMessages( HWND hWnd, UINT uMsg, WPARAM wParam, L
 
 	return FALSE;
 }
-
-/////////////////////////////////////////////////////////////////////////////
 
 RDebugStr::RDebugStr()
 {
@@ -1017,4 +976,20 @@ bool RBaseObject::CheckName(const char* name)
 	return m_Name == name;
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
+D3DXQUATERNION* D3DXQuaternionUnitAxisToUnitAxis2(D3DXQUATERNION *pOut, const rvector *pvFrom, const rvector *pvTo)
+{
+	rvector vAxis = CrossProduct(*pvFrom, *pvTo);
+	pOut->x = vAxis.x;
+	pOut->y = vAxis.y;
+	pOut->z = vAxis.z;
+	pOut->w = DotProduct(*pvFrom, *pvTo);
+	return pOut;
+}
+
+D3DXQUATERNION* D3DXQuaternionAxisToAxis(D3DXQUATERNION *pOut, const rvector *pvFrom, const rvector *pvTo)
+{
+	auto vA = Normalized(*pvFrom);
+	auto vB = Normalized(*pvTo);
+	auto vHalf = Normalized(vA + vB);
+	return D3DXQuaternionUnitAxisToUnitAxis2(pOut, &vA, &vHalf);
+}

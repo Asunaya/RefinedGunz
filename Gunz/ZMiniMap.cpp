@@ -166,11 +166,9 @@ void ZMiniMap::OnDraw(MDrawContext* pDC)
 	pd3dDevice->SetFVF(D3DFVF_MINIMAPCUSTOMVERTEX);
 	pd3dDevice->SetTexture( 0, m_pBaseTexture->GetTexture() );
 
-	// view , projection 은 이미 설정되어있다는 가정하에,
-
 	rmatrix World;
 	GetIdentityMatrix(World);
-	pd3dDevice->SetTransform(D3DTS_WORLD, &World);
+	RSetTransform(D3DTS_WORLD, World);
 
 	RUpdateCamera();
 
@@ -234,18 +232,16 @@ void ZMiniMap::OnDraw(MDrawContext* pDC)
 		World._21 = right.y;	World._22 = dir.y;	World._23 = up.y;
 		World._31 = right.z;	World._32 = dir.z;	World._33 = up.z;
 
-		// 그림자
 		World._41 = pos.x;		World._42 = pos.y;	World._43 = 0;
-		pd3dDevice->SetTransform(D3DTS_WORLD, &World);
+		RSetTransform(D3DTS_WORLD, World);
 
 		pd3dDevice->SetRenderState(D3DRS_TEXTUREFACTOR, 0xff000000);
 		pd3dDevice->SetTextureStageState( 0, D3DTSS_COLOROP , D3DTOP_MODULATE );
 		pd3dDevice->SetTexture( 0, m_pTeamColorTexture->GetTexture() );
 		pd3dDevice->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, playerVer, sizeof(MINIMAPCUSTOMVERTEX));
 
-
 		World._41 = pos.x;		World._42 = pos.y;	World._43 = pos.z;
-		pd3dDevice->SetTransform(D3DTS_WORLD, &World);
+		RSetTransform(D3DTS_WORLD, World);
 
 		pd3dDevice->SetRenderState(D3DRS_TEXTUREFACTOR, color);
 		pd3dDevice->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, playerVer, sizeof(MINIMAPCUSTOMVERTEX));

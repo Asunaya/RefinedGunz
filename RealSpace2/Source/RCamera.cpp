@@ -21,10 +21,9 @@ void ComputeViewFrustum(rplane *plane, float x, float y, float z)
 
 void ComputeZPlane(rplane *plane, float z, int sign)
 {
-	static rvector normal, t;
-	t = RCameraPosition + z*RCameraDirection;
-	normal = float(sign)*RCameraDirection;
-	D3DXVec3Normalize(&normal, &normal);
+	rvector normal, t;
+	t = RCameraPosition + z * RCameraDirection;
+	normal = Normalized(float(sign) * RCameraDirection);
 	plane->a = normal.x; plane->b = normal.y; plane->c = normal.z;
 	plane->d = -plane->a*t.x - plane->b*t.y - plane->c*t.z;
 }
@@ -59,17 +58,17 @@ void RSetCamera(const rvector &from, const rvector &at, const rvector &up)
 void RUpdateCamera()
 {
 	RView = ViewMatrix(RCameraPosition, RCameraDirection, RCameraUp);
-	RGetDevice()->SetTransform(D3DTS_VIEW, &RView);
+	RSetTransform(D3DTS_VIEW, RView);
 
-	auto CheckNaN = [](auto& vec)
+	auto CheckNaN = [](auto& vec, const v3& def = { 1, 0, 0 })
 	{
-		if (isnan(vec.x) || isnan(vec.y) || isnan(vec.z))
-			vec = { 1, 0, 0 };
+		if (isnan(vec))
+			vec = def;
 	};
 
 	CheckNaN(RCameraPosition);
 	CheckNaN(RCameraDirection);
-	CheckNaN(RCameraUp);
+	CheckNaN(RCameraUp, { 0, 0, 1 });
 
 	UpdateViewFrustrum();
 }
@@ -81,7 +80,7 @@ void RSetProjection(float fFov, float fAspect, float fNearZ, float fFarZ)
 	RNearZ = fNearZ; RFarZ = fFarZ;
 
 	RProjection = PerspectiveProjectionMatrix(fAspect, RFov_vert, fNearZ, fFarZ);
-	RGetDevice()->SetTransform(D3DTS_PROJECTION, &RProjection);
+	RSetTransform(D3DTS_PROJECTION, RProjection);
 
 	UpdateViewFrustrum();
 }
@@ -95,7 +94,7 @@ void RSetProjection(float fFov, float fNearZ, float fFarZ)
 	RNearZ = fNearZ; RFarZ = fFarZ;
 
 	RProjection = PerspectiveProjectionMatrix(fAspect, RFov_vert, fNearZ, fFarZ);
-	RGetDevice()->SetTransform(D3DTS_PROJECTION, &RProjection);
+	RSetTransform(D3DTS_PROJECTION, RProjection);
 
 	UpdateViewFrustrum();
 }
@@ -132,7 +131,7 @@ rvector RGetCameraPosition()
 
 void RResetTransform()
 {
-	RGetDevice()->SetTransform(D3DTS_VIEW, &RView);
-	RGetDevice()->SetTransform(D3DTS_PROJECTION, &RProjection);
+	RSetTransform(D3DTS_VIEW, RView);
+	RSetTransform(D3DTS_PROJECTION, RProjection);
 }
 _NAMESPACE_REALSPACE2_END

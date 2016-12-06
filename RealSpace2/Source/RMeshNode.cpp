@@ -2,22 +2,17 @@
 #include <stdio.h>
 #include <math.h>
 #include <tchar.h>
-
 #include "MXml.h"
-
 #include "RealSpace2.h"
 #include "RMesh.h"
 #include "RMeshMgr.h"
-
 #include "MDebug.h"
-
 #include "RAnimationMgr.h"
 #include "RVisualmeshMgr.h"
-
 #include "MZFileSystem.h"
 #include "fileinfo.h"
-
 #include "RShaderMgr.h"
+#include "LogMatrix.h"
 
 #ifndef _PUBLISH
 
@@ -35,12 +30,7 @@ _USING_NAMESPACE_REALSPACE2
 
 _NAMESPACE_REALSPACE2_BEGIN
 
-//////////////////////////////////////////////////////////////////////////////////
-// RMeshNodeInfo Class
-
 #define RVERTEX_MAX		1024*100*32			// 34133 face
-
-///////////////////////////////////////////////////////////////////////////////////
 
 RMeshNodeInfo::RMeshNodeInfo()
 {
@@ -56,7 +46,7 @@ RMeshNodeInfo::RMeshNodeInfo()
 	m_vis_alpha = 1.f;
 	m_bClothMeshNodeSkip  = true;
 	
-	m_CutPartsType	  = cut_parts_upper_body; //상체아니면 하체..
+	m_CutPartsType	  = cut_parts_upper_body;
 	m_LookAtParts	  = lookat_parts_etc;
 	m_WeaponDummyType = weapon_dummy_etc;
 
@@ -390,9 +380,9 @@ void RMeshNode::RenderNodeVS(RMesh* pMesh, const rmatrix& pWorldMat_,ESHADER sha
 	//Register Matrix
 	dev->SetVertexShaderConstantF( CAMERA_POSITION, RCameraPosition, 1 );
 
-	dev->GetTransform( D3DTS_WORLD, &world );
-	dev->GetTransform( D3DTS_VIEW, &view );
-	dev->GetTransform( D3DTS_PROJECTION, &proj );
+	dev->GetTransform(D3DTS_WORLD, static_cast<D3DMATRIX*>(world));
+	dev->GetTransform(D3DTS_VIEW, static_cast<D3DMATRIX*>(view));
+	dev->GetTransform(D3DTS_PROJECTION, static_cast<D3DMATRIX*>(proj));
 
 	GetIdentityMatrix(matTemp);
 
@@ -760,7 +750,7 @@ void RMeshNode::ToonRenderSettingOnOld(RMtrl* pMtrl)
 		dev->SetTextureStageState( 0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_COUNT2 );
 		dev->SetTextureStageState( 0, D3DTSS_TEXCOORDINDEX, D3DTSS_TCI_CAMERASPACENORMAL );
 
-		dev->SetTransform( D3DTS_TEXTURE0, &m_pParentMesh->m_pVisualMesh->m_ToonUVMat ); 
+		dev->SetTransform(D3DTS_TEXTURE0, static_cast<const D3DMATRIX*>(m_pParentMesh->m_pVisualMesh->m_ToonUVMat));
 		dev->SetTexture( 0, m_pParentMesh->m_pVisualMesh->m_ToonTexture );
 
 		if(toonTexture) {
@@ -872,7 +862,7 @@ void RMeshNode::ToonRenderSettingOn(RMtrl* pMtrl)
 			dev->SetTextureStageState( 1, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_COUNT2 );
 			dev->SetTextureStageState( 1, D3DTSS_TEXCOORDINDEX, D3DTSS_TCI_CAMERASPACENORMAL );
 
-			dev->SetTransform( D3DTS_TEXTURE1, &m_pParentMesh->m_pVisualMesh->m_ToonUVMat ); 
+			dev->SetTransform(D3DTS_TEXTURE1, static_cast<const D3DMATRIX*>(m_pParentMesh->m_pVisualMesh->m_ToonUVMat));
 
 			if(pMtrl->m_pToonTexture)
 				dev->SetTexture( 1, pMtrl->m_pToonTexture->GetTexture() );
@@ -884,7 +874,7 @@ void RMeshNode::ToonRenderSettingOn(RMtrl* pMtrl)
 
 			dev->SetTextureStageState( 1, D3DTSS_COLOROP,   D3DTOP_DISABLE );
 			dev->SetTextureStageState( 1, D3DTSS_ALPHAOP,   D3DTOP_DISABLE );
-			dev->SetTexture( 1, NULL ); // 1d 텍스쳐
+			dev->SetTexture( 1, NULL );
 		}
 	}
 }
@@ -920,7 +910,6 @@ void RMeshNode::ToonRenderSilhouetteSettingOn()
 	LPDIRECT3DDEVICE9 dev = RGetDevice();
 
 	DWORD color = 0xff111111;
-	rmatrix m, s;
 
 	dev->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
 	dev->SetRenderState(D3DRS_CULLMODE, D3DCULL_CW);
@@ -960,26 +949,18 @@ void RMeshNode::Render(rmatrix* pWorldMatrix)
 
 	bool bSoft = isSoftRender();
 
-	{
-	
-	if(pWorldMatrix)	RGetDevice()->SetTransform( D3DTS_WORLD, pWorldMatrix );
-	else				RGetDevice()->SetTransform( D3DTS_WORLD, &m_ModelWorldMatrix );
-
-	}
-	
-	// vertex setting 은 한번만..
+	if (pWorldMatrix)	RSetTransform(D3DTS_WORLD, *pWorldMatrix);
+	else				RSetTransform(D3DTS_WORLD, m_ModelWorldMatrix);
 
 	if(bSoft==false)
 		m_vb->SetVertexBuffer();
-
-	// sub mtrl indexbuffer 만큼....
 
 	for (int index = 0; index < m_nMtrlCnt ; index ++) {
 
 		pMtrl = GetMtrl(index);
 	
 		if(pMtrl==NULL) return;
-		if(m_ib[index]==NULL) continue;//size가 0 일경우...
+		if(m_ib[index]==NULL) continue;
 
 		__BP(402,"RMeshNode::Render State b");
 
@@ -1023,7 +1004,6 @@ void RMeshNode::Render(rmatrix* pWorldMatrix)
 
 		if(RMesh::m_bSilhouette)
 		{
-			// 라인의 두께를 결정한다...
 			ToonRenderSilhouetteSettingOn();
 
 			rvector pos,cpos;
@@ -1037,14 +1017,11 @@ void RMeshNode::Render(rmatrix* pWorldMatrix)
 			cpos.y = RView._42;
 			cpos.z = RView._43;
 
-//			float fLen = D3DXVec3Length(&(cpos-pos))/300.f;
 			float fLen = D3DXVec3Length(&(cpos-pos))/RMesh::m_fSilhouetteLength;
 
-			// 간단 테스트 목적 : 노멀 방향으로 확장해준다...
-			// 나중에는 미리 만들어져 있어야함..
 			m_vb->ConvertSilhouetteBuffer(fLen);
 
-			if(bSoft)	m_vb->RenderIndexSoft(m_ib[index]);		// vertexbuffer 없이 그린다..
+			if(bSoft)	m_vb->RenderIndexSoft(m_ib[index]);
 			else 		m_vb->RenderIndexBuffer(m_ib[index]);
 
 			m_vb->ReConvertSilhouetteBuffer(fLen);
@@ -1067,7 +1044,8 @@ void RMeshNode::Render(rmatrix* pWorldMatrix)
 
 auto MakeAlignScaleMatrix(const rmatrix& mat)
 {
-	v3 svec = { Magnitude(rvector(mat._11,mat._12,mat._13)),//right
+	v3 svec = {
+		Magnitude(rvector(mat._11,mat._12,mat._13)),//right
 		Magnitude(rvector(mat._21,mat._22,mat._23)),//up
 		Magnitude(rvector(mat._31,mat._32,mat._33)),//dir
 	};
@@ -1093,19 +1071,13 @@ void RMeshNode::CheckAlignMapObject(rmatrix& hr_mat)
 
 		rmatrix mat;
 
-		rvector right,up,vUp,vDir,vPos,vRight;
+		auto vUp		= rvector(ret_mat._21,ret_mat._22,ret_mat._23);
+		auto vDir	= Normalized(cam_dir);
+		auto vPos	= rvector(ret_mat._41,ret_mat._42,ret_mat._43);
 
-		vUp		= rvector(ret_mat._21,ret_mat._22,ret_mat._23);
-		vDir	= cam_dir;
-		vPos	= rvector(ret_mat._41,ret_mat._42,ret_mat._43);
+		auto right = Normalized(CrossProduct(vUp, vDir));
 
-		D3DXVec3Normalize(&vDir, &vDir);
-
-		D3DXVec3Cross(&right, &vUp, &vDir);
-		D3DXVec3Normalize(&right, &right);
-
-		D3DXVec3Cross(&up, &vDir, &right);
-		D3DXVec3Normalize(&up, &up);
+		auto up = Normalized(CrossProduct(vDir, right));
 
 		mat._14 = 0.f;
 		mat._24 = 0.f;
@@ -1186,19 +1158,13 @@ void RMeshNode::CheckAlign(const rmatrix& world_mat)
 
 		rmatrix mat;
 
-		rvector right,up,vUp,vDir,vPos,vRight;
+		auto vUp		= rvector(ret_mat._21,ret_mat._22,ret_mat._23);
+		auto vDir	= Normalized(cam_dir);
+		auto vPos	= rvector(ret_mat._41,ret_mat._42,ret_mat._43);
 
-		vUp		= rvector(ret_mat._21,ret_mat._22,ret_mat._23);
-		vDir	= cam_dir;
-		vPos	= rvector(ret_mat._41,ret_mat._42,ret_mat._43);
+		auto right = Normalized(CrossProduct(vUp, vDir));
 
-		D3DXVec3Normalize(&vDir, &vDir);
-
-		D3DXVec3Cross(&right, &vUp, &vDir);
-		D3DXVec3Normalize(&right, &right);
-
-		D3DXVec3Cross(&up, &vDir, &right);
-		D3DXVec3Normalize(&up, &up);
+		auto up = Normalized(CrossProduct(vDir, right));
 
 		mat._14 = 0.f;
 		mat._24 = 0.f;
@@ -1282,7 +1248,7 @@ void RMeshNode::CalcVertexBuffer_Physique(const rmatrix& world_mat, int frame)
 	int p_num,i,j,p_id;
 	rvector _vec_all,_vec;
 	float weight;
-	rmatrix t_mat,local,basemat,inv;
+	rmatrix t_mat;
 
 	RMeshNode* pTMP = NULL;
 
@@ -1304,11 +1270,11 @@ void RMeshNode::CalcVertexBuffer_Physique(const rmatrix& world_mat, int frame)
 			pTMP = pMesh->m_data[p_id];
 
 			if( pTMP) 	t_mat = pTMP->m_mat_result;
-			else 		mlog("RMesh::CalcVertexBuffer() %s node : %d physique :num %d :not found !!! \n",GetName(),i,j);
+			else 		mlog("RMesh::CalcVertexBuffer() %s node : %d physique :num %d :not found !!! \n", GetName(), i, j);
 
 			_vec = m_physique[i].m_offset[j];
 
-			D3DXVec3TransformCoord(&_vec,&_vec,&t_mat);
+			_vec = TransformCoord(_vec, t_mat);
 			_vec_all += _vec * weight;
 		}
 
@@ -1330,6 +1296,7 @@ void RMeshNode::CalcVertexBuffer_Bbox(CalcVertexBufferBboxMode nBboxMode,rmatrix
 
 			for(int i=0;i<nCnt;i++) {
 				pMesh->SubCalcBBox( &pMesh->m_vBBMax, &pMesh->m_vBBMin, &m_point_list[i]);
+				
 			}
 		}
 	else if(nBboxMode==CalcVertexBufferBboxMode_TM_MapObject||
@@ -1474,21 +1441,19 @@ void RMeshNode::CalcVertexBuffer(const rmatrix& world_mat, bool box)
 		nBboxMode = CalcVertexBufferBboxMode_Physique;
 		nNeedUpdate = 1;
 	}
+	else if (pMesh->m_is_map_object) {
+		ModelWorldMatrix = result_mat * map_rot_mat;
+		CheckAlignMapObject(ModelWorldMatrix);
+
+		nBboxMode = CalcVertexBufferBboxMode_TM_MapObject;
+		BBoxMatrix = ModelWorldMatrix;
+
+		ModelWorldMatrix = ModelWorldMatrix * world_mat;
+	}
 	else {
-		if(pMesh->m_is_map_object) { 
-			ModelWorldMatrix = result_mat * map_rot_mat;
-			CheckAlignMapObject(ModelWorldMatrix);
-
-			nBboxMode = CalcVertexBufferBboxMode_TM_MapObject;
-			BBoxMatrix = ModelWorldMatrix;
-
-			ModelWorldMatrix = ModelWorldMatrix * world_mat;
-		}
-		else {
-			nBboxMode = CalcVertexBufferBboxMode_TM_Object;
-			BBoxMatrix = result_mat;
-			ModelWorldMatrix = result_mat * world_mat;
-		}
+		nBboxMode = CalcVertexBufferBboxMode_TM_Object;
+		BBoxMatrix = result_mat;
+		ModelWorldMatrix = result_mat * world_mat;
 	}
 
 	if(box)

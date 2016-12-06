@@ -119,6 +119,16 @@ GraphicsAPI GetGraphicsAPI()
 {
 	return g_GraphicsAPI;
 }
+rmatrix RGetTransform(D3DTRANSFORMSTATETYPE ts)
+{
+	rmatrix mat;
+	RGetDevice()->GetTransform(ts, static_cast<D3DMATRIX*>(mat));
+	return mat;
+}
+void RSetTransform(D3DTRANSFORMSTATETYPE ts, const rmatrix & mat)
+{
+	RGetDevice()->SetTransform(ts, static_cast<const D3DMATRIX*>(mat));
+}
 static unsigned long g_rsnRenderFlags = RRENDER_CLEAR_BACKBUFFER;
 void RSetRenderFlags(unsigned long nFlags) { g_rsnRenderFlags = nFlags; }
 unsigned long RGetRenderFlags() { return g_rsnRenderFlags; }
@@ -609,9 +619,7 @@ void RDrawLine(const rvector &v1, const rvector &v2, DWORD dwColor)
 
 rvector RGetTransformCoord(const rvector &coord)
 {
-	rvector ret;
-	D3DXVec3TransformCoord(&ret, &coord, &RViewProjectionViewport);
-	return ret;
+	return TransformCoord(coord, RViewProjectionViewport);
 }
 
 bool SaveMemoryBmp(int x, int y, void *data, void **retmemory, int *nsize)
@@ -786,12 +794,10 @@ bool RGetScreenLine(int sx, int sy, rvector *pos, rvector *dir)
 	rmatrix inv;
 	inv = Inverse(RViewProjectionViewport);
 
-	rvector worldpoint;
-	D3DXVec3TransformCoord(&worldpoint, &scrpoint, &inv);
+	rvector worldpoint = TransformCoord(scrpoint, inv);
 
 	*pos = RCameraPosition;
-	*dir = worldpoint - RCameraPosition;
-	D3DXVec3Normalize(dir, dir);
+	*dir = Normalized(worldpoint - RCameraPosition);
 
 	return true;
 }
@@ -800,14 +806,12 @@ rvector RGetIntersection(int x, int y, rplane &plane)
 {
 	rvector scrpoint = rvector((float)x, (float)y, 0.1f);
 
-	rmatrix inv;
-	inv = Inverse(RViewProjectionViewport);
+	rmatrix inv = Inverse(RViewProjectionViewport);
 
-	rvector worldpoint;
-	D3DXVec3TransformCoord(&worldpoint, &scrpoint, &inv);
+	rvector worldpoint = TransformCoord(scrpoint, inv);
 
 	rvector ret;
-	D3DXPlaneIntersectLine(&ret, &plane, &worldpoint, &RCameraPosition);
+	IntersectLineSegmentPlane(&ret, plane, worldpoint, RCameraPosition);
 
 	return ret;
 }

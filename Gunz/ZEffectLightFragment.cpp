@@ -32,16 +32,15 @@ bool ZEffectLightFragment::Draw(unsigned long int nTime)
 	DWORD dwPrevDiff = nTime-m_nPrevTime;
 
 	float fSec = (float)dwDiff/1000.0f;
-	rvector Distance = ParabolicMotion(m_Velocity, fSec) * 100;	// *100은 미터에서 센티로 변환
+	rvector Distance = ParabolicMotion(m_Velocity, fSec) * 100;
 	rvector NewPos = m_OrigPos + Distance;
 	rvector Acceleration = NewPos - m_Pos;
 	m_Pos = NewPos;
 	m_fOpacity = (LIGHTFRAGMENT_LIFETIME-dwDiff)/(float)LIGHTFRAGMENT_LIFETIME;
 
-	rvector right;
-	D3DXVec3Cross(&right, &Acceleration, &RealSpace2::RCameraDirection);
-	D3DXVec3Cross(&m_Normal, &Acceleration, &right);
-	D3DXVec3Cross(&m_Up, &m_Normal, &Acceleration);
+	rvector right = CrossProduct(Acceleration, RCameraDirection);
+	m_Normal = CrossProduct(Acceleration, right);
+	m_Up = CrossProduct(m_Normal, Acceleration);
 
 	if(dwDiff>LIGHTFRAGMENT_LIFETIME) return false;
 
@@ -74,16 +73,15 @@ bool ZEffectLightFragment2::Draw(unsigned long int nTime)
 	DWORD dwPrevDiff = nTime-m_nPrevTime;
 
 	float fSec = (float)dwDiff/1000.0f;
-	rvector Distance = ParabolicMotion(m_Velocity, fSec) * 100;	// *100은 미터에서 센티로 변환
+	rvector Distance = ParabolicMotion(m_Velocity, fSec) * 100;
 	rvector NewPos = m_OrigPos + Distance;
 	rvector Acceleration = NewPos - m_Pos;
 	m_Pos = NewPos;
 	m_fOpacity = (LIGHTFRAGMENT_LIFETIME-dwDiff)/(float)LIGHTFRAGMENT_LIFETIME;
 
-	rvector right;
-	D3DXVec3Cross(&right, &Acceleration, &RealSpace2::RCameraDirection);
-	D3DXVec3Cross(&m_Normal, &Acceleration, &right);
-	D3DXVec3Cross(&m_Up, &m_Normal, &Acceleration);
+	rvector right = CrossProduct(Acceleration, RCameraDirection);
+	m_Normal = CrossProduct(Acceleration, right);
+	m_Up = CrossProduct(m_Normal, Acceleration);
 
 	if(dwDiff>LIGHTFRAGMENT_LIFETIME) return false;
 

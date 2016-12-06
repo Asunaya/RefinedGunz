@@ -4,35 +4,20 @@
 
 using namespace RealSpace2;
 
-//////////////////////////////////////////////////////////////////////////
-//	생성자
-//////////////////////////////////////////////////////////////////////////
-
-RCylinder::RCylinder(void)
+RCylinder::RCylinder()
 :mTopCentre(0,0,0),	mBottomCentre(0,0,0), mHeight(0), mRadius(0), mCylinder(0)
 {
 	GetIdentityMatrix(mWorld);
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//	소멸자
-//////////////////////////////////////////////////////////////////////////
-
-RCylinder::~RCylinder(void)
+RCylinder::~RCylinder()
 {
 	SAFE_RELEASE( mCylinder );
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-// isCollide Function
-//////////////////////////////////////////////////////////////////////////
-
 bool RCylinder::isCollide( CDInfo* data_, CDInfoType cdType_ )
 {
 	rvector intersection;
-	rvector direction;
 	float distance;
 
 	if( !getDistanceBetLineSegmentAndPoint( mTopCentre, mBottomCentre, data_->clothCD.v,  &intersection , NULL, distance ) )
@@ -45,17 +30,11 @@ bool RCylinder::isCollide( CDInfo* data_, CDInfoType cdType_ )
 		return false;
 	}
 
-	// 충돌이 있을 경우 input vertex의 normal 방향으로 vertex를 이동시킨다
 	*data_->clothCD.pos = intersection + ( (*data_->clothCD.n) * mRadius * 1.2 );
-	//*data_->clothCD.pos = intersection + *data_->clothCD.n;
 
 	return true;
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-// getDistanceBetLineSegmentAndPoint
-//////////////////////////////////////////////////////////////////////////
 bool getDistanceBetLineSegmentAndPoint( const rvector& lineStart_, 
 									   const rvector& lineEnd_, 
 									   rvector* point_, 
@@ -65,9 +44,9 @@ bool getDistanceBetLineSegmentAndPoint( const rvector& lineStart_,
 {
 	rvector line = lineEnd_ - lineStart_;
 	rvector cross_line = *point_ - lineStart_;
-	float line_length_square = D3DXVec3LengthSq( &line );
+	float line_length_square = MagnitudeSq(line);
 
-	float u = ( D3DXVec3Dot( &cross_line, &line ) ) / line_length_square ;
+	float u = DotProduct(cross_line, line) / line_length_square;
 
 	if( u < 0.0f || u > 1.0f )
 	{
@@ -84,7 +63,7 @@ bool getDistanceBetLineSegmentAndPoint( const rvector& lineStart_,
 	if( direction_ != NULL )
 	{
 		auto vec = *point_ - intersection;
-		D3DXVec3Normalize( direction_, &vec );
+		*direction_ = Normalized(vec);
 	}
 
 	distance_ = Magnitude(*point_ - intersection);
@@ -113,7 +92,7 @@ void RCylinder::draw()
 		D3DXCreateCylinder( RGetDevice(), mRadius, mRadius, mHeight, 20, 10, &mCylinder, NULL );
 	}
 
- 	RGetDevice()->SetTransform( D3DTS_WORLD, &mWorld ); 
+	RGetDevice()->SetTransform(D3DTS_WORLD, static_cast<D3DMATRIX*>(mWorld));
 
 	mCylinder->DrawSubset( 0 );
 	{

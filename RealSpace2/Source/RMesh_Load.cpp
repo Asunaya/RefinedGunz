@@ -807,7 +807,6 @@ bool RMesh::ReadElu(const char* fname)
 	}
 
 	bool bNeedScaleMat = false;
-	rmatrix smat;
 
 	for(i=0;i<t_hd.mesh_num;i++) {
 
@@ -956,7 +955,7 @@ bool RMesh::ReadElu(const char* fname)
 			}
 		}
 
-		D3DXPLANE	plane;
+		rplane plane;
 		rvector	vv[3];
 
 		if( t_hd.ver < EXPORTER_MESH_VER6 ) {
@@ -969,8 +968,7 @@ bool RMesh::ReadElu(const char* fname)
 					vv[1] = pMeshNode->m_point_list[pMeshNode->m_face_list[a].m_point_index[1]];
 					vv[2] = pMeshNode->m_point_list[pMeshNode->m_face_list[a].m_point_index[2]];
 
-					D3DXPlaneFromPoints(&plane,&vv[0],&vv[1],&vv[2]);
-					D3DXPlaneNormalize(&plane,&plane);
+					plane = Normalized(PlaneFromPoints(vv[0], vv[1], vv[2]));
 
 					pMeshNode->m_face_normal_list[a].m_normal.x = plane.a;
 					pMeshNode->m_face_normal_list[a].m_normal.y = plane.b;
@@ -993,7 +991,7 @@ bool RMesh::ReadElu(const char* fname)
 
 				for(k=0;k<pMeshNode->m_point_num;k++) {
 					pPointNormal[k] = pPointNormal[k]/3.f;
-					D3DXVec3Normalize(&pPointNormal[k],&pPointNormal[k]);
+					Normalize(pPointNormal[k]);
 				}
 
 				for(k=0;k<pMeshNode->m_face_num;k++) {
@@ -1227,7 +1225,7 @@ bool RMesh::CalcLocalMatrix(RMeshNode* pNode)
 	if(!pNode) 
 		return false;
 
-	rmatrix dest, inv = IdentityMatrix();
+	rmatrix inv = IdentityMatrix();
 	RMeshNode* pPN = NULL;
 	int id = _FindMeshId(pNode->m_Parent);
 

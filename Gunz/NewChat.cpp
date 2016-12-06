@@ -837,7 +837,7 @@ void Chat::Display(){
 
 			if (nLines > 0)
 			{
-				D3DXVECTOR2 v1, v2;
+				v2 v1, v2;
 
 				v1.x = Output.x1;
 				v1.y = Output.y2 - 5 - nLines * nFontHeight;
@@ -1116,7 +1116,7 @@ void Chat::DrawBorder()
 	{ float(Border.x2), float(Border.y2 - 2 - nFontHeight) });
 }
 
-void Chat::Line(const D3DXVECTOR2 &v1, const D3DXVECTOR2 &v2, D3DCOLOR Color, float z)
+void Chat::Line(const v2 &v1, const v2 &v2, D3DCOLOR Color, float z)
 {
 	ScreenSpaceVertex v;
 
@@ -1140,7 +1140,7 @@ void Chat::Line(const D3DXVECTOR2 &v1, const D3DXVECTOR2 &v2, D3DCOLOR Color, fl
 		EndDraw();
 }
 
-void Chat::Quad(const D3DXVECTOR2 &v1, const D3DXVECTOR2 &v2, D3DCOLOR Color, float z)
+void Chat::Quad(const v2 &v1, const v2 &v2, D3DCOLOR Color, float z)
 {
 	ScreenSpaceVertex v;
 

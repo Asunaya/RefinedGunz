@@ -30,9 +30,8 @@ bool RLenzFlare::Render( rvector& light_pos_, rvector& centre_, RBspObject* pbsp
 		return false;
 	}
 
-	rmatrix view, proj;
-	RGetDevice()->GetTransform( D3DTS_VIEW, &view );
-	RGetDevice()->GetTransform( D3DTS_PROJECTION, &proj );
+	auto view = RGetTransform(D3DTS_VIEW);
+	auto proj = RGetTransform(D3DTS_PROJECTION);
 	
 	rvector pos = ( light_pos_ * view * proj ) ;
 	pos.z = 0.0f;

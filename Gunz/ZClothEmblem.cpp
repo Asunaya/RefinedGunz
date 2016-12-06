@@ -66,8 +66,7 @@ void	ZClothEmblem::CreateFromMeshNode( RMeshNode* pMeshNdoe_ , ZWorld* pWorld)
 	D3DXVECTOR4 rVec;
 	for( i = 0 ; i < mpMeshNode->m_point_num; ++i )
 	{
-		D3DXVec3Transform( &rVec, &mpMeshNode->m_point_list[i], &mWorldMat );
-		mpMeshNode->m_point_list[i] = (rvector)rVec;
+		mpMeshNode->m_point_list[i] = Transform(mpMeshNode->m_point_list[i], mWorldMat);
 	}
 
 	//	Copy Vertex
@@ -89,7 +88,7 @@ void	ZClothEmblem::CreateFromMeshNode( RMeshNode* pMeshNdoe_ , ZWorld* pWorld)
 				m_pConst[ i*3 + j ].refB = mpMeshNode->m_face_list[i].m_point_index[j+1];
 			}
 			vecDistance = mpMeshNode->m_point_list[m_pConst[ i*3 + j ].refA] - mpMeshNode->m_point_list[m_pConst[ i*3 + j ].refB];
-			m_pConst[ i*3 + j ].restLength = D3DXVec3Length(&vecDistance);
+			m_pConst[ i*3 + j ].restLength = Magnitude(vecDistance);
 		}
 	}
 
@@ -125,7 +124,7 @@ void	ZClothEmblem::CreateFromMeshNode( RMeshNode* pMeshNdoe_ , ZWorld* pWorld)
 	for(auto& Light : m_pWorld->GetBsp()->GetObjectLightList())
 	{
 		auto vec = Light.Position - m_pX[0];
-		fTemp	= D3DXVec3Length(&vec);
+		fTemp	= Magnitude(vec);
 		if( fTemp < minDistance )
 		{
 			minDistance		= fTemp;
@@ -327,13 +326,13 @@ void ZClothEmblem::satisfyConstraints()
 
 				rvector dir = myPos - pos;
 
-				float lengthsq = D3DXVec3LengthSq(&dir);
+				float lengthsq = MagnitudeSq(dir);
 				if (lengthsq > CHARACTER_RADIUS*CHARACTER_RADIUS)
 				{
 					continue;
 				}
 
-				D3DXVec3Normalize(&dir, &dir);
+				Normalize(dir);
 
 				myPos = pos + dir * (CHARACTER_RADIUS);
 				m_pX[j].x = myPos.x;
@@ -344,7 +343,7 @@ void ZClothEmblem::satisfyConstraints()
 
 
 	// Restriction
-	for (list<sRestriction*>::iterator itor = mRestrictionList.begin();
+	for (std::list<sRestriction*>::iterator itor = mRestrictionList.begin();
 	itor != mRestrictionList.end(); ++itor)
 	{
 		for (int j = 0; j < m_nCntP; ++j)
@@ -382,7 +381,7 @@ void ZClothEmblem::satisfyConstraints()
 		x2 = &m_pX[c->refB];
 
 		delta = *x2 - *x1;
-		deltaLegth = D3DXVec3Length(&delta);
+		deltaLegth = Magnitude(delta);
 		diff = (float)((deltaLegth - c->restLength) / (deltaLegth));
 
 		*x1 += delta * diff * 0.5;
@@ -441,9 +440,7 @@ void ZClothEmblem::render()
 	RGetDevice()->SetLight( 0, mpLight );
 	RGetDynamicLightManager()->SetLight( m_pX[0], 1, LIGHT_DISTANCE );
 
-	rmatrix Identity;
-	GetIdentityMatrix(Identity );
-	RGetDevice()->SetTransform( D3DTS_WORLD, &Identity );
+	RSetTransform(D3DTS_WORLD, IdentityMatrix());
 
 	RGetDevice()->SetRenderState( D3DRS_ALPHABLENDENABLE, TRUE );
  	RGetDevice()->SetRenderState( D3DRS_SRCBLEND, D3DBLEND_SRCALPHA );
@@ -518,7 +515,7 @@ void ZClothEmblem::UpdateNormal()
 		}
 		rvector n;
 		CrossProduct(&n, Point[2] - Point[0], Point[2] - Point[1]);
-		D3DXVec3Normalize(&n,&n);
+		Normalize(n);
 
 		for( j = 0 ; j < 3; ++j )
 		{
@@ -528,20 +525,20 @@ void ZClothEmblem::UpdateNormal()
 
 	for( i = 0 ; i < m_nCntP; ++i )
 	{
-		D3DXVec3Normalize( &m_pNormal[i], &m_pNormal[i] );
+		Normalize(m_pNormal[i]);
 	}
 }
 
 void ZClothEmblem::setExplosion( rvector& pos_, float power_ )
 {
 	rvector	dir		= m_pX[0] - pos_;
-	float lengthsq	= D3DXVec3LengthSq( &dir );
+	float lengthsq = MagnitudeSq(dir);
 	if( lengthsq	 > 250000 )
 	{
 		return;
 	}
 
-	D3DXVec3Normalize( &dir, &dir );
+	Normalize(dir);
 	*mpWind	+= dir * power_ / sqrt(lengthsq) * 10;
 }
 
@@ -554,11 +551,10 @@ void ZClothEmblem::CheckSpearing( rvector& bullet_begin_, rvector& bullet_end_, 
 	}
 	else return;
 
-	rvector dir = bullet_end_ - bullet_begin_;
-	D3DXVec3Normalize( &dir, &dir );
+	rvector dir = Normalized(bullet_end_ - bullet_begin_);
 
 	// test line vs AABB
-	if( !D3DXBoxBoundProbe( &mAABB.vmin , &mAABB.vmax,	&bullet_begin_, &dir ) )
+	if (!IntersectLineSegmentAABB(bullet_begin_, dir, mAABB))
 	{
 		return;
 	}
@@ -576,7 +572,7 @@ void ZClothEmblem::CheckSpearing( rvector& bullet_begin_, rvector& bullet_end_, 
 			v[j]	= &m_pX[index[j]];
 		}
 
-		if( D3DXIntersectTri( v[0], v[1], v[2], &bullet_begin_, &dir, &uvt.x, &uvt.y, &uvt.z ) ) 
+		if (IntersectTriangle(*v[0], *v[1], *v[2], bullet_begin_, dir, nullptr, &uvt.x, &uvt.y))
 		{
 			if( uvt.x + uvt.y < 0.66 )
 			{

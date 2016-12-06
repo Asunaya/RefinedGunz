@@ -299,7 +299,7 @@ public:
 	int	frame;
 };
 
-#define RRotKey RQuatKey
+using RRotKey = RQuatKey;
 
 class RVisKey {
 public:
@@ -307,7 +307,7 @@ public:
 	int frame;
 };
 
-class RTMKey : public rmatrix{
+class RTMKey : public rmatrix {
 public:
 	int frame;
 };
@@ -452,26 +452,8 @@ public:
 	LPDIRECT3DVERTEXBUFFER9	m_vb;
 };
 
-inline D3DXQUATERNION* WINAPI D3DXQuaternionUnitAxisToUnitAxis2( D3DXQUATERNION *pOut, const rvector *pvFrom, const rvector *pvTo)
-{
-	rvector vAxis;
-	D3DXVec3Cross(&vAxis, pvFrom, pvTo);    
-	pOut->x = vAxis.x;
-	pOut->y = vAxis.y;
-	pOut->z = vAxis.z;
-	pOut->w = D3DXVec3Dot( pvFrom, pvTo );
-	return pOut;
-}
-
-inline D3DXQUATERNION* WINAPI D3DXQuaternionAxisToAxis( D3DXQUATERNION *pOut, const rvector *pvFrom, const rvector *pvTo)
-{
-	rvector vA, vB;
-	D3DXVec3Normalize(&vA, pvFrom);
-	D3DXVec3Normalize(&vB, pvTo);
-	rvector vHalf(vA + vB);
-	D3DXVec3Normalize(&vHalf, &vHalf);
-	return D3DXQuaternionUnitAxisToUnitAxis2(pOut, &vA, &vHalf);
-}
+D3DXQUATERNION* D3DXQuaternionUnitAxisToUnitAxis2(D3DXQUATERNION *pOut, const rvector *pvFrom, const rvector *pvTo);
+D3DXQUATERNION* D3DXQuaternionAxisToAxis(D3DXQUATERNION *pOut, const rvector *pvFrom, const rvector *pvTo);
 
 class CD3DArcBall
 {

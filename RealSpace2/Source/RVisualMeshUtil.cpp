@@ -122,7 +122,7 @@ void RWeaponTracks::MakeBuffer()
 	{
 		for(int i=0;i<m_current_node_size;i++)
 		{
-			if( (i < 1) || (i > m_current_node_size-3) ) { // 보간이 별 의미가 없다..
+			if( (i < 1) || (i > m_current_node_size-3) ) {
 				SetVertexSpline(m_pNode[i].up , m_pNode[i].color[0]);
 				SetVertexSpline(m_pNode[i].down , m_pNode[i].color[1]);
 			}
@@ -136,11 +136,11 @@ void RWeaponTracks::MakeBuffer()
 				if( m_pNode[i].len > 10 )
 					cnt = m_pNode[i].len / 10;
 
-				static rvector vOut;
+				rvector vOut;
 
 				float s = 1.0f;
 
-				static rvector v1,v2,v3,v4,v5,v6,v7,v8;
+				rvector v1,v2,v3,v4,v5,v6,v7,v8;
 
 				v1 = m_pNode[i-1].up;
 				v2 = m_pNode[i  ].up;
@@ -156,13 +156,13 @@ void RWeaponTracks::MakeBuffer()
 
 				for(int j=1;j<cnt+1;j++) {
 
-					s = j*10/fLen;
+					s = j * 10 / fLen;
 
-					D3DXVec3CatmullRom(&vOut,&v1,&v2,&v3,&v4,s);
-					SetVertexSpline(vOut,m_pNode[i].color[0]);
+					vOut = CatmullRomSpline(v1, v2, v3, v4, s);
+					SetVertexSpline(vOut, m_pNode[i].color[0]);
 
-					D3DXVec3CatmullRom(&vOut,&v5,&v6,&v7,&v8,s);
-					SetVertexSpline(vOut,m_pNode[i].color[1]);
+					vOut = CatmullRomSpline(v5, v6, v7, v8, s);
+					SetVertexSpline(vOut, m_pNode[i].color[1]);
 				}
 			}
 		}
@@ -175,8 +175,6 @@ void RWeaponTracks::MakeBuffer()
 			SetVertexSpline(m_pNode[i].down , m_pNode[i].color[1]);
 		}
 	}
-	
-	/////////////////////////////////////////////////////
 
 	float at,ct;
 
@@ -184,11 +182,11 @@ void RWeaponTracks::MakeBuffer()
 	{
 		if(i) {
 			at = (i/(float)m_current_vertex_size);
-			ct = at;// * 1.2f;
+			ct = at;
 		}
 		else {
 			at = 0.1f;
-			ct = at;// * 1.2f;
+			ct = at;
 		}
 
 		m_pVertSpline[i].color = GetColor(m_pVertSpline[i].color,at,ct);
@@ -208,7 +206,7 @@ void RWeaponTracks::Render()
 		MakeBuffer();
 
 		static rmatrix _init_mat = GetIdentityMatrix();
-		dev->SetTransform( D3DTS_WORLD, &_init_mat );
+		dev->SetTransform(D3DTS_WORLD, static_cast<D3DMATRIX*>(_init_mat));
 
 		dev->SetTextureStageState( 0, D3DTSS_COLORARG2, D3DTA_DIFFUSE );
 		dev->SetTextureStageState( 0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE );

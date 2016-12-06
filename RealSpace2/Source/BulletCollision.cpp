@@ -96,8 +96,8 @@ static bool SetResults(const T& Result,
 
 	btVector3 point;
 	point.setInterpolate3(Src, Dest, Result.m_closestHitFraction);
-	if (Hit) *Hit = static_cast<float*>(point);
-	if (Normal) *Normal = v3{ Result.m_hitNormalWorld };
+	if (Hit) *Hit = v3{ point.x(), point.y(), point.z() };
+	if (Normal) *Normal = v3{ Result.m_hitNormalWorld.x(), Result.m_hitNormalWorld.y(), Result.m_hitNormalWorld.z() };
 
 	return true;
 }

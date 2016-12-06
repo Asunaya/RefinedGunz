@@ -27,7 +27,7 @@ RSphere::~RSphere(void)
 bool RSphere::isCollide( CDInfo* data_, CDInfoType cdType_ )
 {
 	rvector distance = *data_->clothCD.v - mCentre;
-	if( D3DXVec3LengthSq( &distance ) < ( mRadius * mRadius ) )
+	if (MagnitudeSq(distance) < mRadius * mRadius)
 	{
 		*data_->clothCD.pos = mCentre + ( mRadius * *data_->clothCD.n);
 		return true;
@@ -52,7 +52,7 @@ void RSphere::draw()
 	}
 
 	RGetDevice()->SetRenderState( D3DRS_LIGHTING, FALSE );
-	RGetDevice()->SetTransform( D3DTS_WORLD, &mWorld );
+	RGetDevice()->SetTransform(D3DTS_WORLD, static_cast<D3DMATRIX*>(mWorld));
 
  	mSphere->DrawSubset( 0 );
 

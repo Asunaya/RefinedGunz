@@ -81,9 +81,7 @@ void ZStencilLight::PreRender()
 	pd3dDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
 	pd3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
 
-	rmatrix World;
-	GetIdentityMatrix(World);
-	RGetDevice()->SetTransform(D3DTS_WORLD, &World);
+	RSetTransform(D3DTS_WORLD, IdentityMatrix());
 }
 
 void ZStencilLight::RenderStencil()
@@ -94,7 +92,6 @@ void ZStencilLight::RenderStencil()
 	}
 
 	LPDIRECT3DDEVICE9 dev = RGetDevice();
-//	dev->GetViewport()
 
 	dev->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_ALWAYS);
 
@@ -107,7 +104,7 @@ void ZStencilLight::RenderStencil()
 	world._41 = m_Position.x;
 	world._42 = m_Position.y;
 	world._43 = m_Position.z;
-	dev->SetTransform(D3DTS_WORLD, &world);
+	RSetTransform(D3DTS_WORLD, world);
 
 	// render stencil
 	dev->SetRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_INCR);
@@ -139,11 +136,10 @@ void ZStencilLight::RenderStencil(const rvector& p, float raidus)
 	world._41 = p.x;
 	world._42 = p.y;
 	world._43 = p.z;
-	dev->SetTransform(D3DTS_WORLD, &world);
+	RSetTransform(D3DTS_WORLD, world);
 
 	if(bInverse)
 	{
-		// render stencil
 		dev->SetRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_INCR);
 		dev->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
 		m_pMesh->DrawSubset(0);
@@ -154,7 +150,6 @@ void ZStencilLight::RenderStencil(const rvector& p, float raidus)
 	}
 	else
 	{
-		// render stencil
 		dev->SetRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_INCR);
 		dev->SetRenderState(D3DRS_CULLMODE, D3DCULL_CW);
 		m_pMesh->DrawSubset(0);
@@ -173,8 +168,6 @@ void ZStencilLight::RenderLight()
 	static bool init = false;
 	if(!init)
 	{
-		//m_pTex = RCreateBaseTexture("light.bmp");
-
 		m_VBuffer[0].p		= D3DXVECTOR4( 0.0f - CORRECTION, 0.0f - CORRECTION, 0, 1.0f );
 		m_VBuffer[0].color	= 0xFFFFFFFF;	m_VBuffer[0].tu		= 0.0f;	m_VBuffer[0].tv		= 0.0f;
 		// right top
@@ -191,11 +184,7 @@ void ZStencilLight::RenderLight()
 	}
 
  	RSetWBuffer(FALSE);
-	//dev->SetRenderState(D3DRS_STENCILENABLE, TRUE);
-	//dev->SetRenderState(D3DRS_FOGENABLE, FALSE);
-	//dev->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
 	dev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
- 	//dev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
 
 	dev->SetTextureStageState(0,D3DTSS_COLORARG1, D3DTA_TFACTOR);
 	dev->SetTextureStageState(0,D3DTSS_COLORARG2, D3DTA_DIFFUSE);
@@ -206,12 +195,8 @@ void ZStencilLight::RenderLight()
 
   	dev->SetRenderState(D3DRS_TEXTUREFACTOR, 0x05FF7722);
 
-	//dev->SetRenderState(D3DRS_STENCILREF, 0x1);
   	dev->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_LESSEQUAL);
-	//dev->SetRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_KEEP);
 
-	//draw
- 	//dev->SetTexture(0, m_pTex->GetTexture());
 	dev->SetFVF( RTLVertexType );
 	dev->DrawPrimitiveUP( D3DPT_TRIANGLEFAN, 2, m_VBuffer, sizeof(RTLVertex) );
 
@@ -277,7 +262,6 @@ void ZStencilLight::Render()
 			: pLS->power;
 		fPower = min(1.f,max(0.f,fPower));
 
-		// 주황색 하드코드
 		light.Diffuse.r		= fPower;
 		light.Diffuse.g		= .5*fPower;
 		light.Diffuse.b		= .25*fPower;
@@ -317,7 +301,6 @@ int ZStencilLight::AddLightSource(const rvector& p, float power )
 	m_LightSource.insert( map<int,LightSource*>::value_type(m_id,pNew) );
 	int rid = m_id;
 	m_id = m_id>=MAXLSID?1:m_id+1;
-	DMLog("light %d added\n", rid);
 	return rid;
 }
 

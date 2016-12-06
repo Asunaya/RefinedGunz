@@ -5,6 +5,7 @@
 #include "RError.h"
 #include "MZFileSystem.h"
 #include "RNameSpace.h"
+#include <d3d9.h>
 #pragma comment(lib, "d3dx9.lib")
 _NAMESPACE_REALSPACE2_BEGIN
 
@@ -70,6 +71,9 @@ void SetVSync(bool b);
 D3DFORMAT GetDepthStencilFormat();
 const D3DCAPS9& GetDeviceCaps();
 GraphicsAPI GetGraphicsAPI();
+
+rmatrix RGetTransform(D3DTRANSFORMSTATETYPE ts);
+void RSetTransform(D3DTRANSFORMSTATETYPE ts, const rmatrix& mat);
 
 int RGetAdapterModeCount(D3DFORMAT Format, UINT Adapter = D3DADAPTER_DEFAULT);
 bool REnumAdapterMode(UINT Adapter, D3DFORMAT Format, UINT Mode, D3DDISPLAYMODE* pMode);

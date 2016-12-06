@@ -61,33 +61,7 @@ void DMLog(const char* Format, ...)
 
 	OutputDebugString(temp);
 }
-
-void DLogMatrix(const matrix& mat)
-{
-	for (int i = 0; i < 4; i++)
-	{
-		for (int j = 0; j < 4; j++)
-		{
-			DMLog("%f ", mat(i, j));
-		}
-
-		DMLog("\n");
-	}
-}
 #endif
-
-void LogMatrix(const matrix& mat)
-{
-	for (int i = 0; i < 4; i++)
-	{
-		for (int j = 0; j < 4; j++)
-		{
-			MLog("%f ", mat(i, j));
-		}
-
-		MLog("\n");
-	}
-}
 
 void MLogFile(const char* Msg)
 {

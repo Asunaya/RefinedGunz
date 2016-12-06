@@ -356,22 +356,22 @@ static const std::array<NodeInfo, eq_parts_pos_info_end> Nodes = []()
 	return infos;
 }();
 
-static void GetAniMat(matrix& mat, RAnimationNode& node, const matrix* parent_base_inv, int frame);
-static void GetRotAniMat(matrix& mat, RAnimationNode& node, const matrix* parent_base_inv, int frame);
-static void GetPosAniMat(matrix& mat, RAnimationNode& node, const matrix* parent_base_inv, int frame);
-static void RotateSpine(matrix& mat, RMeshPartsPosInfoType parts, float y, float tremble);
+static void GetAniMat(rmatrix& mat, RAnimationNode& node, const rmatrix* parent_base_inv, int frame);
+static void GetRotAniMat(rmatrix& mat, RAnimationNode& node, const rmatrix* parent_base_inv, int frame);
+static void GetPosAniMat(rmatrix& mat, RAnimationNode& node, const rmatrix* parent_base_inv, int frame);
+static void RotateSpine(rmatrix& mat, RMeshPartsPosInfoType parts, float y, float tremble);
 
 template <size_t size>
-static matrix GetNodeHierarchyMatrix(RAnimation* LowerAni, RAnimation* UpperAni,
+static rmatrix GetNodeHierarchyMatrix(RAnimation* LowerAni, RAnimation* UpperAni,
 	int LowerFrame, int UpperFrame,
 	const RMeshPartsPosInfoType(&Hierarchy)[size],
 	float y, float tremble)
 {
 	assert(LowerFrame >= 0);
 	assert(UpperFrame >= 0);
-	matrix last_mat;
-	matrix last_mat_inv;
-	matrix mat;
+	rmatrix last_mat;
+	rmatrix last_mat_inv;
+	rmatrix mat;
 	rmatrix* last_mat_inv_ptr = nullptr;
 	for (auto Parts : Hierarchy)
 	{
@@ -424,7 +424,7 @@ static matrix GetNodeHierarchyMatrix(RAnimation* LowerAni, RAnimation* UpperAni,
 }
 
 template <size_t size>
-static matrix LogNodeHierarchyMatrix(RAnimation* LowerAni, RAnimation* UpperAni,
+static rmatrix LogNodeHierarchyMatrix(RAnimation* LowerAni, RAnimation* UpperAni,
 	int LowerFrame, int UpperFrame,
 	const RMeshPartsPosInfoType(&Hierarchy)[size],
 	float y, float tremble)
@@ -489,7 +489,7 @@ static matrix LogNodeHierarchyMatrix(RAnimation* LowerAni, RAnimation* UpperAni,
 	return mat;
 }
 
-bool GetNodeMatrix(matrix& mat, const char* Name, const matrix* parent_base_inv,
+bool GetNodeMatrix(rmatrix& mat, const char* Name, const rmatrix* parent_base_inv,
 	RAnimation* Ani, int Frame, float y, float tremble)
 {
 	const NodeInfo* nodeinfo = nullptr;
@@ -518,11 +518,11 @@ bool GetNodeMatrix(matrix& mat, const char* Name, const matrix* parent_base_inv,
 	return true;
 }
 
-bool GetUpperSpine1(matrix& mat, RAnimation* Ani, int Frame, float y, float tremble)
+bool GetUpperSpine1(rmatrix& mat, RAnimation* Ani, int Frame, float y, float tremble)
 {
 	auto& spine1 = *Ani->m_pAniData->GetNode("Bip01 Spine1");
 	auto& spine = *Ani->m_pAniData->GetNode("Bip01 Spine");
-	matrix spine_base_inv = spine.m_mat_base;
+	auto spine_base_inv = spine.m_mat_base;
 	RMatInv(spine_base_inv, spine_base_inv);
 	GetAniMat(mat, spine1, &spine_base_inv, Frame);
 	RotateSpine(mat, eq_parts_pos_info_Spine1, y, tremble);
@@ -539,7 +539,7 @@ v3 GetHeadPosition(RAnimation* LowerAni, RAnimation* UpperAni,
 	/*DMLog("GetHeadPosition -- %p, %p, %d, %d, %f, %f\n", LowerAni, UpperAni, LowerFrame, UpperFrame,
 		y, tremble);*/
 
-	matrix mat = GetNodeHierarchyMatrix(LowerAni, UpperAni, LowerFrame, UpperFrame,
+	auto mat = GetNodeHierarchyMatrix(LowerAni, UpperAni, LowerFrame, UpperFrame,
 		Hierarchy, y, tremble);
 
 	/*v3 trans = GetTransPos(mat);
@@ -568,8 +568,8 @@ v3 GetFootPosition(RAnimation* LowerAni, int Frame)
 	static const RMeshPartsPosInfoType HierarchyL[] = { eq_parts_pos_info_Root, eq_parts_pos_info_Pelvis,
 		eq_parts_pos_info_Spine, eq_parts_pos_info_LThigh, eq_parts_pos_info_LCalf, eq_parts_pos_info_LFoot };
 
-	matrix matR = GetNodeHierarchyMatrix(LowerAni, nullptr, Frame, 0 ,HierarchyR, 0, 0);
-	matrix matL = GetNodeHierarchyMatrix(LowerAni, nullptr, Frame, 0, HierarchyL, 0, 0);
+	auto matR = GetNodeHierarchyMatrix(LowerAni, nullptr, Frame, 0 ,HierarchyR, 0, 0);
+	auto matL = GetNodeHierarchyMatrix(LowerAni, nullptr, Frame, 0, HierarchyL, 0, 0);
 
 	v3 ret = GetTransPos(matR) + GetTransPos(matL);
 	ret /= 2;
@@ -577,7 +577,7 @@ v3 GetFootPosition(RAnimation* LowerAni, int Frame)
 	return ret;
 }
 
-static void GetAniMat(matrix& mat, RAnimationNode& node, const matrix* parent_base_inv, int frame)
+static void GetAniMat(rmatrix& mat, RAnimationNode& node, const rmatrix* parent_base_inv, int frame)
 {
 	if (node.m_mat_cnt)
 	{
@@ -602,9 +602,9 @@ static void GetAniMat(matrix& mat, RAnimationNode& node, const matrix* parent_ba
 	GetPosAniMat(mat, node, parent_base_inv, frame);
 }
 
-static void GetRotAniMat(matrix& mat, RAnimationNode& node, const matrix* parent_base_inv, int frame)
+static void GetRotAniMat(rmatrix& mat, RAnimationNode& node, const rmatrix* parent_base_inv, int frame)
 {
-	rmatrix buffer, Inv;
+	rmatrix buffer;
 
 	if (node.m_rot_cnt) {
 		mat = QuaternionToMatrix(node.GetRotValue(frame));
@@ -623,9 +623,9 @@ static void GetRotAniMat(matrix& mat, RAnimationNode& node, const matrix* parent
 	}
 }
 
-static void GetPosAniMat(matrix& mat, RAnimationNode& node, const matrix* parent_base_inv, int frame)
+static void GetPosAniMat(rmatrix& mat, RAnimationNode& node, const rmatrix* parent_base_inv, int frame)
 {
-	rmatrix buffer, Inv;
+	rmatrix buffer;
 
 	if (node.m_pos_cnt) {
 		auto pos = node.GetPosValue(frame);
@@ -646,7 +646,7 @@ static void GetPosAniMat(matrix& mat, RAnimationNode& node, const matrix* parent
 	}
 }
 
-static void RotateSpine(matrix& mat, RMeshPartsPosInfoType parts, float y, float tremble)
+static void RotateSpine(rmatrix& mat, RMeshPartsPosInfoType parts, float y, float tremble)
 {
 	float ratio = 0;
 
@@ -667,7 +667,7 @@ static void RotateSpine(matrix& mat, RMeshPartsPosInfoType parts, float y, float
 
 	float y_clamped = y;
 
-	constexpr auto MAX_YA_FRONT = 50;
+	constexpr auto MAX_YA_FRONT = 50.f;
 	constexpr auto MAX_YA_BACK = -70.f;
 
 	if (y_clamped > MAX_YA_FRONT)
@@ -808,7 +808,7 @@ v3 GetAbsHead(const v3 & Origin, const v3 & Dir, MMatchSex Sex,
 	{
 		v3 Foot = GetFootPosition(LowerAni, LowerFrame);
 
-		matrix WorldRot;
+		rmatrix WorldRot;
 		MakeWorldMatrix(&WorldRot, { 0, 0, 0 }, xydir, { 0, 0, 1 });
 
 		Foot *= WorldRot;
@@ -816,7 +816,7 @@ v3 GetAbsHead(const v3 & Origin, const v3 & Dir, MMatchSex Sex,
 		AdjPos = Origin - Foot;
 	}
 
-	matrix World;
+	rmatrix World;
 	MakeWorldMatrix(&World, AdjPos, xydir, v3(0, 0, 1));
 
 	return Head * World;

@@ -27,7 +27,7 @@ void ZEffectBulletMarkList::Add(const rvector &pos, const rvector &normal)
 {
 	// Early Culling
 	auto vec = g_pGame->m_pMyCharacter->GetPosition() - pos;
-	float fDistanceSq = D3DXVec3LengthSq(&vec);
+	float fDistanceSq = MagnitudeSq(vec);
 	int nLevel = GetEffectLevel();
 	if( nLevel >= 1 && ( fDistanceSq > BULLETMART_CULL_DISTACNE_SQ_1 ) ) return;
 	if( nLevel == 2 && ( fDistanceSq > BULLETMART_CULL_DISTACNE_SQ_2 ) ) return;
@@ -41,20 +41,15 @@ void ZEffectBulletMarkList::Add(const rvector &pos, const rvector &normal)
 
 	rvector dir = normal;
 
-	rvector up=rvector(0,0,1);
-
-	rvector right;
+	rvector up = rvector(0, 0, 1);
 
 	float dot = DotProduct(dir,up);
 
 	if(dot > 0.99f || dot < -0.99f)
 		up = rvector(0,1,0);
 
-	D3DXVec3Cross(&right, &up, &dir);
-	D3DXVec3Normalize(&right, &right);
-
-	D3DXVec3Cross(&up, &right, &dir);
-	D3DXVec3Normalize(&up, &up);
+	auto right = Normalized(CrossProduct(up, dir));
+	up = Normalized(CrossProduct(right, dir));
 
 	rmatrix mat;
 	GetIdentityMatrix(mat);
@@ -68,18 +63,16 @@ void ZEffectBulletMarkList::Add(const rvector &pos, const rvector &normal)
 
 
 	static ZEFFECTCUSTOMVERTEX v[] = {
-		{-1, -1, 0, 0xFFFFFFFF, 1, 0},
-		{-1,  1, 0, 0xFFFFFFFF, 1, 1},
-		{ 1,  1, 0, 0xFFFFFFFF, 0, 1},
-		{ 1, -1, 0, 0xFFFFFFFF, 0, 0},
+		{{-1, -1, 0}, 0xFFFFFFFF, 1, 0 },
+		{{-1,  1, 0}, 0xFFFFFFFF, 1, 1},
+		{{ 1,  1, 0}, 0xFFFFFFFF, 0, 1},
+		{{ 1, -1, 0}, 0xFFFFFFFF, 0, 0},
 	};
     
 	for(int i=0;i<4;i++)
 	{
-		rvector worldv = BULLETMARK_SCALE*rvector(v[i].x,v[i].y,v[i].z) * matWorld;
-		pNewItem->v[i].x = worldv.x;
-		pNewItem->v[i].y = worldv.y;
-		pNewItem->v[i].z = worldv.z;
+		rvector worldv = BULLETMARK_SCALE * v[i].pos * matWorld;
+		pNewItem->v[i].pos = worldv;
 		pNewItem->v[i].tu = v[i].tu;
 		pNewItem->v[i].tv = v[i].tv;
 		pNewItem->v[i].color= 0xffffffff;

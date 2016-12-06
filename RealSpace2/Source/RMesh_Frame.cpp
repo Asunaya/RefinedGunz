@@ -2,22 +2,17 @@
 #include <stdio.h>
 #include <math.h>
 #include <tchar.h>
-
 #include "MXml.h"
-
 #include "RealSpace2.h"
 #include "RMesh.h"
 #include "RMeshMgr.h"
-
 #include "MDebug.h"
-
 #include "RAnimationMgr.h"
 #include "RVisualmeshMgr.h"
-
 #include "MZFileSystem.h"
 #include "fileinfo.h"
-
 #include "RShaderMgr.h"
+#include "LogMatrix.h"
 
 #ifdef _DEBUG
 #include "../../CSCommon/Include/AnimationStuff.h"
@@ -113,7 +108,7 @@ void RMesh::GetNodeAniMatrix(RMeshNode* pMeshNode,rmatrix& ani_mat)
 		_RGetRotAniMat(pMeshNode,frame,ani_mat);
 		_RGetPosAniMat(pMeshNode,frame,ani_mat);
 
-		CalcLookAtParts( ani_mat, pMeshNode, m_pVisualMesh );
+		CalcLookAtParts(ani_mat, pMeshNode, m_pVisualMesh);
 
 #ifdef SCALE_RMESHNODE
 		if (pMeshNode->ScaleEnabled)
@@ -142,13 +137,7 @@ void RMesh::_RGetAniMat(RMeshNode* pMeshNode,int frame,rmatrix& t_ani_mat)
 			bAni = true;
 
 	if ( bAni )	{
-
-		rvector v;
-
 		t_ani_mat = pANode->GetTMValue(frame);
-	}
-	else {
-
 	}
 }
 
@@ -169,7 +158,6 @@ void RMesh::_RGetRotAniMat(RMeshNode* pMeshNode,int frame,rmatrix& t_ani_mat)
 
 	if ( bAni )	{
 		t_ani_mat = QuaternionToMatrix(pANode->GetRotValue(frame));
-		//D3DXMatrixRotationQuaternion(&t_ani_mat, &pANode->GetRotValue(frame));
 	} else {
 
 		GetIdentityMatrix(buffer);
@@ -183,7 +171,6 @@ void RMesh::_RGetRotAniMat(RMeshNode* pMeshNode,int frame,rmatrix& t_ani_mat)
 			if(pMeshNode->m_pParent) {
 				RMatInv(Inv, pMeshNode->m_pParent->m_mat_base);
 				buffer = pMeshNode->m_mat_base * Inv;
-				//D3DXMatrixMultiply(&buffer, &pMeshNode->m_mat_base, &Inv);
 			}
 			else {
 				memcpy(&buffer,&pMeshNode->m_mat_local,sizeof(rmatrix));
@@ -192,8 +179,6 @@ void RMesh::_RGetRotAniMat(RMeshNode* pMeshNode,int frame,rmatrix& t_ani_mat)
 
 		SetTransPos(buffer, { 0, 0, 0 });
 		t_ani_mat *= buffer;
-		//buffer._41 = buffer._42 = buffer._43 = 0;
-		//D3DXMatrixMultiply(&t_ani_mat, &t_ani_mat, &buffer);
 	}
 }
 
@@ -202,19 +187,13 @@ void RMesh::_RGetPosAniMat(RMeshNode* pMeshNode,int frame,rmatrix& t_ani_mat)
 	if(pMeshNode==NULL)
 		return;
 
-	rmatrix buffer,Inv;
+	rmatrix buffer;
 
 	RAnimationNode* pANode = pMeshNode->m_pAnimationNode;
 
-	if(pMeshNode->m_LookAtParts == lookat_parts_spine1) {
-		if( m_pAniSet[1] ) {
-
-			t_ani_mat._41 = pMeshNode->m_spine_local_pos.x;
-			t_ani_mat._42 = pMeshNode->m_spine_local_pos.y;
-			t_ani_mat._43 = pMeshNode->m_spine_local_pos.z;
-
-			return;
-		}
+	if(pMeshNode->m_LookAtParts == lookat_parts_spine1 && m_pAniSet[1]) {
+		SetTransPos(t_ani_mat, pMeshNode->m_spine_local_pos);
+		return;
 	}
 
 	bool bAni = false;
@@ -224,38 +203,23 @@ void RMesh::_RGetPosAniMat(RMeshNode* pMeshNode,int frame,rmatrix& t_ani_mat)
 			bAni = true;
 
 	if ( bAni ) {
-
-		rvector v;
-
-		v = pANode->GetPosValue(frame);
-
-		t_ani_mat._41  = v.x;
-		t_ani_mat._42  = v.y;
-		t_ani_mat._43  = v.z;
+		SetTransPos(t_ani_mat, pANode->GetPosValue(frame));
 	}
 	else {
-
 		GetIdentityMatrix(buffer);
 
-		if( m_isNPCMesh && pMeshNode->m_WeaponDummyType != weapon_dummy_etc )
-		{
+		if( m_isNPCMesh && pMeshNode->m_WeaponDummyType != weapon_dummy_etc ) {
 			buffer = pMeshNode->m_mat_local;
-
-		} else  {
-		
-			if(pMeshNode->m_pParent) {
-				buffer = pMeshNode->m_mat_base * pMeshNode->m_pParent->m_mat_inv;
-			}
-			else {
-				buffer = pMeshNode->m_mat_local;
-			}
-
+		}
+		else if(pMeshNode->m_pParent) {
+			buffer = pMeshNode->m_mat_base * pMeshNode->m_pParent->m_mat_inv;
+		}
+		else {
+			buffer = pMeshNode->m_mat_local;
 		}
 
-		t_ani_mat._41 = buffer._41;
-		t_ani_mat._42 = buffer._42;
-		t_ani_mat._43 = buffer._43;
-
+		auto Trans = GetTransPos(buffer);
+		SetTransPos(t_ani_mat, Trans);
 	}
 }
 
@@ -267,88 +231,38 @@ void RMesh::_RGetPosAniMat(RMeshNode* pMeshNode,int frame,rmatrix& t_ani_mat)
 
 void RMesh::CalcLookAtParts(rmatrix& pAniMat,RMeshNode* pMeshNode,RVisualMesh* pVisualMesh)
 {
-	if( pMeshNode && pVisualMesh ) {
+	if (!pMeshNode || !pVisualMesh)
+		return;
 
-		float add_value = pVisualMesh->m_FrameTime.GetValue();
-		float add_value_npc = 0.f;
+	float add_value = pVisualMesh->m_FrameTime.GetValue();
+	float add_value_npc = 0.f;
 
-		float rot_x = pVisualMesh->m_vRotXYZ.x;
-		float rot_y = pVisualMesh->m_vRotXYZ.y;
+	float rot_x = pVisualMesh->m_vRotXYZ.x;
+	float rot_y = pVisualMesh->m_vRotXYZ.y;
 
-		if(m_isNPCMesh) {
-			add_value_npc = add_value;
-		}
-
-		if(rot_x > MAX_XA_LEFT)		rot_x = MAX_XA_LEFT;
-		if(rot_x < MAX_XA_RIGHT)	rot_x = MAX_XA_RIGHT;
-
-		if(rot_y > MAX_YA_FRONT)	rot_y = MAX_YA_FRONT;
-		if(rot_y < MAX_YA_BACK)		rot_y = MAX_YA_BACK;
-
-		auto Rotate = [&](auto&& add, auto&& coefficient) {
-			float rot_y2 = rot_y + add;
-
-			auto mx = RGetRotX(rot_x * coefficient);
-			auto my = RGetRotY(rot_y2 * coefficient);
-
-			pAniMat *= mx;
-			pAniMat *= my;
-		};
-
-		if (pMeshNode->m_LookAtParts == lookat_parts_spine1) Rotate(add_value_npc, 0.6f);
-		else if (pMeshNode->m_LookAtParts == lookat_parts_spine2) Rotate(add_value, 0.5f);
-		else if (pMeshNode->m_LookAtParts == lookat_parts_head) Rotate(add_value * 0.5f, 0.3f);
+	if (m_isNPCMesh) {
+		add_value_npc = add_value;
 	}
-}
 
-void RMesh::CalcLookAtParts2(rmatrix& pAniMat,RMeshNode* pMeshNode,RVisualMesh* pVisualMesh)
-{
-	if( pMeshNode && pVisualMesh ) {
+	if (rot_x > MAX_XA_LEFT)		rot_x = MAX_XA_LEFT;
+	if (rot_x < MAX_XA_RIGHT)	rot_x = MAX_XA_RIGHT;
 
-		rmatrix* mat = NULL;
+	if (rot_y > MAX_YA_FRONT)	rot_y = MAX_YA_FRONT;
+	if (rot_y < MAX_YA_BACK)		rot_y = MAX_YA_BACK;
 
-		bool ch = false;
+	auto Rotate = [&](auto&& add, auto&& coefficient) {
+		float rot_y2 = rot_y + add;
 
-		if(pMeshNode->m_LookAtParts == lookat_parts_spine1) {
-			mat = &pMeshNode->m_mat_result;
-			ch = true;
-		}
+		auto mx = RGetRotX(rot_x * coefficient);
+		auto my = RGetRotY(rot_y2 * coefficient);
 
-		if(pMeshNode->m_LookAtParts == lookat_parts_spine2) {
-			mat = &pMeshNode->m_mat_result;
-			ch = true;
-		}
+		pAniMat *= mx;
+		pAniMat *= my;
+	};
 
-		if(pMeshNode->m_LookAtParts == lookat_parts_head) {
-			mat = &pMeshNode->m_mat_result;
-			ch = true;
-		}
-
-		if(ch) {
-
-			mat->_11 = pVisualMesh->m_UpperRotMat._11;
-			mat->_12 = pVisualMesh->m_UpperRotMat._12;
-			mat->_13 = pVisualMesh->m_UpperRotMat._13;
-
-			mat->_21 = pVisualMesh->m_UpperRotMat._21;
-			mat->_22 = pVisualMesh->m_UpperRotMat._22;
-			mat->_23 = pVisualMesh->m_UpperRotMat._23;
-
-			mat->_31 = pVisualMesh->m_UpperRotMat._31;
-			mat->_32 = pVisualMesh->m_UpperRotMat._32;
-			mat->_33 = pVisualMesh->m_UpperRotMat._33;
-		}
-
-	}
-}
-
-
-void RMesh::RenderFrameSingleParts() {
-
-}
-
-void RMesh::RenderFrameMultiParts() {
-
+	if (pMeshNode->m_LookAtParts == lookat_parts_spine1) Rotate(add_value_npc, 0.6f);
+	else if (pMeshNode->m_LookAtParts == lookat_parts_spine2) Rotate(add_value, 0.5f);
+	else if (pMeshNode->m_LookAtParts == lookat_parts_head) Rotate(add_value * 0.5f, 0.3f);
 }
 
 RAnimation* RMesh::GetNodeAniSet(RMeshNode* pNode)
@@ -364,7 +278,7 @@ RAnimation* RMesh::GetNodeAniSet(RMeshNode* pNode)
 	return pAniSet;
 }
 
-static void GetQuat(D3DXQUATERNION& q,rvector& dir1,rvector& dir2)
+static void GetQuat(rquaternion& q,rvector& dir1,rvector& dir2)
 {
 	rvector axis;
 	CrossProduct(&axis,dir1,dir2);
@@ -373,42 +287,14 @@ static void GetQuat(D3DXQUATERNION& q,rvector& dir1,rvector& dir2)
 
 	float rad = acos( theta );
 
-	D3DXQuaternionRotationAxis(&q,&axis,rad);
+	q = AngleAxisToQuaternion(axis, rad);
 }
 
 static void GetMat(rmatrix& m, rvector& dir1, rvector& dir2)
 {
-	D3DXQUATERNION q;
+	rquaternion q;
 	GetQuat(q, dir1, dir2);
 	m = QuaternionToMatrix(q);
-}
-
-static rmatrix makematrix(rvector pos, rvector dir, rvector up)
-{
-	rmatrix m;
-	rvector right = Normalized(CrossProduct(up, dir));
-	up = Normalized(CrossProduct(right, dir));
-	Normalize(dir);
-
-	GetIdentityMatrix(m);
-
-	m._11 = right.x;
-	m._12 = right.y;
-	m._13 = right.z;
-
-	m._21 = up.x;
-	m._22 = up.y;
-	m._23 = up.z;
-
-	m._31 = dir.x;
-	m._32 = dir.y;
-	m._33 = dir.z;
-
-	m._41 = pos.x;
-	m._42 = pos.y;
-	m._43 = pos.z;
-
-	return m;
 }
 
 static void CalcNodeMatrix(RVisualMesh* pVMesh , RMeshNode* pNode ,bool upLimit)
@@ -457,8 +343,6 @@ static void CalcNodeMatrix(RVisualMesh* pVMesh , RMeshNode* pNode ,bool upLimit)
 
 void RMesh::RenderFrame()
 {
-	rmatrix	s;
-
 	if (m_list.empty())
 		return;
 

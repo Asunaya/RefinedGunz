@@ -1006,11 +1006,9 @@ void ZSoundEngine::Run(void)
 			Pos.z += 170.f;
 		}
 
-		rvector Orientation = Pos - RCameraPosition;
-		D3DXVec3Normalize(&Orientation, &Orientation);
+		rvector Orientation = Normalized(Pos - RCameraPosition);
 
-		rvector right;
-		D3DXVec3Cross(&right, &Orientation, &RCameraUp);
+		rvector right = CrossProduct(Orientation, RCameraUp);
 
 		UpdateAmbSound(Pos, right);
 
@@ -1262,25 +1260,7 @@ void ZSoundEngine::SetMusicMute( bool b )
 	if( !b )	SetMusicVolume( m_fMusicVolume );
 }
 
-
-//int ZSoundEngine::PlaySE(FSOUND_SAMPLE* pFS, rvector& pos, bool bPlayer, bool bLoop )
-//{
-//	if( !m_bSoundEnable || m_bEffectMute ) return false;
-//	if( !m_b3DSoundUpdate ) return false;
-//
-//	if(pFS == NULL) return -1;
-//
-//	return ZGetSoundFMod()->Play( pFS, &pos, 0, (int)(m_fEffectVolume * 255.f), 0, bPlayer );
-//}
-
-//int ZSoundEngine::PlaySE(FSOUND_SAMPLE* pFS, bool bLoop )
-//{
-//	if( !m_bSoundEnable || m_bEffectMute ) return false;
-//	if(pFS == NULL) return -1;
-//	return ZGetSoundFMod()->Play( pFS, m_fEffectVolume * 255 );
-//}
-
-int ZSoundEngine::PlaySE(FSOUND_SAMPLE* pFS, const rvector& pos, int Priority, bool bPlayer /* = false */, bool bLoop /* = false  */)
+int ZSoundEngine::PlaySE(FSOUND_SAMPLE* pFS, const rvector& pos, int Priority, bool bPlayer, bool bLoop)
 {
 	if(!m_bSoundEnable||m_bEffectMute||pFS==NULL) return -1;
 	return ZGetSoundFMod()->Play(pFS, &pos, NULL, m_fEffectVolume*255,Priority,bPlayer,bLoop);
@@ -1352,7 +1332,7 @@ void ZSoundEngine::SetAmbientSoundBox( char* Name, rvector& pos1, rvector& pos2,
 	if(!b2d) 
 	{
 		auto vec = rvector(AS.dx, AS.dy, AS.dz);
-		float length = D3DXVec3Length(&vec);
+		float length = Magnitude(vec);
 		FSOUND_Sample_SetMinMaxDistance( AS.pSS->pFS, length * 0.1f, length );
 	}
 }
@@ -1450,19 +1430,11 @@ float ZSoundEngine::GetArea( rvector& Pos, AmbSound& a )
 	// sphere 
 	else if( a.type & AS_SPHERE )
 	{
-		/*
-		float lengthsq = D3DXVec3LengthSq(&(a.center - Pos));
-		float radiussq = a.radius*a.radius;
-		if( lengthsq >= radiussq ) return -1;
-		float sacred = radiussq*((a.type&AS_2D)?AS_TA_ATTENUATION_RATIO_SQ:AS_TB_ATTENUATION_RATIO_SQ); // 감쇄 없는 거리
-		if( lengthsq <= sacred ) return 1;
-		return (radiussq - lengthsq)/(radiussq-sacred);
-		//*/
 		auto vec = a.center - Pos;
- 		float length = D3DXVec3Length(&vec);
+ 		float length = Magnitude(vec);
 		float radius = a.radius;
 		if( length >= radius ) return -1;
-		float sacred = radius*((a.type&AS_2D)?AS_TA_ATTENUATION_RATIO_SQ:AS_TB_ATTENUATION_RATIO_SQ); // 감쇄 없는 거리
+		float sacred = radius*((a.type&AS_2D)?AS_TA_ATTENUATION_RATIO_SQ:AS_TB_ATTENUATION_RATIO_SQ);
 		if( length <= sacred ) return 1;
 		return (radius - length)/(radius-sacred);
 	}
@@ -1599,7 +1571,7 @@ void ZSoundEngine::PlayNPCSound(MQUEST_NPC nNPC, MQUEST_NPC_SOUND nSound, rvecto
 bool ZSoundEngine::CheckCulling(const char* szName, SoundSource* pSS, const rvector& vSoundPos, bool bHero, int* pnoutPriority)
 {
 	auto vec = vSoundPos - m_ListenerPos;
-	float fDistSq = D3DXVec3LengthSq(&vec);
+	float fDistSq = MagnitudeSq(vec);
 
 	if(!bHero)
 	{

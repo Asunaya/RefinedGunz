@@ -33,9 +33,6 @@
 
 _NAMESPACE_REALSPACE2_BEGIN
 
-////////////////////////////////////////////////////////////////////////////
-// 우선 uv ani.. 구현.. 나중에 plugins 로 빼기..
-
 void RMesh::SetMtrlUvAni_ON()
 {
 	if( m_pVisualMesh && m_pVisualMesh->m_bUVAni) { // on
@@ -48,7 +45,7 @@ void RMesh::SetMtrlUvAni_ON()
 		mat._31 = add_t * m_pVisualMesh->m_fUAniValue;
 		mat._32 = add_t * m_pVisualMesh->m_fVAniValue;
 
-		RGetDevice()->SetTransform( D3DTS_TEXTURE0, &mat);
+		RGetDevice()->SetTransform( D3DTS_TEXTURE0, static_cast<const D3DMATRIX*>(mat));
 		RGetDevice()->SetTextureStageState( 0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_COUNT2 ); 
 		RGetDevice()->SetTextureStageState( 0, D3DTSS_TEXCOORDINDEX, 0 );
 	}
@@ -66,9 +63,7 @@ void RMesh::SetMtrlUvAni_OFF()
 
 void RMesh::SetShaderDiffuseMap_OFF()
 {
-	RGetDevice()->SetRenderState( D3DRS_ALPHABLENDENABLE, FALSE );
-//	RGetDevice()->SetRenderState( D3DRS_TEXTUREFACTOR, D3DCOLOR_COLORVALUE(0.0f,0.f,0.f,0.0f));
-
+	RGetDevice()->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
 }
 
 void RMesh::SetShaderAlphaMap_OFF()

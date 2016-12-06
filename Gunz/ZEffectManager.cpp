@@ -705,7 +705,6 @@ void ZEffectManager::Add(ZEffect* pNew)
 
 #define MAX_WATER_DEEP 150
 
-	rvector	water_pos;
 	rvector	src_pos = pNew->GetSortPos();
 
 	_ASSERT(pNew->GetDrawMode()<ZEDM_COUNT);
@@ -1136,7 +1135,7 @@ void ZEffectManager::AddLightFragment(rvector Target,rvector TargetNormal)
 	else if( g_nEffectLevel == Z_VIDEO_EFFECT_NORMAL ) 
 	{
 		auto vec = g_pGame->m_pMyCharacter->GetPosition() - Target;
-		float fDistacneSQ = D3DXVec3LengthSq(&vec);
+		float fDistacneSQ = MagnitudeSq(vec);
 		if( fDistacneSQ > 640000 ) return;
 	}
 
@@ -2110,7 +2109,7 @@ void ZEffectManager::AddGrenadeEffect(const rvector& Target, const rvector& Targ
 
 	if( ZGetGame()->GetWorld()->GetBsp()->Pick( Target, -up, &info ) ) {
 		auto vec = Target - info.PickPos;
-		distance = D3DXVec3LengthSq(&vec);
+		distance = MagnitudeSq(vec);
 	}
 
 	if(distance < 150.f) {
@@ -2480,7 +2479,8 @@ void ZEffectManager::AddSmokeGrenadeEffect( rvector& Target  )
 	v.x	= (rand() % MAX_SG_VELOCITY) * 2 - MAX_SG_VELOCITY;
 	v.y	= (rand() % MAX_SG_VELOCITY) * 2 - MAX_SG_VELOCITY;
 	v.z	= 0.f;
-	D3DXVec3Normalize( &v, &v );
+	Normalize(v);
+
 	ZEffect* pNew	= new ZEffectSmokeGrenade( m_pEBSSmokes[0], Target, v, 10, 1000, 20000 );
 	((ZEffectSmokeGrenade*)pNew)->SetDistOption(29999.f,29999.f,29999.f);
 	Add( pNew );
@@ -2494,8 +2494,8 @@ void ZEffectManager::AddGrenadeSmokeEffect(const rvector& Target ,float min,floa
 	v.x	= (rand() % MAX_SG_VELOCITY) * 2 - MAX_SG_VELOCITY;
 	v.y	= (rand() % MAX_SG_VELOCITY) * 2 - MAX_SG_VELOCITY;
 	v.z	= 0.f;
+	Normalize(v);
 
-	D3DXVec3Normalize( &v, &v );
 	ZEffect* pNew	= new ZEffectSmokeGrenade( m_pEBSSmokes[0], Target, v, min, max, time );
 	Add( pNew );
 }

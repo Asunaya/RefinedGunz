@@ -267,22 +267,14 @@ void ZGameAction::OnPeerSkill_Uppercut(ZCharacter *pOwnerCharacter)
 
 					rvector fTarDir = pTar->GetPosition() - (pOwnerCharacter->GetPosition() - 50.f*OwnerDir);
 					Normalize(fTarDir);
-					float fDot = D3DXVec3Dot(&OwnerDir, &fTarDir);
-					if (fDot>0)
+					float fDot = DotProduct(OwnerDir, fTarDir);
+					if (fDot > 0)
 					{
-						int cm = g_pGame->SelectSlashEffectMotion(pOwnerCharacter);//남녀 칼 휘두르는 방향
+						int cm = g_pGame->SelectSlashEffectMotion(pOwnerCharacter);
 
 						rvector tpos = pTar->GetPosition();
 
 						tpos.z += 130.f;
-
-						/*
-						if (IsPlayerObject(pTar))
-						{
-							// 우선 플레이어만 이펙트가 나온다. - effect 다 정리하고 NPC도 나오게 바뀌어야 함 -bird
-							ZGetEffectManager()->AddSwordUppercutDamageEffect(tpos,(ZCharacter*)pTar);
-						}
-						*/
 
 						tpos -= pOwnerCharacter->m_Direction * 50.f;
 
@@ -334,7 +326,6 @@ void ZGameAction::OnPeerSkill_Dash(ZCharacter *pOwnerCharacter)
 	for (ZObjectManager::iterator itor = ZGetObjectManager()->begin();
 		itor != ZGetObjectManager()->end(); ++itor)
 	{
-//		ZCharacter* pTar = (*itor).second;
 		ZObject* pTar = (*itor).second;
 
 		if (pOwnerCharacter == pTar) continue;
@@ -343,7 +334,6 @@ void ZGameAction::OnPeerSkill_Dash(ZCharacter *pOwnerCharacter)
 
 		if(pTar->IsDie()) continue;
 
-		// 적절한 위치를 얻어낼수 없으면 다음으로~
 		if( !pTar->GetHistory(&TargetPosition,&TargetDir,fShotTime)) continue;
 
 		float fDist = Magnitude(OwnerPosition + OwnerDir*10.f - TargetPosition);
@@ -353,16 +343,6 @@ void ZGameAction::OnPeerSkill_Dash(ZCharacter *pOwnerCharacter)
 			if ((pTar) && (pTar != pOwnerCharacter)) {
 
 				bool bCheck = false;
-/*
-				if (ZApplication::GetGame()->GetMatch()->IsTeamPlay()){
-					if( pOwnerCharacter->IsTeam( pTar ) == false){
-						bCheck = true;
-					}
-				}
-				else {
-					bCheck = true;
-				}
-*/
 				if (ZApplication::GetGame()->GetMatch()->IsTeamPlay()){
 					if (IsPlayerObject(pTar)) {
 						if( pOwnerCharacter->IsTeam( (ZCharacter*)pTar ) == false){
@@ -377,20 +357,18 @@ void ZGameAction::OnPeerSkill_Dash(ZCharacter *pOwnerCharacter)
 					bCheck = true;
 				}
 
-				if(g_pGame->CheckWall(pOwnerCharacter,pTar)==true) //중간에 벽이 막고 있는가?
+				if(g_pGame->CheckWall(pOwnerCharacter,pTar)==true)
 					bCheck = false;
 
-				if( bCheck) {//팀이아닌경우만
-					//				if( pOwnerCharacter->IsTeam( pTar ) == false) {//팀이아닌경우만
-
+				if( bCheck) {
 					rvector fTarDir = pTar->GetPosition() - pOwnerCharacter->GetPosition();
 					Normalize(fTarDir);
 
-					float fDot = D3DXVec3Dot(&OwnerDir, &fTarDir);
+					float fDot = DotProduct(OwnerDir, fTarDir);
 
 					bool bDamage = false;
 
-					if( fDist < 100.f) { // 1m 안쪽은 앞에만 있어도..
+					if( fDist < 100.f) { // 1m
 						if(fDot > 0.f) {
 							bDamage = true;
 						}
@@ -408,38 +386,33 @@ void ZGameAction::OnPeerSkill_Dash(ZCharacter *pOwnerCharacter)
 
 					if ( bDamage ) {
 
-						int cm = g_pGame->SelectSlashEffectMotion(pOwnerCharacter);//남녀 칼 휘두르는 방향
+						int cm = g_pGame->SelectSlashEffectMotion(pOwnerCharacter);
 
 						float add_time = 0.3f * (fDist / 600.f);
-						float time = g_pGame->GetTime() + add_time;			// 거리에 따라서 시간을 달리하도록 수정하기..
+						float time = g_pGame->GetTime() + add_time;
 
 						rvector tpos = pTar->GetPosition();
 
-						tpos.z += 180.f;//좀더 높임
+						tpos.z += 180.f;
 
 						ZGetEffectManager()->AddSwordUppercutDamageEffect(tpos,pTar->GetUID(),(DWORD)(add_time*1000));
-//						ZGetEffectManager()->AddSwordUppercutDamageEffect(tpos,pTar);
 
 						tpos -= pOwnerCharacter->m_Direction * 50.f;
 
-//						ZGetEffectManager()->AddBloodEffect( tpos , -fTarDir);
-//						ZGetEffectManager()->AddSlashEffect( tpos , -fTarDir , cm );
-						// 소리도 특정 시간 뒤에
 						ZGetSoundEngine()->PlaySound("uppercut", tpos );
 
 						if (pTar == g_pGame->m_pMyCharacter) {
 							rvector _dir = pTar->GetPosition() - pOwnerCharacter->GetPosition();
 							_dir.z = 0.f;
 
-//							m_pMyCharacter->OnDashAttacked(_dir);
 							g_pGame->m_pMyCharacter->ReserveDashAttacked( pOwnerCharacter->GetUID(), time,_dir );
 						}
 						pTar->OnBlastDagger(OwnerDir,OwnerPosition);
 
-						float fDamage = pDesc->m_nDamage * 1.5f;// 기본 무기데미지 * 150 %
+						float fDamage = pDesc->m_nDamage * 1.5f;
 						float fRatio = pItem->GetPiercingRatio( pDesc->m_nWeaponType , eq_parts_chest );
 
-						if(ZGetGame()->IsAttackable(pOwnerCharacter,pTar))//공격 가능한 경우만.. 퀘스트의 경우 데미지는 없다..
+						if(ZGetGame()->IsAttackable(pOwnerCharacter,pTar))
 							pTar->OnDamagedSkill(pOwnerCharacter,pOwnerCharacter->GetPosition(),ZD_MELEE,MWT_DAGGER,fDamage,fRatio);
 
 						g_pGame->CheckCombo(pOwnerCharacter, pTar,true);
@@ -471,7 +444,6 @@ bool ZGameAction::OnEnchantDamage(MCommand* pCommand)
 	{
 		bool bObserverTarget = pTarget->GetUID()==ZGetCombatInterface()->GetTargetUID();
 		rvector soundPos = pTarget->GetPosition();
-		// 데미지는 내가 HP를 관리하는 캐릭터에 한해서 준다
 		switch(pOwnerCharacter->GetEnchantType())
 		{
 			case ZC_ENCHANT_FIRE : {

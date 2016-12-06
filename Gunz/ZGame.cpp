@@ -1491,7 +1491,7 @@ bool ZGame::OnCommand_Immediate(MCommand* pCommand)
 	case MC_PEER_SHOT_MELEE:
 		{
 			float fShotTime;
-			rvector pos, dir;
+			rvector pos;
 
 			pCommand->GetParameter(&fShotTime, 0, MPT_FLOAT);
 			pCommand->GetParameter(&pos, 1, MPT_POS);
@@ -2405,7 +2405,7 @@ void ZGame::OnPeerShot_Melee(const MUID& uidOwner, float fShotTime)
 		ZObject* pTar = (*itor).second;
 		if (pOwner == pTar) continue;
 
-		rvector TargetPosition,TargetDir,TargetDirLow;
+		rvector TargetPosition, TargetDir;
 
 		if(pTar->IsDie()) continue;
 		if( !pTar->GetHistory(&TargetPosition,&TargetDir,fShotTime)) continue;
@@ -2420,7 +2420,7 @@ void ZGame::OnPeerShot_Melee(const MUID& uidOwner, float fShotTime)
 				
 				rvector fTarDir = TargetPosition - (OwnerPosition - OwnerDir*50.f);
 				Normalize(fTarDir);
-				float fDot = D3DXVec3Dot(&OwnerDir, &fTarDir);
+				float fDot = DotProduct(OwnerDir, fTarDir);
 
 				if (fDot > 0.5f) {
 
@@ -2886,7 +2886,7 @@ void ZGame::OnPeerShot_Range(MMatchCharItemParts sel_type, const MUID& uidOwner,
 	ZApplication::GetSoundEngine()->PlaySEFire(pDesc, Pos.x, Pos.y, Pos.z, bPlayer);
 #define SOUND_CULL_DISTANCE 1500.0F
 	auto vec = v2 - pTargetCharacter->m_Position;
-	if( D3DXVec3LengthSq(&vec) < (SOUND_CULL_DISTANCE * SOUND_CULL_DISTANCE) )
+	if (MagnitudeSq(vec) < SOUND_CULL_DISTANCE * SOUND_CULL_DISTANCE)
 	{
 		if(nTargetType == ZTT_OBJECT) { 
 			ZGetSoundEngine()->PlaySEHitObject( v2.x, v2.y, v2.z, pickinfo.bpi ); 
@@ -2976,7 +2976,6 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 	bool waterSound{};
 
 	bool bHitGuard{}, bHitBody{}, bHitGround{}, bHitEnemy{};
-	rvector GuardPos, BodyPos, GroundPos;
 
 	rvector v1, v2;
 
@@ -3704,8 +3703,8 @@ rvector ZGame::GetFloor(rvector pos,rplane *pimpactplane)
 					floor=newfloor;
 					if(pimpactplane)
 					{
-						rvector up=rvector(0,0,1);
-						D3DXPlaneFromPointNormal(pimpactplane,&floor,&up);
+						rvector up = rvector(0, 0, 1);
+						*pimpactplane = PlaneFromPointNormal(floor, up);
 					}
 				}
 			}

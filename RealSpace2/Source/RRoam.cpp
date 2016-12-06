@@ -424,8 +424,8 @@ void Patch::Tessellate()
 //
 void Patch::Render()
 {
-	RGetDevice()->SetTransform(D3DTS_WORLD,
-		&unmove(TranslationMatrix({static_cast<float>(m_WorldX), static_cast<float>(m_WorldY), 0 })));
+	RSetTransform(D3DTS_WORLD,
+		unmove(TranslationMatrix({static_cast<float>(m_WorldX), static_cast<float>(m_WorldY), 0 })));
 
 #ifdef USEVB
 	Landscape::m_nIndicies=0;

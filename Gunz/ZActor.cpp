@@ -671,9 +671,9 @@ void ZActor::Attack_Range(rvector& dir)
 	m_Animation.Input(ZA_INPUT_ATTACK_RANGE);
 
 	SetDirection(dir);
-	rvector pos,to;
-	pos = m_Position+rvector(0,0,100);
-	ZPostNPCRangeShot(GetUID(),g_pGame->GetTime(),pos,pos+10000.f*dir,MMCIP_PRIMARY);
+	rvector pos;
+	pos = m_Position + rvector(0, 0, 100);
+	ZPostNPCRangeShot(GetUID(), g_pGame->GetTime(), pos, pos + 10000.f*dir, MMCIP_PRIMARY);
 }
 
 void ZActor::Skill(int nSkill)
@@ -746,9 +746,9 @@ ZOBJECTHITTEST ZActor::HitTest(const rvector& origin, const rvector& to, float f
 			rvector dir = to - origin;
 			Normalize(dir);
 
-			rvector ap2cp=ap-cp;
-			float fap2cpsq=D3DXVec3LengthSq(&ap2cp);
-			float fdiff=sqrtf(m_Collision.fRadius*m_Collision.fRadius-fap2cpsq);
+			rvector ap2cp = ap - cp;
+			float fap2cpsq = MagnitudeSq(ap2cp);
+			float fdiff = sqrt(m_Collision.fRadius*m_Collision.fRadius - fap2cpsq);
 
 			if(pOutPos) *pOutPos = ap-dir*fdiff;;
 
@@ -759,7 +759,8 @@ ZOBJECTHITTEST ZActor::HitTest(const rvector& origin, const rvector& to, float f
 	return ZOH_NONE;
 }
 
-void ZActor::OnDamaged(ZObject* pAttacker, rvector srcPos, ZDAMAGETYPE damageType, MMatchWeaponType weaponType, float fDamage, float fPiercingRatio, int nMeleeType)
+void ZActor::OnDamaged(ZObject* pAttacker, rvector srcPos, ZDAMAGETYPE damageType, MMatchWeaponType weaponType,
+	float fDamage, float fPiercingRatio, int nMeleeType)
 {
 	if (!CheckFlag(AF_SOUND_WOUNDED))
 	{

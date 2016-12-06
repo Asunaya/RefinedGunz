@@ -20,7 +20,7 @@ void CalcRangeShotControllability(v3& vOutDir, const v3& vSrcDir,
 ZOBJECTHITTEST PlayerHitTest(const v3& head, const v3& foot,
 	const v3& src, const v3& dest, v3* pOutPos)
 {
-	v3 footpos, headpos, characterdir;
+	v3 footpos, headpos;
 
 	footpos = foot;
 	headpos = head;

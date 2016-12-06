@@ -3,17 +3,15 @@
 
 #include <string>
 #include <list>
-#include "d3dx9math.h"
 #include "GlobalTypes.h"
 #include "RNameSpace.h"
+#include "rvector.h"
+#include "rmatrix.h"
+#include "rplane.h"
+#include "rquaternion.h"
 
-using rvector = D3DXVECTOR3;
-using rmatrix = D3DXMATRIX;
-using rplane = D3DXPLANE;
-using rvector2 = D3DXVECTOR2;
-using rquaternion = D3DXQUATERNION;
-using RPIXELFORMAT = D3DFORMAT;
-using rmatrixa16 = D3DXMATRIXA16;
+enum _D3DFORMAT;
+using RPIXELFORMAT = _D3DFORMAT;
 
 _NAMESPACE_REALSPACE2_BEGIN
 
@@ -58,6 +56,7 @@ struct RMODEPARAMS {
 struct rboundingbox
 {
 	rboundingbox() {}
+	rboundingbox(const v3& vmin, const v3& vmax) : vmin{ vmin }, vmax{ vmax } {}
 
 	union {
 	struct {

@@ -74,11 +74,11 @@ rmatrix ZShadow::setDirection( rvector& dir_ )
 
 	rvector xVector = dir_;
 	xVector.y = 0;
-	float xtheta = D3DXVec3Dot( &mNormal, &xVector );
+	float xtheta = DotProduct(mNormal, xVector);
 
 	rvector yVector = dir_;
 	yVector.x = 0;
-	float yTheta = D3DXVec3Dot( &mNormal, &yVector );
+	float yTheta = DotProduct(mNormal, yVector);
 
 	xRotMat = RGetRotX(xtheta);
 	yRotMat = RGetRotY(yTheta);
@@ -86,23 +86,16 @@ rmatrix ZShadow::setDirection( rvector& dir_ )
 	return xRotMat*yRotMat;
 }
 
-//////////////////////////////////////////////////////////////////////////
-//	setMatirx
-//	(desc) call by outside
-//		set transformation matrix
-//////////////////////////////////////////////////////////////////////////
 bool ZShadow::setMatrix(ZCharacterObject& char_, float size_  )
 {
 	return setMatrix( *char_.m_pVMesh ,size_);
 }
 
-bool ZShadow::setMatrix( RVisualMesh& vmesh, float size_ /* = 100.f  */, RBspObject* p_map /* = 0 */)
+bool ZShadow::setMatrix( RVisualMesh& vmesh, float size_, RBspObject* p_map)
 {
-	// 캐릭터의 발의 위치 얻어오기
 	rvector footPosition[2];
 	footPosition[0] = vmesh.GetLFootPosition();
 	footPosition[1] = vmesh.GetRFootPosition();
-	// 발의 위치로 부터의 floor의 위치 얻어오기
 	if( p_map == 0 )
 		p_map = g_app.GetGame()->GetWorld()->GetBsp();
 
@@ -116,7 +109,7 @@ bool ZShadow::setMatrix( RVisualMesh& vmesh, float size_ /* = 100.f  */, RBspObj
 	{
 		if(g_pGame) {
 			floorPosition[0] = g_pGame->GetFloor(footPosition[0]);
-		} else { // 그냥발위치..
+		} else {
 			bLFShadow = false;
 		}
 
@@ -133,13 +126,11 @@ bool ZShadow::setMatrix( RVisualMesh& vmesh, float size_ /* = 100.f  */, RBspObj
 	if( (bLFShadow==false) && ((bRFShadow==false)))
 		return false;
 
-	// 거리 측정하여 그림자를 그려줄 것인지 결정
 	float distanceL , distanceR;
 	auto vecx = footPosition[0] - floorPosition[0];
 	auto vecy = footPosition[1] - floorPosition[1];
-	distanceL = D3DXVec3LengthSq(&vecx) - 200;
-	distanceR = D3DXVec3LengthSq(&vecy) - 200;
-	//float boundarySquare = VALID_SHADOW_LENGTH * VALID_SHADOW_LENGTH;
+	distanceL = MagnitudeSq(vecx) - 200;
+	distanceR = MagnitudeSq(vecy) - 200;
 	
 	if( VALID_SHADOW_BOUNDARY_SQUARE >= distanceL && floorPosition[0].z < footPosition[0].z )	bLFShadow = true;
 	else	bLFShadow = false;

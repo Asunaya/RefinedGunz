@@ -3,7 +3,7 @@
 #include <limits.h>
 #include "MPacketCrypter.h"
 #include "MUID.h"
-#include "d3dx9math.h"
+#include "RTypes.h"
 
 inline auto MGetTimeDistance(u64 a, u64 b) { return b - a; }
 

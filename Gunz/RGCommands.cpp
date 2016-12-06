@@ -312,7 +312,7 @@ void LoadRGCommands(ZChatCmdManager& CmdManager)
 #ifdef TIMESCALE
 unsigned long long GetGlobalTimeMS()
 {
-	//if (!ZApplication::GetInstance())
+	if (!ZApplication::GetInstance())
 		return timeGetTime();
 
 	return ZApplication::GetInstance()->GetTime();

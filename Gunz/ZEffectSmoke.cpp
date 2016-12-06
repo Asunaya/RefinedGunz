@@ -111,10 +111,9 @@ bool ZEffectSmokeGrenade::Draw( unsigned long int nTime )
 	m_Pos.z += m_Scale.z * 0.5;
 
 	m_Normal.z = 0;
-	rvector right;
-	D3DXVec3Normalize( &m_Normal, &m_Normal );
-	D3DXVec3Cross( &right, &m_Normal, &m_Up );
-	D3DXVec3Cross( &m_Up, &right, &m_Normal );
+	Normalize(m_Normal);
+	auto right = CrossProduct(m_Normal, m_Up);
+	m_Up = CrossProduct(right, m_Normal);
 
 	ZEffectBillboard::Draw(nTime);
 	

@@ -468,8 +468,8 @@ bool LightmapGenerator::CheckShadow(const RLIGHT* plight,
 		bbox.vmin = ObjectInfo.pVisualMesh->m_vBMin;
 		bbox.vmax = ObjectInfo.pVisualMesh->m_vBMax;
 
+		auto bBBTest = IntersectLineAABB(origin, dir, bbox);
 		float t;
-		auto bBBTest = IntersectLineAABB(t, origin, dir, bbox);
 		if (bBBTest &&
 			ObjectInfo.pVisualMesh->Pick(plight->Position, dirorigin, &vOut, &t))
 		{

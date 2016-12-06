@@ -278,13 +278,10 @@ bool ZCamera::CheckCollisionWall(float &fRealDist, rvector& pos, rvector& dir)
 
 	rvector up2, right2;
 	up2 = rvector(0.0f, 0.0f, 1.0f);
-	D3DXVec3Cross(&right2, &dir, &up2);
-	D3DXVec3Normalize(&right2, &right2);
+	right2 = Normalized(CrossProduct(dir, up2));
 
-	D3DXVec3Cross(&up2, &right2, &dir);
-	D3DXVec3Normalize(&up2, &up2);
-	D3DXVec3Cross(&right2, &dir, &up2);
-	D3DXVec3Normalize(&right2, &right2);
+	up2 = Normalized(CrossProduct(right2, dir));
+	right2 = Normalized(CrossProduct(dir, up2));
 
 	float fov = g_fFOV;
 	float e = 1 / (tanf(fov / 2));
@@ -306,7 +303,7 @@ bool ZCamera::CheckCollisionWall(float &fRealDist, rvector& pos, rvector& dir)
 	{
 		if (Magnitude(tar - bpi.PickPos) < Magnitude(tar - pos2))
 		{
-			rvector v1, v2, v3, v4;
+			rvector v1, v2, v3;
 
 			v1 = bpi.PickPos;
 			v3 = tar;
@@ -320,10 +317,8 @@ bool ZCamera::CheckCollisionWall(float &fRealDist, rvector& pos, rvector& dir)
 				{
 					rvector vv1 = v1 - v2, vv2 = v2 - v3;
 					D3DXVECTOR4 rV4;
-					D3DXVec3Transform(&rV4, &vv1, &matView);
-					vv1.x = rV4.x; vv1.y = rV4.y; vv1.z = rV4.z;
-					D3DXVec3Transform(&rV4, &vv2, &matView);
-					vv2.x = rV4.x; vv2.y = rV4.y; vv2.z = rV4.z;
+					vv1 = Transform(vv1, matView);
+					v2 = Transform(vv2, matView);
 
 					float fAng = GetAngleOfVectors(vv1, vv2);
 					if (fAng < 0.0f) fAng = -fAng;
@@ -345,14 +340,13 @@ bool ZCamera::CheckCollisionWall(float &fRealDist, rvector& pos, rvector& dir)
 
 	pos2 = pos;
 	tar = tarpos + (right2 * fPH);
-	dir2 = tar - pos2;
-	D3DXVec3Normalize(&dir2, &dir2);
+	dir2 = Normalized(tar - pos2);
 
 	if (ZGetGame()->GetWorld()->GetBsp()->Pick(pos2, dir2, &bpi))
 	{
 		if (Magnitude(tar - bpi.PickPos) < Magnitude(tar - pos2))
 		{
-			rvector v1, v2, v3, v4;
+			rvector v1, v2, v3;
 
 			v1 = bpi.PickPos;
 			v3 = tar;
@@ -385,15 +379,14 @@ bool ZCamera::CheckCollisionWall(float &fRealDist, rvector& pos, rvector& dir)
 
 	pos2 = pos;
 	tar = tarpos - (up2 * fPV);
-	dir2 = tar - pos2;
-	D3DXVec3Normalize(&dir2, &dir2);
+	dir2 = Normalized(tar - pos2);
 	matView = ViewMatrix(pos2, Normalized(dir2 - pos2), up2);
 
 	if (ZGetGame()->GetWorld()->GetBsp()->Pick(pos2, dir2, &bpi))
 	{
 		if (Magnitude(tar - bpi.PickPos) < Magnitude(tar - pos2))
 		{
-			rvector v1, v2, v3, v4;
+			rvector v1, v2, v3;
 
 			v1 = bpi.PickPos;
 			v3 = tar;
@@ -408,12 +401,8 @@ bool ZCamera::CheckCollisionWall(float &fRealDist, rvector& pos, rvector& dir)
 					bCollisionWall = true;
 
 					rvector vv1 = v1 - v2, vv2 = v2 - v3;
-					D3DXVECTOR4 rV4;
-					D3DXVec3Transform(&rV4, &vv1, &matView);
-					vv1.x = rV4.x; vv1.y = rV4.y; vv1.z = rV4.z;
-					D3DXVec3Transform(&rV4, &vv2, &matView);
-					vv2.x = rV4.x; vv2.y = rV4.y; vv2.z = rV4.z;
-
+					vv1 = Transform(vv1, matView);
+					vv2 = Transform(vv2, matView);
 
 					float fAng = GetAngleOfVectors(vv1, vv2);
 					if (fAng < 0.0f) fAng = -fAng;
@@ -433,14 +422,13 @@ bool ZCamera::CheckCollisionWall(float &fRealDist, rvector& pos, rvector& dir)
 
 	pos2 = pos;
 	tar = tarpos - (right2 * fPH);
-	dir2 = tar - pos2;
-	D3DXVec3Normalize(&dir2, &dir2);
+	dir2 = Normalized(tar - pos2);
 
 	if (ZGetGame()->GetWorld()->GetBsp()->Pick(pos2, dir2, &bpi))
 	{
 		if (Magnitude(tar - bpi.PickPos) < Magnitude(tar - pos2))
 		{
-			rvector v1, v2, v3, v4;
+			rvector v1, v2, v3;
 
 			v1 = bpi.PickPos;
 			v3 = tar;

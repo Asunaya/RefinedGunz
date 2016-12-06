@@ -1,9 +1,10 @@
+#include <d3dx9.h>
 #include "RMath.h"
 #include "MMath.h"
-#include <d3dx9.h>
 #define GLM_GTC_quaternion 
 #include "../sdk/glm/gtc/quaternion.hpp"
 #include "../sdk/glm/gtx/quaternion.hpp"
+#include "LogMatrix.h"
 #include "TestAssert.h"
 
 using namespace RealSpace2;
@@ -40,7 +41,7 @@ static bool TestIntersectLineSegmentPlane()
 	l1 = { 10194.750000f, 6517.653809f, -98.953125f };
 	result = IntersectLineSegmentPlane(&hit, p, l0, l1);
 	assert(result);
-	assert(hit == v3(4104.648438f, -834.347534f, 602.078552f));
+	assert(Equals(hit, v3(4104.648438f, -834.347534f, 602.078552f)));
 
 	return true;
 }
@@ -101,8 +102,11 @@ static bool TestRotationMatrix()
 
 #ifdef TEST_COMPARE_TO_D3DX
 	D3DXMATRIX d3dx_mat;
-	D3DXMatrixRotationAxis(&d3dx_mat, &axis, angle);
-	auto d3dx_result = v * d3dx_mat;
+	D3DXVECTOR3 d3dx_axis = axis;
+	D3DXMatrixRotationAxis(&d3dx_mat, &d3dx_axis, angle);
+	D3DXVECTOR3 d3dx_result;
+	D3DXVECTOR3 d3dx_v = v;
+	D3DXVec3TransformCoord(&d3dx_result, &d3dx_v, &d3dx_mat);
 	Check(d3dx_result);
 #endif
 
@@ -143,17 +147,20 @@ static bool TestIntersectLineAABB()
 	v3 origin{ 50, 50, 30 }, dir{ 0, 0, -1 };
 
 	float t;
-	auto success = IntersectLineAABB(t, origin, dir, bbox);
+	auto success = IntersectLineAABB(origin, dir, bbox, &t);
 	assert(success && IS_EQ(t, 20));
 
-	success = IntersectLineSegmentAABB(t, origin, origin + dir * 100, bbox);
+	auto end = origin + dir * 100;
+	auto norm = Normalized(end - origin);
+	auto dirfrac = 1 / norm;
+	success = IntersectLineSegmentAABB(origin, end, bbox, &t);
 	assert(success && IS_EQ(t, 20));
 
-	success = IntersectLineSegmentAABB(t, origin, origin + dir * 10, bbox);
+	success = IntersectLineSegmentAABB(origin, origin + dir * 10, bbox, &t);
 	assert(!success);
 
 	dir = { 1, 0, 0 };
-	success = IntersectLineAABB(t, origin, dir, bbox);
+	success = IntersectLineAABB(origin, dir, bbox, &t);
 	assert(!success);
 
 	return true;
@@ -206,7 +213,7 @@ static bool TestTransform()
 	return true;
 }
 
-v3 operator *(const v3& vec, const rquaternion& quat) {
+inline v3 operator *(const v3& vec, const rquaternion& quat) {
 	v3 quat_vec{ EXPAND_VECTOR(quat) };
 	auto uv = CrossProduct(quat_vec, vec);
 	auto uuv = CrossProduct(quat_vec, uv);
@@ -224,12 +231,12 @@ static bool TestQuaternionAxisAngle(const v3& axis, float angle)
 	auto expected = test_vec * ref_mat;
 	auto actual = test_vec * quat_mat;
 
-	LogMatrix(quat_mat);
 	assert(Equals(expected, actual));
 
 	D3DXQUATERNION d3dx_quat;
 
-	D3DXQuaternionRotationAxis(&d3dx_quat, &axis, angle);
+	D3DXVECTOR3 d3dx_axis = axis;
+	D3DXQuaternionRotationAxis(&d3dx_quat, &d3dx_axis, angle);
 	expected = test_vec * d3dx_quat;
 	actual = test_vec * quat;
 
@@ -246,15 +253,47 @@ static bool TestQuaternionAxisAngle(const v3& axis, float angle)
 
 	D3DXMATRIX d3dx_mat;
 
-	D3DXMatrixRotationAxis(&d3dx_mat, &axis, angle);
+	d3dx_axis = axis;
+	D3DXMatrixRotationAxis(&d3dx_mat, &d3dx_axis, angle);
 	assert(Equals(d3dx_mat, quat_mat));
 	assert(Equals(d3dx_mat, ref_mat));
 
-	D3DXMatrixRotationQuaternion(&d3dx_mat, &norm_quat);
+	D3DXQUATERNION d3dx_norm_quat = norm_quat;
+	D3DXMatrixRotationQuaternion(&d3dx_mat, &d3dx_norm_quat);
 
-	LogMatrix(d3dx_mat);
-	LogMatrix(quat_mat);
 	assert(Equals(d3dx_mat, quat_mat));
+
+	return true;
+}
+
+static v3 test_vecs[] = {
+	{ 1, 0, 0 },
+	{ 0, 1, 0 },
+	{ 0, 0, 1 },
+	{ 1, 1, 0 },
+	{ 1, 1, 1 },
+	{ 1, 0.5, 0.333f },
+};
+
+static bool TestSlerp(const rquaternion& a, const rquaternion& b)
+{
+	for (auto&& test_vec : test_vecs)
+	{
+		for (int i = 1; i < 50; ++i)
+		{
+			auto t = sin(TAU_FLOAT / i);
+
+			auto actual_quat = Slerp(a, b, t);
+			D3DXQUATERNION expected_quat;
+			D3DXQUATERNION d3dx_quat = a;
+			D3DXQUATERNION d3dx_quat2 = b;
+			D3DXQuaternionSlerp(&expected_quat, &d3dx_quat, &d3dx_quat2, t);
+
+			auto expected = test_vec * expected_quat;
+			auto actual = test_vec * actual_quat;
+			assert(Equals(expected, actual));
+		}
+	}
 
 	return true;
 }
@@ -262,9 +301,14 @@ static bool TestQuaternionAxisAngle(const v3& axis, float angle)
 static bool TestQuaternions()
 {
 	auto ret = true;
+	rquaternion last = Normalized(rquaternion{ 1, 1, 1, 1 });
 
 	auto TestAxisAngle = [&](const v3& axis, float angle) {
 		ret &= TestQuaternionAxisAngle(Normalized(axis), angle);
+		
+		auto quat = AngleAxisToQuaternion(axis, angle);
+		ret &= TestSlerp(quat, last);
+		last = quat;
 	};
 
 	for (int i = 1; i < 16; ++i)
@@ -281,7 +325,24 @@ static bool TestQuaternions()
 		Test({ 1, 0.5, 0.333f });
 	}
 
+	rquaternion a{ 0.814870715f, -0.239277035f, 0.0268819593f, 0.527266204f };
+	rquaternion b{ -0.839663744f, 0.264600188f, -0.0283754189f, -0.473441035f };
+	ret &= TestSlerp(a, b);
+
 	return ret;
+}
+
+static bool TestInterpolation()
+{
+	v3 p{ 1, 2, 3 };
+	auto expected = p;
+	auto actual = Lerp(p, p, 0.5);
+	assert(expected == actual);
+
+	actual = Slerp(p, p, 0.5);
+	assert(expected == actual);
+
+	return true;
 }
 
 bool TestMath()
@@ -297,6 +358,7 @@ bool TestMath()
 	ret &= TestNormalize();
 	ret &= TestTransform();
 	ret &= TestQuaternions();
+	ret &= TestInterpolation();
 
 	return ret;
 }

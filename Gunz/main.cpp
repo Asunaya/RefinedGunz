@@ -348,6 +348,8 @@ RRESULT OnUpdate(void* pParam)
 	return R_OK;
 }
 
+#include "LogMatrix.h"
+
 RRESULT OnRender(void *pParam)
 {
 	auto mainOnRender = MBeginProfile("main::OnRender");
@@ -390,9 +392,10 @@ RRESULT OnRender(void *pParam)
 			auto&& dir = ZGetGame()->m_pMyCharacter->GetDirection();
 			PrintText("Dir: %f, %f, %f", dir.x, dir.y, dir.z);
 
+			auto* vmesh = ZGetGame()->m_pMyCharacter->m_pVMesh;
 			if (ZGetGame()->m_pMyCharacter->m_pVMesh)
 			{
-				pos = ZGetGame()->m_pMyCharacter->m_pVMesh->GetHeadPosition();
+				pos = vmesh->GetHeadPosition();
 				PrintText("Head pos: %d, %d, %d", int(pos.x), int(pos.y), int(pos.z));
 
 				auto lower = ZGetGame()->m_pMyCharacter->GetStateLower();

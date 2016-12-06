@@ -198,7 +198,7 @@ void RNavigationMesh::Render()
 {
 	LPDIRECT3DDEVICE9 pd3dDevice=RGetDevice();
 
-	RGetDevice()->SetTransform(D3DTS_WORLD, &unmove(GetIdentityMatrix()));
+	RSetTransform(D3DTS_WORLD, GetIdentityMatrix());
 
 	pd3dDevice->SetFVF( D3DFVF_XYZ );
 	pd3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_CW );
@@ -246,7 +246,7 @@ void RNavigationMesh::Render()
 
 void RNavigationMesh::RenderLinks()
 {
-	RGetDevice()->SetTransform(D3DTS_WORLD, &unmove(GetIdentityMatrix()));
+	RSetTransform(D3DTS_WORLD, GetIdentityMatrix());
 
 	LPDIRECT3DDEVICE9 pd3dDevice=RGetDevice();
 	pd3dDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
