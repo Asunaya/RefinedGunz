@@ -438,6 +438,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Source\TextureLoader.cpp" />
     <ClCompile Include="Source\vulkandebug.cpp" />
     <ClCompile Include="Source\VulkanMaterial.cpp" />
     <ClCompile Include="Source\vulkantools.cpp" />
@@ -513,6 +514,7 @@
     <ClInclude Include="Include\RVersions.h" />
     <ClInclude Include="Include\ShaderUtil.h" />
     <ClInclude Include="Include\Sphere.h" />
+    <ClInclude Include="Include\TextureLoader.h" />
     <ClInclude Include="Include\vulkanbuffer.hpp" />
     <ClInclude Include="Include\vulkandebug.h" />
     <ClInclude Include="Include\vulkandevice.h" />
