@@ -69,7 +69,7 @@ void MovingWeaponManager::Update(float Elapsed)
 		v3 Normal;
 		if (pi.bBspPicked)
 		{
-			plane& plane = pi.bpi.pNode->pInfo[pi.bpi.nIndex].plane;
+			rplane& plane = pi.bpi.pNode->pInfo[pi.bpi.nIndex].plane;
 			Normal = rvector(plane.a, plane.b, plane.c);
 		}
 		else if (pi.pObject)
