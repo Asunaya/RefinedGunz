@@ -479,8 +479,6 @@ void RBspObjectDrawD3D9::SetMaterial(Material& Mat)
 		int TexIndices[] = { Mat.Diffuse, Mat.Normal, Mat.Specular, Mat.Opacity, Mat.Emissive };
 		for (size_t i{}; i < ArraySize(TexIndices); ++i)
 			dev->SetTexture(i, GetTexture(TexIndices[i]));
-		if (Type > Opacity)
-			dev->SetRenderState(D3DRS_ALPHAREF, Mat.AlphaTestValue);
 		SetPSFloat(DeferredShaderConstant::Opacity, Type <= Normal);
 	}
 }
@@ -488,6 +486,7 @@ void RBspObjectDrawD3D9::SetMaterial(Material& Mat)
 template <RBspObjectDrawD3D9::MaterialType Type>
 void RBspObjectDrawD3D9::SetPrerenderStates()
 {
+
 	switch (Type)
 	{
 	case Normal:
@@ -512,15 +511,27 @@ void RBspObjectDrawD3D9::SetPrerenderStates()
 		break;
 	case AlphaTest:
 		dev->SetRenderState(D3DRS_ZWRITEENABLE, true);
-		dev->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL);
-		dev->SetRenderState(D3DRS_ALPHATESTENABLE, true);
+		// disable alpha test in deferred rendering mode
+		// as it is handled in the shader
 		dev->SetRenderState(D3DRS_ALPHABLENDENABLE, false);
+		if (!UsingLighting()) {
+			dev->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL);
+			dev->SetRenderState(D3DRS_ALPHATESTENABLE, true);
+			dev->SetRenderState(D3DRS_ALPHABLENDENABLE, false);
 
-		dev->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
-		dev->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
-		dev->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
+			dev->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
+			dev->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+			dev->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+			dev->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+
+			dev->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
+			dev->SetTextureStageState(1, D3DTSS_COLORARG1, D3DTA_CURRENT);
+			dev->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+			dev->SetTextureStageState(1, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+		}
 		break;
 	}
+
 }
 
 template <RBspObjectDrawD3D9::MaterialType Type>
@@ -751,6 +762,7 @@ void RBspObjectDrawD3D9::SetPrologueStates()
 	if (!UsingLighting())
 	{
 		dev->SetFVF(GetFVF());
+		dev->SetTextureStageState(1, D3DTSS_TEXCOORDINDEX, 0);
 	}
 	else
 	{
