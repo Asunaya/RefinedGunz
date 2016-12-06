@@ -289,7 +289,7 @@ bool RMesh::CmpName(const char* name)
 	return false;
 }
 
-void RMesh::GetMeshData(RMeshPartsType type,vector<RMeshNode*>& nodetable)
+void RMesh::GetMeshData(RMeshPartsType type, std::vector<RMeshNode*>& nodetable)
 {
 	RMeshNode*	pMesh = NULL;
 
@@ -342,7 +342,7 @@ RMeshNode* RMesh::GetPartsNode(const char* name)
 	return m_parts_mgr->GetPartsNode(name);
 }
 
-void RMesh::GetPartsNode(RMeshPartsType type,vector<RMeshNode*>& nodetable)
+void RMesh::GetPartsNode(RMeshPartsType type, std::vector<RMeshNode*>& nodetable)
 {
 	if(!m_parts_mgr)
 		return;

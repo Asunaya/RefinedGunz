@@ -238,14 +238,14 @@ public:
 	bool ReadXml(const char* fname);
 	bool SaveXml(const char* fname);
 
-	bool ReadXmlElement(MXmlElement* pNode,char* Path);
+	bool ReadXmlElement(MXmlElement* pNode, const char* Path);
 
 	bool ReadElu(const char* fname);
 	bool SaveElu(const char* fname);
 
 	void RenderFrame();
 
-	void Render(const rmatrix* world_mat, bool NoPartsChange=false);
+	void Render(const rmatrix* world_mat, bool NoPartsChange = false);
 	RAnimation* GetNodeAniSet(RMeshNode* pNode);
 
 	void SetLitVertexModel(bool v);
@@ -343,8 +343,8 @@ public:
 	void  SetName(const char* name);
 	bool  CmpName(const char* name);
 
-	void GetMeshData(RMeshPartsType type,vector<RMeshNode*>& nodetable);
-	void GetPartsNode(RMeshPartsType type,vector<RMeshNode*>& nodetable);
+	void GetMeshData(RMeshPartsType type, std::vector<RMeshNode*>& nodetable);
+	void GetPartsNode(RMeshPartsType type, std::vector<RMeshNode*>& nodetable);
 
 	RMeshNode* GetMeshData(RMeshPartsType type);
 	RMeshNode* GetMeshData(const char* name);
@@ -382,8 +382,8 @@ public:
 	bool	m_isPhysiqueMesh;
 	bool	m_bUnUsededCheck;
 
-	string	m_FileName;
-	string	m_ModelName;
+	std::string	m_FileName;
+	std::string	m_ModelName;
 
 	int		m_id;
 

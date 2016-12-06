@@ -14,9 +14,8 @@ _NAMESPACE_REALSPACE2_BEGIN
 #define RTextureType_Object		1<<2
 #define RTextureType_All		1<<3
 
-/////////////////////////////////////////////////////////
-// texture loading base class
-// bmp : jpg : tga : dds
+class RTextureManager;
+
 class RBaseTexture final
 {
 public:
@@ -55,6 +54,9 @@ public:
 	D3DPtr<IDirect3DTexture9> m_pTex;
 
 private:
+	friend RTextureManager;
+	~RBaseTexture();
+
 	bool SubCreateTexture(char* TextureFileBuffer);
 };
 
@@ -65,7 +67,7 @@ public:
 
 	void Destroy();
 
-	RBaseTexture *CreateBaseTextureSub(bool mg, const char* filename, int texlevel,
+	RBaseTexture *CreateBaseTextureSub(bool Managed, const char* filename, int texlevel,
 		bool bUseMipmap = false, bool bUseFileSystem = true);
 	RBaseTexture *CreateBaseTexture(const char* filename, int texlevel,
 		bool bUseMipmap = false, bool bUseFileSystem = true);
@@ -77,9 +79,9 @@ public:
 
 	void OnInvalidate();
 	void OnRestore();
-	void OnChangeTextureLevel(DWORD flag);
+	void OnChangeTextureLevel(u32 flag);
 
-	int UpdateTexture(DWORD max_life_time=5000);
+	int UpdateTexture(u32 max_life_time = 5000);
 	int CalcUsedSize();
 	int CalcAllUsedSize();
 	int PrintUsedTexture();
@@ -87,7 +89,7 @@ public:
 };
 
 void RBaseTexture_Create();
-void RBaseTexture_Destory();
+void RBaseTexture_Destroy();
 
 void RBaseTexture_Invalidate();
 void RBaseTexture_Restore();

@@ -82,9 +82,9 @@ public:
 
 	void Destroy();
 
-	int Add(const std::string& str,int );
+	int Add(const std::string& str, int);
 	int Get(const std::string& str);
-	int Get(char* str) { return Get(string(str)); }
+	int Get(char* str) { return Get(str); }
 
 	rmesh_node_table m_table;
 };

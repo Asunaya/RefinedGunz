@@ -338,15 +338,15 @@ bool RLenzFlare::ReadXmlElement(MXmlElement* PNode,char* Path)
 				{
 					continue;
 				}
-				if(!Leaf.GetAttribute( texture_file_name, "FILE_NAME" ))
+				if (!Leaf.GetAttribute(texture_file_name, "FILE_NAME"))
 				{
-					for( int k = 0 ; k < MAX_NUMBER_TEXTURE; ++k )
+					for (int k = 0; k < MAX_NUMBER_TEXTURE; ++k)
 					{
-						SAFE_DELETE( msTextures[k] );
+						RDestroyBaseTexture(msTextures[k]);
 					}
 					return false;
 				}
-				msTextures[index++] = RCreateBaseTexture( texture_file_name );
+				msTextures[index++] = RCreateBaseTexture(texture_file_name);
 			}
 		}
 		else if( !strcmp( NodeName, "ELEMENTS" ) )

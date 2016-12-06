@@ -371,6 +371,7 @@
     <ClCompile Include="Include\RS2D3D9.cpp" />
     <ClCompile Include="Include\RS2Vulkan.cpp" />
     <ClCompile Include="Source\BulletCollision.cpp" />
+    <ClCompile Include="Source\ColorTypes.cpp" />
     <ClCompile Include="Source\EluLoader.cpp" />
     <ClCompile Include="Source\LightmapGenerator.cpp" />
     <ClCompile Include="Source\MeshManager.cpp" />
@@ -446,6 +447,7 @@
   <ItemGroup>
     <ClInclude Include="Include\BulletCollision.h" />
     <ClInclude Include="Include\BulletCollisionLibs.h" />
+    <ClInclude Include="Include\ColorTypes.h" />
     <ClInclude Include="Include\EluLoader.h" />
     <ClInclude Include="Include\LightmapGenerator.h" />
     <ClInclude Include="Include\LogMatrix.h" />

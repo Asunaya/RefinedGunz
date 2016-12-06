@@ -152,7 +152,7 @@ void RMeshNodeMtrl::SetMtrlDiffuse(RMtrl* pMtrl,float vis_alpha)
 
 	ZeroMemory( &mtrl, sizeof(D3DMATERIAL9) );
 
-	D3DXCOLOR* c = &pMtrl->m_diffuse;
+	auto* c = &pMtrl->m_diffuse;
 
 	mtrl.Diffuse.r = c->r*0.5f;
 	mtrl.Diffuse.g = c->g*0.5f;

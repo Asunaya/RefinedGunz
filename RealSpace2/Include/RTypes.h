@@ -9,6 +9,7 @@
 #include "rmatrix.h"
 #include "rplane.h"
 #include "rquaternion.h"
+#include "ColorTypes.h"
 
 enum _D3DFORMAT;
 using RPIXELFORMAT = _D3DFORMAT;

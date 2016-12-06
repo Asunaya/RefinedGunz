@@ -16,7 +16,7 @@ _NAMESPACE_REALSPACE2_BEGIN
 RVisualMeshMgr::RVisualMeshMgr() {
 
 	m_id_last = 0;
-	m_node_table.reserve(MAX_VMESH_TABLE);//±âº»
+	m_node_table.reserve(MAX_VMESH_TABLE);
 
 }
 

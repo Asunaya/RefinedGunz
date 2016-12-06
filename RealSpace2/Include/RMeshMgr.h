@@ -5,7 +5,7 @@
 
 _NAMESPACE_REALSPACE2_BEGIN
 
-typedef list<RMesh*>			r_mesh_list;
+typedef std::list<RMesh*>		r_mesh_list;
 typedef r_mesh_list::iterator	r_mesh_node;
 
 #define MAX_NODE_TABLE 1000
@@ -16,17 +16,17 @@ public:
 	RMeshMgr();
 	~RMeshMgr();
 
-	int		Add(char* name,char* modelname=NULL,bool namesort=false);
-	int		AddXml(char* name,char* modelname=NULL,bool autoload=true,bool namesort=false);
-	int     AddXml(MXmlElement* pNode,char* Path,char* modelname=NULL,bool namesort=false);
+	int		Add(const char* name, const char* modelname = NULL, bool namesort = false);
+	int		AddXml(const char* name, const char* modelname = NULL, bool autoload = true, bool namesort = false);
+	int     AddXml(MXmlElement* pNode, const char* Path, const char* modelname = NULL, bool namesort = false);
 
-	int		LoadXmlList(char* name,RFPROGRESSCALLBACK pfnProgressCallback=NULL, void *CallbackParam=NULL);
+	int		LoadXmlList(const char* name, RFPROGRESSCALLBACK pfnProgressCallback = NULL, void *CallbackParam = NULL);
 
 	void	Del(int id);
 	void	Del(RMesh* pMesh);
 
-	int		LoadList(char* name);
-	int		SaveList(char* name);
+	int		LoadList(const char* name);
+	int		SaveList(const char* name);
 
 	void	DelAll();
 
@@ -34,7 +34,7 @@ public:
 	void	Render();
 	void	Render(int id);
 
-	void	RenderFast(int id,rmatrix* unit_mat);
+	void	RenderFast(int id, rmatrix* unit_mat);
 
 	RMesh*	GetFast(int id);
 	RMesh*	Get(const char* name);
@@ -50,7 +50,7 @@ public:
 
 	void ReloadAllAnimation();
 
-	void GetPartsNode(RMeshPartsType parts,vector<RMeshNode*>& nodetable);
+	void GetPartsNode(RMeshPartsType parts, std::vector<RMeshNode*>& nodetable);
 	RMeshNode* GetPartsNode(const char* name);
 
 	void SetMtrlAutoLoad(bool b) {
@@ -75,8 +75,8 @@ public:
 	bool		m_mtrl_auto_load;
 	bool		m_is_map_object;
 
-	vector<RMesh*> m_node_table;
-	DWORD	m_cur;
+	std::vector<RMesh*> m_node_table;
+	u32 m_cur;
 };
 
 _NAMESPACE_REALSPACE2_END

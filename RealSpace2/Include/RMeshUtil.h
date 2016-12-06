@@ -531,7 +531,7 @@ public:
 
 	char m_temp[256];
 
-	string m_str;
+	std::string m_str;
 };
 
 void GetPath(const char* str, char* path, size_t path_len);
@@ -556,7 +556,7 @@ public:
 	void  SetName(const char* name);
 
 	bool  CheckName(const char* name);
-	bool  CheckName(const string& name);
+	bool  CheckName(const std::string& name);
 
 public:
 
@@ -608,7 +608,7 @@ public:
 
 	T Find(const char *name) {
 
-		auto itor = m_HashMap.find( string(name) );
+		auto itor = m_HashMap.find(name);
 
 		if (itor != m_HashMap.end()) {
 			return (*itor).second;

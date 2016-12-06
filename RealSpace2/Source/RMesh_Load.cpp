@@ -33,10 +33,7 @@
 
 _NAMESPACE_REALSPACE2_BEGIN
 
-////////////////////////////////////////////////////////////////////////////////
-//
-
-bool RMesh::ReadXmlElement(MXmlElement* PNode,char* Path)
+bool RMesh::ReadXmlElement(MXmlElement* PNode, const char* Path)
 {
 	char NodeName[256];
 	char IDName[256];
@@ -210,7 +207,7 @@ bool RMesh::ReadXml(const char* filename)
 	char Path[256];
 	Path[0] = NULL;
 
-	string BackupName = filename;
+	std::string BackupName = filename;
 
 	GetPath(filename,Path);
 

@@ -1,19 +1,11 @@
 #include "stdafx.h"
 #include "RMtrl.h"
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
-
-#include <string.h>
-#include <stdio.h>
-
+#include <cstring>
+#include <cstdio>
 #include "RMtrl.h"
 #include "assert.h"
 #include <tchar.h>
-
 #include "RBaseTexture.h"
-
 #include "MDebug.h"
 
 _USING_NAMESPACE_REALSPACE2
@@ -25,8 +17,8 @@ RMtrl::RMtrl()
 
 	m_id		= -1;
 	m_u_id		= -1;
-	m_mtrl_id	= -1;	//
-	m_sub_mtrl_id = -1;	//
+	m_mtrl_id	= -1;
+	m_sub_mtrl_id = -1;
 
 	m_bDiffuseMap	= false;
 	m_bAlphaMap		= false;
@@ -51,7 +43,6 @@ RMtrl::RMtrl()
 	m_ToonFilterType	= D3DTEXF_POINT;
 	m_AlphaRefValue		= 0x05;
 	m_TextureBlendMode		= D3DTOP_BLENDTEXTUREALPHA;
-//	m_ToonTextureBlendMode	= D3DTOP_ADDSIGNED;
 	m_ToonTextureBlendMode	= D3DTOP_MODULATE2X;
 
 	m_bAniTex = false;
@@ -64,7 +55,7 @@ RMtrl::RMtrl()
 	m_name_ani_tex_ext[0] = 0;
 	m_bObjectMtrl = false;
 
-	m_dwTFactorColor = D3DCOLOR_COLORVALUE(0.0f,1.0f,0.0f,0.0f);	//	알파도 없는 완전 녹색..색이 없다는걸 의미
+	m_dwTFactorColor = D3DCOLOR_COLORVALUE(0.0f,1.0f,0.0f,0.0f);
 }
 
 RMtrl::~RMtrl()
@@ -82,30 +73,6 @@ RMtrl::~RMtrl()
 		m_pTexture = NULL;
 	}
 }
-
-//#define COPY_MEMBER(member) member = rhs.member
-//#define COPY_ARRAY(member) memcpy(member, rhs.member, sizeof(member))
-//RMtrl::RMtrl(const RMtrl& rhs)
-//{
-//	COPY_MEMBER(m_pTexture);
-//	COPY_MEMBER(m_pToonTexture);
-//	COPY_MEMBER(m_FilterType);
-//	COPY_MEMBER(m_ToonFilterType);
-//	COPY_MEMBER(m_AlphaRefValue);
-//	COPY_MEMBER(m_TextureBlendMode);
-//	COPY_MEMBER(m_ToonTextureBlendMode);
-//	COPY_MEMBER(m_ambient);
-//	COPY_MEMBER(m_diffuse);
-//	COPY_MEMBER(m_specular);
-//	COPY_MEMBER(m_power);
-//	COPY_ARRAY(m_mtrl_name);
-//	COPY_ARRAY(m_name);
-//	COPY_ARRAY(m_opa_name);
-//	COPY_ARRAY(m_name_ani_tex);
-//	COPY_ARRAY(m_name_ani_tex_ext);
-//	COPY_MEMBER(
-//}
-//#undef COPY_MEMBER
 
 LPDIRECT3DTEXTURE9 RMtrl::GetTexture() {
 
@@ -138,12 +105,12 @@ LPDIRECT3DTEXTURE9 RMtrl::GetTexture() {
 	}
 }
 
-void RMtrl::SetTColor(DWORD color)
+void RMtrl::SetTColor(u32 color)
 {
 	m_dwTFactorColor = color;
 }
 
-DWORD RMtrl::GetTColor()
+u32 RMtrl::GetTColor()
 {
 	return m_dwTFactorColor;
 }
@@ -273,18 +240,14 @@ void RMtrl::Restore(LPDIRECT3DDEVICE9 dev,char* path)
 		}
 		else {
 
-			m_pTexture=RCreateBaseTextureMg(m_name,level);
+			m_pTexture = RCreateBaseTextureMg(m_name, level);
 		}
 	}
 }
 
 RMtrlMgr::RMtrlMgr()
 {
-	m_id_last = 0;
-
-	m_node_table.reserve(MAX_MTRL_NODE);//기본
-
-	m_bObjectMtrl = false;
+	m_node_table.reserve(MAX_MTRL_NODE);
 }
 
 RMtrlMgr::~RMtrlMgr()
@@ -303,12 +266,9 @@ int RMtrlMgr::Add(char* name,int u_id)
 
 	strcpy_safe(node->m_name,name);
 
-	// tool 구분용..
-
 	sprintf_safe(node->m_mtrl_name,"%s%d",name,m_id_last);
 
 	m_node_table.push_back(node);
-//	m_data[m_id_last] = node;
 
 	push_back(node);
 	m_id_last++;
@@ -323,7 +283,6 @@ int RMtrlMgr::Add(RMtrl* tex)
 	sprintf_safe(tex->m_mtrl_name,"%s%d",tex->m_name,tex->m_id);
 
 	m_node_table.push_back(tex);
-//	m_node_table[m_id_last] = tex;
 
 	push_back(tex);
 	m_id_last++;
@@ -332,40 +291,11 @@ int RMtrlMgr::Add(RMtrl* tex)
 
 int	RMtrlMgr::LoadList(char* fname)
 {
-
-/*
-	FILE *fp;
-
-	fp = fopen(fname, "rt");
-
-	if ( fp == NULL )	
-	{ 
-		mlog("texture list 파일이 없음");
-		return 0;
-	}
-
-	char t_line[256];
-	char name[256];
-
-	int u_id;
-
-	while ( !feof(fp) )
-	{
-		fgets(t_line, 256, fp);
-		sscanf(t_line, "%d %s", &u_id,name);
-
-		Add(name,u_id);
-	}
-
-	fclose(fp);
-*/
-
 	return 1;
 }
 
 int	RMtrlMgr::SaveList(char* name)
 {
-
 	return 1;
 }
 
@@ -407,23 +337,17 @@ void RMtrlMgr::DelAll()
 	RMtrl *pMtrl;
 
 	for(node = begin(); node != end(); ) {
-		/*
-	    if(!m_bAssigned)
-			SAFE_REL( (*node)->m_tex);
-		*/
 		pMtrl = *node;
 		delete pMtrl;
 		pMtrl = NULL;
 
-		node = erase(node);// ++node
+		node = erase(node);
 	}
 
-	m_node_table.clear();//버퍼는 남아 있다..
+	m_node_table.clear();
 
 	m_id_last = 0;
 }
-
-/////////////////////////////////////
 
 void RMtrlMgr::Restore(LPDIRECT3DDEVICE9 dev,char* path)
 {
@@ -466,7 +390,7 @@ void RMtrlMgr::ClearUsedMtrl()
 		if(pMtrl->m_bUse==false) {
 			delete pMtrl;
 			pMtrl = NULL;
-			node = erase(node);// ++node
+			node = erase(node);
 		} else {
 			++node;
 		}
@@ -476,36 +400,14 @@ void RMtrlMgr::ClearUsedMtrl()
 
 }
 
-#include "MProfiler.h"
-
 RMtrl*	RMtrlMgr::Get_s(int mtrl_id,int sub_id)
 {
-//	_BP("RMtrlMgr::Get_s");
-
 	if(size()==0)
 		return NULL;
 
 	iterator node;
 
 	RMtrl* pMtrl = NULL;
-
-	//////////////////////////////////////////////
-
-/*
-	static int _cnt = 0;
-	static int _size = 0;
-	static char _buffer[256];
-
-	_cnt++;
-	_size = size();
-
-	sprintf_safe(_buffer,"%d : RMtrlMgr::Get_s : %d\n",_cnt,_size);
-
-	OutputDebugString(_buffer);
-
-*/
-	///////////////////////////////////////////////
-
 
 	for(node = begin(); node != end(); ++node) {
 
@@ -514,14 +416,11 @@ RMtrl*	RMtrlMgr::Get_s(int mtrl_id,int sub_id)
 		if(pMtrl) {
 			if(pMtrl->m_mtrl_id == mtrl_id) {
 				if(pMtrl->m_sub_mtrl_id == sub_id) {
-//					_EP("RMtrlMgr::Get_s");
 					return pMtrl;
 				}
 			}
 		}
 	}
-
-//	_EP("RMtrlMgr::Get_s");
 
 	return NULL;
 }

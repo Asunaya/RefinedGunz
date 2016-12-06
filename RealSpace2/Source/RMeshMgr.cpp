@@ -29,13 +29,13 @@ RMeshMgr::~RMeshMgr()
 	DelAll();
 }
 
-int RMeshMgr::Add(char* name,char* modelname,bool namesort)
+int RMeshMgr::Add(const char* name, const char* modelname, bool namesort)
 {
 	RMesh* node;
 	node = new RMesh;
 
 	if(node==NULL) {
-		mlog("RMeshMgr::Add begin modelname = %s  ",modelname);
+		mlog("RMeshMgr::Add begin modelname = %s  ", modelname);
 		return -1;
 	}
 
@@ -67,7 +67,7 @@ int RMeshMgr::Add(char* name,char* modelname,bool namesort)
 	return m_id_last-1;
 }
 
-int	RMeshMgr::LoadXmlList(char* name,RFPROGRESSCALLBACK pfnProgressCallback, void *CallbackParam)
+int	RMeshMgr::LoadXmlList(const char* name, RFPROGRESSCALLBACK pfnProgressCallback, void *CallbackParam)
 {
 	__BP(2007,"RMeshMgr::LoadXmlList");
 
@@ -260,7 +260,7 @@ int	RMeshMgr::LoadXmlList(char* name,RFPROGRESSCALLBACK pfnProgressCallback, voi
 	return 1;
 }
 
-int RMeshMgr::AddXml(MXmlElement* pNode,char* Path,char* modelname,bool namesort)
+int RMeshMgr::AddXml(MXmlElement* pNode, const char* Path, const char* modelname, bool namesort)
 {
 	RMesh* node;
 	node = new RMesh;
@@ -291,7 +291,7 @@ int RMeshMgr::AddXml(MXmlElement* pNode,char* Path,char* modelname,bool namesort
 	return m_id_last-1;
 }
 
-int RMeshMgr::AddXml(char* name,char* modelname,bool AutoLoad,bool namesort)
+int RMeshMgr::AddXml(const char* name, const char* modelname, bool AutoLoad, bool namesort)
 {
 	RMesh* node;
 	node = new RMesh;
@@ -321,7 +321,7 @@ int RMeshMgr::AddXml(char* name,char* modelname,bool AutoLoad,bool namesort)
 	node->m_id = m_id_last;
 
 	if(m_id_last > MAX_NODE_TABLE)
-		mlog("MeshNode 예약 사이즈를 늘리는것이 좋겠음...\n");
+		mlog("MeshNode overflow\n");
 
 	m_list.push_back(node);
 	m_id_last++;
@@ -329,12 +329,12 @@ int RMeshMgr::AddXml(char* name,char* modelname,bool AutoLoad,bool namesort)
 	return m_id_last-1;
 }
 
-int	RMeshMgr::LoadList(char* fname)
+int	RMeshMgr::LoadList(const char* fname)
 {
 	return 1;
 }
 
-int	RMeshMgr::SaveList(char* name)
+int	RMeshMgr::SaveList(const char* name)
 {
 	return 1;
 }
@@ -503,18 +503,18 @@ void RMeshMgr::UnLoad(const char* name)
 
 	if(pMesh) {
 
-		string filename = pMesh->GetFileName();
-		string modelname = pMesh->GetName();
+		std::string filename = pMesh->GetFileName();
+		std::string modelname = pMesh->GetName();
 
 		Del(pMesh);
 
-		AddXml((char*)filename.c_str(),(char*)modelname.c_str(),false,false);
+		AddXml(filename.c_str(), modelname.c_str(),false,false);
 	}
 }
 
 void RMeshMgr::LoadAll()
 {
-	vector<string> t_vec;
+	std::vector<std::string> t_vec;
 
 	r_mesh_node node;
 
@@ -525,14 +525,14 @@ void RMeshMgr::LoadAll()
 	int cnt = (int)t_vec.size();
 
 	for(int i=0;i<cnt;i++) {
-		Load( (char*)t_vec[i].c_str() );
+		Load(t_vec[i].c_str() );
 	}
 
 }
 
 void RMeshMgr::UnLoadAll()
 {
-	vector<string> t_vec;
+	std::vector<std::string> t_vec;
 
 	r_mesh_node node;
 
@@ -578,7 +578,7 @@ void RMeshMgr::UnLoadChecked()
 }
 
 
-void RMeshMgr::GetPartsNode(RMeshPartsType parts,vector<RMeshNode*>& nodetable)
+void RMeshMgr::GetPartsNode(RMeshPartsType parts, std::vector<RMeshNode*>& nodetable)
 {
 	r_mesh_node node;
 	RMesh* pMesh = NULL;

@@ -954,8 +954,6 @@ void RDebugStr::PrintLog() {
 	mlog( m_str.c_str() );
 }
 
-////////////////////////////////////////////////////////////////////////
-
 const char* RBaseObject::GetName() const
 {
 	return m_Name.c_str();
@@ -966,7 +964,7 @@ void RBaseObject::SetName(const char* name)
 	m_Name = name;
 }
 
-bool RBaseObject::CheckName(const string& name)
+bool RBaseObject::CheckName(const std::string& name)
 {
 	return m_Name == name;
 }

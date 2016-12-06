@@ -11,14 +11,12 @@ _NAMESPACE_REALSPACE2_BEGIN
 #define _MANAGED
 #define LOAD_FROM_DDS
 
-///////////////////////////////////////////////////////////////////////
-
-static int g_nObjectTextureLevel = 0;
-static int g_nMapTextureLevel = 0;
-static int g_nTextureFormat = 0; // 0 = 16 bit, 1 = 32bit
+static int g_nObjectTextureLevel;
+static int g_nMapTextureLevel;
+static int g_nTextureFormat; // 0 = 16 bit, 1 = 32bit
 
 void SetObjectTextureLevel(int nLevel) {
-	g_nObjectTextureLevel = nLevel == 3 ? 8 : nLevel; // Hacky uwu
+	g_nObjectTextureLevel = nLevel == 3 ? 8 : nLevel; // HACK: Archetype's
 }
 void SetMapTextureLevel(int nLevel) {
 	g_nMapTextureLevel = nLevel == 3 ? 8 : nLevel;
@@ -40,7 +38,7 @@ static int SubGetTexLevel(u32 tex_type)
 	return 0;
 }
 
-///////////////////////////////////////////////////////////////////////
+RBaseTexture::~RBaseTexture() = default;
 
 void RBaseTexture::Destroy()
 {
@@ -218,7 +216,7 @@ void RBaseTexture_Create()
 	g_pTextureManager = new RTextureManager;
 }
 
-void RBaseTexture_Destory()
+void RBaseTexture_Destroy()
 {
 	SAFE_DELETE(g_pTextureManager);
 }
@@ -238,7 +236,8 @@ void RTextureManager::Destroy() {
 		RBaseTexture *pTex = begin()->second;
 		if (pTex->m_nRefCount > 0)
 		{
-			_RPT2(_CRT_WARN, " %s texture not destroyed. ( ref count = %d )\n", pTex->m_szTextureName, pTex->m_nRefCount);
+			_RPT2(_CRT_WARN, " %s texture not destroyed. ( ref count = %d )\n",
+				pTex->m_szTextureName, pTex->m_nRefCount);
 		}
 		delete pTex;
 		erase(begin());
@@ -257,11 +256,11 @@ void RTextureManager::OnInvalidate() {
 
 };
 
-int RTextureManager::UpdateTexture(DWORD max_life_time)
+int RTextureManager::UpdateTexture(u32 max_life_time)
 {
 	RBaseTexture* pTex = NULL;
 
-	DWORD this_time = GetGlobalTimeMS();
+	u32 this_time = GetGlobalTimeMS();
 	int cnt = 0;
 
 	for (iterator i = begin(); i != end(); i++) {
@@ -277,7 +276,7 @@ int RTextureManager::UpdateTexture(DWORD max_life_time)
 	return cnt;
 }
 
-void RTextureManager::OnChangeTextureLevel(DWORD flag)
+void RTextureManager::OnChangeTextureLevel(u32 flag)
 {
 	RBaseTexture* pTex = NULL;
 
@@ -389,17 +388,20 @@ void RTextureManager::OnRestore() {
 };
 
 
-RBaseTexture *RTextureManager::CreateBaseTexture(const char* filename, int tex_type, bool bUseMipmap, bool bUseFileSystem)
+RBaseTexture *RTextureManager::CreateBaseTexture(const char* filename, int tex_type, bool bUseMipmap,
+	bool bUseFileSystem)
 {
 	return CreateBaseTextureSub(false, filename, tex_type, bUseMipmap, bUseFileSystem);
 }
 
-RBaseTexture *RTextureManager::CreateBaseTextureMg(const char* filename, int tex_type, bool bUseMipmap, bool bUseFileSystem)
+RBaseTexture *RTextureManager::CreateBaseTextureMg(const char* filename, int tex_type, bool bUseMipmap,
+	bool bUseFileSystem)
 {
 	return CreateBaseTextureSub(true, filename, tex_type, bUseMipmap, bUseFileSystem);
 }
 
-RBaseTexture *RTextureManager::CreateBaseTextureSub(bool Mg, const char* filename, int tex_type, bool bUseMipmap, bool bUseFileSystem)
+RBaseTexture *RTextureManager::CreateBaseTextureSub(bool Managed, const char* filename,
+	int tex_type, bool bUseMipmap, bool bUseFileSystem)
 {
 	if (filename == NULL || strlen(filename) == 0) return NULL;
 
@@ -408,7 +410,7 @@ RBaseTexture *RTextureManager::CreateBaseTextureSub(bool Mg, const char* filenam
 	strcpy_safe(texturefilename, filename);
 	_strlwr_s(texturefilename);
 
-	iterator i = find(string(texturefilename));
+	iterator i = find(texturefilename);
 
 	if (i != end())
 	{
@@ -426,8 +428,8 @@ RBaseTexture *RTextureManager::CreateBaseTextureSub(bool Mg, const char* filenam
 	strcpy_safe(pnew->m_szTextureName, texturefilename);
 
 #ifndef _PUBLISH
-	if (Mg == false) {
-		if (!pnew->OnRestore(Mg)) {
+	if (Managed == false) {
+		if (!pnew->OnRestore(Managed)) {
 			delete pnew;
 			return NULL;
 		}

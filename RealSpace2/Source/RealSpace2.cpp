@@ -446,7 +446,7 @@ bool RInitDisplay(HWND hWnd, HINSTANCE inst, const RMODEPARAMS *params, Graphics
 bool RCloseDisplay()
 {
 	RFontDestroy();
-	RBaseTexture_Destory();
+	RBaseTexture_Destroy();
 	RFrame_Invalidate();
 	RBaseTexture_Invalidate();
 
