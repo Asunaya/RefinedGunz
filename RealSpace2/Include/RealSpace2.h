@@ -6,7 +6,6 @@
 #include "MZFileSystem.h"
 #include "RNameSpace.h"
 #include <d3d9.h>
-#pragma comment(lib, "d3dx9.lib")
 _NAMESPACE_REALSPACE2_BEGIN
 
 extern int g_nFrameCount, g_nLastFrameCount;
@@ -136,8 +135,6 @@ void RDrawArc(rvector origin, float fRadius, float fAngle1, float fAngle2, int n
 
 bool RSaveAsBmp(int x, int y, void *data, const char *szFilename);
 bool RScreenShot(int x, int y, void *data, const char *szFilename);
-
-LPDIRECT3DSURFACE9 RCreateImageSurface(const char *filename);
 
 void RSetGammaRamp(unsigned short nGammaValue = 255);
 void RSetWBuffer(bool bEnable);

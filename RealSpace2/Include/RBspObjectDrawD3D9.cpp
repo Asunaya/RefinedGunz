@@ -8,6 +8,7 @@
 #include "ShaderUtil.h"
 #include "RS2.h"
 #include "Sphere.h"
+#include "RUtil.h"
 
 // Shader objects
 #include "DeferredVS.h"
@@ -29,10 +30,6 @@ struct MaterialBatch
 
 using namespace rsx;
 using IndexType = u32;
-
-template <typename T> constexpr D3DFORMAT GetD3DFormat();
-template <>	constexpr D3DFORMAT GetD3DFormat<u16>() { return D3DFMT_INDEX16; }
-template <> constexpr D3DFORMAT GetD3DFormat<u32>() { return D3DFMT_INDEX32; }
 
 template <typename VertexType, typename IndexType>
 static bool CreateBuffers(size_t VertexCount, size_t IndexCount, u32 FVF,

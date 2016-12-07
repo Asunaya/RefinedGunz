@@ -1184,13 +1184,7 @@ void	RButterflyMesh::CalAddedVertex( sHEEdge* peCurr_, sHEVertex* pvCurr_, sHEVe
 		peTemp	= peCurr_;
 		peTemp	= peTemp->pPair;
 		pvTemp	= peTemp->pVertex;
-/*
-		// xxx: Validate Link
-		if( !(pvTemp == pvCurr_) )
-		{
-			_ASSERT( !" " );
-		}
-//*/
+
 		float weight_sum = 0;
 		float weight;
 
@@ -1201,8 +1195,8 @@ void	RButterflyMesh::CalAddedVertex( sHEEdge* peCurr_, sHEVertex* pvCurr_, sHEVe
 
 		for( int j = 1 ; j < valence_ ; ++j )
 		{
-			weight = ((0.25 + cos(( 2 * D3DX_PI * j ) / valence_ )) + 
-				(0.5 * cos(( 4 * D3DX_PI * j ) / valence_ )) ) / valence_;
+			weight = ((0.25 + cos(( 2 * PI_FLOAT * j ) / valence_ )) + 
+				(0.5 * cos(( 4 * PI_FLOAT * j ) / valence_ )) ) / valence_;
 
 			if( reverse )
 			{
@@ -1213,13 +1207,10 @@ void	RButterflyMesh::CalAddedVertex( sHEEdge* peCurr_, sHEVertex* pvCurr_, sHEVe
 					peTemp	= peTemp->pPair;
 					peTemp	= peTemp->pPrev;
 				}
-				//pvTemp	= peTemp->pVertex;
 			}
 			else
 			{
 				peTemp	= peTemp->pNext;
-				//peTemp	= peTemp->pPair;
-				//if( peTemp == NULL )
 				if( peTemp->pPair == NULL )
 				{
 					pvTemp	= peTemp->pNext->pVertex;
@@ -1227,7 +1218,6 @@ void	RButterflyMesh::CalAddedVertex( sHEEdge* peCurr_, sHEVertex* pvCurr_, sHEVe
 					reverse	= true;
 					peTemp	= peCurr_;
 					peTemp	= peTemp->pPrev;
-					//pvTemp	= peTemp->pVertex;
 				}
 				else
 				{
@@ -1362,13 +1352,11 @@ void	RButterflyMesh::Draw()
 		for( j = 0 ; j < 3; ++j )
 		{
 			pVertices[nVertex].p	= peCurr->pVertex->pos;
-			//pVertices[nVertex].n	= peCurr->pVertex->normal;
 			pVertices[nVertex].n	= rvector( 0, 1, 0 );
 			pVertices[nVertex].tu	= peCurr->pVertex->tu;
 			pVertices[nVertex].tv	= peCurr->pVertex->tv;
 
 			peCurr	= peCurr->pNext;
-		//	peCurr	= peCurr->pPrev->pNext;
 
 			if( peCurr->pPair != NULL )
 			{
@@ -1383,20 +1371,10 @@ void	RButterflyMesh::Draw()
 	RGetDevice()->SetRenderState( D3DRS_LIGHTING, FALSE );
 	RGetDevice()->SetTexture( 0, NULL );
 	RGetDevice()->SetRenderState( D3DRS_FILLMODE, D3DFILL_WIREFRAME );
-/* test code */
-	/*
-	LPDIRECT3DTEXTURE9	tex;
-	D3DXCreateTextureFromFile( RGetDevice(), "maps/prison/gzd_map_SOP_water001.bmp", &tex );
-	RGetDevice()->SetTexture( 0, tex );
-	RGetDevice()->SetRenderState( D3DRS_LIGHTING, true );
-	//*/
-/* end test code*/
 	RGetDevice()->SetFVF( RVertexType );
 	RGetDevice()->DrawPrimitiveUP( D3DPT_TRIANGLELIST, nPrimitive, pVertices, sizeof(RVertex) );
 	RGetDevice()->SetRenderState( D3DRS_FILLMODE, D3DFILL_SOLID );
 	RGetDevice()->SetRenderState( D3DRS_LIGHTING, TRUE );
-
-//	tex->Release();
 
 	delete[]	pVertices;
 }

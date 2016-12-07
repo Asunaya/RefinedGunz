@@ -468,7 +468,7 @@ void ZCharacter::UpdateDirection(float fDelta, const v3& Direction)
 				Normalize(dir);
 
 			bool bInversed = false;
-			if (DotProduct(targetdir, dir) < -cos(D3DX_PI / 4.f) + 0.01f)
+			if (DotProduct(targetdir, dir) < -cos(PI_FLOAT / 4.f) + 0.01f)
 			{
 				dir = -dir;
 				bInversed = true;
@@ -480,35 +480,35 @@ void ZCharacter::UpdateDirection(float fDelta, const v3& Direction)
 
 #define ROTATION_SPEED	400.f
 
-			if (fAngleLower > 5.f / 180.f*D3DX_PI)
+			if (fAngleLower > 5.f / 180.f*PI_FLOAT)
 			{
-				mat = RGetRotZ(max(-ROTATION_SPEED*fDelta / 180.f*D3DX_PI, -fAngleLower));
+				mat = RGetRotZ(max(-ROTATION_SPEED*fDelta / 180.f*PI_FLOAT, -fAngleLower));
 				m_DirectionLower = m_DirectionLower * mat;
 			}
 
-			if (fAngleLower < -5.f / 180.f*D3DX_PI)
+			if (fAngleLower < -5.f / 180.f*PI_FLOAT)
 			{
-				mat = RGetRotZ(min(ROTATION_SPEED*fDelta / 180.f*D3DX_PI, -fAngleLower));
+				mat = RGetRotZ(min(ROTATION_SPEED*fDelta / 180.f*PI_FLOAT, -fAngleLower));
 				m_DirectionLower = m_DirectionLower * mat;
 			}
 
 			float fAngle = GetAngleOfVectors(m_TargetDir, m_DirectionLower);
 
-			if (fAngle < -65.f / 180.f*D3DX_PI)
+			if (fAngle < -65.f / 180.f*PI_FLOAT)
 			{
-				fAngle = -65.f / 180.f*D3DX_PI;
-				mat = RGetRotZ(-65.f / 180.f*D3DX_PI);
+				fAngle = -65.f / 180.f*PI_FLOAT;
+				mat = RGetRotZ(-65.f / 180.f*PI_FLOAT);
 				m_DirectionLower = m_Direction * mat;
 			}
 
-			if (fAngle >= 65.f / 180.f*D3DX_PI)
+			if (fAngle >= 65.f / 180.f*PI_FLOAT)
 			{
-				fAngle = 65.f / 180.f*D3DX_PI;
-				mat = RGetRotZ(65.f / 180.f*D3DX_PI);
+				fAngle = 65.f / 180.f*PI_FLOAT;
+				mat = RGetRotZ(65.f / 180.f*PI_FLOAT);
 				m_DirectionLower = m_Direction * mat;
 			}
 
-			m_pVMesh->m_vRotXYZ.x = -fAngle * 180 / D3DX_PI *.9f;
+			m_pVMesh->m_vRotXYZ.x = -fAngle * 180 / PI_FLOAT *.9f;
 
 			m_pVMesh->m_vRotXYZ.y = (m_TargetDir.z + 0.05f) * 50.f;
 		}
@@ -983,7 +983,7 @@ void ZCharacter::OnUpdate(float fDelta)
 			float fAngle = GetAngleOfVectors(dir, ProxyDirection);
 
 			rvector vRot;
-			vRot.x = -fAngle*180/ D3DX_PI *.9f;
+			vRot.x = -fAngle*180/ PI_FLOAT *.9f;
 			vRot.y = (dir.z+0.05f) * 50.f;
 			vRot.z = 0.f;
 
@@ -1138,7 +1138,7 @@ void ZCharacter::UpdateVelocity(float fDelta)
 		float back_speed = BACK_SPEED * fRatio;
 		float stop_formax_speed = STOP_FORMAX_SPEED * (1/fRatio);  
 
-		if(DotProduct(forward,dir)>cosf(10.f*D3DX_PI /180.f))
+		if(DotProduct(forward,dir)>cosf(10.f*PI_FLOAT /180.f))
 		{
 			if(fSpeed>run_speed)
 				fSpeed=max(fSpeed-stop_formax_speed*fDelta,run_speed);

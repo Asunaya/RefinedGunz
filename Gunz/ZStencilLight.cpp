@@ -5,7 +5,7 @@
 #include "RMeshUtil.h"
 #include "RBspObject.h"
 
-#define CORRECTION		0.01
+#define CORRECTION		0.01f
 #define SLSEGMENT		8
 #define MAXLSID			60000
 #define SLNITER			8
@@ -15,14 +15,13 @@ using namespace RealSpace2;
 
 bool bInverse = false;
 
-ZStencilLight ZStencilLight::m_instance;
 ZStencilLight* ZGetStencilLight() { return ZStencilLight::GetInstance(); }
 
 ZStencilLight::ZStencilLight()
 {
 	m_id = 1;
 	m_pTex = NULL;
-	m_pMesh = NULL;
+	Mesh = CreateSphere(1, SLSEGMENT, SLSEGMENT);
 }
 
 ZStencilLight::~ZStencilLight()
@@ -35,11 +34,10 @@ void ZStencilLight::Destroy()
 	if(m_pTex)
 	{
 		RDestroyBaseTexture(m_pTex);
-		m_pTex=NULL;
+		m_pTex = NULL;
 	}
-	SAFE_RELEASE(m_pMesh);
 
-	for( map<int, LightSource*>::iterator iter = m_LightSource.begin(); iter != m_LightSource.end(); )
+	for (map<int, LightSource*>::iterator iter = m_LightSource.begin(); iter != m_LightSource.end(); )
 	{
 		LightSource* pLS = iter->second;
 		SAFE_DELETE(pLS);
@@ -86,11 +84,6 @@ void ZStencilLight::PreRender()
 
 void ZStencilLight::RenderStencil()
 {
-	if(m_pMesh == NULL)
-	{
-		D3DXCreateSphere( RGetDevice(), 1.0f, SLSEGMENT, SLSEGMENT, &m_pMesh, NULL );
-	}
-
 	LPDIRECT3DDEVICE9 dev = RGetDevice();
 
 	dev->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_ALWAYS);
@@ -109,20 +102,15 @@ void ZStencilLight::RenderStencil()
 	// render stencil
 	dev->SetRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_INCR);
 	dev->SetRenderState(D3DRS_CULLMODE, D3DCULL_CW);
-	m_pMesh->DrawSubset(0);
+	Mesh.Draw();
 
 	dev->SetRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_DECR);
 	dev->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
-	m_pMesh->DrawSubset(0);
+	Mesh.Draw();
 }
 
 void ZStencilLight::RenderStencil(const rvector& p, float raidus)
 {
-	if(m_pMesh == NULL)
-	{
-		D3DXCreateSphere( RGetDevice(), 1.0f, SLSEGMENT, SLSEGMENT, &m_pMesh, NULL );
-	}
-
 	LPDIRECT3DDEVICE9 dev = RGetDevice();
  
 	dev->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_ALWAYS);
@@ -142,21 +130,21 @@ void ZStencilLight::RenderStencil(const rvector& p, float raidus)
 	{
 		dev->SetRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_INCR);
 		dev->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
-		m_pMesh->DrawSubset(0);
+		Mesh.Draw();
 
 		dev->SetRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_DECR);
 		dev->SetRenderState(D3DRS_CULLMODE, D3DCULL_CW);
-		m_pMesh->DrawSubset(0);
+		Mesh.Draw();
 	}
 	else
 	{
 		dev->SetRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_INCR);
 		dev->SetRenderState(D3DRS_CULLMODE, D3DCULL_CW);
-		m_pMesh->DrawSubset(0);
+		Mesh.Draw();
 
 		dev->SetRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_DECR);
 		dev->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
-		m_pMesh->DrawSubset(0);
+		Mesh.Draw();
 	}	
 	bInverse = false;
 }
@@ -168,16 +156,16 @@ void ZStencilLight::RenderLight()
 	static bool init = false;
 	if(!init)
 	{
-		m_VBuffer[0].p		= D3DXVECTOR4( 0.0f - CORRECTION, 0.0f - CORRECTION, 0, 1.0f );
+		m_VBuffer[0].p		= { 0.0f - CORRECTION, 0.0f - CORRECTION, 0, 1.0f };
 		m_VBuffer[0].color	= 0xFFFFFFFF;	m_VBuffer[0].tu		= 0.0f;	m_VBuffer[0].tv		= 0.0f;
 		// right top
-		m_VBuffer[1].p		= D3DXVECTOR4( RGetScreenWidth() + CORRECTION, 0.0f - CORRECTION, 0, 1.0f );
+		m_VBuffer[1].p		= { RGetScreenWidth() + CORRECTION, 0.0f - CORRECTION, 0, 1.0f };
 		m_VBuffer[1].color	= 0xFFFFFFFF;	m_VBuffer[1].tu		= 1.0f;	m_VBuffer[1].tv		= 0.0f;
 		// right bottom
-		m_VBuffer[2].p		= D3DXVECTOR4( RGetScreenWidth() + CORRECTION, RGetScreenHeight() + CORRECTION, 0, 1.0f );
+		m_VBuffer[2].p		= { RGetScreenWidth() + CORRECTION, RGetScreenHeight() + CORRECTION, 0, 1.0f };
 		m_VBuffer[2].color	= 0xFFFFFFFF;	m_VBuffer[2].tu		= 1.0f;	m_VBuffer[2].tv		= 1.0f;
 		// left bottom
-		m_VBuffer[3].p		= D3DXVECTOR4( 0.0f - CORRECTION, RGetScreenHeight(), 0, 1.0f );
+		m_VBuffer[3].p		= { 0.0f - CORRECTION, static_cast<float>(RGetScreenHeight()), 0, 1.0f };
 		m_VBuffer[3].color	= 0xFFFFFFFF;	m_VBuffer[3].tu		= 0.0f;	m_VBuffer[3].tv		= 1.0f;
 
 		init = true;

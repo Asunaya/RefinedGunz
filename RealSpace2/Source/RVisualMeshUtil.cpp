@@ -288,8 +288,6 @@ int RWeaponTracks::GetLastAddVertex(rvector* pOutVec)
 {
 	int cnt = 0;
 
-	// 휘둘렀을 경우만 값을 넘겨준다...서있는상태에서는 cnt = 0;
-	
 	if( pOutVec && m_current_node_size )
 	{
 		pOutVec[0] = m_vSwordPos[0];
@@ -330,79 +328,6 @@ void RWeaponTracks::AddVertex(RLVertex* pVert)
 	m_current_vertex_size += 2;
 	m_current_node_size++;
 }
-/*
-#define MAX_TRACK_LEN 10.f
-
-void RWeaponTracks::AddVertexSpline(RLVertex* pVert)
-{
-	// 마지막 위치에서의 길이..
-	// 실시간으로 하지 않으려고.. 추가시에 생성...
-	// 실시간으로 노드의 up down 을 가지고 만들어야 함...
-
-	if(m_current_node_size)
-	{
-		RWeaponSNode* pN = &m_pNode[m_current_node_size-1];
-		RWeaponSNode* pNN;
-
-		if(m_current_node_size > 1)
-			pNN = &m_pNode[m_current_node_size-2];
-		else 
-			pNN = &m_pNode[m_current_node_size-1];
-
-		if(pN && pNN) {
-			
-			float fLen = Magnitude( pN->up - pVert[0].p );
-
-			if( fLen > MAX_TRACK_LEN ) {// MAX_TRACK_LEN 보다 작으면 그냥 더해준다..
-
-				int nCnt = 1;
-
-				nCnt = (int)fLen / MAX_TRACK_LEN;
-
-				float s = 1.f;
-				
-				static RLVertex t_vert[2];
-
-				t_vert[0] = pVert[0];
-				t_vert[1] = pVert[1];
-
-				static rvector vOut;
-				static rvector vp[4];
-
-				for( int i=1;i < nCnt+1;i++ ) 
-				{
-					s = i / (float)nCnt;
-
-					vp[0] = pNN->up;
-					vp[1] = pN->up;
-					vp[2] = pVert[0].p;
-					vp[3] = pVert[0].p;
-
-					D3DXVec3CatmullRom(&vOut,&vp[0],&vp[1],&vp[2],&vp[3],s);
-					
-					t_vert[0].p = vOut;
-
-					vp[0] = pNN->down;
-					vp[1] = pN->down;
-					vp[2] = pVert[1].p;
-					vp[3] = pVert[1].p;
-
-					D3DXVec3CatmullRom(&vOut,&vp[0],&vp[1],&vp[2],&vp[3],s);
-
-					t_vert[1].p = vOut;
-
-					AddVertex(t_vert);
-				}
-
-				return;
-			}
-		}	
-	}
-
-	AddVertex(pVert);
-
-}
-*/
 
 unsigned char g_FireRed[256] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,4,4,4,4,4,4,4,8,8,8,8,8,12,12,12,12,16,16,16,16,20,20,20,24,24,
@@ -454,8 +379,6 @@ RFireEffectTexture::~RFireEffectTexture()
 
 HRESULT RFireEffectTexture::Create(LPDIRECT3DDEVICE9 dev, int w,int h)
 {
-	HRESULT hr;
-
 	m_w = w;
 	m_h = h;
 
@@ -468,11 +391,7 @@ HRESULT RFireEffectTexture::Create(LPDIRECT3DDEVICE9 dev, int w,int h)
 	m_pFireActive = m_pData;
 	m_pFireScratch = m_pData2;
 
-	if (FAILED(hr = D3DXCreateTexture(dev, w, h, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &m_pTexture))) 
-		return hr;
-
-	return S_OK;
-
+	return RGetDevice()->CreateTexture(w, h, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &m_pTexture, nullptr);
 }
 
 void RFireEffectTexture::Destroy()

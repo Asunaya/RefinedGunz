@@ -529,8 +529,8 @@ void ZGameInput::Update(float fElapsed)
 
 				if (pCamera->GetLookMode() == ZCAMERA_MINIMAP)
 				{
-					pCamera->m_fAngleX = max(D3DX_PI / 2 + .1f, pCamera->m_fAngleX);
-					pCamera->m_fAngleX = min(D3DX_PI - 0.1f, pCamera->m_fAngleX);
+					pCamera->m_fAngleX = max(PI_FLOAT / 2 + .1f, pCamera->m_fAngleX);
+					pCamera->m_fAngleX = min(PI_FLOAT - 0.1f, pCamera->m_fAngleX);
 				}
 				else
 				{
@@ -547,11 +547,11 @@ void ZGameInput::Update(float fElapsed)
 						pCamera->m_fAngleX = max(CAMERA_ANGLEX_MIN, pCamera->m_fAngleX);
 						pCamera->m_fAngleX = min(CAMERA_ANGLEX_MAX, pCamera->m_fAngleX);
 
-						pCamera->m_fAngleX = max(lastanglex - D3DX_PI / 4.f, pCamera->m_fAngleX);
-						pCamera->m_fAngleX = min(lastanglex + D3DX_PI / 4.f, pCamera->m_fAngleX);
+						pCamera->m_fAngleX = max(lastanglex - PI_FLOAT / 4.f, pCamera->m_fAngleX);
+						pCamera->m_fAngleX = min(lastanglex + PI_FLOAT / 4.f, pCamera->m_fAngleX);
 
-						pCamera->m_fAngleZ = max(lastanglez - D3DX_PI / 4.f, pCamera->m_fAngleZ);
-						pCamera->m_fAngleZ = min(lastanglez + D3DX_PI / 4.f, pCamera->m_fAngleZ);
+						pCamera->m_fAngleZ = max(lastanglez - PI_FLOAT / 4.f, pCamera->m_fAngleZ);
+						pCamera->m_fAngleZ = min(lastanglez + PI_FLOAT / 4.f, pCamera->m_fAngleZ);
 
 					}
 				}

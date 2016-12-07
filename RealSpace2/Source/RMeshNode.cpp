@@ -687,11 +687,9 @@ void RMeshNode::ToonRenderSettingOnOld(RMtrl* pMtrl)
 		bool toonTexture	= m_pParentMesh->m_pVisualMesh->m_bToonTextureRender;
 
 		DWORD color = 0xffffffff;
-		D3DXCOLOR  dx_color = D3DXCOLOR(1.f,1.f,1.f,1.f);
+		color_r32 dx_color{ 1, 1, 1, 1 };
 
 		int ColorMode = 0;
-
-		// 재질의 컬러설정이 우선권...
 
 		if( pMtrl->GetTColor() != D3DCOLOR_COLORVALUE(0.0f,1.0f,0.0f,0.0f) ) {
 			ColorMode = 1;
@@ -711,7 +709,7 @@ void RMeshNode::ToonRenderSettingOnOld(RMtrl* pMtrl)
 			g = (color>> 8)&0xff;
 			b = (color    )&0xff;
 
-			dx_color = D3DXCOLOR(r/255.f,g/255.f,b/255.f,a/255.f);
+			dx_color = color_r32(r / 255.f, g / 255.f, b / 255.f, a / 255.f);
 		}
 
 		LPDIRECT3DDEVICE9 dev = RGetDevice();
@@ -781,7 +779,7 @@ void RMeshNode::ToonRenderSettingOn(RMtrl* pMtrl)
 		bool toonTexture	= m_pParentMesh->m_pVisualMesh->m_bToonTextureRender;
 
 		DWORD color = 0xffffffff;
-		D3DXCOLOR  dx_color = D3DXCOLOR(1.f,1.f,1.f,1.f);
+		color_r32 dx_color{ 1, 1, 1, 1 };
 
 		int ColorMode = 0;
 
@@ -803,7 +801,7 @@ void RMeshNode::ToonRenderSettingOn(RMtrl* pMtrl)
 			g = (color>> 8)&0xff;
 			b = (color    )&0xff;
 
-			dx_color = D3DXCOLOR(r/255.f,g/255.f,b/255.f,a/255.f);
+			dx_color = color_r32(r / 255.f, g / 255.f, b / 255.f, a / 255.f);
 		}
 
 		LPDIRECT3DDEVICE9 dev = RGetDevice();
@@ -1017,7 +1015,7 @@ void RMeshNode::Render(rmatrix* pWorldMatrix)
 			cpos.y = RView._42;
 			cpos.z = RView._43;
 
-			float fLen = D3DXVec3Length(&(cpos-pos))/RMesh::m_fSilhouetteLength;
+			float fLen = Magnitude(cpos - pos) / RMesh::m_fSilhouetteLength;
 
 			m_vb->ConvertSilhouetteBuffer(fLen);
 

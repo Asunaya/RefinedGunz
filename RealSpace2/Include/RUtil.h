@@ -36,3 +36,7 @@ inline void SetShaders(const ShaderRefPair& Shaders)
 	RGetDevice()->SetVertexShader(Shaders.first.get());
 	RGetDevice()->SetPixelShader(Shaders.second.get());
 }
+
+template <typename T> constexpr D3DFORMAT GetD3DFormat();
+template <>	constexpr D3DFORMAT GetD3DFormat<u16>() { return D3DFMT_INDEX16; }
+template <> constexpr D3DFORMAT GetD3DFormat<u32>() { return D3DFMT_INDEX32; }

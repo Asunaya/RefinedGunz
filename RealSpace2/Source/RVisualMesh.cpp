@@ -2144,9 +2144,9 @@ rvector	RVisualMesh::GetRootPosition()
 	return GetTransPos(m);
 }
 
-D3DXQUATERNION RVisualMesh::GetBipRootRot(int frame)
+rquaternion RVisualMesh::GetBipRootRot(int frame)
 {
-	D3DXQUATERNION q = D3DXQUATERNION( 0.f,0.f,0.f,0.f );
+	rquaternion q(0, 0, 0, 0);
 
 	RAnimation* pAni = GetFrameInfo(ani_mode_lower)->m_pAniSet;
 
@@ -2161,8 +2161,8 @@ D3DXQUATERNION RVisualMesh::GetBipRootRot(int frame)
 
 rmatrix	RVisualMesh::GetBipRootMat(int frame)
 {
-	D3DXQUATERNION q = GetBipRootRot(frame);
-	rvector v = GetBipRootPos(frame);
+	auto q = GetBipRootRot(frame);
+	auto v = GetBipRootPos(frame);
 
 	auto m = QuaternionToMatrix(q);
 	SetTransPos(m, v);

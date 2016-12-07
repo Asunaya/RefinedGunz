@@ -212,12 +212,17 @@ bool ZWaterList::SetSurface(bool b)
 		RPIXELFORMAT pixelFormat = RGetPixelFormat();
 
 		if(g_pTexReflection==NULL) {
-			if(FAILED( D3DXCreateTexture( g_pDevice, WATERTEXTURE_SIZE, WATERTEXTURE_SIZE, 1, D3DUSAGE_RENDERTARGET, pixelFormat, D3DPOOL_DEFAULT, &g_pTexReflection))
-				&& FAILED( D3DXCreateTexture( g_pDevice, WATERTEXTURE_SIZE, WATERTEXTURE_SIZE, 1, D3DUSAGE_DYNAMIC|D3DUSAGE_RENDERTARGET, pixelFormat, D3DPOOL_DEFAULT, &g_pTexReflection)))
+			if(FAILED(RGetDevice()->CreateTexture(WATERTEXTURE_SIZE, WATERTEXTURE_SIZE,
+				1, D3DUSAGE_RENDERTARGET, pixelFormat, D3DPOOL_DEFAULT, &g_pTexReflection, nullptr)))
 			{
-				mlog( "Fail to Create Reflection Texture for Water Mesh\n" );
-				g_pTexReflection = 0;
-				return false;
+				if (FAILED(RGetDevice()->CreateTexture(WATERTEXTURE_SIZE, WATERTEXTURE_SIZE,
+					1, D3DUSAGE_DYNAMIC | D3DUSAGE_RENDERTARGET, pixelFormat, D3DPOOL_DEFAULT,
+					&g_pTexReflection, nullptr)))
+				{
+					mlog("Fail to Create Reflection Texture for Water Mesh\n");
+					g_pTexReflection = 0;
+					return false;
+				}
 			}
 		}
 		if(g_pSufReflection==NULL) {
@@ -330,7 +335,9 @@ bool ZWater::SetMesh( RMeshNode* meshNode )
 
 		// set Material
 		memset(&m_mtrl,0, sizeof(D3DMATERIAL9));
-		m_mtrl.Ambient = pMtrl->m_ambient;	m_mtrl.Diffuse = pMtrl->m_diffuse;	m_mtrl.Diffuse.a = 0.5;	m_mtrl.Power = 0;
+		m_mtrl.Ambient = static_cast<D3DCOLORVALUE>(pMtrl->m_ambient);
+		m_mtrl.Diffuse = static_cast<D3DCOLORVALUE>(pMtrl->m_diffuse);
+		m_mtrl.Diffuse.a = 0.5;	m_mtrl.Power = 0;
 		m_mtrl.Specular.a = 0;	m_mtrl.Specular.r = 0;	m_mtrl.Specular.g = 0;	m_mtrl.Specular.b = 0;
 	}	
 
@@ -478,25 +485,25 @@ void MakeBuffer()
 #define S_H	( S_Y + m_h )
 
 	// left top
-	m_buffer[0].p		= D3DXVECTOR4( S_X - CORRECTION, S_Y - CORRECTION, 0, 1.0f );
+	m_buffer[0].p		= { S_X - CORRECTION, S_Y - CORRECTION, 0, 1.0f };
 	m_buffer[0].color	= 0xffffffff;
 	m_buffer[0].tu		= 0.0f;
 	m_buffer[0].tv		= 0.0f;
 
 	// right top
-	m_buffer[1].p		= D3DXVECTOR4( S_W + CORRECTION, S_Y - CORRECTION, 0, 1.0f );
+	m_buffer[1].p		= { S_W + CORRECTION, S_Y - CORRECTION, 0, 1.0f };
 	m_buffer[1].color	= 0xffffffff;
 	m_buffer[1].tu		= 1.0f;
 	m_buffer[1].tv		= 0.0f;
 
 	// right bottom
-	m_buffer[2].p		= D3DXVECTOR4( S_W + CORRECTION, S_H + CORRECTION, 0, 1.0f );
+	m_buffer[2].p		= { S_W + CORRECTION, S_H + CORRECTION, 0, 1.0f };
 	m_buffer[2].color	= 0xffffffff;
 	m_buffer[2].tu		= 1.0f;
 	m_buffer[2].tv		= 1.0f;
 
 	// left bottom
-	m_buffer[3].p		= D3DXVECTOR4( S_X - CORRECTION, S_H + CORRECTION, 0, 1.0f );
+	m_buffer[3].p		= { S_X - CORRECTION, S_H + CORRECTION, 0, 1.0f };
 	m_buffer[3].color	= 0xffffffff;
 	m_buffer[3].tu		= 0.0f;
 	m_buffer[3].tv		= 1.0f;

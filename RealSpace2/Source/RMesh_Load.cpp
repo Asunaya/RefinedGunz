@@ -731,9 +731,9 @@ bool RMesh::ReadElu(const char* fname)
 		MZF_READ(&node->m_mtrl_id    ,4 );
 		MZF_READ(&node->m_sub_mtrl_id,4 );
 
-		MZF_READ(&node->m_ambient ,sizeof(D3DXCOLOR) );
-		MZF_READ(&node->m_diffuse ,sizeof(D3DXCOLOR) );
-		MZF_READ(&node->m_specular,sizeof(D3DXCOLOR) );
+		MZF_READ(&node->m_ambient ,sizeof(color_r32) );
+		MZF_READ(&node->m_diffuse ,sizeof(color_r32) );
+		MZF_READ(&node->m_specular,sizeof(color_r32) );
 
 		MZF_READ(&node->m_power,4 );
 

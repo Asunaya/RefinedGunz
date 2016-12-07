@@ -513,6 +513,7 @@
     <ClInclude Include="Include\RTypes.h" />
     <ClInclude Include="Include\RVersions.h" />
     <ClInclude Include="Include\ShaderUtil.h" />
+    <ClInclude Include="Include\SimpleMesh.h" />
     <ClInclude Include="Include\Sphere.h" />
     <ClInclude Include="Include\TextureLoader.h" />
     <ClInclude Include="Include\vulkanbuffer.hpp" />

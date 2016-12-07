@@ -4,25 +4,15 @@
 
 using namespace RealSpace2;
 
-RSphere::RSphere(void)
-//:mCentre(0,0,0), mRadius(10), mSphere(0)
+RSphere::RSphere()
 {
 	mCentre	= rvector(0,0,0);
 	mRadius	=  10.f;
-	mSphere = 0;
 }
 
-RSphere::~RSphere(void)
+RSphere::~RSphere()
 {
-#ifdef _DEBUG
-	SAFE_RELEASE( mSphere );
-#endif
 }
-
-
-//////////////////////////////////////////////////////////////////////////
-// isCollide
-//////////////////////////////////////////////////////////////////////////
 
 bool RSphere::isCollide( CDInfo* data_, CDInfoType cdType_ )
 {
@@ -33,29 +23,4 @@ bool RSphere::isCollide( CDInfo* data_, CDInfoType cdType_ )
 		return true;
 	}
 	return false;
-}
-
-
-
-//////////////////////////////////////////////////////////////////////////
-// draw
-//////////////////////////////////////////////////////////////////////////
-
-void RSphere::draw()
-{
-#ifdef _DEBUG
-	RGetDevice()->SetRenderState( D3DRS_FILLMODE, D3DFILL_WIREFRAME );
-
-	if(mSphere == 0)
-	{
-		D3DXCreateSphere( RGetDevice(), mRadius, 20, 20, &mSphere, NULL );
-	}
-
-	RGetDevice()->SetRenderState( D3DRS_LIGHTING, FALSE );
-	RGetDevice()->SetTransform(D3DTS_WORLD, static_cast<D3DMATRIX*>(mWorld));
-
- 	mSphere->DrawSubset( 0 );
-
-	RGetDevice()->SetRenderState( D3DRS_FILLMODE, D3DFILL_SOLID );
-#endif
 }

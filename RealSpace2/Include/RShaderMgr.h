@@ -3,7 +3,6 @@
 #include <Windows.h>
 #include <vector>
 #include <map>
-#include "d3dx9.h"
 #include "MUtil.h"
 
 #define MAX_LIGHT 3
@@ -28,10 +27,10 @@ public:
 
 	LPDIRECT3DVERTEXSHADER9 getShader(int i_);
 	LPDIRECT3DVERTEXDECLARATION9 getShaderDecl(int i);
-	void setMtrl(D3DXCOLOR& rColor_, float fVisAlpha_);
+	void setMtrl(color_r32& rColor_, float fVisAlpha_);
 	void setMtrl(class RMtrl* pMtrl_, float fVisAlpha_);
 	void setLight(int iLignt_, D3DLIGHT9* pLight_);
-	void setAmbient(DWORD value_);
+	void setAmbient(u32 value_);
 	void LightEnable(int iLignt_, bool bEnable_);
 
 	void Update();

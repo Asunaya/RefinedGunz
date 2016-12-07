@@ -327,9 +327,6 @@
     <ClInclude Include="ZEffectFlashBang.h">
       <Filter>Effect</Filter>
     </ClInclude>
-    <ClInclude Include="ZEffectGunFire.h">
-      <Filter>Effect</Filter>
-    </ClInclude>
     <ClInclude Include="ZEffectLightFragment.h">
       <Filter>Effect</Filter>
     </ClInclude>
@@ -971,9 +968,6 @@
       <Filter>Effect</Filter>
     </ClCompile>
     <ClCompile Include="ZEffectFlashBang.cpp">
-      <Filter>Effect</Filter>
-    </ClCompile>
-    <ClCompile Include="ZEffectGunFire.cpp">
       <Filter>Effect</Filter>
     </ClCompile>
     <ClCompile Include="ZEffectLightFragment.cpp">

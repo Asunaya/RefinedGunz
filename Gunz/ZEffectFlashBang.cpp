@@ -53,25 +53,25 @@ extern ZGame* g_pGame;
 void ZEffectFlashBang::SetBuffer()
 {
 	// left top
-	mBuffer[0].p		= D3DXVECTOR4( 0.0f - CORRECTION, 0.0f - CORRECTION, 0, 1.0f );
+	mBuffer[0].p		= { 0.0f - CORRECTION, 0.0f - CORRECTION, 0, 1.0f };
 	mBuffer[0].color	= 0xffffffff;
 	mBuffer[0].tu		= 0.0f;
 	mBuffer[0].tv		= 0.0f;
 
 	// right top
-	mBuffer[1].p		= D3DXVECTOR4( RGetScreenWidth() + CORRECTION, 0.0f - CORRECTION, 0, 1.0f );
+	mBuffer[1].p		= { RGetScreenWidth() + CORRECTION, 0.0f - CORRECTION, 0, 1.0f };
 	mBuffer[1].color	= 0xffffffff;
 	mBuffer[1].tu		= 1.0f;
 	mBuffer[1].tv		= 0.0f;
 
 	// right bottom
-	mBuffer[2].p		= D3DXVECTOR4( RGetScreenWidth() + CORRECTION, RGetScreenHeight() + CORRECTION, 0, 1.0f );
+	mBuffer[2].p		= { RGetScreenWidth() + CORRECTION, RGetScreenHeight() + CORRECTION, 0, 1.0f };
 	mBuffer[2].color	= 0xffffffff;
 	mBuffer[2].tu		= 1.0f;
 	mBuffer[2].tv		= 1.0f;
 
 	// left bottom
-	mBuffer[3].p		= D3DXVECTOR4( 0.0f - CORRECTION, RGetScreenHeight(), 0, 1.0f );
+	mBuffer[3].p		= { 0.0f - CORRECTION, static_cast<float>(RGetScreenHeight()), 0, 1.0f };
 	mBuffer[3].color	= 0xffffffff;
 	mBuffer[3].tu		= 0.0f;
 	mBuffer[3].tv		= 1.0f;
@@ -92,15 +92,23 @@ void ZEffectFlashBang::SetBuffer()
 
 	if( mpBlurTexture == 0 ) 
 	{
-		if(FAILED( D3DXCreateTexture( RGetDevice(), SCREEN_BLUR_TEXTURE_SIZE_WIDTH, SCREEN_BLUR_TEXTURE_SIZE_HEIGHT, 1, 
-		D3DUSAGE_RENDERTARGET, mode.Format, D3DPOOL_DEFAULT, &mpBlurTexture))
-		&& FAILED( D3DXCreateTexture( RGetDevice(), SCREEN_BLUR_TEXTURE_SIZE_WIDTH, SCREEN_BLUR_TEXTURE_SIZE_HEIGHT, 1, 
-		D3DUSAGE_DYNAMIC|D3DUSAGE_RENDERTARGET, mode.Format, D3DPOOL_MANAGED, &mpBlurTexture)))
+		if(FAILED(RGetDevice()->CreateTexture(
+			SCREEN_BLUR_TEXTURE_SIZE_WIDTH, SCREEN_BLUR_TEXTURE_SIZE_HEIGHT,
+			1, D3DUSAGE_RENDERTARGET,
+			mode.Format, D3DPOOL_DEFAULT,
+			&mpBlurTexture, nullptr)))
 		{
-			mlog( "Fail to create BLUR texture\n" );
-			mbDrawCopyScreen	= false;
-			mpBlurTexture	= 0;
-			return;
+			if (FAILED(RGetDevice()->CreateTexture(
+					SCREEN_BLUR_TEXTURE_SIZE_WIDTH, SCREEN_BLUR_TEXTURE_SIZE_HEIGHT,
+					1, D3DUSAGE_DYNAMIC | D3DUSAGE_RENDERTARGET,
+					mode.Format, D3DPOOL_MANAGED,
+					&mpBlurTexture, nullptr)))
+			{
+				mlog("Fail to create BLUR texture\n");
+				mbDrawCopyScreen = false;
+				mpBlurTexture = 0;
+				return;
+			}
 		}
 
 		if( mpBlurTexture != 0 )

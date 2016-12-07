@@ -110,6 +110,6 @@ private:
 	std::unordered_map<ZCharacter*, MicStuff> MicStreams;
 	std::unordered_set<MUID> MutedPlayers;
 
-	D3DPtr<IDirect3DTexture9> SpeakerTexture{ nullptr };
+	RBaseTexturePtr SpeakerTexture;
 };
 #endif

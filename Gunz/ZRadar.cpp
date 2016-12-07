@@ -55,7 +55,7 @@ bool ZRadar::OnCreate()
 	for (int i = 1; i < 8; i++)
 	{
 		m_Nodes[i].bShoted = false;
-		fRot = (D3DX_PI / 4.0f) * i;
+		fRot = (PI_FLOAT / 4.0f) * i;
 
 		for (int j = 0; j < 4; j++)
 		{
@@ -154,7 +154,7 @@ void ZRadar::OnAttack(rvector& pAttackerPos)
 		r = -(float)(acos(cosAng1)); 
 	}
 
-	float t = (D3DX_PI / 4.0f);
+	float t = (PI_FLOAT / 4.0f);
 
 	int nIndex = -1;
 	if ((r > 0) && (r < t))	nIndex = 1;

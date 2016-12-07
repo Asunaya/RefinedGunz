@@ -468,5 +468,6 @@
     <ClInclude Include="Include\LogMatrix.h" />
     <ClInclude Include="Include\ColorTypes.h" />
     <ClInclude Include="Include\TextureLoader.h" />
+    <ClInclude Include="Include\SimpleMesh.h" />
   </ItemGroup>
 </Project>

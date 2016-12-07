@@ -36,6 +36,12 @@ static rmatrix GetDefaultProjectionMatrix(float Near = DEFAULT_NEAR_Z, float Far
 		Near, Far);
 }
 
+struct D3DVERTEX
+{
+	v3 pos;
+	float tu, tv;
+};
+
 Portal::Portal() : ValidPortals(PortalList)
 {
 	static constexpr int coords[] = { 200, 20,
@@ -50,96 +56,48 @@ Portal::Portal() : ValidPortals(PortalList)
 		109, 49,
 	};
 
-	static constexpr int NumVertices = sizeof(coords) / sizeof(coords[0]) / 2;
+	static constexpr int NumVertices = ArraySize(coords) / 2;
 
-	DWORD dwFVF = (D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_TEX1);
-	D3DXCreateMeshFVF(4, 4, D3DXMESH_MANAGED, dwFVF, RGetDevice(), MakeWriteProxy(pRectangleMesh));
-	D3DXCreateMeshFVF(NumVertices - 2, NumVertices, D3DXMESH_MANAGED, dwFVF, RGetDevice(), MakeWriteProxy(pEdgeMesh));
-
-	struct D3DVERTEX
-	{
-		rvector p;
-		rvector n;
-		FLOAT       tu, tv;
+	D3DVERTEX RectangleVertices[] = {
+		{{-100, -150, 0}, 0, 0 },
+		{{-100, 150, 0}, 0, 1},
+		{{100, 150, 0}, 1, 1},
+		{{100, -150, 0}, 1, 0},
 	};
 
-	D3DVERTEX*              pSrc;
+	u16 RectangleIndices[] = {
+		0, 1, 2,
+		0, 2, 3,
+	};
 
-	pRectangleMesh->LockVertexBuffer(0, (void**)&pSrc);
+	RectangleMesh.Create(RectangleVertices, RectangleIndices);
 
-	//left bottom point
-	pSrc[0].p.x = -100;
-	pSrc[0].p.y = -150;
-	pSrc[0].p.z = 0;
-
-	//left top point
-	pSrc[1].p.x = -100;
-	pSrc[1].p.y = 150;
-	pSrc[1].p.z = 0;
-
-	//right top point
-	pSrc[2].p.x = 100;
-	pSrc[2].p.y = 150;
-	pSrc[2].p.z = 0;
-
-	//right bottom point
-	pSrc[3].p.x = 100;
-	pSrc[3].p.y = -150;
-	pSrc[3].p.z = 0;
-
-
-	pSrc[0].tu = 0;
-	pSrc[0].tv = 0;
-
-	pSrc[1].tu = 0;
-	pSrc[1].tv = 1;
-
-	pSrc[2].tu = 1;
-	pSrc[2].tv = 1;
-
-	pSrc[3].tu = 1;
-	pSrc[3].tv = 0;
-
-	pRectangleMesh->UnlockVertexBuffer();
-
-	WORD* pIndexBuffer = 0;
-	pRectangleMesh->LockIndexBuffer(0, (void**)&pIndexBuffer);
-
-	pIndexBuffer[0] = 0; pIndexBuffer[1] = 1; pIndexBuffer[2] = 2;
-	pIndexBuffer[3] = 0; pIndexBuffer[4] = 2; pIndexBuffer[5] = 3;
-	pRectangleMesh->UnlockIndexBuffer();
-
-	pEdgeMesh->LockVertexBuffer(0, (void**)&pSrc);
-
+	D3DVERTEX EdgeVertices[NumVertices];
 	for (int i = 0; i < NumVertices; i++)
 	{
-		pSrc[i].p.x = float(coords[i * 2] - 200) / 400 * 200;
-		pSrc[i].p.y = float(coords[i * 2 + 1] - 300) / 600 * 300;
-		pSrc[i].p.z = 0;
-		pSrc[i].tu = float(coords[i * 2]) / 400;
-		pSrc[i].tv = float(coords[i * 2 + 1]) / 600;
+		EdgeVertices[i].pos.x = float(coords[i * 2] - 200) / 400 * 200;
+		EdgeVertices[i].pos.y = float(coords[i * 2 + 1] - 300) / 600 * 300;
+		EdgeVertices[i].pos.z = 0;
+		EdgeVertices[i].tu = float(coords[i * 2]) / 400;
+		EdgeVertices[i].tv = float(coords[i * 2 + 1]) / 600;
 	}
 
-	pEdgeMesh->UnlockVertexBuffer();
-
-	pIndexBuffer = 0;
-	pEdgeMesh->LockIndexBuffer(0, (void**)&pIndexBuffer);
-
-	// fill in the front face index data
+	u16 EdgeIndices[(NumVertices - 2) * 3];
 	for (int i = 0; i < NumVertices - 2; i++)
 	{
-		pIndexBuffer[i * 3] = 0;
-		pIndexBuffer[i * 3 + 1] = i + 1;
-		pIndexBuffer[i * 3 + 2] = i + 2;
+		EdgeIndices[i * 3] = 0;
+		EdgeIndices[i * 3 + 1] = i + 1;
+		EdgeIndices[i * 3 + 2] = i + 2;
 	}
-	pEdgeMesh->UnlockIndexBuffer();
+
+	EdgeMesh.Create(EdgeVertices, EdgeIndices);
 
 	// set material
-	Mat.Diffuse = D3DXCOLOR(1.f, 1.f, 1.f, 1.f);
-	Mat.Ambient = D3DXCOLOR(1.f, 1.f, 1.f, 1.f);
-	Mat.Specular = D3DXCOLOR(1.f, 1.f, 1.f, 1.f);
-	Mat.Emissive = D3DXCOLOR(0.f, 0.f, 0.f, 0.f);
-	Mat.Power = 0.f;
+	Mat.Diffuse = { 1, 1, 1, 1 };
+	Mat.Ambient = { 1, 1, 1, 1 };
+	Mat.Specular = { 1, 1, 1, 1 };
+	Mat.Emissive = { 0, 0, 0, 0 };
+	Mat.Power = 0;
 
 #ifdef PORTAL_USE_RT_TEXTURE
 	CreateTextures();
@@ -154,21 +112,7 @@ Portal::Portal() : ValidPortals(PortalList)
 	{
 		char path[128];
 		sprintf_safe(path, "Interface/default/portal%d.png", i + 1);
-		auto ret = ReadMZFile(path);
-
-		if (!ret.first)
-		{
-			MLog("Failed to load portal %d texture file %s\n", i + 1, path);
-			break;
-		}
-
-		if (FAILED(D3DXCreateTextureFromFileInMemory(RGetDevice(),
-			ret.second.data(), ret.second.size(),
-			MakeWriteProxy(PortalEdgeTex[i]))))
-		{
-			MLog("Failed to create portal %d texture\n", i + 1);
-			break;
-		}
+		PortalEdgeTex[i] = RBaseTexturePtr{ RCreateBaseTexture(path, RTextureType::Map) };
 	}
 
 	bLastLClick = false;
@@ -184,7 +128,8 @@ Portal::Portal() : ValidPortals(PortalList)
 
 #ifndef PORTAL_USE_RT_TEXTURE
 	if (!RIsStencilBuffer())
-		MLog("Portal::Portal() - Your graphics card doesn't support stencil buffers; no portals will be drawn.\n");
+		MLog("Portal::Portal() - Your graphics card doesn't support stencil buffers;
+			"no portals will be drawn.\n");
 #endif
 }
 
@@ -415,8 +360,6 @@ void Portal::RenderEdge(const PortalInfo& portalinfo)
 
 	RSetTransform(D3DTS_WORLD, matWorld);
 
-	RGetDevice()->SetFVF(pRectangleMesh->GetFVF());
-
 	RGetDevice()->SetRenderState(D3DRS_COLORWRITEENABLE, D3DCOLORWRITEENABLE_ALPHA | D3DCOLORWRITEENABLE_RED | D3DCOLORWRITEENABLE_GREEN | D3DCOLORWRITEENABLE_BLUE);
 	RGetDevice()->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
 	RGetDevice()->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
@@ -434,9 +377,9 @@ void Portal::RenderEdge(const PortalInfo& portalinfo)
 	RGetDevice()->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
 	RGetDevice()->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL);
 
-	RGetDevice()->SetTexture(0, PortalEdgeTex[portalinfo.Index].get());
+	RGetDevice()->SetTexture(0, PortalEdgeTex[portalinfo.Index].get()->GetTexture());
 
-	pRectangleMesh->DrawSubset(0);
+	RectangleMesh.Draw();
 
 	RGetDevice()->SetTexture(0, NULL);
 
@@ -1306,12 +1249,11 @@ void Portal::RenderPortals(const RecursionContext& rc)
 
 			RSetTransform(D3DTS_WORLD, portalinfo.matWorld);
 
-			RGetDevice()->SetFVF(pEdgeMesh->GetFVF());
 			RGetDevice()->SetTexture(0, BlackTex.get());
 
 			RGetDevice()->SetMaterial(&Mat);
 
-			pEdgeMesh->DrawSubset(0);
+			EdgeMesh.Draw();
 
 			RSetTransform(D3DTS_WORLD, portalinfo.matWorld);
 
@@ -1326,7 +1268,7 @@ void Portal::RenderPortals(const RecursionContext& rc)
 			RGetDevice()->SetRenderState(D3DRS_COLORWRITEENABLE, 0);
 			RGetDevice()->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
 
-			pEdgeMesh->DrawSubset(0);
+			EdgeMesh.Draw();
 
 			RGetDevice()->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 			RGetDevice()->SetRenderState(D3DRS_COLORWRITEENABLE, D3DCOLORWRITEENABLE_ALPHA | D3DCOLORWRITEENABLE_RED | D3DCOLORWRITEENABLE_GREEN | D3DCOLORWRITEENABLE_BLUE);
@@ -1412,12 +1354,11 @@ void Portal::WriteDepth(const RecursionContext& rc)
 
 			RSetTransform(D3DTS_WORLD, pi.matWorld);
 
-			RGetDevice()->SetFVF(pRectangleMesh->GetFVF());
 			RGetDevice()->SetTexture(0, nullptr);
 
 			RGetDevice()->SetRenderState(D3DRS_COLORWRITEENABLE, 0);
 
-			pEdgeMesh->DrawSubset(0);
+			EdgeMesh.Draw();
 
 			RGetDevice()->SetRenderState(D3DRS_COLORWRITEENABLE, D3DCOLORWRITEENABLE_ALPHA | D3DCOLORWRITEENABLE_RED | D3DCOLORWRITEENABLE_GREEN | D3DCOLORWRITEENABLE_BLUE);
 		}

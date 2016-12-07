@@ -581,7 +581,7 @@ HRESULT GenerateMassiveTexture(IDirect3DTexture9 **Tex, D3DCOLOR Color)
 	return S_OK;
 }
 
-IDirect3DTexture9* HueShiftTexture(IDirect3DTexture9* Tex, float Hue)
+/*IDirect3DTexture9* HueShiftTexture(IDirect3DTexture9* Tex, float Hue)
 {
 	int Levels = Tex->GetLevelCount();
 
@@ -649,7 +649,7 @@ IDirect3DTexture9* HueShiftTexture(IDirect3DTexture9* Tex, float Hue)
 	}
 
 	return NewTex;
-}
+}*/
 
 void RGMain::SetSwordColor(const MUID& UID, uint32_t Color)
 {

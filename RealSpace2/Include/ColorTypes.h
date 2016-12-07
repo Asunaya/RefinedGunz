@@ -15,6 +15,7 @@ struct color_r32
 		g{ ((argb & 0xFF00) >> 8) * (1.0f / 255.0f) },
 		b{ (argb & 0xFF) * (1.0f / 255.0f) }
 	{}
+	color_r32(float r, float g, float b, float a) : r{ r }, g{ g }, b{ b }, a{ a } {}
 	color_r32(const float(&arr)[4]) :
 		a{ arr[0] },
 		r{ arr[1] },
@@ -22,5 +23,30 @@ struct color_r32
 		b{ arr[3] }
 	{}
 
-	operator D3DCOLORVALUE() const;
+	explicit operator D3DCOLORVALUE() const;
+	explicit operator u32() const;
+
+	color_r32& operator +=(const color_r32& rhs) {
+		r += rhs.r;
+		g += rhs.g;
+		b += rhs.b;
+		a += rhs.a;
+		return *this;
+	}
+
+	color_r32& operator *=(const color_r32& rhs) {
+		r *= rhs.r;
+		g *= rhs.g;
+		b *= rhs.b;
+		a *= rhs.a;
+		return *this;
+	}
 };
+
+inline color_r32 operator +(const color_r32& a, const color_r32& b) {
+	auto ret = a; return ret += b;
+}
+
+inline color_r32 operator *(const color_r32& a, const color_r32& b) {
+	auto ret = a; return ret *= b;
+}

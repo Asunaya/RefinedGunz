@@ -251,7 +251,7 @@ void RMeshNodeMtrl::SetMtrl(RMtrl* pMtrl,float vis_alpha,bool bNpc,D3DCOLORVALUE
 	}
 }
 
-void RMeshNodeMtrl::SetMtrl(D3DXCOLOR* c,float vis_alpha) 
+void RMeshNodeMtrl::SetMtrl(color_r32* c,float vis_alpha) 
 {
 	if(!c) return;
 

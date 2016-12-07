@@ -749,8 +749,7 @@ void draw_box(rmatrix* wmat, const rvector& max, const rvector& min, DWORD color
 
 CD3DArcBall::CD3DArcBall()
 {
-	D3DXQuaternionIdentity( &m_qDown );
-	D3DXQuaternionIdentity( &m_qNow );
+	m_qDown = m_qNow = IdentityQuaternion();
 	GetIdentityMatrix(m_matRotation );
 	GetIdentityMatrix(m_matRotationDelta );
 	GetIdentityMatrix(m_matTranslation );
@@ -827,8 +826,8 @@ LRESULT CD3DArcBall::HandleMouseMessages( HWND hWnd, UINT uMsg, WPARAM wParam, L
 		if( MK_RBUTTON & wParam )  {
 			if( m_bDrag )  {
 				rvector vCur = ScreenToVector( iMouseX, iMouseY );
-				D3DXQUATERNION qAxisToAxis;
-				D3DXQuaternionAxisToAxis(&qAxisToAxis, &s_vDown, &vCur);
+				rquaternion qAxisToAxis;
+				QuaternionAxisToAxis(&qAxisToAxis, &s_vDown, &vCur);
 				m_qNow = m_qDown;
 				m_qNow *= qAxisToAxis;
 				m_matRotationDelta = QuaternionToMatrix(qAxisToAxis);
@@ -974,7 +973,7 @@ bool RBaseObject::CheckName(const char* name)
 	return m_Name == name;
 }
 
-D3DXQUATERNION* D3DXQuaternionUnitAxisToUnitAxis2(D3DXQUATERNION *pOut, const rvector *pvFrom, const rvector *pvTo)
+rquaternion* QuaternionUnitAxisToUnitAxis2(rquaternion *pOut, const rvector *pvFrom, const rvector *pvTo)
 {
 	rvector vAxis = CrossProduct(*pvFrom, *pvTo);
 	pOut->x = vAxis.x;
@@ -984,10 +983,10 @@ D3DXQUATERNION* D3DXQuaternionUnitAxisToUnitAxis2(D3DXQUATERNION *pOut, const rv
 	return pOut;
 }
 
-D3DXQUATERNION* D3DXQuaternionAxisToAxis(D3DXQUATERNION *pOut, const rvector *pvFrom, const rvector *pvTo)
+rquaternion* QuaternionAxisToAxis(rquaternion *pOut, const rvector *pvFrom, const rvector *pvTo)
 {
 	auto vA = Normalized(*pvFrom);
 	auto vB = Normalized(*pvTo);
 	auto vHalf = Normalized(vA + vB);
-	return D3DXQuaternionUnitAxisToUnitAxis2(pOut, &vA, &vHalf);
+	return QuaternionUnitAxisToUnitAxis2(pOut, &vA, &vHalf);
 }

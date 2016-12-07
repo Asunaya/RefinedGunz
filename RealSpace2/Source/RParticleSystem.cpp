@@ -1,21 +1,18 @@
 #include "stdafx.h"
 #include "RParticleSystem.h"
 #include "RealSpace2.h"
-//#include "ZWater.h"
 #include "MDebug.h"
 
 _USING_NAMESPACE_REALSPACE2
 _NAMESPACE_REALSPACE2_BEGIN
 
-const DWORD POINTVERTEX::FVF = D3DFVF_XYZ | D3DFVF_DIFFUSE;
+const u32 POINTVERTEX::FVF = D3DFVF_XYZ | D3DFVF_DIFFUSE;
 
 LPDIRECT3DVERTEXBUFFER9 RParticleSystem::m_pVB=NULL;
 DWORD RParticleSystem::m_dwBase=DISCARD_COUNT;
 
-// 이 virtual 함수에서 움직임을 결정한다. 반환값이 false이면 해당 파티클제거
 bool RParticle::Update(float fTimeElapsed)
 {
-	// TODO : 시간간격이 커짐에 따라 부정확하다
 	velocity+=accel*fTimeElapsed;
 	position+=velocity*fTimeElapsed;
 	ftime+=fTimeElapsed;
@@ -42,7 +39,6 @@ bool RParticles::Create(const char *szTextureName,float fSize)
 	{
 		return false;
 	}
-	//*/
 	return true;
 }
 
@@ -109,11 +105,7 @@ bool RParticles::Draw()
 		FLOAT       fLength = Magnitude(vVel);
 		UINT        dwSteps;
 
-		//dwSteps=min((int)(fLength/20.f),4);
-		//vVel*=(.05f/dwSteps);
-
 		dwSteps = 1;
-
 
 		// Render each particle a bunch of times to get a blurring effect
 		for( DWORD j = 0; j < dwSteps; j++ )
@@ -121,12 +113,12 @@ bool RParticles::Draw()
 			pVertices->v     = vPos;
             if(!isInViewFrustum(vPos,m_fSize,RGetViewFrustum())) continue;	// viewfrustum culling
 
-			static D3DXCOLOR czero=D3DXCOLOR(0,0,0,0),cone=D3DXCOLOR(1,1,1,1);
+			color_r32 czero{ 0, 0, 0, 0 };
+			color_r32 cone{ 1, 1, 1, 1 };
 
-			D3DXCOLOR color;
-			D3DXColorLerp( &color, &cone, &czero, pParticle->ftime/LIFETIME );
+			color_r32 color = Lerp(cone, czero, pParticle->ftime / LIFETIME);
 
-			pVertices->color = color;
+			pVertices->color = static_cast<u32>(color);
 			pVertices++;
 
 			if( ++dwNumParticlesToRender == FLUSH_COUNT)
@@ -307,115 +299,3 @@ RParticles *RParticleSystem::AddParticles(const char *szTextureName,float fSize)
 }
 
 _NAMESPACE_REALSPACE2_END
-
-/*
-//////////////////////////////////////////////////////////////////////////
-//	ZWaterSplash -> Draw
-//////////////////////////////////////////////////////////////////////////
-bool ZWaterSplash::Draw()
-{
-	if(	0 == size() )
-	{
-		return true;
-	}
-
-	HRESULT hr;
-	LPDIRECT3DDEVICE9 pd3dDevice	= RGetDevice();
-
-	pd3dDevice->SetRenderState( D3DRS_POINTSIZE, FtoDW(m_fSize));
-	pd3dDevice->SetTexture( 0, m_Texture->GetTexture() );
-
-	POINTVERTEX* pVertices;
-	DWORD        dwNumParticlesToRender = 0;
-
-	RParticleSystem::m_dwBase += FLUSH_COUNT;
-
-	if(RParticleSystem::m_dwBase >= DISCARD_COUNT)
-	{
-		RParticleSystem::m_dwBase = 0;
-	}
-
-	if( FAILED( RParticleSystem::m_pVB->Lock( RParticleSystem::m_dwBase * sizeof(POINTVERTEX), FLUSH_COUNT * sizeof(POINTVERTEX),
-		(VOID**) &pVertices, RParticleSystem::m_dwBase ? D3DLOCK_NOOVERWRITE : D3DLOCK_DISCARD ) ) )
-	{
-		return false;
-	}
-
-	pd3dDevice->SetTextureStageState( 0, D3DTSS_COLOROP, D3DTOP_MODULATE );
-	pd3dDevice->SetTextureStageState( 0, D3DTSS_COLORARG1, D3DTA_TEXTURE );
-	pd3dDevice->SetTextureStageState( 0, D3DTSS_COLORARG2, D3DTA_DIFFUSE );
-
-	for( iterator i = begin(); i != end(); ++i ) 
-	{
-		RParticle*		pParticle	= *i;
-		rvector		vPos(pParticle->position);
-
-		rvector vVel(pParticle->velocity);
-		FLOAT       fLength = Magnitude(vVel);
-		UINT        dwSteps;
-
-		dwSteps		= min((int)(fLength/20.f),4);
-		vVel		*= (.05f/dwSteps);
-
-		dwSteps = 1;
-
-		// Render each particle a bunch of times to get a blurring effect
-		for( DWORD j = 0; j < dwSteps; j++ )
-		{
-			pVertices->v     = vPos;
-
-			static D3DXCOLOR czero=D3DXCOLOR(0,0,0,0),cone=D3DXCOLOR(1,1,1,1);
-
-			D3DXCOLOR color;
-			float height	= fabs(vPos.z - mfDeadLine);
-#define	MAX_SPLASH_HEIGHT	300	// 사람키의 2배 높이
-
-			if( pParticle->velocity.z > 0 )
-			{
-				D3DXColorLerp( &color, &cone, &czero, height / MAX_SPLASH_HEIGHT * 0.5  );
-			}
-			else
-			{
-				D3DXColorLerp( &color, &cone, &czero, MAX_SPLASH_HEIGHT / (MAX_SPLASH_HEIGHT + height) );
-			}
-
-			pVertices->color = color;
-			pVertices++;
-
-			if( ++dwNumParticlesToRender == FLUSH_COUNT)
-			{
-				RParticleSystem::m_pVB->Unlock();
-
-				if(FAILED( hr = pd3dDevice->DrawPrimitive( D3DPT_POINTLIST, RParticleSystem::m_dwBase, dwNumParticlesToRender)))
-					return false;
-
-				RParticleSystem::m_dwBase += FLUSH_COUNT;
-
-				if(RParticleSystem::m_dwBase >= DISCARD_COUNT)
-					RParticleSystem::m_dwBase = 0;
-
-				if( FAILED( hr = RParticleSystem::m_pVB->Lock( RParticleSystem::m_dwBase * sizeof(POINTVERTEX), FLUSH_COUNT * sizeof(POINTVERTEX),
-					(VOID**) &pVertices, RParticleSystem::m_dwBase ? D3DLOCK_NOOVERWRITE : D3DLOCK_DISCARD ) ) )
-				{
-					return false;
-				}
-
-				dwNumParticlesToRender = 0;
-			}
-			vPos += vVel;
-		}
-	}
-
-	// Unlock the vertex buffer
-	RParticleSystem::m_pVB->Unlock();
-
-	// Render any remaining particles
-	if( dwNumParticlesToRender )
-	{
-		if(FAILED(hr = pd3dDevice->DrawPrimitive( D3DPT_POINTLIST, RParticleSystem::m_dwBase, dwNumParticlesToRender )))
-			return false;
-	}
-
-	return true;
-}
-//*/

@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "ZPrerequisites.h"
 #include "ZEffectManager.h"
-#include "ZEffectGunFire.h"
 #include "ZEffectBulletMark.h"
 #include "ZEffectLightFragment.h"
 #include "ZEffectSmoke.h"

@@ -132,7 +132,7 @@ void RShaderMgr::setMtrl(RMtrl* pmtrl_, float fVisAlpha_)
 	pmtrl_->m_specular.a = 1.0f - fVisAlpha_;
 }
 
-void RShaderMgr::setMtrl(D3DXCOLOR& rColor_, float fVisAlpha_)
+void RShaderMgr::setMtrl(color_r32& rColor_, float fVisAlpha_)
 {
 	if (!mbUsingShader) return;
 
@@ -167,7 +167,7 @@ void RShaderMgr::setLight(int iLignt_, D3DLIGHT9* pLight_)
 	mLight[iLignt_].Position = pLight_->Position;
 }
 
-void RShaderMgr::setAmbient(DWORD value_)
+void RShaderMgr::setAmbient(u32 value_)
 {
 	if (!mbUsingShader) return;
 
@@ -227,8 +227,8 @@ void RShaderMgr::init()
 {
 	LPDIRECT3DDEVICE9 dev = RealSpace2::RGetDevice();
 
-	D3DXVECTOR4 constv = D3DXVECTOR4(0, 0, 0, 0);
-	D3DXVECTOR4 constvatten = D3DXVECTOR4(0.1, 0.1, 0.1, 0.1);
+	v4 constv{ 0, 0, 0, 0 };
+	v4 constvatten{ 0.1f, 0.1f, 0.1f, 0.1f };
 
 	float fConst[] = {
 		1.0f, -1.0f, 0.5f, 255.f

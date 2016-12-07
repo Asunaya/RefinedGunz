@@ -5,6 +5,7 @@
 #include "ZCharacter.h"
 #include <unordered_map>
 #include "ArrayView.h"
+#include "SimpleMesh.h"
 
 //#define PORTAL_USE_RT_TEXTURE
 
@@ -245,8 +246,7 @@ public:
 	}
 
 private:
-	D3DPtr<ID3DXMesh> pEdgeMesh;
-	D3DPtr<ID3DXMesh> pRectangleMesh;
+	SimpleMesh<struct D3DVERTEX, u16, D3DFVF_XYZ | D3DFVF_TEX1> RectangleMesh, EdgeMesh;
 	D3DMATERIAL9 Mat;
 #ifdef PORTAL_USE_RT_TEXTURE
 	IDirect3DTexture9 *pTex[2];
@@ -255,7 +255,7 @@ private:
 	IDirect3DSurface9 *pDummySurf;
 #endif
 	D3DPtr<IDirect3DTexture9> BlackTex;
-	D3DPtr<IDirect3DTexture9> PortalEdgeTex[2];
+	RBaseTexturePtr PortalEdgeTex[2];
 
 	std::unordered_map<ZCharacter *, PortalPair> PortalList;
 	ValidPortalAdapter ValidPortals;

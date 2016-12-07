@@ -251,7 +251,7 @@ void ZInterfaceBackground::Draw(void)
 	RSetCamera( vCamPos, (vCamPos + vCamDir), rvector( 0, 0, 1));
 
 	// Draw
-	RSetProjection( D3DX_PI * 70 / 180, RGetScreenWidth() / (float)RGetScreenHeight(), 10.0f, 15000.0f);
+	RSetProjection( PI_FLOAT * 70 / 180, RGetScreenWidth() / (float)RGetScreenHeight(), 10.0f, 15000.0f);
 	SetFogState( fForgDensity-10000.0f, fForgDensity, 0x00000000);
 	m_matWorld = TranslationMatrix({ 0, 0, 0 });
 	RSetTransform( D3DTS_WORLD, m_matWorld);

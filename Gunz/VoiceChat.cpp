@@ -396,17 +396,9 @@ int VoiceChat::PlayCallback(const void *inputBuffer, void *outputBuffer,
 
 void VoiceChat::OnCreateDevice()
 {
-	auto ret = ReadMZFile("Interface/default/SpeakerIcon.png");
-
-	if (!ret.first)
-		return MLog("Failed to load speaker icon texture file\n");
-
-	auto hr = D3DXCreateTextureFromFileInMemory(RGetDevice(),
-		ret.second.data(), ret.second.size(),
-		MakeWriteProxy(SpeakerTexture));
-
-	if (FAILED(hr))
-		return MLog("Failed to create speaker icon texture\n");
+	SpeakerTexture = RBaseTexturePtr{ RCreateBaseTexture("Interface/default/SpeakerIcon.png") };
+	if (!SpeakerTexture)
+		MLog("Failed to create speaker icon texture\n");
 }
 
 void VoiceChat::Draw()
@@ -431,7 +423,8 @@ void VoiceChat::Draw()
 		D3DXVECTOR2 SpeakerIconOrigin = TopLeft + D3DXVECTOR2(RELWIDTH(10), RELHEIGHT(10));
 		D3DXVECTOR2 SpeakerIconExtents(RELWIDTH(30), RELHEIGHT(30));
 
-		g_Draw.TexturedQuad(SpeakerIconOrigin, SpeakerIconOrigin + SpeakerIconExtents, SpeakerTexture.get());
+		g_Draw.TexturedQuad(SpeakerIconOrigin, SpeakerIconOrigin + SpeakerIconExtents,
+			SpeakerTexture.get()->GetTexture());
 
 		i++;
 	};

@@ -834,47 +834,6 @@ bool RGetIntersection(rvector& a, rvector& b, rplane &plane, rvector* pIntersect
 	return true;
 }
 
-LPDIRECT3DSURFACE9 RCreateImageSurface(const char *filename)
-{
-	char *buffer;
-	MZFile mzf;
-
-	if (g_pFileSystem)
-	{
-		if (!mzf.Open(filename, g_pFileSystem)) {
-			if (!mzf.Open(filename))
-				return false;
-		}
-	}
-	else
-	{
-		if (!mzf.Open(filename))
-			return false;
-	}
-
-	buffer = new char[mzf.GetLength()];
-	mzf.Read(buffer, mzf.GetLength());
-
-	LPDIRECT3DSURFACE9 pSurface = NULL;
-	D3DXIMAGE_INFO info;
-
-	RGetDevice()->CreateOffscreenPlainSurface(1, 1, D3DFMT_A8R8G8B8, D3DPOOL_SCRATCH, &pSurface, NULL);
-	D3DXLoadSurfaceFromFileInMemory(pSurface, NULL, NULL, buffer, mzf.GetLength(), NULL, D3DX_FILTER_NONE, 0, &info);
-	pSurface->Release();
-
-	HRESULT hr;
-
-	hr = RGetDevice()->CreateOffscreenPlainSurface(info.Width, info.Height, info.Format, D3DPOOL_SCRATCH, &pSurface, NULL);
-	_ASSERT(hr == D3D_OK);
-	hr = D3DXLoadSurfaceFromFileInMemory(pSurface, NULL, NULL, buffer, mzf.GetLength(), NULL, D3DX_FILTER_NONE, 0, &info);
-	_ASSERT(hr == D3D_OK);
-
-	delete buffer;
-	mzf.Close();
-
-	return pSurface;
-}
-
 void RSetGammaRamp(unsigned short nGammaValue)
 {
 	D3DCAPS9 caps;
@@ -901,8 +860,8 @@ void RDrawCylinder(rvector origin, float fRadius, float fHeight, int nSegment)
 	RGetDevice()->SetFVF(D3DFVF_XYZ | D3DFVF_DIFFUSE);
 	for (int i = 0; i < nSegment; i++)
 	{
-		float fAngle = i * 2 * D3DX_PI / (float)nSegment;
-		float fAngle2 = (i + 1) * 2 * D3DX_PI / (float)nSegment;
+		float fAngle = i * 2 * PI_FLOAT / (float)nSegment;
+		float fAngle2 = (i + 1) * 2 * PI_FLOAT / (float)nSegment;
 
 		rvector a = fRadius*rvector(cos(fAngle), sin(fAngle), 0) + origin;
 		rvector b = fRadius*rvector(cos(fAngle2), sin(fAngle2), 0) + origin;
@@ -934,8 +893,8 @@ void RDrawCorn(rvector center, rvector pole, float fRadius, int nSegment)
 
 	for (int i = 0; i < nSegment; i++)
 	{
-		float fAngle = i * 2 * D3DX_PI / (float)nSegment;
-		float fAngle2 = (i + 1) * 2 * D3DX_PI / (float)nSegment;
+		float fAngle = i * 2 * PI_FLOAT / (float)nSegment;
+		float fAngle2 = (i + 1) * 2 * PI_FLOAT / (float)nSegment;
 
 		rvector a = fRadius*(x*cos(fAngle) + y*sin(fAngle)) + center;
 		rvector b = fRadius*(x*cos(fAngle2) + y*sin(fAngle2)) + center;
@@ -953,19 +912,26 @@ void RDrawSphere(rvector origin, float fRadius, int nSegment, u32 Color)
 
 	for (int i = 0; i < nSegment; i++)
 	{
-		float fAngleZ = i * 2 * D3DX_PI / (float)nSegment;
-		float fAngleZ2 = (i + 1) * 2 * D3DX_PI / (float)nSegment;
+		float fAngleZ = i * 2 * PI_FLOAT / (float)nSegment;
+		float fAngleZ2 = (i + 1) * 2 * PI_FLOAT / (float)nSegment;
 		for (int j = 0; j < nSegment; j++)
 		{
-			float fAngle = j * 2 * D3DX_PI / (float)nSegment;
-			float fAngle2 = (j + 1) * 2 * D3DX_PI / (float)nSegment;
+			float fAngle = j * 2 * PI_FLOAT / (float)nSegment;
+			float fAngle2 = (j + 1) * 2 * PI_FLOAT / (float)nSegment;
 
-			rvector a = fRadius*rvector(cos(fAngle)*cos(fAngleZ), sin(fAngle)*cos(fAngleZ), sin(fAngleZ)) + origin;
-			rvector b = fRadius*rvector(cos(fAngle2)*cos(fAngleZ), sin(fAngle2)*cos(fAngleZ), sin(fAngleZ)) + origin;
+			rvector a = fRadius * rvector(cos(fAngle) * cos(fAngleZ),
+				sin(fAngle) * cos(fAngleZ),
+				sin(fAngleZ)) + origin;
+
+			rvector b = fRadius * rvector(cos(fAngle2) * cos(fAngleZ),
+				sin(fAngle2) * cos(fAngleZ),
+				sin(fAngleZ)) + origin;
 
 			RDrawLine(a, b, Color);
 
-			b = fRadius*rvector(cos(fAngle)*cos(fAngleZ2), sin(fAngle)*cos(fAngleZ2), sin(fAngleZ2)) + origin;
+			b = fRadius * rvector(cos(fAngle) * cos(fAngleZ2),
+				sin(fAngle) * cos(fAngleZ2),
+				sin(fAngleZ2)) + origin;
 
 			RDrawLine(a, b, Color);
 		}
@@ -990,8 +956,8 @@ void RDrawCircle(rvector origin, float fRadius, int nSegment)
 	RGetDevice()->SetFVF(D3DFVF_XYZ | D3DFVF_DIFFUSE);
 	for (int i = 0; i < nSegment; i++)
 	{
-		float fAngle = i * 2 * D3DX_PI / (float)nSegment;
-		float fAngle2 = (i + 1) * 2 * D3DX_PI / (float)nSegment;
+		float fAngle = i * 2 * PI_FLOAT / (float)nSegment;
+		float fAngle2 = (i + 1) * 2 * PI_FLOAT / (float)nSegment;
 
 		rvector a = fRadius*rvector(cos(fAngle), sin(fAngle), 0) + origin;
 		rvector b = fRadius*rvector(cos(fAngle2), sin(fAngle2), 0) + origin;

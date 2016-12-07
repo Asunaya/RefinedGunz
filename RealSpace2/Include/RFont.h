@@ -1,7 +1,6 @@
 #pragma once
 
 #include "RTypes.h"
-#include "d3dx9.h"
 #include <map>
 #include <list>
 #include <string>
@@ -99,7 +98,6 @@ public:
 };
 
 // debug
-bool DumpFontTexture();
 bool RFontCreate();
 void RFontDestroy();
 

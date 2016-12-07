@@ -288,7 +288,7 @@ public:
 	bool IsSelectWeaponGrenade();
 
 	rvector			GetBipRootPos(int frame);
-	D3DXQUATERNION	GetBipRootRot(int frame);
+	rquaternion		GetBipRootRot(int frame);
 	rmatrix			GetBipRootMat(int frame);
 
 	rvector			GetFootPosition();

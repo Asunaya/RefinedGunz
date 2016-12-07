@@ -270,7 +270,7 @@ void RFontDestroy()
 
 #define RFONT_VERTEXCOUNT	4
 struct FONT2DVERTEX { 
-	D3DXVECTOR4 p;   
+	v4 p;   
 	DWORD color;     
 	FLOAT tu, tv; 
 };
@@ -279,9 +279,9 @@ struct FONT2DVERTEX {
 
 #define MAX_FONT_BUFFER 4000
 
-static	int				g_nFontCount=0;
-static	FONT2DVERTEX	g_FontVertexBuffer[4*MAX_FONT_BUFFER];
-static	WORD			g_FontIndexBuffer[6*MAX_FONT_BUFFER];
+static	int				g_nFontCount = 0;
+static	FONT2DVERTEX	g_FontVertexBuffer[4 * MAX_FONT_BUFFER];
+static	WORD			g_FontIndexBuffer[6 * MAX_FONT_BUFFER];
 
 
 RFont::RFont()
@@ -483,10 +483,10 @@ void RFont::DrawText(float x, float y, const TCHAR* szText, DWORD dwColor, float
 			if(x+w > RGetViewport()->X && x < RGetViewport()->X+RGetViewport()->Width &&
 				y+h > RGetViewport()->Y && y < RGetViewport()->Y+RGetViewport()->Height) 
 			{
-				vertices[0].p = D3DXVECTOR4(x,y,0,1);
-				vertices[1].p = D3DXVECTOR4(x,y+h,0,1);
-				vertices[2].p = D3DXVECTOR4(x+w,y+h,0,1);
-				vertices[3].p = D3DXVECTOR4(x+w,y,0,1);
+				vertices[0].p = { x, y, 0, 1 };
+				vertices[1].p = { x, y + h, 0, 1 };
+				vertices[2].p = { x + w, y + h, 0, 1 };
+				vertices[3].p = { x + w, y, 0, 1 };
 
 				int nCellX = pInfo->nFontTextureIndex % m_pFontTexture->GetCellCountX();
 				int nCellY = pInfo->nFontTextureIndex / m_pFontTexture->GetCellCountX();
@@ -585,13 +585,6 @@ int RFont::GetTextWidth(const TCHAR* szText, int nSize)
 	}
 
 	return nWidth;
-}
-
-bool DumpFontTexture()
-{
-	if ( D3DXSaveTextureToFile("fonttex.bmp", D3DXIFF_BMP , g_FontTexture.GetTexture(),NULL) != D3D_OK)
-		return false;
-	return true;
 }
 
 _NAMESPACE_REALSPACE2_END

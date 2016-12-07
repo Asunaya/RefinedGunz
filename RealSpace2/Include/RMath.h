@@ -89,6 +89,7 @@ inline rmatrix GetIdentityMatrix() {
 }
 
 inline rmatrix IdentityMatrix() { return GetIdentityMatrix(); }
+inline rquaternion IdentityQuaternion() { return{ 0, 0, 0, 1 }; }
 
 inline rmatrix ScalingMatrix(const v4& scale)
 {

@@ -5,8 +5,7 @@
 #include "RMeshUtil.h"
 #include "map"
 #include "MemPool.h"
-
-using namespace std;
+#include "SimpleMesh.h"
 
 struct LightSource : public CMemPoolSm<LightSource>
 {
@@ -22,14 +21,11 @@ class ZStencilLight
 protected:
 	rvector m_Position;
 	float m_Radius;
-	LPD3DXMESH m_pMesh;
+	RealSpace2::SphereMesh Mesh;
 	RealSpace2::RBaseTexture* m_pTex;
 	RTLVertex m_VBuffer[4];
 	int m_id;
 	map<int, LightSource*> m_LightSource;
-
-protected:
-	static ZStencilLight m_instance;
     
 public:
 	void Destroy();
@@ -53,7 +49,7 @@ public:
 	bool DeleteLightSource( int id );
 	bool DeleteLightSource( int id, DWORD lastTime );
 
-	static ZStencilLight* GetInstance() { return &m_instance;}
+	static ZStencilLight* GetInstance() { static ZStencilLight inst; return &inst; }
 
 	size_t GetCount() { return m_LightSource.size(); }
 

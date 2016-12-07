@@ -36,7 +36,7 @@ MDrawContextR2::~MDrawContextR2(void)
 {
 }
 
-struct PIXEL2DVERTEX { D3DXVECTOR4 p;   DWORD color; };
+struct PIXEL2DVERTEX { v4 p;   DWORD color; };
 #define D3DFVF_PIXEL2DVERTEX (D3DFVF_XYZRHW|D3DFVF_DIFFUSE)
 
 void MDrawContextR2::SetPixel(int x, int y, MCOLOR& color)

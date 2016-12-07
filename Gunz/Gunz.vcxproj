@@ -669,7 +669,6 @@ rem call copy_share.bat
     <ClInclude Include="ZEffectBulletMark.h" />
     <ClInclude Include="ZEffectBulletMarkList.h" />
     <ClInclude Include="ZEffectFlashBang.h" />
-    <ClInclude Include="ZEffectGunFire.h" />
     <ClInclude Include="ZEffectLightFragment.h" />
     <ClInclude Include="ZEffectLightFragmentList.h" />
     <ClInclude Include="ZEffectLightTracer.h" />
@@ -892,7 +891,6 @@ rem call copy_share.bat
     <ClCompile Include="ZEffectBulletMark.cpp" />
     <ClCompile Include="ZEffectBulletMarkList.cpp" />
     <ClCompile Include="ZEffectFlashBang.cpp" />
-    <ClCompile Include="ZEffectGunFire.cpp" />
     <ClCompile Include="ZEffectLightFragment.cpp" />
     <ClCompile Include="ZEffectLightFragmentList.cpp" />
     <ClCompile Include="ZEffectLightTracer.cpp" />

@@ -1,8 +1,4 @@
-#ifndef _RSPHERE_H
-#define _RSPHERE_H
-
-
-//#pragma once
+#pragma once
 
 //  [10/13/2003]
 //////////////////////////////////////////////////////////////////////////
@@ -14,9 +10,6 @@
 #include "RBoundary.h"
 #include "RTypes.h"
 
-// Declare
-
-// class RSphere
 class RSphere :	public RBoundary
 {
 public:
@@ -35,20 +28,12 @@ public:
 		mRadius	= radius_;
 	}
 
-	//////////////////////////////////////////////////////////////////////////
-	//
-	//	<<<	Rendering Primitives >>>
-	//	
-	LPD3DXMESH mSphere;
 	rmatrix mWorld;
 	inline void setTransform( rmatrix& world_ );
-	void draw();
-	//
-	//////////////////////////////////////////////////////////////////////////
 
 public:
-	RSphere(void);
-	~RSphere(void);
+	RSphere();
+	~RSphere();
 };
 
 void RSphere::setSphere( const rvector& centre_, float radius_ )
@@ -63,5 +48,3 @@ void RSphere::setTransform( rmatrix& world_ )
 	mWorld = TranslationMatrix(mCentre);
 	mWorld *= world_;
 }
-
-#endif

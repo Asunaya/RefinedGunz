@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "RMath.h"
-#include <d3dx9.h>
 #include <cmath>
 
 _NAMESPACE_REALSPACE2_BEGIN
@@ -560,10 +559,18 @@ void TransformBox(rboundingbox* result, const rboundingbox& src, const rmatrix& 
 
 v3 CatmullRomSpline(const v3& V0, const v3& V1, const v3& V2, const v3& V3, float s)
 {
-	D3DXVECTOR3 v[4] = { {EXPAND_VECTOR(V0)}, {EXPAND_VECTOR(V1)},{ EXPAND_VECTOR(V2)},{ EXPAND_VECTOR(V3)} };
-	D3DXVECTOR3 Out;
-	D3DXVec3CatmullRom(&Out, v, v + 1, v + 2, v + 3, s);
-	return v3{ Out.x, Out.y, Out.z };
+	return{
+		0.5f * (2.0f * V1.x + (V2.x - V0.x) * s +
+		(2.0f *V0.x - 5.0f * V1.x + 4.0f * V2.x - V3.x) * s * s +
+			(V3.x - 3.0f * V2.x + 3.0f * V1.x - V0.x) * s * s * s),
+
+		0.5f * (2.0f * V1.y + (V2.y - V0.y) * s +
+			(2.0f *V0.y - 5.0f * V1.y + 4.0f * V2.y - V3.y) * s * s +
+			(V3.y - 3.0f * V2.y + 3.0f * V1.y - V0.y) * s * s * s),
+		
+		0.5f * (2.0f * V1.z + (V2.z - V0.z) * s +
+			(2.0f *V0.z - 5.0f * V1.z + 4.0f * V2.z - V3.z) * s * s +
+			(V3.z - 3.0f * V2.z + 3.0f * V1.z - V0.z) * s * s * s) };
 }
 
 bool isnan(const v3& vec) {

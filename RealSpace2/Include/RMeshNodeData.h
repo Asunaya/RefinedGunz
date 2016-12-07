@@ -105,7 +105,7 @@ public:
 
 	void	SetMtrlDiffuse(RMtrl* pMtrl,float vis_alpha);
 	void	SetMtrl(RMtrl* pMtrl,float vis_alpha,bool bNpc,D3DCOLORVALUE color );
-	void	SetMtrl(D3DXCOLOR* c,float vis_alpha);
+	void	SetMtrl(color_r32* c,float vis_alpha);
 
 public:
 

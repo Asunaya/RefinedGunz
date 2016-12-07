@@ -1,7 +1,4 @@
-#ifndef _RCYLINDER_H
-#define _RCYLINDER_H
-
-//#pragma once
+#pragma once
 
 //  [10/13/2003]
 //////////////////////////////////////////////////////////////////////////
@@ -25,18 +22,10 @@ public:
 	float mHeight;
 	float mRadius;
 
-	//////////////////////////////////////////////////////////////////////////
-	//
-	//	<<<	Rendering Primitives >>>
-	//	
-	LPD3DXMESH mCylinder;
 	rmatrix mWorld;
-	//
-	//////////////////////////////////////////////////////////////////////////
 
 public:
 	bool isCollide(	CDInfo* data_, CDInfoType cdType_ );
-	void draw();
 	inline void setTopCentre( const rvector& in_ );
 	inline void setBottomCentre( const rvector& in_ );
 	inline void setHeight( const float& in_ );
@@ -44,8 +33,8 @@ public:
 	inline void setTransform( rmatrix& world_ );
 
 public:
-	RCylinder(void);
-	virtual ~RCylinder(void);
+	RCylinder();
+	virtual ~RCylinder();
 };
 
 void RCylinder::setTopCentre(const rvector& in_) {
@@ -72,5 +61,3 @@ bool getDistanceBetLineSegmentAndPoint( const rvector& lineStart_,
 									   rvector* intersection_, 
 									   rvector* direction_, 
 									   float& distance_ );
-
-#endif

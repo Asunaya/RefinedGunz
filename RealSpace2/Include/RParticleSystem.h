@@ -20,9 +20,9 @@ struct RParticle {
 struct POINTVERTEX
 {
 	rvector v;
-	D3DCOLOR    color;
+	D3DCOLOR color;
 
-	static const DWORD FVF;
+	static const u32 FVF;
 };
 
 class RParticles : public std::list<RParticle*> {

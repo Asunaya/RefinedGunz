@@ -3,7 +3,7 @@
 #include <list>
 #include <string>
 #include <unordered_map>
-#include "d3dx9.h"
+#include <d3d9.h>
 #include "RTypes.h"
 #include "RMath.h"
 
@@ -20,8 +20,6 @@
 #ifndef USING_VERTEX_SHADER
 #define USING_VERTEX_SHADER
 #endif
-
-/////////////////////////////////////////////////////
 
 #define EXPORTER_MESH_VER1	0x00000011
 #define EXPORTER_MESH_VER2	0x00005001
@@ -253,7 +251,7 @@ enum RShaderBlendInput {
 };
 
 struct RTLVertex { 
-	D3DXVECTOR4 p;   
+	v4 p;   
 	DWORD color;     
 	FLOAT tu, tv; 
 };
@@ -452,8 +450,8 @@ public:
 	LPDIRECT3DVERTEXBUFFER9	m_vb;
 };
 
-D3DXQUATERNION* D3DXQuaternionUnitAxisToUnitAxis2(D3DXQUATERNION *pOut, const rvector *pvFrom, const rvector *pvTo);
-D3DXQUATERNION* D3DXQuaternionAxisToAxis(D3DXQUATERNION *pOut, const rvector *pvFrom, const rvector *pvTo);
+rquaternion* QuaternionUnitAxisToUnitAxis2(rquaternion *pOut, const rvector *pvFrom, const rvector *pvTo);
+rquaternion* QuaternionAxisToAxis(rquaternion *pOut, const rvector *pvFrom, const rvector *pvTo);
 
 class CD3DArcBall
 {
@@ -462,8 +460,8 @@ class CD3DArcBall
 	FLOAT          m_fRadius;				
 	FLOAT          m_fRadiusTranslation;	
 
-	D3DXQUATERNION m_qDown;					
-	D3DXQUATERNION m_qNow;					
+	rquaternion m_qDown;					
+	rquaternion m_qNow;
 	rmatrix     m_matRotation;			
 	rmatrix     m_matRotationDelta;		
 	rmatrix     m_matTranslation;		
@@ -509,21 +507,21 @@ public:
 
 	void Clear();
 
-	void Add(const char* str,bool line=true);
-	void Add(bool b,bool line=true);
-	void Add(char c,bool line=true);
-	void Add(short s,bool line=true);
-	void Add(u16 w,bool line=true);
-	void Add(int i,bool line=true);
-	void Add(unsigned long d,bool line=true);
+	void Add(const char* str, bool line = true);
+	void Add(bool b, bool line = true);
+	void Add(char c, bool line = true);
+	void Add(short s, bool line = true);
+	void Add(u16 w, bool line = true);
+	void Add(int i, bool line = true);
+	void Add(unsigned long d, bool line = true);
 	void Add(unsigned int u, bool line = true)
 	{
 		Add(static_cast<unsigned long>(u), line);
 	}
-	void Add(float f,bool line=true);
-	void Add(rvector& v,bool line=true);
-	void AddLine(int cnt=1);
-	void AddTab(int cnt=1);
+	void Add(float f, bool line = true);
+	void Add(rvector& v, bool line = true);
+	void AddLine(int cnt = 1);
+	void AddTab(int cnt = 1);
 
 	void PrintLog();
 

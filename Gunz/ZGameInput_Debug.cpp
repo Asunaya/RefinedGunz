@@ -164,7 +164,6 @@ bool ZGameInput::OnDebugEvent(MEvent* pEvent)
 			case 'I' : g_pGame->m_pMyCharacter->AddIcon(rand()%5); return true;
 				// Å×½ºÆ®^^
 
-//			case 'F' : DumpFontTexture(); return true;
 			case 'F' : 
 				{
 					static bool toggle = false;

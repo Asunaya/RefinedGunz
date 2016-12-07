@@ -4,15 +4,14 @@
 
 using namespace RealSpace2;
 
-RCylinder::RCylinder()
-:mTopCentre(0,0,0),	mBottomCentre(0,0,0), mHeight(0), mRadius(0), mCylinder(0)
+RCylinder::RCylinder() :
+	mTopCentre(0, 0, 0), mBottomCentre(0, 0, 0), mHeight(0), mRadius(0)
 {
 	GetIdentityMatrix(mWorld);
 }
 
 RCylinder::~RCylinder()
 {
-	SAFE_RELEASE( mCylinder );
 }
 
 bool RCylinder::isCollide( CDInfo* data_, CDInfoType cdType_ )
@@ -20,7 +19,8 @@ bool RCylinder::isCollide( CDInfo* data_, CDInfoType cdType_ )
 	rvector intersection;
 	float distance;
 
-	if( !getDistanceBetLineSegmentAndPoint( mTopCentre, mBottomCentre, data_->clothCD.v,  &intersection , NULL, distance ) )
+	if( !getDistanceBetLineSegmentAndPoint( mTopCentre, mBottomCentre, data_->clothCD.v, 
+		&intersection , NULL, distance ) )
 	{
 		return false;
 	}
@@ -69,33 +69,4 @@ bool getDistanceBetLineSegmentAndPoint( const rvector& lineStart_,
 	distance_ = Magnitude(*point_ - intersection);
 
 	return true;
-}
-
-void RCylinder::draw()
-{
-	rvector centre;
-	rmatrix tr;
-
-	rmatrix fix_rotation;
-	fix_rotation = RGetRotX(PI_FLOAT * 0.5f);
-
-	centre = ( mTopCentre + mBottomCentre ) * 0.5;
-	tr = TranslationMatrix(centre + v3{ 0, 0, 50 });
-
-    mWorld = mWorld * fix_rotation ;
-	{
- 		RGetDevice()->SetRenderState( D3DRS_FILLMODE, D3DFILL_WIREFRAME );
-	}
-
-	if( mCylinder == 0 )  
-	{
-		D3DXCreateCylinder( RGetDevice(), mRadius, mRadius, mHeight, 20, 10, &mCylinder, NULL );
-	}
-
-	RGetDevice()->SetTransform(D3DTS_WORLD, static_cast<D3DMATRIX*>(mWorld));
-
-	mCylinder->DrawSubset( 0 );
-	{
-		RGetDevice()->SetRenderState( D3DRS_FILLMODE, D3DFILL_SOLID );
-	}
 }

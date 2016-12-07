@@ -3,7 +3,6 @@
 #include "GlobalTypes.h"
 #include "MMath.h"
 #include <random>
-#include "d3dx9.h"
 #include "RTypes.h"
 #include "RMath.h"
 
