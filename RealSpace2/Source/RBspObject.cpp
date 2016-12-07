@@ -323,7 +323,8 @@ void RBspObject::DrawNodesImpl(int LoopCount)
 			SetDiffuseMap(MaterialIndex);
 
 			if (!LightmapTextures.empty())
-				dev->SetTexture(static_cast<DWORD>(ShaderSampler::Lightmap), LightmapTextures[i / Materials.size()].get());
+				dev->SetTexture(static_cast<DWORD>(ShaderSampler::Lightmap),
+					LightmapTextures[i / Materials.size()].get()->GetTexture());
 		}
 
 		if (SetAlphaTestFlags)
@@ -1124,7 +1125,7 @@ bool RBspObject::Open_MaterialList(rapidxml::xml_node<>& parent)
 		if (!PhysOnly && szMapName[0])
 		{
 			if (GetRS2().UsingD3D9())
-				Materials[i].texture = RCreateBaseTexture(szMapName, RTextureType_Map, true);
+				Materials[i].texture = RCreateBaseTexture(szMapName, RTextureType::Map, true);
 			else
 				Materials[i].VkMaterial.Texture = GetRS2Vulkan().LoadTexture(szMapName);
 		}
@@ -1824,18 +1825,10 @@ bool RBspObject::OpenLightmap()
 		bmpmemory.resize(nBmpSize);
 		V(file.Read(&bmpmemory[0], nBmpSize));
 
-		HRESULT hr = D3DXCreateTextureFromFileInMemoryEx(
-			RGetDevice(), &bmpmemory[0], nBmpSize,
-			D3DX_DEFAULT, D3DX_DEFAULT,
-			D3DX_DEFAULT,
-			0, D3DFMT_UNKNOWN, D3DPOOL_MANAGED,
-			D3DX_FILTER_TRIANGLE | D3DX_FILTER_MIRROR,
-			D3DX_FILTER_TRIANGLE | D3DX_FILTER_MIRROR,
-			0, NULL, NULL, MakeWriteProxy(LightmapTex));
+		LightmapTex = RBaseTexturePtr{ RCreateBaseTextureFromMemory(bmpmemory.data(), nBmpSize) };
 
-		if (FAILED(hr))
-			mlog("Failed to load lightmap texture! Error code = %d, error message = %s\n",
-				hr, DXGetErrorString(hr));
+		if (!LightmapTex)
+			mlog("Failed to load lightmap texture!\n");
 	}
 
 	// Read ???
@@ -2596,7 +2589,7 @@ bool RBspObject::CreateShadeMap(const char *szShadeMap)
 {
 	if (m_pShadeMap)
 		DestroyShadeMap();
-	m_pShadeMap = RCreateBaseTexture(szShadeMap, RTextureType_Etc, false);
+	m_pShadeMap = RCreateBaseTexture(szShadeMap, RTextureType::Etc, false);
 	return true;
 }
 

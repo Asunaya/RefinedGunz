@@ -249,7 +249,7 @@ bool RAnimationFile::LoadAni(const char* filename)
 
 				RQuatKey q;
 
-				D3DXQUATERNION eq,q1,q2;
+				rquaternion eq,q1,q2;
 
 				pANode->m_quat = new RQuatKey[rot_key_num+1];
 

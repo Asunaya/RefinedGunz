@@ -131,10 +131,7 @@ static int Floorer2PowerSize(int v)
 	return 2;
 }
 
-//////////////////////////////////////////////////////////////////////////
-//	Draw
-//////////////////////////////////////////////////////////////////////////
-void	ZInitialLoading::Draw( LOADING_SCENE_MODE mode_ /* = MODE_DEFAULT */, int destIndex_ /* = -1 */, bool bFlip_, bool fromThread_ )
+void ZInitialLoading::Draw(LOADING_SCENE_MODE mode_, int destIndex_, bool bFlip_, bool fromThread_)
 {
 	RRESULT isOK=RIsReadyToRender();
 	if(isOK ==R_NOTREADY)
@@ -153,7 +150,7 @@ void	ZInitialLoading::Draw( LOADING_SCENE_MODE mode_ /* = MODE_DEFAULT */, int d
 	float msw2 = msw; 
 	float msh2 = msh;
 
-	D3DFORMAT d3dformat = mBitmaps[miCurrScene].m_pTexture->m_Info.Format;
+	D3DFORMAT d3dformat = mBitmaps[miCurrScene].m_pTexture->GetFormat();
 	
 	if( d3dformat==D3DFMT_DXT1 ||
 		d3dformat==D3DFMT_DXT2 ||

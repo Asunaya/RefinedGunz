@@ -434,7 +434,7 @@ private:
 
 	ROcclusionList m_OcclusionList;
 
-	std::vector<D3DPtr<IDirect3DTexture9>> LightmapTextures;
+	std::vector<RBaseTexturePtr> LightmapTextures;
 
 	// Convex polygons.
 	// Note that these are only used for lightmap generation, and therefore

@@ -94,7 +94,7 @@ void RBspObjectDrawD3D9::CreateTextures()
 					return it->second;
 			}
 
-			auto* Tex = RCreateBaseTexture(name.c_str(), RTextureType_Map, true);
+			auto* Tex = RCreateBaseTexture(name.c_str(), RTextureType::Map, true);
 			if (!Tex)
 			{
 				MLog("RBspObjectDrawD3D9::CreateTextures -- Failed to load texture %s\n",

@@ -173,10 +173,10 @@ void RMtrl::Restore(LPDIRECT3DDEVICE9 dev,char* path)
 	char name[256];
 	char name2[256];
 
-	int level = RTextureType_Etc;
+	auto level = RTextureType::Etc;
 
 	if(m_bObjectMtrl) {
-		level = RTextureType_Object;
+		level = RTextureType::Object;
 	}
 
 	bool map_path = false;

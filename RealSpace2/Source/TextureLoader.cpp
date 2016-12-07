@@ -26,6 +26,13 @@ static D3DPtr<IDirect3DTexture9> LoadDDS(const void* data, size_t size,
 	case gli::FORMAT_RGBA_DXT5_UNORM:
 		format = D3DFMT_DXT5;
 		break;
+	case gli::FORMAT_BGRA8_UNORM:
+		format = D3DFMT_A8B8G8R8;
+		break;
+	default:
+		MLog("LoadDDS -- Unknown DDS format %d\n", tex.format());
+		assert(false);
+		return nullptr;
 	}
 	gli::texture2D tex2D(tex);
 	if (tex2D.empty())

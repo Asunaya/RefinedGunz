@@ -102,8 +102,6 @@ void ZHelpScreen::DrawHelpScreen()
 	if( !m_bDrawHelpScreen )
 		return;
 
-	// 필터링을 끄고..
-
 	if(m_pHelpScreenBitmap==NULL) 
 		return;
 
@@ -125,7 +123,7 @@ void ZHelpScreen::DrawHelpScreen()
 	float msw2 = msw; 
 	float msh2 = msh;
 
-	D3DFORMAT d3dformat = m_pHelpScreenBitmap->m_pTexture->m_Info.Format;
+	D3DFORMAT d3dformat = m_pHelpScreenBitmap->m_pTexture->GetFormat();
 
 	if( d3dformat==D3DFMT_DXT1 ||
 		d3dformat==D3DFMT_DXT2 ||
@@ -147,8 +145,6 @@ void ZHelpScreen::DrawHelpScreen()
 		{mx      - ADJUST_SIZE , my + mh - ADJUST_SIZE2, 0, 1.0f, (msx)/ftw       , (msy + msh2)/fth},
 	};
 
-//	RSetWBuffer(true);
-
 	RGetDevice()->SetRenderState( D3DRS_ALPHABLENDENABLE, TRUE );
 	RGetDevice()->SetRenderState( D3DRS_SRCBLEND,D3DBLEND_SRCALPHA );	
 	RGetDevice()->SetRenderState( D3DRS_DESTBLEND,D3DBLEND_INVSRCALPHA );
@@ -161,22 +157,14 @@ void ZHelpScreen::DrawHelpScreen()
 	RGetDevice()->SetTexture( 0, m_pHelpScreenBitmap->m_pTexture->GetTexture() );
 	RGetDevice()->SetSamplerState( 0, D3DSAMP_MAGFILTER , D3DTEXF_POINT );
 	RGetDevice()->SetSamplerState( 0, D3DSAMP_MINFILTER , D3DTEXF_POINT );
-//	RGetDevice()->SetSamplerState( 0, D3DSAMP_MAGFILTER , D3DTEXF_NONE );
-//	RGetDevice()->SetSamplerState( 0, D3DSAMP_MINFILTER , D3DTEXF_NONE );
 
 	RGetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, Sprite, sizeof(CUSTOMVERTEX));
 
-//	RGetDevice()->SetTextureStageState( 0, D3DTSS_MAGFILTER , D3DTEXF_LINEAR );
-//	RGetDevice()->SetTextureStageState( 0, D3DTSS_MINFILTER , D3DTEXF_LINEAR );
 	RGetDevice()->SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR );
 	RGetDevice()->SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR );
 
-	// 굵은 폰트로 바인딩된 키그려주기...
-
 	g_pDC->SetColor(MCOLOR(0xFF000000));
 
-//	g_pDC->SetFont(MFontManager::Get("FONTc8b"));
-//	g_pDC->SetFont(MFontManager::Get("FONTa12_O1Blr"));
 	g_pDC->SetFont(MFontManager::Get("FONTb11b"));
 
 	float aspect_x = RGetScreenWidth()/800.f;
@@ -187,7 +175,6 @@ void ZHelpScreen::DrawHelpScreen()
 
 	int nHeight = 193 * aspect_y;
 
-	// x y 중앙
 	TextOutKeymap(ZACTION_MELEE_WEAPON    , 90*aspect_x,nHeight);
 	TextOutKeymap(ZACTION_PRIMARY_WEAPON  ,148*aspect_x,nHeight);
 	TextOutKeymap(ZACTION_SECONDARY_WEAPON,209*aspect_x,nHeight);
@@ -212,7 +199,4 @@ void ZHelpScreen::DrawHelpScreen()
 	TextOutKeymap(ZACTION_JUMP     ,196*aspect_x,nHeight);
 
 	pFont->m_fScale = 1.0f;
-
-//	RSetWBuffer(true);
-
 }

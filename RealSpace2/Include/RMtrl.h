@@ -6,6 +6,7 @@
 #include <map>
 #include "RBaseTexture.h"
 #include "RTypes.h"
+#include <d3d9.h>
 
 _USING_NAMESPACE_REALSPACE2
 
@@ -98,7 +99,7 @@ public:
 	int		SaveList(char* name);
 
 	void	DelAll();
-	void	Restore(LPDIRECT3DDEVICE9 dev,char* path=NULL);
+	void	Restore(LPDIRECT3DDEVICE9 dev, char* path = NULL);
 
 	void	CheckUsed(bool b);
 	void	ClearUsedCheck();

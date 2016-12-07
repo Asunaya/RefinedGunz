@@ -2,6 +2,8 @@
 
 #include "MUtil.h"
 
+typedef enum _D3DFORMAT D3DFORMAT;
+
 namespace RealSpace2 {
 
 struct TextureInfo

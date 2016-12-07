@@ -485,7 +485,7 @@ bool ZOptionInterface::SaveInterfaceOption(void)
 		MComboBox*	pWidget = (MComboBox*)pResource->FindWidget("CharTexLevel");
 
 		int TexLevel = 0;
-		DWORD flag = 0;
+		u32 flag = 0;
 		int EffectLevel = 0;
 		int nTextureFormat = 0;
 
@@ -502,12 +502,12 @@ bool ZOptionInterface::SaveInterfaceOption(void)
 				else
 					SetObjectTextureLevel(TexLevel);
 
-				flag |= RTextureType_Object;
+				flag |= static_cast<u32>(RTextureType::Object);
 			}
 			else if( ZGetConfiguration()->GetVideo()->nCharTexLevel != TexLevel ) {
 				ZGetConfiguration()->GetVideo()->nCharTexLevel = TexLevel;
 				SetObjectTextureLevel(TexLevel);
-				flag |= RTextureType_Object;
+				flag |= static_cast<u32>(RTextureType::Object);
 			}
 		}
 
@@ -526,12 +526,12 @@ bool ZOptionInterface::SaveInterfaceOption(void)
 				else
 					SetObjectTextureLevel(TexLevel);
 
-				flag |= RTextureType_Object;
+				flag |= static_cast<u32>(RTextureType::Object);
 			}
 			if( ZGetConfiguration()->GetVideo()->nMapTexLevel != TexLevel ) {
 				ZGetConfiguration()->GetVideo()->nMapTexLevel = TexLevel;
 				SetMapTextureLevel(TexLevel);
-				flag |= RTextureType_Map;
+				flag |= static_cast<u32>(RTextureType::Map);
 			}
 		}
 
@@ -544,7 +544,6 @@ bool ZOptionInterface::SaveInterfaceOption(void)
 			if( ZGetConfiguration()->GetVideo()->nEffectLevel != EffectLevel ) {
 				ZGetConfiguration()->GetVideo()->nEffectLevel = EffectLevel;
 				SetEffectLevel(EffectLevel);
-				//				flag |= RTextureType_Map;
 			}
 		}
 
@@ -557,12 +556,12 @@ bool ZOptionInterface::SaveInterfaceOption(void)
 			if( ZGetConfiguration()->GetVideo()->nTextureFormat != nTextureFormat ) {
 				ZGetConfiguration()->GetVideo()->nTextureFormat = nTextureFormat;
 				SetTextureFormat(nTextureFormat);
-				flag = RTextureType_All;
+				flag = static_cast<u32>(RTextureType::All);
 			}
 		}
 
 		if(flag) {
-			RChangeBaseTextureLevel(flag);
+			RChangeBaseTextureLevel(static_cast<RTextureType>(flag));
 		}
 	}
 	{

@@ -312,11 +312,11 @@ MBitmapR2::~MBitmapR2(void)
 	Destroy();
 }
 
-bool MBitmapR2::Create(const char* szAliasName, LPDIRECT3DDEVICE9 pd3dDevice, const char* szFileName,bool bUseFileSystem)
+bool MBitmapR2::Create(const char* szAliasName, LPDIRECT3DDEVICE9 pd3dDevice, const char* szFileName, bool bUseFileSystem)
 {
 	MBitmap::Create(szAliasName);
 
-	m_pTexture = RCreateBaseTexture(szFileName,RTextureType_Etc,false,bUseFileSystem);
+	m_pTexture = RCreateBaseTexture(szFileName, RTextureType::Etc, false, bUseFileSystem);
 	if(!m_pTexture) return false;
 
 	m_pd3dDevice = pd3dDevice;
@@ -324,7 +324,7 @@ bool MBitmapR2::Create(const char* szAliasName, LPDIRECT3DDEVICE9 pd3dDevice, co
 	return true;
 }
 
-void MBitmapR2::Destroy(void)
+void MBitmapR2::Destroy()
 {
 	if(m_pTexture)
 	{
@@ -333,19 +333,19 @@ void MBitmapR2::Destroy(void)
 	}
 }
 
-int MBitmapR2::GetWidth(void)
+int MBitmapR2::GetWidth()
 {
 	if(!m_pTexture) 
 		return 0;
-	return m_pTexture->m_Info.Width;
+	return m_pTexture->GetWidth();
 }
 
-int MBitmapR2::GetHeight(void)
+int MBitmapR2::GetHeight()
 {
 	if(!m_pTexture) 
 		return 0;
 
-	return m_pTexture->m_Info.Height;
+	return m_pTexture->GetWidth();
 }
 
 struct CUSTOMVERTEX{

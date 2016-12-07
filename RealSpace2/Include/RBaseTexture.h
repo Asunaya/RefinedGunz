@@ -1,6 +1,5 @@
 #pragma once
 
-#include "d3dx9.h"
 #include <string>
 #include <map>
 #include <algorithm>
@@ -8,84 +7,95 @@
 #include "RNameSpace.h"
 #include "TextureLoader.h"
 
+typedef struct IDirect3DTexture9 *LPDIRECT3DTEXTURE9;
+
 _NAMESPACE_REALSPACE2_BEGIN
 
-#define RTextureType_Etc		0
-#define RTextureType_Map		1<<1
-#define RTextureType_Object		1<<2
-#define RTextureType_All		1<<3
+enum class RTextureType
+{
+	Etc = 1 << 0,
+	Map = 1 << 1,
+	Object = 1 << 2,
+	All = 1 << 3,
+};
 
 class RTextureManager;
 
 class RBaseTexture final
 {
 public:
-	void Destroy();
+	RBaseTexture(const void* data, size_t size);
+	RBaseTexture(RBaseTexture&&) = default;
+	RBaseTexture& operator =(RBaseTexture&&) = default;
+	~RBaseTexture() = default;
 
-	void OnInvalidate();
-	bool OnRestore(bool bManaged = false);
+	void Resize();
 
 	auto GetWidth() const { return m_Info.Width; }
 	auto GetHeight() const { return m_Info.Height; }
 	auto GetMipLevels() const { return m_Info.MipLevels; }
 
 	auto GetTexLevel() const { return m_nTexLevel; }
-	void SetTexLevel(int level) { m_nTexLevel = level;}
+	void SetTexLevel(int level) { m_nTexLevel = level; }
 
 	auto GetTexType() const { return m_nTexType; }
-	void SetTexType(int type) { m_nTexType = type; }
+	void SetTexType(RTextureType type) { m_nTexType = type; }
 
 	auto GetFormat() const { return m_Info.Format; }
 
 	LPDIRECT3DTEXTURE9 GetTexture();
 
+private:
+	friend RTextureManager;
+
+	bool SubCreateTexture(const void* data, size_t size);
+
 	bool	m_bManaged{};
-	u32		m_dwLastUseTime{};
-	int		m_nFileSize{};
-	char	m_szTextureName[256];
 	int		m_nRefCount{};
 	bool	m_bUseMipmap{};
 	bool	m_bUseFileSystem = true;
 
 	int		m_nTexLevel{};
-	u32		m_nTexType = RTextureType_Etc;
+	RTextureType m_nTexType = RTextureType::Etc;
 
 	TextureInfo m_Info{};
 	D3DPtr<IDirect3DTexture9> m_pTex;
 
-private:
-	friend RTextureManager;
-	~RBaseTexture();
-
-	bool SubCreateTexture(char* TextureFileBuffer);
+	std::string filename;
 };
 
-class RTextureManager final : public std::map<std::string, RBaseTexture*> 
+class RTextureManager final
 {
 public:
+	RTextureManager() = default;
+	RTextureManager(const RTextureManager&) = delete;
 	~RTextureManager();
 
 	void Destroy();
 
-	RBaseTexture *CreateBaseTextureSub(bool Managed, const char* filename, int texlevel,
+	RBaseTexture *CreateBaseTexture(const char* filename, RTextureType tex_type,
 		bool bUseMipmap = false, bool bUseFileSystem = true);
-	RBaseTexture *CreateBaseTexture(const char* filename, int texlevel,
+	RBaseTexture *CreateBaseTextureMg(const char* filename, RTextureType tex_type,
 		bool bUseMipmap = false, bool bUseFileSystem = true);
-	RBaseTexture *CreateBaseTextureMg(const char* filename, int texlevel,
+	RBaseTexture *CreateBaseTextureFromMemory(const void* data, size_t size, RTextureType texlevel,
 		bool bUseMipmap = false, bool bUseFileSystem = true);
 
 	void DestroyBaseTexture(RBaseTexture*);
-	void DestroyBaseTexture(const char* szName);
 
 	void OnInvalidate();
 	void OnRestore();
-	void OnChangeTextureLevel(u32 flag);
+	void OnChangeTextureLevel(RTextureType flag);
 
-	int UpdateTexture(u32 max_life_time = 5000);
 	int CalcUsedSize();
-	int CalcAllUsedSize();
 	int PrintUsedTexture();
 	int CalcUsedCount();
+
+private:
+	RBaseTexture *CreateBaseTextureSub(bool Managed, const char* filename, RTextureType tex_type,
+		bool bUseMipmap = false, bool bUseFileSystem = true);
+
+	std::list<RBaseTexture> Textures;
+	std::unordered_map<std::string, RBaseTexture*> FilenameToTexture;
 };
 
 void RBaseTexture_Create();
@@ -104,12 +114,14 @@ int GetObjectTextureLevel();
 int GetMapTextureLevel();
 int GetTextureFormat();
 
-RBaseTexture* RCreateBaseTexture(const char* filename, DWORD nTexType = RTextureType_Etc,
-	bool bUseMipmap = false, bool bUseFileSystem = true);
-RBaseTexture* RCreateBaseTextureMg(const char* filename, DWORD nTexType = RTextureType_Etc,
-	bool bUseMipmap = false, bool bUseFileSystem = true);
+RBaseTexture* RCreateBaseTexture(const char* filename, RTextureType TexType = RTextureType::Etc,
+	bool UseMipmap = false, bool bUseFileSystem = true);
+RBaseTexture* RCreateBaseTextureMg(const char* filename, RTextureType TexType = RTextureType::Etc,
+	bool UseMipmap = false, bool bUseFileSystem = true);
+RBaseTexture* RCreateBaseTextureFromMemory(const void* data, size_t size,
+	RTextureType TexType = RTextureType::Etc, bool UseMipmap = false);
 void RDestroyBaseTexture(RBaseTexture*);
-void RChangeBaseTextureLevel(DWORD flag);
+void RChangeBaseTextureLevel(RTextureType flag);
 
 struct RBaseTextureDeleter {
 	void operator()(RBaseTexture* ptr) const {
