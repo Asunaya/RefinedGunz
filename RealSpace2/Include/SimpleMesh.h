@@ -56,13 +56,26 @@ public:
 			return;
 	}
 
-	void Draw()
+	bool Draw()
 	{
+		if (!VB || !IB)
+			return false;
+
 		RGetDevice()->SetFVF(FVF);
 		RGetDevice()->SetStreamSource(0, VB.get(), 0, sizeof(VertexType));
 		RGetDevice()->SetIndices(IB.get());
 
 		RGetDevice()->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, NumVertices, 0, NumIndices / 3);
+
+		return true;
+	}
+
+	void Destroy()
+	{
+		VB.reset();
+		IB.reset();
+		NumVertices = 0;
+		NumIndices = 0;
 	}
 
 private:

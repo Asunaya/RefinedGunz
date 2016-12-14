@@ -270,6 +270,8 @@ RRESULT OnDestroy(void *pParam)
 	RAnimationFileMgr::GetInstance()->Destroy();
 	ZStringResManager::FreeInstance();
 
+	g_RGMain.reset();
+
 	mlog("main : OnDestroy() done\n");
 
 	return R_OK;

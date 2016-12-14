@@ -25,7 +25,7 @@ protected:
 	RealSpace2::RBaseTexture* m_pTex;
 	RTLVertex m_VBuffer[4];
 	int m_id;
-	map<int, LightSource*> m_LightSource;
+	std::map<int, LightSource*> m_LightSource;
     
 public:
 	void Destroy();
@@ -41,7 +41,7 @@ public:
 	void Update();
 	
 	void SetPosition( const rvector& p) { m_Position = p; }
-	void SetRadius( const float r )	{ m_Radius = r; }
+	void SetRadius( float r )	{ m_Radius = r; }
 	
 	int AddLightSource( const rvector& p, float power );
 	int AddLightSource(const rvector& p, float power, DWORD lastTime );
@@ -55,6 +55,7 @@ public:
 
 public:
 	ZStencilLight();
+	ZStencilLight(const ZStencilLight&) = delete;
 	~ZStencilLight();
 };
 

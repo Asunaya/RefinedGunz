@@ -44,6 +44,8 @@ void ZStencilLight::Destroy()
 		iter = m_LightSource.erase(iter);
 	}
 	LightSource::Release();
+
+	Mesh.Destroy();
 }
 
 
