@@ -62,12 +62,23 @@ RBspObjectDrawD3D9::~RBspObjectDrawD3D9() = default;
 
 void RBspObjectDrawD3D9::OnInvalidate()
 {
-	ReleaseRTs();
+	ReleaseRTs(); 
+	
+	SAFE_RELEASE(LitVertexDecl);
+	SAFE_RELEASE(DeferredVS);
+	SAFE_RELEASE(DeferredPS);
+	SAFE_RELEASE(PointLightVS);
+	SAFE_RELEASE(PointLightPS);
+	SAFE_RELEASE(DepthCopyVS);
+	SAFE_RELEASE(DepthCopyPS);
+	SAFE_RELEASE(VisualizeLinearDepthPS);
+	SAFE_RELEASE(OrigRT);
+	SAFE_RELEASE(OrigDepthSurface);
 }
 
 void RBspObjectDrawD3D9::OnRestore()
 {
-	CreateRTs();
+	CreateShaderStuff();
 }
 
 void RBspObjectDrawD3D9::CreateTextures()
@@ -395,6 +406,7 @@ void RBspObjectDrawD3D9::ReleaseRTs()
 {
 	for (auto& RT : RTs)
 		SAFE_RELEASE(RT);
+	SAFE_RELEASE(DummyDepthSurface);
 }
 
 void RBspObjectDrawD3D9::Create(rsx::LoaderState && srcState)
