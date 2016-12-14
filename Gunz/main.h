@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef _DEBUG
+/*#ifdef _DEBUG
 #pragma comment(lib,"cmld.lib")
 #pragma comment(lib,"mint2d.lib")
 #pragma comment(lib,"RealSoundd.lib")
@@ -18,7 +18,7 @@
 #pragma comment(lib,"SafeUDP.lib")
 #pragma comment(lib, "dxerr.lib")
 
-#endif
+#endif*/
 
 #include "Config.h"
 

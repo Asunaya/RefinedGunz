@@ -233,16 +233,12 @@
     <ClCompile Include="Source\vulkan_functions.cpp">
       <Filter>Vulkan</Filter>
     </ClCompile>
-    <ClCompile Include="Include\RS2Vulkan.cpp" />
     <ClCompile Include="Include\RS2D3D9.cpp" />
     <ClCompile Include="Source\RBspObjectDrawVulkan.cpp">
       <Filter>Map</Filter>
     </ClCompile>
     <ClCompile Include="Source\VulkanMaterial.cpp">
       <Filter>Vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="Include\RBspObjectDrawD3D9.cpp">
-      <Filter>Map</Filter>
     </ClCompile>
     <ClCompile Include="Source\EluLoader.cpp">
       <Filter>Map\RSX</Filter>
@@ -261,6 +257,10 @@
     <ClCompile Include="Source\rmatrix.cpp" />
     <ClCompile Include="Source\ColorTypes.cpp" />
     <ClCompile Include="Source\TextureLoader.cpp" />
+    <ClCompile Include="Source\RS2Vulkan.cpp" />
+    <ClCompile Include="Source\RBspObjectDrawD3D9.cpp">
+      <Filter>Map</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\RHalfEdgeMesh.h">

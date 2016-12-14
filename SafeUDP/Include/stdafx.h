@@ -11,6 +11,7 @@
 #endif // _MSC_VER > 1000
 
 #include "targetver.h"
+#include "SafeString.h"
 
 #define POINTER_64 __ptr64
 

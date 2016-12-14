@@ -128,7 +128,7 @@ Portal::Portal() : ValidPortals(PortalList)
 
 #ifndef PORTAL_USE_RT_TEXTURE
 	if (!RIsStencilBuffer())
-		MLog("Portal::Portal() - Your graphics card doesn't support stencil buffers;
+		MLog("Portal::Portal() - Your graphics card doesn't support stencil buffers;"
 			"no portals will be drawn.\n");
 #endif
 }

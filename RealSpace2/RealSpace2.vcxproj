@@ -367,14 +367,13 @@
     <None Include="Source\Globals.hlslh" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Include\RBspObjectDrawD3D9.cpp" />
     <ClCompile Include="Include\RS2D3D9.cpp" />
-    <ClCompile Include="Include\RS2Vulkan.cpp" />
     <ClCompile Include="Source\BulletCollision.cpp" />
     <ClCompile Include="Source\ColorTypes.cpp" />
     <ClCompile Include="Source\EluLoader.cpp" />
     <ClCompile Include="Source\LightmapGenerator.cpp" />
     <ClCompile Include="Source\MeshManager.cpp" />
+    <ClCompile Include="Source\RBspObjectDrawD3D9.cpp" />
     <ClCompile Include="Source\RBspObjectDrawVulkan.cpp" />
     <ClCompile Include="Source\Renderer.cpp" />
     <ClCompile Include="Source\RHalfEdgeMesh.cpp" />
@@ -392,6 +391,7 @@
     <ClCompile Include="source\RMeshUtil.cpp" />
     <ClCompile Include="Source\RMtrl.cpp" />
     <ClCompile Include="Source\rquaternion.cpp" />
+    <ClCompile Include="Source\RS2Vulkan.cpp" />
     <ClCompile Include="Source\rvector.cpp" />
     <ClCompile Include="source\RVisualMesh.cpp" />
     <ClCompile Include="source\RVisualMeshMgr.cpp" />

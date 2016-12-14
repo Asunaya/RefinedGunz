@@ -461,8 +461,8 @@
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Include\BasicInfoHistory.cpp" />
     <ClCompile Include="Source\AnimationStuff.cpp" />
+    <ClCompile Include="Source\BasicInfoHistory.cpp" />
     <ClCompile Include="Source\HitRegistration.cpp" />
     <ClCompile Include="Source\MAgentObject.cpp" />
     <ClCompile Include="Source\MBaseChannelRule.cpp" />

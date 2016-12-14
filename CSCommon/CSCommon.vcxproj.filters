@@ -254,12 +254,12 @@
     <ClCompile Include="Source\MSurvivalMap.cpp" />
     <ClCompile Include="Source\Physics.cpp" />
     <ClCompile Include="Source\stuff.cpp" />
-    <ClCompile Include="Include\BasicInfoHistory.cpp" />
     <ClCompile Include="Source\MQuestNPC.cpp" />
     <ClCompile Include="Source\MBaseQuest.cpp" />
     <ClCompile Include="Source\MQuestItem.cpp" />
     <ClCompile Include="Source\MMatchNotify.cpp" />
     <ClCompile Include="Source\MMatchWorldItemDesc.cpp" />
     <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="Source\BasicInfoHistory.cpp" />
   </ItemGroup>
 </Project>

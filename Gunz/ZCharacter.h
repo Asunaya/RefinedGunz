@@ -7,7 +7,6 @@
 #include "ZCharacterObject.h"
 #include "MUID.h"
 #include "RTypes.h"
-#include "RPathFinder.h"
 #include "RVisualMeshMgr.h"
 
 #include "MObjectTypes.h"
