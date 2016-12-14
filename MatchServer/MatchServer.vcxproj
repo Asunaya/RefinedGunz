@@ -349,7 +349,6 @@
     <ClCompile Include="MQuestPlayer.cpp" />
     <ClCompile Include="MQuestScenario.cpp" />
     <ClCompile Include="MSacrificeQItemTable.cpp" />
-    <ClCompile Include="MServer.cpp" />
     <ClCompile Include="MSmartRefreshImpl.cpp" />
     <ClCompile Include="MSSQLDatabase.cpp" />
     <ClCompile Include="MTeamGameStrategy.cpp" />
@@ -447,7 +446,6 @@
     <ClInclude Include="MQuestPlayer.h" />
     <ClInclude Include="MQuestScenario.h" />
     <ClInclude Include="MSacrificeQItemTable.h" />
-    <ClInclude Include="MServer.h" />
     <ClInclude Include="MSmartRefreshImpl.h" />
     <ClInclude Include="MSSQLDatabase.h" />
     <ClInclude Include="MTeamGameStrategy.h" />

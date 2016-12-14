@@ -4,8 +4,6 @@
 
 
 #include "MCommandManager.h"
-#include "MMonitor.h"
-#include "MMaster.h"
 
 class COutputView;
 class CMatchServerDoc;

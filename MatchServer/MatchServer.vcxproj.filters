@@ -255,7 +255,6 @@
     <ClCompile Include="MMatchEventFactory.cpp" />
     <ClCompile Include="MMatchRuleSkillmap.cpp" />
     <ClCompile Include="MovingWeaponManager.cpp" />
-    <ClCompile Include="MServer.cpp" />
     <ClCompile Include="MSSQLDatabase.cpp" />
     <ClCompile Include="SQLiteDatabase.cpp" />
     <ClCompile Include="MNJ_DBAgentClient.cpp">
@@ -455,7 +454,6 @@
     <ClInclude Include="MAsyncProxy.h" />
     <ClInclude Include="MMatchRuleSkillmap.h" />
     <ClInclude Include="MovingWeaponManager.h" />
-    <ClInclude Include="MServer.h" />
     <ClInclude Include="MSSQLDatabase.h" />
     <ClInclude Include="SQLiteDatabase.h" />
     <ClInclude Include="MNJ_DBAgentClient.h">

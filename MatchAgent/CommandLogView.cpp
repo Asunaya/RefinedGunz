@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "CommandLogView.h"
+#include "MCommandManager.h"
 #include "MCommand.h"
 #include "MSharedCommandTable.h"
 

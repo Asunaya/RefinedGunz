@@ -6,7 +6,6 @@
 #include <windowsx.h>
 #include "MErrorTable.h"
 #include "MCRC32.h"
-#include "MMatchConfig.h"
 #include "MMatchUtil.h"
 
 static int g_LogCommObjectCreated = 0;

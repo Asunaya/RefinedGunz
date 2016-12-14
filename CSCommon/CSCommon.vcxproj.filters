@@ -172,6 +172,7 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Include\Config.h" />
     <ClInclude Include="Include\MPickInfo.h" />
+    <ClInclude Include="Include\MServer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\MCommand.cpp">
@@ -261,5 +262,6 @@
     <ClCompile Include="Source\MMatchWorldItemDesc.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="Source\BasicInfoHistory.cpp" />
+    <ClCompile Include="Source\MServer.cpp" />
   </ItemGroup>
 </Project>

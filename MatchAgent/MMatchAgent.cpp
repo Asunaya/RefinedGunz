@@ -16,7 +16,7 @@
 #define MATCHSERVER_DEFAULT_UDP_PORT	7778
 #define DEFAULT_REQUEST_UID_SIZE		10000
 MMatchAgent* MMatchAgent::m_pInstance = NULL;
-extern void RcpLog(const char *pFormat,...);
+extern void RCPLog(const char *pFormat,...);
 
 
 MMatchAgent::MMatchAgent(void)
@@ -59,7 +59,7 @@ bool MMatchAgent::Create(int nPort)
 		return false;
 	}
 
-	SetupRCPLog(RcpLog);
+	SetupRCPLog(RCPLog);
 	m_RealCPNet.SetLogLevel(1);
 
 	m_SafeUDP.Create(false, GetUDPPort());

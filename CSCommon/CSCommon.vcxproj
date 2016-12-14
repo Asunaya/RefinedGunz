@@ -436,6 +436,7 @@
     <ClInclude Include="Include\MQuestItem.h" />
     <ClInclude Include="Include\MQuestMap.h" />
     <ClInclude Include="Include\MQuestNPC.h" />
+    <ClInclude Include="Include\MServer.h" />
     <ClInclude Include="Include\MSkillDesc.h" />
     <ClInclude Include="Include\MSkillTypes.h" />
     <ClInclude Include="Include\MSurvivalMap.h" />
@@ -489,6 +490,7 @@
     <ClCompile Include="Source\MQuestItem.cpp" />
     <ClCompile Include="Source\MQuestMap.cpp" />
     <ClCompile Include="Source\MQuestNPC.cpp" />
+    <ClCompile Include="Source\MServer.cpp" />
     <ClCompile Include="Source\MSurvivalMap.cpp" />
     <ClCompile Include="Source\MUID.cpp" />
     <ClCompile Include="Source\MObject.cpp" />
