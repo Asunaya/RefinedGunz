@@ -149,7 +149,7 @@ private:
 		const MMatchServerMode nServerMode,
 		const char* szAccountID, const MMatchUserGradeID nUGradeID,
 		const MMatchPremiumGradeID nPGradeID, const MUID& uidPlayer,
-		const char* szRandomValue, unsigned char* szEncryptMsg) override final;
+		const char* szRandomValue) override final;
 	virtual void OnBridgePeerACK(const MUID& uidChar, int nCode);
 	virtual void OnObjectCache(unsigned int nType, void* pBlob, int nCount) override final;
 	virtual void OnAgentError(int nError) override final;

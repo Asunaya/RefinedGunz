@@ -3,6 +3,7 @@
 #include <string>
 #include <memory>
 #include "TMP.h"
+#include "GlobalTypes.h"
 
 #ifndef SAFE_DELETE
 #define SAFE_DELETE(p)       { if(p) { delete (p);     (p)=NULL; } }
@@ -203,3 +204,11 @@ auto MakeWriteProxy(std::unique_ptr<T...>& ptr) { return WriteProxy<std::unique_
 
 template <typename T>
 T& unmove(T&& x) { return x; }
+
+inline u32 Floorer2PowerSize(u32 value)
+{
+	unsigned long ret;
+	if (!_BitScanReverse(&ret, value))
+		return 2;
+	return ret;
+}

@@ -203,11 +203,10 @@ int ZGameClient::OnResponseMatchLogin(const MUID& uidServer,
 	const MMatchUserGradeID nUGradeID,
 	const MMatchPremiumGradeID nPGradeID,
 	const MUID& uidPlayer,
-	const char* szRandomValue,
-	unsigned char* pbyGuidReqMsg)
+	const char* szRandomValue)
 {
 	int nRet = MMatchClient::OnResponseMatchLogin(uidServer, nResult, szServerName, nServerMode,
-		szAccountID, nUGradeID, nPGradeID, uidPlayer, szRandomValue, pbyGuidReqMsg);
+		szAccountID, nUGradeID, nPGradeID, uidPlayer, szRandomValue);
 
 	ZGetMyInfo()->InitAccountInfo(szAccountID, nUGradeID, nPGradeID);
 

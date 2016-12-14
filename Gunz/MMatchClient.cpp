@@ -27,7 +27,6 @@ void MakeUDPCommandSerialNumber(MCommand* pCmd)
 
 #define MAX_PING_TRY_COUNT		3
 
-/////////////////////////////////////////////////////////////////////////////////////////
 int MMatchPeerInfo::GetPing(unsigned int nCurrTime) 
 { 
 	if ((int)m_nLastPongTime - (int)m_nLastPingTime < 0) 
@@ -57,7 +56,6 @@ void MMatchPeerInfo::SetLastPingTime(unsigned int nTime)
 	m_nPingTryCount++;
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////
 MMatchPeerInfoList::MMatchPeerInfoList()
 {
 	InitializeCriticalSection(&m_csLock);
@@ -152,8 +150,6 @@ MUID MMatchPeerInfoList::FindUID(DWORD dwIP, int nPort)
 	return uidRet;
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////
 MMatchClient::MMatchClient()
 {
 	g_pMatchClient = this;
@@ -168,7 +164,6 @@ MMatchClient::MMatchClient()
 
 	m_szServerName[0] = 0;
 	m_nServerMode = MSM_NORMAL_;
-//	m_SafeUDP.Create(true, MATCHCLIENT_DEFAULT_UDP_PORT);
 }
 
 MMatchClient::~MMatchClient()
@@ -193,7 +188,6 @@ bool MMatchClient::Create(unsigned short nUDPPort)
 	m_SafeUDP.SetCustomRecvCallback(UDPSocketRecvEvent);
 	SetUDPTestProcess(false);
 
-	// Agent 소켓 이벤트 연결
 	m_AgentSocket.SetCallbackContext(this);
 	m_AgentSocket.SetConnectCallback(SocketConnectEvent);
 	m_AgentSocket.SetDisconnectCallback(SocketDisconnectEvent);
@@ -250,20 +244,17 @@ bool MMatchClient::OnCommand(MCommand* pCommand)
 
 	if ( (pCommand->m_pCommandDesc->IsFlag(MCDT_PEER2PEER)==true) )
 	{
-		// Peer Network 안타고 OnCommand 불린경우 CommUID를 PlayerUID로 치환
 		if (pCommand->GetSenderUID() == GetUID())
 		{
 			pCommand->SetSenderUID(GetPlayerUID());
 		}
 		else
 		{
-			// Peer의 패킷 시리얼은 여기서 체크한다.
 			MMatchPeerInfo* pPeer = FindPeer(pCommand->GetSenderUID());
 			if (pPeer)
 			{
 				if (!pPeer->CheckCommandValidate(pCommand))
 				{
-					// 암호화안한 데이타는 무시
 					if (pCommand->m_pCommandDesc->IsFlag(MCCT_NON_ENCRYPTED) == false)
 					{
 						return false;
@@ -318,19 +309,13 @@ bool MMatchClient::OnCommand(MCommand* pCommand)
 				pCommand->GetParameter(&uidPlayer,		6, MPT_UID);
 				pCommand->GetParameter(szRandomValue,	7, MPT_STR, sizeof(szRandomValue) );
 
-				MCommandParameter* pParam = pCommand->GetParameter(8);
-				if (pParam->GetType()!=MPT_BLOB) break;
-				void* pBlob = pParam->GetPointer();
-				int nCount = MGetBlobArrayCount(pBlob);
-				unsigned char* pbyGuidReqMsg = (unsigned char*)MGetBlobArrayElement(pBlob, 0);
-
 				OnResponseMatchLogin(
 					pCommand->GetSenderUID(),
 					nResult, szServerName,
 					MMatchServerMode(nServerMode), 
 					szAccountID, MMatchUserGradeID(nUGradeID),
 					MMatchPremiumGradeID(nPGradeID), uidPlayer,
-					szRandomValue, pbyGuidReqMsg);
+					szRandomValue);
 			}
 			break;
 		case MC_MATCH_OBJECT_CACHE:
@@ -497,8 +482,7 @@ int MMatchClient::OnResponseMatchLogin(const MUID& uidServer, int nResult, const
 									   const MMatchUserGradeID nUGradeID, 
 									   const MMatchPremiumGradeID nPGradeID,
 									   const MUID& uidPlayer,
-									   const char* szRandomValue,
-									   unsigned char* pbyGuidReqMsg)
+									   const char* szRandomValue)
 {
 	m_uidServer = uidServer;
 	m_uidPlayer = uidPlayer;
@@ -703,10 +687,8 @@ void MMatchClient::OnAgentError(int nError)
 
 void MMatchClient::SendCommand(MCommand* pCommand)
 {
-	// P2P일경우에는 UDP를 이용
 	if (pCommand->m_pCommandDesc->IsFlag(MCDT_PEER2PEER)==true)
 	{
-		// 시리얼 입력
 		MakeUDPCommandSerialNumber(pCommand);
 
 		if (GetBridgePeerFlag() == false) {
@@ -721,7 +703,6 @@ void MMatchClient::SendCommand(MCommand* pCommand)
 				if (pCommand->GetReceiverUID() == MUID(0, 0)) {	// BroadCasting
 					int nTunnelingCount = 0;
 
-					// Peer2Peer 메세지는 Sender가 플레이어이다.
 					for (MMatchPeerInfoList::iterator itor = m_Peers.begin();
 					itor != m_Peers.end(); ++itor)
 					{
@@ -760,7 +741,8 @@ void MMatchClient::SendCommand(MCommand* pCommand)
 #else
 						if (pCommand->GetID() != MC_PEER_BASICINFO_RG)
 							DMLog("Sending direct command ID %d from %d to %d\n",
-								pCommand->GetID(), pCommand->GetSenderUID().Low, pCommand->GetReceiverUID().Low);
+								pCommand->GetID(), pCommand->GetSenderUID().Low,
+								pCommand->GetReceiverUID().Low);
 						if (!pPeerInfo->GetUDPTestResult())
 							SendCommandByMatchServerTunneling(pCommand, pPeerInfo->uidChar);
 #endif
@@ -814,9 +796,7 @@ void MMatchClient::SendCommandByUDP(MCommand* pCommand, char* szIP, int nPort)
 	int nPacketSize = CalcPacketSize(pCommand);
 	char* pSendBuf = new char[nPacketSize];
 
-	// ##중요## - MMatchServer, MMatchAgent와 UDP통신할 때에는 암호화하지 않는 Command만 전송이 가능하다. 
 	int nSize = MakeCmdPacket(pSendBuf, nPacketSize, &m_PeerPacketCrypter, pCommand);
-
 
 	_ASSERT(nPacketSize > 0 && nPacketSize == nSize);
 
@@ -833,7 +813,6 @@ void MMatchClient::SendCommandByUDP(MCommand* pCommand, char* szIP, int nPort)
 
 bool MMatchClient::MakeTunnelingCommandBlob(MCommand* pWrappingCmd, MCommand* pSrcCmd)
 {
-	// Create Param : Command Blob ////
 	int nCmdSize = pSrcCmd->GetSize();
 	if (nCmdSize == 0)
 	{
@@ -866,41 +845,40 @@ bool MMatchClient::MakeTunnelingCommandBlob(MCommand* pWrappingCmd, MCommand* pS
 
 void MMatchClient::SendCommandByTunneling(MCommand* pCommand)
 {
-	if (GetAllowTunneling() == false) {
-	} else {
-		if (GetBridgePeerFlag() == false) {
-			MCommand* pCmd = CreateCommand(MC_AGENT_TUNNELING_TCP, GetAgentServerUID());
-				pCmd->AddParameter(new MCmdParamUID(GetPlayerUID()));
-				pCmd->AddParameter(new MCmdParamUID(pCommand->GetReceiverUID()));
-				
-				// Create Param : Command Blob ////
-				if (!MakeTunnelingCommandBlob(pCmd, pCommand))
-				{
-					delete pCmd; pCmd=NULL; return;
-				}
-				///////////////////////////////////
-			SendCommandToAgent(pCmd);
-			delete pCmd;	// PACKETQUEUE 만들때까지 delete 임시로 사용
-		} else {
-			MCommand* pCmd = CreateCommand(MC_AGENT_TUNNELING_UDP, GetAgentServerUID());
-				pCmd->AddParameter(new MCmdParamUID(GetPlayerUID()));
-				pCmd->AddParameter(new MCmdParamUID(pCommand->GetReceiverUID()));
-				// Create Param : Command Blob ////
-				if (!MakeTunnelingCommandBlob(pCmd, pCommand))
-				{
-					delete pCmd; pCmd=NULL; return;
-				}
-				///////////////////////////////////
-			SendCommandByUDP(pCmd, GetAgentIP(), GetAgentPeerPort());
-			delete pCmd;	// PACKETQUEUE 만들때까지 delete 임시로 사용
+	if (!GetAllowTunneling())
+		return;
+
+	if (!GetBridgePeerFlag()) {
+		MCommand* pCmd = CreateCommand(MC_AGENT_TUNNELING_TCP, GetAgentServerUID());
+		pCmd->AddParameter(new MCmdParamUID(GetPlayerUID()));
+		pCmd->AddParameter(new MCmdParamUID(pCommand->GetReceiverUID()));
+
+		if (!MakeTunnelingCommandBlob(pCmd, pCommand))
+		{
+			delete pCmd; pCmd = NULL; return;
 		}
+
+		SendCommandToAgent(pCmd);
+		delete pCmd;
+	}
+	else {
+		MCommand* pCmd = CreateCommand(MC_AGENT_TUNNELING_UDP, GetAgentServerUID());
+		pCmd->AddParameter(new MCmdParamUID(GetPlayerUID()));
+		pCmd->AddParameter(new MCmdParamUID(pCommand->GetReceiverUID()));
+
+		if (!MakeTunnelingCommandBlob(pCmd, pCommand))
+		{
+			delete pCmd; pCmd = NULL; return;
+		}
+
+		SendCommandByUDP(pCmd, GetAgentIP(), GetAgentPeerPort());
+
+		delete pCmd;
 	}
 }
 
 void MMatchClient::SendCommandByMatchServerTunneling(MCommand * pCommand, const MUID & Receiver)
 {
-	//DMLog("SendCommandByMatchServerTunneling %d %d\n", GetAllowTunneling(), GetBridgePeerFlag());
-
 	MCommand* pCmd = CreateCommand(MC_MATCH_P2P_COMMAND, GetServerUID());
 	pCmd->AddParameter(new MCmdParamUID(Receiver));
 
@@ -1182,7 +1160,8 @@ void MMatchClient::StartAgentPeerConnect()
 
 void MMatchClient::CastAgentPeerConnect()
 {
-	MCommand* pCmd = new MCommand(m_CommandManager.GetCommandDescByID(MC_AGENT_PEER_BINDUDP), GetAgentServerUID(), m_This);		
+	MCommand* pCmd = new MCommand(m_CommandManager.GetCommandDescByID(MC_AGENT_PEER_BINDUDP),
+		GetAgentServerUID(), m_This);		
 	pCmd->AddParameter(new MCommandParameterUID(GetPlayerUID()));
 	pCmd->AddParameter(new MCommandParameterString("localhost"));
 	pCmd->AddParameter(new MCommandParameterUInt(0));

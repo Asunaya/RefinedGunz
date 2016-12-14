@@ -166,7 +166,7 @@ bool ZApplication::ParseArguments(const char* pszArgs)
 
 	SetLaunchMode(ZLAUNCH_MODE_STANDALONE);
 
-	return false;
+	return true;
 }
 
 void ZApplication::CheckSound()

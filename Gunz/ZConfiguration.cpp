@@ -373,7 +373,7 @@ bool ZConfiguration::LoadConfig(const char* szFileName)
 	{
 		mlog( "- FAIL\n");
 		xmlConfig.Destroy();
-		return false;
+		return true;
 	}
 	mlog( "- SUCCESS\n");
 

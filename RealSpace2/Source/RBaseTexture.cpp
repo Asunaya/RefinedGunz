@@ -148,26 +148,6 @@ int RTextureManager::CalcUsedCount()
 		return counter + static_cast<int>(tex.m_pTex != nullptr); });
 }
 
-static int Floorer2PowerSize(int v)
-{
-	if (v <= 2)			return 2;
-	else if (v <= 4)	return 4;
-	else if (v <= 8)	return 8;
-	else if (v <= 16)	return 16;
-	else if (v <= 32)	return 32;
-	else if (v <= 64)	return 64;
-	else if (v <= 128)	return 128;
-	else if (v <= 256)	return 256;
-	else if (v <= 512)	return 512;
-	else if (v <= 1024)	return 1024;
-	else if (v <= 2048)	return 2048;
-	else if (v <= 4096)	return 4096;
-
-	assert(FALSE);	// Too Big!
-
-	return 2;
-}
-
 int RTextureManager::CalcUsedSize()
 {
 	int return_size = 0;
@@ -244,6 +224,9 @@ RBaseTexture *RTextureManager::CreateBaseTextureSub(bool Managed, const char* fi
 
 	MZFile mzf;
 	MZFileSystem* pfs = UseFileSystem ? g_pFileSystem : nullptr;
+
+	/*if (strstr(filename, "loginpanel"))
+		DebugBreak();*/
 
 	// TODO: Fix this silly stuff. Add .dds to the filenames
 	// in the xmls if there is actually one available

@@ -113,24 +113,6 @@ bool	ZInitialLoading::AddBitmapBar( const char* bitmapName_ )
 	return true;
 }
 
-static int Floorer2PowerSize(int v)
-{
-		 if(v<=2)		return 2;
-	else if(v<=4)		return 4;
-	else if(v<=8)		return 8;
-	else if(v<=16)		return 16;
-	else if(v<=32)		return 32;
-	else if(v<=64)		return 64;
-	else if(v<=128)		return 128;
-	else if(v<=256)		return 256;
-	else if(v<=512)		return 512;
-	else if(v<=1024)	return 1024;
-
-	_ASSERT(FALSE);	// Too Big!
-
-	return 2;
-}
-
 void ZInitialLoading::Draw(LOADING_SCENE_MODE mode_, int destIndex_, bool bFlip_, bool fromThread_)
 {
 	RRESULT isOK=RIsReadyToRender();

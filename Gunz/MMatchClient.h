@@ -12,7 +12,6 @@
 #include "MMatchGlobal.h"
 #include "MPacketCrypter.h"
 
-
 #define MATCHCLIENT_DEFAULT_UDP_PORT	10000
 #define MAX_PING						999
 
@@ -75,10 +74,10 @@ public:
 };
 
 
-class MMatchPeerInfoList : public map<MUID, MMatchPeerInfo*>
+class MMatchPeerInfoList : public std::map<MUID, MMatchPeerInfo*>
 {
 private:
-	map<MUID, MMatchPeerInfo*>		m_IPnPortMap;
+	std::map<MUID, MMatchPeerInfo*>		m_IPnPortMap;
 	CRITICAL_SECTION				m_csLock;
 	void Lock()			{ EnterCriticalSection(&m_csLock); }
 	void Unlock()		{ LeaveCriticalSection(&m_csLock); }
@@ -92,7 +91,6 @@ public:
 	MUID FindUID(DWORD dwIP, int nPort);
 };
 
-/// 게임 클라이언트
 class MMatchClient : public MClient
 {
 protected:
@@ -106,7 +104,7 @@ protected:
 	char				m_szServerIP[32];
 	int					m_nServerPort;
 	int					m_nServerPeerPort;
-	MMatchServerMode	m_nServerMode;				///< 서버모드
+	MMatchServerMode	m_nServerMode;
 
 protected:
 	MMatchObjCacheMap	m_ObjCacheMap;
@@ -114,8 +112,8 @@ protected:
 	MMatchPeerInfoList	m_Peers;
 	bool				m_bBridgePeerFlag;
 	bool				m_bUDPTestProcess;
-	MPacketCrypter		m_AgentPacketCrypter;		///< 에이전트 암호화 키
-	MPacketCrypter		m_PeerPacketCrypter;		///< 클라이언트끼리 통신할때의 암호화 키
+	MPacketCrypter		m_AgentPacketCrypter;
+	MPacketCrypter		m_PeerPacketCrypter;
 protected:
 	MClientSocket		m_AgentSocket;
 
@@ -126,8 +124,8 @@ protected:
 	int					m_nAgentPort;
 	int					m_nAgentPeerPort;
 
-	bool				m_bAgentPeerFlag;	// Agent와 UDP연결여부
-	int					m_nAgentPeerCount;	// Agent와 UDP연결시 Retry를 위한 정보
+	bool				m_bAgentPeerFlag;
+	int					m_nAgentPeerCount;
 
 	bool				m_bAllowTunneling;
 
@@ -163,8 +161,7 @@ protected:
                                      const MMatchUserGradeID nUGradeID, 
                                      const MMatchPremiumGradeID nPGradeID,
 									 const MUID& uidPlayer,
-									 const char* szRandomValue,
-									 unsigned char* pbyGuidReqMsg);
+									 const char* szRandomValue);
 	virtual void OnObjectCache(unsigned int nType, void* pBlob, int nCount);
 	virtual void OnUDPTest(const MUID& uidChar);
 	virtual void OnUDPTestReply(const MUID& uidChar);
