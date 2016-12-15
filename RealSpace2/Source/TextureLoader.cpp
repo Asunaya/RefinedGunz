@@ -85,7 +85,11 @@ static D3DPtr<IDirect3DTexture9> LoadSTB(const void* data, size_t size,
 
 	auto* tex_ptr = tex_mem.get();
 
-	assert(Width && Height && comp && tex_mem);
+	if (!(Width && Height && comp && tex_mem))
+	{
+		assert(false);
+		return nullptr;
+	}
 
 	c_ptr resized_tex_mem;
 	if (!Equals(sample_ratio, 1))
@@ -113,8 +117,11 @@ static D3DPtr<IDirect3DTexture9> LoadSTB(const void* data, size_t size,
 		return nullptr;
 
 	D3DLOCKED_RECT LockedRect;
-	auto hr = ret->LockRect(0, &LockedRect, nullptr, 0);
-	assert(SUCCEEDED(hr));
+	if (FAILED(ret->LockRect(0, &LockedRect, nullptr, 0)))
+	{
+		assert(false);
+		return nullptr;
+	}
 	auto* ptr = static_cast<unsigned char*>(LockedRect.pBits);
 	for (int i{}; i < Width * Height; ++i)
 	{
@@ -127,7 +134,11 @@ static D3DPtr<IDirect3DTexture9> LoadSTB(const void* data, size_t size,
 		tex_ptr += 4;
 #undef SET
 	}
-	assert(SUCCEEDED(ret->UnlockRect(0)));
+	if (FAILED(ret->UnlockRect(0)))
+	{
+		assert(false);
+		return nullptr;
+	}
 
 	info.Width = Width;
 	info.Height = Height;
