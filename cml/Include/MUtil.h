@@ -207,8 +207,11 @@ T& unmove(T&& x) { return x; }
 
 inline u32 NextPowerOfTwo(u32 value)
 {
-	unsigned long ret;
-	if (!_BitScanReverse(&ret, value))
+	unsigned long rightmost_bit;
+	if (!_BitScanReverse(&rightmost_bit, value))
 		return 2;
-	return ret << 1;
+	auto rightmost_bit_value = 1 << rightmost_bit;
+	if ((value ^ rightmost_bit_value) != 0)
+		rightmost_bit_value <<= 1;
+	return rightmost_bit_value;
 }
