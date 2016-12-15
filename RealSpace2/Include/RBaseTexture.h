@@ -43,6 +43,8 @@ public:
 
 	auto GetFormat() const { return m_Info.Format; }
 
+	auto& GetFileName() const { return filename; }
+
 	LPDIRECT3DTEXTURE9 GetTexture();
 
 private:

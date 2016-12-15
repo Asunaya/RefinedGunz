@@ -516,6 +516,7 @@
     <ClInclude Include="Include\SimpleMesh.h" />
     <ClInclude Include="Include\Sphere.h" />
     <ClInclude Include="Include\TextureLoader.h" />
+    <ClInclude Include="Include\VertexTypes.h" />
     <ClInclude Include="Include\vulkanbuffer.hpp" />
     <ClInclude Include="Include\vulkandebug.h" />
     <ClInclude Include="Include\vulkandevice.h" />

@@ -5,6 +5,7 @@
 #include "RShaderMgr.h"
 #include "MColorTable.h"
 #include "mdebug.h"
+#include "VertexTypes.h"
 
 std::list<ZMeshView*> ZMeshView::msMeshViewList;
 
@@ -27,23 +28,15 @@ void ZMeshView::DrawTestScene()
 
 	RSetTransform(D3DTS_WORLD, GetIdentityMatrix());
 
-	struct CUSTOMVERTEX{
-		FLOAT x, y, z;      // The untransformed, 3D position for the vertex
-		DWORD color;        // The vertex color
-	};
-
-// Our custom FVF, which describes our custom vertex structure
-#define D3DFVF_CUSTOMVERTEX (D3DFVF_XYZ|D3DFVF_DIFFUSE)
-
-    CUSTOMVERTEX g_Vertices[] =
+	WorldSpaceColorVertex g_Vertices[] =
     {
         { -1.0f,-1.0f, 0.0f, 0xffff0000, },
         {  0.0f, 1.0f, 0.0f, 0xffffffff, },
         {  1.0f,-1.0f, 0.0f, 0xff0000ff, },
     };
 
-	RGetDevice()->SetFVF( D3DFVF_CUSTOMVERTEX );
-    RGetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLELIST, 1, g_Vertices, sizeof(CUSTOMVERTEX));
+	RGetDevice()->SetFVF(WorldSpaceColorFVF);
+    RGetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLELIST, 1, g_Vertices, sizeof(WorldSpaceColorVertex));
 }
 
 void ZMeshView::SetLight(rvector LPos)

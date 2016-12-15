@@ -205,10 +205,10 @@ auto MakeWriteProxy(std::unique_ptr<T...>& ptr) { return WriteProxy<std::unique_
 template <typename T>
 T& unmove(T&& x) { return x; }
 
-inline u32 Floorer2PowerSize(u32 value)
+inline u32 NextPowerOfTwo(u32 value)
 {
 	unsigned long ret;
 	if (!_BitScanReverse(&ret, value))
 		return 2;
-	return ret;
+	return ret << 1;
 }

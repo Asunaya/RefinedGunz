@@ -8,15 +8,10 @@
 #include "ZGameInterface.h"
 #include "ZGlobal.h"
 #include "ZMyInfo.h"
+#include "VertexTypes.h"
 
 using namespace RealSpace2;
 
-struct CUSTOMVERTEX{
-	FLOAT	x, y, z, rhw;
-	FLOAT	tu, tv;
-};
-
-#define D3DFVF_CUSTOMVERTEX (D3DFVF_XYZRHW|D3DFVF_TEX1)
 #define NUM_BAR_BITMAP	1
 #define IL_TEXT_BUFFER_SIZE 512
 #define ADJUST_SIZE				0.5f
@@ -140,11 +135,11 @@ void ZInitialLoading::Draw(LOADING_SCENE_MODE mode_, int destIndex_, bool bFlip_
 		d3dformat==D3DFMT_DXT4 ||
 		d3dformat==D3DFMT_DXT5 )
 	{
-		msw2 = (float)Floorer2PowerSize((int)msw);
-		msh2 = (float)Floorer2PowerSize((int)msh);
+		msw2 = (float)NextPowerOfTwo((int)msw);
+		msh2 = (float)NextPowerOfTwo((int)msh);
 	}
 
-	CUSTOMVERTEX Sprite[4] = {
+	ScreenSpaceTexVertex Sprite[4] = {
 		{mx      - ADJUST_SIZE , my      - ADJUST_SIZE , 0, 1.0f, (msx)/ftw       , (msy)/fth },
 		{mx + mw - ADJUST_SIZE2, my      - ADJUST_SIZE , 0, 1.0f, (msx + msw2)/ftw, (msy)/fth },
 		{mx + mw - ADJUST_SIZE2, my + mh - ADJUST_SIZE2, 0, 1.0f, (msx + msw2)/ftw, (msy + msh2)/fth },
@@ -207,9 +202,9 @@ void ZInitialLoading::Draw(LOADING_SCENE_MODE mode_, int destIndex_, bool bFlip_
 		RGetDevice()->SetSamplerState( 0, D3DSAMP_MAGFILTER , D3DTEXF_LINEAR);
 		RGetDevice()->SetSamplerState( 0, D3DSAMP_MINFILTER , D3DTEXF_LINEAR);
 	
-		RGetDevice()->SetFVF(D3DFVF_CUSTOMVERTEX);
+		RGetDevice()->SetFVF(ScreenSpaceTexFVF);
 		RGetDevice()->SetTexture(0, mBitmaps[miCurrScene].m_pTexture->GetTexture());
-		RGetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, Sprite, sizeof(CUSTOMVERTEX));
+		RGetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, Sprite, sizeof(ScreenSpaceTexVertex));
 
 	//	if( mode_ == MODE_FADEOUT )
 		{
@@ -255,7 +250,7 @@ void ZInitialLoading::DrawBar( float x_, float y_, float w_, float h_, float per
 	if( !mbBitmapBar ) return;
 	if( percent_ > 1.0f ) return;
 
-	CUSTOMVERTEX Sprite[4] = {
+	ScreenSpaceTexVertex Sprite[4] = {
 		{x_ - ADJUST_SIZE, y_ - ADJUST_SIZE, 0, 1.0f, 0, 0 },
 		{x_ + ( w_ * percent_ ) - ADJUST_SIZE2, y_ - ADJUST_SIZE, 0, 1.0f, w_/h_ * percent_, 0 },
 		{x_ + ( w_ * percent_ ) - ADJUST_SIZE2, y_ + h_ - ADJUST_SIZE2, 0, 1.0f, w_/h_ * percent_, 1 },
@@ -269,9 +264,9 @@ void ZInitialLoading::DrawBar( float x_, float y_, float w_, float h_, float per
 
 	RGetDevice()->SetTextureStageState( 0, D3DTSS_COLORARG1 , D3DTA_TEXTURE );
 	RGetDevice()->SetTextureStageState( 0, D3DTSS_COLOROP, D3DTOP_SELECTARG1 );
-	RGetDevice()->SetFVF(D3DFVF_CUSTOMVERTEX);
+	RGetDevice()->SetFVF(ScreenSpaceTexFVF);
 	RGetDevice()->SetTexture(0, mBitmap_Bar[0].m_pTexture->GetTexture());
-	RGetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, Sprite, sizeof(CUSTOMVERTEX));
+	RGetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, Sprite, sizeof(ScreenSpaceTexVertex));
 	//Sleep( 0 );
 }
 

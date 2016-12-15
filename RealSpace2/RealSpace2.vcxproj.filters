@@ -469,5 +469,6 @@
     <ClInclude Include="Include\ColorTypes.h" />
     <ClInclude Include="Include\TextureLoader.h" />
     <ClInclude Include="Include\SimpleMesh.h" />
+    <ClInclude Include="Include\VertexTypes.h" />
   </ItemGroup>
 </Project>

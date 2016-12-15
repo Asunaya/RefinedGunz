@@ -3,12 +3,6 @@
 #include "ZEffectManager.h"
 #include "RBaseTexture.h"
 
-struct CUSTOMVERTEX{
-	FLOAT	x, y, z;
-	DWORD	color;
-	FLOAT	tu, tv;
-};
-
 class ZEffectBillboardSource {
 protected:
 	RBaseTexture*	m_pTex;

@@ -6,15 +6,9 @@
 #include "ZActiondef.h"
 #include "ZHelpScreen.h"
 #include "ZInput.h"
+#include "VertexTypes.h"
 
 _USING_NAMESPACE_REALSPACE2
-
-struct CUSTOMVERTEX{
-	FLOAT	x, y, z, rhw;
-	FLOAT	tu, tv;
-};
-
-#define D3DFVF_CUSTOMVERTEX (D3DFVF_XYZRHW|D3DFVF_TEX1)
 
 #define NUM_BAR_BITMAP	1
 #define IL_TEXT_BUFFER_SIZE 512
@@ -113,13 +107,13 @@ void ZHelpScreen::DrawHelpScreen()
 		d3dformat==D3DFMT_DXT4 ||
 		d3dformat==D3DFMT_DXT5 )
 	{
-		msw2 = (float)Floorer2PowerSize((int)msw);
-		msh2 = (float)Floorer2PowerSize((int)msh);
+		msw2 = (float)NextPowerOfTwo((int)msw);
+		msh2 = (float)NextPowerOfTwo((int)msh);
 	}
 
 	RGetDevice()->SetRenderState( D3DRS_LIGHTING, FALSE);
 
-	CUSTOMVERTEX Sprite[4] = 
+	ScreenSpaceTexVertex Sprite[4] =
 	{
 		{mx      - ADJUST_SIZE , my      - ADJUST_SIZE , 0, 1.0f, (msx)/ftw       , (msy)/fth },
 		{mx + mw - ADJUST_SIZE2, my      - ADJUST_SIZE , 0, 1.0f, (msx + msw2)/ftw, (msy)/fth },
@@ -135,12 +129,12 @@ void ZHelpScreen::DrawHelpScreen()
 	RGetDevice()->SetTextureStageState( 0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE );
 	RGetDevice()->SetTextureStageState( 0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1 );
 
-	RGetDevice()->SetFVF(D3DFVF_CUSTOMVERTEX);
+	RGetDevice()->SetFVF(ScreenSpaceTexFVF);
 	RGetDevice()->SetTexture( 0, m_pHelpScreenBitmap->m_pTexture->GetTexture() );
 	RGetDevice()->SetSamplerState( 0, D3DSAMP_MAGFILTER , D3DTEXF_POINT );
 	RGetDevice()->SetSamplerState( 0, D3DSAMP_MINFILTER , D3DTEXF_POINT );
 
-	RGetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, Sprite, sizeof(CUSTOMVERTEX));
+	RGetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, Sprite, sizeof(ScreenSpaceTexVertex));
 
 	RGetDevice()->SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR );
 	RGetDevice()->SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR );

@@ -19,7 +19,7 @@ void Draw::OnReset()
 
 void Draw::Line(const D3DXVECTOR2 &v1, const D3DXVECTOR2 &v2, D3DCOLOR Color, float z)
 {
-	ScreenSpaceVertex v;
+	ScreenSpaceColorVertex v;
 
 	v.x = v1.x;
 	v.y = v1.y;
@@ -43,7 +43,7 @@ void Draw::Line(const D3DXVECTOR2 &v1, const D3DXVECTOR2 &v2, D3DCOLOR Color, fl
 
 void Draw::Quad(const D3DXVECTOR2 &v1, const D3DXVECTOR2 &v2, D3DCOLOR Color, float z)
 {
-	ScreenSpaceVertex v;
+	ScreenSpaceColorVertex v;
 
 	v.x = v1.x;
 	v.y = v1.y;
@@ -160,12 +160,12 @@ void Draw::EndDraw()
 	int nLines = Lines.size() / 2;
 
 	if (nLines)
-		RGetDevice()->DrawPrimitiveUP(D3DPT_LINELIST, nLines, Lines.data(), sizeof(ScreenSpaceVertex));
+		RGetDevice()->DrawPrimitiveUP(D3DPT_LINELIST, nLines, Lines.data(), sizeof(ScreenSpaceColorVertex));
 
 	int nTriangles = Triangles.size() / 3;
 
 	if (nTriangles)
-		RGetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLELIST, nTriangles, Triangles.data(), sizeof(ScreenSpaceVertex));
+		RGetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLELIST, nTriangles, Triangles.data(), sizeof(ScreenSpaceColorVertex));
 
 	if (Alpha)
 	{

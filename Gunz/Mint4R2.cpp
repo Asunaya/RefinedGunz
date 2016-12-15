@@ -330,13 +330,6 @@ int MBitmapR2::GetHeight()
 	return m_pTexture->GetWidth();
 }
 
-struct CUSTOMVERTEX{
-    FLOAT	x, y, z, rhw;
-    u32		color;
-    FLOAT	tu, tv;
-};
-#define D3DFVF_CUSTOMVERTEX (D3DFVF_XYZRHW|D3DFVF_DIFFUSE|D3DFVF_TEX1)
-
 u32 MBitmapR2::m_dwStateBlock;
 
 void MBitmapR2::BeginState(MDrawEffect effect)
@@ -445,6 +438,14 @@ void MBitmapR2::CheckDrawMode(float* fuv)
 	}
 }
 
+struct BitmapVertex {
+    FLOAT	x, y, z, rhw;
+    u32		color;
+    FLOAT	tu, tv;
+};
+
+constexpr u32 BitmapFVF = D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1;
+
 void MBitmapR2::Draw(float x, float y, float w, float h, float sx, float sy, float sw, float sh, 
 					 DWORD dwColor, MDrawEffect effect)
 {
@@ -462,7 +463,7 @@ void MBitmapR2::Draw(float x, float y, float w, float h, float sx, float sy, flo
 
 	CheckDrawMode(fuv);
 
-	CUSTOMVERTEX Sprite[4] = {
+	BitmapVertex Sprite[4] = {
 #define ADJUST_SIZE		0.5f
 #define ADJUST_SIZE2	0.0f
 		{x-ADJUST_SIZE,    y-ADJUST_SIZE,    0, 1.0f, dwColor, fuv[0], fuv[1]},
@@ -470,14 +471,14 @@ void MBitmapR2::Draw(float x, float y, float w, float h, float sx, float sy, flo
 		{x+w-ADJUST_SIZE2, y+h-ADJUST_SIZE2, 0, 1.0f, dwColor, fuv[4], fuv[5]},
 		{x-ADJUST_SIZE,    y+h-ADJUST_SIZE2, 0, 1.0f, dwColor, fuv[6], fuv[7]},
 	};
-	m_pd3dDevice->SetFVF(D3DFVF_CUSTOMVERTEX);
+	m_pd3dDevice->SetFVF(BitmapFVF);
 	m_pd3dDevice->SetPixelShader(NULL);
 
 	m_pd3dDevice->SetTexture(0, m_pTexture->GetTexture());
 
 	BeginState(effect);
 
-	HRESULT hr = m_pd3dDevice->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, Sprite, sizeof(CUSTOMVERTEX));
+	HRESULT hr = m_pd3dDevice->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, Sprite, sizeof(BitmapVertex));
 	_ASSERT(hr==D3D_OK);
 
 	EndState();
@@ -498,7 +499,7 @@ void MBitmapR2::DrawEx(float tx1, float ty1, float tx2, float ty2,
 
 	CheckDrawMode(fuv);
 
-	CUSTOMVERTEX Sprite[4] = {
+	BitmapVertex Sprite[4] = {
 #define ADJUST_SIZE		0.5f
 #define ADJUST_SIZE2	0.0f
 		{tx1-ADJUST_SIZE,  ty1-ADJUST_SIZE,  0, 1.0f, dwColor, fuv[0], fuv[1]},
@@ -506,14 +507,14 @@ void MBitmapR2::DrawEx(float tx1, float ty1, float tx2, float ty2,
 		{tx4-ADJUST_SIZE2, ty4-ADJUST_SIZE2, 0, 1.0f, dwColor, fuv[4], fuv[5]},
 		{tx3-ADJUST_SIZE,  ty3-ADJUST_SIZE2, 0, 1.0f, dwColor, fuv[6], fuv[7]},
 	};
-	m_pd3dDevice->SetFVF(D3DFVF_CUSTOMVERTEX);
+	m_pd3dDevice->SetFVF(BitmapFVF);
 	m_pd3dDevice->SetPixelShader(NULL);
 
 	m_pd3dDevice->SetTexture(0, m_pTexture->GetTexture());
 
 	BeginState(effect);
 
-	HRESULT hr = m_pd3dDevice->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, Sprite, sizeof(CUSTOMVERTEX));
+	HRESULT hr = m_pd3dDevice->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, Sprite, sizeof(BitmapVertex));
 	_ASSERT(hr==D3D_OK);
 
 	EndState();

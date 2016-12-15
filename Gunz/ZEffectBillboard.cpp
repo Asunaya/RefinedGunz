@@ -5,20 +5,26 @@
 #include "MZFileSystem.h"
 #include "RTypes.h"
 
-#define D3DFVF_CUSTOMVERTEX (D3DFVF_XYZ|D3DFVF_DIFFUSE|D3DFVF_TEX1)
+struct BillboardVertex {
+	FLOAT	x, y, z;
+	DWORD	color;
+	FLOAT	tu, tv;
+};
+
+constexpr u32 BillboardFVF = D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_TEX1;
 
 static LPDIRECT3DVERTEXBUFFER9 g_pVB;
 
 bool CreateCommonRectVertexBuffer()
 {
-	static CUSTOMVERTEX Billboard[] = {
+	static BillboardVertex Billboard[] = {
 		{-1, -1, 0, 0xFFFFFFFF, 1, 0},
 		{-1,  1, 0, 0xFFFFFFFF, 1, 1},
 		{ 1,  1, 0, 0xFFFFFFFF, 0, 1},
 		{ 1, -1, 0, 0xFFFFFFFF, 0, 0},
 	};
 
-	if(FAILED(RGetDevice()->CreateVertexBuffer(sizeof(Billboard), 0, D3DFVF_CUSTOMVERTEX, D3DPOOL_MANAGED, &g_pVB,NULL)))
+	if (FAILED(RGetDevice()->CreateVertexBuffer(sizeof(Billboard), 0, BillboardFVF, D3DPOOL_MANAGED, &g_pVB, NULL)))
 		return false;
 
 	BYTE* pVertices;
@@ -91,8 +97,8 @@ bool ZEffectBillboardSource::Draw(rvector &Pos, rvector &Dir, rvector &Up, rvect
 
 	RGetDevice()->SetRenderState(D3DRS_TEXTUREFACTOR, (DWORD)((BYTE)(0xFF*fOpacity))<<24);
 
-	RGetDevice()->SetStreamSource(0, GetCommonRectVertexBuffer(), 0, sizeof(CUSTOMVERTEX));
-	RGetDevice()->SetFVF(D3DFVF_CUSTOMVERTEX);
+	RGetDevice()->SetStreamSource(0, GetCommonRectVertexBuffer(), 0, sizeof(BillboardVertex));
+	RGetDevice()->SetFVF(BillboardFVF);
 	RGetDevice()->SetTexture(0, m_pTex->GetTexture());
 	RGetDevice()->DrawPrimitive(D3DPT_TRIANGLEFAN, 0, 2);
 	RGetDevice()->SetStreamSource( 0, NULL, 0, 0 );
@@ -174,8 +180,8 @@ bool ZEffectBillboardDrawer::Draw(LPDIRECT3DTEXTURE9 pEffectBillboardTexture, rv
 
 	RGetDevice()->SetRenderState(D3DRS_TEXTUREFACTOR, 0xFFFFFFFF);
 
-	RGetDevice()->SetStreamSource(0, GetCommonRectVertexBuffer(), 0,sizeof(CUSTOMVERTEX));
-	RGetDevice()->SetFVF(D3DFVF_CUSTOMVERTEX);
+	RGetDevice()->SetStreamSource(0, GetCommonRectVertexBuffer(), 0, sizeof(BillboardVertex));
+	RGetDevice()->SetFVF(BillboardFVF);
 	RGetDevice()->SetTexture(0, pEffectBillboardTexture);
 	RGetDevice()->DrawPrimitive(D3DPT_TRIANGLEFAN, 0, 2);
 	RGetDevice()->SetStreamSource( 0, NULL, 0, 0 );

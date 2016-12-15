@@ -1,6 +1,7 @@
 #pragma once
 #include "d3dx9.h"
 #include <vector>
+#include "VertexTypes.h"
 
 class Draw
 {
@@ -30,20 +31,8 @@ public:
 	void EndDraw();
 
 private:
-	struct ScreenSpaceVertex
-	{
-		float x, y, z, rhw;
-		DWORD color;
-	};
-
-	struct ScreenSpaceTexVertex
-	{
-		float x, y, z, rhw;
-		float tu, tv;
-	};
-
-	std::vector<ScreenSpaceVertex> Lines;
-	std::vector<ScreenSpaceVertex> Triangles;
+	std::vector<ScreenSpaceColorVertex> Lines;
+	std::vector<ScreenSpaceColorVertex> Triangles;
 	bool Alpha;
 	bool BegunDrawing;
 
