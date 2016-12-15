@@ -327,7 +327,7 @@ int MBitmapR2::GetHeight()
 	if(!m_pTexture) 
 		return 0;
 
-	return m_pTexture->GetWidth();
+	return m_pTexture->GetHeight();
 }
 
 u32 MBitmapR2::m_dwStateBlock;
