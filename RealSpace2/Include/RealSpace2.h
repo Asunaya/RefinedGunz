@@ -55,6 +55,7 @@ bool	RIsTrilinear();
 int		RGetApproxVMem();
 int		RGetScreenWidth();
 int		RGetScreenHeight();
+float 	RGetAspect();
 int		RGetPicmip();
 RPIXELFORMAT RGetPixelFormat();
 D3DADAPTER_IDENTIFIER9*	RGetAdapterID();

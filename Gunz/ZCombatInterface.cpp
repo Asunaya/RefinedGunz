@@ -331,7 +331,7 @@ void ZCombatInterface::OnDestroy()
 
 void TextRelative(MDrawContext* pDC,float x,float y,const char *szText,bool bCenter)
 {
-	int screenx=x*MGetWorkspaceWidth();
+	int screenx = x*MGetWorkspaceWidth();
 	if(bCenter)
 	{
 		MFont *pFont=pDC->GetFont();

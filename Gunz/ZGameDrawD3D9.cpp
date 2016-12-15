@@ -41,7 +41,7 @@ static void SetStatesPreDraw(ZGame& Game)
 #ifdef PORTAL
 	if (!g_pPortal->ForceProjection())
 #endif
-		RSetProjection(g_fFOV, DEFAULT_NEAR_Z, g_fFarZ);
+		RSetProjection(FIXED_FOV(g_fFOV), DEFAULT_NEAR_Z, g_fFarZ);
 
 	bool bTrilinear = RIsTrilinear();
 
@@ -180,7 +180,7 @@ void ZGameDrawD3D9::DrawScene()
 #ifdef PORTAL
 	if (!g_pPortal->ForceProjection())
 #endif
-		RSetProjection(g_fFOV, DEFAULT_NEAR_Z, g_fFarZ);
+		RSetProjection(FIXED_FOV(g_fFOV), DEFAULT_NEAR_Z, g_fFarZ);
 	RSetFog(FALSE);
 
 	// Draw the blinding effect of flashbangs

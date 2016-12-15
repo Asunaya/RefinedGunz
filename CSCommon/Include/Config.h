@@ -35,6 +35,9 @@
 // Default field of view in radians.
 #define DEFAULT_FOV		1.22173048f // 70 degrees in radians
 
+//Use this macro to have fixed vertical FOV across all aspect ratios (21:9/16:9/4:3)
+#define FIXED_FOV(x)	(2. * atan(tan((2. * atan(tan((x) / 2.) / (4./3.))) / 2.) * RGetAspect()))
+
 // Default distance from the camera to the near plane in the projection transform.
 // 5.0f in vanilla Gunz
 #define DEFAULT_NEAR_Z	5.0f

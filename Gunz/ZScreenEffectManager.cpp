@@ -59,10 +59,6 @@ bool ZScreenEffect::DrawCustom(unsigned long int nTime, const rvector& vOffset, 
 	auto View = ViewMatrix(eye, Normalized(at - eye), up);
 	auto Offset = TranslationMatrix(vOffset);
 
-	auto Ratio = 4.0f / 3 / (float(RGetScreenWidth()) / RGetScreenHeight());
-	auto Scale = ScalingMatrix({ 1, Ratio, 1, 1 });
-
-	View = Scale * View;
 	View = Offset * View;
 
 	RSetTransform(D3DTS_VIEW, View);
