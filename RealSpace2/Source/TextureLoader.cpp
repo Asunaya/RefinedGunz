@@ -113,7 +113,8 @@ static D3DPtr<IDirect3DTexture9> LoadSTB(const void* data, size_t size,
 		return nullptr;
 
 	D3DLOCKED_RECT LockedRect;
-	assert(SUCCEEDED(ret->LockRect(0, &LockedRect, nullptr, 0)));
+	auto hr = ret->LockRect(0, &LockedRect, nullptr, 0);
+	assert(SUCCEEDED(hr));
 	auto* ptr = static_cast<unsigned char*>(LockedRect.pBits);
 	for (int i{}; i < Width * Height; ++i)
 	{
