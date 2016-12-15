@@ -331,14 +331,16 @@ void ZCombatInterface::OnDestroy()
 
 void TextRelative(MDrawContext* pDC,float x,float y,const char *szText,bool bCenter)
 {
-	int screenx = x*MGetWorkspaceWidth();
+	int corrected_workspace_w = MGetWorkspaceWidth() / RGetAspect() * (4. / 3.);
+	int start = (MGetWorkspaceWidth() - corrected_workspace_w) / 2;
+	int screenx = x * corrected_workspace_w + start;
 	if(bCenter)
 	{
 		MFont *pFont=pDC->GetFont();
 		screenx-=pFont->GetWidth(szText)/2;
 	}
 
-	pDC->Text(screenx,y*MGetWorkspaceHeight(),szText);
+	pDC->Text(screenx, y * MGetWorkspaceHeight(), szText);
 }
 
 void ZCombatInterface::DrawNPCName(MDrawContext* pDC)
@@ -532,8 +534,6 @@ void ZCombatInterface::OnDraw(MDrawContext* pDC)
 		{
 			char	charName[ 3][ 32];
 			charName[0][0] = charName[1][0] = charName[2][0] = 0;
-			float fRx = (float)MGetWorkspaceWidth()  / 800.0f;
-			float fRy = (float)MGetWorkspaceHeight() / 600.0f;
 
 			MFont *pFont = MFontManager::Get( "FONTa10_O2Wht");
 			if ( pFont == NULL)
@@ -604,8 +604,8 @@ void ZCombatInterface::OnDraw(MDrawContext* pDC)
 			{
 				pDC->SetBitmap( pBitmap);
 
-				int nIcon = 50.0f*fRx;
-				pDC->Draw( 8.0f*fRx, 153.0f*fRy, nIcon, nIcon);
+				float nIcon = 50.0f;
+				pDC->DrawRelative(8.0f / 800.f, 153.0f / 600.f, nIcon, nIcon);
 			}
 
 			pBitmap = MBitmapManager::Get( "icon_play.tga");
@@ -613,9 +613,9 @@ void ZCombatInterface::OnDraw(MDrawContext* pDC)
 			{
 				pDC->SetBitmap( pBitmap);
 
-				int nIcon = 22.0f*fRx;
-				pDC->Draw( 60.0f*fRx, 175.0f*fRy, nIcon, nIcon);
-				pDC->Draw( 53.0f*fRx, 175.0f*fRy, nIcon, nIcon);
+				float nIcon = 22.0f;
+				pDC->DrawRelative(60.0f / 800.f, 175.0f / 600.f, nIcon, nIcon);
+				pDC->DrawRelative(53.0f / 800.f, 175.0f / 600.f, nIcon, nIcon);
 			}
 
 			MCOLOR color;
@@ -629,13 +629,13 @@ void ZCombatInterface::OnDraw(MDrawContext* pDC)
 			if ( bIsChallengerDie)
 				pDC->SetColor( MCOLOR( 0xFF808080));
 
-			int nPosY = 160.0f*fRy;
-			pDC->Text( 60.0f*fRx, nPosY, charName[ 0]);
+			float nPosY = 160.0f / 600.f;
+			pDC->TextRelative(60.0f / 800.f, nPosY, charName[ 0]);
 
 			pDC->SetColor( MCOLOR(0xFF808080));
-			nPosY += 20;
-			pDC->Text( 80.0f*fRx, nPosY, charName[ 1]);
-			nPosY += 15;
+			nPosY += 20.f / MGetWorkspaceHeight();
+			pDC->Text(80.0f/ 800.f, nPosY, charName[ 1]);
+			nPosY += 15 / MGetWorkspaceHeight();
 		}
 	}
 
@@ -786,32 +786,32 @@ int ZCombatInterface::DrawVictory( MDrawContext* pDC, int x, int y, int nWinCoun
 	nImage *= 32;
 
 	// Draw
-	int nPosX = x * fRx;
-	int nPosY = y * fRy;
-	int nSize = 17.0f * fRx;
+	float nPosX = x / 800.f;
+	float nPosY = y / 600.f;
+	float nSize = 17.0f;
 	for ( int i = 0;  i < (nWinCount % 5);  i++)
 	{
-		pDC->Draw( nPosX, nPosY, nSize, nSize, nImage, 0, 32, 32);
-		nPosX -= nSize * 0.63f;
+		pDC->DrawRelative(nPosX, nPosY, nSize, nSize, nImage, 0, 32, 32);
+		nPosX -= nSize * 0.63f / 800.f;
 	}
 
-	nSize = 19.0f * fRx;
-	nPosY = ( y - 2) * fRy;
+	nSize = 19.0f;
+	nPosY = ( y - 2) / 600.f;
 	if ( (nWinCount % 10) >= 5)
 	{
-		nPosX -= nSize * 0.2f;
-		pDC->Draw( nPosX, nPosY, nSize, nSize, nImage, 64, 32, 32);
-		nPosX -= nSize * 1.1f;
+		nPosX -= nSize * 0.2f / 800.f;
+		pDC->DrawRelative(nPosX, nPosY, nSize, nSize, nImage, 64, 32, 32);
+		nPosX -= nSize * 1.1f / 800.f;
 	}
 	else
 		nPosX -= nSize * 0.5f;
 
-	nSize = 22.0f * fRx;
-	nPosY = ( y - 5) * fRy;
+	nSize = 22.0f;
+	nPosY = ( y - 5) / 600.f;
 	for ( int i = 0;  i < (nWinCount / 10);  i++)
 	{
-		pDC->Draw( nPosX, nPosY, nSize, nSize, nImage, 32, 32, 32);
-		nPosX -= nSize * 0.5f;
+		pDC->DrawRelative(nPosX, nPosY, nSize, nSize, nImage, 32, 32, 32);
+		nPosX -= nSize * 0.5f / 800.f;
 	}
 
 	return 0;
@@ -1703,13 +1703,9 @@ void ZCombatInterface::DrawScoreBoard(MDrawContext* pDC)
 			if(pbmp) {
 				pDC->SetBitmap(pbmp);
 
-				const float fIconSize = .1f;
-				int nIconSize = fIconSize * MGetWorkspaceWidth();
+				const float fIconSize = .1f * 800.f;
 
-				int screenx=(clancenter-.5f*fIconSize)*MGetWorkspaceWidth();
-				int screeny=(clany)*MGetWorkspaceHeight();
-
-				pDC->Draw(screenx,screeny,nIconSize,nIconSize);
+				pDC->DrawRelative(clancenter - 0.5f * fIconSize, clany, fIconSize, fIconSize);
 
 				clany+=fIconSize+1.2*linespace;
 			}
@@ -1858,14 +1854,14 @@ void ZCombatInterface::DrawScoreBoard(MDrawContext* pDC)
 
 		if(pItem->bMyChar || pItem->bCommander)
 		{
-			int y1 = itemy * MGetWorkspaceHeight();
-			int y2 = (y + linespace * nCount) * MGetWorkspaceHeight();
+			float y1 = itemy;
+			float y2 = y + linespace * nCount;
 
-			int x1 = bClanGame ? 0.43*MGetWorkspaceWidth() : 0.255*MGetWorkspaceWidth();
-			int x2 = (0.715+0.26)*MGetWorkspaceWidth();
+			float x1 = bClanGame ? 0.43 : 0.255;
+			float x2 = 0.715 + 0.26;
 
 			pDC->SetColor(backgroundcolor);
-			pDC->FillRectangle(x1,y1,x2-x1,y2-y1);
+			pDC->FillRectangleRelative(x1,y1,x2-x1,y2-y1);
 		}
 
 //		backgroundy=newbackgroundy;
@@ -1877,9 +1873,8 @@ void ZCombatInterface::DrawScoreBoard(MDrawContext* pDC)
 			pDC->SetBitmap( MBitmapManager::Get( "icon_gameroom_s.tga"));
 			int nIconSize = .8f * linespace * (float)MGetWorkspaceHeight();
 			float icony = itemy + (linespace - (float)nIconSize / (float)MGetWorkspaceHeight())*.5f;
-			int screenx = ( ITEM_XPOS[0] - 0.024f) * MGetWorkspaceWidth();
-			int screeny = icony * MGetWorkspaceHeight();
-			pDC->Draw( screenx, screeny, nIconSize+4, nIconSize);
+			float iconx = ITEM_XPOS[0] - 0.024f;
+			pDC->DrawRelative(iconx, icony, nIconSize+4, nIconSize);
 		}
 
 
@@ -1925,11 +1920,7 @@ void ZCombatInterface::DrawScoreBoard(MDrawContext* pDC)
 				MBitmap *pbmp = ZGetEmblemInterface()->GetClanEmblem(pItem->nClanID);
 				if(pbmp) {
 					pDC->SetBitmap(pbmp);
-					int screenx=x*MGetWorkspaceWidth();
-					int screeny=icony*MGetWorkspaceHeight();
-
-					pDC->Draw(screenx,screeny,nIconSize,nIconSize);
-
+					pDC->DrawRelative(x, icony, nIconSize, nIconSize);
 				}
 			}
 			x+= (float)nIconSize/(float)MGetWorkspaceWidth() +0.005f;
@@ -1946,17 +1937,18 @@ void ZCombatInterface::DrawScoreBoard(MDrawContext* pDC)
 				MCOLOR tmpColor = pDC->GetColor();
 
 				x=ITEM_XPOS[2];
+				float inv_h = 1.f / MGetWorkspaceHeight();
 				pDC->SetColor( MCOLOR( 0x40FF0000));
-				pDC->FillRectangle( (x*MGetWorkspaceWidth()), texty*MGetWorkspaceHeight()+1, 0.08*MGetWorkspaceWidth(), 7);
+				pDC->FillRectangleRelative(x, texty + inv_h, 0.08, 7.f * inv_h);
 				float nValue = 0.08 * pQuestPlayerInfo->GetHP() / pQuestPlayerInfo->GetProperty()->fMaxHP;
 				pDC->SetColor( MCOLOR( 0x90FF0000));
-				pDC->FillRectangle( (x*MGetWorkspaceWidth()), texty*MGetWorkspaceHeight()+1, nValue*MGetWorkspaceWidth(), 7);
+				pDC->FillRectangle(x, texty + inv_h, nValue, 7.f * inv_h);
 
 				pDC->SetColor( MCOLOR( 0x4000FF00));
-				pDC->FillRectangle( (x*MGetWorkspaceWidth()), texty*MGetWorkspaceHeight()+9, 0.08*MGetWorkspaceWidth(), 3);
+				pDC->FillRectangle(x, texty + 9.f * inv_h, 0.08, 3.f * inv_h);
 				nValue = 0.08 * pQuestPlayerInfo->GetAP() / pQuestPlayerInfo->GetProperty()->fMaxAP;
 				pDC->SetColor( MCOLOR( 0x9000FF00));
-				pDC->FillRectangle( (x*MGetWorkspaceWidth()), texty*MGetWorkspaceHeight()+9, nValue*MGetWorkspaceWidth(), 3);
+				pDC->FillRectangle(x, texty + 9.f * inv_h, nValue, 3.f * inv_h);
 
 				pDC->SetColor( tmpColor);
 
@@ -2650,7 +2642,7 @@ void ZCombatInterface::DrawResultBoard(MDrawContext* pDC)
 		{
 			ZResultBoardItem *pItem=*i;
 
-			int y1,y2;
+			float y1, y2;
 			float itemy;
 
 			float clancenter;
@@ -2668,8 +2660,8 @@ void ZCombatInterface::DrawResultBoard(MDrawContext* pDC)
 					clancenter = 0.25f;
 				}
 				backgroundcolor = (nLeft%2==0) ? BACKGROUND_COLOR1 : BACKGROUND_COLOR2;
-				y1 = itemy * MGetWorkspaceHeight();
-				y2 = (y + linespace * nLeft) * MGetWorkspaceHeight();
+				y1 = itemy;
+				y2 = (y + linespace * nLeft);
 			}else {
 				x = 0.55f;
 				itemy = y + linespace * nRight;
@@ -2680,8 +2672,8 @@ void ZCombatInterface::DrawResultBoard(MDrawContext* pDC)
 					clancenter = 0.75f;
 				}
 				backgroundcolor = (nRight%2==1) ? BACKGROUND_COLOR1 : BACKGROUND_COLOR2;
-				y1 = itemy * MGetWorkspaceHeight();
-				y2 = (y + linespace * nRight) * MGetWorkspaceHeight();
+				y1 = itemy;
+				y2 = (y + linespace * nRight);
 			}
 
 			if(bDrawClanName)
@@ -2718,9 +2710,7 @@ void ZCombatInterface::DrawResultBoard(MDrawContext* pDC)
 				backgroundcolor = BACKGROUND_COLOR_MYCHAR_DEATH_MATCH;
 			backgroundcolor.a=opacity.a>>1;
 			pDC->SetColor(backgroundcolor);
-			pDC->FillRectangle(
-				(x-.01f)*MGetWorkspaceWidth(),y1,
-				.44f*MGetWorkspaceWidth(),y2-y1);
+			pDC->FillRectangleRelative(x - 0.01f, y1, 0.44f, y2 - y1);
 
 			MCOLOR textcolor = TEXT_COLOR_DEATH_MATCH;
 			textcolor.a=opacity.a;
@@ -2760,12 +2750,10 @@ void ZCombatInterface::DrawResultBoard(MDrawContext* pDC)
 			backgroundcolor.a=opacity.a>>1;
 			pDC->SetColor(backgroundcolor);
 
-			int y1 = itemy * MGetWorkspaceHeight();
-			int y2 = (y + linespace * nCount) * MGetWorkspaceHeight();
+			float y1 = itemy;
+			float y2 = (y + linespace * nCount);
 
-			pDC->FillRectangle(
-				0.022f*MGetWorkspaceWidth(),y1,
-				0.960*MGetWorkspaceWidth(),y2-y1);
+			pDC->FillRectangleRelative(0.022f, y1, 0.960, y2 - y1);
 
 			MCOLOR textcolor= TEXT_COLOR_DEATH_MATCH ;
 
@@ -2833,11 +2821,9 @@ void ZCombatInterface::IconRelative(MDrawContext* pDC,float x,float y,int nIcon)
 	if(!pbmp) return;
 
 	pDC->SetBitmap(pbmp);
-	int screenx=x*MGetWorkspaceWidth();
-	int screeny=y*MGetWorkspaceHeight();
 
 	int nSize=pDC->GetFont()->GetHeight();
-	pDC->Draw(screenx,screeny,nSize,nSize);
+	pDC->DrawRelative(x, y, nSize, nSize);
 }
 
 void ZCombatInterface::Finish()

@@ -467,10 +467,13 @@ void DrawGuage(float x,float y,float fWidth,float fHeight,float fLeanDir,DWORD c
 
 	float fLean=fHeight*(float)MGetWorkspaceHeight()*fLeanDir;
 
+	int corrected_workspace_w = MGetWorkspaceWidth() / RGetAspect() * (4. / 3.);
+	int start = (MGetWorkspaceWidth() - corrected_workspace_w) / 2;
+
 	int x1,y1,x2,y2;
-	x1=x*(float)MGetWorkspaceWidth();
+	x1=x * corrected_workspace_w + start;
 	y1=y*(float)MGetWorkspaceHeight();
-	x2=(x+fWidth)*(float)MGetWorkspaceWidth();
+	x2=(x+fWidth) * corrected_workspace_w + start;
 	y2=(y+fHeight)*(float)MGetWorkspaceHeight();
 
 	SETVERTEX(0,x1		,y1,0,	0,0,color);
