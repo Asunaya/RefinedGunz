@@ -32,7 +32,7 @@ static void MakePlane(D3DXPLANE &plane, const rvector &v, const rvector &u, cons
 static rmatrix GetDefaultProjectionMatrix(float Near = DEFAULT_NEAR_Z, float Far = DEFAULT_FAR_Z) {
 	return PerspectiveProjectionMatrixViewport(
 		RGetScreenWidth(), RGetScreenHeight(),
-		g_fFOV,
+		FIXED_FOV(g_fFOV),
 		Near, Far);
 }
 
@@ -899,7 +899,7 @@ void Portal::RedirectCamera()
 		plane->d = -plane->a*t.x - plane->b*t.y - plane->c*t.z;
 	};
 
-	float RFov_horiz = g_fFOV;
+	float RFov_horiz = FIXED_FOV(g_fFOV);
 	float RFov_vert = atanf(tanf(RFov_horiz / 2.0f) / (float(RGetScreenWidth()) / RGetScreenHeight()))*2.0f;
 	float fovh2 = RFov_horiz / 2.0f, fovv2 = RFov_vert / 2.0f;
 	float ch = cosf(fovh2), sh = sinf(fovh2);
@@ -1490,7 +1490,7 @@ static void MakeFrustum(rplane (&Frustum)[6], rmatrix View, rvector Pos, rvector
 		plane->d = -plane->a*t.x - plane->b*t.y - plane->c*t.z;
 	};
 
-	float RFov_horiz = g_fFOV;
+	float RFov_horiz = FIXED_FOV(g_fFOV);
 	float RFov_vert = atanf(tanf(RFov_horiz / 2.0f) / (float(RGetScreenWidth()) / RGetScreenHeight()))*2.0f;
 	float fovh2 = RFov_horiz / 2.0f, fovv2 = RFov_vert / 2.0f;
 	float ch = cosf(fovh2), sh = sinf(fovh2);

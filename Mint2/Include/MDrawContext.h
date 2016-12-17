@@ -97,6 +97,12 @@ public:
 	virtual void FillRectangle(int x, int y, int cx, int cy) = 0;
 	void FillRectangle(const MRECT& r);
 
+	virtual void DrawRelative(float x, float y, float w, float h) = 0;
+	virtual void DrawRelative(float x, float y, int w, int h) = 0;
+	virtual int TextRelative(float x, float y, const char* szText) = 0;
+	virtual void DrawRelative(float x, float y, float w, float h, int sx, int sy, int sw, int sh) = 0;
+	virtual void FillRectangleRelative(float x, float y, float cx, float cy) = 0;
+
 	// Bitmap Drawing
 	void Draw(int x, int y);
 	void Draw(int x, int y, int w, int h);

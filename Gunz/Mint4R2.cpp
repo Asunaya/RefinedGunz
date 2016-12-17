@@ -277,6 +277,49 @@ void MDrawContextR2::SetClipRect(MRECT& r)
 	_ASSERT(hr==D3D_OK);
 }
 
+void MDrawContextR2::DrawRelative(float x, float y, float w, float h)
+{
+	int correct_w = MGetWorkspaceWidth() / RGetAspect() * (4. / 3.);
+	int correct_h = MGetWorkspaceHeight();
+	int start = (MGetWorkspaceWidth() - correct_w) / 2;
+	float m = correct_w / 800.f;
+
+	MDrawContext::Draw(x * correct_w + start, y * correct_h, w * m, h * m);
+}
+void MDrawContextR2::DrawRelative(float x, float y, int w, int h)
+{
+	int correct_w = MGetWorkspaceWidth() / RGetAspect() * (4. / 3.);
+	int correct_h = MGetWorkspaceHeight();
+	int start = (MGetWorkspaceWidth() - correct_w) / 2;
+
+	MDrawContext::Draw(x * correct_w + start, y * correct_h, w, h);
+}
+int MDrawContextR2::TextRelative(float x, float y, const char* szText)
+{
+	int correct_w = MGetWorkspaceWidth() / RGetAspect() * (4. / 3.);
+	int correct_h = MGetWorkspaceHeight();
+	int start = (MGetWorkspaceWidth() - correct_w) / 2;
+
+	return Text(x * correct_w + start, y * correct_h, szText);
+}
+void MDrawContextR2::DrawRelative(float x, float y, float w, float h, int sx, int sy, int sw, int sh)
+{
+	int correct_w = MGetWorkspaceWidth() / RGetAspect() * (4. / 3.);
+	int correct_h = MGetWorkspaceHeight();
+	int start = (MGetWorkspaceWidth() - correct_w) / 2;
+	float m = correct_w / 800.f;
+
+	MDrawContext::Draw(x * correct_w + start, y * correct_h, w * m, h * m, sx, sy, sw, sh);
+}
+void MDrawContextR2::FillRectangleRelative(float x, float y, float cx, float cy)
+{
+	int correct_w = MGetWorkspaceWidth() / RGetAspect() * (4. / 3.);
+	int correct_h = MGetWorkspaceHeight();
+	int start = (MGetWorkspaceWidth() - correct_w) / 2;
+
+	FillRectangle(x * correct_w + start, y * correct_h, cx * correct_w, cy * correct_h);
+}
+
 
 MBitmapR2::MBitmapR2(void)
 {

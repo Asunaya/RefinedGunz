@@ -108,6 +108,7 @@ bool RIsTrilinear() { return g_bTrilinear; }
 bool RIsAvailUserClipPlane() { return g_bAvailUserClipPlane; }
 int RGetScreenWidth() { return g_nScreenWidth; }
 int RGetScreenHeight() { return g_nScreenHeight; }
+float RGetAspect() { return (float)g_nScreenWidth / (float)g_nScreenHeight; }
 int RGetPicmip() { return g_nPicmip; }
 RPIXELFORMAT RGetPixelFormat() { return g_PixelFormat; }
 LPDIRECT3DDEVICE9	RGetDevice() { return g_pd3dDevice; }
