@@ -14,6 +14,7 @@
 #include "ZMyInfo.h"
 
 #include "ZChat_CmdID.h"
+#include "Config.h"
 
 #define ZCHAT_CHAT_DELAY				250
 #define ZCHAT_CHAT_ABUSE_COOLTIME		(1000 * 60)		// 1분
@@ -146,7 +147,10 @@ bool ZChat::Input(const char* szMsg)
 				{
 					bMsgIsCmd = false;
 
-//					return true;			// 채팅창에 표시 안되게 한다.
+#ifdef HIDE_UNRECOGNIZED_COMMAND_INPUTS
+					ZChatOutput("Unrecognized command.");
+					return true;
+#endif
 				}
 			}
 		}

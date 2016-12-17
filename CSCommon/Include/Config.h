@@ -57,3 +57,7 @@
 // immediately or 250 ms delayed.
 // It's delayed in vanilla Gunz.
 #define INSTANT_SLASH_DECAL
+
+// Prevents /<command> where <command> isn't a recognized command
+// from showing up in chat.
+#define HIDE_UNRECOGNIZED_COMMAND_INPUTS
