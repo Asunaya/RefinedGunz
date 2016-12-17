@@ -47,15 +47,16 @@ static D3DPtr<IDirect3DTexture9> LoadDDS(const void* data, size_t size,
 		format, pool, MakeWriteProxy(ret), nullptr)))
 		return nullptr;
 
-	// Copy memory
+	// Copy all mipmap levels into the texture
 	for (size_t i{}; i < Levels; ++i)
 	{
 		D3DLOCKED_RECT LockedRect;
 		if (FAILED(ret->LockRect(i, &LockedRect, nullptr, 0)))
-			return false;
+			return nullptr;
 		auto&& img = tex2D[i];
 		memcpy(LockedRect.pBits, img.data(), img.size());
-		assert(SUCCEEDED(ret->UnlockRect(i)));
+		if (FAILED(ret->UnlockRect(i)))
+			return nullptr;
 	}
 
 	info.Width = Width;
