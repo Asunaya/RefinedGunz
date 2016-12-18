@@ -7,6 +7,7 @@
 #include "RBspObject.h"
 #include "RS2.h"
 #include <cstdint>
+#include "ZOptionInterface.h"
 
 bool CheckDeveloperMode(const char* Name)
 {
@@ -122,6 +123,30 @@ void LoadRGCommands(ZChatCmdManager& CmdManager)
 
 		ZGetConfiguration()->Save();
 	}, CCF_ALL, 1, 1, true, "/fullscreen", "");
+
+	CmdManager.AddCommand(0, "resolution", [](const char *line, int argc, char ** const argv) {
+		auto Width = atoi(argv[1]);
+		auto Height = atoi(argv[2]);
+		if (Width == 0 || Height == 0)
+		{
+			ZChatOutput("Invalid resolution");
+			return;
+		}
+		ZGetConfiguration()->GetVideo()->nWidth = Width;
+		ZGetConfiguration()->GetVideo()->nHeight = Height;
+
+		RMODEPARAMS ModeParams = { Width, Height,
+			ZGetConfiguration()->GetVideo()->FullscreenMode, RGetPixelFormat() };
+
+		RResetDevice(&ModeParams);
+
+		Mint::GetInstance()->SetWorkspaceSize(ModeParams.nWidth, ModeParams.nHeight);
+		Mint::GetInstance()->GetMainFrame()->SetSize(ModeParams.nWidth, ModeParams.nHeight);
+
+		ZGetOptionInterface()->Resize(ModeParams.nWidth, ModeParams.nHeight);
+
+		ZGetConfiguration()->Save();
+	}, CCF_ALL, 2, 2, true, "/resolution <width> <height>", "");
 
 	auto Sens = [](const char *line, int argc, char ** const argv) {
 		float fSens = atof(argv[1]);
