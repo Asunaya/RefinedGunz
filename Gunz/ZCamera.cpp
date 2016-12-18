@@ -261,8 +261,6 @@ void ZCamera::Init()
 	m_fAngleX = CAMERA_DEFAULT_ANGLEX;
 	m_fAngleZ = CAMERA_DEFAULT_ANGLEZ;
 	m_fDist = CAMERA_DEFAULT_DISTANCE;
-	if (ZGetConfiguration()->GetCamFix())
-		m_fDist *= RGetScreenWidth() / RGetScreenHeight() / (4.f / 3.f);
 	m_fCurrentDist = CAMERA_DEFAULT_DISTANCE;
 	m_bShocked = false;
 	m_Position = rvector(0, 0, 0);

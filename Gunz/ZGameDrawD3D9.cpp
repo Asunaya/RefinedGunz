@@ -111,6 +111,10 @@ bool ZGameDrawD3D9::DrawShadows()
 	return RS2::Get().Render.DrawShadows([&] { DrawShadowCastingObjects(); });
 }
 
+static auto FixedFOV(float x) {
+	return 2.f * atan(tan((2.f * atan(tan(x / 2.f) / (4.f / 3.f))) / 2.f) * RGetAspect());
+}
+
 void ZGameDrawD3D9::DrawScene()
 {
 	auto profZGameDraw = MBeginProfile("ZGame::Draw");
@@ -123,6 +127,14 @@ void ZGameDrawD3D9::DrawScene()
 #endif
 
 	SetStatesPreDraw(Game);
+
+	if (ZGetConfiguration()->GetCamFix())
+		RSetProjection(FixedFOV(g_fFOV), DEFAULT_NEAR_Z, g_fFarZ);
+
+	DEFER(
+		if (ZGetConfiguration()->GetCamFix())
+			RSetProjection(g_fFOV, DEFAULT_NEAR_Z, g_fFarZ);
+	);
 
 	{
 		// Save the world matrix because, apparently, something in this block mutates it.

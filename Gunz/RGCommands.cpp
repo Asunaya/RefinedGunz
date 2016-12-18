@@ -67,14 +67,6 @@ void LoadRGCommands(ZChatCmdManager& CmdManager)
 			bCamFix = atoi(argv[1]) != 0;
 
 		ZGetConfiguration()->bCamFix = bCamFix;
-		if (bCamFix)
-		{
-			auto Ratio = float(RGetScreenWidth()) / RGetScreenHeight() / (4.0f / 3);
-			ZGetCamera()->m_fDist = CAMERA_DEFAULT_DISTANCE * Ratio;
-		}
-		else
-			ZGetCamera()->m_fDist = CAMERA_DEFAULT_DISTANCE;
-
 		ZGetConfiguration()->Save();
 
 		ZChatOutputF("Cam fix %s", bCamFix ? "enabled" : "disabled");
