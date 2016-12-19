@@ -111,10 +111,6 @@ bool ZGameDrawD3D9::DrawShadows()
 	return RS2::Get().Render.DrawShadows([&] { DrawShadowCastingObjects(); });
 }
 
-static auto FixedFOV(float x) {
-	return 2.f * atan(tan((2.f * atan(tan(x / 2.f) / (4.f / 3.f))) / 2.f) * RGetAspect());
-}
-
 void ZGameDrawD3D9::DrawScene()
 {
 	auto profZGameDraw = MBeginProfile("ZGame::Draw");

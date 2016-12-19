@@ -129,3 +129,7 @@ inline ZMyCharacter* MyChar()
 {
 	return ZGetGame()->m_pMyCharacter;
 }
+
+inline auto FixedFOV(float x) {
+	return 2.f * atan(tan((2.f * atan(tan(x / 2.f) / (4.f / 3.f))) / 2.f) * RGetAspect());
+}

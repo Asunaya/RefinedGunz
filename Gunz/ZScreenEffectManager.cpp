@@ -10,6 +10,7 @@
 #include "ZQuest.h"
 #include "ZRuleDuel.h"
 #include "ZConfiguration.h"
+#include "RGMain.h"
 
 void DrawGuage(float x,float y,float fWidth,float fHeight,float fLeanDir,DWORD color);
 
@@ -41,10 +42,6 @@ bool ZScreenEffect::IsDeleteTime()
 	if(m_VMesh.isOncePlayDone())
 		return true;
 	return false;
-}
-
-static auto FixedFOV(float x) {
-	return 2.f * atan(tan((2.f * atan(tan(x / 2.f) / (4.f / 3.f))) / 2.f) * RGetAspect());
 }
 
 bool ZScreenEffect::DrawCustom(unsigned long int nTime, const rvector& vOffset, float fAngle)
