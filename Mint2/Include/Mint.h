@@ -51,6 +51,7 @@ protected:
 	// Workspace Size
 	int			m_nWorkspaceWidth;
 	int			m_nWorkspaceHeight;
+	bool		Stretch = true;
 
 	/// Action Map
 //	ACTIONKEYMAP	m_ActionKeyMap;
@@ -157,6 +158,9 @@ public:
 	/// Mint가 동작될 화면의 크기 설정
 	void SetWorkspaceSize(int w, int h);
 
+	auto GetStretch() const { return Stretch; }
+	void SetStretch(bool b) { Stretch = b; }
+
 	/// 시스템에 맞는 Bitmap Open Function을 제공해야 한다.
 	virtual MBitmap* OpenBitmap(const char* szName) = 0;
 	/// 시스템에 맞는 Font Open Function을 제공해야 한다.
@@ -231,6 +235,14 @@ inline int MGetWorkspaceWidth(void){
 /// Mint가 동작될 화면의 세로 크기 얻기
 inline int MGetWorkspaceHeight(void){
 	return Mint::GetInstance()->GetWorkspaceHeight();
+}
+
+inline int MGetCorrectedWorkspaceWidth() {
+	if (Mint::GetInstance()->GetStretch())
+		return MGetWorkspaceWidth();
+
+	auto Aspect = static_cast<float>(MGetWorkspaceWidth()) / MGetWorkspaceHeight();
+	return static_cast<int>(MGetWorkspaceWidth() / Aspect * (4.f / 3.f));
 }
 
 // Sample

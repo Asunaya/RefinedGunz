@@ -33,6 +33,13 @@ public:
 
 	virtual void SetClipRect(MRECT& r);
 
+	//Functions to draw relative to 4:3 aspect ratio
+	virtual void DrawRelative(float x, float y, float w, float h);
+	virtual void DrawRelative(float x, float y, int w, int h);
+	virtual int TextRelative(float x, float y, const char* szText);
+	virtual void DrawRelative(float x, float y, float w, float h, int sx, int sy, int sw, int sh);
+	virtual void FillRectangleRelative(float x, float y, float cx, float cy);
+
 private:
 	virtual void Draw(MBitmap *pBitmap, int x, int y, int w, int h, int sx, int sy, int sw, int sh);
 };

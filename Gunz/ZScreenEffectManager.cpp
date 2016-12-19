@@ -9,6 +9,7 @@
 #include "ZMyInfo.h"
 #include "ZQuest.h"
 #include "ZRuleDuel.h"
+#include "ZConfiguration.h"
 
 void DrawGuage(float x,float y,float fWidth,float fHeight,float fLeanDir,DWORD color);
 
@@ -42,6 +43,10 @@ bool ZScreenEffect::IsDeleteTime()
 	return false;
 }
 
+static auto FixedFOV(float x) {
+	return 2.f * atan(tan((2.f * atan(tan(x / 2.f) / (4.f / 3.f))) / 2.f) * RGetAspect());
+}
+
 bool ZScreenEffect::DrawCustom(unsigned long int nTime, const rvector& vOffset, float fAngle)
 {
 	RGetDevice()->SetRenderState(D3DRS_ZENABLE, FALSE);
@@ -59,16 +64,27 @@ bool ZScreenEffect::DrawCustom(unsigned long int nTime, const rvector& vOffset, 
 	auto View = ViewMatrix(eye, Normalized(at - eye), up);
 	auto Offset = TranslationMatrix(vOffset);
 
-	auto Ratio = 4.0f / 3 / (float(RGetScreenWidth()) / RGetScreenHeight());
-	auto Scale = ScalingMatrix({ 1, Ratio, 1, 1 });
+	if (ZGetConfiguration()->GetInterfaceFix())
+	{
+		RSetProjection(FixedFOV(g_fFOV), DEFAULT_NEAR_Z, 100000.f);
+	}
+	else
+	{
+		auto Ratio = 4.0f / 3 / (float(RGetScreenWidth()) / RGetScreenHeight());
+		auto Scale = ScalingMatrix({ 1, Ratio, 1, 1 });
 
-	View = Scale * View;
+		View = Scale * View;
+	}
+
 	View = Offset * View;
 
 	RSetTransform(D3DTS_VIEW, View);
 
 	m_VMesh.SetWorldMatrix(World);
 	m_VMesh.Render();
+	
+	if (ZGetConfiguration()->GetInterfaceFix())
+		RSetProjection(g_fFOV, DEFAULT_NEAR_Z, 100000.f);
 
 	if(m_VMesh.isOncePlayDone()) {
 		return false;
@@ -470,12 +486,15 @@ void DrawGuage(float x,float y,float fWidth,float fHeight,float fLeanDir,DWORD c
 #define SETVERTEX(_a,_x,_y,_z,_u,_v,_color) { ver[_a].x=_x;ver[_a].y=_y;ver[_a].z=_z;ver[_a].u=_u;ver[_a].v=_v;ver[_a].color=_color;  ver[_a].w=.1f; }
 
 	float fLean=fHeight*(float)MGetWorkspaceHeight()*fLeanDir;
+	
+	int corrected_workspace_w = MGetCorrectedWorkspaceWidth();
+	int start = (MGetWorkspaceWidth() - corrected_workspace_w) / 2;
 
 	int x1,y1,x2,y2;
-	x1=x*(float)MGetWorkspaceWidth();
-	y1=y*(float)MGetWorkspaceHeight();
-	x2=(x+fWidth)*(float)MGetWorkspaceWidth();
-	y2=(y+fHeight)*(float)MGetWorkspaceHeight();
+	x1 = x * corrected_workspace_w + start;
+	y1 = y*(float)MGetWorkspaceHeight();
+	x2 = (x + fWidth) * corrected_workspace_w + start;
+	y2 = (y + fHeight)*(float)MGetWorkspaceHeight();
 
 	SETVERTEX(0,x1		,y1,0,	0,0,color);
 	SETVERTEX(1,x2		,y1,0,	1,0,color);

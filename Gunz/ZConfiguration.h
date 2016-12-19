@@ -179,6 +179,7 @@ public:
 	int GetVisualFPSLimit() const { return VisualFPSLimit; }
 	int GetLogicalFPSLimit() const { return LogicalFPSLimit; }
 	bool GetCamFix() const { return bCamFix; }
+	bool GetInterfaceFix() const { return InterfaceFix; }
 	auto GetChatBackgroundColor() const { return ChatBackgroundColor; }
 	bool GetShowHitboxes() const { return bShowHitboxes; }
 	bool GetDynamicResourceLoad() const { return bDynamicResourceLoad; }
@@ -227,6 +228,7 @@ private:
 	int LogicalFPSLimit = 250;
 
 	bool bCamFix{};
+	bool InterfaceFix{};
 	// 50% transparent black
 	u32 ChatBackgroundColor = 0x80000000;
 	bool bShowHitboxes{};

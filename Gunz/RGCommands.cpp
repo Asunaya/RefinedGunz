@@ -75,6 +75,23 @@ void LoadRGCommands(ZChatCmdManager& CmdManager)
 		CCF_ALL, 0, 1, true, "/camfix [0/1]", "");
 
 
+	CmdManager.AddCommand(0, "interfacefix", [](const char *line, int argc, char ** const argv) {
+		bool val;
+		if (argc == 1)
+			val = !ZGetConfiguration()->GetInterfaceFix();
+		else
+			val = atoi(argv[1]) != 0;
+
+		ZGetConfiguration()->InterfaceFix = val;
+		ZGetConfiguration()->Save();
+
+		Mint::GetInstance()->SetStretch(!val);
+
+		ZChatOutputF("Interface fix %s", val ? "enabled" : "disabled");
+	},
+		CCF_ALL, 0, 1, true, "/interfacefix [0/1]", "");
+
+
 	CmdManager.AddCommand(0, "backgroundcolor", [](const char *line, int argc, char ** const argv){
 		DWORD BackgroundColor = strtoul(argv[1], nullptr, 16);
 		g_Chat.SetBackgroundColor(BackgroundColor);
