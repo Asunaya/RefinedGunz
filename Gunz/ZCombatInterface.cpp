@@ -634,8 +634,8 @@ void ZCombatInterface::OnDraw(MDrawContext* pDC)
 
 			pDC->SetColor( MCOLOR(0xFF808080));
 			nPosY += 20.f / MGetWorkspaceHeight();
-			pDC->Text(80.0f/ 800.f, nPosY, charName[ 1]);
-			nPosY += 15 / MGetWorkspaceHeight();
+			pDC->TextRelative(80.0f / 800.f, nPosY, charName[1]);
+			nPosY += 15.f / MGetWorkspaceHeight();
 		}
 	}
 
