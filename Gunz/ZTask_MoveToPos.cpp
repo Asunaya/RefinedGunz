@@ -46,7 +46,7 @@ ZTaskResult ZTask_MoveToPos::OnRun(float fDelta)
 			fRotAngle = -fAngle;
 			m_bRotated = true;
 		}
-		mat = RGetRotZ(fRotAngle);
+		mat = RGetRotZ(ToDegree(fRotAngle));
 
 		m_pParent->RotateTo(vBodyDir * mat);
 	}
