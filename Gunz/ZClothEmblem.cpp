@@ -210,11 +210,8 @@ void ZClothEmblem::setOption( int nIter_, float power_, float inertia_ )
 //////////////////////////////////////////////////////////////////////////
 void ZClothEmblem::update()
 {
-	if( !isInViewFrustum( &mAABB, RGetViewFrustum() )  || 
-		!m_pWorld->GetBsp()->IsVisible(mAABB) ) {
-			mbIsInFrustrum = false;
-			return;
-		}
+	if (!mbIsInFrustrum)
+		return;
 
 	DWORD currTime = GetGlobalTimeMS();
 	if ( mMyTime - currTime < 33 )
@@ -234,7 +231,6 @@ void ZClothEmblem::update()
 	}
 	satisfyConstraints();
 	mWndGenerator.Update( GetGlobalTimeMS() );
-	mbIsInFrustrum = true;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -399,7 +395,13 @@ void ZClothEmblem::satisfyConstraints()
 
 void ZClothEmblem::render()
 {
-	if( !mbIsInFrustrum ) return;
+	if (!isInViewFrustum(&mAABB, RGetViewFrustum()) ||
+		!m_pWorld->GetBsp()->IsVisible(mAABB)) {
+		mbIsInFrustrum = false;
+		return;
+	}
+
+	mbIsInFrustrum = true;
 
 	int		i, index;
 
