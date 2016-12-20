@@ -8,6 +8,7 @@
 #include "RS2.h"
 #include <cstdint>
 #include "ZOptionInterface.h"
+#include "ZTestGame.h"
 
 bool CheckDeveloperMode(const char* Name)
 {
@@ -341,6 +342,15 @@ void LoadRGCommands(ZChatCmdManager& CmdManager)
 		ZChatOutputF("Set showrts to %d", val);
 	},
 		CCF_ALL, 0, 1, true, "/showrts <0/1>", "");
+
+	CmdManager.AddCommand(0, "map", [](const char *line, int argc, char ** const argv) {
+		if (!CheckDeveloperMode("map"))
+			return;
+
+		ZGetGameInterface()->SetState(GUNZ_LOBBY);
+		CreateTestGame(argv[1]);
+	},
+		CCF_ALL, 0, 1, true, "/map <name>", "");
 }
 
 #ifdef TIMESCALE
