@@ -280,9 +280,13 @@ void RBspObjectDrawD3D9::CreateBatches()
 					else
 					{
 						AddVertexData(Mesh.Positions[i] * Mesh.World * Object.World);
-						AddVertexData(Mesh.Normals[i]);
+						AddVertexData(TransformNormal(Mesh.Normals[i], Mesh.World * Object.World));
 						AddVertexData(Mesh.TexCoords[i]);
-						AddVertexData(Mesh.Tangents[i]);
+						v4 tan = Mesh.Tangents[i];
+						tan.w = 0;
+						tan = Transform(tan, Mesh.World * Object.World);
+						tan.w = Mesh.Tangents[i].w;
+						AddVertexData(tan);
 					}
 				}
 				CumulativeVertexBase += Mesh.VertexCount;
