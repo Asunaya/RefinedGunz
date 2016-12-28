@@ -125,6 +125,7 @@ void RBspObjectDrawD3D9::CreateTextures()
 		Mat.Emissive = LoadTexture(EluMat.tEmissive);
 		Mat.AlphaTestValue = EluMat.AlphaTestValue;
 		Mat.TwoSided = EluMat.TwoSided;
+		Mat.Shininess = EluMat.shininess;
 	}
 }
 
@@ -379,7 +380,7 @@ void RBspObjectDrawD3D9::CreateRTs()
 	{
 		auto& RT = RTs[i];
 
-		D3DFORMAT Format = i == static_cast<size_t>(RTType::LinearDepth) ? D3DFMT_R32F : D3DFMT_X8R8G8B8;
+		D3DFORMAT Format = i == static_cast<size_t>(RTType::LinearDepth) ? D3DFMT_R32F : D3DFMT_A8R8G8B8;
 
 		if (FAILED(dev->CreateTexture(
 			RGetScreenWidth(), RGetScreenHeight(),
@@ -493,6 +494,7 @@ void RBspObjectDrawD3D9::SetMaterial(Material& Mat)
 		for (size_t i{}; i < ArraySize(TexIndices); ++i)
 			dev->SetTexture(i, GetTexture(TexIndices[i]));
 		SetPSFloat(DeferredShaderConstant::Opacity, Type <= Normal);
+		SetPSFloat(DeferredShaderConstant::SpecLevel, Mat.Shininess / 255.f);
 	}
 }
 
@@ -685,6 +687,7 @@ void RBspObjectDrawD3D9::DrawLighting()
 	dev->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
 
 	DrawAmbient(GetRT(RTType::Ambient).get());
+
 
 	dev->SetVertexShader(PointLightVS.get());
 	dev->SetPixelShader(PointLightPS.get());

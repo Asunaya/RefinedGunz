@@ -80,17 +80,20 @@ PS_OUTPUT ps_main(in VS_OUTPUT In)
 	normal = normalize(In.Normal);
 
 	float3 color = tex2D(diffuseTexture, In.Texture).xyz;
-	float specular = tex2D(specularTexture, In.Texture).w;
-
+	float specular = 0;
+	// SpecLevel == 0 means no specular texture
+	if (SpecLevel <= 0.)
+		specular = 0;
+	else
+		specular = tex2D(specularTexture, In.Texture).w;
 
 	Out.Diffuse.xyz = tex2D(diffuseTexture, In.Texture).xyz;
 	Out.Diffuse.w = specular;
 	Out.Normal.xyz = normal*0.5 + 0.5;
-	Out.Normal.w = 1.0;
+	Out.Normal.w = SpecLevel;
 
 	float d = (In.viewpos.z - Near) / (Far - Near);
 	Out.Depth = float4(d, d, d, 1.0);
 	Out.Ambient = float4(tex2D(selfIllumTexture, In.Texture).xyz + Out.Diffuse.xyz*0.3, 1.0);
-
 	return Out;
 }
