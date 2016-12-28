@@ -125,6 +125,7 @@ void RBspObjectDrawD3D9::CreateTextures()
 		Mat.Emissive = LoadTexture(EluMat.tEmissive);
 		Mat.AlphaTestValue = EluMat.AlphaTestValue;
 		Mat.TwoSided = EluMat.TwoSided;
+		Mat.Shininess = EluMat.shininess;
 	}
 }
 
@@ -280,9 +281,13 @@ void RBspObjectDrawD3D9::CreateBatches()
 					else
 					{
 						AddVertexData(Mesh.Positions[i] * Mesh.World * Object.World);
-						AddVertexData(Mesh.Normals[i]);
+						AddVertexData(TransformNormal(Mesh.Normals[i], Mesh.World * Object.World));
 						AddVertexData(Mesh.TexCoords[i]);
-						AddVertexData(Mesh.Tangents[i]);
+						v4 tan = Mesh.Tangents[i];
+						tan.w = 0;
+						tan = Transform(tan, Mesh.World * Object.World);
+						tan.w = Mesh.Tangents[i].w;
+						AddVertexData(tan);
 					}
 				}
 				CumulativeVertexBase += Mesh.VertexCount;
@@ -375,7 +380,7 @@ void RBspObjectDrawD3D9::CreateRTs()
 	{
 		auto& RT = RTs[i];
 
-		D3DFORMAT Format = i == static_cast<size_t>(RTType::LinearDepth) ? D3DFMT_R32F : D3DFMT_X8R8G8B8;
+		D3DFORMAT Format = i == static_cast<size_t>(RTType::LinearDepth) ? D3DFMT_R32F : D3DFMT_A8R8G8B8;
 
 		if (FAILED(dev->CreateTexture(
 			RGetScreenWidth(), RGetScreenHeight(),
@@ -489,6 +494,7 @@ void RBspObjectDrawD3D9::SetMaterial(Material& Mat)
 		for (size_t i{}; i < ArraySize(TexIndices); ++i)
 			dev->SetTexture(i, GetTexture(TexIndices[i]));
 		SetPSFloat(DeferredShaderConstant::Opacity, Type <= Normal);
+		SetPSFloat(DeferredShaderConstant::SpecLevel, Mat.Shininess / 255.f);
 	}
 }
 
@@ -681,6 +687,7 @@ void RBspObjectDrawD3D9::DrawLighting()
 	dev->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
 
 	DrawAmbient(GetRT(RTType::Ambient).get());
+
 
 	dev->SetVertexShader(PointLightVS.get());
 	dev->SetPixelShader(PointLightPS.get());

@@ -67,6 +67,7 @@ private:
 		u16 Opacity = -1;
 		u16 Emissive = -1;
 		u8 AlphaTestValue = -1;
+		float Shininess = 0;
 		bool TwoSided{};
 
 		bool HasDiffuse() const { return Diffuse != static_cast<decltype(Diffuse)>(-1); }
