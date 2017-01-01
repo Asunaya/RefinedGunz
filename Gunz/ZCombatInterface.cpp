@@ -681,7 +681,7 @@ void ZCombatInterface::OnDraw(MDrawContext* pDC)
 
 	if (ZGetGame()->GetMatch()->GetMatchType() == MMATCH_GAMETYPE_GUNGAME)
 	{
-		char buffer[32];
+		char buffer[64];
 		sprintf(buffer, "[Level %d / %d ]", ZGetGame()->m_pMyCharacter->GetKills(), ZGetGame()->GetMatch()->GetRoundCount());
 		TextRelative(pDC, 660.f / 800.f, 480.f / 600.f, buffer);
 	}
