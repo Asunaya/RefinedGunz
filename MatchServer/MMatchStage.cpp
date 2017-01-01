@@ -16,6 +16,7 @@
 #include "MMatchRuleBerserker.h"
 #include "MMatchRuleDuel.h"
 #include "MMatchRuleSkillmap.h"
+#include "MMatchRuleGunGame.h"
 #include "MErrorTable.h"
 
 MMatchStage::MMatchStage() : MovingWeaponMgr(*this), m_WorldItemManager(this)
@@ -391,6 +392,10 @@ MMatchRule* MMatchStage::CreateRule(MMATCH_GAMETYPE nGameType)
 								 return (new MMatchRuleSkillmap(this));
 	}
 		break;
+	case MMATCH_GAMETYPE_GUNGAME:
+	{
+		return (new MMatchRuleGunGame(this));
+	}break;
 	default:
 		{
 			_ASSERT(0);

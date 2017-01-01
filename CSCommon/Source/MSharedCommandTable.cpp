@@ -65,6 +65,11 @@ void MAddSharedCommandTable(MCommandManager* pCommandManager, int nSharedType)
 		P(MPT_BLOB, "Ping list")
 	C(MC_PEER_BASICINFO_RG, "", "", MCDT_PEER2PEER)
 		P(MPT_BLOB, "BasicInfo")
+	C(MC_MATCH_GUNGAME_SEND_NEW_WEAPON, "", "", MCDT_MACHINE2MACHINE)
+		P(MPT_UID, "uidPlayer")
+		P(MPT_UINT,"melee")
+		P(MPT_UINT, "primary")
+		P(MPT_UINT, "secondary")
 
 
 	C(MC_LOCAL_INFO, "Local.Info", "Local information", MCDT_LOCAL)

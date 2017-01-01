@@ -129,7 +129,8 @@ inline bool IsGameRuleDeathMatch(MMATCH_GAMETYPE nGameType)
 	return (
 		(nGameType == MMATCH_GAMETYPE_DEATHMATCH_SOLO) || 
 		(nGameType == MMATCH_GAMETYPE_DEATHMATCH_TEAM) ||
-		(nGameType == MMATCH_GAMETYPE_TRAINING)
+		(nGameType == MMATCH_GAMETYPE_TRAINING)||
+		(nGameType == MMATCH_GAMETYPE_GUNGAME)
 	);
 }
 inline bool IsGameRuleGladiator(MMATCH_GAMETYPE nGameType)

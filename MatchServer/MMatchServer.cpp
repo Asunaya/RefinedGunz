@@ -46,7 +46,7 @@
 #include "MTeamGameStrategy.h"
 #include "stuff.h"
 #include "MPickInfo.h"
-
+#include "GunGame.h"
 #define DEFAULT_REQUEST_UID_SIZE		4200000000
 #define DEFAULT_REQUEST_UID_SPARE_SIZE	10000
 #define DEFAULT_ASYNCPROXY_THREADPOOL	6
@@ -389,6 +389,12 @@ bool MMatchServer::LoadInitFile()
 		return false;
 	}
 
+	if (!MGetGunGame()->ReadXML("gungame.xml"))
+	{
+		Log(LOG_ALL, "Load GunGame.xml Failed.\n");
+		return false;
+	}
+
 	unsigned long nItemChecksum = MGetMZFileChecksum(FILENAME_ITEM_DESC);
 	SetItemFileChecksum(nItemChecksum);
 
@@ -562,6 +568,7 @@ void MMatchServer::Destroy()
 	m_AsyncProxy.Destroy();
 	MGetMatchShop()->Destroy();
 	m_SafeUDP.Destroy();
+	MGetGunGame()->~GunGame();
 	MServer::Destroy();
 
 	MMatchStringResManager::FreeInstance();

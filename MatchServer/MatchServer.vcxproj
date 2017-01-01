@@ -268,6 +268,7 @@
     <ClCompile Include="ConsoleBar.cpp" />
     <ClCompile Include="DBQuestCachingData.cpp" />
     <ClCompile Include="ExceptionAttacher.cpp" />
+    <ClCompile Include="GunGame.cpp" />
     <ClCompile Include="LagCompensation.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainFrm.cpp" />
@@ -318,6 +319,7 @@
     <ClCompile Include="MMatchRuleDeathMatch.cpp" />
     <ClCompile Include="MMatchRuleDuel.cpp" />
     <ClCompile Include="MMatchRuleGladiator.cpp" />
+    <ClCompile Include="MMatchRuleGunGame.cpp" />
     <ClCompile Include="MMatchRuleQuest.cpp" />
     <ClCompile Include="MMatchRuleSkillmap.cpp" />
     <ClCompile Include="MMatchRuleSurvival.cpp" />
@@ -375,6 +377,7 @@
     <ClInclude Include="CommandLogView.h" />
     <ClInclude Include="ConsoleBar.h" />
     <ClInclude Include="DBQuestCachingData.h" />
+    <ClInclude Include="GunGame.h" />
     <ClInclude Include="IDatabase.h" />
     <ClInclude Include="LagCompensation.h" />
     <ClInclude Include="MainFrm.h" />
@@ -427,6 +430,7 @@
     <ClInclude Include="MMatchRuleDeathMatch.h" />
     <ClInclude Include="MMatchRuleDuel.h" />
     <ClInclude Include="MMatchRuleGladiator.h" />
+    <ClInclude Include="MMatchRuleGunGame.h" />
     <ClInclude Include="MMatchRuleQuest.h" />
     <ClInclude Include="MMatchRuleSkillmap.h" />
     <ClInclude Include="MMatchRuleSurvival.h" />

@@ -5110,6 +5110,7 @@ bool ZGame::OnRuleCommand(MCommand* pCommand)
 	case MC_MATCH_ASSIGN_BERSERKER:
 	case MC_MATCH_GAME_DEAD:
 	case MC_MATCH_DUEL_QUEUEINFO:
+	case MC_MATCH_GUNGAME_SEND_NEW_WEAPON:
 		{
 			if (m_Match.OnCommand(pCommand)) return true;
 		};

@@ -360,6 +360,7 @@ void ZStageInterface::OnStageInterfaceSettup( void)
 			break;
 
 		case MMATCH_GAMETYPE_DEATHMATCH_SOLO:
+		case MMATCH_GAMETYPE_GUNGAME:
 			color = SDM_COLOR;
 			break;
 
@@ -472,7 +473,8 @@ void ZStageInterface::ChangeStageGameSetting( MSTAGE_SETTING_NODE* pSetting)
 		 (pSetting->nGameType == MMATCH_GAMETYPE_GLADIATOR_SOLO) ||				// 칼전 개인전이거나...
 		 (pSetting->nGameType == MMATCH_GAMETYPE_BERSERKER) ||					// 버서커모드이거나...
 		 (pSetting->nGameType == MMATCH_GAMETYPE_TRAINING) ||					// 트레이닝이거나...
-		 (pSetting->nGameType == MMATCH_GAMETYPE_DUEL))							// 듀얼모드 이면...
+		 (pSetting->nGameType == MMATCH_GAMETYPE_DUEL)||
+		 (pSetting->nGameType == MMATCH_GAMETYPE_GUNGAME))							// 듀얼모드 이면...
 	{
 		// 맵 이름 배경 이미지 변환
 		if ( pAniMapImg)
@@ -573,7 +575,8 @@ void ZStageInterface::ChangeStageGameSetting( MSTAGE_SETTING_NODE* pSetting)
 			(pSetting->nGameType == MMATCH_GAMETYPE_GLADIATOR_SOLO) ||
 			(pSetting->nGameType == MMATCH_GAMETYPE_TRAINING) ||
 			(pSetting->nGameType == MMATCH_GAMETYPE_BERSERKER) ||
-			(pSetting->nGameType == MMATCH_GAMETYPE_DUEL))
+			(pSetting->nGameType == MMATCH_GAMETYPE_DUEL)||
+			(pSetting->nGameType == MMATCH_GAMETYPE_GUNGAME))
 			pWidget->SetText( ZMsg(MSG_WORD_KILL));
 
 		else

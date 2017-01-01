@@ -4766,6 +4766,7 @@ void ZGameInterface::RequestQuickJoin()
 	SetBitSet(quick_join_param.nModeEnum, MMATCH_GAMETYPE_DEATHMATCH_SOLO);
 	SetBitSet(quick_join_param.nModeEnum, MMATCH_GAMETYPE_DEATHMATCH_TEAM);
 	SetBitSet(quick_join_param.nModeEnum, MMATCH_GAMETYPE_ASSASSINATE);
+	SetBitSet(quick_join_param.nModeEnum, MMATCH_GAMETYPE_GUNGAME);
 
 	ZPostRequestQuickJoin(ZGetGameClient()->GetPlayerUID(), &quick_join_param);
 }
