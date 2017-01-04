@@ -568,7 +568,6 @@ void MMatchServer::Destroy()
 	m_AsyncProxy.Destroy();
 	MGetMatchShop()->Destroy();
 	m_SafeUDP.Destroy();
-	MGetGunGame()->~GunGame();
 	MServer::Destroy();
 
 	MMatchStringResManager::FreeInstance();

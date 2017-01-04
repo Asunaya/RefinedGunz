@@ -4,7 +4,7 @@
 
 class MMatchRuleGunGame : public MMatchRule {
 protected:
-	vector<GGSet*> m_pGGSet;
+	vector<GGSet>  m_MatchSet;
 			void SendNewSet(const MUID& uidPlayer, int KillCount);
 	virtual void OnBegin();
 	virtual void OnEnd();
