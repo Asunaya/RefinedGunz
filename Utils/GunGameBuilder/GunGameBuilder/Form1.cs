@@ -24,63 +24,44 @@ namespace GunGameBuilder
             new List<GunGame> { },
             new List<GunGame> { }
         };
-        private static Random rng = new Random();
-
         public Form1()
         {
             InitializeComponent();
         }
         public void ReadZItem()
         {
+
             textBox2.AppendText("Reading ZItem");
             XmlReaderSettings settings = new XmlReaderSettings();
             settings.DtdProcessing = DtdProcessing.Parse;
             XmlReader reader = XmlReader.Create("zitem.xml", settings);
             if (reader == null)
                 return;
-            while(reader.Read())
+            while (reader.Read())
             {
-                //if (GunGameItems.Count > 300)
-                //    break;
                 GunGame ItemNode = new GunGame();
                 reader.ReadToFollowing("ITEM");
                 if (reader.GetAttribute("slot") == "melee")
-                    ItemNode.Melee = Convert.ToInt32(reader.GetAttribute("id"));
-                while (reader.ReadToNextSibling("ITEM"))
                 {
-                    if (reader.GetAttribute("slot") == "range")
-                    {
-                        ItemNode.Primary = Convert.ToInt32(reader.GetAttribute("id"));
-                    }
-                    break;
-                }
-                if (ItemNode.Primary != 0)
-                {
-                    while (reader.ReadToNextSibling("ITEM"))
-                    {
-                        if (reader.GetAttribute("slot") == "range")
-                        {
-                            ItemNode.Secondary = Convert.ToInt32(reader.GetAttribute("id")); break;
-                        }
-                    }
-                }
-                if (GunGameItems[0].Count < 100)
+                    ItemNode.melee = Convert.ToInt32(reader.GetAttribute("id"));
                     GunGameItems[0].Add(ItemNode);
-                else
+                }
+                if (reader.GetAttribute("slot") == "range")
                 {
-                    if (GunGameItems[1].Count < 100)
-                        GunGameItems[1].Add(ItemNode);
-                    else
-                    {
-                        if (GunGameItems[2].Count < 100)
-                            GunGameItems[2].Add(ItemNode);
-                    }
+                    ItemNode.primary = Convert.ToInt32(reader.GetAttribute("id"));
+                    GunGameItems[1].Add(ItemNode);
+                }
+                if (reader.GetAttribute("slot") == "range")
+                {
+                    ItemNode.secondary = Convert.ToInt32(reader.GetAttribute("id"));
+                    GunGameItems[2].Add(ItemNode);
                 }
             }
             reader.Close();
         }
         public void WriteGunGame()
         {
+            Random rng = new Random();
             Shuffler.ListShuffler.Shuffle(GunGameItems[0], rng);
             Shuffler.ListShuffler.Shuffle(GunGameItems[1], rng);
             Shuffler.ListShuffler.Shuffle(GunGameItems[2], rng);
@@ -95,19 +76,17 @@ namespace GunGameBuilder
             writer.WriteStartDocument();
             writer.WriteStartElement("XML");
             writer.WriteAttributeString("id", "gungame");
-            writer.WriteStartElement("SET");
-            writer.WriteAttributeString("id", Convert.ToString(1));
-
-            foreach (var Item in GunGameItems)
+            int setID = 1;
+            for (int i = 0; i < GunGameItems.Length; ++i)
             {
-                for (int i = 0; i < 33; ++i)
+                writer.WriteStartElement("SET");
+                writer.WriteAttributeString("id", Convert.ToString(setID));
+                for (int j = 0; j <= 100; ++j)
                 {
-                    Random rand = new Random();
-                    int Array = rand.Next(0, i);
                     writer.WriteStartElement("ITEMSET");
-                    int melee = Item[i].Melee;
-                    int primary = Item[i].Primary;
-                    int secondary = Item[i].Secondary;
+                    int melee = GunGameItems[0][j].melee;
+                    int primary = GunGameItems[1][j].primary;
+                    int secondary = GunGameItems[2][j].secondary;
                     writer.WriteAttributeString("melee", melee.ToString());
                     writer.WriteAttributeString("primary", primary.ToString());
                     writer.WriteAttributeString("secondary", secondary.ToString());
@@ -118,63 +97,20 @@ namespace GunGameBuilder
                     textBox1.AppendText(text);
                     textBox1.AppendText(Environment.NewLine);
                 }
+                writer.WriteEndElement();
+                ++setID;
             }
-        
-            writer.WriteEndElement();
-            writer.WriteStartElement("SET");
-            writer.WriteAttributeString("id", Convert.ToString(2));
-            foreach (var Item in GunGameItems)
-            {
-                for (int i = 0; i < 33; ++i)
-                {
-                    Random rand = new Random();
-                    int Array = rand.Next(0, i);
-                    writer.WriteStartElement("ITEMSET");
-                    int melee = Item[Array].Melee;
-                    int primary = Item[Array].Primary;
-                    int secondary = Item[Array].Secondary;
-                    writer.WriteAttributeString("melee", melee.ToString());
-                    writer.WriteAttributeString("primary", primary.ToString());
-                    writer.WriteAttributeString("secondary", secondary.ToString());
 
-                    writer.WriteEndElement();
-                    string text = "ITEMSET: " + melee.ToString() + " " + primary.ToString() + " " +
-                        secondary.ToString();
-                    textBox1.AppendText(text);
-                    textBox1.AppendText(Environment.NewLine);
-                }
-            }
-            writer.WriteEndElement();
-            writer.WriteStartElement("SET");
-            writer.WriteAttributeString("id", Convert.ToString(3));
-            foreach (var Item in GunGameItems)
-            {
-                for (int i = 0; i < 33; ++i)
-                {
-                    Random rand = new Random();
-                    int Array = rand.Next(0, i);
-                    writer.WriteStartElement("ITEMSET");
-                    int melee = Item[Array].Melee;
-                    int primary = Item[Array].Primary;
-                    int secondary = Item[Array].Secondary;
-                    writer.WriteAttributeString("melee", melee.ToString());
-                    writer.WriteAttributeString("primary", primary.ToString());
-                    writer.WriteAttributeString("secondary", secondary.ToString());
-
-                    writer.WriteEndElement();
-                    string text = "ITEMSET: " + melee.ToString() + " " + primary.ToString() + " " +
-                        secondary.ToString();
-                    textBox1.AppendText(text);
-                    textBox1.AppendText(Environment.NewLine);
-                }
-            }
-            writer.WriteEndElement();
             writer.WriteEndElement();
             writer.WriteEndDocument();
             writer.Close();
             textBox2.Clear();
             textBox2.AppendText("Finished writing GunGame.xml");
             textBox1.AppendText("Thanks for using my gungame generator. Created by Jetman82");
+            for (int i = 0; i < 3; ++i)
+            {
+                GunGameItems[i].Clear();
+            }
         }
 
         private void writeGunGameToolStripMenuItem_Click(object sender, EventArgs e)

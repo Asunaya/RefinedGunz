@@ -24,62 +24,11 @@ namespace GunGameBuilder
             }
         }
     }
-    public class ZItem
+    public class GunGame
     {
-       public uint id;
-       // public int 
-        public string slot;
-    }
-   public class GunGame
-    {
-        int id;
-        public int ID
-        {
-            get
-            {
-                return id;
-            }
-            set
-            {
-                id = value;
-            }
-        }
-        int melee;
-        public int Melee
-        {
-            get
-            {
-                return melee;
-            }
-            set
-            {
-                melee = value;
-            }
-        }
-        int primary;
-        public int Primary
-        {
-            get
-            {
-                return primary;
-            }
-            set
-            {
-                primary = value;
-            }
-        }
-        int secondary;
-        public int Secondary
-        {
-            get
-            {
-                return secondary;
-            }
-            set
-            {
-                secondary = value;
-            }
-        }
+        public int melee;
+        public int primary;
+        public int secondary;
     }
     static class Program
     {
