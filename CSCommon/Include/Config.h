@@ -26,7 +26,7 @@
 // The interval between client transmission of MC_PEER_BASICINFO packets in milliseconds.
 // Basicinfo packets contain several core pieces of physical information:
 // Position, direction, velocity, animation indices and selected item slot.
-#define BASICINFO_INTERVAL 10 // Milliseconds
+#define BASICINFO_INTERVAL 33 // Milliseconds
 
 // Controls whether your camera direction is locked to a small 90 degree area
 // when dashing, hanging, etc. See ZMyCharacter::IsDirLocked for a full list.
