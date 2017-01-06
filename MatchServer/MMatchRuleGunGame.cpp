@@ -106,11 +106,6 @@ void MMatchRuleGunGame::SendNewSet(const MUID& uidPlayer,int KillCount)
 	MGetMatchServer()->RouteToBattle(GetStage()->GetUID(), pCommand);
 }
 
-bool MMatchRuleGunGame::OnRun()
-{
-	return MMatchRule::OnRun();
-}
-
 void MMatchRuleGunGame::OnEnterBattle(MUID& uidPlayer)
 {
 	SendNewSet(uidPlayer, 0);

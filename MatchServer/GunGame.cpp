@@ -18,7 +18,7 @@ GunGame* GunGame::GetInstance()
 	return &Instance;
 }
 
-bool GunGame::ReadXML(const char* szFileName, MZFileSystem* pFileSystem)
+bool GunGame::ReadXML(const char* szFileName)
 {
 	m_Set.clear();
 	MXmlDocument	xmlIniData;
@@ -27,24 +27,10 @@ bool GunGame::ReadXML(const char* szFileName, MZFileSystem* pFileSystem)
 	char *buffer;
 	MZFile mzf;
 
-	if (pFileSystem)
+	//Server side only, server doesn't use the filesystem.
+	if (!mzf.Open(szFileName))
 	{
-		if (!mzf.Open(szFileName, pFileSystem))
-		{
-			if (!mzf.Open(szFileName))
-			{
-				xmlIniData.Destroy();
-				return false;
-			}
-		}
-	}
-	else
-	{
-		if (!mzf.Open(szFileName))
-		{
-			xmlIniData.Destroy();
-			return false;
-		}
+		return false;
 	}
 
 	buffer = new char[mzf.GetLength() + 1];

@@ -14,7 +14,7 @@ private:
 public:
 	GunGame();
 	~GunGame();
-	bool			ReadXML(const char* szFileName, MZFileSystem* pFileSystem = nullptr);
+	bool			ReadXML(const char* szFileName);
 	static GunGame* GetInstance();	
 
 	std::vector<GGSet> GetGGSet(int set){

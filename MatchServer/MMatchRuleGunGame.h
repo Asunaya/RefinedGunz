@@ -12,11 +12,10 @@ protected:
 	virtual void OnGameKill(const MUID& uidAttacker, const MUID& uidVictim);
 	virtual void OnEnterBattle(MUID& uidPlayer);
 	virtual bool CheckKillCount(MMatchObject* pOutObj);
-	virtual bool OnRun();
-	virtual bool OnCheckRoundFinish();
-	virtual bool RoundCount();
-	virtual void OnRoundBegin();
-	virtual void OnRoundEnd();
+	virtual bool OnCheckRoundFinish() override;
+	virtual bool RoundCount() override;
+	virtual void OnRoundBegin() override;
+	virtual void OnRoundEnd() override;
 
 public:
 	MMatchRuleGunGame(MMatchStage* pStage);
