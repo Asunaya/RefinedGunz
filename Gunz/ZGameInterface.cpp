@@ -73,6 +73,7 @@
 #include "NewChat.h"
 #include "ReplayControl.h"
 #include "RGMain.h"
+#include "defer.h"
 
 #ifdef _XTRAP
 #include "XTrap/XTrap.h"
@@ -4641,14 +4642,12 @@ void ZGameInterface::ShowPrivateStageJoinFrame(const char* szStageName)
 void ZGameInterface::LeaveBattle()
 {
 	ZGetGameInterface()->SetCursorEnable(true);
-	m_bLeaveBattleReserved = false;
-	m_bLeaveStageReserved = false;
 	ShowMenu(false);
+	DEFER(m_bLeaveBattleReserved = m_bLeaveStageReserved = EnteredReplayFromLogin = false;);
 
 	if (EnteredReplayFromLogin)
 	{
 		SetState(GUNZ_LOGIN);
-		EnteredReplayFromLogin = false;
 		return;
 	}
 
