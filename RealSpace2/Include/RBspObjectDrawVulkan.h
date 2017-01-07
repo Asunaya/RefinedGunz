@@ -21,6 +21,8 @@ public:
 	void Draw();
 	void UpdateUniformBuffers();
 
+	void SetLighting(bool) {}
+
 private:
 	// Creates and fills the vertex and index buffers
 	void CreateBuffers();

@@ -27,6 +27,7 @@ public:
 
 	POLYVAR_METHOD(Init)
 	POLYVAR_METHOD(Draw)
+	POLYVAR_METHOD(SetLighting)
 	POLYVAR_METHOD(OnInvalidate);
 	POLYVAR_METHOD(OnRestore);
 
