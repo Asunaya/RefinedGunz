@@ -27,7 +27,6 @@ bool GunGame::ReadXML(const char* szFileName)
 	char *buffer;
 	MZFile mzf;
 
-	//Server side only, server doesn't use the filesystem.
 	if (!mzf.Open(szFileName))
 	{
 		return false;
@@ -51,7 +50,7 @@ bool GunGame::ReadXML(const char* szFileName)
 
 	rootElement = xmlIniData.GetDocumentElement();
 	int Count = rootElement.GetChildNodeCount();
-	//Init vector size based on # of SetNodes
+
 	m_Set.resize(Count);
 	for (int i = 0; i < Count; i++)
 	{
