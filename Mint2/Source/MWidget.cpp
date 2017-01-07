@@ -94,7 +94,6 @@ bool MWidget::EventResize(MEvent* pEvent)
 					r.x = pp.x;
 				}
 				SetPosition(r.x, r.y);
-// 임시로 위젯 최소 크기를 지정, 나중에 멤버로 빠져줄 필요가 있다.
 				if(r.w<m_nMinWidth) r.w = m_nMinWidth;
 				if(r.h<m_nMinHeight) r.h = m_nMinHeight;
 				SetSize(r.w, r.h);
@@ -154,20 +153,6 @@ MWidget* MWidget::GetLatestExclusive(void)
 	return NULL;
 }
 
-/*
-void MWidget::UseAcceleractorAndCharacter(char* szText)
-{
-	if(szText==NULL){
-		m_nAccelerator = -1;
-		return;
-	}
-	char szAnd[2] = {GetAndChar(szText), 0};
-	_strupr(szAnd);
-	m_nAccelerator = szAnd[0];
-	if(m_nAccelerator==0) m_nAccelerator = -1;
-}
-*/
-
 MWidget::MWidget(const char* szName, MWidget* pParent, MListener* pListener)
 {
 	g_nWidgetCount++;
@@ -179,7 +164,6 @@ MWidget::MWidget(const char* szName, MWidget* pParent, MListener* pListener)
 			strcpy_safe(m_szName, szName);
 		}
 		else{
-			// MWIDGET_NAME_LENGTH보다 큰 문자열은 잘라 버림.
 			memcpy(m_szName, szName, MWIDGET_NAME_LENGTH-4);
 			m_szName[MWIDGET_NAME_LENGTH-4] = '.';
 			m_szName[MWIDGET_NAME_LENGTH-3] = '.';
@@ -208,38 +192,22 @@ MWidget::MWidget(const char* szName, MWidget* pParent, MListener* pListener)
 
 	m_pToolTip = NULL;
 
-	//EnableAccelerator(true);
-	//SetLabelAccelerator();
 	SetAccelerator(0);
 
-	//Show(true, false);
-
 	m_bZOrderChangable = false;
-	m_bResizable = false;	// 디폴트는 리사이즈 불가능
+	m_bResizable = false;
 	m_nResizeSide = 0;
 
 	m_bClipByParent = true;
 
-//	if (m_pParent!=NULL) m_nOpacity = m_pParent->GetOpacity();
-//	else 
-		m_nOpacity = 255;
-
-//	m_bVisibleChildren = true;
+	m_nOpacity = 255;
 
 	m_bEnableDesignerMode = true;
 	m_nDMDragWidget = 0;
 	m_bModifiedByDesigner = false;
 	m_bAddedByDesigner = false;
-	//m_nID = -1;
 
 	m_BoundsAlignment = MAM_NOTALIGN;
-
-	/*
-	m_bAnchorLeft = true;
-	m_bAnchorRight = false;
-	m_bAnchorTop = true;
-	m_bAnchorBottom = false;
-	*/
 
 	m_nMinWidth = 10;
 	m_nMinHeight = 10;
@@ -259,18 +227,8 @@ MWidget::~MWidget(void)
 
 	for(int i=0; i<m_Children.GetCount(); i++){
 		MWidget* pWidget = m_Children.Get(i);
-		pWidget->m_pParent = NULL;	// 부모가 먼저 죽을 경우 Children's Parent Link 삭제
+		pWidget->m_pParent = NULL;
 	}
-
-	/*
-	// 기존 코드가 명시적으로 Child를 각각 가지고 있을때 문제가 발생한다.
-	// 가지고 있는 Children도 모두 삭제
-	while(m_Children.GetCount()>0){
-		MWidget* pWidget = m_Children.Get(0);
-		delete pWidget;
-		//RemoveChild(pWidget);
-	}
-	*/
 
 	if(m_pParent!=NULL) m_pParent->RemoveChild(this);
 	if(MWidget::m_pCapturedWidget==this) MWidget::m_pCapturedWidget = NULL;
@@ -289,12 +247,6 @@ void MWidget::OnDraw(MDrawContext* pDC)
 	pDC->FillRectangle(GetInitialClientRect());
 }
 
-/*
-void MWidget::OnDraw3D(MDrawContext3D* pDC)
-{
-}
-*/
-
 bool MWidget::OnEvent(MEvent* pEvent, MListener* pListener)
 {
 	return false;
@@ -309,28 +261,23 @@ void MWidget::Run(void)
 		pCurWnd->Run();
 	}
 }
-#include "MDebug.h"
 
 void MWidget::Draw(MDrawContext* pDC)
 {
 	if(m_bVisible==false) return;
 
-//	MBeginProfile(100+m_nID,m_szIDLName);
-
-	// Opacity 설정
 	unsigned char nLastOpacity;
 	nLastOpacity = pDC->GetOpacity();
 
 	MRECT sr = GetScreenRect();
 	pDC->SetOrigin(MPOINT(sr.x, sr.y));
 
-	// 그리기 전 초기화
 	if(m_pFont!=NULL) pDC->SetFont(m_pFont);
-	else pDC->SetFont(MFontManager::Get(NULL));	// 폰트가 NULL인 경우 Default Font로 세팅한다.
+	else pDC->SetFont(MFontManager::Get(NULL));
 
 	pDC->SetOpacity((unsigned char)(nLastOpacity * (float)(m_nOpacity / 255.0f)));
 	if(!IsEnable())
-		pDC->SetOpacity((unsigned char)(pDC->GetOpacity()*0.70));		// Disable 상태일때 너무 어두워서 좀 밝게 했음(동환)
+		pDC->SetOpacity((unsigned char)(pDC->GetOpacity()*0.70));
 
 	bool bIntersect = true;
 	MRECT rectScreen(0, 0, MGetWorkspaceWidth()-1, MGetWorkspaceHeight()-1);
@@ -341,55 +288,32 @@ void MWidget::Draw(MDrawContext* pDC)
 	}else
 		PrevClipRect = rectScreen;
 
-	//if(GetParent()!=NULL) PrevClipRect = GetParent()->GetScreenRect();
 	MRECT CurrClipRect = GetScreenRect();
 	MRECT IntersectClipRect;
 
 	if(m_bClipByParent==true){
-		// 부모 위젯과 공통되는 영역이 있을 경우에만 그린다.
 		if(PrevClipRect.Intersect(&IntersectClipRect, CurrClipRect)==true){
 			MRECT test = IntersectClipRect;
 			if(IntersectClipRect.w>0 && IntersectClipRect.h>0) {
 				pDC->SetClipRect(IntersectClipRect);
-				// 그리기
 				OnDraw(pDC);
 			}
 		}
 	}
 	else{
 		pDC->SetClipRect(CurrClipRect);
-		// 그리기
 		OnDraw(pDC);
 	}
 
-	// Child Widget Drawing
-//	if(m_bVisibleChildren==true){
 	for(int i=0; i<m_Children.GetCount(); i++){
 		MWidget* pCurWnd = m_Children.Get(i);
 		if(pCurWnd==GetLatestExclusive()) continue;
 		if(pCurWnd != NULL ) pCurWnd->Draw(pDC);
 	}
-	if(GetLatestExclusive()!=NULL) GetLatestExclusive()->Draw(pDC);	// Exclusive Widget을 마지막에 그린다.
-//	}
+	if(GetLatestExclusive()!=NULL) GetLatestExclusive()->Draw(pDC);
 
-	// Opacity 재설정
 	pDC->SetOpacity(nLastOpacity);
-
-//	MEndProfile(100+m_nID);
 }
-
-/*
-void MWidget::Draw3D(MDrawContext3D* pDC)
-{
-	if(m_bVisible==true) OnDraw3D(pDC);
-	else return;
-
-	for(int i=0; i<m_Children.GetCount(); i++){
-		MWidget* pCurWnd = m_Children.Get(i);
-		pCurWnd->Draw3D(pDC);
-	}
-}
-*/
 
 void MWidget::Redraw(void)
 {
@@ -398,10 +322,8 @@ void MWidget::Redraw(void)
 
 bool MWidget::Event(MEvent* pEvent)
 {
-	if(m_bVisible==false) return false;	// 보이는 윈도우만 이벤트를 처리할 수 있다.
+	if(m_bVisible==false) return false;
 
-	// Look에서 정의한 Client영역이 아닌 실제 Client 영역
-	//MRECT r = GetClientRect();
 	MRECT r = GetRect();
 	r.x = r.y = 0;
 
@@ -415,15 +337,14 @@ bool MWidget::Event(MEvent* pEvent)
 		if(pEvent->nMessage==MWM_LBUTTONDOWN )
 			int k=0;
 	}
-	// Disable상태에서도 툴팁은 보이게 해준다.
-	//if(pEvent->nMessage==MWM_MOUSEMOVE && m_Rect.InPoint(pEvent->Pos)==true && (MWidget::m_pCapturedWidget==NULL || MWidget::m_pCapturedWidget==this)){
-	if(r.InPoint(LocalEvent.Pos)==true && (MWidget::m_pCapturedWidget==NULL || MWidget::m_pCapturedWidget==this) && IsVisible()==true){
+
+	if(r.InPoint(LocalEvent.Pos)==true && (MWidget::m_pCapturedWidget==NULL ||
+		MWidget::m_pCapturedWidget==this) && IsVisible()==true){
 		if(m_pCursor!=NULL) MCursorSystem::Set(m_pCursor);
-		else MCursorSystem::Set(MCURSOR_ARROW);		// 아무것도 지정되어 있지 않으면 Default Cursor로...
+		else MCursorSystem::Set(MCURSOR_ARROW);
 
 		if(m_pToolTip!=NULL){
-			// 툴팁 보여주기 위해 ZOrder를 바꾸면 안되지만, 해결책이 없으므로 우선 이렇게 해둔다.
-			SetZOrder(MZ_TOP);	// 이 윈도우를 차일드 윈도우 맨 앞에 보이게 해서.. 툴팁이 가리지 않게..
+			SetZOrder(MZ_TOP);
 			m_pToolTip->Show(true);
 		}
 	}
@@ -435,10 +356,9 @@ bool MWidget::Event(MEvent* pEvent)
 
 	if(m_bEnable==false) return false;
 
-//	if(m_bVisibleChildren==true && GetLatestExclusive()!=NULL){
 	if(GetLatestExclusive()!=NULL){
 		if(GetLatestExclusive()->Event(pEvent)==true) return true;
-		if(GetLatestExclusive()!=NULL) return false;	// 이벤트 핸들러에 의해 Exclusive가 풀리는 경우가 있으면 다음으로 넘어간다.
+		if(GetLatestExclusive()!=NULL) return false;
 	}
 
 	if(pEvent->nMessage==MWM_LBUTTONDOWN)
@@ -446,20 +366,12 @@ bool MWidget::Event(MEvent* pEvent)
 		if ( r.InPoint(LocalEvent.Pos)==true)
 		{
 			SetFocus();
-//			OnSetFocus();
- 			if((m_bFocusEnable)&&(m_bZOrderChangable==true)) SetZOrder(MZ_TOP);	// 해당 위젯을 맨 위로 올려준다.
-		}
-		else	// ReleaseFocus
-		{
-//			ReleaseFocus();
-//			OnReleaseFocus();
-//			ReleaseCapture();
+ 			if((m_bFocusEnable)&&(m_bZOrderChangable==true)) SetZOrder(MZ_TOP);
 		}
 	}
 
-//	if(m_bVisibleChildren==true && GetLatestExclusive()==NULL){
 	if(GetLatestExclusive()==NULL){
-		for(int i=m_Children.GetCount()-1; i>=0; i--){	// 마지막에 추가된 윈도우부터
+		for(int i=m_Children.GetCount()-1; i>=0; i--){
 			MWidget* pCurWnd = m_Children.Get(i);
 			if(pCurWnd->Event(pEvent)==true) {
 				return true;
@@ -467,29 +379,16 @@ bool MWidget::Event(MEvent* pEvent)
 		}
 	}
 
-	// 위젯 리사이즈
-	// 클라이언트 영역을 벗어나서 제어해야하므로, Event()에서 처리한다.
 	if(EventResize(pEvent)==true) return true;
 
-	//if(pEvent->nMessage==MWM_RESIZE) OnReSize();
-	
-	// HotKey
-	/*
-	if(pEvent->nMessage==MWM_KEYDOWN){
-	//if(OnHotKey(pEvent->nKey, pEvent->GetShiftState(), pEvent->GetCtrlState(), pEvent->GetAltState())==true) return true;
-	if(OnHotKey(pEvent->nKey, pEvent->GetShiftState(), pEvent->bCtrl, pEvent->bAlt)==true) return true;
-	}
-	*/
 	if(pEvent->nMessage==MWM_HOTKEY){
-		//if(OnHotKey(pEvent->nKey, pEvent->GetShiftState(), pEvent->GetCtrlState(), pEvent->GetAltState())==true) return true;
 		if(OnHotKey(pEvent->nKey)==true) return true;
 	}
 
 	// Focused Event
 	if(pEvent->nMessage==MWM_CHAR || pEvent->nMessage==MWM_KEYDOWN || pEvent->nMessage==MWM_IMECOMPOSE ||
 		pEvent->nMessage==MWM_ACTIONKEYDOWN || pEvent->nMessage==MWM_ACTIONKEYUP || pEvent->nMessage==MWM_ACTIONPRESSED || pEvent->nMessage==MWM_ACTIONRELEASED){
-		if (IsFocus()) {	// KEY Event는 Focus 없는 위젯에는 의미없다
-			//먼저 자식에게로 전해져서 처리되면 ok 처리한 자식이 없으면 부모에게까지 간다
+		if (IsFocus()) {
 			if(OnEvent(&LocalEvent, GetListener())==true) 
 				return true;
 
@@ -498,19 +397,10 @@ bool MWidget::Event(MEvent* pEvent)
 				if(OnTab(!pEvent->GetShiftState())==true) 
 					return true;
 			}
-
-			/*
-			// Focused Widget에게 우선권이 있으며...
-			if(MWidget::m_pFocusedWidget==this){	// MWM_CHAR 메세지인 경우 현재 포커스된 윈도우에게만 메세지가 보내진다.
-				if(OnEvent(&LocalEvent, GetListener())==true) 
-					return true;
-			}
-			*/
-			// Accelerator는 EventAccelerator쪽으로 빠짐
 		}
 	}
 	else{
-		if((MWidget::m_pCapturedWidget==NULL || MWidget::m_pCapturedWidget==this))	// Capture가 걸릴 경우 Capture된 윈도우에만 메세지 보내기
+		if((MWidget::m_pCapturedWidget==NULL || MWidget::m_pCapturedWidget==this))
 			if(OnEvent(&LocalEvent, GetListener())==true) 
 				return true;
 	}
@@ -522,31 +412,28 @@ bool MWidget::Event(MEvent* pEvent)
 
 bool MWidget::EventAccelerator(MEvent* pEvent)
 {
-	if(m_bVisible==false) return false;	// 보이는 윈도우만 이벤트를 처리할 수 있다.
+	if(m_bVisible==false) return false;
 	if(m_bEnable==false) return false;
 
 	if(!(pEvent->nMessage==MWM_KEYDOWN || pEvent->nMessage==MWM_SYSKEYDOWN)) return false;
 
-	// KEYDOWN일때 Edit에 Focus가 있을 경우 Accelerator는 무시된다. (SYSKEYDOWN만 유효하게 된다)
 	if(pEvent->nMessage==MWM_KEYDOWN)
 		if(MWidget::m_pFocusedWidget!=NULL)
 			if(strcmp(MWidget::m_pFocusedWidget->GetClassName(), MINT_EDIT)==0) return false;
 
 	if(GetLatestExclusive()!=NULL){
 		if(GetLatestExclusive()->EventAccelerator(pEvent)==true) return true;
-		if(GetLatestExclusive()!=NULL) return false;	// 이벤트 핸들러에 의해 Exclusive가 풀리는 경우가 있으면 다음으로 넘어간다.
+		if(GetLatestExclusive()!=NULL) return false;
 	}
 
 	if(GetLatestExclusive()==NULL){
-		for(int i=m_Children.GetCount()-1; i>=0; i--){	// 마지막에 추가된 윈도우부터
+		for(int i=m_Children.GetCount()-1; i>=0; i--){
 			MWidget* pCurWnd = m_Children.Get(i);
 			if(pCurWnd->EventAccelerator(pEvent)==true) return true;
 		}
 	}
 
-	// Accelerator
 	char szKey[2] = {(char)pEvent->nKey, 0};
-//	_strupr(szKey);
 	if(m_nAccelerator==szKey[0]) {
 
 		m_bEventAcceleratorCall = true;
@@ -563,18 +450,18 @@ bool MWidget::EventAccelerator(MEvent* pEvent)
 
 bool MWidget::EventDefaultKey(MEvent* pEvent)
 {
-	if(m_bVisible==false) return false;	// 보이는 윈도우만 이벤트를 처리할 수 있다.
+	if(m_bVisible==false) return false;
 	if(m_bEnable==false) return false;
 
 	if(!(pEvent->nMessage==MWM_KEYDOWN))return false;
 
 	if(GetLatestExclusive()!=NULL){
 		if(GetLatestExclusive()->EventDefaultKey(pEvent)==true) return true;
-		if(GetLatestExclusive()!=NULL) return false;	// 이벤트 핸들러에 의해 Exclusive가 풀리는 경우가 있으면 다음으로 넘어간다.
+		if(GetLatestExclusive()!=NULL) return false;
 	}
 
 	if(GetLatestExclusive()==NULL){
-		for(int i=m_Children.GetCount()-1; i>=0; i--){	// 마지막에 추가된 윈도우부터
+		for(int i=m_Children.GetCount()-1; i>=0; i--){
 			MWidget* pCurWnd = m_Children.Get(i);
 			if(pCurWnd->EventDefaultKey(pEvent)==true) return true;
 		}
@@ -590,28 +477,9 @@ bool MWidget::EventDefaultKey(MEvent* pEvent)
 	return false;
 }
 
-bool MWidget::OnShow(void)
-{
-	return true;
-}
-
-void MWidget::OnHide(void)
-{
-}
-
-void MWidget::OnSize(int w, int h)
-{
-}
-
-/*
-void MWidget::OnReSize()
-{
-}
-*/
-
 void MWidget::OnShow(bool bVisible)
 {
-	for(int i=m_Children.GetCount()-1; i>=0; i--){	// 마지막에 추가된 윈도우부터
+	for(int i=m_Children.GetCount()-1; i>=0; i--){
 		MWidget* pCurWnd = m_Children.Get(i);
 		if(pCurWnd->m_bVisible==true) pCurWnd->OnShow(bVisible);
 	}
@@ -658,7 +526,7 @@ void MWidget::ResizeChildrenByAnchor(int w, int h)
 		MWidget* pChild = m_Children.Get(i);
 		if(pChild->GetBoundsAlignment()!=0){
 			pChild->SetBoundsAlignment(pChild->GetBoundsAlignment(), w, h);
-			continue;	// Bounds Alignment에 우선순위가 있다.
+			continue;
 		}
 
 		MRECT r = pChild->m_Rect;
@@ -704,12 +572,12 @@ void MWidget::Enable(bool bEnable)
 	m_bEnable = bEnable;
 }
 
-bool MWidget::IsVisible(void)
+bool MWidget::IsVisible()
 {
 	return m_bVisible;
 }
 
-bool MWidget::IsEnable(void)
+bool MWidget::IsEnable()
 {
 	return m_bEnable;
 }
@@ -719,7 +587,7 @@ void MWidget::SetResizable(bool bEnable)
 	m_bResizable = bEnable;
 }
 
-bool MWidget::IsResizable(void)
+bool MWidget::IsResizable()
 {
 	return m_bResizable;
 }
@@ -729,12 +597,12 @@ void MWidget::SetListener(MListener* pListener)
 	m_pListener = pListener;
 }
 
-MListener* MWidget::GetListener(void)
+MListener* MWidget::GetListener()
 {
 	return m_pListener;
 }
 
-int MWidget::GetID(void)
+int MWidget::GetID()
 {
 	return m_nID;
 }
@@ -754,20 +622,19 @@ void MWidget::SetText(const char* szText)
 	if(m_pToolTip!=NULL) if(m_pToolTip->IsUseParentName()==true) m_pToolTip->SetBounds();
 
 	SetLabelAccelerator();
-	//if(m_nAcceleratorType==1) UseAcceleratorAndCharacter(szText);
 }
 
-const char* MWidget::GetText(void)
+const char* MWidget::GetText()
 {
 	return m_szName;
 }
 
-void MWidget::SetCapture(void)
+void MWidget::SetCapture()
 {
 	MWidget::m_pCapturedWidget = this;
 }
 
-void MWidget::ReleaseCapture(void)
+void MWidget::ReleaseCapture()
 {
 	MWidget::m_pCapturedWidget = NULL;
 }
@@ -777,32 +644,17 @@ void MWidget::SetFocusEnable(bool bEnable)
 	m_bFocusEnable = bEnable;
 }
 
-bool MWidget::IsFocusEnable(void)
+bool MWidget::IsFocusEnable()
 {
 	return m_bFocusEnable;
 }
 
-void MWidget::SetFocus(void)
+void MWidget::SetFocus()
 {
 	if(m_bFocusEnable==false) return;
-	/*
-	if(m_pParent!=NULL){
-		if(m_pParent->m_pExclusive!=NULL && m_pParent->m_pExclusive!=MWidget::m_pFocusedWidget) return;
-	}
-	*/
-	// 자식중에 Exclusive 위젯이 있는경우,
-	// 현재 Exclusive 위젯과 그 Children에게만 Focus가 갈 수 있도록 한다.
+
 	MWidget* pExDes = FindExclusiveDescendant();
 	if(pExDes!=NULL) return;
-	/*
-	if(MWidget::m_pFocusedWidget!=NULL){
-		if(MWidget::m_pFocusedWidget->m_pParent!=NULL){
-			if(MWidget::m_pFocusedWidget->m_pParent->m_pExclusive==MWidget::m_pFocusedWidget){
-				return;
-			}
-		}
-	}
-	*/
 
 	if(MWidget::m_pFocusedWidget==this) return;
 
@@ -812,24 +664,24 @@ void MWidget::SetFocus(void)
 	OnSetFocus();
 }
 
-void MWidget::ReleaseFocus(void)
+void MWidget::ReleaseFocus()
 {
 	if(MWidget::m_pFocusedWidget==this) OnReleaseFocus();
 	MWidget::m_pFocusedWidget = NULL;
 }
 
-bool MWidget::IsFocus(void)
+bool MWidget::IsFocus()
 {
 	if(MWidget::m_pFocusedWidget==this) return true;
 	return false;
 }
 
-MWidget* MWidget::GetParent(void)
+MWidget* MWidget::GetParent()
 {
 	return m_pParent;
 }
 
-int MWidget::GetChildCount(void)
+int MWidget::GetChildCount()
 {
 	return m_Children.GetCount();
 }
@@ -853,7 +705,7 @@ void MWidget::SetExclusive(void)
 {
 	if(m_pParent!=NULL){
 		m_pParent->AddExclusive(this);
-		SetFocus();	// Exclusive로 보여질때 포커싱.
+		SetFocus();
 	}
 }
 
@@ -893,7 +745,6 @@ void MWidget::SetSize(int w, int h)
 	if(w<0) w = 1;
 	if(h<0) h = 1;
 
-	// TODO: 100,100 으로 지정하면 default size 가 되어 onsize가 불리지 않음.
 	if(w==m_Rect.w && h==m_Rect.h) return;
 
 	ResizeChildrenByAnchor(w, h);
@@ -914,9 +765,6 @@ void MWidget::SetPosition(int x, int y)
 {
 	MPOINT p;
 
-	//if(m_BoundsAlignment!=MAM_NOTALIGN) return;	// 얼라인 모드 설정된 위젯은 위치 재설정을 허용하지 않는다.
-	//m_BoundsAlignment = MAM_NOTALIGN;	// 위치를 바꾸면 얼라인이 없어진다.
-
 	m_Rect.x = x;
 	m_Rect.y = y;
 
@@ -935,36 +783,24 @@ void MWidget::SetBounds(const MRECT& r)
 void MWidget::SetBounds(int x, int y, int w, int h)
 {
 	SetPosition(x, y);
-	//m_Rect.x = x;
-	//m_Rect.y = y;
 
 	if(w<0) w = 1;
 	if(h<0) h = 1;
 
 	SetSize(w, h);
-	/*
-	bool bResized = false;
-	if(w!=m_Rect.w || h!=m_Rect.h){
-		m_Rect.w = w;
-		m_Rect.h = h;
-		bResized = true;
-	}
-	*/
-
-	//if(bResized==true) OnSize(w, h);
 }
 
-MPOINT MWidget::GetPosition(void)
+MPOINT MWidget::GetPosition()
 {
 	return MPOINT(m_Rect.x, m_Rect.y);
 }
 
-MRECT MWidget::GetRect(void)
+MRECT MWidget::GetRect()
 {
 	return m_Rect;
 }
 
-MRECT MWidget::GetIDLRect(void)
+MRECT MWidget::GetIDLRect()
 {
 	return m_IDLRect;
 }
@@ -1000,7 +836,6 @@ void MWidget::SetBoundsAlignment(MAlignmentMode am, int w, int h)
 	MPOINT p;
 	GetBoundsAlignmentPosition(&p, m_BoundsAlignment, w, h);
 
-	// 포지션 정렬에 의해 재설정
 	m_Rect.x = p.x;
 	m_Rect.y = p.y;
 }
@@ -1011,7 +846,7 @@ MAlignmentMode MWidget::GetBoundsAlignment(void)
 }
 
 
-MRECT MWidget::GetScreenRect(void) const
+MRECT MWidget::GetScreenRect() const
 {
 	if(m_pParent!=NULL){
 		MRECT sr = m_pParent->GetScreenRect();
@@ -1048,17 +883,16 @@ MToolTip* MWidget::GetToolTip(void)
 
 void MWidget::SetAccelerator(int a)
 {
-	//m_nAcceleratorType = 0;	// use custom accelerator type
 	if(a==0) m_nAccelerator = -1;
 	else m_nAccelerator = a;
 }
 
-void MWidget::SetLabelAccelerator(void)
+void MWidget::SetLabelAccelerator()
 {
 	SetAccelerator(GetLabelAccelerator());
 }
 
-char MWidget::GetLabelAccelerator(void)
+char MWidget::GetLabelAccelerator()
 {
 	char szAnd[2] = {GetAndChar(m_szName), 0};
 	_strupr_s(szAnd);
@@ -1066,7 +900,7 @@ char MWidget::GetLabelAccelerator(void)
 	return szAnd[0];
 }
 
-char MWidget::GetToolTipAccelerator(void)
+char MWidget::GetToolTipAccelerator()
 {
 	if(m_pToolTip!=NULL){
 		char szAnd[2] = {GetAndChar(m_pToolTip->m_szName), 0};
@@ -1078,34 +912,13 @@ char MWidget::GetToolTipAccelerator(void)
 		return -1;
 	}
 }
-/*
-void MWidget::SetLabelAccelerator(void)
-{
-	m_nAcceleratorType = 1;	// use label's & character
-	UseAcceleractorAndCharacter(m_szName);
-}
 
-void MWidget::SetToolTipAccelerator(void)
-{
-	m_nAcceleratorType = 2;	// use tooltip's & character
-	if(m_pToolTip!=NULL)
-		UseAcceleractorAndCharacter(m_pToolTip->m_szName);
-	else
-		UseAcceleractorAndCharacter(NULL);
-}
-
-void MWidget::EnableAccelerator(bool bEnabled)
-{
-	m_bAcceleratorEnabled = bEnabled;
-}
-*/
-
-MRECT MWidget::GetClientRect(void)
+MRECT MWidget::GetClientRect()
 {
 	return MRECT(0, 0, m_Rect.w, m_Rect.h);
 }
 
-MRECT MWidget::GetInitialClientRect(void)
+MRECT MWidget::GetInitialClientRect()
 {
 	return MWidget::GetClientRect();
 }
@@ -1129,7 +942,7 @@ void MWidget::SetZOrder(MZOrder z)
 
 MWidget* MWidget::FindExclusiveDescendant(void)
 {
-	if(m_Exclusive.GetCount()>0) return m_Exclusive.Get(m_Exclusive.GetCount()-1);	// 마지막에 추가된것
+	if(m_Exclusive.GetCount()>0) return m_Exclusive.Get(m_Exclusive.GetCount()-1);
 
 	for(int i=0; i<m_Children.GetCount(); i++){
 		MWidget* pChild = m_Children.Get(i);
@@ -1219,7 +1032,6 @@ MWidget* MWidget::FindWidgetByHierarchicalName(const char* szName)
 
 bool MWidget::IsMsg(const char* szMsg1, const char* szMsg2)
 {
-	// 대소문자를 안가린다.
 	char szTmp1[256];
 	char szTmp2[256];
 	strcpy_safe(szTmp1, szMsg1);
@@ -1238,17 +1050,9 @@ void* MWidget::Query(const char* szQuery)
 void MWidget::SetOpacity(unsigned char nOpacity)
 {
 	m_nOpacity = nOpacity;
-	/*
-	for(int i=0; i<m_Children.GetCount(); i++)
-	{
-		MWidget* pCurWnd = m_Children.Get(i);
-		if(pCurWnd==GetLatestExclusive()) continue;
-		pCurWnd->SetOpacity(nOpacity);
-	}
-	*/
 }
 
-unsigned char MWidget::GetOpacity()
+unsigned char MWidget::GetOpacity() const
 {
 	return m_nOpacity;
 }
