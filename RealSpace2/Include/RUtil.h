@@ -40,3 +40,11 @@ inline void SetShaders(const ShaderRefPair& Shaders)
 template <typename T> constexpr D3DFORMAT GetD3DFormat();
 template <>	constexpr D3DFORMAT GetD3DFormat<u16>() { return D3DFMT_INDEX16; }
 template <> constexpr D3DFORMAT GetD3DFormat<u32>() { return D3DFMT_INDEX32; }
+
+template <size_t size>
+auto CreateVertexDeclaration(const D3DVERTEXELEMENT9(&Decl)[size])
+{
+	D3DPtr<IDirect3DVertexDeclaration9> ptr;
+	RGetDevice()->CreateVertexDeclaration(Decl, MakeWriteProxy(ptr));
+	return ptr;
+}

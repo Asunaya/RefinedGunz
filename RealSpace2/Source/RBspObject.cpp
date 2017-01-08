@@ -166,6 +166,8 @@ void RBspObject::LightMapOnOff(bool bDraw)
 		return;
 
 	m_bisDrawLightMap = bDraw;
+	if (GetRS2().UsingD3D9())
+		DrawObj.SetLightingStatic<RBspObjectDrawD3D9>(bDraw);
 
 	if (bDraw)
 	{

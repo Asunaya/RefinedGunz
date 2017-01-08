@@ -31,31 +31,6 @@ struct MaterialBatch
 using namespace rsx;
 using IndexType = u32;
 
-template <typename VertexType, typename IndexType>
-static bool CreateBuffers(size_t VertexCount, size_t IndexCount, u32 FVF,
-	D3DPtr<IDirect3DVertexBuffer9>& vb, D3DPtr<IDirect3DIndexBuffer9>& ib)
-{
-	auto hr = RGetDevice()->CreateVertexBuffer(VertexCount * sizeof(VertexType), 0,
-		FVF, D3DPOOL_MANAGED,
-		MakeWriteProxy(vb), nullptr);
-	if (FAILED(hr))
-	{
-		MLog("RBspObjectDrawD3D9::Create -- Failed to create vertex buffer\n");
-		return false;
-	}
-
-	hr = RGetDevice()->CreateIndexBuffer(IndexCount * sizeof(IndexType), 0,
-		GetD3DFormat<IndexType>(), D3DPOOL_MANAGED,
-		MakeWriteProxy(ib), nullptr);
-	if (FAILED(hr))
-	{
-		MLog("RBspObjectDrawD3D9::Create -- Failed to create index buffer\n");
-		return false;
-	}
-
-	return true;
-}
-
 RBspObjectDrawD3D9::RBspObjectDrawD3D9(RBspObject& bsp) : bsp{ bsp }, dev{ RGetDevice() } {}
 RBspObjectDrawD3D9::RBspObjectDrawD3D9(RBspObjectDrawD3D9&&) = default;
 RBspObjectDrawD3D9::~RBspObjectDrawD3D9() = default;
@@ -129,30 +104,39 @@ void RBspObjectDrawD3D9::CreateTextures()
 	}
 }
 
-static D3DPtr<IDirect3DVertexDeclaration9> CreateLitVertexDecl()
+static D3DPtr<IDirect3DVertexDeclaration9> CreateUnlitVertexDecl()
 {
-	D3DVERTEXELEMENT9 Decl[] =
-	{
+	D3DVERTEXELEMENT9 Decl[] = {
 		{ 0, 0,     D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0 },
-		{ 0, 3 * 4, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_NORMAL,   0 },
-		{ 0, 6 * 4, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0 },
-		{ 0, 8 * 4, D3DDECLTYPE_FLOAT4, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TANGENT,  0 },
+		{ 1, 0,     D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0 },
 		D3DDECL_END()
 	};
+	return CreateVertexDeclaration(Decl);
+}
 
-	D3DPtr<IDirect3DVertexDeclaration9> ptr;
-	RGetDevice()->CreateVertexDeclaration(Decl, MakeWriteProxy(ptr));
-	return ptr;
+static D3DPtr<IDirect3DVertexDeclaration9> CreateLitVertexDecl()
+{
+	D3DVERTEXELEMENT9 Decl[] = {
+		{ 0, 0,     D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0 },
+		{ 1, 0,     D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0 },
+		{ 2, 0,     D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_NORMAL,   0 },
+		{ 3, 0,     D3DDECLTYPE_FLOAT4, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TANGENT,  0 },
+		D3DDECL_END()
+	};
+	return CreateVertexDeclaration(Decl);
 }
 
 void RBspObjectDrawD3D9::CreateShaderStuff()
 {
 	SupportsDynamicLighting = SupportsVertexShaderVersion(3, 0) &&
 		SupportsPixelShaderVersion(3, 0) &&
-		GetDeviceCaps().NumSimultaneousRTs >= 4;
+		GetDeviceCaps().NumSimultaneousRTs >= 4 &&
+		GetDeviceCaps().MaxStreams >= 4;
+
 	if (!SupportsDynamicLighting)
 		return;
 
+	UnlitVertexDecl = CreateUnlitVertexDecl();
 	LitVertexDecl = CreateLitVertexDecl();
 	DeferredVS = CreateVertexShader(DeferredVSData);
 	DeferredPS = CreatePixelShader(DeferredPSData);
@@ -163,6 +147,45 @@ void RBspObjectDrawD3D9::CreateShaderStuff()
 	VisualizeLinearDepthPS = CreatePixelShader(VisualizeLinearDepthData);
 
 	CreateRTs();
+}
+
+template <typename VertexType>
+bool CreateVB(D3DPtr<IDirect3DVertexBuffer9>& ptr, size_t VertexCount, u32 FVF)
+{
+	auto hr = RGetDevice()->CreateVertexBuffer(VertexCount * sizeof(VertexType), 0,
+		FVF, D3DPOOL_MANAGED,
+		MakeWriteProxy(ptr), nullptr);
+	if (FAILED(hr))
+	{
+		MLog("RBspObjectDrawD3D9::Create -- Failed to create vertex buffer\n");
+		return false;
+	}
+	return true;
+}
+
+bool RBspObjectDrawD3D9::CreateBuffers()
+{
+#define CREATE_VB(x) if (!CreateVB<decltype(EluObjectData{}.Meshes[0].x[0])>(VBs.x, \
+		State.TotalVertexCount, GetFVF())) return false;
+	CREATE_VB(Positions);
+	if (SupportsDynamicLighting)
+	{
+		CREATE_VB(TexCoords);
+		CREATE_VB(Normals);
+		CREATE_VB(Tangents);
+	}
+#undef CREATE_VB
+	
+	auto hr = RGetDevice()->CreateIndexBuffer(State.TotalIndexCount * sizeof(IndexType), 0,
+		GetD3DFormat<IndexType>(), D3DPOOL_MANAGED,
+		MakeWriteProxy(IndexBuffer), nullptr);
+	if (FAILED(hr))
+	{
+		MLog("RBspObjectDrawD3D9::Create -- Failed to create index buffer\n");
+		return false;
+	}
+
+	return true;
 }
 
 void RBspObjectDrawD3D9::CreateBatches()
@@ -204,28 +227,11 @@ void RBspObjectDrawD3D9::CreateBatches()
 		}
 	}
 
-	bool ret{};
-	if (UsingLighting())
-	{
-		ret = CreateBuffers<LitVertex, IndexType>(
-			State.TotalVertexCount, State.TotalIndexCount,
-			GetFVF(), VertexBuffer, IndexBuffer);
-	}
-	else
-	{
-		ret = CreateBuffers<SimpleVertex, IndexType>(
-			State.TotalVertexCount, State.TotalIndexCount,
-			GetFVF(), VertexBuffer, IndexBuffer);
-	}
-
-	if (!ret)
+	if (!CreateBuffers())
 	{
 		MLog("RBspObjectDrawD3D9::Create -- Failed to create vertex and index buffers\n");
 		return;
 	}
-
-	DMLog("Create vertex buffer with %d vertices, index buffer with %d indices\n",
-		State.TotalVertexCount, State.TotalIndexCount);
 
 	// Lock vertex and index buffers.
 	auto Lock = [](auto& Buffer, auto*& Pointer)
@@ -237,7 +243,19 @@ void RBspObjectDrawD3D9::CreateBatches()
 		}
 		return true;
 	};
-	char* Verts{};        if (!Lock(VertexBuffer, Verts))  return;
+	char* Positions{};
+	char* TexCoords{};
+	char* Normals{};
+	char* Tangents{};
+#define LOCK(x) Lock(VBs.x, x)
+	LOCK(Positions);
+	if (SupportsDynamicLighting)
+	{
+		LOCK(TexCoords);
+		LOCK(Normals);
+		LOCK(Tangents);
+	}
+#undef LOCK
 	IndexType* Indices{}; if (!Lock(IndexBuffer, Indices)) return;
 
 	// Insert transformed vertices for each object into the vertex buffer
@@ -269,25 +287,25 @@ void RBspObjectDrawD3D9::CreateBatches()
 
 				for (size_t i{}; i < Mesh.VertexCount; ++i)
 				{
-					auto AddVertexData = [&](auto&& val) {
-						memcpy(Verts, &val, sizeof(val));
-						Verts += sizeof(val);
+					auto AddVertexData = [&](auto& stream, auto&& val) {
+						memcpy(stream, &val, sizeof(val));
+						stream += sizeof(val);
 					};
-					if (!UsingLighting())
+					if (!SupportsDynamicLighting)
 					{
-						AddVertexData(Mesh.Positions[i] * Mesh.World * Object.World);
-						AddVertexData(Mesh.TexCoords[i]);
+						AddVertexData(Positions, Mesh.Positions[i] * Mesh.World * Object.World);
+						AddVertexData(Positions, Mesh.TexCoords[i]);
 					}
 					else
 					{
-						AddVertexData(Mesh.Positions[i] * Mesh.World * Object.World);
-						AddVertexData(TransformNormal(Mesh.Normals[i], Mesh.World * Object.World));
-						AddVertexData(Mesh.TexCoords[i]);
+						AddVertexData(Positions, Mesh.Positions[i] * Mesh.World * Object.World);
+						AddVertexData(Normals, TransformNormal(Mesh.Normals[i], Mesh.World * Object.World));
+						AddVertexData(TexCoords, Mesh.TexCoords[i]);
 						v4 tan = Mesh.Tangents[i];
 						tan.w = 0;
 						tan = Transform(tan, Mesh.World * Object.World);
 						tan.w = Mesh.Tangents[i].w;
-						AddVertexData(tan);
+						AddVertexData(Tangents, tan);
 					}
 				}
 				CumulativeVertexBase += Mesh.VertexCount;
@@ -340,7 +358,7 @@ void RBspObjectDrawD3D9::CreateBatches()
 	DMLog("Added %d vertices, %d indices\n", CumulativeVertexBase, CumulativeIndexBase);
 
 	// Unlock vertex and index buffers.
-	VertexBuffer->Unlock();
+	VBs.Positions->Unlock(); VBs.TexCoords->Unlock(); VBs.Normals->Unlock(); VBs.Tangents->Unlock(); 
 	IndexBuffer->Unlock();
 
 	// Sort materials by state changes.
@@ -375,7 +393,7 @@ void RBspObjectDrawD3D9::CreateRTs()
 {
 	if (!UsingLighting())
 		return;
-
+	
 	for (size_t i{}; i < ArraySize(RTs); ++i)
 	{
 		auto& RT = RTs[i];
@@ -419,7 +437,7 @@ void RBspObjectDrawD3D9::Create(rsx::LoaderState && srcState)
 	Materials.clear();
 	TextureMemory.clear();
 	MaterialBatches.clear();
-	VertexBuffer.reset();
+	VBs.Positions.reset(); VBs.TexCoords.reset(); VBs.Normals.reset(); VBs.Tangents.reset(); 
 	IndexBuffer.reset();
 	NormalMaterialsEnd = 0;
 	OpacityMaterialsEnd = 0;
@@ -586,11 +604,6 @@ LPDIRECT3DTEXTURE9 RBspObjectDrawD3D9::GetTexture(int Index) const
 u32 RBspObjectDrawD3D9::GetFVF() const
 {
 	return D3DFVF_XYZ | D3DFVF_TEX1;
-}
-
-size_t RBspObjectDrawD3D9::GetStride() const
-{
-	return UsingLighting() ? sizeof(LitVertex) : sizeof(SimpleVertex);
 }
 
 bool RBspObjectDrawD3D9::UsingLighting() const
@@ -772,12 +785,26 @@ void RBspObjectDrawD3D9::SetPrologueStates()
 	// Map triangles are clockwise, so cull counter-clockwise faces.
 	dev->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
 
-	dev->SetStreamSource(0, VertexBuffer.get(), 0, GetStride());
+	if (!SupportsDynamicLighting)
+	{
+		dev->SetStreamSource(0, VBs.Positions.get(), 0, sizeof(SimpleVertex));
+	}
+	else
+	{
+		dev->SetStreamSource(0, VBs.Positions.get(), 0, sizeof(v3));
+		dev->SetStreamSource(1, VBs.TexCoords.get(), 0, sizeof(v2));
+		if (UsingLighting())
+		{
+			dev->SetStreamSource(2, VBs.Normals.get(), 0, sizeof(v3));
+			dev->SetStreamSource(3, VBs.Tangents.get(), 0, sizeof(v4));
+		}
+	}
 	dev->SetIndices(IndexBuffer.get());
 
 	if (!UsingLighting())
 	{
 		dev->SetFVF(GetFVF());
+		dev->SetVertexDeclaration(UnlitVertexDecl.get());
 		dev->SetTextureStageState(1, D3DTSS_TEXCOORDINDEX, 0);
 	}
 	else
@@ -867,6 +894,12 @@ void RBspObjectDrawD3D9::Draw()
 		DrawLighting();
 
 	SetEpilogueStates();
+}
+
+void RBspObjectDrawD3D9::SetLighting(bool b)
+{
+	if (b && !RTs[0])
+		CreateRTs();
 }
 
 _NAMESPACE_REALSPACE2_END

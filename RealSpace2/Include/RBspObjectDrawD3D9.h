@@ -23,6 +23,8 @@ public:
 
 	bool ShowRTsEnabled{};
 
+	void SetLighting(bool);
+
 private:
 	struct SimpleVertex
 	{
@@ -30,17 +32,10 @@ private:
 		v2 Tex;
 	};
 
-	struct LitVertex
-	{
-		v3 Pos;
-		v3 Nor;
-		v2 Tex;
-		v4 Tan;
-	};
-
 	void CreateTextures();
 	void CreateShaderStuff();
 	void CreateBatches();
+	bool CreateBuffers();
 
 	void CreateRTs();
 	void ReleaseRTs();
@@ -54,7 +49,6 @@ private:
 	LPDIRECT3DTEXTURE9 GetTexture(int Index) const;
 
 	u32 GetFVF() const;
-	size_t GetStride() const;
 	bool UsingLighting() const;
 
 	RBspObject& bsp;
@@ -94,10 +88,17 @@ private:
 	template <MaterialType Type>
 	void RenderMaterials(int StartIndex, int EndIndex);
 
-	D3DPtr<IDirect3DVertexBuffer9> VertexBuffer;
+	struct {
+		// If SupportsDynamicLighting is true, each of these contain a vertex buffer with their component.
+		// Otherwise, Positions is the only valid pointer, and it holds an interleaved stream of
+		// position and texcoord components.
+		D3DPtr<IDirect3DVertexBuffer9> Positions, TexCoords, Normals, Tangents;
+	} VBs;
+
 	D3DPtr<IDirect3DIndexBuffer9> IndexBuffer;
 
 	D3DPtr<IDirect3DVertexDeclaration9> LitVertexDecl;
+	D3DPtr<IDirect3DVertexDeclaration9> UnlitVertexDecl;
 
 	D3DPtr<IDirect3DVertexShader9> DeferredVS;
 	D3DPtr<IDirect3DPixelShader9> DeferredPS;
