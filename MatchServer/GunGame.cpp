@@ -50,7 +50,7 @@ bool GunGame::ReadXML(const char* szFileName)
 
 	rootElement = xmlIniData.GetDocumentElement();
 	int Count = rootElement.GetChildNodeCount();
-
+	//Set vector size to childnodecount
 	m_Set.resize(Count);
 	for (int i = 0; i < Count; i++)
 	{
@@ -60,8 +60,6 @@ bool GunGame::ReadXML(const char* szFileName)
 
 		if (!stricmp(szTagName, "SET"))
 		{
-			int ID;
-			chrElement.GetAttribute(&ID, "id", 0);
 			vector<GGSet> ItemSets;
 			ItemSets.clear();
 			int ChildCount = chrElement.GetChildNodeCount();
@@ -81,7 +79,7 @@ bool GunGame::ReadXML(const char* szFileName)
 					ItemSets.push_back(Node);
 				}
 			}
-			m_Set[ID] = ItemSets;
+			m_Set.push_back(ItemSets);
 		}
 	}
 
