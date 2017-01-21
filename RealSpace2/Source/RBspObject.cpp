@@ -148,9 +148,8 @@ RBspObject::RBspObject(bool PhysOnly)
 	m_MeshList.SetMtrlAutoLoad(true);
 	m_MeshList.SetMapObject(true);
 
-#ifdef SHADOW_TEST
-	RenderWithNormal = true;
-#endif
+	if (GetRS2().UsingD3D9())
+		DrawObj.SetLightingStatic<RBspObjectDrawD3D9>(m_bisDrawLightMap);
 }
 
 RBspObject::~RBspObject() = default;
@@ -231,12 +230,10 @@ void RBspObject::SetDiffuseMap(int nMaterial)
 template <typename T>
 static void DrawImpl(RSBspNode& Node, int Material, T& DrawFunc)
 {
-#ifndef SHADOW_TEST
 	// nFrameCount is updated to the current frame number
 	// only for nodes that aren't occluded.
 	if (Node.nFrameCount != g_nFrameNumber)
 		return;
-#endif
 
 	// Leaf node
 	if (Node.nPolygon)

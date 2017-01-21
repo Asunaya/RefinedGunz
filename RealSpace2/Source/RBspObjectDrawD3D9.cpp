@@ -7,17 +7,7 @@
 #include "ShaderGlobals.h"
 #include "ShaderUtil.h"
 #include "RS2.h"
-#include "Sphere.h"
 #include "RUtil.h"
-
-// Shader objects
-#include "DeferredVS.h"
-#include "DeferredPS.h"
-#include "PointLightVS.h"
-#include "PointLightPS.h"
-#include "DepthCopyVS.h"
-#include "DepthCopyPS.h"
-#include "VisualizeLinearDepth.h"
 
 _NAMESPACE_REALSPACE2_BEGIN
 
@@ -31,30 +21,19 @@ struct MaterialBatch
 using namespace rsx;
 using IndexType = u32;
 
-RBspObjectDrawD3D9::RBspObjectDrawD3D9(RBspObject& bsp) : bsp{ bsp }, dev{ RGetDevice() } {}
+RBspObjectDrawD3D9::RBspObjectDrawD3D9(RBspObject& bsp) : bsp{ bsp }, dev{ RGetDevice() }
+{
+	CreateShaderStuff();
+
+	if (UsingLighting())
+		GetRenderer().UpdateRTs();
+}
+
 RBspObjectDrawD3D9::RBspObjectDrawD3D9(RBspObjectDrawD3D9&&) = default;
 RBspObjectDrawD3D9::~RBspObjectDrawD3D9() = default;
 
-void RBspObjectDrawD3D9::OnInvalidate()
-{
-	ReleaseRTs(); 
-	
-	SAFE_RELEASE(LitVertexDecl);
-	SAFE_RELEASE(DeferredVS);
-	SAFE_RELEASE(DeferredPS);
-	SAFE_RELEASE(PointLightVS);
-	SAFE_RELEASE(PointLightPS);
-	SAFE_RELEASE(DepthCopyVS);
-	SAFE_RELEASE(DepthCopyPS);
-	SAFE_RELEASE(VisualizeLinearDepthPS);
-	SAFE_RELEASE(OrigRT);
-	SAFE_RELEASE(OrigDepthSurface);
-}
-
-void RBspObjectDrawD3D9::OnRestore()
-{
-	CreateShaderStuff();
-}
+void RBspObjectDrawD3D9::OnInvalidate(){}
+void RBspObjectDrawD3D9::OnRestore(){}
 
 void RBspObjectDrawD3D9::CreateTextures()
 {
@@ -128,25 +107,8 @@ static D3DPtr<IDirect3DVertexDeclaration9> CreateLitVertexDecl()
 
 void RBspObjectDrawD3D9::CreateShaderStuff()
 {
-	SupportsDynamicLighting = SupportsVertexShaderVersion(3, 0) &&
-		SupportsPixelShaderVersion(3, 0) &&
-		GetDeviceCaps().NumSimultaneousRTs >= 4 &&
-		GetDeviceCaps().MaxStreams >= 4;
-
-	if (!SupportsDynamicLighting)
-		return;
-
 	UnlitVertexDecl = CreateUnlitVertexDecl();
 	LitVertexDecl = CreateLitVertexDecl();
-	DeferredVS = CreateVertexShader(DeferredVSData);
-	DeferredPS = CreatePixelShader(DeferredPSData);
-	PointLightVS = CreateVertexShader(PointLightVSData);
-	PointLightPS = CreatePixelShader(PointLightPSData);
-	DepthCopyVS = CreateVertexShader(DepthCopyVSData);
-	DepthCopyPS = CreatePixelShader(DepthCopyPSData);
-	VisualizeLinearDepthPS = CreatePixelShader(VisualizeLinearDepthData);
-
-	CreateRTs();
 }
 
 template <typename VertexType>
@@ -168,7 +130,7 @@ bool RBspObjectDrawD3D9::CreateBuffers()
 #define CREATE_VB(x) if (!CreateVB<decltype(EluObjectData{}.Meshes[0].x[0])>(VBs.x, \
 		State.TotalVertexCount, GetFVF())) return false;
 	CREATE_VB(Positions);
-	if (SupportsDynamicLighting)
+	if (GetRenderer().SupportsDynamicLighting())
 	{
 		CREATE_VB(TexCoords);
 		CREATE_VB(Normals);
@@ -249,7 +211,7 @@ void RBspObjectDrawD3D9::CreateBatches()
 	char* Tangents{};
 #define LOCK(x) Lock(VBs.x, x)
 	LOCK(Positions);
-	if (SupportsDynamicLighting)
+	if (GetRenderer().SupportsDynamicLighting())
 	{
 		LOCK(TexCoords);
 		LOCK(Normals);
@@ -291,7 +253,7 @@ void RBspObjectDrawD3D9::CreateBatches()
 						memcpy(stream, &val, sizeof(val));
 						stream += sizeof(val);
 					};
-					if (!SupportsDynamicLighting)
+					if (!GetRenderer().SupportsDynamicLighting())
 					{
 						AddVertexData(Positions, Mesh.Positions[i] * Mesh.World * Object.World);
 						AddVertexData(Positions, Mesh.TexCoords[i]);
@@ -387,49 +349,6 @@ void RBspObjectDrawD3D9::CreateBatches()
 		"OpacityMaterialsEnd = %d\n"
 		"AlphaTestMaterialsEnd = %d\n",
 		NormalMaterialsEnd, OpacityMaterialsEnd, AlphaTestMaterialsEnd);
-}
-
-void RBspObjectDrawD3D9::CreateRTs()
-{
-	if (!UsingLighting())
-		return;
-	
-	for (size_t i{}; i < ArraySize(RTs); ++i)
-	{
-		auto& RT = RTs[i];
-
-		D3DFORMAT Format = i == static_cast<size_t>(RTType::LinearDepth) ? D3DFMT_R32F : D3DFMT_A8R8G8B8;
-
-		if (FAILED(dev->CreateTexture(
-			RGetScreenWidth(), RGetScreenHeight(),
-			1, D3DUSAGE_RENDERTARGET,
-			Format,
-			D3DPOOL_DEFAULT,
-			MakeWriteProxy(RT),
-			nullptr)))
-		{
-			MLog("RBspObjectDrawD3D9::CreateShaderStuff -- Failed to create render target\n");
-		}
-	}
-
-	if (FAILED(RGetDevice()->CreateDepthStencilSurface(
-		RGetScreenWidth(), RGetScreenHeight(),
-		GetDepthStencilFormat(),
-		D3DMULTISAMPLE_NONE,
-		0,
-		FALSE,
-		MakeWriteProxy(DummyDepthSurface),
-		nullptr)))
-	{
-		MLog("RBspObjectDrawD3D9::CreateShaderStuff -- Failed to create depth surface\n");
-	}
-}
-
-void RBspObjectDrawD3D9::ReleaseRTs()
-{
-	for (auto& RT : RTs)
-		SAFE_RELEASE(RT);
-	SAFE_RELEASE(DummyDepthSurface);
 }
 
 void RBspObjectDrawD3D9::Create(rsx::LoaderState && srcState)
@@ -608,166 +527,7 @@ u32 RBspObjectDrawD3D9::GetFVF() const
 
 bool RBspObjectDrawD3D9::UsingLighting() const
 {
-	return SupportsDynamicLighting && bsp.m_bisDrawLightMap;
-}
-
-static void DrawQuad(const v2& p1, const v2& p2)
-{
-	struct VertexType
-	{
-		float x, y, z, rhw;
-		float u, v;
-	};
-
-	VertexType Vertices[] = {
-		{ p1.x - 0.5f, p1.y - 0.5f, 0, 1, 0, 0 },
-		{ p1.x - 0.5f, p2.y - 0.5f, 0, 1, 0, 1 },
-		{ p2.x - 0.5f, p2.y - 0.5f, 0, 1, 1, 1 },
-		{ p2.x - 0.5f, p1.y - 0.5f, 0, 1, 1, 0 },
-	};
-
-	RGetDevice()->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-	RGetDevice()->SetFVF(D3DFVF_XYZRHW | D3DFVF_TEX1);
-
-	RGetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, &Vertices, sizeof(VertexType));
-}
-
-static void DrawFullscreenQuad()
-{
-	auto Width = (float)RGetScreenWidth();
-	auto Height = (float)RGetScreenHeight();
-	DrawQuad({ 0, 0 }, { Width, Height });
-}
-
-static void DrawAmbient(LPDIRECT3DTEXTURE9 Ambient)
-{
-	RGetDevice()->SetTexture(0, Ambient);
-	DrawFullscreenQuad();
-}
-
-void RBspObjectDrawD3D9::ShowRTs()
-{
-	auto ShowRT = [&](auto& RT, auto&& p1, auto&& p2) {
-		RGetDevice()->SetTexture(0, RT.get());
-		DrawQuad(p1, p2);
-	};
-
-	auto ShowDepth = [&](auto& RT, auto&& p1, auto&& p2) {
-		RGetDevice()->SetPixelShader(VisualizeLinearDepthPS.get());
-		GetRenderer().SetScreenSpaceVertexDeclaration();
-		ShowRT(RT, p1, p2);
-		RGetDevice()->SetPixelShader(nullptr);
-	};
-
-	for (size_t i{}; i < ArraySize(RTs); ++i)
-	{
-		auto Width = float(RGetScreenWidth());
-		auto Height = float(RGetScreenHeight());
-		v2 p1{ Width / 2 + (i % 2) * Width / 4, Height / 2 + (i >= 2) * Height / 4 };
-		v2 p2{ p1 + v2{Width / 4, Height / 4} };
-		if (i == static_cast<size_t>(RTType::LinearDepth))
-			ShowDepth(RTs[i], p1, p2);
-		else
-			ShowRT(RTs[i], p1, p2);
-	}
-}
-
-static bool IsSphereInsideFrustum(const v3& Center, float Radius, const rplane(&Frustum)[6])
-{
-	for (auto& Plane : Frustum)
-		if (DotProduct(Center, v3{ EXPAND_VECTOR(Plane) }) + Plane.d < -Radius)
-			return false;
-	return true;
-}
-
-void RBspObjectDrawD3D9::DrawLighting()
-{
-	dev->SetRenderTarget(0, OrigRT.get());
-	OrigRT.reset();
-	for (size_t i = 1; i < ArraySize(RTs); ++i)
-		dev->SetRenderTarget(i, nullptr);
-
-	dev->SetVertexShader(nullptr);
-	dev->SetPixelShader(nullptr);
-
-	// Enable additive blending
-	dev->SetRenderState(D3DRS_ALPHABLENDENABLE, true);
-	dev->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
-	dev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
-	dev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
-	// Disable depth writing and testing
-	dev->SetRenderState(D3DRS_ZWRITEENABLE, false);
-	dev->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
-
-	DrawAmbient(GetRT(RTType::Ambient).get());
-
-
-	dev->SetVertexShader(PointLightVS.get());
-	dev->SetPixelShader(PointLightPS.get());
-
-	for (size_t i{}; i < ArraySize(RTs); ++i)
-		dev->SetTexture(i, RTs[i].get());
-
-	SetShaderMatrix(LightingShaderConstant::Proj, Transpose(RProjection));
-	v2 InvRes{ 1.0f / RGetScreenWidth(), 1.0f / RGetScreenHeight() };
-	SetShaderVector2(LightingShaderConstant::InvRes, InvRes);
-	v2 InvFocalLen{ 1.0f / RProjection._11, 1.0f / RProjection._22 };
-	SetShaderVector2(LightingShaderConstant::InvFocalLen, InvFocalLen);
-	SetShaderFloat(LightingShaderConstant::Near, GetRenderer().GetNearZ());
-	SetShaderFloat(LightingShaderConstant::Far, GetRenderer().GetFarZ());
-
-	dev->SetFVF(D3DFVF_XYZ);
-
-	for (auto& Light : bsp.StaticMapLightList)
-	{
-		if (!IsSphereInsideFrustum(Light.Position, Light.fAttnEnd, RViewFrustum))
-			continue;
-
-		auto& pos = Light.Position * RView;
-		SetShaderVector4(LightingShaderConstant::Light, { EXPAND_VECTOR(pos), Light.fAttnEnd });
-		SetShaderVector3(LightingShaderConstant::LightColor, Light.Color);
-
-		if (Magnitude(pos) < Light.fAttnEnd * 1.3 + GetRenderer().GetNearZ())
-		{
-			dev->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
-			dev->SetRenderState(D3DRS_CULLMODE, D3DCULL_CW);
-		}
-		else
-		{
-			dev->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
-			dev->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
-		}
-
-		dev->DrawPrimitiveUP(D3DPT_TRIANGLELIST, data::nvert / 3, data::sphere, 3 * sizeof(float));
-	}
-
-	// Reset states
-	dev->SetRenderState(D3DRS_ALPHABLENDENABLE, false);
-	dev->SetRenderState(D3DRS_ZWRITEENABLE, true);
-	dev->SetRenderState(D3DRS_ZENABLE, true);
-
-	dev->SetVertexShader(nullptr);
-	dev->SetPixelShader(nullptr);
-
-	if (ShowRTsEnabled)
-		ShowRTs();
-}
-
-void RBspObjectDrawD3D9::DepthCopy()
-{
-	dev->SetRenderState(D3DRS_COLORWRITEENABLE, 0);
-
-	SetShaderFloat(DepthCopyShaderConstant::Near, GetRenderer().GetNearZ());
-	SetShaderFloat(DepthCopyShaderConstant::Far, GetRenderer().GetFarZ());
-
-	dev->SetTexture(0, GetRT(RTType::LinearDepth).get());
-
-	dev->SetVertexShader(DepthCopyVS.get());
-	dev->SetPixelShader(DepthCopyPS.get());
-
-	DrawFullscreenQuad();
-
-	dev->SetRenderState(D3DRS_COLORWRITEENABLE, 0xFFFFFFFF);
+	return GetRenderer().SupportsDynamicLighting() && bsp.m_bisDrawLightMap;
 }
 
 void RBspObjectDrawD3D9::SetPrologueStates()
@@ -785,7 +545,7 @@ void RBspObjectDrawD3D9::SetPrologueStates()
 	// Map triangles are clockwise, so cull counter-clockwise faces.
 	dev->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
 
-	if (!SupportsDynamicLighting)
+	if (!GetRenderer().SupportsDynamicLighting())
 	{
 		dev->SetStreamSource(0, VBs.Positions.get(), 0, sizeof(SimpleVertex));
 	}
@@ -809,26 +569,8 @@ void RBspObjectDrawD3D9::SetPrologueStates()
 	}
 	else
 	{
+		dev->SetFVF(0);
 		dev->SetVertexDeclaration(LitVertexDecl.get());
-		dev->SetVertexShader(DeferredVS.get());
-		dev->SetPixelShader(DeferredPS.get());
-
-		const auto& WorldView = RView;
-		SetShaderMatrix(DeferredShaderConstant::WorldView, Transpose(WorldView));
-		const auto& Projection = RProjection;
-		auto WorldViewProjection = WorldView * RProjection;
-		SetShaderMatrix(DeferredShaderConstant::WorldViewProjection, Transpose(WorldViewProjection));
-
-		SetShaderFloat(DeferredShaderConstant::Near, GetRenderer().GetNearZ());
-		SetShaderFloat(DeferredShaderConstant::Far, GetRenderer().GetFarZ());
-
-		dev->GetRenderTarget(0, MakeWriteProxy(OrigRT));
-		for (size_t i{}; i < ArraySize(RTs); ++i)
-		{
-			D3DPtr<IDirect3DSurface9> Surface;
-			RTs[i]->GetSurfaceLevel(0, MakeWriteProxy(Surface));
-			dev->SetRenderTarget(i, Surface.get());
-		}
 	}
 }
 
@@ -867,6 +609,11 @@ void RBspObjectDrawD3D9::Draw()
 {
 	SetPrologueStates();
 
+	if (UsingLighting())
+	{
+		GetRenderer().BeginLighting();
+	}
+
 	RenderMaterials<Normal>(0, NormalMaterialsEnd);
 	RenderMaterials<Opacity>(NormalMaterialsEnd, OpacityMaterialsEnd);
 	RenderMaterials<AlphaTest>(OpacityMaterialsEnd, AlphaTestMaterialsEnd);
@@ -891,15 +638,17 @@ void RBspObjectDrawD3D9::Draw()
 	dev->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
 
 	if (UsingLighting())
-		DrawLighting();
+	{
+		GetRenderer().EndLighting(bsp.StaticMapLightList);
+	}
 
 	SetEpilogueStates();
 }
 
 void RBspObjectDrawD3D9::SetLighting(bool b)
 {
-	if (b && !RTs[0])
-		CreateRTs();
+	GetRenderer().SetDynamicLights(b);
+	GetRenderer().UpdateRTs();
 }
 
 _NAMESPACE_REALSPACE2_END

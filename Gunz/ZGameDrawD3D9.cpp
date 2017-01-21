@@ -23,13 +23,7 @@
 
 using namespace RealSpace2;
 
-ZGameDrawD3D9::ZGameDrawD3D9(ZGame& Game)
-	: Game(Game)
-{
-#ifdef SHADOW_TEST
-	RenderWithShader = true;
-#endif
-}
+ZGameDrawD3D9::ZGameDrawD3D9(ZGame& Game) : Game(Game) {}
 
 extern float g_fFOV;
 extern float g_fFarZ;
@@ -97,20 +91,6 @@ static void SetStatesPreDraw(ZGame& Game)
 #define PROFILE_IMPL(expr, name) [&]{ auto name = MBeginProfile(#expr); { expr; } MEndProfile(name); }()
 #define PROFILE(expr) PROFILE_IMPL(expr, TOKENIZE(prof, __COUNTER__))
 
-void ZGameDrawD3D9::DrawShadowCastingObjects()
-{
-	// Draw the world, i.e. the
-	// - Skybox
-	// - Static parts of the map
-	// - Emblem flags (e.g. the red flags from Mansion).
-	PROFILE(Game.GetWorld()->Draw());
-}
-
-bool ZGameDrawD3D9::DrawShadows()
-{
-	return RS2::Get().Render.DrawShadows([&] { DrawShadowCastingObjects(); });
-}
-
 void ZGameDrawD3D9::DrawScene()
 {
 	auto profZGameDraw = MBeginProfile("ZGame::Draw");
@@ -136,15 +116,11 @@ void ZGameDrawD3D9::DrawScene()
 		// Save the world matrix because, apparently, something in this block mutates it.
 		rmatrix OrigWorld = RGetTransform(D3DTS_WORLD);
 
-		if (RenderWithShader)
-			RS2::Get().Render.SetDynamicLights(true);
-
-		DrawShadowCastingObjects();
-
-		if (RenderWithShader)
-			RS2::Get().Render.SetDynamicLights(false);
-
-		GetRS2().Render.ApplyLighting();
+		// Draw the world, i.e. the
+		// - Skybox
+		// - Static parts of the map
+		// - Emblem flags (e.g. the red flags from Mansion).
+		PROFILE(Game.GetWorld()->Draw());
 
 		if (Game.GetMapDesc())
 			Game.GetMapDesc()->DrawMapDesc();
@@ -213,25 +189,5 @@ void ZGameDrawD3D9::Draw()
 	if (RIsReadyToRender() == R_NOTREADY)
 		return;
 
-	if (!RenderWithShader)
-	{
-		DrawScene();
-		return;
-	}
-
-	RS2::Get().Render.SetPrerenderStates();
-
-	bool RenderedShadow = DrawShadows();
-	if (!RenderedShadow)
-		RenderWithShader = false;
-
 	DrawScene();
-}
-
-void ZGameDrawD3D9::OnInvalidate()
-{
-}
-
-void ZGameDrawD3D9::OnRestore()
-{
 }

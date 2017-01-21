@@ -470,5 +470,11 @@
     <ClInclude Include="Include\TextureLoader.h" />
     <ClInclude Include="Include\SimpleMesh.h" />
     <ClInclude Include="Include\VertexTypes.h" />
+    <ClInclude Include="Include\REffect.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Source\ObliqueDepthLinearization.hlsl">
+      <Filter>D3D9\Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

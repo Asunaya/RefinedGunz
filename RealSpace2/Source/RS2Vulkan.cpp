@@ -69,17 +69,18 @@ bool RS2Vulkan::Create(HWND hwnd, HINSTANCE inst)
 	return true;
 }
 
-static RBspObject bsp;
+static RBspObject* bsp;
 
 void RS2Vulkan::Init()
 {
+	bsp = new RBspObject;
 	BaseInit();
-	bsp.Open("Maps/Mansion/Mansion.rs");
+	bsp->Open("Maps/Mansion/Mansion.rs");
 }
 
 void RS2Vulkan::Draw()
 {
-	bsp.UpdateUBO();
+	bsp->UpdateUBO();
 
 	prepareFrame();
 

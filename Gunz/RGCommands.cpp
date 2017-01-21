@@ -333,7 +333,7 @@ void LoadRGCommands(ZChatCmdManager& CmdManager)
 		if (!GetRS2().UsingD3D9())
 			return;
 
-		bool& val = ZGetGame()->GetWorld()->GetBsp()->DrawObj.Get<RBspObjectDrawD3D9>().ShowRTsEnabled;
+		bool& val = GetRenderer().ShowRTsEnabled;
 		if (argc == 1)
 			val = !val;
 		else

@@ -8,16 +8,11 @@ public:
 	ZGameDrawD3D9(class ZGame& Game);
 
 	void Draw();
-
-	void OnInvalidate();
-	void OnRestore();
+	void OnInvalidate() {}
+	void OnRestore() {}
 
 private:
 	void DrawScene();
-	bool DrawShadows();
-	void DrawShadowCastingObjects();
 
 	ZGame& Game;
-
-	bool RenderWithShader{};
 };

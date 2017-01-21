@@ -456,6 +456,7 @@
     <ClInclude Include="Include\RBspObjectDraw.h" />
     <ClInclude Include="Include\RBspObjectDrawD3D9.h" />
     <ClInclude Include="Include\RBspObjectDrawVulkan.h" />
+    <ClInclude Include="Include\REffect.h" />
     <ClInclude Include="Include\RHalfEdgeMesh.h" />
     <ClInclude Include="Include\RMath.h" />
     <ClInclude Include="Include\rmatrix.h" />
@@ -632,6 +633,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Source\VisualizeLinearDepth.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Source\ObliqueDepthLinearization.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
