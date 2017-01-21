@@ -27,7 +27,7 @@ static D3DPtr<IDirect3DTexture9> LoadDDS(const void* data, size_t size,
 		format = D3DFMT_DXT5;
 		break;
 	case gli::FORMAT_BGRA8_UNORM:
-		format = D3DFMT_A8B8G8R8;
+		format = D3DFMT_A8R8G8B8;
 		break;
 	default:
 		MLog("LoadDDS -- Unknown DDS format %d\n", tex.format());
