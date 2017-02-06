@@ -199,7 +199,7 @@ void MMatchWorldItemManager::AddItem(const unsigned short nItemID, short nSpawnI
 	NewWorldItem.nStaticSpawnIndex = nSpawnIndex;
 	NewWorldItem.Origin = { x, y, z };
 	NewWorldItem.nLifeTime= nLifeTime;
-	for (size_t i = 0; i < ArraySize(NewWorldItem.nExtraValue); i++)
+	for (size_t i = 0; i < std::size(NewWorldItem.nExtraValue); i++)
 		NewWorldItem.nExtraValue[i] = pnExtraValues[i];
 
 	m_ItemMap.emplace(m_nUIDGenerate, NewWorldItem);
