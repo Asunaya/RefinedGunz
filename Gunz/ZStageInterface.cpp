@@ -1,16 +1,6 @@
-/***********************************************************************
-  ZStageInterface.cpp
-  
-  용  도 : 스테이지 인터페이스를 관리하는 클래스. 코드 관리상의 편리를 위해
-           분리했음(사실 아직 완전히 다 분리 못했음. -_-;).
-  작성일 : 11, MAR, 2004
-  작성자 : 임동환
-************************************************************************/
-
-
-#include "stdafx.h"							// Include stdafx.h
-#include "ZStageInterface.h"				// Include ZStageInterface.h
-#include "ZStageSetting.h"					// Include ZStageSetting.h
+#include "stdafx.h"
+#include "ZStageInterface.h"
+#include "ZStageSetting.h"
 #include "ZGameInterface.h"
 #include "ZPlayerListBox.h"
 #include "ZCombatMenu.h"
@@ -20,19 +10,6 @@
 #include "ZMessages.h"
 #include "ZLanguageConf.h"
 
-
-/* 해야할 것들...
-
- 1. ZStageSetting 관련 루틴을 여기로 옮겨와야 하는디...  -_-;
- 2. 버튼 UI쪽도 역시 여기로 옮겨와야 하는데 졸라 꼬여있다...  -_-;
-*/
-
-
-/***********************************************************************
-  ZStageInterface : public
-  
-  desc : 생성자
-************************************************************************/
 ZStageInterface::ZStageInterface( void)
 {
 	m_bPrevQuest = false;
@@ -44,12 +21,6 @@ ZStageInterface::ZStageInterface( void)
 	m_nStateSacrificeItemBox = 0;
 }
 
-
-/***********************************************************************
-  ~ZStageInterface : public
-  
-  desc : 소멸자
-************************************************************************/
 ZStageInterface::~ZStageInterface( void)
 {
 	if ( m_pTopBgImg != NULL)
@@ -65,17 +36,10 @@ ZStageInterface::~ZStageInterface( void)
 	}
 }
 
-
-/***********************************************************************
-  Create : public
-  
-  desc : 초기화
-************************************************************************/
 void ZStageInterface::OnCreate( void)
 {
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
 
-	// 초기화 해주고
 	m_bPrevQuest = false;
 	m_bDrawStartMovieOfQuest = false;
 	m_nStateSacrificeItemBox = 0;		// Hide
@@ -141,37 +105,26 @@ void ZStageInterface::OnCreate( void)
 	ZApplication::GetGameInterface()->ShowWidget( "Stage_Flame0", false);
 	ZApplication::GetGameInterface()->ShowWidget( "Stage_Flame1", false);
 
-	MComboBox* pCombo = (MComboBox*)pResource->FindWidget("StageType");			// 게임 방식을 채로 방 나갔다가 다른 방 들어가면 버그 생기는거 수정 
+	MComboBox* pCombo = (MComboBox*)pResource->FindWidget("StageType");
 	if ( pCombo)
 		pCombo->CloseComboBoxList();
 
-	pCombo = (MComboBox*)pResource->FindWidget("MapSelection");					// 맵리스트 연 채로 방 나갔다가 다른 방 들어가면 방장이 아닌데도 맵 바꿔지는 버그 수정
+	pCombo = (MComboBox*)pResource->FindWidget("MapSelection");
 	if ( pCombo)
 		pCombo->CloseComboBoxList();
 
 
-	// 채널 리스트 박스는 닫아버림
 	pWidget = (MWidget*)pResource->FindWidget( "ChannelListFrame");
 	if ( pWidget)
 		pWidget->Show( false);
 
 
-	// 화면 업데 한번 해주삼~
 	UpdateSacrificeItem();
 	SerializeSacrificeItemListBox();
 
-	// QL 초기화
 	OnResponseQL( 0);
 }
 
-
-/***********************************************************************
-  OnDestroy : public
-  
-  desc : 서버나 혹은 시스템의 요청으로부터 스테이지 화면을 새로 갱신하는 함수
-  arg  : none
-  ret  : none
-************************************************************************/
 void ZStageInterface::OnDestroy( void)
 {
 	ZApplication::GetGameInterface()->ShowWidget( "Stage", false);
@@ -209,47 +162,19 @@ void ZStageInterface::OnDestroy( void)
 	m_SenarioNameDesc.clear();
 }
 
-
-/***********************************************************************
-  OnStageInterfaceSettup : public
-  
-  desc : 서버나 혹은 시스템의 요청으로부터 스테이지 화면을 새로 갱신하는 함수
-  arg  : none
-  ret  : none
-************************************************************************/
 void ZStageInterface::OnStageInterfaceSettup( void)
 {
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
 
 	ZStageSetting::InitStageSettingGameType();
-/*
-	// 맵 종류를 설정한다.
-	MComboBox* pCB = (MComboBox*)pResource->FindWidget( "MapSelection");
-	if ( pCB)
-	{
-		int nSelected = pCB->GetSelIndex();
 
-		InitMaps( pCB);
-
-		if ( nSelected >= pCB->GetCount())
-			nSelected = pCB->GetCount() - 1;
-
-		pCB->SetSelIndex( nSelected);
-	}
-*/
-
-	// CharListView의 Add, Remove, Update는 ZGameClient::OnObjectCache 에서 관리한다.
 	MSTAGE_CHAR_SETTING_NODE* pMyCharNode = NULL;
-	bool bMyReady = false;		// Ready 상태인지 아닌지...
-	for ( MStageCharSettingList::iterator itor = ZGetGameClient()->GetMatchStageSetting()->m_CharSettingList.begin();
-		itor != ZGetGameClient()->GetMatchStageSetting()->m_CharSettingList.end();  ++itor) 
+	bool bMyReady = false;
+	for (auto&& CharNode : ZGetGameClient()->GetMatchStageSetting()->m_CharSettingList) 
 	{
-		MSTAGE_CHAR_SETTING_NODE* pCharNode = (*itor);
-
-		// 나 자신일 경우
-		if ( pCharNode->uidChar == ZGetGameClient()->GetPlayerUID()) 
+		if ( CharNode.uidChar == ZGetGameClient()->GetPlayerUID()) 
 		{
-			pMyCharNode = pCharNode;
+			pMyCharNode = &CharNode;
 			if (pMyCharNode->nState == MOSS_READY)
 				bMyReady = true;
 			else
@@ -261,62 +186,48 @@ void ZStageInterface::OnStageInterfaceSettup( void)
 		{
 			bool bMaster = false;
 
-			if ( ZGetGameClient()->GetMatchStageSetting()->GetMasterUID() == pCharNode->uidChar)
+			if ( ZGetGameClient()->GetMatchStageSetting()->GetMasterUID() == CharNode.uidChar)
 				bMaster = true;
 			
-			pItem->UpdatePlayer( pCharNode->uidChar,(MMatchObjectStageState)pCharNode->nState,bMaster,MMatchTeam(pCharNode->nTeam));
+			pItem->UpdatePlayer(CharNode.uidChar, (MMatchObjectStageState)CharNode.nState,
+				bMaster, MMatchTeam(CharNode.nTeam));
 		}
 	}
 
-	// 스테이지의 버튼 상태(게임시작, 난입, 준비완료)를 설정한다.
 	ChangeStageButtons( ZGetGameClient()->IsForcedEntry(), ZGetGameClient()->AmIStageMaster(), bMyReady);
 
-	// 스테이지의...
 	ChangeStageGameSetting( ZGetGameClient()->GetMatchStageSetting()->GetStageSetting());
 	
-	// 난입 멤버일 경우에...
 	if ( !ZGetGameClient()->AmIStageMaster() && ( ZGetGameClient()->IsForcedEntry()))
 	{
 		if ( pMyCharNode != NULL)
 			ChangeStageEnableReady( bMyReady);
 	}
 
-	// 만약 난입으로 들어왔는데 다른 사람 다 나가서 내가 방장이 되었다면 난입모드 해제
 	if ( (ZGetGameClient()->AmIStageMaster() == true) && ( ZGetGameClient()->IsForcedEntry()))
 	{
-		if ( ZGetGameClient()->GetMatchStageSetting()->GetStageState() == STAGE_STATE_STANDBY)
+		bool b = ZGetGameClient()->GetMatchStageSetting()->GetStageState() == STAGE_STATE_STANDBY;
+		if (b)
 		{
 			ZGetGameClient()->ReleaseForcedEntry();
+		}
 
-			// 인터페이스관련
-			ZApplication::GetGameInterface()->EnableWidget( "StageSettingCaller", true);	// 방설정 버튼
-			ZApplication::GetGameInterface()->EnableWidget( "MapSelection", true);			// 맵선택 콤보박스
-			ZApplication::GetGameInterface()->EnableWidget( "StageType", true);				// 게임방식 콤보박스
-			ZApplication::GetGameInterface()->EnableWidget( "StageMaxPlayer", true);		// 최대인원 콤보박스
-			ZApplication::GetGameInterface()->EnableWidget( "StageRoundCount", true);		// 경기횟수 콤보박스
-		}
-		else	// 마스터인데 다른사람들 게임중이면 인터페이스 Disable
-		{
-			// 인터페이스관련
-			ZApplication::GetGameInterface()->EnableWidget( "StageSettingCaller", false);	// 방설정 버튼
-			ZApplication::GetGameInterface()->EnableWidget( "MapSelection", false);			// 맵선택 콤보박스
-			ZApplication::GetGameInterface()->EnableWidget( "StageType", false);			// 게임방식 콤보박스
-			ZApplication::GetGameInterface()->EnableWidget( "StageMaxPlayer", false);		// 최대인원 콤보박스
-			ZApplication::GetGameInterface()->EnableWidget( "StageRoundCount", false);		// 경기횟수 콤보박스
-		}
+		ZGetGameInterface()->EnableWidget( "StageSettingCaller", b);
+		ZGetGameInterface()->EnableWidget( "MapSelection", b);
+		ZGetGameInterface()->EnableWidget( "StageType", b);
+		ZGetGameInterface()->EnableWidget( "StageMaxPlayer", b);
+		ZGetGameInterface()->EnableWidget( "StageRoundCount", b);
 	}
 
-
-	// 화면 상단의 맵 이미지 설정하기
 	MPicture* pPicture = 0;
 	MBitmap* pBitmap = 0;
 	char szMapName[256];
  	pPicture = (MPicture*)pResource->FindWidget( "Stage_MainBGTop");
 	if ( pPicture)
 	{
-		sprintf_safe( szMapName, "interface/loadable/%s", MGetMapImageName( ZGetGameClient()->GetMatchStageSetting()->GetMapName()));
+		sprintf_safe( szMapName, "interface/loadable/%s",
+			MGetMapImageName( ZGetGameClient()->GetMatchStageSetting()->GetMapName()));
 
-		// 임시 하드코딩 우에엥~~~
 		if ( m_nGameType == MMATCH_GAMETYPE_QUEST)
 			strcpy_safe( szMapName, "interface/loadable/map_Mansion.bmp");
 
@@ -333,16 +244,16 @@ void ZStageInterface::OnStageInterfaceSettup( void)
 			pPicture->SetBitmap( m_pTopBgImg->GetSourceBitmap());
 	}
 	
-	// 정보창에 게임방제 설정하기
 	MLabel* pLabel = (MLabel*)pResource->FindWidget( "StageNameLabel");
 	if ( pLabel != 0)
 	{
 		char szStr[ 256];
-		sprintf_safe( szStr, "%s > %s > %03d:%s", ZGetGameClient()->GetServerName(), ZMsg( MSG_WORD_STAGE), ZGetGameClient()->GetStageNumber(), ZGetGameClient()->GetStageName());
+		sprintf_safe( szStr, "%s > %s > %03d:%s",
+			ZGetGameClient()->GetServerName(), ZMsg( MSG_WORD_STAGE),
+			ZGetGameClient()->GetStageNumber(), ZGetGameClient()->GetStageName());
 		pLabel->SetText( szStr);
 	}
 
-	// 상하단 스트라이프의 색상 바꾸기
 #define SDM_COLOR			MCOLOR(255,0,0)
 #define TDM_COLOR			MCOLOR(0,255,0)
 #define SGD_COLOR			MCOLOR(0,0,255)
@@ -421,29 +332,16 @@ void ZStageInterface::OnStageInterfaceSettup( void)
 	}
 }
 
-
-/***********************************************************************
-  ChangeStageGameSetting : public
-  
-  desc : 이것도 게임 관련 인터페이스를 수정하는거 같은데... 왜이렇게 많이 나눠놓은거지? -_-;
-         주로 화면의 전체적인 UI를 설정한다.
-  arg  : pSetting = 스테이지 설정 정보
-  ret  : none
-************************************************************************/
 void ZStageInterface::ChangeStageGameSetting( MSTAGE_SETTING_NODE* pSetting)
 {
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
 
 	m_nGameType = pSetting->nGameType;
 
-	// Set map name
 	SetMapName( pSetting->szMapName);
 
-	// Is team game?
 	ZApplication::GetGameInterface()->m_bTeamPlay = ZGetGameTypeManager()->IsTeamGame( pSetting->nGameType);
 
-
-	// 관전 허용 여부 확인
 	MComboBox* pCombo = (MComboBox*)pResource->FindWidget( "StageObserver");
 	MButton* pObserverBtn = (MButton*)pResource->FindWidget( "StageObserverBtn");
 	MLabel* pObserverLabel = (MLabel*)pResource->FindWidget( "StageObserverLabel");
@@ -462,57 +360,46 @@ void ZStageInterface::ChangeStageGameSetting( MSTAGE_SETTING_NODE* pSetting)
 		}
 	}
 
-	// 청팀, 홍팀 상태 설정
 	ZApplication::GetGameInterface()->UpdateBlueRedTeam();
 
-	// 게임 방식에 따라서 UI를 변경한다
 	MAnimation* pAniMapImg = (MAnimation*)pResource->FindWidget( "Stage_MapNameBG");
 	bool bQuestUI = false;
-	if ( (pSetting->nGameType == MMATCH_GAMETYPE_DEATHMATCH_SOLO) ||			// 데쓰매치 개인전이거나...
-		 (pSetting->nGameType == MMATCH_GAMETYPE_GLADIATOR_SOLO) ||				// 칼전 개인전이거나...
-		 (pSetting->nGameType == MMATCH_GAMETYPE_BERSERKER) ||					// 버서커모드이거나...
-		 (pSetting->nGameType == MMATCH_GAMETYPE_TRAINING) ||					// 트레이닝이거나...
-		 (pSetting->nGameType == MMATCH_GAMETYPE_DUEL))							// 듀얼모드 이면...
+	if ( (pSetting->nGameType == MMATCH_GAMETYPE_DEATHMATCH_SOLO) ||
+		 (pSetting->nGameType == MMATCH_GAMETYPE_GLADIATOR_SOLO) ||
+		 (pSetting->nGameType == MMATCH_GAMETYPE_BERSERKER) ||
+		 (pSetting->nGameType == MMATCH_GAMETYPE_TRAINING) ||
+		 (pSetting->nGameType == MMATCH_GAMETYPE_DUEL))
 	{
-		// 맵 이름 배경 이미지 변환
 		if ( pAniMapImg)
 			pAniMapImg->SetCurrentFrame( 0);
 
-		// 퀘스트 UI 감춤
 		bQuestUI = false;
 	}
-	else if ( (pSetting->nGameType == MMATCH_GAMETYPE_DEATHMATCH_TEAM) ||		// 데쓰매치 팀전이거나...
-		(pSetting->nGameType == MMATCH_GAMETYPE_DEATHMATCH_TEAM2) ||			// 무한데스매치 팀전이거나...
-		 (pSetting->nGameType == MMATCH_GAMETYPE_GLADIATOR_TEAM) ||				// 칼전 팀전이거나...
-		 (pSetting->nGameType == MMATCH_GAMETYPE_ASSASSINATE))					// 암살전 이면...
+	else if ( (pSetting->nGameType == MMATCH_GAMETYPE_DEATHMATCH_TEAM) ||
+		(pSetting->nGameType == MMATCH_GAMETYPE_DEATHMATCH_TEAM2) ||
+		 (pSetting->nGameType == MMATCH_GAMETYPE_GLADIATOR_TEAM) ||
+		 (pSetting->nGameType == MMATCH_GAMETYPE_ASSASSINATE))
 	{
-		// 맵 이름 배경 이미지 변환
 		if ( pAniMapImg)
 			pAniMapImg->SetCurrentFrame( 1);
 
-		// 퀘스트 UI 감춤
 		bQuestUI = false;
 	}
-	else if ( pSetting->nGameType == MMATCH_GAMETYPE_SURVIVAL)					// 서바이벌 모드이면...
+	else if ( pSetting->nGameType == MMATCH_GAMETYPE_SURVIVAL)
 	{
-		// 맵 이름 배경 이미지 변환
 		if ( pAniMapImg)
 			pAniMapImg->SetCurrentFrame( 0);
 
-		// 퀘스트 UI 감춤
 		bQuestUI = false;
 	}
-	else if ( pSetting->nGameType == MMATCH_GAMETYPE_QUEST)						// 퀘스트 모드이면...
+	else if ( pSetting->nGameType == MMATCH_GAMETYPE_QUEST)
 	{
-		// 맵 이름 배경 이미지 변환
 		if ( pAniMapImg)
 			pAniMapImg->SetCurrentFrame( 2);
 
-		// 퀘스트 UI 보임
 		bQuestUI = true;
 	}
 
-	// 퀘스트 UI 설정
 	ZApplication::GetGameInterface()->ShowWidget( "Stage_SacrificeItemImage0", bQuestUI);
 	ZApplication::GetGameInterface()->ShowWidget( "Stage_SacrificeItemImage1", bQuestUI);
 	ZApplication::GetGameInterface()->ShowWidget( "Stage_Lights0", bQuestUI);
@@ -531,7 +418,6 @@ void ZStageInterface::ChangeStageGameSetting( MSTAGE_SETTING_NODE* pSetting)
 
 		if ( bQuestUI)
 		{
-//			ZApplication::GetGameInterface()->EnableWidget( "StageMaxPlayer", false);
 			ZPostRequestSacrificeSlotInfo( ZGetGameClient()->GetPlayerUID());
 			ZPostRequestQL( ZGetGameClient()->GetPlayerUID());
 			OpenSacrificeItemBox();
@@ -542,8 +428,6 @@ void ZStageInterface::ChangeStageGameSetting( MSTAGE_SETTING_NODE* pSetting)
 			if ( pLabel)
 				pLabel->SetText( "");
 			ZApplication::GetGameInterface()->ShowWidget( "Stage_SenarioNameImg", false);
-//			if (ZGetGameClient()->AmIStageMaster())
-//				ZApplication::GetGameInterface()->EnableWidget( "StageMaxPlayer", true);
 
 			HideSacrificeItemBox();
 		}
@@ -554,18 +438,6 @@ void ZStageInterface::ChangeStageGameSetting( MSTAGE_SETTING_NODE* pSetting)
 	if ( (pSetting->nGameType == MMATCH_GAMETYPE_SURVIVAL) || (pSetting->nGameType == MMATCH_GAMETYPE_QUEST))
 		ZApplication::GetGameInterface()->EnableWidget( "StageSettingCaller", false);
 
-
-	// 라운드 선택 콤보박스 보이기
-//	bool bShowRound = true;
-//	if ( ( pSetting->nGameType == MMATCH_GAMETYPE_SURVIVAL) || ( pSetting->nGameType == MMATCH_GAMETYPE_QUEST))
-//		bShowRound = false;
-	
-//	ZApplication::GetGameInterface()->ShowWidget( "StageRoundCountLabelBG", bShowRound);
-//	ZApplication::GetGameInterface()->ShowWidget( "StageRoundCountLabel", bShowRound);
-//	ZApplication::GetGameInterface()->ShowWidget( "StageRoundCount", bShowRound);
-
-
-	// 라운드 or Kill
 	MWidget* pWidget = ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "StageRoundCountLabel");
 	if ( pWidget)
 	{
@@ -580,12 +452,8 @@ void ZStageInterface::ChangeStageGameSetting( MSTAGE_SETTING_NODE* pSetting)
 			pWidget->SetText( ZMsg(MSG_WORD_ROUND));
 	}
 
-
-	// 콤포넌트 업데이트
 	ZStageSetting::ShowStageSettingDialog( pSetting, false);
 
-
-	// 게임중 메뉴 수정 - 머하는 부분인지 알수 없음...
 #ifdef _QUEST
 	if ( ZGetGameTypeManager()->IsQuestDerived( pSetting->nGameType))
 		ZApplication::GetGameInterface()->GetCombatMenu()->EnableItem( ZCombatMenu::ZCMI_BATTLE_EXIT, false);
@@ -594,20 +462,9 @@ void ZStageInterface::ChangeStageGameSetting( MSTAGE_SETTING_NODE* pSetting)
 #endif
 }
 
-
-/***********************************************************************
-  ChangeStageButtons : public
-  
-  desc : 스테이지 내의 버튼들(게임시작, 난입, 준비완료)의 상태를 설정한다.
-         게임 설정과 관련된 위젯의 UI를 설정한다.
-  arg  : bForcedEntry = 난입 여부(true or false)
-         bMaster = 방장 여부(true or false)
-		 bReady = 준비 완료 여부(true or false)
-  ret  : none
-************************************************************************/
 void ZStageInterface::ChangeStageButtons( bool bForcedEntry, bool bMaster, bool bReady)
 {
-	if ( bForcedEntry)	// 난입 모드
+	if ( bForcedEntry)
 	{
 		ZApplication::GetGameInterface()->ShowWidget( "GameStart", false);
 		ZApplication::GetGameInterface()->ShowWidget( "StageReady", false);
@@ -632,14 +489,6 @@ void ZStageInterface::ChangeStageButtons( bool bForcedEntry, bool bMaster, bool 
 	}
 }
 
-
-/***********************************************************************
-  ChangeStageEnableReady : public
-  
-  desc : 스테이지의 인터페이스(버튼 enable등)를 켜거나 끄는 함수
-  arg  : true(=interface enable) or false(=interface disable)
-  ret  : none
-************************************************************************/
 void ZStageInterface::ChangeStageEnableReady( bool bReady)
 {
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
@@ -663,7 +512,6 @@ void ZStageInterface::ChangeStageEnableReady( bool bReady)
 			ZApplication::GetGameInterface()->EnableWidget( "MapSelection", !bReady);
 			ZApplication::GetGameInterface()->EnableWidget( "StageType", !bReady);
 		}
-//		ZApplication::GetGameInterface()->EnableWidget( "StageMaxPlayer", false);
 		ZApplication::GetGameInterface()->EnableWidget( "StageSettingCaller", false);
 	}
 	else
@@ -695,14 +543,6 @@ void ZStageInterface::ChangeStageEnableReady( bool bReady)
 	END_WIDGETLIST();
 }
 
-
-/***********************************************************************
-  SetMapName : public
-  
-  desc : 맵 선택 콤보박스에 맵 이름을 하나씩 등록시킨다.
-  arg  : szMapName = 등록시킬 맵 이름
-  ret  : none
-************************************************************************/
 void ZStageInterface::SetMapName( const char* szMapName)
 {
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
@@ -713,7 +553,6 @@ void ZStageInterface::SetMapName( const char* szMapName)
 	MComboBox* pMapCombo = (MComboBox*)pResource->FindWidget( "MapSelection");
 	if ( pMapCombo)
 	{
-		// 일단 임시 하드코딩(우에엥~ ㅠ.ㅠ)
 		if ( m_nGameType == MMATCH_GAMETYPE_QUEST)
 			pMapCombo->SetText( "Mansion");
 		else
@@ -721,25 +560,6 @@ void ZStageInterface::SetMapName( const char* szMapName)
 	}
 }
 
-
-
-
-/*
-	여기서부터 새로 추가된 내용...
-
-	왠만한건 리스너나 다른 곳에서 자동으로 호출되도록 해놨으나 아직 테스트인 관계로
-	완벽한건 아님...  -_-;
-*/
-
-
-
-/***********************************************************************
-  OpenSacrificeItemBox : public
-  
-  desc : 희생 아이템 선택 창 열기
-  arg  : none
-  ret  : none
-************************************************************************/
 void ZStageInterface::OpenSacrificeItemBox( void)
 {
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
@@ -755,14 +575,6 @@ void ZStageInterface::OpenSacrificeItemBox( void)
 	GetSacrificeItemBoxPos();
 }
 
-
-/***********************************************************************
-  CloseSacrificeItemBox : public
-  
-  desc : 희생 아이템 선택 창 닫기
-  arg  : none
-  ret  : none
-************************************************************************/
 void ZStageInterface::CloseSacrificeItemBox( void)
 {
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
@@ -782,14 +594,6 @@ void ZStageInterface::CloseSacrificeItemBox( void)
 	GetSacrificeItemBoxPos();
 }
 
-
-/***********************************************************************
-  HideSacrificeItemBox : public
-  
-  desc : 희생 아이템 선택 창 감추기
-  arg  : none
-  ret  : none
-************************************************************************/
 void ZStageInterface::HideSacrificeItemBox( void)
 {
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
@@ -809,21 +613,8 @@ void ZStageInterface::HideSacrificeItemBox( void)
 	GetSacrificeItemBoxPos();
 }
 
-
-/***********************************************************************
-  HideSacrificeItemBox : public
-  
-  desc : 희생 아이템 선택 창 위치 구하기
-  arg  : none
-  ret  : none
-************************************************************************/
 void ZStageInterface::GetSacrificeItemBoxPos( void)
 {
-//#ifdef _DEBUG
-//	m_nListFramePos = 0;
-//	return;
-//#endif
-
 	MWidget* pWidget = ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "Stage_ItemListView");
 	if ( pWidget)
 	{
@@ -848,43 +639,18 @@ void ZStageInterface::GetSacrificeItemBoxPos( void)
 	}
 }
 
-
-/***********************************************************************
-  OnSacrificeItem0 : public
-  
-  desc : 희생 아이템0을 눌렀을 때
-  arg  : none
-  ret  : none
-************************************************************************/
 void ZStageInterface::OnSacrificeItem0( void)
 {
 }
 
-
-/***********************************************************************
-  OnSacrificeItem1 : public
-  
-  desc : 희생 아이템1를 눌렀을 때
-  arg  : none
-  ret  : none
-************************************************************************/
 void ZStageInterface::OnSacrificeItem1( void)
 {
 }
 
-
-/***********************************************************************
-  UpdateSacrificeItem : protected
-  
-  desc : 변경된 희생 아이템 이미지, 정보등을 업데이트 함.
-  arg  : none
-  ret  : none
-************************************************************************/
 void ZStageInterface::UpdateSacrificeItem( void)
 {
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
 
-	// 스테이지 영역에 있는 희생 아이템 이미지 수정
 	for ( int i = SACRIFICEITEM_SLOT0;  i <= SACRIFICEITEM_SLOT1;  i++)
 	{
 		char szWidgetNameItem[ 128];
@@ -912,14 +678,6 @@ void ZStageInterface::UpdateSacrificeItem( void)
 	}
 }
 
-
-/***********************************************************************
-  SerializeSacrificeItemListBox : public
-  
-  desc : 희생 아이템 리스트 박스에 자료를 받는다.
-  arg  : none
-  ret  : none
-************************************************************************/
 void ZStageInterface::SerializeSacrificeItemListBox( void)
 {
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
@@ -932,7 +690,6 @@ void ZStageInterface::SerializeSacrificeItemListBox( void)
 	int nSelectIndex = pListBox->GetSelIndex();
 	pListBox->RemoveAll();
 
-	// 리스트에 추가
 	for ( MQUESTITEMNODEMAP::iterator questitem_itor = ZGetMyInfo()->GetItemList()->GetQuestItemMap().begin();
 		  questitem_itor != ZGetMyInfo()->GetItemList()->GetQuestItemMap().end();
 		  questitem_itor++)
@@ -951,7 +708,7 @@ void ZStageInterface::SerializeSacrificeItemListBox( void)
 				 (pItemDesc->m_nItemID == m_SacrificeItem[ SACRIFICEITEM_SLOT1].GetItemID()))
 				nCount--;
 
-			if ( pItemDesc->m_bSecrifice && (nCount > 0))		// 희생 아이템만 추가
+			if ( pItemDesc->m_bSecrifice && (nCount > 0))
 			{
 				pListBox->Add( new SacrificeItemListBoxItem( pItemDesc->m_nItemID,
 															 ZApplication::GetGameInterface()->GetQuestItemIcon( pItemDesc->m_nItemID, true),
@@ -975,14 +732,6 @@ void ZStageInterface::SerializeSacrificeItemListBox( void)
 	pListBox->SetSelIndex( min( (pListBox->GetCount() - 1), nSelectIndex));
 }
 
-
-/***********************************************************************
-  OnDropSacrificeItem : public
-  
-  desc : 희생 아이템 놓기
-  arg  : none
-  ret  : none
-************************************************************************/
 void ZStageInterface::OnDropSacrificeItem( int nSlotNum)
 {
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
@@ -996,7 +745,6 @@ void ZStageInterface::OnDropSacrificeItem( int nSlotNum)
 	{
 		MTextArea* pDesc = (MTextArea*)pResource->FindWidget( "Stage_ItemDesc");
 
-		// 슬롯이 비어있으면 무조건 올림
 		if ( ! m_SacrificeItem[ nSlotNum].IsExist())
 		{
 			ZPostRequestDropSacrificeItem( ZGetGameClient()->GetPlayerUID(), nSlotNum, pItemDesc->GetItemID());
@@ -1005,7 +753,6 @@ void ZStageInterface::OnDropSacrificeItem( int nSlotNum)
 				pDesc->Clear();
 		}
 
-		// 슬롯이 비어있지 않으면...
 		else
 		{
 			if ( (m_SacrificeItem[ nSlotNum].GetUID()    != ZGetGameClient()->GetPlayerUID()) ||
@@ -1018,14 +765,6 @@ void ZStageInterface::OnDropSacrificeItem( int nSlotNum)
 	}
 }
 
-
-/***********************************************************************
-  OnRemoveSacrificeItem : public
-  
-  desc : 희생 아이템 빼기
-  arg  : none
-  ret  : none
-************************************************************************/
 void ZStageInterface::OnRemoveSacrificeItem( int nSlotNum)
 {
 	if ( !m_SacrificeItem[ nSlotNum].IsExist())
@@ -1040,12 +779,6 @@ void ZStageInterface::OnRemoveSacrificeItem( int nSlotNum)
 		pDesc->Clear();
 }
 
-
-/***********************************************************************
-  MSacrificeItemListBoxListener
-  
-  desc : 희생 아이템 리스트 박스 리스너
-************************************************************************/
 class MSacrificeItemListBoxListener : public MListener
 {
 public:
@@ -1056,7 +789,6 @@ public:
 		{
 			MListBox* pListBox = (MListBox*)pWidget;
 
-			// 아이템 설명 업데이트
 			SacrificeItemListBoxItem* pItemDesc = (SacrificeItemListBoxItem*)pListBox->GetSelItem();
 			MTextArea* pDesc = (MTextArea*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "Stage_ItemDesc");
 			if ( pItemDesc && pDesc)
@@ -1096,13 +828,8 @@ MListener* ZGetSacrificeItemListBoxListener( void)
 	return &g_SacrificeItemListBoxListener;
 }
 
-
-/***********************************************************************
-  OnDropCallbackRemoveSacrificeItem
-  
-  desc : 희생 아이템 제거
-************************************************************************/
-void OnDropCallbackRemoveSacrificeItem( void* pSelf, MWidget* pSender, MBitmap* pBitmap, const char* szString, const char* szItemString)
+void OnDropCallbackRemoveSacrificeItem( void* pSelf, MWidget* pSender, MBitmap* pBitmap,
+	const char* szString, const char* szItemString)
 {
 	if ( (pSender == NULL) || (strcmp(pSender->GetClassName(), MINT_ITEMSLOTVIEW)))
 		return;
@@ -1111,21 +838,12 @@ void OnDropCallbackRemoveSacrificeItem( void* pSelf, MWidget* pSender, MBitmap* 
 	ZApplication::GetStageInterface()->OnRemoveSacrificeItem( (strcmp( pItemSlotView->m_szItemSlotPlace, "SACRIFICE0") == 0) ? 0 : 1);
 }
 
-
-/***********************************************************************
-  StartMovieOfQuest : public
-  
-  desc : 퀘스트 모드로 시작할때 아이템 합쳐지는 무비를 시작함
-  arg  : none
-  ret  : none
-************************************************************************/
 void ZStageInterface::StartMovieOfQuest( void)
 {
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
 
 	m_dwClockOfStartMovie = GetGlobalTimeMS();
 
-	// 화염 애니메이션 시작
 	MAnimation* pAnimation = (MAnimation*)pResource->FindWidget( "Stage_Flame0");
 	if ( pAnimation && m_SacrificeItem[ SACRIFICEITEM_SLOT0].IsExist())
 	{
@@ -1144,14 +862,6 @@ void ZStageInterface::StartMovieOfQuest( void)
 	m_bDrawStartMovieOfQuest = true;
 }
 
-
-/***********************************************************************
-  OnDrawStartMovieOfQuest : public
-  
-  desc : 퀘스트 모드로 시작할때 아이템 합쳐지는 무비를 그림
-  arg  : none
-  ret  : none
-************************************************************************/
 void ZStageInterface::OnDrawStartMovieOfQuest( void)
 {
 	if ( !m_bDrawStartMovieOfQuest)
@@ -1159,10 +869,8 @@ void ZStageInterface::OnDrawStartMovieOfQuest( void)
 
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
 
-	// 경과 시간을 구한다.
 	DWORD dwClock = GetGlobalTimeMS() - m_dwClockOfStartMovie;
 
-	// 희생 아이템 페이드 아웃
 	int nOpacity = 255 - dwClock * 0.12f;
 	if ( nOpacity < 0)
 		nOpacity = 0;
@@ -1175,14 +883,12 @@ void ZStageInterface::OnDrawStartMovieOfQuest( void)
 	if ( pPicture && m_SacrificeItem[ SACRIFICEITEM_SLOT1].IsExist())
 		pPicture->SetOpacity( nOpacity);
 
-	// 종료 시간일 경우에...
 	if ( dwClock > 3200)
 	{
 		m_bDrawStartMovieOfQuest = false;
 
 		ZMyQuestItemMap::iterator itMyQItem;
 
-		// 여기서 슬롯에 자신의 아이템이 올려져 있으면 해당 아이템 카운트 감소.
 		if( ZGetGameClient()->GetUID() == m_SacrificeItem[ SACRIFICEITEM_SLOT0].GetUID() )
 		{
 			itMyQItem = ZGetMyInfo()->GetItemList()->GetQuestItemMap().find( m_SacrificeItem[ SACRIFICEITEM_SLOT0].GetItemID() );
@@ -1201,14 +907,6 @@ void ZStageInterface::OnDrawStartMovieOfQuest( void)
 	}
 }
 
-
-/***********************************************************************
-  IsShowStartMovieOfQuest : public
-  
-  desc : 퀘스트 모드로 시작할때 아이템 합쳐지는 무비를 보여줄지 여부를 결정.
-  arg  : none
-  ret  : true(=Quest mode start movie) or false(=none)
-************************************************************************/
 bool ZStageInterface::IsShowStartMovieOfQuest( void)
 {
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
@@ -1221,16 +919,8 @@ bool ZStageInterface::IsShowStartMovieOfQuest( void)
 
 	return false;
 }
-
-
-/***********************************************************************
-  OnResponseDropSacrificeItemOnSlot : public
-  
-  desc : 희생 아이템이 올라갔을때
-  arg  : none
-  ret  : none
-************************************************************************/
-bool ZStageInterface::OnResponseDropSacrificeItemOnSlot( const int nResult, const MUID& uidRequester, const int nSlotIndex, const int nItemID )
+bool ZStageInterface::OnResponseDropSacrificeItemOnSlot( const int nResult, const MUID& uidRequester,
+	int nSlotIndex, int nItemID )
 {
 #ifdef _QUEST_ITEM
 	if( MOK == nResult)
@@ -1245,21 +935,17 @@ bool ZStageInterface::OnResponseDropSacrificeItemOnSlot( const int nResult, cons
 	}
 	else if( ITEM_TYPE_NOT_SACRIFICE == nResult)
 	{
-		// 희생 아이템이 아님.
 		return false;
 	}
 	else if( NEED_MORE_QUEST_ITEM == nResult )
 	{
-		// 현제 가지고 있는 수량을 초과해서 올려 놓으려고 했을경우.
 	}
 	else if( MOK != nResult )
 	{
-		// 실패...
 		return false;
 	}
 	else
 	{
-		// 정의되지 않은 error...
 		ASSERT( 0 );
 	}
 
@@ -1268,14 +954,6 @@ bool ZStageInterface::OnResponseDropSacrificeItemOnSlot( const int nResult, cons
 	return true;
 }
 
-
-/***********************************************************************
-  OnResponseCallbackSacrificeItem : public
-  
-  desc : 희생 아이템이 내려갔을때
-  arg  : none
-  ret  : none
-************************************************************************/
 bool ZStageInterface::OnResponseCallbackSacrificeItem( const int nResult, const MUID& uidRequester, const int nSlotIndex, const int nItemID )
 {
 #ifdef _QUEST_ITEM
@@ -1292,7 +970,6 @@ bool ZStageInterface::OnResponseCallbackSacrificeItem( const int nResult, const 
 	}
 	else if( ERR_SACRIFICE_ITEM_INFO == nResult )
 	{
-		// 클라이언트에서 보낸 정보가 잘못된 정보. 따러 에러처리가 필요하면 여기서 해주면 됨.
 	}
 
 #endif
@@ -1301,17 +978,10 @@ bool ZStageInterface::OnResponseCallbackSacrificeItem( const int nResult, const 
 }
 
 #ifdef _QUEST_ITEM
-///
-// Fist : 추교성.
-// Last : 추교성.
-// 
-// 서버로부터 QL의 정보를 받음.
-///
 bool ZStageInterface::OnResponseQL( const int nQL )
 {
 	ZGetQuest()->GetGameInfo()->SetQuestLevel( nQL);
 
-	// 스테이지 영역에 있는 퀘스트 레벨 표시 수정
 	MLabel* pLabel = (MLabel*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "Stage_QuestLevel");
 	if ( pLabel)
 	{
@@ -1331,7 +1001,6 @@ bool ZStageInterface::OnStageGameInfo( const int nQL, const int nMapsetID, const
 	}
 	else
 	{
-		// 시나리오가 없으면 그냥 0으로 보이게 한다.
 		ZGetQuest()->GetGameInfo()->SetQuestLevel( 0 );
 	}
 
@@ -1381,22 +1050,6 @@ bool ZStageInterface::OnQuestStartFailed( const int nState )
 		pTextArea->AddText( text);
 	}
 
-/*
-	if( MSQITRES_INV == nState )
-	{
-		// 해당 QL에대한 희생아이템 정보 테이블이 없음. 이경우는 맞지 않는 희생 아이템이 올려져 있을경우.
-		MTextArea* pTextArea = (MTextArea*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "StageChattingOutput");
-		if ( pTextArea)
-			pTextArea->AddText( "^1현재 놓여있는 아이템은 조건에 맞지 않아 게임을 시작할 수 없습니다.");
-	}
-	else if( MSQITRES_DUP == nState )
-	{
-		// 양쪽 슬롯에 같은 아이템이 올려져 있음.
-		MTextArea* pTextArea = (MTextArea*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "StageChattingOutput");
-		if ( pTextArea)
-			pTextArea->AddText( "^1같은 아이템 2개가 놓여있으므로 게임을 시작할 수 없습니다.");
-	}
-*/
 	return true;
 }
 
@@ -1411,7 +1064,6 @@ void ZStageInterface::UpdateStageGameInfo(const int nQL, const int nMapsetID, co
 {
 	if (!ZGetGameTypeManager()->IsQuestDerived(ZGetGameClient()->GetMatchStageSetting()->GetGameType())) return;
 
-	// 스테이지 영역에 있는 퀘스트 레벨 표시 수정
 	MLabel* pLabel = (MLabel*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "Stage_QuestLevel");
 	if ( pLabel)
 	{
@@ -1423,9 +1075,7 @@ void ZStageInterface::UpdateStageGameInfo(const int nQL, const int nMapsetID, co
 
 #define		MAPSET_NORMAL		MCOLOR(0xFFFFFFFF)
 #define		MAPSET_SPECIAL		MCOLOR(0xFFFFFF40)			// Green
-//#define		MAPSET_SPECIAL		MCOLOR(0xFFFF2020)		// Red
 
-	// 여기서 시나리오 이름을 보여준다.
 	pLabel = (MLabel*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "Stage_SenarioName");
 	MWidget* pWidget = ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "Stage_SenarioNameImg");
 	MPicture* pPictureL = (MPicture*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "Stage_Lights0");
@@ -1434,7 +1084,6 @@ void ZStageInterface::UpdateStageGameInfo(const int nQL, const int nMapsetID, co
 	{
 		if (nScenarioID == 0)
 		{
-			// 시나리오가 없는 경우
 			pLabel->SetText( "");
 			if ( pWidget)
 				pWidget->Show( false);
@@ -1468,7 +1117,6 @@ void ZStageInterface::UpdateStageGameInfo(const int nQL, const int nMapsetID, co
 			}
 			else
 			{
-				// 특별시나리오가 없을경우는 정규시나리오이다.
 				pLabel->SetText("");
 				pLabel->SetTextColor(MCOLOR(0xFFFFFFFF));
 				if ( pWidget)
@@ -1488,13 +1136,6 @@ void ZStageInterface::UpdateStageGameInfo(const int nQL, const int nMapsetID, co
 	}
 }
 
-/***********************************************************************
-  SetSacrificeItemSlot : public
-  
-  desc : 희생 아이템 슬롯에 아이템 정보를 입력
-  arg  : none
-  ret  : none
-************************************************************************/
 void SacrificeItemSlotDesc::SetSacrificeItemSlot( const MUID& uidUserID, const unsigned long int nItemID, MBitmap* pBitmap, const char* szItemName, const int nQL)
 {
 	m_uidUserID = uidUserID;
@@ -1505,27 +1146,12 @@ void SacrificeItemSlotDesc::SetSacrificeItemSlot( const MUID& uidUserID, const u
 	m_bExist = true;
 }
 
-
-/***********************************************************************
-  ReadSenarioNameXML : protected
-  
-  desc : 퀘스트 희생 아이템 XML을 읽는다
-  arg  : none
-  ret  : true(=success) or false(=fail)
-************************************************************************/
 bool ZStageInterface::ReadSenarioNameXML( void)
 {
 	m_SenarioNameDesc.clear();
 
-	// XML 파일을 연다
 	MXmlDocument xmlQuestItemDesc;
 	xmlQuestItemDesc.Create();
-
-//	if ( !xmlQuestItemDesc.LoadFromFile( "System/scenario.xml"))
-//	{
-//		xmlQuestItemDesc.Destroy();
-//		return false;
-//	}
 
 	char			*buffer;
 	MZFile			mzFile;
@@ -1549,8 +1175,6 @@ bool ZStageInterface::ReadSenarioNameXML( void)
 	delete[] buffer;
 	mzFile.Close();
 
-
-	// 데이터를 읽어온다
 	MXmlElement rootElement = xmlQuestItemDesc.GetDocumentElement();
 	for ( int i = 0;  i < rootElement.GetChildNodeCount();  i++)
 	{
@@ -1563,7 +1187,7 @@ bool ZStageInterface::ReadSenarioNameXML( void)
 			continue;
 
 		bool bFindPage = false;
-		if ( !_stricmp( szTagName, "SPECIAL_SCENARIO"))			// 태그 시작
+		if ( !_stricmp( szTagName, "SPECIAL_SCENARIO"))
 		{
 			char szAttrName[64];
 			char szAttrValue[256];

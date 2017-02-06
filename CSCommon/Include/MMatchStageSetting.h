@@ -12,7 +12,6 @@
 #define MMATCH_TEAM1_NAME_STR		"RED TEAM"
 #define MMATCH_TEAM2_NAME_STR		"BLUE TEAM"
 
-
 inline const char* GetTeamNameStr(MMatchTeam nTeam)
 {
 	switch (nTeam)
@@ -29,7 +28,6 @@ inline const char* GetTeamNameStr(MMatchTeam nTeam)
 	return "";
 }
 
-
 enum STAGE_STATE {
 	STAGE_STATE_STANDBY		= 0,
 	STAGE_STATE_COUNTDOWN,
@@ -37,9 +35,9 @@ enum STAGE_STATE {
 	STAGE_STATE_CLOSE
 };
 
-#define MSTAGENODE_FLAG_FORCEDENTRY_ENABLED		1		// 난입
-#define MSTAGENODE_FLAG_PRIVATE					2		// 비밀방
-#define MSTAGENODE_FLAG_LIMITLEVEL				4		// 레벨제한
+#define MSTAGENODE_FLAG_FORCEDENTRY_ENABLED		1
+#define MSTAGENODE_FLAG_PRIVATE					2
+#define MSTAGENODE_FLAG_LIMITLEVEL				4
 
 enum class NetcodeType : u8
 {
@@ -48,27 +46,25 @@ enum class NetcodeType : u8
 	P2PLead,
 };
 
-
 #pragma pack(push, 1)
 struct MSTAGE_SETTING_NODE {
 	MUID				uidStage;
 	char				szStageName[64];
-	char				szMapName[MAPNAME_LENGTH];	// 맵이름
-	char				nMapIndex;					// 맵인덱스
-	MMATCH_GAMETYPE		nGameType;					// 게임타입
-	int					nRoundMax;					// 라운드
-	int					nLimitTime;					// 제한시간(1 - 1분)
-	int					nLimitLevel;				// 제한레벨
-	int					nMaxPlayers;				// 최대인원
-	bool				bTeamKillEnabled;			// 팀킬여부
-	bool				bTeamWinThePoint;			// 선승제 여부
-	bool				bForcedEntryEnabled;		// 게임중 참가 여부
+	char				szMapName[MAPNAME_LENGTH];
+	char				nMapIndex;
+	MMATCH_GAMETYPE		nGameType;
+	int					nRoundMax;
+	int					nLimitTime;
+	int					nLimitLevel;
+	int					nMaxPlayers;
+	bool				bTeamKillEnabled;
+	bool				bTeamWinThePoint;
+	bool				bForcedEntryEnabled;
 
-	// 추가됨
-	bool				bAutoTeamBalancing;			// 오토팀밸런스 - 팀플게임에서만 사용
+	bool				bAutoTeamBalancing;
 #ifdef _VOTESETTING
-	bool				bVoteEnabled;				// 투표가능 여부
-	bool				bObserverEnabled;			// 관전모드 여부
+	bool				bVoteEnabled;
+	bool				bObserverEnabled;
 #endif
 
 	NetcodeType Netcode = NetcodeType::ServerBased;
@@ -84,52 +80,33 @@ struct MSTAGE_SETTING_NODE {
 };
 #pragma pack(pop)
 
-// 방 처음 만들었을때 스테이지 세팅 초기값
 #define MMATCH_DEFAULT_STAGESETTING_MAPNAME			"Mansion"
 
 #define MMATCH_DEFAULT_STAGESETTING_GAMETYPE			MMATCH_GAMETYPE_DEATHMATCH_SOLO
-#define MMATCH_DEFAULT_STAGESETTING_ROUNDMAX			50		// 50라운드
-#define MMATCH_DEFAULT_STAGESETTING_LIMITTIME			30		// 30분
-#define MMATCH_DEFAULT_STAGESETTING_LIMITLEVEL			0		// 무제한
-#define MMATCH_DEFAULT_STAGESETTING_MAXPLAYERS			8		// 8명
-#define MMATCH_DEFAULT_STAGESETTING_TEAMKILL			false	// 팀킬불가
-#define MMATCH_DEFAULT_STAGESETTING_TEAM_WINTHEPOINT	false	// 선승제 여부
-#define MMATCH_DEFAULT_STAGESETTING_FORCEDENTRY			true	// 난입가능
-#define MMATCH_DEFAULT_STAGESETTING_AUTOTEAMBALANCING	true	// 오토팀밸런스
+#define MMATCH_DEFAULT_STAGESETTING_ROUNDMAX			50
+#define MMATCH_DEFAULT_STAGESETTING_LIMITTIME			30
+#define MMATCH_DEFAULT_STAGESETTING_LIMITLEVEL			0
+#define MMATCH_DEFAULT_STAGESETTING_MAXPLAYERS			8
+#define MMATCH_DEFAULT_STAGESETTING_TEAMKILL			false
+#define MMATCH_DEFAULT_STAGESETTING_TEAM_WINTHEPOINT	false
+#define MMATCH_DEFAULT_STAGESETTING_FORCEDENTRY			true
+#define MMATCH_DEFAULT_STAGESETTING_AUTOTEAMBALANCING	true
 
 
-#define STAGESETTING_LIMITTIME_UNLIMITED				0		// 제한시간이 무제한은 0
+#define STAGESETTING_LIMITTIME_UNLIMITED				0
 
 
 struct MSTAGE_CHAR_SETTING_NODE {
-	MUID	uidChar;
-	int		nTeam;
-	MMatchObjectStageState	nState;
-	MSTAGE_CHAR_SETTING_NODE() : uidChar(MUID(0,0)), nTeam(0), nState(MOSS_NONREADY) {	}
-};
-class MStageCharSettingList : public list<MSTAGE_CHAR_SETTING_NODE*> {
-public:
-	void DeleteAll() {
-		for (iterator i=begin(); i!=end(); i++) {
-			delete (*i);
-		}
-		clear();
-	}
+	MUID	uidChar{};
+	int		nTeam{};
+	MMatchObjectStageState	nState = MOSS_NONREADY;
 };
 
+using MStageCharSettingList = std::vector<MSTAGE_CHAR_SETTING_NODE>;
 
-
-
-class MMatchStageSetting {
-protected:
-	MSTAGE_SETTING_NODE		m_StageSetting;
-	MUID					m_uidMaster;
-	STAGE_STATE				m_nStageState;
+class MMatchStageSetting final
+{
 public:
-	MStageCharSettingList	m_CharSettingList;
-public:
-	MMatchStageSetting();
-	virtual ~MMatchStageSetting();
 	void Clear();
 	void SetDefault();
 	unsigned long GetChecksum();
@@ -171,9 +148,16 @@ public:
 	void UpdateStageSetting(MSTAGE_SETTING_NODE* pSetting);
 	void UpdateCharSetting(const MUID& uid, unsigned int nTeam, MMatchObjectStageState nStageState);
 
-	void ResetCharSetting() { m_CharSettingList.DeleteAll(); }
+	void ResetCharSetting() { m_CharSettingList.clear(); }
 	bool IsTeamPlay();
 	bool IsWaitforRoundEnd();
 	bool IsQuestDrived();
 	bool IsTeamWinThePoint() const { return m_StageSetting.bTeamWinThePoint; }
+
+	MStageCharSettingList	m_CharSettingList;
+
+protected:
+	MSTAGE_SETTING_NODE		m_StageSetting;
+	MUID					m_uidMaster;
+	STAGE_STATE				m_nStageState;
 };

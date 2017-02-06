@@ -447,8 +447,8 @@ void ZGameClient::OnStageEnterBattle(const MUID& uidChar, MCmdEnterBattleParam n
 		ZPostClientSettings(ClientSettings);
 
 		// Unready every player
-		for (auto* CharNode : m_MatchStageSetting.m_CharSettingList)
-			CharNode->nState = MOSS_NONREADY;
+		for (auto&& CharNode : m_MatchStageSetting.m_CharSettingList)
+			CharNode.nState = MOSS_NONREADY;
 	}
 
 	if (GetMatchStageSetting()->GetNetcode() != NetcodeType::ServerBased)

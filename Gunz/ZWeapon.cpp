@@ -61,8 +61,6 @@ bool ZWeapon::Update(float fElapsedTime)
 	return true;
 }
 
-////////////////////////////////////////////////////////////////////////////
-
 MImplementRTTI(ZMovingWeapon, ZWeapon);
 
 ZMovingWeapon::ZMovingWeapon() : ZWeapon() {
@@ -75,8 +73,6 @@ ZMovingWeapon::~ZMovingWeapon() {
 
 void ZMovingWeapon::Explosion() {
 }
-
-/////////////////////////// 로켓
 
 MImplementRTTI(ZWeaponRocket,ZMovingWeapon);
 
@@ -121,11 +117,9 @@ void ZWeaponRocket::Create(RMesh* pMesh, const rvector &pos, const rvector &dir,
 		_ASSERT(m_SLSid==0);
 		m_SLSid = ZGetStencilLight()->AddLightSource( m_Position, 2.0f );
 	}
-
-	//ZGetEffectManager()->AddRocketSmokeEffect(m_Position,-RealSpace2::RCameraDirection);
 }
 
-#define ROCKET_LIFE			10.f		// 10초 뒤에 터짐
+#define ROCKET_LIFE			10.f
 
 bool ZWeaponRocket::Update(float fElapsedTime)
 {
@@ -138,7 +132,6 @@ bool ZWeaponRocket::Update(float fElapsedTime)
 	rvector oldPos = m_Position;
 
 	if(g_pGame->GetTime() - m_fStartTime > ROCKET_LIFE ) {
-		// 수류탄은 터지는 순간에 이펙트 추가.. 삭제...
 		Explosion();
 
 		if(Z_VIDEO_DYNAMICLIGHT && m_SLSid ) {
@@ -236,54 +229,19 @@ bool ZWeaponRocket::Update(float fElapsedTime)
 
 void ZWeaponRocket::Render()
 {
-	ZWeapon::Render();
-
-	//add
-
-//	RGetDevice()->SetRenderState(D3DRS_ALPHATESTENABLE,	TRUE);
-//	RGetDevice()->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
-
-//	RGetDevice()->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-//	RGetDevice()->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
-//	RGetDevice()->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
-
-	//alpha
-/*
-	RGetDevice()->SetRenderState(D3DRS_ALPHAREF, (DWORD)0x00000000);
-	RGetDevice()->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_NOTEQUAL );
-	RGetDevice()->SetRenderState(D3DRS_ALPHATESTENABLE,	TRUE);
-
-	RGetDevice()->SetTextureStageState( 0, D3DTSS_ALPHAARG1 , D3DTA_TEXTURE );
-	RGetDevice()->SetTextureStageState( 0, D3DTSS_ALPHAARG2 , D3DTA_TFACTOR );
-	RGetDevice()->SetTextureStageState( 0, D3DTSS_ALPHAOP , D3DTOP_MODULATE );
-
-	RGetDevice()->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-	RGetDevice()->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-	RGetDevice()->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
-
-	RGetDevice()->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
-*/
-
-}
+	ZWeapon::Render();}
 
 void ZWeaponRocket::Explosion()
 {
-	// 자신의 이펙트 그리고..
-	// 주변 유닛들에게 데미지 주는 메시지 날리고..
-	// ( 메시지 받은곳에서 주변 유닛들 체크하고.. 
-	// 죽은 유닛이 있다면 발사유닛의 킬수를 올려주기)
-
 	rvector v = m_Position;
-
-	//	if(v.z < 0.f)	v.z = 0.f;//높이
 
 	rvector dir = -RealSpace2::RCameraDirection;
 	ZGetEffectManager()->AddRocketEffect(v,dir);
 
-	// 메시지를 날리거나~
-	// 각각의 클라이언트의 무기 정보를 믿고 처리하거나~
-
-	g_pGame->OnExplosionGrenade(m_uidOwner,v,m_fDamage,ROCKET_SPLASH_RANGE,ROCKET_MINIMUM_DAMAGE,ROCKET_KNOCKBACK_CONST,m_nTeamID);
+	g_pGame->OnExplosionGrenade(m_uidOwner,
+		v, m_fDamage,
+		ROCKET_SPLASH_RANGE, ROCKET_MINIMUM_DAMAGE,
+		ROCKET_KNOCKBACK_CONST, m_nTeamID);
 
 	ZGetSoundEngine()->PlaySound("fx_explosion01",v);
 
@@ -291,13 +249,10 @@ void ZWeaponRocket::Explosion()
 
 }
 
-////////////////////////// 메디킷
-
 MImplementRTTI(ZWeaponItemkit,ZMovingWeapon);
 
 ZWeaponItemkit::ZWeaponItemkit() :ZMovingWeapon()
 {
-//	m_nWeaponType = 0;
 	m_fDeathTime = 0;
 	m_nWorldItemID = 0;
 
@@ -344,8 +299,6 @@ void ZWeaponItemkit::Create(RMesh* pMesh, const rvector &pos, const rvector &vel
 
 	m_fDamage=pDesc->m_nDamage;
 
-//	m_nSpItemID = m_nMySpItemID++;
-
 	m_bSendMsg = false;
 }
 
@@ -353,14 +306,11 @@ void ZWeaponItemkit::Render()
 {
 	if(m_bInit) {
 		if(m_pVMesh->m_pMesh) {
-		// 무기 파츠를 캐릭터에 붙어있을경우 조명을 받고 안붙어있을경우 조명을 안받는 2가지용도로사용하기때문		
 
 		rmatrix mat;
 		MakeWorldMatrix(&mat,m_Position,m_Dir,m_Up);
 		m_pVMesh->SetWorldMatrix(mat);
-//		m_pVMesh->m_pMesh->m_LitVertexModel = true;
 		ZMovingWeapon::Render();
-//		m_pVMesh->m_pMesh->m_LitVertexModel = false;
 
 		}
 	}
@@ -368,8 +318,6 @@ void ZWeaponItemkit::Render()
 
 void ZWeaponItemkit::UpdateFirstPos()
 {
-	/////////////////////////////////////// 지금은 계산해서 보내준다...
-
 	m_bInit = true;
 	return;
 
@@ -552,18 +500,15 @@ void ZWeaponGrenade::Create(RMesh* pMesh, const rvector &pos, const rvector &vel
 
 	m_fDamage=pDesc->m_nDamage;
 
-	m_nSoundCount = rand() % 2 + 2;	// 2~ 3번 소리를 낸다
+	m_nSoundCount = rand() % 2 + 2;
 }
 
+#define GRENADE_LIFE			2.f
 
-#define GRENADE_LIFE			2.f		// 3초 뒤에 터짐
-
-// 서로간에 동기화 되어야 한다.
 bool ZWeaponGrenade::Update(float fElapsedTime)
 {
 	rvector oldPos = m_Position;
 	if(g_pGame->GetTime() - m_fStartTime > GRENADE_LIFE) {
-		// 수류탄은 터지는 순간에 이펙트 추가.. 삭제...
 		Explosion();
 		if(Z_VIDEO_DYNAMICLIGHT)
 		ZGetStencilLight()->AddLightSource( m_Position, 3.0f, 1300 );
@@ -607,8 +552,6 @@ bool ZWeaponGrenade::Update(float fElapsedTime)
 			}
 		}
 
-
-		// 어딘가에 충돌했다
 		if(bPicked && fabsf(Magnitude(pickpos-m_Position))<fDist)
 		{
 			m_Position=pickpos+normal;
@@ -832,8 +775,6 @@ bool	ZWeaponFlashBang::Update( float fElapsedTime )
 
 	return true;
 }
-
-//////////////////////////////////////////////////////////////
 
 MImplementRTTI(ZWeaponSmokeGrenade,ZWeaponGrenade);
 
@@ -1129,10 +1070,6 @@ bool ZWeaponMagic::Update(float fElapsedTime)
 	Normalize(dir);
 	MakeWorldMatrix(&mat,m_Position,m_Dir,m_Up);
 
-//	mat._12 *= m_fMagicScale;
-//	mat._23 *= m_fMagicScale;
-//	mat._31 *= m_fMagicScale;
-
 	m_pVMesh->SetScale(rvector(m_fMagicScale,m_fMagicScale,m_fMagicScale));
 	m_pVMesh->SetWorldMatrix(mat);
 
@@ -1142,24 +1079,8 @@ bool ZWeaponMagic::Update(float fElapsedTime)
 
 #define _ROCKET_RAND_CAP 10
 
-		/*
-		rvector add;
-
-		add.x = rand()%_ROCKET_RAND_CAP;
-		add.y = rand()%_ROCKET_RAND_CAP;
-		add.z = rand()%_ROCKET_RAND_CAP;
-
-		if(rand()%2) add.x=-add.x;
-		if(rand()%2) add.y=-add.y;
-		if(rand()%2) add.z=-add.z;
-
-		rvector pos = m_Position+add;
-		*/
-
 		rvector add = rvector(RANDOMFLOAT-0.5f,RANDOMFLOAT-0.5f,RANDOMFLOAT-0.5f);
 		rvector pos = m_Position + 20.f*add;
-
-//		case type
 
 		ZSKILLEFFECTTRAILTYPE nEffectType = ZSTE_NONE;
 
@@ -1172,8 +1093,6 @@ bool ZWeaponMagic::Update(float fElapsedTime)
 			else if(nEffectType==ZSTE_MAGIC)	ZGetEffectManager()->AddTrackMagic(pos);
 		}
 
-//		ZGetEffectManager()->AddRocketSmokeEffect(pos);
-//		ZGetEffectManager()->AddSmokeEffect(NULL,pos,rvector(0,0,0),rvector(0,0,0),60.f,80.f,1.5f);
 		ZGetWorld()->GetFlags()->CheckSpearing( oldPos, pos	, ROCKET_SPEAR_EMBLEM_POWER );
 		m_fLastAddTime = this_time;
 	}
@@ -1188,8 +1107,6 @@ void ZWeaponMagic::Render()
 {
 	ZWeapon::Render();
 
-
-	// test 코드
 #ifndef _PUBLISH
 	if ((ZApplication::GetGameInterface()->GetScreenDebugger()->IsVisible()) && (ZIsLaunchDevelop()))
 	{
@@ -1227,10 +1144,9 @@ void ZWeaponMagic::Explosion(WeaponMagicExplosionType type, ZObject* pVictim, co
 
 	rvector pos = m_Position;
 
-	if(type == WMET_OBJECT) {// object 에 부딪히는 경우...
+	if(type == WMET_OBJECT) {
 		float fScale = m_fMagicScale;
 		
-		// 이펙트는 스케일링하면 줄인다.
 		if(nEffectType==ZSTE_FIRE)			
 		{
 			if (fScale > 1.0f)
@@ -1250,15 +1166,12 @@ void ZWeaponMagic::Explosion(WeaponMagicExplosionType type, ZObject* pVictim, co
 			ZGetEffectManager()->AddMagicEffect(m_Position,0, fScale);
 		}
 	}
-	else { // WMET_MAP
+	else {
 
 		 if(nEffectType==ZSTE_FIRE)		 ZGetEffectManager()->AddMagicEffectWall(0,pos,vDir,0, m_fMagicScale);
 		 else if(nEffectType==ZSTE_COLD) ZGetEffectManager()->AddMagicEffectWall(1,pos,vDir,0, m_fMagicScale);
 		 else if(nEffectType==ZSTE_MAGIC)ZGetEffectManager()->AddMagicEffectWall(2,pos,vDir,0, m_fMagicScale);
 	}
-
-//	ZGetEffectManager()->AddLighteningEffect(v);
-//	ZGetEffectManager()->AddBlizzardEffect( v,5 );
 
 	if (m_pSkillDesc->szExplosionSound[0] != 0)
 	{

@@ -337,6 +337,15 @@ ZObjectManager* ZGetObjectManager()
 	return &g_pGame->m_ObjectManager;
 }
 
+static float CalcDamageRatio(float Distance, float MinRatio,
+	float PointBlankRange, float Range)
+{
+	if (Distance > Range) {
+		return 0;
+	}
+	return 1 - (1 - MinRatio) * (std::max(Distance - PointBlankRange, 0.0f) / (Range - PointBlankRange));
+}
+
 ZGame::ZGame()
 	: DrawObj{ *this, D3D9Tag{} }
 {
@@ -2109,86 +2118,67 @@ bool ZGame::CheckWall(ZObject* pObj1,ZObject* pObj2)
 	return false;
 }
 
-void ZGame::OnExplosionGrenade(MUID uidOwner,rvector pos,float fDamage,float fRange,float fMinDamage,float fKnockBack,MMatchTeam nTeamID)
+void ZGame::OnExplosionGrenade(MUID uidOwner, rvector pos, float fDamage, float fRange,
+	float fMinDamageRatio, float fKnockBack, MMatchTeam nTeamID)
 {
 	if (ZGetGame()->GetMatch()->GetMatchType() == MMATCH_GAMETYPE_SKILLMAP)
 		return;
 
-	ZObject* pTarget = NULL;
+	for (auto* Target : MakePairValueAdapter(m_ObjectManager))
+	{
+		if (Target->IsDie())
+			continue;
 
-	float fDist,fDamageRange;
+		auto TargetToPos = pos - (Target->GetPosition() + rvector(0, 0, 80));
+		auto DistanceToExplosion = Magnitude(TargetToPos);
+		if (DistanceToExplosion > fRange)
+			continue;
 
-	for (ZObjectManager::iterator itor = m_ObjectManager.begin(); itor != m_ObjectManager.end(); ++itor) {
+		auto dir = Normalized(TargetToPos);
 
-		pTarget = (*itor).second;
+		constexpr auto MAX_DMG_RANGE = 50.f;
+		float DamageRange = CalcDamageRatio(DistanceToExplosion, fMinDamageRatio, MAX_DMG_RANGE, fRange);
 
-		if(pTarget && !pTarget->IsDie()) {
+		ZActor* pATarget = MDynamicCast(ZActor, Target);
 
-			fDist = Magnitude(pos-(pTarget->GetPosition()+rvector(0,0,80)));
-			if(fDist < fRange) {
+		bool bPushSkip = false;
 
-				{
-					rvector dir=pos-(pTarget->GetPosition()+rvector(0,0,80));
-					Normalize(dir);
-
-					if(GetDistance(pos,pTarget->GetPosition()+rvector(0,0,50),pTarget->GetPosition()+rvector(0,0,130))<50)
-					{
-						fDamageRange = 1.f;
-					}else
-					{
-#define MAX_DMG_RANGE	50.f
-
-						fDamageRange = 1.f - (1.f-fMinDamage)*( std::max(fDist-MAX_DMG_RANGE, 0.0f) / (fRange-MAX_DMG_RANGE));
-					}
-
-					// 수류탄을 맞으면 반동으로 튀어나간다.
-
-					ZActor* pATarget = MDynamicCast(ZActor,pTarget);
-
-					bool bPushSkip = false;
-
-					if(pATarget) {
-						bPushSkip = pATarget->GetNPCInfo()->bNeverPushed;
-					}
-
-					if(bPushSkip==false) {
-						pTarget->AddVelocity(fKnockBack*7.f*(fRange-fDist)*-dir);
-					}
-					else {
-						ZGetSoundEngine()->PlaySound("fx_bullethit_mt_met");
-					}
-
-					ZCharacter* pOwnerCharacter = g_pGame->m_CharacterManager.Find( uidOwner );
-					if(pOwnerCharacter) {
-						CheckCombo(pOwnerCharacter, pTarget,!bPushSkip);
-						CheckStylishAction(pOwnerCharacter);
-					}
-
-					float fActualDamage = fDamage * fDamageRange;
-					float fRatio = ZItem::GetPiercingRatio( MWT_FRAGMENTATION , eq_parts_chest );//수류탄과 로켓 구분없다..
-					if (ZGetGameClient()->GetMatchStageSetting()->GetNetcode() != NetcodeType::ServerBased)
-						pTarget->OnDamaged(pOwnerCharacter,pos,ZD_EXPLOSION,MWT_FRAGMENTATION,fActualDamage,fRatio);
-				}
-			}
+		if (pATarget) {
+			bPushSkip = pATarget->GetNPCInfo()->bNeverPushed;
 		}
+
+		if (bPushSkip == false) {
+			Target->AddVelocity(fKnockBack * 7.f * (fRange - DistanceToExplosion) * -dir);
+		}
+		else {
+			ZGetSoundEngine()->PlaySound("fx_bullethit_mt_met");
+		}
+
+		ZCharacter* pOwnerCharacter = g_pGame->m_CharacterManager.Find(uidOwner);
+		if (pOwnerCharacter) {
+			CheckCombo(pOwnerCharacter, Target, !bPushSkip);
+			CheckStylishAction(pOwnerCharacter);
+		}
+
+		float fActualDamage = fDamage * DamageRange;
+		float fRatio = ZItem::GetPiercingRatio(MWT_FRAGMENTATION, eq_parts_chest);
+		if (ZGetGameClient()->GetMatchStageSetting()->GetNetcode() != NetcodeType::ServerBased)
+			Target->OnDamaged(pOwnerCharacter, pos, ZD_EXPLOSION, MWT_FRAGMENTATION, fActualDamage, fRatio);
 	}
 
-#define SHOCK_RANGE		1500.f			// 10미터까지 흔들린다
+	constexpr auto SHOCK_RANGE = 1500.f;
 
-	ZCharacter *pTargetCharacter=ZGetGameInterface()->GetCombatInterface()->GetTargetCharacter();
-	float fPower= (SHOCK_RANGE-Magnitude(pTargetCharacter->GetPosition()+rvector(0,0,50) - pos))/SHOCK_RANGE;
+	ZCharacter *pTargetCharacter = ZGetGameInterface()->GetCombatInterface()->GetTargetCharacter();
+	float fPower = (SHOCK_RANGE - Magnitude(pTargetCharacter->GetPosition() + rvector(0, 0, 50) - pos)) /SHOCK_RANGE;
 
-	if(fPower>0)
-		ZGetGameInterface()->GetCamera()->Shock(fPower*500.f, .5f, rvector(0.0f, 0.0f, -1.0f));
+	if (fPower > 0)
+		ZGetGameInterface()->GetCamera()->Shock(fPower * 500.f, .5f, rvector(0.0f, 0.0f, -1.0f));
 
 	GetWorld()->GetWaters()->CheckSpearing( pos, pos + rvector(0,0,MAX_WATER_DEEP), 500, 0.8f );
-
-//	static RealSoundEffectSource* pSES= ZApplication::GetSoundEngine()->GetSES("explosion");
-//	ZApplication::GetSoundEngine()->PlaySE(pSES,pos.x,pos.y,pos.z);
 }
 
-// 매직류의 무기의 데미지를 준다
-void ZGame::OnExplosionMagic(ZWeaponMagic *pWeapon, MUID uidOwner,rvector pos,float fMinDamage,float fKnockBack,MMatchTeam nTeamID,bool bSkipNpc)
+void ZGame::OnExplosionMagic(ZWeaponMagic *pWeapon, MUID uidOwner, rvector pos,
+	float fMinDamage, float fKnockBack, MMatchTeam nTeamID, bool bSkipNpc)
 {
 	ZObject* pTarget = NULL;
 
@@ -2199,69 +2189,51 @@ void ZGame::OnExplosionMagic(ZWeaponMagic *pWeapon, MUID uidOwner,rvector pos,fl
 
 		pTarget = (*itor).second;
 
-		// 범위공격이 아니라면 타겟만 검사하면된다.
 		if(pTarget->IsNPC()) continue;
 
 		if(!pWeapon->GetDesc()->IsAreaTarget() && pWeapon->GetTarget()!=pTarget->GetUID()) continue;
 
 		if(pTarget && !pTarget->IsDie()) {
 
-			// 두 캐릭터사이에 장애물이 없어야한다~ 
-//				if( CheckWall(pos,pTarget) == false )
+			fDist = Magnitude(pos - (pTarget->GetPosition() + rvector(0, 0, 80)));
+			if (pWeapon->GetDesc()->IsAreaTarget())
 			{
-				fDist = Magnitude(pos-(pTarget->GetPosition()+rvector(0,0,80)));
-				if(pWeapon->GetDesc()->IsAreaTarget())	// 범위공격이면 거리에 따른 데미지를 계산한다
+				if (fDist > fRange) continue;
+
+				if (GetDistance(pos, pTarget->GetPosition() + rvector(0, 0, 50), pTarget->GetPosition() + rvector(0, 0, 130)) < 50)
 				{
-					if(fDist > fRange) continue;	// 범위를 벗어났다
-
-					// 몸에 직접 맞았다.
-					if(GetDistance(pos,pTarget->GetPosition()+rvector(0,0,50),pTarget->GetPosition()+rvector(0,0,130))<50)
-					{
-						fDamageRange = 1.f;
-					}else
-					{
-#define MAX_DMG_RANGE	50.f	// 반경이만큼 까지는 최대 데미지를 다 먹는다
-
-						fDamageRange = 1.f - (1.f-fMinDamage)*( std::max(fDist-MAX_DMG_RANGE, 0.0f) / (fRange-MAX_DMG_RANGE));
-					}
-				}else {
 					fDamageRange = 1.f;
 				}
-
-				// resist 를 체크한다
-				float fDamage = pWeapon->GetDesc()->nModDamage;
-				if(pWeapon->GetDesc()->CheckResist(pTarget,&fDamage)) 
+				else
 				{
-					ZCharacter* pOwnerCharacter = g_pGame->m_CharacterManager.Find( uidOwner );
-					if(pOwnerCharacter) {
-						CheckCombo(pOwnerCharacter, pTarget,true);
-						CheckStylishAction(pOwnerCharacter);
-					}
+#define MAX_DMG_RANGE	50.f
 
-					// 수류탄을 맞으면 반동으로 튀어나간다.
-					rvector dir=pos-(pTarget->GetPosition()+rvector(0,0,80));
-					Normalize(dir);
-					pTarget->AddVelocity(fKnockBack*7.f*(fRange-fDist)*-dir);
-
-					float fActualDamage = fDamage * fDamageRange;
-					float fRatio = ZItem::GetPiercingRatio( MWT_FRAGMENTATION , eq_parts_chest );//수류탄과 로켓 구분없다..
-					pTarget->OnDamaged(pOwnerCharacter,pos,ZD_MAGIC,MWT_FRAGMENTATION,fActualDamage,fRatio);
-				} else {
-					// TODO: 저항에 성공했으니 이펙트를 보여주자.
+					fDamageRange = 1.f - (1.f - fMinDamage)*(std::max(fDist - MAX_DMG_RANGE, 0.0f) / (fRange - MAX_DMG_RANGE));
 				}
+			}
+			else {
+				fDamageRange = 1.f;
+			}
+
+			float fDamage = pWeapon->GetDesc()->nModDamage;
+			if (pWeapon->GetDesc()->CheckResist(pTarget, &fDamage))
+			{
+				ZCharacter* pOwnerCharacter = g_pGame->m_CharacterManager.Find(uidOwner);
+				if (pOwnerCharacter) {
+					CheckCombo(pOwnerCharacter, pTarget, true);
+					CheckStylishAction(pOwnerCharacter);
+				}
+
+				rvector dir = pos - (pTarget->GetPosition() + rvector(0, 0, 80));
+				Normalize(dir);
+				pTarget->AddVelocity(fKnockBack*7.f*(fRange - fDist)*-dir);
+
+				float fActualDamage = fDamage * fDamageRange;
+				float fRatio = ZItem::GetPiercingRatio(MWT_FRAGMENTATION, eq_parts_chest);
+				pTarget->OnDamaged(pOwnerCharacter, pos, ZD_MAGIC, MWT_FRAGMENTATION, fActualDamage, fRatio);
 			}
 		}
 	}
-
-/*
-#define SHOCK_RANGE		1500.f			// 10미터까지 흔들린다
-
-	ZCharacter *pTargetCharacter=ZGetGameInterface()->GetCombatInterface()->GetTargetCharacter();
-	float fPower= (SHOCK_RANGE-Magnitude(pTargetCharacter->GetPosition()+rvector(0,0,50) - pos))/SHOCK_RANGE;
-
-	if ((fPower>0) && (pWeapon->GetDesc()->bCameraShock))
-		ZGetGameInterface()->GetCamera()->Shock(fPower*500.f, .5f, rvector(0.0f, 0.0f, -1.0f));
-*/
 
 	if (pWeapon->GetDesc()->bCameraShock)
 	{
@@ -2299,15 +2271,12 @@ void ZGame::OnExplosionMagicNonSplash(ZWeaponMagic *pWeapon, MUID uidOwner, MUID
 				CheckStylishAction(pOwnerCharacter);
 			}
 
-			// 반동으로 튀어나간다.
 			rvector dir=pos-(pTarget->GetPosition()+rvector(0,0,80));
 			Normalize(dir);
 			pTarget->AddVelocity(fKnockBack*7.f*-dir);
 
 			float fRatio = ZItem::GetPiercingRatio( MWT_FRAGMENTATION , eq_parts_chest );
 			pTarget->OnDamaged(pOwnerCharacter,pos,ZD_MAGIC,MWT_FRAGMENTATION,fDamage,fRatio);
-		} else {
-			// TODO: 저항에 성공했으니 이펙트를 보여주자.
 		}
 	}
 }
@@ -3202,7 +3171,7 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 
 void ZGame::OnPeerShot(const MUID& uid, float fShotTime, rvector& pos, rvector& to,MMatchCharItemParts sel_type)
 {
-	ZCharacter* pOwnerCharacter = NULL;		// 총 쏜 사람
+	ZCharacter* pOwnerCharacter = NULL;
 
 	pOwnerCharacter = m_CharacterManager.Find(uid);
 
@@ -3387,7 +3356,6 @@ void ZGame::OnPeerDead(const MUID& uidAttacker, const unsigned long int nAttacke
 
 	if(bSuicide && (ZGetCharacterManager()->Find(uidAttacker)==g_pGame->m_pMyCharacter)) 
 	{
-		// 자살
 		ZGetScreenEffectManager()->AddExpEffect(nVictimExp);
 		int nExpPercent = GetExpPercentFromTransData(nVictimArg);
 		ZGetMyInfo()->SetLevelPercent(nExpPercent);
@@ -3946,8 +3914,6 @@ void ZGame::PostNewBasicInfo()
 	size_t Size = 1;
 	auto Write = [&](auto&& Val)
 	{
-		// Compiler crashes here z__z
-		//static_assert(std::is_pointer<decltype(Val)>::value, "Don't do that please");
 		memcpy(buf + Offset, &Val, sizeof(Val));
 		Offset += sizeof(Val);
 		Size += sizeof(Val);
@@ -3980,8 +3946,6 @@ void ZGame::PostNewBasicInfo()
 	Write(Velocity);
 	
 	auto&& Vel = m_pMyCharacter->GetVelocity();
-	/*for (auto&& Val : { Vel.x, Vel.y, Vel.z })
-		assert(Val < SHRT_MAX && Val > SHRT_MIN);*/
 
 	if (m_pMyCharacter->IsDirLocked())
 	{
@@ -4062,8 +4026,6 @@ void ZGame::PostPeerPingInfo()
 				MCommand* pCmd = new MCommand(MCmdMgr->GetCommandDescByID(MC_PEER_PING), 
 					pPeerInfo->uidChar, ZGetGameClient()->GetUID());	
 				pCmd->AddParameter(new MCmdParamUInt(nTimeStamp));
-				/*MLog("Posting ping with timestamp %08X, current time %016llX\n",
-					nTimeStamp, GetTickTime());*/
 				ZGetGameClient()->Post(pCmd);
 
 #ifdef _DEBUG
@@ -4132,7 +4094,6 @@ void ZGame::CheckCombo(ZCharacter *pOwnerCharacter, ZObject *pHitObject, bool bP
 
 void ZGame::UpdateCombo(bool bShot)
 {
-	// 내 캐릭터 혹은 내가 보고있는 캐릭터
 	ZCharacter *pTargetCharacter = ZGetGameInterface()->GetCombatInterface()->GetTargetCharacter();
 	if(!pTargetCharacter) return;
 
@@ -4143,7 +4104,6 @@ void ZGame::UpdateCombo(bool bShot)
 	if (bShot) 
 	{
 		if(pTargetCharacter->GetStatus()->nCombo<2) {
-			// hit 이펙트
 			ZGetScreenEffectManager()->AddHit();
 		}
 
@@ -4831,7 +4791,7 @@ void ZGame::OnAddPeer(const MUID& uidChar, DWORD dwIP, const int nPort, MTD_Peer
 			_ASSERT(0);
 		}
 
-		ZGetGameClient()->DeletePeer(uidChar); // Delete exist info
+		ZGetGameClient()->DeletePeer(uidChar);
 
 		MMatchPeerInfo* pNewPeerInfo = new MMatchPeerInfo;
 
@@ -4942,7 +4902,7 @@ bool ZGame::FilterDelayedCommand(MCommand *pCommand)
 
 				if(pChar!=m_pMyCharacter &&
 					( pChar->m_pVMesh->m_SelectWeaponMotionType==eq_wd_dagger ||
-					pChar->m_pVMesh->m_SelectWeaponMotionType==eq_ws_dagger )) // dagger
+					pChar->m_pVMesh->m_SelectWeaponMotionType==eq_ws_dagger ))
 				{
 					pChar->SetAnimationUpper(ZC_STATE_UPPER_SHOT);
 				}
@@ -4968,7 +4928,7 @@ bool ZGame::FilterDelayedCommand(MCommand *pCommand)
 
 				if(pChar!=m_pMyCharacter &&
 					(pChar->m_pVMesh->m_SelectWeaponMotionType == eq_wd_dagger ||
-						pChar->m_pVMesh->m_SelectWeaponMotionType == eq_ws_dagger)) // dagger
+						pChar->m_pVMesh->m_SelectWeaponMotionType == eq_ws_dagger))
 				{
 					pChar->SetAnimationUpper(ZC_STATE_UPPER_SHOT);
 				}
@@ -4989,7 +4949,6 @@ bool ZGame::FilterDelayedCommand(MCommand *pCommand)
 			break;
 
 
-		// 이것들 이외의 것들은 
 		default:
 			bFiltered = false;
 			break;
