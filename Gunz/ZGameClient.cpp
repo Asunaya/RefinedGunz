@@ -1501,6 +1501,9 @@ void ZGameClient::OnUserWhisper(char* pszSenderName, char* pszTargetName, char* 
 		}
 	}
 
+#ifdef FLASH_WINDOW_ON_WHISPER
+	FlashWindow(g_hWnd, FALSE);
+#endif
 }
 
 void ZGameClient::OnChatRoomJoin(char* pszPlayerName, char* pszChatRoomName)

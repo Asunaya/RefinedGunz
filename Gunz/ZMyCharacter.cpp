@@ -2245,6 +2245,15 @@ void ZMyCharacter::InitStatus()
 
 }
 
+void ZMyCharacter::Revival()
+{
+	ZCharacter::Revival();
+
+#ifdef FLASH_WINDOW_ON_RESPAWN
+	FlashWindow(g_hWnd, FALSE);
+#endif
+}
+
 void ZMyCharacter::InitBullet()
 {
 	ZCharacter::InitBullet();

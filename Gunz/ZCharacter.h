@@ -259,7 +259,7 @@ public:
 	const MUID& GetLastThrower() const { return m_LastThrower; }
 	float GetLastThrowClearTime() const { return m_tmLastThrowClear; }
 
-	void Revival();
+	virtual void Revival();
 	void Die();
 	void ActDead();
 	virtual void InitHPAP();

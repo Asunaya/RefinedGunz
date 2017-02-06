@@ -169,6 +169,7 @@ public:
 	void OnDashAttacked(rvector &dir);
 	void ReserveDashAttacked(MUID uid, float time,rvector &dir);
 
+	virtual void Revival() override final;
 	virtual void InitBullet() override final;
 	virtual void InitStatus() override final;
 	virtual void InitRound() override final;
