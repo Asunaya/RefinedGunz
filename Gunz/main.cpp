@@ -358,7 +358,7 @@ RRESULT OnRender(void *pParam)
 	if (!RIsActive() && RIsFullscreen())
 		return R_NOTREADY;
 
-	if (ZGetConfiguration()->DecoupleLogicAndRendering && !VisualFPSLimiter.Tick())
+	if (ZGetConfiguration()->GetVisualFPSLimit() != 0 && !VisualFPSLimiter.Tick())
 		return R_NOFLIP;
 
 	g_App.OnDraw();
@@ -376,7 +376,7 @@ RRESULT OnRender(void *pParam)
 			y_offset += 20;
 		};
 
-		if (ZGetConfiguration()->DecoupleLogicAndRendering)
+		if (ZGetConfiguration()->GetVisualFPSLimit() != 0)
 		{
 			PrintText("Visual FPS: %d", VisualFPSLimiter.LastFPS);
 			PrintText("Logical FPS: %d", LogicalFPSLimiter.LastFPS);

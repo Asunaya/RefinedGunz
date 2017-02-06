@@ -395,7 +395,7 @@ bool ZConfiguration::LoadConfig(const char* szFileName)
 
 			char FullscreenMode[64];
 			childElement.GetChildContents(FullscreenMode, ZTOK_VIDEO_FULLSCREEN);
-#define READ
+
 			if (!_stricmp(FullscreenMode, "fullscreen"))
 				m_Video.FullscreenMode = FullscreenType::Fullscreen;
 			else if (!_stricmp(FullscreenMode, "borderless"))
@@ -414,9 +414,6 @@ bool ZConfiguration::LoadConfig(const char* szFileName)
 			childElement.GetChildContents(&m_Video.nTextureFormat, ZTOK_VIDEO_TEXTUREFORMAT );
 			childElement.GetChildContents(&m_Video.bTerrible, "NHARDWARETNL");
 
-			int temp{};
-			childElement.GetChildContents(&temp, "DECOUPLELOGICANDRENDERING");
-			DecoupleLogicAndRendering = temp != 0;
 			childElement.GetChildContents(&VisualFPSLimit, "VISUALFPSLIMIT");
 			childElement.GetChildContents(&LogicalFPSLimit, "LOGICALFPSLIMIT");
 			childElement.GetChildContents(&bCamFix, "CAMFIX");

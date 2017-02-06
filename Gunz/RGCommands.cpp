@@ -47,20 +47,6 @@ void LoadRGCommands(ZChatCmdManager& CmdManager)
 		CCF_ALL, 1, 1, true, "/fpslimit <fps>", "");
 
 
-	CmdManager.AddCommand(0, "decouple", [](const char *line, int argc, char ** const argv) {
-		bool& val = ZGetConfiguration()->DecoupleLogicAndRendering;
-		if (argc == 1)
-			val = !val;
-		else
-			val = atoi(argv[1]) != 0;
-
-		ZGetConfiguration()->Save();
-
-		ZChatOutputF("Logic and rendering decoupling %s", val ? "enabled" : "disabled");
-	},
-		CCF_ALL, 0, 1, true, "/decouple [0/1]", "");
-
-
 	CmdManager.AddCommand(0, "camfix", [](const char *line, int argc, char ** const argv){
 		bool bCamFix;
 		if (argc == 1)
