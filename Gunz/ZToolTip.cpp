@@ -84,14 +84,14 @@ void ZToolTip::OnDraw(MDrawContext* pDC)
 	pDC->TextMultiLine(text_r, szName,ZTOOLTIP_LINE_GAP);	
 }
 
-int GetLineCount(char* str,int& max) {
+int GetLineCount(char* str, int& maxval) {
 
 	if(!str || str[0]==NULL)
 		return 0;
 
 	int line = 0;
 
-	max = 0;
+	maxval = 0;
 
 	int cnt = (int)strlen(str);
 	int back = 0;
@@ -100,7 +100,7 @@ int GetLineCount(char* str,int& max) {
 		if(str[i]=='\n') {
 			line++;
 
-			max = ::max((i - back),max); 
+			maxval = (std::max)((i - back), maxval); 
 			back = i;
 		}
 	}

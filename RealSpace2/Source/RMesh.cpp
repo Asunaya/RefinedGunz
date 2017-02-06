@@ -762,17 +762,17 @@ void RMesh::CalcBBox(rvector* v)
 	SubCalcBBox(&m_vBBMax, &m_vBBMin, v);
 }
 
-void RMesh::SubCalcBBox(rvector* max,rvector* min,rvector* v)
+void RMesh::SubCalcBBox(rvector* vmax, rvector* vmin, rvector* v)
 {
-	if ( (max==NULL) || (min==NULL) || (v==NULL) ) return;
+	if ( (vmax==NULL) || (vmin==NULL) || (v==NULL) ) return;
 
-	min->x = ::min(min->x, v->x);
-	min->y = ::min(min->y, v->y);
-	min->z = ::min(min->z, v->z);
+	vmin->x = (std::min)(vmin->x, v->x);
+	vmin->y = (std::min)(vmin->y, v->y);
+	vmin->z = (std::min)(vmin->z, v->z);
 
-	max->x = ::max(max->x, v->x);
-	max->y = ::max(max->y, v->y);
-	max->z = ::max(max->z, v->z);
+	vmax->x = (std::max)(vmax->x, v->x);
+	vmax->y = (std::max)(vmax->y, v->y);
+	vmax->z = (std::max)(vmax->z, v->z);
 }
 
 void RMesh::RenderBox(rmatrix* world_mat)

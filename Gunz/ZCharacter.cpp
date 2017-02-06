@@ -1152,7 +1152,7 @@ void ZCharacter::UpdateVelocity(float fDelta)
 
 	if(IS_ZERO(Magnitude(m_Accel)) && m_bLand && !m_bWallJump && !m_bWallJump2 && !bTumble
 		&& (!m_bBlast || m_nBlastType != 1))
-		fSpeed = max(fSpeed-STOP_SPEED*fDelta,0);
+		fSpeed = std::max(fSpeed-STOP_SPEED*fDelta,0.0f);
 
 	SetVelocity(dir.x*fSpeed, dir.y*fSpeed, GetVelocity().z);
 }

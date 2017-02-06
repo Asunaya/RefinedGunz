@@ -8,6 +8,8 @@
 #include "RFont.h"
 #include "dxerr.h"
 #include "RS2.h"
+using std::min;
+using std::max;
 #ifdef _USE_GDIPLUS
 #include "unknwn.h"
 #include "gdiplus.h"

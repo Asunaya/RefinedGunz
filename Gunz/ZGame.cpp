@@ -124,7 +124,7 @@ public:
 		default: nSnowParticleCountPerSec = 0; break;
 		}
 
-		int nCount = min(nSnowParticleCountPerSec * fDeltaTime,20);
+		int nCount = std::min(nSnowParticleCountPerSec * fDeltaTime, 20.0f);
 		for(int i=0;i<nCount;i++)
 		{
 			RParticle *pp=new RSnowParticle();
@@ -2138,7 +2138,7 @@ void ZGame::OnExplosionGrenade(MUID uidOwner,rvector pos,float fDamage,float fRa
 					{
 #define MAX_DMG_RANGE	50.f
 
-						fDamageRange = 1.f - (1.f-fMinDamage)*( max(fDist-MAX_DMG_RANGE,0) / (fRange-MAX_DMG_RANGE));
+						fDamageRange = 1.f - (1.f-fMinDamage)*( std::max(fDist-MAX_DMG_RANGE, 0.0f) / (fRange-MAX_DMG_RANGE));
 					}
 
 					// 수류탄을 맞으면 반동으로 튀어나간다.
@@ -2222,7 +2222,7 @@ void ZGame::OnExplosionMagic(ZWeaponMagic *pWeapon, MUID uidOwner,rvector pos,fl
 					{
 #define MAX_DMG_RANGE	50.f	// 반경이만큼 까지는 최대 데미지를 다 먹는다
 
-						fDamageRange = 1.f - (1.f-fMinDamage)*( max(fDist-MAX_DMG_RANGE,0) / (fRange-MAX_DMG_RANGE));
+						fDamageRange = 1.f - (1.f-fMinDamage)*( std::max(fDist-MAX_DMG_RANGE, 0.0f) / (fRange-MAX_DMG_RANGE));
 					}
 				}else {
 					fDamageRange = 1.f;
@@ -2723,13 +2723,13 @@ void ZGame::OnPeerMassive(ZCharacter *pOwner, const rvector &pos, const rvector 
 #define MAX_DMG_RANGE	50.f
 #define MIN_DMG			0.3f
 
-		float fDamageRange = 1.f - (1.f - MIN_DMG)*(max(fDist - MAX_DMG_RANGE, 0) / (float(nRange) - MAX_DMG_RANGE));
+		float fDamageRange = 1.f - (1.f - MIN_DMG)*(std::max(fDist - MAX_DMG_RANGE, 0.0f) / (float(nRange) - MAX_DMG_RANGE));
 
 #define SLASH_DAMAGE	3
 
 		int nSwordDamage = pDesc->m_nDamage;
 
-		int damage = (1.5f - (1.5f - 0.9f) * (max(fDist - MAX_DMG_RANGE, 0) / (nRange - MAX_DMG_RANGE))) * nSwordDamage;
+		int damage = (1.5f - (1.5f - 0.9f) * (std::max(fDist - MAX_DMG_RANGE, 0.0f) / (nRange - MAX_DMG_RANGE))) * nSwordDamage;
 
 		// Stop dash locks
 		if (pVictim == m_pMyCharacter && m_pMyCharacter->m_bTumble)

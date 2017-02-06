@@ -614,7 +614,7 @@ void ZActor::ProcessMovement(float fDelta)
 
 #define NPC_STOP_SPEED			2000.f
 
-		fSpeed = max(fSpeed-NPC_STOP_SPEED*fDelta,0);
+		fSpeed = std::max(fSpeed-NPC_STOP_SPEED*fDelta, 0.0f);
 		SetVelocity(dir.x*fSpeed, dir.y*fSpeed, GetVelocity().z);
 	}
 }

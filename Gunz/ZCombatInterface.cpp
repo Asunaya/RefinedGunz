@@ -2590,7 +2590,7 @@ void ZCombatInterface::DrawResultBoard(MDrawContext* pDC)
 
 	int nFrame = pvm->GetFrameInfo(ani_mode_lower)->m_nFrame;
 
-	float fOpacity=min(1.f,max(0,float(nFrame-FADE_START_FRAME)
+	float fOpacity=std::min(1.f,std::max(0.0f,float(nFrame-FADE_START_FRAME)
 		/float(pvm->GetFrameInfo(ani_mode_lower)->m_pAniSet->GetMaxFrame()-FADE_START_FRAME)));
 
 	MFont *pFont=GetGameFont();

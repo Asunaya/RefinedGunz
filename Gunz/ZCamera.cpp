@@ -122,7 +122,7 @@ void ZCamera::Update(float fElapsed)
 			const float FFMAX_POWER = 300.f;
 
 			float ffPower = fPower * m_fShockPower / FFMAX_POWER;
-			ffPower = min(ffPower, 1);
+			ffPower = std::min(ffPower, 1.0f);
 			ZGetInput()->SetDeviceForcesXY(ffPower, ffPower);
 
 			fPower = pow(fPower, 1.5f);

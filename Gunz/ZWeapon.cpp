@@ -800,7 +800,7 @@ bool	ZWeaponFlashBang::Update( float fElapsedTime )
 
 	if( !mbLand )
 	{
-		mRotVelocity	= min( Magnitude( m_Velocity ), MAX_ROT_VELOCITY );
+		mRotVelocity	= std::min( Magnitude( m_Velocity ), static_cast<float>(MAX_ROT_VELOCITY) );
 
 		if( Magnitude(m_Velocity) < LANDING_VELOCITY )
 		{
@@ -928,7 +928,7 @@ bool ZWeaponSmokeGrenade::Update( float fElapsedTime )
 
 	if( !mbLand )
 	{
- 		mRotVelocity	= min( Magnitude( m_Velocity ), MAX_ROT_VELOCITY );
+ 		mRotVelocity	= std::min( Magnitude( m_Velocity ), static_cast<float>(MAX_ROT_VELOCITY) );
 
 		if( Magnitude(m_Velocity) < LANDING_VELOCITY )
 		{
