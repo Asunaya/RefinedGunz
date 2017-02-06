@@ -365,7 +365,7 @@ private:
 		u32 PassFlag, RBSPPICKINFO* Out);
 
 	template <bool UseOccluders>
-	void ChooseNodes(RSBspNode *bspNode);
+	void ChooseNodes(RSBspNode *bspNode, const rfrustum& LocalViewFrustum);
 	int ChooseNodes(RSBspNode *bspNode, const rvector &center, float fRadius);
 
 	auto* GetLeafNode(const rvector &pos) { return BspRoot[0].GetLeafNode(pos); }
@@ -428,9 +428,6 @@ private:
 	// Thus, every material index in the map file maps to
 	// the index in this array that is one higher.
 	std::vector<RBSPMATERIAL> Materials;
-
-	// ???
-	rplane m_localViewFrustum[6];
 
 	ROcclusionList m_OcclusionList;
 

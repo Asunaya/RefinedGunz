@@ -70,16 +70,12 @@ ZApplication::ZApplication()
 	SetLaunchMode(ZLAUNCH_MODE_DEBUG);
 
 #ifdef _ZPROFILER
-	m_pProfiler = new ZProfiler;
+	m_pProfiler = std::make_unique<ZProfiler>();
 #endif
 }
 
 ZApplication::~ZApplication()
 {
-#ifdef _ZPROFILER
-	SAFE_DELETE(m_pProfiler);
-#endif
-
 	m_pInstance = NULL;
 }
 

@@ -456,7 +456,6 @@
     <ClInclude Include="Include\RBspObjectDraw.h" />
     <ClInclude Include="Include\RBspObjectDrawD3D9.h" />
     <ClInclude Include="Include\RBspObjectDrawVulkan.h" />
-    <ClInclude Include="Include\REffect.h" />
     <ClInclude Include="Include\RHalfEdgeMesh.h" />
     <ClInclude Include="Include\RMath.h" />
     <ClInclude Include="Include\rmatrix.h" />

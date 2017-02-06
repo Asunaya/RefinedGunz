@@ -48,6 +48,8 @@ class RGMain
 {
 public:
 	RGMain();
+	RGMain(const RGMain&) = delete;
+	~RGMain();
 
 	void OnUpdate(double Elapsed);
 	bool OnEvent(MEvent *pEvent);

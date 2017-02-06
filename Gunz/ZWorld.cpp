@@ -21,10 +21,6 @@ void ZWorld::Update(float fDelta)
 	m_flags.Update();
 }
 
-namespace RealSpace2 {
-void ComputeZPlane(rplane *plane,float z,int sign);
-}
-
 void ZWorld::Draw()
 {
 	auto Shaders = SaveAndDisableShaders();
@@ -35,7 +31,7 @@ void ZWorld::Draw()
 	SetShaders(Shaders);
 
 	if (m_bFog)
-		ComputeZPlane(RGetViewFrustum() + 5, m_fFogFar, -1);
+		RGetViewFrustum()[5] = ComputeZPlane(m_fFogFar, -1, RCameraPosition, RCameraDirection);
 
 	m_pBsp->Draw();
 

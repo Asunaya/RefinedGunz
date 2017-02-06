@@ -698,7 +698,7 @@ void ZCharacter::OnDraw()
 
 	// Don't draw if the bounding box isn't visible
 	if (!ZGetGame()->GetWorld()->GetBsp()->IsVisible(bb)) return;
-	if (!isInViewFrustum(&bb, RGetViewFrustum())) return;
+	if (!isInViewFrustum(bb, RGetViewFrustum())) return;
 
 	auto ZCharacterDrawLight = MBeginProfile("ZCharacter::Draw::Light");
 

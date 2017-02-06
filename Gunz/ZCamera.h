@@ -46,6 +46,8 @@ public:
 	void SetLookMode(ZCAMERALOOKMODE mode);
 	void SetNextLookMode();
 
+	static v3 GetTargetOffset(const v3& Dir, float Scale = 1);
+
 private:
 	friend class Portal;
 	friend class ZGameInput;

@@ -92,7 +92,7 @@ bool ROcclusionList::IsVisible(const rboundingbox &bb) const
 
 		for (size_t j = 0; j < Occlusion.Vertices.size() + 1; j++)
 		{
-			if (isInPlane(&bb, &Occlusion.Planes[j]))
+			if (isInPlane(bb, Occlusion.Planes[j]))
 			{
 				bVisible = true;
 				break;

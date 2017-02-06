@@ -175,7 +175,7 @@ int RDynamicLightManager::SetLight(const rvector& pos_ )
 	{
 		float	decisionTest;
 		bool	bCull = false;
-		rplane* frustum	= RGetViewFrustum();
+		rplane* frustum	= &RGetViewFrustum()[0];
 		sMapLightObj*	pCurr;
 
 		for( vector<sMapLightObj>::iterator  itor = mExplosionLightList.begin(); 

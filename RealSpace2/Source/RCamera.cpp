@@ -3,47 +3,22 @@
 
 _NAMESPACE_REALSPACE2_BEGIN
 
-rvector RCameraPosition, RCameraDirection, RCameraUp{ 0, 0, 1 };
+rvector RCameraPosition, RCameraDirection{ 1, 0, 0 }, RCameraUp{ 0, 0, 1 };
 rmatrix RView, RProjection, RViewProjection, RViewport, RViewProjectionViewport;
-rplane RViewFrustum[6];
+rfrustum RViewFrustum;
 static float RFov_horiz, RFov_vert, RNearZ, RFarZ;
 static D3DVIEWPORT9 g_d3dViewport;
 
-void ComputeViewFrustum(rplane *plane, float x, float y, float z)
+static void UpdateViewFrustum()
 {
-	plane->a = RView._11*x + RView._12*y + RView._13*z;
-	plane->b = RView._21*x + RView._22*y + RView._23*z;
-	plane->c = RView._31*x + RView._32*y + RView._33*z;
-	plane->d = -plane->a*RCameraPosition.x
-		- plane->b*RCameraPosition.y
-		- plane->c*RCameraPosition.z;
-}
-
-void ComputeZPlane(rplane *plane, float z, int sign)
-{
-	rvector normal, t;
-	t = RCameraPosition + z * RCameraDirection;
-	normal = Normalized(float(sign) * RCameraDirection);
-	plane->a = normal.x; plane->b = normal.y; plane->c = normal.z;
-	plane->d = -plane->a*t.x - plane->b*t.y - plane->c*t.z;
-}
-
-void UpdateViewFrustrum()
-{
-	float fovh2 = RFov_horiz / 2.0f, fovv2 = RFov_vert / 2.0f;
-	float ch = cosf(fovh2), sh = sinf(fovh2);
-	float cv = cosf(fovv2), sv = sinf(fovv2);
-
-	ComputeViewFrustum(RViewFrustum + 0, -ch, 0, sh);
-	ComputeViewFrustum(RViewFrustum + 1, ch, 0, sh);
-	ComputeViewFrustum(RViewFrustum + 2, 0, cv, sv);
-	ComputeViewFrustum(RViewFrustum + 3, 0, -cv, sv);
-	ComputeZPlane(RViewFrustum + 4, RNearZ, 1);
-	ComputeZPlane(RViewFrustum + 5, RFarZ, -1);
+	RViewFrustum = MakeViewFrustum(
+		RView,
+		RCameraPosition, RCameraDirection,
+		RFov_horiz, RFov_vert,
+		RNearZ, RFarZ);
 
 	RViewProjection = RView * RProjection;
 	RViewProjectionViewport = RViewProjection * RViewport;
-
 }
 
 void RSetCamera(const rvector &from, const rvector &at, const rvector &up)
@@ -70,33 +45,23 @@ void RUpdateCamera()
 	CheckNaN(RCameraDirection);
 	CheckNaN(RCameraUp, { 0, 0, 1 });
 
-	UpdateViewFrustrum();
+	UpdateViewFrustum();
 }
 
 void RSetProjection(float fFov, float fAspect, float fNearZ, float fFarZ)
 {
 	RFov_horiz = fFov;
-	RFov_vert = atanf(tanf(RFov_horiz / 2.0f) / fAspect)*2.0f;
+	RFov_vert = ComputeVerticalFOV(RFov_horiz, fAspect);
 	RNearZ = fNearZ; RFarZ = fFarZ;
 
 	RProjection = PerspectiveProjectionMatrix(fAspect, RFov_vert, fNearZ, fFarZ);
 	RSetTransform(D3DTS_PROJECTION, RProjection);
 
-	UpdateViewFrustrum();
+	UpdateViewFrustum();
 }
 
-void RSetProjection(float fFov, float fNearZ, float fFarZ)
-{
-	FLOAT fAspect = (FLOAT)RGetScreenWidth() / (FLOAT)RGetScreenHeight();
-
-	RFov_horiz = fFov;
-	RFov_vert = atanf(tanf(RFov_horiz / 2.0f) / fAspect)*2.0f;
-	RNearZ = fNearZ; RFarZ = fFarZ;
-
-	RProjection = PerspectiveProjectionMatrix(fAspect, RFov_vert, fNearZ, fFarZ);
-	RSetTransform(D3DTS_PROJECTION, RProjection);
-
-	UpdateViewFrustrum();
+void RSetProjection(float fFov, float fNearZ, float fFarZ) {
+	RSetProjection(fFov, static_cast<float>(RGetScreenWidth()) / RGetScreenHeight(), fNearZ, fFarZ);
 }
 
 D3DVIEWPORT9* RGetViewport() { return &g_d3dViewport; }

@@ -351,6 +351,94 @@ void LoadRGCommands(ZChatCmdManager& CmdManager)
 		CreateTestGame(argv[1]);
 	},
 		CCF_ALL, 0, 1, true, "/map <name>", "");
+
+	CmdManager.AddCommand(0, "equip", [](const char *line, int argc, char ** const argv) {
+		if (!CheckDeveloperMode("equip"))
+			return;
+
+		int id = -1;
+		{
+			auto pair = StringToInt(argv[1]);
+			if (!pair.first)
+			{
+				ZChatOutput("Malformed item ID");
+				return;
+			}
+			id = pair.second;
+		}
+
+		auto desc = MGetMatchItemDescMgr()->GetItemDesc(id);
+		if (!desc)
+		{
+			ZChatOutput("Non-existent item ID");
+			return;
+		}
+
+		auto GetSlot = [&]
+		{
+			MMatchCharItemParts slot = MMCIP_END;
+			switch (desc->m_nSlot)
+			{
+			case MMIST_MELEE:
+				return MMCIP_MELEE;
+			case MMIST_HEAD:
+				return MMCIP_HEAD;
+			case MMIST_CHEST:
+				return MMCIP_CHEST;
+			case MMIST_HANDS:
+				return MMCIP_HANDS;
+			case MMIST_LEGS:
+				return MMCIP_LEGS;
+			case MMIST_FEET:
+				return MMCIP_FEET;
+			case MMIST_RANGE:
+				slot = MMCIP_PRIMARY;
+				break;
+			case MMIST_FINGER:
+				slot = MMCIP_FINGERL;
+				break;
+			case MMIST_EXTRA:
+				slot = MMCIP_CUSTOM1;
+				break;
+			}
+			if (argc > 2)
+				slot = MMatchCharItemParts(int(slot) + 1);
+			return slot;
+		};
+
+		auto slot = GetSlot();
+		if (slot == MMCIP_END)
+		{
+			ZChatOutputF("Item ID %d has invalid slot type %d", id, desc->m_nSlot);
+			return;
+		}
+
+		auto success = ZGetGame()->m_pMyCharacter->m_Items.EquipItem(slot, id);
+		if (!success)
+		{
+			ZChatOutputF("Failed to equip item %d in slot %d", id, slot);
+			return;
+		}
+	},
+		CCF_ALL, 1, 2, true, "/equip <zitem id> [1]", "");
+
+	CmdManager.AddCommand(0, "lockfrustra", [](const char *line, int argc, char ** const argv) {
+		if (!CheckDeveloperMode("lockfrustra"))
+			return;
+
+		void TogglePortalFrustraLock();
+		TogglePortalFrustraLock();
+	},
+		CCF_ALL, 0, 1, true, "", "");
+
+	CmdManager.AddCommand(0, "drawfrustra", [](const char *line, int argc, char ** const argv) {
+		if (!CheckDeveloperMode("drawfrustra"))
+			return;
+
+		void TogglePortalFrustraDraw();
+		TogglePortalFrustraDraw();
+	},
+		CCF_ALL, 0, 1, true, "", "");
 }
 
 #ifdef TIMESCALE

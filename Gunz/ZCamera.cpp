@@ -34,7 +34,7 @@ rvector ZCamera::GetCurrentDir()
 		cosf(m_fAngleX));
 }
 
-static v3 GetTargetOffset(ZCharacter* Char, const v3& Dir)
+v3 ZCamera::GetTargetOffset(const v3& Dir, float Scale)
 {
 	v3 right;
 	CrossProduct(&right, v3{ 0, 0, 1 }, Dir);
@@ -45,8 +45,8 @@ static v3 GetTargetOffset(ZCharacter* Char, const v3& Dir)
 	// Move to the right, so that we're looking over the player's right shoulder
 	Offset += 30.f * right;
 
-	if (Char->GetScale() != 1.0f)
-		Offset *= Char->GetScale();
+	if (Scale != 1)
+		Offset *= Scale;
 
 	return Offset;
 };
@@ -88,7 +88,7 @@ void ZCamera::Update(float fElapsed)
 	}
 	if (!pTargetCharacter) return;
 
-	m_Target = PlayerPosition + GetTargetOffset(pTargetCharacter, PlayerDirection);
+	m_Target = PlayerPosition + GetTargetOffset(PlayerDirection, pTargetCharacter->GetScale());
 
 	v3 dir;
 	if (Observing && GetLookMode() == ZCAMERA_DEFAULT)

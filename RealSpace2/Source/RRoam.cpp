@@ -393,7 +393,7 @@ inline int orientation( int pX, int pY, int qX, int qY, int rX, int rY )
 //
 void Patch::SetVisibility()
 {
-	m_isVisible=isInViewFrustum(&m_BoundingBox,RGetViewFrustum());
+	m_isVisible = isInViewFrustum(m_BoundingBox, RGetViewFrustum());
 //	mlog("%d\n",m_isVisible);
 //	m_isVisible=1;
 }

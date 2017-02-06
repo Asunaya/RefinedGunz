@@ -231,7 +231,7 @@ public:
 
 	void OnPeerShot_Melee(const MUID& uidOwner, float fShotTime);
 	void OnPeerShot_Range(MMatchCharItemParts sel_type, const MUID& uidOwner, float fShotTime,
-		rvector& pos, rvector& to, u32 seed);
+		rvector pos, rvector to, u32 seed);
 	void OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float fShotTime,
 		rvector& pos, rvector& to, u32 seed);
 
@@ -366,6 +366,7 @@ private:
 extern ZGame* g_pGame;
 extern MUID g_MyChrUID;
 extern float g_fFOV;
+extern float g_fFarZ;
 
 ZCharacterManager*	ZGetCharacterManager();
 ZObjectManager*		ZGetObjectManager();

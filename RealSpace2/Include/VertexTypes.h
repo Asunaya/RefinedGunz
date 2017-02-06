@@ -26,3 +26,11 @@ struct WorldSpaceColorVertex
 };
 
 constexpr u32 WorldSpaceColorFVF = D3DFVF_XYZ | D3DFVF_DIFFUSE;
+
+struct WorldSpaceTexVertex
+{
+	v3 pos;
+	float tu, tv;
+};
+
+constexpr u32 WorldSpaceTexFVF = D3DFVF_XYZ | D3DFVF_TEX1;

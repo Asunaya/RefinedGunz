@@ -70,7 +70,7 @@ bool ZEffectBillboardSource::Draw(rvector &Pos, rvector &Dir, rvector &Up, rvect
 	bbox.vmin = Pos-_scale;
 	bbox.vmax = Pos+_scale;
 
-	if(isInViewFrustum( &bbox, RGetViewFrustum())==false) {
+	if (isInViewFrustum(bbox, RGetViewFrustum()) == false) {
   		return false;
 	}
 

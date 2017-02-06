@@ -27,18 +27,6 @@ inline bool IS_EQ(float a, float b)
 #define BYTE2RGB32(a,r,g,b)	((DWORD) (((BYTE) (b)|((WORD) (g) << 8))|(((DWORD) (BYTE) (r)) << 16)|(((DWORD) (BYTE) (a)) << 24)))
 #define DWORD2VECTOR(x)		rvector(float(((x)& 0xff0000) >> 16)/255.f, float(((x) & 0xff00) >> 8)/255.f,float(((x) & 0xff))/255.f))
 
-namespace detail
-{
-	template <typename T1, typename T2>
-	constexpr auto&& max_(const T1& a, const T2& b) {
-		return a > b ? a : b;
-	}
-	template <typename T1, typename T2>
-	constexpr auto&& min_(const T1& a, const T2& b) {
-		return a > b ? b : a;
-	}
-}
-
 _NAMESPACE_REALSPACE2_BEGIN
 
 inline bool Equals(float a, float b)
@@ -228,42 +216,37 @@ inline rvector GetPoint(const rboundingbox& bb, int i) {
 inline rboundingbox Union(const rboundingbox& a, const rboundingbox& b)
 {
 	rboundingbox ret;
-	auto set = [&](auto member, auto fn) {
-		for (size_t i = 0; i < 3; i++)
-			(ret.*member)[i] = fn((a.*member)[i], (b.*member)[i]);
-	};
-	set(&rboundingbox::vmax, detail::max_<float, float>);
-	set(&rboundingbox::vmin, detail::min_<float, float>);
+	for (size_t i = 0; i < 3; ++i)
+		ret.vmin[i] = (std::min)(ret.vmin[i], b.vmin[i]);
+	for (size_t i = 0; i < 3; ++i)
+		ret.vmax[i] = (std::max)(ret.vmax[i], b.vmax[i]);
 	return ret;
 }
 
 inline rboundingbox Union(const rboundingbox& a, const rvector& b)
 {
 	rboundingbox ret;
-	auto set = [&](auto member, auto fn) {
-		for (size_t i = 0; i < 3; i++)
-			(ret.*member)[i] = fn((a.*member)[i], b[i]);
-	};
-	set(&rboundingbox::vmax, detail::max_<float, float>);
-	set(&rboundingbox::vmin, detail::min_<float, float>);;
+	for (size_t i = 0; i < 3; ++i)
+		ret.vmin[i] = (std::min)(ret.vmin[i], b[i]);
+	for (size_t i = 0; i < 3; ++i)
+		ret.vmax[i] = (std::max)(ret.vmax[i], b[i]);;
 	return ret;
 }
 
 inline rboundingbox Union(const v3& a, const v3& b)
 {
 	rboundingbox ret;
-	auto set = [&](auto member, auto fn) {
-		for (size_t i = 0; i < 3; i++)
-			(ret.*member)[i] = fn(a[i], b[i]);
-	};
-	set(&rboundingbox::vmax, detail::max_<float, float>);
-	set(&rboundingbox::vmin, detail::min_<float, float>);
+	for (size_t i = 0; i < 3; ++i)
+		ret.vmin[i] = (std::min)(a[i], b[i]);
+	for (size_t i = 0; i < 3; ++i)
+		ret.vmax[i] = (std::max)(a[i], b[i]);
 	return ret;
 }
 
 inline bool Intersects(const rboundingbox& a, const rboundingbox &b)
 {
-	return a.vmin.x < b.vmax.x &&
+	return
+		a.vmin.x < b.vmax.x &&
 		a.vmax.x > b.vmin.x &&
 		a.vmin.y < b.vmax.y &&
 		a.vmax.y > b.vmin.y &&
@@ -367,7 +350,7 @@ float GetDistanceBetweenLineSegment(const rvector &a, const rvector &aa, const r
 float GetDistance(const rvector &position, const rplane &plane);
 rvector GetNearestPoint(const rvector &a, const rvector &aa, const rplane &plane);
 float GetDistance(const rvector &a, const rvector &aa, const rplane &plane);
-float GetDistance(const rboundingbox *bb, const rplane *plane);
+float GetDistance(const rboundingbox& bb, const rplane& plane);
 void GetDistanceMinMax(rboundingbox &bb, rplane &plane, float *MinDist, float *MaxDist);
 float GetDistance(const rboundingbox &bb, const rvector &point);
 float GetArea(rvector &v1, rvector &v2, rvector &v3);
@@ -395,15 +378,27 @@ inline v3 HadamardProduct(const v3& a, const v3& b) {
 	return{ a.x * b.x, a.y * b.y, a.z * b.z };
 }
 
-bool IsIntersect(rboundingbox *bb1, rboundingbox *bb2);
-bool isInPlane(const rboundingbox *bb, const rplane *plane);
-bool IsInSphere(const rboundingbox &bb, const rvector &point, float radius);
-bool isInViewFrustum(const rvector &point, rplane *plane);
-bool isInViewFrustum(const rvector &point, float radius, rplane *plane);
-bool isInViewFrustum(const rboundingbox *bb, const rplane *plane);
-bool isInViewFrustum(const rvector &point1, const rvector &point2, rplane *planes);
-bool isInViewFrustumWithZ(rboundingbox *bb, rplane *plane);
-bool isInViewFrustumwrtnPlanes(rboundingbox *bb, rplane *plane, int nplane);
+bool IsIntersect(const rboundingbox& bb1, const rboundingbox& bb2);
+bool isInPlane(const rboundingbox& bb, const rplane& plane);
+bool IsInSphere(const rboundingbox& bb, const rvector& point, float radius);
+
+// Frustum intersection checks for the forward planes (ignores near and far).
+
+// Point
+bool isInViewFrustum(const rvector &point, const rfrustum& frustum);
+// Ball
+bool isInViewFrustum(const rvector &point, float radius, const rfrustum& frustum);
+// Bounding box
+bool isInViewFrustum(const rboundingbox& bb, const rfrustum& frustum);
+// Line segment
+bool isInViewFrustum(const rvector &point1, const rvector &point2, const rfrustum& frustum);
+
+// Bounding box, all planes
+bool isInViewFrustumWithZ(const rboundingbox& bb, const rfrustum& frustum);
+// Bounding box, forward and far plane
+bool isInViewFrustumWithFarZ(const rboundingbox& bb, const rfrustum& frustum);
+// Bounding box, N planes (starting from the first)
+bool isInViewFrustumwrtnPlanes(const rboundingbox& bb, const rfrustum& frustum, int nplane);
 
 bool isLineIntersectBoundingBox(rvector &origin, rvector &dir, rboundingbox &bb);
 bool IsIntersect(rvector& line_begin_, rvector& line_end_, rboundingbox& box_);
@@ -411,7 +406,7 @@ bool IsIntersect(rvector& line_begin_, rvector& line_dir_, rvector& center_, flo
 	float* dist = nullptr, rvector* p = nullptr);
 bool IsIntersect(const rvector& orig, const rvector& dir, const rvector& center,
 	const float radius, rvector* p = nullptr);
-bool GetIntersectionOfTwoPlanes(rvector *pOutDir, rvector *pOutAPoint, rplane &plane1, rplane &plane2);
+bool GetIntersectionOfTwoPlanes(rvector *pOutDir, rvector *pOutAPoint, const rplane &plane1, const rplane &plane2);
 
 void MergeBoundingBox(rboundingbox *dest, rboundingbox *src);
 void TransformBox(rboundingbox* result, const rboundingbox& src, const rmatrix& matrix);
@@ -875,5 +870,50 @@ bool isnan(const v3& vec);
 bool isinf(const v3& vec);
 bool isnan(const rmatrix& mat);
 bool isinf(const rmatrix& mat);
+
+inline rplane ComputeZPlane(float z, float sign, const v3& Pos, const v3& Dir)
+{
+	rplane ret;
+	auto t = Pos + z * Dir;
+	auto normal = Normalized(sign * Dir);
+
+	return{ EXPAND_VECTOR(normal), -DotProduct(normal, t) };
+}
+
+inline float ComputeVerticalFOV(float HorizontalFOV, float Aspect) {
+	return atan(tan(HorizontalFOV / 2.0f) / Aspect) * 2.0f;
+}
+
+inline rfrustum MakeViewFrustum(
+	const rmatrix& View,
+	const v3& Pos, const v3& Dir,
+	float HorizontalFOV, float VerticalFOV,
+	float Near, float Far)
+{
+	auto ComputeForwardPlane = [&](float x, float y, float z)
+	{
+		v3 normal{
+			View._11*x + View._12*y + View._13*z,
+			View._21*x + View._22*y + View._23*z,
+			View._31*x + View._32*y + View._33*z
+		};
+
+		return rplane{ EXPAND_VECTOR(normal), -DotProduct(normal, Pos) };
+	};
+
+	float fovh2 = HorizontalFOV / 2.0f;
+	float fovv2 = VerticalFOV / 2.0f;
+	float ch = cos(fovh2), sh = sin(fovh2);
+	float cv = cos(fovv2), sv = sin(fovv2);
+
+	return{
+		ComputeForwardPlane(-ch, 0, sh),
+		ComputeForwardPlane(ch, 0, sh),
+		ComputeForwardPlane(0, cv, sv),
+		ComputeForwardPlane(0, -cv, sv),
+		ComputeZPlane(Near, 1, Pos, Dir),
+		ComputeZPlane(Far, -1, Pos, Dir),
+	};
+}
 
 _NAMESPACE_REALSPACE2_END

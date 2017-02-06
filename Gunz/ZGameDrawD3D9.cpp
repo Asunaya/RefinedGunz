@@ -33,7 +33,7 @@ static void SetStatesPreDraw(ZGame& Game)
 	auto profPreDraw = MBeginProfile("ZGame::OnPreDraw");
 
 #ifdef PORTAL
-	if (!g_pPortal->ForceProjection())
+	if (!g_pPortal->ForcingProjection())
 #endif
 		RSetProjection(g_fFOV, DEFAULT_NEAR_Z, g_fFarZ);
 
@@ -162,7 +162,7 @@ void ZGameDrawD3D9::DrawScene()
 		PROFILE(RGetLenzFlare()->Render(RCameraPosition, Game.GetWorld()->GetBsp()));
 
 #ifdef PORTAL
-	if (!g_pPortal->ForceProjection())
+	if (!g_pPortal->ForcingProjection())
 #endif
 		RSetProjection(g_fFOV, DEFAULT_NEAR_Z, g_fFarZ);
 	RSetFog(FALSE);
@@ -178,6 +178,8 @@ void ZGameDrawD3D9::DrawScene()
 	PROFILE(Game.GetMatch()->OnDrawGameMessage());
 
 	PROFILE(g_RGMain->OnGameDraw());
+
+	PROFILE(g_pPortal->PostDraw());
 
 	MEndProfile(profZGameDraw);
 }

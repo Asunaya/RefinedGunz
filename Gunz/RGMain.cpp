@@ -36,7 +36,7 @@ void RGMain::OnAppCreate()
 	ZRuleSkillmap::CourseMgr.Init();
 
 #ifdef PORTAL
-	g_pPortal = new Portal();
+	g_pPortal = std::make_unique<Portal>();
 #endif
 }
 
@@ -247,8 +247,13 @@ std::pair<int, ZCharacter*> FindSinglePlayer(const char * NameSubstring)
 	return{ -1, nullptr };
 }
 
-RGMain::RGMain()
+RGMain::RGMain() = default;
+
+RGMain::~RGMain()
 {
+#ifdef PORTAL
+	g_pPortal.reset();
+#endif
 }
 
 void RGMain::OnUpdate(double Elapsed)

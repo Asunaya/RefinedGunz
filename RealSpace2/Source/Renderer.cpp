@@ -259,7 +259,7 @@ void Renderer::DrawLighting(const std::vector<RLIGHT>& Lights)
 
 	for (auto& Light : Lights)
 	{
-		if (!IsSphereInsideFrustum(Light.Position, Light.fAttnEnd, RViewFrustum))
+		if (!isInViewFrustum(Light.Position, Light.fAttnEnd, RViewFrustum))
 			continue;
 
 		auto& pos = Light.Position * RView;

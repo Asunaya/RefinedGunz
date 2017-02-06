@@ -443,10 +443,10 @@ bool RMesh::CheckOcclusion(RMeshNode *pMeshNode)
 				bb.vmax = pMeshNode->m_max * _mm;
 				bb.vmin = pMeshNode->m_min * _mm;
 				
-				BBoxSubCalc(&bb.vmax,&bb.vmin);
+				BBoxSubCalc(&bb.vmax, &bb.vmin);
 
 				if(m_pVisualMesh->m_bCheckViewFrustum) {
-					if(isInViewFrustumWithZ( &bb, RGetViewFrustum()) == false) {
+					if(isInViewFrustumWithZ(bb, RGetViewFrustum()) == false) {
 						return false;
 					}
 				}

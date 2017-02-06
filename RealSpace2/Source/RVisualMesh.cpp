@@ -745,7 +745,7 @@ void RVisualMesh::Render(bool low,bool render_buffer) {
 		}
 
 		if (m_bCheckViewFrustum) {
-			if (isInViewFrustumWithZ(&bbox, RGetViewFrustum()) == false) {
+			if (isInViewFrustumWithZ(bbox, RGetViewFrustum()) == false) {
 				m_bIsRender = false;
 				return;
 			}

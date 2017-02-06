@@ -167,7 +167,9 @@ template <typename T>
 auto MakePairValueAdapter(T& Container) { return PairValueAdapter<T>(Container); }
 
 template <typename T, size_t size>
-inline constexpr size_t ArraySize(T(&)[size]) { return size; }
+constexpr size_t ArraySize(const T(&)[size]) { return size; }
+template <typename T, size_t size>
+constexpr size_t ArraySize(const std::array<T, size>&) { return size; }
 
 inline std::pair<bool, int> StringToInt(const char* String, int Radix = 10)
 {
@@ -215,3 +217,15 @@ inline u32 NextPowerOfTwo(u32 value)
 		rightmost_bit_value <<= 1;
 	return rightmost_bit_value;
 }
+
+template <typename T>
+struct Range
+{
+	auto begin() { return its.first; }
+	auto end() { return its.second; }
+
+	std::pair<T, T> its;
+};
+
+template <typename T>
+auto MakeRange(T&& begin, T&& end) { return Range<std::remove_reference_t<T>>{ {begin, end} }; }

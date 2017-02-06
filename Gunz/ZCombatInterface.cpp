@@ -365,7 +365,7 @@ void ZCombatInterface::DrawNPCName(MDrawContext* pDC)
 		box.vmax = pos + rvector(50.f, 50.f, 190.f);
 		box.vmin = pos + rvector(-50.f, -50.f, 0.f);
 
-		if (isInViewFrustum(&box, RGetViewFrustum()))
+		if (isInViewFrustum(box, RGetViewFrustum()))
 		{
 			screen_pos = RGetTransformCoord(pObject->GetPosition()+rvector(0,0,100.f));
 
@@ -1258,7 +1258,7 @@ void ZCombatInterface::DrawFriendName(MDrawContext* pDC)
 			box.vmax = pos + rvector(50.f, 50.f, 190.f);
 			box.vmin = pos + rvector(-50.f, -50.f, 0.f);
 
-			if (isInViewFrustum(&box, RGetViewFrustum()))
+			if (isInViewFrustum(box, RGetViewFrustum()))
 			{
 				/*
 #define CHARACTER_HEIGHT	185.0f
@@ -1363,7 +1363,7 @@ void ZCombatInterface::DrawAllPlayerName(MDrawContext* pDC)
 		box.vmax = pos + rvector(50.f, 50.f, 190.f);
 		box.vmin = pos + rvector(-50.f, -50.f, 0.f);
 
-		if (isInViewFrustum(&box, RGetViewFrustum()))
+		if (isInViewFrustum(box, RGetViewFrustum()))
 		{
 			if(ZGetCamera()->GetLookMode()==ZCAMERA_MINIMAP) {
 				rvector pos = pCharacter->m_Position;

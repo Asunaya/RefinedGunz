@@ -2745,7 +2745,7 @@ void ZGame::OnPeerMassive(ZCharacter *pOwner, const rvector &pos, const rvector 
 }
 
 void ZGame::OnPeerShot_Range(MMatchCharItemParts sel_type, const MUID& uidOwner, float fShotTime,
-	rvector& pos, rvector& to, u32 seed)
+	rvector pos, rvector to, u32 seed)
 {
 	ZObject *pOwner = m_ObjectManager.GetObject(uidOwner);
 	if(!pOwner) return;
@@ -2773,6 +2773,10 @@ void ZGame::OnPeerShot_Range(MMatchCharItemParts sel_type, const MUID& uidOwner,
 	const DWORD dwPickPassFlag=RM_FLAG_ADDITIVE | RM_FLAG_HIDE | RM_FLAG_PASSROCKET | RM_FLAG_PASSBULLET;
 
 	pOwner->Tremble(8.f, 50, 30);
+
+#ifdef PORTAL
+	g_pPortal->RedirectPos(pos, to);
+#endif
 	
 	bool Picked = ::PickHistory(m_pMyCharacter, pos, to, GetWorld()->GetBsp(), pickinfo,
 			MakePairValueAdapter(m_ObjectManager), fShotTime, dwPickPassFlag);
@@ -3010,7 +3014,13 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 
 		const DWORD dwPickPassFlag=RM_FLAG_ADDITIVE | RM_FLAG_HIDE | RM_FLAG_PASSROCKET | RM_FLAG_PASSBULLET;
 
-		bool Picked = ::PickHistory(pOwnerCharacter, pos, pos + 10000 * dir, GetWorld()->GetBsp(),
+		auto from = pos;
+		auto to = pos + 10000 * dir;
+#ifdef PORTAL
+		g_pPortal->RedirectPos(from, to);
+#endif
+
+		bool Picked = ::PickHistory(pOwnerCharacter, from, to, GetWorld()->GetBsp(),
 			pickinfo, MakePairValueAdapter(m_CharacterManager), fShotTime, dwPickPassFlag);
 
 		if(Picked)
