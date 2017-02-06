@@ -166,11 +166,6 @@ private:
 template <typename T>
 auto MakePairValueAdapter(T& Container) { return PairValueAdapter<T>(Container); }
 
-template <typename T, size_t size>
-constexpr size_t ArraySize(const T(&)[size]) { return size; }
-template <typename T, size_t size>
-constexpr size_t ArraySize(const std::array<T, size>&) { return size; }
-
 inline std::pair<bool, int> StringToInt(const char* String, int Radix = 10)
 {
 	char *endptr = nullptr;

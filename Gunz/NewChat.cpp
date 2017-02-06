@@ -1109,8 +1109,8 @@ void Chat::DrawBorder()
 	{ float(Border.x1), float(Border.y2) },
 	};
 
-	for (size_t i = 0; i < ArraySize(vs); i++)
-		Line(vs[i], vs[(i + 1) % ArraySize(vs)]);
+	for (size_t i = 0; i < std::size(vs); i++)
+		Line(vs[i], vs[(i + 1) % std::size(vs)]);
 
 	Line({ float(Border.x1), float(Border.y2 - 2 - nFontHeight) },
 	{ float(Border.x2), float(Border.y2 - 2 - nFontHeight) });

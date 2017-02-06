@@ -1535,7 +1535,7 @@ bool ZGameInterface::OnCreate(ZLoadingProgress *pLoadingProgress)
 		{
 			char LastErrorString[256];
 			FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM, nullptr, LastError,
-				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), LastErrorString, ArraySize(LastErrorString), nullptr);
+				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), LastErrorString, std::size(LastErrorString), nullptr);
 			strMsg.resize(256);
 			sprintf_safe(&strMsg[0], strMsg.size(), "Network error %d: %s", LastError, LastErrorString);
 		}

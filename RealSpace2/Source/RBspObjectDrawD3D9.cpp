@@ -428,7 +428,7 @@ void RBspObjectDrawD3D9::SetMaterial(Material& Mat)
 	else
 	{
 		int TexIndices[] = { Mat.Diffuse, Mat.Normal, Mat.Specular, Mat.Opacity, Mat.Emissive };
-		for (size_t i{}; i < ArraySize(TexIndices); ++i)
+		for (size_t i{}; i < std::size(TexIndices); ++i)
 			dev->SetTexture(i, GetTexture(TexIndices[i]));
 		SetPSFloat(DeferredShaderConstant::Opacity, Type <= Normal);
 		SetPSFloat(DeferredShaderConstant::SpecLevel, Mat.Shininess / 255.f);

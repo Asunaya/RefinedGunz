@@ -217,7 +217,7 @@ static bool IsFileType(FileType Type, const void* data, size_t size)
 		"DDS",
 	};
 
-	if (static_cast<size_t>(Type) >= ArraySize(magics))
+	if (static_cast<size_t>(Type) >= std::size(magics))
 		return false;
 
 	if (Type == FileType::TGA)

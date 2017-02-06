@@ -244,7 +244,7 @@ inline std::vector<ReplayPlayerInfo> ZReplayLoader::GetCharInfo()
 			COPY_CHARINFO(nCR);
 			COPY_CHARINFO(nER);
 			COPY_CHARINFO(nWR);
-			for (size_t i = 0; i < min(static_cast<size_t>(MMCIP_END), ArraySize(oldinfo.nEquipedItemDesc)); i++)
+			for (size_t i = 0; i < min(static_cast<size_t>(MMCIP_END), std::size(oldinfo.nEquipedItemDesc)); i++)
 				COPY_CHARINFO(nEquipedItemDesc[i]);
 			COPY_CHARINFO(nUGradeID);
 		};
@@ -318,7 +318,7 @@ inline std::vector<ReplayPlayerInfo> ZReplayLoader::GetCharInfo()
 			COPY_CHARSTATE(AP);
 			COPY_CHARSTATE(Status);
 
-			for (size_t i = 0; i < min(static_cast<size_t>(MMCIP_END), ArraySize(src.BulletInfos)); i++)
+			for (size_t i = 0; i < min(static_cast<size_t>(MMCIP_END), std::size(src.BulletInfos)); i++)
 				COPY_CHARSTATE(BulletInfos[i]);
 
 			COPY_CHARSTATE(Position);
@@ -598,7 +598,7 @@ bool ZReplayLoader::GetCommands(T ForEachCommand, bool PersistentMCommands, Arra
 	{
 		MCommand StackCommand;
 		u8 Stack[512];
-		stack_allocator<u8, ArraySize(Stack)> Alloc(Stack);
+		stack_allocator<u8, std::size(Stack)> Alloc(Stack);
 
 		auto Stuff = [&](const char *CommandBuffer, const MUID& Sender, auto fTime)
 		{

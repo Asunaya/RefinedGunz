@@ -51,7 +51,7 @@ void Renderer::CreateTextures()
 	if (!DynamicLights)
 		return;
 
-	for (size_t i{}; i < ArraySize(RTs); ++i)
+	for (size_t i{}; i < std::size(RTs); ++i)
 	{
 		auto& RT = RTs[i];
 
@@ -130,7 +130,7 @@ void Renderer::BeginLighting()
 	SetShaderFloat(DeferredShaderConstant::Far, GetFarZ());
 
 	RGetDevice()->GetRenderTarget(0, MakeWriteProxy(OrigRT));
-	for (size_t i{}; i < ArraySize(RTs); ++i)
+	for (size_t i{}; i < std::size(RTs); ++i)
 	{
 		D3DPtr<IDirect3DSurface9> Surface;
 		RTs[i]->GetSurfaceLevel(0, MakeWriteProxy(Surface));
@@ -224,7 +224,7 @@ void Renderer::DrawLighting(const std::vector<RLIGHT>& Lights)
 {
 	RGetDevice()->SetRenderTarget(0, OrigRT.get());
 	OrigRT.reset();
-	for (size_t i = 1; i < ArraySize(RTs); ++i)
+	for (size_t i = 1; i < std::size(RTs); ++i)
 		RGetDevice()->SetRenderTarget(i, nullptr);
 
 	RGetDevice()->SetVertexShader(nullptr);
@@ -244,7 +244,7 @@ void Renderer::DrawLighting(const std::vector<RLIGHT>& Lights)
 	RGetDevice()->SetVertexShader(PointLightVS.get());
 	RGetDevice()->SetPixelShader(PointLightPS.get());
 
-	for (size_t i{}; i < ArraySize(RTs); ++i)
+	for (size_t i{}; i < std::size(RTs); ++i)
 		RGetDevice()->SetTexture(i, RTs[i].get());
 
 	SetShaderMatrix(LightingShaderConstant::Proj, Transpose(RProjection));
@@ -304,7 +304,7 @@ void Renderer::ShowRTs()
 		RGetDevice()->SetPixelShader(nullptr);
 	};
 
-	for (size_t i{}; i < ArraySize(RTs); ++i)
+	for (size_t i{}; i < std::size(RTs); ++i)
 	{
 		auto Width = float(RGetScreenWidth());
 		auto Height = float(RGetScreenHeight());

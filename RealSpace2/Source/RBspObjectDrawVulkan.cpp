@@ -264,14 +264,14 @@ void RBspObjectDrawVulkan::CreatePipelines()
 	VkPipelineDynamicStateCreateInfo dynamicState =
 		vkTools::initializers::pipelineDynamicStateCreateInfo(
 			dynamicStateEnables,
-			static_cast<uint32_t>(ArraySize(dynamicStateEnables)),
+			static_cast<uint32_t>(std::size(dynamicStateEnables)),
 			0);
 
 	// Load shaders
 	std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages;
 
-	shaderStages[0] = GetRS2Vulkan().loadShader(BasicRenderVS, ArraySize(BasicRenderVS), VK_SHADER_STAGE_VERTEX_BIT);
-	shaderStages[1] = GetRS2Vulkan().loadShader(BasicRenderFS, ArraySize(BasicRenderFS), VK_SHADER_STAGE_FRAGMENT_BIT);
+	shaderStages[0] = GetRS2Vulkan().loadShader(BasicRenderVS, std::size(BasicRenderVS), VK_SHADER_STAGE_VERTEX_BIT);
+	shaderStages[1] = GetRS2Vulkan().loadShader(BasicRenderFS, std::size(BasicRenderFS), VK_SHADER_STAGE_FRAGMENT_BIT);
 
 	VkGraphicsPipelineCreateInfo PipelineCreateInfos[5];
 	for (auto& PipelineCreateInfo : PipelineCreateInfos)
@@ -295,7 +295,7 @@ void RBspObjectDrawVulkan::CreatePipelines()
 
 	// The first pipeline, Solid, is the base pipeline, the rest are derivatives.
 	PipelineCreateInfos[0].flags |= VK_PIPELINE_CREATE_ALLOW_DERIVATIVES_BIT;
-	for (size_t i = 1; i < ArraySize(PipelineCreateInfos); ++i)
+	for (size_t i = 1; i < std::size(PipelineCreateInfos); ++i)
 	{
 		PipelineCreateInfos[i].basePipelineIndex = 0;
 		PipelineCreateInfos[i].flags |= VK_PIPELINE_CREATE_DERIVATIVE_BIT;
@@ -320,7 +320,7 @@ void RBspObjectDrawVulkan::CreatePipelines()
 	//PipelineCreateInfos[Index] = PipelineCreateInfos[Index - 1];
 	auto AlphaTestingShaderStages = shaderStages;
 	PipelineCreateInfos[Index].pStages = AlphaTestingShaderStages.data();
-	AlphaTestingShaderStages[1] = GetRS2Vulkan().loadShader(AlphaTestingFS, ArraySize(AlphaTestingFS), VK_SHADER_STAGE_FRAGMENT_BIT);
+	AlphaTestingShaderStages[1] = GetRS2Vulkan().loadShader(AlphaTestingFS, std::size(AlphaTestingFS), VK_SHADER_STAGE_FRAGMENT_BIT);
 	++Index;
 
 	// Additive pipeline
@@ -351,7 +351,7 @@ void RBspObjectDrawVulkan::CreatePipelines()
 
 	VK_CHECK_RESULT(vkCreateGraphicsPipelines(
 		GetRS2Vulkan().Device, PipelineCache,
-		ArraySize(PipelineCreateInfos), PipelineCreateInfos,
+		std::size(PipelineCreateInfos), PipelineCreateInfos,
 		nullptr, &Pipelines.Solid));
 }
 

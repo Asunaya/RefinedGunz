@@ -261,7 +261,7 @@ Portal::Portal()
 		{ 109, 49 },
 	};
 
-	static constexpr int NumVertices = ArraySize(coords);
+	static constexpr int NumVertices = std::size(coords);
 
 	WorldSpaceTexVertex RectangleVertices[] = {
 		{{-100, -150, 0}, 0, 0 },

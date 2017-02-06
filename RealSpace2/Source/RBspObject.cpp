@@ -476,7 +476,7 @@ bool RBspObject::Draw()
 
 		rmatrix trWorld = Transpose(World);
 
-		for (size_t i = 0; i < ArraySize(LocalViewFrustum); i++)
+		for (size_t i = 0; i < std::size(LocalViewFrustum); i++)
 			LocalViewFrustum[i] = Transform(RGetViewFrustum()[i], trWorld);
 	}
 

@@ -841,10 +841,10 @@ void ZGame::ParseReservedWord(char* pszDest, size_t maxlen, const char* pszSrc)
 			sprintf_safe(szWord, "%d %d", m_pMyCharacter->GetUID().High, m_pMyCharacter->GetUID().Low);
 		}
 
-		strcpy_safe(szOut + nOutOffset, ArraySize(szOut) - nOutOffset, szWord);
+		strcpy_safe(szOut + nOutOffset, std::size(szOut) - nOutOffset, szWord);
 		nOutOffset += (int)strlen(szWord);
 		if (*pszNext) { 
-			strcpy_safe(szOut + nOutOffset, ArraySize(szOut) - nOutOffset, " ");
+			strcpy_safe(szOut + nOutOffset, std::size(szOut) - nOutOffset, " ");
 			nOutOffset++;
 		}
 	}
@@ -1376,7 +1376,7 @@ bool ZGame::OnCommand_Immediate(MCommand* pCommand)
 					if ( !ZGetGameClient()->GetRejectNormalChat() || ( strcmp( pChar->GetUserName(), ZGetMyInfo()->GetCharName()) == 0))
 					{
 						ZGetSoundEngine()->PlaySound("if_error");
-						char szTemp[ArraySize(szMsg) + 64];
+						char szTemp[std::size(szMsg) + 64];
 
 						if(bSpUser) {
 							sprintf_safe(szTemp, "%s: %s", pChar->GetProperty()->szName, szMsg);

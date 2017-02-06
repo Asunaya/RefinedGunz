@@ -181,7 +181,7 @@ void ZMatch::InitCharactersPosition()
 		for (auto& pair : g_pGame->m_CharacterManager)
 		{
 			ZCharacter* pCharacter = pair.second;
-			for (size_t i = 0; i < ArraySize(nSpawnIndex); i++)
+			for (size_t i = 0; i < std::size(nSpawnIndex); i++)
 			{
 				if (pCharacter->GetTeamID() == MMT_RED + i)
 				{
