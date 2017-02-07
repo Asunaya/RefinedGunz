@@ -19,7 +19,6 @@ desc : 무기 사용 키 커스터마이즈 관련
 #include "MMath.h"
 #include "ZGameConst.h"
 #include "ZInput.h"
-#include "Rules.h"
 #include "HitRegistration.h"
 #include "MUtil.h"
 #include "RBspObject.h"
@@ -541,7 +540,7 @@ void ZMyCharacter::OnShotMelee()
 		m_f1ShotTime = g_pGame->GetTime();
 	}
 	else {
-		if (g_Rules.IsVanillaMode())
+		if (ZGetGameClient()->GetMatchStageSetting()->IsVanillaMode())
 		{
 			ZPostShotMelee(g_pGame->GetTime(), m_Position, m_nShot);
 			AddDelayedWork(g_pGame->GetTime() + 0.2f, ZDW_RECOIL);
@@ -1740,7 +1739,7 @@ void ZMyCharacter::OnUpdate(float fDelta)
 
 	if (m_bShot && m_nShot == 1 && !m_b1ShotSended && g_pGame->GetTime() - m_f1ShotTime > GUARD_TIME) {
 		m_b1ShotSended = true;
-		if (g_Rules.IsVanillaMode())
+		if (ZGetGameClient()->GetMatchStageSetting()->IsVanillaMode())
 		{
 			ZPostShotMelee(g_pGame->GetTime(), m_Position, 1);
 			AddDelayedWork(g_pGame->GetTime() + 0.2f, ZDW_RECOIL);
@@ -2648,7 +2647,7 @@ void ZMyCharacter::OnDelayedWork(ZDELAYEDWORKITEM& Item)
 		rvector HVectorToTarget = AttackerPosition - TargetPosition;
 		HVectorToTarget.z = 0;
 		float dist = Magnitude(HVectorToTarget);
-		if (dist > (g_Rules.CanTipslash() ? 240 : 400))
+		if (dist > 240)
 			return;
 
 		rvector HDirToTarget = TargetPosition - AttackerPosition;
@@ -2697,7 +2696,7 @@ void ZMyCharacter::ChargedShot()
 
 	ReleaseLButtonQueue();
 
-	if (g_Rules.IsVanillaMode())
+	if (ZGetGameClient()->GetMatchStageSetting()->IsVanillaMode())
 	{
 		AddDelayedWork(g_pGame->GetTime() + 0.25f, ZDW_RECOIL);
 		AddDelayedWork(g_pGame->GetTime() + 0.3f, ZDW_MASSIVE);
@@ -2717,7 +2716,7 @@ void ZMyCharacter::JumpChargedShot()
 	m_bCharged = false;
 	ReleaseLButtonQueue();
 
-	if (g_Rules.IsVanillaMode())
+	if (ZGetGameClient()->GetMatchStageSetting()->IsVanillaMode())
 	{
 		AddDelayedWork(g_pGame->GetTime() + 0.15f, ZDW_RECOIL);
 		AddDelayedWork(g_pGame->GetTime() + 0.2f, ZDW_MASSIVE);

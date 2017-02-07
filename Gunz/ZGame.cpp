@@ -73,7 +73,6 @@
 
 #include "RGMain.h"
 #include "Portal.h"
-#include "Rules.h"
 #include "Hitboxes.h"
 #include "ZRuleSkillmap.h"
 #include "VoiceChat.h"
@@ -2532,10 +2531,11 @@ void ZGame::OnPeerSlash(ZCharacter *pOwner, const rvector &pos, const rvector &d
 		if (fDot < 0.5)
 			continue;
 
-		// Old, buggy check allows for invulnerability
-		/*int nDebugRegister;
-		if (ZGameCheckWall(ZGetGame(), pOwner, pTarget, nDebugRegister))
-		continue;*/
+		if (ZGetGameClient()->GetMatchStageSetting()->InvulnerabilityStates())
+		{
+			if (CheckWall(pOwner, pTarget))
+				continue;
+		}
 
 		rvector v1 = pos + rvector(0, 0, 100),
 			v2 = TargetPos + rvector(0, 0, 100);
@@ -2614,9 +2614,6 @@ void ZGame::OnPeerSlash(ZCharacter *pOwner, const rvector &pos, const rvector &d
 
 void ZGame::OnPeerMassive(ZCharacter *pOwner, const rvector &pos, const rvector &dir)
 {
-	if (!g_Rules.MassiveEffectEnabled())
-		return;
-
 	const int nRange = 280;
 
 	g_RGMain->OnMassive(pOwner, pos, dir);
@@ -2653,9 +2650,11 @@ void ZGame::OnPeerMassive(ZCharacter *pOwner, const rvector &pos, const rvector 
 		if (!IsAttackable(pOwner, pVictim))
 			continue;
 
-		/*int nDebugRegister;
-		if (ZGameCheckWall(ZGetGame(), pOwner, pVictim, nDebugRegister))
-		continue;*/
+		if (ZGetGameClient()->GetMatchStageSetting()->InvulnerabilityStates())
+		{
+			if (CheckWall(pOwner, pVictim))
+				continue;
+		}
 
 		rvector v1 = pos + rvector(0, 0, 100),
 			v2 = TargetPos + rvector(0, 0, 100);
@@ -3986,7 +3985,7 @@ void ZGame::PostBasicInfo()
 	if(m_pMyCharacter->IsDie() && GetTime()-m_pMyCharacter->m_fDeadTime>5.f) return;
 
 	int nMoveTick;
-	if (g_Rules.IsVanillaMode())
+	if (ZGetGameClient()->GetMatchStageSetting()->IsVanillaMode())
 		nMoveTick = (ZGetGameClient()->GetAllowTunneling() == false) ? PEERMOVE_TICK : PEERMOVE_AGENT_TICK;
 	else
 		nMoveTick = BASICINFO_INTERVAL;
@@ -3996,7 +3995,7 @@ void ZGame::PostBasicInfo()
 	{
 		m_nLastTime[ZLASTTIME_BASICINFO] = nNowTime;
 
-		if (g_Rules.IsVanillaMode())
+		if (ZGetGameClient()->GetMatchStageSetting()->IsVanillaMode())
 			PostOldBasicInfo(GetTime(), m_pMyCharacter);
 		else
 			PostNewBasicInfo();

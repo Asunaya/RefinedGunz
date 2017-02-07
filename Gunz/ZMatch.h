@@ -3,7 +3,6 @@
 #include <list>
 #include "ZPrerequisites.h"
 #include "MUID.h"
-#include "Rules.h"
 #include "MMatchGlobal.h"
 
 class ZCharacter;

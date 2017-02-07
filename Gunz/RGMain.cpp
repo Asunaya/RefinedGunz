@@ -677,7 +677,6 @@ void RGMain::OnReceiveVoiceChat(ZCharacter *Char, const uint8_t *Buffer, int Len
 
 void RGMain::OnGameCreate()
 {
-	g_Rules.OnGameCreate();
 }
 
 void RGMain::OnSlash(ZCharacter * Char, const rvector & Pos, const rvector & Dir)

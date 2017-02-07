@@ -147,6 +147,8 @@ public:
 	int GetForcedAP() const { return m_StageSetting.AP; }
 	bool CanFlip() const { return !m_StageSetting.NoFlip; }
 	bool IsSwordsOnly() const { return m_StageSetting.SwordsOnly; }
+	bool IsVanillaMode() const { return m_StageSetting.VanillaMode; }
+	bool InvulnerabilityStates() const { return m_StageSetting.InvulnerabilityStates; }
 	MSTAGE_SETTING_NODE* GetStageSetting()			{ return &m_StageSetting; }
 	const MMatchGameTypeInfo* GetCurrGameTypeInfo();
 

@@ -27,7 +27,6 @@
 #include "BasicInfoHistory.inl"
 #include "RGMain.h"
 #include "Portal.h"
-#include "Rules.h"
 
 #define ANGLE_TOLER			.1f
 #define ANGLE_SPEED			12.f
@@ -447,7 +446,7 @@ void ZCharacter::UpdateDirection(float fDelta, const v3& Direction)
 		return;
 	}
 
-	if (g_Rules.IsVanillaMode())
+	if (ZGetGameClient()->GetMatchStageSetting()->IsVanillaMode())
 	{
 		if ((m_AniState_Lower == ZC_STATE_LOWER_IDLE1) ||
 			(m_AniState_Lower == ZC_STATE_LOWER_RUN_FORWARD) ||
@@ -976,7 +975,7 @@ void ZCharacter::OnUpdate(float fDelta)
 		if (!GetHistory(&m_vProxyPosition, &dir, g_pGame->GetTime() - pObserver->GetDelay()))
 			return;
 
-		if (g_Rules.IsVanillaMode())
+		if (ZGetGameClient()->GetMatchStageSetting()->IsVanillaMode())
 		{
 			ProxyDirection = m_DirectionLower;
 
