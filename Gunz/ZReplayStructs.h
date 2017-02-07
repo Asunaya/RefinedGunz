@@ -40,6 +40,9 @@ struct REPLAY_STAGE_SETTING_NODE
 	int					AP;
 	bool				NoFlip;
 	bool				SwordsOnly;
+	bool				VanillaMode;
+	bool				InvulnerabilityStates;
+	char				Reserved[46];
 };
 
 struct REPLAY_STAGE_SETTING_NODE_RG_V1
@@ -57,6 +60,29 @@ struct REPLAY_STAGE_SETTING_NODE_RG_V1
 	bool				bTeamWinThePoint;
 	bool				bForcedEntryEnabled;
 	bool				bAutoTeamBalancing;
+};
+
+struct REPLAY_STAGE_SETTING_NODE_RG_V2
+{
+	MUID				uidStage;
+	char				szStageName[64];
+	char				szMapName[MAPNAME_LENGTH];
+	i32					nMapIndex;
+	MMATCH_GAMETYPE		nGameType;
+	i32					nRoundMax;
+	i32					nLimitTime;
+	i32					nLimitLevel;
+	i32					nMaxPlayers;
+	bool				bTeamKillEnabled;
+	bool				bTeamWinThePoint;
+	bool				bForcedEntryEnabled;
+	bool				bAutoTeamBalancing;
+	NetcodeType			Netcode;
+	bool				ForceHPAP;
+	int					HP;
+	int					AP;
+	bool				NoFlip;
+	bool				SwordsOnly;
 };
 
 struct REPLAY_STAGE_SETTING_NODE_OLD

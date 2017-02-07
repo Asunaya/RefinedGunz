@@ -60,41 +60,58 @@ struct MSTAGE_SETTING_NODE {
 	bool				bTeamKillEnabled;
 	bool				bTeamWinThePoint;
 	bool				bForcedEntryEnabled;
-
 	bool				bAutoTeamBalancing;
 #ifdef _VOTESETTING
 	bool				bVoteEnabled;
 	bool				bObserverEnabled;
 #endif
 
-	NetcodeType Netcode = NetcodeType::ServerBased;
+	NetcodeType Netcode;
 
-	bool ForceHPAP = true;
+	bool ForceHPAP;
+	int HP;
+	int AP;
+	bool NoFlip;
+	bool SwordsOnly;
+	bool VanillaMode;
+	bool InvulnerabilityStates;
 
-	int HP = 100;
-	int AP = 50;
+	MSTAGE_SETTING_NODE() { SetDefaults(); }
 
-	bool NoFlip = true;
+	void SetDefaults()
+	{
+		uidStage = MUID{ 0, 0 };
+		memset(szStageName, 0, std::size(szStageName));
+		strcpy_safe(szMapName, "Mansion");
+		nMapIndex = 0;
+		nGameType = MMATCH_GAMETYPE_DEATHMATCH_SOLO;
+		nRoundMax = 50;
+		nLimitTime = 30;
+		nLimitLevel = 0;
+		nMaxPlayers = 8;
+		bTeamKillEnabled = false;
+		bTeamWinThePoint = false;
+		bForcedEntryEnabled = true;
+		bAutoTeamBalancing = true;
 
-	bool SwordsOnly = false;
+#ifdef _VOTESETTING
+		bVoteEnabled = true;
+		bObserverEnabled = false;
+#endif
+
+		Netcode = NetcodeType::ServerBased;
+		ForceHPAP = true;
+		HP = 100;
+		AP = 50;
+		NoFlip = true;
+		SwordsOnly = false;
+		VanillaMode = false;
+		InvulnerabilityStates = false;
+	}
 };
 #pragma pack(pop)
 
-#define MMATCH_DEFAULT_STAGESETTING_MAPNAME			"Mansion"
-
-#define MMATCH_DEFAULT_STAGESETTING_GAMETYPE			MMATCH_GAMETYPE_DEATHMATCH_SOLO
-#define MMATCH_DEFAULT_STAGESETTING_ROUNDMAX			50
-#define MMATCH_DEFAULT_STAGESETTING_LIMITTIME			30
-#define MMATCH_DEFAULT_STAGESETTING_LIMITLEVEL			0
-#define MMATCH_DEFAULT_STAGESETTING_MAXPLAYERS			8
-#define MMATCH_DEFAULT_STAGESETTING_TEAMKILL			false
-#define MMATCH_DEFAULT_STAGESETTING_TEAM_WINTHEPOINT	false
-#define MMATCH_DEFAULT_STAGESETTING_FORCEDENTRY			true
-#define MMATCH_DEFAULT_STAGESETTING_AUTOTEAMBALANCING	true
-
-
 #define STAGESETTING_LIMITTIME_UNLIMITED				0
-
 
 struct MSTAGE_CHAR_SETTING_NODE {
 	MUID	uidChar{};

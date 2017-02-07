@@ -62,36 +62,48 @@ void GetReplayStageSetting(REPLAY_STAGE_SETTING_NODE& dest, const MSTAGE_SETTING
 	COPY_MEMBER(bTeamKillEnabled);
 	COPY_MEMBER(bTeamWinThePoint);
 	COPY_MEMBER(bForcedEntryEnabled);
+	COPY_MEMBER(bAutoTeamBalancing);
 	COPY_MEMBER(ForceHPAP);
 	COPY_MEMBER(HP);
 	COPY_MEMBER(AP);
 	COPY_MEMBER(NoFlip);
 	COPY_MEMBER(SwordsOnly);
+	COPY_MEMBER(VanillaMode);
+	COPY_MEMBER(InvulnerabilityStates);
+	memset(dest.Reserved, 0, sizeof(dest.Reserved));
+}
+
+static void ConvertStageSettingNode(const REPLAY_STAGE_SETTING_NODE& src, MSTAGE_SETTING_NODE& dest)
+{
+	COPY_MEMBER(uidStage);
+	strcpy_safe(dest.szStageName, src.szStageName);
+	strcpy_safe(dest.szMapName, src.szMapName);
+	COPY_MEMBER(nMapIndex);
+	COPY_MEMBER(nGameType);
+	COPY_MEMBER(nRoundMax);
+	COPY_MEMBER(nLimitTime);
+	COPY_MEMBER(nLimitLevel);
+	COPY_MEMBER(nMaxPlayers);
+	COPY_MEMBER(bTeamKillEnabled);
+	COPY_MEMBER(bTeamWinThePoint);
+	COPY_MEMBER(bForcedEntryEnabled);
+	COPY_MEMBER(bAutoTeamBalancing);
+	COPY_MEMBER(ForceHPAP);
+	COPY_MEMBER(HP);
+	COPY_MEMBER(AP);
+	COPY_MEMBER(NoFlip);
+	COPY_MEMBER(SwordsOnly);
+	COPY_MEMBER(VanillaMode);
+	COPY_MEMBER(InvulnerabilityStates);
 }
 #undef COPY_MEMBER
 
-static void ConvertStageSettingNode(REPLAY_STAGE_SETTING_NODE* pSource, MSTAGE_SETTING_NODE* pTarget)
-{
-	pTarget->uidStage = pSource->uidStage;
-	strcpy_safe(pTarget->szStageName, pSource->szStageName);
-	strcpy_safe(pTarget->szMapName, pSource->szMapName);
-	pTarget->nMapIndex = pSource->nMapIndex;
-	pTarget->nGameType = (MMATCH_GAMETYPE)pSource->nGameType;
-	pTarget->nRoundMax = pSource->nRoundMax;
-	pTarget->nLimitTime = pSource->nLimitTime;
-	pTarget->nLimitLevel = pSource->nLimitLevel;
-	pTarget->nMaxPlayers = pSource->nMaxPlayers;
-	pTarget->bTeamKillEnabled = pSource->bTeamKillEnabled;
-	pTarget->bTeamWinThePoint = pSource->bTeamWinThePoint;
-	pTarget->bForcedEntryEnabled = pSource->bForcedEntryEnabled;
-}
-
-static void ChangeGameState(REPLAY_STAGE_SETTING_NODE& rssn)
+static void ChangeGameState(const REPLAY_STAGE_SETTING_NODE& rssn)
 {
 	MSTAGE_SETTING_NODE stageSetting;
 	memset(&stageSetting, 0, sizeof(MSTAGE_SETTING_NODE));
 
-	ConvertStageSettingNode(&rssn, &stageSetting);
+	ConvertStageSettingNode(rssn, stageSetting);
 
 	ZGetGameClient()->GetMatchStageSetting()->UpdateStageSetting(&stageSetting);
 	ZApplication::GetStageInterface()->SetMapName(ZGetGameClient()->GetMatchStageSetting()->GetMapName());

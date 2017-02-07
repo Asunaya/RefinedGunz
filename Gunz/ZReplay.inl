@@ -106,6 +106,7 @@ typename std::enable_if<!has_szStageName<T>::value>::type CopyStageName(REPLAY_S
 inline void ZReplayLoader::GetStageSetting(REPLAY_STAGE_SETTING_NODE& ret)
 {
 #define COPY_SETTING(member) ret.member = Setting.member;
+
 	auto CopySetting = [&](const auto &Setting)
 	{
 		COPY_SETTING(uidStage);
@@ -124,7 +125,6 @@ inline void ZReplayLoader::GetStageSetting(REPLAY_STAGE_SETTING_NODE& ret)
 
 		CopyStageName(ret, Setting);
 	};
-#undef COPY_SETTING
 
 	switch (Version.Server)
 	{
@@ -153,8 +153,22 @@ inline void ZReplayLoader::GetStageSetting(REPLAY_STAGE_SETTING_NODE& ret)
 			REPLAY_STAGE_SETTING_NODE_RG_V1 Setting;
 			Read(Setting);
 			CopySetting(Setting);
+			COPY_SETTING(bAutoTeamBalancing);
 		}
 		else if (Version.nVersion == 2)
+		{
+			REPLAY_STAGE_SETTING_NODE_RG_V2 Setting;
+			Read(Setting);
+			CopySetting(Setting);
+			COPY_SETTING(bAutoTeamBalancing);
+			COPY_SETTING(Netcode);
+			COPY_SETTING(ForceHPAP);
+			COPY_SETTING(HP);
+			COPY_SETTING(AP);
+			COPY_SETTING(NoFlip);
+			COPY_SETTING(SwordsOnly);
+		}
+		else if (Version.nVersion == 3)
 		{
 			Read(ret);
 		}
@@ -182,6 +196,8 @@ inline void ZReplayLoader::GetStageSetting(REPLAY_STAGE_SETTING_NODE& ret)
 
 	IsDojo = !_stricmp(ret.szMapName, "Dojo");
 	GameType = ret.nGameType;
+
+#undef COPY_SETTING
 }
 
 inline void ZReplayLoader::GetDuelQueueInfo(MTD_DuelQueueInfo* QueueInfo)

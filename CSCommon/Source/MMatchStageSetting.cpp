@@ -8,30 +8,7 @@ unsigned long MMatchStageSetting::GetChecksum()
 
 void MMatchStageSetting::SetDefault()
 {
-	m_StageSetting.nMapIndex = 0;
-	strcpy_safe(m_StageSetting.szMapName, MMATCH_DEFAULT_STAGESETTING_MAPNAME);
-	m_StageSetting.nGameType = MMATCH_DEFAULT_STAGESETTING_GAMETYPE;
-	m_StageSetting.bTeamKillEnabled = MMATCH_DEFAULT_STAGESETTING_TEAMKILL;
-	m_StageSetting.bTeamWinThePoint = MMATCH_DEFAULT_STAGESETTING_TEAM_WINTHEPOINT;
-	m_StageSetting.bForcedEntryEnabled = MMATCH_DEFAULT_STAGESETTING_FORCEDENTRY;
-	m_StageSetting.nLimitTime = MMATCH_DEFAULT_STAGESETTING_LIMITTIME;
-	m_StageSetting.nMaxPlayers = MMATCH_DEFAULT_STAGESETTING_MAXPLAYERS;
-	m_StageSetting.nRoundMax = MMATCH_DEFAULT_STAGESETTING_ROUNDMAX;
-	m_StageSetting.nLimitLevel = MMATCH_DEFAULT_STAGESETTING_LIMITLEVEL;
-	m_StageSetting.bAutoTeamBalancing = MMATCH_DEFAULT_STAGESETTING_AUTOTEAMBALANCING;
-	m_StageSetting.uidStage = MUID(0,0);
-
-#ifdef _VOTESETTING
-	m_StageSetting.bVoteEnabled = true;
-	m_StageSetting.bObserverEnabled = false;
-#endif
-
-	m_StageSetting.Netcode = NetcodeType::ServerBased;
-	m_StageSetting.ForceHPAP = true;
-	m_StageSetting.HP = 100;
-	m_StageSetting.AP = 50;
-	m_StageSetting.NoFlip = true;
-	m_StageSetting.SwordsOnly = false;
+	m_StageSetting.SetDefaults();
 }
 
 void MMatchStageSetting::SetMapName(const char* pszName)
