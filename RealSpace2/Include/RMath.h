@@ -217,9 +217,9 @@ inline rboundingbox Union(const rboundingbox& a, const rboundingbox& b)
 {
 	rboundingbox ret;
 	for (size_t i = 0; i < 3; ++i)
-		ret.vmin[i] = (std::min)(ret.vmin[i], b.vmin[i]);
+		ret.vmin[i] = (std::min)(a.vmin[i], b.vmin[i]);
 	for (size_t i = 0; i < 3; ++i)
-		ret.vmax[i] = (std::max)(ret.vmax[i], b.vmax[i]);
+		ret.vmax[i] = (std::max)(a.vmax[i], b.vmax[i]);
 	return ret;
 }
 
@@ -227,9 +227,9 @@ inline rboundingbox Union(const rboundingbox& a, const rvector& b)
 {
 	rboundingbox ret;
 	for (size_t i = 0; i < 3; ++i)
-		ret.vmin[i] = (std::min)(ret.vmin[i], b[i]);
+		ret.vmin[i] = (std::min)(a.vmin[i], b[i]);
 	for (size_t i = 0; i < 3; ++i)
-		ret.vmax[i] = (std::max)(ret.vmax[i], b[i]);;
+		ret.vmax[i] = (std::max)(a.vmax[i], b[i]);
 	return ret;
 }
 
