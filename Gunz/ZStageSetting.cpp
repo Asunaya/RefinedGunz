@@ -402,7 +402,7 @@ void ZStageSetting::ShowStageSettingDialog(MSTAGE_SETTING_NODE* pStageSetting, b
 		{
 			Widget->SetCheck(Value);
 			if (Enable != -1)
-				Widget->Enable(Enable);
+				Widget->Enable(Enable != 0);
 		}
 	};
 

@@ -17,16 +17,24 @@ static D3DPtr<IDirect3DTexture9> LoadDDS(const void* data, size_t size,
 	auto tex = gli::load(static_cast<const char*>(data), size);
 	switch (tex.format())
 	{
-	case gli::FORMAT_RGB_DXT1_UNORM:
+	case gli::FORMAT_RGB_DXT1_UNORM_BLOCK8:
+	case gli::FORMAT_RGBA_DXT1_UNORM_BLOCK8:
+	case gli::FORMAT_RGB_DXT1_SRGB_BLOCK8:
+	case gli::FORMAT_RGBA_DXT1_SRGB_BLOCK8:
 		format = D3DFMT_DXT1;
 		break;
-	case gli::FORMAT_RGBA_DXT3_UNORM:
+	case gli::FORMAT_RGBA_DXT3_UNORM_BLOCK16:
+	case gli::FORMAT_RGBA_DXT3_SRGB_BLOCK16:
 		format = D3DFMT_DXT3;
 		break;
-	case gli::FORMAT_RGBA_DXT5_UNORM:
+	case gli::FORMAT_RGBA_DXT5_UNORM_BLOCK16:
+	case gli::FORMAT_RGBA_DXT5_SRGB_BLOCK16:
 		format = D3DFMT_DXT5;
 		break;
-	case gli::FORMAT_BGRA8_UNORM:
+	case gli::FORMAT_BGR8_UNORM_PACK8:
+	case gli::FORMAT_BGRA8_UNORM_PACK8:
+	case gli::FORMAT_BGR8_UNORM_PACK32:
+	case gli::FORMAT_BGR8_SRGB_PACK32:
 		format = D3DFMT_A8R8G8B8;
 		break;
 	default:
@@ -34,12 +42,12 @@ static D3DPtr<IDirect3DTexture9> LoadDDS(const void* data, size_t size,
 		assert(false);
 		return nullptr;
 	}
-	gli::texture2D tex2D(tex);
+	gli::texture2d tex2D(tex);
 	if (tex2D.empty())
 		return false;
 
-	auto Width = tex2D[0].dimensions().x;
-	auto Height = tex2D[0].dimensions().y;
+	auto Width = tex2D[0].extent().x;
+	auto Height = tex2D[0].extent().y;
 	auto Levels = tex2D.levels();
 	auto Usage = 0;
 
