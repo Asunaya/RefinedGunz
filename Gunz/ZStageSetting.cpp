@@ -246,6 +246,14 @@ static bool BuildStageSetting(MSTAGE_SETTING_NODE* pOutNode)
 	if (Widget)
 		pOutNode->SwordsOnly = Widget->GetCheck();
 
+	Widget = static_cast<MButton*>(pResource->FindWidget("StageVanillaMode"));
+	if (Widget)
+		pOutNode->VanillaMode = Widget->GetCheck();
+
+	Widget = static_cast<MButton*>(pResource->FindWidget("StageInvulnerabilityStates"));
+	if (Widget)
+		pOutNode->InvulnerabilityStates = Widget->GetCheck();
+
 	return true;
 }
 
@@ -376,40 +384,36 @@ void ZStageSetting::ShowStageSettingDialog(MSTAGE_SETTING_NODE* pStageSetting, b
 	if (pCBTeamBanlance)
 		pCBTeamBanlance->Enable(ZGetGameTypeManager()->IsTeamGame(pStageSetting->nGameType));
 
-	auto ForceHPAP = static_cast<MButton*>(pResource->FindWidget("StageForceHPAP"));
-	if (ForceHPAP)
+	auto SetEditToInt = [&](const char* Name, int Value)
 	{
-		ForceHPAP->SetCheck(pStageSetting->ForceHPAP);
-	}
+		char buf[64];
+		auto Widget = static_cast<MEdit*>(pResource->FindWidget(Name));
+		if (Widget)
+		{
+			itoa_safe(Value, buf, 10);
+			Widget->SetText(buf);
+		}
+	};
 
-	char buf[64];
-	auto HP = static_cast<MEdit*>(pResource->FindWidget("StageHP"));
-	if (HP)
+	auto SetButtonWidget = [&](const char* Name, bool Value, int Enable = -1)
 	{
-		itoa_safe(pStageSetting->HP, buf, 10);
-		HP->SetText(buf);
-	}
+		auto Widget = static_cast<MButton*>(pResource->FindWidget(Name));
+		if (Widget)
+		{
+			Widget->SetCheck(Value);
+			if (Enable != -1)
+				Widget->Enable(Enable);
+		}
+	};
 
-	auto AP = static_cast<MEdit*>(pResource->FindWidget("StageAP"));
-	if (AP)
-	{
-		itoa_safe(pStageSetting->AP, buf, 10);
-		AP->SetText(buf);
-	}
+	SetButtonWidget("StageForceHPAP", pStageSetting->ForceHPAP);
+	SetEditToInt("StageHP", pStageSetting->HP);
+	SetEditToInt("StageAP", pStageSetting->AP);
 
-	auto NoFlip = static_cast<MButton*>(pResource->FindWidget("StageNoFlip"));
-	if (NoFlip)
-	{
-		NoFlip->SetCheck(pStageSetting->NoFlip);
-	}
-
-	auto SwordsOnly = static_cast<MButton*>(pResource->FindWidget("StageSwordsOnly"));
-	if (SwordsOnly)
-	{
-		SwordsOnly->SetCheck(pStageSetting->SwordsOnly);
-
-		SwordsOnly->Enable(!IsSwordsOnly(pStageSetting->nGameType));
-	}
+	SetButtonWidget("StageNoFlip", pStageSetting->NoFlip);
+	SetButtonWidget("StageSwordsOnly", pStageSetting->SwordsOnly, !IsSwordsOnly(pStageSetting->nGameType));
+	SetButtonWidget("StageVanillaMode", pStageSetting->VanillaMode);
+	SetButtonWidget("StageInvulnerabilityStates", pStageSetting->InvulnerabilityStates);
 
 	if (bShowAll)
 	{

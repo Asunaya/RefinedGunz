@@ -918,9 +918,6 @@ void ZGameClient::UpdateStageSetting(MSTAGE_SETTING_NODE* pSetting, STAGE_STATE 
 		{
 			Changed = false;
 
-			/*if (CreatedStage)
-				return false;*/
-
 			if (New == Default)
 				return false;
 
@@ -977,6 +974,18 @@ void ZGameClient::UpdateStageSetting(MSTAGE_SETTING_NODE* pSetting, STAGE_STATE 
 	{
 		sprintf_safe(buf, "Swords only%s%s", Changed ? " changed to " : ": ",
 			pSetting->SwordsOnly ? "true" : "false");
+		ZChatOutput(buf, ZChat::CMT_SYSTEM);
+	}
+	if (CHECK_SETTING(VanillaMode, false))
+	{
+		sprintf_safe(buf, "Vanilla mode%s%s", Changed ? " changed to " : ": ",
+			pSetting->VanillaMode ? "true" : "false");
+		ZChatOutput(buf, ZChat::CMT_SYSTEM);
+	}
+	if (CHECK_SETTING(InvulnerabilityStates, false))
+	{
+		sprintf_safe(buf, "Invulnerability states%s%s", Changed ? " changed to " : ": ",
+			pSetting->InvulnerabilityStates ? "true" : "false");
 		ZChatOutput(buf, ZChat::CMT_SYSTEM);
 	}
 
