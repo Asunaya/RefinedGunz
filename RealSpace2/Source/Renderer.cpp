@@ -6,6 +6,7 @@
 #include "VertexTypes.h"
 #include "Sphere.h"
 #include "RLightList.h"
+#include "RS2.h"
 // TODO: Remove
 #include "../CSCommon/Include/Config.h"
 
@@ -36,6 +37,9 @@ static auto CreateScreenSpaceVertexDeclaration()
 Renderer::Renderer()
 	: LightPos{ 0, 0, 100 }, NearZ{ DEFAULT_NEAR_Z }, FarZ{ DEFAULT_FAR_Z }
 {
+	if (!GetRS2().UsingD3D9())
+		return;
+
 	SetTransform(TransformType::World, GetIdentityMatrix());
 	ScreenSpaceVertexDeclaration = CreateScreenSpaceVertexDeclaration();
 	CreateShaders();

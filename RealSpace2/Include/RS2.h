@@ -11,6 +11,11 @@ _NAMESPACE_REALSPACE2_BEGIN
 
 class RS2
 {
+private:
+	std::string ApplicationName;
+
+	variant<RS2D3D9, RS2Vulkan> var;
+
 public:
 	RS2(D3D9Tag) : var{ RS2D3D9{} } {};
 	template <typename... Ts>
@@ -32,11 +37,6 @@ public:
 	static RS2& Get();
 
 	Renderer Render;
-
-private:
-	std::string ApplicationName;
-
-	variant<RS2D3D9, RS2Vulkan> var;
 };
 
 inline auto& GetRS2() { return RS2::Get(); }

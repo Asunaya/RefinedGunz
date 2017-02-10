@@ -254,21 +254,24 @@ RRESULT OnDestroy(void *pParam)
 		_findclose(hFile);
 	}
 
-	MFontManager::Destroy();
-	MBitmapManager::Destroy();
-	MBitmapManager::DestroyAniBitmap();
+	if (GetRS2().UsingD3D9())
+	{
+		MFontManager::Destroy();
+		MBitmapManager::Destroy();
+		MBitmapManager::DestroyAniBitmap();
 
-	mlog("main : MBitmapManager::DestroyAniBitmap()\n");
+		mlog("main : MBitmapManager::DestroyAniBitmap()\n");
 
-	ZBasicInfoItem::Release(); 
+		ZBasicInfoItem::Release();
 
-	ZGetStencilLight()->Destroy();
-	LightSource::Release();
+		ZGetStencilLight()->Destroy();
+		LightSource::Release();
 
-	RBspObject::DestroyShadeMap();
-	RDestroyLenzFlare();
-	RAnimationFileMgr::GetInstance()->Destroy();
-	ZStringResManager::FreeInstance();
+		RBspObject::DestroyShadeMap();
+		RDestroyLenzFlare();
+		RAnimationFileMgr::GetInstance()->Destroy();
+		ZStringResManager::FreeInstance();
+	}
 
 	g_RGMain.reset();
 
