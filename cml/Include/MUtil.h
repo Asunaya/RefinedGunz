@@ -95,7 +95,29 @@ T1 reinterpret(const T2& val)
 	return T1_rep;
 }
 
+template <typename T1>
 void reinterpret(void*) = delete;
+
+template <typename T>
+struct Range
+{
+	decltype(auto) begin() { return its.first; }
+	decltype(auto) end() { return its.second; }
+	decltype(auto) begin() const { return its.first; }
+	decltype(auto) end() const { return its.second; }
+
+	std::pair<T, T> its;
+};
+
+template <typename T>
+auto MakeRange(T&& begin, T&& end) { return Range<std::remove_reference_t<T>>{ {begin, end} }; }
+
+template <template <typename...> class itT, typename T>
+auto MakeAdapter(T& Container) {
+	return MakeRange(
+		itT<decltype(Container.begin())>{ Container.begin() },
+		itT<decltype(Container.end())>{ Container.end() });
+}
 
 template <typename ItT>
 class ValueIterator
@@ -125,27 +147,10 @@ private:
 	ItT it;
 };
 
-template <typename ContainerT>
-class PairValueAdapter
-{
-public:
-	PairValueAdapter(ContainerT& o) : Container(o) { }
-
-	auto begin() {
-		return ValueIterator<typename ContainerT::iterator>(Container.begin()); }
-	auto end() {
-		return ValueIterator<typename ContainerT::iterator>(Container.end()); }
-	auto begin() const {
-		return ValueIterator<typename ContainerT::iterator>(Container.begin()); } 
-	auto end() const {
-		return ValueIterator<typename ContainerT::iterator>(Container.end()); }
-
-private:
-	ContainerT& Container;
-};
-
+// Returns an adapter whose iterators returns .second of the pair that
+// iterators of the original container return, i.e. the values of a map.
 template <typename T>
-auto MakePairValueAdapter(T& Container) { return PairValueAdapter<T>(Container); }
+auto MakePairValueAdapter(T& Container) { return MakeAdapter<ValueIterator>(Container); }
 
 inline std::pair<bool, int> StringToInt(const char* String, int Radix = 10)
 {
@@ -159,30 +164,47 @@ inline std::pair<bool, int> StringToInt(const char* String, int Radix = 10)
 	return{ true, IntVal };
 }
 
+// WriteProxy
+// A class that acts as a pointer-to-pointer wrapper for smart pointers for passing to functions
+// that expect to "return" a pointer by writing to a pointer-to-pointer argument.
+// Should only ever be instantiated by MakeWriteProxy as a temporary for a argument.
+// The smart pointer will then have the returned value (if set) after the full expression it appears in.
+//
+// Example:
+// void foo(int**); std::unique_ptr<int> ptr; foo(MakeWriteProxy(ptr));
 template <typename T>
 class WriteProxy
 {
 	using StoredType = get_template_argument_t<T, 0>;
 public:
-	WriteProxy(T& ptr) : ptr(ptr), temp(ptr.get()) {}
 	~WriteProxy() { ptr = T{ temp }; }
 
-	operator StoredType**() { return &temp; }
+	operator StoredType**() && { return &temp; }
 
 private:
+	WriteProxy(T& ptr) : ptr(ptr), temp(ptr.get()) {}
+	WriteProxy(const WriteProxy&) = delete;
+	WriteProxy(WriteProxy&&) = default;
+	WriteProxy& operator =(const WriteProxy&) = delete;
+	WriteProxy& operator =(WriteProxy&&) = delete;
+
+	template <typename... U>
+	friend WriteProxy<std::unique_ptr<U...>> MakeWriteProxy(std::unique_ptr<U...>&);
+
 	T& ptr;
-	StoredType* temp;
+	StoredType* temp{};
 };
 
-template <typename T>
-auto MakeWriteProxy(D3DPtr<T>& ptr) { return WriteProxy<D3DPtr<T>>{ptr}; }
-
 template <typename... T>
-auto MakeWriteProxy(std::unique_ptr<T...>& ptr) { return WriteProxy<std::unique_ptr<T...>>(ptr); }
+WriteProxy<std::unique_ptr<T...>> MakeWriteProxy(std::unique_ptr<T...>& ptr) {
+	return WriteProxy<std::unique_ptr<T...>>(ptr);
+}
 
+// Converts an rvalue to a mutable lvalue
 template <typename T>
 T& unmove(T&& x) { return x; }
 
+// Returns value rounded up towards the nearest power of two
 inline u32 NextPowerOfTwo(u32 value)
 {
 	unsigned long rightmost_bit;
@@ -193,15 +215,3 @@ inline u32 NextPowerOfTwo(u32 value)
 		rightmost_bit_value <<= 1;
 	return rightmost_bit_value;
 }
-
-template <typename T>
-struct Range
-{
-	auto begin() { return its.first; }
-	auto end() { return its.second; }
-
-	std::pair<T, T> its;
-};
-
-template <typename T>
-auto MakeRange(T&& begin, T&& end) { return Range<std::remove_reference_t<T>>{ {begin, end} }; }
