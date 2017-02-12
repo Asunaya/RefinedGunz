@@ -52,11 +52,6 @@ static int SubGetTexLevel(RTextureType tex_type)
 	return 0;
 }
 
-RBaseTexture::RBaseTexture(const void* data, size_t size)
-{
-	SubCreateTexture(data, size);
-}
-
 void RBaseTexture::Resize()
 {
 }
@@ -189,18 +184,19 @@ RBaseTexture *RTextureManager::CreateBaseTextureMg(const char* filename, RTextur
 RBaseTexture * RTextureManager::CreateBaseTextureFromMemory(const void * data, size_t size,
 	RTextureType tex_type, bool bUseMipmap, bool bUseFileSystem)
 {
-	Textures.emplace_back(data, size);
+	Textures.emplace_back();
 	auto&& new_tex = Textures.back();
-	if (!new_tex.m_pTex)
-	{
-		Textures.pop_back();
-		return nullptr;
-	}
 	new_tex.m_bUseFileSystem = bUseFileSystem;
 	new_tex.m_nRefCount = 1;
 	new_tex.m_bUseMipmap = bUseMipmap;
 	new_tex.m_nTexType = tex_type;
 	new_tex.m_nTexLevel = SubGetTexLevel(tex_type);
+	new_tex.SubCreateTexture(data, size);
+	if (!new_tex.m_pTex)
+	{
+		Textures.pop_back();
+		return nullptr;
+	}
 	return &new_tex;
 }
 
