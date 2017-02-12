@@ -54,6 +54,15 @@ static int SubGetTexLevel(RTextureType tex_type)
 
 void RBaseTexture::Resize()
 {
+	if (filename.empty())
+		return;
+
+	MZFile mzf;
+	if (!mzf.Open(filename.c_str(), m_bUseFileSystem ? g_pFileSystem : nullptr))
+		return;
+	auto buf = mzf.Release();
+
+	SubCreateTexture(buf.get(), mzf.GetLength());
 }
 
 LPDIRECT3DTEXTURE9 RBaseTexture::GetTexture()
@@ -112,6 +121,7 @@ void RTextureManager::OnChangeTextureLevel(RTextureType flag)
 	for (auto&& tex : Textures)
 	{
 		if (flag == RTextureType::All || (static_cast<u32>(flag) & static_cast<u32>(tex.m_nTexType))) {
+			tex.m_nTexLevel = SubGetTexLevel(flag);
 			tex.Resize();
 		}
 	}
@@ -226,7 +236,9 @@ RBaseTexture *RTextureManager::CreateBaseTextureSub(bool Managed, const char* fi
 #ifdef LOAD_FROM_DDS
 	char ddstexturefile[MAX_PATH];
 	sprintf_safe(ddstexturefile, "%s.dds", filename);
-	if (!mzf.Open(ddstexturefile, pfs))
+	if (mzf.Open(ddstexturefile, pfs))
+		filename = ddstexturefile;
+	else
 #endif
 		if (!mzf.Open(filename, pfs))
 			return nullptr;
