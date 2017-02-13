@@ -23,15 +23,11 @@ class ZMonsterBookInterface;
 
 enum ZChangeWeaponType;
 
-class MUserDataListItem : public MDefaultListItem{
+class MUserDataListItem : public MDefaultListItem {
 	int m_nUserData;
 public:
-	MUserDataListItem(const char* szText, int nUserData)
-		: MDefaultListItem(szText){
-			m_nUserData=nUserData;
-		}
-
-	int GetUserData() { return m_nUserData; }
+	MUserDataListItem(const char* szText, int nUserData) : MDefaultListItem{ szText }, m_nUserData{ nUserData } {}
+	int GetUserData() const { return m_nUserData; }
 };
 
 class ZGameInterface : public ZInterface {
@@ -44,7 +40,7 @@ public:
 	int					m_nEquipTabNum;
 
 	bool				m_bLoginTimeout;
-	DWORD				m_dwLoginTimeout;
+	u32					m_dwLoginTimeout;
 	
 protected:
 	ZScreenEffectManager *m_pScreenEffectManager;
@@ -77,7 +73,7 @@ protected:
 	bool				m_bCursor;
 	LPDIRECT3DSURFACE9	m_pCursorSurface;
 
-	DWORD				m_dwFrameMoveClock;
+	u32					m_dwFrameMoveClock;
 
 	ZIDLResource		m_IDLResource;
 
@@ -99,19 +95,19 @@ protected:
 	bool				m_bOnEndOfReplay;
 	int					m_nLevelPercentCache;
 
-	unsigned long int	m_nDrawCount;
+	u32					m_nDrawCount;
 
-	bool			m_bReservedWeapon;
-	ZChangeWeaponType m_ReservedWeapon;
+	bool				m_bReservedWeapon;
+	ZChangeWeaponType	m_ReservedWeapon;
 
 	bool			m_bLeaveBattleReserved;
 	bool			m_bLeaveStageReserved;
-	DWORD			m_dwLeaveBattleTime;
+	u32				m_dwLeaveBattleTime;
 
 
 	int				m_nLoginState;
-	DWORD			m_dwLoginTimer;
-	DWORD			m_dwRefreshTime;
+	u32				m_dwLoginTimer;
+	u32				m_dwRefreshTime;
 	int				m_nLocServ;
 
 	MBitmapR2*		m_pRoomListFrame;
@@ -123,8 +119,8 @@ protected:
 	ZLocatorList*	m_pLocatorList;
 	ZLocatorList*	m_pTLocatorList;
 
-	DWORD			m_dwTimeCount;
-	DWORD			m_dwHourCount;
+	u32				m_dwTimeCount;
+	u32				m_dwHourCount;
 
 protected:
 	static bool		OnGlobalEvent(MEvent* pEvent);
@@ -199,6 +195,8 @@ protected:
 	void OnResponseBlockCountryCodeIP( const char* pszBlockCountryCode, const char* pszRoutingURL );
 
 	void RequestServerStatusListInfo();
+
+	void ShowShopOrEquipmentDialog(bool Shop);
 
 public:
 	ZGameInterface(const char* szName=NULL, MWidget* pParent=NULL, MListener* pListener=NULL);
@@ -293,8 +291,8 @@ public:
 	bool Equip(MMatchCharItemParts parts, MUID& uidItem);
 	void RequestQuickJoin();
 	void GetBringAccountItem();
-	void ShowEquipmentDialog(bool bShow=true);
-	void ShowShopDialog(bool bShow=true);
+	void ShowEquipmentDialog(bool bShow);
+	void ShowShopDialog(bool bShow);
 	void SelectShopTab(int nTabIndex);
 	void SelectEquipmentTab(int nTabIndex);
 	void SelectEquipmentFrameList( const char* szName, bool bOpen);
@@ -373,7 +371,10 @@ public:
 
 #define DEFAULT_INTERFACE_SKIN "Default"
 
-
 #define WM_CHANGE_GAMESTATE		(WM_USER + 25)
 
 void ZChangeGameState(GunzState state);
+
+inline ZIDLResource* GetZIDLResource() {
+	return ZGetGameInterface()->GetIDLResource();
+}

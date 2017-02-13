@@ -6,14 +6,6 @@
 
 void MBmButton::OnDownDraw(MDrawContext* pDC)
 {
-	/*
-	if(m_pDownBitmap==NULL) MButton::OnDownDraw(pDC);	// Bitmap이 없으면 text로 표시
-	else{
-		pDC->SetBitmap(m_pDownBitmap);
-		pDC->Draw(m_Rect.x, m_Rect.y);
-	}
-	*/
-	
 	if(m_pDownBitmap!=NULL){
 		pDC->SetBitmap(m_pDownBitmap);
 		MRECT r = GetClientRect();
@@ -26,13 +18,6 @@ void MBmButton::OnDownDraw(MDrawContext* pDC)
 
 void MBmButton::OnUpDraw(MDrawContext* pDC)
 {
-	/*
-	if(m_pUpBitmap==NULL) MButton::OnUpDraw(pDC);	// Bitmap이 없으면 text로 표시
-	else{
-		pDC->SetBitmap(m_pUpBitmap);
-		pDC->Draw(m_Rect.x, m_Rect.y);
-	}
-	*/
 	if(m_pUpBitmap!=NULL){
 		pDC->SetBitmap(m_pUpBitmap);
 		MRECT r = GetClientRect();
@@ -45,14 +30,6 @@ void MBmButton::OnUpDraw(MDrawContext* pDC)
 
 void MBmButton::OnOverDraw(MDrawContext* pDC)
 {
-	/*
-	if(m_pUpBitmap==NULL) MButton::OnOverDraw(pDC);	// Bitmap이 없으면 text로 표시
-	else{
-		// 현재는 UpBitmap으로..
-		pDC->SetBitmap(m_pUpBitmap);
-		pDC->Draw(m_Rect.x, m_Rect.y);
-	}
-	*/
 	if(m_pUpBitmap!=NULL){
 		pDC->SetBitmap(m_pOverBitmap);
 		MRECT r = GetClientRect();
@@ -101,7 +78,6 @@ void MBmButton::OnDraw(MDrawContext* pDC)
 		OnUpDraw(pDC);
 	}
 
-	// 글씨
 	if( m_bTextColor )
 	{
 		pDC->SetColor( m_BmTextColor );

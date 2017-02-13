@@ -15,14 +15,12 @@
 #include "MPicture.h"
 #include "MAnimation.h"
 #include "MHotKey.h"
-//#include "MActionKey.h"
 #include "MBmButton.h"
 #include "MTabCtrl.h"
 #include "MPanel.h"
 #include "GlobalTypes.h"
 
 class MMainFrame : public MWidget{
-protected:
 protected:
 	virtual void OnDraw(MDrawContext* pDC){
 		// Draw Nothing
@@ -31,15 +29,14 @@ protected:
 		return false;
 	}
 public:
-	MMainFrame(const char* szName=NULL, MWidget* pParent=NULL, MListener* pListener=NULL)
+	MMainFrame(const char* szName = nullptr, MWidget* pParent = nullptr, MListener* pListener = nullptr)
 		: MWidget(szName, pParent, pListener){
 	}
-	virtual ~MMainFrame(void){
-	}
+	virtual ~MMainFrame() = default;
 };
 
 
-Mint* Mint::m_pInstance = NULL;
+Mint* Mint::m_pInstance;
 
 void Mint::DrawCandidateList(MDrawContext* pDC, MPOINT& p)
 {
@@ -48,20 +45,17 @@ void Mint::DrawCandidateList(MDrawContext* pDC, MPOINT& p)
 
 		MRECT r(p.x, p.y, GetCandidateListWidth(), GetCandidateListHeight());
 
-//		pDC->SetColor(MCOLOR(0x30000000));		// 그림자
-//		pDC->FillRectangle( r.x+5, r.y+5, r.w, r.h);
-		
-		pDC->SetColor(MCOLOR(0xFF050505));		// 프레임 바탕
+		pDC->SetColor(MCOLOR(0xFF050505));
 		pDC->FillRectangle(r);
 
-		pDC->SetColor(MCOLOR(0xFF505050));		// 프레임 어두운 부분
+		pDC->SetColor(MCOLOR(0xFF505050));
 		pDC->Rectangle( r.x+1, r.y+1, r.w,   r.h);
 
-		pDC->SetColor(MCOLOR(0xFFB0B0B0));		// 프레임 밝은 부분
+		pDC->SetColor(MCOLOR(0xFFB0B0B0));
 		pDC->Rectangle(r);
 
 		MFont* pFont = pDC->GetFont();
-		pDC->SetFont( MFontManager::Get( "Default"));		// 강제로 폰트를 디폴트로 고정한다.
+		pDC->SetFont( MFontManager::Get( "Default"));
 
 		int nStart = GetCandidatePageStart();
 
@@ -78,13 +72,12 @@ void Mint::DrawCandidateList(MDrawContext* pDC, MPOINT& p)
 			pDC->Text(p.x+4, p.y + nIndexInPage*pDC->GetFont()->GetHeight() + 4, temp);
 		}
 
-		// 현재 선택 인덱스 및 총 개수 출력
 		sprintf_safe(temp, "(%d/%d)", GetCandidateSelection()+1, GetCandidateCount());
 		pDC->SetColor(MCOLOR(DEFCOLOR_NORMAL));
 		pDC->Text(p.x + 4, p.y + GetCandidatePageSize()*pDC->GetFont()->GetHeight() + 4, temp);
 
 		pDC->SetColor(c);
-		pDC->SetFont( MFontManager::Get( pFont->m_szName));		// 원래 폰트로 복구
+		pDC->SetFont( MFontManager::Get( pFont->m_szName));
 	}
 }
 
@@ -97,7 +90,6 @@ Mint::Mint()
 	m_pDC = NULL;
 	m_hImc = NULL;
 
-//	m_nDragObjectID = -1;
 	m_szDragObjectString[0] = 0;
 	m_szDragObjectItemString[0] = 0;
 	m_pDragObjectBitmap = NULL;
@@ -110,14 +102,11 @@ Mint::Mint()
 
 	m_fnGlobalEventCallBack = NULL;
 
-//	memset(m_ActionKeyPressedTable, 0, sizeof(bool)*ACTIONKEYMAP_IDCOUNT);
-
 	m_pCandidateList = NULL;
 	m_nCandidateListSize = 0;
 
 	m_nCompositionAttributeSize = 0;
 	memset(m_nCompositionAttributes, 0, sizeof(BYTE)*(MIMECOMPOSITIONSTRING_LENGTH));
-	//memset(m_dwCompositionClauses, 0, sizeof(DWORD)*(MIMECOMPOSITIONSTRING_LENGTH));
 
 	m_nCompositionCaretPosition = 0;
 
@@ -130,7 +119,7 @@ Mint::~Mint()
 	m_pInstance = NULL;
 }
 
-Mint* Mint::GetInstance(void)
+Mint* Mint::GetInstance()
 {
 	_ASSERT(m_pInstance!=NULL);
 	return m_pInstance;
@@ -142,7 +131,6 @@ bool Mint::Initialize(int nWorkspaceWidth, int nWorkspaceHeight, MDrawContext* p
 
 	m_pDC = pDC;
 
-//	MFontManager::Add(pDefaultFont);
 	MFontManager::SetDefaultFont(pDefaultFont);
 
 	m_pMainFrame = new MMainFrame("Mint");
@@ -153,7 +141,7 @@ bool Mint::Initialize(int nWorkspaceWidth, int nWorkspaceHeight, MDrawContext* p
 	return true;
 }
 
-void Mint::Finalize(void)
+void Mint::Finalize()
 {
 	if(m_pMainFrame!=NULL){
 		delete m_pMainFrame;
@@ -172,12 +160,10 @@ bool Mint::ProcessEvent(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 	MEvent e;
 	int nResult = e.TranslateEvent(hwnd, message, wparam, lparam);
 	if(nResult&EVENT_MINT_TRANSLATED){
-		// Drag & Drop
 		if(m_pDragSourceObject!=NULL){
-#define DRAm_VISIBLE_LENGTH	2	// 드래그 오브젝트를 보여주기 시작하는 간격
+#define DRAm_VISIBLE_LENGTH	2
 			if(e.nMessage==MWM_MOUSEMOVE){
 				MPOINT p = e.Pos;
-				//MPOINT p = MEvent::GetMousePos();
 				int px = m_GrabPoint.x - p.x;
 				if ( px < 0)  px *= -1;
 				int py = m_GrabPoint.y - p.y;
@@ -195,29 +181,24 @@ bool Mint::ProcessEvent(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 			if(e.nMessage==MWM_LBUTTONUP){
 				MPOINT p = e.Pos;
 				MWidget* pFind = FindWidgetDropAble(p);
-//				MWidget* pFind = FindWidget(p);
 				if(pFind!=NULL && pFind->IsDropable(m_pDragSourceObject)==true)
-					pFind->Drop(m_pDragSourceObject, m_pDragObjectBitmap, m_szDragObjectString, m_szDragObjectItemString);	// 해당 위젯에 드롭
+					pFind->Drop(m_pDragSourceObject, m_pDragObjectBitmap, m_szDragObjectString, m_szDragObjectItemString);
 				m_pDragSourceObject = NULL;
 				m_pMainFrame->ReleaseCapture();
 				return true;
 			}
 		}
 
-		// 전역 이벤트 처리
 		if (m_fnGlobalEventCallBack) {
 			if (m_fnGlobalEventCallBack(&e) == true) return true;
 		}
 
-		// 일반 이벤트 처리
 		if(m_pMainFrame->Event(&e)==true) return true;
-		// 없으면 Accelerator 처리
 		if(m_pMainFrame->EventAccelerator(&e)==true) return true;
-		// Default Key(Enter, ESC) 처리
 		if(m_pMainFrame->EventDefaultKey(&e)==true) return true;
 
 	}
-	if(nResult&EVENT_PROCESSED) return true;	// 무조건 처리됨
+	if(nResult&EVENT_PROCESSED) return true;
 
 	return false;
 }
@@ -243,32 +224,16 @@ void Mint::Draw(void)
 	pDC->SetOrigin(MPOINT(sr.x, sr.y));
 	pDC->SetClipRect(sr);
 
-
-	// Candidate List 그리기
 	DrawCandidateList(pDC, m_CandidateListPos);
 
-
-	// Drag & Drop
-	/*
-	MDragObject* pDragObject = MGetDragObject();
-	if(pDragObject!=NULL){
-		pDC->SetBitmap(pDragObject->GetBitmap());
-		MPOINT p = MEvent::GetMousePos();
-		pDC->Draw(p);
-		pDC->Text(p, pDragObject->GetString());
-	}
-	*/
-	//int nDragObjectID = GetDragObject();
 	MWidget* pDragSourceObject = GetDragObject();
 	if(pDragSourceObject!=NULL && m_bVisibleDragObject==true){
-		// 현재 위치에서 드롭할 수 있는 위젯을 표시
 		if(m_pDropableObject!=NULL){
 			MRECT r = m_pDropableObject->GetScreenRect();
 			pDC->SetColor(0, 0, 0, 32);
 			pDC->FillRectangle(r);
 		}
 
-		// 커서에 붙는 드래그 오브젝트 그리기
 		pDC->SetBitmap(m_pDragObjectBitmap);
 		MPOINT p = MEvent::GetMousePos();
 		p.x-=(m_pDragObjectBitmap!=NULL?m_pDragObjectBitmap->GetWidth()/2:0);
@@ -291,40 +256,6 @@ void Mint::Draw(void)
 	
 }
 
-/*
-bool Mint::EventActionKey(unsigned long int nKey, bool bPressed)
-{
-	MEvent e;
-
-	if(bPressed==true) e.nMessage = MWM_ACTIONKEYDOWN;
-	else e.nMessage = MWM_ACTIONKEYUP;
-	e.nKey = nKey;
-
-	if (m_pMainFrame == NULL)
-		return false;
-
-	if (m_fnGlobalEventCallBack) m_fnGlobalEventCallBack(&e);
-	m_pMainFrame->Event(&e);
-
-	ACTIONKEYMAP::iterator i = m_ActionKeyMap.find(nKey);
-	int nActionID = -1;
-	if(i!=m_ActionKeyMap.end()) nActionID = (*i).second;
-	if(bPressed==true){
-		e.nMessage = MWM_ACTIONPRESSED;
-		if(nActionID>=0 && nActionID<ACTIONKEYMAP_IDCOUNT) m_ActionKeyPressedTable[nActionID] = true;
-	}
-	else{
-		e.nMessage = MWM_ACTIONRELEASED;
-		if(nActionID>=0 && nActionID<ACTIONKEYMAP_IDCOUNT) m_ActionKeyPressedTable[nActionID] = false;
-	}
-	e.nKey = nActionID;
-
-	if (m_fnGlobalEventCallBack) m_fnGlobalEventCallBack(&e);
-
-	return m_pMainFrame->Event(&e);
-}
-*/
-
 MWidget* Mint::GetMainFrame(void)
 {
 	return m_pMainFrame;
@@ -341,7 +272,6 @@ void Mint::SetHWND(HWND hWnd)
 {
 	m_hWnd = hWnd;
 
-	// ime status 창을 hide한다
 	HWND imehwnd=ImmGetDefaultIMEWnd(Mint::GetInstance()->GetHWND());
 
 	LRESULT lr=SendMessage(imehwnd,WM_IME_CONTROL ,IMC_CLOSESTATUSWINDOW,0);
@@ -371,23 +301,20 @@ void Mint::EnableIME(bool bEnable)
 	if ( (bEnable == true) && MEvent::GetIMESupport()) {
 		if (m_hImc) {
 			ImmAssociateContext(GetHWND(), m_hImc);
-			m_hImc = NULL;	// EnableIME(false) 할때 다시 셋팅된다
+			m_hImc = NULL;
 			::SetFocus(GetHWND());
 		}
 		m_bEnableIME = true;
 	} else {
-		// HIMC를 m_hImc에 임시 보관해 뒀다가, Enable때 복구한다.
 		m_hImc = ImmGetContext(GetHWND());
 		if (m_hImc) {
 			ImmAssociateContext(GetHWND(), NULL);
 			ImmReleaseContext(GetHWND(), m_hImc);
 			::SetFocus(GetHWND());
 		}
-		//ImmDisableIME(0);
 		m_bEnableIME = false;
 	}
 
-	// Composition중인 문자열 제거
 	HIMC hImc = ImmGetContext(GetInstance()->GetHWND());
 	if(hImc!=NULL){
 		ImmNotifyIME(hImc, NI_COMPOSITIONSTR, CPS_CANCEL, 0);
@@ -440,82 +367,10 @@ void Mint::UnregisterHotKey(int nID)
 #endif
 }
 
-/*
-bool Mint::RegisterActionKey(int nActionID, unsigned long int nKey)
-{
-	if(nActionID<0 || nActionID>=ACTIONKEYMAP_IDCOUNT){
-		_ASSERT(FALSE);	// 0 ~ ACTIONKEYMAP_IDCOUNT-1 사이값이여야 한다.
-		return false;
-	}
-
-	m_ActionKeyMap.insert(ACTIONKEYMAP::value_type(nKey, nActionID));
-	return true;
-}
-
-bool Mint::UnregisterActionKey(int nActionID)
-{
-	if(nActionID<0 || nActionID>=ACTIONKEYMAP_IDCOUNT){
-		_ASSERT(FALSE);	// 0 ~ ACTIONKEYMAP_IDCOUNT-1 사이값이여야 한다.
-		return false;
-	}
-
-	for(ACTIONKEYMAP::iterator i=m_ActionKeyMap.begin(); i!=m_ActionKeyMap.end(); i++){
-		if((*i).second==nActionID){
-			m_ActionKeyMap.erase(i);
-			return true;
-		}
-	}
-	return false;
-}
-
-const char* Mint::GetActionKeyName(unsigned long int nKey)
-{
-	_ASSERT(FALSE);
-	// Not Implemented. User must implement
-
-	static char* szNullName = "Unknown";
-	return szNullName;
-}
-
-unsigned long int Mint::GetActionKey(int nActionID)
-{
-	for(ACTIONKEYMAP::iterator i=m_ActionKeyMap.begin(); i!=m_ActionKeyMap.end(); i++){
-		if((*i).second==nActionID){
-			return (*i).first;
-		}
-	}
-	return -1;
-}
-
-bool Mint::IsActionKeyPressed(int nActionID)
-{
-	if(nActionID<0 || nActionID>=ACTIONKEYMAP_IDCOUNT){
-		_ASSERT(FALSE);	// 0 ~ ACTIONKEYMAP_IDCOUNT-1 사이값이여야 한다.
-		return false;
-	}
-	return m_ActionKeyPressedTable[nActionID];
-}
-*/
-
 void Mint::SetGlobalEvent(MGLOBALEVENTCALLBACK pGlobalEventCallback)
 {
 	m_fnGlobalEventCallBack = pGlobalEventCallback;
 }
-
-/*
-MDragObject* m_pDragObject = NULL;
-
-MDragObject* MSetDragObject(MDragObject* pDragObject)
-{
-	MDragObject* pPrevDragObject = m_pDragObject;
-	m_pDragObject = pDragObject;
-	return pPrevDragObject;
-}
-MDragObject* MGetDragObject(void)
-{
-	return m_pDragObject;
-}
-*/
 
 MWidget* Mint::SetDragObject(MWidget* pSender, MBitmap* pBitmap, const char* szString, const char* szItemString)
 {
@@ -680,11 +535,6 @@ int Mint::GetSubLanguageIdentifier(void) const
 
 const char* Mint::GetLanguageIndicatorString(void) const
 {
-	/*
-	static char* szIndicator[] = {
-	"EN", "KO", "JP", "CH", "?",
-	};
-	*/
 	static char* szIndicator[] = {
 		"?", "EN", "한", "궇", "中", "PT"
 	};
@@ -712,12 +562,9 @@ bool Mint::IsNativeIME(void) const
 	bool bNative = false;
 
 	if(GetPrimaryLanguageIdentifier()==LANG_JAPANESE){
-		// 일본어인경우 ConversionMode가 아닌 OpenSatus로 입력기가 활성화 되었는지 알 수 있다.
-		// 일본어 IME 이상함!
 		bNative = (ImmGetOpenStatus(hImc)==TRUE);
 	}
 	else{
-		// 영문(IME_CMODE_ALPHANUMERIC) 또는 네이티브(IME_CMODE_NATIVE) 언어인지를 판별
 		DWORD dwConvMode, dwSentMode;
 		ImmGetConversionStatus(hImc, &dwConvMode, &dwSentMode);
 
@@ -729,9 +576,8 @@ bool Mint::IsNativeIME(void) const
 	return bNative;
 }
 
-void Mint::OpenCandidateList(void)
+void Mint::OpenCandidateList()
 {
-	// Candidate List 얻어내기
 	HIMC hImc = ImmGetContext(GetInstance()->GetHWND());
 	if(hImc==NULL) return;
 
@@ -747,9 +593,8 @@ void Mint::OpenCandidateList(void)
 	ImmReleaseContext(GetInstance()->GetHWND(), hImc);
 }
 
-void Mint::CloseCandidateList(void)
+void Mint::CloseCandidateList()
 {
-	// Candidate List 닫힘
 	if(m_pCandidateList!=NULL) delete[] m_pCandidateList;
 	m_pCandidateList = NULL;
 	m_nCandidateListSize = 0;
@@ -767,7 +612,7 @@ const char* Mint::GetCandidate(int nIndex) const
 	return pCandidate;
 }
 
-int Mint::GetCandidateCount(void) const
+int Mint::GetCandidateCount() const
 {
 	if(m_pCandidateList==NULL) return 0;
 
@@ -776,7 +621,7 @@ int Mint::GetCandidateCount(void) const
 	return pCandidateList->dwCount;
 }
 
-int Mint::GetCandidateSelection(void) const
+int Mint::GetCandidateSelection() const
 {
 	if(m_pCandidateList==NULL) return 0;
 
@@ -785,23 +630,13 @@ int Mint::GetCandidateSelection(void) const
 	return pCandidateList->dwSelection;
 }
 
-int Mint::GetCandidatePageStart(void) const
+int Mint::GetCandidatePageStart() const
 {
 	if(m_pCandidateList==NULL) return 0;
 
-	// GetCandidatePageStart(); 가 일본어에서 버그가 있으므로, 수동으로 계산
 	int nStart = GetCandidatePageSize() * (GetCandidateSelection()/GetCandidatePageSize());
 
 	return nStart;
-
-	/*
-	// 일본어를 제외하고 작동되는 원래 코드
-	if(m_pCandidateList==NULL) return 0;
-
-	CANDIDATELIST* pCandidateList = (CANDIDATELIST*)m_pCandidateList;
-
-	return pCandidateList->dwPageStart;
-	*/
 }
 
 int Mint::GetCandidatePageSize(void) const
@@ -817,14 +652,10 @@ void Mint::SetCandidateListPosition(MPOINT& p, int nWidgetHeight)
 {
 	MPOINT cp = p;
 
-	// 가로 영역 체크
 	if((cp.x+GetCandidateListWidth())>=MGetWorkspaceWidth()){
 		cp.x = MGetWorkspaceWidth()-GetCandidateListWidth();
 	}
-	else{
-//		cp.x -= 4;
-	}
-	// 세로 영역 체크
+	
 	if((cp.y+GetCandidateListHeight()+nWidgetHeight+8)>=MGetWorkspaceHeight()){
 		cp.y -= GetCandidateListHeight() + 6;
 	}
@@ -840,7 +671,7 @@ int Mint::GetCandidateListWidth(void)
 	int w = 60;
 	if(GetCandidateCount()>0){
 		const char* szCandidate = GetCandidate(0);
-		w = max(w, MFontManager::Get( "Default")->GetWidth(szCandidate)+100);	// 다른 문자열의 너비가 더 클 수 있으므로 여유값을 충분히 준다.
+		w = max(w, MFontManager::Get("Default")->GetWidth(szCandidate) + 100);
 	}
 	return w + 4;
 }
@@ -850,16 +681,14 @@ int Mint::GetCandidateListHeight(void)
 	return (MFontManager::Get( "Default")->GetHeight()*(GetCandidatePageSize()+1) + 6);
 }
 
-// 멀티라인 지원을 위해 글자 단위 출력
 int Mint::DrawCompositionAttribute(MDrawContext* pDC, MPOINT& p, const char* szComposition, int i)
 {
 	if(i>=(int)strlen(szComposition)) return 0;
-	//if(pMint->GetPrimaryLanguageIdentifier()!=LANG_JAPANESE) return;
 
 	const BYTE* pCompAttr = GetCompositionAttributes();
 	DWORD nCompAttrSize = GetCompositionAttributeSize();
 
-	if(i>=(int)nCompAttrSize) return 0;	// Composition Attribute 범위를 벗어나는 경우
+	if(i>=(int)nCompAttrSize) return 0;
 
 	MFont* pFont = pDC->GetFont();
 	int nFontHeight = pFont->GetHeight();
@@ -870,11 +699,11 @@ int Mint::DrawCompositionAttribute(MDrawContext* pDC, MPOINT& p, const char* szC
 	if(bTwoByteChar) nCharSize = 2;
 	int nWidth = pFont->GetWidth(&(szComposition[i]), nCharSize);
 
-	if(pCompAttr[i]==ATTR_TARGET_CONVERTED)				// 변환될 내용
+	if(pCompAttr[i]==ATTR_TARGET_CONVERTED)
 		pDC->SetColor(MCOLOR(255, 0, 0, 128));
-	else if(pCompAttr[i]==ATTR_TARGET_NOTCONVERTED)		// 변환되지 않는 내용
+	else if(pCompAttr[i]==ATTR_TARGET_NOTCONVERTED)
 		pDC->SetColor(MCOLOR(0, 196, 0, 128));
-	else												// 변환 가능 절
+	else
 		pDC->SetColor(MCOLOR(128, 128, 128, 128));
 
 	pDC->FillRectangle(p.x, p.y, nWidth, nFontHeight);
@@ -904,7 +733,6 @@ void Mint::DrawIndicator(MDrawContext* pDC, MRECT& r)
 	MFont* pFont = pDC->GetFont();
 	int nFontHeight = pFont->GetHeight();
 
-	// 해당 언어에 따라 표기
 	const char* szLanguageIndicator = GetLanguageIndicatorString();
 
 	int nIdicatorWidth = pFont->GetWidth(szLanguageIndicator);
@@ -918,13 +746,7 @@ void Mint::DrawIndicator(MDrawContext* pDC, MRECT& r)
 		pDC->SetColor(MCOLOR(0, 0, 0));
 		pDC->Text(r.x+r.w-nIdicatorWidth-2, r.y + (r.h-nFontHeight)/2, szLanguageIndicator);
 	}
-	else{
-//		pDC->SetColor(MCOLOR(0, 0, 0));
-//		pDC->FillRectangle(fr);
-//		pDC->SetColor(MCOLOR(DEFCOLOR_NORMAL));
-	}
 
-//	pDC->Text(r.x+r.w-nIdicatorWidth-2, r.y + (r.h-nFontHeight)/2, szLanguageIndicator);
 	pDC->SetColor(c);
 }
 
@@ -971,11 +793,10 @@ TCHAR* szStar[] = {
 };
 
 
-void MCreateSample(void)
+void MCreateSample()
 {
 	MWidget* pMainFrame = Mint::GetInstance()->GetMainFrame();
 	MWidget* pNew = new MFileDialog("*.*", pMainFrame, pMainFrame);
-	//pNew->SetBounds(10, 10, 300, 300);
 	pNew->Show(true);
 
 	class MFrameBitmap : public MFrame{
@@ -991,7 +812,6 @@ void MCreateSample(void)
 			pDC->SetBitmap(MBitmapManager::Get(m_nBitmap));
 			m_nBitmap++;
 			pDC->Draw(r.x, r.y);
-			//pDC->Draw(r);
 		}
 	public:
 		MFrameBitmap(const char* szName=NULL, MWidget* pParent=NULL, MListener* pListener=NULL)
@@ -1030,12 +850,6 @@ void MCreateSample(void)
 			sprintf_safe(temp, "FPS = %d", m_nFPS);
 			pDC->Text(r.x, r.y, temp);
 
-			// Cursor Pos
-			/*
-			POINT p;
-			GetCursorPos(&p);
-			ScreenToClient(m_hWnd, &p);
-			*/
 			MPOINT p = MEvent::GetMousePos();
 			sprintf_safe(temp, "Cursor Pos = %d, %d", p.x, p.y);
 			pDC->Text(r.x, r.y+GetFont()->GetHeight(), temp);
@@ -1073,11 +887,6 @@ void MCreateSample(void)
 			nRaw%=nRawSize;
 		}
 		virtual bool OnCommand(MWidget* pWidget, const char* szMessage){
-			/*
-			if(pWidget->GetID()==MGetResourceID("ID_OK") && IsMsg(szMessage, MBTN_CLK_MSG)==true){
-				Hide();
-			}
-			*/
 			return false;
 		}
 	public:
@@ -1107,11 +916,6 @@ void MCreateSample(void)
 	pNewMenu->Show(true);
 }
 
-void MDestroySample(void)
+void MDestroySample()
 {
 }
-
-/*
-TODO: Edit 셀렉션 지원
-TODO: Text Area IME 지원
-*/

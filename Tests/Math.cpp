@@ -11,6 +11,10 @@ using namespace RealSpace2;
 
 #define TEST_COMPARE_TO_D3DX
 
+#ifdef TEST_COMPARE_TO_D3DX
+#pragma comment(lib, "d3dx9.lib")
+#endif
+
 static bool TestIntersectLineSegmentPlane()
 {
 	rplane p{ 1, 0, 0, -500 };
@@ -233,12 +237,14 @@ static bool TestQuaternionAxisAngle(const v3& axis, float angle)
 
 	assert(Equals(expected, actual));
 
+#ifdef TEST_COMPARE_TO_D3DX
 	D3DXQUATERNION d3dx_quat;
 
 	D3DXVECTOR3 d3dx_axis = axis;
 	D3DXQuaternionRotationAxis(&d3dx_quat, &d3dx_axis, angle);
 	expected = test_vec * d3dx_quat;
 	actual = test_vec * quat;
+#endif
 
 	assert(Equals(expected, actual));
 
@@ -251,6 +257,7 @@ static bool TestQuaternionAxisAngle(const v3& axis, float angle)
 
 	assert(Equals(expected, actual));
 
+#ifdef TEST_COMPARE_TO_D3DX
 	D3DXMATRIX d3dx_mat;
 
 	d3dx_axis = axis;
@@ -262,6 +269,7 @@ static bool TestQuaternionAxisAngle(const v3& axis, float angle)
 	D3DXMatrixRotationQuaternion(&d3dx_mat, &d3dx_norm_quat);
 
 	assert(Equals(d3dx_mat, quat_mat));
+#endif
 
 	return true;
 }
@@ -281,6 +289,7 @@ static bool TestSlerp(const rquaternion& a, const rquaternion& b)
 	{
 		for (int i = 1; i < 50; ++i)
 		{
+#ifdef TEST_COMPARE_TO_D3DX
 			auto t = sin(TAU_FLOAT / i);
 
 			auto actual_quat = Slerp(a, b, t);
@@ -292,6 +301,7 @@ static bool TestSlerp(const rquaternion& a, const rquaternion& b)
 			auto expected = test_vec * expected_quat;
 			auto actual = test_vec * actual_quat;
 			assert(Equals(expected, actual));
+#endif
 		}
 	}
 

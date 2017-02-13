@@ -26,18 +26,18 @@ protected:
 	virtual void OnDraw(MDrawContext* pDC);
 
 public:
-	MBmButton(const char* szName=NULL, MWidget* pParent=NULL, MListener* pListener=NULL);
+	MBmButton(const char* szName = NULL, MWidget* pParent = NULL, MListener* pListener = NULL);
 
 	void SetUpBitmap(MBitmap* pBitmap);
 	void SetDownBitmap(MBitmap* pBitmap);
 	void SetDisableBitmap(MBitmap* pBitmap);
 	void SetOverBitmap(MBitmap* pBitmap);
 #define MINT_BMBUTTON	"BmButton"
-	virtual const char* GetClassName(void){ return MINT_BMBUTTON; }
+	virtual const char* GetClassName() override { return MINT_BMBUTTON; }
 
-	void SetStretch( bool b ){		m_bStretch = b;	}
+	void SetStretch(bool b) { m_bStretch = b; }
 
-	virtual MRECT GetClientRect(void){ return MWidget::GetClientRect(); }
+	virtual MRECT GetClientRect() override { return MWidget::GetClientRect(); }
 };
 
 #endif

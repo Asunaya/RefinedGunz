@@ -195,14 +195,6 @@ bool CreateReplayGame(const char *SelectedFilename)
 	return true;
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-ZReplayLoader::ZReplayLoader() : m_fGameTime(0.0f)
-{
-	Version.Server = SERVER::NONE;
-	Version.nVersion = 0;
-	Version.nSubVersion = 0;
-}
-
 bool ZReplayLoader::LoadFile(const char* FileName)
 {
 	auto pair = ReadZFile(FileName);
@@ -218,13 +210,13 @@ bool ZReplayLoader::LoadFile(const char* FileName)
 template <typename T>
 bool ZReplayLoader::CreateCommandFromStream(const char* pStream, MCommand& Command, T& Alloc)
 {
-	if (Version.Server == SERVER::OFFICIAL && Version.nVersion <= 2)
+	if (Version.Server == ServerType::Official && Version.nVersion <= 2)
 	{
 		CreateCommandFromStreamVersion2(pStream, Command);
 		return true;
 	}
 
-	bool ReadSerial = !(Version.Server == SERVER::OFFICIAL && Version.nVersion == 11);
+	bool ReadSerial = !(Version.Server == ServerType::Official && Version.nVersion == 11);
 
 	return Command.SetData(pStream, ZGetGameClient()->GetCommandManager(), 65535, ReadSerial, Alloc);
 }

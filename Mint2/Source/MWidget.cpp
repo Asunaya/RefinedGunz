@@ -760,14 +760,10 @@ void MWidget::SetSize(MSIZE& s)
 	SetSize(s.w, s.h);
 }
 
-
 void MWidget::SetPosition(int x, int y)
 {
-	MPOINT p;
-
 	m_Rect.x = x;
 	m_Rect.y = y;
-
 }
 
 void MWidget::SetPosition(const MPOINT& p)

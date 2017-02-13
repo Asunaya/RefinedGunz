@@ -10,23 +10,6 @@ extern bool Enable_Cloth;
 static rvector force = rvector( 15, 0, 0 );
 static float maxForce = 10;
 
-
-char* szItemNames[MMCIP_END] = 
-{
-		"머리",
-		"가슴",
-		"손",
-		"다리",
-		"발",
-		"왼쪽손가락",
-		"오른쪽손가락",
-		"근접무기",
-		"주무기",
-		"보조무기",
-		"아이템1",
-		"아이템2",
-};
-
 unsigned long int GetVisualWeaponID(unsigned long int nMeleeItemID, unsigned long int nPrimaryItemID,
 									unsigned long int nSecondaryItemID, unsigned long int nCustom1ItemID,
 									unsigned long int nCustom2ItemID)
@@ -40,8 +23,7 @@ unsigned long int GetVisualWeaponID(unsigned long int nMeleeItemID, unsigned lon
 	return 0;
 }
 
-
-void ZCharacterView::RepositionItemSlots(void)
+void ZCharacterView::RepositionItemSlots()
 {
 	MRECT r = GetClientRect();
 
@@ -80,7 +62,6 @@ void ZCharacterView::OnDraw(MDrawContext* pDC)
 
 	m_dwTime = dwCurTime;
 
-
 	if( !Enable_Cloth )
 	{
 		m_pTVisualMesh.m_pVisualMesh->DestroyCloth();
@@ -98,124 +79,12 @@ void ZCharacterView::OnDraw(MDrawContext* pDC)
  		force.z = -90;
 
 		m_pTVisualMesh.m_pVisualMesh->SetClothForce( force );
-
-//		if( m_pTVisualMesh.m_pVisualMesh->GetClothMeshNodeRender() )
-//			m_pTVisualMesh.m_pVisualMesh->SetClothMeshNodeRender(false);
 	}
 
 	bool bGame = g_pGame ? true:false;
-	m_pTVisualMesh.m_pVisualMesh->SetClothValue(bGame,0.f); // cloth
+	m_pTVisualMesh.m_pVisualMesh->SetClothValue(bGame,0.f);
 
 	ZMeshView::OnDraw(pDC);
-
-	if( m_pTVisualMesh.m_pVisualMesh->isChestClothMesh() )
-	{
-//		m_pTVisualMesh.m_pVisualMesh->UpdateCloth();
-//		m_pTVisualMesh.m_pVisualMesh->RenderCloth();
-	}
-
-	if (GetDrawInfo() == false) 
-		return;
-
-	MRECT r; 
-	/*= GetClientRect();
-
-	if (ZApplication::GetGameInterface()->GetState() == GUNZ_STAGE)
-	{
-		if (ZGetGameClient()->GetMatchStageSetting()->IsTeamPlay())
-		{
-			MRECT tr(66, 12, 16, 16);
-			if(m_Info.nTeam== MMT_RED){		// Rea Team
-				pDC->SetColor(255, 0, 0);
-				pDC->FillRectangle(tr);
-			}
-			else if(m_Info.nTeam==MMT_BLUE){	// Blue Team
-				pDC->SetColor(0, 0, 255);
-				pDC->FillRectangle(tr);
-			}
-		}
-		
-		if (m_Info.bMaster == true) 
-		{
-			pDC->SetColor(171, 245, 167);
-			pDC->Text(r, "Master", MAM_VCENTER|MAM_HCENTER);
-		}
-		else 
-		{
-			switch (m_Info.nStageState)
-			{
-			case MOSS_NONREADY:
-				{
-
-				}
-				break;
-			case MOSS_READY:
-				{
-					pDC->SetColor(255, 255, 255);
-					pDC->Text(r, "Ready", MAM_VCENTER|MAM_HCENTER);
-				}
-				break;
-			case MOSS_SHOP:
-				{
-					pDC->SetColor(252, 231, 122);
-					pDC->Text(r, "Shop", MAM_VCENTER|MAM_HCENTER);
-				}
-				break;
-			case MOSS_EQUIPMENT:
-				{
-					pDC->SetColor(252, 231, 122);
-					pDC->Text(r, "Equipment", MAM_VCENTER|MAM_HCENTER);
-				}
-				break;
-			}
-		}
-	}
-
-#define TEXTAREA_HEIGHT	14	// 텍스트가 위치할 아랫쪽 크기
-
-	// 이름을 쓴다.
-	r.y = r.h-TEXTAREA_HEIGHT;
-	r.h = TEXTAREA_HEIGHT;
-	pDC->SetColor(255, 255, 255);
-	pDC->Text(r, GetText(), MAM_HCENTER);
-
-	// 레벨을 쓴다.
-	r.y -= TEXTAREA_HEIGHT;
-	char szLevel[16];
-	sprintf_safe(szLevel, "Lv.%d", m_Info.nLevel);
-	pDC->SetColor(255, 125, 125);
-	pDC->Text(r, szLevel, MAM_HCENTER);
-
-	if(m_Info.bFireWall==true){
-		MBitmap* pBitmap = MBitmapManager::Get("firewall.png");
-		pDC->SetBitmap(pBitmap);
-		pDC->Draw(0, 0);
-	}
-	if(m_Info.bNAT==true){
-		MBitmap* pBitmap = MBitmapManager::Get("nat.png");
-		pDC->SetBitmap(pBitmap);
-		pDC->Draw(16, 0);
-	}
-//*/
-/* 	r = GetInitialClientRect();
-	pDC->SetColor( 61, 61, 61 );
-  	pDC->FillRectangle(r.x, r.y+r.h-22, r.w, 22 );
-
-	pDC->SetColor( 128, 128, 128 );
-	pDC->Rectangle(r);
-	
-	pDC->SetColor( 255,255,255);
- 	pDC->Text( MRECT( r.x+27, r.y + r.h-22, r.w, 22 ), GetText(), MAM_VCENTER );
-
-	MBitmap* pBitmap = MBitmapManager::Get("level_marker.png");
-	if(pBitmap != NULL ) pDC->SetBitmap( pBitmap );
-	pDC->Draw( r.x + r.w - 40, r.y + r.h - 20, 16, 16 );
-
-	pDC->SetColor( 255, 255, 255 );
-	char szLevel[16];
-	sprintf_safe( szLevel, "%2d", m_Info.nLevel );
- 	pDC->Text( MRECT(r.x + r.w - 30, r.y + r.h - 22, 30, 22 ), szLevel );
-*/	// 동환이가 막음
 }
 
 bool ZCharacterView::IsDropable(MWidget* pSender)
@@ -229,12 +98,8 @@ bool ZCharacterView::OnDrop(MWidget* pSender, MBitmap* pBitmap, const char* szSt
 }
 
 ZCharacterView::ZCharacterView(const char* szName, MWidget* pParent, MListener* pListener)
-: ZMeshView(szName, pParent, pListener)
+	: ZMeshView(szName, pParent, pListener)
 {
-	// ZOrder변경되는 문제로 툴팁은 우선 보여주지 않는다.
-//	AttachToolTip(szName);
-//	m_pTVisualMesh.SetVisualMesh();
-
 	SetDrawInfo(false);
 
 	m_fDist = 235.0f;

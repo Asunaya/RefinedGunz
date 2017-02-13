@@ -852,7 +852,7 @@ END_IMPLEMENT_LISTENER()
 
 
 BEGIN_IMPLEMENT_LISTENER(ZGetShopCallerButtonListener, MBTN_CLK_MSG)
-	ZApplication::GetGameInterface()->ShowShopDialog();
+	ZApplication::GetGameInterface()->ShowShopDialog(true);
 END_IMPLEMENT_LISTENER()
 
 BEGIN_IMPLEMENT_LISTENER(ZGetShopCloseButtonListener, MBTN_CLK_MSG)
@@ -860,7 +860,7 @@ BEGIN_IMPLEMENT_LISTENER(ZGetShopCloseButtonListener, MBTN_CLK_MSG)
 END_IMPLEMENT_LISTENER()
 
 BEGIN_IMPLEMENT_LISTENER(ZGetEquipmentCallerButtonListener, MBTN_CLK_MSG)
-	ZApplication::GetGameInterface()->ShowEquipmentDialog();
+	ZApplication::GetGameInterface()->ShowEquipmentDialog(true);
 END_IMPLEMENT_LISTENER()
 
 BEGIN_IMPLEMENT_LISTENER(ZGetEquipmentCloseButtonListener, MBTN_CLK_MSG)

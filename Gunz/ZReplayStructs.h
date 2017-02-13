@@ -36,8 +36,8 @@ struct REPLAY_STAGE_SETTING_NODE
 	bool				bAutoTeamBalancing;
 	NetcodeType			Netcode;
 	bool				ForceHPAP;
-	int					HP;
-	int					AP;
+	i32					HP;
+	i32					AP;
 	bool				NoFlip;
 	bool				SwordsOnly;
 	bool				VanillaMode;
@@ -79,8 +79,8 @@ struct REPLAY_STAGE_SETTING_NODE_RG_V2
 	bool				bAutoTeamBalancing;
 	NetcodeType			Netcode;
 	bool				ForceHPAP;
-	int					HP;
-	int					AP;
+	i32					HP;
+	i32					AP;
 	bool				NoFlip;
 	bool				SwordsOnly;
 };
@@ -91,13 +91,14 @@ struct REPLAY_STAGE_SETTING_NODE_OLD
 	char				szMapName[32];
 	i32					nMapIndex;
 	MMATCH_GAMETYPE		nGameType;
-	int					nRoundMax;
-	int					nLimitTime;
-	int					nLimitLevel;
-	int					nMaxPlayers;
+	i32					nRoundMax;
+	i32					nLimitTime;
+	i32					nLimitLevel;
+	i32					nMaxPlayers;
 	bool				bTeamKillEnabled;
 	bool				bTeamWinThePoint;
 	bool				bForcedEntryEnabled;
+
 	char				pad;
 };
 struct REPLAY_STAGE_SETTING_NODE_V11
@@ -107,13 +108,14 @@ struct REPLAY_STAGE_SETTING_NODE_V11
 	char				unk[32];
 	i32					nMapIndex;
 	MMATCH_GAMETYPE		nGameType;
-	int					nRoundMax;
-	int					nLimitTime;
-	int					nLimitLevel;
-	int					nMaxPlayers;
+	i32					nRoundMax;
+	i32					nLimitTime;
+	i32					nLimitLevel;
+	i32					nMaxPlayers;
 	bool				bTeamKillEnabled;
 	bool				bTeamWinThePoint;
 	bool				bForcedEntryEnabled;
+
 	char				pad;
 };
 
@@ -123,14 +125,15 @@ struct REPLAY_STAGE_SETTING_NODE_FG
 	char				szMapName[32];
 	i32					nMapIndex;
 	MMATCH_GAMETYPE		nGameType;
-	int					nRoundMax;
-	int					nLimitTime;
-	int					nLimitLevel;
-	int					nMaxPlayers;
+	i32					nRoundMax;
+	i32					nLimitTime;
+	i32					nLimitLevel;
+	i32					nMaxPlayers;
 	bool				bTeamKillEnabled;
 	bool				bTeamWinThePoint;
 	bool				bForcedEntryEnabled;
 	char				szStageName[64];
+
 	char				unk;
 };
 
@@ -140,49 +143,43 @@ struct REPLAY_STAGE_SETTING_NODE_DG
 	char				szMapName[32];
 	i32					nMapIndex;
 	MMATCH_GAMETYPE		nGameType;
-	int					nRoundMax;
-	int					nLimitTime;
-	int					nLimitLevel;
-	int					nMaxPlayers;
+	i32					nRoundMax;
+	i32					nLimitTime;
+	i32					nLimitLevel;
+	i32					nMaxPlayers;
 	bool				bTeamKillEnabled;
 	bool				bTeamWinThePoint;
 	bool				bForcedEntryEnabled;
+
 	char				unk[5];
 };
 
 struct MTD_CharInfo_V5
 {
-	// 캐릭터 정보
 	char				szName[32];
 	char				szClanName[16];
 	MMatchClanGrade		nClanGrade;
-	unsigned short		nClanContPoint;
+	u16					nClanContPoint;
 	char				nCharNum;
-	unsigned short		nLevel;
+	u16					nLevel;
 	char				nSex;
 	char				nHair;
 	char				nFace;
-	unsigned long int	nXP;
-	int					nBP;
+	u32					nXP;
+	i32					nBP;
 	float				fBonusRate;
-	unsigned short		nPrize;
-	unsigned short		nHP;
-	unsigned short		nAP;
-	unsigned short		nMaxWeight;
-	unsigned short		nSafeFalls;
-	unsigned short		nFR;
-	unsigned short		nCR;
-	unsigned short		nER;
-	unsigned short		nWR;
-
-	// 아이템 정보
+	u16					nPrize;
+	u16					nHP;
+	u16					nAP;
+	u16					nMaxWeight;
+	u16					nSafeFalls;
+	u16					nFR;
+	u16					nCR;
+	u16					nER;
+	u16					nWR;
 	u32					nEquipedItemDesc[12];
-
-	// account 의 정보
 	MMatchUserGradeID	nUGradeID;
-
-	// ClanCLID
-	unsigned int		nClanCLID;
+	u32					nClanCLID;
 };
 
 struct MTD_CharInfo_V6
@@ -190,37 +187,28 @@ struct MTD_CharInfo_V6
 	char				szName[32];
 	char				szClanName[16];
 	MMatchClanGrade		nClanGrade;
-	unsigned short		nClanContPoint;
+	u16					nClanContPoint;
 	char				nCharNum;
-	unsigned short		nLevel;
+	u16					nLevel;
 	char				nSex;
 	char				nHair;
 	char				nFace;
-	unsigned long int	nXP;
-	int					nBP;
+	u32					nXP;
+	i32					nBP;
 	float				fBonusRate;
-	unsigned short		nPrize;
-	unsigned short		nHP;
-	unsigned short		nAP;
-	unsigned short		nMaxWeight;
-	unsigned short		nSafeFalls;
-	unsigned short		nFR;
-	unsigned short		nCR;
-	unsigned short		nER;
-	unsigned short		nWR;
-
-	// 아이템 정보
-	u32	nEquipedItemDesc[17];
-
-	// account 의 정보
+	u16					nPrize;
+	u16					nHP;
+	u16					nAP;
+	u16					nMaxWeight;
+	u16					nSafeFalls;
+	u16					nFR;
+	u16					nCR;
+	u16					nER;
+	u16					nWR;
+	u32					nEquipedItemDesc[17];
 	MMatchUserGradeID	nUGradeID;
-
-	// ClanCLID
-	unsigned int		nClanCLID;
-
-	// 지난주 듀얼토너먼트 등급
-	int					nDTLastWeekGrade;
-
+	u32					nClanCLID;
+	i32					nDTLastWeekGrade;
 	MUID				uidEquipedItem[17];
 	u32					nEquipedItemCount[17];
 };
@@ -230,41 +218,32 @@ struct MTD_CharInfo_V11
 	char				szName[32];
 	char				szClanName[16];
 	MMatchClanGrade		nClanGrade;
-	unsigned short		nClanContPoint;
+	u16					nClanContPoint;
 	char				nCharNum;
-	unsigned short		nLevel;
+	u16					nLevel;
 	char				nSex;
 	char				nHair;
 	char				nFace;
-	unsigned long int	nXP;
-	int					nBP;
+	u32					nXP;
+	i32					nBP;
 	float				fBonusRate;
-	unsigned short		nPrize;
-	unsigned short		nHP;
-	unsigned short		nAP;
-	unsigned short		nMaxWeight;
-	unsigned short		nSafeFalls;
-	unsigned short		nFR;
-	unsigned short		nCR;
-	unsigned short		nER;
-	unsigned short		nWR;
-
-	// 아이템 정보
+	u16					nPrize;
+	u16					nHP;
+	u16					nAP;
+	u16					nMaxWeight;
+	u16					nSafeFalls;
+	u16					nFR;
+	u16					nCR;
+	u16					nER;
+	u16					nWR;
 	u32					nEquipedItemDesc[17];
-
-	// account 의 정보
 	MMatchUserGradeID	nUGradeID;
-
-	// ClanCLID
-	unsigned int		nClanCLID;
-
-	// 지난주 듀얼토너먼트 등급
-	int					nDTLastWeekGrade;
-
+	u32					nClanCLID;
+	i32					nDTLastWeekGrade;
 	MUID				uidEquipedItem[17];
 	u32					nEquipedItemCount[17];
 
-	char unk[8];
+	char				unk[8];
 };
 
 using MTD_CharInfo_FG_V7_0 = MTD_CharInfo_V6;
@@ -274,32 +253,28 @@ struct MTD_CharInfo_FG_V7_1
 	char				szName[32];
 	char				szClanName[16];
 	MMatchClanGrade		nClanGrade;
-	unsigned short		nClanContPoint;
+	u16					nClanContPoint;
 	char				nCharNum;
-	unsigned short		nLevel;
+	u16					nLevel;
 	char				nSex;
 	char				nHair;
 	char				nFace;
-	unsigned long int	nXP;
-	int					nBP;
+	u32					nXP;
+	i32					nBP;
 	float				fBonusRate;
-	unsigned short		nPrize;
-	unsigned short		nHP;
-	unsigned short		nAP;
-	unsigned short		nMaxWeight;
-	unsigned short		nSafeFalls;
-	unsigned short		nFR;
-	unsigned short		nCR;
-	unsigned short		nER;
-	unsigned short		nWR;
-
+	u16					nPrize;
+	u16					nHP;
+	u16					nAP;
+	u16					nMaxWeight;
+	u16					nSafeFalls;
+	u16					nFR;
+	u16					nCR;
+	u16					nER;
+	u16					nWR;
 	u32					nEquipedItemDesc[22];
-
 	MMatchUserGradeID	nUGradeID;
-
-	unsigned int		nClanCLID;
-
-	int					nDTLastWeekGrade;
+	u32					nClanCLID;
+	i32					nDTLastWeekGrade;
 
 	MUID				uidEquipedItem[22];
 	u32					nEquipedItemCount[22];
@@ -312,40 +287,31 @@ struct MTD_CharInfo_FG_V8
 	char				szName[32];
 	char				szClanName[16];
 	MMatchClanGrade		nClanGrade;
-	unsigned short		nClanContPoint;
+	u16					nClanContPoint;
 	char				nCharNum;
-	unsigned short		nLevel;
+	u16					nLevel;
 	char				nSex;
 	char				nHair;
 	char				nFace;
-	unsigned long int	nXP;
-	int					nBP;
+	u32					nXP;
+	i32					nBP;
 	float				fBonusRate;
-	unsigned short		nPrize;
-	unsigned short		nHP;
-	unsigned short		nAP;
-	unsigned short		nMaxWeight;
-	unsigned short		nSafeFalls;
-	unsigned short		nFR;
-	unsigned short		nCR;
-	unsigned short		nER;
-	unsigned short		nWR;
-
-	// 아이템 정보
-	unsigned long int	nEquipedItemDesc[22];
-
-	// account 의 정보
+	u16					nPrize;
+	u16					nHP;
+	u16					nAP;
+	u16					nMaxWeight;
+	u16					nSafeFalls;
+	u16					nFR;
+	u16					nCR;
+	u16					nER;
+	u16					nWR;
+	u32					nEquipedItemDesc[22];
 	MMatchUserGradeID	nUGradeID;
+	u32					nClanCLID;
+	i32					nDTLastWeekGrade;
 
-	// ClanCLID
-	unsigned int		nClanCLID;
+	u32					unk[6];
 
-	// 지난주 듀얼토너먼트 등급
-	int					nDTLastWeekGrade;
-
-	uint32_t unk[6];
-
-	// 아이템 정보 추가
 	MUID				uidEquipedItem[22];
 	u32					nEquipedItemCount[22];
 	u32					nEquipedItemRarity[22];
@@ -357,40 +323,31 @@ struct MTD_CharInfo_FG_V9
 	char				szName[32];
 	char				szClanName[16];
 	MMatchClanGrade		nClanGrade;
-	unsigned short		nClanContPoint;
+	u16					nClanContPoint;
 	char				nCharNum;
-	unsigned short		nLevel;
+	u16					nLevel;
 	char				nSex;
 	char				nHair;
 	char				nFace;
-	unsigned long int	nXP;
-	int					nBP;
+	u32					nXP;
+	i32					nBP;
 	float				fBonusRate;
-	unsigned short		nPrize;
-	unsigned short		nHP;
-	unsigned short		nAP;
-	unsigned short		nMaxWeight;
-	unsigned short		nSafeFalls;
-	unsigned short		nFR;
-	unsigned short		nCR;
-	unsigned short		nER;
-	unsigned short		nWR;
-
-	// 아이템 정보
-	unsigned long int	nEquipedItemDesc[22];
-
-	// account 의 정보
+	u16					nPrize;
+	u16					nHP;
+	u16					nAP;
+	u16					nMaxWeight;
+	u16					nSafeFalls;
+	u16					nFR;
+	u16					nCR;
+	u16					nER;
+	u16					nWR;
+	u32					nEquipedItemDesc[22];
 	MMatchUserGradeID	nUGradeID;
+	u32					nClanCLID;
+	i32					nDTLastWeekGrade;
 
-	// ClanCLID
-	unsigned int		nClanCLID;
+	u32					unk[6];
 
-	// 지난주 듀얼토너먼트 등급
-	int					nDTLastWeekGrade;
-
-	u32					 unk[6];
-
-	// 아이템 정보 추가
 	MUID				uidEquipedItem[22];
 	u32					nEquipedItemCount[22];
 	u32					nEquipedItemRarity[22];
@@ -401,8 +358,8 @@ struct MTD_CharInfo_FG_V9
 
 struct BulletInfo
 {
-	int Clip;
-	int Magazine;
+	i32 Clip;
+	i32 Magazine;
 };
 
 template<size_t NumItems>
@@ -447,36 +404,28 @@ struct MTD_CharInfo_DG
 	char				szName[32];
 	char				szClanName[16];
 	MMatchClanGrade		nClanGrade;
-	unsigned short		nClanContPoint;
+	u16					nClanContPoint;
 	char				nCharNum;
-	unsigned short		nLevel;
+	u16					nLevel;
 	char				nSex;
 	char				nHair;
 	char				nFace;
-	unsigned long int	nXP;
-	int					nBP;
+	u32					nXP;
+	i32					nBP;
 	float				fBonusRate;
-	unsigned short		nPrize;
-	unsigned short		nHP;
-	unsigned short		nAP;
-	unsigned short		nMaxWeight;
-	unsigned short		nSafeFalls;
-	unsigned short		nFR;
-	unsigned short		nCR;
-	unsigned short		nER;
-	unsigned short		nWR;
-
-	// 아이템 정보
-	unsigned long int	nEquipedItemDesc[17];
-
-	// account 의 정보
+	u16					nPrize;
+	u16					nHP;
+	u16					nAP;
+	u16					nMaxWeight;
+	u16					nSafeFalls;
+	u16					nFR;
+	u16					nCR;
+	u16					nER;
+	u16					nWR;
+	u32					nEquipedItemDesc[17];
 	MMatchUserGradeID	nUGradeID;
-
-	// ClanCLID
-	unsigned int		nClanCLID;
-
-	// 지난주 듀얼토너먼트 등급
-	int					nDTLastWeekGrade;
+	u32					nClanCLID;
+	i32					nDTLastWeekGrade;
 
 	MUID				uidEquipedItem[17];
 	u32					nEquipedItemCount[17];

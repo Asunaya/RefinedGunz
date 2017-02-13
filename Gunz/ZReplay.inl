@@ -17,12 +17,12 @@ inline ReplayVersion ZReplayLoader::GetVersion()
 
 	if (header == RG_REPLAY_MAGIC_NUMBER)
 	{
-		Version.Server = SERVER::REFINED_GUNZ;
+		Version.Server = ServerType::RefinedGunz;
 		FoundServer = true;
 	}
 	else if (header != GUNZ_REC_FILE_ID)
 	{
-		Version.Server = SERVER::NONE;
+		Version.Server = ServerType::None;
 		return Version;
 	}
 
@@ -38,24 +38,24 @@ inline ReplayVersion ZReplayLoader::GetVersion()
 
 		if (Version.nVersion >= 7 && Version.nVersion <= 9 && Something <= 0x01)
 		{
-			Version.Server = SERVER::FREESTYLE_GUNZ;
+			Version.Server = ServerType::FreestyleGunz;
 		}
 		else if (Version.nVersion == 6)
 		{
 			ReadAt(Something, 0x91);
 
 			if (Something == 0x00)
-				Version.Server = SERVER::DarkGunz;
+				Version.Server = ServerType::DarkGunz;
 			else
-				Version.Server = SERVER::OFFICIAL;
+				Version.Server = ServerType::Official;
 		}
 		else
 		{
-			Version.Server = SERVER::OFFICIAL;
+			Version.Server = ServerType::Official;
 		}
 	}
 
-	if (Version.Server == SERVER::REFINED_GUNZ && Version.nVersion >= 2)
+	if (Version.Server == ServerType::RefinedGunz && Version.nVersion >= 2)
 	{
 		u32 ClientVersion = 0;
 		Read(ClientVersion);
@@ -65,7 +65,7 @@ inline ReplayVersion ZReplayLoader::GetVersion()
 		Read(Time);
 		Timestamp = Time;
 	}
-	else if(Version.Server == SERVER::FREESTYLE_GUNZ && Version.nVersion == 7)
+	else if(Version.Server == ServerType::FreestyleGunz && Version.nVersion == 7)
 	{
 		REPLAY_STAGE_SETTING_NODE_FG Setting;
 		Peek(Setting);
@@ -128,7 +128,7 @@ inline void ZReplayLoader::GetStageSetting(REPLAY_STAGE_SETTING_NODE& ret)
 
 	switch (Version.Server)
 	{
-	case SERVER::OFFICIAL:
+	case ServerType::Official:
 	{
 		if (Version.nVersion <= 6)
 		{
@@ -146,7 +146,7 @@ inline void ZReplayLoader::GetStageSetting(REPLAY_STAGE_SETTING_NODE& ret)
 		}
 	}
 	break;
-	case SERVER::REFINED_GUNZ:
+	case ServerType::RefinedGunz:
 	{
 		if (Version.nVersion == 1)
 		{
@@ -178,14 +178,14 @@ inline void ZReplayLoader::GetStageSetting(REPLAY_STAGE_SETTING_NODE& ret)
 		}
 	}
 	break;
-	case SERVER::FREESTYLE_GUNZ:
+	case ServerType::FreestyleGunz:
 	{
 		REPLAY_STAGE_SETTING_NODE_FG Setting;
 		Read(Setting);
 		CopySetting(Setting);
 	}
 	break;
-	case SERVER::DarkGunz:
+	case ServerType::DarkGunz:
 	{
 		REPLAY_STAGE_SETTING_NODE_DG Setting;
 		Read(Setting);
@@ -231,7 +231,7 @@ inline std::vector<ReplayPlayerInfo> ZReplayLoader::GetCharInfo()
 	for (int i = 0; i < nCharacterCount; i++)
 	{
 		bool IsHero;
-		if (Version.Server != SERVER::DarkGunz)
+		if (Version.Server != ServerType::DarkGunz)
 			Read(IsHero);
 
 		MTD_CharInfo CharInfo;
@@ -268,7 +268,7 @@ inline std::vector<ReplayPlayerInfo> ZReplayLoader::GetCharInfo()
 
 #define READ_CHARINFO(type) do { type info; Read(info); CopyCharInfo(info); } while(false)
 
-		if (Version.Server == SERVER::OFFICIAL)
+		if (Version.Server == ServerType::Official)
 		{
 			if (Version.nVersion <= 5)
 			{
@@ -293,7 +293,7 @@ inline std::vector<ReplayPlayerInfo> ZReplayLoader::GetCharInfo()
 				READ_CHARINFO(MTD_CharInfo_V11);
 			}
 		}
-		else if (Version.Server == SERVER::FREESTYLE_GUNZ)
+		else if (Version.Server == ServerType::FreestyleGunz)
 		{
 			if (Version.nVersion == 7)
 			{
@@ -317,7 +317,7 @@ inline std::vector<ReplayPlayerInfo> ZReplayLoader::GetCharInfo()
 
 			CharInfo.nEquipedItemDesc[MMCIP_MELEE] = 2; // Rusty Sword
 		}
-		else if (Version.Server == SERVER::REFINED_GUNZ)
+		else if (Version.Server == ServerType::RefinedGunz)
 		{
 			Read(CharInfo);
 		}
@@ -347,7 +347,7 @@ inline std::vector<ReplayPlayerInfo> ZReplayLoader::GetCharInfo()
 
 #define READ_CHARSTATE(type) do { type state; Read(state); CopyCharState(state); } while (false)
 
-		if (Version.Server == SERVER::FREESTYLE_GUNZ)
+		if (Version.Server == ServerType::FreestyleGunz)
 		{
 			if (Version.nVersion == 7)
 			{
@@ -369,11 +369,11 @@ inline std::vector<ReplayPlayerInfo> ZReplayLoader::GetCharInfo()
 				READ_CHARSTATE(ZCharacterReplayState_FG_V9);
 			}
 		}
-		else if (Version.Server == SERVER::REFINED_GUNZ)
+		else if (Version.Server == ServerType::RefinedGunz)
 		{
 			Read(CharState);
 		}
-		else if (Version.Server == SERVER::OFFICIAL)
+		else if (Version.Server == ServerType::Official)
 		{
 			if (Version.nVersion >= 6)
 			{
@@ -393,7 +393,7 @@ inline std::vector<ReplayPlayerInfo> ZReplayLoader::GetCharInfo()
 		}
 #undef READ_CHARSTATE
 
-		if (Version.Server == SERVER::DarkGunz)
+		if (Version.Server == ServerType::DarkGunz)
 		{
 			ReplayPlayerInfo_DG rpi;
 			Read(rpi);
@@ -457,7 +457,7 @@ inline void ZReplayLoader::ReadN(void* Obj, size_t Size)
 
 inline bool ZReplayLoader::FixCommand(MCommand& Command)
 {
-	if (Version.Server == SERVER::FREESTYLE_GUNZ && IsDojo)
+	if (Version.Server == ServerType::FreestyleGunz && IsDojo)
 	{
 		auto Transform = [](float pos[3])
 		{
@@ -486,7 +486,7 @@ inline bool ZReplayLoader::FixCommand(MCommand& Command)
 			}
 		}
 	}
-	else if (Version.Server == SERVER::OFFICIAL && Version.nVersion == 11)
+	else if (Version.Server == ServerType::Official && Version.nVersion == 11)
 	{
 		if (Command.GetID() == MC_PEER_BASICINFO)
 		{
