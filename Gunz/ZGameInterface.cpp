@@ -669,10 +669,12 @@ bool ZGameInterface::InitInterfaceListener()
 	SetListenerWidget("DefaultSettingLoad", ZGetLoadDefaultKeySettingListener() );
 	SetListenerWidget("Optimization",ZSetOptimizationListener());
 
-	SetListenerWidget("ShopCaller", ZGetShopCallerButtonListener());
+	SetListenerWidget("LobbyShopCaller", ZGetShopCallerButtonListener());
+	SetListenerWidget("StageShopCaller", ZGetShopCallerButtonListener());
 	SetListenerWidget("ShopClose", ZGetShopCloseButtonListener());
 
-	SetListenerWidget("EquipmentCaller", ZGetEquipmentCallerButtonListener());
+	SetListenerWidget("LobbyEquipmentCaller", ZGetEquipmentCallerButtonListener());
+	SetListenerWidget("StageEquipmentCaller", ZGetEquipmentCallerButtonListener());
 	SetListenerWidget("EquipmentClose", ZGetEquipmentCloseButtonListener());
 
 	SetListenerWidget("CharSelectionCaller", ZGetCharSelectionCallerButtonListener());
@@ -4027,21 +4029,18 @@ void ZGameInterface::ShowEquipmentDialog(bool bShow)
 		ShowWidget( "Stage", false);
 		ShowWidget( "Shop",  false);
 
-		MButton* pButton = (MButton*)pResource->FindWidget("Equipment_to_Shop");
 		MLabel* pLabel = (MLabel*)pResource->FindWidget("Equip_Message");
-		if ( pButton && pLabel)
+		if ( pLabel)
 		{
 			char buf[ 256];
 			if ( ZApplication::GetGameInterface()->GetState() == GUNZ_STAGE)
 			{
-				pButton->Show(false);
 				sprintf_safe(buf, "%s > %s > %s", ZGetGameClient()->GetServerName(), ZMsg(MSG_WORD_STAGE),
 					ZMsg(MSG_WORD_EQUIPMENT));
 				pLabel->SetText(buf);
 			}
 			else
 			{
-				pButton->Show(true);
 				sprintf_safe(buf, "%s > %s > %s", ZGetGameClient()->GetServerName(), ZMsg(MSG_WORD_LOBBY),
 					ZMsg(MSG_WORD_EQUIPMENT));
 				pLabel->SetText(buf);
@@ -4158,7 +4157,14 @@ void ZGameInterface::ShowShopDialog(bool bShow)
 
 		char buf[256];
 		MLabel* pLabel = (MLabel*)pResource->FindWidget("Shop_Message");
-		sprintf_safe( buf, "%s > %s > %s", ZGetGameClient()->GetServerName(), ZMsg( MSG_WORD_LOBBY), ZMsg( MSG_WORD_SHOP));
+		if (GetState() == GUNZ_STAGE)
+		{
+			sprintf_safe(buf, "%s > %s > %s", ZGetGameClient()->GetServerName(), ZMsg(MSG_WORD_STAGE), ZMsg(MSG_WORD_SHOP));
+		}
+		else
+		{
+			sprintf_safe(buf, "%s > %s > %s", ZGetGameClient()->GetServerName(), ZMsg(MSG_WORD_LOBBY), ZMsg(MSG_WORD_SHOP));
+		}
 		if (pLabel) 
 			pLabel->SetText(buf);
 
@@ -4188,7 +4194,10 @@ void ZGameInterface::ShowShopDialog(bool bShow)
 		MWidget* pWidget = pResource->FindWidget("Shop");
 		if(pWidget!=NULL) pWidget->Show(false);
 
-		ShowWidget( "Lobby", true);
+		if ( ZApplication::GetGameInterface()->GetState() == GUNZ_STAGE)
+			ShowWidget( "Stage", true);
+		else
+			ShowWidget( "Lobby", true);
 	}
 }
 
@@ -4563,8 +4572,8 @@ void ZGameInterface::EnableLobbyInterface(bool bEnable)
 	EnableWidget("Lobby_Charviewer_info", bEnable);
 	EnableWidget("StageJoin", bEnable);
 	EnableWidget("StageCreateFrameCaller", bEnable);
-	EnableWidget("ShopCaller", bEnable);
-	EnableWidget("EquipmentCaller", bEnable);
+	EnableWidget("LobbyShopCaller", bEnable);
+	EnableWidget("LobbyEquipmentCaller", bEnable);
 	EnableWidget("ReplayCaller", bEnable);
 	EnableWidget("CharSelectionCaller", bEnable);
 	EnableWidget("Logout", bEnable);
@@ -4595,8 +4604,8 @@ void ZGameInterface::EnableStageInterface(bool bEnable)
 	EnableWidget("StageTeamBlue2", bEnable);
 	EnableWidget("StageTeamRed",  bEnable);
 	EnableWidget("StageTeamRed2", bEnable);
-	EnableWidget("ShopCaller", bEnable);
-	EnableWidget("EquipmentCaller", bEnable);
+	EnableWidget("StageShopCaller", bEnable);
+	EnableWidget("StageEquipmentCaller", bEnable);
 	EnableWidget("StageSettingCaller", bEnable);
 	EnableWidget("StageObserverBtn", bEnable);
 	EnableWidget("Lobby_StageExit", bEnable);
@@ -4863,8 +4872,8 @@ void ZGameInterface::OnArrangedTeamGameUI(bool bFinding)
 #define SAFE_ENABLE(x) { pWidget= m_IDLResource.FindWidget( x ); if(pWidget) pWidget->Enable(!bFinding); }
 
 	SAFE_ENABLE("LobbyChannelPlayerList");
-	SAFE_ENABLE("ShopCaller");
-	SAFE_ENABLE("EquipmentCaller");
+	SAFE_ENABLE("LobbyShopCaller");
+	SAFE_ENABLE("LobbyEquipmentCaller");
 	SAFE_ENABLE("ChannelListFrameCaller");
 	SAFE_ENABLE("LobbyOptionFrame");
 	SAFE_ENABLE("Logout");

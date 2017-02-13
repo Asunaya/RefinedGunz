@@ -538,7 +538,7 @@ void ZStageInterface::ChangeStageEnableReady( bool bReady)
 	pButton->Enable( !bReady);
 	END_WIDGETLIST();
 
-	BEGIN_WIDGETLIST( "EquipmentCaller", pResource, MButton*, pButton);
+	BEGIN_WIDGETLIST( "StageEquipmentCaller", pResource, MButton*, pButton);
 	pButton->Enable( !bReady);
 	END_WIDGETLIST();
 }
