@@ -2249,7 +2249,7 @@ ExpelResult MSSQLDatabase::ExpelClanMember(const int nCLID, const int nAdminGrad
 
 	auto DBReturn = rs.Field("Ret").AsInt();
 
-	if (DBReturn < 0 || DBReturn >= static_cast<int>(ArraySize(DBReturnMap)))
+	if (DBReturn < 0 || DBReturn >= static_cast<int>(std::size(DBReturnMap)))
 	{
 		Log("MSSQLDatabase::ExpelClanMember - unknown return value %d from DB\n", DBReturn);
 		return ExpelResult::DBError;

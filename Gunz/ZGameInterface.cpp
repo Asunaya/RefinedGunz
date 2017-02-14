@@ -1860,24 +1860,20 @@ void ZGameInterface::OnShutdownState()
 
 bool ZGameInterface::SetState(GunzState nState)
 {
-#ifdef _BIRDTEST
-	if ((nState != GUNZ_LOGIN) && (m_nState==GUNZ_BIRDTEST)) return false;
-#endif
-
-	if ( m_nState == nState)
+	if (m_nState == nState)
 		return true;
 
-	if ( nState == GUNZ_PREVIOUS)
+	if (nState == GUNZ_PREVIOUS)
 		nState = m_nPreviousState;
 
-	if ( nState == GUNZ_GAME)
+	if (nState == GUNZ_GAME)
 	{
-		if ( ZApplication::GetStageInterface()->IsShowStartMovieOfQuest())
+		if (ZApplication::GetStageInterface()->IsShowStartMovieOfQuest())
 		{
 			ZApplication::GetStageInterface()->ChangeStageEnableReady( true);
 			MWidget* pWidget = ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "StageReady");
-			if ( pWidget)
-				pWidget->Enable( false);
+			if (pWidget)
+				pWidget->Enable(false);
 			ZApplication::GetStageInterface()->StartMovieOfQuest();
 			return true;
 		}
@@ -1885,30 +1881,27 @@ bool ZGameInterface::SetState(GunzState nState)
 
 	m_nPreviousState = m_nState;
 
-	if(m_nState==GUNZ_GAME) OnGameDestroy();
-	else if(m_nState==GUNZ_LOGIN) if (!GetIDLResource()->FindWidget("Login_BackgrdImg")) OnLoginDestroy();
-	else if(m_nState==GUNZ_LOBBY) OnLobbyDestroy();
-	else if(m_nState==GUNZ_STAGE) OnStageDestroy();
-	else if(m_nState==GUNZ_GREETER) OnGreeterDestroy();
-	else if(m_nState==GUNZ_CHARSELECTION)
+	if (m_nState == GUNZ_GAME) { OnGameDestroy(); }
+	else if (m_nState == GUNZ_LOGIN) { if (!GetIDLResource()->FindWidget("Login_BackgrdImg")) { OnLoginDestroy(); } }
+	else if (m_nState == GUNZ_LOBBY) { OnLobbyDestroy(); }
+	else if (m_nState == GUNZ_STAGE) { OnStageDestroy(); }
+	else if (m_nState == GUNZ_GREETER) { OnGreeterDestroy(); }
+	else if (m_nState == GUNZ_CHARSELECTION)
 	{
 		OnCharSelectionDestroy();
 
 		if ( nState == GUNZ_LOBBY)
 			ZPostRequestGetCharQuestItemInfo( ZGetGameClient()->GetPlayerUID());
 	}
-	else if(m_nState==GUNZ_CHARCREATION) OnCharCreationDestroy();
-#ifdef _BIRDTEST
-	else if(m_nState==GUNZ_BIRDTEST) OnBirdTestDestroy();
-#endif
+	else if (m_nState == GUNZ_CHARCREATION) { OnCharCreationDestroy(); }
 
 	bool bStateChanged = true;
-	if(nState==GUNZ_GAME) bStateChanged = OnGameCreate();
-	else if(nState==GUNZ_LOGIN) OnLoginCreate();
-	else if(nState==GUNZ_LOBBY)	OnLobbyCreate();
-	else if(nState==GUNZ_STAGE) OnStageCreate();
-	else if(nState==GUNZ_GREETER) OnGreeterCreate();
-	else if(nState==GUNZ_CHARSELECTION)
+	if (nState == GUNZ_GAME) { bStateChanged = OnGameCreate(); }
+	else if (nState == GUNZ_LOGIN) { OnLoginCreate(); }
+	else if (nState == GUNZ_LOBBY) { OnLobbyCreate(); }
+	else if (nState == GUNZ_STAGE) { OnStageCreate(); }
+	else if (nState == GUNZ_GREETER) { OnGreeterCreate(); }
+	else if (nState == GUNZ_CHARSELECTION)
 	{
 		if ( m_nPreviousState == GUNZ_LOGIN)
 		{
@@ -1925,14 +1918,10 @@ bool ZGameInterface::SetState(GunzState nState)
 		else
 			OnCharSelectionCreate();
 	}
-	else if(nState==GUNZ_CHARCREATION) OnCharCreationCreate();
-	else if(nState==GUNZ_SHUTDOWN) OnShutdownState();
-#ifdef _BIRDTEST
-	else if(nState==GUNZ_BIRDTEST) OnBirdTestCreate();
-#endif
+	else if (nState == GUNZ_CHARCREATION) { OnCharCreationCreate(); }
+	else if (nState == GUNZ_SHUTDOWN) { OnShutdownState(); }
 
-
-	if(bStateChanged==false){
+	if (bStateChanged == false) {
 		m_pMsgBox->SetText("Error: Can't Create a Game!");
 		m_pMsgBox->Show(true, true);
 		SetState(GUNZ_PREVIOUS);

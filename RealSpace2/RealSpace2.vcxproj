@@ -635,11 +635,6 @@
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="Source\ObliqueDepthLinearization.hlsl">
-      <FileType>Document</FileType>
-    </None>
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

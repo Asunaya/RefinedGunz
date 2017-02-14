@@ -471,9 +471,4 @@
     <ClInclude Include="Include\SimpleMesh.h" />
     <ClInclude Include="Include\VertexTypes.h" />
   </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="Source\ObliqueDepthLinearization.hlsl">
-      <Filter>D3D9\Shaders</Filter>
-    </FxCompile>
-  </ItemGroup>
 </Project>
