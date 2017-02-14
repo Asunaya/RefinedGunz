@@ -1886,7 +1886,7 @@ bool ZGameInterface::SetState(GunzState nState)
 	m_nPreviousState = m_nState;
 
 	if(m_nState==GUNZ_GAME) OnGameDestroy();
-	else if(m_nState==GUNZ_LOGIN) OnLoginDestroy();
+	else if(m_nState==GUNZ_LOGIN) if (!GetIDLResource()->FindWidget("Login_BackgrdImg")) OnLoginDestroy();
 	else if(m_nState==GUNZ_LOBBY) OnLobbyDestroy();
 	else if(m_nState==GUNZ_STAGE) OnStageDestroy();
 	else if(m_nState==GUNZ_GREETER) OnGreeterDestroy();
@@ -5561,6 +5561,8 @@ void ZGameInterface::ViewReplay()
 	}
 
 	EnteredReplayFromLogin = GetState() == GUNZ_LOGIN;
+	if (EnteredReplayFromLogin)
+		OnLoginDestroy();
 
 	m_bOnEndOfReplay = true;
 	m_nLevelPercentCache = ZGetMyInfo()->GetLevelPercent();
