@@ -271,6 +271,8 @@ RRESULT OnDestroy(void *pParam)
 		RDestroyLenzFlare();
 		RAnimationFileMgr::GetInstance()->Destroy();
 		ZStringResManager::FreeInstance();
+
+		GetMeshManager()->Destroy();
 	}
 
 	g_RGMain.reset();

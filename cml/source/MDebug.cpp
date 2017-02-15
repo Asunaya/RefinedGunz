@@ -200,9 +200,10 @@ struct MPROFILEITEM {
 };
 #include <unordered_map>
 #include <stack>
-static std::unordered_map<std::string, MPROFILEITEM> ProfileItems;
-static u64 g_dwEnableTime;
-static std::stack<std::string> Stack;
+static thread_local std::unordered_map<std::string, MPROFILEITEM> ProfileItems;
+static thread_local u64 g_dwEnableTime;
+static thread_local std::stack<std::string> Stack;
+static thread_local std::stack<int> IndexStack;
 
 void MInitProfile()
 {
@@ -239,6 +240,8 @@ std::unordered_map<int, Item> RefCounts;
 
 void MBeginProfile(int nIndex, const char *szName)
 {
+	IndexStack.push(nIndex);
+
 	auto lvalue = MBeginProfile(szName);
 	lvalue.Active = false;
 	auto&& item = RefCounts[nIndex];
@@ -249,6 +252,10 @@ void MBeginProfile(int nIndex, const char *szName)
 
 void MEndProfile(int nIndex)
 {
+	auto ExpectedIndex = IndexStack.top();
+	assert(ExpectedIndex == nIndex);
+	IndexStack.pop();
+
 	ProfilerGuard Guard;
 	MEndProfile(Guard);
 	auto&& item = RefCounts[nIndex];
@@ -257,6 +264,10 @@ void MEndProfile(int nIndex)
 
 void MCheckProfileCount()
 {
+	bool var = IndexStack.empty();
+	assert(var);
+	var = Stack.empty();
+	assert(var);
 	for (auto&& pair : RefCounts)
 	{
 		if (pair.second.RefCount != 0)
