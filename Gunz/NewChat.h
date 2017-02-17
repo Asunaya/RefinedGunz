@@ -171,6 +171,8 @@ private:
 	std::vector<std::string> vstrPlayerList;
 	int nCurPlayer;
 	int nPlayerListWidth;*/
+	int InputHeight{};
+	int CaretPosX{};
 
 	struct ScreenSpaceVertex {
 		float x, y, z, rhw;

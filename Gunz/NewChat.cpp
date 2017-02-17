@@ -266,6 +266,25 @@ int Chat::GetTextLength(MFontR2 *pFont, const char *szFormat, ...)
 	return pFont->GetWidth(buf);
 }
 
+struct v2_int { int x, y; };
+static v2_int GetWrappedTextPos(MFontR2* pFont, const char* Text, int Width)
+{
+	int x = 0;
+	int y = 1;
+	for (const char* c = Text; *c != 0; ++c)
+	{
+		TCHAR Text[] = { *c, 0 };
+		auto CharWidth = pFont->m_Font.GetTextWidth(Text, 1);
+		x += CharWidth;
+		if (x > Width)
+		{
+			++y;
+			x = CharWidth;
+		}
+	}
+	return{ x, y };
+}
+
 bool Chat::GetPos(const ChatLine &c, unsigned long nPos, POINT *pRet){
 	if (nPos > c.Msg.length())
 		return 0;
@@ -518,6 +537,10 @@ void Chat::OnEvent(MEvent *pEvent){
 				}
 			};
 		}
+		
+		auto pos = GetWrappedTextPos(pFont.get(), strField.c_str(), Border.x2 - (Border.x1 + 5));
+		CaretPosX = pos.x;
+		InputHeight = pos.y;
 	}
 	else if (pEvent->nMessage == MWM_CHAR && pEvent->nKey == VK_RETURN)
 		EnableInput(1, 0);
@@ -786,7 +809,7 @@ D3DRECT Chat::GetOutputRect(){
 }
 
 D3DRECT Chat::GetInputRect(){
-	D3DRECT r = { Border.x1, Border.y2 - nFontHeight, Border.x2, Border.y2 };
+	D3DRECT r = { Border.x1, Border.y2 - nFontHeight, Border.x2, Border.y2 + (InputHeight - 1) * nFontHeight };
 	return r;
 }
 
@@ -851,7 +874,9 @@ void Chat::Display(){
 		}
 		else
 		{
-			Quad(Border, BackgroundColor);
+			auto rect = Border;
+			rect.y2 += (InputHeight - 1) * nFontHeight;
+			Quad(rect, BackgroundColor);
 		}
 	}
 
@@ -1043,15 +1068,15 @@ ret:;
 	r.right = Border.x2;
 	r.bottom = Border.y2;
 
-	int x = r.left + GetTextLen(strField.c_str(), nCaretPos + 1) + 1;
-	int y = r.top;
+	int x = r.left + CaretPosX;
+	int y = r.top + (InputHeight - 1) * nFontHeight;
 
 	if (fmod(tNow, .8f * nTPS) > .4f * nTPS)
 		Line(x, y, x, y + nFontHeight, TextColor);
 
 	y -= 2;
 
-	DrawTextN(pFont.get(), strField.c_str(), r, TextColor);
+	DrawTextWordWrap(pFont.get(), strField.c_str(), r, TextColor);
 }
 
 int Chat::DrawTextWordWrap(MFontR2 *pFont, const TCHAR *szStr, const RECT &r, DWORD dwColor)
@@ -1105,17 +1130,21 @@ void Chat::DrawTextN(MFontR2 *pFont, const TCHAR *szStr, const RECT &r, DWORD dw
 
 void Chat::DrawBorder()
 {
-	v2 vs[] = { { float(Border.x1), float(Border.y1) },
-	{ float(Border.x2), float(Border.y1) },
-	{ float(Border.x2), float(Border.y2) },
-	{ float(Border.x1), float(Border.y2) },
+	auto rect = Border;
+	rect.y2 += (InputHeight - 1) * nFontHeight;
+	v2 vs[] = { { float(rect.x1), float(rect.y1) },
+	{ float(rect.x2), float(rect.y1) },
+	{ float(rect.x2), float(rect.y2) },
+	{ float(rect.x1), float(rect.y2) },
 	};
 
 	for (size_t i = 0; i < std::size(vs); i++)
 		Line(vs[i], vs[(i + 1) % std::size(vs)]);
 
-	Line({ float(Border.x1), float(Border.y2 - 2 - nFontHeight) },
-	{ float(Border.x2), float(Border.y2 - 2 - nFontHeight) });
+	rect.y2 -= 2;
+	rect.y2 -= InputHeight * nFontHeight;
+	Line({ float(rect.x1), float(rect.y2) },
+	{ float(rect.x2), float(rect.y2) });
 }
 
 void Chat::Line(const v2 &v1, const v2 &v2, D3DCOLOR Color, float z)
