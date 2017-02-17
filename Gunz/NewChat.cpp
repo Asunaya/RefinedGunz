@@ -535,14 +535,16 @@ void Chat::OnUpdate(){
 	POINT PrevCursorPos = Cursor;
 	GetCursorPos(&Cursor);
 
+	v2 MinimumSize{ 192.f * RGetScreenWidth() / 1920.f, 108.f * RGetScreenHeight() / 1080.f };
+
 	if (dwResize){
-		if (dwResize & RESIZE_X1 && Border.x1 + Cursor.x - PrevCursorPos.x < Border.x2 - 20)
+		if (dwResize & RESIZE_X1 && Border.x1 + Cursor.x - PrevCursorPos.x < Border.x2 - MinimumSize.x)
 			Border.x1 += Cursor.x - PrevCursorPos.x;
-		if (dwResize & RESIZE_X2 && Border.x2 + Cursor.x - PrevCursorPos.x > Border.x1 + 20)
+		if (dwResize & RESIZE_X2 && Border.x2 + Cursor.x - PrevCursorPos.x > Border.x1 + MinimumSize.x)
 			Border.x2 += Cursor.x - PrevCursorPos.x;
-		if (dwResize & RESIZE_Y1 && Border.y1 + Cursor.y - PrevCursorPos.y  < Border.y2 - 20)
+		if (dwResize & RESIZE_Y1 && Border.y1 + Cursor.y - PrevCursorPos.y < Border.y2 - MinimumSize.y)
 			Border.y1 += Cursor.y - PrevCursorPos.y;
-		if (dwResize & RESIZE_Y2 && Border.y2 + Cursor.y - PrevCursorPos.y > Border.y1 + 20)
+		if (dwResize & RESIZE_Y2 && Border.y2 + Cursor.y - PrevCursorPos.y > Border.y1 + MinimumSize.y)
 			Border.y2 += Cursor.y - PrevCursorPos.y;
 
 		for (std::vector<ChatLine>::iterator it = vMsgs.begin(); it != vMsgs.end(); it++)
@@ -618,7 +620,7 @@ void Chat::OnUpdate(){
 		}
 	}
 
-	const int nBorderWidth = RELWIDTH(10);
+	const int nBorderWidth = 5;
 
 	//dwResize = 0;
 	if (GetAsyncKeyState(VK_LBUTTON) & 0x8000){
