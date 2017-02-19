@@ -266,23 +266,33 @@ int Chat::GetTextLength(MFontR2 *pFont, const char *szFormat, ...)
 	return pFont->GetWidth(buf);
 }
 
-struct v2_int { int x, y; };
-static v2_int GetWrappedTextPos(MFontR2* pFont, const char* Text, int Width)
+struct CaretType
 {
-	int x = 0;
-	int y = 1;
+	int TotalTextHeight;
+	v2i CaretPos;
+};
+static CaretType GetCaretPos(MFontR2* pFont, const char* Text, int CaretPos, int Width)
+{
+	CaretType ret{ 1, { 0, 1 } };
+	v2i Cursor{ 0, 1 };
 	for (const char* c = Text; *c != 0; ++c)
 	{
-		TCHAR Text[] = { *c, 0 };
-		auto CharWidth = pFont->m_Font.GetTextWidth(Text, 1);
-		x += CharWidth;
-		if (x > Width)
+		TCHAR c_str[] = { *c, 0 };
+		auto CharWidth = pFont->m_Font.GetTextWidth(c_str, 1);
+
+		Cursor.x += CharWidth;
+		if (Cursor.x > Width)
 		{
-			++y;
-			x = CharWidth;
+			++Cursor.y;
+			Cursor.x = CharWidth;
 		}
+		
+		auto Distance = c - Text;
+		if (Distance == CaretPos)
+			ret.CaretPos = Cursor;
 	}
-	return{ x, y };
+	ret.TotalTextHeight = Cursor.y;
+	return ret;
 }
 
 bool Chat::GetPos(const ChatLine &c, unsigned long nPos, POINT *pRet){
@@ -447,7 +457,7 @@ void Chat::OnEvent(MEvent *pEvent){
 				break;
 
 			case VK_RIGHT:
-				if (nCaretPos <= int(strField.length()) - 1)
+				if (nCaretPos < int(strField.length()) - 1)
 					nCaretPos++;
 				break;
 
@@ -538,9 +548,9 @@ void Chat::OnEvent(MEvent *pEvent){
 			};
 		}
 		
-		auto pos = GetWrappedTextPos(pFont.get(), strField.c_str(), Border.x2 - (Border.x1 + 5));
-		CaretPosX = pos.x;
-		InputHeight = pos.y;
+		auto ret = GetCaretPos(pFont.get(), strField.c_str(), nCaretPos, Border.x2 - (Border.x1 + 5));
+		InputHeight = ret.TotalTextHeight;
+		CaretCoord = ret.CaretPos;
 	}
 	else if (pEvent->nMessage == MWM_CHAR && pEvent->nKey == VK_RETURN)
 		EnableInput(1, 0);
@@ -1068,8 +1078,8 @@ ret:;
 	r.right = Border.x2;
 	r.bottom = Border.y2;
 
-	int x = r.left + CaretPosX;
-	int y = r.top + (InputHeight - 1) * nFontHeight;
+	int x = r.left + CaretCoord.x;
+	int y = r.top + (CaretCoord.y - 1) * nFontHeight;
 
 	if (fmod(tNow, .8f * nTPS) > .4f * nTPS)
 		Line(x, y, x, y + nFontHeight, TextColor);

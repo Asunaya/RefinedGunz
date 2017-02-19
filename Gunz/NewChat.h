@@ -102,6 +102,11 @@ enum ChatWindowAction{
 	CWA_SELECTING,
 };
 
+struct v2i
+{
+	int x, y;
+};
+
 class Chat{
 public:
 	void Create(const std::string &strFont, int nFontSize);
@@ -172,7 +177,7 @@ private:
 	int nCurPlayer;
 	int nPlayerListWidth;*/
 	int InputHeight{};
-	int CaretPosX{};
+	v2i CaretCoord{};
 
 	struct ScreenSpaceVertex {
 		float x, y, z, rhw;
