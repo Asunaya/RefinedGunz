@@ -34,7 +34,12 @@ struct ChatLine{
 	D3DCOLOR DefaultColor;
 	std::vector<FormatSpecifier> vFormatSpecifiers;
 
-	ChatLine(unsigned long long a, const std::wstring& b) : Time(a), Msg(b), DefaultColor(0) { }
+	ChatLine(unsigned long long Time, std::wstring Msg, D3DCOLOR DefaultColor)
+		: Time{ Time }, Msg{ std::move(Msg) }, DefaultColor{ DefaultColor } {
+		SubstituteFormatSpecifiers();
+	}
+
+	void SubstituteFormatSpecifiers();
 
 	int GetLines() const {
 		int i = 1;
@@ -227,7 +232,7 @@ private:
 	int GetTextLen(const char *szMsg, int nCount);
 
 	int GetLines(MFontR2 *pFont, const wchar_t *szMsg, int nWidth, int nSize = -1);
-	int GetTextLength(MFontR2 *pFont, const char *szFormat, ...);
+	int GetTextLength(MFontR2 *pFont, const wchar_t *szFormat, ...);
 	int DrawTextWordWrap(MFontR2 *pFont, const wchar_t *szStr, const RECT &r, DWORD dwColor);
 	void DrawTextN(MFontR2 *pFont, const wchar_t *szStr, const RECT &r, DWORD dwColor, int nLen = -1);
 

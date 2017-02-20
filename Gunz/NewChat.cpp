@@ -4,6 +4,7 @@
 #include "ZCharacterManager.h"
 #include "ZInput.h"
 #include "Config.h"
+#include <wchar.h>
 
 // Resize flags
 enum
@@ -23,6 +24,109 @@ bool g_bNewChat = true;
 #else
 bool g_bNewChat = false;
 #endif
+
+void ChatLine::SubstituteFormatSpecifiers()
+{
+	static const std::unordered_map<char, FormatSpecifierType> Map {
+		{ 'b', FT_BOLD },
+		{ 'i', FT_ITALIC },
+		{ 's', FT_STRIKETHROUGH },
+		{ 'u', FT_UNDERLINE },
+		//{ 'n', FT_LINEBREAK }, // Linebreak specifier is disabled.
+	};
+
+	const auto npos = std::wstring::npos;
+
+	for (auto Pos = Msg.find_first_of(L"^[", 0);
+		Pos != npos && Pos < Msg.length() - 2;
+		Pos = Pos < Msg.length() ? Msg.find_first_of(L"^[", Pos + 1) : npos)
+	{
+		auto Erase = [&](std::wstring::size_type Count) {
+			Msg.erase(Pos, Count);
+			--Pos;
+		};
+
+		auto RemainingLength = Msg.length() - Pos;
+		auto CurrentChar = Msg[Pos];
+
+		if (CurrentChar == '^')
+		{
+			// Handles color specifiers, like "Normal text ^1Red text"
+			auto NextChar = Msg[Pos + 1];
+			if (isdigit(NextChar))
+			{
+				// Simple specifier, e.g. "^1Red text"
+
+				vFormatSpecifiers.emplace_back(Pos, MMColorSet[NextChar - '0']);
+				Erase(2);
+			}
+			else if (NextChar == '#')
+			{
+				// Elaborate specifier, e.g. "^#80FF0000Transparent red text"
+
+				auto ishexdigit = [&](auto c) {
+					c = tolower(c);
+					return isdigit(c) || (c >= 'a' && c <= 'f');
+				};
+
+				auto ColorStart = Pos + 2;
+				auto ColorEnd = ColorStart;
+				while (ColorEnd < Msg.length() &&
+					ColorEnd - ColorStart < 8 &&
+					ishexdigit(Msg[ColorEnd])) {
+					++ColorEnd;
+				}
+
+				auto Distance = ColorEnd - ColorStart;
+
+				// Must be 8 digits
+				if (Distance != 8)
+					continue;
+
+				wchar_t ColorString[32];
+				memcpy(ColorString, &Msg[ColorStart], Distance * sizeof(wchar_t));
+				ColorString[Distance] = 0;
+				wchar_t* endptr;
+				auto Color = static_cast<D3DCOLOR>(wcstoul(ColorString, &endptr, 16));
+				assert(endptr == ColorString + Distance);
+
+				vFormatSpecifiers.emplace_back(Pos, Color);
+				Erase(ColorEnd - Pos);
+			}
+		}
+		else if (CurrentChar == '[')
+		{
+			// Handles specifiers like "Normal text [b]Bold text[/b]"
+			auto EndBracket = Msg.find_first_of(L"]", Pos + 1);
+
+			if (EndBracket == npos)
+				continue; // Malformed specifier
+
+			auto Distance = EndBracket - Pos;
+
+			if (Msg[Pos + 1] == '/' && (Distance == 2 || Distance == 3))
+			{
+				// End of sequence
+				// Matches e.g. [/], [/b], [/i]
+
+				// Go back to default text
+				vFormatSpecifiers.emplace_back(Pos, FT_DEFAULT);
+			}
+			else
+			{
+				// Beginning of sequence
+				// Matches e.g. [b], [i]
+				auto it = Map.find(Msg[Pos + 1]);
+				if (it == Map.end())
+					continue;
+
+				vFormatSpecifiers.emplace_back(Pos, it->second);
+			}
+
+			Erase(Distance + 1);
+		}
+	}
+}
 
 void Chat::Create(const std::string &strFont, int nFontSize){
 	fFadeTime = 10;
@@ -101,103 +205,9 @@ void Chat::OutputChatMsg(const char *szMsg, DWORD dwColor){
 	MultiByteToWideChar(CP_UTF8, 0,
 		szMsg, -1,
 		WideMsg, std::size(WideMsg));
-	vMsgs.push_back(ChatLine(t, WideMsg));
+	vMsgs.emplace_back(t, WideMsg, dwColor);
 
-	ChatLine &cl = vMsgs.back();
-
-	cl.DefaultColor = dwColor;
-
-	/*unsigned long nPos = cl.Msg.find_first_of(L"^[", 0);
-	while (nPos != std::string::npos && nPos < cl.Msg.length() - 2){
-		if (cl.Msg.at(nPos) == '^'){
-			if (cl.Msg.at(nPos + 1) >= '0' && cl.Msg.at(nPos + 1) <= '9'){
-				cl.vFormatSpecifiers.push_back(FormatSpecifier(nPos, MMColorSet[cl.Msg.at(nPos + 1) - '0']));
-				cl.Msg.erase(nPos, 2);
-				nPos = cl.Msg.find_first_of(L"^[", nPos);
-			}
-			else if (tolower(cl.Msg.at(nPos + 1)) == 'b'){
-				cl.vFormatSpecifiers.push_back(FormatSpecifier(nPos, FT_BOLD));
-				cl.Msg.erase(nPos, 2);
-				nPos = cl.Msg.find_first_of(L"^[", nPos);
-			}
-			else if (tolower(cl.Msg.at(nPos + 1)) == 'i'){
-				cl.vFormatSpecifiers.push_back(FormatSpecifier(nPos, FT_ITALIC));
-				cl.Msg.erase(nPos, 2);
-				nPos = cl.Msg.find_first_of(L"^[", nPos);
-			}
-			else if (tolower(cl.Msg.at(nPos + 1)) == 'n'){
-				cl.vFormatSpecifiers.push_back(FormatSpecifier(nPos, FT_LINEBREAK));
-				cl.Msg.erase(nPos, 2);
-				nPos = cl.Msg.find_first_of(L"^[", nPos);
-			}
-			else if (tolower(cl.Msg.at(nPos + 1)) == '#'){
-				wchar_t buf[9];
-				int len = min(static_cast<int>(cl.Msg.length() - 1 - nPos - 2), 8);
-				strncpy_safe(buf, cl.Msg.data() + nPos + 2, nLen);
-
-				char *pcEnd;
-				D3DCOLOR Color = strtoul(buf, &pcEnd, 16);
-				if (pcEnd - buf <= 6)
-					Color |= 0xFF000000;
-
-				cl.vFormatSpecifiers.push_back(FormatSpecifier(nPos, Color));
-				cl.Msg.erase(nPos, 2 + nLen);
-				nPos = cl.Msg.find_first_of("^[", nPos);
-			}
-			else if ((cl.Msg.at(nPos + 1) == '/')){
-				cl.vFormatSpecifiers.push_back(FormatSpecifier(nPos, XRGB(0xC8, 0xC8, 0xC8)));
-				cl.vFormatSpecifiers.push_back(FormatSpecifier(nPos, FT_DEFAULT));
-				cl.Msg.erase(nPos, 2);
-				nPos = cl.Msg.find_first_of("^[", nPos);
-			}
-			else
-				nPos = cl.Msg.find_first_of("^[", nPos + 1);
-		}
-		else if (cl.Msg.at(nPos) == '[' && nPos != cl.Msg.size() - 2){
-			if (cl.Msg.at(nPos + 2) == ']'){
-				if (tolower(cl.Msg.at(nPos + 1)) == 'b' || tolower(cl.Msg.at(nPos + 1)) == 'i'){
-					int nStart = nPos;
-					FormatSpecifierType t;
-
-					if (tolower(cl.Msg.at(nPos + 1)) == 'b')
-						t = FT_BOLD;
-					else
-						t = FT_ITALIC;
-
-					cl.Msg.erase(nStart, 3);
-
-					cl.vFormatSpecifiers.push_back(FormatSpecifier(nStart, t));
-
-					cprint("FormatSpecifier: %d, %s\n", nStart, t == FT_BOLD ? "bold" : "italic");
-
-					nPos = cl.Msg.find_first_of("^[", nPos);
-					continue;
-				}
-			}
-			else if (cl.Msg.at(nPos + 1) == '/' && nPos != cl.Msg.size() - 3 && cl.Msg.at(nPos + 3) == ']'){
-				if (tolower(cl.Msg.at(nPos + 2)) == 'b' || tolower(cl.Msg.at(nPos + 2)) == 'i'){
-					int nStart = nPos;
-					FormatSpecifierType t;
-
-					cl.Msg.erase(nStart, 4);
-
-					t = FT_DEFAULT;
-
-					cl.vFormatSpecifiers.push_back(FormatSpecifier(nStart, t));
-
-					cprint("FormatSpecifier: %d, FT_DEFAULT\n", nStart);
-
-					nPos = cl.Msg.find_first_of("^[", nPos);
-					continue;
-				}
-			}
-			nPos = cl.Msg.find_first_of("^[", nPos + 1);
-		}
-		else
-			nPos = cl.Msg.find_first_of("^[", nPos + 1);
-	}*/
-
-	CalcLineBreaks(cl);
+	CalcLineBreaks(vMsgs.back());
 }
 
 int Chat::GetLines(MFontR2 *pFont, const wchar_t *szMsg, int nWidth, int nSize)
@@ -262,10 +272,13 @@ bool Chat::CursorInRange(int x1, int y1, int x2, int y2){
 #define DWSIZEOF(x) ((sizeof(x) + sizeof(DWORD) - 1) & ~(sizeof(DWORD) - 1))
 #define GETVA(lastarg) ((va_list)&lastarg + DWSIZEOF(lastarg))
 
-int Chat::GetTextLength(MFontR2 *pFont, const char *szFormat, ...) 
+int Chat::GetTextLength(MFontR2 *pFont, const wchar_t *szFormat, ...)
 {
-	char buf[256] = { 0 };
-	vsnprintf(buf, sizeof(buf), szFormat, GETVA(szFormat));
+	wchar_t buf[256];
+	va_list va;
+	va_start(va, szFormat);
+	vswprintf(buf, sizeof(buf), szFormat, va);
+	va_end(va);
 	return pFont->GetWidth(buf);
 }
 
@@ -332,7 +345,7 @@ bool Chat::GetPos(const ChatLine &c, unsigned long nPos, POINT *pRet){
 					nOffset = c.GetLineBreak(nLine - 1)->nStartPos;
 			}
 
-			pRet->x = Output.x1 + 5 + GetTextLength(pFont.get(), "%.*s_", nPos - nOffset, &c.Msg.at(nOffset)) - GetTextLength(pFont.get(), "_");
+			pRet->x = Output.x1 + 5 + GetTextLength(pFont.get(), L"%.*s_", nPos - nOffset, &c.Msg.at(nOffset)) - GetTextLength(pFont.get(), L"_");
 
 			return 1;
 		}
@@ -578,11 +591,11 @@ void Chat::OnEvent(MEvent *pEvent){
 }
 
 int Chat::GetTextLen(ChatLine &cl, int nPos, int nCount){
-	return GetTextLength(pFont.get(), "_%.*s_", nCount, &cl.Msg.at(nPos)) - GetTextLength(pFont.get(), "__");
+	return GetTextLength(pFont.get(), L"_%.*s_", nCount, &cl.Msg.at(nPos)) - GetTextLength(pFont.get(), L"__");
 }
 
 int Chat::GetTextLen(const char *szMsg, int nCount){
-	return GetTextLength(pFont.get(), "_%.*s_", nCount, szMsg) - GetTextLength(pFont.get(), "__");
+	return GetTextLength(pFont.get(), L"_%.*s_", nCount, szMsg) - GetTextLength(pFont.get(), L"__");
 }
 
 void Chat::OnUpdate(){
