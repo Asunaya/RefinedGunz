@@ -59,7 +59,6 @@ void Chat::Create(const std::string &strFont, int nFontSize){
 	pFromMsg = 0;
 	pToMsg = 0;
 
-	strField.assign("");
 	nCaretPos = -1;
 
 	bAlpha = false;
@@ -98,38 +97,42 @@ void Chat::OutputChatMsg(const char *szMsg){
 void Chat::OutputChatMsg(const char *szMsg, DWORD dwColor){
 	unsigned long long t = QPC();
 
-	vMsgs.push_back(ChatLine(t, std::string(szMsg)));
+	wchar_t WideMsg[1024];
+	MultiByteToWideChar(CP_UTF8, 0,
+		szMsg, -1,
+		WideMsg, std::size(WideMsg));
+	vMsgs.push_back(ChatLine(t, WideMsg));
 
 	ChatLine &cl = vMsgs.back();
 
 	cl.DefaultColor = dwColor;
 
-	unsigned long nPos = cl.Msg.find_first_of("^[", 0);
+	/*unsigned long nPos = cl.Msg.find_first_of(L"^[", 0);
 	while (nPos != std::string::npos && nPos < cl.Msg.length() - 2){
 		if (cl.Msg.at(nPos) == '^'){
 			if (cl.Msg.at(nPos + 1) >= '0' && cl.Msg.at(nPos + 1) <= '9'){
 				cl.vFormatSpecifiers.push_back(FormatSpecifier(nPos, MMColorSet[cl.Msg.at(nPos + 1) - '0']));
 				cl.Msg.erase(nPos, 2);
-				nPos = cl.Msg.find_first_of("^[", nPos);
+				nPos = cl.Msg.find_first_of(L"^[", nPos);
 			}
 			else if (tolower(cl.Msg.at(nPos + 1)) == 'b'){
 				cl.vFormatSpecifiers.push_back(FormatSpecifier(nPos, FT_BOLD));
 				cl.Msg.erase(nPos, 2);
-				nPos = cl.Msg.find_first_of("^[", nPos);
+				nPos = cl.Msg.find_first_of(L"^[", nPos);
 			}
 			else if (tolower(cl.Msg.at(nPos + 1)) == 'i'){
 				cl.vFormatSpecifiers.push_back(FormatSpecifier(nPos, FT_ITALIC));
 				cl.Msg.erase(nPos, 2);
-				nPos = cl.Msg.find_first_of("^[", nPos);
+				nPos = cl.Msg.find_first_of(L"^[", nPos);
 			}
 			else if (tolower(cl.Msg.at(nPos + 1)) == 'n'){
 				cl.vFormatSpecifiers.push_back(FormatSpecifier(nPos, FT_LINEBREAK));
 				cl.Msg.erase(nPos, 2);
-				nPos = cl.Msg.find_first_of("^[", nPos);
+				nPos = cl.Msg.find_first_of(L"^[", nPos);
 			}
 			else if (tolower(cl.Msg.at(nPos + 1)) == '#'){
-				char buf[9];
-				int nLen = min(static_cast<int>(cl.Msg.length() - 1 - nPos - 2), 8);
+				wchar_t buf[9];
+				int len = min(static_cast<int>(cl.Msg.length() - 1 - nPos - 2), 8);
 				strncpy_safe(buf, cl.Msg.data() + nPos + 2, nLen);
 
 				char *pcEnd;
@@ -192,12 +195,12 @@ void Chat::OutputChatMsg(const char *szMsg, DWORD dwColor){
 		}
 		else
 			nPos = cl.Msg.find_first_of("^[", nPos + 1);
-	}
+	}*/
 
 	CalcLineBreaks(cl);
 }
 
-int Chat::GetLines(MFontR2 *pFont, const char *szMsg, int nWidth, int nSize)
+int Chat::GetLines(MFontR2 *pFont, const wchar_t *szMsg, int nWidth, int nSize)
 {
 	int nMsgWidth = pFont->GetWidth(szMsg, nSize);
 	return nMsgWidth / nWidth + (nMsgWidth % nWidth != 0);
@@ -211,7 +214,7 @@ void Chat::CalcLineBreaks(ChatLine &cl){
 	int nTempLines = GetLines(pFont.get(), cl.Msg.c_str(), r.right - r.left);
 
 	int Lines = 1;
-	int StringLength = strlen(cl.Msg.c_str());
+	int StringLength = cl.Msg.length();
 	int CurrentLineLength = 0;
 	int MaxLineLength = r.right - r.left;
 
@@ -271,14 +274,13 @@ struct CaretType
 	int TotalTextHeight;
 	v2i CaretPos;
 };
-static CaretType GetCaretPos(MFontR2* pFont, const char* Text, int CaretPos, int Width)
+static CaretType GetCaretPos(MFontR2* pFont, const wchar_t* Text, int CaretPos, int Width)
 {
 	CaretType ret{ 1, { 0, 1 } };
 	v2i Cursor{ 0, 1 };
-	for (const char* c = Text; *c != 0; ++c)
+	for (auto c = Text; *c != 0; ++c)
 	{
-		TCHAR c_str[] = { *c, 0 };
-		auto CharWidth = pFont->m_Font.GetTextWidth(c_str, 1);
+		auto CharWidth = pFont->GetWidth(c, 1);
 
 		Cursor.x += CharWidth;
 		if (Cursor.x > Width)
@@ -389,7 +391,7 @@ void Chat::OnEvent(MEvent *pEvent){
 
 				size_t PartialNameLength = strField.size() - StartPos;
 
-				const char *PartialName = strField.data() + StartPos;
+				auto PartialName = strField.data() + StartPos;
 
 				for (auto &it : *ZGetCharacterManager())
 				{
@@ -400,7 +402,13 @@ void Chat::OnEvent(MEvent *pEvent){
 					if (PlayerNameLength < PartialNameLength)
 						continue;
 
-					if (!_strnicmp(PartialName, PlayerName, PartialNameLength))
+					wchar_t WidePlayerName[256];
+					auto len = MultiByteToWideChar(CP_ACP, 0,
+						PlayerName, -1,
+						WidePlayerName, std::size(WidePlayerName));
+					assert(len != 0);
+
+					if (!_wcsnicmp(PartialName, WidePlayerName, PartialNameLength))
 					{
 						if (strField.size() + PlayerNameLength - PartialNameLength > MAX_INPUT_LENGTH)
 							break;
@@ -408,7 +416,7 @@ void Chat::OnEvent(MEvent *pEvent){
 						for (size_t i = 0; i < PartialNameLength; i++)
 							strField.erase(strField.size() - 1);
 
-						strField.append(PlayerName);
+						strField.append(WidePlayerName);
 						nCaretPos += PlayerNameLength - PartialNameLength;
 						break;
 					}
@@ -440,7 +448,7 @@ void Chat::OnEvent(MEvent *pEvent){
 
 				if (nCurInputHistoryEntry < int(vstrInputHistory.size()) - 1){
 					nCurInputHistoryEntry++;
-					std::string &strEntry = vstrInputHistory.at(nCurInputHistoryEntry);
+					auto&& strEntry = vstrInputHistory.at(nCurInputHistoryEntry);
 					strField.assign(strEntry);
 					nCaretPos = strEntry.length() - 1;
 				}
@@ -472,19 +480,18 @@ void Chat::OnEvent(MEvent *pEvent){
 						if (!OpenClipboard(g_hWnd))
 							return;
 
-						HANDLE h = GetClipboardData(CF_TEXT);
+						HANDLE h = GetClipboardData(CF_UNICODETEXT);
 
 						if (!h)
 							return;
 
-						const char *s = (const char *)GlobalLock(h);
-						std::string str = s;
+						std::wstring str = (const wchar_t *)GlobalLock(h);
 						if (strField.length() + str.length() > MAX_INPUT_LENGTH)
 						{
 							strField += str.substr(0, MAX_INPUT_LENGTH - strField.length());
 						}
 						else
-							strField += s;
+							strField += str;
 
 						GlobalUnlock(h);
 						CloseClipboard();
@@ -509,10 +516,17 @@ void Chat::OnEvent(MEvent *pEvent){
 					break;
 				}*/
 
-				if (strField.compare("")){
+				if (strField.compare(L"")){
 					vstrInputHistory.push_back(strField);
 					nCurInputHistoryEntry = vstrInputHistory.size();
-					ZGetGameInterface()->GetChat()->Input(strField.c_str());
+
+					char MultibyteString[1024];
+					WideCharToMultiByte(CP_UTF8, 0,
+						strField.c_str(), -1,
+						MultibyteString, std::size(MultibyteString),
+						nullptr, nullptr);
+
+					ZGetGameInterface()->GetChat()->Input(MultibyteString);
 					strField.clear();
 				}
 
@@ -534,12 +548,19 @@ void Chat::OnEvent(MEvent *pEvent){
 					if (pEvent->nKey < 27) // Ctrl + A-Z
 						break;
 
+					MLog("Received MWM_CHAR %X\n", pEvent->nKey);
+
 					strField.insert(nCaretPos + 1, 1, pEvent->nKey);
 
-					if (strField == "/r ")
+					if (strField == L"/r ")
 					{
-						strField = "/whisper ";
-						strField += ZGetGameInterface()->GetChat()->m_szWhisperLastSender;
+						std::wstring LastSenderWide;
+						auto* LastSender = ZGetGameInterface()->GetChat()->m_szWhisperLastSender;
+						std::copy(LastSender, LastSender + strlen(LastSender),
+							std::back_inserter(LastSenderWide));
+
+						strField = L"/whisper ";
+						strField += LastSenderWide;
 						nCaretPos += strlen("/whisper ") - strlen("/r ");
 					}
 
@@ -597,18 +618,21 @@ void Chat::OnUpdate(){
 
 			if (pFromMsg == pToMsg){
 				HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, abs(nToPos - nFromPos) + 2);
-				void *pMem = GlobalLock(hMem);
-				strcpy_trunc(reinterpret_cast<char *>(pMem),
-					abs(nToPos - nFromPos) + 1,
-					&pFromMsg->Msg.at(min(nFromPos, nToPos)));
+				auto pMem = reinterpret_cast<wchar_t*>(GlobalLock(hMem));
+
+				auto src_index = min(nFromPos, nToPos);
+				auto src = pFromMsg->Msg.data() + src_index;
+				auto selected_len = abs(nToPos - nFromPos) + 1;
+				auto len = min(int(pFromMsg->Msg.length()) - src_index, selected_len);
+				memcpy(pMem, src, len);
 				GlobalUnlock(hMem);
 
-				SetClipboardData(CF_TEXT, hMem);
+				SetClipboardData(CF_UNICODETEXT, hMem);
 
 				cprint("Copied %.*s\n", abs(nToPos - nFromPos) + 1, &pFromMsg->Msg.at(min(nFromPos, nToPos)));
 			}
 			else{
-				std::string str;
+				std::wstring str;
 
 				bool bFirstFound = 0;
 
@@ -626,7 +650,7 @@ void Chat::OnUpdate(){
 						}
 						else{
 							int nPos = pcl == pFromMsg ? nFromPos : nToPos;
-							str.append("\n");
+							str.append(L"\n");
 							str.append(pcl->Msg.c_str(), nPos + 2);
 
 							break;
@@ -634,18 +658,18 @@ void Chat::OnUpdate(){
 					}
 
 					if (bFirstFound){
-						str.append("\n");
+						str.append(L"\n");
 						str.append(pcl->Msg.c_str());
 					}
 				}
 
 				if (bFirstFound){
 					HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, str.length());
-					void *pMem = GlobalLock(hMem);
-					strcpy_safe((char *)pMem, str.length(), str.c_str());
+					auto pMem = reinterpret_cast<wchar_t*>(GlobalLock(hMem));
+					memcpy(pMem, str.c_str(), std::size(str));
 					GlobalUnlock(hMem);
 
-					SetClipboardData(CF_TEXT, hMem);
+					SetClipboardData(CF_UNICODETEXT, hMem);
 				}
 			}
 
@@ -941,7 +965,7 @@ void Chat::Display(){
 					nLen = it->nStartPos - nPos;
 				}
 				else{
-					nLen = strlen(cl.Msg.data() + nPos);
+					nLen = cl.Msg.length() - nPos;
 				}
 
 				//g_pDraw->Text(pFont, cl.Msg.data() + nPos, nLen, &Rect, DT_TOP | DT_LEFT | DT_NOCLIP, dwColor);
@@ -1054,7 +1078,7 @@ ret:;
 
 	DrawBorder();
 
-	DrawTextN(pFont.get(), "D", r, TextColor);
+	DrawTextN(pFont.get(), L"D", r, TextColor);
 
 	D3DXCOLOR Color;
 	if (GetAsyncKeyState(VK_LBUTTON) & 0x8000)
@@ -1089,16 +1113,16 @@ ret:;
 	DrawTextWordWrap(pFont.get(), strField.c_str(), r, TextColor);
 }
 
-int Chat::DrawTextWordWrap(MFontR2 *pFont, const TCHAR *szStr, const RECT &r, DWORD dwColor)
+int Chat::DrawTextWordWrap(MFontR2 *pFont, const wchar_t *szStr, const RECT &r, DWORD dwColor)
 {
 	int Lines = 1;
-	int StringLength = _tcslen(szStr);
+	int StringLength = wcslen(szStr);
 	int CurrentLineLength = 0;
 	int MaxLineLength = r.right - r.left;
 
 	for (int i = 0; i < StringLength; i++)
 	{
-		int CharWidth = pFont->GetWidth((const char *)szStr + i, 1);
+		int CharWidth = pFont->GetWidth(szStr + i, 1);
 		int CharHeight = pFont->GetHeight();
 
 		if (CurrentLineLength + CharWidth > MaxLineLength)
@@ -1107,9 +1131,11 @@ int Chat::DrawTextWordWrap(MFontR2 *pFont, const TCHAR *szStr, const RECT &r, DW
 			Lines++;
 		}
 
-		TCHAR String[2] = { szStr[i], 0 };
-		
-		pFont->m_Font.DrawTextA(r.left + CurrentLineLength, r.top + (CharHeight + 1) * max(0, Lines - 1), String, dwColor);
+		auto x = r.left + CurrentLineLength;
+		auto y = r.top + (CharHeight + 1) * max(0, Lines - 1);
+		pFont->m_Font.DrawTextN(x, y,
+			szStr + i, 1,
+			dwColor);
 
 		CurrentLineLength += CharWidth;
 	}
@@ -1117,25 +1143,9 @@ int Chat::DrawTextWordWrap(MFontR2 *pFont, const TCHAR *szStr, const RECT &r, DW
 	return Lines;
 }
 
-void Chat::DrawTextN(MFontR2 *pFont, const TCHAR *szStr, const RECT &r, DWORD dwColor, int nLen)
+void Chat::DrawTextN(MFontR2 *pFont, const wchar_t *szStr, const RECT &r, DWORD dwColor, int nLen)
 {
-	const TCHAR *String;
-	std::unique_ptr<TCHAR[]> p;
-
-	if (nLen != -1)
-	{
-		auto size = nLen + 1;
-		p = decltype(p){new TCHAR[size]};
-		_tcsncpy_s(p.get(), size, szStr, nLen);
-		p[nLen] = 0;
-		String = p.get();
-	}
-	else
-	{
-		String = szStr;
-	}
-
-	pFont->m_Font.DrawTextA(r.left, r.top, String, dwColor);
+	pFont->m_Font.DrawTextN(r.left, r.top, szStr, nLen, dwColor);
 }
 
 void Chat::DrawBorder()

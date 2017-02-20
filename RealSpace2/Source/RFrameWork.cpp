@@ -19,6 +19,24 @@
 #define __EP(i) ;
 #endif
 
+#define UNICODE_WINDOW
+
+#ifdef UNICODE_WINDOW
+const auto RegisterClassX = RegisterClassW;
+const auto PeekMessageX = PeekMessageW;
+const auto DispatchMessageX = DispatchMessageW;
+#define CreateWindowX CreateWindowW
+using WNDCLASSX = WNDCLASSW;
+#define TEXTX(expr) L##expr
+#else
+const auto RegisterClassX = RegisterClassA;
+const auto PeekMessageX = PeekMessageA;
+const auto DispatchMessageX = DispatchMessageA;
+#define CreateWindowX CreateWindowA
+using WNDCLASSX = WNDCLASSA;
+#define TEXTX(expr) expr
+#endif
+
 #define RTOOLTIP_GAP 700
 static DWORD g_last_mouse_move_time;
 static bool g_tool_tip;
@@ -210,7 +228,7 @@ LRESULT FAR PASCAL WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 
 static bool RegisterWindowClass(HINSTANCE this_inst, WORD IconResID, WNDPROC WindowProc)
 {
-	WNDCLASS wc;
+	WNDCLASSX wc;
 	wc.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
 	wc.lpfnWndProc = WindowProc;
 	wc.cbClsExtra = 0;
@@ -220,8 +238,8 @@ static bool RegisterWindowClass(HINSTANCE this_inst, WORD IconResID, WNDPROC Win
 	wc.hCursor = 0;
 	wc.hbrBackground = NULL;
 	wc.lpszMenuName = NULL;
-	wc.lpszClassName = "RealSpace2";
-	return RegisterClass(&wc) != 0;
+	wc.lpszClassName = TEXTX("RealSpace2");
+	return RegisterClassX(&wc) != 0;
 }
 
 static bool InitGraphicsAPI(const RMODEPARAMS* ModeParams, HINSTANCE inst, HWND hWnd, GraphicsAPI API)
@@ -253,12 +271,12 @@ static int RenderLoop()
 
 	do
 	{
-		auto GotMsg = PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE);
+		auto GotMsg = PeekMessageX(&msg, NULL, 0U, 0U, PM_REMOVE);
 
 		if (GotMsg)
 		{
 			TranslateMessage(&msg);
-			DispatchMessage(&msg);
+			DispatchMessageX(&msg);
 		}
 		else
 		{
@@ -279,27 +297,46 @@ static int RenderLoop()
 	return static_cast<int>(msg.wParam);
 }
 
+static bool RCreateWindow(const char *AppName, HINSTANCE this_inst, HINSTANCE prev_inst,
+	RMODEPARAMS *ModeParams, WORD IconResID)
+{
+#ifndef UNICODE_WINDOW
+	auto AdjAppName = AppName;
+#else
+	wchar_t AdjAppName[256];
+
+	auto len = MultiByteToWideChar(CP_UTF8, 0, AppName, -1, AdjAppName, std::size(AdjAppName));
+	if (len == 0)
+		return false;
+#endif
+
+	// Make a window
+	if (!RegisterWindowClass(this_inst, IconResID, WndProc))
+		return false;
+
+	auto Style = GetWindowStyle(*ModeParams);
+	g_hWnd = CreateWindowX(TEXTX("RealSpace2"), AdjAppName, Style, CW_USEDEFAULT, CW_USEDEFAULT,
+		ModeParams->nWidth, ModeParams->nHeight, NULL, NULL, this_inst, NULL);
+
+	RAdjustWindow(ModeParams);
+
+	return true;
+}
+
 int RMain(const char *AppName, HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline,
 	int cmdshow, RMODEPARAMS *ModeParams, WNDPROC winproc, WORD IconResID,
 	GraphicsAPI API)
 {
 	g_WinProc = winproc ? winproc : DefWindowProc;
 
-	// Make a window
-	if (!RegisterWindowClass(this_inst, IconResID, WndProc))
-		return -1;
-
-	auto Style = GetWindowStyle(*ModeParams);
-	g_hWnd = CreateWindow("RealSpace2", AppName, Style, CW_USEDEFAULT, CW_USEDEFAULT,
-		ModeParams->nWidth, ModeParams->nHeight, NULL, NULL, this_inst, NULL);
-
-	RAdjustWindow(ModeParams);
+	if (!RCreateWindow(AppName, this_inst, prev_inst, ModeParams, IconResID))
+		return 1;
 
 	while (ShowCursor(FALSE) > 0)
 		Sleep(10);
 
 	if (!InitGraphicsAPI(ModeParams, this_inst, g_hWnd, API))
-		return -1;
+		return 1;
 
 	return RenderLoop();
 }

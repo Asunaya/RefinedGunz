@@ -94,4 +94,7 @@ public:
 
 	virtual int GetHeight();
 	virtual int GetWidth(const char* szText, int nSize = -1);
+	int GetWidth(const wchar_t* szText, int nSize = -1) {
+		return int(m_Font.GetTextWidth(szText, nSize)*m_fScale);
+	}
 };

@@ -7,6 +7,7 @@
 #include "mprofiler.h"
 #include "dxerr.h"
 #pragma comment(lib, "dxerr.lib")
+#include <tchar.h>
 
 #ifdef _USE_GDIPLUS
 #include "unknwn.h"
@@ -167,21 +168,17 @@ bool RFontTexture::IsNeedUpdate(int nIndex, int nID)
 	return true;
 }
 
-bool RFontTexture::MakeFontBitmap(HFONT hFont, RCHARINFO *pInfo, const TCHAR* szText, int nOutlineStyle, DWORD nColorArg1, DWORD nColorArg2)
+bool RFontTexture::MakeFontBitmap(HFONT hFont, RCHARINFO *pInfo, const wchar_t* szText,
+	int nOutlineStyle, DWORD nColorArg1, DWORD nColorArg2)
 {
 	HFONT hPrevFont = (HFONT)SelectObject(m_hDC, hFont);
 
 	SIZE size;
-	GetTextExtentPoint32(m_hDC, szText, _tcslen(szText), &size);
+	GetTextExtentPoint32W(m_hDC, szText, wcslen(szText), &size);
 
 	int nWidth = min(size.cx,CELL_SIZE);
 
 #ifdef _USE_GDIPLUS
-	WCHAR wstrText[256];
-	int nTextLen = strlen(szText)+1;
-	MultiByteToWideChar(CP_ACP, 0, szText, -1, wstrText, nTextLen-1);
-	wstrText[nTextLen-1] = 0;
-
 	Graphics graphics(m_hDC);
 	Gdiplus::Font font(m_hDC, hFont);
 
@@ -192,7 +189,7 @@ bool RFontTexture::MakeFontBitmap(HFONT hFont, RCHARINFO *pInfo, const TCHAR* sz
 	if (nOutlineStyle == 0)
 	{
 		SolidBrush  solidBrush(Color(255, 255, 255, 255));
-		graphics.DrawString(wstrText, -1, &font, PointF(0.0f, 0.0f), pTypoFormat, &solidBrush);
+		graphics.DrawString(szText, -1, &font, PointF(0.0f, 0.0f), pTypoFormat, &solidBrush);
 	}
 	else if (nOutlineStyle == 1)
 	{
@@ -206,7 +203,7 @@ bool RFontTexture::MakeFontBitmap(HFONT hFont, RCHARINFO *pInfo, const TCHAR* sz
 		int nHeight;
 		nHeight = min( (int)tm.tmHeight, (int)CELL_SIZE-2);
 
-		path.AddString(	wstrText, -1, &fontFamily, FontStyleBold, nHeight, PointF(-1.0f, -1.0f), pTypoFormat);
+		path.AddString(szText, -1, &fontFamily, FontStyleBold, nHeight, PointF(-1.0f, -1.0f), pTypoFormat);
 
 		graphics.SetSmoothingMode(SmoothingModeAntiAlias);
 
@@ -219,13 +216,13 @@ bool RFontTexture::MakeFontBitmap(HFONT hFont, RCHARINFO *pInfo, const TCHAR* sz
 	else if (nOutlineStyle == 2)
 	{
 		SolidBrush  solidBrush2(Color((Gdiplus::ARGB)nColorArg2));
-		graphics.DrawString(wstrText, -1, &font, PointF(1.0f, 1.0f), pTypoFormat, &solidBrush2);
+		graphics.DrawString(szText, -1, &font, PointF(1.0f, 1.0f), pTypoFormat, &solidBrush2);
 
 		SolidBrush  solidBrush1(Color((Gdiplus::ARGB)nColorArg1));
 
-		graphics.DrawString(wstrText, -1, &font, PointF(0.0f, 0.0f), pTypoFormat, &solidBrush1);
+		graphics.DrawString(szText, -1, &font, PointF(0.0f, 0.0f), pTypoFormat, &solidBrush1);
 
-		char chChar = (char)wstrText[0];
+		char chChar = (char)szText[0];
 		if ( (chChar >= '0') && (chChar <= '9'))
 			nWidth++;
 	}
@@ -246,13 +243,31 @@ bool RFontTexture::MakeFontBitmap(HFONT hFont, RCHARINFO *pInfo, const TCHAR* sz
 
 }
 
-int RFontTexture::GetCharWidth(HFONT hFont, const TCHAR* szChar)
+int RFontTexture::GetCharWidth(HFONT hFont, const char* szChar)
 {
 	SIZE size;
 	HFONT hPrevFont = (HFONT)SelectObject(m_hDC, hFont);
-	GetTextExtentPoint32(m_hDC, szChar, _tcslen(szChar), &size);
+	GetTextExtentPoint32A(m_hDC, szChar, strlen(szChar), &size);
 	SelectObject(m_hDC, hPrevFont);
 	return size.cx;
+}
+
+int RFontTexture::GetCharWidth(HFONT hFont, const wchar_t* szChar)
+{
+	SIZE size;
+	HFONT hPrevFont = (HFONT)SelectObject(m_hDC, hFont);
+	GetTextExtentPoint32W(m_hDC, szChar, wcslen(szChar), &size);
+	SelectObject(m_hDC, hPrevFont);
+	return size.cx;
+}
+
+bool RFontTexture::MakeFontBitmap(HFONT hFont, RCHARINFO * pInfo, const char * szText,
+	int nOutlineStyle, DWORD nColorArg1, DWORD nColorArg2)
+{
+	wchar_t WideText[256];
+	auto len = MultiByteToWideChar(CP_ACP, 0, szText, -1, WideText, std::size(WideText));
+	assert(len != 0);
+	return MakeFontBitmap(hFont, pInfo, WideText, nOutlineStyle, nColorArg1, nColorArg2);
 }
 
 RFontTexture g_FontTexture;
@@ -420,68 +435,89 @@ bool RFont::EndFont()
 	return true;
 }
 
-void RFont::DrawText(float x, float y, const TCHAR* szText, DWORD dwColor, float fScale)
-{
-	if(szText==NULL)	return;
-	if(szText[0]==NULL) return;
+static const char* inc(const char* c) {
+	return (const char*)_mbsinc((const unsigned char*)c);
+}
 
-	bool bPrevInFont = false;	
+static const wchar_t* inc(const wchar_t* c) {
+	return c + 1;
+}
+
+static size_t len(const char* str) {
+	return strlen(str);
+}
+
+static size_t len(const wchar_t* str) {
+	return wcslen(str);
+}
+
+template <typename CharT>
+void RFont::DrawTextImpl(float x, float y, const CharT * szText, int Length, DWORD dwColor, float fScale)
+{
+	if (szText == NULL)	return;
+	if (szText[0] == NULL) return;
+
+	if (Length == -1)
+		Length = int(len(szText));
+
+	bool bPrevInFont = false;
 
 	BeginFont();
 
-	const TCHAR* p = (const TCHAR*)szText;
-	TCHAR szChar[4];
+	auto p = szText;
+	CharT szChar[4];
 
-	while(1) {
-
-		TCHAR* pp = _tcsinc(p);
-
-		if(pp-p==sizeof(TCHAR)){
+	while (true)
+	{
+		auto pp = inc(p);
+		if (pp - p == 1) {
 			szChar[0] = *p;
 			szChar[1] = 0;
 		}
-		else{
+		else {
 			szChar[0] = *p;
-			szChar[1] = *(p+1);
+			szChar[1] = *(p + 1);
 			szChar[2] = 0;
 		}
-		_ASSERT(pp-p==sizeof(TCHAR)*2 || pp-p==sizeof(TCHAR));
+		_ASSERT(pp - p == 2 || pp - p == 1);
 
 		WORD key = *(WORD*)szChar;
 
-		RCHARINFOMAP::iterator i = m_CharInfoMap.find(key);
-		
+		auto i = m_CharInfoMap.find(key);
+
 		RCHARINFO *pInfo = NULL;
-		if(i==m_CharInfoMap.end()) {
+		if (i == m_CharInfoMap.end()) {
 			pInfo = new RCHARINFO;
-			bool bRet = m_pFontTexture->MakeFontBitmap(m_hFont,pInfo,szChar,m_nOutlineStyle,m_ColorArg1,m_ColorArg2);
-			if(bRet)
-				m_CharInfoMap.insert(RCHARINFOMAP::value_type(key,pInfo));
+			bool bRet = m_pFontTexture->MakeFontBitmap(m_hFont, pInfo, szChar,
+				m_nOutlineStyle, m_ColorArg1, m_ColorArg2);
+			if (bRet)
+				m_CharInfoMap.insert(RCHARINFOMAP::value_type(key, pInfo));
 			else {
 				SAFE_DELETE(pInfo);
 			}
-		}else
+		}
+		else
 		{
 			pInfo = i->second;
-			if(m_pFontTexture->IsNeedUpdate(pInfo->nFontTextureIndex,pInfo->nFontTextureID)) {
-				m_pFontTexture->MakeFontBitmap(m_hFont,pInfo,szChar,m_nOutlineStyle,m_ColorArg1,m_ColorArg2);
+			if (m_pFontTexture->IsNeedUpdate(pInfo->nFontTextureIndex, pInfo->nFontTextureID)) {
+				m_pFontTexture->MakeFontBitmap(m_hFont, pInfo, szChar,
+					m_nOutlineStyle, m_ColorArg1, m_ColorArg2);
 			}
 		}
 
-		if(pInfo != NULL) {
+		if (pInfo != NULL) {
 
 			static FONT2DVERTEX vertices[RFONT_VERTEXCOUNT];
 			WORD indices[6] = { 3,0,2,0,1,2 };
-			/*		0 3
+			// 0 3
+			// 1 2
 
-					1 2			*/
-
-			int nWidth = min(CELL_SIZE,pInfo->nWidth);
+			int nWidth = min(CELL_SIZE, pInfo->nWidth);
 			int w = nWidth*fScale;
 			int h = CELL_SIZE*fScale;
 
-			if(x+w > RGetViewport()->X && x < RGetViewport()->X+RGetViewport()->Width &&
-				y+h > RGetViewport()->Y && y < RGetViewport()->Y+RGetViewport()->Height) 
+			if (x + w > RGetViewport()->X && x < RGetViewport()->X + RGetViewport()->Width &&
+				y + h > RGetViewport()->Y && y < RGetViewport()->Y + RGetViewport()->Height)
 			{
 				vertices[0].p = { x, y, 0, 1 };
 				vertices[1].p = { x, y + h, 0, 1 };
@@ -490,30 +526,30 @@ void RFont::DrawText(float x, float y, const TCHAR* szText, DWORD dwColor, float
 
 				int nCellX = pInfo->nFontTextureIndex % m_pFontTexture->GetCellCountX();
 				int nCellY = pInfo->nFontTextureIndex / m_pFontTexture->GetCellCountX();
-				
-				float fMinX = (float)(.5f+nCellX*CELL_SIZE) / (float)m_pFontTexture->GetWidth();
-				float fMaxX = (float)(.5f+nCellX*CELL_SIZE+nWidth) / (float)m_pFontTexture->GetWidth();
-				float fMinY = (float)(.5f+nCellY*CELL_SIZE) / (float)m_pFontTexture->GetHeight();
-				float fMaxY = (float)(.5f+(nCellY+1)*CELL_SIZE) / (float)m_pFontTexture->GetHeight();
-				
-				vertices[0].tu = fMinX;vertices[0].tv = fMinY;
-				vertices[1].tu = fMinX;vertices[1].tv = fMaxY;
-				vertices[2].tu = fMaxX;vertices[2].tv = fMaxY;
-				vertices[3].tu = fMaxX;vertices[3].tv = fMinY;
+
+				float fMinX = (float)(.5f + nCellX*CELL_SIZE) / (float)m_pFontTexture->GetWidth();
+				float fMaxX = (float)(.5f + nCellX*CELL_SIZE + nWidth) / (float)m_pFontTexture->GetWidth();
+				float fMinY = (float)(.5f + nCellY*CELL_SIZE) / (float)m_pFontTexture->GetHeight();
+				float fMaxY = (float)(.5f + (nCellY + 1)*CELL_SIZE) / (float)m_pFontTexture->GetHeight();
+
+				vertices[0].tu = fMinX; vertices[0].tv = fMinY;
+				vertices[1].tu = fMinX; vertices[1].tv = fMaxY;
+				vertices[2].tu = fMaxX; vertices[2].tv = fMaxY;
+				vertices[3].tu = fMaxX; vertices[3].tv = fMinY;
 
 				vertices[0].color = vertices[1].color = vertices[2].color = vertices[3].color = dwColor;
 
-				for(int i=0;i<6;i++) {
-					indices[i]+=g_nFontCount*4;
+				for (int i = 0; i<6; i++) {
+					indices[i] += g_nFontCount * 4;
 				}
 
-				memcpy(g_FontVertexBuffer+g_nFontCount*4,vertices,sizeof(vertices));
-				memcpy(g_FontIndexBuffer+g_nFontCount*6,indices,sizeof(indices));
+				memcpy(g_FontVertexBuffer + g_nFontCount * 4, vertices, sizeof(vertices));
+				memcpy(g_FontIndexBuffer + g_nFontCount * 6, indices, sizeof(indices));
 				g_nFontCount++;
 			}
 
-			if (m_nOutlineStyle==1)
-				x += min((pInfo->nWidth*fScale+1),CELL_SIZE);
+			if (m_nOutlineStyle == 1)
+				x += min((pInfo->nWidth*fScale + 1), CELL_SIZE);
 			else
 				x += (pInfo->nWidth*fScale);
 
@@ -521,70 +557,92 @@ void RFont::DrawText(float x, float y, const TCHAR* szText, DWORD dwColor, float
 
 		p = pp;
 
-		if(pp==NULL) break;
-		if(*pp==0)	 break;
+		if (p - szText >= Length)
+			break;
 	}
 
-	if(!bPrevInFont)
+	if (!bPrevInFont)
 		EndFont();
 }
 
-int RFont::GetTextWidth(const TCHAR* szText, int nSize)
+void RFont::DrawText(float x, float y, const char* szText, DWORD dwColor, float fScale) {
+	return DrawTextImpl(x, y, szText, -1, dwColor, fScale);
+}
+void RFont::DrawText(float x, float y, const wchar_t* szText, DWORD dwColor, float fScale) {
+	return DrawTextImpl(x, y, szText, -1, dwColor, fScale);
+}
+
+void RFont::DrawTextN(float x, float y, const char* szText, int Length, DWORD dwColor, float fScale) {
+	return DrawTextImpl(x, y, szText, Length, dwColor, fScale);
+}
+void RFont::DrawTextN(float x, float y, const wchar_t* szText, int Length, DWORD dwColor, float fScale) {
+	return DrawTextImpl(x, y, szText, Length, dwColor, fScale);
+}
+
+template <typename CharT>
+int RFont::GetTextWidthImpl(const CharT* szText, int nSize)
 {
-	if(nSize==0) return 0;
-	if(szText==NULL) return 0;
-	if(szText[0]==NULL) return 0;
+	if (!nSize || !szText || !szText[0]) return 0;
+	if (nSize == -1) nSize = len(szText);
 
-	int nWidth=0,nCount=0;
+	int nWidth = 0;
 
-	const TCHAR* p = (const TCHAR*)szText;
-	TCHAR szChar[4];
+	auto p = szText;
+	CharT szChar[4];
 
-	while(1) {
+	while (true)
+	{
+		auto pp = inc(p);
 
-		TCHAR* pp = _tcsinc(p);
-
-		if(pp-p==sizeof(TCHAR)){
+		if (pp - p == 1) {
 			szChar[0] = *p;
 			szChar[1] = 0;
-			nCount++;
 		}
 		else{
 			szChar[0] = *p;
 			szChar[1] = *(p+1);
 			szChar[2] = 0;
-			nCount+=2;
 		}
-		_ASSERT(pp-p==sizeof(TCHAR)*2 || pp-p==sizeof(TCHAR));
+		_ASSERT(pp - p == 2 || pp - p == 1);
 
 		WORD key = *(WORD*)szChar;
 
-		RCHARINFOMAP::iterator i = m_CharInfoMap.find(key);
+		auto i = m_CharInfoMap.find(key);
 
 		RCHARINFO *pInfo = NULL;
 
 		int nCurWidth;
-		if(i==m_CharInfoMap.end()) {
+		if (i == m_CharInfoMap.end()) {
 			nCurWidth = m_pFontTexture->GetCharWidth(m_hFont, szChar);
 			pInfo = new RCHARINFO;
 			pInfo->nWidth = nCurWidth;
 			pInfo->nFontTextureIndex = -1;
-			m_CharInfoMap.insert(RCHARINFOMAP::value_type(key,pInfo));
-		}else
+			m_CharInfoMap.emplace(key, pInfo);
+		}
+		else
 		{
-			nCurWidth=(*i->second).nWidth;
+			nCurWidth = (*i->second).nWidth;
 		}
 
-		nWidth+=nCurWidth;
+		nWidth += nCurWidth;
 
 		p = pp;
 
-		if(pp==NULL) break;
-		if(*pp==0)	 break;
-		if(nSize!=-1 && nCount>=nSize) break;
+		if (p - szText >= nSize)
+			break;
 	}
 
 	return nWidth;
+}
+
+int RFont::GetTextWidth(const char * szText, int nSize)
+{
+	return GetTextWidthImpl(szText, nSize);
+}
+
+int RFont::GetTextWidth(const wchar_t * szText, int nSize)
+{
+	return GetTextWidthImpl(szText, nSize);
 }
 
 _NAMESPACE_REALSPACE2_END

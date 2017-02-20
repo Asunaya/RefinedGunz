@@ -30,11 +30,11 @@ struct FormatSpecifier{
 
 struct ChatLine{
 	unsigned long long Time;
-	std::string Msg;
+	std::wstring Msg;
 	D3DCOLOR DefaultColor;
 	std::vector<FormatSpecifier> vFormatSpecifiers;
 
-	ChatLine(unsigned long long a, const std::string& b) : Time(a), Msg(b), DefaultColor(0) { }
+	ChatLine(unsigned long long a, const std::wstring& b) : Time(a), Msg(b), DefaultColor(0) { }
 
 	int GetLines() const {
 		int i = 1;
@@ -167,9 +167,9 @@ private:
 	int nFromPos;
 	const ChatLine *pToMsg;
 	int nToPos;
-	std::vector<std::string> vstrInputHistory;
+	std::vector<std::wstring> vstrInputHistory;
 	int nCurInputHistoryEntry;
-	std::string strField;
+	std::wstring strField;
 	int nCaretPos;
 	/*bool bPlayerList;
 	ID3DXLine *pPlayerListLine;
@@ -226,10 +226,10 @@ private:
 	int GetTextLen(ChatLine &cl, int nPos, int nCount);
 	int GetTextLen(const char *szMsg, int nCount);
 
-	int GetLines(MFontR2 *pFont, const char *szMsg, int nWidth, int nSize = -1);
+	int GetLines(MFontR2 *pFont, const wchar_t *szMsg, int nWidth, int nSize = -1);
 	int GetTextLength(MFontR2 *pFont, const char *szFormat, ...);
-	int DrawTextWordWrap(MFontR2 *pFont, const TCHAR *szStr, const RECT &r, DWORD dwColor);
-	void DrawTextN(MFontR2 *pFont, const TCHAR *szStr, const RECT &r, DWORD dwColor, int nLen = -1);
+	int DrawTextWordWrap(MFontR2 *pFont, const wchar_t *szStr, const RECT &r, DWORD dwColor);
+	void DrawTextN(MFontR2 *pFont, const wchar_t *szStr, const RECT &r, DWORD dwColor, int nLen = -1);
 
 	void ResetFonts();
 };
