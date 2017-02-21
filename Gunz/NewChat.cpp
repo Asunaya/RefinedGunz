@@ -25,6 +25,54 @@ bool g_bNewChat = true;
 bool g_bNewChat = false;
 #endif
 
+static std::wstring GetClipboard()
+{
+	if (!IsClipboardFormatAvailable(CF_UNICODETEXT))
+		return{};
+
+	if (!OpenClipboard(g_hWnd))
+		return{};
+
+	auto ClipboardData = GetClipboardData(CF_UNICODETEXT);
+	if (!ClipboardData)
+		return{};
+
+	auto ptr = static_cast<const wchar_t*>(GlobalLock(ClipboardData));
+	if (!ptr)
+		return{};
+
+	std::wstring ret = ptr;
+	GlobalUnlock(ClipboardData);
+	CloseClipboard();
+
+	return ret;
+}
+
+static bool SetClipboard(const std::wstring& str)
+{
+	auto MemSize = (str.length() + 1) * sizeof(wchar_t);
+	HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, MemSize);
+	if (!hMem)
+		return false;
+
+	auto pMem = static_cast<wchar_t*>(GlobalLock(hMem));
+	if (!pMem)
+	{
+		GlobalUnlock(pMem);
+		GlobalFree(pMem);
+		return false;
+	}
+
+	strcpy_safe(pMem, MemSize, str.c_str());
+	GlobalUnlock(hMem);
+
+	auto Success = SetClipboardData(CF_UNICODETEXT, hMem) != NULL;
+	if (!Success)
+		GlobalFree(hMem);
+
+	return Success;
+}
+
 void ChatLine::SubstituteFormatSpecifiers()
 {
 	static const std::unordered_map<char, FormatSpecifierType> Map {
@@ -84,8 +132,8 @@ void ChatLine::SubstituteFormatSpecifiers()
 					continue;
 
 				wchar_t ColorString[32];
-				memcpy(ColorString, &Msg[ColorStart], Distance * sizeof(wchar_t));
-				ColorString[Distance] = 0;
+				strncpy_safe(ColorString, &Msg[ColorStart], Distance);
+
 				wchar_t* endptr;
 				auto Color = static_cast<D3DCOLOR>(wcstoul(ColorString, &endptr, 16));
 				assert(endptr == ColorString + Distance);
@@ -269,15 +317,12 @@ bool Chat::CursorInRange(int x1, int y1, int x2, int y2){
 	return Cursor.x > x1 && Cursor.x < x2 && Cursor.y > y1 && Cursor.y < y2;
 }
 
-#define DWSIZEOF(x) ((sizeof(x) + sizeof(DWORD) - 1) & ~(sizeof(DWORD) - 1))
-#define GETVA(lastarg) ((va_list)&lastarg + DWSIZEOF(lastarg))
-
 int Chat::GetTextLength(MFontR2 *pFont, const wchar_t *szFormat, ...)
 {
 	wchar_t buf[256];
 	va_list va;
 	va_start(va, szFormat);
-	vswprintf(buf, sizeof(buf), szFormat, va);
+	vswprintf_safe(buf, szFormat, va);
 	va_end(va);
 	return pFont->GetWidth(buf);
 }
@@ -487,27 +532,14 @@ void Chat::OnEvent(MEvent *pEvent){
 						if (!pEvent->bCtrl)
 							return;
 
-						if (!IsClipboardFormatAvailable(CF_TEXT))
-							return;
-
-						if (!OpenClipboard(g_hWnd))
-							return;
-
-						HANDLE h = GetClipboardData(CF_UNICODETEXT);
-
-						if (!h)
-							return;
-
-						std::wstring str = (const wchar_t *)GlobalLock(h);
-						if (strField.length() + str.length() > MAX_INPUT_LENGTH)
+						auto Clipboard = GetClipboard();
+						if (strField.length() + Clipboard.length() > MAX_INPUT_LENGTH)
 						{
-							strField += str.substr(0, MAX_INPUT_LENGTH - strField.length());
+							strField += Clipboard.substr(0, MAX_INPUT_LENGTH - strField.length());
 						}
 						else
-							strField += str;
+							strField += Clipboard;
 
-						GlobalUnlock(h);
-						CloseClipboard();
 						break;
 			}
 
@@ -561,23 +593,29 @@ void Chat::OnEvent(MEvent *pEvent){
 					if (pEvent->nKey < 27) // Ctrl + A-Z
 						break;
 
-					MLog("Received MWM_CHAR %X\n", pEvent->nKey);
-
 					strField.insert(nCaretPos + 1, 1, pEvent->nKey);
 
-					if (strField == L"/r ")
+					auto SlashR = L"/r ";
+					auto SlashWhisper = L"/whisper ";
+					if (strField == SlashR)
 					{
 						std::wstring LastSenderWide;
+						LastSenderWide.resize(MATCHOBJECT_NAME_LENGTH);
 						auto* LastSender = ZGetGameInterface()->GetChat()->m_szWhisperLastSender;
-						std::copy(LastSender, LastSender + strlen(LastSender),
-							std::back_inserter(LastSenderWide));
+						auto len = MultiByteToWideChar(CP_ACP, 0,
+							LastSender, -1,
+							&LastSenderWide[0], std::size(LastSenderWide));
+						if (len == 0)
+							break;
 
-						strField = L"/whisper ";
+						LastSenderWide.resize(len);
+
+						strField = SlashWhisper;
 						strField += LastSenderWide;
-						nCaretPos += strlen("/whisper ") - strlen("/r ");
+						nCaretPos = strField.length() - 1;
 					}
-
-					nCaretPos++;
+					else
+						nCaretPos++;
 				}
 			};
 		}
@@ -630,19 +668,8 @@ void Chat::OnUpdate(){
 			EmptyClipboard();
 
 			if (pFromMsg == pToMsg){
-				HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, abs(nToPos - nFromPos) + 2);
-				auto pMem = reinterpret_cast<wchar_t*>(GlobalLock(hMem));
-
-				auto src_index = min(nFromPos, nToPos);
-				auto src = pFromMsg->Msg.data() + src_index;
-				auto selected_len = abs(nToPos - nFromPos) + 1;
-				auto len = min(int(pFromMsg->Msg.length()) - src_index, selected_len);
-				memcpy(pMem, src, len);
-				GlobalUnlock(hMem);
-
-				SetClipboardData(CF_UNICODETEXT, hMem);
-
-				cprint("Copied %.*s\n", abs(nToPos - nFromPos) + 1, &pFromMsg->Msg.at(min(nFromPos, nToPos)));
+				auto str = pFromMsg->Msg.substr(min(nFromPos, nToPos));
+				SetClipboard(str);
 			}
 			else{
 				std::wstring str;
@@ -677,12 +704,7 @@ void Chat::OnUpdate(){
 				}
 
 				if (bFirstFound){
-					HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, str.length());
-					auto pMem = reinterpret_cast<wchar_t*>(GlobalLock(hMem));
-					memcpy(pMem, str.c_str(), std::size(str));
-					GlobalUnlock(hMem);
-
-					SetClipboardData(CF_UNICODETEXT, hMem);
+					SetClipboard(str);
 				}
 			}
 
