@@ -7,7 +7,7 @@
 #include "ZCanvas.h"
 #include "ZInput.h"
 #include "ZRoomListBox.h"
-#include "NewChat.h"
+#include "RGMain.h"
 #include "RBspObject.h"
 
 #define DEFAULT_SLIDER_MAX			10000
@@ -1337,7 +1337,7 @@ void ZOptionInterface::Resize(int w, int h)
 	if (ZGetCombatInterface())
 		ZGetCombatInterface()->Resize(w, h);
 
-	g_Chat.Resize(w, h);
+	GetRGMain().Resize(w, h);
 }
 
 void ZOptionInterface::GetOldScreenResolution()

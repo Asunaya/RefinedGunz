@@ -10,21 +10,25 @@
 #include "Tasks.h"
 #include "Hitboxes.h"
 #include "ZReplay.h"
+#include "NewChat.h"
+#include "DeferredConstructionWrapper.h"
 
 class ZChatCmdManager;
-bool OnGameInput();
+class MEvent;
+class ZIDLResource;
+
 HRESULT GenerateTexture(IDirect3DDevice9 *pD3Ddev, IDirect3DTexture9 **ppD3Dtex, DWORD colour32);
 void LoadRGCommands(ZChatCmdManager &CmdManager);
 std::pair<bool, std::vector<unsigned char>> ReadMZFile(const char *szPath);
 std::pair<bool, std::vector<unsigned char>> ReadZFile(const char *szPath);
 void Invoke(std::function<void()> fn);
-// 0 = ok, -1 = not found, -2 = too many found
-std::pair<int, ZCharacter*> FindSinglePlayer(const char* NameSubstring);
-IDirect3DTexture9* HueShiftTexture(IDirect3DTexture9* Tex, float Hue);
-HRESULT GenerateMassiveTexture(IDirect3DTexture9 **Tex, D3DCOLOR Color);
-
-class MEvent;
-class ZIDLResource;
+enum class PlayerFoundStatus
+{
+	FoundOne,
+	NotFound,
+	TooManyFound,
+};
+std::pair<PlayerFoundStatus, ZCharacter*> FindSinglePlayer(const char* NameSubstring);
 
 struct ReplayInfo
 {
@@ -59,26 +63,24 @@ public:
 	void OnCreateDevice();
 	void OnAppCreate();
 #ifdef VOICECHAT
-	auto MutePlayer(const MUID& UID)
-	{
-		return m_VoiceChat.MutePlayer(UID);
-	}
+	auto MutePlayer(const MUID& UID) { return m_VoiceChat.MutePlayer(UID); }
 #endif
 
 	void OnDrawLobby();
 	void OnRender();
-	void OnGameDraw();
+	void OnDrawGame();
+	void OnDrawGameInterface(MDrawContext* pDC);
 	void OnGameCreate();
+	bool OnGameInput();
+
+	void Resize(int w, int h);
 
 	void OnSlash(ZCharacter* Char, const rvector& Pos, const rvector& Dir);
 	void OnMassive(ZCharacter* Char, const rvector& Pos, const rvector& Dir);
 
 	void SetSwordColor(const MUID& UID, uint32_t Hue);
 
-	void AddMapBanner(const char* MapName, MBitmap* Bitmap)
-	{
-		MapBanners.insert({ MapName, Bitmap });
-	}
+	void AddMapBanner(const char* MapName, MBitmap* Bitmap) { MapBanners.insert({ MapName, Bitmap }); }
 
 	void OnReceiveVoiceChat(ZCharacter *Char, const uint8_t *Buffer, int Length);
 
@@ -97,7 +99,13 @@ public:
 		QueuedInvokations.push_back({ Callback, Time + Delay });
 	}
 
+	Chat& GetChat() { return m_Chat.Get(); }
+	const Chat& GetChat() const { return m_Chat.Get(); }
+	bool IsNewChatEnabled() const { return NewChatEnabled; }
+
 private:
+	friend void LoadRGCommands(ZChatCmdManager& CmdManager);
+
 	void DrawReplayInfo() const;
 
 	double Time = 0;
@@ -123,9 +131,20 @@ private:
 	VoiceChat m_VoiceChat;
 #endif
 	HitboxManager m_HitboxManager;
+
+	DeferredConstructionWrapper<Chat> m_Chat;
+
+#ifdef NEW_CHAT
+	bool NewChatEnabled = true;
+#else
+	bool NewChatEnabled = false;
+#endif
 };
 
-extern std::unique_ptr<RGMain> g_RGMain;
+ RGMain& GetRGMain();
+ void CreateRGMain();
+ void DestroyRGMain();
+ inline Chat& GetNewChat() { return GetRGMain().GetChat(); }
 
 inline ZMyCharacter* MyChar()
 {

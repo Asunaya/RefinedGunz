@@ -29,7 +29,11 @@ inline bool DXErr(HRESULT hr, const char* CallingFunction, const char* DXFunctio
 	return true;
 }
 
-std::unique_ptr<RGMain> g_RGMain;
+DeferredConstructionWrapper<RGMain> g_RGMain;
+
+RGMain& GetRGMain() { return g_RGMain.Get(); }
+void CreateRGMain() { g_RGMain.Construct(); }
+void DestroyRGMain() { g_RGMain.Destroy(); }
 
 void RGMain::OnAppCreate()
 {
@@ -42,8 +46,8 @@ void RGMain::OnAppCreate()
 
 void RGMain::OnCreateDevice()
 {
-	g_Chat.Create("Arial", 16);
-	g_Chat.SetBackgroundColor(ZGetConfiguration()->GetChatBackgroundColor());
+	m_Chat.Construct("Arial", 16);
+	m_Chat.Get().SetBackgroundColor(ZGetConfiguration()->GetChatBackgroundColor());
 
 	g_Draw.OnCreateDevice();
 
@@ -54,7 +58,9 @@ void RGMain::OnCreateDevice()
 	m_HitboxManager.Create();
 }
 
-void RGMain::OnGameDraw()
+void RGMain::OnDrawGame() {}
+
+void RGMain::OnDrawGameInterface(MDrawContext* pDC)
 {
 	if (ZGetGame()->GetMatch()->GetMatchType() == MMATCH_GAMETYPE_SKILLMAP)
 		((ZRuleSkillmap *)ZGetGame()->GetMatch()->GetRule())->Draw();
@@ -66,90 +72,27 @@ void RGMain::OnGameDraw()
 	m_VoiceChat.Draw();
 #endif
 
-	/*for (auto pair : *ZGetCharacterManager())
-	{
-		auto Char = pair.second;
+	if (NewChatEnabled)
+		GetChat().OnDraw(pDC);
 
-		if (Char == ZGetGame()->m_pMyCharacter)
-			continue;
-
-		if (ZGetGame()->CheckWall(Char, ZGetGame()->m_pMyCharacter))
-		{
-			g_Draw.Text("Evading", 10, 500);
-		}
-		else
-		{
-			g_Draw.Text("Not evading", 10, 500);
-		}
-	}*/
-
-	/*auto* me = ZGetGame()->m_pMyCharacter;
-	if (!me)
-		return;
-
-	RGetDevice()->SetTexture(0, NULL);
-	RGetDevice()->SetRenderState(D3DRS_LIGHTING, FALSE);
-	RGetDevice()->SetFVF(D3DFVF_XYZ | D3DFVF_DIFFUSE);
-	RGetDevice()->SetRenderState(D3DRS_ZENABLE, FALSE);
-
-	RDrawLine(me->GetPosition() + v3{ -100, 0, 100 }, me->GetPosition() + v3{ 100, 0, 100 }, 0xFFFF0000);*/
-
-#if 0
-	for (auto pair : *ZGetCharacterManager())
-	{
-		auto& Char = *pair.second;
-
-		if (!Char.m_pVMesh)
-			continue;
-
-		auto GetItemDesc = [&](MMatchCharItemParts slot)
-		{
-			return Char.GetItems()->GetDesc(slot);
-		};
-
-		auto Time = ZGetGame()->GetTime();
-
-		auto Observer = ZGetGameInterface()->GetCombatInterface()->GetObserver();
-		if (Observer->IsVisible())
-			Time -= Observer->GetDelay();
-
-		v3 Head, Foot;
-		Char.BasicInfoHistory.GetPositions(&Head, &Foot, nullptr,
-			Time,
-			GetItemDesc, (MMatchSex)!Char.IsMan(), Char.IsDie());
-
-		v3 OldHead = Head;
-		v3 OldFoot = Foot;
-
-		RGetDevice()->SetTexture(0, NULL);
-		RGetDevice()->SetRenderState(D3DRS_LIGHTING, FALSE);
-		RGetDevice()->SetFVF(D3DFVF_XYZ | D3DFVF_DIFFUSE);
-		RGetDevice()->SetRenderState(D3DRS_ZENABLE, FALSE);
-
-		RDrawSphere(Head, 15, 20);
-		RDrawLine(Head, Foot, 0xFFFF0000);
-
-		Head = Char.m_pVMesh->GetHeadPosition();
-		Foot = Char.m_vProxyPosition;
-		RDrawSphere(Head, 15, 20, 0xFF0000FF);
-		RDrawLine(Head, Foot, 0xFF0000FF);
-
-		///DMLog("Time: %f, diff: %f, %f\n", Time, Magnitude(Head - OldHead), Magnitude(Foot - OldFoot));
-
-		RGetDevice()->SetRenderState(D3DRS_ZENABLE, TRUE);
-	}
-#endif
+	if (ZGetGame()->IsReplay())
+		g_ReplayControl.Draw();
 }
 
-bool OnGameInput()
+bool RGMain::OnGameInput()
 {
-	if (g_Chat.IsInputEnabled())
+	if (GetChat().IsInputEnabled())
 	{
-		g_Chat.OnUpdate();
+		GetChat().OnUpdate();
 		return true;
 	}
 
 	return false;
+}
+
+void RGMain::Resize(int w, int h)
+{
+	GetChat().Resize(w, h);
 }
 
 HRESULT GenerateTexture(IDirect3DDevice9 *pD3Ddev, IDirect3DTexture9 **ppD3Dtex, DWORD colour32){
@@ -222,7 +165,7 @@ std::pair<bool, std::vector<unsigned char>> ReadZFile(const char *szPath)
 	return{ true, InflatedFile };
 }
 
-std::pair<int, ZCharacter*> FindSinglePlayer(const char * NameSubstring)
+std::pair<PlayerFoundStatus, ZCharacter*> FindSinglePlayer(const char * NameSubstring)
 {
 	bool Found = false;
 	ZCharacter* FoundChar = nullptr;
@@ -235,16 +178,16 @@ std::pair<int, ZCharacter*> FindSinglePlayer(const char * NameSubstring)
 			continue;
 
 		if (Found)
-			return{ -2, nullptr };
+			return{ PlayerFoundStatus::TooManyFound, nullptr };
 
 		Found = true;
 		FoundChar = Char;
 	}
 
 	if (Found)
-		return{ 0, FoundChar };
+		return{ PlayerFoundStatus::FoundOne, FoundChar };
 
-	return{ -1, nullptr };
+	return{ PlayerFoundStatus::NotFound, nullptr };
 }
 
 RGMain::RGMain() = default;
@@ -254,6 +197,8 @@ RGMain::~RGMain()
 #ifdef PORTAL
 	g_pPortal.reset();
 #endif
+	if (m_Chat.IsConstructed())
+		m_Chat.Destroy();
 }
 
 void RGMain::OnUpdate(double Elapsed)
@@ -286,15 +231,14 @@ void RGMain::OnUpdate(double Elapsed)
 
 bool RGMain::OnEvent(MEvent *pEvent)
 {
-	if (g_bNewChat)
-		g_Chat.OnEvent(pEvent);
+	if (NewChatEnabled)
+		GetChat().OnEvent(pEvent);
 
-	auto IsChatVisible = [] {
-		if (g_bNewChat)
-			return g_Chat.IsInputEnabled();
-		else
-			return ZGetCombatInterface()->IsChatVisible();
-	}();
+	bool IsChatVisible = false;
+	if (NewChatEnabled)
+		IsChatVisible = GetChat().IsInputEnabled();
+	else
+		IsChatVisible = ZGetCombatInterface()->IsChatVisible();
 
 	if (IsChatVisible)
 	{
@@ -581,81 +525,6 @@ std::pair<bool, uint32_t> RGMain::GetPlayerSwordColor(const MUID& UID)
 	return{ true, it->second };
 }
 
-HRESULT GenerateMassiveTexture(IDirect3DTexture9 **Tex, D3DCOLOR Color)
-{
-	return S_OK;
-}
-
-/*IDirect3DTexture9* HueShiftTexture(IDirect3DTexture9* Tex, float Hue)
-{
-	int Levels = Tex->GetLevelCount();
-
-	D3DSURFACE_DESC Desc;
-	Tex->GetLevelDesc(0, &Desc);
-
-	IDirect3DTexture9 *NewTex;
-	RGetDevice()->CreateTexture(Desc.Width, Desc.Height, Levels, 0,
-		D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &NewTex, nullptr);
-
-	int Level = 0;
-
-	for (int Level = 0; Level < Levels; Level++)
-	{
-		Tex->GetLevelDesc(Level, &Desc);
-
-		D3DPtr<IDirect3DSurface9> OrigSurface = nullptr;
-		Tex->GetSurfaceLevel(Level, MakeWriteProxy(OrigSurface));
-
-		D3DPtr<IDirect3DSurface9> NewSurface = nullptr;
-		NewTex->GetSurfaceLevel(Level, MakeWriteProxy(NewSurface));
-
-		if (FAILED(D3DXLoadSurfaceFromSurface(NewSurface.get(), nullptr, nullptr,
-			OrigSurface.get(), nullptr, nullptr, D3DX_FILTER_NONE, 0)))
-		{
-			MLog("Failed to load surface from material\n");
-			return nullptr;
-		}
-
-		D3DLOCKED_RECT Rect;
-		auto hr = NewSurface->LockRect(&Rect, nullptr, 0);
-
-		if (FAILED(hr))
-		{
-			MLog("Failed to lock texture\n");
-			return nullptr;
-		}
-
-		for (UINT j = 0; j < Desc.Height; j++)
-		{
-			for (INT i = 0; i < Rect.Pitch; i += 4)
-			{
-				uint32_t& Pixel = *(uint32_t *)(PBYTE(Rect.pBits) + i + j * Rect.Pitch);
-				rgb color;
-				color.r = ((Pixel & 0x0000FF00) >> 8) / 2.55;
-				color.g = ((Pixel & 0x00FF0000) >> 16) / 2.55;
-				color.b = ((Pixel & 0xFF000000) >> 24) / 2.55;
-				hsv HSV = rgb2hsv(color);
-				HSV.h += fmod(Hue, 360.0);
-				color = hsv2rgb(HSV);
-				Pixel = (int(color.r * 2.55) << 8)
-					| (int(color.g * 2.55) << 16)
-					| (int(color.b * 2.55) << 24)
-					| (Pixel & 0xFF);
-			}
-		}
-
-		hr = NewSurface->UnlockRect();
-
-		if (FAILED(hr))
-		{
-			MLog("Failed to unlock texture\n");
-			return false;
-		}
-	}
-
-	return NewTex;
-}*/
-
 void RGMain::SetSwordColor(const MUID& UID, uint32_t Color)
 {
 	SwordColors[UID] = Color;
@@ -691,5 +560,5 @@ void RGMain::OnMassive(ZCharacter * Char, const rvector & Pos, const rvector & D
 
 bool RGMain::IsCursorEnabled() const
 {
-	return g_Chat.IsInputEnabled();
+	return GetChat().IsInputEnabled();
 }

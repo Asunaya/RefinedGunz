@@ -461,7 +461,7 @@ bool ZGameInterface::InitInterface(const char* szSkinName, ZLoadingProgress *pLo
 	MEndProfile(IDLRsrc);
 
 	auto Etc = MBeginProfile("ZGameInterface::InitInterface - Etc.");
-	g_RGMain->OnInitInterface(m_IDLResource);
+	GetRGMain().OnInitInterface(m_IDLResource);
 
 	MBFrameLook* pFrameLook = (MBFrameLook*)m_IDLResource.FindFrameLook("DefaultFrameLook");
 	if (pFrameLook != NULL)
@@ -993,7 +993,7 @@ bool ZGameInterface::OnGameCreate(void)
 		m_CombatMenu.EnableItem(ZCombatMenu::ZCMI_BATTLE_EXIT, true);
 	}
 
-	g_RGMain->OnGameCreate();
+	GetRGMain().OnGameCreate();
 
 	return true;
 }
@@ -1966,11 +1966,7 @@ void ZGameInterface::OnDrawStateGame(MDrawContext* pDC)
 
 			m_pCombatInterface->OnDrawCustom(pDC);
 
-			if (g_bNewChat)
-				g_Chat.Display();
-
-			if (ZGetGame()->IsReplay())
-				g_ReplayControl.Draw();
+			GetRGMain().OnDrawGameInterface(pDC);
 		}
 
 	}
@@ -2378,7 +2374,7 @@ void ZGameInterface::OnDraw(MDrawContext *pDC)
 		{
 			OnDrawStateLobbyNStage(pDC);
 			if(GetState() == GUNZ_LOBBY)
-				g_RGMain->OnDrawLobby();
+				GetRGMain().OnDrawLobby();
 		}
 		break;
 	case GUNZ_CHARSELECTION:
@@ -2853,7 +2849,7 @@ void ZGameInterface::UpdateCursorEnable()
 		IsMenuVisible() || 
 		m_pMsgBox->IsVisible() ||
 		m_pConfirmMsgBox->IsVisible() ||
-		g_RGMain->IsCursorEnabled()
+		GetRGMain().IsCursorEnabled()
 		)
 		SetCursorEnable(true);
 	else

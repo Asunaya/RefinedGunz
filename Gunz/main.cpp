@@ -106,7 +106,7 @@ RRESULT OnCreate(void *pParam)
 
 	g_App.PreCheckArguments();
 
-	g_RGMain->OnCreateDevice();
+	GetRGMain().OnCreateDevice();
 
 	RCreateLenzFlare("System/LenzFlare.xml");
 	RGetLenzFlare()->Initialize();
@@ -275,7 +275,7 @@ RRESULT OnDestroy(void *pParam)
 		GetMeshManager()->Destroy();
 	}
 
-	g_RGMain.reset();
+	DestroyRGMain();
 
 	mlog("main : OnDestroy() done\n");
 
@@ -417,7 +417,7 @@ RRESULT OnRender(void *pParam)
 #endif
 	}
 
-	g_RGMain->OnRender();
+	GetRGMain().OnRender();
 
 	MEndProfile(mainOnRender);
 
@@ -661,7 +661,7 @@ int PASCAL WinMain(HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline, int 
 
 	ZGetConfiguration()->Load();
 
-	g_RGMain = std::make_unique<RGMain>();
+	CreateRGMain();
 
 	ZStringResManager::MakeInstance();
 	if( !ZApplication::GetInstance()->InitLocale() )

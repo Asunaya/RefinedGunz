@@ -284,7 +284,7 @@ bool ZApplication::OnCreate(ZLoadingProgress *pLoadingProgress)
 
 	__BP(2000, "ZApplication::OnCreate");
 
-	g_RGMain->OnAppCreate();
+	GetRGMain().OnAppCreate();
 
 	InitialLoading.UpdateAndDraw(1);
 
@@ -612,7 +612,7 @@ void ZApplication::OnUpdate()
 		return;
 	}
 
-	g_RGMain->OnUpdate(ElapsedTime);
+	GetRGMain().OnUpdate(ElapsedTime);
 
 	__BP(1,"ZApplication::OnUpdate::m_pInterface->Update");
 	if (m_pGameInterface) m_pGameInterface->Update(ElapsedTime);
@@ -743,7 +743,7 @@ void ZApplication::OnRestore()
 		RGetShaderMgr()->SetEnable();
 	}
 
-	g_RGMain->OnReset();
+	GetRGMain().OnReset();
 }
 
 void ZApplication::Exit()

@@ -1196,7 +1196,7 @@ bool ZGame::OnCommand_Immediate(MCommand* pCommand)
 		if (pParam->GetType() != MPT_BLOB) break;
 		void* pBlob = pParam->GetPointer();
 
-		g_RGMain->OnReceiveVoiceChat(Char, (unsigned char *)pBlob, pParam->GetSize() - sizeof(int));
+		GetRGMain().OnReceiveVoiceChat(Char, (unsigned char *)pBlob, pParam->GetSize() - sizeof(int));
 	}
 		break;
 	case MC_PEER_SET_SWORD_COLOR:
@@ -1205,7 +1205,7 @@ bool ZGame::OnCommand_Immediate(MCommand* pCommand)
 		if (!pCommand->GetParameter(&Color, 0, MPT_UINT))
 			break;
 
-		g_RGMain->SetSwordColor(pCommand->GetSenderUID(), Color);
+		GetRGMain().SetSwordColor(pCommand->GetSenderUID(), Color);
 	}
 	break;
 	case MC_PEER_ANTILEAD_DAMAGE:
@@ -2480,7 +2480,7 @@ void ZGame::OnPeerSlash(ZCharacter *pOwner, const rvector &pos, const rvector &d
 {
 	//g_Attacks[pOwner].TotalSlashes++;
 
-	g_RGMain->OnSlash(pOwner, pos, dir);
+	GetRGMain().OnSlash(pOwner, pos, dir);
 
 	ZItem *pItem = pOwner->GetItems()->GetItem(MMCIP_MELEE);
 	if (!pItem) return;
@@ -2616,7 +2616,7 @@ void ZGame::OnPeerMassive(ZCharacter *pOwner, const rvector &pos, const rvector 
 {
 	const int nRange = 280;
 
-	g_RGMain->OnMassive(pOwner, pos, dir);
+	GetRGMain().OnMassive(pOwner, pos, dir);
 
 	ZItem *pItem = pOwner->GetItems()->GetItem(MMCIP_MELEE);
 	if (!pItem) return;

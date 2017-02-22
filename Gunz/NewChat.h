@@ -2,9 +2,12 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include "MUtil.h"
 
-#define CHAT_DEFAULT_TEXT_COLOR 0xFFC8C8C8
-#define CHAT_DEFAULT_INTERFACE_COLOR 0xFF00A5C3
+constexpr u32 CHAT_DEFAULT_TEXT_COLOR = XRGB(0xC8, 0xC8, 0xC8);
+constexpr u32 CHAT_DEFAULT_INTERFACE_COLOR = XRGB(0, 0xA5, 0xC3);
+constexpr u32 CHAT_DEFAULT_BACKGROUND_COLOR = 0;
+constexpr u32 CHAT_DEFAULT_SELECTION_COLOR = ARGB(0xA0, 0, 0x80, 0xFF);
 
 // Note that while FT_WRAP and FT_LINEBREAK are both linebreaks, the former is placed by the line-wrapping mechanism and the latter is explicitly placed by the message creator.
 enum FormatSpecifierType{
@@ -29,7 +32,7 @@ struct FormatSpecifier{
 };
 
 struct ChatLine{
-	unsigned long long Time;
+	u64 Time;
 	std::wstring Msg;
 	D3DCOLOR DefaultColor;
 	std::vector<FormatSpecifier> vFormatSpecifiers;
@@ -112,19 +115,21 @@ struct v2i
 	int x, y;
 };
 
-class Chat{
+class Chat
+{
 public:
-	void Create(const std::string &strFont, int nFontSize);
-	void Destroy();
+	Chat(const std::string &strFont, int nFontSize);
 
 	void EnableInput(bool bEnable, bool bToTeam);
 	void OutputChatMsg(const char *szMsg);
 	void OutputChatMsg(const char *szMsg, DWORD dwColor);
-	void Display();
+
+	void OnUpdate();
+	void OnDraw(MDrawContext* pDC);
+	bool OnEvent(MEvent* pEvent);
+
 	void Scale(double fWidthRatio, double fHeightRatio);
 	void Resize(int Width, int Height);
-	void OnEvent(MEvent *pEvent);
-	void OnUpdate();
 
 	void ClearHistory() { vMsgs.clear(); }
 
@@ -151,31 +156,32 @@ public:
 
 private:
 	std::string strFont;
-	int nFontSize;
-	int nFontHeight;
-	double fFadeTime;
+	int nFontSize{};
+	int nFontHeight{};
+	double fFadeTime = 10;
 	std::vector<ChatLine> vMsgs;
-	bool bInputEnabled;
-	POINT Cursor;
-	D3DRECT Border;
+	bool bInputEnabled{};
+	POINT Cursor{};
+	D3DRECT Border{};
 	std::unique_ptr<MFontR2> pFont;
 	std::unique_ptr<MFontR2> pItalicFont;
 	// The normal font is already bold right now.
 	//MFontR2 *pBoldFont;
 	//MFontR2 *pBoldItalicFont;
-	D3DCOLOR TextColor;
-	D3DCOLOR InterfaceColor;
-	D3DCOLOR BackgroundColor;
-	ChatWindowAction Action;
-	DWORD dwResize;
-	const ChatLine *pFromMsg;
-	int nFromPos;
-	const ChatLine *pToMsg;
-	int nToPos;
+	D3DCOLOR TextColor = CHAT_DEFAULT_TEXT_COLOR;
+	D3DCOLOR InterfaceColor = CHAT_DEFAULT_INTERFACE_COLOR;
+	D3DCOLOR BackgroundColor = CHAT_DEFAULT_BACKGROUND_COLOR;
+	D3DCOLOR SelectionColor = CHAT_DEFAULT_SELECTION_COLOR;
+	ChatWindowAction Action = CWA_NONE;
+	DWORD dwResize{};
+	const ChatLine *pFromMsg{};
+	int nFromPos{};
+	const ChatLine *pToMsg{};
+	int nToPos{};
 	std::vector<std::wstring> vstrInputHistory;
-	int nCurInputHistoryEntry;
+	int nCurInputHistoryEntry{};
 	std::wstring strField;
-	int nCaretPos;
+	int nCaretPos = -1;
 	/*bool bPlayerList;
 	ID3DXLine *pPlayerListLine;
 	std::vector<std::string> vstrPlayerList;
@@ -184,43 +190,11 @@ private:
 	int InputHeight{};
 	v2i CaretCoord{};
 
-	struct ScreenSpaceVertex {
-		float x, y, z, rhw;
-		DWORD color;
-	};
-	struct LineListIndex
-	{
-		short v1;
-		short v2;
-	};
-	struct TriangleListIndex
-	{
-		short v1;
-		short v2;
-		short v3;
-	};
-
-	void DrawBorder();
-
-	void Line(float x1, float y1, float x2, float y2, D3DCOLOR Color = CHAT_DEFAULT_INTERFACE_COLOR, float z = 0) {
-		Line(v2(x1, y1), v2(x2, y2), Color, z);
-	}
-	void Line(const v2 &v1, const v2 &v2, D3DCOLOR Color = CHAT_DEFAULT_INTERFACE_COLOR, float z = 0);
-	void Quad(float x1, float y1, float x2, float y2, D3DCOLOR Color = CHAT_DEFAULT_INTERFACE_COLOR) {
-		Quad(v2(x1, y1), v2(x2, y2), Color);
-	}
-	void Quad(const D3DRECT &r, D3DCOLOR Color = CHAT_DEFAULT_INTERFACE_COLOR, float z = 0) {
-		Quad(v2(r.x1, r.y1), v2(r.x2, r.y2), Color, z);
-	}
-	void Quad(const v2 &v1, const v2 &v2, D3DCOLOR Color = CHAT_DEFAULT_INTERFACE_COLOR, float z = 0);
-
-	std::vector<ScreenSpaceVertex> Lines;
-	std::vector<ScreenSpaceVertex> Triangles;
-	bool bAlpha;
-	bool bBegunDrawing;
-
-	void BeginDraw();
-	void EndDraw();
+	void DrawBorder(MDrawContext* pDC);
+	void DrawBackground(MDrawContext* pDC, u64 Time, u64 TPS, int nLimit, bool bShowAll);
+	void DrawChatLines(MDrawContext* pDC, u64 Time, u64 TPS, int nLimit, bool bShowAll);
+	void DrawSelection(MDrawContext* pDC);
+	void DrawFrame(MDrawContext* pDC, u64 Time, u64 TPS);
 
 	D3DRECT GetOutputRect();
 	D3DRECT GetInputRect();
@@ -233,11 +207,8 @@ private:
 
 	int GetLines(MFontR2 *pFont, const wchar_t *szMsg, int nWidth, int nSize = -1);
 	int GetTextLength(MFontR2 *pFont, const wchar_t *szFormat, ...);
-	int DrawTextWordWrap(MFontR2 *pFont, const wchar_t *szStr, const RECT &r, DWORD dwColor);
-	void DrawTextN(MFontR2 *pFont, const wchar_t *szStr, const RECT &r, DWORD dwColor, int nLen = -1);
+	int DrawTextWordWrap(MFontR2 *pFont, const wchar_t *szStr, const D3DRECT &r, DWORD dwColor);
+	void DrawTextN(MFontR2 *pFont, const wchar_t *szStr, const D3DRECT &r, DWORD dwColor, int nLen = -1);
 
 	void ResetFonts();
 };
-
-extern Chat g_Chat;
-extern bool g_bNewChat;

@@ -177,7 +177,7 @@ void ZGameDrawD3D9::DrawScene()
 
 	PROFILE(Game.GetMatch()->OnDrawGameMessage());
 
-	PROFILE(g_RGMain->OnGameDraw());
+	PROFILE(GetRGMain().OnDrawGame());
 
 	PROFILE(g_pPortal->PostDraw());
 

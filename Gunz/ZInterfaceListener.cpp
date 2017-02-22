@@ -2039,7 +2039,7 @@ MListener* ZGetReplayFileListBoxListener( void)
 				if (pFindWidget != NULL)
 					pFindWidget->Enable(true);
 
-				g_RGMain->OnReplaySelected();
+				GetRGMain().OnReplaySelected();
 
                 return true;
 			}

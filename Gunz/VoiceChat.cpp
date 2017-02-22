@@ -309,7 +309,7 @@ void VoiceChat::ThreadLoop()
 			ZPostVoiceChat(EncodedFrame.data(), Size);
 		};
 
-		g_RGMain->Invoke(lambda, 2);
+		GetRGMain().Invoke(lambda, 2);
 
 		CurrentBufferIndex = (CurrentBufferIndex + 1) % NumBuffers;
 
@@ -350,7 +350,7 @@ int VoiceChat::RecordCallback(const void *inputBuffer, void *outputBuffer,
 		ZPostVoiceChat(EncodedFrame.data(), Size);
 	};
 
-	g_RGMain->Invoke(lambda);
+	GetRGMain().Invoke(lambda);
 
 	return paContinue;
 }

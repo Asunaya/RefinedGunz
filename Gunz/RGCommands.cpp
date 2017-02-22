@@ -81,7 +81,7 @@ void LoadRGCommands(ZChatCmdManager& CmdManager)
 
 	CmdManager.AddCommand(0, "backgroundcolor", [](const char *line, int argc, char ** const argv){
 		DWORD BackgroundColor = strtoul(argv[1], nullptr, 16);
-		g_Chat.SetBackgroundColor(BackgroundColor);
+		GetRGMain().GetChat().SetBackgroundColor(BackgroundColor);
 		ZGetConfiguration()->ChatBackgroundColor = BackgroundColor;
 
 		ZGetConfiguration()->Save();
@@ -187,22 +187,22 @@ void LoadRGCommands(ZChatCmdManager& CmdManager)
 		{
 			switch (ret.first)
 			{
-			case -1:
+			case PlayerFoundStatus::NotFound:
 				ZChatOutputF("No player with %s in their name was found", argv[1]);
 				break;
 
-			case -2:
+			case PlayerFoundStatus::TooManyFound:
 				ZChatOutputF("Too many players with %s in their name was found", argv[1]);
 				break;
 
 			default:
-				ZChatOutputF("Unknown error");
+				ZChatOutputF("Unknown error %d", static_cast<int>(ret.first));
 			};
 			
 			return;
 		}
 
-		bool b = g_RGMain->MutePlayer(ret.second->GetUID());
+		bool b = GetRGMain().MutePlayer(ret.second->GetUID());
 
 		ZChatOutputF("%s has been %s", ret.second->GetUserName(), b ? "muted" : "unmuted");
 	}, CCF_ALL, 1, 1, true, "/swordcolor <AARRGGBB>", "");

@@ -9,7 +9,7 @@
 #include "MChattingFilter.h"
 #include "MTextArea.h"
 #include "ZConfiguration.h"
-#include "NewChat.h"
+#include "RGMain.h"
 
 #define MAX_CHAT_OUTPUT_LINE 7
 
@@ -211,7 +211,7 @@ void ZCombatChat::UpdateChattingBox()
 
 void ZCombatChat::EnableInput(bool bEnable, bool bToTeam)
 {
-	if (g_bNewChat)
+	if (GetRGMain().IsNewChatEnabled())
 	{
 		bEnable = false;
 		bToTeam = false;
@@ -261,9 +261,9 @@ void ZCombatChat::EnableInput(bool bEnable, bool bToTeam)
 
 void ZCombatChat::OutputChatMsg(const char* szMsg)
 {
-	if (g_bNewChat)
+	if (GetRGMain().IsNewChatEnabled())
 	{
-		g_Chat.OutputChatMsg(szMsg);
+		GetRGMain().GetChat().OutputChatMsg(szMsg);
 		return;
 	}
 
@@ -278,9 +278,9 @@ void ZCombatChat::OutputChatMsg(const char* szMsg)
 
 void ZCombatChat::OutputChatMsg(MCOLOR color, const char* szMsg)
 {
-	if (g_bNewChat)
+	if (GetRGMain().IsNewChatEnabled())
 	{
-		g_Chat.OutputChatMsg(szMsg, *PDWORD(&color));
+		GetRGMain().GetChat().OutputChatMsg(szMsg, color.GetARGB());
 		return;
 	}
 
