@@ -568,7 +568,6 @@ rem call copy_share.bat
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\cml\Include\SafeString.h" />
-    <ClInclude Include="Draw.h" />
     <ClInclude Include="Hitboxes.h" />
     <ClInclude Include="MClient.h" />
     <ClInclude Include="MMatchClient.h" />
@@ -788,7 +787,6 @@ rem call copy_share.bat
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Draw.cpp" />
     <ClCompile Include="Hitboxes.cpp" />
     <ClCompile Include="MClient.cpp" />
     <ClCompile Include="MMatchClient.cpp" />

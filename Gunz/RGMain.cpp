@@ -4,7 +4,6 @@
 #include "NewChat.h"
 #include "ZConfiguration.h"
 #include "Hitboxes.h"
-#include "Draw.h"
 #include "ZRule.h"
 #include "ZRuleSkillmap.h"
 #include "VoiceChat.h"
@@ -16,6 +15,7 @@
 #include "MeshManager.h"
 #include "hsv.h"
 #include "dxerr.h"
+#include "defer.h"
 
 #define DXERR(func) DXErr(func, __func__, #func)
 
@@ -49,8 +49,6 @@ void RGMain::OnCreateDevice()
 	m_Chat.Construct("Arial", 16);
 	m_Chat.Get().SetBackgroundColor(ZGetConfiguration()->GetChatBackgroundColor());
 
-	g_Draw.OnCreateDevice();
-
 #ifdef VOICECHAT
 	m_VoiceChat.OnCreateDevice();
 #endif
@@ -69,14 +67,14 @@ void RGMain::OnDrawGameInterface(MDrawContext* pDC)
 		m_HitboxManager.Draw();
 
 #ifdef VOICECHAT
-	m_VoiceChat.Draw();
+	m_VoiceChat.OnDraw(pDC);
 #endif
 
 	if (NewChatEnabled)
 		GetChat().OnDraw(pDC);
 
 	if (ZGetGame()->IsReplay())
-		g_ReplayControl.Draw();
+		g_ReplayControl.OnDraw(pDC);
 }
 
 bool RGMain::OnGameInput()
@@ -282,34 +280,35 @@ bool RGMain::OnEvent(MEvent *pEvent)
 	return ret;
 }
 
-void RGMain::OnReset()
+void RGMain::OnReset() {}
+void RGMain::OnDrawLobby(MDrawContext* pDC) {}
+
+struct CustomReplayFrame : MWidget
 {
-	g_Draw.OnReset();
-}
+	using MWidget::MWidget;
+
+	void OnDraw(MDrawContext* pDC) override
+	{
+		GetRGMain().DrawReplayInfo(pDC, this);
+	}
+};
 
 void RGMain::OnInitInterface(ZIDLResource &IDLResource)
 {
+	// Create a new widget and attach it as a child to the ReplayGroup widget
+	// in order to have our own custom draw code run in its OnDraw callback.
+	auto ReplayWidget = IDLResource.FindWidget("ReplayGroup");
+	auto Widget = new CustomReplayFrame{ "CustomReplayFrame", ReplayWidget };
+	// m_Rect controls the area that is drawn to in OnDraw so we need to set it properly.
+	// This is roughly the right part of the replay window.
+	Widget->m_Rect = MRECT{ 310, 50, 290, 245 };
 }
 
-void RGMain::OnDrawLobby()
-{
-}
-
-void RGMain::OnReplaySelected()
+void RGMain::OnReplaySelected(MListBox* ReplayFileListWidget)
 {
 	SelectedReplayInfo.PlayerInfos.clear();
 
-	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
-
-	auto ReplayWidget = pResource->FindWidget("Replay");
-
-	if (!ReplayWidget->IsVisible())
-		return;
-
-	auto ReplayFileList = (MListBox *)pResource->FindWidget("Replay_FileList");
-
-	auto SelectedReplay = ReplayFileList->GetSelItem();
-
+	auto SelectedReplay = ReplayFileListWidget->GetSelItem();
 	if (!SelectedReplay)
 		return;
 
@@ -414,25 +413,11 @@ void RGMain::OnReplaySelected()
 	}
 }
 
-void RGMain::DrawReplayInfo() const
+void RGMain::DrawReplayInfo(MDrawContext* pDC, MWidget* Widget) const
 {
-	extern MFontR2 *g_pDefFont;
+	v2 Offset{ 0, 0 };
 
-	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
-
-	auto ReplayWidget = pResource->FindWidget("Replay");
-	if (!ReplayWidget->IsVisible())
-		return;
-
-	auto ReplayFileList = (MListBox *)pResource->FindWidget("Replay_FileList");
-	if (!ReplayFileList->GetSelItem())
-		return;
-
-	auto ReplayGroupWidget = pResource->FindWidget("ReplayGroup");
-	auto Offset = ReplayGroupWidget->GetPosition();
-
-	Offset.x += 310;
-	Offset.y += 50;
+	pDC->SetColor(ARGB(255, 255, 255, 255));
 
 	auto Print = [&](const char *Format, ...)
 	{
@@ -444,7 +429,7 @@ void RGMain::DrawReplayInfo() const
 		int ret = _vsnprintf_s(buf, sizeof(buf) - 1, Format, args);
 		va_end(args);
 
-		g_pDefFont->m_Font.DrawTextA(Offset.x, Offset.y, buf);
+		pDC->Text(Offset.x, Offset.y, buf);
 
 		Offset.y += 12;
 	};
@@ -468,8 +453,8 @@ void RGMain::DrawReplayInfo() const
 			return;
 
 		auto Bitmap = it->second;
-		((MBitmapR2 *)Bitmap->GetSourceBitmap())->Draw(Offset.x, Offset.y, 260, 30,
-			Bitmap->GetX(), Bitmap->GetY(), Bitmap->GetWidth(), Bitmap->GetHeight(), 0xFFFFFFFF);
+		pDC->SetBitmap(Bitmap);
+		pDC->Draw(Offset.x, Offset.y, 260, 30);
 
 		Offset.y += 30;
 	}();
@@ -508,11 +493,6 @@ void RGMain::DrawReplayInfo() const
 
 		Print("%s - %d/%d", Player.Name, Player.Kills, Player.Deaths);
 	}
-}
-
-void RGMain::OnRender()
-{
-	DrawReplayInfo();
 }
 
 std::pair<bool, uint32_t> RGMain::GetPlayerSwordColor(const MUID& UID)

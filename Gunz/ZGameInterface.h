@@ -375,6 +375,6 @@ public:
 
 void ZChangeGameState(GunzState state);
 
-inline ZIDLResource* GetZIDLResource() {
+inline ZIDLResource* ZGetIDLResource() {
 	return ZGetGameInterface()->GetIDLResource();
 }

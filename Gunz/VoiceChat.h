@@ -32,7 +32,7 @@ public:
 
 	bool MutePlayer(const MUID& UID);
 
-	void Draw();
+	void OnDraw(MDrawContext* pDC);
 
 	static constexpr int SampleRate = 48000;
 	static constexpr int FrameSize = static_cast<int>(SampleRate * 0.06); // 60 ms
@@ -110,6 +110,6 @@ private:
 	std::unordered_map<ZCharacter*, MicStuff> MicStreams;
 	std::unordered_set<MUID> MutedPlayers;
 
-	RBaseTexturePtr SpeakerTexture;
+	MBitmapR2 SpeakerBitmap;
 };
 #endif

@@ -4,7 +4,7 @@
 class ReplayControl
 {
 public:
-	void Draw();
+	void OnDraw(MDrawContext* pDC);
 	bool OnEvent(MEvent *pEvent);
 private:
 };

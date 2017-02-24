@@ -59,15 +59,14 @@ public:
 	bool OnEvent(MEvent *pEvent);
 	void OnReset();
 	void OnInitInterface(ZIDLResource &IDLResource);
-	void OnReplaySelected();
+	void OnReplaySelected(MListBox* ReplayFileListWidget);
 	void OnCreateDevice();
 	void OnAppCreate();
 #ifdef VOICECHAT
 	auto MutePlayer(const MUID& UID) { return m_VoiceChat.MutePlayer(UID); }
 #endif
 
-	void OnDrawLobby();
-	void OnRender();
+	void OnDrawLobby(MDrawContext* pDC);
 	void OnDrawGame();
 	void OnDrawGameInterface(MDrawContext* pDC);
 	void OnGameCreate();
@@ -103,10 +102,10 @@ public:
 	const Chat& GetChat() const { return m_Chat.Get(); }
 	bool IsNewChatEnabled() const { return NewChatEnabled; }
 
+	void DrawReplayInfo(MDrawContext* pDC, MWidget* Widget) const;
+
 private:
 	friend void LoadRGCommands(ZChatCmdManager& CmdManager);
-
-	void DrawReplayInfo() const;
 
 	double Time = 0;
 	double LastTime = 0;

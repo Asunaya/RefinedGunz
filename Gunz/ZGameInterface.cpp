@@ -2374,7 +2374,7 @@ void ZGameInterface::OnDraw(MDrawContext *pDC)
 		{
 			OnDrawStateLobbyNStage(pDC);
 			if(GetState() == GUNZ_LOBBY)
-				GetRGMain().OnDrawLobby();
+				GetRGMain().OnDrawLobby(pDC);
 		}
 		break;
 	case GUNZ_CHARSELECTION:
@@ -4200,7 +4200,7 @@ static void HideShopOrEquipmentDialog(bool Shop)
 		ZPostStageState(ZGetGameClient()->GetPlayerUID(), ZGetGameClient()->GetStageUID(), MOSS_NONREADY);
 
 	// Hide the shop or equipment widget.
-	MWidget* pWidget = GetZIDLResource()->FindWidget(Shop ? "Shop" : "Equipment");
+	MWidget* pWidget = ZGetIDLResource()->FindWidget(Shop ? "Shop" : "Equipment");
 	if (pWidget)
 		pWidget->Show(false);
 

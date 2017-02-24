@@ -417,8 +417,6 @@ RRESULT OnRender(void *pParam)
 #endif
 	}
 
-	GetRGMain().OnRender();
-
 	MEndProfile(mainOnRender);
 
 	return R_OK;

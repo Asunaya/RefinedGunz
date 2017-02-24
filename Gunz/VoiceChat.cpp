@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "VoiceChat.h"
 #include "RGMain.h"
-#include "Draw.h"
 
 #ifdef VOICECHAT
 
@@ -396,35 +395,37 @@ int VoiceChat::PlayCallback(const void *inputBuffer, void *outputBuffer,
 
 void VoiceChat::OnCreateDevice()
 {
-	SpeakerTexture = RBaseTexturePtr{ RCreateBaseTexture("Interface/default/SpeakerIcon.png") };
-	if (!SpeakerTexture)
+	auto Success = SpeakerBitmap.Create("SpeakerIcon", RGetDevice(), "Interface/default/SpeakerIcon.png");
+	if (!Success)
 		MLog("Failed to create speaker icon texture\n");
 }
 
-void VoiceChat::Draw()
+void VoiceChat::OnDraw(MDrawContext* pDC)
 {
 	int i = 0;
 
 	auto DrawStuff = [&](ZCharacter* Player)
 	{
-		D3DXVECTOR2 TopLeft(RELWIDTH(1920 - 400), RELHEIGHT(1080 / 2 + i * 100));
-		D3DXVECTOR2 Extents(RELWIDTH(300), RELHEIGHT(50));
+		v2 TopLeft{ float(RELWIDTH(1920 - 400)), float(RELHEIGHT(1080 / 2 + i * 100)) };
+		v2 Extents{ float(RELWIDTH(300)), float(RELHEIGHT(50)) };
 
 		auto color = Player->GetTeamID() == MMT_BLUE ? 0xC000A5C3 : 0xC0FF0000;
 
-		g_Draw.Quad(TopLeft, TopLeft + Extents, color);
+		pDC->SetColor(color);
+		pDC->FillRectangle(TopLeft.x, TopLeft.y, Extents.x, Extents.y);
 
-		D3DXVECTOR2 TextOffset(RELWIDTH(50), RELHEIGHT(10));
+		v2 TextOffset{ float(RELWIDTH(50)), float(RELHEIGHT(10)) };
 
 		auto v = TopLeft + TextOffset;
 
-		g_Draw.Text(Player->GetUserName(), v.x, v.y);
+		pDC->SetColor(ARGB(255, 255, 255, 255));
+		pDC->Text(v.x, v.y, Player->GetUserName());
 
-		D3DXVECTOR2 SpeakerIconOrigin = TopLeft + D3DXVECTOR2(RELWIDTH(10), RELHEIGHT(10));
-		D3DXVECTOR2 SpeakerIconExtents(RELWIDTH(30), RELHEIGHT(30));
+		auto SpeakerIconOrigin = TopLeft + v2{ float(RELWIDTH(10)), float(RELHEIGHT(10)) };
+		v2 SpeakerIconExtents{ float(RELWIDTH(30)), float(RELHEIGHT(30)) };
 
-		g_Draw.TexturedQuad(SpeakerIconOrigin, SpeakerIconOrigin + SpeakerIconExtents,
-			SpeakerTexture.get()->GetTexture());
+		pDC->SetBitmap(&SpeakerBitmap);
+		pDC->Draw(SpeakerIconOrigin.x, SpeakerIconOrigin.y, SpeakerIconExtents.x, SpeakerIconExtents.y);
 
 		i++;
 	};
