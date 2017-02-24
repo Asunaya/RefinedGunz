@@ -14,28 +14,28 @@ struct v2i
 	int x, y;
 };
 
-enum ChatWindowAction {
-	CWA_NONE,
-	CWA_MOVING,
-	CWA_RESIZING,
-	CWA_SELECTING,
+enum class ChatWindowAction {
+	None,
+	Moving,
+	Resizing,
+	Selecting,
 };
 
 class Chat
 {
 public:
-	Chat(const std::string &strFont, int nFontSize);
+	Chat(const std::string& FontName, int FontSize);
 	~Chat();
 
-	void EnableInput(bool bEnable, bool bToTeam);
-	void OutputChatMsg(const char *szMsg);
-	void OutputChatMsg(const char *szMsg, u32 dwColor);
+	void EnableInput(bool Enable, bool ToTeam);
+	void OutputChatMsg(const char *Msg);
+	void OutputChatMsg(const char *Msg, u32 Color);
 
 	void OnUpdate();
 	void OnDraw(MDrawContext* pDC);
 	bool OnEvent(MEvent* pEvent);
 
-	void Scale(double fWidthRatio, double fHeightRatio);
+	void Scale(double WidthRatio, double HeightRatio);
 	void Resize(int Width, int Height);
 
 	void ClearHistory();
@@ -44,13 +44,13 @@ public:
 	void SetRect(D3DRECT &r) { Border = r; }
 	void SetRect(int x1, int y1, int x2, int y2) { Border.x1 = x1; Border.y1 = y1; Border.x2 = x2; Border.y2 = y2; }
 
-	float GetFadeTime() const { return fFadeTime; }
-	void SetFadeTime(float fFade) { fFadeTime = fFade; }
+	float GetFadeTime() const { return FadeTime; }
+	void SetFadeTime(float fFade) { FadeTime = fFade; }
 
-	const std::string &GetFont() const { return strFont; }
-	int GetFontSize() const { return nFontSize; }
-	void SetFont(std::string &s) { strFont.assign(s); ResetFonts(); }
-	void SetFontSize(int nSize) { nFontSize = nSize; ResetFonts(); }
+	const std::string &GetFont() const { return FontName; }
+	int GetFontSize() const { return FontSize; }
+	void SetFont(std::string s) { FontName = std::move(s); ResetFonts(); }
+	void SetFontSize(int nSize) { FontSize = nSize; ResetFonts(); }
 
 	D3DCOLOR GetTextColor() const { return TextColor; }
 	D3DCOLOR GetInterfaceColor() const { return InterfaceColor; }
@@ -59,37 +59,39 @@ public:
 	void SetBackgroundColor(D3DCOLOR Color) { BackgroundColor = Color; }
 	void SetInterfaceColor(D3DCOLOR Color) { InterfaceColor = Color; }
 
-	bool IsInputEnabled() const { return bInputEnabled; }
+	bool IsInputEnabled() const { return InputEnabled; }
 
 private:
-	std::string strFont;
-	int nFontSize{};
-	int nFontHeight{};
-	double fFadeTime = 10;
-	std::vector<struct ChatLine> vMsgs;
+	std::string FontName;
+	int FontSize{};
+	int FontHeight{};
+	double FadeTime = 10;
+	std::vector<struct ChatMessage> Msgs;
 	std::vector<struct LineSegmentInfo> LineSegments;
-	bool bInputEnabled{};
+	bool InputEnabled{};
 	POINT Cursor{};
 	D3DRECT Border{};
-	std::unique_ptr<MFontR2> pFont;
-	std::unique_ptr<MFontR2> pItalicFont;
+	MFontR2 DefaultFont;
+	MFontR2 ItalicFont;
 	// The normal font is already bold right now.
-	//MFontR2 *pBoldFont;
-	//MFontR2 *pBoldItalicFont;
-	D3DCOLOR TextColor = CHAT_DEFAULT_TEXT_COLOR;
-	D3DCOLOR InterfaceColor = CHAT_DEFAULT_INTERFACE_COLOR;
-	D3DCOLOR BackgroundColor = CHAT_DEFAULT_BACKGROUND_COLOR;
-	D3DCOLOR SelectionColor = CHAT_DEFAULT_SELECTION_COLOR;
-	ChatWindowAction Action = CWA_NONE;
-	DWORD dwResize{};
-	const ChatLine *pFromMsg{};
-	int nFromPos{};
-	const ChatLine *pToMsg{};
-	int nToPos{};
-	std::vector<std::wstring> vstrInputHistory;
-	int nCurInputHistoryEntry{};
-	std::wstring strField;
-	int nCaretPos = -1;
+	//MFontR2 BoldFont;
+	//MFontR2 BoldItalicFont;
+	u32 TextColor = CHAT_DEFAULT_TEXT_COLOR;
+	u32 InterfaceColor = CHAT_DEFAULT_INTERFACE_COLOR;
+	u32 BackgroundColor = CHAT_DEFAULT_BACKGROUND_COLOR;
+	u32 SelectionColor = CHAT_DEFAULT_SELECTION_COLOR;
+	ChatWindowAction Action = ChatWindowAction::None;
+	u32 ResizeFlags{};
+	struct SelectionStateType {
+		const ChatMessage *FromMsg;
+		int FromPos;
+		const ChatMessage *ToMsg;
+		int ToPos;
+	} SelectionState{};
+	std::vector<std::wstring> InputHistory;
+	int CurInputHistoryEntry{};
+	std::wstring InputField;
+	int CaretPos = -1;
 	/*bool bPlayerList;
 	ID3DXLine *pPlayerListLine;
 	std::vector<std::string> vstrPlayerList;
@@ -99,26 +101,25 @@ private:
 	v2i CaretCoord{};
 
 	void DrawBorder(MDrawContext* pDC);
-	void DrawBackground(MDrawContext* pDC, u64 Time, u64 TPS, int nLimit, bool bShowAll);
-	void DrawChatLines(MDrawContext* pDC, u64 Time, u64 TPS, int nLimit, bool bShowAll);
+	void DrawBackground(MDrawContext* pDC, u64 Time, u64 TPS, int Limit, bool ShowAll);
+	void DrawChatLines(MDrawContext* pDC, u64 Time, u64 TPS, int Limit, bool ShowAll);
 	void DrawSelection(MDrawContext* pDC);
 	void DrawFrame(MDrawContext* pDC, u64 Time, u64 TPS);
-	MFontR2* GetFont(u32 Emphasis);
+	MFontR2& GetFont(u32 Emphasis);
 
 	D3DRECT GetOutputRect();
 	D3DRECT GetInputRect();
 	D3DRECT GetTotalRect();
 	template <typename T>
 	void DivideIntoLines(int ChatLineIndex, T&& OutputIterator);
-	bool GetPos(const ChatLine &cl, unsigned long nPos, POINT *pRet);
-	bool CursorInRange(int x, int y, int nWidth, int nHeight);
-	int GetTextLen(ChatLine &cl, int nPos, int nCount);
-	int GetTextLen(const char *szMsg, int nCount);
+	std::pair<bool, v2i> GetPos(const ChatMessage &cl, unsigned long nPos);
+	bool CursorInRange(int x, int y, int Width, int Height);
+	int GetTextLen(ChatMessage &cl, int Pos, int Count);
+	int GetTextLen(const char *Msg, int Count);
 
-	int GetLines(MFontR2 *pFont, const wchar_t *szMsg, int nWidth, int nSize = -1);
-	int GetTextLength(MFontR2 *pFont, const wchar_t *szFormat, ...);
-	int DrawTextWordWrap(MFontR2 *pFont, const wchar_t *szStr, const D3DRECT &r, DWORD dwColor);
-	void DrawTextN(MFontR2 *pFont, const wchar_t *szStr, const D3DRECT &r, DWORD dwColor, int nLen = -1);
+	int GetTextLength(MFontR2& Font, const wchar_t *Format, ...);
+	int DrawTextWordWrap(MFontR2& Font, const wchar_t *Str, const D3DRECT &r, u32 Color);
+	void DrawTextN(MFontR2& Font, const wchar_t *Str, const D3DRECT &r, u32 Color, int nLen = -1);
 
 	void ResetFonts();
 };

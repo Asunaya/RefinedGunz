@@ -6,28 +6,31 @@
 #include "Config.h"
 #include <wchar.h>
 
-// Resize flags
+namespace ResizeFlagsType
+{
 enum
 {
-	RESIZE_X1 = 1 << 0,
-	RESIZE_Y1 = 1 << 1,
-	RESIZE_X2 = 1 << 2,
-	RESIZE_Y2 = 1 << 3,
+	X1 = 1 << 0,
+	Y1 = 1 << 1,
+	X2 = 1 << 2,
+	Y2 = 1 << 3,
 };
+}
 
-// Note that while FT_WRAP and FT_LINEBREAK are both linebreaks, 
+// Note that while Wrap and Linebreak both act as linebreaks,
 // the former is placed by the line-wrapping mechanism and
 // the latter is explicitly placed by the message creator.
-enum FormatSpecifierType {
-	FT_WRAP,
-	FT_LINEBREAK,
-	FT_COLOR,
-	FT_DEFAULT,
-	FT_BOLD,
-	FT_ITALIC,
-	FT_BOLDITALIC,
-	FT_UNDERLINE,
-	FT_STRIKETHROUGH,
+enum class FormatSpecifierType {
+	Unknown = -1,
+	Wrap,
+	Linebreak,
+	Color,
+	Default,
+	Bold,
+	Italic,
+	BoldItalic,
+	Underline,
+	Strikethrough,
 };
 
 struct FormatSpecifier {
@@ -35,15 +38,15 @@ struct FormatSpecifier {
 	FormatSpecifierType ft;
 	D3DCOLOR Color;
 
-	FormatSpecifier(int nStart, D3DCOLOR c) : nStartPos(nStart), ft(FT_COLOR), Color(c) { }
+	FormatSpecifier(int nStart, D3DCOLOR c) : nStartPos(nStart), ft(FormatSpecifierType::Color), Color(c) { }
 	FormatSpecifier(int nStart, FormatSpecifierType type) : nStartPos(nStart), ft(type) { }
 };
 
-struct ChatLine {
+struct ChatMessage {
 	u64 Time{};
 	std::wstring Msg;
-	D3DCOLOR DefaultColor;
-	std::vector<FormatSpecifier> vFormatSpecifiers;
+	u32 DefaultColor;
+	std::vector<FormatSpecifier> FormatSpecifiers;
 	int Lines{};
 
 	void SubstituteFormatSpecifiers();
@@ -53,18 +56,13 @@ struct ChatLine {
 	}
 
 	void ClearWrappingLineBreaks() {
-		erase_remove_if(vFormatSpecifiers, [&](auto&& x) { return x.ft == FT_WRAP; });
-	}
-
-	int GetNumWrappingLineBreaks() const {
-		std::count_if(vFormatSpecifiers.begin(), vFormatSpecifiers.end(),
-			[&](auto&& x) { return x.ft == FT_WRAP; });
+		erase_remove_if(FormatSpecifiers, [&](auto&& x) { return x.ft == FormatSpecifierType::Wrap; });
 	}
 
 	const FormatSpecifier *GetLineBreak(int n) const {
 		int i = 0;
-		for (auto it = vFormatSpecifiers.begin(); it != vFormatSpecifiers.end(); it++) {
-			if (it->ft == FT_WRAP || it->ft == FT_LINEBREAK) {
+		for (auto it = FormatSpecifiers.begin(); it != FormatSpecifiers.end(); it++) {
+			if (it->ft == FormatSpecifierType::Wrap || it->ft == FormatSpecifierType::Linebreak) {
 				if (i == n)
 					return &*it;
 
@@ -81,25 +79,25 @@ struct ChatLine {
 		if (n < 0)
 			n = 0;
 
-		if (vFormatSpecifiers.begin() == vFormatSpecifiers.end()) {
-			vFormatSpecifiers.emplace_back(n, FT_WRAP);
+		if (FormatSpecifiers.empty()) {
+			FormatSpecifiers.emplace_back(n, FormatSpecifierType::Wrap);
 			// Return the last iterator, since we appended to the end.
-			return std::prev(vFormatSpecifiers.end());
+			return std::prev(FormatSpecifiers.end());
 		}
 
-		for (auto it = vFormatSpecifiers.rbegin(); it != vFormatSpecifiers.rend(); it++) {
+		for (auto it = FormatSpecifiers.rbegin(); it != FormatSpecifiers.rend(); it++) {
 			if (it->nStartPos < n) {
 				// it.base() is AFTER it (in terms of normal order, not reversed),
 				// and insert inserts BEFORE the passed iterator, so this inserts
 				// after the current iterator, which is correct since the
 				// desired index n is after the current format specifier.
-				return vFormatSpecifiers.insert(it.base(), FormatSpecifier(n, FT_WRAP));
+				return FormatSpecifiers.insert(it.base(), FormatSpecifier(n, FormatSpecifierType::Wrap));
 			}
 		}
 
 		// The loop was unable to find a format specifier that precedes
 		// the position, so we must add it at the start.
-		return vFormatSpecifiers.insert(vFormatSpecifiers.begin(), FormatSpecifier(n, FT_WRAP));
+		return FormatSpecifiers.insert(FormatSpecifiers.begin(), FormatSpecifier(n, FormatSpecifierType::Wrap));
 	}
 };
 
@@ -120,8 +118,8 @@ enum
 struct LineSegmentInfo
 {
 	// Index into Chat::vMsgs.
-	int ChatLineIndex;
-	// Offset into ChatLine::Msg at which the substring to be displayed begins.
+	int ChatMessageIndex;
+	// Offset into ChatMessage::Msg at which the substring to be displayed begins.
 	u16 Offset;
 	// Length of the substring, in characters.
 	u16 LengthInCharacters;
@@ -139,12 +137,6 @@ struct LineSegmentInfo
 
 // Stuff crashes if this is increased
 static constexpr int MAX_INPUT_LENGTH = 230;
-
-#ifdef NEW_CHAT
-bool g_bNewChat = true;
-#else
-bool g_bNewChat = false;
-#endif
 
 static std::wstring GetClipboard()
 {
@@ -194,14 +186,20 @@ static bool SetClipboard(const std::wstring& str)
 	return Success;
 }
 
-void ChatLine::SubstituteFormatSpecifiers()
+void ChatMessage::SubstituteFormatSpecifiers()
 {
-	static const std::unordered_map<char, FormatSpecifierType> Map {
-		{ 'b', FT_BOLD },
-		{ 'i', FT_ITALIC },
-		{ 's', FT_STRIKETHROUGH },
-		{ 'u', FT_UNDERLINE },
-		//{ 'n', FT_LINEBREAK }, // Linebreak specifier is disabled.
+	// TODO: Properly handle multiple emphases at once, e.g. both italic and underlined,
+	// and remove only one when one is ended.
+
+	auto CharToFT = [&](char c) {
+		switch (c) {
+		case 'b': return FormatSpecifierType::Bold;
+		case 'i': return FormatSpecifierType::Italic;
+		case 's': return FormatSpecifierType::Strikethrough;
+		case 'u': return FormatSpecifierType::Underline;
+		//case 'n': return FormatSpecifierType::Linebreak;
+		default:  return FormatSpecifierType::Unknown;
+		};
 	};
 
 	const auto npos = std::wstring::npos;
@@ -226,7 +224,7 @@ void ChatLine::SubstituteFormatSpecifiers()
 			{
 				// Simple specifier, e.g. "^1Red text"
 
-				vFormatSpecifiers.emplace_back(Pos, MMColorSet[NextChar - '0']);
+				FormatSpecifiers.emplace_back(Pos, MMColorSet[NextChar - '0']);
 				Erase(2);
 			}
 			else if (NextChar == '#')
@@ -259,7 +257,7 @@ void ChatLine::SubstituteFormatSpecifiers()
 				auto Color = static_cast<D3DCOLOR>(wcstoul(ColorString, &endptr, 16));
 				assert(endptr == ColorString + Distance);
 
-				vFormatSpecifiers.emplace_back(Pos, Color);
+				FormatSpecifiers.emplace_back(Pos, Color);
 				Erase(ColorEnd - Pos);
 			}
 		}
@@ -279,17 +277,17 @@ void ChatLine::SubstituteFormatSpecifiers()
 				// Matches e.g. [/], [/b], [/i]
 
 				// Go back to default text
-				vFormatSpecifiers.emplace_back(Pos, FT_DEFAULT);
+				FormatSpecifiers.emplace_back(Pos, FormatSpecifierType::Default);
 			}
 			else
 			{
 				// Beginning of sequence
 				// Matches e.g. [b], [i]
-				auto it = Map.find(Msg[Pos + 1]);
-				if (it == Map.end())
+				auto ft = CharToFT(Msg[Pos + 1]);
+				if (ft == FormatSpecifierType::Unknown)
 					continue;
 
-				vFormatSpecifiers.emplace_back(Pos, it->second);
+				FormatSpecifiers.emplace_back(Pos, ft);
 			}
 
 			Erase(Distance + 1);
@@ -297,8 +295,8 @@ void ChatLine::SubstituteFormatSpecifiers()
 	}
 }
 
-Chat::Chat(const std::string &strFont, int nFontSize)
-	: strFont{ strFont }, nFontSize{ nFontSize }
+Chat::Chat(const std::string& FontName, int FontSize)
+	: FontName{ FontName }, FontSize{ FontSize }
 {
 	auto ScreenWidth = RGetScreenWidth();
 	auto ScreenHeight = RGetScreenHeight();
@@ -311,25 +309,23 @@ Chat::Chat(const std::string &strFont, int nFontSize)
 	Cursor.x = ScreenWidth / 2;
 	Cursor.y = ScreenHeight / 2;
 
-	pFont = std::make_unique<MFontR2>();
-	pFont->Create("NewChatFont", strFont.c_str(),
-		int(float(nFontSize) / 1080 * RGetScreenHeight() + 0.5), 1, true);
-	pItalicFont = std::make_unique<MFontR2>();
-	pItalicFont->Create("NewChatItalicFont", strFont.c_str(),
-		int(float(nFontSize) / 1080 * RGetScreenHeight() + 0.5), 1, true, true);
+	DefaultFont.Create("NewChatFont", FontName.c_str(),
+		int(float(FontSize) / 1080 * RGetScreenHeight() + 0.5), 1, true);
+	ItalicFont.Create("NewChatItalicFont", FontName.c_str(),
+		int(float(FontSize) / 1080 * RGetScreenHeight() + 0.5), 1, true, true);
 
-	nFontHeight = pFont->GetHeight();
+	FontHeight = DefaultFont.GetHeight();
 }
 
 Chat::~Chat() = default;
 
-void Chat::EnableInput(bool bEnable, bool bToTeam){
-	bInputEnabled = bEnable;
+void Chat::EnableInput(bool Enable, bool ToTeam){
+	InputEnabled = Enable;
 
-	if (bEnable){
-		strField.clear();
+	if (Enable){
+		InputField.clear();
 
-		nCaretPos = -1;
+		CaretPos = -1;
 
 		SetCursorPos(RGetScreenWidth() / 2, RGetScreenHeight() / 2);
 	}
@@ -339,24 +335,23 @@ void Chat::EnableInput(bool bEnable, bool bToTeam){
 		//ZGetInput()->m_fRotationDeltaX = 0.f;
 		//ZGetInput()->m_fRotationDeltaY = 0.f;
 
-		pFromMsg = 0;
-		pToMsg = 0;
+		SelectionState = SelectionStateType{};
 	}
 
-	ZGetGameInterface()->SetCursorEnable(bEnable);
+	ZGetGameInterface()->SetCursorEnable(Enable);
 
-	ZPostPeerChatIcon(bEnable);
+	ZPostPeerChatIcon(Enable);
 }
 
-void Chat::OutputChatMsg(const char *szMsg){
-	OutputChatMsg(szMsg, TextColor);
+void Chat::OutputChatMsg(const char *Msg){
+	OutputChatMsg(Msg, TextColor);
 }
 
-static std::wstring UTF8toUTF16(const char* szMsg)
+static std::wstring UTF8toUTF16(const char* Msg)
 {
 	wchar_t WideBuffer[1024];
 	auto len = MultiByteToWideChar(CP_UTF8, 0,
-		szMsg, -1,
+		Msg, -1,
 		WideBuffer, std::size(WideBuffer));
 	if (len == 0)
 	{
@@ -368,30 +363,22 @@ static std::wstring UTF8toUTF16(const char* szMsg)
 
 void Chat::OutputChatMsg(const char *szMsg, u32 dwColor)
 {
-	vMsgs.emplace_back();
-	auto&& Msg = vMsgs.back();
+	Msgs.emplace_back();
+	auto&& Msg = Msgs.back();
 	Msg.Time = QPC();
 	Msg.Msg = UTF8toUTF16(szMsg);
 	Msg.DefaultColor = dwColor;
 
 	Msg.SubstituteFormatSpecifiers();
-	DivideIntoLines(vMsgs.size() - 1, std::back_inserter(LineSegments));
+	DivideIntoLines(Msgs.size() - 1, std::back_inserter(LineSegments));
 }
 
-int Chat::GetLines(MFontR2 *pFont, const wchar_t *szMsg, int nWidth, int nSize)
-{
-	int nMsgWidth = pFont->GetWidth(szMsg, nSize);
-	return nMsgWidth / nWidth + (nMsgWidth % nWidth != 0);
-}
+void Chat::Scale(double WidthRatio, double HeightRatio){
+	Border.x1 *= WidthRatio;
+	Border.x2 *= WidthRatio;
+	Border.y1 *= HeightRatio;
+	Border.y2 *= HeightRatio;
 
-void Chat::Scale(double fWidthRatio, double fHeightRatio){
-	//MLog("Scale: %f, %f\n", fWidthRatio, fHeightRatio);
-	Border.x1 *= fWidthRatio;
-	Border.x2 *= fWidthRatio;
-	Border.y1 *= fHeightRatio;
-	Border.y2 *= fHeightRatio;
-
-	//nFontSize *= fHeightRatio;
 	ResetFonts();
 }
 
@@ -407,21 +394,21 @@ void Chat::Resize(int nWidth, int nHeight)
 
 void Chat::ClearHistory()
 {
-	vMsgs.clear();
+	Msgs.clear();
 }
 
 bool Chat::CursorInRange(int x1, int y1, int x2, int y2){
 	return Cursor.x > x1 && Cursor.x < x2 && Cursor.y > y1 && Cursor.y < y2;
 }
 
-int Chat::GetTextLength(MFontR2 *pFont, const wchar_t *szFormat, ...)
+int Chat::GetTextLength(MFontR2& Font, const wchar_t *Format, ...)
 {
 	wchar_t buf[256];
 	va_list va;
-	va_start(va, szFormat);
-	vswprintf_safe(buf, szFormat, va);
+	va_start(va, Format);
+	vswprintf_safe(buf, Format, va);
 	va_end(va);
-	return pFont->GetWidth(buf);
+	return Font.GetWidth(buf);
 }
 
 struct CaretType
@@ -429,13 +416,13 @@ struct CaretType
 	int TotalTextHeight;
 	v2i CaretPos;
 };
-static CaretType GetCaretPos(MFontR2* pFont, const wchar_t* Text, int CaretPos, int Width)
+static CaretType GetCaretPos(MFontR2& Font, const wchar_t* Text, int CaretPos, int Width)
 {
 	CaretType ret{ 1, { 0, 1 } };
 	v2i Cursor{ 0, 1 };
 	for (auto c = Text; *c != 0; ++c)
 	{
-		auto CharWidth = pFont->GetWidth(c, 1);
+		auto CharWidth = Font.GetWidth(c, 1);
 
 		Cursor.x += CharWidth;
 		if (Cursor.x > Width)
@@ -452,56 +439,60 @@ static CaretType GetCaretPos(MFontR2* pFont, const wchar_t* Text, int CaretPos, 
 	return ret;
 }
 
-bool Chat::GetPos(const ChatLine &c, unsigned long nPos, POINT *pRet){
-	if (nPos > c.Msg.length())
-		return 0;
+std::pair<bool, v2i> Chat::GetPos(const ChatMessage &c, unsigned long Pos)
+{
+	std::pair<bool, v2i> ret{ false, {0, 0} };
+	if (Pos > c.Msg.length())
+		return ret;
 
 	D3DRECT Output = GetOutputRect();
 
-	int nLimit = (Output.y2 - Output.y1 - 10) / nFontHeight;
+	int Limit = (Output.y2 - Output.y1 - 10) / FontHeight;
 
 	int nLines = 0;
 
-	for (int i = vMsgs.size() - 1; nLines < nLimit && i >= 0; i--){
-		ChatLine &cl = vMsgs.at(i);
+	for (int i = Msgs.size() - 1; nLines < Limit && i >= 0; i--){
+		auto &cl = Msgs.at(i);
 
 		if (&c == &cl){
 			int nOffset = 0;
 
 			if (c.GetLines() == 1){
-				pRet->y = Output.y2 - 5 - (nLines) * nFontHeight - nFontHeight * .5;
+				ret.second.y = Output.y2 - 5 - (nLines) * FontHeight - FontHeight * .5;
 			}
 			else{
 				int nLine = 0;
 
 				for (int i = 0; i < c.GetLines() - 1; i++){
-					if (int(nPos) < c.GetLineBreak(i)->nStartPos)
+					if (int(Pos) < c.GetLineBreak(i)->nStartPos)
 						break;
 
 					nLine++;
 				}
 
-				pRet->y = Output.y2 - 5 - (nLines - nLine) * nFontHeight - nFontHeight * .5;
+				ret.second.y = Output.y2 - 5 - (nLines - nLine) * FontHeight - FontHeight * .5;
 
 				if (nLine > 0)
 					nOffset = c.GetLineBreak(nLine - 1)->nStartPos;
 			}
 
-			pRet->x = Output.x1 + 5 + GetTextLength(pFont.get(), L"%.*s_", nPos - nOffset, &c.Msg.at(nOffset)) - GetTextLength(pFont.get(), L"_");
+			ret.second.x = Output.x1 + 5 + GetTextLength(DefaultFont, L"%.*s_", Pos - nOffset,
+				&c.Msg.at(nOffset)) - GetTextLength(DefaultFont, L"_");
 
-			return 1;
+			ret.first = true;
+			return ret;
 		}
 
 		nLines += cl.GetLines();
 	}
 
-	return 0;
+	return ret;
 }
 
 bool Chat::OnEvent(MEvent* pEvent){
-	if (!bInputEnabled) {
+	if (!InputEnabled) {
 		if (pEvent->nMessage == MWM_CHAR && pEvent->nKey == VK_RETURN) {
-			EnableInput(1, 0);
+			EnableInput(true, false);
 		}
 
 		return false;
@@ -511,11 +502,11 @@ bool Chat::OnEvent(MEvent* pEvent){
 		switch (pEvent->nKey) {
 
 		case VK_HOME:
-			nCaretPos = -1;
+			CaretPos = -1;
 			break;
 
 		case VK_END:
-			nCaretPos = strField.length() - 1;
+			CaretPos = InputField.length() - 1;
 			break;
 
 		case VK_TAB:
@@ -539,21 +530,21 @@ bool Chat::OnEvent(MEvent* pEvent){
 			}
 			else{
 			std::string &strEntry = vstrPlayerList.at(nCurPlayer);
-			strField.insert(nCaretPos + 1, strEntry);
-			nCaretPos += strEntry.length();
+			InputField.insert(CaretPos + 1, strEntry);
+			CaretPos += strEntry.length();
 			vstrPlayerList.clear();
 			}*/
 
 		{
-			size_t StartPos = strField.rfind(0x20);
+			size_t StartPos = InputField.rfind(0x20);
 			if (StartPos == std::string::npos)
 				StartPos = 0;
 			else
 				StartPos++;
 
-			size_t PartialNameLength = strField.size() - StartPos;
+			size_t PartialNameLength = InputField.size() - StartPos;
 
-			auto PartialName = strField.data() + StartPos;
+			auto PartialName = InputField.data() + StartPos;
 
 			for (auto &it : *ZGetCharacterManager())
 			{
@@ -572,14 +563,14 @@ bool Chat::OnEvent(MEvent* pEvent){
 
 				if (!_wcsnicmp(PartialName, WidePlayerName, PartialNameLength))
 				{
-					if (strField.size() + PlayerNameLength - PartialNameLength > MAX_INPUT_LENGTH)
+					if (InputField.size() + PlayerNameLength - PartialNameLength > MAX_INPUT_LENGTH)
 						break;
 
 					for (size_t i = 0; i < PartialNameLength; i++)
-						strField.erase(strField.size() - 1);
+						InputField.erase(InputField.size() - 1);
 
-					strField.append(WidePlayerName);
-					nCaretPos += PlayerNameLength - PartialNameLength;
+					InputField.append(WidePlayerName);
+					CaretPos += PlayerNameLength - PartialNameLength;
 					break;
 				}
 			}
@@ -594,10 +585,10 @@ bool Chat::OnEvent(MEvent* pEvent){
 				break;
 			}*/
 
-			if (nCurInputHistoryEntry > 0) {
-				nCurInputHistoryEntry--;
-				strField.assign(vstrInputHistory.at(nCurInputHistoryEntry));
-				nCaretPos = vstrInputHistory.at(nCurInputHistoryEntry).length() - 1;
+			if (CurInputHistoryEntry > 0) {
+				CurInputHistoryEntry--;
+				InputField.assign(InputHistory.at(CurInputHistoryEntry));
+				CaretPos = InputHistory.at(CurInputHistoryEntry).length() - 1;
 			}
 			break;
 
@@ -608,27 +599,27 @@ bool Chat::OnEvent(MEvent* pEvent){
 				break;
 			}*/
 
-			if (nCurInputHistoryEntry < int(vstrInputHistory.size()) - 1) {
-				nCurInputHistoryEntry++;
-				auto&& strEntry = vstrInputHistory.at(nCurInputHistoryEntry);
-				strField.assign(strEntry);
-				nCaretPos = strEntry.length() - 1;
+			if (CurInputHistoryEntry < int(InputHistory.size()) - 1) {
+				CurInputHistoryEntry++;
+				auto&& strEntry = InputHistory.at(CurInputHistoryEntry);
+				InputField.assign(strEntry);
+				CaretPos = strEntry.length() - 1;
 			}
 			else {
-				strField.clear();
-				nCaretPos = -1;
+				InputField.clear();
+				CaretPos = -1;
 			}
 
 			break;
 
 		case VK_LEFT:
-			if (nCaretPos >= 0)
-				nCaretPos--;
+			if (CaretPos >= 0)
+				CaretPos--;
 			break;
 
 		case VK_RIGHT:
-			if (nCaretPos < int(strField.length()) - 1)
-				nCaretPos++;
+			if (CaretPos < int(InputField.length()) - 1)
+				CaretPos++;
 			break;
 
 		case 'V':
@@ -637,12 +628,12 @@ bool Chat::OnEvent(MEvent* pEvent){
 				break;
 
 			auto Clipboard = GetClipboard();
-			if (strField.length() + Clipboard.length() > MAX_INPUT_LENGTH)
+			if (InputField.length() + Clipboard.length() > MAX_INPUT_LENGTH)
 			{
-				strField += Clipboard.substr(0, MAX_INPUT_LENGTH - strField.length());
+				InputField += Clipboard.substr(0, MAX_INPUT_LENGTH - InputField.length());
 			}
 			else
-				strField += Clipboard;
+				InputField += Clipboard;
 
 			break;
 		}
@@ -658,50 +649,50 @@ bool Chat::OnEvent(MEvent* pEvent){
 		case VK_RETURN:
 			/*if (bPlayerList){
 				std::string &strEntry = vstrPlayerList.at(nCurPlayer);
-				strField.insert(nCaretPos + 1, strEntry);
-				nCaretPos += strEntry.length();
+				InputField.insert(CaretPos + 1, strEntry);
+				CaretPos += strEntry.length();
 				vstrPlayerList.clear();
 				bPlayerList = 0;
 				break;
 			}*/
 
-			if (strField.compare(L"")) {
-				vstrInputHistory.push_back(strField);
-				nCurInputHistoryEntry = vstrInputHistory.size();
+			if (InputField.compare(L"")) {
+				InputHistory.push_back(InputField);
+				CurInputHistoryEntry = InputHistory.size();
 
 				char MultibyteString[1024];
 				WideCharToMultiByte(CP_UTF8, 0,
-					strField.c_str(), -1,
+					InputField.c_str(), -1,
 					MultibyteString, std::size(MultibyteString),
 					nullptr, nullptr);
 
 				ZGetGameInterface()->GetChat()->Input(MultibyteString);
-				strField.clear();
+				InputField.clear();
 			}
 
-			EnableInput(0, 0);
+			EnableInput(false, false);
 			break;
 
 		case VK_BACK:
-			if (nCaretPos >= 0) {
-				strField.erase(nCaretPos, 1);
-				nCaretPos--;
+			if (CaretPos >= 0) {
+				InputField.erase(CaretPos, 1);
+				CaretPos--;
 			}
 			break;
 		case VK_ESCAPE:
-			EnableInput(0, 0);
+			EnableInput(false, false);
 			break;
 
 		default:
-			if (strField.length() < MAX_INPUT_LENGTH) {
+			if (InputField.length() < MAX_INPUT_LENGTH) {
 				if (pEvent->nKey < 27) // Ctrl + A-Z
 					break;
 
-				strField.insert(nCaretPos + 1, 1, pEvent->nKey);
+				InputField.insert(CaretPos + 1, 1, pEvent->nKey);
 
 				auto SlashR = L"/r ";
 				auto SlashWhisper = L"/whisper ";
-				if (strField == SlashR)
+				if (InputField == SlashR)
 				{
 					std::wstring LastSenderWide;
 					LastSenderWide.resize(MATCHOBJECT_NAME_LENGTH);
@@ -714,29 +705,29 @@ bool Chat::OnEvent(MEvent* pEvent){
 
 					LastSenderWide.resize(len);
 
-					strField = SlashWhisper;
-					strField += LastSenderWide;
-					nCaretPos = strField.length() - 1;
+					InputField = SlashWhisper;
+					InputField += LastSenderWide;
+					CaretPos = InputField.length() - 1;
 				}
 				else
-					nCaretPos++;
+					CaretPos++;
 			}
 		};
 	}
 
-	auto ret = GetCaretPos(pFont.get(), strField.c_str(), nCaretPos, Border.x2 - (Border.x1 + 5));
+	auto ret = GetCaretPos(DefaultFont, InputField.c_str(), CaretPos, Border.x2 - (Border.x1 + 5));
 	InputHeight = ret.TotalTextHeight;
 	CaretCoord = ret.CaretPos;
 
 	return true;
 }
 
-int Chat::GetTextLen(ChatLine &cl, int nPos, int nCount){
-	return GetTextLength(pFont.get(), L"_%.*s_", nCount, &cl.Msg.at(nPos)) - GetTextLength(pFont.get(), L"__");
+int Chat::GetTextLen(ChatMessage &cl, int Pos, int Count){
+	return GetTextLength(DefaultFont, L"_%.*s_", Count, &cl.Msg.at(Pos)) - GetTextLength(DefaultFont, L"__");
 }
 
-int Chat::GetTextLen(const char *szMsg, int nCount){
-	return GetTextLength(pFont.get(), L"_%.*s_", nCount, szMsg) - GetTextLength(pFont.get(), L"__");
+int Chat::GetTextLen(const char *Msg, int Count){
+	return GetTextLength(DefaultFont, L"_%.*s_", Count, Msg) - GetTextLength(DefaultFont, L"__");
 }
 
 void Chat::OnUpdate(){
@@ -745,55 +736,66 @@ void Chat::OnUpdate(){
 
 	v2 MinimumSize{ 192.f * RGetScreenWidth() / 1920.f, 108.f * RGetScreenHeight() / 1080.f };
 
-	if (dwResize){
-		if (dwResize & RESIZE_X1 && Border.x1 + Cursor.x - PrevCursorPos.x < Border.x2 - MinimumSize.x)
+	if (ResizeFlags){
+		if (ResizeFlags & ResizeFlagsType::X1 &&
+			Border.x1 + Cursor.x - PrevCursorPos.x < Border.x2 - MinimumSize.x) {
 			Border.x1 += Cursor.x - PrevCursorPos.x;
-		if (dwResize & RESIZE_X2 && Border.x2 + Cursor.x - PrevCursorPos.x > Border.x1 + MinimumSize.x)
+		}
+		if (ResizeFlags & ResizeFlagsType::X2 &&
+			Border.x2 + Cursor.x - PrevCursorPos.x > Border.x1 + MinimumSize.x) {
 			Border.x2 += Cursor.x - PrevCursorPos.x;
-		if (dwResize & RESIZE_Y1 && Border.y1 + Cursor.y - PrevCursorPos.y < Border.y2 - MinimumSize.y)
+		}
+		if (ResizeFlags & ResizeFlagsType::Y1 &&
+			Border.y1 + Cursor.y - PrevCursorPos.y < Border.y2 - MinimumSize.y) {
 			Border.y1 += Cursor.y - PrevCursorPos.y;
-		if (dwResize & RESIZE_Y2 && Border.y2 + Cursor.y - PrevCursorPos.y > Border.y1 + MinimumSize.y)
+		}
+		if (ResizeFlags & ResizeFlagsType::Y2 &&
+			Border.y2 + Cursor.y - PrevCursorPos.y > Border.y1 + MinimumSize.y) {
 			Border.y2 += Cursor.y - PrevCursorPos.y;
+		}
 
 		LineSegments.clear();
-		for (int i = 0; i < int(vMsgs.size()); ++i)
+		for (int i = 0; i < int(Msgs.size()); ++i)
 			DivideIntoLines(i, std::back_inserter(LineSegments));
 	}
 
-	if (Action == CWA_MOVING){
+	if (Action == ChatWindowAction::Moving){
 		Border.x1 += Cursor.x - PrevCursorPos.x;
 		Border.y1 += Cursor.y - PrevCursorPos.y;
 		Border.x2 += Cursor.x - PrevCursorPos.x;
 		Border.y2 += Cursor.y - PrevCursorPos.y;
 	}
 
-	if (pFromMsg && pToMsg && GetAsyncKeyState(VK_CONTROL) & 0x8000 && GetAsyncKeyState('C') & 0x8000){
+	if (SelectionState.FromMsg && SelectionState.ToMsg &&
+		GetAsyncKeyState(VK_CONTROL) & 0x8000 && GetAsyncKeyState('C') & 0x8000){
 		if (OpenClipboard(g_hWnd)){
 			EmptyClipboard();
 
-			if (pFromMsg == pToMsg){
-				auto str = pFromMsg->Msg.substr(min(nFromPos, nToPos));
+			if (SelectionState.FromMsg == SelectionState.ToMsg){
+				auto index = min(SelectionState.FromPos, SelectionState.ToPos);
+				auto str = SelectionState.FromMsg->Msg.substr(index);
 				SetClipboard(str);
 			}
 			else{
 				std::wstring str;
 
-				bool bFirstFound = 0;
+				bool FirstFound = false;
 
-				for (std::vector<ChatLine>::const_iterator it = vMsgs.begin(); it != vMsgs.end(); it++){
-					const ChatLine *pcl = &*it;
+				for (auto it = Msgs.begin(); it != Msgs.end(); it++){
+					auto* pcl = &*it;
 
-					if (pcl == pFromMsg || pcl == pToMsg){
-						if (!bFirstFound){
-							int nPos = pcl == pFromMsg ? nFromPos : nToPos;
+					if (pcl == SelectionState.FromMsg || pcl == SelectionState.ToMsg){
+						if (!FirstFound){
+							auto nPos = pcl == SelectionState.FromMsg ?
+								SelectionState.FromPos : SelectionState.ToPos;
 							str.append(&pcl->Msg.at(nPos));
 
-							bFirstFound = 1;
-
+							FirstFound = true;
 							continue;
 						}
 						else{
-							int nPos = pcl == pFromMsg ? nFromPos : nToPos;
+							auto nPos = pcl == SelectionState.FromMsg ?
+								SelectionState.FromPos : SelectionState.ToPos;
 							str.append(L"\n");
 							str.append(pcl->Msg.c_str(), nPos + 2);
 
@@ -801,13 +803,13 @@ void Chat::OnUpdate(){
 						}
 					}
 
-					if (bFirstFound){
+					if (FirstFound){
 						str.append(L"\n");
 						str.append(pcl->Msg.c_str());
 					}
 				}
 
-				if (bFirstFound){
+				if (FirstFound){
 					SetClipboard(str);
 				}
 			}
@@ -818,171 +820,154 @@ void Chat::OnUpdate(){
 
 	const int nBorderWidth = 5;
 
-	//dwResize = 0;
-	if (GetAsyncKeyState(VK_LBUTTON) & 0x8000){
-		if (Action == CWA_NONE){
+	// TODO: Move to OnEvent
+	if (GetAsyncKeyState(VK_LBUTTON) & 0x8000) {
+		if (Action == ChatWindowAction::None) {
 			D3DRECT tr = GetTotalRect();
 
-			if (CursorInRange(tr.x1 - nBorderWidth, tr.y1 - nBorderWidth, tr.x1 + nBorderWidth, tr.y2 + nBorderWidth))
-				dwResize |= RESIZE_X1;
-			if (CursorInRange(tr.x1 - nBorderWidth, tr.y1 - nBorderWidth, tr.x2 + nBorderWidth, tr.y1 + nBorderWidth))
-				dwResize |= RESIZE_Y1;
-			if (CursorInRange(tr.x2 - nBorderWidth, tr.y1 - nBorderWidth, tr.x2 + nBorderWidth, tr.y2 + nBorderWidth))
-				dwResize |= RESIZE_X2;
-			if (CursorInRange(tr.x1 - nBorderWidth, tr.y2 - nBorderWidth, tr.x2 + nBorderWidth, tr.y2 + nBorderWidth))
-				dwResize |= RESIZE_Y2;
+			if (CursorInRange(tr.x1 - nBorderWidth, tr.y1 - nBorderWidth,
+				tr.x1 + nBorderWidth, tr.y2 + nBorderWidth)) {
+				ResizeFlags |= ResizeFlagsType::X1;
+			}
+			if (CursorInRange(tr.x1 - nBorderWidth, tr.y1 - nBorderWidth,
+				tr.x2 + nBorderWidth, tr.y1 + nBorderWidth)) {
+				ResizeFlags |= ResizeFlagsType::Y1;
+			}
+			if (CursorInRange(tr.x2 - nBorderWidth, tr.y1 - nBorderWidth,
+				tr.x2 + nBorderWidth, tr.y2 + nBorderWidth)) {
+				ResizeFlags |= ResizeFlagsType::X2;
+			}
+			if (CursorInRange(tr.x1 - nBorderWidth, tr.y2 - nBorderWidth,
+				tr.x2 + nBorderWidth, tr.y2 + nBorderWidth)) {
+				ResizeFlags |= ResizeFlagsType::Y2;
+			}
 
-			if (dwResize)
-				Action = CWA_RESIZING;
+			if (ResizeFlags)
+				Action = ChatWindowAction::Resizing;
 		}
 
-		if (CursorInRange(Border.x2 - 15, Border.y1 - 18, Border.x2 - 15 + 12, Border.y1 - 18 + nFontHeight) && Action == CWA_NONE){
+		if (CursorInRange(Border.x2 - 15, Border.y1 - 18, Border.x2 - 15 + 12, Border.y1 - 18 + FontHeight) &&
+			Action == ChatWindowAction::None) {
 			Border.x1 = 10;
 			Border.y1 = double(1080 - 300) / 1080 * RGetScreenHeight();
 			Border.x2 = (double)500 / 1920 * RGetScreenWidth();
 			Border.y2 = double(1080 - 100) / 1080 * RGetScreenHeight();
 		}
-		else if (CursorInRange(Border.x1 + 5, Border.y1 + 5, Border.x2 - 5, Border.y2 - 5)){
-			if (Action != CWA_SELECTING){
-				D3DRECT Output = GetOutputRect();
+		else if (CursorInRange(Border.x1 + 5, Border.y1 + 5, Border.x2 - 5, Border.y2 - 5)) {
+			if (Action != ChatWindowAction::Selecting) {
+				auto&& Output = GetOutputRect();
 
-				int nLimit = (Output.y2 - Output.y1 - 10) / nFontHeight;
-				cprint("nLimit: %d\n", nLimit);
+				int Limit = (Output.y2 - Output.y1 - 10) / FontHeight;
+				int Line = Limit - ((Output.y2 - 5) - Cursor.y) / FontHeight;
 
-				int nLine = nLimit - ((Output.y2 - 5) - Cursor.y) / nFontHeight;
-				cprint("nLine: %d\n", nLine);
-
-				int i = vMsgs.size() - 1;
-				int nCurLine = nLimit + 1;
+				int i = Msgs.size() - 1;
+				int CurLine = Limit + 1;
 
 				while (i >= 0){
-					ChatLine &cl = vMsgs.at(i);
+					auto&& cl = Msgs[i];
 
-					if (nCurLine - cl.GetLines() <= nLine){
-						pFromMsg = &cl;
-						Action = CWA_SELECTING;
+					if (CurLine - cl.GetLines() <= Line){
+						SelectionState.FromMsg = &cl;
+						Action = ChatWindowAction::Selecting;
 
-						unsigned long nPos = nCurLine - cl.GetLines() == nLine ? 0 : cl.GetLineBreak(nLine - (nCurLine - cl.GetLines()) - 1)->nStartPos;
+						auto Pos = CurLine - cl.GetLines() == Line ?
+							0 : cl.GetLineBreak(Line - (CurLine - cl.GetLines()) - 1)->nStartPos;
 						int x = Cursor.x - (Output.x1 + 5);
-						int nLen = 0;
+						int Len = 0;
 
-						while (x > nLen && nPos < cl.Msg.length()){
-							nLen += GetTextLen(cl, nPos, 1);
-							nPos++;
-
-							/*if(nPos == cl.Msg.size()){
-							pFromMsg = 0;
-							pToMsg = 0;
-
-							goto doublebreak;
-							}*/
+						while (x > Len && Pos < int(cl.Msg.length())){
+							Len += GetTextLen(cl, Pos, 1);
+							Pos++;
 						}
 
-						nPos--;
+						Pos--;
 
-						if (nLen - GetTextLen(cl, nPos, 1) / 2 > x)
-							nFromPos = nPos - 1;
+						if (Len - GetTextLen(cl, Pos, 1) / 2 > x)
+							SelectionState.FromPos = Pos - 1;
 						else
-							nFromPos = nPos;
-
-						//cprint("nFromMsg: %s\nnFromPos = %d\n", cl.Msg.c_str(), nFromPos);
+							SelectionState.FromPos = Pos;
 
 						break;
 					}
 
-					nCurLine -= cl.GetLines();
+					CurLine -= cl.GetLines();
 					i--;
 				}
 
 				if (i < 0){
-					pFromMsg = 0;
-					pToMsg = 0;
+					SelectionState.FromMsg = 0;
+					SelectionState.ToMsg = 0;
 				}
 			}
 			else{
-				D3DRECT Output = GetOutputRect();
+				auto&& Output = GetOutputRect();
 
-				int nLimit = (Output.y2 - Output.y1 - 10) / nFontHeight;
-				//cprint("nLimit: %d\n", nLimit);
+				int Limit = (Output.y2 - Output.y1 - 10) / FontHeight;
+				int Line = Limit - ((Output.y2 - 5) - Cursor.y) / FontHeight;
 
-				int nLine = nLimit - ((Output.y2 - 5) - Cursor.y) / nFontHeight;
-				//cprint("nLine: %d\n", nLine);
-
-				int i = vMsgs.size() - 1;
-				int nCurLine = nLimit + 1;
+				int i = Msgs.size() - 1;
+				int CurLine = Limit + 1;
 
 				while (i >= 0){
-					ChatLine &cl = vMsgs.at(i);
+					auto&& cl = Msgs.at(i);
 
-					if (nCurLine - cl.GetLines() <= nLine || i == 0){
-						pToMsg = &cl;
+					if (CurLine - cl.GetLines() <= Line || i == 0){
+						SelectionState.ToMsg = &cl;
 
-						unsigned long nPos;
+						int Pos;
 
-						if (nCurLine - cl.GetLines() <= nLine)
-							nPos = nCurLine - cl.GetLines() == nLine ? 0 : cl.GetLineBreak(nLine - (nCurLine - cl.GetLines()) - 1)->nStartPos;
+						if (CurLine - cl.GetLines() <= Line)
+							Pos = CurLine - cl.GetLines() == Line ?
+								0 : cl.GetLineBreak(Line - (CurLine - cl.GetLines()) - 1)->nStartPos;
 						else
-							nPos = 0;
+							Pos = 0;
 
 						int x = Cursor.x - (Output.x1 + 5);
 						int nLen = 0;
 
-						while (x > nLen && nPos < cl.Msg.length()){
-							nLen += GetTextLen(cl, nPos, 1);
-							nPos++;
+						while (x > nLen && Pos < int(cl.Msg.length())){
+							nLen += GetTextLen(cl, Pos, 1);
+							Pos++;
 						}
 
-						nPos--;
+						Pos--;
 
-						if (nLen - GetTextLen(cl, nPos, 1) / 2 > x)
-							nToPos = nPos - 1;
+						if (nLen - GetTextLen(cl, Pos, 1) / 2 > x)
+							SelectionState.ToPos = Pos - 1;
 						else
-							nToPos = nPos;
-
-						//cprint("nToMsg: %s\nnToPos = %d\n", cl.Msg.c_str(), nToPos);
+							SelectionState.ToPos = Pos;
 
 						break;
 					}
 
-					nCurLine -= cl.GetLines();
+					CurLine -= cl.GetLines();
 					i--;
 				}
-
-				/*if(i < 0){
-				pFromMsg = 0;
-				pToMsg = 0;
-				}*/
 			}
 		}
-		else if (Action != CWA_SELECTING){
-			pFromMsg = 0;
-			pToMsg = 0;
+		else if (Action != ChatWindowAction::Selecting){
+			SelectionState.FromMsg = 0;
+			SelectionState.ToMsg = 0;
 		}
 
-		if (Action == CWA_NONE && CursorInRange(Border.x1, Border.y1 - 20, Border.x2 + 1, Border.y1))
-			Action = CWA_MOVING;
+		if (Action == ChatWindowAction::None &&
+			CursorInRange(Border.x1, Border.y1 - 20, Border.x2 + 1, Border.y1))
+			Action = ChatWindowAction::Moving;
 	}
-	else if (GetAsyncKeyState(VK_RBUTTON) & 0x8000){
-	}
-	else{
-		Action = CWA_NONE;
-		dwResize = 0;
-		/*if(bSelecting && pFromMsg && pToMsg){
-		cprint("Message selected! %d\n", pFromMsg == pToMsg);
-		if(pFromMsg == pToMsg)
-		cprint("%.*s\nnFromPos = %d; nToPos = %d; pToMsg->Msg.c_str(): %s; pToMsg->Msg.length(): %d\n",
-		abs(nToPos - nFromPos), &pFromMsg->Msg.at(min(nFromPos, nToPos)), nFromPos, nToPos, pToMsg->Msg.c_str(), pToMsg->Msg.length());
-		}*/
+	else
+	{
+		Action = ChatWindowAction::None;
+		ResizeFlags = 0;
 	}
 }
 
 D3DRECT Chat::GetOutputRect(){
-	D3DRECT r = { Border.x1, Border.y1, Border.x2, Border.y2 - nFontHeight };
+	D3DRECT r = { Border.x1, Border.y1, Border.x2, Border.y2 - FontHeight };
 	return r;
 }
 
 D3DRECT Chat::GetInputRect(){
-	D3DRECT r = { Border.x1, Border.y2 - nFontHeight, Border.x2, Border.y2 + (InputHeight - 1) * nFontHeight };
+	D3DRECT r = { Border.x1, Border.y2 - FontHeight, Border.x2, Border.y2 + (InputHeight - 1) * FontHeight };
 	return r;
 }
 
@@ -991,6 +976,8 @@ D3DRECT Chat::GetTotalRect(){
 	return r;
 }
 
+// Converts a D3DRECT, which is specified in terms of the coordinates of each corner,
+// to an MRECT, which is specified in terms of the top left coordinate and the extents.
 static MRECT MakeMRECT(const D3DRECT& src)
 {
 	return{
@@ -1003,20 +990,20 @@ static MRECT MakeMRECT(const D3DRECT& src)
 
 void Chat::OnDraw(MDrawContext* pDC)
 {
-	bool bShowAll = ZIsActionKeyPressed(ZACTION_SHOW_FULL_CHAT) && !bInputEnabled;
+	bool ShowAll = ZIsActionKeyPressed(ZACTION_SHOW_FULL_CHAT) && !InputEnabled;
 	auto&& Output = GetOutputRect();
 
-	int nLimit;
-	if (bShowAll)
-		nLimit = (Output.y2 - 5) / nFontHeight;
+	int Limit;
+	if (ShowAll)
+		Limit = (Output.y2 - 5) / FontHeight;
 	else
-		nLimit = (Output.y2 - Output.y1 - 10) / nFontHeight;
+		Limit = (Output.y2 - Output.y1 - 10) / FontHeight;
 
 	auto Time = QPC();
 	auto TPS = QPF();
 
-	DrawBackground(pDC, Time, TPS, nLimit, bShowAll);
-	DrawChatLines(pDC, Time, TPS, nLimit, bShowAll);
+	DrawBackground(pDC, Time, TPS, Limit, ShowAll);
+	DrawChatLines(pDC, Time, TPS, Limit, ShowAll);
 	DrawSelection(pDC);
 	
 	if (IsInputEnabled()) {
@@ -1024,17 +1011,17 @@ void Chat::OnDraw(MDrawContext* pDC)
 	}
 }
 
-int Chat::DrawTextWordWrap(MFontR2 *pFont, const wchar_t *szStr, const D3DRECT &r, DWORD dwColor)
+int Chat::DrawTextWordWrap(MFontR2& Font, const wchar_t *Str, const D3DRECT &r, u32 Color)
 {
 	int Lines = 1;
-	int StringLength = wcslen(szStr);
+	int StringLength = wcslen(Str);
 	int CurrentLineLength = 0;
 	int MaxLineLength = r.x2 - r.x1;
 
 	for (int i = 0; i < StringLength; i++)
 	{
-		int CharWidth = pFont->GetWidth(szStr + i, 1);
-		int CharHeight = pFont->GetHeight();
+		int CharWidth = Font.GetWidth(Str + i, 1);
+		int CharHeight = Font.GetHeight();
 
 		if (CurrentLineLength + CharWidth > MaxLineLength)
 		{
@@ -1044,9 +1031,9 @@ int Chat::DrawTextWordWrap(MFontR2 *pFont, const wchar_t *szStr, const D3DRECT &
 
 		auto x = r.x1 + CurrentLineLength;
 		auto y = r.y1 + (CharHeight + 1) * max(0, Lines - 1);
-		pFont->m_Font.DrawTextN(x, y,
-			szStr + i, 1,
-			dwColor);
+		Font.m_Font.DrawTextN(x, y,
+			Str + i, 1,
+			Color);
 
 		CurrentLineLength += CharWidth;
 	}
@@ -1054,15 +1041,15 @@ int Chat::DrawTextWordWrap(MFontR2 *pFont, const wchar_t *szStr, const D3DRECT &
 	return Lines;
 }
 
-void Chat::DrawTextN(MFontR2 *pFont, const wchar_t *szStr, const D3DRECT &r, DWORD dwColor, int nLen)
+void Chat::DrawTextN(MFontR2& pFont, const wchar_t *Str, const D3DRECT &r, u32 Color, int Len)
 {
-	pFont->m_Font.DrawTextN(r.x1, r.y1, szStr, nLen, dwColor);
+	pFont.m_Font.DrawTextN(r.x1, r.y1, Str, Len, Color);
 }
 
 void Chat::DrawBorder(MDrawContext* pDC)
 {
 	auto rect = Border;
-	rect.y2 += (InputHeight - 1) * nFontHeight;
+	rect.y2 += (InputHeight - 1) * FontHeight;
 
 	// Draw the box outline
 	v2 vs[] = {
@@ -1081,24 +1068,24 @@ void Chat::DrawBorder(MDrawContext* pDC)
 
 	// Draw the line between the output and input
 	rect.y2 -= 2;
-	rect.y2 -= InputHeight * nFontHeight;
+	rect.y2 -= InputHeight * FontHeight;
 	pDC->Line(rect.x1, rect.y2, rect.x2, rect.y2);
 }
 
-void Chat::DrawBackground(MDrawContext* pDC, u64 Time, u64 TPS, int nLimit, bool bShowAll)
+void Chat::DrawBackground(MDrawContext* pDC, u64 Time, u64 TPS, int Limit, bool ShowAll)
 {
 	if (BackgroundColor & 0xFF000000)
 	{
-		if (!bInputEnabled)
+		if (!InputEnabled)
 		{
 			// Need to store this value instead of calculating it every frame
 			int nLines = 0;
 			// i needs to be signed since it terminates on -1
-			for (int i = int(vMsgs.size() - 1); nLines < nLimit && i >= 0; i--)
+			for (int i = int(Msgs.size() - 1); nLines < Limit && i >= 0; i--)
 			{
-				ChatLine &cl = vMsgs.at(i);
+				auto&& cl = Msgs.at(i);
 
-				if (cl.Time + TPS * fFadeTime < Time && !bShowAll && !bInputEnabled)
+				if (cl.Time + TPS * FadeTime < Time && !ShowAll && !InputEnabled)
 					break;
 
 				nLines += cl.GetLines();
@@ -1109,7 +1096,7 @@ void Chat::DrawBackground(MDrawContext* pDC, u64 Time, u64 TPS, int nLimit, bool
 				auto&& Output = GetOutputRect();
 				D3DRECT Rect = {
 					Output.x1,
-					Output.y2 - 5 - nLines * nFontHeight,
+					Output.y2 - 5 - nLines * FontHeight,
 					Output.x2,
 					Output.y2,
 				};
@@ -1121,7 +1108,7 @@ void Chat::DrawBackground(MDrawContext* pDC, u64 Time, u64 TPS, int nLimit, bool
 		else
 		{
 			auto Rect = Border;
-			Rect.y2 += (InputHeight - 1) * nFontHeight;
+			Rect.y2 += (InputHeight - 1) * FontHeight;
 
 			pDC->SetColor(BackgroundColor);
 			pDC->FillRectangle(MakeMRECT(Rect));
@@ -1134,16 +1121,16 @@ struct LineDivisionState
 {
 	T&& OutputIterator;
 	LineSegmentInfo CurLineSegmentInfo;
-	int ChatLineIndex = 0;
+	int ChatMessageIndex = 0;
 	int MsgIndex = 0;
 	int Lines = 0;
 	int CurrentLinePixelLength = 0;
 	u32 CurTextColor;
 	u32 CurEmphasis = EmphasisType::Default;
 
-	LineDivisionState(T&& OutputIterator, int ChatLineIndex, u32 CurTextColor) :
+	LineDivisionState(T&& OutputIterator, int ChatMessageIndex, u32 CurTextColor) :
 		OutputIterator{ std::forward<T>(OutputIterator) },
-		ChatLineIndex{ ChatLineIndex },
+		ChatMessageIndex{ ChatMessageIndex },
 		CurTextColor{ CurTextColor }
 	{}
 
@@ -1165,7 +1152,7 @@ struct LineDivisionState
 		// Reset to zero-initialized LineSegmentInfo.
 		CurLineSegmentInfo = LineSegmentInfo{};
 		// Set data.
-		CurLineSegmentInfo.ChatLineIndex = ChatLineIndex;
+		CurLineSegmentInfo.ChatMessageIndex = ChatMessageIndex;
 		CurLineSegmentInfo.Offset = MsgIndex;
 		CurLineSegmentInfo.PixelOffsetX = CurrentLinePixelLength;
 		CurLineSegmentInfo.IsStartOfLine = CurrentLinePixelLength == 0;
@@ -1175,82 +1162,89 @@ struct LineDivisionState
 
 	void HandleFormatSpecifier(FormatSpecifier& FormatSpec)
 	{
-		bool IsLine = false;
 		switch (FormatSpec.ft) {
-		case FT_COLOR:
+		case FormatSpecifierType::Color:
 			CurTextColor = FormatSpec.Color;
 			break;
 
-		case FT_DEFAULT:
+		case FormatSpecifierType::Default:
 			CurEmphasis = EmphasisType::Default;
 			break;
 
-		case FT_BOLD:
+		case FormatSpecifierType::Bold:
 			CurEmphasis |= EmphasisType::Bold;
 			break;
 
-		case FT_ITALIC:
+		case FormatSpecifierType::Italic:
 			CurEmphasis |= EmphasisType::Italic;
 			break;
 
-		case FT_UNDERLINE:
+		case FormatSpecifierType::Underline:
 			CurEmphasis |= EmphasisType::Underline;
 			break;
 
-		case FT_STRIKETHROUGH:
+		case FormatSpecifierType::Strikethrough:
 			CurEmphasis |= EmphasisType::Strikethrough;
 			break;
 
-		case FT_LINEBREAK:
-			IsLine = true;
-			break;
+		case FormatSpecifierType::Linebreak:
+			AddSegment(true);
+			return;
 		};
 
-		// If MsgIndex - int(CurLineSegmentInfo.Offset) equals zero,
-		// the substring would be empty if we were to add a line.
-		if (IsLine || MsgIndex - int(CurLineSegmentInfo.Offset) != 0)
-			AddSegment(IsLine);
+		if (MsgIndex - int(CurLineSegmentInfo.Offset) == 0)
+		{
+			// If MsgIndex - int(CurLineSegmentInfo.Offset) equals zero,
+			// the substring would be empty if we were to add a line.
+			// Instead, we want to add the modified text attributes to the current segment.
+			CurLineSegmentInfo.TextColor = CurTextColor;
+			CurLineSegmentInfo.Emphasis = CurEmphasis;
+		}
+		else
+		{
+			AddSegment(false);
+		}
 	}
 };
 
 template <typename T>
-void Chat::DivideIntoLines(int ChatLineIndex, T&& OutputIterator)
+void Chat::DivideIntoLines(int ChatMessageIndex, T&& OutputIterator)
 {
-	auto&& cl = vMsgs[ChatLineIndex];
+	auto&& cl = Msgs[ChatMessageIndex];
 	// Clear the previous wrapping line breaks, since we're going to add new ones.
 	cl.ClearWrappingLineBreaks();
 
 	auto MaxLineLength = (Border.x2 - 5) - (Border.x1 + 5);
 
-	LineDivisionState<T> State{ std::forward<T>(OutputIterator), ChatLineIndex, TextColor };
+	LineDivisionState<T> State{ std::forward<T>(OutputIterator), ChatMessageIndex, TextColor };
 
 	// Initialize the first segment.
-	State.CurLineSegmentInfo.ChatLineIndex = ChatLineIndex;
+	State.CurLineSegmentInfo.ChatMessageIndex = ChatMessageIndex;
 	State.CurLineSegmentInfo.Offset = 0;
 	State.CurLineSegmentInfo.PixelOffsetX = 0;
 	State.CurLineSegmentInfo.IsStartOfLine = true;
 	State.CurLineSegmentInfo.TextColor = TextColor;
 	State.CurLineSegmentInfo.Emphasis = EmphasisType::Default;
 
-	auto FormatIterator = cl.vFormatSpecifiers.begin();
+	auto FormatIterator = cl.FormatSpecifiers.begin();
 	for (State.MsgIndex = 0; State.MsgIndex < int(cl.Msg.length()); ++State.MsgIndex)
 	{
 		// Process all the format specifiers at this index.
 		// There may be more than one, so we do a loop.
-		while (FormatIterator != cl.vFormatSpecifiers.end() &&
+		while (FormatIterator != cl.FormatSpecifiers.end() &&
 			FormatIterator->nStartPos == State.MsgIndex)
 		{
 			State.HandleFormatSpecifier(*FormatIterator);
 			++FormatIterator;
 		}
 
-		auto CharWidth = pFont->GetWidth(cl.Msg.data() + State.MsgIndex, 1);
+		auto CharWidth = DefaultFont.GetWidth(cl.Msg.data() + State.MsgIndex, 1);
 
 		// If adding this character would make the line length exceed the max,
 		// we add a new line for this character to go on.
 		if (State.CurrentLinePixelLength + CharWidth > MaxLineLength)
 		{
-			// ChatLine::AddWrappingLineBreak returns an iterator to the line break
+			// ChatMessage::AddWrappingLineBreak returns an iterator to the line break
 			// that was inserted, so we want to set FormatIterator to the next one.
 			// We do this since the current iterator may have been invalidated by the mutation.
 			FormatIterator = std::next(cl.AddWrappingLineBreak(State.MsgIndex));
@@ -1266,12 +1260,12 @@ void Chat::DivideIntoLines(int ChatLineIndex, T&& OutputIterator)
 	cl.Lines = State.Lines;
 }
 
-MFontR2* Chat::GetFont(u32 Emphasis)
+MFontR2& Chat::GetFont(u32 Emphasis)
 {
 	if (Emphasis & EmphasisType::Italic)
-		return pItalicFont.get();
+		return ItalicFont;
 
-	return pFont.get();
+	return DefaultFont;
 }
 
 template <typename T>
@@ -1290,22 +1284,22 @@ static auto GetDrawLinesRect(const D3DRECT& OutputRect, int LinesDrawn,
 	};
 }
 
-void Chat::DrawChatLines(MDrawContext* pDC, u64 Time, u64 TPS, int nLimit, bool bShowAll)
+void Chat::DrawChatLines(MDrawContext* pDC, u64 Time, u64 TPS, int Limit, bool ShowAll)
 {
-	pFont->m_Font.BeginFont();
+	DefaultFont.m_Font.BeginFont();
 
 	int LinesDrawn = 0;
 	for (auto&& LineSegment : Reverse(LineSegments))
 	{
-		auto&& Rect = GetDrawLinesRect(GetOutputRect(), LinesDrawn, LineSegment.PixelOffsetX, nFontHeight);
-		auto&& cl = vMsgs[LineSegment.ChatLineIndex];
+		auto&& Rect = GetDrawLinesRect(GetOutputRect(), LinesDrawn, LineSegment.PixelOffsetX, FontHeight);
+		auto&& cl = Msgs[LineSegment.ChatMessageIndex];
 
-		if (!bShowAll && !bInputEnabled && Time > cl.Time + TPS * fFadeTime)
+		if (!ShowAll && !InputEnabled && Time > cl.Time + TPS * FadeTime)
 			break;
 
 		auto String = cl.Msg.data() + LineSegment.Offset;
 		auto Length = LineSegment.LengthInCharacters;
-		auto Font = GetFont(LineSegment.Emphasis);
+		auto&& Font = GetFont(LineSegment.Emphasis);
 		auto Color = LineSegment.TextColor;
 
 		DrawTextN(Font, String, Rect, Color, Length);
@@ -1313,75 +1307,74 @@ void Chat::DrawChatLines(MDrawContext* pDC, u64 Time, u64 TPS, int nLimit, bool 
 		if (LineSegment.IsStartOfLine)
 		{
 			++LinesDrawn;
-			if (LinesDrawn > nLimit)
+			if (LinesDrawn > Limit)
 				break;
 		}
 	}
 
-	pFont->m_Font.EndFont();
+	DefaultFont.m_Font.EndFont();
 }
 
 void Chat::DrawSelection(MDrawContext * pDC)
 {
-	if (pFromMsg && pToMsg) {
-		POINT p;
-
-		if (!GetPos(*pFromMsg, nFromPos, &p))
+	if (SelectionState.FromMsg && SelectionState.ToMsg)
+	{
+		auto ret = GetPos(*SelectionState.FromMsg, SelectionState.FromPos);
+		if (!ret.first)
 			return;
+		auto From = ret.second;
 
-		int nFromX = p.x;
-		int nFromY = p.y;
-
-		if (!GetPos(*pToMsg, nToPos, &p))
+		ret = GetPos(*SelectionState.ToMsg, SelectionState.ToPos);
+		if (!ret.first)
 			return;
+		auto To = ret.second;
 
-		int nToX = p.x;
-		int nToY = p.y;
+		auto ShouldSwap = From.y > To.y || From.y == To.y && From.x > To.x;
 
-		bool bSwap = nFromY > nToY || nFromY == nToY && nFromX > nToX;
-
-		if (bSwap) {
-			std::swap(nFromX, nToX);
-			std::swap(nFromY, nToY);
-
-			if (!GetPos(*pFromMsg, nFromPos + 1, &p))
-				return;
+		std::pair<const ChatMessage*, int> Stuff;
+		if (ShouldSwap)
+		{
+			std::swap(From, To);
+			Stuff = { SelectionState.FromMsg, SelectionState.FromPos };
 		}
 		else
-			if (!GetPos(*pToMsg, nToPos + 1, &p))
-				return;
+		{
+			Stuff = { SelectionState.ToMsg, SelectionState.ToPos };
+		}
 
-		nToX = p.x;
-		nToY = p.y;
+		ret = GetPos(*Stuff.first, Stuff.second + 1);
+		if (!ret.first)
+			return;
+		To = ret.second;
 
 		auto Fill = [&](auto&&... Coords) {
 			pDC->FillRectangle(MakeMRECT({ Coords... }));
 		};
 
 		pDC->SetColor(ARGB(0xA0, 00, 0x80, 0xFF));
-		if (nFromY == nToY)
+		if (From.y == To.y)
 		{
-			Fill(nFromX,
-				nFromY - nFontHeight / 2,
-				nToX,
-				nToY + nFontHeight / 2);
+			Fill(From.x,
+				From.y - FontHeight / 2,
+				To.x,
+				To.y + FontHeight / 2);
 		}
 		else {
-			Fill(nFromX,
-				nFromY - nFontHeight / 2,
+			Fill(From.x,
+				From.y - FontHeight / 2,
 				Border.x2 - 5,
-				nToY + nFontHeight / 2);
+				To.y + FontHeight / 2);
 
-			for (int i = nFontHeight; i < nToY - nFromY; i += nFontHeight) {
+			for (int i = FontHeight; i < To.y - From.y; i += FontHeight) {
 				Fill(Border.x1 + 5,
-					nFromY + i - nFontHeight / 2,
+					From.y + i - FontHeight / 2,
 					Border.x2 - 5,
-					nFromY + i + nFontHeight / 2);
+					From.y + i + FontHeight / 2);
 			}
 			Fill(Border.x1,
-				nFromY - nFontHeight / 2,
-				nToX - 5,
-				nToY + nFontHeight / 2);
+				From.y - FontHeight / 2,
+				To.x - 5,
+				To.y + FontHeight / 2);
 		}
 	}
 }
@@ -1390,7 +1383,12 @@ void Chat::DrawFrame(MDrawContext * pDC, u64 Time, u64 TPS)
 {
 	// Draw top of border
 	{
-		D3DRECT Rect = { Border.x1, Border.y1 - 20, Border.x2 + 1, Border.y1 };
+		D3DRECT Rect = {
+			Border.x1,
+			Border.y1 - 20,
+			Border.x2 + 1,
+			Border.y1
+		};
 
 		pDC->SetColor(InterfaceColor);
 		pDC->FillRectangle(MakeMRECT(Rect));
@@ -1400,54 +1398,44 @@ void Chat::DrawFrame(MDrawContext * pDC, u64 Time, u64 TPS)
 
 	// Draw D button
 	{
-		D3DRECT Rect;
+		D3DRECT Rect = {
+			Border.x2 - 15,
+			Border.y1 - 18,
+			Border.x2 - 15 + 12,
+			Border.y1 - 18 + FontHeight,
+		};
 
-		Rect.x1 = Border.x2 - 15;
-		Rect.y1 = Border.y1 - 18;
-		Rect.x2 = Border.x2 - 15 + 12;
-		Rect.y2 = Border.y1 - 18 + nFontHeight;
-
-		DrawTextN(pFont.get(), L"D", Rect, TextColor);
+		DrawTextN(DefaultFont, L"D", Rect, TextColor);
 	}
 
-	D3DXCOLOR Color;
-	if (GetAsyncKeyState(VK_LBUTTON) & 0x8000)
-		Color = XRGB(0xFF, 0xFF, 0xFF);
-	else {
-		Color = 0xFF00A5C3;
-		D3DXColorScale(&Color, &Color, 1.2);
-	}
-
-	D3DRECT Rect;
-	Rect.x1 = Border.x1 + 5;
-	Rect.y1 = Border.y2 - 2 - nFontHeight;
-	Rect.x2 = Border.x2;
-	Rect.y2 = Border.y2;
+	D3DRECT Rect = {
+		Border.x1 + 5,
+		Border.y2 - 2 - FontHeight,
+		Border.x2,
+		Border.y2,
+	};
 
 	int x = Rect.x1 + CaretCoord.x;
-	int y = Rect.y1 + (CaretCoord.y - 1) * nFontHeight;
+	int y = Rect.y1 + (CaretCoord.y - 1) * FontHeight;
 
 	if (fmod(Time, .8f * TPS) > .4f * TPS)
 	{
 		// Draw caret
 		pDC->SetColor(TextColor);
-		pDC->Line(x, y, x, y + nFontHeight);
+		pDC->Line(x, y, x, y + FontHeight);
 	}
 
-	DrawTextWordWrap(pFont.get(), strField.c_str(), Rect, TextColor);
+	DrawTextWordWrap(DefaultFont, InputField.c_str(), Rect, TextColor);
 }
 
 void Chat::ResetFonts(){
-	SafeDestroy(pFont.get());
-	SafeDestroy(pItalicFont.get());
+	DefaultFont.Destroy();
+	ItalicFont.Destroy();
 
-	char buf[64];
-	sprintf_safe(buf, "Font size: %d\n", int(float(nFontSize) / 1080 * RGetScreenHeight() + 0.5));
-	OutputDebugString(buf);
-	pFont->Create("NewChatFont", strFont.c_str(),
-		int(float(nFontSize) / 1080 * RGetScreenHeight() + 0.5), 1, true);
-	pItalicFont->Create("NewChatItalicFont", strFont.c_str(),
-		int(float(nFontSize) / 1080 * RGetScreenHeight() + 0.5), 1, true, true);
+	DefaultFont.Create("NewChatFont", FontName.c_str(),
+		int(float(FontSize) / 1080 * RGetScreenHeight() + 0.5), 1, true);
+	ItalicFont.Create("NewChatItalicFont", FontName.c_str(),
+		int(float(FontSize) / 1080 * RGetScreenHeight() + 0.5), 1, true, true);
 
-	nFontHeight = pFont->GetHeight();
+	FontHeight = DefaultFont.GetHeight();
 }
