@@ -1,5 +1,4 @@
-#ifndef MIDLRESOURCE_H
-#define MIDLRESOURCE_H
+#pragma once
 
 #include "MZFileSystem.h"
 #include "MXml.h"
@@ -11,7 +10,6 @@
 #include <list>
 #include <map>
 #include <algorithm>
-using namespace std;
 
 class MFrame;
 class MLabel;
@@ -49,11 +47,9 @@ class MBSliderLook;
 class MBGroupLook;
 class MBitmap;
 class MHotKey;
-//class MActionKey;
 class MBTextAreaLook;
 class MBSliderThumbLook;
 class MBTabCtrlLook;
-
 
 #define IDL_ROOT	"XML"
 
@@ -68,13 +64,13 @@ class MBTabCtrlLook;
 #define IDL_ATTR_ITEM	"item"
 #define IDL_ATTR_PARENT	"parent"
 
-class MWidgetMMap : public multimap<string, MWidget*>
+class MWidgetMMap : public std::multimap<std::string, MWidget*>
 {
 public:
-	virtual ~MWidgetMMap(void){ Clear(); }
+	virtual ~MWidgetMMap() { Clear(); }
 
 	void Clear() {
-		while(empty()==false)
+		while (empty() == false)
 		{
 			delete (*begin()).second;
 			erase(begin());
@@ -82,45 +78,41 @@ public:
 	}
 };
 
-class MWidgetList : public list<MWidget*> { };
+using MWidgetList = std::list<MWidget*>;
 
 /// Maiet Interface Definition Language Resource
 class MIDLResource
 {
-private:
-
 protected:
-	MWidget*						m_pParent;		///< 추가될 최상위 위젯
+	MWidget*						m_pParent;
 
-	map<string, MBLabelLook*>		m_LabelLookMap;
-	map<string, MBButtonLook*>		m_ButtonLookMap;
-	map<string, MBGroupLook*>		m_GroupLookMap;
-	map<string, MBFrameLook*>		m_FrameLookMap;
-	map<string, MBEditLook*>		m_EditLookMap;
-	map<string, MBListBoxLook*>		m_ListBoxLookMap;
-	map<string, MBScrollBarLook*>	m_ScrollBarLookMap;
-	map<string, MBArrowLook*>		m_ArrowLookMap;
-	map<string, MBThumbLook*>		m_ThumbLookMap;
-	map<string, MBSliderLook*>		m_SliderLookMap;
-	map<string, MAniBitmap*>		m_AniBitmapMap;
-	map<string, MBTextAreaLook*>	m_TextAreaLookMap;
-	map<string, MBTabCtrlLook*>		m_TabCtrlLookMap;
+	map<std::string, MBLabelLook*>		m_LabelLookMap;
+	map<std::string, MBButtonLook*>		m_ButtonLookMap;
+	map<std::string, MBGroupLook*>		m_GroupLookMap;
+	map<std::string, MBFrameLook*>		m_FrameLookMap;
+	map<std::string, MBEditLook*>		m_EditLookMap;
+	map<std::string, MBListBoxLook*>		m_ListBoxLookMap;
+	map<std::string, MBScrollBarLook*>	m_ScrollBarLookMap;
+	map<std::string, MBArrowLook*>		m_ArrowLookMap;
+	map<std::string, MBThumbLook*>		m_ThumbLookMap;
+	map<std::string, MBSliderLook*>		m_SliderLookMap;
+	map<std::string, MAniBitmap*>		m_AniBitmapMap;
+	map<std::string, MBTextAreaLook*>	m_TextAreaLookMap;
+	map<std::string, MBTabCtrlLook*>		m_TabCtrlLookMap;
 
 	MWidgetMMap						m_WidgetMap;
 
-	map<string, MButtonGroup*>		m_ButtonGroupMap;
+	std::map<std::string, MButtonGroup*>		m_ButtonGroupMap;
 
-	// 기본요소
 	MPOINT			GetPoint(MXmlElement& element);
 	MRECT			GetRect(MXmlElement& element);
 	MSIZE			GetSize(MXmlElement& element);
 	MCOLOR			GetColor(MXmlElement& element);
 	MBitmap*		GetBitmap(MXmlElement& element);
-	MBitmap*		GetBitmapAlias(MXmlElement& element);	// 부분bitmap을 특정 이름으로 alias
+	MBitmap*		GetBitmapAlias(MXmlElement& element);
 	MAnchors		GetAnchors(MXmlElement& element);
 	MAlignmentMode	GetAlignmentMode(MXmlElement& element);
 
-	// Widget
 	MWidget*		GetParentWidget(MXmlElement& element);
 	MFrame*			GetFrame(MXmlElement& element);
 	MLabel*			GetLabel(MXmlElement& element);
@@ -140,7 +132,6 @@ protected:
 	MBmLabel*		GetBmLabel(MXmlElement& element);
 	MFont*			GetFont(MXmlElement& element);
 	MHotKey*		GetHotKey(MXmlElement& element);
-//	MActionKey*		GetActionKey(MXmlElement& element);
 	MTextArea*		GetTextArea(MXmlElement& element);
 	MTabCtrl*		GetTabCtrl(MXmlElement& element);
 	MPanel*			GetPanel(MXmlElement& element);
@@ -151,7 +142,7 @@ protected:
 	MBGroupLook*	GetGroupLook(MXmlElement& element);
 	MBFrameLook*	GetFrameLook(MXmlElement& element);
 	MBEditLook*		GetEditLook(MXmlElement& element);
-	MBListBoxLook*	GetListBoxLook(MXmlElement& element, int nType);	///< nType: 0=ListBox, 1=ComboListBox
+	MBListBoxLook*	GetListBoxLook(MXmlElement& element, int nType); // nType: 0 = ListBox, 1 = ComboListBox
 	MBScrollBarLook* GetScrollBarLook(MXmlElement& element);
 	MBArrowLook*	GetArrowLook(MXmlElement& element);
 	MBThumbLook*	GetThumbLook(MXmlElement& element);
@@ -173,33 +164,30 @@ protected:
 	bool GetCommonWidgetProperty(MWidget* pWidget, MXmlElement& element, const char* szTagName);
 	void ClearLooks();
 
-	// 저장 관련 - 나중에 필요할때 만들자.
 	void SetLabel(MXmlElement& element, MLabel* pLabel);
 	void SetPoint(MXmlElement& element, MPOINT* pPoint, const char* szTagName);
 	void SetRect(MXmlElement& element, MRECT* pRect, const char* szTagName);
 	void SetSize(MXmlElement& element, MSIZE* pSize, const char* szTagName);
 	void SetColor(MXmlElement& element, MCOLOR* pColor, const char* szTagName);
 
-	virtual MFrame*	CreateFrame(const char* szName=NULL, MWidget* pParent=NULL, MListener* pListener=
-NULL);
+	virtual MFrame*	CreateFrame(const char* szName=NULL, MWidget* pParent=NULL,
+		MListener* pListener = NULL);
 	virtual MFont* CreateFont(char* szAliasName, char* szFontName, int nHeight, 
-		bool bBold = false, bool bItalic = false, int nOutlineStyle = 1, bool bAntialiasing = false, DWORD nColorArg1=0, DWORD nColorArg2=0);
+		bool bBold = false, bool bItalic = false, int nOutlineStyle = 1,
+		bool bAntialiasing = false, DWORD nColorArg1=0, DWORD nColorArg2=0);
 
 	virtual void Parse(MXmlElement& element);
-	virtual void TransText(const char* szSrc, char* szOut, int maxlen);		// 국제화를 위한 함수
+	virtual void TransText(const char* szSrc, char* szOut, int maxlen);
+
 public:
 	MIDLResource();
 	virtual ~MIDLResource();
-	bool LoadFromFile(const char* szFileName, MWidget* pParent=NULL,MZFileSystem *pfs=NULL);
+	bool LoadFromFile(const char* szFileName, MWidget* pParent = NULL, MZFileSystem *pfs = NULL);
 	bool SaveToFile(const char* szFileName);
 	virtual void Clear();
 	MWidgetMMap* GetWidgetMap() { return &m_WidgetMap; }
 	MWidget* FindWidget(string szItem);
-	void FindWidgets(MWidgetList& widgetList, string szItem);
+	void FindWidgets(MWidgetList& widgetList, std::string szItem);
 
-	MBFrameLook* FindFrameLook(string szItem);
-
-	
+	MBFrameLook* FindFrameLook(std::string szItem);
 };
-
-#endif

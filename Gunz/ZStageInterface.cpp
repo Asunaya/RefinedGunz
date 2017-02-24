@@ -1,16 +1,6 @@
-/***********************************************************************
-  ZStageInterface.cpp
-  
-  ¿ë  µµ : ½ºÅ×ÀÌÁö ÀÎÅÍÆäÀÌ½º¸¦ °ü¸®ÇÏ´Â Å¬·¡½º. ÄÚµå °ü¸®»óÀÇ Æí¸®¸¦ À§ÇØ
-           ºÐ¸®ÇßÀ½(»ç½Ç ¾ÆÁ÷ ¿ÏÀüÈ÷ ´Ù ºÐ¸® ¸øÇßÀ½. -_-;).
-  ÀÛ¼ºÀÏ : 11, MAR, 2004
-  ÀÛ¼ºÀÚ : ÀÓµ¿È¯
-************************************************************************/
-
-
-#include "stdafx.h"							// Include stdafx.h
-#include "ZStageInterface.h"				// Include ZStageInterface.h
-#include "ZStageSetting.h"					// Include ZStageSetting.h
+#include "stdafx.h"
+#include "ZStageInterface.h"
+#include "ZStageSetting.h"
 #include "ZGameInterface.h"
 #include "ZPlayerListBox.h"
 #include "ZCombatMenu.h"
@@ -20,19 +10,6 @@
 #include "ZMessages.h"
 #include "ZLanguageConf.h"
 
-
-/* ÇØ¾ßÇÒ °Íµé...
-
- 1. ZStageSetting °ü·Ã ·çÆ¾À» ¿©±â·Î ¿Å°Ü¿Í¾ß ÇÏ´Âµð...  -_-;
- 2. ¹öÆ° UIÂÊµµ ¿ª½Ã ¿©±â·Î ¿Å°Ü¿Í¾ß ÇÏ´Âµ¥ Á¹¶ó ²¿¿©ÀÖ´Ù...  -_-;
-*/
-
-
-/***********************************************************************
-  ZStageInterface : public
-  
-  desc : »ý¼ºÀÚ
-************************************************************************/
 ZStageInterface::ZStageInterface( void)
 {
 	m_bPrevQuest = false;
@@ -44,12 +21,6 @@ ZStageInterface::ZStageInterface( void)
 	m_nStateSacrificeItemBox = 0;
 }
 
-
-/***********************************************************************
-  ~ZStageInterface : public
-  
-  desc : ¼Ò¸êÀÚ
-************************************************************************/
 ZStageInterface::~ZStageInterface( void)
 {
 	if ( m_pTopBgImg != NULL)
@@ -65,17 +36,10 @@ ZStageInterface::~ZStageInterface( void)
 	}
 }
 
-
-/***********************************************************************
-  Create : public
-  
-  desc : ÃÊ±âÈ­
-************************************************************************/
 void ZStageInterface::OnCreate( void)
 {
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
 
-	// ÃÊ±âÈ­ ÇØÁÖ°í
 	m_bPrevQuest = false;
 	m_bDrawStartMovieOfQuest = false;
 	m_nStateSacrificeItemBox = 0;		// Hide
@@ -135,43 +99,32 @@ void ZStageInterface::OnCreate( void)
 	if ( pDesc)
 	{
 		pDesc->SetTextColor( MCOLOR(0xFF808080));
-		pDesc->SetText( "¾ÆÀÌÅÛÀ» È­¸é Áß¾Ó¿¡ ÀÖ´Â µÎ°³ÀÇ Á¦´Ü¿¡ ²ø¾î³õÀ½À¸·Î½á °ÔÀÓ ·¹º§À» Á¶Á¤ÇÒ ¼ö ÀÖ½À´Ï´Ù.");
+		pDesc->SetText( "ì•„ì´í…œì„ í™”ë©´ ì¤‘ì•™ì— ìžˆëŠ” ë‘ê°œì˜ ì œë‹¨ì— ëŒì–´ë†“ìŒìœ¼ë¡œì¨ ê²Œìž„ ë ˆë²¨ì„ ì¡°ì •í•  ìˆ˜ ìžˆìŠµë‹ˆë‹¤.");
 	}
 
 	ZApplication::GetGameInterface()->ShowWidget( "Stage_Flame0", false);
 	ZApplication::GetGameInterface()->ShowWidget( "Stage_Flame1", false);
 
-	MComboBox* pCombo = (MComboBox*)pResource->FindWidget("StageType");			// °ÔÀÓ ¹æ½ÄÀ» Ã¤·Î ¹æ ³ª°¬´Ù°¡ ´Ù¸¥ ¹æ µé¾î°¡¸é ¹ö±× »ý±â´Â°Å ¼öÁ¤ 
+	MComboBox* pCombo = (MComboBox*)pResource->FindWidget("StageType");
 	if ( pCombo)
 		pCombo->CloseComboBoxList();
 
-	pCombo = (MComboBox*)pResource->FindWidget("MapSelection");					// ¸Ê¸®½ºÆ® ¿¬ Ã¤·Î ¹æ ³ª°¬´Ù°¡ ´Ù¸¥ ¹æ µé¾î°¡¸é ¹æÀåÀÌ ¾Æ´Ñµ¥µµ ¸Ê ¹Ù²ãÁö´Â ¹ö±× ¼öÁ¤
+	pCombo = (MComboBox*)pResource->FindWidget("MapSelection");
 	if ( pCombo)
 		pCombo->CloseComboBoxList();
 
 
-	// Ã¤³Î ¸®½ºÆ® ¹Ú½º´Â ´Ý¾Æ¹ö¸²
 	pWidget = (MWidget*)pResource->FindWidget( "ChannelListFrame");
 	if ( pWidget)
 		pWidget->Show( false);
 
 
-	// È­¸é ¾÷µ¥ ÇÑ¹ø ÇØÁÖ»ï~
 	UpdateSacrificeItem();
 	SerializeSacrificeItemListBox();
 
-	// QL ÃÊ±âÈ­
 	OnResponseQL( 0);
 }
 
-
-/***********************************************************************
-  OnDestroy : public
-  
-  desc : ¼­¹ö³ª È¤Àº ½Ã½ºÅÛÀÇ ¿äÃ»À¸·ÎºÎÅÍ ½ºÅ×ÀÌÁö È­¸éÀ» »õ·Î °»½ÅÇÏ´Â ÇÔ¼ö
-  arg  : none
-  ret  : none
-************************************************************************/
 void ZStageInterface::OnDestroy( void)
 {
 	ZApplication::GetGameInterface()->ShowWidget( "Stage", false);
@@ -209,47 +162,19 @@ void ZStageInterface::OnDestroy( void)
 	m_SenarioNameDesc.clear();
 }
 
-
-/***********************************************************************
-  OnStageInterfaceSettup : public
-  
-  desc : ¼­¹ö³ª È¤Àº ½Ã½ºÅÛÀÇ ¿äÃ»À¸·ÎºÎÅÍ ½ºÅ×ÀÌÁö È­¸éÀ» »õ·Î °»½ÅÇÏ´Â ÇÔ¼ö
-  arg  : none
-  ret  : none
-************************************************************************/
 void ZStageInterface::OnStageInterfaceSettup( void)
 {
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
 
 	ZStageSetting::InitStageSettingGameType();
-/*
-	// ¸Ê Á¾·ù¸¦ ¼³Á¤ÇÑ´Ù.
-	MComboBox* pCB = (MComboBox*)pResource->FindWidget( "MapSelection");
-	if ( pCB)
-	{
-		int nSelected = pCB->GetSelIndex();
 
-		InitMaps( pCB);
-
-		if ( nSelected >= pCB->GetCount())
-			nSelected = pCB->GetCount() - 1;
-
-		pCB->SetSelIndex( nSelected);
-	}
-*/
-
-	// CharListViewÀÇ Add, Remove, Update´Â ZGameClient::OnObjectCache ¿¡¼­ °ü¸®ÇÑ´Ù.
 	MSTAGE_CHAR_SETTING_NODE* pMyCharNode = NULL;
-	bool bMyReady = false;		// Ready »óÅÂÀÎÁö ¾Æ´ÑÁö...
-	for ( MStageCharSettingList::iterator itor = ZGetGameClient()->GetMatchStageSetting()->m_CharSettingList.begin();
-		itor != ZGetGameClient()->GetMatchStageSetting()->m_CharSettingList.end();  ++itor) 
+	bool bMyReady = false;
+	for (auto&& CharNode : ZGetGameClient()->GetMatchStageSetting()->m_CharSettingList) 
 	{
-		MSTAGE_CHAR_SETTING_NODE* pCharNode = (*itor);
-
-		// ³ª ÀÚ½ÅÀÏ °æ¿ì
-		if ( pCharNode->uidChar == ZGetGameClient()->GetPlayerUID()) 
+		if ( CharNode.uidChar == ZGetGameClient()->GetPlayerUID()) 
 		{
-			pMyCharNode = pCharNode;
+			pMyCharNode = &CharNode;
 			if (pMyCharNode->nState == MOSS_READY)
 				bMyReady = true;
 			else
@@ -261,62 +186,48 @@ void ZStageInterface::OnStageInterfaceSettup( void)
 		{
 			bool bMaster = false;
 
-			if ( ZGetGameClient()->GetMatchStageSetting()->GetMasterUID() == pCharNode->uidChar)
+			if ( ZGetGameClient()->GetMatchStageSetting()->GetMasterUID() == CharNode.uidChar)
 				bMaster = true;
 			
-			pItem->UpdatePlayer( pCharNode->uidChar,(MMatchObjectStageState)pCharNode->nState,bMaster,MMatchTeam(pCharNode->nTeam));
+			pItem->UpdatePlayer(CharNode.uidChar, (MMatchObjectStageState)CharNode.nState,
+				bMaster, MMatchTeam(CharNode.nTeam));
 		}
 	}
 
-	// ½ºÅ×ÀÌÁöÀÇ ¹öÆ° »óÅÂ(°ÔÀÓ½ÃÀÛ, ³­ÀÔ, ÁØºñ¿Ï·á)¸¦ ¼³Á¤ÇÑ´Ù.
 	ChangeStageButtons( ZGetGameClient()->IsForcedEntry(), ZGetGameClient()->AmIStageMaster(), bMyReady);
 
-	// ½ºÅ×ÀÌÁöÀÇ...
 	ChangeStageGameSetting( ZGetGameClient()->GetMatchStageSetting()->GetStageSetting());
 	
-	// ³­ÀÔ ¸â¹öÀÏ °æ¿ì¿¡...
 	if ( !ZGetGameClient()->AmIStageMaster() && ( ZGetGameClient()->IsForcedEntry()))
 	{
 		if ( pMyCharNode != NULL)
 			ChangeStageEnableReady( bMyReady);
 	}
 
-	// ¸¸¾à ³­ÀÔÀ¸·Î µé¾î¿Ô´Âµ¥ ´Ù¸¥ »ç¶÷ ´Ù ³ª°¡¼­ ³»°¡ ¹æÀåÀÌ µÇ¾ú´Ù¸é ³­ÀÔ¸ðµå ÇØÁ¦
 	if ( (ZGetGameClient()->AmIStageMaster() == true) && ( ZGetGameClient()->IsForcedEntry()))
 	{
-		if ( ZGetGameClient()->GetMatchStageSetting()->GetStageState() == STAGE_STATE_STANDBY)
+		bool b = ZGetGameClient()->GetMatchStageSetting()->GetStageState() == STAGE_STATE_STANDBY;
+		if (b)
 		{
 			ZGetGameClient()->ReleaseForcedEntry();
+		}
 
-			// ÀÎÅÍÆäÀÌ½º°ü·Ã
-			ZApplication::GetGameInterface()->EnableWidget( "StageSettingCaller", true);	// ¹æ¼³Á¤ ¹öÆ°
-			ZApplication::GetGameInterface()->EnableWidget( "MapSelection", true);			// ¸Ê¼±ÅÃ ÄÞº¸¹Ú½º
-			ZApplication::GetGameInterface()->EnableWidget( "StageType", true);				// °ÔÀÓ¹æ½Ä ÄÞº¸¹Ú½º
-			ZApplication::GetGameInterface()->EnableWidget( "StageMaxPlayer", true);		// ÃÖ´ëÀÎ¿ø ÄÞº¸¹Ú½º
-			ZApplication::GetGameInterface()->EnableWidget( "StageRoundCount", true);		// °æ±âÈ½¼ö ÄÞº¸¹Ú½º
-		}
-		else	// ¸¶½ºÅÍÀÎµ¥ ´Ù¸¥»ç¶÷µé °ÔÀÓÁßÀÌ¸é ÀÎÅÍÆäÀÌ½º Disable
-		{
-			// ÀÎÅÍÆäÀÌ½º°ü·Ã
-			ZApplication::GetGameInterface()->EnableWidget( "StageSettingCaller", false);	// ¹æ¼³Á¤ ¹öÆ°
-			ZApplication::GetGameInterface()->EnableWidget( "MapSelection", false);			// ¸Ê¼±ÅÃ ÄÞº¸¹Ú½º
-			ZApplication::GetGameInterface()->EnableWidget( "StageType", false);			// °ÔÀÓ¹æ½Ä ÄÞº¸¹Ú½º
-			ZApplication::GetGameInterface()->EnableWidget( "StageMaxPlayer", false);		// ÃÖ´ëÀÎ¿ø ÄÞº¸¹Ú½º
-			ZApplication::GetGameInterface()->EnableWidget( "StageRoundCount", false);		// °æ±âÈ½¼ö ÄÞº¸¹Ú½º
-		}
+		ZGetGameInterface()->EnableWidget( "StageSettingCaller", b);
+		ZGetGameInterface()->EnableWidget( "MapSelection", b);
+		ZGetGameInterface()->EnableWidget( "StageType", b);
+		ZGetGameInterface()->EnableWidget( "StageMaxPlayer", b);
+		ZGetGameInterface()->EnableWidget( "StageRoundCount", b);
 	}
 
-
-	// È­¸é »ó´ÜÀÇ ¸Ê ÀÌ¹ÌÁö ¼³Á¤ÇÏ±â
 	MPicture* pPicture = 0;
 	MBitmap* pBitmap = 0;
 	char szMapName[256];
  	pPicture = (MPicture*)pResource->FindWidget( "Stage_MainBGTop");
 	if ( pPicture)
 	{
-		sprintf_safe( szMapName, "interface/loadable/%s", MGetMapImageName( ZGetGameClient()->GetMatchStageSetting()->GetMapName()));
+		sprintf_safe( szMapName, "interface/loadable/%s",
+			MGetMapImageName( ZGetGameClient()->GetMatchStageSetting()->GetMapName()));
 
-		// ÀÓ½Ã ÇÏµåÄÚµù ¿ì¿¡¿¨~~~
 		if ( m_nGameType == MMATCH_GAMETYPE_QUEST)
 			strcpy_safe( szMapName, "interface/loadable/map_Mansion.bmp");
 
@@ -333,16 +244,16 @@ void ZStageInterface::OnStageInterfaceSettup( void)
 			pPicture->SetBitmap( m_pTopBgImg->GetSourceBitmap());
 	}
 	
-	// Á¤º¸Ã¢¿¡ °ÔÀÓ¹æÁ¦ ¼³Á¤ÇÏ±â
 	MLabel* pLabel = (MLabel*)pResource->FindWidget( "StageNameLabel");
 	if ( pLabel != 0)
 	{
 		char szStr[ 256];
-		sprintf_safe( szStr, "%s > %s > %03d:%s", ZGetGameClient()->GetServerName(), ZMsg( MSG_WORD_STAGE), ZGetGameClient()->GetStageNumber(), ZGetGameClient()->GetStageName());
+		sprintf_safe( szStr, "%s > %s > %03d:%s",
+			ZGetGameClient()->GetServerName(), ZMsg( MSG_WORD_STAGE),
+			ZGetGameClient()->GetStageNumber(), ZGetGameClient()->GetStageName());
 		pLabel->SetText( szStr);
 	}
 
-	// »óÇÏ´Ü ½ºÆ®¶óÀÌÇÁÀÇ »ö»ó ¹Ù²Ù±â
 #define SDM_COLOR			MCOLOR(255,0,0)
 #define TDM_COLOR			MCOLOR(0,255,0)
 #define SGD_COLOR			MCOLOR(0,0,255)
@@ -422,29 +333,16 @@ void ZStageInterface::OnStageInterfaceSettup( void)
 	}
 }
 
-
-/***********************************************************************
-  ChangeStageGameSetting : public
-  
-  desc : ÀÌ°Íµµ °ÔÀÓ °ü·Ã ÀÎÅÍÆäÀÌ½º¸¦ ¼öÁ¤ÇÏ´Â°Å °°Àºµ¥... ¿ÖÀÌ·¸°Ô ¸¹ÀÌ ³ª´²³õÀº°ÅÁö? -_-;
-         ÁÖ·Î È­¸éÀÇ ÀüÃ¼ÀûÀÎ UI¸¦ ¼³Á¤ÇÑ´Ù.
-  arg  : pSetting = ½ºÅ×ÀÌÁö ¼³Á¤ Á¤º¸
-  ret  : none
-************************************************************************/
 void ZStageInterface::ChangeStageGameSetting( MSTAGE_SETTING_NODE* pSetting)
 {
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
 
 	m_nGameType = pSetting->nGameType;
 
-	// Set map name
 	SetMapName( pSetting->szMapName);
 
-	// Is team game?
 	ZApplication::GetGameInterface()->m_bTeamPlay = ZGetGameTypeManager()->IsTeamGame( pSetting->nGameType);
 
-
-	// °üÀü Çã¿ë ¿©ºÎ È®ÀÎ
 	MComboBox* pCombo = (MComboBox*)pResource->FindWidget( "StageObserver");
 	MButton* pObserverBtn = (MButton*)pResource->FindWidget( "StageObserverBtn");
 	MLabel* pObserverLabel = (MLabel*)pResource->FindWidget( "StageObserverLabel");
@@ -463,58 +361,48 @@ void ZStageInterface::ChangeStageGameSetting( MSTAGE_SETTING_NODE* pSetting)
 		}
 	}
 
-	// Ã»ÆÀ, È«ÆÀ »óÅÂ ¼³Á¤
 	ZApplication::GetGameInterface()->UpdateBlueRedTeam();
 
-	// °ÔÀÓ ¹æ½Ä¿¡ µû¶ó¼­ UI¸¦ º¯°æÇÑ´Ù
 	MAnimation* pAniMapImg = (MAnimation*)pResource->FindWidget( "Stage_MapNameBG");
 	bool bQuestUI = false;
-	if ( (pSetting->nGameType == MMATCH_GAMETYPE_DEATHMATCH_SOLO) ||			// µ¥¾²¸ÅÄ¡ °³ÀÎÀüÀÌ°Å³ª...
-		 (pSetting->nGameType == MMATCH_GAMETYPE_GLADIATOR_SOLO) ||				// Ä®Àü °³ÀÎÀüÀÌ°Å³ª...
-		 (pSetting->nGameType == MMATCH_GAMETYPE_BERSERKER) ||					// ¹ö¼­Ä¿¸ðµåÀÌ°Å³ª...
-		 (pSetting->nGameType == MMATCH_GAMETYPE_TRAINING) ||					// Æ®·¹ÀÌ´×ÀÌ°Å³ª...
+
+	if ( (pSetting->nGameType == MMATCH_GAMETYPE_DEATHMATCH_SOLO) ||			// ë°ì“°ë§¤ì¹˜ ê°œì¸ì „ì´ê±°ë‚˜...
+		 (pSetting->nGameType == MMATCH_GAMETYPE_GLADIATOR_SOLO) ||				// ì¹¼ì „ ê°œì¸ì „ì´ê±°ë‚˜...
+		 (pSetting->nGameType == MMATCH_GAMETYPE_BERSERKER) ||					// ë²„ì„œì»¤ëª¨ë“œì´ê±°ë‚˜...
+		 (pSetting->nGameType == MMATCH_GAMETYPE_TRAINING) ||					// íŠ¸ë ˆì´ë‹ì´ê±°ë‚˜...
 		 (pSetting->nGameType == MMATCH_GAMETYPE_DUEL)||
-		 (pSetting->nGameType == MMATCH_GAMETYPE_GUNGAME))							// µà¾ó¸ðµå ÀÌ¸é...
+		 (pSetting->nGameType == MMATCH_GAMETYPE_GUNGAME))							// ë“€ì–¼ëª¨ë“œ ì´ë©´...
 	{
-		// ¸Ê ÀÌ¸§ ¹è°æ ÀÌ¹ÌÁö º¯È¯
 		if ( pAniMapImg)
 			pAniMapImg->SetCurrentFrame( 0);
 
-		// Äù½ºÆ® UI °¨Ãã
 		bQuestUI = false;
 	}
-	else if ( (pSetting->nGameType == MMATCH_GAMETYPE_DEATHMATCH_TEAM) ||		// µ¥¾²¸ÅÄ¡ ÆÀÀüÀÌ°Å³ª...
-		(pSetting->nGameType == MMATCH_GAMETYPE_DEATHMATCH_TEAM2) ||			// ¹«ÇÑµ¥½º¸ÅÄ¡ ÆÀÀüÀÌ°Å³ª...
-		 (pSetting->nGameType == MMATCH_GAMETYPE_GLADIATOR_TEAM) ||				// Ä®Àü ÆÀÀüÀÌ°Å³ª...
-		 (pSetting->nGameType == MMATCH_GAMETYPE_ASSASSINATE))					// ¾Ï»ìÀü ÀÌ¸é...
+	else if ( (pSetting->nGameType == MMATCH_GAMETYPE_DEATHMATCH_TEAM) ||
+		(pSetting->nGameType == MMATCH_GAMETYPE_DEATHMATCH_TEAM2) ||
+		 (pSetting->nGameType == MMATCH_GAMETYPE_GLADIATOR_TEAM) ||
+		 (pSetting->nGameType == MMATCH_GAMETYPE_ASSASSINATE))
 	{
-		// ¸Ê ÀÌ¸§ ¹è°æ ÀÌ¹ÌÁö º¯È¯
 		if ( pAniMapImg)
 			pAniMapImg->SetCurrentFrame( 1);
 
-		// Äù½ºÆ® UI °¨Ãã
 		bQuestUI = false;
 	}
-	else if ( pSetting->nGameType == MMATCH_GAMETYPE_SURVIVAL)					// ¼­¹ÙÀÌ¹ú ¸ðµåÀÌ¸é...
+	else if ( pSetting->nGameType == MMATCH_GAMETYPE_SURVIVAL)
 	{
-		// ¸Ê ÀÌ¸§ ¹è°æ ÀÌ¹ÌÁö º¯È¯
 		if ( pAniMapImg)
 			pAniMapImg->SetCurrentFrame( 0);
 
-		// Äù½ºÆ® UI °¨Ãã
 		bQuestUI = false;
 	}
-	else if ( pSetting->nGameType == MMATCH_GAMETYPE_QUEST)						// Äù½ºÆ® ¸ðµåÀÌ¸é...
+	else if ( pSetting->nGameType == MMATCH_GAMETYPE_QUEST)
 	{
-		// ¸Ê ÀÌ¸§ ¹è°æ ÀÌ¹ÌÁö º¯È¯
 		if ( pAniMapImg)
 			pAniMapImg->SetCurrentFrame( 2);
 
-		// Äù½ºÆ® UI º¸ÀÓ
 		bQuestUI = true;
 	}
 
-	// Äù½ºÆ® UI ¼³Á¤
 	ZApplication::GetGameInterface()->ShowWidget( "Stage_SacrificeItemImage0", bQuestUI);
 	ZApplication::GetGameInterface()->ShowWidget( "Stage_SacrificeItemImage1", bQuestUI);
 	ZApplication::GetGameInterface()->ShowWidget( "Stage_Lights0", bQuestUI);
@@ -533,7 +421,6 @@ void ZStageInterface::ChangeStageGameSetting( MSTAGE_SETTING_NODE* pSetting)
 
 		if ( bQuestUI)
 		{
-//			ZApplication::GetGameInterface()->EnableWidget( "StageMaxPlayer", false);
 			ZPostRequestSacrificeSlotInfo( ZGetGameClient()->GetPlayerUID());
 			ZPostRequestQL( ZGetGameClient()->GetPlayerUID());
 			OpenSacrificeItemBox();
@@ -544,8 +431,6 @@ void ZStageInterface::ChangeStageGameSetting( MSTAGE_SETTING_NODE* pSetting)
 			if ( pLabel)
 				pLabel->SetText( "");
 			ZApplication::GetGameInterface()->ShowWidget( "Stage_SenarioNameImg", false);
-//			if (ZGetGameClient()->AmIStageMaster())
-//				ZApplication::GetGameInterface()->EnableWidget( "StageMaxPlayer", true);
 
 			HideSacrificeItemBox();
 		}
@@ -556,18 +441,6 @@ void ZStageInterface::ChangeStageGameSetting( MSTAGE_SETTING_NODE* pSetting)
 	if ( (pSetting->nGameType == MMATCH_GAMETYPE_SURVIVAL) || (pSetting->nGameType == MMATCH_GAMETYPE_QUEST))
 		ZApplication::GetGameInterface()->EnableWidget( "StageSettingCaller", false);
 
-
-	// ¶ó¿îµå ¼±ÅÃ ÄÞº¸¹Ú½º º¸ÀÌ±â
-//	bool bShowRound = true;
-//	if ( ( pSetting->nGameType == MMATCH_GAMETYPE_SURVIVAL) || ( pSetting->nGameType == MMATCH_GAMETYPE_QUEST))
-//		bShowRound = false;
-	
-//	ZApplication::GetGameInterface()->ShowWidget( "StageRoundCountLabelBG", bShowRound);
-//	ZApplication::GetGameInterface()->ShowWidget( "StageRoundCountLabel", bShowRound);
-//	ZApplication::GetGameInterface()->ShowWidget( "StageRoundCount", bShowRound);
-
-
-	// ¶ó¿îµå or Kill
 	MWidget* pWidget = ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "StageRoundCountLabel");
 	if ( pWidget)
 	{
@@ -583,12 +456,8 @@ void ZStageInterface::ChangeStageGameSetting( MSTAGE_SETTING_NODE* pSetting)
 			pWidget->SetText( ZMsg(MSG_WORD_ROUND));
 	}
 
-
-	// ÄÞÆ÷³ÍÆ® ¾÷µ¥ÀÌÆ®
 	ZStageSetting::ShowStageSettingDialog( pSetting, false);
 
-
-	// °ÔÀÓÁß ¸Þ´º ¼öÁ¤ - ¸ÓÇÏ´Â ºÎºÐÀÎÁö ¾Ë¼ö ¾øÀ½...
 #ifdef _QUEST
 	if ( ZGetGameTypeManager()->IsQuestDerived( pSetting->nGameType))
 		ZApplication::GetGameInterface()->GetCombatMenu()->EnableItem( ZCombatMenu::ZCMI_BATTLE_EXIT, false);
@@ -597,20 +466,9 @@ void ZStageInterface::ChangeStageGameSetting( MSTAGE_SETTING_NODE* pSetting)
 #endif
 }
 
-
-/***********************************************************************
-  ChangeStageButtons : public
-  
-  desc : ½ºÅ×ÀÌÁö ³»ÀÇ ¹öÆ°µé(°ÔÀÓ½ÃÀÛ, ³­ÀÔ, ÁØºñ¿Ï·á)ÀÇ »óÅÂ¸¦ ¼³Á¤ÇÑ´Ù.
-         °ÔÀÓ ¼³Á¤°ú °ü·ÃµÈ À§Á¬ÀÇ UI¸¦ ¼³Á¤ÇÑ´Ù.
-  arg  : bForcedEntry = ³­ÀÔ ¿©ºÎ(true or false)
-         bMaster = ¹æÀå ¿©ºÎ(true or false)
-		 bReady = ÁØºñ ¿Ï·á ¿©ºÎ(true or false)
-  ret  : none
-************************************************************************/
 void ZStageInterface::ChangeStageButtons( bool bForcedEntry, bool bMaster, bool bReady)
 {
-	if ( bForcedEntry)	// ³­ÀÔ ¸ðµå
+	if ( bForcedEntry)
 	{
 		ZApplication::GetGameInterface()->ShowWidget( "GameStart", false);
 		ZApplication::GetGameInterface()->ShowWidget( "StageReady", false);
@@ -635,14 +493,6 @@ void ZStageInterface::ChangeStageButtons( bool bForcedEntry, bool bMaster, bool 
 	}
 }
 
-
-/***********************************************************************
-  ChangeStageEnableReady : public
-  
-  desc : ½ºÅ×ÀÌÁöÀÇ ÀÎÅÍÆäÀÌ½º(¹öÆ° enableµî)¸¦ ÄÑ°Å³ª ²ô´Â ÇÔ¼ö
-  arg  : true(=interface enable) or false(=interface disable)
-  ret  : none
-************************************************************************/
 void ZStageInterface::ChangeStageEnableReady( bool bReady)
 {
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
@@ -666,7 +516,6 @@ void ZStageInterface::ChangeStageEnableReady( bool bReady)
 			ZApplication::GetGameInterface()->EnableWidget( "MapSelection", !bReady);
 			ZApplication::GetGameInterface()->EnableWidget( "StageType", !bReady);
 		}
-//		ZApplication::GetGameInterface()->EnableWidget( "StageMaxPlayer", false);
 		ZApplication::GetGameInterface()->EnableWidget( "StageSettingCaller", false);
 	}
 	else
@@ -693,19 +542,11 @@ void ZStageInterface::ChangeStageEnableReady( bool bReady)
 	pButton->Enable( !bReady);
 	END_WIDGETLIST();
 
-	BEGIN_WIDGETLIST( "EquipmentCaller", pResource, MButton*, pButton);
+	BEGIN_WIDGETLIST( "StageEquipmentCaller", pResource, MButton*, pButton);
 	pButton->Enable( !bReady);
 	END_WIDGETLIST();
 }
 
-
-/***********************************************************************
-  SetMapName : public
-  
-  desc : ¸Ê ¼±ÅÃ ÄÞº¸¹Ú½º¿¡ ¸Ê ÀÌ¸§À» ÇÏ³ª¾¿ µî·Ï½ÃÅ²´Ù.
-  arg  : szMapName = µî·Ï½ÃÅ³ ¸Ê ÀÌ¸§
-  ret  : none
-************************************************************************/
 void ZStageInterface::SetMapName( const char* szMapName)
 {
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
@@ -716,7 +557,6 @@ void ZStageInterface::SetMapName( const char* szMapName)
 	MComboBox* pMapCombo = (MComboBox*)pResource->FindWidget( "MapSelection");
 	if ( pMapCombo)
 	{
-		// ÀÏ´Ü ÀÓ½Ã ÇÏµåÄÚµù(¿ì¿¡¿¨~ ¤Ð.¤Ð)
 		if ( m_nGameType == MMATCH_GAMETYPE_QUEST)
 			pMapCombo->SetText( "Mansion");
 		else
@@ -724,25 +564,6 @@ void ZStageInterface::SetMapName( const char* szMapName)
 	}
 }
 
-
-
-
-/*
-	¿©±â¼­ºÎÅÍ »õ·Î Ãß°¡µÈ ³»¿ë...
-
-	¿Ø¸¸ÇÑ°Ç ¸®½º³Ê³ª ´Ù¸¥ °÷¿¡¼­ ÀÚµ¿À¸·Î È£ÃâµÇµµ·Ï ÇØ³ùÀ¸³ª ¾ÆÁ÷ Å×½ºÆ®ÀÎ °ü°è·Î
-	¿Ïº®ÇÑ°Ç ¾Æ´Ô...  -_-;
-*/
-
-
-
-/***********************************************************************
-  OpenSacrificeItemBox : public
-  
-  desc : Èñ»ý ¾ÆÀÌÅÛ ¼±ÅÃ Ã¢ ¿­±â
-  arg  : none
-  ret  : none
-************************************************************************/
 void ZStageInterface::OpenSacrificeItemBox( void)
 {
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
@@ -758,14 +579,6 @@ void ZStageInterface::OpenSacrificeItemBox( void)
 	GetSacrificeItemBoxPos();
 }
 
-
-/***********************************************************************
-  CloseSacrificeItemBox : public
-  
-  desc : Èñ»ý ¾ÆÀÌÅÛ ¼±ÅÃ Ã¢ ´Ý±â
-  arg  : none
-  ret  : none
-************************************************************************/
 void ZStageInterface::CloseSacrificeItemBox( void)
 {
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
@@ -785,14 +598,6 @@ void ZStageInterface::CloseSacrificeItemBox( void)
 	GetSacrificeItemBoxPos();
 }
 
-
-/***********************************************************************
-  HideSacrificeItemBox : public
-  
-  desc : Èñ»ý ¾ÆÀÌÅÛ ¼±ÅÃ Ã¢ °¨Ãß±â
-  arg  : none
-  ret  : none
-************************************************************************/
 void ZStageInterface::HideSacrificeItemBox( void)
 {
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
@@ -812,21 +617,8 @@ void ZStageInterface::HideSacrificeItemBox( void)
 	GetSacrificeItemBoxPos();
 }
 
-
-/***********************************************************************
-  HideSacrificeItemBox : public
-  
-  desc : Èñ»ý ¾ÆÀÌÅÛ ¼±ÅÃ Ã¢ À§Ä¡ ±¸ÇÏ±â
-  arg  : none
-  ret  : none
-************************************************************************/
 void ZStageInterface::GetSacrificeItemBoxPos( void)
 {
-//#ifdef _DEBUG
-//	m_nListFramePos = 0;
-//	return;
-//#endif
-
 	MWidget* pWidget = ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "Stage_ItemListView");
 	if ( pWidget)
 	{
@@ -851,43 +643,18 @@ void ZStageInterface::GetSacrificeItemBoxPos( void)
 	}
 }
 
-
-/***********************************************************************
-  OnSacrificeItem0 : public
-  
-  desc : Èñ»ý ¾ÆÀÌÅÛ0À» ´­·¶À» ¶§
-  arg  : none
-  ret  : none
-************************************************************************/
 void ZStageInterface::OnSacrificeItem0( void)
 {
 }
 
-
-/***********************************************************************
-  OnSacrificeItem1 : public
-  
-  desc : Èñ»ý ¾ÆÀÌÅÛ1¸¦ ´­·¶À» ¶§
-  arg  : none
-  ret  : none
-************************************************************************/
 void ZStageInterface::OnSacrificeItem1( void)
 {
 }
 
-
-/***********************************************************************
-  UpdateSacrificeItem : protected
-  
-  desc : º¯°æµÈ Èñ»ý ¾ÆÀÌÅÛ ÀÌ¹ÌÁö, Á¤º¸µîÀ» ¾÷µ¥ÀÌÆ® ÇÔ.
-  arg  : none
-  ret  : none
-************************************************************************/
 void ZStageInterface::UpdateSacrificeItem( void)
 {
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
 
-	// ½ºÅ×ÀÌÁö ¿µ¿ª¿¡ ÀÖ´Â Èñ»ý ¾ÆÀÌÅÛ ÀÌ¹ÌÁö ¼öÁ¤
 	for ( int i = SACRIFICEITEM_SLOT0;  i <= SACRIFICEITEM_SLOT1;  i++)
 	{
 		char szWidgetNameItem[ 128];
@@ -915,14 +682,6 @@ void ZStageInterface::UpdateSacrificeItem( void)
 	}
 }
 
-
-/***********************************************************************
-  SerializeSacrificeItemListBox : public
-  
-  desc : Èñ»ý ¾ÆÀÌÅÛ ¸®½ºÆ® ¹Ú½º¿¡ ÀÚ·á¸¦ ¹Þ´Â´Ù.
-  arg  : none
-  ret  : none
-************************************************************************/
 void ZStageInterface::SerializeSacrificeItemListBox( void)
 {
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
@@ -935,7 +694,6 @@ void ZStageInterface::SerializeSacrificeItemListBox( void)
 	int nSelectIndex = pListBox->GetSelIndex();
 	pListBox->RemoveAll();
 
-	// ¸®½ºÆ®¿¡ Ãß°¡
 	for ( MQUESTITEMNODEMAP::iterator questitem_itor = ZGetMyInfo()->GetItemList()->GetQuestItemMap().begin();
 		  questitem_itor != ZGetMyInfo()->GetItemList()->GetQuestItemMap().end();
 		  questitem_itor++)
@@ -954,7 +712,7 @@ void ZStageInterface::SerializeSacrificeItemListBox( void)
 				 (pItemDesc->m_nItemID == m_SacrificeItem[ SACRIFICEITEM_SLOT1].GetItemID()))
 				nCount--;
 
-			if ( pItemDesc->m_bSecrifice && (nCount > 0))		// Èñ»ý ¾ÆÀÌÅÛ¸¸ Ãß°¡
+			if ( pItemDesc->m_bSecrifice && (nCount > 0))
 			{
 				pListBox->Add( new SacrificeItemListBoxItem( pItemDesc->m_nItemID,
 															 ZApplication::GetGameInterface()->GetQuestItemIcon( pItemDesc->m_nItemID, true),
@@ -978,14 +736,6 @@ void ZStageInterface::SerializeSacrificeItemListBox( void)
 	pListBox->SetSelIndex( min( (pListBox->GetCount() - 1), nSelectIndex));
 }
 
-
-/***********************************************************************
-  OnDropSacrificeItem : public
-  
-  desc : Èñ»ý ¾ÆÀÌÅÛ ³õ±â
-  arg  : none
-  ret  : none
-************************************************************************/
 void ZStageInterface::OnDropSacrificeItem( int nSlotNum)
 {
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
@@ -999,7 +749,6 @@ void ZStageInterface::OnDropSacrificeItem( int nSlotNum)
 	{
 		MTextArea* pDesc = (MTextArea*)pResource->FindWidget( "Stage_ItemDesc");
 
-		// ½½·ÔÀÌ ºñ¾îÀÖÀ¸¸é ¹«Á¶°Ç ¿Ã¸²
 		if ( ! m_SacrificeItem[ nSlotNum].IsExist())
 		{
 			ZPostRequestDropSacrificeItem( ZGetGameClient()->GetPlayerUID(), nSlotNum, pItemDesc->GetItemID());
@@ -1008,7 +757,6 @@ void ZStageInterface::OnDropSacrificeItem( int nSlotNum)
 				pDesc->Clear();
 		}
 
-		// ½½·ÔÀÌ ºñ¾îÀÖÁö ¾ÊÀ¸¸é...
 		else
 		{
 			if ( (m_SacrificeItem[ nSlotNum].GetUID()    != ZGetGameClient()->GetPlayerUID()) ||
@@ -1021,14 +769,6 @@ void ZStageInterface::OnDropSacrificeItem( int nSlotNum)
 	}
 }
 
-
-/***********************************************************************
-  OnRemoveSacrificeItem : public
-  
-  desc : Èñ»ý ¾ÆÀÌÅÛ »©±â
-  arg  : none
-  ret  : none
-************************************************************************/
 void ZStageInterface::OnRemoveSacrificeItem( int nSlotNum)
 {
 	if ( !m_SacrificeItem[ nSlotNum].IsExist())
@@ -1043,12 +783,6 @@ void ZStageInterface::OnRemoveSacrificeItem( int nSlotNum)
 		pDesc->Clear();
 }
 
-
-/***********************************************************************
-  MSacrificeItemListBoxListener
-  
-  desc : Èñ»ý ¾ÆÀÌÅÛ ¸®½ºÆ® ¹Ú½º ¸®½º³Ê
-************************************************************************/
 class MSacrificeItemListBoxListener : public MListener
 {
 public:
@@ -1059,7 +793,6 @@ public:
 		{
 			MListBox* pListBox = (MListBox*)pWidget;
 
-			// ¾ÆÀÌÅÛ ¼³¸í ¾÷µ¥ÀÌÆ®
 			SacrificeItemListBoxItem* pItemDesc = (SacrificeItemListBoxItem*)pListBox->GetSelItem();
 			MTextArea* pDesc = (MTextArea*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "Stage_ItemDesc");
 			if ( pItemDesc && pDesc)
@@ -1099,13 +832,8 @@ MListener* ZGetSacrificeItemListBoxListener( void)
 	return &g_SacrificeItemListBoxListener;
 }
 
-
-/***********************************************************************
-  OnDropCallbackRemoveSacrificeItem
-  
-  desc : Èñ»ý ¾ÆÀÌÅÛ Á¦°Å
-************************************************************************/
-void OnDropCallbackRemoveSacrificeItem( void* pSelf, MWidget* pSender, MBitmap* pBitmap, const char* szString, const char* szItemString)
+void OnDropCallbackRemoveSacrificeItem( void* pSelf, MWidget* pSender, MBitmap* pBitmap,
+	const char* szString, const char* szItemString)
 {
 	if ( (pSender == NULL) || (strcmp(pSender->GetClassName(), MINT_ITEMSLOTVIEW)))
 		return;
@@ -1114,21 +842,12 @@ void OnDropCallbackRemoveSacrificeItem( void* pSelf, MWidget* pSender, MBitmap* 
 	ZApplication::GetStageInterface()->OnRemoveSacrificeItem( (strcmp( pItemSlotView->m_szItemSlotPlace, "SACRIFICE0") == 0) ? 0 : 1);
 }
 
-
-/***********************************************************************
-  StartMovieOfQuest : public
-  
-  desc : Äù½ºÆ® ¸ðµå·Î ½ÃÀÛÇÒ¶§ ¾ÆÀÌÅÛ ÇÕÃÄÁö´Â ¹«ºñ¸¦ ½ÃÀÛÇÔ
-  arg  : none
-  ret  : none
-************************************************************************/
 void ZStageInterface::StartMovieOfQuest( void)
 {
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
 
 	m_dwClockOfStartMovie = GetGlobalTimeMS();
 
-	// È­¿° ¾Ö´Ï¸ÞÀÌ¼Ç ½ÃÀÛ
 	MAnimation* pAnimation = (MAnimation*)pResource->FindWidget( "Stage_Flame0");
 	if ( pAnimation && m_SacrificeItem[ SACRIFICEITEM_SLOT0].IsExist())
 	{
@@ -1147,14 +866,6 @@ void ZStageInterface::StartMovieOfQuest( void)
 	m_bDrawStartMovieOfQuest = true;
 }
 
-
-/***********************************************************************
-  OnDrawStartMovieOfQuest : public
-  
-  desc : Äù½ºÆ® ¸ðµå·Î ½ÃÀÛÇÒ¶§ ¾ÆÀÌÅÛ ÇÕÃÄÁö´Â ¹«ºñ¸¦ ±×¸²
-  arg  : none
-  ret  : none
-************************************************************************/
 void ZStageInterface::OnDrawStartMovieOfQuest( void)
 {
 	if ( !m_bDrawStartMovieOfQuest)
@@ -1162,10 +873,8 @@ void ZStageInterface::OnDrawStartMovieOfQuest( void)
 
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
 
-	// °æ°ú ½Ã°£À» ±¸ÇÑ´Ù.
 	DWORD dwClock = GetGlobalTimeMS() - m_dwClockOfStartMovie;
 
-	// Èñ»ý ¾ÆÀÌÅÛ ÆäÀÌµå ¾Æ¿ô
 	int nOpacity = 255 - dwClock * 0.12f;
 	if ( nOpacity < 0)
 		nOpacity = 0;
@@ -1178,14 +887,12 @@ void ZStageInterface::OnDrawStartMovieOfQuest( void)
 	if ( pPicture && m_SacrificeItem[ SACRIFICEITEM_SLOT1].IsExist())
 		pPicture->SetOpacity( nOpacity);
 
-	// Á¾·á ½Ã°£ÀÏ °æ¿ì¿¡...
 	if ( dwClock > 3200)
 	{
 		m_bDrawStartMovieOfQuest = false;
 
 		ZMyQuestItemMap::iterator itMyQItem;
 
-		// ¿©±â¼­ ½½·Ô¿¡ ÀÚ½ÅÀÇ ¾ÆÀÌÅÛÀÌ ¿Ã·ÁÁ® ÀÖÀ¸¸é ÇØ´ç ¾ÆÀÌÅÛ Ä«¿îÆ® °¨¼Ò.
 		if( ZGetGameClient()->GetUID() == m_SacrificeItem[ SACRIFICEITEM_SLOT0].GetUID() )
 		{
 			itMyQItem = ZGetMyInfo()->GetItemList()->GetQuestItemMap().find( m_SacrificeItem[ SACRIFICEITEM_SLOT0].GetItemID() );
@@ -1204,14 +911,6 @@ void ZStageInterface::OnDrawStartMovieOfQuest( void)
 	}
 }
 
-
-/***********************************************************************
-  IsShowStartMovieOfQuest : public
-  
-  desc : Äù½ºÆ® ¸ðµå·Î ½ÃÀÛÇÒ¶§ ¾ÆÀÌÅÛ ÇÕÃÄÁö´Â ¹«ºñ¸¦ º¸¿©ÁÙÁö ¿©ºÎ¸¦ °áÁ¤.
-  arg  : none
-  ret  : true(=Quest mode start movie) or false(=none)
-************************************************************************/
 bool ZStageInterface::IsShowStartMovieOfQuest( void)
 {
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
@@ -1224,16 +923,8 @@ bool ZStageInterface::IsShowStartMovieOfQuest( void)
 
 	return false;
 }
-
-
-/***********************************************************************
-  OnResponseDropSacrificeItemOnSlot : public
-  
-  desc : Èñ»ý ¾ÆÀÌÅÛÀÌ ¿Ã¶ó°¬À»¶§
-  arg  : none
-  ret  : none
-************************************************************************/
-bool ZStageInterface::OnResponseDropSacrificeItemOnSlot( const int nResult, const MUID& uidRequester, const int nSlotIndex, const int nItemID )
+bool ZStageInterface::OnResponseDropSacrificeItemOnSlot( const int nResult, const MUID& uidRequester,
+	int nSlotIndex, int nItemID )
 {
 #ifdef _QUEST_ITEM
 	if( MOK == nResult)
@@ -1248,21 +939,17 @@ bool ZStageInterface::OnResponseDropSacrificeItemOnSlot( const int nResult, cons
 	}
 	else if( ITEM_TYPE_NOT_SACRIFICE == nResult)
 	{
-		// Èñ»ý ¾ÆÀÌÅÛÀÌ ¾Æ´Ô.
 		return false;
 	}
 	else if( NEED_MORE_QUEST_ITEM == nResult )
 	{
-		// ÇöÁ¦ °¡Áö°í ÀÖ´Â ¼ö·®À» ÃÊ°úÇØ¼­ ¿Ã·Á ³õÀ¸·Á°í ÇßÀ»°æ¿ì.
 	}
 	else if( MOK != nResult )
 	{
-		// ½ÇÆÐ...
 		return false;
 	}
 	else
 	{
-		// Á¤ÀÇµÇÁö ¾ÊÀº error...
 		ASSERT( 0 );
 	}
 
@@ -1271,14 +958,6 @@ bool ZStageInterface::OnResponseDropSacrificeItemOnSlot( const int nResult, cons
 	return true;
 }
 
-
-/***********************************************************************
-  OnResponseCallbackSacrificeItem : public
-  
-  desc : Èñ»ý ¾ÆÀÌÅÛÀÌ ³»·Á°¬À»¶§
-  arg  : none
-  ret  : none
-************************************************************************/
 bool ZStageInterface::OnResponseCallbackSacrificeItem( const int nResult, const MUID& uidRequester, const int nSlotIndex, const int nItemID )
 {
 #ifdef _QUEST_ITEM
@@ -1295,7 +974,6 @@ bool ZStageInterface::OnResponseCallbackSacrificeItem( const int nResult, const 
 	}
 	else if( ERR_SACRIFICE_ITEM_INFO == nResult )
 	{
-		// Å¬¶óÀÌ¾ðÆ®¿¡¼­ º¸³½ Á¤º¸°¡ Àß¸øµÈ Á¤º¸. µû·¯ ¿¡·¯Ã³¸®°¡ ÇÊ¿äÇÏ¸é ¿©±â¼­ ÇØÁÖ¸é µÊ.
 	}
 
 #endif
@@ -1304,17 +982,10 @@ bool ZStageInterface::OnResponseCallbackSacrificeItem( const int nResult, const 
 }
 
 #ifdef _QUEST_ITEM
-///
-// Fist : Ãß±³¼º.
-// Last : Ãß±³¼º.
-// 
-// ¼­¹ö·ÎºÎÅÍ QLÀÇ Á¤º¸¸¦ ¹ÞÀ½.
-///
 bool ZStageInterface::OnResponseQL( const int nQL )
 {
 	ZGetQuest()->GetGameInfo()->SetQuestLevel( nQL);
 
-	// ½ºÅ×ÀÌÁö ¿µ¿ª¿¡ ÀÖ´Â Äù½ºÆ® ·¹º§ Ç¥½Ã ¼öÁ¤
 	MLabel* pLabel = (MLabel*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "Stage_QuestLevel");
 	if ( pLabel)
 	{
@@ -1334,7 +1005,6 @@ bool ZStageInterface::OnStageGameInfo( const int nQL, const int nMapsetID, const
 	}
 	else
 	{
-		// ½Ã³ª¸®¿À°¡ ¾øÀ¸¸é ±×³É 0À¸·Î º¸ÀÌ°Ô ÇÑ´Ù.
 		ZGetQuest()->GetGameInfo()->SetQuestLevel( 0 );
 	}
 
@@ -1384,22 +1054,6 @@ bool ZStageInterface::OnQuestStartFailed( const int nState )
 		pTextArea->AddText( text);
 	}
 
-/*
-	if( MSQITRES_INV == nState )
-	{
-		// ÇØ´ç QL¿¡´ëÇÑ Èñ»ý¾ÆÀÌÅÛ Á¤º¸ Å×ÀÌºíÀÌ ¾øÀ½. ÀÌ°æ¿ì´Â ¸ÂÁö ¾Ê´Â Èñ»ý ¾ÆÀÌÅÛÀÌ ¿Ã·ÁÁ® ÀÖÀ»°æ¿ì.
-		MTextArea* pTextArea = (MTextArea*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "StageChattingOutput");
-		if ( pTextArea)
-			pTextArea->AddText( "^1ÇöÀç ³õ¿©ÀÖ´Â ¾ÆÀÌÅÛÀº Á¶°Ç¿¡ ¸ÂÁö ¾Ê¾Æ °ÔÀÓÀ» ½ÃÀÛÇÒ ¼ö ¾ø½À´Ï´Ù.");
-	}
-	else if( MSQITRES_DUP == nState )
-	{
-		// ¾çÂÊ ½½·Ô¿¡ °°Àº ¾ÆÀÌÅÛÀÌ ¿Ã·ÁÁ® ÀÖÀ½.
-		MTextArea* pTextArea = (MTextArea*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "StageChattingOutput");
-		if ( pTextArea)
-			pTextArea->AddText( "^1°°Àº ¾ÆÀÌÅÛ 2°³°¡ ³õ¿©ÀÖÀ¸¹Ç·Î °ÔÀÓÀ» ½ÃÀÛÇÒ ¼ö ¾ø½À´Ï´Ù.");
-	}
-*/
 	return true;
 }
 
@@ -1414,7 +1068,6 @@ void ZStageInterface::UpdateStageGameInfo(const int nQL, const int nMapsetID, co
 {
 	if (!ZGetGameTypeManager()->IsQuestDerived(ZGetGameClient()->GetMatchStageSetting()->GetGameType())) return;
 
-	// ½ºÅ×ÀÌÁö ¿µ¿ª¿¡ ÀÖ´Â Äù½ºÆ® ·¹º§ Ç¥½Ã ¼öÁ¤
 	MLabel* pLabel = (MLabel*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "Stage_QuestLevel");
 	if ( pLabel)
 	{
@@ -1426,9 +1079,7 @@ void ZStageInterface::UpdateStageGameInfo(const int nQL, const int nMapsetID, co
 
 #define		MAPSET_NORMAL		MCOLOR(0xFFFFFFFF)
 #define		MAPSET_SPECIAL		MCOLOR(0xFFFFFF40)			// Green
-//#define		MAPSET_SPECIAL		MCOLOR(0xFFFF2020)		// Red
 
-	// ¿©±â¼­ ½Ã³ª¸®¿À ÀÌ¸§À» º¸¿©ÁØ´Ù.
 	pLabel = (MLabel*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "Stage_SenarioName");
 	MWidget* pWidget = ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "Stage_SenarioNameImg");
 	MPicture* pPictureL = (MPicture*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "Stage_Lights0");
@@ -1437,7 +1088,6 @@ void ZStageInterface::UpdateStageGameInfo(const int nQL, const int nMapsetID, co
 	{
 		if (nScenarioID == 0)
 		{
-			// ½Ã³ª¸®¿À°¡ ¾ø´Â °æ¿ì
 			pLabel->SetText( "");
 			if ( pWidget)
 				pWidget->Show( false);
@@ -1471,7 +1121,6 @@ void ZStageInterface::UpdateStageGameInfo(const int nQL, const int nMapsetID, co
 			}
 			else
 			{
-				// Æ¯º°½Ã³ª¸®¿À°¡ ¾øÀ»°æ¿ì´Â Á¤±Ô½Ã³ª¸®¿ÀÀÌ´Ù.
 				pLabel->SetText("");
 				pLabel->SetTextColor(MCOLOR(0xFFFFFFFF));
 				if ( pWidget)
@@ -1491,13 +1140,6 @@ void ZStageInterface::UpdateStageGameInfo(const int nQL, const int nMapsetID, co
 	}
 }
 
-/***********************************************************************
-  SetSacrificeItemSlot : public
-  
-  desc : Èñ»ý ¾ÆÀÌÅÛ ½½·Ô¿¡ ¾ÆÀÌÅÛ Á¤º¸¸¦ ÀÔ·Â
-  arg  : none
-  ret  : none
-************************************************************************/
 void SacrificeItemSlotDesc::SetSacrificeItemSlot( const MUID& uidUserID, const unsigned long int nItemID, MBitmap* pBitmap, const char* szItemName, const int nQL)
 {
 	m_uidUserID = uidUserID;
@@ -1508,27 +1150,12 @@ void SacrificeItemSlotDesc::SetSacrificeItemSlot( const MUID& uidUserID, const u
 	m_bExist = true;
 }
 
-
-/***********************************************************************
-  ReadSenarioNameXML : protected
-  
-  desc : Äù½ºÆ® Èñ»ý ¾ÆÀÌÅÛ XMLÀ» ÀÐ´Â´Ù
-  arg  : none
-  ret  : true(=success) or false(=fail)
-************************************************************************/
 bool ZStageInterface::ReadSenarioNameXML( void)
 {
 	m_SenarioNameDesc.clear();
 
-	// XML ÆÄÀÏÀ» ¿¬´Ù
 	MXmlDocument xmlQuestItemDesc;
 	xmlQuestItemDesc.Create();
-
-//	if ( !xmlQuestItemDesc.LoadFromFile( "System/scenario.xml"))
-//	{
-//		xmlQuestItemDesc.Destroy();
-//		return false;
-//	}
 
 	char			*buffer;
 	MZFile			mzFile;
@@ -1552,8 +1179,6 @@ bool ZStageInterface::ReadSenarioNameXML( void)
 	delete[] buffer;
 	mzFile.Close();
 
-
-	// µ¥ÀÌÅÍ¸¦ ÀÐ¾î¿Â´Ù
 	MXmlElement rootElement = xmlQuestItemDesc.GetDocumentElement();
 	for ( int i = 0;  i < rootElement.GetChildNodeCount();  i++)
 	{
@@ -1566,7 +1191,7 @@ bool ZStageInterface::ReadSenarioNameXML( void)
 			continue;
 
 		bool bFindPage = false;
-		if ( !_stricmp( szTagName, "SPECIAL_SCENARIO"))			// ÅÂ±× ½ÃÀÛ
+		if ( !_stricmp( szTagName, "SPECIAL_SCENARIO"))
 		{
 			char szAttrName[64];
 			char szAttrValue[256];

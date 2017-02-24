@@ -3,19 +3,19 @@
 #include "MWidget.h"
 #include "Mint.h"
 
-void MPOINT::Scale(float x, float y)
+void MPOINT::Scale(float sx, float sy)
 {
-	MPOINT::x = int(MPOINT::x*x);
-	MPOINT::y = int(MPOINT::y*y);
+	x = int(x * sx);
+	y = int(y * sy);
 }
 
-void MPOINT::ScaleRes(void)
+void MPOINT::ScaleRes()
 {
-	x = MPOINT::x*MGetWorkspaceWidth()/640;
-	y = MPOINT::y*MGetWorkspaceHeight()/480;
+	x = x * MGetWorkspaceWidth() / 640;
+	y = y * MGetWorkspaceHeight() / 480;
 }
 
-void MPOINT::TranslateRes(void)
+void MPOINT::TranslateRes()
 {
 	int nDiffX = x - 320;
 	int nDiffY = y - 240;
@@ -24,80 +24,80 @@ void MPOINT::TranslateRes(void)
 	y = nDiffY + MGetWorkspaceHeight()/2;
 }
 
-void MRECT::ScalePos(float x, float y)
+void MRECT::ScalePos(float sx, float sy)
 {
-	MRECT::x = int(MRECT::x*x);
-	MRECT::y = int(MRECT::y*y);
+	x = int(x * sx);
+	y = int(y * sy);
 }
 
-void MRECT::ScaleArea(float x, float y)
+void MRECT::ScaleArea(float sx, float sy)
 {
-	MRECT::x = int(MRECT::x*x);
-	MRECT::y = int(MRECT::y*y);
-	MRECT::w = int(MRECT::w*x);
-	MRECT::h = int(MRECT::h*y);
+	x = int(x * sx);
+	y = int(y * sy);
+	w = int(w * sx);
+	h = int(h * sy);
 }
 
-void MRECT::ScalePosRes(void)
+void MRECT::ScalePosRes()
 {
-	float x = MGetWorkspaceWidth()/(float)640;
-	float y = MGetWorkspaceHeight()/(float)480;
+	float x = MGetWorkspaceWidth() / 640.f;
+	float y = MGetWorkspaceHeight() / 480.f;
 	ScalePos(x, y);
 }
 
-void MRECT::ScaleAreaRes(void)
+void MRECT::ScaleAreaRes()
 {
-	float x = MGetWorkspaceWidth()/(float)640;
-	float y = MGetWorkspaceHeight()/(float)480;
+	float x = MGetWorkspaceWidth() / 640.f;
+	float y = MGetWorkspaceHeight() / 480.f;
 	ScaleArea(x, y);
 }
 
-void MRECT::TranslateRes(void)
+void MRECT::TranslateRes()
 {
 	int nDiffX = x - 320;
 	int nDiffY = y - 240;
 
-	x = nDiffX + MGetWorkspaceWidth()/2;
-	y = nDiffY + MGetWorkspaceHeight()/2;
+	x = nDiffX + MGetWorkspaceWidth() / 2;
+	y = nDiffY + MGetWorkspaceHeight() / 2;
 }
 
-void MRECT::EnLarge(int w)
+void MRECT::EnLarge(int s)
 {
-	x -= w;
-	y -= w;
-	w += (w*2);
-	h += (w*2);
+	x -= s;
+	y -= s;
+	w += s * 2;
+	h += s * 2;
 }
 
-void MRECT::Offset(int x, int y)
+void MRECT::Offset(int sx, int sy)
 {
-	MRECT::x += x;
-	MRECT::y += y;
+	x += sx;
+	y += sy;
 }
 
 bool MRECT::Intersect(MRECT* pIntersect, const MRECT& r)
 {
-	_ASSERT(pIntersect!=NULL);
+	_ASSERT(pIntersect != NULL);
 
-	if(x>r.x){
+	if (x > r.x) {
 		pIntersect->x = x;
-		pIntersect->w = min(r.x+r.w, x+w) - x;
+		pIntersect->w = min(r.x + r.w, x + w) - x;
 	}
-	else{
+	else {
 		pIntersect->x = r.x;
-		pIntersect->w = min(r.x+r.w, x+w) - r.x;
+		pIntersect->w = min(r.x + r.w, x + w) - r.x;
 	}
-	if(y>r.y){
+	if (y > r.y) {
 		pIntersect->y = y;
-		pIntersect->h = min(r.y+r.h, y+h) - y;
+		pIntersect->h = min(r.y + r.h, y + h) - y;
 	}
-	else{
+	else {
 		pIntersect->y = r.y;
-		pIntersect->h = min(r.y+r.h, y+h) - r.y;
+		pIntersect->h = min(r.y + r.h, y + h) - r.y;
 	}
 
-	if(pIntersect->w<0) return false;
-	if(pIntersect->h<0) return false;
+	if (pIntersect->w < 0) return false;
+	if (pIntersect->h < 0) return false;
 
 	return true;
 }

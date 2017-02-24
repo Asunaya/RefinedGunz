@@ -874,7 +874,7 @@ unsigned int MZFileCheckList::GetCRC32(const char *szFileName) const
 
 MMappedFile::MMappedFile(const char * Filename)
 {
-	auto File = CreateFile(Filename, GENERIC_READ, 0, 0, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
+	auto File = CreateFile(Filename, GENERIC_READ, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
 	if (File == INVALID_HANDLE_VALUE)
 	{
 		MLog("MMappedFile::MMappedFile - CreateFile failed on %s! GetLastError() = %d\n",

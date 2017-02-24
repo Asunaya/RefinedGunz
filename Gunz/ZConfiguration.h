@@ -190,8 +190,6 @@ public:
 
 	bool LateStringConvert();
 
-	bool DecoupleLogicAndRendering{};
-
 private:
 	friend void LoadRGCommands(ZChatCmdManager &CmdManager);
 	friend class ZOptionInterface;
@@ -224,7 +222,7 @@ private:
 
 	std::map<int, ZSERVERNODE> m_ServerList;
 
-	int VisualFPSLimit = 120;
+	int VisualFPSLimit = 0;
 	int LogicalFPSLimit = 250;
 
 	bool bCamFix{};

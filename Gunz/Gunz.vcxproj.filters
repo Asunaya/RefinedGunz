@@ -682,9 +682,6 @@
     <ClInclude Include="Portal.h">
       <Filter>RGunz</Filter>
     </ClInclude>
-    <ClInclude Include="Rules.h">
-      <Filter>RGunz</Filter>
-    </ClInclude>
     <ClInclude Include="NewChat.h">
       <Filter>RGunz</Filter>
     </ClInclude>
@@ -1295,9 +1292,6 @@
       <Filter>StringRes</Filter>
     </ClCompile>
     <ClCompile Include="Portal.cpp">
-      <Filter>RGunz</Filter>
-    </ClCompile>
-    <ClCompile Include="Rules.cpp">
       <Filter>RGunz</Filter>
     </ClCompile>
     <ClCompile Include="RGCommands.cpp">

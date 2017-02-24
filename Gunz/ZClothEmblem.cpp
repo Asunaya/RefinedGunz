@@ -395,7 +395,7 @@ void ZClothEmblem::satisfyConstraints()
 
 void ZClothEmblem::render()
 {
-	if (!isInViewFrustum(&mAABB, RGetViewFrustum()) ||
+	if (!isInViewFrustum(mAABB, RGetViewFrustum()) ||
 		!m_pWorld->GetBsp()->IsVisible(mAABB)) {
 		mbIsInFrustrum = false;
 		return;
@@ -546,20 +546,17 @@ void ZClothEmblem::setExplosion( rvector& pos_, float power_ )
 
 void ZClothEmblem::CheckSpearing( rvector& bullet_begin_, rvector& bullet_end_, float power_ )
 {	
-	if(mbIsInFrustrum)
-	{
-		if(!isInViewFrustum( &mAABB, RGetViewFrustum())) 
-			mbIsInFrustrum =false;
-	}
-	else return;
+	if (!mbIsInFrustrum)
+		return;
+
+	if (!isInViewFrustum(mAABB, RGetViewFrustum()))
+		mbIsInFrustrum = false;
 
 	rvector dir = Normalized(bullet_end_ - bullet_begin_);
 
 	// test line vs AABB
 	if (!IntersectLineSegmentAABB(bullet_begin_, dir, mAABB))
-	{
 		return;
-	}
 
 	// line vs triangle test and determine which particle get power
 	int index[3], sIndex = -1;

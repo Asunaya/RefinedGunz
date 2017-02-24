@@ -447,8 +447,8 @@ void ZGameClient::OnStageEnterBattle(const MUID& uidChar, MCmdEnterBattleParam n
 		ZPostClientSettings(ClientSettings);
 
 		// Unready every player
-		for (auto* CharNode : m_MatchStageSetting.m_CharSettingList)
-			CharNode->nState = MOSS_NONREADY;
+		for (auto&& CharNode : m_MatchStageSetting.m_CharSettingList)
+			CharNode.nState = MOSS_NONREADY;
 	}
 
 	if (GetMatchStageSetting()->GetNetcode() != NetcodeType::ServerBased)
@@ -918,9 +918,6 @@ void ZGameClient::UpdateStageSetting(MSTAGE_SETTING_NODE* pSetting, STAGE_STATE 
 		{
 			Changed = false;
 
-			/*if (CreatedStage)
-				return false;*/
-
 			if (New == Default)
 				return false;
 
@@ -977,6 +974,18 @@ void ZGameClient::UpdateStageSetting(MSTAGE_SETTING_NODE* pSetting, STAGE_STATE 
 	{
 		sprintf_safe(buf, "Swords only%s%s", Changed ? " changed to " : ": ",
 			pSetting->SwordsOnly ? "true" : "false");
+		ZChatOutput(buf, ZChat::CMT_SYSTEM);
+	}
+	if (CHECK_SETTING(VanillaMode, false))
+	{
+		sprintf_safe(buf, "Vanilla mode%s%s", Changed ? " changed to " : ": ",
+			pSetting->VanillaMode ? "true" : "false");
+		ZChatOutput(buf, ZChat::CMT_SYSTEM);
+	}
+	if (CHECK_SETTING(InvulnerabilityStates, false))
+	{
+		sprintf_safe(buf, "Invulnerability states%s%s", Changed ? " changed to " : ": ",
+			pSetting->InvulnerabilityStates ? "true" : "false");
 		ZChatOutput(buf, ZChat::CMT_SYSTEM);
 	}
 
@@ -1501,6 +1510,9 @@ void ZGameClient::OnUserWhisper(char* pszSenderName, char* pszTargetName, char* 
 		}
 	}
 
+#ifdef FLASH_WINDOW_ON_WHISPER
+	FlashWindow(g_hWnd, FALSE);
+#endif
 }
 
 void ZGameClient::OnChatRoomJoin(char* pszPlayerName, char* pszChatRoomName)

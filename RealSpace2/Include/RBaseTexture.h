@@ -24,7 +24,7 @@ class RTextureManager;
 class RBaseTexture final
 {
 public:
-	RBaseTexture(const void* data, size_t size);
+	RBaseTexture() = default;
 	RBaseTexture(RBaseTexture&&) = default;
 	RBaseTexture& operator =(RBaseTexture&&) = default;
 	~RBaseTexture() = default;

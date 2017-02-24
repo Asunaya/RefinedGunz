@@ -52,13 +52,17 @@ static int SubGetTexLevel(RTextureType tex_type)
 	return 0;
 }
 
-RBaseTexture::RBaseTexture(const void* data, size_t size)
-{
-	SubCreateTexture(data, size);
-}
-
 void RBaseTexture::Resize()
 {
+	if (filename.empty())
+		return;
+
+	MZFile mzf;
+	if (!mzf.Open(filename.c_str(), m_bUseFileSystem ? g_pFileSystem : nullptr))
+		return;
+	auto buf = mzf.Release();
+
+	SubCreateTexture(buf.get(), mzf.GetLength());
 }
 
 LPDIRECT3DTEXTURE9 RBaseTexture::GetTexture()
@@ -117,6 +121,7 @@ void RTextureManager::OnChangeTextureLevel(RTextureType flag)
 	for (auto&& tex : Textures)
 	{
 		if (flag == RTextureType::All || (static_cast<u32>(flag) & static_cast<u32>(tex.m_nTexType))) {
+			tex.m_nTexLevel = SubGetTexLevel(flag);
 			tex.Resize();
 		}
 	}
@@ -189,18 +194,19 @@ RBaseTexture *RTextureManager::CreateBaseTextureMg(const char* filename, RTextur
 RBaseTexture * RTextureManager::CreateBaseTextureFromMemory(const void * data, size_t size,
 	RTextureType tex_type, bool bUseMipmap, bool bUseFileSystem)
 {
-	Textures.emplace_back(data, size);
+	Textures.emplace_back();
 	auto&& new_tex = Textures.back();
-	if (!new_tex.m_pTex)
-	{
-		Textures.pop_back();
-		return nullptr;
-	}
 	new_tex.m_bUseFileSystem = bUseFileSystem;
 	new_tex.m_nRefCount = 1;
 	new_tex.m_bUseMipmap = bUseMipmap;
 	new_tex.m_nTexType = tex_type;
 	new_tex.m_nTexLevel = SubGetTexLevel(tex_type);
+	new_tex.SubCreateTexture(data, size);
+	if (!new_tex.m_pTex)
+	{
+		Textures.pop_back();
+		return nullptr;
+	}
 	return &new_tex;
 }
 
@@ -230,7 +236,9 @@ RBaseTexture *RTextureManager::CreateBaseTextureSub(bool Managed, const char* fi
 #ifdef LOAD_FROM_DDS
 	char ddstexturefile[MAX_PATH];
 	sprintf_safe(ddstexturefile, "%s.dds", filename);
-	if (!mzf.Open(ddstexturefile, pfs))
+	if (mzf.Open(ddstexturefile, pfs))
+		filename = ddstexturefile;
+	else
 #endif
 		if (!mzf.Open(filename, pfs))
 			return nullptr;

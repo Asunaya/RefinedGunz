@@ -13,37 +13,37 @@ bool CreateReplayGame(const char *filename);
 #define GUNZ_REC_FILE_EXT		"gzr"
 
 #define RG_REPLAY_MAGIC_NUMBER 0x00DEFBAD
-#define RG_REPLAY_BINARY_VERSION 2
+#define RG_REPLAY_BINARY_VERSION 3
 
-enum class SERVER
+enum class ServerType
 {
-	NONE,
-	OFFICIAL, // igunz, ijji gunz, aeria gunz
-	REFINED_GUNZ,
-	FREESTYLE_GUNZ,
+	None,
+	Official, // igunz, ijji gunz, aeria gunz
+	RefinedGunz,
+	FreestyleGunz,
 	DarkGunz,
-	MAX,
+	Max,
 };
 
 struct ReplayVersion
 {
-	SERVER Server;
-	int nVersion;
-	int nSubVersion;
+	ServerType Server = ServerType::None;
+	int nVersion = -1;
+	int nSubVersion = -1;
 
 	const char* GetServerString()
 	{
 		switch (Server)
 		{
-		case SERVER::OFFICIAL:
+		case ServerType::Official:
 			return "Official";
-		case SERVER::FREESTYLE_GUNZ:
+		case ServerType::FreestyleGunz:
 			return "Freestyle Gunz";
-		case SERVER::REFINED_GUNZ:
+		case ServerType::RefinedGunz:
 			return "Refined Gunz";
-		case SERVER::DarkGunz:
+		case ServerType::DarkGunz:
 			return "Dark Gunz";
-		case SERVER::NONE:
+		case ServerType::None:
 		default:
 			return "Unknown";
 		}
@@ -56,7 +56,7 @@ struct ReplayVersion
 		ret += " V";
 		ret += std::to_string(nVersion);
 
-		if (Server == SERVER::FREESTYLE_GUNZ && nVersion == 7)
+		if (Server == ServerType::FreestyleGunz && nVersion == 7)
 		{
 			ret += ".";
 			ret += std::to_string(nSubVersion);
@@ -71,8 +71,6 @@ void GetReplayStageSetting(REPLAY_STAGE_SETTING_NODE& dest, const MSTAGE_SETTING
 class ZReplayLoader
 {
 public:
-	ZReplayLoader();
-
 	bool LoadFile(const char* FileName);
 
 	float GetGameTime() const { return m_fGameTime; }
@@ -94,7 +92,7 @@ private:
 	float m_fGameTime = 0.f;
 	int Position = 0;
 	bool IsDojo = false;
-	MMATCH_GAMETYPE GameType;
+	MMATCH_GAMETYPE GameType = MMATCH_GAMETYPE_DEATHMATCH_SOLO;
 	time_t Timestamp = 0;
 
 	template <typename T>

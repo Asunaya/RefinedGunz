@@ -168,13 +168,13 @@ float GetDistanceBetweenLineSegment(const rvector &a, const rvector &aa,
 
 
 
-float GetDistance(const rboundingbox *bb, const rplane *plane)
+float GetDistance(const rboundingbox& bb, const rplane& plane)
 {
 	float a, b, c;
-	a = (plane->a>0) ? bb->m[1][0] : bb->m[0][0];
-	b = (plane->b>0) ? bb->m[1][1] : bb->m[0][1];
-	c = (plane->c>0) ? bb->m[1][2] : bb->m[0][2];
-	return plane->a*a + plane->b*b + plane->c*c + plane->d;
+	a = (plane.a > 0) ? bb.m[1][0] : bb.m[0][0];
+	b = (plane.b > 0) ? bb.m[1][1] : bb.m[0][1];
+	c = (plane.c > 0) ? bb.m[1][2] : bb.m[0][2];
+	return plane.a*a + plane.b*b + plane.c*c + plane.d;
 }
 
 void GetDistanceMinMax(rboundingbox &bb, rplane &plane, float *MinDist, float *MaxDist)
@@ -201,9 +201,9 @@ float GetArea(rvector &v1, rvector &v2, rvector &v3)
 	return sqrt(p*(p - a)*(p - b)*(p - c));
 }
 
-bool isInPlane(const rboundingbox *bb, const rplane *plane)
+bool isInPlane(const rboundingbox& bb, const rplane& plane)
 {
-	return (GetDistance(bb, plane) >= 0);
+	return GetDistance(bb, plane) >= 0;
 }
 
 template <typename T>
@@ -258,14 +258,14 @@ rquaternion Slerp(const rquaternion& from, const rquaternion& to, float t)
 	};
 }
 
-bool IsIntersect(rboundingbox *bb1, rboundingbox *bb2)
+bool IsIntersect(const rboundingbox& bb1, const rboundingbox& bb2)
 {
-	if (bb1->minx>bb2->maxx) return false;
-	if (bb1->miny>bb2->maxy) return false;
-	if (bb1->minz>bb2->maxz) return false;
-	if (bb2->minx>bb1->maxx) return false;
-	if (bb2->miny>bb1->maxy) return false;
-	if (bb2->minz>bb1->maxz) return false;
+	if (bb1.minx > bb2.maxx) return false;
+	if (bb1.miny > bb2.maxy) return false;
+	if (bb1.minz > bb2.maxz) return false;
+	if (bb2.minx > bb1.maxx) return false;
+	if (bb2.miny > bb1.maxy) return false;
+	if (bb2.minz > bb1.maxz) return false;
 
 	return true;
 }
@@ -294,36 +294,39 @@ bool IsInSphere(const rboundingbox &bb, const rvector &point, float radius)
 		bb.maxx >= point.x && bb.maxy >= point.y && bb.maxz >= point.z);
 }
 
-bool isInViewFrustum(const rvector &point, rplane *plane)
+bool isInViewFrustum(const rvector &point, const rfrustum& frustum)
 {
-#define FN(i) ((plane[i].a*point.x+plane[i].b*point.y+plane[i].c*point.z+plane[i].d)>=0)
+#define FN(i) frustum[i].a * point.x + frustum[i].b * point.y + frustum[i].c * point.z+frustum[i].d >= 0
 	return FN(0) && FN(1) && FN(2) && FN(3);
 }
 
-bool isInViewFrustum(const rvector &point, float radius, rplane *plane)
+bool isInViewFrustum(const rvector &point, float radius, const rfrustum& frustum)
 {
-	return DotProduct(plane[0], point) > -radius &&
-		DotProduct(plane[1], point) > -radius &&
-		DotProduct(plane[2], point) > -radius &&
-		DotProduct(plane[3], point) > -radius &&
-		DotProduct(plane[5], point) > -radius;
+	return
+		DotProduct(frustum[0], point) > -radius &&
+		DotProduct(frustum[1], point) > -radius &&
+		DotProduct(frustum[2], point) > -radius &&
+		DotProduct(frustum[3], point) > -radius &&
+		DotProduct(frustum[5], point) > -radius;
 }
 
-bool isInViewFrustum(const rboundingbox *bb, const rplane *plane)
+bool isInViewFrustum(const rboundingbox& bb, const rfrustum& frustum)
 {
-	if (isInPlane(bb, plane) && isInPlane(bb, plane + 1) &&
-		isInPlane(bb, plane + 2) && isInPlane(bb, plane + 3)) return true;
-	return false;
+	return
+		isInPlane(bb, frustum[0]) &&
+		isInPlane(bb, frustum[1]) &&
+		isInPlane(bb, frustum[2]) &&
+		isInPlane(bb, frustum[3]);
 }
 
-bool isInViewFrustum(const rvector &point1, const rvector &point2, rplane *planes)
+bool isInViewFrustum(const rvector &point1, const rvector &point2, const rfrustum& frustum)
 {
 	rvector p1 = point1, p2 = point2;
 
-	for (int i = 0; i<6; i++) {
-		rplane *plane = planes + i;
-		float d1 = DotProduct(*plane, p1);
-		float d2 = DotProduct(*plane, p2);
+	for (int i = 0; i < 6; i++) {
+		auto&& plane = frustum[i];
+		float d1 = DotProduct(plane, p1);
+		float d2 = DotProduct(plane, p2);
 		rsign s1 = SIGNOF(d1);
 		rsign s2 = SIGNOF(d2);
 
@@ -348,18 +351,32 @@ bool isInViewFrustum(const rvector &point1, const rvector &point2, rplane *plane
 	return false;
 }
 
-bool isInViewFrustumWithZ(rboundingbox *bb, rplane *plane)
+bool isInViewFrustumWithZ(const rboundingbox& bb, const rfrustum& frustum)
 {
-	if (isInPlane(bb, plane) && isInPlane(bb, plane + 1) &&
-		isInPlane(bb, plane + 2) && isInPlane(bb, plane + 3) &&
-		isInPlane(bb, plane + 4) && isInPlane(bb, plane + 5)) return true;
-	return false;
+	return
+		isInPlane(bb, frustum[0]) &&
+		isInPlane(bb, frustum[1]) &&
+		isInPlane(bb, frustum[2]) &&
+		isInPlane(bb, frustum[3]) &&
+		isInPlane(bb, frustum[4]) &&
+		isInPlane(bb, frustum[5]);
 }
 
-bool isInViewFrustumwrtnPlanes(rboundingbox *bb, rplane *plane, int nplane)
+bool isInViewFrustumWithFarZ(const rboundingbox& bb, const rfrustum& frustum)
 {
-	for (int i = 0; i<nplane; i++)
-		if (!isInPlane(bb, plane + i)) return false;
+	return
+		isInPlane(bb, frustum[0]) &&
+		isInPlane(bb, frustum[1]) &&
+		isInPlane(bb, frustum[2]) &&
+		isInPlane(bb, frustum[3]) &&
+		isInPlane(bb, frustum[5]);
+}
+
+bool isInViewFrustumwrtnPlanes(const rboundingbox& bb, const rfrustum& frustum, int nplane)
+{
+	for (int i = 0; i < nplane; i++)
+		if (!isInPlane(bb, frustum[i]))
+			return false;
 
 	return true;
 }
@@ -520,7 +537,7 @@ bool IsIntersect(const rvector& orig, const rvector& dir, const rvector& center,
 	return true;
 }
 
-bool GetIntersectionOfTwoPlanes(rvector *pOutDir, rvector *pOutAPoint, rplane &plane1, rplane &plane2)
+bool GetIntersectionOfTwoPlanes(rvector *pOutDir, rvector *pOutAPoint, const rplane &plane1, const rplane &plane2)
 {
 	rvector n1 = rvector(plane1.a, plane1.b, plane1.c);
 	rvector n2 = rvector(plane2.a, plane2.b, plane2.c);

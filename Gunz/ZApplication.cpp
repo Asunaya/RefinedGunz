@@ -70,16 +70,12 @@ ZApplication::ZApplication()
 	SetLaunchMode(ZLAUNCH_MODE_DEBUG);
 
 #ifdef _ZPROFILER
-	m_pProfiler = new ZProfiler;
+	m_pProfiler = std::make_unique<ZProfiler>();
 #endif
 }
 
 ZApplication::~ZApplication()
 {
-#ifdef _ZPROFILER
-	SAFE_DELETE(m_pProfiler);
-#endif
-
 	m_pInstance = NULL;
 }
 
@@ -256,7 +252,7 @@ bool ZApplication::OnCreate(ZLoadingProgress *pLoadingProgress)
 	const char* CachedFileNames[] = { "system", "model", "sfx",
 		"interface/default", "interface/loadable", "interface/login",
 		"sound/bgm", "sound/effect", };
-	constexpr int NumCachedFiles = ArraySize(CachedFileNames);
+	constexpr int NumCachedFiles = std::size(CachedFileNames);
 	int CacheIndices[NumCachedFiles];
 	for (int i = 0; i < NumCachedFiles; i++)
 		CacheIndices[i] = m_FileSystem.CacheArchive(CachedFileNames[i]);

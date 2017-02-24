@@ -27,7 +27,6 @@
 #include "BasicInfoHistory.inl"
 #include "RGMain.h"
 #include "Portal.h"
-#include "Rules.h"
 
 #define ANGLE_TOLER			.1f
 #define ANGLE_SPEED			12.f
@@ -447,7 +446,7 @@ void ZCharacter::UpdateDirection(float fDelta, const v3& Direction)
 		return;
 	}
 
-	if (g_Rules.IsVanillaMode())
+	if (ZGetGameClient()->GetMatchStageSetting()->IsVanillaMode())
 	{
 		if ((m_AniState_Lower == ZC_STATE_LOWER_IDLE1) ||
 			(m_AniState_Lower == ZC_STATE_LOWER_RUN_FORWARD) ||
@@ -698,7 +697,7 @@ void ZCharacter::OnDraw()
 
 	// Don't draw if the bounding box isn't visible
 	if (!ZGetGame()->GetWorld()->GetBsp()->IsVisible(bb)) return;
-	if (!isInViewFrustum(&bb, RGetViewFrustum())) return;
+	if (!isInViewFrustum(bb, RGetViewFrustum())) return;
 
 	auto ZCharacterDrawLight = MBeginProfile("ZCharacter::Draw::Light");
 
@@ -976,7 +975,7 @@ void ZCharacter::OnUpdate(float fDelta)
 		if (!GetHistory(&m_vProxyPosition, &dir, g_pGame->GetTime() - pObserver->GetDelay()))
 			return;
 
-		if (g_Rules.IsVanillaMode())
+		if (ZGetGameClient()->GetMatchStageSetting()->IsVanillaMode())
 		{
 			ProxyDirection = m_DirectionLower;
 
@@ -1152,7 +1151,7 @@ void ZCharacter::UpdateVelocity(float fDelta)
 
 	if(IS_ZERO(Magnitude(m_Accel)) && m_bLand && !m_bWallJump && !m_bWallJump2 && !bTumble
 		&& (!m_bBlast || m_nBlastType != 1))
-		fSpeed = max(fSpeed-STOP_SPEED*fDelta,0);
+		fSpeed = std::max(fSpeed-STOP_SPEED*fDelta,0.0f);
 
 	SetVelocity(dir.x*fSpeed, dir.y*fSpeed, GetVelocity().z);
 }

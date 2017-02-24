@@ -596,7 +596,7 @@ void ZGameInput::Update(float fElapsed)
 						if (pMinimap)
 							targetPos.z = max(min(targetPos.z, pMinimap->GetHeightMax()), pMinimap->GetHeightMin());
 						else
-							targetPos.z = max(min(targetPos.z, 7000), 2000);
+							targetPos.z = std::max(std::min(targetPos.z, 7000.0f), 2000.0f);
 					}
 
 					pCamera->SetPosition(targetPos);

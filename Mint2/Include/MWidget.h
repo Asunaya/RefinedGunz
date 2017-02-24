@@ -1,7 +1,3 @@
-//
-// MINT ( MAIET In-house wiNdows sysTem )
-//
-////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
 #include "CMPtrList.h"
@@ -15,7 +11,6 @@ class MListener{
 public:
 	virtual bool OnCommand(MWidget* pWidget, const char* szMessage) = 0;
 };
-
 
 class MToolTip;
 class MResourceMap;
@@ -192,7 +187,6 @@ public:
 
 	void SetPosition(int x, int y);
 	void SetPosition(const MPOINT& p);
-	void SetInitialBounds(MRECT& r);
 	void SetBounds(const MRECT& r);
 	void SetBounds(int x, int y, int w, int h);
 	MPOINT GetPosition();
@@ -206,7 +200,7 @@ public:
 
 	MRECT GetScreenRect() const;
 
-	void AttachToolTip(const char* szToolTipString=NULL);
+	void AttachToolTip(const char* szToolTipString = nullptr);
 	void AttachToolTip(MToolTip* pToolTip);
 	void DetachToolTip();
 	MToolTip* GetToolTip();
@@ -226,7 +220,7 @@ public:
 	MWidget* Find(const MPOINT& p);
 	MWidget* FindDropAble(MPOINT& p);
 
-	virtual bool IsDropable(MWidget* pSender){ return false; }
+	virtual bool IsDropable(MWidget* pSender) { return false; }
 	bool Drop(MWidget* pSender, MBitmap* pBitmap, const char* szString, const char* szItemString);
 
 	void SetVisible(bool b) { m_bVisible = b; }
@@ -239,7 +233,7 @@ public:
 	void GetHierarchicalName(char* szName, int maxlen);
 	MWidget* FindWidgetByHierarchicalName(const char* szName);
 
-	virtual bool DefaultCommand(void){ return false; }
+	virtual bool DefaultCommand(){ return false; }
 
 	static bool IsMsg(const char* szMsg1, const char* szMsg2);
 
@@ -250,7 +244,7 @@ public:
 	}
 
 #define MINT_WIDGET	"Widget"
-	virtual const char* GetClassName(void){ return MINT_WIDGET; }
+	virtual const char* GetClassName(){ return MINT_WIDGET; }
 };
 
 int GetAndPos(const char* szText);
@@ -264,10 +258,12 @@ int RemoveAnd(char(&szRemovedText)[size], const char* szText) {
 int RemoveAnd(char* szRemovedText, int maxlen, const char* szText);
 
 template<size_t size>
-int RemoveAnd(char(&szRemovedFrontText)[size], char* cUnderLineChar, char* szRemovedBackText, const char* szText) {
+int RemoveAnd(char(&szRemovedFrontText)[size], char* cUnderLineChar,
+	char* szRemovedBackText, const char* szText) {
 	return RemoveAnd(szRemovedFrontText, size, cUnderLineChar, szRemovedBackText, szText);
 }
-int RemoveAnd(char* szRemovedFrontText, int maxlen, char* cUnderLineChar, char* szRemovedBackText, const char* szText);
+int RemoveAnd(char* szRemovedFrontText, int maxlen, char* cUnderLineChar,
+	char* szRemovedBackText, const char* szText);
 
 MPOINT MClientToScreen(const MWidget* pWidget, const MPOINT& p);
 MPOINT MScreenToClient(const MWidget* pWidget, const MPOINT& p);

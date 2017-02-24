@@ -3,45 +3,21 @@
 #include "ShaderGlobals.h"
 #include <fstream>
 #include "ShaderUtil.h"
-// Awkward
+#include "VertexTypes.h"
+#include "Sphere.h"
+#include "RLightList.h"
+#include "RS2.h"
+// TODO: Remove
 #include "../CSCommon/Include/Config.h"
 
-// Shader object files
-#include "ShadowVS.h"
-#include "ShadowPS.h"
-#include "MergeShadowMapsVS.h"
-#include "MergeShadowMapsPS.h"
-
-constexpr float LightFov = TAU / 4;
-constexpr float LightTheta = LightFov / 2;
-const float LightCosTheta = cos(LightTheta);
-constexpr float AttenuationStart = 300;
-constexpr float AttenuationEnd = 2000;
-const v4 AttenuationValues{ Square(AttenuationStart), Square(AttenuationEnd), Square(AttenuationEnd) - Square(AttenuationStart), 0 };
-
-static auto* CreateVertexDeclaration(bool Normal)
-{
-	IDirect3DVertexDeclaration9* Decl;
-
-	D3DVERTEXELEMENT9 Elements[] = {
-		{ 0, 0, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0 },
-		{ 0, sizeof(float) * 3, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0 },
-		{ 0, sizeof(float) * 5, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 1 },
-		D3DDECL_END()
-	};
-
-	D3DVERTEXELEMENT9 ElementsNormal[] = {
-		{ 0, 0, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0 },
-		{ 0, sizeof(float) * 3, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_NORMAL, 0 },
-		{ 0, sizeof(float) * 6, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0 },
-		{ 0, sizeof(float) * 8, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 1 },
-		D3DDECL_END()
-	};
-
-	RGetDevice()->CreateVertexDeclaration(Normal ? ElementsNormal : Elements, &Decl);
-
-	return Decl;
-}
+// Shader objects
+#include "DeferredVS.h"
+#include "DeferredPS.h"
+#include "PointLightVS.h"
+#include "PointLightPS.h"
+#include "DepthCopyVS.h"
+#include "DepthCopyPS.h"
+#include "VisualizeLinearDepth.h"
 
 static auto CreateScreenSpaceVertexDeclaration()
 {
@@ -61,30 +37,12 @@ static auto CreateScreenSpaceVertexDeclaration()
 Renderer::Renderer()
 	: LightPos{ 0, 0, 100 }, NearZ{ DEFAULT_NEAR_Z }, FarZ{ DEFAULT_FAR_Z }
 {
+	if (!GetRS2().UsingD3D9())
+		return;
+
 	SetTransform(TransformType::World, GetIdentityMatrix());
 	ScreenSpaceVertexDeclaration = CreateScreenSpaceVertexDeclaration();
-
-#ifdef SHADOW_TEST
 	CreateShaders();
-	CreateTextures();
-
-	void* Pointers[] = { 
-		VertexDeclaration,
-		ShadowVS, ShadowPS,
-		ShadowTexture, ShadowDepthSurface,
-		MergeShadowMapsVS, MergeShadowMapsPS};
-	for (auto* Pointer : Pointers)
-	{
-		if (!Pointer)
-		{
-			MLog("Renderer::Renderer -- Something failed, can't render with shader\n");
-			assert(false);
-			return;
-		}
-	}
-
-	CanRenderWithShader = true;
-#endif
 }
 
 void Renderer::SetScreenSpaceVertexDeclaration()
@@ -94,67 +52,105 @@ void Renderer::SetScreenSpaceVertexDeclaration()
 
 void Renderer::CreateTextures()
 {
-#ifdef SHADOW_TEST
-	RGetDevice()->CreateCubeTexture(
-		ShadowMapSize,
-		1,
-		D3DUSAGE_RENDERTARGET,
-		D3DFMT_R32F,
-		D3DPOOL_DEFAULT,
-		MakeWriteProxy(ShadowCubeTexture),
-		nullptr);
+	if (!DynamicLights)
+		return;
 
-	RGetDevice()->CreateTexture(
-		ShadowMapSize, ShadowMapSize,
-		1, D3DUSAGE_RENDERTARGET,
-		D3DFMT_R32F,
-		D3DPOOL_DEFAULT,
-		MakeWriteProxy(ShadowTexture),
-		nullptr);
+	for (size_t i{}; i < std::size(RTs); ++i)
+	{
+		auto& RT = RTs[i];
 
-	RGetDevice()->CreateDepthStencilSurface(
-		ShadowMapSize, ShadowMapSize,
-		GetDepthStencilFormat(),
-		D3DMULTISAMPLE_NONE,
-		0,
-		TRUE,
-		MakeWriteProxy(ShadowDepthSurface),
-		nullptr);
+		D3DFORMAT Format = i == static_cast<size_t>(RTType::LinearDepth) ? D3DFMT_R32F : D3DFMT_A8R8G8B8;
 
-	RGetDevice()->CreateTexture(
-		RGetScreenWidth(), RGetScreenHeight(),
-		0, D3DUSAGE_RENDERTARGET,
-		D3DFMT_X8R8G8B8,
-		D3DPOOL_DEFAULT,
-		MakeWriteProxy(DiffuseMap),
-		nullptr);
-#endif
+		auto hr = RGetDevice()->CreateTexture(
+			RGetScreenWidth(), RGetScreenHeight(),
+			1, D3DUSAGE_RENDERTARGET,
+			Format,
+			D3DPOOL_DEFAULT,
+			MakeWriteProxy(RT),
+			nullptr);
+		if (FAILED(hr))
+		{
+			MLog("Renderer::CreateTextures -- Failed to create render target %d, hr = %08X\n", i, hr);
+		}
+	}
 }
 
 void Renderer::CreateShaders()
 {
-#ifdef SHADOW_TEST
-	VertexDeclaration = CreateVertexDeclaration(true);
-	ShadowVS = CreateVertexShader(ShadowVSData);
-	ShadowPS = CreatePixelShader(ShadowPSData);
-	MergeShadowMapsVS = CreateVertexShader(MergeShadowMapsVSData);
-	MergeShadowMapsPS = CreatePixelShader(MergeShadowMapsPSData);
-#endif
+	SupportsDynamicLighting_ = SupportsVertexShaderVersion(3, 0) &&
+		SupportsPixelShaderVersion(3, 0) &&
+		GetDeviceCaps().NumSimultaneousRTs >= 4 &&
+		GetDeviceCaps().MaxStreams >= 4;
+
+	if (!SupportsDynamicLighting())
+		return;
+
+	DeferredVS = CreateVertexShader(DeferredVSData);
+	DeferredPS = CreatePixelShader(DeferredPSData);
+	PointLightVS = CreateVertexShader(PointLightVSData);
+	PointLightPS = CreatePixelShader(PointLightPSData);
+	DepthCopyVS = CreateVertexShader(DepthCopyVSData);
+	DepthCopyPS = CreatePixelShader(DepthCopyPSData);
+	VisualizeLinearDepthPS = CreatePixelShader(VisualizeLinearDepthData);
 }
 
 void Renderer::OnInvalidate()
 {
-#ifdef SHADOW_TEST
-	SAFE_RELEASE(ShadowTexture);
-	SAFE_RELEASE(ShadowCubeTexture);
-	SAFE_RELEASE(ShadowDepthSurface);
-	SAFE_RELEASE(DiffuseMap);
-#endif
+	SAFE_RELEASE(DeferredVS);
+	SAFE_RELEASE(DeferredPS);
+	SAFE_RELEASE(PointLightVS);
+	SAFE_RELEASE(PointLightPS);
+	SAFE_RELEASE(DepthCopyVS);
+	SAFE_RELEASE(DepthCopyPS);
+	SAFE_RELEASE(VisualizeLinearDepthPS);
+	SAFE_RELEASE(OrigRT);
+	SAFE_RELEASE(OrigDepthSurface);
+
+	for (auto& RT : RTs)
+		SAFE_RELEASE(RT);
 }
 
 void Renderer::OnRestore()
 {
 	CreateTextures();
+	CreateShaders();
+}
+
+void Renderer::BeginLighting()
+{
+	if (!DynamicLights)
+		return;
+
+	RGetDevice()->SetVertexShader(DeferredVS.get());
+	RGetDevice()->SetPixelShader(DeferredPS.get());
+
+	const auto& WorldView = RView;
+	SetShaderMatrix(DeferredShaderConstant::WorldView, Transpose(WorldView));
+	const auto& Projection = RProjection;
+	auto WorldViewProjection = WorldView * RProjection;
+	SetShaderMatrix(DeferredShaderConstant::WorldViewProjection, Transpose(WorldViewProjection));
+
+	SetShaderFloat(DeferredShaderConstant::Near, GetNearZ());
+	SetShaderFloat(DeferredShaderConstant::Far, GetFarZ());
+
+	RGetDevice()->GetRenderTarget(0, MakeWriteProxy(OrigRT));
+	for (size_t i{}; i < std::size(RTs); ++i)
+	{
+		D3DPtr<IDirect3DSurface9> Surface;
+		RTs[i]->GetSurfaceLevel(0, MakeWriteProxy(Surface));
+		RGetDevice()->SetRenderTarget(i, Surface.get());
+	}
+}
+
+void Renderer::EndLighting(const std::vector<struct RLIGHT>& Lights)
+{
+	if (!DynamicLights)
+		return;
+
+	DrawLighting(Lights);
+
+	if (ShowRTsEnabled)
+		ShowRTs();
 }
 
 void Renderer::SetAlphaBlending(bool b)
@@ -163,22 +159,6 @@ void Renderer::SetAlphaBlending(bool b)
 		return;
 
 	AlphaBlending = b;
-
-#ifdef SHADOW_TEST
-	if (DrawingShadows)
-	{
-		if (!AlphaBlending)
-		{
-			RGetDevice()->SetVertexShader(ShadowVS);
-			RGetDevice()->SetPixelShader(ShadowPS);
-		}
-		else
-		{
-			RGetDevice()->SetVertexShader(nullptr);
-			RGetDevice()->SetPixelShader(nullptr);
-		}
-	}
-#endif
 }
 
 bool Renderer::SetDrawShadows(bool b)
@@ -188,144 +168,155 @@ bool Renderer::SetDrawShadows(bool b)
 
 	DrawingShadows = b;
 
-/*#define V(expr) if (FAILED(expr)) return false
-	
-	auto* dev = RGetDevice();
-	if (DrawingShadows)
-	{
-		V(dev->GetRenderTarget(0, MakeWriteProxy(OldRT)));
-		V(dev->GetDepthStencilSurface(MakeWriteProxy(OldZSurface)));
-
-		D3DPtr<IDirect3DSurface9> ShadowRTSurface;
-		V(ShadowTexture->GetSurfaceLevel(0, MakeWriteProxy(ShadowRTSurface)));
-		V(dev->SetRenderTarget(0, ShadowRTSurface));
-		V(dev->SetDepthStencilSurface(ShadowDepthSurface));
-
-		V(dev->Clear(0, nullptr, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, 0x00000000, 1, 0));
-
-		SetTransform(TransformType::View, LightView);
-		SetTransform(TransformType::Projection, LightProjection);
-		CommitChanges();
-
-		RGetDevice()->SetVertexShader(ShadowVS);
-		RGetDevice()->SetPixelShader(AlphaBlending ? ShadowAlphaPS : ShadowPS);
-	}
-	else
-	{
-		V(dev->SetRenderTarget(0, OldRT));
-		V(dev->SetDepthStencilSurface(OldZSurface));
-
-		SetTransform(TransformType::View, RView);
-		SetTransform(TransformType::Projection, RProjection);
-		CommitChanges();
-	}*/
-
 	return true;
 }
 
 void Renderer::SetDynamicLights(bool b)
 {
 	DynamicLights = b;
-
-	/*if (DynamicLights)
-	{
-		//RGetDevice()->SetTexture(static_cast<DWORD>(ShaderSampler::Shadow), ShadowCubeTexture.get());
-		RGetDevice()->SetTexture(ShaderSampler::Diffuse, DiffuseMap.get());
-		RGetDevice()->SetVertexShader(SceneVS);
-		RGetDevice()->SetPixelShader(ScenePointLightPS);
-	}
-	else*/
-	{
-		//RGetDevice()->SetTexture(static_cast<DWORD>(ShaderSampler::Shadow), nullptr);
-		RGetDevice()->SetTexture(ShaderSampler::Diffuse, nullptr);
-		RGetDevice()->SetVertexShader(nullptr);
-		RGetDevice()->SetPixelShader(nullptr);
-	}
 }
 
-void Renderer::CommitChanges()
+void Renderer::UpdateRTs()
 {
-#ifdef SHADOW_TEST
-	auto& World = GetTransform(TransformType::World);
-	auto& View = GetTransform(TransformType::View);
-	auto& Projection = GetTransform(TransformType::Projection);
-
-	auto WorldView = World * View;
-	auto trWorldViewProj = Transpose(WorldView * Projection);
-	auto trWorldView = Transpose(WorldView);
-	auto trProj = Transpose(Projection);
-
-	SetVSMatrix(ShaderConstant::WorldViewProjection, trWorldViewProj);
-	SetVSMatrix(ShaderConstant::WorldView, trWorldView);  SetPSMatrix(ShaderConstant::WorldView, trWorldView);
-	SetVSMatrix(ShaderConstant::Projection, trProj);      SetPSMatrix(ShaderConstant::Projection, trProj);
-	SetVSMatrix(ShaderConstant::World, Transpose(World));
-
-	SetPSVector3(ShaderConstant::LightPos0, LightPos);
-	SetPSVector3(ShaderConstant::LightDir0, LightDir);
-
-	LightProjection = PerspectiveProjectionMatrix(1, LightFov, NearZ, FarZ);
-#endif
+	if (!RTs[0])
+		CreateTextures();
 }
 
-void Renderer::SetPrerenderStates()
+static void DrawQuad(const v2& p1, const v2& p2)
 {
-#ifdef SHADOW_TEST
-	RGetDevice()->SetTexture(static_cast<DWORD>(ShaderSampler::Shadow0), nullptr);
-
-	rmatrixa16 LightView = ViewMatrix(LightPos, LightDir, { 0, 0, 1 });
-	rmatrixa16 LightViewProjection = Transpose(LightView * LightProjection);
-
-	SetVSMatrix(ShaderConstant::LightViewProjection, LightViewProjection);
-	SetPSFloat(ShaderConstant::CosTheta, LightCosTheta);
-	SetPSVector4(ShaderConstant::LightDiffuse, v4{ 1, 1, 1, 1 });
-	SetPSVector4(ShaderConstant::LightAmbient, v4{ 0.3f, 0.3f, 0.3f, 1 });
-	SetPSFloat(ShaderConstant::ShadowMapSize, ShadowMapSize);
-	SetPSVector4(ShaderConstant::AttenuationValues, AttenuationValues);
-#endif
-}
-
-void Renderer::ApplyLighting()
-{
-#ifdef SHADOW_TEST
-	RGetDevice()->SetVertexShader(nullptr);
-	RGetDevice()->SetPixelShader(nullptr);
-	RGetDevice()->SetRenderState(D3DRS_LIGHTING, FALSE);
-	RGetDevice()->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-	RGetDevice()->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_DESTCOLOR);
-	RGetDevice()->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
-	RGetDevice()->SetStreamSource(0, nullptr, 0, 0);
-	RGetDevice()->SetIndices(nullptr);
-
-	RGetDevice()->SetTexture(0, DiffuseMap.get());
-	RGetDevice()->SetFVF(D3DFVF_XYZRHW | D3DFVF_TEX1);
-	RGetDevice()->SetRenderState(D3DRS_ZWRITEENABLE, false);
-	
 	struct VertexType
 	{
 		float x, y, z, rhw;
 		float u, v;
 	};
 
-	auto Width = (float)RGetScreenWidth();
-	auto Height = (float)RGetScreenHeight();
-	VertexType Vertices[] = {
-		{0, 0, 0, 1, 0, 0},
-		{ 0, Height, 0, 1, 0, 1 },
-		{Width, Height, 0, 1, 1, 1},
-		{Width, 0, 0, 1, 1, 0},
+	ScreenSpaceTexVertex Vertices[] = {
+		{ p1.x - 0.5f, p1.y - 0.5f, 0, 1, 0, 0 },
+		{ p1.x - 0.5f, p2.y - 0.5f, 0, 1, 0, 1 },
+		{ p2.x - 0.5f, p2.y - 0.5f, 0, 1, 1, 1 },
+		{ p2.x - 0.5f, p1.y - 0.5f, 0, 1, 1, 0 },
 	};
 
-	RGetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, &Vertices, sizeof(VertexType));
+	RGetDevice()->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+	RGetDevice()->SetFVF(D3DFVF_XYZRHW | D3DFVF_TEX1);
 
-	/*D3DPtr<IDirect3DSurface9> DiffuseSurface;
-	DiffuseMap->GetSurfaceLevel(0, MakeWriteProxy(DiffuseSurface));
-	D3DPtr<IDirect3DSurface9> RT;
-	RGetDevice()->GetRenderTarget(0, MakeWriteProxy(RT));
-	RECT r;
-	r.left = 1080;
-	r.right = 1920;
-	r.top = 720;
-	r.bottom = 1080;
-	RGetDevice()->StretchRect(DiffuseSurface, nullptr, RT, &r, D3DTEXF_NONE);*/
-#endif
+	RGetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, &Vertices, sizeof(VertexType));
+}
+
+static void DrawFullscreenQuad()
+{
+	auto Width = (float)RGetScreenWidth();
+	auto Height = (float)RGetScreenHeight();
+	DrawQuad({ 0, 0 }, { Width, Height });
+}
+
+static void DrawAmbient(LPDIRECT3DTEXTURE9 Ambient)
+{
+	RGetDevice()->SetTexture(0, Ambient);
+	DrawFullscreenQuad();
+}
+
+static bool IsSphereInsideFrustum(const v3& Center, float Radius, const rplane(&Frustum)[6])
+{
+	for (auto& Plane : Frustum)
+		if (DotProduct(Center, v3{ EXPAND_VECTOR(Plane) }) + Plane.d < -Radius)
+			return false;
+	return true;
+}
+
+void Renderer::DrawLighting(const std::vector<RLIGHT>& Lights)
+{
+	RGetDevice()->SetRenderTarget(0, OrigRT.get());
+	OrigRT.reset();
+	for (size_t i = 1; i < std::size(RTs); ++i)
+		RGetDevice()->SetRenderTarget(i, nullptr);
+
+	RGetDevice()->SetVertexShader(nullptr);
+	RGetDevice()->SetPixelShader(nullptr);
+
+	// Enable additive blending
+	RGetDevice()->SetRenderState(D3DRS_ALPHABLENDENABLE, true);
+	RGetDevice()->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+	RGetDevice()->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
+	RGetDevice()->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
+	// Disable depth writing and testing
+	RGetDevice()->SetRenderState(D3DRS_ZWRITEENABLE, false);
+	RGetDevice()->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
+
+	DrawAmbient(GetRT(RTType::Ambient).get());
+
+	RGetDevice()->SetVertexShader(PointLightVS.get());
+	RGetDevice()->SetPixelShader(PointLightPS.get());
+
+	for (size_t i{}; i < std::size(RTs); ++i)
+		RGetDevice()->SetTexture(i, RTs[i].get());
+
+	SetShaderMatrix(LightingShaderConstant::Proj, Transpose(RProjection));
+	v2 InvRes{ 1.0f / RGetScreenWidth(), 1.0f / RGetScreenHeight() };
+	SetShaderVector2(LightingShaderConstant::InvRes, InvRes);
+	v2 InvFocalLen{ 1.0f / RProjection._11, 1.0f / RProjection._22 };
+	SetShaderVector2(LightingShaderConstant::InvFocalLen, InvFocalLen);
+	SetShaderFloat(LightingShaderConstant::Near, GetNearZ());
+	SetShaderFloat(LightingShaderConstant::Far, GetFarZ());
+
+	RGetDevice()->SetFVF(D3DFVF_XYZ);
+
+	for (auto& Light : Lights)
+	{
+		if (!isInViewFrustum(Light.Position, Light.fAttnEnd, RViewFrustum))
+			continue;
+
+		auto& pos = Light.Position * RView;
+		SetShaderVector4(LightingShaderConstant::Light, { EXPAND_VECTOR(pos), Light.fAttnEnd });
+		SetShaderVector3(LightingShaderConstant::LightColor, Light.Color);
+
+		if (Magnitude(pos) < Light.fAttnEnd * 1.3 + GetNearZ())
+		{
+			RGetDevice()->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
+			RGetDevice()->SetRenderState(D3DRS_CULLMODE, D3DCULL_CW);
+		}
+		else
+		{
+			RGetDevice()->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
+			RGetDevice()->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
+		}
+
+		RGetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLELIST,
+			rsx::data::nvert / 3, rsx::data::sphere, 3 * sizeof(float));
+	}
+
+	// Reset states
+	RGetDevice()->SetRenderState(D3DRS_ALPHABLENDENABLE, false);
+	RGetDevice()->SetRenderState(D3DRS_ZWRITEENABLE, true);
+	RGetDevice()->SetRenderState(D3DRS_ZENABLE, true);
+
+	RGetDevice()->SetVertexShader(nullptr);
+	RGetDevice()->SetPixelShader(nullptr);
+}
+
+void Renderer::ShowRTs()
+{
+	auto ShowRT = [&](auto& RT, auto&& p1, auto&& p2) {
+		RGetDevice()->SetTexture(0, RT.get());
+		DrawQuad(p1, p2);
+	};
+
+	auto ShowDepth = [&](auto& RT, auto&& p1, auto&& p2) {
+		RGetDevice()->SetPixelShader(VisualizeLinearDepthPS.get());
+		SetScreenSpaceVertexDeclaration();
+		ShowRT(RT, p1, p2);
+		RGetDevice()->SetPixelShader(nullptr);
+	};
+
+	for (size_t i{}; i < std::size(RTs); ++i)
+	{
+		auto Width = float(RGetScreenWidth());
+		auto Height = float(RGetScreenHeight());
+		v2 p1{ Width / 2 + (i % 2) * Width / 4, Height / 2 + (i >= 2) * Height / 4 };
+		v2 p2{ p1 + v2{ Width / 4, Height / 4 } };
+		if (i == static_cast<size_t>(RTType::LinearDepth))
+			ShowDepth(RTs[i], p1, p2);
+		else
+			ShowRT(RTs[i], p1, p2);
+	}
 }

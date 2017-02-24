@@ -21,8 +21,6 @@ public:
 	void Create(rsx::LoaderState&&);
 	void Draw();
 
-	bool ShowRTsEnabled{};
-
 	void SetLighting(bool);
 
 private:
@@ -37,14 +35,8 @@ private:
 	void CreateBatches();
 	bool CreateBuffers();
 
-	void CreateRTs();
-	void ReleaseRTs();
-
 	void SetPrologueStates();
 	void SetEpilogueStates();
-	void DrawLighting();
-	void DepthCopy();
-	void ShowRTs();
 
 	LPDIRECT3DTEXTURE9 GetTexture(int Index) const;
 
@@ -100,36 +92,11 @@ private:
 	D3DPtr<IDirect3DVertexDeclaration9> LitVertexDecl;
 	D3DPtr<IDirect3DVertexDeclaration9> UnlitVertexDecl;
 
-	D3DPtr<IDirect3DVertexShader9> DeferredVS;
-	D3DPtr<IDirect3DPixelShader9> DeferredPS;
-	D3DPtr<IDirect3DVertexShader9> PointLightVS;
-	D3DPtr<IDirect3DPixelShader9> PointLightPS;
-	D3DPtr<IDirect3DVertexShader9> DepthCopyVS;
-	D3DPtr<IDirect3DPixelShader9> DepthCopyPS;
-	D3DPtr<IDirect3DPixelShader9> VisualizeLinearDepthPS;
-
-	enum class RTType
-	{
-		Color,
-		Normal,
-		LinearDepth,
-		Ambient,
-		Max,
-	};
-	D3DPtr<IDirect3DTexture9> RTs[static_cast<size_t>(RTType::Max)];
-	auto& GetRT(RTType Index) const { return RTs[static_cast<size_t>(Index)]; }
-	D3DPtr<IDirect3DSurface9> DummyDepthSurface;
-
-	D3DPtr<IDirect3DSurface9> OrigRT;
-	D3DPtr<IDirect3DSurface9> OrigDepthSurface;
-
 	// Indices map to State.Materials.
 	std::vector<MaterialBatch> MaterialBatches;
 	int NormalMaterialsEnd{};
 	int OpacityMaterialsEnd{};
 	int AlphaTestMaterialsEnd{};
-
-	bool SupportsDynamicLighting{};
 
 	IDirect3DDevice9* dev{};
 };

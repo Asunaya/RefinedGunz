@@ -3,6 +3,7 @@
 
 #include <string>
 #include <list>
+#include <array>
 #include "GlobalTypes.h"
 #include "RNameSpace.h"
 #include "rvector.h"
@@ -15,6 +16,8 @@ enum _D3DFORMAT;
 using RPIXELFORMAT = _D3DFORMAT;
 
 _NAMESPACE_REALSPACE2_BEGIN
+
+using rfrustum = std::array<rplane, 6>;
 
 enum rsign { NEGATIVE = -1, ZERO = 0, POSITIVE = 1 };
 
@@ -56,12 +59,12 @@ struct RMODEPARAMS {
 
 struct rboundingbox
 {
-	rboundingbox() {}
+	rboundingbox() = default;
 	rboundingbox(const v3& vmin, const v3& vmax) : vmin{ vmin }, vmax{ vmax } {}
 
 	union {
 	struct {
-		float minx,miny,minz,maxx,maxy,maxz;
+		float minx, miny, minz, maxx, maxy, maxz;
 	};
 	struct {
 		rvector vmin,vmax;

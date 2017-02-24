@@ -9,52 +9,76 @@
 
 constexpr auto pool = D3DPOOL_MANAGED;
 
+// Returns the smallest n such that (length >> n) >= 4
+static int GetMinimumPower(int length)
+{
+	unsigned long rightmost_bit;
+	if (!_BitScanReverse(&rightmost_bit, length))
+	{
+		assert(false);
+		return 0;
+	}
+	return rightmost_bit - 2;
+}
+
+static int GetInitialMipmapLevel(int width, int height, int levels, float sample_ratio)
+{
+	// power = smallest integer n such that 2^n <= sample_ratio
+	auto power = static_cast<int>(floor(log2(sample_ratio)));
+	auto texture_level = std::max(-power, 0);
+
+	// The minimum mipmap level legal for these texture properties, regardless of sample_ratio
+	auto min_level = std::min({ GetMinimumPower(width), GetMinimumPower(height), levels - 1 });
+
+	return std::min(min_level, texture_level);
+}
+
 static D3DPtr<IDirect3DTexture9> LoadDDS(const void* data, size_t size,
 	float sample_ratio, TextureInfo& info)
 {
 	D3DPtr<IDirect3DTexture9> ret;
-	D3DFORMAT format;
+
 	auto tex = gli::load(static_cast<const char*>(data), size);
-	switch (tex.format())
-	{
-	case gli::FORMAT_RGB_DXT1_UNORM:
-		format = D3DFMT_DXT1;
-		break;
-	case gli::FORMAT_RGBA_DXT3_UNORM:
-		format = D3DFMT_DXT3;
-		break;
-	case gli::FORMAT_RGBA_DXT5_UNORM:
-		format = D3DFMT_DXT5;
-		break;
-	case gli::FORMAT_BGRA8_UNORM:
-		format = D3DFMT_A8B8G8R8;
-		break;
-	default:
-		MLog("LoadDDS -- Unknown DDS format %d\n", tex.format());
-		assert(false);
+	if (tex.format() == gli::FORMAT_UNDEFINED)
 		return nullptr;
-	}
-	gli::texture2D tex2D(tex);
+	auto format = static_cast<D3DFORMAT>(gli::dx{}.translate(tex.format()).D3DFormat);
+
+	gli::texture2d tex2D(tex);
 	if (tex2D.empty())
-		return false;
-
-	auto Width = tex2D[0].dimensions().x;
-	auto Height = tex2D[0].dimensions().y;
-	auto Levels = tex2D.levels();
-	auto Usage = 0;
-
-	if (FAILED(RGetDevice()->CreateTexture(Width, Height, Levels, Usage,
-		format, pool, MakeWriteProxy(ret), nullptr)))
 		return nullptr;
 
-	// Copy all mipmap levels into the texture
-	for (size_t i{}; i < Levels; ++i)
+	auto Width = tex2D.extent().x;
+	auto Height = tex2D.extent().y;
+	auto Levels = tex2D.levels();
+
+	// The mipmap level that we will use as the main level for the new texture.
+	// The reason for this is resizing: The mipmaps already contain downsampled
+	// versions, so using one of these avoids a resize step being done at runtime.
+	auto InitialMipmapLevel = GetInitialMipmapLevel(Width, Height, Levels, sample_ratio);
+	if (InitialMipmapLevel > 0)
+	{
+		Width = std::max(Width >> InitialMipmapLevel, 4);
+		Height = std::max(Height >> InitialMipmapLevel, 4);
+		Levels -= InitialMipmapLevel;
+	}
+
+	auto hr = RGetDevice()->CreateTexture(
+		Width, Height, Levels,
+		0, // Usage
+		format, pool, MakeWriteProxy(ret), nullptr);
+	if (FAILED(hr))
+		return nullptr;
+
+	// Copy all mipmap levels after InitialMipmapLevel into the texture
+	for (size_t i = 0; i < Levels; ++i)
 	{
 		D3DLOCKED_RECT LockedRect;
 		if (FAILED(ret->LockRect(i, &LockedRect, nullptr, 0)))
 			return nullptr;
-		auto&& img = tex2D[i];
+
+		auto&& img = tex2D[i + InitialMipmapLevel];
 		memcpy(LockedRect.pBits, img.data(), img.size());
+
 		if (FAILED(ret->UnlockRect(i)))
 			return nullptr;
 	}
@@ -217,7 +241,7 @@ static bool IsFileType(FileType Type, const void* data, size_t size)
 		"DDS",
 	};
 
-	if (static_cast<size_t>(Type) >= ArraySize(magics))
+	if (static_cast<size_t>(Type) >= std::size(magics))
 		return false;
 
 	if (Type == FileType::TGA)

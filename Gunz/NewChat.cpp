@@ -4,6 +4,7 @@
 #include "ZCharacterManager.h"
 #include "ZInput.h"
 #include "Config.h"
+#include <wchar.h>
 
 // Resize flags
 enum
@@ -23,6 +24,157 @@ bool g_bNewChat = true;
 #else
 bool g_bNewChat = false;
 #endif
+
+static std::wstring GetClipboard()
+{
+	if (!IsClipboardFormatAvailable(CF_UNICODETEXT))
+		return{};
+
+	if (!OpenClipboard(g_hWnd))
+		return{};
+
+	auto ClipboardData = GetClipboardData(CF_UNICODETEXT);
+	if (!ClipboardData)
+		return{};
+
+	auto ptr = static_cast<const wchar_t*>(GlobalLock(ClipboardData));
+	if (!ptr)
+		return{};
+
+	std::wstring ret = ptr;
+	GlobalUnlock(ClipboardData);
+	CloseClipboard();
+
+	return ret;
+}
+
+static bool SetClipboard(const std::wstring& str)
+{
+	auto MemSize = (str.length() + 1) * sizeof(wchar_t);
+	HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, MemSize);
+	if (!hMem)
+		return false;
+
+	auto pMem = static_cast<wchar_t*>(GlobalLock(hMem));
+	if (!pMem)
+	{
+		GlobalUnlock(pMem);
+		GlobalFree(pMem);
+		return false;
+	}
+
+	strcpy_safe(pMem, MemSize, str.c_str());
+	GlobalUnlock(hMem);
+
+	auto Success = SetClipboardData(CF_UNICODETEXT, hMem) != NULL;
+	if (!Success)
+		GlobalFree(hMem);
+
+	return Success;
+}
+
+void ChatLine::SubstituteFormatSpecifiers()
+{
+	static const std::unordered_map<char, FormatSpecifierType> Map {
+		{ 'b', FT_BOLD },
+		{ 'i', FT_ITALIC },
+		{ 's', FT_STRIKETHROUGH },
+		{ 'u', FT_UNDERLINE },
+		//{ 'n', FT_LINEBREAK }, // Linebreak specifier is disabled.
+	};
+
+	const auto npos = std::wstring::npos;
+
+	for (auto Pos = Msg.find_first_of(L"^[", 0);
+		Pos != npos && Pos < Msg.length() - 2;
+		Pos = Pos < Msg.length() ? Msg.find_first_of(L"^[", Pos + 1) : npos)
+	{
+		auto Erase = [&](std::wstring::size_type Count) {
+			Msg.erase(Pos, Count);
+			--Pos;
+		};
+
+		auto RemainingLength = Msg.length() - Pos;
+		auto CurrentChar = Msg[Pos];
+
+		if (CurrentChar == '^')
+		{
+			// Handles color specifiers, like "Normal text ^1Red text"
+			auto NextChar = Msg[Pos + 1];
+			if (isdigit(NextChar))
+			{
+				// Simple specifier, e.g. "^1Red text"
+
+				vFormatSpecifiers.emplace_back(Pos, MMColorSet[NextChar - '0']);
+				Erase(2);
+			}
+			else if (NextChar == '#')
+			{
+				// Elaborate specifier, e.g. "^#80FF0000Transparent red text"
+
+				auto ishexdigit = [&](auto c) {
+					c = tolower(c);
+					return isdigit(c) || (c >= 'a' && c <= 'f');
+				};
+
+				auto ColorStart = Pos + 2;
+				auto ColorEnd = ColorStart;
+				while (ColorEnd < Msg.length() &&
+					ColorEnd - ColorStart < 8 &&
+					ishexdigit(Msg[ColorEnd])) {
+					++ColorEnd;
+				}
+
+				auto Distance = ColorEnd - ColorStart;
+
+				// Must be 8 digits
+				if (Distance != 8)
+					continue;
+
+				wchar_t ColorString[32];
+				strncpy_safe(ColorString, &Msg[ColorStart], Distance);
+
+				wchar_t* endptr;
+				auto Color = static_cast<D3DCOLOR>(wcstoul(ColorString, &endptr, 16));
+				assert(endptr == ColorString + Distance);
+
+				vFormatSpecifiers.emplace_back(Pos, Color);
+				Erase(ColorEnd - Pos);
+			}
+		}
+		else if (CurrentChar == '[')
+		{
+			// Handles specifiers like "Normal text [b]Bold text[/b]"
+			auto EndBracket = Msg.find_first_of(L"]", Pos + 1);
+
+			if (EndBracket == npos)
+				continue; // Malformed specifier
+
+			auto Distance = EndBracket - Pos;
+
+			if (Msg[Pos + 1] == '/' && (Distance == 2 || Distance == 3))
+			{
+				// End of sequence
+				// Matches e.g. [/], [/b], [/i]
+
+				// Go back to default text
+				vFormatSpecifiers.emplace_back(Pos, FT_DEFAULT);
+			}
+			else
+			{
+				// Beginning of sequence
+				// Matches e.g. [b], [i]
+				auto it = Map.find(Msg[Pos + 1]);
+				if (it == Map.end())
+					continue;
+
+				vFormatSpecifiers.emplace_back(Pos, it->second);
+			}
+
+			Erase(Distance + 1);
+		}
+	}
+}
 
 void Chat::Create(const std::string &strFont, int nFontSize){
 	fFadeTime = 10;
@@ -59,7 +211,6 @@ void Chat::Create(const std::string &strFont, int nFontSize){
 	pFromMsg = 0;
 	pToMsg = 0;
 
-	strField.assign("");
 	nCaretPos = -1;
 
 	bAlpha = false;
@@ -98,106 +249,16 @@ void Chat::OutputChatMsg(const char *szMsg){
 void Chat::OutputChatMsg(const char *szMsg, DWORD dwColor){
 	unsigned long long t = QPC();
 
-	vMsgs.push_back(ChatLine(t, std::string(szMsg)));
+	wchar_t WideMsg[1024];
+	MultiByteToWideChar(CP_UTF8, 0,
+		szMsg, -1,
+		WideMsg, std::size(WideMsg));
+	vMsgs.emplace_back(t, WideMsg, dwColor);
 
-	ChatLine &cl = vMsgs.back();
-
-	cl.DefaultColor = dwColor;
-
-	unsigned long nPos = cl.Msg.find_first_of("^[", 0);
-	while (nPos != std::string::npos && nPos < cl.Msg.length() - 2){
-		if (cl.Msg.at(nPos) == '^'){
-			if (cl.Msg.at(nPos + 1) >= '0' && cl.Msg.at(nPos + 1) <= '9'){
-				cl.vFormatSpecifiers.push_back(FormatSpecifier(nPos, MMColorSet[cl.Msg.at(nPos + 1) - '0']));
-				cl.Msg.erase(nPos, 2);
-				nPos = cl.Msg.find_first_of("^[", nPos);
-			}
-			else if (tolower(cl.Msg.at(nPos + 1)) == 'b'){
-				cl.vFormatSpecifiers.push_back(FormatSpecifier(nPos, FT_BOLD));
-				cl.Msg.erase(nPos, 2);
-				nPos = cl.Msg.find_first_of("^[", nPos);
-			}
-			else if (tolower(cl.Msg.at(nPos + 1)) == 'i'){
-				cl.vFormatSpecifiers.push_back(FormatSpecifier(nPos, FT_ITALIC));
-				cl.Msg.erase(nPos, 2);
-				nPos = cl.Msg.find_first_of("^[", nPos);
-			}
-			else if (tolower(cl.Msg.at(nPos + 1)) == 'n'){
-				cl.vFormatSpecifiers.push_back(FormatSpecifier(nPos, FT_LINEBREAK));
-				cl.Msg.erase(nPos, 2);
-				nPos = cl.Msg.find_first_of("^[", nPos);
-			}
-			else if (tolower(cl.Msg.at(nPos + 1)) == '#'){
-				char buf[9];
-				int nLen = min(static_cast<int>(cl.Msg.length() - 1 - nPos - 2), 8);
-				strncpy_safe(buf, cl.Msg.data() + nPos + 2, nLen);
-
-				char *pcEnd;
-				D3DCOLOR Color = strtoul(buf, &pcEnd, 16);
-				if (pcEnd - buf <= 6)
-					Color |= 0xFF000000;
-
-				cl.vFormatSpecifiers.push_back(FormatSpecifier(nPos, Color));
-				cl.Msg.erase(nPos, 2 + nLen);
-				nPos = cl.Msg.find_first_of("^[", nPos);
-			}
-			else if ((cl.Msg.at(nPos + 1) == '/')){
-				cl.vFormatSpecifiers.push_back(FormatSpecifier(nPos, XRGB(0xC8, 0xC8, 0xC8)));
-				cl.vFormatSpecifiers.push_back(FormatSpecifier(nPos, FT_DEFAULT));
-				cl.Msg.erase(nPos, 2);
-				nPos = cl.Msg.find_first_of("^[", nPos);
-			}
-			else
-				nPos = cl.Msg.find_first_of("^[", nPos + 1);
-		}
-		else if (cl.Msg.at(nPos) == '[' && nPos != cl.Msg.size() - 2){
-			if (cl.Msg.at(nPos + 2) == ']'){
-				if (tolower(cl.Msg.at(nPos + 1)) == 'b' || tolower(cl.Msg.at(nPos + 1)) == 'i'){
-					int nStart = nPos;
-					FormatSpecifierType t;
-
-					if (tolower(cl.Msg.at(nPos + 1)) == 'b')
-						t = FT_BOLD;
-					else
-						t = FT_ITALIC;
-
-					cl.Msg.erase(nStart, 3);
-
-					cl.vFormatSpecifiers.push_back(FormatSpecifier(nStart, t));
-
-					cprint("FormatSpecifier: %d, %s\n", nStart, t == FT_BOLD ? "bold" : "italic");
-
-					nPos = cl.Msg.find_first_of("^[", nPos);
-					continue;
-				}
-			}
-			else if (cl.Msg.at(nPos + 1) == '/' && nPos != cl.Msg.size() - 3 && cl.Msg.at(nPos + 3) == ']'){
-				if (tolower(cl.Msg.at(nPos + 2)) == 'b' || tolower(cl.Msg.at(nPos + 2)) == 'i'){
-					int nStart = nPos;
-					FormatSpecifierType t;
-
-					cl.Msg.erase(nStart, 4);
-
-					t = FT_DEFAULT;
-
-					cl.vFormatSpecifiers.push_back(FormatSpecifier(nStart, t));
-
-					cprint("FormatSpecifier: %d, FT_DEFAULT\n", nStart);
-
-					nPos = cl.Msg.find_first_of("^[", nPos);
-					continue;
-				}
-			}
-			nPos = cl.Msg.find_first_of("^[", nPos + 1);
-		}
-		else
-			nPos = cl.Msg.find_first_of("^[", nPos + 1);
-	}
-
-	CalcLineBreaks(cl);
+	CalcLineBreaks(vMsgs.back());
 }
 
-int Chat::GetLines(MFontR2 *pFont, const char *szMsg, int nWidth, int nSize)
+int Chat::GetLines(MFontR2 *pFont, const wchar_t *szMsg, int nWidth, int nSize)
 {
 	int nMsgWidth = pFont->GetWidth(szMsg, nSize);
 	return nMsgWidth / nWidth + (nMsgWidth % nWidth != 0);
@@ -211,7 +272,7 @@ void Chat::CalcLineBreaks(ChatLine &cl){
 	int nTempLines = GetLines(pFont.get(), cl.Msg.c_str(), r.right - r.left);
 
 	int Lines = 1;
-	int StringLength = strlen(cl.Msg.c_str());
+	int StringLength = cl.Msg.length();
 	int CurrentLineLength = 0;
 	int MaxLineLength = r.right - r.left;
 
@@ -256,14 +317,42 @@ bool Chat::CursorInRange(int x1, int y1, int x2, int y2){
 	return Cursor.x > x1 && Cursor.x < x2 && Cursor.y > y1 && Cursor.y < y2;
 }
 
-#define DWSIZEOF(x) ((sizeof(x) + sizeof(DWORD) - 1) & ~(sizeof(DWORD) - 1))
-#define GETVA(lastarg) ((va_list)&lastarg + DWSIZEOF(lastarg))
-
-int Chat::GetTextLength(MFontR2 *pFont, const char *szFormat, ...) 
+int Chat::GetTextLength(MFontR2 *pFont, const wchar_t *szFormat, ...)
 {
-	char buf[256] = { 0 };
-	vsnprintf(buf, sizeof(buf), szFormat, GETVA(szFormat));
+	wchar_t buf[256];
+	va_list va;
+	va_start(va, szFormat);
+	vswprintf_safe(buf, szFormat, va);
+	va_end(va);
 	return pFont->GetWidth(buf);
+}
+
+struct CaretType
+{
+	int TotalTextHeight;
+	v2i CaretPos;
+};
+static CaretType GetCaretPos(MFontR2* pFont, const wchar_t* Text, int CaretPos, int Width)
+{
+	CaretType ret{ 1, { 0, 1 } };
+	v2i Cursor{ 0, 1 };
+	for (auto c = Text; *c != 0; ++c)
+	{
+		auto CharWidth = pFont->GetWidth(c, 1);
+
+		Cursor.x += CharWidth;
+		if (Cursor.x > Width)
+		{
+			++Cursor.y;
+			Cursor.x = CharWidth;
+		}
+		
+		auto Distance = c - Text;
+		if (Distance == CaretPos)
+			ret.CaretPos = Cursor;
+	}
+	ret.TotalTextHeight = Cursor.y;
+	return ret;
 }
 
 bool Chat::GetPos(const ChatLine &c, unsigned long nPos, POINT *pRet){
@@ -301,7 +390,7 @@ bool Chat::GetPos(const ChatLine &c, unsigned long nPos, POINT *pRet){
 					nOffset = c.GetLineBreak(nLine - 1)->nStartPos;
 			}
 
-			pRet->x = Output.x1 + 5 + GetTextLength(pFont.get(), "%.*s_", nPos - nOffset, &c.Msg.at(nOffset)) - GetTextLength(pFont.get(), "_");
+			pRet->x = Output.x1 + 5 + GetTextLength(pFont.get(), L"%.*s_", nPos - nOffset, &c.Msg.at(nOffset)) - GetTextLength(pFont.get(), L"_");
 
 			return 1;
 		}
@@ -360,7 +449,7 @@ void Chat::OnEvent(MEvent *pEvent){
 
 				size_t PartialNameLength = strField.size() - StartPos;
 
-				const char *PartialName = strField.data() + StartPos;
+				auto PartialName = strField.data() + StartPos;
 
 				for (auto &it : *ZGetCharacterManager())
 				{
@@ -371,7 +460,13 @@ void Chat::OnEvent(MEvent *pEvent){
 					if (PlayerNameLength < PartialNameLength)
 						continue;
 
-					if (!_strnicmp(PartialName, PlayerName, PartialNameLength))
+					wchar_t WidePlayerName[256];
+					auto len = MultiByteToWideChar(CP_ACP, 0,
+						PlayerName, -1,
+						WidePlayerName, std::size(WidePlayerName));
+					assert(len != 0);
+
+					if (!_wcsnicmp(PartialName, WidePlayerName, PartialNameLength))
 					{
 						if (strField.size() + PlayerNameLength - PartialNameLength > MAX_INPUT_LENGTH)
 							break;
@@ -379,7 +474,7 @@ void Chat::OnEvent(MEvent *pEvent){
 						for (size_t i = 0; i < PartialNameLength; i++)
 							strField.erase(strField.size() - 1);
 
-						strField.append(PlayerName);
+						strField.append(WidePlayerName);
 						nCaretPos += PlayerNameLength - PartialNameLength;
 						break;
 					}
@@ -411,7 +506,7 @@ void Chat::OnEvent(MEvent *pEvent){
 
 				if (nCurInputHistoryEntry < int(vstrInputHistory.size()) - 1){
 					nCurInputHistoryEntry++;
-					std::string &strEntry = vstrInputHistory.at(nCurInputHistoryEntry);
+					auto&& strEntry = vstrInputHistory.at(nCurInputHistoryEntry);
 					strField.assign(strEntry);
 					nCaretPos = strEntry.length() - 1;
 				}
@@ -428,7 +523,7 @@ void Chat::OnEvent(MEvent *pEvent){
 				break;
 
 			case VK_RIGHT:
-				if (nCaretPos <= int(strField.length()) - 1)
+				if (nCaretPos < int(strField.length()) - 1)
 					nCaretPos++;
 				break;
 
@@ -437,28 +532,14 @@ void Chat::OnEvent(MEvent *pEvent){
 						if (!pEvent->bCtrl)
 							return;
 
-						if (!IsClipboardFormatAvailable(CF_TEXT))
-							return;
-
-						if (!OpenClipboard(g_hWnd))
-							return;
-
-						HANDLE h = GetClipboardData(CF_TEXT);
-
-						if (!h)
-							return;
-
-						const char *s = (const char *)GlobalLock(h);
-						std::string str = s;
-						if (strField.length() + str.length() > MAX_INPUT_LENGTH)
+						auto Clipboard = GetClipboard();
+						if (strField.length() + Clipboard.length() > MAX_INPUT_LENGTH)
 						{
-							strField += str.substr(0, MAX_INPUT_LENGTH - strField.length());
+							strField += Clipboard.substr(0, MAX_INPUT_LENGTH - strField.length());
 						}
 						else
-							strField += s;
+							strField += Clipboard;
 
-						GlobalUnlock(h);
-						CloseClipboard();
 						break;
 			}
 
@@ -480,10 +561,17 @@ void Chat::OnEvent(MEvent *pEvent){
 					break;
 				}*/
 
-				if (strField.compare("")){
+				if (strField.compare(L"")){
 					vstrInputHistory.push_back(strField);
 					nCurInputHistoryEntry = vstrInputHistory.size();
-					ZGetGameInterface()->GetChat()->Input(strField.c_str());
+
+					char MultibyteString[1024];
+					WideCharToMultiByte(CP_UTF8, 0,
+						strField.c_str(), -1,
+						MultibyteString, std::size(MultibyteString),
+						nullptr, nullptr);
+
+					ZGetGameInterface()->GetChat()->Input(MultibyteString);
 					strField.clear();
 				}
 
@@ -507,42 +595,61 @@ void Chat::OnEvent(MEvent *pEvent){
 
 					strField.insert(nCaretPos + 1, 1, pEvent->nKey);
 
-					if (strField == "/r ")
+					auto SlashR = L"/r ";
+					auto SlashWhisper = L"/whisper ";
+					if (strField == SlashR)
 					{
-						strField = "/whisper ";
-						strField += ZGetGameInterface()->GetChat()->m_szWhisperLastSender;
-						nCaretPos += strlen("/whisper ") - strlen("/r ");
-					}
+						std::wstring LastSenderWide;
+						LastSenderWide.resize(MATCHOBJECT_NAME_LENGTH);
+						auto* LastSender = ZGetGameInterface()->GetChat()->m_szWhisperLastSender;
+						auto len = MultiByteToWideChar(CP_ACP, 0,
+							LastSender, -1,
+							&LastSenderWide[0], std::size(LastSenderWide));
+						if (len == 0)
+							break;
 
-					nCaretPos++;
+						LastSenderWide.resize(len);
+
+						strField = SlashWhisper;
+						strField += LastSenderWide;
+						nCaretPos = strField.length() - 1;
+					}
+					else
+						nCaretPos++;
 				}
 			};
 		}
+		
+		auto ret = GetCaretPos(pFont.get(), strField.c_str(), nCaretPos, Border.x2 - (Border.x1 + 5));
+		InputHeight = ret.TotalTextHeight;
+		CaretCoord = ret.CaretPos;
 	}
 	else if (pEvent->nMessage == MWM_CHAR && pEvent->nKey == VK_RETURN)
 		EnableInput(1, 0);
 }
 
 int Chat::GetTextLen(ChatLine &cl, int nPos, int nCount){
-	return GetTextLength(pFont.get(), "_%.*s_", nCount, &cl.Msg.at(nPos)) - GetTextLength(pFont.get(), "__");
+	return GetTextLength(pFont.get(), L"_%.*s_", nCount, &cl.Msg.at(nPos)) - GetTextLength(pFont.get(), L"__");
 }
 
 int Chat::GetTextLen(const char *szMsg, int nCount){
-	return GetTextLength(pFont.get(), "_%.*s_", nCount, szMsg) - GetTextLength(pFont.get(), "__");
+	return GetTextLength(pFont.get(), L"_%.*s_", nCount, szMsg) - GetTextLength(pFont.get(), L"__");
 }
 
 void Chat::OnUpdate(){
 	POINT PrevCursorPos = Cursor;
 	GetCursorPos(&Cursor);
 
+	v2 MinimumSize{ 192.f * RGetScreenWidth() / 1920.f, 108.f * RGetScreenHeight() / 1080.f };
+
 	if (dwResize){
-		if (dwResize & RESIZE_X1 && Border.x1 + Cursor.x - PrevCursorPos.x < Border.x2 - 20)
+		if (dwResize & RESIZE_X1 && Border.x1 + Cursor.x - PrevCursorPos.x < Border.x2 - MinimumSize.x)
 			Border.x1 += Cursor.x - PrevCursorPos.x;
-		if (dwResize & RESIZE_X2 && Border.x2 + Cursor.x - PrevCursorPos.x > Border.x1 + 20)
+		if (dwResize & RESIZE_X2 && Border.x2 + Cursor.x - PrevCursorPos.x > Border.x1 + MinimumSize.x)
 			Border.x2 += Cursor.x - PrevCursorPos.x;
-		if (dwResize & RESIZE_Y1 && Border.y1 + Cursor.y - PrevCursorPos.y  < Border.y2 - 20)
+		if (dwResize & RESIZE_Y1 && Border.y1 + Cursor.y - PrevCursorPos.y < Border.y2 - MinimumSize.y)
 			Border.y1 += Cursor.y - PrevCursorPos.y;
-		if (dwResize & RESIZE_Y2 && Border.y2 + Cursor.y - PrevCursorPos.y > Border.y1 + 20)
+		if (dwResize & RESIZE_Y2 && Border.y2 + Cursor.y - PrevCursorPos.y > Border.y1 + MinimumSize.y)
 			Border.y2 += Cursor.y - PrevCursorPos.y;
 
 		for (std::vector<ChatLine>::iterator it = vMsgs.begin(); it != vMsgs.end(); it++)
@@ -561,19 +668,11 @@ void Chat::OnUpdate(){
 			EmptyClipboard();
 
 			if (pFromMsg == pToMsg){
-				HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, abs(nToPos - nFromPos) + 2);
-				void *pMem = GlobalLock(hMem);
-				strcpy_trunc(reinterpret_cast<char *>(pMem),
-					abs(nToPos - nFromPos) + 1,
-					&pFromMsg->Msg.at(min(nFromPos, nToPos)));
-				GlobalUnlock(hMem);
-
-				SetClipboardData(CF_TEXT, hMem);
-
-				cprint("Copied %.*s\n", abs(nToPos - nFromPos) + 1, &pFromMsg->Msg.at(min(nFromPos, nToPos)));
+				auto str = pFromMsg->Msg.substr(min(nFromPos, nToPos));
+				SetClipboard(str);
 			}
 			else{
-				std::string str;
+				std::wstring str;
 
 				bool bFirstFound = 0;
 
@@ -591,7 +690,7 @@ void Chat::OnUpdate(){
 						}
 						else{
 							int nPos = pcl == pFromMsg ? nFromPos : nToPos;
-							str.append("\n");
+							str.append(L"\n");
 							str.append(pcl->Msg.c_str(), nPos + 2);
 
 							break;
@@ -599,18 +698,13 @@ void Chat::OnUpdate(){
 					}
 
 					if (bFirstFound){
-						str.append("\n");
+						str.append(L"\n");
 						str.append(pcl->Msg.c_str());
 					}
 				}
 
 				if (bFirstFound){
-					HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, str.length());
-					void *pMem = GlobalLock(hMem);
-					strcpy_safe((char *)pMem, str.length(), str.c_str());
-					GlobalUnlock(hMem);
-
-					SetClipboardData(CF_TEXT, hMem);
+					SetClipboard(str);
 				}
 			}
 
@@ -618,7 +712,7 @@ void Chat::OnUpdate(){
 		}
 	}
 
-	const int nBorderWidth = RELWIDTH(10);
+	const int nBorderWidth = 5;
 
 	//dwResize = 0;
 	if (GetAsyncKeyState(VK_LBUTTON) & 0x8000){
@@ -784,7 +878,7 @@ D3DRECT Chat::GetOutputRect(){
 }
 
 D3DRECT Chat::GetInputRect(){
-	D3DRECT r = { Border.x1, Border.y2 - nFontHeight, Border.x2, Border.y2 };
+	D3DRECT r = { Border.x1, Border.y2 - nFontHeight, Border.x2, Border.y2 + (InputHeight - 1) * nFontHeight };
 	return r;
 }
 
@@ -849,7 +943,9 @@ void Chat::Display(){
 		}
 		else
 		{
-			Quad(Border, BackgroundColor);
+			auto rect = Border;
+			rect.y2 += (InputHeight - 1) * nFontHeight;
+			Quad(rect, BackgroundColor);
 		}
 	}
 
@@ -904,7 +1000,7 @@ void Chat::Display(){
 					nLen = it->nStartPos - nPos;
 				}
 				else{
-					nLen = strlen(cl.Msg.data() + nPos);
+					nLen = cl.Msg.length() - nPos;
 				}
 
 				//g_pDraw->Text(pFont, cl.Msg.data() + nPos, nLen, &Rect, DT_TOP | DT_LEFT | DT_NOCLIP, dwColor);
@@ -1017,7 +1113,7 @@ ret:;
 
 	DrawBorder();
 
-	DrawTextN(pFont.get(), "D", r, TextColor);
+	DrawTextN(pFont.get(), L"D", r, TextColor);
 
 	D3DXCOLOR Color;
 	if (GetAsyncKeyState(VK_LBUTTON) & 0x8000)
@@ -1041,27 +1137,27 @@ ret:;
 	r.right = Border.x2;
 	r.bottom = Border.y2;
 
-	int x = r.left + GetTextLen(strField.c_str(), nCaretPos + 1) + 1;
-	int y = r.top;
+	int x = r.left + CaretCoord.x;
+	int y = r.top + (CaretCoord.y - 1) * nFontHeight;
 
 	if (fmod(tNow, .8f * nTPS) > .4f * nTPS)
 		Line(x, y, x, y + nFontHeight, TextColor);
 
 	y -= 2;
 
-	DrawTextN(pFont.get(), strField.c_str(), r, TextColor);
+	DrawTextWordWrap(pFont.get(), strField.c_str(), r, TextColor);
 }
 
-int Chat::DrawTextWordWrap(MFontR2 *pFont, const TCHAR *szStr, const RECT &r, DWORD dwColor)
+int Chat::DrawTextWordWrap(MFontR2 *pFont, const wchar_t *szStr, const RECT &r, DWORD dwColor)
 {
 	int Lines = 1;
-	int StringLength = _tcslen(szStr);
+	int StringLength = wcslen(szStr);
 	int CurrentLineLength = 0;
 	int MaxLineLength = r.right - r.left;
 
 	for (int i = 0; i < StringLength; i++)
 	{
-		int CharWidth = pFont->GetWidth((const char *)szStr + i, 1);
+		int CharWidth = pFont->GetWidth(szStr + i, 1);
 		int CharHeight = pFont->GetHeight();
 
 		if (CurrentLineLength + CharWidth > MaxLineLength)
@@ -1070,9 +1166,11 @@ int Chat::DrawTextWordWrap(MFontR2 *pFont, const TCHAR *szStr, const RECT &r, DW
 			Lines++;
 		}
 
-		TCHAR String[2] = { szStr[i], 0 };
-		
-		pFont->m_Font.DrawTextA(r.left + CurrentLineLength, r.top + (CharHeight + 1) * max(0, Lines - 1), String, dwColor);
+		auto x = r.left + CurrentLineLength;
+		auto y = r.top + (CharHeight + 1) * max(0, Lines - 1);
+		pFont->m_Font.DrawTextN(x, y,
+			szStr + i, 1,
+			dwColor);
 
 		CurrentLineLength += CharWidth;
 	}
@@ -1080,40 +1178,28 @@ int Chat::DrawTextWordWrap(MFontR2 *pFont, const TCHAR *szStr, const RECT &r, DW
 	return Lines;
 }
 
-void Chat::DrawTextN(MFontR2 *pFont, const TCHAR *szStr, const RECT &r, DWORD dwColor, int nLen)
+void Chat::DrawTextN(MFontR2 *pFont, const wchar_t *szStr, const RECT &r, DWORD dwColor, int nLen)
 {
-	const TCHAR *String;
-	std::unique_ptr<TCHAR[]> p;
-
-	if (nLen != -1)
-	{
-		auto size = nLen + 1;
-		p = decltype(p){new TCHAR[size]};
-		_tcsncpy_s(p.get(), size, szStr, nLen);
-		p[nLen] = 0;
-		String = p.get();
-	}
-	else
-	{
-		String = szStr;
-	}
-
-	pFont->m_Font.DrawTextA(r.left, r.top, String, dwColor);
+	pFont->m_Font.DrawTextN(r.left, r.top, szStr, nLen, dwColor);
 }
 
 void Chat::DrawBorder()
 {
-	v2 vs[] = { { float(Border.x1), float(Border.y1) },
-	{ float(Border.x2), float(Border.y1) },
-	{ float(Border.x2), float(Border.y2) },
-	{ float(Border.x1), float(Border.y2) },
+	auto rect = Border;
+	rect.y2 += (InputHeight - 1) * nFontHeight;
+	v2 vs[] = { { float(rect.x1), float(rect.y1) },
+	{ float(rect.x2), float(rect.y1) },
+	{ float(rect.x2), float(rect.y2) },
+	{ float(rect.x1), float(rect.y2) },
 	};
 
-	for (size_t i = 0; i < ArraySize(vs); i++)
-		Line(vs[i], vs[(i + 1) % ArraySize(vs)]);
+	for (size_t i = 0; i < std::size(vs); i++)
+		Line(vs[i], vs[(i + 1) % std::size(vs)]);
 
-	Line({ float(Border.x1), float(Border.y2 - 2 - nFontHeight) },
-	{ float(Border.x2), float(Border.y2 - 2 - nFontHeight) });
+	rect.y2 -= 2;
+	rect.y2 -= InputHeight * nFontHeight;
+	Line({ float(rect.x1), float(rect.y2) },
+	{ float(rect.x2), float(rect.y2) });
 }
 
 void Chat::Line(const v2 &v1, const v2 &v2, D3DCOLOR Color, float z)

@@ -663,7 +663,7 @@ void ZWater::Render()
 
 void ZWater::Update()
 {
-	if(!isInViewFrustum(&m_BoundingBox, RGetViewFrustum()))	return;
+	if (!isInViewFrustum(m_BoundingBox, RGetViewFrustum())) return;
 
 	if(m_nWaterType != WaterType2)
    		Ripple( (rvector)m_BoundingBox.m[0], 5, 0.01f );

@@ -254,21 +254,26 @@ RRESULT OnDestroy(void *pParam)
 		_findclose(hFile);
 	}
 
-	MFontManager::Destroy();
-	MBitmapManager::Destroy();
-	MBitmapManager::DestroyAniBitmap();
+	if (GetRS2().UsingD3D9())
+	{
+		MFontManager::Destroy();
+		MBitmapManager::Destroy();
+		MBitmapManager::DestroyAniBitmap();
 
-	mlog("main : MBitmapManager::DestroyAniBitmap()\n");
+		mlog("main : MBitmapManager::DestroyAniBitmap()\n");
 
-	ZBasicInfoItem::Release(); 
+		ZBasicInfoItem::Release();
 
-	ZGetStencilLight()->Destroy();
-	LightSource::Release();
+		ZGetStencilLight()->Destroy();
+		LightSource::Release();
 
-	RBspObject::DestroyShadeMap();
-	RDestroyLenzFlare();
-	RAnimationFileMgr::GetInstance()->Destroy();
-	ZStringResManager::FreeInstance();
+		RBspObject::DestroyShadeMap();
+		RDestroyLenzFlare();
+		RAnimationFileMgr::GetInstance()->Destroy();
+		ZStringResManager::FreeInstance();
+
+		GetMeshManager()->Destroy();
+	}
 
 	g_RGMain.reset();
 
@@ -358,7 +363,7 @@ RRESULT OnRender(void *pParam)
 	if (!RIsActive() && RIsFullscreen())
 		return R_NOTREADY;
 
-	if (ZGetConfiguration()->DecoupleLogicAndRendering && !VisualFPSLimiter.Tick())
+	if (ZGetConfiguration()->GetVisualFPSLimit() != 0 && !VisualFPSLimiter.Tick())
 		return R_NOFLIP;
 
 	g_App.OnDraw();
@@ -376,7 +381,7 @@ RRESULT OnRender(void *pParam)
 			y_offset += 20;
 		};
 
-		if (ZGetConfiguration()->DecoupleLogicAndRendering)
+		if (ZGetConfiguration()->GetVisualFPSLimit() != 0)
 		{
 			PrintText("Visual FPS: %d", VisualFPSLimiter.LastFPS);
 			PrintText("Logical FPS: %d", LogicalFPSLimiter.LastFPS);

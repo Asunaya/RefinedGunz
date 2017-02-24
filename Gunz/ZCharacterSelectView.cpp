@@ -205,11 +205,11 @@ void ZCharacterSelectView::Draw()
 		srand( GetGlobalTimeMS());
  		int rint = rand() % 10;
 		force.x += rint - 7;
-		force.x = min(max( force.x, 5 ), maxForce * 0.3 );
+		force.x = std::min(std::max( force.x, 5.0f ), maxForce * 0.3f );
 		srand( GetGlobalTimeMS());
 		rint = rand() % (int)(maxForce*0.3);
 		force.y += rint - 4;	
-		force.y = min(max( force.y, 0 ), maxForce );
+		force.y = std::min(std::max( force.y, 0.0f ), maxForce );
 		force.z = -70;
 
 		m_pVisualMesh->SetClothForce(force);

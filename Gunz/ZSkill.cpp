@@ -373,6 +373,8 @@ bool ZSkill::Init(int nID, ZObject *pOwner)
 
 void ZSkill::InitStatus()
 {
+	if (!m_pDesc) return;
+
 	m_bEnable = false;
 	m_fLastBeginTime = g_pGame->GetTime() - .001f * m_pDesc->nDelay;
 	m_nUseNum = 0;

@@ -14,7 +14,7 @@ extern HWND	g_hWnd;
 extern MZFileSystem *g_pFileSystem;
 extern rvector RCameraPosition, RCameraDirection, RCameraUp;
 extern rmatrix RView, RProjection, RViewProjection, RViewport, RViewProjectionViewport;
-extern rplane RViewFrustum[6];
+extern rfrustum RViewFrustum;
 
 enum class GraphicsAPI
 {
@@ -113,7 +113,7 @@ void RUpdateCamera();
 void RSetProjection(float fFov, float fNearZ, float fFarZ);
 void RSetProjection(float fFov, float fAspect, float fNearZ, float fFarZ);
 
-inline rplane *RGetViewFrustum();
+inline rfrustum& RGetViewFrustum() { return RViewFrustum; }
 void RSetViewport(int x1, int y1, int x2, int y2);
 D3DVIEWPORT9 *RGetViewport();
 
@@ -144,9 +144,5 @@ void RSetFunction(RFUNCTIONTYPE ft, RFFUNCTION pfunc);
 int RMain(const char *AppName, HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline,
 	int cmdshow, RMODEPARAMS *pModeParams, WNDPROC winproc, WORD nIconResID,
 	GraphicsAPI API);
-
-inline rplane *RGetViewFrustum() {
-	return RViewFrustum;
-}
 
 _NAMESPACE_REALSPACE2_END

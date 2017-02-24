@@ -28,6 +28,7 @@
 #include "EluLoader.h"
 #include "BulletCollision.h"
 #include "LightmapGenerator.h"
+#include "LogMatrix.h"
 
 #ifndef _PUBLISH
 
@@ -148,9 +149,8 @@ RBspObject::RBspObject(bool PhysOnly)
 	m_MeshList.SetMtrlAutoLoad(true);
 	m_MeshList.SetMapObject(true);
 
-#ifdef SHADOW_TEST
-	RenderWithNormal = true;
-#endif
+	if (GetRS2().UsingD3D9())
+		DrawObj.SetLightingStatic<RBspObjectDrawD3D9>(m_bisDrawLightMap);
 }
 
 RBspObject::~RBspObject() = default;
@@ -231,12 +231,10 @@ void RBspObject::SetDiffuseMap(int nMaterial)
 template <typename T>
 static void DrawImpl(RSBspNode& Node, int Material, T& DrawFunc)
 {
-#ifndef SHADOW_TEST
 	// nFrameCount is updated to the current frame number
 	// only for nodes that aren't occluded.
 	if (Node.nFrameCount != g_nFrameNumber)
 		return;
-#endif
 
 	// Leaf node
 	if (Node.nPolygon)
@@ -470,6 +468,7 @@ bool RBspObject::Draw()
 	dev->SetTextureStageState(2, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
 
 	// Update occlusion list and local view frustum
+	rfrustum LocalViewFrustum;
 	{
 		rmatrix World = RGetTransform(D3DTS_WORLD);
 
@@ -477,15 +476,15 @@ bool RBspObject::Draw()
 
 		rmatrix trWorld = Transpose(World);
 
-		for (size_t i = 0; i < ArraySize(m_localViewFrustum); i++)
-			m_localViewFrustum[i] = Transform(RGetViewFrustum()[i], trWorld);
+		for (size_t i = 0; i < std::size(LocalViewFrustum); i++)
+			LocalViewFrustum[i] = Transform(RGetViewFrustum()[i], trWorld);
 	}
 
 	_BP("ChooseNodes");
 	if (m_OpenMode != ROpenMode::Editor)
-		ChooseNodes<true>(OcRoot.data());
+		ChooseNodes<true>(OcRoot.data(), LocalViewFrustum);
 	else
-		ChooseNodes<false>(OcRoot.data());
+		ChooseNodes<false>(OcRoot.data(), LocalViewFrustum);
 	_EP("ChooseNodes");
 
 	// Disable alpha blending
@@ -803,18 +802,10 @@ void RBspObject::DrawNavi_Polygon() {}
 void RBspObject::DrawNavi_Links() {}
 #endif
 
-bool isInViewFrustumWithFarZ(rboundingbox *bb, rplane *plane)
-{
-	if (isInPlane(bb, plane) && isInPlane(bb, plane + 1) &&
-		isInPlane(bb, plane + 2) && isInPlane(bb, plane + 3) &&
-		isInPlane(bb, plane + 5)) return true;
-	return false;
-}
-
 template <bool UseOccluders>
-void RBspObject::ChooseNodes(RSBspNode *bspNode)
+void RBspObject::ChooseNodes(RSBspNode *bspNode, const rfrustum& LocalViewFrustum)
 {
-	if (!isInViewFrustumWithFarZ(&bspNode->bbTree, m_localViewFrustum))
+	if (!isInViewFrustumWithFarZ(bspNode->bbTree, LocalViewFrustum))
 		return;
 
 	// Check if the node is behind an occluder
@@ -826,9 +817,9 @@ void RBspObject::ChooseNodes(RSBspNode *bspNode)
 
 	bspNode->nFrameCount = g_nFrameNumber;
 	if (bspNode->m_pNegative)
-		ChooseNodes<UseOccluders>(bspNode->m_pNegative);
+		ChooseNodes<UseOccluders>(bspNode->m_pNegative, LocalViewFrustum);
 	if (bspNode->m_pPositive)
-		ChooseNodes<UseOccluders>(bspNode->m_pPositive);
+		ChooseNodes<UseOccluders>(bspNode->m_pPositive, LocalViewFrustum);
 }
 
 int RBspObject::ChooseNodes(RSBspNode *bspNode, const rvector &center, float fRadius)

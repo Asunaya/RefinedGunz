@@ -316,8 +316,6 @@ RVisualMesh::RVisualMesh() {
 	m_pMesh = NULL;
 	m_pLowPolyMesh = NULL;
 
-	m_pTMesh = NULL;
-
 	m_id = -1;
 
 	m_nAnimationState = APState_Stop;
@@ -426,7 +424,7 @@ RVisualMesh::RVisualMesh() {
 RVisualMesh::~RVisualMesh() 
 {
 	if (IsDynamicResourceLoad())
-		GetMeshManager()->OnDestroyObject(this);
+		GetMeshManager()->RemoveObject(this);
 
 	Destroy();
 }
@@ -444,30 +442,6 @@ void RVisualMesh::Destroy()
 	if(m_pTracks[1]) {
 		delete m_pTracks[1];
 		m_pTracks[1] = NULL;
-	}
-
-	if(m_pTMesh) {
-		if (IsDynamicResourceLoad())
-		{
-			for (int i = 0; i < eq_parts_end; i++)
-			{
-				if (!m_pTMesh[i])
-					continue;
-
-				switch (i)
-				{
-				case eq_parts_head:
-				case eq_parts_chest:
-				case eq_parts_hands:
-				case eq_parts_legs:
-				case eq_parts_feet:
-					GetMeshManager()->Release(m_pTMesh[i]);
-				}
-			}
-		}
-
-		delete [] m_pTMesh;
-		m_pTMesh = NULL;
 	}
 
 	if(m_pBipMatrix) {
@@ -491,18 +465,6 @@ bool RVisualMesh::Create(RMesh* pMesh) {
 	}
 
 	if( m_bIsCharacter || m_bIsNpc) {
-
-		if(m_bIsCharacter) {
-			if(m_pTMesh==NULL) {
-
-				m_pTMesh = new RMeshNode*[eq_parts_end];
-
-				for(int i=0;i<eq_parts_end;i++){
-					m_pTMesh[i] = NULL;
-				}
-			}
-		}
-
 		if(m_pBipMatrix==NULL) {
 
 			m_pBipMatrix = new rmatrix [eq_parts_pos_info_end];
@@ -745,7 +707,7 @@ void RVisualMesh::Render(bool low,bool render_buffer) {
 		}
 
 		if (m_bCheckViewFrustum) {
-			if (isInViewFrustumWithZ(&bbox, RGetViewFrustum()) == false) {
+			if (isInViewFrustumWithZ(bbox, RGetViewFrustum()) == false) {
 				m_bIsRender = false;
 				return;
 			}
@@ -1500,39 +1462,8 @@ void RVisualMesh::RemoveAllWeapon()
 }
 
 void RVisualMesh::ClearParts() {
-
-	if(m_pTMesh==NULL) return;
-
-	if (IsDynamicResourceLoad())
-	{
-		for (int i = 0; i < eq_parts_end; i++) {
-			if (!m_pTMesh[i])
-				continue;
-
-			switch (i)
-			{
-			case eq_parts_head:
-			case eq_parts_chest:
-			case eq_parts_hands:
-			case eq_parts_legs:
-			case eq_parts_feet:
-				GetMeshManager()->Release(m_pTMesh[i]);
-			};
-
-			m_pTMesh[i] = nullptr;
-		}
-	}
-}
-
-void RVisualMesh::SetParts(RMeshPartsType parts, RMeshNode* pMN) {
-
-	if(parts < 0 && parts >= eq_parts_end ) 
-		return;
-
-	if(m_pTMesh==NULL) return;
-
-	m_pTMesh[parts] = pMN;
-	if(m_pMesh)	m_pMesh->ConnectPhysiqueParent(pMN);
+	for (auto&& node : m_pTMesh)
+		node.reset();
 }
 
 void RVisualMesh::SetParts(RMeshPartsType parts, const char* name)
@@ -1540,22 +1471,12 @@ void RVisualMesh::SetParts(RMeshPartsType parts, const char* name)
 	if(parts < 0 && parts >= eq_parts_end ) 
 		return;
 
-	if(m_pTMesh==NULL) return;
-
 	if(!m_pMesh) return;
 
 	if (IsDynamicResourceLoad())
 	{
-		GetMeshManager()->GetAsync(m_pMesh->GetName(), name, this,
-			[this, saved_name = std::string(name), parts](RMeshNode *pNode)
+		auto lambda = [this, saved_name = std::string(name), parts](RMeshNode *pNode)
 		{
-			RMeshNode *pPreviousNode = m_pTMesh[parts];
-
-			if (pPreviousNode)
-			{
-				GetMeshManager()->Release(pPreviousNode);
-			}
-
 			if (!pNode)
 				pNode = m_pMesh->GetPartsNode(saved_name.c_str());
 
@@ -1565,10 +1486,10 @@ void RVisualMesh::SetParts(RMeshPartsType parts, const char* name)
 				return;
 			}
 
-			m_pTMesh[parts] = pNode;
+			m_pTMesh[parts] = RMeshNodePtr{ pNode };
 			m_pMesh->ConnectPhysiqueParent(pNode);
-		}
-		);
+		};
+		GetMeshManager()->GetAsync(m_pMesh->GetName(), name, this, lambda);
 	}
 	else
 	{
@@ -1576,7 +1497,7 @@ void RVisualMesh::SetParts(RMeshPartsType parts, const char* name)
 
 		if (pNode)
 		{
-			m_pTMesh[parts] = pNode;
+			m_pTMesh[parts] = RMeshNodePtr{ pNode };
 			m_pMesh->ConnectPhysiqueParent(pNode);
 		}
 	}
@@ -1587,9 +1508,7 @@ RMeshNode* RVisualMesh::GetParts(RMeshPartsType parts) {
 	if(parts < 0 || parts >= eq_parts_end ) 
 		return NULL;
 
-	if(m_pTMesh==NULL) return NULL;
-
-	return m_pTMesh[parts];
+	return m_pTMesh[parts].get();
 }
 
 void RVisualMesh::ClearFrame()
@@ -2000,8 +1919,6 @@ void RVisualMesh::SetBaseParts(RMeshPartsType parts) {
 	if(parts < 0 && parts >= eq_parts_end ) 
 		return;
 
-	if(m_pTMesh==NULL) return;
-
 	m_pTMesh[parts] = NULL;
 }
 
@@ -2248,8 +2165,6 @@ bool RVisualMesh::IsSelectWeaponGrenade()
 
 bool RVisualMesh::IsClothModel() 
 {
-	if(m_pTMesh==NULL) return false;
-
 	if(m_pTMesh[eq_parts_chest]) {
 		if(m_pTMesh[eq_parts_chest]->m_point_color_num)
 			return true;

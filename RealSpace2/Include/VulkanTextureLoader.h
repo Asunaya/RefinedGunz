@@ -110,15 +110,15 @@ namespace vkTools
 		{
 			auto tex = gli::load(Data, Size);
 			// TODO: Move this stuff elsewhere
-			if (tex.format() == gli::FORMAT_RGB_DXT1_UNORM)
+			if (tex.format() == gli::FORMAT_RGB_DXT1_UNORM_BLOCK8)
 				format = VK_FORMAT_BC1_RGBA_UNORM_BLOCK;
-			else if (tex.format() == gli::FORMAT_RGBA_DXT3_UNORM)
+			else if (tex.format() == gli::FORMAT_RGBA_DXT3_UNORM_BLOCK16)
 				format = VK_FORMAT_BC3_UNORM_BLOCK;
-			gli::texture2D tex2D(tex);
+			gli::texture2d tex2D(tex);
 			assert(!tex2D.empty());
 
-			texture->width = static_cast<uint32_t>(tex2D[0].dimensions().x);
-			texture->height = static_cast<uint32_t>(tex2D[0].dimensions().y);
+			texture->width = static_cast<uint32_t>(tex2D[0].extent().x);
+			texture->height = static_cast<uint32_t>(tex2D[0].extent().y);
 			texture->mipLevels = static_cast<uint32_t>(tex2D.levels());
 
 			// Get device properites for the requested texture format
@@ -180,8 +180,8 @@ namespace vkTools
 					bufferCopyRegion.imageSubresource.mipLevel = i;
 					bufferCopyRegion.imageSubresource.baseArrayLayer = 0;
 					bufferCopyRegion.imageSubresource.layerCount = 1;
-					bufferCopyRegion.imageExtent.width = static_cast<uint32_t>(tex2D[i].dimensions().x);
-					bufferCopyRegion.imageExtent.height = static_cast<uint32_t>(tex2D[i].dimensions().y);
+					bufferCopyRegion.imageExtent.width = static_cast<uint32_t>(tex2D[i].extent().x);
+					bufferCopyRegion.imageExtent.height = static_cast<uint32_t>(tex2D[i].extent().y);
 					bufferCopyRegion.imageExtent.depth = 1;
 					bufferCopyRegion.bufferOffset = offset;
 
@@ -439,12 +439,12 @@ namespace vkTools
 
 			free(textureData);
 #else
-			gli::textureCube texCube(gli::load(filename));
+			gli::texture_cube texCube(gli::load(filename));
 #endif	
 			assert(!texCube.empty());
 
-			texture->width = static_cast<uint32_t>(texCube.dimensions().x);
-			texture->height = static_cast<uint32_t>(texCube.dimensions().y);
+			texture->width = static_cast<uint32_t>(texCube.extent().x);
+			texture->height = static_cast<uint32_t>(texCube.extent().y);
 			texture->mipLevels = static_cast<uint32_t>(texCube.levels());
 
 			VkMemoryAllocateInfo memAllocInfo = vkTools::initializers::memoryAllocateInfo();
@@ -491,8 +491,8 @@ namespace vkTools
 					bufferCopyRegion.imageSubresource.mipLevel = level;
 					bufferCopyRegion.imageSubresource.baseArrayLayer = face;
 					bufferCopyRegion.imageSubresource.layerCount = 1;
-					bufferCopyRegion.imageExtent.width = static_cast<uint32_t>(texCube[face][level].dimensions().x);
-					bufferCopyRegion.imageExtent.height = static_cast<uint32_t>(texCube[face][level].dimensions().y);
+					bufferCopyRegion.imageExtent.width = static_cast<uint32_t>(texCube[face][level].extent().x);
+					bufferCopyRegion.imageExtent.height = static_cast<uint32_t>(texCube[face][level].extent().y);
 					bufferCopyRegion.imageExtent.depth = 1;
 					bufferCopyRegion.bufferOffset = offset;
 
@@ -656,13 +656,13 @@ namespace vkTools
 
 			free(textureData);
 #else
-			gli::texture2DArray tex2DArray(gli::load(filename));
+			gli::texture2d_array tex2DArray(gli::load(filename));
 #endif	
 
 			assert(!tex2DArray.empty());
 
-			texture->width = static_cast<uint32_t>(tex2DArray.dimensions().x);
-			texture->height = static_cast<uint32_t>(tex2DArray.dimensions().y);
+			texture->width = static_cast<uint32_t>(tex2DArray.extent().x);
+			texture->height = static_cast<uint32_t>(tex2DArray.extent().y);
 			texture->layerCount = static_cast<uint32_t>(tex2DArray.layers());
 			texture->mipLevels = static_cast<uint32_t>(tex2DArray.levels());
 
@@ -710,8 +710,8 @@ namespace vkTools
 					bufferCopyRegion.imageSubresource.mipLevel = level;
 					bufferCopyRegion.imageSubresource.baseArrayLayer = layer;
 					bufferCopyRegion.imageSubresource.layerCount = 1;
-					bufferCopyRegion.imageExtent.width = static_cast<uint32_t>(tex2DArray[layer][level].dimensions().x);
-					bufferCopyRegion.imageExtent.height = static_cast<uint32_t>(tex2DArray[layer][level].dimensions().y);
+					bufferCopyRegion.imageExtent.width = static_cast<uint32_t>(tex2DArray[layer][level].extent().x);
+					bufferCopyRegion.imageExtent.height = static_cast<uint32_t>(tex2DArray[layer][level].extent().y);
 					bufferCopyRegion.imageExtent.depth = 1;
 					bufferCopyRegion.bufferOffset = offset;
 

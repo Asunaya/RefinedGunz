@@ -150,14 +150,14 @@ void ZMatch::SoloSpawn()
 		
 	if (!pSpawnData)
 	{
-		if (ZApplication::GetInstance()->GetLaunchMode() == ZApplication::ZLAUNCH_MODE_STANDALONE_GAME)
+		if (ZGetApplication()->IsDeveloperMode())
 			ZPostSpawn(v3{ 0, 0, 100 }, v3{ 1, 0, 0 });
 		else
 			assert(false);
 	}
 	else
 	{
-		if (ZApplication::GetInstance()->GetLaunchMode() == ZApplication::ZLAUNCH_MODE_DEBUG) {
+		if (ZGetApplication()->IsDeveloperMode()) {
 			ZPostSpawn(pSpawnData->m_Pos, pSpawnData->m_Dir);
 		} else {
 			if (g_pGame->GetSpawnRequested() == false) {
@@ -181,7 +181,7 @@ void ZMatch::InitCharactersPosition()
 		for (auto& pair : g_pGame->m_CharacterManager)
 		{
 			ZCharacter* pCharacter = pair.second;
-			for (size_t i = 0; i < ArraySize(nSpawnIndex); i++)
+			for (size_t i = 0; i < std::size(nSpawnIndex); i++)
 			{
 				if (pCharacter->GetTeamID() == MMT_RED + i)
 				{

@@ -1,17 +1,6 @@
 #include "stdafx.h"
 #include "MMatchStageSetting.h"
 
-MMatchStageSetting::MMatchStageSetting()
-{
-	Clear();
-}
-
-
-MMatchStageSetting::~MMatchStageSetting()
-{
-	Clear();
-}
-
 unsigned long MMatchStageSetting::GetChecksum()
 {
 	return (m_StageSetting.nMapIndex + m_StageSetting.nGameType + m_StageSetting.nMaxPlayers);
@@ -19,37 +8,13 @@ unsigned long MMatchStageSetting::GetChecksum()
 
 void MMatchStageSetting::SetDefault()
 {
-	m_StageSetting.nMapIndex = 0;
-	strcpy_safe(m_StageSetting.szMapName, MMATCH_DEFAULT_STAGESETTING_MAPNAME);
-	m_StageSetting.nGameType = MMATCH_DEFAULT_STAGESETTING_GAMETYPE;
-	m_StageSetting.bTeamKillEnabled = MMATCH_DEFAULT_STAGESETTING_TEAMKILL;
-	m_StageSetting.bTeamWinThePoint = MMATCH_DEFAULT_STAGESETTING_TEAM_WINTHEPOINT;
-	m_StageSetting.bForcedEntryEnabled = MMATCH_DEFAULT_STAGESETTING_FORCEDENTRY;
-	m_StageSetting.nLimitTime = MMATCH_DEFAULT_STAGESETTING_LIMITTIME;
-	m_StageSetting.nMaxPlayers = MMATCH_DEFAULT_STAGESETTING_MAXPLAYERS;
-	m_StageSetting.nRoundMax = MMATCH_DEFAULT_STAGESETTING_ROUNDMAX;
-	m_StageSetting.nLimitLevel = MMATCH_DEFAULT_STAGESETTING_LIMITLEVEL;
-	m_StageSetting.bAutoTeamBalancing = MMATCH_DEFAULT_STAGESETTING_AUTOTEAMBALANCING;
-	m_StageSetting.uidStage = MUID(0,0);
-
-#ifdef _VOTESETTING
-	m_StageSetting.bVoteEnabled = true;
-	m_StageSetting.bObserverEnabled = false;
-#endif
-
-	m_StageSetting.Netcode = NetcodeType::ServerBased;
-	m_StageSetting.ForceHPAP = true;
-	m_StageSetting.HP = 100;
-	m_StageSetting.AP = 50;
-	m_StageSetting.NoFlip = true;
-	m_StageSetting.SwordsOnly = false;
+	m_StageSetting.SetDefaults();
 }
 
 void MMatchStageSetting::SetMapName(const char* pszName)
 { 
 	strcpy_safe(m_StageSetting.szMapName, pszName); 
 
-	// MapIndex까지 함께 세팅해준다.
 	m_StageSetting.nMapIndex = 0;
 	for (int i = 0; i < MMATCH_MAP_MAX; i++)
 	{
@@ -65,7 +30,6 @@ void MMatchStageSetting::SetMapIndex(int nMapIndex)
 {
 	m_StageSetting.nMapIndex = nMapIndex; 
 
-	// MapName까지 함께 세팅해준다.
 	if (MIsCorrectMap(nMapIndex))
 	{
 		strcpy_safe(m_StageSetting.szMapName, g_MapDesc[nMapIndex].szMapName); 
@@ -75,7 +39,7 @@ void MMatchStageSetting::SetMapIndex(int nMapIndex)
 void MMatchStageSetting::Clear()
 {
 	SetDefault();
-	m_CharSettingList.DeleteAll();
+	m_CharSettingList.clear();
 	m_uidMaster = MUID(0,0);
 	m_nStageState = STAGE_STATE_STANDBY;
 
@@ -83,10 +47,12 @@ void MMatchStageSetting::Clear()
 
 MSTAGE_CHAR_SETTING_NODE* MMatchStageSetting::FindCharSetting(const MUID& uid)
 {
-	for (MStageCharSettingList::iterator i=m_CharSettingList.begin();i!=m_CharSettingList.end();i++) {
-		if (uid == (*i)->uidChar) return (*i);
+	for (auto&& node : m_CharSettingList)
+	{
+		if (uid == node.uidChar)
+			return &node;
 	}
-	return NULL;
+	return nullptr;
 }
 
 bool MMatchStageSetting::IsTeamPlay()
@@ -106,31 +72,25 @@ bool MMatchStageSetting::IsQuestDrived()
 
 void MMatchStageSetting::UpdateStageSetting(MSTAGE_SETTING_NODE* pSetting)
 {
-	memcpy(&m_StageSetting, pSetting, sizeof(MSTAGE_SETTING_NODE));
+	m_StageSetting = *pSetting;
 }
-
 
 void MMatchStageSetting::UpdateCharSetting(const MUID& uid, unsigned int nTeam, MMatchObjectStageState nStageState)
 {
-	MSTAGE_CHAR_SETTING_NODE* pNode = FindCharSetting(uid);
+	auto pNode = FindCharSetting(uid);
 	if (pNode) {
 		pNode->nTeam = nTeam;
 		pNode->nState = nStageState;
 	} else {
-		MSTAGE_CHAR_SETTING_NODE* pNew = new MSTAGE_CHAR_SETTING_NODE;
-		pNew->uidChar = uid;
-		pNew->nTeam = nTeam;
-		pNew->nState = nStageState;
-		m_CharSettingList.push_back(pNew);
+		MSTAGE_CHAR_SETTING_NODE NewNode;
+		NewNode.uidChar = uid;
+		NewNode.nTeam = nTeam;
+		NewNode.nState = nStageState;
+		m_CharSettingList.push_back(NewNode);
 	}			
 }
-
-
 
 const MMatchGameTypeInfo* MMatchStageSetting::GetCurrGameTypeInfo()
 { 
 	return MGetGameTypeMgr()->GetInfo(m_StageSetting.nGameType); 
 }
-
-
-

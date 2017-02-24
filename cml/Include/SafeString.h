@@ -7,27 +7,12 @@
 #pragma warning(push)
 #pragma warning(disable:4996)
 
-template <bool b, size_t size1, size_t size2>
-struct strcpy_literal_dummy
-{
-	static inline char* strcpy_literal_impl(char (&Dest)[size1], const char (&Source)[size2]);
-};
-
-template <size_t size1, size_t size2>
-struct strcpy_literal_dummy<true, size1, size2>
-{
-	static inline char* strcpy_literal_impl(char(&Dest)[size1], const char(&Source)[size2])
-	{
-		memcpy(Dest, Source, size2);
-
-		return Dest + size2 - 1;
-	}
-};
-
 template <size_t size1, size_t size2>
 inline char* strcpy_literal(char(&Dest)[size1], const char(&Source)[size2])
 {
-	return strcpy_literal_dummy<(size2 < size1), size1, size2>::strcpy_literal_impl(Dest, Source);
+	static_assert(size2 < size1, "Literal must be smaller than the destination string");
+	memcpy(Dest, Source, size2);
+	return Dest + size2;
 }
 
 inline char* strcpy_trunc(char* Dest, size_t size, const char* Source)
@@ -97,25 +82,6 @@ inline char* strncpy_safe(char(&Dest)[size], const char *Source, size_t Count)
 	return strncpy_safe(Dest, size, Source, Count);
 }
 
-template <size_t size>
-inline char* strcat_safe(char(&Dest)[size], const char *Source)
-{
-	auto DestLen = strlen(Dest);
-	auto SourceLen = strlen(Source);
-
-	auto BytesToCopy = SourceLen;
-	if (DestLen + BytesToCopy + 1 > size)
-	{
-		BytesToCopy = size - 1 - DestLen;
-	}
-
-	memcpy(Dest + DestLen, Source, BytesToCopy);
-
-	Dest[DestLen + BytesToCopy] = 0;
-
-	return Dest + DestLen + BytesToCopy;
-}
-
 inline char* strcat_safe(char *Dest, size_t size, const char *Source)
 {
 	auto DestLen = strlen(Dest);
@@ -135,22 +101,9 @@ inline char* strcat_safe(char *Dest, size_t size, const char *Source)
 }
 
 template <size_t size>
-inline char* strncat_safe(char(&Dest)[size], const char* Source, size_t Count)
+inline char* strcat_safe(char(&Dest)[size], const char *Source)
 {
-	auto DestLen = strlen(Dest);
-	auto SourceLen = Count;
-
-	auto BytesToCopy = SourceLen;
-	if (DestLen + BytesToCopy + 1 > size)
-	{
-		BytesToCopy = size - 1 - DestLen;
-	}
-
-	memcpy(Dest + DestLen, Source, BytesToCopy);
-
-	Dest[DestLen + BytesToCopy] = 0;
-
-	return Dest + DestLen + BytesToCopy;
+	return strcat_safe(Dest, size, Source);
 }
 
 inline char* strncat_safe(char* Dest, size_t size, const char* Source, size_t Count)
@@ -171,35 +124,193 @@ inline char* strncat_safe(char* Dest, size_t size, const char* Source, size_t Co
 	return Dest + DestLen + BytesToCopy;
 }
 
+template <size_t size>
+inline char* strncat_safe(char(&Dest)[size], const char* Source, size_t Count)
+{
+	return strncat_safe(Dest, size, Source, Count);
+}
+
+inline int vsprintf_safe(char *Dest, size_t size, const char* Format, va_list va)
+{
+	return vsnprintf(Dest, size, Format, va);
+}
+
+template <size_t size>
+inline int vsprintf_safe(char(&Dest)[size], const char* Format, va_list va)
+{
+	return vsprintf_safe(Dest, size, Format, va);
+}
+
 template<size_t size>
 inline int sprintf_safe(char(&Dest)[size], const char *Format, ...)
 {
 	va_list args;
-
 	va_start(args, Format);
-	int ret = vsnprintf(Dest, size, Format, args);
+	int ret = vsprintf_safe(Dest, Format, args);
 	va_end(args);
-
-	Dest[size - 1] = 0;
-
 	return ret;
 }
 
 inline int sprintf_safe(char *Dest, int size, const char *Format, ...)
 {
 	va_list args;
-
 	va_start(args, Format);
-	int ret = vsnprintf(Dest, size, Format, args);
+	int ret = vsprintf_safe(Dest, size, Format, args);
 	va_end(args);
-
 	return ret;
 }
 
-template <size_t size>
-inline int vsprintf_safe(char (&Dest)[size], const char* Format, va_list va)
+template <size_t size1, size_t size2>
+inline wchar_t* strcpy_literal(wchar_t(&Dest)[size1], const wchar_t(&Source)[size2])
 {
-	return vsnprintf(Dest, size, Format, va);
+	static_assert(size2 < size1, "Literal must be smaller than the destination string");
+	memcpy(Dest, Source, size2 * sizeof(wchar_t));
+	return Dest + size2;
+}
+
+inline wchar_t* strcpy_trunc(wchar_t* Dest, size_t size, const wchar_t* Source)
+{
+	auto len = wcslen(Source);
+
+	if (size - 1 < len)
+	{
+		len = size - 1;
+	}
+
+	memcpy(Dest, Source, len * sizeof(wchar_t));
+
+	Dest[len] = 0;
+
+	return Dest + len;
+}
+
+template <size_t size>
+inline wchar_t* strcpy_trunc(wchar_t(&Dest)[size], const wchar_t *Source)
+{
+	return strcpy_trunc(Dest, size, Source);
+}
+
+inline wchar_t* strcpy_safe(wchar_t *Dest, size_t size, const wchar_t *Source)
+{
+	auto len = wcslen(Source);
+
+	if (size - 1 < len && size > 0)
+	{
+		len = size - 1;
+		assert(false);
+	}
+
+	memcpy(Dest, Source, len * sizeof(wchar_t));
+
+	Dest[len] = 0;
+
+	return Dest + len;
+}
+
+template <size_t size>
+inline wchar_t* strcpy_safe(wchar_t(&Dest)[size], const wchar_t *Source)
+{
+	return strcpy_safe(Dest, size, Source);
+}
+
+inline wchar_t* strncpy_safe(wchar_t *Dest, size_t size, const wchar_t *Source, size_t Count)
+{
+	auto len = Count;
+
+	if (size - 1 < len)
+	{
+		len = size - 1;
+	}
+
+	memcpy(Dest, Source, len * sizeof(wchar_t));
+
+	Dest[len] = 0;
+
+	return Dest + len;
+}
+
+template <size_t size>
+inline wchar_t* strncpy_safe(wchar_t(&Dest)[size], const wchar_t *Source, size_t Count)
+{
+	return strncpy_safe(Dest, size, Source, Count);
+}
+
+inline wchar_t* strcat_safe(wchar_t *Dest, size_t size, const wchar_t *Source)
+{
+	auto DestLen = wcslen(Dest);
+	auto SourceLen = wcslen(Source);
+
+	auto BytesToCopy = SourceLen;
+	if (DestLen + BytesToCopy + 1 > size && size > 0)
+	{
+		BytesToCopy = size - 1 - DestLen;
+	}
+
+	memcpy(Dest + DestLen, Source, BytesToCopy * sizeof(wchar_t));
+
+	Dest[DestLen + BytesToCopy] = 0;
+
+	return Dest + DestLen + BytesToCopy;
+}
+
+template <size_t size>
+inline wchar_t* strcat_safe(wchar_t(&Dest)[size], const wchar_t *Source)
+{
+	return strcat_safe(Dest, size, Source);
+}
+
+inline wchar_t* strncat_safe(wchar_t* Dest, size_t size, const wchar_t* Source, size_t Count)
+{
+	auto DestLen = wcslen(Dest);
+	auto SourceLen = Count;
+
+	auto BytesToCopy = SourceLen;
+	if (DestLen + BytesToCopy + 1 > size)
+	{
+		BytesToCopy = size - 1 - DestLen;
+	}
+
+	memcpy(Dest + DestLen, Source, BytesToCopy * sizeof(wchar_t));
+
+	Dest[DestLen + BytesToCopy] = 0;
+
+	return Dest + DestLen + BytesToCopy;
+}
+
+template <size_t size>
+inline wchar_t* strncat_safe(wchar_t(&Dest)[size], const wchar_t* Source, size_t Count)
+{
+	return strncat_safe(Dest, size, Source, Count);
+}
+
+inline int vswprintf_safe(wchar_t *Dest, size_t size, const wchar_t* Format, va_list va)
+{
+	return vswprintf(Dest, size, Format, va);
+}
+
+template <size_t size>
+inline int vswprintf_safe(wchar_t(&Dest)[size], const wchar_t* Format, va_list va)
+{
+	return vswprintf_safe(Dest, size, Format, va);
+}
+
+inline int swprintf_safe(wchar_t *Dest, int size, const wchar_t *Format, ...)
+{
+	va_list args;
+	va_start(args, Format);
+	int ret = vswprintf_safe(Dest, size, Format, args);
+	va_end(args);
+	return ret;
+}
+
+template<size_t size>
+inline int swprintf_safe(wchar_t(&Dest)[size], const wchar_t *Format, ...)
+{
+	va_list args;
+	va_start(args, Format);
+	int ret = vswprintf_safe(Dest, size, Format, args);
+	va_end(args);
+	return ret;
 }
 
 template <size_t size>

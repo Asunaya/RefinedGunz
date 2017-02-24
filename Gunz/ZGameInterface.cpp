@@ -669,10 +669,12 @@ bool ZGameInterface::InitInterfaceListener()
 	SetListenerWidget("DefaultSettingLoad", ZGetLoadDefaultKeySettingListener() );
 	SetListenerWidget("Optimization",ZSetOptimizationListener());
 
-	SetListenerWidget("ShopCaller", ZGetShopCallerButtonListener());
+	SetListenerWidget("LobbyShopCaller", ZGetShopCallerButtonListener());
+	SetListenerWidget("StageShopCaller", ZGetShopCallerButtonListener());
 	SetListenerWidget("ShopClose", ZGetShopCloseButtonListener());
 
-	SetListenerWidget("EquipmentCaller", ZGetEquipmentCallerButtonListener());
+	SetListenerWidget("LobbyEquipmentCaller", ZGetEquipmentCallerButtonListener());
+	SetListenerWidget("StageEquipmentCaller", ZGetEquipmentCallerButtonListener());
 	SetListenerWidget("EquipmentClose", ZGetEquipmentCloseButtonListener());
 
 	SetListenerWidget("CharSelectionCaller", ZGetCharSelectionCallerButtonListener());
@@ -1535,7 +1537,7 @@ bool ZGameInterface::OnCreate(ZLoadingProgress *pLoadingProgress)
 		{
 			char LastErrorString[256];
 			FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM, nullptr, LastError,
-				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), LastErrorString, ArraySize(LastErrorString), nullptr);
+				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), LastErrorString, std::size(LastErrorString), nullptr);
 			strMsg.resize(256);
 			sprintf_safe(&strMsg[0], strMsg.size(), "Network error %d: %s", LastError, LastErrorString);
 		}
@@ -1858,24 +1860,20 @@ void ZGameInterface::OnShutdownState()
 
 bool ZGameInterface::SetState(GunzState nState)
 {
-#ifdef _BIRDTEST
-	if ((nState != GUNZ_LOGIN) && (m_nState==GUNZ_BIRDTEST)) return false;
-#endif
-
-	if ( m_nState == nState)
+	if (m_nState == nState)
 		return true;
 
-	if ( nState == GUNZ_PREVIOUS)
+	if (nState == GUNZ_PREVIOUS)
 		nState = m_nPreviousState;
 
-	if ( nState == GUNZ_GAME)
+	if (nState == GUNZ_GAME)
 	{
-		if ( ZApplication::GetStageInterface()->IsShowStartMovieOfQuest())
+		if (ZApplication::GetStageInterface()->IsShowStartMovieOfQuest())
 		{
 			ZApplication::GetStageInterface()->ChangeStageEnableReady( true);
 			MWidget* pWidget = ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "StageReady");
-			if ( pWidget)
-				pWidget->Enable( false);
+			if (pWidget)
+				pWidget->Enable(false);
 			ZApplication::GetStageInterface()->StartMovieOfQuest();
 			return true;
 		}
@@ -1883,30 +1881,27 @@ bool ZGameInterface::SetState(GunzState nState)
 
 	m_nPreviousState = m_nState;
 
-	if(m_nState==GUNZ_GAME) OnGameDestroy();
-	else if(m_nState==GUNZ_LOGIN) OnLoginDestroy();
-	else if(m_nState==GUNZ_LOBBY) OnLobbyDestroy();
-	else if(m_nState==GUNZ_STAGE) OnStageDestroy();
-	else if(m_nState==GUNZ_GREETER) OnGreeterDestroy();
-	else if(m_nState==GUNZ_CHARSELECTION)
+	if (m_nState == GUNZ_GAME) { OnGameDestroy(); }
+	else if (m_nState == GUNZ_LOGIN) { if (!GetIDLResource()->FindWidget("Login_BackgrdImg")) { OnLoginDestroy(); } }
+	else if (m_nState == GUNZ_LOBBY) { OnLobbyDestroy(); }
+	else if (m_nState == GUNZ_STAGE) { OnStageDestroy(); }
+	else if (m_nState == GUNZ_GREETER) { OnGreeterDestroy(); }
+	else if (m_nState == GUNZ_CHARSELECTION)
 	{
 		OnCharSelectionDestroy();
 
 		if ( nState == GUNZ_LOBBY)
 			ZPostRequestGetCharQuestItemInfo( ZGetGameClient()->GetPlayerUID());
 	}
-	else if(m_nState==GUNZ_CHARCREATION) OnCharCreationDestroy();
-#ifdef _BIRDTEST
-	else if(m_nState==GUNZ_BIRDTEST) OnBirdTestDestroy();
-#endif
+	else if (m_nState == GUNZ_CHARCREATION) { OnCharCreationDestroy(); }
 
 	bool bStateChanged = true;
-	if(nState==GUNZ_GAME) bStateChanged = OnGameCreate();
-	else if(nState==GUNZ_LOGIN) OnLoginCreate();
-	else if(nState==GUNZ_LOBBY)	OnLobbyCreate();
-	else if(nState==GUNZ_STAGE) OnStageCreate();
-	else if(nState==GUNZ_GREETER) OnGreeterCreate();
-	else if(nState==GUNZ_CHARSELECTION)
+	if (nState == GUNZ_GAME) { bStateChanged = OnGameCreate(); }
+	else if (nState == GUNZ_LOGIN) { OnLoginCreate(); }
+	else if (nState == GUNZ_LOBBY) { OnLobbyCreate(); }
+	else if (nState == GUNZ_STAGE) { OnStageCreate(); }
+	else if (nState == GUNZ_GREETER) { OnGreeterCreate(); }
+	else if (nState == GUNZ_CHARSELECTION)
 	{
 		if ( m_nPreviousState == GUNZ_LOGIN)
 		{
@@ -1923,14 +1918,10 @@ bool ZGameInterface::SetState(GunzState nState)
 		else
 			OnCharSelectionCreate();
 	}
-	else if(nState==GUNZ_CHARCREATION) OnCharCreationCreate();
-	else if(nState==GUNZ_SHUTDOWN) OnShutdownState();
-#ifdef _BIRDTEST
-	else if(nState==GUNZ_BIRDTEST) OnBirdTestCreate();
-#endif
+	else if (nState == GUNZ_CHARCREATION) { OnCharCreationCreate(); }
+	else if (nState == GUNZ_SHUTDOWN) { OnShutdownState(); }
 
-
-	if(bStateChanged==false){
+	if (bStateChanged == false) {
 		m_pMsgBox->SetText("Error: Can't Create a Game!");
 		m_pMsgBox->Show(true, true);
 		SetState(GUNZ_PREVIOUS);
@@ -4017,186 +4008,231 @@ void ZGameInterface::ClearEquipPartsToolTipAll( const char* szName)
 		SetWidgetToolTipText( GetItemSlotName( szName, i),  "");
 }
 
-void ZGameInterface::ShowEquipmentDialog(bool bShow)
+static bool SetLocationLabel(bool Shop, ZIDLResource* pResource)
 {
-	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
+	char buf[256];
+	sprintf_safe(buf, "%s_Message", Shop ? "Shop" : "Equip");
 
-	if (bShow)
+	auto* pLabel = (MLabel*)pResource->FindWidget(buf);
+	if (!pLabel)
+		return false;
+
+	bool Stage = ZGetGameInterface()->GetState() == GUNZ_STAGE;
+	auto Location1MsgID = Stage ? MSG_WORD_STAGE : MSG_WORD_LOBBY;
+	auto Location2MsgID = Shop  ? MSG_WORD_SHOP  : MSG_WORD_EQUIPMENT;
+
+	// Server name -> (Lobby|Stage) -> (Shop|Equipment)
+	sprintf_safe(buf, "%s > %s > %s",
+		ZGetGameClient()->GetServerName(),
+		ZMsg(Location1MsgID), ZMsg(Location2MsgID));
+
+	pLabel->SetText(buf);
+
+	return true;
+}
+
+static bool SetStripAnimations(bool Shop, ZIDLResource* pResource)
+{
+	bool ret = true;
+
+	auto f = [&](int AnimType, const char* Name)
 	{
-		ShowWidget( "Lobby", false);
-		ShowWidget( "Stage", false);
-		ShowWidget( "Shop",  false);
-
-		MButton* pButton = (MButton*)pResource->FindWidget("Equipment_to_Shop");
-		MLabel* pLabel = (MLabel*)pResource->FindWidget("Equip_Message");
-		if ( pButton && pLabel)
+		char buf[256];
+		sprintf_safe(buf, "%s_%s", Shop ? "Shop" : "Equip", Name);
+		auto pPicture = (MPicture*)pResource->FindWidget(buf);
+		if (!pPicture)
 		{
-			char buf[ 256];
-			if ( ZApplication::GetGameInterface()->GetState() == GUNZ_STAGE)
-			{
-				pButton->Show(false);
-				sprintf_safe(buf, "%s > %s > %s", ZGetGameClient()->GetServerName(), ZMsg(MSG_WORD_STAGE),
-					ZMsg(MSG_WORD_EQUIPMENT));
-				pLabel->SetText(buf);
-			}
-			else
-			{
-				pButton->Show(true);
-				sprintf_safe(buf, "%s > %s > %s", ZGetGameClient()->GetServerName(), ZMsg(MSG_WORD_LOBBY),
-					ZMsg(MSG_WORD_EQUIPMENT));
-				pLabel->SetText(buf);
-			}
+			ret = false;
+			return;
 		}
 
-		MWidget* pWidget = pResource->FindWidget("Equipment");
-		if(pWidget!=NULL) pWidget->Show(true, true);
+		pPicture->SetAnimation(AnimType, 1000.0f);
+	};
 
-		BEGIN_WIDGETLIST( "EquipmentInformation", pResource, ZCharacterView*, pCharacterView);
-		ZMyInfo* pmi = ZGetMyInfo();
-		ZMyItemList* pil = ZGetMyInfo()->GetItemList();
+	f(0, "StripBottom");
+	f(1, "StripTop");
 
-		u32 nEquipedItemID[MMCIP_END];
+	return ret;
+}
 
-		for (int i = 0; i < MMCIP_END; i++)
+static bool SetItemIcon(bool Shop, ZIDLResource* pResource)
+{
+	char buf[64];
+	sprintf_safe(buf, "%s_ItemIcon", Shop ? "Shop" : "Equip");
+
+	auto pPicture = (MPicture*)pResource->FindWidget(buf);
+	if (!pPicture)
+		return false;
+
+	pPicture->SetBitmap(NULL);
+
+	return true;
+}
+
+static bool DisableWidgets(bool Shop, ZIDLResource* pResource)
+{
+	bool ret = true;
+
+	std::array<const char*, 3> WidgetsToDisable;
+	if (Shop)
+		WidgetsToDisable = { "BuyConfirmCaller", "BuyCashConfirmCaller", "SellConfirmCaller" };
+	else
+		WidgetsToDisable = { "Equip", "SendAccountItemBtn", "BringAccountItemBtn" };
+
+	for (auto&& WidgetName : WidgetsToDisable)
+	{
+		auto Widget = pResource->FindWidget(WidgetName);
+		if (!Widget)
 		{
-			nEquipedItemID[i] = pil->GetEquipedItemID(MMatchCharItemParts(i));
-		}
-		pCharacterView->InitCharParts(pmi->GetSex(), pmi->GetHair(), pmi->GetFace(), nEquipedItemID);
-		END_WIDGETLIST();
-
-		SelectEquipmentTab(0);
-
-		ZPostRequestCharacterItemList(ZGetGameClient()->GetPlayerUID());
-		ZPostStageState( ZGetGameClient()->GetPlayerUID(), ZGetGameClient()->GetStageUID(), MOSS_EQUIPMENT);
-
-		ChangeEquipPartsToolTipAll();
-
-		// Animation sprite
-		MPicture* pPicture = 0;
-		pPicture = (MPicture*)pResource->FindWidget("Equip_StripBottom");
- 		if( pPicture != NULL)
-			pPicture->SetAnimation( 0, 1000.0f);
-		pPicture = (MPicture*)pResource->FindWidget("Equip_StripTop");
-		if( pPicture != NULL)
-			pPicture->SetAnimation( 1, 1000.0f);
-
-		pWidget = pResource->FindWidget("Equip");
-		if ( pWidget != NULL)
-			pWidget->Enable( false);
-		pWidget = pResource->FindWidget("SendAccountItemBtn");
-		if ( pWidget != NULL)
-			pWidget->Enable( false);
-		pWidget = pResource->FindWidget("BringAccountItemBtn");
-		if ( pWidget != NULL)
-			pWidget->Enable( false);
-
-		MTextArea* pTextArea = (MTextArea*)pResource->FindWidget("Equip_ItemDescription1");
-		if(pTextArea)	pTextArea->SetText("");
-
-		pTextArea = (MTextArea*)pResource->FindWidget("Equip_ItemDescription2");
-		if(pTextArea)	pTextArea->SetText("");
-
-		pTextArea = (MTextArea*)pResource->FindWidget("Equip_ItemDescription3");
-		if ( pTextArea)
-		{
-			pTextArea->SetTextColor( MCOLOR( 180, 180, 180));
-			pTextArea->SetText( ZMsg( MSG_SHOPMSG));
+			ret = false;
+			continue;
 		}
 
-		pPicture = (MPicture*)pResource->FindWidget("Equip_ItemIcon");
-		pPicture->SetBitmap( NULL);
+		Widget->Enable(false);
+	}
+
+	return ret;
+}
+
+static bool InitializeItemDescriptions(bool Shop, ZIDLResource* pResource)
+{
+	bool ret = true;
+
+	for (int i = 0; i < 3; ++i)
+	{
+		char buf[256];
+		sprintf_safe(buf, "%s_ItemDescription%d", Shop ? "Shop" : "Equip", i + 1);
+		auto* pTextArea = (MTextArea*)pResource->FindWidget(buf);
+		if (!pTextArea)
+		{
+			ret = false;
+			continue;
+		}
+
+		// Special case for index 3 in equipment.
+		if (!Shop && i == 3)
+		{
+			pTextArea->SetTextColor({ 180, 180, 180 });
+			pTextArea->SetText(ZMsg(MSG_SHOPMSG));
+		}
+		else
+		{
+			pTextArea->SetText("");
+		}
+	}
+
+	return ret;
+}
+
+static void PostStageState(bool Shop)
+{
+	if (ZGetGameInterface()->GetState() == GUNZ_STAGE)
+		ZPostStageState(ZGetGameClient()->GetPlayerUID(), ZGetGameClient()->GetStageUID(),
+			Shop ? MOSS_SHOP : MOSS_EQUIPMENT);
+}
+
+static void InitializeEquipmentInformation(ZIDLResource* pResource)
+{
+	BEGIN_WIDGETLIST("EquipmentInformation", pResource, ZCharacterView*, pCharacterView);
+
+	ZMyInfo* pmi = ZGetMyInfo();
+	ZMyItemList* pil = ZGetMyInfo()->GetItemList();
+
+	u32 nEquipedItemID[MMCIP_END];
+
+	for (int i = 0; i < MMCIP_END; i++)
+	{
+		nEquipedItemID[i] = pil->GetEquipedItemID(MMatchCharItemParts(i));
+	}
+
+	pCharacterView->InitCharParts(pmi->GetSex(), pmi->GetHair(), pmi->GetFace(), nEquipedItemID);
+
+	END_WIDGETLIST();
+}
+
+void ZGameInterface::ShowShopOrEquipmentDialog(bool Shop)
+{
+	auto* pResource = GetIDLResource();
+
+	// Hide lobby and stage in case we're moving from one of those.
+	ShowWidget("Lobby", false);
+	ShowWidget("Stage", false);
+
+	// Hide the other UI in case we're moving between shop and equipment.
+	if (Shop)
+		ShowWidget("Equipment", false);
+	else
+		ShowWidget("Shop", false);
+
+	// Show this UI.
+	auto* Widget = pResource->FindWidget(Shop ? "Shop" : "Equipment");
+	if (Widget)
+		Widget->Show(true, true);
+
+	if (Shop)
+	{
+		ZGetShop()->Create();
+		ZGetShop()->Serialize();
+		SelectShopTab(0);
 	}
 	else
 	{
-		ZPostStageState( ZGetGameClient()->GetPlayerUID(), ZGetGameClient()->GetStageUID(), MOSS_NONREADY);
-
-		MWidget* pWidget = pResource->FindWidget("Equipment");
-		if ( pWidget!=NULL)
-			pWidget->Show(false);
-
-		if ( ZApplication::GetGameInterface()->GetState() == GUNZ_STAGE)
-			ShowWidget( "Stage", true);
-		else
-			ShowWidget( "Lobby", true);
+		InitializeEquipmentInformation(pResource);
+		SelectEquipmentTab(0);
+		ChangeEquipPartsToolTipAll();
 	}
+
+#define V(expr) if (!(expr)) { DMLog("%s\n", #expr "failed"); }
+
+	V(SetLocationLabel(Shop, pResource));
+	V(SetStripAnimations(Shop, pResource));
+	V(InitializeItemDescriptions(Shop, pResource));
+	V(SetItemIcon(Shop, pResource));
+	V(DisableWidgets(Shop, pResource));
+
+#undef V
+
+	PostStageState(Shop);
+	ZPostRequestCharacterItemList(ZGetGameClient()->GetPlayerUID());
+}
+
+static void HideShopOrEquipmentDialog(bool Shop)
+{
+	bool InStage = ZGetGameInterface()->GetState() == GUNZ_STAGE;
+
+	if (InStage)
+		ZPostStageState(ZGetGameClient()->GetPlayerUID(), ZGetGameClient()->GetStageUID(), MOSS_NONREADY);
+
+	// Hide the shop or equipment widget.
+	MWidget* pWidget = GetZIDLResource()->FindWidget(Shop ? "Shop" : "Equipment");
+	if (pWidget)
+		pWidget->Show(false);
+
+	// Return to either the stage or the lobby UI, depending on where we were.
+	ZGetGameInterface()->ShowWidget(InStage ? "Stage" : "Lobby", true);
+}
+
+void ZGameInterface::ShowEquipmentDialog(bool bShow)
+{
+	if (bShow)
+		ShowShopOrEquipmentDialog(false);
+	else
+		HideShopOrEquipmentDialog(false);
 }
 
 void ZGameInterface::ShowShopDialog(bool bShow)
 {
 	if (bShow)
-	{
-		ShowWidget( "Lobby", false);
-		ShowWidget( "Stage", false);
-		ShowWidget( "Equipment", false);
-
-		ZGetShop()->Create();
-		ZGetShop()->Serialize();
-
-		ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
-
-		MPicture* pPicture = 0;
-		pPicture = (MPicture*)pResource->FindWidget("Shop_StripBottom");
- 		if( pPicture != NULL)
-			pPicture->SetAnimation( 0, 1000.0f);
-		pPicture = (MPicture*)pResource->FindWidget("Shop_StripTop");
-		if( pPicture != NULL)
-			pPicture->SetAnimation( 1, 1000.0f);
-
-		ZPostStageState(ZGetGameClient()->GetPlayerUID(), ZGetGameClient()->GetStageUID(), MOSS_SHOP);
-
-		MTextArea* pTextArea = (MTextArea*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget("Shop_ItemDescription1");
-		if(pTextArea)	pTextArea->SetText("");
-
-		pTextArea = (MTextArea*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget("Shop_ItemDescription2");
-		if(pTextArea)	pTextArea->SetText("");
-
-		pTextArea = (MTextArea*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget("Shop_ItemDescription3");
-		if(pTextArea)	pTextArea->SetText("");
-
-		pPicture = (MPicture*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget("Shop_ItemIcon");
-		pPicture->SetBitmap( NULL);
-
-		char buf[256];
-		MLabel* pLabel = (MLabel*)pResource->FindWidget("Shop_Message");
-		sprintf_safe( buf, "%s > %s > %s", ZGetGameClient()->GetServerName(), ZMsg( MSG_WORD_LOBBY), ZMsg( MSG_WORD_SHOP));
-		if (pLabel) 
-			pLabel->SetText(buf);
-
-
-		MWidget* pWidget = pResource->FindWidget("Shop");
-		if(pWidget!=NULL)
-			pWidget->Show( true, true);
-		pWidget = pResource->FindWidget("BuyConfirmCaller");
-		if (pWidget != NULL)
-			pWidget->Enable( false);
-		pWidget = pResource->FindWidget("BuyCashConfirmCaller");
-		if (pWidget != NULL)
-			pWidget->Enable( false);
-		pWidget = pResource->FindWidget("SellConfirmCaller");
-		if (pWidget != NULL)
-			pWidget->Enable( false);
-
-		SelectShopTab(0);
-
-		ZPostRequestCharacterItemList(ZGetGameClient()->GetPlayerUID());
-	}
+		ShowShopOrEquipmentDialog(true);
 	else
-	{
-		ZPostStageState(ZGetGameClient()->GetPlayerUID(), ZGetGameClient()->GetStageUID(), MOSS_NONREADY);
-
-		ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
-		MWidget* pWidget = pResource->FindWidget("Shop");
-		if(pWidget!=NULL) pWidget->Show(false);
-
-		ShowWidget( "Lobby", true);
-	}
+		HideShopOrEquipmentDialog(true);
 }
 
 void ZGameInterface::SelectEquipmentFrameList( const char* szName, bool bOpen)
 {
 	char szTemp[256];
 
-	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
+	ZIDLResource* pResource = GetIDLResource();
 
 	// Frame open/close background image
 	MPicture* pPicture;
@@ -4563,8 +4599,8 @@ void ZGameInterface::EnableLobbyInterface(bool bEnable)
 	EnableWidget("Lobby_Charviewer_info", bEnable);
 	EnableWidget("StageJoin", bEnable);
 	EnableWidget("StageCreateFrameCaller", bEnable);
-	EnableWidget("ShopCaller", bEnable);
-	EnableWidget("EquipmentCaller", bEnable);
+	EnableWidget("LobbyShopCaller", bEnable);
+	EnableWidget("LobbyEquipmentCaller", bEnable);
 	EnableWidget("ReplayCaller", bEnable);
 	EnableWidget("CharSelectionCaller", bEnable);
 	EnableWidget("Logout", bEnable);
@@ -4595,8 +4631,8 @@ void ZGameInterface::EnableStageInterface(bool bEnable)
 	EnableWidget("StageTeamBlue2", bEnable);
 	EnableWidget("StageTeamRed",  bEnable);
 	EnableWidget("StageTeamRed2", bEnable);
-	EnableWidget("ShopCaller", bEnable);
-	EnableWidget("EquipmentCaller", bEnable);
+	EnableWidget("StageShopCaller", bEnable);
+	EnableWidget("StageEquipmentCaller", bEnable);
 	EnableWidget("StageSettingCaller", bEnable);
 	EnableWidget("StageObserverBtn", bEnable);
 	EnableWidget("Lobby_StageExit", bEnable);
@@ -4864,8 +4900,8 @@ void ZGameInterface::OnArrangedTeamGameUI(bool bFinding)
 #define SAFE_ENABLE(x) { pWidget= m_IDLResource.FindWidget( x ); if(pWidget) pWidget->Enable(!bFinding); }
 
 	SAFE_ENABLE("LobbyChannelPlayerList");
-	SAFE_ENABLE("ShopCaller");
-	SAFE_ENABLE("EquipmentCaller");
+	SAFE_ENABLE("LobbyShopCaller");
+	SAFE_ENABLE("LobbyEquipmentCaller");
 	SAFE_ENABLE("ChannelListFrameCaller");
 	SAFE_ENABLE("LobbyOptionFrame");
 	SAFE_ENABLE("Logout");
@@ -5515,6 +5551,8 @@ void ZGameInterface::ViewReplay()
 	}
 
 	EnteredReplayFromLogin = GetState() == GUNZ_LOGIN;
+	if (EnteredReplayFromLogin)
+		OnLoginDestroy();
 
 	m_bOnEndOfReplay = true;
 	m_nLevelPercentCache = ZGetMyInfo()->GetLevelPercent();

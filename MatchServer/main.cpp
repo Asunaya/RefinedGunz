@@ -43,7 +43,7 @@ try
 	InitLog(MLOGSTYLE_DEBUGSTRING | MLOGSTYLE_FILE, LogFileName);
 
 	char cwd[256];
-	GetCurrentDirectory(ArraySize(cwd), cwd);
+	GetCurrentDirectory(std::size(cwd), cwd);
 	MLog("cwd: %s\n", cwd);
 
 	MBMatchServer MatchServer;

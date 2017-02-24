@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "Hitboxes.h"
 #include "RGMain.h"
-#include "Rules.h"
 #include "ZConfiguration.h"
 
 static const int nSlashVertices = 17;

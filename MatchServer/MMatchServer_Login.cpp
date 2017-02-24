@@ -177,7 +177,7 @@ void MMatchServer::CreateAccount(const MUID &uidComm, const char *Username,
 		return;
 	}
 
-	auto ret = GetDBMgr()->CreateAccountNew(Username, PasswordData, ArraySize(PasswordData), Email);
+	auto ret = GetDBMgr()->CreateAccountNew(Username, PasswordData, std::size(PasswordData), Email);
 	switch (ret)
 	{
 	case AccountCreationResult::Success:
@@ -263,7 +263,7 @@ MCommand* MMatchServer::CreateCmdMatchResponseLoginOK(const MUID& uidComm,
 	
 	char blob[1]{};
 
-	pCmd->AddParameter(new MCommandParameterBlob(blob, ArraySize(blob)));
+	pCmd->AddParameter(new MCommandParameterBlob(blob, std::size(blob)));
 
 	return pCmd;
 }

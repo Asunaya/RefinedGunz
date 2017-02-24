@@ -11,6 +11,7 @@
 #include "ZSkill.h"
 #include "ZWorldManager.h"
 #include <string>
+#include <memory>
 
 class ZGame;
 class ZGameClient;
@@ -19,7 +20,7 @@ class ZLoadingProgress;
 class ZProfiler;
 class ZOptionInterface;
 
-enum GunzState{
+enum GunzState {
 	GUNZ_NA = 0,
 	GUNZ_GAME = 1,
 	GUNZ_LOGIN = 2,
@@ -78,7 +79,7 @@ protected:
 	ZWorldManager			m_WorldManager;
 	MZFileCheckList			m_fileCheckList;
 #ifdef _ZPROFILER
-	ZProfiler				*m_pProfiler;
+	std::unique_ptr<ZProfiler> m_pProfiler;
 #endif
 
 public:
@@ -124,12 +125,12 @@ public:
 	static ZSkillManager*		GetSkillManager()		{ return &m_SkillManager; }
 	ZWorldManager*				GetWorldManager()		{ return &m_WorldManager; }
 
-	__forceinline ZLAUNCH_MODE GetLaunchMode()			{ return m_nLaunchMode; }
-	__forceinline void SetLaunchMode(ZLAUNCH_MODE nMode){ m_nLaunchMode = nMode; }
-	__forceinline bool IsLaunchDevelop()				{ return m_bLaunchDevelop; }
-	__forceinline bool IsLaunchTest()					{ return m_bLaunchTest; }
+	ZLAUNCH_MODE GetLaunchMode() const		{ return m_nLaunchMode; }
+	void SetLaunchMode(ZLAUNCH_MODE nMode)  { m_nLaunchMode = nMode; }
+	bool IsLaunchDevelop() const			{ return m_bLaunchDevelop; }
+	bool IsLaunchTest() const				{ return m_bLaunchTest; }
 
-	__forceinline unsigned int GetFileListCRC()			{ return m_fileCheckList.GetCRC32(); }
+	unsigned int GetFileListCRC() const { return m_fileCheckList.GetCRC32(); }
 
 	bool InitLocale();
 	void PreCheckArguments();
@@ -137,4 +138,6 @@ public:
 	auto GetTime() const { return Time; }
 	auto GetTimescale() const { return Timescale; }
 	void SetTimescale(float f) { Timescale = f; }
+
+	bool IsDeveloperMode() const { return GetLaunchMode() == ZApplication::ZLAUNCH_MODE_STANDALONE_GAME; }
 };

@@ -230,8 +230,8 @@ void ZGameClient::OnReplyAgreement(const MUID& uidProposer,
 				}
 				int nCount = m_AgreementBuilder.GetReplierNames(
 					&ppMember[1],
-					ArraySize(*szMember),
-					ArraySize(ppMember) - 1);
+					std::size(*szMember),
+					std::size(ppMember) - 1);
 
 				strcpy_safe(szMember[0], ZGetMyInfo()->GetCharName());
 				nCount++;
@@ -249,8 +249,8 @@ void ZGameClient::OnReplyAgreement(const MUID& uidProposer,
 				}
 				int nCount = m_AgreementBuilder.GetReplierNames(
 					&ppMember[1],
-					ArraySize(*szMember),
-					ArraySize(ppMember) - 1);
+					std::size(*szMember),
+					std::size(ppMember) - 1);
 
 				// 자신도 넣는다.
 				strcpy_safe(szMember[0], ZGetMyInfo()->GetCharName());

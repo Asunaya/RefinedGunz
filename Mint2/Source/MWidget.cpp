@@ -419,7 +419,7 @@ bool MWidget::EventAccelerator(MEvent* pEvent)
 
 	if(pEvent->nMessage==MWM_KEYDOWN)
 		if(MWidget::m_pFocusedWidget!=NULL)
-			if(strcmp(MWidget::m_pFocusedWidget->GetClassName(), MINT_EDIT)==0) return false;
+			if(dynamic_cast<MEdit*>(MWidget::m_pFocusedWidget) != nullptr) return false;
 
 	if(GetLatestExclusive()!=NULL){
 		if(GetLatestExclusive()->EventAccelerator(pEvent)==true) return true;
@@ -760,14 +760,10 @@ void MWidget::SetSize(MSIZE& s)
 	SetSize(s.w, s.h);
 }
 
-
 void MWidget::SetPosition(int x, int y)
 {
-	MPOINT p;
-
 	m_Rect.x = x;
 	m_Rect.y = y;
-
 }
 
 void MWidget::SetPosition(const MPOINT& p)

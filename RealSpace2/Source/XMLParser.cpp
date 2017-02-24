@@ -109,7 +109,7 @@ static bool GetFloat3XYZ(float(&dest)[3], const char* node_name, rapidxml::xml_n
 		return toFloat(value);
 	};
 	const char* vector_elements[] = { "x", "y", "z" };
-	for (size_t i{}; i < ArraySize(dest); ++i)
+	for (size_t i{}; i < std::size(dest); ++i)
 		dest[i] = Get(vector_elements[i]);
 	return true;
 }
@@ -138,7 +138,7 @@ static bool GetUShort3(float (&dest)[3], const char* node_name, rapidxml::xml_no
 	if (!value) return false;
 	int vals[3]{};
 	if (sscanf_s(value, "%i %i %i", vals, vals + 1, vals + 2) != 3) return false;
-	for (size_t i{}; i < ArraySize(dest); ++i)
+	for (size_t i{}; i < std::size(dest); ++i)
 		dest[i] = vals[i];
 	return true;
 }

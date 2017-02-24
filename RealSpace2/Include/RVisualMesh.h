@@ -1,6 +1,8 @@
 #pragma once
 
 #include "RVisualMeshUtil.h"
+#include "MeshManager.h"
+#include <array>
 
 class RCharCloth;
 
@@ -214,7 +216,6 @@ public:
 
 	// weapon parts
 
-	void SetParts(RMeshPartsType parts, RMeshNode* pMN);
 	void SetParts(RMeshPartsType parts, const char* name);
 
 	void ClearParts();
@@ -419,7 +420,7 @@ public:
 	rvector			m_vUp;
 	rmatrix			m_WorldMat;
 	rmatrix			m_ScaleMat;
-	RMeshNode**		m_pTMesh;
+	std::array<RMeshNodePtr, eq_parts_end> m_pTMesh;
 	RMesh*			m_pMesh;
 	RMesh*			m_pLowPolyMesh;
 

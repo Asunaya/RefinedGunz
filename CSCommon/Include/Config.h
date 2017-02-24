@@ -61,3 +61,8 @@
 // Prevents /<command> where <command> isn't a recognized command
 // from showing up in chat.
 #define HIDE_UNRECOGNIZED_COMMAND_INPUTS
+
+// Controls whether the Gunz window in the Windows taskbar
+// flashes on respawn and whisper, respectively
+#define FLASH_WINDOW_ON_RESPAWN
+#define FLASH_WINDOW_ON_WHISPER

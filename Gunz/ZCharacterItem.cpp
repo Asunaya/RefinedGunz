@@ -152,7 +152,7 @@ bool ZCharacterItem::IsWeaponItem(MMatchCharItemParts parts)
 
 void ZCharacterItem::Save(BulletInfo(&Bullets)[MMCIP_END])
 {
-	for (size_t i = 0; i < ArraySize(Bullets); i++)
+	for (size_t i = 0; i < std::size(Bullets); i++)
 	{
 		ZItem *Item = GetItem(MMatchCharItemParts(i));
 		Bullets[i].Clip = Item->GetBullet();
@@ -162,7 +162,7 @@ void ZCharacterItem::Save(BulletInfo(&Bullets)[MMCIP_END])
 
 void ZCharacterItem::Load(const BulletInfo(&Bullets)[MMCIP_END])
 {
-	for (size_t i = 0; i < ArraySize(Bullets); i++)
+	for (size_t i = 0; i < std::size(Bullets); i++)
 	{
 		ZItem *Item = GetItem(MMatchCharItemParts(i));
 		Item->SetBullet(Bullets[i].Clip);
