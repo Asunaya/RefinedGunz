@@ -15,6 +15,128 @@ enum
 	RESIZE_Y2 = 1 << 3,
 };
 
+// Note that while FT_WRAP and FT_LINEBREAK are both linebreaks, 
+// the former is placed by the line-wrapping mechanism and
+// the latter is explicitly placed by the message creator.
+enum FormatSpecifierType {
+	FT_WRAP,
+	FT_LINEBREAK,
+	FT_COLOR,
+	FT_DEFAULT,
+	FT_BOLD,
+	FT_ITALIC,
+	FT_BOLDITALIC,
+	FT_UNDERLINE,
+	FT_STRIKETHROUGH,
+};
+
+struct FormatSpecifier {
+	int nStartPos;
+	FormatSpecifierType ft;
+	D3DCOLOR Color;
+
+	FormatSpecifier(int nStart, D3DCOLOR c) : nStartPos(nStart), ft(FT_COLOR), Color(c) { }
+	FormatSpecifier(int nStart, FormatSpecifierType type) : nStartPos(nStart), ft(type) { }
+};
+
+struct ChatLine {
+	u64 Time{};
+	std::wstring Msg;
+	D3DCOLOR DefaultColor;
+	std::vector<FormatSpecifier> vFormatSpecifiers;
+	int Lines{};
+
+	void SubstituteFormatSpecifiers();
+
+	int GetLines() const {
+		return Lines;
+	}
+
+	void ClearWrappingLineBreaks() {
+		erase_remove_if(vFormatSpecifiers, [&](auto&& x) { return x.ft == FT_WRAP; });
+	}
+
+	int GetNumWrappingLineBreaks() const {
+		std::count_if(vFormatSpecifiers.begin(), vFormatSpecifiers.end(),
+			[&](auto&& x) { return x.ft == FT_WRAP; });
+	}
+
+	const FormatSpecifier *GetLineBreak(int n) const {
+		int i = 0;
+		for (auto it = vFormatSpecifiers.begin(); it != vFormatSpecifiers.end(); it++) {
+			if (it->ft == FT_WRAP || it->ft == FT_LINEBREAK) {
+				if (i == n)
+					return &*it;
+
+				i++;
+			}
+		}
+
+		return 0;
+	}
+
+	// Returns an iterator to the format specifier that was inserted.
+	auto AddWrappingLineBreak(int n) {
+		assert(n >= 0);
+		if (n < 0)
+			n = 0;
+
+		if (vFormatSpecifiers.begin() == vFormatSpecifiers.end()) {
+			vFormatSpecifiers.emplace_back(n, FT_WRAP);
+			// Return the last iterator, since we appended to the end.
+			return std::prev(vFormatSpecifiers.end());
+		}
+
+		for (auto it = vFormatSpecifiers.rbegin(); it != vFormatSpecifiers.rend(); it++) {
+			if (it->nStartPos < n) {
+				// it.base() is AFTER it (in terms of normal order, not reversed),
+				// and insert inserts BEFORE the passed iterator, so this inserts
+				// after the current iterator, which is correct since the
+				// desired index n is after the current format specifier.
+				return vFormatSpecifiers.insert(it.base(), FormatSpecifier(n, FT_WRAP));
+			}
+		}
+
+		// The loop was unable to find a format specifier that precedes
+		// the position, so we must add it at the start.
+		return vFormatSpecifiers.insert(vFormatSpecifiers.begin(), FormatSpecifier(n, FT_WRAP));
+	}
+};
+
+namespace EmphasisType
+{
+enum
+{
+	Default = 0,
+	Italic = 1 << 0,
+	Bold = 1 << 1,
+	Underline = 1 << 2,
+	Strikethrough = 1 << 3,
+};
+}
+
+// A substring of a line to be displayed.
+// The substring may be the entire line, but cannot span more than one line.
+struct LineSegmentInfo
+{
+	// Index into Chat::vMsgs.
+	int ChatLineIndex;
+	// Offset into ChatLine::Msg at which the substring to be displayed begins.
+	u16 Offset;
+	// Length of the substring, in characters.
+	u16 LengthInCharacters;
+	// Pixel offset on the X axis at which this segment starts.
+	u16 PixelOffsetX;
+	struct {
+		// Is this the start of the line?
+		u16 IsStartOfLine : 1;
+		// Emphasis, i.e. italic, bold, etc.
+		// This is a bitmask; it can hold a combination of multiple emphases.
+		u16 Emphasis : 15;
+	};
+	u32 TextColor;
+};
+
 // Stuff crashes if this is increased
 static constexpr int MAX_INPUT_LENGTH = 230;
 
@@ -199,6 +321,8 @@ Chat::Chat(const std::string &strFont, int nFontSize)
 	nFontHeight = pFont->GetHeight();
 }
 
+Chat::~Chat() = default;
+
 void Chat::EnableInput(bool bEnable, bool bToTeam){
 	bInputEnabled = bEnable;
 
@@ -228,50 +352,36 @@ void Chat::OutputChatMsg(const char *szMsg){
 	OutputChatMsg(szMsg, TextColor);
 }
 
-void Chat::OutputChatMsg(const char *szMsg, DWORD dwColor){
-	unsigned long long t = QPC();
-
-	wchar_t WideMsg[1024];
-	MultiByteToWideChar(CP_UTF8, 0,
+static std::wstring UTF8toUTF16(const char* szMsg)
+{
+	wchar_t WideBuffer[1024];
+	auto len = MultiByteToWideChar(CP_UTF8, 0,
 		szMsg, -1,
-		WideMsg, std::size(WideMsg));
-	vMsgs.emplace_back(t, WideMsg, dwColor);
+		WideBuffer, std::size(WideBuffer));
+	if (len == 0)
+	{
+		assert(false);
+		return L"";
+	}
+	return std::wstring{ WideBuffer, static_cast<size_t>(len) };
+}
 
-	CalcLineBreaks(vMsgs.back());
+void Chat::OutputChatMsg(const char *szMsg, u32 dwColor)
+{
+	vMsgs.emplace_back();
+	auto&& Msg = vMsgs.back();
+	Msg.Time = QPC();
+	Msg.Msg = UTF8toUTF16(szMsg);
+	Msg.DefaultColor = dwColor;
+
+	Msg.SubstituteFormatSpecifiers();
+	DivideIntoLines(vMsgs.size() - 1, std::back_inserter(LineSegments));
 }
 
 int Chat::GetLines(MFontR2 *pFont, const wchar_t *szMsg, int nWidth, int nSize)
 {
 	int nMsgWidth = pFont->GetWidth(szMsg, nSize);
 	return nMsgWidth / nWidth + (nMsgWidth % nWidth != 0);
-}
-
-void Chat::CalcLineBreaks(ChatLine &cl){
-	cl.ClearLineBreaks();
-
-	RECT r = { Border.x1 + 5, 0, Border.x2 - 5, RGetScreenHeight() };
-
-	int nTempLines = GetLines(pFont.get(), cl.Msg.c_str(), r.right - r.left);
-
-	int Lines = 1;
-	int StringLength = cl.Msg.length();
-	int CurrentLineLength = 0;
-	int MaxLineLength = r.right - r.left;
-
-	for (int i = 0; i < StringLength; i++)
-	{
-		int CharWidth = pFont->GetWidth(cl.Msg.data() + i, 1);
-		int CharHeight = pFont->GetHeight();
-
-		if (CurrentLineLength + CharWidth > MaxLineLength)
-		{
-			cl.AddLineBreak(i);
-			CurrentLineLength = 0;
-			Lines++;
-		}
-
-		CurrentLineLength += CharWidth;
-	}
 }
 
 void Chat::Scale(double fWidthRatio, double fHeightRatio){
@@ -293,6 +403,11 @@ void Chat::Resize(int nWidth, int nHeight)
 	Border.y2 = double(1080 - 100) / 1080 * RGetScreenHeight();
 
 	ResetFonts();
+}
+
+void Chat::ClearHistory()
+{
+	vMsgs.clear();
 }
 
 bool Chat::CursorInRange(int x1, int y1, int x2, int y2){
@@ -640,8 +755,9 @@ void Chat::OnUpdate(){
 		if (dwResize & RESIZE_Y2 && Border.y2 + Cursor.y - PrevCursorPos.y > Border.y1 + MinimumSize.y)
 			Border.y2 += Cursor.y - PrevCursorPos.y;
 
-		for (std::vector<ChatLine>::iterator it = vMsgs.begin(); it != vMsgs.end(); it++)
-			CalcLineBreaks(*it);
+		LineSegments.clear();
+		for (int i = 0; i < int(vMsgs.size()); ++i)
+			DivideIntoLines(i, std::back_inserter(LineSegments));
 	}
 
 	if (Action == CWA_MOVING){
@@ -1013,116 +1129,192 @@ void Chat::DrawBackground(MDrawContext* pDC, u64 Time, u64 TPS, int nLimit, bool
 	}
 }
 
-void Chat::DrawChatLines(MDrawContext* pDC, u64 Time, u64 TPS, int nLimit, bool bShowAll)
+template <typename T>
+struct LineDivisionState
 {
-	auto&& Output = GetOutputRect();
+	T&& OutputIterator;
+	LineSegmentInfo CurLineSegmentInfo;
+	int ChatLineIndex = 0;
+	int MsgIndex = 0;
+	int Lines = 0;
+	int CurrentLinePixelLength = 0;
+	u32 CurTextColor;
+	u32 CurEmphasis = EmphasisType::Default;
 
-	int nLines = 0;
+	LineDivisionState(T&& OutputIterator, int ChatLineIndex, u32 CurTextColor) :
+		OutputIterator{ std::forward<T>(OutputIterator) },
+		ChatLineIndex{ ChatLineIndex },
+		CurTextColor{ CurTextColor }
+	{}
 
-	pFont->m_Font.BeginFont();
+	void AddSegment(bool IsEndOfLine)
+	{
+		// Compute the length from the distance from the current character index
+		// to the one the substring started at.
+		CurLineSegmentInfo.LengthInCharacters = MsgIndex - int(CurLineSegmentInfo.Offset);
 
-	for (int i = vMsgs.size() - 1; nLines < nLimit && i >= 0; i--) {
-		ChatLine &cl = vMsgs.at(i);
+		// Add this LineSegmentInfo to the vector.
+		OutputIterator++ = CurLineSegmentInfo;
 
-		if (cl.Time + TPS * fFadeTime < Time && !bShowAll && !bInputEnabled)
+		if (IsEndOfLine)
+		{
+			CurrentLinePixelLength = 0;
+			Lines++;
+		}
+
+		// Reset to zero-initialized LineSegmentInfo.
+		CurLineSegmentInfo = LineSegmentInfo{};
+		// Set data.
+		CurLineSegmentInfo.ChatLineIndex = ChatLineIndex;
+		CurLineSegmentInfo.Offset = MsgIndex;
+		CurLineSegmentInfo.PixelOffsetX = CurrentLinePixelLength;
+		CurLineSegmentInfo.IsStartOfLine = CurrentLinePixelLength == 0;
+		CurLineSegmentInfo.TextColor = CurTextColor;
+		CurLineSegmentInfo.Emphasis = CurEmphasis;
+	}
+
+	void HandleFormatSpecifier(FormatSpecifier& FormatSpec)
+	{
+		bool IsLine = false;
+		switch (FormatSpec.ft) {
+		case FT_COLOR:
+			CurTextColor = FormatSpec.Color;
 			break;
 
-		long nMsgOffset;
-		long nTempLines;
+		case FT_DEFAULT:
+			CurEmphasis = EmphasisType::Default;
+			break;
 
-		auto it = cl.vFormatSpecifiers.begin();
+		case FT_BOLD:
+			CurEmphasis |= EmphasisType::Bold;
+			break;
 
-		if (cl.GetLines() + nLines > nLimit) {
-			nMsgOffset = cl.GetLineBreak(cl.GetLines() + nLines - nLimit - 1)->nStartPos;
+		case FT_ITALIC:
+			CurEmphasis |= EmphasisType::Italic;
+			break;
 
-			while (&*it != cl.GetLineBreak(cl.GetLines() + nLines - nLimit - 1))
-				it++;
+		case FT_UNDERLINE:
+			CurEmphasis |= EmphasisType::Underline;
+			break;
 
-			it++;
-			nTempLines = cl.GetLines() + nLines - nLimit;
-			cprint("nMsgOffset = %d, nTempLines = %d, cl.GetLines() + nLines - nLimit - 1 = %d\n", nMsgOffset, nTempLines, cl.GetLines() + nLines - nLimit - 1);
+		case FT_STRIKETHROUGH:
+			CurEmphasis |= EmphasisType::Strikethrough;
+			break;
+
+		case FT_LINEBREAK:
+			IsLine = true;
+			break;
+		};
+
+		// If MsgIndex - int(CurLineSegmentInfo.Offset) equals zero,
+		// the substring would be empty if we were to add a line.
+		if (IsLine || MsgIndex - int(CurLineSegmentInfo.Offset) != 0)
+			AddSegment(IsLine);
+	}
+};
+
+template <typename T>
+void Chat::DivideIntoLines(int ChatLineIndex, T&& OutputIterator)
+{
+	auto&& cl = vMsgs[ChatLineIndex];
+	// Clear the previous wrapping line breaks, since we're going to add new ones.
+	cl.ClearWrappingLineBreaks();
+
+	auto MaxLineLength = (Border.x2 - 5) - (Border.x1 + 5);
+
+	LineDivisionState<T> State{ std::forward<T>(OutputIterator), ChatLineIndex, TextColor };
+
+	// Initialize the first segment.
+	State.CurLineSegmentInfo.ChatLineIndex = ChatLineIndex;
+	State.CurLineSegmentInfo.Offset = 0;
+	State.CurLineSegmentInfo.PixelOffsetX = 0;
+	State.CurLineSegmentInfo.IsStartOfLine = true;
+	State.CurLineSegmentInfo.TextColor = TextColor;
+	State.CurLineSegmentInfo.Emphasis = EmphasisType::Default;
+
+	auto FormatIterator = cl.vFormatSpecifiers.begin();
+	for (State.MsgIndex = 0; State.MsgIndex < int(cl.Msg.length()); ++State.MsgIndex)
+	{
+		// Process all the format specifiers at this index.
+		// There may be more than one, so we do a loop.
+		while (FormatIterator != cl.vFormatSpecifiers.end() &&
+			FormatIterator->nStartPos == State.MsgIndex)
+		{
+			State.HandleFormatSpecifier(*FormatIterator);
+			++FormatIterator;
 		}
-		else {
-			nMsgOffset = 0;
-			nTempLines = cl.GetLines();
+
+		auto CharWidth = pFont->GetWidth(cl.Msg.data() + State.MsgIndex, 1);
+
+		// If adding this character would make the line length exceed the max,
+		// we add a new line for this character to go on.
+		if (State.CurrentLinePixelLength + CharWidth > MaxLineLength)
+		{
+			// ChatLine::AddWrappingLineBreak returns an iterator to the line break
+			// that was inserted, so we want to set FormatIterator to the next one.
+			// We do this since the current iterator may have been invalidated by the mutation.
+			FormatIterator = std::next(cl.AddWrappingLineBreak(State.MsgIndex));
+			State.AddSegment(true);
 		}
 
-		if (it == cl.vFormatSpecifiers.end()) {
-			D3DRECT Rect = {
-				Output.x1 + 5,
-				Output.y2 - 5 - (nTempLines + nLines) * nFontHeight,
-				Output.x2 - 5,
-				Output.y2 - 5
-			};
-			DrawTextN(pFont.get(), cl.Msg.data() + nMsgOffset, Rect, cl.DefaultColor);
-			nLines++;
-		}
-		else {
-			MFontR2 *pFont = this->pFont.get();
-			D3DCOLOR dwColor = cl.DefaultColor;
-			long nTemp = nTempLines;
-			int nOffsetX = 0;
-			int nPos = nMsgOffset;
+		State.CurrentLinePixelLength += CharWidth;
+	}
 
-			while (nTemp && (unsigned long)nPos < cl.Msg.length()) {
-				D3DRECT Rect = {
-					Output.x1 + 5 + nOffsetX,
-					Output.y2 - 5 - (nTemp + nLines) * nFontHeight,
-					Output.x2 - 5,
-					Output.y2 - 5
-				};
+	// Add the final segment.
+	State.AddSegment(true);
 
-				int nLen;
+	cl.Lines = State.Lines;
+}
 
-				if (it != cl.vFormatSpecifiers.end()) {
-					nLen = it->nStartPos - nPos;
-				}
-				else {
-					nLen = cl.Msg.length() - nPos;
-				}
+MFontR2* Chat::GetFont(u32 Emphasis)
+{
+	if (Emphasis & EmphasisType::Italic)
+		return pItalicFont.get();
 
-				//g_pDraw->Text(pFont, cl.Msg.data() + nPos, nLen, &Rect, DT_TOP | DT_LEFT | DT_NOCLIP, dwColor);
-				//pFont->m_Font.DrawTextA(Rect.left, Rect.top, cl.Msg.data() + nPos, dwColor);
-				DrawTextN(pFont, cl.Msg.data() + nPos, Rect, dwColor, nLen);
+	return pFont.get();
+}
 
-				nOffsetX += GetTextLen(cl, nPos, nLen);
+template <typename T>
+static auto Reverse(T&& Container) {
+	return MakeRange(Container.rbegin(), Container.rend());
+}
 
-				if (it != cl.vFormatSpecifiers.end()) {
-					nPos = it->nStartPos;
+static auto GetDrawLinesRect(const D3DRECT& OutputRect, int LinesDrawn,
+	int PixelOffsetX, int FontHeight)
+{
+	return D3DRECT{
+		OutputRect.x1 + 5 + PixelOffsetX,
+		OutputRect.y2 - 5 - ((LinesDrawn + 1) * FontHeight),
+		OutputRect.x2 - 5,
+		OutputRect.y2 - 5
+	};
+}
 
-					switch (it->ft) {
-					case FT_COLOR:
-						dwColor = it->Color;
-						break;
+void Chat::DrawChatLines(MDrawContext* pDC, u64 Time, u64 TPS, int nLimit, bool bShowAll)
+{
+	pFont->m_Font.BeginFont();
 
-					case FT_DEFAULT:
-						pFont = this->pFont.get();
-						break;
+	int LinesDrawn = 0;
+	for (auto&& LineSegment : Reverse(LineSegments))
+	{
+		auto&& Rect = GetDrawLinesRect(GetOutputRect(), LinesDrawn, LineSegment.PixelOffsetX, nFontHeight);
+		auto&& cl = vMsgs[LineSegment.ChatLineIndex];
 
-					case FT_BOLD:
-						//pFont = pBoldFont;
-						break;
+		if (!bShowAll && !bInputEnabled && Time > cl.Time + TPS * fFadeTime)
+			break;
 
-					case FT_ITALIC:
-						pFont = pItalicFont.get();
-						break;
+		auto String = cl.Msg.data() + LineSegment.Offset;
+		auto Length = LineSegment.LengthInCharacters;
+		auto Font = GetFont(LineSegment.Emphasis);
+		auto Color = LineSegment.TextColor;
 
-					case FT_WRAP:
-					case FT_LINEBREAK:
-						nTemp--;
-						nOffsetX = 0;
-						break;
-					};
+		DrawTextN(Font, String, Rect, Color, Length);
 
-					it++;
-				}
-				else {
-					nTemp--;
-					nOffsetX = 0;
-				}
-			}
-
-			nLines += cl.GetLines();
+		if (LineSegment.IsStartOfLine)
+		{
+			++LinesDrawn;
+			if (LinesDrawn > nLimit)
+				break;
 		}
 	}
 

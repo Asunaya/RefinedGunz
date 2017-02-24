@@ -9,120 +9,27 @@ constexpr u32 CHAT_DEFAULT_INTERFACE_COLOR = XRGB(0, 0xA5, 0xC3);
 constexpr u32 CHAT_DEFAULT_BACKGROUND_COLOR = 0;
 constexpr u32 CHAT_DEFAULT_SELECTION_COLOR = ARGB(0xA0, 0, 0x80, 0xFF);
 
-// Note that while FT_WRAP and FT_LINEBREAK are both linebreaks, the former is placed by the line-wrapping mechanism and the latter is explicitly placed by the message creator.
-enum FormatSpecifierType{
-	FT_WRAP,
-	FT_LINEBREAK,
-	FT_COLOR,
-	FT_DEFAULT,
-	FT_BOLD,
-	FT_ITALIC,
-	FT_BOLDITALIC,
-	FT_UNDERLINE,
-	FT_STRIKETHROUGH,
+struct v2i
+{
+	int x, y;
 };
 
-struct FormatSpecifier{
-	int nStartPos;
-	FormatSpecifierType ft;
-	D3DCOLOR Color;
-
-	FormatSpecifier(int nStart, D3DCOLOR c) : nStartPos(nStart), ft(FT_COLOR), Color(c) { }
-	FormatSpecifier(int nStart, FormatSpecifierType type) : nStartPos(nStart), ft(type) { }
-};
-
-struct ChatLine{
-	u64 Time;
-	std::wstring Msg;
-	D3DCOLOR DefaultColor;
-	std::vector<FormatSpecifier> vFormatSpecifiers;
-
-	ChatLine(unsigned long long Time, std::wstring Msg, D3DCOLOR DefaultColor)
-		: Time{ Time }, Msg{ std::move(Msg) }, DefaultColor{ DefaultColor } {
-		SubstituteFormatSpecifiers();
-	}
-
-	void SubstituteFormatSpecifiers();
-
-	int GetLines() const {
-		int i = 1;
-		for (auto it = vFormatSpecifiers.begin(); it != vFormatSpecifiers.end(); it++)
-		if (it->ft == FT_WRAP || it->ft == FT_LINEBREAK)
-			i++;
-
-		return i;
-	}
-
-	void ClearLineBreaks(){
-		for (auto it = vFormatSpecifiers.begin(); it != vFormatSpecifiers.end();)
-		if (it->ft == FT_WRAP)
-			it = vFormatSpecifiers.erase(it);
-		else
-			it++;
-	}
-
-	int GetNumLineBreaks() const {
-		int i = 0;
-		for (auto it = vFormatSpecifiers.begin(); it != vFormatSpecifiers.end(); it++)
-			if (it->ft == FT_WRAP)
-				i++;
-
-		return i;
-	}
-
-	const FormatSpecifier *GetLineBreak(int n) const {
-		int i = 0;
-		for (auto it = vFormatSpecifiers.begin(); it != vFormatSpecifiers.end(); it++){
-			if (it->ft == FT_WRAP || it->ft == FT_LINEBREAK){
-				if (i == n)
-					return &*it;
-
-				i++;
-			}
-		}
-
-		return 0;
-	}
-
-	void AddLineBreak(int n){
-		if (vFormatSpecifiers.begin() == vFormatSpecifiers.end()){
-			vFormatSpecifiers.push_back(FormatSpecifier(n, FT_WRAP));
-			return;
-		}
-
-		for (auto it = vFormatSpecifiers.crbegin(); it != vFormatSpecifiers.crend(); it++)
-		if (it->nStartPos < n){
-			vFormatSpecifiers.insert(it.base(), FormatSpecifier(n, FT_WRAP));
-			return;
-		}
-
-		if (vFormatSpecifiers.cbegin()->nStartPos < n)
-			vFormatSpecifiers.insert(vFormatSpecifiers.cbegin() + 1, FormatSpecifier(n, FT_WRAP));
-		else
-			vFormatSpecifiers.insert(vFormatSpecifiers.cbegin(), FormatSpecifier(n, FT_WRAP));
-	}
-};
-
-enum ChatWindowAction{
+enum ChatWindowAction {
 	CWA_NONE,
 	CWA_MOVING,
 	CWA_RESIZING,
 	CWA_SELECTING,
 };
 
-struct v2i
-{
-	int x, y;
-};
-
 class Chat
 {
 public:
 	Chat(const std::string &strFont, int nFontSize);
+	~Chat();
 
 	void EnableInput(bool bEnable, bool bToTeam);
 	void OutputChatMsg(const char *szMsg);
-	void OutputChatMsg(const char *szMsg, DWORD dwColor);
+	void OutputChatMsg(const char *szMsg, u32 dwColor);
 
 	void OnUpdate();
 	void OnDraw(MDrawContext* pDC);
@@ -131,7 +38,7 @@ public:
 	void Scale(double fWidthRatio, double fHeightRatio);
 	void Resize(int Width, int Height);
 
-	void ClearHistory() { vMsgs.clear(); }
+	void ClearHistory();
 
 	const D3DRECT &GetRect() const { return Border; }
 	void SetRect(D3DRECT &r) { Border = r; }
@@ -159,7 +66,8 @@ private:
 	int nFontSize{};
 	int nFontHeight{};
 	double fFadeTime = 10;
-	std::vector<ChatLine> vMsgs;
+	std::vector<struct ChatLine> vMsgs;
+	std::vector<struct LineSegmentInfo> LineSegments;
 	bool bInputEnabled{};
 	POINT Cursor{};
 	D3DRECT Border{};
@@ -195,11 +103,13 @@ private:
 	void DrawChatLines(MDrawContext* pDC, u64 Time, u64 TPS, int nLimit, bool bShowAll);
 	void DrawSelection(MDrawContext* pDC);
 	void DrawFrame(MDrawContext* pDC, u64 Time, u64 TPS);
+	MFontR2* GetFont(u32 Emphasis);
 
 	D3DRECT GetOutputRect();
 	D3DRECT GetInputRect();
 	D3DRECT GetTotalRect();
-	void CalcLineBreaks(ChatLine &cl);
+	template <typename T>
+	void DivideIntoLines(int ChatLineIndex, T&& OutputIterator);
 	bool GetPos(const ChatLine &cl, unsigned long nPos, POINT *pRet);
 	bool CursorInRange(int x, int y, int nWidth, int nHeight);
 	int GetTextLen(ChatLine &cl, int nPos, int nCount);

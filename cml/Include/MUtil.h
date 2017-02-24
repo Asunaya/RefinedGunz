@@ -215,3 +215,14 @@ inline u32 NextPowerOfTwo(u32 value)
 		rightmost_bit_value <<= 1;
 	return rightmost_bit_value;
 }
+
+template <typename ContainerType, typename ValueType>
+void erase_remove(ContainerType&& Container, ValueType&& Value) {
+	Container.erase(std::remove(Container.begin(), Container.end(), Value), Container.end());
+}
+
+template <typename ContainerType, typename PredicateType>
+void erase_remove_if(ContainerType&& Container, PredicateType&& Predicate) {
+	Container.erase(std::remove_if(Container.begin(), Container.end(), std::forward<PredicateType>(Predicate)),
+		Container.end());
+}
