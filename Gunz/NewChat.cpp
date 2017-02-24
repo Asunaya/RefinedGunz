@@ -1351,30 +1351,36 @@ void Chat::DrawSelection(MDrawContext * pDC)
 			pDC->FillRectangle(MakeMRECT({ Coords... }));
 		};
 
-		pDC->SetColor(ARGB(0xA0, 00, 0x80, 0xFF));
+		pDC->SetColor(SelectionColor);
+		// Get half of font, adjusted in each direction to compensate for odd font heights.
+		// For instance, if the font height is 15, we want to subtract 8 and add 7,
+		// since adjusting by a single integer value would make the rectangles we draw
+		// overlap each other slightly. (The height would be even when it ought to be odd.)
+		auto TopOffset = int(ceil(FontHeight / 2.f));
+		auto BottomOffset = FontHeight / 2;
 		if (From.y == To.y)
 		{
 			Fill(From.x,
-				From.y - FontHeight / 2,
+				From.y - TopOffset,
 				To.x,
-				To.y + FontHeight / 2);
+				To.y + BottomOffset);
 		}
 		else {
 			Fill(From.x,
-				From.y - FontHeight / 2,
+				From.y - TopOffset,
 				Border.x2 - 5,
-				To.y + FontHeight / 2);
+				From.y + BottomOffset);
 
 			for (int i = FontHeight; i < To.y - From.y; i += FontHeight) {
 				Fill(Border.x1 + 5,
-					From.y + i - FontHeight / 2,
+					From.y + i - TopOffset,
 					Border.x2 - 5,
-					From.y + i + FontHeight / 2);
+					From.y + i + BottomOffset);
 			}
 			Fill(Border.x1,
-				From.y - FontHeight / 2,
+				To.y - TopOffset,
 				To.x - 5,
-				To.y + FontHeight / 2);
+				To.y + BottomOffset);
 		}
 	}
 }
