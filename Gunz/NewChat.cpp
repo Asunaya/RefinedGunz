@@ -43,7 +43,7 @@ struct FormatSpecifier {
 };
 
 struct ChatMessage {
-	u64 Time{};
+	float Time{};
 	std::wstring Msg;
 	u32 DefaultColor;
 	std::vector<FormatSpecifier> FormatSpecifiers;
@@ -365,7 +365,7 @@ void Chat::OutputChatMsg(const char *szMsg, u32 dwColor)
 {
 	Msgs.emplace_back();
 	auto&& Msg = Msgs.back();
-	Msg.Time = QPC();
+	Msg.Time = ZGetGame()->GetTime();
 	Msg.Msg = UTF8toUTF16(szMsg);
 	Msg.DefaultColor = dwColor;
 
@@ -1032,15 +1032,14 @@ void Chat::OnDraw(MDrawContext* pDC)
 		CeiledLimit = int(ceil(Limit));
 	}
 
-	auto Time = QPC();
-	auto TPS = QPF();
+	auto Time = ZGetGame()->GetTime();
 
-	DrawBackground(pDC, Time, TPS, NumNewlyAddedLines > 0 ? CeiledLimit : FlooredLimit, ShowAll);
-	DrawChatLines(pDC, Time, TPS, InputEnabled ? CeiledLimit : FlooredLimit, ShowAll);
+	DrawBackground(pDC, Time, NumNewlyAddedLines > 0 ? CeiledLimit : FlooredLimit, ShowAll);
+	DrawChatLines(pDC, Time, InputEnabled ? CeiledLimit : FlooredLimit, ShowAll);
 	DrawSelection(pDC);
 	
 	if (IsInputEnabled()) {
-		DrawFrame(pDC, Time, TPS);
+		DrawFrame(pDC, Time);
 	}
 }
 
@@ -1105,7 +1104,7 @@ void Chat::DrawBorder(MDrawContext* pDC)
 	pDC->Line(rect.x1, rect.y2, rect.x2, rect.y2);
 }
 
-void Chat::DrawBackground(MDrawContext* pDC, u64 Time, u64 TPS, int Limit, bool ShowAll)
+void Chat::DrawBackground(MDrawContext* pDC, float Time, int Limit, bool ShowAll)
 {
 	if (BackgroundColor & 0xFF000000)
 	{
@@ -1118,7 +1117,7 @@ void Chat::DrawBackground(MDrawContext* pDC, u64 Time, u64 TPS, int Limit, bool 
 			{
 				auto&& cl = Msgs.at(i);
 
-				if (cl.Time + TPS * FadeTime < Time && !ShowAll && !InputEnabled)
+				if (cl.Time + FadeTime < Time && !ShowAll && !InputEnabled)
 					break;
 
 				Lines += cl.GetLines();
@@ -1326,11 +1325,9 @@ static auto GetDrawLinesRect(const D3DRECT& OutputRect, int LinesDrawn,
 	};
 }
 
-static u32 ScaleAlpha(u32 Color, u64 MessageTimeTicks, u64 CurrentTimeTicks,
-	u64 TPS, float BeginFadeTime, float EndFadeTime)
+static u32 ScaleAlpha(u32 Color, float MessageTime, float CurrentTime,
+	float BeginFadeTime, float EndFadeTime)
 {
-	auto MessageTime = float(double(MessageTimeTicks) / TPS);
-	auto CurrentTime = float(double(CurrentTimeTicks) / TPS);
 	auto Delta = CurrentTime - MessageTime;
 
 	auto A =  (Color & 0xFF000000) >> 24;
@@ -1347,7 +1344,7 @@ static u32 ScaleAlpha(u32 Color, u64 MessageTimeTicks, u64 CurrentTimeTicks,
 	return (AS << 24) | RGB;
 }
 
-void Chat::DrawChatLines(MDrawContext* pDC, u64 Time, u64 TPS, int Limit, bool ShowAll)
+void Chat::DrawChatLines(MDrawContext* pDC, float Time, int Limit, bool ShowAll)
 {
 	DefaultFont.m_Font.BeginFont();
 
@@ -1371,7 +1368,7 @@ void Chat::DrawChatLines(MDrawContext* pDC, u64 Time, u64 TPS, int Limit, bool S
 		auto&& Rect = GetDrawLinesRect(GetOutputRect(), LinesDrawn, PixelOffset, FontHeight);
 		auto&& cl = Msgs[LineSegment.ChatMessageIndex];
 
-		if (!ShowAll && !InputEnabled && Time > cl.Time + TPS * FadeTime)
+		if (!ShowAll && !InputEnabled && Time > cl.Time + FadeTime)
 			break;
 
 		auto String = cl.Msg.data() + LineSegment.Offset;
@@ -1380,7 +1377,7 @@ void Chat::DrawChatLines(MDrawContext* pDC, u64 Time, u64 TPS, int Limit, bool S
 		auto Color = LineSegment.TextColor;
 
 		if (!ShowAll && !InputEnabled)
-			Color = ScaleAlpha(Color, cl.Time, Time, TPS, FadeTime * 0.8f, FadeTime);
+			Color = ScaleAlpha(Color, cl.Time, Time, FadeTime * 0.8f, FadeTime);
 
 		DrawTextN(Font, String, Rect, Color, Length);
 
@@ -1466,7 +1463,7 @@ void Chat::DrawSelection(MDrawContext * pDC)
 	}
 }
 
-void Chat::DrawFrame(MDrawContext * pDC, u64 Time, u64 TPS)
+void Chat::DrawFrame(MDrawContext * pDC, float Time)
 {
 	// Draw top of border
 	{
@@ -1505,7 +1502,9 @@ void Chat::DrawFrame(MDrawContext * pDC, u64 Time, u64 TPS)
 	int x = Rect.x1 + CaretCoord.x;
 	int y = Rect.y1 + (CaretCoord.y - 1) * FontHeight;
 
-	if (fmod(Time, .8f * TPS) > .4f * TPS)
+	// Alternate every 0.4 seconds
+	auto Period = 0.4f;
+	if (fmod(Time, Period * 2) > Period)
 	{
 		// Draw caret
 		pDC->SetColor(TextColor);

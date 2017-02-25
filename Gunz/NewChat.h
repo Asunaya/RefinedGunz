@@ -112,10 +112,10 @@ private:
 	void UpdateNewMessagesAnimation(float TimeDelta);
 
 	void DrawBorder(MDrawContext* pDC);
-	void DrawBackground(MDrawContext* pDC, u64 Time, u64 TPS, int Limit, bool ShowAll);
-	void DrawChatLines(MDrawContext* pDC, u64 Time, u64 TPS, int Limit, bool ShowAll);
+	void DrawBackground(MDrawContext* pDC, float Time, int Limit, bool ShowAll);
+	void DrawChatLines(MDrawContext* pDC, float Time, int Limit, bool ShowAll);
 	void DrawSelection(MDrawContext* pDC);
-	void DrawFrame(MDrawContext* pDC, u64 Time, u64 TPS);
+	void DrawFrame(MDrawContext* pDC, float Time);
 	MFontR2& GetFont(u32 Emphasis);
 
 	D3DRECT GetOutputRect();
