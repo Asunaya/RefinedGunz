@@ -1326,6 +1326,27 @@ static auto GetDrawLinesRect(const D3DRECT& OutputRect, int LinesDrawn,
 	};
 }
 
+static u32 ScaleAlpha(u32 Color, u64 MessageTimeTicks, u64 CurrentTimeTicks,
+	u64 TPS, float BeginFadeTime, float EndFadeTime)
+{
+	auto MessageTime = float(double(MessageTimeTicks) / TPS);
+	auto CurrentTime = float(double(CurrentTimeTicks) / TPS);
+	auto Delta = CurrentTime - MessageTime;
+
+	auto A =  (Color & 0xFF000000) >> 24;
+	auto RGB = Color & 0x00FFFFFF;
+
+	if (Delta < BeginFadeTime)
+		return Color; // 100% alpha
+	if (Delta > EndFadeTime)
+		return RGB;   // 0% alpha
+
+	auto Scale = 1 - ((Delta - BeginFadeTime) / (EndFadeTime - BeginFadeTime));
+	auto AS = static_cast<u8>(A * Scale);
+
+	return (AS << 24) | RGB;
+}
+
 void Chat::DrawChatLines(MDrawContext* pDC, u64 Time, u64 TPS, int Limit, bool ShowAll)
 {
 	DefaultFont.m_Font.BeginFont();
@@ -1357,6 +1378,9 @@ void Chat::DrawChatLines(MDrawContext* pDC, u64 Time, u64 TPS, int Limit, bool S
 		auto Length = LineSegment.LengthInCharacters;
 		auto&& Font = GetFont(LineSegment.Emphasis);
 		auto Color = LineSegment.TextColor;
+
+		if (!ShowAll && !InputEnabled)
+			Color = ScaleAlpha(Color, cl.Time, Time, TPS, FadeTime * 0.8f, FadeTime);
 
 		DrawTextN(Font, String, Rect, Color, Length);
 
