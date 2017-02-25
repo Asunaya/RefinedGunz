@@ -79,13 +79,7 @@ void RGMain::OnDrawGameInterface(MDrawContext* pDC)
 
 bool RGMain::OnGameInput()
 {
-	if (GetChat().IsInputEnabled())
-	{
-		GetChat().OnUpdate();
-		return true;
-	}
-
-	return false;
+	return GetChat().IsInputEnabled();
 }
 
 void RGMain::Resize(int w, int h)
@@ -225,6 +219,8 @@ void RGMain::OnUpdate(double Elapsed)
 	}
 
 	TaskManager::GetInstance().Update(Elapsed);
+
+	GetChat().OnUpdate(Elapsed);
 }
 
 bool RGMain::OnEvent(MEvent *pEvent)

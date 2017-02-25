@@ -31,7 +31,7 @@ public:
 	void OutputChatMsg(const char *Msg);
 	void OutputChatMsg(const char *Msg, u32 Color);
 
-	void OnUpdate();
+	void OnUpdate(float TimeDelta);
 	void OnDraw(MDrawContext* pDC);
 	bool OnEvent(MEvent* pEvent);
 
@@ -99,6 +99,17 @@ private:
 	int nPlayerListWidth;*/
 	int InputHeight{};
 	v2i CaretCoord{};
+
+	// Number of newly added lines.
+	// These have a gradual, animated entry into the chat box.
+	// Once a message is fully visible, it's not longer newly added
+	// and this value will get decremented.
+	int NumNewlyAddedLines{};
+	// The vertical offset when rendering messages, due to
+	// the animation of new messages coming in.
+	float ChatLinesPixelOffsetY{};
+
+	void UpdateNewMessagesAnimation(float TimeDelta);
 
 	void DrawBorder(MDrawContext* pDC);
 	void DrawBackground(MDrawContext* pDC, u64 Time, u64 TPS, int Limit, bool ShowAll);

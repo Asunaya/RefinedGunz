@@ -4,7 +4,7 @@
 #include "ZCharacterManager.h"
 #include "ZInput.h"
 #include "Config.h"
-#include <wchar.h>
+#include "defer.h"
 
 namespace ResizeFlagsType
 {
@@ -371,6 +371,10 @@ void Chat::OutputChatMsg(const char *szMsg, u32 dwColor)
 
 	Msg.SubstituteFormatSpecifiers();
 	DivideIntoLines(Msgs.size() - 1, std::back_inserter(LineSegments));
+
+	NumNewlyAddedLines += Msg.GetLines();
+	if (ChatLinesPixelOffsetY <= 0)
+		ChatLinesPixelOffsetY = FontHeight;
 }
 
 void Chat::Scale(double WidthRatio, double HeightRatio){
@@ -730,7 +734,12 @@ int Chat::GetTextLen(const char *Msg, int Count){
 	return GetTextLength(DefaultFont, L"_%.*s_", Count, Msg) - GetTextLength(DefaultFont, L"__");
 }
 
-void Chat::OnUpdate(){
+void Chat::OnUpdate(float TimeDelta){
+	UpdateNewMessagesAnimation(TimeDelta);
+
+	if (!IsInputEnabled())
+		return;
+
 	POINT PrevCursorPos = Cursor;
 	GetCursorPos(&Cursor);
 
@@ -961,6 +970,24 @@ void Chat::OnUpdate(){
 	}
 }
 
+void Chat::UpdateNewMessagesAnimation(float TimeDelta)
+{
+	if (ChatLinesPixelOffsetY <= 0) {
+		return;
+	}
+
+	constexpr auto LinesPerSecond = 4;
+
+	auto PixelDelta = TimeDelta * FontHeight * LinesPerSecond;
+	ChatLinesPixelOffsetY -= PixelDelta;
+
+	if (ChatLinesPixelOffsetY <= 0)
+	{
+		NumNewlyAddedLines--;
+		ChatLinesPixelOffsetY = NumNewlyAddedLines > 0 ? FontHeight + ChatLinesPixelOffsetY : 0;
+	}
+}
+
 D3DRECT Chat::GetOutputRect(){
 	D3DRECT r = { Border.x1, Border.y1, Border.x2, Border.y2 - FontHeight };
 	return r;
@@ -993,17 +1020,23 @@ void Chat::OnDraw(MDrawContext* pDC)
 	bool ShowAll = ZIsActionKeyPressed(ZACTION_SHOW_FULL_CHAT) && !InputEnabled;
 	auto&& Output = GetOutputRect();
 
-	int Limit;
+	int CeiledLimit, FlooredLimit;
 	if (ShowAll)
-		Limit = (Output.y2 - 5) / FontHeight;
+	{
+		CeiledLimit = FlooredLimit = (Output.y2 - 5) / FontHeight;
+	}
 	else
-		Limit = (Output.y2 - Output.y1 - 10) / FontHeight;
+	{
+		auto Limit = float(Output.y2 - Output.y1 - 10) / FontHeight;
+		FlooredLimit = int(Limit);
+		CeiledLimit = int(ceil(Limit));
+	}
 
 	auto Time = QPC();
 	auto TPS = QPF();
 
-	DrawBackground(pDC, Time, TPS, Limit, ShowAll);
-	DrawChatLines(pDC, Time, TPS, Limit, ShowAll);
+	DrawBackground(pDC, Time, TPS, NumNewlyAddedLines > 0 ? CeiledLimit : FlooredLimit, ShowAll);
+	DrawChatLines(pDC, Time, TPS, InputEnabled ? CeiledLimit : FlooredLimit, ShowAll);
 	DrawSelection(pDC);
 	
 	if (IsInputEnabled()) {
@@ -1079,27 +1112,36 @@ void Chat::DrawBackground(MDrawContext* pDC, u64 Time, u64 TPS, int Limit, bool 
 		if (!InputEnabled)
 		{
 			// Need to store this value instead of calculating it every frame
-			int nLines = 0;
+			int Lines = -max(0, NumNewlyAddedLines - 1);
 			// i needs to be signed since it terminates on -1
-			for (int i = int(Msgs.size() - 1); nLines < Limit && i >= 0; i--)
+			for (int i = int(Msgs.size() - 1); Lines < Limit && i >= 0; i--)
 			{
 				auto&& cl = Msgs.at(i);
 
 				if (cl.Time + TPS * FadeTime < Time && !ShowAll && !InputEnabled)
 					break;
 
-				nLines += cl.GetLines();
+				Lines += cl.GetLines();
 			}
 
-			if (nLines > 0)
+			Lines = min(Lines, Limit);
+
+			if (Lines > 0)
 			{
 				auto&& Output = GetOutputRect();
 				D3DRECT Rect = {
 					Output.x1,
-					Output.y2 - 5 - nLines * FontHeight,
+					Output.y2 - 5 - Lines * FontHeight,
 					Output.x2,
 					Output.y2,
 				};
+
+				if (NumNewlyAddedLines > 0) {
+					Rect.y1 += ChatLinesPixelOffsetY;
+					if (!ShowAll) {
+						Rect.y1 = max(Rect.y1, Output.y1);
+					}
+				}
 
 				pDC->SetColor(BackgroundColor);
 				pDC->FillRectangle(MakeMRECT(Rect));
@@ -1269,16 +1311,16 @@ MFontR2& Chat::GetFont(u32 Emphasis)
 }
 
 template <typename T>
-static auto Reverse(T&& Container) {
-	return MakeRange(Container.rbegin(), Container.rend());
+static auto Reverse(T&& Container, int Offset = 0) {
+	return MakeRange(Container.rbegin() + Offset, Container.rend());
 }
 
 static auto GetDrawLinesRect(const D3DRECT& OutputRect, int LinesDrawn,
-	int PixelOffsetX, int FontHeight)
+	v2i PixelOffset, int FontHeight)
 {
 	return D3DRECT{
-		OutputRect.x1 + 5 + PixelOffsetX,
-		OutputRect.y2 - 5 - ((LinesDrawn + 1) * FontHeight),
+		OutputRect.x1 + 5 + PixelOffset.x,
+		OutputRect.y2 - 5 - ((LinesDrawn + 1) * FontHeight) + PixelOffset.y,
 		OutputRect.x2 - 5,
 		OutputRect.y2 - 5
 	};
@@ -1288,10 +1330,24 @@ void Chat::DrawChatLines(MDrawContext* pDC, u64 Time, u64 TPS, int Limit, bool S
 {
 	DefaultFont.m_Font.BeginFont();
 
-	int LinesDrawn = 0;
-	for (auto&& LineSegment : Reverse(LineSegments))
+	auto PrevClipRect = pDC->GetClipRect();
 	{
-		auto&& Rect = GetDrawLinesRect(GetOutputRect(), LinesDrawn, LineSegment.PixelOffsetX, FontHeight);
+		auto ClipRect = GetOutputRect();
+		if (ShowAll)
+			ClipRect.y1 = 0;
+		pDC->SetClipRect(MakeMRECT(ClipRect));
+	}
+
+	if (ChatLinesPixelOffsetY > 0)
+		Limit++;
+
+	auto MessagesOffset = max(0, NumNewlyAddedLines - 1);
+
+	int LinesDrawn = 0;
+	for (auto&& LineSegment : Reverse(LineSegments, MessagesOffset))
+	{
+		v2i PixelOffset{ LineSegment.PixelOffsetX, int(ChatLinesPixelOffsetY) };
+		auto&& Rect = GetDrawLinesRect(GetOutputRect(), LinesDrawn, PixelOffset, FontHeight);
 		auto&& cl = Msgs[LineSegment.ChatMessageIndex];
 
 		if (!ShowAll && !InputEnabled && Time > cl.Time + TPS * FadeTime)
@@ -1307,11 +1363,12 @@ void Chat::DrawChatLines(MDrawContext* pDC, u64 Time, u64 TPS, int Limit, bool S
 		if (LineSegment.IsStartOfLine)
 		{
 			++LinesDrawn;
-			if (LinesDrawn > Limit)
+			if (LinesDrawn >= Limit)
 				break;
 		}
 	}
 
+	pDC->SetClipRect(PrevClipRect);
 	DefaultFont.m_Font.EndFont();
 }
 
