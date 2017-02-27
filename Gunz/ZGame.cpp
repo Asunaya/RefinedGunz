@@ -2506,7 +2506,7 @@ void ZGame::OnPeerSlash(ZCharacter *pOwner, const rvector &pos, const rvector &d
 	{
 		ZObject *pTarget = it.second;
 
-		if (pTarget == pOwner)
+		if (pTarget == pOwner || pTarget->IsDie())
 			continue;
 
 		const rvector &TargetPos = pTarget->GetPosition();
@@ -2638,6 +2638,9 @@ void ZGame::OnPeerMassive(ZCharacter *pOwner, const rvector &pos, const rvector 
 
 		if ((pOwner == m_pMyCharacter || pVictim != m_pMyCharacter)
 			&& (!pVictim->IsNPC() || !static_cast<ZActor*>(pVictim)->IsMyControl()))
+			continue;
+
+		if (pVictim->IsDie())
 			continue;
 
 		const rvector &TargetPos = pVictim->GetPosition();
