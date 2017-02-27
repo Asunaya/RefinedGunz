@@ -231,6 +231,9 @@ void MCursorSystem::Draw(MDrawContext* pDC, int x, int y)
 void MCursorSystem::Show(bool bShow)
 {
 	m_bShow = bShow;
+
+	if (Get() == nullptr)
+		Set("");
 }
 
 bool MCursorSystem::IsVisible(void)
