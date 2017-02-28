@@ -923,6 +923,7 @@ void ZConfiguration::Init()
 	m_Audio.fBGMVolume	= 0.3f;
 	m_Audio.bBGMMute	= false;
 	m_Audio.bEffectMute = false;
+	m_Audio.fEffectVolume = 0.3f;
 	m_Audio.b3DSound	= true;
 	m_Audio.b8BitSound	= false;
 	m_Audio.bInverse	= false;
