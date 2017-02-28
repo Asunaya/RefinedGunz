@@ -147,7 +147,7 @@ bool MWidget::RemoveExclusive(MWidget* pWidget)
 	return false;
 }
 
-MWidget* MWidget::GetLatestExclusive(void)
+MWidget* MWidget::GetLatestExclusive()
 {
 	if(m_Exclusive.GetCount()>0) return m_Exclusive.Get(m_Exclusive.GetCount()-1);
 	return NULL;
@@ -221,7 +221,7 @@ MWidget::MWidget(const char* szName, MWidget* pParent, MListener* pListener)
 
 }
 
-MWidget::~MWidget(void)
+MWidget::~MWidget()
 {
 	ReleaseExclusive();
 
@@ -236,7 +236,7 @@ MWidget::~MWidget(void)
 	DetachToolTip();
 }
 
-void MWidget::OnRun(void)
+void MWidget::OnRun()
 {
 }
 
@@ -252,7 +252,7 @@ bool MWidget::OnEvent(MEvent* pEvent, MListener* pListener)
 	return false;
 }
 
-void MWidget::Run(void)
+void MWidget::Run()
 {
 	OnRun();
 
@@ -315,7 +315,7 @@ void MWidget::Draw(MDrawContext* pDC)
 	pDC->SetOpacity(nLastOpacity);
 }
 
-void MWidget::Redraw(void)
+void MWidget::Redraw()
 {
 	Mint::GetInstance()->Update();
 }
@@ -701,7 +701,7 @@ int MWidget::GetChildIndex(MWidget* pWidget)
 	return -1;
 }
 
-void MWidget::SetExclusive(void)
+void MWidget::SetExclusive()
 {
 	if(m_pParent!=NULL){
 		m_pParent->AddExclusive(this);
@@ -709,7 +709,7 @@ void MWidget::SetExclusive(void)
 	}
 }
 
-void MWidget::ReleaseExclusive(void)
+void MWidget::ReleaseExclusive()
 {
 	if(m_pParent!=NULL)
 		m_pParent->RemoveExclusive(this);
@@ -722,7 +722,7 @@ MCursor* MWidget::SetCursor(MCursor* pCursor)
 	return pTemp;
 }
 
-MCursor* MWidget::GetCursor(void)
+MCursor* MWidget::GetCursor()
 {
 	return m_pCursor;
 }
@@ -734,7 +734,7 @@ MFont* MWidget::SetFont(MFont* pFont)
 	return pTemp;
 }
 
-MFont* MWidget::GetFont(void)
+MFont* MWidget::GetFont()
 {
 	if(m_pFont==NULL) return MFontManager::Get(NULL);
 	else return m_pFont;
@@ -836,7 +836,7 @@ void MWidget::SetBoundsAlignment(MAlignmentMode am, int w, int h)
 	m_Rect.y = p.y;
 }
 
-MAlignmentMode MWidget::GetBoundsAlignment(void)
+MAlignmentMode MWidget::GetBoundsAlignment()
 {
 	return m_BoundsAlignment;
 }
@@ -866,13 +866,13 @@ void MWidget::AttachToolTip(MToolTip* pToolTip)
 	m_pToolTip = pToolTip;
 }
 
-void MWidget::DetachToolTip(void)
+void MWidget::DetachToolTip()
 {
 	if(m_pToolTip!=NULL) delete m_pToolTip;
 	m_pToolTip = NULL;
 }
 
-MToolTip* MWidget::GetToolTip(void)
+MToolTip* MWidget::GetToolTip()
 {
 	return m_pToolTip;
 }
@@ -936,7 +936,7 @@ void MWidget::SetZOrder(MZOrder z)
 	}
 }
 
-MWidget* MWidget::FindExclusiveDescendant(void)
+MWidget* MWidget::FindExclusiveDescendant()
 {
 	if(m_Exclusive.GetCount()>0) return m_Exclusive.Get(m_Exclusive.GetCount()-1);
 
@@ -1125,7 +1125,7 @@ MRECT MScreenToClient(const MWidget* pWidget, const MRECT& p)
 	return MRECT(p.x-r.x, p.y-r.y, p.w, p.h);
 }
 
-MPOINT GetCursorPosition(void)
+MPOINT GetCursorPosition()
 {
 	POINT p;
 	GetCursorPos(&p);

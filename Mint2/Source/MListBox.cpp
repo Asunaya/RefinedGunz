@@ -16,7 +16,7 @@
 
 IMPLEMENT_LOOK(MListBox, MListBoxLook)
 
-int MListBox::GetItemHeight(void)
+int MListBox::GetItemHeight()
 {
 	if(m_nItemHeight>0) return m_nItemHeight;
 	return GetFont()->GetHeight()+MLISTBOX_ITEM_MARGIN_Y;
@@ -66,10 +66,6 @@ bool MListBox::GetItemPos(MPOINT* p, int i)
 	MRECT r = GetClientRect();
 	p->x = r.x;
 	p->y = r.y + nHeaderHeight + (i-m_nStartItemPos) * nFontHeight;
-	/*
-	p->x = m_Rect.x + MLISTBOX_MARGIN_X;
-	p->y = m_Rect.y + (i-m_nStartItemPos) * nFontHeight;
-	*/
 
 	if(i>=m_nStartItemPos && i<m_nStartItemPos+m_nShowItemCount) return true;
 	return false;
@@ -99,7 +95,6 @@ bool MListBox::OnEvent(MEvent* pEvent, MListener* pListener)
 		
 		if(pListener!=NULL) pListener->OnCommand(this, MLB_ITEM_SEL);
 
-		// 드래그 & 드롭
 		if ( m_bDragAndDrop)
 		{
 			MListItem* pItem = GetSelItem();
@@ -196,7 +191,7 @@ bool MListBox::OnEvent(MEvent* pEvent, MListener* pListener)
 	return false;
 }
 
-void MListBox::RecalcList(void)
+void MListBox::RecalcList()
 {
 	int nItemHeight = GetItemHeight();
 	MRECT r = GetClientRect();
@@ -217,7 +212,7 @@ void MListBox::RecalcList(void)
 	RecalcScrollBar();
 }
 
-void MListBox::RecalcScrollBar(void)
+void MListBox::RecalcScrollBar()
 {
 	if(m_nShowItemCount<GetCount())
 	{
@@ -260,20 +255,18 @@ int MListBox::FindNextItem(int i, char c)
 void MListBox::OnSize(int w, int h)
 {
 	MRECT cr = GetInitialClientRect();
-	if(m_pScrollBar->IsVisible()==true)
-//		m_pScrollBar->SetBounds(MRECT(cr.x+cr.w-m_pScrollBar->GetDefaultBreadth()-5, cr.y+3, m_pScrollBar->GetDefaultBreadth(), cr.h-6));
-		m_pScrollBar->SetBounds(MRECT(cr.x+cr.w-m_pScrollBar->GetDefaultBreadth(), cr.y+1, m_pScrollBar->GetDefaultBreadth(), cr.h-1));
-	else	// 안보이는 경우 클라이언트 영역이 스크롤바 영역까지 있으므로, 감안해서 계산
-//		m_pScrollBar->SetBounds(MRECT(cr.x+cr.w-m_pScrollBar->GetDefaultBreadth()-5, cr.y+3, m_pScrollBar->GetDefaultBreadth(), cr.h-6));
-		m_pScrollBar->SetBounds(MRECT(cr.x+cr.w-m_pScrollBar->GetDefaultBreadth(), cr.y+1, m_pScrollBar->GetDefaultBreadth(), cr.h-1));
+	if (m_pScrollBar->IsVisible() == true)
+		m_pScrollBar->SetBounds(MRECT(cr.x + cr.w - m_pScrollBar->GetDefaultBreadth(), cr.y + 1,
+			m_pScrollBar->GetDefaultBreadth(), cr.h - 1));
+	else
+		m_pScrollBar->SetBounds(MRECT(cr.x + cr.w - m_pScrollBar->GetDefaultBreadth(), cr.y + 1,
+			m_pScrollBar->GetDefaultBreadth(), cr.h - 1));
 
 	RecalcList();
 }
 
-void MListBox::Initialize(void)
+void MListBox::Initialize()
 {
-	LOOK_IN_CONSTRUCTOR()
-
 	m_nOverItem = -1;
 	m_nSelItem = -1;
 	m_nStartItemPos = 0;
@@ -315,9 +308,8 @@ MListBox::MListBox(MWidget* pParent, MListener* pListener)
 	Initialize();
 }
 
-MListBox::~MListBox(void)
+MListBox::~MListBox()
 {
-//	while(m_Items.GetCount()>0) m_Items.Delete(0);
 	m_Items.DeleteAll();
 	if(m_pScrollBar!=NULL) delete m_pScrollBar;
 }
@@ -326,15 +318,9 @@ void MListBox::Add(const char* szItem)
 {
 	MListItem* pItem = new MDefaultListItem(szItem);
 	m_Items.Add(pItem);
-	/*
-	char* pNewItem = new char[strlen(szItem)+1];
-	strcpy_safe(pNewItem, szItem);
-	m_Items.Add(pNewItem);
-	*/
 	if(m_Items.GetCount()) {
 		if(m_nSelItem == -1)
 			m_nSelItem = 0;
-//			SetSelIndex(0);
 	}
 
 	RecalcList();
@@ -394,7 +380,7 @@ void MListBox::Remove(int i)
 	RecalcScrollBar();
 }
 
-void MListBox::RemoveAll(void)
+void MListBox::RemoveAll()
 {
 	while(m_Items.GetCount()>0) Remove(0);
 
@@ -412,24 +398,24 @@ bool MListBox::Swap(int i, int j)
 	return true;
 }
 
-int MListBox::GetCount(void)
+int MListBox::GetCount()
 {
 	return m_Items.GetCount();
 }
 
-int MListBox::GetSelIndex(void)
+int MListBox::GetSelIndex()
 {
 	return m_nSelItem;
 }
 
-const char* MListBox::GetSelItemString(void)
+const char* MListBox::GetSelItemString()
 {
 	if(m_nSelItem==-1) return NULL;
 	if(m_nSelItem>=m_Items.GetCount()) return NULL;
 	return m_Items.Get(m_nSelItem)->GetString();
 }
 
-MListItem* MListBox::GetSelItem(void)
+MListItem* MListBox::GetSelItem()
 {
 	if(m_nSelItem==-1) return NULL;
 	return m_Items.Get(m_nSelItem);
@@ -476,7 +462,7 @@ void MListBox::ShowItem(int i)
 
 void MListBox::SetStartItem(int i)
 {
-	if(GetCount()<=m_nShowItemCount) return;	// 이미 다 보이면 리턴
+	if(GetCount()<=m_nShowItemCount) return;
 
 	if(i<0) i = 0;
 	else if(i+m_nShowItemCount>GetCount()) i = GetCount()-m_nShowItemCount;
@@ -485,17 +471,17 @@ void MListBox::SetStartItem(int i)
 	GetListener()->OnCommand(this, MLB_ITEM_START);	
 }
 
-int MListBox::GetStartItem(void)
+int MListBox::GetStartItem()
 {
 	return m_nStartItemPos;
 }
 
-int MListBox::GetShowItemCount(void)
+int MListBox::GetShowItemCount()
 {
 	return m_nShowItemCount;
 }
 
-MScrollBar* MListBox::GetScrollBar(void)
+MScrollBar* MListBox::GetScrollBar()
 {
 	return m_pScrollBar;
 }
@@ -533,7 +519,7 @@ void MListBox::AddField(const char* szFieldName, int nTabSize)
 	strcpy_safe(pNew->szFieldName, szFieldName);
 	pNew->nTabSize = nTabSize;
 	m_Fields.Add(pNew);
-	if(bVisibleHeader!=IsVisibleHeader()) RecalcList();	// 헤더가 보이게 되는 경우
+	if(bVisibleHeader!=IsVisibleHeader()) RecalcList();
 }
 
 void MListBox::RemoveField(const char* szFieldName)
@@ -543,13 +529,13 @@ void MListBox::RemoveField(const char* szFieldName)
 		MLISTFIELD* pField = m_Fields.Get(i);
 		if(strcmp(pField->szFieldName, szFieldName)==0){
 			m_Fields.Delete(i);
-			if(bVisibleHeader!=IsVisibleHeader()) RecalcList();	// 헤더가 사라지게 되는 경우
+			if(bVisibleHeader!=IsVisibleHeader()) RecalcList();
 			return;
 		}
 	}
 }
 
-void MListBox::RemoveAllField(void)
+void MListBox::RemoveAllField()
 {
 	while(m_Fields.GetCount()){
 		m_Fields.Delete(0);
@@ -561,12 +547,12 @@ MLISTFIELD* MListBox::GetField(int i)
 	return m_Fields.Get(i);
 }
 
-int MListBox::GetFieldCount(void)
+int MListBox::GetFieldCount()
 {
 	return m_Fields.GetCount();
 }
 
-bool MListBox::IsVisibleHeader(void)
+bool MListBox::IsVisibleHeader()
 {
 	if(GetFieldCount()==0) return false;
 
@@ -602,12 +588,7 @@ int MListBox::GetTabSize()
 void MListBoxLook::OnHeaderDraw(MDrawContext* pDC, MRECT& r, const char* szText)
 {
 	if(szText==NULL) return;
-	pDC->SetColor(MCOLOR(m_SelectedPlaneColor));
-//	pDC->FillRectangle(r);			// 안이뻐서 동환이가 지워버림... 걍 비트맵 쓰져... ㅠ.ㅠ
-
 	pDC->SetColor(MCOLOR(m_SelectedTextColor));
-
-	//pDC->Text(r.x,r.y, szText);
 	pDC->Text( r, szText );
 }
 
@@ -625,8 +606,6 @@ int MListBoxLook::OnItemDraw(MDrawContext* pDC, MRECT& r, const char* szText, MC
 
 	if(bSelected==true) pDC->SetColor(MCOLOR(m_SelectedTextColor));
 	else pDC->SetColor(color);
-
-//	else pDC->SetColor(MCOLOR(DEFCOLOR_MLIST_TEXT));
 
 	if( m_pItemSlotBitmap != NULL )
 	{
@@ -714,8 +693,6 @@ void MListBoxLook::OnDraw(MListBox* pListBox, MDrawContext* pDC)
 	pDC->SetFont( pListBox->GetFont() );	
 	m_ItemTextAlignmentMode = pListBox->m_FontAlign;
 
-//	pDC->BeginFont();
-
 	if(pListBox->IsVisibleHeader()==true){
 		int nFieldStartX = 0;
 		for(int i=0; i<pListBox->GetFieldCount(); i++){
@@ -738,7 +715,6 @@ void MListBoxLook::OnDraw(MListBox* pListBox, MDrawContext* pDC)
 			p.y = r.y+nHeaderHeight+nItemHeight*nShowCount;
 
 			MListItem* pItem = pListBox->Get(i);
-//			bool bSelected = (pListBox->IsSelected()) ? (pListBox->GetSelIndex()==i) : false;
 			bool bSelected = pItem->m_bSelected;
 			bool bFocused = (pListBox->IsFocus());
 
@@ -759,7 +735,7 @@ void MListBoxLook::OnDraw(MListBox* pListBox, MDrawContext* pDC)
 				const char* szText = pItem->GetString(j);
 				MBitmap* pBitmap = pItem->GetBitmap(j);
 							
-				if(pBitmap!=NULL)//이미지 그리고
+				if(pBitmap!=NULL)
 					OnItemDraw(pDC, ir, pBitmap,  bSelected, bFocused, nWidth);
 
  				MCOLOR color;
@@ -768,22 +744,15 @@ void MListBoxLook::OnDraw(MListBox* pListBox, MDrawContext* pDC)
 				else
 					color = pListBox->m_FontColor;
 
-				if(szText!=NULL && szText[0]!=0 )// 텍스트 그리고
+				if(szText!=NULL && szText[0]!=0 )
 				{
 					nLine = OnItemDraw(pDC, ir, szText,color,bSelected, bFocused, nAdjustWidth);
 				}
 
-/*
-				if(szText!=NULL)
-					OnItemDraw(pDC, ir, szText, color, bSelected, bFocused, nAdjustWidth);
-				else if(pBitmap!=NULL)
-					OnItemDraw(pDC, ir, pBitmap,  bSelected, bFocused, nAdjustWidth);
-*/
 				nFieldStartX += nWidth;
 				if(nFieldStartX>=r.w) break;
 			}
 
-			//nShowCount++;
 			nShowCount += nLine;
 
 			if(nShowCount>=pListBox->GetShowItemCount()) break;
@@ -807,7 +776,6 @@ void MListBoxLook::OnDraw(MListBox* pListBox, MDrawContext* pDC)
 		for(int i=pListBox->GetStartItem(); i<pListBox->GetCount(); i++)
 		{
 			MListItem* pItem = pListBox->Get(i);
-//			bool bSelected = (pListBox->IsSelected()) ? (pListBox->GetSelIndex()==i) : false;
 			bool bSelected = pItem->m_bSelected;
 			bool bFocused = (pListBox->IsFocus());
 
@@ -834,15 +802,12 @@ void MListBoxLook::OnDraw(MListBox* pListBox, MDrawContext* pDC)
 				nStartX = 0;
 				nStartY += nItemHeight + 5;
 
-//				if (nStartY >= (r.h - TabSize.h)) break;
 			}
 
 			nShowCount++;
 			if(nShowCount>=pListBox->GetShowItemCount()) break;
 		}
 	}
-
-//	pDC->EndFont();
 }
 
 MRECT MListBoxLook::GetClientRect(MListBox* pListBox, const MRECT& r)
@@ -852,7 +817,7 @@ MRECT MListBoxLook::GetClientRect(MListBox* pListBox, const MRECT& r)
 		r.h-2);
 }
 
-MListBoxLook::MListBoxLook(void)
+MListBoxLook::MListBoxLook()
 {
 	m_SelectedPlaneColor = DEFCOLOR_MLIST_SELECTEDPLANE;
 	m_SelectedTextColor = DEFCOLOR_MLIST_SELECTEDTEXT;
@@ -862,7 +827,7 @@ MListBoxLook::MListBoxLook(void)
 	m_pItemSlotBitmap				= NULL;
 }
 
-bool MListBox::IsAlwaysVisibleScrollbar(void)
+bool MListBox::IsAlwaysVisibleScrollbar()
 {
 	return m_bAlwaysVisibleScrollbar;
 }

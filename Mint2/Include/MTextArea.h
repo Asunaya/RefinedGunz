@@ -1,5 +1,4 @@
-#ifndef MTEXTAREA_H
-#define MTEXTAREA_H
+#pragma once
 
 #include <list>
 #include <string>
@@ -12,7 +11,7 @@ class MScrollBar;
 
 #define MTEXTAREA_DEFAULT_TEXT_COLOR		MCOLOR(224,224,224)
 
-class MTextAreaLook{
+class MTextAreaLook {
 public:
 	virtual void OnDraw(MTextArea* pTextArea, MDrawContext* pDC);
 	virtual MRECT GetClientRect(MTextArea* pTextArea, const MRECT& r);
@@ -36,8 +35,8 @@ struct MLineItem {
 	string text;
 };
 
-typedef list<MLineItem> MLINELIST;
-typedef list<MLineItem>::iterator MLINELISTITERATOR;
+typedef std::list<MLineItem> MLINELIST;
+typedef std::list<MLineItem>::iterator MLINELISTITERATOR;
 
 
 class MTextArea : public MWidget{
@@ -68,20 +67,20 @@ protected:
 	MLINELIST			m_Lines;
 	MLINELISTITERATOR	m_CurrentLine;
 
-	MScrollBar*		m_pScrollBar;
+	std::unique_ptr<MScrollBar>	m_pScrollBar;
 
 	// Look & Feel
 	DECLARE_LOOK(MTextAreaLook)
 	DECLARE_LOOK_CLIENT()
 
 protected:
-	virtual void OnSize(int w, int h);
-	virtual bool OnCommand(MWidget* pWindow, const char* szMessage);
-	virtual bool OnEvent(MEvent* pEvent, MListener* pListener);
-	virtual void OnSetFocus(void);
-	virtual void OnReleaseFocus(void);
+	virtual void OnSize(int w, int h) override;
+	virtual bool OnCommand(MWidget* pWindow, const char* szMessage) override;
+	virtual bool OnEvent(MEvent* pEvent, MListener* pListener) override;
+	virtual void OnSetFocus() override;
+	virtual void OnReleaseFocus() override;
 	
-	virtual bool InputFilterKey(int nKey,bool bCtrl);	// MWM_KEYDOWN
+	virtual bool InputFilterKey(int nKey, bool bCtrl);	// MWM_KEYDOWN
 	virtual bool InputFilterChar(int nKey);	// MWM_CHAR
 
 	bool OnLButtonDown(MPOINT pos);
@@ -114,7 +113,7 @@ public:
 	virtual ~MTextArea();
 
 #define MINT_TEXTAREA	"TextArea"
-	virtual const char* GetClassName(void){ return MINT_TEXTAREA; }
+	virtual const char* GetClassName() override { return MINT_TEXTAREA; }
 
 	MPOINT GetCaretPos() { return m_CaretPos; }
 	int	GetStartLine() { return m_nStartLine; }
@@ -133,7 +132,7 @@ public:
 	void SetMaxLen(int nMaxLen);
 	int	GetMaxLen() { return m_nMaxLen; }
 
-	const char* GetCompositionString(void);
+	const char* GetCompositionString();
 
 	void SetEditable(bool editable){ m_bEditable = editable; }
 	bool GetEditable() { return m_bEditable; }
@@ -146,7 +145,7 @@ public:
 	void SetIndentation(int nIndentation) { m_nIndentation = nIndentation; }
 	
 	void SetTextColor(MCOLOR color);
-	MCOLOR GetTextColor(void);
+	MCOLOR GetTextColor();
 
 	void Clear();
 
@@ -163,5 +162,3 @@ public:
 
 #define MTEXTAREA_ENTER_VALUE		"entered"
 #define MTEXTAREA_ESC_VALUE			"esc"
-
-#endif

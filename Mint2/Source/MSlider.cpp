@@ -25,10 +25,9 @@ IMPLEMENT_LOOK(MSliderThumb, MSliderThumbLook)
 MSliderThumb::MSliderThumb(const char* szName, MWidget* pParent, MListener* pListener)
 : MThumb(szName, pParent, pListener)
 {
-	LOOK_IN_CONSTRUCTOR()
 }
 
-MSIZE MSliderThumb::GetDefaultSize(void)
+MSIZE MSliderThumb::GetDefaultSize()
 {
 	if(GetLook()!=NULL) return GetLook()->GetDefaultSize(this);
 	return MSIZE(MSCROLLBAR_DEFAULT_WIDTH, MSCROLLBAR_DEFAULT_WIDTH);
@@ -37,20 +36,19 @@ MSIZE MSliderThumb::GetDefaultSize(void)
 
 IMPLEMENT_LOOK(MSlider, MScrollBarLook)
 
-int MSlider::GetThumbSize(void)
+int MSlider::GetThumbSize()
 {
 	MSIZE s = ((MSliderThumb*)m_pThumb)->GetDefaultSize();
 	return s.w;
 }
 
-void MSlider::Initialize(void)
+void MSlider::Initialize()
 {
 	delete m_pThumb;
 	m_pThumb = new MSliderThumb(NULL, this, this);
 	MSIZE s = ((MSliderThumb*)m_pThumb)->GetDefaultSize();
 	m_pThumb->SetSize(s.w, s.h);
 	m_pThumb->m_nDirection = MSBT_HORIZONTAL;
-	LOOK_IN_CONSTRUCTOR()
 }
 
 MSlider::MSlider(const char* szName, MWidget* pParent, MListener* pListener)
@@ -65,6 +63,6 @@ MSlider::MSlider(MWidget* pParent, MListener* pListener)
 	Initialize();
 }
 
-MSlider::~MSlider(void)
+MSlider::~MSlider()
 {
 }

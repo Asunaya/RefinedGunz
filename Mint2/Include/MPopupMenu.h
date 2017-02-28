@@ -1,5 +1,4 @@
-#ifndef MPOPUPMENU_H
-#define MPOPUPMENU_H
+#pragma once
 
 #include "MWidget.h"
 #include "MDrawContext.h"
@@ -8,7 +7,6 @@
 class MPopupMenu;
 class MMenuItem;
 
-// MPopupMenu의 Draw 코드가 있는 클래스, 이 클래스를 상속받아서 커스텀룩을 가질 수 있다.
 class MPopupMenuLook {
 public: 
 	MCOLOR		m_SelectedPlaneColor;
@@ -28,25 +26,25 @@ private:
 	bool			m_bSelected;
 
 protected:
-	virtual void OnDraw(MDrawContext* pDC);
+	virtual void OnDraw(MDrawContext* pDC) override;
 	virtual void OnDrawMenuItem(MDrawContext* pDC, bool bSelected);
-	virtual bool OnEvent(MEvent* pEvent, MListener* pListener);
+	virtual bool OnEvent(MEvent* pEvent, MListener* pListener) override;
 public:
 	MMenuItem(const char* szName=NULL);
-	virtual ~MMenuItem(void);
+	virtual ~MMenuItem() override;
 
-	bool IsSelected(void);
+	bool IsSelected();
 
-	int GetWidth(void);
-	int GetHeight(void);
+	int GetWidth();
+	int GetHeight();
 
-	virtual MPopupMenu* CreateSubMenu(void);
-	MPopupMenu* GetSubMenu(void);
+	virtual MPopupMenu* CreateSubMenu();
+	MPopupMenu* GetSubMenu();
 
 	void Select(bool bSelect);
 
 #define MINT_MENUITEM	"MenuItem"
-	virtual const char* GetClassName(void){ return MINT_MENUITEM; }
+	virtual const char* GetClassName() override{ return MINT_MENUITEM; }
 };
 
 enum MPopupMenuTypes{
@@ -60,40 +58,32 @@ protected:
 	int				m_nSelectedMenu;
 
 protected:
-	virtual bool OnEvent(MEvent* pEvent, MListener* pListener);
-
-	virtual bool OnCommand(MWidget* pWindow, const char* szMessage);
+	virtual bool OnEvent(MEvent* pEvent, MListener* pListener) override;
+	virtual bool OnCommand(MWidget* pWindow, const char* szMessage) override;
 
 public:
-	MPopupMenu(const char* szName=NULL, MWidget* pParent=NULL, MListener* pListener=NULL, MPopupMenuTypes t=MPMT_VERTICAL);
-	virtual ~MPopupMenu(void);
+	MPopupMenu(const char* szName = nullptr, MWidget* pParent = nullptr,
+		MListener* pListener = nullptr, MPopupMenuTypes t = MPMT_VERTICAL);
+	virtual ~MPopupMenu() override;
 
 	MPopupMenuTypes GetPopupMenuType() { return m_nPopupMenuType; }
 	virtual MMenuItem* AddMenuItem(const char* szMenuName);
 	void AddMenuItem(MMenuItem* pMenuItem);
 	void RemoveMenuItem(MMenuItem* pMenuItem);
-	void RemoveAllMenuItem(void);
+	void RemoveAllMenuItem();
 
-	virtual void Show(bool bVisible=true);
-	virtual void Show(int x, int y, bool bVisible=true);
-
-	/*
-	void SetScreenBounds(MRECT& r);
-	void SetSize(int w, int h);
-	void SetScreenPosition(int x, int y);
-	*/
+	virtual void Show(bool bVisible = true);
+	virtual void Show(int x, int y, bool bVisible = true);
 
 	void SetType(MPopupMenuTypes t);
-	MPopupMenuTypes GetType(void);
+	MPopupMenuTypes GetType();
 
 	void Select(int idx);
 	void Select(MMenuItem* pMenuItem);
 
 #define MINT_POPUPMENU	"PopupMenu"
-	virtual const char* GetClassName(void){ return MINT_POPUPMENU; }
+	virtual const char* GetClassName() override { return MINT_POPUPMENU; }
 
 	DECLARE_LOOK(MPopupMenuLook)
 	DECLARE_LOOK_CLIENT()
 };
-
-#endif

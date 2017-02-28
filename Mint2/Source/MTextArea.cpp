@@ -2,16 +2,13 @@
 #include "MTextArea.h"
 #include "MColorTable.h"
 #include "MScrollBar.h"
-#include "MEdit.h"	// blinktime땜시
+#include "MEdit.h"
 #include "Mint.h"
 
-#define MTEXTAREA_DEFAULT_WIDTH				100			// Default MTextArea Widget Width, Height는 Font Height에 의해 초기 결정된다.
+#define MTEXTAREA_DEFAULT_WIDTH				100
 
 IMPLEMENT_LOOK(MTextArea, MTextAreaLook)
 
-
-// nPos번째 글자가 어느 위치에 그려져야 하는지 pOut으로 리턴해준다
-// x는 픽셀수 , y 는 라인수,bFirst는 캐럿일경우 앞/뒤플래그
 bool MTextArea::GetCaretPosition(MPOINT *pOut,int nSize,const char* szText,int nPos,bool bFirst)
 {
 	MFont *pFont=GetFont();
@@ -22,13 +19,12 @@ bool MTextArea::GetCaretPosition(MPOINT *pOut,int nSize,const char* szText,int n
 	bool bResult = false;
 
 	int nCurPos=0;
-	do {	// 라인당 루프
+	do {
 		int nIndentation = (nLine==0 ? 0 : m_nIndentation);
 		int nOriginalCharCount = MMGetNextLinePos(pFont,szText+nCurPos,GetClientWidth()-nIndentation,m_bWordWrap,m_bColorSupport);
 		if(nOriginalCharCount==-1) return false;
 
 		for(int i=0; i<nSize && nPos+i<=nLength; i++){
-			// 현재 라인안에 속한 문자(nPos~nPos+nSize)가 있으면 위치 계산 결과 저장
 			if(nPos+i>=nCurPos && nPos+i<=nCurPos+nOriginalCharCount){
 				pOut[i].x = MMGetWidth(pFont, szText+nCurPos, nPos+i-nCurPos, m_bColorSupport) + nIndentation;
 				pOut[i].y = nLine;
@@ -43,53 +39,8 @@ bool MTextArea::GetCaretPosition(MPOINT *pOut,int nSize,const char* szText,int n
 	return bResult;
 }
 
-/*
-// nPos번째 글자가 어느 위치에 그려져야 하는지 pOut으로 리턴해준다
-// x는 픽셀수 , y 는 라인수,bFirst는 캐럿일경우 앞/뒤플래그
-bool MTextArea::GetCaretPosition(MPOINT *pOut,int nSize,const char* szText,int nPos,bool bFirst)
-{
-	MFont *pFont=GetFont();
-
-	int nLine = 0;
-	int nLength = strlen(szText);
-
-	int nCurPos=0;
-	do {
-		int nIndentation = (nLine==0 ? 0 : m_nIndentation);
-		int nOriginalCharCount = MMGetNextLinePos(pFont,szText+nCurPos,GetClientWidth()-nIndentation,m_bWordWrap,m_bColorSupport);
-		if(nOriginalCharCount==-1) return false;
-
-		if(nCurPos+nOriginalCharCount==nPos && nPos<nLength) {
-			// 현재줄의 맨끝 또는 다음줄의 맨 앞.
-			if(bFirst) {
-				pOut->x=MMGetWidth(pFont,szText+nCurPos,nPos-nCurPos,m_bColorSupport)+nIndentation;
-				pOut->y=nLine;
-			}else {
-				pOut->x=m_nIndentation;
-				pOut->y=nLine+1;
-			}
-			return true;
-		}
-
-		// 이번행에 넘어가면
-		if(nCurPos+nOriginalCharCount>=nPos) {
-			pOut->x=MMGetWidth(pFont,szText+nCurPos,nPos-nCurPos,m_bColorSupport)+nIndentation;
-			pOut->y=nLine;
-			return true;
-		}
-		nCurPos+=nOriginalCharCount;
-		nLine++;
-	} while(nCurPos<nLength);
-
-	// 이경우는 일어나면 안된다
-	//	_ASSERT(FALSE);
-	return false;
-}
-*/
-// MDrawTextMultiline으로 그릴때 nLine 행에 nX픽셀 위치에 몇번째 글자가 찍힐지 알려주는 펑션
 int MTextArea::GetCharPosition(const char* szText,int nX,int nLine)
 {
-
 	MFont *pFont = GetFont();
 
 	int nCur= MMGetLinePos(pFont,szText,GetClientWidth(),m_bWordWrap,m_bColorSupport,nLine,m_nIndentation);
@@ -99,8 +50,6 @@ int MTextArea::GetCharPosition(const char* szText,int nX,int nLine)
 	return nCur+x;
 }
 
-// 현재 캐럿의 위치가 한 라인안에서 다음줄로 wrap때문에 넘어간경우
-// 그줄 마지막이나 다음줄 첫번째가 사실상 같은 위치이다. 이런경우인지 알아본다
 bool MTextArea::IsDoubleCaretPos()
 {
 	const char *szText = m_CurrentLine->text.c_str();
@@ -159,7 +108,6 @@ void MTextArea::ScrollUp()
 	}
 }
 
-// ctrl+home , end 눌렀을때. 아직 구현이 안되었음.
 void MTextArea::MoveFirst()
 {
 }
@@ -186,10 +134,10 @@ void MTextArea::UpdateScrollBar(bool bAdjustStart)
 
 		const char *szText = itr->text.c_str();
 		int nLine = MMGetLineCount(GetFont(),szText,nCntWidth,m_bWordWrap,m_bColorSupport,m_nIndentation);
-		if(nLine==-1) 
+		if (nLine == -1)
 		{
 			int nLine = MMGetLineCount(GetFont(),szText,nCntWidth,m_bWordWrap,m_bColorSupport,m_nIndentation);
-			return;	// 폭이 좁아서 실패한경우는 의미가 없다
+			return;
 		}
 
 		if(i==GetStartLine()) {
@@ -208,15 +156,11 @@ void MTextArea::UpdateScrollBar(bool bAdjustStart)
 		itr++;
 	}
 
-	// 스크롤바를 드래그 하고 있을때는 스크롤하지 않는다
-	if(bAdjustStart && MWidget::m_pCapturedWidget!=m_pScrollBar)
+	if (bAdjustStart && MWidget::m_pCapturedWidget != m_pScrollBar.get())
 	{
-//		int nVisibleCount = (r.h-1) / GetLineHeight( GetFont()->GetHeight()) + 1;
 		int nVisibleCount = r.h / GetLineHeight() ;
 		
-		
 		if(nCurrentLine>=nStartLine+nVisibleCount) {
-			// 화면 아래쪽에 캐럿이 있으므로 캐럿이 맨 아랫줄에 오도록 조절한다
             int nCount = nCurrentLine-(nStartLine+nVisibleCount)+1;
 			for(int j=0;j<nCount;j++)
 			{
@@ -226,7 +170,6 @@ void MTextArea::UpdateScrollBar(bool bAdjustStart)
 		}
 
 		if(nCurrentLine<nStartLine) {
-			// 화면 위쪽에 캐럿이 있다.
             int nCount = nStartLine-nCurrentLine;
 			for(int j=0;j<nCount;j++)
 			{
@@ -263,8 +206,8 @@ void MTextArea::OnScrollBarChanged(int nPos)
 	{
 		const char *szText = itr->text.c_str();
 		int nLine = MMGetLineCount(GetFont(),szText,GetClientWidth(),m_bWordWrap,m_bColorSupport,m_nIndentation);
-		if(nLine==-1) 
-			return;	// 폭이 좁아서 실패한경우는 의미가 없다
+		if (nLine == -1)
+			return;
 
 		if(nTotalLine<=nPos && nPos<nTotalLine+nLine) {
 			m_nStartLine = i;
@@ -279,14 +222,14 @@ void MTextArea::OnScrollBarChanged(int nPos)
 
 bool MTextArea::OnCommand(MWidget* pWindow, const char* szMessage)
 {
-	if(pWindow==m_pScrollBar && strcmp(szMessage, MLIST_VALUE_CHANGED)==0){
+	if (pWindow == m_pScrollBar.get() && strcmp(szMessage, MLIST_VALUE_CHANGED) == 0) {
 		OnScrollBarChanged(m_pScrollBar->GetValue());
 		return true;
 	}
 	return false;
 }
 
-bool MTextArea::MoveLeft(bool bBackspace)		// 움직였으면 return true. 백스페이스를 위한 리턴
+bool MTextArea::MoveLeft(bool bBackspace)
 {
 	if(IsDoubleCaretPos() && m_bCaretFirst==false && !bBackspace)
 	{
@@ -309,7 +252,6 @@ bool MTextArea::MoveLeft(bool bBackspace)		// 움직였으면 return true. 백스페이스
 	}
 	else
 	{
-//		맨앞이다.
 		return false;
 	}
 
@@ -328,7 +270,6 @@ void MTextArea::MoveRight()
 		m_CaretPos.x+=2;
 	else
 	if((int)m_CurrentLine->text.size()>m_CaretPos.x)
-//		m_CaretPos.x=min((int)m_CurrentLine->size(),m_CaretPos.x+1);
 		m_CaretPos.x++;
 	else
 	if(m_CaretPos.y+1<(int)m_Lines.size())
@@ -342,7 +283,6 @@ void MTextArea::MoveRight()
 
 void MTextArea::MoveUp()
 {
-	// 현재 라인안에서 움직이면 되는거 먼저 본다
 	if(GetCaretPos().x==m_CurrentLine->text.size()) 
 		m_bCaretFirst=true;
 
@@ -354,8 +294,6 @@ void MTextArea::MoveUp()
 
 	carpos.x++;
 	if(carpos.y>0) {
-		// 현재 라인안에서 움직이면 된다
-
 		if(!m_bVerticalMoving)
 		{
 			m_bVerticalMoving=true;
@@ -367,7 +305,6 @@ void MTextArea::MoveUp()
 		return ;
 	}
 
-	// 윗 라인으로 올라간다
 	if(m_CaretPos.y>0)
 	{
 		MFont *pFont=GetFont();
@@ -388,8 +325,6 @@ void MTextArea::MoveUp()
 
 void MTextArea::MoveDown()
 {
-	// 현재 라인안에서 움직이면 되는거 먼저 본다
-
 	if(GetCaretPos().x==0) 
 		m_bCaretFirst=false;
 
@@ -405,8 +340,6 @@ void MTextArea::MoveDown()
 	carpos.x++;
 
 	if(carpos.y+1<nCurrentLineLineCount) {
-		// 현재 라인안에서 움직이면 된다
-
 		if(!m_bVerticalMoving)
 		{
 			m_bVerticalMoving=true;
@@ -418,7 +351,6 @@ void MTextArea::MoveDown()
 		return ;
 	}
 
-	// 다음 라인으로 넘어간다
 	if(m_CaretPos.y+1<(int)m_Lines.size())
 	{
 		MFont *pFont=GetFont();
@@ -465,19 +397,19 @@ void MTextArea::OnEnd()
 
 void MTextArea::DeleteCurrent()
 {
-	if(m_CaretPos.x+1<(int)m_CurrentLine->text.size() && IsHangul(*(m_CurrentLine->text.begin()+m_CaretPos.x)))		// 한글 
+	if(m_CaretPos.x+1<(int)m_CurrentLine->text.size() && IsHangul(*(m_CurrentLine->text.begin()+m_CaretPos.x)))
 	{
 		m_CurrentLine->text.erase(m_CurrentLine->text.begin()+m_CaretPos.x,m_CurrentLine->text.begin()+m_CaretPos.x+2); 
 		m_nCurrentSize-=2;
 	}
 	else
-	if(m_CaretPos.x<(int)m_CurrentLine->text.size())																// 영문
+	if(m_CaretPos.x<(int)m_CurrentLine->text.size())
 	{
 		m_CurrentLine->text.erase(m_CurrentLine->text.begin()+m_CaretPos.x);
 		m_nCurrentSize--;
 	}
 	else
-	if(m_CaretPos.y+1<(int)m_Lines.size())																	// 줄 맨 뒤
+	if(m_CaretPos.y+1<(int)m_Lines.size())
 	{
 		MLINELISTITERATOR willbedel=m_CurrentLine;
 		willbedel++;
@@ -501,8 +433,8 @@ bool MTextArea::OnLButtonDown(MPOINT pos)
 	{
 		const char *szText = m_CurrentLine->text.c_str();
 		int nLine = MMGetLineCount(GetFont(),szText,GetClientWidth(),m_bWordWrap,m_bColorSupport,m_nIndentation);
-		if(pos.y <= y + nLine*GetLineHeight() ||	// 이 줄을 클릭했거나
-			i==GetLineCount()-1) {	// 마지막줄이거나
+		if(pos.y <= y + nLine*GetLineHeight() ||
+			i==GetLineCount()-1) {
 			int n = min(nLine-1,(pos.y - y) / GetLineHeight());
 
 			m_CaretPos.x=GetCharPosition(szText,pos.x,n);
@@ -514,7 +446,6 @@ bool MTextArea::OnLButtonDown(MPOINT pos)
 		m_CurrentLine++;
 	}
 
-	// 이경우가 생기면 안됨
 	_ASSERT(FALSE);
 	return false;
 }
@@ -562,15 +493,6 @@ bool MTextArea::OnEvent(MEvent* pEvent, MListener* pListener)
 	case MWM_MOUSEWHEEL:
 		if(r.InPoint(pEvent->Pos)==false) break;
 
-		/*
-#define MAX_WHEEL_RANGE	2
-
-		// 
-		m_nStartLine=m_nStartLine+min(max(-pEvent->nDelta, -MAX_WHEEL_RANGE), MAX_WHEEL_RANGE);
-		m_nStartLine=max(0,min(m_nStartLine,(int)m_Lines.size()-1));
-		UpdateScrollBar();
-		*/
-
 		if(pEvent->nDelta<0)
 		{
 			ScrollDown();
@@ -583,10 +505,9 @@ bool MTextArea::OnEvent(MEvent* pEvent, MListener* pListener)
 		UpdateScrollBar();
 
 
-		return false; // 다른 윈도우도 같이쓰자~
+		return false;
 
 	case MWM_LBUTTONDOWN: 	
-		// 마우스 클릭으로 캐럿 포지셔닝
 		{
 			MRECT r = GetClientRect();
 			if(r.InPoint(pEvent->Pos)==true){
@@ -598,12 +519,12 @@ bool MTextArea::OnEvent(MEvent* pEvent, MListener* pListener)
 	return false;
 }
 
-void MTextArea::OnSetFocus(void)
+void MTextArea::OnSetFocus()
 {
 	Mint::GetInstance()->EnableIME(true);
 }
 
-void MTextArea::OnReleaseFocus(void)
+void MTextArea::OnReleaseFocus()
 {
 	Mint::GetInstance()->EnableIME(false);
 }
@@ -626,7 +547,8 @@ bool MTextArea::InputFilterKey(int nKey,bool bCtrl)
 
 	case VK_RETURN :
 		if(GetLength()<GetMaxLen()){
-			MLineItem newline(m_CurrentLine->color,string(m_CurrentLine->text.begin()+m_CaretPos.x,m_CurrentLine->text.end()));
+			MLineItem newline(m_CurrentLine->color,
+				string(m_CurrentLine->text.begin() + m_CaretPos.x, m_CurrentLine->text.end()));
 			m_CurrentLine->text.erase(m_CaretPos.x,m_CurrentLine->text.size());
 			m_CurrentLine++;
 			m_CurrentLine=m_Lines.insert(m_CurrentLine,newline);
@@ -648,7 +570,6 @@ bool MTextArea::InputFilterChar(int nKey)
 		return true;
 	}
 	else if(nKey==VK_ESCAPE){
-		//ReleaseFocus();
 		MListener* pListener = GetListener();
 		if(pListener!=NULL) pListener->OnCommand(this, MTEXTAREA_ESC_VALUE);
 		return true;
@@ -670,12 +591,9 @@ bool MTextArea::InputFilterChar(int nKey)
 
 void MTextArea::SetMaxLen(int nMaxLen)
 {
-//	if(m_pBuffer) delete m_pBuffer;
 	m_Lines.erase(m_Lines.begin(),m_Lines.end());
 
 	m_nMaxLen = nMaxLen;
-//	m_pBuffer = new char[nMaxLen];
-//	m_pBuffer[0] = NULL;
 
 	m_nStartLine=0;
 	m_nStartLineSkipLine=0;
@@ -690,8 +608,6 @@ void MTextArea::SetMaxLen(int nMaxLen)
 MTextArea::MTextArea(int nMaxLen, const char* szName, MWidget* pParent, MListener* pListener)
  : MWidget(szName, pParent, pListener) , m_TextOffset(0, 0)
 {
-	LOOK_IN_CONSTRUCTOR()
-
 	m_bScrollBarEnable = true;
 	m_bWordWrap = true;
 	m_bColorSupport = true;
@@ -710,12 +626,11 @@ MTextArea::MTextArea(int nMaxLen, const char* szName, MWidget* pParent, MListene
 	m_szIMECompositionString[0] = NULL;
 	m_bEditable = true;
 	
-	m_pScrollBar = new MScrollBar(this, this);
+	m_pScrollBar = std::make_unique<MScrollBar>(this, this);
 	m_pScrollBar->Show(false,false);
 
 	SetFocusEnable(true);
 
-//	m_pBuffer=NULL;
 	SetMaxLen(nMaxLen);
 }
 
@@ -729,19 +644,12 @@ void MTextArea::SetTextColor(MCOLOR color)
 	m_TextColor = color;
 }
 
-MCOLOR MTextArea::GetTextColor(void)
+MCOLOR MTextArea::GetTextColor()
 {
 	return m_TextColor;
 }
 
-MTextArea::~MTextArea()
-{
-/*	if(m_pBuffer){
-		delete []m_pBuffer;
-		m_pBuffer = NULL;
-	}*/
-	delete m_pScrollBar;
-}
+MTextArea::~MTextArea() = default;
 
 bool MTextArea::GetText(char *pBuffer,int nBufferSize)
 {
@@ -836,7 +744,7 @@ void MTextAreaLook::OnFrameDraw(MTextArea* pTextArea, MDrawContext* pDC)
 //	pDC->Rectangle(r);
 }
 
-const char* MTextArea::GetCompositionString(void)
+const char* MTextArea::GetCompositionString()
 {
 	return m_szIMECompositionString;
 }

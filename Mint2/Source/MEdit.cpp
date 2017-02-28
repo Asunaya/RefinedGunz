@@ -7,7 +7,7 @@
 #include "Mint.h"
 #include "MDebug.h"
 
-#define MEDIT_DEFAULT_WIDTH				100			// Default MEdit Widget Width, Height는 Font Height에 의해 초기 결정된다.
+#define MEDIT_DEFAULT_WIDTH				100
 
 IMPLEMENT_LOOK(MEdit, MEditLook)
 
@@ -61,13 +61,6 @@ int PrevPos(char* szText, int nPos)
 	int nLen = strlen(szText);
 	if(nPos<=1) return 0;
 
-	/*
-	int nNewPos = nPos-1;
-	if(nNewPos>0 && IsHangul(szText[nNewPos-1])==true) nNewPos--;
-
-	return nNewPos;
-	*/
-
 	int nCurPos=0;
 	while(1)
 	{
@@ -77,27 +70,23 @@ int PrevPos(char* szText, int nPos)
 	}
 }
 
-void MEdit::OnHide(void)
+void MEdit::OnHide()
 {
 	if (GetTabHandler()) {
 		GetTabHandler()->Show(false);
 	}
 }
 
-static bool g_bFocus=false;
+static bool g_bFocus = false;
 
-void MEdit::OnSetFocus(void)
+void MEdit::OnSetFocus()
 {
 	Mint::GetInstance()->EnableIME(true);
-//	g_bFocus=true;
-//	MEvent::ForceSetIME(Mint::GetInstance()->m_dwIMEConvMode, IME_SMODE_AUTOMATIC);
 }
 
-void MEdit::OnReleaseFocus(void)
+void MEdit::OnReleaseFocus()
 {
 	Mint::GetInstance()->EnableIME(false);
-//	g_bFocus=false;
-//	MEvent::ForceSetIME(IME_CMODE_ALPHANUMERIC, IME_SMODE_AUTOMATIC);
 }
 
 bool MEdit::OnEvent(MEvent* pEvent, MListener* pListener)
@@ -116,8 +105,6 @@ bool MEdit::OnEvent(MEvent* pEvent, MListener* pListener)
 			return ret;
 		}
 		break;
-		//InputFilterKey(pEvent->nKey);
-		//return true;
 	case MWM_CHAR:
 		{
 			bool ret = false;
@@ -130,20 +117,6 @@ bool MEdit::OnEvent(MEvent* pEvent, MListener* pListener)
 					if(InsertString(m_pBuffer, temp, m_nCaretPos, m_nMaxLength)==true)
 						m_nCaretPos++;
 					_ASSERT(m_nCaretPos>=0 && m_nCaretPos<=(int)strlen(m_pBuffer));
-					/*
-					if(m_nCaretPos==nLen){
-						m_pBuffer[nLen] = (char)pEvent->nKey;
-						m_pBuffer[nLen+1] = 0;
-					}
-					else{
-						char* temp = new char[nLen];
-						strcpy_safe(temp, m_pBuffer+m_nCaretPos);
-						m_pBuffer[m_nCaretPos] = (char)pEvent->nKey;
-						m_nCaretPos++;
-						strcpy_safe(m_pBuffer+m_nCaretPos, temp);
-						delete temp;
-					}
-					*/
 				}
 				ret=true;
 			}
@@ -155,34 +128,21 @@ bool MEdit::OnEvent(MEvent* pEvent, MListener* pListener)
 		break;
 	case MWM_IMECONVERSION:
 		{
-//			OutputDebugString("MWM_IMECONVERSION\n");
-			// IsFocus() 를 사용하면 ReleaseFocus때에 바뀔때에도 true이기 때문에...
 			if(g_bFocus) OnSetFocus();
 		}return false;
 	case MWM_IMECOMPOSE:
-		/*
-		OutputDebugString("MWM_IMECOMPOSE\n");
-		OutputDebugString(m_szIMECompositionString);
-		*/
 		strcpy_safe(m_szIMECompositionString, pEvent->szIMECompositionString);
 		if(pEvent->szIMECompositionResultString[0]!=NULL){
 			if(InsertString(m_pBuffer, pEvent->szIMECompositionResultString, m_nCaretPos, m_nMaxLength)==true){
 				m_nCaretPos += strlen(pEvent->szIMECompositionResultString);
 				_ASSERT(m_nCaretPos>=0 && m_nCaretPos<=(int)strlen(m_pBuffer));
 			}
-			/*
-			int nLen = strlen(m_pBuffer);
-			if(nLen<int(m_nMaxLength-strlen(pEvent->szIMECompositionResultString))){
-				wsprintf(m_pBuffer, "%s%s", m_pBuffer, pEvent->szIMECompositionResultString);
-			}
-			*/
 			MListener* pListener = GetListener();
 			if(pListener!=NULL) pListener->OnCommand(this, MEDIT_CHAR_MSG);
 
 		}
 		return true;
 	case MWM_LBUTTONDOWN:
-		// 마우스 클릭으로 캐럿 포지셔닝
 		{
 			MRECT r = GetClientRect();
 			if(r.InPoint(pEvent->Pos)==true){
@@ -196,7 +156,6 @@ bool MEdit::OnEvent(MEvent* pEvent, MListener* pListener)
 		}
 
 	case MWM_MOUSEMOVE:
-		// 현재 캐럿의 위치와 다른 위치일 경우 셀렉트로 인정
 		{			
 			if( !bMyEvent ) return false;
 		
@@ -220,40 +179,11 @@ bool MEdit::OnEvent(MEvent* pEvent, MListener* pListener)
 	}
 	return false;
 }
-/*
-bool MEdit::OnEvent(MEvent* pEvent, MListener* pListener)
-{
-	switch(pEvent->nMessage){
-	case MWM_CHAR:
-		if(InputFilter(pEvent->nKey)==false){
-			int nLen = strlen(m_pBuffer);
-			if(nLen<m_nMaxLength-1){
-				m_pBuffer[nLen] = (char)pEvent->nKey;
-				m_pBuffer[nLen+1] = 0;
-			}
-		}
-		return true;
-	case MWM_IMECOMPOSE:
-		OutputDebugString("MWM_IMECOMPOSE\n");
-		strcpy_safe(m_szIMECompositionString, pEvent->szIMECompositionString);
-		OutputDebugString(m_szIMECompositionString);
-		if(pEvent->szIMECompositionResultString[0]!=NULL){
-			int nLen = strlen(m_pBuffer);
-			if(nLen<int(m_nMaxLength-strlen(pEvent->szIMECompositionResultString))){
-				wsprintf(m_pBuffer, "%s%s", m_pBuffer, pEvent->szIMECompositionResultString);
-			}
-		}
-		return true;
-	}
-	return false;
-}
-*/
 
 bool MEdit::InputFilterKey(int nKey)
 {
 	if(nKey==VK_DELETE){
 		int nCount = DeleteChar(m_pBuffer, m_nCaretPos);
-		//m_nCaretPos += nCount;
 		return true;
 	}
 	else if(nKey==VK_LEFT){
@@ -303,7 +233,6 @@ bool MEdit::InputFilterKey(int nKey)
 		return true;
 	}
 	else if(nKey==VK_RETURN){
-		//ReleaseFocus();
 		if(m_bSupportHistory==true) AddHistory(GetText());
 		MListener* pListener = GetListener();
 		if(pListener!=NULL) return pListener->OnCommand(this, MEDIT_ENTER_VALUE);
@@ -333,22 +262,11 @@ bool MEdit::InputFilterChar(int nKey)
 			m_nCaretPos = nCaretPos;
 			_ASSERT(m_nCaretPos>=0 && m_nCaretPos<=(int)strlen(m_pBuffer));
 		}
-		/*
-		int nLen = strlen(m_pBuffer);
-		if(nLen!=0){
-			if(nLen>1 && (unsigned char)m_pBuffer[nLen-1]>127)	//한글
-				m_pBuffer[nLen-2] = 0;
-			else	// 영문
-				m_pBuffer[nLen-1] = 0;
-		}
-		*/
-		// 캐럿이 문자열의 시작지점보다 앞쪽이면, 보이게끔 해준다.
 		if(m_nCaretPos<m_nStartPos) m_nStartPos = m_nCaretPos;
 
 		return true;
 	}
 	else if(nKey==VK_ESCAPE){
-		//ReleaseFocus();
 		MListener* pListener = GetListener();
 		if(pListener!=NULL) pListener->OnCommand(this, MEDIT_ESC_VALUE);
 		return true;
@@ -384,7 +302,7 @@ bool MEdit::InputFilterChar(int nKey)
 	switch(nKey){
 	case VK_TAB:
 	case VK_RETURN:
-	case VK_NONCONVERT:		// ctrl+] 를 하면 들어가는 문자, 무엇인지는 모름.
+	case VK_NONCONVERT:		// ctrl+]
 		return true;
 	}
 
@@ -396,17 +314,12 @@ bool MEdit::InputFilterChar(int nKey)
 
 void MEdit::Initialize(int nMaxLength, const char* szName)
 {
-	LOOK_IN_CONSTRUCTOR()
-
 	m_nMaxLength = nMaxLength+2;
 	m_bMouseOver = false;
 
 	MFont* pFont = GetFont();
 	int w = MEDIT_DEFAULT_WIDTH;
 	int h = pFont->GetHeight()+2;
-	//SetTextOffset(MPOINT(1, 1));
-
-	//m_TextColor = MCOLOR(0, 255, 0); 
 
 	m_pBuffer = new char[m_nMaxLength];
 	m_pBuffer[0] = NULL;
@@ -429,13 +342,13 @@ void MEdit::Initialize(int nMaxLength, const char* szName)
 }
 
 MEdit::MEdit(int nMaxLength, const char* szName, MWidget* pParent, MListener* pListener )
- : MWidget(szName, pParent, pListener) //, m_TextOffset(0, 0)
+ : MWidget(szName, pParent, pListener)
 {
 	Initialize(nMaxLength, szName);
 }
 
 MEdit::MEdit(const char* szName, MWidget* pParent, MListener* pListener)
- : MWidget(szName, pParent, pListener) //, m_TextOffset(0, 0)
+ : MWidget(szName, pParent, pListener)
 {
 	Initialize(200, szName);
 }
@@ -454,24 +367,6 @@ MEdit::~MEdit()
 	}
 }
 
-/*
-void MEdit::SetTextOffset(MPOINT p)
-{
-	m_TextOffset = p;
-}
-*/
-/*
-void MEdit::SetTextColor(MCOLOR color)
-{
-	m_TextColor = color;
-}
-
-MCOLOR MEdit::GetTextColor(void)
-{
-	return m_TextColor;
-}
-*/
-
 void MEdit::SetText(const char* szText)
 {
 	if(m_pBuffer) {
@@ -483,7 +378,7 @@ void MEdit::SetText(const char* szText)
 		m_nStartPos=m_nCaretPos;
 }
 
-const char* MEdit::GetText(void)
+const char* MEdit::GetText()
 {
 	return m_pBuffer;
 }
@@ -496,19 +391,19 @@ void MEdit::AddText(const char* szText)
 	SetText(temp);
 }
 
-int MEdit::MoveCaretHome(void)
+int MEdit::MoveCaretHome()
 {
 	m_nCaretPos = 0;
 	return m_nCaretPos;
 }
 
-int MEdit::MoveCaretEnd(void)
+int MEdit::MoveCaretEnd()
 {
 	m_nCaretPos = strlen(m_pBuffer);
 	return m_nCaretPos;
 }
 
-int MEdit::MoveCaretPrev(void)
+int MEdit::MoveCaretPrev()
 {
 	m_nCaretPos = PrevPos(m_pBuffer, m_nCaretPos);
 	if(m_nCaretPos<m_nStartPos)
@@ -519,24 +414,24 @@ int MEdit::MoveCaretPrev(void)
 	return m_nCaretPos;
 }
 
-int MEdit::MoveCaretNext(void)
+int MEdit::MoveCaretNext()
 {
 	m_nCaretPos = NextPos(m_pBuffer, m_nCaretPos);
 	_ASSERT(m_nCaretPos>=0 && m_nCaretPos<=(int)strlen(m_pBuffer));
 	return m_nCaretPos;
 }
 
-int MEdit::GetMaxLength(void)
+int MEdit::GetMaxLength()
 {
 	return m_nMaxLength;
 }
 
-const char* MEdit::GetCompositionString(void)
+const char* MEdit::GetCompositionString()
 {
 	return m_szIMECompositionString;
 }
 
-int MEdit::GetCarretPos(void)
+int MEdit::GetCarretPos()
 {
 	return m_nCaretPos;
 }
@@ -578,7 +473,7 @@ void MEdit::SetPasswordField(bool bPassword)
 	m_bPassword = bPassword;
 }
 
-bool MEdit::IsPasswordField(void)
+bool MEdit::IsPasswordField()
 {
 	return m_bPassword;
 }

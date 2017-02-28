@@ -6,7 +6,6 @@ MComboListBox::MComboListBox(MWidget* pParent, MListener* pListener)
 : MListBox(pParent, pListener)
 {
 	m_bClipByParent = false;
-	LOOK_IN_CONSTRUCTOR()
 }
 
 bool MComboListBox::OnEvent(MEvent* pEvent, MListener* pListener)
@@ -19,7 +18,7 @@ bool MComboListBox::OnEvent(MEvent* pEvent, MListener* pListener)
 	case MWM_LBUTTONDBLCLK:
 	case MWM_RBUTTONDBLCLK:
 		Show(false);
-		return false;	// 다른 Widget에게 넘겨준다.
+		return false;
 	}
 
 	return false;
@@ -33,7 +32,7 @@ IMPLEMENT_LOOK(MComboListBox, MListBoxLook)
 MComboBox::MComboBox(const char* szName, MWidget* pParent, MListener* pListener)
 : MButton(szName, pParent, pListener)
 {
-	MButton::SetListener(this);	// Button 메세지는 한번 걸러서 보내준다.
+	MButton::SetListener(this);
 
 	m_pListBox = new MComboListBox(pParent, this);
 	m_pListBox->Show(false);
@@ -42,7 +41,7 @@ MComboBox::MComboBox(const char* szName, MWidget* pParent, MListener* pListener)
 
 	if(szName!=NULL && szName[0]!=0) Add(szName);
 
-	m_bHighlight = false; // 콤보박스에서는 하이라이트(&)를 지원할 필요가 없다.
+	m_bHighlight = false;
 
 	m_pComboBoxListener = pListener;
 
@@ -55,7 +54,7 @@ MComboBox::MComboBox(const char* szName, MWidget* pParent, MListener* pListener)
 	m_bDropUnder = true;
 }
 
-MComboBox::~MComboBox(void)
+MComboBox::~MComboBox()
 {
 	delete m_pListBox;
 }
@@ -90,17 +89,17 @@ void MComboBox::Remove(int i)
 	m_pListBox->Remove(i);
 }
 
-void MComboBox::RemoveAll(void)
+void MComboBox::RemoveAll()
 {
 	m_pListBox->RemoveAll();
 }
 
-int MComboBox::GetCount(void)
+int MComboBox::GetCount()
 {
 	return m_pListBox->GetCount();
 }
 
-int MComboBox::GetSelIndex(void)
+int MComboBox::GetSelIndex()
 {
 	return m_pListBox->GetSelIndex();
 }
@@ -112,12 +111,12 @@ bool MComboBox::SetSelIndex(int i)
 	return bReturn;
 }
 
-const char* MComboBox::GetSelItemString(void)
+const char* MComboBox::GetSelItemString()
 {
 	return m_pListBox->GetSelItemString();
 }
 
-MListItem* MComboBox::GetSelItem(void)
+MListItem* MComboBox::GetSelItem()
 {
 	return m_pListBox->GetSelItem();
 }
@@ -175,14 +174,12 @@ bool MComboBox::OnCommand(MWidget* pWindow, const char* szMessage)
 		
 		bool bSCheck = false;
 
- 		if(m_nComboType == 0) { // 2부분으로 나누어처리
+ 		if(m_nComboType == 0) {
 
 			if( GetNextComboBoxTypeSize() > m_ClickPos.x ) {
 				bSCheck = true;
 			}
 		}
-
-		// DropHeight가 넉넉하면 자동으로 크기를 줄인다.
 
 		if(bSCheck) {
 
@@ -247,7 +244,7 @@ bool MComboBox::OnCommand(MWidget* pWindow, const char* szMessage)
 	return false;
 }
 
-void MComboBox::Sort(void)
+void MComboBox::Sort()
 {
 	m_pListBox->Sort();
 }
@@ -256,7 +253,7 @@ void MComboBox::SetListener(MListener* pListener)
 {
 	m_pComboBoxListener = pListener;
 }
-MListener* MComboBox::GetListener(void)
+MListener* MComboBox::GetListener()
 {
 	return MWidget::GetListener();
 }

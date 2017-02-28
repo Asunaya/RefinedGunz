@@ -7,7 +7,7 @@ IMPLEMENT_LOOK(MPopupMenu, MPopupMenuLook)
 
 
 //// MPopupMenuLook ////
-MPopupMenuLook::MPopupMenuLook(void)
+MPopupMenuLook::MPopupMenuLook()
 {
 	m_SelectedPlaneColor = DEFCOLOR_MLIST_SELECTEDPLANE;
 	m_SelectedTextColor = DEFCOLOR_MLIST_SELECTEDTEXT;
@@ -16,7 +16,6 @@ MPopupMenuLook::MPopupMenuLook(void)
 
 void MPopupMenuLook::OnFrameDraw(MPopupMenu* pPopupMenu, MDrawContext* pDC)
 {
-//	MRECT r = pPopupMenu->GetInitialClientRect();
 	MRECT r = pPopupMenu->GetClientRect();
 	pDC->SetColor(MCOLOR(DEFCOLOR_MPOPUP_PLANE));
 	pDC->FillRectangle(r);
@@ -70,11 +69,9 @@ bool MMenuItem::OnEvent(MEvent* pEvent, MListener* pListener)
 			pPopupMenu->Select(this);
 			return true;
 		}
-		//else Select(false);
 		break;
 	case MWM_LBUTTONUP:
 		if(r.InPoint(pEvent->Pos)==true){
-			//m_bSelected = true;
 			MPopupMenu* pPopupMenu = (MPopupMenu *)GetParent();
 			if(GetSubMenu()!=NULL) pPopupMenu->Select(this);
 			else{
@@ -92,10 +89,9 @@ bool MMenuItem::OnEvent(MEvent* pEvent, MListener* pListener)
 MMenuItem::MMenuItem(const char* szName) : MWidget(szName, NULL, NULL)
 {
 	m_bSelected = false;
-//	m_Anchors.m_bRight=true;
 }
 
-MMenuItem::~MMenuItem(void)
+MMenuItem::~MMenuItem()
 {
 	while(m_Children.GetCount()>0){
 		MWidget* pWidget = m_Children.Get(0);
@@ -103,42 +99,36 @@ MMenuItem::~MMenuItem(void)
 	}
 }
 
-bool MMenuItem::IsSelected(void)
+bool MMenuItem::IsSelected()
 {
 	return m_bSelected;
 }
 
 #define MENUITEM_MARGIN_X	20
 #define MENUITEM_MARGIN_Y	4
-int MMenuItem::GetWidth(void)
+int MMenuItem::GetWidth()
 {
 	MFont* pFont = GetFont();
 	const char* szText = GetText();
 
 	return pFont->GetWidth(szText) + MENUITEM_MARGIN_X;
-//	return GetClientRect().w;
 }
 
-int MMenuItem::GetHeight(void)
+int MMenuItem::GetHeight()
 {
 	MFont* pFont = GetFont();
 	return pFont->GetHeight() + MENUITEM_MARGIN_Y;
 	return GetClientRect().h;
 }
-/*
-void MMenuItem::SetSubMenu(MPopupMenu* pMenu)
-{
-	m_pSubMenu = pMenu;
-}
-*/
-MPopupMenu* MMenuItem::CreateSubMenu(void)
+
+MPopupMenu* MMenuItem::CreateSubMenu()
 {
 	if(m_Children.GetCount()>0) return (MPopupMenu *)m_Children.Get(0);
 	MPopupMenu* pSubMenu = new MPopupMenu("SubMenu", this, GetParent());
 	return pSubMenu;
 }
 
-MPopupMenu* MMenuItem::GetSubMenu(void)
+MPopupMenu* MMenuItem::GetSubMenu()
 {
 	if(m_Children.GetCount()>0) return (MPopupMenu *)m_Children.Get(0);
 	return NULL;
@@ -146,8 +136,6 @@ MPopupMenu* MMenuItem::GetSubMenu(void)
 
 void MMenuItem::Select(bool bSelect)
 {
-	//if(m_bSelected==bSelect) return;	// Sub Menu를 보여주기 위해 주석 처리..
-
 	m_bSelected = bSelect;
 
 	MRECT r = GetClientRect();
@@ -175,7 +163,6 @@ bool MPopupMenu::OnEvent(MEvent* pEvent, MListener* pListener)
 	case MWM_LBUTTONUP:
 	case MWM_LBUTTONDBLCLK:
 	case MWM_RBUTTONDOWN:
-	//case MWM_RBUTTONUP:
 	case MWM_RBUTTONDBLCLK:
 	case MWM_MBUTTONDOWN:
 	case MWM_MBUTTONUP:
@@ -192,11 +179,9 @@ bool MPopupMenu::OnEvent(MEvent* pEvent, MListener* pListener)
 MPopupMenu::MPopupMenu(const char* szName, MWidget* pParent, MListener* pListener, MPopupMenuTypes t) : MWidget(szName, pParent, pListener)
 {
 	m_nPopupMenuType = t;
-
-	LOOK_IN_CONSTRUCTOR()
 }
 
-MPopupMenu::~MPopupMenu(void)
+MPopupMenu::~MPopupMenu()
 {
 	while(m_Children.GetCount()>0){
 		MWidget* pWidget = m_Children.Get(0);
@@ -255,9 +240,9 @@ void MPopupMenu::RemoveMenuItem(MMenuItem* pMenuItem)
 	delete pMenuItem;
 }
 
-void MPopupMenu::RemoveAllMenuItem(void)
+void MPopupMenu::RemoveAllMenuItem()
 {
-	while(GetChildCount()>0){
+	while (GetChildCount() > 0) {
 		MWidget* pChild = m_Children.Get(0);
 		delete pChild;
 	}
@@ -266,14 +251,13 @@ void MPopupMenu::RemoveAllMenuItem(void)
 void MPopupMenu::Show(int x, int y, bool bVisible)
 {
 	MWidget::Show(bVisible);
-	if(bVisible==true) SetPosition(x, y);
+	if (bVisible == true) SetPosition(x, y);
 }
 
 void MPopupMenu::Show(bool bVisible)
 {
-	Select((MMenuItem *)NULL);
+	Select(nullptr);
 	MWidget::Show(bVisible);
-	//Show(0, 0, bVisible);
 }
 
 void MPopupMenu::SetType(MPopupMenuTypes t)
@@ -281,7 +265,7 @@ void MPopupMenu::SetType(MPopupMenuTypes t)
 	m_nPopupMenuType = t;
 }
 
-MPopupMenuTypes MPopupMenu::GetType(void)
+MPopupMenuTypes MPopupMenu::GetType()
 {
 	return m_nPopupMenuType;
 }

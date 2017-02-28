@@ -1,8 +1,6 @@
-#ifndef MLISTBOX_H
-#define MLISTBOX_H
+#pragma once
 
 #include "MWidget.h"
-//#include "CMPtrList.h"
 #include "CMList.h"
 #include "MScrollBar.h"
 #include "MColorTable.h"
@@ -19,10 +17,10 @@ class MListItem{
 public:
 	bool m_bSelected;
 
-	MListItem(void) { m_bSelected = false; }
-	virtual ~MListItem(void){}
+	MListItem() { m_bSelected = false; }
+	virtual ~MListItem(){}
 
-	virtual const char* GetString(void) = 0;
+	virtual const char* GetString() = 0;
 	virtual const char* GetString(int i){
 		if(i==0) return GetString();
 		return NULL;
@@ -30,14 +28,14 @@ public:
 	virtual void SetString(const char *szText){
 	}
 
-	MBitmap* GetBitmap(void){
+	MBitmap* GetBitmap(){
 		return GetBitmap(0);
 	}
 	virtual MBitmap* GetBitmap(int i){
 		return NULL;
 	}
 
-	virtual const MCOLOR GetColor(void) { return GetColor(0); }
+	virtual const MCOLOR GetColor() { return GetColor(0); }
 	virtual const MCOLOR GetColor(int i) { 
 		return MCOLOR(DEFCOLOR_MLIST_TEXT);
 	}
@@ -70,7 +68,7 @@ public:
 		m_szString = NULL;
 		m_pBitmap = pBitmap;
 	}
-	virtual ~MListFieldItem(void){
+	virtual ~MListFieldItem(){
 		if(m_szString!=NULL){
 			delete[] m_szString;
 			m_szString = NULL;
@@ -78,7 +76,7 @@ public:
 		m_szString = NULL;
 	}
 
-	virtual const char* GetString(void){
+	virtual const char* GetString(){
 		return m_szString;
 	}
 	virtual void SetString(const char* szString){
@@ -91,7 +89,7 @@ public:
 	void SetColor(MCOLOR color) { m_Color = color; }
 	virtual const MCOLOR GetColor() { return m_Color; }
 
-	MBitmap* GetBitmap(void){ return m_pBitmap; }
+	MBitmap* GetBitmap(){ return m_pBitmap; }
 	void SetBitmap(MBitmap* pBitmap){ m_pBitmap = pBitmap; }
 };
 
@@ -99,7 +97,7 @@ public:
 class MDefaultListItem : public MListItem{
 	CMPtrList<MListFieldItem>	m_Items;
 public:
-	MDefaultListItem(void){
+	MDefaultListItem(){
 	}
 	MDefaultListItem(const char* szText, const MCOLOR color) {
 		MListFieldItem* pNew = new MListFieldItem(szText, color);
@@ -115,21 +113,21 @@ public:
 		pNew = new MListFieldItem(szText);
 		m_Items.Add(pNew);
 	}
-	virtual ~MDefaultListItem(void){
+	virtual ~MDefaultListItem() override {
 		for(int i=0; i<m_Items.GetCount(); i++){
 			MListFieldItem* pItem = m_Items.Get(i);
 			delete pItem;
 		}
 	}
-	virtual const char* GetString(void){
+	virtual const char* GetString() override{
 		if(m_Items.GetCount()>0) return m_Items.Get(0)->GetString();
 		return NULL;
 	}
-	virtual const char* GetString(int i){
+	virtual const char* GetString(int i) override{
 		if(i<m_Items.GetCount()) return m_Items.Get(i)->GetString();
 		return NULL;
 	}
-	virtual void SetString(const char *szText){
+	virtual void SetString(const char *szText) override{
 		if(m_Items.GetCount()){
 			delete m_Items.Get(0);
 			m_Items.Delete(0);
@@ -139,26 +137,15 @@ public:
 		m_Items.InsertBefore(pNew);
 	}
 
-	virtual MBitmap* GetBitmap(int i){
+	virtual MBitmap* GetBitmap(int i) override{
 		if(i<m_Items.GetCount()) return m_Items.Get(i)->GetBitmap();
 		return NULL;
 	}
 
-	virtual const MCOLOR GetColor() { 
+	virtual const MCOLOR GetColor() override { 
 		if (m_Items.GetCount()>0) return m_Items.Get(0)->GetColor();
 		return MCOLOR(DEFCOLOR_MLIST_TEXT);
 	}
-	/*
-	virtual int GetBitmapMaxHeight(void){
-		int nHeight = 0;
-		for(int i=0; i<m_Items.GetCount(); i++){
-			MListFieldItem* pItem = m_Items.Get(i);
-			MBitmap* pBitmap = pItem->GetBitmap();
-			if(pBitmap!=NULL) nHeight = max(nHeight, pBitmap->GetHeight());
-		}
-		return nHeight;
-	}
-	*/
 };
 
 struct MLISTFIELD{
@@ -181,7 +168,7 @@ protected:
 	virtual int OnItemDraw(MDrawContext* pDC, MRECT& r, MBitmap* pBitmap, bool bSelected, bool bFocus, int nAdjustWidth = 0);
 	virtual void OnFrameDraw(MListBox* pListBox, MDrawContext* pDC);
 public:
-	MListBoxLook(void);
+	MListBoxLook();
 
 	virtual void OnDraw(MListBox* pListBox, MDrawContext* pDC);
 	virtual MRECT GetClientRect(MListBox* pListBox, const MRECT& r);
@@ -189,14 +176,13 @@ public:
 
 typedef void (*ZCB_ONDROP)(void* pSelf, MWidget* pSender, MBitmap* pBitmap, const char* szString, const char* szItemString);
 
-/// 리스트 박스
 class MListBox : public MWidget{
 protected:
 	class SortedItemList : public CMLinkedList<MListItem>{
 	public:
 		bool	m_bAscend;
 	public:
-		SortedItemList(void){
+		SortedItemList(){
 			m_bAscend = true;
 		}
 		virtual int Compare(MListItem *lpRecord1,MListItem *lpRecord2){
@@ -222,26 +208,26 @@ protected:
 	ZCB_ONDROP		m_pOnDropFunc;
 
 public:
-	bool			m_bAbsoulteTabSpacing;	// Field간격이 절대 Pixel값인지, 아님 %값인지.
+	bool			m_bAbsoulteTabSpacing;
 	bool			m_bHideScrollBar;
 	bool			m_bNullFrame;
 	bool			m_bMultiSelect;
 
 protected:
-	virtual bool OnEvent(MEvent* pEvent, MListener* pListener);
-	virtual bool OnDrop(MWidget* pSender, MBitmap* pBitmap, const char* szString, const char* szItemString);
-	virtual bool IsDropable(MWidget* pSender)		{ return m_bDragAndDrop; }
+	virtual bool OnEvent(MEvent* pEvent, MListener* pListener) override;
+	virtual bool OnDrop(MWidget* pSender, MBitmap* pBitmap, const char* szString, const char* szItemString) override;
+	virtual bool IsDropable(MWidget* pSender) override { return m_bDragAndDrop; }
 
-	void RecalcList(void);			// 리스트 박스 레이 아웃 전체 정보 갱신
-	void RecalcScrollBar(void);		// 현재 아이템 개수에 따른 스크롤 바 세팅
+	void RecalcList();
+	void RecalcScrollBar();
 
 	int FindNextItem(int i, char c);
 
-	virtual void OnSize(int w, int h);
+	virtual void OnSize(int w, int h) override;
 
-	virtual bool OnCommand(MWidget* pWindow, const char* szMessage);
+	virtual bool OnCommand(MWidget* pWindow, const char* szMessage) override;
 
-	void Initialize(void);
+	void Initialize();
 
 public:
 	MCOLOR m_FontColor;
@@ -250,7 +236,7 @@ public:
 public:
 	MListBox(const char* szName, MWidget* pParent=NULL, MListener* pListener=NULL);
 	MListBox(MWidget* pParent=NULL, MListener* pListener=NULL);
-	virtual ~MListBox(void);
+	virtual ~MListBox() override;
 
 	void Add(const char* szItem);
 	void Add(const char* szItem, MCOLOR color);
@@ -260,44 +246,42 @@ public:
 	bool Set(int i, const char* szItem);
 	bool Set(int i, MListItem* pItem);
 	void Remove(int i);
-	void RemoveAll(void);
+	void RemoveAll();
 	bool Swap(int i, int j);
-	int GetCount(void);
-	int GetSelIndex(void);
+	int GetCount();
+	int GetSelIndex();
 	bool SetSelIndex(int i);
-	const char* GetSelItemString(void);
-	MListItem* GetSelItem(void);
+	const char* GetSelItemString();
+	MListItem* GetSelItem();
 
-	// multiselect 관련
-	int GetSelCount(void);
+	int GetSelCount();
 
 	int FindItem(MPOINT& p);
 	bool GetItemPos(MPOINT* p, int i);
 
-	int GetItemHeight(void);
+	int GetItemHeight();
 	void SetItemHeight(int nHeight);
 
 	bool IsShowItem(int i);
 	void ShowItem(int i);
 	void SetStartItem(int i);
-	int GetStartItem(void);
-	int GetShowItemCount(void);
+	int GetStartItem();
+	int GetShowItemCount();
 
-	MScrollBar* GetScrollBar(void);
+	MScrollBar* GetScrollBar();
 
 	void Sort(bool bAscend=true);
 
-	// Field Support
 	void AddField(const char* szFieldName, int nTabSize);
 	void RemoveField(const char* szFieldName);
 	MLISTFIELD* GetField(int i);
-	int GetFieldCount(void);
-	void RemoveAllField(void);
+	int GetFieldCount();
+	void RemoveAllField();
 
-	bool IsVisibleHeader(void);
+	bool IsVisibleHeader();
 	void SetVisibleHeader(bool bVisible);
 
-	bool IsAlwaysVisibleScrollbar(void);
+	bool IsAlwaysVisibleScrollbar();
 	void SetAlwaysVisibleScrollbar(bool bVisible);
 
 	bool IsSelected() { return m_bSelected; }
@@ -309,12 +293,11 @@ public:
 
 	void SetOnDropCallback(ZCB_ONDROP pCallback) { m_pOnDropFunc = pCallback; }
 
-
 	DECLARE_LOOK(MListBoxLook)
 	DECLARE_LOOK_CLIENT()
 
 #define MINT_LISTBOX	"ListBox"
-	virtual const char* GetClassName(void){ return MINT_LISTBOX; }
+	virtual const char* GetClassName() override { return MINT_LISTBOX; }
 };
 
 #define MLB_ITEM_SEL		"selected"
@@ -322,7 +305,6 @@ public:
 #define MLB_ITEM_DBLCLK		"dclk"
 #define MLB_ITEM_SELLOST	"lost"
 #define MLB_ITEM_DEL		"del"
-#define MLB_ITEM_START		"start"			// 시작아이템이 바뀔때
+#define MLB_ITEM_START		"start"
 #define MLB_ITEM_CLICKOUT	"clickout"
 
-#endif

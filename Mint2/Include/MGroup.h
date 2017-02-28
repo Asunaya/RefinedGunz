@@ -1,11 +1,10 @@
-#ifndef MGROUP_H
-#define MGROUP_H
+#pragma once
 
 #include "MWidget.h"
 #include "MLookNFeel.h"
 
 class MGroup;
-class MGroupLook{
+class MGroupLook {
 public:
 	virtual void OnDraw(MGroup* pGroup, MDrawContext* pDC);
 	virtual MRECT GetClientRect(MGroup* pGroup, const MRECT& r);
@@ -16,10 +15,8 @@ class MGroup : public MWidget{
 	DECLARE_LOOK_CLIENT()
 public:
 	MGroup(const char* szName=NULL, MWidget* pParent=NULL, MListener* pListener=NULL);
-	virtual ~MGroup(void);
+	virtual ~MGroup();
 
 #define MINT_GROUP	"Group"
-	virtual const char* GetClassName(void){ return MINT_GROUP; }
+	virtual const char* GetClassName() override { return MINT_GROUP; }
 };
-
-#endif

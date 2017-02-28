@@ -12,30 +12,28 @@ IMPLEMENT_LOOK(MScrollBar, MScrollBarLook)
 MThumb::MThumb(const char* szName, MWidget* pParent, MListener* pListener)
 		: MWidget(szName, pParent, pListener)
 {
-	LOOK_IN_CONSTRUCTOR()
 }
 
 MArrow::MArrow(const char* szName, MWidget* pParent, MListener* pListener)
 	: MButton(szName, pParent, pListener)
 {
 	m_nDirection = 0;
-	LOOK_IN_CONSTRUCTOR()
 }
 
-MSIZE MArrow::GetDefaultSize(void)
+MSIZE MArrow::GetDefaultSize()
 {
 	if(GetLook()!=NULL) return GetLook()->GetDefaultSize(this);
 	return MSIZE(MSCROLLBAR_DEFAULT_WIDTH, MSCROLLBAR_DEFAULT_WIDTH);
 }
 
 
-void MScrollBar::OnRun(void)
+void MScrollBar::OnRun()
 {
 	MListener* pListener = GetListener();
 	if(pListener==NULL) return;
 
 	auto nCurrTime = GetGlobalTimeMS();
-	if(nCurrTime-m_nPrevThumbRefresh<m_nThumbRefreshDelay) return;		// m_nPrevThumbRefresh Time만큼 지났으면..
+	if(nCurrTime-m_nPrevThumbRefresh<m_nThumbRefreshDelay) return;
 
 	if(m_pUp->IsButtonDown()==true){
 		if(m_nValue>m_nMinValue){
@@ -145,7 +143,6 @@ bool MScrollBar::OnEvent(MEvent* pEvent, MListener* pListener)
 		break;
 	}
 
-	// ScrollBar영역에 다른 컨트롤의 이벤트 발생을 막는다.
 	if(pEvent->nMessage!=MWM_CHAR && r.InPoint(pEvent->Pos)==true) return true;
 
 	return false;
@@ -168,7 +165,7 @@ void MScrollBar::OnSize(int w, int h)
 	RecalcThumbBounds();
 }
 
-int MScrollBar::GetThumbMoveRange(void)
+int MScrollBar::GetThumbMoveRange()
 {
 	MRECT r = GetClientRect();
 	if(m_nScrollBarType==MSBT_VERTICAL)
@@ -177,7 +174,7 @@ int MScrollBar::GetThumbMoveRange(void)
 		return ( r.w - (m_pUp->GetRect().w+m_pDown->GetRect().w+m_pThumb->GetRect().w) );
 }
 
-int MScrollBar::GetMoveRange(void)
+int MScrollBar::GetMoveRange()
 {
 	MRECT r = GetClientRect();
 	if(m_nScrollBarType==MSBT_VERTICAL)
@@ -186,19 +183,15 @@ int MScrollBar::GetMoveRange(void)
 		return ( r.w - (m_pUp->GetRect().w+m_pDown->GetRect().w) );
 }
 
-int MScrollBar::GetThumbSize(void)
+int MScrollBar::GetThumbSize()
 {
 	int nDiff = m_nMaxValue-m_nMinValue;
 	int nMoveRange = GetMoveRange();
-	/*
-	int nThumbDec = nMoveRange / 10;
-	int nThumbSize = nMoveRange - nThumbDec*nDiff;
-	*/
 	int nThumbSize = nMoveRange - nDiff * 3;
 	return max(nThumbSize, MSCROLLBAR_THUMB_HEIGHT);
 }
 
-void MScrollBar::RecalcThumbPos(void)
+void MScrollBar::RecalcThumbPos()
 {
 	MRECT r = GetClientRect();
 	int nSpace = GetThumbMoveRange();
@@ -212,7 +205,7 @@ void MScrollBar::RecalcThumbPos(void)
 		m_pThumb->SetPosition(r.x+m_pUp->GetRect().w+nThumbPos, r.y);
 }
 
-void MScrollBar::RecalcThumbBounds(void)
+void MScrollBar::RecalcThumbBounds()
 {
 	MRECT r = GetClientRect();
 	if(m_nScrollBarType==MSBT_VERTICAL)
@@ -223,19 +216,8 @@ void MScrollBar::RecalcThumbBounds(void)
 	RecalcThumbPos();
 }
 
-/*
-bool MScrollBar::OnEvent(MEvent* pEvent, MListener* pListener)
-{
-	// ScrollBar영역에 다른 컨트롤의 이벤트 발생을 막는다.
-	if(pEvent->nMessage!=MWM_CHAR && m_Rect.InPoint(pEvent->Pos)==true) return true;
-	return false;
-}
-*/
-
 void MScrollBar::Initialize(MScrollBarTypes t)
 {
-	LOOK_IN_CONSTRUCTOR()
-
 	m_nMinValue = 0;
 	m_nMaxValue = 99;
 	m_nValue = 0;
@@ -245,13 +227,12 @@ void MScrollBar::Initialize(MScrollBarTypes t)
 	m_pUp->SetSize(s.w, s.h);
 	m_pDown = new MArrow(NULL, this, this);
 	m_pDown->SetSize(s.w, s.h);
-	//m_pThumb = new MWidget(NULL, this, this);
 	m_pThumb = new MThumb(NULL, this, this);
 	m_pThumb->SetSize(s.w, s.h);
 
 	SetType(t);
 
-	m_nThumbRefreshDelay = 80;		// 이 시간에 한 칸씩 움직여 진다. ( msec )
+	m_nThumbRefreshDelay = 80;
 	m_nPrevThumbRefresh = 0;
 
 	m_bThumbMove = false;
@@ -270,7 +251,7 @@ MScrollBar::MScrollBar(MWidget* pParent, MListener* pListener, MScrollBarTypes t
 	Initialize(t);
 }
 
-MScrollBar::~MScrollBar(void)
+MScrollBar::~MScrollBar()
 {
 	if(m_pUp!=NULL) delete m_pUp;
 	if(m_pDown!=NULL) delete m_pDown;
@@ -294,12 +275,12 @@ void MScrollBar::SetValue(int nValue)
 	}
 }
 
-int MScrollBar::GetValue(void)
+int MScrollBar::GetValue()
 {
 	return m_nValue;
 }
 
-MScrollBarTypes MScrollBar::GetType(void)
+MScrollBarTypes MScrollBar::GetType()
 {
 	return m_nScrollBarType;
 }
@@ -339,35 +320,8 @@ void MScrollBar::ChangeCustomThumbLook(MThumbLook *pThumbLook)
 	m_pThumb->ChangeCustomLook(pThumbLook);
 }
 
-
-
-/*
-void MScrollBar::OnCommand(MWidget* pWindow, char* szMessage)
+int MScrollBar::GetDefaultBreadth()
 {
-	MListener* pListener = GetListener();
-
-	if(pWindow==m_pUp && strcmp(szMessage, MBTN_CLK_MSG)==0){
-		if(m_nValue>m_nMinValue){
-			m_nValue--;
-			RecalcThumbPos();
-			if(pListener!=NULL) pListener->OnCommand(this, MLIST_VALUE_CHANGED);
-		}
-	}
-	else if(pWindow==m_pDown && strcmp(szMessage, MBTN_CLK_MSG)==0){
-		if(m_nValue<m_nMaxValue){
-			m_nValue++;
-			RecalcThumbPos();
-			if(pListener!=NULL) pListener->OnCommand(this, MLIST_VALUE_CHANGED);
-		}
-	}
-	else if(pWindow==m_pThumb){
-	}
-}
-*/
-
-int MScrollBar::GetDefaultBreadth(void)
-{
-	// Arrow 크기에 의존한다.
 	MSIZE s = m_pUp->GetDefaultSize();
 	if(GetType()==MSBT_VERTICAL) return s.w;
 	else return s.h;

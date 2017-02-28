@@ -17,7 +17,8 @@
 
 #define PLAYERLIST_ITEM_HEIGHT	23
 
-void ZPlayerListBoxLook::OnItemDraw2(MDrawContext* pDC, MRECT& r, const char* szText, MCOLOR color, bool bSelected, bool bFocus, int nAdjustWidth)
+void ZPlayerListBoxLook::OnItemDraw2(MDrawContext* pDC, MRECT& r, const char* szText, MCOLOR color,
+	bool bSelected, bool bFocus, int nAdjustWidth)
 {
 	if(szText==NULL) return;
 
@@ -160,15 +161,11 @@ void ZPlayerListBoxLook::OnDraw(MListBox* pListBox, MDrawContext* pDC)
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////
-
 IMPLEMENT_LOOK(ZPlayerListBox, ZPlayerListBoxLook)
 
 ZPlayerListBox::ZPlayerListBox(const char* szName, MWidget* pParent, MListener* pListener)
 : MListBox(szName, pParent, pListener)
 {
-	LOOK_IN_CONSTRUCTOR()
-
 	SetVisibleHeader(false);
 
 	m_bAbsoulteTabSpacing = true;
@@ -248,7 +245,6 @@ void ZPlayerListBox::InitUI(PLAYERLISTMODE nMode)
 		}break;
 	}
 
-	// (좋지않은 구조) 클랜인데 클랜에 가입이 안되어있으면 생성 창을 보인다
 	MWidget *pFrame = ZGetGameInterface()->GetIDLResource()->FindWidget("LobbyPlayerListClanCreateFrame");
 	MButton* pButtonUp = (MButton*)ZGetGameInterface()->GetIDLResource()->FindWidget("LobbyChannelPlayerListPrev");
 	MButton* pButtonDn = (MButton*)ZGetGameInterface()->GetIDLResource()->FindWidget("LobbyChannelPlayerListNext");
@@ -279,7 +275,6 @@ void ZPlayerListBox::SetMode(PLAYERLISTMODE nMode)
 	if(!ZGetGameClient()) return;
 	if(nMode==PLAYERLISTMODE_CHANNEL) {
 		if (ZGetGameClient()->IsConnected()) {
-			//UpdateList(nMode);
 			if(pWidget) {
 				int nPage = pWidget->m_nPage;
 				ZPostRequestChannelPlayerList(ZGetGameClient()->GetPlayerUID(),ZGetGameClient()->GetChannelUID(),nPage);
@@ -299,12 +294,6 @@ void ZPlayerListBox::SetMode(PLAYERLISTMODE nMode)
 			ZPostRequestClanMemberList(ZGetGameClient()->GetPlayerUID());
 	}
 }
-/*
-void ZPlayerListBox::SetBitmap( MBitmap* pBitmap)
-{
-	m_pBitmap	= pBitmap;
-}
-*/
 
 void GetRectMul(MRECT* rect,MRECT* org_rect,float f)
 {

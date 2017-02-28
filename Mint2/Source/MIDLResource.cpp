@@ -28,7 +28,6 @@
 #include "MBmButton.h"
 #include "MBmLabel.h"
 #include "MHotKey.h"
-//#include "MActionKey.h"
 #include "MMsgBox.h"
 #include "MTextArea.h"
 #include "MBTextAreaLook.h"
@@ -147,9 +146,6 @@ void MIDLResource::GetFrameBtn(MFrameBtn* pFrameBtn, MBFrameLook* pFrameLook, MX
 	}
 
 	pFrameBtn->m_bVisible = true;
-
-//	pFrameBtn->m_pBitmap[0] = pFrameLook->m_pCloseButtonBitmaps[0];
-//	pFrameBtn->m_pBitmap[1] = pFrameLook->m_pCloseButtonBitmaps[1];
 }
 
 void MIDLResource::GetBmButtonBitmaps(MBitmap** ppBitmaps, MXmlElement& element)
@@ -349,7 +345,7 @@ MBitmap* MIDLResource::GetBitmap(MXmlElement& element)
 		}
 	}
 
-	if(bSourceFound && bBoundsFound) {	// 부분 bitmap 이다
+	if(bSourceFound && bBoundsFound) {
 
 		if(szFileName[0]==0 || _stricmp(szFileName,"NULL")==0) return NULL;
 		MBitmap *pBitmap = MBitmapManager::Get(szFileName);
@@ -360,12 +356,10 @@ MBitmap* MIDLResource::GetBitmap(MXmlElement& element)
 
 		MPartialBitmap *pNewBitmap = new MPartialBitmap(pBitmap,rt);
 
-		MBitmapManager::Add(pNewBitmap);	// 나중에 지워주어야 한다
+		MBitmapManager::Add(pNewBitmap);
 
 		return pNewBitmap;
 	}
-
-	// 그렇지 않으면 통 bitmap 이다
 
 	element.GetContents(szFileName);
 	if(szFileName[0]==0 || _stricmp(szFileName,"NULL")==0) return NULL;
@@ -378,7 +372,6 @@ MBitmap* MIDLResource::GetBitmap(MXmlElement& element)
 	return pBitmap;
 }
 
-// 부분 bitmap의 alias
 MBitmap* MIDLResource::GetBitmapAlias(MXmlElement& element)
 {
 	bool bSourceFound = false;
@@ -415,7 +408,7 @@ MBitmap* MIDLResource::GetBitmapAlias(MXmlElement& element)
 	char szAliasName[256];
 	element.GetAttribute(szAliasName, "name");
 
-	if(bSourceFound && bBoundsFound) {	// 부분 bitmap 이다
+	if(bSourceFound && bBoundsFound) {
 
 		if(szSourceFileName[0]==0 || _stricmp(szSourceFileName,"NULL")==0) return NULL;
 		MBitmap *pBitmap = MBitmapManager::Get(szSourceFileName);
@@ -427,7 +420,7 @@ MBitmap* MIDLResource::GetBitmapAlias(MXmlElement& element)
 		MPartialBitmap *pNewBitmap = new MPartialBitmap(pBitmap,rt);
 		strcpy_safe(pNewBitmap->m_szName,szAliasName);
 
-		MBitmapManager::Add(pNewBitmap);	// 나중에 지워주어야 한다
+		MBitmapManager::Add(pNewBitmap);
 
 		return pNewBitmap;
 	}
@@ -513,7 +506,7 @@ MBGroupLook* MIDLResource::GetGroupLook(MXmlElement& element)
 	// Default Look
 	if(bDefaultLook==true) MGroup::ChangeLook(pGroupLook);
 
-	// FrameLook 등록
+	// FrameLook
 	char szItem[256];
 	element.GetAttribute(szItem, IDL_ATTR_ITEM, "");
 	if(!m_GroupLookMap.insert(map<string, MBGroupLook*>::value_type(string(szItem), pGroupLook)).second)
@@ -601,7 +594,7 @@ MBFrameLook* MIDLResource::GetFrameLook(MXmlElement& element)
 	// Default Look
 	if(bDefaultLook==true) MFrame::ChangeLook(pFrameLook);
 
-	// FrameLook 등록
+	// FrameLook
 	char szItem[256];
 	element.GetAttribute(szItem, IDL_ATTR_ITEM, "");
 	if(!m_FrameLookMap.insert(map<string, MBFrameLook*>::value_type(string(szItem), pFrameLook)).second)
@@ -647,7 +640,7 @@ MBTextAreaLook*	MIDLResource::GetTextAreaLook(MXmlElement& element)
 	// Default Look
 	if(bDefaultLook==true) MTextArea::ChangeLook(pTextAreaLook);
 
-	// TextAreaLook 등록
+	// TextAreaLook
 	char szItem[256];
 	element.GetAttribute(szItem, IDL_ATTR_ITEM, "");
 	if(!m_TextAreaLookMap.insert(map<string, MBTextAreaLook*>::value_type(string(szItem), pTextAreaLook)).second)
@@ -694,7 +687,7 @@ MBLabelLook* MIDLResource::GetLabelLook(MXmlElement& element)
 	// Default Look
 	if(bDefaultLook==true) MLabel::ChangeLook(pLabelLook);
 
-	// LabelLook 등록
+	// LabelLook
 	char szItem[256];
 	element.GetAttribute(szItem, IDL_ATTR_ITEM, "");
 	if(!m_LabelLookMap.insert(map<string, MBLabelLook*>::value_type(string(szItem), pLabelLook)).second)
@@ -793,7 +786,7 @@ MBButtonLook* MIDLResource::GetButtonLook(MXmlElement& element)
 	// Default Look
 	if(bDefaultLook==true) MButton::ChangeLook(pButtonLook);
 
-	// ButtonLook 등록
+	// ButtonLook
 	char szItem[256];
 	element.GetAttribute(szItem, IDL_ATTR_ITEM, "");
 	if(!m_ButtonLookMap.insert(map<string, MBButtonLook*>::value_type(string(szItem), pButtonLook)).second)
@@ -844,10 +837,9 @@ MBEditLook* MIDLResource::GetEditLook(MXmlElement& element)
 	if(bDefaultLook==true){
 		MEdit::ChangeLook(pEditLook);
 		MHotKey::ChangeLook(pEditLook);
-//		MActionKey::ChangeLook(pEditLook);
 	}
 
-	// EditLook 등록
+	// EditLook
 	char szItem[256];
 	element.GetAttribute(szItem, IDL_ATTR_ITEM, "");
 	if(!m_EditLookMap.insert(map<string, MBEditLook*>::value_type(string(szItem), pEditLook)).second)
@@ -925,7 +917,7 @@ MBListBoxLook* MIDLResource::GetListBoxLook(MXmlElement& element, int nType)
 		else			MComboListBox::ChangeLook(pListBoxLook);
 	}
 
-	// ListBoxLook 등록
+	// ListBoxLook
 	char szItem[256];
 	element.GetAttribute(szItem, IDL_ATTR_ITEM, "");
 	if(!m_ListBoxLookMap.insert(map<string, MBListBoxLook*>::value_type(string(szItem), pListBoxLook)).second)
@@ -965,7 +957,7 @@ MBArrowLook* MIDLResource::GetArrowLook(MXmlElement& element)
 	// Default Look
 	if(bDefaultLook==true) MArrow::ChangeLook(pArrowLook);
 
-	// ArrowLook 등록
+	// ArrowLook
 	char szItem[256];
 	element.GetAttribute(szItem, IDL_ATTR_ITEM, "");
 	if(!m_ArrowLookMap.insert(map<string, MBArrowLook*>::value_type(string(szItem), pArrowLook)).second)
@@ -1209,19 +1201,8 @@ bool MIDLResource::GetCommonWidgetProperty(MWidget* pWidget, MXmlElement& elemen
 			h = r.h;
 		}
 		MRECT rect = GetRect(element);
-		// 만약 크기가 음수라면 현재 화면에서 최대 크기
 		if(rect.w<0) rect.w = w-abs(rect.x);
 		if(rect.h<0) rect.h = h-abs(rect.y);
-
-		// 만약 위치가 CENTER_NUMBER이면 정 중앙에서 시작
-		// 만약 위치가 음수라면 좌측또는 하단으로 얼라인
-		/*
-#define CENTER_NUMBER	-10000
-		if(rect.x<=CENTER_NUMBER) rect.x = MGetWorkspaceWidth()/2 + (rect.x-CENTER_NUMBER);
-		else if(rect.x<0) rect.x = w-rect.w+rect.x + 1;
-		if(rect.y<=CENTER_NUMBER) rect.y = MGetWorkspaceHeight()/2 + (rect.y-CENTER_NUMBER);
-		else if(rect.y<0) rect.y = h-rect.h+rect.y + 1;
-		*/
 
 		pWidget->SetBounds(rect);
 		pWidget->m_IDLRect = rect;
@@ -1288,7 +1269,6 @@ MFrame*	MIDLResource::GetFrame(MXmlElement& element)
 	MBFrameLook* pFrameLook = NULL;
 
 	pListener = pParentWidget = GetParentWidget(element);
-//	MFrame* pFrame = new MFrame("", pParentWidget, pListener);
 	MFrame* pFrame = CreateFrame("", pParentWidget, pListener);
 	InsertWidget(element, pFrame);
 
@@ -1320,24 +1300,10 @@ MFrame*	MIDLResource::GetFrame(MXmlElement& element)
 		else if (!strcmp(szBuf, "CLOSE_BUTTON"))
 		{
 			GetFrameBtn(pFrame->GetCloseButton(), pFrameLook, childElement);
-			/*
-			GetFrameButton(pFrame->GetCloseButton(), childElement);
-			pFrame->GetCloseButton()->SetUpBitmap(pFrameLook->m_pCloseButtonBitmaps[0]);
-			pFrame->GetCloseButton()->SetDownBitmap(pFrameLook->m_pCloseButtonBitmaps[1]);
-			pFrame->GetCloseButton()->SetDisableBitmap(pFrameLook->m_pCloseButtonBitmaps[2]);
-			*/
-//			pFrame->GetCloseButton()->Show(true);
 		}
 		else if (!strcmp(szBuf, "MINIMIZE_BUTTON"))
 		{
 			GetFrameBtn(pFrame->GetMinimizeButton(), pFrameLook, childElement);
-			/*
-			GetFrameButton(pFrame->GetMinimizeButton(), childElement);
-			pFrame->GetMinimizeButton()->SetUpBitmap(pFrameLook->m_pMinimizeButtonBitmaps[0]);
-			pFrame->GetMinimizeButton()->SetDownBitmap(pFrameLook->m_pMinimizeButtonBitmaps[1]);
-			pFrame->GetMinimizeButton()->SetDisableBitmap(pFrameLook->m_pMinimizeButtonBitmaps[2]);
-			*/
-//			pFrame->GetMinimizeButton()->Show(true);
 		}
 		else if (!strcmp(szBuf, "TITLEBAR"))
 		{
@@ -1581,7 +1547,7 @@ MListBox* MIDLResource::GetListBox(MXmlElement& element)
 	MListBoxLook* pListBoxLook = NULL;
 
 	pListener = pParentWidget = GetParentWidget(element);
-	MListBox* pListBox = (MListBox*)Mint::GetInstance()->NewWidget(MINT_LISTBOX, "", pParentWidget, pListener);	// RAONHAJE TODO : NewWidget에 Name 넘겨주도록 바꾸자.
+	MListBox* pListBox = (MListBox*)Mint::GetInstance()->NewWidget(MINT_LISTBOX, "", pParentWidget, pListener);
 	InsertWidget(element, pListBox);
 
 	int iCount = element.GetChildNodeCount();
@@ -2324,10 +2290,6 @@ MFont* MIDLResource::GetFont(MXmlElement& element)
 		if (!strcmp(szBuf, "FONTSET"))
 		{
 			childElement.GetContents(szName);
-//			char szAniBitmap[256];
-//			MAniBitmap* pAniBitmap = NULL;
-//			childElement.GetContents(szAniBitmap);
-//			if (pCursor == NULL) pCursor = new MAniBitmapCursor(szItem, pAniBitmap);
 		}
 		else if (!strcmp(szBuf, "FONTHEIGHT"))
 		{
@@ -2415,47 +2377,6 @@ MHotKey* MIDLResource::GetHotKey(MXmlElement& element)
 
 	return pHotKey;
 }
-
-/*
-MActionKey* MIDLResource::GetActionKey(MXmlElement& element)
-{
-	MXmlElement childElement;
-	char szBuf[4096];
-	MWidget* pParentWidget;	MListener* pListener;
-
-	pListener = pParentWidget = GetParentWidget(element);
-	MActionKey* pActionKey = (MActionKey*)Mint::GetInstance()->NewWidget(MINT_ACTIONKEY, "", pParentWidget, pListener);
-	InsertWidget(element, pActionKey);
-
-	int iCount = element.GetChildNodeCount();
-
-	for (int i = 0; i < iCount; i++)
-	{
-		memset(szBuf, 0, sizeof(szBuf));
-		childElement = element.GetChildNode(i);
-		childElement.GetTagName(szBuf);
-
-		if (GetCommonWidgetProperty(pActionKey, childElement, szBuf)) continue;
-
-
-		if (!strcmp(szBuf, "EDITLOOK"))
-		{
-			char szItem[256];
-			memset(szItem, 0, sizeof(szItem));
-			childElement.GetContents(szItem);
-
-			map<string, MBEditLook*>::iterator itor = m_EditLookMap.find(szItem);
-			if (itor != m_EditLookMap.end())
-			{
-				pActionKey->ChangeCustomLook((MBEditLook*)(*itor).second);
-			}
-		}
-
-	}
-
-	return pActionKey;
-}
-*/
 
 MTextArea* MIDLResource::GetTextArea(MXmlElement& element)
 {
@@ -2590,7 +2511,6 @@ MPanel* MIDLResource::GetPanel(MXmlElement& element)
 {
 	MXmlElement childElement;
 	char szBuf[4096];
-//	char szFontName[4096];
 	MWidget* pParentWidget;	MListener* pListener;
 
 	pListener = pParentWidget = GetParentWidget(element);
@@ -3059,16 +2979,6 @@ void MIDLResource::GetRebounds(MXmlElement& element)
 
 	MWidgetList widget_list;
 	FindWidgets(widget_list, string(szItem));
-
-
-/*
-#ifdef _DEBUG
-	if (widget_list.size() != 1)
-	{
-		_ASSERT(0);		// 위젯이 하나가 아니다.
-	}
-#endif
-*/
 
 	for (MWidgetList::iterator itor = widget_list.begin(); itor != widget_list.end(); ++itor)
 	{

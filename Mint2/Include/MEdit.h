@@ -1,5 +1,4 @@
-#ifndef MEDIT_H
-#define MEDIT_H
+#pragma once
 
 #include "MWidget.h"
 #include <list>
@@ -40,8 +39,8 @@ protected:
 public:
 	int			m_nSelectionRange;
 protected:
-	list<char*>				m_History;
-	list<char*>::iterator	m_nCurrentHistory;
+	std::list<char*>			m_History;
+	std::list<char*>::iterator	m_nCurrentHistory;
 
 	DECLARE_LOOK(MEditLook)
 	DECLARE_LOOK_CLIENT()
@@ -50,41 +49,41 @@ public:
 	bool		m_bSupportHistory;
 
 protected:
-	virtual bool OnEvent(MEvent* pEvent, MListener* pListener);
+	virtual bool OnEvent(MEvent* pEvent, MListener* pListener) override;
 	
 	virtual bool InputFilterKey(int nKey);	// MWM_KEYDOWN
 	virtual bool InputFilterChar(int nKey);	// MWM_CHAR
 
-	virtual void OnSetFocus(void);
-	virtual void OnReleaseFocus(void);
+	virtual void OnSetFocus() override;
+	virtual void OnReleaseFocus() override;
 
 	void Initialize(int nMaxLength, const char* szName);
 public:
-	MEdit(int nMaxLength, const char* szName=NULL, MWidget* pParent=NULL, MListener* pListener=NULL);
-	MEdit(const char* szName=NULL, MWidget* pParent=NULL, MListener* pListener=NULL );
+	MEdit(int nMaxLength, const char* szName = nullptr, MWidget* pParent = nullptr, MListener* pListener = nullptr);
+	MEdit(const char* szName = nullptr, MWidget* pParent = nullptr, MListener* pListener = nullptr);
 	virtual ~MEdit();
 
-	virtual void OnHide(void);
+	virtual void OnHide() override;
 
-	virtual void SetText(const char* szText);
-	virtual const char* GetText(void);
+	virtual void SetText(const char* szText) override;
+	virtual const char* GetText() override;
 	void AddText(const char* szText);
 
-	int MoveCaretHome(void);
-	int MoveCaretEnd(void);
-	int MoveCaretPrev(void);
-	int MoveCaretNext(void);
+	int MoveCaretHome();
+	int MoveCaretEnd();
+	int MoveCaretPrev();
+	int MoveCaretNext();
 
 	void SetMaxLength(int nMaxLength);
-	int GetMaxLength(void);
-	const char* GetCompositionString(void);
-	int GetCarretPos(void);
-	int GetStartPos(void) { return m_nStartPos; }
+	int GetMaxLength();
+	const char* GetCompositionString();
+	int GetCarretPos();
+	int GetStartPos() { return m_nStartPos; }
 	bool SetStartPos(int nStartPos);
 	int GetPosByScreen(int x);
 
 	void SetPasswordField(bool bPassword);
-	bool IsPasswordField(void);
+	bool IsPasswordField();
 
 	bool GetClipboard(char* szText, int nSize);
 	bool SetClipboard(const char* szText);
@@ -95,7 +94,7 @@ public:
 	void SetTabHandler(MWidget* pWidget)	{ m_pTabHandler = pWidget; }
 
 #define MINT_EDIT	"Edit"
-	virtual const char* GetClassName(void){ return MINT_EDIT; }
+	virtual const char* GetClassName() override { return MINT_EDIT; }
 };
 
 #define MEDIT_KEYDOWN_MSG		"keydown"
@@ -106,4 +105,3 @@ public:
 
 
 #define MEDIT_BLINK_TIME		400
-#endif

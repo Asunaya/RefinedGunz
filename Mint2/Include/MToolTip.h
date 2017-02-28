@@ -1,5 +1,4 @@
-#ifndef MTOOLTIP_H
-#define MTOOLTIP_H
+#pragma once
 
 #include "MWidget.h"
 
@@ -8,22 +7,17 @@ protected:
 	bool	m_bUseParentName;
 
 public:
-	// szName이 NULL이면 Parent의 m_szName을 표시한다.
 	MToolTip(const char* szName, MWidget* pParent);
-	virtual ~MToolTip(void);
+	virtual ~MToolTip() override;
 
-	// ToolTip의 String의 크기에 따라 Widget크기 자동 조절
-	virtual void SetBounds(void);
+	virtual void SetBounds();
 
-	// 텍스트 입력, SetBounds()실행된다.
 	void SetText(const char* szText);
 
-	bool IsUseParentName(void);
+	bool IsUseParentName();
 
-	virtual void OnDraw(MDrawContext* pDC);
+	virtual void OnDraw(MDrawContext* pDC) override;
 
 #define MINT_TOOLTIP	"ToolTip"
-	virtual const char* GetClassName(void){ return MINT_TOOLTIP; }
+	virtual const char* GetClassName() override { return MINT_TOOLTIP; }
 };
-
-#endif

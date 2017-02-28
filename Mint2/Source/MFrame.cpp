@@ -5,31 +5,6 @@
 
 #define MTITLEBAR_HEIGHT		18
 
-/*
-class MTitleBar : public MWidget{
-protected:
-	virtual void OnDraw(MDrawContext* pDC){
-		pDC->SetColor(MCOLOR(DEFCOLOR_MMENUBAR_PLANE));
-		pDC->FillRectangle(m_Rect);
-		pDC->SetColor(MCOLOR(DEFCOLOR_MMENUBAR_TEXT));
-		pDC->Text(m_Rect, m_szName, MAM_LEFT);
-	}
-public:
-	MTitleBar(char* szName=NULL, MWidget* pParent=NULL, MListener* pListener=NULL)
-		: MWidget(szName, pParent, pListener){}
-	//virtual ~MTitleBar(void){}
-};
-
-class MClient : public MWidget{
-protected:
-	virtual void OnDraw(MDrawContext* pDC){
-	}
-public:
-	MClient(char* szName=NULL, MWidget* pParent=NULL, MListener* pListener=NULL)
-		: MWidget(szName, pParent, pListener){}
-};
-*/
-
 #define FRAME_W	300
 #define FRAME_X	10
 #define FRAME_H	300
@@ -42,15 +17,6 @@ void MFrameLook::OnDraw(MFrame* pFrame, MDrawContext* pDC)
 	pDC->FillRectangle(r);
 	pDC->SetColor(128,128,128,255);
 	pDC->Rectangle(r);
-
-	/*
-	// Frame Board
-	MRECT r(0, 0, pFrame->m_Rect.w, pFrame->m_Rect.h);
-	pDC->SetColor(MCOLOR(DEFCOLOR_MFRAME_PLANE));
-	pDC->FillRectangle(r);
-	pDC->SetColor(MCOLOR(DEFCOLOR_MFRAME_OUTLINE));
-	pDC->Rectangle(r);
-	*/
 
 	// TitleBar
 	if(pFrame->m_bTitleBar==true){
@@ -70,18 +36,15 @@ MRECT MFrameLook::GetClientRect(MFrame* pFrame, const MRECT& r)
 
 IMPLEMENT_LOOK(MFrame, MFrameLook)
 
-
 bool MFrame::OnEvent(MEvent* pEvent, MListener* pListener)
 {
 	if (IsFocusEnable() == false)
 		return false;
 
-	//if(m_bTitleBar==true) return false;	// 타이틀바가 없는 프레임은 이벤트를 받지 않는다.
-
 	MRECT TitleBarRect(0, 0, m_Rect.w, MTITLEBAR_HEIGHT);
 	MRECT WidgetRect(0, 0, m_Rect.w, m_Rect.h);
 	MPOINT sp = MClientToScreen(this, pEvent->Pos);
-	//MPOINT sp(m_Rect.x, m_Rect.y);
+
 	switch(pEvent->nMessage){
 	case MWM_LBUTTONDOWN:
 
@@ -165,46 +128,13 @@ bool MFrame::OnEvent(MEvent* pEvent, MListener* pListener)
 		}
 		break;
 	case MWM_LBUTTONDBLCLK:
-		// m_BtnClose 가 초기화가 안되어서 debug 에서는 동작을 안함. 일단 주석
-		/*
-		if (m_bTitleBar==true && m_BtnClose.m_Rect.InPoint(pEvent->Pos)==true)
-		{
-			OnCloseButtonClick();
-		}
-		else if (m_bTitleBar==true && m_BtnMinimize.m_Rect.InPoint(pEvent->Pos)==true)
-		{
-			OnMinimizeButtonClick();
-		}
-
-		// Shade
-		else if(m_bTitleBar==true && TitleBarRect.InPoint(pEvent->Pos)==true){
-			SetShade(!m_bShade);
-			return true;
-		}
-
-		else if(WidgetRect.InPoint(pEvent->Pos)==true){
-			return true;
-		}
-		return false;
-		*/
 		break;
 	}
 	return false;
 }
 
-bool MFrame::OnShow(void)
+bool MFrame::OnShow()
 {
-	/*
-	// 에디트 컨트롤에 우선순위를 두고...
-	for(int i=0; i<GetChildCount(); i++){
-		MWidget* pWidget = GetChild(i);
-		if(strcmp(pWidget->GetClassName(), "Edit")==0){
-			pWidget->SetFocus();
-			return true;
-		}
-	}
-	*/
-	// Children의 첫번째 Widget에게 포커스를 준다.
 	if(GetChildCount()>0) GetChild(0)->SetFocus();
 	return true;
 }
@@ -212,8 +142,6 @@ bool MFrame::OnShow(void)
 MFrame::MFrame(const char* szName, MWidget* pParent, MListener* pListener)
 : MWidget(szName, pParent, pListener)
 {
-	LOOK_IN_CONSTRUCTOR()
-
 	SetBounds(MRECT(FRAME_X, FRAME_Y, FRAME_W, FRAME_H));
 	m_OldRect = m_Rect;
 
@@ -236,10 +164,7 @@ MFrame::MFrame(const char* szName, MWidget* pParent, MListener* pListener)
 	m_nMinHeight = 200;
 }
 
-MFrame::~MFrame(void)
-{
-
-}
+MFrame::~MFrame() = default;
 
 void MFrame::OnSize(int w, int h)
 {

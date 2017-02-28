@@ -1,5 +1,4 @@
-#ifndef MFRAME_H
-#define MFRAME_H
+#pragma once
 
 #include "MWidget.h"
 #include "MLookNFeel.h"
@@ -17,7 +16,6 @@ struct MFrameBtn
 	bool		m_bVisible;
 	bool		m_bMouseOver;
 	bool		m_bLButtonDown;
-//	bool		m_bDowned;
 	MRECT		m_Rect;
 	MAnchors	m_Anchors;
 	MFrameBtn() { 
@@ -29,38 +27,37 @@ struct MFrameBtn
 	bool IsButtonDown() { if ((m_bLButtonDown==true) && (m_bMouseOver==true)) return true; return false; }
 };
 
-/// 움직일 수 있는 프레임으로 구성된 위젯
 class MFrame : public MWidget{
 	DECLARE_LOOK(MFrameLook)
 	DECLARE_LOOK_CLIENT()
 protected:
-	bool	m_bDragWidget;		///< Drag Widget
+	bool	m_bDragWidget;
 	MPOINT	m_DragPoint;
 
-	bool	m_bMovable;			///< 움직일 수 있는지 여부
-	bool	m_bCanShade;		///< Shade 할 수 있는지 여부 - false이면 Shade할 수 없다.
+	bool	m_bMovable;
+	bool	m_bCanShade;
 	bool	m_bShade;
-	MSIZE	m_BeforeShade;		///< Before Shade
+	MSIZE	m_BeforeShade;
 
 	MRECT		m_OldRect;
 	MFrameBtn	m_BtnClose;
 	MFrameBtn	m_BtnMinimize;
 
 public:
-	bool		m_bTitleBar;	///< Use Title Bar
+	bool		m_bTitleBar;
 
 protected:
-	virtual bool OnCommand(MWidget* pWindow, const char* szMessage);
-	virtual bool OnEvent(MEvent* pEvent, MListener* pListener);
-	virtual void OnSize(int w, int h);
-	virtual bool OnShow(void);
+	virtual bool OnCommand(MWidget* pWindow, const char* szMessage) override;
+	virtual bool OnEvent(MEvent* pEvent, MListener* pListener) override;
+	virtual void OnSize(int w, int h) override;
+	virtual bool OnShow() override;
 
 	void ResizeBtnsByAnchors(int w, int h);
 	void OnCloseButtonClick();
 	void OnMinimizeButtonClick();
 public:
-	MFrame(const char* szName=NULL, MWidget* pParent=NULL, MListener* pListener=NULL);
-	virtual ~MFrame(void);
+	MFrame(const char* szName = nullptr, MWidget* pParent = nullptr, MListener* pListener = nullptr);
+	virtual ~MFrame();
 
 	void SetShade(bool bShade);
 	void SetMovable(bool bValue) { m_bMovable = bValue; }
@@ -68,10 +65,8 @@ public:
 	MFrameBtn*	GetMinimizeButton() { return &m_BtnMinimize; }
 
 #define MINT_FRAME	"Frame"
-	virtual const char* GetClassName(void){ return MINT_FRAME; }
+	virtual const char* GetClassName(){ return MINT_FRAME; }
 };
 
 #define MFRAME_CLOSE_MSG	"close"
 #define MFRAME_MINIMIZE_MSG	"minimize"
-
-#endif

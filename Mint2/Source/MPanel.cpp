@@ -6,8 +6,6 @@ IMPLEMENT_LOOK(MPanel, MPanelLook)
 
 MPanel::MPanel(const char* szName, MWidget* pParent, MListener* pListener) : MWidget(szName, pParent, pListener)
 {
-	LOOK_IN_CONSTRUCTOR()
-
 	m_BorderColor = MCOLOR(DEFCOLOR_MPANEL_BORDER);
 	m_BackgroundColor = MCOLOR(DEFCOLOR_MPANEL_PLANE);
 	m_nBorderStyle = MBS_SINGLE;
@@ -45,7 +43,6 @@ MCOLOR MPanel::GetBackgroundColor(void)
 	return m_BackgroundColor;
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////
 void MPanelLook::OnDraw(MPanel* pPanel, MDrawContext* pDC)
 {
 	if (pPanel->GetBorderStyle() == MBS_SINGLE) OnFrameDraw(pPanel, pDC);

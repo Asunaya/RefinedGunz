@@ -25,9 +25,8 @@ IMPLEMENT_LOOK(MGroup, MGroupLook)
 MGroup::MGroup(const char* szName, MWidget* pParent, MListener* pListener)
 : MWidget(szName, pParent, pListener)
 {
-	LOOK_IN_CONSTRUCTOR()
 }
 
-MGroup::~MGroup(void)
+MGroup::~MGroup()
 {
 }

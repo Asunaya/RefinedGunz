@@ -22,19 +22,17 @@
 
 class MMainFrame : public MWidget{
 protected:
-	virtual void OnDraw(MDrawContext* pDC){
+	virtual void OnDraw(MDrawContext* pDC) override {
 		// Draw Nothing
 	}
-	virtual bool OnCommand(MWidget* pWidget, const char* szMessage){
+	virtual bool OnCommand(MWidget* pWidget, const char* szMessage) override {
 		return false;
 	}
 public:
 	MMainFrame(const char* szName = nullptr, MWidget* pParent = nullptr, MListener* pListener = nullptr)
 		: MWidget(szName, pParent, pListener){
 	}
-	virtual ~MMainFrame() = default;
 };
-
 
 Mint* Mint::m_pInstance;
 
@@ -203,14 +201,14 @@ bool Mint::ProcessEvent(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 	return false;
 }
 
-void Mint::Run(void)
+void Mint::Run()
 {
 	if(!m_pMainFrame) return;
 
 	m_pMainFrame->Run();
 }
 
-void Mint::Draw(void)
+void Mint::Draw()
 {
 	if(!m_pMainFrame) return;
 
@@ -256,12 +254,12 @@ void Mint::Draw(void)
 	
 }
 
-MWidget* Mint::GetMainFrame(void)
+MWidget* Mint::GetMainFrame()
 {
 	return m_pMainFrame;
 }
 
-MDrawContext* Mint::GetDrawContext(void)
+MDrawContext* Mint::GetDrawContext()
 {
 	return m_pDC;
 }
@@ -289,7 +287,7 @@ void Mint::SetHWND(HWND hWnd)
 		Mint::EnableIME(false);
 	}
 }
-HWND Mint::GetHWND(void)
+HWND Mint::GetHWND()
 {
 	return m_hWnd;
 }
@@ -322,7 +320,7 @@ void Mint::EnableIME(bool bEnable)
 	}
 }
 
-bool Mint::IsEnableIME(void)
+bool Mint::IsEnableIME()
 {
 	return m_bEnableIME;
 }
@@ -385,7 +383,7 @@ MWidget* Mint::SetDragObject(MWidget* pSender, MBitmap* pBitmap, const char* szS
 	m_bVisibleDragObject = false;
 	return pPrev;
 }
-MWidget* Mint::GetDragObject(void)
+MWidget* Mint::GetDragObject()
 {
 	return m_pDragSourceObject;
 }
@@ -472,12 +470,12 @@ MWidget* Mint::FindWidget(int x, int y)
 }
 
 
-int Mint::GetWorkspaceWidth(void)
+int Mint::GetWorkspaceWidth()
 {
 	return m_nWorkspaceWidth;
 }
 
-int Mint::GetWorkspaceHeight(void)
+int Mint::GetWorkspaceHeight()
 {
 	return m_nWorkspaceHeight;
 }
@@ -488,7 +486,7 @@ void Mint::SetWorkspaceSize(int w, int h)
 	m_nWorkspaceHeight = h;
 }
 
-const char* Mint::GetDefaultFontName(void) const
+const char* Mint::GetDefaultFontName() const
 {
 	static char* szFontName[] = {
 		"Tahoma",		// Default
@@ -509,7 +507,7 @@ const char* Mint::GetDefaultFontName(void) const
 	return szFontName[nFont];
 }
 
-int Mint::GetPrimaryLanguageIdentifier(void) const
+int Mint::GetPrimaryLanguageIdentifier() const
 {
 	/*
 	Language Identifiers
@@ -526,14 +524,14 @@ int Mint::GetPrimaryLanguageIdentifier(void) const
 	return PRIMARYLANGID(nLanguageIdentifier);
 }
 
-int Mint::GetSubLanguageIdentifier(void) const
+int Mint::GetSubLanguageIdentifier() const
 {
 	HKL hKeyboardLayout = GetKeyboardLayout(0);
 	WORD nLanguageIdentifier = LOWORD(hKeyboardLayout);
 	return SUBLANGID(nLanguageIdentifier);
 }
 
-const char* Mint::GetLanguageIndicatorString(void) const
+const char* Mint::GetLanguageIndicatorString() const
 {
 	static char* szIndicator[] = {
 		"?", "EN", "ÇÑ", "‚ ", "ñé", "PT"
@@ -554,7 +552,7 @@ const char* Mint::GetLanguageIndicatorString(void) const
 	}
 }
 
-bool Mint::IsNativeIME(void) const
+bool Mint::IsNativeIME() const
 {
 	HIMC hImc = ImmGetContext(GetInstance()->GetHWND());
 	if(hImc==NULL) return false;
@@ -639,7 +637,7 @@ int Mint::GetCandidatePageStart() const
 	return nStart;
 }
 
-int Mint::GetCandidatePageSize(void) const
+int Mint::GetCandidatePageSize() const
 {
 	if(m_pCandidateList==NULL) return 0;
 
@@ -666,7 +664,7 @@ void Mint::SetCandidateListPosition(MPOINT& p, int nWidgetHeight)
 	m_CandidateListPos = cp;
 }
 
-int Mint::GetCandidateListWidth(void)
+int Mint::GetCandidateListWidth()
 {
 	int w = 60;
 	if(GetCandidateCount()>0){
@@ -676,7 +674,7 @@ int Mint::GetCandidateListWidth(void)
 	return w + 4;
 }
 
-int Mint::GetCandidateListHeight(void)
+int Mint::GetCandidateListHeight()
 {
 	return (MFontManager::Get( "Default")->GetHeight()*(GetCandidatePageSize()+1) + 6);
 }
@@ -818,7 +816,7 @@ void MCreateSample()
 			: MFrame(szName, pParent, pListener){
 			m_nBitmap = 0;
 		}
-		virtual ~MFrameBitmap(void){
+		virtual ~MFrameBitmap(){
 		}
 	};
 
@@ -863,7 +861,7 @@ void MCreateSample()
 			m_nFPS(0)
 		{
 		}
-		virtual ~MFrameInfo(void){
+		virtual ~MFrameInfo(){
 		}
 	};
 
@@ -893,7 +891,7 @@ void MCreateSample()
 		MFrameStar(const char* szName=NULL, MWidget* pParent=NULL, MListener* pListener=NULL)
 			: MFrame(szName, pParent, pListener){
 		}
-		virtual ~MFrameStar(void){
+		virtual ~MFrameStar(){
 		}
 	};
 

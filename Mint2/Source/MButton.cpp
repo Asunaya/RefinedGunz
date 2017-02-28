@@ -151,7 +151,6 @@ void MButton::OnHide()
 MButton::MButton(const char* szName, MWidget* pParent, MListener* pListener)
 	: MWidget(szName, pParent, pListener)
 {
-	LOOK_IN_CONSTRUCTOR()
 }
 
 MButton::~MButton() = default;

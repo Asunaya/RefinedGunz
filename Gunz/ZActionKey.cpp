@@ -14,7 +14,7 @@ public:
 void ZActionKeyLook::OnFrameDraw(MEdit* pEdit, MDrawContext* pDC)
 {
 	MRECT r = pEdit->GetInitialClientRect();
-	ZActionKey* pActionKey = (ZActionKey*)pEdit;	// -_-;
+	ZActionKey* pActionKey = (ZActionKey*)pEdit;
 	MCOLOR color = pActionKey->IsFocus() ? MCOLOR(200,200,200,255) : MCOLOR(100,100,100,255);
 	pDC->SetColor(color);
 	pDC->Rectangle(r);
@@ -34,7 +34,6 @@ ZActionKeyLook* ZActionKey::m_pStaticLook = &ZActionKey::m_DefaultLook;
 ZActionKey::ZActionKey(const char* szName, MWidget* pParent, MListener* pListener)
 : MEdit(szName, pParent, pListener ), m_bReadyInput(false), m_nKey(-1), m_nAltKey(-1)
 {
-	LOOK_IN_CONSTRUCTOR();
 }
 
 void ZActionKey::OnDraw( MDrawContext* pDC )
@@ -42,15 +41,6 @@ void ZActionKey::OnDraw( MDrawContext* pDC )
 	if( GetLook() != NULL )
 		GetLook()->OnDraw( this, pDC );
 }
-
-/*
-void ZActionKey::GetActionKeyName(char* szActionKeyName)
-{
-	const char* szKeyName = Mint::GetInstance()->GetActionKeyName(m_nKey);
-	if(szKeyName!=NULL) strcpy_safe(szActionKeyName, szKeyName);
-	else strcpy_safe(szActionKeyName, "N/A");
-}
-*/
 
 void ZActionKey::GetActionKey(int* pKey)
 {
@@ -105,7 +95,7 @@ void ZActionKey::SetActionKey(int nKey)
 		m_nAltKey = -1;
 	}else if(m_nKey==nKey)
 		m_nAltKey = -1;
-	else// 그렇지 않으면 key를 제거후 등록
+	else
 	{
 		m_nKey = m_nAltKey;
 		m_nAltKey = nKey;
@@ -136,21 +126,6 @@ bool ZActionKey::DeleteActionKey(int nKey)
 	return bDeleted;
 }
 
-
-/*
-bool ZActionKey::RegisterActionKey(int nActionID)
-{
-	return ZGetInput()->RegisterActionKey(nActionID, m_nKey);
-//	return Mint::GetInstance()->RegisterActionKey(nActionID, m_nKey);
-}
-
-bool ZActionKey::UnregisterActionKey(void)
-{
-	return ZGetInput()->UnregisterActionKey(m_nKey);
-//	return Mint::GetInstance()->UnregisterActionKey(m_nKey);
-}
-*/
-
 void ZActionKey::RegisterForbidKey(int nkey)
 {
 	m_ForbidKey.insert(nkey);
@@ -174,13 +149,11 @@ bool ZActionKey::OnExclusiveEvent(MEvent* pEvent)
 {
 	_ASSERT(pEvent->nMessage == Z_DIRECTINPUTKEY_MESSAGE);
 
-	// 포커스가 생길때의 이벤트 (lbutton 이나 tab )을 무시한다
 	if(!m_exclusiveActionKey->m_bReadyInput)
 	{
 		m_exclusiveActionKey->m_bReadyInput = true;
 	}else
 	{
-		// 한번 입력되었으면 끝.
 		m_exclusiveActionKey->SetActionKey(pEvent->nKey);
 		m_exclusiveActionKey->ReleaseFocus();
 	}

@@ -1,36 +1,31 @@
-#ifndef MPICTURE_H
-#define MPICTURE_H
+#pragma once
 
 #include "MWidget.h"
 #include "GlobalTypes.h"
 
-/// Picture
 class MPicture : public MWidget{
 protected:
 	MBitmap* m_pBitmap;
 	int		m_iStretch;
-	int		m_iAnimType;			// 0:좌->우, 1:우->좌
-	float	m_fAnimTime;			// 애니메이션 되는 시간
+	int		m_iAnimType;
+	float	m_fAnimTime;
 	u64		m_CurrentTime;
 	bool	m_bAnim;
-	DWORD	m_DrawMode;
+	u32		m_DrawMode;
 
 	MCOLOR	m_BitmapColor;
 	MCOLOR	m_BitmapReseveColor;
 	bool	m_bSwaped;
 
 protected:
-	/// Draw Handler
-	virtual void OnDraw(MDrawContext* pDC);
+	virtual void OnDraw(MDrawContext* pDC) override;
 	void OnAnimDraw(MDrawContext* pDC, int x, int y, int w, int h, int bx, int by, int bw, int bh );
 
 public:
-	MPicture(const char* szName=NULL, MWidget* pParent=NULL, MListener* pListener=NULL);
+	MPicture(const char* szName = nullptr, MWidget* pParent = nullptr, MListener* pListener = nullptr);
 
-	/// 비트맵 지정
 	void SetBitmap(MBitmap* pBitmap);
-	/// 비트맵 얻기
-	MBitmap* GetBitmap(void);
+	MBitmap* GetBitmap();
 	int		GetStretch() { return m_iStretch; }
 	void SetStretch(int i) { m_iStretch = i; }
 
@@ -44,18 +39,15 @@ public:
 		return m_BitmapReseveColor;	
 	}
 
-	void SetDrawMode( DWORD mode ) {
+	void SetDrawMode( u32 mode ) {
 		m_DrawMode = mode;
 	}
-	DWORD GetDrawMode( ) const {
+	u32 GetDrawMode( ) const {
 		return m_DrawMode;
 	}
 
 	bool IsAnim() const { return m_bAnim;}
 
 #define MINT_PICTURE	"Picture"
-	virtual const char* GetClassName(void){ return MINT_PICTURE; }
+	virtual const char* GetClassName() override { return MINT_PICTURE; }
 };
-
-
-#endif

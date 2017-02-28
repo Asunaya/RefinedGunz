@@ -36,27 +36,25 @@ MTabItem::MTabItem(MWidget *pFrame,MButton *pButton,MListener *pListener)
 //// MTabCtrl ///////////////////////////////////////////////////////
 MTabCtrl::MTabCtrl(const char* szName, MWidget* pParent, MListener* pListener) : MWidget(szName, pParent, pListener)
 {
-	LOOK_IN_CONSTRUCTOR()
 }
 
 MTabCtrl::MTabCtrl(MWidget* pParent, MListener* pListener) : MWidget("TabCtrl", pParent, pListener)
 {
-	LOOK_IN_CONSTRUCTOR()
 }
 
-MTabCtrl::~MTabCtrl(void)
+MTabCtrl::~MTabCtrl()
 {
 	RemoveAll();
 }
 
-void MTabCtrl::Add(MButton *pButton, MWidget *pFrame)		// pButton 을 누르면 pFrame 이 보여진다
+void MTabCtrl::Add(MButton *pButton, MWidget *pFrame)
 {
 	MTabItem *pItem = new MTabItem(pFrame,pButton,pButton->GetListener());
 	pButton->SetListener(this);
 	m_TabList.push_back(pItem);
 }
 
-void MTabCtrl::RemoveAll(void)
+void MTabCtrl::RemoveAll()
 {
 	while(m_TabList.size() > 0) {
 		MTabItem* pItem = *m_TabList.begin();
@@ -65,12 +63,12 @@ void MTabCtrl::RemoveAll(void)
 	}
 }
 
-int MTabCtrl::GetCount(void)
+int MTabCtrl::GetCount()
 {
 	return m_TabList.size();
 }
 
-int MTabCtrl::GetSelIndex(void)
+int MTabCtrl::GetSelIndex()
 {
 	return m_nCurrentSel;
 }
@@ -127,7 +125,7 @@ void MTabCtrl::UpdateListeners()
 	for(MTabList::iterator i=m_TabList.begin();i!=m_TabList.end();i++)
 	{
 		MTabItem *pItem = *i;
-		if(pItem->pButton->GetListener()!=this)	// 바뀐것은 갱신해준다
+		if (pItem->pButton->GetListener() != this)
 		{
 			pItem->pButtonListener = pItem->pButton->GetListener();
 			pItem->pButton->SetListener(this);

@@ -9,8 +9,6 @@ IMPLEMENT_LOOK(MLabel, MLabelLook)
 
 MLabel::MLabel(const char* szName, MWidget* pParent, MListener* pListener) : MWidget(szName, pParent, pListener)
 {
-	LOOK_IN_CONSTRUCTOR()
-
 	m_TextColor		= DEFCOLOR_MLABEL_TEXT;
 	m_AlignmentMode	= MLABEL_DEFAULT_ALIGNMENT_MODE;
 
@@ -26,12 +24,12 @@ void MLabel::SetTextColor(MCOLOR color)
 	m_TextColor = color;
 }
 
-MCOLOR MLabel::GetTextColor(void)
+MCOLOR MLabel::GetTextColor()
 {
 	return m_TextColor;
 }
 
-MAlignmentMode MLabel::GetAlignment(void)
+MAlignmentMode MLabel::GetAlignment()
 {
 	return m_AlignmentMode;
 }
