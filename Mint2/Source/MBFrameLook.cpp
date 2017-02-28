@@ -145,7 +145,7 @@ MBFrameLook::MBFrameLook(void)	: MScalableLook()
 }
 
 #define RECT_DEFAULT_SPACE 12
-MRECT MBFrameLook::GetClientRect(MFrame* pFrame, MRECT& r)
+MRECT MBFrameLook::GetClientRect(MFrame* pFrame, const MRECT& r)
 {
 	if(GetCustomLook() == 1)
 	{

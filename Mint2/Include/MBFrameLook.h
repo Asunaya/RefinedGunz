@@ -31,7 +31,7 @@ public:
 		return m_iCustomLook;
 	}
 
-	virtual MRECT GetClientRect(MFrame* pFrame, MRECT& r);
+	virtual MRECT GetClientRect(MFrame* pFrame, const MRECT& r) override;
 };
 
 #endif
