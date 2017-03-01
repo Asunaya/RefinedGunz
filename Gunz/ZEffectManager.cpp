@@ -154,83 +154,22 @@ public:
 	}
 };
 
-template <typename T, typename T2>
-class TexSwapEffect : public T
+namespace RealSpace2
 {
-public:
-	MUID UID;
-	T2 Getter;
-
-	template <typename... Args>
-	TexSwapEffect(const MUID& uid, T2 fn, Args... args) : UID(uid), Getter(fn), T(args...)
-	{
-	}
-
-	virtual ~TexSwapEffect() override
-	{
-	}
-
-	virtual bool Draw(unsigned long int nTime) override
-	{
-		auto SetTextures = [&](std::vector<IDirect3DTexture9*> &Vec)
-		{
-			size_t i = 0;
-			for (auto Mtrl : m_VMesh.m_pMesh->m_mtrl_list_ex)
-			{
-				if (Vec.size() < i + 1)
-					break;
-
-				Mtrl->m_pTexture->m_pTex = Vec[i];
-
-				i++;
-			}
-		};
-
-		std::vector<IDirect3DTexture9*> OrigTextures;
-		std::vector<IDirect3DTexture9*>* Textures = Getter(UID);
-		bool SwitchTextures = Textures != nullptr;
-
-		if (SwitchTextures)
-		{
-			for (auto Mtrl : m_VMesh.m_pMesh->m_mtrl_list_ex)
-				OrigTextures.push_back(Mtrl->m_pTexture->m_pTex);
-
-			SetTextures(*Textures);
-		}
-
-		auto ret = T::Draw(nTime);
-
-		if (SwitchTextures)
-		{
-			SetTextures(OrigTextures);
-		}
-
-		return ret;
-	}
-};
-
-template <typename T, typename T2, typename... ArgsType>
-TexSwapEffect<T, T2>* MakeTexSwapEffect(const MUID& UID, T2 fn, ArgsType... args)
-{
-	return new TexSwapEffect<T, T2>(UID, fn, args...);
+extern uint32_t BlendColor;
 }
 
-uint32_t BlendColor = 0;
-
-template <typename T, typename T2>
-class TexBlendEffect : public T
+template <typename ParentType, typename GetterType>
+class TexBlendEffect : public ParentType
 {
-	T2 Get;
+	std::remove_reference_t<GetterType> Get;
 public:
 
 	template <typename... Args>
-	TexBlendEffect(T2 fn, Args... args) : Get(fn), T(args...)
-	{
-	}
-
-	virtual ~TexBlendEffect() override
-	{
-	}
+	TexBlendEffect(GetterType&& fn, Args&&... args) :
+		Get{ std::forward<GetterType>(fn) },
+		ParentType{ std::forward<Args>(args)... }
+	{}
 
 	virtual bool Draw(unsigned long int nTime) override
 	{
@@ -238,18 +177,24 @@ public:
 		
 		BlendColor = Color;
 
-		auto ret = T::Draw(nTime);
+		auto ret = ParentType::Draw(nTime);
 
 		BlendColor = 0;
 
 		return ret;
 	}
+
+	// Need these to override the same operators in CMemPool[Sm]<ParentType> in the parent class
+	// since the ones in the memory pool expect to be allocating space for instances
+	// of the parent class's type, not of this type, which is larger.
+	static void* operator new(size_t size){ return ::operator new(size); }
+	static void  operator delete(void* ptr, size_t size) { ::operator delete(ptr, size); }
 };
 
 template <typename T, typename T2, typename... ArgsType>
-TexBlendEffect<T, T2>* MakeTexBlendEffect(T2 fn, ArgsType... args)
+TexBlendEffect<T, T2>* MakeTexBlendEffect(T2&& fn, ArgsType&&... args)
 {
-	return new TexBlendEffect<T, T2>(fn, args...);
+	return new TexBlendEffect<T, T2>(std::forward<T2>(fn), std::forward<ArgsType>(args)...);
 }
 
 ZEffect::ZEffect()
