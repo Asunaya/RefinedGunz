@@ -21,32 +21,23 @@ sCharacterLight	g_CharLightList[NUM_LIGHT_TYPE];
 
 ZCharacterObject::ZCharacterObject()
 {
-	m_pshadow = NULL;
-	m_bDynamicLight = false;
-
-	m_iDLightType = 0;
-	m_fLightLife = 0.f;
-
-	m_fTime = 0.f;
-
 	m_pSoundMaterial[0] = 0;
 
-	m_bHero = false;
-	m_fTremblePower = 30.0f;
-
-	m_pModule_HPAP = AddModule<ZModule_HPAP>();
-	m_pModule_Resistance = AddModule<ZModule_Resistance>();
-	m_pModule_FireDamage = AddModule<ZModule_FireDamage>();
-	m_pModule_ColdDamage = AddModule<ZModule_ColdDamage>();
-	m_pModule_PoisonDamage = AddModule<ZModule_PoisonDamage>();
-	m_pModule_LightningDamage = AddModule<ZModule_LightningDamage>();
+#define ADD_MODULE(module) m_pModule_##module = AddModule<ZModule_##module>();
+	ADD_MODULE(HPAP);
+	ADD_MODULE(Resistance);
+	ADD_MODULE(FireDamage);
+	ADD_MODULE(ColdDamage);
+	ADD_MODULE(PoisonDamage);
+	ADD_MODULE(LightningDamage);
+#undef ADD_MODULE
 }
 
 ZCharacterObject::~ZCharacterObject() = default;
 
 void ZCharacterObject::CreateShadow()
 {
-	m_pshadow = std::make_unique<ZShadow>();
+	Shadow.Construct();
 }
 
 bool ZCharacterObject::GetWeaponTypePos(WeaponDummyType type,rvector* pos,bool bLeft)
@@ -441,11 +432,11 @@ void ZCharacterObject::DrawShadow()
 {
 	__BP(28, "ZCharacter::Draw::Shadow");
 
-	if(!m_pshadow) return;
+	if(!Shadow.IsConstructed()) return;
 
 	if(!IsDie())
 	{
-		float fSize = 100.f;
+		float fSize = ZShadow::DefaultSize;
 		
 		ZActor* pActor = MDynamicCast(ZActor,this);
 
@@ -453,8 +444,8 @@ void ZCharacterObject::DrawShadow()
 			fSize = pActor->GetNPCInfo()->fCollRadius * 3.0f;
 		}
 
-		if(m_pshadow->setMatrix( *this ,fSize ))
-			m_pshadow->draw();
+		if (Shadow.Get().SetMatrices(*m_pVMesh, *ZGetGame()->GetWorld()->GetBsp(), fSize))
+			Shadow.Get().Draw();
 	}
 
 	__EP(28);

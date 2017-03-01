@@ -1,153 +1,81 @@
 #include "stdafx.h"
-
-#include ".\zshadow.h"
-#include ".\ZCharacter.h"
+#include "ZShadow.h"
 #include "RBspObject.h"
 #include "MDebug.h"
 
-#define VALID_SHADOW_LENGTH 250
-#define VALID_SHADOW_BOUNDARY_SQUARE 62500
+// Maximum distance to the floor before the shadow disappears
+constexpr float MaxShadowDistance = 250;
+constexpr float MaxShadowDistanceSquared = Square(MaxShadowDistance);
 
-extern ZApplication g_app;
-
-rvector ZShadow::mNormal;
-
-//////////////////////////////////////////////////////////////////////////
-//	Constructor / Desturctor
-//////////////////////////////////////////////////////////////////////////
-ZShadow::ZShadow(void)
+static int GetAlpha(float DistanceToFloorSquared)
 {
-	// normalÀº +z
-	mNormal = rvector( 0.f, 0.f, 1.f);
-
-	GetIdentityMatrix(mWorldMatLF );
-	GetIdentityMatrix(mWorldMatRF );
-
-	bLFShadow = false;
-	bRFShadow = false;
+	if (DistanceToFloorSquared > MaxShadowDistanceSquared) {
+		// Out of range. 0% alpha.
+		return 0;
+	}
+	else if (DistanceToFloorSquared <= 0) {
+		// Shadow is above the foot position?
+		// Strange but whatever, 100% alpha.
+		return 255;
+	}
+	else {
+		// Scale the alpha based on distance.
+		const auto BlendFactor = 1 - (DistanceToFloorSquared / MaxShadowDistanceSquared);
+		return static_cast<int>(BlendFactor * 255);
+	}
 }
 
-//////////////////////////////////////////////////////////////////////////
-//	draw
-//////////////////////////////////////////////////////////////////////////
-void ZShadow::draw(bool bForced)
+void ZShadow::Draw()
 {
-	if( (bLFShadow==false) && ((bRFShadow==false)))
-		return;
-
-	float blend_factor = ( mfDistance )/ VALID_SHADOW_BOUNDARY_SQUARE;
-
-		 if( blend_factor >= 1  )	blend_factor = 0;
-	else if( mfDistance <= 0 )		blend_factor = 1;
-	else							blend_factor = 1 - blend_factor;
-
-	DWORD _color = ((DWORD)(blend_factor * 255))<<24 | 0xffffff;
-
-	if(bLFShadow)
-		ZGetEffectManager()->AddShadowEffect(mWorldMatLF,_color);
-
-	if(bRFShadow)
-		ZGetEffectManager()->AddShadowEffect(mWorldMatRF,_color);
-
-}
-
-//////////////////////////////////////////////////////////////////////////
-//	setSize
-//	(desc) return scale matrix which scales by size_
-//	(ref) this shadow object is unit length(1) 2d box
-//	+ helper function
-//////////////////////////////////////////////////////////////////////////
-rmatrix ZShadow::setSize( float size_  )
-{
-	return ScalingMatrix(size_);
-}
-
-//////////////////////////////////////////////////////////////////////////
-//	setDirection
-//	(desc) return rotation matrix to match shadow object's normal to input direction
-//	+ helper function
-//////////////////////////////////////////////////////////////////////////
-rmatrix ZShadow::setDirection( rvector& dir_ )
-{
-	rmatrix xRotMat;
-	rmatrix yRotMat;
-
-	rvector xVector = dir_;
-	xVector.y = 0;
-	float xtheta = DotProduct(mNormal, xVector);
-
-	rvector yVector = dir_;
-	yVector.x = 0;
-	float yTheta = DotProduct(mNormal, yVector);
-
-	xRotMat = RGetRotX(xtheta);
-	yRotMat = RGetRotY(yTheta);
-
-	return xRotMat*yRotMat;
-}
-
-bool ZShadow::setMatrix(ZCharacterObject& char_, float size_  )
-{
-	return setMatrix( *char_.m_pVMesh ,size_);
-}
-
-bool ZShadow::setMatrix( RVisualMesh& vmesh, float size_, RBspObject* p_map)
-{
-	rvector footPosition[2];
-	footPosition[0] = vmesh.GetLFootPosition();
-	footPosition[1] = vmesh.GetRFootPosition();
-	if( p_map == 0 )
-		p_map = g_app.GetGame()->GetWorld()->GetBsp();
-
-	rvector floorPosition[2];
-	rvector dir[2];
-
-	bLFShadow = true;
-	bRFShadow = true;
-
-	if( !p_map->GetShadowPosition( footPosition[0], rvector( 0, 0, -1), &dir[0], &floorPosition[0] ))
+	for (auto&& Shadow : Shadows)
 	{
-		if(g_pGame) {
-			floorPosition[0] = g_pGame->GetFloor(footPosition[0]);
-		} else {
-			bLFShadow = false;
+		if (!Shadow.Visible)
+			continue;
+
+		const auto Alpha = GetAlpha(Shadow.DistanceToFloorSquared);
+		if (Alpha == 0)
+			continue;
+
+		const auto Color = ARGB(Alpha, 255, 255, 255);
+		ZGetEffectManager()->AddShadowEffect(Shadow.World, Color);
+	}
+}
+
+bool ZShadow::SetMatrices(RVisualMesh& VisualMesh, RBspObject& Map, float Size)
+{
+	const v3 FootPositions[] = {
+		VisualMesh.GetLFootPosition(),
+		VisualMesh.GetRFootPosition(),
+	};
+
+	for (int ShadowIndex = 0; ShadowIndex < int(std::size(Shadows)); ++ShadowIndex)
+	{
+		auto&& Shadow = Shadows[ShadowIndex];
+		Shadow.Visible = true;
+		const auto& FootPosition = FootPositions[ShadowIndex];
+
+		const v3 Down{ 0, 0, -1 };
+		v3 Dir, FloorPosition;
+		if (!Map.GetShadowPosition(FootPosition, Down, &Dir, &FloorPosition))
+		{
+			if (ZGetGame()) {
+				FloorPosition = ZGetGame()->GetFloor(FootPosition);
+			}
+			else {
+				Shadow.Visible = false;
+			}
 		}
 
-	}
-	if( !p_map->GetShadowPosition( footPosition[1], rvector( 0, 0, -1), &dir[1], &floorPosition[1] ))
-	{
-		if(g_pGame) {
-			floorPosition[1] = g_pGame->GetFloor(footPosition[1]);
-		} else { 
-			bRFShadow = false;
+		Shadow.DistanceToFloorSquared = MagnitudeSq(FootPosition - FloorPosition);
+		Shadow.Visible = Shadow.DistanceToFloorSquared <= MaxShadowDistanceSquared &&
+			FloorPosition.z < FootPosition.z;
+
+		if (!Shadow.Visible) {
+			continue;
 		}
+
+		Shadow.World = ScalingMatrix(Size) * TranslationMatrix(FloorPosition + v3{ 0, 0, 1 });
 	}
 
-	if( (bLFShadow==false) && ((bRFShadow==false)))
-		return false;
-
-	float distanceL , distanceR;
-	auto vecx = footPosition[0] - floorPosition[0];
-	auto vecy = footPosition[1] - floorPosition[1];
-	distanceL = MagnitudeSq(vecx) - 200;
-	distanceR = MagnitudeSq(vecy) - 200;
-	
-	if( VALID_SHADOW_BOUNDARY_SQUARE >= distanceL && floorPosition[0].z < footPosition[0].z )	bLFShadow = true;
-	else	bLFShadow = false;
-	
-	if( VALID_SHADOW_BOUNDARY_SQUARE >= distanceR && floorPosition[1].z < footPosition[1].z)	bRFShadow = true;
-	else	bRFShadow = false;
-		
-	mfDistance = ( distanceL + distanceR ) * 0.5 ;
-	
-	//matrix setup
-	float fSize = vmesh.m_vScale.x * size_;
-	rmatrix scaleMat = setSize( size_ );
-	
-	if( bLFShadow )
-		mWorldMatLF = scaleMat * TranslationMatrix(floorPosition[0] + v3{0, 0, 1});
-	if( bRFShadow )
-		mWorldMatRF = scaleMat * TranslationMatrix(floorPosition[0] + v3{ 0, 0, 1 });
-
-	return true;
+	return Shadows[0].Visible || Shadows[1].Visible;
 }

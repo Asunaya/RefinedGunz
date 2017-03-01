@@ -6,8 +6,8 @@
 #include "ZObject.h"
 #include "stuff.h"
 #include "BasicInfoHistory.h"
-
-class ZShadow;
+#include "DeferredConstructionWrapper.h"
+#include "ZShadow.h"
 
 namespace RealSpace2
 {
@@ -62,27 +62,27 @@ public:
 	void SetTremblePower(float fPower) { m_fTremblePower = fPower; }
 
 	char	m_pSoundMaterial[16];
-	bool	m_bLeftShot;
-	float	m_fTime;
-	int		m_iDLightType;
-	float	m_fLightLife;
-	rvector	m_vLightColor;
+	bool	m_bLeftShot{};
+	float	m_fTime{};
+	int		m_iDLightType{};
+	float	m_fLightLife{};
+	rvector	m_vLightColor{};
 
-	std::unique_ptr<ZShadow> m_pshadow;
-	bool m_bDynamicLight;
+	DeferredConstructionWrapper<ZShadow> Shadow;
+	bool m_bDynamicLight{};
 
-	ZModule_HPAP			*m_pModule_HPAP;
-	ZModule_Resistance		*m_pModule_Resistance;
-	ZModule_FireDamage		*m_pModule_FireDamage;
-	ZModule_ColdDamage		*m_pModule_ColdDamage;
-	ZModule_PoisonDamage	*m_pModule_PoisonDamage;
-	ZModule_LightningDamage	*m_pModule_LightningDamage;
+	ZModule_HPAP			*m_pModule_HPAP{};
+	ZModule_Resistance		*m_pModule_Resistance{};
+	ZModule_FireDamage		*m_pModule_FireDamage{};
+	ZModule_ColdDamage		*m_pModule_ColdDamage{};
+	ZModule_PoisonDamage	*m_pModule_PoisonDamage{};
+	ZModule_LightningDamage	*m_pModule_LightningDamage{};
 
 protected:
-	bool m_bHero;
+	bool m_bHero{};
 
 private:
-	float m_fTremblePower;
+	float m_fTremblePower = 30;
 
 	void SetGunLight();
 };

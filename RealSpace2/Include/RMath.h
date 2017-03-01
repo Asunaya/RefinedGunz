@@ -111,7 +111,7 @@ inline void SetTransPos(rmatrix& m, const v3& trans) {
 }
 
 template <typename T>
-auto Square(const T& x) {
+constexpr auto Square(const T& x) {
 	return x * x;
 }
 
