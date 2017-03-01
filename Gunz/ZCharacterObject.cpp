@@ -17,7 +17,49 @@
 
 MImplementRTTI(ZCharacterObject, ZObject);
 
-sCharacterLight	g_CharLightList[NUM_LIGHT_TYPE];
+struct sCharacterLight
+{
+	CharacterLight::Type Type;
+	float Life;
+	v3 LightColor;
+	float Range;
+};
+
+static const sCharacterLight g_CharLightList[CharacterLight::End] = {
+	// Gun
+	{
+		// Type
+		CharacterLight::Gun,
+		// Life
+		300,
+		// LightColor
+		v3{5, 1, 1},
+		// Range
+		100,
+	},
+	// Shotgun
+	{
+		// Type
+		CharacterLight::Shotgun,
+		// Life
+		1000,
+		// LightColor
+		v3{6, 1.3, 1.3},
+		// Range
+		150,
+	},
+	// Cannon
+	{
+		// Type
+		CharacterLight::Cannon,
+		// Life
+		1300,
+		// LightColor
+		v3{7, 1.3, 1.3},
+		// Range
+		200,
+	},
+};
 
 ZCharacterObject::ZCharacterObject()
 {
@@ -265,7 +307,7 @@ void ZCharacterObject::SetGunLight()
 		Light.Diffuse.r = m_vLightColor.x;
 		Light.Diffuse.g = m_vLightColor.y;
 		Light.Diffuse.b = m_vLightColor.z;
-		Light.Range = g_CharLightList[m_iDLightType].fRange;
+		Light.Range = g_CharLightList[m_iDLightType].Range;
 
 		float lastTime = m_fTime;
 		m_fTime = GetGlobalTimeMS();
@@ -528,15 +570,32 @@ void ZCharacterObject::OnKnockback(const rvector& dir, float fForce)
 	Tremble(fMaxValue, 50, 100);
 }
 
+void ZCharacterObject::SetLight(CharacterLight::Type Type)
+{
+	if (Type < 0 || Type > CharacterLight::End)
+	{
+		assert(!"ZCharacterObject::SetLight -- Type is out of bounds");
+		return;
+	}
+
+	if (m_bDynamicLight) {
+		m_vLightColor = g_CharLightList[Type].LightColor;
+		m_fLightLife = g_CharLightList[Type].Life;
+	}
+	else {
+		m_bDynamicLight = true;
+		m_vLightColor = g_CharLightList[Type].LightColor;
+		m_vLightColor.x = 1.0f;
+		m_iDLightType = Type;
+		m_fLightLife = g_CharLightList[Type].Life;
+	}
+}
+
 MImplementRTTI(ZCharacterObjectHistory, ZCharacterObject);
 
 void ZCharacterObjectHistory::EmptyHistory()
 {
-	while (m_BasicHistory.size())
-	{
-		delete *m_BasicHistory.begin();
-		m_BasicHistory.erase(m_BasicHistory.begin());
-	}
+	m_BasicHistory.clear();
 }
 
 bool ZCharacterObjectHistory::GetHistory(rvector *pos, rvector *direction, float fTime, rvector* camerapos)
@@ -564,21 +623,21 @@ bool ZCharacterObjectHistory::GetHistory(rvector *pos, rvector *direction, float
 
 	if (m_BasicHistory.size() > 1)
 	{
-		ZBasicInfoHistory::iterator hi;
-		hi = m_BasicHistory.end();
+		auto hi = m_BasicHistory.end();
 
 		ZBasicInfoItem *bi = NULL, *binext = NULL;
 
 		do {
 			hi--;
 			binext = bi;
-			bi = *hi;
+			bi = &*hi;
 		} while (hi != m_BasicHistory.begin() && bi->fSendTime > fTime);
 
 		if (fTime < bi->fSendTime)
 			return false;
 
-		ZBasicInfoItem *pnext, next;
+		ZBasicInfoItem *pnext;
+		ZBasicInfoItem next;
 
 		if (!binext)
 		{
@@ -608,4 +667,13 @@ bool ZCharacterObjectHistory::GetHistory(rvector *pos, rvector *direction, float
 	}
 
 	return false;
+}
+
+void ZCharacterObjectHistory::AddToHistory(const ZBasicInfoItem & Item)
+{
+	m_BasicHistory.push_back(Item);
+
+	int Surplus = int(m_BasicHistory.size()) - MaxHistorySize;
+	if (Surplus > 0)
+		m_BasicHistory.erase(m_BasicHistory.begin() + Surplus, m_BasicHistory.end());
 }

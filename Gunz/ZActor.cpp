@@ -96,8 +96,6 @@ void ZActor::SetMyControl(bool bMyControl)
 	EmptyHistory();
 }
 
-extern sCharacterLight g_CharLightList[NUM_LIGHT_TYPE];
-
 bool ZActor::IsDieAnimationDone()
 {
 	if(m_Animation.GetCurrState() == ZA_ANIM_DIE) {
@@ -480,24 +478,14 @@ void ZActor::PostBasicInfo()
 
 		pbi.anistate = GetCurrAni();
 
-
 		ZPOSTCMD1(MC_QUEST_PEER_NPC_BASICINFO, MCommandParameterBlob(&pbi,sizeof(ZACTOR_BASICINFO)));
 
-#define ACTOR_HISTROY_COUNT 100
-
-		ZBasicInfoItem *pitem=new ZBasicInfoItem;
-		pitem->info.position = m_Position;
-		pitem->info.direction = GetDirection();
-		pitem->info.velocity = GetVelocity();
-
-		pitem->fSendTime = pitem->fReceivedTime = ZGetGame()->GetTime();
-		m_BasicHistory.push_back(pitem);
-
-		while(m_BasicHistory.size()>ACTOR_HISTROY_COUNT)
-		{
-			delete *m_BasicHistory.begin();
-			m_BasicHistory.pop_front();
-		}
+		ZBasicInfoItem Item;
+		Item.info.position = m_Position;
+		Item.info.direction = GetDirection();
+		Item.info.velocity = GetVelocity();
+		Item.fSendTime = Item.fReceivedTime = ZGetGame()->GetTime();
+		AddToHistory(Item);
 	}
 }
 

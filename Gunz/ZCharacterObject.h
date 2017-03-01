@@ -14,14 +14,16 @@ namespace RealSpace2
 struct RLIGHT;
 }
 
-struct ZBasicInfoItem : public CMemPoolSm<ZBasicInfoItem>
+namespace CharacterLight
 {
-	ZBasicInfo info;
-	float fReceivedTime;
-	float fSendTime;
+enum Type
+{
+	Gun,
+	Shotgun,
+	Cannon,
+	End,
 };
-
-using ZBasicInfoHistory = std::list<ZBasicInfoItem*>;
+}
 
 class ZCharacterObject : public ZObject
 {
@@ -61,6 +63,20 @@ public:
 	virtual void OnKnockback(const rvector& dir, float fForce);
 	void SetTremblePower(float fPower) { m_fTremblePower = fPower; }
 
+	void SetLight(CharacterLight::Type Type);
+
+	const char* GetSoundMaterial() const { return m_pSoundMaterial; }
+
+protected:
+	ZModule_HPAP			*m_pModule_HPAP{};
+	ZModule_Resistance		*m_pModule_Resistance{};
+	ZModule_FireDamage		*m_pModule_FireDamage{};
+	ZModule_ColdDamage		*m_pModule_ColdDamage{};
+	ZModule_PoisonDamage	*m_pModule_PoisonDamage{};
+	ZModule_LightningDamage	*m_pModule_LightningDamage{};
+
+	bool m_bHero{};
+
 	char	m_pSoundMaterial[16];
 	bool	m_bLeftShot{};
 	float	m_fTime{};
@@ -71,28 +87,30 @@ public:
 	DeferredConstructionWrapper<ZShadow> Shadow;
 	bool m_bDynamicLight{};
 
-	ZModule_HPAP			*m_pModule_HPAP{};
-	ZModule_Resistance		*m_pModule_Resistance{};
-	ZModule_FireDamage		*m_pModule_FireDamage{};
-	ZModule_ColdDamage		*m_pModule_ColdDamage{};
-	ZModule_PoisonDamage	*m_pModule_PoisonDamage{};
-	ZModule_LightningDamage	*m_pModule_LightningDamage{};
-
-protected:
-	bool m_bHero{};
-
 private:
-	float m_fTremblePower = 30;
-
 	void SetGunLight();
+
+	float m_fTremblePower = 30;
 };
+
+struct ZBasicInfoItem
+{
+	ZBasicInfo info;
+	float fReceivedTime;
+	float fSendTime;
+};
+
+using ZBasicInfoHistory = std::vector<ZBasicInfoItem>;
 
 class ZCharacterObjectHistory : public ZCharacterObject
 {
 	MDeclareRTTI;
 public:
 	virtual bool GetHistory(rvector *pos, rvector *direction, float fTime, rvector* camerapos = nullptr) override;
+	void AddToHistory(const ZBasicInfoItem& Item);
 	void EmptyHistory();
 
-	ZBasicInfoHistory	m_BasicHistory;
+private:
+	ZBasicInfoHistory m_BasicHistory;
+	static constexpr int MaxHistorySize = 100;
 };

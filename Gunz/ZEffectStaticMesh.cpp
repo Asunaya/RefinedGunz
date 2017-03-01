@@ -70,7 +70,9 @@ bool ZEffectStaticMesh::Draw(unsigned long int nTime)
 		m_VMesh.Render();
 		m_bisRendered = m_VMesh.m_bIsRender;
 	} 
-	else m_bisRendered = false;
+	else {
+		m_bisRendered = false;
+	}
 
 	static const char* base_snd_name = "fx_slugdrop_";
 	static char buffer[64];
@@ -78,28 +80,23 @@ bool ZEffectStaticMesh::Draw(unsigned long int nTime)
 	if( dwDiff > EC_LIFETIME )
 	{
 		ZObject* pObj = ZGetObjectManager()->GetObject(m_uid);
-
 		ZCharacterObject* pCObj = MDynamicCast(ZCharacterObject, pObj);
-
 		if(!pCObj) return false;
 
-		if( pCObj->m_pSoundMaterial == 0 )
-		{
-			ZGetSoundEngine()->PlaySound("fx_slugdrop_mt_con",Pos);
-		} 
-		else 
-		{
-			if( pCObj == NULL )
-			{
-				ZGetSoundEngine()->PlaySound("fx_slugdrop_mt_con",Pos);
-			}
-			else
-			{
-				strcpy_safe( buffer, base_snd_name );
-				strcat_safe( buffer, pCObj->m_pSoundMaterial );
+		auto* SoundMaterial = pCObj->GetSoundMaterial();
 
-				ZGetSoundEngine()->PlaySoundElseDefault(buffer,"fx_slugdrop_mt_con",Pos);
-			}			
+		auto DefaultSound = "fx_slugdrop_mt_con";
+
+		if(SoundMaterial == nullptr || SoundMaterial[0] == 0)
+		{
+			ZGetSoundEngine()->PlaySound(DefaultSound, Pos);
+		} 
+		else
+		{
+			strcpy_safe(buffer, base_snd_name);
+			strcat_safe(buffer, SoundMaterial);
+
+			ZGetSoundEngine()->PlaySoundElseDefault(buffer, DefaultSound, Pos);
 		}
 		return false;
 		

@@ -262,8 +262,6 @@ RRESULT OnDestroy(void *pParam)
 
 		mlog("main : MBitmapManager::DestroyAniBitmap()\n");
 
-		ZBasicInfoItem::Release();
-
 		ZGetStencilLight()->Destroy();
 		LightSource::Release();
 

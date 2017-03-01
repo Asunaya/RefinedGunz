@@ -165,8 +165,6 @@ ZGame*	g_pGame = NULL;
 float	g_fFOV = DEFAULT_FOV;
 float	g_fFarZ = DEFAULT_FAR_Z;
 
-extern sCharacterLight g_CharLightList[NUM_LIGHT_TYPE];
-
 MUID tempUID(0, 0);
 MUID g_MyChrUID(0, 0);
 
@@ -465,30 +463,6 @@ bool ZGame::Create(MZFileSystem *pfs, ZLoadingProgress *pLoading )
 	mlog("ZGame::Create() m_CharacterManager.Clear done \n");
 
 	m_pMyCharacter = (ZMyCharacter*)m_CharacterManager.Add(ZGetGameClient()->GetPlayerUID(), rvector(0.0f, 0.0f, 0.0f),true);
-
-	
-	{
-		g_CharLightList[GUN].fLife	= 300;
-		g_CharLightList[GUN].fRange = 100;
-		g_CharLightList[GUN].iType	= GUN;
-		g_CharLightList[GUN].vLightColor.x	= 5.0f;
-		g_CharLightList[GUN].vLightColor.y	= 1.0f;
-		g_CharLightList[GUN].vLightColor.z	= 1.0f;
-
-		g_CharLightList[SHOTGUN].fLife	= 1000;
-		g_CharLightList[SHOTGUN].fRange = 150;
-		g_CharLightList[SHOTGUN].iType	= SHOTGUN;
-		g_CharLightList[SHOTGUN].vLightColor.x	= 6.0f;
-		g_CharLightList[SHOTGUN].vLightColor.y	= 1.3f;
-		g_CharLightList[SHOTGUN].vLightColor.z	= 1.3f;
-
-		g_CharLightList[CANNON].fLife	= 1300;
-		g_CharLightList[CANNON].fRange	= 200;
-		g_CharLightList[CANNON].iType	= CANNON;
-		g_CharLightList[CANNON].vLightColor.x	= 7.0f;
-		g_CharLightList[CANNON].vLightColor.y	= 1.3f;
-		g_CharLightList[CANNON].vLightColor.z	= 1.3f;
-	}
 
 	ZGetFlashBangEffect()->SetBuffer();
 	ZGetScreenEffectManager()->SetGuageExpFromMyInfo();
@@ -2064,25 +2038,8 @@ void ZGame::OnPeerShotSp(const MUID& uid, float fShotTime, const rvector& pos, c
 	
 	if( dLight )
 	{	
-		ZCharacter* pChar;
-
 		if( ZGetConfiguration()->GetVideo()->bDynamicLight && pOwnerCharacter != NULL )	{
-
-			pChar = pOwnerCharacter;
-
-			if( pChar->m_bDynamicLight ) {
-
-				pChar->m_vLightColor = g_CharLightList[CANNON].vLightColor;
-				pChar->m_fLightLife = g_CharLightList[CANNON].fLife;
-
-			} else {
-
-				pChar->m_bDynamicLight = true;
-				pChar->m_vLightColor = g_CharLightList[CANNON].vLightColor;
-				pChar->m_vLightColor.x = 1.0f;
-				pChar->m_iDLightType = CANNON;
-				pChar->m_fLightLife = g_CharLightList[CANNON].fLife;
-			}
+			pOwnerCharacter->SetLight(CharacterLight::Cannon);
 
 			if( pOwnerCharacter->IsHero() )
 			{
@@ -2907,25 +2864,9 @@ void ZGame::OnPeerShot_Range(MMatchCharItemParts sel_type, const MUID& uidOwner,
 		ZGetEffectManager()->AddShotEffect(v, size, v2, BulletMarkNormal, nTargetType,
 			wtype, pCOwnerObject, bDrawFireEffects, bDrawTargetEffects);
 
-		ZCharacterObject* pChar;
-
 		if( ZGetConfiguration()->GetVideo()->bDynamicLight && pCOwnerObject != NULL )
 		{
-			pChar = pCOwnerObject;
-		
-			if( pChar->m_bDynamicLight )
-			{
-				pChar->m_vLightColor = g_CharLightList[GUN].vLightColor;
-				pChar->m_fLightLife = g_CharLightList[GUN].fLife;
-			}
-			else
-			{
-				pChar->m_bDynamicLight = true;
-				pChar->m_vLightColor = g_CharLightList[GUN].vLightColor;
-				pChar->m_vLightColor.x = 1.0f;
-				pChar->m_iDLightType = GUN;
-				pChar->m_fLightLife = g_CharLightList[GUN].fLife;
-			}
+			pCOwnerObject->SetLight(CharacterLight::Gun);
 		}
 	}
 		   
@@ -3134,7 +3075,9 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 		CheckCombo(pOwnerCharacter, NULL,true);
 	}
 
-	ZApplication::GetSoundEngine()->PlaySEFire(pItem->GetDesc(), pos.x, pos.y, pos.z, (pOwnerCharacter==m_pMyCharacter));
+	ZApplication::GetSoundEngine()->PlaySEFire(pItem->GetDesc(),
+		pos.x, pos.y, pos.z,
+		pOwnerCharacter == m_pMyCharacter);
 
 	if(!pOwnerCharacter->IsRendered()) return;
 
@@ -3147,31 +3090,17 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 
 	ZGetEffectManager()->AddShotgunEffect(pos,v[1],dir,pOwnerCharacter);
 
-	ZCharacter* pChar;
 	if( ZGetConfiguration()->GetVideo()->bDynamicLight && pOwnerCharacter != NULL )
 	{
-		pChar = pOwnerCharacter;
-
-		if( pChar->m_bDynamicLight )
-		{
-			pChar->m_vLightColor = g_CharLightList[SHOTGUN].vLightColor;
-			pChar->m_fLightLife = g_CharLightList[SHOTGUN].fLife;
-		}
-		else
-		{
-			pChar->m_bDynamicLight = true;
-			pChar->m_vLightColor = g_CharLightList[SHOTGUN].vLightColor;
-			pChar->m_vLightColor.x = 1.0f;
-			pChar->m_iDLightType = SHOTGUN;
-			pChar->m_fLightLife = g_CharLightList[SHOTGUN].fLife;
-		}
+		pOwnerCharacter->SetLight(CharacterLight::Shotgun);
 	}
 
 	if(Z_VIDEO_DYNAMICLIGHT)
 		ZGetStencilLight()->AddLightSource(v1, 2.0f, 200 );
 }
 
-void ZGame::OnPeerShot(const MUID& uid, float fShotTime, rvector& pos, rvector& to,MMatchCharItemParts sel_type)
+void ZGame::OnPeerShot(const MUID& uid, float fShotTime, rvector& pos, rvector& to,
+	MMatchCharItemParts sel_type)
 {
 	ZCharacter* pOwnerCharacter = NULL;
 

@@ -466,19 +466,3 @@ private:
 void ZChangeCharParts(RVisualMesh* pVMesh, MMatchSex nSex, int nHair, int nFace, u32* pItemID);
 void ZChangeCharWeaponMesh(RVisualMesh* pVMesh, unsigned long int nWeaponID);
 bool CheckTeenVersionMesh(RMesh** ppMesh);
-
-enum CHARACTER_LIGHT_TYPE
-{
-	GUN,
-	SHOTGUN,
-	CANNON,
-	NUM_LIGHT_TYPE,
-};
-
-struct sCharacterLight
-{
-	int			iType;
-	float		fLife;
-	rvector		vLightColor;
-	float		fRange;
-};
