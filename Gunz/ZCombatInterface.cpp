@@ -26,6 +26,7 @@
 #include "ZRuleDuel.h"
 #include "ZInput.h"
 #include "ZPickInfo.h"
+#include "Config.h"
 
 #define BACKGROUND_COLOR1					0xff202020
 #define BACKGROUND_COLOR2					0xff000000
@@ -523,12 +524,12 @@ void ZCombatInterface::OnDraw(MDrawContext* pDC)
 			TextRelative(pDC, 720.f / 800.f, 585.f / 600.f, buffer);
 		}
 
-		float Ratio = float(RGetScreenWidth()) / RGetScreenHeight() / (4.0f / 3);
-
+#ifdef DRAW_HPAP_NUMBERS
 		sprintf_safe(buffer, "%d", pCharacter->GetHP());
-		TextRelative(pDC, 160.f * Ratio / 1920, 44.f / 1080, buffer);
+		TextRelative(pDC, 84.f / 800.f, 24.f / 600.f, buffer);
 		sprintf_safe(buffer, "%d", pCharacter->GetAP());
-		TextRelative(pDC, 160.f * Ratio / 1920, 92.f / 1080, buffer);
+		TextRelative(pDC, 84.f / 800.f, 51.f / 600.f, buffer);
+#endif
 
 		if ( ZApplication::GetGame()->GetMatch()->GetMatchType() == MMATCH_GAMETYPE_DUEL)
 		{

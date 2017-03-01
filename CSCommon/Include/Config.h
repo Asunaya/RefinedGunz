@@ -66,3 +66,7 @@
 // flashes on respawn and whisper, respectively
 #define FLASH_WINDOW_ON_RESPAWN
 #define FLASH_WINDOW_ON_WHISPER
+
+// Controls whether the HP and AP of the player are drawn
+// as numbers on top of the health gauges in the UI
+#define DRAW_HPAP_NUMBERS
