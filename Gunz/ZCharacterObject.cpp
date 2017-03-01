@@ -44,7 +44,7 @@ static const sCharacterLight g_CharLightList[CharacterLight::End] = {
 		// Life
 		1000,
 		// LightColor
-		v3{6, 1.3, 1.3},
+		v3{6, 1.3f, 1.3f},
 		// Range
 		150,
 	},
@@ -55,7 +55,7 @@ static const sCharacterLight g_CharLightList[CharacterLight::End] = {
 		// Life
 		1300,
 		// LightColor
-		v3{7, 1.3, 1.3},
+		v3{7, 1.3f, 1.3f},
 		// Range
 		200,
 	},
