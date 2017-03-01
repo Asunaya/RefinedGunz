@@ -69,7 +69,7 @@ private:
 	std::vector<struct ChatMessage> Msgs;
 	std::vector<struct LineSegmentInfo> LineSegments;
 	bool InputEnabled{};
-	POINT Cursor{};
+	MPOINT Cursor{};
 	D3DRECT Border{};
 	MFontR2 DefaultFont;
 	MFontR2 ItalicFont;

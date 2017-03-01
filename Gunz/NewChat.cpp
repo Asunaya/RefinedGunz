@@ -740,8 +740,8 @@ void Chat::OnUpdate(float TimeDelta){
 	if (!IsInputEnabled())
 		return;
 
-	POINT PrevCursorPos = Cursor;
-	GetCursorPos(&Cursor);
+	auto PrevCursorPos = Cursor;
+	Cursor = MEvent::LatestPos;
 
 	v2 MinimumSize{ 192.f * RGetScreenWidth() / 1920.f, 108.f * RGetScreenHeight() / 1080.f };
 
