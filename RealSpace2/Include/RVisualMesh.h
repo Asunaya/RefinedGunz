@@ -478,7 +478,7 @@ public:
 private:
 	void RenderWeaponSub(RVisualMesh* WeaponMesh,
 		rmatrix(RVisualMesh::* DummyMatrix)[weapon_dummy_end],
-		int sel_parts,
+		int sel_parts, int mode,
 		bool RenderMesh, bool RenderTracks);
 
 	u32 CustomColor[2]{};

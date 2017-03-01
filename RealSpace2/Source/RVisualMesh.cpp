@@ -1118,18 +1118,20 @@ void RVisualMesh::DrawEnchantPoison(RVisualMesh* pVWMesh,int mode,rmatrix& m)
 
 void RVisualMesh::RenderWeaponSub(RVisualMesh* WeaponMesh,
 	rmatrix(RVisualMesh::* DummyMatrix)[weapon_dummy_end],
-	int sel_parts,
+	int sel_parts, int mode,
 	bool RenderMesh, bool RenderTracks)
 {
+	auto&& WeaponPartInfo = m_WeaponPartInfo[sel_parts];
+
 	rmatrix WeaponWorldMatrix;
 	if (!m_isScale)
-		WeaponWorldMatrix = m_WeaponPartInfo[sel_parts].mat * m_WorldMat;
+		WeaponWorldMatrix = WeaponPartInfo.mat * m_WorldMat;
 	else
-		WeaponWorldMatrix = m_WeaponPartInfo[sel_parts].mat * m_ScaleMat * m_WorldMat;
+		WeaponWorldMatrix = WeaponPartInfo.mat * m_ScaleMat * m_WorldMat;
 
 	WeaponMesh->SetWorldMatrix(WeaponWorldMatrix);
 
-	auto vis = m_WeaponPartInfo[sel_parts].vis;
+	auto vis = WeaponPartInfo.vis;
 	if (RenderMesh && vis) {
 		WeaponMesh->SetVisibility(min(m_fVis, vis));
 		WeaponMesh->Render();
@@ -1144,7 +1146,7 @@ void RVisualMesh::RenderWeaponSub(RVisualMesh* WeaponMesh,
 	for (auto Dummy : Dummies)
 	{
 		// The transformed weapon matrix in the RVisualMesh that owns the weapon
-		auto& MyMat = m_WeaponDummyMatrix[Dummy];
+		auto& MyMat = (this->*DummyMatrix)[Dummy];
 		// The weapon's untransformed matrix
 		auto& WeaponMat = (WeaponMesh->*DummyMatrix)[Dummy];
 		// The left weapon's untransformed matrix
@@ -1158,8 +1160,8 @@ void RVisualMesh::RenderWeaponSub(RVisualMesh* WeaponMesh,
 		WeaponMesh->m_bRenderMatrix = false;
 
 	if (RenderTracks) {
-		DrawTracks(m_bDrawTracks, WeaponMesh, 0, WeaponWorldMatrix);
-		DrawEnchant(WeaponMesh, 0, WeaponWorldMatrix);
+		DrawTracks(m_bDrawTracks, WeaponMesh, mode, WeaponWorldMatrix);
+		DrawEnchant(WeaponMesh, mode, WeaponWorldMatrix);
 	}
 }
 
@@ -1187,9 +1189,11 @@ void RVisualMesh::RenderWeapon()
 	if (m_bRenderMatrix)
 		WeaponMesh->m_bRenderMatrix = true;
 
-	RenderWeaponSub(WeaponMesh, &RVisualMesh::m_WeaponDummyMatrix, sel_parts[0], RenderMesh, RenderTracks);
+	RenderWeaponSub(WeaponMesh, &RVisualMesh::m_WeaponDummyMatrix, sel_parts[0], 0,
+		RenderMesh, RenderTracks);
 	if (IsTwoHanded)
-		RenderWeaponSub(WeaponMesh, &RVisualMesh::m_WeaponDummyMatrix2, sel_parts[1], RenderMesh, RenderTracks);
+		RenderWeaponSub(WeaponMesh, &RVisualMesh::m_WeaponDummyMatrix2, sel_parts[1], 1,
+			RenderMesh, RenderTracks);
 
 	if (m_bRenderMatrix)
 		WeaponMesh->m_bRenderMatrix = false;
