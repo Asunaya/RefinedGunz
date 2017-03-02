@@ -491,12 +491,17 @@ RRESULT OnError(void *pParam)
 	return R_OK;
 }
 
-// Sets mode parameters to values retrieved from config.xml
 static void SetModeParams()
 {
 	g_ModeParams.FullscreenMode = ZGetConfiguration()->GetVideo()->FullscreenMode;
 	g_ModeParams.nWidth = ZGetConfiguration()->GetVideo()->nWidth;
 	g_ModeParams.nHeight = ZGetConfiguration()->GetVideo()->nHeight;
+}
+
+static void ApplyInitialConfiguration()
+{
+	SetModeParams();
+	Mint::GetInstance()->SetStretch(!ZGetConfiguration()->GetInterfaceFix());
 }
 
 LONG_PTR FAR PASCAL WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -687,7 +692,7 @@ int PASCAL WinMain(HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline, int 
 	}
 
 	SetRS2Callbacks();
-	SetModeParams();
+	ApplyInitialConfiguration();
 
 	int nReturn = RMain(APPLICATION_NAME, this_inst, prev_inst, cmdline, cmdshow,
 		&g_ModeParams, WndProc, IDI_ICON1, GfxAPI);

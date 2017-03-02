@@ -417,6 +417,7 @@ bool ZConfiguration::LoadConfig(const char* szFileName)
 			childElement.GetChildContents(&VisualFPSLimit, "VISUALFPSLIMIT");
 			childElement.GetChildContents(&LogicalFPSLimit, "LOGICALFPSLIMIT");
 			childElement.GetChildContents(&bCamFix, "CAMFIX");
+			childElement.GetChildContents(&InterfaceFix, "INTERFACEFIX");
 		}
 		if (parentElement.FindChildNode(ZTOK_AUDIO, &childElement))
 		{
@@ -502,287 +503,186 @@ bool ZConfiguration::LoadConfig(const char* szFileName)
 	return true;
 }
 
+struct ConfigSection
+{
+	MXmlElement Element;
+	bool IsFirst = true;
+
+	ConfigSection(MXmlElement& RootElement, const char* Name) :
+		Element{ RootElement.CreateChildElement(Name) }
+	{
+		Element.AppendText("\n\t\t");
+	}
+
+	~ConfigSection()
+	{
+		Element.AppendText("\n\t");
+	}
+
+	// Non-floating point overload
+	template <typename T>
+	std::enable_if_t<!std::is_floating_point<T>::value, MXmlElement> Add(const char* Name, T Value)
+	{
+		if (!IsFirst) {
+			Element.AppendText("\n\t\t");
+		} else {
+			IsFirst = false;
+		}
+
+		auto NewElement = Element.CreateChildElement(Name);
+		NewElement.SetContents(Value);
+		return NewElement;
+	}
+
+	// Floating point overload
+	// The default MXmlElement::SetContents for float has weird padding, so we'll do our own thing.
+	template <typename T>
+	std::enable_if_t<std::is_floating_point<T>::value, MXmlElement> Add(const char* Name, T Value)
+	{
+		char buf[128];
+		sprintf_safe(buf, "%f", Value);
+		return Add(Name, buf);
+	}
+
+	auto AddHex(const char* Name, u32 Value)
+	{
+		char buf[64];
+		sprintf_safe(buf, "%08X", Value);
+		return Add(Name, buf);
+	}
+};
+
+static const char* GetFullscreenString(FullscreenType Mode)
+{
+	switch (Mode)
+	{
+	case FullscreenType::Fullscreen:
+		return "fullscreen";
+	case FullscreenType::Borderless:
+		return "borderless";
+	case FullscreenType::Windowed:
+		return "windowed";
+	default:
+		assert(false);
+		return "fullscreen";
+	};
+}
+
 bool ZConfiguration::SaveToFile(const char *szFileName, const char* szHeader)
 {
-	char buffer[256];
-
-	MXmlDocument	xmlConfig;
-
+	MXmlDocument xmlConfig;
 	xmlConfig.Create();
 	xmlConfig.CreateProcessingInstruction(szHeader);
 
-	MXmlElement		aRootElement;
+	auto RootElement = xmlConfig.CreateElement("XML");
+	RootElement.AppendText("\n\t");
 
-	aRootElement=xmlConfig.CreateElement("XML");
-	aRootElement.AppendText("\n\t");
+	xmlConfig.AppendChild(RootElement);
 
-	xmlConfig.AppendChild(aRootElement);
+	auto AddIntersectionWhitespace = [&] {
+		RootElement.AppendText("\n\n\t");
+	};
 
 	// Server
 	{
-		MXmlElement	serverElement=aRootElement.CreateChildElement(ZTOK_SERVER);
-		serverElement.AppendText("\n\t\t");
-
-		MXmlElement		aElement;
-		aElement = serverElement.CreateChildElement(ZTOK_IP);
-		aElement.SetContents(m_szServerIP);
-
-		serverElement.AppendText("\n\t\t");
-		aElement = serverElement.CreateChildElement(ZTOK_PORT);
-		sprintf_safe(buffer,"%d",m_nServerPort);
-		aElement.SetContents(buffer);
-
-		serverElement.AppendText("\n\t");
+		auto Section = ConfigSection(RootElement, ZTOK_SERVER);
+		Section.Add(ZTOK_IP, m_szServerIP);
+		Section.Add(ZTOK_PORT, m_nServerPort);
 	}
 
-	aRootElement.AppendText("\n\n\t");
+	AddIntersectionWhitespace();
 
 	// Skin
 	{
-		MXmlElement	skinElement=aRootElement.CreateChildElement(ZTOK_SKIN);
+		auto skinElement = RootElement.CreateChildElement(ZTOK_SKIN);
 		skinElement.SetContents(m_szInterfaceSkinName);
 		skinElement.AppendText("");
 	}
 
-	aRootElement.AppendText("\n\n\t");
+	AddIntersectionWhitespace();
 
 	// Video
 	{
-		MXmlElement	parentElement=aRootElement.CreateChildElement(ZTOK_VIDEO);
-
-		parentElement.AppendText("\n\t\t");
-		MXmlElement		aElement;
-		aElement = parentElement.CreateChildElement(ZTOK_VIDEO_WIDTH);
-		char temp[256];
-		sprintf_safe(temp, "%d", m_Video.nWidth);
-		aElement.SetContents(temp);
-
-		parentElement.AppendText("\n\t\t");
-		aElement = parentElement.CreateChildElement(ZTOK_VIDEO_HEIGHT);
-		sprintf_safe(temp, "%d", m_Video.nHeight);
-		aElement.SetContents(temp);
-
-		parentElement.AppendText("\n\t\t");
-		aElement = parentElement.CreateChildElement(ZTOK_VIDEO_COLORBITS);
-		sprintf_safe(temp, "%d", m_Video.nColorBits);
-		aElement.SetContents(temp);
-
-		parentElement.AppendText("\n\t\t");
-		aElement = parentElement.CreateChildElement(ZTOK_VIDEO_GAMMA);
-		sprintf_safe(temp, "%d", m_Video.nGamma);
-		aElement.SetContents(temp);
-
-		parentElement.AppendText("\n\t\t");
-		aElement = parentElement.CreateChildElement(ZTOK_VIDEO_FULLSCREEN);
-		if (m_Video.FullscreenMode == FullscreenType::Fullscreen)
-			strcpy_safe(temp, "fullscreen");
-		else if (m_Video.FullscreenMode == FullscreenType::Borderless)
-			strcpy_safe(temp, "borderless");
-		else if (m_Video.FullscreenMode == FullscreenType::Windowed)
-			strcpy_safe(temp, "windowed");
-		aElement.SetContents(temp);
-
-		parentElement.AppendText("\n\t\t");
-		aElement = parentElement.CreateChildElement(ZTOK_VIDEO_REFLECTION);
-		if(m_Video.bReflection==true) strcpy_safe(temp, "true");
-		else strcpy_safe(temp, "false");
-		aElement.SetContents(temp);
-
-		parentElement.AppendText("\n\t\t");
-		aElement = parentElement.CreateChildElement(ZTOK_VIDEO_LIGHTMAP);
-		if(m_Video.bLightMap==true) strcpy_safe(temp, "true");
-		else strcpy_safe(temp, "false");
-		aElement.SetContents(temp);
-
-		parentElement.AppendText("\n\t\t");
-		aElement = parentElement.CreateChildElement(ZTOK_VIDEO_DYNAMICLIGHT);
-		if(m_Video.bDynamicLight==true) strcpy_safe(temp, "true");
-		else strcpy_safe(temp, "false");
-		aElement.SetContents(temp);
-
-		parentElement.AppendText("\n\t\t");
-		aElement = parentElement.CreateChildElement(ZTOK_VIDEO_SHADER);
-		if(m_Video.bShader==true) strcpy_safe(temp, "true");
-		else strcpy_safe(temp, "false");
-		aElement.SetContents(temp);
-
-		parentElement.AppendText("\n\t\t");
-		aElement = parentElement.CreateChildElement(ZTOK_VIDEO_CHARTEXLEVEL);
-		sprintf_safe(temp, "%d", m_Video.nCharTexLevel);
-		aElement.SetContents(temp);
-
-		parentElement.AppendText("\n\t\t");
-		aElement = parentElement.CreateChildElement(ZTOK_VIDEO_MAPTEXLEVEL);
-		sprintf_safe(temp, "%d", m_Video.nMapTexLevel);
-		aElement.SetContents(temp);
-
-		parentElement.AppendText("\n\t\t");
-		aElement = parentElement.CreateChildElement(ZTOK_VIDEO_EFFECTLEVEL);
-		sprintf_safe(temp, "%d", m_Video.nEffectLevel);
-		aElement.SetContents(temp);
-
-		parentElement.AppendText("\n\t\t");
-		aElement = parentElement.CreateChildElement(ZTOK_VIDEO_TEXTUREFORMAT);
-		sprintf_safe(temp, "%d", m_Video.nTextureFormat);
-		aElement.SetContents(temp);
-
-		parentElement.AppendText("\n\t\t");
-		aElement = parentElement.CreateChildElement("NHARDWARETNL");
-		sprintf_safe(temp, "%s", m_Video.bTerrible ? "true" : "false" );
-		aElement.SetContents(temp);
-
-		auto Write = [&](auto* name, auto val) {
-			parentElement.AppendText("\n\t\t");
-			aElement = parentElement.CreateChildElement(name);
-			sprintf_safe(temp, "%d", val);
-			aElement.SetContents(temp);
-		};
-
-		Write("VISUALFPSLIMIT", VisualFPSLimit);
-		Write("LOGICALFPSLIMIT", LogicalFPSLimit);
-
-		parentElement.AppendText("\n\t\t");
-		aElement = parentElement.CreateChildElement("CAMFIX");
-		sprintf_safe(temp, "%d", bCamFix);
-		aElement.SetContents(temp);
-
-		parentElement.AppendText("\n\t");
+		auto Section = ConfigSection(RootElement, ZTOK_VIDEO);
+		Section.Add(ZTOK_VIDEO_WIDTH, m_Video.nWidth);
+		Section.Add(ZTOK_VIDEO_HEIGHT, m_Video.nHeight);
+		Section.Add(ZTOK_VIDEO_COLORBITS, m_Video.nColorBits);
+		Section.Add(ZTOK_VIDEO_GAMMA, m_Video.nGamma);
+		Section.Add(ZTOK_VIDEO_FULLSCREEN, GetFullscreenString(m_Video.FullscreenMode));
+		Section.Add(ZTOK_VIDEO_REFLECTION, m_Video.bReflection);
+		Section.Add(ZTOK_VIDEO_LIGHTMAP, m_Video.bLightMap);
+		Section.Add(ZTOK_VIDEO_DYNAMICLIGHT, m_Video.bDynamicLight);
+		Section.Add(ZTOK_VIDEO_SHADER, m_Video.bShader);
+		Section.Add(ZTOK_VIDEO_CHARTEXLEVEL, m_Video.nCharTexLevel);
+		Section.Add(ZTOK_VIDEO_MAPTEXLEVEL, m_Video.nMapTexLevel);
+		Section.Add(ZTOK_VIDEO_EFFECTLEVEL, m_Video.nEffectLevel);
+		Section.Add(ZTOK_VIDEO_TEXTUREFORMAT, m_Video.nTextureFormat);
+		Section.Add("NHARDWARETNL", m_Video.bTerrible);
+		Section.Add("VISUALFPSLIMIT", VisualFPSLimit);
+		Section.Add("LOGICALFPSLIMIT", LogicalFPSLimit);
+		Section.Add("CAMFIX", bCamFix);
+		Section.Add("INTERFACEFIX", InterfaceFix);
 	}
 
-	aRootElement.AppendText("\n\n\t");
+	AddIntersectionWhitespace();
 
 	// Audio
 	{
-		MXmlElement	parentElement=aRootElement.CreateChildElement(ZTOK_AUDIO);
-
-		parentElement.AppendText("\n\t\t");
-		MXmlElement		aElement;
-		char temp[256];
-
-		aElement = parentElement.CreateChildElement(ZTOK_AUDIO_BGM_MUTE);
-		if(m_Audio.bBGMMute==true) strcpy_safe(temp, "true");
-		else strcpy_safe(temp, "false");
-		aElement.SetContents(temp);
-
-		parentElement.AppendText("\n\t\t");
-		aElement = parentElement.CreateChildElement(ZTOK_AUDIO_BGM_VOLUME);
-		sprintf_safe(temp, "%f", m_Audio.fBGMVolume );
-		aElement.SetContents(temp);
-
-		parentElement.AppendText("\n\t\t");
-		aElement = parentElement.CreateChildElement(ZTOK_AUDIO_EFFECT_MUTE);
-		if(m_Audio.bEffectMute==true) strcpy_safe(temp, "true");
-		else strcpy_safe(temp, "false");
-		aElement.SetContents(temp);
-
-		parentElement.AppendText("\n\t\t");
-		aElement = parentElement.CreateChildElement(ZTOK_AUDIO_EFFECT_VOLUME);
-		sprintf_safe(temp, "%f", m_Audio.fEffectVolume);
-		aElement.SetContents(temp);
-
-		parentElement.AppendText("\n\t\t");
-		aElement = parentElement.CreateChildElement(ZTOK_AUDIO_3D_SOUND);
-		sprintf_safe(temp, "%d", m_Audio.b3DSound);
-		aElement.SetContents(temp);
-
-		parentElement.AppendText("\n\t\t");
-		aElement = parentElement.CreateChildElement(ZTOK_AUDIO_8BITSOUND);
-		if(m_Audio.b8BitSound==true) strcpy_safe(temp, "true");
-		else strcpy_safe(temp, "false");
-		aElement.SetContents(temp);
-
-		parentElement.AppendText("\n\t\t");
-		aElement = parentElement.CreateChildElement(ZTOK_AUDIO_INVERSE);
-		if(m_Audio.bInverse==true) strcpy_safe(temp, "true");
-		else strcpy_safe(temp, "false");
-		aElement.SetContents(temp);
-
-		parentElement.AppendText("\n\t\t");
-		aElement = parentElement.CreateChildElement(ZTOK_AUDIO_HWMIXING);
-		if(m_Audio.bHWMixing==true) strcpy_safe(temp, "true");
-		else strcpy_safe(temp, "false");
-		aElement.SetContents(temp);
-
-		parentElement.AppendText("\n\t\t");
-		aElement = parentElement.CreateChildElement(ZTOK_AUDIO_HITSOUND);
- 		if(m_Audio.bHitSound==true) strcpy_safe(temp, "true");
-		else strcpy_safe(temp, "false");
-		aElement.SetContents(temp);
-
-		parentElement.AppendText("\n\t");
+		auto Section = ConfigSection(RootElement, ZTOK_AUDIO);
+		Section.Add(ZTOK_AUDIO_BGM_MUTE, m_Audio.bBGMMute);
+		Section.Add(ZTOK_AUDIO_BGM_VOLUME, m_Audio.fBGMVolume);
+		Section.Add(ZTOK_AUDIO_EFFECT_VOLUME, m_Audio.fEffectVolume);
+		Section.Add(ZTOK_AUDIO_3D_SOUND, m_Audio.b3DSound);
+		Section.Add(ZTOK_AUDIO_8BITSOUND, m_Audio.b8BitSound);
+		Section.Add(ZTOK_AUDIO_INVERSE, m_Audio.bInverse);
+		Section.Add(ZTOK_AUDIO_HWMIXING, m_Audio.bHWMixing);
+		Section.Add(ZTOK_AUDIO_HITSOUND, m_Audio.bHitSound);
 	}
 
-	aRootElement.AppendText("\n\n\t");
+	AddIntersectionWhitespace();
 
 	// Mouse
 	{
-		MXmlElement	parentElement=aRootElement.CreateChildElement(ZTOK_MOUSE);
-
-		parentElement.AppendText("\n\t\t");
-		MXmlElement		aElement;
-		aElement = parentElement.CreateChildElement(ZTOK_MOUSE_SENSITIVITY);
-		char temp[256];
-		sprintf_safe(temp, "%f", m_Mouse.fSensitivity);
-		aElement.SetContents(temp);
-
-		parentElement.AppendText("\n\t\t");
-		aElement = parentElement.CreateChildElement(ZTOK_MOUSE_INVERT);
-		if(m_Mouse.bInvert==true) strcpy_safe(temp, "TRUE");
-		else strcpy_safe(temp, "FALSE");
-		aElement.SetContents(temp);
-
-		parentElement.AppendText("\n\t");
+		auto Section = ConfigSection(RootElement, ZTOK_MOUSE);
+		Section.Add(ZTOK_MOUSE_SENSITIVITY, m_Mouse.fSensitivity);
+		Section.Add(ZTOK_MOUSE_INVERT, m_Mouse.bInvert);
 	}
 
-	aRootElement.AppendText("\n\n\t");
+	AddIntersectionWhitespace();
 
 	// Joystick
 	{
-		MXmlElement	parentElement=aRootElement.CreateChildElement(ZTOK_JOYSTICK);
-
-		parentElement.AppendText("\n\t\t");
-		MXmlElement		aElement;
-		aElement = parentElement.CreateChildElement(ZTOK_JOYSTICK_SENSITIVITY);
-		char temp[256];
-		sprintf_safe(temp, "%f", m_Joystick.fSensitivity);
-		aElement.SetContents(temp);
-
-		parentElement.AppendText("\n\t");
+		auto Section = ConfigSection(RootElement, ZTOK_JOYSTICK);
+		Section.Add(ZTOK_JOYSTICK_SENSITIVITY, m_Joystick.fSensitivity);
 	}
 
-	aRootElement.AppendText("\n\n\t");
+	AddIntersectionWhitespace();
 
 	// Control
 	{
-		MXmlElement	parentElement=aRootElement.CreateChildElement(ZTOK_KEYBOARD);
-		for(int i=0; i<ZACTION_COUNT; i++){
+		auto Section = ConfigSection(RootElement, ZTOK_KEYBOARD);
+		
+		for (auto&& ActionKey : m_Keyboard.ActionKeys)
+		{
+			if (ActionKey.szName[0] == 0)
+				continue;
+
 			char szItemName[256];
-			strcpy_safe(szItemName, m_Keyboard.ActionKeys[i].szName);
+			strcpy_safe(szItemName, ActionKey.szName);
 			_strupr_s(szItemName);
 
-			if(szItemName[0]!=0){
-				parentElement.AppendText("\n\t\t");
-				MXmlElement		aElement;
-				aElement = parentElement.CreateChildElement(szItemName);
-				char temp[256];
-				sprintf_safe(temp, "%d", m_Keyboard.ActionKeys[i].nVirtualKey);
-				aElement.SetContents(temp);
-				aElement.SetAttribute("alt",m_Keyboard.ActionKeys[i].nVirtualKeyAlt);
-			}
+			auto KeyElement = Section.Add(szItemName, ActionKey.nVirtualKey);
+			KeyElement.SetAttribute("alt", ActionKey.nVirtualKeyAlt);
 		}
-		parentElement.AppendText("\n\t");
 	}
 
-	aRootElement.AppendText("\n\n\t");
+	AddIntersectionWhitespace();
 
+	// Macro
 	{
-		MXmlElement	parentElement=aRootElement.CreateChildElement(ZTOK_MACRO);
+		auto Section = ConfigSection(RootElement, ZTOK_MACRO);
 
-		parentElement.AppendText("\n\t\t");
-
-		MXmlElement		aElement;
-
-		char* _temp[ZCONFIG_MACRO_MAX] = {
+		const char* MacroStrings[ZCONFIG_MACRO_MAX] = {
 			ZTOK_MACRO_F1,
 			ZTOK_MACRO_F2,
 			ZTOK_MACRO_F3,
@@ -793,105 +693,38 @@ bool ZConfiguration::SaveToFile(const char *szFileName, const char* szHeader)
 			ZTOK_MACRO_F8
 		};
 
-		for(int i=0;i<ZCONFIG_MACRO_MAX;i++) {
-
-			aElement = parentElement.CreateChildElement( _temp[i] );
-			aElement.SetContents(m_Macro.szMacro[i]);
-
-			parentElement.AppendText("\n\t\t");
+		for (int i = 0; i < int(std::size(MacroStrings)); ++i)
+		{
+			Section.Add(MacroStrings[i], m_Macro.szMacro[i]);
 		}
-		parentElement.AppendText("\n\t");
 	}
 
-	aRootElement.AppendText("\n\n\t");
+	AddIntersectionWhitespace();
 
 	// Etc
 	{
-		MXmlElement	parentElement=aRootElement.CreateChildElement(ZTOK_ETC);
-
-		MXmlElement		aElement;
-
-		// Network port
-		parentElement.AppendText("\n\t\t");
-		aElement = parentElement.CreateChildElement(ZTOK_ETC_NETWORKPORT1);
-		char temp[256];
-		sprintf_safe(temp, "%d", m_Etc.nNetworkPort1);
-		aElement.SetContents(temp);
-
-		parentElement.AppendText("\n\t\t");
-		aElement = parentElement.CreateChildElement(ZTOK_ETC_NETWORKPORT2);
-		sprintf_safe(temp, "%d", m_Etc.nNetworkPort2);
-		aElement.SetContents(temp);
-
-		// Boost
-		parentElement.AppendText("\n\t\t");
-		aElement = parentElement.CreateChildElement(ZTOK_ETC_BOOST);
-		sprintf_safe(temp, "%s", m_Etc.bBoost?"TRUE":"FALSE");
-		aElement.SetContents(temp);
-
-		// Reject normal chat
-		parentElement.AppendText("\n\t\t");
-		aElement = parentElement.CreateChildElement(ZTOK_ETC_REJECT_NORMALCHAT);
-		sprintf_safe(temp, "%s", m_Etc.bRejectNormalChat?"TRUE":"FALSE");
-		aElement.SetContents(temp);
-
-		// Reject team chat
-		parentElement.AppendText("\n\t\t");
-		aElement = parentElement.CreateChildElement(ZTOK_ETC_REJECT_TEAMCHAT);
-		sprintf_safe(temp, "%s", m_Etc.bRejectTeamChat?"TRUE":"FALSE");
-		aElement.SetContents(temp);
-
-		// Reject clan chat
-		parentElement.AppendText("\n\t\t");
-		aElement = parentElement.CreateChildElement(ZTOK_ETC_REJECT_CLANCHAT);
-		sprintf_safe(temp, "%s", m_Etc.bRejectClanChat?"TRUE":"FALSE");
-		aElement.SetContents(temp);
-
-		// Reject whisper
-		parentElement.AppendText("\n\t\t");
-		aElement = parentElement.CreateChildElement(ZTOK_ETC_REJECT_WHISPER);
-		sprintf_safe(temp, "%s", m_Etc.bRejectWhisper?"TRUE":"FALSE");
-		aElement.SetContents(temp);
-
-		// Reject invite
-		parentElement.AppendText("\n\t\t");
-		aElement = parentElement.CreateChildElement(ZTOK_ETC_REJECT_INVITE);
-		sprintf_safe(temp, "%s", m_Etc.bRejectInvite?"TRUE":"FALSE");
-		aElement.SetContents(temp);
-
-		// crosshair
-		parentElement.AppendText("\n\t\t");
-		aElement = parentElement.CreateChildElement(ZTOK_ETC_CROSSHAIR);
-		sprintf_safe(temp, "%d", m_Etc.nCrossHair);
-		aElement.SetContents(temp);
-
-		parentElement.AppendText("\n\t\t");
-		aElement = parentElement.CreateChildElement("DRAWTRAILS");
-		sprintf_safe(temp, "%d", bDrawTrails);
-		aElement.SetContents(temp);
-
-		parentElement.AppendText("\n\t");
+		auto Section = ConfigSection(RootElement, ZTOK_ETC);
+		Section.Add(ZTOK_ETC_NETWORKPORT1, m_Etc.nNetworkPort1);
+		Section.Add(ZTOK_ETC_NETWORKPORT2, m_Etc.nNetworkPort2);
+		Section.Add(ZTOK_ETC_BOOST, m_Etc.bBoost);
+		Section.Add(ZTOK_ETC_REJECT_NORMALCHAT, m_Etc.bRejectNormalChat);
+		Section.Add(ZTOK_ETC_REJECT_TEAMCHAT, m_Etc.bRejectTeamChat);
+		Section.Add(ZTOK_ETC_REJECT_CLANCHAT, m_Etc.bRejectClanChat);
+		Section.Add(ZTOK_ETC_REJECT_WHISPER, m_Etc.bRejectWhisper);
+		Section.Add(ZTOK_ETC_REJECT_INVITE, m_Etc.bRejectInvite);
+		Section.Add(ZTOK_ETC_CROSSHAIR, m_Etc.nCrossHair);
+		Section.Add("DRAWTRAILS", bDrawTrails);
 	}
 
-	aRootElement.AppendText("\n\n\t");
+	AddIntersectionWhitespace();
 
-	aRootElement.AppendText("\n\n\t");
+	// Chat
 	{
-		MXmlElement	parentElement = aRootElement.CreateChildElement("CHAT");
-
-		parentElement.AppendText("\n\t\t");
-		MXmlElement		aElement;
-		aElement = parentElement.CreateChildElement("BACKGROUNDCOLOR");
-		char temp[256];
-		sprintf_safe(temp, "%d", ChatBackgroundColor);
-		aElement.SetContents(temp);
-
-		parentElement.AppendText("\n\t");
+		auto Section = ConfigSection(RootElement, "CHAT");
+		Section.AddHex("BACKGROUNDCOLOR", ChatBackgroundColor);
 	}
 
-	aRootElement.AppendText("\n\n\t");
-
-	aRootElement.AppendText("\n");
+	RootElement.AppendText("\n");
 
 	return xmlConfig.SaveToFile(szFileName);
 }
