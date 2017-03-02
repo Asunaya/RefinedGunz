@@ -844,6 +844,7 @@ void ZApplication::SetInitialState()
 
 bool ZApplication::InitLocale()
 {
+	ZStringResManager::MakeInstance();
 	ZGetStringResManager()->Init("system/", 0, GetFileSystem());
 
 	return true;

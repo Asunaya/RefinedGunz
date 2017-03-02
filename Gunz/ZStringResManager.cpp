@@ -13,21 +13,12 @@ ZStringResManager::~ZStringResManager() = default;
 
 bool ZStringResManager::OnInit()
 {
-	string strFileName = m_strPath + FILENAME_MESSAGES;
+	auto strFileName = m_strPath + FILENAME_MESSAGES;
 
-	if (ZGetConfiguration()->IsComplete())
+	if (!m_Messages.Initialize(strFileName.c_str(), 0, m_pFS))
 	{
-		if (!m_Messages.Initialize(strFileName.c_str(), 0, m_pFS))
-		{
-			_ASSERT(0);
-			mlog("Error!! - Messages Initalize Failed\n");
-			return false;
-		}
-	}
-	else
-	{
-		ASSERT( 0 );
-		mlog( "'Configuration' or 'ZLocale' must be completed befor 'Message'.\n" );
+		_ASSERT(0);
+		mlog("Error! -- Initialization of ZStringResManager from file \"%s\" failed\n", strFileName);
 		return false;
 	}
 

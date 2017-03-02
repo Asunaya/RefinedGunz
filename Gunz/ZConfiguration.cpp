@@ -99,9 +99,10 @@ bool ZConfiguration::Load()
 		return false;
 	}
 
+	ConvertMacroStrings();
+
 	if (!retValue)
 		return false;
-
 
 	return retValue;
 }
@@ -769,8 +770,8 @@ void ZConfiguration::Init()
 	m_Joystick.fSensitivity = 1.f;
 	m_Joystick.bInvert = false;
 
-	for (int i{}; i < 8; ++i)
-		m_Macro.SetString(i, "");
+	for (int i = 0; i < std::size(m_Macro.szMacro); ++i)
+		sprintf_safe(m_Macro.szMacro[i], "STR:CONFIG_MACRO_F%d", i + 1);
 
 	m_Etc.nNetworkPort1 = 7700;
 	m_Etc.nNetworkPort2 = 7800;
@@ -859,16 +860,13 @@ ZSERVERNODE ZConfiguration::GetServerNode( int nNum) const
 }
 
 
-bool ZConfiguration::LateStringConvert()
+bool ZConfiguration::ConvertMacroStrings()
 {
-	char buf[8][256];
-
 	for (int i = 0; i < 8; i++)
 	{
-		memset( buf[i], 0, 256 );
-		strcpy_safe( buf[i], m_Macro.szMacro[i] );
-		memset( m_Macro.szMacro[i],0, 256 );
-		strcpy_safe(m_Macro.szMacro[i], ZGetStringResManager()->GetStringFromXml(buf[i]));
+		auto&& Macro = m_Macro.szMacro[i];
+		if (strncmp(Macro, "STR:", 4) == 0)
+			strcpy_safe(Macro, ZGetStringResManager()->GetStringFromXml(Macro));
 	}
 
 	return true;

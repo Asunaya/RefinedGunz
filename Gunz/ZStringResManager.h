@@ -1,6 +1,4 @@
-#ifndef _ZSTRINGRES_MANAGER_H
-#define _ZSTRINGRES_MANAGER_H
-
+#pragma once
 
 #include "MBaseStringResManager.h"
 
@@ -8,7 +6,7 @@ class ZStringResManager : public MBaseStringResManager
 {
 protected:
 	MStringRes<int>			m_Messages;
-	virtual bool OnInit();
+	virtual bool OnInit() override;
 public:
 	ZStringResManager();
 	virtual ~ZStringResManager();
@@ -45,6 +43,3 @@ inline bool ZTransMsg(char* poutStr, int maxlen, int nMsgID, const int argnum=0,
 	va_end(args);
 	return ret;
 }
-
-
-#endif

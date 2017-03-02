@@ -660,22 +660,15 @@ int PASCAL WinMain(HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline, int 
 	MZFile::SetReadMode( MZIPREADFLAG_MRS2 );
 #endif
 
-	ZGetConfiguration()->Load();
-
 	CreateRGMain();
 
-	ZStringResManager::MakeInstance();
 	if( !ZApplication::GetInstance()->InitLocale() )
 	{
 		MLog("Failed to initialize locale, exiting\n");
 		return false;
 	}
 
-	if (!ZGetConfiguration()->LateStringConvert())
-	{
-		MLog("main.cpp - Late string convert fail.\n");
-		return false;
-	}
+	ZGetConfiguration()->Load();
 
 	if (!ZApplication::GetInstance()->ParseArguments(cmdline))
 		return 0;

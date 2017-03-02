@@ -188,7 +188,7 @@ public:
 
 	bool IsComplete() const			{ return m_bIsComplete; }
 
-	bool LateStringConvert();
+	bool ConvertMacroStrings();
 
 private:
 	friend void LoadRGCommands(ZChatCmdManager &CmdManager);

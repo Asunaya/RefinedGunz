@@ -1,6 +1,4 @@
-#ifndef _MBASE_STRINGRES_MANAGER_H
-#define _MBASE_STRINGRES_MANAGER_H
-
+#pragma once
 
 #include "MStringRes.h"
 
@@ -14,10 +12,10 @@ class MBaseStringResManager
 {
 protected:
 	static MBaseStringResManager*	m_pInstance;
-	string							m_strPath;
+	std::string						m_strPath;
 	MZFileSystem*					m_pFS;
 	MStringRes<int>					m_ErrorTable;
-	MStringRes<string>				m_StringTable;
+	MStringRes<std::string>			m_StringTable;
 
 	virtual bool OnInit() { return true; }
 public:
@@ -28,7 +26,7 @@ public:
 	static void FreeInstance();
 
 	const char* GetErrorStr(int nID);
-	const char* GetString(string& key);
+	const char* GetString(std::string& key);
 	const char* GetStringFromXml(const char* str);
 };
 
@@ -37,13 +35,3 @@ inline MBaseStringResManager* MGetStringResManager()
 {
 	return MBaseStringResManager::GetInstance();
 }
-
-
-
-
-
-
-
-
-
-#endif
