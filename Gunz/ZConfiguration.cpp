@@ -361,6 +361,33 @@ bool ZConfiguration::LoadSystem(const char* szFileName)
 	return true;
 }
 
+static const char* GetFullscreenString(FullscreenType Mode)
+{
+	switch (Mode)
+	{
+	case FullscreenType::Fullscreen:
+		return "fullscreen";
+	case FullscreenType::Borderless:
+		return "borderless";
+	case FullscreenType::Windowed:
+		return "windowed";
+	default:
+		assert(false);
+		return "fullscreen";
+	};
+}
+
+static FullscreenType GetFullscreenMode(const char* String)
+{
+	if (!_stricmp(String, "fullscreen"))
+		return FullscreenType::Fullscreen;
+	else if (!_stricmp(String, "borderless"))
+		return FullscreenType::Borderless;
+	else if (!_stricmp(String, "windowed"))
+		return FullscreenType::Windowed;
+	return FullscreenType::Fullscreen;
+}
+
 bool ZConfiguration::LoadConfig(const char* szFileName)
 {
 	MXmlDocument	xmlConfig;
@@ -394,15 +421,9 @@ bool ZConfiguration::LoadConfig(const char* szFileName)
 			childElement.GetChildContents(&m_Video.nHeight, ZTOK_VIDEO_HEIGHT);
 			childElement.GetChildContents(&m_Video.nColorBits, ZTOK_VIDEO_COLORBITS);
 
-			char FullscreenMode[64];
-			childElement.GetChildContents(FullscreenMode, ZTOK_VIDEO_FULLSCREEN);
-
-			if (!_stricmp(FullscreenMode, "fullscreen"))
-				m_Video.FullscreenMode = FullscreenType::Fullscreen;
-			else if (!_stricmp(FullscreenMode, "borderless"))
-				m_Video.FullscreenMode = FullscreenType::Borderless;
-			else if (!_stricmp(FullscreenMode, "windowed"))
-				m_Video.FullscreenMode = FullscreenType::Windowed;
+			char FullscreenString[64];
+			childElement.GetChildContents(FullscreenString, ZTOK_VIDEO_FULLSCREEN);
+			m_Video.FullscreenMode = GetFullscreenMode(FullscreenString);
 
 			childElement.GetChildContents(&m_Video.nGamma, ZTOK_VIDEO_GAMMA);
 			childElement.GetChildContents(&m_Video.bReflection,	ZTOK_VIDEO_REFLECTION );
@@ -413,12 +434,11 @@ bool ZConfiguration::LoadConfig(const char* szFileName)
 			childElement.GetChildContents(&m_Video.nMapTexLevel, ZTOK_VIDEO_MAPTEXLEVEL );
 			childElement.GetChildContents(&m_Video.nEffectLevel, ZTOK_VIDEO_EFFECTLEVEL );
 			childElement.GetChildContents(&m_Video.nTextureFormat, ZTOK_VIDEO_TEXTUREFORMAT );
-			childElement.GetChildContents(&m_Video.bTerrible, "NHARDWARETNL");
-
-			childElement.GetChildContents(&VisualFPSLimit, "VISUALFPSLIMIT");
-			childElement.GetChildContents(&LogicalFPSLimit, "LOGICALFPSLIMIT");
-			childElement.GetChildContents(&bCamFix, "CAMFIX");
-			childElement.GetChildContents(&InterfaceFix, "INTERFACEFIX");
+			childElement.GetChildContents(&m_Video.bTerrible, ZTOK_VIDEO_HARDWARETNL);
+			childElement.GetChildContents(&VisualFPSLimit, ZTOK_VIDEO_VISUALFPSLIMIT);
+			childElement.GetChildContents(&LogicalFPSLimit, ZTOK_VIDEO_LOGICALFPSLIMIT);
+			childElement.GetChildContents(&bCamFix, ZTOK_VIDEO_CAMFIX);
+			childElement.GetChildContents(&InterfaceFix, ZTOK_VIDEO_INTERFACEFIX);
 		}
 		if (parentElement.FindChildNode(ZTOK_AUDIO, &childElement))
 		{
@@ -487,16 +507,14 @@ bool ZConfiguration::LoadConfig(const char* szFileName)
 			childElement.GetChildContents(&m_Etc.bRejectWhisper, ZTOK_ETC_REJECT_WHISPER);
 			childElement.GetChildContents(&m_Etc.bRejectInvite, ZTOK_ETC_REJECT_INVITE);
 			childElement.GetChildContents(&m_Etc.nCrossHair, ZTOK_ETC_CROSSHAIR);
-			int temp{};
-			childElement.GetChildContents(&temp, "DRAWTRAILS");
-			bDrawTrails = temp != 0;
+			childElement.GetChildContents(&bDrawTrails, ZTOK_ETC_DRAWTRAILS);
 		}
 
 
-		if (parentElement.FindChildNode("CHAT", &childElement))
+		if (parentElement.FindChildNode(ZTOK_CHAT, &childElement))
 		{
 			char buf[64];
-			childElement.GetChildContents(buf, "BACKGROUNDCOLOR");
+			childElement.GetChildContents(buf, ZTOK_CHAT_BACKGROUNDCOLOR);
 			ChatBackgroundColor = strtoul(buf, nullptr, 16);
 		}
 	}
@@ -555,22 +573,6 @@ struct ConfigSection
 	}
 };
 
-static const char* GetFullscreenString(FullscreenType Mode)
-{
-	switch (Mode)
-	{
-	case FullscreenType::Fullscreen:
-		return "fullscreen";
-	case FullscreenType::Borderless:
-		return "borderless";
-	case FullscreenType::Windowed:
-		return "windowed";
-	default:
-		assert(false);
-		return "fullscreen";
-	};
-}
-
 bool ZConfiguration::SaveToFile(const char *szFileName, const char* szHeader)
 {
 	MXmlDocument xmlConfig;
@@ -620,11 +622,11 @@ bool ZConfiguration::SaveToFile(const char *szFileName, const char* szHeader)
 		Section.Add(ZTOK_VIDEO_MAPTEXLEVEL, m_Video.nMapTexLevel);
 		Section.Add(ZTOK_VIDEO_EFFECTLEVEL, m_Video.nEffectLevel);
 		Section.Add(ZTOK_VIDEO_TEXTUREFORMAT, m_Video.nTextureFormat);
-		Section.Add("NHARDWARETNL", m_Video.bTerrible);
-		Section.Add("VISUALFPSLIMIT", VisualFPSLimit);
-		Section.Add("LOGICALFPSLIMIT", LogicalFPSLimit);
-		Section.Add("CAMFIX", bCamFix);
-		Section.Add("INTERFACEFIX", InterfaceFix);
+		Section.Add(ZTOK_VIDEO_HARDWARETNL, m_Video.bTerrible);
+		Section.Add(ZTOK_VIDEO_VISUALFPSLIMIT, VisualFPSLimit);
+		Section.Add(ZTOK_VIDEO_LOGICALFPSLIMIT, LogicalFPSLimit);
+		Section.Add(ZTOK_VIDEO_CAMFIX, bCamFix);
+		Section.Add(ZTOK_VIDEO_INTERFACEFIX, InterfaceFix);
 	}
 
 	AddIntersectionWhitespace();
@@ -716,15 +718,15 @@ bool ZConfiguration::SaveToFile(const char *szFileName, const char* szHeader)
 		Section.Add(ZTOK_ETC_REJECT_WHISPER, m_Etc.bRejectWhisper);
 		Section.Add(ZTOK_ETC_REJECT_INVITE, m_Etc.bRejectInvite);
 		Section.Add(ZTOK_ETC_CROSSHAIR, m_Etc.nCrossHair);
-		Section.Add("DRAWTRAILS", bDrawTrails);
+		Section.Add(ZTOK_ETC_DRAWTRAILS, bDrawTrails);
 	}
 
 	AddIntersectionWhitespace();
 
 	// Chat
 	{
-		auto Section = ConfigSection(RootElement, "CHAT");
-		Section.AddHex("BACKGROUNDCOLOR", ChatBackgroundColor);
+		auto Section = ConfigSection(RootElement, ZTOK_CHAT);
+		Section.AddHex(ZTOK_CHAT_BACKGROUNDCOLOR, ChatBackgroundColor);
 	}
 
 	RootElement.AppendText("\n");
