@@ -112,7 +112,7 @@ class ZCharacter : public ZCharacterObject
 	MDeclareRTTI;
 public:
 	ZCharacter();
-	virtual ~ZCharacter();
+	virtual ~ZCharacter() override;
 
 	BasicInfoHistoryManager BasicInfoHistory;
 
@@ -173,7 +173,7 @@ public:
 
 	bool IsRunWall();
 	bool IsMeleeWeapon();
-	virtual bool IsCollideable();
+	virtual bool IsCollideable() override;
 
 	void SetTargetDir(rvector vDir); 
 

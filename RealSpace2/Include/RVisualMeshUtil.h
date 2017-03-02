@@ -1,5 +1,4 @@
-#ifndef _RVisualMeshUtil_h
-#define _RVisualMeshUtil_h
+#pragma once
 
 #include "RAnimationMgr.h"
 #include <vector>
@@ -106,7 +105,7 @@ public:
 	DWORD	color[2];
 	rvector up;
 	rvector down;
-	float	len;		//이전노드부터의 거리
+	float	len;
 };
 
 class RWeaponTracks {
@@ -124,19 +123,11 @@ public:
 	void CheckShift();
 
 	void AddVertex(RLVertex* pVert );
-//	void AddVertexSpline(RLVertex* pVert);
 	void SetVertexSpline(rvector& p, DWORD c );
 
 	void Clear();
 
 	int  GetLastAddVertex(rvector* pOutVec);
-
-/*
-	RWeaponTracksNode** m_pNodeTable;
-
-	int	m_max_node_size;
-	int m_current_node_size;
-*/
 
 public:
 
@@ -201,5 +192,3 @@ public:
 };
 
 _NAMESPACE_REALSPACE2_END
-
-#endif//_RVisualMeshUtil_h

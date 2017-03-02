@@ -35,7 +35,7 @@ _NAMESPACE_REALSPACE2_BEGIN
 
 void RMesh::SetMtrlUvAni_ON()
 {
-	if( m_pVisualMesh && m_pVisualMesh->m_bUVAni) { // on
+	if( m_pVisualMesh && m_pVisualMesh->m_bUVAni) {
 
 		rmatrix mat;
 		GetIdentityMatrix(mat);
@@ -116,7 +116,7 @@ void RMesh::SetShaderDiffuseMap(RMtrl* pMtrl,DWORD color)
 	dev->SetRenderState( D3DRS_SRCBLEND,  D3DBLEND_SRCALPHA );
 	dev->SetRenderState( D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA );
 
-	if(color == 0x0000ff00) {//알파없는완전녹색인경우..무시..초기값..
+	if(color == 0x0000ff00) {
 
 		dev->SetTextureStageState( 0, D3DTSS_COLORARG1, D3DTA_TEXTURE );
 		dev->SetTextureStageState( 0, D3DTSS_COLORARG2, D3DTA_DIFFUSE );
@@ -171,9 +171,8 @@ void RMesh::SetShaderAlphaTestMap(int value,float fVis)
 	dev->SetRenderState( D3DRS_ALPHAREF, _ref );
 
 	dev->SetRenderState( D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL );
-//	dev->SetRenderState( D3DRS_ALPHAFUNC, D3DCMP_NOTEQUAL );
 
-	if(m_isNPCMesh || m_isCharacterMesh && !GetToolMesh())//캐릭터인 경우~툴은아님..
+	if(m_isNPCMesh || m_isCharacterMesh && !GetToolMesh())
 		dev->SetTextureStageState( 0, D3DTSS_COLOROP,   D3DTOP_MODULATE2X );
 	else
 		dev->SetTextureStageState( 0, D3DTSS_COLOROP,   D3DTOP_MODULATE );
@@ -192,9 +191,8 @@ void RMesh::SetShaderAlphaMap()
 	dev->SetRenderState( D3DRS_ALPHATESTENABLE, TRUE );
 	dev->SetRenderState( D3DRS_ALPHAREF, 0x04 );
 	dev->SetRenderState( D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL );
-//	dev->SetRenderState( D3DRS_ALPHAFUNC, D3DCMP_NOTEQUAL );
 
-	if(m_isNPCMesh || m_isCharacterMesh && !GetToolMesh())//캐릭터인 경우~툴은아님..
+	if(m_isNPCMesh || m_isCharacterMesh && !GetToolMesh())
 		dev->SetTextureStageState( 0, D3DTSS_COLOROP,   D3DTOP_MODULATE2X );
 	else
 		dev->SetTextureStageState( 0, D3DTSS_COLOROP,   D3DTOP_MODULATE );
@@ -218,10 +216,7 @@ void RMesh::SetShaderAdditiveMap()
 	if(RGetFog())
 		dev->SetRenderState( D3DRS_FOGENABLE, FALSE );
 
-	dev->SetTextureStageState( 0, D3DTSS_COLOROP,   D3DTOP_SELECTARG1 );//light ignore
-//	dev->SetTextureStageState( 0, D3DTSS_COLOROP,   D3DTOP_MODULATE );
-//	dev->SetTextureStageState( 0, D3DTSS_ALPHAOP,   D3DTOP_MODULATE );
-//	dev->SetTextureStageState( 0, D3DTSS_ALPHAOP,   D3DTOP_DISABLE  );
+	dev->SetTextureStageState( 0, D3DTSS_COLOROP,   D3DTOP_SELECTARG1 );
 	dev->SetTextureStageState( 0, D3DTSS_ALPHAOP,   D3DTOP_SELECTARG2 );
 		
 }
@@ -232,7 +227,7 @@ void RMesh::SetShaderNormalMap()
 
 	dev->SetRenderState( D3DRS_ALPHABLENDENABLE, FALSE);
 
-	if(m_isNPCMesh || m_isCharacterMesh && !GetToolMesh())//캐릭터인 경우~
+	if(m_isNPCMesh || m_isCharacterMesh && !GetToolMesh())
 		dev->SetTextureStageState( 0, D3DTSS_COLOROP,   D3DTOP_MODULATE2X );
 	else
 		dev->SetTextureStageState( 0, D3DTSS_COLOROP,   D3DTOP_MODULATE );
@@ -270,8 +265,6 @@ void RMesh::SetCharacterMtrl_ON(RMtrl* pMtrl,RMeshNode* pMNode,float vis_alpha,D
 	_color.b = 0.6;
 	_color.a = 1.0;
 
-	// npc 의 손에 들린 무기 모델이라면 색 블랜딩은 무시한다..
-
 	if( m_pVisualMesh && !pMNode->m_bNpcWeaponMeshNode ) { 
 		_color = m_pVisualMesh->m_NPCBlendColor; 
 	}
@@ -283,7 +276,7 @@ void RMesh::SetCharacterMtrl_ON(RMtrl* pMtrl,RMeshNode* pMNode,float vis_alpha,D
 
 	if(pMtrl) {
 
-		if(pMtrl->m_bAlphaTestMap && m_is_map_object)	// 임시 희철씨 오기전까지-나무가 검게 나와서
+		if(pMtrl->m_bAlphaTestMap && m_is_map_object)
 			m_LitVertexModel = true;
 
 		vis_alpha = min(vis_alpha,m_fVis);
@@ -291,10 +284,6 @@ void RMesh::SetCharacterMtrl_ON(RMtrl* pMtrl,RMeshNode* pMNode,float vis_alpha,D
 		dev->SetTextureStageState( 0, D3DTSS_COLORARG1, D3DTA_TEXTURE );
 		dev->SetTextureStageState( 0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE );
 
-		//-------------------------------------------------------------
-		// color 는 캐릭터 노드를 섞기위한색.. vis_alpha 는 부모mesh 와 노드중작은 vis 값
-
-//		if(m_LitVertexModel && vis_alpha != 1.0f) {
 		if(m_LitVertexModel) {
 			DWORD _c  = D3DCOLOR_COLORVALUE(1.f,1.f,1.f,vis_alpha);
 			dev->SetRenderState( D3DRS_TEXTUREFACTOR, _c);
@@ -313,16 +302,11 @@ void RMesh::SetCharacterMtrl_ON(RMtrl* pMtrl,RMeshNode* pMNode,float vis_alpha,D
 
 		dev->SetTextureStageState( 0, D3DTSS_ALPHAOP,   D3DTOP_MODULATE);
 
-		//-------------------------------------------------------------
-
 		if(pMtrl->m_bTwoSided) {
 			dev->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
 		}
 		
-		// 어떤 상태든 vis_alpha (vis_ani 거나 code vis ) 떄문에 알파 상태가 될수있다...주의..
-		// LVertex 는.. diffuseMap 지원안함...
 		if( pMtrl->m_bDiffuseMap ) {
-//			SetMtrlDiffuse(pMtrl,vis_alpha);
 			SetShaderDiffuseMap(pMtrl,color);
 		}
 
@@ -338,18 +322,12 @@ void RMesh::SetCharacterMtrl_ON(RMtrl* pMtrl,RMeshNode* pMNode,float vis_alpha,D
 		if( pMtrl->m_bAlphaTestMap ) {
 			SetShaderAlphaTestMap( pMtrl->m_nAlphaTestValue ,vis_alpha );
 		}
-
-		{ // normal
-//			SetShaderNormalMap();
-		}
 	}
 
-	if( GetTextureRenderOnOff() && pMtrl )						// debug func
+	if( GetTextureRenderOnOff() && pMtrl )
 		dev->SetTexture( 0, pMtrl->GetTexture());
 	else
 		dev->SetTexture( 0, NULL);
-
-	// test 코드 주의해서 쓰자...
 
 	if( m_nSpRenderMode==1 )
 	{
@@ -360,12 +338,10 @@ void RMesh::SetCharacterMtrl_ON(RMtrl* pMtrl,RMeshNode* pMNode,float vis_alpha,D
 	}
 	else if( m_nSpRenderMode==2 )
 	{
-//		dev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA); 
-//		dev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA); 
 		dev->SetRenderState(D3DRS_ZFUNC, D3DCMP_EQUAL); 
 	}
 
-	SkyBoxMtrlOn();// 스카이 박스라면 처리한다..
+	SkyBoxMtrlOn();
 }
 
 void RMesh::SetCharacterMtrl_OFF(RMtrl* pMtrl,float vis_alpha)
@@ -374,22 +350,14 @@ void RMesh::SetCharacterMtrl_OFF(RMtrl* pMtrl,float vis_alpha)
 
 	SkyBoxMtrlOff();
 
-	if(pMtrl) {//기본으로 복원..
+	if(pMtrl) {
 
 		vis_alpha = min(vis_alpha,m_fVis);
-/*
-		if( pMtrl->m_bAlphaMap || pMtrl->m_bDiffuseMap || vis_alpha != 1.f) {// off
-//			SetShaderAlphaMap_OFF();
-		}
-*/
+
 		if( pMtrl->m_bAdditive ) {
 			SetShaderAdditiveMap_OFF();
 		}
-/*
-		else {
-//			SetShaderNormalMap_OFF();
-		}
-*/
+
 		if(pMtrl->m_bTwoSided) {
 			dev->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
 		}
@@ -437,17 +405,6 @@ void RMesh::SkyBoxMtrlOn()
 
 		dev->SetTextureStageState( 0, D3DTSS_COLOROP,   D3DTOP_SELECTARG1 );
 		dev->SetTextureStageState( 0, D3DTSS_COLORARG1, D3DTA_TEXTURE );
-
-//		dev->GetTransform(D3DTS_WORLD,&tmpWrd);
-//		dev->GetTransform(D3DTS_VIEW,&tmpView);
-
-//		rmatrix tmp = tmpWrd;
-//		tmp._41 = tmp._42 = tmp._43 = 0.f;
-//		dev->SetTransform(D3DTS_WORLD,&tmp);
-
-//		tmp = tmpView;
-//		tmp._41 = tmp._42 = tmp._43 = 0.f;
-//		dev->SetTransform(D3DTS_VIEW,&tmp);
 	}
 }
 
@@ -459,8 +416,6 @@ void RMesh::SkyBoxMtrlOff()
 
 		RSetWBuffer( TRUE );
 		dev->SetRenderState( D3DRS_ZWRITEENABLE, TRUE );
-//		dev->SetTransform(D3DTS_WORLD,&tmpWrd);
-//		dev->SetTransform(D3DTS_VIEW,&tmpView);
 	}
 }
 

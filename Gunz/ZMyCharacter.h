@@ -198,7 +198,7 @@ public:
 
 	virtual void OnStun(float fTime) override final;
 
-	bool IsDirLocked() const {
+	bool IsDirLocked() {
 		return (m_bSkill || m_bWallJump || m_bWallJump2 || m_bWallHang ||
 			m_bTumble || m_bBlast || m_bBlastStand || m_bBlastDrop)
 			&& !IsDie();

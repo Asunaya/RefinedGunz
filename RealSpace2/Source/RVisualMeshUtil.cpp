@@ -19,7 +19,6 @@ RWeaponTracks::RWeaponTracks()
 	m_current_spline_vertex_size = 0;
 
 	m_bSpline = true;
-//	m_bSpline = false;
 
 	m_vSwordPos[0] = rvector(0,0,0);
 	m_vSwordPos[1] = rvector(0,0,0);
@@ -74,9 +73,8 @@ void RWeaponTracks::SetVertexSpline(rvector& p,DWORD c)
 
 	m_current_spline_vertex_size++;
 
-	if(m_current_spline_vertex_size > m_spline_vertex_size-1) {//에러...
+	if(m_current_spline_vertex_size > m_spline_vertex_size-1) {
 		m_current_spline_vertex_size--;
-//		mlog("m_current_spline_vertex_size > m_spline_vertex_size \n");
 	}
 }
 
@@ -498,10 +496,8 @@ void RFireEffectTexture::ProcessFire(int coolamount)
 			firevalue_bottom = pInTex[((yplus1)*w)+x];
 			firevalue_top    = pInTex[((yminus1)*w)+x];
 
-			// 위 아래 좌우 값의 평균값..
 			finalfirevalue = (firevalue_left+firevalue_right+firevalue_top+firevalue_bottom)/4;
 
-			// 열에너지손실
 			finalfirevalue -= coolamount;
 
 			if (finalfirevalue < 0) 
@@ -512,10 +508,7 @@ void RFireEffectTexture::ProcessFire(int coolamount)
 		}
 	}
 
-	// 연료공급
-
-//	for (int x=0; x < w; x+=2) {
-	for (int x=10; x < w-10; x+=2) {//20 이상이어야함..
+	for (int x=10; x < w-10; x+=2) {
 
 		int y=h-1;
 

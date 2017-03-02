@@ -100,16 +100,15 @@ protected:
 	bool				m_bTestControl;
 	void TestControl(float fDelta);
 
+	virtual void OnDraw() override;
+	virtual void OnUpdate(float fDelta) override;
+
 	virtual void InitProperty();
 	virtual void InitStatus();
-
-	virtual void OnDraw();
-	virtual void OnUpdate(float fDelta);
 	virtual bool ProcessMotion(float fDelta);
 	virtual void ProcessNetwork(float fDelta);
-
-	// task
 	virtual void ProcessAI(float fDelta);
+
 	void ProcessMovement(float fDelta);
 	void CheckDead(float fDelta);
 
@@ -117,7 +116,7 @@ protected:
 
 public:
 	ZActor();
-	virtual ~ZActor();
+	virtual ~ZActor() override;
 	static ZActor* CreateActor(MQUEST_NPC nNPCType, float fTC, int nQL);
 	void InputBasicInfo(ZBasicInfo* pni, BYTE anistate);
 	void Input(AI_INPUT_SET nInput);

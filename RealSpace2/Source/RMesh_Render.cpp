@@ -22,8 +22,6 @@
 
 #include "ROcclusionList.h"
 
-using namespace std;
-
 #ifndef _PUBLISH
 
 #define __BP(i,n)	MBeginProfile(i,n);

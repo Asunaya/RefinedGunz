@@ -11,8 +11,6 @@ _USING_NAMESPACE_REALSPACE2
 
 _NAMESPACE_REALSPACE2_BEGIN
 
-//////////////////////////////////////////////////////////
-
 RVisualMeshMgr::RVisualMeshMgr() {
 
 	m_id_last = 0;
@@ -39,7 +37,6 @@ int RVisualMeshMgr::Add(RMesh* pMesh)
 		return -1;
 	}
 
-//	m_node_table[m_id_last] = node;
 	m_node_table.push_back(node);
 	node->m_id = m_id_last;
 
@@ -55,7 +52,6 @@ int RVisualMeshMgr::Add(RVisualMesh* node)
 		return -1;
 	}
 
-//	m_node_table[m_id_last] = node;
 	m_node_table.push_back(node);
 	node->m_id = m_id_last;
 
@@ -103,10 +99,10 @@ void RVisualMeshMgr::DelAll() {
 
 	for(node = m_list.begin(); node != m_list.end(); ) {
 		delete (*node);
-		node = m_list.erase(node);// ++node
+		node = m_list.erase(node);
 	}
 
-	m_node_table.clear();//버퍼는 남아 있다..재 사용하기 위해 delall 호출했다고 본다..
+	m_node_table.clear();
 
 	m_id_last = 0;
 }
@@ -167,7 +163,6 @@ void RVisualMeshMgr::Frame(int id) {
 }
 
 RVisualMesh* RVisualMeshMgr::GetFast(int id) {
-//	if(id == -1) return NULL;
 	if(id < 0)			return NULL;
 	if(id > m_id_last)	return NULL;
 	return m_node_table[id];

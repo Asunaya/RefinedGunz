@@ -3,13 +3,7 @@
 #include "RealSpace2.h"
 #include "MDebug.h"
 
-/////////////////////////////////////////////////////////////////////////
-// RIBuffer
-
 using namespace RealSpace2;
-
-/////////////////////////////////////////////////////////////////////////
-// RVBuffer
 
 RIndexBuffer::RIndexBuffer()
 {
@@ -76,9 +70,8 @@ bool RIndexBuffer::Create(int size,WORD* pData,DWORD flag,DWORD Usage,D3DPOOL Po
 	if(flag & USE_VERTEX_SW) m_bUseSWVertex = true;
 
 	if(m_bUseHWVertex) {
-		if( FAILED( RGetDevice()->CreateIndexBuffer( sizeof(WORD)*size, Usage , D3DFMT_INDEX16 , Pool, &m_ib ,0) ) ) {
-//		return false; 
-//		soft 로 돌수도 있다..
+		if (FAILED(RGetDevice()->CreateIndexBuffer(sizeof(WORD)*size, Usage, D3DFMT_INDEX16,
+			Pool, &m_ib, 0))) {
 			mlog("RIndexBuffer::Create Error : use soft index buffer\n");
 		}
 	}
@@ -96,8 +89,6 @@ void RIndexBuffer::SetIndices()
 {
 	RGetDevice()->SetIndices(m_ib);
 }
-
-//////////////////////////////////////////////////////////////////
 
 RVertexBuffer::RVertexBuffer()
 {
@@ -127,7 +118,7 @@ void RVertexBuffer::Init() {
 
 	m_nRenderCnt = 0;
 	m_pVert = NULL;
-	m_bUseSWVertex = false;//기본은 둘다사용,. 옵션에서 바꿀수도 있으므로..
+	m_bUseSWVertex = false;
 	m_bUseHWVertex = false;
 }
 
@@ -139,12 +130,10 @@ void RVertexBuffer::Clear() {
 	Init();
 }
 
-// size는 vertex * size 값
-bool RVertexBuffer::Create(char* pVertex,DWORD fvf,int VertexSize,int VertexCnt,DWORD flag,DWORD Usage,D3DPOOL Pool) 
+bool RVertexBuffer::Create(char* pVertex, DWORD fvf, int VertexSize, int VertexCnt,
+	DWORD flag, DWORD Usage, D3DPOOL Pool)
 {
 	Clear();
-
-	// 기본적인 정보는 채워주고
 
 	m_nVertexSize = VertexSize;
 	m_nVertexCnt = VertexCnt;
@@ -160,11 +149,8 @@ bool RVertexBuffer::Create(char* pVertex,DWORD fvf,int VertexSize,int VertexCnt,
 	if(flag & USE_VERTEX_SW) m_bUseSWVertex = true;
 	if(flag & USE_VERTEX_HW) m_bUseHWVertex = true;
 
-	// 버퍼는 필요에 의해서 채우고
-
 	if(m_bUseHWVertex) {
 		if( FAILED( RGetDevice()->CreateVertexBuffer( m_nBufferSize , Usage , fvf , Pool ,&m_vb ,0) ) ) {
-//			return false; // tnt 등의 경우 soft 로 돌수도 있다..
 		}
 	}
 
@@ -211,7 +197,7 @@ bool RVertexBuffer::UpdateData(char* pVertex)
 	return true;
 }
 
-#ifndef _MAX_EXPORT // max 와 겹침..
+#ifndef _MAX_EXPORT
 
 void RVertexBuffer::UpdateDataLVert(RLVertex* pVert,rvector* pVec,int nCnt)
 {
@@ -229,8 +215,6 @@ void RVertexBuffer::UpdateDataVert(RVertex* pVert,rvector* pVec,int nCnt)
 
 #endif
 
-// 범용처리는 아닌..
-
 bool RVertexBuffer::UpdateData(rvector* pVec)
 {
 	if(!m_is_init) 	return false;
@@ -239,7 +223,6 @@ bool RVertexBuffer::UpdateData(rvector* pVec)
 
 		 if(m_nVertexSize==sizeof(RLVertex))	{ nVertType = 0; }
 	else if(m_nVertexSize==sizeof(RVertex))		{ nVertType = 1; }
-//	else if(m_nVertexSize==sizeof(RBlendVertex)){ nVertType = 2; }
 	else 	return false;
 
 	if(m_vb) {
@@ -274,13 +257,13 @@ bool RVertexBuffer::Update(char* pVertex,DWORD fvf,int VertexSize,int VertexCnt)
 	int BufferSize = VertexSize * VertexCnt;
 
 	if(m_nBufferSize != BufferSize) {
-		if(m_nRealBufferSize < BufferSize) {// 진짜 버퍼보다 작다면 그냥 쓰자..
+		if(m_nRealBufferSize < BufferSize) {
 			if(Create(pVertex,fvf,VertexSize,VertexCnt,m_dwUsage,m_dwPool)==false)
 				return false;
 		}
 		else 
 		{
-			m_nBufferSize = BufferSize; // m_nRealBufferSize 는 따로다..
+			m_nBufferSize = BufferSize;
 			m_nVertexCnt = VertexCnt;
 		}
 	}
@@ -290,12 +273,10 @@ bool RVertexBuffer::Update(char* pVertex,DWORD fvf,int VertexSize,int VertexCnt)
 
 void RVertexBuffer::Lock() {
 	if(m_vb) m_vb->Lock( 0, 0, (VOID**)&m_v, m_dwLockFlag );
-//	else 	 assert(0);
 }
 
 void RVertexBuffer::Unlock() {
 	if(m_vb) m_vb->Unlock();
-//	else	 assert(0);
 }
 
 void RVertexBuffer::SetStreamSource()
@@ -330,18 +311,12 @@ void RVertexBuffer::RenderSoft()
 	if(dev==NULL) return;
 
 	dev->SetFVF( m_dwFVF );
-//	dev->SetStreamSource( 0, m_vb, 0,m_nVertexSize );
-//	dev->DrawPrimitive( m_PrimitiveType, 0, m_nRenderCnt);
 	dev->DrawPrimitiveUP(m_PrimitiveType, m_nVertexCnt/3, (LPVOID) m_pVert, m_nVertexSize);
 }
 
-// soft 버퍼만 지원한다..  Vertex Type 인경우..lvert blendvert
-// 우선테스트해본다..괜찮으면 버퍼를 만들던가 한다..
 void RVertexBuffer::ConvertSilhouetteBuffer(float fLineWidth)
 {
 	if(!m_pVert) return;
-
-	// normal 이 없으면 의미 없다..
 
 	if(m_nVertexSize==sizeof(RVertex))	{ 
 
@@ -364,8 +339,6 @@ void RVertexBuffer::ConvertSilhouetteBuffer(float fLineWidth)
 void RVertexBuffer::ReConvertSilhouetteBuffer(float fLineWidth)
 {
 	if(!m_pVert) return;
-
-	// normal 이 없으면 의미 없다..
 
 	if(m_nVertexSize==sizeof(RVertex))	{ 
 
@@ -461,8 +434,6 @@ void GetPath(const char* str, char* path, size_t path_len)
 
 static RLVertex t_grid_vert[1000];
 
-//<---------------------------------------------------------------------
-
 void _GetModelTry(RLVertex* pVert,int size,DWORD color,int* face_num)
 {
 	RLVertex _vert[4];
@@ -507,8 +478,6 @@ void _GetModelTry(RLVertex* pVert,int size,DWORD color,int* face_num)
 	pVert[9]  = _vert[3];
 	pVert[10] = _vert[2];
 	pVert[11] = _vert[0];
-
-	// face index num
 
 	*face_num = 4;
 }
