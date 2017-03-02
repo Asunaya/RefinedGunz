@@ -423,6 +423,7 @@ void ZPlayerListBox::AddPlayer(const MUID& puid, MMatchObjectStageState state, i
 				else 							strcpy_safe(szFileName, "stg_status_master_normal_ready.tga");
 				break;
 			case MOSS_EQUIPMENT	: 
+			case MOSS_SHOP		:
 				if(nTeam == MMT_RED)			strcpy_safe(szFileName, "stg_status_master_red_equip.tga");
 				else if(nTeam == MMT_BLUE)		strcpy_safe(szFileName, "stg_status_master_blue_equip.tga");
 				else if(nTeam == MMT_SPECTATOR)	strcpy_safe(szFileName, "stg_status_master_observer.tga");
@@ -448,6 +449,7 @@ void ZPlayerListBox::AddPlayer(const MUID& puid, MMatchObjectStageState state, i
 				else							strcpy_safe(szFileName, "stg_status_member_normal_ready.tga");	
 				break;
 			case MOSS_EQUIPMENT	: 
+			case MOSS_SHOP		:
 				if(nTeam == MMT_RED)			strcpy_safe(szFileName, "stg_status_member_red_equip.tga");
 				else if(nTeam == MMT_BLUE)		strcpy_safe(szFileName, "stg_status_member_blue_equip.tga");	
 				else if(nTeam == MMT_SPECTATOR)	strcpy_safe(szFileName, "stg_status_member_observer.tga");	
@@ -626,6 +628,7 @@ void ZPlayerListBox::UpdatePlayer(const MUID& puid,MMatchObjectStageState state,
 					else 							{ strcpy_safe(szFileName, "stg_status_master_normal_ready.tga");		pItem->m_nTeam = 0;}
 					break;
 				case MOSS_EQUIPMENT	: 
+				case MOSS_SHOP		:
 					if(nTeam == MMT_RED)			{ strcpy_safe(szFileName, "stg_status_master_red_equip.tga");		pItem->m_nTeam = 1;}
 					else if(nTeam == MMT_BLUE)		{ strcpy_safe(szFileName, "stg_status_master_blue_equip.tga");		pItem->m_nTeam = 2;}
 					else if(nTeam == MMT_SPECTATOR)	{ strcpy_safe(szFileName, "stg_status_master_observer.tga");			pItem->m_nTeam = 3;}
@@ -651,6 +654,7 @@ void ZPlayerListBox::UpdatePlayer(const MUID& puid,MMatchObjectStageState state,
 					else 							{ strcpy_safe(szFileName, "stg_status_member_normal_ready.tga");		pItem->m_nTeam = 0;}
 					break;
 				case MOSS_EQUIPMENT	: 
+				case MOSS_SHOP		:
 					if(nTeam == MMT_RED)			{ strcpy_safe(szFileName, "stg_status_member_red_equip.tga");		pItem->m_nTeam = 1;}
 					else if(nTeam == MMT_BLUE)		{ strcpy_safe(szFileName, "stg_status_member_blue_equip.tga");		pItem->m_nTeam = 2;}
 					else if(nTeam == MMT_SPECTATOR)	{ strcpy_safe(szFileName, "stg_status_member_observer.tga");			pItem->m_nTeam = 3;}
@@ -717,6 +721,7 @@ void ZPlayerListBox::UpdatePlayer(const MUID& puid,MMatchObjectStageState state,
 					else 							strcpy_safe(szFileName, "stg_status_master_normal_ready.tga");
 					break;
 				case MOSS_EQUIPMENT	: 
+				case MOSS_SHOP		:
 					if(nTeam == MMT_RED)			strcpy_safe(szFileName, "stg_status_master_red_equip.tga");
 					else if(nTeam == MMT_BLUE)		strcpy_safe(szFileName, "stg_status_master_blue_equip.tga");
 					else if(nTeam == MMT_SPECTATOR)	strcpy_safe(szFileName, "stg_status_master_observer.tga");
@@ -742,6 +747,7 @@ void ZPlayerListBox::UpdatePlayer(const MUID& puid,MMatchObjectStageState state,
 					else 							strcpy_safe(szFileName, "stg_status_member_normal_ready.tga");
 					break;
 				case MOSS_EQUIPMENT	: 
+				case MOSS_SHOP		:
 					if(nTeam == MMT_RED)			strcpy_safe(szFileName, "stg_status_member_red_equip.tga");
 					else if(nTeam == MMT_BLUE)		strcpy_safe(szFileName, "stg_status_member_blue_equip.tga");
 					else if(nTeam == MMT_SPECTATOR)	strcpy_safe(szFileName, "stg_status_member_observer.tga");
