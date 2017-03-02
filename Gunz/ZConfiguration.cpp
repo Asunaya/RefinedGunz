@@ -495,7 +495,9 @@ bool ZConfiguration::LoadConfig(const char* szFileName)
 
 		if (parentElement.FindChildNode("CHAT", &childElement))
 		{
-			childElement.GetChildContents((int *)&ChatBackgroundColor, "BACKGROUNDCOLOR");
+			char buf[64];
+			childElement.GetChildContents(buf, "BACKGROUNDCOLOR");
+			ChatBackgroundColor = strtoul(buf, nullptr, 16);
 		}
 	}
 
@@ -770,7 +772,7 @@ void ZConfiguration::Init()
 	m_Joystick.fSensitivity = 1.f;
 	m_Joystick.bInvert = false;
 
-	for (int i = 0; i < std::size(m_Macro.szMacro); ++i)
+	for (int i = 0; i < int(std::size(m_Macro.szMacro)); ++i)
 		sprintf_safe(m_Macro.szMacro[i], "STR:CONFIG_MACRO_F%d", i + 1);
 
 	m_Etc.nNetworkPort1 = 7700;
