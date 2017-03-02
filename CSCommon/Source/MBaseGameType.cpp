@@ -28,7 +28,7 @@ void MMatchGameTypeInfo::Set(const MMATCH_GAMETYPE a_nGameTypeID, const char* a_
 
 void MMatchGameTypeInfo::AddMap(int nMapID)
 {
-	MapSet.insert(set<int>::value_type(nMapID));
+	MapSet.insert(std::set<int>::value_type(nMapID));
 }
 
 void MMatchGameTypeInfo::AddAllMap()
@@ -64,6 +64,7 @@ _InitGameType(MMATCH_GAMETYPE_DEATHMATCH_TEAM2,	MMATCH_GAMETYPE_DEATHMATCH_TEAM2
 _InitGameType(MMATCH_GAMETYPE_DUEL, MMATCH_GAMETYPE_DUEL, MMATCH_GAMETYPE_DUEL_STR, 1.0f, 1.0f, 0.0f);
 
 _InitGameType(MMATCH_GAMETYPE_SKILLMAP, MMATCH_GAMETYPE_SKILLMAP, "Skillmap", 1.0f, 1.0f, 0.0f);
+_InitGameType(MMATCH_GAMETYPE_GUNGAME, MMATCH_GAMETYPE_GUNGAME, "GunGame", 1.0f, 1.0f, 0.0f);
 /*
 #ifdef _CLASSIC
 _InitGameType(MMATCH_GAMETYPE_CLASSIC_SOLO, MMATCH_GAMETYPE_CLASSIC_SOLO,

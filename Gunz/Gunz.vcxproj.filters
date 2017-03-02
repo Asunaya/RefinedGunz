@@ -731,6 +731,9 @@
       <Filter>Vulkan</Filter>
     </ClInclude>
     <ClInclude Include="ZPickInfo.h" />
+    <ClInclude Include="ZRuleGunGame.h">
+      <Filter>Interface\Game\Rule</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ZCanvas.cpp">
@@ -1321,6 +1324,9 @@
     </ClCompile>
     <ClCompile Include="ZGameClient_Command.cpp">
       <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="ZRuleGunGame.cpp">
+      <Filter>Interface\Game\Rule</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

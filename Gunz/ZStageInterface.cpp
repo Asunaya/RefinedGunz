@@ -99,7 +99,7 @@ void ZStageInterface::OnCreate( void)
 	if ( pDesc)
 	{
 		pDesc->SetTextColor( MCOLOR(0xFF808080));
-		pDesc->SetText( "¾ÆÀÌÅÛÀ» È­¸é Áß¾Ó¿¡ ÀÖ´Â µÎ°³ÀÇ Á¦´Ü¿¡ ²ø¾î³õÀ½À¸·Î½á °ÔÀÓ ·¹º§À» Á¶Á¤ÇÒ ¼ö ÀÖ½À´Ï´Ù.");
+		pDesc->SetText( "ì•„ì´í…œì„ í™”ë©´ ì¤‘ì•™ì— ìžˆëŠ” ë‘ê°œì˜ ì œë‹¨ì— ëŒì–´ë†“ìŒìœ¼ë¡œì¨ ê²Œìž„ ë ˆë²¨ì„ ì¡°ì •í•  ìˆ˜ ìžˆìŠµë‹ˆë‹¤.");
 	}
 
 	ZApplication::GetGameInterface()->ShowWidget( "Stage_Flame0", false);
@@ -271,6 +271,7 @@ void ZStageInterface::OnStageInterfaceSettup( void)
 			break;
 
 		case MMATCH_GAMETYPE_DEATHMATCH_SOLO:
+		case MMATCH_GAMETYPE_GUNGAME:
 			color = SDM_COLOR;
 			break;
 
@@ -364,11 +365,13 @@ void ZStageInterface::ChangeStageGameSetting( MSTAGE_SETTING_NODE* pSetting)
 
 	MAnimation* pAniMapImg = (MAnimation*)pResource->FindWidget( "Stage_MapNameBG");
 	bool bQuestUI = false;
-	if ( (pSetting->nGameType == MMATCH_GAMETYPE_DEATHMATCH_SOLO) ||
-		 (pSetting->nGameType == MMATCH_GAMETYPE_GLADIATOR_SOLO) ||
-		 (pSetting->nGameType == MMATCH_GAMETYPE_BERSERKER) ||
-		 (pSetting->nGameType == MMATCH_GAMETYPE_TRAINING) ||
-		 (pSetting->nGameType == MMATCH_GAMETYPE_DUEL))
+
+	if ( (pSetting->nGameType == MMATCH_GAMETYPE_DEATHMATCH_SOLO) ||			// ë°ì“°ë§¤ì¹˜ ê°œì¸ì „ì´ê±°ë‚˜...
+		 (pSetting->nGameType == MMATCH_GAMETYPE_GLADIATOR_SOLO) ||				// ì¹¼ì „ ê°œì¸ì „ì´ê±°ë‚˜...
+		 (pSetting->nGameType == MMATCH_GAMETYPE_BERSERKER) ||					// ë²„ì„œì»¤ëª¨ë“œì´ê±°ë‚˜...
+		 (pSetting->nGameType == MMATCH_GAMETYPE_TRAINING) ||					// íŠ¸ë ˆì´ë‹ì´ê±°ë‚˜...
+		 (pSetting->nGameType == MMATCH_GAMETYPE_DUEL)||
+		 (pSetting->nGameType == MMATCH_GAMETYPE_GUNGAME))							// ë“€ì–¼ëª¨ë“œ ì´ë©´...
 	{
 		if ( pAniMapImg)
 			pAniMapImg->SetCurrentFrame( 0);
@@ -445,7 +448,8 @@ void ZStageInterface::ChangeStageGameSetting( MSTAGE_SETTING_NODE* pSetting)
 			(pSetting->nGameType == MMATCH_GAMETYPE_GLADIATOR_SOLO) ||
 			(pSetting->nGameType == MMATCH_GAMETYPE_TRAINING) ||
 			(pSetting->nGameType == MMATCH_GAMETYPE_BERSERKER) ||
-			(pSetting->nGameType == MMATCH_GAMETYPE_DUEL))
+			(pSetting->nGameType == MMATCH_GAMETYPE_DUEL)||
+			(pSetting->nGameType == MMATCH_GAMETYPE_GUNGAME))
 			pWidget->SetText( ZMsg(MSG_WORD_KILL));
 
 		else

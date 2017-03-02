@@ -274,6 +274,8 @@
     <ClCompile Include="MLadderMgr.cpp" />
     <ClCompile Include="DBQuestCachingData.cpp" />
     <ClCompile Include="MMatchObjectCacheBuilder.cpp" />
+    <ClCompile Include="GunGame.cpp" />
+    <ClCompile Include="MMatchRuleGunGame.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ChildFrm.h">
@@ -474,6 +476,8 @@
     <ClInclude Include="MLadderMgr.h" />
     <ClInclude Include="DBQuestCachingData.h" />
     <ClInclude Include="MMatchObjectCacheBuilder.h" />
+    <ClInclude Include="GunGame.h" />
+    <ClInclude Include="MMatchRuleGunGame.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\MatchServer.ico">

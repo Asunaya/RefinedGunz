@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<XML id="GunGame">
+
+	<SET id="1">
+		<ITEMSET melee="1" primary="6001" secondary="0"/>
+		<ITEMSET melee="12" primary="6001" secondary="0"/>
+	</SET>
+
+	<SET id="2">
+		<ITEMSET melee="2" primary="6001" secondary="0"/>
+		<ITEMSET melee="13" primary="0" secondary="0"/>
+	</SET>
+
+	<SET id="3">
+		<ITEMSET melee="2" primary="0" secondary="0"/>
+		<ITEMSET melee="0" primary="6001" secondary="0"/>
+	</SET>
+	
+</XML>
