@@ -195,7 +195,7 @@ public:
 		m_fLastShotTime = fTime;
 	}
 
-	auto IsDie() const { return m_bDie; }
+	bool IsDie() override { return m_bDie; }
 	auto IsAlive() const { return !m_bDie; }
 	void ForceDie() { SetHP(0); m_bDie = true; }
 
