@@ -997,6 +997,12 @@ void RMeshNode::Render(rmatrix* pWorldMatrix)
 		if(bSoft)	m_vb->RenderIndexSoft(m_ib[index]);
 		else 		m_vb->RenderIndexBuffer(m_ib[index]);
 
+		if (BlendColor)
+		{
+			RGetDevice()->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
+			RGetDevice()->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
+		}
+
 
 #ifdef USE_TOON_RENDER
 
