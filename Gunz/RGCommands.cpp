@@ -225,6 +225,25 @@ void LoadRGCommands(ZChatCmdManager& CmdManager)
 	},
 		CCF_ALL, 0, 0, true, "/hello", "");
 
+	CmdManager.AddCommand(0, "clear", [](const char *line, int argc, char ** const argv) {
+		GetRGMain().GetChat().ClearHistory();
+	},
+		CCF_ALL, 0, 0, true, "/clear", "");
+
+	CmdManager.AddCommand(0, "fov", [](const char *line, int argc, char ** const argv) {
+		float fov_radians = DEFAULT_FOV;
+		if (argc > 1)
+		{
+			auto arg = atof(argv[1]);
+			if (arg != 0)
+				fov_radians = ToRadian(arg);
+		}
+
+		g_fFOV = fov_radians;
+		ZChatOutputF("Field of view set to %d degrees", int(ToDegree(fov_radians)));
+	},
+		CCF_ALL, 0, 1, true, "/fov [value, in degrees]", "");
+
 	CmdManager.AddCommand(0, "setparts", [](const char *line, int argc, char ** const argv) {
 		if (!CheckDeveloperMode("setparts"))
 			return;

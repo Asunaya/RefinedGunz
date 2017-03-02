@@ -12,6 +12,8 @@
 #include "ZConfiguration.h"
 #include "RGMain.h"
 
+constexpr float ScreenFOVInRadians = ToRadian(70);
+
 void DrawGuage(float x,float y,float fWidth,float fHeight,float fLeanDir,DWORD color);
 
 ZScreenEffect::ZScreenEffect(RMesh *pMesh,rvector offset)
@@ -60,10 +62,14 @@ bool ZScreenEffect::DrawCustom(unsigned long int nTime, const rvector& vOffset, 
 	const rvector eye(0, 0, -650), at(0, 0, 0), up(0, 1, 0);
 	auto View = ViewMatrix(eye, Normalized(at - eye), up);
 	auto Offset = TranslationMatrix(vOffset);
+	rmatrix OriginalProjection;
 
 	if (ZGetConfiguration()->GetInterfaceFix())
 	{
-		RSetProjection(FixedFOV(g_fFOV), DEFAULT_NEAR_Z, 100000.f);
+		OriginalProjection = RGetTransform(D3DTS_PROJECTION);
+		auto&& Proj = PerspectiveProjectionMatrixViewport(RGetScreenWidth(), RGetScreenHeight(),
+			FixedFOV(ScreenFOVInRadians), 5, 10000);
+		RSetTransform(D3DTS_PROJECTION, Proj);
 	}
 	else
 	{
@@ -81,7 +87,7 @@ bool ZScreenEffect::DrawCustom(unsigned long int nTime, const rvector& vOffset, 
 	m_VMesh.Render();
 	
 	if (ZGetConfiguration()->GetInterfaceFix())
-		RSetProjection(g_fFOV, DEFAULT_NEAR_Z, 100000.f);
+		RSetTransform(D3DTS_PROJECTION, OriginalProjection);
 
 	if(m_VMesh.isOncePlayDone()) {
 		return false;
@@ -685,6 +691,8 @@ void ZScreenEffectManager::Draw()
 {
 	ZCharacter *pTargetCharacter = ZGetGameInterface()->GetCombatInterface()->GetTargetCharacter();
 	if(!pTargetCharacter || !pTargetCharacter->GetInitialized()) return;
+
+	RSetProjection(ScreenFOVInRadians, 5, 10000);
 
 	if(!ZGetGameInterface()->GetCombatInterface()->GetObserverMode())
 	{

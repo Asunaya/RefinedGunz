@@ -399,6 +399,9 @@ void Chat::Resize(int nWidth, int nHeight)
 void Chat::ClearHistory()
 {
 	Msgs.clear();
+	LineSegments.clear();
+	NumNewlyAddedLines = 0;
+	ChatLinesPixelOffsetY = 0;
 }
 
 bool Chat::CursorInRange(int x1, int y1, int x2, int y2){
