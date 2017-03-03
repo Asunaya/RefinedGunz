@@ -11,11 +11,14 @@
 #include "ZCombatMenu.h"
 #include "ZMyCharacter.h"
 
-#define LOGINSTATE_FADEIN				0
-#define LOGINSTATE_SHOWLOGINFRAME		1
-#define LOGINSTATE_STANDBY				2
-#define LOGINSTATE_LOGINCOMPLETE		3
-#define LOGINSTATE_FADEOUT				4
+enum class LoginState
+{
+	FadeIn,
+	ShowLoginFrame,
+	Standby,
+	LoginComplete,
+	Fadeout,
+};
 
 class ZLocatorList;
 class ZGameInput;
@@ -32,21 +35,23 @@ public:
 
 class ZGameInterface : public ZInterface {
 public:
-	GunzState			m_nInitialState;
-	bool				m_bTeenVersion;
-	bool				m_bViewUI;
-	bool				m_bTeamPlay;
-	int					m_nShopTabNum;
-	int					m_nEquipTabNum;
+	GunzState			m_nInitialState{};
+	bool				m_bTeenVersion{};
+	bool				m_bViewUI{};
+	bool				m_bTeamPlay{};
+	int					m_nShopTabNum{};
+	int					m_nEquipTabNum{};
 
-	bool				m_bLoginTimeout;
-	u32					m_dwLoginTimeout;
+	bool				m_bLoginTimeout{};
+	u32					m_dwLoginTimeout{};
 	
 protected:
+	ZIDLResource		m_IDLResource;
+
 	ZScreenEffectManager *m_pScreenEffectManager;
 	ZEffectManager*		m_pEffectManager;
 
-	GunzState			m_nPreviousState;
+	GunzState			m_nPreviousState{};
 
 	ZCombatInterface*	m_pCombatInterface;
 	ZGameInput*			m_pGameInput;
@@ -64,63 +69,61 @@ protected:
 	ZScreenDebugger		m_ScreenDebugger;
 	ZCombatMenu			m_CombatMenu;
 
-	ZMyCharacter*		m_pMyCharacter;
+	ZMyCharacter*		m_pMyCharacter{};
 
-	ZMonsterBookInterface* m_pMonsterBookInterface;
+	ZMonsterBookInterface* m_pMonsterBookInterface{};
 	
-	bool				m_bShowInterface;
+	bool				m_bShowInterface{};
 
-	bool				m_bCursor;
-	LPDIRECT3DSURFACE9	m_pCursorSurface;
+	bool				m_bCursor{};
+	LPDIRECT3DSURFACE9	m_pCursorSurface{};
 
-	u32					m_dwFrameMoveClock;
+	u32					m_dwFrameMoveClock{};
 
-	ZIDLResource		m_IDLResource;
+	GunzState			m_nState{};
+	bool				m_bLogin{};
 
-	GunzState			m_nState;
-	bool				m_bLogin;
+	bool				m_bLoading{};
+	bool				m_bWaitingArrangedGame{};
 
-	bool				m_bLoading;
-	bool				m_bWaitingArrangedGame;
+	int					m_nSellQuestItemCount{};
 
-	int					m_nSellQuestItemCount;
+	MBitmap				*m_pThumbnailBitmap{};
 
-	MBitmap				*m_pThumbnailBitmap;
+	ZMsgBox*				m_pMsgBox{};
+	ZMsgBox*				m_pConfirmMsgBox{};
+	ZInterfaceBackground*	m_pBackground{};
+	ZCharacterSelectView*	m_pCharacterSelectView{};
 
-	ZMsgBox*				m_pMsgBox;
-	ZMsgBox*				m_pConfirmMsgBox;
-	ZInterfaceBackground*	m_pBackground;
-	ZCharacterSelectView*	m_pCharacterSelectView;
+	bool				m_bOnEndOfReplay{};
+	int					m_nLevelPercentCache{};
 
-	bool				m_bOnEndOfReplay;
-	int					m_nLevelPercentCache;
+	u32					m_nDrawCount{};
 
-	u32					m_nDrawCount;
+	bool				m_bReservedWeapon{};
+	ZChangeWeaponType	m_ReservedWeapon{};
 
-	bool				m_bReservedWeapon;
-	ZChangeWeaponType	m_ReservedWeapon;
-
-	bool			m_bLeaveBattleReserved;
-	bool			m_bLeaveStageReserved;
-	u32				m_dwLeaveBattleTime;
+	bool			m_bLeaveBattleReserved{};
+	bool			m_bLeaveStageReserved{};
+	u32				m_dwLeaveBattleTime{};
 
 
-	int				m_nLoginState;
-	u32				m_dwLoginTimer;
-	u32				m_dwRefreshTime;
-	int				m_nLocServ;
+	LoginState		m_nLoginState = LoginState::Standby;
+	u32				m_dwLoginTimer{};
+	u32				m_dwRefreshTime{};
+	int				m_nLocServ{};
 
-	MBitmapR2*		m_pRoomListFrame;
-	MBitmapR2*		m_pBottomFrame;
-	MBitmapR2*		m_pClanInfo;
-	MBitmapR2*		m_pLoginBG;
-	MBitmapR2*		m_pLoginPanel;
+	MBitmapR2*		m_pRoomListFrame{};
+	MBitmapR2*		m_pBottomFrame{};
+	MBitmapR2*		m_pClanInfo{};
+	MBitmapR2*		m_pLoginBG{};
+	MBitmapR2*		m_pLoginPanel{};
 
-	ZLocatorList*	m_pLocatorList;
-	ZLocatorList*	m_pTLocatorList;
+	ZLocatorList*	m_pLocatorList{};
+	ZLocatorList*	m_pTLocatorList{};
 
-	u32				m_dwTimeCount;
-	u32				m_dwHourCount;
+	u32				m_dwTimeCount{};
+	u32				m_dwHourCount{};
 
 protected:
 	static bool		OnGlobalEvent(MEvent* pEvent);
@@ -129,9 +132,8 @@ protected:
 	virtual bool	OnCommand(MWidget* pWidget, const char* szMessage);
 	static bool		OnCommand(MCommand* pCommand);
 
-	bool ResizeWidget(const char* szName, int w, int h);
-	bool ResizeWidgetRecursive( MWidget* pWidget, int w, int h);
 	friend class RGMain;
+
 	void SetListenerWidget(const char* szName, MListener* pListener);
 
 	void UpdateCursorEnable();
@@ -171,8 +173,6 @@ protected:
 	void OnBirdTestDraw();
 	void OnBirdTestCommand(MCommand* pCmd);
 #endif
-
-	void OnUpdateGameMessage();
 
 	void HideAllWidgets();
 
@@ -325,9 +325,6 @@ public:
 
 	void OnReplay();
 
-	void OnRequestNewHashValue( const char* szNewRandomValue );
-	void OnResponseNewHashValue( const char* szNewSerialKey );
-
 	void OnDisconnectMsg( const DWORD dwMsgID );
 	void OnAnnounceDeleteClan( const string& strAnnounce );
 
@@ -377,4 +374,17 @@ void ZChangeGameState(GunzState state);
 
 inline ZIDLResource* ZGetIDLResource() {
 	return ZGetGameInterface()->GetIDLResource();
+}
+
+inline MWidget* ZFindWidget(const char* Name) {
+	return ZGetIDLResource()->FindWidget(Name);
+}
+
+template <typename T>
+inline T* ZFindWidgetAs(const char* Name) {
+	auto Widget = ZFindWidget(Name);
+#ifdef _DEBUG
+	assert(Widget == nullptr || dynamic_cast<T*>(Widget) != nullptr || !"Illegal typecast");
+#endif
+	return static_cast<T*>(Widget);
 }

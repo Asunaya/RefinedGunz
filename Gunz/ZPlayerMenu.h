@@ -61,7 +61,9 @@ public:
 	void SetTargetUID(const MUID& uidTarget)	{ m_PlayerUID = uidTarget; }
 
 	void SetupMenu(ZPLAYERMENU_SET nMenuSet);
-	virtual void Show(int x, int y, bool bVisible=true);
+
+	using MPopupMenu::Show;
+	virtual void Show(int x, int y, bool bVisible = true) override;
 };
 
 

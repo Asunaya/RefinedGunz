@@ -189,7 +189,7 @@ void ZStageInterface::OnStageInterfaceSettup( void)
 			if ( ZGetGameClient()->GetMatchStageSetting()->GetMasterUID() == CharNode.uidChar)
 				bMaster = true;
 			
-			pItem->UpdatePlayer(CharNode.uidChar, (MMatchObjectStageState)CharNode.nState,
+			pItem->UpdatePlayer(CharNode.uidChar, CharNode.nState,
 				bMaster, MMatchTeam(CharNode.nTeam));
 		}
 	}

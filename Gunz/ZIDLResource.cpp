@@ -30,14 +30,8 @@
 
 #include "RGMain.h"
 
-ZIDLResource::ZIDLResource()
-{
-
-}
-ZIDLResource::~ZIDLResource()
-{
-
-}
+ZIDLResource::ZIDLResource() = default;
+ZIDLResource::~ZIDLResource() = default;
 
 ZCanvas* ZIDLResource::GetCanvas(MXmlElement& element)
 {
@@ -424,7 +418,6 @@ ZStageInfoBox* ZIDLResource::GetStageInfoBox(MXmlElement& element)
 			{
 				MBListBoxLook* pListBoxLook = NULL;
 				pListBoxLook = (*itor).second;
-//				pWidget->ChangeCustomLook(pListBoxLook);
 				pWidget->SetLook(pListBoxLook);
 			}
 		}
@@ -504,7 +497,6 @@ ZClanListBox* ZIDLResource::GetClanListBox( MXmlElement& element )
 {
 	MXmlElement childElement;
 	char szBuf[4096];
-//	char szAttr[4096];
 
 	MWidget* pParentWidget = GetParentWidget(element);
 	ZClanListBox* pWidget = new ZClanListBox("", pParentWidget, pParentWidget);
@@ -540,13 +532,6 @@ ZServerView* ZIDLResource::GetServerView(MXmlElement& element)
 		childElement.GetTagName( szBuf);
 
 		GetCommonWidgetProperty( pWidget, childElement, szBuf);
-
-//		if ( !strcmp( szBuf, "NAME"))
-//		{
-//			char szName[ 25];
-//			childElement.GetContents( szName);
-//			pWidget->SetName( szName);
-//		}
 	}
 
 	return pWidget;
@@ -573,18 +558,9 @@ ZPlayerListBox* ZIDLResource::GetPlayerListBox( MXmlElement& element )
 		childElement = element.GetChildNode(i);
 		childElement.GetTagName(szBuf);
 
-		if(GetCommonWidgetProperty(pWidget, childElement, szBuf)) continue;
-		/*
-		else	if( strcmp(szBuf, "BITMAP") == 0)
-		{
-			childElement.GetAttribute(szAttr, "type" );
-			if( strcmp(szAttr,"slot") == 0)
-			{
-				childElement.GetContents(szAttr);
-				MBitmap* pBitmap =GetBitmap(childElement);
-				pWidget->SetBitmap(pBitmap);
-			}
-		}*/
+		if (GetCommonWidgetProperty(pWidget, childElement, szBuf)) {
+			continue;
+		}
 		else if( strcmp(szBuf, "SIZE" ) == 0 )
 		{
 			childElement.GetAttribute(szAttr, "type");
@@ -607,9 +583,9 @@ ZPlayerListBox* ZIDLResource::GetPlayerListBox( MXmlElement& element )
 	}
 
 	if(bMode1==false)
-		pWidget->InitUI(ZPlayerListBox::PLAYERLISTMODE_CHANNEL);
+		pWidget->InitUI(ZPlayerListBox::PlayerListMode::Channel);
 	else
-		pWidget->InitUI(ZPlayerListBox::PLAYERLISTMODE_STAGE);
+		pWidget->InitUI(ZPlayerListBox::PlayerListMode::Stage);
 
 	return pWidget;
 }
@@ -618,7 +594,6 @@ ZPlayerSelectListBox* ZIDLResource::GetPlayerSelectListBox(MXmlElement& element)
 {
 	MXmlElement childElement;
 	char szBuf[4096];
-//	char szAttr[4096];
 
 	MWidget* pParentWidget = GetParentWidget(element);
 	ZPlayerSelectListBox* pWidget = new ZPlayerSelectListBox("SelectPlayer", pParentWidget, pParentWidget);
@@ -698,24 +673,7 @@ ZActionKey* ZIDLResource::GetActionKey(MXmlElement& element)
 		childElement = element.GetChildNode(i);
 		childElement.GetTagName(szBuf);
 
-		if (GetCommonWidgetProperty(pActionKey, childElement, szBuf)) continue;
-
-		/*
-		if (!strcmp(szBuf, "EDITLOOK"))
-		{
-			char szItem[256];
-			memset(szItem, 0, sizeof(szItem));
-			childElement.GetContents(szItem);
-
-			map<string, MBEditLook*>::iterator itor = m_EditLookMap.find(szItem);
-			if (itor != m_EditLookMap.end())
-			{
-				pActionKey->ChangeCustomLook((MBEditLook*)(*itor).second);
-			}
-		}
-		*/
-
-	}
+		if (GetCommonWidgetProperty(pActionKey, childElement, szBuf)) continue;	}
 
 	return pActionKey;
 }
@@ -830,5 +788,3 @@ void ZGetInterfaceSkinPath(char* pOutPath, int maxlen, const char* szSkinName)
 {
 	sprintf_safe(pOutPath, maxlen, "%s%s/", PATH_INTERFACE, szSkinName);
 }
-
-

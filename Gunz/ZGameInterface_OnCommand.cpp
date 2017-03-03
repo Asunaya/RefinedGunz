@@ -62,11 +62,6 @@
 #include "MFileDialog.h"
 #include "ZServerView.h"
 
-#ifdef _XTRAP
-#include "XTrap/XTrap.h"
-#endif
-
-
 bool ZGameInterface::OnCommand(MCommand* pCommand)
 {
 #ifdef _BIRDTEST

@@ -71,6 +71,11 @@ inline constexpr uint32_t XRGB(uint8_t r, uint8_t g, uint8_t b)
 	return ARGB(0xFF, r, g, b);
 }
 
+inline constexpr uint32_t XRGB(uint8_t value)
+{
+	return XRGB(value, value, value);
+}
+
 enum MDateType
 {
 	MDT_Y = 1,

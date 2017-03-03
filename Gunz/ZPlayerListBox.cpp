@@ -1,79 +1,74 @@
 #include "stdafx.h"
-
-#include "zapplication.h"
+#include "ZApplication.h"
 #include "MMatchObjCache.h"
-#include ".\zplayerlistbox.h"
+#include "ZPlayerListBox.h"
 #include "MBitmap.h"
 #include "MListBox.h"
-#include "zpost.h"
+#include "ZPost.h"
 #include "ZCharacterView.h"
 #include "ZPlayerMenu.h"
 #include "MToolTip.h"
 #include "ZButton.h"
 #include "ZMyInfo.h"
 
-
 #define PLAYER_SLOT_GAP 1
-
 #define PLAYERLIST_ITEM_HEIGHT	23
 
 void ZPlayerListBoxLook::OnItemDraw2(MDrawContext* pDC, MRECT& r, const char* szText, MCOLOR color,
 	bool bSelected, bool bFocus, int nAdjustWidth)
 {
-	if(szText==NULL) return;
+	if (szText == nullptr)
+		return;
 
 	pDC->SetColor(color);
 
-	MRECT rtemp, rtemp2;
-	rtemp2 = rtemp = pDC->GetClipRect();
-	rtemp2.x	+= r.x;
-	rtemp2.y	+= r.y;
-	rtemp2.w	 = r.w;
-	rtemp2.h	 = r.h;
-	pDC->SetClipRect(rtemp2);
+	auto PrevClipRect = pDC->GetClipRect();
+
+	auto NewClipRect = pDC->GetClipRect();
+	NewClipRect.x	+= r.x;
+	NewClipRect.y	+= r.y;
+	NewClipRect.w	 = r.w;
+	NewClipRect.h	 = r.h;
+
+	pDC->SetClipRect(NewClipRect);
+
 #ifdef COLORTEXT_SUPPORT
 	pDC->TextMultiLine(r, szText,0,false);
 #else
 	pDC->Text(r.x, r.y+(r.h-pDC->GetFont()->GetHeight())/2, szText);
 #endif
-	pDC->SetClipRect(rtemp);
-}
 
+	pDC->SetClipRect(PrevClipRect);
+}
 
 void ZPlayerListBoxLook::OnItemDraw2(MDrawContext* pDC, MRECT& r, MBitmap* pBitmap, bool bSelected, bool bFocus, int nAdjustWidth)
 {
-	if(pBitmap==NULL) return;
+	if (pBitmap == nullptr) return;
 
-	MRECT rtemp, rtemp2;
-	rtemp2 = rtemp = pDC->GetClipRect();
-	rtemp2.w -= nAdjustWidth;
-	pDC->SetClipRect(rtemp2);
+	auto PrevClipRect = pDC->GetClipRect();
+
+	auto NewClipRect = pDC->GetClipRect();
+	NewClipRect.w -= nAdjustWidth;
+	pDC->SetClipRect(NewClipRect);
 
 	pDC->SetBitmap(pBitmap);
 	pDC->Draw(r, MRECT(0,0,pBitmap->GetWidth(),pBitmap->GetHeight()));
 
-	pDC->SetClipRect(rtemp);
+	pDC->SetClipRect(PrevClipRect);
 }
 
-MRECT ZPlayerListBoxLook::GetClientRect(MListBox* pListBox, const MRECT& r)
-{
-	return r;
-}
-
-float GetF(float _old,float _new)
-{
+static float GetF(float _old, float _new) {
 	return _old/_new;
 }
-
-float GetF(float _new)
-{
+static float GetF(float _new) {
 	return _new/800.f;
 }
 
-
 void ZPlayerListBoxLook::OnDraw(MListBox* pListBox, MDrawContext* pDC)
 {
-	((ZPlayerListBox*)pListBox)->UpdateList(((ZPlayerListBox*)pListBox)->GetPlayerListMode());
+	auto* PlayerListBox = static_cast<ZPlayerListBox*>(pListBox);
+
+	PlayerListBox->UpdateList();
 
 	int newW = RGetScreenWidth();
 	float fA = GetF(newW);
@@ -83,35 +78,22 @@ void ZPlayerListBoxLook::OnDraw(MListBox* pListBox, MDrawContext* pDC)
 	int nItemHeight = 23*fA;
 	int nShowCount = 0;
 
-	MRECT r = pListBox->GetClientRect();
-	MPOINT pos = pListBox->GetPosition();
+	auto ClientRect = pListBox->GetClientRect();
 
 	int nHeaderHeight = nItemHeight;
 
-	MRECT rr = pListBox->m_Rect;
-	rr.x = 0;
-	rr.y = 0;
-
-	bool bShowClanCreateFrame = 
-		((ZPlayerListBox*)pListBox)->GetMode()==ZPlayerListBox::PLAYERLISTMODE_CHANNEL_CLAN 
-		&& !ZGetMyInfo()->IsClanJoined();
+	bool bShowClanCreateFrame = PlayerListBox->GetMode() == ZPlayerListBox::PlayerListMode::ChannelClan &&
+		!ZGetMyInfo()->IsClanJoined();
 
 	pDC->SetColor(10,10,10);
 
-	ZPlayerListBox::PLAYERLISTMODE pm = ((ZPlayerListBox*)pListBox)->GetPlayerListMode();
+	auto pm = PlayerListBox->GetMode();
 
-	int nMode = 0; // 0 : lobby 1 : stage
-
-	if( pm == ZPlayerListBox::PLAYERLISTMODE_STAGE || pm == ZPlayerListBox::PLAYERLISTMODE_STAGE_FRIEND)
-		nMode = 1;
-
-	MBitmap* pBaseBmp = NULL;
-
-	for(int i=pListBox->GetStartItem(); i<pListBox->GetCount(); i++) {
+	for (int i = pListBox->GetStartItem(); i < pListBox->GetCount(); i++) {
 
 		MPOINT p;
-		p.x = r.x;
-		p.y = r.y+nHeaderHeight+nItemHeight*nShowCount;
+		p.x = ClientRect.x;
+		p.y = ClientRect.y + nHeaderHeight + nItemHeight*nShowCount;
 
 		MListItem* pItem = pListBox->Get(i);
 		bool bSelected = pItem->m_bSelected;
@@ -119,23 +101,25 @@ void ZPlayerListBoxLook::OnDraw(MListBox* pListBox, MDrawContext* pDC)
 
 		int nFieldStartX = 0;
 
+		// Draw rectangle around selected item.
 		if(bSelected) {
 			pDC->SetColor(130,130,130);
-			pDC->Rectangle(MRECT(p.x+2,p.y+5,r.x+r.w-8,nItemHeight-4));
+			pDC->Rectangle(MRECT(p.x + 2, p.y + 5, ClientRect.x + ClientRect.w - 8, nItemHeight - 4));
 		}
 
-		for(int j=0; j<max(pListBox->GetFieldCount(), 1); j++){
+		for (int j = 0; j < max(pListBox->GetFieldCount(), 1); j++) {
 
-			int nTabSize = r.w;
+			int nTabSize = ClientRect.w;
 			if(j<pListBox->GetFieldCount()) nTabSize = pListBox->GetField(j)->nTabSize;
 
-			int nWidth = min(nTabSize, r.w-nFieldStartX);
-			if(pListBox->m_bAbsoulteTabSpacing==false) nWidth = r.w*nTabSize/100;
+			int nWidth = min(nTabSize, ClientRect.w - nFieldStartX);
+			if (pListBox->m_bAbsoulteTabSpacing == false) nWidth = ClientRect.w*nTabSize / 100;
 
 			int nAdjustWidth = 0;
 
-			if(pListBox->GetScrollBar()->IsVisible()){
-				nAdjustWidth = pListBox->GetScrollBar()->GetRect().w + pListBox->GetScrollBar()->GetRect().w/2;
+			if (pListBox->GetScrollBar()->IsVisible()) {
+				nAdjustWidth = pListBox->GetScrollBar()->GetRect().w +
+					pListBox->GetScrollBar()->GetRect().w / 2;
 			}
 
 			MRECT ir(p.x+nFieldStartX+5, p.y+7, nWidth-7, nItemHeight-7);
@@ -145,26 +129,26 @@ void ZPlayerListBoxLook::OnDraw(MListBox* pListBox, MDrawContext* pDC)
 			MBitmap* pBitmap = pItem->GetBitmap(j);
 			MCOLOR color = pItem->GetColor();
 
-			if(pBitmap!=NULL)
+			if (pBitmap != NULL)
 				OnItemDraw2(pDC, ir, pBitmap,  bSelected, bFocused, nAdjustWidth);
 
-			if(szText!=NULL)
+			if (szText != NULL)
 				OnItemDraw2(pDC, irt, szText, color, bSelected, bFocused, nAdjustWidth);
 
 			nFieldStartX += nWidth;
-			if(nFieldStartX>=r.w) break;
+			if (nFieldStartX >= ClientRect.w) break;
 		}
 
 		nShowCount++;
 
-		if(nShowCount>=pListBox->GetShowItemCount()) break;
+		if (nShowCount >= pListBox->GetShowItemCount()) break;
 	}
 }
 
 IMPLEMENT_LOOK(ZPlayerListBox, ZPlayerListBoxLook)
 
 ZPlayerListBox::ZPlayerListBox(const char* szName, MWidget* pParent, MListener* pListener)
-: MListBox(szName, pParent, pListener)
+	: MListBox(szName, pParent, pListener)
 {
 	SetVisibleHeader(false);
 
@@ -192,16 +176,55 @@ ZPlayerListBox::ZPlayerListBox(const char* szName, MWidget* pParent, MListener* 
 
 	SetListener(this);
 
-	m_pButton = new ZBmButton(NULL,this,this);
+	m_pButton = std::make_unique<ZBmButton>(nullptr, this, this);
 	m_pButton->SetStretch(true);
 
-	m_nMode = PLAYERLISTMODE_CHANNEL;
+	m_nMode = PlayerListMode::Channel;
 	InitUI(m_nMode);
 }
 
-ZPlayerListBox::~ZPlayerListBox(void)
+ZPlayerListBox::~ZPlayerListBox() = default;
+
+bool ZPlayerListBox::LegalState(const char * szName, ModeCategory ExpectedCategory)
 {
-	SAFE_DELETE(m_pButton);
+	if (szName[0] == 0)
+	{
+		assert(!"szName may not be empty");
+		MLog("ZPlayerListBox::AddPlayer* -- Called with null name\n");
+		return false;
+	}
+
+	auto ModeToCategory = [](auto PlayerListMode)
+	{
+		switch (PlayerListMode)
+		{
+		case PlayerListMode::Channel:
+			return ModeCategory::Channel;
+		case PlayerListMode::Stage:
+			return ModeCategory::Stage;
+		case PlayerListMode::ChannelFriend:
+		case PlayerListMode::StageFriend:
+			return ModeCategory::Friend;
+		case PlayerListMode::ChannelClan:
+		case PlayerListMode::StageClan:
+			return ModeCategory::Clan;
+		default:
+			assert(!"Unknown mode");
+			return ModeCategory::Unknown;
+		};
+	};
+
+	auto ActualCategory = ModeToCategory(m_nMode);
+
+	if (ActualCategory != ExpectedCategory)
+	{
+		assert(!"Wrong mode");
+		MLog("ZPlayerListBox::AddPlayer* -- Called while in wrong category %d, only legal in %d\n",
+			ActualCategory, ExpectedCategory);
+		return false;
+	}
+
+	return true;
 }
 
 void ZPlayerListBox::SetupButton(const char *szOn, const char *szOff)
@@ -211,44 +234,62 @@ void ZPlayerListBox::SetupButton(const char *szOn, const char *szOff)
 	m_pButton->SetOverBitmap(MBitmapManager::Get(szOff));
 }
 
-void ZPlayerListBox::InitUI(PLAYERLISTMODE nMode)
+void ZPlayerListBox::InitUI(PlayerListMode nMode)
 {
 	int newW = RGetScreenWidth();
 	float fA = GetF(newW);
 
 	m_nMode = nMode;
-	_ASSERT(nMode>=0 && nMode<PLAYERLISTMODE_END);
+	assert(static_cast<int>(nMode) >= 0 && nMode < PlayerListMode::End);
 
 	RemoveAllField();
 
-	const int nFields[PLAYERLISTMODE_END] = { 5,5,2,2,4,4 }; 
-	for(int i=0;i<nFields[nMode];i++) {
-		AddField("",10);
+	const int nFields[static_cast<size_t>(PlayerListMode::End)] = {
+		5, 5, // Channel, Stage
+		2, 2, // ChannelFriend, StageFriend
+		4, 4, // ChannelClan, StageClan
+	};
+	for (int i = 0; i < nFields[static_cast<size_t>(nMode)]; i++) {
+		AddField("", 10);
 	}
-	OnSize(0,0);
+	OnSize(0, 0);
+
+	auto GetModeString = [](auto Mode)
+	{
+		switch (Mode)
+		{
+		case PlayerListMode::Channel:
+		default:
+			return "lobby";
+		case PlayerListMode::Stage:
+			return "game";
+		case PlayerListMode::ChannelFriend:
+		case PlayerListMode::StageFriend:
+			return "friends";
+		case PlayerListMode::ChannelClan:
+		case PlayerListMode::StageClan:
+			return "clan";
+		}
+	};
 
 	bool bShowClanCreateFrame = false;
+	{
+		auto ModeString = GetModeString(m_nMode);
+		char on[256];
+		char off[256];
+		sprintf_safe(on,  "pltab_%s_on.tga",  ModeString);
+		sprintf_safe(off, "pltab_%s_off.tga", ModeString);
+		SetupButton(on, off);
 
-	switch(m_nMode) {
-		case PLAYERLISTMODE_CHANNEL:	SetupButton("pltab_lobby_on.tga","pltab_lobby_off.tga");break;
-		
-		case PLAYERLISTMODE_STAGE: 		SetupButton("pltab_game_on.tga","pltab_game_off.tga");break;
-		
-		case PLAYERLISTMODE_CHANNEL_FRIEND:
-		case PLAYERLISTMODE_STAGE_FRIEND: 	SetupButton("pltab_friends_on.tga","pltab_friends_off.tga");break;
-		
-		case PLAYERLISTMODE_CHANNEL_CLAN:
-		case PLAYERLISTMODE_STAGE_CLAN: 	
-		{
-			SetupButton("pltab_clan_on.tga","pltab_clan_off.tga");
+		if (!strcmp(ModeString, "clan")) {
 			bShowClanCreateFrame = !ZGetMyInfo()->IsClanJoined();
-		}break;
+		}
 	}
 
-	MWidget *pFrame = ZGetGameInterface()->GetIDLResource()->FindWidget("LobbyPlayerListClanCreateFrame");
-	MButton* pButtonUp = (MButton*)ZGetGameInterface()->GetIDLResource()->FindWidget("LobbyChannelPlayerListPrev");
-	MButton* pButtonDn = (MButton*)ZGetGameInterface()->GetIDLResource()->FindWidget("LobbyChannelPlayerListNext");
-	if( pFrame)
+	auto pFrame = ZFindWidget("LobbyPlayerListClanCreateFrame");
+	auto pButtonUp = ZFindWidgetAs<MButton>("LobbyChannelPlayerListPrev");
+	auto pButtonDn = ZFindWidgetAs<MButton>("LobbyChannelPlayerListNext");
+	if(pFrame)
 	{
 		pFrame->Show(bShowClanCreateFrame);
 		pButtonUp->Show(!bShowClanCreateFrame);
@@ -261,37 +302,38 @@ void ZPlayerListBox::RefreshUI()
 	InitUI(GetMode());
 }
 
-void ZPlayerListBox::SetMode(PLAYERLISTMODE nMode)
+void ZPlayerListBox::SetMode(PlayerListMode nMode)
 {
-	ZPlayerListBox* pWidget = (ZPlayerListBox*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget("LobbyChannelPlayerList");
+	auto* pWidget = ZFindWidgetAs<ZPlayerListBox>("LobbyChannelPlayerList");
 	if(pWidget) {
 		pWidget->RemoveAll();
 	}
 
-	mlog("ZPlayerListBox::SetMode %d \n" , nMode);
+	mlog("ZPlayerListBox::SetMode %d\n", nMode);
 
 	InitUI(nMode);
 
-	if(!ZGetGameClient()) return;
-	if(nMode==PLAYERLISTMODE_CHANNEL) {
-		if (ZGetGameClient()->IsConnected()) {
-			if(pWidget) {
-				int nPage = pWidget->m_nPage;
-				ZPostRequestChannelPlayerList(ZGetGameClient()->GetPlayerUID(),ZGetGameClient()->GetChannelUID(),nPage);
-			}
-		}
+	if (!ZGetGameClient() || !ZGetGameClient()->IsConnected()) {
+		return;
 	}
-	else if(nMode==PLAYERLISTMODE_STAGE) {
-		if (ZGetGameClient()->IsConnected())
+
+	switch (nMode)
+	{
+		case PlayerListMode::Channel:
+			ZPostRequestChannelPlayerList(ZGetGameClient()->GetPlayerUID(),
+				ZGetGameClient()->GetChannelUID(), pWidget->m_nPage);
+			break;
+		case PlayerListMode::Stage:
 			ZPostRequestStagePlayerList(ZGetGameClient()->GetStageUID());
-	}
-	else if(nMode==PLAYERLISTMODE_CHANNEL_FRIEND || nMode==PLAYERLISTMODE_STAGE_FRIEND) {
-		if (ZGetGameClient()->IsConnected())
+			break;
+		case PlayerListMode::ChannelFriend:
+		case PlayerListMode::StageFriend:
 			ZPostFriendList();
-	}
-	else if (nMode==PLAYERLISTMODE_CHANNEL_CLAN || nMode==PLAYERLISTMODE_STAGE_CLAN) {
-		if (ZGetGameClient()->IsConnected())
+			break;
+		case PlayerListMode::ChannelClan:
+		case PlayerListMode::StageClan:
 			ZPostRequestClanMemberList(ZGetGameClient()->GetPlayerUID());
+			break;
 	}
 }
 
@@ -305,7 +347,7 @@ void GetRectMul(MRECT* rect,MRECT* org_rect,float f)
 
 void ZPlayerListBox::OnSize(int w,int h)
 {
-	if(m_Fields.GetCount()==0) return;
+	if (m_Fields.GetCount() == 0) return;
 
 	int newW = RGetScreenWidth();
 	float fA = GetF(newW);
@@ -314,51 +356,38 @@ void ZPlayerListBox::OnSize(int w,int h)
 
 	m_pButton->SetBounds(0, 0, m_Rect.w, (int)(28.0 * fA));
 
-	switch(m_nMode) {
-	case PLAYERLISTMODE_CHANNEL:
-		{
-			m_Fields.Get(0)->nTabSize = 23*fA;	//icon
-			m_Fields.Get(1)->nTabSize = 16*fA;	//level
-			m_Fields.Get(2)->nTabSize = 72*fA;	//name
-			m_Fields.Get(3)->nTabSize = 23*fA;	//icon
-			m_Fields.Get(4)->nTabSize = 80*fA;	//clan name
-		}
+	switch (m_nMode) {
+	case PlayerListMode::Channel:
+	case PlayerListMode::Stage:
+		m_Fields.Get(0)->nTabSize = 23 * fA; //icon
+		m_Fields.Get(1)->nTabSize = 16 * fA; //level
+		m_Fields.Get(2)->nTabSize = 72 * fA; //name
+		m_Fields.Get(3)->nTabSize = 23 * fA; //icon
+		m_Fields.Get(4)->nTabSize = 80 * fA; //clan name
 		break;
-	case PLAYERLISTMODE_STAGE:
-		{
-			m_Fields.Get(0)->nTabSize = 23*fA;	//icon
-			m_Fields.Get(1)->nTabSize = 16*fA;	//level
-			m_Fields.Get(2)->nTabSize = 72*fA;	//name
-			m_Fields.Get(3)->nTabSize = 23*fA;	//icon
-			m_Fields.Get(4)->nTabSize = 80*fA;	//clan name
-		}
+	case PlayerListMode::StageFriend:
+	case PlayerListMode::ChannelFriend:
+		m_Fields.Get(0)->nTabSize = 23 * fA; //icon
+		m_Fields.Get(1)->nTabSize = 72 * fA; //name
 		break;
-	case PLAYERLISTMODE_STAGE_FRIEND:
-	case PLAYERLISTMODE_CHANNEL_FRIEND:
-		{
-			m_Fields.Get(0)->nTabSize = 23*fA;	//icon
-			m_Fields.Get(1)->nTabSize = 72*fA;	//name
-		}
-		break;
-	case PLAYERLISTMODE_CHANNEL_CLAN:
-	case PLAYERLISTMODE_STAGE_CLAN:
-		{
-			m_Fields.Get(0)->nTabSize = 23*fA;	//icon
-			m_Fields.Get(1)->nTabSize = 85*fA;	//name
-			m_Fields.Get(2)->nTabSize = 23*fA;	//icon
-			m_Fields.Get(3)->nTabSize = 90*fA;	//clan grade
-		}
+	case PlayerListMode::ChannelClan:
+	case PlayerListMode::StageClan:
+		m_Fields.Get(0)->nTabSize = 23 * fA; //icon
+		m_Fields.Get(1)->nTabSize = 85 * fA; //name
+		m_Fields.Get(2)->nTabSize = 23 * fA; //icon
+		m_Fields.Get(3)->nTabSize = 90 * fA; //clan grade
 		break;
 	};
+	
 	RecalcList();
 }
 
-// mode PLAYERLISTMODE_CHANNEL
-void ZPlayerListBox::AddPlayer(const MUID& puid, ePlayerState state, int nLevel,
+void ZPlayerListBox::AddPlayerChannel(const MUID& puid, ePlayerState state, int nLevel,
 	const char* szName, const char *szClanName, unsigned int nClanID, MMatchUserGradeID nGrade )
 {
-	if ( (int)strlen( szName) == 0)
+	if (!LegalState(szName, ModeCategory::Channel)) {
 		return;
+	}
 
 	char szFileName[64] = "";
 	char szLevel[64] = "";
@@ -378,7 +407,7 @@ void ZPlayerListBox::AddPlayer(const MUID& puid, ePlayerState state, int nLevel,
 		case PS_LOBBY	: strcpy_safe(szFileName, "player_status_lobby.tga");	break;
 	}
 
-	ZLobbyPlayerListItem* pItem = new ZLobbyPlayerListItem(puid, MBitmapManager::Get(szFileName), nClanID, szLevel, szRefName, szClanName, state,nGrade );
+	auto* pItem = new ZLobbyPlayerListItem(puid, MBitmapManager::Get(szFileName), nClanID, szLevel, szRefName, szClanName, state,nGrade );
 
 	if(bSpUser)
 		pItem->SetColor(_color);
@@ -386,168 +415,178 @@ void ZPlayerListBox::AddPlayer(const MUID& puid, ePlayerState state, int nLevel,
 	MListBox::Add( pItem );
 }
 
-void ZPlayerListBox::AddPlayer(const MUID& puid, MMatchObjectStageState state, int nLevel,
-	const char* szName, const char* szClanName, unsigned int nClanID, bool isMaster, MMatchTeam nTeam)
+// Gets the flag bitmap that is displayed in the gameroom.
+static MBitmap* GetStagePlayerBitmap(MMatchObjectStageState State, bool IsMaster, MMatchTeam Team)
 {
-	if ( (int)strlen( szName) == 0)
+	{
+		const auto* pStageSetting = ZGetGameClient()->GetMatchStageSetting()->GetStageSetting();
+		const auto IsTeamGameType = ZGetGameTypeManager()->IsTeamGame(pStageSetting->nGameType);
+
+		// If they're not on the spectator team, and it's not a team gametype
+		// they can only be MMT_ALL (since MMT_RED and MMT_BLUE are only for team gametypes).
+		if (Team != MMT_SPECTATOR && IsTeamGameType == false) {
+			Team = MMT_ALL;
+		}
+	}
+
+	auto GetTeamString = [](auto Team)
+	{
+		switch (Team)
+		{
+		case MMT_RED:
+			return "red";
+		case MMT_BLUE:
+			return "blue";
+		case MMT_SPECTATOR:
+			return "observer";
+		case MMT_ALL:
+		default:
+			return "normal";
+		};
+	};
+
+	// The return value includes the underscore if it's not empty.
+	auto GetReadyString = [](auto StageState, auto Team)
+	{
+		// Spectators can't be ready.
+		if (Team == MMT_SPECTATOR)
+			return "";
+
+		switch (StageState)
+		{
+		case MOSS_READY:
+			return "_ready";
+		case MOSS_EQUIPMENT:
+		case MOSS_SHOP:
+			return "_equip";
+		case MOSS_NONREADY:
+		default:
+			return "";
+		};
+	};
+
+	auto PlayerStatusString = IsMaster ? "master" : "member";
+	auto TeamString = GetTeamString(Team);
+	auto ReadyString = GetReadyString(State, Team);
+
+	char BitmapFilename[512];
+	// ReadyString includes the underscore if it's not empty.
+	sprintf_safe(BitmapFilename, "stg_status_%s_%s%s.tga",
+		PlayerStatusString, TeamString, ReadyString);
+
+	return MBitmapManager::Get(BitmapFilename);
+}
+
+// Updates the checkmarks in the buttons that select your team.
+static void UpdateTeamButtonChecks(MMatchTeam Team)
+{
+	auto SetButtonCheck = [](auto&& Name, bool Value) {
+		auto* pButton = ZFindWidgetAs<MButton>(Name);
+		if (pButton) {
+			pButton->SetCheck(Value);
+		}
+	};
+
+	SetButtonCheck("StageTeamBlue", Team == MMT_BLUE);
+	SetButtonCheck("StageTeamRed", Team == MMT_RED);
+}
+
+void ZPlayerListBox::AddPlayerStage(const MUID& puid, MMatchObjectStageState state, int nLevel,
+	const char* szName, const char* szClanName, unsigned int nClanID,
+	bool isMaster, MMatchTeam nTeam)
+{
+	if (!LegalState(szName, ModeCategory::Stage)) {
 		return;
+	}
 
-
-	char szFileName[64] = "";
-	char szFileNameState[64] = "";
-	char szLevel[64] = "";
-
-	const char* szRefName = nullptr;
-
-	MCOLOR _color;
+	MCOLOR Color;
 	char sp_name[256];
 	MMatchUserGradeID gid = MMUG_FREE;
-	bool bSpUser = GetUserInfoUID(puid, _color, sp_name, gid);
+	bool IsSpecialUser = GetUserInfoUID(puid, Color, sp_name, gid);
+	const char* RefName = szName;
 
-	sprintf_safe(szLevel, "%2d", nLevel);
-	szRefName = szName;
+	char Level[256];
+	sprintf_safe(Level, "%2d", nLevel);
 
-	MBitmap* pBitmap = nullptr;
-	if(isMaster) {
-		switch (state) {
-			case MOSS_NONREADY	:
-				if(nTeam == MMT_RED)			strcpy_safe(szFileName, "stg_status_master_red.tga");
-				else if(nTeam == MMT_BLUE)		strcpy_safe(szFileName, "stg_status_master_blue.tga");
-				else if(nTeam == MMT_SPECTATOR)	strcpy_safe(szFileName, "stg_status_master_observer.tga");
-				else 							strcpy_safe(szFileName, "stg_status_master_normal.tga");
-				break;
-			case MOSS_READY		:
-				if(nTeam == MMT_RED)			strcpy_safe(szFileName, "stg_status_master_red_ready.tga");
-				else if(nTeam == MMT_BLUE)		strcpy_safe(szFileName, "stg_status_master_blue_ready.tga");
-				else if(nTeam == MMT_SPECTATOR)	strcpy_safe(szFileName, "stg_status_master_observer.tga");
-				else 							strcpy_safe(szFileName, "stg_status_master_normal_ready.tga");
-				break;
-			case MOSS_EQUIPMENT	: 
-			case MOSS_SHOP		:
-				if(nTeam == MMT_RED)			strcpy_safe(szFileName, "stg_status_master_red_equip.tga");
-				else if(nTeam == MMT_BLUE)		strcpy_safe(szFileName, "stg_status_master_blue_equip.tga");
-				else if(nTeam == MMT_SPECTATOR)	strcpy_safe(szFileName, "stg_status_master_observer.tga");
-				else 							strcpy_safe(szFileName, "stg_status_master_normal_equip.tga");
-				break;
-			default :
-				strcpy_safe(szFileName, " ");
-				break;
-		}
+	auto Bitmap = GetStagePlayerBitmap(state, isMaster, nTeam);
+	auto* pItem = new ZStagePlayerListItem(puid, Bitmap, nClanID, RefName, szClanName, Level, gid);
+
+	if (IsSpecialUser)
+		pItem->SetColor(Color);
+
+	MListBox::Add(pItem);
+
+	if (ZGetMyUID() == puid) {
+		UpdateTeamButtonChecks(nTeam);
 	}
-	else {
-		switch (state) {
-			case MOSS_NONREADY	:
-				if(nTeam == MMT_RED)			strcpy_safe(szFileName, "stg_status_member_red.tga");
-				else if(nTeam == MMT_BLUE)		strcpy_safe(szFileName, "stg_status_member_blue.tga");	
-				else if(nTeam == MMT_SPECTATOR)	strcpy_safe(szFileName, "stg_status_member_observer.tga");	
-				else							strcpy_safe(szFileName, "stg_status_member_normal.tga");	
-				break;
-			case MOSS_READY		: 
-				if(nTeam == MMT_RED)			strcpy_safe(szFileName, "stg_status_member_red_ready.tga");
-				else if(nTeam == MMT_BLUE)		strcpy_safe(szFileName, "stg_status_member_blue_ready.tga");	
-				else if(nTeam == MMT_SPECTATOR)	strcpy_safe(szFileName, "stg_status_member_observer.tga");	
-				else							strcpy_safe(szFileName, "stg_status_member_normal_ready.tga");	
-				break;
-			case MOSS_EQUIPMENT	: 
-			case MOSS_SHOP		:
-				if(nTeam == MMT_RED)			strcpy_safe(szFileName, "stg_status_member_red_equip.tga");
-				else if(nTeam == MMT_BLUE)		strcpy_safe(szFileName, "stg_status_member_blue_equip.tga");	
-				else if(nTeam == MMT_SPECTATOR)	strcpy_safe(szFileName, "stg_status_member_observer.tga");	
-				else							strcpy_safe(szFileName, "stg_status_member_normal_equip.tga");	
-				break;
-		}
-	}
-	pBitmap = MBitmapManager::Get(szFileName);
+}
 
-	ZStagePlayerListItem* pItem = new ZStagePlayerListItem(puid, pBitmap, nClanID, szRefName, szClanName, szLevel , gid );
-
-	if(bSpUser)
-		pItem->SetColor(_color);
-
-	MListBox::Add( pItem );
-
-	if( ZGetMyUID() == puid )
+// Gets the bitmap displayed in the lobby.
+static const char* GetPlayerStateBitmapFilename(ePlayerState State)
+{
+	switch (State)
 	{
-		bool bBlue, bRed;
-		bBlue = bRed = false;
-		if( nTeam == MMT_BLUE)	bBlue = true;
-		if( nTeam == MMT_RED)	bRed = true;
-		
-		MButton* pButton = (MButton*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget("StageTeamBlue");
-		pButton->SetCheck( bBlue );
-
-		pButton = (MButton*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget("StageTeamRed");
-		pButton->SetCheck( bRed );
+	case PS_FIGHT: return "player_status_player.tga";
+	case PS_WAIT:  return "player_status_game.tga";
+	case PS_LOBBY:
+	default:       return "player_status_lobby.tga";
 	}
 }
 
-// mode PLAYERLISTMODE_CHANNEL_FRIEND, PLAYERLISTMODE_STAGE_FRIEND
-void ZPlayerListBox::AddPlayer(ePlayerState state, char* szName, char* szLocation)
-{
-	if ( (int)strlen( szName) == 0)
-		return;
-
-	char szFileName[64] = "";
-	switch (state) {
-		case PS_FIGHT	: strcpy_safe(szFileName, "player_status_player.tga");	break;
-		case PS_WAIT	: strcpy_safe(szFileName, "player_status_game.tga");		break;
-		case PS_LOBBY	: strcpy_safe(szFileName, "player_status_lobby.tga");	break;
-	}
-
-	MListBox::Add(new ZFriendPlayerListItem(MUID(0,0),MBitmapManager::Get(szFileName), szName,NULL,szLocation,state,MMUG_FREE));
+static MBitmap* GetPlayerStateBitmap(ePlayerState State) {
+	return MBitmapManager::Get(GetPlayerStateBitmapFilename(State));
 }
 
-// mode PLAYERLISTMODE_CHANNEL_CLAN
-void ZPlayerListBox::AddPlayer(const MUID& puid, ePlayerState state, char* szName, int nLevel ,MMatchClanGrade nGrade )
+void ZPlayerListBox::AddPlayerFriend(ePlayerState state, char* szName, char* szLocation)
 {
-	if ( (int)strlen( szName) == 0)
+	if (!LegalState(szName, ModeCategory::Friend)) {
 		return;
-
-
-	char szFileName[64] = "";
-	char szGradeName[64];
-
-	char* szRefName = NULL;
-
-	MCOLOR _color = MCOLOR(240,64,64);
-	bool bSpUser = false;
-
-	switch(nGrade) {
-		case MCG_MASTER : 
-			sprintf_safe(szGradeName, ZMsg( MSG_WORD_CLAN_MASTER));
-			bSpUser = true;
-			break;
-		case MCG_ADMIN	: 
-			sprintf_safe(szGradeName, ZMsg( MSG_WORD_CLAN_ADMIN));
-			bSpUser = true;
-			break;
-		default : sprintf_safe(szGradeName, ZMsg( MSG_WORD_CLAN_MEMBER));
-			break;
-	}
-	szRefName = szName;
-
-	switch (state) {
-
-		case PS_FIGHT	: strcpy_safe(szFileName, "player_status_player.tga");	break;
-		case PS_WAIT	: strcpy_safe(szFileName, "player_status_game.tga");		break;
-		case PS_LOBBY	: strcpy_safe(szFileName, "player_status_lobby.tga");	break;
 	}
 
-	ZClanPlayerListItem* pItem = new ZClanPlayerListItem(puid, MBitmapManager::Get(szFileName), szRefName, szGradeName, NULL, state, nGrade );
+	auto* NewItem = new ZFriendPlayerListItem(MUID(0, 0), GetPlayerStateBitmap(state),
+		szName, nullptr, szLocation, state, MMUG_FREE);
+	MListBox::Add(NewItem);
+}
 
-	if(bSpUser)
-		pItem->SetColor(_color);
+void ZPlayerListBox::AddPlayerClan(const MUID& puid, ePlayerState state, char* szName, int nLevel,
+	MMatchClanGrade nGrade )
+{
+	if (!LegalState(szName, ModeCategory::Clan)) {
+		return;
+	}
 
-	MListBox::Add( pItem );
+	auto GetClanGradeName = [](auto ClanGrade)
+	{
+		switch (ClanGrade)
+		{
+		case MCG_MASTER: return ZMsg(MSG_WORD_CLAN_MASTER);
+		case MCG_ADMIN: return ZMsg(MSG_WORD_CLAN_ADMIN);
+		default: return ZMsg(MSG_WORD_CLAN_MEMBER);
+		}
+	};
+
+	auto IsSpecialClanGrade = [&](auto ClanGrade) {
+		return ClanGrade == MCG_MASTER || ClanGrade == MCG_ADMIN;
+	};
+
+	auto* Bitmap = GetPlayerStateBitmap(state);
+	auto* pItem = new ZClanPlayerListItem(puid, Bitmap,
+		szName, GetClanGradeName(nGrade),
+		nullptr, state, nGrade);
+
+	MCOLOR Color{ 240, 64, 64 };
+	if (IsSpecialClanGrade(nGrade)) {
+		pItem->SetColor(Color);
+	}
+
+	MListBox::Add(pItem);
 }
 
 void ZPlayerListBox::DelPlayer(const MUID& puid)
 {
-	ZPlayerListItem* pItem = NULL;
-
-	for(int i=0;i<GetCount();i++) {
-		pItem = (ZPlayerListItem*)Get(i);
-		if(pItem->m_PlayerUID==puid){
+	for (int i = 0; i < GetCount(); i++) {
+		auto pItem = static_cast<ZPlayerListItem*>(Get(i));
+		if (pItem->m_PlayerUID == puid) {
 			Remove(i);
 			return;
 		}
@@ -559,8 +598,8 @@ ZPlayerListItem* ZPlayerListBox::GetUID(MUID uid)
 	ZPlayerListItem* pItem = NULL;
 
 	for(int i=0;i<GetCount();i++) {
-		pItem = (ZPlayerListItem*)Get(i);
-		if(pItem->m_PlayerUID==uid)
+		auto pItem = static_cast<ZPlayerListItem*>(Get(i));
+		if (pItem->m_PlayerUID == uid)
 			return pItem;
 	}
 	return NULL;
@@ -581,263 +620,86 @@ static DWORD g_zplayer_list_update_time = 0;
 
 #define ZPLAYERLIST_UPDATE_TIME 2000
 
-void ZPlayerListBox::UpdateList(int mode)
+void ZPlayerListBox::UpdateList()
 {
 	if (ZGetGameClient()->IsConnected() == false) return;
 
 	DWORD this_time = GetGlobalTimeMS();
 
-	if( this_time < g_zplayer_list_update_time + ZPLAYERLIST_UPDATE_TIME)
+	if (this_time < g_zplayer_list_update_time + ZPLAYERLIST_UPDATE_TIME)
 		return;
 
 	g_zplayer_list_update_time = this_time;
 }
 
-
-void ZPlayerListBox::UpdatePlayer(const MUID& puid,MMatchObjectStageState state, bool isMaster,MMatchTeam nTeam)
+void ZPlayerListBox::UpdatePlayer(const MUID& puid, MMatchObjectStageState state,
+	bool isMaster, MMatchTeam nTeam)
 {
-	ZStagePlayerListItem* pItem = (ZStagePlayerListItem*)GetUID(puid);
+	auto* pItem = static_cast<ZStagePlayerListItem*>(GetUID(puid));
 
 	if(pItem) {
-
-		char szFileName[64] = "";
-		char szFileNameState[64] = "";
-
-		MBitmap* pBitmap = NULL;
-		MBitmap* pBitmapState = NULL;
-
-		MSTAGE_SETTING_NODE* pStageSetting = ZGetGameClient()->GetMatchStageSetting()->GetStageSetting();
-
-		if ( (nTeam != MMT_SPECTATOR) && (ZGetGameTypeManager()->IsTeamGame(pStageSetting->nGameType) == false))
-		{
-			nTeam = MMT_ALL;
-		}
-
-		if(isMaster) {
-			switch (state) {
-				case MOSS_NONREADY	:
-					if(nTeam == MMT_RED)			{ strcpy_safe(szFileName, "stg_status_master_red.tga");				pItem->m_nTeam = 1;}
-					else if(nTeam == MMT_BLUE)		{ strcpy_safe(szFileName, "stg_status_master_blue.tga");				pItem->m_nTeam = 2;}
-					else if(nTeam == MMT_SPECTATOR)	{ strcpy_safe(szFileName, "stg_status_master_observer.tga");			pItem->m_nTeam = 3;}
-					else 							{ strcpy_safe(szFileName, "stg_status_master_normal.tga");			pItem->m_nTeam = 0;}
-					break;
-				case MOSS_READY		:
-					if(nTeam == MMT_RED)			{ strcpy_safe(szFileName, "stg_status_master_red_ready.tga");		pItem->m_nTeam = 1;}
-					else if(nTeam == MMT_BLUE)		{ strcpy_safe(szFileName, "stg_status_master_blue_ready.tga");		pItem->m_nTeam = 2;}
-					else if(nTeam == MMT_SPECTATOR)	{ strcpy_safe(szFileName, "stg_status_master_observer.tga");			pItem->m_nTeam = 3;}
-					else 							{ strcpy_safe(szFileName, "stg_status_master_normal_ready.tga");		pItem->m_nTeam = 0;}
-					break;
-				case MOSS_EQUIPMENT	: 
-				case MOSS_SHOP		:
-					if(nTeam == MMT_RED)			{ strcpy_safe(szFileName, "stg_status_master_red_equip.tga");		pItem->m_nTeam = 1;}
-					else if(nTeam == MMT_BLUE)		{ strcpy_safe(szFileName, "stg_status_master_blue_equip.tga");		pItem->m_nTeam = 2;}
-					else if(nTeam == MMT_SPECTATOR)	{ strcpy_safe(szFileName, "stg_status_master_observer.tga");			pItem->m_nTeam = 3;}
-					else 							{ strcpy_safe(szFileName, "stg_status_master_normal_equip.tga");		pItem->m_nTeam = 0;}
-					break;
-				default :
-					strcpy_safe(szFileName, " ");
-					break;
-			}
-		}
-		else {
-			switch (state) {
-				case MOSS_NONREADY	:
-					if(nTeam == MMT_RED)			{ strcpy_safe(szFileName, "stg_status_member_red.tga");				pItem->m_nTeam = 1;}
-					else if(nTeam == MMT_BLUE)		{ strcpy_safe(szFileName, "stg_status_member_blue.tga");				pItem->m_nTeam = 2;}
-					else if(nTeam == MMT_SPECTATOR)	{ strcpy_safe(szFileName, "stg_status_member_observer.tga");			pItem->m_nTeam = 3;}
-					else 							{ strcpy_safe(szFileName, "stg_status_member_normal.tga");			pItem->m_nTeam = 0;}
-					break;
-				case MOSS_READY		: 
-					if(nTeam == MMT_RED)			{ strcpy_safe(szFileName, "stg_status_member_red_ready.tga");		pItem->m_nTeam = 1;}
-					else if(nTeam == MMT_BLUE)		{ strcpy_safe(szFileName, "stg_status_member_blue_ready.tga");		pItem->m_nTeam = 2;}
-					else if(nTeam == MMT_SPECTATOR)	{ strcpy_safe(szFileName, "stg_status_member_observer.tga");			pItem->m_nTeam = 3;}
-					else 							{ strcpy_safe(szFileName, "stg_status_member_normal_ready.tga");		pItem->m_nTeam = 0;}
-					break;
-				case MOSS_EQUIPMENT	: 
-				case MOSS_SHOP		:
-					if(nTeam == MMT_RED)			{ strcpy_safe(szFileName, "stg_status_member_red_equip.tga");		pItem->m_nTeam = 1;}
-					else if(nTeam == MMT_BLUE)		{ strcpy_safe(szFileName, "stg_status_member_blue_equip.tga");		pItem->m_nTeam = 2;}
-					else if(nTeam == MMT_SPECTATOR)	{ strcpy_safe(szFileName, "stg_status_member_observer.tga");			pItem->m_nTeam = 3;}
-					else 							{ strcpy_safe(szFileName, "stg_status_member_normal_equip.tga");		pItem->m_nTeam = 0;}
-					break;
-			}
-		}
-
-		pBitmap = MBitmapManager::Get(szFileName);
-
-		pItem->m_pBitmap = pBitmap;
+		auto Bitmap = GetStagePlayerBitmap(state, isMaster, nTeam);
+		pItem->m_pBitmap = Bitmap;
+		pItem->Team = nTeam;
 	}	
 
-	ZCharacterView* pCharView = (ZCharacterView*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget("Stage_Charviewer_");
-	if( pCharView != 0 && puid == pCharView->m_Info.UID )
+	auto* pCharView = static_cast<ZCharacterView*>(ZGetIDLResource()->FindWidget("Stage_Charviewer_"));
+	if (pCharView != nullptr && puid == pCharView->m_Info.UID)
 	{
 		pCharView->m_Info.bMaster = isMaster;
 		pCharView->m_Info.nTeam = nTeam;
 		pCharView->m_Info.nStageState = state;
 	}
 
-	if( (nTeam != MMT_SPECTATOR) && (ZGetMyUID() == puid ))
+	if (nTeam != MMT_SPECTATOR && ZGetMyUID() == puid)
 	{
-		bool bBlue, bRed;
-		bBlue = bRed = false;
-		if( nTeam == MMT_BLUE)	bBlue = true;
-		if( nTeam == MMT_RED)	bRed = true;
-				
-		MButton* pButton = (MButton*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget("StageTeamBlue");
-		pButton->SetCheck( bBlue );
-
-		pButton = (MButton*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget("StageTeamRed");
-		pButton->SetCheck( bRed );
-	}
-}
-
-
-void ZPlayerListBox::UpdatePlayer(const MUID& puid,MMatchObjectStageState state, char* szName, int  nLevel ,bool isMaster,MMatchTeam nTeam)
-{
-	return;
-
-	ZStagePlayerListItem* pItem = (ZStagePlayerListItem*)GetUID(puid);
-	if(pItem) {
-
-		char szFileName[64] = "";
-		char szFileNameState[64] = "";
-		char szLevel[64];
-
-		MBitmap* pBitmap = NULL;
-		MBitmap* pBitmapState = NULL;
-
-		if(isMaster) {
-			switch (state) {
-				case MOSS_NONREADY	:
-					if(nTeam == MMT_RED)			strcpy_safe(szFileName, "stg_status_master_red.tga");
-					else if(nTeam == MMT_BLUE)		strcpy_safe(szFileName, "stg_status_master_blue.tga");
-					else if(nTeam == MMT_SPECTATOR)	strcpy_safe(szFileName, "stg_status_master_observer.tga");
-					else 							strcpy_safe(szFileName, "stg_status_master_normal.tga");
-					break;
-				case MOSS_READY		:
-					if(nTeam == MMT_RED)			strcpy_safe(szFileName, "stg_status_master_red_ready.tga");
-					else if(nTeam == MMT_BLUE)		strcpy_safe(szFileName, "stg_status_master_blue_ready.tga");
-					else if(nTeam == MMT_SPECTATOR)	strcpy_safe(szFileName, "stg_status_master_observer.tga");
-					else 							strcpy_safe(szFileName, "stg_status_master_normal_ready.tga");
-					break;
-				case MOSS_EQUIPMENT	: 
-				case MOSS_SHOP		:
-					if(nTeam == MMT_RED)			strcpy_safe(szFileName, "stg_status_master_red_equip.tga");
-					else if(nTeam == MMT_BLUE)		strcpy_safe(szFileName, "stg_status_master_blue_equip.tga");
-					else if(nTeam == MMT_SPECTATOR)	strcpy_safe(szFileName, "stg_status_master_observer.tga");
-					else 							strcpy_safe(szFileName, "stg_status_master_normal_equip.tga");
-					break;
-				default :
-					strcpy_safe(szFileName, " ");
-					break;
-			}
-		}
-		else {
-			switch (state) {
-				case MOSS_NONREADY	:
-					if(nTeam == MMT_RED)			strcpy_safe(szFileName, "stg_status_member_red.tga");
-					else if(nTeam == MMT_BLUE)		strcpy_safe(szFileName, "stg_status_member_blue.tga");
-					else if(nTeam == MMT_SPECTATOR)	strcpy_safe(szFileName, "stg_status_member_observer.tga");
-					else 							strcpy_safe(szFileName, "stg_status_member_normal.tga");
-					break;
-				case MOSS_READY		: 
-					if(nTeam == MMT_RED)			strcpy_safe(szFileName, "stg_status_member_red_ready.tga");
-					else if(nTeam == MMT_BLUE)		strcpy_safe(szFileName, "stg_status_member_blue_ready.tga");
-					else if(nTeam == MMT_SPECTATOR)	strcpy_safe(szFileName, "stg_status_member_observer.tga");
-					else 							strcpy_safe(szFileName, "stg_status_member_normal_ready.tga");
-					break;
-				case MOSS_EQUIPMENT	: 
-				case MOSS_SHOP		:
-					if(nTeam == MMT_RED)			strcpy_safe(szFileName, "stg_status_member_red_equip.tga");
-					else if(nTeam == MMT_BLUE)		strcpy_safe(szFileName, "stg_status_member_blue_equip.tga");
-					else if(nTeam == MMT_SPECTATOR)	strcpy_safe(szFileName, "stg_status_member_observer.tga");
-					else 							strcpy_safe(szFileName, "stg_status_member_normal_equip.tga");
-					break;
-			}
-		}
-
-		pBitmap = MBitmapManager::Get(szFileName);
-
-		pItem->m_pBitmap = pBitmap;
-
-		sprintf_safe(szLevel,"Lv %2d",nLevel);
-		strcpy_safe(pItem->m_szLevel,szLevel);
-		strcpy_safe(pItem->m_szName,szName);
-
-	}
-
-	ZCharacterView* pCharView = (ZCharacterView*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget("Stage_Charviewer_");
-	if( pCharView != 0 && puid == pCharView->m_Info.UID )
-	{
-		pCharView->m_Info.bMaster = isMaster;
-		pCharView->m_Info.nTeam = nTeam;
-		pCharView->m_Info.nStageState = state;
-		pCharView->m_Info.nLevel = nLevel;
-		pCharView->SetText(szName);
-	}
-
-	if( ZGetMyUID() == puid )
-	{
-		bool bBlue, bRed;
-		bBlue = bRed = false;
-		if( nTeam == MMT_BLUE)	bBlue = true;
-		if( nTeam == MMT_RED)	bRed = true;
-
-		MButton* pButton = (MButton*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget("StageTeamBlue");
-		pButton->SetCheck( bBlue );
-
-		pButton = (MButton*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget("StageTeamRed");
-		pButton->SetCheck( bRed );
+		UpdateTeamButtonChecks(nTeam);
 	}
 }
 
 bool ZPlayerListBox::OnCommand(MWidget* pWidget, const char* szMessage)
 {
-	if(pWidget==m_pButton) {
-		if( strcmp(szMessage, MBTN_CLK_MSG)==0 ) {
-			switch(GetMode()) {
-			case PLAYERLISTMODE_CHANNEL :
-				SetMode(PLAYERLISTMODE_CHANNEL_FRIEND);
+	if (pWidget == m_pButton.get()) {
+		if (strcmp(szMessage, MBTN_CLK_MSG) == 0) {
+			switch (GetMode()) {
+			case PlayerListMode::Channel:
+				SetMode(PlayerListMode::ChannelFriend);
 				break;
-			case PLAYERLISTMODE_CHANNEL_FRIEND :
-				SetMode(PLAYERLISTMODE_CHANNEL_CLAN);
+			case PlayerListMode::ChannelFriend:
+				SetMode(PlayerListMode::ChannelClan);
 				break;
-			case PLAYERLISTMODE_CHANNEL_CLAN :
-				SetMode(PLAYERLISTMODE_CHANNEL);
+			case PlayerListMode::Stage:
+			case PlayerListMode::StageFriend:
+			case PlayerListMode::StageClan:
 				break;
-			case PLAYERLISTMODE_STAGE :
-				break;
-			case PLAYERLISTMODE_STAGE_FRIEND :
-				break;
-			case PLAYERLISTMODE_STAGE_CLAN :
-				break;
+			case PlayerListMode::ChannelClan: 
 			default:
-				SetMode(PLAYERLISTMODE_CHANNEL);
+				SetMode(PlayerListMode::Channel);
 				break;
 			}
 			return true;
 		}
-	}else
-	if( strcmp(szMessage, "selected")==0 ) {
-
+	}
+	else if (strcmp(szMessage, "selected") == 0) {
 		if(m_nSelItem != -1) {
-			ZStagePlayerListItem* pItem = (ZStagePlayerListItem*)Get(m_nSelItem);
+			auto* pItem = static_cast<ZStagePlayerListItem*>(Get(m_nSelItem));
 			if(pItem) {
 				MUID uid = pItem->m_PlayerUID;
 
-				ZCharacterView* pCharView = (ZCharacterView*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget("Stage_Charviewer");
-				if(pCharView!=0) pCharView->SetCharacter( uid );
+				auto* CharViewWidget = ZGetIDLResource()->FindWidget("Stage_Charviewer");
+				auto* pCharView = static_cast<ZCharacterView*>(CharViewWidget);
+				if (pCharView != nullptr)
+					pCharView->SetCharacter(uid);
 			}
 		}
-		return true;
 	}
-	else if(strcmp(szMessage, "selected2")==0) {
-		if((GetKeyState(VK_MENU)&0x8000)!=0) {
-			if(m_nSelItem != -1) {
-				ZStagePlayerListItem* pItem = (ZStagePlayerListItem*)Get(m_nSelItem);
-				if(pItem) {
+	else if (strcmp(szMessage, "selected2") == 0) {
+		if ((GetKeyState(VK_MENU) & 0x8000) != 0) {
+			if (m_nSelItem != -1) {
+				auto* pItem = static_cast<ZStagePlayerListItem*>(Get(m_nSelItem));
+				if (pItem) {
 					char temp[1024];
-					sprintf_safe(temp,"/kick %s", pItem->m_szName);
+					sprintf_safe(temp, "/kick %s", pItem->m_szName);
 					ZPostStageChat(ZGetGameClient()->GetPlayerUID(), ZGetGameClient()->GetStageUID(), temp);
 				}
 			}
@@ -846,11 +708,12 @@ bool ZPlayerListBox::OnCommand(MWidget* pWidget, const char* szMessage)
 
 	return true;
 }
+
 bool ZPlayerListBox::OnEvent(MEvent* pEvent, MListener* pListener)
 {
-	MRECT rtClient = GetClientRect();
+	auto rtClient = GetClientRect();
 
-	if(pEvent->nMessage==MWM_RBUTTONDOWN) {
+	if (pEvent->nMessage == MWM_RBUTTONDOWN) {
 		if(rtClient.InPoint(pEvent->Pos)==true) {
 			int nSelItem = FindItem(pEvent->Pos);
 			if (nSelItem != -1) {
@@ -862,13 +725,14 @@ bool ZPlayerListBox::OnEvent(MEvent* pEvent, MListener* pListener)
 				char sp_name[256];
 				MMatchUserGradeID gid;
 
-				if(pItem->GetUID() == ZGetMyUID() && 
-					GetMode()!=PLAYERLISTMODE_CHANNEL_CLAN)	
+				if (pItem->GetUID() == ZGetMyUID() &&
+					GetMode() != PlayerListMode::ChannelClan) {
 					bShow = false;
+				}
 
-				GetUserInfoUID(pItem->GetUID(),_color,sp_name,gid);
+				GetUserInfoUID(pItem->GetUID(), _color, sp_name, gid);
 
-				if((gid==MMUG_DEVELOPER) || (gid==MMUG_ADMIN)) {
+				if (gid == MMUG_DEVELOPER || gid == MMUG_ADMIN) {
 					bShow = false;
 				}
 
@@ -880,26 +744,25 @@ bool ZPlayerListBox::OnEvent(MEvent* pEvent, MListener* pListener)
 					pMenu->SetTargetUID(pItem->GetUID());
 
 					switch(GetMode()) {
-					case PLAYERLISTMODE_CHANNEL:
+					case PlayerListMode::Channel:
 						pMenu->SetupMenu(ZPLAYERMENU_SET_LOBBY);
 						break;
-					case PLAYERLISTMODE_STAGE:
+					case PlayerListMode::Stage:
 						pMenu->SetupMenu(ZPLAYERMENU_SET_STAGE);
 						break;
-					case PLAYERLISTMODE_CHANNEL_FRIEND:
+					case PlayerListMode::ChannelFriend:
+					case PlayerListMode::StageFriend:
 						pMenu->SetupMenu(ZPLAYERMENU_SET_FRIEND);
 						break;
-					case PLAYERLISTMODE_STAGE_FRIEND:
-						pMenu->SetupMenu(ZPLAYERMENU_SET_FRIEND);
-						break;
-					case PLAYERLISTMODE_CHANNEL_CLAN:
+					case PlayerListMode::ChannelClan:
+					case PlayerListMode::StageClan:
 						if(pItem->GetUID() == ZGetMyUID())
 							pMenu->SetupMenu(ZPLAYERMENU_SET_CLAN_ME);
 						else
 							pMenu->SetupMenu(ZPLAYERMENU_SET_CLAN);
 						break;
 					default:
-						_ASSERT("Unknown PlayerMenu Setup");
+						assert(!"Unknown PlayerMenu Setup");
 					};
 
 					MPOINT posItem;
@@ -918,17 +781,16 @@ bool ZPlayerListBox::OnEvent(MEvent* pEvent, MListener* pListener)
 			}
 		}
 	}
-
-	else if ( pEvent->nMessage == MWM_LBUTTONDBLCLK)
+	else if (pEvent->nMessage == MWM_LBUTTONDBLCLK)
 	{
-		if ( rtClient.InPoint( pEvent->Pos) == true)
+		if (rtClient.InPoint(pEvent->Pos) == true)
 		{
 			int nSelItem = FindItem( pEvent->Pos);
 
-			if ( nSelItem != -1)
+			if (nSelItem != -1)
 			{
-				ZLobbyPlayerListItem* pItem = (ZLobbyPlayerListItem*)Get( nSelItem);
-				ZPostRequestCharInfoDetail( ZGetMyUID(), pItem->m_szName);
+				auto* pItem = static_cast<ZLobbyPlayerListItem*>(Get(nSelItem));
+				ZPostRequestCharInfoDetail(ZGetMyUID(), pItem->m_szName);
 			}
 		}
 	}
@@ -938,8 +800,9 @@ bool ZPlayerListBox::OnEvent(MEvent* pEvent, MListener* pListener)
 
 MUID ZPlayerListBox::GetSelectedPlayerUID() 
 {
-	ZLobbyPlayerListItem* pItem = (ZLobbyPlayerListItem*)GetSelItem();
-	if(!pItem) return MUID(0,0);
+	auto* pItem = static_cast<ZLobbyPlayerListItem*>(GetSelItem());
+	if (!pItem)
+		return MUID(0, 0);
     
 	return pItem->GetUID();
 }
@@ -948,7 +811,7 @@ void ZPlayerListBox::SelectPlayer(MUID uid)
 {
 	for(int i=0;i<GetCount();i++)
 	{
-		ZLobbyPlayerListItem* pItem = (ZLobbyPlayerListItem*)Get(i);
+		auto* pItem = static_cast<ZLobbyPlayerListItem*>(Get(i));
 		if(pItem->GetUID()==uid){
 			SetSelIndex(i);
 			return;

@@ -1325,8 +1325,8 @@ MListener* ZGetLevelConfirmListenter()
 
 BEGIN_IMPLEMENT_LISTENER(ZGetPlayerListPrevListener, MBTN_CLK_MSG)
 {
-	ZPlayerListBox* pWidget = (ZPlayerListBox*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget("LobbyChannelPlayerList");
-	if (pWidget->GetMode() == ZPlayerListBox::PLAYERLISTMODE_CHANNEL_FRIEND) {
+	auto* pWidget = ZFindWidgetAs<ZPlayerListBox>("LobbyChannelPlayerList");
+	if (pWidget->GetMode() == ZPlayerListBox::PlayerListMode::ChannelFriend) {
 		int iStart = pWidget->GetStartItem();
 		if (iStart > 0) 
 			pWidget->SetStartItem(iStart-1);
@@ -1348,8 +1348,8 @@ END_IMPLEMENT_LISTENER()
 
 BEGIN_IMPLEMENT_LISTENER(ZGetPlayerListNextListener, MBTN_CLK_MSG)
 {
-	ZPlayerListBox* pWidget = (ZPlayerListBox*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget("LobbyChannelPlayerList");
-	if (pWidget->GetMode() == ZPlayerListBox::PLAYERLISTMODE_CHANNEL_FRIEND) {
+	auto* pWidget = ZFindWidgetAs<ZPlayerListBox>("LobbyChannelPlayerList");
+	if (pWidget->GetMode() == ZPlayerListBox::PlayerListMode::ChannelFriend) {
 		int iStart = pWidget->GetStartItem();
 		pWidget->SetStartItem(iStart+1);
 		return true;
@@ -1376,8 +1376,8 @@ END_IMPLEMENT_LISTENER()
 
 BEGIN_IMPLEMENT_LISTENER(ZGetStagePlayerListPrevListener, MBTN_CLK_MSG)
 {
-	ZPlayerListBox* pWidget = (ZPlayerListBox*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget("StagePlayerList_");
-	if (pWidget->GetMode() == ZPlayerListBox::PLAYERLISTMODE_STAGE_FRIEND) {
+	auto* pWidget = ZFindWidgetAs<ZPlayerListBox>("StagePlayerList_");
+	if (pWidget->GetMode() == ZPlayerListBox::PlayerListMode::StageFriend) {
 		int iStart = pWidget->GetStartItem();
 		if (iStart > 0) 
 			pWidget->SetStartItem(iStart-1);
@@ -1390,8 +1390,8 @@ END_IMPLEMENT_LISTENER()
 
 BEGIN_IMPLEMENT_LISTENER(ZGetStagePlayerListNextListener, MBTN_CLK_MSG)
 {
-	ZPlayerListBox* pWidget = (ZPlayerListBox*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget("StagePlayerList_");
-	if (pWidget->GetMode() == ZPlayerListBox::PLAYERLISTMODE_STAGE_FRIEND) {
+	auto* pWidget = ZFindWidgetAs<ZPlayerListBox>("StagePlayerList_");
+	if (pWidget->GetMode() == ZPlayerListBox::PlayerListMode::StageFriend) {
 		int iStart = pWidget->GetStartItem();
 		pWidget->SetStartItem(iStart+1);
 		return true;
@@ -1403,7 +1403,7 @@ BEGIN_IMPLEMENT_LISTENER(ZGetStagePlayerListNextListener, MBTN_CLK_MSG)
 END_IMPLEMENT_LISTENER()
 
 BEGIN_IMPLEMENT_LISTENER(ZGetRoomListListener, MLIST_VALUE_CHANGED)
-	ZRoomListBox* pWidget = (ZRoomListBox*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget("Lobby_StageList");
+	auto* pWidget = ZFindWidgetAs<ZRoomListBox>("Lobby_StageList");
 	pWidget->SetPage();
 END_IMPLEMENT_LISTENER()
 
@@ -1441,7 +1441,7 @@ class ZMapListListener : public MListener{
 	{	
 		if(MWidget::IsMsg(szMessage, MLB_ITEM_SEL)==true)
 		{
-			MListBox* pList = (MListBox*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget("MapList");
+			auto* pList = ZFindWidgetAs<MListBox>("MapList");
 			if(pList != NULL)
 			{
 				MComboBox* pCombo = (MComboBox*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget("MapSelection");
@@ -1457,7 +1457,7 @@ class ZMapListListener : public MListener{
 		}
 		if(MWidget::IsMsg(szMessage, MLB_ITEM_DBLCLK)==true)
 		{
-			MListBox* pList = (MListBox*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget("MapList");
+			auto* pList = ZFindWidgetAs<MListBox>("MapList");
 			if(pList != NULL)
 			{
 				pList->Show(FALSE);
@@ -1474,8 +1474,8 @@ MListener* ZGetStageMapListSelectionListener()
 }
 
 BEGIN_IMPLEMENT_LISTENER(ZGetStageMapListCallerListener, MBTN_CLK_MSG)
-	MListBox* pList = (MListBox*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget("MapList");
-	pList->Show(TRUE);
+	auto* pList = ZFindWidgetAs<MListBox>("MapList");
+	pList->Show(true);
 END_IMPLEMENT_LISTENER();
 
 
@@ -2068,7 +2068,7 @@ BEGIN_IMPLEMENT_LISTENER(ZGetLeaveClanOKListener, MBTN_CLK_MSG)
 
 	ZPlayerListBox *pPlayerListBox = (ZPlayerListBox*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "LobbyChannelPlayerList" );
 	if(pPlayerListBox)
-		pPlayerListBox->SetMode(ZPlayerListBox::PLAYERLISTMODE_CHANNEL_CLAN);
+		pPlayerListBox->SetMode(ZPlayerListBox::PlayerListMode::ChannelClan);
 END_IMPLEMENT_LISTENER();
 
 BEGIN_IMPLEMENT_LISTENER(ZGetLeaveClanCancelListener, MBTN_CLK_MSG)

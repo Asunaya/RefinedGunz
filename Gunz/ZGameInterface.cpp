@@ -75,10 +75,6 @@
 #include "RGMain.h"
 #include "defer.h"
 
-#ifdef _XTRAP
-#include "XTrap/XTrap.h"
-#endif
-
 extern MCommandLogFrame* m_pLogFrame;
 
 static int g_debug_tex_update_cnt;
@@ -195,17 +191,17 @@ void AddListItem(MListBox* pList, MBitmap* pBitmap, const char* szString, const 
 		char m_szDragItemString[256];
 	public:
 		MDragableListItem(MBitmap* pBitmap, const char* szText, const char* szItemString)
-			: MDefaultListItem(pBitmap, szText){
-				if(szItemString!=NULL) strcpy_safe(m_szDragItemString, szItemString);
-				else m_szDragItemString[0] = 0;
-			}
-			virtual bool GetDragItem(MBitmap** ppDragBitmap, char* szDragString, char* szDragItemString){
-				*ppDragBitmap = GetBitmap(0);
-				if(GetString(1)!=NULL) strcpy_unsafe(szDragString, GetString(1));
-				else szDragString[0] = 0;
-				strcpy_unsafe(szDragItemString, m_szDragItemString);
-				return true;
-			};
+			: MDefaultListItem(pBitmap, szText) {
+			if (szItemString != NULL) strcpy_safe(m_szDragItemString, szItemString);
+			else m_szDragItemString[0] = 0;
+		}
+		virtual bool GetDragItem(MBitmap** ppDragBitmap, char* szDragString, char* szDragItemString) {
+			*ppDragBitmap = GetBitmap(0);
+			if (GetString(1) != NULL) strcpy_unsafe(szDragString, GetString(1));
+			else szDragString[0] = 0;
+			strcpy_unsafe(szDragItemString, m_szDragItemString);
+			return true;
+		};
 	};
 	MDefaultListItem* pNew = new MDragableListItem(pBitmap, szString, szItemString);
 	pList->Add(pNew);
@@ -213,9 +209,9 @@ void AddListItem(MListBox* pList, MBitmap* pBitmap, const char* szString, const 
 
 bool InitSkillList(MWidget* pWidget)
 {
-	if(pWidget==NULL) return false;
+	if (pWidget == NULL) return false;
 
-	if(strcmp(pWidget->GetClassName(), MINT_LISTBOX)!=0) return false;
+	if (strcmp(pWidget->GetClassName(), MINT_LISTBOX) != 0) return false;
 	MListBox* pList = (MListBox*)pWidget;
 
 	pList->SetItemHeight(32);
@@ -230,9 +226,9 @@ bool InitSkillList(MWidget* pWidget)
 
 bool InitItemList(MWidget* pWidget)
 {
-	if(pWidget==NULL) return false;
+	if (pWidget == NULL) return false;
 
-	if(strcmp(pWidget->GetClassName(), MINT_LISTBOX)!=0) return false;
+	if (strcmp(pWidget->GetClassName(), MINT_LISTBOX) != 0) return false;
 	MListBox* pList = (MListBox*)pWidget;
 
 	pList->SetVisibleHeader(false);
@@ -256,7 +252,7 @@ bool InitItemList(MWidget* pWidget)
 #define DEFAULT_SLIDER_MAX			10000
 
 ZGameInterface::ZGameInterface(const char* szName, MWidget* pParent, MListener* pListener)
-: ZInterface(szName,pParent,pListener)
+	: ZInterface(szName, pParent, pListener)
 {
 	m_bShowInterface = true;
 	m_bViewUI = true;
@@ -285,23 +281,23 @@ ZGameInterface::ZGameInterface(const char* szName, MWidget* pParent, MListener* 
 	m_pBottomFrame = NULL;
 	m_pClanInfo = NULL;
 
-	MSetString( 1, ZMsg(MSG_MENUITEM_OK));
-	MSetString( 2, ZMsg(MSG_MENUITEM_CANCEL));
-	MSetString( 3, ZMsg(MSG_MENUITEM_YES));
-	MSetString( 4, ZMsg(MSG_MENUITEM_NO));
-	MSetString( 5, ZMsg(MSG_MENUITEM_MESSAGE));
+	MSetString(1, ZMsg(MSG_MENUITEM_OK));
+	MSetString(2, ZMsg(MSG_MENUITEM_CANCEL));
+	MSetString(3, ZMsg(MSG_MENUITEM_YES));
+	MSetString(4, ZMsg(MSG_MENUITEM_NO));
+	MSetString(5, ZMsg(MSG_MENUITEM_MESSAGE));
 	m_pMsgBox = new ZMsgBox("", Mint::GetInstance()->GetMainFrame(), this, MT_OK);
 	m_pConfirmMsgBox = new ZMsgBox("", Mint::GetInstance()->GetMainFrame(), this, MT_YESNO);
 
 	m_pMonsterBookInterface = new ZMonsterBookInterface();
 
-	m_pThumbnailBitmap=NULL;
+	m_pThumbnailBitmap = NULL;
 
 	m_pCharacterSelectView = NULL;
 	m_pBackground = new ZInterfaceBackground();
 
-	m_pCursorSurface=NULL;
-	g_pGameClient=NULL;
+	m_pCursorSurface = NULL;
+	g_pGameClient = NULL;
 
 	m_nDrawCount = 0;
 
@@ -310,7 +306,7 @@ ZGameInterface::ZGameInterface(const char* szName, MWidget* pParent, MListener* 
 	m_pScreenEffectManager = NULL;
 	m_pEffectManager = NULL;
 	m_pGameInput = NULL;
-	
+
 	m_bReservedWeapon = false;
 	m_ReservedWeapon = ZCWT_NONE;
 
@@ -323,7 +319,7 @@ ZGameInterface::ZGameInterface(const char* szName, MWidget* pParent, MListener* 
 	m_pPlayerMenu = NULL;
 	m_pMiniMap = NULL;
 
-    m_bOnEndOfReplay = false;
+	m_bOnEndOfReplay = false;
 	m_nLevelPercentCache = 0;
 
 	m_nShopTabNum = 0;
@@ -332,7 +328,6 @@ ZGameInterface::ZGameInterface(const char* szName, MWidget* pParent, MListener* 
 	m_pLoginBG = NULL;
 	m_pLoginPanel = NULL;
 
-	m_nLoginState = LOGINSTATE_STANDBY;
 	m_dwLoginTimer = 0;
 
 	m_nLocServ = 0;
@@ -341,30 +336,30 @@ ZGameInterface::ZGameInterface(const char* szName, MWidget* pParent, MListener* 
 	m_dwTimeCount = GetGlobalTimeMS() + 3600000;
 
 	// Lobby Bitmap
-	if ( m_pRoomListFrame != NULL)
+	if (m_pRoomListFrame != NULL)
 	{
-        delete m_pRoomListFrame;
+		delete m_pRoomListFrame;
 		m_pRoomListFrame = NULL;
 	}
-	if ( m_pBottomFrame != NULL)
+	if (m_pBottomFrame != NULL)
 	{
 		delete m_pBottomFrame;
 		m_pBottomFrame = NULL;
-	}	
-	if ( m_pClanInfo != NULL)
+	}
+	if (m_pClanInfo != NULL)
 	{
 		delete m_pClanInfo;
 		m_pClanInfo = NULL;
 	}
 
 	// Login Bitmap
-	if ( m_pLoginBG != NULL)
+	if (m_pLoginBG != NULL)
 	{
 		delete m_pLoginBG;
 		m_pLoginBG = NULL;
 	}
 
-	if ( m_pLoginPanel != NULL)
+	if (m_pLoginPanel != NULL)
 	{
 		delete m_pLoginPanel;
 		m_pLoginPanel = NULL;
@@ -390,13 +385,13 @@ ZGameInterface::~ZGameInterface()
 	SAFE_DELETE(m_pConfirmMsgBox);
 	SAFE_DELETE(m_pMonsterBookInterface);
 
-	if ( m_pRoomListFrame != NULL)
+	if (m_pRoomListFrame != NULL)
 		delete m_pRoomListFrame;
 
-	if ( m_pBottomFrame != NULL)
+	if (m_pBottomFrame != NULL)
 		delete m_pBottomFrame;
-	
-	if ( m_pClanInfo != NULL)
+
+	if (m_pClanInfo != NULL)
 		delete m_pClanInfo;
 
 	SAFE_DELETE(m_pLoginPanel);
@@ -404,9 +399,18 @@ ZGameInterface::~ZGameInterface()
 
 bool ZGameInterface::InitInterface(const char* szSkinName, ZLoadingProgress *pLoadingProgress)
 {
-	DWORD _begin_time,_end_time;
-#define BEGIN_ { _begin_time = GetGlobalTimeMS(); }
-#define END_(x) { _end_time = GetGlobalTimeMS(); float f_time = (_end_time - _begin_time) / 1000.f; mlog("%s : %f \n", x,f_time ); }
+	struct {
+		u64 BeginTime = 0;
+		u64 EndTime = 0;
+	} TimingState;
+	auto BeginTimingSection = [&] {
+		TimingState.BeginTime = GetGlobalTimeMS();
+	};
+	auto EndTimingSection = [&](const char* Name) {
+		TimingState.EndTime = GetGlobalTimeMS();
+		auto Delta = (TimingState.EndTime - TimingState.BeginTime) / 1000.f;
+		MLog("%s took %f seconds\n", Name, Delta);
+	};
 
 	SetObjectTextureLevel(ZGetConfiguration()->GetVideo()->nCharTexLevel);
 	SetMapTextureLevel(ZGetConfiguration()->GetVideo()->nMapTexLevel);
@@ -424,24 +428,26 @@ bool ZGameInterface::InitInterface(const char* szSkinName, ZLoadingProgress *pLo
 
 	ZEmptyBitmap();
 
-	ZLoadingProgress pictureProgress("pictures",pLoadingProgress,.7f);
+	// Pictures
+	ZLoadingProgress pictureProgress("pictures", pLoadingProgress, .7f);
 	auto LoadingPictures = MBeginProfile("ZGameInterface::InitInterface - LoadBitmaps");
-	BEGIN_;
+	BeginTimingSection();
 
-	LoadBitmaps(szPath,&pictureProgress);
+	LoadBitmaps(szPath, &pictureProgress);
 
-	END_("loading pictures");
+	EndTimingSection("loading pictures");
 	MEndProfile(LoadingPictures);
 
+	// IDLResource loading
 	auto IDLRsrc = MBeginProfile("ZGameInterface::InitInterface - MIDLResource::LoadFromFile");
-	BEGIN_;
+	BeginTimingSection();
 	if (!m_IDLResource.LoadFromFile(szFileName, this, ZGetFileSystem()))
 	{
 		strcpy_safe(a_szSkinName, DEFAULT_INTERFACE_SKIN);
 		ZGetInterfaceSkinPath(szPath, a_szSkinName);
 		sprintf_safe(szFileName, "%s%s", szPath, FILENAME_INTERFACE_MAIN);
 
-		LoadBitmaps(szPath,&pictureProgress);
+		LoadBitmaps(szPath, &pictureProgress);
 
 		if (m_IDLResource.LoadFromFile(szFileName, this, ZGetFileSystem()))
 		{
@@ -457,21 +463,22 @@ bool ZGameInterface::InitInterface(const char* szSkinName, ZLoadingProgress *pLo
 	{
 		mlog("IDLResource Loading Success!!\n");
 	}
-	END_("IDL resources");
+	EndTimingSection("IDL resources");
 	MEndProfile(IDLRsrc);
 
+	// Etc.
 	auto Etc = MBeginProfile("ZGameInterface::InitInterface - Etc.");
 	GetRGMain().OnInitInterface(m_IDLResource);
 
-	MBFrameLook* pFrameLook = (MBFrameLook*)m_IDLResource.FindFrameLook("DefaultFrameLook");
-	if (pFrameLook != NULL)
+	auto* pFrameLook = (MBFrameLook*)m_IDLResource.FindFrameLook("DefaultFrameLook");
+	if (pFrameLook != nullptr)
 	{
 		m_pMsgBox->ChangeCustomLook((MFrameLook*)pFrameLook);
 		m_pConfirmMsgBox->ChangeCustomLook((MFrameLook*)pFrameLook);
 	}
 	else
 	{
-		_ASSERT(0);
+		assert(!"DefaultFrameLook is nullptr");
 	}
 
 	ZStageSetting::InitStageSettingDialog();
@@ -481,8 +488,8 @@ bool ZGameInterface::InitInterface(const char* szSkinName, ZLoadingProgress *pLo
 	{
 		pEquipmentListBox->SetOnDropCallback(ShopPurchaseItemListBoxOnDrop);
 
-		MWidget *pFrame=ZGetGameInterface()->GetIDLResource()->FindWidget("Shop_ItemDescriptionFrame");
-		if(pFrame) {
+		MWidget *pFrame = ZGetGameInterface()->GetIDLResource()->FindWidget("Shop_ItemDescriptionFrame");
+		if (pFrame) {
 			pFrame->Show(false);
 			pEquipmentListBox->SetDescriptionWidget(pFrame);
 		}
@@ -491,8 +498,8 @@ bool ZGameInterface::InitInterface(const char* szSkinName, ZLoadingProgress *pLo
 	if (pEquipmentListBox)
 	{
 		pEquipmentListBox->SetOnDropCallback(ShopSaleItemListBoxOnDrop);
-		MWidget *pFrame=ZGetGameInterface()->GetIDLResource()->FindWidget("Shop_ItemDescriptionFrame");
-		if(pFrame) {
+		MWidget *pFrame = ZGetGameInterface()->GetIDLResource()->FindWidget("Shop_ItemDescriptionFrame");
+		if (pFrame) {
 			pFrame->Show(false);
 			pEquipmentListBox->SetDescriptionWidget(pFrame);
 		}
@@ -502,8 +509,8 @@ bool ZGameInterface::InitInterface(const char* szSkinName, ZLoadingProgress *pLo
 	if (pEquipmentListBox)
 	{
 		pEquipmentListBox->SetOnDropCallback(CharacterEquipmentItemListBoxOnDrop);
-		MWidget *pFrame=ZGetGameInterface()->GetIDLResource()->FindWidget("Equip_ItemDescriptionFrame");
-		if(pFrame) {
+		MWidget *pFrame = ZGetGameInterface()->GetIDLResource()->FindWidget("Equip_ItemDescriptionFrame");
+		if (pFrame) {
 			pFrame->Show(false);
 			pEquipmentListBox->SetDescriptionWidget(pFrame);
 		}
@@ -512,8 +519,8 @@ bool ZGameInterface::InitInterface(const char* szSkinName, ZLoadingProgress *pLo
 	pEquipmentListBox = (ZEquipmentListBox*)m_IDLResource.FindWidget("AccountItemList");
 	if (pEquipmentListBox)
 	{
-		MWidget *pFrame=ZGetGameInterface()->GetIDLResource()->FindWidget("Equip_ItemDescriptionFrame");
-		if(pFrame) {
+		MWidget *pFrame = ZGetGameInterface()->GetIDLResource()->FindWidget("Equip_ItemDescriptionFrame");
+		if (pFrame) {
 			pFrame->Show(false);
 			pEquipmentListBox->SetDescriptionWidget(pFrame);
 		}
@@ -528,16 +535,12 @@ bool ZGameInterface::InitInterface(const char* szSkinName, ZLoadingProgress *pLo
 
 	ZGetOptionInterface()->InitInterfaceOption();
 
-#ifdef _FASTDEBUG
-	m_IDLResource.FindWidget("LoginPassword")->SetText("1111");
-//	m_IDLResource.FindWidget("LoginPassword")->SetText("2708");
-#endif
 	InitMaps(m_IDLResource.FindWidget("MapSelection"));
 
-	_ASSERT(m_pPlayerMenu==NULL);
+	_ASSERT(m_pPlayerMenu == NULL);
 
 	m_pPlayerMenu = new ZPlayerMenu("PlayerMenu", this, this, MPMT_VERTICAL);
-	((MPopupMenu*)m_pPlayerMenu)->Show(false);
+	m_pPlayerMenu->Show(false);
 	MEndProfile(Etc);
 
 	return true;
@@ -545,24 +548,20 @@ bool ZGameInterface::InitInterface(const char* szSkinName, ZLoadingProgress *pLo
 
 bool ZGameInterface::InitInterfaceListener()
 {
-	// 다이알로그
 	m_pMsgBox->SetListener(ZGetMsgBoxListener());
 	m_pConfirmMsgBox->SetListener(ZGetConfirmMsgBoxListener());
 
-
-	// 옵션
 	SetListenerWidget("VideoGamma", ZGetOptionGammaSliderChangeListener());
 	SetListenerWidget("ResizeCancel", ZGetCancelResizeConfirmListener());
 	SetListenerWidget("ResizeRequest", ZGetRequestResizeListener());
 	SetListenerWidget("ResizeReject", ZGetViewConfirmCancelListener());
 	SetListenerWidget("ResizeAccept", ZGetViewConfrimAcceptListener());
-	SetListenerWidget("16BitSound",ZGet16BitSoundListener());
-	SetListenerWidget("8BitSound",ZGet8BitSoundListener());
+	SetListenerWidget("16BitSound", ZGet16BitSoundListener());
+	SetListenerWidget("8BitSound", ZGet8BitSoundListener());
 
 	SetListenerWidget("NetworkPortChangeRestart", ZGetNetworkPortChangeRestartListener());
 	SetListenerWidget("NetworkPortChangeCancel", ZGetNetworkPortChangeCancelListener());
 
-	// 로그인화면
 	SetListenerWidget("Exit", ZGetExitListener());
 	SetListenerWidget("LoginOK", ZGetLoginListener());
 	SetListenerWidget("CreateAccountFrameCaller", ZGetCreateAccountFrameCallerListener());
@@ -574,7 +573,6 @@ bool ZGameInterface::InitInterfaceListener()
 
 	SetListenerWidget("WarningExit", ZGetExitListener());
 
-	// 로비
 	SetListenerWidget("Logout", ZGetLogoutListener());
 	SetListenerWidget("ChannelChattingInput", ZGetChannelChatInputListener());
 	SetListenerWidget("GameStart", ZGetGameStartListener());
@@ -599,7 +597,7 @@ bool ZGameInterface::InitInterfaceListener()
 	SetListenerWidget("Lobby_RoomNo4", ZGetLobbyNextRoomNoButtonListener());
 	SetListenerWidget("Lobby_RoomNo5", ZGetLobbyNextRoomNoButtonListener());
 	SetListenerWidget("Lobby_RoomNo6", ZGetLobbyNextRoomNoButtonListener());
-	
+
 	SetListenerWidget("LobbyChannelPlayerListPrev", ZGetPlayerListPrevListener());
 	SetListenerWidget("LobbyChannelPlayerListNext", ZGetPlayerListNextListener());
 
@@ -611,20 +609,20 @@ bool ZGameInterface::InitInterfaceListener()
 	SetListenerWidget("ArrangedTeamDialogClose", ZGetArrangedTeamDialogCloseListener());
 	SetListenerWidget("ArrangedTeamGame_Cancel", ZGetArrangedTeamGame_CancelListener());
 
-	SetListenerWidget("LeaveClanOK",		ZGetLeaveClanOKListener());
-	SetListenerWidget("LeaveClanCancel",	ZGetLeaveClanCancelListener());
+	SetListenerWidget("LeaveClanOK", ZGetLeaveClanOKListener());
+	SetListenerWidget("LeaveClanCancel", ZGetLeaveClanCancelListener());
 
 	// channel
 	SetListenerWidget("ChannelJoin", ZGetChannelListJoinButtonListener());
 	SetListenerWidget("ChannelListClose", ZGetChannelListCloseButtonListener());
 	SetListenerWidget("ChannelList", ZGetChannelListListener());
 	SetListenerWidget("PrivateChannelEnter", ZGetPrivateChannelEnterListener());
-	
+
 	SetListenerWidget("ChannelList_Normal", ZGetChannelList());
 	SetListenerWidget("ChannelList_Private", ZGetChannelList());
 	SetListenerWidget("ChannelList_Clan", ZGetChannelList());
 	SetListenerWidget("MyClanChannel", ZGetMyClanChannel());
-	
+
 	// stage 
 	SetListenerWidget("StageCreateFrameCaller", ZGetStageCreateFrameCallerListener());
 
@@ -662,12 +660,12 @@ bool ZGameInterface::InitInterfaceListener()
 	SetListenerWidget("Stage_SacrificeItemListbox", ZGetSacrificeItemListBoxListener());
 	SetListenerWidget("MonsterBookCaller", ZGetMonsterBookCaller());
 
-	SetListenerWidget("MapSelection",  ZGetMapComboListener());
+	SetListenerWidget("MapSelection", ZGetMapComboListener());
 	SetListenerWidget("SaveOptionButton", ZGetSaveOptionButtonListener());
 	SetListenerWidget("CancelOptionButton", ZGetCancelOptionButtonListener());
 
-	SetListenerWidget("DefaultSettingLoad", ZGetLoadDefaultKeySettingListener() );
-	SetListenerWidget("Optimization",ZSetOptimizationListener());
+	SetListenerWidget("DefaultSettingLoad", ZGetLoadDefaultKeySettingListener());
+	SetListenerWidget("Optimization", ZSetOptimizationListener());
 
 	SetListenerWidget("LobbyShopCaller", ZGetShopCallerButtonListener());
 	SetListenerWidget("StageShopCaller", ZGetShopCallerButtonListener());
@@ -702,10 +700,10 @@ bool ZGameInterface::InitInterfaceListener()
 
 	SetListenerWidget("Shop_AllEquipmentFilter", ZGetShopAllEquipmentFilterListener());
 	SetListenerWidget("Equip_AllEquipmentFilter", ZGetEquipAllEquipmentFilterListener());
-	SetListenerWidget("Shop_to_Equipment", ZGetShopEquipmentCallerButtonListener() );
+	SetListenerWidget("Shop_to_Equipment", ZGetShopEquipmentCallerButtonListener());
 
 	SetListenerWidget("Shop_EquipListFrameCloseButton", ZShopListFrameClose());
-	SetListenerWidget("Shop_EquipListFrameOpenButton",  ZShopListFrameOpen());
+	SetListenerWidget("Shop_EquipListFrameOpenButton", ZShopListFrameOpen());
 
 	SetListenerWidget("Equipment_CharacterTab", ZGetEquipmentCharacterTabButtonListener());
 	SetListenerWidget("Equipment_AccountTab", ZGetEquipmentAccountTabButtonListener());
@@ -714,7 +712,7 @@ bool ZGameInterface::InitInterfaceListener()
 	SetListenerWidget("Equipment_to_Shop", ZGetEquipmentShopCallerButtonListener());
 	SetListenerWidget("SendAccountItemBtn", ZGetSendAccountItemButtonListener());
 	SetListenerWidget("BringAccountItemBtn", ZGetBringAccountItemButtonListener());
-	SetListenerWidget("Equip_EquipListFrameOpenButton",  ZEquipListFrameOpen());
+	SetListenerWidget("Equip_EquipListFrameOpenButton", ZEquipListFrameOpen());
 	SetListenerWidget("Equip_EquipListFrameCloseButton", ZEquipListFrameClose());
 	SetListenerWidget("Equipment_CharacterRotate", ZEquipmetRotateBtn());
 
@@ -764,7 +762,7 @@ bool ZGameInterface::InitInterfaceListener()
 	SetListenerWidget("ClanJoinerAgreementConfirm_OK", ZGetClanJoinerAgreementConfirm_OKButtonListener());
 	SetListenerWidget("ClanJoinerAgreementConfirm_Cancel", ZGetClanJoinerAgreementConfirm_CancelButtonListener());
 	SetListenerWidget("ClanJoinerAgreementWait_Cancel", ZGetClanJoinerAgreementWait_CancelButtonListener());
-	
+
 	SetListenerWidget("LobbyPlayerListTabClanCreateButton", ZGetLobbyPlayerListTabClanCreateButtonListener());
 	SetListenerWidget("ClanCreateDialogOk", ZGetClanCreateDialogOk());
 	SetListenerWidget("ClanCreateDialogClose", ZGetClanCreateDialogClose());
@@ -775,15 +773,16 @@ bool ZGameInterface::InitInterfaceListener()
 	SetListenerWidget("ProposalAgreementConfirm_Cancel",
 		ZGetProposalAgreementConfirm_CancelButtonListener());
 
-	SetListenerWidget("ReplayOkButton",				ZReplayOk());
-	SetListenerWidget("ReplayCaller",				ZGetReplayCallerButtonListener());
-	SetListenerWidget("ReplayLoginCaller",			ZGetReplayCallerButtonListener());
-	SetListenerWidget("Replay_View",				ZGetReplayViewButtonListener());
-	SetListenerWidget("ReplayClose",				ZGetReplayExitButtonListener());
-	SetListenerWidget("Replay_FileList",			ZGetReplayFileListBoxListener());
+	SetListenerWidget("ReplayOkButton", ZReplayOk());
+	SetListenerWidget("ReplayCaller", ZGetReplayCallerButtonListener());
+	SetListenerWidget("ReplayLoginCaller", ZGetReplayCallerButtonListener());
+	SetListenerWidget("Replay_View", ZGetReplayViewButtonListener());
+	SetListenerWidget("ReplayClose", ZGetReplayExitButtonListener());
+	SetListenerWidget("Replay_FileList", ZGetReplayFileListBoxListener());
 
-	MTabCtrl *pTab = (MTabCtrl*)m_IDLResource.FindWidget("PlayerListControl");
-	if( pTab ) pTab->UpdateListeners();
+	auto* pTab = ZFindWidgetAs<MTabCtrl>("PlayerListControl");
+	if (pTab)
+		pTab->UpdateListeners();
 
 	return true;
 }
@@ -805,11 +804,11 @@ bool ZGameInterface::ChangeInterfaceSkin(const char* szNewSkinName)
 	sprintf_safe(szFileName, "%s%s", szPath, FILENAME_INTERFACE_MAIN);
 
 	FinalInterface();
-	bool bSuccess=InitInterface(szNewSkinName);
+	bool bSuccess = InitInterface(szNewSkinName);
 
-	if(bSuccess)
+	if (bSuccess)
 	{
-		switch(m_nState)
+		switch (m_nState)
 		{
 		case GUNZ_LOGIN:	ShowWidget("Login", true); break;
 		case GUNZ_LOBBY:	ShowWidget("Lobby", true); 	break;
@@ -819,9 +818,9 @@ bool ZGameInterface::ChangeInterfaceSkin(const char* szNewSkinName)
 			{
 				ShowWidget("CharSelection", true);
 			}break;
-		case GUNZ_CHARCREATION : ShowWidget("CharCreation", true); break;
+		case GUNZ_CHARCREATION: ShowWidget("CharCreation", true); break;
 		}
-		ZGetOptionInterface()->Resize(MGetWorkspaceWidth(),MGetWorkspaceHeight());
+		ZGetOptionInterface()->Resize(MGetWorkspaceWidth(), MGetWorkspaceHeight());
 	}
 
 	return bSuccess;
@@ -834,17 +833,17 @@ bool ZGameInterface::ShowWidget(const char* szName, bool bVisible, bool bModal)
 {
 	MWidget* pWidget = m_IDLResource.FindWidget(szName);
 
-	if ( pWidget == NULL)
+	if (pWidget == NULL)
 		return false;
 
-	if ( strcmp( szName, "Lobby") == 0)
+	if (strcmp(szName, "Lobby") == 0)
 	{
 		pWidget->Show(bVisible, bModal);
 
-		pWidget = m_IDLResource.FindWidget( "Shop");
-		pWidget->Show( false);
-		pWidget = m_IDLResource.FindWidget( "Equipment");
-		pWidget->Show( false);
+		pWidget = m_IDLResource.FindWidget("Shop");
+		pWidget->Show(false);
+		pWidget = m_IDLResource.FindWidget("Equipment");
+		pWidget->Show(false);
 	}
 	else
 		pWidget->Show(bVisible, bModal);
@@ -872,7 +871,7 @@ void ZGameInterface::SetTextWidget(const char* szName, const char* szText)
 	END_WIDGETLIST();
 }
 
-bool ZGameInterface::OnGameCreate(void)
+bool ZGameInterface::OnGameCreate()
 {
 	m_Camera.Init();
 	ClearMapThumbnail();
@@ -885,72 +884,72 @@ bool ZGameInterface::OnGameCreate(void)
 
 	ZLoadingProgress gameLoading("Game");
 
-	ZGetInitialLoading()->Initialize( 1, 0,0, RGetScreenWidth(), RGetScreenHeight(), 0,0, 1024, 768, true );
+	ZGetInitialLoading()->Initialize(1, 0, 0, RGetScreenWidth(), RGetScreenHeight(), 0, 0, 1024, 768, true);
 
 	char szFileName[256];
 	int nBitmap = rand() % 9;
-	switch ( nBitmap)
+	switch (nBitmap)
 	{
-		case ( 0) :
-			strcpy_safe( szFileName, "Interface/Default/LOADING/loading_dash.jpg");
-			break;
-		case ( 1) :
-			strcpy_safe( szFileName, "Interface/Default/LOADING/loading_gaurd.jpg");
-			break;
-		case ( 2) :
-			strcpy_safe( szFileName, "Interface/Default/LOADING/loading_ksa.jpg");
-			break;
-		case ( 3) :
-			strcpy_safe( szFileName, "Interface/Default/LOADING/loading_safefall.jpg");
-			break;
-		case ( 4) :
-			strcpy_safe( szFileName, "Interface/Default/LOADING/loading_tumbling.jpg");
-			break;
-		case ( 5) :
-			strcpy_safe( szFileName, "Interface/Default/LOADING/loading_wallhang.jpg");
-			break;
-		case ( 6) :
-			strcpy_safe( szFileName, "Interface/Default/LOADING/loading_walljump.jpg");
-			break;
-		case ( 7) :
-			strcpy_safe( szFileName, "Interface/Default/LOADING/loading_wallrun01.jpg");
-			break;
-		case ( 8) :
-			strcpy_safe( szFileName, "Interface/Default/LOADING/loading_wallrun02.jpg");
-			break;
-		default :
-			strcpy_safe( szFileName, "");
-			break;
+	case (0) :
+		strcpy_safe(szFileName, "Interface/Default/LOADING/loading_dash.jpg");
+		break;
+	case (1) :
+		strcpy_safe(szFileName, "Interface/Default/LOADING/loading_gaurd.jpg");
+		break;
+	case (2) :
+		strcpy_safe(szFileName, "Interface/Default/LOADING/loading_ksa.jpg");
+		break;
+	case (3) :
+		strcpy_safe(szFileName, "Interface/Default/LOADING/loading_safefall.jpg");
+		break;
+	case (4) :
+		strcpy_safe(szFileName, "Interface/Default/LOADING/loading_tumbling.jpg");
+		break;
+	case (5) :
+		strcpy_safe(szFileName, "Interface/Default/LOADING/loading_wallhang.jpg");
+		break;
+	case (6) :
+		strcpy_safe(szFileName, "Interface/Default/LOADING/loading_walljump.jpg");
+		break;
+	case (7) :
+		strcpy_safe(szFileName, "Interface/Default/LOADING/loading_wallrun01.jpg");
+		break;
+	case (8) :
+		strcpy_safe(szFileName, "Interface/Default/LOADING/loading_wallrun02.jpg");
+		break;
+	default:
+		strcpy_safe(szFileName, "");
+		break;
 	}
 
-	if ( !ZGetInitialLoading()->AddBitmap( 0, szFileName))
-		ZGetInitialLoading()->AddBitmap( 0, "Interface/Default/LOADING/loading_teen.jpg");
-	ZGetInitialLoading()->AddBitmapBar( "Interface/Default/LOADING/loading.bmp" );
-	ZGetInitialLoading()->SetTipNum( nBitmap);
+	if (!ZGetInitialLoading()->AddBitmap(0, szFileName))
+		ZGetInitialLoading()->AddBitmap(0, "Interface/Default/LOADING/loading_teen.jpg");
+	ZGetInitialLoading()->AddBitmapBar("Interface/Default/LOADING/loading.bmp");
+	ZGetInitialLoading()->SetTipNum(nBitmap);
 
 #ifndef _FASTDEBUG
-	ZGetInitialLoading()->SetPercentage( 0.0f );
-	ZGetInitialLoading()->Draw( MODE_FADEIN, 0 , true  );
+	ZGetInitialLoading()->SetPercentage(0.0f);
+	ZGetInitialLoading()->Draw(MODE_FADEIN, 0, true);
 #else
-	ZGetInitialLoading()->SetPercentage( 10.f );
-	ZGetInitialLoading()->Draw( MODE_DEFAULT, 0, true );
+	ZGetInitialLoading()->SetPercentage(10.f);
+	ZGetInitialLoading()->Draw(MODE_DEFAULT, 0, true);
 #endif
 
-	m_pGame=new ZGame;
-	g_pGame=m_pGame;
-	if(!m_pGame->Create(ZApplication::GetFileSystem(), &gameLoading ))
+	m_pGame = new ZGame;
+	g_pGame = m_pGame;
+	if (!m_pGame->Create(ZApplication::GetFileSystem(), &gameLoading))
 	{
 		mlog("ZGame 생성 실패\n");
 		SAFE_DELETE(m_pGame);
-		g_pGame=NULL;
+		g_pGame = NULL;
 		m_bLoading = false;
 
 		ZGetInitialLoading()->Release();
-		
+
 		return false;
 	}
 
-	m_pMyCharacter=(ZMyCharacter*)g_pGame->m_pMyCharacter;
+	m_pMyCharacter = (ZMyCharacter*)g_pGame->m_pMyCharacter;
 
 	SetFocus();
 
@@ -960,14 +959,14 @@ bool ZGameInterface::OnGameCreate(void)
 	m_pCombatInterface->SetBounds(GetRect());
 	m_pCombatInterface->OnCreate();
 
-	
+
 	MWidget *pWidget = m_IDLResource.FindWidget("SkillFrame");
-	if(pWidget!=NULL) pWidget->Show(true);
+	if (pWidget != NULL) pWidget->Show(true);
 
 	InitSkillList(m_IDLResource.FindWidget("SkillList"));
 
 	pWidget = m_IDLResource.FindWidget("InventoryFrame");
-	if(pWidget!=NULL) pWidget->Show(true);
+	if (pWidget != NULL) pWidget->Show(true);
 
 	InitItemList(m_IDLResource.FindWidget("ItemList"));
 
@@ -976,15 +975,15 @@ bool ZGameInterface::OnGameCreate(void)
 	m_bLoading = false;
 
 #ifndef _FASTDEBUG
-	ZGetInitialLoading()->SetPercentage( 100.0f) ;
-	ZGetInitialLoading()->Draw( MODE_FADEOUT, 0 , true );
+	ZGetInitialLoading()->SetPercentage(100.0f);
+	ZGetInitialLoading()->Draw(MODE_FADEOUT, 0, true);
 #endif
 	ZGetInitialLoading()->Release();
 
 
-	if( (ZApplication::GetInstance()->GetLaunchMode() == ZApplication::ZLAUNCH_MODE_STANDALONE_REPLAY) ||
-		(ZGetGameClient()->IsLadderGame()) || 
-		ZGetGameTypeManager()->IsQuestDerived(ZGetGameClient()->GetMatchStageSetting()->GetGameType()) )
+	if ((ZApplication::GetInstance()->GetLaunchMode() == ZApplication::ZLAUNCH_MODE_STANDALONE_REPLAY) ||
+		(ZGetGameClient()->IsLadderGame()) ||
+		ZGetGameTypeManager()->IsQuestDerived(ZGetGameClient()->GetMatchStageSetting()->GetGameType()))
 	{
 		m_CombatMenu.EnableItem(ZCombatMenu::ZCMI_BATTLE_EXIT, false);
 	}
@@ -998,20 +997,20 @@ bool ZGameInterface::OnGameCreate(void)
 	return true;
 }
 
-void ZGameInterface::OnGameDestroy(void)
+void ZGameInterface::OnGameDestroy()
 {
 	mlog("OnGameDestroy Started\n");
 
 	MPicture* pPicture;
-	pPicture = (MPicture*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "ClanResult_ClanBitmap1");
-	if(pPicture) pPicture->SetBitmap(NULL);
-	pPicture = (MPicture*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "ClanResult_ClanBitmap2");
-	if(pPicture) pPicture->SetBitmap(NULL);
+	pPicture = (MPicture*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget("ClanResult_ClanBitmap1");
+	if (pPicture) pPicture->SetBitmap(NULL);
+	pPicture = (MPicture*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget("ClanResult_ClanBitmap2");
+	if (pPicture) pPicture->SetBitmap(NULL);
 
-	MWidget *pWidget = ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "GameResult");
-	if ( pWidget) {
+	MWidget *pWidget = ZApplication::GetGameInterface()->GetIDLResource()->FindWidget("GameResult");
+	if (pWidget) {
 		MFrame *pFrame = (MFrame*)pWidget;
-		pFrame->MFrame::Show( false);
+		pFrame->MFrame::Show(false);
 	}
 
 	ZGetGameClient()->RequestOnGameDestroyed();
@@ -1032,7 +1031,7 @@ void ZGameInterface::OnGameDestroy(void)
 
 	ShowWidget(CENTERMESSAGE, false);
 
-	if(g_pGame!=NULL){
+	if (g_pGame != NULL) {
 		g_pGame->Destroy();
 		SAFE_DELETE(m_pGame);
 		g_pGame = NULL;
@@ -1045,135 +1044,135 @@ void ZGameInterface::OnGameDestroy(void)
 	mlog("OnGameDestroy Finished\n");
 }
 
-void ZGameInterface::OnGreeterCreate(void)
+void ZGameInterface::OnGreeterCreate()
 {
 	ShowWidget("Greeter", true);
 
-	if ( m_pBackground)
+	if (m_pBackground)
 		m_pBackground->SetScene(LOGIN_SCENE_FIXEDSKY);
 
 	ZApplication::GetSoundEngine()->StopMusic();
-	ZApplication::GetSoundEngine()->OpenMusic( BGMID_INTRO, ZApplication::GetFileSystem());
+	ZApplication::GetSoundEngine()->OpenMusic(BGMID_INTRO, ZApplication::GetFileSystem());
 }
 
-void ZGameInterface::OnGreeterDestroy(void)
+void ZGameInterface::OnGreeterDestroy()
 {
 	ShowWidget("Greeter", false);
 
-	if ( m_pBackground)
+	if (m_pBackground)
 		m_pBackground->SetScene(LOGIN_SCENE_FIXEDCHAR);
 }
 
-void ZGameInterface::OnLoginCreate(void)
+void ZGameInterface::OnLoginCreate()
 {
 	m_bLoginTimeout = false;
-	m_nLoginState = LOGINSTATE_FADEIN;
+	m_nLoginState = LoginState::FadeIn;
 	m_dwLoginTimer = GetGlobalTimeMS();
 
-	if ( m_pLoginBG != NULL)
+	if (m_pLoginBG != NULL)
 	{
 		delete m_pLoginBG;
 		m_pLoginBG = NULL;
 	}
 	m_pLoginBG = new MBitmapR2;
-	((MBitmapR2*)m_pLoginBG)->Create( "loginbg.png", RGetDevice(), "Interface/loadable/loginbg.jpg");
-	if ( m_pLoginBG)
+	((MBitmapR2*)m_pLoginBG)->Create("loginbg.png", RGetDevice(), "Interface/loadable/loginbg.jpg");
+	if (m_pLoginBG)
 	{
-		MPicture* pPicture = (MPicture*)m_IDLResource.FindWidget( "Login_BackgrdImg");
-		if ( pPicture)
-			pPicture->SetBitmap( m_pLoginBG->GetSourceBitmap());
+		MPicture* pPicture = (MPicture*)m_IDLResource.FindWidget("Login_BackgrdImg");
+		if (pPicture)
+			pPicture->SetBitmap(m_pLoginBG->GetSourceBitmap());
 	}
 
 
-    // 패널 이미지 로딩
-	if ( m_pLoginPanel != NULL)
+	// 패널 이미지 로딩
+	if (m_pLoginPanel != NULL)
 	{
 		delete m_pLoginPanel;
 		m_pLoginPanel = NULL;
 	}
 
 	m_pLoginPanel = new MBitmapR2;
-	((MBitmapR2*)m_pLoginPanel)->Create( "loginpanel.png", RGetDevice(), "Interface/loadable/loginpanel.tga");
-	if ( m_pLoginPanel)
+	((MBitmapR2*)m_pLoginPanel)->Create("loginpanel.png", RGetDevice(), "Interface/loadable/loginpanel.tga");
+	if (m_pLoginPanel)
 	{
-		MPicture* pPicture = (MPicture*)m_IDLResource.FindWidget( "Login_Panel");
-		if ( pPicture)
-			pPicture->SetBitmap( m_pLoginPanel->GetSourceBitmap());
+		MPicture* pPicture = (MPicture*)m_IDLResource.FindWidget("Login_Panel");
+		if (pPicture)
+			pPicture->SetBitmap(m_pLoginPanel->GetSourceBitmap());
 	}
 
-	MButton* pLoginOk = (MButton*)m_IDLResource.FindWidget( "LoginOK");
+	MButton* pLoginOk = (MButton*)m_IDLResource.FindWidget("LoginOK");
 	if (pLoginOk)
 		pLoginOk->Enable(true);
-	MWidget* pLoginFrame = m_IDLResource.FindWidget( "LoginFrame");
+	MWidget* pLoginFrame = m_IDLResource.FindWidget("LoginFrame");
 	if (pLoginFrame)
 	{
-		MWidget* pLoginBG = m_IDLResource.FindWidget( "Login_BackgrdImg");
-		if ( pLoginBG)
+		MWidget* pLoginBG = m_IDLResource.FindWidget("Login_BackgrdImg");
+		if (pLoginBG)
 			pLoginFrame->Show(false);
 		else
 			pLoginFrame->Show(true);
 	}
-	pLoginFrame = m_IDLResource.FindWidget( "Login_ConnectingMsg");
-	if ( pLoginFrame)
-		pLoginFrame->Show( false);
+	pLoginFrame = m_IDLResource.FindWidget("Login_ConnectingMsg");
+	if (pLoginFrame)
+		pLoginFrame->Show(false);
 
-	MLabel* pErrorLabel = (MLabel*)m_IDLResource.FindWidget( "LoginError");
-	if ( pErrorLabel)
-		pErrorLabel->SetText( "");
+	MLabel* pErrorLabel = (MLabel*)m_IDLResource.FindWidget("LoginError");
+	if (pErrorLabel)
+		pErrorLabel->SetText("");
 
-	MLabel* pPasswd = (MLabel*)m_IDLResource.FindWidget( "LoginPassword");
-	if ( pPasswd)
-		pPasswd->SetText( "");
+	MLabel* pPasswd = (MLabel*)m_IDLResource.FindWidget("LoginPassword");
+	if (pPasswd)
+		pPasswd->SetText("");
 
 	if (ZApplication::GetInstance()->GetLaunchMode() == ZApplication::ZLAUNCH_MODE_NETMARBLE) {
 		mlog("Netmarble Logout \n");
 		ZApplication::Exit();
 		return;
 	}
-	
+
 	HideAllWidgets();
 
 	ShowWidget("Login", true);
 
-	ZServerView* pServerList = (ZServerView*)m_IDLResource.FindWidget( "SelectedServer");
-	if ( pServerList)
+	ZServerView* pServerList = (ZServerView*)m_IDLResource.FindWidget("SelectedServer");
+	if (pServerList)
 	{
 		pServerList->ClearServerList();
-		if ( strcmp( Z_LOCALE_DEFAULT_FONT, "Arial") == 0)
-			pServerList->SetTextOffset( -2);
+		if (strcmp(Z_LOCALE_DEFAULT_FONT, "Arial") == 0)
+			pServerList->SetTextOffset(-2);
 
 #ifdef	_DEBUG
 		ShowWidget("LabelServerIP", true);
 		ShowWidget("ServerAddress", true);
 		ShowWidget("ServerPort", true);
 
-		pServerList->AddServer( "Debug Server", "", 0, 1, 0, 1000, true);			// Debug server
-		pServerList->AddServer( "", "", 0, 0, 0, 1000, false);						// Null
-		pServerList->SetCurrSel( 0);
+		pServerList->AddServer("Debug Server", "", 0, 1, 0, 1000, true);			// Debug server
+		pServerList->AddServer("", "", 0, 0, 0, 1000, false);						// Null
+		pServerList->SetCurrSel(0);
 #else
-		if ( ZIsLaunchDevelop())
+		if (ZIsLaunchDevelop())
 		{
 			ShowWidget("LabelServerIP", true);
 			ShowWidget("ServerAddress", true);
 			ShowWidget("ServerPort", true);
 
-			pServerList->AddServer( "Debug Server", "", 0, 1, 0, 1000, true);			// Debug server
-			pServerList->AddServer( "", "", 0, 0, 0, 1000, false);						// Null
-			pServerList->SetCurrSel( 0);
+			pServerList->AddServer("Debug Server", "", 0, 1, 0, 1000, true);			// Debug server
+			pServerList->AddServer("", "", 0, 0, 0, 1000, false);						// Null
+			pServerList->SetCurrSel(0);
 		}
 #endif
 
 
 #ifdef _LOCATOR
-	
-		if ( ZApplication::GetInstance()->IsLaunchTest())
+
+		if (ZApplication::GetInstance()->IsLaunchTest())
 		{
-			if( m_pTLocatorList && (m_pTLocatorList->GetSize() > 0))
+			if (m_pTLocatorList && (m_pTLocatorList->GetSize() > 0))
 				m_nLocServ = rand() % m_pTLocatorList->GetSize();
 		}
 		else
 		{
-			if( m_pLocatorList && (m_pLocatorList->GetSize() > 0))
+			if (m_pLocatorList && (m_pLocatorList->GetSize() > 0))
 				m_nLocServ = rand() % m_pLocatorList->GetSize();
 		}
 
@@ -1181,19 +1180,19 @@ void ZGameInterface::OnLoginCreate(void)
 
 #else
 
-		for ( int i = 0;  i < ZGetConfiguration()->GetServerCount();  i++)
+		for (int i = 0; i < ZGetConfiguration()->GetServerCount(); i++)
 		{
-			ZSERVERNODE ServerNode = ZGetConfiguration()->GetServerNode( i);
+			ZSERVERNODE ServerNode = ZGetConfiguration()->GetServerNode(i);
 
-			if ( ServerNode.nType != 1)
-				pServerList->AddServer( ServerNode.szName, ServerNode.szAddress, ServerNode.nPort, ServerNode.nType, 0, 1000, true);
+			if (ServerNode.nType != 1)
+				pServerList->AddServer(ServerNode.szName, ServerNode.szAddress, ServerNode.nPort, ServerNode.nType, 0, 1000, true);
 		}
 #endif
 	}
 
 
 	MWidget* pWidget = m_IDLResource.FindWidget("LoginID");
-	if(pWidget)
+	if (pWidget)
 	{
 		char buffer[256];
 		if (ZGetApplication()->GetSystemValue("LoginID", buffer))
@@ -1201,61 +1200,61 @@ void ZGameInterface::OnLoginCreate(void)
 	}
 
 	pWidget = m_IDLResource.FindWidget("ServerAddress");
-	if(pWidget)
+	if (pWidget)
 	{
 		pWidget->SetText(ZGetConfiguration()->GetServerIP());
 	}
 	pWidget = m_IDLResource.FindWidget("ServerPort");
-	if(pWidget)
+	if (pWidget)
 	{
-		char szText[ 25];
-		sprintf_safe( szText, "%d", ZGetConfiguration()->GetServerPort());
-		pWidget->SetText( szText);
+		char szText[25];
+		sprintf_safe(szText, "%d", ZGetConfiguration()->GetServerPort());
+		pWidget->SetText(szText);
 	}
 
-	if ( m_pBackground)
+	if (m_pBackground)
 	{
 		m_pBackground->LoadMesh();
 		m_pBackground->SetScene(LOGIN_SCENE_FIXEDSKY);
 	}
 
 	ZApplication::GetSoundEngine()->StopMusic();
-	ZApplication::GetSoundEngine()->OpenMusic( BGMID_INTRO, ZApplication::GetFileSystem());
+	ZApplication::GetSoundEngine()->OpenMusic(BGMID_INTRO, ZApplication::GetFileSystem());
 
 	if (g_pGameClient->IsConnected())
 	{
 		ZPostDisconnect();
 	}
 }
-void ZGameInterface::OnLoginDestroy(void)
+void ZGameInterface::OnLoginDestroy()
 {
 	ShowWidget("Login", false);
 
 	MWidget* pWidget = m_IDLResource.FindWidget("LoginID");
-	if(pWidget)
+	if (pWidget)
 	{
 		ZGetApplication()->SetSystemValue("LoginID", pWidget->GetText());
 
-		if ( m_pBackground)
+		if (m_pBackground)
 			m_pBackground->SetScene(LOGIN_SCENE_FIXEDCHAR);
 	}
 
-	if ( m_pLoginBG != NULL)
+	if (m_pLoginBG != NULL)
 	{
-		MPicture* pPicture = (MPicture*)m_IDLResource.FindWidget( "Login_BackgrdImg");
-		if ( pPicture)
-			pPicture->SetBitmap( NULL);
-	
+		MPicture* pPicture = (MPicture*)m_IDLResource.FindWidget("Login_BackgrdImg");
+		if (pPicture)
+			pPicture->SetBitmap(NULL);
+
 		delete m_pLoginBG;
 		m_pLoginBG = NULL;
 	}
 
-	if ( m_pLoginPanel != NULL)
+	if (m_pLoginPanel != NULL)
 	{
-		MPicture* pPicture = (MPicture*)m_IDLResource.FindWidget( "Login_Panel");
-		if ( pPicture)
-			pPicture->SetBitmap( NULL);
-	
+		MPicture* pPicture = (MPicture*)m_IDLResource.FindWidget("Login_Panel");
+		if (pPicture)
+			pPicture->SetBitmap(NULL);
+
 		delete m_pLoginPanel;
 		m_pLoginPanel = NULL;
 	}
@@ -1263,19 +1262,19 @@ void ZGameInterface::OnLoginDestroy(void)
 
 void ZGameInterface::OnLobbyCreate()
 {
-	if ( m_bOnEndOfReplay)
+	if (m_bOnEndOfReplay)
 	{
 		m_bOnEndOfReplay = false;
-		ZGetMyInfo()->SetLevelPercent( m_nLevelPercentCache);
+		ZGetMyInfo()->SetLevelPercent(m_nLevelPercentCache);
 	}
 
-	if ( m_bOnEndOfReplay)
+	if (m_bOnEndOfReplay)
 	{
 		m_bOnEndOfReplay = false;
-		ZGetMyInfo()->SetLevelPercent( m_nLevelPercentCache);
+		ZGetMyInfo()->SetLevelPercent(m_nLevelPercentCache);
 	}
 
-	if( m_pBackground != 0 )
+	if (m_pBackground != 0)
 		m_pBackground->Free();
 
 	if (g_pGameClient)
@@ -1286,106 +1285,106 @@ void ZGameInterface::OnLobbyCreate()
 
 	SetRoomNoLight(1);
 	ZGetGameClient()->RequestOnLobbyCreated();
-	
+
 
 	ShowWidget("CombatMenuFrame", false);
 	ShowWidget("Lobby", true);
 	EnableLobbyInterface(true);
 
 	MWidget* pWidget = m_IDLResource.FindWidget("StageName");
-	if(pWidget){
+	if (pWidget) {
 		char buffer[256];
 		if (ZGetApplication()->GetSystemValue("StageName", buffer))
 			pWidget->SetText(buffer);
 	}
 
- 	ZRoomListBox* pRoomList = (ZRoomListBox*)m_IDLResource.FindWidget("Lobby_StageList");
+	ZRoomListBox* pRoomList = (ZRoomListBox*)m_IDLResource.FindWidget("Lobby_StageList");
 	if (pRoomList) pRoomList->Clear();
 
 	ShowWidget("Lobby_StageList", true);
 
 	MPicture* pPicture = 0;
 	pPicture = (MPicture*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget("Lobby_StripBottom");
- 	if(pPicture != NULL)	pPicture->SetAnimation( 0, 1000.0f);
+	if (pPicture != NULL)	pPicture->SetAnimation(0, 1000.0f);
 	pPicture = (MPicture*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget("Lobby_StripTop");
-	if(pPicture != NULL)	pPicture->SetAnimation( 1, 1000.0f);
+	if (pPicture != NULL)	pPicture->SetAnimation(1, 1000.0f);
 
-    pPicture = (MPicture*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "Lobby_RoomListBG");
-	if ( pPicture)
+	pPicture = (MPicture*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget("Lobby_RoomListBG");
+	if (pPicture)
 	{
 		m_pRoomListFrame = new MBitmapR2;
-		((MBitmapR2*)m_pRoomListFrame)->Create( "gamelist_panel.png", RGetDevice(), "interface/loadable/gamelist_panel.png");
+		((MBitmapR2*)m_pRoomListFrame)->Create("gamelist_panel.png", RGetDevice(), "interface/loadable/gamelist_panel.png");
 
-		if ( m_pRoomListFrame != NULL)
-			pPicture->SetBitmap( m_pRoomListFrame->GetSourceBitmap());
+		if (m_pRoomListFrame != NULL)
+			pPicture->SetBitmap(m_pRoomListFrame->GetSourceBitmap());
 	}
-    pPicture = (MPicture*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "Lobby_BottomBG");
-	if ( pPicture)
+	pPicture = (MPicture*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget("Lobby_BottomBG");
+	if (pPicture)
 	{
 		m_pBottomFrame = new MBitmapR2;
-		((MBitmapR2*)m_pBottomFrame)->Create( "bottom_panel.png", RGetDevice(), "interface/loadable/bottom_panel.png");
+		((MBitmapR2*)m_pBottomFrame)->Create("bottom_panel.png", RGetDevice(), "interface/loadable/bottom_panel.png");
 
-		if ( m_pBottomFrame != NULL)
-			pPicture->SetBitmap( m_pBottomFrame->GetSourceBitmap());
+		if (m_pBottomFrame != NULL)
+			pPicture->SetBitmap(m_pBottomFrame->GetSourceBitmap());
 	}
-    pPicture = (MPicture*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "Lobby_ClanInfoBG");
-	if ( pPicture)
+	pPicture = (MPicture*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget("Lobby_ClanInfoBG");
+	if (pPicture)
 	{
 		m_pClanInfo = new MBitmapR2;
-		((MBitmapR2*)m_pClanInfo)->Create( "claninfo_panel.tga", RGetDevice(), "interface/loadable/claninfo_panel.tga");
+		((MBitmapR2*)m_pClanInfo)->Create("claninfo_panel.tga", RGetDevice(), "interface/loadable/claninfo_panel.tga");
 
-		if ( m_pClanInfo != NULL)
-			pPicture->SetBitmap( m_pClanInfo->GetSourceBitmap());
+		if (m_pClanInfo != NULL)
+			pPicture->SetBitmap(m_pClanInfo->GetSourceBitmap());
 	}
 
 	// music
 #ifdef _BIRDSOUND
 	ZApplication::GetSoundEngine()->OpenMusic(BGMID_LOBBY);
-	ZApplication::GetSoundEngine()->PlayMusic( true);
+	ZApplication::GetSoundEngine()->PlayMusic(true);
 #else
 	ZApplication::GetSoundEngine()->OpenMusic(BGMID_LOBBY, ZApplication::GetFileSystem());
-	ZApplication::GetSoundEngine()->PlayMusic( true);
+	ZApplication::GetSoundEngine()->PlayMusic(true);
 #endif
 
-	ZPlayerListBox *pPlayerListBox = (ZPlayerListBox*)m_IDLResource.FindWidget( "LobbyChannelPlayerList" );
-	if(pPlayerListBox)
-		pPlayerListBox->SetMode(ZPlayerListBox::PLAYERLISTMODE_CHANNEL);
+	auto* pPlayerListBox = ZFindWidgetAs<ZPlayerListBox>("LobbyChannelPlayerList");
+	if (pPlayerListBox)
+		pPlayerListBox->SetMode(ZPlayerListBox::PlayerListMode::Channel);
 
-	pWidget= m_IDLResource.FindWidget( "ChannelChattingInput" );
-	if(pWidget) pWidget->SetFocus();
+	pWidget = m_IDLResource.FindWidget("ChannelChattingInput");
+	if (pWidget)
+		pWidget->SetFocus();
 
-	if ( m_pBackground)
-		m_pBackground->SetScene( LOGIN_SCENE_FIXEDCHAR);
+	if (m_pBackground)
+		m_pBackground->SetScene(LOGIN_SCENE_FIXEDCHAR);
 }
 
-void ZGameInterface::OnLobbyDestroy(void)
+void ZGameInterface::OnLobbyDestroy()
 {
 	ShowWidget("Lobby", false);
 
-	MPicture* pPicture = (MPicture*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "Lobby_RoomListBG");
-	if ( pPicture)
-		pPicture->SetBitmap( NULL);
+	auto* pPicture = ZFindWidgetAs<MPicture>("Lobby_RoomListBG");
+	if (pPicture)
+		pPicture->SetBitmap(NULL);
 
-	pPicture = (MPicture*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "Lobby_BottomBG");
-	if ( pPicture)
-		pPicture->SetBitmap( NULL);
-    
-	pPicture = (MPicture*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "Lobby_ClanInfoBG");
-	if ( pPicture)
-		pPicture->SetBitmap( NULL);
+	pPicture = ZFindWidgetAs<MPicture>("Lobby_BottomBG");
+	if (pPicture)
+		pPicture->SetBitmap(NULL);
 
+	pPicture = ZFindWidgetAs<MPicture>("Lobby_ClanInfoBG");
+	if (pPicture)
+		pPicture->SetBitmap(NULL);
 
-	if ( m_pRoomListFrame != NULL)
+	if (m_pRoomListFrame != NULL)
 	{
-        delete m_pRoomListFrame;
+		delete m_pRoomListFrame;
 		m_pRoomListFrame = NULL;
 	}
-	if ( m_pBottomFrame != NULL)
+	if (m_pBottomFrame != NULL)
 	{
 		delete m_pBottomFrame;
 		m_pBottomFrame = NULL;
-	}	
-	if ( m_pClanInfo != NULL)
+	}
+	if (m_pClanInfo != NULL)
 	{
 		delete m_pClanInfo;
 		m_pClanInfo = NULL;
@@ -1393,10 +1392,10 @@ void ZGameInterface::OnLobbyDestroy(void)
 
 
 	MWidget* pWidget = m_IDLResource.FindWidget("StageName");
-	if(pWidget) ZGetApplication()->SetSystemValue("StageName", pWidget->GetText());
+	if (pWidget) ZGetApplication()->SetSystemValue("StageName", pWidget->GetText());
 }
 
-void ZGameInterface::OnStageCreate(void)
+void ZGameInterface::OnStageCreate()
 {
 	mlog("StageCreated\n");
 
@@ -1410,83 +1409,83 @@ void ZGameInterface::OnStageCreate(void)
 	ShowWidget("Stage", true);
 	EnableStageInterface(true);
 	MButton* pObserverBtn = (MButton*)m_IDLResource.FindWidget("StageObserverBtn");
-	if ( pObserverBtn)
-		pObserverBtn->SetCheck( false);
+	if (pObserverBtn)
+		pObserverBtn->SetCheck(false);
 
 	ZCharacterView* pCharView = (ZCharacterView*)m_IDLResource.FindWidget("Stage_Charviewer");
-	
-	if( pCharView != NULL )
+
+	if (pCharView != NULL)
 	{
-		pCharView->SetCharacter( ZGetMyUID());
+		pCharView->SetCharacter(ZGetMyUID());
 	}
 
 	MPicture* pPicture = (MPicture*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget("Stage_StripBottom");
-	if(pPicture != NULL)	pPicture->SetBitmapColor(0xFFFFFFFF);
+	if (pPicture != NULL)	pPicture->SetBitmapColor(0xFFFFFFFF);
 	pPicture = (MPicture*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget("Stage_StripTop");
-	if(pPicture != NULL)	pPicture->SetBitmapColor(0xFFFFFFFF);
+	if (pPicture != NULL)	pPicture->SetBitmapColor(0xFFFFFFFF);
 
 	ZPostRequestStageSetting(ZGetGameClient()->GetStageUID());
 	SerializeStageInterface();
 
 #ifdef _BIRDSOUND
-		ZApplication::GetSoundEngine()->OpenMusic(BGMID_LOBBY);
-		ZApplication::GetSoundEngine()->PlayMusic(true);
+	ZApplication::GetSoundEngine()->OpenMusic(BGMID_LOBBY);
+	ZApplication::GetSoundEngine()->PlayMusic(true);
 #else
-		ZApplication::GetSoundEngine()->OpenMusic(BGMID_LOBBY, ZApplication::GetFileSystem());
-		ZApplication::GetSoundEngine()->PlayMusic(true);
+	ZApplication::GetSoundEngine()->OpenMusic(BGMID_LOBBY, ZApplication::GetFileSystem());
+	ZApplication::GetSoundEngine()->PlayMusic(true);
 #endif
 
 	ZApplication::GetStageInterface()->OnCreate();
 }
 
-void ZGameInterface::OnStageDestroy(void)
+void ZGameInterface::OnStageDestroy()
 {
 	ZApplication::GetStageInterface()->OnDestroy();
 }
 
-char* GetItemSlotName( const char* szName, int nItem)
+char* GetItemSlotName(const char* szName, int nItem)
 {
 	static char szTemp[256];
-	strcpy_safe( szTemp, szName);
+	strcpy_safe(szTemp, szName);
 
-	switch ( nItem)
+	switch (nItem)
 	{
-		case 0 :
-			strcat_safe( szTemp, "_EquipmentSlot_Head");
-			break;
-		case 1 :
-			strcat_safe( szTemp, "_EquipmentSlot_Chest");
-			break;
-		case 2 :
-			strcat_safe( szTemp, "_EquipmentSlot_Hands");
-			break;
-		case 3 :
-			strcat_safe( szTemp, "_EquipmentSlot_Legs");
-			break;
-		case 4 :
-			strcat_safe( szTemp, "_EquipmentSlot_Feet");
-			break;
-		case 5 :
-			strcat_safe( szTemp, "_EquipmentSlot_FingerL");
-			break;
-		case 6 :
-			strcat_safe( szTemp, "_EquipmentSlot_FingerR");
-			break;
-		case 7 :
-			strcat_safe( szTemp, "_EquipmentSlot_Melee");
-			break;
-		case 8 :
-			strcat_safe( szTemp, "_EquipmentSlot_Primary");
-			break;
-		case 9 :
-			strcat_safe( szTemp, "_EquipmentSlot_Secondary");
-			break;
-		case 10 :
-			strcat_safe( szTemp, "_EquipmentSlot_Custom1");
-			break;
-		case 11 :
-			strcat_safe( szTemp, "_EquipmentSlot_Custom2");
-			break;
+	case 0:
+		strcat_safe(szTemp, "_EquipmentSlot_Head");
+		break;
+	case 1:
+		strcat_safe(szTemp, "_EquipmentSlot_Chest");
+		break;
+	case 2:
+		strcat_safe(szTemp, "_EquipmentSlot_Hands");
+		break;
+	case 3:
+		strcat_safe(szTemp, "_EquipmentSlot_Legs");
+		break;
+	case 4:
+		strcat_safe(szTemp, "_EquipmentSlot_Feet");
+		break;
+	case 5:
+		strcat_safe(szTemp, "_EquipmentSlot_FingerL");
+		break;
+	case 6:
+		strcat_safe(szTemp, "_EquipmentSlot_FingerR");
+		break;
+	case 7:
+		strcat_safe(szTemp, "_EquipmentSlot_Melee");
+		break;
+	case 8:
+		strcat_safe(szTemp, "_EquipmentSlot_Primary");
+		break;
+	case 9:
+		strcat_safe(szTemp, "_EquipmentSlot_Secondary");
+		break;
+	case 10:
+		strcat_safe(szTemp, "_EquipmentSlot_Custom1");
+		break;
+	case 11:
+		strcat_safe(szTemp, "_EquipmentSlot_Custom2");
+		break;
 	}
 
 	return szTemp;
@@ -1496,14 +1495,14 @@ bool ZGameInterface::OnCreate(ZLoadingProgress *pLoadingProgress)
 {
 	g_pGameClient = new ZGameClient();
 
-	if(!m_Tips.Initialize(ZApplication::GetFileSystem(), ML_INVALID)) {
+	if (!m_Tips.Initialize(ZApplication::GetFileSystem(), ML_INVALID)) {
 		mlog("Check tips.xml\n");
 		return false;
 	}
-	
+
 	auto ZGameInterfaceInitInterface = MBeginProfile("ZGameInterface::InitInterface");
-	ZLoadingProgress interfaceProgress("interfaceSkin",pLoadingProgress,.7f);
-	if(!InitInterface(ZGetConfiguration()->GetInterfaceSkinName(),&interfaceProgress))
+	ZLoadingProgress interfaceProgress("interfaceSkin", pLoadingProgress, .7f);
+	if (!InitInterface(ZGetConfiguration()->GetInterfaceSkinName(), &interfaceProgress))
 	{
 		mlog("ZGameInterface::OnCreate: Failed InitInterface\n");
 		return false;
@@ -1513,22 +1512,22 @@ bool ZGameInterface::OnCreate(ZLoadingProgress *pLoadingProgress)
 	interfaceProgress.UpdateAndDraw(1.f);
 
 	auto ZScreenEffectManagerCreate = MBeginProfile("ZGameInterface - ZScreenEffectManager::Create");
-	m_pScreenEffectManager=new ZScreenEffectManager;
-	if(!m_pScreenEffectManager->Create()) 
+	m_pScreenEffectManager = new ZScreenEffectManager;
+	if (!m_pScreenEffectManager->Create())
 		return false;
 	MEndProfile(ZScreenEffectManagerCreate);
 
 	auto ZEffectManagerCreate = MBeginProfile("ZGameInterface - ZEffectManager::Create");
 	m_pEffectManager = new ZEffectManager;
-	if(!m_pEffectManager->Create())
+	if (!m_pEffectManager->Create())
 		return false;
 	MEndProfile(ZEffectManagerCreate);
 
 	SetTeenVersion(false);
 
 	auto ZGameClientCreate = MBeginProfile("ZGameInterface - ZGameClient::Create");
-	int nNetworkPort = RandomNumber( ZGetConfiguration()->GetEtc()->nNetworkPort1, ZGetConfiguration()->GetEtc()->nNetworkPort2);
-	if (g_pGameClient->Create( nNetworkPort) == false) {
+	int nNetworkPort = RandomNumber(ZGetConfiguration()->GetEtc()->nNetworkPort1, ZGetConfiguration()->GetEtc()->nNetworkPort2);
+	if (g_pGameClient->Create(nNetworkPort) == false) {
 		std::string strMsg = "Unknown Network Error";
 		auto LastError = GetLastError();
 		if (LastError == WSAEADDRINUSE)
@@ -1550,70 +1549,70 @@ bool ZGameInterface::OnCreate(ZLoadingProgress *pLoadingProgress)
 	auto Etc = MBeginProfile("ZGameInterface - Etc.");
 
 	ZItemSlotView* itemSlot;
-	for(int i = 0;  i < MMCIP_END;  i++)
+	for (int i = 0; i < MMCIP_END; i++)
 	{
-		itemSlot = (ZItemSlotView*)m_IDLResource.FindWidget( GetItemSlotName( "Shop", i));
-		if ( itemSlot)
+		itemSlot = (ZItemSlotView*)m_IDLResource.FindWidget(GetItemSlotName("Shop", i));
+		if (itemSlot)
 		{
-			strcpy_safe( itemSlot->m_szItemSlotPlace, "Shop");
+			strcpy_safe(itemSlot->m_szItemSlotPlace, "Shop");
 
-			switch ( itemSlot->GetParts())
+			switch (itemSlot->GetParts())
 			{
-				case MMCIP_HEAD:		itemSlot->SetText( ZMsg( MSG_WORD_HEAD));		break;
-				case MMCIP_CHEST:		itemSlot->SetText( ZMsg( MSG_WORD_CHEST));		break;
-				case MMCIP_HANDS:		itemSlot->SetText( ZMsg( MSG_WORD_HANDS));		break;
-				case MMCIP_LEGS:		itemSlot->SetText( ZMsg( MSG_WORD_LEGS));		break;
-				case MMCIP_FEET:		itemSlot->SetText( ZMsg( MSG_WORD_FEET));		break;
-				case MMCIP_FINGERL:		itemSlot->SetText( ZMsg( MSG_WORD_LFINGER));	break;
-				case MMCIP_FINGERR:		itemSlot->SetText( ZMsg( MSG_WORD_RFINGER));	break;
-				case MMCIP_MELEE:		itemSlot->SetText( ZMsg( MSG_WORD_MELEE));		break;
-				case MMCIP_PRIMARY:		itemSlot->SetText( ZMsg( MSG_WORD_WEAPON1));	break;
-				case MMCIP_SECONDARY:	itemSlot->SetText( ZMsg( MSG_WORD_WEAPON2));	break;
-				case MMCIP_CUSTOM1:		itemSlot->SetText( ZMsg( MSG_WORD_ITEM1));		break;
-				case MMCIP_CUSTOM2:		itemSlot->SetText( ZMsg( MSG_WORD_ITEM2));		break;
-				default :				itemSlot->SetText("");							break;
+			case MMCIP_HEAD:		itemSlot->SetText(ZMsg(MSG_WORD_HEAD));		break;
+			case MMCIP_CHEST:		itemSlot->SetText(ZMsg(MSG_WORD_CHEST));		break;
+			case MMCIP_HANDS:		itemSlot->SetText(ZMsg(MSG_WORD_HANDS));		break;
+			case MMCIP_LEGS:		itemSlot->SetText(ZMsg(MSG_WORD_LEGS));		break;
+			case MMCIP_FEET:		itemSlot->SetText(ZMsg(MSG_WORD_FEET));		break;
+			case MMCIP_FINGERL:		itemSlot->SetText(ZMsg(MSG_WORD_LFINGER));	break;
+			case MMCIP_FINGERR:		itemSlot->SetText(ZMsg(MSG_WORD_RFINGER));	break;
+			case MMCIP_MELEE:		itemSlot->SetText(ZMsg(MSG_WORD_MELEE));		break;
+			case MMCIP_PRIMARY:		itemSlot->SetText(ZMsg(MSG_WORD_WEAPON1));	break;
+			case MMCIP_SECONDARY:	itemSlot->SetText(ZMsg(MSG_WORD_WEAPON2));	break;
+			case MMCIP_CUSTOM1:		itemSlot->SetText(ZMsg(MSG_WORD_ITEM1));		break;
+			case MMCIP_CUSTOM2:		itemSlot->SetText(ZMsg(MSG_WORD_ITEM2));		break;
+			default:				itemSlot->SetText("");							break;
 			}
 		}
 	}
-	for(int i = 0;  i < MMCIP_END;  i++)
+	for (int i = 0; i < MMCIP_END; i++)
 	{
-		itemSlot = (ZItemSlotView*)m_IDLResource.FindWidget( GetItemSlotName( "Equip", i));
-		if ( itemSlot)
+		itemSlot = (ZItemSlotView*)m_IDLResource.FindWidget(GetItemSlotName("Equip", i));
+		if (itemSlot)
 		{
-			strcpy_safe( itemSlot->m_szItemSlotPlace, "Equip");
+			strcpy_safe(itemSlot->m_szItemSlotPlace, "Equip");
 
-			switch ( itemSlot->GetParts())
+			switch (itemSlot->GetParts())
 			{
-				case MMCIP_HEAD:		itemSlot->SetText( ZMsg( MSG_WORD_HEAD));		break;
-				case MMCIP_CHEST:		itemSlot->SetText( ZMsg( MSG_WORD_CHEST));		break;
-				case MMCIP_HANDS:		itemSlot->SetText( ZMsg( MSG_WORD_HANDS));		break;
-				case MMCIP_LEGS:		itemSlot->SetText( ZMsg( MSG_WORD_LEGS));		break;
-				case MMCIP_FEET:		itemSlot->SetText( ZMsg( MSG_WORD_FEET));		break;
-				case MMCIP_FINGERL:		itemSlot->SetText( ZMsg( MSG_WORD_LFINGER));	break;
-				case MMCIP_FINGERR:		itemSlot->SetText( ZMsg( MSG_WORD_RFINGER));	break;
-				case MMCIP_MELEE:		itemSlot->SetText( ZMsg( MSG_WORD_MELEE));		break;
-				case MMCIP_PRIMARY:		itemSlot->SetText( ZMsg( MSG_WORD_WEAPON1));	break;
-				case MMCIP_SECONDARY:	itemSlot->SetText( ZMsg( MSG_WORD_WEAPON2));	break;
-				case MMCIP_CUSTOM1:		itemSlot->SetText( ZMsg( MSG_WORD_ITEM1));		break;
-				case MMCIP_CUSTOM2:		itemSlot->SetText( ZMsg( MSG_WORD_ITEM2));		break;
-				default :				itemSlot->SetText("");							break;
+			case MMCIP_HEAD:		itemSlot->SetText(ZMsg(MSG_WORD_HEAD));		break;
+			case MMCIP_CHEST:		itemSlot->SetText(ZMsg(MSG_WORD_CHEST));		break;
+			case MMCIP_HANDS:		itemSlot->SetText(ZMsg(MSG_WORD_HANDS));		break;
+			case MMCIP_LEGS:		itemSlot->SetText(ZMsg(MSG_WORD_LEGS));		break;
+			case MMCIP_FEET:		itemSlot->SetText(ZMsg(MSG_WORD_FEET));		break;
+			case MMCIP_FINGERL:		itemSlot->SetText(ZMsg(MSG_WORD_LFINGER));	break;
+			case MMCIP_FINGERR:		itemSlot->SetText(ZMsg(MSG_WORD_RFINGER));	break;
+			case MMCIP_MELEE:		itemSlot->SetText(ZMsg(MSG_WORD_MELEE));		break;
+			case MMCIP_PRIMARY:		itemSlot->SetText(ZMsg(MSG_WORD_WEAPON1));	break;
+			case MMCIP_SECONDARY:	itemSlot->SetText(ZMsg(MSG_WORD_WEAPON2));	break;
+			case MMCIP_CUSTOM1:		itemSlot->SetText(ZMsg(MSG_WORD_ITEM1));		break;
+			case MMCIP_CUSTOM2:		itemSlot->SetText(ZMsg(MSG_WORD_ITEM2));		break;
+			default:				itemSlot->SetText("");							break;
 			}
 		}
 	}
 	ZEquipmentListBox* pItemListBox = (ZEquipmentListBox*)m_IDLResource.FindWidget("EquipmentList");
-	if ( pItemListBox)
+	if (pItemListBox)
 	{
-		pItemListBox->AttachMenu(new ZItemMenu("ItemMenu", pItemListBox, pItemListBox, MPMT_VERTICAL));	
-		pItemListBox->EnableDragAndDrop( true);
+		pItemListBox->AttachMenu(new ZItemMenu("ItemMenu", pItemListBox, pItemListBox, MPMT_VERTICAL));
+		pItemListBox->EnableDragAndDrop(true);
 	}
 
-	MListBox* pReplayBox = (MListBox*)m_IDLResource.FindWidget( "Replay_FileList");
-	if ( pReplayBox)
+	MListBox* pReplayBox = (MListBox*)m_IDLResource.FindWidget("Replay_FileList");
+	if (pReplayBox)
 	{
 		pReplayBox->m_FontAlign = MAM_VCENTER;
-		pReplayBox->SetVisibleHeader( false);
-		pReplayBox->AddField( "NAME", 200);
-		pReplayBox->AddField( "VERSION", 70);
+		pReplayBox->SetVisibleHeader(false);
+		pReplayBox->AddField("NAME", 200);
+		pReplayBox->AddField("VERSION", 70);
 	}
 
 	// Setting Configuration about ZGameClient
@@ -1626,189 +1625,189 @@ bool ZGameInterface::OnCreate(ZLoadingProgress *pLoadingProgress)
 	g_pGameClient->SetRejectWhisper(Z_ETC_REJECT_WHISPER);
 	g_pGameClient->SetRejectInvite(Z_ETC_REJECT_INVITE);
 
-	MTextArea* pTextArea = (MTextArea*)m_IDLResource.FindWidget( "CombatResult_PlayerNameList");
-	if ( pTextArea)
+	MTextArea* pTextArea = (MTextArea*)m_IDLResource.FindWidget("CombatResult_PlayerNameList");
+	if (pTextArea)
 	{
-		pTextArea->SetFont( MFontManager::Get( "FONTa10b"));
-		pTextArea->SetLineHeight( 18);
+		pTextArea->SetFont(MFontManager::Get("FONTa10b"));
+		pTextArea->SetLineHeight(18);
 	}
-	pTextArea = (MTextArea*)m_IDLResource.FindWidget( "CombatResult_PlayerKillList");
-	if ( pTextArea)
+	pTextArea = (MTextArea*)m_IDLResource.FindWidget("CombatResult_PlayerKillList");
+	if (pTextArea)
 	{
-		pTextArea->SetFont( MFontManager::Get( "FONTa10b"));
-		pTextArea->SetLineHeight( 18);
+		pTextArea->SetFont(MFontManager::Get("FONTa10b"));
+		pTextArea->SetLineHeight(18);
 	}
-	pTextArea = (MTextArea*)m_IDLResource.FindWidget( "CombatResult_PlayerDeathList");
-	if ( pTextArea)
+	pTextArea = (MTextArea*)m_IDLResource.FindWidget("CombatResult_PlayerDeathList");
+	if (pTextArea)
 	{
-		pTextArea->SetFont( MFontManager::Get( "FONTa10b"));
-		pTextArea->SetLineHeight( 18);
+		pTextArea->SetFont(MFontManager::Get("FONTa10b"));
+		pTextArea->SetLineHeight(18);
 	}
-	pTextArea = (MTextArea*)m_IDLResource.FindWidget( "ClanResult_PlayerNameList1");
-	if ( pTextArea)
+	pTextArea = (MTextArea*)m_IDLResource.FindWidget("ClanResult_PlayerNameList1");
+	if (pTextArea)
 	{
-		pTextArea->SetFont( MFontManager::Get( "FONTa10b"));
-		pTextArea->SetLineHeight( 18);
+		pTextArea->SetFont(MFontManager::Get("FONTa10b"));
+		pTextArea->SetLineHeight(18);
 	}
-	pTextArea = (MTextArea*)m_IDLResource.FindWidget( "ClanResult_PlayerKillList1");
-	if ( pTextArea)
+	pTextArea = (MTextArea*)m_IDLResource.FindWidget("ClanResult_PlayerKillList1");
+	if (pTextArea)
 	{
-		pTextArea->SetFont( MFontManager::Get( "FONTa10b"));
-		pTextArea->SetLineHeight( 18);
+		pTextArea->SetFont(MFontManager::Get("FONTa10b"));
+		pTextArea->SetLineHeight(18);
 	}
-	pTextArea = (MTextArea*)m_IDLResource.FindWidget( "ClanResult_PlayerDeathList1");
-	if ( pTextArea)
+	pTextArea = (MTextArea*)m_IDLResource.FindWidget("ClanResult_PlayerDeathList1");
+	if (pTextArea)
 	{
-		pTextArea->SetFont( MFontManager::Get( "FONTa10b"));
-		pTextArea->SetLineHeight( 18);
+		pTextArea->SetFont(MFontManager::Get("FONTa10b"));
+		pTextArea->SetLineHeight(18);
 	}
-	pTextArea = (MTextArea*)m_IDLResource.FindWidget( "ClanResult_PlayerNameList2");
-	if ( pTextArea)
+	pTextArea = (MTextArea*)m_IDLResource.FindWidget("ClanResult_PlayerNameList2");
+	if (pTextArea)
 	{
-		pTextArea->SetFont( MFontManager::Get( "FONTa10b"));
-		pTextArea->SetLineHeight( 18);
+		pTextArea->SetFont(MFontManager::Get("FONTa10b"));
+		pTextArea->SetLineHeight(18);
 	}
-	pTextArea = (MTextArea*)m_IDLResource.FindWidget( "ClanResult_PlayerKillList2");
-	if ( pTextArea)
+	pTextArea = (MTextArea*)m_IDLResource.FindWidget("ClanResult_PlayerKillList2");
+	if (pTextArea)
 	{
-		pTextArea->SetFont( MFontManager::Get( "FONTa10b"));
-		pTextArea->SetLineHeight( 18);
+		pTextArea->SetFont(MFontManager::Get("FONTa10b"));
+		pTextArea->SetLineHeight(18);
 	}
-	pTextArea = (MTextArea*)m_IDLResource.FindWidget( "ClanResult_PlayerDeathList2");
-	if ( pTextArea)
+	pTextArea = (MTextArea*)m_IDLResource.FindWidget("ClanResult_PlayerDeathList2");
+	if (pTextArea)
 	{
-		pTextArea->SetFont( MFontManager::Get( "FONTa10b"));
-		pTextArea->SetLineHeight( 18);
+		pTextArea->SetFont(MFontManager::Get("FONTa10b"));
+		pTextArea->SetLineHeight(18);
 	}
-	MPicture* pPicture = (MPicture*)m_IDLResource.FindWidget( "CombatResult_Header");
-	if ( pPicture)
-		pPicture->SetOpacity( 80);
-	pPicture = (MPicture*)m_IDLResource.FindWidget( "ClanResult_Header1");
-	if ( pPicture)
-		pPicture->SetOpacity( 80);
-	pPicture = (MPicture*)m_IDLResource.FindWidget( "ClanResult_Header2");
-	if ( pPicture)
+	MPicture* pPicture = (MPicture*)m_IDLResource.FindWidget("CombatResult_Header");
+	if (pPicture)
+		pPicture->SetOpacity(80);
+	pPicture = (MPicture*)m_IDLResource.FindWidget("ClanResult_Header1");
+	if (pPicture)
+		pPicture->SetOpacity(80);
+	pPicture = (MPicture*)m_IDLResource.FindWidget("ClanResult_Header2");
+	if (pPicture)
 		pPicture->SetOpacity(80);
 
-	MListBox* pListBox = (MListBox*)m_IDLResource.FindWidget( "Stage_SacrificeItemListbox");
-	if ( pListBox)
+	MListBox* pListBox = (MListBox*)m_IDLResource.FindWidget("Stage_SacrificeItemListbox");
+	if (pListBox)
 	{
 		pListBox->m_FontAlign = MAM_VCENTER;
-		pListBox->AddField( "ICON", 32);
-		pListBox->AddField( "NAME", 170);
-		pListBox->SetItemHeight( 32);
-		pListBox->SetVisibleHeader( false);
+		pListBox->AddField("ICON", 32);
+		pListBox->AddField("NAME", 170);
+		pListBox->SetItemHeight(32);
+		pListBox->SetVisibleHeader(false);
 		pListBox->m_bNullFrame = true;
-		pListBox->EnableDragAndDrop( true);
-		pListBox->SetOnDropCallback( OnDropCallbackRemoveSacrificeItem);
+		pListBox->EnableDragAndDrop(true);
+		pListBox->SetOnDropCallback(OnDropCallbackRemoveSacrificeItem);
 	}
 
-	itemSlot = (ZItemSlotView*)m_IDLResource.FindWidget( "Stage_SacrificeItemButton0");
-	if ( itemSlot)
+	itemSlot = (ZItemSlotView*)m_IDLResource.FindWidget("Stage_SacrificeItemButton0");
+	if (itemSlot)
 	{
-		itemSlot->EnableDragAndDrop( true);
-		strcpy_safe( itemSlot->m_szItemSlotPlace, "SACRIFICE0");
+		itemSlot->EnableDragAndDrop(true);
+		strcpy_safe(itemSlot->m_szItemSlotPlace, "SACRIFICE0");
 	}
-	itemSlot = (ZItemSlotView*)m_IDLResource.FindWidget( "Stage_SacrificeItemButton1");
-	if ( itemSlot)
+	itemSlot = (ZItemSlotView*)m_IDLResource.FindWidget("Stage_SacrificeItemButton1");
+	if (itemSlot)
 	{
-		itemSlot->EnableDragAndDrop( true);
-		strcpy_safe( itemSlot->m_szItemSlotPlace, "SACRIFICE1");
+		itemSlot->EnableDragAndDrop(true);
+		strcpy_safe(itemSlot->m_szItemSlotPlace, "SACRIFICE1");
 	}
 
-	pListBox = (MListBox*)m_IDLResource.FindWidget( "QuestResult_ItemListbox");
-	if ( pListBox)
+	pListBox = (MListBox*)m_IDLResource.FindWidget("QuestResult_ItemListbox");
+	if (pListBox)
 	{
 		pListBox->m_FontAlign = MAM_VCENTER;
-		pListBox->AddField( "ICON", 35);
-		pListBox->AddField( "NAME", 300);
-		pListBox->SetItemHeight( 32);
-		pListBox->SetVisibleHeader( false);
-		pListBox->SetFont( MFontManager::Get( "FONTa10b"));
-		pListBox->m_FontColor = MCOLOR( 0xFFFFF794);
+		pListBox->AddField("ICON", 35);
+		pListBox->AddField("NAME", 300);
+		pListBox->SetItemHeight(32);
+		pListBox->SetVisibleHeader(false);
+		pListBox->SetFont(MFontManager::Get("FONTa10b"));
+		pListBox->m_FontColor = MCOLOR(0xFFFFF794);
 		pListBox->m_bNullFrame = true;
 	}
 
-	int nMargin[ BMNUM_NUMOFCHARSET] = { 15,15,15,15,15,15,15,15,15,15,8,10,8 };
-	ZBmNumLabel* pBmNumLabel = (ZBmNumLabel*)m_IDLResource.FindWidget( "Lobby_ClanInfoWinLose");
-	if ( pBmNumLabel)
-		pBmNumLabel->SetCharMargin( nMargin);
-	pBmNumLabel = (ZBmNumLabel*)m_IDLResource.FindWidget( "Lobby_ClanInfoPoints");
-	if ( pBmNumLabel)
-		pBmNumLabel->SetCharMargin( nMargin);
-	pBmNumLabel = (ZBmNumLabel*)m_IDLResource.FindWidget( "Lobby_ClanInfoTotalPoints");
-	if ( pBmNumLabel)
-		pBmNumLabel->SetCharMargin( nMargin);
-	pBmNumLabel = (ZBmNumLabel*)m_IDLResource.FindWidget( "Lobby_ClanInfoRanking");
-	if ( pBmNumLabel)
-		pBmNumLabel->SetCharMargin( nMargin);
-	pBmNumLabel = (ZBmNumLabel*)m_IDLResource.FindWidget( "QuestResult_GetPlusXP");
-	if ( pBmNumLabel)
-		pBmNumLabel->SetCharMargin( nMargin);
-	pBmNumLabel = (ZBmNumLabel*)m_IDLResource.FindWidget( "QuestResult_GetMinusXP");
-	if ( pBmNumLabel)
+	int nMargin[BMNUM_NUMOFCHARSET] = { 15,15,15,15,15,15,15,15,15,15,8,10,8 };
+	ZBmNumLabel* pBmNumLabel = (ZBmNumLabel*)m_IDLResource.FindWidget("Lobby_ClanInfoWinLose");
+	if (pBmNumLabel)
+		pBmNumLabel->SetCharMargin(nMargin);
+	pBmNumLabel = (ZBmNumLabel*)m_IDLResource.FindWidget("Lobby_ClanInfoPoints");
+	if (pBmNumLabel)
+		pBmNumLabel->SetCharMargin(nMargin);
+	pBmNumLabel = (ZBmNumLabel*)m_IDLResource.FindWidget("Lobby_ClanInfoTotalPoints");
+	if (pBmNumLabel)
+		pBmNumLabel->SetCharMargin(nMargin);
+	pBmNumLabel = (ZBmNumLabel*)m_IDLResource.FindWidget("Lobby_ClanInfoRanking");
+	if (pBmNumLabel)
+		pBmNumLabel->SetCharMargin(nMargin);
+	pBmNumLabel = (ZBmNumLabel*)m_IDLResource.FindWidget("QuestResult_GetPlusXP");
+	if (pBmNumLabel)
+		pBmNumLabel->SetCharMargin(nMargin);
+	pBmNumLabel = (ZBmNumLabel*)m_IDLResource.FindWidget("QuestResult_GetMinusXP");
+	if (pBmNumLabel)
 	{
-		pBmNumLabel->SetCharMargin( nMargin);
-		pBmNumLabel->SetIndexOffset( 16);
+		pBmNumLabel->SetCharMargin(nMargin);
+		pBmNumLabel->SetIndexOffset(16);
 	}
-	pBmNumLabel = (ZBmNumLabel*)m_IDLResource.FindWidget( "QuestResult_GetTotalXP");
-	if ( pBmNumLabel)
-		pBmNumLabel->SetCharMargin( nMargin);
-	pBmNumLabel = (ZBmNumLabel*)m_IDLResource.FindWidget( "QuestResult_GetBounty");
-	if ( pBmNumLabel)
+	pBmNumLabel = (ZBmNumLabel*)m_IDLResource.FindWidget("QuestResult_GetTotalXP");
+	if (pBmNumLabel)
+		pBmNumLabel->SetCharMargin(nMargin);
+	pBmNumLabel = (ZBmNumLabel*)m_IDLResource.FindWidget("QuestResult_GetBounty");
+	if (pBmNumLabel)
 		pBmNumLabel->SetCharMargin(nMargin);
 
 	ZGetGameTypeManager()->SetGameTypeStr(MMATCH_GAMETYPE_DEATHMATCH_SOLO, ZMsg(MSG_MT_DEATHMATCH_SOLO));
-	ZGetGameTypeManager()->SetGameTypeStr( MMATCH_GAMETYPE_DEATHMATCH_TEAM, ZMsg( MSG_MT_DEATHMATCH_TEAM));
-	ZGetGameTypeManager()->SetGameTypeStr( MMATCH_GAMETYPE_GLADIATOR_SOLO, ZMsg( MSG_MT_GLADIATOR_SOLO));
-	ZGetGameTypeManager()->SetGameTypeStr( MMATCH_GAMETYPE_GLADIATOR_TEAM, ZMsg( MSG_MT_GLADIATOR_TEAM));
-	ZGetGameTypeManager()->SetGameTypeStr( MMATCH_GAMETYPE_ASSASSINATE, ZMsg( MSG_MT_ASSASSINATE));
+	ZGetGameTypeManager()->SetGameTypeStr(MMATCH_GAMETYPE_DEATHMATCH_TEAM, ZMsg(MSG_MT_DEATHMATCH_TEAM));
+	ZGetGameTypeManager()->SetGameTypeStr(MMATCH_GAMETYPE_GLADIATOR_SOLO, ZMsg(MSG_MT_GLADIATOR_SOLO));
+	ZGetGameTypeManager()->SetGameTypeStr(MMATCH_GAMETYPE_GLADIATOR_TEAM, ZMsg(MSG_MT_GLADIATOR_TEAM));
+	ZGetGameTypeManager()->SetGameTypeStr(MMATCH_GAMETYPE_ASSASSINATE, ZMsg(MSG_MT_ASSASSINATE));
 	ZGetGameTypeManager()->SetGameTypeStr(MMATCH_GAMETYPE_TRAINING, ZMsg(MSG_MT_TRAINING));
-	ZGetGameTypeManager()->SetGameTypeStr( MMATCH_GAMETYPE_SURVIVAL, ZMsg( MSG_MT_SURVIVAL));
-	ZGetGameTypeManager()->SetGameTypeStr( MMATCH_GAMETYPE_QUEST, ZMsg( MSG_MT_QUEST));
+	ZGetGameTypeManager()->SetGameTypeStr(MMATCH_GAMETYPE_SURVIVAL, ZMsg(MSG_MT_SURVIVAL));
+	ZGetGameTypeManager()->SetGameTypeStr(MMATCH_GAMETYPE_QUEST, ZMsg(MSG_MT_QUEST));
 	ZGetGameTypeManager()->SetGameTypeStr(MMATCH_GAMETYPE_BERSERKER, ZMsg(MSG_MT_BERSERKER));
 	ZGetGameTypeManager()->SetGameTypeStr(MMATCH_GAMETYPE_DEATHMATCH_TEAM2, ZMsg(MSG_MT_DEATHMATCH_TEAM2));
 	ZGetGameTypeManager()->SetGameTypeStr(MMATCH_GAMETYPE_DUEL, ZMsg(MSG_MT_DUEL));
 	ZGetGameTypeManager()->SetGameTypeStr(MMATCH_GAMETYPE_SKILLMAP, "Skillmap");
 
 #ifndef _DEBUG
-	MWidget* pWidget = m_IDLResource.FindWidget( "MonsterBookCaller");
-	if ( pWidget)
-		pWidget->Show( false);
+	MWidget* pWidget = m_IDLResource.FindWidget("MonsterBookCaller");
+	if (pWidget)
+		pWidget->Show(false);
 #endif
 
 #ifndef _QUEST_ITEM
-	MComboBox* pComboBox = (MComboBox*)m_IDLResource.FindWidget( "Shop_AllEquipmentFilter");
-	if ( pComboBox)
-		pComboBox->Remove( 10);
-	pComboBox = (MComboBox*)m_IDLResource.FindWidget( "Equip_AllEquipmentFilter");
-	if ( pComboBox)
-		pComboBox->Remove( 10);
+	MComboBox* pComboBox = (MComboBox*)m_IDLResource.FindWidget("Shop_AllEquipmentFilter");
+	if (pComboBox)
+		pComboBox->Remove(10);
+	pComboBox = (MComboBox*)m_IDLResource.FindWidget("Equip_AllEquipmentFilter");
+	if (pComboBox)
+		pComboBox->Remove(10);
 #endif
 
-	MComboBox* pCombo = (MComboBox*)m_IDLResource.FindWidget( "Shop_AllEquipmentFilter");
-	if ( pCombo)
+	MComboBox* pCombo = (MComboBox*)m_IDLResource.FindWidget("Shop_AllEquipmentFilter");
+	if (pCombo)
 	{
-		pCombo->SetAlignment( MAM_LEFT);
-		pCombo->SetListboxAlignment( MAM_LEFT);
+		pCombo->SetAlignment(MAM_LEFT);
+		pCombo->SetListboxAlignment(MAM_LEFT);
 	}
-	pCombo = (MComboBox*)m_IDLResource.FindWidget( "Equip_AllEquipmentFilter");
-	if ( pCombo)
+	pCombo = (MComboBox*)m_IDLResource.FindWidget("Equip_AllEquipmentFilter");
+	if (pCombo)
 	{
-		pCombo->SetAlignment( MAM_LEFT);
-		pCombo->SetListboxAlignment( MAM_LEFT);
+		pCombo->SetAlignment(MAM_LEFT);
+		pCombo->SetListboxAlignment(MAM_LEFT);
 	}
 
-	pCombo = (MComboBox*)m_IDLResource.FindWidget( "StageType");
-	if ( pCombo)
-		pCombo->SetListboxAlignment( MAM_LEFT);
+	pCombo = (MComboBox*)m_IDLResource.FindWidget("StageType");
+	if (pCombo)
+		pCombo->SetListboxAlignment(MAM_LEFT);
 
-	ZCharacterView* pCharView = (ZCharacterView*)m_IDLResource.FindWidget( "EquipmentInformation");
-	if ( pCharView)
-		pCharView->EnableAutoRotate( true);
-	pCharView = (ZCharacterView*)m_IDLResource.FindWidget( "EquipmentInformationShop");
-	if ( pCharView)
-		pCharView->EnableAutoRotate( true);
+	ZCharacterView* pCharView = (ZCharacterView*)m_IDLResource.FindWidget("EquipmentInformation");
+	if (pCharView)
+		pCharView->EnableAutoRotate(true);
+	pCharView = (ZCharacterView*)m_IDLResource.FindWidget("EquipmentInformationShop");
+	if (pCharView)
+		pCharView->EnableAutoRotate(true);
 
 	MEndProfile(Etc);
 
@@ -1822,7 +1821,7 @@ void ZGameInterface::OnDestroy()
 	mlog("ZGameInterface::OnDestroy() : begin \n");
 
 	ZCharacterView* pCharView = (ZCharacterView*)m_IDLResource.FindWidget("Stage_Charviewer");
-	if(pCharView!= 0) pCharView->OnInvalidate();
+	if (pCharView != 0) pCharView->OnInvalidate();
 
 	SetCursorEnable(false);
 
@@ -1849,11 +1848,11 @@ void ZGameInterface::OnDestroy()
 void ZGameInterface::OnShutdownState()
 {
 	mlog("ZGameInterface::OnShutdown() : begin \n");
-	
-			ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
-			MLabel* pLabel = (MLabel*)pResource->FindWidget("NetmarbleLoginMessage");
-			pLabel->SetText( ZErrStr(MERR_CLIENT_DISCONNECTED) );
-			ZApplication::GetGameInterface()->ShowWidget("NetmarbleLogin", true);
+
+	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
+	MLabel* pLabel = (MLabel*)pResource->FindWidget("NetmarbleLoginMessage");
+	pLabel->SetText(ZErrStr(MERR_CLIENT_DISCONNECTED));
+	ZApplication::GetGameInterface()->ShowWidget("NetmarbleLogin", true);
 
 	mlog("ZGameInterface::OnShutdown() : done() \n");
 }
@@ -1870,8 +1869,8 @@ bool ZGameInterface::SetState(GunzState nState)
 	{
 		if (ZApplication::GetStageInterface()->IsShowStartMovieOfQuest())
 		{
-			ZApplication::GetStageInterface()->ChangeStageEnableReady( true);
-			MWidget* pWidget = ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "StageReady");
+			ZApplication::GetStageInterface()->ChangeStageEnableReady(true);
+			MWidget* pWidget = ZApplication::GetGameInterface()->GetIDLResource()->FindWidget("StageReady");
 			if (pWidget)
 				pWidget->Enable(false);
 			ZApplication::GetStageInterface()->StartMovieOfQuest();
@@ -1890,8 +1889,8 @@ bool ZGameInterface::SetState(GunzState nState)
 	{
 		OnCharSelectionDestroy();
 
-		if ( nState == GUNZ_LOBBY)
-			ZPostRequestGetCharQuestItemInfo( ZGetGameClient()->GetPlayerUID());
+		if (nState == GUNZ_LOBBY)
+			ZPostRequestGetCharQuestItemInfo(ZGetGameClient()->GetPlayerUID());
 	}
 	else if (m_nState == GUNZ_CHARCREATION) { OnCharCreationDestroy(); }
 
@@ -1903,14 +1902,14 @@ bool ZGameInterface::SetState(GunzState nState)
 	else if (nState == GUNZ_GREETER) { OnGreeterCreate(); }
 	else if (nState == GUNZ_CHARSELECTION)
 	{
-		if ( m_nPreviousState == GUNZ_LOGIN)
+		if (m_nPreviousState == GUNZ_LOGIN)
 		{
-			MWidget* pWidget = m_IDLResource.FindWidget( "Login_BackgrdImg");
-			if ( !pWidget)
+			MWidget* pWidget = m_IDLResource.FindWidget("Login_BackgrdImg");
+			if (!pWidget)
 				OnCharSelectionCreate();
 			else
 			{
-				m_nLoginState = LOGINSTATE_LOGINCOMPLETE;
+				m_nLoginState = LoginState::LoginComplete;
 				m_dwLoginTimer = GetGlobalTimeMS() + 1000;
 				return true;
 			}
@@ -1926,7 +1925,7 @@ bool ZGameInterface::SetState(GunzState nState)
 		m_pMsgBox->Show(true, true);
 		SetState(GUNZ_PREVIOUS);
 	}
-	else{
+	else {
 		m_nState = nState;
 	}
 
@@ -1935,8 +1934,8 @@ bool ZGameInterface::SetState(GunzState nState)
 }
 
 _NAMESPACE_REALSPACE2_BEGIN
-extern int g_nPoly,g_nCall;
-extern int g_nPickCheckPolygon,g_nRealPickCheckPolygon;
+extern int g_nPoly, g_nCall;
+extern int g_nPickCheckPolygon, g_nRealPickCheckPolygon;
 _NAMESPACE_REALSPACE2_END
 
 #ifndef _PUBLISH
@@ -1945,21 +1944,22 @@ _NAMESPACE_REALSPACE2_END
 
 void ZGameInterface::OnDrawStateGame(MDrawContext* pDC)
 {
-	if(m_pGame!=NULL) 
+	if (m_pGame != NULL)
 	{
-		if(!IsMiniMapEnable())
+		if (!IsMiniMapEnable())
 			m_pGame->Draw();
 
 		if (m_bViewUI) {
 
-			if(m_bLeaveBattleReserved)
+			if (m_bLeaveBattleReserved)
 			{
-				int nSeconds = (m_dwLeaveBattleTime - GetGlobalTimeMS() + 999 ) / 1000;
-				m_pCombatInterface->SetDrawLeaveBattle(m_bLeaveBattleReserved,nSeconds);
-			}else
-				m_pCombatInterface->SetDrawLeaveBattle(false,0);
+				int nSeconds = (m_dwLeaveBattleTime - GetGlobalTimeMS() + 999) / 1000;
+				m_pCombatInterface->SetDrawLeaveBattle(m_bLeaveBattleReserved, nSeconds);
+			}
+			else
+				m_pCombatInterface->SetDrawLeaveBattle(false, 0);
 
-			if(GetCamera()->GetLookMode()==ZCAMERA_MINIMAP) {
+			if (GetCamera()->GetLookMode() == ZCAMERA_MINIMAP) {
 				_ASSERT(m_pMiniMap);
 				m_pMiniMap->OnDraw(pDC);
 			}
@@ -1975,139 +1975,139 @@ void ZGameInterface::OnDrawStateGame(MDrawContext* pDC)
 
 void ZGameInterface::OnDrawStateLogin(MDrawContext* pDC)
 {
-	MLabel* pConnectingLabel = (MLabel*)m_IDLResource.FindWidget( "Login_ConnectingMsg");
-	if ( pConnectingLabel)
+	MLabel* pConnectingLabel = (MLabel*)m_IDLResource.FindWidget("Login_ConnectingMsg");
+	if (pConnectingLabel)
 	{
-		char szMsg[ 128];
-		memset( szMsg, 0, sizeof( szMsg));
-        int nCount = ( GetGlobalTimeMS() / 800) % 4;
-		for ( int i = 0;  i < nCount;  i++)
-			szMsg[ i] = '<';
-		sprintf_safe( szMsg, "%s %s ", szMsg, "Connecting");
-		for ( int i = 0;  i < nCount;  i++)
-			strcat_safe( szMsg, ">");
+		char szMsg[128];
+		memset(szMsg, 0, sizeof(szMsg));
+		int nCount = (GetGlobalTimeMS() / 800) % 4;
+		for (int i = 0; i < nCount; i++)
+			szMsg[i] = '<';
+		sprintf_safe(szMsg, "%s %s ", szMsg, "Connecting");
+		for (int i = 0; i < nCount; i++)
+			strcat_safe(szMsg, ">");
 
-		pConnectingLabel->SetText( szMsg);
-		pConnectingLabel->SetAlignment( MAM_HCENTER | MAM_VCENTER);
+		pConnectingLabel->SetText(szMsg);
+		pConnectingLabel->SetAlignment(MAM_HCENTER | MAM_VCENTER);
 	}
 
 
-	MWidget* pWidget = m_IDLResource.FindWidget( "LoginFrame");
-	MPicture* pPicture = (MPicture*)m_IDLResource.FindWidget( "Login_BackgrdImg");
-	if ( !pWidget || !pPicture)
+	MWidget* pWidget = m_IDLResource.FindWidget("LoginFrame");
+	MPicture* pPicture = (MPicture*)m_IDLResource.FindWidget("Login_BackgrdImg");
+	if (!pWidget || !pPicture)
 		return;
 
 
-	ZServerView* pServerList = (ZServerView*)m_IDLResource.FindWidget( "SelectedServer");
-	MEdit* pPassword = (MEdit*)m_IDLResource.FindWidget( "LoginPassword");
-	MWidget* pLogin = m_IDLResource.FindWidget( "LoginOK");
-	if ( pServerList && pPassword && pLogin)
+	ZServerView* pServerList = (ZServerView*)m_IDLResource.FindWidget("SelectedServer");
+	MEdit* pPassword = (MEdit*)m_IDLResource.FindWidget("LoginPassword");
+	MWidget* pLogin = m_IDLResource.FindWidget("LoginOK");
+	if (pServerList && pPassword && pLogin)
 	{
-		if ( pServerList->IsSelected() && (int)strlen( pPassword->GetText()))
-			pLogin->Enable( true);
+		if (pServerList->IsSelected() && (int)strlen(pPassword->GetText()))
+			pLogin->Enable(true);
 		else
-			pLogin->Enable( false);
+			pLogin->Enable(false);
 	}
 
 
 	DWORD dwCurrTime = GetGlobalTimeMS();
 
 	// Check timeout
-	if ( m_bLoginTimeout && (m_dwLoginTimeout <= dwCurrTime))
+	if (m_bLoginTimeout && (m_dwLoginTimeout <= dwCurrTime))
 	{
 		m_bLoginTimeout = false;
 
-		MLabel* pLabel = (MLabel*)m_IDLResource.FindWidget( "LoginError");
+		MLabel* pLabel = (MLabel*)m_IDLResource.FindWidget("LoginError");
 		if (pLabel)
-			pLabel->SetText( ZErrStr( MERR_CLIENT_CONNECT_FAILED));
+			pLabel->SetText(ZErrStr(MERR_CLIENT_CONNECT_FAILED));
 
-		MButton* pLoginOK = (MButton*)m_IDLResource.FindWidget( "LoginOK");
+		MButton* pLoginOK = (MButton*)m_IDLResource.FindWidget("LoginOK");
 		if (pLoginOK)
 			pLoginOK->Enable(true);
 
 		pWidget->Show(true);
 
-		if ( pConnectingLabel)
-			pConnectingLabel->Show( false);
+		if (pConnectingLabel)
+			pConnectingLabel->Show(false);
 	}
 
 	// Fade in
-	if ( m_nLoginState == LOGINSTATE_FADEIN)
+	if (m_nLoginState == LoginState::FadeIn)
 	{
 		m_bLoginTimeout = false;
 
-		if ( dwCurrTime >= m_dwLoginTimer)
+		if (dwCurrTime >= m_dwLoginTimer)
 		{
 			int nOpacity = pPicture->GetOpacity() + 3;
-			if ( nOpacity > 255)
+			if (nOpacity > 255)
 				nOpacity = 255;
 
-			pPicture->SetOpacity( nOpacity);
+			pPicture->SetOpacity(nOpacity);
 
 			m_dwLoginTimer = dwCurrTime + 9;
 		}
 
-		if ( pPicture->GetOpacity() == 255)
+		if (pPicture->GetOpacity() == 255)
 		{
 			m_dwLoginTimer = dwCurrTime + 1000;
-			m_nLoginState = LOGINSTATE_SHOWLOGINFRAME;
+			m_nLoginState = LoginState::ShowLoginFrame;
 		}
 		else
-			pWidget->Show( false);
+			pWidget->Show(false);
 	}
 	// Show login frame
-	else if ( m_nLoginState == LOGINSTATE_SHOWLOGINFRAME)
+	else if (m_nLoginState == LoginState::ShowLoginFrame)
 	{
 		m_bLoginTimeout = false;
 
-		if ( GetGlobalTimeMS() > m_dwLoginTimer)
+		if (GetGlobalTimeMS() > m_dwLoginTimer)
 		{
-			m_nLoginState = LOGINSTATE_STANDBY;
-			pWidget->Show( true);
+			m_nLoginState = LoginState::Standby;
+			pWidget->Show(true);
 		}
 	}
 	// Standby
-	else if ( m_nLoginState == LOGINSTATE_STANDBY)
+	else if (m_nLoginState == LoginState::Standby)
 	{
 #ifdef _LOCATOR
 		// Refresh server status info
-		if ( GetGlobalTimeMS() > m_dwRefreshTime)
+		if (GetGlobalTimeMS() > m_dwRefreshTime)
 			RequestServerStatusListInfo();
 #endif
 	}
 	// Login Complete
-	else if ( m_nLoginState == LOGINSTATE_LOGINCOMPLETE)
+	else if (m_nLoginState == LoginState::LoginComplete)
 	{
 		m_bLoginTimeout = false;
 
-		if ( GetGlobalTimeMS() > m_dwLoginTimer)
-			m_nLoginState = LOGINSTATE_FADEOUT;
+		if (GetGlobalTimeMS() > m_dwLoginTimer)
+			m_nLoginState = LoginState::Fadeout;
 
-		if ( pConnectingLabel)
-			pConnectingLabel->Show( false);
+		if (pConnectingLabel)
+			pConnectingLabel->Show(false);
 	}
 	// Fade out
-	else if ( m_nLoginState == LOGINSTATE_FADEOUT)
+	else if (m_nLoginState == LoginState::Fadeout)
 	{
 		m_bLoginTimeout = false;
 		pWidget->Show(false);
 
-		if ( dwCurrTime >= m_dwLoginTimer)
+		if (dwCurrTime >= m_dwLoginTimer)
 		{
 			int nOpacity = pPicture->GetOpacity() - 3;
-			if ( nOpacity < 0)
+			if (nOpacity < 0)
 				nOpacity = 0;
 
-			pPicture->SetOpacity( nOpacity);
+			pPicture->SetOpacity(nOpacity);
 
 			m_dwLoginTimer = dwCurrTime + 9;
 		}
 
-		if ( pPicture->GetOpacity() == 0)
+		if (pPicture->GetOpacity() == 0)
 		{
 			OnLoginDestroy();
-			
-			m_nLoginState = LOGINSTATE_STANDBY;
+
+			m_nLoginState = LoginState::Standby;
 			m_nState = GUNZ_CHARSELECTION;
 			OnCharSelectionCreate();
 		}
@@ -2119,153 +2119,153 @@ void ZGameInterface::OnDrawStateLobbyNStage(MDrawContext* pDC)
 	ZIDLResource* pRes = ZApplication::GetGameInterface()->GetIDLResource();
 
 	DWORD dwClock = GetGlobalTimeMS();
-	if ( (dwClock - m_dwFrameMoveClock) < 30)
+	if ((dwClock - m_dwFrameMoveClock) < 30)
 		return;
 	m_dwFrameMoveClock = dwClock;
 
 
-	if( GetState() == GUNZ_LOBBY )
+	if (GetState() == GUNZ_LOBBY)
 	{
 		// Lobby
 		char buf[512];
 		MLabel* pLabel = (MLabel*)pRes->FindWidget("Lobby_PlayerName");
 		if (pLabel)
 		{
-			sprintf_safe( buf, "%s", ZGetMyInfo()->GetCharName() );
+			sprintf_safe(buf, "%s", ZGetMyInfo()->GetCharName());
 			pLabel->SetText(buf);
 		}
 		// Clan
 		pLabel = (MLabel*)pRes->FindWidget("Lobby_PlayerSpecClan");
-		sprintf_safe( buf, "%s : %s", ZMsg( MSG_CHARINFO_CLAN), ZGetMyInfo()->GetClanName());
+		sprintf_safe(buf, "%s : %s", ZMsg(MSG_CHARINFO_CLAN), ZGetMyInfo()->GetClanName());
 		if (pLabel) pLabel->SetText(buf);
 		// LV
 		pLabel = (MLabel*)pRes->FindWidget("Lobby_PlayerSpecLevel");
-		sprintf_safe( buf, "%s : %d %s", ZMsg( MSG_CHARINFO_LEVEL), ZGetMyInfo()->GetLevel(), ZMsg(MSG_CHARINFO_LEVELMARKER));
+		sprintf_safe(buf, "%s : %d %s", ZMsg(MSG_CHARINFO_LEVEL), ZGetMyInfo()->GetLevel(), ZMsg(MSG_CHARINFO_LEVELMARKER));
 		if (pLabel) pLabel->SetText(buf);
 		// XP
 		pLabel = (MLabel*)pRes->FindWidget("Lobby_PlayerSpecXP");
-		sprintf_safe( buf, "%s : %d%%", ZMsg( MSG_CHARINFO_XP), ZGetMyInfo()->GetLevelPercent());
+		sprintf_safe(buf, "%s : %d%%", ZMsg(MSG_CHARINFO_XP), ZGetMyInfo()->GetLevelPercent());
 		if (pLabel) pLabel->SetText(buf);
 		// BP
 		pLabel = (MLabel*)pRes->FindWidget("Lobby_PlayerSpecBP");
-		sprintf_safe( buf, "%s : %d", ZMsg( MSG_CHARINFO_BOUNTY), ZGetMyInfo()->GetBP());
+		sprintf_safe(buf, "%s : %d", ZMsg(MSG_CHARINFO_BOUNTY), ZGetMyInfo()->GetBP());
 		if (pLabel) pLabel->SetText(buf);
 		// HP
 		pLabel = (MLabel*)pRes->FindWidget("Lobby_PlayerSpecHP");
-		sprintf_safe( buf, "%s : %d", ZMsg( MSG_CHARINFO_HP), ZGetMyInfo()->GetHP());
+		sprintf_safe(buf, "%s : %d", ZMsg(MSG_CHARINFO_HP), ZGetMyInfo()->GetHP());
 		if (pLabel) pLabel->SetText(buf);
 		// AP
 		pLabel = (MLabel*)pRes->FindWidget("Lobby_PlayerSpecAP");
-		sprintf_safe( buf, "%s : %d", ZMsg( MSG_CHARINFO_AP), ZGetMyInfo()->GetAP());
+		sprintf_safe(buf, "%s : %d", ZMsg(MSG_CHARINFO_AP), ZGetMyInfo()->GetAP());
 		if (pLabel) pLabel->SetText(buf);
 		// WT
 		pLabel = (MLabel*)pRes->FindWidget("Lobby_PlayerSpecWT");
-		ZMyItemList* pItems= ZGetMyInfo()->GetItemList();
-		sprintf_safe( buf, "%s : %d/%d", ZMsg( MSG_CHARINFO_WEIGHT), pItems->GetEquipedTotalWeight(), pItems->GetMaxWeight());
+		ZMyItemList* pItems = ZGetMyInfo()->GetItemList();
+		sprintf_safe(buf, "%s : %d/%d", ZMsg(MSG_CHARINFO_WEIGHT), pItems->GetEquipedTotalWeight(), pItems->GetMaxWeight());
 		if (pLabel) pLabel->SetText(buf);
 
 		pLabel = (MLabel*)pRes->FindWidget("Lobby_ChannelName");
-		sprintf_safe( buf, "%s > %s > %s", ZGetGameClient()->GetServerName(), ZMsg( MSG_WORD_LOBBY), ZGetGameClient()->GetChannelName());
-		if (pLabel) 
+		sprintf_safe(buf, "%s > %s > %s", ZGetGameClient()->GetServerName(), ZMsg(MSG_WORD_LOBBY), ZGetGameClient()->GetChannelName());
+		if (pLabel)
 			pLabel->SetText(buf);
 	}
 
 	// Stage
-	else if( GetState() == GUNZ_STAGE)
+	else if (GetState() == GUNZ_STAGE)
 	{
 		char buf[512];
-		MListBox* pListBox = (MListBox*)pRes->FindWidget( "StagePlayerList_");
+		MListBox* pListBox = (MListBox*)pRes->FindWidget("StagePlayerList_");
 		bool bShowMe = true;
-		if ( pListBox)
+		if (pListBox)
 		{
 			ZStagePlayerListItem* pItem = NULL;
-			if ( pListBox->GetSelIndex() < pListBox->GetCount())
+			if (pListBox->GetSelIndex() < pListBox->GetCount())
 			{
-				if ( pListBox->GetSelIndex() >= 0)
-					pItem = (ZStagePlayerListItem*)pListBox->Get( pListBox->GetSelIndex());
+				if (pListBox->GetSelIndex() >= 0)
+					pItem = (ZStagePlayerListItem*)pListBox->Get(pListBox->GetSelIndex());
 
-				if ( (pListBox->GetSelIndex() != -1) && (strcmp(ZGetMyInfo()->GetCharName(), pItem->GetString( 2)) != 0))
+				if ((pListBox->GetSelIndex() != -1) && (strcmp(ZGetMyInfo()->GetCharName(), pItem->GetString(2)) != 0))
 					bShowMe = false;
 			}
 
 			MLabel* pLabel = (MLabel*)pRes->FindWidget("Stage_PlayerName");
-			if ( bShowMe)
-				sprintf_safe( buf, "%s", ZGetMyInfo()->GetCharName() );
+			if (bShowMe)
+				sprintf_safe(buf, "%s", ZGetMyInfo()->GetCharName());
 			else
-				sprintf_safe( buf, "%s", pItem->GetString( 2));
+				sprintf_safe(buf, "%s", pItem->GetString(2));
 			if (pLabel) pLabel->SetText(buf);
 
 			pLabel = (MLabel*)pRes->FindWidget("Stage_PlayerSpecClan");
-			if ( bShowMe)
-				sprintf_safe( buf, "%s : %s", ZMsg( MSG_CHARINFO_CLAN), ZGetMyInfo()->GetClanName());
+			if (bShowMe)
+				sprintf_safe(buf, "%s : %s", ZMsg(MSG_CHARINFO_CLAN), ZGetMyInfo()->GetClanName());
 			else
 			{
-				if ( strcmp( pItem->GetString( 4), "") == 0)
-                    sprintf_safe( buf, "%s :", ZMsg( MSG_CHARINFO_CLAN));
+				if (strcmp(pItem->GetString(4), "") == 0)
+					sprintf_safe(buf, "%s :", ZMsg(MSG_CHARINFO_CLAN));
 				else
-                    sprintf_safe( buf, "%s : %s", ZMsg( MSG_CHARINFO_CLAN), pItem->GetString( 4));
+					sprintf_safe(buf, "%s : %s", ZMsg(MSG_CHARINFO_CLAN), pItem->GetString(4));
 			}
 			if (pLabel) pLabel->SetText(buf);
 
 			pLabel = (MLabel*)pRes->FindWidget("Stage_PlayerSpecLevel");
-			if ( bShowMe)
-				sprintf_safe( buf, "%s : %d %s", ZMsg( MSG_CHARINFO_LEVEL), ZGetMyInfo()->GetLevel(), ZMsg(MSG_CHARINFO_LEVELMARKER));
+			if (bShowMe)
+				sprintf_safe(buf, "%s : %d %s", ZMsg(MSG_CHARINFO_LEVEL), ZGetMyInfo()->GetLevel(), ZMsg(MSG_CHARINFO_LEVELMARKER));
 			else
-				sprintf_safe( buf, "%s : %s %s", ZMsg( MSG_CHARINFO_LEVEL), pItem->GetString( 1), ZMsg(MSG_CHARINFO_LEVELMARKER));
+				sprintf_safe(buf, "%s : %s %s", ZMsg(MSG_CHARINFO_LEVEL), pItem->GetString(1), ZMsg(MSG_CHARINFO_LEVELMARKER));
 			if (pLabel) pLabel->SetText(buf);
 
 			// XP
 			pLabel = (MLabel*)pRes->FindWidget("Stage_PlayerSpecXP");
-			if ( bShowMe)
-				sprintf_safe( buf, "%s : %d%%", ZMsg( MSG_CHARINFO_XP), ZGetMyInfo()->GetLevelPercent());
+			if (bShowMe)
+				sprintf_safe(buf, "%s : %d%%", ZMsg(MSG_CHARINFO_XP), ZGetMyInfo()->GetLevelPercent());
 			else
-				sprintf_safe( buf, "%s : -", ZMsg( MSG_CHARINFO_XP));
+				sprintf_safe(buf, "%s : -", ZMsg(MSG_CHARINFO_XP));
 			if (pLabel)
 			{
 				pLabel->SetText(buf);
-				pLabel->Enable( bShowMe);
+				pLabel->Enable(bShowMe);
 			}
 
 			// BP
 			pLabel = (MLabel*)pRes->FindWidget("Stage_PlayerSpecBP");
-			if ( bShowMe)
-				sprintf_safe( buf, "%s : %d", ZMsg( MSG_CHARINFO_BOUNTY), ZGetMyInfo()->GetBP());
+			if (bShowMe)
+				sprintf_safe(buf, "%s : %d", ZMsg(MSG_CHARINFO_BOUNTY), ZGetMyInfo()->GetBP());
 			else
-				sprintf_safe( buf, "%s : -", ZMsg( MSG_CHARINFO_BOUNTY));
+				sprintf_safe(buf, "%s : -", ZMsg(MSG_CHARINFO_BOUNTY));
 			if (pLabel)
 			{
 				pLabel->SetText(buf);
-				pLabel->Enable( bShowMe);
+				pLabel->Enable(bShowMe);
 			}
 
 			// HP
 			pLabel = (MLabel*)pRes->FindWidget("Stage_PlayerSpecHP");
-			if ( bShowMe)
-				sprintf_safe( buf, "%s : %d", ZMsg( MSG_CHARINFO_HP), ZGetMyInfo()->GetHP());
+			if (bShowMe)
+				sprintf_safe(buf, "%s : %d", ZMsg(MSG_CHARINFO_HP), ZGetMyInfo()->GetHP());
 			else
-				sprintf_safe( buf, "%s : -", ZMsg( MSG_CHARINFO_HP));
+				sprintf_safe(buf, "%s : -", ZMsg(MSG_CHARINFO_HP));
 			if (pLabel)
 			{
 				pLabel->SetText(buf);
-				pLabel->Enable( bShowMe);
+				pLabel->Enable(bShowMe);
 			}
 
 			// AP
 			pLabel = (MLabel*)pRes->FindWidget("Stage_PlayerSpecAP");
-			if ( bShowMe)
-				sprintf_safe( buf, "%s : %d", ZMsg( MSG_CHARINFO_AP), ZGetMyInfo()->GetAP());
+			if (bShowMe)
+				sprintf_safe(buf, "%s : %d", ZMsg(MSG_CHARINFO_AP), ZGetMyInfo()->GetAP());
 			else
-				sprintf_safe( buf, "%s : -", ZMsg( MSG_CHARINFO_AP));
+				sprintf_safe(buf, "%s : -", ZMsg(MSG_CHARINFO_AP));
 			if (pLabel)
 			{
 				pLabel->SetText(buf);
-				pLabel->Enable( bShowMe);
+				pLabel->Enable(bShowMe);
 			}
 
 			// WT
 			pLabel = (MLabel*)pRes->FindWidget("Stage_PlayerSpecWT");
-			ZMyItemList* pItems= ZGetMyInfo()->GetItemList();
-			if ( bShowMe)
+			ZMyItemList* pItems = ZGetMyInfo()->GetItemList();
+			if (bShowMe)
 				sprintf_safe(buf, "%s : %d/%d", ZMsg(MSG_CHARINFO_WEIGHT),
 					pItems->GetEquipedTotalWeight(), pItems->GetMaxWeight());
 			else
@@ -2273,62 +2273,62 @@ void ZGameInterface::OnDrawStateLobbyNStage(MDrawContext* pDC)
 			if (pLabel)
 			{
 				pLabel->SetText(buf);
-				pLabel->Enable( bShowMe);
+				pLabel->Enable(bShowMe);
 			}
 		}
 
 		ZApplication::GetStageInterface()->OnDrawStartMovieOfQuest();
 
-		int nOpacity = 90.0f * ( sin( GetGlobalTimeMS() * 0.003f) + 1) + 75;
+		int nOpacity = 90.0f * (sin(GetGlobalTimeMS() * 0.003f) + 1) + 75;
 
-		MLabel* pLabel = (MLabel*)pRes->FindWidget( "Stage_SenarioName");
-		MPicture* pPicture = (MPicture*)pRes->FindWidget( "Stage_Lights0");
-		if ( pPicture)
+		MLabel* pLabel = (MLabel*)pRes->FindWidget("Stage_SenarioName");
+		MPicture* pPicture = (MPicture*)pRes->FindWidget("Stage_Lights0");
+		if (pPicture)
 		{
-			pPicture->SetOpacity( nOpacity);
+			pPicture->SetOpacity(nOpacity);
 		}
-		pPicture = (MPicture*)pRes->FindWidget( "Stage_Lights1");
-		if ( pPicture)
+		pPicture = (MPicture*)pRes->FindWidget("Stage_Lights1");
+		if (pPicture)
 		{
-			pPicture->SetOpacity( nOpacity);
+			pPicture->SetOpacity(nOpacity);
 		}
 
-		MWidget* pWidget = pRes->FindWidget( "Stage_ItemListView");
-		if ( !pWidget)
+		MWidget* pWidget = pRes->FindWidget("Stage_ItemListView");
+		if (!pWidget)
 			return;
 
 		int nEndPos = ZApplication::GetStageInterface()->m_nListFramePos;
 		MRECT rect = pWidget->GetRect();
-		if ( rect.x == nEndPos)
+		if (rect.x == nEndPos)
 			return;
 
-		int nNewPos = rect.x + ( nEndPos - rect.x) * 0.25;
-		if ( nNewPos == rect.x)		// not changed
+		int nNewPos = rect.x + (nEndPos - rect.x) * 0.25;
+		if (nNewPos == rect.x)		// not changed
 			rect.x = nEndPos;
 		else						// changed
 			rect.x = nNewPos;
 
-		pWidget->SetBounds( rect);
+		pWidget->SetBounds(rect);
 
-		if ( rect.x == 0)
+		if (rect.x == 0)
 		{
-			pWidget = pRes->FindWidget( "Stage_CharacterInfo");
-			if ( pWidget)
-				pWidget->Enable( false);
+			pWidget = pRes->FindWidget("Stage_CharacterInfo");
+			if (pWidget)
+				pWidget->Enable(false);
 		}
 	}
 }
 
 void ZGameInterface::OnDrawStateCharSelection(MDrawContext* pDC)
 {
-	if ( m_pBackground && m_pCharacterSelectView)
+	if (m_pBackground && m_pCharacterSelectView)
 	{
 		m_pBackground->LoadMesh();
 		m_pBackground->Draw();
 		m_pCharacterSelectView->Draw();
 
-		// Draw effects(smoke, cloud)
-		ZGetEffectManager()->Draw( GetGlobalTimeMS());
+		// Draw effects (smoke, cloud)
+		ZGetEffectManager()->Draw(GetGlobalTimeMS());
 
 		// Draw maiet logo effect
 		ZGetScreenEffectManager()->DrawEffects();
@@ -2339,9 +2339,9 @@ void ZGameInterface::OnDraw(MDrawContext *pDC)
 {
 	m_nDrawCount++;
 
-	__BP(11,"ZGameInterface::OnDraw");
+	__BP(11, "ZGameInterface::OnDraw");
 
-	if(m_bLoading) 
+	if (m_bLoading)
 	{
 		__EP(11);
 		return;
@@ -2359,51 +2359,36 @@ void ZGameInterface::OnDraw(MDrawContext *pDC)
 	switch (GetState())
 	{
 	case GUNZ_GAME:
-		{
-			OnDrawStateGame(pDC);
-		}
-		break;
+	{
+		OnDrawStateGame(pDC);
+	}
+	break;
 	case GUNZ_LOGIN:
 	case GUNZ_NETMARBLELOGIN:
-		{
-			OnDrawStateLogin(pDC);
-		}
-		break;
+	{
+		OnDrawStateLogin(pDC);
+	}
+	break;
 	case GUNZ_LOBBY:
 	case GUNZ_STAGE:
-		{
-			OnDrawStateLobbyNStage(pDC);
-			if(GetState() == GUNZ_LOBBY)
-				GetRGMain().OnDrawLobby(pDC);
-		}
-		break;
+	{
+		OnDrawStateLobbyNStage(pDC);
+		if (GetState() == GUNZ_LOBBY)
+			GetRGMain().OnDrawLobby(pDC);
+	}
+	break;
 	case GUNZ_CHARSELECTION:
 	case GUNZ_CHARCREATION:
-		{
-			OnDrawStateCharSelection(pDC);
-		}
-		break;
-	}
-
-#ifdef LOCALE_KOREA
-	if ( GetGlobalTimeMS() >= m_dwTimeCount)
 	{
-		m_dwTimeCount += 3600000;
-		m_dwHourCount++;
-
-		char szText[ 256];
-		if ( m_dwHourCount > 3)
-			sprintf_safe( szText, "%d 시간이 경과했습니다. 잠시 쉬었다 하시기 바랍니다.", m_dwHourCount);
-		else
-			sprintf_safe( szText, "%d 시간이 경과 하였습니다.", m_dwHourCount);
-		ZChatOutput( MCOLOR(ZCOLOR_CHAT_SYSTEM), szText);
+		OnDrawStateCharSelection(pDC);
 	}
-#endif
+	break;
+	}
 
 	__EP(11);
 }
 
-void ZGameInterface::TestChangePartsAll() 
+void ZGameInterface::TestChangePartsAll()
 {
 }
 
@@ -2412,14 +2397,14 @@ void ZGameInterface::TestChangeParts(int mode) {
 #ifndef _PUBLISH
 	RMeshPartsType ptype = eq_parts_etc;
 
- 		 if(mode==0)	{ ptype = eq_parts_chest;  }
-	else if(mode==1)	{ ptype = eq_parts_head	;  }
-	else if(mode==2)	{ ptype = eq_parts_hands;  }
-	else if(mode==3)	{ ptype = eq_parts_legs	;  }
-	else if(mode==4)	{ ptype = eq_parts_feet	;  }
-	else if(mode==5)	{ ptype = eq_parts_face	;  }
+	if (mode == 0) { ptype = eq_parts_chest; }
+	else if (mode == 1) { ptype = eq_parts_head; }
+	else if (mode == 2) { ptype = eq_parts_hands; }
+	else if (mode == 3) { ptype = eq_parts_legs; }
+	else if (mode == 4) { ptype = eq_parts_feet; }
+	else if (mode == 5) { ptype = eq_parts_face; }
 
-	ZPostChangeParts(ptype,1);
+	ZPostChangeParts(ptype, 1);
 
 #endif
 
@@ -2435,7 +2420,7 @@ void ZGameInterface::TestChangeWeapon(RVisualMesh* pVMesh)
 	static int nWeaponIndex = 0;
 
 	int nItemID = 0;
-	switch(nWeaponIndex)
+	switch (nWeaponIndex)
 	{
 	case 0:
 		nItemID = 1;		// katana
@@ -2466,7 +2451,7 @@ void ZGameInterface::TestChangeWeapon(RVisualMesh* pVMesh)
 		if (m_pMyCharacter == NULL) return;
 
 
-		switch(nWeaponIndex)
+		switch (nWeaponIndex)
 		{
 		case 0:
 		case 1:
@@ -2514,7 +2499,7 @@ void ZGameInterface::RespawnMyCharacter()
 	if (ZApplication::GetGame() == NULL) return;
 
 	m_pMyCharacter->Revival();
-	rvector pos=rvector(0,0,0), dir=rvector(0,1,0);
+	rvector pos = rvector(0, 0, 0), dir = rvector(0, 1, 0);
 
 	ZMapSpawnData* pSpawnData = ZApplication::GetGame()->GetMapDesc()->GetSpawnManager()->GetSoloRandomData();
 	if (pSpawnData != NULL)
@@ -2529,23 +2514,23 @@ void ZGameInterface::RespawnMyCharacter()
 
 bool ZGameInterface::OnGlobalEvent(MEvent* pEvent)
 {
-	if ((ZGetGameInterface()->GetState() == GUNZ_GAME)) 
+	if ((ZGetGameInterface()->GetState() == GUNZ_GAME))
 		return ZGameInput::OnEvent(pEvent);
 
 #ifndef _PUBLISH
-	switch(pEvent->nMessage){
-		case MWM_CHAR:
-		{
-			switch (pEvent->nKey) {
-			case '`' :
-				if (ZApplication::GetInstance()->GetLaunchMode() == ZApplication::ZLAUNCH_MODE_STANDALONE_DEVELOP)
-				{
-					ZGetConsole()->Show(!ZGetConsole()->IsVisible());
-					ZGetConsole()->SetZOrder(MZ_TOP);
-				}
-				break;
+	switch (pEvent->nMessage) {
+	case MWM_CHAR:
+	{
+		switch (pEvent->nKey) {
+		case '`':
+			if (ZApplication::GetInstance()->GetLaunchMode() == ZApplication::ZLAUNCH_MODE_STANDALONE_DEVELOP)
+			{
+				ZGetConsole()->Show(!ZGetConsole()->IsVisible());
+				ZGetConsole()->SetZOrder(MZ_TOP);
 			}
-		}break;
+			break;
+		}
+	}break;
 	}
 #endif
 	return false;
@@ -2553,32 +2538,32 @@ bool ZGameInterface::OnGlobalEvent(MEvent* pEvent)
 
 bool ZGameInterface::OnDebugEvent(MEvent* pEvent, MListener* pListener)
 {
-	switch(pEvent->nMessage){
+	switch (pEvent->nMessage) {
 	case MWM_KEYDOWN:
+	{
+		switch (pEvent->nKey)
 		{
-			switch (pEvent->nKey)
+		case VK_F10:
+			m_pLogFrame->Show(!m_pLogFrame->IsVisible());
+			return true;
+		case VK_NUMPAD8:
+		{
+			if (GetState() == GUNZ_LOBBY)
 			{
-			case VK_F10:
-				m_pLogFrame->Show(!m_pLogFrame->IsVisible());
-				return true;
-			case VK_NUMPAD8:
+				if (ZGetCharacterViewList(GUNZ_LOBBY) != NULL)
 				{
-					if (GetState() == GUNZ_LOBBY)
-					{
-						if (ZGetCharacterViewList(GUNZ_LOBBY) != NULL)
-						{
-							RVisualMesh* pVMesh = 
-								ZGetCharacterViewList(GUNZ_LOBBY)->Get(ZGetGameClient()->GetPlayerUID())->GetVisualMesh();
+					RVisualMesh* pVMesh =
+						ZGetCharacterViewList(GUNZ_LOBBY)->Get(ZGetGameClient()->GetPlayerUID())->GetVisualMesh();
 
-							TestChangeWeapon(pVMesh);
-						}
-					}
-
+					TestChangeWeapon(pVMesh);
 				}
-				break;
 			}
+
 		}
 		break;
+		}
+	}
+	break;
 	}
 	return false;
 }
@@ -2594,7 +2579,7 @@ bool ZGameInterface::OnEvent(MEvent* pEvent, MListener* pListener)
 
 bool ZGameInterface::OnCommand(MWidget* pWidget, const char* szMessage)
 {
-	if (pWidget==m_pPlayerMenu) {
+	if (pWidget == m_pPlayerMenu) {
 		MMenuItem* pItem = (MMenuItem*)pWidget;
 
 
@@ -2613,7 +2598,7 @@ void ZGameInterface::ChangeWeapon(ZChangeWeaponType nType)
 
 	if (pChar->m_pVMesh == NULL) return;
 
-	if (pChar->IsDie() ) return;
+	if (pChar->IsDie()) return;
 
 	if (m_pGame->GetMatch()->IsRuleGladiator() && !pChar->IsAdmin())
 		return;
@@ -2631,12 +2616,12 @@ void ZGameInterface::ChangeWeapon(ZChangeWeaponType nType)
 		int nPos = -1;
 		int ItemQueue[MMCIP_END];
 
-		for(int i=MMCIP_MELEE; i<MMCIP_END; i++)
+		for (int i = MMCIP_MELEE; i < MMCIP_END; i++)
 		{
 			if (!pChar->GetItems()->GetItem((MMatchCharItemParts)i)->IsEmpty())
 			{
-				if(pChar->GetItems()->GetSelectedWeaponParts() == i)
-					nPos=nHasItemCount;
+				if (pChar->GetItems()->GetSelectedWeaponParts() == i)
+					nPos = nHasItemCount;
 
 				ItemQueue[nHasItemCount++] = i;
 			}
@@ -2649,16 +2634,17 @@ void ZGameInterface::ChangeWeapon(ZChangeWeaponType nType)
 			if (nHasItemCount <= 1) return;
 
 			int nNewPos = nPos - 1;
-			while(nNewPos != nPos) {
-				if (nNewPos < 0) nNewPos = nHasItemCount-1;
+			while (nNewPos != nPos) {
+				if (nNewPos < 0) nNewPos = nHasItemCount - 1;
 
 				MMatchCharItemParts nPart = (MMatchCharItemParts)ItemQueue[nNewPos];
-				if ( (nPart == MMCIP_CUSTOM1) || (nPart == MMCIP_CUSTOM2) ) {
+				if ((nPart == MMCIP_CUSTOM1) || (nPart == MMCIP_CUSTOM2)) {
 					ZItem* pItem = g_pGame->m_pMyCharacter->GetItems()->GetItem(nPart);
 					if (pItem && pItem->GetBulletAMagazine() > 0) {
 						break;
 					}
-				} else {
+				}
+				else {
 					break;
 				}
 				nNewPos = nNewPos - 1;
@@ -2670,16 +2656,17 @@ void ZGameInterface::ChangeWeapon(ZChangeWeaponType nType)
 			if (nHasItemCount <= 1) return;
 
 			int nNewPos = nPos + 1;
-			while(nNewPos != nPos) {
+			while (nNewPos != nPos) {
 				if (nNewPos >= nHasItemCount) nNewPos = 0;
 
 				MMatchCharItemParts nPart = (MMatchCharItemParts)ItemQueue[nNewPos];
-				if ( (nPart == MMCIP_CUSTOM1) || (nPart == MMCIP_CUSTOM2) ) {
+				if ((nPart == MMCIP_CUSTOM1) || (nPart == MMCIP_CUSTOM2)) {
 					ZItem* pItem = g_pGame->m_pMyCharacter->GetItems()->GetItem(nPart);
 					if (pItem && pItem->GetBulletAMagazine() > 0) {
 						break;
 					}
-				} else {
+				}
+				else {
 					break;
 				}
 				nNewPos = nNewPos + 1;
@@ -2710,7 +2697,7 @@ void ZGameInterface::ChangeWeapon(ZChangeWeaponType nType)
 			break;
 		}
 
-		if ( (nParts == MMCIP_CUSTOM1) || (nParts == MMCIP_CUSTOM2) ) {
+		if ((nParts == MMCIP_CUSTOM1) || (nParts == MMCIP_CUSTOM2)) {
 			ZItem* pItem = pChar->GetItems()->GetItem((MMatchCharItemParts)nParts);
 			if (pItem->GetBulletAMagazine() <= 0)
 				return;
@@ -2720,19 +2707,19 @@ void ZGameInterface::ChangeWeapon(ZChangeWeaponType nType)
 	if (nParts < 0) return;
 	if (pChar->GetItems()->GetSelectedWeaponParts() == nParts) return;
 
-	if(bWheel && (pChar->GetStateUpper() == ZC_STATE_UPPER_LOAD && pChar->IsUpperPlayDone() == false ))
+	if (bWheel && (pChar->GetStateUpper() == ZC_STATE_UPPER_LOAD && pChar->IsUpperPlayDone() == false))
 		return;
 
-	if (pChar->m_bWallHang || pChar->m_bShot || pChar->m_bShotReturn || pChar->m_bTumble 
-		|| pChar->m_bSkill || pChar->m_bGuard || pChar->m_bBlast || 	pChar->m_bBlastFall 
-		|| pChar->m_bBlastDrop || 	pChar->m_bBlastStand || pChar->m_bBlastAirmove
+	if (pChar->m_bWallHang || pChar->m_bShot || pChar->m_bShotReturn || pChar->m_bTumble
+		|| pChar->m_bSkill || pChar->m_bGuard || pChar->m_bBlast || pChar->m_bBlastFall
+		|| pChar->m_bBlastDrop || pChar->m_bBlastStand || pChar->m_bBlastAirmove
 		|| pChar->m_bSlash || pChar->m_bJumpSlash || pChar->m_bJumpSlashLanding
-		|| (pChar->GetStateUpper() == ZC_STATE_UPPER_SHOT && pChar->IsUpperPlayDone() == false ))
-		{
-			m_bReservedWeapon = true;
-			m_ReservedWeapon = nType;
-			return;
-		}
+		|| (pChar->GetStateUpper() == ZC_STATE_UPPER_SHOT && pChar->IsUpperPlayDone() == false))
+	{
+		m_bReservedWeapon = true;
+		m_ReservedWeapon = nType;
+		return;
+	}
 
 	m_bReservedWeapon = false;
 	ZPostChangeWeapon(nParts);
@@ -2744,8 +2731,8 @@ void ZGameInterface::ChangeWeapon(ZChangeWeaponType nType)
 
 void ZGameInterface::OnGameUpdate(float fElapsed)
 {
-	__BP(12,"ZGameInterface::OnGameUpdate");
-	if(m_pGame==NULL) return;
+	__BP(12, "ZGameInterface::OnGameUpdate");
+	if (m_pGame == NULL) return;
 
 	if (m_pGameInput) m_pGameInput->Update(fElapsed);
 
@@ -2753,7 +2740,7 @@ void ZGameInterface::OnGameUpdate(float fElapsed)
 
 	if (m_pCombatInterface) m_pCombatInterface->Update();
 
-	if(m_bReservedWeapon)
+	if (m_bReservedWeapon)
 		ChangeWeapon(m_ReservedWeapon);
 
 	__EP(12);
@@ -2769,58 +2756,58 @@ void ZGameInterface::OnReplay()
 
 bool ZGameInterface::Update(float fElapsed)
 {
-	if ( m_pBackground && ( ( GetState() == GUNZ_CHARSELECTION) || ( GetState() == GUNZ_CHARCREATION)))
-		m_pBackground->OnUpdate( fElapsed);
+	if (m_pBackground && ((GetState() == GUNZ_CHARSELECTION) || (GetState() == GUNZ_CHARCREATION)))
+		m_pBackground->OnUpdate(fElapsed);
 
 	if (GetState() == GUNZ_LOBBY)
 	{
 		if (ZGetApplication()->GetLaunchMode() == ZApplication::ZLAUNCH_MODE_STANDALONE_REPLAY)
 		{
-			ShowWidget( "Lobby", false);
-			ShowWidget( "ReplayConfirm", true);
+			ShowWidget("Lobby", false);
+			ShowWidget("ReplayConfirm", true);
 			return false;
 		}
 	}
 
-	__BP(13,"ZGameInterface::Update");
+	__BP(13, "ZGameInterface::Update");
 
 	ZGetOptionInterface()->Update();
 
-	__BP(14,"ZGameInterface::GameClient Run & update");
+	__BP(14, "ZGameInterface::GameClient Run & update");
 	if (g_pGameClient != NULL) g_pGameClient->Run();
 	g_pGameClient->Tick();
 	__EP(14);
 
- 	if(!m_bLoading) {
-		if(GetState()==GUNZ_GAME){
+	if (!m_bLoading) {
+		if (GetState() == GUNZ_GAME) {
 			OnGameUpdate(fElapsed);
 		}
-		else{
+		else {
 #ifdef _BIRDTEST 
-			if (GetState()==GUNZ_BIRDTEST) OnBirdTestUpdate();
+			if (GetState() == GUNZ_BIRDTEST) OnBirdTestUpdate();
 #endif
 		}
 	}
 
-	if(GetState()==GUNZ_LOBBY && m_bWaitingArrangedGame) {
+	if (GetState() == GUNZ_LOBBY && m_bWaitingArrangedGame) {
 		MLabel *pLabel = (MLabel*)m_IDLResource.FindWidget("LobbyWaitingArrangedGameLabel");
-		if(pLabel) {
-			int nCount = (GetGlobalTimeMS()/500)%5;
+		if (pLabel) {
+			int nCount = (GetGlobalTimeMS() / 500) % 5;
 			char dots[10];
-			for(int i=0;i<nCount;i++) {
-				dots[i]='.';
+			for (int i = 0; i < nCount; i++) {
+				dots[i] = '.';
 			}
-			dots[nCount]=0;
+			dots[nCount] = 0;
 
 			char szBuffer[256];
-			sprintf_safe(szBuffer,"%s%s", ZMsg( MSG_WORD_FINDTEAM), dots);
+			sprintf_safe(szBuffer, "%s%s", ZMsg(MSG_WORD_FINDTEAM), dots);
 			pLabel->SetText(szBuffer);
 		}
 	}
 
 	UpdateCursorEnable();
 
-	if(g_pGame!=NULL && m_bLeaveBattleReserved && (m_dwLeaveBattleTime < GetGlobalTimeMS()))
+	if (g_pGame != NULL && m_bLeaveBattleReserved && (m_dwLeaveBattleTime < GetGlobalTimeMS()))
 		LeaveBattle();
 
 	__EP(13);
@@ -2835,7 +2822,7 @@ void ZGameInterface::OnResetCursor()
 
 void ZGameInterface::SetCursorEnable(bool bEnable)
 {
-	if(m_bCursor==bEnable) return;
+	if (m_bCursor == bEnable) return;
 
 	m_bCursor = bEnable;
 	MCursorSystem::Show(bEnable);
@@ -2843,10 +2830,10 @@ void ZGameInterface::SetCursorEnable(bool bEnable)
 
 void ZGameInterface::UpdateCursorEnable()
 {
-	
-	if( GetState()!=GUNZ_GAME ||
+
+	if (GetState() != GUNZ_GAME ||
 		(GetCombatInterface() && GetCombatInterface()->IsShowResult()) ||
-		IsMenuVisible() || 
+		IsMenuVisible() ||
 		m_pMsgBox->IsVisible() ||
 		m_pConfirmMsgBox->IsVisible() ||
 		GetRGMain().IsCursorEnabled()
@@ -2854,12 +2841,12 @@ void ZGameInterface::UpdateCursorEnable()
 		SetCursorEnable(true);
 	else
 	{
-		MWidget* pWidget = m_IDLResource.FindWidget( "112Confirm");
-		if ( pWidget && pWidget->IsVisible())
-			SetCursorEnable( true);
+		MWidget* pWidget = m_IDLResource.FindWidget("112Confirm");
+		if (pWidget && pWidget->IsVisible())
+			SetCursorEnable(true);
 
 		else
-			SetCursorEnable( false);
+			SetCursorEnable(false);
 	}
 }
 
@@ -2868,13 +2855,13 @@ void ZGameInterface::SetMapThumbnail(const char* szMapName)
 	SAFE_DELETE(m_pThumbnailBitmap);
 
 	char szThumbnail[256];
-	sprintf_safe(szThumbnail, "maps/%s/%s.rs.bmp", szMapName,szMapName);
+	sprintf_safe(szThumbnail, "maps/%s/%s.rs.bmp", szMapName, szMapName);
 
-	m_pThumbnailBitmap=Mint::GetInstance()->OpenBitmap(szThumbnail);
-	if(!m_pThumbnailBitmap)
+	m_pThumbnailBitmap = Mint::GetInstance()->OpenBitmap(szThumbnail);
+	if (!m_pThumbnailBitmap)
 	{
-		sprintf_safe(szThumbnail, "maps/%s/%s.bmp", szMapName,szMapName);
-		m_pThumbnailBitmap=Mint::GetInstance()->OpenBitmap(szThumbnail);
+		sprintf_safe(szThumbnail, "maps/%s/%s.bmp", szMapName, szMapName);
+		m_pThumbnailBitmap = Mint::GetInstance()->OpenBitmap(szThumbnail);
 	}
 }
 
@@ -2886,25 +2873,25 @@ void ZGameInterface::ClearMapThumbnail()
 
 void ZGameInterface::Reload()
 {
-	if(!g_pGame->m_pMyCharacter->GetItems()->GetSelectedWeapon()) return;
+	if (!g_pGame->m_pMyCharacter->GetItems()->GetSelectedWeapon()) return;
 	MMatchItemDesc* pSelectedItemDesc = g_pGame->m_pMyCharacter->GetItems()->GetSelectedWeapon()->GetDesc();
 
 	if (pSelectedItemDesc == NULL) return;
 
 	if (pSelectedItemDesc->m_nType != MMIT_RANGE)  return;
 
-	if(g_pGame->m_pMyCharacter->GetItems()->GetSelectedWeapon()->isReloadable()==false) return;
+	if (g_pGame->m_pMyCharacter->GetItems()->GetSelectedWeapon()->isReloadable() == false) return;
 
 	ZMyCharacter* pChar = g_pGame->m_pMyCharacter;
 
-	if( pChar->m_bBlast || 
-		pChar->m_bBlastFall || 
-		pChar->m_bBlastDrop || 
-		pChar->m_bBlastStand || 
-		pChar->m_bBlastAirmove )
+	if (pChar->m_bBlast ||
+		pChar->m_bBlastFall ||
+		pChar->m_bBlastDrop ||
+		pChar->m_bBlastStand ||
+		pChar->m_bBlastAirmove)
 		return;
 
-	if( pChar->GetStateUpper()==ZC_STATE_UPPER_RELOAD) return ;
+	if (pChar->GetStateUpper() == ZC_STATE_UPPER_RELOAD) return;
 
 	pChar->m_bSpMotion = false;
 
@@ -2918,76 +2905,75 @@ void ZGameInterface::SaveScreenShot()
 #define SCREENSHOT_DELAY		2000
 
 	// 2초 딜레이
-	if ((nNowTime-st_nLastTime) < SCREENSHOT_DELAY)	return;
+	if ((nNowTime - st_nLastTime) < SCREENSHOT_DELAY)	return;
 	st_nLastTime = nNowTime;
 
 
-	int nsscount=0;
+	int nsscount = 0;
 	char screenshotfilename[_MAX_PATH];
 	char screenshotfoldername[_MAX_PATH];
 	char screenshotfilenameJPG[_MAX_PATH];
 	char screenshotfilenameBMP[_MAX_PATH];
 
 	TCHAR szPath[MAX_PATH];
-	if(GetMyDocumentsPath(szPath)) {
-		strcpy_safe(screenshotfoldername,szPath);
-		strcat_safe(screenshotfoldername,GUNZ_FOLDER);
-		CreatePath( screenshotfoldername );
-		strcat_safe(screenshotfoldername,SCREENSHOT_FOLDER);
-		CreatePath( screenshotfoldername );
+	if (GetMyDocumentsPath(szPath)) {
+		strcpy_safe(screenshotfoldername, szPath);
+		strcat_safe(screenshotfoldername, GUNZ_FOLDER);
+		CreatePath(screenshotfoldername);
+		strcat_safe(screenshotfoldername, SCREENSHOT_FOLDER);
+		CreatePath(screenshotfoldername);
 	}
 
 	do {
-		sprintf_safe(screenshotfilename,"%s/Gunz%03d" , screenshotfoldername , nsscount);
-		sprintf_safe(screenshotfilenameJPG,"%s/Gunz%03d.jpg" , screenshotfoldername , nsscount);
-		sprintf_safe(screenshotfilenameBMP,"%s/Gunz%03d.bmp" , screenshotfoldername , nsscount);
+		sprintf_safe(screenshotfilename, "%s/Gunz%03d", screenshotfoldername, nsscount);
+		sprintf_safe(screenshotfilenameJPG, "%s/Gunz%03d.jpg", screenshotfoldername, nsscount);
+		sprintf_safe(screenshotfilenameBMP, "%s/Gunz%03d.bmp", screenshotfoldername, nsscount);
 		nsscount++;
-	}
-	while( (IsExist(screenshotfilenameJPG)||(IsExist(screenshotfilenameBMP))) && nsscount<1000);
+	} while ((IsExist(screenshotfilenameJPG) || (IsExist(screenshotfilenameBMP))) && nsscount < 1000);
 
 	LPBYTE data = NULL;
-	LPDIRECT3DSURFACE9 frontbuffer=NULL;
+	LPDIRECT3DSURFACE9 frontbuffer = NULL;
 
-	if(nsscount<1000)
+	if (nsscount < 1000)
 	{
 
 		HRESULT hr;
-		LPDIRECT3DDEVICE9 pDevice=RGetDevice();
+		LPDIRECT3DDEVICE9 pDevice = RGetDevice();
 
 		D3DDISPLAYMODE d3ddm;
-		pDevice->GetDisplayMode( 0,&d3ddm );
+		pDevice->GetDisplayMode(0, &d3ddm);
 
-		hr=pDevice->CreateOffscreenPlainSurface( d3ddm.Width,d3ddm.Height,D3DFMT_A8R8G8B8,D3DPOOL_SCRATCH,&frontbuffer ,NULL);
-		hr=pDevice->GetFrontBufferData(0,frontbuffer); 
-		
-		_ASSERT(hr==D3D_OK);
+		hr = pDevice->CreateOffscreenPlainSurface(d3ddm.Width, d3ddm.Height, D3DFMT_A8R8G8B8, D3DPOOL_SCRATCH, &frontbuffer, NULL);
+		hr = pDevice->GetFrontBufferData(0, frontbuffer);
+
+		_ASSERT(hr == D3D_OK);
 
 		RECT rt;
-		GetWindowRect(g_hWnd,&rt);
+		GetWindowRect(g_hWnd, &rt);
 
 		D3DLOCKED_RECT LRECT;
-		if(frontbuffer->LockRect(&LRECT,&rt,NULL)==D3D_OK)
+		if (frontbuffer->LockRect(&LRECT, &rt, NULL) == D3D_OK)
 		{
-			int nWidth=rt.right-rt.left;
-			int nHeight=rt.bottom-rt.top;
+			int nWidth = rt.right - rt.left;
+			int nHeight = rt.bottom - rt.top;
 
-			int pitch=LRECT.Pitch;
-			LPBYTE source=(LPBYTE)LRECT.pBits;
+			int pitch = LRECT.Pitch;
+			LPBYTE source = (LPBYTE)LRECT.pBits;
 
-			data=new BYTE[nWidth*nHeight*4];
-			for(int i=0;i<nHeight;i++)
+			data = new BYTE[nWidth*nHeight * 4];
+			for (int i = 0; i < nHeight; i++)
 			{
-				memcpy(data+i*nWidth*4,source+pitch*i,nWidth*4);
+				memcpy(data + i*nWidth * 4, source + pitch*i, nWidth * 4);
 			}
 
-			bool bSuccess = RScreenShot(nWidth,nHeight,data, screenshotfilename);
-			if(!bSuccess) goto SCREENSHOTERROR;
+			bool bSuccess = RScreenShot(nWidth, nHeight, data, screenshotfilename);
+			if (!bSuccess) goto SCREENSHOTERROR;
 
 			char szOutputFilename[256];
-			sprintf_safe(szOutputFilename,GUNZ_FOLDER SCREENSHOT_FOLDER"/Gunz%03d.jpg" , nsscount-1);
+			sprintf_safe(szOutputFilename, GUNZ_FOLDER SCREENSHOT_FOLDER"/Gunz%03d.jpg", nsscount - 1);
 
 			char szOutput[256];
-			ZTransMsg( szOutput,MSG_SCREENSHOT_SAVED,1,szOutputFilename );
+			ZTransMsg(szOutput, MSG_SCREENSHOT_SAVED, 1, szOutputFilename);
 			ZChatOutput(MCOLOR(ZCOLOR_CHAT_SYSTEM), szOutput);
 
 			SAFE_DELETE(data);
@@ -3000,8 +2986,8 @@ SCREENSHOTERROR:
 	SAFE_DELETE(data);
 	SAFE_RELEASE(frontbuffer);
 
-	ZChatOutput(MCOLOR(ZCOLOR_CHAT_SYSTEM), 
-		ZMsg(MSG_SCREENSHOT_CANT_SAVE) );
+	ZChatOutput(MCOLOR(ZCOLOR_CHAT_SYSTEM),
+		ZMsg(MSG_SCREENSHOT_CANT_SAVE));
 
 	return;
 }
@@ -3009,24 +2995,24 @@ SCREENSHOTERROR:
 
 void ZGameInterface::Sell()
 {
-	MButton* pButton = (MButton*)m_IDLResource.FindWidget( "SellConfirmCaller");
-	if ( pButton)
+	MButton* pButton = (MButton*)m_IDLResource.FindWidget("SellConfirmCaller");
+	if (pButton)
 	{
-		pButton->Enable( false);
-		pButton->Show( false);
-		pButton->Show( true);
+		pButton->Enable(false);
+		pButton->Show(false);
+		pButton->Show(true);
 	}
 
 	ZEquipmentListBox* pListBox = (ZEquipmentListBox*)m_IDLResource.FindWidget("MyAllEquipmentList");
-	if ( !pListBox)
+	if (!pListBox)
 		return;
 
-	if ( pListBox->IsSelected())
+	if (pListBox->IsSelected())
 	{
 		ZEquipmentListItem* pListItem = (ZEquipmentListItem*)pListBox->GetSelItem();
-		if (pListItem == NULL) 
+		if (pListItem == NULL)
 		{
-			ZApplication::GetGameInterface()->ShowErrorMessage( MERR_NO_SELITEM );
+			ZApplication::GetGameInterface()->ShowErrorMessage(MERR_NO_SELITEM);
 			return;
 		}
 
@@ -3037,85 +3023,85 @@ void ZGameInterface::Sell()
 	}
 	else
 	{
-		ZApplication::GetGameInterface()->ShowErrorMessage( MERR_NO_SELITEM );
+		ZApplication::GetGameInterface()->ShowErrorMessage(MERR_NO_SELITEM);
 	}
 }
 
 
 void ZGameInterface::SellQuestItem()
 {
-	ZEquipmentListBox* pEquipmentListBox = (ZEquipmentListBox*)m_IDLResource.FindWidget( "MyAllEquipmentList");
-	if ( pEquipmentListBox)
+	ZEquipmentListBox* pEquipmentListBox = (ZEquipmentListBox*)m_IDLResource.FindWidget("MyAllEquipmentList");
+	if (pEquipmentListBox)
 	{
 		ZEquipmentListItem* pListItem = (ZEquipmentListItem*)pEquipmentListBox->GetSelItem();
-		if ( pListItem)
+		if (pListItem)
 		{
-			ZPostRequestSellQuestItem( ZGetGameClient()->GetPlayerUID(), pListItem->GetItemID(), m_nSellQuestItemCount);
+			ZPostRequestSellQuestItem(ZGetGameClient()->GetPlayerUID(), pListItem->GetItemID(), m_nSellQuestItemCount);
 
-			MWidget* pWidget = m_IDLResource.FindWidget( "SellQuestItemConfirmCaller");
-			if ( pWidget)
+			MWidget* pWidget = m_IDLResource.FindWidget("SellQuestItemConfirmCaller");
+			if (pWidget)
 			{
-				pWidget->Show( false);
-				pWidget->Enable( false);
-				pWidget->Show( true);
+				pWidget->Show(false);
+				pWidget->Enable(false);
+				pWidget->Show(true);
 			}
 		}
 	}
 
-	MWidget* pWidget = m_IDLResource.FindWidget( "Shop_SellQuestItem");
-	if ( pWidget)
-		pWidget->Show( false);
+	MWidget* pWidget = m_IDLResource.FindWidget("Shop_SellQuestItem");
+	if (pWidget)
+		pWidget->Show(false);
 }
 
 void ZGameInterface::SetSellQuestItemConfirmFrame()
 {
-	ZEquipmentListBox* pEquipmentListBox = (ZEquipmentListBox*)m_IDLResource.FindWidget( "MyAllEquipmentList");
-	if ( pEquipmentListBox)
+	ZEquipmentListBox* pEquipmentListBox = (ZEquipmentListBox*)m_IDLResource.FindWidget("MyAllEquipmentList");
+	if (pEquipmentListBox)
 	{
 		ZEquipmentListItem* pListItem = (ZEquipmentListItem*)pEquipmentListBox->GetSelItem();
-		if ( pListItem)
+		if (pListItem)
 		{
-			MPicture* pPicture = (MPicture*)m_IDLResource.FindWidget( "SellQuestItem_ItemIcon");
-			if ( pPicture)
-				pPicture->SetBitmap( pListItem->GetBitmap(0));
+			MPicture* pPicture = (MPicture*)m_IDLResource.FindWidget("SellQuestItem_ItemIcon");
+			if (pPicture)
+				pPicture->SetBitmap(pListItem->GetBitmap(0));
 
 
-			ZMyQuestItemNode* pQuestItemNode = ZGetMyInfo()->GetItemList()->GetQuestItemMap().Find( pListItem->GetItemID());
-			if ( pQuestItemNode)
+			ZMyQuestItemNode* pQuestItemNode = ZGetMyInfo()->GetItemList()->GetQuestItemMap().Find(pListItem->GetItemID());
+			if (pQuestItemNode)
 			{
-				if ( m_nSellQuestItemCount > pQuestItemNode->m_nCount)
+				if (m_nSellQuestItemCount > pQuestItemNode->m_nCount)
 					m_nSellQuestItemCount = pQuestItemNode->m_nCount;
 			}
 
 			MQuestItemDesc* pQuestItemDesc = pQuestItemNode->GetDesc();
 
-			MLabel* pLabel = (MLabel*)m_IDLResource.FindWidget( "SellQuestItem_Calculate");
-			if ( pLabel && pQuestItemDesc)
+			MLabel* pLabel = (MLabel*)m_IDLResource.FindWidget("SellQuestItem_Calculate");
+			if (pLabel && pQuestItemDesc)
 			{
-				char szText[ 128];
-				sprintf_safe( szText, "%s(%d bounty) x %d", pQuestItemDesc->m_szQuestItemName,
-														 (int)( pQuestItemDesc->m_nPrice * 0.25),
-														 m_nSellQuestItemCount);
-				pLabel->SetText( szText);
+				char szText[128];
+				sprintf_safe(szText, "%s(%d bounty) x %d", pQuestItemDesc->m_szQuestItemName,
+					(int)(pQuestItemDesc->m_nPrice * 0.25),
+					m_nSellQuestItemCount);
+				pLabel->SetText(szText);
 			}
-			pLabel = (MLabel*)m_IDLResource.FindWidget( "SellQuestItem_Total");
-			if ( pLabel && pQuestItemDesc)
+			pLabel = (MLabel*)m_IDLResource.FindWidget("SellQuestItem_Total");
+			if (pLabel && pQuestItemDesc)
 			{
-				char szText[ 128];
-				sprintf_safe( szText, "= %d bounty", (int)(pQuestItemDesc->m_nPrice * 0.25) * m_nSellQuestItemCount);
-				pLabel->SetText( szText);
+				char szText[128];
+				sprintf_safe(szText, "= %d bounty", (int)(pQuestItemDesc->m_nPrice * 0.25) * m_nSellQuestItemCount);
+				pLabel->SetText(szText);
 			}
 		}
 	}
 
 
-	MLabel* pLabel = (MLabel*)m_IDLResource.FindWidget( "SellQuestItem_CountNum");
-	if ( pLabel)
+	MLabel* pLabel = (MLabel*)m_IDLResource.FindWidget("SellQuestItem_CountNum");
+	if (pLabel)
 	{
-		char szText[ 128];
-		sprintf_safe( szText, "%d", m_nSellQuestItemCount);
-		pLabel->SetAlignment( MAM_RIGHT | MAM_VCENTER);
-		pLabel->SetText( szText);
+		char szText[128];
+		sprintf_safe(szText, "%d", m_nSellQuestItemCount);
+		pLabel->SetAlignment(MAM_RIGHT | MAM_VCENTER);
+		pLabel->SetText(szText);
 	}
 }
 
@@ -3125,9 +3111,9 @@ void ZGameInterface::OpenSellQuestItemConfirm()
 
 	SetSellQuestItemConfirmFrame();
 
-	MWidget* pWidget = m_IDLResource.FindWidget( "Shop_SellQuestItem");
-	if ( pWidget)
-		pWidget->Show( true, true);
+	MWidget* pWidget = m_IDLResource.FindWidget("Shop_SellQuestItem");
+	if (pWidget)
+		pWidget->Show(true, true);
 }
 
 void ZGameInterface::SellQuestItemCountUp()
@@ -3139,7 +3125,7 @@ void ZGameInterface::SellQuestItemCountUp()
 
 void ZGameInterface::SellQuestItemCountDn()
 {
-	if ( m_nSellQuestItemCount > 1)
+	if (m_nSellQuestItemCount > 1)
 		m_nSellQuestItemCount--;
 
 	SetSellQuestItemConfirmFrame();
@@ -3147,50 +3133,50 @@ void ZGameInterface::SellQuestItemCountDn()
 
 void ZGameInterface::Buy()
 {
-	MButton* pButton = (MButton*)m_IDLResource.FindWidget( "BuyConfirmCaller");
-	if ( pButton)
+	MButton* pButton = (MButton*)m_IDLResource.FindWidget("BuyConfirmCaller");
+	if (pButton)
 	{
-		pButton->Enable( false);
-		pButton->Show( false);
-		pButton->Show( true);
+		pButton->Enable(false);
+		pButton->Show(false);
+		pButton->Show(true);
 	}
 	unsigned long int nItemID = 0;
 	ZEquipmentListBox* pListBox = (ZEquipmentListBox*)m_IDLResource.FindWidget("AllEquipmentList");
-	if ( pListBox == NULL)
+	if (pListBox == NULL)
 		return;
 
 	if (pListBox->IsSelected())
 	{
 		ZEquipmentListItem* pListItem = (ZEquipmentListItem*)pListBox->GetSelItem();
-		if (pListItem == NULL) 
+		if (pListItem == NULL)
 		{
-			ZApplication::GetGameInterface()->ShowErrorMessage( MERR_NO_SELITEM );
+			ZApplication::GetGameInterface()->ShowErrorMessage(MERR_NO_SELITEM);
 			return;
 		}
 
 		MUID uidItem = pListItem->GetUID();
 		nItemID = ZGetShop()->GetItemID(pListItem->GetUID().Low - 1);
 
-		MMatchItemDesc* pItemDesc = MGetMatchItemDescMgr()->GetItemDesc( nItemID);
+		MMatchItemDesc* pItemDesc = MGetMatchItemDescMgr()->GetItemDesc(nItemID);
 
 #ifdef _QUEST_ITEM
-		if( 0 == pItemDesc )
+		if (0 == pItemDesc)
 		{
-			MQuestItemDesc* pQuestItemDesc = GetQuestItemDescMgr().FindQItemDesc( nItemID );
-			if( 0 == pQuestItemDesc )
+			MQuestItemDesc* pQuestItemDesc = GetQuestItemDescMgr().FindQItemDesc(nItemID);
+			if (0 == pQuestItemDesc)
 			{
 				return;
 			}
 
-			ZPostRequestBuyQuestItem( ZGetGameClient()->GetPlayerUID(), nItemID );
+			ZPostRequestBuyQuestItem(ZGetGameClient()->GetPlayerUID(), nItemID);
 			return;
 		}
 #endif
-		if ( pItemDesc->IsCashItem())
+		if (pItemDesc->IsCashItem())
 		{
-			TCHAR szURL[ 256];
-			sprintf_safe( szURL, "explorer.exe \"%s\"", Z_LOCALE_CASHSHOP_URL);
-			WinExec( szURL, SW_SHOWNORMAL);
+			TCHAR szURL[256];
+			sprintf_safe(szURL, "explorer.exe \"%s\"", Z_LOCALE_CASHSHOP_URL);
+			WinExec(szURL, SW_SHOWNORMAL);
 		}
 		else
 		{
@@ -3198,26 +3184,26 @@ void ZGameInterface::Buy()
 			ZPostRequestCharacterItemList(ZGetGameClient()->GetPlayerUID());
 		}
 	}
-	else 
+	else
 	{
-		ZApplication::GetGameInterface()->ShowErrorMessage( MERR_NO_SELITEM );
+		ZApplication::GetGameInterface()->ShowErrorMessage(MERR_NO_SELITEM);
 	}
 }
 
 
 void ZGameInterface::BuyCashItem()
 {
-	MButton* pButton = (MButton*)m_IDLResource.FindWidget( "BuyCashConfirmCaller");
-	if ( pButton)
+	MButton* pButton = (MButton*)m_IDLResource.FindWidget("BuyCashConfirmCaller");
+	if (pButton)
 	{
-		pButton->Enable( false);
-		pButton->Show( false);
-		pButton->Show( true);
+		pButton->Enable(false);
+		pButton->Show(false);
+		pButton->Show(true);
 	}
 
-	TCHAR szURL[ 256];
-	sprintf_safe( szURL, "explorer.exe \"%s\"", Z_LOCALE_CASHSHOP_URL);
-	WinExec( szURL, SW_SHOWNORMAL);
+	TCHAR szURL[256];
+	sprintf_safe(szURL, "explorer.exe \"%s\"", Z_LOCALE_CASHSHOP_URL);
+	WinExec(szURL, SW_SHOWNORMAL);
 }
 
 
@@ -3227,21 +3213,21 @@ bool ZGameInterface::Equip()
 	MMatchCharItemParts parts = MMCIP_END;
 
 	ZEquipmentListBox* pListBox = (ZEquipmentListBox*)m_IDLResource.FindWidget("EquipmentList");
-	if(pListBox == NULL) return false;
+	if (pListBox == NULL) return false;
 
 	if (pListBox->IsSelected())
 	{
 		ZEquipmentListItem* pListItem = (ZEquipmentListItem*)pListBox->GetSelItem();
-		if (pListItem == NULL) 
+		if (pListItem == NULL)
 		{
-			ZApplication::GetGameInterface()->ShowErrorMessage( MERR_NO_SELITEM );
+			ZApplication::GetGameInterface()->ShowErrorMessage(MERR_NO_SELITEM);
 			return false;
 		}
 
 		uidItem = pListItem->GetUID();
-		
+
 		MMatchItemDesc* pItemDesc = MGetMatchItemDescMgr()->GetItemDesc(ZGetMyInfo()->GetItemList()->GetItemID(uidItem));
-		
+
 		if (pItemDesc == NULL) return false;
 		if (pItemDesc->m_nSlot == MMIST_RANGE)
 		{
@@ -3282,26 +3268,26 @@ bool ZGameInterface::Equip()
 			parts = GetSuitableItemParts(pItemDesc->m_nSlot);
 		}
 
-		MButton* pButton = (MButton*)m_IDLResource.FindWidget( "Equip");
-		if ( pButton)
+		MButton* pButton = (MButton*)m_IDLResource.FindWidget("Equip");
+		if (pButton)
 		{
-			pButton->Enable( false);
-			pButton->Show( false);
-			pButton->Show( true);
+			pButton->Enable(false);
+			pButton->Show(false);
+			pButton->Show(true);
 		}
-		pButton = (MButton*)m_IDLResource.FindWidget( "SendAccountItemBtn");
-		if ( pButton)
+		pButton = (MButton*)m_IDLResource.FindWidget("SendAccountItemBtn");
+		if (pButton)
 		{
-			pButton->Enable( false);
-			pButton->Show( false);
-			pButton->Show( true);
+			pButton->Enable(false);
+			pButton->Show(false);
+			pButton->Show(true);
 		}
 
-		SetKindableItem( MMIST_NONE);
+		SetKindableItem(MMIST_NONE);
 	}
-	else 
+	else
 	{
-		ZApplication::GetGameInterface()->ShowErrorMessage( MERR_NO_SELITEM );
+		ZApplication::GetGameInterface()->ShowErrorMessage(MERR_NO_SELITEM);
 		return false;
 	}
 
@@ -3325,7 +3311,7 @@ int ZGameInterface::CheckRestrictBringAccountItem()
 	//		  2 : Level restricted
 
 	ZEquipmentListBox* pListBox = (ZEquipmentListBox*)m_IDLResource.FindWidget("AccountItemList");
-	if(pListBox == NULL) return -1;
+	if (pListBox == NULL) return -1;
 
 	if (pListBox->IsSelected())
 	{
@@ -3334,7 +3320,7 @@ int ZGameInterface::CheckRestrictBringAccountItem()
 
 		const unsigned long nItemID = pListItem->GetItemID();
 		MMatchItemDesc* pItemDesc = MGetMatchItemDescMgr()->GetItemDesc(nItemID);
-		if (pItemDesc == NULL) 
+		if (pItemDesc == NULL)
 			return -1;	// Item Not Found
 		if ((pItemDesc->m_nResSex != -1) && (ZGetMyInfo()->GetSex() != pItemDesc->m_nResSex))
 			return 1;	// Sex restricted
@@ -3345,21 +3331,21 @@ int ZGameInterface::CheckRestrictBringAccountItem()
 	return 0;	// No Restriction
 }
 
-void ZGameInterface::BringAccountItem(void)
+void ZGameInterface::BringAccountItem()
 {
 	ZEquipmentListBox* pListBox = (ZEquipmentListBox*)m_IDLResource.FindWidget("AccountItemList");
-	if(pListBox == NULL) return;
+	if (pListBox == NULL) return;
 
 	if (pListBox->IsSelected())
 	{
 		ZEquipmentListItem* pListItem = (ZEquipmentListItem*)pListBox->GetSelItem();
-		if (pListItem == NULL) 
+		if (pListItem == NULL)
 		{
-			ZApplication::GetGameInterface()->ShowErrorMessage( MERR_NO_SELITEM );
+			ZApplication::GetGameInterface()->ShowErrorMessage(MERR_NO_SELITEM);
 			return;
 		}
 
-		const int nAIID =  pListItem->GetAIID();
+		const int nAIID = pListItem->GetAIID();
 		if (nAIID != 0)
 		{
 			static unsigned long int st_LastRequestTime = 0;
@@ -3367,14 +3353,14 @@ void ZGameInterface::BringAccountItem(void)
 			if ((nNowTime - st_LastRequestTime) >= 1000)
 			{
 				ZPostRequestBringAccountItem(ZGetGameClient()->GetPlayerUID(), nAIID);
-			
+
 				st_LastRequestTime = nNowTime;
 			}
 		}
 	}
-	else 
+	else
 	{
-		ZApplication::GetGameInterface()->ShowErrorMessage( MERR_NO_SELITEM );
+		ZApplication::GetGameInterface()->ShowErrorMessage(MERR_NO_SELITEM);
 		return;
 	}
 }
@@ -3384,7 +3370,7 @@ void ZGameInterface::ShowMessage(const char* szText, MListener* pCustomListenter
 	if (pCustomListenter)
 		m_pMsgBox->SetCustomListener(pCustomListenter);
 
-	char text[1024] ="";
+	char text[1024] = "";
 
 	if (nMessageID != 0)
 	{
@@ -3410,8 +3396,8 @@ void ZGameInterface::ShowConfirmMessage(const char* szText, MListener* pCustomLi
 
 void ZGameInterface::ShowMessage(int nMessageID)
 {
-	const char *str = ZMsg( nMessageID );
-	if(str)
+	const char *str = ZMsg(nMessageID);
+	if (str)
 	{
 		char text[1024];
 		sprintf_safe(text, "%s (M%d)", str, nMessageID);
@@ -3456,44 +3442,44 @@ void ZGameInterface::ChangeSelectedChar(int nNum)
 
 void ZGameInterface::OnCharSelectionCreate()
 {
-	ZApplication::GetSoundEngine()->OpenMusic( BGMID_INTRO, ZApplication::GetFileSystem());
+	ZApplication::GetSoundEngine()->OpenMusic(BGMID_INTRO, ZApplication::GetFileSystem());
 
 	EnableCharSelectionInterface(true);
 
-	if (m_pCharacterSelectView!=NULL) SAFE_DELETE(m_pCharacterSelectView);
+	if (m_pCharacterSelectView != NULL) SAFE_DELETE(m_pCharacterSelectView);
 	m_pCharacterSelectView = new ZCharacterSelectView();
 	m_pCharacterSelectView->SetBackground(m_pBackground);
 	m_pCharacterSelectView->SelectChar(ZCharacterSelectView::GetSelectedCharacter());
 
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
 
-	MWidget* pWidget = pResource->FindWidget( "CS_SelectCharDefKey");
-	if ( pWidget)
-		pWidget->Enable( true);
+	MWidget* pWidget = pResource->FindWidget("CS_SelectCharDefKey");
+	if (pWidget)
+		pWidget->Enable(true);
 
-	pWidget = pResource->FindWidget( "CharSel_GameRoomUser");
-	if ( pWidget)
+	pWidget = pResource->FindWidget("CharSel_GameRoomUser");
+	if (pWidget)
 	{
-		if ( ZGetMyInfo()->GetPGradeID() == MMPG_PREMIUM_IP)
-			pWidget->Show( true);
+		if (ZGetMyInfo()->GetPGradeID() == MMPG_PREMIUM_IP)
+			pWidget->Show(true);
 		else
-			pWidget->Show( false);
+			pWidget->Show(false);
 	}
 }
 
 void ZGameInterface::OnCharSelect()
 {
 	m_pCharacterSelectView->SelectMyCharacter();
-	EnableCharSelectionInterface( false);
+	EnableCharSelectionInterface(false);
 
-	if ( m_pBackground)
-		m_pBackground->SetScene( LOGIN_SCENE_SELECTCHAR);
+	if (m_pBackground)
+		m_pBackground->SetScene(LOGIN_SCENE_SELECTCHAR);
 }
 
 void ZGameInterface::OnCharSelectionDestroy()
 {
 	ShowWidget("CharSelection", false);
-	if (m_pCharacterSelectView!=NULL) SAFE_DELETE(m_pCharacterSelectView);
+	if (m_pCharacterSelectView != NULL) SAFE_DELETE(m_pCharacterSelectView);
 }
 
 void ZGameInterface::OnCharCreationCreate()
@@ -3501,7 +3487,7 @@ void ZGameInterface::OnCharCreationCreate()
 	ShowWidget("CharSelection", false);
 	ShowWidget("CharCreation", true);
 
-	if (m_pCharacterSelectView!=NULL) SAFE_DELETE(m_pCharacterSelectView);
+	if (m_pCharacterSelectView != NULL) SAFE_DELETE(m_pCharacterSelectView);
 	m_pCharacterSelectView = new ZCharacterSelectView();
 	m_pCharacterSelectView->SetBackground(m_pBackground);
 	m_pCharacterSelectView->SetState(ZCharacterSelectView::ZCSVS_CREATE);
@@ -3513,7 +3499,7 @@ void ZGameInterface::OnCharCreationDestroy()
 	ShowWidget("CharCreation", false);
 	ShowWidget("CharSelection", true);
 
-	if (m_pCharacterSelectView!=NULL) SAFE_DELETE(m_pCharacterSelectView);
+	if (m_pCharacterSelectView != NULL) SAFE_DELETE(m_pCharacterSelectView);
 }
 
 void ZGameInterface::ChangeToCharSelection()
@@ -3525,55 +3511,55 @@ void ZGameInterface::ChangeToCharSelection()
 void ZGameInterface::OnInvalidate()
 {
 	ZGetWorldManager()->OnInvalidate();
-	if(m_pGame)
+	if (m_pGame)
 		m_pGame->OnInvalidate();
-	if(m_pBackground)
+	if (m_pBackground)
 		m_pBackground->OnInvalidate();
-	if( m_pCharacterSelectView)
+	if (m_pCharacterSelectView)
 		m_pCharacterSelectView->OnInvalidate();
 
-	if(ZGetEffectManager())
-		ZGetEffectManager()->OnInvalidate();	
+	if (ZGetEffectManager())
+		ZGetEffectManager()->OnInvalidate();
 
 	ZCharacterView* pCharView = (ZCharacterView*)m_IDLResource.FindWidget("Stage_Charviewer");
-	if(pCharView!= 0) pCharView->OnInvalidate();
+	if (pCharView != 0) pCharView->OnInvalidate();
 	pCharView = (ZCharacterView*)m_IDLResource.FindWidget("EquipmentInformation");
-	if(pCharView!= 0) pCharView->OnInvalidate();
+	if (pCharView != 0) pCharView->OnInvalidate();
 	pCharView = (ZCharacterView*)m_IDLResource.FindWidget("EquipmentInformationShop");
-	if(pCharView!= 0) pCharView->OnInvalidate();
+	if (pCharView != 0) pCharView->OnInvalidate();
 }
 
 void ZGameInterface::OnRestore()
 {
 	ZGetWorldManager()->OnRestore();
-	if(m_pGame)
+	if (m_pGame)
 		m_pGame->OnRestore();
-	if(m_pBackground)
+	if (m_pBackground)
 		m_pBackground->OnRestore();
-	if( m_pCharacterSelectView)
+	if (m_pCharacterSelectView)
 		m_pCharacterSelectView->OnRestore();
-	if(ZGetEffectManager())
-		ZGetEffectManager()->OnRestore();	
+	if (ZGetEffectManager())
+		ZGetEffectManager()->OnRestore();
 
 	ZCharacterView* pCharView = (ZCharacterView*)m_IDLResource.FindWidget("Stage_Charviewer");
-	if(pCharView!= 0) pCharView->OnRestore();
+	if (pCharView != 0) pCharView->OnRestore();
 	pCharView = (ZCharacterView*)m_IDLResource.FindWidget("EquipmentInformation");
-	if(pCharView!= 0) pCharView->OnRestore();
+	if (pCharView != 0) pCharView->OnRestore();
 	pCharView = (ZCharacterView*)m_IDLResource.FindWidget("EquipmentInformationShop");
-	if(pCharView!= 0) pCharView->OnRestore();
+	if (pCharView != 0) pCharView->OnRestore();
 }
 
 
-void ZGameInterface::UpdateBlueRedTeam( void)
+void ZGameInterface::UpdateBlueRedTeam()
 {
-	MButton* pBlueTeamBtn  = (MButton*)m_IDLResource.FindWidget("StageTeamBlue");
+	MButton* pBlueTeamBtn = (MButton*)m_IDLResource.FindWidget("StageTeamBlue");
 	MButton* pBlueTeamBtn2 = (MButton*)m_IDLResource.FindWidget("StageTeamBlue2");
-	MButton* pRedTeamBtn  = (MButton*)m_IDLResource.FindWidget("StageTeamRed");
+	MButton* pRedTeamBtn = (MButton*)m_IDLResource.FindWidget("StageTeamRed");
 	MButton* pRedTeamBtn2 = (MButton*)m_IDLResource.FindWidget("StageTeamRed2");
 	if ((pRedTeamBtn == NULL) || (pBlueTeamBtn == NULL) || (pRedTeamBtn2 == NULL) || (pBlueTeamBtn2 == NULL))
 		return;
 
-	if ( m_bTeamPlay)
+	if (m_bTeamPlay)
 	{
 		pRedTeamBtn->Show(true);
 		pRedTeamBtn2->Show(true);
@@ -3582,48 +3568,50 @@ void ZGameInterface::UpdateBlueRedTeam( void)
 
 		ZPlayerListBox* pListBox = (ZPlayerListBox*)m_IDLResource.FindWidget("StagePlayerList_");
 
-		if(pListBox)
+		if (pListBox)
 		{
-			int nR=0,nB=0;
+			int nR = 0, nB = 0;
 
-			for( int i = 0;  i < pListBox->GetCount(); i++)
+			for (int i = 0; i < pListBox->GetCount(); i++)
 			{
-				ZStagePlayerListItem *pSItem = (ZStagePlayerListItem*)pListBox->Get(i);
-				if(pSItem->m_nTeam == 1)		nR++;
-				else if(pSItem->m_nTeam == 2)	nB++;
+				auto* pSItem = static_cast<ZStagePlayerListItem*>(pListBox->Get(i));
+				if (pSItem->Team == MMT_RED)
+					nR++;
+				else if (pSItem->Team == MMT_BLUE)
+					nB++;
 			}
 
 			char buffer[64];
 			ZIDLResource* pRes = ZApplication::GetGameInterface()->GetIDLResource();
 			ZBmNumLabel *pNumLabel;
 
-			sprintf_safe(buffer,"%s:%d", ZMsg( MSG_WORD_BLUETEAM), nB);
+			sprintf_safe(buffer, "%s:%d", ZMsg(MSG_WORD_BLUETEAM), nB);
 			pNumLabel = (ZBmNumLabel*)pRes->FindWidget("StageNumOfBlueTeam");
-			if ( pNumLabel)
+			if (pNumLabel)
 			{
 				pNumLabel->SetText(buffer);
-				pNumLabel->Show( true);
+				pNumLabel->Show(true);
 			}
-			MButton* pButton = (MButton*)pRes->FindWidget( "StageTeamBlue");
-			if ( pButton)
-				pButton->SetText( buffer);
+			MButton* pButton = (MButton*)pRes->FindWidget("StageTeamBlue");
+			if (pButton)
+				pButton->SetText(buffer);
 
-			sprintf_safe(buffer,"%s:%d", ZMsg( MSG_WORD_REDTEAM), nR);
+			sprintf_safe(buffer, "%s:%d", ZMsg(MSG_WORD_REDTEAM), nR);
 			pNumLabel = (ZBmNumLabel*)pRes->FindWidget("StageNumOfRedTeam");
-			if ( pNumLabel)
+			if (pNumLabel)
 			{
 				pNumLabel->SetIndexOffset(16);
 				pNumLabel->SetText(buffer);
-				pNumLabel->Show( true);
+				pNumLabel->Show(true);
 			}
-			pButton = (MButton*)pRes->FindWidget( "StageTeamRed");
-			if ( pButton)
-				pButton->SetText( buffer);
+			pButton = (MButton*)pRes->FindWidget("StageTeamRed");
+			if (pButton)
+				pButton->SetText(buffer);
 
-			sprintf_safe( buffer, "%s : %d", ZMsg( MSG_WORD_PLAYERS), nB+nR);
-			MLabel* pLabel = (MLabel*)pRes->FindWidget( "Stage_NumOfPerson");
-			if ( pLabel)
-				pLabel->SetText( buffer);
+			sprintf_safe(buffer, "%s : %d", ZMsg(MSG_WORD_PLAYERS), nB + nR);
+			MLabel* pLabel = (MLabel*)pRes->FindWidget("Stage_NumOfPerson");
+			if (pLabel)
+				pLabel->SetText(buffer);
 		}
 	}
 	else
@@ -3635,14 +3623,14 @@ void ZGameInterface::UpdateBlueRedTeam( void)
 
 		ZPlayerListBox* pListBox = (ZPlayerListBox*)m_IDLResource.FindWidget("StagePlayerList_");
 
-		if(pListBox)
+		if (pListBox)
 		{
-			int nPlayerNum=0;
+			int nPlayerNum = 0;
 
-			for( int i = 0;  i < pListBox->GetCount(); i++)
+			for (int i = 0; i < pListBox->GetCount(); i++)
 			{
 				ZStagePlayerListItem *pSItem = (ZStagePlayerListItem*)pListBox->Get(i);
-				if( pSItem->m_nTeam == 0)
+				if (pSItem->Team == MMT_ALL)
 					nPlayerNum++;
 			}
 
@@ -3652,17 +3640,17 @@ void ZGameInterface::UpdateBlueRedTeam( void)
 			char buffer[64];
 
 			pNumLabel = (ZBmNumLabel*)pRes->FindWidget("StageNumOfBlueTeam");
-			if ( pNumLabel)
-				pNumLabel->Show( false);
+			if (pNumLabel)
+				pNumLabel->Show(false);
 
 			pNumLabel = (ZBmNumLabel*)pRes->FindWidget("StageNumOfRedTeam");
-			if ( pNumLabel)
-				pNumLabel->Show( false);
+			if (pNumLabel)
+				pNumLabel->Show(false);
 
-			sprintf_safe( buffer, "%s : %d", ZMsg( MSG_WORD_PLAYERS), nPlayerNum);
-			MLabel* pLabel = (MLabel*)pRes->FindWidget( "Stage_NumOfPerson");
-			if ( pLabel)
-				pLabel->SetText( buffer);
+			sprintf_safe(buffer, "%s : %d", ZMsg(MSG_WORD_PLAYERS), nPlayerNum);
+			MLabel* pLabel = (MLabel*)pRes->FindWidget("Stage_NumOfPerson");
+			if (pLabel)
+				pLabel->SetText(buffer);
 		}
 	}
 }
@@ -3687,13 +3675,13 @@ void ZGameInterface::ShowInterface(bool bShowInterface)
 	}
 	else if (m_nState == GUNZ_GAME)
 	{
-		bool bConsole=ZGetConsole()->IsVisible();
-		bool bLogFrame=m_pLogFrame->IsVisible();
+		bool bConsole = ZGetConsole()->IsVisible();
+		bool bLogFrame = m_pLogFrame->IsVisible();
 
 		m_pLogFrame->Show(m_bShowInterface);
 		ZGetConsole()->Show(m_bShowInterface);
-		ShowWidget("CombatInfo1",m_bShowInterface);
-		ShowWidget("CombatInfo2",m_bShowInterface);
+		ShowWidget("CombatInfo1", m_bShowInterface);
+		ShowWidget("CombatInfo2", m_bShowInterface);
 		ShowWidget("Time", m_bShowInterface);
 		ZGetConsole()->Show(bConsole);
 		m_pLogFrame->Show(bLogFrame);
@@ -3766,9 +3754,9 @@ void ZGameInterface::FinishGame()
 
 void ZGameInterface::SerializeStageInterface()
 {
-	MComboBox* pCombo = (MComboBox*)m_IDLResource.FindWidget( "MapSelection");
-	if ( pCombo)
-		InitMaps( pCombo);
+	MComboBox* pCombo = (MComboBox*)m_IDLResource.FindWidget("MapSelection");
+	if (pCombo)
+		InitMaps(pCombo);
 
 	ZApplication::GetStageInterface()->OnStageInterfaceSettup();
 }
@@ -3793,20 +3781,20 @@ void ZGameInterface::HideAllWidgets()
 	ShowWidget("PrivateStageJoinFrame", false);
 }
 
-bool SetWidgetToolTipText(char* szWidget,const char* szToolTipText) {
+bool SetWidgetToolTipText(char* szWidget, const char* szToolTipText) {
 
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
 
-	if(pResource==NULL)		return false;
-	if(!szToolTipText)		return false;
+	if (pResource == NULL)		return false;
+	if (!szToolTipText)		return false;
 
 
 	MWidget* pWidget = pResource->FindWidget(szWidget);
 
-	if(pWidget) {
+	if (pWidget) {
 
-		
-		if(!szToolTipText[0]) {
+
+		if (!szToolTipText[0]) {
 			pWidget->DetachToolTip();
 		}
 		else {
@@ -3816,11 +3804,11 @@ bool SetWidgetToolTipText(char* szWidget,const char* szToolTipText) {
 	return false;
 }
 
-bool GetItemDescName(string& str,DWORD nItemID)
+bool GetItemDescName(string& str, DWORD nItemID)
 {
 	MMatchItemDesc* pItemDesc = MGetMatchItemDescMgr()->GetItemDesc(nItemID);
 
-	if ( pItemDesc == NULL)
+	if (pItemDesc == NULL)
 	{
 		str.clear();
 		return false;
@@ -3830,13 +3818,13 @@ bool GetItemDescName(string& str,DWORD nItemID)
 	return false;
 }
 
-bool GetItemDescStr(string& str,DWORD nItemID) {
+bool GetItemDescStr(string& str, DWORD nItemID) {
 
 	static char temp[1024];
 
 	MMatchItemDesc* pItemDesc = MGetMatchItemDescMgr()->GetItemDesc(nItemID);
 
-	if(pItemDesc==NULL) {
+	if (pItemDesc == NULL) {
 		str.clear();
 		return false;
 	}
@@ -3846,117 +3834,117 @@ bool GetItemDescStr(string& str,DWORD nItemID) {
 	int	 nLine = 0;
 	int  nLen = 0;
 
-	if(pItemDesc->m_szName) {
+	if (pItemDesc->m_szName) {
 		str += pItemDesc->m_szName;
 		bAdd = true;
 	}
 
-	if(pItemDesc->m_nResLevel) {
-		if(bAdd) str += " / ";
-		sprintf_safe(temp,"제한레벨:%d",pItemDesc->m_nResLevel);
+	if (pItemDesc->m_nResLevel) {
+		if (bAdd) str += " / ";
+		sprintf_safe(temp, "제한레벨:%d", pItemDesc->m_nResLevel);
 
 		nLen = (int)strlen(temp);
-		if((int)str.size() + nLen > (nLine+1) * MAX_TOOLTIP_LINE_STRING+3) { str += "\n"; nLine++; }
+		if ((int)str.size() + nLen > (nLine + 1) * MAX_TOOLTIP_LINE_STRING + 3) { str += "\n"; nLine++; }
 
 		str += temp;
 		bAdd = true;
 	}
 
-	if(pItemDesc->m_nWeight){
-		if(bAdd) str += " / ";
-		sprintf_safe(temp,"무게:%d",pItemDesc->m_nWeight);
+	if (pItemDesc->m_nWeight) {
+		if (bAdd) str += " / ";
+		sprintf_safe(temp, "무게:%d", pItemDesc->m_nWeight);
 
 		nLen = (int)strlen(temp);
-		if((int)str.size() + nLen > (nLine+1) * MAX_TOOLTIP_LINE_STRING+3) { str += "\n"; nLine++; }
+		if ((int)str.size() + nLen > (nLine + 1) * MAX_TOOLTIP_LINE_STRING + 3) { str += "\n"; nLine++; }
 
 		str += temp;
 		bAdd = true;
 	}
 
-	if(pItemDesc->m_nMaxBullet) {
-		if(bAdd) str += " / ";
-		sprintf_safe(temp,"최대탄수 : %d",pItemDesc->m_nMaxBullet);
+	if (pItemDesc->m_nMaxBullet) {
+		if (bAdd) str += " / ";
+		sprintf_safe(temp, "최대탄수 : %d", pItemDesc->m_nMaxBullet);
 
 		nLen = (int)strlen(temp);
-		if((int)str.size() + nLen > (nLine+1) * MAX_TOOLTIP_LINE_STRING+3) { str += "\n"; nLine++; }
+		if ((int)str.size() + nLen > (nLine + 1) * MAX_TOOLTIP_LINE_STRING + 3) { str += "\n"; nLine++; }
 
 		str += temp;
 		bAdd = true;
 	}
 
-	
-	if(pItemDesc->m_nMagazine) {
-		if(bAdd) str += " / ";
-		sprintf_safe(temp,"탄창 : %d",pItemDesc->m_nMagazine);
+
+	if (pItemDesc->m_nMagazine) {
+		if (bAdd) str += " / ";
+		sprintf_safe(temp, "탄창 : %d", pItemDesc->m_nMagazine);
 
 		nLen = (int)strlen(temp);
-		if((int)str.size() + nLen > (nLine+1) * MAX_TOOLTIP_LINE_STRING+3) { str += "\n"; nLine++; }
+		if ((int)str.size() + nLen > (nLine + 1) * MAX_TOOLTIP_LINE_STRING + 3) { str += "\n"; nLine++; }
 
 		str += temp;
 		bAdd = true;
 	}
 
-	if(pItemDesc->m_nDamage) {
-		if(bAdd) str += " / ";
-		sprintf_safe(temp,"공격력 : %d",pItemDesc->m_nDamage);
+	if (pItemDesc->m_nDamage) {
+		if (bAdd) str += " / ";
+		sprintf_safe(temp, "공격력 : %d", pItemDesc->m_nDamage);
 
 		nLen = (int)strlen(temp);
-		if((int)str.size() + nLen > (nLine+1) * MAX_TOOLTIP_LINE_STRING+3) { str += "\n"; nLine++; }
+		if ((int)str.size() + nLen > (nLine + 1) * MAX_TOOLTIP_LINE_STRING + 3) { str += "\n"; nLine++; }
 
 		str += temp;
 		bAdd = true;
 	}
 
-	if(pItemDesc->m_nDelay) {
-		if(bAdd) str += " / ";
-		sprintf_safe(temp,"딜레이 : %d",pItemDesc->m_nDelay);
+	if (pItemDesc->m_nDelay) {
+		if (bAdd) str += " / ";
+		sprintf_safe(temp, "딜레이 : %d", pItemDesc->m_nDelay);
 
 		nLen = (int)strlen(temp);
-		if((int)str.size() + nLen > (nLine+1) * MAX_TOOLTIP_LINE_STRING+3) { str += "\n"; nLine++; }
+		if ((int)str.size() + nLen > (nLine + 1) * MAX_TOOLTIP_LINE_STRING + 3) { str += "\n"; nLine++; }
 
 		str += temp;
 		bAdd = true;
 	}
 
-	if(pItemDesc->m_nReloadTime) {
-		if(bAdd) str += " / ";
-		sprintf_safe(temp,"장전시간 : %d",pItemDesc->m_nReloadTime);
+	if (pItemDesc->m_nReloadTime) {
+		if (bAdd) str += " / ";
+		sprintf_safe(temp, "장전시간 : %d", pItemDesc->m_nReloadTime);
 
 		nLen = (int)strlen(temp);
-		if((int)str.size() + nLen > (nLine+1) * MAX_TOOLTIP_LINE_STRING+3) { str += "\n"; nLine++; }
+		if ((int)str.size() + nLen > (nLine + 1) * MAX_TOOLTIP_LINE_STRING + 3) { str += "\n"; nLine++; }
 
 		str += temp;
 		bAdd = true;
 	}
 
-	if(pItemDesc->m_nHP) {
-		if(bAdd) str += " / ";
-		sprintf_safe(temp,"+HP : %d",pItemDesc->m_nHP);
+	if (pItemDesc->m_nHP) {
+		if (bAdd) str += " / ";
+		sprintf_safe(temp, "+HP : %d", pItemDesc->m_nHP);
 
 		nLen = (int)strlen(temp);
-		if((int)str.size() + nLen > (nLine+1) * MAX_TOOLTIP_LINE_STRING+3) { str += "\n"; nLine++; }
+		if ((int)str.size() + nLen > (nLine + 1) * MAX_TOOLTIP_LINE_STRING + 3) { str += "\n"; nLine++; }
 
 		str += temp;
 		bAdd = true;
 	}
 
-	if(pItemDesc->m_nAP) {
-		if(bAdd) str += " / ";
-		sprintf_safe(temp,"+AP : %d",pItemDesc->m_nAP);
+	if (pItemDesc->m_nAP) {
+		if (bAdd) str += " / ";
+		sprintf_safe(temp, "+AP : %d", pItemDesc->m_nAP);
 
 		nLen = (int)strlen(temp);
-		if((int)str.size() + nLen > (nLine+1) * MAX_TOOLTIP_LINE_STRING+3) { str += "\n"; nLine++; }
+		if ((int)str.size() + nLen > (nLine + 1) * MAX_TOOLTIP_LINE_STRING + 3) { str += "\n"; nLine++; }
 
 		str += temp;
 		bAdd = true;
 	}
 
-	if(pItemDesc->m_nMaxWT) {
-		if(bAdd) str += " / ";
-		sprintf_safe(temp,"+최대무게 : %d",pItemDesc->m_nMaxWT);
+	if (pItemDesc->m_nMaxWT) {
+		if (bAdd) str += " / ";
+		sprintf_safe(temp, "+최대무게 : %d", pItemDesc->m_nMaxWT);
 
 		nLen = (int)strlen(temp);
-		if((int)str.size() + nLen > (nLine+1) * MAX_TOOLTIP_LINE_STRING+3) { str += "\n"; nLine++; }
+		if ((int)str.size() + nLen > (nLine + 1) * MAX_TOOLTIP_LINE_STRING + 3) { str += "\n"; nLine++; }
 
 		str += temp;
 		bAdd = true;
@@ -3973,35 +3961,35 @@ void ZGameInterface::ChangeEquipPartsToolTipAll()
 	MRECT r;
 	string item_desc_str;
 
-	for ( int i = 0;  i < MMCIP_END;  i++)
+	for (int i = 0; i < MMCIP_END; i++)
 	{
-		GetItemDescName( item_desc_str, pil->GetEquipedItemID(MMatchCharItemParts(i)));
+		GetItemDescName(item_desc_str, pil->GetEquipedItemID(MMatchCharItemParts(i)));
 
 		// Shop
-		pWidget = (MWidget*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( GetItemSlotName( "Shop", i));
-		if ( pWidget != NULL)
+		pWidget = (MWidget*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget(GetItemSlotName("Shop", i));
+		if (pWidget != NULL)
 		{
 			r = pWidget->GetRect();
-			if ( r.w < 100)
-				SetWidgetToolTipText( GetItemSlotName( "Shop", i),  item_desc_str.c_str());
+			if (r.w < 100)
+				SetWidgetToolTipText(GetItemSlotName("Shop", i), item_desc_str.c_str());
 		}
 
 		// Equipment
-		pWidget = (MWidget*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( GetItemSlotName( "Equip", i));
-		if ( pWidget != NULL)
+		pWidget = (MWidget*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget(GetItemSlotName("Equip", i));
+		if (pWidget != NULL)
 		{
 			r = pWidget->GetRect();
-			if ( r.w < 100)
-				SetWidgetToolTipText( GetItemSlotName( "Equip", i),  item_desc_str.c_str());
+			if (r.w < 100)
+				SetWidgetToolTipText(GetItemSlotName("Equip", i), item_desc_str.c_str());
 		}
 		item_desc_str.clear();
 	}
 }
 
-void ZGameInterface::ClearEquipPartsToolTipAll( const char* szName)
+void ZGameInterface::ClearEquipPartsToolTipAll(const char* szName)
 {
-	for (int i = 0;  i < MMCIP_END;  i++)
-		SetWidgetToolTipText( GetItemSlotName( szName, i),  "");
+	for (int i = 0; i < MMCIP_END; i++)
+		SetWidgetToolTipText(GetItemSlotName(szName, i), "");
 }
 
 static bool SetLocationLabel(bool Shop, ZIDLResource* pResource)
@@ -4015,7 +4003,7 @@ static bool SetLocationLabel(bool Shop, ZIDLResource* pResource)
 
 	bool Stage = ZGetGameInterface()->GetState() == GUNZ_STAGE;
 	auto Location1MsgID = Stage ? MSG_WORD_STAGE : MSG_WORD_LOBBY;
-	auto Location2MsgID = Shop  ? MSG_WORD_SHOP  : MSG_WORD_EQUIPMENT;
+	auto Location2MsgID = Shop ? MSG_WORD_SHOP : MSG_WORD_EQUIPMENT;
 
 	// Server name -> (Lobby|Stage) -> (Shop|Equipment)
 	sprintf_safe(buf, "%s > %s > %s",
@@ -4224,7 +4212,7 @@ void ZGameInterface::ShowShopDialog(bool bShow)
 		HideShopOrEquipmentDialog(true);
 }
 
-void ZGameInterface::SelectEquipmentFrameList( const char* szName, bool bOpen)
+void ZGameInterface::SelectEquipmentFrameList(const char* szName, bool bOpen)
 {
 	char szTemp[256];
 
@@ -4232,63 +4220,63 @@ void ZGameInterface::SelectEquipmentFrameList( const char* szName, bool bOpen)
 
 	// Frame open/close background image
 	MPicture* pPicture;
-	strcpy_safe( szTemp, szName);
-	strcat_safe( szTemp, "_BGListFrameOpen");
-	pPicture = (MPicture*)pResource->FindWidget( szTemp);
-	if(pPicture != NULL)
-		pPicture->Show( bOpen);
+	strcpy_safe(szTemp, szName);
+	strcat_safe(szTemp, "_BGListFrameOpen");
+	pPicture = (MPicture*)pResource->FindWidget(szTemp);
+	if (pPicture != NULL)
+		pPicture->Show(bOpen);
 
-	strcpy_safe( szTemp, szName);
-	strcat_safe( szTemp, "_BGListFrameClose");
-	pPicture = (MPicture*)pResource->FindWidget( szTemp);
-	if(pPicture != NULL)
-		pPicture->Show( !bOpen);
+	strcpy_safe(szTemp, szName);
+	strcat_safe(szTemp, "_BGListFrameClose");
+	pPicture = (MPicture*)pResource->FindWidget(szTemp);
+	if (pPicture != NULL)
+		pPicture->Show(!bOpen);
 
 
 	// Frame open/close image
 	MButton* pButton;
-	strcpy_safe( szTemp, szName);
-	strcat_safe( szTemp, "_EquipListFrameCloseButton");
-	pButton = (MButton*)pResource->FindWidget( szTemp);
-	if ( pButton != NULL)
-		pButton->Show( bOpen);
+	strcpy_safe(szTemp, szName);
+	strcat_safe(szTemp, "_EquipListFrameCloseButton");
+	pButton = (MButton*)pResource->FindWidget(szTemp);
+	if (pButton != NULL)
+		pButton->Show(bOpen);
 
-	strcpy_safe( szTemp, szName);
-	strcat_safe( szTemp, "_EquipListFrameOpenButton");
-	pButton = (MButton*)pResource->FindWidget( szTemp);
-	if ( pButton != NULL)
-		pButton->Show( !bOpen);
+	strcpy_safe(szTemp, szName);
+	strcat_safe(szTemp, "_EquipListFrameOpenButton");
+	pButton = (MButton*)pResource->FindWidget(szTemp);
+	if (pButton != NULL)
+		pButton->Show(!bOpen);
 
 
 	// Resize item slot
-	char szWidgetName[ 256];
-	sprintf_safe( szWidgetName, "%s_EquipmentSlot_Head", szName);
-	MWidget* itemSlot = (MWidget*)pResource->FindWidget( szWidgetName);
-	if ( itemSlot)
+	char szWidgetName[256];
+	sprintf_safe(szWidgetName, "%s_EquipmentSlot_Head", szName);
+	MWidget* itemSlot = (MWidget*)pResource->FindWidget(szWidgetName);
+	if (itemSlot)
 	{
 		MRECT rect = itemSlot->GetRect();
 
 		int nWidth;
-		if ( bOpen)
+		if (bOpen)
 			nWidth = 220.0f * (float)RGetScreenWidth() / 800.0f;
 		else
-			nWidth = min( rect.w, rect.h);
+			nWidth = min(rect.w, rect.h);
 
-		for ( int i = 0;  i <MMCIP_END;  i++)
+		for (int i = 0; i < MMCIP_END; i++)
 		{
-			itemSlot = (MWidget*)pResource->FindWidget( GetItemSlotName( szName, i));
+			itemSlot = (MWidget*)pResource->FindWidget(GetItemSlotName(szName, i));
 
-			if ( itemSlot)
+			if (itemSlot)
 			{
 				rect = itemSlot->GetRect();
-				itemSlot->SetBounds( rect.x, rect.y, nWidth, rect.h);
+				itemSlot->SetBounds(rect.x, rect.y, nWidth, rect.h);
 			}
 		}
 	}
 
 	// Set tooltip
-	if ( bOpen)
-		ClearEquipPartsToolTipAll( szName);
+	if (bOpen)
+		ClearEquipPartsToolTipAll(szName);
 	else
 		ChangeEquipPartsToolTipAll();
 }
@@ -4298,137 +4286,137 @@ void ZGameInterface::SelectShopTab(int nTabIndex)
 	ZIDLResource* pResource = GetIDLResource();
 
 #ifndef _DEBUG
-	#if defined(LOCALE_BRAZIL) || defined(LOCALE_INDIA) || defined(LOCALE_US) || defined(LOCALE_JAPAN) || defined(LOCALE_KOREA)
+#if defined(LOCALE_BRAZIL) || defined(LOCALE_INDIA) || defined(LOCALE_US) || defined(LOCALE_JAPAN) || defined(LOCALE_KOREA)
 	{
-		if ( nTabIndex == 2)
+		if (nTabIndex == 2)
 			return;
 	}
-	#endif
+#endif
 #endif
 
 	MWidget* pWidget = pResource->FindWidget("AllEquipmentList");
-	if (pWidget != NULL) pWidget->Show(nTabIndex==0 ? true : false);
+	if (pWidget != NULL) pWidget->Show(nTabIndex == 0 ? true : false);
 	pWidget = pResource->FindWidget("MyAllEquipmentList");
-	if (pWidget != NULL) pWidget->Show(nTabIndex==1 ? true : false);
+	if (pWidget != NULL) pWidget->Show(nTabIndex == 1 ? true : false);
 	pWidget = pResource->FindWidget("CashEquipmentList");
-	if (pWidget != NULL) pWidget->Show(nTabIndex==2 ? true : false);
+	if (pWidget != NULL) pWidget->Show(nTabIndex == 2 ? true : false);
 
 
 	// Set filter
-	MComboBox* pComboBox = (MComboBox*)pResource->FindWidget( "Shop_AllEquipmentFilter");
-	if(pComboBox) {
+	MComboBox* pComboBox = (MComboBox*)pResource->FindWidget("Shop_AllEquipmentFilter");
+	if (pComboBox) {
 		int sel = pComboBox->GetSelIndex();
 
 		ZMyItemList* pil = ZGetMyInfo()->GetItemList();
-		if ( pil)
+		if (pil)
 			pil->m_ListFilter = sel;
 	}
 
 	// 버튼 설정
-	MButton* pButton = (MButton*)pResource->FindWidget( "BuyConfirmCaller");
-	if ( pButton)
+	MButton* pButton = (MButton*)pResource->FindWidget("BuyConfirmCaller");
+	if (pButton)
 	{
-		pButton->Show( false);
-		pButton->Enable( false);
+		pButton->Show(false);
+		pButton->Enable(false);
 	}
-	pButton = (MButton*)pResource->FindWidget( "BuyCashConfirmCaller");
-	if ( pButton)
+	pButton = (MButton*)pResource->FindWidget("BuyCashConfirmCaller");
+	if (pButton)
 	{
-		pButton->Show( false);
-		pButton->Enable( false);
+		pButton->Show(false);
+		pButton->Enable(false);
 	}
-	pButton = (MButton*)pResource->FindWidget( "SellConfirmCaller");
-	if ( pButton)
+	pButton = (MButton*)pResource->FindWidget("SellConfirmCaller");
+	if (pButton)
 	{
-		pButton->Show( false);
-		pButton->Enable( false);
+		pButton->Show(false);
+		pButton->Enable(false);
 	}
-	pButton = (MButton*)pResource->FindWidget( "SellQuestItemConfirmCaller");
-	if ( pButton)
+	pButton = (MButton*)pResource->FindWidget("SellQuestItemConfirmCaller");
+	if (pButton)
 	{
-		pButton->Show( false);
-		pButton->Enable( false);
+		pButton->Show(false);
+		pButton->Enable(false);
 	}
 
 
-	if ( nTabIndex == 0)
+	if (nTabIndex == 0)
 	{
-		pButton = (MButton*)pResource->FindWidget( "BuyConfirmCaller");
-		if ( pButton)
-			pButton->Show( true);
+		pButton = (MButton*)pResource->FindWidget("BuyConfirmCaller");
+		if (pButton)
+			pButton->Show(true);
 	}
-	else if ( nTabIndex == 1)
+	else if (nTabIndex == 1)
 	{
-		if ( pComboBox->GetSelIndex() == 10)
+		if (pComboBox->GetSelIndex() == 10)
 		{
-			pButton = (MButton*)pResource->FindWidget( "SellQuestItemConfirmCaller");
-			if ( pButton)
-				pButton->Show( true);
+			pButton = (MButton*)pResource->FindWidget("SellQuestItemConfirmCaller");
+			if (pButton)
+				pButton->Show(true);
 		}
 		else
 		{
-			pButton = (MButton*)pResource->FindWidget( "SellConfirmCaller");
-			if ( pButton)
-				pButton->Show( true);
+			pButton = (MButton*)pResource->FindWidget("SellConfirmCaller");
+			if (pButton)
+				pButton->Show(true);
 		}
 	}
-	else if ( nTabIndex == 2)
+	else if (nTabIndex == 2)
 	{
-		pButton = (MButton*)pResource->FindWidget( "BuyCashConfirmCaller");
-		if ( pButton)
-			pButton->Show( true);
+		pButton = (MButton*)pResource->FindWidget("BuyCashConfirmCaller");
+		if (pButton)
+			pButton->Show(true);
 	}
 
 
 	pButton = (MButton*)pResource->FindWidget("AllEquipmentListCaller");
 	if (pButton != NULL)
-		pButton->Show(nTabIndex!=0 ? true : false);
+		pButton->Show(nTabIndex != 0 ? true : false);
 	pButton = (MButton*)pResource->FindWidget("MyAllEquipmentListCaller");
 	if (pButton != NULL)
-		pButton->Show(nTabIndex!=1 ? true : false);
+		pButton->Show(nTabIndex != 1 ? true : false);
 	pButton = (MButton*)pResource->FindWidget("CashEquipmentListCaller");
 	if (pButton != NULL)
-		pButton->Show(nTabIndex!=2 ? true : false);
+		pButton->Show(nTabIndex != 2 ? true : false);
 
 	MPicture* pPicture;
 	MBitmap* pBitmap;
 	pPicture = (MPicture*)pResource->FindWidget("Shop_FrameTabLabel1");
-	if ( pPicture)
-		pPicture->Show(nTabIndex==0 ? true : false);
+	if (pPicture)
+		pPicture->Show(nTabIndex == 0 ? true : false);
 	pPicture = (MPicture*)pResource->FindWidget("Shop_FrameTabLabel2");
-	if ( pPicture)
-		pPicture->Show(nTabIndex==1 ? true : false);
+	if (pPicture)
+		pPicture->Show(nTabIndex == 1 ? true : false);
 	pPicture = (MPicture*)pResource->FindWidget("Shop_FrameTabLabel3");
-	if ( pPicture)
-		pPicture->Show(nTabIndex==2 ? true : false);
+	if (pPicture)
+		pPicture->Show(nTabIndex == 2 ? true : false);
 
 	pPicture = (MPicture*)pResource->FindWidget("Shop_TabLabel");
-	if ( pPicture)
+	if (pPicture)
 	{
-		if ( nTabIndex == 0)
-			pBitmap = MBitmapManager::Get( "framepaneltab1.tga");
-		else if ( nTabIndex == 1)
-			pBitmap = MBitmapManager::Get( "framepaneltab2.tga");
-		else if ( nTabIndex == 2)
-			pBitmap = MBitmapManager::Get( "framepaneltab3.tga");
+		if (nTabIndex == 0)
+			pBitmap = MBitmapManager::Get("framepaneltab1.tga");
+		else if (nTabIndex == 1)
+			pBitmap = MBitmapManager::Get("framepaneltab2.tga");
+		else if (nTabIndex == 2)
+			pBitmap = MBitmapManager::Get("framepaneltab3.tga");
 
-		if ( pBitmap)
-			pPicture->SetBitmap( pBitmap);
+		if (pBitmap)
+			pPicture->SetBitmap(pBitmap);
 	}
 
 #ifndef _DEBUG
-	#if defined(LOCALE_BRAZIL) || defined(LOCALE_INDIA) || defined(LOCALE_US) || defined(LOCALE_JAPAN) || defined(LOCALE_KOREA)
+#if defined(LOCALE_BRAZIL) || defined(LOCALE_INDIA) || defined(LOCALE_US) || defined(LOCALE_JAPAN) || defined(LOCALE_KOREA)
 	{
-		pWidget = pResource->FindWidget( "Shop_TabLabelBg");
-		if ( pWidget)  pWidget->Show( false);
+		pWidget = pResource->FindWidget("Shop_TabLabelBg");
+		if (pWidget)  pWidget->Show(false);
 
-		pWidget = pResource->FindWidget( "CashEquipmentListCaller");
-		if ( pWidget)  pWidget->Show( false);
+		pWidget = pResource->FindWidget("CashEquipmentListCaller");
+		if (pWidget)  pWidget->Show(false);
 
-		pWidget = pResource->FindWidget( "Shop_FrameTabLabel3");
-		if ( pWidget)  pWidget->Show( false);
+		pWidget = pResource->FindWidget("Shop_FrameTabLabel3");
+		if (pWidget)  pWidget->Show(false);
 	}
-	#endif
+#endif
 #endif
 
 	m_nShopTabNum = nTabIndex;
@@ -4438,92 +4426,92 @@ void ZGameInterface::SelectEquipmentTab(int nTabIndex)
 {
 	ZIDLResource* pResource = GetIDLResource();
 
-	SetKindableItem( MMIST_NONE);
+	SetKindableItem(MMIST_NONE);
 
 	// Set filter
-	MComboBox* pComboBox = (MComboBox*)pResource->FindWidget( "Equip_AllEquipmentFilter");
-	if(pComboBox) {
+	MComboBox* pComboBox = (MComboBox*)pResource->FindWidget("Equip_AllEquipmentFilter");
+	if (pComboBox) {
 		int sel = pComboBox->GetSelIndex();
 
 		ZMyItemList* pil = ZGetMyInfo()->GetItemList();
-		if ( pil)
+		if (pil)
 			pil->m_ListFilter = sel;
 	}
 
 	// EQUIPMENTLISTBOX
 	MWidget* pWidget = pResource->FindWidget("EquipmentList");
-	if (pWidget != NULL) pWidget->Show(nTabIndex==0 ? true:false);
+	if (pWidget != NULL) pWidget->Show(nTabIndex == 0 ? true : false);
 	pWidget = pResource->FindWidget("AccountItemList");
-	if (pWidget != NULL) pWidget->Show(nTabIndex==0 ? false:true);
+	if (pWidget != NULL) pWidget->Show(nTabIndex == 0 ? false : true);
 
-	MButton* pButton = (MButton*)pResource->FindWidget( "Equip");
-	if ( pButton)
+	MButton* pButton = (MButton*)pResource->FindWidget("Equip");
+	if (pButton)
 	{
-		pButton->Show( false);
-		pButton->Enable( false);
+		pButton->Show(false);
+		pButton->Enable(false);
 	}
-	pButton = (MButton*)pResource->FindWidget( "SendAccountItemBtn");
-	if ( pButton)
+	pButton = (MButton*)pResource->FindWidget("SendAccountItemBtn");
+	if (pButton)
 	{
-		pButton->Show( false);
-		pButton->Enable( false);
+		pButton->Show(false);
+		pButton->Enable(false);
 	}
-	pButton = (MButton*)pResource->FindWidget( "BringAccountItemBtn");
-	if ( pButton)
+	pButton = (MButton*)pResource->FindWidget("BringAccountItemBtn");
+	if (pButton)
 	{
-		pButton->Show( false);
-		pButton->Enable( false);
+		pButton->Show(false);
+		pButton->Enable(false);
 	}
-	if ( nTabIndex == 0)
+	if (nTabIndex == 0)
 	{
-		pButton = (MButton*)pResource->FindWidget( "Equip");
-		if ( pButton)
-			pButton->Show( true);
-		pButton = (MButton*)pResource->FindWidget( "SendAccountItemBtn");
-		if ( pButton)
-			pButton->Show( true);
+		pButton = (MButton*)pResource->FindWidget("Equip");
+		if (pButton)
+			pButton->Show(true);
+		pButton = (MButton*)pResource->FindWidget("SendAccountItemBtn");
+		if (pButton)
+			pButton->Show(true);
 	}
-	else if ( nTabIndex == 1)
+	else if (nTabIndex == 1)
 	{
-		pButton = (MButton*)pResource->FindWidget( "BringAccountItemBtn");
-		if ( pButton)
-			pButton->Show( true);
+		pButton = (MButton*)pResource->FindWidget("BringAccountItemBtn");
+		if (pButton)
+			pButton->Show(true);
 	}
 
 	pButton = (MButton*)pResource->FindWidget("Equipment_CharacterTab");
 	if (pButton)
-		pButton->Show( nTabIndex==0 ? false : true);
+		pButton->Show(nTabIndex == 0 ? false : true);
 	pButton = (MButton*)pResource->FindWidget("Equipment_AccountTab");
 	if (pButton)
-		pButton->Show( nTabIndex==1 ? false : true);
+		pButton->Show(nTabIndex == 1 ? false : true);
 
 	MLabel* pLabel;
 	pLabel = (MLabel*)pResource->FindWidget("Equipment_FrameTabLabel1");
-	if ( pLabel)
-		pLabel->Show( nTabIndex==0 ? true : false);
+	if (pLabel)
+		pLabel->Show(nTabIndex == 0 ? true : false);
 	pLabel = (MLabel*)pResource->FindWidget("Equipment_FrameTabLabel2");
-	if ( pLabel)
-		pLabel->Show( nTabIndex==1 ? true : false);
+	if (pLabel)
+		pLabel->Show(nTabIndex == 1 ? true : false);
 
 	MPicture* pPicture;
 	pPicture = (MPicture*)pResource->FindWidget("Equip_ListLabel1");
-	if ( pPicture)
-		pPicture->Show( nTabIndex==0 ? true : false);
+	if (pPicture)
+		pPicture->Show(nTabIndex == 0 ? true : false);
 	pPicture = (MPicture*)pResource->FindWidget("Equip_ListLabel2");
-	if ( pPicture)
-		pPicture->Show( nTabIndex==1 ? true : false);
+	if (pPicture)
+		pPicture->Show(nTabIndex == 1 ? true : false);
 
 	pPicture = (MPicture*)pResource->FindWidget("Equip_TabLabel");
 	MBitmap* pBitmap;
-	if ( pPicture)
+	if (pPicture)
 	{
-		if ( nTabIndex == 0)
-			pBitmap = MBitmapManager::Get( "framepaneltab1.tga");
+		if (nTabIndex == 0)
+			pBitmap = MBitmapManager::Get("framepaneltab1.tga");
 		else
-			pBitmap = MBitmapManager::Get( "framepaneltab2.tga");
+			pBitmap = MBitmapManager::Get("framepaneltab2.tga");
 
-		if ( pBitmap)
-			pPicture->SetBitmap( pBitmap);
+		if (pBitmap)
+			pPicture->SetBitmap(pBitmap);
 	}
 
 	if (nTabIndex == 1)
@@ -4532,10 +4520,10 @@ void ZGameInterface::SelectEquipmentTab(int nTabIndex)
 		ZGetMyInfo()->GetItemList()->SerializeAccountItem();
 	}
 
-	for(int i = 0;  i < MMCIP_END;  i++)
+	for (int i = 0; i < MMCIP_END; i++)
 	{
-		ZItemSlotView* itemSlot = (ZItemSlotView*)m_IDLResource.FindWidget( GetItemSlotName( "Equip", i));
-		itemSlot->EnableDragAndDrop( nTabIndex==0 ? true : false);
+		ZItemSlotView* itemSlot = (ZItemSlotView*)m_IDLResource.FindWidget(GetItemSlotName("Equip", i));
+		itemSlot->EnableDragAndDrop(nTabIndex == 0 ? true : false);
 	}
 
 	m_nEquipTabNum = nTabIndex;
@@ -4561,30 +4549,30 @@ void ZGameInterface::EnableCharSelectionInterface(bool bEnable)
 	pWidget = m_IDLResource.FindWidget("CS_Name");
 	if (pWidget) pWidget->Enable(bEnable);
 
-	if ( !bEnable)
+	if (!bEnable)
 	{
-		for ( int i = 0;  i < MAX_CHAR_COUNT;  i++)
+		for (int i = 0; i < MAX_CHAR_COUNT; i++)
 		{
-			char szName[ 256];
-			sprintf_safe( szName, "CharSel_SelectBtn%d", i);
-			pWidget = m_IDLResource.FindWidget( szName);
-			if ( pWidget)
-				pWidget->Show( false);
+			char szName[256];
+			sprintf_safe(szName, "CharSel_SelectBtn%d", i);
+			pWidget = m_IDLResource.FindWidget(szName);
+			if (pWidget)
+				pWidget->Show(false);
 		}
 	}
 
-	if ( bEnable && (ZCharacterSelectView::GetNumOfCharacter() == 0))
+	if (bEnable && (ZCharacterSelectView::GetNumOfCharacter() == 0))
 	{
-		pWidget = m_IDLResource.FindWidget( "CS_SelectChar");
-		if (pWidget) pWidget->Enable( false);
-		pWidget = m_IDLResource.FindWidget( "CS_DeleteChar");
-		if (pWidget) pWidget->Enable( false);
+		pWidget = m_IDLResource.FindWidget("CS_SelectChar");
+		if (pWidget) pWidget->Enable(false);
+		pWidget = m_IDLResource.FindWidget("CS_DeleteChar");
+		if (pWidget) pWidget->Enable(false);
 	}
 
-	if ( bEnable && (ZCharacterSelectView::GetNumOfCharacter() >= MAX_CHAR_COUNT))
+	if (bEnable && (ZCharacterSelectView::GetNumOfCharacter() >= MAX_CHAR_COUNT))
 	{
-		pWidget = m_IDLResource.FindWidget( "CS_CreateChar");
-		if (pWidget) pWidget->Enable( false);
+		pWidget = m_IDLResource.FindWidget("CS_CreateChar");
+		if (pWidget) pWidget->Enable(false);
 	}
 }
 
@@ -4604,7 +4592,7 @@ void ZGameInterface::EnableLobbyInterface(bool bEnable)
 	EnableWidget("QuickJoin2", bEnable);
 	EnableWidget("ChannelListFrameCaller", bEnable);
 	EnableWidget("StageList", bEnable);
-	EnableWidget("Lobby_StageList",bEnable);
+	EnableWidget("Lobby_StageList", bEnable);
 	EnableWidget("LobbyChannelPlayerList", bEnable);
 	EnableWidget("ChannelChattingOutput", bEnable);
 	EnableWidget("ChannelChattingInput", bEnable);
@@ -4616,16 +4604,16 @@ void ZGameInterface::EnableStageInterface(bool bEnable)
 	EnableWidget("StagePlayerNameInput_combo", bEnable);
 	EnableWidget("GameStart", bEnable);
 	MButton* pButton = (MButton*)m_IDLResource.FindWidget("StageReady");
-	if ( pButton)
+	if (pButton)
 	{
-		pButton->Enable( bEnable);
-		pButton->SetCheck( false);
+		pButton->Enable(bEnable);
+		pButton->SetCheck(false);
 	}
 	EnableWidget("ForcedEntryToGame", bEnable);
 	EnableWidget("ForcedEntryToGame2", bEnable);
-	EnableWidget("StageTeamBlue",  bEnable);
+	EnableWidget("StageTeamBlue", bEnable);
 	EnableWidget("StageTeamBlue2", bEnable);
-	EnableWidget("StageTeamRed",  bEnable);
+	EnableWidget("StageTeamRed", bEnable);
 	EnableWidget("StageTeamRed2", bEnable);
 	EnableWidget("StageShopCaller", bEnable);
 	EnableWidget("StageEquipmentCaller", bEnable);
@@ -4639,11 +4627,12 @@ void ZGameInterface::EnableStageInterface(bool bEnable)
 	EnableWidget("StageRoundCount", bEnable);
 }
 
-void ZGameInterface::SetRoomNoLight( int d )
-{	char szBuffer[64];
+void ZGameInterface::SetRoomNoLight(int d)
+{
+	char szBuffer[64];
 	sprintf_safe(szBuffer, "Lobby_RoomNo%d", d);
 	MButton* pButton = (MButton*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget(szBuffer);
-	if(pButton) 
+	if (pButton)
 		pButton->SetCheck(true);
 
 }
@@ -4657,7 +4646,7 @@ void ZGameInterface::ShowPrivateStageJoinFrame(const char* szStageName)
 		pStageNameEdit->Enable(false);
 	}
 	MEdit* pPassEdit = (MEdit*)m_IDLResource.FindWidget("PrivateStagePassword");
-	if (pPassEdit!=NULL)
+	if (pPassEdit != NULL)
 	{
 		pPassEdit->SetMaxLength(STAGEPASSWD_LENGTH);
 		pPassEdit->SetText("");
@@ -4687,7 +4676,8 @@ void ZGameInterface::LeaveBattle()
 	if (m_bLeaveStageReserved) {
 		ZPostStageLeave(ZGetGameClient()->GetPlayerUID(), ZGetGameClient()->GetStageUID());
 		SetState(GUNZ_LOBBY);
-	} else {
+	}
+	else {
 		SetState(GUNZ_STAGE);
 	}
 }
@@ -4700,7 +4690,7 @@ void ZGameInterface::ReserveLeaveStage()
 
 void ZGameInterface::ReserveLeaveBattle()
 {
-	if(!m_pGame) return;
+	if (!m_pGame) return;
 
 	if (ZGetGame()->GetTime() - ZGetGame()->m_pMyCharacter->LastDamagedTime > 5
 		|| !ZGetGame()->m_pMyCharacter->IsAlive()
@@ -4727,63 +4717,63 @@ bool ZGameInterface::IsMenuVisible()
 
 void ZGameInterface::Show112Dialog(bool bShow)
 {
-	MWidget* pWidget = m_IDLResource.FindWidget( "112Confirm");
-	if ( !pWidget)
+	MWidget* pWidget = m_IDLResource.FindWidget("112Confirm");
+	if (!pWidget)
 		return;
 
-	if ( pWidget->IsVisible() == bShow)
+	if (pWidget->IsVisible() == bShow)
 		return;
 
-	pWidget->Show( bShow, true);
+	pWidget->Show(bShow, true);
 	pWidget->SetFocus();
 
-	if ( !bShow)
+	if (!bShow)
 		return;
 
 
-	MComboBox* pCombo1 = (MComboBox*)m_IDLResource.FindWidget( "112_ConfirmID");
-	MComboBox* pCombo2 = (MComboBox*)m_IDLResource.FindWidget( "112_ConfirmReason");
+	MComboBox* pCombo1 = (MComboBox*)m_IDLResource.FindWidget("112_ConfirmID");
+	MComboBox* pCombo2 = (MComboBox*)m_IDLResource.FindWidget("112_ConfirmReason");
 
-	if ( !pCombo1 || !pCombo2)
+	if (!pCombo1 || !pCombo2)
 		return;
 
 	pCombo1->RemoveAll();
-	pCombo2->SetSelIndex( 0);
+	pCombo2->SetSelIndex(0);
 
 
-	switch ( m_nState)
+	switch (m_nState)
 	{
-		case GUNZ_LOBBY:
+	case GUNZ_LOBBY:
+	{
+		ZPlayerListBox *pPlayerListBox = (ZPlayerListBox*)m_IDLResource.FindWidget("LobbyChannelPlayerList");
+		if (pPlayerListBox)
 		{
-			ZPlayerListBox *pPlayerListBox = (ZPlayerListBox*)m_IDLResource.FindWidget( "LobbyChannelPlayerList");
-			if ( pPlayerListBox)
-			{
-				for ( int i = 0;  i < pPlayerListBox->GetCount();  i++)
-					pCombo1->Add( pPlayerListBox->GetPlayerName( i));
-			}
+			for (int i = 0; i < pPlayerListBox->GetCount(); i++)
+				pCombo1->Add(pPlayerListBox->GetPlayerName(i));
 		}
-		break;
+	}
+	break;
 
-		case GUNZ_STAGE:
+	case GUNZ_STAGE:
+	{
+		ZPlayerListBox *pPlayerListBox = (ZPlayerListBox*)m_IDLResource.FindWidget("StagePlayerList_");
+		if (pPlayerListBox)
 		{
-			ZPlayerListBox *pPlayerListBox = (ZPlayerListBox*)m_IDLResource.FindWidget( "StagePlayerList_");
-			if ( pPlayerListBox)
-			{
-				for ( int i = 0;  i < pPlayerListBox->GetCount();  i++)
-					pCombo1->Add( pPlayerListBox->GetPlayerName( i));
-			}
+			for (int i = 0; i < pPlayerListBox->GetCount(); i++)
+				pCombo1->Add(pPlayerListBox->GetPlayerName(i));
 		}
-		break;
+	}
+	break;
 
-		case GUNZ_GAME:
-		{
-			for ( ZCharacterManager::iterator itor = ZGetCharacterManager()->begin(); itor != ZGetCharacterManager()->end(); itor++)
-				pCombo1->Add( (*itor).second->GetUserName());
-		}
-		break;
+	case GUNZ_GAME:
+	{
+		for (ZCharacterManager::iterator itor = ZGetCharacterManager()->begin(); itor != ZGetCharacterManager()->end(); itor++)
+			pCombo1->Add((*itor).second->GetUserName());
+	}
+	break;
 	}
 
-	pCombo1->SetSelIndex( 0);
+	pCombo1->SetSelIndex(0);
 }
 
 
@@ -4807,35 +4797,35 @@ void ZGameInterface::InitClanLobbyUI(bool bClanBattleEnable)
 
 	MWidget *pWidget;
 
-	pWidget= m_IDLResource.FindWidget( "StageJoin" );
-	if(pWidget) pWidget->Show(!bClanBattleEnable);
-	pWidget= m_IDLResource.FindWidget( "StageCreateFrameCaller" );
-	if(pWidget) pWidget->Show(!bClanBattleEnable);
+	pWidget = m_IDLResource.FindWidget("StageJoin");
+	if (pWidget) pWidget->Show(!bClanBattleEnable);
+	pWidget = m_IDLResource.FindWidget("StageCreateFrameCaller");
+	if (pWidget) pWidget->Show(!bClanBattleEnable);
 
-	pWidget= m_IDLResource.FindWidget( "ArrangedTeamGame" );
-	if(pWidget) pWidget->Show(bClanBattleEnable);
+	pWidget = m_IDLResource.FindWidget("ArrangedTeamGame");
+	if (pWidget) pWidget->Show(bClanBattleEnable);
 
 	m_CombatMenu.EnableItem(ZCombatMenu::ZCMI_BATTLE_EXIT, !bClanBattleEnable);
 
-	pWidget= m_IDLResource.FindWidget( "QuickJoin" );
-	if(pWidget) pWidget->Show(!bClanBattleEnable);
+	pWidget = m_IDLResource.FindWidget("QuickJoin");
+	if (pWidget) pWidget->Show(!bClanBattleEnable);
 
-	pWidget= m_IDLResource.FindWidget( "QuickJoin2" );
-	if(pWidget) pWidget->Show(!bClanBattleEnable);
+	pWidget = m_IDLResource.FindWidget("QuickJoin2");
+	if (pWidget) pWidget->Show(!bClanBattleEnable);
 
-	bool bClanServer = ZGetGameClient()->GetServerMode()==MSM_CLAN;
+	bool bClanServer = ZGetGameClient()->GetServerMode() == MSM_CLAN;
 
-	pWidget= m_IDLResource.FindWidget( "PrivateChannelInput" );
-	if(pWidget) pWidget->Show(bClanServer);
-	
-	pWidget= m_IDLResource.FindWidget( "PrivateChannelEnter" );
-	if(pWidget) pWidget->Show(bClanServer);
+	pWidget = m_IDLResource.FindWidget("PrivateChannelInput");
+	if (pWidget) pWidget->Show(bClanServer);
 
-	pWidget= m_IDLResource.FindWidget( "Lobby_ClanInfoBG" );
-	if(pWidget) pWidget->Show(bClanBattleEnable);
+	pWidget = m_IDLResource.FindWidget("PrivateChannelEnter");
+	if (pWidget) pWidget->Show(bClanServer);
 
-	pWidget= m_IDLResource.FindWidget( "Lobby_ClanList" );
-	if(pWidget) pWidget->Show(bClanBattleEnable);
+	pWidget = m_IDLResource.FindWidget("Lobby_ClanInfoBG");
+	if (pWidget) pWidget->Show(bClanBattleEnable);
+
+	pWidget = m_IDLResource.FindWidget("Lobby_ClanList");
+	if (pWidget) pWidget->Show(bClanBattleEnable);
 }
 
 void ZGameInterface::InitChannelFrame(MCHANNEL_TYPE nChannelType)
@@ -4843,11 +4833,11 @@ void ZGameInterface::InitChannelFrame(MCHANNEL_TYPE nChannelType)
 	MWidget* pWidget;
 
 	pWidget = m_IDLResource.FindWidget("PrivateChannelInput");
-	if(pWidget) pWidget->Show( nChannelType == MCHANNEL_TYPE_USER );
+	if (pWidget) pWidget->Show(nChannelType == MCHANNEL_TYPE_USER);
 	pWidget = m_IDLResource.FindWidget("PrivateChannelEnter");
-	if(pWidget) pWidget->Show( nChannelType == MCHANNEL_TYPE_USER );
+	if (pWidget) pWidget->Show(nChannelType == MCHANNEL_TYPE_USER);
 	pWidget = m_IDLResource.FindWidget("MyClanChannel");
-	if(pWidget) pWidget->Show( nChannelType == MCHANNEL_TYPE_CLAN );
+	if (pWidget) pWidget->Show(nChannelType == MCHANNEL_TYPE_CLAN);
 
 	MListBox* pListBox = (MListBox*)m_IDLResource.FindWidget("ChannelList");
 	if (pListBox) pListBox->RemoveAll();
@@ -4859,26 +4849,26 @@ void ZGameInterface::InitLadderUI(bool bLadderEnable)
 
 	MWidget *pWidget;
 
-	pWidget= m_IDLResource.FindWidget( "StageJoin" );
-	if(pWidget) pWidget->Show(!bLadderEnable);
-	pWidget= m_IDLResource.FindWidget( "StageCreateFrameCaller" );
-	if(pWidget) pWidget->Show(!bLadderEnable);
+	pWidget = m_IDLResource.FindWidget("StageJoin");
+	if (pWidget) pWidget->Show(!bLadderEnable);
+	pWidget = m_IDLResource.FindWidget("StageCreateFrameCaller");
+	if (pWidget) pWidget->Show(!bLadderEnable);
 
-	pWidget= m_IDLResource.FindWidget( "ArrangedTeamGame" );
-	if(pWidget) pWidget->Show(bLadderEnable);
+	pWidget = m_IDLResource.FindWidget("ArrangedTeamGame");
+	if (pWidget) pWidget->Show(bLadderEnable);
 
 	m_CombatMenu.EnableItem(ZCombatMenu::ZCMI_BATTLE_EXIT, !bLadderEnable);
 
-	bool bLadderServer = 
-		ZGetGameClient()->GetServerMode()==MSM_CLAN ||
-		ZGetGameClient()->GetServerMode()==MSM_LADDER ||
-		ZGetGameClient()->GetServerMode()==MSM_EVENT;
+	bool bLadderServer =
+		ZGetGameClient()->GetServerMode() == MSM_CLAN ||
+		ZGetGameClient()->GetServerMode() == MSM_LADDER ||
+		ZGetGameClient()->GetServerMode() == MSM_EVENT;
 
-	pWidget= m_IDLResource.FindWidget( "PrivateChannelInput" );
-	if(pWidget) pWidget->Show(bLadderServer);
-	
-	pWidget= m_IDLResource.FindWidget( "PrivateChannelEnter" );
-	if(pWidget) pWidget->Show(bLadderServer);
+	pWidget = m_IDLResource.FindWidget("PrivateChannelInput");
+	if (pWidget) pWidget->Show(bLadderServer);
+
+	pWidget = m_IDLResource.FindWidget("PrivateChannelEnter");
+	if (pWidget) pWidget->Show(bLadderServer);
 
 }
 
@@ -4886,11 +4876,11 @@ void ZGameInterface::OnArrangedTeamGameUI(bool bFinding)
 {
 	MWidget *pWidget;
 
-	pWidget= m_IDLResource.FindWidget( "ArrangedTeamGame" );
-	if(pWidget) pWidget->Show(!bFinding);
+	pWidget = m_IDLResource.FindWidget("ArrangedTeamGame");
+	if (pWidget) pWidget->Show(!bFinding);
 
 	pWidget = m_IDLResource.FindWidget("LobbyFindClanTeam");
-	if(pWidget!=NULL) pWidget->Show(bFinding);
+	if (pWidget != NULL) pWidget->Show(bFinding);
 
 #define SAFE_ENABLE(x) { pWidget= m_IDLResource.FindWidget( x ); if(pWidget) pWidget->Enable(!bFinding); }
 
@@ -4910,16 +4900,16 @@ void ZGameInterface::OnArrangedTeamGameUI(bool bFinding)
 
 bool ZGameInterface::IsReadyToPropose()
 {
-	if(GetState() != GUNZ_LOBBY)
+	if (GetState() != GUNZ_LOBBY)
 		return false;
 
-	if(m_bWaitingArrangedGame)
+	if (m_bWaitingArrangedGame)
 		return false;
 
-	if(GetLatestExclusive()!=NULL)
+	if (GetLatestExclusive() != NULL)
 		return false;
 
-	if(m_pMsgBox->IsVisible())
+	if (m_pMsgBox->IsVisible())
 		return false;
 
 	return true;
@@ -4927,14 +4917,14 @@ bool ZGameInterface::IsReadyToPropose()
 
 bool ZGameInterface::IsMiniMapEnable()
 {
-	return GetCamera()->GetLookMode()==ZCAMERA_MINIMAP;
+	return GetCamera()->GetLookMode() == ZCAMERA_MINIMAP;
 }
 
 bool ZGameInterface::OpenMiniMap()
 {
-	if(!m_pMiniMap) {
+	if (!m_pMiniMap) {
 		m_pMiniMap = new ZMiniMap;
-		if(!m_pMiniMap->Create(ZGetGameClient()->GetMatchStageSetting()->GetMapName()))
+		if (!m_pMiniMap->Create(ZGetGameClient()->GetMatchStageSetting()->GetMapName()))
 		{
 			SAFE_DELETE(m_pMiniMap);
 			return false;
@@ -4952,28 +4942,28 @@ string GetRestrictionString(MMatchItemDesc* pItemDesc)
 
 	bool bAdd = false;
 
-	if ( pItemDesc->m_nResSex != -1)
+	if (pItemDesc->m_nResSex != -1)
 	{
-		if ( pItemDesc->m_nResSex == 0)
-			sprintf_safe( temp, "%s\n", ZMsg( MSG_WORD_FORMEN));
-		else if ( pItemDesc->m_nResSex == 1)
-			sprintf_safe( temp, "%s\n", ZMsg( MSG_WORD_FORWOMEN));
+		if (pItemDesc->m_nResSex == 0)
+			sprintf_safe(temp, "%s\n", ZMsg(MSG_WORD_FORMEN));
+		else if (pItemDesc->m_nResSex == 1)
+			sprintf_safe(temp, "%s\n", ZMsg(MSG_WORD_FORWOMEN));
 		str += temp;
 	}
 
-	if ( pItemDesc->m_nResLevel)
+	if (pItemDesc->m_nResLevel)
 	{
-		if ( pItemDesc->m_nResLevel > ZGetMyInfo()->GetLevel())
-			sprintf_safe( temp,"%s : ^1%d ^0%s\n", ZMsg( MSG_WORD_LIMITEDLEVEL), pItemDesc->m_nResLevel, ZMsg(MSG_CHARINFO_LEVELMARKER));
+		if (pItemDesc->m_nResLevel > ZGetMyInfo()->GetLevel())
+			sprintf_safe(temp, "%s : ^1%d ^0%s\n", ZMsg(MSG_WORD_LIMITEDLEVEL), pItemDesc->m_nResLevel, ZMsg(MSG_CHARINFO_LEVELMARKER));
 		else
-			sprintf_safe( temp,"%s : %d %s\n", ZMsg( MSG_WORD_LIMITEDLEVEL), pItemDesc->m_nResLevel, ZMsg(MSG_CHARINFO_LEVELMARKER));
+			sprintf_safe(temp, "%s : %d %s\n", ZMsg(MSG_WORD_LIMITEDLEVEL), pItemDesc->m_nResLevel, ZMsg(MSG_CHARINFO_LEVELMARKER));
 		str += temp;
 		bAdd = true;
 	}
 
-	if ( pItemDesc->m_nWeight)
+	if (pItemDesc->m_nWeight)
 	{
-		sprintf_safe( temp,"%s : %d Wt.", ZMsg( MSG_WORD_WEIGHT), pItemDesc->m_nWeight);
+		sprintf_safe(temp, "%s : %d Wt.", ZMsg(MSG_WORD_WEIGHT), pItemDesc->m_nWeight);
 		str += temp;
 		bAdd = true;
 	}
@@ -4987,162 +4977,162 @@ string GetItemSpecString(MMatchItemDesc* pItemDesc)
 	char temp[1024];
 	bool bAdd = false;
 
-	if ( pItemDesc->IsEnchantItem())
+	if (pItemDesc->IsEnchantItem())
 	{
-		switch ( pItemDesc->m_nWeaponType)
+		switch (pItemDesc->m_nWeaponType)
 		{
-			case MWT_ENCHANT_FIRE :
-				sprintf_safe( temp, "<%s>\n", ZMsg( MSG_WORD_ATTRIBUTE_FIRE));
+		case MWT_ENCHANT_FIRE:
+			sprintf_safe(temp, "<%s>\n", ZMsg(MSG_WORD_ATTRIBUTE_FIRE));
+			str += temp;
+			sprintf_safe(temp, "%s : %d%s\n", ZMsg(MSG_WORD_RUNTIME), pItemDesc->m_nDelay / 1000, ZMsg(MSG_CHARINFO_SECOND));
+			str += temp;
+			if (pItemDesc->m_nDamage)
+			{
+				sprintf_safe(temp, "%s : %d dmg/%s\n", ZMsg(MSG_WORD_DAMAGE), pItemDesc->m_nDamage, ZMsg(MSG_CHARINFO_SECOND));
 				str += temp;
-				sprintf_safe(temp,"%s : %d%s\n", ZMsg( MSG_WORD_RUNTIME), pItemDesc->m_nDelay/1000, ZMsg( MSG_CHARINFO_SECOND));
+			}
+			break;
+
+		case MWT_ENCHANT_COLD:
+			sprintf_safe(temp, "<%s>\n", ZMsg(MSG_WORD_ATTRIBUTE_COLD));
+			str += temp;
+			sprintf_safe(temp, "%s : %d%s\n", ZMsg(MSG_WORD_RUNTIME), pItemDesc->m_nDelay / 1000, ZMsg(MSG_CHARINFO_SECOND));
+			str += temp;
+			if (pItemDesc->m_nLimitSpeed)
+			{
+				sprintf_safe(temp, "%s -%d%%\n", ZMsg(MSG_WORD_RUNSPEED), 100 - pItemDesc->m_nLimitSpeed);
 				str += temp;
-				if ( pItemDesc->m_nDamage)
-				{
-					sprintf_safe(temp,"%s : %d dmg/%s\n", ZMsg( MSG_WORD_DAMAGE), pItemDesc->m_nDamage, ZMsg( MSG_CHARINFO_SECOND));
-					str += temp;
-				}
-				break;
-		
-			case MWT_ENCHANT_COLD :
-				sprintf_safe( temp, "<%s>\n", ZMsg( MSG_WORD_ATTRIBUTE_COLD));
+			}
+			sprintf_safe(temp, "%s\n", ZMsg(MSG_WORD_DONOTDASH));
+			str += temp;
+			sprintf_safe(temp, "%s\n", ZMsg(MSG_WORD_DONOTHANGWALL));
+			str += temp;
+			break;
+
+		case MWT_ENCHANT_LIGHTNING:
+			sprintf_safe(temp, "<%s>\n", ZMsg(MSG_WORD_ATTRIBUTE_LIGHTNING));
+			str += temp;
+			sprintf_safe(temp, "%s : %d%s\n", ZMsg(MSG_WORD_RUNTIME), pItemDesc->m_nDelay / 1000, ZMsg(MSG_CHARINFO_SECOND));
+			str += temp;
+			if (pItemDesc->m_nDamage)
+			{
+				sprintf_safe(temp, "%s : %d dmg.\n", ZMsg(MSG_WORD_ATTACK), pItemDesc->m_nDamage);
 				str += temp;
-				sprintf_safe(temp,"%s : %d%s\n", ZMsg( MSG_WORD_RUNTIME), pItemDesc->m_nDelay/1000, ZMsg( MSG_CHARINFO_SECOND));
+			}
+			break;
+
+		case MWT_ENCHANT_POISON:
+			sprintf_safe(temp, "<%s>\n", ZMsg(MSG_WORD_ATTRIBUTE_POISON));
+			str += temp;
+			sprintf_safe(temp, "%s : %d%s\n", ZMsg(MSG_WORD_RUNTIME), pItemDesc->m_nDelay / 1000, ZMsg(MSG_CHARINFO_SECOND));
+			str += temp;
+			if (pItemDesc->m_nDamage)
+			{
+				sprintf_safe(temp, "%s : %d dmg/%s\n", ZMsg(MSG_WORD_DAMAGE), pItemDesc->m_nDamage, ZMsg(MSG_CHARINFO_SECOND));
 				str += temp;
-				if ( pItemDesc->m_nLimitSpeed)
-				{
-					sprintf_safe(temp,"%s -%d%%\n",  ZMsg( MSG_WORD_RUNSPEED), 100-pItemDesc->m_nLimitSpeed);
-					str += temp;
-				}
-				sprintf_safe(temp,"%s\n", ZMsg( MSG_WORD_DONOTDASH));
-				str += temp;
-				sprintf_safe(temp,"%s\n", ZMsg( MSG_WORD_DONOTHANGWALL));
-				str += temp;
-				break;
-			
-			case MWT_ENCHANT_LIGHTNING :
-				sprintf_safe( temp, "<%s>\n", ZMsg( MSG_WORD_ATTRIBUTE_LIGHTNING));
-				str += temp;
-				sprintf_safe(temp,"%s : %d%s\n", ZMsg( MSG_WORD_RUNTIME), pItemDesc->m_nDelay/1000, ZMsg( MSG_CHARINFO_SECOND));
-				str += temp;
-				if ( pItemDesc->m_nDamage)
-				{
-					sprintf_safe(temp,"%s : %d dmg.\n", ZMsg( MSG_WORD_ATTACK), pItemDesc->m_nDamage);
-					str += temp;
-				}
-				break;
-			
-			case MWT_ENCHANT_POISON :
-				sprintf_safe( temp, "<%s>\n", ZMsg( MSG_WORD_ATTRIBUTE_POISON));
-				str += temp;
-				sprintf_safe(temp,"%s : %d%s\n", ZMsg( MSG_WORD_RUNTIME), pItemDesc->m_nDelay/1000, ZMsg( MSG_CHARINFO_SECOND));
-				str += temp;
-				if ( pItemDesc->m_nDamage)
-				{
-					sprintf_safe(temp,"%s : %d dmg/%s\n", ZMsg( MSG_WORD_DAMAGE), pItemDesc->m_nDamage, ZMsg( MSG_CHARINFO_SECOND));
-					str += temp;
-				}
-				break;
+			}
+			break;
 		}
 	}
 	else
 	{
-		if(pItemDesc->m_nMaxBullet) {
-			sprintf_safe( temp, "%s : %d", ZMsg( MSG_WORD_BULLET), pItemDesc->m_nMagazine);
+		if (pItemDesc->m_nMaxBullet) {
+			sprintf_safe(temp, "%s : %d", ZMsg(MSG_WORD_BULLET), pItemDesc->m_nMagazine);
 
-			if ( ( pItemDesc->m_nMaxBullet / pItemDesc->m_nMagazine) > 1)
-			sprintf_safe( temp, "%s x %d", temp, pItemDesc->m_nMaxBullet / pItemDesc->m_nMagazine);
+			if ((pItemDesc->m_nMaxBullet / pItemDesc->m_nMagazine) > 1)
+				sprintf_safe(temp, "%s x %d", temp, pItemDesc->m_nMaxBullet / pItemDesc->m_nMagazine);
 
 			str += temp;
 			str += "\n";
 			bAdd = true;
 		}
 
-		if(pItemDesc->m_nDamage) {
-			sprintf_safe(temp,"%s : %d dmg.\n", ZMsg( MSG_WORD_ATTACK), pItemDesc->m_nDamage);
+		if (pItemDesc->m_nDamage) {
+			sprintf_safe(temp, "%s : %d dmg.\n", ZMsg(MSG_WORD_ATTACK), pItemDesc->m_nDamage);
 			str += temp;
 			bAdd = true;
 		}
 
-		if(pItemDesc->m_nDelay) {
-			sprintf_safe(temp,"%s : %d\n", ZMsg( MSG_WORD_DELAY), pItemDesc->m_nDelay);
+		if (pItemDesc->m_nDelay) {
+			sprintf_safe(temp, "%s : %d\n", ZMsg(MSG_WORD_DELAY), pItemDesc->m_nDelay);
 			str += temp;
 			bAdd = true;
 		}
-		
+
 		// HP
-		if(pItemDesc->m_nHP) {
-			sprintf_safe(temp,"%s +%d\n", ZMsg(MSG_CHARINFO_HP), pItemDesc->m_nHP);
+		if (pItemDesc->m_nHP) {
+			sprintf_safe(temp, "%s +%d\n", ZMsg(MSG_CHARINFO_HP), pItemDesc->m_nHP);
 			str += temp;
 			bAdd = true;
 		}
 
 
 		// AP
-		if(pItemDesc->m_nAP) {
-			sprintf_safe(temp,"%s +%d\n", ZMsg(MSG_CHARINFO_AP), pItemDesc->m_nAP);
+		if (pItemDesc->m_nAP) {
+			sprintf_safe(temp, "%s +%d\n", ZMsg(MSG_CHARINFO_AP), pItemDesc->m_nAP);
 			str += temp;
 			bAdd = true;
 		}
 
 
-		if(pItemDesc->m_nMaxWT) {
-			sprintf_safe(temp,"%s +%d\n", ZMsg( MSG_WORD_MAXWEIGHT), pItemDesc->m_nMaxWT);
+		if (pItemDesc->m_nMaxWT) {
+			sprintf_safe(temp, "%s +%d\n", ZMsg(MSG_WORD_MAXWEIGHT), pItemDesc->m_nMaxWT);
 			str += temp;
 			bAdd = true;
 		}
 
-		if(pItemDesc->m_nSF) {
-			sprintf_safe(temp,"SF +%d\n",pItemDesc->m_nSF);
+		if (pItemDesc->m_nSF) {
+			sprintf_safe(temp, "SF +%d\n", pItemDesc->m_nSF);
 			str += temp;
 			bAdd = true;
 		}
 
-		if(pItemDesc->m_nFR) {
-			sprintf_safe(temp,"FR +%d\n",pItemDesc->m_nFR);
+		if (pItemDesc->m_nFR) {
+			sprintf_safe(temp, "FR +%d\n", pItemDesc->m_nFR);
 			str += temp;
 			bAdd = true;
 		}
 
-		if(pItemDesc->m_nCR) {
-			sprintf_safe(temp,"CR +%d\n",pItemDesc->m_nCR);
+		if (pItemDesc->m_nCR) {
+			sprintf_safe(temp, "CR +%d\n", pItemDesc->m_nCR);
 			str += temp;
 			bAdd = true;
 		}
 
-		if(pItemDesc->m_nPR) {
-			sprintf_safe(temp,"PR +%d\n",pItemDesc->m_nPR);
+		if (pItemDesc->m_nPR) {
+			sprintf_safe(temp, "PR +%d\n", pItemDesc->m_nPR);
 			str += temp;
 			bAdd = true;
 		}
 
-		if(pItemDesc->m_nLR ) {
-			sprintf_safe(temp,"LR +%d\n",pItemDesc->m_nLR);
+		if (pItemDesc->m_nLR) {
+			sprintf_safe(temp, "LR +%d\n", pItemDesc->m_nLR);
 			str += temp;
 			bAdd = true;
 		}
 
 		str += "\n";
 
-		if(pItemDesc->m_nLimitSpeed != 100) {
-			sprintf_safe(temp,"%s -%d%%\n", ZMsg( MSG_WORD_RUNSPEED), 100-pItemDesc->m_nLimitSpeed);
+		if (pItemDesc->m_nLimitSpeed != 100) {
+			sprintf_safe(temp, "%s -%d%%\n", ZMsg(MSG_WORD_RUNSPEED), 100 - pItemDesc->m_nLimitSpeed);
 			str += temp;
 			bAdd = true;
 		}
 
-		if(pItemDesc->m_nLimitJump) {
-			sprintf_safe(temp,"%s\n", ZMsg( MSG_WORD_DONOTJUMP));
+		if (pItemDesc->m_nLimitJump) {
+			sprintf_safe(temp, "%s\n", ZMsg(MSG_WORD_DONOTJUMP));
 			str += temp;
 			bAdd = true;
 		}
 
-		if(pItemDesc->m_nLimitTumble) {
-			sprintf_safe(temp,"%s\n", ZMsg( MSG_WORD_DONOTDASH));
+		if (pItemDesc->m_nLimitTumble) {
+			sprintf_safe(temp, "%s\n", ZMsg(MSG_WORD_DONOTDASH));
 			str += temp;
 			bAdd = true;
 		}
 
-		if(pItemDesc->m_nLimitWall) {
-			sprintf_safe(temp,"%s\n", ZMsg( MSG_WORD_DONOTHANGWALL));
+		if (pItemDesc->m_nLimitWall) {
+			sprintf_safe(temp, "%s\n", ZMsg(MSG_WORD_DONOTHANGWALL));
 			str += temp;
 			bAdd = true;
 		}
@@ -5151,42 +5141,42 @@ string GetItemSpecString(MMatchItemDesc* pItemDesc)
 	return str;
 }
 
-string GetPeriodItemString( ZMyItemNode* pRentalNode)
+string GetPeriodItemString(ZMyItemNode* pRentalNode)
 {
 	string str = "";
 	char temp[1024];
 
-	if ( pRentalNode != NULL)
+	if (pRentalNode != NULL)
 	{
-		if ( (pRentalNode->GetRentMinutePeriodRemainder() < RENT_MINUTE_PERIOD_UNLIMITED))
+		if ((pRentalNode->GetRentMinutePeriodRemainder() < RENT_MINUTE_PERIOD_UNLIMITED))
 		{
 			DWORD dwRemaind = pRentalNode->GetRentMinutePeriodRemainder();
 			DWORD dwRecievedClock = (GetGlobalTimeMS() - pRentalNode->GetWhenReceivedClock()) / 60000;
 
-			if ( dwRemaind < dwRecievedClock)
+			if (dwRemaind < dwRecievedClock)
 			{
-				str = ZMsg( MSG_EXPIRED);
+				str = ZMsg(MSG_EXPIRED);
 			}
 			else
 			{
 				dwRemaind -= dwRecievedClock;
 
-				if ( dwRemaind > 1440)
+				if (dwRemaind > 1440)
 				{
-					sprintf_safe( temp, "%d%s ", dwRemaind / 1440, ZMsg( MSG_CHARINFO_DAY));
+					sprintf_safe(temp, "%d%s ", dwRemaind / 1440, ZMsg(MSG_CHARINFO_DAY));
 					str += temp;
 					dwRemaind %= 1440;
 				}
 
-				sprintf_safe( temp, "%d%s ", dwRemaind / 60, ZMsg( MSG_CHARINFO_HOUR));
+				sprintf_safe(temp, "%d%s ", dwRemaind / 60, ZMsg(MSG_CHARINFO_HOUR));
 				str += temp;
 				dwRemaind %= 60;
 
-				sprintf_safe( temp, "%d%s", dwRemaind, ZMsg( MSG_CHARINFO_MINUTE));
+				sprintf_safe(temp, "%d%s", dwRemaind, ZMsg(MSG_CHARINFO_MINUTE));
 				str += temp;
 
 				str += "  ";
-				str += ZMsg( MSG_REMAIND_PERIOD);
+				str += ZMsg(MSG_REMAIND_PERIOD);
 			}
 		}
 	}
@@ -5194,40 +5184,40 @@ string GetPeriodItemString( ZMyItemNode* pRentalNode)
 	return str;
 }
 
-void ZGameInterface::SetupItemDescription( MMatchItemDesc* pItemDesc, const char *szTextArea1, const char *szTextArea2, const char *szTextArea3, const char *szIcon, ZMyItemNode* pRentalNode)
+void ZGameInterface::SetupItemDescription(MMatchItemDesc* pItemDesc, const char *szTextArea1, const char *szTextArea2, const char *szTextArea3, const char *szIcon, ZMyItemNode* pRentalNode)
 {
-	if(!pItemDesc) return;
+	if (!pItemDesc) return;
 
 	MTextArea* pTextArea1 = (MTextArea*)ZGetGameInterface()->GetIDLResource()->FindWidget(szTextArea1);
 	MTextArea* pTextArea2 = (MTextArea*)ZGetGameInterface()->GetIDLResource()->FindWidget(szTextArea2);
 	MTextArea* pTextArea3 = (MTextArea*)ZGetGameInterface()->GetIDLResource()->FindWidget(szTextArea3);
-	if( pTextArea1)
+	if (pTextArea1)
 	{
-		pTextArea1->SetTextColor( MCOLOR(255,255,255));
-		pTextArea1->SetText( pItemDesc->m_szName);
+		pTextArea1->SetTextColor(MCOLOR(255, 255, 255));
+		pTextArea1->SetText(pItemDesc->m_szName);
 
-		pTextArea1->AddText( "\n\n\n");
-		pTextArea1->AddText( GetRestrictionString(pItemDesc).c_str(), MCOLOR( 170, 170, 170));
+		pTextArea1->AddText("\n\n\n");
+		pTextArea1->AddText(GetRestrictionString(pItemDesc).c_str(), MCOLOR(170, 170, 170));
 
-		pTextArea1->AddText( "\n");
-		pTextArea1->AddText( GetItemSpecString(pItemDesc).c_str(), MCOLOR( 170, 170, 170));
+		pTextArea1->AddText("\n");
+		pTextArea1->AddText(GetItemSpecString(pItemDesc).c_str(), MCOLOR(170, 170, 170));
 	}
 
-	if( pTextArea2)
+	if (pTextArea2)
 	{
-		pTextArea2->SetTextColor( MCOLOR( 200, 0, 0));
-		pTextArea2->SetText( GetPeriodItemString( pRentalNode).c_str());
+		pTextArea2->SetTextColor(MCOLOR(200, 0, 0));
+		pTextArea2->SetText(GetPeriodItemString(pRentalNode).c_str());
 	}
 
-	if( pTextArea3)
+	if (pTextArea3)
 	{
-		pTextArea3->SetTextColor( MCOLOR( 120, 120, 120));
-		pTextArea3->SetText( pItemDesc->m_szDesc);
+		pTextArea3->SetTextColor(MCOLOR(120, 120, 120));
+		pTextArea3->SetText(pItemDesc->m_szDesc);
 	}
 
-	MPicture* pItemIcon = (MPicture*)ZGetGameInterface()->GetIDLResource()->FindWidget( szIcon);
-	if ( pItemIcon)
-		pItemIcon->SetBitmap( GetItemIconBitmap( pItemDesc, true));
+	MPicture* pItemIcon = (MPicture*)ZGetGameInterface()->GetIDLResource()->FindWidget(szIcon);
+	if (pItemIcon)
+		pItemIcon->SetBitmap(GetItemIconBitmap(pItemDesc, true));
 
 	int PrevHP = 0;
 	int PrevAP = 0;
@@ -5248,15 +5238,15 @@ void ZGameInterface::SetupItemDescription( MMatchItemDesc* pItemDesc, const char
 		PrevWeight = MyItemDesc->m_nWeight;
 		PrevMaxWeight = MyItemDesc->m_nMaxWT;
 	}();
-;
-	char szName[ 128], szBuff[ 128];
-	strcpy_safe( szName, ((strncmp( szTextArea1, "Equip", 5) == 0) ? "Equip_MyInfo" : "Shop_MyInfo"));
-	MTextArea* pTextArea = (MTextArea*)ZGetGameInterface()->GetIDLResource()->FindWidget( szName);
-	if ( pTextArea)
+	;
+	char szName[128], szBuff[128];
+	strcpy_safe(szName, ((strncmp(szTextArea1, "Equip", 5) == 0) ? "Equip_MyInfo" : "Shop_MyInfo"));
+	MTextArea* pTextArea = (MTextArea*)ZGetGameInterface()->GetIDLResource()->FindWidget(szName);
+	if (pTextArea)
 	{
 		pTextArea->Clear();
 
-		if ( pItemDesc->m_nResLevel > ZGetMyInfo()->GetLevel())
+		if (pItemDesc->m_nResLevel > ZGetMyInfo()->GetLevel())
 			sprintf_safe(szBuff, "^9%s : ^1%d ^9%s", ZMsg(MSG_CHARINFO_LEVEL),
 				ZGetMyInfo()->GetLevel(), ZMsg(MSG_CHARINFO_LEVELMARKER));
 		else
@@ -5265,95 +5255,95 @@ void ZGameInterface::SetupItemDescription( MMatchItemDesc* pItemDesc, const char
 		pTextArea->AddText(szBuff);
 
 
-		if ( pItemDesc->m_nBountyPrice > ZGetMyInfo()->GetBP())
+		if (pItemDesc->m_nBountyPrice > ZGetMyInfo()->GetBP())
 			sprintf_safe(szBuff, "^9%s : ^1%d", ZMsg(MSG_CHARINFO_BOUNTY), ZGetMyInfo()->GetBP());
 		else
 			sprintf_safe(szBuff, "^9%s : %d", ZMsg(MSG_CHARINFO_BOUNTY), ZGetMyInfo()->GetBP());
 		pTextArea->AddText(szBuff);
 
 
-		if ( pItemDesc->m_nHP > PrevHP)
-			sprintf_safe(szBuff,"^9%s : %d ^2+%d", ZMsg(MSG_CHARINFO_HP),
+		if (pItemDesc->m_nHP > PrevHP)
+			sprintf_safe(szBuff, "^9%s : %d ^2+%d", ZMsg(MSG_CHARINFO_HP),
 				ZGetMyInfo()->GetHP(), pItemDesc->m_nHP - PrevHP);
-		else if ( pItemDesc->m_nHP < PrevHP)
-			sprintf_safe(szBuff,"^9%s : %d ^1-%d",
+		else if (pItemDesc->m_nHP < PrevHP)
+			sprintf_safe(szBuff, "^9%s : %d ^1-%d",
 				ZMsg(MSG_CHARINFO_HP), ZGetMyInfo()->GetHP(), PrevHP - pItemDesc->m_nHP);
 		else
-			sprintf_safe(szBuff,"^9%s : %d", ZMsg(MSG_CHARINFO_HP), ZGetMyInfo()->GetHP());
-		pTextArea->AddText( szBuff);
+			sprintf_safe(szBuff, "^9%s : %d", ZMsg(MSG_CHARINFO_HP), ZGetMyInfo()->GetHP());
+		pTextArea->AddText(szBuff);
 
 
-		if ( pItemDesc->m_nAP > PrevAP)
-			sprintf_safe(szBuff,"^9%s : %d ^2+%d", ZMsg(MSG_CHARINFO_AP),
+		if (pItemDesc->m_nAP > PrevAP)
+			sprintf_safe(szBuff, "^9%s : %d ^2+%d", ZMsg(MSG_CHARINFO_AP),
 				ZGetMyInfo()->GetAP(), pItemDesc->m_nAP - PrevAP);
-		else if ( pItemDesc->m_nAP < PrevAP)
-			sprintf_safe(szBuff,"^9%s : %d ^1-%d", ZMsg(MSG_CHARINFO_AP),
+		else if (pItemDesc->m_nAP < PrevAP)
+			sprintf_safe(szBuff, "^9%s : %d ^1-%d", ZMsg(MSG_CHARINFO_AP),
 				ZGetMyInfo()->GetAP(), PrevAP - pItemDesc->m_nAP);
 		else
-			sprintf_safe(szBuff,"^9%s : %d", ZMsg(MSG_CHARINFO_AP), ZGetMyInfo()->GetAP());
-		pTextArea->AddText( szBuff);
+			sprintf_safe(szBuff, "^9%s : %d", ZMsg(MSG_CHARINFO_AP), ZGetMyInfo()->GetAP());
+		pTextArea->AddText(szBuff);
 
 
 		if ((ZGetMyInfo()->GetItemList()->GetEquipedTotalWeight() - PrevWeight + pItemDesc->m_nWeight)
 		> ZGetMyInfo()->GetItemList()->GetMaxWeight())
-			sprintf_safe(szBuff,"^9%s : ^1%d^9/", ZMsg(MSG_CHARINFO_WEIGHT),
+			sprintf_safe(szBuff, "^9%s : ^1%d^9/", ZMsg(MSG_CHARINFO_WEIGHT),
 				ZGetMyInfo()->GetItemList()->GetEquipedTotalWeight());
 		else
-			sprintf_safe(szBuff,"^9%s : %d/", ZMsg(MSG_CHARINFO_WEIGHT),
+			sprintf_safe(szBuff, "^9%s : %d/", ZMsg(MSG_CHARINFO_WEIGHT),
 				ZGetMyInfo()->GetItemList()->GetEquipedTotalWeight());
 
-		char chTmp[ 32];
-		if ( pItemDesc->m_nMaxWT > PrevMaxWeight)
-			sprintf_safe(chTmp,"%d ^2+%d", ZGetMyInfo()->GetItemList()->GetMaxWeight(),
+		char chTmp[32];
+		if (pItemDesc->m_nMaxWT > PrevMaxWeight)
+			sprintf_safe(chTmp, "%d ^2+%d", ZGetMyInfo()->GetItemList()->GetMaxWeight(),
 				pItemDesc->m_nMaxWT - PrevMaxWeight);
-		else if ( pItemDesc->m_nMaxWT < PrevMaxWeight)
-			sprintf_safe(chTmp,"%d ^1-%d", ZGetMyInfo()->GetItemList()->GetMaxWeight(),
+		else if (pItemDesc->m_nMaxWT < PrevMaxWeight)
+			sprintf_safe(chTmp, "%d ^1-%d", ZGetMyInfo()->GetItemList()->GetMaxWeight(),
 				PrevMaxWeight - pItemDesc->m_nMaxWT);
 		else
-			sprintf_safe(chTmp,"%d", ZGetMyInfo()->GetItemList()->GetMaxWeight());
-		strcat_safe( szBuff, chTmp);
-		pTextArea->AddText( szBuff);
+			sprintf_safe(chTmp, "%d", ZGetMyInfo()->GetItemList()->GetMaxWeight());
+		strcat_safe(szBuff, chTmp);
+		pTextArea->AddText(szBuff);
 	}
 }
 
-void ZGameInterface::SetupItemDescription( MQuestItemDesc* pItemDesc, const char *szTextArea1, const char *szTextArea2, const char *szTextArea3, const char *szIcon)
+void ZGameInterface::SetupItemDescription(MQuestItemDesc* pItemDesc, const char *szTextArea1, const char *szTextArea2, const char *szTextArea3, const char *szIcon)
 {
-	if(!pItemDesc) return;
+	if (!pItemDesc) return;
 
 	MTextArea* pTextArea1 = (MTextArea*)ZGetGameInterface()->GetIDLResource()->FindWidget(szTextArea1);
 	MTextArea* pTextArea2 = (MTextArea*)ZGetGameInterface()->GetIDLResource()->FindWidget(szTextArea2);
 	MTextArea* pTextArea3 = (MTextArea*)ZGetGameInterface()->GetIDLResource()->FindWidget(szTextArea3);
-	if( pTextArea1)
+	if (pTextArea1)
 	{
-		pTextArea1->SetTextColor( MCOLOR(255,255,255));
-		pTextArea1->SetText( pItemDesc->m_szQuestItemName);
-		pTextArea1->AddText( "\n");
+		pTextArea1->SetTextColor(MCOLOR(255, 255, 255));
+		pTextArea1->SetText(pItemDesc->m_szQuestItemName);
+		pTextArea1->AddText("\n");
 		char szText[256];
-		sprintf_safe( szText, "(%s %s)", ZMsg( MSG_WORD_QUEST), ZMsg( MSG_WORD_ITEM));
-		pTextArea1->AddText( szText, MCOLOR( 170, 170, 170));
-		pTextArea1->AddText( "\n\n");
+		sprintf_safe(szText, "(%s %s)", ZMsg(MSG_WORD_QUEST), ZMsg(MSG_WORD_ITEM));
+		pTextArea1->AddText(szText, MCOLOR(170, 170, 170));
+		pTextArea1->AddText("\n\n");
 
-		if ( pItemDesc->m_bSecrifice)
+		if (pItemDesc->m_bSecrifice)
 		{
-			sprintf_safe( szText, "%s %s", ZMsg( MSG_WORD_SACRIFICE), ZMsg( MSG_WORD_ITEM));
-			pTextArea1->AddText( szText, MCOLOR( 170, 170, 170));
+			sprintf_safe(szText, "%s %s", ZMsg(MSG_WORD_SACRIFICE), ZMsg(MSG_WORD_ITEM));
+			pTextArea1->AddText(szText, MCOLOR(170, 170, 170));
 		}
 	}
 
-	if( pTextArea2)
+	if (pTextArea2)
 	{
-		pTextArea2->SetText( "");
+		pTextArea2->SetText("");
 	}
 
-	if( pTextArea3)
+	if (pTextArea3)
 	{
-		pTextArea3->SetTextColor( MCOLOR( 120, 120, 120));
-		pTextArea3->SetText( pItemDesc->m_szDesc);
+		pTextArea3->SetTextColor(MCOLOR(120, 120, 120));
+		pTextArea3->SetText(pItemDesc->m_szDesc);
 	}
 
-	MPicture* pItemIcon = (MPicture*)ZGetGameInterface()->GetIDLResource()->FindWidget( szIcon);
+	MPicture* pItemIcon = (MPicture*)ZGetGameInterface()->GetIDLResource()->FindWidget(szIcon);
 	if (pItemIcon)
-		pItemIcon->SetBitmap( GetQuestItemIcon(pItemDesc->m_nItemID, true));
+		pItemIcon->SetBitmap(GetQuestItemIcon(pItemDesc->m_nItemID, true));
 	MTextArea* pTextArea = (MTextArea*)m_IDLResource.FindWidget("Shop_MyInfo");
 	if (pTextArea)
 	{
@@ -5404,27 +5394,27 @@ void ZGameInterface::GetBringAccountItem()
 {
 	int nResult = CheckRestrictBringAccountItem();
 	if (nResult == -1)		// Error
-		ShowErrorMessage(  MERR_NO_SELITEM );
+		ShowErrorMessage(MERR_NO_SELITEM);
 
 	else if (nResult == 0)	// Restriction Passed
 	{
 		BringAccountItem();
 
-		MButton* pButton = (MButton*)m_IDLResource.FindWidget( "BringAccountItemBtn");
-		if ( pButton)
+		MButton* pButton = (MButton*)m_IDLResource.FindWidget("BringAccountItemBtn");
+		if (pButton)
 		{
-			pButton->Enable( false);
-			pButton->Show( false);
-			pButton->Show( true);
+			pButton->Enable(false);
+			pButton->Show(false);
+			pButton->Show(true);
 		}
 	}
 
 	else if (nResult == 1)	// Sex Restrict
-		ShowErrorMessage( MERR_BRING_ACCOUNTITEM_BECAUSEOF_SEX );
+		ShowErrorMessage(MERR_BRING_ACCOUNTITEM_BECAUSEOF_SEX);
 
 	else if (nResult == 2)	// Level Restrict
-		ShowConfirmMessage(	ZErrStr(MERR_BRING_CONFIRM_ACCOUNTITEM_BECAUSEOF_LEVEL),
-                            ZGetLevelConfirmListenter() );
+		ShowConfirmMessage(ZErrStr(MERR_BRING_CONFIRM_ACCOUNTITEM_BECAUSEOF_LEVEL),
+			ZGetLevelConfirmListenter());
 	else
 		_ASSERT(FALSE);	// Unknown Restriction
 }
@@ -5432,26 +5422,26 @@ void ZGameInterface::GetBringAccountItem()
 class ReplayListBoxItem : public MListItem
 {
 public:
-	ReplayListBoxItem( const char* szName, const char* szVersion)
+	ReplayListBoxItem(const char* szName, const char* szVersion)
 	{
 		strcpy_safe(m_szName, szName);
 		strcpy_safe(m_szVersion, szVersion);
 	}
 
-	virtual const char* GetString( void)
+	virtual const char* GetString(void)
 	{
 		return m_szName;
 	}
-	virtual const char* GetString( int i)
+	virtual const char* GetString(int i)
 	{
-		if ( i == 0)
+		if (i == 0)
 			return m_szName;
-		else if ( i == 1)
+		else if (i == 1)
 			return m_szVersion;
 
 		return NULL;
 	}
-	virtual MBitmap* GetBitmap( int i)
+	virtual MBitmap* GetBitmap(int i)
 	{
 		return NULL;
 	}
@@ -5461,59 +5451,59 @@ protected:
 	char		m_szVersion[10];
 };
 
-void ZGameInterface::ShowReplayDialog( bool bShow)
+void ZGameInterface::ShowReplayDialog(bool bShow)
 {
-	if ( bShow)
+	if (bShow)
 	{
 		MWidget* pWidget;
-		pWidget = (MWidget*)m_IDLResource.FindWidget( "Replay");
-		if ( pWidget)
-			pWidget->Show( true, true);
+		pWidget = (MWidget*)m_IDLResource.FindWidget("Replay");
+		if (pWidget)
+			pWidget->Show(true, true);
 
-		pWidget = (MWidget*)m_IDLResource.FindWidget( "Replay_View");
-		if ( pWidget)
-			pWidget->Enable( false);
+		pWidget = (MWidget*)m_IDLResource.FindWidget("Replay_View");
+		if (pWidget)
+			pWidget->Enable(false);
 
-		MListBox* pListBox = (MListBox*)m_IDLResource.FindWidget( "Replay_FileList");
-		if ( pListBox)
+		MListBox* pListBox = (MListBox*)m_IDLResource.FindWidget("Replay_FileList");
+		if (pListBox)
 		{
 			pListBox->RemoveAll();
 
 			// Get path name
-			TCHAR szPath[ MAX_PATH];
-			if ( GetMyDocumentsPath( szPath))
+			TCHAR szPath[MAX_PATH];
+			if (GetMyDocumentsPath(szPath))
 			{
-				strcat_safe( szPath, GUNZ_FOLDER);
-				strcat_safe( szPath, REPLAY_FOLDER);
-				CreatePath( szPath );
+				strcat_safe(szPath, GUNZ_FOLDER);
+				strcat_safe(szPath, REPLAY_FOLDER);
+				CreatePath(szPath);
 			}
-			TCHAR szFullPath[ MAX_PATH];
-			strcpy_safe( szFullPath, szPath);
+			TCHAR szFullPath[MAX_PATH];
+			strcpy_safe(szFullPath, szPath);
 
-			strcat_safe( szPath, "/*.gzr");
+			strcat_safe(szPath, "/*.gzr");
 
 			// Get file list
 			struct _finddata_t c_file;
 			long hFile;
-			char szName[ _MAX_PATH];
-			char szFullPathName[ _MAX_PATH];
-			if ( (hFile = _findfirst( szPath, &c_file)) != -1L)
+			char szName[_MAX_PATH];
+			char szFullPathName[_MAX_PATH];
+			if ((hFile = _findfirst(szPath, &c_file)) != -1L)
 			{
 				do
 				{
-					strcpy_safe( szName, c_file.name);
+					strcpy_safe(szName, c_file.name);
 
-					strcpy_safe( szFullPathName, szFullPath);
-					strcat_safe( szFullPathName, "/");
-					strcat_safe( szFullPathName, szName);
+					strcpy_safe(szFullPathName, szFullPath);
+					strcat_safe(szFullPathName, "/");
+					strcat_safe(szFullPathName, szName);
 
 					DWORD dwFileVersion = 0;
 					char szVersion[10] = "";
-				
-					pListBox->Add( new ReplayListBoxItem( szName, szVersion)); // Add to listbox
-				} while ( _findnext( hFile, &c_file) == 0);
 
-				_findclose( hFile);
+					pListBox->Add(new ReplayListBoxItem(szName, szVersion)); // Add to listbox
+				} while (_findnext(hFile, &c_file) == 0);
+
+				_findclose(hFile);
 			}
 
 			pListBox->Sort();
@@ -5521,28 +5511,28 @@ void ZGameInterface::ShowReplayDialog( bool bShow)
 	}
 	else
 	{
-		ShowWidget( "Replay", false);
+		ShowWidget("Replay", false);
 	}
 }
 
 void ZGameInterface::ViewReplay()
 {
-	ShowReplayDialog( false);
+	ShowReplayDialog(false);
 
-	MListBox* pListBox = (MListBox*)m_IDLResource.FindWidget( "Replay_FileList");
-	if ( !pListBox)
-		return ;
+	MListBox* pListBox = (MListBox*)m_IDLResource.FindWidget("Replay_FileList");
+	if (!pListBox)
+		return;
 
-	if ( pListBox->GetSelItemString() == NULL)
-		return ;
+	if (pListBox->GetSelItemString() == NULL)
+		return;
 
-	TCHAR szName[ MAX_PATH];
-	if ( GetMyDocumentsPath( szName))
+	TCHAR szName[MAX_PATH];
+	if (GetMyDocumentsPath(szName))
 	{
-		strcat_safe( szName, GUNZ_FOLDER);
-		strcat_safe( szName, REPLAY_FOLDER);
-		strcat_safe( szName, "/");
-		strcat_safe( szName, pListBox->GetSelItemString());
+		strcat_safe(szName, GUNZ_FOLDER);
+		strcat_safe(szName, REPLAY_FOLDER);
+		strcat_safe(szName, "/");
+		strcat_safe(szName, pListBox->GetSelItemString());
 	}
 
 	EnteredReplayFromLogin = GetState() == GUNZ_LOGIN;
@@ -5552,108 +5542,108 @@ void ZGameInterface::ViewReplay()
 	m_bOnEndOfReplay = true;
 	m_nLevelPercentCache = ZGetMyInfo()->GetLevelPercent();
 
-	if ( !CreateReplayGame( szName))
-		ZApplication::GetGameInterface()->ShowMessage( "Can't Open Replay File" );
+	if (!CreateReplayGame(szName))
+		ZApplication::GetGameInterface()->ShowMessage("Can't Open Replay File");
 
 	m_CombatMenu.EnableItem(ZCombatMenu::ZCMI_BATTLE_EXIT, false);
 }
 
-void ZGameInterface::SetKindableItem( MMatchItemSlotType nSlotType)
+void ZGameInterface::SetKindableItem(MMatchItemSlotType nSlotType)
 {
 	ZItemSlotView* itemSlot;
-	for ( int i = 0;  i < MMCIP_END;  i++)
+	for (int i = 0; i < MMCIP_END; i++)
 	{
-		itemSlot = (ZItemSlotView*)m_IDLResource.FindWidget( GetItemSlotName( "Equip", i));
-		if ( itemSlot)
+		itemSlot = (ZItemSlotView*)m_IDLResource.FindWidget(GetItemSlotName("Equip", i));
+		if (itemSlot)
 		{
 			bool bKindable = false;
-			switch ( nSlotType)
+			switch (nSlotType)
 			{
-				case MMIST_MELEE :
-					if ( itemSlot->GetParts() == MMCIP_MELEE)
-						bKindable = true;
-					break;
-				case MMIST_RANGE :
-					if ( (itemSlot->GetParts() == MMCIP_PRIMARY) || (itemSlot->GetParts() == MMCIP_SECONDARY))
-						bKindable = true;
-					break;
-				case MMIST_CUSTOM :
-					if ( (itemSlot->GetParts() == MMCIP_CUSTOM1) || (itemSlot->GetParts() == MMCIP_CUSTOM2))
-						bKindable = true;
-					break;
-				case MMIST_HEAD :
-					if ( itemSlot->GetParts() == MMCIP_HEAD)
-						bKindable = true;
-					break;
-				case MMIST_CHEST :
-					if ( itemSlot->GetParts() == MMCIP_CHEST)
-						bKindable = true;
-					break;
-				case MMIST_HANDS :
-					if ( itemSlot->GetParts() == MMCIP_HANDS)
-						bKindable = true;
-					break;
-				case MMIST_LEGS :
-					if ( itemSlot->GetParts() == MMCIP_LEGS)
-						bKindable = true;
-					break;
-				case MMIST_FEET :
-					if ( itemSlot->GetParts() == MMCIP_FEET)
-						bKindable = true;
-					break;
-				case MMIST_FINGER :
-					if ( (itemSlot->GetParts() == MMCIP_FINGERL) || (itemSlot->GetParts() == MMCIP_FINGERR))
-						bKindable = true;
-					break;
+			case MMIST_MELEE:
+				if (itemSlot->GetParts() == MMCIP_MELEE)
+					bKindable = true;
+				break;
+			case MMIST_RANGE:
+				if ((itemSlot->GetParts() == MMCIP_PRIMARY) || (itemSlot->GetParts() == MMCIP_SECONDARY))
+					bKindable = true;
+				break;
+			case MMIST_CUSTOM:
+				if ((itemSlot->GetParts() == MMCIP_CUSTOM1) || (itemSlot->GetParts() == MMCIP_CUSTOM2))
+					bKindable = true;
+				break;
+			case MMIST_HEAD:
+				if (itemSlot->GetParts() == MMCIP_HEAD)
+					bKindable = true;
+				break;
+			case MMIST_CHEST:
+				if (itemSlot->GetParts() == MMCIP_CHEST)
+					bKindable = true;
+				break;
+			case MMIST_HANDS:
+				if (itemSlot->GetParts() == MMCIP_HANDS)
+					bKindable = true;
+				break;
+			case MMIST_LEGS:
+				if (itemSlot->GetParts() == MMCIP_LEGS)
+					bKindable = true;
+				break;
+			case MMIST_FEET:
+				if (itemSlot->GetParts() == MMCIP_FEET)
+					bKindable = true;
+				break;
+			case MMIST_FINGER:
+				if ((itemSlot->GetParts() == MMCIP_FINGERL) || (itemSlot->GetParts() == MMCIP_FINGERR))
+					bKindable = true;
+				break;
 			}
 
-			itemSlot->SetKindable( bKindable);
+			itemSlot->SetKindable(bKindable);
 		}
 	}
 }
 
 #ifdef _QUEST_ITEM
-void ZGameInterface::OnResponseCharacterItemList_QuestItem( MTD_QuestItemNode* pQuestItemNode, int nQuestItemCount )
+void ZGameInterface::OnResponseCharacterItemList_QuestItem(MTD_QuestItemNode* pQuestItemNode, int nQuestItemCount)
 {
-	if( 0 == pQuestItemNode)
+	if (0 == pQuestItemNode)
 		return;
 
-	ZGetMyInfo()->GetItemList()->SetQuestItemsAll( pQuestItemNode, nQuestItemCount );
+	ZGetMyInfo()->GetItemList()->SetQuestItemsAll(pQuestItemNode, nQuestItemCount);
 
-	ZApplication::GetStageInterface()->SerializeSacrificeItemListBox();	
+	ZApplication::GetStageInterface()->SerializeSacrificeItemListBox();
 	ZGetMyInfo()->GetItemList()->Serialize();
 }
 
-void ZGameInterface::OnResponseBuyQuestItem( const int nResult, const int nBP )
+void ZGameInterface::OnResponseBuyQuestItem(const int nResult, const int nBP)
 {
-	if( MOK == nResult )
+	if (MOK == nResult)
 	{
-		ZApplication::GetGameInterface()->ShowMessage( MSG_GAME_BUYITEM );
+		ZApplication::GetGameInterface()->ShowMessage(MSG_GAME_BUYITEM);
 
-		ZGetMyInfo()->SetBP( nBP );
+		ZGetMyInfo()->SetBP(nBP);
 	}
-	else if( MERR_TOO_MANY_ITEM == nResult )
+	else if (MERR_TOO_MANY_ITEM == nResult)
 	{
-		ZApplication::GetGameInterface()->ShowErrorMessage( nResult );
+		ZApplication::GetGameInterface()->ShowErrorMessage(nResult);
 	}
-	else if( MERR_TOO_EXPENSIVE_BOUNTY == nResult )
+	else if (MERR_TOO_EXPENSIVE_BOUNTY == nResult)
 	{
-		ZApplication::GetGameInterface()->ShowErrorMessage( nResult );
+		ZApplication::GetGameInterface()->ShowErrorMessage(nResult);
 	}
 	else
 	{
-		mlog( "ZGameInterface::OnCommand::MC_MATCH_RESPONSE_BUY_QUEST_ITEM - 정의되지 않은 결과처리.\n" );
-		ASSERT( 0 );				
+		mlog("ZGameInterface::OnCommand::MC_MATCH_RESPONSE_BUY_QUEST_ITEM - 정의되지 않은 결과처리.\n");
+		ASSERT(0);
 	}
 }
 
-void ZGameInterface::OnResponseSellQuestItem( const int nResult, const int nBP )
+void ZGameInterface::OnResponseSellQuestItem(const int nResult, const int nBP)
 {
-	if( MOK == nResult )
+	if (MOK == nResult)
 	{
 		ZApplication::GetGameInterface()->ShowMessage(MSG_GAME_SELLITEM);
 
-		ZGetMyInfo()->SetBP( nBP );
+		ZGetMyInfo()->SetBP(nBP);
 	}
 	else
 	{
@@ -5661,104 +5651,104 @@ void ZGameInterface::OnResponseSellQuestItem( const int nResult, const int nBP )
 }
 #endif
 
-MBitmap* ZGameInterface::GetQuestItemIcon( int nItemID, bool bSmallIcon)
+MBitmap* ZGameInterface::GetQuestItemIcon(int nItemID, bool bSmallIcon)
 {
-	char szFileName[ 64] = "";
-	switch ( nItemID)
+	char szFileName[64] = "";
+	switch (nItemID)
 	{
 		// Page
-		case 200001 :	strcpy_safe( szFileName, "slot_icon_page"); break; // 13
-		case 200002 :	strcpy_safe( szFileName, "slot_icon_page"); break; // 25
-		case 200003 :	strcpy_safe( szFileName, "slot_icon_page"); break; // 41
-		case 200004 :	strcpy_safe( szFileName, "slot_icon_page"); break; // 65
+	case 200001:	strcpy_safe(szFileName, "slot_icon_page"); break; // 13
+	case 200002:	strcpy_safe(szFileName, "slot_icon_page"); break; // 25
+	case 200003:	strcpy_safe(szFileName, "slot_icon_page"); break; // 41
+	case 200004:	strcpy_safe(szFileName, "slot_icon_page"); break; // 65
 
-		// Skull
-		case 200005 :	strcpy_safe( szFileName, "slot_icon_skull"); break;
-		case 200006 :	strcpy_safe( szFileName, "slot_icon_skull"); break;
-		case 200007 :	strcpy_safe( szFileName, "slot_icon_skull"); break;
-		case 200008 :	strcpy_safe( szFileName, "slot_icon_skull"); break;
-		case 200009 :	strcpy_safe( szFileName, "slot_icon_skull"); break;
-		case 200010 :	strcpy_safe( szFileName, "slot_icon_skull"); break;
+	// Skull
+	case 200005:	strcpy_safe(szFileName, "slot_icon_skull"); break;
+	case 200006:	strcpy_safe(szFileName, "slot_icon_skull"); break;
+	case 200007:	strcpy_safe(szFileName, "slot_icon_skull"); break;
+	case 200008:	strcpy_safe(szFileName, "slot_icon_skull"); break;
+	case 200009:	strcpy_safe(szFileName, "slot_icon_skull"); break;
+	case 200010:	strcpy_safe(szFileName, "slot_icon_skull"); break;
 
 		// Fresh
-		case 200011 :	strcpy_safe( szFileName, "slot_icon_fresh"); break;
-		case 200012 :	strcpy_safe( szFileName, "slot_icon_fresh"); break;
-		case 200013 :	strcpy_safe( szFileName, "slot_icon_fresh"); break;
+	case 200011:	strcpy_safe(szFileName, "slot_icon_fresh"); break;
+	case 200012:	strcpy_safe(szFileName, "slot_icon_fresh"); break;
+	case 200013:	strcpy_safe(szFileName, "slot_icon_fresh"); break;
 
 		// Ring
-		case 200014 :	strcpy_safe( szFileName, "slot_icon_ring"); break;
-		case 200015 :	strcpy_safe( szFileName, "slot_icon_ring"); break;
-		case 200016 :	strcpy_safe( szFileName, "slot_icon_ring"); break;
-		case 200017 :	strcpy_safe( szFileName, "slot_icon_ring"); break;
+	case 200014:	strcpy_safe(szFileName, "slot_icon_ring"); break;
+	case 200015:	strcpy_safe(szFileName, "slot_icon_ring"); break;
+	case 200016:	strcpy_safe(szFileName, "slot_icon_ring"); break;
+	case 200017:	strcpy_safe(szFileName, "slot_icon_ring"); break;
 
 		// Necklace
-		case 200018 :	strcpy_safe( szFileName, "slot_icon_neck"); break;
+	case 200018:	strcpy_safe(szFileName, "slot_icon_neck"); break;
 
 		// Doll
-		case 200019 :	strcpy_safe( szFileName, "slot_icon_doll"); break;
-		case 200020 :	strcpy_safe( szFileName, "slot_icon_doll"); break;
-		case 200021 :	strcpy_safe( szFileName, "slot_icon_doll"); break;
-		case 200022 :	strcpy_safe( szFileName, "slot_icon_doll"); break;
-		case 200023 :	strcpy_safe( szFileName, "slot_icon_doll"); break;
-		case 200024 :	strcpy_safe( szFileName, "slot_icon_doll"); break;
-		case 200025 :	strcpy_safe( szFileName, "slot_icon_doll"); break;
-		case 200026 :	strcpy_safe( szFileName, "slot_icon_doll"); break;
-		case 200027 :	strcpy_safe( szFileName, "slot_icon_doll"); break;
+	case 200019:	strcpy_safe(szFileName, "slot_icon_doll"); break;
+	case 200020:	strcpy_safe(szFileName, "slot_icon_doll"); break;
+	case 200021:	strcpy_safe(szFileName, "slot_icon_doll"); break;
+	case 200022:	strcpy_safe(szFileName, "slot_icon_doll"); break;
+	case 200023:	strcpy_safe(szFileName, "slot_icon_doll"); break;
+	case 200024:	strcpy_safe(szFileName, "slot_icon_doll"); break;
+	case 200025:	strcpy_safe(szFileName, "slot_icon_doll"); break;
+	case 200026:	strcpy_safe(szFileName, "slot_icon_doll"); break;
+	case 200027:	strcpy_safe(szFileName, "slot_icon_doll"); break;
 
 		// Book
-		case 200028 :	strcpy_safe( szFileName, "slot_icon_book"); break;
-		case 200029 :	strcpy_safe( szFileName, "slot_icon_book"); break;
-		case 200030 :	strcpy_safe( szFileName, "slot_icon_book"); break;
+	case 200028:	strcpy_safe(szFileName, "slot_icon_book"); break;
+	case 200029:	strcpy_safe(szFileName, "slot_icon_book"); break;
+	case 200030:	strcpy_safe(szFileName, "slot_icon_book"); break;
 
 		// Object
-		case 200031 :	strcpy_safe( szFileName, "slot_icon_object"); break;
-		case 200032 :	strcpy_safe( szFileName, "slot_icon_object"); break;
-		case 200033 :	strcpy_safe( szFileName, "slot_icon_object"); break;
-		case 200034 :	strcpy_safe( szFileName, "slot_icon_object"); break;
-		case 200035 :	strcpy_safe( szFileName, "slot_icon_object"); break;
-		case 200036 :	strcpy_safe( szFileName, "slot_icon_object"); break;
-		case 200037 :	strcpy_safe( szFileName, "slot_icon_object"); break;
+	case 200031:	strcpy_safe(szFileName, "slot_icon_object"); break;
+	case 200032:	strcpy_safe(szFileName, "slot_icon_object"); break;
+	case 200033:	strcpy_safe(szFileName, "slot_icon_object"); break;
+	case 200034:	strcpy_safe(szFileName, "slot_icon_object"); break;
+	case 200035:	strcpy_safe(szFileName, "slot_icon_object"); break;
+	case 200036:	strcpy_safe(szFileName, "slot_icon_object"); break;
+	case 200037:	strcpy_safe(szFileName, "slot_icon_object"); break;
 
 		// Sword
-		case 200038 :	strcpy_safe( szFileName, "slot_icon_qsword"); break;
+	case 200038:	strcpy_safe(szFileName, "slot_icon_qsword"); break;
 	}
 
 	strcat_safe(szFileName, ".tga");
 
-	return MBitmapManager::Get( szFileName);
+	return MBitmapManager::Get(szFileName);
 }
 
 
-void ZGameInterface::OnResponseServerStatusInfoList( const int nListCount, void* pBlob )
+void ZGameInterface::OnResponseServerStatusInfoList(const int nListCount, void* pBlob)
 {
 	DMLog("OnResponseServerStatusInfoList\n");
-	ZServerView* pServerList = (ZServerView*)m_IDLResource.FindWidget( "SelectedServer");
-	if ( !pServerList)
+	ZServerView* pServerList = (ZServerView*)m_IDLResource.FindWidget("SelectedServer");
+	if (!pServerList)
 		return;
 
 	int nCurrSel = pServerList->GetCurrSel2();
-    pServerList->ClearServerList();
+	pServerList->ClearServerList();
 
 
 #ifdef	_DEBUG
-		pServerList->AddServer(ZMsg(MSG_SERVER_DEBUG), "", 0, 1, 0, 1000, true);
+	pServerList->AddServer(ZMsg(MSG_SERVER_DEBUG), "", 0, 1, 0, 1000, true);
 #else
-		if ( ZIsLaunchDevelop())
-		{
-			pServerList->AddServer(ZMsg(MSG_SERVER_DEBUG), "", 0, 1, 0, 1000, true);
-		}
+	if (ZIsLaunchDevelop())
+	{
+		pServerList->AddServer(ZMsg(MSG_SERVER_DEBUG), "", 0, 1, 0, 1000, true);
+	}
 #endif
 
 
 
-	if( (0 < nListCount) && (0 != pBlob) )
+	if ((0 < nListCount) && (0 != pBlob))
 	{
-		for( int i = 0; i < nListCount; ++i )
+		for (int i = 0; i < nListCount; ++i)
 		{
-			MTD_ServerStatusInfo* pss = (MTD_ServerStatusInfo*)MGetBlobArrayElement( pBlob, i );
-			if( 0 == pss )
+			MTD_ServerStatusInfo* pss = (MTD_ServerStatusInfo*)MGetBlobArrayElement(pBlob, i);
+			if (0 == pss)
 			{
-				mlog( "ZGameInterface::OnResponseServerStatusInfoList - %d번째에서 NULL포인터 발생.", i );
+				mlog("ZGameInterface::OnResponseServerStatusInfoList - %d번째에서 NULL포인터 발생.", i);
 				continue;
 			}
 
@@ -5779,27 +5769,27 @@ void ZGameInterface::OnResponseServerStatusInfoList( const int nListCount, void*
 				Addr = str.c_str();
 			}
 
-			char szServName[ 128 ] = {0,};
+			char szServName[128] = { 0, };
 
-			if ( pss->m_nType == 1)					// Debug server
-				sprintf_safe( szServName, "%s %d", ZMsg(MSG_SERVER_DEBUG), pss->m_nServerID );
-			else if ( pss->m_nType == 2)			// Match server
-				sprintf_safe( szServName, "%s %d", ZMsg(MSG_SERVER_MATCH), pss->m_nServerID );
-			else if ( pss->m_nType == 3)			// Clan server
-				sprintf_safe( szServName, "%s %d", ZMsg(MSG_SERVER_CLAN), pss->m_nServerID );
-			else if ( pss->m_nType == 4)			// Quest server
-				sprintf_safe( szServName, "%s %d", ZMsg(MSG_SERVER_QUEST), pss->m_nServerID );
-			else if ( pss->m_nType == 5)			// Event server
-				sprintf_safe( szServName, "%s %d", ZMsg(MSG_SERVER_EVENT), pss->m_nServerID );
-			else if ( pss->m_nType == 6)			// Test server
-				sprintf_safe( szServName, "Test Server %d", pss->m_nServerID );
+			if (pss->m_nType == 1)					// Debug server
+				sprintf_safe(szServName, "%s %d", ZMsg(MSG_SERVER_DEBUG), pss->m_nServerID);
+			else if (pss->m_nType == 2)			// Match server
+				sprintf_safe(szServName, "%s %d", ZMsg(MSG_SERVER_MATCH), pss->m_nServerID);
+			else if (pss->m_nType == 3)			// Clan server
+				sprintf_safe(szServName, "%s %d", ZMsg(MSG_SERVER_CLAN), pss->m_nServerID);
+			else if (pss->m_nType == 4)			// Quest server
+				sprintf_safe(szServName, "%s %d", ZMsg(MSG_SERVER_QUEST), pss->m_nServerID);
+			else if (pss->m_nType == 5)			// Event server
+				sprintf_safe(szServName, "%s %d", ZMsg(MSG_SERVER_EVENT), pss->m_nServerID);
+			else if (pss->m_nType == 6)			// Test server
+				sprintf_safe(szServName, "Test Server %d", pss->m_nServerID);
 			else
 				continue;
 
-			pServerList->AddServer( szServName, Addr, pss->m_nPort, pss->m_nType, pss->m_nCurPlayer, pss->m_nMaxPlayer, pss->m_bIsLive );
+			pServerList->AddServer(szServName, Addr, pss->m_nPort, pss->m_nType, pss->m_nCurPlayer, pss->m_nMaxPlayer, pss->m_bIsLive);
 #ifdef _DEBUG
-			mlog( "ServerList - Name:%s, IP:%s, Port:%d, Type:%d, (%d/%d)\n",
-				szServName, Addr, pss->m_nPort, pss->m_nType, pss->m_nCurPlayer, pss->m_nMaxPlayer );
+			mlog("ServerList - Name:%s, IP:%s, Port:%d, Type:%d, (%d/%d)\n",
+				szServName, Addr, pss->m_nPort, pss->m_nType, pss->m_nCurPlayer, pss->m_nMaxPlayer);
 #endif
 		}
 	}
@@ -5813,10 +5803,10 @@ void ZGameInterface::OnResponseServerStatusInfoList( const int nListCount, void*
 }
 
 
-void ZGameInterface::OnResponseBlockCountryCodeIP( const char* pszBlockCountryCode, const char* pszRoutingURL )
+void ZGameInterface::OnResponseBlockCountryCodeIP(const char* pszBlockCountryCode, const char* pszRoutingURL)
 {
-	if( 0 != pszBlockCountryCode )
-		ShowMessage( pszRoutingURL );
+	if (0 != pszBlockCountryCode)
+		ShowMessage(pszRoutingURL);
 }
 
 
@@ -5824,76 +5814,39 @@ void ZGameInterface::RequestServerStatusListInfo()
 {
 	ZLocatorList*	pLocatorList;
 
-	if ( ZApplication::GetInstance()->IsLaunchTest())
+	if (ZApplication::GetInstance()->IsLaunchTest())
 		pLocatorList = m_pTLocatorList;
 	else
 		pLocatorList = m_pLocatorList;
 
 
-	if( 0 == pLocatorList ) 
+	if (0 == pLocatorList)
 		return;
 
-	if ( pLocatorList->GetSize() < 1)
+	if (pLocatorList->GetSize() < 1)
 		return;
 
-	MCommand* pCmd = ZNewCmd( MC_REQUEST_SERVER_LIST_INFO );
+	MCommand* pCmd = ZNewCmd(MC_REQUEST_SERVER_LIST_INFO);
 	if (pCmd)
 	{
-		const string strIP = pLocatorList->GetIPByPos( m_nLocServ++);
+		const string strIP = pLocatorList->GetIPByPos(m_nLocServ++);
 		m_nLocServ %= pLocatorList->GetSize();
 
-		GetGameClient()->SendCommandByUDP( pCmd, const_cast<char*>(strIP.c_str()), LOCATOR_PORT);
+		GetGameClient()->SendCommandByUDP(pCmd, const_cast<char*>(strIP.c_str()), LOCATOR_PORT);
 		delete pCmd;
 	}
 
 	m_dwRefreshTime = GetGlobalTimeMS() + 1500;
 }
-
-void ZGameInterface::OnRequestNewHashValue( const char* szNewRandomValue )
-{
-#ifdef _XTRAP
-	if( 0 == szNewRandomValue )
-		return;
-
-	if( 255 < strlen(szNewRandomValue) )
-		return;
-
-	char szRandomValue[ 256 ]	= {0,};
-	char szSerialKey[128]		= {0,};
-
-	strcpy_safe( szRandomValue, szNewRandomValue );
-
-	CreateKF( "54ad5021c90ce0752b376df9cc91d78e", szRandomValue, szSerialKey );
-
-	strcpy_safe(ZGetMyInfo()->GetSystemInfo()->szSerialKey, szSerialKey);
-
-	OnResponseNewHashValue( szSerialKey );
-#endif
-}
-
-
-void ZGameInterface::OnResponseNewHashValue( const char* szNewSerialKey )
-{
-#ifdef _XTRAP
-	if( 0 == szNewSerialKey )
-		return;
-
-	if( 127 < strlen(szNewSerialKey) )
-		return;
-
-	ZPostResponseNewHashValue( szNewSerialKey );
-#endif
-}
-
-
 void ZGameInterface::OnDisconnectMsg(const DWORD dwMsgID)
 {
 	auto pListBox = static_cast<MListBox*>(ZGetGameInterface()->
 		GetIDLResource()->
 		FindWidget("QuestResult_ItemListbox"));
 
-	if (0 != pListBox){
-		ShowMessage(ZErrStr(dwMsgID));}
+	if (0 != pListBox) {
+		ShowMessage(ZErrStr(dwMsgID));
+	}
 }
 
 

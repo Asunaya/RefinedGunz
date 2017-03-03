@@ -269,7 +269,7 @@ void ZGameClient::OnObjectCache(unsigned int nType, void* pBlob, int nCount)
 			if (pCache->CheckFlag(MTD_PlayerFlags_AdminHide)) //  Skip on AdminHide
 				continue;
 
-			pList->AddPlayer(
+			pList->AddPlayerStage(
 				pCache->GetUID(),
 				MOSS_NONREADY,
 				pCache->GetLevel(),
@@ -746,7 +746,7 @@ ZPlayerListBox* GetProperFriendListOutput()
 	case GUNZ_LOBBY:
 	{
 		ZPlayerListBox* pList = (ZPlayerListBox*)pIDLResource->FindWidget("LobbyChannelPlayerList");
-		if (pList && pList->GetMode() == ZPlayerListBox::PLAYERLISTMODE_CHANNEL_FRIEND)
+		if (pList && pList->GetMode() == ZPlayerListBox::PlayerListMode::ChannelFriend)
 			return pList;
 		else
 			return NULL;
@@ -755,7 +755,7 @@ ZPlayerListBox* GetProperFriendListOutput()
 	case GUNZ_STAGE:
 	{
 		ZPlayerListBox* pList = (ZPlayerListBox*)pIDLResource->FindWidget("StagePlayerList_");
-		if (pList && pList->GetMode() == ZPlayerListBox::PLAYERLISTMODE_STAGE_FRIEND)
+		if (pList && pList->GetMode() == ZPlayerListBox::PlayerListMode::StageFriend)
 			return pList;
 		else
 			return NULL;
@@ -785,7 +785,7 @@ void ZGameClient::OnResponseFriendList(void* pBlob, int nCount)
 		};
 
 		if (pList) {
-			pList->AddPlayer(state, pNode->szName, pNode->szDescription);
+			pList->AddPlayerFriend(state, pNode->szName, pNode->szDescription);
 		}
 		else {
 			if (ZApplication::GetGameInterface()->GetState() != GUNZ_LOBBY)
@@ -803,7 +803,7 @@ void ZGameClient::OnChannelPlayerList(int nTotalPlayerCount, int nPage, void* pB
 	ZPlayerListBox* pPlayerListBox = (ZPlayerListBox*)pResource->FindWidget("LobbyChannelPlayerList");
 
 	if (!pPlayerListBox) return;
-	if (pPlayerListBox->GetMode() != ZPlayerListBox::PLAYERLISTMODE_CHANNEL) return;
+	if (pPlayerListBox->GetMode() != ZPlayerListBox::PlayerListMode::Channel) return;
 
 	MUID selUID = pPlayerListBox->GetSelectedPlayerUID();
 
@@ -839,7 +839,7 @@ void ZGameClient::OnChannelPlayerList(int nTotalPlayerCount, int nPage, void* pB
 				//  Skip on AdminHide
 			}
 			else {
-				pPlayerListBox->AddPlayer(pNode->uidPlayer, state, pNode->nLevel, pNode->szName,
+				pPlayerListBox->AddPlayerChannel(pNode->uidPlayer, state, pNode->nLevel, pNode->szName,
 					pNode->szClanName, pNode->nCLID, (MMatchUserGradeID)pNode->nGrade);
 			}
 

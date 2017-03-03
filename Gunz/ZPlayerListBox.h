@@ -22,24 +22,33 @@ enum ePlayerState
 class ZPlayerListItem : public MListItem {
 public:
 	ZPlayerListItem() {
-		m_PlayerUID = MUID(0,0);
-		m_Grade = MMUG_FREE;
-		m_Color = MCOLOR(0xFFCDCDCD);
+		m_szName[0] = 0;
+		m_szClanName[0] = 0;
+		m_szLevel[0] = 0;
 	}
 
-	void SetColor(MCOLOR c) {
-		m_Color = c;
+	ZPlayerListItem(const MUID& UID, MMatchUserGradeID Grade,
+		const char* szName, const char* szClanName, const char* szLevel = 0) :
+		m_PlayerUID{ UID }, m_Grade{ Grade }
+	{
+		assert(m_szName != nullptr);
+
+		auto CopyString = [&](auto&& dest, auto&& src) {
+			strcpy_safe(dest, src ? src : "");
+		};
+
+		CopyString(m_szName, szName);
+		CopyString(m_szClanName, szClanName);
+		CopyString(m_szLevel, szLevel);
 	}
 
-	const MCOLOR GetColor(void) { 
-		return m_Color; 
-	}
+	void SetColor(MCOLOR c) { m_Color = c; }
+	MCOLOR GetColor() const { return m_Color; }
+	const MUID& GetUID() const { return m_PlayerUID; }
 
-public:
-
-	MUID				m_PlayerUID;
-	MMatchUserGradeID	m_Grade;
-	MCOLOR				m_Color;
+	MUID				m_PlayerUID{};
+	MMatchUserGradeID	m_Grade = MMUG_FREE;
+	MCOLOR				m_Color = XRGB(0xCD);
 
 	char			m_szName[MATCHOBJECT_NAME_LENGTH];
 	char			m_szClanName[CLAN_NAME_LENGTH];
@@ -47,200 +56,154 @@ public:
 
 };
 
-class ZLobbyPlayerListItem : public ZPlayerListItem{
+class ZLobbyPlayerListItem : public ZPlayerListItem {
 protected:
-	MBitmap* m_pBitmap;
-	unsigned int m_nClanID;
+	MBitmap* m_pBitmap{};
+	unsigned int m_nClanID{};
 
 public:
-	ePlayerState	m_nLobbyPlayerState;
+	ePlayerState m_nLobbyPlayerState = PS_LOGOUT;
 
 public:
-	ZLobbyPlayerListItem(const MUID& puid, MBitmap* pBitmap, unsigned int nClanID, const char* szLevel, const char* szName, const char *szClanName, ePlayerState nLobbyPlayerState,MMatchUserGradeID Grade)
+	ZLobbyPlayerListItem(const MUID& puid, MBitmap* pBitmap, unsigned int nClanID,
+		const char* szLevel, const char* szName, const char *szClanName,
+		ePlayerState nLobbyPlayerState, MMatchUserGradeID Grade) :
+		ZPlayerListItem{ puid, Grade, szName, szClanName, szLevel }
 	{
 		m_pBitmap = pBitmap;
+		m_nLobbyPlayerState = nLobbyPlayerState;
 		m_nClanID = nClanID;
 		ZGetEmblemInterface()->AddClanInfo(m_nClanID);
-//		m_pBitmapEmblem = pBitmapEmblem;
-		m_PlayerUID = puid;
-		m_nLobbyPlayerState = nLobbyPlayerState;
-		if (szLevel) strcpy_safe(m_szLevel, szLevel);
-		else m_szLevel[0] = NULL;
-		if (szName) strcpy_safe(m_szName, szName);
-		else m_szName[0] = NULL;
-		if(szClanName) strcpy_safe(m_szClanName, szClanName);
-		else m_szClanName[0] = NULL;
-		m_Grade = Grade;
 	}
 
-	virtual ~ZLobbyPlayerListItem() {
+	virtual ~ZLobbyPlayerListItem() override {
 		ZGetEmblemInterface()->DeleteClanInfo(m_nClanID);
 	}
 
-	ZLobbyPlayerListItem(void)
-	{
-		m_pBitmap = NULL;
-		m_nClanID = 0;
-//		m_pBitmapEmblem = NULL;
-		m_PlayerUID = MUID(0,0);
-		m_nLobbyPlayerState = (ePlayerState)0;
-		m_szLevel[0] = 0;
-		m_szName[0] = 0;
-		m_szClanName[0] = 0;
-		m_Grade = MMUG_FREE;
-	}
-
-	virtual const char* GetString(void)
+	virtual const char* GetString() override
 	{
 		return m_szName;
 	}
 
-	virtual const char* GetString(int i)
+	virtual const char* GetString(int i) override
 	{
-		if(i==1) return m_szLevel;
-		else if(i==2) return m_szName;
-		else if(i==4) return m_szClanName;
-		return NULL;
+		if (i == 1)
+			return m_szLevel;
+		else if (i == 2)
+			return m_szName;
+		else if (i == 4)
+			return m_szClanName;
+
+		return nullptr;
 	}
 
-	virtual MBitmap* GetBitmap(int i)
+	virtual MBitmap* GetBitmap(int i) override
 	{
-		if (i == 0) return m_pBitmap;
+		if (i == 0) {
+			return m_pBitmap;
+		}
 		else if (i == 3)
 		{
-			if ( strcmp( m_szClanName, "") == 0)
-				return NULL;
-			else
+			if (strcmp(m_szClanName, "") == 0) {
+				return nullptr;
+			}
+			else {
 				return ZGetEmblemInterface()->GetClanEmblem(m_nClanID);
+			}
 		}
-		return NULL;
-	}
 
-	const MUID& GetUID() { return m_PlayerUID; }
+		return nullptr;
+	}
 };
 
-class ZFriendPlayerListItem : public ZPlayerListItem{
+class ZFriendPlayerListItem : public ZPlayerListItem {
 protected:
 	char		m_szLocation[128];
-	MBitmap*	m_pBitmap;
+	MBitmap*	m_pBitmap{};
 
 public:
-	ePlayerState	m_nLobbyPlayerState;
+	ePlayerState	m_nLobbyPlayerState = PS_LOGOUT;
 
-public:
-	ZFriendPlayerListItem(const MUID& puid, MBitmap* pBitmap, const char* szName, const char* szClanName,const char* szLocation, ePlayerState nLobbyPlayerState,MMatchUserGradeID Grade)
+	ZFriendPlayerListItem()
+	{
+		m_szLocation[0] = 0;
+	}
+
+	ZFriendPlayerListItem(const MUID& puid, MBitmap* pBitmap, const char* szName, const char* szClanName,
+		const char* szLocation, ePlayerState nLobbyPlayerState, MMatchUserGradeID Grade) : 
+		ZPlayerListItem{ puid, Grade, szName, szClanName }
 	{
 		m_pBitmap = pBitmap;
-		m_PlayerUID = puid;
 		m_nLobbyPlayerState = nLobbyPlayerState;
-		if (szName) strcpy_safe(m_szName, szName);
-		else m_szName[0] = NULL;
-		if(szClanName) strcpy_safe(m_szClanName, szClanName);
-		else m_szClanName[0] = NULL;
-
-		m_szLevel[0] = NULL;
-
-		if (szLocation)
-			strcpy_safe(m_szLocation, szLocation);
-		else
-			m_szLocation[0] = NULL;
-
-		m_Grade = Grade;
+		strcpy_safe(m_szLocation, szLocation ? szLocation : "");
 	}
 
-	ZFriendPlayerListItem(void)
-	{
-		m_pBitmap = NULL;
-		m_PlayerUID = MUID(0,0);
-		m_nLobbyPlayerState = (ePlayerState)0;
-		m_szName[0] = PS_END;
-		m_szLevel[0] = NULL;
-		m_szLocation[0] = NULL;
-
-		m_Grade = MMUG_FREE;
-	}
-
-	virtual const char* GetString(void)
+	virtual const char* GetString() override
 	{
 		return m_szName;
 	}
 
-	virtual const char* GetString(int i)
+	virtual const char* GetString(int i) override
 	{
-		if(i==1) return m_szName;
-		//else if(i==2) return m_szLocation;
-		return NULL;
+		if(i==1)
+			return m_szName;
+
+		return nullptr;
 	}
 
-	virtual MBitmap* GetBitmap(int i)
+	virtual MBitmap* GetBitmap(int i) override
 	{
-		if (i == 0) return m_pBitmap;
-		return NULL;
+		if (i == 0)
+			return m_pBitmap;
+
+		return nullptr;
 	}
 
-	const MUID& GetUID() { return m_PlayerUID; }
 	const char* GetLocation() { return m_szLocation; }
 };
 
 class ZClanPlayerListItem : public ZPlayerListItem{
 protected:
-	MBitmap* m_pBitmap;
-	MMatchClanGrade	m_ClanGrade;
+	MBitmap* m_pBitmap{};
+	MMatchClanGrade	m_ClanGrade = MCG_NONE;
 
 public:
-	ePlayerState	m_nLobbyPlayerState;
+	ePlayerState	m_nLobbyPlayerState = PS_LOGOUT;
 
 public:
-	ZClanPlayerListItem(const MUID& puid, MBitmap* pBitmap, const char* szName, const char* szClanName,const char* szLevel, ePlayerState nLobbyPlayerState,MMatchClanGrade clanGrade)
+	ZClanPlayerListItem() = default;
+
+	ZClanPlayerListItem(const MUID& puid, MBitmap* pBitmap, const char* szName, const char* szClanName,
+		const char* szLevel, ePlayerState nLobbyPlayerState, MMatchClanGrade clanGrade) :
+		ZPlayerListItem{ puid, MMUG_FREE, szName, szClanName, szLevel }
 	{
 		m_pBitmap = pBitmap;
-		m_PlayerUID = puid;
 		m_nLobbyPlayerState = nLobbyPlayerState;
-		if (szName)
-			strcpy_safe(m_szName, szName);
-		else
-			m_szName[0] = NULL;
-		if (szLevel) strcpy_safe(m_szLevel, szLevel);
-		else m_szLevel[0] = NULL;
-		if(szClanName) strcpy_safe(m_szClanName, szClanName);
-		else m_szClanName[0] = NULL;
-
 		m_ClanGrade = clanGrade;
-		m_Color = MCOLOR(0xFFCDCDCD);
 	}
 
-	ZClanPlayerListItem(void)
-	{
-		m_pBitmap = NULL;
-		m_PlayerUID = MUID(0,0);
-		m_nLobbyPlayerState = (ePlayerState)0;
-		m_szName[0] = PS_END;
-		m_szClanName[0] = PS_END;
-		m_szLevel[0] = 0;
-		m_Grade = MMUG_FREE;
-		m_ClanGrade = MCG_NONE;
-		m_Color = MCOLOR(0xFFCDCDCD);
-	}
-
-	virtual const char* GetString(void)
+	virtual const char* GetString() override
 	{
 		return m_szName;
 	}
 
-	virtual const char* GetString(int i)
+	virtual const char* GetString(int i) override
 	{
-		if(i==1) return m_szName;
-		else if(i==3) return m_szClanName;
-		return NULL;
+		if (i == 1)
+			return m_szName;
+		else if (i == 3)
+			return m_szClanName;
+
+		return nullptr;
 	}
 
-	virtual MBitmap* GetBitmap(int i)
+	virtual MBitmap* GetBitmap(int i) override
 	{
-		if (i == 0) return m_pBitmap;
-		return NULL;
-	}
+		if (i == 0)
+			return m_pBitmap;
 
-	const MUID& GetUID() { return m_PlayerUID; }
+		return nullptr;
+	}
 };
 
 enum eStagePlayerState
@@ -261,159 +224,141 @@ struct sStagePlayerInfo
 	int	nTeam;
 };
 
-
-class ZStagePlayerListItem : public ZPlayerListItem{
+class ZStagePlayerListItem : public ZPlayerListItem {
 public:
-	int		m_nTeam;
-	bool	m_bEnableObserver;			// 옵져버인지 아닌지... : 동환이가 추가
-	unsigned int m_nClanID;
+	MMatchTeam Team = MMT_ALL;
+	bool	m_bEnableObserver{};
+	unsigned int m_nClanID{};
+	MBitmap* m_pBitmap{};
 
-public:
-	MBitmap* m_pBitmap;
-//	MBitmap* m_pBitmapEmblem;
+	ZStagePlayerListItem() = default;
 
-public:
-	ZStagePlayerListItem(const MUID& puid, MBitmap* pBitmap, unsigned int nClanID, const char* szName, const char* szClanName, const char* szLevel,MMatchUserGradeID Grade)
+	ZStagePlayerListItem(const MUID& puid, MBitmap* pBitmap, unsigned int nClanID,
+		const char* szName, const char* szClanName, const char* szLevel, MMatchUserGradeID Grade) :
+		ZPlayerListItem{ puid, Grade, szName, szClanName, szLevel }
 	{
 		m_pBitmap = pBitmap;
 		m_nClanID = nClanID;
 		ZGetEmblemInterface()->AddClanInfo(m_nClanID);
-//		m_pBitmapEmblem = pBitmapEmblem;
-		m_PlayerUID = puid;
-		strcpy_safe(m_szName, szName);
-		if(szClanName) strcpy_safe(m_szClanName, szClanName);
-		else m_szClanName[0] = NULL;
-
-		strcpy_safe(m_szLevel, szLevel);
-		m_nTeam = 0;
-		m_Grade = Grade;
 	}
 
-	virtual ~ZStagePlayerListItem()
+	virtual ~ZStagePlayerListItem() override
 	{
 		ZGetEmblemInterface()->DeleteClanInfo(m_nClanID);
 	}
 
-	ZStagePlayerListItem(void)
-	{
-		m_pBitmap = NULL;
-		m_nClanID = 0;
-//		m_pBitmapEmblem = NULL;
-		m_PlayerUID = MUID(0,0);
-		m_szName[0] = 0;
-		m_szLevel[0] = 0;
-		m_Grade = MMUG_FREE;
-	}
-
-	virtual const char* GetString(void)
+	virtual const char* GetString() override
 	{
 		return m_szName;
 	}
 
-	virtual const char* GetString(int i)
+	virtual const char* GetString(int i) override
 	{
-		if(i==1) return m_szLevel;
-		else if(i==2) return m_szName;
-		else if(i==4) return m_szClanName;
-		return NULL;
+		if (i == 1)
+			return m_szLevel;
+		else if (i == 2)
+			return m_szName;
+		else if (i == 4)
+			return m_szClanName;
+
+		return nullptr;
 	}
 
-	virtual MBitmap* GetBitmap(int i)
+	virtual MBitmap* GetBitmap(int i) override
 	{
 		if (i == 0) return m_pBitmap;
 		else if (i == 3)
 		{
 			if ( strcmp( m_szClanName, "") == 0)
-				return NULL;
+				return nullptr;
 			else
 				return ZGetEmblemInterface()->GetClanEmblem(m_nClanID);
 		}
-		return NULL;
+		return nullptr;
 	}
-
-	const MUID& GetUID() { return m_PlayerUID; }
 };
 
 class ZPlayerListBoxLook : public MListBoxLook
 {
 public:
-	virtual void OnItemDraw2(MDrawContext* pDC, MRECT& r, const char* szText, MCOLOR color, bool bSelected, bool bFocus, int nAdjustWidth = 0);
-	virtual void OnItemDraw2(MDrawContext* pDC, MRECT& r, MBitmap* pBitmap, bool bSelected, bool bFocus, int nAdjustWidth);
-	virtual void OnDraw(MListBox* pListBox, MDrawContext* pDC);
+	virtual void OnItemDraw2(MDrawContext* pDC, MRECT& r, const char* szText, MCOLOR color,
+		bool bSelected, bool bFocus, int nAdjustWidth = 0);
+	virtual void OnItemDraw2(MDrawContext* pDC, MRECT& r, MBitmap* pBitmap, bool bSelected,
+		bool bFocus, int nAdjustWidth);
 
-	virtual MRECT GetClientRect(MListBox* pListBox, const MRECT& r);
+	virtual void OnDraw(MListBox* pListBox, MDrawContext* pDC) override;
+	virtual MRECT GetClientRect(MListBox* pListBox, const MRECT& r) override { return r; }
 };
 
 class ZPlayerListBox : public MListBox
 {
 public:
-	enum PLAYERLISTMODE {
-		PLAYERLISTMODE_CHANNEL = 0,
-		PLAYERLISTMODE_STAGE ,
-		PLAYERLISTMODE_CHANNEL_FRIEND ,
-		PLAYERLISTMODE_STAGE_FRIEND ,
-		PLAYERLISTMODE_CHANNEL_CLAN ,
-		PLAYERLISTMODE_STAGE_CLAN ,
+	enum class PlayerListMode {
+		Channel = 0,
+		Stage,
+		ChannelFriend,
+		StageFriend,
+		ChannelClan,
+		StageClan,
+		End,
+	};
 
-		PLAYERLISTMODE_END,	// = count
+	enum class ModeCategory {
+		Unknown,
+		Channel, // PlayerListMode::Channel
+		Stage,   // PlayerListMode::Stage
+		Friend,  // PlayerListMode::ChannelFriend or PlayerListMode::StageFriend
+		Clan,    // PlayerListMode::ChannelClan or PlayerListMode::StageClan
 	};
 
 private:
-//	MBitmap*					m_pBitmap;
-//	MBitmap*					m_pBitmapIn;
+	bool LegalState(const char* szName, ModeCategory ExpectedCategory);
 
-	MBmButton*					m_pButton;
+	std::unique_ptr<MBmButton> m_pButton;
 
-//	map< MUID, sPlayerInfo*>	mPlayers;
-	vector<MUID>				mPlayerOrder;
+	std::vector<MUID> mPlayerOrder;
 
-	int				mSelectedPlayer;
-	int				mStartToDisplay;
-	float			m_SlotWidth;
-	float			m_SlotHeight;
+	int				mSelectedPlayer{};
+	int				mStartToDisplay{};
+	float			m_SlotWidth{};
+	float			m_SlotHeight{};
 
-	int				m_nOldW;
-	PLAYERLISTMODE		m_nMode;
-
-
-public:
-
-	
+	int m_nOldW{};
+	PlayerListMode m_nMode{};
 
 protected:
 	void SetupButton(const char *szOn, const char *szOff);
 
 public:
-	void InitUI(PLAYERLISTMODE nMode);
+	ZPlayerListBox(const char* szName = nullptr, MWidget* pParent = nullptr, MListener* pListener = nullptr);
+	virtual ~ZPlayerListBox() override;
+
+	DECLARE_LOOK(ZPlayerListBoxLook)
+	DECLARE_LOOK_CLIENT()
+
+	virtual void OnSize(int w, int h) override;
+
+	void InitUI(PlayerListMode nMode);
 	void RefreshUI();
 
-	PLAYERLISTMODE GetMode() { return m_nMode; }
-	void SetMode(PLAYERLISTMODE mode);
+	PlayerListMode GetMode() const { return m_nMode; }
+	void SetMode(PlayerListMode mode);
 
-//	void SetBitmap( MBitmap* pBitmap );
-//	MBitmap* GetBitmap() {	return m_pBitmap; }
-//	MBitmap* GetBitmapIn() { return m_pBitmapIn; }
-
-	// mode PLAYERLISTMODE_CHANNEL
-	void AddPlayer(const MUID& puid, ePlayerState state, int  nLevel,
+	void AddPlayerChannel(const MUID& puid, ePlayerState state, int nLevel,
 		const char* szName, const char* szClanName, unsigned int nClanID, MMatchUserGradeID nGrade);
 
-	// mode PLAYERLISTMODE_STAGE
-	void AddPlayer(const MUID& puid, MMatchObjectStageState state, int nLevel,
-		const char* szName, const char* szClanName, unsigned int nClanID, bool isMaster, MMatchTeam nTeam);
+	void AddPlayerStage(const MUID& puid, MMatchObjectStageState state, int nLevel,
+		const char* szName, const char* szClanName, unsigned int nClanID,
+		bool isMaster, MMatchTeam nTeam);
 
-	// mode PLAYERLISTMODE_CHANNEL_FRIEND, PLAYERLISTMODE_STAGE_FRIEND
-	void AddPlayer(ePlayerState state, char* szName, char* szLocation);
+	void AddPlayerFriend(ePlayerState state, char* szName, char* szLocation);
 
-	// mode PLAYERLISTMODE_CHANNEL_CLAN
-	void AddPlayer(const MUID& puid, ePlayerState state, char* szName, int  nLevel ,MMatchClanGrade nGrade );
+	void AddPlayerClan(const MUID& puid, ePlayerState state, char* szName, int nLevel, MMatchClanGrade nGrade);
 
 	void DelPlayer(const MUID& puid);
-	void UpdatePlayer(const MUID& puid,MMatchObjectStageState state, char* szName, int  nLevel ,bool isMaster,MMatchTeam nTeam);
-	void UpdatePlayer(const MUID& puid,MMatchObjectStageState state, bool isMaster,MMatchTeam nTeam);
-	void UpdateEmblem(const MUID& puid);
+	void UpdatePlayer(const MUID& puid, MMatchObjectStageState state, bool isMaster, MMatchTeam nTeam);
 
-	void UpdateList(int mode);
+	void UpdateList();
 
 	ZPlayerListItem* GetUID(MUID uid);
 	const char* GetPlayerName( int nIndex);
@@ -421,24 +366,12 @@ public:
 	MUID GetSelectedPlayerUID();
 	void SelectPlayer(MUID);
 
-	virtual bool OnEvent(MEvent* pEvent, MListener* pListener);
-	virtual bool OnCommand(MWidget* pWidget, const char* szMessage);
+	virtual bool OnEvent(MEvent* pEvent, MListener* pListener) override;
+	virtual bool OnCommand(MWidget* pWidget, const char* szMessage) override;
 
-//	MUID	m_MyUID;
-//	MUID	m_uidChannel;
-	int		m_nTotalPlayerCount;
-	int		m_nPage;
+	void SetWidth(float t) { m_SlotWidth = t; }
+	void SetHeight(float t) { m_SlotHeight = t; }
 
-	void SetWidth( float t ) { m_SlotWidth = t;	}
-	void SetHeight( float t ) { m_SlotHeight = t; }
-
-	PLAYERLISTMODE GetPlayerListMode()		{ return m_nMode; }
-public:
-	ZPlayerListBox(const char* szName=NULL, MWidget* pParent=NULL, MListener* pListener=NULL);
-	virtual ~ZPlayerListBox(void);
-
-	DECLARE_LOOK(ZPlayerListBoxLook)
-	DECLARE_LOOK_CLIENT()
-
-	void OnSize(int w,int h);
+	int m_nTotalPlayerCount{};
+	int m_nPage{};
 };
