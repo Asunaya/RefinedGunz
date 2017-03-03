@@ -84,10 +84,11 @@ void MMatchServer::OnMatchLogin(MUID CommUID, const char* szUserID, const unsign
 
 	bool bFreeLoginIP = false;
 
-	if (nVersion < RGUNZ_VERSION)
+	const auto ExpectedVersion = MGetServerConfig()->GetVersion();
+	if (nVersion < ExpectedVersion)
 	{
 		char buf[128];
-		sprintf_safe(buf, "Your client is outdated (expected version %d, got %d)", RGUNZ_VERSION, nVersion);
+		sprintf_safe(buf, "Your client is outdated (expected version %d, got %d)", ExpectedVersion, nVersion);
 		NotifyFailedLogin(CommUID, buf);
 		return;
 	}

@@ -243,6 +243,17 @@ bool MMatchConfig::Create()
 		}
 	}
 
+	auto VersionNode = doc.first_node("version");
+	if (!VersionNode || VersionNode->value() == nullptr || VersionNode->value_size() == 0)
+	{
+		FailedToFindNode("version");
+	}
+	else
+	{
+		Version = atoi(VersionNode->value());
+		MLog("Version: %d\n", Version);
+	}
+
 	m_bIsComplete = true;
 	return m_bIsComplete;
 }

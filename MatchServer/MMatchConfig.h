@@ -54,6 +54,8 @@ private:
 
 	bool				m_bIsComplete;
 
+	int Version{};
+
 private:
 	bool GetPrivateProfileBool(const char* szAppName, const char* szKeyName, 
 							   bool bDefault, const char* szFileName);
@@ -120,6 +122,8 @@ public:
 	bool IsMasterServer() const { return bIsMasterServer; }
 	auto GetPort() const { return 6000; }
 	auto GetDatabaseType() const { return DBType; }
+
+	int GetVersion() const { return Version; }
 };
 
 inline MMatchConfig* MGetServerConfig() { return MMatchConfig::GetInstance(); }
