@@ -274,6 +274,7 @@
     <ClCompile Include="MLadderMgr.cpp" />
     <ClCompile Include="DBQuestCachingData.cpp" />
     <ClCompile Include="MMatchObjectCacheBuilder.cpp" />
+    <ClCompile Include="MBMatchServer_Input.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ChildFrm.h">

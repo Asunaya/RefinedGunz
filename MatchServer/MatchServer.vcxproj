@@ -285,6 +285,7 @@
     <ClCompile Include="MatchServer.cpp" />
     <ClCompile Include="MatchServerDoc.cpp" />
     <ClCompile Include="MatchServerView.cpp" />
+    <ClCompile Include="MBMatchServer_Input.cpp" />
     <ClCompile Include="MLadderMgr.cpp" />
     <ClCompile Include="MLadderPicker.cpp" />
     <ClCompile Include="MMatchAdmin.cpp" />

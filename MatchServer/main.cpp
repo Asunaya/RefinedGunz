@@ -1,7 +1,8 @@
 #include "stdafx.h"
 #include "MBMatchServer.h"
 #include <Shlwapi.h>
-
+#include <iostream>
+#include <atomic>
 #include "BulletCollisionLibs.h"
 
 template <size_t size>
@@ -33,6 +34,42 @@ static bool GetLogFileName(char (&pszBuf)[size])
 	return true;
 }
 
+static std::mutex InputMutex;
+static std::vector<std::string> InputQueue;
+static std::atomic<bool> HasInput;
+
+static void InputThreadProc()
+{
+	std::string Input;
+
+	while (true)
+	{
+		Input.clear();
+		std::getline(std::cin, Input);
+		if (Input.empty())
+			return;
+		{
+			std::lock_guard<std::mutex> Lock{ InputMutex };
+			InputQueue.emplace_back(Input);
+			HasInput = true;
+		}
+	}
+}
+
+static void HandleInput(MBMatchServer& MatchServer)
+{
+	if (!HasInput)
+		return;
+
+	std::lock_guard<std::mutex> Lock{ InputMutex };
+
+	for (auto&& Input : InputQueue)
+		MatchServer.OnInput(Input);
+
+	InputQueue.clear();
+	HasInput = false;
+}
+
 int main(int argc, char** argv)
 try
 {
@@ -56,9 +93,12 @@ try
 
 	MatchServer.InitLocator();
 
+	std::thread{ [&] { InputThreadProc(); } }.detach();
+
 	while (true)
 	{
 		MatchServer.Run();
+		HandleInput(MatchServer);
 		Sleep(1);
 	}
 }

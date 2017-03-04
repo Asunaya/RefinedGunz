@@ -84,7 +84,7 @@ void MMatchServer::OnMatchLogin(MUID CommUID, const char* szUserID, const unsign
 
 	bool bFreeLoginIP = false;
 
-	const auto ExpectedVersion = MGetServerConfig()->GetVersion();
+	const auto ExpectedVersion = MGetServerConfig()->Version;
 	if (nVersion < ExpectedVersion)
 	{
 		char buf[128];

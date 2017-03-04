@@ -103,8 +103,23 @@ public:
 
 	void InitLocator();
 
+	void OnInput(const std::string& Input);
+
 private:
+	void InitConsoleCommands();
+
 	std::unique_ptr<MLocator> Locator;
+
+	struct ConsoleCommand
+	{
+		std::function<void()> Callback;
+		int MinArgs = -1;
+		int MaxArgs = -1;
+		std::string Description;
+		std::string Usage;
+		std::string Help;
+	};
+	std::unordered_map<std::string, ConsoleCommand> ConsoleCommandMap;
 };
 
 

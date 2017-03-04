@@ -33,6 +33,8 @@ bool MBMatchServer::OnCreate(void)
 
 	WriteServerInfoLog();
 
+	InitConsoleCommands();
+
 	return true;
 }
 
