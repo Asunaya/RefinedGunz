@@ -44,7 +44,7 @@ protected:
 	std::vector<MCommandParamCondition*>		m_Conditions;
 	void								InitializeConditions();
 public:
-	MCommandParameterDesc(MCommandParameterType nType, char* szDescription);
+	MCommandParameterDesc(MCommandParameterType nType, const char* szDescription);
 	virtual ~MCommandParameterDesc(void);
 
 	MCommandParameterType GetType(void){ return m_nType; }

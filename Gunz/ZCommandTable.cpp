@@ -1,15 +1,14 @@
 #include "stdafx.h"
 #include "ZCommandTable.h"
-#include "MSharedCommandTable.h"
-#include "MCommandManager.h"
+#include "MCommandRegistration.h"
 
-void ZAddCommandTable(MCommandManager* pCommandManager)
+void ZAddCommandTable(MCommandManager* CommandManager)
 {
-	BEGIN_CMD_DESC(pCommandManager);
+	BEGIN_CMD_DESC(CommandManager, 0);
 
 	C(ZC_CON_CLEAR, "Con.Clear", "Clear Console", MCDT_LOCAL);
-	C(ZC_CON_SIZE, "Con.Size", "Resize Console", MCDT_LOCAL)
-		P(MPT_INT, "width")
+	C(ZC_CON_SIZE, "Con.Size", "Resize Console", MCDT_LOCAL);
+		P(MPT_INT, "width");
 		P(MPT_INT, "height");
 	C(ZC_CON_HIDE, "Con.Hide", "Hide Console", MCDT_LOCAL);
 
@@ -41,17 +40,14 @@ void ZAddCommandTable(MCommandManager* pCommandManager)
 		P(MPT_STR, "SkinName");
 	C(ZC_REPORT_119, "Report119", "Report 119", MCDT_LOCAL);
 	C(ZC_MESSAGE, "Message", "Message", MCDT_LOCAL);
-		P(MPT_INT, "nMessageID")
+		P(MPT_INT, "nMessageID");
 	C(ZC_EVENT_OPTAIN_SPECIAL_WORLDITEM, "Local.Event.Optain.Special.WorldItem", "Event Optain Special WorldItem", MCDT_LOCAL);
-		P(MPT_INT, "WorldItemID")
+		P(MPT_INT, "WorldItemID");
 
 
-	C(MC_QUEST_NPC_LOCAL_SPAWN,	"Quest.NPCLocalSpawn", "Npc Local Spawn", MCDT_LOCAL)
-		P(MPT_UID,		"uidChar")
-		P(MPT_UID,		"nNpcUID")
-		P(MPT_UCHAR,	"nNpcType")
-		P(MPT_UCHAR,	"PositionIndex")
-
-
-	END_CMD_DESC();
+	C(MC_QUEST_NPC_LOCAL_SPAWN,	"Quest.NPCLocalSpawn", "Npc Local Spawn", MCDT_LOCAL);
+		P(MPT_UID,		"uidChar");
+		P(MPT_UID,		"nNpcUID");
+		P(MPT_UCHAR,	"nNpcType");
+		P(MPT_UCHAR,	"PositionIndex");
 }

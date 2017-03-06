@@ -21,7 +21,7 @@ protected:
 	int						m_nBufferNext;
 
 	MCommandList			m_CommandList;
-	list<MPacketHeader*>	m_NetCmdList;
+	std::list<MPacketHeader*>	m_NetCmdList;
 
 	MPacketCrypter*			m_pPacketCrypter;			// ¾ÏÈ£È­
 	MCommandSNChecker		m_CommandSNChecker;

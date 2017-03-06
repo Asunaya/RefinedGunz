@@ -107,8 +107,8 @@ private :
 	void ResponseServerStatusInfoList( DWORD dwIP, int nPort );
 	void ResponseBlockCountryCodeIP( DWORD dwIP, 
 									 int nPort, 
-									 const string& strCountryCode, 
-									 const string& strRoutingURL );
+									 const std::string& strCountryCode, 
+									 const std::string& strRoutingURL );
 
 	bool IsLiveUDP( const MLocatorUDPInfo* pRecvUDPInfo, const DWORD dwEventTime );
 	bool IskLIveBlockUDP( const MLocatorUDPInfo* pBlkRecvUDPInfo, const DWORD dwEventTime );
@@ -124,11 +124,11 @@ private :
 	void UpdateCountryCodeFilter( const DWORD dwEventTime );
 	void UpdateLogManager();
 
-	bool GetCustomIP( const string& strIP, string& strOutCountryCode, bool& bIsBlock, string& strOutComment );
+	bool GetCustomIP( const std::string& strIP, std::string& strOutCountryCode, bool& bIsBlock, std::string& strOutComment );
 
-	bool IsValidCountryCodeIP( const string& strIP, 
-							   string& strOutCountryCode, 
-							   string& strOutRoutingURL );
+	bool IsValidCountryCodeIP( const std::string& strIP, 
+							   std::string& strOutCountryCode, 
+							   std::string& strOutRoutingURL );
 
 	void OnRegisterCommand(MCommandManager* pCommandManager);
 

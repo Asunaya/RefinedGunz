@@ -158,7 +158,7 @@ public:
 };
 
 
-class MSessionMap : protected map<SOCKET, MRealSession*> {
+class MSessionMap : protected std::map<SOCKET, MRealSession*> {
 protected:
 	CRITICAL_SECTION	m_csLock;
 

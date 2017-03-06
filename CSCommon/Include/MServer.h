@@ -11,7 +11,7 @@ class MServer : public MCommandCommunicator {
 protected:
 	MRealCPNet					m_RealCPNet;
 
-	list<MCommObject*>			m_AcceptWaitQueue;
+	std::list<MCommObject*>			m_AcceptWaitQueue;
 	CRITICAL_SECTION			m_csAcceptWaitQueue;
 
 	void LockAcceptWaitQueue()		{ EnterCriticalSection(&m_csAcceptWaitQueue); }

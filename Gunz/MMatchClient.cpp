@@ -429,7 +429,7 @@ bool MMatchClient::OnCommand(MCommand* pCommand)
 void MMatchClient::OnRegisterCommand(MCommandManager* pCommandManager)
 {
 	MClient::OnRegisterCommand(pCommandManager);
-	MAddSharedCommandTable(pCommandManager, MSCT_CLIENT);
+	MAddSharedCommandTable(pCommandManager, MSharedCommandType::Client);
 }
 
 void MMatchClient::OutputLocalInfo(void)

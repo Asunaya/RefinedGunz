@@ -412,6 +412,7 @@
     <ClInclude Include="Include\MCommandManager.h" />
     <ClInclude Include="Include\MCommandParameter.h" />
     <ClInclude Include="Include\MCommandProfiler.h" />
+    <ClInclude Include="Include\MCommandRegistration.h" />
     <ClInclude Include="Include\MCountryFilter.h" />
     <ClInclude Include="Include\MCountryFilterDBMgr.h" />
     <ClInclude Include="Include\MGridMap.h" />

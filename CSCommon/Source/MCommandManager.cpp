@@ -164,7 +164,7 @@ bool MCommandManager::ParseMessage(MCommand* pCmd, char* szErrMsg, int nErrMsgMa
 	char szTemp[ASMESSAGE_LENGTH];
 	strcpy_safe(szTemp, la.GetByStr(0));
 
-	MCommandAliasMap::iterator itor = m_CommandAlias.find(string(szTemp));
+	MCommandAliasMap::iterator itor = m_CommandAlias.find(szTemp);
 	if (itor != m_CommandAlias.end())
 	{
 		strcpy_safe(szTemp, (*itor).second.c_str());
@@ -303,7 +303,7 @@ bool MCommandManager::ParseMessage(MCommand* pCmd, char* szErrMsg, int nErrMsgMa
 	return false;
 }
 
-void MCommandManager::AddAlias(string szName, string szText)
+void MCommandManager::AddAlias(std::string szName, std::string szText)
 {
 	m_CommandAlias.insert(MCommandAliasMap::value_type(szName, szText));
 }

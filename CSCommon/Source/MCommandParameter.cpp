@@ -59,7 +59,7 @@ bool MCommandParamConditionMinMax::Check(MCommandParameter* pCP)
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
-MCommandParameterDesc::MCommandParameterDesc(MCommandParameterType nType, char* szDescription)
+MCommandParameterDesc::MCommandParameterDesc(MCommandParameterType nType, const char* szDescription)
 {
 	m_nType = nType;
 	strcpy_safe(m_szDescription, szDescription);

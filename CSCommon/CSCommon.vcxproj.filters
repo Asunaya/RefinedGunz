@@ -173,6 +173,9 @@
     <ClInclude Include="Include\Config.h" />
     <ClInclude Include="Include\MPickInfo.h" />
     <ClInclude Include="Include\MServer.h" />
+    <ClInclude Include="Include\MCommandRegistration.h">
+      <Filter>Command</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\MCommand.cpp">

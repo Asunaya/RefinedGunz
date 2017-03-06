@@ -588,7 +588,8 @@ void MMatchServer::OnDestroy(void)
 void MMatchServer::OnRegisterCommand(MCommandManager* pCommandManager)
 {
 	MCommandCommunicator::OnRegisterCommand(pCommandManager);
-	MAddSharedCommandTable(pCommandManager, MSCT_MATCHSERVER | MSCT_CLIENT);
+	MAddSharedCommandTable(pCommandManager,
+		static_cast<MSharedCommandType::Type>(MSharedCommandType::MatchServer | MSharedCommandType::Client));
 	Log(LOG_ALL, "Command registeration completed");
 
 }

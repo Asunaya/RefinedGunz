@@ -800,7 +800,7 @@ void MLocator::SendCommandByUDP( DWORD dwIP, int nPort, MCommand* pCmd )
 void MLocator::OnRegisterCommand(MCommandManager* pCommandManager)
 {
 	if( 0 != pCommandManager )
-		MAddSharedCommandTable( pCommandManager, 0 );
+		MAddSharedCommandTable( pCommandManager, static_cast<MSharedCommandType::Type>(0) );
 }
 
 

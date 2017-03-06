@@ -1,13 +1,21 @@
 #pragma once
 
-#define MCOMMAND_VERSION 55
-#define RGUNZ_VERSION 2
+#include <cstdint>
 
-#define MSCT_MASTER			1
-#define MSCT_CLIENT			2
-#define MSCT_MATCHSERVER	4
-#define MSCT_AGENT			8
-#define MSCT_ALL			(MSCT_MASTER | MSCT_CLIENT | MSCT_AGENT)
+#define RGUNZ_VERSION 2
+#define MCOMMAND_VERSION 55
+
+namespace MSharedCommandType
+{
+enum Type : uint32_t
+{
+	Master = 1 << 0,
+	Client = 1 << 1,
+	MatchServer = 1 << 2,
+	Agent = 1 << 3,
+	All = UINT32_MAX,
+};
+}
 
 #define MATCH_CYCLE_CHECK_SPEEDHACK	20000
 
@@ -628,4 +636,4 @@
 #define MC_LOCAL_UPDATE_CUSTOM_IP				50008
 #define MC_LOCAL_UPDATE_ACCEPT_INVALID_IP		50009
 
-void MAddSharedCommandTable(class MCommandManager* pCommandManager, int nSharedType);
+void MAddSharedCommandTable(class MCommandManager*, MSharedCommandType::Type);
