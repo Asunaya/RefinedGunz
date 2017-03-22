@@ -49,9 +49,17 @@ _STATUS_CMD_START;
 
 				if (pCommand->GetParameter(&nCommandVersion, 2, MPT_INT)==false) break;
 				if (pCommand->GetParameter(&nChecksumPack, 3, MPT_UINT) == false) break;
-				if (pCommand->GetParameter(&nVersion, 4, MPT_INT) == false) break;
 
-				OnMatchLogin(pCommand->GetSenderUID(), szUserID, HashedPassword, HashLength, nCommandVersion, nChecksumPack, nVersion);
+				u32 Major, Minor, Patch, Revision;
+				if (pCommand->GetParameter(&Major, 4, MPT_UINT) == false) break;
+				if (pCommand->GetParameter(&Minor, 5, MPT_UINT) == false) break;
+				if (pCommand->GetParameter(&Patch, 6, MPT_UINT) == false) break;
+				if (pCommand->GetParameter(&Revision, 7, MPT_UINT) == false) break;
+
+				OnMatchLogin(pCommand->GetSenderUID(),
+					szUserID, HashedPassword, HashLength,
+					nCommandVersion, nChecksumPack,
+					Major, Minor, Patch, Revision);
 			}
 			break;
 		case MC_MATCH_REQUEST_CREATE_ACCOUNT:

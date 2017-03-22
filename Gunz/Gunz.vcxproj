@@ -598,6 +598,7 @@ rem call copy_share.bat
     <ClInclude Include="ZPickInfo.h" />
     <ClInclude Include="ZRadar.h" />
     <ClInclude Include="ZReplayStructs.h" />
+    <ClInclude Include="ZReplayWrite.h" />
     <ClInclude Include="ZRuleSkillmap.h" />
     <ClInclude Include="ZVoteInterface.h" />
     <ClInclude Include="ZWeaponScreenEffect.h" />
@@ -821,6 +822,7 @@ rem call copy_share.bat
     <ClCompile Include="ZModule_ElementalDamage.cpp" />
     <ClCompile Include="ZObserver.cpp" />
     <ClCompile Include="ZRadar.cpp" />
+    <ClCompile Include="ZReplayWrite.cpp" />
     <ClCompile Include="ZRuleSkillmap.cpp" />
     <ClCompile Include="ZVoteInterface.cpp" />
     <ClCompile Include="ZWeaponScreenEffect.cpp" />

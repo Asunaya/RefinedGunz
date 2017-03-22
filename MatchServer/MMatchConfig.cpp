@@ -9,7 +9,7 @@
 #include "MMatchServer.h"
 #include "rapidxml.hpp"
 #include <fstream>
-
+#include "RGVersion.h"
 
 bool MMatchConfig::GetPrivateProfileBool(const char* szAppName, const char* szKeyName, 
 						   bool bDefault, const char* szFileName)
@@ -38,6 +38,11 @@ MMatchConfig::MMatchConfig()
 	m_bIsDebugServer			= false;
 	m_bEnabledCreateLadderGame	= true;
 	m_bIsComplete				= false;
+
+	Version.Major = RGUNZ_VERSION_MAJOR;
+	Version.Minor = RGUNZ_VERSION_MINOR;
+	Version.Patch = RGUNZ_VERSION_PATCH;
+	Version.Revision = RGUNZ_VERSION_REVISION;
 }
 
 MMatchConfig::~MMatchConfig()
@@ -241,17 +246,6 @@ bool MMatchConfig::Create()
 			DBType = DatabaseType::None;
 			MLog("Unrecognized database type %s!\n", DBTypeString);
 		}
-	}
-
-	auto VersionNode = doc.first_node("version");
-	if (!VersionNode || VersionNode->value() == nullptr || VersionNode->value_size() == 0)
-	{
-		FailedToFindNode("version");
-	}
-	else
-	{
-		Version = atoi(VersionNode->value());
-		MLog("Version: %d\n", Version);
 	}
 
 	m_bIsComplete = true;

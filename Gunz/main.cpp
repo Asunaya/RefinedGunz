@@ -60,6 +60,7 @@
 
 #include "RGMain.h"
 #include "RGGlobal.h"
+#include "RGVersion.h"
 
 RMODEPARAMS	g_ModeParams = { 800,600,FullscreenType::Fullscreen,D3DFMT_R5G6B5 };
 static HANDLE Mutex;
@@ -635,7 +636,8 @@ int PASCAL WinMain(HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline, int 
 	// Seed the random number generator rand() from the C standard library
 	srand((unsigned int)time(nullptr));
 
-	mlog("Refined Gunz version %d launched. Build date: " __DATE__ " " __TIME__ "\n", RGUNZ_VERSION);
+	mlog("Refined Gunz v%d.%d.%d-%X launched. Build date: " __DATE__ " " __TIME__ "\n",
+		RGUNZ_VERSION_MAJOR, RGUNZ_VERSION_MINOR, RGUNZ_VERSION_PATCH, RGUNZ_VERSION_REVISION);
 
 	char szDateRun[128]; szDateRun[0] = 0;
 	char szTimeRun[128]; szTimeRun[0] = 0;

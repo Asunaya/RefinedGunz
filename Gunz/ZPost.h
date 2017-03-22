@@ -149,10 +149,8 @@ inline void ZPostDisconnect()
 	ZPOSTCMD0(MC_NET_DISCONNECT);
 }
 
-inline void ZPostLogin(const char* szUserID, const unsigned char *HashedPassword, int HashLength, unsigned int nChecksumPack)
-{
-	ZPOSTCMD5(MC_MATCH_LOGIN, MCmdParamStr(szUserID), MCmdParamBlob(HashedPassword, HashLength), MCmdParamInt(MCOMMAND_VERSION), MCmdParamUInt(nChecksumPack), MCmdParamInt(RGUNZ_VERSION));
-}
+void ZPostLogin(const char* szUserID, const unsigned char *HashedPassword,
+	int HashLength, unsigned int ChecksumPack);
 
 inline void ZPostNetmarbleLogin(char* szCPCookie, char* szSpareParam, unsigned int nChecksumPack)
 {

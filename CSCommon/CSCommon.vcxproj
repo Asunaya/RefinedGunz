@@ -459,6 +459,7 @@
     <ClInclude Include="Include\MBaseStringResManager.h" />
     <ClInclude Include="Include\MErrorTable.h" />
     <ClInclude Include="Include\MStringRes.h" />
+    <ClInclude Include="Include\RGVersion.h" />
     <ClInclude Include="Include\stuff.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>

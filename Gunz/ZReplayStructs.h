@@ -11,12 +11,25 @@ struct REPLAY_HEADER
 	u32 ReplayBinaryVersion;
 };
 
-struct REPLAY_HEADER_RG
+// RG replay version 1 to 3
+struct REPLAY_HEADER_RG_V3
 {
 	u32 Header;
 	u32 ReplayBinaryVersion;
 	u32 ClientVersion;
 	i64 Timestamp;
+};
+
+// RG replay version 4 and onwards
+struct REPLAY_HEADER_RG
+{
+	u32 Header;
+	u32 ReplayBinaryVersion;
+	i64 Timestamp;
+	u32 ClientVersionMajor;
+	u32 ClientVersionMinor;
+	u32 ClientVersionPatch;
+	u32 ClientVersionRevision;
 };
 
 struct REPLAY_STAGE_SETTING_NODE

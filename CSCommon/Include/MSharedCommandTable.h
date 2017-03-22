@@ -2,7 +2,6 @@
 
 #include <cstdint>
 
-#define RGUNZ_VERSION 2
 #define MCOMMAND_VERSION 55
 
 namespace MSharedCommandType

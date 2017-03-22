@@ -57,13 +57,28 @@ inline ReplayVersion ZReplayLoader::GetVersion()
 
 	if (Version.Server == ServerType::RefinedGunz && Version.nVersion >= 2)
 	{
-		u32 ClientVersion = 0;
-		Read(ClientVersion);
-		Version.nSubVersion = ClientVersion;
+		if (Version.nVersion <= 3)
+		{
+			u32 ClientVersion = 0;
+			Read(ClientVersion);
+			Version.nSubVersion = ClientVersion;
 
-		i64 Time;
-		Read(Time);
-		Timestamp = Time;
+			i64 Time;
+			Read(Time);
+			Timestamp = Time;
+		}
+		else
+		{
+			i64 Time;
+			Read(Time);
+			Timestamp = Time;
+
+			// Read all the four version numbers
+			for (int i = 0; i < 4; ++i) {
+				u32 ClientVersion = 0;
+				Read(ClientVersion);
+			}
+		}
 	}
 	else if(Version.Server == ServerType::FreestyleGunz && Version.nVersion == 7)
 	{
@@ -168,7 +183,7 @@ inline void ZReplayLoader::GetStageSetting(REPLAY_STAGE_SETTING_NODE& ret)
 			COPY_SETTING(NoFlip);
 			COPY_SETTING(SwordsOnly);
 		}
-		else if (Version.nVersion == 3)
+		else if (Version.nVersion >= 3)
 		{
 			Read(ret);
 		}

@@ -326,5 +326,22 @@ unsigned long int ZGetClockDistance(unsigned long int nGlobalClock, unsigned lon
 #define ZPOSTCMD6(_ID, _P0, _P1, _P2, _P3, _P4, _P5)	{ MCommand* pC=ZNewCmd(_ID); pC->AddParameter(new _P0); pC->AddParameter(new _P1); pC->AddParameter(new _P2); pC->AddParameter(new _P3); pC->AddParameter(new _P4); pC->AddParameter(new _P5); ZPostCommand(pC); }
 #define ZPOSTCMD7(_ID, _P0, _P1, _P2, _P3, _P4, _P5, _P6)	{ MCommand* pC=ZNewCmd(_ID); pC->AddParameter(new _P0); pC->AddParameter(new _P1); pC->AddParameter(new _P2); pC->AddParameter(new _P3); pC->AddParameter(new _P4); pC->AddParameter(new _P5); pC->AddParameter(new _P6); ZPostCommand(pC); }
 
+static inline void ZPostCmd_AddParameters(MCommand*) {}
+
+template <typename CurT, typename... RestT>
+void ZPostCmd_AddParameters(MCommand* NewCmd, CurT&& Cur, RestT&&... Rest)
+{
+	NewCmd->AddParameter(std::forward<CurT>(Cur).Clone());
+	ZPostCmd_AddParameters(NewCmd, std::forward<RestT>(Rest)...);
+}
+
+template <typename... T>
+void ZPostCmd(int ID, T&&... Args)
+{
+	auto NewCmd = ZNewCmd(ID);
+	ZPostCmd_AddParameters(NewCmd, std::forward<T>(Args)...);
+	ZPostCommand(NewCmd);
+}
+
 #define HANDLE_COMMAND(message, fn)    \
 	case (message): return fn(pCommand);

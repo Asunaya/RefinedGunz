@@ -121,7 +121,11 @@ public:
 	auto GetPort() const { return 6000; }
 	auto GetDatabaseType() const { return DBType; }
 
-	int Version{};
+	struct VersionType {
+		u32 Major, Minor, Patch, Revision;
+	} Version;
+
+	bool VersionChecking = true;
 };
 
 inline MMatchConfig* MGetServerConfig() { return MMatchConfig::GetInstance(); }

@@ -13,7 +13,7 @@ bool CreateReplayGame(const char *filename);
 #define GUNZ_REC_FILE_EXT		"gzr"
 
 #define RG_REPLAY_MAGIC_NUMBER 0x00DEFBAD
-#define RG_REPLAY_BINARY_VERSION 3
+#define RG_REPLAY_BINARY_VERSION 4
 
 enum class ServerType
 {

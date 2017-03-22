@@ -731,6 +731,7 @@
       <Filter>Vulkan</Filter>
     </ClInclude>
     <ClInclude Include="ZPickInfo.h" />
+    <ClInclude Include="ZReplayWrite.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ZCanvas.cpp">
@@ -1322,6 +1323,7 @@
     <ClCompile Include="ZGameClient_Command.cpp">
       <Filter>Network</Filter>
     </ClCompile>
+    <ClCompile Include="ZReplayWrite.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="runtime\shader\skin.vsh">

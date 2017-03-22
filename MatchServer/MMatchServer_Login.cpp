@@ -71,7 +71,9 @@ bool MMatchServer::CheckOnLoginPre(const MUID& CommUID, int nCmdVersion,
 	return true;
 }
 
-void MMatchServer::OnMatchLogin(MUID CommUID, const char* szUserID, const unsigned char *HashedPassword, int HashLength, int nCommandVersion, unsigned long nChecksumPack, int nVersion)
+void MMatchServer::OnMatchLogin(const MUID& CommUID, const char* UserID, const unsigned char *HashedPassword,
+	int HashLength, int CommandVersion, unsigned long ChecksumPack,
+	u32 Major, u32 Minor, u32 Patch, u32 Revision)
 {
 	if (HashLength != crypto_generichash_BYTES)
 		return;
@@ -84,21 +86,29 @@ void MMatchServer::OnMatchLogin(MUID CommUID, const char* szUserID, const unsign
 
 	bool bFreeLoginIP = false;
 
-	const auto ExpectedVersion = MGetServerConfig()->Version;
-	if (nVersion < ExpectedVersion)
+	if (MGetServerConfig()->VersionChecking)
 	{
-		char buf[128];
-		sprintf_safe(buf, "Your client is outdated (expected version %d, got %d)", ExpectedVersion, nVersion);
-		NotifyFailedLogin(CommUID, buf);
-		return;
+		const auto& ExpectedVersion = MGetServerConfig()->Version;
+		if (Major != ExpectedVersion.Major ||
+			Minor != ExpectedVersion.Minor ||
+			Patch != ExpectedVersion.Patch ||
+			Revision != ExpectedVersion.Revision)
+		{
+			char buf[128];
+			sprintf_safe(buf, "Your client has the wrong version (expected version %d.%d.%d-%X, got %d.%d.%d-%X)",
+				ExpectedVersion.Major, ExpectedVersion.Minor, ExpectedVersion.Patch, ExpectedVersion.Revision,
+				Major, Minor, Patch, Revision);
+			NotifyFailedLogin(CommUID, buf);
+			return;
+		}
 	}
 
-	if (!CheckOnLoginPre(CommUID, nCommandVersion, bFreeLoginIP, strCountryCode3)) return;
+	if (!CheckOnLoginPre(CommUID, CommandVersion, bFreeLoginIP, strCountryCode3)) return;
 
-	if (!GetDBMgr()->GetLoginInfo(szUserID, &nAID, szDBPassword))
+	if (!GetDBMgr()->GetLoginInfo(UserID, &nAID, szDBPassword))
 	{
 		char buf[128];
-		sprintf_safe(buf, "Couldn't find username %s", szUserID);
+		sprintf_safe(buf, "Couldn't find username %s", UserID);
 		NotifyFailedLogin(CommUID, buf);
 
 		return;
@@ -107,7 +117,7 @@ void MMatchServer::OnMatchLogin(MUID CommUID, const char* szUserID, const unsign
 	MCommObject* pCommObj = (MCommObject*)m_CommRefCache.GetRef(CommUID);
 	if (pCommObj)
 	{
-		if (!GetDBMgr()->UpdateLastConnDate(szUserID, pCommObj->GetIPString()))
+		if (!GetDBMgr()->UpdateLastConnDate(UserID, pCommObj->GetIPString()))
 		{
 			mlog("DB Query(OnMatchLogin > UpdateLastConnDate) Failed");
 		}
@@ -143,7 +153,7 @@ void MMatchServer::OnMatchLogin(MUID CommUID, const char* szUserID, const unsign
 		return;
 	}
 
-	AddObjectOnMatchLogin(CommUID, &accountInfo, bFreeLoginIP, strCountryCode3, nChecksumPack);
+	AddObjectOnMatchLogin(CommUID, &accountInfo, bFreeLoginIP, strCountryCode3, ChecksumPack);
 }
 
 void MMatchServer::NotifyFailedLogin(const MUID& uidComm, const char *szReason)

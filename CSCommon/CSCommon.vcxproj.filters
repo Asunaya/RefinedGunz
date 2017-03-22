@@ -176,6 +176,7 @@
     <ClInclude Include="Include\MCommandRegistration.h">
       <Filter>Command</Filter>
     </ClInclude>
+    <ClInclude Include="Include\RGVersion.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\MCommand.cpp">

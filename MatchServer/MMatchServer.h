@@ -294,8 +294,9 @@ protected:
 
 	bool CheckOnLoginPre(const MUID& CommUID, int nCmdVersion, bool& outbFreeIP,
 		std::string& strCountryCode3);
-	void OnMatchLogin(MUID CommUID, const char* szUserID, const unsigned char *HashedPassword,
-		int HashLength, int nCommandVersion, unsigned long nChecksumPack, int nVersion);
+	void OnMatchLogin(const MUID& CommUID, const char* UserID, const unsigned char *HashedPassword,
+		int HashLength, int CommandVersion, unsigned long ChecksumPack,
+		u32 Major, u32 Minor, u32 Patch, u32 Revision);
 	void OnMatchLoginFromDBAgent(const MUID& CommUID, const char* szLoginID,
 		const char* szName, int nSex, bool bFreeLoginIP, unsigned long nChecksumPack);
 	void OnMatchLoginFailedFromDBAgent(const MUID& CommUID, int nResult);

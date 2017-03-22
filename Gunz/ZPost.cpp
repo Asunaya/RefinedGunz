@@ -9,7 +9,7 @@
 #include "ZGameClient.h"
 #include "ZApplication.h"
 #include "ZConfiguration.h"
-
+#include "RGVersion.h"
 
 void ZPostUserOption()
 {
@@ -21,4 +21,13 @@ void ZPostUserOption()
 		nOptionFlags |= MBITFLAG_USEROPTION_REJECT_INVITE;
 
 	ZPOSTCMD1(MC_MATCH_USER_OPTION, MCmdParamUInt(nOptionFlags));
+}
+
+void ZPostLogin(const char* szUserID, const unsigned char *HashedPassword,
+	int HashLength, unsigned int ChecksumPack)
+{
+	ZPostCmd(MC_MATCH_LOGIN, MCmdParamStr(szUserID), MCmdParamBlob(HashedPassword, HashLength),
+		MCmdParamInt(MCOMMAND_VERSION), MCmdParamUInt(ChecksumPack),
+		MCmdParamUInt(RGUNZ_VERSION_MAJOR), MCmdParamUInt(RGUNZ_VERSION_MINOR),
+		MCmdParamUInt(RGUNZ_VERSION_PATCH), MCmdParamUInt(RGUNZ_VERSION_REVISION));
 }

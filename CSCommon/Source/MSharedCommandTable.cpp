@@ -116,7 +116,10 @@ void MAddSharedCommandTable(MCommandManager* CommandManager, MSharedCommandType:
 			P(MPT_BLOB, "Hashed password");
 			P(MPT_INT, "CommandVersion");
 			P(MPT_UINT, "nChecksumPack");
-			P(MPT_INT, "ClientVersion");
+			P(MPT_UINT, "ClientVersionMajor");
+			P(MPT_UINT, "ClientVersionMinor");
+			P(MPT_UINT, "ClientVersionPatch");
+			P(MPT_UINT, "ClientVersionRevision");
 		C(MC_MATCH_RESPONSE_LOGIN_FAILED, "", "", MCDT_MACHINE2MACHINE);
 			P(MPT_STR, "Reason");
 		C(MC_MATCH_RESPONSE_LOGIN, "Match.ResponseLogin", "Response Login", MCDT_MACHINE2MACHINE);

@@ -81,6 +81,7 @@
 #include "stuff.h"
 #include "RBspObject.h"
 #include "ZPickInfo.h"
+#include "ZReplayWrite.h"
 
 _USING_NAMESPACE_REALSPACE2
 
@@ -4363,76 +4364,28 @@ void ZGame::StartRecording()
 	}
 	while( IsExist(replayfilename) && nsscount<1000);
 
-	if(nsscount==1000) goto RECORDING_FAIL;
+	if (nsscount == 1000) goto RECORDING_FAIL;
 
 	m_pReplayFile = zfopen(replayfilename,true);
 	if(!m_pReplayFile) goto RECORDING_FAIL;
 
-	int nWritten;
-	bool Success = false;
-
-	u32 header;
-	header = RG_REPLAY_MAGIC_NUMBER;//GUNZ_REC_FILE_ID;
-	nWritten = zfwrite(&header,sizeof(header),1,m_pReplayFile);
-	if(nWritten==0) goto RECORDING_FAIL;
-
-	header = RG_REPLAY_BINARY_VERSION;//GUNZ_REC_FILE_VERSION;
-	nWritten = zfwrite(&header,sizeof(header),1,m_pReplayFile);
-	if(nWritten==0) goto RECORDING_FAIL;
-
-	if (!m_pReplayFile->Write<u32>(RGUNZ_VERSION))
-		goto RECORDING_FAIL;
-
-	i64 Timestamp = time(nullptr);
-	if (!m_pReplayFile->Write(Timestamp))
-		goto RECORDING_FAIL;
-
+	if (WriteReplayStart(*m_pReplayFile, m_fTime, m_CharacterManager))
 	{
-		REPLAY_STAGE_SETTING_NODE rssn;
-		GetReplayStageSetting(rssn, *ZGetGameClient()->GetMatchStageSetting()->GetStageSetting());
-		Success = m_pReplayFile->Write(rssn);
-		if (!Success)
-			goto RECORDING_FAIL;
+		m_bRecording = true;
+		ZChatOutput(MCOLOR(ZCOLOR_CHAT_SYSTEM),
+			ZMsg(MSG_RECORD_STARTING));
 	}
-
-	if(ZGetGameClient()->GetMatchStageSetting()->GetGameType() == MMATCH_GAMETYPE_DUEL)
+	else
 	{
-		ZRuleDuel* pDuel = (ZRuleDuel*)ZGetGameInterface()->GetGame()->GetMatch()->GetRule();
-		nWritten = zfwrite(&pDuel->QInfo,sizeof(MTD_DuelQueueInfo),1,m_pReplayFile);
-		if(nWritten==0) goto RECORDING_FAIL;
+	RECORDING_FAIL:
+		if (m_pReplayFile)
+		{
+			zfclose(m_pReplayFile);
+			m_pReplayFile = NULL;
+		}
+
+		ZChatOutput(MCOLOR(ZCOLOR_CHAT_SYSTEM), ZMsg(MSG_RECORD_CANT_SAVE));
 	}
-
-	int nCharacterCount= (int)m_CharacterManager.size();
-	nWritten = zfwrite(&nCharacterCount,sizeof(nCharacterCount),1,m_pReplayFile);
-	if(nWritten==0) goto RECORDING_FAIL;
-
-	for (auto& Item : m_CharacterManager)
-	{
-		auto Char = Item.second;
-		ReplayPlayerInfo Info;
-		Char->Save(Info);
-		if (!m_pReplayFile->Write(Info))
-			goto RECORDING_FAIL;
-	}	
-
-	nWritten = zfwrite(&m_fTime,sizeof(m_fTime),1,m_pReplayFile);
-	if(nWritten==0) goto RECORDING_FAIL;
-
-
-	m_bRecording=true;
-	ZChatOutput(MCOLOR(ZCOLOR_CHAT_SYSTEM), 
-		ZMsg(MSG_RECORD_STARTING));
-	return;
-
-RECORDING_FAIL:
-
-	if(m_pReplayFile)
-	{
-		zfclose(m_pReplayFile);
-		m_pReplayFile = NULL;
-	}
-
-	ZChatOutput(MCOLOR(ZCOLOR_CHAT_SYSTEM), ZMsg(MSG_RECORD_CANT_SAVE));
 }
 
 void ZGame::StopRecording()
@@ -4441,34 +4394,13 @@ void ZGame::StopRecording()
 
 	bool bError = false;
 
-	m_bRecording=false;
+	m_bRecording = false;
 
-	ZObserverCommandList::iterator itr = m_ReplayCommandList.begin();
-	for(size_t i=0;i<m_ReplayCommandList.size();i++)
+	WriteReplayEnd(*m_pReplayFile, m_ReplayCommandList);
+
+	while (m_ReplayCommandList.size())
 	{
-		ZObserverCommandItem *pItem = *itr;
-		MCommand *pCommand = pItem->pCommand;
-
-		const int BUF_SIZE = 1024;
-		char CommandBuffer[BUF_SIZE];
-		int nSize = pCommand->GetData(CommandBuffer, BUF_SIZE);
-
-		int nWritten;
-		nWritten = zfwrite(&pItem->fTime,sizeof(pItem->fTime),1,m_pReplayFile);
-		if(nWritten==0) { bError=true; break; }
-		nWritten = zfwrite(&pCommand->m_Sender,sizeof(pCommand->m_Sender),1,m_pReplayFile);
-		if(nWritten==0) { bError=true; break; }
-		nWritten = zfwrite(&nSize,sizeof(nSize),1,m_pReplayFile);
-		if(nWritten==0) { bError=true; break; }
-		nWritten = zfwrite(CommandBuffer,nSize,1,m_pReplayFile);
-		if(nWritten==0) { bError=true; break; }
-
-		itr++;
-	}
-
-	while(m_ReplayCommandList.size())
-	{
-		ZObserverCommandItem *pItem = *m_ReplayCommandList.begin();
+		auto* pItem = m_ReplayCommandList.front();
 		delete pItem->pCommand;
 		delete pItem;
 		m_ReplayCommandList.pop_front();
@@ -4484,7 +4416,9 @@ void ZGame::StopRecording()
 	else
 	{
 		char szOutputFilename[256];
-		sprintf_safe(szOutputFilename, GUNZ_FOLDER REPLAY_FOLDER "/Gunz%03d." GUNZ_REC_FILE_EXT, m_nGunzReplayNumber);
+		sprintf_safe(szOutputFilename,
+			GUNZ_FOLDER REPLAY_FOLDER "/Gunz%03d." GUNZ_REC_FILE_EXT,
+			m_nGunzReplayNumber);
 
 		char szOutput[256];
 		ZTransMsg(szOutput,MSG_RECORD_SAVED,1,szOutputFilename);
