@@ -18,6 +18,10 @@
 #include "DepthCopyVS.h"
 #include "DepthCopyPS.h"
 #include "VisualizeLinearDepth.h"
+#include "Monochrome.h"
+#include "ColorInvert.h"
+
+_NAMESPACE_REALSPACE2_BEGIN
 
 static auto CreateScreenSpaceVertexDeclaration()
 {
@@ -77,6 +81,19 @@ void Renderer::CreateTextures()
 
 void Renderer::CreateShaders()
 {
+	if (SupportsPixelShaderVersion(3, 0))
+	{
+		auto AddEffect = [&](const char* Name, auto&& Data) {
+			PostProcessEffect Effect;
+			Effect.Name = Name;
+			Effect.Shaders.emplace_back(ShaderPair{ nullptr, CreatePixelShader(Data) });
+			GetRenderer().PostProcess.AddEffect(std::move(Effect));
+		};
+
+		AddEffect("Monochrome", MonochromeData);
+		AddEffect("ColorInvert", ColorInvertData);
+	}
+
 	SupportsDynamicLighting_ = SupportsVertexShaderVersion(3, 0) &&
 		SupportsPixelShaderVersion(3, 0) &&
 		GetDeviceCaps().NumSimultaneousRTs >= 4 &&
@@ -108,12 +125,16 @@ void Renderer::OnInvalidate()
 
 	for (auto& RT : RTs)
 		SAFE_RELEASE(RT);
+
+	PostProcess.OnInvalidate();
 }
 
 void Renderer::OnRestore()
 {
 	CreateTextures();
 	CreateShaders();
+
+	PostProcess.OnRestore();
 }
 
 void Renderer::BeginLighting()
@@ -182,7 +203,7 @@ void Renderer::UpdateRTs()
 		CreateTextures();
 }
 
-static void DrawQuad(const v2& p1, const v2& p2)
+void DrawQuad(const v2& p1, const v2& p2)
 {
 	struct VertexType
 	{
@@ -203,7 +224,7 @@ static void DrawQuad(const v2& p1, const v2& p2)
 	RGetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, &Vertices, sizeof(VertexType));
 }
 
-static void DrawFullscreenQuad()
+void DrawFullscreenQuad()
 {
 	auto Width = (float)RGetScreenWidth();
 	auto Height = (float)RGetScreenHeight();
@@ -320,3 +341,5 @@ void Renderer::ShowRTs()
 			ShowRT(RTs[i], p1, p2);
 	}
 }
+
+_NAMESPACE_REALSPACE2_END

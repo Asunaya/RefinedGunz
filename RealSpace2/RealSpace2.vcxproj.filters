@@ -83,6 +83,12 @@
     <None Include="Source\VisualizeLinearDepth.hlsl">
       <Filter>D3D9\Shaders</Filter>
     </None>
+    <None Include="Source\Monochrome.hlsl">
+      <Filter>D3D9\Shaders</Filter>
+    </None>
+    <None Include="Source\ColorInvert.hlsl">
+      <Filter>D3D9\Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\RHalfEdgeMesh.cpp">
@@ -261,6 +267,7 @@
     <ClCompile Include="Source\RBspObjectDrawD3D9.cpp">
       <Filter>Map</Filter>
     </ClCompile>
+    <ClCompile Include="Source\PostProcess.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\RHalfEdgeMesh.h">
@@ -470,5 +477,6 @@
     <ClInclude Include="Include\TextureLoader.h" />
     <ClInclude Include="Include\SimpleMesh.h" />
     <ClInclude Include="Include\VertexTypes.h" />
+    <ClInclude Include="Include\PostProcess.h" />
   </ItemGroup>
 </Project>

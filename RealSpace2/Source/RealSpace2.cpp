@@ -588,10 +588,7 @@ void RFlip()
 
 	g_pd3dDevice->Present(NULL, NULL, NULL, NULL);
 
-	if (g_rsnRenderFlags && RRENDER_CLEAR_BACKBUFFER)
-		g_pd3dDevice->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, g_clear_color, 1.0f, 0L);
-	else
-		g_pd3dDevice->Clear(0, NULL, D3DCLEAR_ZBUFFER, g_clear_color, 1.0f, 0);
+	RClear();
 
 	RBeginScene();
 
@@ -605,6 +602,15 @@ void RFlip()
 		g_dwLastFPSTime = currentTime;
 		g_nLastFrameCount = g_nFrameCount;
 	}
+}
+
+void RClear()
+{
+
+	if (g_rsnRenderFlags && RRENDER_CLEAR_BACKBUFFER)
+		g_pd3dDevice->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, g_clear_color, 1.0f, 0L);
+	else
+		g_pd3dDevice->Clear(0, NULL, D3DCLEAR_ZBUFFER, g_clear_color, 1.0f, 0);
 }
 
 void RDrawLine(const rvector &v1, const rvector &v2, DWORD dwColor)

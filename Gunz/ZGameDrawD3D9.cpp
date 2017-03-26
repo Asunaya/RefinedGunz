@@ -20,6 +20,8 @@
 #include "RS2.h"
 #include "Renderer.inl"
 #include "RBspObject.h"
+#include "Monochrome.h"
+#include "ShaderUtil.h"
 
 using namespace RealSpace2;
 
@@ -104,6 +106,8 @@ void ZGameDrawD3D9::DrawScene()
 
 	SetStatesPreDraw(Game);
 
+	GetRenderer().PostProcess.Begin();
+
 	if (ZGetConfiguration()->GetCamFix())
 		RSetProjection(FixedFOV(g_fFOV), DEFAULT_NEAR_Z, g_fFarZ);
 
@@ -180,6 +184,8 @@ void ZGameDrawD3D9::DrawScene()
 	PROFILE(GetRGMain().OnDrawGame());
 
 	PROFILE(g_pPortal->PostDraw());
+
+	GetRenderer().PostProcess.End();
 
 	MEndProfile(profZGameDraw);
 }

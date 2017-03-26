@@ -94,6 +94,7 @@ LPDIRECT3DDEVICE9 RGetDevice();
 void RResetDevice(const RMODEPARAMS *params);
 RRESULT RIsReadyToRender();
 void RFlip();
+void RClear();
 bool REndScene();
 bool RBeginScene();
 

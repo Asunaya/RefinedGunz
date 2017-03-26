@@ -244,6 +244,24 @@ void LoadRGCommands(ZChatCmdManager& CmdManager)
 	},
 		CCF_ALL, 0, 1, true, "/fov [value, in degrees]", "");
 
+	CmdManager.AddCommand(0, "monochrome", [](const char *line, int argc, char ** const argv) {
+		static bool Enabled = false;
+		Enabled = !Enabled;
+		auto Success = GetRenderer().PostProcess.EnableEffect("Monochrome", Enabled);
+		assert(Success);
+		ZChatOutputF("Monochrome %s", Enabled ? "enabled" : "disabled");
+	},
+		CCF_ALL, 0, 1, true, "", "");
+
+	CmdManager.AddCommand(0, "colorinvert", [](const char *line, int argc, char ** const argv) {
+		static bool Enabled = false;
+		Enabled = !Enabled;
+		auto Success = GetRenderer().PostProcess.EnableEffect("ColorInvert", Enabled);
+		assert(Success);
+		ZChatOutputF("Color invert %s", Enabled ? "enabled" : "disabled");
+	},
+		CCF_ALL, 0, 1, true, "", "");
+
 	CmdManager.AddCommand(0, "setparts", [](const char *line, int argc, char ** const argv) {
 		if (!CheckDeveloperMode("setparts"))
 			return;

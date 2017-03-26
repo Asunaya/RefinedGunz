@@ -1,6 +1,7 @@
 #pragma once
 
 #include "RealSpace2.h"
+#include "PostProcess.h"
 
 _NAMESPACE_REALSPACE2_BEGIN
 
@@ -55,6 +56,7 @@ public:
 	D3DPtr<IDirect3DPixelShader9> VisualizeLinearDepthPS;
 
 	bool ShowRTsEnabled{};
+	PostProcessManager PostProcess;
 
 private:
 	void CreateTextures();
@@ -95,5 +97,9 @@ private:
 	D3DPtr<IDirect3DSurface9> OrigRT;
 	D3DPtr<IDirect3DSurface9> OrigDepthSurface;
 };
+
+void DrawQuad(const v2& p1, const v2& p2);
+void DrawFullscreenQuad();
+
 
 _NAMESPACE_REALSPACE2_END

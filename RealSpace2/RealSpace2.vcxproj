@@ -373,6 +373,7 @@
     <ClCompile Include="Source\EluLoader.cpp" />
     <ClCompile Include="Source\LightmapGenerator.cpp" />
     <ClCompile Include="Source\MeshManager.cpp" />
+    <ClCompile Include="Source\PostProcess.cpp" />
     <ClCompile Include="Source\RBspObjectDrawD3D9.cpp" />
     <ClCompile Include="Source\RBspObjectDrawVulkan.cpp" />
     <ClCompile Include="Source\Renderer.cpp" />
@@ -453,6 +454,7 @@
     <ClInclude Include="Include\LightmapGenerator.h" />
     <ClInclude Include="Include\LogMatrix.h" />
     <ClInclude Include="Include\MeshManager.h" />
+    <ClInclude Include="Include\PostProcess.h" />
     <ClInclude Include="Include\RBspObjectDraw.h" />
     <ClInclude Include="Include\RBspObjectDrawD3D9.h" />
     <ClInclude Include="Include\RBspObjectDrawVulkan.h" />
@@ -632,6 +634,16 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Source\VisualizeLinearDepth.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Source\Monochrome.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Source\ColorInvert.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
