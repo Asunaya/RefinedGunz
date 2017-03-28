@@ -1109,14 +1109,10 @@ struct FrustraDrawerType
 
 static FrustraDrawerType FrustraDrawer;
 
-void TogglePortalFrustraLock()
-{
-	FrustraDrawer.Lock = !FrustraDrawer.Lock;
-}
-void TogglePortalFrustraDraw()
-{
-	FrustraDrawer.Enabled = !FrustraDrawer.Enabled;
-}
+void SetPortalFrustraDrawLock(bool Value) { FrustraDrawer.Lock = Value; }
+bool GetPortalFrustraDrawLock() { return FrustraDrawer.Lock; }
+void SetPortalFrustraDrawEnabled(bool Value) { FrustraDrawer.Enabled = Value; }
+bool GetPortalFrustraDrawEnabled() { return FrustraDrawer.Enabled; }
 
 void Portal::UpdateAndRender(const RecursionContext* PrevContext)
 {

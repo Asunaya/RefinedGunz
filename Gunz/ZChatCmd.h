@@ -4,10 +4,11 @@
 #include <list>
 #include <vector>
 #include <map>
+#include "MXmlParser.h"
 
-#define		ZCHATCMD_TEXSIZE	2048
-#define		ZCHATCMD_NAMESIZE	256
-#define		ZCHATCMD_LIMIT_REPEAT_COUNT 3
+#define	ZCHATCMD_TEXSIZE	2048
+#define	ZCHATCMD_NAMESIZE	256
+#define	ZCHATCMD_LIMIT_REPEAT_COUNT 3
 
 #define ARGVNoMin	(-1)
 #define ARGVNoMax	(-1)
@@ -22,8 +23,8 @@ struct ZChatCmdArgvInfo
 class ZChatCmd;
 class ZChatCmdManager;
 
-typedef std::map<std::string, ZChatCmd*>	ZChatCmdMap;
-typedef void(ZChatCmdProc)(const char* line, const int argc, char **const argv);
+using ZChatCmdMap = std::map<std::string, ZChatCmd>;
+using ZChatCmdProc = void(*)(const char*, int, char **);
 
 enum ZChatCmdFlag
 {
@@ -37,8 +38,6 @@ enum ZChatCmdFlag
 	CCF_ADMIN	= 0x80	
 };
 
-
-
 class ZChatCmd
 {
 private:
@@ -49,34 +48,29 @@ private:
 	int					m_nMinArgs;
 	int					m_nMaxArgs;
 	bool				m_bRepeatEnabled;
-	unsigned long int	m_nFlag;
-	ZChatCmdProc*		m_fnProc;
+	u32					m_nFlag;
+	ZChatCmdProc		m_fnProc;
 protected:
 public:
-	ZChatCmd(int nID, const char* szName, unsigned long int flag,
-		int nMinArgs = ARGVNoMin, int nMaxArgs=ARGVNoMax, bool bRepeatEnabled=true,
-		const char* szUsage=NULL, const char* szHelp=NULL);
-	virtual ~ZChatCmd() { }
+	ZChatCmd(int nID, const char* szName, u32 flag,
+		int nMinArgs = ARGVNoMin, int nMaxArgs = ARGVNoMax, bool bRepeatEnabled = true,
+		const char* szUsage = nullptr, const char* szHelp = nullptr);
 
 	void OnProc(const char* line, const int argc, char **const argv);
-	void SetProc(ZChatCmdProc* fnProc) { m_fnProc = fnProc; }
-	const int GetID()				{ return m_nID; }
-	const char* GetName()			{ return m_szName; }
-	const char* GetUsage()			{ return m_szUsage; }
-	const char* GetHelp()			{ return m_szHelp; }
-	ZChatCmdProc* GetProc()			{ return m_fnProc; }
-	int GetMinArgs()				{ return m_nMinArgs; }
-	int GetMaxArgs()				{ return m_nMaxArgs; }
-	unsigned long int GetFlag()		{ return m_nFlag; }
-	bool GetRepeatEnabled()			{ return m_bRepeatEnabled; }
+	void SetProc(ZChatCmdProc fnProc) { m_fnProc = fnProc; }
+	int GetID() const				{ return m_nID; }
+	const char* GetName() const		{ return m_szName; }
+	const char* GetUsage() const	{ return m_szUsage; }
+	const char* GetHelp() const		{ return m_szHelp; }
+	ZChatCmdProc& GetProc()			{ return m_fnProc; }
+	int GetMinArgs() const			{ return m_nMinArgs; }
+	int GetMaxArgs() const			{ return m_nMaxArgs; }
+	u32 GetFlag() const				{ return m_nFlag; }
+	bool GetRepeatEnabled() const { return m_bRepeatEnabled; }
 };
 
 class ZChatCmdManager
 {
-private:
-	ZChatCmdMap						m_CmdMap;
-	map<std::string, std::string>	m_AliasMap;
-	ZChatCmd* MakeArgv(const char* szLine, ZChatCmdArgvInfo* pAI);
 public:
 	enum CmdInputFlag
 	{
@@ -86,17 +80,17 @@ public:
 	};
 
 	ZChatCmdManager();
-	virtual ~ZChatCmdManager();
+	~ZChatCmdManager();
 
-	void AddCommand(int					nID,
-					const char*			szName, 
-					ZChatCmdProc*		fnProc, 
-					unsigned long int	flag,
-					int					nMinArgs=ARGVNoMin, 
-					int					nMaxArgs=ARGVNoMax,
-					bool				bRepeatEnabled=true,
-					const char*			szUsage=NULL, 
-					const char*			szHelp=NULL);
+	void AddCommand(int		nID,
+		const char*			szName,
+		ZChatCmdProc		fnProc,
+		u32					flag,
+		int					nMinArgs = ARGVNoMin,
+		int					nMaxArgs = ARGVNoMax,
+		bool				bRepeatEnabled = true,
+		const char*			szUsage = nullptr,
+		const char*			szHelp = nullptr);
 	void AddAlias(const char* szNewCmdName, const char* szTarCmdName);
 	bool IsRepeatEnabled(const char* szLine);
 	bool DoCommand(const char* szLine, ZChatCmdFlag nCurrFlag, unsigned long nInputFlag=CIF_NORMAL);
@@ -105,6 +99,11 @@ public:
 	ZChatCmdMap::iterator GetCmdBegin() { return m_CmdMap.begin(); }
 	ZChatCmdMap::iterator GetCmdEnd()	{ return m_CmdMap.end(); }
 	int GetCmdCount() const { return (int)m_CmdMap.size(); }
+
+private:
+	ZChatCmdMap m_CmdMap;
+	std::map<std::string, std::string> m_AliasMap;
+	ZChatCmd* MakeArgv(const char* szLine, ZChatCmdArgvInfo* pAI);
 };
 
 void ZImplodeChatCmdArgs(char* szOut, size_t maxlen, int argc, char **const argv, int nFirstIndex = 0);
@@ -113,31 +112,26 @@ void ZImplodeChatCmdArgs(char (&szOut)[size], int argc, char **const argv, int n
 	return ZImplodeChatCmdArgs(szOut, size, argc, argv, nFirstIndex);
 }
 
-
-#include "MXmlParser.h"
-
 class ZCmdXmlParser : public MXmlParser
 {
 public:
-	struct _CmdStr
+	struct CmdStr
 	{
-		char			szName[ZCHATCMD_NAMESIZE];
-		char			szUsage[ZCHATCMD_TEXSIZE];
-		char			szHelp[ZCHATCMD_TEXSIZE];
-		vector<string>	vecAliases;
-		_CmdStr()
+		char szName[ZCHATCMD_NAMESIZE];
+		char szUsage[ZCHATCMD_TEXSIZE];
+		char szHelp[ZCHATCMD_TEXSIZE];
+		std::vector<std::string> vecAliases;
+		CmdStr()
 		{
 			szName[0] = szUsage[0] = szHelp[0] = 0;
 		}
 	};
+
+	CmdStr* GetStr(int nID);
+
 private:
-	map<int, _CmdStr*>		m_CmdMap;
+	std::map<int, CmdStr> m_CmdMap;
 
 	virtual void ParseRoot(const char* szTagName, MXmlElement* pElement);
 	void ParseCmd(MXmlElement* pElement);
-public:
-	ZCmdXmlParser();
-	virtual ~ZCmdXmlParser();
-	void Clear();
-	_CmdStr* GetStr(int nID);
 };

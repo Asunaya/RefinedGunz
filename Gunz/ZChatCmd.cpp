@@ -22,13 +22,12 @@ int IsSpace(int c)
 	return isspace(c);
 }
 
-ZChatCmd::ZChatCmd(int nID, const char* szName, unsigned long int flag,
-					int nMinArgs, int nMaxArgs,bool bRepeatEnabled,
+ZChatCmd::ZChatCmd(int nID, const char* szName, u32 flag,
+	int nMinArgs, int nMaxArgs, bool bRepeatEnabled,
 					const char* szUsage, const char* szHelp)
 {
 	m_nID = nID;
 
-	m_fnProc = NULL;
 	m_nFlag = flag;
 
 	m_nMinArgs = nMinArgs;
@@ -43,9 +42,8 @@ ZChatCmd::ZChatCmd(int nID, const char* szName, unsigned long int flag,
 
 void ZChatCmd::OnProc(const char* line, const int argc, char **const argv)
 {
-	if (m_fnProc != NULL)
-	{
-		(*m_fnProc)(line, argc, argv);
+	if (m_fnProc) {
+		m_fnProc(line, argc, argv);
 	}
 }
 
@@ -59,7 +57,6 @@ ZChatCmd* ZChatCmdManager::MakeArgv(const char* szLine, ZChatCmdArgvInfo* pAI)
 	char szBuffer[2048];
 	strcpy_safe(szBuffer, szLine);
 
-	// 문자열 끝의 스페이스 제거
 	for (int pos = nLen-1; pos >= 0; pos--)
 	{
 		if (IsSpace(szBuffer[pos])) szBuffer[pos] = '\0';
@@ -106,48 +103,15 @@ ZChatCmd* ZChatCmdManager::MakeArgv(const char* szLine, ZChatCmdArgvInfo* pAI)
 			c = *scp;
 			if ( (c == '\0') || (c == '\n')) break;
 
-			// 마지막 인자는 무조건 문자열 마지막까지의 값이다.
 			if (pAI->cargc != nCmdArgcMax)
 			{
 				if (IsSpace(c)) break;
 			}
 			scp++;
 
-			// 작은 따옴표 처리
-			if (c == '\'') 
-			{
-//				for ( ; ; ) 
-//				{
-//					c = *scp++;
-
-					// 따옴표가 하나만 있으면 널 리턴
-//					if (c == '\0') return NULL;
-
-//					if (c == '\'') break;
-
-					// 너무 길다
-//					if (dcp >= dlim) return NULL;
-
-					*dcp++ = c;
-//				}
-			} 
-			else if (c == '"')	// 큰따옴표처리
-			{	
-//				for ( ; ; ) 
-//				{
-//					c = *scp++;
-//					if (c == '\0') return NULL;
-//					if (c == '"') break;
-
-//					if (dcp >= dlim) return NULL;
-					*dcp++ = c;
-//				}
-			}
-            else 
-			{
-				if (dcp >= dlim) return NULL;
-				*dcp++ = c;
-			}
+			// TODO: Handle a quoted string as a single argument.
+			if (dcp >= dlim) return NULL;
+			*dcp++ = c;
 		}
 
 		*dcp++ = '\0';
@@ -173,17 +137,17 @@ ZChatCmd* ZChatCmdManager::MakeArgv(const char* szLine, ZChatCmdArgvInfo* pAI)
 }
 
 
-void ZChatCmdManager::AddCommand(int nID, const char* szName, ZChatCmdProc* fnProc, unsigned long int flag,
-				int nMinArgs, int nMaxArgs, bool bRepeatEnabled,const char* szUsage, const char* szHelp)
+void ZChatCmdManager::AddCommand(int nID, const char* szName, ZChatCmdProc fnProc, u32 flag,
+	int nMinArgs, int nMaxArgs, bool bRepeatEnabled, const char* szUsage, const char* szHelp)
 {
 	char szLwrName[256];
 	strcpy_safe(szLwrName, szName);
 	_strlwr_s(szLwrName);
 
-	ZChatCmd* pCmd = new ZChatCmd(nID, szLwrName, flag, nMinArgs, nMaxArgs, bRepeatEnabled,szUsage, szHelp);
+	ZChatCmd Cmd(nID, szLwrName, flag, nMinArgs, nMaxArgs, bRepeatEnabled,szUsage, szHelp);
 	
-	pCmd->SetProc(fnProc);
-	m_CmdMap.insert(ZChatCmdMap::value_type(szLwrName, pCmd));
+	Cmd.SetProc(fnProc);
+	m_CmdMap.emplace(szLwrName, std::move(Cmd));
 }
 
 bool ZChatCmdManager::DoCommand(const char* szLine, ZChatCmdFlag nCurrFlag, unsigned long nInputFlag)
@@ -206,12 +170,10 @@ bool ZChatCmdManager::DoCommand(const char* szLine, ZChatCmdFlag nCurrFlag, unsi
 			return true;
 		}
 
-		// 관리자 명령어일때 처리
 		if (pCmd->GetFlag() & CCF_ADMIN)
 		{
 			if ((nInputFlag & CIF_ADMIN) == false) return false;
 		}
-		// 테스트 명령어일때 처리
 		else if (pCmd->GetFlag() & CCF_TEST)
 		{
 			if ((nInputFlag & CIF_TESTER) == false) return false;
@@ -224,7 +186,7 @@ bool ZChatCmdManager::DoCommand(const char* szLine, ZChatCmdFlag nCurrFlag, unsi
 			return true;
 		}
 		// Admin
-		else if ( (CIF_ADMIN & nInputFlag) && (pCmd->GetFlag() & CCF_ADMIN))
+		else if ((CIF_ADMIN & nInputFlag) && (pCmd->GetFlag() & CCF_ADMIN))
 		{
 			if ( IsAdminGrade(ZGetMyInfo()->GetUGradeID()) )
 			{
@@ -233,7 +195,7 @@ bool ZChatCmdManager::DoCommand(const char* szLine, ZChatCmdFlag nCurrFlag, unsi
 			}
 		}
 		// Test
-		else if ( (CIF_TESTER & nInputFlag) && (pCmd->GetFlag() & CCF_TEST))
+		else if ((CIF_TESTER & nInputFlag) && (pCmd->GetFlag() & CCF_TEST))
 		{
 			pCmd->OnProc(szLine, ai.cargc, ai.cargv);
 			return true;
@@ -245,7 +207,8 @@ bool ZChatCmdManager::DoCommand(const char* szLine, ZChatCmdFlag nCurrFlag, unsi
 
 bool ZChatCmdManager::IsRepeatEnabled(const char* szLine)
 {
-	if ((szLine == 0) || (szLine[0] == 0)) return 0;
+	if (szLine == 0 || szLine[0] == 0)
+		return false;
 	
 	ZChatCmdArgvInfo ai;
 	memset(&ai, 0, sizeof(ZChatCmdArgvInfo));
@@ -259,21 +222,8 @@ bool ZChatCmdManager::IsRepeatEnabled(const char* szLine)
 	return false;
 }
 
-ZChatCmdManager::ZChatCmdManager()
-{
-
-}
-
-ZChatCmdManager::~ZChatCmdManager()
-{
-	while (!m_CmdMap.empty())
-	{
-		ZChatCmdMap::iterator i = m_CmdMap.begin();
-		delete (*i).second;
-		m_CmdMap.erase(i);
-	}
-	m_AliasMap.clear();
-}
+ZChatCmdManager::ZChatCmdManager() = default;
+ZChatCmdManager::~ZChatCmdManager() = default;
 
 ZChatCmd* ZChatCmdManager::GetCommandByName(const char* szName)
 {
@@ -281,10 +231,9 @@ ZChatCmd* ZChatCmdManager::GetCommandByName(const char* szName)
 	strcpy_safe(szLwrName, szName);
 	_strlwr_s(szLwrName);
 
+	char szCmdName[256]; szCmdName[0] = 0;
 
-	char szCmdName[256] = "";
-
-	map<std::string, std::string>::iterator itorAlias = m_AliasMap.find(string(szLwrName));
+	auto itorAlias = m_AliasMap.find(string(szLwrName));
 	if (itorAlias != m_AliasMap.end())
 	{
 		strcpy_safe(szCmdName, ((*itorAlias).second).c_str());
@@ -294,27 +243,26 @@ ZChatCmd* ZChatCmdManager::GetCommandByName(const char* szName)
 		strcpy_safe(szCmdName, szLwrName);
 	}
 
-	ZChatCmdMap::iterator pos = m_CmdMap.find(string(szCmdName));
+	auto pos = m_CmdMap.find(szCmdName);
 	if (pos != m_CmdMap.end())
 	{
-		ZChatCmd* pCmd = (*pos).second;
-		return pCmd;
+		return &pos->second;
 	}
 	else
 	{
-		return NULL;
+		return nullptr;
 	}
 }
 
 ZChatCmd* ZChatCmdManager::GetCommandByID(int nID)
 {
-	for (ZChatCmdMap::iterator itor = m_CmdMap.begin(); itor != m_CmdMap.end(); ++itor)
+	for (auto&& ChatCmd : MakePairValueAdapter(m_CmdMap))
 	{
-		ZChatCmd* pChatCmd = (*itor).second;
-		if (pChatCmd->GetID() == nID) return pChatCmd;
+		if (ChatCmd.GetID() == nID) {
+			return &ChatCmd;
+		}
 	}
-	
-	return NULL;
+	return nullptr;
 }
 
 void ZChatCmdManager::AddAlias(const char* szNewCmdName, const char* szTarCmdName)
@@ -323,7 +271,7 @@ void ZChatCmdManager::AddAlias(const char* szNewCmdName, const char* szTarCmdNam
 	strcpy_safe(szLwrName, szNewCmdName);
 	_strlwr_s(szLwrName);
 
-	m_AliasMap.insert(map<std::string, std::string>::value_type(std::string(szLwrName), std::string(szTarCmdName)));
+	m_AliasMap.emplace(szLwrName, szTarCmdName);
 }
 
 
@@ -353,11 +301,10 @@ void ZCmdXmlParser::ParseCmd(MXmlElement* pElement)
 	char szAttrName[64];
 	char szTagName[128];
 
-	_CmdStr* pCmdStr = new _CmdStr;
+	CmdStr NewCmdStr;
 
 	int nID = 0;
 
-	// 속성값 --------------------
 	int nAttrCount = pElement->GetAttributeCount();
 	for (int i = 0; i < nAttrCount; i++)
 	{
@@ -368,15 +315,15 @@ void ZCmdXmlParser::ParseCmd(MXmlElement* pElement)
 		}
 		else if (!_stricmp(szAttrName, ZCMD_TOK_ATTR_NAME))
 		{
-			strcpy_safe(pCmdStr->szName, ZGetStringResManager()->GetStringFromXml(szAttrValue));
+			strcpy_safe(NewCmdStr.szName, ZGetStringResManager()->GetStringFromXml(szAttrValue));
 		}
 		else if (!_stricmp(szAttrName, ZCMD_TOK_ATTR_USAGE))
 		{
-			strcpy_safe(pCmdStr->szUsage, ZGetStringResManager()->GetStringFromXml(szAttrValue));
+			strcpy_safe(NewCmdStr.szUsage, ZGetStringResManager()->GetStringFromXml(szAttrValue));
 		}
 		else if (!_stricmp(szAttrName, ZCMD_TOK_ATTR_HELP))
 		{
-			strcpy_safe(pCmdStr->szHelp, ZGetStringResManager()->GetStringFromXml(szAttrValue));
+			strcpy_safe(NewCmdStr.szHelp, ZGetStringResManager()->GetStringFromXml(szAttrValue));
 		}
 	}
 
@@ -388,7 +335,6 @@ void ZCmdXmlParser::ParseCmd(MXmlElement* pElement)
 		chrElement.GetTagName(szTagName);
 		if (szTagName[0] == '#') continue;
 
-		// ALIAS 태그 --------------------
 		if (!_stricmp(szTagName, ZCMD_TOK_ALIAS))
 		{
 			int nAttrCount = chrElement.GetAttributeCount();
@@ -400,7 +346,7 @@ void ZCmdXmlParser::ParseCmd(MXmlElement* pElement)
 					string str = ZGetStringResManager()->GetStringFromXml(szAttrValue);
 					if (str.size() > 0)
 					{
-						pCmdStr->vecAliases.push_back(str);
+						NewCmdStr.vecAliases.push_back(str);
 					}
 				}
 			}
@@ -409,50 +355,17 @@ void ZCmdXmlParser::ParseCmd(MXmlElement* pElement)
 
 	if (nID != 0)
 	{
-		m_CmdMap.insert(map<int, _CmdStr*>::value_type(nID, pCmdStr));
-	}
-	else
-	{
-		delete pCmdStr;
+		m_CmdMap.emplace(nID, NewCmdStr);
 	}
 }
 
-void ZCmdXmlParser::Clear()
+ZCmdXmlParser::CmdStr* ZCmdXmlParser::GetStr(int nID)
 {
-	for (map<int, _CmdStr*>::iterator itor = m_CmdMap.begin(); itor != m_CmdMap.end(); ++itor)
-	{
-		delete (*itor).second;
-	}
-
-	m_CmdMap.clear();
-
-}
-
-ZCmdXmlParser::ZCmdXmlParser()
-{
-
-}
-
-ZCmdXmlParser::~ZCmdXmlParser()
-{
-	Clear();
-}
-
-ZCmdXmlParser::_CmdStr* ZCmdXmlParser::GetStr(int nID)
-{
-	map<int, _CmdStr*>::iterator itor = m_CmdMap.find(nID);
+	auto itor = m_CmdMap.find(nID);
 	if (itor != m_CmdMap.end())
 	{
-		return (*itor).second;
+		return &itor->second;
 	}
 
-	return NULL;
+	return nullptr;
 }
-
-
-
-
-
-
-
-

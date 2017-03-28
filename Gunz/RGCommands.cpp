@@ -19,7 +19,62 @@ bool CheckDeveloperMode(const char* Name)
 	}
 
 	return true;
+}
+
+struct BoolResult
+{
+	bool Success;
+	bool Value;
 };
+static BoolResult ParseBool(int argc, char ** argv)
+{
+	auto Argument = argv[1];
+	if (!_stricmp(Argument, "true") || !strcmp(Argument, "1")) {
+		return{ true, true };
+	}
+	else if (!_stricmp(Argument, "false") || !strcmp(Argument, "0")) {
+		return{ true, false };
+	}
+
+	return{ false, false };
+}
+
+// Sets the value of a bool according to the given arguments, and outputs feedback to user in chat.
+//
+// If no arguments are given, the value is toggled.
+// If one argument is given, it's parsed by ParseBool: 
+// "true" or "1" sets the bool to true,
+// and "false" or "0" sets it to false.
+//
+// Returns false on invalid arguments. No change to the variable is applied in this case.
+static bool SetBool(const char* Name, bool& Value, int argc, char ** argv)
+{
+	if (argc < 1 || argc > 2) {
+		assert(false);
+		return false;
+	}
+
+	if (argc > 1)
+	{
+		// We got an argument. Parse it into a bool.
+		auto ret = ParseBool(argc, argv);
+		if (!ret.Success)
+		{
+			ZChatOutputF("%s is not a valid bool argument.", argv[1]);
+			return false;
+		}
+
+		Value = ret.Value;
+	}
+	else
+	{
+		// No arguments. Toggle the value.
+		Value = !Value;
+	}
+
+	ZChatOutputF("%s %s.", Name, Value ? "enabled" : "disabled");
+	return true;
+}
 
 void LoadRGCommands(ZChatCmdManager& CmdManager)
 {
@@ -43,38 +98,24 @@ void LoadRGCommands(ZChatCmdManager& CmdManager)
 		CCF_ALL, 1, 1, true, "/visualfpslimit <fps>", "");
 	CmdManager.AddCommand(0, "logicalfpslimit", LogicalFPSLimit,
 		CCF_ALL, 1, 1, true, "/logicalfpslimit <fps>", "");
-	CmdManager.AddCommand(0, "fpslimit", LogicalFPSLimit,
-		CCF_ALL, 1, 1, true, "/fpslimit <fps>", "");
+
+	// Alias /fpslimit to /logicalfpslimit
+	CmdManager.AddAlias("fpslimit", "logicalfpslimit");
 
 
-	CmdManager.AddCommand(0, "camfix", [](const char *line, int argc, char ** const argv){
-		bool bCamFix;
-		if (argc == 1)
-			bCamFix = !ZGetConfiguration()->GetCamFix();
-		else
-			bCamFix = atoi(argv[1]) != 0;
-
-		ZGetConfiguration()->bCamFix = bCamFix;
-		ZGetConfiguration()->Save();
-
-		ZChatOutputF("Cam fix %s", bCamFix ? "enabled" : "disabled");
+	CmdManager.AddCommand(0, "camfix", [](const char *line, int argc, char ** const argv) {
+		if (SetBool("Cam fix", ZGetConfiguration()->bCamFix, argc, argv)) {
+			ZGetConfiguration()->Save();
+		}
 	},
 		CCF_ALL, 0, 1, true, "/camfix [0/1]", "");
 
 
 	CmdManager.AddCommand(0, "interfacefix", [](const char *line, int argc, char ** const argv) {
-		bool val;
-		if (argc == 1)
-			val = !ZGetConfiguration()->GetInterfaceFix();
-		else
-			val = atoi(argv[1]) != 0;
-
-		ZGetConfiguration()->InterfaceFix = val;
-		ZGetConfiguration()->Save();
-
-		Mint::GetInstance()->SetStretch(!val);
-
-		ZChatOutputF("Interface fix %s", val ? "enabled" : "disabled");
+		if (SetBool("Interface fix", ZGetConfiguration()->InterfaceFix, argc, argv)) {
+			ZGetConfiguration()->Save();
+			Mint::GetInstance()->SetStretch(!ZGetConfiguration()->InterfaceFix);
+		}
 	},
 		CCF_ALL, 0, 1, true, "/interfacefix [0/1]", "");
 
@@ -91,8 +132,7 @@ void LoadRGCommands(ZChatCmdManager& CmdManager)
 		CCF_ALL, 1, 1, true, "/backgroundcolor <AARRGGBB hex color>", "");
 
 
-	CmdManager.AddCommand(0, "replayseek",
-		[](const char *line, int argc, char ** const argv){
+	CmdManager.AddCommand(0, "replayseek", [](const char *line, int argc, char ** const argv) {
 		ZGetGame()->SetReplayTime(atof(argv[1]));
 	},
 		CCF_ALL, 1, 1, true, "/replayseek <time>", "");
@@ -246,21 +286,21 @@ void LoadRGCommands(ZChatCmdManager& CmdManager)
 
 	CmdManager.AddCommand(0, "monochrome", [](const char *line, int argc, char ** const argv) {
 		static bool Enabled = false;
-		Enabled = !Enabled;
-		auto Success = GetRenderer().PostProcess.EnableEffect("Monochrome", Enabled);
-		assert(Success);
-		ZChatOutputF("Monochrome %s", Enabled ? "enabled" : "disabled");
+		if (SetBool("Monochrome", Enabled, argc, argv)) {
+			auto Success = GetRenderer().PostProcess.EnableEffect("Monochrome", Enabled);
+			assert(Success);
+		}
 	},
-		CCF_ALL, 0, 1, true, "", "");
+		CCF_ALL, 0, 1, true, "/monochrome [0/1]", "");
 
 	CmdManager.AddCommand(0, "colorinvert", [](const char *line, int argc, char ** const argv) {
 		static bool Enabled = false;
-		Enabled = !Enabled;
-		auto Success = GetRenderer().PostProcess.EnableEffect("ColorInvert", Enabled);
-		assert(Success);
-		ZChatOutputF("Color invert %s", Enabled ? "enabled" : "disabled");
+		if (SetBool("Color invert", Enabled, argc, argv)) {
+			auto Success = GetRenderer().PostProcess.EnableEffect("ColorInvert", Enabled);
+			assert(Success);
+		}
 	},
-		CCF_ALL, 0, 1, true, "", "");
+		CCF_ALL, 0, 1, true, "/colorinvert [0/1]", "");
 
 	CmdManager.AddCommand(0, "setparts", [](const char *line, int argc, char ** const argv) {
 		if (!CheckDeveloperMode("setparts"))
@@ -325,13 +365,14 @@ void LoadRGCommands(ZChatCmdManager& CmdManager)
 		CCF_ALL, 1, 1, true, "/camdist <dist>", "");
 
 	CmdManager.AddCommand(0, "vsync", [](const char *line, int argc, char ** const argv) {
-		auto val = atoi(argv[1]) != 0;
-		SetVSync(val);
-		RMODEPARAMS ModeParams = { RGetScreenWidth(), RGetScreenHeight(),
-			ZGetConfiguration()->GetVideo()->FullscreenMode, RGetPixelFormat() };
-		RResetDevice(&ModeParams);
-
-		ZChatOutputF("%s vsync", val ? "Enabled" : "Disabled");
+		bool Value = false;
+		if (SetBool("Vertical synchronization", Value, argc, argv)) {
+			SetVSync(Value);
+			RMODEPARAMS Params{ RGetScreenWidth(), RGetScreenHeight(),
+				RGetFullscreenMode(), RGetPixelFormat()
+			};
+			RResetDevice(&Params);
+		}
 	},
 		CCF_ALL, 1, 1, true, "/vsync <0/1>", "");
 
@@ -339,32 +380,20 @@ void LoadRGCommands(ZChatCmdManager& CmdManager)
 		if (!CheckDeveloperMode("freelook"))
 			return;
 
-		auto val = atoi(argv[1]) != 0;
-		if (val)
-			ZGetCamera()->SetLookMode(ZCAMERA_FREELOOK);
-		else
-			ZGetCamera()->SetLookMode(ZCAMERA_DEFAULT);
-
-		ZChatOutputF("Set freelook to %d", val);
+		bool Value = ZGetCamera()->GetLookMode() == ZCAMERA_FREELOOK;
+		if (SetBool("Freelook", Value, argc, argv)) {
+			ZGetCamera()->SetLookMode(Value ? ZCAMERA_FREELOOK : ZCAMERA_DEFAULT);
+		}
 	},
 		CCF_ALL, 1, 1, true, "/freelook <0/1>", "");
 
 	CmdManager.AddCommand(0, "showrts", [](const char *line, int argc, char ** const argv) {
-		if (!CheckDeveloperMode("showrts"))
-			return;
-		
-		if (!GetRS2().UsingD3D9())
+		if (!CheckDeveloperMode("showrts") || !GetRS2().UsingD3D9())
 			return;
 
-		bool& val = GetRenderer().ShowRTsEnabled;
-		if (argc == 1)
-			val = !val;
-		else
-			val = atoi(argv[1]) != 0;
-
-		ZChatOutputF("Set showrts to %d", val);
+		SetBool("Show RTs", GetRenderer().ShowRTsEnabled, argc, argv);
 	},
-		CCF_ALL, 0, 1, true, "/showrts <0/1>", "");
+		CCF_ALL, 0, 1, true, "/showrts [0/1]", "");
 
 	CmdManager.AddCommand(0, "map", [](const char *line, int argc, char ** const argv) {
 		if (!CheckDeveloperMode("map"))
@@ -445,12 +474,19 @@ void LoadRGCommands(ZChatCmdManager& CmdManager)
 	},
 		CCF_ALL, 1, 2, true, "/equip <zitem id> [1]", "");
 
+	void SetPortalFrustraDrawLock(bool Value);
+	bool GetPortalFrustraDrawLock();
+	void SetPortalFrustraDrawEnabled(bool Value);
+	bool GetPortalFrustraDrawEnabled();
+
 	CmdManager.AddCommand(0, "lockfrustra", [](const char *line, int argc, char ** const argv) {
 		if (!CheckDeveloperMode("lockfrustra"))
 			return;
 
-		void TogglePortalFrustraLock();
-		TogglePortalFrustraLock();
+		bool Value = GetPortalFrustraDrawLock();
+		if (SetBool("Frustra draw lock", Value, argc, argv)) {
+			SetPortalFrustraDrawLock(Value);
+		}
 	},
 		CCF_ALL, 0, 1, true, "", "");
 
@@ -458,8 +494,10 @@ void LoadRGCommands(ZChatCmdManager& CmdManager)
 		if (!CheckDeveloperMode("drawfrustra"))
 			return;
 
-		void TogglePortalFrustraDraw();
-		TogglePortalFrustraDraw();
+		bool Value = GetPortalFrustraDrawEnabled();
+		if (SetBool("Frustra draw", Value, argc, argv)) {
+			SetPortalFrustraDrawEnabled(Value);
+		}
 	},
 		CCF_ALL, 0, 1, true, "", "");
 }

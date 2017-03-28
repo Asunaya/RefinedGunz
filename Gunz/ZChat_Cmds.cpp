@@ -93,10 +93,10 @@ void ChatCmd_RemoveJjang(const char* line, const int argc, char **const argv);
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
 void _AddCmdFromXml(ZChatCmdManager* pCmdManager, ZCmdXmlParser* pParser, 
-				int nCmdID, ZChatCmdProc* fnProc, unsigned long int flag,
+				int nCmdID, ZChatCmdProc fnProc, unsigned long int flag,
 				int nMinArgs, int nMaxArgs, bool bRepeatEnabled)
 {
-	ZCmdXmlParser::_CmdStr* pCmdStr = pParser->GetStr(nCmdID);
+	auto pCmdStr = pParser->GetStr(nCmdID);
 	if (pCmdStr)
 	{
 		pCmdManager->AddCommand(nCmdID, pCmdStr->szName, fnProc, flag, nMinArgs, nMaxArgs, bRepeatEnabled, 
@@ -277,12 +277,12 @@ void ChatCmd_Help(const char* line, const int argc, char **const argv)
 		for (ZChatCmdMap::iterator itor = pCCM->GetCmdBegin(); itor != pCCM->GetCmdEnd(); ++itor)
 		{
 			nCnt++;
-			ZChatCmd* pCmd = (*itor).second;
+			ZChatCmd& Cmd = itor->second;
 
-			if (pCmd->GetFlag() & CCF_ADMIN) continue;
-			if (!(pCmd->GetFlag() & nCurrFlag)) continue;
+			if (Cmd.GetFlag() & CCF_ADMIN) continue;
+			if (!(Cmd.GetFlag() & nCurrFlag)) continue;
 
-			strcat_safe(szBuf, pCmd->GetName());
+			strcat_safe(szBuf, Cmd.GetName());
 
 			if (nCnt != nCmdCount) strcat_safe(szBuf, ", ");
 		}
