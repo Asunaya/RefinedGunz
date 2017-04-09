@@ -6,6 +6,7 @@
 #include "MUtil.h"
 #include "RNameSpace.h"
 #include "TextureLoader.h"
+#include "StringView.h"
 
 typedef struct IDirect3DTexture9 *LPDIRECT3DTEXTURE9;
 
@@ -75,9 +76,9 @@ public:
 
 	void Destroy();
 
-	RBaseTexture *CreateBaseTexture(const char* filename, RTextureType tex_type,
+	RBaseTexture *CreateBaseTexture(const StringView& filename, RTextureType tex_type,
 		bool bUseMipmap = false, bool bUseFileSystem = true);
-	RBaseTexture *CreateBaseTextureMg(const char* filename, RTextureType tex_type,
+	RBaseTexture *CreateBaseTextureMg(const StringView& filename, RTextureType tex_type,
 		bool bUseMipmap = false, bool bUseFileSystem = true);
 	RBaseTexture *CreateBaseTextureFromMemory(const void* data, size_t size, RTextureType texlevel,
 		bool bUseMipmap = false, bool bUseFileSystem = true);
@@ -93,7 +94,7 @@ public:
 	int CalcUsedCount();
 
 private:
-	RBaseTexture *CreateBaseTextureSub(bool Managed, const char* filename, RTextureType tex_type,
+	RBaseTexture *CreateBaseTextureSub(bool Managed, const StringView& filename, RTextureType tex_type,
 		bool bUseMipmap = false, bool bUseFileSystem = true);
 
 	std::list<RBaseTexture> Textures;
@@ -116,9 +117,9 @@ int GetObjectTextureLevel();
 int GetMapTextureLevel();
 int GetTextureFormat();
 
-RBaseTexture* RCreateBaseTexture(const char* filename, RTextureType TexType = RTextureType::Etc,
+RBaseTexture* RCreateBaseTexture(const StringView& filename, RTextureType TexType = RTextureType::Etc,
 	bool UseMipmap = false, bool bUseFileSystem = true);
-RBaseTexture* RCreateBaseTextureMg(const char* filename, RTextureType TexType = RTextureType::Etc,
+RBaseTexture* RCreateBaseTextureMg(const StringView& filename, RTextureType TexType = RTextureType::Etc,
 	bool UseMipmap = false, bool bUseFileSystem = true);
 RBaseTexture* RCreateBaseTextureFromMemory(const void* data, size_t size,
 	RTextureType TexType = RTextureType::Etc, bool UseMipmap = false);

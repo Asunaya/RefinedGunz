@@ -327,7 +327,8 @@ static bool LoadElu(LoaderState& State, const char* name)
 	State.ObjectData.emplace_back();
 	auto& dest = State.ObjectData.back();
 
-	auto RemoveObjectDefer = make_defer([&] { State.ObjectData.pop_back(); });
+	bool ReachedEnd = false;
+	DEFER([&] { if (!ReachedEnd) State.ObjectData.pop_back(); });
 
 	MZFile File;
 
@@ -396,7 +397,7 @@ static bool LoadElu(LoaderState& State, const char* name)
 
 	State.EluMap[dest.Name] = State.ObjectData.size() - 1;
 
-	RemoveObjectDefer.disarm();
+	ReachedEnd = true;
 
 	return true;
 }

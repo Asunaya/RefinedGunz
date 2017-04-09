@@ -176,9 +176,9 @@ public:
 					return ret;
 #endif
 
-					unsigned long nChecksum = ZGetApplication()->GetFileListCRC();
+					const u32 Checksum = 0;
 
-					ZPostLogin(szID, hashed_password, sizeof(hashed_password), nChecksum);
+					ZPostLogin(szID, hashed_password, sizeof(hashed_password), Checksum);
 					mlog("Login Posted\n");
 				};
 

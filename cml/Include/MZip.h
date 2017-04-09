@@ -10,6 +10,7 @@
 #include <cstdio>
 #include <list>
 #include "GlobalTypes.h"
+#include "StringView.h"
 
 #define MZIPREADFLAG_ZIP		1
 #define MZIPREADFLAG_MRS		1<<1
@@ -43,20 +44,24 @@ public:
 	int GetFileCount(void) const;
 
 	void GetFileName(int i, char *szDest) const;
-	const char* GetFileName(int i) const;
+	StringView GetFileName(int i) const;
 
 	int GetFileIndex(const char* szFileName) const;
 
 	int GetFileLength(int i) const;
-	int GetFileLength(const char* filename);
+	int GetFileLength(const char* filename) const;
 
 	// crc32
-	unsigned int GetFileCRC32(int i);
-	unsigned int GetFileCRC32(const char* filename);
+	unsigned int GetFileCRC32(int i) const;
+	unsigned int GetFileCRC32(const char* filename) const;
 
 	// get modified time
-	unsigned int GetFileTime(int i);
-	unsigned int GetFileTime(const char* filename);
+	unsigned int GetFileTime(int i) const;
+	unsigned int GetFileTime(const char* filename) const;
+
+	size_t GetFileArchiveOffset(int i);
+	size_t GetFileCompressedSize(int i) const;
+	bool IsFileCompressed(int i) const;
 
 	// Read File Raw Data by Index
 	bool ReadFile(int i, void* pBuffer, int nMaxSize);

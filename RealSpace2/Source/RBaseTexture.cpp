@@ -179,13 +179,17 @@ int RTextureManager::CalcUsedSize()
 	return return_size;
 }
 
-RBaseTexture *RTextureManager::CreateBaseTexture(const char* filename, RTextureType tex_type, bool bUseMipmap,
+RBaseTexture *RTextureManager::CreateBaseTexture(const StringView& filename,
+	RTextureType tex_type,
+	bool bUseMipmap,
 	bool bUseFileSystem)
 {
 	return CreateBaseTextureSub(false, filename, tex_type, bUseMipmap, bUseFileSystem);
 }
 
-RBaseTexture *RTextureManager::CreateBaseTextureMg(const char* filename, RTextureType tex_type, bool bUseMipmap,
+RBaseTexture *RTextureManager::CreateBaseTextureMg(const StringView& filename,
+	RTextureType tex_type,
+	bool bUseMipmap,
 	bool bUseFileSystem)
 {
 	return CreateBaseTextureSub(true, filename, tex_type, bUseMipmap, bUseFileSystem);
@@ -210,10 +214,12 @@ RBaseTexture * RTextureManager::CreateBaseTextureFromMemory(const void * data, s
 	return &new_tex;
 }
 
-RBaseTexture *RTextureManager::CreateBaseTextureSub(bool Managed, const char* filename,
+RBaseTexture *RTextureManager::CreateBaseTextureSub(bool Managed, const StringView& _filename,
 	RTextureType tex_type, bool UseMipmap, bool UseFileSystem)
 {
-	if (filename == NULL || strlen(filename) == 0) return NULL;
+	auto filename = _filename;
+	if (filename.empty())
+		return nullptr;
 
 	char texturefilename[256];
 
@@ -228,6 +234,8 @@ RBaseTexture *RTextureManager::CreateBaseTextureSub(bool Managed, const char* fi
 		return it->second;
 	}
 
+	auto filename_str = filename.str();
+
 	MZFile mzf;
 	MZFileSystem* pfs = UseFileSystem ? g_pFileSystem : nullptr;
 
@@ -240,7 +248,7 @@ RBaseTexture *RTextureManager::CreateBaseTextureSub(bool Managed, const char* fi
 		filename = ddstexturefile;
 	else
 #endif
-		if (!mzf.Open(filename, pfs))
+		if (!mzf.Open(filename_str.c_str(), pfs))
 			return nullptr;
 	auto buf = mzf.Release();
 
@@ -249,15 +257,14 @@ RBaseTexture *RTextureManager::CreateBaseTextureSub(bool Managed, const char* fi
 
 	if (!new_tex)
 	{
-		MLog("Failed to create texture from file %s\n",
-			filename);
+		MLog("Failed to create texture from file %.*s\n",
+			filename.size(), filename.data());
 		return nullptr;
 	}
 
-	new_tex->filename = filename;
+	new_tex->filename = filename_str;
 	
-	if (filename)
-		FilenameToTexture.insert({ filename, new_tex });
+	FilenameToTexture.insert({ std::move(filename_str), new_tex });
 
 	return new_tex;
 }
@@ -281,13 +288,13 @@ void RTextureManager::DestroyBaseTexture(RBaseTexture* pTex)
 	Textures.erase(it);
 }
 
-RBaseTexture* RCreateBaseTexture(const char* filename, RTextureType tex_type,
+RBaseTexture* RCreateBaseTexture(const StringView& filename, RTextureType tex_type,
 	bool bUseMipmap, bool bUseFileSystem)
 {
 	return g_pTextureManager->CreateBaseTexture(filename, tex_type, bUseMipmap, bUseFileSystem);
 }
 
-RBaseTexture* RCreateBaseTextureMg(const char* filename, RTextureType tex_type,
+RBaseTexture* RCreateBaseTextureMg(const StringView& filename, RTextureType tex_type,
 	bool bUseMipmap, bool bUseFileSystem)
 {
 	return g_pTextureManager->CreateBaseTextureMg(filename, tex_type, bUseMipmap, bUseFileSystem);

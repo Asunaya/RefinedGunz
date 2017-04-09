@@ -15,33 +15,33 @@ public:
 	virtual ~MDrawContextR2(void);
 
 	// Basic Drawing Functions
-	virtual void SetPixel(int x, int y, MCOLOR& color);
-	virtual void HLine(int x, int y, int len);
-	virtual void VLine(int x, int y, int len);
-	virtual void Line(int sx, int sy, int ex, int ey);
-	virtual void Rectangle(int x, int y, int cx, int cy);
-	virtual void FillRectangle(int x, int y, int cx, int cy);
+	virtual void SetPixel(int x, int y, MCOLOR& color) override;
+	virtual void HLine(int x, int y, int len) override;
+	virtual void VLine(int x, int y, int len) override;
+	virtual void Line(int sx, int sy, int ex, int ey) override;
+	virtual void Rectangle(int x, int y, int cx, int cy) override;
+	virtual void FillRectangle(int x, int y, int cx, int cy) override;
 
 	// Bitmap Drawing
-	virtual void DrawEx(int tx1, int ty1, int tx2, int ty2, int tx3, int ty3, int tx4, int ty4);
+	virtual void DrawEx(int tx1, int ty1, int tx2, int ty2, int tx3, int ty3, int tx4, int ty4) override;
 
 	// Text
-	virtual bool BeginFont();
-	virtual bool EndFont();
+	virtual bool BeginFont() override;
+	virtual bool EndFont() override;
 
-	virtual int Text(int x, int y, const char* szText);
+	virtual int Text(int x, int y, const char* szText) override;
 
-	virtual void SetClipRect(MRECT& r);
+	virtual void SetClipRect(MRECT& r) override;
 
-	//Functions to draw relative to 4:3 aspect ratio
-	virtual void DrawRelative(float x, float y, float w, float h);
-	virtual void DrawRelative(float x, float y, int w, int h);
-	virtual int TextRelative(float x, float y, const char* szText);
-	virtual void DrawRelative(float x, float y, float w, float h, int sx, int sy, int sw, int sh);
-	virtual void FillRectangleRelative(float x, float y, float cx, float cy);
+	// Functions to draw relative to 4:3 aspect ratio
+	virtual void DrawRelative(float x, float y, float w, float h) override;
+	virtual void DrawRelative(float x, float y, int w, int h) override;
+	virtual int TextRelative(float x, float y, const char* szText) override;
+	virtual void DrawRelative(float x, float y, float w, float h, int sx, int sy, int sw, int sh) override;
+	virtual void FillRectangleRelative(float x, float y, float cx, float cy) override;
 
 private:
-	virtual void Draw(MBitmap *pBitmap, int x, int y, int w, int h, int sx, int sy, int sw, int sh);
+	virtual void Draw(MBitmap *pBitmap, int x, int y, int w, int h, int sx, int sy, int sw, int sh) override;
 };
 
 class MBitmapR2 : public MBitmap{
@@ -59,8 +59,8 @@ public:
 	MBitmapR2();
 	virtual ~MBitmapR2();
 
-	virtual bool Create(const char* szAliasName, LPDIRECT3DDEVICE9 pd3dDevice,
-		const char* szFileName, bool bUseFileSystem = true);
+	virtual bool Create(const StringView& szAliasName, LPDIRECT3DDEVICE9 pd3dDevice,
+		const StringView& szFileName, bool bUseFileSystem = true);
 	virtual void Destroy() override;
 
 	virtual int GetWidth() override;
@@ -90,10 +90,10 @@ public:
 		float fScale = 1.0f, bool bBold = false, bool bItalic = false,
 		int nOutlineStyle = 0, int nCacheSize = -1, bool bAntiAlias = false,
 		u32 nColorArg1 = 0, u32 nColorArg2 = 0);
-	virtual void Destroy();
+	virtual void Destroy() override;
 
-	virtual int GetHeight();
-	virtual int GetWidth(const char* szText, int nSize = -1);
+	virtual int GetHeight() override;
+	virtual int GetWidth(const char* szText, int nSize = -1) override;
 	int GetWidth(const wchar_t* szText, int nSize = -1) {
 		return int(m_Font.GetTextWidth(szText, nSize)*m_fScale);
 	}

@@ -56,6 +56,9 @@ inline void SafeRelease(D3DPtr<T>& ptr)
 #define WARN_UNUSED_RESULT __attribute__((warn_unused_result))
 #endif
 
+#define TOKENIZE_IMPL(a, b) a##b
+#define TOKENIZE(a, b) TOKENIZE_IMPL(a, b)
+
 inline constexpr uint32_t ARGB(uint8_t a, uint8_t r, uint8_t g, uint8_t b)
 {
 	return (a << 24) | (r << 16) | (g << 8) | b;
@@ -95,27 +98,40 @@ const std::string MGetStrLocalTime( const unsigned short wYear = 0,
 template <typename T1, typename T2>
 T1 reinterpret(const T2& val)
 {
+	static_assert(std::is_trivially_copyable<T1>::value &&
+		std::is_trivially_copyable<T2>::value,
+		"Both types must be trivially copyable to reinterpret");
+	static_assert(!std::is_pointer<T2>::value, "Use reinterpret_ptr for pointers");
 	T1 T1_rep;
 	memcpy(&T1_rep, &val, min(sizeof(T1), sizeof(T2)));
 	return T1_rep;
 }
 
-template <typename T1>
-void reinterpret(void*) = delete;
+template <typename T1, typename T2>
+T1 reinterpret_ptr(const T2& val)
+{
+	static_assert(std::is_trivially_copyable<T1>::value &&
+		std::is_trivially_copyable<T2>::value,
+		"Both types must be trivially copyable to reinterpret");
+	T1 T1_rep;
+	memcpy(&T1_rep, &val, min(sizeof(T1), sizeof(T2)));
+	return T1_rep;
+}
 
 template <typename T>
 struct Range
 {
-	decltype(auto) begin() { return its.first; }
-	decltype(auto) end() { return its.second; }
-	decltype(auto) begin() const { return its.first; }
-	decltype(auto) end() const { return its.second; }
+	T first;
+	T second;
 
-	std::pair<T, T> its;
+	auto begin() { return first; }
+	auto end() { return second; }
+	auto begin() const { return first; }
+	auto end() const { return second; }
 };
 
 template <typename T>
-auto MakeRange(T&& begin, T&& end) { return Range<std::remove_reference_t<T>>{ {begin, end} }; }
+auto MakeRange(const T& begin, const T& end) { return Range<T>{ begin, end }; }
 
 template <template <typename...> class itT, typename T>
 auto MakeAdapter(T& Container) {
@@ -189,9 +205,7 @@ public:
 private:
 	WriteProxy(T& ptr) : ptr(ptr), temp(ptr.get()) {}
 	WriteProxy(const WriteProxy&) = delete;
-	WriteProxy(WriteProxy&&) = default;
-	WriteProxy& operator =(const WriteProxy&) = delete;
-	WriteProxy& operator =(WriteProxy&&) = delete;
+	WriteProxy& operator=(const WriteProxy&) = delete;
 
 	template <typename... U>
 	friend WriteProxy<std::unique_ptr<U...>> MakeWriteProxy(std::unique_ptr<U...>&);
@@ -202,7 +216,7 @@ private:
 
 template <typename... T>
 WriteProxy<std::unique_ptr<T...>> MakeWriteProxy(std::unique_ptr<T...>& ptr) {
-	return WriteProxy<std::unique_ptr<T...>>(ptr);
+	return{ ptr };
 }
 
 // Converts an rvalue to a mutable lvalue
@@ -228,6 +242,16 @@ void erase_remove(ContainerType&& Container, ValueType&& Value) {
 
 template <typename ContainerType, typename PredicateType>
 void erase_remove_if(ContainerType&& Container, PredicateType&& Predicate) {
-	Container.erase(std::remove_if(Container.begin(), Container.end(), std::forward<PredicateType>(Predicate)),
+	Container.erase(std::remove_if(Container.begin(), Container.end(),
+		std::forward<PredicateType>(Predicate)),
 		Container.end());
 }
+
+struct CFileCloser {
+	void operator()(FILE* ptr) const {
+		if (ptr)
+			fclose(ptr);
+	}
+};
+
+using CFilePtr = std::unique_ptr<FILE, CFileCloser>;

@@ -5,11 +5,9 @@
 #define CHECK_ERR(err, msg) { \
 	if (err != Z_OK) { \
 	fprintf(stderr, "%s error: %d\n", msg, err); \
-	_RPT2(_CRT_WARN, "%s error: %d\n", msg, err); \
 	return 0; \
 	} \
 }
-
 
 ZFile::ZFile()
 {
@@ -36,7 +34,7 @@ bool ZFile::Open(const char *szFileName,bool bWrite)
 		m_Stream.opaque = (voidpf)0;
 
 		err = deflateInit(&m_Stream, Z_DEFAULT_COMPRESSION);
-		if(err!=Z_OK) return false;
+		CHECK_ERR(err, "deflateInit");
 
 		m_Stream.next_out = m_Buffer;
 		m_Stream.avail_out = sizeof(m_Buffer);
@@ -53,7 +51,7 @@ bool ZFile::Open(const char *szFileName,bool bWrite)
 		m_Stream.opaque = (voidpf)0;
 
 		err = inflateInit(&m_Stream);
-		CHECK_ERR(err, "deflateInit");
+		CHECK_ERR(err, "inflateInit");
 
 		m_Stream.next_out = m_Buffer;
 		m_Stream.avail_out = sizeof(m_Buffer);
@@ -66,7 +64,8 @@ bool ZFile::Open(const char *szFileName,bool bWrite)
 
 int ZFile::Read(void *pBuffer,int nByte)
 {
-	if(!m_pFile || m_bWrite) return 0;
+	if(!m_pFile || m_bWrite)
+		return 0;
 
 	int err;
 
@@ -88,28 +87,15 @@ int ZFile::Read(void *pBuffer,int nByte)
 		if (err == Z_STREAM_END) break;
 		CHECK_ERR(err, "inflate");
 
-	} while ( m_Stream.avail_out>0 && m_Stream.avail_in==0);
-
-	/*
-	size_t nRead;
-	while ( nRead = fread(inbuffer,1,sizeof(inbuffer),file) ) {
-		d_stream.next_in  = inbuffer;
-		d_stream.avail_in = (uInt)nRead;
-
-		err = inflate(&d_stream, Z_NO_FLUSH);
-		if (err == Z_STREAM_END) break;
-		CHECK_ERR(err, "inflate");
-	}
-	*/
-
+	} while (m_Stream.avail_out > 0 && m_Stream.avail_in == 0);
 
 	return nByte - m_Stream.avail_out;
 }
 
 int ZFile::Write(const void *pBuffer,int nByte)
 {
-	// 파일이 열려있고 writemode 인지 확인
-	if(!m_pFile || !m_bWrite) return 0;
+	if (!m_pFile || !m_bWrite)
+		return 0;
 
 	m_Stream.next_in  = (Bytef*)pBuffer;
 	m_Stream.avail_in = (uInt)nByte;
@@ -117,10 +103,10 @@ int ZFile::Write(const void *pBuffer,int nByte)
 	int err = deflate(&m_Stream, Z_NO_FLUSH);
 	CHECK_ERR(err, "deflate");
 
-	while(m_Stream.avail_out == 0)	// out buffer 가 꽉찼으므로 디스크로 저장
+	while (m_Stream.avail_out == 0)
 	{
 		size_t nWritten = fwrite(m_Buffer,1,sizeof(m_Buffer),m_pFile);
-		if(nWritten<sizeof(m_Buffer)) return 0;	// 디스크 꽉참 ?
+		if(nWritten<sizeof(m_Buffer)) return 0;
 
 		m_Stream.avail_out = sizeof(m_Buffer);
 		m_Stream.next_out = m_Buffer;
@@ -141,7 +127,7 @@ bool ZFile::Close()
 		for (;;) {
 			err = deflate(&m_Stream, Z_FINISH);
 
-			fwrite(m_Buffer,1,sizeof(m_Buffer)-m_Stream.avail_out,m_pFile);
+			fwrite(m_Buffer, 1, sizeof(m_Buffer) - m_Stream.avail_out, m_pFile);
 			m_Stream.avail_out = sizeof(m_Buffer);
 			m_Stream.next_out = m_Buffer;
 

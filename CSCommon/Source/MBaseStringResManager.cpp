@@ -37,7 +37,7 @@ bool MBaseStringResManager::Init(const char* szPath, const int nLangID, MZFileSy
 	m_strPath = szPath;	
 	m_pFS = pfs;
 
-	string strFileName;
+	std::string strFileName;
 
 	// string table
 	strFileName = m_strPath + FILENAME_STRING_TABLE;
@@ -67,7 +67,7 @@ const char* MBaseStringResManager::GetErrorStr(int nID)
 	return m_ErrorTable.GetStr(nID);
 }
 
-const char* MBaseStringResManager::GetString(string& key)
+const char* MBaseStringResManager::GetString(std::string& key)
 {
 	return m_StringTable.GetStr(key);
 }
@@ -80,8 +80,7 @@ const char* MBaseStringResManager::GetStringFromXml(const char* str)
 	if (nStrLen <= nHeaderLen) return str;
 	if (_strnicmp(str, TOK_XML_STRING_HEADER, nHeaderLen)) return str;
 
-	string key;
-	key = &str[nHeaderLen];
+	std::string key = &str[nHeaderLen];
 
 	return GetString(key);
 }

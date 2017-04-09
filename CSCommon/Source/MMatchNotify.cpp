@@ -4,68 +4,62 @@
 #include <crtdbg.h>
 #include <map>
 #include "MBaseStringResManager.h"
+#include "MDebug.h"
 
 #define MESSAGES_FILE_NAME	"system/notify.xml"
 
 #define ZTOK_MESSAGE		"NOTIFY"
 #define ZTOK_ID				"id"
 
-typedef map<int, string>	MNotifyMap;
+using MNotifyMap = std::map<int, std::string>;
 
-MNotifyMap g_NotifyMap;
+static MNotifyMap g_NotifyMap;
 
 bool InitializeNotify(MZFileSystem *pfs)
 {
 	MZFile mzf;
-	if(!mzf.Open(MESSAGES_FILE_NAME,pfs))
+	if (!mzf.Open(MESSAGES_FILE_NAME, pfs))
 		return false;
 
-	char *buffer;
-	buffer=new char[mzf.GetLength()+1];
-	mzf.Read(buffer,mzf.GetLength());
-	buffer[mzf.GetLength()]=0;
+	auto buffer = mzf.Release();
 
 	MXmlDocument aXml;
 	aXml.Create();
-	if(!aXml.LoadFromMemory(buffer))
+	if(!aXml.LoadFromMemory(buffer.get()))
 	{
-		delete buffer;
+		MLog("InitializeNotify -- MXmlDocument::LoadFromMemory failed\n");
 		return false;
 	}
-	delete buffer;
 
-	int iCount, i;
-	MXmlElement		aParent, aChild;
-	aParent = aXml.GetDocumentElement();
-	iCount = aParent.GetChildNodeCount();
+	auto aParent = aXml.GetDocumentElement();
+	MXmlElement aChild;
 
-	char szTagName[256];
-	for (i = 0; i < iCount; i++)
+	for (int i = 0, end = aParent.GetChildNodeCount(); i < end; i++)
 	{
 		aChild = aParent.GetChildNode(i);
-		aChild.GetTagName(szTagName);
-		if(_stricmp(szTagName,ZTOK_MESSAGE)==0)
+		char TagName[256];
+		aChild.GetTagName(TagName);
+		if (_stricmp(TagName, ZTOK_MESSAGE) == 0)
 		{
-			int nID=0;
-			if(aChild.GetAttribute(&nID,ZTOK_ID))
+			int nID = 0;
+			if (aChild.GetAttribute(&nID, ZTOK_ID))
 			{
-				// 이미 등록되어있는게 없어야 한다. ( 메시지 중복 )
-				_ASSERT(g_NotifyMap.find(nID)==g_NotifyMap.end());		
+				_ASSERT(g_NotifyMap.find(nID) == g_NotifyMap.end());
 				
 				char szContents[256];
 				aChild.GetContents(szContents);
 
-				g_NotifyMap.insert(MNotifyMap::value_type(nID,string(MGetStringResManager()->GetStringFromXml(szContents))));
+				g_NotifyMap.emplace(nID, MGetStringResManager()->GetStringFromXml(szContents));
 			}
 		}
 	}
 	return true;
 }
 
-bool NotifyMessage(int nMsgID, string *out)
+bool NotifyMessage(int nMsgID, std::string *out)
 {
-	MNotifyMap::iterator i=g_NotifyMap.find(nMsgID);
-	if(i==g_NotifyMap.end())
+	auto i = g_NotifyMap.find(nMsgID);
+	if (i == g_NotifyMap.end())
 		return false;
 
 	*out = i->second;

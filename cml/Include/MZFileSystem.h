@@ -1,224 +1,184 @@
 #pragma once
 
-#include <list>
+#include <deque>
 #include <unordered_map>
 #include <string>
+#include <algorithm>
 #include "MZip.h"
+#include "MUtil.h"
+#include "StringView.h"
+#include "Hash.h"
 
 #define DEF_EXT	"mrs"
 
-struct MZFILEDESC
+struct MZFileDesc
 {
-	char m_szFileName[_MAX_PATH];
-	char m_szZFileName[_MAX_PATH];
-	size_t m_iSize;
-	unsigned int m_crc32;
-	unsigned long m_modTime;
-	char *CachedContents = nullptr;
+	// Path to actual file.
+	// Relative to the file system's base path.
+	StringView Path;
+
+	// The path to the archive it's in.
+	// Empty if the file is not in an archive.
+	// Relative to the file system's base path.
+	StringView ArchivePath;
+
+	// The offset into the archive file at which it is located.
+	// Zero if not in archive.
+	size_t ArchiveOffset;
+
+	// The compressed size.
+	// Zero if not compressed, or not in archive.
+	size_t CompressedSize;
+
+	// The uncompressed size of the file, in bytes.
+	size_t Size;
 };
 
-using ZFLIST = std::unordered_map<std::string, MZFILEDESC*>;
-using ZFLISTITOR = ZFLIST::iterator;
-
-template<size_t size> void GetRefineFilename(char(&szRefine)[size], const char *szSource) {
-	GetRefineFilename(szRefine, size, szSource); }
-void GetRefineFilename(char *szRefine, int maxlen, const char *szSource);
-unsigned MGetCRC32(const char *data, int nLength);
-
-#ifdef WIN32
-class MMappedFile
+struct MZDirDesc
 {
-public:
-	MMappedFile() {}
-	MMappedFile(const char* Filename);
-	MMappedFile(const MMappedFile&) = delete;
-	MMappedFile(MMappedFile&&);
-	~MMappedFile();
-	MMappedFile& operator =(MMappedFile&& src)
-	{
-		this->~MMappedFile();
-		new (this) MMappedFile(std::move(src));
-		return *this;
+	StringView Path;
+
+	const MZDirDesc* Parent;
+
+	const MZDirDesc* Subdirs;
+	size_t NumSubdirs;
+
+	const MZFileDesc* Files;
+	size_t NumFiles;
+
+	auto SubdirsRange() const {
+		return ::Range<const MZDirDesc*>{ Subdirs, Subdirs + NumSubdirs };
 	}
 
-	bool Dead() const { return bDead; }
-	auto GetPointer() const { return reinterpret_cast<const char*>(View); }
-	auto GetSize() const { return Size; }
+	auto FilesRange() const {
+		return ::Range<const MZFileDesc*>{ Files, Files + NumFiles };
+	}
+};
+
+struct MZNode
+{
+public:
+	MZNode(const void* Desc, bool IsDirectory)
+		: PackedField{ reinterpret_cast<uintptr_t>(Desc) | static_cast<uintptr_t>(IsDirectory) }
+	{}
+
+	bool IsDirectory() const {
+		return (PackedField & 0x1) != 0;
+	}
+
+	bool IsFile() const {
+		return !IsDirectory();
+	}
+
+	const MZDirDesc& AsDirectory() const {
+		auto ptr = PackedField & ~0x1;
+		return *reinterpret_cast<const MZDirDesc*>(ptr);
+	}
+
+	const MZFileDesc& AsFile() const {
+		return reinterpret_cast<const MZFileDesc&>(AsDirectory());
+	}
 
 private:
-	bool bDead = true;
-	HANDLE File = INVALID_HANDLE_VALUE;
-	HANDLE Mapping = INVALID_HANDLE_VALUE;
-	HANDLE View = INVALID_HANDLE_VALUE;
-	size_t Size = 0;
-};
-#endif
-
-#define ARCHIVE_CACHE_MMAP
-
-struct Archive
-{
-#ifdef ARCHIVE_CACHE_MMAP
-	Archive(const char* Filename) : File(Filename) {}
-	MMappedFile File;
-#endif
-
-	int Index = 0;
-	std::vector<MZFILEDESC*> Files;
-#ifdef _DEBUG
-	std::string Name;
-#endif
+	uintptr_t PackedField;
 };
 
-class MZFileSystem final
+struct PreprocessedDir;
+struct PreprocessedFileTree;
+
+class MZFileSystem
 {
 public:
 	MZFileSystem();
 	~MZFileSystem();
 
-	bool Create(const char* szBasePath,const char* szUpdateName=NULL);
-	void Destroy(void);
+	bool Create(std::string BasePathArgument);
 
-	int GetFileCount(void) const;
-	const char* GetFileName(int i);
-	const MZFILEDESC* GetFileDesc(int i);
+	int GetFileCount() const;
+	const StringView& GetFileName(int i) const;
+	const MZFileDesc* GetFileDesc(int i) const;
+	const MZFileDesc* GetFileDesc(const StringView& Path) const;
+	const MZDirDesc* GetDirectory(const StringView& Path) const;
+	const MZNode* GetNode(const StringView& Path) const;
 
-	auto* GetBasePath() const { return m_szBasePath; }
+	auto* GetBasePath() const { return BasePath.c_str(); }
 
-	MZFILEDESC* GetFileDesc(const char* szFileName);
-
-	unsigned int GetCRC32(const char* szFileName);
-	unsigned int GetTotalCRC();
-
-	int GetFileLength(const char* szFileName);
+	int GetFileLength(const StringView& szFileName);
 	int GetFileLength(int i);
 
-	bool IsZipFile(const char* szFileName);
-
-	bool ReadFile(const char* szFileName, void* pData, int nMaxSize);
-
-	void SetFileCheckList(class MZFileCheckList *pCheckList) { m_pCheckList = pCheckList; }
-	MZFileCheckList *GetFileCheckList()	{ return m_pCheckList; }
-
-	int CacheArchive(const char* Filename);
-	void ReleaseArchive(int Index);
+	void CacheArchive(const StringView& Filename);
+	void ReleaseCachedArchives();
 
 protected:
-	bool AddItem(MZFILEDESC*);
+	friend class MZFile;
 
-	void RemoveFileList(void);
-	void RefreshFileList(const char* szBasePath);
+	void MakeDirectoryTree(PreprocessedFileTree& Tree, const StringView& FullPath, PreprocessedDir& Dir);
+	void AddFilesInArchive(PreprocessedFileTree& Tree, PreprocessedDir& ArchiveDir, MZip& Zip);
 
-	int GetUpdatePackageNumber(const char *szPackageFileName);
+	void UpdateFileList(PreprocessedDir& SrcNode, MZDirDesc& DestNode);
+	void ClearFileList();
+	StringView AllocateString(const StringView& Src);
 
-private:
-	char		m_szBasePath[256];
-	ZFLIST		m_ZFileList;
-	ZFLISTITOR	m_iterator;
-	int			m_nIndex;
+	// The path the file system was initialized in.
+	std::string BasePath;
+	std::vector<MZFileDesc> Files;
+	std::vector<MZDirDesc> Dirs;
 
-	char		m_szUpdateName[256];
+	// Maps paths (relative to BasePath) to indices into FileNodeList.
+	// The paths are case insensitive and do not differentiate between forward slashes and backslashes.
+	std::unordered_map<StringView, MZNode, PathHasher, PathComparer> NodeMap;
 
-	MZFileCheckList *m_pCheckList;
+	std::vector<std::unique_ptr<char[]>> Strings;
 
-	std::vector<Archive> ArchiveCache;
-	int ArchiveIndexCounter = 0;
+	std::unordered_map<const MZFileDesc*, std::unique_ptr<char[]>> CachedFileMap;
 };
 
-struct MZFileBuffer
-{
-	MZFileBuffer(char* ptr, bool owned) : ptr(ptr), owned(owned) {}
-	MZFileBuffer(MZFileBuffer&& src) : ptr(src.ptr), owned(src.owned) { src.ptr = nullptr; }
-	~MZFileBuffer() { Destroy(); }
+#include "MZFile.h"
 
-	MZFileBuffer& operator =(MZFileBuffer&& src)
-	{
-		this->~MZFileBuffer();
-		new (this) MZFileBuffer{ std::move(src) };
+struct RecursiveFileIterator
+{
+public:
+	RecursiveFileIterator(MZFileSystem& FS,
+		const MZDirDesc& Dir,
+		const MZDirDesc* CurrentSubdir,
+		int FileIndex)
+		: FS{ FS }, Dir{ Dir }, CurrentSubdir{ CurrentSubdir }, FileIndex{ FileIndex }
+	{}
+
+	bool operator==(const RecursiveFileIterator& rhs) const {
+		return CurrentSubdir == rhs.CurrentSubdir && FileIndex == rhs.FileIndex;
+	}
+
+	bool operator!=(const RecursiveFileIterator& rhs) const {
+		return !(*this == rhs);
+	}
+
+	const MZFileDesc& operator*() const { return CurrentSubdir->Files[FileIndex]; }
+
+	RecursiveFileIterator& operator++() {
+		AdvanceToNextFile();
 		return *this;
 	}
 
-	void Destroy()
-	{
-		if (owned && ptr)
-		{
-			delete[] ptr;
-			ptr = nullptr;
-		}
+	RecursiveFileIterator& operator++(int) {
+		auto temp = *this;
+		++*this;
+		return temp;
 	}
 
-	auto get() { return ptr; }
-
 private:
-	char* ptr{};
-	bool owned{};
+	void AdvanceToNextFile();
+
+	MZFileSystem& FS;
+	const MZDirDesc& Dir;
+	const MZDirDesc* CurrentSubdir;
+	int FileIndex;
 };
 
-class MZFile final
-{
-public:
-	MZFile();
-	~MZFile();
+Range<RecursiveFileIterator> FilesInDirRecursive(MZFileSystem& FS, const MZDirDesc& Dir);
 
-	bool Open(const char* szFileName, MZFileSystem* pZFS = nullptr);
-	bool Open(const char* szFileName, const char* szZipFileName,
-		bool bFileCheck = false, unsigned int crc32 = 0);
-
-	bool Seek(long off, int mode = current);
-	i64 Tell() const;
-
-	void Close();
-
-	static void SetReadMode(unsigned long mode) { m_dwReadMode = mode; }
-	static unsigned long GetReadMode() { return m_dwReadMode; }
-	static bool isMode(unsigned long mode) { return (m_dwReadMode & mode) != 0; }
-
-	auto GetLength() const { return m_nFileSize; }
-	bool Read(void* pBuffer, int nMaxSize);
-	template <typename T>
-	bool Read(T& dest) {
-		return Read(&dest, sizeof(dest));
-	}
-	bool LoadFile();
-	MZFileBuffer Release();
-	auto IsCachedData() const { return CachedData; }
-
-	enum SeekPos { begin = 0x0, current = 0x1, end = 0x2 };
-
-protected:
-	void ReleaseData();
-
-	FILE*	m_fp;
-
-	MZip	m_Zip;
-
-	char*	m_pData;
-	int		m_nDataSize;
-
-	int		m_nIndexInZip;
-	unsigned int m_crc32;
-
-	int		m_nPos;
-	int		m_nFileSize;
-
-	char	m_FileName[256];
-	char	m_ZipFileName[256];
-
-	bool m_IsZipFile;
-	bool CachedData = false;
-
-	static unsigned long m_dwReadMode;
-};
-
-class MZFileCheckList
-{
-public:
-	bool Open(const char *szFileName, MZFileSystem *pfs = nullptr);
-
-	unsigned int GetCRC32(const char *szFileName) const;
-	unsigned int GetCRC32()	const { return m_crc32; }
-
-private:
-	unsigned int m_crc32;
-	std::unordered_map<std::string, unsigned int> m_fileList;
-};
+template<size_t size> void GetRefineFilename(char(&szRefine)[size], const char *szSource) {
+	GetRefineFilename(szRefine, size, szSource);
+}
+void GetRefineFilename(char *szRefine, int maxlen, const char *szSource);
+unsigned MGetCRC32(const char *data, int nLength);

@@ -64,7 +64,7 @@ void MComboBox::SetDropSize(int nHeight)
 	m_nDropHeight = nHeight;
 }
 
-void MComboBox::Add(const char* szItem)
+void MComboBox::Add(const StringView& szItem)
 {
 	m_pListBox->Add(szItem);
 }

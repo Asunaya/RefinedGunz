@@ -314,7 +314,7 @@ MListBox::~MListBox()
 	if(m_pScrollBar!=NULL) delete m_pScrollBar;
 }
 
-void MListBox::Add(const char* szItem)
+void MListBox::Add(const StringView& szItem)
 {
 	MListItem* pItem = new MDefaultListItem(szItem);
 	m_Items.Add(pItem);
@@ -327,7 +327,7 @@ void MListBox::Add(const char* szItem)
 	RecalcScrollBar();
 }
 
-void MListBox::Add(const char* szItem, MCOLOR color)
+void MListBox::Add(const StringView& szItem, MCOLOR color)
 {
 	MListItem* pItem = new MDefaultListItem(szItem, color);
 

@@ -252,10 +252,8 @@ bool ZApplication::OnCreate(ZLoadingProgress *pLoadingProgress)
 	const char* CachedFileNames[] = { "system", "model", "sfx",
 		"interface/default", "interface/loadable", "interface/login",
 		"sound/bgm", "sound/effect", };
-	constexpr int NumCachedFiles = std::size(CachedFileNames);
-	int CacheIndices[NumCachedFiles];
-	for (int i = 0; i < NumCachedFiles; i++)
-		CacheIndices[i] = m_FileSystem.CacheArchive(CachedFileNames[i]);
+	for (auto&& File : CachedFileNames)
+		m_FileSystem.CacheArchive(File);
 	MEndProfile(CacheArchives);
 #endif
 
@@ -488,8 +486,7 @@ BirdGo:
 	ZSetupDataChecker_Global(&m_GlobalDataChecker);
 
 #ifdef STARTUP_CACHE_FILES
-	for (int i = 0; i < NumCachedFiles; i++)
-		m_FileSystem.ReleaseArchive(CacheIndices[i]);
+	m_FileSystem.ReleaseCachedArchives();
 #endif
 
 	return true;
@@ -862,12 +859,6 @@ void ZApplication::SetSystemValue(const char* szField, const char* szData)
 
 void ZApplication::InitFileSystem()
 {
-	m_FileSystem.Create("./","update");
-
-#ifdef _PUBLISH
-	m_fileCheckList.Open(FILENAME_FILELIST,&m_FileSystem);
-	m_FileSystem.SetFileCheckList(&m_fileCheckList);
-#endif
-
+	m_FileSystem.Create("./");
 	RSetFileSystem(ZApplication::GetFileSystem());
 }

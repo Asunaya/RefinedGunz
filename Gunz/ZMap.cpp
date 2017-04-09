@@ -6,91 +6,124 @@
 #include "ZGameClient.h"
 #include "Config.h"
 
+static constexpr char MapExtension[] = ".rs.xml";
+
+static bool IsQuestDerivedGameType()
+{
+	if (!ZGetGameClient() || !ZGetGameTypeManager())
+		return false;
+
+	auto&& GameType = ZGetGameClient()->GetMatchStageSetting()->GetGameType();
+	return ZGetGameTypeManager()->IsQuestDerived(GameType);
+}
+
 void ZGetCurrMapPath(char* outPath, int maxlen)
 {
 #ifdef _QUEST
-	if (ZGetGameTypeManager()->IsQuestDerived(ZGetGameClient()->GetMatchStageSetting()->GetGameType()))
+	if (IsQuestDerivedGameType() ||
+		ZApplication::GetInstance()->GetLaunchMode() == ZApplication::ZLAUNCH_MODE_STANDALONE_QUEST)
 	{
 		strcpy_safe(outPath, maxlen, PATH_QUEST_MAPS);
 		return;
 	}
 #endif
 
-	if (ZApplication::GetInstance()->GetLaunchMode() == ZApplication::ZLAUNCH_MODE_STANDALONE_QUEST)
+	strcpy_safe(outPath, maxlen, PATH_GAME_MAPS);
+}
+
+static StringView GetMapName(const StringView& Path)
+{
+	if (Path.size() < 2)
+		return "";
+
+	const auto SlashIndex = Path.find_last_of("/\\", Path.size() - 2);
+	if (SlashIndex == Path.npos)
+		return false;
+	const auto NameIndex = SlashIndex + 1;
+	return Path.substr(NameIndex, Path.size() - NameIndex - 1);
+}
+
+static bool IsMapPath(MZFileSystem& FS, const MZDirDesc& MapDirNode, const StringView& DirName)
+{
+	char MapXMLPath[_MAX_PATH];
+	sprintf_safe(MapXMLPath, "%.*s%.*s%s",
+		MapDirNode.Path.size(), MapDirNode.Path.data(),
+		DirName.size(), DirName.data(),
+		MapExtension);
+
+	auto Desc = FS.GetFileDesc(MapXMLPath);
+	return Desc != nullptr;
+}
+
+static bool ShouldAddMap(const StringView& MapName, MChannelRule& ChannelRule, MMATCH_GAMETYPE GameType)
+{
+#if defined(_DEBUG) || defined(ADD_ALL_MAPS)
+	return true;
+#endif
+
+	if (GameType == MMATCH_GAMETYPE_SKILLMAP)
 	{
-		strcpy_safe(outPath, maxlen, PATH_QUEST_MAPS);
+		return icontains(MapName, "skill") || iequals(MapName, "Superflip");
 	}
 	else
 	{
-		strcpy_safe(outPath, maxlen, PATH_GAME_MAPS);
+		const bool IsDuelGameType = GameType == MMATCH_GAMETYPE_DUEL;
+		return ChannelRule.CheckMap(MapName, IsDuelGameType);
 	}
 }
 
-bool InitMaps(MWidget *pWidget)
+static bool AddMaps(MComboBox& Widget, MChannelRule& ChannelRule)
 {
-	if (!pWidget) return false;
+	auto& FS = *ZGetFileSystem();
+	auto&& GameType = ZGetGameClient()->GetMatchStageSetting()->GetGameType();
 
-	MComboBox* pCombo = (MComboBox*)pWidget;
-	pCombo->RemoveAll();
+	char MapDirectory[64];
+	ZGetCurrMapPath(MapDirectory);
 
-	if ((ZGetGameClient()) && (ZGetGameTypeManager()->IsQuestDerived(ZGetGameClient()->GetMatchStageSetting()->GetGameType())))
-	{
-		pCombo->Add("Mansion");
-
-		return true;
-	}
-
-	MChannelRule* pRule = ZGetChannelRuleMgr()->GetCurrentRule();
-	if (pRule == NULL) {
-		mlog("::InitMaps() > No Current ChannelRule \n");
+	auto MapsDirNode = FS.GetDirectory(MapDirectory);
+	if (!MapsDirNode) {
+		MLog("AddMaps -- Couldn't find maps directory (%s)\n", MapDirectory);
 		return false;
 	}
 
-	MZFileSystem *pFS = ZApplication::GetFileSystem();
-#define MAP_EXT	".rs"
-
-	int nExtLen = (int)strlen(MAP_EXT);
-	for (int i = 0; i<pFS->GetFileCount(); i++)
+	for (auto&& MapNode : MapsDirNode->SubdirsRange())
 	{
-		const char* szFileName = pFS->GetFileName(i);
-		const MZFILEDESC* desc = pFS->GetFileDesc(i);
-		int nLen = (int)strlen(szFileName);
-
-		char MAPDIRECTORY[64];
-		ZGetCurrMapPath(MAPDIRECTORY);
-
-		if (_strnicmp(desc->m_szFileName, MAPDIRECTORY, strlen(MAPDIRECTORY)) == 0 &&
-			nLen>nExtLen &&
-			_stricmp(szFileName + nLen - nExtLen, MAP_EXT) == 0)
+		auto MapName = GetMapName(MapNode.Path);
+		if (IsMapPath(FS, MapNode, MapName) &&
+			ShouldAddMap(MapName, ChannelRule, GameType))
 		{
-			char drive[_MAX_DRIVE], dir[_MAX_DIR], fname[_MAX_FNAME], ext[_MAX_EXT];
-			_splitpath_s(szFileName, drive, dir, fname, ext);
-
-#if defined(_DEBUG) || defined(ADD_ALL_MAPS)
-			pCombo->Add(fname);
-
-			continue;
-#endif
-
-			bool bDuelMode = false;
-			if (ZGetGameClient() && (ZGetGameClient()->GetMatchStageSetting()->GetGameType() == MMATCH_GAMETYPE_DUEL))
-				bDuelMode = true;
-
-			if (ZGetGameClient()->GetMatchStageSetting()->GetGameType() == MMATCH_GAMETYPE_SKILLMAP)
-			{
-				char lwrfname[_MAX_FNAME];
-				strcpy_safe(lwrfname, fname);
-				_strlwr_s(lwrfname);
-				if (strstr(lwrfname, "skill") || !_stricmp(fname, "Superflip"))
-					pCombo->Add(fname);
-			}
-			else
-			{
-				if (pRule->CheckMap(fname, bDuelMode))
-					pCombo->Add(fname);
-			}
+			Widget.Add(MapName);
 		}
 	}
 
 	return true;
+}
+
+bool InitMapSelectionWidget()
+{
+	auto MapSelection = ZFindWidgetAs<MComboBox>("MapSelection");
+	if (!MapSelection)
+		return false;
+
+	MapSelection->RemoveAll();
+
+	if (!ZGetGameClient())
+	{
+		MLog("InitMaps -- ZGetGameClient() is null\n");
+		return false;
+	}
+
+	if (IsQuestDerivedGameType())
+	{
+		MapSelection->Add("Mansion");
+		return true;
+	}
+
+	auto* pRule = ZGetChannelRuleMgr()->GetCurrentRule();
+	if (!pRule) {
+		MLog("InitMaps -- No current channelrule\n");
+		return false;
+	}
+
+	return AddMaps(*MapSelection, *pRule);
 }

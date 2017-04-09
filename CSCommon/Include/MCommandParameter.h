@@ -167,7 +167,7 @@ template <typename AllocT>
 class MCommandParameterStringCustomAlloc : public MCommandParameterString
 {
 public:
-	explicit MCommandParameterStringCustomAlloc(AllocT& Alloc_) : Alloc(Alloc_) { }
+	explicit MCommandParameterStringCustomAlloc(const AllocT& Alloc) : Alloc(Alloc) { }
 
 	virtual ~MCommandParameterStringCustomAlloc() override
 	{
@@ -206,7 +206,7 @@ public:
 	}
 
 private:
-	AllocT& Alloc;
+	AllocT Alloc;
 };
 
 class MCommandParameterVector : public MCommandParameter {
@@ -325,7 +325,7 @@ template <typename AllocT>
 class MCommandParameterBlobCustomAlloc : public MCommandParameterBlob
 {
 public:
-	explicit MCommandParameterBlobCustomAlloc(AllocT& Alloc_) : Alloc(Alloc_) { }
+	explicit MCommandParameterBlobCustomAlloc(const AllocT& Alloc_) : Alloc(Alloc_) { }
 
 	virtual ~MCommandParameterBlobCustomAlloc() override
 	{
@@ -365,7 +365,7 @@ public:
 	}
 
 private:
-	AllocT& Alloc;
+	AllocT Alloc;
 };
 
 class MCommandParameterChar : public MCommandParameter, public CMemPool<MCommandParameterChar>

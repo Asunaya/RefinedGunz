@@ -7,6 +7,7 @@
 #include <tchar.h>
 #include <io.h>
 #include <cassert>
+#include "zlib_util.h"
 
 typedef unsigned long dword;
 typedef unsigned short word;
@@ -102,19 +103,14 @@ void ConvertChar(char* pData,int _size)
 	}
 }
 
-static void RecoveryChar(char* pData,int _size)
+static void RecoveryChar(char* data, size_t size)
 {
-	if(!pData) return;
-
-	BYTE b,bh,d;
-
-	for(int i=0;i<_size;i++) {
-
-		b = *pData;
-		bh = b&0x07;
-		d = (bh<<5)|(b>>3);
-		*pData = d ^ 0xff;
-		pData++;
+	for (size_t i = 0; i < size; ++i)
+	{
+		u8& c = reinterpret_cast<u8*>(data)[i];
+		const u8 bh = c & 0x07;
+		const u8 d = (bh << 5) | (c >> 3);
+		c = d ^ 0xFF;
 	}
 }
 
@@ -279,9 +275,12 @@ void MZip::GetFileName(int i, char *szDest) const
 	}
 }
 
-const char* MZip::GetFileName(int i) const
+StringView MZip::GetFileName(int i) const
 {
-	return m_ppDir[i]->GetName();
+	if (i < 0 || i >= m_nDirEntries)
+		return nullptr;
+
+	return{ m_ppDir[i]->GetName(), m_ppDir[i]->fnameLen };
 }
 
 int t_strcmp(const char* str1,const char* str2)
@@ -324,7 +323,7 @@ int MZip::GetFileLength(int i) const
 		return m_ppDir[i]->ucSize;
 }
 
-int MZip::GetFileLength(const char* filename)
+int MZip::GetFileLength(const char* filename) const
 {
 	int index = GetFileIndex(filename);
 
@@ -333,7 +332,7 @@ int MZip::GetFileLength(const char* filename)
 	return GetFileLength(index);
 }
 
-unsigned int MZip::GetFileCRC32(int i)
+unsigned int MZip::GetFileCRC32(int i) const
 {
 	if(i<0 || i>=m_nDirEntries)
 		return 0;
@@ -341,7 +340,7 @@ unsigned int MZip::GetFileCRC32(int i)
 		return m_ppDir[i]->crc32;
 }
 
-unsigned int MZip::GetFileCRC32(const char* filename)
+unsigned int MZip::GetFileCRC32(const char* filename) const
 {
 	int index = GetFileIndex(filename);
 
@@ -350,7 +349,7 @@ unsigned int MZip::GetFileCRC32(const char* filename)
 	return GetFileCRC32(index);
 }
 
-unsigned int MZip::GetFileTime(int i)
+unsigned int MZip::GetFileTime(int i) const
 {
 	if(i<0 || i>=m_nDirEntries)
 		return 0;
@@ -358,13 +357,50 @@ unsigned int MZip::GetFileTime(int i)
 		return MAKELONG(m_ppDir[i]->modTime,m_ppDir[i]->modDate);
 }
 
-unsigned int MZip::GetFileTime(const char* filename)
+unsigned int MZip::GetFileTime(const char* filename) const
 {
 	int index = GetFileIndex(filename);
 
 	if(index == -1) return 0;
 
 	return GetFileCRC32(index);
+}
+
+size_t MZip::GetFileArchiveOffset(int i)
+{
+	if (i < 0 || i >= m_nDirEntries)
+		return 0;
+
+	// The fnameLen and xtraLen in m_ppDir[i] are wrong for some reason,
+	// so need to get these fields from the actual local header.
+	const auto PrevPos = Tell();
+
+	Seek(m_ppDir[i]->hdrOffset, SEEK_SET);
+	MZIPLOCALHEADER h;
+	Read(h);
+
+	Seek(PrevPos, SEEK_SET);
+
+	if (m_nZipMode >= ZMode_Mrs2)
+		RecoveryChar(reinterpret_cast<char*>(&h), sizeof(h));
+
+	return m_ppDir[i]->hdrOffset + sizeof(MZIPLOCALHEADER) + h.fnameLen + h.xtraLen;
+}
+
+size_t MZip::GetFileCompressedSize(int i) const
+{
+	if (i < 0 || i >= m_nDirEntries)
+		return 0;
+
+	return m_ppDir[i]->cSize;
+}
+
+bool MZip::IsFileCompressed(int i) const
+{
+	if (i < 0 || i >= m_nDirEntries)
+		return 0;
+
+	return m_ppDir[i]->compression == MZIPDIRFILEHEADER::COMP_DEFLAT;
 }
 
 void MZip::Seek(i64 Offset, u32 Origin)
@@ -430,48 +466,23 @@ bool MZip::ReadFile(int i, void* pBuffer, int nMaxSize)
 	else if(h.compression!=MZIPLOCALHEADER::COMP_DEFLAT)
 		return false;
 
-	// TODO: Use a stack allocator for pData in the m_fp case,
-	// and also for zlib
-	const char *pData = nullptr;
+	const auto OutputSize = min(static_cast<unsigned int>(nMaxSize), h.ucSize);
+	const auto WindowBits = -MAX_WBITS;
+	IOResult ret;
 	if (FileBuffer)
 	{
-		pData = FileBuffer + Pos;
+		auto pData = FileBuffer + Pos;
+		ret = InflateMemory(pBuffer, OutputSize, pData, h.cSize, WindowBits);
 	}
 	else
 	{
-		auto pDataTemp = new char[h.cSize];
-		if (pDataTemp == NULL) return false;
-		//memset(pDataTemp, 0, h.cSize);
-		ReadN(pDataTemp, h.cSize);
-		pData = pDataTemp;
+		ret = InflateFile(pBuffer, OutputSize, m_fp, WindowBits);
 	}
 
-	z_stream stream;
-	int err;
-
-	stream.zalloc = (alloc_func)0;
-	stream.zfree = (free_func)0;
-	stream.opaque = (voidpf)0;
-
-	stream.next_in = (Bytef*)pData;
-	stream.avail_in = (uInt)h.cSize;
-	stream.next_out = (Bytef*)pBuffer;
-	stream.avail_out = min(static_cast<unsigned int>(nMaxSize), h.ucSize);
-
-	err = inflateInit2(&stream, -MAX_WBITS);
-	if (err == Z_OK) {
-		err = inflate(&stream, Z_FINISH);
-		inflateEnd(&stream);
-		if (err == Z_STREAM_END) err = Z_OK;
-		inflateEnd(&stream);
-	}
-
-	if (m_fp)
-		delete[] pData;
-
-	if (err != Z_OK)
+	if (ret.ErrorCode < 0)
 	{
-		DMLog("MZip::ReadFile - inflate failed with error code %d\n", err);
+		MLog("MZip::ReadFile - inflate failed with error code %d, error message %d, written %d, read %d\n",
+			ret.ErrorCode, ret.ErrorMessage, ret.BytesWritten, ret.BytesRead);
 		return false;
 	}
 

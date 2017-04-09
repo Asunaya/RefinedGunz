@@ -28,35 +28,30 @@ public:
 	{
 		m_StringMap.clear();
 	}
-	bool Initialize(const char* pszFileName, const int nLangID, MZFileSystem *pfs = 0 )
+	bool Initialize(const char* pszFileName, const int nLangID, MZFileSystem *pfs = 0)
 	{
-		if( 0 == pszFileName ) return false;
-
-		MZFile mzf;
-		if( !mzf.Open(pszFileName, pfs) )
+		if (!pszFileName)
 			return false;
-
-		char *buffer = new char[mzf.GetLength()+1];
-		if( 0 == buffer ) return false;
-
-		memset( buffer, 0, mzf.GetLength() + 1 );
-
-		if( !mzf.Read(buffer,mzf.GetLength()) ) return false;
-
-		mlog( "Load XML from memory : %s(0x%04X) ", pszFileName, nLangID);
 
 		MXmlDocument aXml;
-		aXml.Create();
-		if(!aXml.LoadFromMemory(buffer, nLangID))
 		{
-			mlog( "- FAIL\n");
-			delete buffer;
-			return false;
+			MZFile mzf;
+			if (!mzf.Open(pszFileName, pfs))
+				return false;
+
+			mlog("Load XML from memory : %s(0x%04X) ", pszFileName, nLangID);
+
+			auto buffer = mzf.Release();
+
+			aXml.Create();
+			if (!aXml.LoadFromMemory(buffer.get(), nLangID))
+			{
+				mlog("- FAIL\n");
+				return false;
+			}
+
+			mlog("- SUCCESS\n");
 		}
-		delete buffer;
-
-		mlog( "- SUCCESS\n");
-
 
 		MXmlElement aParent = aXml.GetDocumentElement();
 		const int	iCount  = aParent.GetChildNodeCount();

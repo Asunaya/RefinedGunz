@@ -2726,6 +2726,7 @@ bool MIDLResource::LoadFromFile(const char* szFileName, MWidget* pParent, MZFile
 	}
 	else
 	{
+		// Load file.
 		auto FileLoading = MBeginProfile("MIDLResource::LoadFromFile - File loading from disk");
 		MZFile mzf;
 		if (!mzf.Open(szFileName, pfs))
@@ -2733,21 +2734,17 @@ bool MIDLResource::LoadFromFile(const char* szFileName, MWidget* pParent, MZFile
 			return false;
 		}
 
-#if 0
-		MZFileBuffer buffer{ new char[mzf.GetLength() + 1], true };
-		mzf.Read(buffer.get(), mzf.GetLength());
-		buffer.get()[mzf.GetLength()] = 0;
-#else
-		bool Cached = mzf.IsCachedData();
 		auto buffer = mzf.Release();
-		DMLog("Reading file %s, cached = %d\n", szFileName, Cached);
-#endif
+		DMLog("Reading file %s, cached = %d\n", szFileName, buffer.get_deleter().ShouldDelete);
+
 		MEndProfile(FileLoading);
 
+		// Parse file.
 		auto Parsing = MBeginProfile("MIDLResource::LoadFromFile - MXMLDocument parsing");
+
 		if (!xmlDocument.LoadFromMemory(buffer.get()))
 			return false;
-		mzf.Close();
+
 		MEndProfile(Parsing);
 	}
 

@@ -1,25 +1,21 @@
 #pragma once
 
-
 #include <list>
-using namespace std;
 #include "MMatchGlobal.h"
-
+#include "StringView.h"
 
 #define MAX_FRIEND_COUNT	20
 
-
-// 친구관련
 struct MMatchFriendNode {
 	unsigned long	nFriendCID;
 	unsigned short	nFavorite;
 	char			szName[MATCHOBJECT_NAME_LENGTH];
 
-	unsigned char	nState;										// 위치상태(로비, 게임중 등등)
-	char			szDescription[MATCH_SIMPLE_DESC_LENGTH];	// 위치설명(로비이름 등등)
+	unsigned char	nState;
+	char			szDescription[MATCH_SIMPLE_DESC_LENGTH];
 };
-class MMatchFriendList : public list<MMatchFriendNode*> {};
 
+using MMatchFriendList = std::list<MMatchFriendNode*>;
 
 class MMatchFriendInfo {
 private:
@@ -29,9 +25,9 @@ public:
 public:
 	MMatchFriendInfo();
 	virtual ~MMatchFriendInfo();
-	bool Add(unsigned long nFriendCID, unsigned short nFavorite, const char* pszName);
-	void Remove(const char* pszName);
+	bool Add(unsigned long nFriendCID, unsigned short nFavorite, const StringView& Name);
+	void Remove(const StringView& Name);
 	MMatchFriendNode* Find(unsigned long nFriendCID);
-	MMatchFriendNode* Find(const char* pszName);
+	MMatchFriendNode* Find(const StringView& Name);
 	void UpdateDesc();
 };

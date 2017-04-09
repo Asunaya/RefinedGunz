@@ -14,7 +14,7 @@ MDrawContextR2::MDrawContextR2(LPDIRECT3DDEVICE9 pd3dDevice)
 #endif
 }
 
-MDrawContextR2::~MDrawContextR2(void)
+MDrawContextR2::~MDrawContextR2()
 {
 }
 
@@ -310,7 +310,7 @@ void MDrawContextR2::FillRectangleRelative(float x, float y, float cx, float cy)
 	FillRectangle(x * correct_w + start, y * correct_h, cx * correct_w, cy * correct_h);
 }
 
-MBitmapR2::MBitmapR2(void)
+MBitmapR2::MBitmapR2()
 {
 #ifdef _DEBUG
 	m_nTypeID = MINT_R2_CLASS_TYPE;
@@ -321,12 +321,13 @@ MBitmapR2::MBitmapR2(void)
 	m_dwStateBlock = NULL;
 }
 
-MBitmapR2::~MBitmapR2(void)
+MBitmapR2::~MBitmapR2()
 {
 	Destroy();
 }
 
-bool MBitmapR2::Create(const char* szAliasName, LPDIRECT3DDEVICE9 pd3dDevice, const char* szFileName, bool bUseFileSystem)
+bool MBitmapR2::Create(const StringView& szAliasName, LPDIRECT3DDEVICE9 pd3dDevice,
+	const StringView& szFileName, bool bUseFileSystem)
 {
 	MBitmap::Create(szAliasName);
 

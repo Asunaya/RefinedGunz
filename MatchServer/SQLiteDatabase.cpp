@@ -68,16 +68,10 @@ void BindParameter(sqlite3_stmt* stmt, int ParamNum, const char *Value, Args&&..
 	BindParameter(stmt, ParamNum + 1, std::forward<Args>(args)...);
 }
 
-struct StringView
-{
-	const char* Ptr;
-	size_t Size;
-};
-
 template <typename... Args>
 void BindParameter(sqlite3_stmt* stmt, int ParamNum, const StringView& Value, Args&&... args)
 {
-	sqlite3_bind_text(stmt, ParamNum, Value.Ptr, Value.Size, [](void*) {});
+	sqlite3_bind_text(stmt, ParamNum, Value.data(), Value.size(), [](void*) {});
 	BindParameter(stmt, ParamNum + 1, std::forward<Args>(args)...);
 }
 
@@ -202,10 +196,10 @@ int SQLiteStatement::Get<int>(int Column)
 template <>
 StringView SQLiteStatement::Get<StringView>(int Column)
 {
-	StringView ret;
-	ret.Ptr = reinterpret_cast<const char*>(sqlite3_column_text(stmt, Column));
-	ret.Size = sqlite3_column_bytes(stmt, Column);
-	return ret;
+	return{
+		reinterpret_cast<const char*>(sqlite3_column_text(stmt, Column)),
+		static_cast<size_t>(sqlite3_column_bytes(stmt, Column))
+	};
 }
 
 template <>
@@ -446,9 +440,7 @@ try
 
 	auto AID = stmt.Get<int>();
 	auto PasswordData = stmt.Get<StringView>();
-	auto len = min(maxlen, PasswordData.Size);
-	memcpy(outPassword, PasswordData.Ptr, len);
-	outPassword[len] = 0;
+	strcpy_safe(outPassword, maxlen, PasswordData);
 	*outAID = AID;
 
 	return true;
@@ -658,7 +650,7 @@ try
 	int i = 0;
 	while (stmt.HasRow() && i < MAX_CHAR_COUNT)
 	{
-		strcpy_safe(outCharList[i].szName, stmt.Get<StringView>().Ptr);
+		strcpy_safe(outCharList[i].szName, stmt.Get<StringView>());
 		outCharList[i].nCharNum = stmt.Get<int>();
 		outCharList[i].nLevel = stmt.Get<int>();
 		stmt.Step();
@@ -696,7 +688,7 @@ try
 	if (!stmt.HasRow())
 		return false;
 
-	strcpy_safe(outCharInfo->szName, stmt.Get<StringView>().Ptr);
+	strcpy_safe(outCharInfo->szName, stmt.Get<StringView>());
 	outCharInfo->nCharNum = stmt.Get<int>();
 	outCharInfo->nLevel = stmt.Get<int>();
 	outCharInfo->nSex = stmt.Get<int>();
@@ -707,7 +699,7 @@ try
 
 	if (!stmt.IsNull())
 	{
-		strcpy_safe(outCharInfo->szClanName, stmt.Get<StringView>().Ptr);
+		strcpy_safe(outCharInfo->szClanName, stmt.Get<StringView>());
 	}
 	else
 	{
@@ -748,7 +740,7 @@ try
 		return false;
 
 	outAccountInfo->m_nAID = AID;
-	strcpy_safe(outAccountInfo->m_szUserID, stmt.Get<StringView>().Ptr);
+	strcpy_safe(outAccountInfo->m_szUserID, stmt.Get<StringView>());
 	outAccountInfo->m_nUGrade = static_cast<MMatchUserGradeID>(stmt.Get<int>());
 
 	return true;
@@ -781,7 +773,7 @@ try
 
 	outCharInfo->m_nCID = CID;
 	if (!stmt.IsNull())
-		strcpy_safe(outCharInfo->m_szName, stmt.Get<StringView>().Ptr);
+		strcpy_safe(outCharInfo->m_szName, stmt.Get<StringView>());
 	else
 		stmt.NextColumn();
 	outCharInfo->m_nLevel = stmt.Get<int>();
@@ -818,7 +810,7 @@ try
 		outCharInfo->m_ClanInfo.m_nClanID = stmt.Get<int>();
 		if (!stmt.IsNull())
 		{
-			strcpy_safe(outCharInfo->m_ClanInfo.m_szClanName, stmt.Get<StringView>().Ptr);
+			strcpy_safe(outCharInfo->m_ClanInfo.m_szClanName, stmt.Get<StringView>());
 		}
 		else
 		{
@@ -1066,7 +1058,7 @@ try
 
 	if (stmt.HasRow() && !stmt.IsNull())
 	{
-		auto Blob = stmt.Get<StringView>();
+		auto Blob = stmt.Get<::Blob>();
 		if (Blob.Size != sizeof(ItemBlob))
 		{
 			Log("SQLiteDatabase::UpdateEquipedItem - Items blob has wrong size %d, expected %d\n",
@@ -1356,7 +1348,7 @@ try
 		auto FriendCID = stmt.Get<int>();
 		auto Favorite = stmt.Get<int>();
 		auto Name = stmt.Get<StringView>();
-		FriendInfo->Add(FriendCID, Favorite, Name.Ptr);
+		FriendInfo->Add(FriendCID, Favorite, Name);
 		stmt.Step();
 	};
 
@@ -1380,7 +1372,7 @@ try
 		return false;
 
 	*outClanID = stmt.Get<int>();
-	strcpy_safe(outClanName, maxlen, stmt.Get<StringView>().Ptr);
+	strcpy_safe(outClanName, maxlen, stmt.Get<StringView>());
 
 	return true;
 }
@@ -1581,14 +1573,14 @@ try
 		return false;
 
 	outClanInfo->nCLID = CLID;
-	strcpy_safe(outClanInfo->szClanName, stmt.Get<StringView>().Ptr);
+	strcpy_safe(outClanInfo->szClanName, stmt.Get<StringView>());
 	outClanInfo->nTotalPoint = stmt.Get<int>();
 	outClanInfo->nLevel = stmt.Get<int>();
 	outClanInfo->nRanking = stmt.Get<int>();
 	outClanInfo->nPoint = stmt.Get<int>();
 	outClanInfo->nWins = stmt.Get<int>();
 	outClanInfo->nLosses = stmt.Get<int>();
-	strcpy_safe(outClanInfo->szMasterName, stmt.Get<StringView>().Ptr);
+	strcpy_safe(outClanInfo->szMasterName, stmt.Get<StringView>());
 
 	return true;
 }
@@ -1746,7 +1738,7 @@ try
 	if (!stmt.HasRow() || stmt.IsNull())
 		return false;
 
-	outCharName = stmt.Get<StringView>().Ptr;
+	outCharName = stmt.Get<StringView>().str();
 
 	return true;
 }

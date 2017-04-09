@@ -120,7 +120,7 @@ template <typename ParamT, typename AllocT, typename... ArgsT>
 auto MakeParam(AllocT& Alloc, ArgsT&&... Args)
 {
 	auto p = (ParamT*)Alloc.allocate(sizeof(ParamT));
-	Alloc.construct(p, Args...);
+	std::allocator_traits<AllocT>::construct(Alloc, p, Args...);
 	return p;
 }
 

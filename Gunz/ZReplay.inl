@@ -2,7 +2,7 @@
 
 #include "ZRuleDuel.h"
 #include "has_xxx.h"
-#include "stack_allocator.hpp"
+#include "Arena.h"
 
 inline ReplayVersion ZReplayLoader::GetVersion()
 {
@@ -628,8 +628,10 @@ bool ZReplayLoader::GetCommands(T ForEachCommand, bool PersistentMCommands, Arra
 	else
 	{
 		MCommand StackCommand;
-		u8 Stack[512];
-		stack_allocator<u8, std::size(Stack)> Alloc(Stack);
+		u8 ArenaBuffer[4096];
+		Arena arena{ ArenaBuffer, std::size(ArenaBuffer) };
+		using AllocType = ArenaAllocator<u8>;
+		AllocType Alloc{ &arena };
 
 		auto Stuff = [&](const char *CommandBuffer, const MUID& Sender, auto fTime)
 		{
@@ -637,7 +639,7 @@ bool ZReplayLoader::GetCommands(T ForEachCommand, bool PersistentMCommands, Arra
 			{
 				for (auto Param : StackCommand.m_Params)
 				{
-					Alloc.destroy(Param);
+					std::allocator_traits<AllocType>::destroy(Alloc, Param);
 
 					size_t size = 0;
 
@@ -646,14 +648,14 @@ bool ZReplayLoader::GetCommands(T ForEachCommand, bool PersistentMCommands, Arra
 					case MPT_INT: size = sizeof(MCommandParameterInt); break;
 					case MPT_UINT: size = sizeof(MCommandParameterUInt); break;
 					case MPT_FLOAT: size = sizeof(MCommandParameterFloat); break;
-					case MPT_STR: size = sizeof(MCommandParameterStringCustomAlloc<decltype(Alloc)>); break;
+					case MPT_STR: size = sizeof(MCommandParameterStringCustomAlloc<AllocType>); break;
 					case MPT_VECTOR: size = sizeof(MCommandParameterVector); break;
 					case MPT_POS: size = sizeof(MCommandParameterPos); break;
 					case MPT_DIR: size = sizeof(MCommandParameterDir); break;
 					case MPT_BOOL: size = sizeof(MCommandParameterBool); break;
 					case MPT_COLOR: size = sizeof(MCommandParameterColor); break;
 					case MPT_UID: size = sizeof(MCommandParameterUID); break;
-					case MPT_BLOB: size = sizeof(MCommandParameterBlobCustomAlloc<decltype(Alloc)>); break;
+					case MPT_BLOB: size = sizeof(MCommandParameterBlobCustomAlloc<AllocType>); break;
 					case MPT_CHAR: size = sizeof(MCommandParameterChar); break;
 					case MPT_UCHAR: size = sizeof(MCommandParameterUChar); break;
 					case MPT_SHORT: size = sizeof(MCommandParameterShort); break;
@@ -663,7 +665,7 @@ bool ZReplayLoader::GetCommands(T ForEachCommand, bool PersistentMCommands, Arra
 					case MPT_SVECTOR: size = sizeof(MCommandParameterShortVector); break;
 					};
 
-					Alloc.deallocate((uint8_t*)Param, size);
+					arena.deallocate((uint8_t*)Param, size);
 				}
 
 				StackCommand.m_Params.clear();
@@ -671,7 +673,8 @@ bool ZReplayLoader::GetCommands(T ForEachCommand, bool PersistentMCommands, Arra
 
 			if (!StackCommand.m_Params.empty())
 			{
-				MLog("Not empty! size %d, command id %d\n", StackCommand.m_Params.size(), StackCommand.GetID());
+				MLog("Not empty! size %d, command id %d\n",
+					StackCommand.m_Params.size(), StackCommand.GetID());
 				StackCommand.m_Params.clear();
 			}
 

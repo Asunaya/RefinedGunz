@@ -413,17 +413,17 @@ void ZGameClient::OnChannelResponseRule(const MUID& uidchannel, const char* pszR
 
 	SetChannelRuleName(pszRuleName);
 
-	MComboBox* pCombo = (MComboBox*)ZGetGameInterface()->GetIDLResource()->FindWidget("MapSelection");
-	if (pCombo != NULL)
+	auto MapSelection = ZFindWidgetAs<MComboBox>("MapSelection");
+	if (MapSelection != NULL)
 	{
-		InitMaps(pCombo);
-		MListBox* pList = (MListBox*)ZGetGameInterface()->GetIDLResource()->FindWidget("MapList");
-		pList->RemoveAll();
-		if (pList != NULL)
+		InitMapSelectionWidget();
+		auto MapList = ZFindWidgetAs<MListBox>("MapList");
+		if (MapList != NULL)
 		{
-			for (int i = 0; i < pCombo->GetCount(); ++i)
+			MapList->RemoveAll();
+			for (int i = 0; i < MapSelection->GetCount(); ++i)
 			{
-				pList->Add(pCombo->GetString(i));
+				MapList->Add(MapSelection->GetString(i));
 			}
 		}
 	}

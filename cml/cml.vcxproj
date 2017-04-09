@@ -555,6 +555,8 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Include\apply.h" />
+    <ClInclude Include="Include\Arena.h" />
     <ClInclude Include="Include\ArrayView.h" />
     <ClInclude Include="Include\defer.h" />
     <ClInclude Include="Include\DeferredConstructionWrapper.h" />
@@ -568,6 +570,7 @@
     <ClInclude Include="Include\MTime.h" />
     <ClInclude Include="Include\MultiVector.h" />
     <ClInclude Include="Include\MVector3.h" />
+    <ClInclude Include="Include\MZFile.h" />
     <ClInclude Include="Include\seed.h" />
     <ClInclude Include="Include\CfgFile.h" />
     <ClInclude Include="Include\CMError.h" />
@@ -616,16 +619,19 @@
     <ClInclude Include="Include\MXml.h" />
     <ClInclude Include="Include\MZFileSystem.h" />
     <ClInclude Include="Include\MZip.h" />
+    <ClInclude Include="Include\StringView.h" />
     <ClInclude Include="Include\targetver.h" />
     <ClInclude Include="Include\TMP.h" />
     <ClInclude Include="Include\variant.h" />
     <ClInclude Include="Include\VariantPolymorphism.h" />
+    <ClInclude Include="Include\zlib_util.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\MMatrix.cpp" />
     <ClCompile Include="source\MTime.cpp" />
     <ClCompile Include="Source\MVector3.cpp" />
+    <ClCompile Include="Source\MZFile.cpp" />
     <ClCompile Include="source\seed.cpp" />
     <ClCompile Include="Source\CfgFile.cpp" />
     <ClCompile Include="Source\CMError.c">

@@ -9,10 +9,10 @@
 #include "MDebug.h"
 #include "MUtil.h"
 #include <algorithm>
-#include "defer.h"
 #include <cassert>
+#include "Arena.h"
 
-void ReplaceBackSlashToSlash(char* szPath)
+static void ReplaceBackSlashToSlash(char* szPath)
 {
 	int nLen = strlen(szPath);
 	for(int i=0; i<nLen; i++){
@@ -30,7 +30,6 @@ void GetRefineFilename(char *szRefine, int maxlen, const char *szSource)
 
 	ReplaceBackSlashToSlash(szRefine);
 }
-
 
 time_t dos2unixtime(unsigned long dostime)
 {
@@ -76,805 +75,487 @@ second boundary. */
 		s.tm_hour, s.tm_min, s.tm_sec);
 }
 
-void MZFileSystem::RemoveFileList(void)
+// Asserts that the capacity of vec remains unchanged.
+template <typename T>
+static auto CapacityChecker(T& vec)
 {
-	while(1){
-		ZFLISTITOR i=m_ZFileList.begin();
-		if(i==m_ZFileList.end()) break;
-		MZFILEDESC* pZFile = i->second;
-		delete pZFile;
-		m_ZFileList.erase(i);
-	}
+#ifdef _DEBUG
+	struct CapacityChecker
+	{
+		CapacityChecker(T& vec) : vec{ vec } { Capacity = vec.capacity(); };
+		~CapacityChecker() { assert(Capacity == vec.capacity()); }
+		T& vec;
+		size_t Capacity;
+	};
+	return CapacityChecker{ vec };
+#else
+	return 0;
+#endif
 }
 
-bool MZFileSystem::AddItem(MZFILEDESC* pDesc)
+void MZFileSystem::ClearFileList()
 {
-	char key[_MAX_PATH];
-	strcpy_safe(key, pDesc->m_szFileName);
-	_strlwr_s(key);
+	Files.clear();
+	Dirs.clear();
+	NodeMap.clear();
+}
 
-	ZFLISTITOR it=m_ZFileList.find(key);
-	if(it!=m_ZFileList.end())
+StringView MZFileSystem::AllocateString(const StringView& Src)
+{
+	const auto size = Src.size() + 1;
+	Strings.emplace_back(std::make_unique<char[]>(size));
+
+	auto ptr = Strings.back().get();
+	strcpy_safe(ptr, size, Src);
+	
+	return{ ptr, Src.size() };
+}
+
+static bool IsArchivePath(const StringView& Path)
+{
+	const auto ExtIndex = Path.find_last_of('.');
+	if (ExtIndex == Path.npos)
+		return false;
+
+	const auto ExtLen = Path.size() - ExtIndex;
+	if (ExtLen < 4)
+		return false;
+
+	const auto Ext = Path.data() + ExtIndex;
+	return Ext && (_stricmp(Ext, "." DEF_EXT) == 0 || _stricmp(Ext, ".zip") == 0);
+}
+
+template <typename T>
+using AllocType = ArenaAllocator<T>;
+
+struct PreprocessedDir
+{
+	explicit PreprocessedDir(const AllocType<char>& Alloc) : Subdirs{ Alloc }, Files{ Alloc } {}
+
+	// Path to the directory.
+	// If the directory is an archive, this is formatted as a directory (i.e. no archive extension).
+	StringView Path;
+
+	// If this directory is an archive, this is the path to the archive file.
+	// Otherwise, it's empty.
+	StringView ArchivePath;
+
+	std::vector<PreprocessedDir, AllocType<PreprocessedDir>> Subdirs;
+	std::vector<MZFileDesc, AllocType<MZFileDesc>> Files;
+};
+
+struct PreprocessedFileTree
+{
+	explicit PreprocessedFileTree(const AllocType<char>& Alloc) : Alloc{ Alloc }, Root { Alloc } {}
+
+	AllocType<char> Alloc;
+	int NumFiles{};
+	int NumDirectories{};
+	int NumArchives{};
+	PreprocessedDir Root;
+};
+
+void MZFileSystem::AddFilesInArchive(PreprocessedFileTree& Tree, PreprocessedDir& ArchiveDir, MZip& Zip)
+{
+	const auto Count = int(Zip.GetFileCount());
+
+	Tree.NumFiles += Count;
+
+	for (int i = 0; i < Count; i++)
 	{
-		MZFILEDESC *pOld=it->second;
+		const auto Filename = Zip.GetFileName(i);
 
-		double diff=difftime(dos2unixtime(pDesc->m_modTime),dos2unixtime(pOld->m_modTime));
-		if(diff<0)
 		{
-			/*int nOldPkgNum=GetUpdatePackageNumber(pOld->m_szZFileName);
-			int nNewPkgNum=GetUpdatePackageNumber(pDesc->m_szZFileName);*/
-			// NOTE: This is false, idk what's happening here
-			//_ASSERT(nOldPkgNum>nNewPkgNum);
-
-			DMLog("%s, %s existing but diff = %f\n", pDesc->m_szFileName, pDesc->m_szZFileName, diff);
-			return false;
+			const auto lastchar = Filename.back();
+			if (lastchar == '\\' || lastchar == '/') {
+				continue;
+			}
 		}
 
-		delete pOld;
-		m_ZFileList.erase(it);
-	}
+		ArchiveDir.Files.emplace_back();
+		auto&& Child = ArchiveDir.Files.back();
 
-	m_ZFileList.insert(ZFLIST::value_type(std::string(key), pDesc));
-	return true;
+		char Path[_MAX_PATH];
+		sprintf_safe(Path, "%.*s%.*s",
+			ArchiveDir.Path.size(), ArchiveDir.Path.data(),
+			Filename.size(), Filename.data());
+		Child.Path = AllocateString(Path);
+		Child.ArchivePath = ArchiveDir.ArchivePath;
+
+		Child.Size = Zip.GetFileLength(i);
+		Child.ArchiveOffset = Zip.GetFileArchiveOffset(i);
+		Child.CompressedSize = Zip.IsFileCompressed(i) ? Zip.GetFileCompressedSize(i) : 0;
+	}
 }
 
-void MZFileSystem::RefreshFileList(const char* szBasePath)
+void MZFileSystem::MakeDirectoryTree(PreprocessedFileTree& Tree,
+	const StringView& FullPath, PreprocessedDir& Dir)
 {
-	_ASSERT(szBasePath!=NULL);
-
 	char szFilter[_MAX_PATH];
-	sprintf_safe(szFilter,"%s*",szBasePath);
+	sprintf_safe(szFilter, "%.*s*",
+		Dir.Path.size(), Dir.Path.data());
 
-    struct _finddata_t c_file;
-    long hFile;
-	if( (hFile = _findfirst( szFilter, &c_file )) != -1L ){
-		do{
-			if(c_file.attrib&_A_SUBDIR){
-
-				// Recursive Run if Sub Directory.
-				if(strcmp(c_file.name, ".")==0) continue;
-				if(strcmp(c_file.name, "..")==0) continue;
-				
-				char szPath[256];
-				sprintf_safe(szPath,"%s%s/",szBasePath,c_file.name);
-				RefreshFileList(szPath);
-			}
-			else{
-
-				char szDrive[_MAX_PATH], szDir[_MAX_PATH], szFileName[_MAX_PATH], szExt[_MAX_PATH];
-				_splitpath_s(c_file.name, szDrive, szDir, szFileName, szExt);
-				
-				if(_stricmp(szExt, "." DEF_EXT)==0 || _stricmp(szExt, ".zip")==0) {
-
-					char szZipFileName[_MAX_PATH],szBaseLocation[_MAX_PATH];
-					sprintf_safe(szZipFileName,"%s%s",szBasePath,c_file.name);
-					char szRelZipFileName[_MAX_PATH];
-					GetRelativePath(szRelZipFileName, sizeof(szRelZipFileName), m_szBasePath,szZipFileName);
-					ReplaceBackSlashToSlash(szRelZipFileName);
-
-					// base directory
-					if(GetUpdatePackageNumber(szRelZipFileName)>0)
-					{
-						szBaseLocation[0]=0;
-					}else
-					{
-						GetRelativePath(szBaseLocation,m_szBasePath,szBasePath);
-						sprintf_safe(szBaseLocation,"%s%s/",szBaseLocation,szFileName);
-					}
-
-					FILE* fp = nullptr;
-					fopen_s(&fp, szZipFileName, "rb");
-					if(fp==NULL) continue;
-
-					MZip zf;
-
-					if(zf.Initialize(fp, MZFile::GetReadMode()))
-					{
-						for(int i=0; i<zf.GetFileCount(); i++)
-						{
-							char szCurFileName[_MAX_PATH];
-							zf.GetFileName(i, szCurFileName);
-
-							char lastchar=szCurFileName[strlen(szCurFileName)-1];
-							if(lastchar!='\\' && lastchar!='/')
-							{
-								MZFILEDESC* pDesc = new MZFILEDESC;
-								sprintf_safe(pDesc->m_szFileName, "%s%s",szBaseLocation,szCurFileName);
-								ReplaceBackSlashToSlash(pDesc->m_szFileName);
-								strcpy_safe(pDesc->m_szZFileName, szRelZipFileName);
-								pDesc->m_iSize = zf.GetFileLength(i);
-								pDesc->m_crc32 = zf.GetFileCRC32(i);
-								pDesc->m_modTime = zf.GetFileTime(i);
-
-								if(!AddItem(pDesc))
-									delete pDesc;
-							}
-						}
-					}
-
-					fclose(fp);
-				}
-				else
-				{
-					// Add File Desc
-					MZFILEDESC* pDesc = new MZFILEDESC;
-
-					char szFullPath[_MAX_PATH];
-					sprintf_safe(szFullPath, "%s%s", szBasePath, c_file.name);
-					GetRelativePath(pDesc->m_szFileName,m_szBasePath,szFullPath);
-					ReplaceBackSlashToSlash(pDesc->m_szFileName);
-					pDesc->m_szZFileName[0] = NULL;
-					pDesc->m_iSize = c_file.size;
-					pDesc->m_crc32 = 0;
-					pDesc->m_modTime=unix2dostime(c_file.time_write);
-
-					if(!AddItem(pDesc))
-						delete pDesc;
-				}
-			}
-		}while( _findnext( hFile, &c_file ) == 0 );
-
-		_findclose( hFile );
+	_finddata_t FileData;
+	auto hFile = _findfirst(szFilter, &FileData);
+	if (hFile == -1)
+	{
+		MLog("MakeDirectoryTree -- _findfirst failed on filter %s\n", szFilter);
+		return;
 	}
+
+	do {
+		if (strcmp(FileData.name, ".") == 0 || strcmp(FileData.name, "..") == 0)
+			continue;
+
+		auto AddSubdir = [&](const StringView& Filename) -> auto&
+		{
+			char Path[_MAX_PATH];
+			sprintf_safe(Path, "%.*s%.*s/",
+				Dir.Path.size(), Dir.Path.data(),
+				Filename.size(), Filename.data());
+
+			Dir.Subdirs.emplace_back(Tree.Alloc);
+			auto&& Subdir = Dir.Subdirs.back();
+
+			Subdir.Path = AllocateString(Path);
+
+			return Subdir;
+		};
+
+		const auto IsDirectory = (FileData.attrib & _A_SUBDIR) != 0;
+
+		if (IsDirectory)
+		{
+			auto&& Subdir = AddSubdir(FileData.name);
+
+			char SubdirFullPath[_MAX_PATH];
+			sprintf_safe(SubdirFullPath, "%.*s%s/",
+				FullPath.size(), FullPath.data(),
+				FileData.name);
+
+			MakeDirectoryTree(Tree, SubdirFullPath, Subdir);
+
+			++Tree.NumDirectories;
+		}
+		else if (IsArchivePath(FileData.name))
+		{
+
+			StringView Filename{ FileData.name };
+			Filename = Filename.substr(0, Filename.find_last_of('.'));
+			auto&& Subdir = AddSubdir(Filename);
+
+			char ArchivePath[_MAX_PATH];
+			sprintf_safe(ArchivePath, "%.*s%s",
+				Dir.Path.size(), Dir.Path.data(),
+				FileData.name);
+
+			Subdir.ArchivePath = AllocateString(ArchivePath);
+
+			FILE* fp{};
+			fopen_s(&fp, Subdir.ArchivePath.data(), "rb");
+			if (!fp)
+			{
+				MLog("fopen on %.*s failed\n",
+					Subdir.ArchivePath.size(), Subdir.ArchivePath.data());
+				assert(false);
+				continue;
+			}
+
+			MZip Zip;
+			Zip.Initialize(fp, MZFile::GetReadMode());
+
+			AddFilesInArchive(Tree, Subdir, Zip);
+
+			++Tree.NumArchives;
+		}
+		else
+		{
+			Dir.Files.emplace_back();
+			auto&& File = Dir.Files.back();
+
+			char Path[_MAX_PATH];
+			sprintf_safe(Path, "%.*s%s",
+				Dir.Path.size(), Dir.Path.data(),
+				FileData.name);
+
+			File.Path = AllocateString(Path);
+			File.ArchiveOffset = 0;
+			File.CompressedSize = 0;
+			File.Size = FileData.size;
+
+			++Tree.NumFiles;
+		}
+	} while (_findnext(hFile, &FileData) == 0);
+
+	_findclose(hFile);
 }
 
-int MZFileSystem::GetUpdatePackageNumber(const char *szPackageFileName)
+void MZFileSystem::UpdateFileList(PreprocessedDir& Src, MZDirDesc& Dest)
 {
-	if(!szPackageFileName || szPackageFileName[0]==0) return 0;		// 그냥 폴더에 있는 파일이다
+	if (Src.Subdirs.empty() && Src.Files.empty())
+		return;
 
-	int nLength=strlen(m_szUpdateName);
-	if(m_szUpdateName[0] && _strnicmp(szPackageFileName,m_szUpdateName,nLength)==0)
+	auto&& chk1 = CapacityChecker(Files);
+	auto&& chk2 = CapacityChecker(Dirs);
+
+	Dest.Path = Src.Path;
+
+	auto AddNode = [&](auto& x, bool IsDirectory) {
+		NodeMap.emplace(x.Path, MZNode{ &x, IsDirectory });
+	};
+
+	if (Src.Files.empty())
 	{
-		int nNumber=atoi(szPackageFileName+nLength)+1;
-		return nNumber;		// 업데이프 패키지 내에 있는 파일
+		Dest.Files = nullptr;
+		Dest.NumFiles = 0;
 	}
-	return -1;		// 일반적인 패키지 내에 있는 파일
+	else
+	{
+		size_t FilesIndex = Files.size();
+		Files.insert(std::end(Files), std::begin(Src.Files), std::end(Src.Files));
+		Dest.Files = &Files[FilesIndex];
+		Dest.NumFiles = Src.Files.size();
+
+		for (auto&& File : Dest.FilesRange())
+			AddNode(File, false);
+	}
+
+	if (Src.Subdirs.empty())
+	{
+		Dest.Subdirs = nullptr;
+		Dest.NumSubdirs = 0;
+	}
+	else
+	{
+		size_t SubdirsIndex = Dirs.size();
+		Dest.NumSubdirs = Src.Subdirs.size();
+		Dirs.resize(Dirs.size() + Dest.NumSubdirs);
+		Dest.Subdirs = &Dirs[SubdirsIndex];
+
+		for (size_t i = 0; i < Dest.NumSubdirs; ++i)
+		{
+			auto&& SrcSubdir = Src.Subdirs[i];
+			auto&& DestSubdir = Dirs[SubdirsIndex + i];
+			DestSubdir.Parent = &Dest;
+			UpdateFileList(SrcSubdir, DestSubdir);
+		}
+
+		for (auto&& Subdir : Dest.SubdirsRange())
+			AddNode(Subdir, true);
+	}
 }
 
 unsigned MGetCRC32(const char *data, int nLength)
 {
-	uLong crc = crc32(0L, Z_NULL, 0);
-	crc = crc32(crc, (byte*)data, nLength);
+	uLong crc = crc32(0, Z_NULL, 0);
+	crc = crc32(crc, reinterpret_cast<const Byte*>(data), nLength);
 	return crc;
 }
 
-unsigned int MZFileSystem::GetCRC32(const char* szFileName)
+MZFileSystem::MZFileSystem() = default;
+MZFileSystem::~MZFileSystem() = default;
+
+bool MZFileSystem::Create(std::string BasePathArgument)
 {
-	MZFILEDESC* pDesc = GetFileDesc(szFileName);
-	if(!pDesc) return 0;
+	BasePath = std::move(BasePathArgument);
 
-	if(pDesc->m_szZFileName[0]) {
-		return pDesc->m_crc32;
-	}
+	// Add slash to end of path if missing.
+	if (BasePath.back() != '/' && BasePath.back() != '\\')
+		BasePath += '/';
 
-	MZFile mzf;
-	if(!mzf.Open(szFileName,this)) return 0;
+	u8 ArenaBuffer[1024 * 16];
+	Arena arena{ ArenaBuffer, std::size(ArenaBuffer) };
 
-	int nFileLength=mzf.GetLength();
-	char *buffer=new char[nFileLength];
-	mzf.Read(buffer,nFileLength);
-	mzf.Close();
+	PreprocessedFileTree Tree{ ArenaAllocator<char>{ &arena } };
+	Tree.NumDirectories++; // Root.
+	MakeDirectoryTree(Tree, "", Tree.Root);
 
-	unsigned int crc = MGetCRC32(buffer,nFileLength);
-	delete buffer;
+	DMLog("Number of files: %d\n"
+		"Number of archives: %d\n"
+		"Number of directories: %d\n",
+		Tree.NumFiles, Tree.NumArchives, Tree.NumDirectories);
 
-	return crc;
-}
+	const auto NumNodes = Tree.NumArchives + Tree.NumDirectories + Tree.NumFiles;
+	const auto NumDirs = Tree.NumArchives + Tree.NumDirectories;
+	NodeMap.reserve(NumNodes);
+	Files.reserve(Tree.NumFiles);
+	Dirs.reserve(NumDirs);
 
-unsigned int MZFileSystem::GetTotalCRC()
-{
-	unsigned int nCRCTotal = 0;
-	for (int i=0; i<GetFileCount(); i++) {
-		const MZFILEDESC* pDesc = GetFileDesc(i);
-		nCRCTotal += pDesc->m_crc32;
-	}
-	return nCRCTotal;
-}
+	Strings.shrink_to_fit();
 
-MZFileSystem::MZFileSystem(void) : m_pCheckList(NULL)
-{
-	m_szBasePath[0] = 0;
-	m_szUpdateName[0] = 0;
-}
-
-MZFileSystem::~MZFileSystem(void)
-{
-	Destroy();
-}
-
-void AddSlash(char *szPath, int maxlen)
-{
-	int nLength=strlen(szPath);
-	if(nLength>0 && (szPath[nLength-1]!='/' && szPath[nLength-1]!='\\'))
-		strcat_s(szPath, maxlen, "/");
-}
-
-bool MZFileSystem::Create(const char* szBasePath,const char* szUpdateName)
-{
-	Destroy();
-
-	strcpy_safe(m_szBasePath, szBasePath);
-	AddSlash(m_szBasePath, sizeof(m_szBasePath));
-
-	if(szUpdateName) {
-		char szRelative[_MAX_PATH];
-		sprintf_safe(szRelative, "%s%s", m_szBasePath, szUpdateName);
-		GetRelativePath(m_szUpdateName, m_szBasePath,szRelative);
-	}
-
-	RemoveFileList();
-	RefreshFileList(m_szBasePath);
-
-	m_nIndex=0;
-	m_iterator=m_ZFileList.begin();
+	Dirs.emplace_back();
+	auto&& Root = Dirs.back();
+	UpdateFileList(Tree.Root, Root);
 
 	return true;
 }
 
-void MZFileSystem::Destroy(void)
+int MZFileSystem::GetFileCount() const
 {
-	m_szBasePath[0] = 0;
-	RemoveFileList();
+	return static_cast<int>(Files.size());
 }
 
-int MZFileSystem::GetFileCount(void) const
+const StringView& MZFileSystem::GetFileName(int i) const
 {
-	return m_ZFileList.size();
+	assert(i >= 0 && i < int(GetFileCount()));
+	return GetFileDesc(i)->Path;
 }
 
-const char* MZFileSystem::GetFileName(int i)
+const MZFileDesc* MZFileSystem::GetFileDesc(int i) const
 {
-	return GetFileDesc(i)->m_szFileName;
+	assert(i >= 0 && i < int(GetFileCount()));
+	return &Files[i];
 }
 
-const MZFILEDESC* MZFileSystem::GetFileDesc(int i)
+const MZFileDesc* MZFileSystem::GetFileDesc(const StringView& Path) const
 {
-	while(m_nIndex!=i)
-	{
-		if(m_nIndex<i)
-		{
-			m_nIndex++;
-			m_iterator++;
-			if(m_iterator==m_ZFileList.end())
-				return NULL;
-		}
-		else
-		{
-			if(m_iterator==m_ZFileList.begin())
-				return NULL;
-			m_nIndex--;
-			m_iterator--;
-		}
-	}
+	auto Node = GetNode(Path);
+	if (!Node || !Node->IsFile())
+		return nullptr;
 
-	return m_iterator->second;
+	return &Node->AsFile();
 }
 
-MZFILEDESC* MZFileSystem::GetFileDesc(const char* szTarget)
+const MZDirDesc* MZFileSystem::GetDirectory(const StringView& Path) const
 {
-	char key[_MAX_PATH];
-	strcpy_safe(key, szTarget);
-	_strlwr_s(key);
+	auto Node = GetNode(Path);
+	if (!Node || !Node->IsDirectory())
+		return nullptr;
 
-	char *p = key;
-	while (p = strchr(p, '\\'))
-	{
-		*p = '/';
-	}
+	return &Node->AsDirectory();
+}
 
-	ZFLISTITOR found = m_ZFileList.find(key);
-	if(found!=m_ZFileList.end())
-		return found->second;;
+const MZNode* MZFileSystem::GetNode(const StringView& Path) const
+{
+	auto it = NodeMap.find(Path);
+	if (it == NodeMap.end())
+		return nullptr;
 
-	return nullptr;
+	return &it->second;
 }
 
 int MZFileSystem::GetFileLength(int i)
 {
-	const MZFILEDESC* pDesc = GetFileDesc(i);
-	return pDesc->m_iSize;
+	auto pDesc = GetFileDesc(i);
+	if (!pDesc)
+		return 0;
+
+	return pDesc->Size;
 }
 
-int MZFileSystem::GetFileLength(const char* szFileName)
+int MZFileSystem::GetFileLength(const StringView& szFileName)
 {
-	MZFILEDESC* pDesc = GetFileDesc(szFileName);
-	return pDesc->m_iSize;
+	auto pDesc = GetFileDesc(szFileName);
+	if (!pDesc)
+		return 0;
+
+	return pDesc->Size;
 }
 
-bool MZFileSystem::ReadFile(const char* szFileName, void* pData, int nMaxSize)
+#ifdef WIN32
+class MMappedFile
 {
-	MZFILEDESC* pDesc = GetFileDesc(szFileName);
-	if (!pDesc) return false;
-
-	FILE* fp;
-	fopen_s(&fp, pDesc->m_szFileName, "rb");
-
-	if (fp == NULL) return false;
-
-	fread(pData, 1, nMaxSize, fp);
-
-	fclose(fp);
-
-	return true;
-}
-
-int MZFileSystem::CacheArchive(const char * Filename)
-{
-#ifdef _DEBUG
-	if (std::find_if(ArchiveCache.begin(), ArchiveCache.end(),
-		[&](auto&& item) { return item.Name == Filename; }) != ArchiveCache.end())
+public:
+	MMappedFile() {}
+	MMappedFile(const char* Filename);
+	MMappedFile(const MMappedFile&) = delete;
+	MMappedFile(MMappedFile&&);
+	~MMappedFile();
+	MMappedFile& operator =(MMappedFile&& src)
 	{
-		MLog("Duplicate caching on file %s!\n", Filename);
-		return -1;
+		this->~MMappedFile();
+		new (this) MMappedFile(std::move(src));
+		return *this;
 	}
+
+	bool Dead() const { return bDead; }
+	auto GetPointer() const { return reinterpret_cast<const char*>(View); }
+	auto GetSize() const { return Size; }
+
+private:
+	bool bDead = true;
+	HANDLE File = INVALID_HANDLE_VALUE;
+	HANDLE Mapping = INVALID_HANDLE_VALUE;
+	HANDLE View = INVALID_HANDLE_VALUE;
+	size_t Size = 0;
+};
 #endif
 
-	char FilenameWithExtension[64];
-	sprintf_safe(FilenameWithExtension, "%s.%s", Filename, DEF_EXT);
+#ifdef WIN32
+#define ARCHIVE_CACHE_MMAP
+#endif
 
-#ifdef ARCHIVE_CACHE_MMAP
-	ArchiveCache.emplace_back(FilenameWithExtension);
-	if (ArchiveCache.back().File.Dead())
-	{
-		MLog("Failed to load file %s!\n", FilenameWithExtension);
-		return -1;
-	}
-#else
-	ArchiveCache.emplace_back();
-#endif
-	auto&& archive = ArchiveCache.back();
-	archive.Index = ArchiveIndexCounter;
-	++ArchiveIndexCounter;
-#ifdef _DEBUG
-	archive.Name = Filename;
-#endif
+void MZFileSystem::CacheArchive(const StringView& Filename)
+{
+	char FilenameWithExtension[_MAX_PATH];
+	sprintf_safe(FilenameWithExtension, "%.*s.%s", Filename.size(), Filename.data(), DEF_EXT);
 
 	MZip Zip;
+
 #ifdef ARCHIVE_CACHE_MMAP
-	if (!Zip.Initialize(archive.File.GetPointer(), archive.File.GetSize(),
+	MMappedFile File{ FilenameWithExtension };
+	if (File.Dead())
+	{
+		MLog("MZFileSystem::CacheArchive -- Failed to load file %s!\n", FilenameWithExtension);
+		return;
+	}
+
+	const auto ZipInitialized = Zip.Initialize(File.GetPointer(), File.GetSize(), MZFile::GetReadMode());
 #else
 	FILE* fp = nullptr;
 	auto ret = fopen_s(&fp, FilenameWithExtension, "rb");
 	if (!fp || ret != 0)
 	{
-		MLog("MZFileSystem::CacheArchive - fopen_s failed on %s\n", Filename);
+		MLog("MZFileSystem::CacheArchive -- fopen_s failed on %s\n", Filename);
 		return -1;
 	}
-	DEFER( fclose(fp); );
-	if (!Zip.Initialize(fp,
+
+	const auto ZipInitialized = Zip.Initialize(fp, MZFile::GetReadMode());
 #endif
-		MZIPREADFLAG_ZIP | MZIPREADFLAG_MRS | MZIPREADFLAG_MRS2 | MZIPREADFLAG_FILE))
+
+	if (!ZipInitialized)
 	{
-		MLog("MZFileSystem::CacheArchive - MZip::Initialize on %s failed!\n", Filename);
-		return -1;
+		MLog("MZFileSystem::CacheArchive -- MZip::Initialize on %s failed!\n", Filename);
+		return;
 	}
+
 	auto FileCount = Zip.GetFileCount();
 	for (int i = 0; i < FileCount; i++)
 	{
 		char Name[64];
 		Zip.GetFileName(i, Name);
 		char AbsName[64];
-		sprintf_safe(AbsName, "%s/%s", Filename, Name);
+		sprintf_safe(AbsName, "%.*s/%s", Filename.size(), Filename.data(), Name);
 		auto Desc = GetFileDesc(AbsName);
 		if (!Desc)
 		{
 			DMLog("Couldn't find file desc for %s\n", AbsName);
 			continue;
 		}
-		if (strcmp(Desc->m_szZFileName, FilenameWithExtension))
+		if (Desc->ArchivePath == FilenameWithExtension)
 			continue;
 		auto Size = Zip.GetFileLength(i);
-		auto& p = Desc->CachedContents;
-		p = new char[Size];
-		if (!Zip.ReadFile(i, p, Size))
+
+		auto p = std::make_unique<char[]>(Size);
+		if (!Zip.ReadFile(i, p.get(), Size)) {
 			MLog("MZFileSystem::CacheArchive - MZip::ReadFile on %s failed!\n", Name);
+			continue;
+		}
+
+		CachedFileMap.emplace(Desc, std::move(p));
 	}
 
 	DMLog("Cached %d files for archive %s\n", FileCount, Filename);
-
-	return archive.Index;
 }
 
-void MZFileSystem::ReleaseArchive(int Index)
+void MZFileSystem::ReleaseCachedArchives()
 {
-	auto it = std::find_if(ArchiveCache.begin(), ArchiveCache.end(),
-		[&](auto&& item) { return item.Index == Index; });
-	if (it == ArchiveCache.end())
-		return;
-
-	for (auto* Desc : it->Files)
-		SAFE_DELETE_ARRAY(Desc->CachedContents);
-
-	ArchiveCache.erase(it);
-}
-
-unsigned long MZFile::m_dwReadMode =
-MZIPREADFLAG_ZIP | MZIPREADFLAG_MRS | MZIPREADFLAG_MRS2 | MZIPREADFLAG_FILE;
-
-MZFile::MZFile(void) : m_nIndexInZip(-1)
-{
-	m_fp		  = NULL;
-	m_IsZipFile	  = false;
-
-	m_pData		 = NULL;
-	m_nDataSize	 = 0;
-
-	m_nPos		 = 0;
-	m_nFileSize  = 0;
-
-	m_FileName[0]    = 0;
-	m_ZipFileName[0] = 0;
-}
-
-MZFile::~MZFile(void)
-{
-	Close();
-	ReleaseData();
-}
-
-bool MZFile::Open(const char* szFileName, MZFileSystem* pZFS)
-{
-	Close();
-
-	if (!pZFS)
-	{
-		if (!isMode(MZIPREADFLAG_FILE))
-		{
-			MLog("MZFile::Open - Was asked to read non-zipped file, but MZIPREADFLAG_FILE is not enabled\n");
-			assert(false);
-			return false;
-		}
-
-		fopen_s(&m_fp, szFileName, "rb");
-		if (!m_fp)
-		{
-			//MLog("MZFile::Open - Failed to open non-zipped file %s\n", szFileName);
-			return false;
-		}
-
-		fseek(m_fp, 0, SEEK_END);
-		m_nFileSize = ftell(m_fp);
-		fseek(m_fp, 0, SEEK_SET);
-
-		strcpy_safe(m_FileName, szFileName);
-
-		m_IsZipFile = false;
-
-		return true;
-	}
-	else
-	{
-		MZFILEDESC* pDesc = pZFS->GetFileDesc(szFileName);
-
-		if (pDesc == NULL)
-		{
-			// the .dds stuff spams this. maybe add it back when fixed.
-			//MLog("MZFile::Open - Failed to find file description for %s\n", szFileName);
-			return false;
-		}
-
-		if (pDesc->CachedContents)
-		{
-			CachedData = true;
-			m_pData = pDesc->CachedContents;
-			m_nFileSize = pDesc->m_iSize;
-			m_IsZipFile = true;
-			return true;
-		}
-
-		if(pDesc->m_szZFileName[0])
-		{
-			char relativename[_MAX_PATH];
-
-			char *pRelative=pDesc->m_szFileName,*pDest=pDesc->m_szZFileName;
-			while(_strnicmp(pRelative,pDest,1)==0)
-			{
-				pRelative++;
-				pDest++;
-			}
-			if(*pRelative=='/') pRelative++;
-
-			sprintf_safe(relativename, "%s", pRelative);
-
-			char szZipFullPath[_MAX_PATH];
-			sprintf_safe(szZipFullPath, "%s%s", pZFS->GetBasePath(), pDesc->m_szZFileName);
-
-			bool bFileCheck = false;
-
-			return Open(relativename,szZipFullPath,bFileCheck,pDesc->m_crc32);
-		}
-
-		// ZFileName is empty, so it's not zipped. Try to read the plain file.
-		if (!isMode(MZIPREADFLAG_FILE))
-			return false;
-
-		char szFullPath[_MAX_PATH];
-		sprintf_safe(szFullPath, "%s%s", pZFS->GetBasePath(), szFileName);
-
-		return Open(szFullPath);
-	}
-}
-
-bool MZFile::Open(const char* szFileName, const char* szZipFileName,
-	bool bFileCheck, unsigned int crc32)
-{
-	m_nPos		 = 0;
-	m_nFileSize  = 0;
-
-	if(_stricmp(m_ZipFileName,szZipFileName) != 0)
-	{
-		Close();
-
-		fopen_s(&m_fp, szZipFileName, "rb");
-
-		if (m_fp == NULL)
-		{
-			MLog("MZFile::Open - fopen failed on %s!\n", szZipFileName);
-			return false;
-		}
-
-		if (m_Zip.Initialize(m_fp, m_dwReadMode) == false)
-		{
-			MLog("MZFile::Open - MZip::Initialize failed on %s!\n", szFileName);
-			return false;
-		}
-
-		strcpy_safe(m_ZipFileName, szZipFileName);
-	}
-
-	if (m_Zip.isReadAble(m_dwReadMode) == false)
-	{
-		MLog("MZFile::Open - MZip::isReadAble(%08X) was false for %s\n",
-			m_dwReadMode, szFileName);
-		return false;
-	}
-
-	m_nIndexInZip = m_Zip.GetFileIndex(szFileName);
-	m_crc32 = m_Zip.GetFileCRC32(m_nIndexInZip);
-	if(bFileCheck && m_crc32!=crc32) {
-#ifdef _DEBUG
-		char szBuffer[256];
-		sprintf_safe(szBuffer, "crc error, modified after initialize, %s file in %s %u , source %u \n",
-			szFileName, szZipFileName, m_crc32, crc32);
-		OutputDebugString(szBuffer);
-#endif
-		return false;
-	}
-
-	int size = m_Zip.GetFileLength(m_nIndexInZip);
-
-	if (size == 0)
-	{
-		MLog("MZFile::Open - Size is 0 for %s\n", szFileName);
-		return false;
-	}
-
-	ReleaseData();
-	m_nFileSize = size;
-	strcpy_safe(m_FileName, szFileName);
-	m_IsZipFile = true;
-
-	return true;
-}
-
-void MZFile::Close()
-{
-	if(m_IsZipFile)
-	{
-		m_Zip.Finalize();
-		if(m_fp) {
-			fclose(m_fp);
-			m_fp = NULL;
-		}
-		ReleaseData();
-		m_IsZipFile = false;
-	}
-	else {
-
-		if(m_fp) {
-			fclose(m_fp);
-			m_fp = NULL;
-		}
-	}
-
-	m_nPos		 = 0;
-	m_nFileSize  = 0;
-
-	m_FileName[0]    = 0;
-	m_ZipFileName[0] = 0;
-}
-
-bool MZFile::Seek(long off,int mode)
-{
-	if (mode == begin)
-	{
-		if (off >= GetLength())
-			return false;
-	}
-	else if (mode == current)
-	{
-		if (m_nPos + off > GetLength())
-			return false;
-	}
-	else if (mode == end)
-	{
-		if (GetLength() + off > GetLength())
-			return false;
-	}
-
-	if(m_IsZipFile) {
-
-		if(mode == begin)
-		{
-			m_nPos = off;
-			return true;
-		}
-		else if(mode == current)
-		{
-			m_nPos += off;
-			return true;
-		}
-		else if(mode == end)
-		{
-			m_nPos = m_nFileSize + off;
-			return true;
-		}
-	}
-	else
-	{
-		if(mode == begin)
-		{
-			fseek(m_fp,off,SEEK_SET);
-			return true;
-		}
-		else if(mode == current)
-		{
-			fseek(m_fp,off,SEEK_CUR);
-			return true;
-		}
-		else if(mode == end)
-		{
-			fseek(m_fp,off,SEEK_END);
-			return true;
-		}
-	}
-
-	return false;
-}
-
-i64 MZFile::Tell() const
-{
-	if (m_IsZipFile)
-		return m_nPos;
-
-	return ftell(m_fp);
-}
-
-bool MZFile::Read(void* pBuffer, int nMaxSize)
-{
-	if (m_IsZipFile)
-	{
-		if (nMaxSize > m_nFileSize - m_nPos) return false;
-
-		if (!m_pData)
-			if (!LoadFile())
-				return false;
-
-		memcpy(pBuffer, (m_pData + m_nPos), nMaxSize);
-
-		m_nPos += nMaxSize;
-	}
-	else
-	{
-		size_t numread = fread(pBuffer, 1, nMaxSize, m_fp);
-		if (numread != nMaxSize)
-			return false;
-	}
-
-	return true;
-}
-
-bool MZFile::LoadFile()
-{
-	m_pData = new char[m_nFileSize + 1];
-	m_pData[m_nFileSize] = 0;
-
-	if (m_IsZipFile)
-		return m_Zip.ReadFile(m_nIndexInZip, m_pData, m_nFileSize);
-
-	return fread(m_pData, GetLength(), 1, m_fp) == 1;
-}
-
-MZFileBuffer MZFile::Release()
-{
-	if (!m_pData)
-		if (!LoadFile())
-			return{ nullptr, false };
-
-	MZFileBuffer ret{ m_pData, !IsCachedData() };
-	m_pData = nullptr;
-	return ret;
-}
-
-void MZFile::ReleaseData()
-{
-	if (!CachedData)
-		SAFE_DELETE_ARRAY(m_pData);
-}
-
-bool MZFileCheckList::Open(const char *szFileName, MZFileSystem *pfs)
-{
-	MZFile mzf;
-	if(!mzf.Open(szFileName,pfs))
-		return false;
-
-	char *buffer;
-	buffer=new char[mzf.GetLength()+1];
-	mzf.Read(buffer,mzf.GetLength());
-	buffer[mzf.GetLength()]=0;
-
-	MXmlDocument aXml;
-	aXml.Create();
-	if(!aXml.LoadFromMemory(buffer))
-	{
-		delete buffer;
-		return false;
-	}
-
-	m_crc32 = MGetCRC32(buffer,mzf.GetLength());
-	delete buffer;
-
-	int iCount, i;
-	MXmlElement		aParent, aChild;
-	aParent = aXml.GetDocumentElement();
-	iCount = aParent.GetChildNodeCount();
-
-	char szTagName[256];
-	for (i = 0; i < iCount; i++)
-	{
-		aChild = aParent.GetChildNode(i);
-		aChild.GetTagName(szTagName);
-		if(_stricmp(szTagName,"FILE")==0)
-		{
-			char szContents[256],szCrc32[256];
-			aChild.GetAttribute(szContents,"NAME");
-			aChild.GetAttribute(szCrc32,"CRC32");
-
-			if(_stricmp(szContents,"config.xml")!=0)
-			{
-				unsigned int crc32_current;
-				sscanf_s(szCrc32, "%x", &crc32_current);
-
-				char szLowerName[256];
-				strcpy_safe(szLowerName, szContents);
-				_strlwr_s(szLowerName);
-
-				m_fileList.insert({ std::string(szLowerName), crc32_current });
-			}
-		}
-	}
-	return true;
-}
-
-
-unsigned int MZFileCheckList::GetCRC32(const char *szFileName) const
-{
-	char szLowerName[256];
-	strcpy_safe(szLowerName, szFileName);
-	_strlwr_s(szLowerName);
-
-	auto i = m_fileList.find(std::string(szLowerName));
-
-	if(i!=m_fileList.end()) {
-		return i->second;
-	}
-
-	return 0;
+	CachedFileMap.clear();
 }
 
 MMappedFile::MMappedFile(const char * Filename)
 {
-	auto File = CreateFile(Filename, GENERIC_READ, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+	File = CreateFile(Filename, GENERIC_READ, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
 	if (File == INVALID_HANDLE_VALUE)
 	{
 		MLog("MMappedFile::MMappedFile - CreateFile failed on %s! GetLastError() = %d\n",
@@ -888,23 +569,35 @@ MMappedFile::MMappedFile(const char * Filename)
 	sprintf_safe(FileMappingName, "GunzCache_%s", Filename);
 	Mapping = CreateFileMapping(File, 0, PAGE_READONLY, 0, 0, FileMappingName);
 	if (Mapping == NULL)
+	{
+		assert(false);
 		return;
+	}
 
 	View = MapViewOfFile(Mapping, FILE_MAP_READ, 0, 0, 0);
 	if (View == NULL)
+	{
+		assert(false);
 		return;
+	}
 
 	bDead = false;
 }
 
 MMappedFile::~MMappedFile()
 {
-	if (View != INVALID_HANDLE_VALUE)
-		UnmapViewOfFile(View);
-	if (Mapping != INVALID_HANDLE_VALUE)
-		CloseHandle(Mapping);
-	if (File != INVALID_HANDLE_VALUE)
-		CloseHandle(File);
+	if (View != INVALID_HANDLE_VALUE) {
+		auto Success = UnmapViewOfFile(View);
+		assert(Success);
+	}
+	if (Mapping != INVALID_HANDLE_VALUE) {
+		auto Success = CloseHandle(Mapping);
+		assert(Success);
+	}
+	if (File != INVALID_HANDLE_VALUE) {
+		auto Success = CloseHandle(File);
+		assert(Success);
+	}
 }
 
 MMappedFile::MMappedFile(MMappedFile && src)
@@ -914,4 +607,52 @@ MMappedFile::MMappedFile(MMappedFile && src)
 	src.View = INVALID_HANDLE_VALUE;
 	src.Mapping = INVALID_HANDLE_VALUE;
 	src.File = INVALID_HANDLE_VALUE;
+}
+
+void RecursiveFileIterator::AdvanceToNextFile()
+{
+	if (FileIndex < int(CurrentSubdir->NumFiles) - 1)
+	{
+		++FileIndex;
+		return;
+	}
+
+	if (CurrentSubdir == &Dir)
+	{
+		FileIndex = Dir.NumFiles;
+		return;
+	}
+
+	auto ParentRange = CurrentSubdir->Parent->SubdirsRange();
+
+	auto CurrentSubdirIt = std::find_if(std::begin(ParentRange), std::end(ParentRange),
+		[&](auto&& x) { return &x == CurrentSubdir; });
+
+	assert(CurrentSubdirIt != std::end(ParentRange));
+
+	if (CurrentSubdirIt == std::prev(std::end(ParentRange)))
+	{
+		CurrentSubdir = CurrentSubdir->Parent;
+		FileIndex = 0;
+	}
+
+	FileIndex = CurrentSubdirIt - std::begin(ParentRange);
+
+	AdvanceToNextFile();
+}
+
+Range<RecursiveFileIterator> FilesInDirRecursive(MZFileSystem& FS, const MZDirDesc& Dir)
+{
+	// Find first file
+	auto* CurrentSubdir = &Dir;
+	int FileIndex = 0;
+	while (CurrentSubdir->NumFiles == 0)
+	{
+		CurrentSubdir = CurrentSubdir->Subdirs;
+	}
+
+	return{
+		RecursiveFileIterator{ FS, Dir, CurrentSubdir, FileIndex },
+		RecursiveFileIterator{ FS, Dir, &Dir, int(Dir.NumFiles) },
+	};
 }

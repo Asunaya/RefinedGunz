@@ -77,7 +77,6 @@ protected:
 	static ZEmblemInterface	m_EmblemInterface;
 	static ZSkillManager	m_SkillManager;
 	ZWorldManager			m_WorldManager;
-	MZFileCheckList			m_fileCheckList;
 #ifdef _ZPROFILER
 	std::unique_ptr<ZProfiler> m_pProfiler;
 #endif
@@ -129,8 +128,6 @@ public:
 	void SetLaunchMode(ZLAUNCH_MODE nMode)  { m_nLaunchMode = nMode; }
 	bool IsLaunchDevelop() const			{ return m_bLaunchDevelop; }
 	bool IsLaunchTest() const				{ return m_bLaunchTest; }
-
-	unsigned int GetFileListCRC() const { return m_fileCheckList.GetCRC32(); }
 
 	bool InitLocale();
 	void PreCheckArguments();

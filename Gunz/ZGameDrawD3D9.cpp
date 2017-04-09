@@ -111,10 +111,10 @@ void ZGameDrawD3D9::DrawScene()
 	if (ZGetConfiguration()->GetCamFix())
 		RSetProjection(FixedFOV(g_fFOV), DEFAULT_NEAR_Z, g_fFarZ);
 
-	DEFER(
+	DEFER([&] {
 		if (ZGetConfiguration()->GetCamFix())
 			RSetProjection(g_fFOV, DEFAULT_NEAR_Z, g_fFarZ);
-	);
+	});
 
 	{
 		// Save the world matrix because, apparently, something in this block mutates it.

@@ -90,99 +90,74 @@ void ZEmptyBitmap()
 	MBitmapManager::DestroyAniBitmap();
 }
 
+static StringView GetAliasName(const StringView& Path, bool AddDir)
+{
+	if (AddDir)
+		return Path;
+
+	auto SlashIndex = Path.find_last_of("/\\");
+	if (SlashIndex == Path.npos)
+		return Path;
+
+	return Path.substr(SlashIndex + 1);
+}
+
+static void AddBitmap(const StringView& Path, bool AddDirToAliasName)
+{
+#if defined(_PUBLISH) && defined(ONLY_LOAD_MRS_FILES)
+	MZFile::SetReadMode(MZIPREADFLAG_ZIP | MZIPREADFLAG_MRS | MZIPREADFLAG_MRS2 | MZIPREADFLAG_FILE);
+#endif
+
+	auto MBitmapR2Create = MBeginProfile("ZGameInterface::LoadBitmaps - MBitmapR2::Create");
+
+	MBitmapR2* pBitmap = new MBitmapR2;
+	if (pBitmap->Create(GetAliasName(Path, AddDirToAliasName), RGetDevice(), Path) == true)
+		MBitmapManager::Add(pBitmap);
+	else
+		delete pBitmap;
+
+	MEndProfile(MBitmapR2Create);
+
+#if defined(_PUBLISH) && defined(ONLY_LOAD_MRS_FILES)
+	MZFile::SetReadMode(MZIPREADFLAG_MRS2);
+#endif
+}
+
 void ZGameInterface::LoadBitmaps(const char* szDir, ZLoadingProgress *pLoadingProgress)
 {
-	mlog("ZGameInterface::LoadBitmaps\n");
+	mlog("START ZGameInterface::LoadBitmaps\n");
 
-	const char *loadExts[] = { ".png", ".bmp", ".tga" };
+	static const StringView BitmapExtensions[3] = { ".png", ".bmp", ".tga" };
 
-#define EXT_LEN 4
+	auto HasBitmapExtension = [&](auto&& Path) {
+		auto ExtIndex = Path.find_last_of('.');
+		if (ExtIndex == Path.npos)
+			return false;
 
-	MZFileSystem *pfs = ZGetFileSystem();
+		const auto Ext = Path.substr(ExtIndex);
+		auto EqualsExt = [&](auto&& x) { return x == Ext; };
+		return std::any_of(std::begin(BitmapExtensions), std::end(BitmapExtensions), EqualsExt);
+	};
 
-	int nDirLen = (int)strlen(szDir);
+	auto& FS = *ZGetFileSystem();
 
-	int nTotalCount = 0;
+	auto AddBitmapsIn = [&](auto&& Path, bool AddDirToAliasName)
+	{
+		auto DirNode = FS.GetDirectory(szDir);
+		if (!DirNode)
+			return;
 
-	for (int i = 0; i < pfs->GetFileCount(); i++) {
-		const char* szFileName = pfs->GetFileName(i);
-		const MZFILEDESC* desc = pfs->GetFileDesc(i);
-		int nLen = (int)strlen(szFileName);
-
-		for (int j = 0; j < sizeof(loadExts) / sizeof(loadExts[0]); j++) {
-			if (nLen > EXT_LEN && _stricmp(szFileName + nLen - EXT_LEN, loadExts[j]) == 0)
-			{
-				bool bAddDirToAliasName = false;
-				bool bMatch = false;
-
-				if (nDirLen == 0 || _strnicmp(desc->m_szFileName, szDir, nDirLen) == 0)
-					nTotalCount++;
-				// custom crosshair
-				else if (_strnicmp(desc->m_szFileName,
-					PATH_CUSTOM_CROSSHAIR,
-					strlen(PATH_CUSTOM_CROSSHAIR)) == 0)
-					nTotalCount++;
-			}
+		for (auto&& File : FilesInDirRecursive(FS, *DirNode))
+		{
+			if (HasBitmapExtension(File.Path))
+				AddBitmap(File.Path, AddDirToAliasName);
 		}
-	}
+	};
 
-	int nCount = 0;
-	for (int i = 0; i < pfs->GetFileCount(); i++) {
+	AddBitmapsIn(szDir, false);
+	AddBitmapsIn(PATH_CUSTOM_CROSSHAIR, true);
 
-		const char* szFileName = pfs->GetFileName(i);
-		const MZFILEDESC* desc = pfs->GetFileDesc(i);
-		int nLen = (int)strlen(szFileName);
-
-		for (int j = 0; j < sizeof(loadExts) / sizeof(loadExts[0]); j++) {
-			if (nLen > EXT_LEN && _stricmp(szFileName + nLen - EXT_LEN, loadExts[j]) == 0)
-			{
-				bool bAddDirToAliasName = false;
-				bool bMatch = false;
-
-				if (nDirLen == 0 || _strnicmp(desc->m_szFileName, szDir, nDirLen) == 0)
-					bMatch = true;
-
-				// custom crosshair
-				if (_strnicmp(desc->m_szFileName, PATH_CUSTOM_CROSSHAIR, strlen(PATH_CUSTOM_CROSSHAIR)) == 0)
-				{
-					bMatch = true;
-					bAddDirToAliasName = true;
-				}
-
-				if (bMatch) {
-					nCount++;
-					if (pLoadingProgress && nCount % 10 == 0)
-						pLoadingProgress->UpdateAndDraw((float)nCount / (float)nTotalCount);
-
-
-					char aliasname[256];
-					char drive[_MAX_DRIVE], dir[_MAX_DIR], fname[_MAX_FNAME], ext[_MAX_EXT];
-					_splitpath_s(szFileName, drive, dir, fname, ext);
-
-					if (!bAddDirToAliasName) sprintf_safe(aliasname, "%s%s", fname, ext);
-					else sprintf_safe(aliasname, "%s%s%s", dir, fname, ext);
-
-#if defined(_PUBLISH) && defined(ONLY_LOAD_MRS_FILES)
-					MZFile::SetReadMode(MZIPREADFLAG_ZIP | MZIPREADFLAG_MRS | MZIPREADFLAG_MRS2 | MZIPREADFLAG_FILE);
-#endif
-					auto MBitmapR2Create = MBeginProfile("ZGameInterface::LoadBitmaps - MBitmapR2::Create");
-					MBitmapR2* pBitmap = new MBitmapR2;
-					if (pBitmap->Create(aliasname, RGetDevice(), desc->m_szFileName) == true)
-						MBitmapManager::Add(pBitmap);
-					else
-						delete pBitmap;
-					MEndProfile(MBitmapR2Create);
-
-#if defined(_PUBLISH) && defined(ONLY_LOAD_MRS_FILES)
-					MZFile::SetReadMode(MZIPREADFLAG_MRS2);
-#endif
-
-				}
-			}
-		}
-	}
-
-	mlog("ZGameInterface::LoadBitmaps2\n");
+	mlog("END ZGameInterface::LoadBitmaps\n");
 }
 
 void AddListItem(MListBox* pList, MBitmap* pBitmap, const char* szString, const char* szItemString)
@@ -195,7 +170,9 @@ void AddListItem(MListBox* pList, MBitmap* pBitmap, const char* szString, const 
 			if (szItemString != NULL) strcpy_safe(m_szDragItemString, szItemString);
 			else m_szDragItemString[0] = 0;
 		}
-		virtual bool GetDragItem(MBitmap** ppDragBitmap, char* szDragString, char* szDragItemString) {
+		virtual bool GetDragItem(MBitmap** ppDragBitmap,
+			char* szDragString, char* szDragItemString) override
+		{
 			*ppDragBitmap = GetBitmap(0);
 			if (GetString(1) != NULL) strcpy_unsafe(szDragString, GetString(1));
 			else szDragString[0] = 0;
@@ -535,7 +512,7 @@ bool ZGameInterface::InitInterface(const char* szSkinName, ZLoadingProgress *pLo
 
 	ZGetOptionInterface()->InitInterfaceOption();
 
-	InitMaps(m_IDLResource.FindWidget("MapSelection"));
+	InitMapSelectionWidget();
 
 	_ASSERT(m_pPlayerMenu == NULL);
 
@@ -3754,10 +3731,7 @@ void ZGameInterface::FinishGame()
 
 void ZGameInterface::SerializeStageInterface()
 {
-	MComboBox* pCombo = (MComboBox*)m_IDLResource.FindWidget("MapSelection");
-	if (pCombo)
-		InitMaps(pCombo);
-
+	InitMapSelectionWidget();
 	ZApplication::GetStageInterface()->OnStageInterfaceSettup();
 }
 
@@ -3792,8 +3766,6 @@ bool SetWidgetToolTipText(char* szWidget, const char* szToolTipText) {
 	MWidget* pWidget = pResource->FindWidget(szWidget);
 
 	if (pWidget) {
-
-
 		if (!szToolTipText[0]) {
 			pWidget->DetachToolTip();
 		}
@@ -4664,7 +4636,7 @@ void ZGameInterface::LeaveBattle()
 {
 	ZGetGameInterface()->SetCursorEnable(true);
 	ShowMenu(false);
-	DEFER(m_bLeaveBattleReserved = m_bLeaveStageReserved = EnteredReplayFromLogin = false;);
+	DEFER([&] { m_bLeaveBattleReserved = m_bLeaveStageReserved = EnteredReplayFromLogin = false; });
 
 	if (EnteredReplayFromLogin)
 	{

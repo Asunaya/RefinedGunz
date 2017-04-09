@@ -4,13 +4,11 @@
 #include "MZFileSystem.h"
 #include "MMatchMap.h"
 
-
-
-void MChannelRuleMapList::Add(string strMapName)
+void MChannelRuleMapList::Add(const StringView& strMapName)
 {
 	for (int i = 0; i < MMATCH_MAP_MAX; i++)
 	{
-		if (!_stricmp(strMapName.c_str(), g_MapDesc[i].szMapName))
+		if (iequals(strMapName, g_MapDesc[i].szMapName))
 		{
 			Add(i);
 			return;
@@ -20,9 +18,9 @@ void MChannelRuleMapList::Add(string strMapName)
 
 bool MChannelRuleMapList::Exist(int nMapID, bool bOnlyDuel)
 {
-	set<int>::iterator itor = m_Set.find( nMapID);
+	auto itor = m_Set.find( nMapID);
 
-	if ( itor != m_Set.end())
+	if (itor != m_Set.end())
 	{
 		int id = (*itor);
 
@@ -36,15 +34,15 @@ bool MChannelRuleMapList::Exist(int nMapID, bool bOnlyDuel)
 }
 
 
-bool MChannelRuleMapList::Exist(const char* pszMapName, bool bOnlyDuel)
+bool MChannelRuleMapList::Exist(const StringView& pszMapName, bool bOnlyDuel)
 {
-	for (set<int>::iterator itor = m_Set.begin(); itor != m_Set.end(); ++itor)
+	for (auto itor = m_Set.begin(); itor != m_Set.end(); ++itor)
 	{
 		int id = (*itor);
 
 		if ((id >= 0) && (id < MMATCH_MAP_MAX))
 		{
-			if ( !_stricmp(pszMapName, g_MapDesc[id].szMapName))
+			if (iequals(pszMapName, g_MapDesc[id].szMapName))
 			{
 				if ( !bOnlyDuel && g_MapDesc[id].bOnlyDuelMap)
 					return false;
@@ -87,9 +85,9 @@ void MChannelRuleMgr::Clear()
 	}
 }
 
-MChannelRule* MChannelRuleMgr::GetRule(const string& strName)
+MChannelRule* MChannelRuleMgr::GetRule(const StringView& strName)
 {
-	iterator itor = find(strName);
+	iterator itor = find(strName.str());
 	if (itor != end())
 	{
 		return (*itor).second;
@@ -161,7 +159,7 @@ void MChannelRuleMgr::ParseRule(MXmlElement* pElement)
 
 void MChannelRuleMgr::AddRule(MChannelRule* pRule)
 {
-	insert(value_type(pRule->GetName(), pRule));
+	emplace(pRule->GetName(), pRule);
 
 	if (!_stricmp(MCHANNEL_RULE_NOVICE_STR, pRule->GetName()))
 	{
@@ -185,7 +183,6 @@ void MChannelRuleMgr::AddRule(MChannelRule* pRule)
 	}
 	else
 	{
-		_ASSERT(0);		// 그런 룰은 존재하지 않음.
+		_ASSERT(0);
 	}
-
 }

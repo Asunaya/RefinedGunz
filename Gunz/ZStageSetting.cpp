@@ -572,7 +572,5 @@ void ZStageSetting::InitStageSettingGameFromGameType()
 	}
 
 	// Set map
-	MComboBox* pCB = (MComboBox*)pResource->FindWidget("MapSelection");
-	if (pCB)
-		InitMaps(pCB);
+	InitMapSelectionWidget();
 }

@@ -18,7 +18,7 @@ MMatchFriendInfo::~MMatchFriendInfo()
 	}
 }
 
-bool MMatchFriendInfo::Add(unsigned long nFriendCID, unsigned short nFavorite, const char* pszName)
+bool MMatchFriendInfo::Add(unsigned long nFriendCID, unsigned short nFavorite, const StringView& Name)
 {
 	if (Find(nFriendCID) != NULL)
 		return false;
@@ -26,21 +26,22 @@ bool MMatchFriendInfo::Add(unsigned long nFriendCID, unsigned short nFavorite, c
 	MMatchFriendNode* pNode = new MMatchFriendNode;
 	pNode->nFriendCID = nFriendCID;
 	pNode->nFavorite = nFavorite;
-	strcpy_safe(pNode->szName, pszName);
+	strcpy_safe(pNode->szName, Name);
 	strcpy_safe(pNode->szDescription, "");
 	m_FriendList.push_back(pNode);
 
 	return true;
 }
 
-void MMatchFriendInfo::Remove(const char* pszName)
+void MMatchFriendInfo::Remove(const StringView& Name)
 {
-	for (MMatchFriendList::iterator i=m_FriendList.begin(); i!= m_FriendList.end(); i++) 
+	for (auto it = m_FriendList.begin(); it != m_FriendList.end(); ++it)
 	{
-		MMatchFriendNode* pNode = (*i);
-		if (_stricmp(pNode->szName, pszName)==0) {
-			m_FriendList.erase(i);
-			delete pNode;
+		auto* Friend = *it;
+		if (iequals(Friend->szName, Name))
+		{
+			delete Friend;
+			m_FriendList.erase(it);
 			return;
 		}
 	}
@@ -57,15 +58,17 @@ MMatchFriendNode* MMatchFriendInfo::Find(unsigned long nFriendCID)
 	return NULL;
 }
 
-MMatchFriendNode* MMatchFriendInfo::Find(const char* pszName)
+MMatchFriendNode* MMatchFriendInfo::Find(const StringView& Name)
 {
-	for (MMatchFriendList::iterator i=m_FriendList.begin(); i!= m_FriendList.end(); i++) 
+	for (auto&& Friend : m_FriendList)
 	{
-		MMatchFriendNode* pNode = (*i);
-		if (_stricmp(pNode->szName, pszName)==0)
-			return pNode;
+		if (iequals(Friend->szName, Name))
+		{
+			return Friend;
+		}
 	}
-	return NULL;
+
+	return nullptr;
 }
 
 void MMatchFriendInfo::UpdateDesc()

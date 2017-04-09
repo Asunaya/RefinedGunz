@@ -2,6 +2,7 @@
 
 #include "CMList.h"
 #include "MTypes.h"
+#include "StringView.h"
 
 #define MBM_Normal 0
 #define MBM_FlipLR 1
@@ -21,12 +22,12 @@ public:
 	char	m_szName[MBITMAP_NAME_LENGTH];
 	DWORD	m_DrawMode;
 public:
-	MBitmap(void);
-	virtual ~MBitmap(void);
+	MBitmap();
+	virtual ~MBitmap();
 
-	void CreatePartial(MBitmap *pBitmap,MRECT rt,const char *szName);
+	void CreatePartial(MBitmap *pBitmap, MRECT rt, const char *szName);
 
-	virtual bool Create(const char* szName);
+	virtual bool Create(const StringView& szName);
 	virtual void Destroy();
 
 	virtual void SetDrawMode(DWORD md) { m_DrawMode = md; }
@@ -52,7 +53,7 @@ public:
 	virtual int GetWidth() override { return m_Rect.w; }
 	virtual int GetHeight() override { return m_Rect.h; }
 
-	virtual MBitmap *GetSourceBitmap() { return m_pSource; }
+	virtual MBitmap *GetSourceBitmap() override { return m_pSource; }
 };
 
 class MAniBitmap{

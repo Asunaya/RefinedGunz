@@ -87,6 +87,11 @@
     <ClInclude Include="Include\DeferredConstructionWrapper.h" />
     <ClInclude Include="Include\ArrayView.h" />
     <ClInclude Include="Include\hsv.h" />
+    <ClInclude Include="Include\StringView.h" />
+    <ClInclude Include="Include\MZFile.h" />
+    <ClInclude Include="Include\Arena.h" />
+    <ClInclude Include="Include\apply.h" />
+    <ClInclude Include="Include\zlib_util.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\MMatrix.cpp">
@@ -138,5 +143,6 @@
     <ClCompile Include="Source\MZip.cpp" />
     <ClCompile Include="source\MTime.cpp" />
     <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="Source\MZFile.cpp" />
   </ItemGroup>
 </Project>

@@ -5,7 +5,7 @@
 
 // MBitmap Implementation
 /////////////////////////
-MBitmap::MBitmap(void)
+MBitmap::MBitmap()
 {
 #ifdef _DEBUG
 	m_nTypeID = MINT_BASE_CLASS_TYPE;
@@ -13,29 +13,28 @@ MBitmap::MBitmap(void)
 	m_DrawMode = MBM_Normal;
 }
 
-MBitmap::~MBitmap(void)
+MBitmap::~MBitmap()
 {
 	Destroy();
 }
 
-bool MBitmap::Create(const char* szName)
+bool MBitmap::Create(const StringView& szName)
 {
-	_ASSERT(strlen(szName)<MBITMAP_NAME_LENGTH);
 	strcpy_safe(m_szName, szName);
 
 	return true;
 }
 
-void MBitmap::Destroy(void)
+void MBitmap::Destroy()
 {
 }
 
-MAniBitmap::MAniBitmap(void)
+MAniBitmap::MAniBitmap()
 {
 	m_nCurFrame = 0;
 }
 
-MAniBitmap::~MAniBitmap(void)
+MAniBitmap::~MAniBitmap()
 {
 	Destroy();
 }
@@ -48,7 +47,7 @@ bool MAniBitmap::Create(const char* szName)
 	return true;
 }
 
-void MAniBitmap::Destroy(void)
+void MAniBitmap::Destroy()
 {
 	m_Bitmaps.DeleteRecordAll();
 }
@@ -64,41 +63,41 @@ MBitmap* MAniBitmap::Get(int nFrame)
 	return m_Bitmaps.Get(nFrame);
 }
 
-MBitmap* MAniBitmap::Get(void)
+MBitmap* MAniBitmap::Get()
 {
 	return Get(m_nCurFrame);
 }
 
-int MAniBitmap::GetFrameCount(void)
+int MAniBitmap::GetFrameCount()
 {
 	return m_Bitmaps.GetCount();
 }
 
-int MAniBitmap::GetCurFrame(void)
+int MAniBitmap::GetCurFrame()
 {
 	return m_nCurFrame;
 }
 
-bool MAniBitmap::MoveNext(void)
+bool MAniBitmap::MoveNext()
 {
 	if(m_nCurFrame+1>=GetFrameCount()) return false;
 	m_nCurFrame++;
 	return true;
 }
 
-bool MAniBitmap::MovePrevious(void)
+bool MAniBitmap::MovePrevious()
 {
 	if(m_nCurFrame-1<0) return false;
 	m_nCurFrame--;
 	return true;
 }
 
-void MAniBitmap::MoveFirst(void)
+void MAniBitmap::MoveFirst()
 {
 	m_nCurFrame = 0;
 }
 
-void MAniBitmap::MoveLast(void)
+void MAniBitmap::MoveLast()
 {
 	m_nCurFrame = GetFrameCount();
 }
@@ -110,7 +109,7 @@ bool MAniBitmap::Move(int nFrame)
 	return true;
 }
 
-int MAniBitmap::GetDelay(void)
+int MAniBitmap::GetDelay()
 {
 	return m_nDelay;
 }

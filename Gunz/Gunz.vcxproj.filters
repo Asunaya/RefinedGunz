@@ -715,9 +715,6 @@
     <ClInclude Include="ZCharacterStructs.h">
       <Filter>Character</Filter>
     </ClInclude>
-    <ClInclude Include="stack_allocator.hpp">
-      <Filter>RGunz</Filter>
-    </ClInclude>
     <ClInclude Include="MClient.h" />
     <ClInclude Include="MMatchClient.h" />
     <ClInclude Include="ZModule_ElementalDamage.h">

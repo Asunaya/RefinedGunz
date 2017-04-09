@@ -4,7 +4,7 @@
 #include "CMList.h"
 #include "MScrollBar.h"
 #include "MColorTable.h"
-
+#include "StringView.h"
 #include "SafeString.h"
 
 enum MListViewStyle
@@ -47,50 +47,23 @@ public:
 
 class MListFieldItem{
 protected:
-	MCOLOR		m_Color;
-	char*		m_szString;
-	MBitmap*	m_pBitmap;
+	MCOLOR		Color{ DEFCOLOR_MLIST_TEXT };
+	std::string String;
+	MBitmap*	Bitmap{};
 public:
-	MListFieldItem(const char* szString, MCOLOR color) {
-		m_Color = color;
-		m_szString = NULL;
-		SetString(szString);
-		m_pBitmap = NULL;
-	}
-	MListFieldItem(const char* szString){
-		m_Color = MCOLOR(DEFCOLOR_MLIST_TEXT);
-		m_szString = NULL;
-		SetString(szString);
-		m_pBitmap = NULL;
-	}
-	MListFieldItem(MBitmap* pBitmap){
-		m_Color = MCOLOR(DEFCOLOR_MLIST_TEXT);
-		m_szString = NULL;
-		m_pBitmap = pBitmap;
-	}
-	virtual ~MListFieldItem(){
-		if(m_szString!=NULL){
-			delete[] m_szString;
-			m_szString = NULL;
-		}
-		m_szString = NULL;
+	MListFieldItem(const StringView& String, MCOLOR Color) : Color{ Color }, String{ String.str() } {}
+	MListFieldItem(const StringView& String) : String{ String.str() } {}
+	MListFieldItem(MBitmap* Bitmap) : Bitmap{ Bitmap } {}
+
+	const char* GetString(){
+		return String.c_str();
 	}
 
-	virtual const char* GetString(){
-		return m_szString;
-	}
-	virtual void SetString(const char* szString){
-		if(m_szString!=NULL) delete[] m_szString;
-		auto len = strlen(szString) + 2;
-		m_szString = new char[len];
-		strcpy_safe(m_szString, len, szString);
-	}
+	void SetColor(MCOLOR color) { Color = color; }
+	virtual const MCOLOR GetColor() { return Color; }
 
-	void SetColor(MCOLOR color) { m_Color = color; }
-	virtual const MCOLOR GetColor() { return m_Color; }
-
-	MBitmap* GetBitmap(){ return m_pBitmap; }
-	void SetBitmap(MBitmap* pBitmap){ m_pBitmap = pBitmap; }
+	MBitmap* GetBitmap(){ return Bitmap; }
+	void SetBitmap(MBitmap* pBitmap){ Bitmap = pBitmap; }
 };
 
 
@@ -99,11 +72,11 @@ class MDefaultListItem : public MListItem{
 public:
 	MDefaultListItem(){
 	}
-	MDefaultListItem(const char* szText, const MCOLOR color) {
+	MDefaultListItem(const StringView& szText, const MCOLOR color) {
 		MListFieldItem* pNew = new MListFieldItem(szText, color);
 		m_Items.Add(pNew);
 	}
-	MDefaultListItem(const char* szText){
+	MDefaultListItem(const StringView& szText){
 		MListFieldItem* pNew = new MListFieldItem(szText);
 		m_Items.Add(pNew);
 	}
@@ -119,15 +92,15 @@ public:
 			delete pItem;
 		}
 	}
-	virtual const char* GetString() override{
+	virtual const char* GetString() override {
 		if(m_Items.GetCount()>0) return m_Items.Get(0)->GetString();
 		return NULL;
 	}
-	virtual const char* GetString(int i) override{
+	virtual const char* GetString(int i) override {
 		if(i<m_Items.GetCount()) return m_Items.Get(i)->GetString();
 		return NULL;
 	}
-	virtual void SetString(const char *szText) override{
+	virtual void SetString(const char *szText) override {
 		if(m_Items.GetCount()){
 			delete m_Items.Get(0);
 			m_Items.Delete(0);
@@ -137,7 +110,7 @@ public:
 		m_Items.InsertBefore(pNew);
 	}
 
-	virtual MBitmap* GetBitmap(int i) override{
+	virtual MBitmap* GetBitmap(int i) override {
 		if(i<m_Items.GetCount()) return m_Items.Get(i)->GetBitmap();
 		return NULL;
 	}
@@ -191,11 +164,11 @@ protected:
 			else return -nCompare;
 		}
 	} m_Items;
-	int				m_nOverItem;			// 커서에 의해 가리켜진 아이템
-	int				m_nSelItem;				// 선택된 아이템
-	int				m_nShowItemCount;		// 현재 리스트에 보여질 수 있는 아이템 개수
-	int				m_nStartItemPos;		// 현재 리스트에서 맨 처음 보여지는 아이템
-	int				m_nItemHeight;			// Item 높이
+	int				m_nOverItem;
+	int				m_nSelItem;
+	int				m_nShowItemCount;
+	int				m_nStartItemPos;
+	int				m_nItemHeight;
 	MScrollBar*		m_pScrollBar;
 
 	CMLinkedList<MLISTFIELD>	m_Fields;
@@ -238,8 +211,8 @@ public:
 	MListBox(MWidget* pParent=NULL, MListener* pListener=NULL);
 	virtual ~MListBox() override;
 
-	void Add(const char* szItem);
-	void Add(const char* szItem, MCOLOR color);
+	void Add(const StringView& szItem);
+	void Add(const StringView& szItem, MCOLOR color);
 	void Add(MListItem* pItem);
 	const char* GetString(int i);
 	MListItem* Get(int i);
@@ -307,4 +280,3 @@ public:
 #define MLB_ITEM_DEL		"del"
 #define MLB_ITEM_START		"start"
 #define MLB_ITEM_CLICKOUT	"clickout"
-

@@ -1,9 +1,7 @@
-#ifndef MMATCHNOTIFY_H
-#define MMATCHNOTIFY_H
+#pragma once
 
 #include <string>
 #include "MZFileSystem.h"
-
 
 #define MATCHNOTIFY_NETWORK_CREATE_FAILED	10
 #define MATCHNOTIFY_NETWORK_PORTINUSE		11
@@ -32,9 +30,5 @@
 #define MATCHNOTIFY_USER_INVITE_REJECTED	311
 #define MATCHNOTIFY_USER_INVITE_IGNORED		312
 
-
 bool InitializeNotify(MZFileSystem *pfs);
-bool NotifyMessage(int nMsgID, string *out);
-
-
-#endif
+bool NotifyMessage(int nMsgID, std::string *out);

@@ -1072,7 +1072,7 @@ void RBspObject::OnInvalidate()
 
 void RBspObject::OnRestore()
 {
-	if (!m_bisDrawLightMap)
+	if (!m_bisDrawLightMap && !OcRoot.empty())
 		Sort_Nodes(OcRoot.data());
 
 	DrawObj.OnRestoreStatic<RBspObjectDrawD3D9>();

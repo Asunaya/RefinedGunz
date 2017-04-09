@@ -1,24 +1,29 @@
 #pragma once
 
-template <typename T>
-struct defer {
-	defer(T& fn) : fn(fn) {}
-	~defer() { if (armed) execute(); }
-	defer(defer&& src) : fn{ std::move(src.fn) }, armed{ src.armed } { src.disarm(); }
+#include <type_traits>
+#include <tuple>
+#include "MUtil.h"
+#include "apply.h"
 
-	void disarm() { armed = false; }
-	void execute() { fn(); }
+template <typename T, typename... ArgsType>
+struct defer : private std::tuple<std::decay_t<ArgsType>...>
+{
+	using Base = std::tuple<std::decay_t<ArgsType>...>;
+
+	defer(T&& fn, ArgsType&&... Args) : fn(std::forward<T>(fn)), Base{ std::forward<ArgsType>(Args)... } {}
+	defer(const defer& src) = delete;
+	defer& operator=(const defer& src) = delete;
+	~defer() { /*std::*/apply(fn, *static_cast<Base*>(this)); }
 
 private:
-	T fn;
-	bool armed = true;
+	std::decay_t<T> fn;
 };
 
-template <typename T>
-auto make_defer(T& fn) {
-	return defer<T>{fn};
+template <typename T, typename... ArgsType>
+defer<T, ArgsType...> make_defer(T&& fn, ArgsType&&... Args) {
+	// NOTE: No type name here (i.e. `return {...};` instead of `return defer<...>{...};`)
+	// lets you avoid a move somehow. I don't know why, don't ask.
+	return{ std::forward<T>(fn), std::forward<ArgsType>(Args)... };
 }
 
-#define TOKENIZE_IMPL(a, b) a##b
-#define TOKENIZE(a, b) TOKENIZE_IMPL(a, b)
-#define DEFER(block) const auto TOKENIZE(defer_instance, __COUNTER__){make_defer([&](){ block })};
+#define DEFER(callable, ...) const auto&& TOKENIZE(defer_instance, __COUNTER__){make_defer(callable, __VA_ARGS__)}

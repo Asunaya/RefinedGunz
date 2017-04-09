@@ -76,35 +76,6 @@ ZMapListBox::~ZMapListBox(void)
 
 void ZMapListBox::Refresh(MZFileSystem* pFS)
 {
-	m_pListBox->RemoveAll();
-
-#define EXT	".rs"
-#define MAPDIRECTORY "Maps/"
-
-	MChannelRule* pRule = ZGetChannelRuleMgr()->GetCurrentRule();
-	if (pRule == NULL) {
-		mlog("ZMapListBox::Refresh() > No Current ChannelRule \n");
-		return;
-	}
-
-	int nExtLen = (int)strlen(EXT);
-	for(int i=0; i<pFS->GetFileCount(); i++){
-		const char* szFileName = pFS->GetFileName(i);
-		const MZFILEDESC* desc = pFS->GetFileDesc(i);
-		int nLen = (int)strlen(szFileName);
-
-		if( _strnicmp(desc->m_szFileName,MAPDIRECTORY,strlen(MAPDIRECTORY))==0 &&
-			nLen>nExtLen && _stricmp(szFileName+nLen-nExtLen, EXT)==0 )
-		{
-			char drive[_MAX_DRIVE],dir[_MAX_DIR],fname[_MAX_FNAME],ext[_MAX_EXT];
-			_splitpath_s(szFileName,drive,dir,fname,ext);
-
-			if (ZIsLaunchDevelop()) 
-			{
-				m_pListBox->Add(fname);
-			}
-		}
-	}
 }
 
 const char* ZMapListBox::GetSelItemString(void)

@@ -1,5 +1,4 @@
-#ifndef _MBASECHANNELRULE_H
-#define _MBASECHANNELRULE_H
+#pragma once
 
 #include "MXmlParser.h"
 #include <list>
@@ -7,8 +6,7 @@
 #include <set>
 #include <string>
 #include <algorithm>
-using namespace std;
-
+#include "StringView.h"
 
 enum MCHANNEL_RULE {
 	MCHANNEL_RULE_NOVICE=0,
@@ -26,27 +24,25 @@ enum MCHANNEL_RULE {
 #define MCHANNEL_RULE_MASTERY_STR		"mastery"
 #define MCHANNEL_RULE_ELITE_STR			"elite"
 
-
-
-class MChannelRuleMapList : public list<int>
+class MChannelRuleMapList : public std::list<int>
 {
 private:
-	set<int>		m_Set;
+	std::set<int> m_Set;
 public:
 	void Add(int nMapID)
 	{
 		m_Set.insert(nMapID);
 		push_back(nMapID);
 	}
-	void Add(string strMapName);
+	void Add(const StringView& strMapName);
 	bool Exist(int nMapID, bool bOnlyDuel);
-	bool Exist(const char* pszMapName, bool bOnlyDuel);
+	bool Exist(const StringView& pszMapName, bool bOnlyDuel);
 };
 
-class MChannelRuleGameTypeList : public list<int>
+class MChannelRuleGameTypeList : public std::list<int>
 {
 private:
-	set<int>		m_Set;
+	std::set<int> m_Set;
 public:
 	void Add(int nGameTypeID)
 	{
@@ -63,7 +59,7 @@ public:
 class MChannelRule {
 protected:
 	int							m_nID;
-	string						m_Name;
+	std::string					m_Name;
 	MChannelRuleMapList			m_MapList;
 	MChannelRuleGameTypeList	m_GameTypeList;
 public:
@@ -75,16 +71,16 @@ public:
 		m_Name = pszName;
 	}
 
-	int GetID()							{ return m_nID; }
-	const char* GetName()				{ return m_Name.c_str(); }
+	int GetID()	const					{ return m_nID; }
+	const char* GetName() const			{ return m_Name.c_str(); }
 
-	void AddMap(string strMapName)		{ m_MapList.Add(strMapName); }
+	void AddMap(const StringView& strMapName) { m_MapList.Add(strMapName); }
 	void AddGameType(int nGameTypeID)	{ m_GameTypeList.Add(nGameTypeID); }
 	bool CheckMap(int nMapID, bool bOnlyDuel)
 	{
 		return m_MapList.Exist(nMapID, bOnlyDuel);
 	}
-	bool CheckMap(const char* pszMapName, bool bOnlyDuel)
+	bool CheckMap(const StringView& pszMapName, bool bOnlyDuel)
 	{
 		return m_MapList.Exist(pszMapName, bOnlyDuel);
 	}
@@ -98,23 +94,19 @@ public:
 
 
 
-class MChannelRuleMgr : public map<string, MChannelRule*>, public MXmlParser
+class MChannelRuleMgr : public std::map<std::string, MChannelRule*>, public MXmlParser
 {
 private:
-	map<MCHANNEL_RULE, MChannelRule*>		m_RuleTypeMap;
+	std::map<MCHANNEL_RULE, MChannelRule*> m_RuleTypeMap;
 	void AddRule(MChannelRule* pRule);
 public:
 	MChannelRuleMgr();
 	virtual ~MChannelRuleMgr();
 	void Clear();	
-	MChannelRule* GetRule(const string& strName);
+	MChannelRule* GetRule(const StringView& strName);
 	MChannelRule* GetRule(MCHANNEL_RULE nChannelRule);
 
 protected:
 	void ParseRule(MXmlElement* element);
 	virtual void ParseRoot(const char* szTagName, MXmlElement* pElement);
 };
-
-
-
-#endif
