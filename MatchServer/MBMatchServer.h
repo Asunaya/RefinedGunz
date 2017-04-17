@@ -88,16 +88,6 @@ protected :
 	void OnResponseReloadServerConfig( const MUID& uidSender, const string& strFileList );
 	void OnRequestAddHashMapnResponseAddHashMap( const MUID& uidSender, const string& strNewHashValue );
 
-	// filter
-	void OnLocalUpdateUseCountryFilter();
-	void OnLocalGetDBIPtoCountry();
-	void OnLocalGetDBBlockCountryCode();
-	void OnLocalGetDBCustomIP();
-	void OnLocalUpdateIPtoCountry();
-	void OnLocalUpdateBlockCountryCode();
-	void OnLocalUpdateCustomIP();
-	void OnLocalUpdateAcceptInvaildIP();
-
 public:
 	char	m_strFileCrcDataPath[MAX_PATH];
 

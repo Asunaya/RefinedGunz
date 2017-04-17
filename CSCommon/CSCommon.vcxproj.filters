@@ -37,9 +37,6 @@
     <Filter Include="StringRes">
       <UniqueIdentifier>{e3be9540-8987-435f-91c5-ca8418c807aa}</UniqueIdentifier>
     </Filter>
-    <Filter Include="MCountryFilter">
-      <UniqueIdentifier>{df4fc847-e1fe-4df0-83f1-76c1edc9f3a2}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Locale">
       <UniqueIdentifier>{c7f6a2c5-ab95-42fa-9089-b4918035ac34}</UniqueIdentifier>
     </Filter>
@@ -109,9 +106,6 @@
     <ClInclude Include="Include\MPacketCrypter.h">
       <Filter>Packet</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Msg.h">
-      <Filter>Packet</Filter>
-    </ClInclude>
     <ClInclude Include="Include\MCommandCommunicator.h">
       <Filter>CommandCommunicator</Filter>
     </ClInclude>
@@ -129,12 +123,6 @@
     </ClInclude>
     <ClInclude Include="Include\MStringRes.h">
       <Filter>StringRes</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\MCountryFilter.h">
-      <Filter>MCountryFilter</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\MCountryFilterDBMgr.h">
-      <Filter>MCountryFilter</Filter>
     </ClInclude>
     <ClInclude Include="Include\AnimationStuff.h" />
     <ClInclude Include="Include\BasicInfoHistory.h" />
@@ -194,9 +182,6 @@
     <ClCompile Include="Source\MCommandProfiler.cpp">
       <Filter>Map</Filter>
     </ClCompile>
-    <ClCompile Include="Source\MGridMap.cpp">
-      <Filter>Map</Filter>
-    </ClCompile>
     <ClCompile Include="Source\MUID.cpp">
       <Filter>MUID</Filter>
     </ClCompile>
@@ -235,12 +220,6 @@
     </ClCompile>
     <ClCompile Include="Source\MBaseStringResManager.cpp">
       <Filter>StringRes</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\MCountryFilter.cpp">
-      <Filter>MCountryFilter</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\MCountryFilterDBMgr.cpp">
-      <Filter>MCountryFilter</Filter>
     </ClCompile>
     <ClCompile Include="Source\AnimationStuff.cpp" />
     <ClCompile Include="Source\HitRegistration.cpp" />

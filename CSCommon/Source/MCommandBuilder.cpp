@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#include <winsock2.h>
 #include "MCommandBuilder.h"
 #include "MMatchUtil.h"
 
@@ -86,9 +85,9 @@ int MCommandBuilder::MakeCommand(char* pBuffer, int nBufferLen)
 			{
 				MCommand* pCmd = new MCommand();
 				int nCmdSize = nPacketSize - sizeof(MPacketHeader);
-				if (pCmd->SetData(((MCommandMsg*)pPacket)->Buffer, m_pCommandManager, (unsigned short)nCmdSize))
+				if (pCmd->SetData(((MCommandMsg*)pPacket)->Buffer, m_pCommandManager,
+					(unsigned short)nCmdSize))
 				{
-					// 시리얼 체크
 					if (m_bCheckCommandSN)
 					{
 						if (!m_CommandSNChecker.CheckValidate(pCmd->m_nSerialNumber))
@@ -121,7 +120,6 @@ int MCommandBuilder::MakeCommand(char* pBuffer, int nBufferLen)
 			}
 			else 
 			{
-				// 암호화 디코딩
 				MCommand* pCmd = new MCommand();
 
 				int nCmdSize = nPacketSize - sizeof(MPacketHeader);
@@ -134,9 +132,9 @@ int MCommandBuilder::MakeCommand(char* pBuffer, int nBufferLen)
 					}
 				}
 
-				if (pCmd->SetData((char*)((MCommandMsg*)pPacket)->Buffer, m_pCommandManager, (unsigned short)nCmdSize))
+				if (pCmd->SetData((char*)((MCommandMsg*)pPacket)->Buffer,
+					m_pCommandManager, (unsigned short)nCmdSize))
 				{
-					// 시리얼 체크
 					if (m_bCheckCommandSN)
 					{
 						if (!m_CommandSNChecker.CheckValidate(pCmd->m_nSerialNumber))
@@ -158,7 +156,6 @@ int MCommandBuilder::MakeCommand(char* pBuffer, int nBufferLen)
 			}
 		} 
 		else if (pPacket->nMsg == MSGID_REPLYCONNECT) {
-			// 아직 UID 설정하기 전일수 있음
 			if (nPacketSize == sizeof(MReplyConnectMsg))
 			{
 				MPacketHeader* pNewPacket = (MPacketHeader*)malloc(nPacketSize);
@@ -178,7 +175,6 @@ int MCommandBuilder::MakeCommand(char* pBuffer, int nBufferLen)
 		nLen -= nPacketSize;			
 		nCmdCount++;
 
-//			if (nLen < sizeof(MPacketHeader)) break;
 		pPacket = (MPacketHeader*)(pBuffer+nOffset);
 	}
 
@@ -200,7 +196,7 @@ void MCommandBuilder::Clear()
 
 	if (!m_NetCmdList.empty())
 	{
-		for (list<MPacketHeader*>::iterator itorNetCmd = m_NetCmdList.begin(); itorNetCmd != m_NetCmdList.end(); ++itorNetCmd)
+		for (auto itorNetCmd = m_NetCmdList.begin(); itorNetCmd != m_NetCmdList.end(); ++itorNetCmd)
 		{
 			MPacketHeader* pNetCmd = (*itorNetCmd);
 			free(pNetCmd);
@@ -215,11 +211,11 @@ bool MCommandBuilder::Read(char* pBuffer, int nBufferLen)
 
 	if (CheckBufferEmpty() == true)  {
 		if ( (nBufferLen < sizeof(MPacketHeader)) || (nBufferLen < _CalcPacketSize(pPacket)) ) {	
-			AddBuffer(pBuffer, nBufferLen);	// 내부 Buffer에 저장
-		} else {	// Build Command
-			int nSpareData = MakeCommand(pBuffer, nBufferLen);			// Arg로 넘어온 외부버퍼에서 바로 Cmd생성
+			AddBuffer(pBuffer, nBufferLen);
+		} else {
+			int nSpareData = MakeCommand(pBuffer, nBufferLen);
 			if (nSpareData > 0) {
-				AddBuffer(pBuffer+(nBufferLen-nSpareData), nSpareData);	// 남은부분 내부 Buffer에 저장(내부버퍼처음사용)
+				AddBuffer(pBuffer+(nBufferLen-nSpareData), nSpareData);
 			}
 			else if (nSpareData < 0) return false;
 		}
@@ -228,7 +224,7 @@ bool MCommandBuilder::Read(char* pBuffer, int nBufferLen)
 		if (EstimateBufferToCmd() == true) {
 			int nSpareData = MakeCommand(m_Buffer, m_nBufferNext);	// m_nBufferNext == nBufferSize
 			if (nSpareData >= 0)
-				MoveBufferToFront(m_nBufferNext-nSpareData, nSpareData);	// Cmd만들고 남은부분 버퍼 앞쪽으로이동
+				MoveBufferToFront(m_nBufferNext-nSpareData, nSpareData);
 			else return false;
 		}
 	}
@@ -250,7 +246,7 @@ MCommand* MCommandBuilder::GetCommand()
 
 MPacketHeader* MCommandBuilder::GetNetCommand() 
 {
-	list<MPacketHeader*>::iterator itorCmd = m_NetCmdList.begin();
+	auto itorCmd = m_NetCmdList.begin();
 	if (itorCmd != m_NetCmdList.end()) {
 		MPacketHeader* pTestCmd = (*itorCmd);
 		m_NetCmdList.pop_front();

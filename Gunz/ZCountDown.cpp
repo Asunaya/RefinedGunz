@@ -9,11 +9,10 @@ void OnTimer_CountDown(void* pParam)
 
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
 	MWidget* pTargetWidget = pResource->FindWidget(pCountDown->szTargetWidget);
-	if(!pTargetWidget || !pTargetWidget->IsVisible()) return;	// 없거나 숨겨졌으면 카운트를 중지한다.
+	if(!pTargetWidget || !pTargetWidget->IsVisible()) return;
 
 	if(pCountDown->nSeconds>0) {
 
-		// 라벨이 있으면 갱신한다
 		if(pCountDown->szLabelWidget!=NULL)
 		{
 			ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
@@ -31,10 +30,8 @@ void OnTimer_CountDown(void* pParam)
 		return;
 	}
 
-	// 0이 되었으므로 대상 위젯을 숨기고, 
 	pTargetWidget->Show(false);	
 
-	// 콜백이 있으면 실행한다
 	if(pCountDown->pCallBack)
 		pCountDown->pCallBack();
 }

@@ -1,10 +1,4 @@
-#ifndef _MASYNCHTTP_H
-#define _MASYNCHTTP_H
-
-#include<windows.h>
-#include<wininet.h>
-
-//#pragma once
+#pragma once
 
 /*
 200 OK 
@@ -51,6 +45,10 @@ public:
 	MAsyncHttp* GetAsyncHttp()	{ return m_pAsyncHttp; }
 };
 
+using HANDLE = void*;
+using HINTERNET = HANDLE;
+using WIN_DWORD_PTR = std::conditional_t<sizeof(void*) == 4, unsigned long, unsigned long long>;
+
 class MAsyncHttp {
 protected:
 	HINTERNET	m_hInstance;
@@ -78,9 +76,9 @@ protected:
 	void SetVerbose(bool bVal)		{ m_bVerbose = bVal; }
 
 protected:
-	static void CALLBACK StatusCallback(HINTERNET hInternet,
-								DWORD_PTR dwContext, DWORD dwInternetStatus,
-								LPVOID lpStatusInfo, DWORD dwStatusInfoLen);
+	static void __stdcall StatusCallback(HINTERNET hInternet,
+		WIN_DWORD_PTR dwContext, unsigned long dwInternetStatus,
+		void* lpStatusInfo, unsigned long dwStatusInfoLen);
 public:
 	MAsyncHttp();
 	virtual ~MAsyncHttp();
@@ -90,6 +88,3 @@ public:
 
 	bool Get(const char* pszURL);
 };
-
-
-#endif

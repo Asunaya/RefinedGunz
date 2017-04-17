@@ -1,174 +1,112 @@
 #include "stdafx.h"
 #include "ZTimer.h"
-#include <Windows.h>
 
-class ZTimerEvent
+struct ZTimerEvent
 {
-private:
-	unsigned long int			m_nUpdatedTime;				///< 시간계산하기 위해 내부에서만 사용하는 변수
-	unsigned long int			m_nElapse;					///< 사용자가 설정한 시간(1000 - 1초)
-	bool						m_bOnce;					///< true로 설정되면 한번만 타이머 이벤트가 발생한다.
-	void*						m_pParam;					///< Event Callback의 파라메터
-public:
-	ZTimerEvent() { m_nUpdatedTime = 0; m_nElapse = 0; m_bOnce = false; m_fnTimerEventCallBack = NULL; m_pParam=NULL; }
-	bool UpdateTick(unsigned long int nDelta)
+	// The amount of time elapsed so far.
+	double ElapsedTime{};
+
+	// The amount of time that has to pass before the event is triggered.
+	double EventTime{};
+
+	// Is this event only triggered once?
+	bool TriggerOnce{};
+
+	// The callback to be called once the event is triggered.
+	ZGameTimerEventCallback* Callback{};
+
+	// The user-provided parameter to the callback.
+	void* Param{};
+
+	// Returns true if the event is to be stopped and false to continue.
+	bool UpdateTick(double Delta)
 	{
-		if (m_nElapse<0) return false;
+		ElapsedTime += Delta;
 
-		m_nUpdatedTime += nDelta;
-
-		if (m_nUpdatedTime >= m_nElapse)
+		if (ElapsedTime >= Delta)
 		{
-			if (m_fnTimerEventCallBack)
-			{
-				m_fnTimerEventCallBack(m_pParam);
-			}
+			Callback(Param);
 
-			if (m_bOnce) return true;
+			if (TriggerOnce)
+				return true;
 		}
 
 		return false;
 	}
-	void SetTimer(unsigned long int nElapse, ZGameTimerEventCallback* fnTimerEventCallback, void* pParam, bool bTimerOnce)
-	{
-		m_nElapse = nElapse;
-		m_fnTimerEventCallBack = fnTimerEventCallback;
-		m_pParam = pParam;
-		m_bOnce = bTimerOnce;
-	}
-
-	ZGameTimerEventCallback*	m_fnTimerEventCallBack;		///< Event Callback 포인터
 };
-
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ZTimer::ZTimer()
 {
-	m_bInitialized = false;
-	m_nNowTime = 0;
-	m_nLastTime = 0;
-}
-
-ZTimer::~ZTimer()
-{
-	for (list<ZTimerEvent*>::iterator itor = m_EventList.begin(); itor != m_EventList.end(); ++itor)
+#ifdef WIN32
+	LARGE_INTEGER Frequency;
+	auto qpf_ret = QueryPerformanceFrequency(&Frequency);
+	if (qpf_ret != FALSE)
 	{
-		ZTimerEvent* pEvent = (*itor);
-		delete pEvent;
+		UsingQPF = true;
+		TicksPerSecond = Frequency.QuadPart;
 	}
+	else
+	{
+		// timeGetTime resolution is in milliseconds
+		TicksPerSecond = 1000;
+	}
+#endif
 
-	m_EventList.clear();
+	LastTimeInTicks = GetTimeInTicks();
 }
+
+ZTimer::~ZTimer() = default;
 
 void ZTimer::ResetFrame()
 {
-	m_bInitialized=false;
+	LastTimeInTicks = GetTimeInTicks();
+}
+
+u64 ZTimer::GetTimeInTicks()
+{
+	if (UsingQPF)
+		return QPC();
+	
+	return timeGetTime();
 }
 
 double ZTimer::UpdateFrame()
 {
-	static BOOL bUsingQPF=FALSE;
-	static LONGLONG llQPFTicksPerSec  = 0;
-	static LONGLONG llLastElapsedTime = 0;
-	static DWORD thistime,lasttime,elapsed;
+	u64 TimeInTicks = GetTimeInTicks();
+	auto ElapsedTicks = TimeInTicks - LastTimeInTicks;
+	auto ElapsedSeconds = double(ElapsedTicks) / TicksPerSecond;
+	LastTimeInTicks = TimeInTicks;
 
-	LARGE_INTEGER qwTime;
+	UpdateEvents(ElapsedSeconds);
 
-	if(!m_bInitialized)
-	{
-		m_bInitialized = true;
-		LARGE_INTEGER qwTicksPerSec;
-		bUsingQPF = QueryPerformanceFrequency( &qwTicksPerSec );
-		if( bUsingQPF )
-		{
-			llQPFTicksPerSec = qwTicksPerSec.QuadPart;
-
-			QueryPerformanceCounter( &qwTime );
-
-			llLastElapsedTime = qwTime.QuadPart;
-		}
-		else
-		{
-			lasttime = GetGlobalTimeMS();
-		}
-	}
-
-	double fElapsed;
-
-	if( bUsingQPF )
-	{
-		QueryPerformanceCounter( &qwTime );
-		QueryPerformanceFrequency((PLARGE_INTEGER)&llQPFTicksPerSec);
-
-		fElapsed = double( qwTime.QuadPart - llLastElapsedTime ) / llQPFTicksPerSec;
-		llLastElapsedTime = qwTime.QuadPart;
-	}
-	else
-	{
-		thistime = GetGlobalTimeMS();
-		elapsed = thistime - lasttime;
-		lasttime = thistime;
-
-		fElapsed=.001f*(float)elapsed;
-	}
-
-	
-	UpdateEvents();			// 타이머 이벤트들 업데이트
-
-	return fElapsed;
+	return ElapsedSeconds;
 }
 
-void ZTimer::UpdateEvents()
+void ZTimer::UpdateEvents(double DeltaTime)
 {
-	m_nNowTime = GetGlobalTimeMS();
-	unsigned long int nDeltaTime = m_nNowTime - m_nLastTime;
-	m_nLastTime = m_nNowTime;
-
-	if (m_EventList.empty()) return;
-
-	for (list<ZTimerEvent*>::iterator itor = m_EventList.begin(); itor != m_EventList.end(); )
-	{
-		ZTimerEvent* pEvent = (*itor);
-		bool bDone = pEvent->UpdateTick(nDeltaTime);
-		if (bDone)
-		{
-			delete pEvent;
-			itor = m_EventList.erase(itor);
-		}
-		else
-		{
-			++itor;
-		}
-	}
+	// Update all of the events, and remove the ones that return true.
+	erase_remove_if(m_EventList, [&](auto&& Event) {
+		return Event.UpdateTick(DeltaTime);
+	});
 }
 
-void ZTimer::SetTimerEvent(unsigned long int nElapsedTime, ZGameTimerEventCallback* fnTimerEventCallback, void* pParam, bool bTimerOnce)
+void ZTimer::SetTimerEvent(u64 DelayInMilliseconds,
+	ZGameTimerEventCallback* Callback,
+	void* Param,
+	bool TriggerOnce)
 {
-	ZTimerEvent* pNewTimerEvent = new ZTimerEvent;
-	pNewTimerEvent->SetTimer(nElapsedTime, fnTimerEventCallback, pParam, bTimerOnce);
-	m_EventList.push_back(pNewTimerEvent);
+	ZTimerEvent NewEvent;
+	NewEvent.ElapsedTime = 0;
+	NewEvent.EventTime = double(DelayInMilliseconds) / 1000.0;
+	NewEvent.Callback = Callback;
+	NewEvent.Param = Param;
+	NewEvent.TriggerOnce = TriggerOnce;
+	m_EventList.push_back(std::move(NewEvent));
 }
 
 void ZTimer::ClearTimerEvent(ZGameTimerEventCallback* fnTimerEventCallback)
 {
-	if (fnTimerEventCallback == NULL) return;
-
-	for (list<ZTimerEvent*>::iterator itor = m_EventList.begin(); itor != m_EventList.end(); )
-	{
-		ZTimerEvent* pEvent = (*itor);
-
-		if (pEvent->m_fnTimerEventCallBack == fnTimerEventCallback)
-		{
-			delete pEvent;
-			itor = m_EventList.erase(itor);
-		}
-		else
-		{
-			++itor;
-		}
-	}
-
+	erase_remove_if(m_EventList, [&](auto&& Event) {
+		return Event.Callback == fnTimerEventCallback;
+	});
 }
-
-

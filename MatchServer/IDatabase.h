@@ -3,7 +3,6 @@
 #include <cstdint>
 #include <string>
 #include "MMatchGlobal.h"
-#include "MCountryFilter.h"
 
 enum class AccountCreationResult
 {
@@ -227,16 +226,6 @@ public:
 
 	virtual bool GetCID(const char* pszCharName, int& outCID) = 0;
 	virtual bool GetCharName(const int nCID, std::string& outCharName) = 0;
-
-	virtual bool GetIPCountryCode(const std::string& strIP,
-		uint32_t& dwOutIPFrom,
-		uint32_t& dwOutIPTo,
-		std::string& strOutCountryCode) = 0;
-	virtual bool GetBlockCountryCodeList(BlockCountryCodeList& rfBlockCountryCodeList) = 0;
-	virtual bool GetIPtoCountryList(IPtoCountryList& rfIPtoCountryList) = 0;
-	virtual bool GetCustomIP(const std::string& strIP, uint32_t& dwIPFrom, uint32_t& dwIPTo, bool& bIsBlock,
-		std::string& strCountryCode3, std::string& strComment) = 0;
-	virtual bool GetCustomIPList(CustomIPList& rfCustomIPList) = 0;
 
 	virtual bool InsertEvent(uint32_t dwAID, uint32_t dwCID, const std::string& strEventName) = 0;
 

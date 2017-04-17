@@ -1,5 +1,7 @@
 #include "stdafx.h"
-#include <windows.h>
+
+#ifdef WIN32
+
 #include "MDebug.h"
 #include "RealSpace2.h"
 #include "RParticleSystem.h"
@@ -8,6 +10,7 @@
 #include "RS2.h"
 #include "RS2Vulkan.h"
 #include "RBspObject.h"
+#include <Windows.h>
 
 #pragma comment(lib,"winmm.lib")
 
@@ -342,3 +345,5 @@ int RMain(const char *AppName, HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR c
 }
 
 _NAMESPACE_REALSPACE2_END
+
+#endif

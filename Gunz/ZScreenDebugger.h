@@ -1,6 +1,4 @@
-#ifndef _ZSCREENDEBUGGER_H
-#define _ZSCREENDEBUGGER_H
-
+#pragma once
 
 class MDrawContext;
 
@@ -11,7 +9,7 @@ private:
 	int		m_nY;
 
 	void OnDrawAIDebugInfo(MDrawContext *pDC);
-	void DrawActorInfo(int num, MDrawContext *pDC, ZActor* pActor);
+	void DrawActorInfo(int num, MDrawContext *pDC, class ZActor* pActor);
 	void PrintText(MDrawContext* pDC, const char* buffer);
 public:
 	ZScreenDebugger();
@@ -19,10 +17,5 @@ public:
 	void DrawDebugInfo(MDrawContext *pDC);
 	void SwitchDebugInfo();
 
-	bool IsVisible()	{ return (m_nShowDebugInfo != 0); }
+	bool IsVisible();
 };
-
-
-
-
-#endif

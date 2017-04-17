@@ -974,10 +974,10 @@ void ChatCmd_Test(const char* line, const int argc, char **const argv)
 	}
 	char* pszCharName = argv[1];
 
-	ZGameClient* pClient = ZGetGameClient();
-	MMatchPeerInfoList* pList = pClient->GetPeers();
-	for (MMatchPeerInfoList::iterator i=pList->begin(); i!= pList->end(); i++) {
-		MMatchPeerInfo* pInfo = (*i).second;
+	auto* pClient = ZGetGameClient();
+	auto* pList = pClient->GetPeers();
+	for (auto* pInfo : MakePairValueAdapter(pList->MUIDMap))
+	{
 		if(_stricmp(pInfo->CharInfo.szName, pszCharName) == 0) {
 			MCommand* pCmd = pClient->CreateCommand(MC_TEST_PEERTEST_PING, pInfo->uidChar);
 			pClient->Post(pCmd);
@@ -987,8 +987,6 @@ void ChatCmd_Test(const char* line, const int argc, char **const argv)
 
 void ChatCmd_Macro(const char* line,const int argc, char **const argv)
 {
-// config 에 등록 저장 - 키입력 누를때처럼
-// 
 	if(argc != 3)
 	{
 		OutputCmdWrongArgument(argv[0]);
@@ -1114,7 +1112,6 @@ void ChatCmd_LadderInvite(const char* line,const int argc, char **const argv)
 		return;
 	}
 
-	// 테스트로 우선 2명이 한팀
 	char szNames[2][256];
 	strcpy_safe(szNames[0], argv[1]);
 	strcpy_safe(szNames[1], argv[2]);

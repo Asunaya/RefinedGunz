@@ -8,7 +8,6 @@
 #include "MMatchItem.h"
 #include "MAgentObject.h"
 #include "MMatchNotify.h"
-#include "Msg.h"
 #include "MMatchObjCache.h"
 #include "MMatchStage.h"
 #include "MMatchTransDataType.h"

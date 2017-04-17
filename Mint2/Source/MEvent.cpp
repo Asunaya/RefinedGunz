@@ -1,27 +1,30 @@
 #include "stdafx.h"
 #include "MEvent.h"
-#include <zmouse.h>
 #include "Mint.h"
 
-MPOINT MEvent::LatestPos = MPOINT(0, 0);	// 마지막 위치
+MPOINT MEvent::LatestPos = MPOINT(0, 0);
 bool MEvent::bIMESupport = false;	// Default IME Support Enabled
 bool MEvent::bLButton = false;
 bool MEvent::bMButton = false;
 bool MEvent::bRButton = false;
 
-bool MEvent::GetShiftState(void)
+#ifdef WIN32
+
+#include "MWindows.h"
+
+bool MEvent::GetShiftState()
 {
 	if((GetKeyState(VK_SHIFT)&0x8000)==0x8000) return true;
 	return false;
 }
 
-bool MEvent::GetCtrlState(void)
+bool MEvent::GetCtrlState()
 {
 	if((GetKeyState(VK_CONTROL)&0x8000)==0x8000) return true;
 	return false;
 }
 
-bool MEvent::GetAltState(void)
+bool MEvent::GetAltState()
 {
 	if((GetKeyState(VK_MENU)&0x8000)==0x8000) return true;
 	return false;
@@ -47,15 +50,14 @@ bool MEvent::GetMButtonState()
 	return bMButton;
 }
 
-MPOINT MEvent::GetMousePos(void)
+MPOINT MEvent::GetMousePos()
 {
 	POINT p;
 	GetCursorPos(&p);
 	return MPOINT(p.x, p.y);
 }
 
-#include "MDebug.h"
-void MEvent::ForceSetIME(DWORD fdwConversion,DWORD fdwSentence)
+void MEvent::ForceSetIME(u32 fdwConversion, u32 fdwSentence)
 {
 	HWND hWnd = Mint::GetInstance()->GetHWND();
 	HIMC hImc = ImmGetContext(hWnd);
@@ -66,11 +68,9 @@ void MEvent::ForceSetIME(DWORD fdwConversion,DWORD fdwSentence)
 	}
 }
 
-int MEvent::TranslateEvent(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
+int MEvent::TranslateEvent(struct HWND__* hwnd, u32 message, u32 wparam, u32 lparam)
 {
-	//bShift = GetShiftState();
 	bCtrl = GetCtrlState();
-	//bAlt = GetAltState();
 
 	switch(message){
 	case WM_LBUTTONDOWN:
@@ -88,7 +88,7 @@ int MEvent::TranslateEvent(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam
 
 		LatestPos = Pos;
 		break;
-	case WM_MOUSEWHEEL:	// 휠은 절대좌표로 날아옴
+	case WM_MOUSEWHEEL:
 		{
 			POINT pos;
 			pos.x = LOWORD(lparam);
@@ -147,38 +147,9 @@ int MEvent::TranslateEvent(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam
 		nMessage = MWM_MOUSEWHEEL;
 		nDelta = (short)HIWORD(wparam);
 		return EVENT_MINT_TRANSLATED;
-		/*
-	case WM_RESIZE_EVENT:
-		nMessage = MWM_RESIZE;
-		return EVENT_MINT_TRANSLATED;
-
-	case WM_MOVIE_NOTIFY:
-		nMessage = MWM_MOVIE_NOTIFY;
-		return EVENT_MINT_TRANSLATED;
-		*/
-
 	case WM_KEYDOWN:
 		nMessage = MWM_KEYDOWN;
 		nKey = wparam;
-		return EVENT_MINT_TRANSLATED;
-
-		/*
-		switch(wparam){
-		case VK_DELETE:
-			nMessage = MWM_SCHAR;
-			nKey = wparam;
-			return EVENT_MINT_TRANSLATED;
-		case VK_LEFT:
-		case VK_RIGHT:
-		case VK_HOME:
-		case VK_END:
-			nMessage = MWM_CHAR;
-			nKey = wparam;
-			return EVENT_MINT_TRANSLATED;
-		default:
-			return EVENT_NOT_PROCESSED;
-		}
-		*/
 		return EVENT_MINT_TRANSLATED;
 	case WM_KEYUP:
 		nMessage = MWM_KEYUP;
@@ -206,25 +177,17 @@ int MEvent::TranslateEvent(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam
 		nKey = wparam;
 		return EVENT_MINT_TRANSLATED;
 
-	// IME 관련
 	case WM_INPUTLANGCHANGE:
-		// 원래는 여기에 Input Language 이벤트 변화를 받아야 하지만, Mint에서는 폴링 방식으로
-		// GetKeyboardLayout()을 이용하여 필요한 때 얻어서 사용한다.
-		// Mint::IsNativeIME() 참고
-		// 2005-08-18, 이장호
 		return (EVENT_PROCESSED|EVENT_MINT_TRANSLATED);
 	case WM_IME_STARTCOMPOSITION:
 		if(bIMESupport==true){
-			//nMessage = MWM_IMECOMPOSE;
 			szIMECompositionString[0] = NULL;
 			szIMECompositionResultString[0] = NULL;
-//			OutputDebugString("WM_IME_STARTCOMPOSITION");
 			return (EVENT_PROCESSED|EVENT_MINT_TRANSLATED);
 		}
-		return EVENT_PROCESSED;	// 처리가 되므로
+		return EVENT_PROCESSED;
 	case WM_IME_COMPOSITION:
 		if(bIMESupport==true){
-//			OutputDebugString("WM_IME_COMPOSITION\n");
 			nMessage = MWM_IMECOMPOSE;
 
 			Mint* pMint = Mint::GetInstance();
@@ -234,10 +197,8 @@ int MEvent::TranslateEvent(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam
 				if(lparam&GCS_RESULTSTR){
 					LONG i = ImmGetCompositionString(hIMC, GCS_RESULTSTR, szIMECompositionResultString, sizeof(szIMECompositionResultString));
 					szIMECompositionResultString[i] = NULL;
-					//				OutputDebugString("GCS_RESULTSTR\n");
 					pMint->m_nCompositionAttributeSize = 0;
 					memset(pMint->m_nCompositionAttributes, 0, sizeof(BYTE)*(MIMECOMPOSITIONSTRING_LENGTH));
-					//memset(pMint->m_dwCompositionClauses, 0, sizeof(DWORD)*(MIMECOMPOSITIONSTRING_LENGTH));
 				}
 				else{
 					szIMECompositionResultString[0] = NULL;
@@ -245,20 +206,12 @@ int MEvent::TranslateEvent(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam
 				if(lparam&GCS_COMPSTR){
 					LONG i = ImmGetCompositionString(hIMC, GCS_COMPSTR, szIMECompositionString, sizeof(szIMECompositionString));
 					szIMECompositionString[i] = NULL;
-					//				OutputDebugString("GCS_COMPSTR\n");
 
 				}
 				else{
 					szIMECompositionString[0] = NULL;
 				}
 
-				/*
-				// 절 정보 얻기(일어)
-				if(lparam & GCS_COMPCLAUSE)
-					ImmGetCompositionString(hIMC, GCS_COMPCLAUSE, pMint->m_dwCompositionClauses, sizeof(pMint->m_dwCompositionClauses));
-				*/
-
-				// 속성 얻기(각 절이 어떤 값을 가지는가)
 				if(lparam & GCS_COMPATTR)
 					pMint->m_nCompositionAttributeSize = ImmGetCompositionString(hIMC, GCS_COMPATTR, pMint->m_nCompositionAttributes, sizeof(pMint->m_nCompositionAttributes));
 
@@ -266,51 +219,23 @@ int MEvent::TranslateEvent(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam
 					pMint->m_nCompositionCaretPosition = ImmGetCompositionString(hIMC, GCS_CURSORPOS, NULL, 0);
 			}
 			
-//			OutputDebugString("Comp - ");
-//			OutputDebugString(szIMECompositionString);
-//			OutputDebugString("\n");
-//			OutputDebugString("Resl - ");
-//			OutputDebugString(szIMECompositionResultString);
-//			OutputDebugString("\n");
 			return (EVENT_PROCESSED|EVENT_MINT_TRANSLATED);
 		}
-		return EVENT_PROCESSED;	// 처리가 되므로
+		return EVENT_PROCESSED;
 	case WM_IME_ENDCOMPOSITION:
 		if(bIMESupport==true){
-			//nMessage = MWM_IMECOMPOSE;
 			szIMECompositionString[0] = NULL;
 			szIMECompositionResultString[0] = NULL;
-//			OutputDebugString("WM_IME_ENDCOMPOSITION");
 			Mint* pMint = Mint::GetInstance();
 			pMint->m_nCompositionCaretPosition = 0;
 			return (EVENT_PROCESSED|EVENT_MINT_TRANSLATED);
 		}
-		return EVENT_PROCESSED;	// 처리가 되므로
+		return EVENT_PROCESSED;
 	case WM_IME_NOTIFY:
 		{
 			Mint* pMint = Mint::GetInstance();
-			if(bIMESupport==true && pMint->IsEnableIME()==true){	// IsEnableIME() 체크는 창 밖에서 Candidate List가 안나오게 하기 위해
-				/*
-				if(wparam==IMN_SETCONVERSIONMODE){
-					nMessage = MWM_IMECONVERSION;
-
-					if(Mint::GetInstance()->m_dwIMEConvMode==IME_CMODE_ALPHANUMERIC)
-						Mint::GetInstance()->m_dwIMEConvMode=IME_CMODE_NATIVE;
-					else
-						Mint::GetInstance()->m_dwIMEConvMode=IME_CMODE_ALPHANUMERIC;
-					return EVENT_MINT_TRANSLATED;
-				} else if (wparam == IMN_OPENCANDIDATE) {
-					OutputDebugString("IMEDEBUG: IMN_OPENCANDIDATE \n");
-				} else if (wparam == IMN_CLOSECANDIDATE) {
-					OutputDebugString("IMEDEBUG: IMN_CLOSECANDIDATE \n");
-				} else if (wparam == IMN_CHANGECANDIDATE) {
-					OutputDebugString("IMEDEBUG: IMN_CHANGECANDIDATE \n");
-				} else if (wparam == IMN_SETCANDIDATEPOS) {
-					OutputDebugString("IMEDEBUG: IMN_SETCANDIDATEPOS \n");
-				}
-				*/
+			if(bIMESupport==true && pMint->IsEnableIME()==true){
 				if(wparam==IMN_OPENCANDIDATE || wparam==IMN_CHANGECANDIDATE){
-					// IMN_CHANGECANDIDATE 또한 Open과 마찬가지로 CandidateList를 얻어야 함
 					pMint->OpenCandidateList();
 				}
 				else if(wparam==IMN_CLOSECANDIDATE){
@@ -321,7 +246,6 @@ int MEvent::TranslateEvent(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam
 		}
 		return EVENT_PROCESSED;
 	case WM_IME_SETCONTEXT:
-		// 일본어에서 F5에 입력창 뜨는 명령어 차단
 		return EVENT_PROCESSED;
 	default:
 		return EVENT_NOT_PROCESSED;
@@ -330,3 +254,4 @@ int MEvent::TranslateEvent(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam
 	return EVENT_NOT_PROCESSED;
 }
 
+#endif

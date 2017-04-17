@@ -135,32 +135,32 @@ protected:
 
 #include "MZFile.h"
 
-struct RecursiveFileIterator
+struct RecursiveMZFileIterator
 {
 public:
-	RecursiveFileIterator(MZFileSystem& FS,
+	RecursiveMZFileIterator(MZFileSystem& FS,
 		const MZDirDesc& Dir,
 		const MZDirDesc* CurrentSubdir,
 		int FileIndex)
 		: FS{ FS }, Dir{ Dir }, CurrentSubdir{ CurrentSubdir }, FileIndex{ FileIndex }
 	{}
 
-	bool operator==(const RecursiveFileIterator& rhs) const {
+	bool operator==(const RecursiveMZFileIterator& rhs) const {
 		return CurrentSubdir == rhs.CurrentSubdir && FileIndex == rhs.FileIndex;
 	}
 
-	bool operator!=(const RecursiveFileIterator& rhs) const {
+	bool operator!=(const RecursiveMZFileIterator& rhs) const {
 		return !(*this == rhs);
 	}
 
 	const MZFileDesc& operator*() const { return CurrentSubdir->Files[FileIndex]; }
 
-	RecursiveFileIterator& operator++() {
+	RecursiveMZFileIterator& operator++() {
 		AdvanceToNextFile();
 		return *this;
 	}
 
-	RecursiveFileIterator& operator++(int) {
+	RecursiveMZFileIterator& operator++(int) {
 		auto temp = *this;
 		++*this;
 		return temp;
@@ -175,7 +175,7 @@ private:
 	int FileIndex;
 };
 
-Range<RecursiveFileIterator> FilesInDirRecursive(MZFileSystem& FS, const MZDirDesc& Dir);
+Range<RecursiveMZFileIterator> FilesInDirRecursive(MZFileSystem& FS, const MZDirDesc& Dir);
 
 template<size_t size> void GetRefineFilename(char(&szRefine)[size], const char *szSource) {
 	GetRefineFilename(szRefine, size, szSource);

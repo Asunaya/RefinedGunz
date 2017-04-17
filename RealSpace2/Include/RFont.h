@@ -4,7 +4,7 @@
 #include <map>
 #include <list>
 #include <string>
-#include "Realspace2.h"
+#include "RealSpace2.h"
 #include "MemPool.h"
 
 _NAMESPACE_REALSPACE2_BEGIN
@@ -31,7 +31,7 @@ struct RFONTTEXTURECELLINFO {
 class RFontTexture
 {
 	HDC		m_hDC;
-	DWORD	*m_pBitmapBits;
+	u32	*m_pBitmapBits;
 	HBITMAP m_hbmBitmap;
 	HBITMAP m_hPrevBitmap;
 
@@ -46,7 +46,7 @@ class RFontTexture
 	RFONTTEXTURECELLINFO	*m_CellInfo;
 	RFONTTEXTURECELLINFOLIST m_PriorityQueue;
 
-	bool UploadTexture(RCHARINFO *pCharInfo,DWORD* pBitmapBits,int w,int h);
+	bool UploadTexture(RCHARINFO *pCharInfo,u32* pBitmapBits,int w,int h);
 
 public:
 	RFontTexture();
@@ -60,9 +60,9 @@ public:
 	int GetCharWidth(HFONT hFont, const char* szChar);
 	int GetCharWidth(HFONT hFont, const wchar_t* szChar);
 	bool MakeFontBitmap(HFONT hFont, RCHARINFO *pInfo, const char* szText,
-		int nOutlineStyle, DWORD nColorArg1, DWORD nColorArg2);
+		int nOutlineStyle, u32 nColorArg1, u32 nColorArg2);
 	bool MakeFontBitmap(HFONT hFont, RCHARINFO *pInfo, const wchar_t* szText,
-		int nOutlineStyle, DWORD nColorArg1, DWORD nColorArg2);
+		int nOutlineStyle, u32 nColorArg1, u32 nColorArg2);
 	bool IsNeedUpdate(int nIndex, int nID);
 	
 	int GetWidth() { return m_nWidth; }
@@ -73,7 +73,8 @@ public:
 
 class RFont {
 	template <typename CharT>
-	void DrawTextImpl(float x, float y, const CharT* szText, int Length, DWORD dwColor = 0xFFFFFFFF, float fScale = 1.0f);
+	void DrawTextImpl(float x, float y, const BasicStringView<CharT>& Text,
+		u32 dwColor = 0xFFFFFFFF, float fScale = 1.0f);
 	template <typename CharT>
 	int GetTextWidthImpl(const CharT* szText, int nSize = -1);
 
@@ -82,8 +83,8 @@ class RFont {
 	int		m_nOutlineStyle;
 	bool	m_bAntiAlias;
 
-	DWORD	m_ColorArg1;
-	DWORD	m_ColorArg2;
+	u32	m_ColorArg1;
+	u32	m_ColorArg2;
 
 	RCHARINFOMAP m_CharInfoMap;
 	RFontTexture *m_pFontTexture;
@@ -91,26 +92,27 @@ class RFont {
 	static bool m_bInFont;
 
 public:
-	RFont(void);
-	virtual ~RFont(void);
+	RFont();
+	virtual ~RFont();
 
-	bool Create(const TCHAR* szFontName, int nHeight, bool bBold=false, bool bItalic=false, int nOutlineStyle=0, int nCacheSize=-1, bool bAntiAlias=false, DWORD nColorArg1=0, DWORD nColorArg2=0);
-	void Destroy(void);
+	bool Create(const TCHAR* szFontName, int nHeight,
+		bool bBold = false, bool bItalic = false,
+		int nOutlineStyle = 0, int nCacheSize = -1,
+		bool bAntiAlias = false,
+		u32 nColorArg1 = 0, u32 nColorArg2 = 0);
+	void Destroy();
 
 	bool BeginFont();
 	bool EndFont();
 
 	// Draws an extended ASCII string in the current codepage.
-	void DrawText(float x, float y, const char* szText, DWORD dwColor = 0xFFFFFFFF, float fScale = 1.0f);
+	void DrawText(float x, float y, const StringView& Text, u32 Color = 0xFFFFFFFF, float Scale = 1.0f);
+
 	// Draws a UTF-16 string.
 	// Doesn't support astral plane characters.
-	void DrawText(float x, float y, const wchar_t* szText, DWORD dwColor = 0xFFFFFFFF, float fScale = 1.0f);
+	void DrawText(float x, float y, const WStringView& Text, u32 Color = 0xFFFFFFFF, float Scale = 1.0f);
 
-	// Like the above, but with explicit length.
-	void DrawTextN(float x, float y, const char* szText, int Length, DWORD dwColor = 0xFFFFFFFF, float fScale = 1.0f);
-	void DrawTextN(float x, float y, const wchar_t* szText, int Length, DWORD dwColor = 0xFFFFFFFF, float fScale = 1.0f);
-
-	int GetHeight(void){ return m_nHeight; }
+	int GetHeight() const { return m_nHeight; }
 	int GetTextWidth(const char* szText, int nSize = -1);
 	int GetTextWidth(const wchar_t* szText, int nSize = -1);
 };

@@ -6,7 +6,6 @@
 #include "MButton.h"
 #include "MEdit.h"
 
-
 inline bool MIsSameWidgetClass(MWidget* pWidget, const char* szClassName)
 {
 	if (strcmp(pWidget->GetClassName(), szClassName) == 0) return true;
@@ -1123,14 +1122,4 @@ MRECT MScreenToClient(const MWidget* pWidget, const MRECT& p)
 {
 	MRECT r = pWidget->GetScreenRect();
 	return MRECT(p.x-r.x, p.y-r.y, p.w, p.h);
-}
-
-MPOINT GetCursorPosition()
-{
-	POINT p;
-	GetCursorPos(&p);
-	MPOINT mp;
-	mp.x = p.x;
-	mp.y = p.y;
-	return mp;
 }

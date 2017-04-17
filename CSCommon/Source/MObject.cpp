@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#include "winsock2.h"
 #include "MXml.h"
 #include "MObject.h"
 
@@ -80,7 +79,7 @@ void MObject::AddCommListener(MUID ListenerUID)
 
 void MObject::RemoveCommListener(MUID ListenerUID)
 {
-	for (list<MUID>::iterator i=m_CommListener.begin(); i!=m_CommListener.end(); i++) {
+	for (auto i=m_CommListener.begin(); i!=m_CommListener.end(); i++) {
 		MUID uid = *i;
 		if (uid == ListenerUID) {
 			m_CommListener.erase(i);
@@ -91,7 +90,7 @@ void MObject::RemoveCommListener(MUID ListenerUID)
 
 bool MObject::IsCommListener(MUID ListenerUID)
 {
-	for (list<MUID>::iterator i=m_CommListener.begin(); i!=m_CommListener.end(); i++) {
+	for (auto i=m_CommListener.begin(); i!=m_CommListener.end(); i++) {
 		MUID uid = *i;
 		if (uid == ListenerUID)
 			return true;

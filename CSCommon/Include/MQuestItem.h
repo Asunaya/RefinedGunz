@@ -3,9 +3,6 @@
 
 #include "MUID.h"
 #include <map>
-
-#include <mmsystem.h>
-
 #include "MQuestConst.h"
 #include "MDebug.h"
 #include "MZFileSystem.h"
@@ -105,7 +102,7 @@ public :
 		return true;
 	}
 private :
-	map< int, MQuestItemDesc* >	m_MonsterBibleMgr;
+	std::map<int, MQuestItemDesc*> m_MonsterBibleMgr;
 };
 
 #define GetQuestItemDescMgr() MQuestItemDescManager::GetInst()
@@ -133,25 +130,21 @@ public:
 
 	unsigned long int	GetItemID()	{ return m_nItemID; }
 	int GetCount()	{ return m_nCount; }
-	bool IsKnown()	{ return m_bKnown; }	// 한번이라도 획득했었는지 여부
+	bool IsKnown()	{ return m_bKnown; }
 	MQuestItemDesc* GetDesc();
 	void SetDesc( MQuestItemDesc* pDesc ) { m_pDesc = pDesc; }
 	void SetItemID( unsigned long int nItemID )	{ m_nItemID = nItemID; }
 	
-// private:
 	bool SetCount( int nCount, bool bKnown = true );
-private :
+
+private:
 	unsigned long int	m_nItemID;
 	MQuestItemDesc*		m_pDesc;
-	int					m_nCount;			// 같은 종류의 아이템은 새로 생성하지 않고 수를 늘림.
+	int					m_nCount;
 	bool				m_bKnown;
 };
 
-
-// 게임중에 퀘스트 아이템을 등록하고 있는 클래스.
-// 맵에 등록된 퀘스트 아이템은 적어도 한번은 획득한적이 있었던 아이템임.
-// 개수가 1일경우는 획득한 적이 있던 아이템이지만 현재 가지고 있는 수량이 0이라는 뜻.
-class MQuestItemMap : public map< unsigned long int, MQuestItem* >
+class MQuestItemMap : public std::map< unsigned long int, MQuestItem* >
 {
 public :
 	MQuestItemMap() : m_bDoneDbAccess( false )
@@ -173,19 +166,10 @@ public :
 	MQuestItem*		Find( const unsigned long int nItemID );
 	void			Insert( unsigned long int nItemID, MQuestItem* pQuestItem );
 	
-/*
-	static MUID UseUID()
-	{
-		m_csUIDGenerateLock.Lock();
-			m_uidGenerate.Increase();	
-		m_csUIDGenerateLock.Unlock();
-		return m_uidGenerate;
-	}
-*/
 private :
 	static MUID				m_uidGenerate;
 	static MCriticalSection	m_csUIDGenerateLock;
-	bool					m_bDoneDbAccess;		// 디비에서 정보를 가져왔었는지 여부
+	bool					m_bDoneDbAccess;
 };
 
 inline bool IsQuestItemID(unsigned int nItemID)

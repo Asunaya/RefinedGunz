@@ -13,6 +13,7 @@
 #include "RealSoundWaveFile.h"
 #include "MZFileSystem.h"
 #include "RealSpace2.h"
+#include <mmsystem.h>
 
 using namespace RealSpace2;
 
@@ -55,10 +56,10 @@ RSMWaveFile::~RSMWaveFile (void)
 //////////////////////////////////////////////////
 // Member Function Implementation
 
-BOOL RSMWaveFile::Open (LPSTR pszFilename)
+bool RSMWaveFile::Open (char* pszFilename)
 {
     WORD cbExtra = 0;    
-    BOOL fRtn = TRUE;
+    bool fRtn = true;
     
     /////////////////////////////////////////////////
 	// pszFilename으로 지정된 wave화일을 연다.
@@ -119,7 +120,7 @@ BOOL RSMWaveFile::Open (LPSTR pszFilename)
         // Read those extra bytes, append to WAVEFORMATEX structure
         if (cbExtra != 0)
         {
-            if ((m_mmr = mmioRead (m_hmmio, (LPSTR) ((BYTE *)(m_pwfmt) + sizeof (WAVEFORMATEX)), cbExtra)) != cbExtra)
+            if ((m_mmr = mmioRead (m_hmmio, (LPSTR) ((u8 *)(m_pwfmt) + sizeof (WAVEFORMATEX)), cbExtra)) != cbExtra)
             {
                 // Error reading extra bytes
                 m_mmr = MMIOERR_CANNOTREAD;
@@ -158,7 +159,7 @@ BOOL RSMWaveFile::Open (LPSTR pszFilename)
     
 OPEN_ERROR:
     // Handle all errors here
-    fRtn = FALSE;
+    fRtn = false;
     if (m_hmmio)
     {
         // Close file
@@ -180,9 +181,9 @@ OPEN_DONE:
 
 // Cue
 //
-BOOL RSMWaveFile::Cue (void)
+bool RSMWaveFile::Cue (void)
 {
-    BOOL fRtn = TRUE;    // assume success
+    bool fRtn = true;    // assume success
 
     // Seek to 'data' chunk from beginning of file
     if (mmioSeek (m_hmmio, m_mmckiRiff.dwDataOffset + sizeof(FOURCC), SEEK_SET) != -1)
@@ -197,14 +198,14 @@ BOOL RSMWaveFile::Cue (void)
         else
         {
             // UNDONE: set m_mmr
-            fRtn = FALSE;
+            fRtn = false;
         }
     }
     else
     {
         // mmioSeek error
         m_mmr = MMIOERR_CANNOTSEEK;
-        fRtn = FALSE;
+        fRtn = false;
     }
 
     return fRtn;
@@ -215,7 +216,7 @@ BOOL RSMWaveFile::Cue (void)
 // Returns number of bytes actually read.
 // On error, returns 0, MMIO error code in m_mmr.
 //
-UINT RSMWaveFile::Read (BYTE * pbDest, UINT cbSize)
+UINT RSMWaveFile::Read (u8 * pbDest, UINT cbSize)
 {
     MMIOINFO mmioinfo;
     UINT cb;
@@ -290,9 +291,9 @@ READ_DONE:
 // 16-bit mono      2 bytes         0x0000
 // 16-bit stereo    4 bytes         0x00000000
 //
-BYTE RSMWaveFile::GetSilenceData (void)
+u8 RSMWaveFile::GetSilenceData (void)
 {
-    BYTE bSilenceData = 0;
+    u8 bSilenceData = 0;
 
     // Silence data depends on format of Wave file
     if (m_pwfmt)
@@ -300,13 +301,13 @@ BYTE RSMWaveFile::GetSilenceData (void)
         if (m_pwfmt->wBitsPerSample == 8)
         {
             // For 8-bit formats (unsigned, 0 to 255)
-            // Packed DWORD = 0x80808080;
+            // Packed u32 = 0x80808080;
             bSilenceData = 0x80;
         }
         else if (m_pwfmt->wBitsPerSample == 16)
         {
             // For 16-bit formats (signed, -32768 to 32767)
-            // Packed DWORD = 0x00000000;
+            // Packed u32 = 0x00000000;
             bSilenceData = 0x00;
         }
         else
@@ -328,7 +329,7 @@ BYTE RSMWaveFile::GetSilenceData (void)
 RSMemWaveFile::RSMemWaveFile()
 {
 	m_pImageData = NULL;
-	m_bResource = FALSE;
+	m_bResource = false;
 	m_dwImageLen = 0;
 }
 
@@ -340,12 +341,12 @@ RSMemWaveFile::~RSMemWaveFile()
 ///////////////////////////////////
 // Methods
 
-BOOL RSMemWaveFile::Open( const char *szFileName )
+bool RSMemWaveFile::Open( char *szFileName )
 {
 	FILE *fp;
 
 	Close();
-	m_bResource = FALSE;
+	m_bResource = false;
 	
 	fopen_s( &fp, szFileName, "rb" );
 	if( !fp ){
@@ -354,30 +355,30 @@ BOOL RSMemWaveFile::Open( const char *szFileName )
 		OutputDebugString( szFileName );
 		OutputDebugString( "\n");
 #endif
-		return FALSE;
+		return false;
 	}
 	fseek( fp, 0, SEEK_END );
 	m_dwImageLen = ftell( fp );
 
-	m_pImageData = (BYTE *)::GlobalLock(::GlobalAlloc(GMEM_MOVEABLE|GMEM_SHARE, m_dwImageLen));
+	m_pImageData = (u8 *)::GlobalLock(::GlobalAlloc(GMEM_MOVEABLE|GMEM_SHARE, m_dwImageLen));
 	if( !m_pImageData ){
 #ifdef _DEBUG
 		OutputDebugString( "RSMemWaveFile : Open, Cannot allocate memory for reading.\n" );
 #endif
-		return FALSE;
+		return false;
 	}
 	fseek( fp, 0, SEEK_SET );
 	fread( m_pImageData, m_dwImageLen, 1, fp );	// loading from waveform file.
 	fclose( fp );
 
-	return TRUE;
+	return true;
 }
 
-BOOL RSMemWaveFile::Open( UINT uID, HMODULE hMod )
+bool RSMemWaveFile::Open( UINT uID, HMODULE hMod )
 {
 	Close();
 
-	m_bResource = TRUE;
+	m_bResource = true;
 	
 	HRSRC hresInfo;
 	hresInfo = ::FindResource( hMod, MAKEINTRESOURCE(uID), "WAVE" );
@@ -385,12 +386,12 @@ BOOL RSMemWaveFile::Open( UINT uID, HMODULE hMod )
 #ifdef _DEBUG
 		OutputDebugString( "RSMemWaveFile : Open, Cannot find resource.\n" );
 #endif
-		return FALSE;
+		return false;
 	}
 	HGLOBAL hgmemWave = ::LoadResource( hMod, hresInfo );
 	
 	if( hgmemWave ){
-		m_pImageData = (BYTE *)::LockResource( hgmemWave );
+		m_pImageData = (u8 *)::LockResource( hgmemWave );
 		m_dwImageLen = ::SizeofResource( hMod, hresInfo );
 	} else {
 #ifdef _DEBUG
@@ -399,47 +400,47 @@ BOOL RSMemWaveFile::Open( UINT uID, HMODULE hMod )
 		m_pImageData = NULL;
 		m_dwImageLen = 0;
 
-		return FALSE;
+		return false;
 	}
 
-	return TRUE;
+	return true;
 }
 
-BOOL RSMemWaveFile::Open( Package *pPackage, int nIndex )
+bool RSMemWaveFile::Open( Package *pPackage, int nIndex )
 {
 	PakData *pPakData;
 
-	if( !pPackage || nIndex < 0 ) return FALSE;
+	if( !pPackage || nIndex < 0 ) return false;
 	pPakData = pPackage->GetPakData( nIndex );
 
 	if( !pPakData ){
 #ifdef _DEBUG
 		OutputDebugString("RSMemWaveFile : (Open) Cannot find pakdata, GetPakData\n");
 #endif
-		return FALSE;
+		return false;
 	}
 	m_dwImageLen = pPakData->GetFileSize();	
-	m_pImageData = (BYTE *)::GlobalLock(::GlobalAlloc(GMEM_MOVEABLE|GMEM_SHARE, m_dwImageLen));
+	m_pImageData = (u8 *)::GlobalLock(::GlobalAlloc(GMEM_MOVEABLE|GMEM_SHARE, m_dwImageLen));
 	if( !m_pImageData ){
 #ifdef _DEBUG
 		OutputDebugString( "RSMemWaveFile : Open, Cannot allocate memory for reading package.\n" );
 #endif
-		return FALSE;
+		return false;
 	}
 	pPakData->ReadFile( m_pImageData, m_dwImageLen );
 
 	delete pPakData;	
 	
-	return TRUE;
+	return true;
 }
 
-BOOL RSMemWaveFile::Open( Package *pPackage, char* Name )
+bool RSMemWaveFile::Open( Package *pPackage, char* Name )
 {
 	PakData *pPakData = NULL;
 
-	if(!pPackage) return FALSE;
+	if(!pPackage) return false;
 
-//	if( !pPackage || nIndex < 0 ) return FALSE;
+//	if( !pPackage || nIndex < 0 ) return false;
 //	pPakData = pPackage->GetPakData( nIndex );
 	pPakData = pPackage->GetPakData( Name );
 
@@ -447,17 +448,17 @@ BOOL RSMemWaveFile::Open( Package *pPackage, char* Name )
 #ifdef _DEBUG
 		OutputDebugString("RSMemWaveFile : (Open) Cannot find pakdata, GetPakData\n");
 #endif
-		return FALSE;
+		return false;
 	}
 
 	m_dwImageLen = pPakData->GetFileSize();	
-	m_pImageData = (BYTE *)::GlobalLock(::GlobalAlloc(GMEM_MOVEABLE|GMEM_SHARE, m_dwImageLen));
+	m_pImageData = (u8 *)::GlobalLock(::GlobalAlloc(GMEM_MOVEABLE|GMEM_SHARE, m_dwImageLen));
 
 	if( !m_pImageData ) {
 #ifdef _DEBUG
 		OutputDebugString( "RSMemWaveFile : Open, Cannot allocate memory for reading package.\n" );
 #endif
-		return FALSE;
+		return false;
 	}
 
 	pPakData->ReadFile( m_pImageData, m_dwImageLen );
@@ -467,7 +468,7 @@ BOOL RSMemWaveFile::Open( Package *pPackage, char* Name )
 		pPakData = NULL;
 	}
 	
-	return TRUE;
+	return true;
 }
 
 void RSMemWaveFile::Close()
@@ -487,14 +488,29 @@ void RSMemWaveFile::Close()
 	m_dwImageLen = 0;
 }
 
-BOOL RSMemWaveFile::GetFormat( WAVEFORMATEX& wfFormat )
+bool RSMemWaveFile::Play(bool bAsync, bool bLooped) {
+	if (!IsValid()) {
+#ifdef _DEBUG
+		OutputDebugString("DsWave : Play, Data is not ready.\n");
+#endif
+		return false;
+	}
+	return ::PlaySound((const char*)m_pImageData,
+		NULL,
+		SND_MEMORY |
+		SND_NODEFAULT |
+		(bAsync ? SND_ASYNC : SND_SYNC) |
+		(bLooped ? (SND_LOOP | SND_ASYNC) : 0)) != FALSE;
+}
+
+bool RSMemWaveFile::GetFormat( WAVEFORMATEX& wfFormat )
 {
 	HMMIO           hmmioIn;
 	MMIOINFO		mmioInfo;
 	MMCKINFO		ckInRIFF;
 	MMCKINFO        ckIn;           // chunk info. for general use.
 
-	//if( !IsValid() ) return FALSE;
+	//if( !IsValid() ) return false;
 
 	ZeroMemory( &wfFormat, sizeof(WAVEFORMATEX) );
 	ZeroMemory( &mmioInfo, sizeof(MMIOINFO) );
@@ -507,53 +523,53 @@ BOOL RSMemWaveFile::GetFormat( WAVEFORMATEX& wfFormat )
 	
 	if( (hmmioIn = mmioOpen( NULL, &mmioInfo, MMIO_READWRITE )) == NULL ){
 		_RPT0( _CRT_ERROR, "RSMemWaveFile : GetFormat, Memory waveform open failure\n" );
-		return FALSE;
+		return false;
 	}
 
 	if( mmioDescend( hmmioIn, &ckInRIFF, NULL, 0 ) != MMSYSERR_NOERROR ){
 		_RPT0( _CRT_ERROR, "RSMemWaveFile : GetFormat, Error reading.\n" );
-		return FALSE;
+		return false;
 	}
 
 	if( (ckInRIFF.ckid != FOURCC_RIFF) || (ckInRIFF.fccType != mmioFOURCC('W', 'A', 'V', 'E')) ){
 		_RPT0( _CRT_ERROR, "RSMemWaveFile : GetFormat, This file is not wave file.\n" );
-		return FALSE;
+		return false;
 	}
 
 	/* Search the input file for for the 'fmt ' chunk.     */
     ckIn.ckid = mmioFOURCC('f', 'm', 't', ' ');
     if( mmioDescend( hmmioIn, &ckIn, &ckInRIFF, MMIO_FINDCHUNK ) != MMSYSERR_NOERROR ){
 		_RPT0( _CRT_ERROR, "RSMemWaveFile : GetFormat, Cannot find FMT chunk.\n" );
-		return FALSE;	
+		return false;	
 	}
 
     if( mmioRead( hmmioIn, (HPSTR)&wfFormat, sizeof(WAVEFORMATEX) ) != sizeof(WAVEFORMATEX) ){
 		_RPT0( _CRT_ERROR, "RSMemWaveFile : GetFormat, Cannot read WAVEFORMATEX data.\n" );
-		return FALSE;	
+		return false;	
 	}
 	
 	if( mmioAscend( hmmioIn, &ckIn, 0 ) != MMSYSERR_NOERROR ){
 		_RPT0( _CRT_ERROR, "RSMemWaveFile : GetFormat, Ascend failure.\n" );
-		return FALSE;
+		return false;
 	}
 
 	if( mmioClose( hmmioIn, 0 ) != 0 ){
 		_RPT0( _CRT_ERROR, "RSMemWaveFile : GetFormat, Fail to close multimedia file.\n" );
-		return FALSE;
+		return false;
 	}
 
-	return TRUE;
+	return true;
 }
 
-DWORD RSMemWaveFile::GetData( BYTE*& pWaveData, DWORD dwMaxLen )
+u32 RSMemWaveFile::GetData( u8*& pWaveData, u32 dwMaxLen )
 {
 	HMMIO           hmmioIn;
 	MMIOINFO		mmioInfo;
 	MMCKINFO		ckInRIFF;
 	MMCKINFO        ckIn;           // chunk info. for general use.
-	DWORD			dwLenToCopy;
+	u32			dwLenToCopy;
 
-	if( !IsValid() ) return FALSE;
+	if( !IsValid() ) return false;
 	
 	ZeroMemory( &mmioInfo, sizeof(MMIOINFO) );
 	
@@ -565,51 +581,51 @@ DWORD RSMemWaveFile::GetData( BYTE*& pWaveData, DWORD dwMaxLen )
 	
 	if( (hmmioIn = mmioOpen( NULL, &mmioInfo, MMIO_READWRITE )) == NULL ){
 		_RPT0( _CRT_ERROR, "RSMemWaveFile : GetData, Memory waveform open failure\n" );
-		return FALSE;
+		return false;
 	}
 
 	if( mmioDescend( hmmioIn, &ckInRIFF, NULL, 0 ) != MMSYSERR_NOERROR ){
 		_RPT0( _CRT_ERROR, "RSMemWaveFile : GetData, Error reading.\n" );
-		return FALSE;
+		return false;
 	}
 
 	if( (ckInRIFF.ckid != FOURCC_RIFF) || (ckInRIFF.fccType != mmioFOURCC('W', 'A', 'V', 'E')) ){
 		_RPT0( _CRT_ERROR, "RSMemWaveFile : GetData, This file is not wave file.\n" );
-		return FALSE;
+		return false;
 	}
 
 	/* Search the input file for for the 'data' chunk.     */
     ckIn.ckid = mmioFOURCC('d', 'a', 't', 'a');
     if( mmioDescend( hmmioIn, &ckIn, &ckInRIFF, MMIO_FINDCHUNK ) != MMSYSERR_NOERROR ){
 		_RPT0( _CRT_ERROR, "RSMemWaveFile : GetData, Cannot find FMT chunk.\n" );
-		return FALSE;
+		return false;
 	}
 	dwLenToCopy = ckIn.cksize;
 
 	if( pWaveData == NULL ){
-		pWaveData = (BYTE *)::GlobalLock(::GlobalAlloc(GMEM_MOVEABLE, dwLenToCopy));
+		pWaveData = (u8 *)::GlobalLock(::GlobalAlloc(GMEM_MOVEABLE, dwLenToCopy));
 	} else {
 		if( dwMaxLen < dwLenToCopy ) dwLenToCopy = dwMaxLen;
 	}
 
 	if( pWaveData == NULL ){
 		_RPT0( _CRT_ERROR, "RSMemWaveFile : GetData, Cannot allocate memory for waveform data.\n" );
-		return FALSE;
+		return false;
 	}
 
     if( mmioRead( hmmioIn, (HPSTR) pWaveData, dwLenToCopy ) == -1 ){
 		_RPT0( _CRT_ERROR, "RSMemWaveFile : GetData, Cannot read waveform data.\n" );
-		return FALSE;	
+		return false;	
 	}
 
 	if( mmioAscend( hmmioIn, &ckIn, 0 ) != MMSYSERR_NOERROR ){
 		_RPT0( _CRT_ERROR, "RSMemWaveFile : GetFormat, Ascend failure.\n" );
-		return FALSE;
+		return false;
 	}
 
 	if( mmioClose( hmmioIn, 0 ) != 0 ){
 		_RPT0( _CRT_ERROR, "RSMemWaveFile : GetFormat, Fail to close multimedia file.\n" );
-		return FALSE;
+		return false;
 	}
 
 	return dwLenToCopy;
@@ -642,7 +658,7 @@ CWaveFile::CWaveFile()
     m_hmmio   = NULL;
     m_pResourceBuffer = NULL;
     m_dwSize  = 0;
-//    m_bIsReadingFromMemory = FALSE;
+//    m_bIsReadingFromMemory = false;
 }
 
 
@@ -667,12 +683,12 @@ CWaveFile::~CWaveFile()
 // Name: CWaveFile::Open()
 // Desc: Opens a wave file for reading
 //-----------------------------------------------------------------------------
-HRESULT CWaveFile::Open( LPTSTR strFileName, WAVEFORMATEX* pwfx, DWORD dwFlags )
+HRESULT CWaveFile::Open( LPTSTR strFileName, WAVEFORMATEX* pwfx, u32 dwFlags )
 {
     HRESULT hr;
 
     m_dwFlags = dwFlags;
-//    m_bIsReadingFromMemory = FALSE;
+//    m_bIsReadingFromMemory = false;
 
     if( m_dwFlags == WAVEFILE_READ )
     {
@@ -686,7 +702,7 @@ HRESULT CWaveFile::Open( LPTSTR strFileName, WAVEFORMATEX* pwfx, DWORD dwFlags )
         {
 //          HRSRC   hResInfo;
 //          HGLOBAL hResData;
-//          DWORD   dwSize;
+//          u32   dwSize;
 //          VOID*   pvRes;
 
 			MZFile mzf;
@@ -784,14 +800,14 @@ HRESULT CWaveFile::Open( LPTSTR strFileName, WAVEFORMATEX* pwfx, DWORD dwFlags )
 // Name: CWaveFile::OpenFromMemory()
 // Desc: copy data to CWaveFile member variable from memory
 //-----------------------------------------------------------------------------
-HRESULT CWaveFile::OpenFromMemory( BYTE* pbData, ULONG ulDataSize, 
-                                   WAVEFORMATEX* pwfx, DWORD dwFlags )
+HRESULT CWaveFile::OpenFromMemory( u8* pbData, ULONG ulDataSize, 
+                                   WAVEFORMATEX* pwfx, u32 dwFlags )
 {
     m_pwfx       = pwfx;
     m_ulDataSize = ulDataSize;
     m_pbData     = pbData;
     m_pbDataCur  = m_pbData;
-    m_bIsReadingFromMemory = TRUE;
+    m_bIsReadingFromMemory = true;
 	m_dwFlags	= dwFlags;
     
     if( dwFlags != WAVEFILE_READ )
@@ -893,7 +909,7 @@ HRESULT CWaveFile::ReadMMIO()
         m_pwfx->cbSize = cbExtraBytes;
 
         // Now, read those extra bytes into the structure, if cbExtraAlloc != 0.
-        if( mmioRead( m_hmmio, (CHAR*)(((BYTE*)&(m_pwfx->cbSize))+sizeof(WORD)),
+        if( mmioRead( m_hmmio, (CHAR*)(((u8*)&(m_pwfx->cbSize))+sizeof(WORD)),
                       cbExtraBytes ) != cbExtraBytes )
         {
             SAFE_DELETE( m_pwfx );
@@ -918,7 +934,7 @@ HRESULT CWaveFile::ReadMMIO()
 // Name: CWaveFile::GetSize()
 // Desc: Retuns the size of the read access wave file 
 //-----------------------------------------------------------------------------
-DWORD CWaveFile::GetSize()
+u32 CWaveFile::GetSize()
 {
     return m_dwSize;
 }
@@ -995,7 +1011,7 @@ HRESULT CWaveFile::ResetFile()
 //       subsequent calls will be continue where the last left off unless 
 //       Reset() is called.
 //-----------------------------------------------------------------------------
-HRESULT CWaveFile::Read( BYTE* pBuffer, DWORD dwSizeToRead, DWORD* pdwSizeRead )
+HRESULT CWaveFile::Read( u8* pBuffer, u32 dwSizeToRead, u32* pdwSizeRead )
 {
 	MMIOINFO mmioinfoIn; // current status of m_hmmio
 
@@ -1017,10 +1033,10 @@ HRESULT CWaveFile::Read( BYTE* pBuffer, DWORD dwSizeToRead, DWORD* pdwSizeRead )
         if( pdwSizeRead != NULL )
             *pdwSizeRead = 0;
 
-        if( (BYTE*)(m_pbDataCur + dwSizeToRead) > 
-            (BYTE*)(m_pbData + m_ulDataSize) )
+        if( (u8*)(m_pbDataCur + dwSizeToRead) > 
+            (u8*)(m_pbData + m_ulDataSize) )
         {
-            dwSizeToRead = m_ulDataSize - (DWORD)(m_pbDataCur - m_pbData);
+            dwSizeToRead = m_ulDataSize - (u32)(m_pbDataCur - m_pbData);
         }
         
         CopyMemory( pBuffer, m_pbDataCur, dwSizeToRead );
@@ -1038,7 +1054,7 @@ HRESULT CWaveFile::Read( BYTE* pBuffer, DWORD dwSizeToRead, DWORD* pdwSizeRead )
 
         m_ck.cksize -= cbDataIn;
     
-        for( DWORD cT = 0; cT < cbDataIn; cT++ )
+        for( u32 cT = 0; cT < cbDataIn; cT++ )
         {
             // Copy the bytes from the io to the buffer.
             if( mmioinfoIn.pchNext == mmioinfoIn.pchEndRead )
@@ -1051,7 +1067,7 @@ HRESULT CWaveFile::Read( BYTE* pBuffer, DWORD dwSizeToRead, DWORD* pdwSizeRead )
             }
 
             // Actual copy.
-            *((BYTE*)pBuffer+cT) = *((BYTE*)mmioinfoIn.pchNext);
+            *((u8*)pBuffer+cT) = *((u8*)mmioinfoIn.pchNext);
             mmioinfoIn.pchNext++;
         }
 
@@ -1108,8 +1124,8 @@ HRESULT CWaveFile::Close()
 
         if( 0 == mmioDescend( m_hmmio, &m_ck, &m_ckRiff, MMIO_FINDCHUNK ) ) 
         {
-            DWORD dwSamples = 0;
-            mmioWrite( m_hmmio, (HPSTR)&dwSamples, sizeof(DWORD) );
+            u32 dwSamples = 0;
+            mmioWrite( m_hmmio, (HPSTR)&dwSamples, sizeof(u32) );
             mmioAscend( m_hmmio, &m_ck, 0 ); 
         }
     
@@ -1137,10 +1153,10 @@ HRESULT CWaveFile::Close()
 //-----------------------------------------------------------------------------
 HRESULT CWaveFile::WriteMMIO( WAVEFORMATEX *pwfxDest )
 {
-    DWORD    dwFactChunk; // Contains the actual fact chunk. Garbage until WaveCloseWriteFile.
+    u32    dwFactChunk; // Contains the actual fact chunk. Garbage until WaveCloseWriteFile.
     MMCKINFO ckOut1;
     
-    dwFactChunk = (DWORD)-1;
+    dwFactChunk = (u32)-1;
 
     // Create the output file RIFF chunk of form type 'WAVE'.
     m_ckRiff.fccType = mmioFOURCC('W', 'A', 'V', 'E');       
@@ -1205,7 +1221,7 @@ HRESULT CWaveFile::WriteMMIO( WAVEFORMATEX *pwfxDest )
 // Name: CWaveFile::Write()
 // Desc: Writes data to the open wave file
 //-----------------------------------------------------------------------------
-HRESULT CWaveFile::Write( UINT nSizeToWrite, BYTE* pbSrcData, UINT* pnSizeWrote )
+HRESULT CWaveFile::Write( UINT nSizeToWrite, u8* pbSrcData, UINT* pnSizeWrote )
 {
     UINT cT;
 
@@ -1227,8 +1243,8 @@ HRESULT CWaveFile::Write( UINT nSizeToWrite, BYTE* pbSrcData, UINT* pnSizeWrote 
 				return E_FAIL;
         }
 
-        *((BYTE*)m_mmioinfoOut.pchNext) = *((BYTE*)pbSrcData+cT);
-        (BYTE*)m_mmioinfoOut.pchNext++;
+        *((u8*)m_mmioinfoOut.pchNext) = *((u8*)pbSrcData+cT);
+        (u8*)m_mmioinfoOut.pchNext++;
 
         (*pnSizeWrote)++;
     }

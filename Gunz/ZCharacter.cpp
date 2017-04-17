@@ -35,8 +35,6 @@
 
 #define ENABLE_CHARACTER_COLLISION
 
-#define IsKeyDown(key) ((GetAsyncKeyState(key) & 0x8000)!=0)
-
 bool Enable_Cloth = true;
 
 bool CheckTeenVersionMesh(RMesh** ppMesh)

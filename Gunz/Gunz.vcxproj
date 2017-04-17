@@ -780,7 +780,6 @@ rem call copy_share.bat
     <ClInclude Include="ZSecurity.h" />
     <ClInclude Include="NATUPnP.h" />
     <ClInclude Include="upnp.h" />
-    <ClInclude Include="ZLanguageConf.h" />
     <ClInclude Include="ZMessages.h" />
     <ClInclude Include="ZStringResManager.h" />
     <ClInclude Include="ZTips.h" />
@@ -991,7 +990,6 @@ rem call copy_share.bat
     <ClCompile Include="ZPostLocal.cpp" />
     <ClCompile Include="ZSecurity.cpp" />
     <ClCompile Include="upnp.cpp" />
-    <ClCompile Include="ZLanguageConf.cpp" />
     <ClCompile Include="ZMessages.cpp" />
     <ClCompile Include="ZStringResManager.cpp" />
     <ClCompile Include="ZTips.cpp" />

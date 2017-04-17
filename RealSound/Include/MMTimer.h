@@ -9,12 +9,10 @@
 
 	Programming by Chojoongpil
 */
-#include <windows.h>
-#include <mmsystem.h>
+#include "GlobalTypes.h"
+#include "MUtil.h"
 
-#pragma comment( lib, "winmm.lib" )
-
-typedef BOOL (*MMTIMERCALLBACK)(DWORD_PTR);
+typedef bool (*MMTIMERCALLBACK)(uintptr_t);
 
 // 하나의 클래스는 한개의 타이머를 갖는다.
 // 여러개의 셋팅을 지원하지 않으므로 주의할 것.
@@ -25,17 +23,18 @@ public:
     ~MMTimer();
 	
 	// Multimedia Timer한개를 생성한다.
-    BOOL Create(UINT nPeriod, UINT nRes, DWORD dwUser,  MMTIMERCALLBACK pfnCallback);
+    bool Create(u32 nPeriod, u32 nRes, u32 dwUser,  MMTIMERCALLBACK pfnCallback);
 	void Destroy();
 
 protected:
-	static void CALLBACK TimeProc(UINT uID, UINT uMsg, DWORD_PTR dwUser, DWORD_PTR dw1, DWORD_PTR dw2);
+	static void STDCALL TimeProc(unsigned int uID, unsigned int uMsg,
+		WIN_DWORD_PTR dwUser, WIN_DWORD_PTR dw1, WIN_DWORD_PTR dw2);
 
 	// 현재 타이머가 분기할 콜백 함수
     MMTIMERCALLBACK m_pfnCallback;
 
-    DWORD m_dwUser;
-    UINT m_nPeriod;
-    UINT m_nRes;
-    UINT m_nIDTimer;
+    u32 m_dwUser;
+    u32 m_nPeriod;
+    u32 m_nRes;
+    u32 m_nIDTimer;
 };

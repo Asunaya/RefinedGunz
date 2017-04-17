@@ -1,5 +1,4 @@
-#ifndef _MMATCHITEM_H
-#define _MMATCHITEM_H
+#pragma once
 
 #include "MXml.h"
 #include "MUID.h"
@@ -9,15 +8,9 @@
 #include <list>
 #include <vector>
 #include <algorithm>
-using namespace std;
 
 class MZFileSystem;
 
-
-
-
-
-/// 아이템 타입
 enum MMatchItemType
 {
 	MMIT_MELEE = 0,
@@ -27,7 +20,6 @@ enum MMatchItemType
 	MMIT_END
 };
 
-/// 아이템 슬롯 타입
 enum MMatchItemSlotType
 {
 	MMIST_NONE = 0,
@@ -44,7 +36,6 @@ enum MMatchItemSlotType
 	MMIST_END
 };
 
-/// 장비부위
 enum MMatchCharItemParts
 {
 	MMCIP_HEAD		= 0,
@@ -62,7 +53,6 @@ enum MMatchCharItemParts
 	MMCIP_END
 };
 
-// 커스텀 아이템 타입
 enum MMatchCustomItemType
 {
 	MMCIT_MED_KIT		= 0,
@@ -77,10 +67,10 @@ enum MMatchCustomItemType
 	MMCIT_TEARGAS_GRENADE,
 	MMCIT_FOOD,
 
-	MMCIT_ENCHANT_FIRE,			// 인챈트 아이템 - fire
-	MMCIT_ENCHANT_COLD,			// 인챈트 아이템 - cold
-	MMCIT_ENCHANT_LIGHTNING,	// 인챈트 아이템 - lightning
-	MMCIT_ENCHANT_POISON,		// 인챈트 아이템 - poison
+	MMCIT_ENCHANT_FIRE,
+	MMCIT_ENCHANT_COLD,
+	MMCIT_ENCHANT_LIGHTNING,
+	MMCIT_ENCHANT_POISON,
 
 	MMCIT_END
 };
@@ -114,7 +104,6 @@ enum MMatchRangeItemType
 	RIT_END
 };
 
-// Melee, Range, Custom을 합친 무기 타입 .. 한손 양손의 구분은 없다..
 enum MMatchWeaponType
 {
 	MWT_NONE	= 0,
@@ -237,9 +226,9 @@ struct MMatchItemDesc
 	int					m_nLimitJump;
 	int					m_nLimitTumble;
 	int					m_nLimitWall;
-	int					m_nRange;		// melee무기 공격범위
+	int					m_nRange;
 	int					m_nEffectLevel;
-	char				m_szDesc[8192];	// 설명
+	char				m_szDesc[8192];
 
 	unsigned long int	m_nColor;
 	char				m_szMeshName[128];
@@ -260,7 +249,6 @@ struct MMatchItemDesc
 	bool IsEnchantItem() { if (m_nWeaponType>=MWT_ENCHANT_FIRE && m_nWeaponType<=MWT_ENCHANT_POISON) return true; return false; }
 };
 
-// 슬롯과 파츠가 적합한지 체크
 bool IsSuitableItemSlot(MMatchItemSlotType nSlotType, MMatchCharItemParts nParts);
 MMatchCharItemParts GetSuitableItemParts(MMatchItemSlotType nSlotType);
 MMatchItemSlotType	GetSuitableItemSlot(MMatchCharItemParts nParts);
@@ -270,16 +258,13 @@ bool IsWeaponCharItemParts(MMatchCharItemParts nParts);
 char* GetItemSlotTypeStr(MMatchItemSlotType nSlotType);
 char* GetCharItemPartsStr(MMatchCharItemParts nParts);
 
-// 무기타입 알아내기
 MMatchWeaponType GetWeaponType(MMatchMeleeItemType nMeleeItemType);
 MMatchWeaponType GetWeaponType(MMatchRangeItemType nRangeItemType);
 MMatchWeaponType GetWeaponType(MMatchCustomItemType nCustomItemType);
 
-// 인챈트아이템인지 확인
 bool IsEnchantItem(MMatchItemDesc* pItemDesc);
 
-
-class MMatchItemEffectDescMgr : public map<int, MMatchItemEffectDesc*>
+class MMatchItemEffectDescMgr : public std::map<int, MMatchItemEffectDesc*>
 {
 protected:
 	void ParseEffect(MXmlElement& element);
@@ -293,10 +278,10 @@ public:
 	static MMatchItemEffectDescMgr* GetInstance();
 };
 
+inline MMatchItemEffectDescMgr* MGetMatchItemEffectDescMgr() {
+	return MMatchItemEffectDescMgr::GetInstance(); }
 
-inline MMatchItemEffectDescMgr* MGetMatchItemEffectDescMgr() { return MMatchItemEffectDescMgr::GetInstance(); }
-
-class MMatchItemDescMgr : public map<int, MMatchItemDesc*>
+class MMatchItemDescMgr : public std::map<int, MMatchItemDesc*>
 {
 	unsigned long m_nChecksum;
 protected:
@@ -376,17 +361,14 @@ public:
 	auto end() const { return std::end(m_pParts); }
 };
 
-/// 캐릭터가 갖고 있는 아이템들
-class MMatchItemMap : public map<MUID, MMatchItem*>
+class MMatchItemMap : public std::map<MUID, MMatchItem*>
 {
 private:
 protected:
 	static MUID				m_uidGenerate;
 	static MCriticalSection	m_csUIDGenerateLock;
-	bool					m_bDoneDbAccess;		// 디비에서 정보를 가져왔었는지 여부
+	bool					m_bDoneDbAccess;
 
-	/// 기간제 아이템이 하나라도 있는지 여부
-	/// 주의 - 기간제 아이템이 하나라도 없더라도 true일 수도 있다. 
 	bool					m_bHasRentItem;			
 public:
 	MMatchItemMap();
@@ -394,7 +376,9 @@ public:
 	bool IsEmpty() { return empty(); }
 	int GetCount() { return (int)size(); }
 	virtual bool CreateItem(MUID& uid, int nCIID, int nItemDescID, 
-							bool bRentItem=false, int nRentMinutePeriodRemainder=RENT_MINUTE_PERIOD_UNLIMITED, int nCount = 1);
+		bool bRentItem = false,
+		int nRentMinutePeriodRemainder = RENT_MINUTE_PERIOD_UNLIMITED,
+		int nCount = 1);
 	bool RemoveItem(MUID& uidItem);
 	virtual void Clear();
 	MMatchItem* GetItem(MUID& uidItem);
@@ -403,9 +387,9 @@ public:
 	bool HasRentItem() { return m_bHasRentItem; }
 public:
 	static MUID UseUID() {
-		m_csUIDGenerateLock.Lock();
-			m_uidGenerate.Increase();	
-		m_csUIDGenerateLock.Unlock();
+		m_csUIDGenerateLock.lock();
+		m_uidGenerate.Increase();	
+		m_csUIDGenerateLock.unlock();
 		return m_uidGenerate;
 	}
 };
@@ -503,8 +487,6 @@ struct MAccountItemNode
 #define MICTOK_BONUS_BP_QUEST		"bp_quest_bonus"
 
 #define MICTOK_BONUS_DUPLICATE		"duplicate"
-
-#endif
 
 /*
 == XML 기술 설명 ==

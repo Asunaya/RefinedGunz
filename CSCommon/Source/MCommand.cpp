@@ -289,8 +289,6 @@ int MCommand::GetSize() const
 	return nSize;
 }
 
-////////////////////////////////////////////////////////////////////////////////////
-// MCommandSNChecker ///////////////////////////////////////////////////////////////
 #define DEFAULT_COMMAND_SNCHECKER_CAPICITY	50
 
 MCommandSNChecker::MCommandSNChecker() : m_nCapacity(DEFAULT_COMMAND_SNCHECKER_CAPICITY)
@@ -312,7 +310,7 @@ void MCommandSNChecker::InitCapacity(int nCapacity)
 
 bool MCommandSNChecker::CheckValidate(int nSerialNumber)
 {
-	set<int>::iterator itorSet = m_SNSet.find(nSerialNumber);
+	auto itorSet = m_SNSet.find(nSerialNumber);
 	if (itorSet != m_SNSet.end())
 	{
 		// 중복된 커맨드이다.
@@ -321,17 +319,15 @@ bool MCommandSNChecker::CheckValidate(int nSerialNumber)
 
 	_ASSERT(m_nCapacity > 0);
 
-	// 중복되지 않은 것이면 등록한다.
 	if ((int)m_SNQueue.size() >= m_nCapacity)
 	{
-		// 용량의 한계를 넘으면 제일 처음에 들어온 것을 빼준다.
 		int nFirst = m_SNQueue.front();
 		m_SNQueue.pop_front();
 
 		m_SNSet.erase(nFirst);
 	}
 
-	m_SNSet.insert(set<int>::value_type(nSerialNumber));
+	m_SNSet.insert(nSerialNumber);
 	m_SNQueue.push_back(nSerialNumber);
 
 	return true;

@@ -1748,61 +1748,6 @@ catch (const SQLiteError& e)
 	return false;
 }
 
-bool SQLiteDatabase::GetIPCountryCode(const std::string & strIP, uint32_t & dwOutIPFrom, uint32_t & dwOutIPTo, std::string & strOutCountryCode)
-try
-{
-	return true;
-}
-catch (const SQLiteError& e)
-{
-	HandleException(e);
-	return false;
-}
-
-bool SQLiteDatabase::GetBlockCountryCodeList(BlockCountryCodeList & rfBlockCountryCodeList)
-try
-{
-	return true;
-}
-catch (const SQLiteError& e)
-{
-	HandleException(e);
-	return false;
-}
-
-bool SQLiteDatabase::GetIPtoCountryList(IPtoCountryList & rfIPtoCountryList)
-try
-{
-	return true;
-}
-catch (const SQLiteError& e)
-{
-	HandleException(e);
-	return false;
-}
-
-bool SQLiteDatabase::GetCustomIP(const std::string & strIP, uint32_t & dwIPFrom, uint32_t & dwIPTo, bool & bIsBlock, std::string & strCountryCode3, std::string & strComment)
-try
-{
-	return true;
-}
-catch (const SQLiteError& e)
-{
-	HandleException(e);
-	return false;
-}
-
-bool SQLiteDatabase::GetCustomIPList(CustomIPList & rfCustomIPList)
-try
-{
-	return true;
-}
-catch (const SQLiteError& e)
-{
-	HandleException(e);
-	return false;
-}
-
 bool SQLiteDatabase::InsertEvent(uint32_t dwAID, uint32_t dwCID, const std::string & strEventName)
 try
 {

@@ -384,8 +384,8 @@ void Portal::OnShot()
 	int n = -1;
 
 	{
-		bool LClick = !!(GetAsyncKeyState(VK_LBUTTON) & 0x8000);
-		bool RClick = !!(GetAsyncKeyState(VK_RBUTTON) & 0x8000);
+		bool LClick = MEvent::IsKeyDown(VK_LBUTTON);
+		bool RClick = MEvent::IsKeyDown(VK_RBUTTON);
 
 		if (LClick && !LastLClick)
 			n = 0;

@@ -413,8 +413,6 @@
     <ClInclude Include="Include\MCommandParameter.h" />
     <ClInclude Include="Include\MCommandProfiler.h" />
     <ClInclude Include="Include\MCommandRegistration.h" />
-    <ClInclude Include="Include\MCountryFilter.h" />
-    <ClInclude Include="Include\MCountryFilterDBMgr.h" />
     <ClInclude Include="Include\MGridMap.h" />
     <ClInclude Include="Include\MLadderGroup.h" />
     <ClInclude Include="Include\MLadderStatistics.h" />
@@ -452,7 +450,6 @@
     <ClInclude Include="Include\RealCPNet.h" />
     <ClInclude Include="Include\MPacket.h" />
     <ClInclude Include="Include\MPacketCrypter.h" />
-    <ClInclude Include="Include\Msg.h" />
     <ClInclude Include="Include\MCommandCommunicator.h" />
     <ClInclude Include="Include\MXmlParser.h" />
     <ClInclude Include="Include\MBaseLocale.h" />
@@ -476,9 +473,6 @@
     <ClCompile Include="Source\MCommandManager.cpp" />
     <ClCompile Include="Source\MCommandParameter.cpp" />
     <ClCompile Include="Source\MCommandProfiler.cpp" />
-    <ClCompile Include="Source\MCountryFilter.cpp" />
-    <ClCompile Include="Source\MCountryFilterDBMgr.cpp" />
-    <ClCompile Include="Source\MGridMap.cpp" />
     <ClCompile Include="Source\MLadderStatistics.cpp" />
     <ClCompile Include="Source\MMatchGameType.cpp" />
     <ClCompile Include="Source\MMatchItem.cpp" />
@@ -499,9 +493,21 @@
     <ClCompile Include="Source\MSharedCommandTable.cpp" />
     <ClCompile Include="Source\MChattingFilter.cpp" />
     <ClCompile Include="Source\MCustomClient.cpp" />
-    <ClCompile Include="Source\MTCPSocket.cpp" />
+    <ClCompile Include="Source\MTCPSocket.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='MSSQL|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Clang Release LTCG|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release LTCG|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="Source\Physics.cpp" />
-    <ClCompile Include="Source\RealCPNet.cpp" />
+    <ClCompile Include="Source\RealCPNet.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='MSSQL|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Clang Release LTCG|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release LTCG|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="Source\MPacket.cpp" />
     <ClCompile Include="Source\MPacketCrypter.cpp" />
     <ClCompile Include="Source\MCommandCommunicator.cpp" />

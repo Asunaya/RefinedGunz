@@ -6,18 +6,13 @@
 	All copyright (c) 1997, MAIET entertainment software
 */
 #include "stdafx.h"
-#include <windows.h>
+#include "MWindows.h"
 #include <stdio.h>
-
-#ifdef _DEBUG
-#include <crtdbg.h>
-#endif
-
 #include "LibPak.h"
 
 //	Modified by Leejangho ( 98-01-10 5:30:04 ¿ÀÀü )
-//		LPBYTE MemoryMappedFile::Open( char *lpszFileName )
-LPBYTE MemoryMappedFile::Open( const char *lpszFileName , BOOL bReadOnly )
+//		u8* MemoryMappedFile::Open( char *lpszFileName )
+u8* MemoryMappedFile::Open( const char *lpszFileName, bool bReadOnly )
 //	Modified by ...
 {
 	Close();
@@ -71,9 +66,9 @@ LPBYTE MemoryMappedFile::Open( const char *lpszFileName , BOOL bReadOnly )
 
 	
 	if(bReadOnly==TRUE)
-		m_lpPointer=(LPBYTE)MapViewOfFile(m_mapHandle,FILE_MAP_READ,0,0,0);
+		m_lpPointer=(u8*)MapViewOfFile(m_mapHandle,FILE_MAP_READ,0,0,0);
 	else
-		m_lpPointer=(LPBYTE)MapViewOfFile(m_mapHandle,FILE_MAP_READ|FILE_MAP_WRITE,0,0,0);
+		m_lpPointer=(u8*)MapViewOfFile(m_mapHandle,FILE_MAP_READ|FILE_MAP_WRITE,0,0,0);
 	if(m_lpPointer==NULL){
 		CloseHandle(m_mapHandle);
 		CloseHandle(m_fileHandle);
@@ -114,7 +109,7 @@ void MemoryMappedFile::Close(void)
 
 // ---------------------------------------------------------------------------------
 
-BOOL Package::Open( char *szFileName )
+bool Package::Open( char *szFileName )
 {
 	PAKFILEHEADER pfh;
 #ifdef _DEBUG
@@ -177,7 +172,7 @@ LPPAKDATA Package::GetPakData( unsigned long ulIndex )
 	LPPAKDATA pPakData;
 	PAKDATAINFO pdi;
 	DWORD dwReadBytes;
-	LPBYTE pStartPointer;
+	u8* pStartPointer;
 
 	if( !m_mmf.IsOpen() ){ 
 #ifdef _DEBUG
@@ -208,7 +203,7 @@ LPPAKDATA Package::GetPakData(char* Name)
 	LPPAKDATA pPakData;
 //	PAKDATAINFO pdi;
 //	DWORD dwReadBytes;
-	LPBYTE pStartPointer;
+	u8* pStartPointer;
 
 	if( !m_mmf.IsOpen() ){ 
 #ifdef _DEBUG

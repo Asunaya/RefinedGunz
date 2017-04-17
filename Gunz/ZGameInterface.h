@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ZPrerequisites.h"
+#include "ZGame.h"
 #include "ZInterface.h"
 #include "ZCamera.h"
 #include "ZChat.h"
@@ -10,6 +11,12 @@
 #include "ZScreenDebugger.h"
 #include "ZCombatMenu.h"
 #include "ZMyCharacter.h"
+#include "ZLoading.h"
+#include "ZPlayerMenu.h"
+#include "ZMiniMap.h"
+#include "ZMsgBox.h"
+#include "ZInterfaceBackground.h"
+#include "ZCharacterSelectView.h"
 
 enum class LoginState
 {

@@ -5,14 +5,12 @@
 #include "ZChat.h"
 #include "MDrawContext.h"
 #include "ZNetRepository.h"
-
 #include "ZApplication.h"
-#include "ZLanguageConf.h"
 #include "ZConfiguration.h"
 
 
-#define REPORT_ABUSE_ACTIVATE_TIME		(1000 * 60 * 3)		// 이전 3분만 저장한다.
-#define REPORT_ABUSE_COOL_TIME			(1000 * 60)			// 신고하고 1분후 신고할 수 있음
+#define REPORT_ABUSE_ACTIVATE_TIME		(1000 * 60 * 3)
+#define REPORT_ABUSE_COOL_TIME			(1000 * 60)
 #define REPORT_ABUSE_FILENAME			"119.txt"
 
 

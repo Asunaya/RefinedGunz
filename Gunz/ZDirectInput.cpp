@@ -399,11 +399,11 @@ DWORD ZDirectInput::GetKeyboardBufferedData(ZDIBUFFER* pBuffer,unsigned int nBuf
     if( hr != DI_OK ) {
         hr = m_pKeyboard->Acquire();
         while( hr == DIERR_INPUTLOST ) 
-			hr = m_pKeyboard->Acquire();		// 위험한디..
+			hr = m_pKeyboard->Acquire();
 		return 0;
     }
 
-    for( i = 0; i < min(dwElements,nBuffer); i++ ) {
+	for (i = 0; i < min(u32(dwElements), nBuffer); i++) {
 		pBuffer[i].nKey = BYTE(didod[i].dwOfs & 0xFF);
 		pBuffer[i].bPressed = (didod[i].dwData & 0x80)?true:false;
     }

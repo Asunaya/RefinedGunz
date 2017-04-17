@@ -1,15 +1,9 @@
 #include "stdafx.h"
 #include "MSafeUDP.h"
 #include "MBasePacket.h"
-
-#ifdef _DEBUG
-	#include "assert.h"
-#endif
-
-
-// 에이스사가 컴파일 할 경우에는 이 _OLD_SAFEUDP를 활성화해주세요 - 남기룡(2005/07/26)
-//#define _OLD_SAFEUDP
-
+#include <mutex>
+#include "MDebug.h"
+#include "MUtil.h"
 
 #define MAX_RECVBUF_LEN		65535
 
@@ -27,7 +21,7 @@ void MTRACE(char* pszLog)
 {
 	char szBuf[_MAX_DIR];
 	sprintf_safe(szBuf, "%s", pszLog);
-	OutputDebugString(szBuf);
+	DMLog(szBuf);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -37,7 +31,7 @@ MNetLink::MNetLink()
 	m_pSafeUDP = NULL;
 	m_bConnected = false;
 	m_nLinkState = LINKSTATE_CLOSED;
-	memset((char*)&m_Address, 0, sizeof(sockaddr_in));
+	memset((char*)&m_Address, 0, sizeof(MSocket::sockaddr_in));
 	m_nNextReadIndex = 0;
 	m_nNextWriteIndex = 0;
 	m_dwAuthKey = 0;
@@ -92,26 +86,27 @@ void MNetLink::SetLinkState(MNetLink::LINKSTATE nState)
 	#endif
 }
 
-bool MNetLink::MakeSockAddr(char* pszIP, int nPort, sockaddr_in* pSockAddr)
+bool MNetLink::MakeSockAddr(const char* pszIP, int nPort, MSocket::sockaddr_in* pSockAddr)
 {
-	sockaddr_in 	RemoteAddr;
-	memset((char*)&RemoteAddr, 0, sizeof(sockaddr_in));
+	MSocket::sockaddr_in RemoteAddr{};
 
-	//	Set Dest IP and Port 
-	RemoteAddr.sin_family = AF_INET;
-	RemoteAddr.sin_port = htons(nPort);
-	DWORD dwAddr = inet_addr(pszIP);
-	if (dwAddr != INADDR_NONE) {
+	// Set Dest IP and Port 
+	RemoteAddr.sin_family = MSocket::AF::INET;
+	RemoteAddr.sin_port = MSocket::htons(nPort);
+	u32 dwAddr;
+	MSocket::inet_pton(RemoteAddr.sin_family, pszIP, &dwAddr);
+	if (dwAddr != MSocket::in_addr::None) {
 		memcpy(&(RemoteAddr.sin_addr), &dwAddr, 4);
-	} else {		// 연결할 host name을 입력한 경우
-		HOSTENT* pHost = gethostbyname(pszIP);
-		if (pHost == NULL) {	// error
-			OutputDebugString("<SAFEUDP_ERROR> Can't resolve hostname </SAFEUDP_ERROR>\n");
+	} else {
+		auto* pHost = MSocket::gethostbyname(pszIP);
+		if (pHost == NULL) {
+			MLog("<SAFEUDP_ERROR> Can't resolve hostname </SAFEUDP_ERROR>\n");
 			return false;
 		}
-		memcpy((char FAR *)&(RemoteAddr.sin_addr), pHost->h_addr, pHost->h_length);
+		memcpy(&RemoteAddr.sin_addr, pHost->h_addr, pHost->h_length);
 	}
-	memcpy(pSockAddr, &RemoteAddr, sizeof(sockaddr_in));
+
+	*pSockAddr = RemoteAddr;
 	return true;
 }
 
@@ -120,17 +115,22 @@ bool MNetLink::SetAddress(char* pszIP, int nPort)
 	return MakeSockAddr(pszIP, nPort, &m_Address);
 }
 
-__int64 MNetLink::GetMapKey()
+int MNetLink::GetPort()
 {
-	__int64 nKey = GetRawPort();
+	return MSocket::ntohs(m_Address.sin_port);
+}
+
+i64 MNetLink::GetMapKey()
+{
+	auto nKey = i64(GetRawPort());
 	nKey = nKey << 32;
 	nKey += GetIP();
 	return nKey;
 }
 
-__int64 MNetLink::GetMapKey(sockaddr_in* pSockAddr)
+i64 MNetLink::GetMapKey(MSocket::sockaddr_in* pSockAddr)
 {
-	__int64 nKey =  pSockAddr->sin_port;
+	i64 nKey = pSockAddr->sin_port;
 	nKey = nKey << 32;
 	nKey += pSockAddr->sin_addr.S_un.S_addr;
 	return nKey;
@@ -213,7 +213,7 @@ bool MNetLink::OnRecvControl(MControlPacket* pPacket)
 	return m_pSafeUDP->Send(this, pReply, sizeof(MControlPacket));
 }
 
-bool MNetLink::SetACKWait(MSafePacket* pPacket, DWORD dwPacketSize)
+bool MNetLink::SetACKWait(MSafePacket* pPacket, u32 dwPacketSize)
 {
 	if (m_ACKWaitQueue.size() > SAFEUDP_MAX_ACKWAITQUEUE_LENGTH)
 		return false;
@@ -230,7 +230,7 @@ bool MNetLink::SetACKWait(MSafePacket* pPacket, DWORD dwPacketSize)
 	return true;
 }
 
-bool MNetLink::ClearACKWait(BYTE nSafeIndex)
+bool MNetLink::ClearACKWait(u8 nSafeIndex)
 {
 	for (ACKWaitListItor itor = m_ACKWaitQueue.begin(); itor != m_ACKWaitQueue.end(); ) {
 		MACKWaitItem* pACKWaitItem = *itor;
@@ -249,77 +249,106 @@ bool MNetLink::ClearACKWait(BYTE nSafeIndex)
 // MSocketThread class /////////////////////////////////////////////////////////////////////
 void MSocketThread::Create()
 {
-	InitializeCriticalSection(&m_csACKLock);
-	InitializeCriticalSection(&m_csSendLock);
-
 	MThread::Create(); 
 }
 
 void MSocketThread::Destroy()
 { 
 	m_KillEvent.SetEvent(); 
-	MThread::Destroy();		// Wait for Thread Death
-
-	DeleteCriticalSection(&m_csSendLock);
-	DeleteCriticalSection(&m_csACKLock);
+	DMLog("MSocketThread set kill event\n");
+	MThread::Destroy(); // Wait for Thread Death
 }
 
 void MSocketThread::Run()
 {
-	while(true) {	// Waiting for SafeUDP Settting...
-		DWORD dwVal = WaitForSingleObject(m_KillEvent.GetEvent(), 100);
-		if (dwVal == WAIT_OBJECT_0) {
+	while (true)
+	{
+		// Check the kill event while waiting for m_pSafeUDP to be set.
+		auto WaitResult = m_KillEvent.Await(100);
+		if (WaitResult == MSync::WaitFailed)
+		{
+			LOG_SOCKET_ERROR("m_KillEvent.Await", WaitResult);
 			return;
-		} else if (dwVal == WAIT_TIMEOUT) {
-			if (m_pSafeUDP)
-				break;
 		}
+		else if (WaitResult == 0)
+		{
+			// Kill event was triggered.
+			return;
+		}
+
+		if (m_pSafeUDP)
+			break;
 	}
 
-	WSAEVENT EventArray[WSA_MAXIMUM_WAIT_EVENTS];
-	WORD wEventIndex = 0;
-
 	bool bSendable = false;
-	WSANETWORKEVENTS NetEvent;
-	WSAEVENT hFDEvent = WSACreateEvent();
-	EventArray[wEventIndex++] = hFDEvent;
-	EventArray[wEventIndex++] = m_ACKEvent.GetEvent();
-	EventArray[wEventIndex++] = m_SendEvent.GetEvent();
-	EventArray[wEventIndex++] = m_KillEvent.GetEvent();
+	auto SocketEvent = MSocket::CreateEvent();
+	MSignalEvent* EventArray[]{
+		&SocketEvent,
+		&m_ACKEvent,
+		&m_SendEvent,
+		&m_KillEvent,
+	};
 
-	WSAEventSelect(m_pSafeUDP->GetLocalSocket(), hFDEvent, FD_READ|FD_WRITE);
+	{
+		using namespace MSocket::FD;
+		const auto Flags = READ | WRITE;
+		MSocket::EventSelect(m_pSafeUDP->GetLocalSocket(), SocketEvent, Flags);
+	}
 
-	while(TRUE) {
-		DWORD dwReturn = WSAWaitForMultipleEvents(wEventIndex, EventArray, FALSE, SAFEUDP_SAFE_MANAGE_TIME, FALSE);
-		if (dwReturn == WSA_WAIT_TIMEOUT) {					// Time
-			m_pSafeUDP->LockNetLink();
-			SafeSendManage();
-			m_pSafeUDP->UnlockNetLink();
-		} else if (dwReturn == WSA_WAIT_EVENT_0) {			// Socket Event
-			WSAEnumNetworkEvents(m_pSafeUDP->GetLocalSocket(), hFDEvent, &NetEvent);
-			if ((NetEvent.lNetworkEvents & FD_READ) == FD_READ) {
-//				OutputDebugString("SUDP> FD_READ \n");
+	while (true)
+	{
+		auto WaitResult = WaitForMultipleEvents(EventArray, SAFEUDP_SAFE_MANAGE_TIME);
+
+		if (WaitResult == MSync::WaitFailed)
+		{
+			LOG_SOCKET_ERROR("WaitForMultipleEvents", WaitResult);
+		}
+
+		switch (WaitResult)
+		{
+			// Socket Event
+		case 0:
+		{
+			MSocket::NetworkEvents NetEvent;
+			EnumNetworkEvents(m_pSafeUDP->GetLocalSocket(), SocketEvent, &NetEvent);
+			if (MSocket::IsNetworkEventSet(NetEvent, MSocket::FD::READ))
+			{
 				m_pSafeUDP->LockNetLink();
 				Recv();
 				m_pSafeUDP->UnlockNetLink();
-			} 
-			if ((NetEvent.lNetworkEvents & FD_WRITE) == FD_WRITE) {
-				bSendable = true;
-//				OutputDebugString("SUDP> FD_WRITE \n");
 			}
-		} else if (dwReturn == WSA_WAIT_EVENT_0 + 1) {		// ACK Send Event
-//			OutputDebugString("SUDP> ACK_EVENT \n");
+			if (MSocket::IsNetworkEventSet(NetEvent, MSocket::FD::WRITE))
+			{
+				bSendable = true;
+			}
+		}
+			break;
+
+			// ACK Send Event
+		case 1:
 			FlushACK();
-		} else if (dwReturn == WSA_WAIT_EVENT_0 + 2) {		// Packet Send Event
-//			OutputDebugString("SUDP> SEND_EVENT \n");
+			break;
+
+			// Packet Send Event
+		case 2:
 			if (bSendable == true)
 				FlushSend();
-		} else if (dwReturn == WSA_WAIT_EVENT_0 + 3) {		// Kill the Thread
-			break;	// Stop Thread
+			break;
+
+			// Kill event
+		case 3:
+			DMLog("MSocketThread::Run received kill event\n");
+			goto end_thread; // Stop Thread
+
+		default:
+			m_pSafeUDP->LockNetLink();
+			SafeSendManage();
+			m_pSafeUDP->UnlockNetLink();
+			break;
 		}
 	}
 
-	WSACloseEvent(hFDEvent);
+end_thread:
 
 	// Clear Queues
 	LockSend();
@@ -353,11 +382,6 @@ void MSocketThread::Run()
 	UnlockACK();
 }
 
-void MSocketThread::Debug()
-{
-
-}
-
 bool MSocketThread::PushACK(MNetLink* pNetLink, MSafePacket* pPacket)
 {
 	if (m_ACKSendList.size() > SAFEUDP_MAX_ACKQUEUE_LENGTH)
@@ -377,9 +401,9 @@ bool MSocketThread::PushACK(MNetLink* pNetLink, MSafePacket* pPacket)
 	return true;
 }
 
-bool MSocketThread::PushSend(MNetLink* pNetLink, MBasePacket* pPacket, DWORD dwPacketSize, bool bRetransmit)
+bool MSocketThread::PushSend(MNetLink* pNetLink, MBasePacket* pPacket, u32 dwPacketSize, bool bRetransmit)
 {
-	if ( !pNetLink || (m_SendList.size() > SAFEUDP_MAX_SENDQUEUE_LENGTH) )
+	if (!pNetLink || m_SendList.size() > SAFEUDP_MAX_SENDQUEUE_LENGTH)
 		return false;
 
 	MSendQueueItem* pSendItem = new MSendQueueItem;
@@ -388,7 +412,7 @@ bool MSocketThread::PushSend(MNetLink* pNetLink, MBasePacket* pPacket, DWORD dwP
 	pSendItem->pPacket = pPacket;
 	pSendItem->dwPacketSize = dwPacketSize;
 
-	if ((pPacket->GetFlag(SAFEUDP_FLAG_SAFE_PACKET) != FALSE) && (bRetransmit == false)) {
+	if (pPacket->GetFlag(SAFEUDP_FLAG_SAFE_PACKET) != false && bRetransmit == false) {
 		pNetLink->SetACKWait((MSafePacket*)pPacket, dwPacketSize);
 	}
 
@@ -401,12 +425,12 @@ bool MSocketThread::PushSend(MNetLink* pNetLink, MBasePacket* pPacket, DWORD dwP
 	return true;
 }
 
-bool MSocketThread::PushSend(char* pszIP, int nPort, char* pPacket, DWORD dwPacketSize)
+bool MSocketThread::PushSend(const char* pszIP, int nPort, char* pPacket, u32 dwPacketSize)
 {
-	if (m_SendList.size() > SAFEUDP_MAX_SENDQUEUE_LENGTH )
+	if (m_SendList.size() > SAFEUDP_MAX_SENDQUEUE_LENGTH)
 		return false;
 
-	sockaddr_in Addr;
+	MSocket::sockaddr_in Addr;
 	if (MNetLink::MakeSockAddr(pszIP, nPort, &Addr) == false)
 		return false;
 
@@ -425,19 +449,17 @@ bool MSocketThread::PushSend(char* pszIP, int nPort, char* pPacket, DWORD dwPack
 	return true;
 }
 
-
-bool MSocketThread::PushSend( DWORD dwIP, int nPort, char* pPacket, DWORD dwPacketSize )
+bool MSocketThread::PushSend(u32 dwIP, int nPort, char* pPacket, u32 dwPacketSize)
 {
-	if( (SAFEUDP_MAX_SENDQUEUE_LENGTH < m_SendList.size()) ||		
-	 	(INADDR_NONE == dwIP) )
+	if (SAFEUDP_MAX_SENDQUEUE_LENGTH < m_SendList.size() ||
+		MSocket::in_addr::None == dwIP)
 	 	return false;
 
-	sockaddr_in Addr;
-	memset((char*)&Addr, 0, sizeof(sockaddr_in));
+	MSocket::sockaddr_in Addr{};
 
 	//	Set Dest IP and Port 
-	Addr.sin_family = AF_INET;
-	Addr.sin_port = htons(nPort);
+	Addr.sin_family = MSocket::AF::INET;
+	Addr.sin_port = MSocket::htons(nPort);
 	memcpy(&(Addr.sin_addr), &dwIP, 4);
 
 	MSendQueueItem* pSendItem = new MSendQueueItem;
@@ -460,39 +482,57 @@ bool MSocketThread::PushSend( DWORD dwIP, int nPort, char* pPacket, DWORD dwPack
 	return false;
 }
 
+template <typename T>
+bool MSocketThread::SendPacket(const T& DestAddr, const void* Data, size_t DataSize)
+{
+	auto SendToResult = MSocket::sendto(m_pSafeUDP->GetLocalSocket(),
+		static_cast<const char*>(Data),
+		DataSize,
+		0,
+		reinterpret_cast<const MSocket::sockaddr*>(&DestAddr),
+		sizeof(DestAddr));
+
+	if (SendToResult == MSocket::SocketError)
+	{
+		LOG_SOCKET_ERROR("sendto", SendToResult);
+		return false;
+	}
+	else
+	{
+		m_nTotalSend += SendToResult;
+		m_SendTrafficLog.Record(m_nTotalSend);
+	}
+
+	return true;
+}
 
 bool MSocketThread::FlushACK()
 {
-	LockACK();
-	while(m_TempACKSendList.size() > 0) {
-		ACKSendListItor itor = m_TempACKSendList.begin();
-		m_ACKSendList.push_back(*itor);
-		m_TempACKSendList.erase(itor);
+	{
+		std::lock_guard<MCriticalSection> lock{ m_csACKLock };
+		while (m_TempACKSendList.size() > 0) {
+			ACKSendListItor itor = m_TempACKSendList.begin();
+			m_ACKSendList.push_back(*itor);
+			m_TempACKSendList.erase(itor);
+		}
 	}
-	UnlockACK();
 
-	while(m_ACKSendList.size() > 0) {
-		ACKSendListItor itor = m_ACKSendList.begin();
-		MACKQueueItem* pACKItem = *itor;
+	while (m_ACKSendList.size() > 0)
+	{
+		auto itor = m_ACKSendList.begin();
+		auto* pACKItem = *itor;
 
-		MACKPacket ACKPacket;
+		MACKPacket ACKPacket{};
 		ACKPacket.nSafeIndex = pACKItem->nSafeIndex;
 
-		sockaddr_in DestAddr;
-		DestAddr.sin_family = AF_INET;
+		MSocket::sockaddr_in DestAddr{};
+		DestAddr.sin_family = MSocket::AF::INET;
 		DestAddr.sin_addr.S_un.S_addr = pACKItem->dwIP;
 		DestAddr.sin_port = pACKItem->wRawPort;
 
-		int nResult = sendto(m_pSafeUDP->GetLocalSocket(), (char*)&ACKPacket, sizeof(MACKPacket), 
-							 0, (sockaddr*)&DestAddr, sizeof(sockaddr_in));
-		if (nResult == SOCKET_ERROR) {
-			return false;
-		} else {
-			m_nTotalSend += nResult;
-			m_SendTrafficLog.Record(m_nTotalSend);
-		}
+		SendPacket(DestAddr, &ACKPacket, sizeof(ACKPacket));
 
-		delete pACKItem; //delete *itor;
+		delete pACKItem;
 		m_ACKSendList.erase(itor);
 	}
 
@@ -501,49 +541,40 @@ bool MSocketThread::FlushACK()
 
 bool MSocketThread::FlushSend()
 {
-	LockSend();
-	while(m_TempSendList.size() > 0) {
-		SendListItor itor = m_TempSendList.begin();
-		m_SendList.push_back(*itor);
-		m_TempSendList.erase(itor);
+	{
+		std::lock_guard<MCriticalSection> lock{ m_csSendLock };
+		while (m_TempSendList.size() > 0) {
+			auto itor = m_TempSendList.begin();
+			m_SendList.push_back(*itor);
+			m_TempSendList.erase(itor);
+		}
 	}
-	UnlockSend();
 
-	MSendQueueItem* pSendItem;
-	sockaddr_in		DestAddr;
-	int				nResult;
-	while(m_SendList.size() > 0) {
-		SendListItor itor = m_SendList.begin();
+	MSendQueueItem* pSendItem{};
+	MSocket::sockaddr_in DestAddr{};
+
+	while(m_SendList.size() > 0)
+	{
+		auto itor = m_SendList.begin();
 		pSendItem = *itor;
 
-		DestAddr.sin_family = AF_INET;
+		DestAddr.sin_family = MSocket::AF::INET;
 		DestAddr.sin_addr.S_un.S_addr = pSendItem->dwIP;
 		DestAddr.sin_port = pSendItem->wRawPort;
 
-		nResult = sendto(m_pSafeUDP->GetLocalSocket(), (char*)pSendItem->pPacket, pSendItem->dwPacketSize, 
-						 0, (sockaddr*)&DestAddr, sizeof(sockaddr_in));
-		if (nResult == SOCKET_ERROR) {
-			int nErrCode = WSAGetLastError();
-			char szBuf[64]; sprintf_safe(szBuf, "<SAFEUDP_ERROR>FlushSend() - sendto() ErrCode=%d \n", nErrCode);
-			MTRACE(szBuf);
-//			return false;
-		} else {
-			m_nTotalSend += nResult;
-			m_SendTrafficLog.Record(m_nTotalSend);
-		}
+		SendPacket(DestAddr, pSendItem->pPacket, pSendItem->dwPacketSize);
 		
 		#ifdef _OLD_SAFEUDP
-			if (pSendItem->pPacket->GetFlag(SAFEUDP_FLAG_SAFE_PACKET) != FALSE) {
+			if (pSendItem->pPacket->GetFlag(SAFEUDP_FLAG_SAFE_PACKET) != false) {
 				// Don't Delete SafePacket (pSendItem->pPacket)
 				delete pSendItem;
 				m_SendList.erase(itor);
 			} else {	// Means Normal Packet
 				delete pSendItem->pPacket;
-				delete pSendItem; //delete (*itor);
+				delete pSendItem;
 				m_SendList.erase(itor);
 			}
 		#else
-			// 건즈에서는 SAFE_UDP_FLAG_SAFE_PACKET를 사용하지 않는다.
 			delete pSendItem->pPacket;
 			delete pSendItem;
 			m_SendList.erase(itor);
@@ -559,12 +590,11 @@ bool MSocketThread::SafeSendManage()
 	for (NetLinkItor itorLink = m_pSafeUDP->m_NetLinkMap.begin(); itorLink != m_pSafeUDP->m_NetLinkMap.end(); ) {
 		MNetLink* pNetLink = (*itorLink).second;
 
-		timeval tvNow;
+		MTime::timeval tvNow;
 		MTime::GetTime(&tvNow);
 
 		// Closed Idle time check
-		timeval tvIdleDiff;
-		tvIdleDiff = MTime::TimeSub(tvNow, pNetLink->m_tvLastPacketRecvTime);
+		auto tvIdleDiff = MTime::TimeSub(tvNow, pNetLink->m_tvLastPacketRecvTime);
 		if ( (pNetLink->GetLinkState() != MNetLink::LINKSTATE_ESTABLISHED) &&
 			 ((tvIdleDiff.tv_sec*1000 + tvIdleDiff.tv_usec) > SAFEUDP_MAX_SAFE_RETRANS_TIME) ) {
 			MTRACE("SUDP> Idle Control Timeout \n");
@@ -580,8 +610,7 @@ bool MSocketThread::SafeSendManage()
 		for (MNetLink::ACKWaitListItor itorACK = pNetLink->m_ACKWaitQueue.begin(); itorACK != pNetLink->m_ACKWaitQueue.end(); ++itorACK) {
 			MACKWaitItem* pACKWaitItem = *itorACK;
 
-			timeval tvDiff;
-			tvDiff = MTime::TimeSub(tvNow, pACKWaitItem->tvFirstSent);
+			auto tvDiff = MTime::TimeSub(tvNow, pACKWaitItem->tvFirstSent);
 			if ((tvDiff.tv_sec*1000 + tvDiff.tv_usec) > SAFEUDP_MAX_SAFE_RETRANS_TIME) {
 				// Disconnect....
 				MTRACE("SUDP> Retransmit Timeout \n");
@@ -602,32 +631,36 @@ bool MSocketThread::SafeSendManage()
 
 bool MSocketThread::Recv()
 {
-	sockaddr_in		AddrFrom;
-	int				nAddrFromLen = sizeof(sockaddr);
-
-	char			RecvBuf[MAX_RECVBUF_LEN];
-	int				nRecv = 0;
+	MSocket::sockaddr_in AddrFrom{};
+	int	nAddrFromLen = sizeof(MSocket::sockaddr);
+	char RecvBuf[MAX_RECVBUF_LEN];
 
 	while (true)
 	{
-		nRecv = recvfrom(m_pSafeUDP->GetLocalSocket(), RecvBuf, MAX_RECVBUF_LEN, 0, 
-						 (struct sockaddr*)&AddrFrom, &nAddrFromLen);
-		if (nRecv != SOCKET_ERROR) {
+		const auto nRecv = MSocket::recvfrom(m_pSafeUDP->GetLocalSocket(),
+			RecvBuf,
+			MAX_RECVBUF_LEN,
+			0, 
+			reinterpret_cast<MSocket::sockaddr*>(&AddrFrom),
+			&nAddrFromLen);
+
+		if (nRecv != MSocket::SocketError) {
 			m_nTotalRecv += nRecv;
 			m_RecvTrafficLog.Record(m_nTotalRecv);
 		}
 
 		if (nRecv <= 0) break;
 
-		if (m_fnCustomRecvCallback && OnCustomRecv(AddrFrom.sin_addr.S_un.S_addr, AddrFrom.sin_port, RecvBuf, nRecv) == true) {
+		if (m_fnCustomRecvCallback &&
+			OnCustomRecv(AddrFrom.sin_addr.S_un.S_addr, AddrFrom.sin_port, RecvBuf, nRecv) == true) {
 			continue;
-		} else if (((MBasePacket*)RecvBuf)->GetFlag(SAFEUDP_FLAG_CONTROL_PACKET) != FALSE) {
+		} else if (((MBasePacket*)RecvBuf)->GetFlag(SAFEUDP_FLAG_CONTROL_PACKET) != false) {
 			OnControlRecv(AddrFrom.sin_addr.S_un.S_addr, AddrFrom.sin_port, (MBasePacket*)RecvBuf, nRecv);
 			continue;
-		} else if (((MBasePacket*)RecvBuf)->GetFlag(SAFEUDP_FLAG_LIGHT_PACKET) != FALSE) {
+		} else if (((MBasePacket*)RecvBuf)->GetFlag(SAFEUDP_FLAG_LIGHT_PACKET) != false) {
 			OnLightRecv(AddrFrom.sin_addr.S_un.S_addr, AddrFrom.sin_port, (MLightPacket*)RecvBuf, nRecv);
 			continue;
-		} else if (((MBasePacket*)RecvBuf)->GetFlag(SAFEUDP_FLAG_ACK_PACKET) != FALSE) {
+		} else if (((MBasePacket*)RecvBuf)->GetFlag(SAFEUDP_FLAG_ACK_PACKET) != false) {
 			OnACKRecv(AddrFrom.sin_addr.S_un.S_addr, AddrFrom.sin_port, (MACKPacket*)RecvBuf);
 			continue;
 		} else {
@@ -639,43 +672,49 @@ bool MSocketThread::Recv()
 	return true;
 }
 
-bool MSocketThread::OnCustomRecv(DWORD dwIP, WORD wRawPort, char* pPacket, DWORD dwSize)
+bool MSocketThread::OnCustomRecv(u32 dwIP, u16 wRawPort, char* pPacket, u32 dwSize)
 {
 	if (m_fnCustomRecvCallback)
 		return m_fnCustomRecvCallback(dwIP, wRawPort, pPacket, dwSize);
 	return false;
 }
 
-bool MSocketThread::OnControlRecv(DWORD dwIP, WORD wRawPort, MBasePacket* pPacket, DWORD dwSize)
+bool MSocketThread::OnControlRecv(u32 dwIP, u16 wRawPort, MBasePacket* pPacket, u32 dwSize)
 {
 	MControlPacket* pControlPacket = (MControlPacket*)pPacket;
 	MNetLink* pNetLink = m_pSafeUDP->FindNetLink(dwIP, wRawPort);
 
 	if (pNetLink == NULL) {
 		if (pControlPacket->nControl == MControlPacket::CONTROL_SYN) {
-			IN_ADDR addr;
+			MSocket::in_addr addr;
 			addr.S_un.S_addr = dwIP;
-			pNetLink = m_pSafeUDP->OpenNetLink(inet_ntoa(addr), ntohs(wRawPort));
+
+			char ip_string[256];
+			MSocket::inet_ntop(MSocket::AF::INET, &addr, ip_string, std::size(ip_string));
+
+			auto HostOrderPort = MSocket::ntohs(wRawPort);
+
+			pNetLink = m_pSafeUDP->OpenNetLink(ip_string, HostOrderPort);
 			pNetLink->OnRecvControl(pControlPacket);
 		} 
 	} else {
 		pNetLink->OnRecvControl(pControlPacket);
 	}
 
-	if ( pNetLink && (pPacket->GetFlag(SAFEUDP_FLAG_SAFE_PACKET) != FALSE) )
+	if ( pNetLink && (pPacket->GetFlag(SAFEUDP_FLAG_SAFE_PACKET) != false) )
 		PushACK(pNetLink, (MSafePacket*)pPacket);
 
 	return true;
 }
 
-bool MSocketThread::OnLightRecv(DWORD dwIP, WORD wRawPort, MLightPacket* pPacket, DWORD dwSize)
+bool MSocketThread::OnLightRecv(u32 dwIP, u16 wRawPort, MLightPacket* pPacket, u32 dwSize)
 {
 	if (m_fnLightRecvCallback)
 		m_fnLightRecvCallback(dwIP, wRawPort, pPacket, dwSize);
 	return true;
 }
 
-bool MSocketThread::OnACKRecv(DWORD dwIP, WORD wRawPort, MACKPacket* pPacket)
+bool MSocketThread::OnACKRecv(u32 dwIP, u16 wRawPort, MACKPacket* pPacket)
 {
 	MNetLink* pNetLink = m_pSafeUDP->FindNetLink(dwIP, wRawPort);
 	if (pNetLink == NULL)
@@ -686,13 +725,13 @@ bool MSocketThread::OnACKRecv(DWORD dwIP, WORD wRawPort, MACKPacket* pPacket)
 	return false;
 }
 
-bool MSocketThread::OnGenericRecv(DWORD dwIP, WORD wRawPort, MBasePacket* pPacket, DWORD dwSize)
+bool MSocketThread::OnGenericRecv(u32 dwIP, u16 wRawPort, MBasePacket* pPacket, u32 dwSize)
 {
 	MNetLink* pNetLink = m_pSafeUDP->FindNetLink(dwIP, wRawPort);
 	if (pNetLink == NULL)
 		return false;
 
-	if (pPacket->GetFlag(SAFEUDP_FLAG_SAFE_PACKET) != FALSE)
+	if (pPacket->GetFlag(SAFEUDP_FLAG_SAFE_PACKET) != false)
 		PushACK(pNetLink, (MSafePacket*)pPacket);
 
 	// recv
@@ -704,20 +743,20 @@ bool MSocketThread::OnGenericRecv(DWORD dwIP, WORD wRawPort, MBasePacket* pPacke
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 // MSafeUDP class //////////////////////////////////////////////////////////////////////////
-bool MSafeUDP::Create(bool bBindWinsockDLL, int nPort, bool bReusePort)
+bool MSafeUDP::Create(bool BindWinsockDLL, int Port, bool ReusePort)
 {
-	m_bBindWinsockDLL = bBindWinsockDLL;
+	m_bBindWinsockDLL = BindWinsockDLL;
 
-	WSADATA	wsaData;
-	if ((bBindWinsockDLL == true) && (WSAStartup(MAKEWORD(2,2), &wsaData) != 0))
-		return false;
-
-	if (OpenSocket(nPort, bReusePort) == false) {
-		OutputDebugString("<SAFEUDP_ERROR> OpenSocket() FAILED </SAFEUDP_ERROR>\n");
-		return false;
+	if (BindWinsockDLL)
+	{
+		if (!MSocket::Startup())
+			return false;
 	}
 
-	InitializeCriticalSection(&m_csNetLink);
+	if (OpenSocket(Port, ReusePort) == false) {
+		MLog("MSafeUDP::Create -- OpenSocket failed\n");
+		return false;
+	}
 
 	m_SocketThread.SetSafeUDP(this);
 	m_SocketThread.Create();
@@ -734,33 +773,35 @@ void MSafeUDP::Destroy()
 	m_SocketThread.Destroy();
 	CloseSocket();
 
-	DeleteCriticalSection(&m_csNetLink);
-
-	if (m_bBindWinsockDLL == true) {
-		WSACleanup();
+	if (m_bBindWinsockDLL) {
+		MSocket::Cleanup();
 		m_bBindWinsockDLL = false;
 	}
 }
 
 bool MSafeUDP::OpenSocket(int nPort, bool bReuse)
 {
-	SOCKET sockfd = socket(AF_INET, SOCK_DGRAM, 0);
-	if (sockfd == INVALID_SOCKET)
+	SOCKET sockfd = MSocket::socket(MSocket::AF::INET, MSocket::SOCK::DGRAM, 0);
+	if (sockfd == MSocket::InvalidSocket)
 		return false;
 
 	if (bReuse) {
 		int opt = 1;
-		if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (char*)&opt, sizeof(opt)) == SOCKET_ERROR)
+		auto setsockopt_retval = MSocket::setsockopt(sockfd, MSocket::SOL::SOCKET,
+			MSocket::SO::REUSEADDR, (char*)&opt, sizeof(opt));
+		if (setsockopt_retval == MSocket::SocketError)
 			return false;
 	}
 
-	sockaddr_in LocalAddress;
-	LocalAddress.sin_family			= AF_INET;
-	LocalAddress.sin_addr.s_addr	= htonl(INADDR_ANY);
-	LocalAddress.sin_port			= htons(nPort);
+	MSocket::sockaddr_in LocalAddress;
+	LocalAddress.sin_family			= MSocket::AF::INET;
+	LocalAddress.sin_addr.s_addr	= MSocket::htonl(MSocket::in_addr::Any);
+	LocalAddress.sin_port			= MSocket::htons(nPort);
 
-	if (bind(sockfd, (struct sockaddr*)&LocalAddress, sizeof(LocalAddress)) == SOCKET_ERROR) {
-		closesocket(sockfd);
+	const auto bind_retval = MSocket::bind(sockfd,
+		(MSocket::sockaddr*)&LocalAddress, sizeof(LocalAddress));
+	if (bind_retval == MSocket::SocketError) {
+		MSocket::closesocket(sockfd);
 		return false;
 	}
 
@@ -772,27 +813,27 @@ bool MSafeUDP::OpenSocket(int nPort, bool bReuse)
 
 void MSafeUDP::CloseSocket()
 {
-	shutdown(m_Socket, SD_SEND);
-	closesocket(m_Socket);
+	MSocket::shutdown(m_Socket, MSocket::SD::SEND);
+	MSocket::closesocket(m_Socket);
 	m_Socket = 0;
 }
 
-bool MSafeUDP::Send(MNetLink* pNetLink, MBasePacket* pPacket, DWORD dwPacketSize)
+bool MSafeUDP::Send(MNetLink* pNetLink, MBasePacket* pPacket, u32 dwPacketSize)
 {
 	return m_SocketThread.PushSend(pNetLink, pPacket, dwPacketSize, false);
 }
 
-bool MSafeUDP::Send(char* pszIP, int nPort, char* pPacket, DWORD dwSize)
+bool MSafeUDP::Send(const char* pszIP, int nPort, char* pPacket, u32 dwSize)
 {
 	return m_SocketThread.PushSend(pszIP, nPort, pPacket, dwSize);
 }
 
-bool MSafeUDP::Send(DWORD dwIP, int nPort, char* pPacket, DWORD dwSize )
+bool MSafeUDP::Send(u32 dwIP, int nPort, char* pPacket, u32 dwSize )
 {
 	return m_SocketThread.PushSend( dwIP, nPort, pPacket, dwSize );
 }
 
-MNetLink* MSafeUDP::FindNetLink(DWORD dwIP, WORD wRawPort)
+MNetLink* MSafeUDP::FindNetLink(u32 dwIP, u16 wRawPort)
 {
 	__int64 nKey = wRawPort;
 	nKey = nKey << 32;
@@ -819,9 +860,9 @@ MNetLink* MSafeUDP::OpenNetLink(char* szIP, int nPort)
 	pNetLink->SetSafeUDP(this);
 	pNetLink->SetAddress(szIP, nPort);
 	
-	__int64 nKey = pNetLink->GetMapKey();
+	auto nKey = pNetLink->GetMapKey();
 	
-	NetLinkItor pos = m_NetLinkMap.find(nKey);
+	auto pos = m_NetLinkMap.find(nKey);
 	if (pos != m_NetLinkMap.end()) {
 		Reconnect((*pos).second);
 		delete pNetLink;
@@ -835,9 +876,9 @@ MNetLink* MSafeUDP::OpenNetLink(char* szIP, int nPort)
 
 bool MSafeUDP::CloseNetLink(MNetLink* pNetLink)
 {
-	__int64 nKey = pNetLink->GetMapKey();
+	auto nKey = pNetLink->GetMapKey();
 
-	NetLinkItor pos = m_NetLinkMap.find(nKey);
+	auto pos = m_NetLinkMap.find(nKey);
 	if (pos == m_NetLinkMap.end())
 		return false;
 
@@ -849,7 +890,7 @@ bool MSafeUDP::CloseNetLink(MNetLink* pNetLink)
 
 MNetLink* MSafeUDP::Connect(char* szIP, int nPort)
 {
-	MNetLink* pNetLink = OpenNetLink(szIP, nPort);
+	auto* pNetLink = OpenNetLink(szIP, nPort);
 	pNetLink->SendControl(MControlPacket::CONTROL_SYN);
 
 	return pNetLink;

@@ -3,10 +3,10 @@
 
 //// Geneating Lookup Table ////
 /*
-DWORD dwPolynomial = 0xEDB88320;
-DWORD* CRC32Table = NULL;
-CRC32Table = new DWORD[256];
-DWORD dwCRC;
+u32 dwPolynomial = 0xEDB88320;
+u32* CRC32Table = NULL;
+CRC32Table = new u32[256];
+u32 dwCRC;
 for(int i = 0; i < 256; i++) {
 	dwCRC = i;
 	for(int j = 8; j > 0; j--){
@@ -19,7 +19,7 @@ for(int i = 0; i < 256; i++) {
 }
 */
 
-DWORD MCRC32::CRC32Table[256] = {
+u32 MCRC32::CRC32Table[256] = {
 	0x00000000, 0x77073096, 0xEE0E612C, 0x990951BA,
 	0x076DC419, 0x706AF48F, 0xE963A535, 0x9E6495A3,
 	0x0EDB8832, 0x79DCB8A4, 0xE0D5E91E, 0x97D2D988,
@@ -89,16 +89,16 @@ DWORD MCRC32::CRC32Table[256] = {
 	0xB40BBE37, 0xC30C8EA1, 0x5A05DF1B, 0x2D02EF8D,
 };
 
-inline void MCRC32::LookupCRC32(const BYTE byte, DWORD& dwCRC32)
+inline void MCRC32::LookupCRC32(const u8 byte, u32& dwCRC32)
 {
 	dwCRC32 = ((dwCRC32)>>8) ^ CRC32Table[ (byte)^((dwCRC32)&0x000000FF) ];
 }
 
-DWORD MCRC32::BuildCRC32(BYTE* pData, DWORD dwSize)
+u32 MCRC32::BuildCRC32(u8* pData, u32 dwSize)
 {
-	DWORD dwCRC32 = 0xFFFFFFFF;
+	u32 dwCRC32 = 0xFFFFFFFF;
 
-	for( DWORD i = 0; i < dwSize; i++ ){
+	for( u32 i = 0; i < dwSize; i++ ){
 		LookupCRC32(*pData, dwCRC32);
 		pData++;
 	}

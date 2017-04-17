@@ -2,6 +2,7 @@
 #include "MListBox.h"
 #include "MColorTable.h"
 #include "Mint.h"
+#include <algorithm>
 
 #define MLISTBOX_MARGIN_X	2
 #define MLISTBOX_MARGIN_Y	2
@@ -12,7 +13,6 @@
 #define MLISTBOX_ITEM_MARGIN_X	2
 
 #define COLORTEXT_SUPPORT
-
 
 IMPLEMENT_LOOK(MListBox, MListBoxLook)
 
@@ -178,13 +178,16 @@ bool MListBox::OnEvent(MEvent* pEvent, MListener* pListener)
 		if(r.InPoint(pEvent->Pos)==false) return false;
 #define MAX_WHEEL_RANGE	4
 		if (m_ViewStyle == MVS_LIST)
-			SetStartItem(m_nStartItemPos+min(max(-pEvent->nDelta, -MAX_WHEEL_RANGE), MAX_WHEEL_RANGE));
+			SetStartItem(m_nStartItemPos + std::min(std::max(-pEvent->nDelta, -MAX_WHEEL_RANGE),
+				MAX_WHEEL_RANGE));
 		else if (m_ViewStyle == MVS_ICON)
 		{
 			int nTabSize = GetTabSize();
 			int nColCount = r.w / nTabSize;
-			int t = (m_nStartItemPos+min(max(-pEvent->nDelta, -MAX_WHEEL_RANGE), MAX_WHEEL_RANGE)) * nColCount;
-			SetStartItem((m_nStartItemPos+min(max(-pEvent->nDelta, -MAX_WHEEL_RANGE), MAX_WHEEL_RANGE)) * nColCount);
+			int t = (m_nStartItemPos + std::min(std::max(-pEvent->nDelta, -MAX_WHEEL_RANGE),
+				MAX_WHEEL_RANGE)) * nColCount;
+			SetStartItem((m_nStartItemPos + std::min(std::max(-pEvent->nDelta, -MAX_WHEEL_RANGE),
+				MAX_WHEEL_RANGE)) * nColCount);
 		}
 		return true;
 	}
@@ -697,7 +700,7 @@ void MListBoxLook::OnDraw(MListBox* pListBox, MDrawContext* pDC)
 		int nFieldStartX = 0;
 		for(int i=0; i<pListBox->GetFieldCount(); i++){
 			MLISTFIELD* pField = pListBox->GetField(i);
-			int nWidth = min(pField->nTabSize, r.w-nFieldStartX);
+			int nWidth = std::min(pField->nTabSize, r.w-nFieldStartX);
 			if(pListBox->m_bAbsoulteTabSpacing==false) nWidth = r.w*pField->nTabSize/100;
 			MRECT ir(r.x+nFieldStartX, r.y, nWidth, nItemHeight);
 			OnHeaderDraw(pDC, ir, pField->szFieldName);
@@ -719,12 +722,12 @@ void MListBoxLook::OnDraw(MListBox* pListBox, MDrawContext* pDC)
 			bool bFocused = (pListBox->IsFocus());
 
 			int nFieldStartX = 0;
-			for(int j=0; j<max(pListBox->GetFieldCount(), 1); j++){
+			for (int j = 0; j < std::max(pListBox->GetFieldCount(), 1); j++) {
 
 				int nTabSize = r.w;
-				if(j<pListBox->GetFieldCount()) nTabSize = pListBox->GetField(j)->nTabSize;
+				if (j < pListBox->GetFieldCount()) nTabSize = pListBox->GetField(j)->nTabSize;
 
-				int nWidth = min(nTabSize, r.w-nFieldStartX);
+				int nWidth = std::min(nTabSize, r.w-nFieldStartX);
 				if(pListBox->m_bAbsoulteTabSpacing==false) nWidth = r.w*nTabSize/100;
 
 				int nAdjustWidth = 0;
@@ -779,7 +782,7 @@ void MListBoxLook::OnDraw(MListBox* pListBox, MDrawContext* pDC)
 			bool bSelected = pItem->m_bSelected;
 			bool bFocused = (pListBox->IsFocus());
 
-			int nWidth = min(TabSize.w, r.w - nStartX);
+			int nWidth = std::min(TabSize.w, r.w - nStartX);
 
 			int nAdjustWidth = 0;
 			if(pListBox->GetScrollBar()->IsVisible())

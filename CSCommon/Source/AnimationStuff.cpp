@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "AnimationStuff.h"
 #include "MDebug.h"
-#define _WINSOCK2API_
 #include "MMatchItem.h"
 #include <array>
 #include "RAnimationMgr.h"

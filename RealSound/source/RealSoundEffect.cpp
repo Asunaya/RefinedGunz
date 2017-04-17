@@ -5,11 +5,9 @@
 #include <dsound.h>
 #include <crtdbg.h>
 #include <math.h>
-
 #include "MDebug.h"
 #include "dxerr.h"
 
-#define SAFE_RELEASE(p) { if(p) { (p)->Release(); (p)=NULL; } }
 #define OutputDebugStr(a) __noop
 
 struct RSEDSSET{
@@ -18,23 +16,23 @@ public:
 	LPDIRECTSOUND3DBUFFER	m_pDS3DB;
 	//DS3DBUFFER				m_BufferParams;
 public:
-	RSEDSSET(void){
+	RSEDSSET(){
 		m_pDSB = NULL;
 		m_pDS3DB = NULL;
 	}
-	virtual ~RSEDSSET(void){
+	virtual ~RSEDSSET(){
 		_ASSERT(m_pDSB==NULL);
 		_ASSERT(m_pDS3DB==NULL);
 	}
 };
 
-RealSoundEffect::RealSoundEffect(void)
+RealSoundEffect::RealSoundEffect()
 {
 	m_pDSSet	= new RSEDSSET;
 	m_pFX		= 0;
 }
 
-RealSoundEffect::~RealSoundEffect(void)
+RealSoundEffect::~RealSoundEffect()
 {
 	if( m_pDSSet != 0 )
 		delete m_pDSSet;
@@ -46,10 +44,10 @@ RealSoundEffect::~RealSoundEffect(void)
 
 bool RealSoundEffect::Create(RealSound* pRealSound, WAVEFILECLASS* pWaveFile, bool b3D)
 {
-	DWORD dwDataLen;
+	unsigned long dwDataLen;
 	//WAVEFORMATEX wfFormat;
 	DSBUFFERDESC dsbd;
-	LPBYTE pDSBData;
+	u8* pDSBData;
 
 	dwDataLen = pWaveFile->GetSize();
 	//pWaveFile->GetFormat(&wfFormat);
@@ -138,7 +136,7 @@ bool RealSoundEffect::Create(RealSound* pRealSound, WAVEFILECLASS* pWaveFile, bo
 		SAFE_RELEASE(m_pDSSet->m_pDS3DB);
 		return false;
 	}
-	DWORD dwDataLenRead;
+	u32 dwDataLenRead;
 	if( FAILED( pWaveFile->ResetFile() ) )
 	{
 		(m_pDSSet->m_pDSB)->Unlock( pDSBData, dwDataLen, NULL, 0 );
@@ -197,7 +195,7 @@ bool RealSoundEffect::Create(RealSound* pRealSound, RealSoundEffect* pSE, bool b
 	return true;
 }
 
-void RealSoundEffect::Destory(void)
+void RealSoundEffect::Destory()
 {
 	if(m_pDSSet->m_pDSB!=NULL){
 		m_pDSSet->m_pDSB->Release();
@@ -209,10 +207,10 @@ void RealSoundEffect::Destory(void)
 	}
 }
 
-bool RealSoundEffect::IsLost(void)
+bool RealSoundEffect::IsLost()
 {
 	if(m_pDSSet->m_pDSB!=NULL){
-		DWORD dwStatus;
+		unsigned long dwStatus;
 		m_pDSSet->m_pDSB->GetStatus(&dwStatus);
 		return ((dwStatus&DSBSTATUS_BUFFERLOST)?true:false);
 	}
@@ -220,7 +218,7 @@ bool RealSoundEffect::IsLost(void)
 	return false;
 }
 
-void RealSoundEffect::Restore(void)
+void RealSoundEffect::Restore()
 {
 	if(m_pDSSet->m_pDSB!=NULL) m_pDSSet->m_pDSB->Restore();
 }
@@ -231,14 +229,14 @@ bool RealSoundEffect::Play(float x, float y, float z, bool bLoop)
 
 	//SetPosition(x, y, z);
 
-    DWORD dwLooped = bLoop ? DSBPLAY_LOOPING : 0L;
+    u32 dwLooped = bLoop ? DSBPLAY_LOOPING : 0L;
     if( FAILED( m_pDSSet->m_pDSB->Play( 0, 0, dwLooped ) ) )
         return false;	
 
 	return true;
 }
 
-void RealSoundEffect::Stop(void)
+void RealSoundEffect::Stop()
 {
 	if(m_pDSSet->m_pDSB!=NULL){
 		m_pDSSet->m_pDSB->Stop();
@@ -246,10 +244,10 @@ void RealSoundEffect::Stop(void)
 	}
 }
 
-bool RealSoundEffect::IsPlaying(void)
+bool RealSoundEffect::IsPlaying()
 {
 	if(m_pDSSet->m_pDSB!=NULL){
-		DWORD dwStatus;
+		unsigned long dwStatus;
 		MBeginProfile( 33, "RealSoundEffect :: IsPlaying : GetStatus" );
 		m_pDSSet->m_pDSB->GetStatus(&dwStatus);
 		MEndProfile( 33 );
@@ -281,7 +279,7 @@ void RealSoundEffect::SetVolume(float t)
 	}
 }
 
-float RealSoundEffect::GetVolume(void)
+float RealSoundEffect::GetVolume()
 {
 	long lVolume = 0;
 	if(m_pDSSet->m_pDSB!=NULL){
@@ -307,7 +305,7 @@ void RealSoundEffect::SetMaxDistance(float fMax)
 void RealSoundEffect::SetMode(RealSoundEffectMode nMode)
 {
 	if(m_pDSSet->m_pDS3DB!=NULL){
-		DWORD dwMode = DS3DMODE_DISABLE;
+		u32 dwMode = DS3DMODE_DISABLE;
 		if(nMode==RSEM_DISABLE) dwMode = DS3DMODE_DISABLE;
 		else if(nMode==RSEM_HEADRELATIVE) dwMode = DS3DMODE_HEADRELATIVE;
 		else if(nMode==RSEM_NORMAL) dwMode = DS3DMODE_NORMAL;
@@ -316,7 +314,7 @@ void RealSoundEffect::SetMode(RealSoundEffectMode nMode)
 	}
 }
 
-bool RealSoundEffectSource::LoadWaveFromFile(void)
+bool RealSoundEffectSource::LoadWaveFromFile()
 {
 	if(m_pWaveFile->IsValid()==TRUE) return true;
 
@@ -368,7 +366,7 @@ bool RealSoundEffectSource::LoadWaveFromPak()
 }
 
 
-void RealSoundEffectSource::RemoveWaveFromMemory(void)
+void RealSoundEffectSource::RemoveWaveFromMemory()
 {
 //	if( !m_pWaveFile->m_bIsReadingFromMemory )
 		m_pWaveFile->Close();
@@ -405,7 +403,7 @@ void RealSoundEffectSource::DelRealSoundEffect(RealSoundEffect* pRealSoundEffect
 	delete pRealSoundEffect;
 }
 
-RealSoundEffectSource::RealSoundEffectSource(void)
+RealSoundEffectSource::RealSoundEffectSource()
 {
 	m_pWaveFile = new WAVEFILECLASS;
 	m_pOriginalRealSoundEffect = NULL;
@@ -419,7 +417,7 @@ RealSoundEffectSource::RealSoundEffectSource(void)
 	m_iPriority	= 0;
 }
 
-RealSoundEffectSource::~RealSoundEffectSource(void)
+RealSoundEffectSource::~RealSoundEffectSource()
 {
 	Destroy();
 	delete m_pWaveFile;
@@ -473,7 +471,7 @@ bool RealSoundEffectSource::CreatePackage(RealSound* pRealSound, const char* szF
 	return true;
 }
 
-void RealSoundEffectSource::Destroy(void)
+void RealSoundEffectSource::Destroy()
 {
 	_ASSERT(m_nRefCount==0);
 	_ASSERT(m_pOriginalRealSoundEffect==NULL);
@@ -610,7 +608,7 @@ RealSoundEffectPlay::RealSoundEffectPlay(RealSoundEffectSource* pSES, bool b3D, 
 	m_bLoop = false;
 }
 
-RealSoundEffectPlay::~RealSoundEffectPlay(void)
+RealSoundEffectPlay::~RealSoundEffectPlay()
 {
 	if(m_pSES!=NULL && m_pRSE!=NULL){
 		m_pSES->DestroyRealSoundEffect(m_pRSE);
@@ -630,18 +628,18 @@ void RealSoundEffectPlay::Play()
 	if( m_pRSE != NULL ) m_pRSE->Play( m_fX, m_fY, m_fZ, m_bLoop );
 }
 
-void RealSoundEffectPlay::Stop(void)
+void RealSoundEffectPlay::Stop()
 {
 	if(m_pRSE!=NULL) m_pRSE->Stop();
 }
 
-bool RealSoundEffectPlay::IsPlaying(void)
+bool RealSoundEffectPlay::IsPlaying()
 {
 	if(m_pRSE==NULL) return false;
 	return (m_pRSE->IsPlaying()==TRUE)?true:false;
 }
 
-bool RealSoundEffectPlay::IsPlayingLoop(void)
+bool RealSoundEffectPlay::IsPlayingLoop()
 {
 	return (IsPlaying()==true && m_bLoop==true);
 }
@@ -658,7 +656,7 @@ void RealSoundEffectPlay::SetVolume(float t)
 	m_pRSE->SetVolume(t);
 }
 
-float RealSoundEffectPlay::GetVolume(void)
+float RealSoundEffectPlay::GetVolume()
 {
 	if(m_pRSE==NULL) return 0;
 	return m_pRSE->GetVolume();

@@ -31,7 +31,7 @@ inline IOResult InflateFile(void* OutputBuffer, size_t OutputSize,
 	{
 		if (Stream.avail_in == 0)
 		{
-			const auto BytesToRead = min(InputLeft, BufferSize);
+			const auto BytesToRead = std::min(InputLeft, BufferSize);
 			const auto BytesRead = fread(Buffer, 1, BytesToRead, File);
 			if (BytesToRead != BytesRead)
 			{

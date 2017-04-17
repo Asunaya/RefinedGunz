@@ -8,9 +8,8 @@
 #include "ZMyItemList.h"
 #include "ZItemSlotView.h"
 #include "ZMessages.h"
-#include "ZLanguageConf.h"
 
-ZStageInterface::ZStageInterface( void)
+ZStageInterface::ZStageInterface()
 {
 	m_bPrevQuest = false;
 	m_bDrawStartMovieOfQuest = false;
@@ -21,7 +20,7 @@ ZStageInterface::ZStageInterface( void)
 	m_nStateSacrificeItemBox = 0;
 }
 
-ZStageInterface::~ZStageInterface( void)
+ZStageInterface::~ZStageInterface()
 {
 	if ( m_pTopBgImg != NULL)
 	{
@@ -36,7 +35,7 @@ ZStageInterface::~ZStageInterface( void)
 	}
 }
 
-void ZStageInterface::OnCreate( void)
+void ZStageInterface::OnCreate()
 {
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
 
@@ -125,7 +124,7 @@ void ZStageInterface::OnCreate( void)
 	OnResponseQL( 0);
 }
 
-void ZStageInterface::OnDestroy( void)
+void ZStageInterface::OnDestroy()
 {
 	ZApplication::GetGameInterface()->ShowWidget( "Stage", false);
 
@@ -162,7 +161,7 @@ void ZStageInterface::OnDestroy( void)
 	m_SenarioNameDesc.clear();
 }
 
-void ZStageInterface::OnStageInterfaceSettup( void)
+void ZStageInterface::OnStageInterfaceSettup()
 {
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
 
@@ -560,7 +559,7 @@ void ZStageInterface::SetMapName( const char* szMapName)
 	}
 }
 
-void ZStageInterface::OpenSacrificeItemBox( void)
+void ZStageInterface::OpenSacrificeItemBox()
 {
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
 
@@ -575,7 +574,7 @@ void ZStageInterface::OpenSacrificeItemBox( void)
 	GetSacrificeItemBoxPos();
 }
 
-void ZStageInterface::CloseSacrificeItemBox( void)
+void ZStageInterface::CloseSacrificeItemBox()
 {
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
 
@@ -594,7 +593,7 @@ void ZStageInterface::CloseSacrificeItemBox( void)
 	GetSacrificeItemBoxPos();
 }
 
-void ZStageInterface::HideSacrificeItemBox( void)
+void ZStageInterface::HideSacrificeItemBox()
 {
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
 
@@ -613,7 +612,7 @@ void ZStageInterface::HideSacrificeItemBox( void)
 	GetSacrificeItemBoxPos();
 }
 
-void ZStageInterface::GetSacrificeItemBoxPos( void)
+void ZStageInterface::GetSacrificeItemBoxPos()
 {
 	MWidget* pWidget = ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "Stage_ItemListView");
 	if ( pWidget)
@@ -639,15 +638,15 @@ void ZStageInterface::GetSacrificeItemBoxPos( void)
 	}
 }
 
-void ZStageInterface::OnSacrificeItem0( void)
+void ZStageInterface::OnSacrificeItem0()
 {
 }
 
-void ZStageInterface::OnSacrificeItem1( void)
+void ZStageInterface::OnSacrificeItem1()
 {
 }
 
-void ZStageInterface::UpdateSacrificeItem( void)
+void ZStageInterface::UpdateSacrificeItem()
 {
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
 
@@ -678,7 +677,7 @@ void ZStageInterface::UpdateSacrificeItem( void)
 	}
 }
 
-void ZStageInterface::SerializeSacrificeItemListBox( void)
+void ZStageInterface::SerializeSacrificeItemListBox()
 {
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
 
@@ -823,7 +822,7 @@ public:
 
 MSacrificeItemListBoxListener g_SacrificeItemListBoxListener;
 
-MListener* ZGetSacrificeItemListBoxListener( void)
+MListener* ZGetSacrificeItemListBoxListener()
 {
 	return &g_SacrificeItemListBoxListener;
 }
@@ -838,7 +837,7 @@ void OnDropCallbackRemoveSacrificeItem( void* pSelf, MWidget* pSender, MBitmap* 
 	ZApplication::GetStageInterface()->OnRemoveSacrificeItem( (strcmp( pItemSlotView->m_szItemSlotPlace, "SACRIFICE0") == 0) ? 0 : 1);
 }
 
-void ZStageInterface::StartMovieOfQuest( void)
+void ZStageInterface::StartMovieOfQuest()
 {
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
 
@@ -862,7 +861,7 @@ void ZStageInterface::StartMovieOfQuest( void)
 	m_bDrawStartMovieOfQuest = true;
 }
 
-void ZStageInterface::OnDrawStartMovieOfQuest( void)
+void ZStageInterface::OnDrawStartMovieOfQuest()
 {
 	if ( !m_bDrawStartMovieOfQuest)
 		return ;
@@ -907,7 +906,7 @@ void ZStageInterface::OnDrawStartMovieOfQuest( void)
 	}
 }
 
-bool ZStageInterface::IsShowStartMovieOfQuest( void)
+bool ZStageInterface::IsShowStartMovieOfQuest()
 {
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
 
@@ -1146,7 +1145,7 @@ void SacrificeItemSlotDesc::SetSacrificeItemSlot( const MUID& uidUserID, const u
 	m_bExist = true;
 }
 
-bool ZStageInterface::ReadSenarioNameXML( void)
+bool ZStageInterface::ReadSenarioNameXML()
 {
 	m_SenarioNameDesc.clear();
 

@@ -2,10 +2,10 @@
 #include "MLocatorConfig.h"
 #include "MLocatorStatistics.h"
 #include "MServerStatus.h"
-
+#include <ctime>
 #include <algorithm>
 
-const int MakeCustomizeMin( const string& strTime )
+const int MakeCustomizeMin( const std::string& strTime )
 {
 	if (strTime.length() < 16)
 		return -1;
@@ -61,8 +61,9 @@ void MServerStatusMgr::CheckDeadServerByLastUpdatedTime( const int nMarginOfErrM
 
 const int MServerStatusMgr::CalcuMaxCmpCustomizeMin()
 {
-	SYSTEMTIME st;
-	GetLocalTime( &st );
+	auto t = time(nullptr);
+	tm TM;
+	auto ret = localtime_s(&TM, &t);
 
-	return static_cast< int >( (st.wHour * 60) + st.wMinute );
+	return static_cast< int >( (TM.tm_hour * 60) + TM.tm_min );
 }

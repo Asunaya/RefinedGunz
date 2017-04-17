@@ -119,13 +119,7 @@ static struct _reserved_word_constant {
 	{ TINVALID,		NULL		},
 };
 
-
-// 32비트형 컬러 값이다.
-static DWORD		dwScanColor = 0;	// 이런 짓은 클래스 작성에서 좋은 것은 아니지만...
-										// 불필요하게 클래스 멤버로 하나 끼워 넣는 것도 비효율 적이라 불가피하게 이 짓을 하게 되었음.
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// MHyperText
+static u32 dwScanColor = 0;
 
 static char *fold( char *s )
 {
@@ -215,8 +209,8 @@ read_tag_loop:
 			return TINVALID;
 		}
 		else if(c=='#'){						//컬러값이 들어왔다.
-			BYTE nHigh, nLow;
-			BYTE rgb[3];
+			u8 nHigh, nLow;
+			u8 rgb[3];
 
 			for(i=0;i<3;i++){				
 				c = Input();

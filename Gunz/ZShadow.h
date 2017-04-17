@@ -1,12 +1,13 @@
 #pragma once
 
 #include "RTypes.h"
-using namespace RealSpace2;
 
 class ZShadow
 {
 public:
-	bool SetMatrices(RVisualMesh& VisualMesh, RBspObject& Map, float Size = DefaultSize);
+	bool SetMatrices(RealSpace2::RVisualMesh& VisualMesh,
+		RealSpace2::RBspObject& Map,
+		float Size = DefaultSize);
 	void Draw();
 
 	static constexpr float DefaultSize = 100;

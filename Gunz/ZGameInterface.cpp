@@ -74,6 +74,7 @@
 #include "ReplayControl.h"
 #include "RGMain.h"
 #include "defer.h"
+#include "MFile.h"
 
 extern MCommandLogFrame* m_pLogFrame;
 
@@ -1503,22 +1504,22 @@ bool ZGameInterface::OnCreate(ZLoadingProgress *pLoadingProgress)
 	SetTeenVersion(false);
 
 	auto ZGameClientCreate = MBeginProfile("ZGameInterface - ZGameClient::Create");
-	int nNetworkPort = RandomNumber(ZGetConfiguration()->GetEtc()->nNetworkPort1, ZGetConfiguration()->GetEtc()->nNetworkPort2);
-	if (g_pGameClient->Create(nNetworkPort) == false) {
-		std::string strMsg = "Unknown Network Error";
-		auto LastError = GetLastError();
-		if (LastError == WSAEADDRINUSE)
-			NotifyMessage(MATCHNOTIFY_NETWORK_PORTINUSE, &strMsg);
-		else
-		{
-			char LastErrorString[256];
-			FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM, nullptr, LastError,
-				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), LastErrorString, std::size(LastErrorString), nullptr);
-			strMsg.resize(256);
-			sprintf_safe(&strMsg[0], strMsg.size(), "Network error %d: %s", LastError, LastErrorString);
-		}
-		ShowMessage(strMsg.c_str());
+	const auto Start = ZGetConfiguration()->GetEtc()->nNetworkPort1;
+	const auto End = ZGetConfiguration()->GetEtc()->nNetworkPort2;
+	int nNetworkPort = RandomNumber(Start, End);
+
+	MLog("ZGameInterface::OnCreate -- Picked %d as the network port (from a range of %d to %d)\n",
+		nNetworkPort, Start, End);
+
+	const auto CreateGameClientResult = g_pGameClient->Create(nNetworkPort);
+	if (CreateGameClientResult.ErrorCode != 0)
+	{
+		char ErrorMessage[512];
+		sprintf_safe(ErrorMessage, "Network error %d: %s",
+			CreateGameClientResult.ErrorCode, CreateGameClientResult.ErrorMessage.c_str());
+		ShowMessage(ErrorMessage);
 	}
+
 	g_pGameClient->SetOnCommandCallback(OnCommand);
 	g_pGameClient->CreateUPnP(nNetworkPort);
 	MEndProfile(ZGameClientCreate);
@@ -5394,13 +5395,13 @@ void ZGameInterface::GetBringAccountItem()
 class ReplayListBoxItem : public MListItem
 {
 public:
-	ReplayListBoxItem(const char* szName, const char* szVersion)
+	ReplayListBoxItem(const StringView& szName, const StringView& szVersion)
 	{
 		strcpy_safe(m_szName, szName);
 		strcpy_safe(m_szVersion, szVersion);
 	}
 
-	virtual const char* GetString(void)
+	virtual const char* GetString()
 	{
 		return m_szName;
 	}
@@ -5454,29 +5455,8 @@ void ZGameInterface::ShowReplayDialog(bool bShow)
 
 			strcat_safe(szPath, "/*.gzr");
 
-			// Get file list
-			struct _finddata_t c_file;
-			long hFile;
-			char szName[_MAX_PATH];
-			char szFullPathName[_MAX_PATH];
-			if ((hFile = _findfirst(szPath, &c_file)) != -1L)
-			{
-				do
-				{
-					strcpy_safe(szName, c_file.name);
-
-					strcpy_safe(szFullPathName, szFullPath);
-					strcat_safe(szFullPathName, "/");
-					strcat_safe(szFullPathName, szName);
-
-					DWORD dwFileVersion = 0;
-					char szVersion[10] = "";
-
-					pListBox->Add(new ReplayListBoxItem(szName, szVersion)); // Add to listbox
-				} while (_findnext(hFile, &c_file) == 0);
-
-				_findclose(hFile);
-			}
+			for (auto&& FileData : MFile::FilesInDir(szPath))
+				pListBox->Add(new ReplayListBoxItem(FileData.Name, "")); // Add to listbox
 
 			pListBox->Sort();
 		}

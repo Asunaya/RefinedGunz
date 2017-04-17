@@ -28,7 +28,7 @@ void MMatchGameTypeInfo::Set(const MMATCH_GAMETYPE a_nGameTypeID, const char* a_
 
 void MMatchGameTypeInfo::AddMap(int nMapID)
 {
-	MapSet.insert(set<int>::value_type(nMapID));
+	MapSet.insert(nMapID);
 }
 
 void MMatchGameTypeInfo::AddAllMap()

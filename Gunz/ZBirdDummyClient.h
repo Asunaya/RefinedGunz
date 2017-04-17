@@ -7,6 +7,7 @@
 #include "MCommandCommunicator.h"
 #include "MClient.h"
 #include "ZGameClient.h"
+#include "MTCPSocket.h"
 
 class MClientCommandProcessor;
 class MCommand;
@@ -20,11 +21,10 @@ protected:
 	int					m_nDummyID;
 
 	MClientSocket		m_ClientSocket;
-//	char				m_PacketBuffer[MAX_PACKETBUFFER_SIZE];
 	int					m_nPBufferTop;
-	CRITICAL_SECTION	m_csRecvLock;	///< CommandQueue critical section
+	MCriticalSection	m_csRecvLock;
 	MCommandBuilder*	m_pCommandBuilder;
-	MUID				m_Server;		///< 연결된 커뮤니케이터
+	MUID				m_Server;
 
 	ZBT_DummyONCommand	m_fnOnCommandCallBack;
 protected:
@@ -36,8 +36,8 @@ protected:
 	char				m_szStageName[256];
 	char				m_szPlayerName[256];
 protected:
-	void LockRecv() { EnterCriticalSection(&m_csRecvLock); }
-	void UnlockRecv() { LeaveCriticalSection(&m_csRecvLock); }
+	void LockRecv() { m_csRecvLock.lock(); }
+	void UnlockRecv() { m_csRecvLock.unlock(); }
 
 	virtual void OnRegisterCommand(MCommandManager* pCommandManager);
 	virtual bool OnCommand(MCommand* pCommand);
@@ -56,7 +56,7 @@ protected:
 	// Socket Event
 	bool OnSockConnect(SOCKET sock);
 	bool OnSockDisconnect(SOCKET sock);
-	bool OnSockRecv(SOCKET sock, char* pPacket, DWORD dwSize);
+	bool OnSockRecv(SOCKET sock, char* pPacket, u32 dwSize);
 	void OnSockError(SOCKET sock, SOCKET_ERROR_EVENT ErrorEvent, int &ErrorCode);
 protected:
 	int OnResponseMatchLogin(const MUID& uidServer, int nResult, const MUID& uidPlayer);
@@ -72,7 +72,7 @@ public:
 	int Connect(SOCKET* pSocket, char* szIP, int nPort);
 	void Disconnect(MUID uid);
 
-	static bool SocketRecvEvent(void* pCallbackContext, SOCKET sock, char* pPacket, DWORD dwSize);
+	static bool SocketRecvEvent(void* pCallbackContext, SOCKET sock, char* pPacket, u32 dwSize);
 	static bool SocketConnectEvent(void* pCallbackContext, SOCKET sock);
 	static bool SocketDisconnectEvent(void* pCallbackContext, SOCKET sock);
 	static void SocketErrorEvent(void* pCallbackContext, SOCKET sock, SOCKET_ERROR_EVENT ErrorEvent, int &ErrorCode);

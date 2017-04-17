@@ -1,10 +1,9 @@
-#ifndef _ZLOADING_H
-#define _ZLOADING_H
+#pragma once
 
 #include "ZInterface.h"
 #include "MPicture.h"
 
-enum	eLoaindgState
+enum LoadingState
 {
 	LOADING_BEGIN,
 	LOADING_ANIMATION,
@@ -29,9 +28,6 @@ public:
 	virtual void OnDraw(MDrawContext* pDC);
 	virtual bool OnEvent(MEvent* pEvent, MListener* pListener);
 
-	void	Progress( eLoaindgState state );	
+	void	Progress(LoadingState state);
 	int		GetProgress() const;
 };
-
-
-#endif

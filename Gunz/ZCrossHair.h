@@ -1,10 +1,6 @@
-#ifndef _ZCROSSHAIR_H
-#define _ZCROSSHAIR_H
-
+#pragma once
 
 #include "ZIDLResource.h"
-#include <windows.h>
-#include <io.h>
 #include "ZGame.h"
 #include "RealSpace2.h"
 #include "RBaseTexture.h"
@@ -14,8 +10,6 @@
 #include "ZFilePath.h"
 
 #define NUM_DEFAULT_CROSSHAIR		5
-
-
 
 #define FN_CROSSHAIR_HEADER			"crosshair"
 #define FN_CROSSHAIR_TAILER			".png"
@@ -33,12 +27,12 @@ enum ZCROSSHAIR_STATUS
 
 enum ZCrossHairPreset
 {
-	ZCSP_INDEX1		= 0,		// 조준점1
-	ZCSP_INDEX2		= 1,		// 조준점2
-	ZCSP_INDEX3		= 2,		// 조준점3
-	ZCSP_INDEX4		= 3,		// 조준점4
-	ZCSP_INDEX5		= 4,		// 조준점5
-	ZCSP_CUSTOM		= 5			// 사용자 지정
+	ZCSP_INDEX1		= 0,
+	ZCSP_INDEX2		= 1,
+	ZCSP_INDEX3		= 2,
+	ZCSP_INDEX4		= 3,
+	ZCSP_INDEX5		= 4,
+	ZCSP_CUSTOM		= 5
 };
 
 class ZCrossHair
@@ -79,10 +73,3 @@ public:
 
 	static void OnDrawOptionCrossHairPreview(void* pCanvas, MDrawContext *pDC);
 };
-
-
-
-
-
-
-#endif

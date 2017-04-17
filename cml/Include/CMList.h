@@ -6,14 +6,10 @@
 #ifndef LIST_H
 #define LIST_H
 
-#ifdef __BORLANDC__
-#include <assert.h>
+#ifndef _ASSERT
+#include <cassert>
 #define _ASSERT assert
-#else
-#include <crtdbg.h>			// _ASSERT
 #endif
-
-#include <windows.h>		// BOOL
 
 // 리스트를 구성할 레코드
 template<class NEW_TYPE>
@@ -78,13 +74,13 @@ public:
 	//MString GetErrorMessage(void){return m_lpszErrorString;}
 	
 	// 맨 앞에 레코드 삽입(new로 생성된 객체가 그대로 박힌다.)
-	BOOL InsertHead(NEW_TYPE *lpRecord);
+	bool InsertHead(NEW_TYPE *lpRecord);
 	// 현재 위치 다음에 레코드 삽입(new로 생성된 객체가 그대로 박힌다.)
-	BOOL AddAfter(NEW_TYPE *lpRecord);
+	bool AddAfter(NEW_TYPE *lpRecord);
 	// 현재 위치 다음에 레코드 삽입(new로 생성된 객체가 그대로 박힌다.)
-	BOOL Insert(NEW_TYPE *lpRecord);
+	bool Insert(NEW_TYPE *lpRecord);
 	// 맨 뒤에 레코드 추가(new로 생성된 객체가 그대로 박힌다.)
-	BOOL Add(NEW_TYPE *lpRecord);
+	bool Add(NEW_TYPE *lpRecord);
 	
 	// 현재 위치의 레코드를 삭제
 	void Delete(void);
@@ -109,9 +105,9 @@ public:
 	////////////////////////////////////////////
 	// 리스트내의 포인터를 이용한 이동및 값 얻기
 	// 이전 레코드로
-	BOOL PreviousRecord(void);
+	bool PreviousRecord(void);
 	// 다음 레코드로
-	BOOL NextRecord(void);
+	bool NextRecord(void);
 	// 지정된 위치로
 	void MoveRecord(int iindex);
 	// 맨 처음으로
@@ -133,7 +129,7 @@ public:
 	void Swap(int nIndex1,int nIndex2);
 
 	// Record Compare Function. Sort를 위해 virtual로 계승받아야 한다.
-	virtual int Compare(NEW_TYPE *lpRecord1,NEW_TYPE *lpRecord2){return -10;/*FALSE*/}
+	virtual int Compare(NEW_TYPE *lpRecord1,NEW_TYPE *lpRecord2){return -10;/*false*/}
 
 	// Quick Sort를 실행한다.
 	void Sort(void);
@@ -168,7 +164,7 @@ CMLinkedList<NEW_TYPE>::~CMLinkedList(void)
 
 // 레코드 삽입
 template<class NEW_TYPE>
-BOOL CMLinkedList<NEW_TYPE>::AddAfter(NEW_TYPE *lpRecord)
+bool CMLinkedList<NEW_TYPE>::AddAfter(NEW_TYPE *lpRecord)
 {
 	_ASSERT(lpRecord!=NULL);
 
@@ -178,7 +174,7 @@ BOOL CMLinkedList<NEW_TYPE>::AddAfter(NEW_TYPE *lpRecord)
 		ptemp=new CMRecord<NEW_TYPE>;
 		if(ptemp==NULL){
 			//m_lpszErrorString="CMLinkedList::Insert() - Memory Allocation Error";
-			return FALSE;
+			return false;
 		}
 		// 단순히 데이타 포인터 대입. 데이타는 기존에 동적으로 할당되어 있어야 한다.
 		ptemp->m_lpContent=lpRecord;
@@ -191,7 +187,7 @@ BOOL CMLinkedList<NEW_TYPE>::AddAfter(NEW_TYPE *lpRecord)
 	else{
 		CMRecord<NEW_TYPE> *ptemp;
 		ptemp=new CMRecord<NEW_TYPE>;
-		if(ptemp==NULL)return FALSE;
+		if(ptemp==NULL)return false;
 		ptemp->m_lpContent=lpRecord;
 		//memcpy(&(ptemp->m_lpContent),lpRecord,sizeof(NEW_TYPE));
 		// 현재 레코드과 다음 레코드 사이에 삽입
@@ -217,12 +213,12 @@ BOOL CMLinkedList<NEW_TYPE>::AddAfter(NEW_TYPE *lpRecord)
 
 	// 리스트 카운트 증가
 	m_nListCount++;
-	return TRUE;
+	return true;
 }
 
 // 레코드 삽입
 template<class NEW_TYPE>
-BOOL CMLinkedList<NEW_TYPE>::Insert(NEW_TYPE *lpRecord)
+bool CMLinkedList<NEW_TYPE>::Insert(NEW_TYPE *lpRecord)
 {
 	_ASSERT(lpRecord!=NULL);
 
@@ -232,7 +228,7 @@ BOOL CMLinkedList<NEW_TYPE>::Insert(NEW_TYPE *lpRecord)
 		ptemp=new CMRecord<NEW_TYPE>;
 		if(ptemp==NULL){
 			//m_lpszErrorString="CMLinkedList::Insert() - Memory Allocation Error";
-			return FALSE;
+			return false;
 		}
 		// 단순히 데이타 포인터 대입. 데이타는 기존에 동적으로 할당되어 있어야 한다.
 		ptemp->m_lpContent=lpRecord;
@@ -245,7 +241,7 @@ BOOL CMLinkedList<NEW_TYPE>::Insert(NEW_TYPE *lpRecord)
 	else{
 		CMRecord<NEW_TYPE> *ptemp;
 		ptemp=new CMRecord<NEW_TYPE>;
-		if(ptemp==NULL)return FALSE;
+		if(ptemp==NULL)return false;
 		ptemp->m_lpContent=lpRecord;
 		//memcpy(&(ptemp->m_lpContent),lpRecord,sizeof(NEW_TYPE));
 		// 현재 레코드과 다음 레코드 사이에 삽입
@@ -271,11 +267,11 @@ BOOL CMLinkedList<NEW_TYPE>::Insert(NEW_TYPE *lpRecord)
 
 	// 리스트 카운트 증가
 	m_nListCount++;
-	return TRUE;
+	return true;
 }
 
 template<class NEW_TYPE>
-BOOL CMLinkedList<NEW_TYPE>::InsertHead(NEW_TYPE *lpRecord)
+bool CMLinkedList<NEW_TYPE>::InsertHead(NEW_TYPE *lpRecord)
 {
 	_ASSERT(lpRecord!=NULL);
 
@@ -287,7 +283,7 @@ BOOL CMLinkedList<NEW_TYPE>::InsertHead(NEW_TYPE *lpRecord)
 		ptemp=new CMRecord<NEW_TYPE>;
 		if(ptemp==NULL){
 			//m_lpszErrorString="CMLinkedList::Insert() - Memory Allocation Error";
-			return FALSE;
+			return false;
 		}
 		// 단순히 데이타 포인터 대입. 데이타는 기존에 동적으로 할당되어 있어야 한다.
 		ptemp->m_lpContent=lpRecord;
@@ -300,7 +296,7 @@ BOOL CMLinkedList<NEW_TYPE>::InsertHead(NEW_TYPE *lpRecord)
 	else{
 		CMRecord<NEW_TYPE> *ptemp;
 		ptemp=new CMRecord<NEW_TYPE>;
-		if(ptemp==NULL)return FALSE;
+		if(ptemp==NULL)return false;
 		ptemp->m_lpContent=lpRecord;
 		//memcpy(&(ptemp->m_lpContent),lpRecord,sizeof(NEW_TYPE));
 		// 현재 레코드과 다음 레코드 사이에 삽입
@@ -325,12 +321,12 @@ BOOL CMLinkedList<NEW_TYPE>::InsertHead(NEW_TYPE *lpRecord)
 
 	// 리스트 카운트 증가
 	m_nListCount++;
-	return TRUE;
+	return true;
 }
 
 // 레코드 추가
 template<class NEW_TYPE>
-BOOL CMLinkedList<NEW_TYPE>::Add(NEW_TYPE *lpRecord)
+bool CMLinkedList<NEW_TYPE>::Add(NEW_TYPE *lpRecord)
 {
 	MoveLast();
 	return Insert(lpRecord);
@@ -397,7 +393,7 @@ template<class NEW_TYPE>
 void CMLinkedList<NEW_TYPE>::Delete(int iindex)
 {
 	if(iindex<0 || iindex>=m_nListCount) {
-		_ASSERT(FALSE);
+		_ASSERT(false);
 		return ;
 	}
 
@@ -472,7 +468,7 @@ template<class NEW_TYPE>
 void CMLinkedList<NEW_TYPE>::DeleteRecord(int iindex)
 {
 	if(iindex<0 || iindex>=m_nListCount) {
-		_ASSERT(FALSE);
+		_ASSERT(false);
 		return;
 	}
 
@@ -492,7 +488,7 @@ void CMLinkedList<NEW_TYPE>::DeleteRecordAll(void)
 
 // 이전 레코드로
 template<class NEW_TYPE>
-BOOL CMLinkedList<NEW_TYPE>::PreviousRecord(void)
+bool CMLinkedList<NEW_TYPE>::PreviousRecord(void)
 {
 	// 현재 레코드의 포인터는 NULL일수 없다.
 	// 즉, 아무것도 저장되어 있지 않은 상태
@@ -503,17 +499,17 @@ BOOL CMLinkedList<NEW_TYPE>::PreviousRecord(void)
 		_ASSERT(m_nCurrentPosition>=0);
 
 		m_lpCurrentRecord=m_lpCurrentRecord->GetPreviousPointer();
-		return TRUE;
+		return true;
 	}	
 	else{
 		//m_lpszErrorString="CMLinkedList::PreviousRecord() - Out of Range";
-		return FALSE;
+		return false;
 	}
 }
 
 // 다음 레코드로
 template<class NEW_TYPE>
-BOOL CMLinkedList<NEW_TYPE>::NextRecord(void)
+bool CMLinkedList<NEW_TYPE>::NextRecord(void)
 {
 	// 현재 레코드의 포인터는 NULL일수 없다.
 	// 즉, 아무것도 저장되어 있지 않은 상태
@@ -524,11 +520,11 @@ BOOL CMLinkedList<NEW_TYPE>::NextRecord(void)
 		_ASSERT(m_nCurrentPosition<m_nListCount);
 
 		m_lpCurrentRecord=m_lpCurrentRecord->GetNextPointer();
-		return TRUE;
+		return true;
 	}	
 	else{
 		//m_lpszErrorString="CMLinkedList::NextRecord() - Out of Range";
-		return FALSE;
+		return false;
 	}
 }
 
@@ -538,7 +534,7 @@ void CMLinkedList<NEW_TYPE>::MoveRecord(int iindex)
 {
 	// 인덱스는 지정된 범위안에 있어야 한다.
 	if(iindex<0 || iindex>=m_nListCount) {
-		_ASSERT(FALSE);
+		_ASSERT(false);
 		return;
 	}
 	_ASSERT(iindex>=0);
@@ -591,7 +587,7 @@ template<class NEW_TYPE>
 NEW_TYPE *CMLinkedList<NEW_TYPE>::Get(int iindex)
 {
 	if(iindex<0 || iindex>=m_nListCount) {
-		_ASSERT(FALSE);
+		_ASSERT(false);
 		return NULL;
 	}
 
@@ -645,7 +641,7 @@ template<class NEW_TYPE>
 void CMLinkedList<NEW_TYPE>::Swap(int nIndex1,int nIndex2)
 {
 	if(nIndex1<0 || nIndex1>=m_nListCount) {
-		_ASSERT(FALSE);
+		_ASSERT(false);
 		return;
 	}
 
@@ -654,7 +650,7 @@ void CMLinkedList<NEW_TYPE>::Swap(int nIndex1,int nIndex2)
 
 
 	if(nIndex2<0 || nIndex2>=m_nListCount) {
-		_ASSERT(FALSE);
+		_ASSERT(false);
 		return;
 	}
 

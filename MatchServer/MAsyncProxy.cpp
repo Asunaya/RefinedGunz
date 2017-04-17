@@ -8,148 +8,101 @@
 	#include "MProcessController.h"
 #endif
 
-MAsyncProxy::MAsyncProxy()
+bool MAsyncProxy::Create(int ThreadCount)
 {
-	m_nThreadCount = 0;
-	std::fill(std::begin(m_ThreadPool), std::end(m_ThreadPool), INVALID_HANDLE_VALUE);
-}
+	ThreadCount = min(ThreadCount, MAX_THREADPOOL_COUNT);
 
-bool MAsyncProxy::Create(int nThreadCount)
-{
-	m_hEventShutdown = CreateEvent(NULL, FALSE, FALSE, NULL);
-	m_hEventFetchJob = CreateEvent(NULL, FALSE, FALSE, NULL);
-
-	InitializeCriticalSection(&m_csCrashDump);
-
-	nThreadCount = __min(nThreadCount, MAX_THREADPOOL_COUNT);
-	for (int i=0; i<nThreadCount; i++) {
-		DWORD dwThreadId=0;
-		HANDLE hThread = CreateThread(NULL, 0, WorkerThread, this, 0, &dwThreadId);
-		if (hThread == NULL)
-			return false;
-		m_ThreadPool[i] = hThread;
-		m_nThreadCount++;
+	for (int i = 0; i < ThreadCount; i++)
+	{
+		std::thread{ [&] { WorkerThread(); } }.detach();
 	}
+
 	return true;
 }
 
 void MAsyncProxy::Destroy()
 {
-	for (int i=0; i<m_nThreadCount; i++) {
-		SetEvent(GetEventShutdown());
-		Sleep(100);
-	}
-
-	WaitForMultipleObjects(m_nThreadCount,  m_ThreadPool, TRUE, 2000);
-
-	for (int i=0; i<MAX_THREADPOOL_COUNT; i++) {
-		if (INVALID_HANDLE_VALUE != m_ThreadPool[i]) {
-			TerminateThread(m_ThreadPool[i], 0);
-			CloseHandle(m_ThreadPool[i]);
-			m_ThreadPool[i] = INVALID_HANDLE_VALUE;
-			m_nThreadCount--;			
-		}
-	}
-
-	DeleteCriticalSection(&m_csCrashDump);
-
-	CloseHandle(m_hEventFetchJob); m_hEventFetchJob = NULL;
-	CloseHandle(m_hEventShutdown); m_hEventShutdown = NULL;
+	EventShutdown.SetEvent();
 }
 
 void MAsyncProxy::PostJob(MAsyncJob* pJob)
 {
-	m_WaitQueue.Lock();
+	WaitQueue.Lock();
 		pJob->SetPostTime(GetGlobalTimeMS());
-		m_WaitQueue.AddUnsafe(pJob);	
-	m_WaitQueue.Unlock();
+		WaitQueue.AddUnsafe(pJob);	
+	WaitQueue.Unlock();
 
-	SetEvent(GetEventFetchJob());
+	EventFetchJob.SetEvent();
 }
 
-DWORD WINAPI MAsyncProxy::WorkerThread(LPVOID pJobContext)
+void MAsyncProxy::WorkerThread()
 {
-	MAsyncProxy* pProxy = (MAsyncProxy*)pJobContext;
-
-	__try{
-		pProxy->OnRun();
-	} __except(pProxy->CrashDump(GetExceptionInformation())) 
+	__try
 	{
-		// 서버만 실행하도록 하기위함이다.
-		#ifndef _PUBLISH
-			char szFileName[_MAX_DIR];
-			GetModuleFileName(NULL, szFileName, _MAX_DIR);
-			HANDLE hProcess = MProcessController::OpenProcessHandleByFilePath(szFileName);
-			TerminateProcess(hProcess, 0);
-		#endif
+		OnRun();
 	}
-
-	ExitThread(0);
-	return (0);
+	__except(CrashDump(GetExceptionInformation())) 
+	{
+	}
 }
 
 void MAsyncProxy::OnRun()
 {
-	//IDatabase& DatabaseMgr = *MGetMatchServer()->GetDBMgr();
 	DBVariant DatabaseMgr;
 	DatabaseMgr.Create(MGetServerConfig()->GetDatabaseType());
 
-	#define MASYNC_EVENTARRAY_SIZE	2
-	HANDLE EventArray[MASYNC_EVENTARRAY_SIZE];
-
-	ZeroMemory(EventArray, sizeof(HANDLE)*MASYNC_EVENTARRAY_SIZE);
-	WORD wEventCount = 0;
-
-	EventArray[wEventCount++] = GetEventShutdown();
-	EventArray[wEventCount++] = GetEventFetchJob();
+	MSignalEvent* EventArray[]{
+		&EventShutdown,
+		&EventFetchJob,
+	};
 
 	bool bShutdown = false;
-	while(!bShutdown) {
-		#define TICK_ASYNCPROXY_LIVECHECK	1000
-		DWORD dwResult = WaitForMultipleObjects(wEventCount, EventArray, 
-												FALSE, TICK_ASYNCPROXY_LIVECHECK);
-		if (WAIT_TIMEOUT == dwResult) {
-			if (m_WaitQueue.GetCount() > 0) {
-				SetEvent(GetEventFetchJob());
+
+	while (!bShutdown)
+	{
+		const auto Timeout = 1000; // Milliseconds
+		const auto WaitResult = WaitForMultipleEvents(EventArray, Timeout);
+
+		if (WaitResult == MSync::WaitTimeout) {
+			if (WaitQueue.GetCount() > 0) {
+				EventFetchJob.SetEvent();
 			}
 			continue;
 		}
 
-		switch(dwResult) {
-		case WAIT_OBJECT_0:		// Shutdown
-			{
-				bShutdown = true;
-			}
+		switch(WaitResult)
+		{
+		case 0: // Shutdown
+			bShutdown = true;
 			break;
-		case WAIT_OBJECT_0 + 1:	// Fetch Job
+		case 1:	// Fetch Job
 			{
-				m_WaitQueue.Lock();
-					MAsyncJob* pJob = m_WaitQueue.GetJobUnsafe();
-				m_WaitQueue.Unlock();
+				WaitQueue.Lock();
+					MAsyncJob* pJob = WaitQueue.GetJobUnsafe();
+				WaitQueue.Unlock();
 
 				if (pJob) {
 					pJob->Run(&DatabaseMgr.u);
 					pJob->SetFinishTime(GetGlobalTimeMS());
 
-					m_ResultQueue.Lock();
-						m_ResultQueue.AddUnsafe(pJob);
-					m_ResultQueue.Unlock();
+					ResultQueue.Lock();
+						ResultQueue.AddUnsafe(pJob);
+					ResultQueue.Unlock();
 				}
 
-				if (m_WaitQueue.GetCount() > 0) {
-					SetEvent(GetEventFetchJob());
+				if (WaitQueue.GetCount() > 0) {
+					EventFetchJob.SetEvent();
 				}
 			}
 			break;
-		};	// switch
-	};	// while
+		};
+	};
 }
 
-DWORD MAsyncProxy::CrashDump(PEXCEPTION_POINTERS ExceptionInfo)
+u32 MAsyncProxy::CrashDump(EXCEPTION_POINTERS* ExceptionInfo)
 {
 	mlog("CrashDump Entered 1\n");
-	EnterCriticalSection(&m_csCrashDump);
-	mlog("CrashDump Entered 2\n");
+	std::lock_guard<MCriticalSection> lock{ csCrashDump };
 
 	if (PathIsDirectory("Log") == FALSE)
 		CreateDirectory("Log", NULL);
@@ -173,16 +126,13 @@ DWORD MAsyncProxy::CrashDump(PEXCEPTION_POINTERS ExceptionInfo)
 		nFooter++;
 		if (nFooter > 100) 
 		{
-			LeaveCriticalSection(&m_csCrashDump);
 			return false;
 		}
 	}
 
-	DWORD ret = CrashExceptionDump(ExceptionInfo, szFileName);
+	auto ret = CrashExceptionDump(ExceptionInfo, szFileName);
 
 	mlog("CrashDump Leaving\n");
-	LeaveCriticalSection(&m_csCrashDump);
-	mlog("CrashDump Leaved\n");
 
 	return ret;
 }

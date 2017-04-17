@@ -4,22 +4,6 @@
 
 IMPLEMENT_LOOK(MHotKey, MEditLook)
 
-void GetKeyName(char* szKeyName, int nKeyNameSize, UINT nVirtKey, bool bExtended)
-{
-	if(nVirtKey==VK_SHIFT || nVirtKey==VK_CONTROL || nVirtKey==VK_MENU){
-		szKeyName[0] = 0;
-		return;
-	}
-
-	LONG lScan = MapVirtualKey(nVirtKey, 0) << 16;
-
-	// if it's an extended key, add the extended flag
-	if (bExtended)
-		lScan |= 0x01000000L;
-
-	GetKeyNameText(lScan, szKeyName, nKeyNameSize);
-}
-
 
 void MHotKey::OnRun()
 {

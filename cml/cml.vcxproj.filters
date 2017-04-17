@@ -28,8 +28,6 @@
       <Filter>extern</Filter>
     </ClInclude>
     <ClInclude Include="Include\CfgFile.h" />
-    <ClInclude Include="Include\CMError.h" />
-    <ClInclude Include="Include\CMErrorDef.h" />
     <ClInclude Include="Include\CMLexicalAnalyzer.h" />
     <ClInclude Include="Include\CMList.h" />
     <ClInclude Include="Include\CMPtrList.h" />
@@ -70,7 +68,6 @@
     <ClInclude Include="Include\MTrafficLog.h" />
     <ClInclude Include="Include\MTypes.h" />
     <ClInclude Include="Include\MUtil.h" />
-    <ClInclude Include="Include\MWindowFinder.h" />
     <ClInclude Include="Include\MXml.h" />
     <ClInclude Include="Include\MZFileSystem.h" />
     <ClInclude Include="Include\MZip.h" />
@@ -84,7 +81,6 @@
     <ClInclude Include="Include\defer.h" />
     <ClInclude Include="Include\TMP.h" />
     <ClInclude Include="Include\VariantPolymorphism.h" />
-    <ClInclude Include="Include\DeferredConstructionWrapper.h" />
     <ClInclude Include="Include\ArrayView.h" />
     <ClInclude Include="Include\hsv.h" />
     <ClInclude Include="Include\StringView.h" />
@@ -92,6 +88,15 @@
     <ClInclude Include="Include\Arena.h" />
     <ClInclude Include="Include\apply.h" />
     <ClInclude Include="Include\zlib_util.h" />
+    <ClInclude Include="Include\optional.h" />
+    <ClInclude Include="Include\MSocket.h" />
+    <ClInclude Include="Include\MFile.h" />
+    <ClInclude Include="Include\MUrl.h" />
+    <ClInclude Include="Include\MWindows.h" />
+    <ClInclude Include="Include\MVK.h" />
+    <ClInclude Include="Include\MClipboard.h" />
+    <ClInclude Include="Include\MWindowsFwd.h" />
+    <ClInclude Include="Include\RingBuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\MMatrix.cpp">
@@ -104,7 +109,6 @@
       <Filter>extern</Filter>
     </ClCompile>
     <ClCompile Include="Source\CfgFile.cpp" />
-    <ClCompile Include="Source\CMError.c" />
     <ClCompile Include="Source\CMLexicalAnalyzer.cpp" />
     <ClCompile Include="Source\CommonLog.cpp" />
     <ClCompile Include="Source\FileInfo.cpp" />
@@ -144,5 +148,10 @@
     <ClCompile Include="source\MTime.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="Source\MZFile.cpp" />
+    <ClCompile Include="Source\MSocket.cpp" />
+    <ClCompile Include="Source\MFile.cpp" />
+    <ClCompile Include="Source\MUrl.cpp" />
+    <ClCompile Include="Source\MClipboard.cpp" />
+    <ClCompile Include="Source\MVK.cpp" />
   </ItemGroup>
 </Project>

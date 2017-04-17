@@ -5,7 +5,6 @@
 #include "MBlobArray.h"
 #include "MObject.h"
 #include "MMatchObject.h"
-#include "Msg.h"
 #include "MMatchConfig.h"
 #include "MCommandCommunicator.h"
 #include "MDebug.h"
@@ -58,14 +57,6 @@ bool MMatchServer::CheckOnLoginPre(const MUID& CommUID, int nCmdVersion,
 			Post(pCmd);	
 			return false;
 		}
-	}
-
-	if( CheckIsValidIP(CommUID, pCommObj->GetIPString(), strCountryCode3, MGetServerConfig()->IsUseFilter()) )
-		IncreaseNonBlockCount();
-	else
-	{
-		IncreaseBlockCount();
-		return false;
 	}
 
 	return true;
@@ -218,9 +209,6 @@ void MMatchServer::OnMatchLoginFromDBAgent(const MUID& CommUID, const char* szLo
 	MCommObject* pCommObj = (MCommObject*)m_CommRefCache.GetRef(CommUID);
 	if (pCommObj == NULL) return;
 
-	string strCountryCode3;
-	CheckIsValidIP( CommUID, pCommObj->GetIPString(), strCountryCode3, false );
-
 	const char* pUserID = szLoginID;
 	char szPassword[16] = "";
 	char szCertificate[16] = "";
@@ -245,7 +233,7 @@ void MMatchServer::OnMatchLoginFromDBAgent(const MUID& CommUID, const char* szLo
 					bCheckPremiumIP,
 					szIP,
 					dwIP,
-					strCountryCode3);
+					"");
 	PostAsyncJob(pNewJob);
 }
 
@@ -329,7 +317,6 @@ bool MMatchServer::AddObjectOnMatchLogin(const MUID& uidComm,
 	pObj->SetObjectType(MOT_PC);
 	memcpy(pObj->GetAccountInfo(), pSrcAccountInfo, sizeof(MMatchAccountInfo));
 	pObj->SetFreeLoginIP(bFreeLoginIP);
-	pObj->SetCountryCode3( strCountryCode3 );
 	pObj->UpdateTickLastPacketRecved();
 
 	if (pCommObj != NULL)
@@ -374,7 +361,7 @@ bool MMatchServer::AddObjectOnMatchLogin(const MUID& uidComm,
 	Post(pCmd);	
 
 	MAsyncDBJob_InsertConnLog* pNewJob = new MAsyncDBJob_InsertConnLog();
-	pNewJob->Input(pObj->GetAccountInfo()->m_nAID, pObj->GetIPString(), pObj->GetCountryCode3() );
+	pNewJob->Input(pObj->GetAccountInfo()->m_nAID, pObj->GetIPString(), "" );
 	PostAsyncJob(pNewJob);
 
 	return true;

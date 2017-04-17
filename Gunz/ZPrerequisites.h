@@ -1,8 +1,6 @@
 #pragma once
 
-#include "winsock2.h"
 #include "MXml.h"
-#include <windows.h>
 
 #include "RNameSpace.h"
 #include "MUtil.h"

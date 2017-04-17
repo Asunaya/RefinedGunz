@@ -211,7 +211,12 @@
     <ClCompile Include="LocatorDoc.cpp" />
     <ClCompile Include="LocatorView.cpp" />
     <ClCompile Include="MainFrm.cpp" />
-    <ClCompile Include="MLocator.cpp" />
+    <ClCompile Include="MLocator.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Library Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Library Debug|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="MLocatorConfig.cpp" />
     <ClCompile Include="MLocatorDBMgr.cpp" />
     <ClCompile Include="MLocatorStatistics.cpp" />

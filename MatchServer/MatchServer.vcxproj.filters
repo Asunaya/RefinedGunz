@@ -51,9 +51,6 @@
     <ClCompile Include="MBMatchServer.cpp">
       <Filter>Server</Filter>
     </ClCompile>
-    <ClCompile Include="MBMatchServer_CountryFilter.cpp">
-      <Filter>Server</Filter>
-    </ClCompile>
     <ClCompile Include="MBMatchServer_OnCommand.cpp">
       <Filter>Server</Filter>
     </ClCompile>
@@ -227,9 +224,6 @@
       <Filter>MMatchServer\MAsyncJob</Filter>
     </ClCompile>
     <ClCompile Include="MAsyncDBJob_CharFinalize.cpp">
-      <Filter>MMatchServer\MAsyncJob</Filter>
-    </ClCompile>
-    <ClCompile Include="MAsyncDBJob_CountryFilter.cpp">
       <Filter>MMatchServer\MAsyncJob</Filter>
     </ClCompile>
     <ClCompile Include="MAsyncDBJob_Event.cpp">
@@ -445,7 +439,6 @@
     <ClInclude Include="MAsyncDBJob.h" />
     <ClInclude Include="MAsyncDBJob_BringAccountItem.h" />
     <ClInclude Include="MAsyncDBJob_CharFinalize.h" />
-    <ClInclude Include="MAsyncDBJob_CountryFilter.h" />
     <ClInclude Include="MAsyncDBJob_Event.h" />
     <ClInclude Include="MAsyncDBJob_FriendList.h" />
     <ClInclude Include="MAsyncDBJob_GetLoginInfo.h" />

@@ -1,45 +1,40 @@
-#ifndef _MMATCHCLAN_H
-#define _MMATCHCLAN_H
-
+#pragma once
 
 #include "MMatchGlobal.h"
 #include "MUID.h"
 #include "MSmartRefresh.h"
 #include <string>
 #include <list>
-using namespace std;
 
-///////////////////////////////////
 class MMatchObject;
 
-/// 클랜
 class MMatchClan
 {
 private:
-	int				m_nCLID;							///< 클랜 고유의 ID
-	char			m_szClanName[CLAN_NAME_LENGTH];		///< 이름
+	int				m_nCLID;
+	char			m_szClanName[CLAN_NAME_LENGTH];
 	unsigned long	m_nDBRefreshLifeTime;
 
 	struct ClanInfoEx
 	{
-		int	nLevel;							///< 레벨
-		int	nTotalPoint;					///< 토탈포인트
-		int	nPoint;							///< 포인트
-		int	nWins;							///< 전적 - 승수
-		int	nLosses;						///< 전적 - 패수
-		int nRanking;						///< 랭킹
-		int	nTotalMemberCount;				///< 총인원
+		int	nLevel;
+		int	nTotalPoint;
+		int	nPoint;
+		int	nWins;
+		int	nLosses;
+		int nRanking;
+		int	nTotalMemberCount;
 		char szMaster[MATCHOBJECT_NAME_LENGTH];	
-		char szEmblemUrl[256];					///< 클랜마크 URL
-		int nEmblemChecksum;					///< 클랜마크 체크섬
+		char szEmblemUrl[256];
+		int nEmblemChecksum;
 	};
 
 	ClanInfoEx		m_ClanInfoEx;
-	MMatchObjectMap	m_Members;							///< 플레이어들
-	MSmartRefresh	m_SmartRefresh;						///< 플레이어 캐슁
+	MMatchObjectMap	m_Members;
+	MSmartRefresh	m_SmartRefresh;
 
-	int				m_nSeriesOfVictories;				///< 클랜전 연승수
-	list<int>		m_MatchedClanList;					///< 대전했던 클랜
+	int				m_nSeriesOfVictories;
+	std::list<int>	m_MatchedClanList;
 
 	unsigned long	m_nEmptyPeriod;
 
@@ -51,7 +46,6 @@ public:
 	MMatchClan();
 	virtual ~MMatchClan();
 
-	// MMatchClanMap에서 사용하는 함수
 	void Create(int nCLID, const char* szClanName);
 	void AddObject(const MUID& uid, MMatchObject* pObj);
 	void RemoveObject(const MUID& uid);
@@ -59,13 +53,11 @@ public:
 	
 	void Tick(u64 nClock);
 	void SyncPlayerList(MMatchObject* pObj, int nCategory);
-	void InitClanInfoFromDB();			// db에서 클랜정보를 초기화한다.
+	void InitClanInfoFromDB();
 	bool CheckLifePeriod();
 
-	// get 씨리즈
 	int			GetCLID()						{ return m_nCLID; }
 	const char* GetName()						{ return m_szClanName; }
-//	int			GetLevel()						{ return m_nLevel; }
 	int			GetMemberCount()				{ return (int)m_Members.size(); }
 	ClanInfoEx*	GetClanInfoEx()					{ return &m_ClanInfoEx; }
 	bool		IsInitedClanInfoEx()			{ return (m_ClanInfoEx.nLevel != 0); }
@@ -73,8 +65,6 @@ public:
 	const char*	GetEmblemURL()					{ return m_ClanInfoEx.szEmblemUrl; }
 	int			GetEmblemChecksum()				{ return m_ClanInfoEx.nEmblemChecksum; }
 	
-
-	// Inc
 	void IncWins(int nAddedWins) { 
 		m_ClanInfoEx.nWins += nAddedWins; m_nSeriesOfVictories++; 
 	}
@@ -85,13 +75,11 @@ public:
 													if (nAddedPoint > 0) m_ClanInfoEx.nTotalPoint += nAddedPoint; 
 													if (m_ClanInfoEx.nPoint < 0) m_ClanInfoEx.nPoint =0;
 												}
-	void InsertMatchedClanID(int nCLID);	///< 대전했던 클랜
+	void InsertMatchedClanID(int nCLID);
 
 	auto GetMemberBegin()	{ return m_Members.begin(); }
 	auto GetMemberEnd()		{ return m_Members.end(); }
 };
-
-///////////////////////////////////
 
 class MMatchClanMap : public std::map<int, MMatchClan*>
 {
@@ -112,6 +100,3 @@ public:
 	MMatchClan* GetClan(const int nCLID);
 	MMatchClan* GetClan(const char* szClanName);
 };
-
-
-#endif

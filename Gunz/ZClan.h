@@ -2,9 +2,7 @@
 
 #include "ZPrerequisites.h"
 #include "ZMessages.h"
-
 #include "ZApplication.h"
-#include "ZLanguageConf.h"
 
 inline const char* ZGetClanGradeStr(const MMatchClanGrade nGrade)
 {

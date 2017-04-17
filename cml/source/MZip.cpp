@@ -8,6 +8,7 @@
 #include <io.h>
 #include <cassert>
 #include "zlib_util.h"
+#include <algorithm>
 
 typedef unsigned long dword;
 typedef unsigned short word;
@@ -89,15 +90,15 @@ void ConvertChar(char* pData,int _size)
 {
 	if(!pData) return;
 
-	WORD w;
-	BYTE b,bh;
+	u16 w;
+	u8 b, bh;
 
 	for(int i=0;i<_size;i++) {
 		b = *pData ^ 0xFF;
 		w = b<<3;
 		bh = (w&0xff00)>>8;
 		b = w&0xff;
-		*pData = BYTE( b | bh );
+		*pData = u8( b | bh );
 		pData++;
 
 	}
@@ -354,7 +355,7 @@ unsigned int MZip::GetFileTime(int i) const
 	if(i<0 || i>=m_nDirEntries)
 		return 0;
 	else
-		return MAKELONG(m_ppDir[i]->modTime,m_ppDir[i]->modDate);
+		return m_ppDir[i]->modTime | (m_ppDir[i]->modDate << 16);
 }
 
 unsigned int MZip::GetFileTime(const char* filename) const
@@ -466,7 +467,7 @@ bool MZip::ReadFile(int i, void* pBuffer, int nMaxSize)
 	else if(h.compression!=MZIPLOCALHEADER::COMP_DEFLAT)
 		return false;
 
-	const auto OutputSize = min(static_cast<unsigned int>(nMaxSize), h.ucSize);
+	const auto OutputSize = std::min(static_cast<dword>(nMaxSize), h.ucSize);
 	const auto WindowBits = -MAX_WBITS;
 	IOResult ret;
 	if (FileBuffer)
@@ -542,14 +543,14 @@ bool MZip::UpgradeMrs(char* mrs_name) // Mrs To Mrs2
 	memset(pDirData, 0, dir_data_size);
 	fread(pDirData, dir_data_size, 1, fp);
 
-	DWORD _sig = MZIPDIRFILEHEADER::SIGNATURE;
+	u32 _sig = MZIPDIRFILEHEADER::SIGNATURE;
 
 	for(int i=0;i<dir_data_size-3;i++) {
 
-		if((BYTE)pDirData[i] == 0x80) {
-			if((BYTE)pDirData[i+1] == 0x4b) {
-				if((BYTE)pDirData[i+2] == 0x02) {
-					if((BYTE)pDirData[i+3] == 0x05) {
+		if((u8)pDirData[i] == 0x80) {
+			if((u8)pDirData[i+1] == 0x4b) {
+				if((u8)pDirData[i+2] == 0x02) {
+					if((u8)pDirData[i+3] == 0x05) {
 						memcpy(&pDirData[i], &_sig,4);
 					}
 				}
@@ -736,14 +737,14 @@ bool MZip::RecoveryMrs(FILE* fp)
 	memset(pDirData, 0, dir_data_size);
 	fread(pDirData, dir_data_size, 1, fp);
 
-	DWORD _sig = MZIPDIRFILEHEADER::SIGNATURE;
+	u32 _sig = MZIPDIRFILEHEADER::SIGNATURE;
 
 	for(int i=0;i<dir_data_size-3;i++) {
 
-		if((BYTE)pDirData[i] == 0x80) {
-			if((BYTE)pDirData[i+1] == 0x4b) {
-				if((BYTE)pDirData[i+2] == 0x02) {
-					if((BYTE)pDirData[i+3] == 0x05) {
+		if((u8)pDirData[i] == 0x80) {
+			if((u8)pDirData[i+1] == 0x4b) {
+				if((u8)pDirData[i+2] == 0x02) {
+					if((u8)pDirData[i+3] == 0x05) {
 						memcpy(&pDirData[i], &_sig,4);
 					}
 				}
@@ -846,7 +847,7 @@ bool MZip::RecoveryMrs2(FILE* fp)
 bool MZip::isZip()
 {
 	Seek(0, SEEK_SET);
-	DWORD sig = 0;
+	u32 sig = 0;
 	Read(sig);
 
 	if (sig == MZIPLOCALHEADER::SIGNATURE)
@@ -858,7 +859,7 @@ bool MZip::isZip()
 bool MZip::isVersion1Mrs()
 {
 	Seek(0, SEEK_SET);
-	DWORD sig = 0;
+	u32 sig = 0;
 	Read(sig);
 
 	if (sig == MZIPLOCALHEADER::SIGNATURE2)
@@ -870,7 +871,7 @@ bool MZip::isVersion1Mrs()
 bool MZip::isZip(FILE* fp)
 {
 	fseek(fp, 0, SEEK_SET);
-	DWORD sig = 0;
+	u32 sig = 0;
 	fread(&sig, sizeof(sig), 1, fp);
 
 	if (sig == MZIPLOCALHEADER::SIGNATURE)
@@ -882,7 +883,7 @@ bool MZip::isZip(FILE* fp)
 bool MZip::isVersion1Mrs(FILE* fp)
 {
 	fseek(fp, 0, SEEK_SET);
-	DWORD sig = 0;
+	u32 sig = 0;
 	fread(&sig, sizeof(sig), 1, fp);
 
 	if (sig == MZIPLOCALHEADER::SIGNATURE2)
@@ -1002,6 +1003,8 @@ void FFileList::RecoveryZip()
 	}
 }
 
+#ifdef WIN32
+#include <Shlwapi.h>
 void FFileList::ConvertVtf() 
 {
 	iterator node;
@@ -1023,6 +1026,7 @@ void FFileList::ConvertVtf()
 		HINSTANCE hr = ShellExecute(NULL, _T("open"), _T("vtf2tga.exe"),_T(temp_arg), NULL, SW_HIDE);
 	}
 }
+#endif
 
 void FFileList::ConvertNameMRes2Zip() 
 {

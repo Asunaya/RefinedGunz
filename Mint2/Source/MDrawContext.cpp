@@ -4,6 +4,7 @@
 #include <crtdbg.h>
 #include "Mint.h"
 #include <math.h>
+#include <algorithm>
 
 // MDrawContex Implementation
 /////////////////////////////
@@ -151,8 +152,8 @@ void MDrawContext::SetClipRect(MRECT &r)
 	// Screen Coordinate Clipping
 	if(m_Clip.x<0) m_Clip.x = 0;
 	if(m_Clip.y<0) m_Clip.y = 0;
-	if(m_Clip.x+m_Clip.w>MGetWorkspaceWidth()) m_Clip.w = max(MGetWorkspaceWidth()-m_Clip.x, 0);
-	if(m_Clip.y+m_Clip.h>MGetWorkspaceHeight()) m_Clip.h = max(MGetWorkspaceHeight()-m_Clip.y, 0);
+	if(m_Clip.x+m_Clip.w>MGetWorkspaceWidth()) m_Clip.w = std::max(MGetWorkspaceWidth()-m_Clip.x, 0);
+	if(m_Clip.y+m_Clip.h>MGetWorkspaceHeight()) m_Clip.h = std::max(MGetWorkspaceHeight()-m_Clip.y, 0);
 }
 
 void MDrawContext::Rectangle(int x, int y, int cx, int cy)

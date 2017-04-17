@@ -21,8 +21,7 @@ private:
 
 template <typename T, typename... ArgsType>
 defer<T, ArgsType...> make_defer(T&& fn, ArgsType&&... Args) {
-	// NOTE: No type name here (i.e. `return {...};` instead of `return defer<...>{...};`)
-	// lets you avoid a move somehow. I don't know why, don't ask.
+	// Copy-list-initialization avoids a move here.
 	return{ std::forward<T>(fn), std::forward<ArgsType>(Args)... };
 }
 

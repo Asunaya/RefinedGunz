@@ -1,14 +1,9 @@
 #pragma once
 
-#ifdef WIN32
-#include <windows.h>
-#endif
-
 #include <map>
 
 #include "MTypes.h"
 #include "MEvent.h"
-
 
 class MDrawContext;
 class MWidget;
@@ -53,8 +48,8 @@ protected:
 	bool	m_bEnableIME;
 
 public:
-	DWORD	m_nCompositionAttributeSize;
-	BYTE	m_nCompositionAttributes[MIMECOMPOSITIONSTRING_LENGTH];
+	u32		m_nCompositionAttributeSize;
+	u8		m_nCompositionAttributes[MIMECOMPOSITIONSTRING_LENGTH];
 	int		m_nCompositionCaretPosition;
 
 protected:
@@ -68,7 +63,7 @@ public:
 	void Finalize();
 
 #ifdef WIN32
-	bool ProcessEvent(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
+	bool ProcessEvent(struct HWND__* hwnd, u32 message, u32 wparam, u32 lparam);
 #endif
 
 	virtual void Run();
@@ -79,10 +74,10 @@ public:
 	static Mint* GetInstance();
 
 #ifdef WIN32
-	void SetHWND(HWND hWnd);
-	HWND GetHWND();
+	void SetHWND(struct HWND__* hWnd);
+	struct HWND__* GetHWND();
 
-	HIMC m_hImc; // IME Composition handle
+	struct HIMC__* m_hImc; // IME Composition handle
 #endif
 
 	void EnableIME(bool bEnable);
@@ -135,8 +130,8 @@ public:
 	int GetCandidateListWidth();
 	int GetCandidateListHeight();
 
-	DWORD GetCompositionAttributeSize() const { return m_nCompositionAttributeSize; }
-	const BYTE* GetCompositionAttributes() const { return m_nCompositionAttributes; }
+	u32 GetCompositionAttributeSize() const { return m_nCompositionAttributeSize; }
+	const u8* GetCompositionAttributes() const { return m_nCompositionAttributes; }
 
 	int DrawCompositionAttribute(MDrawContext* pDC, MPOINT& p, const char* szComposition, int i);
 	void DrawCompositionAttributes(MDrawContext* pDC, MPOINT& p, const char* szComposition);
@@ -161,15 +156,9 @@ inline int MGetCorrectedWorkspaceWidth() {
 void MCreateSample();
 void MDestroySample();
 
-#ifdef WIN32
-#define MMODIFIER_ALT	MOD_ALT
-#define MMODIFIER_CTRL	MOD_CONTROL
-#define MMODIFIER_SHIFT	MOD_SHIFT
-#else
 #define MMODIFIER_ALT	1
 #define MMODIFIER_CTRL	2
 #define MMODIFIER_SHIFT	4
-#endif
 
 #define MIsActionKeyPressed(_ActionID)	(Mint::GetInstance()->IsActionKeyPressed(_ActionID))
 

@@ -11,7 +11,7 @@
 #include "Hitboxes.h"
 #include "ZReplay.h"
 #include "NewChat.h"
-#include "DeferredConstructionWrapper.h"
+#include "optional.h"
 
 class ZChatCmdManager;
 class MEvent;
@@ -98,8 +98,8 @@ public:
 		QueuedInvokations.push_back({ Callback, Time + Delay });
 	}
 
-	Chat& GetChat() { return m_Chat.Get(); }
-	const Chat& GetChat() const { return m_Chat.Get(); }
+	Chat& GetChat() { return m_Chat.value(); }
+	const Chat& GetChat() const { return m_Chat.value(); }
 	bool IsNewChatEnabled() const { return NewChatEnabled; }
 
 	void DrawReplayInfo(MDrawContext* pDC, MWidget* Widget) const;
@@ -131,7 +131,7 @@ private:
 #endif
 	HitboxManager m_HitboxManager;
 
-	DeferredConstructionWrapper<Chat> m_Chat;
+	optional<Chat> m_Chat;
 
 #ifdef NEW_CHAT
 	bool NewChatEnabled = true;

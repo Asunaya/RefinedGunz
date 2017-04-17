@@ -1,12 +1,11 @@
 #include "stdafx.h"
 #include "MPacketCrypter.h"
 #include "MPacket.h"
+#include "MSharedCommandTable.h"
 
 int MPacketCrypter::m_nSHL = (MCOMMAND_VERSION % 6) + 1;
 unsigned char MPacketCrypter::m_ShlMask = 0;
 
-
-////////////////////////////////////////////////////////////////////////
 bool MPacketCrypter::InitKey(MPacketCrypterKey* pKey)
 {
 	memcpy(&m_Key, pKey, sizeof(MPacketCrypterKey));
@@ -72,18 +71,18 @@ bool MPacketCrypter::Decrypt(const char* pSource, int nSrcLen, char* pTarget, in
 
 char MPacketCrypter::_Enc(char s, char key)
 {
-	WORD w;
-	BYTE b, bh;
+	u16 w;
+	u8 b, bh;
 	b = s ^ key;
 	w = b << m_nSHL;
 	bh = (w&0xFF00)>>8;
 	b = w&0xFF;
-	return( BYTE( b | bh ) ^ 0xF0 );
+	return u8(b | bh) ^ 0xF0;
 }
 
 char MPacketCrypter::_Dec(char s, char key)
 {
-	BYTE b, bh, d;
+	u8 b, bh, d;
 
 	b = s^0xF0;
 	bh = b&m_ShlMask;
@@ -132,7 +131,7 @@ void MPacketCrypter::InitConst()
 {
 	m_nSHL = (MCOMMAND_VERSION % 6) + 1;
 
-	m_ShlMask=0;
+	m_ShlMask = 0;
 	for (int i = 0; i < m_nSHL; i++)
 	{
 		m_ShlMask += (1 << i);

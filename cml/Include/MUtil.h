@@ -2,6 +2,7 @@
 
 #include <string>
 #include <memory>
+#include <algorithm>
 #include "TMP.h"
 #include "GlobalTypes.h"
 
@@ -16,6 +17,7 @@
 #ifdef SAFE_RELEASE
 #undef SAFE_RELEASE
 #endif
+
 template <typename T>
 inline void SafeRelease(T& ptr)
 {
@@ -25,12 +27,8 @@ inline void SafeRelease(T& ptr)
 	ptr = nullptr;
 }
 
-struct D3DDeleter
-{
-	void operator()(IUnknown* ptr) const
-	{
-		ptr->Release();
-	}
+struct D3DDeleter {
+	void operator()(struct IUnknown* ptr) const;
 };
 
 template <typename T>
@@ -42,6 +40,8 @@ inline void SafeRelease(D3DPtr<T>& ptr)
 	ptr = nullptr;
 }
 
+using WIN_DWORD_PTR = std::conditional_t<sizeof(void*) == 4, unsigned long, unsigned long long>;
+
 #define SAFE_RELEASE(p)      { SafeRelease(p); }
 
 #define EXPAND_VECTOR(v) v[0], v[1], v[2]
@@ -52,8 +52,10 @@ inline void SafeRelease(D3DPtr<T>& ptr)
 
 #ifdef _MSC_VER
 #define WARN_UNUSED_RESULT _Check_return_
+#define STDCALL __stdcall
 #else
 #define WARN_UNUSED_RESULT __attribute__((warn_unused_result))
+#define STDCALL __attribute__((stdcall))
 #endif
 
 #define TOKENIZE_IMPL(a, b) a##b
@@ -88,12 +90,12 @@ enum MDateType
 	MDT_YMDHM,
 };
 
-const std::string MGetStrLocalTime( const unsigned short wYear = 0, 
-							   const unsigned short wMon = 0, 
-							   const unsigned short wDay = 0, 
-							   const unsigned short wHour = 0, 
-							   const unsigned short wMin  = 0,
-							   const MDateType = MDT_YMDHM );
+std::string MGetStrLocalTime(unsigned short wYear = 0,
+	unsigned short wMon = 0,
+	unsigned short wDay = 0,
+	unsigned short wHour = 0,
+	unsigned short wMin = 0,
+	MDateType = MDT_YMDHM);
 
 template <typename T1, typename T2>
 T1 reinterpret(const T2& val)
@@ -103,7 +105,7 @@ T1 reinterpret(const T2& val)
 		"Both types must be trivially copyable to reinterpret");
 	static_assert(!std::is_pointer<T2>::value, "Use reinterpret_ptr for pointers");
 	T1 T1_rep;
-	memcpy(&T1_rep, &val, min(sizeof(T1), sizeof(T2)));
+	memcpy(&T1_rep, &val, (std::min)(sizeof(T1), sizeof(T2)));
 	return T1_rep;
 }
 
@@ -114,7 +116,7 @@ T1 reinterpret_ptr(const T2& val)
 		std::is_trivially_copyable<T2>::value,
 		"Both types must be trivially copyable to reinterpret");
 	T1 T1_rep;
-	memcpy(&T1_rep, &val, min(sizeof(T1), sizeof(T2)));
+	memcpy(&T1_rep, &val, (std::min)(sizeof(T1), sizeof(T2)));
 	return T1_rep;
 }
 

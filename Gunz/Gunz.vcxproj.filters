@@ -666,9 +666,6 @@
     <ClInclude Include="upnp.h">
       <Filter>Network\UPNP</Filter>
     </ClInclude>
-    <ClInclude Include="ZLanguageConf.h">
-      <Filter>StringRes</Filter>
-    </ClInclude>
     <ClInclude Include="ZMessages.h">
       <Filter>StringRes</Filter>
     </ClInclude>
@@ -1270,9 +1267,6 @@
     </ClCompile>
     <ClCompile Include="upnp.cpp">
       <Filter>Network\UPNP</Filter>
-    </ClCompile>
-    <ClCompile Include="ZLanguageConf.cpp">
-      <Filter>StringRes</Filter>
     </ClCompile>
     <ClCompile Include="ZMessages.cpp">
       <Filter>StringRes</Filter>

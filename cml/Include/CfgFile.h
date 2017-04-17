@@ -7,6 +7,7 @@
 */
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include <CMList.h>
 
 #ifndef __CFGFILE_HEADER__
@@ -99,12 +100,12 @@ public :
 		return 0;
 	}
 
-	BOOL GetString(char *szBuffer, int maxlen){
-		if(tValue.id == CFG_STRINGTYPE){	//자동 타입 캐스팅을 하지 않는다.
+	bool GetString(char *szBuffer, int maxlen){
+		if (tValue.id == CFG_STRINGTYPE) {
 			strcpy_safe(szBuffer, maxlen, tValue.v.szval);
-			return TRUE;
+			return true;
 		}
-		return FALSE;		
+		return false;
 	}
 
 	// 0 : Integer, 1 : Real, 2 : String
@@ -195,7 +196,7 @@ public :
 	/* CFG 파일을 연다. */
 	int Open(char *szFileName);
 
-	BOOL OpenBinary(char *szFileName);
+	bool OpenBinary(char *szFileName);
 	void SaveBinary(char *szFileName);
 
 	void Close(){ aSectionList.DeleteAll(); m_nErrorLine = -1; }

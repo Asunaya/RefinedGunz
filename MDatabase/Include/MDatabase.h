@@ -1,19 +1,15 @@
 #pragma once
 
 #include "afxdb.h"
-
 #include <string>
 
-using std::string;
-
-typedef void(LOGCALLBACK)( const string& strLog );
-
+typedef void(LOGCALLBACK)( const std::string& strLog );
 
 class MDatabase
 {
 public:
-	MDatabase(void);
-	~MDatabase(void);
+	MDatabase();
+	~MDatabase();
 
 	CDatabase* GetDatabase()	{ return &m_DB; }
 
@@ -27,7 +23,7 @@ public:
 	void SetLogCallback( LOGCALLBACK* fnLogCallback ) { m_fnLogCallback = fnLogCallback; }
 
 private :
-	void WriteLog( const string& strLog );
+	void WriteLog( const std::string& strLog );
 
 private :
 	CDatabase		m_DB;

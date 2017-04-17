@@ -5,6 +5,7 @@
 #include "ZInput.h"
 #include "Config.h"
 #include "defer.h"
+#include "MClipboard.h"
 
 namespace ResizeFlagsType
 {
@@ -137,54 +138,6 @@ struct LineSegmentInfo
 
 // Stuff crashes if this is increased
 static constexpr int MAX_INPUT_LENGTH = 230;
-
-static std::wstring GetClipboard()
-{
-	if (!IsClipboardFormatAvailable(CF_UNICODETEXT))
-		return{};
-
-	if (!OpenClipboard(g_hWnd))
-		return{};
-
-	auto ClipboardData = GetClipboardData(CF_UNICODETEXT);
-	if (!ClipboardData)
-		return{};
-
-	auto ptr = static_cast<const wchar_t*>(GlobalLock(ClipboardData));
-	if (!ptr)
-		return{};
-
-	std::wstring ret = ptr;
-	GlobalUnlock(ClipboardData);
-	CloseClipboard();
-
-	return ret;
-}
-
-static bool SetClipboard(const std::wstring& str)
-{
-	auto MemSize = (str.length() + 1) * sizeof(wchar_t);
-	HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, MemSize);
-	if (!hMem)
-		return false;
-
-	auto pMem = static_cast<wchar_t*>(GlobalLock(hMem));
-	if (!pMem)
-	{
-		GlobalUnlock(pMem);
-		GlobalFree(pMem);
-		return false;
-	}
-
-	strcpy_safe(pMem, MemSize, str.c_str());
-	GlobalUnlock(hMem);
-
-	auto Success = SetClipboardData(CF_UNICODETEXT, hMem) != NULL;
-	if (!Success)
-		GlobalFree(hMem);
-
-	return Success;
-}
 
 void ChatMessage::SubstituteFormatSpecifiers()
 {
@@ -408,9 +361,9 @@ bool Chat::CursorInRange(int x1, int y1, int x2, int y2){
 	return Cursor.x > x1 && Cursor.x < x2 && Cursor.y > y1 && Cursor.y < y2;
 }
 
-int Chat::GetTextLength(MFontR2& Font, const wchar_t *Format, ...)
+int Chat::GetTextLength(MFontR2& Font, const wchar_t* Format, ...)
 {
-	wchar_t buf[256];
+	wchar_t buf[1024];
 	va_list va;
 	va_start(va, Format);
 	vswprintf_safe(buf, Format, va);
@@ -634,10 +587,11 @@ bool Chat::OnEvent(MEvent* pEvent){
 			if (!pEvent->bCtrl)
 				break;
 
-			auto Clipboard = GetClipboard();
-			if (InputField.length() + Clipboard.length() > MAX_INPUT_LENGTH)
+			wchar_t Clipboard[256];
+			MClipboard::Get(g_hWnd, Clipboard, std::size(Clipboard));
+			if (InputField.length() + wcslen(Clipboard) > MAX_INPUT_LENGTH)
 			{
-				InputField += Clipboard.substr(0, MAX_INPUT_LENGTH - InputField.length());
+				InputField.append(Clipboard, Clipboard + MAX_INPUT_LENGTH - InputField.length());
 			}
 			else
 				InputField += Clipboard;
@@ -779,14 +733,14 @@ void Chat::OnUpdate(float TimeDelta){
 	}
 
 	if (SelectionState.FromMsg && SelectionState.ToMsg &&
-		GetAsyncKeyState(VK_CONTROL) & 0x8000 && GetAsyncKeyState('C') & 0x8000){
+		MEvent::IsKeyDown(VK_CONTROL) && MEvent::IsKeyDown('C')){
 		if (OpenClipboard(g_hWnd)){
 			EmptyClipboard();
 
 			if (SelectionState.FromMsg == SelectionState.ToMsg){
 				auto index = min(SelectionState.FromPos, SelectionState.ToPos);
 				auto str = SelectionState.FromMsg->Msg.substr(index);
-				SetClipboard(str);
+				MClipboard::Set(g_hWnd, str);
 			}
 			else{
 				std::wstring str;
@@ -822,7 +776,7 @@ void Chat::OnUpdate(float TimeDelta){
 				}
 
 				if (FirstFound){
-					SetClipboard(str);
+					MClipboard::Set(g_hWnd, str);
 				}
 			}
 
@@ -833,7 +787,7 @@ void Chat::OnUpdate(float TimeDelta){
 	const int nBorderWidth = 5;
 
 	// TODO: Move to OnEvent
-	if (GetAsyncKeyState(VK_LBUTTON) & 0x8000) {
+	if (MEvent::IsKeyDown(VK_LBUTTON)) {
 		if (Action == ChatWindowAction::None) {
 			D3DRECT tr = GetTotalRect();
 
@@ -1046,16 +1000,16 @@ void Chat::OnDraw(MDrawContext* pDC)
 	}
 }
 
-int Chat::DrawTextWordWrap(MFontR2& Font, const wchar_t *Str, const D3DRECT &r, u32 Color)
+int Chat::DrawTextWordWrap(MFontR2& Font, const WStringView& Str, const D3DRECT &r, u32 Color)
 {
 	int Lines = 1;
-	int StringLength = wcslen(Str);
+	int StringLength = int(Str.size());
 	int CurrentLineLength = 0;
 	int MaxLineLength = r.x2 - r.x1;
 
 	for (int i = 0; i < StringLength; i++)
 	{
-		int CharWidth = Font.GetWidth(Str + i, 1);
+		int CharWidth = Font.GetWidth(&Str[i], 1);
 		int CharHeight = Font.GetHeight();
 
 		if (CurrentLineLength + CharWidth > MaxLineLength)
@@ -1066,8 +1020,8 @@ int Chat::DrawTextWordWrap(MFontR2& Font, const wchar_t *Str, const D3DRECT &r, 
 
 		auto x = r.x1 + CurrentLineLength;
 		auto y = r.y1 + (CharHeight + 1) * max(0, Lines - 1);
-		Font.m_Font.DrawTextN(x, y,
-			Str + i, 1,
+		Font.m_Font.DrawText(x, y,
+			Str.substr(i, 1),
 			Color);
 
 		CurrentLineLength += CharWidth;
@@ -1076,9 +1030,9 @@ int Chat::DrawTextWordWrap(MFontR2& Font, const wchar_t *Str, const D3DRECT &r, 
 	return Lines;
 }
 
-void Chat::DrawTextN(MFontR2& pFont, const wchar_t *Str, const D3DRECT &r, u32 Color, int Len)
+void Chat::DrawTextN(MFontR2& pFont, const WStringView& Str, const D3DRECT &r, u32 Color)
 {
-	pFont.m_Font.DrawTextN(r.x1, r.y1, Str, Len, Color);
+	pFont.m_Font.DrawText(r.x1, r.y1, Str, Color);
 }
 
 void Chat::DrawBorder(MDrawContext* pDC)
@@ -1382,7 +1336,7 @@ void Chat::DrawChatLines(MDrawContext* pDC, float Time, int Limit, bool ShowAll)
 		if (!ShowAll && !InputEnabled)
 			Color = ScaleAlpha(Color, cl.Time, Time, FadeTime * 0.8f, FadeTime);
 
-		DrawTextN(Font, String, Rect, Color, Length);
+		DrawTextN(Font, { String, Length }, Rect, Color);
 
 		if (LineSegment.IsStartOfLine)
 		{

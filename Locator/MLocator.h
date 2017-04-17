@@ -2,7 +2,7 @@
 
 #include "MUID.h"
 #include "MCommandManager.h"
-
+#include "MSync.h"
 
 class MCommand;
 class MCommandManager;
@@ -18,31 +18,30 @@ struct MPacketHeader;
 class MLocator
 {
 public:
-	MLocator(void);
-	virtual ~MLocator(void);
+	MLocator();
+	virtual ~MLocator();
 
 	bool Create();
 	void Destroy();
 
-	bool IsBlocker( const DWORD dwIPKey, const DWORD dwEventTime );
-	bool IsDuplicatedUDP( const DWORD dwIPKey, 
-						  MUDPManager& rfCheckUDPManager, 
-						  const DWORD dwEventTime	);
+	bool IsBlocker(const u32 dwIPKey, const u64 dwEventTime);
+	bool IsDuplicatedUDP(const u32 dwIPKey,
+		MUDPManager& rfCheckUDPManager,
+		const u64 dwEventTime);
 
-	void IncreaseRecvCount()		{ ++m_nRecvCount; }
-	void IncreaseSendCount()		{ ++m_nSendCount; }
-	void IncreaseDuplicatedCount()	{ ++m_nDuplicatedCount; }
+	void IncreaseRecvCount() { ++m_nRecvCount; }
+	void IncreaseSendCount() { ++m_nSendCount; }
+	void IncreaseDuplicatedCount() { ++m_nDuplicatedCount; }
 
-	auto* GetServerStatusMgr()		 { return m_pServerStatusMgr; }	
+	auto* GetServerStatusMgr() { return m_pServerStatusMgr; }
 	auto* GetServerStatusMgr() const { return m_pServerStatusMgr; }
 
 	void DumpLocatorStatusInfo();
-	
+
 	void Run();
 
-public :
-	/// 커맨드 매니져 얻기
-	MCommandManager* GetCommandManager(void) { return &m_CommandManager; }
+public:
+	MCommandManager* GetCommandManager() { return &m_CommandManager; }
 	MCommand* GetCommandSafe() { return m_CommandManager.GetCommand(); }
 
 	MCommand* CreateCommand(int nCmdID, const MUID& TargetUID);
@@ -50,120 +49,107 @@ public :
 #ifdef _DEBUG
 	void TestDo();
 	void InitDebug();
-	void DebugOutput( void* vp );
+	void DebugOutput(void* vp);
 #endif
 
-private :
+private:
 	bool InitDBMgr();
 	bool InitSafeUDP();
 	bool InitServerStatusMgr();
 	bool InitUDPManager();
-	bool InitCountryCodeFilter();
-	
+
 	MLocatorDBMgr* GetLocatorDBMgr() { return m_pDBMgr; }
 
 	bool GetServerStatus();
-	void GetDBServerStatus( const DWORD dwEventTime, const bool bIsWithoutDelayUpdate = false );
-	const DWORD GetUpdatedServerStatusTime()		{ return m_dwLastServerStatusUpdatedTime; }
-	const DWORD GetLastUDPManagerUpdateTime()		{ return m_dwLastUDPManagerUpdateTime; }
-	const DWORD GetLastLocatorStatusUpdatedTime()	{ return m_dwLastLocatorStatusUpdatedTime; }
+	void GetDBServerStatus(u64 dwEventTime, const bool bIsWithoutDelayUpdate = false);
+	auto GetUpdatedServerStatusTime() { return m_dwLastServerStatusUpdatedTime; }
+	auto GetLastUDPManagerUpdateTime() { return m_dwLastUDPManagerUpdateTime; }
+	auto GetLastLocatorStatusUpdatedTime() { return m_dwLastLocatorStatusUpdatedTime; }
 
-	MUDPManager& GetRecvUDPManager()  { return *m_pRecvUDPManager; }
-	MUDPManager& GetSendUDPManager()  { return *m_pSendUDPManager; }
+	MUDPManager& GetRecvUDPManager() { return *m_pRecvUDPManager; }
+	MUDPManager& GetSendUDPManager() { return *m_pSendUDPManager; }
 	MUDPManager& GetBlockUDPManager() { return *m_pBlockUDPManager; }
 
-	const DWORD GetRecvCount() const		{ return m_nRecvCount; }
-	const DWORD GetSendCount() const		{ return m_nSendCount; }
-	const DWORD GetDuplicatedCount() const	{ return m_nDuplicatedCount; }
+	auto GetRecvCount() const { return m_nRecvCount; }
+	auto GetSendCount() const { return m_nSendCount; }
+	auto GetDuplicatedCount() const { return m_nDuplicatedCount; }
 
-	void ResetRecvCount()		{ m_nRecvCount = 0; }
-	void ResetSendCount()		{ m_nSendCount = 0; }
-	void ResetDuplicatedCount()	{ m_nDuplicatedCount = 0; }
-
-	MCountryFilter* GetCountryFilter() { return m_pCountryFilter; }
+	void ResetRecvCount() { m_nRecvCount = 0; }
+	void ResetSendCount() { m_nSendCount = 0; }
+	void ResetDuplicatedCount() { m_nDuplicatedCount = 0; }
 
 	void ReleaseDBMgr();
 	void ReleaseSafeUDP();
 	void ReleaseServerStatusMgr();
 	void ReleaseServerStatusInfoBlob();
 	void ReleaseUDPManager();
-	void ReleaseValidCountryCodeList();
 	void ReleaseCommand();
 
-	bool IsElapedServerStatusUpdatedTime( const DWORD dwEventTime );
-	void UpdateLastServerStatusUpdatedTime( const DWORD dwTime )	{ m_dwLastServerStatusUpdatedTime = dwTime; }
-	void UpdateLastUDPManagerUpdateTime( const DWORD dwTime )		{ m_dwLastUDPManagerUpdateTime = dwTime; }
-	void UpdateLastLocatorStatusUpdatedTime( const DWORD dwTime )	{ m_dwLastLocatorStatusUpdatedTime = dwTime; }
-	
-	void ParseUDPPacket( char* pData, 
-						 MPacketHeader* pPacketHeader, 
-						 DWORD dwIP, 
-						 unsigned int nPort);
-	void PostSafeCommand( MCommand* pCmd );
+	bool IsElapedServerStatusUpdatedTime(u64 dwEventTime);
+	void UpdateLastServerStatusUpdatedTime(u64 dwTime) { m_dwLastServerStatusUpdatedTime = dwTime; }
+	void UpdateLastUDPManagerUpdateTime(u64 dwTime) { m_dwLastUDPManagerUpdateTime = dwTime; }
+	void UpdateLastLocatorStatusUpdatedTime(u64 dwTime) { m_dwLastLocatorStatusUpdatedTime = dwTime; }
 
-	void CommandQueueLock()		{ EnterCriticalSection( &m_csCommandQueueLock ); }
-	void CommandQueueUnlock()	{ LeaveCriticalSection( &m_csCommandQueueLock ); }
+	void ParseUDPPacket(char* pData,
+		MPacketHeader* pPacketHeader,
+		u32 dwIP,
+		unsigned int nPort);
+	void PostSafeCommand(MCommand* pCmd);
 
-	void ResponseServerStatusInfoList( DWORD dwIP, int nPort );
-	void ResponseBlockCountryCodeIP( DWORD dwIP, 
-									 int nPort, 
-									 const std::string& strCountryCode, 
-									 const std::string& strRoutingURL );
+	void CommandQueueLock() { m_csCommandQueueLock.lock(); }
+	void CommandQueueUnlock() { m_csCommandQueueLock.unlock(); }
 
-	bool IsLiveUDP( const MLocatorUDPInfo* pRecvUDPInfo, const DWORD dwEventTime );
-	bool IskLIveBlockUDP( const MLocatorUDPInfo* pBlkRecvUDPInfo, const DWORD dwEventTime );
-	bool IsOverflowedNormalUseCount( const MLocatorUDPInfo* pRecvUDPInfo );
+	void ResponseServerStatusInfoList(u32 dwIP, int nPort);
+	void ResponseBlockCountryCodeIP(u32 dwIP,
+		int nPort,
+		const std::string& strCountryCode,
+		const std::string& strRoutingURL);
 
-	const int	MakeCmdPacket( char* pOutPacket, const int nMaxSize, MCommand* pCmd );
-	void		SendCommandByUDP( DWORD dwIP, int nPort, MCommand* pCmd );
-	
-	void UpdateUDPManager( const DWORD dwEventTime );
-	void FlushRecvQueue( const DWORD dwEventTime );
-	void UpdateLocatorStatus( const DWORD dwEventTime );
-	void UpdateLocatorLog( const DWORD dwEventTime );
-	void UpdateCountryCodeFilter( const DWORD dwEventTime );
+	bool IsLiveUDP(const MLocatorUDPInfo* pRecvUDPInfo, u64 dwEventTime);
+	bool IsLiveBlockUDP(const MLocatorUDPInfo* pBlkRecvUDPInfo, u64 dwEventTime);
+	bool IsOverflowedNormalUseCount(const MLocatorUDPInfo* pRecvUDPInfo);
+
+	const int	MakeCmdPacket(char* pOutPacket, const int nMaxSize, MCommand* pCmd);
+	void		SendCommandByUDP(u32 dwIP, int nPort, MCommand* pCmd);
+
+	void UpdateUDPManager(u64 dwEventTime);
+	void FlushRecvQueue(u64 dwEventTime);
+	void UpdateLocatorStatus(u64 dwEventTime);
+	void UpdateLocatorLog(u64 dwEventTime);
+	void UpdateCountryCodeFilter(u64 dwEventTime);
 	void UpdateLogManager();
-
-	bool GetCustomIP( const std::string& strIP, std::string& strOutCountryCode, bool& bIsBlock, std::string& strOutComment );
-
-	bool IsValidCountryCodeIP( const std::string& strIP, 
-							   std::string& strOutCountryCode, 
-							   std::string& strOutRoutingURL );
 
 	void OnRegisterCommand(MCommandManager* pCommandManager);
 
-	static bool UDPSocketRecvEvent( DWORD dwIP, 
-									WORD wRawPort, 
-									char* pPacket, 
-									DWORD dwSize );
+	static bool UDPSocketRecvEvent(u32 dwIP,
+		u16 wRawPort,
+		char* pPacket,
+		u32 dwSize);
 
-	void DeleteCountryFilter();
+private:
+	MCommandManager	m_CommandManager;
+	MUID			m_This{};
 
-private :
-	MCommandManager	m_CommandManager;	///< 커맨드 매니저
-	MUID			m_This;				///< 자기 커뮤니케이터 UID
+	MSafeUDP*			m_pSafeUDP{};
+	MServerStatusMgr*	m_pServerStatusMgr{};
 
-	MSafeUDP*			m_pSafeUDP;
-	MServerStatusMgr*	m_pServerStatusMgr;
+	u64 m_dwLastServerStatusUpdatedTime{};
+	u64 m_dwLastLocatorStatusUpdatedTime{};
 
-	DWORD m_dwLastServerStatusUpdatedTime;
-	DWORD m_dwLastLocatorStatusUpdatedTime;
+	MCriticalSection m_csCommandQueueLock{};
 
-	CRITICAL_SECTION m_csCommandQueueLock;
+	MUDPManager* m_pRecvUDPManager{};
+	MUDPManager* m_pSendUDPManager{};
+	MUDPManager* m_pBlockUDPManager{};
+	u64 m_dwLastUDPManagerUpdateTime{};
 
-	MUDPManager* m_pRecvUDPManager;
-	MUDPManager* m_pSendUDPManager;
-	MUDPManager* m_pBlockUDPManager;
-	DWORD		 m_dwLastUDPManagerUpdateTime;
+	u32 m_nRecvCount{};
+	u32 m_nSendCount{};
+	u32 m_nDuplicatedCount{};
 
-	DWORD m_nRecvCount;
-	DWORD m_nSendCount;
-	DWORD m_nDuplicatedCount;
+	MLocatorDBMgr*	m_pDBMgr{};
 
-	MLocatorDBMgr*	m_pDBMgr = nullptr;
-	MCountryFilter* m_pCountryFilter = nullptr;
-
-	void*		m_vpServerStatusInfoBlob;
-	int			m_nLastGetServerStatusCount;
-	int			m_nServerStatusInfoBlobSize;
+	void*		m_vpServerStatusInfoBlob{};
+	int			m_nLastGetServerStatusCount{};
+	int			m_nServerStatusInfoBlobSize{};
 };

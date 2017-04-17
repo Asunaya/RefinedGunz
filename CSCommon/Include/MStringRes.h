@@ -76,7 +76,7 @@ public:
 
 					aChild.GetContents(szContents);
 
-					m_StringMap.insert(typename map<_T, string>::value_type(CID, string(szContents)));
+					m_StringMap.emplace(CID, szContents);
 				}
 			}
 		}

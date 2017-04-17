@@ -7,7 +7,7 @@
 #include "mprofiler.h"
 #include "dxerr.h"
 #pragma comment(lib, "dxerr.lib")
-#include <tchar.h>
+#include "VertexTypes.h"
 
 #ifdef _USE_GDIPLUS
 #include "unknwn.h"
@@ -96,21 +96,21 @@ void RFontTexture::Destroy() {
 	SAFE_DELETE_ARRAY(m_CellInfo);
 }
 
-void BlitRect(BYTE* pDest, int x1,int y1,int x2,int y2,int w, int h, DWORD* pBitmapBits, INT Pitch)
+void BlitRect(BYTE* pDest, int x1,int y1,int x2,int y2,int w, int h, u32* pBitmapBits, INT Pitch)
 {
 	if(pDest==NULL) return;
 
-	DWORD* pDestTemp = NULL;
+	u32* pDestTemp = NULL;
 
 	int by=0;
 	int bx=0;
 
 	for(int y=y1; y<y2; y++) {
-		pDestTemp = (DWORD*)(pDest+(y*Pitch));
+		pDestTemp = (u32*)(pDest+(y*Pitch));
 		bx = 0;
 		for(int x=x1; x<x2; x++) {
 
-			DWORD dwPixel = pBitmapBits[(w * by) + (bx)];
+			u32 dwPixel = pBitmapBits[(w * by) + (bx)];
 			if ( dwPixel & 0x00ffffff)
 				dwPixel |= 0xff000000;
 
@@ -123,7 +123,7 @@ void BlitRect(BYTE* pDest, int x1,int y1,int x2,int y2,int w, int h, DWORD* pBit
 }
 
 
-bool RFontTexture::UploadTexture(RCHARINFO *pCharInfo,DWORD* pBitmapBits,int w,int h)
+bool RFontTexture::UploadTexture(RCHARINFO *pCharInfo,u32* pBitmapBits,int w,int h)
 {
 	D3DLOCKED_RECT d3dlr;
 	HRESULT hr = m_pTexture->LockRect(0,&d3dlr,NULL,NULL);
@@ -169,7 +169,7 @@ bool RFontTexture::IsNeedUpdate(int nIndex, int nID)
 }
 
 bool RFontTexture::MakeFontBitmap(HFONT hFont, RCHARINFO *pInfo, const wchar_t* szText,
-	int nOutlineStyle, DWORD nColorArg1, DWORD nColorArg2)
+	int nOutlineStyle, u32 nColorArg1, u32 nColorArg2)
 {
 	HFONT hPrevFont = (HFONT)SelectObject(m_hDC, hFont);
 
@@ -262,7 +262,7 @@ int RFontTexture::GetCharWidth(HFONT hFont, const wchar_t* szChar)
 }
 
 bool RFontTexture::MakeFontBitmap(HFONT hFont, RCHARINFO * pInfo, const char * szText,
-	int nOutlineStyle, DWORD nColorArg1, DWORD nColorArg2)
+	int nOutlineStyle, u32 nColorArg1, u32 nColorArg2)
 {
 	wchar_t WideText[256];
 	auto len = MultiByteToWideChar(CP_ACP, 0, szText, -1, WideText, std::size(WideText));
@@ -283,21 +283,15 @@ void RFontDestroy()
 	RCHARINFO::Release();
 }
 
-#define RFONT_VERTEXCOUNT	4
-struct FONT2DVERTEX { 
-	v4 p;   
-	DWORD color;     
-	FLOAT tu, tv; 
-};
+constexpr auto RFONT_VERTEXCOUNT = 4;
+using FONT2DVERTEX = ScreenSpaceColorTexVertex;
+constexpr auto D3DFVF_FONT2DVERTEX = ScreenSpaceColorTexFVF;
 
-#define D3DFVF_FONT2DVERTEX (D3DFVF_XYZRHW|D3DFVF_DIFFUSE|D3DFVF_TEX1)
-
-#define MAX_FONT_BUFFER 4000
+constexpr auto MAX_FONT_BUFFER = 4000;
 
 static	int				g_nFontCount = 0;
 static	FONT2DVERTEX	g_FontVertexBuffer[4 * MAX_FONT_BUFFER];
-static	WORD			g_FontIndexBuffer[6 * MAX_FONT_BUFFER];
-
+static	u16				g_FontIndexBuffer[6 * MAX_FONT_BUFFER];
 
 RFont::RFont()
 {
@@ -309,12 +303,13 @@ RFont::~RFont()
 }
 
 bool RFont::Create(const TCHAR* szFontName, int nHeight, bool bBold, bool bItalic,
-	int nOutlineStyle, int nCacheSize, bool bAntiAlias, DWORD nColorArg1, DWORD nColorArg2)
+	int nOutlineStyle, int nCacheSize, bool bAntiAlias, u32 nColorArg1, u32 nColorArg2)
 {
 	m_nOutlineStyle = nOutlineStyle;
 	HDC hDC = GetDC(g_hWnd);
 	SetMapMode(hDC, MM_TEXT);
-	nHeight = MulDiv(nHeight, GetDeviceCaps(hDC, LOGPIXELSY), 72);
+	nHeight *= GetDeviceCaps(hDC, LOGPIXELSY);
+	nHeight /= 72;
 	
 	m_nHeight = nHeight;
 
@@ -322,18 +317,33 @@ bool RFont::Create(const TCHAR* szFontName, int nHeight, bool bBold, bool bItali
 	m_ColorArg2 = nColorArg2;
 	m_bAntiAlias = bAntiAlias;
 
-	m_hFont = CreateFont(-nHeight, 0, 0, 0, bBold==true?FW_BOLD:FW_NORMAL, bItalic==true?TRUE:FALSE, 
-		FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH , szFontName);
+	const auto Weight = bBold ? FW_BOLD : FW_NORMAL;
+	const auto Italic = static_cast<BOOL>(bItalic);
+	m_hFont = CreateFont(
+		-nHeight,            // Height
+		0,                   // Width
+		0,                   // Escapement
+		0,                   // Orientation
+		Weight,              // Weight
+		Italic,              // Italic
+		FALSE,               // Underline
+		FALSE,               // Strike out
+		DEFAULT_CHARSET,     // Char set
+		OUT_DEFAULT_PRECIS,  // Out precision
+		CLIP_DEFAULT_PRECIS, // Clip precision
+		DEFAULT_QUALITY,     // Quality
+		DEFAULT_PITCH,       // Pitch and family
+		szFontName);         // Face name
 
-	if(m_hFont==NULL)
+	if (m_hFont == NULL)
 		return false;
 	ReleaseDC(g_hWnd, hDC);
 
 	m_pFontTexture = &g_FontTexture;
-	if(m_pFontTexture->GetTexture()==NULL) 
+	if (m_pFontTexture->GetTexture() == NULL)
 		m_pFontTexture->Create();
 
-	_ASSERT(nHeight <= CELL_SIZE);
+	ASSERT(nHeight <= CELL_SIZE);
 
 	return true;
 }
@@ -343,7 +353,7 @@ void RFont::Destroy()
 	DeleteObject(m_hFont);
 	m_hFont = NULL;
 
-	while(m_CharInfoMap.size())
+	while (m_CharInfoMap.size())
 	{
 		RCHARINFO* pCharInfo = m_CharInfoMap.begin()->second;
 		delete pCharInfo;
@@ -357,7 +367,7 @@ bool RFont::BeginFont()
 {
 	if(m_bInFont) return true;
 
-	LPDIRECT3DDEVICE9 pDevice = RGetDevice();
+	auto pDevice = RGetDevice();
 
 	pDevice->SetRenderState( D3DRS_ALPHABLENDENABLE, TRUE);
 	pDevice->SetRenderState( D3DRS_SRCBLEND,   D3DBLEND_SRCALPHA );
@@ -368,7 +378,7 @@ bool RFont::BeginFont()
 
 	constexpr bool bFiltering = true;
 
-	if(bFiltering){
+	if (bFiltering) {
 		pDevice->SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR );
 		pDevice->SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR );
 	}
@@ -419,10 +429,10 @@ bool RFont::EndFont()
 
 	if(g_nFontCount)
 	{
-		HRESULT hr = RGetDevice()->DrawIndexedPrimitiveUP(D3DPT_TRIANGLELIST,0,g_nFontCount*4,g_nFontCount*2,
+		auto hr = RGetDevice()->DrawIndexedPrimitiveUP(D3DPT_TRIANGLELIST,0,g_nFontCount*4,g_nFontCount*2,
 			g_FontIndexBuffer,D3DFMT_INDEX16,g_FontVertexBuffer,sizeof(FONT2DVERTEX));
 
-		_ASSERT(hr==D3D_OK);
+		ASSERT(hr==D3D_OK);
 
 		g_nFontCount = 0;
 	}
@@ -452,19 +462,17 @@ static size_t len(const wchar_t* str) {
 }
 
 template <typename CharT>
-void RFont::DrawTextImpl(float x, float y, const CharT * szText, int Length, DWORD dwColor, float fScale)
+void RFont::DrawTextImpl(float x, float y, const BasicStringView<CharT>& Text,
+	u32 dwColor, float fScale)
 {
-	if (szText == NULL)	return;
-	if (szText[0] == NULL) return;
-
-	if (Length == -1)
-		Length = int(len(szText));
+	if (Text.empty())
+		return;
 
 	bool bPrevInFont = false;
 
 	BeginFont();
 
-	auto p = szText;
+	auto p = Text.data();
 	CharT szChar[4];
 
 	while (true)
@@ -506,23 +514,22 @@ void RFont::DrawTextImpl(float x, float y, const CharT * szText, int Length, DWO
 		}
 
 		if (pInfo != NULL) {
-
 			static FONT2DVERTEX vertices[RFONT_VERTEXCOUNT];
-			WORD indices[6] = { 3,0,2,0,1,2 };
+			u16 indices[6] = { 3, 0, 2, 0, 1, 2 };
 			// 0 3
 			// 1 2
 
 			int nWidth = min(CELL_SIZE, pInfo->nWidth);
-			int w = nWidth*fScale;
-			int h = CELL_SIZE*fScale;
+			int w = nWidth * fScale;
+			int h = CELL_SIZE * fScale;
 
 			if (x + w > RGetViewport()->X && x < RGetViewport()->X + RGetViewport()->Width &&
 				y + h > RGetViewport()->Y && y < RGetViewport()->Y + RGetViewport()->Height)
 			{
-				vertices[0].p = { x, y, 0, 1 };
-				vertices[1].p = { x, y + h, 0, 1 };
-				vertices[2].p = { x + w, y + h, 0, 1 };
-				vertices[3].p = { x + w, y, 0, 1 };
+				vertices[0].pos = { x, y, 0, 1 };
+				vertices[1].pos = { x, y + h, 0, 1 };
+				vertices[2].pos = { x + w, y + h, 0, 1 };
+				vertices[3].pos = { x + w, y, 0, 1 };
 
 				int nCellX = pInfo->nFontTextureIndex % m_pFontTexture->GetCellCountX();
 				int nCellY = pInfo->nFontTextureIndex / m_pFontTexture->GetCellCountX();
@@ -557,7 +564,7 @@ void RFont::DrawTextImpl(float x, float y, const CharT * szText, int Length, DWO
 
 		p = pp;
 
-		if (p - szText >= Length)
+		if (p - Text.data() >= int(Text.size()))
 			break;
 	}
 
@@ -565,18 +572,11 @@ void RFont::DrawTextImpl(float x, float y, const CharT * szText, int Length, DWO
 		EndFont();
 }
 
-void RFont::DrawText(float x, float y, const char* szText, DWORD dwColor, float fScale) {
-	return DrawTextImpl(x, y, szText, -1, dwColor, fScale);
+void RFont::DrawText(float x, float y, const StringView& Text, u32 Color, float Scale) {
+	return DrawTextImpl(x, y, Text, Color, Scale);
 }
-void RFont::DrawText(float x, float y, const wchar_t* szText, DWORD dwColor, float fScale) {
-	return DrawTextImpl(x, y, szText, -1, dwColor, fScale);
-}
-
-void RFont::DrawTextN(float x, float y, const char* szText, int Length, DWORD dwColor, float fScale) {
-	return DrawTextImpl(x, y, szText, Length, dwColor, fScale);
-}
-void RFont::DrawTextN(float x, float y, const wchar_t* szText, int Length, DWORD dwColor, float fScale) {
-	return DrawTextImpl(x, y, szText, Length, dwColor, fScale);
+void RFont::DrawText(float x, float y, const WStringView& Text, u32 Color, float Scale) {
+	return DrawTextImpl(x, y, Text, Color, Scale);
 }
 
 template <typename CharT>

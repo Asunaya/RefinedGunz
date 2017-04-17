@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#include <winsock2.h>
 #include "MErrorTable.h"
 #include "ZConfiguration.h"
 #include "ZGameClient.h"
@@ -31,7 +30,6 @@
 #include "ZCountDown.h"
 #include "ZBmNumLabel.h"
 #include "ZClanListBox.h"
-#include "ZLanguageConf.h"
 
 // In milliseconds
 constexpr auto CLAN_CREATING_AGREEMENT_TIMEOUT = 1000 * 30; // 30 seconds

@@ -8,21 +8,11 @@
 #ifndef __RealSound_HEADER__
 #define __RealSound_HEADER__
 
-#include <windows.h>
-#include <mmsystem.h>
-#include <dsound.h>
+#include "MUtil.h"
 #include <math.h>
+#include <dsound.h>
 
-/*
-#pragma comment( lib, "winmm.lib" )
-#pragma comment( lib, "dxguid.lib" )
-*/
 #pragma comment( lib, "dsound.lib" )
-
-// Wave file handling routine
-//#include "RealSoundWaveFile.h"
-// External Multimedia Timer Handling Routine.
-//#include "MMTimer.h"
 
 class SEObject;
 
@@ -34,7 +24,7 @@ struct ENUMDEVICEINFO{
 #define MAX_ENUM_DEVICE_COUNT	10
 class RealSound {
 protected:
-	HWND m_hOwnerWnd;
+	struct HWND__* m_hOwnerWnd;
 	LPDIRECTSOUND8				m_lpDS;					// Direct Sound
 	LPDIRECTSOUND3DLISTENER8	m_lpDSListener;			// 3D Listener
 
@@ -43,7 +33,8 @@ protected:
 
 protected:
 	static void InitEnumInfo(void);
-	static BOOL CALLBACK EnumProc(LPGUID lpGUID, LPCTSTR lpszDesc, LPCTSTR lpszDrvName, LPVOID lpContext);
+	static int STDCALL EnumProc(LPGUID lpGUID, LPCTSTR lpszDesc,
+		LPCTSTR lpszDrvName, LPVOID lpContext);
 
 public:
 	RealSound();
@@ -59,7 +50,7 @@ public:
 
 	LPDIRECTSOUND GetDS() { return m_lpDS; }
 
-	bool IsValid(){ return (m_lpDS?TRUE:FALSE); }
+	bool IsValid() { return m_lpDS != nullptr; }
 
 	void SetListenerPosition(float x, float y, float z);
 	void SetListenerOrientation(float dirx, float diry, float dirz, float upx, float upy, float upz);

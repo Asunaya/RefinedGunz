@@ -8,7 +8,6 @@
 #include "MMatchItem.h"
 #include "MAgentObject.h"
 #include "MMatchNotify.h"
-#include "Msg.h"
 #include "MMatchObjCache.h"
 #include "MMatchStage.h"
 #include "MMatchTransDataType.h"
@@ -24,7 +23,6 @@
 #include "MAsyncDBJob_WinTheClanGame.h"
 #include "MUtil.h"
 
-// 클랜 관련 공용 함수 ////////////////////////////////////////////////////////////////////////////
 void CopyClanMemberListNodeForTrans(MTD_ClanMemberListNode* pDest, MMatchObject* pSrcObject)
 {
 	pDest->uidPlayer = pSrcObject->GetUID();
@@ -45,7 +43,6 @@ int MMatchServer::ValidateCreateClan(const char* szClanName, MMatchObject* pMast
 		return nResult;
 	}
 
-	// 클랜생성에 필요한 마스터의 레벨 검사
 	if (pMasterObject->GetCharInfo()->m_nLevel < CLAN_CREATING_NEED_LEVEL)
 	{
 		return MERR_CLAN_CREATING_LESS_LEVEL;

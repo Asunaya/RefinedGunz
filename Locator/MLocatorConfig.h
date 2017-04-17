@@ -8,7 +8,7 @@
 class MLocatorConfig
 {
 public:
-	virtual ~MLocatorConfig(void);
+	virtual ~MLocatorConfig();
 
 	bool LoadConfig();
 
@@ -24,20 +24,20 @@ public:
 	const int GetLocatorPort()		const { return m_nLocatorPort; }
 
 	// Environment
-	const u32			GetLocatorID() const							{ return m_dwID; }
-	inline const MUID&	GetLocatorUID() const							{ return m_uidLocatorUID; }
-	inline const u32	GetMaxElapsedUpdateServerStatusTime() const		{ return m_dwMaxElapsedUpdateServerStatusTime; }
-	inline const u32	GetUDPLiveTime() const							{ return m_dwUDPLiveTime; }
-	inline const u32	GetMaxFreeUseCountPerLiveTime() const			{ return m_dwMaxFreeUseCountPerLiveTime; }
-	inline const u32	GetBlockTime() const							{ return m_dwBlockTime; }
-	inline const u32	GetUpdateUDPManagerElapsedTime() const			{ return m_dwUpdateUDPManagerElapsedTime; }
-	inline const u32	GetMarginOfErrorMin() const						{ return m_dwMarginOfErrorMin; }
-	inline const u32	GetElapsedTimeUpdateLocatorLog() const			{ return m_dwElapsedTimeUpdateLocatorLog; }
+	auto GetLocatorID() const							{ return m_dwID; }
+	auto& GetLocatorUID() const							{ return m_uidLocatorUID; }
+	auto GetMaxElapsedUpdateServerStatusTime() const	{ return m_dwMaxElapsedUpdateServerStatusTime; }
+	auto GetUDPLiveTime() const							{ return m_dwUDPLiveTime; }
+	auto GetMaxFreeUseCountPerLiveTime() const			{ return m_dwMaxFreeUseCountPerLiveTime; }
+	auto GetBlockTime() const							{ return m_dwBlockTime; }
+	auto GetUpdateUDPManagerElapsedTime() const			{ return m_dwUpdateUDPManagerElapsedTime; }
+	auto GetMarginOfErrorMin() const					{ return m_dwMarginOfErrorMin; }
+	auto GetElapsedTimeUpdateLocatorLog() const			{ return m_dwElapsedTimeUpdateLocatorLog; }
 
-	inline const bool IsUseCountryCodeFilter() const	{ return m_bIsUseCountryCodeFilter; }
-	inline const bool IsInitCompleted() const			{ return m_bIsInitCompleted; }
-	inline const bool IsAcceptInvalidIP() const			{ return m_bIsAcceptInvaildIP; }
-	inline const bool IsTestServerOnly() const			{ return m_bIsTestServerOnly; }
+	auto IsUseCountryCodeFilter() const	{ return m_bIsUseCountryCodeFilter; }
+	auto IsInitCompleted() const			{ return m_bIsInitCompleted; }
+	auto IsAcceptInvalidIP() const			{ return m_bIsAcceptInvaildIP; }
+	auto IsTestServerOnly() const			{ return m_bIsTestServerOnly; }
 
 	static MLocatorConfig* GetLocatorConfigInst()
 	{
@@ -78,7 +78,7 @@ private:
 private :
 	// Network
 	std::string	m_strLocatorIP;
-	int		m_nLocatorPort;
+	int m_nLocatorPort;
 
 	// Environment
 	u32	m_dwID;

@@ -69,7 +69,7 @@ RealSoundBgm::~RealSoundBgm()
 // Member Functions Implementation
 
 // Multimedia Timer객체를 위한 Callback함수.
-BOOL RealSoundBgm::TimerCallback (DWORD_PTR dwUser)
+bool RealSoundBgm::TimerCallback (uintptr_t dwUser)
 {
     RealSoundBgm * pas = (RealSoundBgm *) dwUser;	// C++에서의 Callback함수를 위해 이와 같은 방법을 사용하였다.
 	if( pas ) return pas->ServiceBuffer(); else return FALSE;
@@ -81,7 +81,7 @@ BOOL RealSoundBgm::TimerCallback (DWORD_PTR dwUser)
 	pszFilename : Wave file name
 	pRealSound       : WaGe object pointer
 */
-BOOL RealSoundBgm::Create (LPSTR pszFilename, RealSound* pRealSound)
+bool RealSoundBgm::Create (LPSTR pszFilename, RealSound* pRealSound)
 {
 	Destroy();
 
@@ -171,15 +171,15 @@ void RealSoundBgm::Cue (void)
 
 	size만큼 Sound Buffer에 Wavedata를 기록한다.
 */
-BOOL RealSoundBgm::WriteWaveData (UINT size)
+bool RealSoundBgm::WriteWaveData (UINT size)
 {
     HRESULT hr;
     LPBYTE lpbuf1 = NULL;
     LPBYTE lpbuf2 = NULL;
-    DWORD dwsize1 = 0;
-    DWORD dwsize2 = 0;
-    DWORD dwbyteswritten1 = 0;
-    DWORD dwbyteswritten2 = 0;
+    unsigned long dwsize1 = 0;
+    unsigned long dwsize2 = 0;
+    u32 dwbyteswritten1 = 0;
+    u32 dwbyteswritten2 = 0;
     
     // Lock the sound buffer
     hr = m_pdsb->Lock(m_cbBufOffset, size, (void **)&lpbuf1, &dwsize1, (void **)&lpbuf2, &dwsize2, 0);
@@ -209,15 +209,15 @@ BOOL RealSoundBgm::WriteWaveData (UINT size)
 
 	size만큼의 Silence데이터를 써넣는다.
 */
-BOOL RealSoundBgm::WriteSilence (UINT size)
+bool RealSoundBgm::WriteSilence (UINT size)
 {	
     HRESULT hr;
     LPBYTE lpbuf1 = NULL;
     LPBYTE lpbuf2 = NULL;
-    DWORD dwsize1 = 0;
-    DWORD dwsize2 = 0;
-    DWORD dwbyteswritten1 = 0;
-    DWORD dwbyteswritten2 = 0;
+	unsigned long dwsize1 = 0;
+	unsigned long dwsize2 = 0;
+    u32 dwbyteswritten1 = 0;
+    u32 dwbyteswritten2 = 0;
         
     hr = m_pdsb->Lock(m_cbBufOffset, size, (void **)&lpbuf1, &dwsize1, (void **)&lpbuf2, &dwsize2, 0);
 	if( hr != DS_OK ){
@@ -249,9 +249,9 @@ BOOL RealSoundBgm::WriteSilence (UINT size)
 	
 	쓰기 동작을 위한 Sound Buffer의 최대 크기를 구한다.
 */
-DWORD RealSoundBgm::GetMaxWriteSize (void)
+u32 RealSoundBgm::GetMaxWriteSize (void)
 {
-    DWORD dwWriteCursor, dwPlayCursor, dwMaxSize;
+	unsigned long dwWriteCursor, dwPlayCursor, dwMaxSize;
 	
 	if (m_pdsb->GetCurrentPosition (&dwPlayCursor, &dwWriteCursor) != DS_OK){
 		_D("Fatal ! : Unable To Get Maximum Writable Size\n");
@@ -278,7 +278,7 @@ DWORD RealSoundBgm::GetMaxWriteSize (void)
 	Create된 객체를 실행시킨다.
 	Play는 그 객체의 처음부터 재생하게 된다.
 */
-void RealSoundBgm::Play( BOOL bLoop )
+void RealSoundBgm::Play( bool bLoop )
 {
     if (m_pdsb)						// Buffer가 존재해야 한다.
     {
@@ -295,7 +295,7 @@ void RealSoundBgm::Play( BOOL bLoop )
 		m_nTimeStarted = GetGlobalTimeMS ();
 		m_ptimer = new MMTimer ();	// 버퍼 관리를 위하여 Multimedia Timer를 구동시킨다.
 		if (m_ptimer){
-			if( !m_ptimer->Create (m_nBufService, m_nBufService, DWORD (this), TimerCallback) ){
+			if( !m_ptimer->Create (m_nBufService, m_nBufService, u32 (this), TimerCallback) ){
 				m_pdsb->Stop ();		
 		        delete (m_ptimer);
 				m_ptimer = NULL;
@@ -345,9 +345,9 @@ void RealSoundBgm::Stop()
 	타이머에 의해 실행되는 버퍼 관리 루틴, RealSoundBgm의 핵심 파트이다.
 	Boolean형의 결과값을 반환한다. 정상인 경우 -> TRUE, 비정상 실행인 경우 -> FALSE
 */
-BOOL RealSoundBgm::ServiceBuffer (void)
+bool RealSoundBgm::ServiceBuffer (void)
 {
-    BOOL fRtn = TRUE;
+    bool fRtn = TRUE;
 
 	//LOG("RealSoundBgm::ServiceBuffer...\n");
 
@@ -362,13 +362,13 @@ BOOL RealSoundBgm::ServiceBuffer (void)
         if (m_nTimeElapsed < m_nDuration)
         {
             // All of sound not played yet, send more data to buffer
-            DWORD dwFreeSpace = GetMaxWriteSize ();
+            u32 dwFreeSpace = GetMaxWriteSize ();
 
             // Determine free space in sound buffer
             if (dwFreeSpace)
             {
                 // See how much wave data remains to be sent to buffer
-                DWORD dwDataRemaining = m_pwavefile->GetNumBytesRemaining ();
+                u32 dwDataRemaining = m_pwavefile->GetNumBytesRemaining ();
                 if (dwDataRemaining == 0)
                 {
                     // All wave data has been sent to buffer

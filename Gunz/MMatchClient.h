@@ -2,7 +2,6 @@
 
 #include <list>
 #include <map>
-
 #include "MMatchGlobal.h"
 #include "MCommandCommunicator.h"
 #include "MClient.h"
@@ -11,6 +10,7 @@
 #include "MMatchTransDataType.h"
 #include "MMatchGlobal.h"
 #include "MPacketCrypter.h"
+#include "MTCPSocket.h"
 
 #define MATCHCLIENT_DEFAULT_UDP_PORT	10000
 #define MAX_PING						999
@@ -20,7 +20,7 @@ class MMatchPeerInfo
 public:
 	MUID	uidChar;
 	char	szIP[64];
-	DWORD	dwIP;
+	u32		dwIP;
 	int		nPort;
 	MTD_CharInfo		CharInfo;
 	MTD_ExtendInfo		ExtendInfo;
@@ -73,22 +73,44 @@ public:
 	}
 };
 
-
-class MMatchPeerInfoList : public std::map<MUID, MMatchPeerInfo*>
+struct IPnPort
 {
-private:
-	std::map<MUID, MMatchPeerInfo*>		m_IPnPortMap;
-	CRITICAL_SECTION				m_csLock;
-	void Lock()			{ EnterCriticalSection(&m_csLock); }
-	void Unlock()		{ LeaveCriticalSection(&m_csLock); }
+	u32 IP;
+	u16 Port;
+
+	IPnPort() = default;
+	IPnPort(u32 IP, u16 Port) : IP{ IP }, Port{ Port } {}
+	IPnPort(MMatchPeerInfo* pPeerInfo) : IP{ pPeerInfo->dwIP }, Port{ static_cast<u16>(pPeerInfo->nPort) } {}
+
+	u64 Packed() const { return (u64(IP) << 32) | Port; }
+
+	bool operator==(const IPnPort& rhs) const { return Packed() == rhs.Packed(); }
+};
+
+struct IPnPortHasher {
+	size_t operator()(const IPnPort& Value) const {
+		auto Packed = Value.Packed();
+		return std::hash<u64>{}(Packed);
+	}
+};
+
+class MMatchPeerInfoList
+{
 public:
 	MMatchPeerInfoList();
-	virtual ~MMatchPeerInfoList();
+	~MMatchPeerInfoList();
 	void Clear();
 	void Add(MMatchPeerInfo* pPeerInfo);
 	bool Delete(MMatchPeerInfo* pPeerInfo);
 	MMatchPeerInfo* Find(const MUID& uidChar);
-	MUID FindUID(DWORD dwIP, int nPort);
+	MUID FindUID(u32 dwIP, int nPort);
+
+	void Lock() { m_csLock.lock(); }
+	void Unlock() { m_csLock.unlock(); }
+
+	std::unordered_map<MUID, MMatchPeerInfo*> MUIDMap;
+	std::unordered_map<IPnPort, MMatchPeerInfo*, IPnPortHasher> IPnPortMap;
+	MCriticalSection m_csLock;
 };
 
 class MMatchClient : public MClient
@@ -145,14 +167,16 @@ protected:
 	void InitPeerCrypt(const MUID& uidStage, unsigned int nChecksum);
 protected:
 	// tcp socket event
-	virtual bool OnSockConnect(SOCKET sock);
-	virtual bool OnSockDisconnect(SOCKET sock);
-	virtual bool OnSockRecv(SOCKET sock, char* pPacket, DWORD dwSize);
-	virtual void OnSockError(SOCKET sock, SOCKET_ERROR_EVENT ErrorEvent, int &ErrorCode);
+	virtual bool OnSockConnect(SOCKET sock) override;
+	virtual bool OnSockDisconnect(SOCKET sock) override;
+	virtual bool OnSockRecv(SOCKET sock, char* pPacket, u32 dwSize) override;
+	virtual void OnSockError(SOCKET sock, SOCKET_ERROR_EVENT ErrorEvent, int &ErrorCode) override;
 
-	virtual int OnConnected(SOCKET sock, MUID* pTargetUID, MUID* pAllocUID, unsigned int nTimeStamp);
-	virtual void OnRegisterCommand(MCommandManager* pCommandManager);
-	virtual bool OnCommand(MCommand* pCommand);
+	virtual int OnConnected(SOCKET sock, MUID* pTargetUID, MUID* pAllocUID, unsigned int nTimeStamp) override;
+	virtual void OnRegisterCommand(MCommandManager* pCommandManager) override;
+	virtual bool OnCommand(MCommand* pCommand) override;
+	virtual void SendCommand(MCommand* pCommand) override;
+
 	virtual int OnResponseMatchLogin(const MUID& uidServer, 
 									 int nResult, 
 									 const char* szServerName, 
@@ -174,37 +198,41 @@ protected:
 	virtual void OnAgentConnected(const MUID& uidAgentServer, const MUID& uidAlloc);
 	virtual void OnAgentError(int nError);
 
-	void OutputLocalInfo(void);
+	void OutputLocalInfo();
 
-	virtual void SendCommand(MCommand* pCommand);
 	bool SendCommandToAgent(MCommand* pCommand);
 	void SendCommandByTunneling(MCommand* pCommand);
 	void SendCommandByMatchServerTunneling(MCommand* pCommand, const MUID& Receiver);
 	void SendCommandByMatchServerTunneling(MCommand* pCommand);
-	void ParseUDPPacket(char* pData,MPacketHeader* pPacketHeader,DWORD dwIP,unsigned int nPort);
+	void ParseUDPPacket(char* pData,MPacketHeader* pPacketHeader,u32 dwIP,unsigned int nPort);
 public:
-	void SendCommandByUDP(MCommand* pCommand, char* szIP, int nPort);
+	void SendCommandByUDP(MCommand* pCommand, const char* szIP, int nPort);
 
 public:
 	MMatchClient();
-	virtual ~MMatchClient();
+	virtual ~MMatchClient() override;
 
-	bool Create(unsigned short nUDPPort);
+	struct CreationResult {
+		int ErrorCode;
+		std::string ErrorMessage;
+	};
+	CreationResult Create(u16 nUDPPort);
 	
 	bool GetBridgePeerFlag()			{ return m_bBridgePeerFlag; }
 	void SetBridgePeerFlag(bool bFlag)	{ m_bBridgePeerFlag = bFlag; }
 	void AddPeer(MMatchPeerInfo* pPeerInfo);
 	bool DeletePeer(const MUID uid);
-	MUID FindPeerUID(const DWORD dwIP, const int nPort);
+	MUID FindPeerUID(const u32 dwIP, const int nPort);
 	MMatchPeerInfo* FindPeer(const MUID& uidChar);
 	void ClearPeers();
-	void CastStageBridgePeer(const MUID& uidChar, const MUID& uidStage);	// UDP lost 대비해 Stage입장시 여러번 호출 필요
+	void CastStageBridgePeer(const MUID& uidChar, const MUID& uidStage);
 
 	bool GetUDPTestProcess()			{ return m_bUDPTestProcess; }
 	void SetUDPTestProcess(bool bVal)	{ m_bUDPTestProcess = bVal; }
 	void UpdateUDPTestProcess();
-	void GetUDPTraffic(int* nSendTraffic, int* nRecvTraffic) const
-	{ return m_SafeUDP.GetTraffic(nSendTraffic, nRecvTraffic); }
+	void GetUDPTraffic(int* nSendTraffic, int* nRecvTraffic) const {
+		return m_SafeUDP.GetTraffic(nSendTraffic, nRecvTraffic);
+	}
 
 	void SetUDPPort(int nPort);
 	auto& GetServerUID() const { return m_uidServer; }
@@ -215,23 +243,23 @@ public:
 
 
 	void SetServerAddr(const char* szIP, int nPort)	{ 
-		strcpy_safe(m_szServerIP,szIP), m_nServerPort = nPort; 
+		strcpy_safe(m_szServerIP, szIP); m_nServerPort = nPort;
 	}
-	char* GetServerIP() { return m_szServerIP; }
-	int GetServerPort() { return m_nServerPort; }
+	const char* GetServerIP() const { return m_szServerIP; }
+	int GetServerPort() const { return m_nServerPort; }
 	void SetServerPeerPort(int nPeerPort) { m_nServerPeerPort = nPeerPort; }
-	int GetServerPeerPort() { return m_nServerPeerPort; }
+	int GetServerPeerPort() const { return m_nServerPeerPort; }
 
 	MMatchPeerInfoList* GetPeers() { return &m_Peers; }	
 	MSafeUDP* GetSafeUDP() { return &m_SafeUDP; }
-	string GetObjName(const MUID& uid);
+	std::string GetObjName(const MUID& uid);
 	MMatchObjCache* FindObjCache(const MUID& uid);
 	void ReplaceObjCache(MMatchObjCache* pCache);
 	void UpdateObjCache(MMatchObjCache* pCache);
 	void RemoveObjCache(const MUID& uid);
 	void ClearObjCaches();
 
-	static bool UDPSocketRecvEvent(DWORD dwIP, WORD wRawPort, char* pPacket, DWORD dwSize);
+	static bool UDPSocketRecvEvent(u32 dwIP, u16 wRawPort, char* pPacket, u32 dwSize);
 
 public:
 	void SetAgentAddr(const char* szIP, int nPort)	{ 

@@ -94,8 +94,8 @@ void ZEffectBulletMarkList::Update(float fElapsed)
 			continue;
 		}
 
-		float fVanish = min(1,max(0,(m_fLifeTime - p->fElapsedTime)/m_fVanishTime));
-		DWORD color = ((DWORD)(fVanish * 255))<<24 | 0xffffff;
+		float fVanish = min(1.f, max(0.f, (m_fLifeTime - p->fElapsedTime) / m_fVanishTime));
+		u32 color = ((u32)(fVanish * 255))<<24 | 0xffffff;
 		p->v[0].color = color;
 		p->v[1].color = color;
 		p->v[2].color = color;
@@ -108,7 +108,7 @@ void ZEffectBulletMarkList::BeginState()
 {
 	LPDIRECT3DDEVICE9 pDevice = RGetDevice();
 
-	pDevice->SetRenderState(D3DRS_ALPHAREF, (DWORD)0x00000000);
+	pDevice->SetRenderState(D3DRS_ALPHAREF, 0x00000000);
 	pDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_NOTEQUAL );
 	pDevice->SetRenderState(D3DRS_ALPHATESTENABLE,	TRUE);
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "MUID.h"
 #include "MBaseLocale.h"
 #include "GlobalTypes.h"
 

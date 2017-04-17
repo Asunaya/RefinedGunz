@@ -1,71 +1,50 @@
 #include "stdafx.h"
 #include "MUtil.h"
+#include "MDebug.h"
+#include <ctime>
 
-#include <windows.h>
-#include <mmsystem.h>
+#ifdef WIN32
+#include <Windows.h>
 
-const std::string MGetStrLocalTime( const unsigned short wYear, const unsigned short wMon, const unsigned short wDay, const unsigned short wHour, const unsigned short wMin, const MDateType DateType )
+void D3DDeleter::operator()(IUnknown* ptr) const {
+	ptr->Release();
+}
+#endif
+
+std::string MGetStrLocalTime(unsigned short wYear, unsigned short wMon, unsigned short wDay,
+	unsigned short wHour, unsigned short wMin, MDateType DateType)
 {
-	char szBuf[ 128 ] = {0,};
-	SYSTEMTIME st;
-	GetLocalTime( &st );
-	
-	GetLocalTime( &st );
+	const char* FormatString = [&]() -> const char* {
+		switch (DateType)
+		{
+		case MDT_Y:
+			return "%Y";
+		case MDT_YM:
+			return "%Y-%m";
+		case MDT_YMD:
+			return "%Y-%m-%d";
+		case MDT_YMDH:
+			return "%Y-%m-%d %H";
+		case MDT_YMDHM:
+			return "%Y-%m-%d %H-%M";
+		default:
+			return nullptr;
+		}
+	}();
+	if (!FormatString)
+		return{};
 
-	st.wMinute += wMin;
-	if( 60 < st.wMinute )
+	auto t = time(nullptr);
+	tm TM;
+	auto ret = localtime_s(&TM, &t);
+	if (ret != 0)
 	{
-		st.wMinute -= 60;
-		st.wHour += 1;
-	}
-	
-	st.wHour += wHour;
-	if( 24 < st.wHour )
-	{
-		st.wHour -= 24;
-		st.wDay += 1;
-	}
-
-	st.wDay += wDay;
-	if( 31 < st.wDay )
-	{
-		st.wDay -= 31;
-		st.wMonth += 1;
-	}
-
-	st.wMonth += wMon;
-	if( 12 < st.wMonth )
-	{
-		st.wMonth -= 12;
-		st.wYear += 1;
-	}
-
-	st.wYear += wYear;
-
-	if( MDT_Y == DateType )
-	{
-		sprintf_safe( szBuf, "%u", st.wYear );
-	}
-	else if( MDT_YM == DateType )
-	{
-		sprintf_safe( szBuf, "%u-%u",
-			st.wYear, st.wMonth );
-	}
-	else if( MDT_YMD == DateType )
-	{
-		sprintf_safe( szBuf, "%u-%u-%u",
-			st.wYear, st.wMonth, st.wDay );
-	}
-	else if( MDT_YMDH == DateType )
-	{
-		sprintf_safe( szBuf, "%u-%u-%u %u",
-			st.wYear, st.wMonth, st.wDay, st.wHour );
-	}
-	else if( MDT_YMDHM == DateType )
-	{
-		sprintf_safe( szBuf, "%u-%u-%u %u:%u",
-			st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute );
+		MLog("MGetStrLocalTime -- localtime_s failed with error code %d\n", ret);
+		return{};
 	}
 	
-	return std::string( szBuf );
+	char buf[128];
+	auto size = strftime(buf, sizeof(buf), FormatString, &TM);
+	
+	return{ buf, size };
 }

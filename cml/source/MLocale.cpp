@@ -1,6 +1,10 @@
 #include "stdafx.h"
 #include "MLocale.h"
 
+#ifdef WIN32
+
+#include <Windows.h>
+
 int	MLocale::GetCharsetFromLang(LANGID langid)
 {
 	switch( PRIMARYLANGID(langid) )
@@ -149,3 +153,5 @@ std::string MLocale::ConvAnsiToUTF8(const char* pszString, LANGID langid)
 //	return TransCode(pszString, nCodePage, CP_UTF8);
 	return TransCode(pszString, CP_ACP, CP_UTF8);
 }
+
+#endif

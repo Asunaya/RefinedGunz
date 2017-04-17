@@ -1,53 +1,24 @@
-#ifndef MTHREAD_H
-#define MTHREAD_H
+#pragma once
 
-
-#include <windows.h>
-#include <MMsystem.h>
 #include "MTime.h"
 #include "GlobalTypes.h"
-
+#include <thread>
+#include "optional.h"
 
 class MThread {
-protected:
-	HANDLE		m_hThread;
-	DWORD		m_idThread;
-
 public:
 	MThread();
 	virtual ~MThread();
+
 	void Create();
 	void Destroy();
 
-	HANDLE GetThreadHandle()	{ return m_hThread; }
-	DWORD GetThreadID()			{ return m_idThread; }
+	auto GetThreadHandle() { return Thread.native_handle(); }
 
-	static DWORD WINAPI ThreadProc(LPVOID lpParameter);
+	virtual void OnCreate() {}
+	virtual void OnDestroy() {}
+	virtual void Run() {}
 
-	virtual void OnCreate()		{}
-	virtual void OnDestroy()	{}
-	virtual void Run()			{}
+protected:
+	std::thread Thread;
 };
-
-class MTime {
-	u32	m;
-	u32	q;
-	u32	a;
-	u32	r;
-	u32	seed;
-
-public:
-	MTime() {
-		m=2147483647; q=127773; a=16807; r=2836;
-		seed = static_cast<u32>(GetGlobalTimeMS());
-	}
-	unsigned long Random(void);
-	int MakeNumber(int nFrom, int nTo);
-	static void GetTime(struct timeval *t);
-	static struct timeval TimeSub(struct timeval Src1, struct timeval Src2);
-	static struct timeval TimeAdd(struct timeval Src1, struct timeval Src2);
-};
-
-#pragma comment(lib, "winmm.lib")
-
-#endif

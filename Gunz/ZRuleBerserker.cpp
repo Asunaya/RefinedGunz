@@ -1,10 +1,9 @@
 #include "stdafx.h"
 #include "ZRuleBerserker.h"
 
-
-#define BERSERKER_UPDATE_HEALTH_TIME		5.0f		// 버서커는 5초마다 피가 10씩 준다.
+#define BERSERKER_UPDATE_HEALTH_TIME		5.0f
 #define BERSERKER_UPDATE_HEALTH				10
-#define BERSERKER_BONUS_HEALTH				50			// 버서커는 적을 죽이면 50의 피가 찬다.
+#define BERSERKER_BONUS_HEALTH				50
 
 ZRuleBerserker::ZRuleBerserker(ZMatch* pMatch) : ZRule(pMatch), m_uidBerserker(0,0)
 {
@@ -84,7 +83,6 @@ void ZRuleBerserker::AssignBerserker(MUID& uidBerserker)
 		ZGetEffectManager()->AddBerserkerIcon(pBerserkerChar);
 		pBerserkerChar->SetTagger(true);
 		
-		// 버서커가 되면 피가 꽉 찬다.
 		if (!pBerserkerChar->IsDie())
 		{
 			float fMaxHP = pBerserkerChar->GetProperty()->fMaxHP;
@@ -141,13 +139,12 @@ void ZRuleBerserker::PenaltyHealth(ZCharacter* pBerserker)
 	{
 		if (pBerserker->GetAP() > 0)
 		{
-			float fAP = max(0.0f, pBerserker->GetAP() - BERSERKER_UPDATE_HEALTH);
+			float fAP = max(0, pBerserker->GetAP() - BERSERKER_UPDATE_HEALTH);
 			pBerserker->SetAP(fAP);
 		}
 		else
 		{
-			// 피가 모잘라도 1까지만 빼준다.
-			float fHP = max(1.0f, pBerserker->GetHP() - BERSERKER_UPDATE_HEALTH);
+			float fHP = max(1, pBerserker->GetHP() - BERSERKER_UPDATE_HEALTH);
             pBerserker->SetHP(fHP);
 		}
 

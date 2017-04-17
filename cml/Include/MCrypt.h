@@ -1,9 +1,7 @@
-#ifndef _MCRYPT_H
-#define _MCRYPT_H
+#pragma once
 
 #include "seed.h"
 
-/// SEED를 사용하는 암호화
 class MSeed
 {
 private:
@@ -21,9 +19,3 @@ public:
 	static bool Encrypt(BYTE* in, DWORD nInLen, BYTE* out, DWORD* pnOutLen, SEED_ALG_INFO* pAlgInfo);
 	static bool Decrypt(BYTE* in, DWORD nInLen, BYTE* out, DWORD* pnOutLen, SEED_ALG_INFO* pAlgInfo);
 };
-
-
-
-
-
-#endif

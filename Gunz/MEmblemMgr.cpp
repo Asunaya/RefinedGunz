@@ -5,7 +5,7 @@
 #include <shlwapi.h>
 #include "ZFilePath.h"
 #include "ZPost.h"
-
+#include "MUrl.h"
 
 #define MTOK_EMBLEM_CLID			"CLID"
 #define MTOK_EMBLEM					"EMBLEM"
@@ -243,29 +243,10 @@ void MEmblemMgr::ClearCache()
 
 bool MEmblemMgr::GetEmblemPath(char* pszFilePath, size_t maxlen, const char* pszURL)
 {
-	//// Parse URL //////////////////
-	#define URLPATH_LEN	256
-	char szFileName[URLPATH_LEN] = "";
+	char szFileName[256];
+	MUrl::GetPath(szFileName, pszURL);
 
-	URL_COMPONENTS uc;
-	ZeroMemory(&uc, sizeof uc);
-	uc.dwStructSize = sizeof uc;
-	uc.lpszUrlPath = szFileName;
-	uc.dwUrlPathLength = URLPATH_LEN;
-
-	if (!InternetCrackUrl(pszURL, lstrlen(pszURL), ICU_DECODE, &uc)) {
-		// GetLastError()
-		return false;
-	}
-	PathStripPath(szFileName);
-
-	char szFullPath[_MAX_DIR];
-	strcpy_safe(szFullPath, GetEmblemBaseDir());
-	strcat_safe(szFullPath, "/");
-	strcat_safe(szFullPath, szFileName);
-
-	// out
-	strcpy_safe(pszFilePath, maxlen, szFullPath);
+	sprintf_safe(pszFilePath, maxlen, "%s/%s", GetEmblemBaseDir(), szFileName);
 
 	return true;
 }

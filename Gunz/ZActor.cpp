@@ -129,11 +129,9 @@ void ZActor::OnDraw()
 	m_pVMesh->Render();
 }
 
-#define IsKeyDown(key) ((GetAsyncKeyState(key) & 0x8000)!=0)
-
 void ZActor::TestControl(float fDelta)
 {
-	if (!IsKeyDown(VK_SHIFT)) return;
+	if (!MEvent::IsKeyDown(VK_SHIFT)) return;
 
 	rvector m_Accel=rvector(0,0,0);
 

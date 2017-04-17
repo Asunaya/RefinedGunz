@@ -1,43 +1,39 @@
 #pragma once
 
-#include "MDatabase.h"
-#include "MCountryFilterDBMgr.h"
-
 #include <string>
 #include <map>
-using namespace std;
 
 class MServerStatusMgr;
 
-class MLocatorDBMgr : public MCountryFilterDBMgr
+class MLocatorDBMgr
 {
 public:
-	MLocatorDBMgr(void);
-	virtual ~MLocatorDBMgr(void);
+	MLocatorDBMgr();
+	virtual ~MLocatorDBMgr();
 
-	CString BuildDSNString( const CString& strDSN, 
-							const CString& strUserName, 
-							const CString& strPassword );
-	bool Connect( const CString& strDSNConnect );
+	CString BuildDSNString(const CString& strDSN,
+		const CString& strUserName,
+		const CString& strPassword);
+	bool Connect(const CString& strDSNConnect);
 	void Disconnect();
 
-	bool GetServerStatus( MServerStatusMgr* pServerStatusMgr );
+	bool GetServerStatus(MServerStatusMgr* pServerStatusMgr);
 
-	bool StartUpLocaterStauts( const int nLocatorID, 
-							   const string& strIP, 
-							   const int nPort, 
-							   const int nDuplicatedUpdateTime );
-	bool UpdateLocaterStatus( const int nLocatorID, 
-							  const DWORD nRecvCount, 
-							  const DWORD nSendCount, 
-							  const DWORD nBlockCount, 
-							  const DWORD nDuplicatedCount );
+	bool StartUpLocaterStauts(const int nLocatorID,
+		const std::string& strIP,
+		const int nPort,
+		const int nDuplicatedUpdateTime);
+	bool UpdateLocaterStatus(const int nLocatorID,
+		const u32 nRecvCount,
+		const u32 nSendCount,
+		const u32 nBlockCount,
+		const u32 nDuplicatedCount);
 
-	bool InsertLocatorLog( const int nLocatorID, const map<string, DWORD>& CountryStatistics );
+	bool InsertLocatorLog(const int nLocatorID, const std::map<std::string, u32>& CountryStatistics);
 
-private :
+private:
 	bool CheckOpen();
 
-private :
+private:
 	CString				m_strDSNConnect;
 };

@@ -180,7 +180,7 @@ void MTextArea::UpdateScrollBar(bool bAdjustStart)
 	}
 
 	int nPosLines = nTotalLine - r.h / GetLineHeight();
-	int nMax=max(nPosLines,0);
+	int nMax = std::max(nPosLines, 0);
 	m_pScrollBar->SetMinMax(0,nMax);
 	
 	if(m_nStartLine>nMax)
@@ -435,7 +435,7 @@ bool MTextArea::OnLButtonDown(MPOINT pos)
 		int nLine = MMGetLineCount(GetFont(),szText,GetClientWidth(),m_bWordWrap,m_bColorSupport,m_nIndentation);
 		if(pos.y <= y + nLine*GetLineHeight() ||
 			i==GetLineCount()-1) {
-			int n = min(nLine-1,(pos.y - y) / GetLineHeight());
+			int n = std::min(nLine-1,(pos.y - y) / GetLineHeight());
 
 			m_CaretPos.x=GetCharPosition(szText,pos.x,n);
 			m_CaretPos.y=i;
@@ -446,7 +446,7 @@ bool MTextArea::OnLButtonDown(MPOINT pos)
 		m_CurrentLine++;
 	}
 
-	_ASSERT(FALSE);
+	assert(false);
 	return false;
 }
 
@@ -909,7 +909,7 @@ void MTextAreaLook::OnTextDraw(MTextArea* pTextArea, MDrawContext* pDC)
 //OutputDebugString(szTmp);
 //////////
 
-	int toline=min(pTextArea->GetLineCount(),pTextArea->GetStartLine()+r.h/pTextArea->GetLineHeight());
+	int toline = min(pTextArea->GetLineCount(), pTextArea->GetStartLine() + r.h / pTextArea->GetLineHeight());
 	for(int i=pTextArea->GetStartLine();i<toline;i++)
 	{
 		if(i==pTextArea->GetCaretPos().y)

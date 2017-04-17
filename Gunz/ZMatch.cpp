@@ -2,7 +2,6 @@
 
 #include "ZMatch.h"
 #include "ZGame.h"
-#include <windows.h>
 #include "ZCharacterManager.h"
 #include "ZCharacter.h"
 #include "ZPost.h"

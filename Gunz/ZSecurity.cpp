@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#include <winsock2.h>
 #include "ZSecurity.h"
 #include "MDataChecker.h"
 #include "MZFileSystem.h"

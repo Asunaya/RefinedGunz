@@ -1,63 +1,32 @@
-#include "stdafx.h"
 #include "MTCPSocket.h"
 #include "MDebug.h"
 #include "MInetUtil.h"
+#include "defer.h"
 
 #define MAX_RECVBUF_LEN						4096
 #define TCPSOCKET_MAX_SENDQUEUE_LEN			5120
 #define MAX_CLIENTSOCKET_LEN				60
 
-////////////////////////////////////////////////////////////////////////////////////////////
-// MTCPSocketThread ///////////////////////////////////////////////////////////////////////////
-MTCPSocketThread::MTCPSocketThread(MTCPSocket* pTCPSocket)
-{
-	m_nTotalSend = 0;
-	m_nTotalRecv = 0;
-
-	m_pTCPSocket = pTCPSocket;
-	m_fnSocketErrorCallback = NULL;
-	m_pCallbackContext = NULL;
-}
-
-MTCPSocketThread::~MTCPSocketThread()
-{
-	
-}
-
 void MTCPSocketThread::Create()
 {
-	if (m_bActive) Destroy();
+	if (IsActive())
+		Destroy();
 
-	InitializeCriticalSection(&m_csSendLock);
-	MThread::Create(); 
+	MThread::Create();
+
 	m_bActive = true;
-
 }
 
-void MTCPSocketThread::Destroy()
-{
+void MTCPSocketThread::Destroy() {
+	DMLog("Set kill event %p\n", this);
 
 	m_bActive = false;
 
-	m_KillEvent.SetEvent(); 
-	MThread::Destroy();		// Wait for Thread Death
+	m_KillEvent.SetEvent();
 
-	DeleteCriticalSection(&m_csSendLock); 
-
+	MThread::Destroy();
 }
 
-void MTCPSocketThread::Run()
-{
-
-}
-
-void MTCPSocketThread::OnSocketError(SOCKET sock, SOCKET_ERROR_EVENT ErrorEvent, int &ErrorCode)
-{
-	if (m_fnSocketErrorCallback)
-		m_fnSocketErrorCallback(m_pCallbackContext, sock, ErrorEvent, ErrorCode);
-}
-////////////////////////////////////////////////////////////////////////////////////////////
-// MClientSocketThread /////////////////////////////////////////////////////////////////////
 bool MClientSocketThread::OnConnect(SOCKET sock)
 {
 	m_bActive = true;
@@ -80,8 +49,9 @@ bool MClientSocketThread::OnDisconnect(SOCKET sock)
 
 void MClientSocketThread::ClearSendList()
 {
-	LockSend();
-	for (TCPSendListItor itor = m_SendList.begin(); itor != m_SendList.end(); )
+	std::lock_guard<MCriticalSection> lock{ m_csSendLock };
+
+	for (auto itor = m_SendList.begin(); itor != m_SendList.end(); )
 	{
 		MTCPSendQueueItem*		pItem = (*itor);
 		delete [] pItem->pPacket;
@@ -90,7 +60,7 @@ void MClientSocketThread::ClearSendList()
 	}
 	m_SendList.clear();
 
-	for (TCPSendListItor itor = m_TempSendList.begin(); itor != m_TempSendList.end(); )
+	for (auto itor = m_TempSendList.begin(); itor != m_TempSendList.end(); )
 	{
 		MTCPSendQueueItem*		pItem = (*itor);
 		delete [] pItem->pPacket;
@@ -98,48 +68,50 @@ void MClientSocketThread::ClearSendList()
 		++itor;
 	}
 	m_TempSendList.clear();
-
-	UnlockSend();
-
 }
 
 bool MClientSocketThread::FlushSend()
 {
-	TCPSendListItor	SendItor;
-
-	LockSend();
-	while (!m_TempSendList.empty())
 	{
-		TCPSendListItor itor = m_TempSendList.begin();
-		m_SendList.push_back(*itor);
-		m_TempSendList.erase(itor);
+		std::lock_guard<MCriticalSection> lock{ m_csSendLock };
+		while (!m_TempSendList.empty())
+		{
+			auto itor = m_TempSendList.begin();
+			m_SendList.push_back(*itor);
+			m_TempSendList.erase(itor);
+		}
 	}
-	UnlockSend();
 
-	while(!m_SendList.empty())
+	while (!m_SendList.empty())
 	{
-		SendItor = m_SendList.begin();
+		auto SendItor = m_SendList.begin();
 		MTCPSendQueueItem* pSendItem = (MTCPSendQueueItem*)(*SendItor);
 
 		unsigned int nTransBytes = 0;
-		while(TRUE) {
-			int nSent = send(m_pTCPSocket->GetSocket(), (char*)pSendItem->pPacket+nTransBytes,
-							pSendItem->dwPacketSize-nTransBytes, 0);
-			if (nSent == SOCKET_ERROR) {
-				int nErrCode = WSAGetLastError();
-					char szBuf[64]; sprintf_safe(szBuf, "FLUSHSEND> FlushSend Error(%d)\n", nErrCode);
-					OutputDebugString(szBuf);
+		while (true)
+		{
+			int nSent = MSocket::send(m_pTCPSocket->GetSocket(),
+				(char*)pSendItem->pPacket + nTransBytes,
+				pSendItem->dwPacketSize - nTransBytes,
+				0);
 
-				if ( (nErrCode == WSAECONNABORTED) ||
-					 (nErrCode == WSAECONNRESET) ||
-					 (nErrCode == WSAETIMEDOUT) ) 
+			if (nSent == MSocket::SocketError) {
+				int ErrorCode = MSocket::GetLastError();
+
+				using namespace MSocket::Error;
+
+				if (ErrorCode == WouldBlock)
+					continue;
+
+				MLog("FLUSHSEND> FlushSend Error(%d)\n", ErrorCode);
+
+				if (ErrorCode == ConnectionAborted ||
+					ErrorCode == ConnectionReset ||
+					ErrorCode == TimedOut)
 				{
-					 OutputDebugString("FLUSHSEND> Connection ERROR Closed!!!!!!!!!! \n");
+					 MLog("FLUSHSEND> Connection ERROR Closed!!!!!!!!!! \n");
 					 return false;
 				}
-				
-				if (nErrCode == WSAEWOULDBLOCK)
-					continue;
 			} else {
 				nTransBytes += nSent;
 				if (nTransBytes >= pSendItem->dwPacketSize)
@@ -150,176 +122,161 @@ bool MClientSocketThread::FlushSend()
 		m_nTotalSend += nTransBytes;
 		m_SendTrafficLog.Record(m_nTotalSend);
 
-		LockSend();
-		if (pSendItem != NULL)
 		{
-			delete [] pSendItem->pPacket;
-			delete pSendItem;
+			std::lock_guard<MCriticalSection> lock{ m_csSendLock };
+			if (pSendItem != NULL)
+			{
+				delete[] pSendItem->pPacket;
+				delete pSendItem;
+			}
+			m_SendList.erase(SendItor);
 		}
-		m_SendList.erase(SendItor);
-
-		UnlockSend();
 	}
-
-/*
-	char buf[255];
-	sprintf_safe(buf, "Flush : %d 남았다\n", m_SendList.size());
-	OutputDebugString(buf);
-*/
 
 	return true;
 }
 
 void MClientSocketThread::Run()
 {
-	while(true) 
-	{	
-		DWORD dwVal = WaitForSingleObject(m_KillEvent.GetEvent(), 100);
-		if (dwVal == WAIT_OBJECT_0) 
+	DMLog("MClientSocketThread::Run -- Entering\n");
+
+	auto SocketEvent = MSocket::CreateEvent();
+
+	{
+		using namespace MSocket::FD;
+		const auto EventFlags = CONNECT | READ | WRITE | CLOSE;
+		auto sel_ret = MSocket::EventSelect(m_pTCPSocket->GetSocket(), SocketEvent, EventFlags);
+		if (sel_ret != 0)
 		{
+			LOG_SOCKET_ERROR("EventSelect", sel_ret);
 			return;
-		} 
-		else if (dwVal == WAIT_TIMEOUT) 
-		{
-			if (m_pTCPSocket)
-				break;
 		}
 	}
 
-	WSAEVENT EventArray[WSA_MAXIMUM_WAIT_EVENTS];
-	WORD wEventIndex = 0;
+	MSignalEvent* EventArray[] = {
+		&SocketEvent,
+		&m_SendEvent,
+		&m_KillEvent,
+	};
 
-	WSANETWORKEVENTS NetEvent;
-	WSAEVENT hFDEvent = WSACreateEvent();
-	DWORD result;
-
-	result = WSAEventSelect(m_pTCPSocket->GetSocket(), hFDEvent, FD_CONNECT|FD_READ|FD_WRITE|FD_CLOSE);
-	if (SOCKET_ERROR == result)
+	while (true)
 	{
-		OutputDebugString("<SOCKETTHREAD_ERROR> WSAEventSelect Error </SOCKETTHREAD_ERROR>\n");
-		return;
+		const auto Timeout = MSync::Infinite;
+		int WaitResult = WaitForMultipleEvents(EventArray, Timeout);
+		if (WaitResult == MSync::WaitFailed)
+		{
+			LOG_SOCKET_ERROR("WaitForMultipleEvents", WaitResult);
+			return;
+		}
+
+		switch (WaitResult)
+		{
+			// Socket Event
+		case 0:
+			HandleSocketEvent(SocketEvent);
+			break;
+
+			// Send Event
+		case 1:
+			if (m_bActive)
+				FlushSend();
+			m_SendEvent.ResetEvent();
+			break;
+
+			// Kill Event
+		case 2:
+			m_KillEvent.ResetEvent();
+			DMLog("MClientSocketThread::Run -- Received kill event\n");
+			goto end_thread;
+			break;
+
+			// Timeout
+		case MSync::WaitTimeout:
+			if (GetSendWaitQueueCount() > 0)
+				FlushSend();
+			break;
+
+		default:
+			LOG_SOCKET_ERROR("WaitForMultipleEvents", WaitResult);
+			break;
+		}
 	}
 
-	EventArray[wEventIndex++] = hFDEvent;
-	EventArray[wEventIndex++] = m_SendEvent.GetEvent();
-	EventArray[wEventIndex++] = m_KillEvent.GetEvent();
-
-	bool bEnd = false;
-	while (!bEnd)
-	{
-		result = WSAWaitForMultipleEvents(wEventIndex, EventArray, FALSE, 100, FALSE);
-		if (result == WSA_WAIT_FAILED) continue;
-
-		switch (result)
-		{
-		case WAIT_OBJECT_0:		// Socket Event
-			{
-				result = WSAEnumNetworkEvents(m_pTCPSocket->GetSocket(), hFDEvent, &NetEvent);
-
-				if (SOCKET_ERROR == result)
-				{
-					OutputDebugString("<SOCKETTHREAD_ERROR> WSAEnumNetworkEvents Error </SOCKETTHREAD_ERROR>\n");
-					ResetEvent(hFDEvent);
-					continue;
-				}
-				
-				if (NetEvent.lNetworkEvents & FD_CONNECT)
-				{
-					if (NetEvent.iErrorCode[FD_CONNECT_BIT] == 0)
-					{
-						OnConnect(m_pTCPSocket->GetSocket());
-					}
-					else
-					{
-						OnSocketError(m_pTCPSocket->GetSocket(), eeConnect, NetEvent.iErrorCode[FD_CONNECT_BIT]);
-						m_KillEvent.SetEvent();
-					}
-				}
-				
-				if (NetEvent.lNetworkEvents & FD_READ)
-				{
-					if (NetEvent.iErrorCode[FD_READ_BIT] == 0)
-					{
-						if (m_bActive) Recv();
-					}
-					else
-					{
-						OnSocketError(m_pTCPSocket->GetSocket(), eeReceive, NetEvent.iErrorCode[FD_READ_BIT]);
-					}
-					
-				}
-
-				if (NetEvent.lNetworkEvents & FD_WRITE)
-				{
-					if (NetEvent.iErrorCode[FD_WRITE_BIT] == 0)
-					{
-//						OutputDebugString("FlushSend 수행했다.\n");
-						if (m_bActive) FlushSend();
-					}
-					else
-					{
-						OnSocketError(m_pTCPSocket->GetSocket(), eeSend, NetEvent.iErrorCode[FD_WRITE_BIT]);
-					}
-				}
-
-				if (NetEvent.lNetworkEvents & FD_CLOSE)
-				{
-					OnDisconnect(m_pTCPSocket->GetSocket());
-					
-					if (NetEvent.iErrorCode[FD_CLOSE_BIT] != 0)
-					{
-						OnSocketError(m_pTCPSocket->GetSocket(), eeDisconnect, NetEvent.iErrorCode[FD_CLOSE_BIT]);
-					}
-					m_KillEvent.SetEvent();
-				}
-			}
-			break;
-		case WAIT_OBJECT_0 + 1:		// Send Event
-			{
-				if (m_bActive) FlushSend();
-				m_SendEvent.ResetEvent();
-			}
-			break;
-		case WAIT_OBJECT_0 + 2:		// Kill Event
-			{
-				bEnd = true;
-				m_KillEvent.ResetEvent();
-			}
-			break;
-		case WSA_WAIT_TIMEOUT:
-			{
-				if (GetSendWaitQueueCount() > 0)
-					FlushSend();
-			}
-			break;
-		default:
-			{
-				OutputDebugString("<SOCKETTHREAD_ERROR> exceptional case </SOCKETTHREAD_ERROR>\n");
-				bEnd = true;
-			}
-			break;
-		}	// switch
-
-	}	// while
-
-	WSACloseEvent(hFDEvent);
+end_thread:
 
 	ClearSendList();
 
 	m_bActive = false;
+	
+	DMLog("MClientSocketThread::Run -- Leaving\n");
 }
 
-MClientSocketThread::MClientSocketThread(MTCPSocket* pTCPSocket): MTCPSocketThread(pTCPSocket)
+void MClientSocketThread::HandleSocketEvent(MSignalEvent& hFDEvent)
 {
-	m_bActive = false;
-	m_fnRecvCallback = NULL;
-	m_fnConnectCallback = NULL;
-	m_fnDisconnectCallback = NULL;
-}
+	MSocket::NetworkEvents NetEvent;
+	auto ene_ret = MSocket::EnumNetworkEvents(m_pTCPSocket->GetSocket(), hFDEvent, &NetEvent);
+	if (ene_ret != 0)
+	{
+		LOG_SOCKET_ERROR("EnumNetworkEvents", ene_ret);
+		return;
+	}
 
-MClientSocketThread::~MClientSocketThread()
-{
+	DMLog("Got socket event, %u\n", NetEvent.ErrorCode);
 
+	if (MSocket::IsNetworkEventSet(NetEvent, MSocket::FD::CONNECT))
+	{
+		auto Value = MSocket::GetNetworkEventValue(NetEvent, MSocket::FD::CONNECT);
+		if (Value == 0)
+		{
+			OnConnect(m_pTCPSocket->GetSocket());
+		}
+		else
+		{
+			OnSocketError(m_pTCPSocket->GetSocket(), eeConnect, Value);
+			m_KillEvent.SetEvent();
+		}
+	}
+
+	if (MSocket::IsNetworkEventSet(NetEvent, MSocket::FD::READ))
+	{
+		auto Value = MSocket::GetNetworkEventValue(NetEvent, MSocket::FD::READ);
+		if (Value == 0)
+		{
+			if (m_bActive)
+				Recv();
+		}
+		else
+		{
+			OnSocketError(m_pTCPSocket->GetSocket(), eeReceive, Value);
+		}
+
+	}
+
+	if (MSocket::IsNetworkEventSet(NetEvent, MSocket::FD::WRITE))
+	{
+		auto Value = MSocket::GetNetworkEventValue(NetEvent, MSocket::FD::WRITE);
+		if (Value == 0)
+		{
+			if (m_bActive)
+				FlushSend();
+		}
+		else
+		{
+			OnSocketError(m_pTCPSocket->GetSocket(), eeSend, Value);
+		}
+	}
+
+	if (MSocket::IsNetworkEventSet(NetEvent, MSocket::FD::CLOSE))
+	{
+		OnDisconnect(m_pTCPSocket->GetSocket());
+
+		auto Value = MSocket::GetNetworkEventValue(NetEvent, MSocket::FD::CLOSE);
+		if (Value != 0)
+		{
+			OnSocketError(m_pTCPSocket->GetSocket(), eeDisconnect, Value);
+		}
+		m_KillEvent.SetEvent();
+	}
 }
 
 bool MClientSocketThread::Recv()
@@ -327,10 +284,10 @@ bool MClientSocketThread::Recv()
 	char			RecvBuf[MAX_RECVBUF_LEN];
 	int				nRecv = 0;
 
-	while(TRUE) 
+	while (true) 
 	{
-		nRecv = recv(m_pTCPSocket->GetSocket(), RecvBuf, MAX_RECVBUF_LEN, 0);
-		if (nRecv != SOCKET_ERROR) {
+		nRecv = MSocket::recv(m_pTCPSocket->GetSocket(), RecvBuf, MAX_RECVBUF_LEN, 0);
+		if (nRecv != MSocket::SocketError) {
 			m_nTotalRecv += nRecv;
 			m_RecvTrafficLog.Record(m_nTotalRecv);
 		}
@@ -346,17 +303,17 @@ bool MClientSocketThread::Recv()
 	return true;
 }
 
-bool MClientSocketThread::OnRecv(SOCKET socket, char *pPacket, DWORD dwSize)
+bool MClientSocketThread::OnRecv(SOCKET socket, char *pPacket, u32 dwSize)
 {
 	if (m_fnRecvCallback) return m_fnRecvCallback(m_pCallbackContext, socket, pPacket, dwSize);
 
 	return false;
 }
 
-bool MClientSocketThread::PushSend(char *pPacket, DWORD dwPacketSize)
+bool MClientSocketThread::PushSend(char *pPacket, u32 dwPacketSize)
 {
-	if ((!m_bActive) || (m_SendList.size() > TCPSOCKET_MAX_SENDQUEUE_LEN)) return false;
-	
+	if (!m_bActive || m_SendList.size() > TCPSOCKET_MAX_SENDQUEUE_LEN)
+		return false;
 
 	_ASSERT(dwPacketSize > 0);
 
@@ -365,48 +322,17 @@ bool MClientSocketThread::PushSend(char *pPacket, DWORD dwPacketSize)
 
 	pSendItem->dwPacketSize = 0;
 
-/* 
-	pSendItem->pPacket = new char[dwPacketSize];
-	memcpy(pSendItem->pPacket, pPacket, dwPacketSize);
-*/
 	pSendItem->pPacket = pPacket;
 	pSendItem->dwPacketSize = dwPacketSize;
 
-	LockSend();
-	m_TempSendList.push_back(pSendItem);
-	UnlockSend();
+	{
+		std::lock_guard<MCriticalSection> lock{ m_csSendLock };
+		m_TempSendList.push_back(pSendItem);
+	}
 
 	m_SendEvent.SetEvent();
 
 	return true;
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////
-// MServerSocketThread /////////////////////////////////////////////////////////////////////
-MServerSocketThread::MServerSocketThread(MTCPSocket* pTCPSocket): MTCPSocketThread(pTCPSocket)
-{
-	m_fnRecvCallback = NULL;
-	m_fnAcceptCallback = NULL;
-	m_fnDisconnectClientCallback = NULL;
-}
-
-MServerSocketThread::~MServerSocketThread()
-{
-
-}
-
-void MServerSocketThread::Create()
-{
-	InitializeCriticalSection(&m_csSocketLock);
-
-	MTCPSocketThread::Create();
-}
-
-void MServerSocketThread::Destroy()
-{
-	MTCPSocketThread::Destroy();
-
-	DeleteCriticalSection(&m_csSocketLock);
 }
 
 bool MServerSocketThread::FlushSend()
@@ -414,24 +340,20 @@ bool MServerSocketThread::FlushSend()
 	return false;
 
 	int result = 0;
-	MTCPSendQueueItem* pSendItem;
-	TCPSendListItor	SendItor;
-	MSocketObj*		pSocketObj;
-	SocketListItor	SocketItor;
 
-	for (SocketItor = m_SocketList.begin(); SocketItor != m_SocketList.end(); ++SocketItor)		
+	for (auto SocketItor = m_SocketList.begin(); SocketItor != m_SocketList.end(); ++SocketItor)		
 	{
-		pSocketObj = *SocketItor;
+		auto pSocketObj = *SocketItor;
 
 		while(pSocketObj->sendlist.size() > 0) 
 		{
-			SendItor = pSocketObj->sendlist.begin();
-			pSendItem = *SendItor;
+			auto SendItor = pSocketObj->sendlist.begin();
+			auto* pSendItem = *SendItor;
 
-			result = send(pSocketObj->sock, (char*)pSendItem->pPacket,
+			result = MSocket::send(pSocketObj->sock, (char*)pSendItem->pPacket,
 							pSendItem->dwPacketSize, 0);
 
-			if (result == SOCKET_ERROR) {
+			if (result == MSocket::SocketError) {
 				return false;
 			} else {
 				m_nTotalSend += result;
@@ -453,10 +375,10 @@ bool MServerSocketThread::Recv(MSocketObj* pSocketObj)
 	char			RecvBuf[MAX_RECVBUF_LEN];
 	int				nRecv = 0;
 
-	while(pSocketObj->sock != INVALID_SOCKET)
+	while(pSocketObj->sock != MSocket::InvalidSocket)
 	{
-		nRecv = recv(pSocketObj->sock, RecvBuf, MAX_RECVBUF_LEN, 0);
-		if (nRecv != SOCKET_ERROR) {
+		nRecv = MSocket::recv(pSocketObj->sock, RecvBuf, MAX_RECVBUF_LEN, 0);
+		if (nRecv != MSocket::SocketError) {
 			m_nTotalRecv += nRecv;
 			m_RecvTrafficLog.Record(m_nTotalRecv);
 		}
@@ -474,160 +396,164 @@ bool MServerSocketThread::Recv(MSocketObj* pSocketObj)
 
 void MServerSocketThread::Run()
 {
-	SOCKET Accept;
-	int Index = 0;
-	bool bEnd = false;
-	MSocketObj* pSocketObj;
-	WSANETWORKEVENTS NetEvent;
-	WSAEVENT hFDEvent, hNewEvent;
-	DWORD result;
-
-	hFDEvent = WSACreateEvent();
-	result = WSAEventSelect(m_pTCPSocket->GetSocket(), hFDEvent, FD_ACCEPT | FD_CLOSE);
-
-	if (SOCKET_ERROR == result)
+	auto SocketEvent = MSignalEvent(true);
 	{
-		OutputDebugString("<SOCKETTHREAD_ERROR> WSAEventSelect Error </SOCKETTHREAD_ERROR>\n");
+		using namespace MSocket::FD;
+		const auto Flags = ACCEPT | CLOSE;
+		auto result = MSocket::EventSelect(m_pTCPSocket->GetSocket(), SocketEvent, Flags);
+
+		if (result == MSocket::SocketError)
+		{
+			LOG_SOCKET_ERROR("EventSelect", result);
+			return;
+		}
+	}
+
+	m_EventArray[0] = &SocketEvent; // Accept
+	m_EventArray[1] = &m_SendEvent;	// Send
+	m_EventArray[2] = &m_KillEvent;	// Kill
+
+	while (true)
+	{
+		auto WaitResult = WaitForMultipleEvents(m_SocketList.size() + 3, m_EventArray, MSync::Infinite);
+
+        if (WaitResult == MSync::WaitFailed)
+        {
+			LOG_SOCKET_ERROR("WaitForMultipleEvents", WaitResult);
+        }
+
+		switch (WaitResult)
+		{
+			case 0: // Accept Event
+				HandleAcceptEvent();
+				break;
+
+			case 1: // Send Event
+				FlushSend();
+				m_SendEvent.ResetEvent();
+				break;
+
+			case 2: // Kill Event
+				return;
+
+			case MSync::WaitTimeout:
+				FlushSend();
+				break;
+		}
+
+		HandleClientSockets();
+	}
+}
+
+void MServerSocketThread::HandleAcceptEvent()
+{
+	MSocket::NetworkEvents NetEvent;
+	auto ret = MSocket::EnumNetworkEvents(m_pTCPSocket->GetSocket(), *m_EventArray[0], &NetEvent);
+	if (ret != 0)
+	{
+		LOG_SOCKET_ERROR("EnumNetworkEvents", ret);
 		return;
 	}
 
-	m_EventArray[0] = hFDEvent;					// Accept 이벤트
-	m_EventArray[1] = m_SendEvent.GetEvent();	// Send 이벤트
-	m_EventArray[2] = m_KillEvent.GetEvent();	// Kill 이벤트
-
-	while (!bEnd)
+	if (MSocket::IsNetworkEventSet(NetEvent, MSocket::FD::ACCEPT))
 	{
-		result = WaitForMultipleObjects((int)m_SocketList.size()+3, m_EventArray, FALSE, INFINITE);
-
-        if (result == WAIT_FAILED)
-        {
-            OutputDebugString("<SOCKETTHREAD_ERROR> WaitForMultipleObjects Failed </SOCKETTHREAD_ERROR>\n");
-            break;
-        }
-
-
-		switch (result)
+		auto Value = MSocket::GetNetworkEventValue(NetEvent, MSocket::FD::ACCEPT);
+		if (Value == 0)
 		{
-			case WAIT_OBJECT_0:		// Accept Event
-				{
-					WSAEnumNetworkEvents(m_pTCPSocket->GetSocket(), hFDEvent, &NetEvent);
-					if (NetEvent.lNetworkEvents & FD_ACCEPT)
-					{
-						if (NetEvent.iErrorCode[FD_ACCEPT_BIT] == 0)
-						{
-							if (m_SocketList.size() >= MAX_CLIENTSOCKET_LEN) 
-							{
-								break;
-							}
-
-							Accept = accept(m_pTCPSocket->GetSocket(), NULL, NULL);
-
-							hNewEvent = WSACreateEvent();
-							WSAEventSelect(Accept, hNewEvent, FD_READ | FD_WRITE | FD_CLOSE);
-
-							MSocketObj* pSocketObj;
-							pSocketObj = InsertSocketObj(Accept, hNewEvent);
-
-							// Accept Callback
-							if (m_fnAcceptCallback && OnAccept(pSocketObj) == true)
-							{
-
-							}
-						}
-						else
-						{
-							OnSocketError(m_pTCPSocket->GetSocket(), eeDisconnect, NetEvent.iErrorCode[FD_ACCEPT_BIT]);
-						}
-					}
-				}
-				break;
-			case WAIT_OBJECT_0 + 1:	// Send Event
-				{
-					FlushSend();
-					m_SendEvent.ResetEvent();
-				}
-				break;
-
-			case WAIT_OBJECT_0 + 2:	// Kill Event
-				{
-					bEnd = true;
-					m_KillEvent.ResetEvent();
-				}
-				break;
-			case WAIT_TIMEOUT:
-				{
-					FlushSend();
-				}
-				break;
-		}	// switch
-
-		// Client Socket Event
-		for (SocketListItor itor = m_SocketList.begin(); itor != m_SocketList.end(); ++itor)
-		{
-			pSocketObj = *itor;
-
-			result = WaitForSingleObject(pSocketObj->event, 0);
-			if (result == WAIT_FAILED)
+			if (m_SocketList.size() >= MAX_CLIENTSOCKET_LEN)
 			{
-				OutputDebugString("<SOCKETTHREAD_ERROR> WaitForSingleObject Failed </SOCKETTHREAD_ERROR>\n");
-				ExitThread(-1);
+				return;
 			}
-			else if (result == WAIT_TIMEOUT)
+
+			auto AcceptSocket = MSocket::accept(m_pTCPSocket->GetSocket(), NULL, NULL);
+
+			InsertSocketObj(AcceptSocket);
+		}
+		else
+		{
+			OnSocketError(m_pTCPSocket->GetSocket(), eeDisconnect, Value);
+		}
+	}
+}
+
+void MServerSocketThread::HandleClientSockets()
+{
+	// Client Socket Event
+	for (auto itor = m_SocketList.begin(); itor != m_SocketList.end();)
+	{
+		auto pSocketObj = *itor;
+
+		bool DontIncrement = false;
+
+		DEFER([&] { if (!DontIncrement) {
+			++itor;
+		}});
+
+		{
+			auto WaitResult = pSocketObj->event.Await(0);
+			if (WaitResult == MSync::WaitFailed)
+			{
+				LOG_SOCKET_ERROR("pSocketObj->event.Await", WaitResult);
+				return;
+			}
+			else if (WaitResult == MSync::WaitTimeout)
 			{
 				continue;
 			}
+		}
 
-			WSAEnumNetworkEvents(pSocketObj->sock, pSocketObj->event, &NetEvent);
-			if (NetEvent.lNetworkEvents & FD_READ)
+		MSocket::NetworkEvents NetEvent;
+		MSocket::EnumNetworkEvents(pSocketObj->sock, pSocketObj->event, &NetEvent);
+
+		if (MSocket::IsNetworkEventSet(NetEvent, MSocket::FD::READ))
+		{
+			auto Value = MSocket::GetNetworkEventValue(NetEvent, MSocket::FD::READ);
+			if (Value == 0)
 			{
-				if (NetEvent.iErrorCode[FD_READ_BIT] == 0)
-				{
-					Recv(pSocketObj);
-				}
-				else
-				{
-					OnSocketError(pSocketObj->sock, eeReceive, NetEvent.iErrorCode[FD_READ_BIT]);
-					Disconnect(pSocketObj);
-
-					OutputDebugString("<SOCKETTHREAD_ERROR> FD_READ error </SOCKETTHREAD_ERROR>\n");
-				}
+				Recv(pSocketObj);
 			}
-			if (NetEvent.lNetworkEvents & FD_WRITE)
+			else
 			{
-				if (NetEvent.iErrorCode[FD_WRITE_BIT] == 0)
-				{
-					FlushSend();
-				}
-				else
-				{
-					OnSocketError(pSocketObj->sock, eeSend, NetEvent.iErrorCode[FD_WRITE_BIT]);
-					Disconnect(pSocketObj);
-
-					OutputDebugString("<SOCKETTHREAD_ERROR> FD_WRITE error </SOCKETTHREAD_ERROR>\n");
-				}
-			}
-			if (NetEvent.lNetworkEvents & FD_CLOSE)
-			{
+				OnSocketError(pSocketObj->sock, eeReceive, Value);
 				Disconnect(pSocketObj);
 
-				if (NetEvent.iErrorCode[FD_CLOSE_BIT] != 0)
-				{
-					OnSocketError(pSocketObj->sock, eeDisconnect, NetEvent.iErrorCode[FD_CLOSE_BIT]);
-				}
+				MLog("<SOCKETTHREAD_ERROR> FD_READ error </SOCKETTHREAD_ERROR>\n");
 			}
-
-			// 안쓰는 소켓 해제
-			if (pSocketObj->sock == INVALID_SOCKET)
+		}
+		if (MSocket::IsNetworkEventSet(NetEvent, MSocket::FD::WRITE))
+		{
+			auto Value = MSocket::GetNetworkEventValue(NetEvent, MSocket::FD::WRITE);
+			if (Value == 0)
 			{
-				FreeSocketObj(pSocketObj);
-				itor = RemoveSocketObj(itor);
-				RenumberEventArray();
-//				break;
+				FlushSend();
 			}
-		}	// for
+			else
+			{
+				OnSocketError(pSocketObj->sock, eeSend, Value);
+				Disconnect(pSocketObj);
 
-	}	// while
+				MLog("<SOCKETTHREAD_ERROR> FD_WRITE error </SOCKETTHREAD_ERROR>\n");
+			}
+		}
+		if (MSocket::IsNetworkEventSet(NetEvent, MSocket::FD::CLOSE))
+		{
+			Disconnect(pSocketObj);
 
+			auto Value = MSocket::GetNetworkEventValue(NetEvent, MSocket::FD::CLOSE);
+			if (Value != 0)
+			{
+				OnSocketError(pSocketObj->sock, eeDisconnect, Value);
+			}
+		}
+
+		if (pSocketObj->sock == MSocket::InvalidSocket)
+		{
+			FreeSocketObj(pSocketObj);
+			itor = RemoveSocketObj(itor);
+			RenumberEventArray();
+			DontIncrement = true;
+		}
+	}
 }
 
 bool MServerSocketThread::OnAccept(MSocketObj *pSocketObj)
@@ -640,13 +566,13 @@ bool MServerSocketThread::OnAccept(MSocketObj *pSocketObj)
 
 bool MServerSocketThread::OnDisconnectClient(MSocketObj* pSocketObj)
 {
-	if (m_fnDisconnectClientCallback)
-		return m_fnDisconnectClientCallback(pSocketObj);
+	if (m_fnDisconnectCallback)
+		return m_fnDisconnectCallback(pSocketObj);
 	else 
 		return false;
 }
 
-bool MServerSocketThread::OnRecv(MSocketObj* pSocketObj, char* pPacket, DWORD dwPacketSize)
+bool MServerSocketThread::OnRecv(MSocketObj* pSocketObj, char* pPacket, u32 dwPacketSize)
 {
 	if (m_fnRecvCallback)
 		return m_fnRecvCallback(pSocketObj, pPacket, dwPacketSize);
@@ -654,45 +580,47 @@ bool MServerSocketThread::OnRecv(MSocketObj* pSocketObj, char* pPacket, DWORD dw
 	return false;
 }
 
-MSocketObj* MServerSocketThread::InsertSocketObj(SOCKET sock, HANDLE event)
+MSocketObj* MServerSocketThread::InsertSocketObj(SOCKET sock)
 {
-	LockSocket();
-
 	MSocketObj* pSocketObj = new MSocketObj;
 
 	pSocketObj->sock = sock;
-	pSocketObj->event = event;
+	pSocketObj->event = MSocket::CreateEvent();
 
-	m_SocketList.push_back(pSocketObj);
-	m_EventArray[m_SocketList.size()+2] = event;
+	{
+		using namespace MSocket::FD;
+		const auto Flags = READ | WRITE | CLOSE;
+		MSocket::EventSelect(pSocketObj->sock, pSocketObj->event, Flags);
+	}
 
-	UnlockSocket();
+	{
+		std::lock_guard<MCriticalSection> lock{ m_csSocketLock };
+		m_SocketList.push_back(pSocketObj);
+		m_EventArray[m_SocketList.size() + 2] = &pSocketObj->event;
+	}
+
+	OnAccept(pSocketObj);
 
 	return pSocketObj;
 }
 
 void MServerSocketThread::RenumberEventArray()
 {
-	int nEventIndex = 1 + 2;
-	MSocketObj* pSocketObj;
+	int EventIndex = ClientSocketsStartIndex;
 
-	for (SocketListItor itor = m_SocketList.begin(); itor != m_SocketList.end(); ++itor)
+	for (auto* Socket : m_SocketList)
 	{
-		pSocketObj = *itor;
-		m_EventArray[nEventIndex++] = pSocketObj->event;
+		m_EventArray[EventIndex] = &Socket->event;
+		++EventIndex;
 	}
 }
 
 void MServerSocketThread::FreeSocketObj(MSocketObj *pSocketObj)
 {
-	MTCPSendQueueItem* pSendItem;
-	TCPSendListItor	SendItor;
-
-	// 버퍼에 있는 내용을 지운다.
 	while(pSocketObj->sendlist.size() > 0) 
 	{
-		SendItor = pSocketObj->sendlist.begin();
-		pSendItem = *SendItor;
+		auto SendItor = pSocketObj->sendlist.begin();
+		auto* pSendItem = *SendItor;
 
 		delete pSendItem->pPacket;
 		delete pSendItem;
@@ -700,33 +628,22 @@ void MServerSocketThread::FreeSocketObj(MSocketObj *pSocketObj)
 		pSocketObj->sendlist.erase(SendItor);
 	}
 
-	WSACloseEvent(pSocketObj->event);
-
-	if (pSocketObj->sock != INVALID_SOCKET)
+	if (pSocketObj->sock != MSocket::InvalidSocket)
 	{
-		closesocket(pSocketObj->sock);
+		MSocket::closesocket(pSocketObj->sock);
 	}
 
-	delete pSocketObj;	pSocketObj = NULL;
+	delete pSocketObj;
+	pSocketObj = NULL;
 }
 
-SocketListItor MServerSocketThread::RemoveSocketObj(SocketListItor itor)
+SocketList::iterator MServerSocketThread::RemoveSocketObj(SocketList::iterator itor)
 {
-	SocketListItor ret_itor;
-
-	LockSocket();
-
-	MSocketObj* pSocketObj = *itor;
-	ret_itor = m_SocketList.erase(itor);
-
-	WSASetEvent(m_EventArray);
- 
-	UnlockSocket();
-
-	return ret_itor;
+	std::lock_guard<MCriticalSection> lock{ m_csSocketLock };
+	return m_SocketList.erase(itor);
 }
 
-bool MServerSocketThread::PushSend(MSocketObj *pSocketObj, char *pPacket, DWORD dwPacketSize)
+bool MServerSocketThread::PushSend(MSocketObj *pSocketObj, char *pPacket, u32 dwPacketSize)
 {
 	if (pSocketObj->sendlist.size() > TCPSOCKET_MAX_SENDQUEUE_LEN) return false;
 
@@ -735,9 +652,10 @@ bool MServerSocketThread::PushSend(MSocketObj *pSocketObj, char *pPacket, DWORD 
 	memcpy(pSendItem->pPacket, pPacket, dwPacketSize);
 	pSendItem->dwPacketSize = dwPacketSize;
 
-	LockSend();
-	pSocketObj->sendlist.push_back(pSendItem);
-	UnlockSend();
+	{
+		std::lock_guard<MCriticalSection> lock{ m_csSendLock };
+		pSocketObj->sendlist.push_back(pSendItem);
+	}
 
 	m_SendEvent.SetEvent();
 
@@ -746,141 +664,29 @@ bool MServerSocketThread::PushSend(MSocketObj *pSocketObj, char *pPacket, DWORD 
 
 void MServerSocketThread::Disconnect(MSocketObj *pSocketObj)
 {
-	closesocket(pSocketObj->sock);
+	MSocket::closesocket(pSocketObj->sock);
 
-	if (m_fnDisconnectClientCallback && OnDisconnectClient(pSocketObj) == true)
-	{
-	}
+	OnDisconnectClient(pSocketObj);
 
-	pSocketObj->sock = INVALID_SOCKET;
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////
-// MTCPSocket //////////////////////////////////////////////////////////////////////////////
-MTCPSocket::MTCPSocket()
-{
-	m_bInitialized = false;
-	m_nPort = 0;
-	m_Socket = INVALID_SOCKET;
-	m_pSocketThread = NULL;
-}
-
-MTCPSocket::~MTCPSocket()
-{
-
-}
-
-bool MTCPSocket::Initialize()
-{
-	WSADATA	wsaData;
-	if (WSAStartup(MAKEWORD(2,2), &wsaData) != 0)
-		return false;
-
-	if ( (LOBYTE( wsaData.wVersion ) != 2) || (HIBYTE( wsaData.wVersion ) != 2) ) 
-	{
-		OutputDebugString("<TCPSOCKET_ERROR> WinSock Version invalid </TCPSOCKET_ERROR>\n");
-		return false;
-	} 
-
-	m_bInitialized = true;
-	return true;
-}
-
-void MTCPSocket::Finalize()
-{
-	if (!m_bInitialized) return;
-
-	WSACleanup();
-
-	m_bInitialized = false;
-}
-
-bool MTCPSocket::OpenSocket()
-{
-	SOCKET sockfd = socket(AF_INET, SOCK_STREAM, 0);
-	if (sockfd == INVALID_SOCKET) return false;
-
-	m_Socket = sockfd;
-
-	u_long option = 1;
-	int result = ioctlsocket(sockfd, FIONBIO, (unsigned long*)&option);
-	if (SOCKET_ERROR == result)
-	{
-		OutputDebugString("<TCPSOCKET_ERROR> ioctl fail </TCPSOCKET_ERROR>\n");
-		return false;
-	}
-
-	BOOL val = TRUE;
-	result = setsockopt(sockfd, IPPROTO_TCP, TCP_NODELAY, (const char FAR *)&val, sizeof(BOOL) );
-	if (SOCKET_ERROR == result) {
-		OutputDebugString("<TCPSOCKET_ERROR> setsockopt(TCP_NODELAY) \n");
-		return false;
-	}
-
-	return true;
-}
-
-void MTCPSocket::CloseSocket()
-{
-//	shutdown(m_Socket, SD_SEND);
-	closesocket(m_Socket);
-}
-
-
-////////////////////////////////////////////////////////////////////////////////////////////
-// MServerSocket ///////////////////////////////////////////////////////////////////////////
-MServerSocket::MServerSocket(): MTCPSocket()
-{
-	Initialize();
-}
-
-MServerSocket::~MServerSocket()
-{
-	Finalize();
-}
-
-bool MServerSocket::Initialize()
-{
-	MTCPSocket::Initialize();
-
-	m_pSocketThread = new MServerSocketThread(this);
-
-	m_bInitialized = true;
-
-	return true;
-}
-
-void MServerSocket::Finalize()
-{
-	if (!m_bInitialized) return;
-	Close();
-
-	if (m_pSocketThread)
-	{
-		delete m_pSocketThread;	m_pSocketThread = NULL;
-	}
-
-	MTCPSocket::Finalize();
+	pSocketObj->sock = MSocket::InvalidSocket;
 }
 
 bool MServerSocket::Disconnect(MSocketObj *pSocketObj)
 {
-	((MServerSocketThread*)(m_pSocketThread))->Disconnect(pSocketObj);
+	Thread.Disconnect(pSocketObj);
 	return true;
 }
 
-bool MServerSocket::Send(MSocketObj *pSocketObj, char *pPacket, DWORD dwPacketSize)
+bool MServerSocket::Send(MSocketObj *pSocketObj, char *pPacket, u32 dwPacketSize)
 {
-	return ((MServerSocketThread*)(m_pSocketThread))->PushSend(pSocketObj, pPacket, dwPacketSize);
+	return Thread.PushSend(pSocketObj, pPacket, dwPacketSize);
 }
 
 bool MServerSocket::Listen(int nPort)
 {
-	if (!m_bInitialized) return false;
-
 	if (!OpenSocket(nPort)) return false;
 
-	listen(m_Socket, 5);
+	MSocket::listen(m_Socket, 5);
 
 	return true;
 }
@@ -896,16 +702,20 @@ bool MServerSocket::OpenSocket(int nPort)
 {
 	if (!MTCPSocket::OpenSocket()) return false;
 
-	m_pSocketThread->Create();
+	Thread.Create();
 
-	sockaddr_in LocalAddress;
-	LocalAddress.sin_family			= AF_INET;
-	LocalAddress.sin_addr.s_addr	= htonl(INADDR_ANY);
-	LocalAddress.sin_port			= htons(nPort);
+	MSocket::sockaddr_in LocalAddress;
+	LocalAddress.sin_family			= MSocket::AF::INET;
+	LocalAddress.sin_addr.s_addr	= MSocket::htonl(MSocket::in_addr::Any);
+	LocalAddress.sin_port			= MSocket::htons(nPort);
 
-	if (::bind(m_Socket, (struct sockaddr*)&LocalAddress, sizeof(LocalAddress)) == SOCKET_ERROR) 
+	const auto LocalAddress_sa = reinterpret<MSocket::sockaddr>(LocalAddress);
+
+	const auto BindResult = MSocket::bind(m_Socket, &LocalAddress_sa, sizeof(LocalAddress_sa));
+
+	if (BindResult == MSocket::SocketError)
 	{
-		closesocket(m_Socket);
+		MSocket::closesocket(m_Socket);
 		return false;
 	}
 	m_LocalAddress = LocalAddress;
@@ -913,149 +723,113 @@ bool MServerSocket::OpenSocket(int nPort)
 	return true;
 }
 
-void MServerSocket::CloseSocket()
+template <typename T>
+bool MTCPSocket<T>::OpenSocket()
 {
-	MTCPSocket::CloseSocket();
-
-	if (m_pSocketThread)
+	DMLog("MTCPSocket::OpenSocket entering\n");
+	SOCKET sockfd = MSocket::socket(MSocket::AF::INET, MSocket::SOCK::STREAM, 0);
+	if (sockfd == MSocket::InvalidSocket)
 	{
-		m_pSocketThread->Destroy();
+		return false;
 	}
-}
 
-////////////////////////////////////////////////////////////////////////////////////////////
-// MClientSocket ///////////////////////////////////////////////////////////////////////////
-MClientSocket::MClientSocket(): MTCPSocket()
-{
-	Initialize();
-}
+	m_Socket = sockfd;
 
-MClientSocket::~MClientSocket()
-{
-	Finalize();
-}
+	u32 option = 1;
+	int result = MSocket::ioctlsocket(sockfd, MSocket::FIO::NBIO, &option);
+	if (result == MSocket::SocketError)
+	{
+		MLog("<TCPSOCKET_ERROR> ioctl fail </TCPSOCKET_ERROR>\n");
+		return false;
+	}
 
-bool MClientSocket::Initialize()
-{
-	MTCPSocket::Initialize();
+	int val = 1;
+	result = MSocket::setsockopt(sockfd,
+		MSocket::IPPROTO::TCP, MSocket::TCP::NODELAY,
+		reinterpret_cast<const char*>(&val), sizeof(int));
+	if (result == MSocket::SocketError) {
+		MLog("<TCPSOCKET_ERROR> setsockopt(TCP_NODELAY) \n");
+		return false;
+	}
 
-	m_pSocketThread = new MClientSocketThread(this);
-	m_bInitialized = true;
+	Derived().Thread.Create();
+
+	DMLog("MTCPSocket::OpenSocket leaving\n");
 
 	return true;
 }
 
-void MClientSocket::Finalize()
+template <typename T>
+void MTCPSocket<T>::CloseSocket()
 {
-	if (!m_bInitialized) return;
-	CloseSocket();
-
-	if (m_pSocketThread)
+	DMLog("MTCPSocket::CloseSocket, active %d, thread %p\n", IsActive(), &Derived().Thread);
+	if (IsActive())
 	{
-		delete m_pSocketThread;	m_pSocketThread = NULL;
+		Derived().Thread.Destroy();
+		MSocket::closesocket(m_Socket);
 	}
-
-	MTCPSocket::Finalize();
 }
 
 bool MClientSocket::Connect(SOCKET* pSocket, const char *szIP, int nPort)
 {
-	if (GetSocket() != INVALID_SOCKET)
+	if (GetSocket() != MSocket::InvalidSocket)
 		CloseSocket();
 
 	strcpy_safe(m_szHost, szIP);
 	m_nPort = nPort;
 
-	sockaddr_in RemoteAddr;
-	memset((char*)&RemoteAddr, 0, sizeof(sockaddr_in));
-	DWORD dwAddr = inet_addr(szIP);
-	if (dwAddr != INADDR_NONE) {
+	MSocket::sockaddr_in RemoteAddr;
+	memset((char*)&RemoteAddr, 0, sizeof(MSocket::sockaddr_in));
+	u32 dwAddr = GetIPv4Number(szIP);
+	if (dwAddr != MSocket::in_addr::None) {
 		memcpy(&(RemoteAddr.sin_addr), &dwAddr, 4);
 	} else {
-		HOSTENT* pHost = gethostbyname(szIP);
+		MSocket::hostent* pHost = MSocket::gethostbyname(szIP);
 		if (pHost == NULL) {
-			OutputDebugString("<TCPSOCKET_ERROR> Can't resolve hostname </TCPSOCKET_ERROR>");
+			MLog("<TCPSOCKET_ERROR> Can't resolve hostname </TCPSOCKET_ERROR>");
 			return false;
 		}
-		memcpy((char FAR *)&(RemoteAddr.sin_addr), pHost->h_addr, pHost->h_length);
+		memcpy((char *)&(RemoteAddr.sin_addr), pHost->h_addr, pHost->h_length);
 	}
 
-	sockaddr_in addr;
+	auto addr = RemoteAddr;
 
-	memset(&addr, 0, sizeof(sockaddr_in));
-	memcpy(&addr, &RemoteAddr, sizeof(sockaddr_in));
-	addr.sin_family = AF_INET;
-	addr.sin_port = htons(nPort);
+	addr.sin_family = MSocket::AF::INET;
+	addr.sin_port = MSocket::htons(nPort);
 
 	OpenSocket();
 	if (pSocket) 
 		*pSocket = m_Socket;
 
-	DWORD result = connect(m_Socket, (sockaddr*)&addr, sizeof(sockaddr_in));
-	if (SOCKET_ERROR == result)	{
-		DWORD dwError = WSAGetLastError();
-		if (dwError != WSAEWOULDBLOCK) {
-			char szLog[64];
-			sprintf_safe(szLog, "Connect Failed (ErrorCode=%d) \n", dwError);
-			OutputDebugString(szLog);
+	u32 result = MSocket::connect(m_Socket, (MSocket::sockaddr*)&addr, sizeof(MSocket::sockaddr_in));
+	if (MSocket::SocketError == result)	{
+		auto Error = MSocket::GetLastError();
+		if (Error != MSocket::Error::WouldBlock) {
+			LOG_SOCKET_ERROR("connect", result);
 			return false;
+		}
+		else
+		{
+			DMLog("MSocket::connect returned EWOULDBLOCK\n");
 		}
 	}
 
-	char szLog[64];
-	sprintf_safe(szLog, "Connect Succeed \n");
-	OutputDebugString(szLog);
+	DMLog("MClientSocket::Connect -- Connect succeeded\n");
 
 	return true;
 }
 
 bool MClientSocket::Disconnect()
 {
-	if (!IsActive()) return false;
+	if (!IsActive())
+		return false;
 
 	CloseSocket();
 
-	((MClientSocketThread*)m_pSocketThread)->OnDisconnect(m_Socket);
-
-	return true;
+	return Thread.OnDisconnect(m_Socket);
 }
 
-bool MClientSocket::SimpleDisconnect()
+bool MClientSocket::Send(char *pPacket, u32 dwPacketSize)
 {
-	if( !IsActive() ) return false;
-
-	SimpleCloseSocket();
-
-	// ((MClientSocketThread*)m_pSocketThread)->OnDisconnect(m_Socket);
-	return true;
-}
-
-bool MClientSocket::OpenSocket()
-{
-	if (!MTCPSocket::OpenSocket()) return false;
-
-	m_pSocketThread->Create();
-
-	return true;
-}
-
-void MClientSocket::CloseSocket()
-{
-	if (IsActive()) 
-	{
-		MTCPSocket::CloseSocket();
-
-		m_pSocketThread->Destroy();
-	}
-}
-
-void MClientSocket::SimpleCloseSocket()
-{
-	MTCPSocket::CloseSocket();
-}
-
-bool MClientSocket::Send(char *pPacket, DWORD dwPacketSize)
-{
-	if ((!m_bInitialized)) return false;
-	return ((MClientSocketThread*)(m_pSocketThread))->PushSend(pPacket, dwPacketSize);
+	return Thread.PushSend(pPacket, dwPacketSize);
 }

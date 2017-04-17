@@ -1,15 +1,11 @@
-#ifndef _MMATCHFORMULA_H
-#define _MMATCHFORMULA_H
+#pragma once
 
-#include "winsock2.h"
 #include "MXml.h"
 #include <vector>
-using namespace std;
-
 #include "MMatchItem.h"
 
 #define FILENAME_MATCH_FORMULA		"formula.xml"
-#define MAX_LEVEL					99		///< 최대 레벨
+#define MAX_LEVEL					99
 
 class MMatchEquipedItem;
 class MMatchStageSetting;
@@ -35,7 +31,7 @@ private:
 	static void PreCalcNeedExp();
 	static void PreCalcGettingExp();
 public:
-	static bool Create(void);
+	static bool Create();
 	static unsigned long int CalcPanaltyEXP(int nAttackerLevel, int nVictimLevel);
 	static unsigned long int GetSuicidePanaltyEXP(int nLevel);
 	static unsigned long int GetGettingExp(int nAttackerLevel, int nVictimLevel);
@@ -43,15 +39,9 @@ public:
 	static unsigned long int GetNeedExp(int nLevel) { if (nLevel<0) nLevel=0; if (nLevel>MAX_LEVEL) nLevel=MAX_LEVEL; return m_nNeedExp[nLevel]; }
 	static int GetLevelFromExp(unsigned long int nExp);
 
-	// 경험치를 다음 레벨 습득까지의 퍼센트로 반환
 	static int GetLevelPercent(unsigned long int nExp, int nNowLevel);
 	static int GetClanBattlePoint(int nWinnerClanPoint, int nLoserClanPoint, int nOneTeamMemberCount);
 
-	// 경험치 보너스 계산
 	static float CalcXPBonusRatio(MMatchObject* pCharObj, MMatchItemBonusType nBonusType);
-	// 바운티 보너스 계산
 	static float CalcBPBounsRatio(MMatchObject* pCharObj, MMatchItemBonusType nBonusType );
 };
-
-
-#endif

@@ -33,7 +33,7 @@ struct MAnchors
 
 #define MWIDGET_NAME_LENGTH		256
 
-class MWidget : public MListener{
+class MWidget : public MListener {
 private:
 	bool				m_bEnable;
 	bool				m_bFocusEnable;
@@ -244,6 +244,9 @@ public:
 	}
 
 #define MINT_WIDGET	"Widget"
+#ifndef GetClassName
+#undef GetClassName
+#endif
 	virtual const char* GetClassName(){ return MINT_WIDGET; }
 };
 
@@ -269,5 +272,3 @@ MPOINT MClientToScreen(const MWidget* pWidget, const MPOINT& p);
 MPOINT MScreenToClient(const MWidget* pWidget, const MPOINT& p);
 MRECT MClientToScreen(const MWidget* pWidget, const MRECT& p);
 MRECT MScreenToClient(const MWidget* pWidget, const MRECT& p);
-
-MPOINT GetCursorPosition();

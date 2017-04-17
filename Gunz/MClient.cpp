@@ -3,7 +3,6 @@
 #include "MSharedCommandTable.h"
 #include <stdarg.h>
 #include "MErrorTable.h"
-#include "Msg.h"
 #include "MDebug.h"
 #include "MCommandBuilder.h"
 #include "MMatchUtil.h"
@@ -33,17 +32,12 @@ void SplitIAddress(char* szIP, int maxlen, int* pPort, const char* szAddress)
 
 MClient::MClient()
 {
-	// _ASSERT(m_pInstance==NULL); 여러개의 클라이언트를 생성할수 있을경우 - by 추교성. KeeperManager.
 	m_pInstance = this;
 
 	m_pCommandBuilder = new MCommandBuilder(MUID(0,0), MUID(0,0), GetCommandManager());
 
-//	m_iPBufferTop = 0;
 	m_Server.SetInvalid();
 
-	InitializeCriticalSection(&m_csRecvLock);
-
-	// 소켓 이벤트 연결
 	m_ClientSocket.SetCallbackContext(this);
 	m_ClientSocket.SetConnectCallback(SocketConnectEvent);
 	m_ClientSocket.SetDisconnectCallback(SocketDisconnectEvent);
@@ -55,11 +49,9 @@ MClient::~MClient()
 {
 	delete m_pCommandBuilder;
 	m_pCommandBuilder = NULL;
-
-	DeleteCriticalSection(&m_csRecvLock);
 }
 
-MClient* MClient::GetInstance(void)
+MClient* MClient::GetInstance()
 {
 	return m_pInstance;
 }
@@ -86,7 +78,6 @@ int MClient::OnConnected(SOCKET sock, MUID* pTargetUID, MUID* pAllocUID, unsigne
 
 		MCommandBuilder* pCmdBuilder = GetCommandBuilder();
 
-		// 암호키 설정
 		MPacketCrypterKey key;
 		MMakeSeedKey(&key, *pTargetUID, *pAllocUID, nTimeStamp);
 		m_ServerPacketCrypter.InitKey(&key);
@@ -293,7 +284,7 @@ bool MClient::OnSockDisconnect(SOCKET sock)
 {
 	return true;
 }
-bool MClient::OnSockRecv(SOCKET sock, char* pPacket, DWORD dwSize)
+bool MClient::OnSockRecv(SOCKET sock, char* pPacket, u32 dwSize)
 {
 	// New Cmd Buffer ////////////////
 	MCommandBuilder* pCmdBuilder = GetCommandBuilder();
@@ -341,85 +332,45 @@ void MClient::OnSockError(SOCKET sock, SOCKET_ERROR_EVENT ErrorEvent, int &Error
 
 }
 
-bool MClient::SocketRecvEvent(void* pCallbackContext, SOCKET sock, char* pPacket, DWORD dwSize)
+bool MClient::SocketRecvEvent(void* pCallbackContext, SOCKET sock, char* pPacket, u32 dwSize)
 {
 	MClient* pClient = (MClient*)pCallbackContext;
-
 	return pClient->OnSockRecv(sock, pPacket, dwSize);
 }
 
 bool MClient::SocketConnectEvent(void* pCallbackContext, SOCKET sock)
 {
-	MClient* pClient = (MClient*)pCallbackContext;
+	DMLog("MClient::SocketConnectEvent %p %p\n",
+		pCallbackContext, reinterpret_cast<void*>(sock));
 
+	MClient* pClient = (MClient*)pCallbackContext;
 	return pClient->OnSockConnect(sock);
 }
 bool MClient::SocketDisconnectEvent(void* pCallbackContext, SOCKET sock)
 {
+	DMLog("MClient::SocketDisconnectEvent %p %p\n",
+		pCallbackContext, reinterpret_cast<void*>(sock));
+
 	MClient* pClient = (MClient*)pCallbackContext;
 	return pClient->OnSockDisconnect(sock);
 }
 
 void MClient::SocketErrorEvent(void* pCallbackContext, SOCKET sock, SOCKET_ERROR_EVENT ErrorEvent, int &ErrorCode)
 {
-	MClient* pClient = (MClient*)pCallbackContext;
+	DMLog("MClient::SocketErrorEvent %p %p %d %d\n",
+		pCallbackContext, reinterpret_cast<void*>(sock), static_cast<int>(ErrorEvent), ErrorCode);
 
+	MClient* pClient = (MClient*)pCallbackContext;
 	pClient->OnSockError(sock, ErrorEvent, ErrorCode);
 }
 
 void MClient::OutputMessage(MZMOMType nType, const char *pFormat,...)
 {
 	va_list args;
-	static char temp[1024];
+	char temp[1024];
 
 	va_start(args, pFormat);
 	vsprintf_safe(temp, pFormat, args);
 	OutputMessage(temp, nType);
 	va_end(args);
-}
-
-
-/////////////////////////////////////////////////////////////////////
-MRingBuffer::MRingBuffer()
-{
-	m_iBufSize = 0;
-	m_Buf = NULL;
-	m_cpBegin = NULL;
-	m_cpEnd = NULL;
-}
-MRingBuffer::MRingBuffer(int iBufSize)
-{
-	m_iBufSize = 0;
-	m_Buf = NULL;
-	m_cpBegin = NULL;
-	m_cpEnd = NULL;
-
-	Reserve(iBufSize);
-}
-
-MRingBuffer::~MRingBuffer()
-{
-	if (m_Buf) delete [] m_Buf;
-}
-
-void MRingBuffer::Reserve(int iBufSize)
-{
-	if (m_Buf) delete [] m_Buf;
-
-	m_Buf = new char[iBufSize];
-	memset(m_Buf, 0, iBufSize);
-
-	m_iBufSize = iBufSize;
-}
-
-bool MRingBuffer::Enqueue(char* cp, int iDataSize)
-{
-		
-
-	return true;
-}
-bool MRingBuffer::Dequeue(char* cpOut, int iDataSize)
-{
-
-	return true;
 }

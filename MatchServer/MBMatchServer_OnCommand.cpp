@@ -114,15 +114,6 @@ bool MBMatchServer::OnCommand(MCommand* pCommand)
 		}
 		break;
 
-	case MC_LOCAL_UPDATE_USE_COUNTRY_FILTER: OnLocalUpdateUseCountryFilter(); break;
-	case MC_LOCAL_GET_DB_IP_TO_COUNTRY : OnLocalGetDBIPtoCountry(); break;
-	case MC_LOCAL_GET_DB_BLOCK_COUNTRY_CODE: OnLocalGetDBBlockCountryCode(); break;
-	case MC_LOCAL_GET_DB_CUSTOM_IP: OnLocalGetDBCustomIP(); break;
-	case MC_LOCAL_UPDATE_IP_TO_COUNTRY: OnLocalUpdateIPtoCountry(); break;
-	case MC_LOCAL_UPDATE_BLOCK_COUTRYCODE: OnLocalUpdateBlockCountryCode(); break;
-	case MC_LOCAL_UPDATE_CUSTOM_IP: OnLocalUpdateCustomIP(); break;
-	case MC_LOCAL_UPDATE_ACCEPT_INVALID_IP: OnLocalUpdateAcceptInvaildIP(); break;
-
 	case MC_REQUEST_RELOAD_CONFIG:
 	{
 		char szFileList[1024] = { 0, };

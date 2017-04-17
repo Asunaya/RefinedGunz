@@ -128,9 +128,9 @@ private:
 	int GetTextLen(ChatMessage &cl, int Pos, int Count);
 	int GetTextLen(const char *Msg, int Count);
 
-	int GetTextLength(MFontR2& Font, const wchar_t *Format, ...);
-	int DrawTextWordWrap(MFontR2& Font, const wchar_t *Str, const D3DRECT &r, u32 Color);
-	void DrawTextN(MFontR2& Font, const wchar_t *Str, const D3DRECT &r, u32 Color, int nLen = -1);
+	int GetTextLength(MFontR2& Font, const wchar_t* Format, ...);
+	int DrawTextWordWrap(MFontR2& Font, const WStringView& Str, const D3DRECT &r, u32 Color);
+	void DrawTextN(MFontR2& Font, const WStringView& Str, const D3DRECT &r, u32 Color);
 
 	void ResetFonts();
 };

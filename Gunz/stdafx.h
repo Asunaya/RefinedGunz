@@ -4,25 +4,12 @@
 
 #define POINTER_64 __ptr64
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-
-#include <winsock2.h>
-#include <mswsock.h>
-
-#include <crtdbg.h>
-
-#include <mmsystem.h>
-#include <shlwapi.h>
-#include <shellapi.h>
-
 #include <stdlib.h>
 #include <malloc.h>
 #include <memory.h>
 #include <tchar.h>
 #include <math.h>
 #include <cstddef>
-#include <comutil.h>
 #include <stdio.h>
 
 #define _QUEST
@@ -38,7 +25,7 @@
 #include <string>
 #include <algorithm>
 
-// 외부 라이브러리
+// d3d9
 #include "d3d9.h"
 #include "d3dx9math.h"
 
@@ -51,6 +38,10 @@
 #include "MRTTI.h"
 #include "MUID.h"
 #include "MemPool.h"
+
+#ifdef GetClassName
+#undef GetClassName
+#endif
 
 // mint
 #include "Mint.h"

@@ -2,39 +2,26 @@
 #include "MDebug.h"
 #include "MLogManager.h"
 
-MLogManager::MLogManager()
+MLogManager::MLogManager() = default;
+MLogManager::~MLogManager() = default;
+
+void MLogManager::InsertLog(const std::string& strLog)
 {
-	InitializeCriticalSection( &m_csLock );
+	m_MLog.push_back(strLog);
 }
 
-
-MLogManager::~MLogManager()
-{
-	DeleteCriticalSection( &m_csLock );
-}
-
-
-void MLogManager::InsertLog( const string& strLog )
-{
-	m_MLog.push_back( strLog );
-}
-
-
-void MLogManager::SafeInsertLog( const string& strLog )
+void MLogManager::SafeInsertLog(const std::string& strLog)
 {
 	Lock();
 	InsertLog( strLog );
 	Unlock();
 }
 
-
 void MLogManager::WriteMLog()
 {
-	vector< string >::iterator it, end;
-	for( it = m_MLog.begin(), end = m_MLog.end(); it != end; ++it )
-		mlog( it->c_str() );
+	for (auto it = m_MLog.begin(), end = m_MLog.end(); it != end; ++it)
+		mlog(it->c_str());
 }
-
 
 void MLogManager::SafeWriteMLog()
 {
@@ -43,14 +30,12 @@ void MLogManager::SafeWriteMLog()
 	Unlock();
 }
 
-
 void MLogManager::SafeReset()
 {
 	Lock();
 	Reset();
 	Unlock();
 }
-
 
 MLogManager& GetLogManager()
 {

@@ -71,11 +71,11 @@ void ZCharacterView::OnDraw(MDrawContext* pDC)
 		srand( GetGlobalTimeMS());
 		int rint = rand() % 10;
 		force.x += rint - 7;
-		force.x = min(max( force.x, 5 ), maxForce * 0.3 );
+		force.x = min(max(force.x, 5.f), maxForce * 0.3f);
 		srand( GetGlobalTimeMS());
 		rint = rand() % (int)(maxForce*0.3);
 		force.y += rint - 4;	
-		force.y = min(max( force.y, 0 ), maxForce );
+		force.y = min(max(force.y, 0.f), maxForce);
  		force.z = -90;
 
 		m_pTVisualMesh.m_pVisualMesh->SetClothForce( force );

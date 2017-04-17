@@ -1,4 +1,7 @@
 #include "stdafx.h"
+
+#ifdef WIN32
+
 #include <windows.h>
 #include "MRegistry.h"
 #include <stdio.h>
@@ -95,8 +98,6 @@ void MRegistry::WriteBinary(HKEY hRegKey, const char* szRegString, const char* p
 	RegCloseKey( hKey );
 }
 
-
-//////////	경로를 직접 서주는 펑션
 bool MRegistry::Read(HKEY hRegKey, const char* szPath, const char* szValueName, char* pOutBuffer, int maxlen)
 {
 	HKEY hKey;
@@ -137,3 +138,4 @@ void MRegistry::Write(HKEY hRegKey, const char* szPath, const char* szValueName,
 	RegCloseKey( hKey );
 }
 
+#endif

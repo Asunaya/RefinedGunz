@@ -1,21 +1,17 @@
-#ifndef _MPDB_H
-#define _MPDB_H
+#pragma once
 
-#include <windows.h>
 #include <string>
 
-using namespace std;
+using DWORD = unsigned long;
+using LPEXCEPTION_POINTERS = struct _EXCEPTION_POINTERS*;
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-//	bool	GetCrashInfo(char* FullPathFileName, DWORD CrashAddress, char* OutInfo);
-	DWORD	GetCrashInfo(LPEXCEPTION_POINTERS exceptionInfo,string& str);
+DWORD GetCrashInfo(LPEXCEPTION_POINTERS exceptionInfo, std::string& str);
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif//_MPDB_H

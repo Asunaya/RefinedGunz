@@ -2,6 +2,7 @@
 #include "MTypes.h"
 #include "MWidget.h"
 #include "Mint.h"
+#include <algorithm>
 
 void MPOINT::Scale(float sx, float sy)
 {
@@ -81,19 +82,19 @@ bool MRECT::Intersect(MRECT* pIntersect, const MRECT& r)
 
 	if (x > r.x) {
 		pIntersect->x = x;
-		pIntersect->w = min(r.x + r.w, x + w) - x;
+		pIntersect->w = std::min(r.x + r.w, x + w) - x;
 	}
 	else {
 		pIntersect->x = r.x;
-		pIntersect->w = min(r.x + r.w, x + w) - r.x;
+		pIntersect->w = std::min(r.x + r.w, x + w) - r.x;
 	}
 	if (y > r.y) {
 		pIntersect->y = y;
-		pIntersect->h = min(r.y + r.h, y + h) - y;
+		pIntersect->h = std::min(r.y + r.h, y + h) - y;
 	}
 	else {
 		pIntersect->y = r.y;
-		pIntersect->h = min(r.y + r.h, y + h) - r.y;
+		pIntersect->h = std::min(r.y + r.h, y + h) - r.y;
 	}
 
 	if (pIntersect->w < 0) return false;

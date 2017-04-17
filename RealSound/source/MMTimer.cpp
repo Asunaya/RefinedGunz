@@ -9,7 +9,11 @@
 */
 #include "stdafx.h"
 #include "MMTimer.h"
-#include "crtdbg.h"
+
+#ifdef WIN32
+
+#include "MWindows.h"
+#include <mmsystem.h>
 
 ////////////////////////////////////////
 // Constructor & Destructor
@@ -35,9 +39,9 @@ void MMTimer::Destroy()
 }
 
 // 콜백함수를 위해 포인터를 두었다.
-BOOL MMTimer::Create (UINT nPeriod, UINT nRes, DWORD dwUser, MMTIMERCALLBACK pfnCallback)
+bool MMTimer::Create (u32 nPeriod, u32 nRes, u32 dwUser, MMTIMERCALLBACK pfnCallback)
 {
-    BOOL bRtn = TRUE;
+    bool bRtn = true;
     
     _ASSERT(pfnCallback);
     _ASSERT(nPeriod > 10);
@@ -48,7 +52,7 @@ BOOL MMTimer::Create (UINT nPeriod, UINT nRes, DWORD dwUser, MMTIMERCALLBACK pfn
     m_dwUser = dwUser;
     m_pfnCallback = pfnCallback;
 
-    if ((m_nIDTimer = timeSetEvent (m_nPeriod, m_nRes, TimeProc, (DWORD) this, TIME_PERIODIC)) == NULL){
+    if ((m_nIDTimer = timeSetEvent (m_nPeriod, m_nRes, TimeProc, (u32) this, TIME_PERIODIC)) == NULL){
         bRtn = FALSE;
     }
 
@@ -56,7 +60,8 @@ BOOL MMTimer::Create (UINT nPeriod, UINT nRes, DWORD dwUser, MMTIMERCALLBACK pfn
 }
 
 // Multimedia 타이머 메시지가 호출될때마다 이 콜백 함수가 불리운다.
-void CALLBACK MMTimer::TimeProc(UINT uID, UINT uMsg, DWORD_PTR dwUser, DWORD_PTR dw1, DWORD_PTR dw2)
+void STDCALL MMTimer::TimeProc(unsigned int uID, unsigned int uMsg,
+	WIN_DWORD_PTR dwUser, WIN_DWORD_PTR dw1, WIN_DWORD_PTR dw2)
 {	    
 	// 콜백함수를 위해 포인터를 두었다.
 	// Callback함수가 static이므로 현재 오브젝트의 pointer를 얻는 방식으로 처리된다.
@@ -66,3 +71,5 @@ void CALLBACK MMTimer::TimeProc(UINT uID, UINT uMsg, DWORD_PTR dwUser, DWORD_PTR
 	// 함수는 MMTIMERCALLBACK의 형을 가졌다.
     (ptimer->m_pfnCallback) (ptimer->m_dwUser);
 }
+
+#endif

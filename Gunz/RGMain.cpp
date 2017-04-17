@@ -24,16 +24,17 @@ inline bool DXErr(HRESULT hr, const char* CallingFunction, const char* DXFunctio
 	if (SUCCEEDED(hr))
 		return false;
 
-	MLog("In %s, %s failed -- error code: %s, description: %s\n", CallingFunction, DXFunction, DXGetErrorString(hr), DXGetErrorDescription(hr));
+	MLog("In %s, %s failed -- error code: %s, description: %s\n",
+		CallingFunction, DXFunction, DXGetErrorString(hr), DXGetErrorDescription(hr));
 
 	return true;
 }
 
-DeferredConstructionWrapper<RGMain> g_RGMain;
+optional<RGMain> g_RGMain;
 
-RGMain& GetRGMain() { return g_RGMain.Get(); }
-void CreateRGMain() { g_RGMain.Construct(); }
-void DestroyRGMain() { g_RGMain.Destroy(); }
+RGMain& GetRGMain() { return g_RGMain.value(); }
+void CreateRGMain() { g_RGMain.emplace(); }
+void DestroyRGMain() { g_RGMain.reset(); }
 
 void RGMain::OnAppCreate()
 {
@@ -46,8 +47,8 @@ void RGMain::OnAppCreate()
 
 void RGMain::OnCreateDevice()
 {
-	m_Chat.Construct("Arial", 16);
-	m_Chat.Get().SetBackgroundColor(ZGetConfiguration()->GetChatBackgroundColor());
+	m_Chat.emplace("Arial", 16);
+	m_Chat.value().SetBackgroundColor(ZGetConfiguration()->GetChatBackgroundColor());
 
 #ifdef VOICECHAT
 	m_VoiceChat.OnCreateDevice();
@@ -183,14 +184,10 @@ std::pair<PlayerFoundStatus, ZCharacter*> FindSinglePlayer(const char * NameSubs
 }
 
 RGMain::RGMain() = default;
-
-RGMain::~RGMain()
-{
+RGMain::~RGMain() {
 #ifdef PORTAL
 	g_pPortal.reset();
 #endif
-	if (m_Chat.IsConstructed())
-		m_Chat.Destroy();
 }
 
 void RGMain::OnUpdate(double Elapsed)

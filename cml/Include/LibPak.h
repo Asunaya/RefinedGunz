@@ -11,13 +11,7 @@
 
 	All copyright (c) 1997, MAIET entertainment software
 */
-#include <windows.h>
-
 #include "CMList.h"
-
-#ifdef _DEBUG
-	#include <crtdbg.h>
-#endif
 
 #ifndef __LIBPAK_HEADER__
 #define __LIBPAK_HEADER__
@@ -26,29 +20,33 @@
 		MemoryMappedFile
    -------------------------------------------------------- */
 
+#define FILE_BEGIN           0
+#define FILE_CURRENT         1
+#define FILE_END             2
+
 class MemoryMappedFile {
 private:
-	HANDLE	m_fileHandle;	// file handler
-	HANDLE	m_mapHandle;	// mapped File handler
+	void*	m_fileHandle;	// file handler
+	void*	m_mapHandle;	// mapped File handler
 
-	DWORD	m_nFileSize;	// file size of memory mapped file
-	LPBYTE	m_lpPointer;	// memory pointer of file head
+	u32	m_nFileSize;	// file size of memory mapped file
+	u8*	m_lpPointer;	// memory pointer of file head
 
-	BOOL	m_bOpened;
-	DWORD	m_nPosition;	// current memory position
+	bool	m_bOpened;
+	u32	m_nPosition;	// current memory position
 public:
-	BOOL IsOpen(){
+	bool IsOpen(){
 		return m_bOpened; 
 	}
 
 	MemoryMappedFile(){
-		m_lpPointer = NULL;
+		m_lpPointer = nullptr;
 		m_nPosition = 0;
 		m_nFileSize = 0;
 
-		m_fileHandle = NULL;
-		m_mapHandle = NULL;
-		m_bOpened = FALSE;
+		m_fileHandle = nullptr;
+		m_mapHandle = nullptr;
+		m_bOpened = false;
 	}
 
 	~MemoryMappedFile(){
@@ -57,60 +55,59 @@ public:
 
 	// open memory mapped file.
 	//	Modified by Leejangho ( 98-01-10 5:30:04 ¿ÀÀü )
-	//		LPBYTE Open( char *lpszFileName )
-	LPBYTE Open( const char *lpszFileName , BOOL bReadOnly=TRUE );
+	//		u8* Open( char *lpszFileName )
+	u8* Open(const char *lpszFileName, bool bReadOnly = true);
 	//	Modified by ...
 
 	// close memory mapped file.
 	void Close(void);
 	
 	// get size of memory mapped file.
-	DWORD GetFileSize(){ return m_nFileSize; }
+	u32 GetFileSize(){ return m_nFileSize; }
 	
 	// get current file pointer
-	LPBYTE GetFilePointer(){ return (m_lpPointer + m_nPosition); }
-	LPBYTE GetStartFilePointer(){ return m_lpPointer; }
+	u8* GetFilePointer(){ return (m_lpPointer + m_nPosition); }
+	u8* GetStartFilePointer(){ return m_lpPointer; }
 	
 	// set current file pointer
-	BOOL SetFilePointer(DWORD lDistanceToMove, DWORD dwMoveMethod = FILE_CURRENT){
+	bool SetFilePointer(u32 lDistanceToMove, u32 dwMoveMethod = FILE_CURRENT){
 		if( dwMoveMethod == FILE_BEGIN ){
 			if( lDistanceToMove < m_nFileSize ){
 				m_nPosition = lDistanceToMove;
-				return TRUE;
+				return true;
 			}
 		} else if( dwMoveMethod == FILE_END ){
 			if( m_nFileSize - lDistanceToMove > 0 ){
 				m_nPosition = (m_nFileSize - 1) - lDistanceToMove;
-				return TRUE;
+				return true;
 			}
 		} else {	// FILE_CURRENT
 			if( m_nPosition + lDistanceToMove < m_nFileSize ){
 				m_nPosition += lDistanceToMove;
-				return TRUE;
+				return true;
 			}			
 		}
-		return FALSE;
+		return false;
 	}
 
 	// read a byte from memory mapped file
-	BYTE ReadByte(){ 
+	u8 ReadByte(){ 
 		m_nPosition ++;
 		return *(m_lpPointer+m_nPosition); 
 	}
 
 	// read data from memory mapped file
 	// return value : actual reading data length
-	DWORD ReadFile(LPVOID lpBuffer, DWORD dwSize){
-		DWORD dwReadSize;
+	u32 ReadFile(void* lpBuffer, u32 dwSize){
+		u32 dwReadSize;
 
-#ifdef _DEBUG
-		_ASSERT(lpBuffer != NULL);
-#endif
+		assert(lpBuffer != nullptr);
+
 		if( m_nPosition + dwSize >= m_nFileSize ){
 			dwReadSize = m_nFileSize - 1 - m_nPosition;
 		} else dwReadSize = dwSize;
 
-		CopyMemory(lpBuffer, m_lpPointer+m_nPosition, dwReadSize);
+		memcpy(lpBuffer, m_lpPointer+m_nPosition, dwReadSize);
 		m_nPosition += dwReadSize;
 
 		return dwReadSize;
@@ -160,17 +157,16 @@ class Package;
 
 class PakData {
 private:
-	LPBYTE m_lpPointer;		// start pointer of extract data
-	DWORD m_nPosition;		// current position
+	u8* m_lpPointer;		// start pointer of extract data
+	u32 m_nPosition;		// current position
 
 	unsigned long m_ulSize;	// block size
 
 	// set start pointer (m_lpPointer) and sizes
-	void ResetPakData(LPBYTE p, unsigned long ulSize){
-#ifdef _DEBUG
-		_ASSERT(p!=NULL);
-		_ASSERT(ulSize!=0);
-#endif
+	void ResetPakData(u8* p, unsigned long ulSize){
+		assert(p!=nullptr);
+		assert(ulSize!=0);
+
 		m_lpPointer = p;
 		m_ulSize = ulSize;
 		m_nPosition = 0;
@@ -178,50 +174,49 @@ private:
 
 public:
 	// Constructor
-	PakData(LPBYTE p, unsigned long ulSize){
+	PakData(u8* p, unsigned long ulSize){
 		ResetPakData(p, ulSize);
 	}
 
 	unsigned long GetFileSize(){ return m_ulSize; }
-	LPBYTE GetStartFilePointer(){ return m_lpPointer; }
+	u8* GetStartFilePointer(){ return m_lpPointer; }
 
 	// get current file pointer
-	LPBYTE GetFilePointer(){ return (m_lpPointer + m_nPosition); }
+	u8* GetFilePointer(){ return (m_lpPointer + m_nPosition); }
 	
 	// set current file pointer
-	BOOL SetFilePointer(DWORD lDistanceToMove, DWORD dwMoveMethod = FILE_CURRENT){
+	bool SetFilePointer(u32 lDistanceToMove, u32 dwMoveMethod = FILE_CURRENT){
 		if( dwMoveMethod == FILE_BEGIN ){
 			if( lDistanceToMove < m_ulSize ){
 				m_nPosition = lDistanceToMove;
-				return TRUE;
+				return true;
 			}
 		} else if( dwMoveMethod == FILE_END ){
 			if( m_ulSize - lDistanceToMove > 0 ){
 				m_nPosition = (m_ulSize - 1) - lDistanceToMove;
-				return TRUE;
+				return true;
 			}
 		} else {	// FILE_CURRENT
 			if( m_nPosition + lDistanceToMove < m_ulSize ){
 				m_nPosition += lDistanceToMove;
-				return TRUE;
+				return true;
 			}			
 		}
-		return FALSE;
+		return false;
 	}
 
 	// read data from pak data
 	// return value : actual reading data length
-	DWORD ReadFile(LPVOID lpBuffer, DWORD dwSize){
-		DWORD dwReadSize;
+	u32 ReadFile(void* lpBuffer, u32 dwSize){
+		u32 dwReadSize;
 
-#ifdef _DEBUG
-		_ASSERT(lpBuffer != NULL);
-#endif
+		assert(lpBuffer != nullptr);
+
 		if( m_nPosition + dwSize > m_ulSize ){
 			dwReadSize = m_ulSize - 1 - m_nPosition;
 		} else dwReadSize = dwSize;
 
-		CopyMemory(lpBuffer, m_lpPointer+m_nPosition, dwReadSize);
+		memcpy(lpBuffer, m_lpPointer+m_nPosition, dwReadSize);
 		m_nPosition += dwReadSize;
 
 		return dwReadSize;
@@ -251,7 +246,7 @@ public:
 		Close();
 	}
 
-	BOOL Open( char *lpszFilename );
+	bool Open( char *lpszFilename );
 	void Close();
 
 	// get PAK data object from package file

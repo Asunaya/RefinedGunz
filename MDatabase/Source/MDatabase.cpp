@@ -1,5 +1,5 @@
-#include "StdAfx.h"
-#include ".\mdatabase.h"
+#include "stdafx.h"
+#include "MDatabase.h"
 
 MDatabase::MDatabase(void) : m_fnLogCallback( 0 )
 {
@@ -105,7 +105,7 @@ void MDatabase::ExecuteSQL( LPCTSTR lpszSQL )
 }
 
 
-void MDatabase::WriteLog( const string& strLog )
+void MDatabase::WriteLog( const std::string& strLog )
 {
 	if( 0 != m_fnLogCallback  )
 	{

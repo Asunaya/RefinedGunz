@@ -1,7 +1,5 @@
 #include "stdafx.h"
 #include "MUID.h"
-#include <windows.h>
-
 
 MUID MUID::Invalid(void)
 {
@@ -54,30 +52,3 @@ MUIDRANGE MUIDRefMap::GetReservedCount(void)
 	r.End = m_CurrentMUID;
 	return r;
 }
-
-/*
-MUIDRefArray::MUIDRefArray(void)
-{
-	m_CurrentMUID.SetZero();
-	push_back(NULL);
-}
-MUIDRefArray::~MUIDRefArray(void)
-{
-}
-
-MUID MUIDRefArray::Generate(void* pRef)
-{
-	_ASSERT(size()==m_CurrentMUID.Low);
-	_ASSERT(1000*1000<m_CurrentMUID.Low);	// 1M 보다 작게 설정한다.
-
-	m_CurrentMUID.Increase();
-	push_back(pRef);
-
-	return m_CurrentMUID;
-}
-void* MUIDRefArray::GetRef(MUID& uid)
-{
-	if(uid.Low<0 || uid.Low>=size()) return NULL;
-	return at(uid.Low);
-}
-*/

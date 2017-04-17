@@ -385,7 +385,7 @@ bool ZApplication::OnCreate(ZLoadingProgress *pLoadingProgress)
 
 	BEGIN_;
 
-	if(m_WeaponMeshMgr.LoadXmlList("model/weapon.xml") == -1) 
+	if(m_WeaponMeshMgr.LoadXmlList("model/weapon.xml") == -1)
 		return false;
 
 	END_("WeaponMesh Loading");

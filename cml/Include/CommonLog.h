@@ -5,11 +5,10 @@
 	Programming by Joongpil Cho
 	All copyright (c) 1999, MAIET entertainment
 */
+#pragma once
+
 #include <stdio.h>
-
-#ifndef __COMMON_HEADER__
-#define __COMMON_HEADER__
-
+#include "MFile.h"
 
 // Base Class of General Log System
 class CMLog {
@@ -44,7 +43,7 @@ public :
 	}
 
 	virtual void Init(){
-		DeleteFile(m_pFileName);
+		MFile::DeleteFile(m_pFileName);
 	}
 
 	virtual void Shutdown(){
@@ -82,15 +81,8 @@ public :
 		//DO NOTHING
 	}
 	virtual void Print( const char *pFormat ){
-		OutputDebugString(pFormat);
 	}
 };
 
-
-
 void SetLogHandler( CMLog *pLog );
 void Log( const char *pFormat, ... );
-
-
-
-#endif // __COMMON_HEADER__

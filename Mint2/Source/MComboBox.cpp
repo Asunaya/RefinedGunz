@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "MComboBox.h"
 #include "Mint.h"
+#include <algorithm>
 
 MComboListBox::MComboListBox(MWidget* pParent, MListener* pListener)
 : MListBox(pParent, pListener)
@@ -203,7 +204,7 @@ bool MComboBox::OnCommand(MWidget* pWindow, const char* szMessage)
 		else {
 		
 			int nFrameHeight = m_pListBox->GetRect().h - m_pListBox->GetClientRect().h;
- 			int nDropHeight	 = min(m_nDropHeight,m_pListBox->GetItemHeight()*m_pListBox->GetCount()+nFrameHeight);
+			int nDropHeight = std::min(m_nDropHeight, m_pListBox->GetItemHeight()*m_pListBox->GetCount() + nFrameHeight);
 
 			bool bDropUnder = true;
 

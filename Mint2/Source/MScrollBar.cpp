@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "MScrollBar.h"
 #include "MColorTable.h"
+#include <algorithm>
 
 #define MSCROLLBAR_NAME				"Scroll Bar"
 
@@ -188,7 +189,7 @@ int MScrollBar::GetThumbSize()
 	int nDiff = m_nMaxValue-m_nMinValue;
 	int nMoveRange = GetMoveRange();
 	int nThumbSize = nMoveRange - nDiff * 3;
-	return max(nThumbSize, MSCROLLBAR_THUMB_HEIGHT);
+	return std::max(nThumbSize, MSCROLLBAR_THUMB_HEIGHT);
 }
 
 void MScrollBar::RecalcThumbPos()

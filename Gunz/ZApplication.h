@@ -4,7 +4,6 @@
 #include "ZSoundEngine.h"
 #include "ZDirectInput.h"
 #include "MDataChecker.h"
-#include "ZLanguageConf.h"
 #include "ZTimer.h"
 #include "ZEmblemInterface.h"
 #include "ZStageInterface.h"

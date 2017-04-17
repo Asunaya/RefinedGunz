@@ -1,13 +1,17 @@
 #include "stdafx.h"
-#include <winsock2.h>
 #include "MInet.h"
+#include <stdio.h> 
+#include "MDebug.h"
+#include <mutex>
+
+#ifdef WIN32
 #include <windows.h> 
 #include <wininet.h> 
-#include <stdio.h> 
-
+#endif
 
 bool MHTTP_Get(const char *szUrl, char *out, int nOutLen)
 {
+#ifdef WIN32
     HINTERNET h, h2; 
     unsigned long len, i = 0; 
 
@@ -29,82 +33,55 @@ bool MHTTP_Get(const char *szUrl, char *out, int nOutLen)
 
     InternetCloseHandle(h); 
 	return false;
-}
-
-
-
-
-//////////////////////////////////////////////////////////////////////////////
-// MHttpThread ///////////////////////////////////////////////////////////////
-MHttpThread::MHttpThread()
-{
-	m_bActive = false;
-	m_pCallbackContext = NULL;
-	m_fnRecvCallback = NULL;
-}
-
-MHttpThread::~MHttpThread()
-{
-
-
+#else
+	return false;
+#endif
 }
 
 void MHttpThread::Run()
 {
 	m_bActive = true;
 
-	WSAEVENT EventArray[WSA_MAXIMUM_WAIT_EVENTS];
-	WORD wEventIndex = 0;
-
-	DWORD result;
-
-	EventArray[wEventIndex++] = m_QueryEvent.GetEvent();
-	EventArray[wEventIndex++] = m_KillEvent.GetEvent();
+	MSignalEvent* EventArray[]{
+		&m_QueryEvent,
+		&m_KillEvent,
+	};
 
 	bool bEnd = false;
 	while (!bEnd)
 	{
-		result = WSAWaitForMultipleEvents(wEventIndex, EventArray, FALSE, WSA_INFINITE, FALSE);
-		if ((result == WSA_WAIT_FAILED) || (result == WSA_WAIT_TIMEOUT)) continue;
+		auto WaitResult = WaitForMultipleEvents(EventArray, MSync::Infinite);
+		if (WaitResult == MSync::WaitFailed ||
+			WaitResult == MSync::WaitTimeout) {
+			continue;
+		}
 
-		switch (result)
+		switch (WaitResult)
 		{
-		case WAIT_OBJECT_0:			//  Query Event
-			{
-				FlushQuery();
-				m_QueryEvent.ResetEvent();
-			}
+		case 0: //  Query Event
+			FlushQuery();
+			m_QueryEvent.ResetEvent();
 			break;
 
-		case WAIT_OBJECT_0 + 1:		// Kill Event
-			{
-				bEnd = true;
-				m_KillEvent.ResetEvent();
-			}
+		case 1: // Kill Event
+			bEnd = true;
+			m_KillEvent.ResetEvent();
 			break;
 
 		default:
-			{
-				OutputDebugString("<SOCKETTHREAD_ERROR> exceptional case </SOCKETTHREAD_ERROR>\n");
-				bEnd = true;
-			}
+			MLog("MHttpThread::Run -- Exceptional case %d\n", WaitResult);
+			bEnd = true;
 			break;
 		}	// switch
 
 	}	// while
 
 	m_bActive = false;
-
-	ExitThread(0);
 }
 
 void MHttpThread::Create()
 {
-	InitializeCriticalSection(&m_csQueryLock);
-
 	MThread::Create();
-
-	memset(m_szRecvBuf, 0, sizeof(m_szRecvBuf));
 }
 
 void MHttpThread::Destroy()
@@ -113,17 +90,16 @@ void MHttpThread::Destroy()
 	m_KillEvent.SetEvent(); 
 
 	MThread::Destroy();
-
-	DeleteCriticalSection(&m_csQueryLock);
 }
 
-void MHttpThread::Query(char* szQuery)
+void MHttpThread::Query(const char* szQuery)
 {
 	if (!m_bActive) return;
 
-	LockQuery();
-	m_TempQueryList.push_back(string(szQuery));
-	UnlockQuery();
+	{
+		std::lock_guard<MCriticalSection> lock{ m_csQueryLock };
+		m_TempQueryList.push_back(szQuery);
+	}
 
 	m_QueryEvent.SetEvent();
 }
@@ -132,19 +108,19 @@ void MHttpThread::FlushQuery()
 {
 	if (!m_bActive) return;
 
-	LockQuery();
-	while (!m_TempQueryList.empty())
 	{
-		list<string>::iterator itor = m_TempQueryList.begin();
-		m_QueryList.push_back(*itor);
-		m_TempQueryList.erase(itor);
+		std::lock_guard<MCriticalSection> lock{ m_csQueryLock };
+		while (!m_TempQueryList.empty())
+		{
+			auto itor = m_TempQueryList.begin();
+			m_QueryList.push_back(*itor);
+			m_TempQueryList.erase(itor);
+		}
 	}
-	UnlockQuery();
 
-
-	while(!m_QueryList.empty())
+	while (!m_QueryList.empty())
 	{
-		list<string>::iterator itor = m_QueryList.begin();
+		auto itor = m_QueryList.begin();
 		const char* szQuery = (*itor).c_str();
 
 		MHTTP_Get(szQuery, m_szRecvBuf, HTTP_BUFSIZE);
@@ -157,25 +133,16 @@ void MHttpThread::FlushQuery()
 		m_QueryList.erase(m_QueryList.begin());
 	}
 }
+
 void MHttpThread::ClearQuery()
 {
-	LockQuery();
+	std::lock_guard<MCriticalSection> lock{ m_csQueryLock };
 	m_TempQueryList.clear();
 	m_QueryList.clear();
-	UnlockQuery();
-}
-//////////////////////////////////////////////////////////////////////////////
-// MHttp /////////////////////////////////////////////////////////////////////
-MHttp::MHttp()
-{
-
 }
 
-MHttp::~MHttp()
-{
-	Destroy();
-}
-
+MHttp::MHttp() = default;
+MHttp::~MHttp() { Destroy(); }
 
 bool MHttp::Create()
 {
@@ -189,13 +156,8 @@ void MHttp::Destroy()
 	m_HttpThread.Destroy();
 }
 
-
-void MHttp::Query(char* szQuery)
+void MHttp::Query(const char* szQuery)
 {
-//	char szRealQuery[1024];
-//	strcpy_safe(szRealQuery, SERVER_URL);
-//	strcat(szRealQuery, szQuery);
-
 	m_HttpThread.Query(szQuery);
 }
 
@@ -205,7 +167,6 @@ void MHttp::Clear()
 	m_HttpThread.m_fnRecvCallback = NULL;
 
 	m_HttpThread.ClearQuery();
-
 }
 
 void MHttp::ReplaceBlank(char* szOut, char* szSrc)
@@ -227,6 +188,3 @@ void MHttp::ReplaceBlank(char* szOut, char* szSrc)
 	}
 	szOut[nOutIdx] = '\0';
 }
-
-
-

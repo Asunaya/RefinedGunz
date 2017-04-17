@@ -19,6 +19,15 @@ struct ScreenSpaceTexVertex
 
 constexpr u32 ScreenSpaceTexFVF = D3DFVF_XYZRHW | D3DFVF_TEX1;
 
+struct ScreenSpaceColorTexVertex
+{
+	v4 pos;
+	u32 color;
+	float tu, tv;
+};
+
+constexpr u32 ScreenSpaceColorTexFVF = D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1;
+
 struct WorldSpaceColorVertex
 {
 	float x, y, z;

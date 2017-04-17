@@ -1,8 +1,6 @@
 #include "stdafx.h"
 
 #include "ZGame.h"
-#include <windows.h>
-
 #include "MZFileSystem.h"
 #include "RealSpace2.h"
 #include "FileInfo.h"
@@ -168,8 +166,6 @@ float	g_fFarZ = DEFAULT_FAR_Z;
 
 MUID tempUID(0, 0);
 MUID g_MyChrUID(0, 0);
-
-#define IsKeyDown(key) ((GetAsyncKeyState(key) & 0x8000)!=0)
 
 bool IsMyCharacter(ZObject* pObject)
 {
@@ -431,8 +427,7 @@ bool ZGame::Create(MZFileSystem *pfs, ZLoadingProgress *pLoading )
 
 	m_Match.Create();
 	
-	D3DMATERIAL9 mtrl;
-	ZeroMemory( &mtrl, sizeof(D3DMATERIAL9) );
+	D3DMATERIAL9 mtrl{};
 
 	mtrl.Diffuse.r = 1.0f;
 	mtrl.Diffuse.g = 1.0f;
@@ -449,7 +444,6 @@ bool ZGame::Create(MZFileSystem *pfs, ZLoadingProgress *pLoading )
 	m_fTime=0.f;
 	m_bReserveObserver = false;
 
-	
 #ifdef _BIRDSOUND
 	ZApplication::GetSoundEngine()->OpenMusic(BGMID_BATTLE);
 	ZApplication::GetSoundEngine()->PlayMusic();
@@ -469,8 +463,8 @@ bool ZGame::Create(MZFileSystem *pfs, ZLoadingProgress *pLoading )
 	ZGetScreenEffectManager()->SetGuageExpFromMyInfo();
 
 #ifndef _BIRDSOUND
-	ZGetSoundEngine()->SetEffectVolume( Z_AUDIO_EFFECT_VOLUME );
-	ZGetSoundEngine()->SetMusicVolume( Z_AUDIO_BGM_VOLUME );
+	ZGetSoundEngine()->SetEffectVolume(Z_AUDIO_EFFECT_VOLUME);
+	ZGetSoundEngine()->SetMusicVolume(Z_AUDIO_BGM_VOLUME);
 #endif
 
 	// Net init
@@ -481,18 +475,22 @@ bool ZGame::Create(MZFileSystem *pfs, ZLoadingProgress *pLoading )
 	ZGetInitialLoading()->SetPercentage( 100.f );
 	ZGetInitialLoading()->Draw( MODE_DEFAULT, 0 , true );
 
-
 #ifndef _BIRDSOUND
 	for (auto& AS : GetWorld()->GetBsp()->GetAmbSndList())
 	{
-		if( AS.itype & AS_AABB)
+		const auto Is2D = (AS.itype & AS_2D) == AS_2D;
+		if (AS.itype & AS_AABB)
+		{
 			ZGetSoundEngine()->SetAmbientSoundBox(AS.szSoundName,
 				AS.min, AS.max,
-				(AS.itype&AS_2D)?true:false );
-		else if( AS.itype & AS_SPHERE )
+				Is2D);
+		}
+		else if (AS.itype & AS_SPHERE)
+		{
 			ZGetSoundEngine()->SetAmbientSoundSphere(AS.szSoundName,
 				AS.center, AS.radius,
-				(AS.itype&AS_2D)?true:false );
+				Is2D);
+		}
 	}
 #endif
 
@@ -3949,8 +3947,8 @@ void ZGame::PostPeerPingInfo()
 
 		unsigned long nTimeStamp = GetTickTime();
 		MMatchPeerInfoList* pPeers = ZGetGameClient()->GetPeers();
-		for (MMatchPeerInfoList::iterator itor = pPeers->begin(); itor != pPeers->end(); ++itor) {
-			MMatchPeerInfo* pPeerInfo = (*itor).second;
+		for (auto* pPeerInfo : MakePairValueAdapter(pPeers->MUIDMap))
+		{
 			if (pPeerInfo->uidChar != ZGetGameClient()->GetPlayerUID()) {
 				_ASSERT(pPeerInfo->uidChar != MUID(0,0));
 
@@ -4544,10 +4542,8 @@ void ZGame::ConfigureCharacter(const MUID& uidChar, MMatchTeam nTeam, unsigned c
 
 void ZGame::RefreshCharacters()
 {
-	for (MMatchPeerInfoList::iterator itor = ZGetGameClient()->GetPeers()->begin();
-		itor != ZGetGameClient()->GetPeers()->end(); ++itor)
+	for (auto* pPeerInfo : MakePairValueAdapter(ZGetGameClient()->GetPeers()->MUIDMap))
 	{
-		MMatchPeerInfo* pPeerInfo = (*itor).second;
 		ZCharacter* pCharacter = m_CharacterManager.Find(pPeerInfo->uidChar);
 
 		if (!pCharacter) {

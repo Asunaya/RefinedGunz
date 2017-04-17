@@ -1,21 +1,17 @@
 #pragma once
 
-/////////////////////////////////////////////////////////////////////////
-// Purpose		: Blocking 작업을 여러 쓰레드로 나눠 Async 스럽게 굴린다.
-// Last Update	: 2004-02-04 
-
 #include <deque>
 #include <algorithm>
 #include <functional>
 #include <mutex>
-
+#include "GlobalTypes.h"
+#include "MSync.h"
 
 enum MASYNC_RESULT {
 	MASYNC_RESULT_SUCCEED,
 	MASYNC_RESULT_FAILED,
 	MASYNC_RESULT_TIMEOUT
 };
-
 
 class MAsyncJob {
 protected:
@@ -46,15 +42,12 @@ public:
 	virtual void Run(void* pContext) = 0;
 };
 
-class MAsyncJobList final : private std::deque<MAsyncJob*> {
+class MAsyncJobList : private std::deque<MAsyncJob*> {
 protected:
-	CRITICAL_SECTION	m_csLock;
+	MCriticalSection m_csLock;
 public:
-	MAsyncJobList()				{ InitializeCriticalSection(&m_csLock); }
-	~MAsyncJobList()	{ DeleteCriticalSection(&m_csLock); }
-
-	void Lock()		{ EnterCriticalSection(&m_csLock); }
-	void Unlock()	{ LeaveCriticalSection(&m_csLock); }
+	void Lock()		{ m_csLock.lock(); }
+	void Unlock()	{ m_csLock.unlock(); }
 
 	auto GetBeginItorUnsafe()	{ return begin(); }
 	auto GetEndItorUnsafe()		{ return end(); }
@@ -81,36 +74,30 @@ public:
 
 #define MAX_THREADPOOL_COUNT 10
 
+using EXCEPTION_POINTERS = struct _EXCEPTION_POINTERS;
+
 class MAsyncProxy final {
 protected:
-	HANDLE				m_hEventShutdown;
-	HANDLE				m_hEventFetchJob;
+	MSignalEvent EventShutdown;
+	MSignalEvent EventFetchJob;
 
-	int					m_nThreadCount;
-	HANDLE				m_ThreadPool[MAX_THREADPOOL_COUNT];
-
-	MAsyncJobList		m_WaitQueue;
-	MAsyncJobList		m_ResultQueue;
+	MAsyncJobList WaitQueue;
+	MAsyncJobList ResultQueue;
 
 	std::deque<std::function<void()>> GenericJobs;
 	std::mutex GenericJobMutex;
 
-	CRITICAL_SECTION	m_csCrashDump;
-	
-protected:
-	HANDLE GetEventShutdown()	{ return m_hEventShutdown; }
-	HANDLE GetEventFetchJob()	{ return m_hEventFetchJob; }
+	MCriticalSection csCrashDump;
 
-	static DWORD WINAPI WorkerThread(LPVOID pJobContext);
+	void WorkerThread();
 	void OnRun();
 
 public:
-	MAsyncProxy();
-	bool Create(int nThreadCount);
+	bool Create(int ThreadCount);
 	void Destroy();
 	
-	int GetWaitQueueCount()		{ return m_WaitQueue.GetCount(); }
-	int GetResultQueueCount()	{ return m_ResultQueue.GetCount(); }
+	int GetWaitQueueCount()		{ return WaitQueue.GetCount(); }
+	int GetResultQueueCount()	{ return ResultQueue.GetCount(); }
 
 	void PostJob(MAsyncJob* pJob);
 	template <typename T>
@@ -119,13 +106,12 @@ public:
 		std::lock_guard<std::mutex> lock(GenericJobMutex);
 		GenericJobs.emplace_back(std::forward<T>(fn));
 	}
-	MAsyncJob* GetJobResult()	{
-		MAsyncJob* pJob = NULL;
-		m_ResultQueue.Lock();
-			pJob = m_ResultQueue.GetJobUnsafe();
-		m_ResultQueue.Unlock();
+	MAsyncJob* GetJobResult() {
+		ResultQueue.Lock();
+			auto pJob = ResultQueue.GetJobUnsafe();
+		ResultQueue.Unlock();
 		return pJob;
 	}
 
-	DWORD CrashDump( PEXCEPTION_POINTERS ExceptionInfo );
+	u32 CrashDump(EXCEPTION_POINTERS* ExceptionInfo);
 };

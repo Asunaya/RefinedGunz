@@ -1,18 +1,10 @@
-#ifndef _MPAGEARRAY_H
-#define _MPAGEARRAY_H
-
-//#pragma once
+#pragma once
 
 #include <vector>
 #include <list>
 #include <queue>
 #include <functional>
-using namespace std;
 
-#include <crtdbg.h>
-
-
-//// PageArray 에 삽입되는 데이터에 Index를 기억하는 용도로 사용.
 class MPageArrayCursor {
 protected:
 	int		m_nIndex;
@@ -26,12 +18,11 @@ public:
 
 template<class T>
 class MPageArray {
-//protected:
 public:
 	int				m_nPageSize;
 	int				m_nMaxIndex;
-	vector<T>		m_Array;
-	priority_queue< int,vector<int>,greater<int> >	m_UnusedQueue;
+	std::vector<T>		m_Array;
+	std::priority_queue<int, std::vector<int>, std::greater<int>> m_UnusedQueue;
 
 public:
 	MPageArray() 
@@ -44,7 +35,7 @@ public:
 		m_Array.clear();
 	}
 
-	void Reserve(int nPageSize, int nTotalSize)	// 마지막 Page를 다 못채우고 끝날경우대비 여분을둔다.
+	void Reserve(int nPageSize, int nTotalSize)
 	{
 		m_nPageSize = nPageSize;
 		
@@ -61,9 +52,8 @@ public:
 			m_Array[i] = 0;
 			m_UnusedQueue.push(i);
 		}
-		for(int j=i; j<nReserveSize; j++) {	// 잉여분의 초기화
+		for(int j=i; j<nReserveSize; j++) {
 			m_Array[j] = 0;
-//			m_UnusedQueue.push(j);
 		}
 	}
 
@@ -123,6 +113,3 @@ public:
 		}
 	}
 };
-
-
-#endif

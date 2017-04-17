@@ -3,16 +3,10 @@
 #include "MDebug.h"
 #include "MUtil.h"
 #include "MLocatorConfig.h"
+#include "MTime.h"
 
-MLocatorStatistics::MLocatorStatistics() : m_dwCountryCodeCacheHitMissCount( 0 ), m_dwInvalidIPCount( 0 ), m_dwLastUpdatedTime( timeGetTime() )
-	,m_dwCountryCodeCheckCount( 0 ), m_dwBlockCount( 0 ), m_dwBlockCountryCodeHitCount( 0 )
-{
-}
-
-
-MLocatorStatistics::~MLocatorStatistics()
-{
-}
+MLocatorStatistics::MLocatorStatistics() = default;
+MLocatorStatistics::~MLocatorStatistics() = default;
 
 
 void MLocatorStatistics::Reset()
@@ -29,7 +23,7 @@ void MLocatorStatistics::Reset()
 }
 
 
-void MLocatorStatistics::IncreaseCountryStatistics( const string& strCountryCode3, const int nCount )
+void MLocatorStatistics::IncreaseCountryStatistics( const std::string& strCountryCode3, const int nCount )
 {
 	if( strCountryCode3.empty() || (3 < strCountryCode3.length()) ) 
 		return;
@@ -109,7 +103,7 @@ void MLocatorStatistics::DumpSelfLog()
 }
 
 
-void MLocatorStatistics::InitInsertCountryCode( const string& strCountryCode3 )
+void MLocatorStatistics::InitInsertCountryCode( const std::string& strCountryCode3 )
 {
 	if( strCountryCode3.empty() || (3 < strCountryCode3.length()) ) 
 		return;

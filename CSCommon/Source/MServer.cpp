@@ -7,6 +7,7 @@
 #include "MErrorTable.h"
 #include "MCRC32.h"
 #include "MMatchUtil.h"
+#include "MTime.h"
 
 static int g_LogCommObjectCreated = 0;
 static int g_LogCommObjectDestroyed = 0;
@@ -26,7 +27,7 @@ void __cdecl RCPLog(const char *pFormat,...)
 		szBuf[nEnd] = NULL;
 		strcat_safe(szBuf, "\n");
 	}
-	OutputDebugString(szBuf);
+	DMLog(szBuf);
 }
 
 MServer::MServer()
@@ -39,15 +40,11 @@ MServer::MServer()
 
 MServer::~MServer() = default;
 
-bool MServer::Create(int nPort, const bool bReuse )
+bool MServer::Create(int nPort, const bool bReuse)
 {
-	InitializeCriticalSection(&m_csSafeCmdQueue);
-	InitializeCriticalSection(&m_csCommList);
-	InitializeCriticalSection(&m_csAcceptWaitQueue);
-	
 	bool bResult = true;
 
-	if(MCommandCommunicator::Create()==false) 
+	if (MCommandCommunicator::Create() == false)
 	{
 		mlog( "MServer::Create - MCommandCommunicator::Create()==false\n" );
 		bResult = false;
@@ -79,10 +76,6 @@ void MServer::Destroy(void)
 	UnlockCommList();
 
 	MCommandCommunicator::Destroy();
-
-	DeleteCriticalSection(&m_csAcceptWaitQueue);
-	DeleteCriticalSection(&m_csCommList);
-	DeleteCriticalSection(&m_csSafeCmdQueue);
 }
 
 int MServer::GetCommObjCount()	
@@ -132,7 +125,7 @@ void MServer::SendCommand(MCommand* pCommand)
 {
 	_ASSERT(pCommand->GetReceiverUID().High || pCommand->GetReceiverUID().Low);
 
-	DWORD nClientKey = NULL;
+	u32 nClientKey = NULL;
 	bool bGetComm = false;
 
 	MPacketCrypterKey CrypterKey;
@@ -160,7 +153,6 @@ void MServer::SendCommand(MCommand* pCommand)
 	}
 	else 
 	{
-		// 커맨드 암호화
 		SendMsgCommand(nClientKey, CmdData, nSize, MSGID_COMMAND, &CrypterKey);
 	}
 }
@@ -245,7 +237,7 @@ bool MServer::OnCommand(MCommand* pCommand)
 			OnNetPong(pCommand->GetSenderUID(), nTimeStamp);
 
 			LOG(LOG_DEBUG, "Ping from (%u:%u) = %d", 
-				pCommand->GetSenderUID().High, pCommand->GetSenderUID().Low, GetGlobalTimeMS()-nTimeStamp);
+				pCommand->GetSenderUID().High, pCommand->GetSenderUID().Low, GetGlobalTimeMS() - nTimeStamp);
 			return true;
 		}
 		break;
@@ -317,7 +309,7 @@ void MServer::OnLocalLogin(MUID CommUID, MUID PlayerUID)
 	MCommObject* pCommObj = NULL;
 
 	LockAcceptWaitQueue();
-	for (list<MCommObject*>::iterator i = m_AcceptWaitQueue.begin(); i!= m_AcceptWaitQueue.end(); i++) {
+	for (auto i = m_AcceptWaitQueue.begin(); i!= m_AcceptWaitQueue.end(); i++) {
 		MCommObject* pTmpObj = (*i);
 		if (pTmpObj->GetUID() == CommUID) {
 			pCommObj = pTmpObj;
@@ -342,7 +334,7 @@ void MServer::OnLocalLogin(MUID CommUID, MUID PlayerUID)
 
 void MServer::Disconnect(MUID uid)
 {
-	DWORD nClientKey = NULL;
+	u32 nClientKey = NULL;
 	bool bGetComm = false;
 
 	LockCommList();
@@ -371,7 +363,7 @@ int MServer::OnDisconnect(const MUID& uid)
 
 bool MServer::SendMsgReplyConnect(MUID* pHostUID, MUID* pAllocUID, unsigned int nTimeStamp, MCommObject* pCommObj)
 {
-	DWORD nKey = pCommObj->GetUserContext();
+	u32 nKey = pCommObj->GetUserContext();
 	
 	MReplyConnectMsg* pMsg = (MReplyConnectMsg*)malloc(sizeof(MReplyConnectMsg));
 	pMsg->nMsg = MSGID_REPLYCONNECT; 
@@ -385,7 +377,7 @@ bool MServer::SendMsgReplyConnect(MUID* pHostUID, MUID* pAllocUID, unsigned int 
 	return m_RealCPNet.Send(nKey, pMsg, pMsg->nSize);
 }
 
-bool MServer::SendMsgCommand(DWORD nClientKey, char* pBuf, int nSize, unsigned short nMsgHeaderID, MPacketCrypterKey* pCrypterKey)
+bool MServer::SendMsgCommand(u32 nClientKey, char* pBuf, int nSize, unsigned short nMsgHeaderID, MPacketCrypterKey* pCrypterKey)
 {
 	int nBlockSize = nSize+sizeof(MPacketHeader);
 	MCommandMsg* pMsg = (MCommandMsg*)malloc(nBlockSize);
@@ -397,7 +389,7 @@ bool MServer::SendMsgCommand(DWORD nClientKey, char* pBuf, int nSize, unsigned s
 
 	if (nMsgHeaderID == MSGID_RAWCOMMAND)
 	{
-		CopyMemory(pMsg->Buffer, pBuf, nSize);
+		memcpy(pMsg->Buffer, pBuf, nSize);
 	}
 	else if (nMsgHeaderID == MSGID_COMMAND)
 	{
@@ -411,7 +403,7 @@ bool MServer::SendMsgCommand(DWORD nClientKey, char* pBuf, int nSize, unsigned s
 		if (!MPacketCrypter::Encrypt(pBuf, nSize, SendBuf, nSize, pCrypterKey))
 			return false;
 
-		CopyMemory(pMsg->Buffer, SendBuf, nSize);			
+		memcpy(pMsg->Buffer, SendBuf, nSize);			
 	}
 	else
 	{
@@ -424,11 +416,7 @@ bool MServer::SendMsgCommand(DWORD nClientKey, char* pBuf, int nSize, unsigned s
 	return m_RealCPNet.Send(nClientKey, pMsg, nPacketSize);
 }
 
-struct SOCKADDR_EXT : public SOCKADDR_IN {
-	char sin_ext[16];
-};
-
-void MServer::RCPCallback(void* pCallbackContext, RCP_IO_OPERATION nIO, DWORD nKey, MPacketHeader* pPacket, DWORD dwPacketLen)
+void MServer::RCPCallback(void* pCallbackContext, RCP_IO_OPERATION nIO, u32 nKey, MPacketHeader* pPacket, u32 dwPacketLen)
 {
 	MServer* pServer = (MServer*)pCallbackContext;
 

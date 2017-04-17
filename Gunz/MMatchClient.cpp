@@ -2,10 +2,10 @@
 #include "MMatchClient.h"
 #include "MErrorTable.h"
 #include "MSharedCommandTable.h"
-#include "Msg.h"
 #include "MDebug.h"
 #include "MBlobArray.h"
 #include "MMatchUtil.h"
+#include "MMatchNotify.h"
 
 MMatchClient* g_pMatchClient = NULL;
 MMatchClient* GetMainMatchClient() { return g_pMatchClient; }
@@ -29,10 +29,10 @@ void MakeUDPCommandSerialNumber(MCommand* pCmd)
 
 int MMatchPeerInfo::GetPing(unsigned int nCurrTime) 
 { 
-	if ((int)m_nLastPongTime - (int)m_nLastPingTime < 0) 
+	if ((int)m_nLastPongTime - (int)m_nLastPingTime < 0)
 	{
 		int nDelay = nCurrTime - m_nLastPingTime;
-		if ((nDelay >= MAX_PING) && (m_nPingTryCount >= MAX_PING_TRY_COUNT))
+		if (nDelay >= MAX_PING && m_nPingTryCount >= MAX_PING_TRY_COUNT)
 		{
 			return MAX_PING;
 		}
@@ -56,98 +56,71 @@ void MMatchPeerInfo::SetLastPingTime(unsigned int nTime)
 	m_nPingTryCount++;
 }
 
-MMatchPeerInfoList::MMatchPeerInfoList()
-{
-	InitializeCriticalSection(&m_csLock);
-}
+MMatchPeerInfoList::MMatchPeerInfoList() = default;
 
 MMatchPeerInfoList::~MMatchPeerInfoList()
 {
 	Clear();
-	DeleteCriticalSection(&m_csLock);
 	mlog("PeerInfoList Released\n");
 }
 
 bool MMatchPeerInfoList::Delete(MMatchPeerInfo* pPeerInfo)
 {
-	bool ret = false;
-	Lock();
-	iterator itor = find(pPeerInfo->uidChar);
-	if (itor != end())
-	{
-		erase(itor);
+	std::lock_guard<MCriticalSection> lock{ m_csLock };
 
-		map<MUID, MMatchPeerInfo*>::iterator itorIPPortNode = 
-			m_IPnPortMap.find(MUID(pPeerInfo->dwIP, (unsigned long)pPeerInfo->nPort));
+	if (pPeerInfo == nullptr)
+		return false;
 
-		if (itorIPPortNode != m_IPnPortMap.end())
-		{
-			m_IPnPortMap.erase(itorIPPortNode);
-		}
+	auto it = MUIDMap.find(pPeerInfo->uidChar);
+	if (it == MUIDMap.end())
+		return false;
 
-		delete pPeerInfo; pPeerInfo = NULL;
+	IPnPortMap.erase(IPnPort{ pPeerInfo });
+	MUIDMap.erase(it);
+	delete pPeerInfo;
 
-		ret = true;
-	}
-
-	Unlock();
-	return ret;
+	return true;
 }
 
 void MMatchPeerInfoList::Clear() 
 { 
-	Lock();
+	std::lock_guard<MCriticalSection> lock{ m_csLock };
 
-	while(empty()==false) 
-	{ 
-		delete (*begin()).second;
-		erase(begin()); 
-	} 
+	for (auto* PeerInfo : MakePairValueAdapter(MUIDMap))
+		delete PeerInfo;
 
-	m_IPnPortMap.clear();
-
-	Unlock();
+	MUIDMap.clear();
+	IPnPortMap.clear();
 }
 
 void MMatchPeerInfoList::Add(MMatchPeerInfo* pPeerInfo)
 {
-	Lock();
-	insert(value_type(pPeerInfo->uidChar, pPeerInfo));
+	std::lock_guard<MCriticalSection> lock{ m_csLock };
 
-	MUID uidIPPort = MUID(pPeerInfo->dwIP, (unsigned long)pPeerInfo->nPort);
-	m_IPnPortMap.insert(map<MUID, MMatchPeerInfo*>::value_type(uidIPPort, pPeerInfo));
-	Unlock();
+	MUIDMap.emplace(pPeerInfo->uidChar, pPeerInfo);
+	IPnPortMap.emplace(IPnPort{ pPeerInfo }, pPeerInfo);
 }
 
 MMatchPeerInfo* MMatchPeerInfoList::Find(const MUID& uidChar)
 {
-	MMatchPeerInfo* pPeer = NULL;
-	Lock();
+	std::lock_guard<MCriticalSection> lock{ m_csLock };
 
-	iterator itor = find(uidChar);
-	if (itor != end())
-	{
-		pPeer = (*itor).second;
-	}
+	auto it = MUIDMap.find(uidChar);
+	if (it == MUIDMap.end())
+		return nullptr;
 
-	Unlock();
-	return pPeer;
+	return it->second;
 }
 
-MUID MMatchPeerInfoList::FindUID(DWORD dwIP, int nPort)
+MUID MMatchPeerInfoList::FindUID(u32 dwIP, int nPort)
 {
-	MUID uidRet = MUID(0,0);
+	std::lock_guard<MCriticalSection> lock{ m_csLock };
 
-	Lock();
-	map<MUID, MMatchPeerInfo*>::iterator itor = m_IPnPortMap.find(MUID(dwIP, (unsigned long)nPort));
-	if (itor != m_IPnPortMap.end())
-	{
-		MMatchPeerInfo* pPeerInfo = (*itor).second;
-		uidRet = pPeerInfo->uidChar;
-	}
-	Unlock();
+	auto it = IPnPortMap.find(IPnPort{ dwIP, static_cast<u16>(nPort) });
+	if (it == IPnPortMap.end())
+		return{ 0, 0 };
 
-	return uidRet;
+	return it->second->uidChar;
 }
 
 MMatchClient::MMatchClient()
@@ -173,16 +146,26 @@ MMatchClient::~MMatchClient()
 	ClearObjCaches();
 }
 
-bool MMatchClient::Create(unsigned short nUDPPort)
+MMatchClient::CreationResult MMatchClient::Create(u16 nUDPPort)
 {
-	if (MCommandCommunicator::Create() == false) {
-		MLog("MCommandCommunicator::Create failed!\n");
-		return false;
+	if (MCommandCommunicator::Create() == false)
+	{
+		return{ -1, "MCommandCommunicator::Create failed" };
 	}
 
-	if (m_SafeUDP.Create(true, nUDPPort, false) == false) {
-		MLog("MSafeUDP::Create failed! GetLastError() = %d\n", GetLastError());
-		return false;
+	if (m_SafeUDP.Create(true, nUDPPort, false) == false)
+	{
+		auto ErrorCode = MSocket::GetLastError();
+		std::string ErrorMessage;
+		if (ErrorCode == MSocket::Error::AddressInUse)
+		{
+			NotifyMessage(MATCHNOTIFY_NETWORK_PORTINUSE, &ErrorMessage);
+		}
+		else
+		{
+			MSocket::GetErrorString(ErrorCode, ErrorMessage);
+		}
+		return{ int(ErrorCode), ErrorMessage };
 	}
 
 	m_SafeUDP.SetCustomRecvCallback(UDPSocketRecvEvent);
@@ -194,7 +177,7 @@ bool MMatchClient::Create(unsigned short nUDPPort)
 	m_AgentSocket.SetRecvCallback(SocketRecvEvent);
 	m_AgentSocket.SetSocketErrorCallback(SocketErrorEvent);
 
-	return true;
+	return{ 0, "" };
 }
 
 MUID MMatchClient::GetSenderUIDBySocket(SOCKET socket)
@@ -222,7 +205,7 @@ bool MMatchClient::OnSockDisconnect(SOCKET sock)
 
 	return true;
 }
-bool MMatchClient::OnSockRecv(SOCKET sock, char* pPacket, DWORD dwSize)
+bool MMatchClient::OnSockRecv(SOCKET sock, char* pPacket, u32 dwSize)
 {
 	MClient::OnSockRecv(sock, pPacket, dwSize);
 
@@ -517,7 +500,8 @@ void MMatchClient::OnObjectCache(unsigned int nType, void* pBlob, int nCount)
 
 void MMatchClient::CastStageBridgePeer(const MUID& uidChar, const MUID& uidStage)
 {
-	MCommand* pCmd = new MCommand(m_CommandManager.GetCommandDescByID(MC_MATCH_BRIDGEPEER), GetServerUID(), m_This);		
+	auto* Desc = m_CommandManager.GetCommandDescByID(MC_MATCH_BRIDGEPEER);
+	auto* pCmd = new MCommand(Desc, GetServerUID(), m_This);		
 	pCmd->AddParameter(new MCommandParameterUID(uidChar));
 	pCmd->AddParameter(new MCommandParameterUInt(0)); // IP
 	pCmd->AddParameter(new MCommandParameterUInt(0)); // Port
@@ -553,8 +537,8 @@ void MMatchClient::OnUDPTestReply(const MUID& uidChar)
 void MMatchClient::UpdateUDPTestProcess()
 {
 	int nProcessCount = 0;
-	for (auto i=m_Peers.begin(); i!=m_Peers.end(); i++) {
-		auto* pPeer = (*i).second;
+	for (auto* pPeer : MakePairValueAdapter(m_Peers.MUIDMap))
+	{
 		if (pPeer->GetProcess()) {
 			pPeer->UseTestCount();
 			if (pPeer->GetTestCount() <= 0) {
@@ -703,12 +687,10 @@ void MMatchClient::SendCommand(MCommand* pCommand)
 				if (pCommand->GetReceiverUID() == MUID(0, 0)) {	// BroadCasting
 					int nTunnelingCount = 0;
 
-					for (MMatchPeerInfoList::iterator itor = m_Peers.begin();
-					itor != m_Peers.end(); ++itor)
+					for (auto* pPeerInfo : MakePairValueAdapter(m_Peers.MUIDMap))
 					{
-						MMatchPeerInfo* pPeerInfo = (*itor).second;
-						if ((pPeerInfo->uidChar == MUID(0, 0)) ||
-							(pPeerInfo->uidChar != GetPlayerUID()))
+						if (pPeerInfo->uidChar == MUID(0, 0) ||
+							pPeerInfo->uidChar != GetPlayerUID())
 						{
 #ifdef MATCHAGENT
 							if ((pPeerInfo->GetProcess() == false) &&
@@ -791,7 +773,7 @@ bool MMatchClient::SendCommandToAgent(MCommand* pCommand)
 	}
 }
 
-void MMatchClient::SendCommandByUDP(MCommand* pCommand, char* szIP, int nPort)
+void MMatchClient::SendCommandByUDP(MCommand* pCommand, const char* szIP, int nPort)
 {
 	int nPacketSize = CalcPacketSize(pCommand);
 	char* pSendBuf = new char[nPacketSize];
@@ -895,7 +877,7 @@ void MMatchClient::SendCommandByMatchServerTunneling(MCommand* pCommand)
 	SendCommandByMatchServerTunneling(pCommand, pCommand->GetReceiverUID());
 }
 
-bool MMatchClient::UDPSocketRecvEvent(DWORD dwIP, WORD wRawPort, char* pPacket, DWORD dwSize)
+bool MMatchClient::UDPSocketRecvEvent(u32 dwIP, WORD wRawPort, char* pPacket, u32 dwSize)
 {
 	if (GetMainMatchClient() == NULL) return false;
 	if (dwSize < sizeof(MPacketHeader)) return false;
@@ -928,7 +910,7 @@ void MMatchClient::AddPeer(MMatchPeerInfo* pPeerInfo)
 	m_Peers.Add(pPeerInfo);
 }
 
-MUID MMatchClient::FindPeerUID(const DWORD dwIP, const int nPort)
+MUID MMatchClient::FindPeerUID(const u32 dwIP, const int nPort)
 {
 	return m_Peers.FindUID(dwIP, nPort);
 }
@@ -1018,7 +1000,7 @@ void MMatchClient::ClearObjCaches()
 	}
 }
 
-void MMatchClient::ParseUDPPacket(char* pData, MPacketHeader* pPacketHeader, DWORD dwIP, unsigned int nPort)
+void MMatchClient::ParseUDPPacket(char* pData, MPacketHeader* pPacketHeader, u32 dwIP, unsigned int nPort)
 {
 	switch (pPacketHeader->nMsg)
 	{
@@ -1176,15 +1158,18 @@ void MMatchClient::CastAgentPeerConnect()
 void MMatchClient::StartUDPTest(const MUID& uidChar)
 {
 	SetUDPTestProcess(true);
-	if (uidChar == GetPlayerUID()) {
-		for (MMatchPeerInfoList::iterator i=m_Peers.begin(); i!=m_Peers.end(); i++) {
-			MMatchPeerInfo* pPeer = (*i).second;
+	if (uidChar == GetPlayerUID())
+	{
+		for (auto* pPeer : MakePairValueAdapter(m_Peers.MUIDMap))
+		{
 			if (pPeer->GetUDPTestResult() == false)
 				pPeer->StartUDPTest();
 		}
-	} else {
-		MMatchPeerInfo* pPeer = FindPeer(uidChar);
-		if ( (pPeer) && (pPeer->GetUDPTestResult() == false) )
+	}
+	else
+	{
+		auto* pPeer = FindPeer(uidChar);
+		if (pPeer && pPeer->GetUDPTestResult() == false)
 			pPeer->StartUDPTest();
 	}
 }

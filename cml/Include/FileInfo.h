@@ -1,8 +1,13 @@
 #pragma once
 
-#include <windows.h>
-#include <time.h>
 #include "GlobalTypes.h"
+
+#ifdef WIN32
+#pragma comment(lib, "Shlwapi.lib")
+#endif
+
+using HANDLE = void*;
+using FILETIME = struct _FILETIME;
 
 bool GetLastUpdate(const char *pFileName, FILETIME *ft);
 
@@ -28,13 +33,13 @@ void GetPurePath(char *pPurePath, int maxlen, const char *pFilename);
 template <size_t size>
 void GetPureFilename(char (&PureFilename)[size],const char *pFilename)
 {
-	char drive[_MAX_DRIVE], dir[_MAX_DIR], ext[_MAX_EXT];
+	char drive[3], dir[256], ext[256];
 	_splitpath_s(pFilename, drive, dir, PureFilename, ext);
 }
 template <size_t size>
 void GetPureExtension(char (&PureExtension)[size],const char *pFilename)
 {
-	char drive[_MAX_DRIVE], dir[_MAX_DIR], fname[_MAX_FNAME];
+	char drive[3], dir[256], fname[256];
 	_splitpath_s(pFilename, drive, dir, fname, PureExtension);
 }
 
@@ -50,14 +55,10 @@ void GetParentDirectory(char* pszFileName);
 
 bool MakePath(const char* pszFileName);
 
-void time_tToFILETIME(time_t t, LPFILETIME pft);
+void time_tToFILETIME(time_t t, FILETIME* pft);
 
-bool MSetFileTime(LPCTSTR lpszPath, FILETIME ft);
+bool MSetFileTime(const char* lpszPath, FILETIME ft);
 
 bool GetMyDocumentsPath(char* path);
 
 bool CreatePath(char* path);
-
-#ifdef WIN32
-#pragma comment(lib, "Shlwapi.lib")
-#endif

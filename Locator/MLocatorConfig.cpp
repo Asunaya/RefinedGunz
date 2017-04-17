@@ -1,16 +1,11 @@
 #include "StdAfx.h"
 #include ".\mlocatorconfig.h"
-
-
+#include <Windows.h>
 
 MLocatorConfig* GetLocatorConfig()
 {
 	return MLocatorConfig::GetLocatorConfigInst();
 }
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
 MLocatorConfig::MLocatorConfig(void) : m_bIsInitCompleted( false )
 {

@@ -57,15 +57,13 @@ struct DBCharCachingData
 	}
 };
 
-
-// 캐릭터의 클랜정보
 struct MMatchCharClanInfo
 {
-	int					m_nClanID;							// db상의 클랜 ID
-	char				m_szClanName[CLAN_NAME_LENGTH];		// 클랜 이름
-	MMatchClanGrade		m_nGrade;							// 클랜에서의 권한
-	int					m_nContPoint;						// 클랜 기여도
-	string				m_strDeleteDate;
+	int					m_nClanID;
+	char				m_szClanName[CLAN_NAME_LENGTH];
+	MMatchClanGrade		m_nGrade;
+	int					m_nContPoint;
+	std::string			m_strDeleteDate;
 
 	MMatchCharClanInfo() {  Clear(); }
 	void Clear()
@@ -79,14 +77,11 @@ struct MMatchCharClanInfo
 	bool IsJoined() { return (m_nClanID == 0) ? false : true; }
 };
 
-
 #define DEFAULT_CHARINFO_MAXWEIGHT		100
 #define DEFAULT_CHARINFO_SAFEFALLS		0
 #define DEFAULT_CHARINFO_BONUSRATE		0.0f
 #define DEFAULT_CHARINFO_PRIZE			0
 
-
-/// 캐릭터 정보
 class MMatchCharInfo
 {
 public:
@@ -94,9 +89,9 @@ public:
 	int					m_nCharNum;
 	char				m_szName[MATCHOBJECT_NAME_LENGTH];
 	int					m_nLevel;
-	MMatchSex			m_nSex;			// 성별
-	int					m_nHair;		// 머리
-	int					m_nFace;		// 얼굴
+	MMatchSex			m_nSex;
+	int					m_nHair;
+	int					m_nFace;
 	unsigned long int	m_nXP;
 	int					m_nBP;
 	float				m_fBonusRate;
@@ -110,28 +105,24 @@ public:
 	int					m_nER;
 	int					m_nWR;
 	unsigned long int	m_nEquipedItemCIID[MMCIP_END];
-	MMatchItemMap		m_ItemList;			// 아이템 정보
-	MMatchEquipedItem	m_EquipedItem;		// 장비하고 있는 아이템 정보
-	MMatchCharClanInfo	m_ClanInfo;			// 클랜 정보
+	MMatchItemMap		m_ItemList;
+	MMatchEquipedItem	m_EquipedItem;
+	MMatchCharClanInfo	m_ClanInfo;
 
-	// 퀘스트 아이템.
 	MQuestItemMap		m_QuestItemList;
 	DBQuestCachingData	m_DBQuestCachingData;
 	DBQuestCachingData& GetDBQuestCachingData() { return m_DBQuestCachingData; }
 
-
-	// 몬스터 바이블
 	MQuestMonsterBible	m_QMonsterBible;
 
+	unsigned long int	m_nTotalPlayTimeSec;
+	u64					m_nConnTime;
 
-	unsigned long int	m_nTotalPlayTimeSec;	// 플레이 시간
-	u64					m_nConnTime;			// 접속한 시간(1초 = 1000)
-
-	unsigned long int	m_nTotalKillCount;			// 전체 킬수
-	unsigned long int	m_nTotalDeathCount;			// 전체 데쓰수
-	unsigned long int	m_nConnKillCount;			// 접속이후로 누적된 킬수
-	unsigned long int	m_nConnDeathCount;			// 접속이후로 누적된 데쓰수
-	unsigned long int   m_nConnXP;					// 접속이후로 누적된 경험치
+	unsigned long int	m_nTotalKillCount;
+	unsigned long int	m_nTotalDeathCount;
+	unsigned long int	m_nConnKillCount;
+	unsigned long int	m_nConnDeathCount;
+	unsigned long int   m_nConnXP;
 
 protected:
 	DBCharCachingData	m_DBCachingData;
@@ -156,8 +147,6 @@ public:
 	void Clear();
 	void GetTotalWeight(int* poutWeight, int* poutMaxWeight);
 
-
-	// db caching까지 함께 더해준다.
 	void IncKill()
 	{ 
 		m_nTotalKillCount += 1;
@@ -208,10 +197,9 @@ public:
 	void Update(u64 nClock)				{ m_nLastSyncClock = nClock; }
 };
 
-// MatchObject가 게임안에서 사용하는 변수들
 struct MMatchObjectGameInfo
 {
-	bool		bJoinedGame;		// 게임에 참가중인지 여부 - 팀전에서 난입했을때
+	bool		bJoinedGame;
 };
 
 
@@ -238,13 +226,10 @@ public :
 	auto& GetComment() const { return m_strComment; }
 		
 	const bool	IsSendDisconnMsg()	{ return m_bIsSendDisconnMsg; }
-	void		SendCompleted()		{ m_bIsSendDisconnMsg = false; }	// MMatchServer에서 커맨드 처리를 위해서 사용...
-																		// IsSendDisconnMsg로 접속 종료 메시지를 보내야 하는지 검사후,
-																		// 커맨드를 보내후에는 SendCompleted()를 호출하여 다음에 중복으로 보내는 것을 막는다.
-																		// 더 좋은 방법을 생각해 봐야 함. -by SungE. 2006-03-07.
+	void		SendCompleted()		{ m_bIsSendDisconnMsg = false; }
 
 	const bool IsUpdateDB()			{ return m_bIsUpdateDB; }
-	void UpdateDataBaseCompleted()	{ m_bIsUpdateDB = false; } // Update되면은 다음 BlockType이 설정전까진 false로 설정.
+	void UpdateDataBaseCompleted()	{ m_bIsUpdateDB = false; }
 
 	const bool IsDisconnectable( const u64 dwTime = GetGlobalTimeMS() )
 	{
@@ -288,11 +273,11 @@ private :
 	MMatchDisconnectStatus	m_DisconnStatus;
 	u64						m_dwLastDisconnStatusUpdatedTime;
 	u64						m_dwDisconnSetTime;
-	DWORD					m_dwMsgID;
+	u32						m_dwMsgID;
 	MMatchBlockType			m_BlockType;
 	MMatchBlockLevel		m_BlockLevel;
-	string					m_strEndDate;
-	string					m_strComment;
+	std::string				m_strEndDate;
+	std::string				m_strComment;
 	bool					m_bIsSendDisconnMsg;
 	bool					m_bIsUpdateDB;
 
@@ -561,9 +546,6 @@ public:
 	void SetStageCursor(int nStageCursor);
 	const MMatchObjectGameInfo* GetGameInfo() { return &m_GameInfo; }
 
-	void			SetCountryCode3( const string strCountryCode3 ) { m_strCountryCode3 = strCountryCode3; }
-	const string&	GetCountryCode3() const							{ return m_strCountryCode3; }
-
 	void AddPing(int Ping)
 	{
 		Pings.push_front(Ping);
@@ -622,9 +604,8 @@ public:
 	bool m_bQuestRecvPong;
 };
 
-class MMatchObjectList : public map<MUID, MMatchObject*>{};
+using MMatchObjectList = std::map<MUID, MMatchObject*>;
 
-// 입을 수 있는 아이템인지 체크
 bool IsEquipableItem(unsigned long int nItemID, int nPlayerLevel, MMatchSex nPlayerSex);
 
 inline bool IsEnabledObject(MMatchObject* pObject) 
@@ -639,10 +620,6 @@ inline bool IsAdminGrade(MMatchObject* pObject)
 
 	return IsAdminGrade(pObject->GetAccountInfo()->m_nUGrade);
 }
-
-
-//////////////////////////////////////////////////////////////////////////
-
 
 u32 MMatchObject::GetQuestLatency() const
 {

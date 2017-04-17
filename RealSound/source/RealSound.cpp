@@ -12,9 +12,9 @@
 #include "stdafx.h"
 #include <crtdbg.h>
 #include "RealSound.h"
-
 #include "MDebug.h"
-
+#include "MWindows.h"
+#include <dsound.h>
 
 #ifdef _DEBUG
 	#define _D		::OutputDebugString

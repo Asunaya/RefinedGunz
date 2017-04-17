@@ -1,6 +1,4 @@
-#ifndef _ZFILEPATH_H
-#define _ZFILEPATH_H
-
+#pragma once
 
 #define FILENAME_TIPS					"System/tips.xml"
 #define FILENAME_ZITEM_DESC				"system/zitem.xml"
@@ -18,26 +16,14 @@
 #define MPATH_EMBLEMFOLDER				"/Emblem"
 #define MPATH_EMBLEMFILE				"/emblem.xml"
 
-// path는 마지막에 '/' 를 꼭 붙여줘야 한다.
-
 #define	PATH_INTERFACE					"Interface/"
 #define PATH_CUSTOM_CROSSHAIR			"custom/crosshair/"
 #define PATH_GAME_MAPS					"maps/"
 #define PATH_QUEST						"quest/"
 #define PATH_QUEST_MAPS					"quest/maps/"
 
-// 마지막에 /를 붙이지 않음. ZLanguageConf클래스에서 커리해줌.
 const char CLI_LANG_DIR[]					= "lang";
 const char CLI_MESSAGE_TYPE[]				= "message";
 const char CLI_ERRMESSAGE_TYPE[]			= "cserror";
 const char CLI_MESSAGE_FILE_NAME[]			= "messages.xml";
 const char CLI_ERROR_MESSAGE_FILE_NAME[]	= "cserror.xml";
-/////////////////////////////////////////////////////////////
-
-
-
-
-
-
-
-#endif

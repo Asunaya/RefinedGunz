@@ -79,7 +79,7 @@ ZCharacterObject::~ZCharacterObject() = default;
 
 void ZCharacterObject::CreateShadow()
 {
-	Shadow.Construct();
+	Shadow.emplace();
 }
 
 bool ZCharacterObject::GetWeaponTypePos(WeaponDummyType type,rvector* pos,bool bLeft)
@@ -474,7 +474,7 @@ void ZCharacterObject::DrawShadow()
 {
 	__BP(28, "ZCharacter::Draw::Shadow");
 
-	if(!Shadow.IsConstructed()) return;
+	if(!Shadow.has_value()) return;
 
 	if(!IsDie())
 	{
@@ -486,8 +486,8 @@ void ZCharacterObject::DrawShadow()
 			fSize = pActor->GetNPCInfo()->fCollRadius * 3.0f;
 		}
 
-		if (Shadow.Get().SetMatrices(*m_pVMesh, *ZGetGame()->GetWorld()->GetBsp(), fSize))
-			Shadow.Get().Draw();
+		if (Shadow.value().SetMatrices(*m_pVMesh, *ZGetGame()->GetWorld()->GetBsp(), fSize))
+			Shadow.value().Draw();
 	}
 
 	__EP(28);

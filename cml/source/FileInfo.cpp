@@ -4,7 +4,6 @@
 #include <shlwapi.h>
 #include <shlobj.h>
 
-
 bool GetLastUpdate(const char *pFileName, FILETIME *ft)
 {
 	HANDLE hFile;
@@ -369,7 +368,7 @@ void time_tToFILETIME(time_t t, LPFILETIME pft)
 	pft->dwHighDateTime = (u32)(ll >> 32);
 }
 
-bool MSetFileTime(LPCTSTR lpszPath, FILETIME ft)
+bool MSetFileTime(const char* lpszPath, FILETIME ft)
 {
 	u32 attr;
 	HANDLE hFile;

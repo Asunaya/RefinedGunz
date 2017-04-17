@@ -6,7 +6,6 @@
 	All copyright (c) 1999, MAIET entertainment
 */
 #include "stdafx.h"
-#include <windows.h>
 #include "CommonLog.h"
 
 ///////////////////////////////////////////////////////////////////////

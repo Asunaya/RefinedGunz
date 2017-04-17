@@ -1,6 +1,9 @@
 #include "stdafx.h"
 #include "MBitmapDrawer.h"
 #include "MDrawContext.h"
+#include <algorithm>
+using std::min;
+using std::max;
 
 void HLineBitmap(MDrawContext* pDC, int x, int y, int w, MBitmap* pBm, bool bStretch, float fScale)
 {

@@ -5,13 +5,13 @@
 
 void ZModule_HPAP::SetHP(int nHP)
 {
-	nHP = min(max(0, nHP), m_nMaxHP);
+	nHP = min(max(0, nHP), int(m_nMaxHP));
 	fHP = nHP;
 }
 
 void ZModule_HPAP::SetAP(int nAP) 
 { 
-	nAP = min(max(0,nAP),m_nMaxAP);
+	nAP = min(max(0,nAP), int(m_nMaxAP));
 	fAP = nAP;
 }
 

@@ -2,7 +2,7 @@
 
 #include <string>
 #include "SafeString.h"
-#include <WinSock2.h>
+#include "MSocket.h"
 
 template <size_t size>
 bool GetLocalIP(char (&szOutIP)[size])
@@ -23,7 +23,7 @@ bool GetLocalIP(char (&szOutIP)[size])
 }
 
 template <size_t size>
-void GetIPv4String(in_addr addr, char(&ip_string)[size])
+void GetIPv4String(MSocket::in_addr addr, char(&ip_string)[size])
 {
 	sprintf_safe(ip_string, "%d.%d.%d.%d",
 		addr.S_un.S_un_b.s_b1,
@@ -32,7 +32,7 @@ void GetIPv4String(in_addr addr, char(&ip_string)[size])
 		addr.S_un.S_un_b.s_b4);
 }
 
-inline std::string GetIPv4String(in_addr addr)
+inline std::string GetIPv4String(MSocket::in_addr addr)
 {
 	char buf[32];
 	GetIPv4String(addr, buf);
@@ -41,7 +41,7 @@ inline std::string GetIPv4String(in_addr addr)
 
 inline u32 GetIPv4Number(const char* addr)
 {
-	in_addr ret;
+	MSocket::in_addr ret;
 	auto count = sscanf_s(addr, "%hhd.%hhd.%hhd.%hhd",
 		&ret.S_un.S_un_b.s_b1,
 		&ret.S_un.S_un_b.s_b2,
@@ -49,7 +49,7 @@ inline u32 GetIPv4Number(const char* addr)
 		&ret.S_un.S_un_b.s_b4);
 	
 	if (count != 4)
-		return INADDR_NONE;
+		return MSocket::in_addr::None;
 
 	return ret.S_un.S_addr;
 }

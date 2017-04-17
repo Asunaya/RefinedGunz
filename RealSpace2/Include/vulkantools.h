@@ -21,11 +21,7 @@
 #include <vector>
 #include <iostream>
 #include <stdexcept>
-#if defined(_WIN32)
-#include <windows.h>
-#include <fcntl.h>
-#include <io.h>
-#elif defined(__ANDROID__)
+#if defined(__ANDROID__)
 #include "vulkanandroid.h"
 #include <android/asset_manager.h>
 #endif

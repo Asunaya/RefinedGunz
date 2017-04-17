@@ -8,44 +8,41 @@
 #ifndef __WAVEFILE_HEADER__
 #define __WAVEFILE_HEADER__
 
+#include <Windows.h>
+#include <mmsystem.h>
+
 class Package;
+
+using WAVEFORMATEX = struct tWAVEFORMATEX;
 
 class RSMemWaveFile {
 private:
-	BYTE *m_pImageData;	// 角力 Waveform Data
-	DWORD m_dwImageLen;	// 角力 Waveform Data Length
+	u8 *m_pImageData;	// 角力 Waveform Data
+	u32 m_dwImageLen;	// 角力 Waveform Data Length
 
-	BOOL m_bResource;	
+	bool m_bResource;	
 public:
 	RSMemWaveFile();
 	virtual ~RSMemWaveFile();
 
 	// Methods
-	BOOL Open( const char *szFileName );
-	BOOL Open( UINT uID, HMODULE hMod );
-	BOOL Open( Package *pPackage, int nIndex );
-	BOOL Open( Package *pPackage, char* Name );
+	bool Open( char *szFileName );
+	bool Open( u32 uID, HMODULE hMod );
+	bool Open( Package *pPackage, int nIndex );
+	bool Open( Package *pPackage, char* Name );
 
 	void Close();
 	
 	// Inline Methods
 	// IsValid : Whether valid or invalid?
-	BOOL IsValid() const { return (m_pImageData?TRUE:FALSE); }
+	bool IsValid() const { return (m_pImageData?true:false); }
 	
 	// Play : Instant Playback of Waveform Data
-	BOOL Play( BOOL bAsync = TRUE, BOOL bLooped = FALSE ){
-		if( !IsValid() ){
-#ifdef _DEBUG
-			OutputDebugString("DsWave : Play, Data is not ready.\n");
-#endif
-			return FALSE;
-		}
-		return ::PlaySound( (LPSTR) m_pImageData, NULL, SND_MEMORY|SND_NODEFAULT|(bAsync?SND_ASYNC:SND_SYNC)|(bLooped?(SND_LOOP|SND_ASYNC):0) );
-	}
-	BOOL GetFormat( WAVEFORMATEX& wfFormat );
-	DWORD GetData( BYTE*& pWaveData, DWORD dwMaxLen );
-	//DWORD GetDataLen(){ return m_dwImageLen; }
-	DWORD GetSize(){ return m_dwImageLen; }
+	bool Play(bool bAsync = true, bool bLooped = false);
+	bool GetFormat( WAVEFORMATEX& wfFormat );
+	u32 GetData( u8*& pWaveData, u32 dwMaxLen );
+	//u32 GetDataLen(){ return m_dwImageLen; }
+	u32 GetSize(){ return m_dwImageLen; }
 };
 
 /**
@@ -57,17 +54,17 @@ class RSMWaveFile
 public:
     RSMWaveFile();
     virtual ~RSMWaveFile();
-    BOOL Open(LPSTR pszFilename);
-    BOOL Cue();
-    UINT Read(BYTE * pbDest, UINT cbSize);
-	BYTE GetSilenceData();
+    bool Open(char* pszFilename);
+    bool Cue();
+    u32 Read(u8 * pbDest, u32 cbSize);
+	u8 GetSilenceData();
 
 	// Inline Functions
-    UINT GetNumBytesRemaining(){ return (m_nDataSize - m_nBytesPlayed); }
-    UINT GetAvgDataRate(){ return (m_nAvgDataRate); }
-    UINT GetDataSize(){ return (m_nDataSize); }
-    UINT GetNumBytesPlayed(){ return (m_nBytesPlayed); }
-    UINT GetDuration(){ return (m_nDuration); }
+    u32 GetNumBytesRemaining(){ return (m_nDataSize - m_nBytesPlayed); }
+    u32 GetAvgDataRate(){ return (m_nAvgDataRate); }
+    u32 GetDataSize(){ return (m_nDataSize); }
+    u32 GetNumBytesPlayed(){ return (m_nBytesPlayed); }
+    u32 GetDuration(){ return (m_nDuration); }
     
     WAVEFORMATEX * m_pwfmt;
 protected:
@@ -76,11 +73,11 @@ protected:
     MMCKINFO m_mmckiRiff;
     MMCKINFO m_mmckiFmt;
     MMCKINFO m_mmckiData;
-    UINT m_nDuration;           // duration of sound in msec
-    UINT m_nBlockAlign;         // wave data block alignment spec
-    UINT m_nAvgDataRate;        // average wave data rate
-    UINT m_nDataSize;           // size of data chunk
-    UINT m_nBytesPlayed;        // offset into data chunk
+    u32 m_nDuration;           // duration of sound in msec
+    u32 m_nBlockAlign;         // wave data block alignment spec
+    u32 m_nAvgDataRate;        // average wave data rate
+    u32 m_nDataSize;           // size of data chunk
+    u32 m_nBytesPlayed;        // offset into data chunk
 };
 
 
@@ -100,12 +97,12 @@ public:
     HMMIO         m_hmmio;       // MM I/O handle for the WAVE
     MMCKINFO      m_ck;          // Multimedia RIFF chunk
     MMCKINFO      m_ckRiff;      // Use in opening a WAVE file
-    DWORD         m_dwSize;      // The size of the wave file
+    u32         m_dwSize;      // The size of the wave file
     MMIOINFO      m_mmioinfoOut;
-    DWORD         m_dwFlags;
-    //BOOL          m_bIsReadingFromMemory;
-    BYTE*         m_pbData;
-    BYTE*         m_pbDataCur;
+    u32         m_dwFlags;
+    //bool          m_bIsReadingFromMemory;
+    u8*         m_pbData;
+    u8*         m_pbDataCur;
     ULONG         m_ulDataSize;
     CHAR*         m_pResourceBuffer;
 
@@ -117,16 +114,16 @@ public:
     CWaveFile();
     ~CWaveFile();
 
-    HRESULT Open( LPTSTR strFileName, WAVEFORMATEX* pwfx=NULL, DWORD dwFlags=WAVEFILE_READ );
-	//HRESULT OpenFromMemory( BYTE* pbData, ULONG ulDataSize, WAVEFORMATEX* pwfx, DWORD dwFlags=WAVEFILE_READ );
+    HRESULT Open( LPTSTR strFileName, WAVEFORMATEX* pwfx=NULL, u32 dwFlags=WAVEFILE_READ );
+	//HRESULT OpenFromMemory( u8* pbData, ULONG ulDataSize, WAVEFORMATEX* pwfx, u32 dwFlags=WAVEFILE_READ );
     HRESULT Close();
 
-	BOOL IsValid() const { return (m_hmmio?TRUE:FALSE); }
+	bool IsValid() const { return (m_hmmio?true:false); }
 
-    HRESULT Read( BYTE* pBuffer, DWORD dwSizeToRead, DWORD* pdwSizeRead );
-    HRESULT Write( UINT nSizeToWrite, BYTE* pbData, UINT* pnSizeWrote );
+    HRESULT Read( u8* pBuffer, u32 dwSizeToRead, u32* pdwSizeRead );
+    HRESULT Write( u32 nSizeToWrite, u8* pbData, u32* pnSizeWrote );
 
-    DWORD   GetSize();
+    u32   GetSize();
     HRESULT ResetFile();
     WAVEFORMATEX* GetFormat() { return m_pwfx; };
 };

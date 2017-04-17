@@ -2,6 +2,7 @@
 #include "ReplayControl.h"
 #include "RGMain.h"
 #include "NewChat.h"
+#include "defer.h"
 
 ReplayControl g_ReplayControl;
 
@@ -79,15 +80,14 @@ bool ReplayControl::OnEvent(MEvent *pEvent)
 	if (!ZGetGame()->IsReplay() || !GetRGMain().GetChat().IsInputEnabled())
 		return false;
 
-	static bool bLastLb = false;
+	static bool LastLb = false;
+	auto CurLb = MEvent::IsKeyDown(VK_LBUTTON);
+	DEFER([&] { LastLb = CurLb; });
 
-	if (!(GetAsyncKeyState(VK_LBUTTON) & 0x8000 && !bLastLb))
+	if (!(CurLb && !LastLb))
 	{
-		bLastLb = (GetAsyncKeyState(VK_LBUTTON) & 0x8000) != 0;
 		return false;
 	}
-
-	bLastLb = (GetAsyncKeyState(VK_LBUTTON) & 0x8000) != 0;
 
 	POINT p;
 	GetCursorPos(&p);

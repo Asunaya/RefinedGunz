@@ -4,7 +4,6 @@
 #include <stdarg.h>
 #include "MCommandBuilder.h"
 
-
 MCommObject::MCommObject(MCommandCommunicator* pCommunicator)
 {
 	m_uid = MUID(0,0);
@@ -17,9 +16,8 @@ MCommObject::MCommObject(MCommandCommunicator* pCommunicator)
 
 	m_bAllowed = true;
 
-	m_pCommandBuilder = new MCommandBuilder(MUID(0,0), pCommunicator->GetUID(), 
+	m_pCommandBuilder = new MCommandBuilder(MUID(0, 0), pCommunicator->GetUID(),
 											pCommunicator->GetCommandManager());
-
 }
 
 MCommObject::~MCommObject()
@@ -45,7 +43,7 @@ bool MCommandCommunicator::OnCommand(MCommand* pCommand)
 	return false;
 }
 
-void MCommandCommunicator::OnPrepareRun(void)
+void MCommandCommunicator::OnPrepareRun()
 {
 }
 
@@ -53,7 +51,7 @@ void MCommandCommunicator::OnPrepareCommand(MCommand* pCommand)
 {
 }
 
-void MCommandCommunicator::OnRun(void)
+void MCommandCommunicator::OnRun()
 {
 }
 
@@ -62,13 +60,13 @@ void MCommandCommunicator::SetDefaultReceiver(MUID Receiver)
 	m_DefaultReceiver = Receiver;
 }
 
-MCommandCommunicator::MCommandCommunicator(void)
+MCommandCommunicator::MCommandCommunicator()
 {
 	m_This.SetZero();
 	m_DefaultReceiver.SetZero();
 }
 
-MCommandCommunicator::~MCommandCommunicator(void)
+MCommandCommunicator::~MCommandCommunicator()
 {
 	Destroy();
 #ifdef _CMD_PROFILE
@@ -76,17 +74,17 @@ MCommandCommunicator::~MCommandCommunicator(void)
 #endif
 }
 
-bool MCommandCommunicator::Create(void)
+bool MCommandCommunicator::Create()
 {
 #ifdef _CMD_PROFILE
 	m_CommandProfiler.Init(&m_CommandManager);
 #endif
 
-	OnRegisterCommand(&m_CommandManager);	// Virtual Function은 Constructor에서 호출되지 않는다.
+	OnRegisterCommand(&m_CommandManager);
 	return true;
 }
 
-void MCommandCommunicator::Destroy(void)
+void MCommandCommunicator::Destroy()
 {
 	while(MCommand* pCmd = GetCommandSafe()) {
 		delete pCmd;
@@ -140,7 +138,7 @@ MCommand* MCommandCommunicator::GetCommandSafe()
 	return m_CommandManager.GetCommand();
 }
 
-void MCommandCommunicator::Run(void)
+void MCommandCommunicator::Run()
 {
 	OnPrepareRun();
 

@@ -1,6 +1,4 @@
 #include "stdafx.h"
-
-#include <winsock2.h>
 #include "MErrorTable.h"
 #include "ZConfiguration.h"
 #include "ZGameClient.h"
@@ -161,7 +159,6 @@ ZGameClient::~ZGameClient()
 {
 	DestroyUPnP();
 	m_EmblemMgr.Destroy();
-
 	ZGetMyInfo()->Clear();
 }
 
@@ -1214,13 +1211,13 @@ void ZGameClient::Tick()
 
 	if (GetUDPTestProcess()) {
 #define CLOCK_UDPTEST	500
-		static unsigned long nUDPTestTimer = 0;
+		static u64 nUDPTestTimer = 0;
 		if (nClock - nUDPTestTimer > CLOCK_UDPTEST) {
 			nUDPTestTimer = nClock;
 
-			MMatchPeerInfoList* PeerList = GetPeers();
-			for (MMatchPeerInfoList::iterator i = PeerList->begin(); i != PeerList->end(); i++) {
-				MMatchPeerInfo* pPeer = (*i).second;
+			auto* PeerList = GetPeers();
+			for (auto* pPeer : MakePairValueAdapter(PeerList->MUIDMap))
+			{
 				if (pPeer->GetProcess()) {
 					MCommand* pCmd = CreateCommand(MC_PEER_UDPTEST, pPeer->uidChar);
 					SendCommandByUDP(pCmd, pPeer->szIP, pPeer->nPort);

@@ -7,6 +7,9 @@
 #include <cassert>
 #define _USE_MATH_DEFINES
 #include <cmath>
+#include <algorithm>
+using std::min;
+using std::max;
 
 #ifndef TOLER
 #define TOLER 0.001

@@ -130,14 +130,6 @@ void ZScreenDebugger::DrawDebugInfo(MDrawContext *pDC)
 		OUTTEXT();
 		NEXTLINE();
 #endif
-		//NEXTLINE();
-		//{
-		//	sprintf_safe( buffer, "2D Sound Effect Number : %d 3D Sound Effect Number : %d", ZGetSoundEngine()->GetMySoundEffectPlayer()->GetSoundEffectNum(), ZGetSoundEngine()->GetSoundEffectPlayer()->GetSoundEffectNum() );
-		//	pDC->SetColor( MCOLOR(0xFFFFFFFF) );
-		//	OUTTEXT();
-		//	NEXTLINE();
-		//}
-
 
 		sprintf_safe(buffer, "%d textures , %d bytes ", RGetTextureManager()->CalcUsedCount(), RGetTextureManager()->CalcUsedSize() );
 		OUTTEXT();
@@ -146,16 +138,6 @@ void ZScreenDebugger::DrawDebugInfo(MDrawContext *pDC)
 		return;
 	}
 
-	/*for (int i = 0; i < 4; i++)
-	{
-		if (pCamera->m_bCollision[i]) sprintf_safe(buffer, "True");
-		else sprintf_safe(buffer, "False");
-
-		OUTTEXT();
-		NEXTLINE();
-	}
-	sprintf_safe(buffer, "AngleX : %3.3f , AngleZ : %3.3f , Dist : %3.3f", pCamera->m_fAngleX, pCamera->m_fAngleZ,
-		pCamera->m_fCurrentDist);*/
 	OUTTEXT();
 	NEXTLINE();
 	
@@ -337,7 +319,6 @@ void ZScreenDebugger::DrawDebugInfo(MDrawContext *pDC)
 		NEXTLINE();
 	}
 
-	// npc 출력
 	for (ZObjectManager::iterator itor = g_pGame->m_ObjectManager.begin();
 		itor != g_pGame->m_ObjectManager.end(); ++itor)
 	{
@@ -449,13 +430,6 @@ void ZScreenDebugger::DrawDebugInfo(MDrawContext *pDC)
 
 		ZGetGame()->GetWorld()->GetBsp()->DrawSolidNode();
 
-//		ZGetGame()->GetWorld()->GetBsp()->DrawAdjPoltyongs();
-
-		/*
-		float fDist=ZGetGame()->GetWorld()->GetBsp()->CheckFloor(pCharacter->m_Position);
-		float fDistCeiling=ZGetGame()->GetWorld()->GetBsp()->CheckCeiling(pCharacter->m_Position+rvector(0,0,180));
-		*/
-
 		rvector checkpos=pCharacter->m_Position+rvector(0,0,90);
 		sprintf_safe(buffer,"dist to floor = %6.3f ", g_pGame->m_pMyCharacter->GetDistToFloor());
 		pDC->SetColor(MCOLOR(0xFFffffff));
@@ -484,12 +458,6 @@ void ZScreenDebugger::DrawDebugInfo(MDrawContext *pDC)
 		NEXTLINE();
 	}	
 
-	//{
-	//	sprintf_safe( buffer, "2D Sound Effect Number : %d 3D Sound Effect Number : %d", ZGetSoundEngine()->GetMySoundEffectPlayer()->GetSoundEffectNum(), ZGetSoundEngine()->GetSoundEffectPlayer()->GetSoundEffectNum() );
-	//	pDC->SetColor( MCOLOR(0xFFFFFFFF) );
-	//	OUTTEXT();
-	//	NEXTLINE();
-	//}
 	pDC->EndFont();
 
 #endif
@@ -506,7 +474,6 @@ static void DrawDebugInfo_NPCArc(rvector pos, rvector dir, float fRange, float f
 	rvector orig = rvector(1.0f, 0.0f, 0.0f);
 	float OriginAngle = GetAngleOfVectors(orig, dir);
 
-	// 근거리 범위 각도
 	float src_angle = fAngle;
 	float start_angle = OriginAngle - src_angle / 2.0f;
 	float end_angle = start_angle + src_angle;
@@ -609,8 +576,6 @@ void ZScreenDebugger::OnDrawAIDebugInfo(MDrawContext *pDC)
 		}
 	}
 
-
-	// hud출력
 	int n=0;
 	for (ZObjectManager::iterator itor = pcm->begin(); itor != pcm->end(); ++itor)
 	{
@@ -692,4 +657,9 @@ void ZScreenDebugger::SwitchDebugInfo()
 	case 3: m_nShowDebugInfo=0; break;
 	}
 //#endif
+}
+
+bool ZScreenDebugger::IsVisible()
+{
+	return m_nShowDebugInfo != 0;
 }

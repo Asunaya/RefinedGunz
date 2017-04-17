@@ -1,13 +1,9 @@
 #include "stdafx.h"
-
-#include "winsock2.h"
 #include "upnp.h"
 #include "NATUPnP.h"
+#include "MSocket.h"
 
-UPnP::UPnP()
-{
-	m_Port = 0;
-}
+UPnP::UPnP() = default;
 
 UPnP::~UPnP()
 {
@@ -92,7 +88,7 @@ bool UPnP::Create(u16 Port)
 	return true;
 }
 
-void  UPnP::Destroy(void)
+void UPnP::Destroy()
 {
 	IUPnPNAT * Nat = NULL;
 	IStaticPortMappingCollection * PortMappingCollection = NULL;
@@ -151,12 +147,11 @@ bool UPnP::GetIp()
 {
 	char HostName[256];
 	hostent * Host;
-	SOCKADDR_IN Addr;
+	MSocket::sockaddr_in Addr;
 
-	int ret;
+	auto ret = gethostname(HostName, 256);
 
-	// Get your own Ip
-	if(ret = gethostname(HostName, 256) != 0)
+	if(ret != 0)
 	{
 #ifdef MFC
 		TRACE("UPnP: gethostname failed\n");
@@ -178,10 +173,9 @@ bool UPnP::GetIp()
 #endif
 		return false;
 	}
-	Addr.sin_addr.s_addr = ((IN_ADDR *)Host->h_addr)->s_addr;
+	Addr.sin_addr.s_addr = ((MSocket::in_addr *)Host->h_addr)->s_addr;
 	auto Address = GetIPv4String(Addr.sin_addr);
 
-	// idk how this could possibly fail but w/e
 	if(Address.empty())
 	{
 #ifdef MFC

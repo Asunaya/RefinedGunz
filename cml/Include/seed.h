@@ -26,10 +26,6 @@ C0001 : Modified by Hyo Sun Hwang (hyosun@future.co.kr) 2000/00/00
 #define _SEED_H
 
 /*************** Header files *********************************************/
-#include <stdlib.h>
-#include <string.h>
-#include <memory.h>
-#include <windows.h>
 
 /*************** Assertions ***********************************************/
 ////////	Define the Endianness	////////
@@ -107,12 +103,12 @@ C0001 : Modified by Hyo Sun Hwang (hyosun@future.co.kr) 2000/00/00
 /*************** New Data Types *******************************************/
 ////////	Determine data types depand on the processor and compiler.
 
-/*
-#define BOOL	int					//	1-bit data type
-#define BYTE	unsigned char		//	unsigned 1-byte data type
-#define WORD	unsigned short int	//	unsigned 2-bytes data type
-#define DWORD	unsigned int		//	unsigned 4-bytes data type
-*/
+
+using BOOL = int;
+using BYTE = unsigned char;
+using WORD = unsigned short;
+using DWORD = unsigned long;
+using RET_VAL = DWORD;
 #define RET_VAL		DWORD			//	return values
 
 ////	SEED..

@@ -240,7 +240,7 @@ void ZEffectBillboardList::Update(float fElapsed)
 		}
 
 		p->normal=-RCameraDirection;
-		p->fOpacity = min(1,max(0,(p->fLifeTime - p->fElapsedTime)/m_fVanishTime));
+		p->fOpacity = min(1.f, max(0.f, (p->fLifeTime - p->fElapsedTime) / m_fVanishTime));
 
 		if( p->bUseSteamSmoke ) {
 
@@ -248,7 +248,7 @@ void ZEffectBillboardList::Update(float fElapsed)
 			
 			float fLen = Magnitude(p->accel);
 
-			if( fLen < 1.f ) {//바람이 거의 없으면
+			if( fLen < 1.f ) {
 				p->velocity+=fElapsed*p->accel2;
 				p->position+=fElapsed*p->velocity;
 			}
@@ -257,12 +257,12 @@ void ZEffectBillboardList::Update(float fElapsed)
 				p->position+=fElapsed*p->velocity;
 			}
 		}
-		else if( p->bUseTrainSmoke ) {// 기차연기..특수한 형태로 가속을 받는다..
+		else if( p->bUseTrainSmoke ) {
 			
 			float fRatio = GetLifeRatio(p);
 
 			if(fRatio < 0.1f) {
-				p->velocity += fElapsed * rvector(0,0,10) ;// 거의 위쪽으로만 올라간다..
+				p->velocity += fElapsed * rvector(0, 0, 10);
 				p->position += fElapsed * p->velocity ;
 			}
 			else if(fRatio > 0.6f) {
@@ -433,7 +433,7 @@ bool ZEffectBillboardList::Draw()
 
 			rvector pos=p->position;
 
-			float fInt = min(1,max(0,(p->fLifeTime - p->fElapsedTime)/p->fLifeTime));
+			float fInt = min(1.f, max(0.f, (p->fLifeTime - p->fElapsedTime) / p->fLifeTime));
 
 			float fScale=p->fStartSize * fInt + p->fEndSize * (1.f - fInt);
 
@@ -575,8 +575,6 @@ void ZEffectBillboardTexAniList::Update(float fElapsed)
 		p->fElapsedTime+=fElapsed;
 
 		if( p->fElapsedTime > p->fLifeTime + p->fAddTime ) {
-//		if( p->fElapsedTime > p->fLifeTime ) {
-
 			delete p;
 			i=erase(i);
 			continue;
@@ -585,17 +583,13 @@ void ZEffectBillboardTexAniList::Update(float fElapsed)
 		p->normal=-RCameraDirection;
 		p->velocity+=fElapsed*p->accel;
 		p->position+=fElapsed*p->velocity;
-		p->fOpacity = min(1,max(0,(p->fLifeTime - p->fElapsedTime)/m_fVanishTime));
-
-		// 캐릭터의 특정 위치를 따라 가야하는 노드라면...
-
+		p->fOpacity = min(1.f, max(0.f, (p->fLifeTime - p->fElapsedTime) / m_fVanishTime));
 
 		pChar = ZGetCharacterManager()->Find(p->CharUID);
 
 		if( pChar ) {
 			if( p->partstype != eq_parts_pos_info_etc) {
 				if(pChar->m_pVMesh) {
-
 					p->position = pChar->m_pVMesh->GetBipTypePosition( p->partstype );
 				}
 			}
@@ -772,7 +766,7 @@ bool ZEffectBillboardTexAniList::Draw()
 
 			rvector pos = p->position;
 
-			float fInt = min(1,max(0,(p->fLifeTime - p->fElapsedTime)/p->fLifeTime));
+			float fInt = min(1.f, max(0.f, (p->fLifeTime - p->fElapsedTime) / p->fLifeTime));
 			float fScale=p->fStartSize * fInt + p->fEndSize * (1.f - fInt);
 
 			matScaling = ScalingMatrix(fScale * m_Scale);

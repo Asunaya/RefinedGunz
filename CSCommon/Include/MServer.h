@@ -2,7 +2,7 @@
 
 #include "MCommandCommunicator.h"
 #include "RealCPNet.h"
-
+#include "MDebug.h"
 #include <list>
 
 class MCommand;
@@ -12,21 +12,21 @@ protected:
 	MRealCPNet					m_RealCPNet;
 
 	std::list<MCommObject*>			m_AcceptWaitQueue;
-	CRITICAL_SECTION			m_csAcceptWaitQueue;
+	MCriticalSection				m_csAcceptWaitQueue;
 
-	void LockAcceptWaitQueue()		{ EnterCriticalSection(&m_csAcceptWaitQueue); }
-	void UnlockAcceptWaitQueue()		{ LeaveCriticalSection(&m_csAcceptWaitQueue); }
+	void LockAcceptWaitQueue() { m_csAcceptWaitQueue.lock(); }
+	void UnlockAcceptWaitQueue() { m_csAcceptWaitQueue.unlock(); }
 
-	MUIDRefCache<MCommObject>			m_CommRefCache;
-	CRITICAL_SECTION			m_csCommList;
+	MUIDRefCache<MCommObject>	m_CommRefCache;
+	MCriticalSection			m_csCommList;
 
-	void LockCommList()			{ EnterCriticalSection(&m_csCommList); }
-	void UnlockCommList()		{ LeaveCriticalSection(&m_csCommList); }
+	void LockCommList() { m_csCommList.lock(); }
+	void UnlockCommList() { m_csCommList.unlock(); }
 
 	MCommandList				m_SafeCmdQueue;
-	CRITICAL_SECTION			m_csSafeCmdQueue;
-	void LockSafeCmdQueue()		{ EnterCriticalSection(&m_csSafeCmdQueue); }
-	void UnlockSafeCmdQueue()	{ LeaveCriticalSection(&m_csSafeCmdQueue); }
+	MCriticalSection			m_csSafeCmdQueue;
+	void LockSafeCmdQueue() { m_csSafeCmdQueue.lock(); }
+	void UnlockSafeCmdQueue() { m_csSafeCmdQueue.unlock(); }
 
 	virtual MUID UseUID() = 0;
 
@@ -48,19 +48,19 @@ protected:
 
 	bool SendMsgReplyConnect(MUID* pHostUID, MUID* pAllocUID, unsigned int nTimeStamp,
 		MCommObject* pCommObj);
-	bool SendMsgCommand(DWORD nClientKey, char* pBuf, int nSize,
+	bool SendMsgCommand(u32 nClientKey, char* pBuf, int nSize,
 		unsigned short nMsgHeaderID, MPacketCrypterKey* pCrypterKey);
 
 	static void RCPCallback(void* pCallbackContext, RCP_IO_OPERATION nIO,
-		DWORD nKey, MPacketHeader* pPacket, DWORD dwPacketLen);	// Thread not safe
+		u32 nKey, MPacketHeader* pPacket, u32 dwPacketLen);	// Thread not safe
 
 public:	// For Debugging
 	char m_szName[128];
 	void SetName(char* pszName) { strcpy_safe(m_szName, pszName); }
 	void DebugLog(char* pszLog) {
 		char szLog[128];
-		wsprintf(szLog, "[%s] %s \n", m_szName, pszLog);
-		OutputDebugString(szLog);
+		sprintf_safe(szLog, "[%s] %s\n", m_szName, pszLog);
+		DMLog(szLog);
 	}
 
 public:

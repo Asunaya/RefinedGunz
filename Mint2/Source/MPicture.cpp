@@ -9,7 +9,7 @@ void MPicture::OnDraw(MDrawContext* pDC)
 
 	MCOLOR tempColor = pDC->GetBitmapColor();
 	pDC->SetBitmapColor( m_BitmapColor );
-	DWORD tempDrawMode = m_pBitmap->GetDrawMode();
+	auto tempDrawMode = m_pBitmap->GetDrawMode();
 	m_pBitmap->SetDrawMode( m_DrawMode );
 
 	int bw, bh;

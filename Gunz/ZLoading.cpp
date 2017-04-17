@@ -65,7 +65,7 @@ bool ZLoading::OnEvent(MEvent* pEvent, MListener* pListener)
 	return true;
 }
 
-void ZLoading::Progress( eLoaindgState state )
+void ZLoading::Progress(LoadingState state )
 {
 	m_iPercentage = ciPercentageList[state];
 }

@@ -24,7 +24,7 @@ public:
 	}
 };
 
-class MEdit : public MWidget{
+class MEdit : public MWidget {
 protected:
 	bool		m_bMouseOver;
 	MCOLOR		m_TextColor;
@@ -94,6 +94,9 @@ public:
 	void SetTabHandler(MWidget* pWidget)	{ m_pTabHandler = pWidget; }
 
 #define MINT_EDIT	"Edit"
+#ifdef GetClassName
+#undef GetClassName
+#endif
 	virtual const char* GetClassName() override { return MINT_EDIT; }
 };
 
@@ -101,7 +104,5 @@ public:
 #define MEDIT_CHAR_MSG			"char"
 #define MEDIT_ENTER_VALUE		"entered"
 #define MEDIT_ESC_VALUE			"esc"
-
-
 
 #define MEDIT_BLINK_TIME		400

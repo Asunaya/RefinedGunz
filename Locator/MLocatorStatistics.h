@@ -1,25 +1,22 @@
-#ifndef _LOCATOR_STATISTICS
-#define _LOCATOR_STATISTICS
+#pragma once
 
 #include <map>
 #include <string>
-using namespace std;
 
-
-typedef map< string, DWORD >	CountryStatisticsMap;
-typedef map< int, DWORD >		DeadServerStatisticsMap;
+typedef std::map<std::string, u32>	CountryStatisticsMap;
+typedef std::map<int, u32>		DeadServerStatisticsMap;
 
 
 class MLocatorStatistics
 {
-public :
+public:
 	~MLocatorStatistics();
 
 	void Reset();
 
-	void InitInsertCountryCode( const string& strCountryCode3 );
+	void InitInsertCountryCode( const std::string& strCountryCode3 );
 
-	void IncreaseCountryStatistics( const string& strCountryCode3, const int nCount = 1 );
+	void IncreaseCountryStatistics( const std::string& strCountryCode3, const int nCount = 1 );
 	void IncreaseDeadServerStatistics( const int nServerID );
 	void IncreaseCountryCodeCacheHitMissCount() { ++m_dwCountryCodeCacheHitMissCount; }
 	void IncreaseInvalidIPCount()				{ ++m_dwInvalidIPCount; }
@@ -27,11 +24,11 @@ public :
 	void IncreaseBlockCountryCodeHitCount()		{ ++m_dwBlockCountryCodeHitCount; }
 	
 	const CountryStatisticsMap& GetCountryStatistics() const	{ return m_CountryStatistics; }
-	const DWORD GetLastUpdatedTime()							{ return m_dwLastUpdatedTime; }
+	auto GetLastUpdatedTime()							{ return m_dwLastUpdatedTime; }
 	
-	void SetLastUpdatedTime( const DWORD dwTime )	{ m_dwLastUpdatedTime = dwTime; }
-	void SetDeadServerCount( const DWORD dwCount )	{ m_dwDeadServerCount = dwCount; }
-	void SetLiveServerCount( const DWORD dwCount )	{ m_dwLiveServerCount = dwCount; }
+	void SetLastUpdatedTime( u64 dwTime )	{ m_dwLastUpdatedTime = dwTime; }
+	void SetDeadServerCount( const u32 dwCount )	{ m_dwDeadServerCount = dwCount; }
+	void SetLiveServerCount( const u32 dwCount )	{ m_dwLiveServerCount = dwCount; }
 
 	static MLocatorStatistics& GetInstance() 
 	{
@@ -39,18 +36,18 @@ public :
 		return LocatorStatistics;
 	}
 
-private :
+private:
 	MLocatorStatistics();
 
 	void IncreaseCountryCodeCheckCount() { ++m_dwCountryCodeCheckCount; }
 
-	const DWORD GetCountryCodeCacheHitMissCount() const { return m_dwCountryCodeCacheHitMissCount; }
-	const DWORD GetInvalidIPCount() const				{ return m_dwInvalidIPCount; }
-	const DWORD GetCountryCodeCheckCount() const		{ return m_dwCountryCodeCheckCount; }
-	const DWORD GetBlockCount() const					{ return m_dwBlockCount; }
-	const DWORD GetDeadServerCount() const				{ return m_dwDeadServerCount; }
-	const DWORD GetLiveServerCount() const				{ return m_dwLiveServerCount; }
-	const DWORD GetBlockCountryCodeHitCount() const		{ return m_dwBlockCountryCodeHitCount; }
+	const u32 GetCountryCodeCacheHitMissCount() const { return m_dwCountryCodeCacheHitMissCount; }
+	const u32 GetInvalidIPCount() const				{ return m_dwInvalidIPCount; }
+	const u32 GetCountryCodeCheckCount() const		{ return m_dwCountryCodeCheckCount; }
+	const u32 GetBlockCount() const					{ return m_dwBlockCount; }
+	const u32 GetDeadServerCount() const				{ return m_dwDeadServerCount; }
+	const u32 GetLiveServerCount() const				{ return m_dwLiveServerCount; }
+	const u32 GetBlockCountryCodeHitCount() const		{ return m_dwBlockCountryCodeHitCount; }
 
 	void ResetCountryStatistics();
 	void ResetDeadServerStatistics();
@@ -65,17 +62,15 @@ private :
 private :
 	CountryStatisticsMap	m_CountryStatistics;
 	DeadServerStatisticsMap m_DeadServerStatistics;
-	DWORD					m_dwCountryCodeCacheHitMissCount;
-	DWORD					m_dwInvalidIPCount;
-	DWORD					m_dwCountryCodeCheckCount;
-	DWORD					m_dwBlockCount;
-	DWORD					m_dwLiveServerCount;
-	DWORD					m_dwDeadServerCount;
-	DWORD					m_dwBlockCountryCodeHitCount;
+	u32					m_dwCountryCodeCacheHitMissCount{};
+	u32					m_dwInvalidIPCount{};
+	u32					m_dwCountryCodeCheckCount{};
+	u32					m_dwBlockCount{};
+	u32					m_dwLiveServerCount{};
+	u32					m_dwDeadServerCount{};
+	u32					m_dwBlockCountryCodeHitCount{};
 
-	DWORD					m_dwLastUpdatedTime;
+	u64					m_dwLastUpdatedTime{};
 };
 
 MLocatorStatistics& GetLocatorStatistics();
-
-#endif

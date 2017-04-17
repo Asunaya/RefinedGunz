@@ -1,11 +1,10 @@
 #include "stdafx.h"
 #include "MEdit.h"
 #include "MColorTable.h"
-#include <mmsystem.h>
 #include <stdio.h>
-#include <memory.h>
 #include "Mint.h"
 #include "MDebug.h"
+#include "MClipboard.h"
 
 #define MEDIT_DEFAULT_WIDTH				100
 
@@ -276,7 +275,6 @@ bool MEdit::InputFilterChar(int nKey)
 		memset(temp, 0, m_nMaxLength);
 		if ( GetClipboard(temp, m_nMaxLength)==true)
 		{
-			// 줄바꿈이 발견되면 잘라낸다.
 			char *pFirst = strstr(temp,"\r");
 			if(pFirst!=NULL)
 			{
@@ -480,70 +478,15 @@ bool MEdit::IsPasswordField()
 
 bool MEdit::GetClipboard(char* szText, int nSize)
 {
-	if ( m_bPassword)
+	if (m_bPassword)
 		return false;
 
-	if(OpenClipboard(NULL)==FALSE)
-		return false;
-
-	/* get text from the clipboard */
-	HANDLE hClipData = GetClipboardData(CF_TEXT);
-	if(hClipData==NULL){
-		CloseClipboard();
-		return false;
-	}
-	
-	HANDLE hText = GlobalAlloc(GMEM_MOVEABLE, GlobalSize(hClipData));
-	if(hText==NULL){
-		CloseClipboard();
-		return false;
-	}
-	char* lpClipData = (char *)GlobalLock(hClipData);
-	if(lpClipData==NULL){
-		CloseClipboard();
-		return false;
-	}
-
-	if((int)strlen(lpClipData)>(nSize-2)){
-		memcpy(szText, lpClipData, nSize-1);
-		szText[nSize-1] = 0;
-	}
-	else{
-		strcpy_safe(szText, nSize, lpClipData);
-	}
-
-	GlobalUnlock(hClipData);
-
-	CloseClipboard();
-
-	GlobalUnlock(hText);
-
-	return true;
+	return MClipboard::Get(Mint::GetInstance()->GetHWND(), szText, static_cast<size_t>(nSize));
 }
 
 bool MEdit::SetClipboard(const char* szText)
 {
-	int len = strlen(szText) + 2;
-	HANDLE hData = GlobalAlloc(GMEM_DDESHARE, len);
-    if(hData==NULL){
-        return false;
-    }
-
-	char* lpData = (char*)GlobalLock(hData);
-    if(lpData==NULL){
-		return false;
-    }
-
-	strcpy_safe(lpData, len, szText);
-
-    GlobalUnlock(hData);
-
-    if (OpenClipboard(NULL)) {
-        EmptyClipboard();
-        SetClipboardData(CF_TEXT, hData);
-        CloseClipboard();
-    }
-	return true;
+	return MClipboard::Set(Mint::GetInstance()->GetHWND(), szText);
 }
 
 void MEdit::AddHistory(const char* szText)
@@ -559,8 +502,7 @@ void MEdit::AddHistory(const char* szText)
 void MEdit::SetMaxLength(int nMaxLength)
 {
 	nMaxLength += 1;
-	char *pNewBuffer = new char[nMaxLength];
-	ZeroMemory(pNewBuffer,nMaxLength);
+	char *pNewBuffer = new char[nMaxLength] {};
 
 	if (m_pBuffer != NULL) {
 		strcpy_safe(pNewBuffer, nMaxLength, m_pBuffer);
@@ -593,7 +535,7 @@ void MEditLook::OnTextDraw(MEdit* pEdit, MDrawContext* pDC, bool bShowLanguageTa
 	if(pEdit->GetMaxLength()+2>BUFFERSIZE) return;
 
 	if(pEdit->IsPasswordField()==false){
-		wsprintf(szBuffer, "%s", pEdit->GetText());
+		sprintf_safe(szBuffer, "%s", pEdit->GetText());
 	}
 	else{
 		memset(szBuffer, '*', strlen(pEdit->GetText()));
@@ -605,13 +547,6 @@ void MEditLook::OnTextDraw(MEdit* pEdit, MDrawContext* pDC, bool bShowLanguageTa
 		InsertString(szBuffer, pEdit->GetCompositionString(), pEdit->GetCarretPos(), sizeof(szBuffer));
 	}
 
-	/*
-	MFDTextStyle nTextStyle=MFDTS_NORMAL;
-	if(MWidget::m_pFocusedWindow==this) nTextStyle=MFDTS_ACTIVE;
-	else if(m_bMouseOver==true) nTextStyle=MFDTS_NORMAL;
-	else nTextStyle=MFDTS_NORMAL;
-	*/
-	//pFD->Text(pDC, m_Rect, temp, MAM_EDIT, nTextStyle, false);
 	pDC->SetColor(MCOLOR(DEFCOLOR_MEDIT_TEXT));
 
 	MFont* pFont = pDC->GetFont();
@@ -622,7 +557,6 @@ void MEditLook::OnTextDraw(MEdit* pEdit, MDrawContext* pDC, bool bShowLanguageTa
 
 	if( bShowLanguageTab )
 		r.w-=pFont->GetHeight();
-//	r.w-=10;
 
 	if(pEdit->GetCarretPos()<pEdit->GetStartPos())
 		pEdit->SetStartPos(pEdit->GetCarretPos());
@@ -631,25 +565,19 @@ void MEditLook::OnTextDraw(MEdit* pEdit, MDrawContext* pDC, bool bShowLanguageTa
 
 	int nCompositionStringLength = strlen(pEdit->GetCompositionString());
 
-
-	// 텍스트의 시작 문자열 위치 지정
 	char* szTemp = NULL;
 	szTemp = szBuffer+pEdit->GetStartPos();
-	int nTestLen = pEdit->GetCarretPos()-pEdit->GetStartPos()+nCompositionStringLength;	// pEdit->GetCompositionString()의 길이도 포함해야 StartPos 세팅에 컴포지션을 고려된다.
+	int nTestLen = pEdit->GetCarretPos()-pEdit->GetStartPos()+nCompositionStringLength;
 
-	// Composition 문자열이 Edit 너비를 넘어설때는 StartPos이 Composition 문자열 안으로 들어와야 한다.
-	// 이런 경우 ESC 등으로 StartPos이 Composition 문자열을 제외한 원래 문자열로 돌아오는 문제점등이 생기므로,
-	// StartPos의 범위는 Composition 문자열을 제외한 문자열로 제한한다.
 #define INDICATOR_WIDTH	10
-	while(szTemp[0]!=NULL && r.w-INDICATOR_WIDTH < pFont->GetWidth(szTemp, nTestLen)){	// -INDICATOR_WIDTH는 IME Indicator 위치 보정
+	while(szTemp[0]!=NULL && r.w-INDICATOR_WIDTH < pFont->GetWidth(szTemp, nTestLen)){
 		int nStartPos = NextPos(pEdit->GetText(), pEdit->GetStartPos());
 		if(pEdit->SetStartPos(nStartPos)==false) break;
 		szTemp = szBuffer+pEdit->GetStartPos();
 		nTestLen = pEdit->GetCarretPos()-pEdit->GetStartPos()+nCompositionStringLength;
 	}
 
-
-	char* szStartText = szBuffer+pEdit->GetStartPos();	// 현재 창에 표시되는 문자열의 시작
+	char* szStartText = szBuffer+pEdit->GetStartPos();
 
 	if(pEdit->IsFocus()==true){
 		int nFontHeight = pFont->GetHeight();
@@ -658,50 +586,25 @@ void MEditLook::OnTextDraw(MEdit* pEdit, MDrawContext* pDC, bool bShowLanguageTa
 		int nInsertPosInWidget = pFont->GetWidth(szStartText, pEdit->GetCarretPos()-pEdit->GetStartPos());
 		int nCaretPosInWidget = pFont->GetWidth(szStartText, pEdit->GetCarretPos()+pMint->m_nCompositionCaretPosition-pEdit->GetStartPos());
 
-		// 출력될 Candidate List 위치 지정하기
 		MRECT r = pEdit->GetClientRect();
-		//int nTextWidth = pFont->GetWidth(pEdit->GetText());
+
 		MPOINT cp = MClientToScreen(pEdit, MPOINT(r.x+nInsertPosInWidget, r.y));
 		pMint->SetCandidateListPosition(cp, r.h);
 
 		// Caret
 		int nSelStartPos=0;
 		int nSelEndPos=0;
-		//if(pEdit->m_nSelectionRange!=0)
-		//{
-		//	// Selection
-		//	nSelStartPos = pEdit->GetCarretPos();
-		//	nSelEndPos = nSelStartPos+pEdit->m_nSelectionRange;
-		//	if(nSelStartPos>nSelEndPos)
-		//	{
-		//		int nTemp = nSelStartPos;
-		//		nSelStartPos = nSelEndPos;
-		//		nSelEndPos = nSelStartPos;
-		//	}
-		//	if(nSelStartPos<pEdit->GetStartPos()) nSelStartPos = pEdit->GetStartPos();
-
-		//	const char* szSelText = szBuffer + nSelStartPos;
-		//	int nWidth = pFont->GetWidth(szSelText, nSelEndPos-nSelStartPos);
-		//	MRECT r = pEdit->GetClientRect();
-		//	pDC->SetColor(109,207,246,255);
-		//	pDC->FillRectangle( r.x+nCaretPosInWidget, r.y, nWidth, r.h );
-		//}
-		//else
+		
 		{
-			// Caret
 			auto nCurrTime = GetGlobalTimeMS();
 			if((nCurrTime%(MEDIT_BLINK_TIME*2))>MEDIT_BLINK_TIME){
-				//pDC->Text(r.x+nWidth-1, r.y, "|");
-//				r.x+=nCaretPosInWidget-(int)((float)pFont->GetHeight()*0.3f);
-				r.x+=nCaretPosInWidget;//-(int)((float)pFont->GetHeight());
+				r.x+=nCaretPosInWidget;
 				pDC->Text(r, "|", MAM_LEFT);
 			}
 		}
 
-
 		r = pEdit->GetClientRect();
 
-		// Composition 언더바 출력
 		MPOINT p;
 		pDC->GetPositionOfAlignment(&p, r, szStartText, MAM_LEFT);
 		p.x += nInsertPosInWidget;
@@ -710,26 +613,9 @@ void MEditLook::OnTextDraw(MEdit* pEdit, MDrawContext* pDC, bool bShowLanguageTa
 
 
 	r = pEdit->GetClientRect();
-	//if(pEdit->m_nSelectionRange != 0 )
-	//{
-	//	if( nSelStartPos != 0 ) 
-	//	{
-	//		strncpy( szBuffer, szStartText, nSelStartPos );
-	//		szBuffer[nSelStartPos+1]=0;
-	//		pDC->Text( );
-	//	}
-	//	if( )
-	//	{
 
-	//	}
-
-	//	pDC->Text(r, szBuffer, MAM_LEFT);
-	//}
-	//else
 	pDC->Text(r, szStartText, MAM_LEFT);
 
-
-	// 인디케이터 표기, 지전분하게 텍스트와 겹쳐서 보이지 않게 앞쪽에 그려준다.
 	if(pEdit->IsFocus()==true){
 		if(bShowLanguageTab){
 			Mint* pMint = Mint::GetInstance();
@@ -747,5 +633,4 @@ void MEditLook::OnDraw(MEdit* pEdit, MDrawContext* pDC, bool bShowLanguageTab)
 MRECT MEditLook::GetClientRect(MEdit* pEdit, const MRECT& r)
 {
 	return MRECT(r.x, r.y, r.w, r.h);
-	//return MRECT(r.x, r.y, r.w-10, r.h);	// IME Indicator 여유분
 }

@@ -1,8 +1,5 @@
 #pragma once
 
-#include "winsock2.h"
-#include "windows.h"
-#include <comutil.h>
 #include <stdio.h>
 #include <string>
 

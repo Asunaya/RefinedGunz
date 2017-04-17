@@ -1,9 +1,7 @@
-#ifndef ZIDLRESOURCE_H
-#define ZIDLRESOURCE_H
+#pragma once 
 
 #include "MIDLResource.h"
 #include "ZFilePath.h"
-
 
 class ZFrame;
 class ZMapListBox;
@@ -63,5 +61,3 @@ void ZGetInterfaceSkinPath(char(&pOutPath)[size], const char* szSkinName) {
 	ZGetInterfaceSkinPath(pOutPath, size, szSkinName);
 }
 void ZGetInterfaceSkinPath(char* pOutPath, int maxlen, const char* szSkinName);
-
-#endif

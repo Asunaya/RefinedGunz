@@ -1,14 +1,10 @@
-#ifndef MCOMMANDBUILDER_H
-#define MCOMMANDBUILDER_H
+#pragma once
 
-#include <windowsx.h>
 #include "MCommandManager.h"
-#include "Msg.h"
+#include "MPacket.h"
 #include "MDebug.h"
-#include "MCRC32.h"
 #include "MPacketCrypter.h"
 
-/// MCommandBuilder : 완결되지않은 Stream을 버퍼링한뒤 Command로 복원한다. <Builder Pattern>
 class MCommandBuilder {	
 protected:
 	MUID					m_uidSender;	// client
@@ -23,7 +19,7 @@ protected:
 	MCommandList			m_CommandList;
 	std::list<MPacketHeader*>	m_NetCmdList;
 
-	MPacketCrypter*			m_pPacketCrypter;			// 암호화
+	MPacketCrypter*			m_pPacketCrypter;
 	MCommandSNChecker		m_CommandSNChecker;
 	bool					m_bCheckCommandSN;
 protected:
@@ -65,7 +61,7 @@ public:
 		MCommandMsg* pMsg = (MCommandMsg*)(m_szBuffer+m_nBufferNext);
 		pMsg->nMsg = MSGID_COMMAND;
 		pMsg->nSize = nBlockSize;
-		CopyMemory(pMsg->Buffer, SendBuf, nSize);
+		memcpy(pMsg->Buffer, SendBuf, nSize);
 
 		m_nBufferNext += nBlockSize;
 		return nBlockSize;
@@ -94,6 +90,3 @@ public:
 //	//CmdBuilder.Read(CmdTestor.m_szBuffer+4, 45);
 //	//CmdBuilder.Read(CmdTestor.m_szBuffer+4+45, nSizeTotal-4-45);
 //////////////////////////////////////////////////////////////////
-
-
-#endif

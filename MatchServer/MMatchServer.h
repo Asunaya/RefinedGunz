@@ -1,6 +1,5 @@
 #pragma once
 
-#include "winsock2.h"
 #include "MXml.h"
 #include "MServer.h"
 #include "MMatchObject.h"
@@ -118,24 +117,8 @@ public:
 	void OnGameKill(const MUID& uidAttacker, const MUID& uidVictim);
 
 	bool CheckUpdateItemXML();
-	IPtoCountryList& GetTmpIPtoCountryList() { return m_TmpIPtoCountryList; }
-	BlockCountryCodeList& GetTmpBlockCountryCodeList() { return m_TmpBlockCountryCodeList; }
-	CustomIPList& GetTmpCustomIPList() { return m_TmpCustomIPList; }
-	void SetUseCountryFilter();
-	void SetAccetpInvalidIP();
-	void UpdateIPtoCountryList();
-	void UpdateBlockCountryCodeLsit();
-	void UpdateCustomIPList();
-	void ResetBlockCount() { m_dwBlockCount = 0; }
-	void ResetNonBlockCount() { m_dwNonBlockCount = 0; }
-	void IncreaseBlockCount() { ++m_dwBlockCount = 0; }
-	void IncreaseNonBlockCount() { ++m_dwNonBlockCount = 0; }
-	DWORD GetBlockCount() { return m_dwBlockCount; }
-	DWORD GetNonBlockCount() { return m_dwNonBlockCount; }
-	bool CheckIsValidIP(const MUID& CommUID, const std::string& strIP, std::string& strCountryCode3,
-		bool bUseFilter);
 
-	void CustomCheckEventObj(const DWORD dwEventID, MMatchObject* pObj, void* pContext);
+	void CustomCheckEventObj(const u32 dwEventID, MMatchObject* pObj, void* pContext);
 
 	MLadderMgr*	GetLadderMgr() { return &m_LadderMgr; }
 	MMatchObjectList*	GetObjects() { return &m_Objects; }
@@ -300,7 +283,7 @@ protected:
 	void OnMatchLoginFromDBAgent(const MUID& CommUID, const char* szLoginID,
 		const char* szName, int nSex, bool bFreeLoginIP, unsigned long nChecksumPack);
 	void OnMatchLoginFailedFromDBAgent(const MUID& CommUID, int nResult);
-	void OnBridgePeer(const MUID& uidChar, DWORD dwIP, DWORD nPort);
+	void OnBridgePeer(const MUID& uidChar, u32 dwIP, u32 nPort);
 	bool AddObjectOnMatchLogin(const MUID& uidComm,
 		MMatchAccountInfo* pSrcAccountInfo,
 		bool bFreeLoginIP,
@@ -312,8 +295,8 @@ protected:
 		const unsigned char *HashedPassword, int HashLength, const char *szEmail);
 	void CreateAccountResponse(const MUID &uidComm, const char *szMessage);
 
-	void LockUIDGenerate() { m_csUIDGenerateLock.Lock(); }
-	void UnlockUIDGenerate() { m_csUIDGenerateLock.Unlock(); }
+	void LockUIDGenerate() { m_csUIDGenerateLock.lock(); }
+	void UnlockUIDGenerate() { m_csUIDGenerateLock.unlock(); }
 
 	int ObjectAdd(const MUID& uidComm);
 	int ObjectRemove(const MUID& uid, MMatchObjectList::iterator* pNextItor);
@@ -323,9 +306,9 @@ protected:
 	// UDP
 	MSafeUDP* GetSafeUDP() { return &m_SafeUDP; }
 	void SendCommandByUDP(MCommand* pCommand, char* szIP, int nPort);
-	void ParsePacket(char* pData, MPacketHeader* pPacketHeader, DWORD dwIP, WORD wRawPort);
-	static bool UDPSocketRecvEvent(DWORD dwIP, WORD wRawPort, char* pPacket, DWORD dwSize);
-	void ParseUDPPacket(char* pData, MPacketHeader* pPacketHeader, DWORD dwIP, WORD wRawPort);
+	void ParsePacket(char* pData, MPacketHeader* pPacketHeader, u32 dwIP, u16 wRawPort);
+	static bool UDPSocketRecvEvent(u32 dwIP, u16 wRawPort, char* pPacket, u32 dwSize);
+	void ParseUDPPacket(char* pData, MPacketHeader* pPacketHeader, u32 dwIP, u16 wRawPort);
 
 	// Async DB
 	void ProcessAsyncJob();
@@ -709,13 +692,6 @@ protected:
 
 	bool CheckItemXML();
 
-	MCountryFilter& GetCountryFilter() { return m_CountryFilter; }
-	bool InitCountryFilterDB();
-	CUSTOM_IP_STATUS CheckIsValidCustomIP(const MUID& CommUID,
-		const std::string& strIP, std::string& strCountryCode3, const bool bUseFilter);
-	COUNT_CODE_STATUS CheckIsNonBlockCountry(const MUID& CommUID,
-		const std::string& strIP, std::string& strCountryCode3, const bool bUseFilter);
-
 	inline void SetTickTime(u64 nTickTime);
 
 	static MMatchServer*	m_pInstance;
@@ -754,13 +730,6 @@ protected:
 	MMatchScheduleMgr*		m_pScheduler;
 	MMatchQuest				m_Quest;
 
-	MCountryFilter			m_CountryFilter;
-	IPtoCountryList			m_TmpIPtoCountryList;
-	BlockCountryCodeList	m_TmpBlockCountryCodeList;
-	CustomIPList			m_TmpCustomIPList;
-	u32						m_dwBlockCount;
-	u32						m_dwNonBlockCount;
-
 	MMatchEventManager		m_CustomEventManager;
 
 	u64 LastPingTime{};
@@ -776,17 +745,17 @@ inline MMatchServer* MGetMatchServer()
 
 inline u64 MMatchServer::GetTickTime()
 {
-	m_csTickTimeLock.Lock();
+	m_csTickTimeLock.lock();
 	auto ret = m_nTickTime;
-	m_csTickTimeLock.Unlock();
+	m_csTickTimeLock.unlock();
 	return ret;
 }
 
 inline void MMatchServer::SetTickTime(u64 nTickTime)
 {
-	m_csTickTimeLock.Lock();
+	m_csTickTimeLock.lock();
 	m_nTickTime = nTickTime;
-	m_csTickTimeLock.Unlock();
+	m_csTickTimeLock.unlock();
 }
 
 inline const char* MErrStr(const int nID)

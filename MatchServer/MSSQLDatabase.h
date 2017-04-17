@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IDatabase.h"
+#include <memory>
 
 class MSSQLDatabase final : public IDatabase
 {
@@ -175,16 +176,6 @@ public:
 
 	virtual bool GetCID(const char* pszCharName, int& outCID) override;
 	virtual bool GetCharName(const int nCID, std::string& outCharName) override;
-
-	virtual bool GetIPCountryCode(const std::string& strIP,
-		uint32_t& dwOutIPFrom,
-		uint32_t& dwOutIPTo,
-		std::string& strOutCountryCode) override;
-	virtual bool GetBlockCountryCodeList(BlockCountryCodeList& rfBlockCountryCodeList) override;
-	virtual bool GetIPtoCountryList(IPtoCountryList& rfIPtoCountryList) override;
-	virtual bool GetCustomIP(const std::string& strIP, uint32_t& dwIPFrom, uint32_t& dwIPTo, bool& bIsBlock,
-		std::string& strCountryCode3, std::string& strComment) override;
-	virtual bool GetCustomIPList(CustomIPList& rfCustomIPList) override;
 
 	virtual bool InsertEvent(uint32_t dwAID, uint32_t dwCID, const std::string& strEventName) override;
 

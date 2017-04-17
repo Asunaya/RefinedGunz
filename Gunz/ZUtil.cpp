@@ -29,7 +29,7 @@ void ShowIExplorer(BOOL bShow, const char* szTitleTok)
 		max_wnd_count--;
 		BasehWnd = hWnd;
 
-		::GetClassName((HWND)BasehWnd, strBuf, 1023);
+		::GetClassNameA((HWND)BasehWnd, strBuf, 1023);
 		if( lstrcmpi(strBuf, "IEFrame") == 0 )
 		{
 			if( (BasehWnd = ::FindWindowEx((HWND)BasehWnd, NULL, "WorkerW", NULL)) )

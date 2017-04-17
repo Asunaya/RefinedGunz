@@ -5,12 +5,9 @@
 #include <crtdbg.h>
 #include <time.h>
 
-
 MProfiler	g_DefaultProfiler;	// Default Global Profiler
 
-
-
-MProfileStack::~MProfileStack(void)
+MProfileStack::~MProfileStack()
 {
 	while(empty()==false){
 		MPROFILEITEM* pProfileItem = top();
@@ -36,61 +33,11 @@ void MProfileLoop::AddProfile(MPROFILELOG* pPL)
 		}
 	}
 
-	/*
-	for(MProfileLoop::reverse_iterator ri=rbegin(); ri!=rend(); ri++){
-		MPROFILELOG* pLog = *ri;
-		if(pLog->nDepth==pPL->nDepth){
-			pPL->nCount = 1;
-			MProfileLoop::iterator i(ri.base());
-			insert(i, pPL);
-			return;
-		}
-	}
-	*/
-
 	pPL->nCount = 1;
 	insert(begin(), pPL);
 }
-/*
-void MProfileLoop::AddProfile(char* szName, int nDepth)
-{
-	// 중복된 Item은 리스트에 마지막에만 나타난다.
-	MPROFILELOG* pLog = NULL;
-	if(rbegin()!=rend()) pLog = *rbegin();
 
-	if(pLog==NULL || strcmp(pLog->szName, szName)!=0){
-		MPROFILELOG* pPL = new MPROFILELOG;
-		strcpy_safe(pPL->szName, szName);
-		pPL->nCount = 0;
-		pPL->nDepth = nDepth;
-		pPL->nMaxTime = -1;
-		pPL->nMinTime = -1;
-		pPL->nTotalTime = -1;
-		insert(end(), pPL);
-	}
-}
-
-void MProfileLoop::SetProfile(int nTime)
-{
-	MPROFILELOG* pProfileLog = NULL;
-	if(rbegin()!=rend()) pProfileLog = *rbegin();
-
-	if(pProfileLog->nCount==0){	// 초기 생성되는 Profile인 경우
-		pProfileLog->nCount = 1;
-		pProfileLog->nMaxTime = nTime;
-		pProfileLog->nMinTime = nTime;
-		pProfileLog->nTotalTime = nTime;
-	}
-	else{	// 누적되는 Profile
-		pProfileLog->nCount++;
-		pProfileLog->nMaxTime = max(pProfileLog->nMaxTime, nTime);
-		pProfileLog->nMinTime = min(pProfileLog->nMinTime, nTime);
-		pProfileLog->nTotalTime += nTime;
-	}
-}
-*/
-
-int MProfileLoop::GetTotalTime(void)
+int MProfileLoop::GetTotalTime()
 {
 	int nMinDepth = 9999;
 	u64 nTotalTime = 0;
@@ -116,14 +63,14 @@ int MProfileLoop::GetTotalTime(void)
 }
 
 
-MProfiler::MProfiler(void)
+MProfiler::MProfiler()
 {
 	m_pOneLoopProfile = NULL;
 	m_bEnableOneLoopProfile = false;
 	m_szFirstProfileName = NULL;
 	m_pOneLoopProfileResult = NULL;
 }
-MProfiler::~MProfiler(void)
+MProfiler::~MProfiler()
 {
 	if(m_pOneLoopProfile!=NULL){
 		delete m_pOneLoopProfile;
@@ -152,17 +99,13 @@ void MProfiler::BeginProfile(char* szProfileName)
 
 	MPROFILEITEM* pProfileItem = new MPROFILEITEM;
 
-	// Safe String Copy
-	int nLen = strlen(szProfileName);
-	memcpy(pProfileItem->szName, szProfileName, min(MPROFILE_ITEM_NAME_LENGTH, nLen+1));
-	pProfileItem->szName[min(MPROFILE_ITEM_NAME_LENGTH-1, nLen)] = NULL;
+	strcpy_safe(pProfileItem->szName, szProfileName);
 
 	pProfileItem->nStartTime = GetGlobalTimeMS();
 	pProfileItem->nEndTime = 0;
 
-	if(m_ProfileStack.empty()==true && m_szFirstProfileName!=NULL && strcmp(m_szFirstProfileName, szProfileName)==0){	// 한 루프가 끝나면 m_pOneLoopProfile 리셋
+	if(m_ProfileStack.empty()==true && m_szFirstProfileName!=NULL && strcmp(m_szFirstProfileName, szProfileName)==0){
 		if(m_pOneLoopProfile!=NULL){
-			// m_pOneLoopProfileResult 으로 결과값 이양
 			if(m_pOneLoopProfileResult!=NULL) delete m_pOneLoopProfileResult;
 			m_pOneLoopProfileResult = m_pOneLoopProfile;
 			m_pOneLoopProfile = NULL;
@@ -178,8 +121,6 @@ void MProfiler::BeginProfile(char* szProfileName)
 	}
 
 	m_ProfileStack.push(pProfileItem);
-
-	//m_ProfileLoop.AddProfile(pProfileItem->szName, m_ProfileStack.size()-1);
 }
 
 void MProfiler::EndProfile(char* szProfileName)
@@ -188,21 +129,14 @@ void MProfiler::EndProfile(char* szProfileName)
 
 	if(m_ProfileStack.empty()==true) return;
 	MPROFILEITEM* pProfileItem = m_ProfileStack.top();
-//	if(pProfileItem==NULL) return;	// 중간 Depth에서 프로파일링을 Enable 시키는 경우 최상위 _BP()가 불리기 전에 _EP()가 불려진다.
 
-	// 속도상의 이유로 Debug에서만 비교한다.
-	// 페어가 깨진 경우가 절대 있어서 안된다.
-	if(strcmp(pProfileItem->szName, szProfileName)!=0){	// 현재 스택 Top의 값과 같은 이름의 Profile이여야 한다.
+	if(strcmp(pProfileItem->szName, szProfileName)!=0){
 		_ASSERT(FALSE);
 		return;
 	}
-	//_ASSERT(strcmp(pProfileItem->szName, szProfileName)==0);	// 현재 스택 Top의 값과 같은 이름의 Profile이여야 한다.
-	pProfileItem->nEndTime = GetGlobalTimeMS();
 
-	/*
-	m_ProfileLoop.SetProfile(pProfileItem->nEndTime - pProfileItem->nStartTime);
-	delete pProfileItem;
-	*/
+	pProfileItem->nEndTime = GetGlobalTimeMS();
+	
 	MPROFILELOG* pProfileLog = new MPROFILELOG;
 	strcpy_safe(pProfileLog->szName, pProfileItem->szName);
 	pProfileLog->nCount = 1;
@@ -212,27 +146,16 @@ void MProfiler::EndProfile(char* szProfileName)
 	pProfileLog->nTotalTime = pProfileLog->nMaxTime;
 	delete pProfileItem;
 
-	//if(m_bEnableOneLoopProfile==true){
-		if(m_pOneLoopProfile==NULL)
-			m_pOneLoopProfile = new MProfileLoop;
-		MPROFILELOG* pCopy = new MPROFILELOG;
-		memcpy(pCopy, pProfileLog, sizeof(MPROFILELOG));
-		m_pOneLoopProfile->AddProfile(pCopy);
-	//}
+	if(m_pOneLoopProfile==NULL)
+		m_pOneLoopProfile = new MProfileLoop;
+	MPROFILELOG* pCopy = new MPROFILELOG;
+	memcpy(pCopy, pProfileLog, sizeof(MPROFILELOG));
+	m_pOneLoopProfile->AddProfile(pCopy);
 
 	m_ProfileLoop.AddProfile(pProfileLog);
 
 	m_ProfileStack.pop();
 }
-
-/*
- 
-----------------------------------------------------------------------------------------------------------------------------------------
- Total             | Average           | Min               | Max               | Count             | Scope
-----------------------------------------------------------------------------------------------------------------------------------------
- 12345 (100%)      | %d                | %d                | %d                | %d                | Scope
-----------------------------------------------------------------------------------------------------------------------------------------
-*/
 
 bool MProfiler::FinalAnalysis(char* szFileName)
 {
@@ -251,12 +174,9 @@ bool MProfiler::FinalAnalysis(char* szFileName)
 
 	sprintf_safe(szLog, "%s %s\n\n", szDate, szTime);
 	fputs(szLog, fp);
-	//fputs(Profiling Data\n, fp);
 	sprintf_safe(szLog, "Total Profiling Time : %8.3f sec\n", nTotalTime/1000.0f);
 	fputs(szLog, fp);
 
-	// Total Profile Loop Count
-	//fputs(temp, fp);
 	fputs("----------------------------------------------------------------------------------------------------------------------------------------\n", fp);
 	fputs("       Total        |   Count    |       Average      |         Min        |         Max        | Scope\n", fp);
 	fputs("----------------------------------------------------------------------------------------------------------------------------------------\n", fp);
@@ -297,7 +217,7 @@ bool MProfiler::FinalAnalysis(char* szFileName)
 	return true;
 }
 
-int MProfiler::GetTotalTime(void)
+int MProfiler::GetTotalTime()
 {
 	return m_ProfileLoop.GetTotalTime();
 }
@@ -312,17 +232,17 @@ void MProfiler::EnableOneLoopProfile(bool bEnable)
 	m_bEnableOneLoopProfile = bEnable;
 }
 
-bool MProfiler::IsOneLoopProfile(void)
+bool MProfiler::IsOneLoopProfile()
 {
 	return m_bEnableOneLoopProfile;
 }
 
-MProfileLoop* MProfiler::GetOneLoopProfile(void)
+MProfileLoop* MProfiler::GetOneLoopProfile()
 {
 	return m_pOneLoopProfileResult;
 }
 
-MProfileLoop* MProfiler::GetProfile(void)
+MProfileLoop* MProfiler::GetProfile()
 {
 	return m_pOneLoopProfile;
 }

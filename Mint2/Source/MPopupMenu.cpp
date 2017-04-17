@@ -1,10 +1,9 @@
 #include "stdafx.h"
 #include "MPopupMenu.h"
 #include "MColorTable.h"
-
+#include <algorithm>
 
 IMPLEMENT_LOOK(MPopupMenu, MPopupMenuLook)
-
 
 //// MPopupMenuLook ////
 MPopupMenuLook::MPopupMenuLook()
@@ -209,7 +208,7 @@ void MPopupMenu::AddMenuItem(MMenuItem* pMenuItem)
 		for(int i=0; i<m_Children.GetCount(); i++){
 			MMenuItem* pMenuItem = (MMenuItem *)m_Children.Get(i);
 			pMenuItem->SetPosition(cr.x, cr.y+y);
-			nWidth = max(nWidth, pMenuItem->GetWidth());
+			nWidth = std::max(nWidth, pMenuItem->GetWidth());
 			y += pMenuItem->GetHeight();
 		}
 		for(int i=0; i<m_Children.GetCount(); i++){
@@ -224,7 +223,7 @@ void MPopupMenu::AddMenuItem(MMenuItem* pMenuItem)
 		for(int i=0; i<m_Children.GetCount(); i++){
 			MMenuItem* pMenuItem = (MMenuItem *)m_Children.Get(i);
 			pMenuItem->SetPosition(cr.x+x, cr.y);
-			nHeight = max(nHeight, pMenuItem->GetHeight());
+			nHeight = std::max(nHeight, pMenuItem->GetHeight());
 			x += pMenuItem->GetWidth();
 		}
 		for(int i=0; i<m_Children.GetCount(); i++){

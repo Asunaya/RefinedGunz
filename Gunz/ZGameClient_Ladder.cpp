@@ -1,6 +1,4 @@
 #include "stdafx.h"
-
-#include <winsock2.h>
 #include "MErrorTable.h"
 #include "ZConfiguration.h"
 #include "ZGameClient.h"
@@ -19,13 +17,9 @@
 #include "ZNetRepository.h"
 #include "ZCountDown.h"
 
-#include "ZLanguageConf.h"
+#define PROPOSAL_AGREEMENT_TIMEOUT_SEC 30
 
-#define PROPOSAL_AGREEMENT_TIMEOUT_SEC			(30)		// 30√  ≈∏¿”æ∆øÙ
-
-void ShowProposalWaitFrame(bool bVisible, const char* szTitle=NULL, const char* szMessage=NULL);
-
-
+void ShowProposalWaitFrame(bool bVisible, const char* szTitle = NULL, const char* szMessage = NULL);
 
 void OnAskReplierAgreement_OnExpire()
 {

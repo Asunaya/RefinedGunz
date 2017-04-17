@@ -13,20 +13,12 @@
 #include "MDebug.h"
 #include "MMatchTransDataType.h"
 #include "MBlobArray.h"
-#include "MTCPSocket.h"
 #include "ZGameClient.h"
 #include "MCommandBuilder.h"
 
 #include "MCommandLogFrame.h"
 #include "MListBox.h"
 extern MCommandLogFrame* m_pLogFrame;
-
-#include "ZLanguageConf.h"
-
-
-
-// 여기서부터 테스트를 위한 코드 - Bird ////////////////////////////////////////////////
-//#ifdef _BIRDTEST
 
 bool ZBirdPostCommand(ZBirdDummyClient* pDummyClient, MCommand* pCmd)
 {
@@ -46,24 +38,17 @@ ZBirdDummyClient::ZBirdDummyClient() : MCommandCommunicator()
 	m_nPBufferTop = 0;
 	m_Server.SetInvalid();
 
-	InitializeCriticalSection(&m_csRecvLock);
-
-	// 소켓 이벤트 연결
 	m_ClientSocket.SetCallbackContext(this);
 	m_ClientSocket.SetConnectCallback(SocketConnectEvent);
 	m_ClientSocket.SetDisconnectCallback(SocketDisconnectEvent);
 	m_ClientSocket.SetRecvCallback(SocketRecvEvent);
 	m_ClientSocket.SetSocketErrorCallback(SocketErrorEvent);
-
-	
 }
 
 ZBirdDummyClient::~ZBirdDummyClient()
 {
 	delete m_pCommandBuilder;
 	m_pCommandBuilder = NULL;
-
-	DeleteCriticalSection(&m_csRecvLock);
 }
 
 void ZBirdDummyClient::Create(int nID, ZBT_DummyONCommand pCallBack)
@@ -169,7 +154,7 @@ bool ZBirdDummyClient::OnSockDisconnect(SOCKET sock)
 	return true;
 }
 
-bool ZBirdDummyClient::OnSockRecv(SOCKET sock, char* pPacket, DWORD dwSize)
+bool ZBirdDummyClient::OnSockRecv(SOCKET sock, char* pPacket, u32 dwSize)
 {
 	if (m_pCommandBuilder==NULL) return false;
 	// New Cmd Buffer ////////////////
@@ -226,7 +211,7 @@ void ZBirdDummyClient::OnSockError(SOCKET sock, SOCKET_ERROR_EVENT ErrorEvent, i
 }
 
 
-bool ZBirdDummyClient::SocketRecvEvent(void* pCallbackContext, SOCKET sock, char* pPacket, DWORD dwSize)
+bool ZBirdDummyClient::SocketRecvEvent(void* pCallbackContext, SOCKET sock, char* pPacket, u32 dwSize)
 {
 	ZBirdDummyClient* pClient = (ZBirdDummyClient*)pCallbackContext;
 	return pClient->OnSockRecv(sock, pPacket, dwSize);

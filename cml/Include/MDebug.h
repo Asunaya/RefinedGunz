@@ -1,8 +1,4 @@
-#ifndef __MDEBUG_H
-#define __MDEBUG_H
-
-#include <Windows.h>
-#include <crtdbg.h>
+#pragma once
 
 #include "GlobalTypes.h"
 
@@ -41,6 +37,7 @@ extern "C" void CustomLog(const char *Msg);
 void __cdecl MMsg(const char *pFormat,...);
 #endif
 
+using LPEXCEPTION_POINTERS = struct _EXCEPTION_POINTERS*;
 void MFilterException(LPEXCEPTION_POINTERS p);
 
 void MInitProfile();
@@ -65,6 +62,4 @@ void MCheckProfileCount();
 inline char MBeginProfile(const char *szName) { return{}; }
 inline void MEndProfile(char guard) { (void)guard; }
 inline void MCheckProfileCount() {}
-#endif
-
 #endif

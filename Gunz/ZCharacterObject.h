@@ -6,7 +6,7 @@
 #include "ZObject.h"
 #include "stuff.h"
 #include "BasicInfoHistory.h"
-#include "DeferredConstructionWrapper.h"
+#include "optional.h"
 #include "ZShadow.h"
 
 namespace RealSpace2
@@ -84,7 +84,7 @@ protected:
 	float	m_fLightLife{};
 	rvector	m_vLightColor{};
 
-	DeferredConstructionWrapper<ZShadow> Shadow;
+	optional<ZShadow> Shadow;
 	bool m_bDynamicLight{};
 
 private:

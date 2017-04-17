@@ -3,9 +3,8 @@
 #include "CMLexicalAnalyzer.h"
 #include <algorithm>
 #include "MStrEx.h"
-#include <Windows.h>	// for test
 
-void MCommandManager::InitializeCommandDesc(void)
+void MCommandManager::InitializeCommandDesc()
 {
 	for(MCommandDescMap::iterator i=m_CommandDescs.begin(); i!=m_CommandDescs.end(); i++){
 		delete (*i).second;
@@ -13,13 +12,13 @@ void MCommandManager::InitializeCommandDesc(void)
 	m_CommandDescs.clear();
 }
 
-MCommandManager::MCommandManager(void)
+MCommandManager::MCommandManager()
 {
 	InitializeCommandMemPool();
 	InitializeCommandDesc();
 }
 
-MCommandManager::~MCommandManager(void)
+MCommandManager::~MCommandManager()
 {
 	InitializeCommandDesc();
 	while(PeekCommand()) {
@@ -29,7 +28,7 @@ MCommandManager::~MCommandManager(void)
 	FinalizeCommandMemPool();
 }
 
-void MCommandManager::Initialize(void)
+void MCommandManager::Initialize()
 {
 	for(MCommandList::iterator i=m_CommandQueue.begin(); i!=m_CommandQueue.end(); i++){
 		delete (*i);
@@ -37,12 +36,12 @@ void MCommandManager::Initialize(void)
 	m_CommandQueue.clear();
 }
 
-int MCommandManager::GetCommandDescCount(void) const
+int MCommandManager::GetCommandDescCount() const
 {
 	return (int)m_CommandDescs.size();
 }
 
-int MCommandManager::GetCommandQueueCount(void) const
+int MCommandManager::GetCommandQueueCount() const
 {
 	return (int)m_CommandQueue.size();
 }
@@ -110,7 +109,7 @@ bool MCommandManager::Post(MCommand* pCmd)
 	return true;
 }
 
-MCommand* MCommandManager::GetCommand(void)
+MCommand* MCommandManager::GetCommand()
 {
 	if(m_CommandQueue.size()==0) return NULL;
 
@@ -121,7 +120,7 @@ MCommand* MCommandManager::GetCommand(void)
 	return pCmd;
 }
 
-MCommand* MCommandManager::PeekCommand(void)
+MCommand* MCommandManager::PeekCommand()
 {
 	if(m_CommandQueue.size()==0) return NULL;
 

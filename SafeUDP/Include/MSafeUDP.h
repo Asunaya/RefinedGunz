@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <winsock2.h>
+#include "MTime.h"
 #include "MSync.h"
 #include "MThread.h"
 #include "MBasePacket.h"
@@ -19,28 +19,32 @@
 #include "MInetUtil.h"
 #include <memory>
 
+#ifdef WIN32
+#pragma comment(lib, "ws2_32.lib")
+#endif
+
 class MSafeUDP;
 
 // INNER CLASS //////////////////////////////////////////////////////////////////////////
 struct MSendQueueItem {
-	u32			dwIP;
-	u16			wRawPort;
-	MBasePacket*pPacket;
-	u32			dwPacketSize;
+	u32 dwIP;
+	u16 wRawPort;
+	MBasePacket* pPacket;
+	u32 dwPacketSize;
 };
 
 struct MACKQueueItem {
-	u32			dwIP;
-	u16			wRawPort;
-	u8			nSafeIndex;
+	u32 dwIP;
+	u16 wRawPort;
+	u8 nSafeIndex;
 };
 
 struct MACKWaitItem {
 	std::unique_ptr<MSafePacket> pPacket;
-	u32				dwPacketSize;
-	timeval			tvFirstSent;
-	timeval			tvLastSent;
-	u8				nSendCount;
+	u32 dwPacketSize;
+	MTime::timeval tvFirstSent;
+	MTime::timeval tvLastSent;
+	u8 nSendCount;
 };
 
 // OUTER CLASS //////////////////////////////////////////////////////////////////////////
@@ -59,19 +63,19 @@ public:
 	typedef ACKWaitList::iterator	ACKWaitListItor;
 
 private:
-	MSafeUDP*		m_pSafeUDP;
-	bool			m_bConnected;
-	LINKSTATE		m_nLinkState;
-	sockaddr_in		m_Address;		// IP and Port
-	BYTE			m_nNextReadIndex;
-	BYTE			m_nNextWriteIndex;
+	MSafeUDP*		m_pSafeUDP{};
+	bool			m_bConnected{};
+	LINKSTATE		m_nLinkState = LINKSTATE_CLOSED;
+	MSocket::sockaddr_in m_Address{}; // IP and Port
+	u8				m_nNextReadIndex{};
+	u8				m_nNextWriteIndex{};
 
-	DWORD			m_dwAuthKey;
-	void*			m_pUserData;
+	u32				m_dwAuthKey{};
+	void*			m_pUserData{};
 
 public:
-	timeval			m_tvConnectedTime;
-	timeval			m_tvLastPacketRecvTime;
+	MTime::timeval			m_tvConnectedTime{};
+	MTime::timeval			m_tvLastPacketRecvTime{};
 
 public:
 	ACKWaitList		m_ACKWaitQueue;	// Safe Sent queue, Wait for ACK
@@ -79,11 +83,10 @@ public:
 private:
 	void Setconnected(bool bConnected)	{ m_bConnected = bConnected; }
 	void CreateAuthKey() { 	
-		srand((unsigned)time(NULL));
-		m_dwAuthKey = rand()*rand();
+		m_dwAuthKey = rand() * rand();
 	}
-	BYTE GetNextReadIndex()				{ return m_nNextReadIndex++; }
-	BYTE GetNextWriteIndex()			{ return m_nNextWriteIndex++; }
+	u8 GetNextReadIndex() { return m_nNextReadIndex++; }
+	u8 GetNextWriteIndex() { return m_nNextWriteIndex++; }
 
 public:
 	MNetLink();
@@ -92,25 +95,25 @@ public:
 	bool SendControl(MControlPacket::CONTROL nControl);
 	bool OnRecvControl(MControlPacket* pPacket);
 
-	bool SetACKWait(MSafePacket* pPacket, DWORD dwPacketSize);
-	bool ClearACKWait(BYTE nSafeIndex);
+	bool SetACKWait(MSafePacket* pPacket, u32 dwPacketSize);
+	bool ClearACKWait(u8 nSafeIndex);
 
 	void SetSafeUDP(MSafeUDP* pSafeUDP)	{ m_pSafeUDP = pSafeUDP; }
 	MSafeUDP* GetSafeUDP()				{ return m_pSafeUDP; }
 	bool IsConnected()					{ return m_bConnected; }
-	timeval GetConnectedTime()			{ return m_tvConnectedTime; }
+	MTime::timeval GetConnectedTime()			{ return m_tvConnectedTime; }
 	void SetLinkState(MNetLink::LINKSTATE nState);
 	MNetLink::LINKSTATE GetLinkState()	{ return m_nLinkState; }
-	static bool MakeSockAddr(char* pszIP, int nPort, sockaddr_in* pSockAddr);
+	static bool MakeSockAddr(const char* pszIP, int nPort, MSocket::sockaddr_in* pSockAddr);
 	bool SetAddress(char* pszIP, int nPort);
 	std::string GetIPString() const		{ return GetIPv4String(m_Address.sin_addr); }
 	u32 GetIP() const					{ return m_Address.sin_addr.S_un.S_addr; }
 	u16 GetRawPort()					{ return m_Address.sin_port; }
-	int GetPort()						{ return ntohs(m_Address.sin_port); }
-	sockaddr_in* GetSockAddr()			{ return &m_Address; }
+	int GetPort();
+	MSocket::sockaddr_in* GetSockAddr()			{ return &m_Address; }
 	i64 GetMapKey();
-	static i64 GetMapKey(sockaddr_in* pSockAddr);
-	timeval GetLastPacketRecvTime()		{ return m_tvLastPacketRecvTime; }
+	static i64 GetMapKey(MSocket::sockaddr_in* pSockAddr);
+	MTime::timeval GetLastPacketRecvTime()		{ return m_tvLastPacketRecvTime; }
 
 	u32 GetAuthKey() const			{ return m_dwAuthKey; }
 	void SetUserData(void* pUserData)	{ m_pUserData = pUserData; }
@@ -124,47 +127,46 @@ typedef NetLinkMap::iterator	NetLinkItor;
 
 // INNER CLASS //////////////////////////////////////////////////////////////////////////
 typedef void(MNETLINKSTATECALLBACK)(MNetLink* pNetLink, MNetLink::LINKSTATE nState);
-typedef bool(MCUSTOMRECVCALLBACK)(DWORD dwIP, WORD wRawPort, char* pPacket, DWORD dwSize);	// Real UDP Packet
-typedef void(MLIGHTRECVCALLBACK)(DWORD dwIP, WORD wRawPort, MLightPacket* pPacket, DWORD dwSize);
-typedef void(MGENERICRECVCALLBACK)(MNetLink* pNetLink, MBasePacket* pPacket, DWORD dwSize);
+typedef bool(MCUSTOMRECVCALLBACK)(u32 dwIP, u16 wRawPort, char* pPacket, u32 dwSize);	// Real UDP Packet
+typedef void(MLIGHTRECVCALLBACK)(u32 dwIP, u16 wRawPort, MLightPacket* pPacket, u32 dwSize);
+typedef void(MGENERICRECVCALLBACK)(MNetLink* pNetLink, MBasePacket* pPacket, u32 dwSize);
 
 class MSafeUDP;
-class MSocketThread : public MThread {
+class MSocketThread : public MThread
+{
 public:
 	typedef std::list<MACKQueueItem*>	ACKSendList;
 	typedef ACKSendList::iterator	ACKSendListItor;
 	typedef std::list<MSendQueueItem*>	SendList;
 	typedef SendList::iterator		SendListItor;
 
-private:
-	MSafeUDP*				m_pSafeUDP;
-	MSignalEvent			m_ACKEvent;
-	MSignalEvent			m_SendEvent;
-	MSignalEvent			m_KillEvent;
+	MCUSTOMRECVCALLBACK*	m_fnCustomRecvCallback{};
+	MLIGHTRECVCALLBACK*		m_fnLightRecvCallback{};
+	MGENERICRECVCALLBACK*	m_fnGenericRecvCallback{};
 
-	ACKSendList				m_ACKSendList;		// Sending priority High
-	ACKSendList				m_TempACKSendList;	// Temporary ACK List for Sync
-	CRITICAL_SECTION		m_csACKLock;
+	// Shadows MThread::Create.
+	void Create();
 
-	SendList				m_SendList;			// Sending priority Low	(Safe|Normal) Packet
-	SendList				m_TempSendList;		// Temporary Send List for Sync
-	CRITICAL_SECTION		m_csSendLock;
+	// Shadows MThread::Destroy.
+	void Destroy();
 
-	DWORD					m_nTotalSend;
-	DWORD					m_nTotalRecv;
-	MTrafficLog				m_SendTrafficLog;
-	MTrafficLog				m_RecvTrafficLog;
+	MSafeUDP* GetSafeUDP() const { return m_pSafeUDP; }
+	void SetSafeUDP(MSafeUDP* pSafeUDP)	{ m_pSafeUDP = pSafeUDP; }
 
-public:
-	MCUSTOMRECVCALLBACK*	m_fnCustomRecvCallback;
-	MLIGHTRECVCALLBACK*		m_fnLightRecvCallback;
-	MGENERICRECVCALLBACK*	m_fnGenericRecvCallback;
+	bool PushSend(MNetLink* pNetLink, MBasePacket* pPacket, u32 dwpPacketSize, bool bRetransmit);	
+	bool PushSend(const char* pszIP, int nPort, char* pPacket, u32 dwPacketSize);
+	bool PushSend(u32 dwIP, int nPort, char* pPacket, u32 dwPacketSize );
+
+	int GetSendTraffic() const { return m_SendTrafficLog.GetTrafficSpeed(); }
+	int GetRecvTraffic() const { return m_RecvTrafficLog.GetTrafficSpeed(); }
+
+	virtual void Run() override;
 
 private:
-	void LockACK() { EnterCriticalSection(&m_csACKLock); }
-	void UnlockACK() { LeaveCriticalSection(&m_csACKLock); }
-	void LockSend() { EnterCriticalSection(&m_csSendLock); }
-	void UnlockSend() { LeaveCriticalSection(&m_csSendLock); }
+	void LockACK() { m_csACKLock.lock(); }
+	void UnlockACK() { m_csACKLock.unlock(); }
+	void LockSend() { m_csSendLock.lock(); }
+	void UnlockSend() { m_csSendLock.unlock(); }
 
 	bool PushACK(MNetLink* pNetLink, MSafePacket* pPacket);
 	bool FlushACK();
@@ -173,78 +175,38 @@ private:
 	bool SafeSendManage();
 
 	bool Recv();
-	bool OnCustomRecv(DWORD dwIP, WORD wRawPort, char* pPacket, DWORD dwSize);
-	bool OnControlRecv(DWORD dwIP, WORD wRawPort, MBasePacket* pPacket, DWORD dwSize);
-	bool OnLightRecv(DWORD dwIP, WORD wRawPort, MLightPacket* pPacket, DWORD dwSize);
-	bool OnACKRecv(DWORD dwIP, WORD wRawPort, MACKPacket* pPacket);
-	bool OnGenericRecv(DWORD dwIP, WORD wRawPort, MBasePacket* pPacket, DWORD dwSize);
+	bool OnCustomRecv(u32 dwIP, u16 wRawPort, char* pPacket, u32 dwSize);
+	bool OnControlRecv(u32 dwIP, u16 wRawPort, MBasePacket* pPacket, u32 dwSize);
+	bool OnLightRecv(u32 dwIP, u16 wRawPort, MLightPacket* pPacket, u32 dwSize);
+	bool OnACKRecv(u32 dwIP, u16 wRawPort, MACKPacket* pPacket);
+	bool OnGenericRecv(u32 dwIP, u16 wRawPort, MBasePacket* pPacket, u32 dwSize);
 
-public:
-	MSocketThread()						{ 
-		m_pSafeUDP=NULL; 
-		m_fnCustomRecvCallback = NULL; m_fnLightRecvCallback=NULL; m_fnGenericRecvCallback=NULL; 
-		m_nTotalSend = 0;	m_nTotalRecv = 0;
-	}
-	~MSocketThread()					{ m_pSafeUDP=NULL; }
-	void Create();						
-	void Destroy();
-	MSafeUDP* GetSafeUDP()				{ return m_pSafeUDP; }
-	void SetSafeUDP(MSafeUDP* pSafeUDP)	{ m_pSafeUDP = pSafeUDP; }
+	template <typename T>
+	bool SendPacket(const T& DestAddr, const void* Data, size_t DataSize);
 
-	bool PushSend(MNetLink* pNetLink, MBasePacket* pPacket, DWORD dwpPacketSize, bool bRetransmit);	
-	bool PushSend(char* pszIP, int nPort, char* pPacket, DWORD dwPacketSize);
-	bool PushSend( DWORD dwIP, int nPort, char* pPacket, DWORD dwPacketSize );
+	MSafeUDP*				m_pSafeUDP{};
+	MSignalEvent			m_ACKEvent;
+	MSignalEvent			m_SendEvent;
+	MSignalEvent			m_KillEvent;
 
-	int GetSendTraffic() const { return m_SendTrafficLog.GetTrafficSpeed(); }
-	int GetRecvTraffic() const { return m_RecvTrafficLog.GetTrafficSpeed(); }
+	ACKSendList				m_ACKSendList;		// Sending priority High
+	ACKSendList				m_TempACKSendList;	// Temporary ACK List for Sync
+	MCriticalSection		m_csACKLock;
 
-	// Dbg code. don't use for release mode. - by SungE.
-	int GetSendListSize() { return (int)m_SendList.size(); }
-	int GetTempSendList() { return (int)m_TempSendList.size(); }
-	// 
+	SendList				m_SendList;			// Sending priority Low	(Safe|Normal) Packet
+	SendList				m_TempSendList;		// Temporary Send List for Sync
+	MCriticalSection		m_csSendLock;
 
-	virtual void Run();
-	virtual void Debug();
+	u32						m_nTotalSend{};
+	u32						m_nTotalRecv{};
+	MTrafficLog				m_SendTrafficLog;
+	MTrafficLog				m_RecvTrafficLog;
 };
 
-// OUTER CLASS //////////////////////////////////////////////////////////////////////////
-class MSafeUDP {
-	bool						m_bBindWinsockDLL;		// Socket DLL Load
-	SOCKET						m_Socket;			// My Socket
-	sockaddr_in					m_LocalAddress;		// My IP and Port
-
-	MSocketThread				m_SocketThread;
-
-	CRITICAL_SECTION			m_csNetLink;
-
+class MSafeUDP
+{
 public:
-	NetLinkMap					m_NetLinkMap;
-	MNETLINKSTATECALLBACK*		m_fnNetLinkStateCallback;
-	void LockNetLink()			{ EnterCriticalSection(&m_csNetLink); }
-	void UnlockNetLink()		{ LeaveCriticalSection(&m_csNetLink); }
-
-public:
-	SOCKET GetLocalSocket()		{ return m_Socket; }
-	std::string GetLocalIPString() { return GetIPv4String(m_LocalAddress.sin_addr); }
-	DWORD GetLocalIP()			{ return m_LocalAddress.sin_addr.S_un.S_addr; }
-	WORD GetLocalPort()			{ return m_LocalAddress.sin_port; }
-
-	MNetLink* FindNetLink(DWORD dwIP, WORD wRawPort);
-	MNetLink* FindNetLink(__int64 nMapKey);
-
-	void GetTraffic(int* nSendTraffic, int* nRecvTraffic) const {
-		*nSendTraffic = m_SocketThread.GetSendTraffic();
-		*nRecvTraffic = m_SocketThread.GetRecvTraffic();
-	}
-
-private:
-	bool OpenSocket(int nPort, bool bReuse=true);
-	void CloseSocket();
-	void OnConnect(MNetLink* pNetLink);
-	void OnDisconnect(MNetLink* pNetLink);
-
-public:
-	bool Create(bool bBindWinsockDLL, int nPort, bool bReuse=true);
+	bool Create(bool bBindWinsockDLL, int nPort, bool bReuse = true);
 	void Destroy();
 
 	void SetNetLinkStateCallback(MNETLINKSTATECALLBACK pCallback) { m_fnNetLinkStateCallback = pCallback; }
@@ -260,16 +222,40 @@ public:
 	bool Disconnect(MNetLink* pNetLink);
 	int DisconnectAll();
 
-	bool Send(MNetLink* pNetLink, MBasePacket* pPacket, DWORD dwSize);
-	bool Send(char* pszIP, int nPort, char* pPacket, DWORD dwSize);
-	bool Send(DWORD dwIP, int nPort, char* pPacket, DWORD dwSize );
+	bool Send(MNetLink* pNetLink, MBasePacket* pPacket, u32 dwSize);
+	bool Send(const char* pszIP, int nPort, char* pPacket, u32 dwSize);
+	bool Send(u32 dwIP, int nPort, char* pPacket, u32 dwSize );
 
-	void Debug() { m_SocketThread.Debug(); }
+	SOCKET GetLocalSocket() const { return m_Socket; }
+	std::string GetLocalIPString() const { return GetIPv4String(m_LocalAddress.sin_addr); }
+	u32 GetLocalIP() const { return m_LocalAddress.sin_addr.S_un.S_addr; }
+	u16 GetLocalPort() const { return m_LocalAddress.sin_port; }
 
-	// Dbg code. don't use for release mode. - by SungE.
-	MSocketThread& GetSocketThread() { return m_SocketThread; }
-	//
+	MNetLink* FindNetLink(u32 dwIP, u16 wRawPort);
+	MNetLink* FindNetLink(__int64 nMapKey);
+
+	void GetTraffic(int* nSendTraffic, int* nRecvTraffic) const {
+		*nSendTraffic = m_SocketThread.GetSendTraffic();
+		*nRecvTraffic = m_SocketThread.GetRecvTraffic();
+	}
+
+	void LockNetLink() { m_csNetLink.lock(); }
+	void UnlockNetLink() { m_csNetLink.unlock(); }
+
+	MCriticalSection			m_csNetLink;
+
+	NetLinkMap					m_NetLinkMap;
+	MNETLINKSTATECALLBACK*		m_fnNetLinkStateCallback;
+
+private:
+	bool OpenSocket(int nPort, bool bReuse = true);
+	void CloseSocket();
+	void OnConnect(MNetLink* pNetLink);
+	void OnDisconnect(MNetLink* pNetLink);
+
+	bool						m_bBindWinsockDLL;	// Socket DLL Load
+	SOCKET						m_Socket;			// My Socket
+	MSocket::sockaddr_in		m_LocalAddress;		// My IP and Port
+
+	MSocketThread				m_SocketThread;
 };
-
-
-#pragma comment(lib, "ws2_32.lib")

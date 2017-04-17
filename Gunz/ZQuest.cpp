@@ -18,7 +18,6 @@
 #include "ZWorldManager.h"
 #include "ZCommandTable.h"
 #include "ZModule_Skills.h"
-#include "ZLanguageConf.h"
 #include "RNavigationMesh.h"
 #include "RNavigationNode.h"
 #include "ZEquipmentListBox.h"

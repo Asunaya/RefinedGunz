@@ -5,10 +5,13 @@
 #include "MDebug.h"
 #include <string>
 #include "MPdb.h"
-#include <windows.h>
 #include <mutex>
 #include "../../sdk/dx9/Include/d3dx9.h"
 #include <cassert>
+
+#ifdef WIN32
+#include <windows.h>
+#endif
 
 static char logfilename[256];
 static int g_nLogMethod=MLOGSTYLE_DEBUGSTRING;
@@ -102,20 +105,20 @@ void MLog(const char *pFormat,...)
 
 extern "C" void CustomLogDefault(const char* Msg) {}
 
-#ifdef _WIN32
-#include <windows.h>
-#include <crtdbg.h>
-
 void __cdecl MMsg(const char *pFormat,...)
 {
-    char buff[256];
+    char buf[256];
 
-    wvsprintf(buff, pFormat, (char *)(&pFormat+1));
-    lstrcat(buff, "\r\n");
-    MessageBox( NULL, buff, "RealSpace Message", MB_OK );
-	mlog(buff);mlog("\n");
-}
+	va_list va;
+	va_start(va, pFormat);
+	vsprintf_safe(buf, pFormat, va);
+	va_end(va);
+	strcat_safe(buf, "\r\n");
+#ifdef WIN32
+	MessageBox(0, buf, "RealSpace Message", MB_OK);
 #endif
+	MLog("%s\n", buf);
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // exception handler
@@ -170,9 +173,9 @@ void MFilterException(LPEXCEPTION_POINTERS p)
 
 	mlog("\n");
 
-	string str;
+	std::string str;
 
-	GetCrashInfo(p,str);
+	GetCrashInfo(p, str);
 
 	mlog(str.c_str());
 	mlog("\n");

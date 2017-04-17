@@ -1,5 +1,6 @@
-#ifndef MRegistry_H
-#define MRegistry_H
+#pragma once
+
+#ifdef WIN32
 
 class MRegistry {
 public:
@@ -23,6 +24,5 @@ public:
 	static bool Read(HKEY hRegKey, const char* szPath, const char* szValueName, char* pOutBuffer, int maxlen);
 	static void Write(HKEY hRegKey, const char* szPath, const char* szValueName, const char* szValue);
 };
-
 
 #endif

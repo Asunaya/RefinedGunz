@@ -1,5 +1,4 @@
-#ifndef REALCPNET_H
-#define REALCPNET_H
+#pragma once
 
 //////////////////////////////////////////////////////////////////
 // Class:	MRealCPNet class (2001/10/25)
@@ -12,12 +11,15 @@
 
 #include <list>
 #include <algorithm>
-
-#include <Winsock2.h>
-#include <mswsock.h>
-
 #include "MPacket.h"
+#include "MSocket.h"
+#include "MSync.h"
+#include "MUtil.h"
 
+#ifdef REALCPNET_LINK_SOCKET_LIBS
+#pragma comment(lib, "ws2_32.lib")
+#pragma comment(lib, "mswsock.lib")
+#endif
 
 // Constants
 #define DEFAULT_PORT		5000
@@ -39,79 +41,6 @@ enum RCP_IO_OPERATION {
 	RCP_IO_WRITE,
 };
 
-class RCPOverlapped : public WSAOVERLAPPED {
-protected:
-	RCP_IO_OPERATION	m_IOOperation;
-public:
-	RCPOverlapped(RCP_IO_OPERATION nIO) {	
-		ZeroMemory(this, sizeof(RCPOverlapped));	
-		m_IOOperation = nIO;
-	}
-	RCP_IO_OPERATION GetIOOperation()			{ return m_IOOperation; }
-};
-
-class RCPOverlappedSend : public RCPOverlapped {
-protected:
-	int		m_nTotalBytes;
-	int		m_nTransBytes;
-	char*	m_pData;
-public:
-	RCPOverlappedSend() : RCPOverlapped(RCP_IO_WRITE) {
-		m_nTotalBytes = 0;
-		m_nTransBytes = 0;
-		m_pData = NULL;
-	}
-	virtual ~RCPOverlappedSend() {
-		free(m_pData);	m_pData = NULL;
-	}
-	void SetData(char* pData, int nDataLen) {
-		m_pData = pData;
-		m_nTotalBytes = nDataLen;
-	}
-	int GetTotalBytes()				{ return m_nTotalBytes; }
-	int GetTransBytes()				{ return m_nTransBytes; }
-	void AddTransBytes(int nBytes)	{ m_nTransBytes += nBytes; }
-	char* GetData()					{ return m_pData; }
-};
-
-class RCPOverlappedRecv : public RCPOverlapped { 
-protected:
-	char*	m_pBuffer;
-	int		m_nBufferSize;
-public:
-	RCPOverlappedRecv() : RCPOverlapped(RCP_IO_READ) {
-		m_pBuffer = 0;
-		m_nBufferSize = 0;
-	}
-	void SetBuffer(char* pBuffer, int nBufferSize) {
-		m_pBuffer = pBuffer;
-		m_nBufferSize = nBufferSize;
-	}
-	char* GetBuffer()				{ return m_pBuffer; }
-	int GetBufferSize()				{ return m_nBufferSize; }
-};
-
-class RCPOverlappedAccept : public RCPOverlapped {
-protected:
-	SOCKET	m_Socket;
-	char*	m_pBuffer;
-	int		m_nBufferSize;
-public:
-	RCPOverlappedAccept() : RCPOverlapped(RCP_IO_ACCEPT) {
-		m_Socket = INVALID_SOCKET;
-		m_pBuffer = 0;
-		m_nBufferSize = 0;
-	}
-	void SetSocket(SOCKET sd)		{ m_Socket = sd; }
-	SOCKET GetSocket()				{ return m_Socket; }
-	void SetBuffer(char* pBuffer, int nBufferSize) {
-		m_pBuffer = pBuffer;
-		m_nBufferSize = nBufferSize;
-	}
-	char* GetBuffer()				{ return m_pBuffer; }
-	int GetBufferSize()				{ return m_nBufferSize; }
-};
-
 // For AcceptEx, the IOCP key is the MRealSession for the listening socket,
 // so we need to another field SocketAccept in PER_IO_CONTEXT. When the outstanding
 // AcceptEx completes, this field is our connection socket handle.
@@ -119,118 +48,83 @@ class MRealSession {
 public:
 	enum SESSIONSTATE { SESSIONSTATE_IDLE, SESSIONSTATE_ACTIVE, SESSIONSTATE_DEAD };
 
-private:
-	SOCKET						m_sdSocket;
-	SOCKADDR_IN					m_SockAddr;
-	SESSIONSTATE				m_nSessionState;
-	void*						m_pUserContext;
-
-public:
-	CHAR						m_RecvBuffer[MAX_BUFF_SIZE];	// RCPOverlappedRecv 용도
-
-public:
-	MRealSession() { 
-		m_sdSocket = INVALID_SOCKET;
-		ZeroMemory(&m_SockAddr, sizeof(SOCKADDR_IN));
-		SetSessionState(SESSIONSTATE_IDLE); 
-		SetUserContext(NULL);
-
-		ZeroMemory(m_RecvBuffer, sizeof(CHAR)*MAX_BUFF_SIZE);
-	}
-
-	virtual ~MRealSession() {
-	}
+	MRealSession() = default;
+	virtual ~MRealSession() = default;
 
 	void SetSocket(SOCKET sd)	{ m_sdSocket = sd; }
 	SOCKET	GetSocket()			{ return m_sdSocket; }
 
-	void SetSockAddr(SOCKADDR_IN* pAddr, int nAddrLen) {
-		CopyMemory(&m_SockAddr, pAddr, min(static_cast<int>(sizeof(SOCKADDR_IN)), nAddrLen)); }
-	SOCKADDR_IN* GetSockAddr()	{ return &m_SockAddr; }
-	DWORD GetIP()				{ return m_SockAddr.sin_addr.S_un.S_addr; }
-	int GetPort()				{ return ntohs(m_SockAddr.sin_port); }
-	WORD GetRawPort()			{ return m_SockAddr.sin_port; }
+	void SetSockAddr(MSocket::sockaddr_in* pAddr, int nAddrLen) {
+		memcpy(&m_SockAddr, pAddr, (std::min)(static_cast<int>(sizeof(MSocket::sockaddr_in)), nAddrLen)); }
+	MSocket::sockaddr_in* GetSockAddr()	{ return &m_SockAddr; }
+	u32 GetIP() const { return m_SockAddr.sin_addr.S_un.S_addr; }
+	int GetPort() const { return MSocket::ntohs(m_SockAddr.sin_port); }
+	u16 GetRawPort() const { return m_SockAddr.sin_port; }
 
 	void SetSessionState(SESSIONSTATE nState) { m_nSessionState = nState; }
-	SESSIONSTATE GetSessionState() { return m_nSessionState; }
+	SESSIONSTATE GetSessionState() const { return m_nSessionState; }
 	void SetUserContext(void* pContext) { m_pUserContext = pContext; }
-	void* GetUserContext()		{ return m_pUserContext; }
+	void* GetUserContext() const { return m_pUserContext; }
+
+	char m_RecvBuffer[MAX_BUFF_SIZE]{};
+
+private:
+	SOCKET						m_sdSocket = MSocket::InvalidSocket;
+	MSocket::sockaddr_in		m_SockAddr{};
+	SESSIONSTATE				m_nSessionState = SESSIONSTATE_IDLE;
+	void*						m_pUserContext{};
 };
 
 
-class MSessionMap : protected std::map<SOCKET, MRealSession*> {
-protected:
-	CRITICAL_SECTION	m_csLock;
-
+class MSessionMap : public std::map<SOCKET, MRealSession*> {
 public:
-	MSessionMap()			{ InitializeCriticalSection(&m_csLock); }
-	virtual ~MSessionMap()	{ DeleteCriticalSection(&m_csLock); }
+	MCriticalSection m_csLock;
 
-	// Safe Methods ////////////////////////////////////////////////////////
+	void Lock() { m_csLock.lock(); }
+	void Unlock() { m_csLock.unlock(); }
+
+	// Safe methods
 	void Add(MRealSession* pSession) {
-		Lock();
-			_ASSERT(pSession->GetSocket() != INVALID_SOCKET);
-			insert(MSessionMap::value_type(pSession->GetSocket(), pSession));
-		Unlock();
+		std::lock_guard<MCriticalSection> lock{ m_csLock };
+
+		_ASSERT(pSession->GetSocket() != MSocket::InvalidSocket);
+		insert(MSessionMap::value_type(pSession->GetSocket(), pSession));
 	}
-	bool Remove(SOCKET sd, MSessionMap::iterator* pNextItor=NULL) {
-		bool bResult = false;
-		Lock();
-			MSessionMap::iterator i = find(sd);
-			if (i!=end()) {
-				MRealSession* pSession = (*i).second;
-				delete pSession;
-				MSessionMap::iterator itorTmp = erase(i);
-				if (pNextItor)
-					*pNextItor = itorTmp;
-				bResult = true;
-			}
-		Unlock();
-		return bResult;
+	bool Remove(SOCKET sd, MSessionMap::iterator* pNextItor = nullptr) {
+		std::lock_guard<MCriticalSection> lock{ m_csLock };
+		return RemoveUnsafe(sd, pNextItor);
 	}
 	void RemoveAll() {
-		OutputDebugString("MSessionMap::RemoveAll() Proceeding \n");
-		Lock();
-			MSessionMap::iterator itor = begin();
-			while( itor != end()) {
-				MRealSession* pSession = (*itor).second;
-				delete pSession;
-				itor = erase(itor);
-			}
-		Unlock();
-		OutputDebugString("MSessionMap::RemoveAll() Finished \n");
+		std::lock_guard<MCriticalSection> lock{ m_csLock };
+
+		for (auto* Session : MakePairValueAdapter(*this))
+			delete Session;
+		
+		clear();
 	}
 	bool IsExist(SOCKET sd) {
-		bool bResult = false;
-		Lock();
-			MSessionMap::iterator i = find(sd);
-			if(i!=end()) bResult = true;				
-		Unlock();
-		return bResult;
+		std::lock_guard<MCriticalSection> lock{ m_csLock };
+
+		auto it = find(sd);
+		return it != end();
 	}
 	MRealSession* GetSession(SOCKET sd) {
-		MRealSession* pSession = NULL;
-		Lock();
-			MSessionMap::iterator i = find(sd);
-			if(i!=end()) 
-				pSession = (*i).second;
-		Unlock();
-		return pSession;
+		std::lock_guard<MCriticalSection> lock{ m_csLock };
+
+		auto it = find(sd);
+		if (it == end())
+			return nullptr;
+
+		return it->second;
 	}
 
-	// Unsafe Methods /////////////////////////////////////////////////////////////////////
-	// ~Unsafe() 용도 이외엔 사용금지
-	void Lock()		{ EnterCriticalSection(&m_csLock); }
-	void Unlock()	{ LeaveCriticalSection(&m_csLock); }
-
-	MSessionMap::iterator GetBeginItorUnsafe()	{ return begin(); }
-	MSessionMap::iterator GetEndItorUnsafe()	{ return end(); }
+	// Unsafe methods
 	MRealSession* GetSessionUnsafe(SOCKET sd) {
-		MSessionMap::iterator i = find(sd);
-		if(i==end()) 
-			return NULL;
-		else
-			return (*i).second;
+		auto it = find(sd);
+		if (it == end())
+			return nullptr;
+
+		return it->second;
 	}
 	bool IsExistUnsafe(MRealSession* pSession) {
 		for (MSessionMap::iterator i=begin(); i!=end(); i++) {
@@ -240,70 +134,65 @@ public:
 		}
 		return false;
 	}
-	bool RemoveUnsafe(SOCKET sd, MSessionMap::iterator* pNextItor=NULL) {
-		bool bResult = false;
-		MSessionMap::iterator i = find(sd);
-		if (i!=end()) {
-			MRealSession* pSession = (*i).second;
-			delete pSession;
-			MSessionMap::iterator itorTmp = erase(i);
-			if (pNextItor)
-				*pNextItor = itorTmp;
-			bResult = true;
-		}
-		return bResult;
+	bool RemoveUnsafe(SOCKET sd, MSessionMap::iterator* pNextItor = nullptr) {
+		auto it = find(sd);
+		if (it == end())
+			return false;
+
+		delete it->second;
+		auto next_it = erase(it);
+		if (pNextItor)
+			*pNextItor = next_it;
+
+		return true;
 	}
-friend MRealCPNet;
 };
 
-
 using RCPCALLBACK = void(void* pCallbackContext, RCP_IO_OPERATION nIO,
-	DWORD dwKey, MPacketHeader* pPacket, DWORD dwPacketLen);
-
+	u32 dwKey, MPacketHeader* pPacket, u32 dwPacketLen);
 
 class MRealCPNet {
 private:
-	unsigned short		m_nPort;
-	BOOL				m_bEndServer;
-	BOOL				m_bRestart;
-	BOOL				m_bVerbose;
-	HANDLE				m_hIOCP;
-	SOCKET				m_sdListen;
-	DWORD               m_dwThreadCount;
-	HANDLE				m_ThreadHandles[MAX_WORKER_THREAD];
-	HANDLE				m_hCleanupEvent;
+	unsigned short		m_nPort = DEFAULT_PORT;
+	bool				m_bEndServer{};
+	bool				m_bRestart = true;
+	bool				m_bVerbose{};
+	HANDLE				m_hIOCP{};
+	SOCKET				m_sdListen = MSocket::InvalidSocket;
+	u32					m_dwThreadCount{};
+	MSignalEvent		m_hCleanupEvent{};
 
-	MRealSession*		m_pListenSession;
+	MRealSession*		m_pListenSession{};
 	MSessionMap			m_SessionMap;
 
-	CRITICAL_SECTION	m_csCrashDump;
+	MCriticalSection	m_csCrashDump;
 
-	RCPCALLBACK*		m_fnCallback;
-	void*				m_pCallbackContext;
+	RCPCALLBACK*		m_fnCallback{};
+	void*				m_pCallbackContext{};
 
 private:
-	DWORD CrashDump(PEXCEPTION_POINTERS ExceptionInfo);
+	u32 CrashDump(struct _EXCEPTION_POINTERS* ExceptionInfo);
 
 protected:
-	SOCKET CreateSocket(void);
-	BOOL CreateListenSocket( const bool bReuse );
-	BOOL CreateAcceptSocket(BOOL fUpdateIOCP);
+	SOCKET CreateSocket();
+	bool CreateListenSocket(bool bReuse);
+	bool CreateAcceptSocket(bool fUpdateIOCP);
 
-	MRealSession* UpdateCompletionPort(SOCKET sd, RCP_IO_OPERATION nOperation, BOOL bAddToList);
+	MRealSession* UpdateCompletionPort(SOCKET sd, RCP_IO_OPERATION nOperation, bool bAddToList);
 	// bAddToList is FALSE for listening socket, and TRUE for connection sockets.
 	// As we maintain the context for listening socket in a global structure, we
 	// don't need to add it to the list.
 
-	bool PostIOSend(SOCKET sd, char* pBuf, DWORD nBufLen);
+	bool PostIOSend(SOCKET sd, char* pBuf, u32 nBufLen);
 	void PostIORecv(SOCKET sd);
 
-	static bool MakeSockAddr(const char* pszIP, int nPort, sockaddr_in* pSockAddr);
-	bool CheckIPFloodAttack(sockaddr_in* pRemoteAddr, int* poutIPCount);
+	static bool MakeSockAddr(const char* pszIP, int nPort, MSocket::sockaddr_in* pSockAddr);
+	bool CheckIPFloodAttack(MSocket::sockaddr_in* pRemoteAddr, int* poutIPCount);
 
 	MRealSession* CreateSession(SOCKET sd, RCP_IO_OPERATION ClientIO);
 	void DeleteAllSession();
 
-	static DWORD WINAPI WorkerThread(LPVOID WorkContext);
+	void WorkerThread();
 
 public:
 	MRealCPNet();
@@ -311,17 +200,18 @@ public:
 	bool Create(int nPort, const bool bReuse = false );
 	void Destroy();
 
-	void SetLogLevel(int nLevel) { if (nLevel > 0) m_bVerbose = TRUE; else m_bVerbose = FALSE; }
-	void SetCallback(RCPCALLBACK* pCallback, void* pCallbackContext) { m_fnCallback = pCallback; m_pCallbackContext = pCallbackContext; }
+	void SetLogLevel(int nLevel) { m_bVerbose = nLevel > 0; }
+	void SetCallback(RCPCALLBACK* pCallback, void* pCallbackContext) {
+		m_fnCallback = pCallback; m_pCallbackContext = pCallbackContext; }
 
 	bool Connect(SOCKET* pSocket, const char* pszAddress, int nPort);
 	void Disconnect(SOCKET sd);
-	VOID CloseSession(MRealSession* pSession, BOOL bGraceful);
+	void CloseSession(MRealSession* pSession, bool bGraceful);
 
 	template<size_t size> bool GetAddress(SOCKET sd, char(&pszAddress)[size], int *pPort) {
 		return GetAddress(sd, pszAddress, size, pPort);
 	}
-	bool GetAddress(SOCKET sd, char* pszAddress, int maxlen, int* pPort);
+	bool GetAddress(SOCKET sd, char* pszAddress, size_t maxlen, int* pPort);
 	void* GetUserContext(SOCKET sd);
 	void SetUserContext(SOCKET sd, void* pContext);
 
@@ -333,11 +223,3 @@ friend RCPCALLBACK;
 
 typedef void(RCPLOGFUNC)(const char *pFormat,...);
 void SetupRCPLog(RCPLOGFUNC* pFunc);
-
-#ifdef REALCPNET_LINK_SOCKET_LIBS
-	#pragma comment(lib, "ws2_32.lib")
-	#pragma comment(lib, "mswsock.lib")
-#endif
-
-
-#endif

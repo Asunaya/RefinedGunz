@@ -32,3 +32,6 @@
 
 bool InitializeNotify(MZFileSystem *pfs);
 bool NotifyMessage(int nMsgID, std::string *out);
+bool NotifyMessage(int nMsgID, char* Output, size_t OutputSize);
+template <size_t Size> bool NotifyMessage(int nMsgID, char(&Output)[Size]) {
+	return NotifyMessage(nMsgID, Output, Size); }

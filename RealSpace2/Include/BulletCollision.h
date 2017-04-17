@@ -5,7 +5,7 @@
 #pragma warning(disable: 4305)
 #include "../sdk/bullet/include/btBulletCollisionCommon.h"
 #pragma warning(pop)
-#include "DeferredConstructionWrapper.h"
+#include "optional.h"
 #include "RNameSpace.h"
 
 _NAMESPACE_REALSPACE2_BEGIN
@@ -39,7 +39,7 @@ private:
 
 	btCollisionObject Object;
 	btTriangleIndexVertexArray Triangles;
-	DeferredConstructionWrapper<btBvhTriangleMeshShape> Mesh;
+	optional<btBvhTriangleMeshShape> Mesh;
 	std::vector<v3> Vertices;
 	std::vector<BulletCollision::IndexType> Indices;
 };

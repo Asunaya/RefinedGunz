@@ -4,242 +4,244 @@
 #include <vector>
 #include <deque>
 #include <algorithm>
-
-#include <winsock2.h>
-#include <windows.h>
-#include <crtdbg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-
+#include "MSocket.h"
 #include "MSync.h"
 #include "MThread.h"
 #include "MPacket.h"
 #include "MCommand.h"
 #include "MTrafficLog.h"
 
-class MTCPSocket;
 class MServerSocket;
 class MClientSocket;
 
 struct MTCPSendQueueItem
 {
-	char*			pPacket;
-	DWORD			dwPacketSize;
+	char*		pPacket;
+	u32			dwPacketSize;
 };
 
-typedef std::list<MTCPSendQueueItem*>	TCPSendList;
-typedef TCPSendList::iterator			TCPSendListItor;
+using TCPSendList = std::list<MTCPSendQueueItem*>;
 
 struct MSocketObj
 {
 	SOCKET				sock;
-	HANDLE				event;
+	MSignalEvent		event;
 	TCPSendList			sendlist;
 };
 
-typedef std::list<MSocketObj*>			SocketList;
-typedef SocketList::iterator		SocketListItor;
+using SocketList = std::list<MSocketObj*>;
 
-enum SOCKET_ERROR_EVENT {eeGeneral, eeSend, eeReceive, eeConnect, eeDisconnect, eeAccept};
+enum SOCKET_ERROR_EVENT { eeGeneral, eeSend, eeReceive, eeConnect, eeDisconnect, eeAccept };
 
 // general callback
-typedef void(MSOCKETERRORCALLBACK)(void* pCallbackContext, SOCKET sock, SOCKET_ERROR_EVENT ErrorEvent, int &ErrorCode);
+typedef void(MSOCKETERRORCALLBACK)(void* pCallbackContext, SOCKET sock, SOCKET_ERROR_EVENT ErrorEvent,
+	int &ErrorCode);
 // client callback
-typedef bool(MCLIENTRECVCALLBACK)(void* pCallbackContext, SOCKET socket, char* pPacket, DWORD dwSize);
+typedef bool(MCLIENTRECVCALLBACK)(void* pCallbackContext, SOCKET socket, char* pPacket, u32 dwSize);
 typedef bool(MCONNECTCALLBACK)(void* pCallbackContext, SOCKET sock);
 typedef bool(MDISCONNECTCALLBACK)(void* pCallbackContext, SOCKET sock);
 // server callback
-typedef bool(MSERVERRECVCALLBACK)(MSocketObj* pSocketObj, char* pPacket, DWORD dwSize);
+typedef bool(MSERVERRECVCALLBACK)(MSocketObj* pSocketObj, char* pPacket, u32 dwSize);
 typedef bool(MACCEPTCALLBACK)(MSocketObj* pSocketObj);
 typedef bool(MDISCONNECTCLIENTCALLBACK)(MSocketObj* pSocketObj);
 
 class MTCPSocketThread : public MThread 
 {
-private:
+public:
+	int GetSendTraffic() const { return m_SendTrafficLog.GetTrafficSpeed(); }
+	int GetRecvTraffic() const { return m_RecvTrafficLog.GetTrafficSpeed(); }
+
+	bool IsActive() const { return m_bActive; }
+
+	// Shadows MThread::Create
+	void Create();
+
+	// Shadows MThread::Destroy
+	void Destroy();
+
+	void*						m_pCallbackContext{};
+	MSOCKETERRORCALLBACK*		m_fnSocketErrorCallback{};
+
 protected:
-	MTCPSocket*				m_pTCPSocket;
+	void OnSocketError(SOCKET sock, SOCKET_ERROR_EVENT ErrorEvent, int &ErrorCode) {
+		if (m_fnSocketErrorCallback)
+			m_fnSocketErrorCallback(m_pCallbackContext, sock, ErrorEvent, ErrorCode);
+	}
+
 	MSignalEvent			m_SendEvent;
 	MSignalEvent			m_KillEvent;
-	CRITICAL_SECTION		m_csSendLock;
-	bool					m_bActive;
+	MCriticalSection		m_csSendLock;
+	bool					m_bActive{};
 
-	DWORD					m_nTotalSend;
-	DWORD					m_nTotalRecv;
+	u32						m_nTotalSend{};
+	u32						m_nTotalRecv{};
 	MTrafficLog				m_SendTrafficLog;
 	MTrafficLog				m_RecvTrafficLog;
-
-	virtual void OnSocketError(SOCKET sock, SOCKET_ERROR_EVENT ErrorEvent, int &ErrorCode);
-public:
-	MTCPSocketThread(MTCPSocket* pTCPSocket);
-	~MTCPSocketThread();
-	virtual void Run();
-	virtual void Create();
-	virtual void Destroy();
-	void LockSend()			{ EnterCriticalSection(&m_csSendLock); }
-	void UnlockSend()		{ LeaveCriticalSection(&m_csSendLock); }
-	bool IsActive()			{ return m_bActive; }
-
-	int GetSendTraffic()	{ return m_SendTrafficLog.GetTrafficSpeed(); }
-	int GetRecvTraffic()	{ return m_RecvTrafficLog.GetTrafficSpeed(); }
-
-	void*						m_pCallbackContext;
-	MSOCKETERRORCALLBACK*		m_fnSocketErrorCallback;
 };
 
 class MClientSocketThread : public MTCPSocketThread 
 {
-private:
-protected:
-	TCPSendList				m_SendList;			// Sending priority Low	(Safe|Normal) Packet
-	TCPSendList				m_TempSendList;		// Temporary Send List for Sync
-
-	size_t GetSendWaitQueueCount()	{ return m_TempSendList.size(); }
-
-	bool OnConnect(SOCKET sock);
-	bool OnRecv(SOCKET socket, char* pPacket, DWORD dwSize);
-	bool FlushSend();
-	bool Recv();
-	void ClearSendList();
 public:
-	MClientSocketThread(MTCPSocket* pTCPSocket);
-	~MClientSocketThread();
-	virtual void Run();
+	MClientSocketThread(MClientSocket* Socket) : m_pTCPSocket{ Socket } {}
 
-	bool PushSend(char* pPacket, DWORD dwPacketSize);
+	bool PushSend(char* pPacket, u32 dwPacketSize);
 
 	bool OnDisconnect(SOCKET sock);
 	int GetSendItemCount()	{ return (int)m_SendList.size(); }
 
-	MCLIENTRECVCALLBACK*	m_fnRecvCallback;
-	MCONNECTCALLBACK*		m_fnConnectCallback;
-	MDISCONNECTCALLBACK*	m_fnDisconnectCallback;
+	virtual void Run() override;
+
+	MClientSocket* m_pTCPSocket{};
+
+	MCONNECTCALLBACK*		m_fnConnectCallback{};
+	MCLIENTRECVCALLBACK*	m_fnRecvCallback{};
+	MDISCONNECTCALLBACK*	m_fnDisconnectCallback{};
+
+protected:
+	TCPSendList				m_SendList;			// Sending priority Low	(Safe|Normal) Packet
+	TCPSendList				m_TempSendList;		// Temporary Send List for Sync
+
+	size_t GetSendWaitQueueCount() { return m_TempSendList.size(); }
+
+	bool OnConnect(SOCKET sock);
+	bool OnRecv(SOCKET socket, char* pPacket, u32 dwSize);
+	bool FlushSend();
+	bool Recv();
+	void ClearSendList();
+
+	void HandleSocketEvent(MSignalEvent& hFDEvent);
 };
 
 class MServerSocketThread : public MTCPSocketThread 
 {
-private:
-	WSAEVENT				m_EventArray[WSA_MAXIMUM_WAIT_EVENTS];
-protected:
-	CRITICAL_SECTION		m_csSocketLock;
+public:
+	MServerSocketThread(MServerSocket* Socket) : m_pTCPSocket{ Socket } {}
 
-	bool OnRecv(MSocketObj* pSocketObj, char* pPacket, DWORD dwPacketSize);
+	void Disconnect(MSocketObj* pSocketObj);
+	bool PushSend(MSocketObj* pSocketObj, char *pPacket, u32 dwPacketSize);
+
+	virtual void Run() override;
+
+	MServerSocket* m_pTCPSocket{};
+
+	MACCEPTCALLBACK*			m_fnAcceptCallback{};
+	MSERVERRECVCALLBACK*		m_fnRecvCallback{};
+	MDISCONNECTCLIENTCALLBACK*	m_fnDisconnectCallback{};
+
+private:
+	bool OnRecv(MSocketObj* pSocketObj, char* pPacket, u32 dwPacketSize);
 	bool OnAccept(MSocketObj* pSocketObj);
 	bool OnDisconnectClient(MSocketObj* pSocketObj);
 
 	bool FlushSend();
 	bool Recv(MSocketObj* pSocketObj);
 	void FreeSocketObj(MSocketObj* pSocketObj);
-	SocketListItor RemoveSocketObj(SocketListItor itor);
+	SocketList::iterator RemoveSocketObj(SocketList::iterator itor);
 	void RenumberEventArray();
-	MSocketObj* InsertSocketObj(SOCKET sock, HANDLE event);
-public:
-	MServerSocketThread(MTCPSocket* pTCPSocket);
-	~MServerSocketThread();	
+	MSocketObj* InsertSocketObj(SOCKET sock);
 
-	void Disconnect(MSocketObj* pSocketObj);
-	bool PushSend(MSocketObj* pSocketObj, char *pPacket, DWORD dwPacketSize);
-	virtual void Run();
-	virtual void Destroy();
-	virtual void Create();
-	void LockSocket()	{ EnterCriticalSection(&m_csSocketLock); }
-	void UnlockSocket()	{ LeaveCriticalSection(&m_csSocketLock); }
+	void HandleAcceptEvent();
+	void HandleClientSockets();
 
-	SocketList					m_SocketList;
+	MCriticalSection m_csSocketLock;
+	SocketList m_SocketList;
 
-	MSERVERRECVCALLBACK*		m_fnRecvCallback;
-	MACCEPTCALLBACK*			m_fnAcceptCallback;
-	MDISCONNECTCLIENTCALLBACK*	m_fnDisconnectClientCallback;
+	// 0 = Accept event (from m_pTCPSocket)
+	// 1 = Send event (m_SendEvent)
+	// 2 = Kill event (m_KillEvent)
+	// 3-63 = Client socket events
+	MSignalEvent* m_EventArray[64];
+	static constexpr auto ClientSocketsStartIndex = 3;
 };
 
+template <typename T>
 class MTCPSocket
 {
-private:
-protected:
-	bool						m_bInitialized;
-	int							m_nPort;
-	SOCKET						m_Socket;
-	MTCPSocketThread*			m_pSocketThread;
-
-	virtual bool Initialize();
-	virtual void Finalize();
-	virtual bool OpenSocket();
-	virtual void CloseSocket();
 public:
-	MTCPSocket();
-	virtual ~MTCPSocket();
-	SOCKET GetSocket()			{ return m_Socket; }
-	int GetPort()				{ return m_nPort; }
-	bool IsActive() { return m_pSocketThread->IsActive(); }
-	void GetTraffic(int* nSendTraffic, int* nRecvTraffic) {
-		*nSendTraffic = m_pSocketThread->GetSendTraffic();
-		*nRecvTraffic = m_pSocketThread->GetRecvTraffic();
+	MTCPSocket() {
+		MSocket::Startup();
 	}
-	void SetSocketErrorCallback(MSOCKETERRORCALLBACK pCallback) 
-					{ m_pSocketThread->m_fnSocketErrorCallback = pCallback; }
-	void SetCallbackContext(void* pCallbackContext) 
-					{ m_pSocketThread->m_pCallbackContext = pCallbackContext; }
+	~MTCPSocket() {
+		MSocket::Cleanup();
+	}
+
+	SOCKET GetSocket() const { return m_Socket; }
+	int GetPort() const { return m_nPort; }
+	bool IsActive() const { return Derived().Thread.IsActive(); }
+
+	void GetTraffic(int* nSendTraffic, int* nRecvTraffic) {
+		*nSendTraffic = Derived().Thread.GetSendTraffic();
+		*nRecvTraffic = Derived().Thread.GetRecvTraffic();
+	}
+
+	void SetSocketErrorCallback(MSOCKETERRORCALLBACK pCallback) {
+		Derived().Thread.m_fnSocketErrorCallback = pCallback;
+	}
+	void SetCallbackContext(void* pCallbackContext) {
+		Derived().Thread.m_pCallbackContext = pCallbackContext;
+	}
+	template <typename T>
+	void SetRecvCallback(T pCallback) {
+		Derived().Thread.m_fnRecvCallback = pCallback;
+	}
+	template <typename T>
+	void SetDisconnectCallback(T pCallback) {
+		Derived().Thread.m_fnDisconnectCallback = pCallback;
+	}
+
+protected:
+	bool OpenSocket();
+	void CloseSocket();
+	
+	int							m_nPort{};
+	SOCKET						m_Socket = MSocket::InvalidSocket;
+
+	T& Derived() { return *static_cast<T*>(this); }
+	const T& Derived() const { return *static_cast<const T*>(this); }
 };
 
-class MServerSocket: public MTCPSocket
+class MServerSocket : public MTCPSocket<MServerSocket>
 {
-private:
-protected:
-	sockaddr_in					m_LocalAddress;
-	virtual void Finalize();
-	virtual bool Initialize();
-	virtual bool OpenSocket(int nPort);
-	virtual void CloseSocket();
 public:
-	MServerSocket();
-	virtual ~MServerSocket();
+	MServerSocket() : Thread{ this } {}
+	~MServerSocket() = default;
 
 	bool Listen(int nPort);
 	bool Close();
 	bool Disconnect(MSocketObj* pSocketObj);
 
-	bool Send(MSocketObj* pSocketObj, char* pPacket, DWORD dwPacketSize);	
+	bool Send(MSocketObj* pSocketObj, char* pPacket, u32 dwPacketSize);
 
+	void SetAcceptCallback(MACCEPTCALLBACK pCallback) { 
+		Thread.m_fnAcceptCallback = pCallback;
+	}
 
-	void SetRecvCallback(MSERVERRECVCALLBACK pCallback) { ((MServerSocketThread*)(m_pSocketThread))->m_fnRecvCallback = pCallback; }
-	void SetAcceptCallback(MACCEPTCALLBACK pCallback) { ((MServerSocketThread*)(m_pSocketThread))->m_fnAcceptCallback = pCallback; }
-	void SetDisconnectClientCallback(MDISCONNECTCLIENTCALLBACK pCallback) { ((MServerSocketThread*)(m_pSocketThread))->m_fnDisconnectClientCallback = pCallback; }
+	u32 GetLocalIP() const { return m_LocalAddress.sin_addr.S_un.S_addr; }
 
-	SocketList* GetClientList()	{ return &((MServerSocketThread*)(m_pSocketThread))->m_SocketList; }
+	bool OpenSocket(int nPort);
 
-	DWORD GetLocalIP()			{ return m_LocalAddress.sin_addr.S_un.S_addr; }
+	MServerSocketThread Thread;
+
+	MSocket::sockaddr_in m_LocalAddress;
 };
 
-class MClientSocket: public MTCPSocket
+class MClientSocket : public MTCPSocket<MClientSocket>
 {
-private:
-protected:
-	char			m_szHost[255];
-	virtual void Finalize();
-	virtual bool Initialize();
-	virtual bool OpenSocket();
-	virtual void CloseSocket();
-
-	virtual void SimpleCloseSocket();
 public:
-	MClientSocket();
-	virtual ~MClientSocket();
+	MClientSocket() : Thread{ this } {}
+	~MClientSocket() { CloseSocket(); }
 
 	bool Connect(SOCKET* pSocket, const char* szIP, int nPort);
 	bool Disconnect();
-	bool Send(char *pPacket, DWORD dwPacketSize);
+	bool Send(char *pPacket, u32 dwPacketSize);
 
-	virtual bool SimpleDisconnect();
-
-	void SetRecvCallback(MCLIENTRECVCALLBACK pCallback) {
-		((MClientSocketThread*)(m_pSocketThread))->m_fnRecvCallback = pCallback; }
 	void SetConnectCallback(MCONNECTCALLBACK pCallback) {
-		((MClientSocketThread*)(m_pSocketThread))->m_fnConnectCallback = pCallback; }
-	void SetDisconnectCallback(MDISCONNECTCALLBACK pCallback) {
-		((MClientSocketThread*)(m_pSocketThread))->m_fnDisconnectCallback = pCallback; }
+		Thread.m_fnConnectCallback = pCallback;
+	}
 
-	const char* GetHost()	{ return m_szHost; }
+	const char* GetHost() const { return m_szHost; }
+
+	MClientSocketThread Thread;
+
+	char m_szHost[255];
 };
-
-
-#pragma comment(lib, "ws2_32.lib")

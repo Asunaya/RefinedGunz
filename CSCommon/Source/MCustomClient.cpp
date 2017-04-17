@@ -1,11 +1,9 @@
 #include "stdafx.h"
 #include "MCustomClient.h"
-
+#include "MErrorTable.h"
 
 MCustomClient::MCustomClient()
 {
-	InitializeCriticalSection(&m_csRecvLock);
-
 	m_ClientSocket.SetCallbackContext(this);
 	m_ClientSocket.SetConnectCallback(SocketConnectEvent);
 	m_ClientSocket.SetDisconnectCallback(SocketDisconnectEvent);
@@ -15,7 +13,6 @@ MCustomClient::MCustomClient()
 
 MCustomClient::~MCustomClient()
 {
-	DeleteCriticalSection(&m_csRecvLock);
 }
 
 bool MCustomClient::OnSockConnect(SOCKET sock)
@@ -28,7 +25,7 @@ bool MCustomClient::OnSockDisconnect(SOCKET sock)
 	return true;
 }
 
-bool MCustomClient::OnSockRecv(SOCKET sock, char* pPacket, DWORD dwSize)
+bool MCustomClient::OnSockRecv(SOCKET sock, char* pPacket, u32 dwSize)
 {
 	return false;
 }
@@ -46,12 +43,12 @@ int MCustomClient::Connect(char* szIP, int nPort)
 		return MERR_UNKNOWN;
 }
 
-void MCustomClient::Send(char* pBuf, DWORD nSize)
+void MCustomClient::Send(char* pBuf, u32 nSize)
 {
 	m_ClientSocket.Send(pBuf, nSize);
 }
 
-bool MCustomClient::SocketRecvEvent(void* pCallbackContext, SOCKET sock, char* pPacket, DWORD dwSize)
+bool MCustomClient::SocketRecvEvent(void* pCallbackContext, SOCKET sock, char* pPacket, u32 dwSize)
 {
 	MCustomClient* pClient = (MCustomClient*)pCallbackContext;
 

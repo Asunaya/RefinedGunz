@@ -1,8 +1,8 @@
 #pragma once
 
 #include <cmath>
-#include <crtdbg.h>
 #include <cstdlib>
+#include <cassert>
 
 #ifndef PI
 #define PI 3.14159265358979323846
@@ -14,7 +14,7 @@
 
 inline int RandomNumber(int nMin, int nMax)
 {
-	_ASSERT((nMax-nMin) < 131072);
+	assert((nMax-nMin) < 131072);
 	return (rand() * (nMax - nMin + 1) / (RAND_MAX+1) + nMin );
 }
 

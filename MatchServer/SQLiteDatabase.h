@@ -193,20 +193,6 @@ public:
 
 
 	//
-	// Country filter
-	//
-	virtual bool GetIPCountryCode(const std::string& strIP,
-		uint32_t& dwOutIPFrom,
-		uint32_t& dwOutIPTo,
-		std::string& strOutCountryCode) override;
-	virtual bool GetBlockCountryCodeList(BlockCountryCodeList& rfBlockCountryCodeList) override;
-	virtual bool GetIPtoCountryList(IPtoCountryList& rfIPtoCountryList) override;
-	virtual bool GetCustomIP(const std::string& strIP, uint32_t& dwIPFrom, uint32_t& dwIPTo, bool& bIsBlock,
-		std::string& strCountryCode3, std::string& strComment) override;
-	virtual bool GetCustomIPList(CustomIPList& rfCustomIPList) override;
-
-
-	//
 	// Admin
 	//
 	virtual bool BanPlayer(int nAID, const char *szReason, const time_t &UnbanTime) override;

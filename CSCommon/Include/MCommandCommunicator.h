@@ -2,7 +2,7 @@
 
 #include "MCommandManager.h"
 #include "MUID.h"
-#include "MTCPSocket.h"
+#include "MPacket.h"
 #include "MPacketCrypter.h"
 #include "SafeString.h"
 #include "GlobalTypes.h"

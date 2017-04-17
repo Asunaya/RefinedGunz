@@ -1,13 +1,10 @@
 #include "stdafx.h"
-
 #include "ZIDLResource.h"
-#include "winsock2.h"
 #include "ZGame.h"
 #include "Mint4R2.h"
 #include "RealSpace2.h"
 #include "Mint.h"
 #include "MBScrollBarLook.h"
-
 #include "ZFrame.h"
 #include "ZMapListBox.h"
 #include "ZScoreListBox.h"
@@ -27,7 +24,6 @@
 #include "ZServerView.h"
 #include "ZStringResManager.h"
 #include "ZActionKey.h"
-
 #include "RGMain.h"
 
 ZIDLResource::ZIDLResource() = default;

@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "MPdb.h"
 #include <stdio.h>
+#include <Windows.h>
 #pragma warning(push)
 #pragma warning(disable: 4091)
 #include <imagehlp.h>

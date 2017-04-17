@@ -1,5 +1,4 @@
-#ifndef _MMATCHADMIN_H
-#define _MMATCHADMIN_H
+#pragma once
 
 #include <string>
 #include <list>
@@ -7,12 +6,10 @@
 #include <map>
 #include <deque>
 #include <algorithm>
-using namespace std;
-
 #include "MUID.h"
 
-#define	CONSOLE_TEXTSIZE	4096	///< Console Command Usage, Help 문자열 길이
-#define	CONSOLE_NAMESIZE	256		///< Console Name 문자열 길이
+#define	CONSOLE_TEXTSIZE	4096
+#define	CONSOLE_NAMESIZE	256
 #define	ARGVNoMin (-1)
 #define ARGVNoMax (-1)
 
@@ -22,7 +19,7 @@ struct MAdminArgvInfo
 {
 	char *cargv[255];
 	int cargc;
-	char argbuf[2048];		// 실제 argv 값이 들어가는 buf
+	char argbuf[2048];
 };
 
 class MMatchServer;
@@ -40,6 +37,3 @@ public:
 	void Destroy();
 	bool Execute(const MUID& uidAdmin, const char* szStr);
 };
-
-
-#endif

@@ -1,65 +1,59 @@
-#ifndef _MHTTPSPOOLER_H
-#define _MHTTPSPOOLER_H
+#pragma once
 
-//#pragma once
-
-#include<list>
-using namespace std;
-
+#include <list>
 #include "MThread.h"
 #include "MSync.h"
 #include "MAsyncHttp.h"
-
 
 class MHttpSpoolerNode {
 protected:
 	unsigned int	m_nID;
 	unsigned int	m_nChecksum;
-	string			m_strURL;
+	std::string		m_strURL;
 public:
-	MHttpSpoolerNode(unsigned int nID, unsigned int nChecksum, const string& strURL) {
+	MHttpSpoolerNode(unsigned int nID, unsigned int nChecksum, const std::string& strURL) {
 		m_nID = nID;
 		m_nChecksum = nChecksum;
 		m_strURL = strURL;
 	}
 	virtual ~MHttpSpoolerNode()	{}
 	unsigned int GetID()		{ return m_nID; }
-	string GetURL()				{ return m_strURL; }
+	std::string GetURL()				{ return m_strURL; }
 	unsigned int GetChecksum()	{ return m_nChecksum; }
 };
 
 class MHttpSpoolerQueue {
 protected:
-	list<MHttpSpoolerNode*>	m_SpoolQueue;
+	std::list<MHttpSpoolerNode*>	m_SpoolQueue;
 	MCriticalSection		m_csLock;
 public:
 	bool CheckExist(unsigned int nID)
 	{
 		bool bFound = false;
-		m_csLock.Lock();
-		for (list<MHttpSpoolerNode*>::iterator i=m_SpoolQueue.begin(); i!=m_SpoolQueue.end(); i++) {
+		m_csLock.lock();
+		for (auto i = m_SpoolQueue.begin(); i != m_SpoolQueue.end(); i++) {
 			MHttpSpoolerNode* pNode = (*i);
 			if (pNode->GetID() == nID)
 				bFound = true;
 		}
-		m_csLock.Unlock();
+		m_csLock.unlock();
 		return bFound;
 	}
 	void Post(MHttpSpoolerNode* pSpoolNode) 
 	{
-		m_csLock.Lock();
+		m_csLock.lock();
 		m_SpoolQueue.push_back(pSpoolNode);
-		m_csLock.Unlock();
+		m_csLock.unlock();
 	}
 	MHttpSpoolerNode* Pop()
 	{
 		MHttpSpoolerNode* pSpoolNode = NULL;
-		m_csLock.Lock();
+		m_csLock.lock();
 		if (!m_SpoolQueue.empty()) {
 			pSpoolNode = (*m_SpoolQueue.begin());
 			m_SpoolQueue.pop_front();
 		}            
-		m_csLock.Unlock();
+		m_csLock.unlock();
 		return pSpoolNode;
 	}
 };
@@ -88,7 +82,7 @@ public:
 	const char* GetBasePath()				{ return m_AsyncHttp.GetBasePath(); }
 	void SetBasePath(const char* pszPath)	{ m_AsyncHttp.SetBasePath(pszPath); }
 
-	void Post(unsigned int nID, unsigned int nChecksum, const string strURL)
+	void Post(unsigned int nID, unsigned int nChecksum, const std::string &strURL)
 	{
 		if (m_RequestQueue.CheckExist(nID) || m_ResultQueue.CheckExist(nID))
 			return;
@@ -96,7 +90,7 @@ public:
 		MHttpSpoolerNode* pNode = new MHttpSpoolerNode(nID, nChecksum, strURL);
 		m_RequestQueue.Post(pNode);
 	}
-	bool Pop(unsigned int* poutID, unsigned int* poutChecksum, string* poutstrURL)
+	bool Pop(unsigned int* poutID, unsigned int* poutChecksum, std::string* poutstrURL)
 	{
 		MHttpSpoolerNode* pNode = m_ResultQueue.Pop();
 		if (pNode == NULL) return false;
@@ -109,6 +103,3 @@ public:
 		return true;
 	}
 };
-
-
-#endif

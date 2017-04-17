@@ -1,16 +1,5 @@
 #include "stdafx.h"
 
-#include <windows.h>
-#include <wingdi.h>
-#include <mmsystem.h>
-#include <shlwapi.h>
-#include <shellapi.h>
-
-#pragma warning(push)
-#pragma warning(disable:4091)
-#include <ShlObj.h>
-#pragma warning(pop)
-
 #include "ZPrerequisites.h"
 #include "ZConfiguration.h"
 #include "ZGameClient.h"
@@ -57,10 +46,18 @@
 #include "MTraceMemory.h"
 #include "ZInput.h"
 #include "Mint4Gunz.h"
+#include "MFile.h"
 
 #include "RGMain.h"
 #include "RGGlobal.h"
 #include "RGVersion.h"
+
+#ifdef WIN32
+#pragma warning(push)
+#pragma warning(disable: 4091)
+#include <ShlObj.h>
+#pragma warning(pop)
+#endif
 
 RMODEPARAMS	g_ModeParams = { 800,600,FullscreenType::Fullscreen,D3DFMT_R5G6B5 };
 static HANDLE Mutex;
@@ -95,6 +92,34 @@ void _ZChangeGameState(int nIndex)
 	}
 }
 
+template <int(__stdcall *Function)(LPCTSTR)>
+static void ForEachFont()
+{
+#ifdef WIN32
+
+#define FONT_DIR	"Font/"
+#define FONT_EXT	"ttf"
+
+	for (auto&& FileData : MFile::FilesInDir(FONT_DIR "*." FONT_EXT))
+	{
+		char Filename[_MAX_PATH];
+		sprintf_safe(Filename, "%s%.*s", FONT_DIR, FileData.Name.size(), FileData.Name.data());
+		Function(Filename);
+	}
+
+#endif
+}
+
+static void AddFonts()
+{
+	ForEachFont<AddFontResource>();
+}
+
+static void RemoveFonts()
+{
+	ForEachFont<RemoveFontResource>();
+}
+
 RRESULT OnCreate(void *pParam)
 {
 	if (GetRS2().UsingVulkan())
@@ -126,20 +151,6 @@ RRESULT OnCreate(void *pParam)
 
 	mlog("main : ZGetInitialLoading()->Initialize() \n");
 
-	struct _finddata_t c_file;
-	intptr_t hFile;
-	char szFileName[256];
-#define FONT_DIR	"Font/"
-#define FONT_EXT	"ttf"
-	if( (hFile = _findfirst(FONT_DIR "*." FONT_EXT, &c_file )) != -1L ){
-		do{
-			strcpy_safe(szFileName, FONT_DIR);
-			strcat_safe(szFileName, c_file.name);
-			AddFontResource(szFileName);
-		}while( _findnext( hFile, &c_file ) == 0 );
-		_findclose(hFile);
-	}
-
 	g_pDefFont = new MFontR2;
 
 	if( !g_pDefFont->Create("Default", Z_LOCALE_DEFAULT_FONT, 9, 1.0f) )
@@ -149,6 +160,8 @@ RRESULT OnCreate(void *pParam)
 		SAFE_DELETE( g_pDefFont );
 		g_pDefFont	= NULL;
 	}
+	
+	AddFonts();
 
 	g_pDC = new MDrawContextR2(RGetDevice());
 
@@ -241,19 +254,7 @@ RRESULT OnDestroy(void *pParam)
 
 	delete g_pDC;
 
-	struct _finddata_t c_file;
-	intptr_t hFile;
-	char szFileName[256];
-#define FONT_DIR	"Font/"
-#define FONT_EXT	"ttf"
-	if( (hFile = _findfirst(FONT_DIR" *." FONT_EXT, &c_file )) != -1L ){
-		do{
-			strcpy_safe(szFileName, FONT_DIR);
-			strcat_safe(szFileName, c_file.name);
-			RemoveFontResource(szFileName);
-		}while( _findnext( hFile, &c_file ) == 0 );
-		_findclose(hFile);
-	}
+	RemoveFonts();
 
 	if (GetRS2().UsingD3D9())
 	{
@@ -547,6 +548,7 @@ void CheckFileAssociation()
 {
 #define GUNZ_REPLAY_CLASS_NAME	"GunzReplay"
 
+#ifdef WIN32
 	char szValue[256];
 	if (!MRegistry::Read(HKEY_CLASSES_ROOT, "." GUNZ_REC_FILE_EXT, NULL, szValue))
 	{
@@ -562,6 +564,7 @@ void CheckFileAssociation()
 
 		SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_FLUSH, NULL, NULL);
 	}
+#endif
 }
 
 void UpgradeMrsFile()

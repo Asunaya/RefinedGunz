@@ -1,7 +1,4 @@
-#ifndef _MPACKET_CRYPTER_H
-#define _MPACKET_CRYPTER_H
-
-#include "MCrypt.h"
+#pragma once
 
 #define PACKET_CRYPTER_KEY_LEN		32
 
@@ -30,11 +27,12 @@ public:
 	const MPacketCrypterKey* GetKey() { return &m_Key; }
 
 	static void InitConst();
-	static bool Encrypt(const char* pSource, int nSrcLen, char* pTarget, int nTarLen, MPacketCrypterKey* pKey);
-	static bool Decrypt(const char* pSource, int nSrcLen, char* pTarget, int nTarLen, MPacketCrypterKey* pKey);
+	static bool Encrypt(const char* pSource, int nSrcLen,
+		char* pTarget, int nTarLen,
+		MPacketCrypterKey* pKey);
+	static bool Decrypt(const char* pSource, int nSrcLen,
+		char* pTarget, int nTarLen,
+		MPacketCrypterKey* pKey);
 	static bool Encrypt(char* pSource, int nSrcLen, MPacketCrypterKey* pKey);
 	static bool Decrypt(char* pSource, int nSrcLen, MPacketCrypterKey* pKey);
 };
-
-
-#endif

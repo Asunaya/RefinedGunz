@@ -1,22 +1,20 @@
-#ifndef _MLOG_MANAGER
-#define _MLOG_MANAGER
+#pragma once
 
 #include <vector>
 #include <string>
-
-using namespace std;
+#include "MSync.h"
 
 class MLogManager
 {
-public :
+public:
 	MLogManager();
 	~MLogManager();
 
-	void InsertLog( const string& strLog );
-	void SafeInsertLog( const string& strLog );
+	void InsertLog(const std::string& strLog);
+	void SafeInsertLog(const std::string& strLog);
 
-	void Lock()		{ EnterCriticalSection( &m_csLock ); }
-	void Unlock()	{ LeaveCriticalSection( &m_csLock ); }
+	void Lock() { m_csLock.lock(); }
+	void Unlock() { m_csLock.unlock(); }
 
 	void WriteMLog();
 	void SafeWriteMLog();
@@ -29,13 +27,11 @@ public :
 		static MLogManager LogManager;
 		return LogManager;
 	}
-	
-private :
-	CRITICAL_SECTION m_csLock;
 
-	vector< string > m_MLog;
+private:
+	MCriticalSection m_csLock;
+
+	std::vector<std::string> m_MLog;
 };
 
 MLogManager& GetLogManager();
-
-#endif

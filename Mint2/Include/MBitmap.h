@@ -20,7 +20,7 @@ public:
 
 public:
 	char	m_szName[MBITMAP_NAME_LENGTH];
-	DWORD	m_DrawMode;
+	u32	m_DrawMode;
 public:
 	MBitmap();
 	virtual ~MBitmap();
@@ -30,8 +30,8 @@ public:
 	virtual bool Create(const StringView& szName);
 	virtual void Destroy();
 
-	virtual void SetDrawMode(DWORD md) { m_DrawMode = md; }
-	virtual DWORD GetDrawMode() { return m_DrawMode; }
+	virtual void SetDrawMode(u32 md) { m_DrawMode = md; }
+	virtual u32 GetDrawMode() { return m_DrawMode; }
 
 	virtual int GetX() { return 0; }
 	virtual int GetY() { return 0; }

@@ -658,9 +658,9 @@ MQuestNPCSetInfo* MQuestNPCSetCatalogue::GetInfo(const char* szName)
 	char szLwrName[64];
 	strcpy_safe(szLwrName, szName);
 	_strlwr_s(szLwrName);
-	string strName = szLwrName;
+	auto strName = szLwrName;
 
-	map<string, MQuestNPCSetInfo*>::iterator itor = m_NameMap.find(strName);
+	auto itor = m_NameMap.find(strName);
 	if (itor != m_NameMap.end())
 	{
 		return (*itor).second;
@@ -676,7 +676,6 @@ void MQuestNPCSetCatalogue::Insert(MQuestNPCSetInfo* pNPCSetInfo)
 
 	if (GetInfo(nID))
 	{
-		// 똑같은 ID의 NPCSET가 존재한다.
 		_ASSERT(0);
 		return;
 	}
@@ -687,10 +686,9 @@ void MQuestNPCSetCatalogue::Insert(MQuestNPCSetInfo* pNPCSetInfo)
 	strcpy_safe(szLwrName, pNPCSetInfo->szName);
 
 	_strlwr_s(szLwrName);
-	string strName = szLwrName;
-	m_NameMap.insert(map<string, MQuestNPCSetInfo*>::value_type(strName, pNPCSetInfo));
+	auto strName = szLwrName;
+	m_NameMap.emplace(strName, pNPCSetInfo);
 }
-
 
 #define MTOK_NPCSET							"NPCSET"
 #define MTOK_NPCSET_TAG_ADDNPC				"ADDNPC"
@@ -702,8 +700,6 @@ void MQuestNPCSetCatalogue::Insert(MQuestNPCSetInfo* pNPCSetInfo)
 #define MTOK_NPCSET_ATTR_MIN_RATE			"min_rate"
 #define MTOK_NPCSET_ATTR_MAX_RATE			"max_rate"
 #define MTOK_NPCSET_ATTR_MAX_COUNT			"max_count"
-
-
 
 bool MQuestNPCSetCatalogue::ReadXml(const char* szFileName)
 {
@@ -743,7 +739,6 @@ bool MQuestNPCSetCatalogue::ReadXml(const char* szFileName)
 
 bool MQuestNPCSetCatalogue::ReadXml(MZFileSystem* pFileSystem, const char* szFileName)
 {
-
 	MXmlDocument	xmlIniData;
 	xmlIniData.Create();
 
@@ -814,7 +809,6 @@ void MQuestNPCSetCatalogue::ParseNPCSet(MXmlElement& element)
 
 	MQuestNPCSetInfo* pNPCSetInfo = new MQuestNPCSetInfo();
 
-	// NPCSET 태그 속성값 --------------------
 	int nAttrCount = element.GetAttributeCount();
 	for (int i = 0; i < nAttrCount; i++)
 	{
@@ -842,7 +836,6 @@ void MQuestNPCSetCatalogue::ParseNPCSet(MXmlElement& element)
 		chrElement.GetTagName(szTagName);
 		if (szTagName[0] == '#') continue;
 
-		// ADDNPC 태그 --------------------
 		if (!_stricmp(szTagName, MTOK_NPCSET_TAG_ADDNPC))
 		{
 			MNPCSetNPC add_npc;
@@ -858,12 +851,10 @@ void MQuestNPCSetCatalogue::ParseNPCSet(MXmlElement& element)
 				else if (!_stricmp(szAttrName, MTOK_NPCSET_ATTR_MIN_RATE))
 				{
 					add_npc.nMinRate = atoi(szAttrValue);
-					//add_npc.fMinRate = ((float)atoi(szAttrValue) / 100.0f);
 				}
 				else if (!_stricmp(szAttrName, MTOK_NPCSET_ATTR_MAX_RATE))
 				{
 					add_npc.nMaxRate = atoi(szAttrValue);
-					//add_npc.fMaxRate = ((float)atoi(szAttrValue) / 100.0f);
 				}
 				else if (!_stricmp(szAttrName, MTOK_NPCSET_ATTR_MIN_RATE))
 				{

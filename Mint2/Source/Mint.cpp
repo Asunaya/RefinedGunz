@@ -19,6 +19,13 @@
 #include "MTabCtrl.h"
 #include "MPanel.h"
 #include "GlobalTypes.h"
+#include <algorithm>
+
+#ifdef WIN32
+#include "MWindows.h"
+
+static HWND m_hWnd = NULL;
+#endif
 
 class MMainFrame : public MWidget{
 protected:
@@ -104,7 +111,7 @@ Mint::Mint()
 	m_nCandidateListSize = 0;
 
 	m_nCompositionAttributeSize = 0;
-	memset(m_nCompositionAttributes, 0, sizeof(BYTE)*(MIMECOMPOSITIONSTRING_LENGTH));
+	memset(m_nCompositionAttributes, 0, sizeof(u8)*(MIMECOMPOSITIONSTRING_LENGTH));
 
 	m_nCompositionCaretPosition = 0;
 
@@ -151,7 +158,7 @@ void Mint::Finalize()
 	m_pDC = NULL;
 }
 
-bool Mint::ProcessEvent(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
+bool Mint::ProcessEvent(struct HWND__* hwnd, u32 message, u32 wparam, u32 lparam)
 {
 	if(!m_pMainFrame) return false;
 
@@ -264,62 +271,6 @@ MDrawContext* Mint::GetDrawContext()
 	return m_pDC;
 }
 
-#ifdef WIN32
-HWND m_hWnd = NULL;
-void Mint::SetHWND(HWND hWnd)
-{
-	m_hWnd = hWnd;
-
-	HWND imehwnd=ImmGetDefaultIMEWnd(Mint::GetInstance()->GetHWND());
-
-	LRESULT lr=SendMessage(imehwnd,WM_IME_CONTROL ,IMC_CLOSESTATUSWINDOW,0);
-	_ASSERT(lr==0);
-
-	HIMC	hImc;
-	hImc = ImmGetContext(Mint::GetInstance()->GetHWND());
-	if (hImc)
-	{
-		// Get current IME status
-		DWORD dwIMEConvMode, dwSentMode;
-		ImmGetConversionStatus(hImc, &dwIMEConvMode, &dwSentMode);
-		ImmSetConversionStatus(hImc,IME_CMODE_ALPHANUMERIC, dwSentMode);
-
-		Mint::EnableIME(false);
-	}
-}
-HWND Mint::GetHWND()
-{
-	return m_hWnd;
-}
-#endif
-
-void Mint::EnableIME(bool bEnable)
-{
-	_ASSERT(GetHWND());
-	if ( (bEnable == true) && MEvent::GetIMESupport()) {
-		if (m_hImc) {
-			ImmAssociateContext(GetHWND(), m_hImc);
-			m_hImc = NULL;
-			::SetFocus(GetHWND());
-		}
-		m_bEnableIME = true;
-	} else {
-		m_hImc = ImmGetContext(GetHWND());
-		if (m_hImc) {
-			ImmAssociateContext(GetHWND(), NULL);
-			ImmReleaseContext(GetHWND(), m_hImc);
-			::SetFocus(GetHWND());
-		}
-		m_bEnableIME = false;
-	}
-
-	HIMC hImc = ImmGetContext(GetInstance()->GetHWND());
-	if(hImc!=NULL){
-		ImmNotifyIME(hImc, NI_COMPOSITIONSTR, CPS_CANCEL, 0);
-		ImmReleaseContext(GetInstance()->GetHWND(), hImc);
-	}
-}
-
 bool Mint::IsEnableIME()
 {
 	return m_bEnableIME;
@@ -329,7 +280,7 @@ bool Mint::IsEnableIME()
 int Mint::RegisterHotKey(unsigned long int nModifier, unsigned long int nVirtKey)
 {
 #ifdef WIN32
-	_ASSERT(m_hWnd!=NULL);	// Should call SetHWND() before this function
+	_ASSERT(m_hWnd != NULL);	// Should call SetHWND() before this function
 
 	char szAtomName[64] = {0,};
 	if(nModifier==MMODIFIER_ALT) strcat_safe(szAtomName, "Alt");
@@ -520,14 +471,14 @@ int Mint::GetPrimaryLanguageIdentifier() const
 	ms-help://MS.VSCC.2003/MS.MSDNQTR.2003FEB.1042/intl/nls_238z.htm
 	*/
 	HKL hKeyboardLayout = GetKeyboardLayout(0);
-	WORD nLanguageIdentifier = LOWORD(hKeyboardLayout);
+	u16 nLanguageIdentifier = LOWORD(hKeyboardLayout);
 	return PRIMARYLANGID(nLanguageIdentifier);
 }
 
 int Mint::GetSubLanguageIdentifier() const
 {
 	HKL hKeyboardLayout = GetKeyboardLayout(0);
-	WORD nLanguageIdentifier = LOWORD(hKeyboardLayout);
+	u16 nLanguageIdentifier = LOWORD(hKeyboardLayout);
 	return SUBLANGID(nLanguageIdentifier);
 }
 
@@ -563,7 +514,7 @@ bool Mint::IsNativeIME() const
 		bNative = (ImmGetOpenStatus(hImc)==TRUE);
 	}
 	else{
-		DWORD dwConvMode, dwSentMode;
+		unsigned long dwConvMode, dwSentMode;
 		ImmGetConversionStatus(hImc, &dwConvMode, &dwSentMode);
 
 		bNative = (dwConvMode&IME_CMODE_NATIVE);
@@ -606,7 +557,7 @@ const char* Mint::GetCandidate(int nIndex) const
 
 	if(nIndex>=(int)pCandidateList->dwCount) return NULL;
 
-	char* pCandidate = (char*)((BYTE*)pCandidateList+pCandidateList->dwOffset[nIndex]);
+	char* pCandidate = (char*)((u8*)pCandidateList+pCandidateList->dwOffset[nIndex]);
 	return pCandidate;
 }
 
@@ -669,7 +620,7 @@ int Mint::GetCandidateListWidth()
 	int w = 60;
 	if(GetCandidateCount()>0){
 		const char* szCandidate = GetCandidate(0);
-		w = max(w, MFontManager::Get("Default")->GetWidth(szCandidate) + 100);
+		w = (std::max)(w, MFontManager::Get("Default")->GetWidth(szCandidate) + 100);
 	}
 	return w + 4;
 }
@@ -683,8 +634,8 @@ int Mint::DrawCompositionAttribute(MDrawContext* pDC, MPOINT& p, const char* szC
 {
 	if(i>=(int)strlen(szComposition)) return 0;
 
-	const BYTE* pCompAttr = GetCompositionAttributes();
-	DWORD nCompAttrSize = GetCompositionAttributeSize();
+	const u8* pCompAttr = GetCompositionAttributes();
+	u32 nCompAttrSize = GetCompositionAttributeSize();
 
 	if(i>=(int)nCompAttrSize) return 0;
 
@@ -916,4 +867,61 @@ void MCreateSample()
 
 void MDestroySample()
 {
+}
+
+
+#ifdef WIN32
+void Mint::SetHWND(struct HWND__* hWnd)
+{
+	m_hWnd = hWnd;
+
+	auto imehwnd = ImmGetDefaultIMEWnd(Mint::GetInstance()->GetHWND());
+
+	LRESULT lr = SendMessage(imehwnd, WM_IME_CONTROL, IMC_CLOSESTATUSWINDOW, 0);
+	_ASSERT(lr == 0);
+
+	HIMC	hImc;
+	hImc = ImmGetContext(Mint::GetInstance()->GetHWND());
+	if (hImc)
+	{
+		// Get current IME status
+		unsigned long dwIMEConvMode, dwSentMode;
+		ImmGetConversionStatus(hImc, &dwIMEConvMode, &dwSentMode);
+		ImmSetConversionStatus(hImc, IME_CMODE_ALPHANUMERIC, dwSentMode);
+
+		Mint::EnableIME(false);
+	}
+}
+struct HWND__* Mint::GetHWND()
+{
+	return m_hWnd;
+}
+#endif
+
+void Mint::EnableIME(bool bEnable)
+{
+	_ASSERT(GetHWND());
+	if ((bEnable == true) && MEvent::GetIMESupport()) {
+		if (m_hImc) {
+			ImmAssociateContext(GetHWND(), m_hImc);
+			m_hImc = NULL;
+			::SetFocus(GetHWND());
+		}
+		m_bEnableIME = true;
+	}
+	else {
+		m_hImc = ImmGetContext(GetHWND());
+		if (m_hImc) {
+			ImmAssociateContext(GetHWND(), NULL);
+			ImmReleaseContext(GetHWND(), m_hImc);
+			::SetFocus(GetHWND());
+		}
+		m_bEnableIME = false;
+	}
+
+	HIMC hImc = ImmGetContext(GetInstance()->GetHWND());
+	if (hImc != NULL) {
+		ImmNotifyIME(hImc, NI_COMPOSITIONSTR, CPS_CANCEL, 0);
+		ImmReleaseContext(GetInstance()->GetHWND(), hImc);
+	}
 }

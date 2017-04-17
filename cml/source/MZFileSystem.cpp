@@ -31,50 +31,6 @@ void GetRefineFilename(char *szRefine, int maxlen, const char *szSource)
 	ReplaceBackSlashToSlash(szRefine);
 }
 
-time_t dos2unixtime(unsigned long dostime)
-{
-	tm t;         /* argument for mktime() */
-	time_t clock = time(NULL);
-
-	localtime_s(&t, &clock);
-	t.tm_isdst = -1;     /* let mktime() determine if DST is in effect */
-	/* Convert DOS time to UNIX time_t format */
-	t.tm_sec = (((int)dostime) << 1) & 0x3e;
-	t.tm_min = (((int)dostime) >> 5) & 0x3f;
-	t.tm_hour = (((int)dostime) >> 11) & 0x1f;
-	t.tm_mday = (int)(dostime >> 16) & 0x1f;
-	t.tm_mon = ((int)(dostime >> 21) & 0x0f) - 1;
-	t.tm_year = ((int)(dostime >> 25) & 0x7f) + 80;
-
-	return mktime(&t);
-}
-
-unsigned long dostime(int y, int n, int d, int h, int m, int s)
-/* year, month, day, hour, minute, second */
-/*	Convert the date y/n/d and time h:m:s to a four byte DOS date and
-time (date in high two bytes, time in low two bytes allowing magnitude
-comparison). */
-{
-	return y < 1980 ? dostime(1980, 1, 1, 0, 0, 0) :
-	(((unsigned long)y - 1980) << 25) | ((unsigned long)n << 21) | 
-		((unsigned long)d << 16) | ((unsigned long)h << 11) | 
-		((unsigned long)m << 5) | ((unsigned long)s >> 1);
-}
-
-
-unsigned long unix2dostime(time_t t)          /* unix time to convert */
-/* Return the Unix time t in DOS format, rounded up to the next two
-second boundary. */
-{
-	time_t t_even;
-	tm s;         /* result of localtime() */
-
-	t_even = (t + 1) & (~1);     /* Round up to even seconds. */
-	localtime_s(&s, &t_even);       /* Use local time since MSDOS does. */
-	return dostime(s.tm_year + 1900, s.tm_mon + 1, s.tm_mday,
-		s.tm_hour, s.tm_min, s.tm_sec);
-}
-
 // Asserts that the capacity of vec remains unchanged.
 template <typename T>
 static auto CapacityChecker(T& vec)
@@ -609,7 +565,7 @@ MMappedFile::MMappedFile(MMappedFile && src)
 	src.File = INVALID_HANDLE_VALUE;
 }
 
-void RecursiveFileIterator::AdvanceToNextFile()
+void RecursiveMZFileIterator::AdvanceToNextFile()
 {
 	if (FileIndex < int(CurrentSubdir->NumFiles) - 1)
 	{
@@ -641,7 +597,7 @@ void RecursiveFileIterator::AdvanceToNextFile()
 	AdvanceToNextFile();
 }
 
-Range<RecursiveFileIterator> FilesInDirRecursive(MZFileSystem& FS, const MZDirDesc& Dir)
+Range<RecursiveMZFileIterator> FilesInDirRecursive(MZFileSystem& FS, const MZDirDesc& Dir)
 {
 	// Find first file
 	auto* CurrentSubdir = &Dir;
@@ -652,7 +608,7 @@ Range<RecursiveFileIterator> FilesInDirRecursive(MZFileSystem& FS, const MZDirDe
 	}
 
 	return{
-		RecursiveFileIterator{ FS, Dir, CurrentSubdir, FileIndex },
-		RecursiveFileIterator{ FS, Dir, &Dir, int(Dir.NumFiles) },
+		RecursiveMZFileIterator{ FS, Dir, CurrentSubdir, FileIndex },
+		RecursiveMZFileIterator{ FS, Dir, &Dir, int(Dir.NumFiles) },
 	};
 }

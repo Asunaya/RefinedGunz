@@ -1,37 +1,36 @@
-#ifndef _ZTIMER_H
-#define _ZTIMER_H
+#pragma once
 
 #include <list>
-using namespace std;
 
-typedef void(ZGameTimerEventCallback)(void* pParam);
-class ZTimerEvent;
+using ZGameTimerEventCallback = void(void*);
 
-// 앞으로 게임틱, 타이머 관련은 여기서 관리하도록 하자
+struct ZTimerEvent;
+
 class ZTimer
 {
-private:
-	bool						m_bInitialized;
-
-
-	unsigned long int			m_nLastTime;
-	unsigned long int			m_nNowTime;
-	list<ZTimerEvent*>			m_EventList;
-
-	void UpdateEvents();
 public:
 	ZTimer();
-	virtual ~ZTimer();
+	~ZTimer();
 
 	double UpdateFrame();
 	void ResetFrame();
 
-	// 타이머 이벤트 관련
-	void SetTimerEvent(unsigned long int nElapsedTime, ZGameTimerEventCallback* fnTimerEventCallback, void* pParam, bool bTimerOnce=false);
+	void SetTimerEvent(u64 DelayInMilliseconds,
+		ZGameTimerEventCallback* Callback,
+		void* Param,
+		bool TriggerOnce = false);
+
 	void ClearTimerEvent(ZGameTimerEventCallback* fnTimerEventCallback);
 
+private:
+	void UpdateEvents(double DeltaTime);
+	u64 GetTimeInTicks();
 
-	unsigned long int GetNowTick() { return m_nNowTime; }
+	std::vector<ZTimerEvent> m_EventList;
+
+	bool UsingQPF{};
+	u64 LastTimeInTicks{};
+	u64 TicksPerSecond{};
 };
 
 class ZUpdateTimer
@@ -55,6 +54,3 @@ public:
 	void SetUpdateTime(float fUpdateTime) { m_fUpdateTime = fUpdateTime; }
 	float GetUpdateTime() const { return m_fUpdateTime; }
 };
-
-
-#endif

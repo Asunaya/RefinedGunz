@@ -7,7 +7,6 @@
 #include "MMatchObject.h"
 #include "MMatchItem.h"
 #include "MMatchNotify.h"
-#include "Msg.h"
 #include "MMatchObjCache.h"
 #include "MMatchStage.h"
 #include "MMatchTransDataType.h"
@@ -270,10 +269,8 @@ MMatchServer::MMatchServer() : m_pScheduler( 0 )
 	_ASSERT(m_pInstance==NULL);
 	m_pInstance = this;
 	m_nTickTime = 0;
-	m_dwBlockCount = 0;
-	m_dwNonBlockCount = 0;
 
-	m_This = (MATCHSERVER_UID);
+	m_This = MATCHSERVER_UID;
 
 	SetName("MATCHSERVER");	// For Debug
 	SetDefaultChannelName("PUBLIC-");
@@ -468,18 +465,6 @@ bool MMatchServer::LoadChannelPreset()
 bool MMatchServer::InitDB()
 {
 	Database.Create(MGetServerConfig()->GetDatabaseType());
-
-	if( MGetServerConfig()->IsUseFilter() )
-	{
-		if( InitCountryFilterDB() )
-			LOG(LOG_ALL, "InitCountryFilterDB.\n");
-		else
-		{
-			LOG( LOG_ALL, "Fail to init country filter DB.\n" );
-			return false;
-		}
-	}
-	
 	return true;
 }
 
@@ -492,7 +477,7 @@ bool MMatchServer::Create(int nPort)
 
 	SetupRCPLog(RcpLog);
 #ifdef _DEBUG
-	m_RealCPNet.SetLogLevel(0);
+	m_RealCPNet.SetLogLevel(1);
 #else
 	m_RealCPNet.SetLogLevel(0);
 #endif
@@ -784,13 +769,6 @@ void MMatchServer::OnRun(void)
 
 	MGetServerStatusSingleton()->SetRunStatus(110);
 
-	// update custom ip list.
-	if( 3600000 < (nGlobalClock - m_CountryFilter.GetLastUpdatedTime()) )
-	{
-		UpdateCustomIPList();
-		m_CountryFilter.SetLastUpdatedTime( nGlobalClock );
-	}
-
 	MGetServerStatusSingleton()->SetRunStatus(111);
 
 	// Shutdown...
@@ -803,7 +781,7 @@ void MMatchServer::UpdateServerLog()
 {
 	if (!IsCreated()) return;
 
-#define SERVER_LOG_TICK		(60000)	// 1분 (1000 * 60)
+#define SERVER_LOG_TICK		(60000)
 
 	static u64 st_nElapsedTime = 0;
 	static auto nLastTime = GetGlobalTimeMS();
@@ -816,10 +794,8 @@ void MMatchServer::UpdateServerLog()
 		st_nElapsedTime = 0;
 
 		GetDBMgr()->InsertServerLog(MGetServerConfig()->GetServerID(), 
-									 (int)m_Objects.size(), (int)m_StageMap.size(), 
-									 GetBlockCount(), GetNonBlockCount() );
-		ResetBlockCount();
-		ResetNonBlockCount();
+			(int)m_Objects.size(), (int)m_StageMap.size(),
+			0, 0);
 	}
 
 	nLastTime = nNowTime;
@@ -1208,7 +1184,7 @@ void MMatchServer::OnPeerShot(MMatchObject& SenderObj, MMatchStage& Stage, const
 
 struct stRouteListenerNode
 {
-	DWORD				nUserContext;
+	u32				nUserContext;
 	MPacketCrypterKey	CryptKey;
 };
 
@@ -1635,7 +1611,7 @@ void MMatchServer::AnnounceErrorMsg(MObject* pObj, const int nErrorCode)
 
 
 
-void MMatchServer::OnBridgePeer(const MUID& uidChar, DWORD dwIP, DWORD nPort)
+void MMatchServer::OnBridgePeer(const MUID& uidChar, u32 dwIP, u32 nPort)
 {
 	auto* pObj = GetObject(uidChar);
 	if (!pObj)
@@ -1707,7 +1683,7 @@ void MMatchServer::SendCommandByUDP(MCommand* pCommand, char* szIP, int nPort)
 	bool bRet = m_SafeUDP.Send(szIP, nPort, szBuf, size);
 }
 
-bool MMatchServer::UDPSocketRecvEvent(DWORD dwIP, WORD wRawPort, char* pPacket, DWORD dwSize)
+bool MMatchServer::UDPSocketRecvEvent(u32 dwIP, u16 wRawPort, char* pPacket, u32 dwSize)
 {
 	if (dwSize < sizeof(MPacketHeader)) return false;
 
@@ -1722,7 +1698,7 @@ bool MMatchServer::UDPSocketRecvEvent(DWORD dwIP, WORD wRawPort, char* pPacket, 
 	return true;
 }
 
-void MMatchServer::ParseUDPPacket(char* pData, MPacketHeader* pPacketHeader, DWORD dwIP, WORD wRawPort)
+void MMatchServer::ParseUDPPacket(char* pData, MPacketHeader* pPacketHeader, u32 dwIP, u16 wRawPort)
 {
 	switch (pPacketHeader->nMsg)
 	{
@@ -2787,238 +2763,9 @@ bool MMatchServer::InitLocale()
 		return false;
 	}
 
-	MGetStringResManager()->Init( "", MGetLocale()->GetCountry() );	// 실행파일과 같은 폴더에 xml파일이 있다.
+	MGetStringResManager()->Init( "", MGetLocale()->GetCountry() );
 
 	return true;
-}
-
-
-bool MMatchServer::InitCountryFilterDB()
-{
-	IPtoCountryList icl;
-	BlockCountryCodeList bccl;
-	CustomIPList cil;
-
-	/* 실시간으로 caching하기로 함.
-	if( !GetDBMgr()->GetIPtoCountryList(icl) )
-	{
-		ASSERT( 0 && "Fail to init IPtoCountryList.\n" );
-		mlog( "Fail to init IPtoCountryList.\n" );
-		return false;
-	}
-	*/
-
-	if( !GetDBMgr()->GetBlockCountryCodeList(bccl) )
-	{
-		ASSERT( 0 && "Fail to init BlockCoutryCodeList.\n" );
-		mlog( "Fail to init BlockCountryCodeList.\n" );
-		return false;
-	}
-
-	if( !GetDBMgr()->GetCustomIPList(cil) )
-	{
-		ASSERT( 0 && "Fail to init CustomIPList.\n" );
-		mlog( "Fail to init CustomIPList.\n" );
-		return false;
-	}
-
-	if( !GetCountryFilter().Create(bccl, icl, cil) )
-	{
-		ASSERT( 0 && "Fail to create country filter.\n" );
-		mlog( "Fail to create country filter.\n" );
-		return false;
-	}
-
-	return true;
-}
-
-
-void MMatchServer::SetUseCountryFilter()
-{
-	MCommand* pCmd = CreateCommand( MC_LOCAL_UPDATE_USE_COUNTRY_FILTER, GetUID() );
-	if( 0 != pCmd )
-		Post( pCmd );
-}
-
-
-void MMatchServer::UpdateIPtoCountryList()
-{
-	MCommand* pCmd = CreateCommand( MC_LOCAL_GET_DB_IP_TO_COUNTRY, GetUID() );
-	if( 0 != pCmd )
-		Post( pCmd );
-}
-
-
-void MMatchServer::UpdateBlockCountryCodeLsit()
-{
-	MCommand* pCmd = CreateCommand( MC_LOCAL_GET_DB_BLOCK_COUNTRY_CODE, GetUID() );
-	if( 0 != pCmd )
-		Post( pCmd );
-}
-
-
-void MMatchServer::UpdateCustomIPList()
-{
-	MCommand* pCmd = CreateCommand( MC_LOCAL_GET_DB_CUSTOM_IP, GetUID() );
-	if( 0 != pCmd )
-		Post( pCmd );
-}
-
-
-void MMatchServer::SetAccetpInvalidIP()
-{
-	MCommand* pCmd = CreateCommand( MC_LOCAL_UPDATE_ACCEPT_INVALID_IP, GetUID() );
-	if( 0 != pCmd )
-		Post( pCmd );
-}
-
-
-bool MMatchServer::CheckIsValidIP( const MUID& CommUID, const string& strIP, string& strCountryCode3, const bool bUseFilter )
-{
-	switch( CheckIsValidCustomIP(CommUID, strIP, strCountryCode3, bUseFilter) )
-	{
-	case CIS_INVALID :
-		{
-			switch( CheckIsNonBlockCountry(CommUID, strIP, strCountryCode3, bUseFilter) )
-			{
-			case CCS_NONBLOCK :
-				{
-					return true;
-				}
-				break;
-
-			case CCS_BLOCK :
-				{
-				}
-				break;
-
-			case CCS_INVALID :
-				{
-					return MGetServerConfig()->IsAcceptInvalidIP();
-				}
-				break;
-
-			default :
-				{
-					ASSERT( 0 );
-				}
-				break;
-			}
-		}
-		break;
-
-	case CIS_NONBLOCK :
-		{
-			return true;
-		}
-		break;
-
-	case CIS_BLOCK :
-		{
-			return false;
-		}
-		break;
-
-	default : 
-		{
-			ASSERT( 0 );
-		}
-		break;
-	}
-	
-	return false;
-}
-
-CUSTOM_IP_STATUS MMatchServer::CheckIsValidCustomIP(const MUID& CommUID,
-	const std::string& strIP, std::string& strCountryCode3, const bool bUseFilter)
-{
-	string strComment;
-	bool bIsBlock = false;
-
-	if (!GetCountryFilter().GetCustomIP(strIP, bIsBlock, strCountryCode3, strComment))
-		return CIS_INVALID;
-
-	if (bUseFilter && bIsBlock)
-	{
-		MCommand* pCmd = CreateCommand(MC_RESPONSE_BLOCK_COUNTRYCODE, CommUID);
-		if( 0 != pCmd )
-		{
-			pCmd->AddParameter( new MCommandParameterString(strComment.c_str()) );
-			Post( pCmd );
-		}
-
-		if( 3 != strCountryCode3.length() )
-			strCountryCode3 = "er_";
-		return CIS_BLOCK;
-	}
-	
-	return CIS_NONBLOCK;
-}
-
-
-COUNT_CODE_STATUS MMatchServer::CheckIsNonBlockCountry(const MUID& CommUID,
-	const std::string& strIP, std::string& strCountryCode3, const bool bUseFilter)
-{
-	if( !bUseFilter )
-		return CCS_NONBLOCK;
-
-	if( GetCountryFilter().GetIPCountryCode(strIP, strCountryCode3) )
-	{
-		string strRoutingURL;
-
-		if( GetCountryFilter().IsNotBlockCode(strCountryCode3, strRoutingURL) )
-			return CCS_NONBLOCK;
-		else 
-		{
-			MCommand* pCmd = CreateCommand(MC_RESPONSE_BLOCK_COUNTRYCODE, CommUID);
-			if( 0 != pCmd )
-			{
-				pCmd->AddParameter( new MCommandParameterString(strRoutingURL.c_str()) );
-				Post( pCmd );
-			}
-			return CCS_BLOCK;
-		}
-	}	
-	else
-	{
-		uint32_t dwIPFrom = 0;
-		uint32_t dwIPTo = 0;
-		
-		// IP를 포함하고 있는 범위의 정보를 DB에서 새로 가져옴.
-		if( GetDBMgr()->GetIPCountryCode(strIP, dwIPFrom, dwIPTo, strCountryCode3) )
-		{
-			// 새로운 IP범위를 리스트에 추가 함.
-			if( !GetCountryFilter().AddIPtoCountry(dwIPFrom, dwIPTo, strCountryCode3) )
-			{
-				mlog( "MMatchServer::CheckIsNonBlockCountry - add new IPtoCountry(f:%u, t%u, c:%s) fail.\n",
-					dwIPFrom, dwIPTo, strCountryCode3.c_str() );
-			}
-
-			// 해당 IP가 블럭 국가의 IP인지 검사.
-			string strRoutingURL;
-			if( GetCountryFilter().IsNotBlockCode(strCountryCode3, strRoutingURL) )
-				return CCS_NONBLOCK;
-		}
-
-		// 여기까지 내려오면 현제 IPtoCountry테이블에 등록되지 않은 IP.
-		if( MGetServerConfig()->IsAcceptInvalidIP() )
-		{
-			strCountryCode3 = "N/S";
-			return CCS_INVALID;
-		}
-		else
-		{
-			MCommand* pCmd = CreateCommand(MC_RESPONSE_BLOCK_COUNTRYCODE, CommUID);
-			if( 0 != pCmd )
-			{
-				pCmd->AddParameter( new MCommandParameterString(strCountryCode3.c_str()) );
-				Post( pCmd );
-			}
-			return CCS_INVALID;
-		}
-	}
-
-	return CCS_BLOCK;
 }
 
 bool MMatchServer::InitEvent()
@@ -3055,7 +2802,7 @@ bool MMatchServer::InitEvent()
 }
 
 
-void MMatchServer::CustomCheckEventObj( const DWORD dwEventID, MMatchObject* pObj, void* pContext )
+void MMatchServer::CustomCheckEventObj( const u32 dwEventID, MMatchObject* pObj, void* pContext )
 {
 	m_CustomEventManager.CustomCheckEventObj( dwEventID, pObj, pContext );
 }

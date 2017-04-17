@@ -65,10 +65,10 @@ void BulletCollision::Build()
 		return;
 	}
 
-	Mesh.Construct(&Triangles, true, false);
-	Mesh.Get().buildOptimizedBvh();
+	Mesh.emplace(&Triangles, true, false);
+	Mesh.value().buildOptimizedBvh();
 
-	Object.setCollisionShape(&Mesh.Get());
+	Object.setCollisionShape(&Mesh.value());
 	btTransform t;
 	t.setIdentity();
 	Object.setWorldTransform(t);
@@ -80,7 +80,7 @@ void BulletCollision::Build()
 void BulletCollision::Clear()
 {
 	Triangles.getIndexedMeshArray().clear();
-	Mesh.Destroy();
+	Mesh.reset();
 	Vertices.clear();
 	Indices.clear();
 	World.removeCollisionObject(&Object);

@@ -43,9 +43,6 @@ void MBMatchServer::OnResponseServerHeartbeat( const MUID& uidSender )
 		return;
 
 	Post( pCmd );
-
-	// 수동적으로 요청이 있을때만 응답함.
-	// OnResponseServerStatus( uidSender );
 }
 
 
@@ -64,7 +61,6 @@ void MBMatchServer::OnRequestConnectMatchServer( const MUID& uidSender )
 		pObj->AddCommListener( uidSender );
 		pObj->SetObjectType(MOT_PC);
 		pObj->SetFreeLoginIP( true );
-		pObj->SetCountryCode3( "kpr" );
 		
 		if (pCommObj != NULL)
 		{

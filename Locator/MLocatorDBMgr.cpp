@@ -56,26 +56,6 @@ bool MLocatorDBMgr::GetServerStatus( MServerStatusMgr* pServerStatusMgr )
 	{
 		pServerStatusMgr->Clear();
 
-		/////////////////////////////////
-		//CTime tm = CTime::GetCurrentTime();
-		//CString strTime = tm.Format("%Y-%m-%d %H:%M:%S");
-
-		//MServerStatus ss;
-
-		//ss.SetID( 999 );
-		//ss.SetCurPlayer( 999 );
-		//ss.SetMaxPalyer( 1500 );
-		//ss.SetLastUpdatedTime( (LPCTSTR)strTime );
-		//ss.SetIPString( "200.229.52.13" );
-		//ss.SetIP( inet_addr("200.229.52.13") );
-		//ss.SetPort( 6000 );
-		//ss.SetServerName( "Test" );
-		//ss.SetOpenState( 1 );
-
-		//pServerStatusMgr->Insert( ss );
-		//return 1;
-		/////////////////////////////////
-
 		CODBCRecordset rs(GetDB());
 
 		try

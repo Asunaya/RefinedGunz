@@ -1,12 +1,10 @@
-#ifndef MMATCHCHANNEL_H
-#define MMATCHCHANNEL_H
+#pragma once
 
 #include <map>
 #include <list>
 
 #include "MMatchGlobal.h"
 #include "MUID.h"
-#include "MMatchChannel.h"
 #include "MPageArray.h"
 #include "MSmartRefresh.h"
 #include "MMatchChannelRule.h"
@@ -15,7 +13,7 @@ class MMatchObject;
 class MMatchStage;
 class MCommand;
 
-typedef std::map<std::string, MMatchObject*>MObjectStrMap;
+typedef std::map<std::string, MMatchObject*> MObjectStrMap;
 typedef std::map<int, MMatchStage*>			MChannelStageMap;
 typedef MPageArray<MMatchObject*>			MChannelUserArray;
 
@@ -36,7 +34,7 @@ private:
 	MMatchObjectMap	m_ObjUIDLobbyCaches;
 
 	MMatchStage*	m_pStages[MAX_CHANNEL_MAXSTAGES];
-	list<int>		m_UnusedStageIndexList;
+	std::list<int>	m_UnusedStageIndexList;
 
 	MChannelUserArray			m_UserArray;
 	MSmartRefresh				m_SmartRefresh;
@@ -101,12 +99,11 @@ public:
 	void SyncPlayerList(MMatchObject* pObj, int nPage);
 };
 
-
-class MMatchChannelMap : public map<MUID, MMatchChannel*> {
+class MMatchChannelMap : public std::map<MUID, MMatchChannel*> {
 private:
 	MUID						m_uidGenerate;
 	unsigned long				m_nChecksum;
-	map<MUID, MMatchChannel*>	m_TypesChannelMap[MCHANNEL_TYPE_MAX];
+	std::map<MUID, MMatchChannel*>	m_TypesChannelMap[MCHANNEL_TYPE_MAX];
 	void Insert(const MUID& uid, MMatchChannel* pChannel)	{	insert(value_type(uid, pChannel));	}
 	MUID UseUID()				{	m_uidGenerate.Increase();	return m_uidGenerate;	}
 
@@ -125,10 +122,7 @@ public:
 	unsigned long GetChannelListChecksum() const { return m_nChecksum; }
 	int GetChannelCount(MCHANNEL_TYPE nChannelType);
 
-	map<MUID, MMatchChannel*>::iterator GetTypesChannelMapBegin(MCHANNEL_TYPE nType);
-	map<MUID, MMatchChannel*>::iterator GetTypesChannelMapEnd(MCHANNEL_TYPE nType);
+	std::map<MUID, MMatchChannel*>::iterator GetTypesChannelMapBegin(MCHANNEL_TYPE nType);
+	std::map<MUID, MMatchChannel*>::iterator GetTypesChannelMapEnd(MCHANNEL_TYPE nType);
 
 };
-
-
-#endif

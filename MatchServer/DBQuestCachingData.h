@@ -55,10 +55,10 @@ public:
 	bool DoUpdateDBCharQuestItemInfo();
 
 private:
-	MMatchObject*	m_pObject;				// DB업데이트때 데이터를 가져오기 위해서 저장해 놓은 포인터.
-	u64				m_dwLastUpdateTime;		// 업데이트가 적용되면 같이 갱신됨. 
-	int				m_nPlayCount;			// 게임횟수는 게임에 들어가서 하는 모든 행동에 관계없이 완료를 해야 1번 적용됨. 
-	int				m_nShopTradeCount;		// 상점에서의 퀘스트 아이템 거래 횟수.
-	bool			m_bEnableUpdate;		// 현재 상태. 업데이트가 가능하면 true임.
-	int				m_nRewardCount;			// 현제까지 보상 받은 횟수.
+	MMatchObject*	m_pObject;
+	u64				m_dwLastUpdateTime;
+	int				m_nPlayCount;
+	int				m_nShopTradeCount;
+	bool			m_bEnableUpdate;
+	int				m_nRewardCount;
 };

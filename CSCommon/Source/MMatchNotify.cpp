@@ -66,3 +66,14 @@ bool NotifyMessage(int nMsgID, std::string *out)
 
 	return true;
 }
+
+bool NotifyMessage(int nMsgID, char* Output, size_t OutputSize)
+{
+	auto i = g_NotifyMap.find(nMsgID);
+	if (i == g_NotifyMap.end())
+		return false;
+
+	strcpy_safe(Output, OutputSize, i->second.c_str());
+
+	return true;
+}

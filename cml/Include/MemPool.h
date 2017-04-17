@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Windows.h"
-#include "Winbase.h"
 #include "MDebug.h"
 #include "assert.h"
 #include <mutex>
@@ -100,8 +98,8 @@ public:
 	static void Release();
 
 public:
-	CMemPoolSm(void) {};
-	~CMemPoolSm(void) {};
+	CMemPoolSm() {};
+	~CMemPoolSm() {};
 };
 
 

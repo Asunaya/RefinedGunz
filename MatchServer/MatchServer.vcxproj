@@ -274,7 +274,6 @@
     <ClCompile Include="MAsyncDBJob.cpp" />
     <ClCompile Include="MAsyncDBJob_BringAccountItem.cpp" />
     <ClCompile Include="MAsyncDBJob_CharFinalize.cpp" />
-    <ClCompile Include="MAsyncDBJob_CountryFilter.cpp" />
     <ClCompile Include="MAsyncDBJob_Event.cpp" />
     <ClCompile Include="MAsyncDBJob_FriendList.cpp" />
     <ClCompile Include="MAsyncDBJob_GetLoginInfo.cpp" />
@@ -351,7 +350,9 @@
     <ClCompile Include="MQuestScenario.cpp" />
     <ClCompile Include="MSacrificeQItemTable.cpp" />
     <ClCompile Include="MSmartRefreshImpl.cpp" />
-    <ClCompile Include="MSSQLDatabase.cpp" />
+    <ClCompile Include="MSSQLDatabase.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='MSSQL|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="MTeamGameStrategy.cpp" />
     <ClCompile Include="MVoteDiscussImpl.cpp" />
     <ClCompile Include="MVoteMgr.cpp" />
@@ -365,7 +366,6 @@
     </ClCompile>
     <ClCompile Include="TrayIcon.cpp" />
     <ClCompile Include="MBMatchServer.cpp" />
-    <ClCompile Include="MBMatchServer_CountryFilter.cpp" />
     <ClCompile Include="MBMatchServer_OnCommand.cpp" />
     <ClCompile Include="MBMatchServer_ServerKeeper.cpp" />
     <ClCompile Include="MBMatchServerConfigReloader.cpp" />
@@ -382,7 +382,6 @@
     <ClInclude Include="MAsyncDBJob.h" />
     <ClInclude Include="MAsyncDBJob_BringAccountItem.h" />
     <ClInclude Include="MAsyncDBJob_CharFinalize.h" />
-    <ClInclude Include="MAsyncDBJob_CountryFilter.h" />
     <ClInclude Include="MAsyncDBJob_Event.h" />
     <ClInclude Include="MAsyncDBJob_FriendList.h" />
     <ClInclude Include="MAsyncDBJob_GetLoginInfo.h" />

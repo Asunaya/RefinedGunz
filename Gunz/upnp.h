@@ -14,6 +14,6 @@ public:
 protected:
 	bool GetIp();
 
-	char m_Address[17];
-	u16 m_Port;
+	char m_Address[17]{};
+	u16 m_Port{};
 };

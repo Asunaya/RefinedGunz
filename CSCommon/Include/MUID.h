@@ -2,7 +2,6 @@
 
 #include <map>
 #include <vector>
-#include <crtdbg.h>
 #include "GlobalTypes.h"
 
 /// MAIET Unique ID

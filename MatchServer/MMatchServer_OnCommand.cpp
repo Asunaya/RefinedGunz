@@ -7,7 +7,6 @@
 #include "MMatchObject.h"
 #include "MAgentObject.h"
 #include "MMatchNotify.h"
-#include "Msg.h"
 #include "MMatchStage.h"
 #include "MCommandCommunicator.h"
 #include "MMatchTransDataType.h"

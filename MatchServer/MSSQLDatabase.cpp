@@ -1,14 +1,11 @@
-#define _WINDOWS_
 #include "stdafx.h"
 #ifdef MSSQL_ENABLED
-#undef _WINDOWS_
-#undef ASSERT
+#include "MMatchServer.h"
+#include "ODBCRecordset.h"
 #include "MSSQLDatabase.h"
 #include "MDatabase.h"
-#include "MCountryFilterDBMgr.h"
 #include "MMatchDBFilter.h"
 #include "MMatchObject.h"
-#include "afxwin.h"
 #include "MMatchTransDataType.h"
 #include "MMatchFriendInfo.h"
 #include <stdio.h>
@@ -17,218 +14,70 @@
 #include "MMatchStatus.h"
 #include "MMatchFriendInfo.h"
 #include "MMatchClan.h"
-#include "mmsystem.h"
 #include "MInetUtil.h"
 #include "mcrc32.h"
 #include "MQuestConst.h"
 #include "MQuestItem.h"
 #include "MMatchConfig.h"
-#undef _WINDOWS_
-#include <Windows.h>
 
 // SQL ////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
 // UserID, Password, Cert, Name, Age, Sex 
 static TCHAR g_szDB_CREATE_ACCOUNT[] = _T("{CALL spInsertAccount ('%s', '%s', %d, '%s', %d, %d)}");
-
-// 계정 로그인 정보 받아오기
 static TCHAR g_szDB_GET_LOGININFO[] = _T("{CALL spGetLoginInfo ('%s')}");
-
-// 계정 정보 받아오기
 static TCHAR g_szDB_GET_ACCOUNTINFO[] = _T("{CALL spGetAccountInfo (%d)}");
-
-// 캐릭터 생성
 static TCHAR g_szDB_CREATE_CHAR[] = _T("{CALL spInsertChar (%d, %d, '%s', %d, %d, %d, %d)}");
-
-// 캐릭터 삭제
 static TCHAR g_szDB_DELETE_CHAR[] = _T("{CALL spDeleteChar (%d, %d, '%s')}");
-
-// 캐릭터 리스트 받아오기
 static TCHAR g_szDB_GET_CHARLIST[] = _T("{CALL spGetCharList (%d)}");
-
-// 계정 캐릭터 정보 받아오기
 static TCHAR g_szDB_GET_ACCOUNT_CHARINFO[] = _T("{CALL spGetAccountCharInfo (%d, %d)}");
-
-// 캐릭터 정보 받아오기
 static TCHAR g_szDB_GET_CHARINFO_BY_AID[] = _T("{CALL spGetCharInfoByCharNum (%d, %d)}");
-
-// 캐릭터 정보 업데이트
 static TCHAR g_szDB_SIMPLE_UPDATE_CHARINFO[] = _T("{CALL spSimpleUpdateChar (%d, '%s', %d, %d, %d)}");
-
-// 캐릭터 아이템 추가
 static TCHAR g_szDB_INSERT_CHAR_ITEM[] = _T("{CALL spInsertCharItem (%d, %d, %d)}");
-
-// 캐릭터 아이템 삭제
 static TCHAR g_szDB_DELETE_CHAR_ITEM[] = _T("{CALL spDeleteCharItem (%d, %d)}");
-
-// 캐릭터 아이템 정보 가져오기
 static TCHAR g_szDB_SELECT_CHAR_ITEM[] = _T("{CALL spSelectCharItem (%d)}");
-
-// 캐릭터의 창고 아이템 가져오기
 static TCHAR g_szDB_SELECT_ACCOUNT_ITEM[] = _T("{CALL spSelectAccountItem (%d)}");
-
-// 캐릭터 장비 아이템 정보 가져오기
-//static TCHAR g_szDB_SELECT_CHAR_EQUIPED_ITEM[] = _T("{CALL spSelectCharEquipedItemCIID (%d)}");
-
-// 상점에서 아이템 구매
 static TCHAR g_szDB_BUY_BOUNTY_ITEM[] = _T("{CALL spBuyBountyItem (%d, %d, %d)}");
-
-// 상점에서 아이템 판매
 static TCHAR g_szDB_SELL_BOUNTY_ITEM[] = _T("{CALL spSellBountyItem (%d, %d, %d, %d, %d)}");
-
-
-// 캐릭터 아이템 장비하기
 static TCHAR g_szDB_UPDATE_EQUIPITEM[] = _T("{CALL spUpdateEquipItem (%d, %d, %d, %d)}");
-
-// 접속 로그
-// static TCHAR g_szDB_INSERT_CONN_LOG[] = _T("{CALL spInsertConnLog (%d, '%s', '%s')}");
 static TCHAR g_szDB_INSERT_CONN_LOG[] = _T("{CALL spInsertConnLog (%d, %d, %d, %d, %d, '%s')}");
-
-// 게임 로그
 static TCHAR g_szDB_INSERT_GAME_LOG[] = _T("{CALL spInsertGameLog ('%s', '%s', '%s', %d, %d, %d, '%s')}");
-
-// 킬 로그
 static TCHAR g_szDB_INSERT_KILL_LOG[] = _T("{CALL spInsertKillLog (%d, %d)}");
-
-// 바운티로 아이템 구입 로그
 static TCHAR g_szDB_INSERT_ITEM_PURCHASE_BY_BOUNTY_LOG[] = _T("{CALL spInsertItemPurchaseLogByBounty (%d, %d, %d, %d, '%s')}");
-
-// 캐릭터 생성 로그
 static TCHAR g_szDB_INSERT_CHAR_MAKING_LOG[] = _T("{CALL spInsertCharMakingLog (%d, '%s', '%s')}");
-
-// 서버 로그
 static TCHAR g_szDB_INSERT_SERVER_LOG[] = _T("{CALL spInsertServerLog (%d, %d, %d, %u, %u)}");
-
-// 서버 동접자 상태
-//static TCHAR g_szDB_UPDATE_SERVER_STATUS[] = _T("UPDATE ServerStatus Set CurrPlayer=%d, Time=GETDATE() WHERE ServerID=%d");
-// 인자: CurrPlayer, ServerID
 static TCHAR g_szDB_UPDATE_SERVER_STATUS[] = _T("{CALL spUpdateServerStatus (%d, %d)}");
-
-// 서버 최대 인원 업데이트
 static TCHAR g_szDB_UPDATE_SERVER_INFO[] = _T("UPDATE ServerStatus Set MaxPlayer=%d, ServerName='%s' WHERE ServerID=%d");
-
-// 플레이어 로그
 static TCHAR g_szDB_INSERT_PLAYER_LOG[] = _T("{CALL spInsertPlayerLog (%d, %d, %d, %d, %d, %d)}");
-
-// 레벨업 로그
 static TCHAR g_szDB_INSERT_LEVELUP_LOG[] = _T("{CALL spInsertLevelUpLog (%d, %d, %d, %d, %d, %d)}");
-
-
-// 레벨 업데이트
-//static TCHAR g_szDB_UPDATE_CHAR_LEVEL[] = _T("UPDATE Character Set Level=%d WHERE CID=%d");
-// 인자: Level, CID
 static TCHAR g_szDB_UPDATE_CHAR_LEVEL[] = _T("{CALL spUpdateCharLevel (%d, %d)}");
-
-// BP 업데이트
-//static TCHAR g_szDB_UPDATE_CHAR_BP[] = _T("UPDATE Character SET BP=BP+(%d) WHERE CID=%d");
-// 인자: BPInc, CID
 static TCHAR g_szDB_UPDATE_CHAR_BP[] = _T("{CALL spUpdateCharBP (%d, %d)}");
-
-// 캐릭터 정보(XP, BP, KillCount, DeathCount) 업데이트
-//static TCHAR g_szDB_UPDATE_CHAR_INFO_DATA[] = _T("UPDATE Character SET XP=XP+(%d), BP=BP+(%d), KillCount=KillCount+(%d), DeathCount=DeathCount+(%d) WHERE CID=%d");
-// 인자: XPInc, BPInc, KillInc, DeathInc, CID
 static TCHAR g_szDB_UPDATE_CHAR_INFO_DATA[] = _T("{CALL spUpdateCharInfoData (%d, %d, %d, %d, %d)}");
-
-// 캐릭터 플레이 시간 업데이트
-//static TCHAR g_szDB_UPDATE_CHAR_PLAYTIME[] = _T("UPDATE Character SET PlayTime=PlayTime+(%d), LastTime=GETDATE() WHERE CID=%d");
-// 인자: PlayTimeInc, CID
 static TCHAR g_szDB_UPDATE_CHAR_PLAYTIME[] = _T("{CALL	spUpdateCharPlayTime (%d, %d)}");
-
-// 접속시간, IP저장
-// 인자: IP, 넷마블UserID
 static TCHAR g_szDB_UPDATE_LAST_CONNDATE[] = _T("{CALL	spUpdateLastConnDate ('%s', '%s')}");
-
-// 중앙은행 아이템 내 캐릭터로 가져오기
-// 인자: AID, CID, AIID
 static TCHAR g_szDB_BRING_ACCOUNTITEM[] = _T("{CALL spBringAccountItem (%d, %d, %d)}");
-
-// 중앙은행에 내 캐쉬아이템 넣기
-// 인자: AID, CID, CIID
 static TCHAR g_szDB_BRING_BACK_ACCOUNTITEM[] = _T("{CALL spBringBackAccountItem (%d, %d, %d)}");
-
-// 모든 장비 해제
-// 인자: CID
 static TCHAR g_szDB_CLEARALL_EQUIPEDITEM[] = _T("{CALL spClearAllEquipedItem (%d)}");
-
-// 친구 추가
-// 인자: CID, FriendCID, Favorite
 static TCHAR g_szDB_ADD_FRIEND[] = _T("{CALL spAddFriend (%d, %d, %d)}");
-
-// 인자: CID, FriendCID
 static TCHAR g_szDB_REMOVE_FRIEND[] = _T("{CALL spRemoveFriend (%d, %d)}");
-
-// 인자: CID
 static TCHAR g_szDB_GET_FRIEND_LIST[] = _T("{CALL spGetFriendList (%d)}");
-
-// 캐릭터가 속한 클랜 알아오기
-// 인자: CID
 static TCHAR g_szDB_GET_CHAR_CLAN[] = _T("{CALL spGetCharClan (%d)}");
-
-// 클랜이름으로 CLID 알아오기
-// 인자: ClanName	varchar(24)
 static TCHAR g_szDB_GET_CLID_FROM_CLANNAME[] = _T("{CALL spGetCLIDFromClanName ('%s')}");
-
-// 클랜 만들기
-// 인자: ClanName	varchar(24), MasterCID, Member1CID, Member2CID, Member3CID, Member4CID
 static TCHAR g_szDB_CREATE_CLAN[] = _T("{CALL spCreateClan ('%s', %d, %d, %d, %d, %d)}");
-
-// 클랜 폐쇄 예약
-// 인자: CLID, ClanName, MasterCID
 static TCHAR g_szDB_RESERVE_CLOSE_CLAN[] = _T("{CALL spReserveCloseClan (%d, '%s', %d, '%s')}");
-
-// 클랜원 추가
-// 인자: CLID, JoinerCID, ClanGrade
 static TCHAR g_szDB_ADD_CLAN_MEMBER[] = _T("{CALL spAddClanMember (%d, %d, %d)}");
-
-// 클랜원 탈퇴
-// 인자: CLID, LeaverCID
 static TCHAR g_szDB_REMOVE_CLAN_MEMBER[] = _T("{CALL spRemoveClanMember (%d, %d)}");
-
-// 클랜 멤버 권한 변경
-// 인자: CLID, MemberCID, ClanGrade
 static TCHAR g_szDB_UPDATE_CLAN_GRADE[] = _T("{CALL spUpdateClanGrade (%d, %d, %d)}");
-
-// 클랜 멤버 강제 탈퇴
-// 인자: CLID, AdminClanGrade, MemberCharName
 static TCHAR g_szDB_EXPEL_CLAN_MEMBER[] = _T("{CALL spRemoveClanMemberFromCharName (%d, %d, '%s')}");
-
-// 클랜 정보 얻기 - 클랜전서버만 사용
 static TCHAR g_szDB_GET_CLAN_INFO[] = _T("{CALL spGetClanInfo (%d)}");
-
-/* 래더 관련 */
-// 4명팀 ID 알아오기
-// 인자: Member1CID, Member2CID, Member3CID, Member4CID
 static TCHAR g_szDB_GET_LADDER_TEAM4_ID[] = _T("{CALL spGetTeamID4 (%d, %d, %d, %d)}");
-
-// 4명팀 승리 전적 업데이트
-// 인자: WinnerTeamID, LoserTeamID, DrawFlag
 static TCHAR g_szDB_TEAM4_WIN_THE_GAME[] = _T("{CALL spTeam4WinTheGame (%d, %d, %d, %d, %d, %d)}");
-
-// CID로 나머지 팀멤버 리스트 얻어오기
-// 인자: CID
 static TCHAR g_szDB_GET_LADDER_TEAM_MEMBERLIST[] = _T("{CALL spGetLadderTeamMemberByCID (%d)}");
-
-/* 클랜전 */
-// 클랜전 승리 전적 업데이트
-// 인자: WinnerCLID, LoserCLID, DrawFlag, WinnerPoint, LoserPoint, WinnerClanName, LoserClanName, 
-//       RoundWins, RoundLosses, MapID, GameType
 static TCHAR g_szDB_WIN_THE_CLAN_GAME[] = _T("{CALL spWinTheClanGame (%d, %d, %d, %d, %d, '%s', '%s', %d, %d, %d, %d, '%s', '%s')}");
-
-// 클랜 기여도 업데이트
 static TCHAR g_szDB_UPDATE_CHAR_CLAN_CONTPOINT[] = _T("{CALL spUpdateCharClanContPoint (%d, %d, %d)}");
-
-/* 이벤트 */
-// 이벤트 짱마크 부여
-// 인자 GradeID, AID
 static TCHAR g_szDB_EVENT_JJANG_UPDATE[] = _T("UPDATE Account SET UGradeID=%d WHERE AID=%d");
-
-// 중앙은행의 기간 만료 아이템 삭제
 static TCHAR g_szDB_DELETE_EXPIRED_ACCOUNT_ITEM[] = _T("{CALL spDeleteExpiredAccountItem (%d)}");
-
-// 케릭터의 퀘스트 아이템 정보 요청.
 static TCHAR g_szDB_SELECT_QUEST_ITEM_INFO_BY_CID[] = _T("{CALL spSelectCharQuestItemInfoByCID (%d)}");
-// Quest게임 로그.
 // @GameName varchar(64)
 // @Master int 
 // @Player1 int 
@@ -238,68 +87,45 @@ static TCHAR g_szDB_SELECT_QUEST_ITEM_INFO_BY_CID[] = _T("{CALL spSelectCharQues
 // @ScenarioID smallint 
 // @GamePlayTime tinyint 
 static TCHAR g_szDB_INSERT_QUEST_GAME_LOG[] = _T("{CALL spInsertQuestGameLog ('%s', %d, %d, %d, %d, %d, %d, %d)}");
-
-// 유니크 퀘스트 아이템 로그 저장.
 // @QGLID int 
 // @CID int
 // @QIID int
 static TCHAR g_szDB_INSERT_QUINQUEITEMLOG[] = _T("{CALL spInsertQUniqueItemLog (%d, %d, %d)}");
-
-// 프리미엄 IP 검색
 static TCHAR g_szDB_CHECK_PREMIUM_IP[] = _T("{CALL spCheckPremiumIP ('%s')}");
-
-// 이벤트 당첨자의 CID 저장.
 // @AID int
 // @CID int
 // @EventName varchar(24)
 static TCHAR g_szInsertEvent[] = _T("{CALL spInsertEvent (%u, %u, '%s')}");
-
 // @AID int
 // @CID int
 // @BlockType tinyint
 // @Comment varchar(256)
 // @EndBlockDate datetime
 static TCHAR g_szSetBlockAccount[] = _T("{CALL spSetBlockAccount (%u, %u, %u, '%s', '%s', '%s')}");
-
 // @AID int
 // @BlockType tinyint
 static TCHAR g_szResetAccountBlock[] = _T("{CALL spResetAccountBlock (%u, %u)}");
-
 // @AID int
 // @CID int
 // @BlockType tinyint
 // @Comment varchar(256)
 // @IP varchar(15)
 static TCHAR g_szInsertBlockLog[] = _T("{CALL spInsertBlockLog (%u, %u, %u,'%s', '%s')}");
-
 // @CID int
 // @CLID int
 // @DeleteDate smalldatetime
 static TCHAR g_szSetClanDeleteDate[] = _T("{CALL spSetClanDeleteDate (%u, %u, '%s')}");
-
 // @CLID int
 // @MasterCID int
 // @DeleteName varchar(24)
 // @WaitHour int = 168 -- 1주일
 static TCHAR g_szDeleteExpiredClan[] = _T("{CALL spDeleteExpiredClan (%u, %u, '%s', %u)}");
-
 static TCHAR g_szAdminResetAllHackingBlock[] = _T("{CALL spResetHackingBlock}");
 
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-
-std::string FilterSQL( const std::string& str )
+static std::string FilterSQL(std::string str)
 {
-	static std::string strRemoveTok = "'";
-
-	std::string strTmp = str;
-
-	std::string::size_type pos;
-
-	while ((pos = strTmp.find_first_of(strRemoveTok)) != std::string::npos)
-		strTmp.erase(pos, 1);
-
-	return strTmp;
+	erase_remove(str, '\'');
+	return str;
 }
 
 class MSSQLDatabaseImpl
@@ -314,8 +140,6 @@ private:
 
 	MDatabase	m_DB;
 	CString		m_strDSNConnect;
-
-	MCountryFilterDBMgr m_CountryFilterDBMgr;
 
 	MMatchDBFilter m_DBFilter;
 
@@ -363,15 +187,8 @@ CString MSSQLDatabaseImpl::BuildDSNString(const CString strDSN, const CString st
 
 bool MSSQLDatabaseImpl::Connect(CString strDSNConnect)
 {
-	if (m_DB.Connect(strDSNConnect))
-	{
-		m_CountryFilterDBMgr.SetDB(&m_DB);
-		return true;
-	}
-
-	return false;
+	return m_DB.Connect(strDSNConnect);
 }
-
 
 void MSSQLDatabase::Log(const char *pFormat, ...)
 {
@@ -602,11 +419,9 @@ int MSSQLDatabase::CreateCharacter(int nAID, const char* szNewName, int nCharInd
 		return MERR_UNKNOWN;
 	}
 
-	// 같은 이름의 캐릭이 이미 존재하는지 체크
 	if ((rs.IsOpen() == FALSE) || (rs.GetRecordCount() <= 0) || (rs.IsBOF() == TRUE))
 	{
 		return MERR_UNKNOWN;
-		return false;
 	}
 	if (rs.Field("NUM").AsInt() > 0)
 	{
@@ -682,79 +497,6 @@ bool MSSQLDatabase::GetAccountCharList(const int nAID, MTD_AccountCharInfo* pout
 
 	return true;
 }
-
-/*
-bool MSSQLDatabase::GetAccountCharList(const int nAID, MTD_CharInfo* poutCharList, int* noutCharCount)
-{
-_STATUS_DB_START
-if (!CheckOpen()) return false;
-
-
-CString strSQL;
-strSQL.Format(g_szDB_GET_CHARLIST, nAID);
-CODBCRecordset rs(&Impl->m_DB);
-
-bool bException = false;
-try
-{
-rs.Open(strSQL, CRecordset::forwardOnly, CRecordset::readOnly);
-}
-catch(CDBException* e)
-{
-bException = true;
-Log("MSSQLDatabase::GetAccountCharList - %s\n", e->m_strError);
-return false;
-}
-
-if (rs.IsOpen() == FALSE)
-{
-return false;
-}
-
-int t = 0;
-for( ; ! rs.IsEOF(); rs.MoveNext() )
-{
-if (t >= 4) break;
-
-memset(&poutCharList[t], 0, sizeof(MTD_CharInfo));
-
-
-strcpy_safe(poutCharList[t].szName, (LPCTSTR)rs.Field("Name").AsString());
-strcpy_safe(poutCharList[t].szClanName, (LPCTSTR)rs.Field("ClanName").AsString());
-
-poutCharList[t].nCharNum = rs.Field("CharNum").AsInt();
-poutCharList[t].nLevel = rs.Field("Level").AsInt();
-poutCharList[t].nSex = rs.Field("Sex").AsInt();
-poutCharList[t].nHair = rs.Field("Hair").AsInt();
-poutCharList[t].nFace = rs.Field("Face").AsInt();
-poutCharList[t].nXP = (unsigned long)rs.Field("XP").AsLong();
-poutCharList[t].nBP = (unsigned long)rs.Field("BP").AsLong();
-
-
-memset(poutCharList[t].nEquipedItemDesc, 0, sizeof(unsigned long int) * MMCIP_END);
-poutCharList[t].nEquipedItemDesc[MMCIP_HEAD] = rs.Field("head_ItemID").AsInt();
-poutCharList[t].nEquipedItemDesc[MMCIP_CHEST] = rs.Field("chest_ItemID").AsInt();
-poutCharList[t].nEquipedItemDesc[MMCIP_HANDS] = rs.Field("hands_ItemID").AsInt();
-poutCharList[t].nEquipedItemDesc[MMCIP_LEGS] = rs.Field("legs_ItemID").AsInt();
-poutCharList[t].nEquipedItemDesc[MMCIP_FEET] = rs.Field("feet_ItemID").AsInt();
-poutCharList[t].nEquipedItemDesc[MMCIP_FINGERL] = rs.Field("fingerl_ItemID").AsInt();
-poutCharList[t].nEquipedItemDesc[MMCIP_FINGERR] = rs.Field("fingerr_ItemID").AsInt();
-poutCharList[t].nEquipedItemDesc[MMCIP_MELEE] = rs.Field("melee_ItemID").AsInt();
-poutCharList[t].nEquipedItemDesc[MMCIP_PRIMARY] = rs.Field("primary_ItemID").AsInt();
-poutCharList[t].nEquipedItemDesc[MMCIP_SECONDARY] = rs.Field("secondary_ItemID").AsInt();
-poutCharList[t].nEquipedItemDesc[MMCIP_CUSTOM1] = rs.Field("custom1_ItemID").AsInt();
-poutCharList[t].nEquipedItemDesc[MMCIP_CUSTOM2] = rs.Field("custom2_ItemID").AsInt();
-
-t++;
-}
-
-*noutCharCount = t;
-
-_STATUS_DB_END(3);
-
-return true;
-}
-*/
 
 bool MSSQLDatabase::GetAccountCharInfo(const int nAID, const int nCharIndex, MTD_CharInfo* poutCharInfo)
 {
@@ -873,7 +615,6 @@ bool MSSQLDatabase::GetCharInfoByAID(const int nAID, const int nCharIndex, MMatc
 	poutCharInfo->m_nTotalDeathCount = rs.Field("DeathCount").AsInt();
 	poutCharInfo->m_nTotalPlayTimeSec = rs.Field("PlayTime").AsInt();
 
-
 	// clan
 	poutCharInfo->m_ClanInfo.m_nClanID = (int)rs.Field("CLID").AsInt();
 
@@ -889,7 +630,6 @@ bool MSSQLDatabase::GetCharInfoByAID(const int nAID, const int nCharIndex, MMatc
 	if (!rs.Field("WaitHourDiff").IsNull())
 		nWaitHourDiff = (int)rs.Field("WaitHourDiff").AsInt();
 
-	// 아이템
 	memset(&poutCharInfo->m_nEquipedItemCIID, 0, sizeof(poutCharInfo->m_nEquipedItemCIID));
 
 	poutCharInfo->m_nEquipedItemCIID[MMCIP_HEAD] = (unsigned long int)rs.Field("head_slot").AsLong();
@@ -1032,8 +772,6 @@ bool MSSQLDatabase::InsertCharItem(const unsigned int nCID, int nItemDescID, boo
 	_STATUS_DB_START
 		if (!CheckOpen()) return false;
 
-
-	// 무기한 아이템이면 nRentPeriodHour=0 이다.
 	if (bRentItem == false) nRentPeriodHour = 0;
 
 	CString strSQL;
@@ -1194,24 +932,15 @@ bool MSSQLDatabase::GetCharItemInfo(MMatchCharInfo& CharInfo)
 		nItemDescID = (int)rs.Field("ItemID").AsInt();
 		nCIID = (unsigned long int)rs.Field("CIID").AsLong();
 
-
-		bool bIsRentItem = !rs.Field("RentPeriodRemainder").IsNull();		// 기간제 아이템 여부
-		int nRentMinutePeriodRemainder = RENT_MINUTE_PERIOD_UNLIMITED;		// 기간제아이템 남은시간(분)
-		bool bSpendingItem = false;											// 소비아이템 여부 (지금은 무조건 false - 아직 완전히 구현되지 않음)
-		int nCnt = -1;														// 소비아이템 개수
-
+		bool bIsRentItem = !rs.Field("RentPeriodRemainder").IsNull();
+		int nRentMinutePeriodRemainder = RENT_MINUTE_PERIOD_UNLIMITED;
+		bool bSpendingItem = false;
+		int nCnt = -1;
 
 		if (bIsRentItem)
 		{
 			nRentMinutePeriodRemainder = rs.Field("RentPeriodRemainder").AsInt();
 		}
-		/*
-		if (!rs.Field("Cnt").IsNull())
-		{
-		bSpendingItem = true;
-		nCnt = (int)rs.Field("Cnt").AsShort();
-		}
-		*/
 
 		MUID uidNew = MMatchItemMap::UseUID();
 		CharInfo.m_ItemList.CreateItem(uidNew, nCIID, nItemDescID, bIsRentItem, nRentMinutePeriodRemainder);
@@ -1219,7 +948,7 @@ bool MSSQLDatabase::GetCharItemInfo(MMatchCharInfo& CharInfo)
 		t++;
 	}
 
-	CharInfo.m_ItemList.SetDbAccess();	// 디비에서 가져왔다고 알림
+	CharInfo.m_ItemList.SetDbAccess();
 
 	_STATUS_DB_END(10);
 	return true;
@@ -1256,36 +985,27 @@ bool MSSQLDatabase::GetAccountItemInfo(const int nAID, MAccountItemNode* pOut, i
 	int aiid = 0, itemid = 0;
 	int nodecount = 0;
 
-	int nExpiredItemCount = 0;		// 기간만료된 아이템 개수
+	int nExpiredItemCount = 0;
 
 	for (; !rs.IsEOF(); rs.MoveNext())
 	{
 		itemid = (int)rs.Field("ItemID").AsInt();
 		aiid = (int)rs.Field("AIID").AsInt();
 
-		bool bIsRentItem = !rs.Field("RentPeriodRemainder").IsNull();		// 기간제 아이템 여부
-		int nRentMinutePeriodRemainder = RENT_MINUTE_PERIOD_UNLIMITED;		// 기간제아이템 남은 시간(분단위)
-		bool bSpendingItem = false;											// 소비아이템 여부(아직 완전히 구현되어있지 않음)
-		int nCnt = -1;														// 소비아이템 개수
-
+		bool bIsRentItem = !rs.Field("RentPeriodRemainder").IsNull();
+		int nRentMinutePeriodRemainder = RENT_MINUTE_PERIOD_UNLIMITED;
+		bool bSpendingItem = false;
+		int nCnt = -1;
 
 		if (bIsRentItem)
 		{
 			nRentMinutePeriodRemainder = rs.Field("RentPeriodRemainder").AsInt();
 		}
-		/*
-		if (!rs.Field("Cnt").IsNull())
-		{
-		bSpendingItem = true;
-		nCnt = (int)rs.Field("Cnt").AsShort();
-		}
-		*/
 
 		if ((bIsRentItem) && (nRentMinutePeriodRemainder <= 0))
 		{
 			if (nExpiredItemCount < nMaxExpiredItemCount)
 			{
-				// 만약 기간만료 아이템이 있으면 accountitem에 추가하지 않는다.
 				pOutExpiredItemList[nExpiredItemCount].nAIID = aiid;
 				pOutExpiredItemList[nExpiredItemCount].nItemID = (unsigned long int)itemid;
 				nExpiredItemCount++;
@@ -1340,6 +1060,17 @@ bool MSSQLDatabase::UpdateEquipedItem(const unsigned long nCID, MMatchCharItemPa
 	return rs.Field("Ret").AsInt() != 0;
 }
 
+static bool SplitStrIP(int(&out)[4], const char* szIP)
+{
+	if (sscanf_s(szIP, "%d.%d.%d.%d", &out[0], &out[1], &out[2], &out[3]) != 4)
+		return false;
+
+	for (auto val : out)
+		if (val < 0 || val > 255)
+			return false;
+
+	return true;
+}
 
 bool MSSQLDatabase::InsertConnLog(const int nAID, const char* szIP, const string& strCountryCode3)
 {
@@ -1348,8 +1079,8 @@ bool MSSQLDatabase::InsertConnLog(const int nAID, const char* szIP, const string
 
 	if (0 == szIP) return false;
 
-	vector< uint8_t > vIP;
-	if (!SplitStrIP(szIP, vIP) || (4 != vIP.size()))
+	int nIP[4];
+	if (!SplitStrIP(nIP, szIP))
 	{
 		mlog("MSSQLDatabase::InsertConnLog - 문자열 IP(%s)분해 실패. AID(%u)\n",
 			nAID, szIP);
@@ -1361,8 +1092,7 @@ bool MSSQLDatabase::InsertConnLog(const int nAID, const char* szIP, const string
 		auto temp = FilterSQL(strCountryCode3);
 
 		CString strSQL;
-		// strSQL.Format(g_szDB_INSERT_CONN_LOG, nAID, szUserID, szIP);
-		strSQL.Format(g_szDB_INSERT_CONN_LOG, nAID, vIP[0], vIP[1], vIP[2], vIP[3], temp.c_str());
+		strSQL.Format(g_szDB_INSERT_CONN_LOG, nAID, nIP[0], nIP[1], nIP[2], nIP[3], temp.c_str());
 
 		Impl->m_DB.ExecuteSQL(strSQL);
 	}
@@ -1446,8 +1176,6 @@ bool MSSQLDatabase::InsertChatLog(const unsigned long int nCID, const char* szMs
 	return true;
 }
 
-
-// 캐릭터 레벨 업데이트
 bool MSSQLDatabase::UpdateCharLevel(const int nCID, const int nLevel)
 {
 	_STATUS_DB_START
@@ -1469,17 +1197,14 @@ bool MSSQLDatabase::UpdateCharLevel(const int nCID, const int nLevel)
 	return true;
 }
 
-// bp 업데이트
 bool MSSQLDatabase::UpdateCharBP(const int nCID, const int nBPInc)
 {
 	_STATUS_DB_START
 		if (!CheckOpen()) return false;
 
-
 #ifdef _DEBUG
 	mlog("MSSQLDatabase::UpdateCharBP - Added bounty price:%d\n", nBPInc);
 #endif
-
 
 	try
 	{
@@ -1502,9 +1227,7 @@ bool MSSQLDatabase::InsertItemPurchaseLogByBounty(const unsigned long int nItemI
 	const int nBounty, const int nCharBP, const ItemPurchaseType nType)
 {
 	_STATUS_DB_START
-		if (!CheckOpen()) return false;
-
-
+	if (!CheckOpen()) return false;
 
 	char szType[8] = "";
 
@@ -1536,9 +1259,7 @@ bool MSSQLDatabase::InsertCharMakingLog(const unsigned int nAID, const char* szC
 	const CharMakingType nType)
 {
 	_STATUS_DB_START
-		if (!CheckOpen()) return false;
-
-
+	if (!CheckOpen()) return false;
 
 	char szType[8] = "";
 
@@ -1572,8 +1293,7 @@ bool MSSQLDatabase::InsertServerLog(const int nServerID, const int nPlayerCount,
 	const uint32_t dwBlockCount, const uint32_t dwNonBlockCount)
 {
 	_STATUS_DB_START
-		if (!CheckOpen()) return false;
-
+	if (!CheckOpen()) return false;
 
 	try
 	{
@@ -1595,7 +1315,7 @@ bool MSSQLDatabase::InsertServerLog(const int nServerID, const int nPlayerCount,
 bool MSSQLDatabase::UpdateServerStatus(const int nServerID, const int nCurrPlayer)
 {
 	_STATUS_DB_START
-		if (!CheckOpen()) return false;
+	if (!CheckOpen()) return false;
 
 	try
 	{
@@ -1617,8 +1337,7 @@ bool MSSQLDatabase::UpdateServerStatus(const int nServerID, const int nCurrPlaye
 bool MSSQLDatabase::UpdateServerInfo(const int nServerID, const int nMaxPlayer, const char* szServerName)
 {
 	_STATUS_DB_START
-		if (!CheckOpen()) return false;
-
+	if (!CheckOpen()) return false;
 
 	try
 	{
@@ -1643,7 +1362,7 @@ bool MSSQLDatabase::InsertPlayerLog(const unsigned long int nCID,
 	const int nPlayTime, const int nKillCount, const int nDeathCount, const int nXP, const int nTotalXP)
 {
 	_STATUS_DB_START
-		if (!CheckOpen()) return false;
+	if (!CheckOpen()) return false;
 
 	try
 	{
@@ -1666,7 +1385,7 @@ bool MSSQLDatabase::InsertLevelUpLog(const int nCID, const int nLevel, const int
 	const int nKillCount, const int nDeathCount, const int nPlayTime)
 {
 	_STATUS_DB_START
-		if (!CheckOpen()) return false;
+	if (!CheckOpen()) return false;
 
 	try
 	{
@@ -1689,8 +1408,7 @@ bool MSSQLDatabase::InsertLevelUpLog(const int nCID, const int nLevel, const int
 bool MSSQLDatabase::UpdateCharPlayTime(const unsigned long int nCID, const unsigned long int nPlayTime)
 {
 	_STATUS_DB_START
-		if (!CheckOpen()) return false;
-
+	if (!CheckOpen()) return false;
 
 	try
 	{
@@ -1713,8 +1431,7 @@ bool MSSQLDatabase::UpdateCharInfoData(const int nCID, const int nAddedXP, const
 	const int nAddedKillCount, const int nAddedDeathCount)
 {
 	_STATUS_DB_START
-		if (!CheckOpen()) return false;
-
+	if (!CheckOpen()) return false;
 
 	try
 	{
@@ -1737,7 +1454,7 @@ bool MSSQLDatabase::UpdateCharInfoData(const int nCID, const int nAddedXP, const
 bool MSSQLDatabase::UpdateLastConnDate(const char* szUserID, const char* szIP)
 {
 	_STATUS_DB_START
-		if (!CheckOpen()) return false;
+	if (!CheckOpen()) return false;
 
 	try
 	{
@@ -1763,7 +1480,7 @@ bool MSSQLDatabase::BringAccountItem(const int nAID, const int nCID, const int n
 	bool* poutIsRentItem, int* poutRentMinutePeriodRemainder)
 {
 	_STATUS_DB_START
-		if (!CheckOpen()) return false;
+	if (!CheckOpen()) return false;
 
 	CString strSQL;
 	strSQL.Format(g_szDB_BRING_ACCOUNTITEM, nAID, nCID, nAIID);
@@ -1787,9 +1504,8 @@ bool MSSQLDatabase::BringAccountItem(const int nAID, const int nCID, const int n
 	*poutCIID = rs.Field("ORDERCIID").AsLong();
 	*poutItemID = rs.Field("ItemID").AsLong();
 
-
-	bool bIsRentItem = !rs.Field("RentPeriodRemainder").IsNull();		// 기간제 아이템 여부
-	int nRentMinutePeriodRemainder = RENT_MINUTE_PERIOD_UNLIMITED;		// 기간제아이템 남은시간(분)
+	bool bIsRentItem = !rs.Field("RentPeriodRemainder").IsNull();
+	int nRentMinutePeriodRemainder = RENT_MINUTE_PERIOD_UNLIMITED;
 
 	if (bIsRentItem)
 	{
@@ -1806,7 +1522,7 @@ bool MSSQLDatabase::BringAccountItem(const int nAID, const int nCID, const int n
 bool MSSQLDatabase::BringBackAccountItem(const int nAID, const int nCID, const int nCIID)
 {
 	_STATUS_DB_START
-		if (!CheckOpen()) return false;
+	if (!CheckOpen()) return false;
 
 	try
 	{
@@ -1823,14 +1539,12 @@ bool MSSQLDatabase::BringBackAccountItem(const int nAID, const int nCID, const i
 
 	_STATUS_DB_END(32);
 	return true;
-
-
 }
 
 bool MSSQLDatabase::ClearAllEquipedItem(const unsigned long nCID)
 {
 	_STATUS_DB_START
-		if (!CheckOpen()) return false;
+	if (!CheckOpen()) return false;
 
 	try
 	{
@@ -1847,15 +1561,13 @@ bool MSSQLDatabase::ClearAllEquipedItem(const unsigned long nCID)
 
 	_STATUS_DB_END(27);
 	return true;
-
-
 }
 
 bool MSSQLDatabase::GetCharCID(const TCHAR* pszName, int* poutCID)
 {
 	_STATUS_DB_START
 
-		if (!CheckOpen()) return false;
+	if (!CheckOpen()) return false;
 	CODBCRecordset rs(&Impl->m_DB);
 
 	try
@@ -1872,7 +1584,6 @@ bool MSSQLDatabase::GetCharCID(const TCHAR* pszName, int* poutCID)
 		return false;
 	}
 
-	// 존재하는 캐릭이름인지 체크
 	if ((rs.IsOpen() == FALSE) || (rs.GetRecordCount() <= 0) || (rs.IsBOF() == TRUE))
 	{
 		return false;
@@ -1888,10 +1599,9 @@ bool MSSQLDatabase::FriendAdd(const int nCID, const int nFriendCID, const int nF
 {
 	_STATUS_DB_START
 
-		if (!CheckOpen()) return false;
+	if (!CheckOpen()) return false;
 	CODBCRecordset rs(&Impl->m_DB);
 
-	// 친구 추가
 	CString strSQL;
 	strSQL.Format(g_szDB_ADD_FRIEND, nCID, nFriendCID, nFavorite);
 
@@ -1914,7 +1624,7 @@ bool MSSQLDatabase::FriendAdd(const int nCID, const int nFriendCID, const int nF
 bool MSSQLDatabase::FriendRemove(const int nCID, const int nFriendCID)
 {
 	_STATUS_DB_START
-		if (!CheckOpen()) return false;
+	if (!CheckOpen()) return false;
 
 	try
 	{
@@ -1937,7 +1647,7 @@ bool MSSQLDatabase::FriendGetList(const int nCID, MMatchFriendInfo* pFriendInfo)
 #define MAX_FRIEND_LISTCOUNT 30
 
 	_STATUS_DB_START
-		if (!CheckOpen()) return false;
+	if (!CheckOpen()) return false;
 
 	CString strSQL;
 	strSQL.Format(g_szDB_GET_FRIEND_LIST, nCID);
@@ -1981,7 +1691,7 @@ bool MSSQLDatabase::FriendGetList(const int nCID, MMatchFriendInfo* pFriendInfo)
 bool MSSQLDatabase::GetCharClan(const int nCID, int* poutClanID, TCHAR* poutClanName, int maxlen)
 {
 	_STATUS_DB_START
-		if (!CheckOpen()) return false;
+	if (!CheckOpen()) return false;
 
 	CString strSQL;
 	strSQL.Format(g_szDB_GET_CHAR_CLAN, nCID);
@@ -2016,7 +1726,7 @@ bool MSSQLDatabase::GetCharClan(const int nCID, int* poutClanID, TCHAR* poutClan
 bool MSSQLDatabase::GetClanIDFromName(const TCHAR* szClanName, int* poutCLID)
 {
 	_STATUS_DB_START
-		if (!CheckOpen()) return false;
+	if (!CheckOpen()) return false;
 
 	auto temp = FilterSQL(szClanName);
 
@@ -2056,7 +1766,7 @@ bool MSSQLDatabase::CreateClan(const TCHAR* szClanName, const int nMasterCID, co
 	const int nMember3CID, const int nMember4CID, bool* boutRet, int* noutNewCLID)
 {
 	_STATUS_DB_START
-		if (!CheckOpen()) return false;
+	if (!CheckOpen()) return false;
 
 	auto temp = FilterSQL(szClanName);
 
@@ -2089,17 +1799,14 @@ bool MSSQLDatabase::CreateClan(const TCHAR* szClanName, const int nMasterCID, co
 	*boutRet = rs.Field("Ret").AsBool();
 	*noutNewCLID = rs.Field("NewCLID").AsInt();
 
-
 	_STATUS_DB_END(35);
 	return true;
-
-
 }
 
 bool MSSQLDatabase::ReserveCloseClan(const int nCLID, const TCHAR* szClanName, const int nMasterCID, const string& strDeleteDate)
 {
 	_STATUS_DB_START
-		if (!CheckOpen()) return false;
+	if (!CheckOpen()) return false;
 
 	try
 	{
@@ -2938,123 +2645,13 @@ bool MSSQLDatabase::CheckPremiumIP(const char* szIP, bool& outbResult)
 	if (IsGameRoom)
 	{
 		outbResult = IsGameRoom;
-
-		// 추가적인 작업은 여기에.
 	}
 	else
 	{
 		outbResult = false;
 	}
 
-	/* 2006-08-31이후 사용하지 않음. 혹시 모르니 보시면 삭제 바람.
-	else if ((rs.GetRecordCount() <= 0) || (rs.IsBOF()==TRUE)) 	// 결과값이 0개이면 false
-	{
-	outbResult = false;
-	}
-	else
-	{
-	outbResult = true;
-	}
-	*/
-
-
 	_STATUS_DB_END(57);
-	return true;
-}
-
-
-bool MSSQLDatabase::GetIPCountryCode(const string& strIP,
-	uint32_t& dwOutIPFrom,
-	uint32_t& dwOutIPTo,
-	string& strOutCountryCode)
-{
-	_STATUS_DB_START
-
-		auto temp = FilterSQL(strIP);
-
-	try
-	{
-		Impl->m_CountryFilterDBMgr.GetIPCountryCode(temp.c_str(), dwOutIPFrom, dwOutIPTo, strOutCountryCode);
-	}
-	catch (CDBException* e)
-	{
-		Log("MSSQLDatabase::GetIPCountryCode - %s\n", e->m_strError);
-		return false;
-	}
-	_STATUS_DB_END(58);
-	return true;
-}
-
-
-bool MSSQLDatabase::GetBlockCountryCodeList(BlockCountryCodeList& rfBlockCountryCodeList)
-{
-	_STATUS_DB_START
-		try
-	{
-		Impl->m_CountryFilterDBMgr.GetBlockCountryCodeList(rfBlockCountryCodeList);
-	}
-	catch (CDBException* e)
-	{
-		Log("MSSQLDatabase::GetBlockCountryCodeList - %s\n", e->m_strError);
-		return false;
-	}
-	_STATUS_DB_END(60);
-	return true;
-}
-
-
-bool MSSQLDatabase::GetCustomIP(const string& strIP, uint32_t& dwIPFrom, uint32_t& dwIPTo,
-	bool& bIsBlock,string& strCountryCode3, string& strComment)
-{
-	_STATUS_DB_START
-
-		auto temp = FilterSQL(strIP);
-
-	try
-	{
-		Impl->m_CountryFilterDBMgr.GetCustomIP(temp.c_str(), dwIPFrom, dwIPTo, bIsBlock, strCountryCode3, strComment);
-	}
-	catch (CDBException* e)
-	{
-		Log("MSSQLDatabase::GetCustomIP - %s\n", e->m_strError);
-		return false;
-	}
-	_STATUS_DB_END(59);
-	return true;
-
-}
-
-
-bool MSSQLDatabase::GetIPtoCountryList(IPtoCountryList& rfIPtoCountryList)
-{
-	_STATUS_DB_START
-		try
-	{
-		Impl->m_CountryFilterDBMgr.GetIPtoCountryList(rfIPtoCountryList);
-	}
-	catch (CDBException* e)
-	{
-		Log("MSSQLDatabase::GetIPtoCountryList - %s\n", e->m_strError);
-		return false;
-	}
-	_STATUS_DB_END(61);
-	return true;
-}
-
-
-bool MSSQLDatabase::GetCustomIPList(CustomIPList& rfCustomIPList)
-{
-	_STATUS_DB_START
-		try
-	{
-		Impl->m_CountryFilterDBMgr.GetCustomIPList(rfCustomIPList);
-	}
-	catch (CDBException* e)
-	{
-		Log("MSSQLDatabase::GetCustomIPList - %s\n", e->m_strError);
-		return false;
-	}
-	_STATUS_DB_END(62);
 	return true;
 }
 
@@ -3233,5 +2830,4 @@ bool MSSQLDatabase::AdminResetAllHackingBlock()
 	return true;
 }
 
-// 최고 69
 #endif

@@ -1,10 +1,4 @@
-
-#ifndef __ODBCRECORDSET_H__
-#define __ODBCRECORDSET_H__
-
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include "MDatabase.h"
 
@@ -15,10 +9,9 @@ using std::vector;
 #include <afxtempl.h>
 #include <afxdtctl.h>
 
-#define BINARY_FIELD_MAX_SIZE	7000	// DB에 사용할 Binary필드의 최대 크기(최대크기는 8000).
-#define BINARY_CHUNK_SIZE		7000	// Binary필드에 데이터를 전송할때 BINARY_CHUNK_SIZE보다 크면 나누어 보냄.
-#define RESERVE_SIZE			100		// CDBBinary클래스 vector자료구조를 위해서 사용.
-
+#define BINARY_FIELD_MAX_SIZE	7000
+#define BINARY_CHUNK_SIZE		7000
+#define RESERVE_SIZE			100
 
 class CSimpleDBBinary
 {
@@ -49,7 +42,7 @@ public :
 	{
 		if( (0 == pData) || 
 			(BINARY_FIELD_MAX_SIZE < nInDataSize) || 
-			(0 > nInDataSize) ) // 0 > nInDataSize 이것은 NULL을 읽었을시 크기를 0으로 셋팅해 주기 위해서.
+			(0 > nInDataSize) )
 			return -1;
 
 		m_UsedSize = nInDataSize;
@@ -124,10 +117,8 @@ public :
 
 	int InsertData( const unsigned char* pData, const int nSrcDataSize )
 	{
-		// 현제까지 할당된 공간이 충분한지 검사.
 		if( m_iIndex >= static_cast<int>(m_vBinary.capacity()) )
 		{
-			// 공간이 부족하면 추가적인 공간 할당을 함.
 			if( !Reserve(m_ReserveSize) )
 				return -1;
 		}
@@ -140,7 +131,6 @@ public :
 		// test
 		sbn.test = m_iIndex;
 
-		// Insert작업이 끝난후의 데이터가 원본 데이터의 크기와 같은지 비교.
 		if( nSrcDataSize != sbn.SetData(pData, nSrcDataSize) )
 		{
 			--m_iIndex;
@@ -163,14 +153,12 @@ private :
 			return false;
 		}
 
-		// 공간 확보. 공간 확보 실패시를 대비해서.
 		try
 		{
 			m_vBinary.reserve( iExtSize + m_vBinary.size() );
 		}
 		catch( ... )
 		{
-			// 실패하면 크기 관련된 데이터를 -1로 설정.
 			m_iCurrentUsedSize	= -1;
 			m_iIndex			= -1;
 
@@ -181,8 +169,8 @@ private :
 	}
 	
 private :
-	int				m_iIndex;				// Insert, Get에 의해 참조된 마지막index.
-	int				m_iCurrentUsedSize;		// InsertData( )에 의해서 추가된 총 필드 수.
+	int				m_iIndex;
+	int				m_iCurrentUsedSize;
 	int				m_ReserveSize;
 	BinaryDataVec	m_vBinary;
 };
@@ -557,6 +545,3 @@ inline
 CLongBinary*	CODBCRecordset::GetBinary( int nCol ) {
 	return	Field( nCol ).AsBinary();
 }
-////////////////////////////////////////////////////////////////
-
-#endif		//		__ODBCRECORDSET_H__

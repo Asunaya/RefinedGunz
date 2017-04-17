@@ -174,7 +174,7 @@ void ZGameAction::OnPeerSkill_LastShot(float fShotTime,ZCharacter *pOwnerCharact
 #define MAX_DMG_RANGE	50.f
 #define MIN_DMG			0.3f
 
-						float fDamageRange = 1.f - (1.f - MIN_DMG)*(max(fDist - MAX_DMG_RANGE, 0) / (fRange - MAX_DMG_RANGE));
+						float fDamageRange = 1.f - (1.f - MIN_DMG)*(max(fDist - MAX_DMG_RANGE, 0.f) / (fRange - MAX_DMG_RANGE));
 
 #define SPLASH_DAMAGE_RATIO	.4f
 #define SLASH_DAMAGE	3

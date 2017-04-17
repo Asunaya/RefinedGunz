@@ -1,8 +1,11 @@
 #include "stdafx.h"
+
+#ifdef WIN32
+
 #include "MAsyncHttp.h"
 #include <crtdbg.h>
 #include <shlwapi.h>
-using namespace std;
+#include <WinInet.h>
 
 #pragma comment(lib, "shlwapi.lib")
 #pragma comment(lib, "Wininet.lib")
@@ -85,8 +88,7 @@ bool MAsyncHttp::Get(const char* pszURL)
 	}
 
 	// Setup callback function
-	if (InternetSetStatusCallback(m_hInstance,
-									(INTERNET_STATUS_CALLBACK)&StatusCallback) == INTERNET_INVALID_STATUS_CALLBACK)
+	if (InternetSetStatusCallback(m_hInstance, StatusCallback) == INTERNET_INVALID_STATUS_CALLBACK)
 	{
 		// GetLastError()
 		return false;
@@ -265,8 +267,8 @@ bool MAsyncHttp::Get(const char* pszURL)
 }
 
 void CALLBACK MAsyncHttp::StatusCallback(HINTERNET hInternet,
-								DWORD_PTR dwContext, DWORD dwInternetStatus,
-								LPVOID pStatusInfo, DWORD dwStatusInfoLen)
+	DWORD_PTR dwContext, DWORD dwInternetStatus,
+	LPVOID pStatusInfo, DWORD dwStatusInfoLen)
 {
 	MAsyncHttpContext* pMAHContext = (MAsyncHttpContext*)dwContext;
 	MAsyncHttp* pAsyncHttp = pMAHContext->GetAsyncHttp();
@@ -350,3 +352,5 @@ void CALLBACK MAsyncHttp::StatusCallback(HINTERNET hInternet,
 		break;
 	}; // switch(dwContext)
 }
+
+#endif
