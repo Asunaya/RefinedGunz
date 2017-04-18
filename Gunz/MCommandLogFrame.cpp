@@ -40,7 +40,7 @@ void MCommandLogFrame::AddCommand(unsigned long int nGlobalClock, MCommand* pCmd
 	for(int i=0; i<pCmd->GetParameterCount(); i++){
 		pCmd->GetParameter(i)->GetString(szParam);
 		uid = pCmd->GetSenderUID();
-		sprintf_safe(temp, "%s (uid:%d) %s(%s)", temp, uid.Low , pCmd->GetParameter(i)->GetClassName(), szParam);
+		sprintf_safe(temp, "%s (uid:%d) %s(%s)", temp, uid.Low , typeid(pCmd->GetParameter(i)).name(), szParam);
 		
 	}
 	m_pCommandList->Add(temp);

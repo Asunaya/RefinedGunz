@@ -13,7 +13,8 @@ static void* AddBytes(void* ptr, int NumBytes) {
 
 void* MMakeBlobArray(int nOneBlobSize, int nBlobCount)
 {
-	unsigned char* pBlob = new unsigned char[sizeof(nOneBlobSize)+sizeof(nBlobCount)+nOneBlobSize*nBlobCount];
+	const auto Size = sizeof(nOneBlobSize) + sizeof(nBlobCount) + nOneBlobSize * nBlobCount;
+	unsigned char* pBlob = new unsigned char[Size];
 	memcpy(pBlob, &nOneBlobSize, sizeof(nOneBlobSize));
 	memcpy(pBlob + sizeof(nBlobCount), &nBlobCount, sizeof(nOneBlobSize));
 	return pBlob;
@@ -73,4 +74,16 @@ size_t MGetBlobArrayElementSize(const void* pBlob)
 	int nOneBlobSize;
 	memcpy(&nOneBlobSize, pBlob, sizeof(nOneBlobSize));
 	return nOneBlobSize;
+}
+
+bool MValidateBlobArraySize(const void* pBlob, size_t Size)
+{
+	// Size must at least contain the two info members.
+	if (Size < 8)
+		return false;
+
+	const auto OneBlobSize = MGetBlobArrayElementSize(pBlob);
+	const auto BlobCount = MGetBlobArrayCount(pBlob);
+
+	return Size == MGetBlobArrayInfoSize() + OneBlobSize * BlobCount;
 }

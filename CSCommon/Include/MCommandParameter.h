@@ -45,10 +45,10 @@ protected:
 	void								InitializeConditions();
 public:
 	MCommandParameterDesc(MCommandParameterType nType, const char* szDescription);
-	virtual ~MCommandParameterDesc(void);
+	virtual ~MCommandParameterDesc();
 
-	MCommandParameterType GetType(void){ return m_nType; }
-	const char* GetDescription(void){ return m_szDescription; }
+	MCommandParameterType GetType(){ return m_nType; }
+	const char* GetDescription(){ return m_szDescription; }
 
 	void AddCondition(MCommandParamCondition* pCondition);
 	bool HasConditions() { return (!m_Conditions.empty()); }
@@ -62,17 +62,15 @@ protected:
 	MCommandParameterType	m_nType;
 public:
 	MCommandParameter(MCommandParameterType nType){ m_nType = nType; }
-	virtual ~MCommandParameter(void){}
+	virtual ~MCommandParameter(){}
 
-	MCommandParameterType GetType(void){ return m_nType; }
+	MCommandParameterType GetType(){ return m_nType; }
 
-	virtual MCommandParameter* Clone(void) = 0;
+	virtual MCommandParameter* Clone() = 0;
 	virtual void GetValue(void* p) = 0;
 	virtual int GetData(char* pData, int nSize) = 0;
 	virtual int SetData(const char* pData) = 0;
-	virtual void *GetPointer(void) = 0; 
-
-	virtual const char* GetClassName(void) = 0;
+	virtual void *GetPointer() = 0; 
 
 	template<size_t size>
 	void GetString(char(&szValue)[size]) {
@@ -87,16 +85,15 @@ class MCommandParameterInt : public MCommandParameter, public CMemPool<MCommandP
 public:
 	int		m_Value;
 public:
-	MCommandParameterInt(void);
+	MCommandParameterInt();
 	MCommandParameterInt(int Value);
 	virtual ~MCommandParameterInt() override = default;
 
-	virtual MCommandParameter* Clone(void) override;
+	virtual MCommandParameter* Clone() override;
 	virtual void GetValue(void* p) override;
 	virtual int GetData(char* pData, int nSize) override;
 	virtual int SetData(const char* pData) override;
 	virtual void *GetPointer() override { return &m_Value; }
-	virtual const char* GetClassName(void) override { return "Int"; }
 	virtual void GetString(char* szValue, int maxlen) override { sprintf_safe(szValue, maxlen, "%d", m_Value); }
 	virtual int GetSize() override { return sizeof(int); }
 };
@@ -105,16 +102,15 @@ class MCommandParameterUInt : public MCommandParameter, public CMemPool<MCommand
 public:
 	unsigned int		m_Value;
 public:
-	MCommandParameterUInt(void);
+	MCommandParameterUInt();
 	MCommandParameterUInt(unsigned int Value);
 	virtual ~MCommandParameterUInt() override = default;
 
-	virtual MCommandParameter* Clone(void) override;
+	virtual MCommandParameter* Clone() override;
 	virtual void GetValue(void* p) override;
 	virtual int GetData(char* pData, int nSize) override;
 	virtual int SetData(const char* pData);
 	virtual void *GetPointer() { return &m_Value; }
-	virtual const char* GetClassName(void){ return "UInt"; }
 	virtual void GetString(char* szValue, int maxlen){ sprintf_safe(szValue, maxlen, "%u", m_Value); }
 	virtual int GetSize() { return sizeof(unsigned int); }
 };
@@ -123,15 +119,14 @@ class MCommandParameterFloat : public MCommandParameter, public CMemPool<MComman
 public:
 	float	m_Value;
 public:
-	MCommandParameterFloat(void);
+	MCommandParameterFloat();
 	MCommandParameterFloat(float Value);
 
-	virtual MCommandParameter* Clone(void);
+	virtual MCommandParameter* Clone();
 	virtual void GetValue(void* p);
 	virtual int GetData(char* pData, int nSize);
 	virtual int SetData(const char* pData);
 	virtual void *GetPointer() { return &m_Value; }
-	virtual const char* GetClassName(void){ return "Float"; }
 	virtual void GetString(char* szValue, int maxlen){ sprintf_safe(szValue, maxlen, "%f", m_Value); }
 	virtual int GetSize() { return sizeof(float); }
 };
@@ -140,16 +135,15 @@ class MCommandParameterString : public MCommandParameter{
 public:
 	char*	m_Value;
 public:
-	MCommandParameterString(void);
+	MCommandParameterString();
 	MCommandParameterString(const char* Value);
-	virtual ~MCommandParameterString(void) override;
+	virtual ~MCommandParameterString() override;
 
-	virtual MCommandParameter* Clone(void) override;
+	virtual MCommandParameter* Clone() override;
 	virtual void GetValue(void* p) override;
 	virtual int GetData(char* pData, int nSize) override;
 	virtual int SetData(const char* pData) override;
 	virtual void *GetPointer() override { return &m_Value; }
-	virtual const char* GetClassName(void) override { return "String"; }
 	virtual void GetString(char* szValue, int maxlen) override
 	{ 
 		if( 0 != szValue )
@@ -178,7 +172,7 @@ public:
 		}
 	}
 
-	virtual MCommandParameterStringCustomAlloc<AllocT>* Clone(void) override
+	virtual MCommandParameterStringCustomAlloc<AllocT>* Clone() override
 	{
 		return new MCommandParameterStringCustomAlloc<AllocT>(Alloc);
 	}
@@ -215,65 +209,60 @@ public:
 	float	m_fY;
 	float	m_fZ;
 public:
-	MCommandParameterVector(void);
+	MCommandParameterVector();
 	MCommandParameterVector(float x ,float y, float z);
-	virtual ~MCommandParameterVector(void) override;
+	virtual ~MCommandParameterVector() override;
 
-	virtual MCommandParameter* Clone(void) override;
+	virtual MCommandParameter* Clone() override;
 	virtual void GetValue(void* p) override;
 	virtual int GetData(char* pData, int nSize) override;
 	virtual int SetData(const char* pData) override;
 	virtual void *GetPointer() override { return &m_fX; }
-	virtual const char* GetClassName(void) override { return "Vector"; }
 	virtual void GetString(char* szValue, int maxlen) override { sprintf_safe(szValue, maxlen, "%.2f,%.2f,%.2f", m_fX, m_fY, m_fZ); }
 	virtual int GetSize() override { return (sizeof(float)*3); }
 };
 
 class MCommandParameterPos : public MCommandParameterVector, public CMemPool<MCommandParameterPos> {
 public:
-	MCommandParameterPos(void) : MCommandParameterVector() { m_nType=MPT_POS; }
+	MCommandParameterPos() : MCommandParameterVector() { m_nType=MPT_POS; }
 	MCommandParameterPos(float x, float y, float z) : MCommandParameterVector(x, y, z){ m_nType=MPT_POS; }
 	virtual ~MCommandParameterPos() override = default;
 
-	virtual MCommandParameter* Clone(void) override { return new MCommandParameterPos(m_fX, m_fY, m_fZ); }
-	virtual const char* GetClassName(void) override { return "Pos"; }
+	virtual MCommandParameter* Clone() override { return new MCommandParameterPos(m_fX, m_fY, m_fZ); }
 };
 
 class MCommandParameterDir : public MCommandParameterVector, public CMemPool<MCommandParameterDir> {
 public:
-	MCommandParameterDir(void) : MCommandParameterVector() { m_nType=MPT_DIR; }
+	MCommandParameterDir() : MCommandParameterVector() { m_nType=MPT_DIR; }
 	MCommandParameterDir(float x, float y, float z) : MCommandParameterVector(x, y, z){ m_nType=MPT_DIR; }
 	virtual ~MCommandParameterDir() override = default;
 
-	virtual MCommandParameter* Clone(void) override { return new MCommandParameterDir(m_fX, m_fY, m_fZ); }
-	virtual const char* GetClassName(void) override { return "Dir"; }
+	virtual MCommandParameter* Clone() override { return new MCommandParameterDir(m_fX, m_fY, m_fZ); }
 };
 
 class MCommandParameterColor : public MCommandParameterVector, public CMemPool<MCommandParameterColor> {
 public:
-	MCommandParameterColor(void) : MCommandParameterVector() { m_nType=MPT_COLOR; }
+	MCommandParameterColor() : MCommandParameterVector() { m_nType=MPT_COLOR; }
 	MCommandParameterColor(float r, float g, float b) : MCommandParameterVector(r, g, b){ m_nType=MPT_COLOR; }
 	virtual ~MCommandParameterColor() override = default;
 
-	virtual MCommandParameter* Clone(void) override { return new MCommandParameterColor(m_fX, m_fY, m_fZ); }
-	virtual const char* GetClassName(void) override { return "Color"; }
+	virtual MCommandParameter* Clone() override { return new MCommandParameterColor(m_fX, m_fY, m_fZ); }
 };
 
 class MCommandParameterBool : public MCommandParameter, public CMemPool<MCommandParameterBool> {
 	bool	m_Value;
 public:
-	MCommandParameterBool(void) : MCommandParameter(MPT_BOOL) { }
+	MCommandParameterBool() : MCommandParameter(MPT_BOOL) { }
 	MCommandParameterBool(bool bValue) : MCommandParameter(MPT_BOOL) {
 		m_Value = bValue;
 	}
 	virtual ~MCommandParameterBool() override = default;
 
-	virtual MCommandParameter* Clone(void) override;
+	virtual MCommandParameter* Clone() override;
 	virtual void GetValue(void* p) override;
 	virtual int GetData(char* pData, int nSize) override;
 	virtual int SetData(const char* pData) override;
-	virtual void *GetPointer(void) override;
-	virtual const char* GetClassName(void) override { return "Bool"; }
+	virtual void *GetPointer() override;
 	virtual void GetString(char* szValue, int maxlen) override { if (m_Value == true) strcpy_safe(szValue, maxlen, "true"); else strcpy_safe(szValue, maxlen, "false"); }
 	virtual int GetSize() override { return sizeof(bool); }
 };
@@ -282,17 +271,17 @@ class MCommandParameterUID : public MCommandParameter, public CMemPool<MCommandP
 public:
 	MUID	m_Value;
 public:
-	MCommandParameterUID(void);
+	MCommandParameterUID();
 	MCommandParameterUID(const MUID& uid);
-	virtual ~MCommandParameterUID(void) override;
+	virtual ~MCommandParameterUID() override;
 
-	virtual MCommandParameterUID* Clone(void) override;
+	virtual MCommandParameterUID* Clone() override;
 	virtual void GetValue(void* p) override;
 	virtual int GetData(char* pData, int nSize) override;
 	virtual int SetData(const char* pData) override;
 	virtual void *GetPointer() override { return &m_Value; }
-	virtual const char* GetClassName(void) override { return "UID"; }
-	virtual void GetString(char* szValue, int maxlen) override { sprintf_safe(szValue, maxlen, "%u:%u", m_Value.High, m_Value.Low); }
+	virtual void GetString(char* szValue, int maxlen) override {
+		sprintf_safe(szValue, maxlen, "%u:%u", m_Value.High, m_Value.Low); }
 	virtual int GetSize() override { return sizeof(MUID); }
 };
 
@@ -301,24 +290,21 @@ public:
 	void*	m_Value = nullptr;
 	int		m_nSize = 0;
 public:
-	MCommandParameterBlob(void);
+	MCommandParameterBlob();
 	explicit MCommandParameterBlob(size_t Size);
 	explicit MCommandParameterBlob(const void* Value, int nSize);
-	virtual ~MCommandParameterBlob(void) override;
+	virtual ~MCommandParameterBlob() override;
 
-	virtual MCommandParameterBlob* Clone(void) override;
+	virtual MCommandParameterBlob* Clone() override;
 	virtual void GetValue(void* p) override;
 	virtual int GetData(char* pData, int nSize) override;
 	virtual int SetData(const char* pData) override;
 	virtual void *GetPointer() override { return m_Value; }
-	virtual const char* GetClassName(void) override { return "Blob"; }
-	virtual void GetString(char* szValue, int maxlen) override { sprintf_safe(szValue, maxlen, "%02X%02X..", *((unsigned char*)(m_Value)), *((unsigned char*)(m_Value)+1)); }
+	virtual void GetString(char* szValue, int maxlen) override {
+		sprintf_safe(szValue, maxlen, "%02X%02X..", *((unsigned char*)(m_Value)), *((unsigned char*)(m_Value)+1)); }
 	virtual int GetSize() override;
 
-	size_t GetPayloadSize() const
-	{
-		return m_nSize;
-	}
+	size_t GetPayloadSize() const { return m_nSize; }
 };
 
 template <typename AllocT>
@@ -336,7 +322,7 @@ public:
 		}
 	}
 
-	virtual MCommandParameterBlobCustomAlloc<AllocT>* Clone(void) override
+	virtual MCommandParameterBlobCustomAlloc<AllocT>* Clone() override
 	{
 		return new MCommandParameterBlobCustomAlloc<AllocT>(Alloc);
 	}
@@ -373,16 +359,15 @@ class MCommandParameterChar : public MCommandParameter, public CMemPool<MCommand
 public:
 	char	m_Value;
 public:
-	MCommandParameterChar(void);
+	MCommandParameterChar();
 	MCommandParameterChar(char Value);
 	virtual ~MCommandParameterChar() override = default;
 
-	virtual MCommandParameter* Clone(void) override;
+	virtual MCommandParameter* Clone() override;
 	virtual void GetValue(void* p) override;
 	virtual int GetData(char* pData, int nSize) override;
 	virtual int SetData(const char* pData) override;
 	virtual void *GetPointer() override { return &m_Value; }
-	virtual const char* GetClassName(void) override { return "Char"; }
 	virtual void GetString(char* szValue, int maxlen) override { sprintf_safe(szValue, maxlen, "%d", m_Value); }
 	virtual int GetSize() override { return sizeof(char); }
 };
@@ -392,16 +377,15 @@ class MCommandParameterUChar : public MCommandParameter, public CMemPool<MComman
 public:
 	unsigned char	m_Value;
 public:
-	MCommandParameterUChar(void);
+	MCommandParameterUChar();
 	MCommandParameterUChar(unsigned char Value);
 	virtual ~MCommandParameterUChar() override = default;
 
-	virtual MCommandParameter* Clone(void) override;
+	virtual MCommandParameter* Clone() override;
 	virtual void GetValue(void* p) override;
 	virtual int GetData(char* pData, int nSize) override;
 	virtual int SetData(const char* pData) override;
 	virtual void *GetPointer() override { return &m_Value; }
-	virtual const char* GetClassName(void) override { return "UChar"; }
 	virtual void GetString(char* szValue, int maxlen) override { sprintf_safe(szValue, maxlen, "%u", m_Value); }
 	virtual int GetSize() override { return sizeof(unsigned char); }
 };
@@ -411,16 +395,15 @@ class MCommandParameterShort : public MCommandParameter, public CMemPool<MComman
 public:
 	short	m_Value;
 public:
-	MCommandParameterShort(void);
+	MCommandParameterShort();
 	MCommandParameterShort(short Value);
 	virtual ~MCommandParameterShort() override = default;
 
-	virtual MCommandParameter* Clone(void) override;
+	virtual MCommandParameter* Clone() override;
 	virtual void GetValue(void* p) override;
 	virtual int GetData(char* pData, int nSize) override;
 	virtual int SetData(const char* pData) override;
 	virtual void *GetPointer() override { return &m_Value; }
-	virtual const char* GetClassName(void) override { return "Short"; }
 	virtual void GetString(char* szValue, int maxlen) override { sprintf_safe(szValue, maxlen, "%d", m_Value); }
 	virtual int GetSize() override { return sizeof(short); }
 };
@@ -430,16 +413,15 @@ class MCommandParameterUShort : public MCommandParameter, public CMemPool<MComma
 public:
 	unsigned short	m_Value;
 public:
-	MCommandParameterUShort(void);
+	MCommandParameterUShort();
 	MCommandParameterUShort(unsigned short Value);
 	virtual ~MCommandParameterUShort() override = default;
 
-	virtual MCommandParameter* Clone(void) override;
+	virtual MCommandParameter* Clone() override;
 	virtual void GetValue(void* p) override;
 	virtual int GetData(char* pData, int nSize) override;
 	virtual int SetData(const char* pData) override;
 	virtual void *GetPointer() override { return &m_Value; }
-	virtual const char* GetClassName(void) override { return "UShort"; }
 	virtual void GetString(char* szValue, int maxlen) override { sprintf_safe(szValue, maxlen, "%u", m_Value); }
 	virtual int GetSize() override { return sizeof(unsigned short); }
 };
@@ -449,16 +431,15 @@ class MCommandParameterInt64 : public MCommandParameter, public CMemPool<MComman
 public:
 	int64	m_Value;
 public:
-	MCommandParameterInt64(void);
+	MCommandParameterInt64();
 	MCommandParameterInt64(int64 Value);
 	virtual ~MCommandParameterInt64() override = default;
 
-	virtual MCommandParameter* Clone(void) override;
+	virtual MCommandParameter* Clone() override;
 	virtual void GetValue(void* p) override;
 	virtual int GetData(char* pData, int nSize) override;
 	virtual int SetData(const char* pData) override;
 	virtual void *GetPointer() override { return &m_Value; }
-	virtual const char* GetClassName(void) override { return "Int64"; }
 	virtual void GetString(char* szValue, int maxlen) override { sprintf_safe(szValue, maxlen, "%lld", m_Value); }
 	virtual int GetSize() override { return sizeof(int64); }
 };
@@ -468,16 +449,15 @@ class MCommandParameterUInt64 : public MCommandParameter, public CMemPool<MComma
 public:
 	uint64	m_Value;
 public:
-	MCommandParameterUInt64(void);
+	MCommandParameterUInt64();
 	MCommandParameterUInt64(uint64 Value);
 	virtual ~MCommandParameterUInt64() override = default;
 
-	virtual MCommandParameter* Clone(void) override;
+	virtual MCommandParameter* Clone() override;
 	virtual void GetValue(void* p) override;
 	virtual int GetData(char* pData, int nSize) override;
 	virtual int SetData(const char* pData) override;
 	virtual void *GetPointer() override { return &m_Value; }
-	virtual const char* GetClassName(void) override { return "UInt64"; }
 	virtual void GetString(char* szValue, int maxlen) override { sprintf_safe(szValue, maxlen, "%llu", m_Value); }
 	virtual int GetSize() override { return sizeof(uint64); }
 };
@@ -488,17 +468,16 @@ public:
 	short	m_nY;
 	short	m_nZ;
 public:
-	MCommandParameterShortVector(void);
+	MCommandParameterShortVector();
 	MCommandParameterShortVector(short x ,short y, short z);
 	MCommandParameterShortVector(float x ,float y, float z);
-	virtual ~MCommandParameterShortVector(void) override;
+	virtual ~MCommandParameterShortVector() override;
 
-	virtual MCommandParameter* Clone(void) override;
+	virtual MCommandParameter* Clone() override;
 	virtual void GetValue(void* p) override;
 	virtual int GetData(char* pData, int nSize) override;
 	virtual int SetData(const char* pData) override;
 	virtual void *GetPointer() override { return &m_nX; }
-	virtual const char* GetClassName(void) override { return "ShortVector"; }
 	virtual void GetString(char* szValue, int maxlen) override { sprintf_safe(szValue, maxlen, "%d,%d,%d", m_nX, m_nY, m_nZ); }
 	virtual int GetSize() override { return (sizeof(short)*3); }
 };
@@ -513,16 +492,16 @@ public:
 	size_t Size = 0;
 	bool OwnsData = false;
 public:
-	MCommandParameterCommand(void) : MCommandParameter(MPT_CMD), Data(nullptr), Size(0), OwnsData(false) { }
+	MCommandParameterCommand() : MCommandParameter(MPT_CMD), Data(nullptr), Size(0), OwnsData(false) { }
 	explicit MCommandParameterCommand(const MCommand& Command);
 
-	virtual ~MCommandParameterCommand(void) override
+	virtual ~MCommandParameterCommand() override
 	{
 		if (OwnsData)
 			delete Data;
 	}
 
-	virtual MCommandParameterCommand* Clone(void) override
+	virtual MCommandParameterCommand* Clone() override
 	{
 		return MakeOwningMCmdParamCmd(Data, Size);
 	}
@@ -540,8 +519,8 @@ public:
 		return Size;
 	}
 	virtual void *GetPointer() override { return Data; }
-	virtual const char* GetClassName(void) override { return "Command"; }
-	virtual void GetString(char* szValue, int maxlen) override { sprintf_safe(szValue, maxlen, "Command ID %d/0x%04X", GetID(), GetID()); }
+	virtual void GetString(char* szValue, int maxlen) override {
+		sprintf_safe(szValue, maxlen, "Command ID %d/0x%04X", GetID(), GetID()); }
 	virtual int GetSize() override
 	{
 		return Size;
@@ -579,8 +558,8 @@ static inline MCommandParameterCommand* MakeNonOwningMCmdParamCmd(const void* Da
 class MCommandParamCondition
 {
 public:
-	MCommandParamCondition(void) = default;
-	virtual ~MCommandParamCondition(void) = default;
+	MCommandParamCondition() = default;
+	virtual ~MCommandParamCondition() = default;
 	virtual bool Check(MCommandParameter* pCP) = 0;
 };
 
@@ -591,11 +570,39 @@ private:
 	int m_nMax;
 public:
 	MCommandParamConditionMinMax(int nMin, int nMax) : m_nMin(nMin), m_nMax(nMax) {}
-	virtual ~MCommandParamConditionMinMax(void) override = default;
 	virtual bool Check(MCommandParameter* pCP) override;
 };
 
+// Checks that the parameter is a blob
+// whose payload size is exactly Size.
+class MCommandParamConditionBlobSize : public MCommandParamCondition
+{
+public:
+	MCommandParamConditionBlobSize(int Size) : Size{ Size } { assert(Size > 0); }
+	virtual bool Check(MCommandParameter* pCP) override;
 
+private:
+	int Size{};
+};
+
+// Checks that the parameter is a blob whose payload is a
+// valid blob array and whose element size is exactly Size.
+// If MinCount or MaxCount are not -1, then
+// the blob count is checked according to them also.
+class MCommandParamConditionBlobArraySize : public MCommandParamCondition
+{
+public:
+	MCommandParamConditionBlobArraySize(int Size, int MinCount = -1, int MaxCount = -1)
+		: Size{ Size }, MinCount{ MinCount }, MaxCount{ MaxCount } {
+		assert(Size > 0);
+	}
+	virtual bool Check(MCommandParameter* pCP) override;
+
+private:
+	int Size{};
+	int MinCount{};
+	int MaxCount{};
+};
 
 // Short Name
 typedef MCommandParameterBlob			MCmdParamBlob;
@@ -618,3 +625,7 @@ typedef MCommandParameterUShort			MCmdParamUShort;
 typedef MCommandParameterInt64			MCmdParamInt64;
 typedef MCommandParameterUInt64			MCmdParamUInt64;
 typedef MCommandParameterShortVector	MCmdParamShortVector;
+
+using MCPCMinMax = MCommandParamConditionMinMax;
+using MCPCBlobSize = MCommandParamConditionBlobSize;
+using MCPCBlobArraySize = MCommandParamConditionBlobArraySize;

@@ -905,15 +905,6 @@ static int GetBlobCmdID(const char* Data)
 	return *(u16*)(Data + 2);
 }
 
-#pragma pack(push, 1)
-struct ZPACKEDSHOTINFO {
-	float	fTime;
-	short	posx, posy, posz;
-	short	tox, toy, toz;
-	BYTE	sel_type;
-};
-#pragma pack(pop)
-
 void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Receiver, const char * Blob, size_t BlobSize)
 {
 	auto SenderObj = GetObjectA(Sender);

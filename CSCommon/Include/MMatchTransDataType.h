@@ -397,14 +397,33 @@ struct MTD_PingInfo
 	uint16_t Ping;
 };
 
-#pragma pack(1)
 struct MFRIENDLISTNODE {
 	unsigned char	nState;
 	char			szName[MATCHOBJECT_NAME_LENGTH];
 	char			szDescription[MATCH_SIMPLE_DESC_LENGTH];
 };
-#pragma pack()
 
+struct ZACTOR_BASICINFO {
+	float			fTime;
+	MUID			uidNPC;
+	short			posx, posy, posz;
+	short			velx, vely, velz;
+	short			dirx, diry, dirz;
+	BYTE			anistate;
+};
+
+struct ZPACKEDSHOTINFO {
+	float	fTime;
+	short	posx, posy, posz;
+	short	tox, toy, toz;
+	BYTE	sel_type;
+};
+
+struct ZPACKEDDASHINFO {
+	short	posx, posy, posz;
+	short	dirx, diry, dirz;
+	BYTE	seltype;
+};
 
 #pragma pack(pop, old)
 

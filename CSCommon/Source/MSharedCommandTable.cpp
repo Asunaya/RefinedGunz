@@ -3,6 +3,19 @@
 #include "MMatchGlobal.h"
 #include "MMatchItem.h"
 
+// Transmission data types for blob validation.
+#include "MMatchTransDataType.h"
+
+// MC_MATCH_OBJECT_CACHE: MMatchObjCache.
+#include "MMatchObjCache.h"
+
+// MC_PEER_BASICINFO: ZPACKEDBASICINFO.
+#include "stuff.h"
+
+// MC_MATCH_LOGIN: crypto_generichash_BYTES.
+#define SODIUM_STATIC
+#include "sodium.h"
+
 void MAddSharedCommandTable(MCommandManager* CommandManager, MSharedCommandType::Type SharedType)
 {
 	BEGIN_CMD_DESC(CommandManager, SharedType);
@@ -60,8 +73,9 @@ void MAddSharedCommandTable(MCommandManager* CommandManager, MSharedCommandType:
 	C(MC_MATCH_UPDATE_CLIENT_SETTINGS, "", "", MCDT_MACHINE2MACHINE);
 		P(MPT_BLOB, "Settings");
 	C(MC_MATCH_PING_LIST, "", "", MCDT_MACHINE2MACHINE);
-		P(MPT_BLOB, "Ping list");
+		P(MPT_BLOB, "Ping list", MCPCBlobArraySize{ sizeof(MTD_PingInfo) });
 	C(MC_PEER_BASICINFO_RG, "", "", MCDT_PEER2PEER);
+		// NOTE: This is validated in the handler, by UnpackNewBasicInfo.
 		P(MPT_BLOB, "BasicInfo");
 
 
@@ -113,7 +127,7 @@ void MAddSharedCommandTable(MCommandManager* CommandManager, MSharedCommandType:
 			P(MPT_UINT, "GlobalClock(msec);");
 		C(MC_MATCH_LOGIN, "Match.Login", "Login Match Server", MCDT_MACHINE2MACHINE);
 			P(MPT_STR, "UserID");
-			P(MPT_BLOB, "Hashed password");
+			P(MPT_BLOB, "Hashed password", MCPCBlobSize{ crypto_generichash_BYTES });
 			P(MPT_INT, "CommandVersion");
 			P(MPT_UINT, "nChecksumPack");
 			P(MPT_UINT, "ClientVersionMajor");
@@ -131,6 +145,7 @@ void MAddSharedCommandTable(MCommandManager* CommandManager, MSharedCommandType:
 			P(MPT_UCHAR, "PGradeID");
 			P(MPT_UID,	"uidPlayer");
 			P(MPT_STR,	"RandomValue");
+			// NOTE: Unused.
 			P(MPT_BLOB,	"EncryptMsg");
 
 		C(MC_MATCH_RESPONSE_RESULT, "Match.Response.Result", "Response Result", MCDT_MACHINE2MACHINE);
@@ -162,7 +177,7 @@ void MAddSharedCommandTable(MCommandManager* CommandManager, MSharedCommandType:
 
 		C(MC_MATCH_OBJECT_CACHE, "Match.ObjectCache", "Match Object Cache", MCDT_MACHINE2MACHINE);
 			P(MPT_UCHAR, "Type");
-			P(MPT_BLOB, "ObjectCache");
+			P(MPT_BLOB, "ObjectCache", MCPCBlobArraySize{ sizeof(MMatchObjCache) });
 		C(MC_MATCH_BRIDGEPEER, "Match.BridgePeer", "Match BridgePeer", MCDT_MACHINE2MACHINE | MCCT_NON_ENCRYPTED);
 			P(MPT_UID, "uidPlayer");
 			P(MPT_UINT, "dwIP");
@@ -183,44 +198,50 @@ void MAddSharedCommandTable(MCommandManager* CommandManager, MSharedCommandType:
 			P(MPT_STR, "ChannelName");
 		C(MC_MATCH_CHANNEL_REQUEST_JOIN_FROM_NAME, "Channel.RequestJoinFromName", "Join a Channel From Name", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uidPlayer");
-			P_MINMAX(MPT_INT, "nChannelType", 0, MCHANNEL_TYPE_MAX - 1);
+			P(MPT_INT, "nChannelType", MCPCMinMax{ 0, MCHANNEL_TYPE_MAX - 1 });
 			P(MPT_STR, "ChannelName");
 		C(MC_MATCH_CHANNEL_LEAVE, "Channel.Leave", "Leave Channel", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uidPlayer");
 			P(MPT_UID, "uidChannel");
 		C(MC_MATCH_CHANNEL_LIST_START, "Channel.ListStart", "Channel List transmit start", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uidPlayer");
-			P_MINMAX(MPT_INT, "nChannelType", 0, MCHANNEL_TYPE_MAX - 1);
+			P(MPT_INT, "nChannelType", MCPCMinMax{ 0, MCHANNEL_TYPE_MAX - 1 });
 		C(MC_MATCH_CHANNEL_LIST_STOP, "Channel.ListStop", "Channel List transmit stop", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uidPlayer");
 		C(MC_MATCH_CHANNEL_LIST, "Channel.List", "Channel List", MCDT_MACHINE2MACHINE);
-			P(MPT_BLOB, "ChannelList");
+			P(MPT_BLOB, "ChannelList", MCPCBlobArraySize{ sizeof(MCHANNELLISTNODE) });
 
-		C(MC_MATCH_CHANNEL_REQUEST_CHAT, "Channel.Request.Chat", "Request Chat to Channel", MCDT_MACHINE2MACHINE);
+		C(MC_MATCH_CHANNEL_REQUEST_CHAT, "Channel.Request.Chat",
+			"Request Chat to Channel", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uidPlayer");
 			P(MPT_UID, "uidChannel");
 			P(MPT_STR, "Chat");
 
-		C(MC_MATCH_CHANNEL_CHAT, "Channel.Chat", "Chat to Channel", MCDT_MACHINE2MACHINE);
+		C(MC_MATCH_CHANNEL_CHAT, "Channel.Chat",
+			"Chat to Channel", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uidChannel");
 			P(MPT_STR, "PlayerName");
 			P(MPT_STR, "Chat");
 			P(MPT_INT, "nGrade");
 
-		C(MC_MATCH_CHANNEL_REQUEST_RULE, "Channel.Request.Rule", "Request the Channel Rule", MCDT_MACHINE2MACHINE);
+		C(MC_MATCH_CHANNEL_REQUEST_RULE, "Channel.Request.Rule",
+			"Request the Channel Rule", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uidChannel");
-		C(MC_MATCH_CHANNEL_RESPONSE_RULE, "Channel.Response.Rule", "Response the Channel Rule", MCDT_MACHINE2MACHINE);
+		C(MC_MATCH_CHANNEL_RESPONSE_RULE, "Channel.Response.Rule",
+			"Response the Channel Rule", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uidChannel");
 			P(MPT_STR, "RuleName");
 
-		C(MC_MATCH_CHANNEL_REQUEST_ALL_PLAYER_LIST, "Channel.RequestAllPlayerList", "Request Channel All Player List", MCDT_MACHINE2MACHINE);
+		C(MC_MATCH_CHANNEL_REQUEST_ALL_PLAYER_LIST, "Channel.RequestAllPlayerList",
+			"Request Channel All Player List", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uidPlayer");
 			P(MPT_UID, "uidChannel");
 			P(MPT_UINT, "PlaceFilter");
 			P(MPT_UINT, "Options");
-		C(MC_MATCH_CHANNEL_RESPONSE_ALL_PLAYER_LIST, "Channel.ResponseAllPlayerList", "Response Channel All Player List", MCDT_MACHINE2MACHINE);
+		C(MC_MATCH_CHANNEL_RESPONSE_ALL_PLAYER_LIST, "Channel.ResponseAllPlayerList",
+			"Response Channel All Player List", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uidChannel");
-			P(MPT_BLOB, "PlayerList");
+			P(MPT_BLOB, "PlayerList", MCPCBlobArraySize{ sizeof(MTD_ChannelPlayerListNode) });
 
 		C(MC_MATCH_STAGE_CREATE, "Stage.Create", "Create a Stage", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uidChar");
@@ -263,9 +284,9 @@ void MAddSharedCommandTable(MCommandManager* CommandManager, MSharedCommandType:
 			P(MPT_UID, "uidStage");
 		C(MC_MATCH_RESPONSE_GAME_INFO, "ResponseGameInfo", "Response Game Info", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uidStage");
-			P(MPT_BLOB, "GameInfo");
-			P(MPT_BLOB, "RuleInfo");
-			P(MPT_BLOB, "PlayerInfo");
+			P(MPT_BLOB, "GameInfo", MCPCBlobArraySize{ sizeof(MTD_GameInfo) });
+			P(MPT_BLOB, "RuleInfo", MCPCBlobArraySize{ sizeof(MTD_RuleInfo) });
+			P(MPT_BLOB, "PlayerInfo", MCPCBlobArraySize{ sizeof(MTD_GameInfoPlayerItem) });
 		C(MC_MATCH_RESPONSE_STAGE_CREATE, "Stage.ResponseCreate", "Response Create a Stage", MCDT_MACHINE2MACHINE);
 			P(MPT_INT, "Result");
 
@@ -274,7 +295,7 @@ void MAddSharedCommandTable(MCommandManager* CommandManager, MSharedCommandType:
 			P(MPT_UID, "uidStage");
 		C(MC_MATCH_STAGE_ENTERBATTLE, "Stage.EnterBattle", "Enter Stage Battle", MCDT_MACHINE2MACHINE);
 			P(MPT_UCHAR, "Param");
-			P(MPT_BLOB, "CharData");
+			P(MPT_BLOB, "CharData", MCPCBlobArraySize{ sizeof(MTD_PeerListNode), 1, 1 });
 
 		C(MC_MATCH_STAGE_LEAVEBATTLE, "Stage.LeaveBattle", "Leave Stage Battle", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uidPlayer");
@@ -293,7 +314,7 @@ void MAddSharedCommandTable(MCommandManager* CommandManager, MSharedCommandType:
 
 		C(MC_MATCH_STAGE_REQUEST_QUICKJOIN, "Stage.RequestQuickJoin", "Stage Request QuickJoin", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uidPlayer");
-			P(MPT_BLOB, "Param");
+			P(MPT_BLOB, "Param", MCPCBlobArraySize{ sizeof(MTD_QuickJoinParam), 1, 1 });
 		C(MC_MATCH_STAGE_RESPONSE_QUICKJOIN, "Stage.ResponseQuickJoin", "Stage Response QuickJoin", MCDT_MACHINE2MACHINE);
 			P(MPT_INT, "Result");
 			P(MPT_UID, "uidStage");
@@ -304,7 +325,7 @@ void MAddSharedCommandTable(MCommandManager* CommandManager, MSharedCommandType:
 		C(MC_MATCH_STAGE_PLAYER_STATE, "Stage.State", "Change State In Stage", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uidPlayer");
 			P(MPT_UID, "uidStage");
-			P_MINMAX(MPT_INT, "nState", 0, MOSS_END - 1);
+			P(MPT_INT, "nState", MCPCMinMax{ 0, MOSS_END - 1 });
 		C(MC_MATCH_STAGE_TEAM, "Stage.Team", "Change Team", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uidPlayer");
 			P(MPT_UID, "uidStage");
@@ -312,39 +333,44 @@ void MAddSharedCommandTable(MCommandManager* CommandManager, MSharedCommandType:
 		C(MC_MATCH_STAGE_MASTER, "Stage.Master", "Set Master", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uidStage");
 			P(MPT_UID, "uidPlayer");
-		C(MC_MATCH_STAGE_LIST_START, "Stage.ListStart", "Stage List transmit start", MCDT_MACHINE2MACHINE); 
-		C(MC_MATCH_STAGE_LIST_STOP, "Stage.ListStop", "Stage List transmit stop", MCDT_MACHINE2MACHINE); 
+		C(MC_MATCH_STAGE_LIST_START, "Stage.ListStart",
+			"Stage List transmit start", MCDT_MACHINE2MACHINE); 
+		C(MC_MATCH_STAGE_LIST_STOP, "Stage.ListStop",
+			"Stage List transmit stop", MCDT_MACHINE2MACHINE); 
 		C(MC_MATCH_STAGE_LIST, "Stage.List", "Stage List", MCDT_MACHINE2MACHINE); 
 			P(MPT_CHAR, "PrevStageListCount");
 			P(MPT_CHAR, "NextStageListCount");
-			P(MPT_BLOB, "StageList");
-		C(MC_MATCH_REQUEST_STAGE_LIST, "Stage.RequestStageList", "Request Stage List", MCDT_MACHINE2MACHINE);
+			P(MPT_BLOB, "StageList", MCPCBlobArraySize{ sizeof(MTD_StageListNode) });
+		C(MC_MATCH_REQUEST_STAGE_LIST, "Stage.RequestStageList",
+			"Request Stage List", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uidPlayer");
 			P(MPT_UID, "uidChannel");
 			P(MPT_INT, "StageCursor");
 			
-		C(MC_MATCH_CHANNEL_REQUEST_PLAYER_LIST, "Channel.RequestPlayerList", "Request Channel Player List", MCDT_MACHINE2MACHINE);
+		C(MC_MATCH_CHANNEL_REQUEST_PLAYER_LIST, "Channel.RequestPlayerList",
+			"Request Channel Player List", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uidPlayer");
 			P(MPT_UID, "uidChannel");
 			P(MPT_INT, "PlayerListPage");
-		C(MC_MATCH_CHANNEL_RESPONSE_PLAYER_LIST, "Channel.ResponsePlayerList", "Response Channel Player List", MCDT_MACHINE2MACHINE);
+		C(MC_MATCH_CHANNEL_RESPONSE_PLAYER_LIST, "Channel.ResponsePlayerList",
+			"Response Channel Player List", MCDT_MACHINE2MACHINE);
 			P(MPT_UCHAR, "TotalPlayerCount");
 			P(MPT_UCHAR, "PlayerListPage");
-			P(MPT_BLOB, "PlayerList");
+			P(MPT_BLOB, "PlayerList", MCPCBlobArraySize{ sizeof(MTD_ChannelPlayerListNode) });
 
 		C(MC_MATCH_REQUEST_STAGESETTING, "Stage.RequestStageSetting", "Request stage setting", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uidStage");
 		C(MC_MATCH_RESPONSE_STAGESETTING, "Stage.ResponseStageSetting", "Response stage setting", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uidStage");
-			P(MPT_BLOB, "StageSetting");
-			P(MPT_BLOB, "CharSetting");
+			P(MPT_BLOB, "StageSetting", MCPCBlobArraySize{ sizeof(MSTAGE_SETTING_NODE), 1, 1 });
+			P(MPT_BLOB, "CharSetting", MCPCBlobArraySize{ sizeof(MSTAGE_CHAR_SETTING_NODE) });
 			P(MPT_INT, "StageState");
 			P(MPT_UID, "uidMaster");
 
 		C(MC_MATCH_STAGESETTING, "Stage.StageSetting", "Setting up Stage", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uidPlayer");
 			P(MPT_UID, "uidStage");
-			P(MPT_BLOB, "StageSetting");
+			P(MPT_BLOB, "StageSetting", MCPCBlobArraySize{ sizeof(MSTAGE_SETTING_NODE), 1, 1 });
 		C(MC_MATCH_STAGE_LAUNCH, "Stage.Launch", "Launch Stage", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uidStage");
 			P(MPT_STR, "MapName");
@@ -356,7 +382,7 @@ void MAddSharedCommandTable(MCommandManager* CommandManager, MSharedCommandType:
 			P(MPT_UID, "uidStage");
 		C(MC_MATCH_RESPONSE_PEERLIST, "Stage.ResponsePeerList", "Response peer list", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uidStage");
-			P(MPT_BLOB, "PeerList");
+			P(MPT_BLOB, "PeerList", MCPCBlobArraySize{ sizeof(MTD_PeerListNode) });
 		C(MC_MATCH_LOADING_COMPLETE, "Loading.Complete", "Loading Complete", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "ChrUID");
 			P(MPT_INT, "Percent");
@@ -396,26 +422,32 @@ void MAddSharedCommandTable(MCommandManager* CommandManager, MSharedCommandType:
 			P(MPT_UID, "CharUID");
 			P(MPT_UINT, "ExpArg");
 
-		C(MC_MATCH_GAME_REQUEST_TIMESYNC, "Game.RequestTimeSync", "Request TimeSync for Game", MCDT_MACHINE2MACHINE);
+		C(MC_MATCH_GAME_REQUEST_TIMESYNC, "Game.RequestTimeSync",
+			"Request TimeSync for Game", MCDT_MACHINE2MACHINE);
 			P(MPT_UINT, "LocalTimeStamp");
-		C(MC_MATCH_GAME_RESPONSE_TIMESYNC, "Game.ResponseTimeSync", "Response TimeSync for Game", MCDT_MACHINE2MACHINE);
+		C(MC_MATCH_GAME_RESPONSE_TIMESYNC, "Game.ResponseTimeSync",
+			"Response TimeSync for Game", MCDT_MACHINE2MACHINE);
 			P(MPT_UINT, "LocalTimeStamp");
 			P(MPT_UINT, "GlobalTimeStamp");
-		C(MC_MATCH_GAME_REPORT_TIMESYNC, "Game.ReportTimeSync", "Report TimeSync for Verify SpeedHack", MCDT_MACHINE2MACHINE);
+		C(MC_MATCH_GAME_REPORT_TIMESYNC, "Game.ReportTimeSync",
+			"Report TimeSync for Verify SpeedHack", MCDT_MACHINE2MACHINE);
 			P(MPT_UINT, "LocalTimeStamp");
 			P(MPT_UINT, "MemoryChecksum");
 
-		C(MC_MATCH_STAGE_REQUEST_FORCED_ENTRY, "Stage.RequestForcedEntry", "Request Forced Entry", MCDT_MACHINE2MACHINE);
+		C(MC_MATCH_STAGE_REQUEST_FORCED_ENTRY, "Stage.RequestForcedEntry",
+			"Request Forced Entry", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uidChar");
 			P(MPT_UID, "uidStage");
-		C(MC_MATCH_STAGE_RESPONSE_FORCED_ENTRY, "Stage.ResponseForcedEntry", "Response Forced Entry", MCDT_MACHINE2MACHINE);
+		C(MC_MATCH_STAGE_RESPONSE_FORCED_ENTRY, "Stage.ResponseForcedEntry",
+			"Response Forced Entry", MCDT_MACHINE2MACHINE);
 			P(MPT_INT, "Result");
 
-		C(MC_MATCH_ROUND_FINISHINFO, "Stage.RoundFinishInfo", "Update Round Finished Info", MCDT_MACHINE2MACHINE);
+		C(MC_MATCH_ROUND_FINISHINFO, "Stage.RoundFinishInfo",
+			"Update Round Finished Info", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uidStage");
 			P(MPT_UID, "uidChar");
-			P(MPT_BLOB, "PeerInfo");
-			P(MPT_BLOB, "KillInfo");
+			P(MPT_BLOB, "PeerInfo", MCPCBlobArraySize{ sizeof(MTD_RoundPeerInfo) });
+			P(MPT_BLOB, "KillInfo", MCPCBlobArraySize{ sizeof(MTD_RoundKillInfo) });
 
 		C(MC_MATCH_NOTIFY, "Match.Notify", "Notify Message", MCDT_MACHINE2MACHINE);
 			P(MPT_UINT, "nMsgID");
@@ -448,38 +480,50 @@ void MAddSharedCommandTable(MCommandManager* CommandManager, MSharedCommandType:
 			P(MPT_STR, "SenderName");
 			P(MPT_STR, "Message");
 		
-		C(MC_MATCH_REQUEST_ACCOUNT_CHARLIST, "Match.RequestAccountCharList", "Request Account Character List", MCDT_MACHINE2MACHINE);
+#define SIZEOF_GUIDACKMSG 20
+		C(MC_MATCH_REQUEST_ACCOUNT_CHARLIST, "Match.RequestAccountCharList",
+			"Request Account Character List", MCDT_MACHINE2MACHINE);
 			P(MPT_STR, "SKey");
-			P(MPT_BLOB, "EMsg");
-		C(MC_MATCH_RESPONSE_ACCOUNT_CHARLIST, "Match.ResponseAccountCharList", "Response Account Character List", MCDT_MACHINE2MACHINE);
-			P(MPT_BLOB, "CharList");
-		C(MC_MATCH_REQUEST_ACCOUNT_CHARINFO, "Match.RequestAccountCharInfo", "Request Account Character Info", MCDT_MACHINE2MACHINE);
-			P_MINMAX(MPT_CHAR, "CharNum", 0, MAX_CHAR_COUNT);
-		C(MC_MATCH_RESPONSE_ACCOUNT_CHARINFO, "Match.ResponseAccountCharInfo", "Response Account Character Info", MCDT_MACHINE2MACHINE);
-			P(MPT_CHAR, "CharNum");
-			P(MPT_BLOB, "CharInfo");
-		C(MC_MATCH_REQUEST_SELECT_CHAR, "Match.RequestSelectChar", "Request Select Character", MCDT_MACHINE2MACHINE);
+			P(MPT_BLOB, "EMsg", MCPCBlobArraySize{ 1, SIZEOF_GUIDACKMSG, SIZEOF_GUIDACKMSG });
+		C(MC_MATCH_RESPONSE_ACCOUNT_CHARLIST, "Match.ResponseAccountCharList",
+			"Response Account Character List", MCDT_MACHINE2MACHINE);
+			P(MPT_BLOB, "CharList", MCPCBlobArraySize{ sizeof(MTD_AccountCharInfo) });
+		C(MC_MATCH_REQUEST_ACCOUNT_CHARINFO, "Match.RequestAccountCharInfo",
+			"Request Account Character Info", MCDT_MACHINE2MACHINE);
+			P(MPT_CHAR, "CharNum", MCPCMinMax{ 0, MAX_CHAR_COUNT - 1 });
+		C(MC_MATCH_RESPONSE_ACCOUNT_CHARINFO, "Match.ResponseAccountCharInfo",
+			"Response Account Character Info", MCDT_MACHINE2MACHINE);
+			P(MPT_CHAR, "CharNum", MCPCMinMax{ 0, MAX_CHAR_COUNT - 1 });
+			P(MPT_BLOB, "CharInfo", MCPCBlobArraySize{ sizeof(MTD_CharInfo), 1, 1 });
+		C(MC_MATCH_REQUEST_SELECT_CHAR, "Match.RequestSelectChar",
+			"Request Select Character", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uid");
-			P_MINMAX(MPT_UINT, "CharIndex", 0, MAX_CHAR_COUNT-1);
-		C(MC_MATCH_RESPONSE_SELECT_CHAR, "Match.ResponseSelectChar", "Response Select Character", MCDT_MACHINE2MACHINE);
+			P(MPT_UINT, "CharIndex", MCPCMinMax{ 0, MAX_CHAR_COUNT - 1 });
+		C(MC_MATCH_RESPONSE_SELECT_CHAR, "Match.ResponseSelectChar",
+			"Response Select Character", MCDT_MACHINE2MACHINE);
 			P(MPT_INT, "Result");
-			P(MPT_BLOB, "CharInfo");
-			P(MPT_BLOB, "MyExtraCharInfo");
-		C(MC_MATCH_REQUEST_MYCHARINFO, "Match.RequestCharInfo", "Request Character Info", MCDT_MACHINE2MACHINE);
+			P(MPT_BLOB, "CharInfo", MCPCBlobArraySize{ sizeof(MTD_CharInfo), 1, 1 });
+			P(MPT_BLOB, "MyExtraCharInfo", MCPCBlobArraySize{ sizeof(MTD_MyExtraCharInfo), 1, 1 });
+		C(MC_MATCH_REQUEST_MYCHARINFO, "Match.RequestCharInfo",
+			"Request Character Info", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uid");
 			P(MPT_UINT, "CharIndex");
-		C(MC_MATCH_RESPONSE_MYCHARINFO, "Match.ResponseCharInfo", "Response Character Info", MCDT_MACHINE2MACHINE);
+		C(MC_MATCH_RESPONSE_MYCHARINFO, "Match.ResponseCharInfo",
+			"Response Character Info", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uid");
-			P(MPT_BLOB, "CharInfo");
-		C(MC_MATCH_REQUEST_DELETE_CHAR, "Match.RequestDeleteChar", "Request Delete Character", MCDT_MACHINE2MACHINE);
+			P(MPT_BLOB, "CharInfo", MCPCBlobArraySize{ sizeof(MTD_CharInfo), 1, 1 });
+		C(MC_MATCH_REQUEST_DELETE_CHAR, "Match.RequestDeleteChar",
+			"Request Delete Character", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uid");
-			P_MINMAX(MPT_UINT, "CharIndex", 0, MAX_CHAR_COUNT-1);
+			P(MPT_UINT, "CharIndex", MCPCMinMax{ 0, MAX_CHAR_COUNT - 1 });
 			P(MPT_STR, "CharName");
-		C(MC_MATCH_RESPONSE_DELETE_CHAR, "Match.ResponseDeleteChar", "Response Delete Character", MCDT_MACHINE2MACHINE);
+		C(MC_MATCH_RESPONSE_DELETE_CHAR, "Match.ResponseDeleteChar",
+			"Response Delete Character", MCDT_MACHINE2MACHINE);
 			P(MPT_INT, "Result");
-		C(MC_MATCH_REQUEST_CREATE_CHAR, "Match.RequestCreateChar", "Request Create Character", MCDT_MACHINE2MACHINE);
+		C(MC_MATCH_REQUEST_CREATE_CHAR, "Match.RequestCreateChar",
+			"Request Create Character", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uid");
-			P_MINMAX(MPT_UINT, "CharIndex", 0, MAX_CHAR_COUNT-1);
+			P(MPT_UINT, "CharIndex", MCPCMinMax{ 0, MAX_CHAR_COUNT - 1 });
 			P(MPT_STR, "Name");
 			P(MPT_UINT, "Sex");
 			P(MPT_UINT, "Hair");
@@ -496,17 +540,19 @@ void MAddSharedCommandTable(MCommandManager* CommandManager, MSharedCommandType:
 			P(MPT_UID, "uid");
 			P(MPT_STR, "CharName");
 		C(MC_MATCH_RESPONSE_CHARINFO_DETAIL, "Match.ResponseCharInfoDetail", "Response Character Info Detail", MCDT_MACHINE2MACHINE);
-			P(MPT_BLOB, "CharInfo");
+			P(MPT_BLOB, "CharInfo", MCPCBlobArraySize{ sizeof(MTD_CharInfo), 1, 1 });
 
+		// NOTE: Unused.
 		C(MC_MATCH_REQUEST_SIMPLE_CHARINFO, "Match.RequestSimpleCharInfo", "Request Simple CharInfo", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uid");
+		// NOTE: Unused.
 		C(MC_MATCH_RESPONSE_SIMPLE_CHARINFO, "Match.ResponseSimpleCharInfo", "Response Simple CharInfo", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uid");
 			P(MPT_BLOB, "SimpleCharInfo");
 		C(MC_MATCH_REQUEST_MY_SIMPLE_CHARINFO, "Match.RequestMySimpleCharInfo", "Request My Simple CharInfo", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uidChar");
 		C(MC_MATCH_RESPONSE_MY_SIMPLE_CHARINFO, "Match.ResponseMySimpleCharInfo", "Response My Simple CharInfo", MCDT_MACHINE2MACHINE);
-			P(MPT_BLOB, "MySimpleCharInfo");
+			P(MPT_BLOB, "MySimpleCharInfo", MCPCBlobArraySize{ sizeof(MTD_MySimpleCharInfo), 1, 1 });
 
 
 		C(MC_MATCH_REQUEST_BUY_ITEM, "Match.RequestBuyItem", "Request Buy Item", MCDT_MACHINE2MACHINE);
@@ -526,31 +572,31 @@ void MAddSharedCommandTable(MCommandManager* CommandManager, MSharedCommandType:
 			P(MPT_INT, "FirstItemIndex");
 			P(MPT_INT, "ItemCount");
 		C(MC_MATCH_RESPONSE_SHOP_ITEMLIST, "Match.ResponseShopItemList", "Response Shop Item List", MCDT_MACHINE2MACHINE);
-			P(MPT_BLOB, "ItemList");
+			P(MPT_BLOB, "ItemList", MCPCBlobArraySize{ sizeof(u32) });
 
 		C(MC_MATCH_REQUEST_CHARACTER_ITEMLIST, "Match.RequestCharacterItemList", "Request Character Item List", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uid");
 
 		C(MC_MATCH_RESPONSE_CHARACTER_ITEMLIST, "Match.ResponseCharacterItemList", "Response Character Item List", MCDT_MACHINE2MACHINE);
 			P(MPT_INT, "Bounty");
-			P(MPT_BLOB, "EquipItemList");
-			P(MPT_BLOB, "ItemList");
+			P(MPT_BLOB, "EquipItemList", MCPCBlobArraySize{ sizeof(MUID) });
+			P(MPT_BLOB, "ItemList", MCPCBlobArraySize{ sizeof(MTD_ItemNode) });
 			
 		C(MC_MATCH_REQUEST_EQUIP_ITEM, "MatchRequestEquipItem", "Request Equip Item", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uidChar");
 			P(MPT_UID, "uidItem");
-			P_MINMAX(MPT_UINT, "EquipmentSlot", 0, MMCIP_END - 1);
+			P(MPT_UINT, "EquipmentSlot", MCPCMinMax{ 0, MMCIP_END - 1 });
 		C(MC_MATCH_RESPONSE_EQUIP_ITEM, "MatchResponseEquipItem", "Response Equip Item", MCDT_MACHINE2MACHINE);
 			P(MPT_INT, "Result");
 		C(MC_MATCH_REQUEST_TAKEOFF_ITEM, "MatchRequestTakeoffItem", "Request Takeoff Item", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uid");
-			P_MINMAX(MPT_UINT, "EquipmentSlot", 0, MMCIP_END - 1);
+			P(MPT_UINT, "EquipmentSlot", MCPCMinMax{ 0, MMCIP_END - 1 });
 		C(MC_MATCH_RESPONSE_TAKEOFF_ITEM, "MatchResponseTakeoffItem", "Response Takeoff Item", MCDT_MACHINE2MACHINE);
 			P(MPT_INT, "Result");
 		C(MC_MATCH_REQUEST_ACCOUNT_ITEMLIST, "Match.RequestAccountItemList", "Request Account Item List", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uid");
 		C(MC_MATCH_RESPONSE_ACCOUNT_ITEMLIST, "Match.ResponseAccountItemList", "Response Account Item List" , MCDT_MACHINE2MACHINE);
-			P(MPT_BLOB, "ItemList");
+			P(MPT_BLOB, "ItemList", MCPCBlobArraySize{ sizeof(MTD_AccountItemNode) });
 		C(MC_MATCH_REQUEST_BRING_ACCOUNTITEM, "Match.RequestBringAccountItem", "Request Bring Account Item", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uidChar");
 			P(MPT_INT, "AIID");
@@ -562,7 +608,7 @@ void MAddSharedCommandTable(MCommandManager* CommandManager, MSharedCommandType:
 		C(MC_MATCH_RESPONSE_BRING_BACK_ACCOUNTITEM, "Match.ResponseBringBackAccountItem", "Response BringBack Account Item", MCDT_MACHINE2MACHINE);
 			P(MPT_INT, "Result");
 		C(MC_MATCH_EXPIRED_RENT_ITEM, "Match.ExpiredRentItem", "Match.Expired Rent Item", MCDT_MACHINE2MACHINE);
-			P(MPT_BLOB, "ItemIDList");
+			P(MPT_BLOB, "ItemIDList", MCPCBlobArraySize{ sizeof(u32) });
 
 
 		C(MC_MATCH_REQUEST_SUICIDE, "Match.Request.Suicide", "Request Suicide", MCDT_MACHINE2MACHINE);
@@ -578,7 +624,7 @@ void MAddSharedCommandTable(MCommandManager* CommandManager, MSharedCommandType:
 			P(MPT_UID, "uidChar");
 			P(MPT_INT, "nItemUID");
 		C(MC_MATCH_SPAWN_WORLDITEM, "Match.WorldItem.Spawn", "Spawn WorldItem", MCDT_MACHINE2MACHINE);
-			P(MPT_BLOB, "SpawnInfo");
+			P(MPT_BLOB, "SpawnInfo", MCPCBlobArraySize{ sizeof(MTD_WorldItem) });
 		C(MC_MATCH_REQUEST_SPAWN_WORLDITEM, "Match.Request.Spawn.WorldItem", "Request Spawn WorldItem", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uidChar");
 			P(MPT_INT, "ItemID");
@@ -587,7 +633,7 @@ void MAddSharedCommandTable(MCommandManager* CommandManager, MSharedCommandType:
 			P(MPT_INT, "nWorldItemUID");
 
 		C(MC_MATCH_RESET_TEAM_MEMBERS, "Match.Reset.TeamMembers", "Reset Team Members", MCDT_MACHINE2MACHINE);
-			P(MPT_BLOB, "TeamMemberData");
+			P(MPT_BLOB, "TeamMemberData", MCPCBlobArraySize{ sizeof(MTD_ResetTeamMembersData) });
 
 		C(MC_MATCH_ASSIGN_COMMANDER, "Match.Assign.Commander", "Assign Commander", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uidRedCommander");
@@ -599,7 +645,7 @@ void MAddSharedCommandTable(MCommandManager* CommandManager, MSharedCommandType:
 		C(MC_MATCH_LADDER_REQUEST_CHALLENGE, "Match.Ladder.Request.Challenge", "Request Challenge a Ladder", MCDT_MACHINE2MACHINE);
 			P(MPT_INT, "MemberCount");
 			P(MPT_UINT, "Options");
-			P(MPT_BLOB, "MemberNames");
+			P(MPT_BLOB, "MemberNames", MCPCBlobArraySize{ sizeof(MTD_LadderTeamMemberNode) });
 			
 		C(MC_MATCH_LADDER_RESPONSE_CHALLENGE, "Match.Ladder.Response.Challenge", "Response Challenge a Ladder", MCDT_MACHINE2MACHINE);
 			P(MPT_INT, "Result");
@@ -619,14 +665,14 @@ void MAddSharedCommandTable(MCommandManager* CommandManager, MSharedCommandType:
 			P(MPT_INT, "ProposalMode");	// MMatchProposalMode
 			P(MPT_INT, "RequestID");
 			P(MPT_INT, "ReplierCount");
-			P(MPT_BLOB, "ReplierCharNames");
+			P(MPT_BLOB, "ReplierCharNames", MCPCBlobArraySize{ sizeof(MTD_ReplierNode) });
 		C(MC_MATCH_RESPONSE_PROPOSAL, "Match.ResponseProposal", "Response Proposal", MCDT_MACHINE2MACHINE);
 			P(MPT_INT, "Result");
 			P(MPT_INT, "ProposalMode");	// MMatchAgreementMode
 			P(MPT_INT, "RequestID");
 		C(MC_MATCH_ASK_AGREEMENT, "Match.AskAgreement", "Ask Agreement", MCDT_MACHINE2MACHINE);
 			P(MPT_UID,	"uidProposer");
-			P(MPT_BLOB,	"MembersCharName");
+			P(MPT_BLOB, "MembersCharName", MCPCBlobArraySize{ sizeof(MTD_ReplierNode) });
 			P(MPT_INT,	"ProposalMode"); // MMatchAgreementMode
 			P(MPT_INT,	"RequestID");
 		C(MC_MATCH_REPLY_AGREEMENT, "Match.ReplyAgreement", "Reply Agreement", MCDT_MACHINE2MACHINE);
@@ -644,11 +690,13 @@ void MAddSharedCommandTable(MCommandManager* CommandManager, MSharedCommandType:
 			P(MPT_STR, "Name");
 		C(MC_MATCH_FRIEND_LIST, "Match.Friend.List", "List Friend", MCDT_MACHINE2MACHINE);
 		C(MC_MATCH_RESPONSE_FRIENDLIST, "Match.Response.FriendList", "Response List Friend", MCDT_MACHINE2MACHINE);
-			P(MPT_BLOB, "FriendList");
+			P(MPT_BLOB, "FriendList", MCPCBlobArraySize{ sizeof(MFRIENDLISTNODE) });
 		C(MC_MATCH_FRIEND_MSG, "Match.Friend.Msg", "Message to Friends", MCDT_MACHINE2MACHINE);
 			P(MPT_STR, "Msg");
 
-		C(MC_MATCH_CLAN_REQUEST_CREATE_CLAN, "Match.Clan.RequestCreateClan", "Request Create Clan", MCDT_MACHINE2MACHINE);
+		C(MC_MATCH_CLAN_REQUEST_CREATE_CLAN,
+			"Match.Clan.RequestCreateClan", "Request Create Clan",
+			MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uidChar");
 			P(MPT_INT, "RequestID");
 			P(MPT_STR, "ClanName");
@@ -656,15 +704,21 @@ void MAddSharedCommandTable(MCommandManager* CommandManager, MSharedCommandType:
 			P(MPT_STR, "Member2CharName");
 			P(MPT_STR, "Member3CharName");
 			P(MPT_STR, "Member4CharName");
-        C(MC_MATCH_CLAN_RESPONSE_CREATE_CLAN, "Match.Clan.ResponseCreateClan", "Response Create Clan", MCDT_MACHINE2MACHINE);
+        C(MC_MATCH_CLAN_RESPONSE_CREATE_CLAN,
+			"Match.Clan.ResponseCreateClan", "Response Create Clan",
+			MCDT_MACHINE2MACHINE);
 			P(MPT_INT, "Result");
 			P(MPT_INT, "RequestID");
-		C(MC_MATCH_CLAN_ASK_SPONSOR_AGREEMENT, "Match.Clan.AskSponsorAgreement", "Ask Sponsor's Agreement", MCDT_MACHINE2MACHINE);
+		C(MC_MATCH_CLAN_ASK_SPONSOR_AGREEMENT,
+			"Match.Clan.AskSponsorAgreement", "Ask Sponsor's Agreement",
+			MCDT_MACHINE2MACHINE);
 			P(MPT_INT, "RequestID");
 			P(MPT_STR, "ClanName");
 			P(MPT_UID, "uidClanMaster");
 			P(MPT_STR, "szClanMaster");
-		C(MC_MATCH_CLAN_ANSWER_SPONSOR_AGREEMENT, "Match.Clan.AnswerSponsorAgreement", "Answer Sponsor's Agreement", MCDT_MACHINE2MACHINE);
+		C(MC_MATCH_CLAN_ANSWER_SPONSOR_AGREEMENT,
+			"Match.Clan.AnswerSponsorAgreement", "Answer Sponsor's Agreement",
+			MCDT_MACHINE2MACHINE);
 			P(MPT_INT,	"RequestID");
 			P(MPT_UID,	"uidClanMaster");
 			P(MPT_STR,	"SponsorCharName");
@@ -712,12 +766,12 @@ void MAddSharedCommandTable(MCommandManager* CommandManager, MSharedCommandType:
 			P(MPT_INT, "Result");
 
 		C(MC_MATCH_CLAN_UPDATE_CHAR_CLANINFO, "Match.Clan.UpdateCharClanInfo", "Update Char ClanInfo", MCDT_MACHINE2MACHINE);
-			P(MPT_BLOB, "ClanInfo");
+			P(MPT_BLOB, "ClanInfo", MCPCBlobArraySize{ sizeof(MTD_CharClanInfo)});
 
 		C(MC_MATCH_CLAN_MASTER_REQUEST_CHANGE_GRADE, "Match.Clan.Master.RequestChangeGrade", "Request Change ClanGrade", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uidClanMaster");
 			P(MPT_STR, "szMember");
-			P_MINMAX(MPT_INT, "Grade", 0, MCG_END - 1);
+			P(MPT_INT, "Grade", MCPCMinMax{ 0, MCG_END - 1 });
 		C(MC_MATCH_CLAN_MASTER_RESPONSE_CHANGE_GRADE, "Match.Clan.Master.ResponseChangeGrade", "Response Change ClanGrade", MCDT_MACHINE2MACHINE);
 			P(MPT_INT, "Result");
 
@@ -735,31 +789,41 @@ void MAddSharedCommandTable(MCommandManager* CommandManager, MSharedCommandType:
 			P(MPT_STR, "SenderName");
 			P(MPT_STR, "Msg");
 
-		C(MC_MATCH_CLAN_REQUEST_MEMBER_LIST, "Match.Clan.Request.ClanMemberList", "Request Clan Member List", MCDT_MACHINE2MACHINE);
+		C(MC_MATCH_CLAN_REQUEST_MEMBER_LIST, "Match.Clan.Request.ClanMemberList",
+			"Request Clan Member List", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uidChar");
-		C(MC_MATCH_CLAN_RESPONSE_MEMBER_LIST, "Match.Clan.Response.ClanMemberList", "Response Clan Member List", MCDT_MACHINE2MACHINE);
-			P(MPT_BLOB, "ClanMemberList");
-		C(MC_MATCH_CLAN_REQUEST_CLAN_INFO, "Match.Clan.Request.Clan.Info", "Request Clan Info", MCDT_MACHINE2MACHINE);
+		C(MC_MATCH_CLAN_RESPONSE_MEMBER_LIST, "Match.Clan.Response.ClanMemberList",
+			"Response Clan Member List", MCDT_MACHINE2MACHINE);
+			P(MPT_BLOB, "ClanMemberList", MCPCBlobArraySize{ sizeof(MTD_ClanMemberListNode) });
+		C(MC_MATCH_CLAN_REQUEST_CLAN_INFO, "Match.Clan.Request.Clan.Info",
+			"Request Clan Info", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uidChar");
 			P(MPT_STR, "ClanName");
-			C(MC_MATCH_CLAN_RESPONSE_CLAN_INFO, "Match.Clan.Response.Clan.Info", "Response Clan Info", MCDT_MACHINE2MACHINE);
-			P(MPT_BLOB, "ClanInfo");
-		C(MC_MATCH_CLAN_STANDBY_CLAN_LIST, "Match.Clan.Standby.ClanList", "Standby Clan List", MCDT_MACHINE2MACHINE);
+		C(MC_MATCH_CLAN_RESPONSE_CLAN_INFO, "Match.Clan.Response.Clan.Info",
+			"Response Clan Info", MCDT_MACHINE2MACHINE);
+			P(MPT_BLOB, "ClanInfo", MCPCBlobArraySize{ sizeof(MTD_ClanInfo), 1, 1 });
+		C(MC_MATCH_CLAN_STANDBY_CLAN_LIST, "Match.Clan.Standby.ClanList",
+			"Standby Clan List", MCDT_MACHINE2MACHINE);
 			P(MPT_INT, "PrevClanListCount");
 			P(MPT_INT, "NextClanListCount");
-			P(MPT_BLOB, "ClanList");
-		C(MC_MATCH_CLAN_MEMBER_CONNECTED, "Match.Clan.Member.Connected", "Member Connected", MCDT_MACHINE2MACHINE);
+			P(MPT_BLOB, "ClanList", MCPCBlobArraySize{ sizeof(MTD_StandbyClanList) });
+		C(MC_MATCH_CLAN_MEMBER_CONNECTED, "Match.Clan.Member.Connected",
+			"Member Connected", MCDT_MACHINE2MACHINE);
 			P(MPT_STR, "szMember");
-		C(MC_MATCH_CLAN_REQUEST_EMBLEMURL, "Match.Clan.Request.EmblemURL", "Request EmblemURL", MCDT_MACHINE2MACHINE);
+		C(MC_MATCH_CLAN_REQUEST_EMBLEMURL, "Match.Clan.Request.EmblemURL",
+			"Request EmblemURL", MCDT_MACHINE2MACHINE);
 			P(MPT_INT, "ClanCLID");
-		C(MC_MATCH_CLAN_RESPONSE_EMBLEMURL, "Match.Clan.Response.EmblemURL", "Response EmblemURL", MCDT_MACHINE2MACHINE);
+		C(MC_MATCH_CLAN_RESPONSE_EMBLEMURL, "Match.Clan.Response.EmblemURL",
+			"Response EmblemURL", MCDT_MACHINE2MACHINE);
 			P(MPT_INT, "ClanCLID");
 			P(MPT_INT, "EmblemChecksum");
 			P(MPT_STR, "EmblemURL");
-		C(MC_MATCH_CLAN_LOCAL_EMBLEMREADY, "Match.Clan.Local.EmblemReady", "Notify Emblem Ready", MCDT_LOCAL);
+		C(MC_MATCH_CLAN_LOCAL_EMBLEMREADY, "Match.Clan.Local.EmblemReady",
+			"Notify Emblem Ready", MCDT_LOCAL);
 			P(MPT_INT, "ClanCLID");
 			P(MPT_STR, "EmblemURL");
-		C(MC_MATCH_CLAN_ACCOUNCE_DELETE, "MC_MATCH_CLAN_ACCOUNCE_DELETE", "delete clan info announce to clan member", MCDT_MACHINE2MACHINE);
+		C(MC_MATCH_CLAN_ACCOUNCE_DELETE, "MC_MATCH_CLAN_ACCOUNCE_DELETE",
+			"delete clan info announce to clan member", MCDT_MACHINE2MACHINE);
 			P(MPT_STR, "delete info" );
 
 		// Votes
@@ -777,21 +841,25 @@ void MAddSharedCommandTable(MCommandManager* CommandManager, MSharedCommandType:
 		C(MC_MATCH_VOTE_STOP, "Vote stop", "Vote stop", MCDT_MACHINE2MACHINE );
 
 		// Clan broadcasting
-		C(MC_MATCH_BROADCAST_CLAN_RENEW_VICTORIES, "Match.Broadcast.ClanRenewVictories", "Broadcast Clan Renew Victories", MCDT_MACHINE2MACHINE);
+		C(MC_MATCH_BROADCAST_CLAN_RENEW_VICTORIES, "Match.Broadcast.ClanRenewVictories",
+			"Broadcast Clan Renew Victories", MCDT_MACHINE2MACHINE);
 			P(MPT_STR, "strWinnerClanName");
 			P(MPT_STR, "strLoserClanName");
 			P(MPT_INT, "nVictories");
-		C(MC_MATCH_BROADCAST_CLAN_INTERRUPT_VICTORIES, "Match.Broadcast.ClanInterruptVictories", "Broadcast Clan Interrupt Victories", MCDT_MACHINE2MACHINE);
+		C(MC_MATCH_BROADCAST_CLAN_INTERRUPT_VICTORIES, "Match.Broadcast.ClanInterruptVictories",
+			"Broadcast Clan Interrupt Victories", MCDT_MACHINE2MACHINE);
 			P(MPT_STR, "strWinnerClanName");
 			P(MPT_STR, "strLoserClanName");
 			P(MPT_INT, "nVictories");
 
-		C(MC_MATCH_BROADCAST_DUEL_RENEW_VICTORIES, "Match.Broadcast.DuelRenewVictories", "Broadcast Duel Renew Victories", MCDT_MACHINE2MACHINE);
+		C(MC_MATCH_BROADCAST_DUEL_RENEW_VICTORIES, "Match.Broadcast.DuelRenewVictories",
+			"Broadcast Duel Renew Victories", MCDT_MACHINE2MACHINE);
 			P(MPT_STR, "strChampionName");
 			P(MPT_STR, "strChannelName");
 			P(MPT_INT, "nRoomNumber");
 			P(MPT_INT, "nVictories");
-		C(MC_MATCH_BROADCAST_DUEL_INTERRUPT_VICTORIES, "Match.Broadcast.DuelInterruptVictories", "Broadcast Duel Interrupt Victories", MCDT_MACHINE2MACHINE);
+		C(MC_MATCH_BROADCAST_DUEL_INTERRUPT_VICTORIES, "Match.Broadcast.DuelInterruptVictories",
+			"Broadcast Duel Interrupt Victories", MCDT_MACHINE2MACHINE);
 			P(MPT_STR, "strChampionName");
 			P(MPT_STR, "strInterrupterName");
 			P(MPT_INT, "nVictories");
@@ -801,7 +869,7 @@ void MAddSharedCommandTable(MCommandManager* CommandManager, MSharedCommandType:
 			P(MPT_UID, "uidPlayer");
 
 		C(MC_MATCH_DUEL_QUEUEINFO, "Match.Duel.Queue Info", "Queue Info", MCDT_MACHINE2MACHINE);
-			P(MPT_BLOB, "QueueInfo");
+			P(MPT_BLOB, "QueueInfo", MCPCBlobSize{ sizeof(MTD_DuelQueueInfo) });
 
 		C(MC_QUEST_PING, "Match.Quest.Ping", "QuestPing", MCDT_MACHINE2MACHINE);
 			P(MPT_UINT, "nTimeStamp");
@@ -813,11 +881,13 @@ void MAddSharedCommandTable(MCommandManager* CommandManager, MSharedCommandType:
 		C(MC_EVENT_CHANGE_MASTER, "Event.ChangeMaster", "Take out Master from Stage", MCDT_MACHINE2MACHINE);
 		C(MC_EVENT_CHANGE_PASSWORD, "Event.ChangePassword", "Change Password on Stage", MCDT_MACHINE2MACHINE);
 			P(MPT_STR, "strPassword");
-		C(MC_EVENT_REQUEST_JJANG, "Event.RequestJJang", "Request JJang mark to a Player", MCDT_MACHINE2MACHINE);
+		C(MC_EVENT_REQUEST_JJANG, "Event.RequestJJang",
+			"Request JJang mark to a Player", MCDT_MACHINE2MACHINE);
 			P(MPT_STR, "strTargetName");
 		C(MC_EVENT_REMOVE_JJANG, "Event.RemoveJJang", "Remove JJang mark from a Player", MCDT_MACHINE2MACHINE);
 			P(MPT_STR, "strTargetName");
-		C(MC_EVENT_UPDATE_JJANG, "Event.UpdateJJang", "Update JJang Player", MCDT_MACHINE2MACHINE);
+		C(MC_EVENT_UPDATE_JJANG, "Event.UpdateJJang",
+			"Update JJang Player", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uidPlayer");
 			P(MPT_BOOL, "bJjang");
 
@@ -868,7 +938,7 @@ void MAddSharedCommandTable(MCommandManager* CommandManager, MSharedCommandType:
 			P(MPT_UINT, "XPBonus");
 
 		C(MC_QUEST_GAME_INFO, "Quest.GameInfo", "Quest Game Info", MCDT_MACHINE2MACHINE);
-			P(MPT_BLOB, "Info");
+			P(MPT_BLOB, "Info", MCPCBlobArraySize{ sizeof(MTD_QuestGameInfo), 1, 1 });
 		C(MC_QUEST_COMBAT_STATE, "Quest.Combat.State", "Quest Combat State", MCDT_MACHINE2MACHINE);
 			P(MPT_CHAR, "CombatState");
 
@@ -876,7 +946,7 @@ void MAddSharedCommandTable(MCommandManager* CommandManager, MSharedCommandType:
 			P(MPT_CHAR, "SectorIndex");
 
 		C(MC_QUEST_COMPLETED, "Quest.Complete", "Complete Quest", MCDT_MACHINE2MACHINE);
-			P(MPT_BLOB, "RewardInfo");
+			P(MPT_BLOB, "RewardInfo", MCPCBlobArraySize{ sizeof(MTD_QuestReward) });
 		C(MC_QUEST_FAILED, "Quest", "Quest failed", MCDT_MACHINE2MACHINE);
 
 		C(MC_QUEST_REQUEST_MOVETO_PORTAL, "Quest.Request.Moveto.Portal", "Request Moveto Portal", MCDT_MACHINE2MACHINE);
@@ -887,22 +957,29 @@ void MAddSharedCommandTable(MCommandManager* CommandManager, MSharedCommandType:
 		C(MC_QUEST_READYTO_NEWSECTOR, "Quest.Readyto.NewSector", "Ready To New Sector", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uidPlayer");
 
-		C(MC_QUEST_PEER_NPC_BASICINFO,		"Quest.Peer.NPC.BasicInfo",		"NPC BasicInfo", MCDT_PEER2PEER);
-			P(MPT_BLOB, "Info");
-		C(MC_QUEST_PEER_NPC_HPINFO,			"Quest.Peer.NPC.HPInfo",		"NPC HPInfo", MCDT_PEER2PEER);
+		C(MC_QUEST_PEER_NPC_BASICINFO, "Quest.Peer.NPC.BasicInfo",
+			"NPC BasicInfo", MCDT_PEER2PEER);
+			P(MPT_BLOB, "Info", MCPCBlobSize{ sizeof(ZACTOR_BASICINFO) });
+		// NOTE: This command is not used.
+		C(MC_QUEST_PEER_NPC_HPINFO, "Quest.Peer.NPC.HPInfo",
+			"NPC HPInfo", MCDT_PEER2PEER);
 			P(MPT_INT, "nNPCCount");
 			P(MPT_BLOB, "HPTable");
-		C(MC_QUEST_PEER_NPC_ATTACK_MELEE,	"Quest.Peer.NPC.Attack.Melee",	"NPC Melee Attack", MCDT_PEER2PEER);
+		C(MC_QUEST_PEER_NPC_ATTACK_MELEE, "Quest.Peer.NPC.Attack.Melee",
+			"NPC Melee Attack", MCDT_PEER2PEER);
 			P(MPT_UID, "uidOwner");
-		C(MC_QUEST_PEER_NPC_ATTACK_RANGE,	"Quest.Peer.NPC.Attack.Range",	"NPC Range Attack", MCDT_PEER2PEER);
+		C(MC_QUEST_PEER_NPC_ATTACK_RANGE, "Quest.Peer.NPC.Attack.Range",
+			"NPC Range Attack", MCDT_PEER2PEER);
 			P(MPT_UID, "uidOwner");
-			P(MPT_BLOB, "Info");
-		C(MC_QUEST_PEER_NPC_SKILL_START,	"Quest.Peer.NPC.Skill.Start",	"NPC Skill Start", MCDT_PEER2PEER);
+			P(MPT_BLOB, "Info", MCPCBlobSize{ sizeof(ZPACKEDSHOTINFO) });
+		C(MC_QUEST_PEER_NPC_SKILL_START, "Quest.Peer.NPC.Skill.Start",
+			"NPC Skill Start", MCDT_PEER2PEER);
 			P(MPT_UID, "uidOwner");
 			P(MPT_INT, "nSkill");
 			P(MPT_UID, "uidTarget");
 			P(MPT_POS, "targetPos");
-		C(MC_QUEST_PEER_NPC_SKILL_EXECUTE,	"Quest.Peer.NPC.Skill.Execute",	"NPC Skill Start", MCDT_PEER2PEER);
+		C(MC_QUEST_PEER_NPC_SKILL_EXECUTE,	"Quest.Peer.NPC.Skill.Execute",
+			"NPC Skill Start", MCDT_PEER2PEER);
 			P(MPT_UID, "uidOwner");
 			P(MPT_INT, "nSkill");
 			P(MPT_UID, "uidTarget");
@@ -938,6 +1015,7 @@ void MAddSharedCommandTable(MCommandManager* CommandManager, MSharedCommandType:
 		if (IsTypeAnyOf(MatchServer, Client)) {
 			C(MC_ADMIN_REQUEST_SERVER_INFO, "Admin.RequestServerInfo", "Request Server Info", MCDT_MACHINE2MACHINE);
 				P(MPT_UID, "uidAdmin");
+			// NOTE: Unused.
 			C(MC_ADMIN_RESPONSE_SERVER_INFO, "Admin.ResponseServerInfo", "Response Server Info", MCDT_MACHINE2MACHINE);
 				P(MPT_BLOB, "ServerInfo");
 			C(MC_ADMIN_SERVER_HALT, "Admin.Halt", "Halt Server", MCDT_MACHINE2MACHINE);
@@ -1019,7 +1097,7 @@ void MAddSharedCommandTable(MCommandManager* CommandManager, MSharedCommandType:
 			P(MPT_UID, "TargetUID");
 
 		C(MC_PEER_SHOT, "Peer.Shot", "Shot", MCDT_PEER2PEER);
-			P(MPT_BLOB, "Info");
+			P(MPT_BLOB, "Info", MCPCBlobSize{ sizeof(ZPACKEDSHOTINFO) });
 
 		C(MC_PEER_SHOT_MELEE, "Peer.Shot.Melee", "ShotMelee", MCDT_PEER2PEER);
 			P(MPT_FLOAT, "Time");
@@ -1048,7 +1126,7 @@ void MAddSharedCommandTable(MCommandManager* CommandManager, MSharedCommandType:
 			P(MPT_DIR, "Direction");
 
 		C(MC_PEER_DASH, "Peer.Dash", "Dash", MCDT_PEER2PEER);
-			P(MPT_BLOB, "DashInfo");
+			P(MPT_BLOB, "DashInfo", MCPCBlobSize{ sizeof(ZPACKEDDASHINFO) });
 
 		C(MC_PEER_SKILL, "Peer.ObjectSkill", "Skill", MCDT_PEER2PEER);
 			P(MPT_FLOAT, "Time");
@@ -1056,7 +1134,7 @@ void MAddSharedCommandTable(MCommandManager* CommandManager, MSharedCommandType:
 			P(MPT_INT, "SelType");
 
 		C(MC_PEER_BASICINFO, "Peer.CharacterBasicInfo", "BasicInfo", MCDT_PEER2PEER);
-			P(MPT_BLOB, "Info");
+			P(MPT_BLOB, "Info", MCPCBlobSize{ sizeof(ZPACKEDBASICINFO) });
 
 		C(MC_PEER_HPINFO, "Peer.CharacterHPInfo", "HPInfo", MCDT_PEER2PEER);
 			P(MPT_FLOAT, "fHP");

@@ -1132,7 +1132,7 @@ void MMatchServer::ResponseGameInfo(const MUID& uidChar, const MUID& uidStage)
 	if (pStage->GetRule())
 		pRuleInfoArray = pStage->GetRule()->CreateRuleInfoBlob();
 	if (pRuleInfoArray == NULL)
-		pRuleInfoArray = MMakeBlobArray(0, 0);
+		pRuleInfoArray = MMakeBlobArray(sizeof(MTD_RuleInfo), 0);
 	pNew->AddParameter(new MCommandParameterBlob(pRuleInfoArray, MGetBlobArraySize(pRuleInfoArray)));
 	MEraseBlobArray(pRuleInfoArray);
 

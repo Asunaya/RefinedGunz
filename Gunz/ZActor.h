@@ -38,15 +38,6 @@ enum ZACTOR_FLAG
 	AF_SOUND_WOUNDED	= 0x1000,
 };
 
-struct ZACTOR_BASICINFO {
-	float			fTime;
-	MUID			uidNPC;
-	short			posx,posy,posz;
-	short			velx,vely,velz;
-	short			dirx,diry,dirz;
-	BYTE			anistate;
-};
-
 struct MQuestNPCInfo;
 
 class ZActor : public ZCharacterObjectHistory

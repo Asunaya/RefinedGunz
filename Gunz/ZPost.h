@@ -10,23 +10,6 @@
 #include "SafeString.h"
 #include "VersionNo.h"
 
-#pragma pack(1)
-
-struct ZPACKEDSHOTINFO {
-	float	fTime;
-	short	posx,posy,posz;
-	short	tox,toy,toz;
-	BYTE	sel_type;
-};
-
-struct ZPACKEDDASHINFO {
-	short	posx, posy, posz;
-	short	dirx, diry, dirz;
-	BYTE	seltype;
-};
-
-#pragma pack()
-
 inline void ZPostHPInfo(float fHP)
 {
 	ZPOSTCMD1(MC_PEER_HPINFO, MCmdParamFloat(fHP));
@@ -262,7 +245,7 @@ inline void ZPostStageSetting(const MUID& uidChar, const MUID& uidStage, MSTAGE_
 {
 	void* pBlob = MMakeBlobArray(sizeof(MSTAGE_SETTING_NODE), 1);
 	auto* pBlobNode = (MSTAGE_SETTING_NODE*)MGetBlobArrayElement(pBlob, 0);
-	CopyMemory(pBlobNode, pSetting, sizeof(MSTAGE_SETTING_NODE));
+	memcpy(pBlobNode, pSetting, sizeof(MSTAGE_SETTING_NODE));
 	ZPOSTCMD3(MC_MATCH_STAGESETTING,
 		MCommandParameterUID(uidChar),
 		MCommandParameterUID(uidStage),
@@ -663,7 +646,7 @@ inline void ZPostRequestQuickJoin(const MUID& uidChar, MTD_QuickJoinParam* pPara
 {
 	void* pBlob = MMakeBlobArray(sizeof(MTD_QuickJoinParam), 1);
 	MTD_QuickJoinParam* pBlobNode = (MTD_QuickJoinParam*)MGetBlobArrayElement(pBlob, 0);
-	CopyMemory(pBlobNode, pParam, sizeof(MTD_QuickJoinParam));
+	memcpy(pBlobNode, pParam, sizeof(MTD_QuickJoinParam));
 
 	ZPOSTCMD2(MC_MATCH_STAGE_REQUEST_QUICKJOIN, MCommandParameterUID(uidChar), MCommandParameterBlob(pBlob, MGetBlobArraySize(pBlob)));
 	MEraseBlobArray(pBlob);

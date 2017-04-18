@@ -2,6 +2,7 @@
 #include <string.h>
 #include "MCommand.h"
 #include "MCommandParameter.h"
+#include "MBlobArray.h"
 
 bool MCommandParamConditionMinMax::Check(MCommandParameter* pCP)
 {
@@ -51,9 +52,44 @@ bool MCommandParamConditionMinMax::Check(MCommandParameter* pCP)
 		break;
 	default:
 		{
-			_ASSERT(0); // 없는 제약조건이다.
+			assert(false);
 		}
 	};
+
+	return true;
+}
+
+bool MCommandParamConditionBlobSize::Check(MCommandParameter* pCP)
+{
+	assert(pCP->GetType() == MPT_BLOB);
+
+	auto* BlobParameter = static_cast<MCommandParameterBlob*>(pCP);
+
+	return BlobParameter->GetPayloadSize() == Size;
+}
+
+bool MCommandParamConditionBlobArraySize::Check(MCommandParameter* pCP)
+{
+	assert(pCP->GetType() == MPT_BLOB);
+
+	auto* BlobParameter = static_cast<MCommandParameterBlob*>(pCP);
+
+	const auto* BlobArrayPointer = BlobParameter->GetPointer();
+	const auto BlobSize = BlobParameter->GetPayloadSize();
+	if (!MValidateBlobArraySize(BlobArrayPointer, BlobSize))
+		return false;
+
+	const auto OneBlobSize = MGetBlobArrayElementSize(BlobArrayPointer);
+	if (OneBlobSize != Size)
+		return false;
+
+	const auto BlobCount = MGetBlobArrayCount(BlobArrayPointer);
+
+	if (MinCount != -1 && int(BlobCount) < MinCount)
+		return false;
+
+	if (MaxCount != -1 && int(BlobCount) > MaxCount)
+		return false;
 
 	return true;
 }
@@ -246,7 +282,7 @@ int MCommandParameterString::SetData(const char* pData)
 
 	if( (nValueSize > (USHRT_MAX-2)) || (0 == nValueSize) )
 	{
-		ASSERT( 0 && "비정상 길이의 문자." );
+		assert(false);
 		return sizeof(nValueSize);
 	}
 
