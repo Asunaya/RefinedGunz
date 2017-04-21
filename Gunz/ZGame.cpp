@@ -659,9 +659,9 @@ void ZGame::Update(float fElapsed)
 #endif
 	m_Match.Update(fElapsed);
 
-	if(m_bReplaying) 
+	if (m_bReplaying)
 		OnReplayRun();
-	if(ZGetGameInterface()->GetCombatInterface()->GetObserverMode())
+	if (ZGetGameInterface()->GetCombatInterface()->GetObserverMode())
 		OnObserverRun();
 
 	ProcessDelayedCommand();
@@ -836,12 +836,13 @@ extern bool g_bProfile;
 
 bool IsIgnoreObserverCommand(int nID)
 {
-	switch(nID) {
-		case MC_PEER_OPENED	:
-		case MC_MATCH_GAME_RESPONSE_TIMESYNC :
-			return false;
+	switch (nID) {
+	case MC_PEER_OPENED:
+	case MC_MATCH_GAME_RESPONSE_TIMESYNC:
+		return false;
+	default:
+		return true;
 	}
-	return true;
 }
 
 void ZGame::OnCommand_Observer(MCommand* pCommand)
@@ -859,40 +860,38 @@ void ZGame::OnCommand_Observer(MCommand* pCommand)
 
 	if (pCommand->GetID() == MC_PEER_BASICINFO)
 		OnPeerBasicInfo(pCommand, true, false);
+	else if (pCommand->GetID() == MC_PEER_BASICINFO_RG)
+		OnPeerNewBasicInfo(pCommand, true, false);
 }
 
 void ZGame::ProcessDelayedCommand()
 {
-	// TODO: Erase-remove
-	for (auto i = m_DelayedCommandList.begin(); i != m_DelayedCommandList.end(); ++i)
-	{
-		auto *pItem = *i;
+	erase_remove_if(m_DelayedCommandList, [&](auto* Item) {
+		assert(Item != nullptr);
 
-		if (GetTime() <= pItem->fTime)
-			continue;
+		if (GetTime() <= Item->fTime)
+			return false;
 
-		OnCommand_Immediate(pItem->pCommand);
-		delete pItem->pCommand;
-		delete pItem;
-		i = m_DelayedCommandList.erase(i);
-		if (i == m_DelayedCommandList.end())
-			break;
-	}
+		OnCommand_Immediate(Item->pCommand);
+		delete Item->pCommand;
+		delete Item;
+		return true;
+	});
 }
 
 void ZGame::OnReplayRun()
 {
 	if (ReplayIterator == m_ReplayCommandList.end() && m_bReplaying) {
-		m_bReplaying=false;
+		m_bReplaying = false;
 		EndReplay();
 		return;
 	}
 
 	while (ReplayIterator != m_ReplayCommandList.end())
 	{
-		ZObserverCommandItem *pItem = *ReplayIterator;
+		auto* pItem = *ReplayIterator;
 
-		if(GetTime() < pItem->fTime)
+		if (GetTime() < pItem->fTime)
 			return;
 		
 		OnCommand_Observer(pItem->pCommand);
@@ -900,18 +899,31 @@ void ZGame::OnReplayRun()
 	}
 }
 
+static bool IsBasicInfo(u16 ID)
+{
+	switch (ID) {
+	case MC_PEER_BASICINFO:
+	case MC_PEER_BASICINFO_RG:
+		return true;
+	default:
+		return false;
+	}
+}
+
 void ZGame::OnObserverRun()
 {
-	while(m_ObserverCommandList.begin() != m_ObserverCommandList.end())
+	while (m_ObserverCommandList.begin() != m_ObserverCommandList.end())
 	{
-		ZObserverCommandItem *pItem=*m_ObserverCommandList.begin();
-		if(GetTime()-pItem->fTime < ZGetGameInterface()->GetCombatInterface()->GetObserver()->GetDelay())
+		auto* pItem = *m_ObserverCommandList.begin();
+		if (GetTime() - pItem->fTime < ZGetGameInterface()->GetCombatInterface()->GetObserver()->GetDelay())
 			return;
 
 		m_ObserverCommandList.erase(m_ObserverCommandList.begin());
 
-		if(pItem->pCommand->GetID()==MC_PEER_BASICINFO)
-			OnPeerBasicInfo(pItem->pCommand,false,true);
+		if (pItem->pCommand->GetID() == MC_PEER_BASICINFO)
+			OnPeerBasicInfo(pItem->pCommand, false, true);
+		else if (pItem->pCommand->GetID() == MC_PEER_BASICINFO_RG)
+			OnPeerNewBasicInfo(pItem->pCommand, false, true);
 		else
 			OnCommand_Immediate(pItem->pCommand);
 
@@ -928,7 +940,7 @@ void ZGame::FlushObserverCommands()
 
 		m_ObserverCommandList.erase(m_ObserverCommandList.begin());
 
-		if(pItem->pCommand->GetID()!=MC_PEER_BASICINFO)
+		if (!IsBasicInfo(pItem->pCommand->GetID()))
 			OnCommand_Immediate(pItem->pCommand);
 
 		delete pItem->pCommand;
@@ -4469,8 +4481,14 @@ void ZGame::EndReplay()
 		float(ReplayEndTime - ReplayStartTime)/1000.f,
 		1000.f*g_nFrameCount/float(ReplayEndTime - ReplayStartTime));
 #endif
-
-	ZChangeGameState(GUNZ_LOBBY);
+	
+	if (ZGetGameInterface()->EnteredReplayFromLogin) {
+		ZChangeGameState(GUNZ_LOGIN);
+		ZGetGameInterface()->EnteredReplayFromLogin = false;
+	}
+	else {
+		ZChangeGameState(GUNZ_LOBBY);
+	}
 }
 
 void ZGame::SetReplayTime(float Time)

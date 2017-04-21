@@ -25,7 +25,7 @@ static void CopyFileData(FileData& dest, const _finddata_t& src)
 	dest.LastAccessTime = src.time_access;
 	dest.LastModifiedTime = src.time_write;
 	dest.Size = src.size;
-	dest.Name = src.name;
+	strcpy_safe(dest.Name, src.name);
 }
 
 template <bool Recursive>
@@ -33,10 +33,11 @@ FileIterator<Recursive>& FileIterator<Recursive>::operator++()
 {
 	_finddata_t fd;
 	auto find_ret = _findnext(Range.First, &fd);
-	if (find_ret == 0)
+	if (find_ret != 0)
 		End = true;
+	else
+		CopyFileData(Range.Data, fd);
 
-	CopyFileData(Range.Data, fd);
 	return *this;
 }
 
@@ -58,7 +59,8 @@ FileRange<Recursive> FilesInDirImpl(const char* Path)
 	_finddata_t fd;
 	ret.First = _findfirst(Path, &fd);
 
-	CopyFileData(ret.Data, fd);
+	if (ret.First != -1)
+		CopyFileData(ret.Data, fd);
 
 	return ret;
 }

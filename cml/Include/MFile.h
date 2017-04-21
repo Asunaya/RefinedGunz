@@ -16,7 +16,7 @@ struct FileData
 	u64 LastAccessTime;
 	u64 LastModifiedTime;
 	u64 Size;
-	StringView Name;
+	char Name[260];
 };
 
 template <bool Recursive>

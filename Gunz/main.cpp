@@ -103,7 +103,7 @@ static void ForEachFont()
 	for (auto&& FileData : MFile::FilesInDir(FONT_DIR "*." FONT_EXT))
 	{
 		char Filename[_MAX_PATH];
-		sprintf_safe(Filename, "%s%.*s", FONT_DIR, FileData.Name.size(), FileData.Name.data());
+		sprintf_safe(Filename, "%s%s", FONT_DIR, FileData.Name);
 		Function(Filename);
 	}
 
