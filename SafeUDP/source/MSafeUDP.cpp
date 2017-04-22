@@ -94,8 +94,8 @@ bool MNetLink::MakeSockAddr(const char* pszIP, int nPort, MSocket::sockaddr_in* 
 	RemoteAddr.sin_family = MSocket::AF::INET;
 	RemoteAddr.sin_port = MSocket::htons(nPort);
 	u32 dwAddr;
-	MSocket::inet_pton(RemoteAddr.sin_family, pszIP, &dwAddr);
-	if (dwAddr != MSocket::in_addr::None) {
+	auto pton_ret = MSocket::inet_pton(RemoteAddr.sin_family, pszIP, &dwAddr);
+	if (pton_ret == 1) {
 		memcpy(&(RemoteAddr.sin_addr), &dwAddr, 4);
 	} else {
 		auto* pHost = MSocket::gethostbyname(pszIP);
