@@ -70,3 +70,6 @@
 // Controls whether the HP and AP of the player are drawn
 // as numbers on top of the health gauges in the UI
 #define DRAW_HPAP_NUMBERS
+
+// Controls whether the /fov command is usable (outside of dev mode).
+#define ENABLE_FOV_COMMAND
