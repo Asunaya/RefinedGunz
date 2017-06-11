@@ -748,26 +748,12 @@ void ZEmblemList::OnRestore()
 
 void ZEmblemList::InitEnv( char* pFileName_ )
 {
-	MXmlDocument	Data;
-	Data.Create();
-
-	MZFile mzf;
-	if( !mzf.Open( pFileName_, g_pFileSystem ))
+	MXmlDocument Data;
+	if (!Data.LoadFromFile(pFileName_, g_pFileSystem))
 	{
+		MLog("Failed to initialize emblem list environment\n");
 		return;
 	}
-	char* buffer;
-	buffer	= new char[mzf.GetLength() + 1];
-	mzf.Read( buffer, mzf.GetLength() );
-	buffer[mzf.GetLength()] = 0;
-
-	if( !Data.LoadFromMemory(buffer) )
-	{
-		delete buffer;
-		return;
-	}
-	delete buffer;
-	mzf.Close();
 
 	MXmlElement root, child;
 	char TagName[256];

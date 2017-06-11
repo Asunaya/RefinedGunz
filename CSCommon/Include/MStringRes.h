@@ -35,16 +35,9 @@ public:
 
 		MXmlDocument aXml;
 		{
-			MZFile mzf;
-			if (!mzf.Open(pszFileName, pfs))
-				return false;
-
 			mlog("Load XML from memory : %s(0x%04X) ", pszFileName, nLangID);
 
-			auto buffer = mzf.Release();
-
-			aXml.Create();
-			if (!aXml.LoadFromMemory(buffer.get(), nLangID))
+			if (!aXml.LoadFromFile(pszFileName, pfs))
 			{
 				mlog("- FAIL\n");
 				return false;

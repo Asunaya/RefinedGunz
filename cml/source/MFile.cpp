@@ -165,6 +165,11 @@ bool File::open(const char* path)
 	return open_impl(path, "rb");
 }
 
+bool File::open(const char* path, TextType)
+{
+	return open_impl(path, "r");
+}
+
 void File::close()
 {
 	if (!file_ptr)

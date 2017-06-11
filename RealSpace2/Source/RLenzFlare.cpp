@@ -226,44 +226,15 @@ bool RLenzFlare::Create( char* filename_ )
 {
 	MXmlDocument	XmlDoc;
 	MXmlElement		PNode,Node;
+	if(!XmlDoc.LoadFromFile(filename_, g_pFileSystem))
+		return false;
 
-	XmlDoc.Create();
+	PNode = XmlDoc.GetDocumentElement();
 
 	char Path[256];
 	Path[0] = NULL;
 
-	GetPath(filename_,Path);
-
-	char *buffer;
-	MZFile mzf;
-
-	if(g_pFileSystem)
-	{
-		if(!mzf.Open( filename_, g_pFileSystem ))
-		{
-			if(!mzf.Open( filename_ ))
-				return false;
-		}
-	} 
-	else 
-	{
-		if(!mzf.Open( filename_ ))
-			return false;
-	}
-
-	buffer = new char[mzf.GetLength()+1];
-	buffer[mzf.GetLength()] = 0;
-
-	mzf.Read(buffer,mzf.GetLength());
-
-	if(!XmlDoc.LoadFromMemory(buffer))
-		return false;
-
-	delete[] buffer;
-
-	mzf.Close();
-
-	PNode = XmlDoc.GetDocumentElement();
+	GetPath(filename_, Path);
 
 	if( ReadXmlElement( &PNode, Path ) == false ) 
 	{

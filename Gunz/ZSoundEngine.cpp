@@ -1086,25 +1086,10 @@ bool ZSoundEngine::LoadResource( char* pFileName_ ,ZLoadingProgress *pLoading )
 	}
 
 	MXmlDocument Data;
-
-	MZFile mzf;
-	if(!mzf.Open(pFileName_,ZGetFileSystem()))
-		return false;
-
-	char *buffer;
-	buffer=new char[mzf.GetLength()+1];
-	mzf.Read(buffer,mzf.GetLength());
-	buffer[mzf.GetLength()]=0;
-
-	Data.Create();
-	if(!Data.LoadFromMemory(buffer))
+	if (!Data.LoadFromFile(pFileName_, ZGetFileSystem()))
 	{
-		delete buffer;
 		return false;
 	}
-	delete buffer;
-	mzf.Close();
-
 
 	MXmlElement root, chr, attr;
 

@@ -559,42 +559,16 @@ bool ZMonsterBookInterface::DeleteIllustImage( void)
   arg  : none
   ret  : true(=success) or false(=fail)
 ************************************************************************/
-bool ZMonsterBookInterface::ReadQuestItemXML( void)
+bool ZMonsterBookInterface::ReadQuestItemXML()
 {
-	// XML 파일을 연다
+	auto Filename = "System/zquestitem.xml";
+
 	MXmlDocument xmlQuestItemDesc;
-	xmlQuestItemDesc.Create();
-
-//	if ( !xmlQuestItemDesc.LoadFromFile( "System/zquestitem.xml"))
-//	{
-//		xmlQuestItemDesc.Destroy();
-//		return false;
-//	}
-
-	char			*buffer;
-	MZFile			mzFile;
-
-	if( !mzFile.Open( "System/zquestitem.xml", ZApplication::GetFileSystem())) 
+	if( !xmlQuestItemDesc.LoadFromFile(Filename, ZApplication::GetFileSystem()))
 	{
-		xmlQuestItemDesc.Destroy();
-		return false;
-	} 
-
-	buffer = new char[ mzFile.GetLength() + 1];
-	buffer[ mzFile.GetLength()] = 0;
-
-	mzFile.Read( buffer, mzFile.GetLength());
-
-	if( !xmlQuestItemDesc.LoadFromMemory( buffer))
-	{
-		xmlQuestItemDesc.Destroy();
 		return false;
 	}
-	delete[] buffer;
-	mzFile.Close();
 
-
-	// 데이터를 읽어온다
 	MXmlElement rootElement = xmlQuestItemDesc.GetDocumentElement();
 	for ( int i = 0;  i < rootElement.GetChildNodeCount();  i++)
 	{
@@ -607,7 +581,7 @@ bool ZMonsterBookInterface::ReadQuestItemXML( void)
 			continue;
 
 		bool bFindPage = false;
-		if ( !_stricmp( szTagName, "ITEM"))						// 태그 시작
+		if ( !_stricmp( szTagName, "ITEM"))
 		{
 			char szAttrName[64];
 			char szAttrValue[256];
@@ -644,7 +618,8 @@ bool ZMonsterBookInterface::ReadQuestItemXML( void)
          pIterator* = 리턴받을 Iterrator
   ret  : true(=success) or false(=fail)
 ************************************************************************/
-bool ZMonsterBookInterface::ReadSimpleQuestItemDesc( int nItemID, map< int, MQuestItemSimpleDesc>::iterator* pIterator)
+bool ZMonsterBookInterface::ReadSimpleQuestItemDesc( int nItemID,
+	map< int, MQuestItemSimpleDesc>::iterator* pIterator)
 {
 	map< int, MQuestItemSimpleDesc>::iterator iterator;
 	iterator = m_QuestItemDesc.find( nItemID);

@@ -94,6 +94,12 @@ enum class Seek
 	End = SEEK_END,
 };
 
+constexpr struct ClearExistingContentsType {} ClearExistingContents;
+constexpr struct PreserveExistingContentsAndAppendType {} PreserveExistingContentsAndAppend;
+constexpr struct PreserveExistingContentsAndPrependType {} PreserveExistingContentsAndPrepend;
+
+constexpr struct TextType {} Text;
+
 // A simple class that wraps a FILE*.
 // It supports 64-bit offsets and is always in read-only binary mode.
 struct File
@@ -103,9 +109,13 @@ struct File
 	File(CFilePtr file_ptr) : file_ptr{ std::move(file_ptr) } {}
 	// Wrapper for open.
 	File(const char* path) { open(path); }
+	File(const char* path, TextType) { open(path, Text); }
 
 	// Opens a file. Returns true on success, or false on error.
 	bool open(const char* path);
+
+	// Opens a file in text mode. Returns true on success, or false on error.
+	bool open(const char* path, TextType);
 
 	// Closes the file, if it is open.
 	void close();
@@ -156,12 +166,6 @@ protected:
 		bool error;
 	} state{};
 };
-
-constexpr struct ClearExistingContentsType {} ClearExistingContents;
-constexpr struct PreserveExistingContentsAndAppendType {} PreserveExistingContentsAndAppend;
-constexpr struct PreserveExistingContentsAndPrependType {} PreserveExistingContentsAndPrepend;
-
-constexpr struct TextType {} Text;
 
 // A File, except it also supports writing.
 struct RWFile : public File

@@ -202,39 +202,15 @@ bool RMesh::ReadXml(const char* filename)
 	MXmlDocument	XmlDoc;
 	MXmlElement		PNode,Node;
 
-	XmlDoc.Create();
-
 	char Path[256];
 	Path[0] = NULL;
 
 	std::string BackupName = filename;
 
 	GetPath(filename,Path);
-
-	char *buffer;
-	MZFile mzf;
-
-	if(g_pFileSystem) {
-		if(!mzf.Open(filename,g_pFileSystem)) {
-			if(!mzf.Open(filename))
-				return false;
-		}
-	} else {
-		if(!mzf.Open(filename))
-			return false;
-	}
-
-	buffer = new char[mzf.GetLength()+1];
-	buffer[mzf.GetLength()] = 0;
-
-	mzf.Read(buffer,mzf.GetLength());
-
-	if(!XmlDoc.LoadFromMemory(buffer))
+	
+	if (!XmlDoc.LoadFromFile(filename, g_pFileSystem))
 		return false;
-
-	delete[] buffer;
-
-	mzf.Close();
 
 	PNode = XmlDoc.GetDocumentElement();
 

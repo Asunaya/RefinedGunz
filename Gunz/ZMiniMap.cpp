@@ -52,26 +52,14 @@ void ZMiniMap::Destroy()
 
 bool ZMiniMap::Create(const char *szName)
 {
-	// xml 이름을 직접받자 zcombatingerface 로 옮겨가자
 	char szXMLName[256];
 	char szMapPath[64];
 	ZGetCurrMapPath(szMapPath);
 	sprintf_safe(szXMLName, "%s%s/%s.minimap.xml", szMapPath, szName, szName);
 
-	MZFile mzf;
-	if(!mzf.Open(szXMLName,ZGetFileSystem()))
-		return false;
-
-	char *buffer;
-	buffer=new char[mzf.GetLength()+1];
-	mzf.Read(buffer,mzf.GetLength());
-	buffer[mzf.GetLength()]=0;
-
 	MXmlDocument aXml;
-	aXml.Create();
-	if(!aXml.LoadFromMemory(buffer))
+	if(!aXml.LoadFromFile(szXMLName, ZApplication::GetFileSystem()))
 	{
-		delete buffer;
 		return false;
 	}
 
@@ -112,9 +100,6 @@ bool ZMiniMap::Create(const char *szName)
 			aChild.GetChildContents(&m_fCameraHeightMax, "MAX");
 		}
 	}
-
-	delete buffer;
-	mzf.Close();
 
 	m_pBaseTexture = RCreateBaseTexture(szTextureName);
 	if(!m_pBaseTexture) return false;

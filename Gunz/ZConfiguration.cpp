@@ -113,32 +113,14 @@ bool ZConfiguration::LoadLocale(const char* szFileName)
 	MXmlElement		parentElement, serverElement, bindsElement;
 	MXmlElement		childElement;
 
-	char			*buffer;
-	MZFile			mzFile;
-
-	xmlLocale.Create();
-
-	if( !mzFile.Open(szFileName, ZApplication::GetFileSystem()))
-	{
-		xmlLocale.Destroy();
-		return false;
-	} 
-
-	buffer = new char[ mzFile.GetLength()+1];
-	buffer[mzFile.GetLength()]=0;
-	mzFile.Read( buffer, mzFile.GetLength());
-
 	mlog( "Load XML from memory : %s", szFileName);
 
-	if( !xmlLocale.LoadFromMemory(buffer) )
+	if( !xmlLocale.LoadFromFile(szFileName, ZApplication::GetFileSystem()))
 	{
 		mlog( "- FAIL\n");
 
-		xmlLocale.Destroy();
 		return false;
 	}
-	delete[] buffer;
-	mzFile.Close();
 	mlog( "- SUCCESS\n");
 
 	parentElement = xmlLocale.GetDocumentElement();
@@ -178,28 +160,13 @@ bool ZConfiguration::LoadLocale(const char* szFileName)
 bool ZConfiguration::LoadGameTypeCfg(const char* szFileName)
 {
 	MXmlDocument xmlIniData;
-	xmlIniData.Create();
-
-	char *buffer;
-	MZFile mzFile;
-	if( !mzFile.Open(szFileName, ZApplication::GetFileSystem())) 
-	{
-		xmlIniData.Destroy();
-		return false;
-	} 
-
-	buffer = new char[ mzFile.GetLength()+1];
-	buffer[mzFile.GetLength()]=0;
-	mzFile.Read( buffer, mzFile.GetLength());
 
 	mlog( "Load XML from memory : %s", szFileName);
 
-	if( !xmlIniData.LoadFromMemory( buffer))
+	if (!xmlIniData.LoadFromFile(szFileName, ZApplication::GetFileSystem()))
 	{
 		mlog( "- FAIL\n");
 
-		xmlIniData.Destroy();
-		delete []buffer;
 		return false;
 	}
 
@@ -230,41 +197,19 @@ bool ZConfiguration::LoadGameTypeCfg(const char* szFileName)
 		}
 	}
 
-	xmlIniData.Destroy();
-	delete []buffer;
-
 	return true;
 }
 
 bool ZConfiguration::LoadSystem(const char* szFileName)
 {
-	char			*buffer;
-	MZFile			mzFile;
-	MXmlDocument	xmlConfig;
-	xmlConfig.Create();
+	mlog( "Load XML from memory : %s", szFileName);
 
-	if( !mzFile.Open( szFileName, ZApplication::GetFileSystem())) 
-	{
-		mlog("MFile::Open failed\n");
-		xmlConfig.Destroy();
-		return false;
-	} 
-
-	buffer = new char[ mzFile.GetLength()+1];
-	buffer[mzFile.GetLength()]=0;
-	mzFile.Read( buffer, mzFile.GetLength());
-
-	mlog( "Load XML from memory : %s", FILENAME_SYSTEM );
-
-	if( !xmlConfig.LoadFromMemory( buffer, GetLanguageID(m_Locale.strLanguage.c_str())) )
+	MXmlDocument xmlConfig;
+	if (!xmlConfig.LoadFromFile(szFileName, ZApplication::GetFileSystem()))
 	{
 		mlog( "- FAIL\n");
-
-		xmlConfig.Destroy();
 		return false;
 	}
-	delete[] buffer;
-	mzFile.Close();
 	mlog( "- SUCCESS\n");
 
 	MXmlElement		parentElement = xmlConfig.GetDocumentElement();

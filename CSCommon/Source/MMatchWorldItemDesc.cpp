@@ -59,45 +59,11 @@ bool MMatchWorldItemDescMgr::ReadXml(const char* szFileName)
 
 bool MMatchWorldItemDescMgr::ReadXml(MZFileSystem* pFileSystem, const char* szFileName)
 {
-	MXmlDocument	xmlIniData;
-	xmlIniData.Create();
-
-	//	<-----------------
-	char *buffer;
-	MZFile mzf;
-
-	if(pFileSystem) 
+	MXmlDocument xmlIniData;
+	if(!xmlIniData.LoadFromFile(szFileName, pFileSystem))
 	{
-		if(!mzf.Open(szFileName,pFileSystem)) 
-		{
-			if(!mzf.Open(szFileName)) 
-			{
-				xmlIniData.Destroy();
-				return false;
-			}
-		}
-	} 
-	else 
-	{
-		if(!mzf.Open(szFileName))
-		{
-			xmlIniData.Destroy();
-			return false;
-		}
-	}
-
-	buffer = new char[mzf.GetLength()+1];
-	buffer[mzf.GetLength()] = 0;
-	mzf.Read(buffer,mzf.GetLength());
-
-	if(!xmlIniData.LoadFromMemory(buffer))
-	{
-		xmlIniData.Destroy();
 		return false;
 	}
-	delete[] buffer;
-	mzf.Close();
-	//	<------------------
 
 	MXmlElement rootElement, chrElement, attrElement;
 	char szTagName[256];

@@ -167,36 +167,11 @@ void ZSkillManager::Destroy()
 
 bool ZSkillManager::Create()
 {
-	MXmlDocument	xmlDocument;
-
-	xmlDocument.Create();
-
-	char *buffer;
-	MZFile mzf;
-
-	if(!mzf.Open(FILENAME_ZSKILL_DESC,ZGetFileSystem())) 
+	MXmlDocument xmlDocument;
+	if(!xmlDocument.LoadFromFile(FILENAME_ZSKILL_DESC, ZGetFileSystem()))
 	{
-		if(!mzf.Open(FILENAME_ZSKILL_DESC)) 
-		{
-			xmlDocument.Destroy();
-			return false;
-		}
-	}
-
-	buffer = new char[mzf.GetLength()+1];
-	buffer[mzf.GetLength()] = 0;
-
-	mzf.Read(buffer,mzf.GetLength());
-
-	if(!xmlDocument.LoadFromMemory(buffer))
-	{
-		xmlDocument.Destroy();
-		delete[] buffer;
 		return false;
 	}
-	delete[] buffer;
-	mzf.Close();
-
 
 	MXmlElement rootElement, element;
 	char szTagName[256];

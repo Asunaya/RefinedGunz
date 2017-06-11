@@ -378,29 +378,11 @@ bool ZMapDesc::Open(RBspObject* pBspObject)
 
 bool ZMapDesc::LoadSmokeDesc(const char* pFileName)
 {
-	MXmlDocument	Data;
-	Data.Create();
-
-	MZFile mzf;
-
-	if( !mzf.Open( pFileName, g_pFileSystem ))
+	MXmlDocument Data;
+	if (!Data.LoadFromFile(pFileName, ZApplication::GetFileSystem()))
 	{
 		return false;
 	}
-
-	char* buffer;
-	buffer	= new char[mzf.GetLength() + 1];
-	mzf.Read( buffer, mzf.GetLength() );
-	buffer[mzf.GetLength()] = 0;
-
-	if( !Data.LoadFromMemory(buffer) )
-	{
-		delete buffer;
-		return false;
-	}
-
-	delete buffer;
-	mzf.Close();
 
 	MXmlElement root, child;
 	char TagName[256];

@@ -2,53 +2,34 @@
 
 #include <stdio.h>
 #include <string>
+#include "rapidxml.hpp"
+#include "MZFileSystem.h"
 
-#ifdef _MSXML2
-	#import "msxml4.dll" named_guids no_implementation
-
-	typedef MSXML2::IXMLDOMDocumentPtr				MXmlDomDocPtr;
-	typedef MSXML2::IXMLDOMNodePtr					MXmlDomNodePtr;
-	typedef MSXML2::IXMLDOMNodeListPtr				MXmlDomNodeListPtr;
-	typedef MSXML2::IXMLDOMElementPtr				MXmlDomElementPtr;
-	typedef MSXML2::IXMLDOMProcessingInstructionPtr MXmlDomPIPtr;
-	typedef MSXML2::IXMLDOMNamedNodeMapPtr			MXmlDomNamedNodeMapPtr;
-	typedef MSXML2::IXMLDOMTextPtr					MXmlDomTextPtr;
-	typedef MSXML2::IXMLDOMParseErrorPtr			MXmlDomParseErrorPtr;
-
-#else
-#ifdef _MSC_VER
-	#import "msxml.dll" named_guids no_implementation
-#else
-#include "msxml.tlh"
-#endif
-
-	typedef MSXML::IXMLDOMDocumentPtr				MXmlDomDocPtr;
-	typedef MSXML::IXMLDOMNodePtr					MXmlDomNodePtr;
-	typedef MSXML::IXMLDOMNodeListPtr				MXmlDomNodeListPtr;
-	typedef MSXML::IXMLDOMElementPtr				MXmlDomElementPtr;
-	typedef MSXML::IXMLDOMProcessingInstructionPtr	MXmlDomPIPtr;
-	typedef MSXML::IXMLDOMNamedNodeMapPtr			MXmlDomNamedNodeMapPtr;
-	typedef MSXML::IXMLDOMTextPtr					MXmlDomTextPtr;
-	typedef MSXML::IXMLDOMParseErrorPtr				MXmlDomParseErrorPtr;
-#endif
+using MXmlDomDoc = rapidxml::xml_document<>;
+using MXmlDomDocPtr = MXmlDomDoc*;
+using MXmlDomNodePtr = rapidxml::xml_node<>*;
+using MXmlDomElementPtr = rapidxml::xml_node<>*;
+using MXmlDomPIPtr = rapidxml::xml_node<>*;
+using MXmlDomNamedNodeMapPtr = rapidxml::xml_node<>*;
+using MXmlDomTextPtr = rapidxml::xml_node<>*;
+using MXmlDomParseError = rapidxml::parse_error;
+using MXmlDomNodeType = rapidxml::node_type;
 
 class MXmlDocument;
 
 class MXmlNode
 {
-private:
-
 protected:
-	MXmlDomNodePtr		m_pDomNode;	
-public:
-	MXmlNode() { m_pDomNode = NULL; }
-	MXmlNode(MXmlDomNodePtr a_pDomNode) { m_pDomNode = a_pDomNode; }
-	virtual ~MXmlNode() { m_pDomNode = NULL; }
+	MXmlDomNodePtr		m_pDomNode{};
 
-	MXmlDomNodePtr	GetXmlDomNodePtr() { return m_pDomNode; }
+public:
+	MXmlNode() = default;
+	MXmlNode(MXmlDomNodePtr m_pDomNode) : m_pDomNode{ m_pDomNode } {}
+
+	MXmlDomNodePtr	GetXmlDomNodePtr() const { return m_pDomNode; }
 	void			SetXmlDomNodePtr(MXmlDomNodePtr pNode) { m_pDomNode = pNode; }
 
-	bool IsEmpty() { if (m_pDomNode == NULL) return true; else return false; }
+	bool IsEmpty() const { return m_pDomNode == nullptr; }
 
 	template<size_t size> void GetNodeName(char(&sOutStr)[size]) {
 		GetNodeName(sOutStr, size);
@@ -58,7 +39,7 @@ public:
 	void SetText(const char* sText);
 	
 	int	GetChildNodeCount();
-	DOMNodeType GetNodeType();
+	MXmlDomNodeType GetNodeType();
 	bool HasChildNodes();
 
 	void NextSibling();
@@ -68,27 +49,16 @@ public:
 
 	bool FindChildNode(const char* sNodeName, MXmlNode* pOutNode);
 
-	MXmlNode GetParent() { if (m_pDomNode) return MXmlNode(m_pDomNode->parentNode); else return MXmlNode(); }
+	MXmlNode GetParent() { if (m_pDomNode) return MXmlNode(m_pDomNode->parent()); else return MXmlNode(); }
 	MXmlNode GetChildNode(int iIndex);
-
-	MXmlNode SelectSingleNode(TCHAR* sQueryStr);
-	MXmlDomNodeListPtr	SelectNodes(TCHAR* sQueryStr);
-
-	MXmlNode& operator= (MXmlNode aNode) { m_pDomNode = aNode.GetXmlDomNodePtr(); return *this; }
 };
 
-class MXmlElement: public MXmlNode
+class MXmlElement : public MXmlNode
 {
-private:
-
-protected:
-
 public:
-	MXmlElement() { }
-	MXmlElement(MXmlDomElementPtr a_pDomElement)	{ m_pDomNode = a_pDomElement; }
-	MXmlElement(MXmlDomNodePtr a_pDomNode)			{ m_pDomNode = a_pDomNode; }
-	MXmlElement(MXmlNode aNode)						{ m_pDomNode = aNode.GetXmlDomNodePtr(); }
-	virtual ~MXmlElement() { }
+	MXmlElement() = default;
+	MXmlElement(MXmlNode Node) : MXmlNode{ Node } {}
+	using MXmlNode::MXmlNode;
 
 	template<size_t size> void GetTagName(char(&sOutStr)[size]) {
 		GetTagName(sOutStr, size);
@@ -139,27 +109,18 @@ public:
 	MXmlElement	CreateChildElement(const char* sTagName);
 
 	bool AppendText(const char* sText);
-
-	MXmlElement& operator= (MXmlElement aElement) { m_pDomNode = aElement.GetXmlDomNodePtr(); return *this; }
-	MXmlElement& operator= (MXmlNode aNode) { m_pDomNode = aNode.GetXmlDomNodePtr(); return *this; }
 };
 
 class MXmlDocument final
 {
-private:
-	bool							m_bInitialized;	
-	MXmlDomDocPtr*					m_ppDom;
-protected:
-
 public:
-	MXmlDocument();
-	~MXmlDocument();
+	// Dummy methods for backwards compatibility.
+	bool Create() { return true; }
+	bool Destroy() { return true; }
 
-	bool				Create();
-	bool				Destroy();
-
-	bool				LoadFromFile(const char* m_sFileName);
-	bool				LoadFromMemory(char* szBuffer, LANGID lanid = LANG_KOREAN);
+	bool				LoadFromFile(const char* m_sFileName, MZFileSystem* FileSystem = nullptr);
+	// If Size is -1, szBuffer must be null-terminated.
+	bool				LoadFromMemory(char* szBuffer, size_t Size = -1);
 
 	bool				SaveToFile(const char* m_sFileName);
 
@@ -170,12 +131,22 @@ public:
 
 	bool				AppendChild(MXmlNode node);
 
-	MXmlDomDocPtr		GetDocument()	{ return (*m_ppDom); }
-	MXmlElement			GetDocumentElement()	{ return MXmlElement((*m_ppDom)->documentElement); }
+	MXmlElement			GetDocumentElement() { return MXmlElement(Root); }
 
-	MXmlNode			FindElement(TCHAR* sTagName);
+protected:
+	// Parses the data in FileBuffer.
+	bool Parse(const char* Filename = nullptr);
+
+	// The RapidXML document.
+	MXmlDomDoc Doc;
+
+	// For some reason, all MAIET XMLs have an "<XML>" tag wrapped around their data, even though
+	// MXml users expect not to see it.
+	// So, this data member holds that element in order to give it out in GetDocumentElement.
+	MXmlDomNodePtr Root{};
+
+	// The memory in the file.
+	// RapidXML doesn't save it, it only gives you back pointers into the memory you gave it, so we
+	// need to save it ourselves.
+	std::string FileBuffer;
 };
-
-// Utils
-#define _BSTRToAscii(s) (const char*)(_bstr_t)(s)
-BSTR _AsciiToBSTR(const char* ascii);

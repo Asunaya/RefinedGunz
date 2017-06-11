@@ -73,45 +73,11 @@ int	RMeshMgr::LoadXmlList(const char* name, RFPROGRESSCALLBACK pfnProgressCallba
 
 	MXmlDocument	XmlDoc;
 	MXmlElement		PNode,Node,SNode;
-
-	XmlDoc.Create();
-
-	char *buffer;
-	MZFile mzf;
-
-	if(g_pFileSystem) {
-		if(!mzf.Open(name,g_pFileSystem)) {
-			if(!mzf.Open(name))
-			{
-				MLog("RMeshMgr::LoadXmlList - MZFile::Open on %s failed with and without FS %p!\n",
-					name, g_pFileSystem);
-				return -1;
-			}
-		}
-	} else {
-		if (!mzf.Open(name))
-		{
-			MLog("RMeshMgr::LoadXmlList - MZFile::Open on %s with FS %p failed!\n",
-				name, g_pFileSystem);
-			return -1;
-		}
-	}
-
-	buffer = new char[mzf.GetLength()+1];
-	buffer[mzf.GetLength()] = 0;
-
-	mzf.Read(buffer,mzf.GetLength());
-
-	if (!XmlDoc.LoadFromMemory(buffer))
+	if (!XmlDoc.LoadFromFile(name, g_pFileSystem))
 	{
-		MLog("RMeshMgr::LoadXmlList - MXmlDocument::LoadFromMemory on %s failed!\n",
-			name);
+		MLog("RMeshMgr::LoadXmlList - MXmlDocument::LoadFromFile on %s failed!\n", name);
 		return -1;
 	}
-
-	delete[] buffer;
-
-	mzf.Close();
 
 	char Path[256];
 	Path[0] = NULL;

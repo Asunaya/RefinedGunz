@@ -1150,29 +1150,10 @@ bool ZStageInterface::ReadSenarioNameXML()
 	m_SenarioNameDesc.clear();
 
 	MXmlDocument xmlQuestItemDesc;
-	xmlQuestItemDesc.Create();
-
-	char			*buffer;
-	MZFile			mzFile;
-
-	if( !mzFile.Open( "System/scenario.xml", ZApplication::GetFileSystem())) 
+	if( !xmlQuestItemDesc.LoadFromFile("System/scenario.xml", ZApplication::GetFileSystem()))
 	{
-		xmlQuestItemDesc.Destroy();
-		return false;
-	} 
-
-	buffer = new char[ mzFile.GetLength() + 1];
-	buffer[ mzFile.GetLength()] = 0;
-
-	mzFile.Read( buffer, mzFile.GetLength());
-
-	if( !xmlQuestItemDesc.LoadFromMemory( buffer))
-	{
-		xmlQuestItemDesc.Destroy();
 		return false;
 	}
-	delete[] buffer;
-	mzFile.Close();
 
 	MXmlElement rootElement = xmlQuestItemDesc.GetDocumentElement();
 	for ( int i = 0;  i < rootElement.GetChildNodeCount();  i++)

@@ -8,109 +8,104 @@
 #include <algorithm>
 #include <cassert>
 #include "MUtil.h"
+#include "rapidxml.hpp"
+#include "rapidxml_print.hpp"
+#include "StringView.h"
+#include "ArrayView.h"
+#include "MZFile.h"
 
-#ifndef _MSC_VER
-#include "msxml.tli"
-#endif
-
-#ifdef _MSXML2
-#import "msxml4.dll" named_guids implementation_only
-#else
-#import "msxml.dll" named_guids implementation_only
-#endif
-
-BSTR _AsciiToBSTR(const char* ascii)
-{
-	WCHAR wide[1024];
-	int ret=::MultiByteToWideChar(CP_ACP, 0, ascii, -1, wide, 1024);
-	MASSERT(ret!=0);
-	return SysAllocString(wide);
-}
-
-
-//-----------------------------------------------------------------------------
 void MXmlNode::GetNodeName(char* sOutStr, int maxlen)
 {
 	if (m_pDomNode)
 	{
-		strcpy_safe(sOutStr, maxlen, _BSTRToAscii(m_pDomNode->nodeName));
+		strcpy_safe(sOutStr, maxlen, m_pDomNode->name());
 	}
 }
 
 void MXmlNode::GetText(char* sOutStr, int nMaxCharNum)
 {
-	if ( m_pDomNode)
-	{
-		if ( nMaxCharNum == -1)
-		{
-			strcpy_safe(sOutStr, nMaxCharNum, _BSTRToAscii(m_pDomNode->Gettext()));
-			return;
-		}
-		else
-		{
-			int nLen = min( nMaxCharNum, (int)strlen( m_pDomNode->Gettext()));
+	if (!m_pDomNode)
+		return;
 
-			if (m_pDomNode)
-			{
-				strncpy_s(sOutStr, nMaxCharNum, _BSTRToAscii(m_pDomNode->Gettext()), nLen);
-				*(sOutStr + nLen) = 0;
-			}
-		}
+	auto value = m_pDomNode->value();
+	if (!value)
+		return;
+
+	if (nMaxCharNum == -1)
+	{
+		strcpy_unsafe(sOutStr, value);
+	}
+	else
+	{
+		strcpy_safe(sOutStr, nMaxCharNum, value);
 	}
 }
 
 void MXmlNode::SetText(const char* sText)
 {
-	if (m_pDomNode)
-	{
-		BSTR bszText;
+	if (!m_pDomNode)
+		return;
 
-		bszText = _AsciiToBSTR(sText);
-		m_pDomNode->Puttext(bszText);
-		SysFreeString(bszText);
-	}
+	m_pDomNode->value(sText);
 }
-
 
 int	MXmlNode::GetChildNodeCount()
 {
-	if (m_pDomNode) return m_pDomNode->childNodes->length;
-	else return -1;
+	if (!m_pDomNode)
+		return 0;
+
+	int count = 0;
+	auto ptr = m_pDomNode->first_node();
+	while (ptr)
+	{
+		ptr = ptr->next_sibling();
+		++count;
+	}
+	
+	return count;
 }
 
-
-DOMNodeType MXmlNode::GetNodeType()
+MXmlDomNodeType MXmlNode::GetNodeType()
 {
-	if (m_pDomNode) return (DOMNodeType)m_pDomNode->nodeType;
-	return NODE_INVALID;
-}
+	if (!m_pDomNode)
+	{
+		assert(false);
+		return rapidxml::node_element;
+	}
 
+	return m_pDomNode->type();
+}
 
 bool MXmlNode::HasChildNodes()
 {
-	if ((m_pDomNode != NULL) && 
-		(m_pDomNode->hasChildNodes() == VARIANT_TRUE)) return true;
+	if (!m_pDomNode)
+		return false;
 
-	return false;
+	return m_pDomNode->first_node() != nullptr;
 }
 
 MXmlNode MXmlNode::GetChildNode(int iIndex)
 {
-	if (m_pDomNode)
+	if (!m_pDomNode)
+		return MXmlNode{};
+
+	auto ptr = m_pDomNode->first_node();
+	for (int i = 0; i < iIndex; ++i)
 	{
-		return MXmlNode(m_pDomNode->childNodes->Getitem(iIndex));
+		if (!ptr)
+			break;
+
+		ptr = ptr->next_sibling();
 	}
-	else
-	{
-		return MXmlNode();
-	}
+
+	return ptr;
 }
 
 void MXmlNode::NextSibling()
 {
 	if (m_pDomNode)
 	{
-		m_pDomNode = m_pDomNode->nextSibling;
+		m_pDomNode = m_pDomNode->next_sibling();
 	}
 }
 
@@ -118,70 +113,34 @@ void MXmlNode::PreviousSibling()
 {
 	if (m_pDomNode)
 	{
-		m_pDomNode = m_pDomNode->previousSibling;
+		m_pDomNode = m_pDomNode->previous_sibling();
 	}
 }
 
 bool MXmlNode::FindChildNode(const char* sNodeName, MXmlNode* pOutNode)
 {
-	int iCount, i;
-	char szBuf[8192];
-	MXmlDomNodePtr		pNode;
+	if (!m_pDomNode)
+		return false;
 
-	iCount = m_pDomNode->childNodes->length;
+	auto ptr = m_pDomNode->first_node(sNodeName);
+	if (!ptr)
+		return false;
 
-	for (i = 0; i < iCount; i++)
-	{
-		pNode = m_pDomNode->childNodes->Getitem(i);
-		strcpy_safe(szBuf, _BSTRToAscii(pNode->nodeName));
-
-		if (!_stricmp(szBuf, sNodeName))
-		{
-			pOutNode->SetXmlDomNodePtr(pNode);
-			return true;
-		}
-	}
-
-	return false;
-}
-
-
-MXmlNode MXmlNode::SelectSingleNode(TCHAR* sQueryStr)
-{
-	BSTR bszQueryStr;
-
-	bszQueryStr = _AsciiToBSTR(sQueryStr);
-	MXmlDomNodePtr pNode = m_pDomNode->selectSingleNode(bszQueryStr);
-	SysFreeString(bszQueryStr);
-
-	return MXmlNode(pNode);
-}
-
-MXmlDomNodeListPtr MXmlNode::SelectNodes(TCHAR* sQueryStr)
-{
-	BSTR bszQueryStr;
-
-	bszQueryStr = _AsciiToBSTR(sQueryStr);
-	MXmlDomNodeListPtr pNodeList = m_pDomNode->selectNodes(bszQueryStr);
-	SysFreeString(bszQueryStr);
-
-	return pNodeList;
+	pOutNode->SetXmlDomNodePtr(ptr);
+	return true;
 }
 
 bool MXmlNode::AppendChild(MXmlNode node)
 {
-	m_pDomNode->appendChild(node.GetXmlDomNodePtr());
+	m_pDomNode->append_node(node.GetXmlDomNodePtr());
 
 	return true;
 }
 
-
-//-----------------------------------------------------------------------------
 void MXmlElement::SetContents(int iValue)
 {
 	char szTemp[20];
-	_itoa_s(iValue, szTemp, 10);
-
+	sprintf_safe(szTemp, "%d", iValue);
 	SetContents(szTemp);
 	
 }
@@ -207,74 +166,52 @@ void MXmlElement::SetContents(bool bValue)
 
 bool MXmlElement::AppendText(const char* sText)
 {
-	MXmlDomTextPtr		pText;
-	MXmlDomDocPtr		pDom(MSXML::CLSID_DOMDocument);
-
-	BSTR pBSTRText = _AsciiToBSTR(sText);
-	pText = pDom->createTextNode(pBSTRText);
-	SysFreeString(pBSTRText);
-	m_pDomNode->appendChild(pText);
+	auto node = m_pDomNode->document()->allocate_node(rapidxml::node_data, 0, sText);
+	m_pDomNode->append_node(node);
 
 	return true;
 }
 
 bool MXmlElement::AppendChild(MXmlElement aChildElement)
 {
-	MXmlDomElementPtr	pElement;
-
-	pElement = aChildElement.GetXmlDomNodePtr();
-	m_pDomNode->appendChild(pElement);
+	auto pElement = aChildElement.GetXmlDomNodePtr();
+	m_pDomNode->append_node(pElement);
 
 	return true;
 }
 
 bool MXmlElement::AppendChild(const char* sTagName, const char* sTagText)
 {
-	MXmlDomElementPtr	pElement;
-	MXmlDomDocPtr		pDom(MSXML::CLSID_DOMDocument);
-
-	pElement = pDom->createElement(sTagName);
-
-	if (sTagText != NULL)
-	{
-		pElement->appendChild(pDom->createTextNode(sTagText));
-	}
-
-	m_pDomNode->appendChild(pElement);
+	auto node = m_pDomNode->document()->allocate_node(rapidxml::node_element, sTagName, sTagText);
+	m_pDomNode->append_node(node);
 
 	return true;
 }
 
 MXmlElement	MXmlElement::CreateChildElement(const char* sTagName)
 {
-	MXmlDomElementPtr	pDomElement;
-	MXmlDomDocPtr		pDom(MSXML::CLSID_DOMDocument);
+	auto node = m_pDomNode->document()->allocate_node(rapidxml::node_element, sTagName);
+	m_pDomNode->append_node(node);
 
-	pDomElement = pDom->createElement(sTagName);
-
-	m_pDomNode->appendChild(pDomElement);
-
-	return MXmlElement(pDomElement);
+	return MXmlElement{ node };
 }
 
 bool MXmlElement::GetAttribute(char* sOutText, int maxlen, const char* sAttrName, char* sDefaultText)
 {
-	MXmlDomNamedNodeMapPtr pAttributes = m_pDomNode->attributes;
-	MXmlDomNodePtr pNode;
-
-	for(int i=0; i < pAttributes->length; i++)
+	auto Attribute = m_pDomNode->first_attribute(sAttrName);
+	if (!Attribute || !Attribute->value())
 	{
-		 pNode = pAttributes->Getitem(i);
-		 
-		 if(!_stricmp(_BSTRToAscii(pNode->nodeName), sAttrName))
-		 {
-			 strcpy_safe(sOutText, maxlen, _BSTRToAscii(pNode->text));
-			 return true;
-		 }
+		if (sDefaultText)
+		{
+			strcpy_safe(sOutText, maxlen, sDefaultText);
+		}
+
+		return false;
 	}
 
-	strcpy_safe(sOutText, maxlen, sDefaultText);
-	return false;
+	strcpy_safe(sOutText, maxlen, Attribute->value());
+
+	return true;
 }
 
 bool MXmlElement::GetAttribute(int* ipOutValue, const char* sAttrName, int nDefaultValue)
@@ -369,35 +306,40 @@ bool MXmlElement::GetAttribute(std::string* pstrOutValue, const char* sAttrName,
 
 int MXmlElement::GetAttributeCount()
 {
-	MXmlDomNamedNodeMapPtr pAttributes = m_pDomNode->attributes;
-	return pAttributes->length;
+	auto ptr = m_pDomNode->first_attribute();
+	int count = 0;
+
+	while (ptr)
+	{
+		ptr = ptr->next_attribute();
+		++count;
+	}
+
+	return count;
 }
 
 void MXmlElement::GetAttribute(int index, char* szoutAttrName, int maxlen1, char* szoutAttrValue, int maxlen2)
 {
-	MXmlDomNamedNodeMapPtr pAttributes = m_pDomNode->attributes;
-	MXmlDomNodePtr pNode = pAttributes->Getitem(index);
+	auto ptr = m_pDomNode->first_attribute();
 
-	strcpy_safe(szoutAttrName, maxlen1, (_BSTRToAscii(pNode->nodeName)));
-	strcpy_safe(szoutAttrValue, maxlen2, _BSTRToAscii(pNode->text));
+	for (int i = 0; i < index; ++i)
+		ptr = ptr->next_attribute();
+
+	if (!ptr || !ptr->name() || !ptr->value())
+	{
+		strcpy_safe(szoutAttrName, maxlen1, "");
+		strcpy_safe(szoutAttrValue, maxlen2, "");
+		return;
+	}
+
+	strcpy_safe(szoutAttrName, maxlen1, ptr->name());
+	strcpy_safe(szoutAttrValue, maxlen2, ptr->value());
 }
 
 bool MXmlElement::AddAttribute(const char* sAttrName, const char* sAttrText)
 {
-	MXmlDomDocPtr	pDom(MSXML::CLSID_DOMDocument);
-	MXmlDomNodePtr pNode;
-	MXmlDomNamedNodeMapPtr pAttrs;
-
-	BSTR pBSTRAttrName = _AsciiToBSTR(sAttrName);
-	BSTR pBSTRAttrText = _AsciiToBSTR(sAttrText);
-
-	pAttrs = m_pDomNode->Getattributes();
-	pNode = pDom->createAttribute(pBSTRAttrName);
-	pNode->Puttext(pBSTRAttrText);
-	pAttrs->setNamedItem(pNode);
-
-	SysFreeString(pBSTRAttrName);
-	SysFreeString(pBSTRAttrText);
+	auto Attribute = m_pDomNode->document()->allocate_attribute(sAttrName, sAttrText);
+	m_pDomNode->append_attribute(Attribute);
 
 	return true;
 }
@@ -422,30 +364,14 @@ bool MXmlElement::AddAttribute(const char* sAttrName, bool bAttrValue)
 	}
 	return false;
 }
+
 bool MXmlElement::SetAttribute(const char* sAttrName, char* sAttrText)
 {
-	MXmlDomNodePtr pNode;
-	MXmlDomNamedNodeMapPtr pAttrs;
-	char sTemp[8192];
+	auto Attribute = m_pDomNode->first_attribute(sAttrName);
+	if (!Attribute)
+		return false;
 
-	if (!GetAttribute(sTemp, sAttrName))
-	{
-		AddAttribute(sAttrName, sAttrText);
-	}
-	else
-	{
-		pAttrs = m_pDomNode->attributes;
-		for (int i = 0; i < pAttrs->length; i++)
-		{
-			pNode = pAttrs->Getitem(i);
-			if (!_stricmp(_BSTRToAscii(pNode->nodeName), sAttrName))
-			{
-				BSTR pBSTRAttrText = _AsciiToBSTR(sAttrText);
-				pNode->Puttext(pBSTRAttrText);
-				SysFreeString(pBSTRAttrText);
-			}
-		}
-	}
+	Attribute->value(sAttrText);
 
 	return true;
 }
@@ -460,7 +386,7 @@ bool MXmlElement::SetAttribute(const char* sAttrName, int iAttrValue)
 
 bool MXmlElement::GetChildContents(char* sOutStr, const char* sChildTagName, int nMaxCharNum)
 {
-	MXmlNode		node;
+	MXmlNode node;
 
 	if (FindChildNode(sChildTagName, &node))
 	{
@@ -597,220 +523,106 @@ void MXmlElement::GetContents(std::string* pstrValue)
 
 bool MXmlElement::RemoveAttribute(const char* sAttrName)
 {
-	BSTR pBSTRAttrName = _AsciiToBSTR(sAttrName);
-	((MXmlDomElementPtr)m_pDomNode)->removeAttribute(pBSTRAttrName);
-	SysFreeString(pBSTRAttrName);
+	auto Attribute = m_pDomNode->first_attribute(sAttrName);
+	if (!Attribute)
+		return false;
 
-	return true;
-}
-//-----------------------------------------------------------------------------
-
-
-MXmlDocument::MXmlDocument()
-{
-	m_bInitialized = false;
-
-	m_ppDom = NULL;
-
-	CoInitialize(NULL);
-}
-
-MXmlDocument::~MXmlDocument()
-{
-	if (m_bInitialized) Destroy();
-
-	CoUninitialize();
-}
-
-bool MXmlDocument::Create()
-{
-	m_ppDom = new MXmlDomDocPtr;
-
-	MXmlDomDocPtr pDom(MSXML::CLSID_DOMDocument);
-
-	(*m_ppDom) = pDom;
-
-	(*m_ppDom)->async = false;
-	(*m_ppDom)->preserveWhiteSpace = VARIANT_TRUE;
-
-	m_bInitialized = true;
+	m_pDomNode->remove_attribute(Attribute);
 
 	return true;
 }
 
-bool MXmlDocument::Destroy()
+bool MXmlDocument::LoadFromFile(const char* m_sFileName, MZFileSystem* FileSystem)
 {
-	if (!m_bInitialized) return false;
+	MZFile File;
+	if (!File.Open(m_sFileName, FileSystem))
+		return false;
 
-	SAFE_DELETE(m_ppDom);
+	const auto Size = File.GetLength();
+	FileBuffer.resize(Size);
+	if (!File.Read(&FileBuffer[0], Size))
+		return false;
 
-	m_bInitialized = false;
-
-	return true;
+	return Parse(m_sFileName);
 }
 
-bool MXmlDocument::LoadFromFile(const char* m_sFileName)
+bool MXmlDocument::LoadFromMemory(char* szBuffer, size_t Size)
 {
-	if (!m_bInitialized) return false;
+	if (Size == -1)
+		Size = strlen(szBuffer);
+	FileBuffer = { szBuffer, Size };
 
-	_variant_t varOut((bool)TRUE);
-	varOut = (*m_ppDom)->load((_variant_t)m_sFileName);
-	if (!static_cast<bool>(varOut))
+	return Parse();
+}
+
+bool MXmlDocument::Parse(const char* Filename)
+{
+	try
 	{
-		MXmlDomParseErrorPtr errPtr = (*m_ppDom)->GetparseError();
-		_bstr_t bstrErr(errPtr->reason);
-
-		MLog("-------------------------------\n");
-		MLog("Error In Xml File(%s)\n", m_sFileName);
-		MLog("Code = 0x%x\n", errPtr->errorCode);
-		MLog("Source = Line : %ld; Char : %ld\n", errPtr->line, errPtr->linepos);
-		MLog("Error Description = %s\n", static_cast<char*>(bstrErr));
-
-		assert(false);
-
+		Doc.parse<rapidxml::parse_default>(&FileBuffer[0], FileBuffer.size());
+	}
+	catch (rapidxml::parse_error& e)
+	{
+		if (Filename == nullptr)
+		{
+			MLog("RapidXML threw parse_error on file in memory!\n"
+				"e.what() = %s, e.where() = %s\n",
+				e.what(), e.where<char>());
+		}
+		else
+		{
+			MLog("RapidXML threw parse_error on %s!\n"
+				"e.what() = %s, e.where() = %s\n",
+				Filename,
+				e.what(), e.where<char>());
+		}
 		return false;
 	}
 
-	return true;
+	Root = Doc.first_node("xml", 0, false);
+
+	return Root != nullptr;
 }
-
-bool MXmlDocument::LoadFromMemory(char* szBuffer, LANGID lanid)
-{
-	if (!m_bInitialized) return false;
-
-	// TODO: Remove this copy
-	std::string s = szBuffer;
-
-	int pos = s.find("<XML>");
-	if (pos == std::string::npos)
-	{
-		pos = s.find("<xml>");
-
-		if (pos == std::string::npos)
-		{
-			pos = s.find("?>");
-
-			if (pos == std::string::npos)
-			{
-				s.clear();
-				MLog("MXmlDocument::LoadFromMemory - Failed to find beginning of xml declaration\n");
-				assert(false);
-				return false;
-			}
-
-			pos += 2;
-		}
-	}
-	const char* cp = &s[pos];
-
-	pos = s.find("</XML>");
-	if (pos == std::string::npos)
-	{
-		pos = s.find("</xml>");
-
-		if (pos == std::string::npos)
-		{
-			s.clear();
-			MLog("MXmlDocument::LoadFromMemory - Failed to find end of xml declaration\n");
-			assert(false);
-			return false;
-		}
-	}
-	s[pos + 6] = 0;
-
-	_bstr_t bsXML{ cp };
-	if ((*m_ppDom)->loadXML(BSTR(bsXML)) != -1)
-	{
-		MXmlDomParseErrorPtr errPtr = (*m_ppDom)->GetparseError();
-		_bstr_t bstrErr(errPtr->reason);
-
-		MLog("-------------------------------\n");
-		MLog("MXmlDocument::LoadFromMemory -- Error parsing XML file\n");
-		MLog("Code = 0x%x\n", errPtr->errorCode);
-		MLog("Source = Line: %ld; char: %ld\n", errPtr->line, errPtr->linepos);
-		MLog("Error description = %s\n", static_cast<char*>(bstrErr));
-
-		assert(false);
-
-		return false;
-	}
-
-	return true;
-}
-
 
 bool MXmlDocument::SaveToFile(const char* m_sFileName)
 {
-	try
-	{
-		(*m_ppDom)->save((_variant_t)m_sFileName);
-	}
-	catch(_com_error& e)
-    {
-		OutputDebugString(e.ErrorMessage());
-    }
- 
+	MFile::RWFile File{ m_sFileName, MFile::ClearExistingContents };
+
+	if (File.error())
+		return false;
+
+	rapidxml::print(MFile::FileOutputIterator{ File }, Doc);
+
+	if (File.error())
+		return false;
+
 	return true;
 }
 
-
 bool MXmlDocument::CreateProcessingInstruction( const char* szHeader)
 {
-	MXmlDomPIPtr	pi;
-
-	_bstr_t bsPI( "xml" );
-    _bstr_t bsAttr( szHeader);
-
-	try
-	{
-		pi = (*m_ppDom)->createProcessingInstruction((BSTR)bsPI, (BSTR)bsAttr);
-	}
-	catch(_com_error& e)
-	{
-		OutputDebugString(e.ErrorMessage());
-	}
-
-	if (pi != NULL) (*m_ppDom)->appendChild(pi);
-
+	auto node = Doc.allocate_node(rapidxml::node_pi);
+	Doc.append_node(node);
 	return true;
 }
 
 bool MXmlDocument::Delete(MXmlNode* pNode)
 {
-	pNode->GetParent().GetXmlDomNodePtr()->removeChild(pNode->GetXmlDomNodePtr());
+	pNode->GetParent().GetXmlDomNodePtr()->remove_node(pNode->GetXmlDomNodePtr());
 
-	if (pNode->GetXmlDomNodePtr() != NULL) 
-	{
-		return true;
-	}
-	else return false;
-}
-
-
-MXmlNode MXmlDocument::FindElement(TCHAR* sTagName)
-{
-	char sBuf[1023];
-	sprintf_safe(sBuf, "//%s", sTagName);
-
-	BSTR bszQueryStr;
-	bszQueryStr = _AsciiToBSTR(sBuf);
-	MXmlDomNodePtr pNode = (*m_ppDom)->selectSingleNode(bszQueryStr);
-	SysFreeString(bszQueryStr);
-
-	return MXmlNode(pNode);
+	return pNode->GetXmlDomNodePtr() != NULL;
 }
 
 bool MXmlDocument::AppendChild(MXmlNode node)
 {
-	(*m_ppDom)->appendChild(node.GetXmlDomNodePtr());
+	Doc.append_node(node.GetXmlDomNodePtr());
 
 	return true;
 }
 
 MXmlElement	MXmlDocument::CreateElement(const char* sName)
 {
-	MXmlDomElementPtr pDomElement;
-	pDomElement = (*m_ppDom)->createElement(sName);
+	auto node = Doc.allocate_node(rapidxml::node_element, sName);
 
-	return MXmlElement(pDomElement);
+	return MXmlElement(node);
 }

@@ -2714,39 +2714,8 @@ bool MIDLResource::LoadFromFile(const char* szFileName, MWidget* pParent, MZFile
 	MXmlElement		rootElement, childElement;
 	char			szBuf[4096];
 
-	xmlDocument.Create();
-
-	if (!pfs)
-	{
-		if (!xmlDocument.LoadFromFile(szFileName))
-		{
-			xmlDocument.Destroy();
-			return false;
-		}
-	}
-	else
-	{
-		// Load file.
-		auto FileLoading = MBeginProfile("MIDLResource::LoadFromFile - File loading from disk");
-		MZFile mzf;
-		if (!mzf.Open(szFileName, pfs))
-		{
-			return false;
-		}
-
-		auto buffer = mzf.Release();
-		DMLog("Reading file %s, cached = %d\n", szFileName, buffer.get_deleter().ShouldDelete);
-
-		MEndProfile(FileLoading);
-
-		// Parse file.
-		auto Parsing = MBeginProfile("MIDLResource::LoadFromFile - MXMLDocument parsing");
-
-		if (!xmlDocument.LoadFromMemory(buffer.get()))
-			return false;
-
-		MEndProfile(Parsing);
-	}
+	if (!xmlDocument.LoadFromFile(szFileName, pfs))
+		return false;
 
 	rootElement = xmlDocument.GetDocumentElement();
 
@@ -2754,16 +2723,18 @@ bool MIDLResource::LoadFromFile(const char* szFileName, MWidget* pParent, MZFile
 
 	for (int i = 0; i < iCount; i++)
 	{
-		memset(szBuf, 0, sizeof(szBuf));
 		childElement = rootElement.GetChildNode(i);
 
 		childElement.GetTagName(szBuf);
-		if (szBuf[0] == '#') continue;
+		if (szBuf[0] == '#') {
+			continue;
+		}
 		else if (!strcmp(szBuf, "INCLUDE"))
 		{
-			char* pdest;
-			pdest = strrchr(const_cast<char *>(szFileName), '\\');
-			if (pdest == NULL) pdest = strrchr(const_cast<char *>(szFileName), '/');
+			auto pdest = strrchr(szFileName, '\\');
+			if (pdest == NULL) {
+				pdest = strrchr(szFileName, '/');
+			}
 
 			char szContents[256], szFileName2[256];
 			childElement.GetContents(szContents);

@@ -17,17 +17,10 @@ static MNotifyMap g_NotifyMap;
 
 bool InitializeNotify(MZFileSystem *pfs)
 {
-	MZFile mzf;
-	if (!mzf.Open(MESSAGES_FILE_NAME, pfs))
-		return false;
-
-	auto buffer = mzf.Release();
-
 	MXmlDocument aXml;
-	aXml.Create();
-	if(!aXml.LoadFromMemory(buffer.get()))
+	if(!aXml.LoadFromFile(MESSAGES_FILE_NAME, pfs))
 	{
-		MLog("InitializeNotify -- MXmlDocument::LoadFromMemory failed\n");
+		MLog("InitializeNotify -- Failed to load XML from file %s\n", MESSAGES_FILE_NAME);
 		return false;
 	}
 

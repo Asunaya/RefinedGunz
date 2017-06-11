@@ -202,43 +202,10 @@ bool MQuestNPCCatalogue::ReadXml(const char* szFileName)
 
 bool MQuestNPCCatalogue::ReadXml(MZFileSystem* pFileSystem, const char* szFileName)
 {
-
-	MXmlDocument	xmlIniData;
-	xmlIniData.Create();
-
-	char *buffer;
-	MZFile mzf;
-
-	if(pFileSystem) {
-		if(!mzf.Open(szFileName,pFileSystem))  {
-			if(!mzf.Open(szFileName))  {
-				xmlIniData.Destroy();
-				return false;
-			}
-		}
-	} 
-	else  {
-
-		if(!mzf.Open(szFileName)) {
-
-			xmlIniData.Destroy();
-			return false;
-		}
-	}
-
-	buffer = new char[mzf.GetLength()+1];
-	buffer[mzf.GetLength()] = 0;
-
-	mzf.Read(buffer,mzf.GetLength());
-
-	if(!xmlIniData.LoadFromMemory(buffer)) {
-		xmlIniData.Destroy();
+	MXmlDocument xmlIniData;
+	if(!xmlIniData.LoadFromFile(szFileName, pFileSystem)) {
 		return false;
 	}
-
-	delete[] buffer;
-	mzf.Close();
-
 
 	MXmlElement rootElement, chrElement, attrElement;
 	char szTagName[256];
@@ -739,42 +706,10 @@ bool MQuestNPCSetCatalogue::ReadXml(const char* szFileName)
 
 bool MQuestNPCSetCatalogue::ReadXml(MZFileSystem* pFileSystem, const char* szFileName)
 {
-	MXmlDocument	xmlIniData;
-	xmlIniData.Create();
-
-	char *buffer;
-	MZFile mzf;
-
-	if(pFileSystem) {
-		if(!mzf.Open(szFileName,pFileSystem))  {
-			if(!mzf.Open(szFileName))  {
-				xmlIniData.Destroy();
-				return false;
-			}
-		}
-	} 
-	else  {
-
-		if(!mzf.Open(szFileName)) {
-
-			xmlIniData.Destroy();
-			return false;
-		}
-	}
-
-	buffer = new char[mzf.GetLength()+1];
-	buffer[mzf.GetLength()] = 0;
-
-	mzf.Read(buffer,mzf.GetLength());
-
-	if(!xmlIniData.LoadFromMemory(buffer)) {
-		xmlIniData.Destroy();
+	MXmlDocument xmlIniData;
+	if(!xmlIniData.LoadFromFile(szFileName, pFileSystem)) {
 		return false;
 	}
-
-	delete[] buffer;
-	mzf.Close();
-
 
 	MXmlElement rootElement, chrElement, attrElement;
 	char szTagName[256];

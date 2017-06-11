@@ -19,25 +19,14 @@ ZTips::ZTips() : m_bIsShowedNewbieTips(false)
 
 bool ZTips::Initialize(MZFileSystem* pfs, const MLanguage LangID )
 {
-	MZFile mzf;
-	if(!mzf.Open(FILENAME_TIPS,pfs)) return false;
-
-	char *buffer;
-	buffer=new char[mzf.GetLength()+1];
-	mzf.Read(buffer,mzf.GetLength());
-	buffer[mzf.GetLength()]=0;
-
 	mlog( "Load XML from memory : %s(0x%04X)", FILENAME_TIPS, LangID);
 
 	MXmlDocument aXml;
-	aXml.Create();
-	if(!aXml.LoadFromMemory(buffer, LangID))
+	if(!aXml.LoadFromFile(FILENAME_TIPS, pfs))
 	{
 		mlog( "- FAIL\n");
-		delete buffer;
 		return false;
 	}
-	delete buffer;
 	mlog( "- SUCCESS\n");
 
 	int iCount, i;
