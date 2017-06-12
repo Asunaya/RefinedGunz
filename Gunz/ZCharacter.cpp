@@ -2299,6 +2299,9 @@ bool ZCharacter::CheckValidShotTime(int nItemID, float fTime, ZItem* pItem)
 	char szLog[256];
 #endif
 
+	if (pItem->GetDesc() == nullptr)
+		return false;
+
 	if (GetLastShotItemID() == nItemID) {
 		if (fTime - GetLastShotTime() < (float)pItem->GetDesc()->m_nDelay/1000.0f) {
 			MMatchWeaponType nWeaponType = pItem->GetDesc()->m_nWeaponType;

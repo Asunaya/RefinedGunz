@@ -36,7 +36,7 @@ inline ReplayVersion ZReplayLoader::GetVersion()
 		u8 Something;
 		ReadAt(Something, 0x4A);
 
-		if (Version.nVersion >= 7 && Version.nVersion <= 9 && Something <= 0x01)
+		if (Version.nVersion >= 7 && Version.nVersion <= 10 && Something <= 0x01)
 		{
 			Version.Server = ServerType::FreestyleGunz;
 		}
@@ -120,6 +120,12 @@ typename std::enable_if<!has_szStageName<T>::value>::type CopyStageName(REPLAY_S
 
 inline void ZReplayLoader::GetStageSetting(REPLAY_STAGE_SETTING_NODE& ret)
 {
+	// Zero out ret.
+	// This is necessary since several members of our stage settings struct do not exist in the
+	// ones of other servers, and are therefore never set by the conversion, so this gives them
+	// default values.
+	ret = REPLAY_STAGE_SETTING_NODE{};
+
 #define COPY_SETTING(member) ret.member = Setting.member;
 
 	auto CopySetting = [&](const auto &Setting)
@@ -329,8 +335,20 @@ inline std::vector<ReplayPlayerInfo> ZReplayLoader::GetCharInfo()
 			{
 				READ_CHARINFO(MTD_CharInfo_FG_V9);
 			}
+			else if (Version.nVersion == 10)
+			{
+				READ_CHARINFO(MTD_CharInfo_FG_V10);
+			}
+			else
+			{
+				assert(false);
+			}
 
-			CharInfo.nEquipedItemDesc[MMCIP_MELEE] = 2; // Rusty Sword
+			CharInfo.nEquipedItemDesc[MMCIP_MELEE]     = 2;     // Rusty Sword
+			CharInfo.nEquipedItemDesc[MMCIP_PRIMARY]   = 6001;  // Breaker 5
+			CharInfo.nEquipedItemDesc[MMCIP_SECONDARY] = 6002;  // Breaker 6
+			CharInfo.nEquipedItemDesc[MMCIP_CUSTOM1]   = 30001; // Medical Kit MK-1
+			CharInfo.nEquipedItemDesc[MMCIP_SECONDARY] = 30101; // Repair Kit RK-1
 		}
 		else if (Version.Server == ServerType::RefinedGunz)
 		{
@@ -382,6 +400,14 @@ inline std::vector<ReplayPlayerInfo> ZReplayLoader::GetCharInfo()
 			else if (Version.nVersion == 9)
 			{
 				READ_CHARSTATE(ZCharacterReplayState_FG_V9);
+			}
+			else if (Version.nVersion == 10)
+			{
+				READ_CHARSTATE(ZCharacterReplayState_FG_V10);
+			}
+			else
+			{
+				assert(false);
 			}
 		}
 		else if (Version.Server == ServerType::RefinedGunz)

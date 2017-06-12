@@ -369,6 +369,45 @@ struct MTD_CharInfo_FG_V9
 	char				unk2[24];
 };
 
+struct MTD_CharInfo_FG_V10
+{
+	char				szName[32];
+	char				szClanName[16];
+	MMatchClanGrade		nClanGrade;
+	u16					nClanContPoint;
+	char				nCharNum;
+	u16					nLevel;
+	char				nSex;
+	char				nHair;
+	char				nFace;
+	u32					nXP;
+	i32					nBP;
+	float				fBonusRate;
+	u16					nPrize;
+	u16					nHP;
+	u16					nAP;
+	u16					nMaxWeight;
+	u16					nSafeFalls;
+	u16					nFR;
+	u16					nCR;
+	u16					nER;
+	u16					nWR;
+	u32					nEquipedItemDesc[22];
+	MMatchUserGradeID	nUGradeID;
+	u32					nClanCLID;
+	i32					nDTLastWeekGrade;
+
+	u32					unk[6];
+
+	MUID				uidEquipedItem[22];
+	u32					nEquipedItemCount[22];
+	u32					nEquipedItemRarity[22];
+	u32					nEquipedItemLevel[22];
+
+	char				unk2[24];
+	char				unk3[24];
+};
+
 struct BulletInfo
 {
 	i32 Clip;
@@ -403,6 +442,28 @@ using ZCharacterReplayState_FG_V8 = ZCharacterReplayStateImpl<23>;
 using ZCharacterReplayState_FG_V9 = ZCharacterReplayStateImpl<24>;
 using ZCharacterReplayState_Official_V6 = ZCharacterReplayStateImpl<17>;
 using ZCharacterReplayState_Official_V11 = ZCharacterReplayStateImpl<34>;
+
+struct ZCharacterReplayState_FG_V10
+{
+	MUID UID;
+	ZCharacterProperty Property;
+	float HP;
+	float AP;
+	ZCharacterStatus Status;
+
+	BulletInfo BulletInfos[24];
+
+	char unk[20];
+
+	rvector Position;
+	rvector Direction;
+
+	MMatchTeam Team;
+
+	bool Dead;
+
+	bool HidingAdmin;
+};
 
 template <typename CharInfo, typename ReplayState>
 struct ReplayPlayerInfoImpl
@@ -482,6 +543,7 @@ using ReplayPlayerInfo_FG_V7_0 = ReplayPlayerInfoImpl<MTD_CharInfo_FG_V7_0, ZCha
 using ReplayPlayerInfo_FG_V7_1 = ReplayPlayerInfoImpl<MTD_CharInfo_FG_V7_1, ZCharacterReplayState_FG_V7_1>;
 using ReplayPlayerInfo_FG_V8 = ReplayPlayerInfoImpl<MTD_CharInfo_FG_V8, ZCharacterReplayState_FG_V8>;
 using ReplayPlayerInfo_FG_V9 = ReplayPlayerInfoImpl<MTD_CharInfo_FG_V9, ZCharacterReplayState_FG_V9>;
+using ReplayPlayerInfo_FG_V10 = ReplayPlayerInfoImpl<MTD_CharInfo_FG_V10, ZCharacterReplayState_FG_V10>;
 using ReplayPlayerInfo_Official_V6 = ReplayPlayerInfoImpl<MTD_CharInfo_V6, ZCharacterReplayState_Official_V6>;
 using ReplayPlayerInfo_Official_V11 = ReplayPlayerInfoImpl<MTD_CharInfo_V11, ZCharacterReplayState_Official_V11>;
 
