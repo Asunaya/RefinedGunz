@@ -4919,6 +4919,8 @@ void ZGame::ShowReplayInfo( bool bShow)
 		pWidget->Show( bShow);
 
 	m_bShowReplayInfo = bShow;
+
+	GetRGMain().GetChat().HideDuringReplays = !bShow;
 }
 
 void ZGame::OnLocalOptainSpecialWorldItem(MCommand* pCommand)

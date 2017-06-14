@@ -974,6 +974,10 @@ static MRECT MakeMRECT(const D3DRECT& src)
 
 void Chat::OnDraw(MDrawContext* pDC)
 {
+	if (HideAlways ||
+		(HideDuringReplays && ZGetGame()->IsReplay()))
+		return;
+
 	bool ShowAll = ZIsActionKeyPressed(ZACTION_SHOW_FULL_CHAT) && !InputEnabled;
 	auto&& Output = GetOutputRect();
 

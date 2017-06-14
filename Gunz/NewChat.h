@@ -61,6 +61,11 @@ public:
 
 	bool IsInputEnabled() const { return InputEnabled; }
 
+	// If HideAlways is true, or HideDuringReplays is true during a replay, the chat will be hidden.
+	// They're controlled by ZACTION_TOGGLE_CHAT and the T or H key during replays, respectively.
+	bool HideAlways{};
+	bool HideDuringReplays{};
+
 private:
 	std::string FontName;
 	int FontSize{};

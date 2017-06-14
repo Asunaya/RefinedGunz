@@ -327,6 +327,12 @@ void ZCombatChat::SetFont( MFont* pFont)
 
 void ZCombatChat::ShowOutput(bool bShow)
 {
+	if (GetRGMain().IsNewChatEnabled())
+	{
+		GetRGMain().GetChat().HideAlways = !bShow;
+		return;
+	}
+
 	if (m_pChattingOutput) m_pChattingOutput->Show(bShow);
 	m_bShowOutput = bShow;
 }
