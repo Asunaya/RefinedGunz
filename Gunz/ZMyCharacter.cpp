@@ -1692,7 +1692,7 @@ void ZMyCharacter::OnUpdate(float fDelta)
 		m_bJumpUp = false;
 
 		SetVelocity(GetVelocity().x, GetVelocity().y, 0);
-}
+	}
 
 	if (m_bWallJump)
 	{

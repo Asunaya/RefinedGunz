@@ -310,6 +310,9 @@ public:
 		float fDamage, float fPiercingRatio=1.f, int nMeleeType=-1) override;
 	virtual void OnScream() override;
 
+	void HandleDamage(ZObject* pAttacker, rvector srcPos, ZDAMAGETYPE damageType, MMatchWeaponType weaponType,
+		float fDamage, float fPiercingRatio = 1.f, int nMeleeType = -1);
+
 	void UpdateTimeOffset(float PeerTime, float LocalTime);
 
 	void SetNetPosition(const rvector& position, const rvector& velocity, const rvector& dir);

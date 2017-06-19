@@ -2988,8 +2988,7 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 					float fRatio = ZItem::GetPiercingRatio( pDesc->m_nWeaponType , pickinfo.info.parts );
 					ZDAMAGETYPE dt = (pickinfo.info.parts==eq_parts_head) ? ZD_BULLET_HEADSHOT : ZD_BULLET;
 
-					if (ZGetGameClient()->GetMatchStageSetting()->GetNetcode() == NetcodeType::P2PLead
-						&& pObject == m_pMyCharacter)
+					if (ZGetGameClient()->GetMatchStageSetting()->GetNetcode() == NetcodeType::P2PLead)
 						pObject->OnDamaged(pOwnerCharacter, pOwnerCharacter->GetPosition(), dt, pDesc->m_nWeaponType, fActualDamage, fRatio );
 
 					nTargetType = ZTT_CHARACTER;
@@ -3851,75 +3850,24 @@ static void PostOldBasicInfo(float Time, ZMyCharacter* MyChar)
 
 void ZGame::PostNewBasicInfo()
 {
-	char buf[64];
+	CharacterInfo CharInfo;
+	CharInfo.Pos = m_pMyCharacter->GetPosition();
+	CharInfo.Dir = m_pMyCharacter->GetDirection();
+	CharInfo.Vel = m_pMyCharacter->GetVelocity();
+	CharInfo.CamDir = RCameraDirection;
+	CharInfo.LowerAni = m_pMyCharacter->GetStateLower();
+	CharInfo.UpperAni = m_pMyCharacter->GetStateUpper();
+	CharInfo.Slot = m_pMyCharacter->GetItems()->GetSelectedWeaponParts();
+	CharInfo.HasCamDir = m_pMyCharacter->IsDirLocked();
 
-	size_t Offset = 1;
-	size_t Size = 1;
-	auto Write = [&](auto&& Val)
-	{
-		memcpy(buf + Offset, &Val, sizeof(Val));
-		Offset += sizeof(Val);
-		Size += sizeof(Val);
-	};
+	auto Blob = PackNewBasicInfo(CharInfo, BasicInfoState, ZGetGame()->GetTime());
+	assert(Blob);
+	if (!Blob)
+		return;
 
-	u8 Flags{};
-
-	float Time = GetTime();
-	Write(Time);
-
-	auto&& Pos = m_pMyCharacter->GetPosition();
-	for (auto&& Val : { Pos.x, Pos.y, Pos.z })
-	{
-		if (Val > SHRT_MAX || Val < SHRT_MIN)
-		{
-			Flags |= static_cast<int>(BasicInfoFlags::LongPos);
-			break;
-		}
-	}
-
-	if (Flags & static_cast<int>(BasicInfoFlags::LongPos))
-		Write(Pos);
-	else
-		Write(MShortVector(Pos));
-
-	auto Dir = PackDirection(m_pMyCharacter->GetDirection());
-	Write(Dir);
-
-	auto Velocity = MShortVector{ m_pMyCharacter->GetVelocity() };
-	Write(Velocity);
-	
-	auto&& Vel = m_pMyCharacter->GetVelocity();
-
-	if (m_pMyCharacter->IsDirLocked())
-	{
-		Flags |= static_cast<int>(BasicInfoFlags::CameraDir);
-		auto CameraDir = PackDirection(RCameraDirection);
-		Write(CameraDir);
-	}
-
-	auto Lower = static_cast<u8>(m_pMyCharacter->GetStateLower());
-	auto Upper = static_cast<u8>(m_pMyCharacter->GetStateUpper());
-	if (LastNetLowerAni != Lower
-		|| LastNetUpperAni != Upper)
-	{
-		Flags |= static_cast<int>(BasicInfoFlags::Animations);
-		Write(Lower);
-		Write(Upper);
-		LastNetLowerAni = static_cast<ZC_STATE_LOWER>(Lower);
-		LastNetUpperAni = static_cast<ZC_STATE_UPPER>(Upper);
-	}
-
-	auto Slot = static_cast<u8>(m_pMyCharacter->GetItems()->GetSelectedWeaponParts());
-	if (LastNetSlot != Slot)
-	{
-		Flags |= static_cast<int>(BasicInfoFlags::SelItem);
-		Write(Slot);
-		LastNetSlot = Slot;
-	}
-
-	buf[0] = Flags;
-
-	ZPOSTCMD1(MC_PEER_BASICINFO_RG, MCommandParameterBlob(&buf, Size));
+	auto Cmd = ZNewCmd(MC_PEER_BASICINFO_RG);
+	Cmd->AddParameter(Blob);
+	ZPostCommand(Cmd);
 }
 
 void ZGame::PostBasicInfo()
@@ -3940,9 +3888,13 @@ void ZGame::PostBasicInfo()
 		m_nLastTime[ZLASTTIME_BASICINFO] = nNowTime;
 
 		if (ZGetGameClient()->GetMatchStageSetting()->IsVanillaMode())
+		{
 			PostOldBasicInfo(GetTime(), m_pMyCharacter);
+		}
 		else
+		{
 			PostNewBasicInfo();
+		}
 	}
 }
 

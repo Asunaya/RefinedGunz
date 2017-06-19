@@ -2719,10 +2719,15 @@ void ZCharacter::OnDamaged(ZObject* pAttacker, rvector srcPos, ZDAMAGETYPE damag
 	if (this != ZGetGame()->m_pMyCharacter)
 		return;
 
-	bool bCanAttack = g_pGame->IsAttackable(pAttacker,this)
-		|| (pAttacker==this && (damageType==ZD_EXPLOSION || damageType==ZD_FALLING));
+	HandleDamage(pAttacker, srcPos, damageType, weaponType, fDamage, fPiercingRatio, nMeleeType);
+}
 
-	if ( damageType != ZD_FALLING)
+void ZCharacter::HandleDamage(ZObject* pAttacker, rvector srcPos, ZDAMAGETYPE damageType, MMatchWeaponType weaponType, float fDamage, float fPiercingRatio, int nMeleeType)
+{
+	bool bCanAttack = g_pGame->IsAttackable(pAttacker, this)
+		|| (pAttacker == this && (damageType == ZD_EXPLOSION || damageType == ZD_FALLING));
+
+	if (damageType != ZD_FALLING)
 		bCanAttack &= !isInvincible();
 
 	rvector dir = GetPosition() - srcPos;
@@ -2731,13 +2736,13 @@ void ZCharacter::OnDamaged(ZObject* pAttacker, rvector srcPos, ZDAMAGETYPE damag
 	m_LastDamageDir = dir;
 	m_LastDamageType = damageType;
 	m_LastDamageWeapon = weaponType;
-	m_LastDamageDot = DotProduct( m_Direction,dir );
+	m_LastDamageDot = DotProduct(m_Direction, dir);
 	m_LastDamageDistance = Magnitude(GetPosition() - srcPos);
 
 	if (bCanAttack)
-		ZObject::OnDamaged(pAttacker,srcPos,damageType,weaponType,fDamage,fPiercingRatio,nMeleeType);
+		ZObject::OnDamaged(pAttacker, srcPos, damageType, weaponType, fDamage, fPiercingRatio, nMeleeType);
 
-	if(damageType==ZD_MELEE) OnDamagedAnimation(pAttacker,nMeleeType);
+	if (damageType == ZD_MELEE) OnDamagedAnimation(pAttacker, nMeleeType);
 
 	m_bDamaged = true;
 }

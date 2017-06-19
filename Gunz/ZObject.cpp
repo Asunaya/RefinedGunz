@@ -100,7 +100,7 @@ void ZObject::SetDeadTime(float fTime)
 //////////////////////////////////////////////////////////////////////
 bool IsPlayerObject(ZObject* pObject)
 {
-	return ((MIsExactlyClass(ZNetCharacter, pObject)) || ((MIsExactlyClass(ZMyCharacter, pObject))));
+	return MDynamicCast(ZCharacter, pObject) != nullptr;
 }
 
 void ZObject::Tremble(float fValue, DWORD nMaxTime, DWORD nReturnMaxTime)

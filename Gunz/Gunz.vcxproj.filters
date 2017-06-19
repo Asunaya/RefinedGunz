@@ -726,6 +726,9 @@
     </ClInclude>
     <ClInclude Include="ZPickInfo.h" />
     <ClInclude Include="ZReplayWrite.h" />
+    <ClInclude Include="ZBotCharacter.h">
+      <Filter>Character</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ZCanvas.cpp">
@@ -1315,6 +1318,9 @@
       <Filter>Network</Filter>
     </ClCompile>
     <ClCompile Include="ZReplayWrite.cpp" />
+    <ClCompile Include="ZBotCharacter.cpp">
+      <Filter>Character</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="runtime\shader\skin.vsh">

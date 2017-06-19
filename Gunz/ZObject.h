@@ -78,7 +78,7 @@ public:
 	void SetVisible(bool bVisible)					{ m_bVisible = bVisible; }
 	bool GetInitialized() const						{ return m_bInitialized; }
 	auto& GetUID() const							{ return m_UID; }
-	void SetUID(MUID& uid)							{ m_UID = uid; }
+	void SetUID(const MUID& uid)					{ m_UID = uid; }
 	void SetSpawnTime(float fTime);
 	float GetSpawnTime() const						{ return m_fSpawnTime; }
 	void SetDeadTime(float fTime);

@@ -579,6 +579,7 @@ rem call copy_share.bat
     <ClInclude Include="Tasks.h" />
     <ClInclude Include="VoiceChat.h" />
     <ClInclude Include="ZActionDef.h" />
+    <ClInclude Include="ZBotCharacter.h" />
     <ClInclude Include="ZCanvas.h" />
     <ClInclude Include="ZCharacterStructs.h" />
     <ClInclude Include="ZCombatChat.h" />
@@ -805,6 +806,7 @@ rem call copy_share.bat
     </ClCompile>
     <ClCompile Include="Tasks.cpp" />
     <ClCompile Include="VoiceChat.cpp" />
+    <ClCompile Include="ZBotCharacter.cpp" />
     <ClCompile Include="ZCanvas.cpp" />
     <ClCompile Include="ZCombatChat.cpp" />
     <ClCompile Include="ZCombatInterface.cpp" />

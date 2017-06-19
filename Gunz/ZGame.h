@@ -19,6 +19,7 @@
 #include "ZGameAction.h"
 #include <utility>
 #include "ZGameDraw.h"
+#include "BasicInfo.h"
 
 _USING_NAMESPACE_REALSPACE2
 
@@ -260,6 +261,8 @@ public:
 	ZHelpScreen	m_HelpScreen;
 
 protected:
+	friend class ZBotCharacter;
+
 	int	m_nGunzReplayNumber;
 	ZFile *m_pReplayFile;
 	bool m_bReplaying;
@@ -330,7 +333,6 @@ protected:
 
 private:
 	bool OnRuleCommand(MCommand* pCommand);
-
 	void PostNewBasicInfo();
 
 	ZGameAction GameAction;
@@ -354,13 +356,11 @@ private:
 	ZObserverCommandList::iterator ReplayIterator;
 	float ReplayStartGameTime{};
 
-	ZC_STATE_LOWER LastNetLowerAni = ZC_STATE_LOWER_IDLE1;
-	ZC_STATE_UPPER LastNetUpperAni = ZC_STATE_UPPER_NONE;
-	int LastNetSlot{};
-
 	PingMap Pings;
 
 	ZGameDraw DrawObj;
+
+	BasicInfoNetState BasicInfoState;
 };
 
 extern ZGame* g_pGame;

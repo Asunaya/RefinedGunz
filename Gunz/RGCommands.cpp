@@ -9,6 +9,7 @@
 #include <cstdint>
 #include "ZOptionInterface.h"
 #include "ZTestGame.h"
+#include "ZBotCharacter.h"
 
 bool CheckDeveloperMode(const char* Name)
 {
@@ -503,6 +504,31 @@ void LoadRGCommands(ZChatCmdManager& CmdManager)
 		if (SetBool("Frustra draw", Value, argc, argv)) {
 			SetPortalFrustraDrawEnabled(Value);
 		}
+	},
+		CCF_ALL, 0, 1, true, "", "");
+
+	CmdManager.AddCommand(0, "addbot", [](const char *line, int argc, char ** const argv) {
+		if (!CheckDeveloperMode("addbot"))
+			return;
+
+		auto* NewChar = new ZBotCharacter;
+
+		MTD_CharInfo info;
+		strcpy_safe(info.szName, "BotCats");
+		info.szClanName[0] = 0;
+		info.nSex = MMS_FEMALE;
+		info.nHP = 100;
+		info.nAP = 0;
+		info.nLevel = 0;
+
+		NewChar->Create(info);
+		NewChar->Revival();
+
+		NewChar->SetUID({ 0, 42 });
+		NewChar->SetPosition(MyChar()->GetPosition());
+		NewChar->SetDirection(MyChar()->GetDirection());
+
+		ZGetCharacterManager()->Add(NewChar);
 	},
 		CCF_ALL, 0, 1, true, "", "");
 }
