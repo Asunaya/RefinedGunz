@@ -19,8 +19,6 @@
 #include "MCommandBuilder.h"
 #include "MMatchStatus.h"
 #include "MMatchLocale.h"
-
-#define SODIUM_STATIC
 #include "sodium.h"
 
 bool MMatchServer::CheckOnLoginPre(const MUID& CommUID, int nCmdVersion,

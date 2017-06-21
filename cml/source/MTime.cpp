@@ -4,6 +4,7 @@
 
 #ifdef WIN32
 #include <Windows.h>
+#include <mmsystem.h>
 #else
 #include <time.h>
 #endif

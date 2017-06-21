@@ -5,6 +5,8 @@
 #include "MDebug.h"
 #endif
 
+#include "GlobalTypes.h"
+
 #include <map>
 #include <string>
 #include <vector>
@@ -14,7 +16,6 @@ using std::string;
 using std::vector;
 using std::pair;
 using std::map;
-
 
 struct BlockCountryCodeInfo
 {
@@ -26,15 +27,15 @@ struct BlockCountryCodeInfo
 
 struct IPtoCountry
 {
-	DWORD	nIPFrom;
-	DWORD	nIPTo;
+	u32	nIPFrom;
+	u32	nIPTo;
 	string	strCountryCode3;
 };
 
 struct CustomIP
 {
-	DWORD	nIPFrom;
-	DWORD	nIPTo;
+	u32	nIPFrom;
+	u32	nIPTo;
 	bool	bIsBlock;
 	string	strCountryCode3;
 	string	strComment;
@@ -53,7 +54,7 @@ public :
 
 	bool operator () ( const BlockCountryCodeInfo& rfBlockCountryCodeInfo )
 	{
-		return 0 == stricmp( m_strSrc.c_str(), rfBlockCountryCodeInfo.strCountryCode.c_str() );
+		return 0 == _stricmp( m_strSrc.c_str(), rfBlockCountryCodeInfo.strCountryCode.c_str() );
 	}
 
 private :
@@ -92,7 +93,7 @@ public :
 #endif
 	}
 
-	void SetIP( const DWORD dwIP ) { m_dwIP = dwIP; }
+	void SetIP( const u32 dwIP ) { m_dwIP = dwIP; }
 
 	const int BinarySearch( const T& tVector )
 	{
@@ -100,8 +101,8 @@ public :
 		size_t nTail = tVector.size() - 2;
 		size_t nMiddle = nTail / 2;
 
-		DWORD dwIPFrom;
-		DWORD dwIPTo;
+		u32 dwIPFrom;
+		u32 dwIPTo;
 
 #ifdef _FILTER_TEST
 		MdlTrace mt;
@@ -143,7 +144,7 @@ public :
 
 #ifdef _FILTER_TEST
 				if( m_dwMaxTraceCount > m_dwTraceCount ){
-					DWORD i = 0;
+					u32 i = 0;
 					T::const_iterator it, end;
 					end = tVector.end();
 					for( it = tVector.begin(); it != end; ++it, ++i ){
@@ -174,10 +175,10 @@ public :
 	}
 
 private :
-	DWORD m_dwIP;
+	u32 m_dwIP;
 #ifdef _FILTER_TEST
-	DWORD m_dwTraceCount;
-	DWORD m_dwMaxTraceCount;
+	u32 m_dwTraceCount;
+	u32 m_dwMaxTraceCount;
 #endif
 };
 
@@ -191,36 +192,37 @@ public :
 	bool Create( const BlockCountryCodeInfoList& rfBlockCountryCodeInfoList, 
 				 const IPtoCountryList& rfIPtoCountryList );
 
-	bool AddIPtoCountry( const DWORD dwIPFrom, const DWORD dwIPTo, const string& strCode );
+	bool AddIPtoCountry( const u32 dwIPFrom, const u32 dwIPTo, const string& strCode );
 	const int GetCustomIP( const string& strIP, string& strOutCountryCode, bool& bIsBlock, string& strComment );
 	const int GetIPCountryCode( const string& strIP, string& strOutCountryCode );
 	bool IsValidContryCode( const string& strCountryCode, string& strOutRoutingURL );
 	bool Update( const BlockCountryCodeInfoList& rfBlockCountryCodeInfoList, 
 				 const IPtoCountryList& rfIPtoCountryList );
 
-	DWORD GetLastUpdatedTime()						{ return m_dwLastUpdatedTime; }
-	void SetLastUpdatedTime( const DWORD dwTime )	{ m_dwLastUpdatedTime = dwTime; }
+	u64 GetLastUpdatedTime() const				{ return m_dwLastUpdatedTime; }
+	void SetLastUpdatedTime( const u64 dwTime )	{ m_dwLastUpdatedTime = dwTime; }
 
 private :
 	bool InitContryCodeTableList( const BlockCountryCodeInfoList& rfBlockCountryCodeInfoList );
 	bool InitIPtoCountryList( const IPtoCountryList& rfIPtoCountryList );
 
-	bool CheckIPtoCountryRange( const DWORD dwIPFrom, const DWORD dwIPTo, const IPtoCountryList& icl );
-	bool CheckIsLast( const DWORD dwIPFrom, const DWORD dwIPTo, const IPtoCountryList& icl );
-	bool CheckIsDuplicatedRange( const DWORD dwIPFrom, const DWORD dwIPTo, const IPtoCountryList& icl );
-	bool CheckIsInverseRange( const DWORD dwIPFrom, const DWORD dwIPTo );
-	bool IsValidContryCode( const string& strCountryCode, string& strOutRoutingURL, BlockCountryCodeInfoList& bcil );
+	bool CheckIPtoCountryRange( const u32 dwIPFrom, const u32 dwIPTo, const IPtoCountryList& icl );
+	bool CheckIsLast( const u32 dwIPFrom, const u32 dwIPTo, const IPtoCountryList& icl );
+	bool CheckIsDuplicatedRange( const u32 dwIPFrom, const u32 dwIPTo, const IPtoCountryList& icl );
+	bool CheckIsInverseRange( const u32 dwIPFrom, const u32 dwIPTo );
+	bool IsValidContryCode( const string& strCountryCode, string& strOutRoutingURL,
+		BlockCountryCodeInfoList& bcil );
 
 	bool UpdateCountryCodeTableList( const BlockCountryCodeInfoList& rfBlockCountryCodeInfoList );
 	bool UpdateIPtoCountryList( const IPtoCountryList& rfIPtoCountryList );
 
-	const DWORD inet_aton( const string& strIP );
+	const u32 inet_aton( const string& strIP );
 
 #ifdef _LOCATOR_TEST
 public :
 	void DoTest();
 	void TestAddIPtoCountry( const IPtoCountryList& rfIPtoCountryList );
-	bool FindEqual( const DWORD dwIPFrom, const DWORD dwIPTo, const string& strCode );
+	bool FindEqual( const u32 dwIPFrom, const u32 dwIPTo, const string& strCode );
 	void TestIP();
 #endif
 
@@ -229,7 +231,7 @@ private :
 	IPtoCountryList				m_IPtoCountryList;
 	CustomIPList				m_CustomIPList;
 
-	DWORD m_dwLastUpdatedTime;
+	u64 m_dwLastUpdatedTime;
 
 	IPRangeBinarySearch< IPtoCountryList >	m_IPCountryCodeSearch;
 	IPRangeBinarySearch< CustomIPList >			m_CustomIPSearch;

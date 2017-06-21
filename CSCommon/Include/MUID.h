@@ -144,7 +144,7 @@ public:
 #ifdef _DEBUG
 		if (GetRef(uid)) {
 			_ASSERT(0);
-			OutputDebugString("MUIDRefCache DUPLICATED Data. \n");
+			MLog("MUIDRefCache DUPLICATED Data. \n");
 		}
 #endif
 		insert(value_type(uid, pRef));

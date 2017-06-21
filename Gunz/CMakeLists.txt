@@ -61,7 +61,7 @@ find_library(fmodvc_path NAMES fmodvc PATHS .)
 
 find_library(libsodium_path NAMES libsodium PATHS ../sdk/libsodium/lib/static)
 
-target_link_libraries_both(
+target_link_libraries_both(PUBLIC
 	${zlib_path}
 	${fmodvc_path}
 	${libsodium_path}
@@ -74,7 +74,7 @@ target_link_libraries_both(
 	SafeUDP
 	MDatabase)
 
-add_dependencies_both(cml RealSpace2 MDatabase Mint2 RealSound SafeUDP)
+add_dependencies_both(cml RealSpace2 CSCommon MDatabase Mint2 RealSound SafeUDP)
 
 target_compile_options_both(PRIVATE 
 		-DSODIUM_STATIC)

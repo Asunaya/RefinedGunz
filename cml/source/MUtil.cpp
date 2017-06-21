@@ -5,6 +5,7 @@
 
 #ifdef WIN32
 #include <Windows.h>
+#include <Unknwn.h>
 
 void D3DDeleter::operator()(IUnknown* ptr) const {
 	ptr->Release();

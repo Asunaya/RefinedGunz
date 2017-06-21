@@ -5,8 +5,6 @@
 #include <tchar.h>
 #include "mDebug.h"
 #include "mprofiler.h"
-#include "dxerr.h"
-#pragma comment(lib, "dxerr.lib")
 #include "VertexTypes.h"
 
 #ifdef _USE_GDIPLUS

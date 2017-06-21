@@ -1004,6 +1004,7 @@ void FFileList::RecoveryZip()
 }
 
 #ifdef WIN32
+#include <Windows.h>
 #include <shellapi.h>
 void FFileList::ConvertVtf() 
 {

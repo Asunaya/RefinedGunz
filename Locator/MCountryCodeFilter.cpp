@@ -1,12 +1,11 @@
 #include "stdafx.h"
 #include "MCountryCodeFilter.h"
 #include "MDebug.h"
-#include <windows.h>
-#include <mmsystem.h>
-
 #include <algorithm>
+#include "MTime.h"
+#include "MSocket.h"
 
-MCountryCodeFilter::MCountryCodeFilter() : m_dwLastUpdatedTime( timeGetTime() )
+MCountryCodeFilter::MCountryCodeFilter() : m_dwLastUpdatedTime( GetGlobalTimeMS() )
 {
 }
 
@@ -30,7 +29,7 @@ bool MCountryCodeFilter::Create( const BlockCountryCodeInfoList& rfBlockCountryC
 }
 
 
-bool MCountryCodeFilter::AddIPtoCountry( const DWORD dwIPFrom, const DWORD dwIPTo, const string& strCode )
+bool MCountryCodeFilter::AddIPtoCountry( const u32 dwIPFrom, const u32 dwIPTo, const string& strCode )
 {
 	if( CheckIsInverseRange(dwIPFrom, dwIPTo) )
 		return false;
@@ -137,50 +136,17 @@ bool MCountryCodeFilter::InitIPtoCountryList( const IPtoCountryList& rfIPtoCount
 }
 
 
-const DWORD MCountryCodeFilter::inet_aton( const string& strIP )
+const u32 MCountryCodeFilter::inet_aton( const string& strIP )
 {
-	if( strIP.empty() ) 
-		return 0;
-
-	size_t a, b, c;
-	char szPos1[ 4 ] = {0,};
-	char szPos2[ 4 ] = {0,};
-	char szPos3[ 4 ] = {0,};
-	char szPos4[ 4 ] = {0,};
-
-	a = strIP.find( "." );
-	if( string::npos == a ) 
-		return 0;
-
-	b = strIP.find( ".", a + 1 );
-	if( string::npos == b ) 
-		return 0;
-
-	c = strIP.find( ".", b + 1 );
-	if( string::npos == c )
-		return 0;
-
-	strncpy( szPos1, &strIP[0], a );
-	strncpy( szPos2, &strIP[a + 1], b - a - 1 );
-	strncpy( szPos3, &strIP[b + 1], c - b - 1 );
-	strncpy( szPos4, &strIP[c + 1], strIP.length() - c - 1 );
-
-	DWORD dwPos1, dwPos2, dwPos3, dwPos4;
-
-	dwPos1 = static_cast< DWORD >( atoi(szPos1) );
-	dwPos2 = static_cast< DWORD >( atoi(szPos2) );
-	dwPos3 = static_cast< DWORD >( atoi(szPos3) );
-	dwPos4 = static_cast< DWORD >( atoi(szPos4) );
-
-	DWORD dwTotal = (dwPos1 * 16777216) + (dwPos2 * 65536) + (dwPos3 * 256) + dwPos4;
-
-	return dwTotal;
+	MSocket::in_addr addr;
+	MSocket::inet_pton(MSocket::AF::INET, strIP.c_str(), &addr);
+	return addr.s_addr;
 }
 
 
 const int MCountryCodeFilter::GetIPCountryCode( const string& strIP, string& strOutCountryCode )
 {
-	const DWORD dwIP = inet_aton( strIP );
+	const u32 dwIP = inet_aton( strIP );
 	if( 0 == dwIP )
 		return false;
 
@@ -194,8 +160,8 @@ const int MCountryCodeFilter::GetIPCountryCode( const string& strIP, string& str
 	size_t nTail = m_IPtoCountryList.size() - 1;
 	size_t nMiddle = nTail / 2;
 
-	DWORD dwIPFrom;
-	DWORD dwIPTo;
+	u32 dwIPFrom;
+	u32 dwIPTo;
 
 	while( true )
 	{
@@ -234,7 +200,7 @@ const int MCountryCodeFilter::GetIPCountryCode( const string& strIP, string& str
 
 const int MCountryCodeFilter::GetCustomIP( const string& strIP, string& strOutCountryCode, bool& bIsBlock, string& strComment )
 {
-	const DWORD dwIP = inet_aton( strIP );
+	const u32 dwIP = inet_aton( strIP );
 	if( 0 == dwIP )
 		return false;
 
@@ -250,7 +216,7 @@ const int MCountryCodeFilter::GetCustomIP( const string& strIP, string& strOutCo
 }
 
 
-bool MCountryCodeFilter::CheckIPtoCountryRange( const DWORD dwIPFrom, const DWORD dwIPTo, const IPtoCountryList& icl )
+bool MCountryCodeFilter::CheckIPtoCountryRange( const u32 dwIPFrom, const u32 dwIPTo, const IPtoCountryList& icl )
 {
 	if( CheckIsInverseRange(dwIPFrom, dwIPTo) )
 		return false;
@@ -265,13 +231,13 @@ bool MCountryCodeFilter::CheckIPtoCountryRange( const DWORD dwIPFrom, const DWOR
 }
 
 
-bool MCountryCodeFilter::CheckIsInverseRange( const DWORD dwIPFrom, const DWORD dwIPTo )
+bool MCountryCodeFilter::CheckIsInverseRange( const u32 dwIPFrom, const u32 dwIPTo )
 {
 	return (dwIPFrom > dwIPTo) ;
 }
 
 
-bool MCountryCodeFilter::CheckIsLast( const DWORD dwIPFrom, const DWORD dwIPTo, const IPtoCountryList& icl )
+bool MCountryCodeFilter::CheckIsLast( const u32 dwIPFrom, const u32 dwIPTo, const IPtoCountryList& icl )
 {
 	if( !icl.empty() )
 	{
@@ -285,7 +251,7 @@ bool MCountryCodeFilter::CheckIsLast( const DWORD dwIPFrom, const DWORD dwIPTo, 
 }
 
 
-bool MCountryCodeFilter::CheckIsDuplicatedRange( const DWORD dwIPFrom, const DWORD dwIPTo, const IPtoCountryList& icl )
+bool MCountryCodeFilter::CheckIsDuplicatedRange( const u32 dwIPFrom, const u32 dwIPTo, const IPtoCountryList& icl )
 {
 	IPtoCountryList::const_iterator it, end;
 	end = icl.end();
@@ -467,7 +433,7 @@ void MCountryCodeFilter::TestAddIPtoCountry( const IPtoCountryList& rfIPtoCountr
 }
 
 
-bool MCountryCodeFilter::FindEqual( const DWORD dwIPFrom, const DWORD dwIPTo, const string& strCode )
+bool MCountryCodeFilter::FindEqual( const u32 dwIPFrom, const u32 dwIPTo, const string& strCode )
 {
 	IPtoCountryList::iterator it, end;
 

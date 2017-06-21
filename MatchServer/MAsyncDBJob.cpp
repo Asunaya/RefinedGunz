@@ -6,6 +6,10 @@
 #include "MMatchConfig.h"
 #include "MMatchQuestGameLog.h"
 
+#include <algorithm>
+using std::max;
+using std::min;
+
 void MAsyncDBJob_Test::Run(void* pContext)
 {
 #ifdef MFC
@@ -83,7 +87,7 @@ void MAsyncDBJob_GetAccountCharList::Run(void* pContext)
 		MTD_AccountCharInfo* pTransCharInfo = (MTD_AccountCharInfo*)MGetBlobArrayElement(pCharArray, i);
 		memcpy(pTransCharInfo, &charlist[i], sizeof(MTD_AccountCharInfo));
 
-		m_nCharMaxLevel = max(m_nCharMaxLevel, pTransCharInfo->nLevel);
+		m_nCharMaxLevel = max(m_nCharMaxLevel, int(pTransCharInfo->nLevel));
 	}
 
 	pNewCmd->AddParameter(new MCommandParameterBlob(pCharArray, MGetBlobArraySize(pCharArray)));

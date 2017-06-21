@@ -3,7 +3,6 @@
 #include <Shlwapi.h>
 #include <iostream>
 #include <atomic>
-#include "BulletCollisionLibs.h"
 
 template <size_t size>
 static bool GetLogFileName(char (&pszBuf)[size])

@@ -45,6 +45,7 @@
 #include "MTeamGameStrategy.h"
 #include "stuff.h"
 #include "MPickInfo.h"
+#include "reinterpret.h"
 
 #define DEFAULT_REQUEST_UID_SIZE		4200000000
 #define DEFAULT_REQUEST_UID_SPARE_SIZE	10000
@@ -1608,7 +1609,7 @@ void MMatchServer::OnBridgePeer(const MUID& uidChar, u32 dwIP, u32 nPort)
 	if (!pObj)
 		return;
 
-	in_addr addr;
+	MSocket::in_addr addr;
 	addr.s_addr = dwIP;
 	auto IP = GetIPv4String(addr);
 
@@ -1711,7 +1712,7 @@ void MMatchServer::ParseUDPPacket(char* pData, MPacketHeader* pPacketHeader, u32
 					pCmd->m_Sender = MUID(0,0);
 					pCmd->m_Receiver = m_This;
 
-					unsigned long nPort = ntohs(wRawPort);
+					unsigned long nPort = MSocket::ntohs(wRawPort);
 
 					MCommandParameterUInt* pParamIP = (MCommandParameterUInt*)pCmd->GetParameter(1);
 					MCommandParameterUInt* pParamPort = (MCommandParameterUInt*)pCmd->GetParameter(2);

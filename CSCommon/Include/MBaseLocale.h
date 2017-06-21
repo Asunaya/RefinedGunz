@@ -1,5 +1,7 @@
 #pragma once
 
+#include <winnt.rh>
+
 enum MCountry
 {
 	MC_INVALID			= 0,
