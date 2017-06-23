@@ -10,7 +10,7 @@
 #define	NUM_ELEMENT	10
 #define MAX_FLARE_ELEMENT_WIDTH		1000
 #define MAX_FLARE_ELEMENT_HEIGHT	1000
-#define MAX_ALPHA	0.5
+#define MAX_ALPHA	0.5f
 
 _USING_NAMESPACE_REALSPACE2
 
@@ -64,10 +64,10 @@ bool RLenzFlare::Render( rvector& light_pos_, rvector& centre_, RBspObject* pbsp
 	float dist = Magnitude(pos - centre);
 	float scale_factor = 1/dist;
 
-	pos.x = (pos.x + 1) * 0.5 * RGetScreenWidth();
-	pos.y = (-pos.y + 1) * 0.5 * RGetScreenHeight();
-	centre.x = (centre.x + 1) * 0.5 * RGetScreenWidth();
-	centre.y = (-centre.y + 1) * 0.5 * RGetScreenHeight();
+	pos.x = (pos.x + 1) * 0.5f * RGetScreenWidth();
+	pos.y = (-pos.y + 1) * 0.5f * RGetScreenHeight();
+	centre.x = (centre.x + 1) * 0.5f * RGetScreenWidth();
+	centre.y = (-centre.y + 1) * 0.5f * RGetScreenHeight();
 	
 	rvector temp = pos - centre;
 
@@ -93,10 +93,10 @@ bool RLenzFlare::Render( rvector& light_pos_, rvector& centre_, RBspObject* pbsp
 			height = MAX_FLARE_ELEMENT_HEIGHT;
 		}
 
-		float px = pos.x + (xInc * i) - width* 0.5;
-		float py = pos.y + (yInc * i) - height * 0.5;
+		float px = pos.x + (xInc * i) - width * 0.5f;
+		float py = pos.y + (yInc * i) - height * 0.5f;
 
-		float alpha = scale_factor * 0.2;
+		float alpha = scale_factor * 0.2f;
 
 		if( alpha > MAX_ALPHA )
 		{
@@ -110,7 +110,7 @@ bool RLenzFlare::Render( rvector& light_pos_, rvector& centre_, RBspObject* pbsp
 		}
 	}
 
-	draw( 0, 0, RGetScreenWidth(), RGetScreenHeight(), alpha, 0xFFFFFFFF, -1 );
+	draw( 0, 0, float(RGetScreenWidth()), float(RGetScreenHeight()), alpha, 0xFFFFFFFF, -1 );
 
     return true;
 }
@@ -155,16 +155,17 @@ bool RLenzFlare::draw( float x_, float y_,  float width_, float height_,
 
 	if( color_ > 0x00ffffff )
 	{
-		DWORD alpha_value = color_ & 0xff000000 ;
+		auto alpha_value = color_ & 0xff000000 ;
 		color_ = color_ - alpha_value;
 	}
+
+	const auto color = RGBAF(0xFF, 0xFF, 0xFF, alpha_);
 
 	vertices[0].p.x = x_; 
 	vertices[0].p.y = y_;
 	vertices[0].p.z = 0.f;
 	vertices[0].p.w = 1.0f;
-	vertices[0].color = RGBA(0, 0, 0, alpha_);
-	vertices[0].color += 0x00FFFFFF;
+	vertices[0].color = color;
 	vertices[0].tu	=	0.f;	
 	vertices[0].tv	=	0.f;
 
@@ -172,8 +173,7 @@ bool RLenzFlare::draw( float x_, float y_,  float width_, float height_,
 	vertices[1].p.y = y_;
 	vertices[1].p.z = 0.f;
 	vertices[1].p.w = 1.0f;
-	vertices[1].color = RGBA(0, 0, 0, alpha_);
-	vertices[1].color += 0x00FFFFFF;
+	vertices[1].color = color;
 	vertices[1].tu	=	1.f;	
 	vertices[1].tv	=	0.f;
 
@@ -181,8 +181,7 @@ bool RLenzFlare::draw( float x_, float y_,  float width_, float height_,
 	vertices[2].p.y = y_ + height_;
 	vertices[2].p.z = 0.f;
 	vertices[2].p.w = 1.0f;
-	vertices[2].color = RGBA(0, 0, 0, alpha_);
-	vertices[2].color += 0x00FFFFFF;
+	vertices[2].color = color;
 	vertices[2].tu	=	1.f;	
 	vertices[2].tv	=	1.f;
 
@@ -190,8 +189,7 @@ bool RLenzFlare::draw( float x_, float y_,  float width_, float height_,
 	vertices[3].p.y = y_ + height_;
 	vertices[3].p.z = 0.f;
 	vertices[3].p.w = 1.0f;
-	vertices[3].color = RGBA(0, 0, 0, alpha_);;
-	vertices[3].color += 0x00FFFFFF;
+	vertices[3].color = color;
 	vertices[3].tu	=	0.f;	
 	vertices[3].tv	=	1.f;
 
@@ -372,13 +370,13 @@ bool RLenzFlare::ReadXmlElement(MXmlElement* PNode,char* Path)
 				{
 					return false;
 				}
-				msElements[index].width = atof(buffer);
+				msElements[index].width = float(atof(buffer));
 
 				if(!Leaf.GetAttribute( buffer, "HEIGHT" ))
 				{
 					return false;
 				}
-				msElements[index].height = atof(buffer);
+				msElements[index].height = float(atof(buffer));
 
 
 				if(!Leaf.GetAttribute( buffer, "COLOR" ))
@@ -386,13 +384,6 @@ bool RLenzFlare::ReadXmlElement(MXmlElement* PNode,char* Path)
 					return false;
 				}
 				msElements[index].color = atol(buffer);
-
-				if(!Leaf.GetAttribute( buffer, "WIDTH" ))
-				{
-					return false;
-				}
-				msElements[index].width = atoi(buffer);
-
 
 				if(!Leaf.GetAttribute( buffer, "TEXTURE_INDEX" ))
 				{

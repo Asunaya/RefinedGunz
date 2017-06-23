@@ -1,17 +1,30 @@
-#ifndef _ZSHOP_H
-#define _ZSHOP_H
+#pragma once
 
+#include "GlobalTypes.h"
 #include "ZPrerequisites.h"
 #include <vector>
-using namespace std;
+
+enum {
+	zshop_item_filter_all = 0,
+	zshop_item_filter_head,
+	zshop_item_filter_chest,
+	zshop_item_filter_hands,
+	zshop_item_filter_legs,
+	zshop_item_filter_feet,
+	zshop_item_filter_melee,
+	zshop_item_filter_range,
+	zshop_item_filter_custom,
+	zshop_item_filter_extra,
+	zshop_item_filter_quest,
+};
 
 class ZShop
 {
 private:
 protected:
-	int m_nPage;			// 샵에서 리스트 페이지
+	int m_nPage;
 	bool m_bCreated;
-	vector<unsigned long int>		m_ItemVector;
+	std::vector<u32> m_ItemVector;
 
 public:
 	int m_ListFilter;
@@ -34,5 +47,3 @@ public:
 };
 
 inline ZShop* ZGetShop() { return ZShop::GetInstance(); }
-
-#endif

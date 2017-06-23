@@ -338,15 +338,15 @@ void Patch::ComputeVariance()
 	// Compute variance on each of the base triangles...
 
 	m_CurrentVariance = m_VarianceLeft;
-	RecursComputeVariance(	0,          PATCH_SIZE, m_HeightMap[PATCH_SIZE * MAP_SIZE],
-							PATCH_SIZE, 0,          m_HeightMap[PATCH_SIZE],
+	RecursComputeVariance(	0,          RROAM_PATCH_SIZE, m_HeightMap[RROAM_PATCH_SIZE * MAP_SIZE],
+							RROAM_PATCH_SIZE, 0,          m_HeightMap[RROAM_PATCH_SIZE],
 							0,          0,          m_HeightMap[0],
 							1);
 
 	m_CurrentVariance = m_VarianceRight;
-	RecursComputeVariance(	PATCH_SIZE, 0,          m_HeightMap[ PATCH_SIZE],
-							0,          PATCH_SIZE, m_HeightMap[ PATCH_SIZE * MAP_SIZE],
-							PATCH_SIZE, PATCH_SIZE, m_HeightMap[(PATCH_SIZE * MAP_SIZE) + PATCH_SIZE],
+	RecursComputeVariance(	RROAM_PATCH_SIZE, 0,          m_HeightMap[ RROAM_PATCH_SIZE],
+							0,          RROAM_PATCH_SIZE, m_HeightMap[ RROAM_PATCH_SIZE * MAP_SIZE],
+							RROAM_PATCH_SIZE, RROAM_PATCH_SIZE, m_HeightMap[(RROAM_PATCH_SIZE * MAP_SIZE) + RROAM_PATCH_SIZE],
 							1);
 
 	// Clear the dirty flag for this patch
@@ -355,17 +355,19 @@ void Patch::ComputeVariance()
 
 void Patch::ComputeBoundingBox()
 {
-	m_BoundingBox.minx=(float)m_WorldX;m_BoundingBox.maxx=(float)m_WorldX+PATCH_SIZE;
-	m_BoundingBox.miny=(float)m_WorldY;m_BoundingBox.maxy=(float)m_WorldY+PATCH_SIZE;
-	m_BoundingBox.minz=255;m_BoundingBox.maxz=0;
+	m_BoundingBox.minx = (float)m_WorldX; m_BoundingBox.maxx = (float)m_WorldX + RROAM_PATCH_SIZE;
+	m_BoundingBox.miny = (float)m_WorldY; m_BoundingBox.maxy = (float)m_WorldY + RROAM_PATCH_SIZE;
+	m_BoundingBox.minz = 255; m_BoundingBox.maxz = 0;
 	
 	int i,j;
-	for(i=0;i<PATCH_SIZE;i++)
-		for(j=0;j<PATCH_SIZE;j++)
+	for (i = 0; i < RROAM_PATCH_SIZE; i++)
+	{
+		for (j = 0; j < RROAM_PATCH_SIZE; j++)
 		{
-			m_BoundingBox.minz=min(m_BoundingBox.minz,m_HeightMap[(i* MAP_SIZE) + j]);
-			m_BoundingBox.maxz=max(m_BoundingBox.maxz,m_HeightMap[(i* MAP_SIZE) + j]);
+			m_BoundingBox.minz = min(m_BoundingBox.minz, float(m_HeightMap[(i* MAP_SIZE) + j]));
+			m_BoundingBox.maxz = max(m_BoundingBox.maxz, float(m_HeightMap[(i* MAP_SIZE) + j]));
 		}
+	}
 }
 
 // ---------------------------------------------------------------------
@@ -406,16 +408,16 @@ void Patch::Tessellate()
 	// Split each of the base triangles
 	m_CurrentVariance = m_VarianceLeft;
 	RecursTessellate (	&m_BaseLeft,
-						m_WorldX,				m_WorldY+PATCH_SIZE,
-						m_WorldX+PATCH_SIZE,	m_WorldY,
+						m_WorldX,				m_WorldY+RROAM_PATCH_SIZE,
+						m_WorldX+RROAM_PATCH_SIZE,	m_WorldY,
 						m_WorldX,				m_WorldY,
 						1 );
 					
 	m_CurrentVariance = m_VarianceRight;
 	RecursTessellate(	&m_BaseRight,
-						m_WorldX+PATCH_SIZE,	m_WorldY,
-						m_WorldX,				m_WorldY+PATCH_SIZE,
-						m_WorldX+PATCH_SIZE,	m_WorldY+PATCH_SIZE,
+						m_WorldX+RROAM_PATCH_SIZE,	m_WorldY,
+						m_WorldX,				m_WorldY+RROAM_PATCH_SIZE,
+						m_WorldX+RROAM_PATCH_SIZE,	m_WorldY+RROAM_PATCH_SIZE,
 						1 );
 }
 
@@ -434,15 +436,15 @@ void Patch::Render()
 #endif
 
 		RecursRender (	&m_BaseLeft,
-			0,				PATCH_SIZE,
-			PATCH_SIZE,		0,
+			0,				RROAM_PATCH_SIZE,
+			RROAM_PATCH_SIZE,		0,
 			0,				0,
 			&idl,&itr,&itl);
 		
 		RecursRender(	&m_BaseRight,
-			PATCH_SIZE,		0,
-			0,				PATCH_SIZE,
-			PATCH_SIZE,		PATCH_SIZE,
+			RROAM_PATCH_SIZE,		0,
+			0,				RROAM_PATCH_SIZE,
+			RROAM_PATCH_SIZE,		RROAM_PATCH_SIZE,
 			&itr,&idl,&idr);
 	
 #ifdef USEVB
@@ -530,7 +532,7 @@ void Landscape::Init(unsigned char *hMap)
 		for ( X=0; X < NUM_PATCHES_PER_SIDE; X++ )
 		{
 			patch = &(m_Patches[Y][X]);
-			patch->Init( X*PATCH_SIZE, Y*PATCH_SIZE, X*PATCH_SIZE, Y*PATCH_SIZE, hMap );
+			patch->Init( X*RROAM_PATCH_SIZE, Y*RROAM_PATCH_SIZE, X*RROAM_PATCH_SIZE, Y*RROAM_PATCH_SIZE, hMap );
 			patch->ComputeVariance();
 			patch->ComputeBoundingBox();
 		}

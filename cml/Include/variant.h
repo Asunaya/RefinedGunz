@@ -5,6 +5,7 @@
 #include <new>
 #include <cassert>
 #include <memory>
+#include "TMP.h"
 
 struct monostate {};
 
@@ -30,11 +31,13 @@ struct heap_wrapper : unique_ptr_with_copy<T>
 
 namespace detail
 {
-	template <typename T>
-	struct identity
-	{
-		using type = T;
-	};
+using namespace tmp;
+
+template <typename T>
+struct identity
+{
+	using type = T;
+};
 
 #define MAX_PROPERTY(prop) \
 template <typename T, typename... rest> \
@@ -52,66 +55,55 @@ struct max_##prop<T> \
 template <typename... Ts> \
 using max_##prop##_t = typename max_##prop<Ts...>::type
 
-	MAX_PROPERTY(alignof);
-	MAX_PROPERTY(sizeof);
+MAX_PROPERTY(alignof);
+MAX_PROPERTY(sizeof);
 
 #undef MAX_PROPERTY
 
-	template <bool b, bool... rest>
-	struct any_of
-	{
-		static constexpr bool value = b || any_of<rest...>::value;
-	};
+template <int index, typename T, typename U, typename... Ts>
+struct get_index_impl
+{
+	static constexpr int value = std::conditional_t < std::is_same<T, U>::value,
+		std::integral_constant<int, index>,
+		get_index_impl < index + 1, T, Ts... >> ::value;
+};
 
-	template <bool b>
-	struct any_of<b>
-	{
-		static constexpr bool value = b;
-	};
+template <int index, typename T, typename U>
+struct get_index_impl<index, T, U>
+{
+	static constexpr int value = index;
+	static_assert(std::is_same<T, U>::value, "");
+};
 
-	template <int index, typename T, typename U, typename... Ts>
-	struct get_index_impl
-	{
-		static constexpr int value = std::conditional_t < std::is_same<T, U>::value,
-			std::integral_constant<int, index>,
-			get_index_impl < index + 1, T, Ts... >> ::value;
-	};
+template <typename T, typename U, typename... Ts>
+struct get_index
+{
+	static constexpr int value = get_index_impl<0, T, U, Ts...>::value;
+};
 
-	template <int index, typename T, typename U>
-	struct get_index_impl<index, T, U>
-	{
-		static constexpr int value = index;
-		static_assert(std::is_same<T, U>::value, "");
-	};
+template <typename T, typename... Ts>
+struct is_part_of
+{
+	static constexpr auto value = tmp::any_of<
+		std::is_same<
+		std::remove_const_t<std::remove_reference_t<T>>, Ts>::value...>::value;
+};
 
-	template <typename T, typename U, typename... Ts>
-	struct get_index
-	{
-		static constexpr int value = get_index_impl<0, T, U, Ts...>::value;
-	};
+template <typename T>
+struct substitute_heap_wrapper : identity<T> {};
 
-	template <typename T, typename... Ts>
-	struct is_part_of
-	{
-		static constexpr auto value = any_of<
-			std::is_same<
-			std::remove_const_t<std::remove_reference_t<T>>, Ts>::value...>::value;
-	};
+template <typename T>
+struct substitute_heap_wrapper<heap_wrapper<T>> : identity<T> {};
 
-	template <typename T>
-	struct substitute_heap_wrapper : identity<T> {};
+template <typename T>
+using substitute_heap_wrapper_t = typename substitute_heap_wrapper<T>::type;
 
-	template <typename T>
-	struct substitute_heap_wrapper<heap_wrapper<T>> : identity<T> {};
+template <typename T, typename... Ts>
+struct is_in_heap_wrapper
+{
+	static constexpr bool value = tmp::any_of<std::is_same<heap_wrapper<T>, Ts>::value...>::value;
+};
 
-	template <typename T>
-	using substitute_heap_wrapper_t = typename substitute_heap_wrapper<T>::type;
-
-	template <typename T, typename... Ts>
-	struct is_in_heap_wrapper
-	{
-		static constexpr bool value = any_of<std::is_same<heap_wrapper<T>, Ts>::value...>::value;
-	};
 }
 
 template <size_t alignment, size_t size, typename... Ts>
@@ -146,9 +138,9 @@ struct variant_impl
 		visit<decltype(fn)&, true>(fn);
 	}
 
-	template <typename fn_t, bool include_monostate = false>
+	template <typename fn_t, bool include_monostate = true>
 	void visit(fn_t&& fn) { visit_impl<fn_t, include_monostate, 0, Ts...>(std::forward<fn_t>(fn)); }
-	template <typename fn_t, bool include_monostate = false>
+	template <typename fn_t, bool include_monostate = true>
 	void visit(fn_t&& fn) const { visit_impl<fn_t, include_monostate, 0, Ts...>(std::forward<fn_t>(fn)); }
 
 	template <typename T, typename = std::enable_if_t<
@@ -164,11 +156,17 @@ struct variant_impl
 	auto get_type_index() const { return type_index; }
 
 	template <typename T>
-	static auto get_index_of_type() { return detail::get_index<T,
+	static constexpr auto get_index_of_type() { return detail::get_index<T,
 		detail::substitute_heap_wrapper_t<Ts>...>::value; }
 
 	template <typename T>
 	auto is_type() const { return get_type_index() == get_index_of_type<T>(); }
+
+	template <typename T>
+	void emplace(T&& src)
+	{
+		construct(std::forward<T>(src));
+	}
 
 private:
 	template <typename T>
@@ -369,15 +367,35 @@ struct recursive_variant : variant_impl<
 	using base::operator=;
 };
 
-template <typename var_t, typename T>
-auto visit(var_t& var, T& visitor)
+namespace detail
 {
-	var.visit(visitor);
+
+template <typename VisitorType>
+auto visit_impl(VisitorType&& visitor) {}
+
+template <typename VisitorType, typename First, typename... Rest>
+auto visit_impl(VisitorType&& visitor, First&& first, Rest&&... rest)
+{
+	std::forward<First>(first).visit(visitor);
+	visit_impl(std::forward<VisitorType>(visitor), std::forward<Rest>(rest)...);
 }
 
-template <typename var_t, typename T, typename... Ts>
-auto visit(var_t& var, T& visitor, Ts&... rest)
+}
+
+template <typename VisitorType, typename... VariantTypes>
+auto visit(VisitorType&& visitor, VariantTypes&&... variants)
 {
-	visit(var, visitor);
-	visit(var, visitors...);
+	detail::visit_impl(std::forward<VisitorType>(visitor), std::forward<VariantTypes>(variants)...);
+}
+
+template <typename T, typename... Ts>
+bool holds_alternative(const variant<Ts...>& v) noexcept
+{
+	return v.is_type<T>();
+}
+
+template <typename T, typename... Ts>
+T& get(variant<Ts...>& v)
+{
+	return v.get_ref<T>();
 }

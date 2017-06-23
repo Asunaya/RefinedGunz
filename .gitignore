@@ -41,6 +41,8 @@ CsCommon/MSSQL
 sdk/bullet/include/**/*.cpp
 mlog.txt
 build/
+msvcbuild/*
+!msvcbuild/build.bat
 
 # Visual Studio 2015 cache/options directory
 .vs/

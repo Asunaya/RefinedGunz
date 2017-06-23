@@ -212,9 +212,10 @@ static auto SlerpImpl(const T& from, const T& to, float t)
 	auto clamp = [&](auto&& val, auto&& minval, auto&& maxval) {
 		return max(minval, min(maxval, val));
 	};
-	auto costheta = clamp(DotProduct(from, to), -1, 1);
 
-	if (costheta > 0.999999)
+	auto costheta = clamp(DotProduct(from, to), -1.f, 1.f);
+
+	if (costheta > 0.999999f)
 		return Lerp(from, to, t);
 
 	auto angle = acos(costheta);
@@ -228,11 +229,6 @@ v4 Slerp(const v4& from, const v4& to, float t) { return SlerpImpl(from, to, t);
 
 rquaternion Slerp(const rquaternion& from, const rquaternion& to, float t)
 {
-	auto clamp = [&](auto&& val, auto&& minval, auto&& maxval) {
-		return max(minval, min(maxval, val));
-	};
-
-
 	auto temp = 1.0f - t;
 	auto costheta = DotProduct(from, to);
 

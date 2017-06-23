@@ -561,6 +561,7 @@
     <ClInclude Include="Include\defer.h" />
     <ClInclude Include="Include\MClipboard.h" />
     <ClInclude Include="Include\MFile.h" />
+    <ClInclude Include="Include\MProcess.h" />
     <ClInclude Include="Include\MUrl.h" />
     <ClInclude Include="Include\MVK.h" />
     <ClInclude Include="Include\MWindows.h" />
@@ -577,6 +578,7 @@
     <ClInclude Include="Include\MultiVector.h" />
     <ClInclude Include="Include\MVector3.h" />
     <ClInclude Include="Include\MZFile.h" />
+    <ClInclude Include="include\reinterpret.h" />
     <ClInclude Include="Include\RingBuffer.h" />
     <ClInclude Include="Include\seed.h" />
     <ClInclude Include="Include\CfgFile.h" />
@@ -585,7 +587,6 @@
     <ClInclude Include="Include\CMPtrList.h" />
     <ClInclude Include="Include\CommonLog.h" />
     <ClInclude Include="Include\FileInfo.h" />
-    <ClInclude Include="Include\Hash.h" />
     <ClInclude Include="Include\LibPak.h" />
     <ClInclude Include="Include\MArchive.h" />
     <ClInclude Include="Include\MAsyncHttp.h" />
@@ -636,6 +637,7 @@
     <ClCompile Include="Source\MClipboard.cpp" />
     <ClCompile Include="Source\MFile.cpp" />
     <ClCompile Include="Source\MMatrix.cpp" />
+    <ClCompile Include="source\MProcess.cpp" />
     <ClCompile Include="source\MTime.cpp" />
     <ClCompile Include="Source\MUrl.cpp" />
     <ClCompile Include="Source\MVector3.cpp" />
@@ -646,20 +648,6 @@
     <ClCompile Include="Source\CMLexicalAnalyzer.cpp" />
     <ClCompile Include="Source\CommonLog.cpp" />
     <ClCompile Include="Source\FileInfo.cpp" />
-    <ClCompile Include="Source\hash.c">
-      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CompileAsCpp</CompileAs>
-      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">CompileAsCpp</CompileAs>
-      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release LTCG|Win32'">CompileAsCpp</CompileAs>
-      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Clang Release LTCG|Win32'">CompileAsCpp</CompileAs>
-      <CompileAs Condition="'$(Configuration)|$(Platform)'=='MatchServer Release|Win32'">CompileAsCpp</CompileAs>
-      <CompileAs Condition="'$(Configuration)|$(Platform)'=='MatchServer Debug|Win32'">CompileAsCpp</CompileAs>
-      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release LTCG|x64'">CompileAsCpp</CompileAs>
-      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Clang Release LTCG|x64'">CompileAsCpp</CompileAs>
-      <CompileAs Condition="'$(Configuration)|$(Platform)'=='MatchServer Release|x64'">CompileAsCpp</CompileAs>
-      <CompileAs Condition="'$(Configuration)|$(Platform)'=='MatchServer Debug|x64'">CompileAsCpp</CompileAs>
-      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CompileAsCpp</CompileAs>
-      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CompileAsCpp</CompileAs>
-    </ClCompile>
     <ClCompile Include="Source\LibPak.cpp" />
     <ClCompile Include="Source\MArchive.cpp" />
     <ClCompile Include="source\MAsyncHttp.cpp" />

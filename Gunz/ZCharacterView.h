@@ -30,6 +30,9 @@ struct ZCharacterViewInfo
 
 class ZCharacterView : public ZMeshView{
 public:
+	rvector force{ 15, 0, 0 };
+	float maxForce = 10;
+
 	bool				m_bDrawInfo;
 	ZCharacterViewInfo	m_Info;
 	ZItemSlot			m_ItemSlots[MMCIP_END];

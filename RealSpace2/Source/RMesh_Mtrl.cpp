@@ -260,10 +260,10 @@ void RMesh::SetCharacterMtrl_ON(RMtrl* pMtrl,RMeshNode* pMNode,float vis_alpha,D
 
 	D3DCOLORVALUE _color;
 
-	_color.r = 0.6;
-	_color.g = 0.6;
-	_color.b = 0.6;
-	_color.a = 1.0;
+	_color.r = 0.6f;
+	_color.g = 0.6f;
+	_color.b = 0.6f;
+	_color.a = 1;
 
 	if( m_pVisualMesh && !pMNode->m_bNpcWeaponMeshNode ) { 
 		_color = m_pVisualMesh->m_NPCBlendColor; 
@@ -419,5 +419,7 @@ void RMesh::SkyBoxMtrlOff()
 	}
 }
 
-
 _NAMESPACE_REALSPACE2_END
+
+#undef __BP
+#undef __EP

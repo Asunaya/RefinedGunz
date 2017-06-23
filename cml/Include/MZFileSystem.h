@@ -7,7 +7,7 @@
 #include "MZip.h"
 #include "MUtil.h"
 #include "StringView.h"
-#include "Hash.h"
+#include "MHash.h"
 
 #define DEF_EXT	"mrs"
 

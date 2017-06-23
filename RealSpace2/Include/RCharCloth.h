@@ -1,6 +1,3 @@
-#ifndef _RCHARCLOTH_H
-#define _RCHARCLOTH_H
-
 //////////////////////////////////////////////////////////////////////////
 //	Cloth for Gunz
 //	- 코트전용
@@ -8,7 +5,7 @@
 //  [10/21/2003]
 //////////////////////////////////////////////////////////////////////////
 
-//#pragma once
+#pragma once
 
 #include "RCloth.h"
 #include "RMesh.h"
@@ -86,13 +83,10 @@ protected:
 	rvector		mForceField;	//	input force
 	rvector*	mpInitNormal;
 
-	bool		mInitParticle;				//	리스폰 같이 순간적으로 캐릭터가 멀리 뛸 경우 옷이 갑자기 늘어나는 현상 방지용
+	bool		mInitParticle;
 	RSphere		mSphere[6];
 
 	RMeshNode*	mBips[NUM_CLOTH_BONE];
 	int			mUpdateStatus;
-	DWORD mTime;
+	u64 mTime;
 };
-
-
-#endif

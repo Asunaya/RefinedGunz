@@ -58,7 +58,7 @@ void AniFrameInfo::Frame(RAniMode amode,RVisualMesh* pVMesh)
 
 	if(m_pAniSet==NULL) return;
 
-	u32 cur = GetGlobalTimeMS();
+	auto cur = GetGlobalTimeMS();
 
 	if(m_bChangeAnimation) {
 
@@ -147,7 +147,7 @@ void AniFrameInfo::Frame(RAniMode amode,RVisualMesh* pVMesh)
 	int bf = 0;
 	int ef = max_frame;
 
-	u32 delta;
+	u64 delta;
 
 	if( m_save_time==0 ) {
 		delta = 0;
@@ -156,7 +156,7 @@ void AniFrameInfo::Frame(RAniMode amode,RVisualMesh* pVMesh)
 	else 
 		delta = cur - m_1frame_time;
 
-	int FrameAdvance = delta * m_fSpeed;
+	int FrameAdvance = int(delta * m_fSpeed);
 
 	m_nFrame += FrameAdvance;
 
@@ -189,7 +189,7 @@ void AniFrameInfo::Frame(RAniMode amode,RVisualMesh* pVMesh)
 }
 
 
-void RFrameTime::Start(float fMax,u32 MaxTime,u32 ReturnMaxTime) {
+void RFrameTime::Start(float fMax, u64 MaxTime, u64 ReturnMaxTime) {
 
 	m_fMaxValue = fMax;
 	m_dwStartTime = GetGlobalTimeMS();
@@ -212,7 +212,7 @@ void RFrameTime::Update() {
 
 	if(!m_bActive) return;
 
-	u32 dwThisTime = GetGlobalTimeMS();
+	u64 dwThisTime = GetGlobalTimeMS();
 
 	if(dwThisTime > m_dwEndTime ) {
 
@@ -1660,7 +1660,7 @@ bool RVisualMesh::SetAnimation(RAniMode animode,RAnimation* pAniSet,bool b)
 			if( pInfo->m_pAniSet->GetMaxFrame())
 				ff = pInfo->m_nFrame / (float) pInfo->m_pAniSet->GetMaxFrame();
 
-			pInfo->m_nAddFrame = pAniSet->GetMaxFrame() * ff; 
+			pInfo->m_nAddFrame = int(pAniSet->GetMaxFrame() * ff);
 		}
 		else {
 			pInfo->m_nAddFrame = 0;
@@ -1910,6 +1910,9 @@ void RVisualMesh::OutputDebugString_CharacterState()
 
 	str.PrintLog();
 }
+
+#undef AddText
+#undef AddTextEnum
 
 void RVisualMesh::ClearAnimation()
 {
@@ -2364,5 +2367,7 @@ void RVisualMesh::SetClothValue(bool bGame,float fDist)
 	m_bClothGame = bGame;
 }
 
+#undef __BP
+#undef __EP
 
 _NAMESPACE_REALSPACE2_END

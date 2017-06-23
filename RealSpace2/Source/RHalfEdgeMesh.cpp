@@ -1099,7 +1099,7 @@ void	RButterflyMesh::CalAddedVertex( sHEEdge* peCurr_, sHEVertex* pvCurr_, sHEVe
 			_ASSERT( !" " );
 		}
 //*/
-		*nVertex_	+= 0.41667 * *pvTemp;
+		*nVertex_	+= 0.41667f * *pvTemp;
 
 		peTemp	= peTemp->pNext;
 		if( peTemp->pPair != NULL )
@@ -1114,7 +1114,7 @@ void	RButterflyMesh::CalAddedVertex( sHEEdge* peCurr_, sHEVertex* pvCurr_, sHEVe
 			reverse	= true;
 		}
 
-		*nVertex_	+= -0.08333 * *pvTemp;
+		*nVertex_	+= -0.08333f * *pvTemp;
 
 		if( reverse )
 		{
@@ -1128,7 +1128,7 @@ void	RButterflyMesh::CalAddedVertex( sHEEdge* peCurr_, sHEVertex* pvCurr_, sHEVe
 			pvTemp	= peTemp->pVertex;
 		}
 
-		*nVertex_	+= -0.08333 * *pvTemp;
+		*nVertex_	+= -0.08333f * *pvTemp;
 	}
 	else if( valence_ == 4 )
 	{
@@ -1137,7 +1137,7 @@ void	RButterflyMesh::CalAddedVertex( sHEEdge* peCurr_, sHEVertex* pvCurr_, sHEVe
 		sHEEdge*	peTemp;
 		sHEVertex*	pvTemp;
 
-		*nVertex_	= 0.75 * *pvDest_;
+		*nVertex_	= 0.75f * *pvDest_;
 
 		peTemp	= peCurr_;
 		peTemp	= peTemp->pPair;
@@ -1149,7 +1149,7 @@ void	RButterflyMesh::CalAddedVertex( sHEEdge* peCurr_, sHEVertex* pvCurr_, sHEVe
 			_ASSERT( !" " );
 		}
 //*/
-		*nVertex_	+= 0.375 * *pvTemp;
+		*nVertex_	+= 0.375f * *pvTemp;
 
 		peTemp	= peTemp->pNext;
 		peTemp	= peTemp->pPair;
@@ -1173,7 +1173,7 @@ void	RButterflyMesh::CalAddedVertex( sHEEdge* peCurr_, sHEVertex* pvCurr_, sHEVe
 			pvTemp	= peTemp->pVertex;
 		}
 		
-		*nVertex_ +=	-0.125 * *pvTemp;
+		*nVertex_ +=	-0.125f * *pvTemp;
 	}
 	else 
 	{
@@ -1188,15 +1188,15 @@ void	RButterflyMesh::CalAddedVertex( sHEEdge* peCurr_, sHEVertex* pvCurr_, sHEVe
 		float weight_sum = 0;
 		float weight;
 
-		weight = ( 1.25 + 0.5 ) / valence_;
+		weight = ( 1.25f + 0.5f ) / valence_;
 		*nVertex_ = weight * *pvTemp;
 
 		weight_sum = weight;
 
 		for( int j = 1 ; j < valence_ ; ++j )
 		{
-			weight = ((0.25 + cos(( 2 * PI_FLOAT * j ) / valence_ )) + 
-				(0.5 * cos(( 4 * PI_FLOAT * j ) / valence_ )) ) / valence_;
+			weight = ((0.25f + cos(( 2 * PI_FLOAT * j ) / valence_ )) + 
+				(0.5f * cos(( 4 * PI_FLOAT * j ) / valence_ )) ) / valence_;
 
 			if( reverse )
 			{

@@ -41,7 +41,6 @@ void ReleaseFlashBangEffect()
 	ZGetFlashBangEffect()->ReleaseBuffer();
 }
 
-#define CORRECTION			0.01f
 #define SCREEN_BLUR_TEXTURE_SIZE_WIDTH	800
 #define SCREEN_BLUR_TEXTURE_SIZE_HEIGHT	600
 #define MAX_MUSIC_VOLUMN	Z_AUDIO_BGM_VOLUME
@@ -52,26 +51,28 @@ extern ZGame* g_pGame;
 
 void ZEffectFlashBang::SetBuffer()
 {
+	constexpr float Correction = 0.01f;
+
 	// left top
-	mBuffer[0].p		= { 0.0f - CORRECTION, 0.0f - CORRECTION, 0, 1.0f };
+	mBuffer[0].p		= { 0.0f - Correction, 0.0f - Correction, 0, 1.0f };
 	mBuffer[0].color	= 0xffffffff;
 	mBuffer[0].tu		= 0.0f;
 	mBuffer[0].tv		= 0.0f;
 
 	// right top
-	mBuffer[1].p		= { RGetScreenWidth() + CORRECTION, 0.0f - CORRECTION, 0, 1.0f };
+	mBuffer[1].p		= { RGetScreenWidth() + Correction, 0.0f - Correction, 0, 1.0f };
 	mBuffer[1].color	= 0xffffffff;
 	mBuffer[1].tu		= 1.0f;
 	mBuffer[1].tv		= 0.0f;
 
 	// right bottom
-	mBuffer[2].p		= { RGetScreenWidth() + CORRECTION, RGetScreenHeight() + CORRECTION, 0, 1.0f };
+	mBuffer[2].p		= { RGetScreenWidth() + Correction, RGetScreenHeight() + Correction, 0, 1.0f };
 	mBuffer[2].color	= 0xffffffff;
 	mBuffer[2].tu		= 1.0f;
 	mBuffer[2].tv		= 1.0f;
 
 	// left bottom
-	mBuffer[3].p		= { 0.0f - CORRECTION, static_cast<float>(RGetScreenHeight()), 0, 1.0f };
+	mBuffer[3].p		= { 0.0f - Correction, static_cast<float>(RGetScreenHeight()), 0, 1.0f };
 	mBuffer[3].color	= 0xffffffff;
 	mBuffer[3].tu		= 0.0f;
 	mBuffer[3].tv		= 1.0f;

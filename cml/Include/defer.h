@@ -25,4 +25,4 @@ defer<T, ArgsType...> make_defer(T&& fn, ArgsType&&... Args) {
 	return{ std::forward<T>(fn), std::forward<ArgsType>(Args)... };
 }
 
-#define DEFER(callable, ...) const auto&& TOKENIZE(defer_instance, __COUNTER__){make_defer(callable, __VA_ARGS__)}
+#define DEFER(...) const auto&& TOKENIZE(defer_instance, __COUNTER__){make_defer(__VA_ARGS__)}

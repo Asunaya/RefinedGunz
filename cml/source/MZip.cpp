@@ -1004,7 +1004,7 @@ void FFileList::RecoveryZip()
 }
 
 #ifdef WIN32
-#include <Shlwapi.h>
+#include <shellapi.h>
 void FFileList::ConvertVtf() 
 {
 	iterator node;
@@ -1023,7 +1023,7 @@ void FFileList::ConvertVtf()
 		strcat_safe(temp, "tga");
 
 		sprintf_safe(temp_arg,"%s %s",pNode->m_name,temp);
-		HINSTANCE hr = ShellExecute(NULL, _T("open"), _T("vtf2tga.exe"),_T(temp_arg), NULL, SW_HIDE);
+		HINSTANCE hr = ShellExecuteA(NULL, _T("open"), _T("vtf2tga.exe"),_T(temp_arg), NULL, SW_HIDE);
 	}
 }
 #endif

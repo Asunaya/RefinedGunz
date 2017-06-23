@@ -1974,6 +1974,21 @@ void ZCharacter::OutputDebugString_CharacterState()
 	}
 }
 
+#undef AddText
+#undef AddTextEnum
+
+#undef IF_SITEM_ENUM
+#undef ELSE_IF_SITEM_ENUM
+
+#undef IF_LD_ENUM
+#undef ELSE_IF_LD_ENUM
+
+#undef IF_Upper_ENUM
+#undef ELSE_IF_Upper_ENUM
+
+#undef IF_Lower_ENUM
+#undef ELSE_IF_Lower_ENUM
+
 void ZCharacter::TestToggleCharacter()
 {
 	if(m_pVMesh->m_pMesh) {

@@ -33,7 +33,6 @@
     <ClInclude Include="Include\CMPtrList.h" />
     <ClInclude Include="Include\CommonLog.h" />
     <ClInclude Include="Include\FileInfo.h" />
-    <ClInclude Include="Include\Hash.h" />
     <ClInclude Include="Include\LibPak.h" />
     <ClInclude Include="Include\MArchive.h" />
     <ClInclude Include="Include\MAsyncHttp.h" />
@@ -97,6 +96,8 @@
     <ClInclude Include="Include\MClipboard.h" />
     <ClInclude Include="Include\MWindowsFwd.h" />
     <ClInclude Include="Include\RingBuffer.h" />
+    <ClInclude Include="Include\MProcess.h" />
+    <ClInclude Include="include\reinterpret.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\MMatrix.cpp">
@@ -112,7 +113,6 @@
     <ClCompile Include="Source\CMLexicalAnalyzer.cpp" />
     <ClCompile Include="Source\CommonLog.cpp" />
     <ClCompile Include="Source\FileInfo.cpp" />
-    <ClCompile Include="Source\hash.c" />
     <ClCompile Include="Source\LibPak.cpp" />
     <ClCompile Include="Source\MArchive.cpp" />
     <ClCompile Include="source\MAsyncHttp.cpp" />
@@ -153,5 +153,6 @@
     <ClCompile Include="Source\MUrl.cpp" />
     <ClCompile Include="Source\MClipboard.cpp" />
     <ClCompile Include="Source\MVK.cpp" />
+    <ClCompile Include="source\MProcess.cpp" />
   </ItemGroup>
 </Project>

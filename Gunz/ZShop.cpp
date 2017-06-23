@@ -11,21 +11,6 @@
 #include "ZEquipmentListBox.h"
 #include "ZNetRepository.h"
 
-// 어디다 넣어야??
-enum {
-	zshop_item_filter_all = 0,
-	zshop_item_filter_head,
-	zshop_item_filter_chest,
-	zshop_item_filter_hands,
-	zshop_item_filter_legs,
-	zshop_item_filter_feet,
-	zshop_item_filter_melee,
-	zshop_item_filter_range,
-	zshop_item_filter_custom,
-	zshop_item_filter_extra,
-	zshop_item_filter_quest,
-};
-
 ZShop::ZShop() : m_nPage(0), m_bCreated(false)
 {
 	m_ListFilter = zshop_item_filter_all;
@@ -39,8 +24,7 @@ bool ZShop::Create()
 {
 	if (m_bCreated) return false;
 
-	// 서버에 Shop Item 리스트 달라고 요청
-	ZPostRequestShopItemList(ZGetGameClient()->GetPlayerUID(), 0, 0);	// 0개면 전체를 달라고 요청하는것이다
+	ZPostRequestShopItemList(ZGetGameClient()->GetPlayerUID(), 0, 0);
 	ZPostRequestCharacterItemList(ZGetGameClient()->GetPlayerUID());
 
 	m_bCreated = true;
@@ -95,12 +79,10 @@ void ZShop::Serialize()
 			pItemDesc = MGetMatchItemDescMgr()->GetItemDesc(m_ItemVector[i]);
 
 			if (pItemDesc != NULL) {
-				// 성별이 다르면 아예 목록에서 뺀다
 				if (pItemDesc->m_nResSex != -1)	{
 					if (pItemDesc->m_nResSex != int(ZGetMyInfo()->GetSex())) continue;
 				}
 
-				// 상점물품은 1부터 시작. int대신 uid 자료형에 넣는다.
 				MUID uidItem = MUID(0, i+1);
 
 				if ( CheckAddType(pItemDesc->m_nSlot))
@@ -142,7 +124,6 @@ void ZShop::Serialize()
 
 
 #ifdef _DEBUG
-	// 테스트
 	pListBox = (MListBox*)pResource->FindWidget( "CashEquipmentList");
 	if ( pListBox)
 	{
@@ -153,7 +134,6 @@ void ZShop::Serialize()
 		{
 			MUID uidItem = MUID(0, 200);
 
-			// 성별이 다르면 아예 목록에서 뺀다
 			if ( (pItemDesc->m_nResSex == -1) || (pItemDesc->m_nResSex == int(ZGetMyInfo()->GetSex())))
 				((ZEquipmentListBox*)(pListBox))->Add( uidItem,
 														pItemDesc->m_nID,

@@ -4,7 +4,7 @@ namespace rsx {
 namespace data {
 
 #pragma warning(push)
-#pragma warning(disable: 4838)
+#pragma warning(disable: 4305 4838)
 const int nvert = 2880;
 const float sphere[] = {
 	0.000698, 1.000000, 0.000030,

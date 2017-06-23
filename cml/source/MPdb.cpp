@@ -33,15 +33,20 @@ PGET_MODULE_BASE_ROUTINE		g_pfnGetModuleBaseRoutine;
 
 #include "MDebug.h"
 
-BOOL CALLBACK EnumLoadedModulesCallback(LPSTR pModuleName, ULONG ulModuleBase,  ULONG ulModuleSize,  PVOID pUserContext)
+namespace MPdb
 {
-    if (!g_pfnSymLoadModule((HANDLE)pUserContext, 0, pModuleName, 0, ulModuleBase, ulModuleSize))
-    {
-//		::MessageBox(NULL,"SymLoadModule failed","error",MB_OK);
-		mlog("SymLoadModule failed %d ( module = %s ) \n",GetLastError(),pModuleName);
+
+BOOL CALLBACK EnumLoadedModulesCallback(LPSTR pModuleName, ULONG ulModuleBase, ULONG ulModuleSize, PVOID pUserContext)
+{
+	if (!g_pfnSymLoadModule((HANDLE)pUserContext, 0, pModuleName, 0, ulModuleBase, ulModuleSize))
+	{
+		//		::MessageBox(NULL,"SymLoadModule failed","error",MB_OK);
+		mlog("SymLoadModule failed %d ( module = %s ) \n", GetLastError(), pModuleName);
 		return false;
-    }
-    return TRUE;
+	}
+	return TRUE;
+}
+
 }
 
 // Disable warning about GetVersionEx deprecation
@@ -68,7 +73,7 @@ void LoadModuleSymbols(DWORD dwProcessId, HANDLE hProcess)
 	if (osver.dwPlatformId == VER_PLATFORM_WIN32_NT)
 	{
 //		mlog("LoadModuleSymbols,VER_PLATFORM_WIN32_NT\n");
-		if (!g_pfnEnumerateLoadedModules(hProcess, (PENUMLOADED_MODULES_CALLBACK)EnumLoadedModulesCallback, (PVOID)hProcess))
+		if (!g_pfnEnumerateLoadedModules(hProcess, (PENUMLOADED_MODULES_CALLBACK)MPdb::EnumLoadedModulesCallback, (PVOID)hProcess))
 		{
 //			::MessageBox(NULL,"EnumerateLoadedModules failed","error",MB_OK);
 //			mlog("LoadModuleSymbols,EnumerateLoadedModules failed\n");

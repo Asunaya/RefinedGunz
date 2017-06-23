@@ -9,5 +9,5 @@ color_r32::operator D3DCOLORVALUE() const
 
 color_r32::operator u32() const
 {
-	return ARGB(a * 255, r * 255, g * 255, b * 255);
+	return ARGB(uint8_t(a * 255), uint8_t(r * 255), uint8_t(g * 255), uint8_t(b * 255));
 }

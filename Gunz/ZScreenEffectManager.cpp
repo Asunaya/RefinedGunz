@@ -469,6 +469,9 @@ bool ZScreenEffectManager::Create()
 
 	END_("Screen Effect Manager Create");
 	return true;
+
+#undef BEGIN_
+#undef END_
 }
 
 void ZScreenEffectManager::Add(ZEffect *pEffect)
@@ -505,6 +508,8 @@ void DrawGuage(float x,float y,float fWidth,float fHeight,float fLeanDir,DWORD c
 	SETVERTEX(3,x2+fLean,y2,0,	1,1,color);
 
 	HRESULT hr=RGetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP,2,ver,sizeof(TLVERTEX));
+
+#undef SETVERTEX
 }
 
 void ZScreenEffectManager::ReSetHpPanel()

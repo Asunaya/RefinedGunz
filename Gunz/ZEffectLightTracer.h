@@ -1,16 +1,13 @@
-#ifndef ZEFFECTLIGHTTRACER_H
-#define ZEFFECTLIGHTTRACER_H
+#pragma once
 
+#include "GlobalTypes.h"
 #include "ZEffectBillboard.h"
-
 #include "mempool.h"
-
-// 사용안하는것들은 지운다..
 
 class ZEffectLightTracer : public ZEffectBillboard , public CMemPoolSm<ZEffectLightTracer>
 {
 protected:
-	unsigned long int m_nStartTime;
+	u64 m_nStartTime;
 
 	rvector	m_LightTracerDir;
 	rvector	m_Start, m_End;
@@ -20,7 +17,5 @@ public:
 	ZEffectLightTracer(ZEffectBillboardSource* pEffectBillboardSource, const rvector& Start, const rvector& End);
 	virtual ~ZEffectLightTracer(void);
 
-	virtual bool Draw(unsigned long int nTime);
+	virtual bool Draw(u64 nTime);
 };
-
-#endif

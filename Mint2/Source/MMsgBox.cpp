@@ -3,6 +3,10 @@
 #include "MStringTable.h"
 #include "Mint.h"
 
+#ifdef GetMessage
+#undef GetMessage
+#endif
+
 int charinstr(char* sz, char c)
 {
 	int len = strlen(sz);

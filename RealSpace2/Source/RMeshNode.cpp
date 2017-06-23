@@ -281,7 +281,7 @@ bool RMeshNode::SetBVertData(RBlendVertex* pBVert,int i,int j,int pv_index,int* 
 			m_MatrixMap[matrixIndex++] = index;
 		}
 
-		pBVert[pv_index].matIndex[k] = DifferenceMap[index];
+		pBVert[pv_index].matIndex[k] = float(DifferenceMap[index]);
 	}
 
 	return true;
@@ -1510,5 +1510,8 @@ bool RMeshNode::isAlphaMtrlNode()
 		return true;
 	return false;
 }
+
+#undef __BP
+#undef __EP
 
 _NAMESPACE_REALSPACE2_END

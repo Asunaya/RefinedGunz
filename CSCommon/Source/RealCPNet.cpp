@@ -15,10 +15,12 @@
 #pragma comment(lib, "Mswsock.lib")
 #endif
 
+#include "MSocket.h"
 #include "RealCPNet.h"
 #include <time.h>
 #include "MCrashDump.h"
 #include "MInetUtil.h"
+#include "MFile.h"
 
 #ifndef _PUBLISH
 	#include "MProcessController.h"
@@ -384,7 +386,7 @@ MRealSession* MRealCPNet::UpdateCompletionPort(SOCKET sd, RCP_IO_OPERATION nOper
 
 bool MRealCPNet::MakeSockAddr(const char* pszIP, int nPort, MSocket::sockaddr_in* pSockAddr)
 {
-	sockaddr_in 	RemoteAddr;
+	sockaddr_in RemoteAddr{};
 	memset((char*)&RemoteAddr, 0, sizeof(sockaddr_in));
 
 	// Set Dest IP and Port 
@@ -394,7 +396,7 @@ bool MRealCPNet::MakeSockAddr(const char* pszIP, int nPort, MSocket::sockaddr_in
 	if (dwAddr != INADDR_NONE) {
 		memcpy(&(RemoteAddr.sin_addr), &dwAddr, 4);
 	} else {
-		auto pHost = gethostbyname(pszIP);
+		auto pHost = MSocket::gethostbyname(pszIP);
 		if (pHost == NULL) { // error
 			OutputDebugString("<REALCP_ERROR> Can't resolve hostname </REALCP_ERROR>\n");
 			return false;
@@ -853,8 +855,8 @@ u32 MRealCPNet::CrashDump(EXCEPTION_POINTERS* ExceptionInfo)
 	mlog("CrashDump Entered\n");
 	std::lock_guard<MCriticalSection> lock{ m_csCrashDump };
 
-	if (PathIsDirectory("Log") == FALSE)
-		CreateDirectory("Log", NULL);
+	if (!MFile::IsDir("Log"))
+		MFile::CreateDir("Log");
 
 	time_t tClock;
 	tm tmTime;

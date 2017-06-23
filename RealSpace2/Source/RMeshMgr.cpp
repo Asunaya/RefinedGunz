@@ -605,4 +605,7 @@ RMeshNode* RMeshMgr::GetPartsNode(const char* name)
 	return NULL;
 }
 
+#undef __BP
+#undef __EP
+
 _NAMESPACE_REALSPACE2_END

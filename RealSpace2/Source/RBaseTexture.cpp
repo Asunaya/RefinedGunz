@@ -333,4 +333,7 @@ void RChangeBaseTextureLevel(RTextureType flag)
 	_RPT0(_CRT_WARN, "change texture level complete\n");
 }
 
+#undef __BP
+#undef __EP
+
 _NAMESPACE_REALSPACE2_END

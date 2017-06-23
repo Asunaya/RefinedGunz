@@ -44,7 +44,7 @@ bool RLightList::Open(rapidxml::xml_node<>& parent)
 			};
 
 			auto ReadFloat = [&](auto& f) {
-				f = atof(szContents);
+				f = float(atof(szContents));
 			};
 
 			if (_stricmp(szTagName, RTOK_POSITION) == 0)

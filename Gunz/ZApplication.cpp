@@ -490,6 +490,9 @@ BirdGo:
 #endif
 
 	return true;
+
+#undef BEGIN_
+#undef END_
 }
 
 void ZApplication::OnDestroy()

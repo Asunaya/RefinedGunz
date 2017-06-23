@@ -1270,11 +1270,6 @@ MFontR2& Chat::GetFont(u32 Emphasis)
 	return DefaultFont;
 }
 
-template <typename T>
-static auto Reverse(T&& Container, int Offset = 0) {
-	return MakeRange(Container.rbegin() + Offset, Container.rend());
-}
-
 static auto GetDrawLinesRect(const D3DRECT& OutputRect, int LinesDrawn,
 	v2i PixelOffset, int FontHeight)
 {
@@ -1307,6 +1302,10 @@ static u32 ScaleAlpha(u32 Color, float MessageTime, float CurrentTime,
 
 void Chat::DrawChatLines(MDrawContext* pDC, float Time, int Limit, bool ShowAll)
 {
+	auto Reverse = [&](auto&& Container, int Offset = 0) {
+		return MakeRange(Container.rbegin() + Offset, Container.rend());
+	};
+
 	DefaultFont.m_Font.BeginFont();
 
 	auto PrevClipRect = pDC->GetClipRect();

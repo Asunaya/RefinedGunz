@@ -20,9 +20,9 @@ u8* MemoryMappedFile::Open( const char *lpszFileName, bool bReadOnly )
 	// Modified by Leejangho ( 98-01-30 5:58:49 ¿ÀÈÄ )
 	//		m_fileHandle=CreateFile(lpszFileName,GENERIC_READ,FILE_SHARE_READ,NULL,OPEN_EXISTING,FILE_FLAG_RANDOM_ACCESS,NULL);
 	if(bReadOnly==TRUE)
-		m_fileHandle=CreateFile(lpszFileName,GENERIC_READ,FILE_SHARE_READ,NULL,OPEN_EXISTING,FILE_FLAG_RANDOM_ACCESS,NULL);
+		m_fileHandle=CreateFileA(lpszFileName,GENERIC_READ,FILE_SHARE_READ,NULL,OPEN_EXISTING,FILE_FLAG_RANDOM_ACCESS,NULL);
 	else
-		m_fileHandle=CreateFile(lpszFileName,GENERIC_READ|GENERIC_WRITE,0,NULL,OPEN_EXISTING,FILE_FLAG_RANDOM_ACCESS,NULL);
+		m_fileHandle=CreateFileA(lpszFileName,GENERIC_READ|GENERIC_WRITE,0,NULL,OPEN_EXISTING,FILE_FLAG_RANDOM_ACCESS,NULL);
 	if(m_fileHandle==INVALID_HANDLE_VALUE){	
 #ifdef _DEBUG
 		OutputDebugString("MemoryMappedFile : (Open) Fail, CreateFile\n");

@@ -5,7 +5,7 @@
 class ZMsgBox : public MMsgBox{
 protected:
 	bool				m_bExclusive;
-	unsigned long int	m_nShowTime;
+	u64					m_nShowTime;
 	bool				m_bNextVisible;
 	MListener*			m_pCustomListener;
 

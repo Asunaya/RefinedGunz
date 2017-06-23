@@ -196,14 +196,14 @@ void MSEHTranslator(UINT nSeCode, _EXCEPTION_POINTERS* pExcPointers)
 
 #define MAX_PROFILE_COUNT	10000
 
-struct MPROFILEITEM {
+struct MProfileItem {
 	u64 dwStartTime;
 	u64 dwTotalTime;
 	DWORD dwCalledCount;
 };
 #include <unordered_map>
 #include <stack>
-static thread_local std::unordered_map<std::string, MPROFILEITEM> ProfileItems;
+static thread_local std::unordered_map<std::string, MProfileItem> ProfileItems;
 static thread_local u64 g_dwEnableTime;
 static thread_local std::stack<std::string> Stack;
 static thread_local std::stack<int> IndexStack;
@@ -301,7 +301,8 @@ void MSaveProfile(const char *filename)
 	for (auto it = ProfileItems.begin(); it != ProfileItems.end(); it++)
 		vec.emplace_back(it);
 
-	std::sort(vec.begin(), vec.end(), [&](auto&& lhs, auto&& rhs) { return lhs->second.dwTotalTime > rhs->second.dwTotalTime; });
+	std::sort(vec.begin(), vec.end(), [&](auto&& lhs, auto&& rhs) {
+		return lhs->second.dwTotalTime > rhs->second.dwTotalTime; });
 
 	fprintf(file," total time = %f seconds \n", (float)dwTotalTime*0.001f);
 	fprintf(file,"id   (loop ms)  seconds     %%        calledcount   name \n");

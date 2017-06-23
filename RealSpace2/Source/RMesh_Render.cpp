@@ -735,3 +735,6 @@ bool RMeshRenderSEnd()
 }
 
 _NAMESPACE_REALSPACE2_END
+
+#undef __BP
+#undef __EP

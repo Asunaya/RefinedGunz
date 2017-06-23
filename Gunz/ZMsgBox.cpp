@@ -67,20 +67,18 @@ MListener* ZGetConfirmMsgBoxListener(void)
 	return &g_CofirmMsgBoxListener;
 }
 
-
-#define TRANSIENT_TIME	200
+constexpr auto ZMSGBOX_TRANSIENT_TIME = 200;
 
 void ZMsgBox::Show(bool bVisible, bool bModal)
 {
-	DWORD elapsed=(GetGlobalTimeMS()-m_nShowTime);
+	auto elapsed = (GetGlobalTimeMS() - m_nShowTime);
 
-	if(m_bNextVisible==m_bVisible && m_bVisible==bVisible && elapsed>TRANSIENT_TIME)
+	if (m_bNextVisible == m_bVisible && m_bVisible == bVisible && elapsed > ZMSGBOX_TRANSIENT_TIME)
 		return;
 
-	// 상태가 변경되는 중간에 다른방향으로 가야할경우
 	if(m_bNextVisible!=bVisible){
-		if(elapsed<TRANSIENT_TIME)
-			m_nShowTime=GetGlobalTimeMS()-(TRANSIENT_TIME-elapsed);
+		if (elapsed < ZMSGBOX_TRANSIENT_TIME)
+			m_nShowTime = GetGlobalTimeMS() - (ZMSGBOX_TRANSIENT_TIME - elapsed);
 		else
 			m_nShowTime=GetGlobalTimeMS();
 	}
@@ -112,7 +110,7 @@ void ZMsgBox::OnDraw(MDrawContext* pDC)
 {
 	float fOpacity = 0;
 	if(m_bNextVisible==false){	// Hide
-		fOpacity = 1.0f-min(float(GetGlobalTimeMS()-m_nShowTime)/(float)TRANSIENT_TIME, 1.0f);
+		fOpacity = 1.0f - min(float(GetGlobalTimeMS() - m_nShowTime) / (float)ZMSGBOX_TRANSIENT_TIME, 1.0f);
 		if(fOpacity==0.0f) {
 			m_bVisible = false;
 			m_bExclusive = false;
@@ -120,7 +118,7 @@ void ZMsgBox::OnDraw(MDrawContext* pDC)
 		SetOpacity(u8(fOpacity*0xFF));
 	}
 	else{	// Show
-		fOpacity = min(float(GetGlobalTimeMS()-m_nShowTime)/(float)TRANSIENT_TIME, 1.0f);
+		fOpacity = min(float(GetGlobalTimeMS() - m_nShowTime) / (float)ZMSGBOX_TRANSIENT_TIME, 1.0f);
 		SetOpacity(u8(fOpacity*0xFF));
 	}
 
@@ -132,7 +130,7 @@ ZMsgBox::ZMsgBox(const char* szMessage, MWidget* pParent, MListener* pListener, 
 {
 	m_bCanShade = false;
 	m_bNextVisible = false;
-	m_nShowTime = GetGlobalTimeMS()-TRANSIENT_TIME*2;
+	m_nShowTime = GetGlobalTimeMS() - ZMSGBOX_TRANSIENT_TIME * 2;
 	SetOpacity(0);
 	m_pCustomListener = NULL;
 }

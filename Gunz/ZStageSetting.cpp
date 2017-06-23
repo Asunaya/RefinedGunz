@@ -198,12 +198,12 @@ static bool BuildStageSetting(MSTAGE_SETTING_NODE* pOutNode)
 			return;
 
 		auto Text = Widget->GetText();
-		auto Pair = StringToInt(Text);
+		auto MaybeInt = StringToInt<int>(Text);
 
-		if (!Pair.first)
+		if (!MaybeInt.has_value())
 			return;
 
-		Ret = Pair.second;
+		Ret = MaybeInt.value();
 	};
 
 	GetWidgetInt("StageHP", pOutNode->HP);

@@ -22,6 +22,7 @@
 #include "RNavigationNode.h"
 #include "ZEquipmentListBox.h"
 #include "RBspObject.h"
+#include "reinterpret.h"
 
 ZQuest::ZQuest() : MBaseQuest(), m_bLoaded(false), m_bCreatedOnce(false)
 {

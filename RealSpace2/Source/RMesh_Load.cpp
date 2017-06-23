@@ -1372,5 +1372,7 @@ void RMesh::ClearVoidMtrl()
 	mtrl_size = m_mtrl_list_ex.size();
 }
 
+#undef __BP
+#undef __EP
 
 _NAMESPACE_REALSPACE2_END

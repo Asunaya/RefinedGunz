@@ -23,6 +23,7 @@ desc : 무기 사용 키 커스터마이즈 관련
 #include "MUtil.h"
 #include "RBspObject.h"
 #include "ZPickInfo.h"
+#include "reinterpret.h"
 
 #define CHARGE_SHOT
 // Ninja jumping
@@ -1145,6 +1146,8 @@ void ZMyCharacter::OutputDebugString_CharacterState()
 
 	str.PrintLog();
 }
+
+#undef AddText
 
 void ZMyCharacter::ProcessShot()
 {

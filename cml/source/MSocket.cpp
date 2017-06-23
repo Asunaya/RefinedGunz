@@ -11,6 +11,7 @@
 #include "MDebug.h"
 #include "MInetUtil.h"
 #include "StringView.h"
+#include "MUtil.h"
 
 namespace MSocket
 {
@@ -239,48 +240,6 @@ static int inet_pton4(int af, const char* src, in_addr& dst)
 	return 1;
 }
 
-template <int Radix>
-static int GetDigit(char c)
-{
-	if (isdigit(c))
-		return c - '0';
-
-	if (Radix == 10)
-		return -1;
-
-	c &= u8(~0x20);
-
-	if (c < 'A' || c > 'F')
-		return -1;
-
-	return c - 'A' + 10;
-}
-
-template <int Radix, typename DestType>
-static bool StringToInt(DestType& Dest, const StringView& Str)
-{
-	static_assert(std::is_unsigned<DestType>::value, "");
-
-	int Accumulator = 0;
-	int Coefficient = Radix;
-	for (size_t i = Str.size() - 1; i > 0; --i)
-	{
-		auto Digit = GetDigit<Radix>(Str[i]);
-		if (Digit == -1)
-			return false;
-
-		Accumulator += Digit * Coefficient;
-		Coefficient *= Radix;
-	}
-
-	// Check for overflow.
-	if (Accumulator > (std::numeric_limits<DestType>::max)())
-		return false;
-
-	Dest = Accumulator;
-	return true;
-};
-
 static int inet_pton6(int af, const char* src, in6_addr& dst)
 {
 	static const StringView Separators = ".:";
@@ -336,8 +295,10 @@ static int inet_pton6(int af, const char* src, in6_addr& dst)
 			if (FoundDot)
 				return 0;
 
-			if (!StringToInt<16>(dst.u.Word[BytesFilled / 2], Substring))
+			auto MaybeValue = StringToInt<u16, 16>(Substring);
+			if (!MaybeValue.has_value())
 				return 0;
+			dst.u.Word[BytesFilled / 2] = MaybeValue.value();
 		}
 		else
 		{
@@ -345,8 +306,10 @@ static int inet_pton6(int af, const char* src, in6_addr& dst)
 				(FoundDoubleColon && BytesFilled < 10))
 				return 0;
 
-			if (!StringToInt<10>(dst.u.Byte[BytesFilled / 2], Substring))
+			auto MaybeValue = StringToInt<u8, 10>(Substring);
+			if (!MaybeValue.has_value())
 				return 0;
+			dst.u.Byte[BytesFilled / 2] = MaybeValue.value();
 
 			FoundDot = true;
 			++NumDots;

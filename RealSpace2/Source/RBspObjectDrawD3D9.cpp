@@ -370,8 +370,7 @@ void RBspObjectDrawD3D9::Create(rsx::LoaderState && srcState)
 	
 	DMLog("RBspObjectDrawD3D9 created\n");
 }
-
-static void SetWireframeStates()
+void RBspObjectDrawD3D9::SetWireframeStates()
 {
 	RGetDevice()->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
 	RGetDevice()->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
@@ -381,7 +380,7 @@ static void SetWireframeStates()
 	RGetDevice()->SetRenderState(D3DRS_LIGHTING, FALSE);
 }
 
-static void SetDefaultStates()
+void RBspObjectDrawD3D9::SetDefaultStates()
 {
 	bool Trilinear = RIsTrilinear();
 
@@ -401,7 +400,7 @@ static void SetDefaultStates()
 	RGetDevice()->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
 }
 
-static void DrawBatch(const MaterialBatch& Mat)
+void RBspObjectDrawD3D9::DrawBatch(const MaterialBatch& Mat)
 {
 	auto hr = RGetDevice()->DrawIndexedPrimitive(
 		D3DPT_TRIANGLELIST,    // Primitive type
@@ -438,7 +437,6 @@ void RBspObjectDrawD3D9::SetMaterial(Material& Mat)
 template <RBspObjectDrawD3D9::MaterialType Type>
 void RBspObjectDrawD3D9::SetPrerenderStates()
 {
-
 	switch (Type)
 	{
 	case Normal:

@@ -5,8 +5,13 @@
 u64 GetGlobalTimeMS();
 float GetGlobalTime();
 
+#ifdef _MSC_VER
+// Link Winmm since timeGetTime depends on it
+#pragma comment(lib, "Winmm.lib")
+
 // Soft link GetGlobalTimeMS to GetGlobalTimeMSDefault
 #pragma comment(linker, "/alternatename:?GetGlobalTimeMS@@YA_KXZ=_GetGlobalTimeMSDefault")
+#endif
 
 class MTime {
 public:

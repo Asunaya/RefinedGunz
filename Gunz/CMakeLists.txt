@@ -1,10 +1,12 @@
-cmake_minimum_required(VERSION 2.8)
-include(../cmake/macros.cmake)
-cmake_policy(SET CMP0015 OLD)
+cmake_policy(SET CMP0015 NEW)
 
-project(Gunz CXX)
-
-link_directories(../Gunz;../sdk/zlib/lib;../sdk/dx9/lib/x86;../RealSound/Lib;../sdk/opus/lib/Release;../sdk/portaudio/lib/Release)
+link_directories(
+	../Gunz
+	../sdk/zlib/lib
+	../sdk/dx9/lib/x86
+	../RealSound/Lib
+	../sdk/opus/lib/Release
+	../sdk/portaudio/lib/Release)
 
 file(GLOB src
     "*.h"
@@ -13,36 +15,74 @@ file(GLOB src
 
 set(src "${src};${CMAKE_CURRENT_SOURCE_DIR}/Gunz.rc")
 
-add_target(NAME Gunz TYPE EXECUTABLE SOURCES "${src}" PCH_FILE stdafx.h)
+add_target(NAME Gunz TYPE EXECUTABLE SOURCES "${src}")
+add_target(NAME Gunz_lib TYPE STATIC SOURCES "${src}")
 
-target_include_directories(Gunz PUBLIC ../sdk/dx9/include;../sdk;../CSCommon/Include;../SafeUDP/Include;../CML/Include;../RealSpace2/Include;../MAI/Include;../RealSpace/Include;../Mint2/Include;../RealSound/Include;../MDatabase/Include;../MCountryFilter/Include;../sdk/rapidxml/include;../sdk/libsodium/include;../sdk/opus/include;../sdk/portaudio/include)
+macro(target_include_directories_both)
+	target_include_directories(Gunz ${ARGV})
+	target_include_directories(Gunz_lib ${ARGV})
+endmacro()
 
-target_link_libraries(Gunz zlib.lib;fmodvc.lib;../sdk/libsodium/lib/static/libsodium;legacy_stdio_definitions.lib)
+macro(target_link_libraries_both)
+	target_link_libraries(Gunz ${ARGV})
+	target_link_libraries(Gunz_lib ${ARGV})
+endmacro()
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4244 /wd4305")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /ignore:4099 /ignore:4221 /SUBSYSTEM:WINDOWS")
+macro(add_dependencies_both)
+	add_dependencies(Gunz ${ARGV})
+	add_dependencies(Gunz_lib ${ARGV})
+endmacro()
 
-function(link_lib lib_name)
-target_link_libraries(Gunz debug ${lib_name}/Debug/${lib_name})
-target_link_libraries(Gunz optimized ${lib_name}/Release/${lib_name})
-endfunction()
+macro(target_compile_options_both)
+	target_compile_options(Gunz ${ARGV})
+	target_compile_options(Gunz_lib ${ARGV})
+endmacro()
 
-link_lib(cml)
-link_lib(RealSpace2)
-link_lib(CSCommon)
-link_lib(Mint2)
-link_lib(RealSound)
-link_lib(SafeUDP)
-link_lib(MDatabase)
+target_include_directories_both(PRIVATE
+	../sdk/dx9/include
+	../sdk
+	../CSCommon/Include
+	../SafeUDP/Include
+	../CML/Include
+	../RealSpace2/Include
+	../MAI/Include
+	../RealSpace/Include
+	../Mint2/Include
+	../RealSound/Include
+	../MDatabase/Include
+	../MCountryFilter/Include
+	../sdk/rapidxml/include
+	../sdk/libsodium/include
+	../sdk/opus/include
+	../sdk/portaudio/include)
 
-add_subdirectory(../cml ./cml)
-add_subdirectory(../RealSpace2 ./RealSpace2)
-add_subdirectory(../CSCommon ./CSCommon)
-add_subdirectory(../MDatabase ./MDatabase)
-add_subdirectory(../Mint2 ./Mint2)
-add_subdirectory(../RealSound ./RealSound)
-add_subdirectory(../SafeUDP ./SafeUDP)
-add_dependencies(RealSpace2 cml)
-add_dependencies(CSCommon cml RealSpace2)
-add_dependencies(Mint2 cml)
-add_dependencies(Gunz cml RealSpace2 MDatabase Mint2 RealSound SafeUDP)
+find_library(zlib_path NAMES zlib PATHS ../sdk/zlib/lib)
+find_library(fmodvc_path NAMES fmodvc PATHS .)
+
+find_library(libsodium_path NAMES libsodium PATHS ../sdk/libsodium/lib/static)
+
+target_link_libraries_both(
+	${zlib_path}
+	${fmodvc_path}
+	${libsodium_path}
+	legacy_stdio_definitions.lib
+	cml
+	RealSpace2
+	CSCommon
+	Mint2
+	RealSound
+	SafeUDP
+	MDatabase)
+
+add_dependencies_both(cml RealSpace2 MDatabase Mint2 RealSound SafeUDP)
+
+target_compile_options_both(PRIVATE 
+		-DSODIUM_STATIC)
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+	target_compile_options_both(PRIVATE
+		/wd4244 /wd4305)
+	ucm_add_linker_flags(
+		/ignore:4099 /ignore:4221
+		/SUBSYSTEM:WINDOWS)
+endif()

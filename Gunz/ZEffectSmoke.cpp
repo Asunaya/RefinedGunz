@@ -120,8 +120,6 @@ bool ZEffectSmokeGrenade::Draw( unsigned long int nTime )
 	return true;
 }
 
-#define  CORRECTION 0.01
-
 ZEffectSmokeGrenade::ZEffectSmokeGrenade( ZEffectBillboardSource* pEffectBillboardSource, const rvector& Pos, const rvector& Velocity, float fMinScale, float fMaxScale, unsigned long int nLifeTime )
 : ZEffectBillboard(pEffectBillboardSource)
 {
@@ -137,50 +135,3 @@ ZEffectSmokeGrenade::ZEffectSmokeGrenade( ZEffectBillboardSource* pEffectBillboa
 ZEffectSmokeGrenade::~ZEffectSmokeGrenade()
 {
 }
-
-//	ZEffectDash
-/*
-#define _DASH_LIFE_TIME		 100	//1ÃÊ
-#define _DASH_CHANGE_TIME	 50
-
-ZEffectDash::ZEffectDash(ZEffectBillboardSource* pESource1,ZEffectBillboardSource* pESource2,rvector& Pos) 
-: ZEffectBillboard(pESource1)
-{
-//	ZEffectBillboard::ZEffectBillboard(pESource1);
-//	SetSource(m_pESource1);
-	m_nStartTime = GetGlobalTimeMS();
-	m_OrigPos = m_Pos = Pos;
-	m_nLifeTime = _DASH_LIFE_TIME;
-//	m_nDrawMode = ZEDM_ALPHAMAP;
-	m_nDrawMode = ZEDM_ADD;
-
-	m_pESource2 = pESource2;
-
-	m_Scale = rvector(85,85,85);
-}
-
-ZEffectDash::~ZEffectDash(void) {
-
-}
-
-bool ZEffectDash::Draw(unsigned long int nTime)
-{
-	m_Normal = -RealSpace2::RCameraDirection;
-	m_Up = RealSpace2::RCameraUp;
-
-	DWORD dwDiff = nTime-m_nStartTime;
-
-	if(dwDiff > _DASH_CHANGE_TIME) {
-		SetSource(m_pESource2);
-	}
-
-	if(dwDiff > m_nLifeTime) 
-		return false;
-
-	m_Pos = m_OrigPos;
-
-	ZEffectBillboard::Draw(nTime);
-
-	return true;
-}
-*/

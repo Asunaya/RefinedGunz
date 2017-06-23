@@ -57,7 +57,7 @@ float RBspLightmapManager::CalcUnused()
 	float fUnused = 0.f;
 
 	for (int i = 0; i <= MAX_LEVEL_COUNT; i++) {
-		float fThisLevelSize = pow(0.25, (MAX_LEVEL_COUNT - i));
+		float fThisLevelSize = pow(0.25f, (MAX_LEVEL_COUNT - i));
 		fUnused += (float)m_pFreeList[i].size()*fThisLevelSize;
 	}
 

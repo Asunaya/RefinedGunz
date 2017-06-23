@@ -72,7 +72,7 @@ public:
 	int 	m_nAniTexCnt;
 	int 	m_nAniTexSpeed;
 	int 	m_nAniTexGap;
-	u32		m_backup_time;
+	u64		m_backup_time;
 
 	bool	m_bObjectMtrl;// effect ,interface , object
 

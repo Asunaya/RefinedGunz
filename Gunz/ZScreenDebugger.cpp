@@ -11,7 +11,7 @@
 #include "RBspObject.h"
 #include "ZModule_Skills.h"
 
-int g_debug_tex_update_cnt;
+static int g_screendebugger_debug_tex_update_cnt;
 
 _NAMESPACE_REALSPACE2_BEGIN
 extern int g_nPoly,g_nCall;
@@ -286,7 +286,7 @@ void ZScreenDebugger::DrawDebugInfo(MDrawContext *pDC)
 
 		float _fsize = RGetTextureManager()->CalcUsedSize() / (1024.f*1024.f);
 
-		sprintf_safe(buffer,"texture used size : %f M,update size : %d" , _fsize , g_debug_tex_update_cnt);
+		sprintf_safe(buffer,"texture used size : %f M,update size : %d" , _fsize , g_screendebugger_debug_tex_update_cnt);
 		OUTTEXT();
 		NEXTLINE();
 	}
@@ -459,6 +459,9 @@ void ZScreenDebugger::DrawDebugInfo(MDrawContext *pDC)
 	}	
 
 	pDC->EndFont();
+
+#undef OUTTEXT
+#undef NEXTLINE
 
 #endif
 }

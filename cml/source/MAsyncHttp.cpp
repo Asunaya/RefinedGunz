@@ -18,9 +18,9 @@ MAsyncHttp::MAsyncHttp()
 	m_hConnect = NULL;
 	m_hRequest = NULL;
 
-	m_hConnectedEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-	m_hRequestOpenedEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-	m_hRequestCompleteEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+	m_hConnectedEvent = CreateEventA(NULL, FALSE, FALSE, NULL);
+	m_hRequestOpenedEvent = CreateEventA(NULL, FALSE, FALSE, NULL);
+	m_hRequestCompleteEvent = CreateEventA(NULL, FALSE, FALSE, NULL);
 
 	m_ConnectContext = MAsyncHttpContext(MAsyncHttpContext::MAHC_TYPE_CONNECT, this);
 	m_RequestContext = MAsyncHttpContext(MAsyncHttpContext::MAHC_TYPE_REQUEST, this);
@@ -206,7 +206,7 @@ bool MAsyncHttp::Get(const char* pszURL)
 	OutputDebugString(szLog);
 
 	// Create File
-	HANDLE hFile = CreateFile(TEXT(szFullPath),	// Open Two.txt.
+	HANDLE hFile = CreateFileA(TEXT(szFullPath),// Open Two.txt.
 						GENERIC_WRITE,			// Open for writing
 						0,						// Do not share
 						NULL,					// No security

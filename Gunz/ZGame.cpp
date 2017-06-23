@@ -80,6 +80,7 @@
 #include "RBspObject.h"
 #include "ZPickInfo.h"
 #include "ZReplayWrite.h"
+#include "reinterpret.h"
 
 _USING_NAMESPACE_REALSPACE2
 

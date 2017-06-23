@@ -100,7 +100,7 @@ static void ForEachFont()
 #define FONT_DIR	"Font/"
 #define FONT_EXT	"ttf"
 
-	for (auto&& FileData : MFile::FilesInDir(FONT_DIR "*." FONT_EXT))
+	for (auto&& FileData : MFile::FilesAndSubdirsInDir(FONT_DIR "*." FONT_EXT))
 	{
 		char Filename[_MAX_PATH];
 		sprintf_safe(Filename, "%s%s", FONT_DIR, FileData.Name);

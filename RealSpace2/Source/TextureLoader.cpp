@@ -119,8 +119,8 @@ static D3DPtr<IDirect3DTexture9> LoadSTB(const void* data, size_t size,
 	c_ptr resized_tex_mem;
 	if (!Equals(sample_ratio, 1))
 	{
-		auto NewWidth = Width * sample_ratio;
-		auto NewHeight = Height * sample_ratio;
+		auto NewWidth = int(Width * sample_ratio);
+		auto NewHeight = int(Height * sample_ratio);
 		resized_tex_mem = c_ptr{ new u8[NewWidth * NewHeight * 4] };
 		if (stbir_resize_uint8(tex_ptr, Width, Height, 0,
 			resized_tex_mem.get(), NewWidth, NewHeight, 0, 4))

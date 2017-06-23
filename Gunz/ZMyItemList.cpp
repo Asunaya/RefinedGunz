@@ -9,21 +9,7 @@
 #include "MMatchTransDataType.h"
 #include "ZMyInfo.h"
 #include "ZCharacterView.h"
-
-// 어디다 넣어야??
-enum {
-	zshop_item_filter_all = 0,
-	zshop_item_filter_head,
-	zshop_item_filter_chest,
-	zshop_item_filter_hands,
-	zshop_item_filter_legs,
-	zshop_item_filter_feet,
-	zshop_item_filter_melee,
-	zshop_item_filter_range,
-	zshop_item_filter_custom,
-	zshop_item_filter_extra,
-	zshop_item_filter_quest,
-};
+#include "ZShop.h"
 
 ZMyItemList::ZMyItemList() : m_bCreated(false)
 {

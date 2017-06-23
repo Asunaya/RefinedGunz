@@ -59,10 +59,10 @@ void ReplaceExtension(char *pTargetName, int maxlen, const char *pSourceName, ch
 int CountStrEqual(const char *pStr0, const char *pStr1)
 {
 	int i;
-	int nStr0Len = strlen(pStr0);
-	int nStr1Len = strlen(pStr1);
+	auto nStr0Len = int(strlen(pStr0));
+	auto nStr1Len = int(strlen(pStr1));
 
-	for (i = 0; i < min(nStr0Len, nStr1Len); i++) {
+	for (i = 0; i < (std::min)(nStr0Len, nStr1Len); i++) {
 		if (pStr0[i] != pStr1[i]) return i;
 	}
 
@@ -159,7 +159,7 @@ void GetRelativePath(char *pRelativePath, int maxlen, const char *pBasePath, con
 
 	int nBaseDepth = GetDirDepth(szBaseDir);
 	int nDepth = GetDirDepth(szDir);
-	for (i = 0; i < min(nBaseDepth, nDepth); i++) {
+	for (i = 0; i < (std::min)(nBaseDepth, nDepth); i++) {
 		GetDirAsDepth(szBaseDepthDir, szBaseDir, i);
 		GetDirAsDepth(szDepthDir, szDir, i);
 		if (strcmp(szDepthDir, szBaseDepthDir) == 0) {

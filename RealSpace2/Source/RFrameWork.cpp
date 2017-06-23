@@ -41,7 +41,7 @@ using WNDCLASSX = WNDCLASSA;
 #endif
 
 #define RTOOLTIP_GAP 700
-static DWORD g_last_mouse_move_time;
+static u64 g_last_mouse_move_time;
 static bool g_tool_tip;
 
 bool IsToolTipEnable() {
@@ -347,3 +347,6 @@ int RMain(const char *AppName, HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR c
 _NAMESPACE_REALSPACE2_END
 
 #endif
+
+#undef __BP
+#undef __EP

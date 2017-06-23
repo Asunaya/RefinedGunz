@@ -35,7 +35,6 @@
 
 #include "RGMain.h"
 
-#define SODIUM_STATIC
 #include "sodium.h"
 
 // Chat Input Listener

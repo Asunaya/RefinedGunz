@@ -51,7 +51,7 @@ bool RMaterialList::Open(rapidxml::xml_node<>& parent)
 			else if (_stricmp(szTagName, RTOK_DIFFUSEMAP) == 0)
 				Material.DiffuseMap = szContents;
 			else if (_stricmp(szTagName, RTOK_POWER) == 0)
-				Material.Power = atof(szContents);
+				Material.Power = float(atof(szContents));
 			else if (_stricmp(szTagName, RTOK_ADDITIVE) == 0)
 				Material.dwFlags |= RM_FLAG_ADDITIVE;
 			else if (_stricmp(szTagName, RTOK_USEOPACITY) == 0)

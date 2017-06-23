@@ -9,7 +9,7 @@ struct color_r32
 	float r, g, b, a;
 
 	color_r32() = default;
-	color_r32(u32 argb) :
+	explicit color_r32(u32 argb) :
 		a{ ((argb & 0xFF000000) >> 24) * (1.0f / 255.0f) },
 		r{ ((argb & 0xFF0000) >> 16) * (1.0f / 255.0f) },
 		g{ ((argb & 0xFF00) >> 8) * (1.0f / 255.0f) },
@@ -41,6 +41,22 @@ struct color_r32
 		a *= rhs.a;
 		return *this;
 	}
+
+	color_r32& operator *=(float rhs) {
+		r *= rhs;
+		g *= rhs;
+		b *= rhs;
+		a *= rhs;
+		return *this;
+	}
+
+	color_r32& operator /=(float rhs) {
+		r /= rhs;
+		g /= rhs;
+		b /= rhs;
+		a /= rhs;
+		return *this;
+	}
 };
 
 inline color_r32 operator +(const color_r32& a, const color_r32& b) {
@@ -49,4 +65,16 @@ inline color_r32 operator +(const color_r32& a, const color_r32& b) {
 
 inline color_r32 operator *(const color_r32& a, const color_r32& b) {
 	auto ret = a; return ret *= b;
+}
+
+inline color_r32 operator *(const color_r32& a, const float& b) {
+	auto ret = a; return ret *= b;
+}
+
+inline color_r32 operator *(const float& a, const color_r32& b) {
+	auto ret = b; return ret *= a;
+}
+
+inline color_r32 operator /(const color_r32& a, const float& b) {
+	auto ret = a; return ret /= b;
 }

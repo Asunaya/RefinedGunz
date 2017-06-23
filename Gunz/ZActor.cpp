@@ -112,8 +112,8 @@ void ZActor::OnDraw()
 
 	if( IsDieAnimationDone() )
 	{
-#define TRAN_AFTER		0.5f
-#define VANISH_TIME		1.f
+		constexpr auto TRAN_AFTER = 0.5f;
+		constexpr auto VANISH_TIME = 1.f;
 
 		if(m_TempBackupTime==-1) m_TempBackupTime = g_pGame->GetTime();
 

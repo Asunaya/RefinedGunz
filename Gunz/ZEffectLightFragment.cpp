@@ -5,19 +5,24 @@
 #include "RealSpace2.h"
 #include "Physics.h"
 
-#define LIGHTTRACTER_LENGTH	4.0f
-#define LIGHTTRACTER_WIDTH	0.8f
-#define LIGHTFRAGMENT_LIFETIME	600
+namespace ZEffectLightFragmentConst
+{
+constexpr float LIGHTTRACER_LENGTH = 4.0f;
+constexpr float LIGHTTRACER_WIDTH = 0.8f;
+constexpr float LIGHTFRAGMENT_LIFETIME = 600;
+}
 
 ZEffectLightFragment::ZEffectLightFragment(ZEffectBillboardSource* pEffectBillboardSource, rvector& Pos, rvector& Velocity)
 : ZEffectBillboard(pEffectBillboardSource)
 {
+	using namespace ZEffectLightFragmentConst;
+
 	m_nStartTime = GetGlobalTimeMS();
 	m_nPrevTime = m_nStartTime;
 	m_OrigPos = m_Pos = Pos;
 	m_Velocity = Velocity;
-	m_Scale.x = LIGHTTRACTER_LENGTH;
-	m_Scale.y = LIGHTTRACTER_WIDTH;
+	m_Scale.x = LIGHTTRACER_LENGTH;
+	m_Scale.y = LIGHTTRACER_WIDTH;
 	m_Scale.z = 1;
 
 	m_nDrawMode = ZEDM_ADD;
@@ -28,8 +33,10 @@ ZEffectLightFragment::~ZEffectLightFragment(void)
 
 bool ZEffectLightFragment::Draw(unsigned long int nTime)
 {
-	DWORD dwDiff = nTime-m_nStartTime;
-	DWORD dwPrevDiff = nTime-m_nPrevTime;
+	using namespace ZEffectLightFragmentConst;
+
+	auto dwDiff = nTime-m_nStartTime;
+	auto dwPrevDiff = nTime-m_nPrevTime;
 
 	float fSec = (float)dwDiff/1000.0f;
 	rvector Distance = ParabolicMotion(m_Velocity, fSec) * 100;
@@ -53,12 +60,14 @@ bool ZEffectLightFragment::Draw(unsigned long int nTime)
 ZEffectLightFragment2::ZEffectLightFragment2(LPDIRECT3DTEXTURE9 pEffectBillboardTexture, rvector& Pos, rvector& Velocity)
 : ZEffectBillboard2(pEffectBillboardTexture)
 {
+	using namespace ZEffectLightFragmentConst;
+
 	m_nStartTime = GetGlobalTimeMS();
 	m_nPrevTime = m_nStartTime;
 	m_OrigPos = m_Pos = Pos;
 	m_Velocity = Velocity;
-	m_Scale.x = LIGHTTRACTER_WIDTH;
-	m_Scale.y = LIGHTTRACTER_WIDTH;
+	m_Scale.x = LIGHTTRACER_WIDTH;
+	m_Scale.y = LIGHTTRACER_WIDTH;
 	m_Scale.z = 1;
 
 	m_nDrawMode = ZEDM_ALPHAMAP;
@@ -69,6 +78,8 @@ ZEffectLightFragment2::~ZEffectLightFragment2(void)
 
 bool ZEffectLightFragment2::Draw(unsigned long int nTime)
 {
+	using namespace ZEffectLightFragmentConst;
+
 	DWORD dwDiff = nTime-m_nStartTime;
 	DWORD dwPrevDiff = nTime-m_nPrevTime;
 

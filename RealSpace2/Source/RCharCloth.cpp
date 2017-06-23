@@ -182,7 +182,7 @@ void RCharCloth::initialize( )
 		Normalize(mpInitNormal[i]);
 
 	m_AccelationRatio	= 1.0f;
-	m_fTimeStep			= 0.06 ;
+	m_fTimeStep			= 0.06f;
 	m_nCntIter				= 1;	
 
 	memset( m_pForce, 0, sizeof(rvector) * m_nCntP );
@@ -207,27 +207,25 @@ void RCharCloth::accumulateForces(bool bGame)
 		{
 			float gravity = -90;
 			float forward, side;
-			forward	= max(min( mForceField.x , -30 ), -200 );
-			side = max(min( mForceField.z,10), -10 ); 
+			forward = max(min(mForceField.x, -30.f), -200.f);
+			side = max(min(mForceField.z, 10.f), -10.f);
 
 
 			if( CLOTH_FORCE & m_pHolds[i] )
 			{
-				m_pForce[i].z	= side + mpInitNormal[i].x * 80 ;
-				m_pForce[i].x	= forward -mpInitNormal[i].z * 30;
-				m_pForce[i].y	= gravity;
+				m_pForce[i].z = side + mpInitNormal[i].x * 80;
+				m_pForce[i].x = forward - mpInitNormal[i].z * 30;
+				m_pForce[i].y = gravity;
 			}
 		}
 	}
 	else
 	{
-		//  천이 위로 말려 올라가는 것 방지
-		float gravity = max(min( mForceField.y, -30 ), -90 );
+		float gravity = max(min(mForceField.y, -30.f), -90.f);
 
-		//	천이 앞으로 말리는 것과 양옆으로 빠지는 것 방지
 		float forward, side;
-		forward	= max(min( mForceField.x , -30 ), -200 );
-		side = max(min( mForceField.z,10), -10 ); 
+		forward = max(min(mForceField.x, -30.f), -200.f);
+		side = max(min(mForceField.z, 10.f), -10.f);
 
 		if( mUpdateStatus & CHARACTER_DIE_STATE )
 		{
@@ -368,8 +366,8 @@ void RCharCloth::update( bool bGame,rmatrix* pWorldMat_, float fDist_ )
 	updateCO();
 	updatePosition( pWorldMat_ );
 
-	DWORD currTime = GetGlobalTimeMS();
-	if( currTime - mTime < 10 )
+	auto currTime = GetGlobalTimeMS();
+	if (currTime - mTime < 10)
 	{
 		return;
 	}
@@ -523,11 +521,11 @@ void RCharCloth::updateCO()
 
 		vec	= GetVector(mBips[LTHIGH]->m_mat_result, mLocalInv );
 		vec_1	= GetVector(mBips[LCALF]->m_mat_result, mLocalInv);
-		mSphere[2].setSphere( (vec*0.4 + vec_1*0.6) );
+		mSphere[2].setSphere( (vec*0.4f + vec_1*0.6f) );
 
 		vec	= GetVector(mBips[RTHIGH]->m_mat_result, mLocalInv );
 		vec_1	= GetVector(mBips[RCALF]->m_mat_result, mLocalInv);
-		mSphere[3].setSphere( (vec*0.4 + vec_1*0.6));
+		mSphere[3].setSphere( (vec*0.4f + vec_1*0.6f));
 
 		vec = GetVector(mBips[LCALF]->m_mat_result, mLocalInv);
 		mSphere[4].setSphere(vec);

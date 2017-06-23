@@ -12,6 +12,7 @@
 #include "ZRuleDuel.h"
 #include "RGMain.h"
 #include "ZReplay.inl"
+#include "reinterpret.h"
 #include <direct.h>
 #include "TestAssert.h"
 

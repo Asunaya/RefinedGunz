@@ -1,7 +1,7 @@
 #include "stdafx.h"
-#include <fstream>
 #include "RealSpace2.h"
 #include "MUtil.h"
+#include "MFile.h"
 
 using namespace RealSpace2;
 
@@ -30,15 +30,16 @@ D3DPtr<IDirect3DPixelShader9> CreatePixelShader(const BYTE* Function) {
 template <typename T, typename fn_t>
 static D3DPtr<T> CreateShaderFromFile(const char* Filename, fn_t CreateShaderFunc)
 {
-	std::ifstream file{ Filename, std::ios::binary | std::ios::ate };
-	auto size = file.tellg();
-	if (size <= 0)
-		return nullptr;
-	std::unique_ptr<char[]> buf{ new char[size] };
-	file.seekg(std::ios::beg);
-	file.read(buf.get(), size);
+	MFile::File File{ Filename };
 
-	const DWORD* Function = reinterpret_cast<const DWORD*>(buf.get());
+	const auto Size64 = File.size();
+	assert(Size64 <= (std::numeric_limits<size_t>::max)());
+	const auto Size = static_cast<size_t>(Size64);
+
+	auto Buffer = std::make_unique<char[]>(Size);
+	File.read(Buffer.get(), Size);
+
+	auto Function = reinterpret_cast<const DWORD*>(Buffer.get());
 
 	return CreateShader<T>(Function, CreateShaderFunc);
 }

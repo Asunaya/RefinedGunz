@@ -14,7 +14,7 @@ cmake_minimum_required(VERSION 2.8.12)
 
 include(CMakeParseArguments)
 
-include(../cmake/cotire.cmake)
+include(cotire)
 
 if(COMMAND cotire AND "1.7.7" VERSION_LESS "${COTIRE_CMAKE_MODULE_VERSION}")
     set(ucm_with_cotire 1)

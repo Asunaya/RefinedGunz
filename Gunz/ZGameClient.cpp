@@ -41,7 +41,6 @@
 #include "MMatchNotify.h"
 #include "MListBox.h"
 #include "ZMsgBox.h"
-#define SODIUM_STATIC
 #include "sodium.h"
 
 MCommand* ZNewCmd(int nID)

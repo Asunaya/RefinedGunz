@@ -4,8 +4,10 @@
 
 #define POINTER_64 __ptr64
 
-#ifdef MFC
 #include <WinSock2.h>
+#include "MWindows.h"
+
+#ifdef MFC
 #include <afxdb.h>
 #include <afxtempl.h>
 #include <afxdtctl.h>

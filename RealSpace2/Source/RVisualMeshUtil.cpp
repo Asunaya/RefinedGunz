@@ -79,12 +79,12 @@ void RWeaponTracks::SetVertexSpline(rvector& p,DWORD c)
 }
 
 union _trcolor {
-	DWORD color;
+	u32 color;
 	struct {
-		BYTE b;
-		BYTE g;
-		BYTE r;
-		BYTE a;
+		u8 b;
+		u8 g;
+		u8 r;
+		u8 a;
 	};
 };
 
@@ -101,10 +101,10 @@ DWORD GetColor(DWORD _color,float at,float ct)
 	g = color.g * ct;
 	b = color.b * ct;
 
-	color.a = (BYTE)min(max(a,0),color.a);
-	color.r = (BYTE)min(max(r,0),color.r);
-	color.g = (BYTE)min(max(g,0),color.g);
-	color.b = (BYTE)min(max(b,0),color.b);
+	color.a = (u8)min(max(a, 0.f), (float)color.a);
+	color.r = (u8)min(max(r, 0.f), (float)color.r);
+	color.g = (u8)min(max(g, 0.f), (float)color.g);
+	color.b = (u8)min(max(b, 0.f), (float)color.b);
 
 	return color.color;
 }
@@ -132,7 +132,7 @@ void RWeaponTracks::MakeBuffer()
 				int cnt = 0;
 
 				if( m_pNode[i].len > 10 )
-					cnt = m_pNode[i].len / 10;
+					cnt = int(m_pNode[i].len / 10);
 
 				rvector vOut;
 

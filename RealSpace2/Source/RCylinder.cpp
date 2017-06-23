@@ -30,7 +30,7 @@ bool RCylinder::isCollide( CDInfo* data_, CDInfoType cdType_ )
 		return false;
 	}
 
-	*data_->clothCD.pos = intersection + ( (*data_->clothCD.n) * mRadius * 1.2 );
+	*data_->clothCD.pos = intersection + ( (*data_->clothCD.n) * mRadius * 1.2f );
 
 	return true;
 }

@@ -1,14 +1,15 @@
 #include "stdafx.h"
 #include "MCrashDump.h"
 
+#ifdef _WIN32
+
 // CrashExceptionDump 함수를 사용하려면 dbghelp.dll이 필요하다.
 // 해당 dll은 http://www.microsoft.com/whdc/ddk/debugging/ 에서 구할 수 있다.
 #pragma comment(lib, "dbghelp.lib") 
 
-
 DWORD CrashExceptionDump(PEXCEPTION_POINTERS ExceptionInfo, const char* szDumpFileName)
 {
-	HANDLE hFile = CreateFile(
+	HANDLE hFile = CreateFileA(
 		szDumpFileName,
 		GENERIC_WRITE,
 		0,
@@ -51,3 +52,5 @@ DWORD CrashExceptionDump(PEXCEPTION_POINTERS ExceptionInfo, const char* szDumpFi
 
 	return EXCEPTION_EXECUTE_HANDLER;
 }
+
+#endif

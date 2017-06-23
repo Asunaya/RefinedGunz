@@ -12,7 +12,7 @@ void MShutdownTraceMemory()	{ }
 #pragma warning(push)
 #pragma warning(disable: 4091)
 #endif
-#include <dbghelp.h>
+#include <imagehlp.h>
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
@@ -88,14 +88,19 @@ struct MCallStackInfo
 	DWORD *pCallStack;
 };
 
-static BOOL CALLBACK EnumLoadedModulesCallback(LPSTR pModuleName, ULONG ulModuleBase,  ULONG ulModuleSize,  PVOID pUserContext)
+namespace MTraceMemory
 {
-    if (!SymLoadModule((HANDLE)pUserContext, 0, pModuleName, 0, ulModuleBase, ulModuleSize))
-    {
-//		::MessageBox(NULL,"SymLoadModule failed","error",MB_OK);
+
+static BOOL CALLBACK EnumLoadedModulesCallback(LPSTR pModuleName, ULONG ulModuleBase, ULONG ulModuleSize, PVOID pUserContext)
+{
+	if (!SymLoadModule((HANDLE)pUserContext, 0, pModuleName, 0, ulModuleBase, ulModuleSize))
+	{
+		//::MessageBox(NULL,"SymLoadModule failed","error",MB_OK);
 		return false;
-    }
-    return TRUE;
+	}
+	return TRUE;
+}
+
 }
 
 // Disable warning about GetVersionEx deprecation
@@ -113,7 +118,7 @@ bool InitializeSymbols()
 
 	if (osver.dwPlatformId == VER_PLATFORM_WIN32_NT)
 	{
-		if (!EnumerateLoadedModules(hProcess, (PENUMLOADED_MODULES_CALLBACK)EnumLoadedModulesCallback, (PVOID)hProcess))
+		if (!EnumerateLoadedModules(hProcess, (PENUMLOADED_MODULES_CALLBACK)MTraceMemory::EnumLoadedModulesCallback, (PVOID)hProcess))
 		{
 //			::MessageBox(NULL,"EnumerateLoadedModules failed","error",MB_OK);
 		}

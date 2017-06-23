@@ -51,7 +51,7 @@ static int g_nVideoMemory;
 int g_nFrameCount;
 int g_nLastFrameCount;
 float g_fFPS;
-static DWORD g_dwLastFPSTime = GetGlobalTimeMS();
+static auto g_dwLastFPSTime = GetGlobalTimeMS();
 
 static bool g_bTrilinear = true;
 constexpr bool bTripleBuffer = false;
@@ -139,7 +139,7 @@ int RGetVideoMemory() { return g_nVideoMemory; }
 int RGetApproxVMem() {
 	if (!g_pd3dDevice)
 		return 0;
-	return g_pd3dDevice->GetAvailableTextureMem()*0.5f;
+	return int(g_pd3dDevice->GetAvailableTextureMem() / 2);
 }
 
 HRESULT RError(int nErrCode)
@@ -593,7 +593,7 @@ void RFlip()
 	RBeginScene();
 
 	g_nFrameCount++;
-	DWORD currentTime = GetGlobalTimeMS();
+	auto currentTime = GetGlobalTimeMS();
 	if (g_dwLastFPSTime + FPS_INTERVAL < currentTime)
 	{
 		g_fFPS = (g_nFrameCount - g_nLastFrameCount)*FPS_INTERVAL /
@@ -606,7 +606,6 @@ void RFlip()
 
 void RClear()
 {
-
 	if (g_rsnRenderFlags && RRENDER_CLEAR_BACKBUFFER)
 		g_pd3dDevice->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, g_clear_color, 1.0f, 0L);
 	else

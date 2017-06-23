@@ -1,22 +1,26 @@
 #include "stdafx.h"
 
-#include <MMSystem.h>
-
 #include "ZEffectLightTracer.h"
 #include "RealSpace2.h"
 
-#define LIGHTTRACTER_LENGTH	100
-#define LIGHTTRACTER_WIDTH	1
-#define LIGHTTRACER_SPEED	10.0f	// cm/msec
+namespace ZEffectLightTracerConst
+{
+constexpr float LIGHTTRACER_LENGTH = 100;
+constexpr float LIGHTTRACER_WIDTH = 1;
+constexpr float LIGHTTRACER_SPEED = 10.0f;	// cm/msec
+}
 
-ZEffectLightTracer::ZEffectLightTracer(ZEffectBillboardSource* pEffectBillboardSource, const rvector& Start, const rvector& End)
+ZEffectLightTracer::ZEffectLightTracer(ZEffectBillboardSource* pEffectBillboardSource,
+	const rvector& Start, const rvector& End)
 : ZEffectBillboard(pEffectBillboardSource)
 {
+	using namespace ZEffectLightTracerConst;
+
 	m_nStartTime = GetGlobalTimeMS();
 	m_Start = Start;
 	m_End = End;
-	m_Scale.x = LIGHTTRACTER_LENGTH;
-	m_Scale.y = LIGHTTRACTER_WIDTH;
+	m_Scale.x = LIGHTTRACER_LENGTH;
+	m_Scale.y = LIGHTTRACER_WIDTH;
 	m_Scale.z = 1;
 
 	m_nDrawMode = ZEDM_ADD;
@@ -31,9 +35,11 @@ ZEffectLightTracer::~ZEffectLightTracer(void)
 {
 }
 
-bool ZEffectLightTracer::Draw(unsigned long int nTime)
+bool ZEffectLightTracer::Draw(u64 nTime)
 {
-	DWORD dwDiff = nTime-m_nStartTime;
+	using namespace ZEffectLightTracerConst;
+
+	auto dwDiff = nTime-m_nStartTime;
 
 	rvector right = CrossProduct(m_LightTracerDir, RCameraDirection);
 	m_Normal = CrossProduct(m_LightTracerDir, right);

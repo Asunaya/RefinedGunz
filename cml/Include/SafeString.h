@@ -1,8 +1,22 @@
+// # SafeString.h
+//
+// Functions for interacting with C strings (null-terminated arrays of characters) with
+// bounds checking.
+//
+// # Return values
+//
+// If the return type of a function in this file is a pointer to a character, the value is the
+// address of the null terminator in the destination string after writing.
+//
+// If the return type is instead integral, the value is the number of characters written, not
+// including the null terminator.
+//
 #pragma once
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
 #include <cassert>
+#include <algorithm>
 
 #pragma warning(push)
 #pragma warning(disable:4996)
@@ -132,7 +146,7 @@ inline char* strncat_safe(char(&Dest)[size], const char* Source, size_t Count)
 
 inline int vsprintf_safe(char *Dest, size_t size, const char* Format, va_list va)
 {
-	return vsnprintf(Dest, size, Format, va);
+	return (std::min)(vsnprintf(Dest, size, Format, va), int(size));
 }
 
 template <size_t size>
@@ -311,6 +325,11 @@ inline int swprintf_safe(wchar_t(&Dest)[size], const wchar_t *Format, ...)
 	int ret = vswprintf_safe(Dest, size, Format, args);
 	va_end(args);
 	return ret;
+}
+
+inline int vprintf_safe(const char* Format, va_list va)
+{
+	return vprintf(Format, va);
 }
 
 template <size_t size>

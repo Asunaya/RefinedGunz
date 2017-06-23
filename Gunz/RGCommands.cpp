@@ -415,13 +415,13 @@ void LoadRGCommands(ZChatCmdManager& CmdManager)
 
 		int id = -1;
 		{
-			auto pair = StringToInt(argv[1]);
-			if (!pair.first)
+			auto maybe_id = StringToInt<i64>(argv[1]);
+			if (!maybe_id.has_value())
 			{
 				ZChatOutput("Malformed item ID");
 				return;
 			}
-			id = pair.second;
+			id = maybe_id.value();
 		}
 
 		auto desc = MGetMatchItemDescMgr()->GetItemDesc(id);

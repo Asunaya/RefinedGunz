@@ -88,8 +88,8 @@ protected:
 #define NUM_PATCHES_PER_SIDE (16)
 
 // Some more definitions
-#define PATCH_SIZE (MAP_SIZE/NUM_PATCHES_PER_SIDE)
-#define TEXTURE_SIZE (128)
+#define RROAM_PATCH_SIZE (MAP_SIZE/NUM_PATCHES_PER_SIDE)
+#define RROAM_TEXTURE_SIZE (128)
 
 //
 // Landscape Class

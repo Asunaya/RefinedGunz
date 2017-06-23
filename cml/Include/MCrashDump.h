@@ -7,7 +7,7 @@
 #pragma warning(push)
 #pragma warning(disable: 4091)
 #endif
-#include <dbghelp.h>
+#include <imagehlp.h>
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif

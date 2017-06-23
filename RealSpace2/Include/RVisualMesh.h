@@ -24,12 +24,12 @@ public:
 
 	bool			m_bChangeAnimation;
 
-	u32				m_nReserveTime;
+	u64				m_nReserveTime;
 
 	int				m_nFrame;
 	int				m_nAddFrame;
-	u32				m_save_time;
-	u32				m_1frame_time;
+	u64				m_save_time;
+	u64				m_1frame_time;
 
 	RAnimation*		m_pAniSet;
 	RAnimation*		m_pAniSetNext;
@@ -43,7 +43,7 @@ public:
 	bool			m_bBlendAniSet;
 	float			m_fMaxBlendTime;
 	float			m_fCurrentBlendTime;
-	u32				m_dwBackupBlendTime;
+	u64				m_dwBackupBlendTime;
 
 };
 
@@ -68,7 +68,7 @@ public:
 	}
 
 public:
-	void Start(float fMax, u32 MaxTime, u32 ReturnMaxTime);
+	void Start(float fMax, u64 MaxTime, u64 ReturnMaxTime);
 	void Stop();
 
 	void Update();
@@ -84,9 +84,9 @@ public:
 	bool  m_bReturn;
 	float m_fMaxValue;
 	float m_fCurValue;
-	u32 m_dwStartTime;
-	u32 m_dwEndTime;
-	u32 m_dwReturnMaxTime;
+	u64 m_dwStartTime;
+	u64 m_dwEndTime;
+	u64 m_dwReturnMaxTime;
 };
 
 #define VISUAL_LIGHT_MAX 3

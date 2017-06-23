@@ -78,8 +78,6 @@
 
 extern MCommandLogFrame* m_pLogFrame;
 
-static int g_debug_tex_update_cnt;
-
 void ZChangeGameState(GunzState state)
 {
 	PostMessage(g_hWnd, WM_CHANGE_GAMESTATE, int(state), 0);
@@ -5455,7 +5453,7 @@ void ZGameInterface::ShowReplayDialog(bool bShow)
 
 			strcat_safe(szPath, "/*.gzr");
 
-			for (auto&& FileData : MFile::FilesInDir(szPath))
+			for (auto&& FileData : MFile::FilesAndSubdirsInDir(szPath))
 				pListBox->Add(new ReplayListBoxItem(FileData.Name, "")); // Add to listbox
 
 			pListBox->Sort();

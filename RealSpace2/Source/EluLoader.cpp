@@ -245,6 +245,8 @@ static bool LoadMesh5013(MZFile& file, EluMesh &mesh)
 	return true;
 }
 
+#undef V
+
 template <typename T>
 static bool TryForEachPath(const std::vector<std::string>& Paths,
 	const std::string& Filename, T& func)

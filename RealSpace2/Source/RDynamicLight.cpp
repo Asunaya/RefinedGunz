@@ -27,9 +27,9 @@ bool RDynamicLightManager::AddLight( MAP_LIGHT_TYPE light_type_, const rvector& 
 		if( mbGunLight )
 		{
 			mGunLight.fLife					= msMapLightList[GUNFIRE].fLife;
-			mGunLight.vLightColor.x += 0.01;
-			mGunLight.vLightColor.y += 0.01;
-			mGunLight.vLightColor.z += 0.01;
+			mGunLight.vLightColor.x += 0.01f;
+			mGunLight.vLightColor.y += 0.01f;
+			mGunLight.vLightColor.z += 0.01f;
 			mGunLight.vLightColor.x = min(mGunLight.vLightColor.x, 1.0f );
 			mGunLight.vLightColor.y = min(mGunLight.vLightColor.y, 1.0f );
 			mGunLight.vLightColor.z = min(mGunLight.vLightColor.z, 1.0f );
@@ -71,8 +71,8 @@ RDynamicLightManager::~RDynamicLightManager()
 
 void RDynamicLightManager::Update()
 {
-	float lastTime = mTime;
-	mTime = GetGlobalTimeMS();
+	auto lastTime = mTime;
+	mTime = float(GetGlobalTimeMS());
 	float lap = mTime - lastTime;
 	
 	if( !mbGunLight && mExplosionLightList.size() <= 0 )
@@ -87,17 +87,14 @@ void RDynamicLightManager::Update()
 		{
 			mbGunLight = false;
 		}
-		mGunLight.vLightColor.x -= 0.01;
-		mGunLight.vLightColor.y -= 0.01;
-		mGunLight.vLightColor.z -= 0.01;
+		mGunLight.vLightColor.x -= 0.01f;
+		mGunLight.vLightColor.y -= 0.01f;
+		mGunLight.vLightColor.z -= 0.01f;
 	}
 
-	vector<sMapLightObj>::iterator itor;
-	sMapLightObj* pCurr;
-
-	for( itor = mExplosionLightList.begin(); itor != mExplosionLightList.end(); )
+	for(auto itor = mExplosionLightList.begin(); itor != mExplosionLightList.end(); )
 	{
-		pCurr = &(*itor);
+		auto pCurr = &(*itor);
 		pCurr->fLife -= lap;
 		if( pCurr->fLife <= 0 )
 		{
@@ -150,7 +147,7 @@ int RDynamicLightManager::SetLight(const rvector& pos_ )
 
 	if( mbGunLight )	
 	{
-		Light.Attenuation1	= 0.00001;
+		Light.Attenuation1	= 0.00001f;
 		Light.Diffuse.r		= mGunLight.vLightColor.x;
 		Light.Diffuse.g		= mGunLight.vLightColor.y;
 		Light.Diffuse.b		= mGunLight.vLightColor.z;
@@ -210,7 +207,7 @@ int RDynamicLightManager::SetLight(const rvector& pos_ )
 		{
 			break;
 		}
-		Light.Attenuation1	= 0.01;
+		Light.Attenuation1	= 0.01f;
 		Light.Position.x	= pCurr->pl->vPos.x;
 		Light.Position.y	= pCurr->pl->vPos.x;
 		Light.Position.z	= pCurr->pl->vPos.x;

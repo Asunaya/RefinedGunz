@@ -43,7 +43,7 @@ public :
 	}
 
 	virtual void Init(){
-		MFile::DeleteFile(m_pFileName);
+		MFile::Delete(m_pFileName);
 	}
 
 	virtual void Shutdown(){

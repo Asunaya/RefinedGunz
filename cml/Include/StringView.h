@@ -4,6 +4,8 @@
 #include <cassert>
 #include <string>
 #include <cwchar>
+#include <utility>
+#include "ArrayView.h"
 
 namespace detail {
 inline size_t len(const char* str) { return strlen(str); }
@@ -13,7 +15,11 @@ inline size_t len(const wchar_t* str) { return wcslen(str); }
 template <typename CharType>
 class BasicStringView
 {
+	using rev_it_t = std::reverse_iterator<const CharType*>;
 public:
+	using size_type = size_t;
+	using iterator = const CharType*;
+
 	BasicStringView() : ptr{ "" }, sz{ 0 } {}
 
 	BasicStringView(const CharType* ptr) : ptr{ ptr } {
@@ -30,6 +36,10 @@ public:
 		return size() == rhs.size() && !memcmp(ptr, rhs.ptr, size() * sizeof(CharType));
 	}
 
+	bool operator!=(const BasicStringView& rhs) const {
+		return !(*this == rhs);
+	}
+
 	const CharType& operator[](size_t i) const {
 		assert(i < sz);
 		return ptr[i];
@@ -39,8 +49,11 @@ public:
 	size_t size() const { return sz; }
 	bool empty() const { return sz == 0; }
 
-	const CharType* begin() const { return ptr; }
-	const CharType* end() const { return ptr + size(); }
+	iterator begin() const { return ptr; }
+	iterator end() const { return ptr + size(); }
+
+	rev_it_t rbegin() const { return rev_it_t{ end() }; }
+	rev_it_t rend() const { return rev_it_t{ begin() }; }
 
 	std::basic_string<CharType> str() const { return{ data(), size() }; }
 
@@ -77,7 +90,7 @@ public:
 		if (pos == npos)
 			pos = 0;
 
-		for (size_t i = pos; i != npos; ++i)
+		for (size_t i = pos, end = size(); i < end; ++i)
 		{
 			for (auto&& c : needle)
 			{
@@ -99,7 +112,7 @@ public:
 		if (pos == npos)
 			pos = size() - 1;
 
-		for (size_t i = pos; i != npos; --i)
+		for (size_t i = pos, end = size(); i < end; --i)
 		{
 			for (auto&& c : needle)
 			{
@@ -180,7 +193,7 @@ inline bool icontains(const WStringView& haystack, const WStringView& needle) {
 }
 
 template <typename CharType>
-inline CharType* strcpy_safe(CharType *Dest, size_t DestSize, const BasicStringView<CharType>& Source)
+CharType* strcpy_safe(CharType *Dest, size_t DestSize, const BasicStringView<CharType>& Source)
 {
 	size_t CopySize = Source.size();
 	if (CopySize + 1 > DestSize)
@@ -195,6 +208,40 @@ inline CharType* strcpy_safe(CharType *Dest, size_t DestSize, const BasicStringV
 }
 
 template <typename CharType, size_t DestSize>
-char* strcpy_safe(char(&Dest)[DestSize], const BasicStringView<CharType>& Source) {
+CharType* strcpy_safe(CharType(&Dest)[DestSize], const BasicStringView<CharType>& Source) {
 	return strcpy_safe(Dest, DestSize, Source);
+}
+
+template <typename CharType>
+CharType* strcpy_safe(ArrayView<CharType>& Dest, const BasicStringView<CharType>& Source) {
+	return strcpy_safe(Dest.data(), Dest.size(), Source);
+}
+
+template <typename CharType>
+CharType* strcat_safe(CharType *Dest, size_t DestSize, const BasicStringView<CharType>& Source)
+{
+	auto DestLen = strlen(Dest);
+	auto SourceLen = Source.size();
+
+	auto CharsToCopy = SourceLen;
+	if (DestLen + CharsToCopy + 1 > size && size > 0)
+	{
+		CharsToCopy = size - 1 - DestLen;
+	}
+
+	memcpy(Dest + DestLen, Source.data(), BytesToCopy * sizeof(CharType));
+
+	Dest[DestLen + BytesToCopy] = 0;
+
+	return Dest + DestLen + BytesToCopy;
+}
+
+template <typename CharType, size_t DestSize>
+CharType* strcat_safe(CharType(&Dest)[DestSize], const BasicStringView<CharType>& Source) {
+	return strcat_safe(Dest, DestSize, Source);
+}
+
+template <typename CharType>
+CharType* strcat_safe(ArrayView<CharType>& Dest, const BasicStringView<CharType>& Source) {
+	return strcat_safe(Dest.data(), Dest.size(), Source);
 }

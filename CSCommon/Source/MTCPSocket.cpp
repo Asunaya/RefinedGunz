@@ -2,6 +2,7 @@
 #include "MDebug.h"
 #include "MInetUtil.h"
 #include "defer.h"
+#include "reinterpret.h"
 
 #define MAX_RECVBUF_LEN						4096
 #define TCPSOCKET_MAX_SENDQUEUE_LEN			5120

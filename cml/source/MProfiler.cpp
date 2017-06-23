@@ -184,13 +184,13 @@ bool MProfiler::FinalAnalysis(char* szFileName)
 	for(MProfileLoop::iterator i=m_ProfileLoop.begin(); i!=m_ProfileLoop.end(); i++){
 		MPROFILELOG* pLog = *i;
 		float fTotalTime = pLog->nTotalTime/1000.0f;
-		float fTotalTimePercent = min(pLog->nTotalTime*100/(float)nTotalTime, 100);
+		float fTotalTimePercent = min(pLog->nTotalTime*100/(float)nTotalTime, 100.f);
 		float fAverageTime = (pLog->nTotalTime/(float)pLog->nCount)/1000.0f;
-		float fAverageTimePercent = min((pLog->nTotalTime*100/(float)pLog->nCount)/(float)nTotalTime, 100);
+		float fAverageTimePercent = min((pLog->nTotalTime*100/(float)pLog->nCount)/(float)nTotalTime, 100.f);
 		float fMinTime = pLog->nMinTime/1000.0f;
-		float fMinTimePercent = min(pLog->nMinTime*100/(float)nTotalTime, 100);
+		float fMinTimePercent = min(pLog->nMinTime*100/(float)nTotalTime, 100.f);
 		float fMaxTime = pLog->nMaxTime/1000.0f;
-		float fMaxTimePercent = min(pLog->nMaxTime*100/(float)nTotalTime, 100);
+		float fMaxTimePercent = min(pLog->nMaxTime*100/(float)nTotalTime, 100.f);
 		sprintf_safe(szLog, " %8.3f (%6.2f%%) | %8d   | %8.3f (%6.2f%%) | %8.3f (%6.2f%%) | %8.3f (%6.2f%%) |",
 			fTotalTime, fTotalTimePercent,
 			pLog->nCount,

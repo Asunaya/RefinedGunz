@@ -18,7 +18,7 @@ CRITICAL_SECTION& MCriticalSection::cs() {
 
 static_assert(WAIT_OBJECT_0 == 0, "");
 
-MSignalEvent::MSignalEvent(bool ManualReset) : EventHandle{ CreateEvent(NULL, ManualReset, FALSE, NULL) } {}
+MSignalEvent::MSignalEvent(bool ManualReset) : EventHandle{ CreateEventA(NULL, ManualReset, FALSE, NULL) } {}
 
 MSignalEvent::~MSignalEvent() {
 	if (EventHandle) {

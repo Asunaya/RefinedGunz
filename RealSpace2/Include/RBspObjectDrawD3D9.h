@@ -80,6 +80,10 @@ private:
 	template <MaterialType Type>
 	void RenderMaterials(int StartIndex, int EndIndex);
 
+	void SetWireframeStates();
+	void SetDefaultStates();
+	void DrawBatch(const MaterialBatch& Mat);
+
 	struct {
 		// If SupportsDynamicLighting is true, each of these contain a vertex buffer with their component.
 		// Otherwise, Positions is the only valid pointer, and it holds an interleaved stream of

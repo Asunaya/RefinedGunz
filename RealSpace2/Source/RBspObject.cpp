@@ -1390,11 +1390,11 @@ bool RBspObject::Set_AmbSound(rapidxml::xml_node<>& parent)
 			};
 
 			auto get_vector = [&](auto& vec) {
-				if (token != nullptr) vec.x = atof(token);
+				if (token != nullptr) vec.x = float(atof(token));
 				get_token();
-				if (token != nullptr) vec.y = atof(token);
+				if (token != nullptr) vec.y = float(atof(token));
 				get_token();
-				if (token != nullptr) vec.z = atof(token);
+				if (token != nullptr) vec.z = float(atof(token));
 			};
 
 			if (_stricmp("MIN_POSITION", prop_name) == 0)
@@ -1402,7 +1402,7 @@ bool RBspObject::Set_AmbSound(rapidxml::xml_node<>& parent)
 			else if (_stricmp("MAX_POSITION", prop_name) == 0)
 				get_vector(asinfo.max);
 			else if (_stricmp("RADIUS", prop_name) == 0)
-				asinfo.radius = atof(prop_value);
+				asinfo.radius = float(atof(prop_value));
 			else if (_stricmp("CENTER", prop_name) == 0)
 				get_vector(asinfo.center);
 		}
@@ -1425,7 +1425,7 @@ bool RBspObject::OpenDescription(const char *filename)
 
 	m_descfilename = filename;
 
-	std::unique_ptr<char[]> buffer{ new char[mzf.GetLength() + 1] };
+	auto buffer = std::make_unique<char[]>(mzf.GetLength() + 1);
 	mzf.Read(buffer.get(), mzf.GetLength());
 	buffer[mzf.GetLength()] = 0;
 
@@ -2704,8 +2704,8 @@ bool RBspObject::DrawLight(RSBspNode *pNode, int nMaterial)
 					rvector l = v[j].coord - g_pTargetLight->Position;
 					l *= 1.f / g_pTargetLight->Range;
 
-					v[j].tu1 = -DotProduct(pdi->pUAxis[i], l) * .5 + .5;
-					v[j].tv1 = -DotProduct(pdi->pVAxis[i], l) * .5 + .5;
+					v[j].tu1 = -DotProduct(pdi->pUAxis[i], l) * .5f + .5f;
+					v[j].tv1 = -DotProduct(pdi->pVAxis[i], l) * .5f + .5f;
 
 					float fIntensity = min(1.f, max(0.f, 1.f - fPlaneDotCoord / g_pTargetLight->Range));
 
@@ -2836,3 +2836,6 @@ bool RBspObject::GenerateLightmap(const char * filename,
 }
 
 _NAMESPACE_REALSPACE2_END
+
+#undef __BP
+#undef __EP

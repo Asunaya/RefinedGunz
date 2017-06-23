@@ -28,9 +28,7 @@ RMtrl::RMtrl()
 
 	m_nAlphaTestValue = -1;
 
-	m_ambient  = 0xffffffff;
-	m_diffuse  = 0xffffffff;
-	m_specular = 0xffffffff;
+	m_ambient = m_diffuse = m_specular = color_r32{ 0xffffffff };
 
 	m_power = 1.0f;
 
@@ -78,16 +76,16 @@ LPDIRECT3DTEXTURE9 RMtrl::GetTexture() {
 
 	if(m_bAniTex) {
 
-		DWORD this_time = GetGlobalTimeMS();
+		auto this_time = GetGlobalTimeMS();
 
-		DWORD gap = (this_time - m_backup_time);
+		auto gap = (this_time - m_backup_time);
 
-		if(gap > (DWORD)m_nAniTexSpeed) {
+		if(gap > (u64)m_nAniTexSpeed) {
 			gap %= m_nAniTexSpeed;
 			m_backup_time = this_time;
 		}
 
-		int pos = gap / m_nAniTexGap;
+		int pos = int(gap / m_nAniTexGap);
 
 		if((pos < 0) || (pos > m_nAniTexCnt-1))
 			pos = 0;

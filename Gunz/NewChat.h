@@ -44,7 +44,7 @@ public:
 	void SetRect(D3DRECT &r) { Border = r; }
 	void SetRect(int x1, int y1, int x2, int y2) { Border.x1 = x1; Border.y1 = y1; Border.x2 = x2; Border.y2 = y2; }
 
-	float GetFadeTime() const { return FadeTime; }
+	auto GetFadeTime() const { return FadeTime; }
 	void SetFadeTime(float fFade) { FadeTime = fFade; }
 
 	const std::string &GetFont() const { return FontName; }

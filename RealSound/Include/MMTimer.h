@@ -9,6 +9,8 @@
 
 	Programming by Chojoongpil
 */
+#pragma once
+
 #include "GlobalTypes.h"
 #include "MUtil.h"
 

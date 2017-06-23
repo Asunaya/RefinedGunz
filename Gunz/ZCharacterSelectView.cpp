@@ -21,8 +21,6 @@
 #include "ZMyInfo.h"
 
 extern bool Enable_Cloth;
-static rvector force = rvector( 15, 0, 0 );
-static float maxForce = 30;
 
 ZSelectCharacterInfo ZCharacterSelectView::m_CharInfo[MAX_CHAR_COUNT];
 int ZCharacterSelectView::m_nNumOfCharacter = 0;

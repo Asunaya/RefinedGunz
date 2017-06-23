@@ -9,4 +9,8 @@
 #undef CreateEvent
 #undef GetUserName
 #undef GetObject
+#undef MoveFile
+#undef DeleteFile
+#undef CreateFile
+#undef CreateDirectory
 #endif

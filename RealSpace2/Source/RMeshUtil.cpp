@@ -486,7 +486,7 @@ void _draw_try(LPDIRECT3DDEVICE9 dev,rmatrix& mat,float size,DWORD color)
 {
 	int face_num = 0;
 
-	_GetModelTry(t_grid_vert,size,color,&face_num);
+	_GetModelTry(t_grid_vert, int(size), color, &face_num);
 
 	dev->SetTransform(D3DTS_WORLD, static_cast<const D3DMATRIX*>(mat));
 	dev->SetTexture(0, NULL);
@@ -954,8 +954,8 @@ rquaternion* QuaternionUnitAxisToUnitAxis2(rquaternion *pOut, const rvector *pvF
 
 rquaternion* QuaternionAxisToAxis(rquaternion *pOut, const rvector *pvFrom, const rvector *pvTo)
 {
-	auto vA = Normalized(*pvFrom);
-	auto vB = Normalized(*pvTo);
-	auto vHalf = Normalized(vA + vB);
-	return QuaternionUnitAxisToUnitAxis2(pOut, &vA, &vHalf);
+	auto a = Normalized(*pvFrom);
+	auto b = Normalized(*pvTo);
+	v3 half = Normalized(a + b);
+	return QuaternionUnitAxisToUnitAxis2(pOut, &a, &half);
 }

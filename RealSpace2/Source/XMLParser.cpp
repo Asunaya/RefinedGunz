@@ -70,7 +70,7 @@ xml_document<> doc; \
 auto ret = ParseXMLFile(filename, doc); \
 if (!ret.success) return false
 
-static float toFloat(const char *str) { return atof(str); }
+static float toFloat(const char *str) { return float(atof(str)); }
 static int toInt(const char *str) { return atoi(str); }
 
 static bool toFloat3(const char *str, float *fv)
@@ -124,11 +124,11 @@ static bool GetFloat(float& dest, const char* node_name, rapidxml::xml_node<>* p
 
 static bool GetInt(int& dest, const char* node_name, rapidxml::xml_node<>* parent)
 {
-	auto* value = GetNodeValue(node_name, parent);
-	if (!value) return false;
-	auto pair = StringToInt(value);
-	if (!pair.first) return false;
-	dest = pair.second;
+	auto* string_value = GetNodeValue(node_name, parent);
+	if (!string_value) return false;
+	auto maybe_int_value = StringToInt<int>(string_value);
+	if (!maybe_int_value.has_value()) return false;
+	dest = maybe_int_value.value();
 	return true;
 }
 
@@ -139,7 +139,7 @@ static bool GetUShort3(float (&dest)[3], const char* node_name, rapidxml::xml_no
 	int vals[3]{};
 	if (sscanf_s(value, "%i %i %i", vals, vals + 1, vals + 2) != 3) return false;
 	for (size_t i{}; i < std::size(dest); ++i)
-		dest[i] = vals[i];
+		dest[i] = float(vals[i]);
 	return true;
 }
 

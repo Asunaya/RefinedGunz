@@ -5,10 +5,9 @@
 #include "ZApplication.h"
 #include "ZMyInfo.h"
 #include "ZGameClient.h"
+#include <algorithm>
 
 extern bool Enable_Cloth;
-static rvector force = rvector( 15, 0, 0 );
-static float maxForce = 10;
 
 unsigned long int GetVisualWeaponID(unsigned long int nMeleeItemID, unsigned long int nPrimaryItemID,
 									unsigned long int nSecondaryItemID, unsigned long int nCustom1ItemID,

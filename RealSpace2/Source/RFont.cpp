@@ -19,8 +19,8 @@
 
 _NAMESPACE_REALSPACE2_BEGIN
 
-#define TEXTURE_SIZE	512
-#define CELL_SIZE		32
+constexpr auto RFONT_TEXTURE_SIZE = 512;
+constexpr auto RFONT_CELL_SIZE = 32;
 
 RFontTexture::RFontTexture() 
 { 
@@ -35,13 +35,13 @@ RFontTexture::~RFontTexture()
 
 bool RFontTexture::Create() 
 {
-	m_nWidth = TEXTURE_SIZE;
-	m_nHeight = TEXTURE_SIZE;
+	m_nWidth = RFONT_TEXTURE_SIZE;
+	m_nHeight = RFONT_TEXTURE_SIZE;
 	HRESULT hr = RGetDevice()->CreateTexture(m_nWidth, m_nHeight, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &m_pTexture,NULL);
 	if(hr!=D3D_OK) return false;
 
-	m_nX = m_nWidth/CELL_SIZE;
-	m_nY = m_nHeight/CELL_SIZE;
+	m_nX = m_nWidth / RFONT_CELL_SIZE;
+	m_nY = m_nHeight / RFONT_CELL_SIZE;
 
 	m_nCell = m_nX * m_nY;
 	m_CellInfo = new RFONTTEXTURECELLINFO[m_nCell];
@@ -60,8 +60,8 @@ bool RFontTexture::Create()
 	BITMAPINFO bmi;
 	ZeroMemory(&bmi.bmiHeader, sizeof(BITMAPINFOHEADER));
 	bmi.bmiHeader.biSize        = sizeof(BITMAPINFOHEADER);
-	bmi.bmiHeader.biWidth       =  (int)CELL_SIZE;
-	bmi.bmiHeader.biHeight      = -(int)CELL_SIZE;
+	bmi.bmiHeader.biWidth       =  (int)RFONT_CELL_SIZE;
+	bmi.bmiHeader.biHeight      = -(int)RFONT_CELL_SIZE;
 	bmi.bmiHeader.biPlanes      = 1;
 	bmi.bmiHeader.biCompression = BI_RGB;
 	bmi.bmiHeader.biBitCount    = 32;
@@ -139,10 +139,10 @@ bool RFontTexture::UploadTexture(RCHARINFO *pCharInfo,u32* pBitmapBits,int w,int
 		int x = pInfo->nIndex % GetCellCountX();
 		int y = pInfo->nIndex / GetCellCountX();
 
-		int _x = x*CELL_SIZE;
-		int _y = y*CELL_SIZE;
+		int _x = x*RFONT_CELL_SIZE;
+		int _y = y*RFONT_CELL_SIZE;
 
-		BlitRect((BYTE*)d3dlr.pBits, _x, _y, _x+w, _y+h, CELL_SIZE, CELL_SIZE, pBitmapBits, d3dlr.Pitch);
+		BlitRect((BYTE*)d3dlr.pBits, _x, _y, _x+w, _y+h, RFONT_CELL_SIZE, RFONT_CELL_SIZE, pBitmapBits, d3dlr.Pitch);
 
 		hr = m_pTexture->UnlockRect(0);
 
@@ -176,7 +176,7 @@ bool RFontTexture::MakeFontBitmap(HFONT hFont, RCHARINFO *pInfo, const wchar_t* 
 	SIZE size;
 	GetTextExtentPoint32W(m_hDC, szText, wcslen(szText), &size);
 
-	int nWidth = min(size.cx,CELL_SIZE);
+	int nWidth = min(int(size.cx), RFONT_CELL_SIZE);
 
 #ifdef _USE_GDIPLUS
 	Graphics graphics(m_hDC);
@@ -201,9 +201,9 @@ bool RFontTexture::MakeFontBitmap(HFONT hFont, RCHARINFO *pInfo, const wchar_t* 
 		GetTextMetrics(m_hDC, &tm);
 
 		int nHeight;
-		nHeight = min( (int)tm.tmHeight, (int)CELL_SIZE-2);
+		nHeight = min( (int)tm.tmHeight, (int)RFONT_CELL_SIZE-2);
 
-		path.AddString(szText, -1, &fontFamily, FontStyleBold, nHeight, PointF(-1.0f, -1.0f), pTypoFormat);
+		path.AddString(szText, -1, &fontFamily, FontStyleBold, Gdiplus::REAL(nHeight), PointF(-1.0f, -1.0f), pTypoFormat);
 
 		graphics.SetSmoothingMode(SmoothingModeAntiAlias);
 
@@ -235,7 +235,7 @@ bool RFontTexture::MakeFontBitmap(HFONT hFont, RCHARINFO *pInfo, const wchar_t* 
 
 #endif
 
-	bool bRet = UploadTexture(pInfo,m_pBitmapBits,nWidth,CELL_SIZE);
+	bool bRet = UploadTexture(pInfo,m_pBitmapBits,nWidth,RFONT_CELL_SIZE);
 	
 	SelectObject(m_hDC, hPrevFont);
 
@@ -343,7 +343,7 @@ bool RFont::Create(const TCHAR* szFontName, int nHeight, bool bBold, bool bItali
 	if (m_pFontTexture->GetTexture() == NULL)
 		m_pFontTexture->Create();
 
-	ASSERT(nHeight <= CELL_SIZE);
+	ASSERT(nHeight <= RFONT_CELL_SIZE);
 
 	return true;
 }
@@ -519,9 +519,9 @@ void RFont::DrawTextImpl(float x, float y, const BasicStringView<CharT>& Text,
 			// 0 3
 			// 1 2
 
-			int nWidth = min(CELL_SIZE, pInfo->nWidth);
-			int w = nWidth * fScale;
-			int h = CELL_SIZE * fScale;
+			int nWidth = min(RFONT_CELL_SIZE, pInfo->nWidth);
+			int w = int(nWidth * fScale);
+			int h = int(RFONT_CELL_SIZE * fScale);
 
 			if (x + w > RGetViewport()->X && x < RGetViewport()->X + RGetViewport()->Width &&
 				y + h > RGetViewport()->Y && y < RGetViewport()->Y + RGetViewport()->Height)
@@ -534,10 +534,10 @@ void RFont::DrawTextImpl(float x, float y, const BasicStringView<CharT>& Text,
 				int nCellX = pInfo->nFontTextureIndex % m_pFontTexture->GetCellCountX();
 				int nCellY = pInfo->nFontTextureIndex / m_pFontTexture->GetCellCountX();
 
-				float fMinX = (float)(.5f + nCellX*CELL_SIZE) / (float)m_pFontTexture->GetWidth();
-				float fMaxX = (float)(.5f + nCellX*CELL_SIZE + nWidth) / (float)m_pFontTexture->GetWidth();
-				float fMinY = (float)(.5f + nCellY*CELL_SIZE) / (float)m_pFontTexture->GetHeight();
-				float fMaxY = (float)(.5f + (nCellY + 1)*CELL_SIZE) / (float)m_pFontTexture->GetHeight();
+				float fMinX = (float)(.5f + nCellX*RFONT_CELL_SIZE) / (float)m_pFontTexture->GetWidth();
+				float fMaxX = (float)(.5f + nCellX*RFONT_CELL_SIZE + nWidth) / (float)m_pFontTexture->GetWidth();
+				float fMinY = (float)(.5f + nCellY*RFONT_CELL_SIZE) / (float)m_pFontTexture->GetHeight();
+				float fMaxY = (float)(.5f + (nCellY + 1)*RFONT_CELL_SIZE) / (float)m_pFontTexture->GetHeight();
 
 				vertices[0].tu = fMinX; vertices[0].tv = fMinY;
 				vertices[1].tu = fMinX; vertices[1].tv = fMaxY;
@@ -556,7 +556,7 @@ void RFont::DrawTextImpl(float x, float y, const BasicStringView<CharT>& Text,
 			}
 
 			if (m_nOutlineStyle == 1)
-				x += min((pInfo->nWidth*fScale + 1), CELL_SIZE);
+				x += min(int(pInfo->nWidth*fScale + 1), RFONT_CELL_SIZE);
 			else
 				x += (pInfo->nWidth*fScale);
 

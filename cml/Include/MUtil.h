@@ -5,6 +5,8 @@
 #include <algorithm>
 #include "TMP.h"
 #include "GlobalTypes.h"
+#include "StringView.h"
+#include "optional.h"
 
 #ifndef SAFE_DELETE
 #define SAFE_DELETE(p)       { if(p) { delete (p);     (p)=NULL; } }
@@ -81,6 +83,16 @@ inline constexpr uint32_t XRGB(uint8_t value)
 	return XRGB(value, value, value);
 }
 
+inline constexpr uint32_t RGBAF(float r, float g, float b, float a)
+{
+	return RGBA(u8(r * 255), u8(g * 255), u8(b * 255), u8(a * 255));
+}
+
+inline constexpr uint32_t ARGBF(float r, float g, float b, float a)
+{
+	return RGBA(u8(r * 255), u8(g * 255), u8(b * 255), u8(a * 255));
+}
+
 enum MDateType
 {
 	MDT_Y = 1,
@@ -97,27 +109,12 @@ std::string MGetStrLocalTime(unsigned short wYear = 0,
 	unsigned short wMin = 0,
 	MDateType = MDT_YMDHM);
 
-template <typename T1, typename T2>
-T1 reinterpret(const T2& val)
-{
-	static_assert(std::is_trivially_copyable<T1>::value &&
-		std::is_trivially_copyable<T2>::value,
-		"Both types must be trivially copyable to reinterpret");
-	static_assert(!std::is_pointer<T2>::value, "Use reinterpret_ptr for pointers");
-	T1 T1_rep;
-	memcpy(&T1_rep, &val, (std::min)(sizeof(T1), sizeof(T2)));
-	return T1_rep;
-}
+namespace detail{
+template <typename T, typename = void>
+struct is_container : std::false_type {};
 
-template <typename T1, typename T2>
-T1 reinterpret_ptr(const T2& val)
-{
-	static_assert(std::is_trivially_copyable<T1>::value &&
-		std::is_trivially_copyable<T2>::value,
-		"Both types must be trivially copyable to reinterpret");
-	T1 T1_rep;
-	memcpy(&T1_rep, &val, (std::min)(sizeof(T1), sizeof(T2)));
-	return T1_rep;
+template <typename T>
+struct is_container<T, decltype(std::begin(std::declval<T>()), std::end(std::declval<T>()), void())> : std::true_type {};
 }
 
 template <typename T>
@@ -126,6 +123,13 @@ struct Range
 	T first;
 	T second;
 
+	Range() = default;
+
+	Range(const T& first, const T& second) : first{ first }, second{ second } {}
+
+	template <typename U, typename = std::enable_if_t<detail::is_container<U>::value>>
+	Range(U&& Container) : first{ Container.begin() }, second{ Container.end() } {}
+
 	auto begin() { return first; }
 	auto end() { return second; }
 	auto begin() const { return first; }
@@ -133,7 +137,19 @@ struct Range
 };
 
 template <typename T>
-auto MakeRange(const T& begin, const T& end) { return Range<T>{ begin, end }; }
+auto MakeRange(const T& begin, const T& end) {
+	return Range<T>{ begin, end };
+}
+
+template <typename T>
+auto MakeRange(T&& x) -> std::enable_if_t<detail::is_container<T>::value, Range<decltype(std::begin(x))>> {
+	return Range<decltype(std::begin(x))>{ x };
+}
+
+template <typename T>
+auto MakeRange(const std::pair<T, T>& x) {
+	return Range<T>{ x.first, x.second };
+}
 
 template <template <typename...> class itT, typename T>
 auto MakeAdapter(T& Container) {
@@ -175,16 +191,90 @@ private:
 template <typename T>
 auto MakePairValueAdapter(T& Container) { return MakeAdapter<ValueIterator>(Container); }
 
-inline std::pair<bool, int> StringToInt(const char* String, int Radix = 10)
+namespace detail
 {
-	char *endptr = nullptr;
+inline bool isdecdigit(char c) { return c >= '0' && c <= '9'; }
+inline char tolower(char c) { return char(u8(u8(c) | 0x20)); }
 
-	int IntVal = strtol(String, &endptr, Radix);
+// Returns the positive value of the digit, or -1 on error.
+template <int Radix>
+int GetDigit(char c)
+{
+	if (isdecdigit(c))
+	{
+		const auto Digit = c - '0';
+		if (Digit > Radix - 1)
+			return -1;
+		return Digit;
+	}
 
-	if (endptr != String + strlen(String))
-		return{ false, -1 };
+	if (Radix <= 10)
+		return -1;
 
-	return{ true, IntVal };
+	c = tolower(c);
+
+	constexpr auto LastValidDigitInBase = 'A' + (Radix - 10);
+	if (c < 'A' || c > LastValidDigitInBase)
+		return -1;
+
+	return c - 'A' + 10;
+}
+}
+
+template <typename T>
+auto Reverse(T&& Container)
+{
+	return MakeRange(std::rbegin(Container), std::rend(Container));
+}
+
+template <typename DestType, int Radix = 10>
+optional<DestType> StringToInt(StringView Str)
+{
+	static_assert(Radix > 0 && Radix <= 36, "Invalid radix");
+
+	// Discard whitespace in the beginning
+	{
+		size_t LastWhitespacePos = 0;
+
+		while (true)
+		{
+			if (LastWhitespacePos >= Str.size())
+			{
+				// The string is either empty (if LastWhitespacePos == 0), or
+				// non-empty and entirely composed of whitespace.
+				return nullopt;
+			}
+
+			if (Str[LastWhitespacePos] != ' ')
+				break;
+
+			++LastWhitespacePos;
+		}
+
+		Str = Str.substr(LastWhitespacePos);
+	}
+
+	DestType Accumulator = 0;
+	DestType Coefficient = 1;
+
+	bool IsNegative = Str[0] == '-';
+	if (IsNegative)
+		Str = Str.substr(1);
+
+	for (auto DigitChar : Reverse(Str))
+	{
+		auto Digit = detail::GetDigit<Radix>(DigitChar);
+		if (Digit == -1)
+			return nullopt;
+
+		Accumulator += Digit * Coefficient;
+		Coefficient *= Radix;
+	}
+
+	if (IsNegative)
+		Accumulator = 0 - Accumulator;
+
+	return Accumulator;
 }
 
 // WriteProxy
@@ -198,7 +288,7 @@ inline std::pair<bool, int> StringToInt(const char* String, int Radix = 10)
 template <typename T>
 class WriteProxy
 {
-	using StoredType = get_template_argument_t<T, 0>;
+	using StoredType = tmp::get_template_argument_t<T, 0>;
 public:
 	~WriteProxy() { ptr = T{ temp }; }
 
@@ -257,3 +347,25 @@ struct CFileCloser {
 };
 
 using CFilePtr = std::unique_ptr<FILE, CFileCloser>;
+
+template <typename DerivedType, typename ValueType, typename CategoryType = std::random_access_iterator_tag>
+struct IteratorBase
+{
+	bool operator!=(const IteratorBase& rhs) const { return !(Derived() == rhs.Derived()); }
+
+	IteratorBase& operator++(int) {
+		auto temp = *this;
+		++Derived();
+		return temp;
+	}
+
+	using difference_type = ptrdiff_t;
+	using value_type = ValueType;
+	using pointer = value_type*;
+	using reference = value_type&;
+	using iterator_category = CategoryType;
+
+private:
+	auto& Derived() { return static_cast<DerivedType&>(*this); }
+	auto& Derived() const { return static_cast<const DerivedType&>(*this); }
+};

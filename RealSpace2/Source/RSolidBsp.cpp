@@ -272,8 +272,8 @@ bool IsCross(const rplane &plane,const rvector &v0,const rvector &v1,float *fPar
 				*fParam=0;
 		}else
 			if(dotv0*dotv1<=0) {
-				*fParam = ( dotv0 / ( dotv0-dotv1));
-				*fParam = min(1,*fParam);
+				*fParam = (dotv0 / (dotv0 - dotv1));
+				*fParam = min(1.f, *fParam);
 			}else
 			{
 				*fParam=-1;
@@ -510,7 +510,7 @@ bool RSolidBspNode::CheckWall2(RSolidBspNode *pRootNode,RImpactPlanes &impactPla
 			return false;
 		}
 
-		float fInter = max(0,min(1.f,fMinDistToOrigin/fMinProjDist));
+		float fInter = max(0.f, min(1.f, fMinDistToOrigin / fMinProjDist));
 		rvector currentorigin;
 		currentorigin = origin + fInter * diff;
 
