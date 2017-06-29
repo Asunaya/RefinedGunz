@@ -540,7 +540,7 @@ void MAddSharedCommandTable(MCommandManager* CommandManager, MSharedCommandType:
 			P(MPT_UID, "uid");
 			P(MPT_STR, "CharName");
 		C(MC_MATCH_RESPONSE_CHARINFO_DETAIL, "Match.ResponseCharInfoDetail", "Response Character Info Detail", MCDT_MACHINE2MACHINE);
-			P(MPT_BLOB, "CharInfo", MCPCBlobArraySize{ sizeof(MTD_CharInfo), 1, 1 });
+			P(MPT_BLOB, "CharInfo", MCPCBlobArraySize{ sizeof(MTD_CharInfo_Detail), 1, 1 });
 
 		// NOTE: Unused.
 		C(MC_MATCH_REQUEST_SIMPLE_CHARINFO, "Match.RequestSimpleCharInfo", "Request Simple CharInfo", MCDT_MACHINE2MACHINE);
