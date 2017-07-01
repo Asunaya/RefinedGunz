@@ -73,3 +73,6 @@
 
 // Controls whether the /fov command is usable (outside of dev mode).
 #define ENABLE_FOV_COMMAND
+
+// Controls whether clans can be created with no sponsors.
+#define SOLO_CLAN_CREATION

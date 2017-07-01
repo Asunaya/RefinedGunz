@@ -57,7 +57,7 @@ void ShowProposalWaitFrame(bool bVisible, const char* szTitle, const char* szMes
 										   ShowProposalWaitFrame_OnExpire};
 
 			countDown.nSeconds=PROPOSAL_AGREEMENT_TIMEOUT_SEC;	// static 이므로 재설정
-			ZApplication::GetTimer()->SetTimerEvent(0, &OnTimer_CountDown, &countDown, true);
+			SetCountdown(countDown);
 
 			pWidget->Show(true, true);
 		}
@@ -188,7 +188,7 @@ void ZGameClient::OnAskAgreement(const MUID& uidProposer, void* pMemberNamesBlob
 										"ProposalAgreementConfirm",
 										OnAskReplierAgreement_OnExpire};
 		countDown.nSeconds=PROPOSAL_AGREEMENT_TIMEOUT_SEC;
-		ZApplication::GetTimer()->SetTimerEvent(0, &OnTimer_CountDown, &countDown, true);
+		::SetCountdown(countDown);
 
 		pWidget->Show(true, true);
 	}

@@ -211,7 +211,7 @@ int GetDigit(char c)
 	if (Radix <= 10)
 		return -1;
 
-	c = tolower(c);
+	c = toupper(c);
 
 	constexpr auto LastValidDigitInBase = 'A' + (Radix - 10);
 	if (c < 'A' || c > LastValidDigitInBase)

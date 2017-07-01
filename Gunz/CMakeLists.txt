@@ -77,7 +77,8 @@ target_link_libraries_both(PUBLIC
 add_dependencies_both(cml RealSpace2 CSCommon MDatabase Mint2 RealSound SafeUDP)
 
 target_compile_options_both(PRIVATE 
-		-DSODIUM_STATIC)
+		-DSODIUM_STATIC
+		-D_LOCATOR)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
 	target_compile_options_both(PRIVATE

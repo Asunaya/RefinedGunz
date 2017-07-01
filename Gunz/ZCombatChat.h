@@ -39,12 +39,7 @@ public:
 	void OnDraw(MDrawContext* pDC);
 	bool IsChat() const { return m_bChatInputVisible; }
 	bool IsTeamChat() const { return m_bTeamChat; }
-	bool IsShow() const
-	{
-		if (!m_pInputEdit)
-			return false;
-		return m_pInputEdit->IsVisible();
-	}
+	bool IsShow() const;
 	void SetFont(MFont* pFont);
 
 	void ShowOutput(bool bShow);

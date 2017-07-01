@@ -3,36 +3,39 @@
 #include "ZGameInterface.h"
 #include "ZApplication.h"
 
-void OnTimer_CountDown(void* pParam)
+void SetCountdown(const ZCOUNTDOWN& Countdown)
 {
-	ZCOUNTDOWN *pCountDown = (ZCOUNTDOWN*)pParam;
+	auto Callback = [Countdown = Countdown]() mutable
+	{
+		ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
+		MWidget* pTargetWidget = pResource->FindWidget(Countdown.szTargetWidget);
+		if (!pTargetWidget || !pTargetWidget->IsVisible()) return true;
 
-	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
-	MWidget* pTargetWidget = pResource->FindWidget(pCountDown->szTargetWidget);
-	if(!pTargetWidget || !pTargetWidget->IsVisible()) return;
+		if (Countdown.nSeconds > 0) {
 
-	if(pCountDown->nSeconds>0) {
-
-		if(pCountDown->szLabelWidget!=NULL)
-		{
-			ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
-			MWidget* pWidget = pResource->FindWidget(pCountDown->szLabelWidget);
-			if(pWidget)
+			if (Countdown.szLabelWidget != NULL)
 			{
-				char buffer[256];
-				sprintf_safe(buffer,"%d",pCountDown->nSeconds);
-				pWidget->SetText(buffer);		
+				ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
+				MWidget* pWidget = pResource->FindWidget(Countdown.szLabelWidget);
+				if (pWidget)
+				{
+					char buffer[256];
+					sprintf_safe(buffer, "%d", Countdown.nSeconds);
+					pWidget->SetText(buffer);
+				}
 			}
+
+			Countdown.nSeconds--;
+			return false;
 		}
 
-		pCountDown->nSeconds--;
-		ZApplication::GetTimer()->SetTimerEvent(1000, &OnTimer_CountDown, pCountDown, true);
-		return;
-	}
+		pTargetWidget->Show(false);
 
-	pTargetWidget->Show(false);	
+		if (Countdown.pCallBack)
+			Countdown.pCallBack();
 
-	if(pCountDown->pCallBack)
-		pCountDown->pCallBack();
+		return true;
+	};
+
+	ZApplication::GetTimer()->SetTimerEvent(1000, Callback);
 }
-

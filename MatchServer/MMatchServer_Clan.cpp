@@ -224,6 +224,7 @@ void MMatchServer::OnClanRequestCreateClan(const MUID& uidPlayer, const int nReq
 	MMatchObject* pMasterObject = GetObject(uidPlayer);
 	if (! IsEnabledObject(pMasterObject)) return;
 
+#if CLAN_SPONSORS_COUNT > 0
 	MMatchObject* pSponsorObjects[CLAN_SPONSORS_COUNT];
 
 	for (int i = 0; i < CLAN_SPONSORS_COUNT; i++)
@@ -242,6 +243,9 @@ void MMatchServer::OnClanRequestCreateClan(const MUID& uidPlayer, const int nReq
 			return;
 		}
 	}
+#else
+	MMatchObject** pSponsorObjects = nullptr;
+#endif
 
 	
 	// 서버단에서 클랜을 생성할 수 있는지 검사한다.
@@ -290,6 +294,39 @@ void MMatchServer::OnClanRequestCreateClan(const MUID& uidPlayer, const int nReq
 	pNewCmd->AddParameter(new MCommandParameterInt(nRet));
 	pNewCmd->AddParameter(new MCommandParameterInt(nRequestID));
 	RouteToListener(pMasterObject, pNewCmd);
+
+#if CLAN_SPONSORS_COUNT == 0
+	// Immediately create the clan.
+
+	int MasterCID = pMasterObject->GetCharInfo()->m_nCID;
+
+	int NewCLID;
+	bool DBResult;
+	if (!Database->CreateClan(szClanName,
+		MasterCID,
+		&DBResult,
+		&NewCLID))
+	{
+		if (IsEnabledObject(pMasterObject))
+		{
+			RouteResponseToListener(pMasterObject, MC_MATCH_CLAN_RESPONSE_AGREED_CREATE_CLAN, MERR_CLAN_CANNOT_CREATE);
+		}
+		return;
+	}
+
+	if (IsEnabledObject(pMasterObject))
+	{
+		pMasterObject->GetCharInfo()->IncBP(-CLAN_CREATING_NEED_BOUNTY);
+		ResponseMySimpleCharInfo(pMasterObject->GetUID());
+
+		UpdateCharClanInfo(pMasterObject, NewCLID, szClanName, MCG_MASTER);
+	}
+
+	if (IsEnabledObject(pMasterObject))
+	{
+		RouteResponseToListener(pMasterObject, MC_MATCH_CLAN_RESPONSE_AGREED_CREATE_CLAN, MOK);
+	}
+#endif
 }
 
 
@@ -314,6 +351,7 @@ void MMatchServer::OnClanRequestAgreedCreateClan(const MUID& uidPlayer, const ch
 	MMatchObject* pMasterObject = GetObject(uidPlayer);
 	if (! IsEnabledObject(pMasterObject)) return;
 
+#if CLAN_SPONSORS_COUNT > 0
 	MMatchObject* pSponsorObjects[CLAN_SPONSORS_COUNT];
 
 	for (int i = 0; i < CLAN_SPONSORS_COUNT; i++)
@@ -332,6 +370,9 @@ void MMatchServer::OnClanRequestAgreedCreateClan(const MUID& uidPlayer, const ch
 	
 	// 서버단에서 클랜을 생성할 수 있는지 검사한다.
 	int nRet = ValidateCreateClan(szClanName, pMasterObject, pSponsorObjects);
+#else
+	int nRet = ValidateCreateClan(szClanName, pMasterObject, nullptr);
+#endif
 
 	if (nRet != MOK)
 	{
@@ -339,38 +380,37 @@ void MMatchServer::OnClanRequestAgreedCreateClan(const MUID& uidPlayer, const ch
 		return;
 	}
 
-	int nMasterCID = 0;
-	int nMemberCID[CLAN_SPONSORS_COUNT] = {0, };
+	int nMasterCID = pMasterObject->GetCharInfo()->m_nCID;
 
-	nMasterCID = pMasterObject->GetCharInfo()->m_nCID;
+#if CLAN_SPONSORS_COUNT > 0
+	int nMemberCID[CLAN_SPONSORS_COUNT]{};
+
 	for (int i = 0; i < CLAN_SPONSORS_COUNT; i++)
 	{
 		nMemberCID[i] = pSponsorObjects[i]->GetCharInfo()->m_nCID;
 	}
+#endif
 
 	int nNewCLID = 0;
 
 	// 실제로 디비에 넣는다.
-	if (CLAN_SPONSORS_COUNT == 4)
-	{
-		MAsyncDBJob_CreateClan* pNewJob = new MAsyncDBJob_CreateClan();
-		pNewJob->Input(szClanName, 
-					   nMasterCID, 
-					   nMemberCID[0], 
-					   nMemberCID[1], 
-					   nMemberCID[2], 
-					   nMemberCID[3],
-					   pMasterObject->GetUID(),
-					   pSponsorObjects[0]->GetUID(),
-					   pSponsorObjects[1]->GetUID(),
-					   pSponsorObjects[2]->GetUID(),
-					   pSponsorObjects[3]->GetUID());
-		PostAsyncJob(pNewJob);
-	}
-	else
-	{
-		_ASSERT(0);
-	}
+#if CLAN_SPONSORS_COUNT == 4
+	MAsyncDBJob_CreateClan* pNewJob = new MAsyncDBJob_CreateClan();
+	pNewJob->Input(szClanName, 
+				   nMasterCID, 
+				   nMemberCID[0], 
+				   nMemberCID[1], 
+				   nMemberCID[2], 
+				   nMemberCID[3],
+				   pMasterObject->GetUID(),
+				   pSponsorObjects[0]->GetUID(),
+				   pSponsorObjects[1]->GetUID(),
+				   pSponsorObjects[2]->GetUID(),
+				   pSponsorObjects[3]->GetUID());
+	PostAsyncJob(pNewJob);
+#elif CLAN_SPONSORS_COUNT > 0
+	static_assert(false, "Invalid CLAN_SPONSORS_COUNT value");
+#endif
 }
 
 void MMatchServer::OnClanRequestCloseClan(const MUID& uidClanMaster, const char* szClanName)

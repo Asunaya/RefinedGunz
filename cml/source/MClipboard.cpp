@@ -24,7 +24,6 @@ static bool GetImpl(void* WindowHandle, CharType* Output, size_t OutputSize)
 	auto ClipboardData = GetClipboardData(Format<CharType>());
 	if (!ClipboardData)
 		return{};
-	DEFER([&] { CloseHandle(ClipboardData); });
 
 	auto ptr = static_cast<const CharType*>(GlobalLock(ClipboardData));
 	if (!ptr)

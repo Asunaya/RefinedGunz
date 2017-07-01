@@ -9,4 +9,4 @@ struct ZCOUNTDOWN {
 	ZCOUNTDOWNEVENTCALLBACK *pCallBack;
 };
 
-void OnTimer_CountDown(void* pParam);
+void SetCountdown(const ZCOUNTDOWN& Countdown);

@@ -12,6 +12,8 @@ macro(add_target)
 	ucm_add_target(${ARGV} ${MACROS_FLAGS})
 	
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -D_PUBLISH")
+	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -D_PUBLISH")
+	set(CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} -D_PUBLISH")
 
 	set(projects_added "${projects_added};${ARG_NAME}" CACHE INTERNAL "projects_added")
 endmacro()

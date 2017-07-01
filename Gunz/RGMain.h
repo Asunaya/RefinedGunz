@@ -104,6 +104,14 @@ public:
 
 	void DrawReplayInfo(MDrawContext* pDC, MWidget* Widget) const;
 
+	// Lines created with /drawline
+	struct LineInfo
+	{
+		v3 v1, v2;
+		u32 Color;
+	};
+	std::vector<LineInfo> Lines;
+
 private:
 	friend void LoadRGCommands(ZChatCmdManager& CmdManager);
 

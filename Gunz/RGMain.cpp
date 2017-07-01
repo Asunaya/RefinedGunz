@@ -57,7 +57,23 @@ void RGMain::OnCreateDevice()
 	m_HitboxManager.Create();
 }
 
-void RGMain::OnDrawGame() {}
+void RGMain::OnDrawGame()
+{
+	RSetTransform(D3DTS_WORLD, IdentityMatrix());
+	RGetDevice()->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
+	RGetDevice()->SetRenderState(D3DRS_LIGHTING, FALSE);
+	RGetDevice()->SetFVF(D3DFVF_XYZ | D3DFVF_DIFFUSE);
+	RGetDevice()->SetRenderState(D3DRS_ZENABLE, TRUE);
+	RGetDevice()->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
+	RGetDevice()->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_DIFFUSE);
+	RGetDevice()->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+	RGetDevice()->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_DIFFUSE);
+
+	for (auto&& Line : Lines)
+	{
+		RDrawLine(Line.v1, Line.v2, Line.Color);
+	}
+}
 
 void RGMain::OnDrawGameInterface(MDrawContext* pDC)
 {

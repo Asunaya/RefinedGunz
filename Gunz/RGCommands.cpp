@@ -308,6 +308,20 @@ void LoadRGCommands(ZChatCmdManager& CmdManager)
 	},
 		CCF_ALL, 0, 1, true, "/colorinvert [0/1]", "");
 
+	CmdManager.AddCommand(0, "slasheffect", [](const char *line, int argc, char ** const argv) {
+		if (SetBool("Slash effect", ZGetConfiguration()->SlashEffect, argc, argv))
+		{
+			ZGetConfiguration()->Save();
+		}
+	}, CCF_ALL, 0, 1, true, "/slasheffect [0/1]", "");
+
+	CmdManager.AddCommand(0, "unlockeddir", [](const char *line, int argc, char ** const argv) {
+		if (SetBool("Unlocked dir", ZGetConfiguration()->UnlockedDir, argc, argv))
+		{
+			ZGetConfiguration()->Save();
+		}
+	}, CCF_ALL, 0, 1, true, "/unlockeddir [0/1]", "");
+
 	CmdManager.AddCommand(0, "setparts", [](const char *line, int argc, char ** const argv) {
 		if (!CheckDeveloperMode("setparts"))
 			return;
@@ -406,9 +420,13 @@ void LoadRGCommands(ZChatCmdManager& CmdManager)
 			return;
 
 		ZGetGameInterface()->SetState(GUNZ_LOBBY);
-		CreateTestGame(argv[1]);
+
+		auto&& Command = "map ";
+		auto Argument = line + strlen(Command);
+
+		CreateTestGame(Argument);
 	},
-		CCF_ALL, 0, 1, true, "/map <name>", "");
+		CCF_ALL, 1, ARGVNoMax, true, "/map <name>", "");
 
 	CmdManager.AddCommand(0, "equip", [](const char *line, int argc, char ** const argv) {
 		if (!CheckDeveloperMode("equip"))
@@ -531,6 +549,28 @@ void LoadRGCommands(ZChatCmdManager& CmdManager)
 		ZGetCharacterManager()->Add(NewChar);
 	},
 		CCF_ALL, 0, 1, true, "", "");
+
+	CmdManager.AddCommand(0, "drawline", [](const char *line, int argc, char ** const argv) {
+		if (!CheckDeveloperMode("drawline"))
+			return;
+
+		auto ParseVector = [&](int Index)
+		{
+			v3 ret;
+			for (int i = 0; i < 3; ++i)
+			{
+				ret[i] = atof(argv[i + Index]);
+			}
+			return ret;
+		};
+
+		auto v1 = ParseVector(1);
+		auto v2 = ParseVector(1 + 3);
+		auto Color = StringToInt<u32, 16>(argv[1 + 3 + 3]).value();
+
+		GetRGMain().Lines.push_back({ v1, v2, Color });
+	},
+		CCF_ALL, 7, 7, true, "", "");
 }
 
 #ifdef TIMESCALE

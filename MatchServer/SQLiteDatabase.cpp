@@ -1409,7 +1409,7 @@ try
 	if (stmt.HasRow())
 		return false;
 
-	stmt = ExecuteSQL("SELECT COUNT(*) FROM ClanMember cm Character c \
+	stmt = ExecuteSQL("SELECT COUNT(*) FROM ClanMember cm, Character c \
 		WHERE((cm.CID = ?) OR(cm.CID = ?) OR(cm.CID = ?) OR(cm.CID = ?) OR \
 		(cm.CID = ?)) AND cm.CID = c.CID AND c.DeleteFlag = 0",
 		MasterCID, Member1CID, Member2CID, Member3CID, Member4CID);
@@ -1438,6 +1438,54 @@ try
 	for (auto CID : MemberCIDs)
 		ExecuteSQL("INSERT INTO ClanMember(CLID, CID, Grade, RegDate) VALUES(?, ?, 9, date('now'))",
 			CLID, CID);
+
+	CommitTransaction();
+
+	return true;
+}
+catch (const SQLiteError& e)
+{
+	HandleException(e);
+	return false;
+}
+
+bool SQLiteDatabase::CreateClan(const char * ClanName, int MasterCID, bool * outRet, int * outNewCLID)
+try
+{
+	auto stmt = ExecuteSQL("SELECT CLID FROM Clan WHERE Name = ?",
+		ClanName);
+
+	if (stmt.HasRow())
+		return false;
+
+	stmt = ExecuteSQL("SELECT COUNT(*) FROM ClanMember cm, Character c "
+		"WHERE cm.CID = ? AND cm.CID = c.CID AND c.DeleteFlag = 0",
+		MasterCID);
+
+	if (!stmt.HasRow() || stmt.Get<int>() > 0)
+		return false;
+
+	auto Trans = BeginTransaction();
+
+	ExecuteSQL("INSERT INTO Clan(Name, MasterCID, RegDate, Exp, Level, Point, Wins, Losses, "
+		"Draws, Ranking, TotalPoint, RankIncrease, EmblemChecksum, LastDayRanking, "
+		"LastMonthRanking, EmblemUrl) "
+		"VALUES(?, ?, date('now'), 0, 0, 0, 0, 0, "
+		"0, 0, 0, 0, 0, 0, "
+		"0, '')",
+		ClanName, MasterCID);
+
+	stmt = ExecuteSQL("SELECT CLID FROM Clan WHERE MasterCID = ?",
+		MasterCID);
+
+	if (!stmt.HasRow())
+		return false;
+
+	auto CLID = stmt.Get<int>();
+
+	ExecuteSQL("INSERT INTO ClanMember(CLID, CID, Grade, RegDate, ContPoint) "
+		"VALUES(?, ?, 1, date('now'), 0)",
+		CLID, MasterCID);
 
 	CommitTransaction();
 
@@ -1491,7 +1539,7 @@ catch (const SQLiteError& e)
 bool SQLiteDatabase::AddClanMember(int CLID, int JoinerCID, int ClanGrade, bool * outRet)
 try
 {
-	ExecuteSQL("INSERT INTO ClanMember(CLID, CID, Grade, RegDate) VALUES(?, ?, ?, date('now'))",
+	ExecuteSQL("INSERT INTO ClanMember(CLID, CID, Grade, RegDate, ContPoint) VALUES(?, ?, ?, date('now'), 0)",
 		CLID, JoinerCID, ClanGrade);
 	*outRet = true;
 	return true;

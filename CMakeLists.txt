@@ -12,6 +12,11 @@ include(macros)
 
 set(UCM_UNITY_BUILD ON)
 
+if(DEFINED MSSQL)
+	set(CMAKE_MFC_FLAG 1)
+	add_definitions(-DMSSQL_ENABLED)
+endif()
+
 add_project_subdir(cml)
 add_project_subdir(RealSpace2)
 add_project_subdir(CSCommon)

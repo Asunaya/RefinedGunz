@@ -10,7 +10,7 @@
 MChattingFilter::MChattingFilter()
 {
 	m_strRemoveTokSkip		= "`-=\\[];'/~!@#$%^&*()_+|{}:\"<>";
-	m_strRemoveTokInvalid	= "`\\;,.'/!%^&|:\"<>?";
+	m_strRemoveTokInvalid	= "'";
 
 	for ( int i = 0;  i <= 32;  i++)
 	{

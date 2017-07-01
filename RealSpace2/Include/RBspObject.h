@@ -490,6 +490,7 @@ private:
 
 #ifdef _DEBUG
 extern int g_nPoly, g_nCall;
+extern int g_nPickCheckPolygon, g_nRealPickCheckPolygon;
 #endif
 
 _NAMESPACE_REALSPACE2_END

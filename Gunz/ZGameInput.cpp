@@ -512,7 +512,7 @@ void ZGameInput::Update(float fElapsed)
 #endif
 
 #ifdef NO_DIRECTION_LOCK
-			bool bRotateEnable = true;
+			bool bRotateEnable = !pMyCharacter->IsDirLocked() || ZGetConfiguration()->GetUnlockedDir();
 #else
 			bool bRotateEnable = !pMyCharacter->IsDirLocked();
 #endif

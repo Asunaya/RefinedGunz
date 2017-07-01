@@ -48,8 +48,17 @@ void MAsyncProxy::WorkerThread()
 
 void MAsyncProxy::OnRun()
 {
-	DBVariant DatabaseMgr;
-	DatabaseMgr.Create(MGetServerConfig()->GetDatabaseType());
+	IDatabase* Database;
+	switch (MGetServerConfig()->GetDatabaseType())
+	{
+	case DatabaseType::SQLite:
+		Database = new SQLiteDatabase;
+		break;
+
+	case DatabaseType::MSSQL:
+		Database = new MSSQLDatabase;
+		break;
+	}
 
 	MSignalEvent* EventArray[]{
 		&EventShutdown,
@@ -82,7 +91,7 @@ void MAsyncProxy::OnRun()
 				WaitQueue.Unlock();
 
 				if (pJob) {
-					pJob->Run(&DatabaseMgr.u);
+					pJob->Run(Database);
 					pJob->SetFinishTime(GetGlobalTimeMS());
 
 					ResultQueue.Lock();

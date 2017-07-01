@@ -139,6 +139,41 @@ struct LineSegmentInfo
 // Stuff crashes if this is increased
 static constexpr int MAX_INPUT_LENGTH = 230;
 
+static constexpr size_t ConversionError = size_t(-1);
+
+template <size_t OutputSize>
+size_t acptoutf16(wchar_t(&Output)[OutputSize], const char* Input)
+{
+	// ACP = [A]NSI [C]ode [P]age
+	auto Len = MultiByteToWideChar(CP_ACP, 0,
+		Input, -1,
+		Output, std::size(Output));
+
+	// 0 indicates error.
+	// This is distinct from an empty string, which would cause to return 1 instead since it'd
+	// write just the null terminator in that case.
+	if (Len == 0)
+		return ConversionError;
+
+	// The return value is chars written including null terminator (when you pass -1 for
+	// cbMultiByte), so we need to subtract one.
+	return size_t(Len) - 1;
+}
+
+template <size_t OutputSize>
+size_t utf16toacp(char(&Output)[OutputSize], const wchar_t* Input)
+{
+	auto Len = WideCharToMultiByte(CP_ACP, 0,
+		Input, -1,
+		Output, std::size(Output),
+		nullptr, nullptr);
+
+	if (Len == 0)
+		return ConversionError;
+
+	return size_t(Len) - 1;
+}
+
 void ChatMessage::SubstituteFormatSpecifiers()
 {
 	// TODO: Properly handle multiple emphases at once, e.g. both italic and underlined,
@@ -300,26 +335,21 @@ void Chat::OutputChatMsg(const char *Msg){
 	OutputChatMsg(Msg, TextColor);
 }
 
-static std::wstring UTF8toUTF16(const char* Msg)
-{
-	wchar_t WideBuffer[1024];
-	auto len = MultiByteToWideChar(CP_UTF8, 0,
-		Msg, -1,
-		WideBuffer, std::size(WideBuffer));
-	if (len == 0)
-	{
-		assert(false);
-		return L"";
-	}
-	return std::wstring{ WideBuffer, static_cast<size_t>(len) };
-}
-
 void Chat::OutputChatMsg(const char *szMsg, u32 dwColor)
 {
+	wchar_t WideMsg[4096];
+	auto ret = acptoutf16(WideMsg, szMsg);
+	if (ret == ConversionError)
+	{
+		MLog("Chat::OutputChatMsg -- Conversion error\n");
+		assert(false);
+		return;
+	}
+
 	Msgs.emplace_back();
 	auto&& Msg = Msgs.back();
 	Msg.Time = ZGetGame()->GetTime();
-	Msg.Msg = UTF8toUTF16(szMsg);
+	Msg.Msg = WideMsg;
 	Msg.DefaultColor = dwColor;
 
 	Msg.SubstituteFormatSpecifiers();
@@ -496,11 +526,14 @@ bool Chat::OnEvent(MEvent* pEvent){
 			}*/
 
 		{
-			size_t StartPos = InputField.rfind(0x20);
+			size_t StartPos = InputField.rfind(' ');
 			if (StartPos == std::string::npos)
 				StartPos = 0;
 			else
 				StartPos++;
+
+			if (StartPos == InputField.length())
+				break;
 
 			size_t PartialNameLength = InputField.size() - StartPos;
 
@@ -516,10 +549,13 @@ bool Chat::OnEvent(MEvent* pEvent){
 					continue;
 
 				wchar_t WidePlayerName[256];
-				auto len = MultiByteToWideChar(CP_ACP, 0,
-					PlayerName, -1,
-					WidePlayerName, std::size(WidePlayerName));
-				assert(len != 0);
+				auto len = acptoutf16(WidePlayerName, PlayerName);
+				if (len == ConversionError)
+				{
+					MLog("Chat::OnEvent -- Conversion error while autocompleting name\n");
+					assert(false);
+					continue;
+				}
 
 				if (!_wcsnicmp(PartialName, WidePlayerName, PartialNameLength))
 				{
@@ -594,7 +630,9 @@ bool Chat::OnEvent(MEvent* pEvent){
 				InputField.append(Clipboard, Clipboard + MAX_INPUT_LENGTH - InputField.length());
 			}
 			else
+			{
 				InputField += Clipboard;
+			}
 
 			break;
 		}
@@ -617,17 +655,15 @@ bool Chat::OnEvent(MEvent* pEvent){
 				break;
 			}*/
 
-			if (InputField.compare(L"")) {
+			if (!InputField.empty()) {
+				char MultiByteString[1024];
+				utf16toacp(MultiByteString, InputField.c_str());
+
+				ZGetGameInterface()->GetChat()->Input(MultiByteString);
+
 				InputHistory.push_back(InputField);
 				CurInputHistoryEntry = InputHistory.size();
 
-				char MultibyteString[1024];
-				WideCharToMultiByte(CP_UTF8, 0,
-					InputField.c_str(), -1,
-					MultibyteString, std::size(MultibyteString),
-					nullptr, nullptr);
-
-				ZGetGameInterface()->GetChat()->Input(MultibyteString);
 				InputField.clear();
 			}
 
@@ -653,25 +689,27 @@ bool Chat::OnEvent(MEvent* pEvent){
 
 				auto SlashR = L"/r ";
 				auto SlashWhisper = L"/whisper ";
-				if (InputField == SlashR)
+				if (iequals(InputField, SlashR))
 				{
-					std::wstring LastSenderWide;
-					LastSenderWide.resize(MATCHOBJECT_NAME_LENGTH);
+					wchar_t LastSenderWide[512];
 					auto* LastSender = ZGetGameInterface()->GetChat()->m_szWhisperLastSender;
-					auto len = MultiByteToWideChar(CP_ACP, 0,
-						LastSender, -1,
-						&LastSenderWide[0], std::size(LastSenderWide));
-					if (len == 0)
+					auto len = acptoutf16(LastSenderWide, LastSender);
+					if (len == ConversionError)
+					{
+						MLog("Chat::OnEvent -- Conversion error while handling /r\n");
+						assert(false);
 						break;
-
-					LastSenderWide.resize(len);
+					}
 
 					InputField = SlashWhisper;
 					InputField += LastSenderWide;
+					InputField += ' ';
 					CaretPos = InputField.length() - 1;
 				}
 				else
+				{
 					CaretPos++;
+				}
 			}
 		};
 	}

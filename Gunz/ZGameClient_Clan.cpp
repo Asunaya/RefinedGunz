@@ -42,9 +42,11 @@ static struct Clan_Sponsors_Ticket
 {
 	int		nRequestID;
 	char	szClanName[256];
+#if CLAN_SPONSORS_COUNT > 0
 	char	szSponsorCharName[CLAN_SPONSORS_COUNT][256];
 	bool	bAnswered[CLAN_SPONSORS_COUNT];
 	bool	bAgreed[CLAN_SPONSORS_COUNT];
+#endif
 } ClanSponsorsTicket;
 
 bool IsWaitingClanCreatingAgree()
@@ -86,7 +88,8 @@ void ShowClanSponsorAgreeWaitFrame(bool bVisible)
 			};
 
 			countDown.nSeconds = 30;
-			ZApplication::GetTimer()->SetTimerEvent(0, &OnTimer_CountDown, &countDown, true);
+
+			SetCountdown(countDown);
 
 			pWidget->Show(true, true);
 		}
@@ -113,7 +116,7 @@ void ShowClanJoinerAgreeWaitFrame(bool bVisible)
 			static ZCOUNTDOWN countDown = {30,"ClanJoinerAgreementWait_Remain",
 				"ClanJoinerAgreementWait",ShowClanJoinerAgreeWaitFrame_OnExpire};
 			countDown.nSeconds = 30;
-			ZApplication::GetTimer()->SetTimerEvent(0, &OnTimer_CountDown, &countDown, true);
+			SetCountdown(countDown);
 
 			pWidget->Show(true, true);
 		}
@@ -185,7 +188,7 @@ void ZGameClient::OnClanAskSponsorAgreement(const int nRequestID, const char* sz
 		static ZCOUNTDOWN countDown = {30,"ClanSponsorAgreementConfirm_Remain",
 			"ClanSponsorAgreementConfirm",OnClanAskSponsorAgreement_OnExpire};
 		countDown.nSeconds = 30;
-		ZApplication::GetTimer()->SetTimerEvent(0, &OnTimer_CountDown, &countDown, true);
+		::SetCountdown(countDown);
 
 		pWidget->Show(true, true);
 	}
@@ -201,6 +204,7 @@ void ZGameClient::OnClanAnswerSponsorAgreement(const int nRequestID, const MUID&
 		return;
 	}
 
+#if CLAN_SPONSORS_COUNT > 0
 	for (int i = 0; i < CLAN_SPONSORS_COUNT; i++)
 	{
 		if ((strlen(ClanSponsorsTicket.szSponsorCharName[i])) > 0)
@@ -213,10 +217,12 @@ void ZGameClient::OnClanAnswerSponsorAgreement(const int nRequestID, const MUID&
 			}
 		}
 	}
+#endif
 
 	bool bAllAgreed = true;
 	bool bAllAnswered = true;
 
+#if CLAN_SPONSORS_COUNT > 0
 	for (int i = 0; i < CLAN_SPONSORS_COUNT; i++)
 	{
 		if ((ClanSponsorsTicket.bAgreed[i] == false) || ((strlen(ClanSponsorsTicket.szSponsorCharName[i])) <= 0))
@@ -229,13 +235,18 @@ void ZGameClient::OnClanAnswerSponsorAgreement(const int nRequestID, const MUID&
 			bAllAnswered = false;
 		}
 	}
+#endif
 
 	if (bAllAgreed)
 	{
 		if (strlen(ClanSponsorsTicket.szClanName) >=4 )
 		{
+#if CLAN_SPONSORS_COUNT > 0
 			char* ppSponsorCharName[CLAN_SPONSORS_COUNT];
 			for (int i = 0; i < CLAN_SPONSORS_COUNT; i++) ppSponsorCharName[i] = ClanSponsorsTicket.szSponsorCharName[i];
+#else
+			char** ppSponsorCharName = nullptr;
+#endif
 			
 			ZPostRequestAgreedCreateClan(GetPlayerUID(), ClanSponsorsTicket.szClanName, ppSponsorCharName, CLAN_SPONSORS_COUNT);
 		}
@@ -292,10 +303,12 @@ void ZGameClient::RequestCreateClan(char* szClanName, char** ppMemberCharNames)
 	ClanSponsorsTicket.nRequestID = m_nRequestID;
 	strcpy_safe(ClanSponsorsTicket.szClanName, szClanName);
 	
+#if CLAN_SPONSORS_COUNT > 0
 	for (int i = 0; i < CLAN_SPONSORS_COUNT; i++)
 	{
 		strcpy_safe(ClanSponsorsTicket.szSponsorCharName[i], ppMemberCharNames[i]);
 	}
+#endif
 
 	ZPostRequestCreateClan(GetPlayerUID(), m_nRequestID, szClanName, ppMemberCharNames, CLAN_SPONSORS_COUNT);
 }
@@ -359,7 +372,7 @@ void ZGameClient::OnClanAskJoinAgreement(const char* szClanName, MUID& uidClanAd
 		static ZCOUNTDOWN countDown = {30,"ClanJoinerAgreementConfirm_Remain",
 			"ClanJoinerAgreementConfirm",OnClanAskJoinAgreement_OnExpire};
 		countDown.nSeconds = 30;
-		ZApplication::GetTimer()->SetTimerEvent(0, &OnTimer_CountDown, &countDown, true);
+		::SetCountdown(countDown);
 
 		pWidget->Show(true, true);
 	}

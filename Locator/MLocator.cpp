@@ -164,8 +164,10 @@ bool MLocator::InitServerStatusMgr()
 
 		if( 0 != GetLocatorDBMgr() )
 			GetDBServerStatus( 0, true );
+#ifdef LOCATOR_FREESTANDING
 		else
 			ASSERT( 0 && "시작시에 DB의 정보를 가져오는것이 좋음." );
+#endif
 		
 		return true;
 	}

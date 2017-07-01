@@ -1,5 +1,24 @@
-#include "stdafx.h"
 #ifdef MSSQL_ENABLED
+
+// MFC stuff
+#undef _WINSOCKAPI_
+
+#define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS
+
+#define _AFX_ALL_WARNINGS
+
+#include <afxwin.h>
+#include <afxext.h>
+#include <afxdisp.h>
+
+#include <afxdtctl.h>
+#ifndef _AFX_NO_AFXCMN_SUPPORT
+#include <afxcmn.h>
+#endif
+#include <afxrich.h>
+#include <afxcview.h>
+
+
 #include "MMatchServer.h"
 #include "ODBCRecordset.h"
 #include "MSSQLDatabase.h"
@@ -64,6 +83,7 @@ static TCHAR g_szDB_GET_FRIEND_LIST[] = _T("{CALL spGetFriendList (%d)}");
 static TCHAR g_szDB_GET_CHAR_CLAN[] = _T("{CALL spGetCharClan (%d)}");
 static TCHAR g_szDB_GET_CLID_FROM_CLANNAME[] = _T("{CALL spGetCLIDFromClanName ('%s')}");
 static TCHAR g_szDB_CREATE_CLAN[] = _T("{CALL spCreateClan ('%s', %d, %d, %d, %d, %d)}");
+static TCHAR g_szDB_CREATE_CLAN2[] = _T("{CALL spCreateClan ('%s', %d)}");
 static TCHAR g_szDB_RESERVE_CLOSE_CLAN[] = _T("{CALL spReserveCloseClan (%d, '%s', %d, '%s')}");
 static TCHAR g_szDB_ADD_CLAN_MEMBER[] = _T("{CALL spAddClanMember (%d, %d, %d)}");
 static TCHAR g_szDB_REMOVE_CLAN_MEMBER[] = _T("{CALL spRemoveClanMember (%d, %d)}");
@@ -1772,6 +1792,46 @@ bool MSSQLDatabase::CreateClan(const TCHAR* szClanName, const int nMasterCID, co
 
 	CString strSQL;
 	strSQL.Format(g_szDB_CREATE_CLAN, temp.c_str(), nMasterCID, nMember1CID, nMember2CID, nMember3CID, nMember4CID);
+
+	CODBCRecordset rs(&Impl->m_DB);
+
+
+	bool bException = false;
+	try
+	{
+		rs.Open(strSQL, CRecordset::forwardOnly, CRecordset::readOnly);
+	}
+	catch (CDBException* e)
+	{
+		bException = true;
+		Log("MSSQLDatabase::CreateClan - %s\n", e->m_strError);
+
+		*boutRet = false;
+		return false;
+	}
+
+	if ((rs.IsOpen() == FALSE) || (rs.GetRecordCount() <= 0) || (rs.IsBOF() == TRUE))
+	{
+		*boutRet = false;
+		return false;
+	}
+
+	*boutRet = rs.Field("Ret").AsBool();
+	*noutNewCLID = rs.Field("NewCLID").AsInt();
+
+	_STATUS_DB_END(35);
+	return true;
+}
+
+bool MSSQLDatabase::CreateClan(const TCHAR* szClanName, const int nMasterCID, bool* boutRet, int* noutNewCLID)
+{
+	_STATUS_DB_START
+	if (!CheckOpen()) return false;
+
+	auto temp = FilterSQL(szClanName);
+
+	CString strSQL;
+	strSQL.Format(g_szDB_CREATE_CLAN2, temp.c_str(), nMasterCID);
 
 	CODBCRecordset rs(&Impl->m_DB);
 

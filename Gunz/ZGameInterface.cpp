@@ -1909,11 +1909,6 @@ bool ZGameInterface::SetState(GunzState nState)
 	return true;
 }
 
-_NAMESPACE_REALSPACE2_BEGIN
-extern int g_nPoly, g_nCall;
-extern int g_nPickCheckPolygon, g_nRealPickCheckPolygon;
-_NAMESPACE_REALSPACE2_END
-
 #ifndef _PUBLISH
 #include "fmod.h"
 #endif

@@ -1615,6 +1615,7 @@ BEGIN_IMPLEMENT_LISTENER(ZGetClanCreateDialogOk, MBTN_CLK_MSG)
 		ZPlayerSelectListBox *pPlayerList = (ZPlayerSelectListBox*)pResource->FindWidget("ClanSponsorSelect");
 		if(pPlayerList)
 		{
+#if CLAN_SPONSORS_COUNT > 0
 			char szSponsors[CLAN_SPONSORS_COUNT][MATCHOBJECT_NAME_LENGTH];
 			char *ppSponsors[CLAN_SPONSORS_COUNT];
 			int nCount = 0;
@@ -1628,6 +1629,10 @@ BEGIN_IMPLEMENT_LISTENER(ZGetClanCreateDialogOk, MBTN_CLK_MSG)
 					nCount ++;
 				}
 			}
+#else
+			char** ppSponsors = nullptr;
+			int nCount = 0;
+#endif
 
 			if ( nCount==CLAN_SPONSORS_COUNT)
 			{

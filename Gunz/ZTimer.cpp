@@ -9,26 +9,23 @@ struct ZTimerEvent
 	// The amount of time that has to pass before the event is triggered.
 	double EventTime{};
 
-	// Is this event only triggered once?
-	bool TriggerOnce{};
-
 	// The callback to be called once the event is triggered.
-	ZGameTimerEventCallback* Callback{};
-
-	// The user-provided parameter to the callback.
-	void* Param{};
+	std::function<bool()> Callback;
 
 	// Returns true if the event is to be stopped and false to continue.
 	bool UpdateTick(double Delta)
 	{
 		ElapsedTime += Delta;
 
-		if (ElapsedTime >= Delta)
+		if (ElapsedTime >= EventTime)
 		{
-			Callback(Param);
+			auto CallbackRet = Callback();
+			if (!CallbackRet)
+			{
+				ElapsedTime -= EventTime;
+			}
 
-			if (TriggerOnce)
-				return true;
+			return CallbackRet;
 		}
 
 		return false;
@@ -91,22 +88,11 @@ void ZTimer::UpdateEvents(double DeltaTime)
 }
 
 void ZTimer::SetTimerEvent(u64 DelayInMilliseconds,
-	ZGameTimerEventCallback* Callback,
-	void* Param,
-	bool TriggerOnce)
+	std::function<bool()> Callback)
 {
 	ZTimerEvent NewEvent;
 	NewEvent.ElapsedTime = 0;
 	NewEvent.EventTime = double(DelayInMilliseconds) / 1000.0;
 	NewEvent.Callback = Callback;
-	NewEvent.Param = Param;
-	NewEvent.TriggerOnce = TriggerOnce;
 	m_EventList.push_back(std::move(NewEvent));
-}
-
-void ZTimer::ClearTimerEvent(ZGameTimerEventCallback* fnTimerEventCallback)
-{
-	erase_remove_if(m_EventList, [&](auto&& Event) {
-		return Event.Callback == fnTimerEventCallback;
-	});
 }

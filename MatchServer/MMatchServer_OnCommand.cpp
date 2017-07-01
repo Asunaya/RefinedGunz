@@ -1036,12 +1036,14 @@ _STATUS_CMD_START;
 			{
 				MUID uidPlayer = pCommand->GetSenderUID();
 				char szClanName[256];
-				char szSponsorNames[CLAN_SPONSORS_COUNT][256];
-				char* sncv[CLAN_SPONSORS_COUNT];
 				int nRequestID;
 
 				pCommand->GetParameter(&nRequestID,			1, MPT_INT);
 				pCommand->GetParameter(szClanName,			2, MPT_STR, sizeof(szClanName) );
+
+#if CLAN_SPONSORS_COUNT > 0
+				char szSponsorNames[CLAN_SPONSORS_COUNT][256];
+				char* sncv[CLAN_SPONSORS_COUNT];
 
 				for (int i = 0; i < CLAN_SPONSORS_COUNT; i++)
 				{
@@ -1049,6 +1051,9 @@ _STATUS_CMD_START;
 
 					sncv[i] = szSponsorNames[i];
 				}
+#else
+				char** sncv = nullptr;
+#endif
 
 				OnClanRequestCreateClan(uidPlayer, nRequestID, szClanName, sncv);
 			}
@@ -1072,10 +1077,12 @@ _STATUS_CMD_START;
 			{
 				MUID uidPlayer = pCommand->GetSenderUID();
 				char szClanName[256];
+
+				pCommand->GetParameter(szClanName, 1, MPT_STR, sizeof(szClanName));
+
+#if CLAN_SPONSORS_COUNT > 0
 				char szSponsorNames[CLAN_SPONSORS_COUNT][256];
 				char* sncv[CLAN_SPONSORS_COUNT];
-
-				pCommand->GetParameter(szClanName,			1, MPT_STR, sizeof(szClanName) );
 
 				for (int i = 0; i < CLAN_SPONSORS_COUNT; i++)
 				{
@@ -1085,6 +1092,9 @@ _STATUS_CMD_START;
 				}
 
 				OnClanRequestAgreedCreateClan(uidPlayer, szClanName, sncv);
+#else
+				OnClanRequestAgreedCreateClan(uidPlayer, szClanName, nullptr);
+#endif
 			}
 			break;
 		case MC_MATCH_CLAN_REQUEST_CLOSE_CLAN:

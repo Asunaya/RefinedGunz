@@ -46,7 +46,8 @@ void MXmlNode::SetText(const char* sText)
 	if (!m_pDomNode)
 		return;
 
-	m_pDomNode->value(sText);
+	auto PermanentString = m_pDomNode->document()->allocate_string(sText);
+	m_pDomNode->value(PermanentString);
 }
 
 int	MXmlNode::GetChildNodeCount()
@@ -132,6 +133,9 @@ bool MXmlNode::FindChildNode(const char* sNodeName, MXmlNode* pOutNode)
 
 bool MXmlNode::AppendChild(MXmlNode node)
 {
+	if (node.GetParent().GetXmlDomNodePtr() != nullptr)
+		return true;
+
 	m_pDomNode->append_node(node.GetXmlDomNodePtr());
 
 	return true;
@@ -166,10 +170,15 @@ void MXmlElement::SetContents(bool bValue)
 
 bool MXmlElement::AppendText(const char* sText)
 {
+	// This is only used for whitespace, which the printer adds anyway, so we'll just ignore it.
+	return true;
+
+	/*
 	auto node = m_pDomNode->document()->allocate_node(rapidxml::node_data, 0, sText);
 	m_pDomNode->append_node(node);
 
 	return true;
+	*/
 }
 
 bool MXmlElement::AppendChild(MXmlElement aChildElement)
@@ -182,7 +191,10 @@ bool MXmlElement::AppendChild(MXmlElement aChildElement)
 
 bool MXmlElement::AppendChild(const char* sTagName, const char* sTagText)
 {
-	auto node = m_pDomNode->document()->allocate_node(rapidxml::node_element, sTagName, sTagText);
+	auto Doc = m_pDomNode->document();
+	auto node = Doc->allocate_node(rapidxml::node_element,
+		Doc->allocate_string(sTagName),
+		Doc->allocate_string(sTagText));
 	m_pDomNode->append_node(node);
 
 	return true;
@@ -190,7 +202,9 @@ bool MXmlElement::AppendChild(const char* sTagName, const char* sTagText)
 
 MXmlElement	MXmlElement::CreateChildElement(const char* sTagName)
 {
-	auto node = m_pDomNode->document()->allocate_node(rapidxml::node_element, sTagName);
+	auto Doc = m_pDomNode->document();
+	auto node = Doc->allocate_node(rapidxml::node_element,
+		Doc->allocate_string(sTagName));
 	m_pDomNode->append_node(node);
 
 	return MXmlElement{ node };
@@ -338,7 +352,9 @@ void MXmlElement::GetAttribute(int index, char* szoutAttrName, int maxlen1, char
 
 bool MXmlElement::AddAttribute(const char* sAttrName, const char* sAttrText)
 {
-	auto Attribute = m_pDomNode->document()->allocate_attribute(sAttrName, sAttrText);
+	auto Doc = m_pDomNode->document();
+	auto Attribute = Doc->allocate_attribute(Doc->allocate_string(sAttrName),
+		Doc->allocate_string(sAttrText));
 	m_pDomNode->append_attribute(Attribute);
 
 	return true;
@@ -371,7 +387,7 @@ bool MXmlElement::SetAttribute(const char* sAttrName, char* sAttrText)
 	if (!Attribute)
 		return false;
 
-	Attribute->value(sAttrText);
+	Attribute->value(m_pDomNode->document()->allocate_string(sAttrText));
 
 	return true;
 }
@@ -601,7 +617,7 @@ bool MXmlDocument::SaveToFile(const char* m_sFileName)
 
 bool MXmlDocument::CreateProcessingInstruction( const char* szHeader)
 {
-	auto node = Doc.allocate_node(rapidxml::node_pi);
+	auto node = Doc.allocate_node(rapidxml::node_pi, 0, szHeader);
 	Doc.append_node(node);
 	return true;
 }
@@ -615,6 +631,9 @@ bool MXmlDocument::Delete(MXmlNode* pNode)
 
 bool MXmlDocument::AppendChild(MXmlNode node)
 {
+	if (node.GetParent().GetXmlDomNodePtr() != nullptr)
+		return true;
+
 	Doc.append_node(node.GetXmlDomNodePtr());
 
 	return true;
@@ -622,7 +641,8 @@ bool MXmlDocument::AppendChild(MXmlNode node)
 
 MXmlElement	MXmlDocument::CreateElement(const char* sName)
 {
-	auto node = Doc.allocate_node(rapidxml::node_element, sName);
+	auto node = Doc.allocate_node(rapidxml::node_element, Doc.allocate_string(sName));
+	Doc.append_node(node);
 
 	return MXmlElement(node);
 }

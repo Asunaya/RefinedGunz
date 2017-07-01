@@ -12,7 +12,7 @@
 
 #include "ZModule_Skills.h"
 
-void CreateTestGame(char *mapname, int nDummyCharacterCount, bool bShot, bool bAITest, int nParam1)
+void CreateTestGame(const char *mapname, int nDummyCharacterCount, bool bShot, bool bAITest, int nParam1)
 {
 	ZApplication::GetStageInterface()->SetMapName(mapname);
 	ZGetGameClient()->GetMatchStageSetting()->SetMapName(mapname);

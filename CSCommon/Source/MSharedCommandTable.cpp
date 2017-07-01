@@ -700,10 +700,14 @@ void MAddSharedCommandTable(MCommandManager* CommandManager, MSharedCommandType:
 			P(MPT_UID, "uidChar");
 			P(MPT_INT, "RequestID");
 			P(MPT_STR, "ClanName");
+#if CLAN_SPONSORS_COUNT == 4
 			P(MPT_STR, "Member1CharName");
 			P(MPT_STR, "Member2CharName");
 			P(MPT_STR, "Member3CharName");
 			P(MPT_STR, "Member4CharName");
+#elif CLAN_SPONSORS_COUNT > 0
+			static_assert(false, "Invalid CLAN_SPONSORS_COUNT value");
+#endif
         C(MC_MATCH_CLAN_RESPONSE_CREATE_CLAN,
 			"Match.Clan.ResponseCreateClan", "Response Create Clan",
 			MCDT_MACHINE2MACHINE);

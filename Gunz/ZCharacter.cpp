@@ -2716,8 +2716,8 @@ void ZCharacter::OnDamaged(ZObject* pAttacker, rvector srcPos, ZDAMAGETYPE damag
 
 	// If this isn't called on MyCharacter, it's unreliable predicted damage.
 	// Actual damage for other players is reported in HP/AP info packets.
-	if (this != ZGetGame()->m_pMyCharacter)
-		return;
+	//if (this != ZGetGame()->m_pMyCharacter)
+		//return;
 
 	HandleDamage(pAttacker, srcPos, damageType, weaponType, fDamage, fPiercingRatio, nMeleeType);
 }

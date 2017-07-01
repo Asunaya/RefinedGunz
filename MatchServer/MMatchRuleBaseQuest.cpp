@@ -409,7 +409,7 @@ void MMatchRuleBaseQuest::ReAssignNPC()
 			{
 				m_NPCManager.RemovePlayerControl(pObj->GetUID());
 			}
-			mlog("Ping : %s (%d)\n", pObj->GetName(), lat);
+			DMLog("Ping : %s (%d)\n", pObj->GetName(), lat);
 		}
 	}
 }

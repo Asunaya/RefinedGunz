@@ -2510,7 +2510,7 @@ void ZGame::OnPeerSlash(ZCharacter *pOwner, const rvector &pos, const rvector &d
 			v2 = TargetPos + rvector(0, 0, 100);
 
 		ZPICKINFO zpi;
-		Pick(pOwner, v1, v2, &zpi);
+		PickTo(pOwner, v1, v2, &zpi);
 
 		if (zpi.bBspPicked && Magnitude(zpi.bpi.PickPos - v1) < Magnitude(v2 - v1))
 			continue;
@@ -2538,7 +2538,7 @@ void ZGame::OnPeerSlash(ZCharacter *pOwner, const rvector &pos, const rvector &d
 
 		rvector AdjTargetPos = pTarget->GetPosition() + rvector(0, 0, 130) + pTarget->GetDirection() * 50;
 
-		if (pTarget == m_pMyCharacter)
+		if (pTarget == m_pMyCharacter || ZGetConfiguration()->GetSlashEffect())
 			ZGetEffectManager()->AddSlashEffect(AdjTargetPos, -dir, cm);
 
 		pTarget->OnDamaged(pOwner, pos, ZD_MELEE, pDesc->m_nWeaponType, fDamage, pItem->GetPiercingRatio(pDesc->m_nWeaponType, eq_parts_chest), cm);
@@ -2632,7 +2632,7 @@ void ZGame::OnPeerMassive(ZCharacter *pOwner, const rvector &pos, const rvector 
 			v2 = TargetPos + rvector(0, 0, 100);
 
 		ZPICKINFO zpi;
-		Pick(pOwner, v1, v2, &zpi);
+		PickTo(pOwner, v1, v2, &zpi);
 
 		if (zpi.bBspPicked && Magnitude(zpi.bpi.PickPos - v1) < Magnitude(v2 - v1))
 			continue;

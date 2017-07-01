@@ -139,6 +139,7 @@ public:
 	virtual bool GetClanIDFromName(const char* szClanName, int* poutCLID) override;
 	virtual bool CreateClan(const char* szClanName, int nMasterCID, int nMember1CID, int nMember2CID,
 		int nMember3CID, int nMember4CID, bool* boutRet, int* noutNewCLID) override;
+	virtual bool CreateClan(const char* szClanName, int nMasterCID, bool* boutRet, int* noutNewCLID) override;
 	virtual bool DeleteExpiredClan(uint32_t dwCID, uint32_t dwCLID, const std::string& strDeleteName,
 		uint32_t dwWaitHour = 24) override;
 	virtual bool SetDeleteTime(uint32_t dwMasterCID, uint32_t dwCLID, const std::string& strDeleteDate) override;

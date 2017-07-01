@@ -658,12 +658,15 @@ inline void ZPostRequestCreateClan(const MUID& uidChar, const int nRequestID, ch
 {
 	if (nMemberCharNamesCount != CLAN_SPONSORS_COUNT) return;
 
-	ZPOSTCMD7(MC_MATCH_CLAN_REQUEST_CREATE_CLAN, MCmdParamUID(uidChar), MCmdParamInt(nRequestID),
-		MCmdParamStr(szClanName),
-		MCmdParamStr(ppMemberCharNames[0]), MCmdParamStr(ppMemberCharNames[1]),
-		MCmdParamStr(ppMemberCharNames[2]), MCmdParamStr(ppMemberCharNames[3]));
-
-}
+	auto Cmd = ZNewCmd(MC_MATCH_CLAN_REQUEST_CREATE_CLAN);
+	Cmd->AddParameter(new MCmdParamUID(uidChar));
+	Cmd->AddParameter(new MCmdParamInt(nRequestID));
+	Cmd->AddParameter(new MCmdParamStr(szClanName));
+	for (int i = 0; i < CLAN_SPONSORS_COUNT; ++i)
+	{
+		Cmd->AddParameter(new MCmdParamStr(ppMemberCharNames[i]));
+	}
+	ZPostCommand(Cmd);}
 
 inline void ZPostAnswerSponsorAgreement(const int nRequestID, const MUID& uidClanMaster, char* szSponsorCharName, const bool bAnswer)
 {

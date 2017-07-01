@@ -5,6 +5,8 @@ set OLDCD=%CD%
 call mkdir build
 call cd build
 
+call del CMakeCache.txt
+
 call cmake -G "Visual Studio 14 2015" -T "v140_xp" ..\..
 
 if errorlevel 1 (

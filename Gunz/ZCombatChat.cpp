@@ -319,6 +319,16 @@ void ZCombatChat::OnDraw(MDrawContext* pDC)
 	}
 }
 
+bool ZCombatChat::IsShow() const
+{
+	if (GetRGMain().IsNewChatEnabled())
+		return GetRGMain().GetChat().IsInputEnabled();
+
+	if (!m_pInputEdit)
+		return false;
+	return m_pInputEdit->IsVisible();
+}
+
 void ZCombatChat::SetFont( MFont* pFont)
 {
 	m_pChattingOutput->SetFont( pFont);

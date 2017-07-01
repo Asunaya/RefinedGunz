@@ -3,6 +3,7 @@
 #include "MUID.h"
 #include "MBaseLocale.h"
 #include "GlobalTypes.h"
+#include "Config.h"
 
 #define MATCHOBJECT_NAME_LENGTH		32
 #define MAX_CHAR_COUNT				4
@@ -29,9 +30,13 @@
 //
 // Clan
 //
+#ifdef SOLO_CLAN_CREATION
+#define CLAN_SPONSORS_COUNT				0
+#else
 #define CLAN_SPONSORS_COUNT				4
-#define CLAN_CREATING_NEED_BOUNTY		1000
-#define CLAN_CREATING_NEED_LEVEL		10
+#endif
+#define CLAN_CREATING_NEED_BOUNTY		0 //1000
+#define CLAN_CREATING_NEED_LEVEL		0 //10
 
 
 #define CLAN_NAME_LENGTH			16

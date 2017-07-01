@@ -465,7 +465,23 @@ bool MMatchServer::LoadChannelPreset()
 
 bool MMatchServer::InitDB()
 {
-	Database.Create(MGetServerConfig()->GetDatabaseType());
+	switch (MGetServerConfig()->GetDatabaseType())
+	{
+	case DatabaseType::SQLite:
+		Database = new SQLiteDatabase;
+		break;
+
+#ifdef MSSQL_ENABLED
+	case DatabaseType::MSSQL:
+		Database = new MSSQLDatabase;
+		break;
+#endif
+
+	default:
+		MLog("MMatchServer::InitDB -- Invalid database type\n");
+		assert(false);
+		return false;
+	}
 	return true;
 }
 
@@ -751,7 +767,10 @@ void MMatchServer::OnRun(void)
 			
 			MUID uid = pObj->GetUID();
 			ObjectRemove(uid, &i);
-			Disconnect(uid);			
+			Disconnect(uid);
+
+			if (i == m_Objects.end())
+				break;
 		}
 	}
 

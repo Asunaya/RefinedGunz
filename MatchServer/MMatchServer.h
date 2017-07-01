@@ -51,49 +51,6 @@ enum COUNT_CODE_STATUS
 	CCS_NON,
 };
 
-struct DBVariant
-{
-	union U
-	{
-		U() {}
-		~U() {}
-		SQLiteDatabase sqlite;
-#ifdef MSSQL_ENABLED
-		MSSQLDatabase mssql;
-#endif
-	};
-
-	DatabaseType Type;
-	U u;
-
-	// TODO: Fixfix
-	/*DBVariant(DatabaseType Type)
-		: Type(Type)*/
-	DBVariant() {}
-	void Create(DatabaseType Type)
-	{
-		this->Type = Type;
-
-		if (Type == DatabaseType::SQLite)
-			new (&u) SQLiteDatabase;
-#ifdef MSSQL_ENABLED
-		else
-			new (&u) MSSQLDatabase;
-#endif
-	}
-	DBVariant(const DBVariant&) = delete;
-	DBVariant(DBVariant&&) = delete;
-	~DBVariant()
-	{
-		if (Type == DatabaseType::SQLite)
-			u.sqlite.~SQLiteDatabase();
-#ifdef MSSQL
-		else
-			u.mssql.~MSSQLDatabase();
-#endif
-	}
-};
-
 class MMatchServer : public MServer {
 public:
 	MMatchServer();
@@ -125,7 +82,7 @@ public:
 	MMatchStageMap*		GetStageMap() { return &m_StageMap; }
 	MMatchChannelMap*	GetChannelMap() { return &m_ChannelMap; }
 	MMatchClanMap*		GetClanMap() { return &m_ClanMap; }
-	IDatabase*			GetDBMgr() { return reinterpret_cast<IDatabase*>(&Database.u); }
+	IDatabase*			GetDBMgr() { return Database; }
 	MMatchQuest*		GetQuest() { return &m_Quest; }
 	int GetClientCount() const { return (int)m_Objects.size(); }
 	int GetAgentCount() const { return (int)m_AgentMap.size(); }
@@ -717,7 +674,7 @@ protected:
 	MAgentObjectMap		m_AgentMap;
 
 	MSafeUDP			m_SafeUDP;
-	DBVariant			Database;
+	IDatabase*			Database{};
 
 	MAsyncProxy			m_AsyncProxy;
 	MMatchAdmin			m_Admin;

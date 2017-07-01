@@ -185,6 +185,8 @@ public:
 	bool GetDynamicResourceLoad() const { return bDynamicResourceLoad; }
 	bool GetDrawTrails() const { return bDrawTrails; }
 	bool GetShowHitRegDebugOutput() const { return HitRegistrationDebugOutput; }
+	bool GetSlashEffect() const { return SlashEffect; }
+	bool GetUnlockedDir() const { return UnlockedDir; }
 
 	bool IsComplete() const			{ return m_bIsComplete; }
 
@@ -233,6 +235,8 @@ private:
 	bool bDynamicResourceLoad{};
 	bool bDrawTrails = true;
 	bool HitRegistrationDebugOutput{};
+	bool SlashEffect = true;
+	bool UnlockedDir{};
 };
 
 ZConfiguration*	ZGetConfiguration();
@@ -333,6 +337,8 @@ ZConfiguration*	ZGetConfiguration();
 #define ZTOK_ETC_REJECT_INVITE		"REJECT_INVITE"
 #define ZTOK_ETC_CROSSHAIR			"CROSSHAIR"
 #define ZTOK_ETC_DRAWTRAILS			"DRAWTRAILS"
+#define ZTOK_ETC_SLASHEFFECT		"SLASHEFFECT"
+#define ZTOK_ETC_UNLOCKEDDIR		"UNLOCKEDDIR"
 
 #define ZTOK_CHAT					"CHAT"
 #define ZTOK_CHAT_BACKGROUNDCOLOR	"BACKGROUNDCOLOR"

@@ -369,7 +369,7 @@ RRESULT OnRender(void *pParam)
 	g_App.OnDraw();
 
 	if(g_pDefFont &&
-		(ZGetGame()->IsShowReplayInfo() || !ZGetGame()->IsReplay())) {
+		(!ZGetGame() || ZGetGame()->IsShowReplayInfo() || !ZGetGame()->IsReplay())) {
 		char buf[512];
 		size_t y_offset{};
 		auto PrintText = [&](const char* Format, ...)

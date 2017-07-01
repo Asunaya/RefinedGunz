@@ -1,8 +1,10 @@
 #pragma once
 
 #include <list>
+#include <functional>
 
 using ZGameTimerEventCallback = void(void*);
+using ZGameTimerEventCallbackMultiple = bool(void*);
 
 struct ZTimerEvent;
 
@@ -16,11 +18,7 @@ public:
 	void ResetFrame();
 
 	void SetTimerEvent(u64 DelayInMilliseconds,
-		ZGameTimerEventCallback* Callback,
-		void* Param,
-		bool TriggerOnce = false);
-
-	void ClearTimerEvent(ZGameTimerEventCallback* fnTimerEventCallback);
+		std::function<bool()> Callback);
 
 private:
 	void UpdateEvents(double DeltaTime);

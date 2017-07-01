@@ -487,6 +487,7 @@ void MMatchServer::OnAsyncCreateClan(MAsyncJob* pJobResult)
 	}
 
 
+#if CLAN_SPONSORS_COUNT > 0
 	MMatchObject* pSponsorObjects[CLAN_SPONSORS_COUNT];
 	_ASSERT(CLAN_SPONSORS_COUNT == 4);
 
@@ -503,6 +504,7 @@ void MMatchServer::OnAsyncCreateClan(MAsyncJob* pJobResult)
 			RouteResponseToListener(pSponsorObjects[i], MC_MATCH_RESPONSE_RESULT, MRESULT_CLAN_CREATED);
 		}
 	}
+#endif
 
 	if (IsEnabledObject(pMasterObject))
 	{

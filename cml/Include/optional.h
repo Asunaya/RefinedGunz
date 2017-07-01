@@ -90,8 +90,8 @@ public:
 
 	T& value() & { return **this; }
 	const T& value() const & { return **this; }
-	T&& value() && { return **this; }
-	const T& value() const && { return **this; }
+	T&& value() && { return *std::move(*this); }
+	const T& value() const && { return *std::move(*this); }
 
 	bool has_value() const { return Constructed; }
 

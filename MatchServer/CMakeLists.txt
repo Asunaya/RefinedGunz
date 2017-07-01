@@ -3,7 +3,7 @@ file(GLOB src
     "*.cpp"
 )
 
-add_target(NAME MatchServer TYPE EXECUTABLE SOURCES "${src}")
+add_target(NAME MatchServer TYPE EXECUTABLE SOURCES "${src}" UNITY_EXCLUDED "MSSQLDatabase.cpp")
 
 target_include_directories(MatchServer PRIVATE
 	../sdk/libsodium/include
