@@ -1153,7 +1153,7 @@ void ZMyCharacter::ProcessShot()
 {
 	if (ZApplication::GetGame()->GetMatch()->GetRoundState() == MMATCH_ROUNDSTATE_PREPARE) return;
 	if (m_bInitialized == false) return;
-	if (MEvent::GetRButtonState()) return;
+	if (ZIsActionKeyPressed(ZACTION_USE_WEAPON2)) return;
 
 	if (!m_bLButtonPressed) m_bEnterCharge = false;
 
@@ -1552,7 +1552,7 @@ void ZMyCharacter::UpdateButtonState()
 	m_bLButtonPressed = bLButtonPressed;
 
 
-	bool bRButtonPressed = MEvent::GetRButtonState();
+	bool bRButtonPressed = ZIsActionKeyPressed(ZACTION_USE_WEAPON2);
 
 	m_bRButtonFirstReleased = (m_bRButtonPressed && !bRButtonPressed);
 
