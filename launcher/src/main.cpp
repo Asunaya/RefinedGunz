@@ -202,6 +202,6 @@ int main(int argc, char** argv)
 	getchar();
 #endif
 
-	Log(LogLevel::Info, "Starting Gunz...");
+	Log(LogLevel::Info, "Starting Gunz...\n");
 	MProcess::Start("Gunz.exe");
 }

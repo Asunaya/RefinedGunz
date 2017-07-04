@@ -119,6 +119,7 @@ struct BlockCounts
 // Synchronizes a file.
 // Returns true on success, or false on error.
 inline bool SynchronizeFile(const char* LocalFilePath,
+	const char* OutputFilePath,
 	const char* RemoteFileURL,
 	const char* SyncFileURL,
 	u64 RemoteFileSize,
@@ -139,39 +140,8 @@ constexpr decltype(auto) emplace_back(ContainerType& Container, ArgsType&&... Ar
 	return Container.back();
 }
 
-template <typename T, size_t size>
-constexpr size_t sizeof_array(T(&arr)[size]) {
-	return sizeof(arr);
-}
-
 // Import the LauncherConfig namespace to refer to LauncherConfig::BlockSize as just BlockSize.
 using namespace LauncherConfig;
-
-enum class BlockType : u8
-{
-	// This remote block exists in the local file, in the same place.
-	Unchanged,
-	// This remote block exists in the local file, at a different place.
-	Moved,
-	// This remote block does not exist in the local file.
-	New,
-};
-
-inline const char* BlockTypeToString(BlockType Type)
-{
-	switch (Type)
-	{
-	case BlockType::Unchanged:
-		return "Unchanged";
-	case BlockType::Moved:
-		return "Moved";
-	case BlockType::New:
-		return "New";
-	default:
-		assert(false);
-		return "???";
-	}
-}
 
 // A block in the remote file.
 // Each of these are LauncherConfig::BlockSize byte large.
@@ -689,7 +659,7 @@ void MakeNewFilePath(char(&OutputFilePath)[OutputSize], const char* LocalFilePat
 }
 
 inline bool CreateNewFile(const char* LocalFilePath,
-	const char* OutputFilePath,
+	const char* SynchronizedFilePath,
 	const char* RemoteFileURL,
 	DownloadManagerType& DownloadManager,
 	const RemoteFile& Remote,
@@ -698,11 +668,11 @@ inline bool CreateNewFile(const char* LocalFilePath,
 {
 	using namespace detail;
 
-	MFile::RWFile OutputFile{ OutputFilePath, MFile::ClearExistingContents };
+	MFile::RWFile OutputFile{ SynchronizedFilePath, MFile::ClearExistingContents };
 	if (OutputFile.error())
 	{
 		Log(LogLevel::Error, "Sync::SynchronizeFile -- Could not open file %s for writing\n",
-			OutputFilePath);
+			SynchronizedFilePath);
 		return false;
 	}
 
@@ -896,7 +866,7 @@ inline bool MakeSyncFile(const char* OutputFilePath, const char* InputFilePath)
 	for (u64 i = 0; i < NumBlocks; ++i)
 	{
 		// Read one block from the file.
-		constexpr auto NumBytesToTryRead = sizeof_array(InputBuffer);
+		constexpr auto NumBytesToTryRead = sizeof(InputBuffer);
 		const auto NumBytesRead = InputFile.read(InputBuffer, NumBytesToTryRead);
 		if (NumBytesRead != NumBytesToTryRead && i != NumBlocks - 1)
 		{
@@ -936,6 +906,7 @@ inline bool MakeSyncFile(const char* OutputFilePath, const char* InputFilePath)
 }
 
 inline bool SynchronizeFile(const char* LocalFilePath,
+	const char* OutputFilePath,
 	const char* RemoteFileURL,
 	const char* SyncFileURL,
 	u64 RemoteFileSize,
@@ -944,6 +915,9 @@ inline bool SynchronizeFile(const char* LocalFilePath,
 	u64* SizeOutput,
 	BlockCounts* BlockCountsOutput)
 {
+	if (OutputFilePath == nullptr)
+		OutputFilePath = LocalFilePath;
+
 	using namespace detail;
 
 	Log.Debug("Downloading sync file\n");
@@ -1015,11 +989,11 @@ inline bool SynchronizeFile(const char* LocalFilePath,
 
 	Log.Debug("Creating new file\n");
 
-	char OutputFilePath[MFile::MaxPath];
-	MakeNewFilePath(OutputFilePath, LocalFilePath);
+	char SynchronizedFilePath[MFile::MaxPath];
+	MakeNewFilePath(SynchronizedFilePath, LocalFilePath);
 
 	Success = CreateNewFile(LocalFilePath,
-		OutputFilePath,
+		SynchronizedFilePath,
 		RemoteFileURL,
 		DownloadManager,
 		Remote,
@@ -1030,9 +1004,20 @@ inline bool SynchronizeFile(const char* LocalFilePath,
 		return false;
 	}
 
-	// Delete the old file and move the new file over the old file.
-	MFile::Delete(LocalFilePath);
-	MFile::Move(OutputFilePath, LocalFilePath);
+	// Delete the output file if it exists and move the synchronized file over the output file.
+	if (MFile::Exists(OutputFilePath))
+	{
+		if (!MFile::Delete(OutputFilePath))
+		{
+			Log.Error("Sync::SynchronizeFile -- Failed to delete existing output file %s\n", LocalFilePath);
+		}
+	}
+
+	if (!MFile::Move(SynchronizedFilePath, OutputFilePath))
+	{
+		Log.Error("Sync::SynchronizeFile -- Failed to move synchronized file %s to output file path %s\n", SynchronizedFilePath, OutputFilePath);
+		return false;
+	}
 
 	return true;
 }

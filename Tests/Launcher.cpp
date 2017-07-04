@@ -163,7 +163,7 @@ static bool TestFile(const ArrayView<u8>& SrcFileContents,
 	u64 ActualSize;
 	Sync::BlockCounts Counts;
 
-	assert(Sync::SynchronizeFile(DestFilePath, SrcURL, SyncURL, SrcFileContents.size(),
+	assert(Sync::SynchronizeFile(DestFilePath, nullptr, SrcURL, SyncURL, SrcFileContents.size(),
 		DownloadManager, &ActualHash, &ActualSize, &Counts));
 
 	assert(Counts.UnmatchingBlocks == ExpectedNumUnmatchingBlocks);

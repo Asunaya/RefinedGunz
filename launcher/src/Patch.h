@@ -161,6 +161,7 @@ inline PatchFileResult PatchFile(DownloadManagerType& DownloadManager,
 			GetSyncFileURL(SyncFileURL, Filename);
 
 			const auto Success = Sync::SynchronizeFile(Filename,
+				OutputFilename,
 				FileURL, SyncFileURL,
 				ExpectedSize,
 				DownloadManager,
