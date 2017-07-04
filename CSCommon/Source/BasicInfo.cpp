@@ -116,7 +116,7 @@ MCommandParameterBlob* PackNewBasicInfo(const CharacterInfo& Input, BasicInfoNet
 	auto Dir = PackDirection(Input.Dir);
 	Write(Dir);
 
-	auto Velocity = MShortVector{ Input.Dir };
+	auto Velocity = MShortVector{ Input.Vel };
 	Write(Velocity);
 
 	if (Input.HasCamDir)

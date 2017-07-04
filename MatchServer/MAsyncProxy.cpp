@@ -55,9 +55,15 @@ void MAsyncProxy::OnRun()
 		Database = new SQLiteDatabase;
 		break;
 
+#ifdef MSSQL_ENABLED
 	case DatabaseType::MSSQL:
 		Database = new MSSQLDatabase;
 		break;
+#endif
+
+	default:
+		MLog("Invalid db config\n");
+		return;
 	}
 
 	MSignalEvent* EventArray[]{
