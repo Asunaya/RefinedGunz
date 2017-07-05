@@ -1256,14 +1256,14 @@ void Chat::DivideIntoLines(int ChatMessageIndex, T&& OutputIterator)
 
 	auto MaxLineLength = (Border.x2 - 5) - (Border.x1 + 5);
 
-	LineDivisionState<T> State{ std::forward<T>(OutputIterator), ChatMessageIndex, TextColor };
+	LineDivisionState<T> State{ std::forward<T>(OutputIterator), ChatMessageIndex, cl.DefaultColor };
 
 	// Initialize the first segment.
 	State.CurLineSegmentInfo.ChatMessageIndex = ChatMessageIndex;
 	State.CurLineSegmentInfo.Offset = 0;
 	State.CurLineSegmentInfo.PixelOffsetX = 0;
 	State.CurLineSegmentInfo.IsStartOfLine = true;
-	State.CurLineSegmentInfo.TextColor = TextColor;
+	State.CurLineSegmentInfo.TextColor = cl.DefaultColor;
 	State.CurLineSegmentInfo.Emphasis = EmphasisType::Default;
 
 	auto FormatIterator = cl.FormatSpecifiers.begin();
