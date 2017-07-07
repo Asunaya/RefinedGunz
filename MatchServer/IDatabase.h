@@ -47,6 +47,7 @@ struct MDB_ClanInfo
 	int		nTotalPoint;
 	int		nWins;
 	int		nLosses;
+	int		nDraws;
 	char	szMasterName[CLAN_NAME_LENGTH];
 	int		nTotalMemberCount;
 	char	szEmblemUrl[256];

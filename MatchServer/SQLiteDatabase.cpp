@@ -1628,7 +1628,11 @@ try
 	outClanInfo->nPoint = stmt.Get<int>();
 	outClanInfo->nWins = stmt.Get<int>();
 	outClanInfo->nLosses = stmt.Get<int>();
+	outClanInfo->nDraws = stmt.Get<int>();
 	strcpy_safe(outClanInfo->szMasterName, stmt.Get<StringView>());
+	outClanInfo->nTotalMemberCount = stmt.Get<int>();
+	strcpy_safe(outClanInfo->szEmblemUrl, stmt.Get<StringView>());
+	outClanInfo->nEmblemChecksum = stmt.Get<int>();
 
 	return true;
 }

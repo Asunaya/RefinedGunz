@@ -83,8 +83,8 @@ void MMatchServer::OnMatchLogin(const MUID& CommUID, const char* UserID, const u
 			Patch != ExpectedVersion.Patch ||
 			Revision != ExpectedVersion.Revision)
 		{
-			char buf[128];
-			sprintf_safe(buf, "Your client has the wrong version (expected version %d.%d.%d-%X, got %d.%d.%d-%X)",
+			char buf[4096];
+			sprintf_safe(buf, "Your client is outdated.\n\nRun the launcher.exe in game directory to update it.\n\n(Server version: %d.%d.%d-%X, your version: %d.%d.%d-%X)",
 				ExpectedVersion.Major, ExpectedVersion.Minor, ExpectedVersion.Patch, ExpectedVersion.Revision,
 				Major, Minor, Patch, Revision);
 			NotifyFailedLogin(CommUID, buf);
