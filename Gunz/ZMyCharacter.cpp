@@ -2695,6 +2695,10 @@ void ZMyCharacter::ChargedShot()
 {
 	m_bSlash = true;
 	m_bTumble = false;
+
+	// Temporary fix for double massive bug.
+	m_bCharged = false;
+
 	SetVelocity(0, 0, 0);
 
 	ReleaseLButtonQueue();

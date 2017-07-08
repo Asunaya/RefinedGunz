@@ -1211,6 +1211,9 @@ void ZCombatInterface::SetMagazine(int nMagazine)
 
 void ZCombatInterface::UpdateCombo(ZCharacter* pCharacter)
 {
+	// Temporary fix for crash in ZScreenEffectManager::SetCombo.
+	return;
+
 	if(pCharacter==NULL) return;
 
 	static int nComboX = -999, nComboY = -999;
