@@ -73,16 +73,16 @@ void RGMain::OnDrawGame()
 	{
 		RDrawLine(Line.v1, Line.v2, Line.Color);
 	}
+
+	if (ZGetGame()->GetMatch()->GetMatchType() == MMATCH_GAMETYPE_SKILLMAP)
+		((ZRuleSkillmap *)ZGetGame()->GetMatch()->GetRule())->Draw();
+
+	if (ZGetConfiguration()->GetShowHitboxes())
+		m_HitboxManager.Draw();
 }
 
 void RGMain::OnDrawGameInterface(MDrawContext* pDC)
 {
-	if (ZGetGame()->GetMatch()->GetMatchType() == MMATCH_GAMETYPE_SKILLMAP)
-		((ZRuleSkillmap *)ZGetGame()->GetMatch()->GetRule())->Draw();
-
-	if(ZGetConfiguration()->GetShowHitboxes())
-		m_HitboxManager.Draw();
-
 #ifdef VOICECHAT
 	m_VoiceChat.OnDraw(pDC);
 #endif
@@ -204,6 +204,8 @@ RGMain::~RGMain() {
 #ifdef PORTAL
 	g_pPortal.reset();
 #endif
+
+	ZRuleSkillmap::CourseMgr.Destroy();
 }
 
 void RGMain::OnUpdate(double Elapsed)

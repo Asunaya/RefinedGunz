@@ -169,6 +169,11 @@ void MDrawContextR2::FillRectangle(int x, int y, int cx, int cy)
 	m_pd3dDevice->SetRenderState( D3DRS_ZWRITEENABLE,     FALSE );
 	m_pd3dDevice->SetRenderState( D3DRS_FOGENABLE, FALSE );
 	m_pd3dDevice->SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE );
+
+	RGetDevice()->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
+	RGetDevice()->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_DIFFUSE);
+	RGetDevice()->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+	RGetDevice()->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_DIFFUSE);
 	
 	m_pd3dDevice->SetTexture(0, NULL);
 	 

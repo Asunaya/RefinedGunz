@@ -368,6 +368,8 @@ extern MUID g_MyChrUID;
 extern float g_fFOV;
 extern float g_fFarZ;
 
+float CorrectedFOV();
+
 ZCharacterManager*	ZGetCharacterManager();
 ZObjectManager*		ZGetObjectManager();
 bool IsMyCharacter(ZObject* pObject);

@@ -57,7 +57,7 @@ void CourseManager::Init()
 		char MapName[256];
 		// Make lowercase
 		std::transform(
-			MapNamePtr, MapNamePtr + MapNameAttr->value_size(),
+			MapNamePtr, MapNamePtr + MapNameAttr->value_size() + 1,
 			MapName,
 			tolower);
 
@@ -135,13 +135,12 @@ void CourseManager::SetCurrentMap(const char *szMap)
 		return;
 
 	pCurrentCourseSet = &it->second;
-	SAFE_RELEASE(pVB);
 
 	PrimitiveCount = 12 * 2 * pCurrentCourseSet->size();
 
 	const int vbsize = PrimitiveCount * sizeof(Line);
 
-	RGetDevice()->CreateVertexBuffer(vbsize, 0, D3DFVF_XYZ, D3DPOOL_MANAGED, &pVB, nullptr);
+	RGetDevice()->CreateVertexBuffer(vbsize, 0, D3DFVF_XYZ, D3DPOOL_MANAGED, MakeWriteProxy(pVB), nullptr);
 
 	Line *pData;
 	pVB->Lock(0, vbsize, (void **)&pData, 0);
@@ -214,6 +213,9 @@ const std::string &CourseManager::GetCourseName(int CourseIndex) const
 
 int CourseManager::GetNumCourses() const
 {
+	if (!pCurrentCourseSet)
+		return 0;
+
 	return static_cast<int>(pCurrentCourseSet->size());
 }
 
@@ -268,12 +270,17 @@ void CourseManager::Draw()
 	RGetDevice()->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_CONSTANT);
 	RGetDevice()->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
 	RGetDevice()->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_CONSTANT);
+	RGetDevice()->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
+	RGetDevice()->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
 	RGetDevice()->SetTexture(0, NULL);
 	RGetDevice()->SetFVF(D3DFVF_XYZ);
+	RGetDevice()->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
 
 	RGetDevice()->SetTextureStageState(0, D3DTSS_CONSTANT, 0xFFFF0000);
 
-	RGetDevice()->SetStreamSource(0, pVB, 0, sizeof(rvector));
+	RGetDevice()->SetStreamSource(0, pVB.get(), 0, sizeof(rvector));
+
+	RSetTransform(D3DTS_WORLD, IdentityMatrix());
 
 	RGetDevice()->DrawPrimitive(D3DPT_LINELIST, 0, PrimitiveCount);
 }

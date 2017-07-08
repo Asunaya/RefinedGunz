@@ -165,6 +165,12 @@ ZGame*	g_pGame = NULL;
 float	g_fFOV = DEFAULT_FOV;
 float	g_fFarZ = DEFAULT_FAR_Z;
 
+float CorrectedFOV()
+{
+	const auto CamFix = ZGetConfiguration()->GetCamFix();
+	return CamFix ? FixedFOV(g_fFOV) : g_fFOV;
+}
+
 MUID tempUID(0, 0);
 MUID g_MyChrUID(0, 0);
 
@@ -1156,7 +1162,7 @@ bool ZGame::OnCommand_Immediate(MCommand* pCommand)
 
 		if (!pCommand->GetParameter(&fTime, 0, MPT_FLOAT))
 			break;
-		if (!pCommand->GetParameter(szCourse, 1, MPT_STR))
+		if (!pCommand->GetParameter(szCourse, 1, MPT_STR, sizeof(szCourse)))
 			break;
 
 		if (szCourse[0] == 0)

@@ -14,6 +14,7 @@ class CourseManager
 {
 public:
 	void Init();
+	void Destroy() { pVB.reset(); }
 
 	void SetCurrentMap(const char *szMap);
 
@@ -33,7 +34,7 @@ private:
 
 	std::unordered_map<std::string, std::vector<Course>> Courses;
 	std::vector<Course> *pCurrentCourseSet;
-	IDirect3DVertexBuffer9 *pVB = nullptr;
+	D3DPtr<IDirect3DVertexBuffer9> pVB;
 	int PrimitiveCount = 0;
 };
 

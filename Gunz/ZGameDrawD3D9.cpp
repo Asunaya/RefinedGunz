@@ -30,14 +30,31 @@ ZGameDrawD3D9::ZGameDrawD3D9(ZGame& Game) : Game(Game) {}
 extern float g_fFOV;
 extern float g_fFarZ;
 
+static void SetProjection()
+{
+#ifdef PORTAL
+	if (g_pPortal->ForcingProjection())
+		return;
+#endif
+	
+	RSetProjection(CorrectedFOV(), DEFAULT_NEAR_Z, g_fFarZ);
+}
+
+static void ResetProjection()
+{
+#ifdef PORTAL
+	if (g_pPortal->ForcingProjection())
+		return;
+#endif
+
+	RSetProjection(g_fFOV, DEFAULT_NEAR_Z, g_fFarZ);
+}
+
 static void SetStatesPreDraw(ZGame& Game)
 {
 	auto profPreDraw = MBeginProfile("ZGame::OnPreDraw");
 
-#ifdef PORTAL
-	if (!g_pPortal->ForcingProjection())
-#endif
-		RSetProjection(g_fFOV, DEFAULT_NEAR_Z, g_fFarZ);
+	SetProjection();
 
 	bool bTrilinear = RIsTrilinear();
 
@@ -108,14 +125,6 @@ void ZGameDrawD3D9::DrawScene()
 
 	GetRenderer().PostProcess.Begin();
 
-	if (ZGetConfiguration()->GetCamFix())
-		RSetProjection(FixedFOV(g_fFOV), DEFAULT_NEAR_Z, g_fFarZ);
-
-	DEFER([&] {
-		if (ZGetConfiguration()->GetCamFix())
-			RSetProjection(g_fFOV, DEFAULT_NEAR_Z, g_fFarZ);
-	});
-
 	{
 		// Save the world matrix because, apparently, something in this block mutates it.
 		rmatrix OrigWorld = RGetTransform(D3DTS_WORLD);
@@ -165,10 +174,9 @@ void ZGameDrawD3D9::DrawScene()
 	if (RReadyLenzFlare())
 		PROFILE(RGetLenzFlare()->Render(RCameraPosition, Game.GetWorld()->GetBsp()));
 
-#ifdef PORTAL
-	if (!g_pPortal->ForcingProjection())
-#endif
-		RSetProjection(g_fFOV, DEFAULT_NEAR_Z, g_fFarZ);
+	PROFILE(GetRGMain().OnDrawGame());
+
+	SetProjection();
 	RSetFog(FALSE);
 
 	// Draw the blinding effect of flashbangs
@@ -181,11 +189,11 @@ void ZGameDrawD3D9::DrawScene()
 
 	PROFILE(Game.GetMatch()->OnDrawGameMessage());
 
-	PROFILE(GetRGMain().OnDrawGame());
-
 	PROFILE(g_pPortal->PostDraw());
 
 	GetRenderer().PostProcess.End();
+
+	ResetProjection();
 
 	MEndProfile(profZGameDraw);
 }
