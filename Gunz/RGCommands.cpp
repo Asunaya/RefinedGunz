@@ -286,7 +286,7 @@ void LoadRGCommands(ZChatCmdManager& CmdManager)
 		}
 
 		g_fFOV = fov_radians;
-		ZChatOutputF("Field of view set to %d degrees", int(ToDegree(fov_radians)));
+		ZChatOutputF("Field of view set to %d degrees", int(round(ToDegree(fov_radians))));
 	},
 		CCF_ALL, 0, 1, true, "/fov [value, in degrees]", "");
 
