@@ -95,9 +95,9 @@ bool ZInput::GetInputKeyName(ZVIRTUALKEY key, char* pBuffer, int nBuffer)
 	else	// keyboard
 	{
 		const char* szKeyName = m_pDirectInput->GetKeyName(key);
-		_ASSERT((int)strlen(szKeyName)<nBuffer);
 		if (szKeyName)
 		{
+			_ASSERT((int)strlen(szKeyName)<nBuffer);
 			strcpy_safe(pBuffer, nBuffer, szKeyName);
 			return true;
 		}

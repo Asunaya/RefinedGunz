@@ -383,11 +383,25 @@ bool MXmlElement::AddAttribute(const char* sAttrName, bool bAttrValue)
 
 bool MXmlElement::SetAttribute(const char* sAttrName, char* sAttrText)
 {
+	if (!m_pDomNode)
+	{
+		return false;
+	}
+
+	auto Doc = m_pDomNode->document();
+	if (!Doc)
+	{
+		assert(false);
+		return false;
+	}
+
 	auto Attribute = m_pDomNode->first_attribute(sAttrName);
 	if (!Attribute)
-		return false;
+	{
+		return AddAttribute(sAttrName, sAttrText);
+	}
 
-	Attribute->value(m_pDomNode->document()->allocate_string(sAttrText));
+	Attribute->value(Doc->allocate_string(sAttrText));
 
 	return true;
 }
