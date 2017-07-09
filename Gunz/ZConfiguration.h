@@ -187,6 +187,7 @@ public:
 	bool GetShowHitRegDebugOutput() const { return HitRegistrationDebugOutput; }
 	bool GetSlashEffect() const { return SlashEffect; }
 	bool GetUnlockedDir() const { return UnlockedDir; }
+	bool GetShowDebugInfo() const { return ShowDebugInfo; }
 
 	bool IsComplete() const			{ return m_bIsComplete; }
 
@@ -237,6 +238,7 @@ private:
 	bool HitRegistrationDebugOutput{};
 	bool SlashEffect = true;
 	bool UnlockedDir{};
+	bool ShowDebugInfo{};
 };
 
 ZConfiguration*	ZGetConfiguration();

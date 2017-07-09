@@ -392,8 +392,8 @@ RRESULT OnRender(void *pParam)
 			PrintText("FPS: %d", LogicalFPSLimiter.LastFPS);
 		}
 
-#ifdef _DEBUG
-		if (ZGetGame() && ZGetGame()->m_pMyCharacter)
+		if (ZGetConfiguration()->GetShowDebugInfo() &&
+			ZGetGame() && ZGetGame()->m_pMyCharacter)
 		{
 			v3 pos = ZGetGame()->m_pMyCharacter->GetPosition();
 			PrintText("Pos: %d, %d, %d", int(pos.x), int(pos.y), int(pos.z));
@@ -401,7 +401,7 @@ RRESULT OnRender(void *pParam)
 			PrintText("Dir: %f, %f, %f", dir.x, dir.y, dir.z);
 
 			auto* vmesh = ZGetGame()->m_pMyCharacter->m_pVMesh;
-			if (ZGetGame()->m_pMyCharacter->m_pVMesh)
+			if (vmesh)
 			{
 				pos = vmesh->GetHeadPosition();
 				PrintText("Head pos: %d, %d, %d", int(pos.x), int(pos.y), int(pos.z));
@@ -411,11 +411,16 @@ RRESULT OnRender(void *pParam)
 
 				PrintText("Lower ani: %s\n", g_AnimationInfoTableLower[lower].Name);
 				PrintText("Upper ani: %s\n", g_AnimationInfoTableUpper[upper].Name);
+				PrintText("Lower time: %.1f\n", vmesh->GetFrameInfo(ani_mode_lower)->m_nFrame / 1000.0);
+				PrintText("Upper time: %.1f\n", vmesh->GetFrameInfo(ani_mode_upper)->m_nFrame / 1000.0);
+				PrintText("Lower spd: %.3f\n", vmesh->GetFrameInfo(ani_mode_lower)->m_fSpeed / 4.8);
+				PrintText("Upper spd: %.3f\n", vmesh->GetFrameInfo(ani_mode_upper)->m_fSpeed / 4.8);
+#ifdef _DEBUG
 				PrintText("Draw calls: %d\n", g_nCall);
 				PrintText("Polygons: %d\n", g_nPoly);
+#endif
 			}
 		}
-#endif
 	}
 
 	MEndProfile(mainOnRender);

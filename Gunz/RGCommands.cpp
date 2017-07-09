@@ -322,6 +322,13 @@ void LoadRGCommands(ZChatCmdManager& CmdManager)
 		}
 	}, CCF_ALL, 0, 1, true, "/unlockeddir [0/1]", "");
 
+	CmdManager.AddCommand(0, "showdebuginfo", [](const char *line, int argc, char ** const argv) {
+		if (SetBool("Show debug info", ZGetConfiguration()->ShowDebugInfo, argc, argv))
+		{
+			ZGetConfiguration()->Save();
+		}
+	}, CCF_ALL, 0, 1, true, "/showdebuginfo [0/1]", "");
+
 	CmdManager.AddCommand(0, "setparts", [](const char *line, int argc, char ** const argv) {
 		if (!CheckDeveloperMode("setparts"))
 			return;
