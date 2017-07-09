@@ -124,6 +124,16 @@ struct ZCONFIG_LOCALE
 	int			nMaxPlayers;
 };
 
+struct ZCONFIG_CHAT
+{
+	std::string Font = "Arial";
+	bool BoldFont = true;
+	int FontSize = 16;
+
+	// 50% transparent black
+	u32 BackgroundColor = 0x80000000;
+};
+
 class ZLocatorList;
 class ZGameTypeList;
 class ZLocale;
@@ -175,12 +185,12 @@ public:
 	ZCONFIG_ETC* GetEtc()			{ return &m_Etc; }
 	ZCONFIG_MACRO* GetMacro()		{ return &m_Macro; }
 	ZCONFIG_LOCALE* GetLocale()		{ return &m_Locale; }
+	ZCONFIG_CHAT* GetChat()			{ return &m_Chat; }
 
 	int GetVisualFPSLimit() const { return VisualFPSLimit; }
 	int GetLogicalFPSLimit() const { return LogicalFPSLimit; }
 	bool GetCamFix() const { return bCamFix; }
 	bool GetInterfaceFix() const { return InterfaceFix; }
-	auto GetChatBackgroundColor() const { return ChatBackgroundColor; }
 	bool GetShowHitboxes() const { return bShowHitboxes; }
 	bool GetDynamicResourceLoad() const { return bDynamicResourceLoad; }
 	bool GetDrawTrails() const { return bDrawTrails; }
@@ -188,6 +198,9 @@ public:
 	bool GetSlashEffect() const { return SlashEffect; }
 	bool GetUnlockedDir() const { return UnlockedDir; }
 	bool GetShowDebugInfo() const { return ShowDebugInfo; }
+	float GetFOV() const { return FOV; }
+	bool GetColorInvert() const { return ColorInvert; }
+	bool GetMonochrome() const { return Monochrome; }
 
 	bool IsComplete() const			{ return m_bIsComplete; }
 
@@ -205,6 +218,7 @@ private:
 	ZCONFIG_MACRO		m_Macro;
 	ZCONFIG_ETC			m_Etc;
 	ZCONFIG_LOCALE		m_Locale;
+	ZCONFIG_CHAT		m_Chat;
 	char				m_szBAReportAddr[256];
 	char				m_szBAReportDir[256];
 	char				m_szInterfaceSkinName[256];
@@ -230,8 +244,6 @@ private:
 
 	bool bCamFix{};
 	bool InterfaceFix{};
-	// 50% transparent black
-	u32 ChatBackgroundColor = 0x80000000;
 	bool bShowHitboxes{};
 	bool bDynamicResourceLoad{};
 	bool bDrawTrails = true;
@@ -239,6 +251,9 @@ private:
 	bool SlashEffect = true;
 	bool UnlockedDir{};
 	bool ShowDebugInfo{};
+	float FOV = ToDegree(DEFAULT_FOV);
+	bool ColorInvert{};
+	bool Monochrome{};
 };
 
 ZConfiguration*	ZGetConfiguration();
@@ -341,8 +356,15 @@ ZConfiguration*	ZGetConfiguration();
 #define ZTOK_ETC_DRAWTRAILS			"DRAWTRAILS"
 #define ZTOK_ETC_SLASHEFFECT		"SLASHEFFECT"
 #define ZTOK_ETC_UNLOCKEDDIR		"UNLOCKEDDIR"
+#define ZTOK_ETC_SHOWDEBUGINFO		"SHOWDEBUGINFO"
+#define ZTOK_ETC_FOV				"FOV"
+#define ZTOK_ETC_COLORINVERT		"COLORINVERT"
+#define ZTOK_ETC_MONOCHROME			"MONOCHROME"
 
 #define ZTOK_CHAT					"CHAT"
+#define ZTOK_CHAT_FONT				"FONT"
+#define ZTOK_CHAT_BOLDFONT			"BOLDFONT"
+#define ZTOK_CHAT_FONTSIZE			"FONTSIZE"
 #define ZTOK_CHAT_BACKGROUNDCOLOR	"BACKGROUNDCOLOR"
 
 #define ZTOK_LOCALE					"LOCALE"

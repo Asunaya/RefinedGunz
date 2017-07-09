@@ -24,7 +24,7 @@ enum class ChatWindowAction {
 class Chat
 {
 public:
-	Chat(const std::string& FontName, int FontSize);
+	Chat(const std::string& FontName, bool Bold, int FontSize);
 	~Chat();
 
 	void EnableInput(bool Enable, bool ToTeam);
@@ -49,7 +49,7 @@ public:
 
 	const std::string &GetFont() const { return FontName; }
 	int GetFontSize() const { return FontSize; }
-	void SetFont(std::string s) { FontName = std::move(s); ResetFonts(); }
+	void SetFont(std::string s, bool b) { FontName = std::move(s); BoldFont = b; ResetFonts(); }
 	void SetFontSize(int nSize) { FontSize = nSize; ResetFonts(); }
 
 	D3DCOLOR GetTextColor() const { return TextColor; }
@@ -67,8 +67,9 @@ public:
 	bool HideDuringReplays{};
 
 private:
-	std::string FontName;
-	int FontSize{};
+	std::string FontName = "Arial";
+	bool BoldFont = true;
+	int FontSize = 16;
 	int FontHeight{};
 	double FadeTime = 10;
 	std::vector<struct ChatMessage> Msgs;

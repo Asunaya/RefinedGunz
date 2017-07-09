@@ -16,6 +16,7 @@
 #include "hsv.h"
 #include "dxerr.h"
 #include "defer.h"
+#include "RS2.h"
 
 #define DXERR(func) DXErr(func, __func__, #func)
 
@@ -47,8 +48,13 @@ void RGMain::OnAppCreate()
 
 void RGMain::OnCreateDevice()
 {
-	m_Chat.emplace("Arial", 16);
-	m_Chat.value().SetBackgroundColor(ZGetConfiguration()->GetChatBackgroundColor());
+	auto&& Cfg = *ZGetConfiguration();
+	auto&& c = *Cfg.GetChat();
+	m_Chat.emplace(c.Font, c.BoldFont, c.FontSize);
+	GetChat().SetBackgroundColor(c.BackgroundColor);
+
+	GetRenderer().PostProcess.EnableEffect("ColorInvert", Cfg.GetColorInvert());
+	GetRenderer().PostProcess.EnableEffect("Monochrome", Cfg.GetMonochrome());
 
 #ifdef VOICECHAT
 	m_VoiceChat.OnCreateDevice();

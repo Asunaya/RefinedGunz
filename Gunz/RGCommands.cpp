@@ -124,7 +124,7 @@ void LoadRGCommands(ZChatCmdManager& CmdManager)
 	CmdManager.AddCommand(0, "backgroundcolor", [](const char *line, int argc, char ** const argv){
 		DWORD BackgroundColor = strtoul(argv[1], nullptr, 16);
 		GetRGMain().GetChat().SetBackgroundColor(BackgroundColor);
-		ZGetConfiguration()->ChatBackgroundColor = BackgroundColor;
+		ZGetConfiguration()->GetChat()->BackgroundColor = BackgroundColor;
 
 		ZGetConfiguration()->Save();
 

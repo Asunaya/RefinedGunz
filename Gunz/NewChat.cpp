@@ -283,11 +283,11 @@ void ChatMessage::SubstituteFormatSpecifiers()
 	}
 }
 
-Chat::Chat(const std::string& FontName, int FontSize)
-	: FontName{ FontName }, FontSize{ FontSize }
+Chat::Chat(const std::string& FontName, bool BoldFont, int FontSize)
+	: FontName{ FontName }, BoldFont{ BoldFont }, FontSize{ FontSize }
 {
-	auto ScreenWidth = RGetScreenWidth();
-	auto ScreenHeight = RGetScreenHeight();
+	const auto ScreenWidth = RGetScreenWidth();
+	const auto ScreenHeight = RGetScreenHeight();
 
 	Border.x1 = 10;
 	Border.y1 = double(1080 - 300) / 1080 * ScreenHeight;
@@ -297,10 +297,11 @@ Chat::Chat(const std::string& FontName, int FontSize)
 	Cursor.x = ScreenWidth / 2;
 	Cursor.y = ScreenHeight / 2;
 
+	const auto Scale = 1.f;
 	DefaultFont.Create("NewChatFont", FontName.c_str(),
-		int(float(FontSize) / 1080 * RGetScreenHeight() + 0.5), 1, true);
+		int(float(FontSize) / 1080 * RGetScreenHeight() + 0.5), Scale, BoldFont);
 	ItalicFont.Create("NewChatItalicFont", FontName.c_str(),
-		int(float(FontSize) / 1080 * RGetScreenHeight() + 0.5), 1, true, true);
+		int(float(FontSize) / 1080 * RGetScreenHeight() + 0.5), Scale, BoldFont, true);
 
 	FontHeight = DefaultFont.GetHeight();
 }
@@ -1516,10 +1517,11 @@ void Chat::ResetFonts(){
 	DefaultFont.Destroy();
 	ItalicFont.Destroy();
 
+	const auto Scale = 1.f;
 	DefaultFont.Create("NewChatFont", FontName.c_str(),
-		int(float(FontSize) / 1080 * RGetScreenHeight() + 0.5), 1, true);
+		int(float(FontSize) / 1080 * RGetScreenHeight() + 0.5), Scale, BoldFont);
 	ItalicFont.Create("NewChatItalicFont", FontName.c_str(),
-		int(float(FontSize) / 1080 * RGetScreenHeight() + 0.5), 1, true, true);
+		int(float(FontSize) / 1080 * RGetScreenHeight() + 0.5), Scale, BoldFont, true);
 
 	FontHeight = DefaultFont.GetHeight();
 }

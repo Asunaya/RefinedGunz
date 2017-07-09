@@ -455,14 +455,28 @@ bool ZConfiguration::LoadConfig(const char* szFileName)
 			childElement.GetChildContents(&bDrawTrails, ZTOK_ETC_DRAWTRAILS);
 			childElement.GetChildContents(&SlashEffect, ZTOK_ETC_SLASHEFFECT);
 			childElement.GetChildContents(&UnlockedDir, ZTOK_ETC_UNLOCKEDDIR);
+			childElement.GetChildContents(&ShowDebugInfo, ZTOK_ETC_SHOWDEBUGINFO);
+			childElement.GetChildContents(&FOV, ZTOK_ETC_FOV);
+			childElement.GetChildContents(&ColorInvert, ZTOK_ETC_COLORINVERT);
+			childElement.GetChildContents(&Monochrome, ZTOK_ETC_MONOCHROME);
 		}
 
 
 		if (parentElement.FindChildNode(ZTOK_CHAT, &childElement))
 		{
-			char buf[64];
-			childElement.GetChildContents(buf, ZTOK_CHAT_BACKGROUNDCOLOR);
-			ChatBackgroundColor = strtoul(buf, nullptr, 16);
+			char buf[1024];
+			if (childElement.GetChildContents(buf, ZTOK_CHAT_FONT))
+			{
+				GetChat()->Font = buf;
+			}
+
+			childElement.GetChildContents(&GetChat()->BoldFont, ZTOK_CHAT_BOLDFONT);
+			childElement.GetChildContents(&GetChat()->FontSize, ZTOK_CHAT_FONTSIZE);
+
+			if (childElement.GetChildContents(buf, ZTOK_CHAT_BACKGROUNDCOLOR))
+			{
+				GetChat()->BackgroundColor = StringToInt<u32, 16>(buf).value_or(0x80000000);
+			}
 		}
 	}
 
@@ -668,6 +682,10 @@ bool ZConfiguration::SaveToFile(const char *szFileName, const char* szHeader)
 		Section.Add(ZTOK_ETC_DRAWTRAILS, bDrawTrails);
 		Section.Add(ZTOK_ETC_SLASHEFFECT, SlashEffect);
 		Section.Add(ZTOK_ETC_UNLOCKEDDIR, UnlockedDir);
+		Section.Add(ZTOK_ETC_SHOWDEBUGINFO, ShowDebugInfo);
+		Section.Add(ZTOK_ETC_FOV, FOV);
+		Section.Add(ZTOK_ETC_COLORINVERT, ColorInvert);
+		Section.Add(ZTOK_ETC_MONOCHROME, Monochrome);
 	}
 
 	AddIntersectionWhitespace();
@@ -675,7 +693,10 @@ bool ZConfiguration::SaveToFile(const char *szFileName, const char* szHeader)
 	// Chat
 	{
 		auto Section = ConfigSection(RootElement, ZTOK_CHAT);
-		Section.AddHex(ZTOK_CHAT_BACKGROUNDCOLOR, ChatBackgroundColor);
+		Section.Add(ZTOK_CHAT_FONT, GetChat()->Font.c_str());
+		Section.Add(ZTOK_CHAT_BOLDFONT, GetChat()->BoldFont);
+		Section.Add(ZTOK_CHAT_FONTSIZE, GetChat()->FontSize);
+		Section.AddHex(ZTOK_CHAT_BACKGROUNDCOLOR, GetChat()->BackgroundColor);
 	}
 
 	RootElement.AppendText("\n");

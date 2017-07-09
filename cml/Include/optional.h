@@ -93,6 +93,9 @@ public:
 	T&& value() && { return *std::move(*this); }
 	const T& value() const && { return *std::move(*this); }
 
+	template <typename U>
+	T value_or(U&& DefaultValue) const { return has_value() ? value() : std::forward<U>(DefaultValue); }
+
 	bool has_value() const { return Constructed; }
 
 	explicit operator bool() const { return has_value(); }

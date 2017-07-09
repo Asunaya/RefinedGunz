@@ -9,6 +9,7 @@
 #include "ZRoomListBox.h"
 #include "RGMain.h"
 #include "RBspObject.h"
+#include "RS2.h"
 
 #define DEFAULT_SLIDER_MAX			10000
 
@@ -169,6 +170,12 @@ void ZOptionInterface::InitInterfaceOption(void)
 			ddm.Format	= RGetPixelFormat();
 			auto iter = find_ddm(ddm);
 			pWidget->SetSelIndex( iter->first );
+		}
+
+		pWidget = ZFindWidgetAs<MComboBox>("FullscreenMode");
+		if (pWidget)
+		{
+			pWidget->SetSelIndex(int(Z_VIDEO_FULLSCREEN));
 		}
 
 		pWidget = (MComboBox*)pResource->FindWidget("CharTexLevel");
@@ -371,13 +378,13 @@ void ZOptionInterface::InitInterfaceOption(void)
 	{
 		static char stemp_str[ZCONFIG_MACRO_MAX][80] = {
 			"MacroF1",
-				"MacroF2",
-				"MacroF3",
-				"MacroF4",
-				"MacroF5",
-				"MacroF6",
-				"MacroF7",
-				"MacroF8"
+			"MacroF2",
+			"MacroF3",
+			"MacroF4",
+			"MacroF5",
+			"MacroF6",
+			"MacroF7",
+			"MacroF8"
 		};
 
 		ZCONFIG_MACRO* pMacro = ZGetConfiguration()->GetMacro();
@@ -400,16 +407,46 @@ void ZOptionInterface::InitInterfaceOption(void)
 	}
 
 	{
-		auto pHitboxes = (MButton*)pResource->FindWidget("HitboxOption");
-		if (pHitboxes)
+		auto&& Cfg = *ZGetConfiguration();
+		std::pair<const char*, bool> Buttons[] = {
+			{"HitboxOption",        Cfg.GetShowHitboxes()},
+			{"DrawTrailsOption",    Cfg.GetDrawTrails()},
+			{"CamFixOption",        Cfg.GetCamFix()},
+			{"InterfaceFixOption",  Cfg.GetInterfaceFix()},
+			{"SlashEffectOption",   Cfg.GetSlashEffect()},
+			{"UnlockedDirOption",   Cfg.GetUnlockedDir()},
+			{"ShowDebugInfoOption", Cfg.GetShowDebugInfo()},
+			{"ChatFontBoldOption",  Cfg.GetChat()->BoldFont},
+			{"ColorInvertOption",   Cfg.GetColorInvert()},
+			{"MonochromeOption",    Cfg.GetMonochrome()},
+		};
+
+		for (auto&& ButtonInfo : Buttons)
 		{
-			pHitboxes->SetCheck(ZGetConfiguration()->GetShowHitboxes());
+			auto ButtonWidget = ZFindWidgetAs<MButton>(ButtonInfo.first);
+			if (ButtonWidget)
+				ButtonWidget->SetCheck(ButtonInfo.second);
 		}
 
-		auto pTrails = (MButton*)pResource->FindWidget("DrawTrailsOption");
-		if (pTrails)
+		char StringFOV[64];
+		sprintf_safe(StringFOV, "%.2f", Cfg.GetFOV());
+		char StringFontSize[64];
+		sprintf_safe(StringFontSize, "%d", Cfg.GetChat()->FontSize);
+		char StringBackgroundColor[64];
+		sprintf_safe(StringBackgroundColor, "%08X", Cfg.GetChat()->BackgroundColor);
+
+		std::pair<const char*, const char*> Edits[] = {
+			{"FOVOption",                 StringFOV},
+			{"ChatFontOption",            Cfg.GetChat()->Font.c_str()},
+			{"ChatFontSizeOption",        StringFontSize},
+			{"ChatBackgroundColorOption", StringBackgroundColor},
+		};
+
+		for (auto&& EditInfo : Edits)
 		{
-			pTrails->SetCheck(ZGetConfiguration()->GetDrawTrails());
+			auto EditWidget = ZFindWidgetAs<MEdit>(EditInfo.first);
+			if (EditWidget)
+				EditWidget->SetText(EditInfo.second);
 		}
 	}
 
@@ -479,8 +516,31 @@ bool ZOptionInterface::SaveInterfaceOption(void)
 	{
 		Z_VIDEO_WIDTH = RGetScreenWidth();
 		Z_VIDEO_HEIGHT	= RGetScreenHeight();
-		Z_VIDEO_FULLSCREEN	= RGetFullscreenMode();
 		Z_VIDEO_BPP	= RGetPixelFormat()==D3DFMT_X8R8G8B8 ? 32:16 ;
+
+		[&] {
+			auto FullscreenModeWidget = ZFindWidgetAs<MComboBox>("FullscreenMode");
+			if (!FullscreenModeWidget)
+				return;
+
+			auto SelIndex = FullscreenModeWidget->GetSelIndex();
+			if (SelIndex < 0 || SelIndex > 2)
+				return;
+
+			auto NewFullscreenMode = static_cast<FullscreenType>(SelIndex);
+			if (Z_VIDEO_FULLSCREEN == NewFullscreenMode)
+				return;
+
+			Z_VIDEO_FULLSCREEN = NewFullscreenMode;
+
+			RMODEPARAMS ModeParams;
+			ModeParams.nWidth = Z_VIDEO_WIDTH;
+			ModeParams.nHeight = Z_VIDEO_HEIGHT;
+			ModeParams.FullscreenMode = Z_VIDEO_FULLSCREEN;
+			ModeParams.PixelFormat = RGetPixelFormat();
+
+			RResetDevice(&ModeParams);
+		}();
 
 		MComboBox*	pWidget = (MComboBox*)pResource->FindWidget("CharTexLevel");
 
@@ -756,18 +816,6 @@ bool ZOptionInterface::SaveInterfaceOption(void)
 			}
 		}
 
-		auto pHitboxes = (MButton*)pResource->FindWidget("HitboxOption");
-		if (pHitboxes)
-		{
-			ZGetConfiguration()->bShowHitboxes = pHitboxes->GetCheck();
-		}
-
-		auto pTrails = (MButton*)pResource->FindWidget("DrawTrailsOption");
-		if (pTrails)
-		{
-			ZGetConfiguration()->bDrawTrails = pTrails->GetCheck();
-		}
-
 		MComboBox* pComboBox = (MComboBox*)pResource->FindWidget("CrossHairComboBox");
 		if (pComboBox)
 		{
@@ -776,17 +824,86 @@ bool ZOptionInterface::SaveInterfaceOption(void)
 	}
 
 	{
+		auto&& Cfg = *ZGetConfiguration();
+
+		const auto OldFont = Cfg.GetChat()->Font;
+		const auto OldBoldFont = Cfg.GetChat()->BoldFont;
+		const auto OldFontSize = Cfg.GetChat()->FontSize;
+
+		std::pair<const char*, bool*> Buttons[] = {
+			{ "HitboxOption",        &Cfg.bShowHitboxes },
+			{ "DrawTrailsOption",    &Cfg.bDrawTrails },
+			{ "CamFixOption",        &Cfg.bCamFix },
+			{ "InterfaceFixOption",  &Cfg.InterfaceFix },
+			{ "SlashEffectOption",   &Cfg.SlashEffect },
+			{ "UnlockedDirOption",   &Cfg.UnlockedDir },
+			{ "ShowDebugInfoOption", &Cfg.ShowDebugInfo },
+			{ "ChatFontBoldOption",  &Cfg.GetChat()->BoldFont },
+			{ "ColorInvertOption",   &Cfg.ColorInvert },
+			{ "MonochromeOption",    &Cfg.Monochrome },
+		};
+
+		for (auto&& ButtonInfo : Buttons)
+		{
+			auto ButtonWidget = ZFindWidgetAs<MButton>(ButtonInfo.first);
+			if (ButtonWidget)
+				*ButtonInfo.second = ButtonWidget->GetCheck();
+		}
+		
+		Mint::GetInstance()->SetStretch(!Cfg.InterfaceFix);
+
+		GetRenderer().PostProcess.EnableEffect("ColorInvert", Cfg.ColorInvert);
+		GetRenderer().PostProcess.EnableEffect("Monochrome", Cfg.Monochrome);
+
+		using SetEditFunction = void(*)(const char*);
+		std::pair<const char*, SetEditFunction> Edits[] = {
+			{ "FOVOption",      [](const char* Value) {
+				ZGetConfiguration()->FOV = atof(Value); } },
+			{ "ChatFontOption", [](const char* Value) {
+				ZGetConfiguration()->GetChat()->Font = Value; } },
+			{ "ChatFontSizeOption", [](const char* Value) {
+				ZGetConfiguration()->GetChat()->FontSize = StringToInt<int>(Value).value_or(16); } },
+			{ "ChatBackgroundColorOption", [](const char* Value) {
+				ZGetConfiguration()->GetChat()->BackgroundColor =
+					StringToInt<u32, 16>(Value).value_or(0x80000000); } },
+		};
+
+		for (auto&& EditInfo : Edits)
+		{
+			auto EditWidget = ZFindWidgetAs<MEdit>(EditInfo.first);
+			if (EditWidget)
+				EditInfo.second(EditWidget->GetText());
+		}
+
+		const auto& CurFont = Cfg.GetChat()->Font;
+		const auto CurBoldFont = Cfg.GetChat()->BoldFont;
+		const auto CurFontSize = Cfg.GetChat()->FontSize;
+		if (!iequals(OldFont, CurFont) || OldBoldFont != CurBoldFont)
+		{
+			GetRGMain().GetChat().SetFont(CurFont, CurBoldFont);
+		}
+		if (OldFontSize != CurFontSize)
+		{
+			GetRGMain().GetChat().SetFontSize(CurFontSize);
+		}
+
+		GetRGMain().GetChat().SetBackgroundColor(Cfg.GetChat()->BackgroundColor);
+
+		g_fFOV = ToRadian(Cfg.FOV);
+	}
+
+	{
 		// Macro
 
 		static char stemp_str[ZCONFIG_MACRO_MAX][80] = {
 			"MacroF1",
-				"MacroF2",
-				"MacroF3",
-				"MacroF4",
-				"MacroF5",
-				"MacroF6",
-				"MacroF7",
-				"MacroF8"
+			"MacroF2",
+			"MacroF3",
+			"MacroF4",
+			"MacroF5",
+			"MacroF6",
+			"MacroF7",
+			"MacroF8"
 		};
 
 		ZCONFIG_MACRO* pMacro = ZGetConfiguration()->GetMacro();
