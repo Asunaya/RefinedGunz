@@ -1277,7 +1277,8 @@ void ZMyCharacter::UpdateAnimation()
 
 	if (m_bStun)
 	{
-		switch (m_nStunType) {
+		switch (m_nStunType)
+		{
 		case 0: SetAnimationLower(ZC_STATE_DAMAGE); break;
 		case 1: SetAnimationLower(ZC_STATE_DAMAGE2); break;
 		case 2: SetAnimationLower(ZC_STATE_DAMAGE_DOWN); break;
@@ -1286,195 +1287,198 @@ void ZMyCharacter::UpdateAnimation()
 		case 5: SetAnimationLower(ZC_STATE_DAMAGE_STUN); break;
 		}
 	}
-	else
-		if (m_bBlastAirmove)
+	else if (m_bBlastAirmove)
+	{
+		SetAnimationLower(ZC_STATE_LOWER_BLAST_AIRMOVE);
+	}
+	else if (m_bBlastStand)
+	{
+		SetAnimationLower(ZC_STATE_LOWER_BLAST_STAND);
+	}
+	else if (m_bBlastFall)
+	{
+		if (m_nBlastType == 0) SetAnimationLower(ZC_STATE_LOWER_BLAST_FALL);
+		else if (m_nBlastType == 1) SetAnimationLower(ZC_STATE_LOWER_BLAST_DROP_DAGGER);
+	}
+	else if (m_bBlastDrop)
+	{
+		if (m_nBlastType == 0) SetAnimationLower(ZC_STATE_LOWER_BLAST_DROP);
+		else if (m_nBlastType == 1) SetAnimationLower(ZC_STATE_LOWER_BLAST_DROP_DAGGER);
+
+	}
+	else if (m_bBlast)
+	{
+		if (m_nBlastType == 0) SetAnimationLower(ZC_STATE_LOWER_BLAST);
+		else if (m_nBlastType == 1) SetAnimationLower(ZC_STATE_LOWER_BLAST_DAGGER);
+
+	}
+	else if (m_bSkill)
+	{
+		SetAnimationLower(ZC_STATE_LOWER_UPPERCUT);
+	}
+	else if (m_bJumpShot)
+	{
+		SetAnimationLower(ZC_STATE_LOWER_JUMPATTACK);
+	}
+	else if (m_bGuard)
+	{
+		if (m_bJumpUp)
 		{
-			SetAnimationLower(ZC_STATE_LOWER_BLAST_AIRMOVE);
+			SetAnimationLower(ZC_STATE_LOWER_JUMP_UP);
 		}
-		else
-			if (m_bBlastStand)
+		else if (m_bJumpDown)
+		{
+			SetAnimationLower(ZC_STATE_LOWER_JUMP_DOWN);
+		}
+		else if (m_bMoving)
+		{
+			if (m_bBackMoving)
 			{
-				SetAnimationLower(ZC_STATE_LOWER_BLAST_STAND);
+				SetAnimationLower(ZC_STATE_LOWER_RUN_BACK);
 			}
 			else
-				if (m_bBlastFall)
-				{
-					if (m_nBlastType == 0) SetAnimationLower(ZC_STATE_LOWER_BLAST_FALL);
-					else if (m_nBlastType == 1) SetAnimationLower(ZC_STATE_LOWER_BLAST_DROP_DAGGER);
-				}
-				else
-					if (m_bBlastDrop)
-					{
-						if (m_nBlastType == 0) SetAnimationLower(ZC_STATE_LOWER_BLAST_DROP);
-						else if (m_nBlastType == 1) SetAnimationLower(ZC_STATE_LOWER_BLAST_DROP_DAGGER);
+			{
+				SetAnimationLower(ZC_STATE_LOWER_RUN_FORWARD);
+			}
+		}
+		else
+		{
+			SetAnimationLower(ZC_STATE_LOWER_IDLE1);
+		}
 
-					}
-					else
-						if (m_bBlast)
-						{
-							if (m_nBlastType == 0) SetAnimationLower(ZC_STATE_LOWER_BLAST);
-							else if (m_nBlastType == 1) SetAnimationLower(ZC_STATE_LOWER_BLAST_DAGGER);
+		if (m_bGuardStart)
+		{
+			SetAnimationUpper(ZC_STATE_UPPER_GUARD_START);
+		}
+		else if (m_bGuardCancel)
+		{
+			SetAnimationUpper(ZC_STATE_UPPER_GUARD_CANCEL);
+		}
+		else if (m_nGuardBlock)
+		{
+			switch (m_nGuardBlock)
+			{
+			case 1: SetAnimationUpper(ZC_STATE_UPPER_GUARD_BLOCK1); break;
+			case 2: SetAnimationUpper(ZC_STATE_UPPER_GUARD_BLOCK2); break;
+			}
+		}
+		else if (m_bGuardBlock_ret)
+		{
+			SetAnimationUpper(ZC_STATE_UPPER_GUARD_BLOCK1_RET);
+		}
+		else
+		{
+			SetAnimationUpper(ZC_STATE_UPPER_GUARD_IDLE);
+		}
+	}
+	else if (m_bShotReturn)
+	{
+		switch (m_nShot)
+		{
+		case 1: SetAnimationLower(ZC_STATE_LOWER_ATTACK1_RET); break;
+		case 2: SetAnimationLower(ZC_STATE_LOWER_ATTACK2_RET); break;
+		case 3: SetAnimationLower(ZC_STATE_LOWER_ATTACK3_RET); break;
+		case 4: SetAnimationLower(ZC_STATE_LOWER_ATTACK4_RET); break;
+		}
+	}
+	else if (m_bShot)
+	{
+		switch (m_nShot)
+		{
+		case 1: SetAnimationLower(ZC_STATE_LOWER_ATTACK1); break;
+		case 2: SetAnimationLower(ZC_STATE_LOWER_ATTACK2); break;
+		case 3: SetAnimationLower(ZC_STATE_LOWER_ATTACK3); break;
+		case 4: SetAnimationLower(ZC_STATE_LOWER_ATTACK4); break;
+		case 5: SetAnimationLower(ZC_STATE_LOWER_ATTACK5); break;
+		}
+	}
+	else if (m_bWallJump2)
+	{
+		switch (m_nWallJump2Dir)
+		{
+		case 0: SetAnimationLower(ZC_STATE_LOWER_JUMP_WALL_FORWARD); break;
+		case 1: SetAnimationLower(ZC_STATE_LOWER_JUMP_WALL_BACK); break;
+		case 2: SetAnimationLower(ZC_STATE_LOWER_JUMP_WALL_LEFT); break;
+		case 3: SetAnimationLower(ZC_STATE_LOWER_JUMP_WALL_RIGHT); break;
+		case 4: SetAnimationLower(ZC_STATE_LOWER_RUN_WALL_LEFT_DOWN); break;
+		case 5: SetAnimationLower(ZC_STATE_LOWER_RUN_WALL_RIGHT_DOWN); break;
+		case 6: SetAnimationLower(ZC_STATE_LOWER_RUN_WALL_DOWN_FORWARD); break;
+		case 7: SetAnimationLower(ZC_STATE_LOWER_RUN_WALL_DOWN); break;
+		}
+	}
+	else if (m_bWallHang)
+	{
+		SetAnimationLower(ZC_STATE_LOWER_BIND);
+	}
+	else if (m_bTumble)
+	{
+		switch (m_nTumbleDir)
+		{
+		case 0: SetAnimationLower(ZC_STATE_LOWER_TUMBLE_FORWARD); break;
+		case 1: SetAnimationLower(ZC_STATE_LOWER_TUMBLE_BACK); break;
+		case 2: SetAnimationLower(ZC_STATE_LOWER_TUMBLE_RIGHT); break;
+		case 3: SetAnimationLower(ZC_STATE_LOWER_TUMBLE_LEFT); break;
+		}
+	}
+	else if (m_bWallJump)
+	{
+		switch (m_nWallJumpDir)
+		{
+		case 0: SetAnimationLower(ZC_STATE_LOWER_RUN_WALL_LEFT); break;
+		case 1: SetAnimationLower(ZC_STATE_LOWER_RUN_WALL); break;
+		case 2: SetAnimationLower(ZC_STATE_LOWER_RUN_WALL_RIGHT); break;
+		}
+	}
+	else if (m_bJumpSlash)
+	{
+		SetAnimationLower(ZC_STATE_JUMP_SLASH1);
+	}
+	else if (m_bJumpSlashLanding)
+	{
+		SetAnimationLower(ZC_STATE_JUMP_SLASH2);
+	}
+	else if (m_bSlash)
+	{
+		SetAnimationLower(ZC_STATE_SLASH);
+	}
+	else if (m_bJumpUp)
+	{
+		SetAnimationLower(ZC_STATE_LOWER_JUMP_UP);
+	}
+	else if (m_bJumpDown)
+	{
+		SetAnimationLower(ZC_STATE_LOWER_JUMP_DOWN);
+	}
+	else if (m_bCharging)
+	{
+		SetAnimationLower(ZC_STATE_CHARGE);
+	}
+	else if (m_bMoving)
+	{
+		if (m_bBackMoving)
+		{
+			SetAnimationLower(ZC_STATE_LOWER_RUN_BACK);
+		}
+		else
+		{
+			SetAnimationLower(ZC_STATE_LOWER_RUN_FORWARD);
+		}
+	}
+	else if (m_bSpMotion)
+	{
+		SetAnimationLower(m_SpMotion);
 
-						}
-						else
-							if (m_bSkill)
-							{
-								SetAnimationLower(ZC_STATE_LOWER_UPPERCUT);
-							}
-							else
-								if (m_bJumpShot)
-								{
-									SetAnimationLower(ZC_STATE_LOWER_JUMPATTACK);
-
-								}
-								else
-									if (m_bGuard)
-									{
-										if (m_bJumpUp) SetAnimationLower(ZC_STATE_LOWER_JUMP_UP);
-										else
-											if (m_bJumpDown) SetAnimationLower(ZC_STATE_LOWER_JUMP_DOWN);
-											else
-												if (m_bMoving)
-												{
-													if (m_bBackMoving) SetAnimationLower(ZC_STATE_LOWER_RUN_BACK);
-													else
-														SetAnimationLower(ZC_STATE_LOWER_RUN_FORWARD);
-												}
-												else
-													SetAnimationLower(ZC_STATE_LOWER_IDLE1);
-
-										if (m_bGuardStart)
-											SetAnimationUpper(ZC_STATE_UPPER_GUARD_START);
-										else
-											if (m_bGuardCancel)
-												SetAnimationUpper(ZC_STATE_UPPER_GUARD_CANCEL);
-											else
-												if (m_nGuardBlock)
-												{
-													switch (m_nGuardBlock) {
-													case 1: SetAnimationUpper(ZC_STATE_UPPER_GUARD_BLOCK1); break;
-													case 2: SetAnimationUpper(ZC_STATE_UPPER_GUARD_BLOCK2); break;
-													}
-												}
-												else
-													if (m_bGuardBlock_ret)
-														SetAnimationUpper(ZC_STATE_UPPER_GUARD_BLOCK1_RET);
-													else
-														SetAnimationUpper(ZC_STATE_UPPER_GUARD_IDLE);
-									}
-									else
-										if (m_bShotReturn)
-										{
-											switch (m_nShot) {
-											case 1: SetAnimationLower(ZC_STATE_LOWER_ATTACK1_RET); break;
-											case 2: SetAnimationLower(ZC_STATE_LOWER_ATTACK2_RET); break;
-											case 3: SetAnimationLower(ZC_STATE_LOWER_ATTACK3_RET); break;
-											case 4: SetAnimationLower(ZC_STATE_LOWER_ATTACK4_RET); break;
-											}
-										}
-										else
-											if (m_bShot)
-											{
-												switch (m_nShot) {
-												case 1: SetAnimationLower(ZC_STATE_LOWER_ATTACK1); break;
-												case 2: SetAnimationLower(ZC_STATE_LOWER_ATTACK2); break;
-												case 3: SetAnimationLower(ZC_STATE_LOWER_ATTACK3); break;
-												case 4:
-													SetAnimationLower(ZC_STATE_LOWER_ATTACK4);
-													break;
-												case 5: SetAnimationLower(ZC_STATE_LOWER_ATTACK5); break;
-												}
-											}
-											else
-												if (m_bWallJump2)
-												{
-													switch (m_nWallJump2Dir) {
-													case 0: SetAnimationLower(ZC_STATE_LOWER_JUMP_WALL_FORWARD); break;
-													case 1: SetAnimationLower(ZC_STATE_LOWER_JUMP_WALL_BACK); break;
-													case 2: SetAnimationLower(ZC_STATE_LOWER_JUMP_WALL_LEFT); break;
-													case 3: SetAnimationLower(ZC_STATE_LOWER_JUMP_WALL_RIGHT); break;
-													case 4: SetAnimationLower(ZC_STATE_LOWER_RUN_WALL_LEFT_DOWN); break;
-													case 5: SetAnimationLower(ZC_STATE_LOWER_RUN_WALL_RIGHT_DOWN); break;
-													case 6: SetAnimationLower(ZC_STATE_LOWER_RUN_WALL_DOWN_FORWARD); break;
-													case 7: SetAnimationLower(ZC_STATE_LOWER_RUN_WALL_DOWN); break;
-													}
-												}
-												else
-													if (m_bWallHang)
-													{
-														SetAnimationLower(ZC_STATE_LOWER_BIND);
-													}
-													else
-														if (m_bTumble)
-														{
-															switch (m_nTumbleDir)
-															{
-															case 0:SetAnimationLower(ZC_STATE_LOWER_TUMBLE_FORWARD); break;
-															case 1:SetAnimationLower(ZC_STATE_LOWER_TUMBLE_BACK); break;
-															case 2:SetAnimationLower(ZC_STATE_LOWER_TUMBLE_RIGHT); break;
-															case 3:SetAnimationLower(ZC_STATE_LOWER_TUMBLE_LEFT); break;
-															}
-														}
-														else
-															if (m_bWallJump)
-															{
-																switch (m_nWallJumpDir)
-																{
-																case 0:SetAnimationLower(ZC_STATE_LOWER_RUN_WALL_LEFT); break;
-																case 1:SetAnimationLower(ZC_STATE_LOWER_RUN_WALL); break;
-																case 2:SetAnimationLower(ZC_STATE_LOWER_RUN_WALL_RIGHT); break;
-																}
-															}
-															else
-																if (m_bJumpSlash) {
-																	SetAnimationLower(ZC_STATE_JUMP_SLASH1);
-																}
-																else
-																	if (m_bJumpSlashLanding) {
-																		SetAnimationLower(ZC_STATE_JUMP_SLASH2);
-																	}
-																	else
-																		if (m_bSlash) {
-																			SetAnimationLower(ZC_STATE_SLASH);
-																		}
-																		else
-																			if (m_bJumpUp)
-																			{
-																				SetAnimationLower(ZC_STATE_LOWER_JUMP_UP);
-																			}
-																			else
-																				if (m_bJumpDown)
-																				{
-																					SetAnimationLower(ZC_STATE_LOWER_JUMP_DOWN);
-																				}
-																				else
-																					if (m_bCharging) {
-																						SetAnimationLower(ZC_STATE_CHARGE);
-																					}
-																					else
-																						if (m_bMoving) {
-
-																							if (m_bBackMoving)
-																								SetAnimationLower(ZC_STATE_LOWER_RUN_BACK);
-																							else {
-																								SetAnimationLower(ZC_STATE_LOWER_RUN_FORWARD);
-																							}
-																						}
-																						else
-																							if (m_bSpMotion) {
-
-																								SetAnimationLower(m_SpMotion);
-
-																								bTaunt = true;
-																							}
-																							else
-																								SetAnimationLower(ZC_STATE_LOWER_IDLE1);
-
-	if (m_bSpMotion) {
-		if (!bTaunt)
-			m_bSpMotion = false;
+		bTaunt = true;
+	}
+	else
+	{
+		SetAnimationLower(ZC_STATE_LOWER_IDLE1);
 	}
 
+	if (m_bSpMotion && !bTaunt)
+	{
+		m_bSpMotion = false;
+	}
 }
 
 void ZMyCharacter::WallJump2()
