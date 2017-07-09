@@ -37,7 +37,7 @@ bool ZGameClient::OnCommand(MCommand* pCommand)
 	break;
 	case MC_MATCH_RESPONSE_LOGIN_FAILED:
 	{
-		char szReason[128];
+		char szReason[4096];
 		if (!pCommand->GetParameter(szReason, 0, MPT_STR, sizeof(szReason)))
 			break;
 
