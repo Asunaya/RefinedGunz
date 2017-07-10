@@ -920,9 +920,6 @@ void ZCharacter::UpdateSpeed()
 		speed_upper = 4.8f * 1.2f;
 	}
 
-	if (m_AniState_Lower == ZC_STATE_SLASH)
-		speed = 4.8 * 0.9;
-
 	m_pVMesh->SetSpeed(speed,speed);
 }
 
