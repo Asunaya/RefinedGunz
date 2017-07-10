@@ -444,7 +444,8 @@ void ZCharacter::UpdateDirection(float fDelta, const v3& Direction)
 		return;
 	}
 
-	if (ZGetGameClient()->GetMatchStageSetting()->IsVanillaMode())
+	auto&& s = *ZGetGameClient()->GetMatchStageSetting();
+	if (s.IsVanillaMode() || s.InvulnerabilityStates())
 	{
 		if ((m_AniState_Lower == ZC_STATE_LOWER_IDLE1) ||
 			(m_AniState_Lower == ZC_STATE_LOWER_RUN_FORWARD) ||
