@@ -579,6 +579,19 @@ inline rmatrix RGetRotZ(float angle) {
 	return RotationMatrix({ 0, 0, 1 }, rads);
 }
 
+// Same as above, but the argument is in radians instead.
+inline rmatrix RGetRotXRad(float angle) {
+	return RotationMatrix({ 1, 0, 0 }, angle);
+}
+
+inline rmatrix RGetRotYRad(float angle) {
+	return RotationMatrix({ 0, 1, 0 }, angle);
+}
+
+inline rmatrix RGetRotZRad(float angle) {
+	return RotationMatrix({ 0, 0, 1 }, angle);
+}
+
 inline rmatrix QuaternionToMatrix(const rquaternion& q)
 {
 	return {

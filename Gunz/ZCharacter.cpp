@@ -479,13 +479,13 @@ void ZCharacter::UpdateDirection(float fDelta, const v3& Direction)
 
 			if (fAngleLower > 5.f / 180.f*PI_FLOAT)
 			{
-				mat = RGetRotZ(max(-ROTATION_SPEED*fDelta / 180.f*PI_FLOAT, -fAngleLower));
+				mat = RGetRotZRad(max(-ROTATION_SPEED*fDelta / 180.f*PI_FLOAT, -fAngleLower));
 				m_DirectionLower = m_DirectionLower * mat;
 			}
 
 			if (fAngleLower < -5.f / 180.f*PI_FLOAT)
 			{
-				mat = RGetRotZ(min(ROTATION_SPEED*fDelta / 180.f*PI_FLOAT, -fAngleLower));
+				mat = RGetRotZRad(min(ROTATION_SPEED*fDelta / 180.f*PI_FLOAT, -fAngleLower));
 				m_DirectionLower = m_DirectionLower * mat;
 			}
 
@@ -494,14 +494,14 @@ void ZCharacter::UpdateDirection(float fDelta, const v3& Direction)
 			if (fAngle < -65.f / 180.f*PI_FLOAT)
 			{
 				fAngle = -65.f / 180.f*PI_FLOAT;
-				mat = RGetRotZ(-65.f / 180.f*PI_FLOAT);
+				mat = RGetRotZRad(-65.f / 180.f*PI_FLOAT);
 				m_DirectionLower = m_Direction * mat;
 			}
 
 			if (fAngle >= 65.f / 180.f*PI_FLOAT)
 			{
 				fAngle = 65.f / 180.f*PI_FLOAT;
-				mat = RGetRotZ(65.f / 180.f*PI_FLOAT);
+				mat = RGetRotZRad(65.f / 180.f*PI_FLOAT);
 				m_DirectionLower = m_Direction * mat;
 			}
 
