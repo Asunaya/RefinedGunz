@@ -434,12 +434,18 @@ void ZOptionInterface::InitInterfaceOption(void)
 		sprintf_safe(StringFontSize, "%d", Cfg.GetChat()->FontSize);
 		char StringBackgroundColor[64];
 		sprintf_safe(StringBackgroundColor, "%08X", Cfg.GetChat()->BackgroundColor);
+		char StringLogicalFPSLimit[64];
+		sprintf_safe(StringLogicalFPSLimit, "%d", Cfg.GetLogicalFPSLimit());
+		char StringVisualFPSLimit[64];
+		sprintf_safe(StringVisualFPSLimit, "%d", Cfg.GetVisualFPSLimit());
 
 		std::pair<const char*, const char*> Edits[] = {
 			{"FOVOption",                 StringFOV},
 			{"ChatFontOption",            Cfg.GetChat()->Font.c_str()},
 			{"ChatFontSizeOption",        StringFontSize},
 			{"ChatBackgroundColorOption", StringBackgroundColor},
+			{"LogicalFPSLimitOption",     StringLogicalFPSLimit},
+			{"VisualFPSLimitOption",      StringVisualFPSLimit},
 		};
 
 		for (auto&& EditInfo : Edits)
@@ -866,6 +872,10 @@ bool ZOptionInterface::SaveInterfaceOption(void)
 			{ "ChatBackgroundColorOption", [](const char* Value) {
 				ZGetConfiguration()->GetChat()->BackgroundColor =
 					StringToInt<u32, 16>(Value).value_or(0x80000000); } },
+			{ "LogicalFPSLimitOption", [](const char* Value) {
+				ZGetConfiguration()->LogicalFPSLimit = StringToInt<int>(Value).value_or(250); } },
+			{ "VisualFPSLimitOption", [](const char* Value) {
+				ZGetConfiguration()->VisualFPSLimit = StringToInt<int>(Value).value_or(0); } },
 		};
 
 		for (auto&& EditInfo : Edits)
