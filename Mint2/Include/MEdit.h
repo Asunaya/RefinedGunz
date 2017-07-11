@@ -8,7 +8,7 @@ class MEdit;
 
 class MEditLook{
 protected:
-	bool		m_bCustomLook;
+	bool		m_bCustomLook = true;
 public:
 	virtual void OnFrameDraw(MEdit* pEdit, MDrawContext* pDC);
 	virtual void OnTextDraw(MEdit* pEdit, MDrawContext* pDC, bool bShowLanguageTab);
