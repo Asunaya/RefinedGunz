@@ -79,6 +79,14 @@ void MAddSharedCommandTable(MCommandManager* CommandManager, MSharedCommandType:
 		P(MPT_BLOB, "BasicInfo");
 
 
+	// Freestyle Gunz commands
+	C(MC_MATCH_GAME_CHAT, "", "", MCDT_MACHINE2MACHINE);
+		P(MPT_UID, "Sender");
+		P(MPT_UINT64, "Unknown");
+		P(MPT_STR, "Message");
+		P(MPT_INT, "Team");
+
+
 	C(MC_LOCAL_INFO, "Local.Info", "Local information", MCDT_LOCAL);
 	C(MC_LOCAL_ECHO, "Local.Echo", "Local echo test", MCDT_LOCAL);
 		P(MPT_STR, "Message");

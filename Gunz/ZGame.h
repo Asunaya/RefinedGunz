@@ -239,6 +239,8 @@ public:
 	void OnPeerSlash(ZCharacter *pOwner, const rvector &pos, const rvector &dir, int Type);
 	void OnPeerMassive(ZCharacter *pOwner, const rvector &pos, const rvector &dir);
 
+	void OnPeerChat(const MUID& Sender, MMatchTeam Team, const char* Message);
+
 	void ReserveSuicide();
 	bool IsReservedSuicide() { return m_bSuicide; }
 	void CancelSuicide() { m_bSuicide = false; }

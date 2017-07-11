@@ -192,6 +192,7 @@ enum Type : uint32_t
 #define MC_MATCH_GAME_REQUEST_SPAWN				1515
 #define MC_MATCH_GAME_RESPONSE_SPAWN			1516
 #define MC_MATCH_GAME_TEAMBONUS					1517
+#define MC_MATCH_GAME_CHAT						1518 // Freestyle Gunz command
 
 // Timesync
 #define MC_MATCH_GAME_REQUEST_TIMESYNC			1521

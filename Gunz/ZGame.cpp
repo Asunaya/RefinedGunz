@@ -1350,64 +1350,36 @@ bool ZGame::OnCommand_Immediate(MCommand* pCommand)
 	case MC_PEER_CHAT:
 		{
 			int nTeam = MMT_ALL;
-			char szMsg[512];
-			memset(szMsg, 0, sizeof(szMsg));
+			char szMsg[512]{};
 
 			pCommand->GetParameter(&nTeam, 0, MPT_INT);
-			pCommand->GetParameter(szMsg, 1, MPT_STR, sizeof(szMsg) );
+			pCommand->GetParameter(szMsg, 1, MPT_STR, sizeof(szMsg));
 
-			MCOLOR ChatColor = MCOLOR(0xFFD0D0D0);
-			const MCOLOR TeamChatColor = MCOLOR(109,207,246);
+			MUID uid = pCommand->GetSenderUID();
 
-			MUID uid=pCommand->GetSenderUID();
-			ZCharacter *pChar=ZGetCharacterManager()->Find(uid);
+			OnPeerChat(uid, MMatchTeam(nTeam), szMsg);
+		}
+		break;
 
-			MCOLOR UserNameColor = MCOLOR(190,190,0);
-
-			char sp_name[256];
-			bool bSpUser = GetUserNameColor(uid, UserNameColor, sp_name);
-
-			if(pChar) 
+	case MC_MATCH_GAME_CHAT:
+		{
+			if (!IsReplay())
 			{
-				int nMyTeam = ZApplication::GetGame()->m_pMyCharacter->GetTeamID();
-
-				if (nTeam == MMT_ALL || nTeam == MMT_SPECTATOR)
-				{
-					if ( !ZGetGameClient()->GetRejectNormalChat() || ( strcmp( pChar->GetUserName(), ZGetMyInfo()->GetCharName()) == 0))
-					{
-						ZGetSoundEngine()->PlaySound("if_error");
-						char szTemp[std::size(szMsg) + 64];
-
-						if(bSpUser) {
-							sprintf_safe(szTemp, "%s: %s", pChar->GetProperty()->szName, szMsg);
-							ZChatOutput(UserNameColor, szTemp);
-						}
-						else {
-							sprintf_safe(szTemp, "%s: %s", pChar->GetProperty()->szName, szMsg);
-							ZChatOutput(ChatColor, szTemp);
-						}
-					}
-				}
-				else if (nTeam == nMyTeam)
-				{
-					if ( (!ZGetGameClient()->IsLadderGame() && !ZGetGameClient()->GetRejectTeamChat()) ||
-						 ( ZGetGameClient()->IsLadderGame() && !ZGetGameClient()->GetRejectClanChat()) ||
-						 ( strcmp( pChar->GetUserName(), ZGetMyInfo()->GetCharName()) == 0))
-					{
-						ZGetSoundEngine()->PlaySound("if_error");
-						char szTemp[512];
-
-						if(bSpUser) {
-							sprintf_safe(szTemp, "(Team)%s: %s", sp_name,szMsg);
-							ZChatOutput(UserNameColor, szTemp);
-						}
-						else {
-							sprintf_safe(szTemp, "(Team)%s: %s", pChar->GetProperty()->szName,szMsg);
-							ZChatOutput(TeamChatColor, szTemp);
-						}
-					}
-				}
+				assert(false);
+				break;
 			}
+
+			MUID Sender{};
+			u64 Unknown{};
+			char Message[512]{};
+			int Team = MMT_ALL;
+
+			pCommand->GetParameter(&Sender, 0, MPT_UID);
+			pCommand->GetParameter(&Unknown, 1, MPT_UINT64);
+			pCommand->GetParameter(Message, 2, MPT_STR, sizeof(Message));
+			pCommand->GetParameter(&Team, 3, MPT_INT);
+
+			OnPeerChat(Sender, MMatchTeam(Team), Message);
 		}
 		break;
 
@@ -3605,6 +3577,62 @@ void ZGame::OnPeerDash(MCommand* pCommand)
 		OnChangeWeapon(uid,parts);
 
 	ZGetEffectManager()->AddDashEffect(pos,dir,pCharacter);
+}
+
+void ZGame::OnPeerChat(const MUID& Sender, MMatchTeam Team, const char* Message)
+{
+	ZCharacter *pChar = ZGetCharacterManager()->Find(Sender);
+
+	MCOLOR ChatColor = MCOLOR(0xFFD0D0D0);
+	const MCOLOR TeamChatColor = MCOLOR(109, 207, 246);
+
+	MCOLOR UserNameColor = MCOLOR(190, 190, 0);
+
+	char sp_name[256];
+	bool bSpUser = GetUserNameColor(Sender, UserNameColor, sp_name);
+
+	if (pChar)
+	{
+		int nMyTeam = ZApplication::GetGame()->m_pMyCharacter->GetTeamID();
+
+		if (Team == MMT_ALL || Team == MMT_SPECTATOR)
+		{
+			if (!ZGetGameClient()->GetRejectNormalChat() ||
+				strcmp(pChar->GetUserName(), ZGetMyInfo()->GetCharName()) == 0)
+			{
+				ZGetSoundEngine()->PlaySound("if_error");
+				char szTemp[4096];
+
+				if (bSpUser) {
+					sprintf_safe(szTemp, "%s: %s", pChar->GetProperty()->szName, Message);
+					ZChatOutput(UserNameColor, szTemp);
+				}
+				else {
+					sprintf_safe(szTemp, "%s: %s", pChar->GetProperty()->szName, Message);
+					ZChatOutput(ChatColor, szTemp);
+				}
+			}
+		}
+		else if (Team == nMyTeam)
+		{
+			if ((!ZGetGameClient()->IsLadderGame() && !ZGetGameClient()->GetRejectTeamChat()) ||
+				(ZGetGameClient()->IsLadderGame() && !ZGetGameClient()->GetRejectClanChat()) ||
+				(strcmp(pChar->GetUserName(), ZGetMyInfo()->GetCharName()) == 0))
+			{
+				ZGetSoundEngine()->PlaySound("if_error");
+				char szTemp[4096];
+
+				if (bSpUser) {
+					sprintf_safe(szTemp, "(Team)%s: %s", sp_name, Message);
+					ZChatOutput(UserNameColor, szTemp);
+				}
+				else {
+					sprintf_safe(szTemp, "(Team)%s: %s", pChar->GetProperty()->szName, Message);
+					ZChatOutput(TeamChatColor, szTemp);
+				}
+			}
+		}
+	}
 }
 
 rvector ZGame::GetFloor(rvector pos,rplane *pimpactplane)
