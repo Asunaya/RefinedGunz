@@ -192,13 +192,18 @@ void ChatMessage::SubstituteFormatSpecifiers()
 
 	const auto npos = std::wstring::npos;
 
+	bool Erased = false;
+
 	for (auto Pos = Msg.find_first_of(L"^[", 0);
-		Pos != npos && Pos < Msg.length() - 2;
-		Pos = Pos < Msg.length() ? Msg.find_first_of(L"^[", Pos + 1) : npos)
+		Pos != npos && Pos <= Msg.length() - 2;
+		Pos = Pos < Msg.length() ? Msg.find_first_of(L"^[", Erased ? Pos : Pos + 1) : npos)
 	{
+		Erased = false;
+
 		auto Erase = [&](std::wstring::size_type Count) {
 			Msg.erase(Pos, Count);
-			--Pos;
+
+			Erased = true;
 		};
 
 		auto RemainingLength = Msg.length() - Pos;
