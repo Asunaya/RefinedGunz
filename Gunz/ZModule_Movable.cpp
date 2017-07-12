@@ -39,11 +39,9 @@ void ZModule_Movable::OnUpdate(float Elapsed)
 	UpdatePosition(Elapsed);
 }
 
-bool ZModule_Movable::Move(const rvector &orig_diff)
+bool ZModule_Movable::Move(rvector &diff)
 {
 	ZObject *pThisObj = MStaticCast(ZObject,m_pContainer);
-
-	auto diff = orig_diff;
 
 #ifdef PORTAL
 	if (g_pPortal->Move(pThisObj, diff))
@@ -106,6 +104,7 @@ bool ZModule_Movable::Move(const rvector &orig_diff)
 		m_bAdjusted = false;
 	}
 
+	diff = targetpos - origin;
 	pThisObj->SetPosition(targetpos - v3(0, 0, fCollUpHeight));
 
 	if (m_bAdjusted)

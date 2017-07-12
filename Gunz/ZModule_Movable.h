@@ -44,7 +44,7 @@ public:
 
 	auto& GetLastMove() const { return m_lastMove; }
 
-	bool Move(const rvector &diff);
+	bool Move(rvector &diff);
 
 	void UpdateGravity(float fDelta);
 

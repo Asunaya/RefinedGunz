@@ -137,7 +137,7 @@ public:
 	bool IsRendered() const { return m_bRendered; }
 
 protected:
-	bool Move(const rvector &diff) { return m_pModule_Movable->Move(diff); }
+	bool Move(rvector &diff) { return m_pModule_Movable->Move(diff); }
 };
 
 bool IsPlayerObject(ZObject* pObject);
