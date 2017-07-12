@@ -162,6 +162,7 @@ public:
 static ZSnowTownParticleSystem g_SnowTownParticleSystem;
 
 ZGame*	g_pGame = NULL;
+// Is in radians
 float	g_fFOV = DEFAULT_FOV;
 float	g_fFarZ = DEFAULT_FAR_Z;
 
@@ -423,7 +424,7 @@ bool ZGame::Create(MZFileSystem *pfs, ZLoadingProgress *pLoading )
 		ZPostRequestPeerList(ZGetGameClient()->GetPlayerUID(), ZGetGameClient()->GetStageUID());
 	}
 
-	g_fFOV = DEFAULT_FOV;
+	g_fFOV = ToRadian(ZGetConfiguration()->GetFOV());
 
 	rvector dir = GetMapDesc()->GetWaitCamDir();
 	rvector pos = GetMapDesc()->GetWaitCamPos();
