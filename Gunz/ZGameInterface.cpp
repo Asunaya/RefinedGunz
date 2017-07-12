@@ -142,7 +142,7 @@ void ZGameInterface::LoadBitmaps(const char* szDir, ZLoadingProgress *pLoadingPr
 
 	auto AddBitmapsIn = [&](auto&& Path, bool AddDirToAliasName)
 	{
-		auto DirNode = FS.GetDirectory(szDir);
+		auto DirNode = FS.GetDirectory(Path);
 		if (!DirNode)
 			return;
 
