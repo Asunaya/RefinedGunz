@@ -24,6 +24,8 @@
 
 #include "RGMain.h"
 
+#include "Config.h"
+
 void ChatCmd_Test(const char* line, const int argc, char **const argv);				// Testing
 
 void ChatCmd_Help(const char* line, const int argc, char **const argv);				// µµ¿ò¸»
@@ -1099,8 +1101,11 @@ void ChatCmd_AdminSwitchCreateLadderGame(const char* line, const int argc, char 
 
 void ChatCmd_Suicide(const char* line,const int argc, char **const argv)
 {
+#ifdef DELAYED_SUICIDE
 	ZGetGame()->ReserveSuicide();
-//	ZGetGameClient()->RequestGameSuicide();
+#else
+	ZGetGameClient()->RequestGameSuicide();
+#endif
 }
 
 

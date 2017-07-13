@@ -76,3 +76,6 @@
 
 // Controls whether clans can be created with no sponsors.
 #define SOLO_CLAN_CREATION
+
+// Controls whether the /suicide command kills you instantly or after a delay.
+//#define DELAYED_SUICIDE

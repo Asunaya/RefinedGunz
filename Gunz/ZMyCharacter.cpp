@@ -2315,6 +2315,8 @@ void ZMyCharacter::OnDie()
 
 	m_bWallHang = false;
 	m_bWallJump = false;
+
+	SetHP(0);
 }
 
 #define DAMAGE_VELOCITY		1700.f
