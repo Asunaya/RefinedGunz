@@ -1906,7 +1906,7 @@ bool ZGameInterface::SetState(GunzState nState)
 	}
 
 	m_nDrawCount = 0;
-	return true;
+	return bStateChanged;
 }
 
 #ifndef _PUBLISH

@@ -98,7 +98,7 @@ static void ConvertStageSettingNode(const REPLAY_STAGE_SETTING_NODE& src, MSTAGE
 }
 #undef COPY_MEMBER
 
-static void ChangeGameState(const REPLAY_STAGE_SETTING_NODE& rssn)
+static bool ChangeGameState(const REPLAY_STAGE_SETTING_NODE& rssn)
 {
 	MSTAGE_SETTING_NODE stageSetting;
 	memset(&stageSetting, 0, sizeof(MSTAGE_SETTING_NODE));
@@ -107,10 +107,13 @@ static void ChangeGameState(const REPLAY_STAGE_SETTING_NODE& rssn)
 
 	ZGetGameClient()->GetMatchStageSetting()->UpdateStageSetting(&stageSetting);
 	ZApplication::GetStageInterface()->SetMapName(ZGetGameClient()->GetMatchStageSetting()->GetMapName());
-	ZGetGameInterface()->SetState(GUNZ_GAME);
+	if (!ZGetGameInterface()->SetState(GUNZ_GAME))
+		return false;
 
 	ZGetCharacterManager()->Clear();
 	ZGetObjectManager()->Clear();
+
+	return true;
 }
 
 static bool LoadReplayData(ZReplayLoader& Loader, const char* filename)
@@ -126,10 +129,14 @@ static bool LoadReplayData(ZReplayLoader& Loader, const char* filename)
 
 		MLog("Replay header loaded -- %s\n", VersionString.c_str());
 
+		if (Version.Server == ServerType::None)
+			return false;
+
 		REPLAY_STAGE_SETTING_NODE StageSetting;
 		Loader.GetStageSetting(StageSetting);
 
-		ChangeGameState(StageSetting);
+		if (!ChangeGameState(StageSetting))
+			return false;
 
 		if (StageSetting.nGameType == MMATCH_GAMETYPE_DUEL)
 		{

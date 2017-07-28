@@ -40,6 +40,9 @@ bool LoadFile(ReplayData& Output, const char* Filename)
 
 		printf_s("Replay header loaded for %s: %s\n", Filename, VersionString.c_str());
 
+		if (Output.Version.Server == ServerType::None)
+			return false;
+
 		Loader.GetStageSetting(Output.StageSetting);
 
 		printf_s("Character position: %d\n", Loader.GetPosition());

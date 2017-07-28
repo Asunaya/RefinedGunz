@@ -4,16 +4,198 @@
 #include "has_xxx.h"
 #include "Arena.h"
 
+template <typename HeaderType, typename StageSettingType, typename PlayerInfoType>
+inline bool ZReplayLoader::IsVersion()
+try
+{
+	const auto OldPosition = Position;
+	Position = 0;
+	DEFER([&] { Position = OldPosition; });
+
+	HeaderType Header;
+	Read(Header);
+
+	StageSettingType Setting;
+	Read(Setting);
+
+	if (Setting.nGameType < MMATCH_GAMETYPE_DEATHMATCH_SOLO) {
+		return false;
+	}
+
+	const auto IsRGReplay = Header.Header != RG_REPLAY_MAGIC_NUMBER;
+	if (IsRGReplay)
+	{
+		if (Setting.nGameType > MMATCH_GAMETYPE_MAX) {
+			return false;
+		}
+	}
+	else
+	{
+		// This isn't an RG replay, so any gametype above duel must be either a corrupt value or a
+		// custom gametype (and we can't deal with custom gametypes at all right now) so just
+		// return false.
+		if (Setting.nGameType > MMATCH_GAMETYPE_DUEL) {
+			return false;
+		}
+	}
+
+	if (Setting.nGameType == MMATCH_GAMETYPE_DUEL)
+	{
+		MTD_DuelQueueInfo DuelQueueInfo;
+		Read(DuelQueueInfo);
+	}
+
+	int PlayerCount = 0;
+	Read(PlayerCount);
+
+	if (PlayerCount <= 0 || PlayerCount > 64) {
+		return false;
+	}
+
+	bool HasFoundHero = false;
+	for (int i = 0; i < PlayerCount; ++i)
+	{
+		PlayerInfoType PlayerInfo;
+		Read(PlayerInfo);
+
+		if (PlayerInfo.IsHero)
+		{
+			if (!HasFoundHero) {
+				HasFoundHero = true;
+			} else {
+				// Can't have two heroes.
+				return false;
+			}
+		}
+
+		auto Equals = [&](auto&& a, auto&& b) { return strcmp(a, b) == 0; };
+
+		// Slightly shorter aliases for brevity.
+		auto&& Info = PlayerInfo.Info;
+		auto&& State = PlayerInfo.State;
+		auto&& Property = PlayerInfo.State.Property;
+
+		if (!Equals(Info.szName,     Property.szName) ||
+			!Equals(Info.szClanName, Property.szClanName)) {
+			return false;
+		}
+
+		if (Info.nLevel != Property.nLevel ||
+			Info.nSex   != Property.nSex   ||
+			Info.nHair  != Property.nHair  ||
+			Info.nFace  != Property.nFace) {
+			return false;
+		}
+
+		if (State.Team < MMT_ALL || State.Team >= MMT_END) {
+			return false;
+		}
+	}
+
+	return true;
+}
+catch (EOFException&)
+{
+	return false;
+}
+
+struct KnownReplayVersion
+{
+	ReplayVersion MinVersion;
+	ReplayVersion MaxVersion;
+
+	bool (ZReplayLoader::*IsVersion)();
+};
+
 inline ReplayVersion ZReplayLoader::GetVersion()
 {
-	ReplayVersion Version;
+	// Distinguishing the replay version, in terms of both version number and which server it
+	// belongs to, is problematic because the only indication of version in the replay itself is
+	// the first 8 bytes: A 4 byte magic number, and a 4 byte version number. Pretty much every
+	// server (except RG) uses the same magic number (GUNZ_REC_FILE_ID = 0x95b1308a), and several
+	// different servers use the same version number even though they have different replay
+	// structures.
+	//
+	// For instance, Freestyle Gunz initially had the version incremented to 7 for their custom
+	// replays, up from the default V6 in the 1.5 source. However, after the release of the source
+	// in late 2011, the official game kept getting updates on late Ijji and through Aeria, so they
+	// ended up making *their own* V7 replay format as well, which was different.
+	// In addition to that, Freestyle Gunz *also* updated their replay format again without
+	// changing the version, so now, a version number of "7" has to be distinguished between
+	// 1) official V7, 2) old FG V7, and 3) new FG V7.
+	//
+	// To distinguish replays in the most effective and simple way, what we do here is have a list
+	// of known replay versions tied to the replay data structures that they use.
+	// Then, when we read the replay version number from the replay file, we go through the list
+	// and check whether any of them make sense with the data.
+	//
+	// If the version doesn't match, that's an immediate rejection. If it does, we go a bit further
+	// and call ZReplayLoader::IsVersion, instantiated with the replay structures of the version
+	// being tested.
+	//
+	// IsVersion then reads data from the replay and checks it for logical consistency.
+	// For instance, the gametype in the stage setting is verified to be within valid bounds.
+	// Since there are several resources of redundant data (e.g. each player's name is stored both
+	// in their MTD_CharInfo *and* their ZCharacterProperty), we also read both of those fields and
+	// check that they are both valid and the same.
+	//
+	// If no versions are matched, or more than one version is matched, GetVersion returns
+	// ServerType::None along with the version number, indicating that it's unrecognized, but still
+	// letting the user know the version number. If only one is matched, that one is returned.
+	//
+	// This process is done even if the version number is unique (i.e. there's only one server it
+	// could've originated from), just to verify that the replay is not corrupt and is as expected.
 
-	unsigned int version = 0;
-	unsigned int header;
+#define VER_FULL(Server, MinVer, MinSub, MaxVer, MaxSub, Header, Setting, Player) \
+		{   {ServerType::Server, MinVer, MinSub}, \
+			{ServerType::Server, MaxVer, MaxSub}, \
+			&ZReplayLoader::IsVersion<Header, Setting, Player> }
+
+#define VER_RANGE(Server, MinVer, MaxVer, Header, Setting, Player) \
+		VER_FULL(Server, MinVer, 0, MaxVer, 0, Header, Setting, Player)
+
+#define VER(Server, Ver, Header, Setting, Player) \
+		VER_FULL(Server, Ver, 0, Ver, 0, Header, Setting, Player)
+
+#define VER_SUB(Server, Ver, SubVer, Header, Setting, Player) \
+		VER_FULL(Server, Ver, SubVer, Ver, SubVer, Header, Setting, Player)
+
+	static const KnownReplayVersion KnownVersions[] = {
+		// Official
+		VER_RANGE(Official,      1, 5,  REPLAY_HEADER,       REPLAY_STAGE_SETTING_NODE_OLD,   ReplayPlayerInfo_Official_V5),
+		VER      (Official,      6,     REPLAY_HEADER,       REPLAY_STAGE_SETTING_NODE_OLD,   ReplayPlayerInfo_Official_V6),
+		VER_RANGE(Official,      7, 10, REPLAY_HEADER,       REPLAY_STAGE_SETTING_NODE_V11,   ReplayPlayerInfo_Official_V6),
+		VER      (Official,      11,    REPLAY_HEADER,       REPLAY_STAGE_SETTING_NODE_V11,   ReplayPlayerInfo_Official_V11),
+
+		// Refined Gunz
+		VER      (RefinedGunz,   1,     REPLAY_HEADER,       REPLAY_STAGE_SETTING_NODE_RG_V1, ReplayPlayerInfo),
+		VER      (RefinedGunz,   2,     REPLAY_HEADER_RG_V3, REPLAY_STAGE_SETTING_NODE_RG_V2, ReplayPlayerInfo),
+		VER      (RefinedGunz,   3,     REPLAY_HEADER_RG_V3, REPLAY_STAGE_SETTING_NODE,       ReplayPlayerInfo),
+		VER      (RefinedGunz,   4,     REPLAY_HEADER_RG,    REPLAY_STAGE_SETTING_NODE,       ReplayPlayerInfo),
+
+		// Freestyle Gunz
+		VER      (FreestyleGunz, 7,     REPLAY_HEADER,       REPLAY_STAGE_SETTING_NODE_FG,    ReplayPlayerInfo_FG_V7_0),
+		VER_SUB  (FreestyleGunz, 7, 1,  REPLAY_HEADER,       REPLAY_STAGE_SETTING_NODE_FG,    ReplayPlayerInfo_FG_V7_1),
+		VER      (FreestyleGunz, 8,     REPLAY_HEADER,       REPLAY_STAGE_SETTING_NODE_FG,    ReplayPlayerInfo_FG_V8),
+		VER      (FreestyleGunz, 9,     REPLAY_HEADER,       REPLAY_STAGE_SETTING_NODE_FG,    ReplayPlayerInfo_FG_V9),
+		VER      (FreestyleGunz, 10,    REPLAY_HEADER,       REPLAY_STAGE_SETTING_NODE_FG,    ReplayPlayerInfo_FG_V10),
+
+		// Dark Gunz
+		VER      (DarkGunz,      6,     REPLAY_HEADER,       REPLAY_STAGE_SETTING_NODE_DG,    ReplayPlayerInfo_DG),
+	};
+
+	ReplayVersion Version;
 
 	bool FoundServer = false;
 
+	u32 header;
 	Read(header);
+
+	u32 version;
+	Read(version);
+
+	Version.nVersion = version;
+	Version.nSubVersion = 0;
 
 	if (header == RG_REPLAY_MAGIC_NUMBER)
 	{
@@ -26,33 +208,53 @@ inline ReplayVersion ZReplayLoader::GetVersion()
 		return Version;
 	}
 
-	Read(version);
-
-	Version.nVersion = version;
-	Version.nSubVersion = 0;
-
 	if (!FoundServer)
 	{
-		u8 Something;
-		ReadAt(Something, 0x4A);
+		const KnownReplayVersion* LastMatchedVersion;
 
-		if (Version.nVersion >= 7 && Version.nVersion <= 10 && Something <= 0x01)
+		for (auto&& KnownVersion : KnownVersions)
 		{
-			Version.Server = ServerType::FreestyleGunz;
-		}
-		else if (Version.nVersion == 6)
-		{
-			ReadAt(Something, 0x91);
+			if (Version.nVersion < KnownVersion.MinVersion.nVersion ||
+				Version.nVersion > KnownVersion.MaxVersion.nVersion)
+				continue;
 
-			if (Something == 0x00)
-				Version.Server = ServerType::DarkGunz;
-			else
-				Version.Server = ServerType::Official;
+			auto ret = std::invoke(KnownVersion.IsVersion, this);
+			if (!ret)
+				continue;
+
+			if (FoundServer)
+			{
+				auto ToStr = [&](auto&& Ver) {
+					if (Ver.MinVersion == Ver.MaxVersion)
+						return Ver.MinVersion.GetVersionString();
+
+					auto Min = Ver.MinVersion.GetVersionString();
+					auto Max = Ver.MaxVersion.GetVersionString();
+
+					return "["s + Min + ", "s + Max + "]";
+				};
+
+				MLog("Replay matches both %s and %s; can't disambiguate.\n",
+					ToStr(*LastMatchedVersion).c_str(), ToStr(KnownVersion).c_str());
+
+				Version.Server = ServerType::None;
+				return Version;
+			}
+
+			FoundServer = true;
+			LastMatchedVersion = &KnownVersion;
 		}
-		else
+
+		if (!FoundServer)
 		{
-			Version.Server = ServerType::Official;
+			MLog("Couldn't match any replay version\n");
+
+			Version.Server = ServerType::None;
+			return Version;
 		}
+
+		Version.Server = LastMatchedVersion->MinVersion.Server;
+		Version.nSubVersion = LastMatchedVersion->MinVersion.nSubVersion;
 	}
 
 	if (Version.Server == ServerType::RefinedGunz && Version.nVersion >= 2)
@@ -242,7 +444,7 @@ inline std::vector<ReplayPlayerInfo> ZReplayLoader::GetCharInfo()
 	int nCharacterCount;
 	Read(nCharacterCount);
 
-	if (nCharacterCount > 64)
+	if (nCharacterCount <= 0 || nCharacterCount > 64)
 	{
 		throw std::runtime_error{ "Replay is corrupt" };
 	}
@@ -305,7 +507,7 @@ inline std::vector<ReplayPlayerInfo> ZReplayLoader::GetCharInfo()
 				}
 				CopyCharInfo(oldinfo);
 			}
-			else if (Version.nVersion == 6)
+			else if (Version.nVersion >= 6 && Version.nVersion < 11)
 			{
 				READ_CHARINFO(MTD_CharInfo_V6);
 			}

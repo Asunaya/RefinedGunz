@@ -31,7 +31,12 @@ struct ReplayVersion
 	int nVersion = -1;
 	int nSubVersion = -1;
 
-	const char* GetServerString()
+	ReplayVersion() = default;
+
+	ReplayVersion(ServerType Server, int nVersion, int nSubVersion)
+		: Server{ Server }, nVersion{ nVersion }, nSubVersion{ nSubVersion } {}
+
+	const char* GetServerString() const
 	{
 		switch (Server)
 		{
@@ -49,7 +54,7 @@ struct ReplayVersion
 		}
 	}
 
-	std::string GetVersionString()
+	std::string GetVersionString() const
 	{
 		std::string ret = "Version: ";
 		ret += GetServerString();
@@ -63,6 +68,14 @@ struct ReplayVersion
 		}
 
 		return ret;
+	}
+
+	bool operator==(const ReplayVersion& rhs) const {
+		return Server == rhs.Server && nVersion == rhs.nVersion && nSubVersion == rhs.nSubVersion;
+	}
+
+	bool operator!=(const ReplayVersion& rhs) const {
+		return !(*this == rhs);
 	}
 };
 
@@ -86,7 +99,7 @@ public:
 	int GetPosition() const { return Position; }
 
 private:
-	std::vector<unsigned char> InflatedFile;
+	std::vector<u8> InflatedFile;
 
 	ReplayVersion Version;
 	float m_fGameTime = 0.f;
@@ -104,6 +117,9 @@ private:
 	void ReadN(void* Obj, size_t Size);
 	template <typename T>
 	bool TryRead(T& Obj);
+
+	template <typename HeaderType, typename StageSettingType, typename PlayerInfoType>
+	bool IsVersion();
 
 	template <typename T>
 	bool GetCommandsImpl(T fn, ArrayView<u32>* WantedCommandIDs);

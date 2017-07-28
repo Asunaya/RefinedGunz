@@ -398,6 +398,14 @@ void RGMain::OnReplaySelected(MListBox* ReplayFileListWidget)
 		if (!Loader.LoadFile(Path))
 			return;
 		SelectedReplayInfo.Version = Loader.GetVersion();
+		
+		if (SelectedReplayInfo.Version.Server == ServerType::None)
+		{
+			MLog("Unknown replay version selected\n");
+			SelectedReplayInfo.Dead = true;
+			return;
+		}
+
 		SelectedReplayInfo.Timestamp = Loader.GetTimestamp();
 		Loader.GetStageSetting(SelectedReplayInfo.StageSetting);
 		Loader.GetDuelQueueInfo();
@@ -453,6 +461,7 @@ void RGMain::DrawReplayInfo(MDrawContext* pDC, MWidget* Widget) const
 
 	if (SelectedReplayInfo.Dead)
 	{
+		Print("%s", SelectedReplayInfo.VersionString.c_str());
 		Print("Failed to load replay");
 		return;
 	}

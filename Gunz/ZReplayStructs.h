@@ -11,7 +11,7 @@ struct REPLAY_HEADER
 	u32 ReplayBinaryVersion;
 };
 
-// RG replay version 1 to 3
+// RG replay version 2 to 3
 struct REPLAY_HEADER_RG_V3
 {
 	u32 Header;
@@ -440,6 +440,7 @@ using ZCharacterReplayState_FG_V7_0 = ZCharacterReplayStateImpl<17>;
 using ZCharacterReplayState_FG_V7_1 = ZCharacterReplayStateImpl<22>;
 using ZCharacterReplayState_FG_V8 = ZCharacterReplayStateImpl<23>;
 using ZCharacterReplayState_FG_V9 = ZCharacterReplayStateImpl<24>;
+using ZCharacterReplayState_Official_V5 = ZCharacterReplayStateImpl<12>;
 using ZCharacterReplayState_Official_V6 = ZCharacterReplayStateImpl<17>;
 using ZCharacterReplayState_Official_V11 = ZCharacterReplayStateImpl<34>;
 
@@ -544,7 +545,9 @@ using ReplayPlayerInfo_FG_V7_1 = ReplayPlayerInfoImpl<MTD_CharInfo_FG_V7_1, ZCha
 using ReplayPlayerInfo_FG_V8 = ReplayPlayerInfoImpl<MTD_CharInfo_FG_V8, ZCharacterReplayState_FG_V8>;
 using ReplayPlayerInfo_FG_V9 = ReplayPlayerInfoImpl<MTD_CharInfo_FG_V9, ZCharacterReplayState_FG_V9>;
 using ReplayPlayerInfo_FG_V10 = ReplayPlayerInfoImpl<MTD_CharInfo_FG_V10, ZCharacterReplayState_FG_V10>;
+using ReplayPlayerInfo_Official_V5 = ReplayPlayerInfoImpl<MTD_CharInfo_V5, ZCharacterReplayState_Official_V5>;
 using ReplayPlayerInfo_Official_V6 = ReplayPlayerInfoImpl<MTD_CharInfo_V6, ZCharacterReplayState_Official_V6>;
-using ReplayPlayerInfo_Official_V11 = ReplayPlayerInfoImpl<MTD_CharInfo_V11, ZCharacterReplayState_Official_V11>;
+using ReplayPlayerInfo_Official_V11 = ReplayPlayerInfoImpl<MTD_CharInfo_V11,
+	ZCharacterReplayState_Official_V11>;
 
 #pragma pack(pop)
