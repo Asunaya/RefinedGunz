@@ -524,9 +524,6 @@ void ZGameInput::Update(float fElapsed)
 				pCamera->m_fAngleX += fRotateY;
 				pCamera->m_fAngleZ += fRotateX;
 
-				pCamera->m_fAngleZ = fmod(pCamera->m_fAngleZ, 2 * PI);
-				pCamera->m_fAngleX = fmod(pCamera->m_fAngleX, 2 * PI);
-
 				if (pCamera->GetLookMode() == ZCAMERA_MINIMAP)
 				{
 					pCamera->m_fAngleX = max(PI_FLOAT / 2 + .1f, pCamera->m_fAngleX);
@@ -536,6 +533,9 @@ void ZGameInput::Update(float fElapsed)
 				{
 					if (bRotateEnable)
 					{
+						pCamera->m_fAngleZ = fmod(pCamera->m_fAngleZ, 2 * PI);
+						pCamera->m_fAngleX = fmod(pCamera->m_fAngleX, 2 * PI);
+
 						pCamera->m_fAngleX = max(CAMERA_ANGLEX_MIN, pCamera->m_fAngleX);
 						pCamera->m_fAngleX = min(CAMERA_ANGLEX_MAX, pCamera->m_fAngleX);
 
