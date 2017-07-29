@@ -482,6 +482,7 @@ struct MTD_CharInfo_DG
 	u16					nClanContPoint;
 	char				nCharNum;
 	u16					nLevel;
+	u16					unk2;
 	char				nSex;
 	char				nHair;
 	char				nFace;
@@ -505,7 +506,7 @@ struct MTD_CharInfo_DG
 	MUID				uidEquipedItem[17];
 	u32					nEquipedItemCount[17];
 
-	char				unk[6];
+	char				unk[4];
 };
 
 struct ZCharacterReplayState_DG

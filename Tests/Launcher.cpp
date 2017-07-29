@@ -62,7 +62,7 @@ static bool TestRollingHashMove()
 
 			IncrementalHash.Move(Sequence[i - 1], Sequence[i + BlockSize - 1], BlockSize);
 
-			assert(IncrementalHash == NonincrementalHash);
+			TestAssert(IncrementalHash == NonincrementalHash);
 		}
 	}
 
@@ -84,7 +84,7 @@ static bool TestRollingHashStream()
 
 		Hash::Rolling StreamHash;
 		Stream.Final(StreamHash);
-		assert(StreamHash == Nonincremental);
+		TestAssert(StreamHash == Nonincremental);
 	}
 
 	// Check that the hash obtained by hashing an entire block of memory is equivalent to the one
@@ -98,7 +98,7 @@ static bool TestRollingHashStream()
 		Hash::Rolling Incremental;
 		Stream.Final(Incremental);
 
-		assert(Nonincremental == Incremental);
+		TestAssert(Nonincremental == Incremental);
 	}
 
 	return true;
@@ -106,8 +106,8 @@ static bool TestRollingHashStream()
 
 static bool TestRollingHash()
 {
-	assert(TestRollingHashMove());
-	assert(TestRollingHashStream());
+	TestAssert(TestRollingHashMove());
+	TestAssert(TestRollingHashStream());
 
 	return true;
 }
@@ -117,10 +117,10 @@ static void WriteFile(const char* Path, const void* Buffer, size_t Size)
 	CreateDirectoriesIfNonexistent(Path);
 
 	MFile::RWFile File{ Path, MFile::ClearExistingContents };
-	assert(!File.error());
+	TestAssert(!File.error());
 
 	File.write(Buffer, Size);
-	assert(!File.error());
+	TestAssert(!File.error());
 }
 
 static bool TestFile(const ArrayView<u8>& SrcFileContents,
@@ -136,7 +136,7 @@ static bool TestFile(const ArrayView<u8>& SrcFileContents,
 	char SyncPath[MFile::MaxPath];
 	sprintf_safe(SyncPath, "%s.sync", SrcFilePath);
 
-	assert(Sync::MakeSyncFile(SyncPath, SrcFilePath));
+	TestAssert(Sync::MakeSyncFile(SyncPath, SrcFilePath));
 
 	// Instead of starting a local webserver, just use FILE URIs.
 	char cwd[MFile::MaxPath];
@@ -152,7 +152,7 @@ static bool TestFile(const ArrayView<u8>& SrcFileContents,
 	MakeFileURI(SyncURL, SyncPath);
 
 	auto DownloadManager = CreateDownloadManager();
-	assert(bool(DownloadManager));
+	TestAssert(bool(DownloadManager));
 
 	Hash::Strong ExpectedHash;
 	ExpectedHash.HashFile(SrcFilePath);
@@ -163,19 +163,19 @@ static bool TestFile(const ArrayView<u8>& SrcFileContents,
 	u64 ActualSize;
 	Sync::BlockCounts Counts;
 
-	assert(Sync::SynchronizeFile(DestFilePath, nullptr, SrcURL, SyncURL, SrcFileContents.size(),
+	TestAssert(Sync::SynchronizeFile(DestFilePath, nullptr, SrcURL, SyncURL, SrcFileContents.size(),
 		DownloadManager, &ActualHash, &ActualSize, &Counts));
 
-	assert(Counts.UnmatchingBlocks == ExpectedNumUnmatchingBlocks);
+	TestAssert(Counts.UnmatchingBlocks == ExpectedNumUnmatchingBlocks);
 
-	assert(ActualHash == ExpectedHash);
-	assert(ActualSize == ExpectedSize);
+	TestAssert(ActualHash == ExpectedHash);
+	TestAssert(ActualSize == ExpectedSize);
 
 	ActualHash.HashFile(DestFilePath);
 	ActualSize = MFile::GetAttributes(DestFilePath)->Size;
 
-	assert(ActualHash == ExpectedHash);
-	assert(ActualSize == ExpectedSize);
+	TestAssert(ActualHash == ExpectedHash);
+	TestAssert(ActualSize == ExpectedSize);
 
 	return true;
 }
@@ -189,7 +189,7 @@ static bool TestSize()
 
 	// Test that the sync algorithm can recognize that two files are the same.
 	auto View = MakeView(FileBuffer);
-	assert(TestFile(View, View, 0));
+	TestAssert(TestFile(View, View, 0));
 
 	// This performs a copy.
 	auto ModifiedBuffer = FileBuffer;
@@ -199,11 +199,11 @@ static bool TestSize()
 	// Change the first byte.
 	ModifiedBuffer[0] += 128;
 
-	assert(TestFile(MakeView(FileBuffer), MakeView(ModifiedBuffer), 1));
+	TestAssert(TestFile(MakeView(FileBuffer), MakeView(ModifiedBuffer), 1));
 
 	// Check that it can recognize that only one block differs between FileBuffer and FileBuffer
 	// from the first byte to the end.
-	assert(TestFile(MakeView(FileBuffer),
+	TestAssert(TestFile(MakeView(FileBuffer),
 		ArrayView<u8>{FileBuffer.data() + 1, FileBuffer.size() - 1},
 		1));
 
@@ -218,7 +218,7 @@ static bool TestSize()
 	}
 
 	// All blocks but the last should be modified.
-	assert(TestFile(MakeView(FileBuffer),
+	TestAssert(TestFile(MakeView(FileBuffer),
 		MakeView(ModifiedBuffer),
 		NumBlocks - 1));
 
@@ -228,7 +228,7 @@ static bool TestSize()
 		ModifiedBuffer[i * LauncherConfig::BlockSize] -= 42;
 	}
 
-	assert(TestFile(MakeView(FileBuffer),
+	TestAssert(TestFile(MakeView(FileBuffer),
 		MakeView(ModifiedBuffer),
 		(NumBlocks - 1) / 2));
 
@@ -250,8 +250,8 @@ static bool TestSyncFile()
 
 bool TestLauncher()
 {
-	assert(TestRollingHash());
-	assert(TestSyncFile());
+	TestAssert(TestRollingHash());
+	TestAssert(TestSyncFile());
 
 	return true;
 }

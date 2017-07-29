@@ -24,28 +24,28 @@ static bool TestIntersectLineSegmentPlane()
 	v3 hit;
 	auto result = IntersectLineSegmentPlane(&hit, p, l0, l1);
 
-	assert(result);
-	assert(hit.x == 500 && hit.y == 0 && hit.z == 0);
+	TestAssert(result);
+	TestAssert(hit.x == 500 && hit.y == 0 && hit.z == 0);
 
 	std::swap(l0, l1);
 
 	result = IntersectLineSegmentPlane(&hit, p, l0, l1);
 
-	assert(result);
-	assert(hit.x == 500 && hit.y == 0 && hit.z == 0);
+	TestAssert(result);
+	TestAssert(hit.x == 500 && hit.y == 0 && hit.z == 0);
 
 	l0 = { 0, 0, 0 };
 	l1 = { 499, 0, 0 };
 
 	result = IntersectLineSegmentPlane(&hit, p, l0, l1);
-	assert(!result);
+	TestAssert(!result);
 
 	p = { -1.000000f, 0.000000f, 0.000000f, 4104.648438f };
 	l0 = { 4013.892578f, -943.908447f, 612.525452f };
 	l1 = { 10194.750000f, 6517.653809f, -98.953125f };
 	result = IntersectLineSegmentPlane(&hit, p, l0, l1);
-	assert(result);
-	assert(Equals(hit, v3(4104.648438f, -834.347534f, 602.078552f)));
+	TestAssert(result);
+	TestAssert(Equals(hit, v3(4104.648438f, -834.347534f, 602.078552f)));
 
 	return true;
 }
@@ -61,9 +61,9 @@ static bool TestIntersectTriangle()
 		auto TestImpl = [&](auto&... tris)
 		{
 			auto success = IntersectTriangle(tris..., Origin, Dir, &Dist);
-			assert(success == ExpectedSuccess);
+			TestAssert(success == ExpectedSuccess);
 			if (ExpectedSuccess)
-				assert(IS_EQ(Dist, ExpectedDist));
+				TestAssert(IS_EQ(Dist, ExpectedDist));
 		};
 		TestImpl(v0, v1, v2);
 		TestImpl(v1, v0, v2);
@@ -96,7 +96,7 @@ static bool TestRotationMatrix()
 	v3 result;
 
 	auto Check = [&](const v3& vec) {
-		assert(IS_EQ(vec.x, result.x) && IS_EQ(vec.y, result.y) && IS_EQ(vec.z, result.z));
+		TestAssert(IS_EQ(vec.x, result.x) && IS_EQ(vec.y, result.y) && IS_EQ(vec.z, result.z));
 	};
 
 	auto angle = static_cast<float>(TAU / 4);
@@ -133,11 +133,11 @@ static bool TestPlaneFromPointNormal()
 {
 	v3 normal{ 1, 0, 0 };
 	rplane plane = PlaneFromPointNormal({ 2, 1, 0 }, normal);
-	assert(GetPlaneNormal(plane) == normal && IS_EQ(plane.d, -2));
+	TestAssert(GetPlaneNormal(plane) == normal && IS_EQ(plane.d, -2));
 
 	normal = { -1, 0, 0 };
 	plane = PlaneFromPointNormal({ 2, 1, 0 }, normal);
-	assert(GetPlaneNormal(plane) == normal && IS_EQ(plane.d, 2));
+	TestAssert(GetPlaneNormal(plane) == normal && IS_EQ(plane.d, 2));
 	
 	return true;
 }
@@ -152,20 +152,20 @@ static bool TestIntersectLineAABB()
 
 	float t;
 	auto success = IntersectLineAABB(origin, dir, bbox, &t);
-	assert(success && IS_EQ(t, 20));
+	TestAssert(success && IS_EQ(t, 20));
 
 	auto end = origin + dir * 100;
 	auto norm = Normalized(end - origin);
 	auto dirfrac = 1 / norm;
 	success = IntersectLineSegmentAABB(origin, end, bbox, &t);
-	assert(success && IS_EQ(t, 20));
+	TestAssert(success && IS_EQ(t, 20));
 
 	success = IntersectLineSegmentAABB(origin, origin + dir * 10, bbox, &t);
-	assert(!success);
+	TestAssert(!success);
 
 	dir = { 1, 0, 0 };
 	success = IntersectLineAABB(origin, dir, bbox, &t);
-	assert(!success);
+	TestAssert(!success);
 
 	return true;
 }
@@ -175,10 +175,10 @@ static bool TestDotAndCross()
 	v3 a{ 1, 0, 0 }, b{ 0, 1, 0 };
 
 	auto dot = DotProduct(a, b);
-	assert(dot == 0);
+	TestAssert(dot == 0);
 
 	auto cross = CrossProduct(a, b);
-	assert(cross == v3(0, 0, 1));
+	TestAssert(cross == v3(0, 0, 1));
 
 	return true;
 }
@@ -187,11 +187,11 @@ static bool TestNormalize()
 {
 	v3 v{ 100, 100, 100 };
 	auto n = Normalized(v);
-	assert(n == v3(sqrt(3.0f) / 3, sqrt(3.0f) / 3, sqrt(3.0f) / 3));
+	TestAssert(n == v3(sqrt(3.0f) / 3, sqrt(3.0f) / 3, sqrt(3.0f) / 3));
 
 	v = { 0, 0, 0 };
 	n = Normalized(v);
-	assert(n == v);
+	TestAssert(n == v);
 
 	return true;
 }
@@ -212,7 +212,7 @@ static bool TestTransform()
 	mat = Transpose(Inverse(mat));
 	auto result = p * mat;
 	rplane expected_result{ 0, 0, -1, -200 };
-	assert(Equals(expected_result, result));
+	TestAssert(Equals(expected_result, result));
 
 	return true;
 }
@@ -235,7 +235,7 @@ static bool TestQuaternionAxisAngle(const v3& axis, float angle)
 	auto expected = test_vec * ref_mat;
 	auto actual = test_vec * quat_mat;
 
-	assert(Equals(expected, actual));
+	TestAssert(Equals(expected, actual));
 
 #ifdef TEST_COMPARE_TO_D3DX
 	D3DXQUATERNION d3dx_quat;
@@ -246,7 +246,7 @@ static bool TestQuaternionAxisAngle(const v3& axis, float angle)
 	actual = test_vec * quat;
 #endif
 
-	assert(Equals(expected, actual));
+	TestAssert(Equals(expected, actual));
 
 	quat = MatrixToQuaternion(quat_mat);
 	auto norm_quat = Normalized(quat);
@@ -255,20 +255,20 @@ static bool TestQuaternionAxisAngle(const v3& axis, float angle)
 	expected = test_vec * ref_mat;
 	actual = test_vec * quat_mat;
 
-	assert(Equals(expected, actual));
+	TestAssert(Equals(expected, actual));
 
 #ifdef TEST_COMPARE_TO_D3DX
 	D3DXMATRIX d3dx_mat;
 
 	d3dx_axis = axis;
 	D3DXMatrixRotationAxis(&d3dx_mat, &d3dx_axis, angle);
-	assert(Equals(d3dx_mat, quat_mat));
-	assert(Equals(d3dx_mat, ref_mat));
+	TestAssert(Equals(d3dx_mat, quat_mat));
+	TestAssert(Equals(d3dx_mat, ref_mat));
 
 	D3DXQUATERNION d3dx_norm_quat = norm_quat;
 	D3DXMatrixRotationQuaternion(&d3dx_mat, &d3dx_norm_quat);
 
-	assert(Equals(d3dx_mat, quat_mat));
+	TestAssert(Equals(d3dx_mat, quat_mat));
 #endif
 
 	return true;
@@ -300,7 +300,7 @@ static bool TestSlerp(const rquaternion& a, const rquaternion& b)
 
 			auto expected = test_vec * expected_quat;
 			auto actual = test_vec * actual_quat;
-			assert(Equals(expected, actual));
+			TestAssert(Equals(expected, actual));
 #endif
 		}
 	}
@@ -347,10 +347,10 @@ static bool TestInterpolation()
 	v3 p{ 1, 2, 3 };
 	auto expected = p;
 	auto actual = Lerp(p, p, 0.5);
-	assert(expected == actual);
+	TestAssert(expected == actual);
 
 	actual = Slerp(p, p, 0.5);
-	assert(expected == actual);
+	TestAssert(expected == actual);
 
 	return true;
 }

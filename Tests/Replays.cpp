@@ -80,6 +80,7 @@ void PrintPlayers(ReplayData& Data)
 	{
 		printf_s("IsHero: %d\n", Player.IsHero);
 		printf_s("Name: %s\n", Player.Info.szName);
+		printf_s("Level: %d\n", Player.Info.nLevel);
 		printf_s("Clan name: %s\n", Player.Info.szClanName);
 		printf_s("Clan grade: %d\n", Player.Info.nClanGrade);
 		printf_s("Clan cont point: %d\n", Player.Info.nClanContPoint);
@@ -98,50 +99,138 @@ void PrintPlayers(ReplayData& Data)
 struct ReplayFile : ReplayData
 {
 	std::string Name;
-	size_t CommandStreamPos;
 };
 
-void SetFileInfo(std::array<ReplayFile, 3>& Files)
+std::vector<ReplayFile> GetFileInfo()
 {
-	size_t i = 0;
+	std::vector<ReplayFile> Files;
 
-	Files[i].Name = "GLT[001]_Alwaysssss_2015-11-15_21-22-36.gzr";
-	strcpy_safe(Files[i].StageSetting.szMapName, "Dojo");
-	Files[i].StageSetting.nGameType = MMATCH_GAMETYPE_GLADIATOR_TEAM;
-	Files[i].StageSetting.bForcedEntryEnabled = true;
-	Files[i].Players.resize(2);
-	Files[i].Players[0].IsHero = true;
-	strcpy_safe(Files[i].Players[0].Info.szName, "Alwaysssss");
-	Files[i].Players[0].Info.nLevel = 1;
-	Files[i].Players[1].IsHero = false;
-	strcpy_safe(Files[i].Players[1].Info.szName, "AMITYVILLE");
-	Files[i].Players[0].Info.nLevel = 63;
-	Files[i].CommandStreamPos = 2250;
-	i++;
+	ReplayFile* File;
 
-	Files[i].Name = "GLT_Rinnema_20160612_175131.gzr";
-	strcpy_safe(Files[i].StageSetting.szMapName, "Battle Arena");
-	Files[i].StageSetting.nGameType = MMATCH_GAMETYPE_GLADIATOR_TEAM;
-	Files[i].Players.resize(2);
-	Files[i].Players[0].IsHero = true;
-	strcpy_safe(Files[i].Players[0].Info.szName, "Rinnema");
-	Files[i].Players[1].IsHero = false;
-	strcpy_safe(Files[i].Players[1].Info.szName, "bestgladna");
-	Files[i].CommandStreamPos = 1562;
-	i++;
+	auto AddFile = [&] {
+		Files.emplace_back();
+		return &Files.back();
+	};
 
-	Files[i].Name = "GLT_dystopiz_20130316_003344.gzr";
-	strcpy_safe(Files[i].StageSetting.szMapName, "Battle Arena");
-	Files[i].StageSetting.nGameType = MMATCH_GAMETYPE_GLADIATOR_TEAM;
-	Files[i].Players.resize(3);
-	Files[i].Players[0].IsHero = false;
-	strcpy_safe(Files[i].Players[0].Info.szName, "Banner");
-	Files[i].Players[1].IsHero = true;
-	strcpy_safe(Files[i].Players[1].Info.szName, "dystopiz");
-	Files[i].Players[2].IsHero = false;
-	strcpy_safe(Files[i].Players[2].Info.szName, "MeetraSurik");
-	Files[i].CommandStreamPos = 2623;
-	i++;
+	auto AddPlayer = [&](const char* Name, int Level, bool IsHero) {
+		File->Players.emplace_back();
+		auto&& Player = File->Players.back();
+		strcpy_safe(Player.Info.szName, Name);
+		Player.Info.nLevel = Level;
+		Player.IsHero = IsHero;
+	};
+
+	File = AddFile();
+	File->Version = { ServerType::FreestyleGunz, 7, 0 };
+	File->Name = "fg-v7_0.gzr";
+	strcpy_safe(File->StageSetting.szMapName, "Dojo");
+	File->StageSetting.nGameType = MMATCH_GAMETYPE_GLADIATOR_TEAM;
+	File->StageSetting.bForcedEntryEnabled = true;
+	AddPlayer("swiftie", 62, true);
+	AddPlayer("dydu", 70, false);
+	File->CommandStreamPos = 1530;
+
+	File = AddFile();
+	File->Version = { ServerType::FreestyleGunz, 7, 1 };
+	File->Name = "fg-v7_1.gzr";
+	strcpy_safe(File->StageSetting.szMapName, "Town");
+	File->StageSetting.nGameType = MMATCH_GAMETYPE_DEATHMATCH_SOLO;
+	File->StageSetting.bForcedEntryEnabled = true;
+	AddPlayer("toxen", 40, true);
+	File->CommandStreamPos = 1133;
+
+	File = AddFile();
+	File->Version = { ServerType::FreestyleGunz, 8, 0 };
+	File->Name = "fg-v8.gzr";
+	strcpy_safe(File->StageSetting.szMapName, "Dojo");
+	File->StageSetting.nGameType = MMATCH_GAMETYPE_GLADIATOR_TEAM;
+	File->StageSetting.bForcedEntryEnabled = true;
+	AddPlayer("^5Alexstrasza", 82, true);
+	AddPlayer("DUCKONWHEELS", 65, false);
+	File->CommandStreamPos = 2186;
+
+	File = AddFile();
+	File->Version = { ServerType::FreestyleGunz, 9, 0 };
+	File->Name = "fg-v9.gzr";
+	strcpy_safe(File->StageSetting.szMapName, "Dojo");
+	File->StageSetting.nGameType = MMATCH_GAMETYPE_GLADIATOR_TEAM;
+	File->StageSetting.bForcedEntryEnabled = true;
+	AddPlayer("Alwaysssss", 1, true);
+	AddPlayer("AMITYVILLE", 63, false);
+	File->CommandStreamPos = 2250;
+
+	File = AddFile();
+	File->Version = { ServerType::FreestyleGunz, 10, 0 };
+	File->Name = "fg-v10.gzr";
+	strcpy_safe(File->StageSetting.szMapName, "Mansion");
+	File->StageSetting.nGameType = MMATCH_GAMETYPE_GLADIATOR_TEAM;
+	AddPlayer("swiftie", 73, true);
+	File->CommandStreamPos = 1241;
+
+	File = AddFile();
+	File->Version = { ServerType::DarkGunz, 6, 0 };
+	File->Name = "dg-v6.gzr";
+	strcpy_safe(File->StageSetting.szMapName, "Battle Arena");
+	File->StageSetting.nGameType = MMATCH_GAMETYPE_GLADIATOR_TEAM;
+	AddPlayer("Rinnema", 63, true);
+	AddPlayer("bestgladna", 46, false);
+	File->CommandStreamPos = 1562;
+
+	File = AddFile();
+	File->Version = { ServerType::Official, 4, 0 };
+	File->Name = "official-v4.gzr";
+	strcpy_safe(File->StageSetting.szMapName, "Battle Arena");
+	File->StageSetting.nGameType = MMATCH_GAMETYPE_DEATHMATCH_TEAM;
+	AddPlayer("Devilito", 50, false);
+	AddPlayer("Tenalady", 62, false);
+	AddPlayer("\x83" "achion", 67, false);
+	AddPlayer("Confucious", 65, false);
+	AddPlayer("Horror", 69, false);
+	AddPlayer("Alinda", 62, false);
+	AddPlayer("Shot", 65, false);
+	AddPlayer("Pallero", 71, false);
+	AddPlayer("GM_DeviIito", 56, true);
+	AddPlayer("ApoIlo", 56, false);
+	File->CommandStreamPos = 4330;
+
+	File = AddFile();
+	File->Version = { ServerType::Official, 6, 0 };
+	File->Name = "official-v6.gzr";
+	strcpy_safe(File->StageSetting.szMapName, "Battle Arena");
+	File->StageSetting.nGameType = MMATCH_GAMETYPE_GLADIATOR_TEAM;
+	AddPlayer("PwnHighLevs", 55, false);
+	AddPlayer("notitiot1052", 32, true);
+	AddPlayer("ImpactedQQ", 45, false);
+	AddPlayer("Mikius", 30, false);
+	AddPlayer("SortaDrunk", 59, false);
+	AddPlayer("[Kor]Apple", 27, false);
+	AddPlayer("^5Ruin^9", 7, false);
+	AddPlayer("Baoser", 26, false);
+	AddPlayer("Joiku", 24, false);
+	AddPlayer("iDeviok", 28, false);
+	AddPlayer("iDeviok", 28, false);
+	File->CommandStreamPos = 7703;
+
+	File = AddFile();
+	File->Version = { ServerType::Official, 7, 0 };
+	File->Name = "official-v7.gzr";
+	strcpy_safe(File->StageSetting.szMapName, "Battle Arena");
+	File->StageSetting.nGameType = MMATCH_GAMETYPE_GLADIATOR_TEAM;
+	AddPlayer("Bewowzers", 13, true);
+	AddPlayer("NUTTER", 1, false);
+	AddPlayer("BadHeros", 26, false);
+	AddPlayer("Dyriel", 43, false);
+	File->CommandStreamPos = 2884;
+
+	File = AddFile();
+	File->Version = { ServerType::Official, 11, 0 };
+	File->Name = "official-v11.gzr";
+	strcpy_safe(File->StageSetting.szMapName, "Battle Arena");
+	File->StageSetting.nGameType = MMATCH_GAMETYPE_GLADIATOR_TEAM;
+	AddPlayer("dystopiz", 8, true);
+	AddPlayer("MeetraSurik", 25, false);
+	AddPlayer("Banner", 90, false);
+	File->CommandStreamPos = 2623;
 
 	std::string cwd(MAX_PATH, 0);
 	_getcwd(&cwd[0], cwd.size());
@@ -167,20 +256,20 @@ void SetFileInfo(std::array<ReplayFile, 3>& Files)
 			File.Name = "../ReplayFiles/" + File.Name;
 		}
 	}
+
+	return Files;
 }
 
 bool TestReplays()
 {
-	std::array<ReplayFile, 3> Files;
-	SetFileInfo(Files);
+	const auto Files = GetFileInfo();
 
 	ReplayData Data;
 
-	printf("%s\n", Files[0].Name.c_str());
-
 	for (auto& File : Files)
 	{
-		ASSERT(LoadFile(Data, File.Name.c_str()));
+		printf("Loading file %s\n", File.Name.c_str());
+		TestAssert(LoadFile(Data, File.Name.c_str()));
 
 		printf_s("Map name: %s\n", Data.StageSetting.szMapName);
 		printf_s("Stage name: %s\n", Data.StageSetting.szStageName);
@@ -193,13 +282,14 @@ bool TestReplays()
 
 		PrintPlayers(Data);
 
-		//ASSERT(memcmp(&Data.StageSetting, &File.StageSetting, sizeof(Data.StageSetting)) == 0);
-		ASSERT(!strcmp(Data.StageSetting.szMapName, File.StageSetting.szMapName));
-		ASSERT(Data.StageSetting.nGameType == File.StageSetting.nGameType);
-		ASSERT(Data.StageSetting.bTeamKillEnabled == false);
-		ASSERT(Data.StageSetting.bTeamWinThePoint == false);
+		TestAssert(Data.Version == File.Version);
+		//TestAssert(memcmp(&Data.StageSetting, &File.StageSetting, sizeof(Data.StageSetting)) == 0);
+		TestAssert(!strcmp(Data.StageSetting.szMapName, File.StageSetting.szMapName));
+		TestAssert(Data.StageSetting.nGameType == File.StageSetting.nGameType);
+		TestAssert(Data.StageSetting.bTeamKillEnabled == false);
+		TestAssert(Data.StageSetting.bTeamWinThePoint == false);
 
-		ASSERT(Data.Players.size() == File.Players.size());
+		TestAssert(Data.Players.size() == File.Players.size());
 
 		for (auto& ExpectedPlayer : File.Players)
 		{
@@ -210,17 +300,18 @@ bool TestReplays()
 				it = std::find_if(Data.Players.begin(), Data.Players.end(), [&](ReplayPlayerInfo& Player) {
 					return strcmp(Player.Info.szName, Name) == 0;
 				});
-				ASSERT(it != Data.Players.end());
+				TestAssert(it != Data.Players.end());
 				return *it;
 			};
 
 			auto& ActualPlayer = FindPlayer(ExpectedPlayer.Info.szName);
 
-			ASSERT(ActualPlayer.IsHero == ExpectedPlayer.IsHero);
-			//ASSERT(!strcmp(ActualPlayer.Info.szClanName, ExpectedPlayer.Info.szClanName));
+			TestAssert(ActualPlayer.IsHero == ExpectedPlayer.IsHero);
+			TestAssert(ActualPlayer.Info.nLevel == ExpectedPlayer.Info.nLevel);
+			//TestAssert(!strcmp(ActualPlayer.Info.szClanName, ExpectedPlayer.Info.szClanName));
 		}
 
-		ASSERT(Data.CommandStreamPos == File.CommandStreamPos);
+		TestAssert(Data.CommandStreamPos == File.CommandStreamPos);
 	}
 	
 	return true;

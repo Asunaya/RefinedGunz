@@ -7,11 +7,11 @@ int main()
 	InitLog();
 
 	bool TestReplays();
-	//assert(TestReplays());
+	TestAssert(TestReplays());
 	bool TestMath();
-	assert(TestMath());
+	TestAssert(TestMath());
 	bool TestLauncher();
-	assert(TestLauncher());
+	TestAssert(TestLauncher());
 
 	printf("\n\n\nAll OK!\n\n");
 
