@@ -2469,8 +2469,6 @@ void ZGame::OnPeerSlash(ZCharacter *pOwner, const rvector &pos, const rvector &d
 		if (!IsAttackable(pOwner, pTarget))
 			continue;
 
-		bPlayerHit = true;
-
 		rvector HDirToTarget = TargetPos - pos;
 		HDirToTarget.z = 0;
 		Normalize(HDirToTarget);
@@ -2493,6 +2491,8 @@ void ZGame::OnPeerSlash(ZCharacter *pOwner, const rvector &pos, const rvector &d
 
 		if (zpi.bBspPicked && Magnitude(zpi.bpi.PickPos - v1) < Magnitude(v2 - v1))
 			continue;
+
+		bPlayerHit = true;
 
 		rvector TargetHDir = pTarget->GetDirection();
 		TargetHDir.z = 0;
