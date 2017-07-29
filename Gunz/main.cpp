@@ -395,26 +395,31 @@ RRESULT OnRender(void *pParam)
 		if (ZGetConfiguration()->GetShowDebugInfo() &&
 			ZGetGame() && ZGetGame()->m_pMyCharacter)
 		{
-			v3 pos = ZGetGame()->m_pMyCharacter->GetPosition();
-			PrintText("Pos: %d, %d, %d", int(pos.x), int(pos.y), int(pos.z));
-			auto&& dir = ZGetGame()->m_pMyCharacter->GetDirection();
-			PrintText("Dir: %f, %f, %f", dir.x, dir.y, dir.z);
+			const auto& CharPos = ZGetGame()->m_pMyCharacter->GetPosition();
+			PrintText("Pos: %d, %d, %d", int(CharPos.x), int(CharPos.y), int(CharPos.z));
+			const auto& CharDir = ZGetGame()->m_pMyCharacter->GetDirection();
+			PrintText("Char dir: %.4f, %.4f, %.4f", CharDir.x, CharDir.y, CharDir.z);
+			const auto& CamDir = ZGetCamera()->GetCurrentDir();
+			PrintText("Cam dir: %.4f, %.4f, %.4f", CamDir.x, CamDir.y, CamDir.z);
+			PrintText("Cam ang: %.1f, %.1f", ToDegree(ZGetCamera()->GetAngleZ()), ToDegree(ZGetCamera()->GetAngleX()));
 
 			auto* vmesh = ZGetGame()->m_pMyCharacter->m_pVMesh;
 			if (vmesh)
 			{
-				pos = vmesh->GetHeadPosition();
-				PrintText("Head pos: %d, %d, %d", int(pos.x), int(pos.y), int(pos.z));
+				const auto& HeadPos = vmesh->GetHeadPosition();
+				PrintText("Head pos: %d, %d, %d", int(HeadPos.x), int(HeadPos.y), int(HeadPos.z));
 
-				auto lower = ZGetGame()->m_pMyCharacter->GetStateLower();
-				auto upper = ZGetGame()->m_pMyCharacter->GetStateUpper();
+				const auto& Lower = ZGetGame()->m_pMyCharacter->GetStateLower();
+				const auto& Upper = ZGetGame()->m_pMyCharacter->GetStateUpper();
 
-				PrintText("Lower ani: %s\n", g_AnimationInfoTableLower[lower].Name);
-				PrintText("Upper ani: %s\n", g_AnimationInfoTableUpper[upper].Name);
-				PrintText("Lower time: %.1f\n", vmesh->GetFrameInfo(ani_mode_lower)->m_nFrame / 1000.0);
-				PrintText("Upper time: %.1f\n", vmesh->GetFrameInfo(ani_mode_upper)->m_nFrame / 1000.0);
-				PrintText("Lower spd: %.3f\n", vmesh->GetFrameInfo(ani_mode_lower)->m_fSpeed / 4.8);
-				PrintText("Upper spd: %.3f\n", vmesh->GetFrameInfo(ani_mode_upper)->m_fSpeed / 4.8);
+				const auto AniSpeedMultiplier = 4.8f;
+
+				PrintText("Lower ani: %s\n", g_AnimationInfoTableLower[Lower].Name);
+				PrintText("Upper ani: %s\n", g_AnimationInfoTableUpper[Upper].Name);
+				PrintText("Lower time: %.2f\n", vmesh->GetFrameInfo(ani_mode_lower)->m_nFrame / 1000.0f / AniSpeedMultiplier);
+				PrintText("Upper time: %.2f\n", vmesh->GetFrameInfo(ani_mode_upper)->m_nFrame / 1000.0f / AniSpeedMultiplier);
+				PrintText("Lower spd: %.3f\n", vmesh->GetFrameInfo(ani_mode_lower)->m_fSpeed / AniSpeedMultiplier);
+				PrintText("Upper spd: %.3f\n", vmesh->GetFrameInfo(ani_mode_upper)->m_fSpeed / AniSpeedMultiplier);
 #ifdef _DEBUG
 				PrintText("Draw calls: %d\n", g_nCall);
 				PrintText("Polygons: %d\n", g_nPoly);

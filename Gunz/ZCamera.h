@@ -46,6 +46,9 @@ public:
 	void SetLookMode(ZCAMERALOOKMODE mode);
 	void SetNextLookMode();
 
+	float GetAngleX() const { return m_fAngleX; }
+	float GetAngleZ() const { return m_fAngleZ; }
+
 	static v3 GetTargetOffset(const v3& Dir, float Scale = 1);
 
 private:
@@ -65,7 +68,9 @@ private:
 
 	float m_fDist;
 
+	// Pitch
 	float m_fAngleX;
+	// Yaw
 	float m_fAngleZ;
 
 	float m_fCurrentDist;
