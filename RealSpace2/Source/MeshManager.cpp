@@ -77,8 +77,14 @@ for (auto var_name = (parent)->first_attribute(tag); var_name; var_name = var_na
 			return std::string{ attr->value(), attr->value_size() };
 		};
 
-		auto& map = PartsToEluMap.emplace(AttributeToString(meshattr), StringMap{}).first->second;
+		auto MeshName = AttributeToString(meshattr);
 
+		auto MeshEmplaceResult = BaseMeshMap.emplace(MeshName, BaseMeshData{});
+		auto&& PartsToEluMap = MeshEmplaceResult.first->second.PartsToEluMap;
+
+		// parts tag example:
+		// <parts file="Model/woman/woman-parts11.elu" part="eq_chest_05" part="eq_legs_005"
+		//     part="eq_feet_005" part="eq_hands_05" part="eq_head_02" part="eq_face_004"/>
 		LOOP_NODES(node, listnode, "parts")
 		{
 			auto fileattr = node->first_attribute("file");
@@ -90,9 +96,11 @@ for (auto var_name = (parent)->first_attribute(tag); var_name; var_name = var_na
 				if (!attr->value())
 					continue;
 
-				map.emplace(AttributeToString(attr), AttributeToString(fileattr));
+				auto PartsName = AttributeToString(attr);
+				auto EluPath = AttributeToString(fileattr);
+				PartsToEluMap.emplace(PartsName, EluPath);
 
-				LOG("Added %s -> %s\n", AttributeToString(attr).c_str(), AttributeToString(fileattr).c_str());
+				LOG("Added %s -> %s\n", PartsName.c_str(), EluPath.c_str());
 			}
 		}
 	}
@@ -105,17 +113,24 @@ for (auto var_name = (parent)->first_attribute(tag); var_name; var_name = var_na
 
 void MeshManager::Destroy()
 {
-	LOG("MeshManager::Destroy()\n"
-		"PartsToEluMap.size() = %zu\n"
-		"AllocatedMeshes.size() = %zu\n"
-		"AllocatedNodes.size() = %zu\n",
-		PartsToEluMap.size(),
-		AllocatedMeshes.size(),
-		AllocatedNodes.size());
+	LOG("MeshManager::Destroy()\n");
 
-	PartsToEluMap.clear();
-	AllocatedMeshes.clear();
-	AllocatedNodes.clear();
+	for (auto&& Pair : BaseMeshMap)
+	{
+		auto&& BaseMeshName = Pair.first;
+		auto&& BaseMesh = Pair.second;
+		LOG("BaseMesh %s\n"
+			"PartsToEluMap.size() = %zu\n"
+			"AllocatedMeshes.size() = %zu\n"
+			"AllocatedNodes.size() = %zu\n"
+			"\n",
+			BaseMeshName,
+			BaseMesh.PartsToEluMap.size(),
+			BaseMesh.AllocatedMeshes.size(),
+			BaseMesh.AllocatedNodes.size());
+	}
+
+	BaseMeshMap.clear();
 }
 
 RMeshNode *MeshManager::Get(const char *szMeshName, const char *szNodeName)
@@ -126,9 +141,18 @@ RMeshNode *MeshManager::Get(const char *szMeshName, const char *szNodeName)
 
 	LOG("Get mesh: %s, node: %s\n", szMeshName, szNodeName);
 
-	auto alloc_node_it = AllocatedNodes.find(szNodeName);
+	auto mesh_it = BaseMeshMap.find(szMeshName);
+	if (mesh_it == BaseMeshMap.end())
+	{
+		LOG("Couldn't find mesh %s in MeshMap!\n", szMeshName);
+		return nullptr;
+	}
 
-	if (alloc_node_it != AllocatedNodes.end())
+	auto&& BaseMesh = mesh_it->second;
+
+	auto alloc_node_it = BaseMesh.AllocatedNodes.find(szNodeName);
+
+	if (alloc_node_it != BaseMesh.AllocatedNodes.end())
 	{
 		auto* meshnode = alloc_node_it->second.Obj;
 
@@ -136,8 +160,8 @@ RMeshNode *MeshManager::Get(const char *szMeshName, const char *szNodeName)
 			meshnode->GetName(), static_cast<void*>(meshnode));
 		
 		auto* mesh = meshnode->m_pParentMesh;
-		auto alloc_mesh_it = AllocatedMeshes.find(mesh->GetFileName());
-		if (alloc_mesh_it == AllocatedMeshes.end())
+		auto alloc_mesh_it = BaseMesh.AllocatedMeshes.find(mesh->GetFileName());
+		if (alloc_mesh_it == BaseMesh.AllocatedMeshes.end())
 		{
 			LOG("Couldn't find mesh %s %p in AllocatedMeshes\n",
 				mesh->GetFileName(), static_cast<void*>(mesh));
@@ -153,18 +177,9 @@ RMeshNode *MeshManager::Get(const char *szMeshName, const char *szNodeName)
 		return meshnode;
 	}
 
-	auto mapsit = PartsToEluMap.find(szMeshName);
-	
-	if (mapsit == PartsToEluMap.end())
-	{
-		LOG("Couldn't find mesh %s in PartsToEluMap\n", szMeshName);
+	auto nodeit = BaseMesh.PartsToEluMap.find(szNodeName);
 
-		return nullptr;
-	}
-
-	auto nodeit = mapsit->second.find(szNodeName);
-
-	if (nodeit == mapsit->second.end())
+	if (nodeit == BaseMesh.PartsToEluMap.end())
 	{ 
 		LOG("Couldn't find node %s in PartsToEluMap element\n", szNodeName);
 
@@ -173,9 +188,9 @@ RMeshNode *MeshManager::Get(const char *szMeshName, const char *szNodeName)
 
 	RMesh *pMesh = nullptr;
 
-	auto allocmesh = AllocatedMeshes.find(nodeit->second);
+	auto allocmesh = BaseMesh.AllocatedMeshes.find(nodeit->second);
 
-	if (allocmesh != AllocatedMeshes.end())
+	if (allocmesh != BaseMesh.AllocatedMeshes.end())
 	{
 		pMesh = allocmesh->second.Obj.get();
 		allocmesh->second.References++;
@@ -201,7 +216,7 @@ RMeshNode *MeshManager::Get(const char *szMeshName, const char *szNodeName)
 			nodeit->second.c_str(), pMesh->GetFileName(),
 			static_cast<void*>(pMesh));
 
-		AllocatedMeshes.emplace(nodeit->second.c_str(),
+		BaseMesh.AllocatedMeshes.emplace(nodeit->second.c_str(),
 			Allocation<RMeshPtr>{ std::move(UniqueMeshPtr), 1 });
 	}
 
@@ -217,7 +232,7 @@ RMeshNode *MeshManager::Get(const char *szMeshName, const char *szNodeName)
 	LOG("Placing %p -> %p in MeshNodeToMeshMap\n",
 		static_cast<void*>(node), static_cast<void*>(pMesh));
 
-	AllocatedNodes.emplace(szNodeName, Allocation<RMeshNode*>{ node, 1 });
+	BaseMesh.AllocatedNodes.emplace(szNodeName, Allocation<RMeshNode*>{ node, 1 });
 
 	return node;
 }
@@ -247,17 +262,30 @@ void MeshManager::Release(RMeshNode *pNode)
 		return;
 	};
 
+	auto* NodeBaseMesh = pNode->m_pBaseMesh;
+	auto* BaseMeshName = NodeBaseMesh->GetName();
+	LOG("Base mesh %s\n", BaseMeshName);
+
+	auto&& BaseMeshIt = BaseMeshMap.find(BaseMeshName);
+	if (BaseMeshIt == BaseMeshMap.end())
+	{
+		LOG("Failed to find base mesh %s in base mesh map!\n", BaseMeshName);
+		return;
+	}
+
+	auto&& BaseMesh = BaseMeshIt->second;
+
 	auto GetMeshAndReleaseNodeAllocation = [&]() -> RMesh*
 	{
-		auto AllocIt = AllocatedNodes.find(pNode->GetName());
-		if (AllocIt == AllocatedNodes.end())
+		auto AllocIt = BaseMesh.AllocatedNodes.find(pNode->GetName());
+		if (AllocIt == BaseMesh.AllocatedNodes.end())
 		{
 			LOG("Couldn't find allocated node %s\n", pNode->GetName());
 			return nullptr;
 		}
 		
 		auto* pMesh = AllocIt->second.Obj->m_pParentMesh;
-		DecrementRefCount(AllocIt);
+		DecrementRefCount(BaseMesh.AllocatedNodes, AllocIt);
 
 		return pMesh;
 	};
@@ -267,17 +295,17 @@ void MeshManager::Release(RMeshNode *pNode)
 
 	LOG("Filename %s, %d\n", pMesh->m_FileName.c_str(), pMesh->m_FileName.length());
 
-	auto allocmesh = AllocatedMeshes.find(pMesh->GetFileName());
-	if (allocmesh == AllocatedMeshes.end())
+	auto allocmesh = BaseMesh.AllocatedMeshes.find(pMesh->GetFileName());
+	if (allocmesh == BaseMesh.AllocatedMeshes.end())
 	{
 		LOG("Couldn't find mesh %s to release\n", pMesh->GetFileName());
 		return;
 	}
 
-	DecrementRefCount(allocmesh);
+	DecrementRefCount(BaseMesh.AllocatedMeshes, allocmesh);
 }
 
-void MeshManager::DecrementRefCount(AllocatedMeshesType::iterator AllocIt)
+void MeshManager::DecrementRefCount(AllocatedMeshesType& AllocatedMeshes, AllocatedMeshesType::iterator AllocIt)
 {
 	auto& alloc = AllocIt->second;
 	auto* mesh = alloc.Obj.get();
@@ -296,7 +324,7 @@ void MeshManager::DecrementRefCount(AllocatedMeshesType::iterator AllocIt)
 	}
 }
 
-void MeshManager::DecrementRefCount(AllocatedNodesType::iterator AllocIt)
+void MeshManager::DecrementRefCount(AllocatedNodesType& AllocatedNodes, AllocatedNodesType::iterator AllocIt)
 {
 	auto& alloc = AllocIt->second;
 	auto* meshnode = alloc.Obj;
