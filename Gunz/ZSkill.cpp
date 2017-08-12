@@ -756,7 +756,7 @@ void ZSkill::Repeat()
 	rmatrix rotmat;
 	GetIdentityMatrix(rotmat);
 
-	rotmat = RGetRotZ(repeat.vAngle.z);
+	rotmat = RGetRotZRad(repeat.vAngle.z);
 	rvector dir = vMissileDir * rotmat;
 
 	rvector tarpos = vMissilePos + (500.0f * dir);

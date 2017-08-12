@@ -568,7 +568,7 @@ void _draw_matrix(LPDIRECT3DDEVICE9 dev,rmatrix& mat,float size)
 
 	//right
 	_tposmat = TranslationMatrix(right);
-	_trotmat = RGetRotZ(-PI_FLOAT / 2);
+	_trotmat = RGetRotZRad(-PI_FLOAT / 2);
 	_mat = _trotmat*_tposmat*_mat;
 	_draw_try(dev,_mat,size/10,0xff00ff00);
 
@@ -581,7 +581,7 @@ void _draw_matrix(LPDIRECT3DDEVICE9 dev,rmatrix& mat,float size)
 	//dir
 	_mat = mat;
 	_tposmat = TranslationMatrix(dir);
-	_trotmat = RGetRotZ(PI_FLOAT / 2);
+	_trotmat = RGetRotZRad(PI_FLOAT / 2);
 	_mat = _trotmat*_tposmat*_mat;
 	_draw_try(dev,_mat,size/10,0xff0000ff);
 

@@ -159,7 +159,7 @@ bool ZEffectAniMesh::Draw(unsigned long int nTime)
 
 	rmatrix Rotation;
 
-	Rotation = RGetRotZ(m_fRotateAngle);
+	Rotation = RGetRotZRad(m_fRotateAngle);
 	World = Rotation * World;
 
 	m_VMesh.SetScale(m_Scale);

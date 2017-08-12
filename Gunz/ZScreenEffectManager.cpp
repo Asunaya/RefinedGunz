@@ -56,7 +56,7 @@ bool ZScreenEffect::DrawCustom(unsigned long int nTime, const rvector& vOffset, 
 
 	if (fAngle != 0.0f)
 	{
-		World = RGetRotZ(fAngle);
+		World = RGetRotZRad(fAngle);
 	}
 
 	const rvector eye(0, 0, -650), at(0, 0, 0), up(0, 1, 0);

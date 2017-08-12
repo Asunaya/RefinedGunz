@@ -762,7 +762,7 @@ bool	ZWeaponFlashBang::Update( float fElapsedTime )
 	}
 	else
 	{
-		rmatrix Temp = RGetRotX(mRotVelocity * 0.001f);
+		rmatrix Temp = RGetRotXRad(mRotVelocity * 0.001f);
 		mRotMatrix	= mRotMatrix * Temp;
 		mRotVelocity	*= 0.97f;
 	}
@@ -887,7 +887,7 @@ bool ZWeaponSmokeGrenade::Update( float fElapsedTime )
 	}
 	else
 	{
-		rmatrix Temp = RGetRotX(mRotVelocity * 0.001f);
+		rmatrix Temp = RGetRotXRad(mRotVelocity * 0.001f);
 		mRotMatrix	= mRotMatrix * Temp;
  		mRotVelocity	*= 0.97f;
 	}
