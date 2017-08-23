@@ -7,6 +7,7 @@
 #include "RNameSpace.h"
 #include "TextureLoader.h"
 #include "StringView.h"
+#include "MHash.h"
 
 typedef struct IDirect3DTexture9 *LPDIRECT3DTEXTURE9;
 
@@ -98,7 +99,8 @@ private:
 		bool bUseMipmap = false, bool bUseFileSystem = true);
 
 	std::list<RBaseTexture> Textures;
-	std::unordered_map<std::string, RBaseTexture*> FilenameToTexture;
+	// String memory is stored within the textures.
+	std::unordered_map<StringView, RBaseTexture*, PathHasher, PathComparer> FilenameToTexture;
 };
 
 void RBaseTexture_Create();

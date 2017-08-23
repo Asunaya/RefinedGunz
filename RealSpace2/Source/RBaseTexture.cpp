@@ -217,16 +217,10 @@ RBaseTexture * RTextureManager::CreateBaseTextureFromMemory(const void * data, s
 RBaseTexture *RTextureManager::CreateBaseTextureSub(bool Managed, const StringView& _filename,
 	RTextureType tex_type, bool UseMipmap, bool UseFileSystem)
 {
-	auto filename = _filename;
-	if (filename.empty())
+	if (_filename.empty())
 		return nullptr;
 
-	char texturefilename[256];
-
-	strcpy_safe(texturefilename, filename);
-	_strlwr_s(texturefilename);
-
-	auto it = FilenameToTexture.find(texturefilename);
+	auto it = FilenameToTexture.find(_filename);
 
 	if (it != FilenameToTexture.end())
 	{
@@ -234,7 +228,7 @@ RBaseTexture *RTextureManager::CreateBaseTextureSub(bool Managed, const StringVi
 		return it->second;
 	}
 
-	auto filename_str = filename.str();
+	auto filename_str = _filename.str();
 
 	MZFile mzf;
 	MZFileSystem* pfs = UseFileSystem ? g_pFileSystem : nullptr;
@@ -243,13 +237,18 @@ RBaseTexture *RTextureManager::CreateBaseTextureSub(bool Managed, const StringVi
 	// in the xmls if there is actually one available
 #ifdef LOAD_FROM_DDS
 	char ddstexturefile[MAX_PATH];
-	sprintf_safe(ddstexturefile, "%s.dds", filename);
+	sprintf_safe(ddstexturefile, "%s.dds", filename_str.c_str());
 	if (mzf.Open(ddstexturefile, pfs))
-		filename = ddstexturefile;
+	{
+		filename_str.append(".dds");
+	}
 	else
 #endif
+	{
 		if (!mzf.Open(filename_str.c_str(), pfs))
 			return nullptr;
+	}
+
 	auto buf = mzf.Release();
 
 	auto* new_tex = CreateBaseTextureFromMemory(buf.get(), mzf.GetLength(),
@@ -257,14 +256,16 @@ RBaseTexture *RTextureManager::CreateBaseTextureSub(bool Managed, const StringVi
 
 	if (!new_tex)
 	{
-		MLog("Failed to create texture from file %.*s\n",
-			filename.size(), filename.data());
+		MLog("Failed to create texture from file %s\n",
+			filename_str.c_str());
 		return nullptr;
 	}
 
-	new_tex->filename = filename_str;
+	// The filename string memory is stored within the texture.
+	new_tex->filename = std::move(filename_str);
 	
-	FilenameToTexture.insert({ std::move(filename_str), new_tex });
+	StringView filename_view = new_tex->filename;
+	FilenameToTexture.insert({ filename_view, new_tex });
 
 	return new_tex;
 }
