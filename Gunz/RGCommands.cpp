@@ -77,6 +77,53 @@ static bool SetBool(const char* Name, bool& Value, int argc, char ** argv)
 	return true;
 }
 
+static int GetStringTexLevel(const StringView& String)
+{
+	static const std::pair<const char*, int> Levels[] = {
+		{ "High", 0 },
+		{ "Normal", 1 },
+		{ "Medium", 1 },
+		{ "Low", 2 },
+		{ "Archetype", 8 },
+		{ "Archetypes", 8 },
+		{ "Archetype's", 8 },
+	};
+
+	for (auto&& Level : Levels)
+	{
+		if (iequals(String, Level.first))
+		{
+			return Level.second;
+		}
+	}
+
+	return -1;
+}
+
+static int ParseTexLevelArg(const StringView& String)
+{
+	int NewTexLevel = GetStringTexLevel(String);
+	if (NewTexLevel != -1)
+		return NewTexLevel;
+
+	auto Conv = StringToInt<int>(String);
+	if (!Conv.has_value())
+	{
+		ZChatOutput("Invalid argument");
+		return -1;
+	}
+
+	NewTexLevel = Conv.value();
+
+	if (NewTexLevel < 0 || NewTexLevel > 8)
+	{
+		ZChatOutput("Texture level must be between 0 and 8");
+		return -1;
+	}
+
+	return NewTexLevel;
+}
+
 void LoadRGCommands(ZChatCmdManager& CmdManager)
 {
 	auto VisualFPSLimit = [](const char *line, int argc, char ** const argv) {
@@ -100,7 +147,6 @@ void LoadRGCommands(ZChatCmdManager& CmdManager)
 	CmdManager.AddCommand(0, "logicalfpslimit", LogicalFPSLimit,
 		CCF_ALL, 1, 1, true, "/logicalfpslimit <fps>", "");
 
-	// Alias /fpslimit to /logicalfpslimit
 	CmdManager.AddAlias("fpslimit", "logicalfpslimit");
 
 
@@ -193,7 +239,7 @@ void LoadRGCommands(ZChatCmdManager& CmdManager)
 		ZGetConfiguration()->Save();
 	}, CCF_ALL, 2, 2, true, "/resolution <width> <height>", "");
 
-	auto Sens = [](const char *line, int argc, char ** const argv) {
+	CmdManager.AddCommand(0, "sensitivity", [](const char *line, int argc, char ** const argv) {
 		float fSens = atof(argv[1]);
 
 		ZGetConfiguration()->GetMouse()->fSensitivity = fSens;
@@ -201,10 +247,9 @@ void LoadRGCommands(ZChatCmdManager& CmdManager)
 		ZGetConfiguration()->Save();
 
 		ZChatOutputF("Sensitivity set to %f", fSens);
-	};
+	}, CCF_ALL, 1, 1, true, "/sensitivity <value>", "");
 
-	CmdManager.AddCommand(0, "sensitivity", Sens, CCF_ALL, 1, 1, true, "/sensitivity <value>", "");
-	CmdManager.AddCommand(0, "sens", Sens, CCF_ALL, 1, 1, true, "/sens <value>", "");
+	CmdManager.AddAlias("sens", "sensitivity");
 
 	CmdManager.AddCommand(0, "admin_mute", [](const char *line, int argc, char ** const argv){
 		ZPostAdminMute(argv[1], argv[3] ? argv[3] : "", atoi(argv[3]) * 60);
@@ -334,6 +379,80 @@ void LoadRGCommands(ZChatCmdManager& CmdManager)
 			ZGetConfiguration()->Save();
 		}
 	}, CCF_ALL, 0, 1, true, "/showdebuginfo [0/1]", "");
+
+	CmdManager.AddCommand(0, "reflection", [](const char *line, int argc, char ** const argv) {
+		if (SetBool("Reflection", Z_VIDEO_REFLECTION, argc, argv))
+		{
+			ZGetConfiguration()->Save();
+		}
+	}, CCF_ALL, 0, 1, true, "/reflection [0/1]", "");
+
+	CmdManager.AddCommand(0, "lightmap", [](const char *line, int argc, char ** const argv) {
+		if (SetBool("Lightmap", Z_VIDEO_LIGHTMAP, argc, argv))
+		{
+			if (ZGetGame()) {
+				ZGetGame()->GetWorld()->GetBsp()->LightMapOnOff(Z_VIDEO_LIGHTMAP);
+			}
+			else {
+				RBspObject::SetDrawLightMap(Z_VIDEO_LIGHTMAP);
+			}
+
+			ZGetConfiguration()->Save();
+		}
+	}, CCF_ALL, 0, 1, true, "/lightmap [0/1]", "");
+
+	CmdManager.AddCommand(0, "dynamiclight", [](const char *line, int argc, char ** const argv) {
+		if (SetBool("Dynamic light", Z_VIDEO_DYNAMICLIGHT, argc, argv))
+		{
+			ZGetConfiguration()->Save();
+		}
+	}, CCF_ALL, 0, 1, true, "/dynamiclight [0/1]", "");
+
+	CmdManager.AddAlias("dynlight", "dynamiclight");
+
+	CmdManager.AddCommand(0, "shader", [](const char *line, int argc, char ** const argv) {
+		if (SetBool("Shader", Z_VIDEO_SHADER, argc, argv))
+		{
+			if (Z_VIDEO_SHADER)
+			{
+				RGetShaderMgr()->SetEnable();
+			}
+			else
+			{
+				RGetShaderMgr()->SetDisable();
+			}
+
+			ZGetConfiguration()->Save();
+		}
+	}, CCF_ALL, 0, 1, true, "/shader [0/1]", "");
+
+	CmdManager.AddCommand(0, "maptex", [](const char *line, int argc, char ** const argv) {
+		const auto NewTexLevel = ParseTexLevelArg(argv[1]);
+
+		if (NewTexLevel == -1)
+			return;
+
+		ZGetConfiguration()->GetVideo()->nMapTexLevel = NewTexLevel;
+		SetMapTextureLevel(NewTexLevel);
+
+		RChangeBaseTextureLevel(RTextureType::Map);
+
+		ZGetConfiguration()->Save();
+	}, CCF_ALL, 1, 1, true, "/maptex <level>", "");
+
+	CmdManager.AddCommand(0, "chartex", [](const char *line, int argc, char ** const argv) {
+		const auto NewTexLevel = ParseTexLevelArg(argv[1]);
+
+		if (NewTexLevel == -1)
+			return;
+
+		ZGetConfiguration()->GetVideo()->nCharTexLevel = NewTexLevel;
+		SetObjectTextureLevel(NewTexLevel);
+
+		RChangeBaseTextureLevel(RTextureType::Object);
+
+		ZGetConfiguration()->Save();
+	}, CCF_ALL, 1, 1, true, "/chartex <level>", "");
 
 	CmdManager.AddCommand(0, "setparts", [](const char *line, int argc, char ** const argv) {
 		if (!CheckDeveloperMode("setparts"))
