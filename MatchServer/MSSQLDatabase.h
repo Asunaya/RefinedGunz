@@ -151,6 +151,7 @@ public:
 	virtual ExpelResult ExpelClanMember(int nCLID, int nAdminGrade, const char* szMember) override;
 	virtual bool GetClanInfo(int nCLID, MDB_ClanInfo* poutClanInfo) override;
 	virtual bool UpdateCharClanContPoint(int nCID, int nCLID, int nAddedContPoint) override;
+	virtual bool CloseClan(int nCLID, const char* szClanName, int nMasterCID) override;
 
 
 	//// Ladder ////

@@ -318,13 +318,7 @@ void ZGameClient::OnClanResponseCloseClan(const int nResult)
 {
 	if (nResult == MOK)
 	{
-		char szDay[ 4 ] = "";
-		char szText[256] = "";
-
-		sprintf_safe( szDay, "%u", DAY_OF_DELETE_CLAN );
-		ZTransMsg( szText, MSG_CLAN_CLOSE_RESERVED, 1, szDay );
-
-		ZApplication::GetGameInterface()->ShowMessage( szText );
+		ZApplication::GetGameInterface()->ShowMessage( "Your clan has been deleted." );
 	}
 	else 
 	{

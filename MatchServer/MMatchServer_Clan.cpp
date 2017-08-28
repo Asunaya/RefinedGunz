@@ -438,15 +438,16 @@ void MMatchServer::ResponseCloseClan(const MUID& uidClanMaster, const char* szCl
 	}
 
 	// 실제로 디비에서 폐쇄 예약
-	if (!GetDBMgr()->ReserveCloseClan(pMasterObject->GetCharInfo()->m_ClanInfo.m_nClanID,
+	if (!GetDBMgr()->CloseClan(pMasterObject->GetCharInfo()->m_ClanInfo.m_nClanID,
 										pMasterObject->GetCharInfo()->m_ClanInfo.m_szClanName,
-										pMasterObject->GetCharInfo()->m_nCID,
-										MGetStrLocalTime(0, 0, DAY_OF_DELETE_CLAN, 0, 0, MDT_YMD)))
+										pMasterObject->GetCharInfo()->m_nCID))
 	{
 		RouteResponseToListener(pMasterObject, MC_MATCH_CLAN_RESPONSE_CLOSE_CLAN, MERR_CLAN_CANNOT_CLOSE);
 		return;
 	}
 
+	UpdateCharClanInfo(pMasterObject, 0, "", MCG_NONE);
+	ResponseMySimpleCharInfo(pMasterObject->GetUID());
 
 	// 폐쇄예약되었다는 메세지를 보낸다.
 	RouteResponseToListener(pMasterObject, MC_MATCH_CLAN_RESPONSE_CLOSE_CLAN, MOK);

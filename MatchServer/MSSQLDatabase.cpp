@@ -85,6 +85,7 @@ static TCHAR g_szDB_GET_CLID_FROM_CLANNAME[] = _T("{CALL spGetCLIDFromClanName (
 static TCHAR g_szDB_CREATE_CLAN[] = _T("{CALL spCreateClan ('%s', %d, %d, %d, %d, %d)}");
 static TCHAR g_szDB_CREATE_CLAN2[] = _T("{CALL spCreateClan ('%s', %d)}");
 static TCHAR g_szDB_RESERVE_CLOSE_CLAN[] = _T("{CALL spReserveCloseClan (%d, '%s', %d, '%s')}");
+static TCHAR g_szDB_CLOSE_CLAN[] = _T("{CALL spCloseClan (%d, '%s', %d, '%s')}");
 static TCHAR g_szDB_ADD_CLAN_MEMBER[] = _T("{CALL spAddClanMember (%d, %d, %d)}");
 static TCHAR g_szDB_REMOVE_CLAN_MEMBER[] = _T("{CALL spRemoveClanMember (%d, %d)}");
 static TCHAR g_szDB_UPDATE_CLAN_GRADE[] = _T("{CALL spUpdateClanGrade (%d, %d, %d)}");
@@ -1880,6 +1881,29 @@ bool MSSQLDatabase::ReserveCloseClan(const int nCLID, const TCHAR* szClanName, c
 	catch (CDBException* e)
 	{
 		Log("MSSQLDatabase::ReserveCloseClan - %s\n", e->m_strError);
+		return false;
+	}
+
+	_STATUS_DB_END(36);
+	return true;
+}
+
+bool MSSQLDatabase::CloseClan(int nCLID, const TCHAR* szClanName, int nMasterCID)
+{
+	_STATUS_DB_START
+		if (!CheckOpen()) return false;
+
+	try
+	{
+		auto temp1 = FilterSQL(szClanName);
+
+		CString strSQL;
+		strSQL.Format(g_szDB_CLOSE_CLAN, nCLID, temp1.c_str(), nMasterCID);
+		Impl->m_DB.ExecuteSQL(strSQL);
+	}
+	catch (CDBException* e)
+	{
+		Log("MSSQLDatabase::CloseClan - %s\n", e->m_strError);
 		return false;
 	}
 

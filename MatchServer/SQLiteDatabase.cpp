@@ -419,6 +419,27 @@ void SQLiteDatabase::CommitTransaction()
 	InTransaction = false;
 }
 
+int SQLiteDatabase::RowsModified()
+{
+	return sqlite3_changes(sqlite.get());
+}
+
+int SQLiteDatabase::TotalRowsModified()
+{
+	return sqlite3_total_changes(sqlite.get());
+}
+
+void SQLiteDatabase::ReportWrongRowsModified(const char* ExpectedValue)
+{
+	const auto ActualValue = RowsModified();
+	Log("Expected rows modified to be %s, actual value is %d\n", ExpectedValue, ActualValue);
+	
+	assert(false);
+}
+
+#define ASSERT_ROWS_MODIFIED_NOT_ZERO() \
+	if (RowsModified() == 0) { ReportWrongRowsModified("not zero"); return false; }
+
 void SQLiteDatabase::Log(const char * Format, ...)
 {
 	va_list va;
@@ -1441,6 +1462,8 @@ try
 
 	CommitTransaction();
 
+	*outNewCLID = CLID;
+
 	return true;
 }
 catch (const SQLiteError& e)
@@ -1489,6 +1512,8 @@ try
 
 	CommitTransaction();
 
+	*outNewCLID = CLID;
+
 	return true;
 }
 catch (const SQLiteError& e)
@@ -1528,6 +1553,31 @@ try
 {
 	ExecuteSQL("UPDATE Clan SET DeleteFlag = 2 WHERE CLID = ? AND Name = ? AND MasterCID = ?",
 		CLID, ClanName, MasterCID);
+	return true;
+}
+catch (const SQLiteError& e)
+{
+	HandleException(e);
+	return false;
+}
+
+bool SQLiteDatabase::CloseClan(int CLID, const char * ClanName, int MasterCID)
+try
+{
+	auto Trans = BeginTransaction();
+
+	ExecuteSQL("DELETE FROM ClanMember WHERE CLID = ?", CLID);
+
+	ASSERT_ROWS_MODIFIED_NOT_ZERO();
+
+	ExecuteSQL("UPDATE Clan SET DeleteFlag = 1, MasterCID = NULL, DeleteName = ?, Name = NULL "
+		"WHERE CLID = ? AND Name = ? AND MasterCID = ?",
+		ClanName, CLID, ClanName, MasterCID);
+
+	ASSERT_ROWS_MODIFIED_NOT_ZERO();
+
+	CommitTransaction();
+
 	return true;
 }
 catch (const SQLiteError& e)

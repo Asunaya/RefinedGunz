@@ -175,6 +175,7 @@ public:
 	virtual ExpelResult ExpelClanMember(int CLID, int AdminGrade, const char* Member) override;
 	virtual bool GetClanInfo(int nCLID, MDB_ClanInfo* poutClanInfo) override;
 	virtual bool UpdateCharClanContPoint(int nCID, int nCLID, int nAddedContPoint) override;
+	virtual bool CloseClan(int nCLID, const char* szClanName, int nMasterCID) override;
 
 
 	//
@@ -269,6 +270,13 @@ private:
 	Transaction BeginTransaction();
 	void RollbackTransaction();
 	void CommitTransaction();
+
+	// Rows modified by the most recent INSERT, UPDATE or DELETE.
+	int RowsModified();
+	// Rows modified by any INSERT, UPDATE or DELETE in the entire lifetime of this instance.
+	int TotalRowsModified();
+
+	void ReportWrongRowsModified(const char* ExpectedValue);
 
 	void Log(const char* Format, ...);
 
