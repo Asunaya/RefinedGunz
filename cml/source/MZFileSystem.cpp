@@ -149,7 +149,7 @@ void MZFileSystem::MakeDirectoryTree(PreprocessedFileTree& Tree,
 {
 	char szFilter[_MAX_PATH];
 	sprintf_safe(szFilter, "%.*s*",
-		Dir.Path.size(), Dir.Path.data());
+		FullPath.size(), FullPath.data());
 
 	_finddata_t FileData;
 	auto hFile = _findfirst(szFilter, &FileData);
@@ -195,24 +195,27 @@ void MZFileSystem::MakeDirectoryTree(PreprocessedFileTree& Tree,
 		}
 		else if (IsArchivePath(FileData.name))
 		{
-
 			StringView Filename{ FileData.name };
 			Filename = Filename.substr(0, Filename.find_last_of('.'));
 			auto&& Subdir = AddSubdir(Filename);
 
-			char ArchivePath[_MAX_PATH];
+			char ArchivePath[MFile::MaxPath];
 			sprintf_safe(ArchivePath, "%.*s%s",
 				Dir.Path.size(), Dir.Path.data(),
 				FileData.name);
 
 			Subdir.ArchivePath = AllocateString(ArchivePath);
 
+			char FullArchivePath[MFile::MaxPath];
+			sprintf_safe(FullArchivePath, "%s%.*s",
+				BasePath.c_str(),
+				Subdir.ArchivePath.size(), Subdir.ArchivePath.data());
+
 			FILE* fp{};
-			fopen_s(&fp, Subdir.ArchivePath.data(), "rb");
+			fopen_s(&fp, FullArchivePath, "rb");
 			if (!fp)
 			{
-				MLog("fopen on %.*s failed\n",
-					Subdir.ArchivePath.size(), Subdir.ArchivePath.data());
+				MLog("fopen on %s failed\n", FullArchivePath);
 				assert(false);
 				continue;
 			}
@@ -324,7 +327,7 @@ bool MZFileSystem::Create(std::string BasePathArgument)
 
 	PreprocessedFileTree Tree{ ArenaAllocator<char>{ &arena } };
 	Tree.NumDirectories++; // Root.
-	MakeDirectoryTree(Tree, "", Tree.Root);
+	MakeDirectoryTree(Tree, BasePath, Tree.Root);
 
 	DMLog("Number of files: %d\n"
 		"Number of archives: %d\n"

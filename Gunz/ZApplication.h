@@ -63,6 +63,7 @@ private:
 	bool					m_bLaunchTest;
 	u64 Time{};
 	float Timescale = 1.f;
+	std::string AssetsDir = "./";
 
 	void ParseStandAloneArguments(const char* pszArgs);
 protected:

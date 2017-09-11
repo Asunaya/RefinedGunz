@@ -670,6 +670,9 @@ int PASCAL WinMain(HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline, int 
 	// Initialize MZFileSystem - MUpdate 
 	MRegistry::szApplicationName = APPLICATION_NAME;
 
+	if (!ZApplication::GetInstance()->ParseArguments(cmdline))
+		return 0;
+
 	g_App.InitFileSystem();
 
 #if defined(_PUBLISH) && defined(ONLY_LOAD_MRS_FILES)
@@ -685,9 +688,6 @@ int PASCAL WinMain(HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline, int 
 	}
 
 	ZGetConfiguration()->Load();
-
-	if (!ZApplication::GetInstance()->ParseArguments(cmdline))
-		return 0;
 
 	GraphicsAPI GfxAPI = GraphicsAPI::D3D9;
 

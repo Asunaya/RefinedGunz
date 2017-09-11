@@ -126,6 +126,16 @@ bool ZApplication::ParseArguments(const char* pszArgs)
 		m_szFileName = pszArgs;
 	}
 
+	auto&& ZTOKEN_ASSETSDIR = "assetsdir";
+
+	auto* str = strstr(pszArgs, ZTOKEN_ASSETSDIR);
+	char buffer[256];
+
+	if (str && GetNextName(buffer, sizeof(buffer), str + strlen(ZTOKEN_ASSETSDIR)))
+	{
+		AssetsDir = buffer;
+	}
+
 	if(_stricmp(m_szFileName.c_str() + m_szFileName.length() - strlen(GUNZ_REC_FILE_EXT),
 		GUNZ_REC_FILE_EXT) == 0){
 		SetLaunchMode(ZLAUNCH_MODE_STANDALONE_REPLAY);
@@ -862,6 +872,6 @@ void ZApplication::SetSystemValue(const char* szField, const char* szData)
 
 void ZApplication::InitFileSystem()
 {
-	m_FileSystem.Create("./");
+	m_FileSystem.Create(AssetsDir);
 	RSetFileSystem(ZApplication::GetFileSystem());
 }
