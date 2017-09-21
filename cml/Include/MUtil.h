@@ -3,6 +3,7 @@
 #include <string>
 #include <memory>
 #include <algorithm>
+#include <intrin.h>
 #include "TMP.h"
 #include "GlobalTypes.h"
 #include "StringView.h"

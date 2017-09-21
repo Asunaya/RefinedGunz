@@ -8,6 +8,7 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <algorithm>
+#include <mmintrin.h>
 using std::min;
 using std::max;
 

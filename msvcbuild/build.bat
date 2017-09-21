@@ -1,20 +1,33 @@
 @echo off
 
+:: Save the current directory so that we can cd back to it at the end of the script.
+
 set OLDCD=%CD%
 
-call mkdir build
+:: Create and enter the build directory, and delete build\CMakeCache.txt if it exists for a clean build.
+
+if exist build (
+	if exist build\CMakeCache.txt (
+		call del build\CMakeCache.txt
+	)
+) else (
+	call mkdir build
+)
+
 call cd build
 
-call del CMakeCache.txt
+:: Generate the Visual Studio project files.
 
-call cmake -G "Visual Studio 14 2015" -T "v140_xp" ..\..
+call cmake -G "Visual Studio 15 2017" -T "v141_xp" -DMSSQL=1 ..\..
 
 if errorlevel 1 (
 	echo cmake generation failed, exiting
 	goto fail
 )
 
-call cmake --build . --config Release
+:: Build in release mode.
+
+call cmake --build . --config RelWithDebInfo
 
 if errorlevel 1 (
 	echo cmake build failed, exiting
