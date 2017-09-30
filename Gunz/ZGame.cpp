@@ -2459,9 +2459,7 @@ void ZGame::OnPeerSlash(ZCharacter *pOwner, const rvector &pos, const rvector &d
 
 		const rvector &TargetPos = pTarget->GetPosition();
 
-		rvector swordPos = pos;
-		swordPos.z += 180 * .5;
-		float fDist = GetDistanceLineSegment(swordPos, TargetPos, TargetPos + rvector(0, 0, CHARACTER_HEIGHT));
+		float fDist = GetMeleeDistance(pos, TargetPos);
 
 		if (fDist > nRange)
 			continue;
@@ -2520,7 +2518,8 @@ void ZGame::OnPeerSlash(ZCharacter *pOwner, const rvector &pos, const rvector &d
 		if (pTarget == m_pMyCharacter || ZGetConfiguration()->GetSlashEffect())
 			ZGetEffectManager()->AddSlashEffect(AdjTargetPos, -dir, cm);
 
-		pTarget->OnDamaged(pOwner, pos, ZD_MELEE, pDesc->m_nWeaponType, fDamage, pItem->GetPiercingRatio(pDesc->m_nWeaponType, eq_parts_chest), cm);
+		pTarget->OnDamaged(pOwner, pos, ZD_MELEE, pDesc->m_nWeaponType, fDamage,
+			pItem->GetPiercingRatio(pDesc->m_nWeaponType, eq_parts_chest), cm);
 
 		pTarget->OnKnockback(dir, pItem->GetKnockbackForce()); // OnKnockback
 
@@ -2576,8 +2575,6 @@ void ZGame::OnPeerMassive(ZCharacter *pOwner, const rvector &pos, const rvector 
 
 	ZGetSoundEngine()->PlaySound("we_smash", pos, false, false, 0);
 
-	rvector MidOwnerPos = pos + rvector(0, 0, 180 / 2);
-
 	ZC_ENCHANT EnchantType = ZC_ENCHANT_NONE;
 
 	for (auto &it : m_ObjectManager)
@@ -2593,7 +2590,7 @@ void ZGame::OnPeerMassive(ZCharacter *pOwner, const rvector &pos, const rvector 
 
 		const rvector &TargetPos = pVictim->GetPosition();
 
-		float fDist = GetDistanceLineSegment(MidOwnerPos, TargetPos, TargetPos + rvector(0, 0, 180));
+		float fDist = GetMeleeDistance(pos, TargetPos);
 
 		if (fDist > nRange)
 			continue;

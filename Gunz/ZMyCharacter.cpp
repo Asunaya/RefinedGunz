@@ -2653,9 +2653,7 @@ void ZMyCharacter::OnDelayedWork(ZDELAYEDWORKITEM& Item)
 
 		rvector TargetPosition = pTarget->GetPosition();
 
-		rvector HVectorToTarget = AttackerPosition - TargetPosition;
-		HVectorToTarget.z = 0;
-		float dist = Magnitude(HVectorToTarget);
+		float dist = GetMeleeDistance(AttackerPosition, TargetPosition);
 		if (dist > 240)
 			return;
 

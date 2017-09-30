@@ -381,6 +381,12 @@ bool GetUserGradeIDColor(MMatchUserGradeID gid, MCOLOR& UserNameColor, char(&sp_
 	return GetUserGradeIDColor(gid, UserNameColor, sp_name, size);
 }
 
+inline float GetMeleeDistance(const v3& AttackerPos, const v3& TargetPos)
+{
+	auto SwordPos = AttackerPos + v3{ 0, 0, CHARACTER_HEIGHT * 0.5f };
+	return GetDistanceLineSegment(SwordPos, TargetPos, TargetPos + v3{ 0, 0, CHARACTER_HEIGHT });
+}
+
 #define MAX_COMBO 99
 
 #define PEERMOVE_TICK			100
