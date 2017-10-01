@@ -459,8 +459,12 @@ bool RCloseDisplay()
 	}
 
 	SAFE_RELEASE(g_pD3D);
-	FreeLibrary(g_hD3DLibrary);
-	g_hD3DLibrary = NULL;
+	// Commented out to prevent crash when in fullscreen.
+	// The crash happens when the window proc code tries to call something inside the
+	// now-unloaded d3d9.dll. Don't know why it doesn't unhook the window proc when the DLL
+	// is unloaded.
+	/*FreeLibrary(g_hD3DLibrary);
+	g_hD3DLibrary = NULL;*/
 
 	return true;
 }

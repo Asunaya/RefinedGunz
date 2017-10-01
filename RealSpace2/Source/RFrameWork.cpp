@@ -308,9 +308,16 @@ static bool RCreateWindow(const char *AppName, HINSTANCE this_inst, HINSTANCE pr
 #else
 	wchar_t AdjAppName[256];
 
-	auto len = MultiByteToWideChar(CP_UTF8, 0, AppName, -1, AdjAppName, std::size(AdjAppName));
+	// CreateWindowExW for some reason takes a wchar_t* but treats it as a char*, meaning that the
+	// window title gets cut off when passed a proper wchar_t since the wide ASCII values have
+	// null higher bytes.
+	// To prevent this, we copy the char bytes into the wchar_t array instead of converting them.
+	// No idea why this happens.
+	memcpy(AdjAppName, AppName, min(std::size(AdjAppName), strlen(AppName) + 1));
+
+	/*auto len = MultiByteToWideChar(CP_UTF8, 0, AppName, -1, AdjAppName, std::size(AdjAppName));
 	if (len == 0)
-		return false;
+		return false;*/
 #endif
 
 	// Make a window

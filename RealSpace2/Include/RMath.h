@@ -755,6 +755,16 @@ inline bool IntersectTriangle(const v3& V1, const v3& V2, const v3& V3, // Trian
 	return false;
 }
 
+inline v3 NoninfiniteReciprocal(const v3& Vec)
+{
+	v3 NonzeroVec{
+		Vec.x == 0 ? 0.000001f : Vec.x,
+		Vec.y == 0 ? 0.000001f : Vec.y,
+		Vec.z == 0 ? 0.000001f : Vec.z,
+	};
+	return 1.f / NonzeroVec;
+}
+
 inline bool IntersectLineAABB(
 	const v3& origin, const v3& dir,
 	const rboundingbox& bbox,
@@ -794,8 +804,7 @@ inline bool IntersectLineAABB(
 	const rboundingbox& bbox,
 	float* t = nullptr)
 {
-	v3 dirfrac{ 1.f / dir.x, 1.f / dir.y, 1.f / dir.z };
-	return IntersectLineAABB(origin, dir, bbox, dirfrac, t);
+	return IntersectLineAABB(origin, dir, bbox, NoninfiniteReciprocal(dir), t);
 }
 
 inline bool IntersectLineSegmentAABB(
@@ -822,7 +831,7 @@ inline bool IntersectLineSegmentAABB(
 	const rboundingbox& bbox,
 	float* t = nullptr)
 {
-	return IntersectLineSegmentAABB(l0, l1, bbox, 1.f / Normalized(l1 - l0), t);
+	return IntersectLineSegmentAABB(l0, l1, bbox, NoninfiniteReciprocal(Normalized(l1 - l0)), t);
 }
 
 inline rplane PlaneFromPointNormal(const v3& point, const v3& normal)
