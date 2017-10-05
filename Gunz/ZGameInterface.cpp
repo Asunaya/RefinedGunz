@@ -2574,12 +2574,21 @@ void ZGameInterface::ChangeWeapon(ZChangeWeaponType nType)
 	if (m_pGame->GetMatch()->IsRuleGladiator() && !pChar->IsAdmin())
 		return;
 
-
 	int nParts = -1;
 
 	bool bWheel = false;
 
-	if ((nType == ZCWT_PREV) || (nType == ZCWT_NEXT))
+	auto IsOutOfAmmo = [&](int PartsInt)
+	{
+		auto Parts = MMatchCharItemParts(PartsInt);
+		auto* Item = g_pGame->m_pMyCharacter->GetItems()->GetItem(Parts);
+		if (!Item)
+			return true;
+
+		return Item->GetBulletAMagazine() <= 0;
+	};
+
+	if (nType == ZCWT_PREV || nType == ZCWT_NEXT)
 	{
 		bWheel = true;
 
@@ -2598,79 +2607,72 @@ void ZGameInterface::ChangeWeapon(ZChangeWeaponType nType)
 			}
 		}
 
-		if (nPos < 0) return;
+		if (nPos < 0 || nHasItemCount <= 1)
+			return;
 
-		if (nType == ZCWT_PREV)
+		// The loop in the else block would go on forever if all of these are true. (I.e., we only
+		// have two items equipped, and no ammo for either.)
+		if (nHasItemCount == 2 && ItemQueue[0] == MMCIP_CUSTOM1 && ItemQueue[1] == MMCIP_CUSTOM2 &&
+			IsOutOfAmmo(MMCIP_CUSTOM1) && IsOutOfAmmo(MMCIP_CUSTOM2))
 		{
-			if (nHasItemCount <= 1) return;
-
+			return;
+		}
+		else
+		{
 			int nNewPos = nPos - 1;
 			while (nNewPos != nPos) {
-				if (nNewPos < 0) nNewPos = nHasItemCount - 1;
+				if (nType == ZCWT_PREV) {
+					if (nNewPos < 0) nNewPos = nHasItemCount - 1;
+				} else {
+					if (nNewPos >= nHasItemCount) nNewPos = 0;
+				}
 
-				MMatchCharItemParts nPart = (MMatchCharItemParts)ItemQueue[nNewPos];
-				if ((nPart == MMCIP_CUSTOM1) || (nPart == MMCIP_CUSTOM2)) {
-					ZItem* pItem = g_pGame->m_pMyCharacter->GetItems()->GetItem(nPart);
-					if (pItem && pItem->GetBulletAMagazine() > 0) {
+				auto nPart = (MMatchCharItemParts)ItemQueue[nNewPos];
+
+				// We can change to any non-item weapon, even if it's out of ammo, but we don't
+				// want to change to an item that is out of ammo.
+				if (nPart == MMCIP_CUSTOM1 || nPart == MMCIP_CUSTOM2) {
+					if (!IsOutOfAmmo(nPart)) {
 						break;
 					}
 				}
 				else {
 					break;
 				}
-				nNewPos = nNewPos - 1;
-			}
-			nPos = nNewPos;
-		}
-		else if (nType == ZCWT_NEXT)
-		{
-			if (nHasItemCount <= 1) return;
 
-			int nNewPos = nPos + 1;
-			while (nNewPos != nPos) {
-				if (nNewPos >= nHasItemCount) nNewPos = 0;
-
-				MMatchCharItemParts nPart = (MMatchCharItemParts)ItemQueue[nNewPos];
-				if ((nPart == MMCIP_CUSTOM1) || (nPart == MMCIP_CUSTOM2)) {
-					ZItem* pItem = g_pGame->m_pMyCharacter->GetItems()->GetItem(nPart);
-					if (pItem && pItem->GetBulletAMagazine() > 0) {
-						break;
-					}
+				if (nType == ZCWT_PREV) {
+					nNewPos = nNewPos - 1;
+				} else {
+					nNewPos = nNewPos + 1;
 				}
-				else {
-					break;
-				}
-				nNewPos = nNewPos + 1;
 			}
-			nPos = nNewPos;
-		}
 
-		nParts = ItemQueue[nPos];
+			nParts = ItemQueue[nNewPos];
+		}
 	}
 	else
 	{
 		switch (nType)
 		{
 		case ZCWT_MELEE:
-			nParts = (int)(MMCIP_MELEE);
+			nParts = int(MMCIP_MELEE);
 			break;
 		case ZCWT_PRIMARY:
-			nParts = (int)(MMCIP_PRIMARY);
+			nParts = int(MMCIP_PRIMARY);
 			break;
 		case ZCWT_SECONDARY:
-			nParts = (int)(MMCIP_SECONDARY);
+			nParts = int(MMCIP_SECONDARY);
 			break;
 		case ZCWT_CUSTOM1:
-			nParts = (int)(MMCIP_CUSTOM1);
+			nParts = int(MMCIP_CUSTOM1);
 			break;
 		case ZCWT_CUSTOM2:
-			nParts = (int)(MMCIP_CUSTOM2);
+			nParts = int(MMCIP_CUSTOM2);
 			break;
 		}
 
-		if ((nParts == MMCIP_CUSTOM1) || (nParts == MMCIP_CUSTOM2)) {
-			ZItem* pItem = pChar->GetItems()->GetItem((MMatchCharItemParts)nParts);
-			if (pItem->GetBulletAMagazine() <= 0)
+		if (nParts == MMCIP_CUSTOM1 || nParts == MMCIP_CUSTOM2) {
+			if (IsOutOfAmmo(nParts))
 				return;
 		}
 	}
