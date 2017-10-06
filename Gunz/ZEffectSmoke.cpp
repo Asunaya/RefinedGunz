@@ -1,13 +1,15 @@
 #include "stdafx.h"
 
-#include <MMSystem.h>
 #include "ZEffectSmoke.h"
 #include "RealSpace2.h"
 #include "Physics.h"
 #include "MDebug.h"
 
-ZEffectSmoke::ZEffectSmoke(ZEffectBillboardSource* pEffectBillboardSource, const rvector& Pos, const rvector& Velocity, float fMinScale, float fMaxScale, unsigned long int nLifeTime)
-: ZEffectBillboard(pEffectBillboardSource)
+ZEffectSmoke::ZEffectSmoke(ZEffectBillboardSource* pEffectBillboardSource,
+	const rvector& Pos, const rvector& Velocity,
+	float fMinScale, float fMaxScale,
+	u64 nLifeTime)
+	: ZEffectBillboard(pEffectBillboardSource)
 {
 	m_nStartTime = GetGlobalTimeMS();
 	m_OrigPos = m_Pos = Pos;
@@ -18,24 +20,20 @@ ZEffectSmoke::ZEffectSmoke(ZEffectBillboardSource* pEffectBillboardSource, const
 	m_Velocity = Velocity;
 }
 
-ZEffectSmoke::~ZEffectSmoke(void)
-{
-}
-
-bool ZEffectSmoke::Draw(unsigned long int nTime)
+bool ZEffectSmoke::Draw(u64 nTime)
 {
 	m_Normal = -RealSpace2::RCameraDirection;
 	m_Up = RealSpace2::RCameraUp;
 
-	DWORD dwDiff = nTime-m_nStartTime;
+	auto dwDiff = nTime-m_nStartTime;
 	m_Scale.x = m_Scale.y = m_Scale.z = m_fMinScale+(m_fMaxScale-m_fMinScale)*dwDiff/(float)m_nLifeTime;
-	m_fOpacity = ((m_nLifeTime-dwDiff)/(float)m_nLifeTime)*0.5f;	// by 베니
+	m_fOpacity = ((m_nLifeTime-dwDiff)/(float)m_nLifeTime)*0.5f;
 
 	if(dwDiff>m_nLifeTime) return false;
 
-#define AIR_RESIST_CONSTANT	0.1f	// 연기 또는 먼지라서 공기 저항 계수를 넣는다.
-	float fSec = (float)dwDiff/1000.0f;	// msec에서 sec로 변환
-	rvector Distance = ParabolicMotion(m_Velocity, fSec) * 100 * AIR_RESIST_CONSTANT;	// *100은 미터에서 센티로 변환
+#define AIR_RESIST_CONSTANT	0.1f
+	float fSec = (float)dwDiff/1000.0f;
+	rvector Distance = ParabolicMotion(m_Velocity, fSec) * 100 * AIR_RESIST_CONSTANT;
 	m_Pos = m_OrigPos + Distance;
 
 	ZEffectBillboard::Draw(nTime);
@@ -45,8 +43,11 @@ bool ZEffectSmoke::Draw(unsigned long int nTime)
 
 ///////////////////////////////////////////////////////////////
 
-ZEffectLandingSmoke::ZEffectLandingSmoke(ZEffectBillboardSource* pEffectBillboardSource, const rvector& Pos, const rvector& Normal, float fMinScale, float fMaxScale, unsigned long int nLifeTime)
-: ZEffectBillboard(pEffectBillboardSource)
+ZEffectLandingSmoke::ZEffectLandingSmoke(ZEffectBillboardSource* pEffectBillboardSource,
+	const rvector& Pos, const rvector& Normal,
+	float fMinScale, float fMaxScale,
+	u64 nLifeTime)
+	: ZEffectBillboard(pEffectBillboardSource)
 {
 	m_nStartTime = GetGlobalTimeMS();
 	m_OrigPos = m_Pos = Pos;
@@ -57,22 +58,12 @@ ZEffectLandingSmoke::ZEffectLandingSmoke(ZEffectBillboardSource* pEffectBillboar
 	m_Velocity = Normal;
 }
 
-ZEffectLandingSmoke::~ZEffectLandingSmoke(void)
+bool ZEffectLandingSmoke::Draw(u64 nTime)
 {
-}
-
-bool ZEffectLandingSmoke::Draw(unsigned long int nTime)
-{
-/*
-	m_Normal = m_Velocity;
-	m_Up	 = RealSpace2::RCameraDirection;
-	m_Up.z = 0.f;
-	Normalize(m_Up);
-*/
 	m_Normal = -RealSpace2::RCameraDirection;
 	m_Up = RealSpace2::RCameraUp;
 
-	DWORD dwDiff = nTime-m_nStartTime;
+	auto dwDiff = nTime-m_nStartTime;
 	m_Scale.x = m_Scale.y = m_Scale.z = m_fMinScale+(m_fMaxScale-m_fMinScale)*dwDiff/(float)m_nLifeTime;
 	m_fOpacity = ( m_nLifeTime - dwDiff ) / (float)m_nLifeTime;
 
@@ -85,14 +76,14 @@ bool ZEffectLandingSmoke::Draw(unsigned long int nTime)
 	return true;
 }
 
-bool ZEffectSmokeGrenade::Draw( unsigned long int nTime )
+bool ZEffectSmokeGrenade::Draw(u64 nTime)
 {
 	_ASSERT(((double)m_nLifeTime)>0);
 
 	m_Normal = -RealSpace2::RCameraDirection;
 	m_Up = RealSpace2::RCameraUp;
 
-	DWORD dwDiff = nTime-m_nStartTime;
+	auto dwDiff = nTime-m_nStartTime;
 
 	if( dwDiff > m_nLifeTime || dwDiff <= 0 || m_nLifeTime <=0 ) return false;
 		
@@ -120,8 +111,11 @@ bool ZEffectSmokeGrenade::Draw( unsigned long int nTime )
 	return true;
 }
 
-ZEffectSmokeGrenade::ZEffectSmokeGrenade( ZEffectBillboardSource* pEffectBillboardSource, const rvector& Pos, const rvector& Velocity, float fMinScale, float fMaxScale, unsigned long int nLifeTime )
-: ZEffectBillboard(pEffectBillboardSource)
+ZEffectSmokeGrenade::ZEffectSmokeGrenade(ZEffectBillboardSource* pEffectBillboardSource,
+	const rvector& Pos, const rvector& Velocity,
+	float fMinScale, float fMaxScale,
+	u64 nLifeTime)
+	: ZEffectBillboard(pEffectBillboardSource)
 {
 	m_nStartTime = GetGlobalTimeMS();
 	m_OrigPos = m_Pos = Pos;
@@ -130,8 +124,4 @@ ZEffectSmokeGrenade::ZEffectSmokeGrenade( ZEffectBillboardSource* pEffectBillboa
 	m_nLifeTime = nLifeTime;
 	m_nDrawMode = ZEDM_ALPHAMAP;
 	m_Velocity = Velocity;
-}
-
-ZEffectSmokeGrenade::~ZEffectSmokeGrenade()
-{
 }

@@ -33,11 +33,11 @@ enum ZEffectAutoAddType {
 enum ZEffectDrawMode{
 	ZEDM_ALPHAMAP=0,
 	ZEDM_ADD,
-	ZEDM_NONE,	// 모델이펙트도 이것
-	ZEDM_COUNT,	// 마지막값이 개수가 된다.
+	ZEDM_NONE,
+	ZEDM_COUNT,
 };
 
-enum ZEffectType { // 몇몇 effect 식별을 위해.. class 단위가 아님.. 같은 class 라도 서로다른..식별..
+enum ZEffectType {
 	ZET_NONE = 0,
 
 	ZET_HEAL ,
@@ -68,7 +68,7 @@ public:
 	virtual bool CheckRenderAble(int level,float dist);
 	virtual void CheckWaterSkip(int mode,float height);
 	
-	virtual bool Draw(unsigned long int nTime);
+	virtual bool Draw(u64 nTime);
 
 	virtual void Update() {}
 
@@ -86,11 +86,11 @@ public:
 	bool  m_bWaterSkip;
 	bool  m_bisRendered;	// for debug
 	bool  m_bRender;
-	float m_fHideDist[3];	// 3단계 옵션에 따른 그려지는 거리제한
+	float m_fHideDist[3];
 	float m_fDist;
 };
 
-typedef std::list<ZEffect*>	ZEffectList;	// DrawMode에 따라 정렬되는 이펙트 리스트
+typedef std::list<ZEffect*>	ZEffectList;
 
 enum ZTargetType{
 	ZTT_CHARACTER,
@@ -223,7 +223,6 @@ protected:
 	RMesh*	m_pFragment[6];
 
 	RMesh*	m_pSwordDefenceEffect[3];
-//	RMesh*	m_pRocketSmokeEffect;
 	RMesh*	m_pSwordWaveEffect[2];
 	RMesh*	m_pPinkSwordWaveEffect;
 	RMesh*	m_pGreenSwordWaveEffect;
@@ -246,7 +245,6 @@ protected:
 	RMesh*	m_pWaterSplash;
 	RMesh*	m_pWorldItemEaten;
 	RMesh*	m_pDaggerUpper;
-//	RMesh*	m_pLighteningEffect;
 	RMesh*  m_pBlizzardEffect;
 
 	RMesh*	m_pSwordFire;

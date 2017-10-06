@@ -36,7 +36,7 @@ public:
 
 public:
 	ZEffectAniMesh(RMesh* pMesh, const rvector& Pos, const rvector& Dir);
-	virtual bool Draw(unsigned long int nTime);
+	virtual bool Draw(u64 nTime) override;
 
 	void CheckCross(rvector& Dir,rvector& Up);
 
@@ -52,7 +52,7 @@ public:
 	void SetAlignType(int type);
 	void SetStartTime(DWORD _time);
 	void SetLifeTime(int nLifeTime) { m_nLifeTime = nLifeTime; }
-	virtual rvector GetSortPos();
+	virtual rvector GetSortPos() override;
 
 };
 
@@ -65,13 +65,13 @@ public:
 class ZEffectDash : public ZEffectAniMesh , public CMemPoolSm<ZEffectDash> {
 public:
 	ZEffectDash(RMesh* pMesh, const rvector& Pos, const rvector& Dir,MUID uidTarget);
-	virtual bool Draw(unsigned long int nTime);
+	virtual bool Draw(u64 nTime) override;
 };
 
 class ZEffectLevelUp : public ZEffectAniMesh , public CMemPoolSm<ZEffectLevelUp> {
 public:
 	ZEffectLevelUp(RMesh* pMesh, const rvector& Pos, const rvector& Dir, const rvector& AddPos,ZObject* pObj);
-	virtual bool Draw(unsigned long int nTime);
+	virtual bool Draw(u64 nTime) override;
 
 	RMeshPartsPosInfoType m_type;
 	rvector m_vAddPos;
@@ -80,7 +80,7 @@ public:
 class ZEffectPartsTypePos : public ZEffectAniMesh , public CMemPoolSm<ZEffectPartsTypePos> {
 public:
 	ZEffectPartsTypePos(RMesh* pMesh, const rvector& Pos, const rvector& Dir, const rvector& AddPos,ZObject* pObj);
-	virtual bool Draw(unsigned long int nTime);
+	virtual bool Draw(u64 nTime) override;
 
 	RMeshPartsPosInfoType m_type;
 	rvector m_vAddPos;
@@ -89,21 +89,21 @@ public:
 class ZEffectWeaponEnchant : public ZEffectAniMesh , public CMemPoolSm<ZEffectWeaponEnchant> {
 public:
 	ZEffectWeaponEnchant(RMesh* pMesh, const rvector& Pos, const rvector& Dir, ZObject* pObj);
-	virtual bool Draw(unsigned long int nTime);
+	virtual bool Draw(u64 nTime) override;
 
 };
 
 class ZEffectIcon : public ZEffectAniMesh {
 public:
 	ZEffectIcon(RMesh* pMesh, ZObject* pObj);
-	virtual bool Draw(unsigned long int nTime);
+	virtual bool Draw(u64 nTime) override;
 	RMeshPartsPosInfoType m_type;
 };
 
 class ZEffectShot : public ZEffectAniMesh , public CMemPoolSm<ZEffectShot> {
 public:
 	ZEffectShot(RMesh* pMesh, const rvector& Pos, const rvector& Dir,ZObject* pObj);
-	virtual bool Draw(unsigned long int nTime);
+	virtual bool Draw(u64 nTime) override;
 
 	void SetStartTime(DWORD _time) {
 		m_nStartAddTime = _time;
@@ -130,7 +130,7 @@ private:
 	unsigned int m_nElapsedTime;
 public:
 	ZEffectBerserkerIconLoop(RMesh* pMesh, ZObject* pObj);
-	virtual bool Draw(unsigned long int nTime);
+	virtual bool Draw(u64 nTime) override;
 };
 
 

@@ -31,9 +31,6 @@ ZEffectLightTracer::ZEffectLightTracer(ZEffectBillboardSource* pEffectBillboardS
 
 	m_Pos = m_Start;
 }
-ZEffectLightTracer::~ZEffectLightTracer(void)
-{
-}
 
 bool ZEffectLightTracer::Draw(u64 nTime)
 {
@@ -53,4 +50,3 @@ bool ZEffectLightTracer::Draw(u64 nTime)
 
 	return true;
 }
-

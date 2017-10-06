@@ -29,7 +29,7 @@ ZScreenEffect::ZScreenEffect(RMesh *pMesh,rvector offset)
 
 }
 
-bool ZScreenEffect::Draw(unsigned long int nTime)
+bool ZScreenEffect::Draw(u64 nTime)
 {
 	return DrawCustom(nTime, m_Offset);
 }
@@ -46,7 +46,7 @@ bool ZScreenEffect::IsDeleteTime()
 	return false;
 }
 
-bool ZScreenEffect::DrawCustom(unsigned long int nTime, const rvector& vOffset, float fAngle)
+bool ZScreenEffect::DrawCustom(u64 nTime, const rvector& vOffset, float fAngle)
 {
 	RGetDevice()->SetRenderState(D3DRS_ZENABLE, FALSE);
 	RGetDevice()->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
@@ -112,9 +112,9 @@ void ZComboEffect::SetFrame(int nFrame)
 	fDeleteTime=g_pGame->GetTime()+10.f;
 }
 
-bool ZComboEffect::Draw(unsigned long int nTime)
+bool ZComboEffect::Draw(u64 nTime)
 {
-	if(bDelete && g_pGame->GetTime()>=fDeleteTime)
+	if (bDelete && g_pGame->GetTime() >= fDeleteTime)
 		return false;
 
 	ZScreenEffect::Draw(nTime);
@@ -143,7 +143,7 @@ void ZBossGaugeEffect::Shock(float fPower)
 	m_fShockPower = max((min(20.0f, 20.0f + fPower)), 70.0f);
 }
 
-bool ZBossGaugeEffect::Draw(unsigned long int nTime)
+bool ZBossGaugeEffect::Draw(u64 nTime)
 {
 	MUID uidBoss = ZGetQuest()->GetGameInfo()->GetBoss();
 	if (uidBoss == MUID(0,0)) return true;

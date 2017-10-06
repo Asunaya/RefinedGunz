@@ -32,7 +32,7 @@ public:
 		m_pEffectBillboardSource = pSource;
 	}
 
-	virtual bool Draw(unsigned long int nTime);
+	virtual bool Draw(u64 nTime) override;
 
 	virtual rvector GetSortPos() {
 		return m_Pos;
@@ -67,7 +67,7 @@ public:
 	ZEffectBillboard2(LPDIRECT3DTEXTURE9 pEffectBillboardTexture);
 	virtual ~ZEffectBillboard2(void);
 
-	virtual bool Draw(unsigned long int nTime);
+	virtual bool Draw(u64 nTime) override;
 
 	virtual rvector GetSortPos() {
 		return m_Pos;

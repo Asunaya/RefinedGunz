@@ -43,12 +43,12 @@ ZEffectStaticMesh::ZEffectStaticMesh(RMesh* pMesh, const rvector& Pos, const rve
 #define EC_LIFETIME	1000
 #define EC_LIMIT_DISTANCE	500.f
 
-bool ZEffectStaticMesh::Draw(unsigned long int nTime)
+bool ZEffectStaticMesh::Draw(u64 nTime)
 {
 	if(m_VMesh.m_pMesh==NULL) 
 		return false;
 
-	DWORD dwDiff = nTime - m_nStartTime;
+	auto dwDiff = nTime - m_nStartTime;
 
 	float fSec = (float)dwDiff/1000.0f;
 	rvector Distance = ParabolicMotion(m_Velocity, fSec) * 100;

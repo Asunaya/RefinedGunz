@@ -5,13 +5,11 @@
 
 class ZEffectBulletMark : public ZEffectBillboard{
 protected:
-	unsigned long int m_nStartTime;
+	u64 m_nStartTime;
 public:
 	ZEffectBulletMark(ZEffectBillboardSource* pEffectBillboardSource, const rvector& Pos, const rvector& Normal);
-	virtual ~ZEffectBulletMark(void);
 
-	virtual bool Draw(unsigned long int nTime);
-	virtual bool DrawTest(unsigned long int nTime);
+	virtual bool Draw(u64 nTime) override;
 };
 
 #endif

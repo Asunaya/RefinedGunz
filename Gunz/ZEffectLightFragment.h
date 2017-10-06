@@ -1,41 +1,38 @@
-#ifndef ZEffectLightFragment_H
-#define ZEffectLightFragment_H
+#pragma once
 
 #include "ZEffectBillboard.h"
 #include "RTypes.h"
 
 #include "mempool.h"
-// 사용안하는것들은 지운다..
+
 class ZEffectLightFragment : public ZEffectBillboard , public CMemPoolSm<ZEffectLightFragment>
 {
 protected:
-	unsigned long int m_nStartTime;
-	unsigned long int m_nPrevTime;
+	u64 m_nStartTime;
+	u64 m_nPrevTime;
 
 	rvector	m_OrigPos;
 	rvector	m_Velocity;
 
 public:
-	ZEffectLightFragment(ZEffectBillboardSource* pEffectBillboardSource, rvector& Pos, rvector& Velocity);
-	virtual ~ZEffectLightFragment(void);
+	ZEffectLightFragment(ZEffectBillboardSource* pEffectBillboardSource,
+		const rvector& Pos, const rvector& Velocity);
 
-	virtual bool Draw(unsigned long int nTime);
+	virtual bool Draw(u64 nTime) override;
 };
 
 class ZEffectLightFragment2 : public ZEffectBillboard2 , public CMemPoolSm<ZEffectLightFragment2>
 {
 protected:
-	unsigned long int m_nStartTime;
-	unsigned long int m_nPrevTime;
+	u64 m_nStartTime;
+	u64 m_nPrevTime;
 
 	rvector	m_OrigPos;
 	rvector	m_Velocity;
 
 public:
-	ZEffectLightFragment2(LPDIRECT3DTEXTURE9 pEffectBillboardTexture, rvector& Pos, rvector& Velocity);
-	virtual ~ZEffectLightFragment2(void);
+	ZEffectLightFragment2(LPDIRECT3DTEXTURE9 pEffectBillboardTexture,
+		const rvector& Pos, const rvector& Velocity);
 
-	virtual bool Draw(unsigned long int nTime);
+	virtual bool Draw(u64 nTime) override;
 };
-
-#endif

@@ -12,8 +12,9 @@ constexpr float LIGHTTRACER_WIDTH = 0.8f;
 constexpr float LIGHTFRAGMENT_LIFETIME = 600;
 }
 
-ZEffectLightFragment::ZEffectLightFragment(ZEffectBillboardSource* pEffectBillboardSource, rvector& Pos, rvector& Velocity)
-: ZEffectBillboard(pEffectBillboardSource)
+ZEffectLightFragment::ZEffectLightFragment(ZEffectBillboardSource* pEffectBillboardSource,
+	const rvector& Pos, const rvector& Velocity)
+	: ZEffectBillboard(pEffectBillboardSource)
 {
 	using namespace ZEffectLightFragmentConst;
 
@@ -27,11 +28,8 @@ ZEffectLightFragment::ZEffectLightFragment(ZEffectBillboardSource* pEffectBillbo
 
 	m_nDrawMode = ZEDM_ADD;
 }
-ZEffectLightFragment::~ZEffectLightFragment(void)
-{
-}
 
-bool ZEffectLightFragment::Draw(unsigned long int nTime)
+bool ZEffectLightFragment::Draw(u64 nTime)
 {
 	using namespace ZEffectLightFragmentConst;
 
@@ -57,8 +55,9 @@ bool ZEffectLightFragment::Draw(unsigned long int nTime)
 	return true;
 }
 
-ZEffectLightFragment2::ZEffectLightFragment2(LPDIRECT3DTEXTURE9 pEffectBillboardTexture, rvector& Pos, rvector& Velocity)
-: ZEffectBillboard2(pEffectBillboardTexture)
+ZEffectLightFragment2::ZEffectLightFragment2(LPDIRECT3DTEXTURE9 pEffectBillboardTexture,
+	const rvector& Pos, const rvector& Velocity)
+	: ZEffectBillboard2(pEffectBillboardTexture)
 {
 	using namespace ZEffectLightFragmentConst;
 
@@ -72,33 +71,29 @@ ZEffectLightFragment2::ZEffectLightFragment2(LPDIRECT3DTEXTURE9 pEffectBillboard
 
 	m_nDrawMode = ZEDM_ALPHAMAP;
 }
-ZEffectLightFragment2::~ZEffectLightFragment2(void)
-{
-}
 
-bool ZEffectLightFragment2::Draw(unsigned long int nTime)
+bool ZEffectLightFragment2::Draw(u64 nTime)
 {
 	using namespace ZEffectLightFragmentConst;
 
-	DWORD dwDiff = nTime-m_nStartTime;
-	DWORD dwPrevDiff = nTime-m_nPrevTime;
+	auto dwDiff = nTime - m_nStartTime;
+	auto dwPrevDiff = nTime - m_nPrevTime;
 
 	float fSec = (float)dwDiff/1000.0f;
 	rvector Distance = ParabolicMotion(m_Velocity, fSec) * 100;
 	rvector NewPos = m_OrigPos + Distance;
 	rvector Acceleration = NewPos - m_Pos;
 	m_Pos = NewPos;
-	m_fOpacity = (LIGHTFRAGMENT_LIFETIME-dwDiff)/(float)LIGHTFRAGMENT_LIFETIME;
+	m_fOpacity = (LIGHTFRAGMENT_LIFETIME - dwDiff) / (float)LIGHTFRAGMENT_LIFETIME;
 
 	rvector right = CrossProduct(Acceleration, RCameraDirection);
 	m_Normal = CrossProduct(Acceleration, right);
 	m_Up = CrossProduct(m_Normal, Acceleration);
 
-	if(dwDiff>LIGHTFRAGMENT_LIFETIME) return false;
+	if (dwDiff > LIGHTFRAGMENT_LIFETIME) return false;
 
 	ZEffectBillboard2::Draw(nTime);
 	m_nPrevTime = nTime;
 
 	return true;
 }
-

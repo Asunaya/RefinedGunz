@@ -5,7 +5,6 @@
 #include "ZEffectLightFragment.h"
 #include "ZEffectSmoke.h"
 #include "ZEffectLightTracer.h"
-#include "ZEffectMesh.h"
 #include "ZEffectStaticMesh.h"
 #include "ZEffectAniMesh.h"
 #include "ZGame.h"
@@ -72,7 +71,7 @@ public:
 			m_uid = pObj->GetUID();
 	}
 
-	virtual bool Draw(unsigned long int nTime)
+	virtual bool Draw(u64 nTime) override
 	{
 		ZObject* pObj = ZGetObjectManager()->GetObject(m_uid);
 
@@ -116,7 +115,7 @@ public:
 			m_uid = pObj->GetUID();
 	}
 
-	virtual bool Draw(unsigned long int nTime)
+	virtual bool Draw(u64 nTime) override
 	{
 		ZObject* pObj = ZGetObjectManager()->GetObject(m_uid);
 
@@ -171,7 +170,7 @@ public:
 		ParentType{ std::forward<Args>(args)... }
 	{}
 
-	virtual bool Draw(unsigned long int nTime) override
+	virtual bool Draw(u64 nTime) override
 	{
 		uint32_t Color = Get();
 		
@@ -241,7 +240,7 @@ void ZEffect::CheckWaterSkip(int mode,float height)
 		m_bWaterSkip = false;
 }
 
-bool ZEffect::Draw(unsigned long int nTime)
+bool ZEffect::Draw(u64 nTime)
 {
 	return true;
 }
@@ -2469,7 +2468,7 @@ public:
 		: ZEffectIcon(pMesh,pObj)
 	{}
 
-		virtual bool Draw(unsigned long int nTime)
+		virtual bool Draw(u64 nTime) override
 		{
 			ZObject* pObj = ZGetObjectManager()->GetObject(m_uid);
 
@@ -2494,7 +2493,7 @@ public:
 		: ZEffectIconLoop(pMesh,pObj)
 	{}
 
-		virtual bool Draw(unsigned long int nTime)
+		virtual bool Draw(u64 nTime) override
 		{
 			MMatchObjCache* pCache = ZGetGameClient()->FindObjCache(m_uid);
 			if (pCache && pCache->GetUGrade() != MMUG_STAR)
@@ -2556,7 +2555,7 @@ void ZEffectManager::AddChatIcon(ZObject* pObj)
 			: ZEffectIcon(pMesh,pObj) {
 			}
 
-			virtual bool Draw(unsigned long int nTime)
+			virtual bool Draw(u64 nTime) override
 			{
 				ZObject* pObj = ZGetObjectManager()->GetObject(m_uid);
 
@@ -2596,7 +2595,7 @@ void ZEffectManager::AddLostConIcon(ZObject* pObj)
 			: ZEffectIcon(pMesh,pObj) {
 			}
 
-			virtual bool Draw(unsigned long int nTime)
+			virtual bool Draw(u64 nTime) override
 			{
 				ZObject* pObj = ZGetObjectManager()->GetObject(m_uid);
 

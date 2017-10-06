@@ -1,5 +1,4 @@
-#ifndef _ZEffectStaticMesh_h
-#define _ZEffectStaticMesh_h
+#pragma once
 
 #include "ZEffectManager.h"
 #include "RVisualMeshMgr.h"
@@ -10,7 +9,6 @@ class ZObject;
 
 class ZEffectMesh : public ZEffect{
 protected:
-//	RealSpace2::RMesh*	m_pMesh;
 	RealSpace2::RVisualMesh m_VMesh;
 	rvector	m_Pos;
 	rvector	m_Velocity;
@@ -20,24 +18,24 @@ protected:
 	float	m_nStartTime;
 
 public:
-	ZEffectMesh(RMesh* pMesh, const rvector& Pos, const rvector& Velocity );
-	virtual bool Draw(unsigned long int nTime){ return true; };
+	ZEffectMesh(RMesh* pMesh, const rvector& Pos, const rvector& Velocity);
+	virtual bool Draw(u64 nTime) override { return true; }
 
 	virtual rvector GetSortPos() {
 		return m_Pos;
 	}
 
 	virtual void CheckWaterSkip(int mode,float height) {
-		if(mode==0)	// 물속..
+		if (mode == 0)
 		{
-			if( m_Pos.z >= height )
+			if (m_Pos.z >= height)
 				m_bWaterSkip = true;
 			else
 				m_bWaterSkip = false;
 		}
-		else // 물위에서 그리기
+		else
 		{
-			if( m_Pos.z >= height )
+			if (m_Pos.z >= height)
 				m_bWaterSkip = false;
 			else
 				m_bWaterSkip = true;
@@ -45,16 +43,11 @@ public:
 	}
 };
 
-class ZEffectStaticMesh : public ZEffectMesh , public CMemPoolSm<ZEffectStaticMesh>
+class ZEffectStaticMesh : public ZEffectMesh, public CMemPoolSm<ZEffectStaticMesh>
 {
-
 protected:
 	MUID	m_uid;
 public:
-	ZEffectStaticMesh(RMesh* pMesh, const rvector& Pos, const rvector& Velocity, MUID uid );
-	virtual bool Draw(unsigned long int nTime);
-
+	ZEffectStaticMesh(RMesh* pMesh, const rvector& Pos, const rvector& Velocity, MUID uid);
+	virtual bool Draw(u64 nTime) override;
 };
-
-
-#endif//_ZEffectStaticMesh_h

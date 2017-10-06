@@ -1,63 +1,63 @@
-#ifndef ZEFFECTSMOKE_H
-#define ZEFFECTSMOKE_H
+#pragma once
 
 #include "ZEffectBillboard.h"
 #include "RTypes.h"
 
 #include "mempool.h"
 
-// 사용안하는것들은 지운다..
-
 class ZEffectSmoke : public ZEffectBillboard , public CMemPoolSm<ZEffectSmoke>
 {
 protected:
-	unsigned long int m_nStartTime;
+	u64 m_nStartTime;
 	float m_fMinScale;
 	float m_fMaxScale;
-	unsigned long int m_nLifeTime;
+	u64 m_nLifeTime;
 	rvector	m_OrigPos;
 	rvector	m_Velocity;
 public:
-	ZEffectSmoke(ZEffectBillboardSource* pEffectBillboardSource, const rvector& Pos, const rvector& Velocity, float fMinScale, float fMaxScale, unsigned long int nLifeTime);
-	virtual ~ZEffectSmoke(void);
+	ZEffectSmoke(ZEffectBillboardSource* pEffectBillboardSource,
+		const rvector& Pos, const rvector& Velocity,
+		float fMinScale, float fMaxScale,
+		u64 nLifeTime);
 
-	virtual bool Draw(unsigned long int nTime);
+	virtual bool Draw(u64 nTime) override;
 };
 
 class ZEffectLandingSmoke : public ZEffectBillboard , public CMemPoolSm<ZEffectLandingSmoke>
 {
 protected:
-	unsigned long int m_nStartTime;
+	u64 m_nStartTime;
 	float m_fMinScale;
 	float m_fMaxScale;
-	unsigned long int m_nLifeTime;
+	u64 m_nLifeTime;
 	rvector	m_OrigPos;
 	rvector	m_Velocity;
 
 public:
-	ZEffectLandingSmoke(ZEffectBillboardSource* pEffectBillboardSource, const rvector& Pos, const rvector& Velocity, float fMinScale, float fMaxScale, unsigned long int nLifeTime);
-	virtual ~ZEffectLandingSmoke(void);
+	ZEffectLandingSmoke(ZEffectBillboardSource* pEffectBillboardSource,
+		const rvector& Pos, const rvector& Velocity,
+		float fMinScale, float fMaxScale,
+		u64 nLifeTime);
 
-	virtual bool Draw(unsigned long int nTime);
+	virtual bool Draw(u64 nTime) override;
 };
  
 class ZEffectSmokeGrenade : public ZEffectBillboard , public CMemPoolSm<ZEffectSmokeGrenade>
 {
 protected:
-	unsigned long int m_nStartTime;
+	u64 m_nStartTime;
 	float m_fMinScale;
 	float m_fMaxScale;
-	unsigned long int m_nLifeTime;
+	u64 m_nLifeTime;
 	rvector	m_OrigPos;
 	rvector	m_Velocity;
 
 public:
-	virtual bool Draw( unsigned long int nTime );
+	virtual bool Draw(u64 nTime) override;
 
 public:
-	ZEffectSmokeGrenade(ZEffectBillboardSource* pEffectBillboardSource, const rvector& Pos, const rvector& Velocity, float fMinScale, float fMaxScale, unsigned long int nLifeTime);
-	virtual ~ZEffectSmokeGrenade();
+	ZEffectSmokeGrenade(ZEffectBillboardSource* pEffectBillboardSource, 
+		const rvector& Pos, const rvector& Velocity,
+		float fMinScale, float fMaxScale,
+		u64 nLifeTime);
 };
-
-
-#endif

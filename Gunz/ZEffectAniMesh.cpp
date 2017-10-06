@@ -15,7 +15,6 @@ ZEffectAniMesh::ZEffectAniMesh(RMesh* pMesh, const rvector& Pos, const rvector& 
 	_ASSERT(pMesh);
 	m_VMesh.Create(pMesh);
 	bool bRet=m_VMesh.SetAnimation("play");
-//	_ASSERT(bRet);
 
 	m_Pos = Pos;
 	m_Dir = dir;
@@ -62,35 +61,25 @@ ZEffectSlash::ZEffectSlash(RMesh* pMesh, const rvector& Pos, const rvector& dir)
 
 void ZEffectAniMesh::CheckCross(rvector& Dir,rvector& Up)
 {
-/*
-	Normalize(Dir);
-	Normalize(Up);
-
-	rvector diff = Dir - Up;
-
-	if( diff.x < 0.001 && diff.y < 0.001 && diff.z < 0.001)
-		Up = rvector(0,1,0);// -.-;;
-*/
 	float dot = DotProduct(Dir,Up);
 
 	if(dot > 0.99f || dot < -0.99f)
-		Up = rvector(0,1,0);// -.-;;
+		Up = rvector(0,1,0);
 }
 
-bool ZEffectAniMesh::Draw(unsigned long int nTime)
+bool ZEffectAniMesh::Draw(u64 nTime)
 {
 	if(m_VMesh.m_pMesh==NULL)
 		return false;
 
 	AniFrameInfo* pInfo = m_VMesh.GetFrameInfo(ani_mode_lower);
 
-	if(pInfo->m_pAniSet==NULL)// m_VMesh.m_pAniSet[0]==NULL
+	if(pInfo->m_pAniSet==NULL)
 		return false;
 
 	if(nTime < m_nStartTime + m_nStartAddTime) {
 		return true;
 	}
-	// 그리기가 연기 된경우 지금 상태의 캐릭터 데이터를 참조..
 
 	if( m_bDelay && !m_isCheck ) {
 
@@ -108,20 +97,6 @@ bool ZEffectAniMesh::Draw(unsigned long int nTime)
 			_vdir.z = 0;
 			Normalize(_vdir);
 
-			/*
-			int cm = g_pGame->SelectSlashEffectMotion(pObj);//남녀 칼 휘두르는 방향
-			if(cm==SEM_ManSlash5) {
-				_vdir.z = 0.f;
-				_vp += _vdir * 120.f;
-				_vp.z -= 100.f;
-			}
-			else if(cm==SEM_WomanSlash5) {
-				_vdir.z = 0.f;
-				_vp += _vdir * 200.f;
-				_vp.z -= 80.f;
-			}
-			*/
-
 			m_Pos = _vp;
 			m_Dir = _vdir;
 		}
@@ -129,10 +104,7 @@ bool ZEffectAniMesh::Draw(unsigned long int nTime)
 		m_isCheck = true;
 	}
 
-	DWORD dwDiff = nTime - m_nStartTime;
-
-//	float fSec = (float)dwDiff/1000.0f;	
-//	float fOpacity = (SC_LIFETIME-dwDiff)/(float)SC_LIFETIME;
+	auto dwDiff = nTime - m_nStartTime;
 
 	rvector Dir;
 
@@ -185,7 +157,6 @@ bool ZEffectAniMesh::Draw(unsigned long int nTime)
 			vPos.y = pNode->m_mat_result._42;
 			vPos.z = pNode->m_mat_result._43;
 
-//			static rmatrix _mrot = RGetRotY(180) * RGetRotX(90);
 			static rmatrix _mrot = RGetRotX(90);
 
 			vPos = vPos * _mrot;
@@ -198,7 +169,7 @@ bool ZEffectAniMesh::Draw(unsigned long int nTime)
 		}
 	}
 
-	if( m_nLifeTime != -1 && m_bLoopType ) {// 소멸 시간이 정해져 있고..에니메이션이 루프 타잎인 경우..
+	if( m_nLifeTime != -1 && m_bLoopType ) {
 		if(m_VMesh.isOncePlayDone())
 			if(nTime > m_nStartTime + m_nLifeTime) {
 				return false;
@@ -268,7 +239,7 @@ ZEffectDash::ZEffectDash(RMesh* pMesh, const rvector& Pos, const rvector& Dir,MU
 }
 
 
-bool ZEffectDash::Draw(unsigned long int nTime)
+bool ZEffectDash::Draw(u64 nTime)
 {
 	ZObject *pTarget = g_pGame->m_ObjectManager.GetObject(m_uid);
 
@@ -283,13 +254,7 @@ bool ZEffectDash::Draw(unsigned long int nTime)
 			m_Pos = pTarget->GetPosition();
 		return ZEffectAniMesh::Draw(nTime);
 	}
-/*
-	if(m_pObj) {
-		m_Pos = m_pObj->GetPosition();
-	}
 
-	return ZEffectSlash::Draw(nTime);
-*/	
 	return false;
 }
 
@@ -306,14 +271,13 @@ ZEffectLevelUp::ZEffectLevelUp(RMesh* pMesh, const rvector& Pos, const rvector& 
 }
 
 
-bool ZEffectLevelUp::Draw(unsigned long int nTime)
+bool ZEffectLevelUp::Draw(u64 nTime)
 {
 	ZObject* pObj = ZGetObjectManager()->GetObject(m_uid);
 
 	if(pObj) {
 		if(pObj->m_pVMesh) {
 		
-//			m_Pos = pObj->GetPosition() + m_vAddPos;
 			m_Pos = pObj->m_pVMesh->GetBipTypePosition(m_type);
 			m_DirOrg = pObj->m_Direction;
 			return ZEffectAniMesh::Draw(nTime);
@@ -335,7 +299,7 @@ ZEffectPartsTypePos::ZEffectPartsTypePos(RMesh* pMesh, const rvector& Pos, const
 }
 
 
-bool ZEffectPartsTypePos::Draw(unsigned long int nTime)
+bool ZEffectPartsTypePos::Draw(u64 nTime)
 {
 	ZObject* pObj = ZGetObjectManager()->GetObject(m_uid);
 
@@ -346,7 +310,6 @@ bool ZEffectPartsTypePos::Draw(unsigned long int nTime)
 				return false;
 
 			m_Pos = pObj->m_pVMesh->GetBipTypePosition(m_type);
-//			m_DirOrg = pObj->m_Direction;
 			return ZEffectAniMesh::Draw(nTime);
 		}
 	}
@@ -365,15 +328,14 @@ ZEffectWeaponEnchant::ZEffectWeaponEnchant(RMesh* pMesh, const rvector& Pos, con
 }
 
 
-bool ZEffectWeaponEnchant::Draw(unsigned long int nTime)
+bool ZEffectWeaponEnchant::Draw(u64 nTime)
 {
 	ZObject* pObj = ZGetObjectManager()->GetObject(m_uid);
 
 	if(pObj) {
 		if(pObj->m_pVMesh) {
 
-			// 무기모델이 안그려지면 
-			RVisualMesh* pVMesh = pObj->m_pVMesh->GetSelectWeaponVMesh();//weapon_mesh
+			RVisualMesh* pVMesh = pObj->m_pVMesh->GetSelectWeaponVMesh();
 
 			if(pVMesh)
 				if(!pVMesh->m_bIsRender) return false;
@@ -384,8 +346,6 @@ bool ZEffectWeaponEnchant::Draw(unsigned long int nTime)
 			m_Up	 = rvector(m._11,m._12,m._13);
 
 			bool hr = ZEffectAniMesh::Draw(nTime);
-
-			// 양손에 무기에 대한처리			
 
 			if( pObj->m_pVMesh->IsDoubleWeapon() ) 
 			{
@@ -415,7 +375,7 @@ ZEffectIcon::ZEffectIcon(RMesh* pMesh, ZObject* pObj)
 }
 
 
-bool ZEffectIcon::Draw(unsigned long int nTime)
+bool ZEffectIcon::Draw(u64 nTime)
 {
 	ZObject* pObj = ZGetObjectManager()->GetObject(m_uid);
 
@@ -445,16 +405,13 @@ ZEffectShot::ZEffectShot(RMesh* pMesh, const rvector& Pos, const rvector& Dir,ZO
 }
 
 
-bool ZEffectShot::Draw(unsigned long int nTime)
+bool ZEffectShot::Draw(u64 nTime)
 {
 	if( m_isMovingPos ) {
 
 		ZObject* pObj = ZGetObjectManager()->GetObject(m_uid);
 
 		if(pObj) {
-
-//			if( MIsDerivedFromClass(ZCharacterObject, pObj )==false) return false;
-//			ZCharacterObject* pCObj = (ZCharacterObject*)pObj;
 
 			ZCharacterObject* pCObj = MDynamicCast(ZCharacterObject, pObj);
 
@@ -499,7 +456,7 @@ ZEffectBerserkerIconLoop::ZEffectBerserkerIconLoop(RMesh* pMesh, ZObject* pObj)
 	}
 }
 
-bool ZEffectBerserkerIconLoop::Draw(unsigned long int nTime)
+bool ZEffectBerserkerIconLoop::Draw(u64 nTime)
 {
 	ZObject* pObj = ZGetObjectManager()->GetObject(m_uid);
 	ZCharacter* pChar = MDynamicCast(ZCharacter, pObj);
@@ -518,4 +475,3 @@ bool ZEffectBerserkerIconLoop::Draw(unsigned long int nTime)
 
 	return false;
 }
-

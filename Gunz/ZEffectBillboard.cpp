@@ -121,7 +121,7 @@ ZEffectBillboard::~ZEffectBillboard(void)
 {
 }
 
-bool ZEffectBillboard::Draw(unsigned long int nTime)
+bool ZEffectBillboard::Draw(u64 nTime)
 {
 	if(m_pEffectBillboardSource!=NULL) {
 		if(m_bRender) {
@@ -208,7 +208,7 @@ ZEffectBillboard2::~ZEffectBillboard2(void)
 {
 }
 
-bool ZEffectBillboard2::Draw(unsigned long int nTime)
+bool ZEffectBillboard2::Draw(u64 nTime)
 {
 	if(m_bRender)
 		m_bisRendered = m_EffectBillboardDrawer.Draw(m_pEffectBillboardTexture, m_Pos, m_Normal, m_Up, m_Scale, m_fOpacity);

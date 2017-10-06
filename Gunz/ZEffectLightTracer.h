@@ -15,7 +15,6 @@ protected:
 
 public:
 	ZEffectLightTracer(ZEffectBillboardSource* pEffectBillboardSource, const rvector& Start, const rvector& End);
-	virtual ~ZEffectLightTracer(void);
 
-	virtual bool Draw(u64 nTime);
+	virtual bool Draw(u64 nTime) override;
 };

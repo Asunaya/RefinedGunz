@@ -3,7 +3,6 @@
 #include "ZEffectManager.h"
 #include "RMeshUtil.h"
 
-
 enum ZCOMBOLEVEL {
 	ZCL_NONE = 0,
 	ZCL_GOOD,
@@ -18,11 +17,11 @@ protected:
 	rvector	m_Offset;
 
 public:
-	ZScreenEffect(RMesh* pMesh,rvector offset=rvector(0,0,0));
-	virtual bool Draw(unsigned long int nTime);
-	virtual void Update();
-	virtual bool IsDeleteTime();
-	bool DrawCustom(unsigned long int nTime, const rvector& offset, float fAngle=0.0f);
+	ZScreenEffect(RMesh* pMesh, rvector offset = rvector(0, 0, 0));
+	virtual bool Draw(u64 nTime) override;
+	virtual void Update() override;
+	virtual bool IsDeleteTime() override;
+	bool DrawCustom(u64 nTime, const rvector& offset, float fAngle = 0.0f);
 	RealSpace2::RVisualMesh *GetVMesh() { return &m_VMesh; }
 	void SetOffset(rvector& offset) { m_Offset = offset; }
 };
@@ -33,7 +32,7 @@ public:
 	bool bDelete;
 	float fDeleteTime;
 	ZComboEffect(RMesh* pMesh,rvector offset=rvector(0,0,0));
-	virtual bool Draw(unsigned long int nTime);
+	virtual bool Draw(u64 nTime) override;
 	void SetFrame(int nFrame);
 	void DeleteAfter(float fTime=0.f);
 };
@@ -50,7 +49,7 @@ private:
 public:
 	ZBossGaugeEffect(RMesh* pMesh,rvector offset=rvector(0,0,0));
 	void Shock(float fPower);
-	virtual bool Draw(unsigned long int nTime);
+	virtual bool Draw(u64 nTime) override;
 };
 
 class ZKOEffect : public ZScreenEffect {
@@ -125,7 +124,6 @@ private:
 	bool m_bShowReload{};
 	bool m_bShowEmpty{};
 
-	// Äù½ºÆ® °ü·Ã
 	ZBossGaugeEffect*	m_pBossHPPanel{};
 	ZScreenEffect*		m_pArrow{};
 	ZKOEffect*			m_pKONumberEffect[10]{};
