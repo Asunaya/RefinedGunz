@@ -386,6 +386,11 @@ struct MTD_DuelQueueInfo
 	bool			m_bIsRoundEnd;					// 라운드 끝날때인가
 };
 
+struct MTD_GunGameWeaponInfo
+{
+	u32 WeaponIDs[5];
+};
+
 struct MTD_ClientSettings
 {
 	bool DebugOutput = false;

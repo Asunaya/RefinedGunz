@@ -46,6 +46,7 @@
 #include "stuff.h"
 #include "MPickInfo.h"
 #include "reinterpret.h"
+#include "GunGame.h"
 
 #define DEFAULT_REQUEST_UID_SIZE		4200000000
 #define DEFAULT_REQUEST_UID_SPARE_SIZE	10000
@@ -384,6 +385,12 @@ bool MMatchServer::LoadInitFile()
 	if (!MGetChannelRuleMgr()->ReadXml(FILENAME_CHANNELRULE))
 	{
 		Log(LOG_ALL, "Load ChannelRule.xml Failed");
+		return false;
+	}
+
+	if (!MGetGunGame()->ReadXML("gungame.xml"))
+	{
+		Log(LOG_ALL, "Load GunGame.xml Failed.\n");
 		return false;
 	}
 

@@ -10,6 +10,7 @@
 #include "ZRuleBerserker.h"
 #include "ZRuleDuel.h"
 #include "ZRuleSkillmap.h"
+#include "ZRuleGunGame.h"
 
 ZRule::ZRule(ZMatch* pMatch)
 {
@@ -91,6 +92,11 @@ ZRule* ZRule::CreateRule(ZMatch* pMatch, MMATCH_GAMETYPE nGameType)
 	{
 								 return (new ZRuleSkillmap(pMatch));
 	}
+		break;
+	case MMATCH_GAMETYPE_GUNGAME:
+		{
+			return (new ZRuleGunGame(pMatch));
+		}
 		break;
 	default:
 		{

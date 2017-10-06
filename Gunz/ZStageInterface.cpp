@@ -270,6 +270,7 @@ void ZStageInterface::OnStageInterfaceSettup()
 			break;
 
 		case MMATCH_GAMETYPE_DEATHMATCH_SOLO:
+		case MMATCH_GAMETYPE_GUNGAME:
 			color = SDM_COLOR;
 			break;
 
@@ -367,7 +368,8 @@ void ZStageInterface::ChangeStageGameSetting( MSTAGE_SETTING_NODE* pSetting)
 		 (pSetting->nGameType == MMATCH_GAMETYPE_GLADIATOR_SOLO) ||
 		 (pSetting->nGameType == MMATCH_GAMETYPE_BERSERKER) ||
 		 (pSetting->nGameType == MMATCH_GAMETYPE_TRAINING) ||
-		 (pSetting->nGameType == MMATCH_GAMETYPE_DUEL))
+		 (pSetting->nGameType == MMATCH_GAMETYPE_DUEL) ||
+		 (pSetting->nGameType == MMATCH_GAMETYPE_GUNGAME))
 	{
 		if ( pAniMapImg)
 			pAniMapImg->SetCurrentFrame( 0);
@@ -444,7 +446,8 @@ void ZStageInterface::ChangeStageGameSetting( MSTAGE_SETTING_NODE* pSetting)
 			(pSetting->nGameType == MMATCH_GAMETYPE_GLADIATOR_SOLO) ||
 			(pSetting->nGameType == MMATCH_GAMETYPE_TRAINING) ||
 			(pSetting->nGameType == MMATCH_GAMETYPE_BERSERKER) ||
-			(pSetting->nGameType == MMATCH_GAMETYPE_DUEL))
+			(pSetting->nGameType == MMATCH_GAMETYPE_DUEL) ||
+			(pSetting->nGameType == MMATCH_GAMETYPE_GUNGAME))
 			pWidget->SetText( ZMsg(MSG_WORD_KILL));
 
 		else

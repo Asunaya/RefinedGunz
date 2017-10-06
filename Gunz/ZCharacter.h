@@ -123,6 +123,7 @@ public:
 	void Destroy();
 	
 	void InitMeshParts();
+	void SelectWeapon();
 	
 	void EmptyHistory();
 

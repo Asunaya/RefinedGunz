@@ -9,6 +9,7 @@
 #include "ZPost.h"
 #include "MMatchUtil.h"
 #include "ZRuleDuel.h"
+#include "ZRuleGunGame.h"
 
 #include "RGMain.h"
 #include "ZReplay.inl"
@@ -116,6 +117,39 @@ static bool ChangeGameState(const REPLAY_STAGE_SETTING_NODE& rssn)
 	return true;
 }
 
+static bool ApplyGunGameWeapons(const std::vector<MTD_GunGameWeaponInfo>& WeaponInfos)
+{
+	int size = int(WeaponInfos.size());
+
+	auto&& CharMgr = *ZGetCharacterManager();
+	auto it = CharMgr.begin();
+
+	auto* Rule = static_cast<ZRuleGunGame*>(ZGetGameInterface()->GetGame()->GetMatch()->GetRule());
+
+	for (int i = 0; i < size; ++i)
+	{
+		if (it == CharMgr.end())
+		{
+			MLog("Internal error: There are fewer characters than there are "
+				"MTD_GunGameWeaponInfos (%d chars, %d gg infos)\n", i, size);
+			return false;
+		}
+
+		Rule->SetPlayerWeapons(it->second, WeaponInfos[i].WeaponIDs);
+
+		++it;
+	}
+
+	if (it != CharMgr.end())
+	{
+		MLog("Internal error: There are more characters than there are "
+			"MTD_GunGameWeaponInfos (%d chars, %d gg infos)\n", int(CharMgr.size()), size);
+		return false;
+	}
+
+	return true;
+}
+
 static bool LoadReplayData(ZReplayLoader& Loader, const char* filename)
 {
 	try
@@ -138,13 +172,26 @@ static bool LoadReplayData(ZReplayLoader& Loader, const char* filename)
 		if (!ChangeGameState(StageSetting))
 			return false;
 
+		std::vector<MTD_GunGameWeaponInfo> GunGameWeaponInfos;
 		if (StageSetting.nGameType == MMATCH_GAMETYPE_DUEL)
 		{
 			ZRuleDuel* pDuel = static_cast<ZRuleDuel*>(ZGetGameInterface()->GetGame()->GetMatch()->GetRule());
 			Loader.GetDuelQueueInfo(&pDuel->QInfo);
 		}
+		else if (StageSetting.nGameType == MMATCH_GAMETYPE_GUNGAME)
+		{
+			GunGameWeaponInfos = Loader.GetGunGameWeaponInfo();
+		}
 
 		CreatePlayers(Loader.GetCharInfo());
+
+		if (StageSetting.nGameType == MMATCH_GAMETYPE_GUNGAME)
+		{
+			if (!ApplyGunGameWeapons(GunGameWeaponInfos))
+			{
+				return false;
+			}
+		}
 
 		auto PerCommand = [&](MCommand *Command, float Time)
 		{

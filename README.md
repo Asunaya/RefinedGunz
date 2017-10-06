@@ -66,6 +66,7 @@ Features of the server can be configured in the file "CSCommon/config.h".
 
 ## New gamemodes
 - Skillmap -- Skillmaps contain start and end zones, track your time, and teleport you back to the start zone when you fall. Will have a time record list in the future. Other players are partially transparent and cannot damage or push you.
+- Gun game -- A gamemode where your equipped weapons change every time you get a kill.
 
 ## Replays
 - Runs multiple formats -- Have so far tested Official V4, V6, V7, V10 and V11; Freestyle Gunz V7 (both formats), V8, V9 and V10; and Dark Gunz V6. If you'd like another replay format to be supported, [make an issue](https://github.com/Asunaya/RefinedGunz/issues/new) with the replay file.
@@ -84,3 +85,4 @@ Features of the server can be configured in the file "CSCommon/config.h".
 
 # Credits
 - grandao for http://forum.ragezone.com/f245/release-development-rsx-realspacex-1060866/
+- Jetman for gun game gamemode

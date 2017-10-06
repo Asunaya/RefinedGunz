@@ -496,6 +496,7 @@ enum Type : uint32_t
 #define MC_MATCH_UPDATE_CLIENT_SETTINGS 8014
 #define MC_MATCH_PING_LIST 8015
 #define MC_PEER_BASICINFO_RG 8016
+#define MC_MATCH_GUNGAME_SEND_NEW_WEAPON 8017
 
 //
 // 10000-19999: Ingame peer-to-peer commands

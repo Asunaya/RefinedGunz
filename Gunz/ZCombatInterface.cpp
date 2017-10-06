@@ -516,6 +516,15 @@ void ZCombatInterface::OnDraw(MDrawContext* pDC)
 			TextRelative(pDC, 100.f / 800.f, fCenterVert, buffer);
 		}
 
+		if (ZGetGame()->GetMatch()->GetMatchType() == MMATCH_GAMETYPE_GUNGAME)
+		{
+			int MaxLevel = ZGetGame()->GetMatch()->GetRoundCount();
+			int Level = std::min(MaxLevel, ZGetGame()->m_pMyCharacter->GetKills() + 1);
+			char buffer[256];
+			sprintf_safe(buffer, "[Level %d / %d]", Level, MaxLevel);
+			TextRelative(pDC, 660.f / 800.f, 480.f / 600.f, buffer);
+		}
+
 		TextRelative(pDC, 660.f / 800.f, 510.f / 600.f, m_szItemName);
 
 		if (pCharacter->GetItems()->GetSelectedWeaponParts() != MMCIP_MELEE)

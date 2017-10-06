@@ -2246,6 +2246,11 @@ void ZCharacter::InitMeshParts()
 	SetAnimationUpper(ZC_STATE_UPPER_NONE);
 	SetAnimationLower(ZC_STATE_LOWER_IDLE1);
 
+	SelectWeapon();
+}
+
+void ZCharacter::SelectWeapon()
+{
 	if (!g_pGame->GetMatch()->IsRuleGladiator())
 	{
 		if (!m_Items.GetItem(MMCIP_PRIMARY)->IsEmpty()) ChangeWeapon(MMCIP_PRIMARY);

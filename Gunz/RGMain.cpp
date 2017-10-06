@@ -408,7 +408,16 @@ void RGMain::OnReplaySelected(MListBox* ReplayFileListWidget)
 
 		SelectedReplayInfo.Timestamp = Loader.GetTimestamp();
 		Loader.GetStageSetting(SelectedReplayInfo.StageSetting);
-		Loader.GetDuelQueueInfo();
+
+		if (SelectedReplayInfo.StageSetting.nGameType == MMATCH_GAMETYPE_DUEL)
+		{
+			Loader.GetDuelQueueInfo();
+		}
+		else if (SelectedReplayInfo.StageSetting.nGameType == MMATCH_GAMETYPE_GUNGAME)
+		{
+			(void)Loader.GetGunGameWeaponInfo();
+		}
+
 		auto InitialCharInfos = Loader.GetCharInfo();
 
 		for (const auto &CharInfo : InitialCharInfos)

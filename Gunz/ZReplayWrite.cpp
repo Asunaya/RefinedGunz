@@ -42,6 +42,54 @@ static bool WriteDuelInfo(ZFile& File)
 	return true;
 }
 
+static bool WriteGunGameInfo(ZFile& File, ZCharacterManager& CharacterManager)
+{
+	// MTD_GunGameWeaponInfo does not itself contain any information about whom it belongs to,
+	// instead this information is inferred from the order, since the data is written for each
+	// player in the same order as the character info written by WriteCharacters.
+	// Also, since ZCharacterManager is a std::map<MUID, ZCharacter*>, they'll be written in
+	// ascending order with respect to the MUID's.
+
+	int CharacterCount = CharacterManager.size();
+	WRITE(CharacterCount);
+	for (auto& Item : CharacterManager)
+	{
+		auto* Char = Item.second;
+		MTD_GunGameWeaponInfo Info{};
+		for (int i = 0; i < 5; ++i)
+		{
+			auto Parts = MMatchCharItemParts(int(MMCIP_MELEE) + i);
+			auto* Item = Char->GetItems()->GetItem(Parts);
+			if (!Item)
+			{
+				assert(false);
+				continue;
+			}
+
+			Info.WeaponIDs[i] = Item->GetDescID();
+		}
+
+		WRITE(Info);
+	}
+
+	return true;
+}
+
+static bool WriteGameTypeInfo(ZFile& File, ZCharacterManager& CharacterManager)
+{
+	switch (ZGetGameClient()->GetMatchStageSetting()->GetGameType())
+	{
+	case MMATCH_GAMETYPE_DUEL:
+		V(WriteDuelInfo(File));
+		break;
+	case MMATCH_GAMETYPE_GUNGAME:
+		V(WriteGunGameInfo(File, CharacterManager));
+		break;
+	}
+
+	return true;
+}
+
 static bool WriteCharacters(ZFile& File, ZCharacterManager& CharacterManager)
 {
 	auto CharacterCount = i32(CharacterManager.size());
@@ -70,9 +118,7 @@ bool WriteReplayStart(ZFile& File, float Time, ZCharacterManager& CharacterManag
 {
 	V(WriteHeader(File));
 	V(WriteStageSetting(File));
-	if (ZGetGameClient()->GetMatchStageSetting()->GetGameType() == MMATCH_GAMETYPE_DUEL) {
-		V(WriteDuelInfo(File));
-	}
+	V(WriteGameTypeInfo(File, CharacterManager));
 	V(WriteCharacters(File, CharacterManager));
 	V(WriteTime(File, Time));
 

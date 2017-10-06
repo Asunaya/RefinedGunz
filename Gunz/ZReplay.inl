@@ -437,6 +437,28 @@ inline void ZReplayLoader::GetDuelQueueInfo(MTD_DuelQueueInfo* QueueInfo)
 	Read(*QueueInfo);
 }
 
+inline std::vector<MTD_GunGameWeaponInfo> ZReplayLoader::GetGunGameWeaponInfo()
+{
+	Read(GunGameCharacterCount);
+
+	if (GunGameCharacterCount <= 0 || GunGameCharacterCount > 64)
+	{
+		MLog("Replay is corrupt: Gun game info character count is %d, "
+			"expected value between 1 and 64\n",
+			GunGameCharacterCount);
+		throw std::runtime_error{ "Replay is corrupt" };
+	}
+
+	std::vector<MTD_GunGameWeaponInfo> ret;
+	ret.resize(GunGameCharacterCount);
+	for (int i = 0; i < GunGameCharacterCount; ++i)
+	{
+		Read(ret[i]);
+	}
+
+	return ret;
+}
+
 inline std::vector<ReplayPlayerInfo> ZReplayLoader::GetCharInfo()
 {
 	std::vector<ReplayPlayerInfo> ret;
@@ -446,6 +468,17 @@ inline std::vector<ReplayPlayerInfo> ZReplayLoader::GetCharInfo()
 
 	if (nCharacterCount <= 0 || nCharacterCount > 64)
 	{
+		MLog("Replay is corrupt: Char info character count is %d, "
+			"expected value between 1 and 64\n",
+			nCharacterCount);
+		throw std::runtime_error{ "Replay is corrupt" };
+	}
+
+	if (GunGameCharacterCount != -1 && GunGameCharacterCount != nCharacterCount)
+	{
+		MLog("Replay is corrupt: Character counts in char info and gun game info differ.\n"
+			"Char info count = %d, gun game info count = %d\n",
+			nCharacterCount, GunGameCharacterCount);
 		throw std::runtime_error{ "Replay is corrupt" };
 	}
 

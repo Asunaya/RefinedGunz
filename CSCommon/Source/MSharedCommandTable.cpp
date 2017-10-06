@@ -77,6 +77,13 @@ void MAddSharedCommandTable(MCommandManager* CommandManager, MSharedCommandType:
 	C(MC_PEER_BASICINFO_RG, "", "", MCDT_PEER2PEER);
 		// NOTE: This is validated in the handler, by UnpackNewBasicInfo.
 		P(MPT_BLOB, "BasicInfo");
+	C(MC_MATCH_GUNGAME_SEND_NEW_WEAPON, "", "", MCDT_MACHINE2MACHINE);
+		P(MPT_UID, "uidPlayer");
+		P(MPT_UINT, "melee");
+		P(MPT_UINT, "primary");
+		P(MPT_UINT, "secondary");
+		P(MPT_UINT, "custom1");
+		P(MPT_UINT, "custom2");
 
 
 	// Freestyle Gunz commands

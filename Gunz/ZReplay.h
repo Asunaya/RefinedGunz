@@ -92,6 +92,7 @@ public:
 	time_t GetTimestamp() const { return Timestamp; }
 	void GetStageSetting(REPLAY_STAGE_SETTING_NODE &ret);
 	void GetDuelQueueInfo(MTD_DuelQueueInfo* QueueInfo = nullptr);
+	std::vector<MTD_GunGameWeaponInfo> GetGunGameWeaponInfo();
 	std::vector<ReplayPlayerInfo> GetCharInfo();
 	template <typename T>
 	bool GetCommands(T ForEachCommand, bool PersistentMCommands, ArrayView<u32>* WantedCommandIDs = nullptr);
@@ -107,6 +108,7 @@ private:
 	bool IsDojo = false;
 	MMATCH_GAMETYPE GameType = MMATCH_GAMETYPE_DEATHMATCH_SOLO;
 	time_t Timestamp = 0;
+	int GunGameCharacterCount = -1;
 
 	template <typename T>
 	void Read(T& Obj);
