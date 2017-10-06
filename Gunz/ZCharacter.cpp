@@ -2703,6 +2703,10 @@ void ZCharacter::InitRound()
 	if(GetUserGrade()==MMUG_STAR) {
 		ZGetEffectManager()->AddStarEffect(this);
 	}
+
+	if (m_bChatEffect) {
+		ZGetEffectManager()->AddChatIcon(this);
+	}
 }
 
 ZOBJECTHITTEST ZCharacter::HitTest(const rvector& origin, const rvector& to,float fTime,rvector *pOutPos)
