@@ -267,7 +267,7 @@ bool RGMain::OnEvent(MEvent *pEvent)
 
 #ifdef VOICECHAT
 	static bool LastState = false;
-	bool CurState = ZIsActionKeyPressed(ZACTION_VOICE_CHAT);
+	bool CurState = ZIsActionKeyDown(ZACTION_VOICE_CHAT);
 
 	ret = [&]
 	{

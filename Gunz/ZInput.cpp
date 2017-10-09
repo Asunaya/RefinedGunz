@@ -121,6 +121,8 @@ void ZInput::Update()
 {
 	if (!m_pDirectInput->IsInitialized()) return;
 
+	memcpy(m_ActionKeyPressedLastTable, m_ActionKeyPressedTable, sizeof(m_ActionKeyPressedTable));
+
 	////////////////////////////////////////////////////////
 	// 키보드 입력
 	static ZDIBUFFER keyBuffer[256];

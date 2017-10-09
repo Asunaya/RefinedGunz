@@ -150,20 +150,20 @@ void ZMyCharacter::ProcessInput(float fDelta)
 				m_Accel += vec;
 				ButtonPressed = true;
 			};
-			if (ZIsActionKeyPressed(ZACTION_FORWARD) == true)
+			if (ZIsActionKeyDown(ZACTION_FORWARD) == true)
 				AddAccel(forward);
-			if (ZIsActionKeyPressed(ZACTION_BACK) == true)
+			if (ZIsActionKeyDown(ZACTION_BACK) == true)
 				AddAccel(-forward);
-			if (ZIsActionKeyPressed(ZACTION_RIGHT) == true)
+			if (ZIsActionKeyDown(ZACTION_RIGHT) == true)
 				AddAccel(right);
-			if (ZIsActionKeyPressed(ZACTION_LEFT) == true)
+			if (ZIsActionKeyDown(ZACTION_LEFT) == true)
 				AddAccel(-right);
 		}
 
 		if (ButtonPressed)
 			Normalize(m_Accel);
 
-		m_bBackMoving = ZIsActionKeyPressed(ZACTION_BACK);
+		m_bBackMoving = ZIsActionKeyDown(ZACTION_BACK);
 
 		float fRatio = GetMoveSpeedRatio();
 
@@ -177,7 +177,7 @@ void ZMyCharacter::ProcessInput(float fDelta)
 		bool bWallJump = false;
 		int nWallJumpDir = -1;
 
-		if (ZIsActionKeyPressed(ZACTION_JUMP) == true)
+		if (ZIsActionKeyDown(ZACTION_JUMP) == true)
 		{
 			if (m_bReleasedJump && !m_bLimitJump)
 			{
@@ -388,7 +388,7 @@ void ZMyCharacter::ProcessInput(float fDelta)
 
 					rvector PickedNormal = -m_Direction; PickedNormal.z = 0;
 
-					if (ZIsActionKeyPressed(ZACTION_FORWARD))
+					if (ZIsActionKeyDown(ZACTION_FORWARD))
 					{
 						m_nWallJump2Dir = 6;
 						SetVelocity(PickedNormal*50.f);
@@ -954,7 +954,7 @@ void ZMyCharacter::ProcessGadget()
 	if (GetStateUpper() == ZC_STATE_UPPER_RELOAD || GetStateUpper() == ZC_STATE_UPPER_LOAD)
 		return;
 
-	bool bPressingSecondary = ZIsActionKeyPressed(ZACTION_USE_WEAPON2);
+	bool bPressingSecondary = ZIsActionKeyDown(ZACTION_USE_WEAPON2);
 	bool bSecondary = bPressingSecondary && !bWasPressingSecondaryLastFrame;
 
 	if (bSecondary && m_bLand) {
@@ -1153,7 +1153,7 @@ void ZMyCharacter::ProcessShot()
 {
 	if (ZApplication::GetGame()->GetMatch()->GetRoundState() == MMATCH_ROUNDSTATE_PREPARE) return;
 	if (m_bInitialized == false) return;
-	if (ZIsActionKeyPressed(ZACTION_USE_WEAPON2)) return;
+	if (ZIsActionKeyDown(ZACTION_USE_WEAPON2)) return;
 
 	if (!m_bLButtonPressed) m_bEnterCharge = false;
 
@@ -1493,7 +1493,7 @@ void ZMyCharacter::WallJump2()
 
 	if (m_nWallJumpDir == 1)
 	{
-		if (ZIsActionKeyPressed(ZACTION_FORWARD))
+		if (ZIsActionKeyDown(ZACTION_FORWARD))
 		{
 			m_nWallJump2Dir = 6;
 			SetVelocity(jump2*50.f);
@@ -1547,7 +1547,7 @@ void ZMyCharacter::UpdateLimit()
 
 void ZMyCharacter::UpdateButtonState()
 {
-	bool bLButtonPressed = ZIsActionKeyPressed(ZACTION_USE_WEAPON);
+	bool bLButtonPressed = ZIsActionKeyDown(ZACTION_USE_WEAPON);
 
 	m_bLButtonFirstPressed = bLButtonPressed && !m_bLButtonPressed;
 	if (m_bLButtonFirstPressed)
@@ -1556,7 +1556,7 @@ void ZMyCharacter::UpdateButtonState()
 	m_bLButtonPressed = bLButtonPressed;
 
 
-	bool bRButtonPressed = ZIsActionKeyPressed(ZACTION_USE_WEAPON2);
+	bool bRButtonPressed = ZIsActionKeyDown(ZACTION_USE_WEAPON2);
 
 	m_bRButtonFirstReleased = (m_bRButtonPressed && !bRButtonPressed);
 
@@ -2402,7 +2402,7 @@ float ZMyCharacter::GetControllabilityFactor()
 void ZMyCharacter::UpdateCAFactor(float fDelta)
 {
 	const float fCurrWeaponCAFactor = GetControllabilityFactor();
-	bool bPressed = ZIsActionKeyPressed(ZACTION_USE_WEAPON);
+	bool bPressed = ZIsActionKeyDown(ZACTION_USE_WEAPON);
 	if (bPressed) return;
 
 	m_fElapsedCAFactorTime += fDelta;

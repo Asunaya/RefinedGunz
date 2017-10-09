@@ -652,7 +652,7 @@ void ZCombatInterface::OnDraw(MDrawContext* pDC)
 
 	m_bDrawScoreBoard = false;
 
-	if( ZIsActionKeyPressed(ZACTION_SCORE) == true ) {
+	if( ZIsActionKeyDown(ZACTION_SCORE) == true ) {
 		if (m_Chat.IsShow() == false)
 			m_bDrawScoreBoard = true;
 	}

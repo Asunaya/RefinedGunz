@@ -1022,7 +1022,7 @@ void Chat::OnDraw(MDrawContext* pDC)
 		(HideDuringReplays && ZGetGame()->IsReplay()))
 		return;
 
-	bool ShowAll = ZIsActionKeyPressed(ZACTION_SHOW_FULL_CHAT) && !InputEnabled;
+	bool ShowAll = ZIsActionKeyDown(ZACTION_SHOW_FULL_CHAT) && !InputEnabled;
 	auto&& Output = GetOutputRect();
 
 	int CeiledLimit, FlooredLimit;

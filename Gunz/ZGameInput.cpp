@@ -569,12 +569,12 @@ void ZGameInput::Update(float fElapsed)
 
 					rvector accel = rvector(0, 0, 0);
 
-					if (ZIsActionKeyPressed(ZACTION_FORWARD) == true)	accel += forward;
-					if (ZIsActionKeyPressed(ZACTION_BACK) == true)		accel -= forward;
-					if (ZIsActionKeyPressed(ZACTION_LEFT) == true)		accel -= right;
-					if (ZIsActionKeyPressed(ZACTION_RIGHT) == true)		accel += right;
-					if (ZIsActionKeyPressed(ZACTION_JUMP) == true)		accel += up;
-					if (ZIsActionKeyPressed(ZACTION_USE_WEAPON) == true)accel -= up;
+					if (ZIsActionKeyDown(ZACTION_FORWARD) == true)	accel += forward;
+					if (ZIsActionKeyDown(ZACTION_BACK) == true)		accel -= forward;
+					if (ZIsActionKeyDown(ZACTION_LEFT) == true)		accel -= right;
+					if (ZIsActionKeyDown(ZACTION_RIGHT) == true)		accel += right;
+					if (ZIsActionKeyDown(ZACTION_JUMP) == true)		accel += up;
+					if (ZIsActionKeyDown(ZACTION_USE_WEAPON) == true)accel -= up;
 
 					auto cameraMove = (pCamera->GetLookMode() == ZCAMERA_FREELOOK ? 1000.f : 10000.f) *
 						fElapsed * accel;

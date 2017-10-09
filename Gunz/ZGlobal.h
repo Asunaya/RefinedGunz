@@ -73,8 +73,22 @@ inline ZWorldManager*		ZGetWorldManager(void) { return ZApplication::GetInstance
 inline ZWorld*				ZGetWorld(void)	{ return ZGetWorldManager()->GetCurrent(); }
 inline ZOptionInterface*	ZGetOptionInterface(void) { return ZApplication::GetInstance()->GetOptionInterface(); }
 
-#define ZIsActionKeyPressed(_ActionID)	(ZGetInput()->IsActionKeyPressed(_ActionID))
-//#define ZWasActionKeyPressedLast(_ActionID)	(ZGetInput()->WasActionKeyPressedLast(_ActionID))
+// Returns true if the key is pressed down this frame.
+#define ZIsActionKeyDown(_ActionID)	(ZGetInput()->IsActionKeyDown(_ActionID))
+// Returns true if the key is not pressed down this frame.
+#define ZIsActionKeyUp(_ActionID)	(!ZGetInput()->IsActionKeyDown(_ActionID))
+
+// Returns true if the key was pressed down last frame.
+#define ZWasActionKeyDownLast(_ActionID)	(ZGetInput()->WasActionKeyDownLast(_ActionID))
+// Returns true if the key was not pressed down last frame.
+#define ZWasActionKeyUpLast(_ActionID)	(!ZGetInput()->WasActionKeyDownLast(_ActionID))
+
+// Returns true if the action key was just pressed down this frame, i.e. it was up last frame and
+// down this frame.
+#define ZWasActionKeyPressed(_ActionID) (ZWasActionKeyUpLast(_ActionID) && ZIsActionKeyDown(_ActionID))
+// Returns true if the action key was just released this frame, i.e. it was down last frame and
+// up this frame.
+#define ZWasActionKeyReleased(_ActionID) (ZWasActionKeyDownLast(_ActionID) && ZIsActionKeyUp(_ActionID))
 
 
 #endif

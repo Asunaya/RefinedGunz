@@ -101,8 +101,8 @@ void ZMatch::ProcessRespawn()
 			else if (m_nSoloSpawnTime >= ZDELAY_AFTER_DYING)
 			{
 				static bool st_bCapturedActionKey = false;
-				bool bNow = ZIsActionKeyPressed(ZACTION_USE_WEAPON) ||
-					ZIsActionKeyPressed(ZACTION_JUMP);
+				bool bNow = ZIsActionKeyDown(ZACTION_USE_WEAPON) ||
+					ZIsActionKeyDown(ZACTION_JUMP);
 
 				if ((st_bCapturedActionKey == true) && (bNow == false))
 				{

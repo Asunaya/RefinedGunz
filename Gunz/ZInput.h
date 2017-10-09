@@ -36,6 +36,7 @@ class ZInput
 	ZACTIONKEYMAP	m_ActionKeyMap;
 
 	bool			m_ActionKeyPressedTable[ZACTION_COUNT];
+	bool			m_ActionKeyPressedLastTable[ZACTION_COUNT];
 	
 	bool			m_JoyPressedTable[MAX_JOY_VIRTUAL_BUTTON];
 
@@ -81,13 +82,22 @@ public:
 	// 모든 입력을 받을수 있는 독점 리스너 설정
 	void SetExclusiveListener(MGLOBALEVENTCALLBACK pEventCallback);
 
-	bool IsActionKeyPressed(int nActionID)
+	bool IsActionKeyDown(int nActionID)
 	{
 		if(nActionID<0 || nActionID>=ZACTION_COUNT){
 			_ASSERT(FALSE);	// 0 ~ ACTIONKEYMAP_IDCOUNT-1 사이값이여야 한다.
 			return false;
 		}
 		return m_ActionKeyPressedTable[nActionID];
+	}
+
+	bool WasActionKeyDownLast(int nActionID)
+	{
+		if (nActionID<0 || nActionID >= ZACTION_COUNT) {
+			_ASSERT(FALSE);	// 0 ~ ACTIONKEYMAP_IDCOUNT-1 사이값이여야 한다.
+			return false;
+		}
+		return m_ActionKeyPressedLastTable[nActionID];
 	}
 
 	// 입력은 0~1 사이, 0 = 진동없음. 1 = 진동 최대

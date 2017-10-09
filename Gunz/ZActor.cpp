@@ -141,10 +141,10 @@ void ZActor::TestControl(float fDelta)
 	Normalize(forward);
 	CrossProduct(&right,rvector(0,0,1),forward);
 
-	if(ZIsActionKeyPressed(ZACTION_FORWARD)==true)	m_Accel+=forward;
-	if(ZIsActionKeyPressed(ZACTION_BACK)==true)		m_Accel-=forward;
-	if(ZIsActionKeyPressed(ZACTION_LEFT)==true)		m_Accel-=right;
-	if(ZIsActionKeyPressed(ZACTION_RIGHT)==true)	m_Accel+=right;
+	if(ZIsActionKeyDown(ZACTION_FORWARD)==true)	m_Accel+=forward;
+	if(ZIsActionKeyDown(ZACTION_BACK)==true)		m_Accel-=forward;
+	if(ZIsActionKeyDown(ZACTION_LEFT)==true)		m_Accel-=right;
+	if(ZIsActionKeyDown(ZACTION_RIGHT)==true)	m_Accel+=right;
 
 	Normalize(m_Accel);
 
