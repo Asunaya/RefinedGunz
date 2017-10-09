@@ -209,7 +209,7 @@ void ZActor::InitFromNPCType(MQUEST_NPC nNPCType, float fTC, int nQL)
 	}
 
 	if(m_pNPCInfo->nSkills) {
-		AddModule<ZModule_Skills>();
+		m_pModule_Skills = AddModule<ZModule_Skills>();
 		m_pModule_Skills->Init(m_pNPCInfo->nSkills,m_pNPCInfo->nSkillIDs);
 	}
 

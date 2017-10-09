@@ -465,8 +465,6 @@ bool ZScreenEffectManager::Create()
 	m_pTDScoreBlink_B = new ZTDMBlinkEffect(m_pEffectMeshMgr->Get("td_scoreblink_b"));
 	m_pTDScoreBlink_R = new ZTDMBlinkEffect(m_pEffectMeshMgr->Get("td_scoreblink_r"));
 
-	CreateQuestRes();
-
 	END_("Screen Effect Manager Create");
 	return true;
 
