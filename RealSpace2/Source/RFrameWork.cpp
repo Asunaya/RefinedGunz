@@ -170,6 +170,12 @@ void RFrame_Render()
 	return RFrame_RenderVulkan();
 }
 
+void RFrame_PrePresent()
+{
+	if (g_pFunctions[RF_PREPRESENT])
+		g_pFunctions[RF_PREPRESENT](nullptr);
+}
+
 LRESULT FAR PASCAL WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	// Handle messages

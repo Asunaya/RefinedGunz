@@ -157,7 +157,8 @@ public:
 	{
 		{
 			std::lock_guard<std::mutex> lock(QueueMutex[0]);
-			Tasks.push(Task);
+			auto Func = std::function<void()>{ std::forward<T>(Task) };
+			Tasks.emplace(std::move(Func));
 			Notified = true;
 		}
 

@@ -528,6 +528,37 @@ void LoadRGCommands(ZChatCmdManager& CmdManager)
 	},
 		CCF_ALL, 1, 1, true, "/vsync <0/1>", "");
 
+	CmdManager.AddCommand(0, "asyncscreenshots", [](const char *line, int argc, char ** const argv) {
+		SetBool("Async screenshots", ZGetConfiguration()->AsyncScreenshots, argc, argv);
+	},
+		CCF_ALL, 0, 1, true, "/asyncscreenshots [0/1]", "");
+
+	CmdManager.AddCommand(0, "screenshotformat", [](const char *line, int argc, char ** const argv) {
+		const char* Extensions[] = {
+			"bmp",
+			"jpg",
+			"png",
+		};
+
+		int Value = -1;
+		for (int i = 0; i < int(std::size(Extensions)); ++i)
+		{
+			if (iequals(argv[1], Extensions[i]))
+			{
+				Value = i;
+			}
+		}
+
+		if (Value == -1)
+		{
+			ZChatOutput("Invalid argument. Must be bmp, jpg or png.");
+		}
+
+		ZGetConfiguration()->ScreenshotFormat = static_cast<ScreenshotFormatType>(Value);
+		ZChatOutputF("Set screenshot format to %s", Extensions[Value]);
+	},
+		CCF_ALL, 1, 1, true, "/screenshotformat <bmp/jpg/png>", "");
+
 	CmdManager.AddCommand(0, "freelook", [](const char *line, int argc, char ** const argv) {
 		if (!CheckDeveloperMode("freelook"))
 			return;

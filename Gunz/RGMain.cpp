@@ -18,19 +18,6 @@
 #include "defer.h"
 #include "RS2.h"
 
-#define DXERR(func) DXErr(func, __func__, #func)
-
-inline bool DXErr(HRESULT hr, const char* CallingFunction, const char* DXFunction)
-{
-	if (SUCCEEDED(hr))
-		return false;
-
-	MLog("In %s, %s failed -- error code: %s, description: %s\n",
-		CallingFunction, DXFunction, DXGetErrorString(hr), DXGetErrorDescription(hr));
-
-	return true;
-}
-
 optional<RGMain> g_RGMain;
 
 RGMain& GetRGMain() { return g_RGMain.value(); }

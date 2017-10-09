@@ -2843,7 +2843,6 @@ void ZGameInterface::ClearMapThumbnail()
 	SAFE_DELETE(m_pThumbnailBitmap);
 }
 
-
 void ZGameInterface::Reload()
 {
 	if (!g_pGame->m_pMyCharacter->GetItems()->GetSelectedWeapon()) return;
@@ -2871,100 +2870,184 @@ void ZGameInterface::Reload()
 	ZPostReload();
 }
 
-void ZGameInterface::SaveScreenShot()
+void ZGameInterface::OnScreenshot()
 {
-	static unsigned long int st_nLastTime = 0;
-	unsigned long int nNowTime = GetGlobalTimeMS();
-#define SCREENSHOT_DELAY		2000
-
-	// 2√  µÙ∑π¿Ã
-	if ((nNowTime - st_nLastTime) < SCREENSHOT_DELAY)	return;
-	st_nLastTime = nNowTime;
-
-
-	int nsscount = 0;
-	char screenshotfilename[_MAX_PATH];
-	char screenshotfoldername[_MAX_PATH];
-	char screenshotfilenameJPG[_MAX_PATH];
-	char screenshotfilenameBMP[_MAX_PATH];
-
-	TCHAR szPath[MAX_PATH];
-	if (GetMyDocumentsPath(szPath)) {
-		strcpy_safe(screenshotfoldername, szPath);
-		strcat_safe(screenshotfoldername, GUNZ_FOLDER);
-		CreatePath(screenshotfoldername);
-		strcat_safe(screenshotfoldername, SCREENSHOT_FOLDER);
-		CreatePath(screenshotfoldername);
-	}
-
-	do {
-		sprintf_safe(screenshotfilename, "%s/Gunz%03d", screenshotfoldername, nsscount);
-		sprintf_safe(screenshotfilenameJPG, "%s/Gunz%03d.jpg", screenshotfoldername, nsscount);
-		sprintf_safe(screenshotfilenameBMP, "%s/Gunz%03d.bmp", screenshotfoldername, nsscount);
-		nsscount++;
-	} while ((IsExist(screenshotfilenameJPG) || (IsExist(screenshotfilenameBMP))) && nsscount < 1000);
-
-	LPBYTE data = NULL;
-	LPDIRECT3DSURFACE9 frontbuffer = NULL;
-
-	if (nsscount < 1000)
+	if (ZGetConfiguration()->AsyncScreenshots)
 	{
-
-		HRESULT hr;
-		LPDIRECT3DDEVICE9 pDevice = RGetDevice();
-
-		D3DDISPLAYMODE d3ddm;
-		pDevice->GetDisplayMode(0, &d3ddm);
-
-		hr = pDevice->CreateOffscreenPlainSurface(d3ddm.Width, d3ddm.Height, D3DFMT_A8R8G8B8, D3DPOOL_SCRATCH, &frontbuffer, NULL);
-		hr = pDevice->GetFrontBufferData(0, frontbuffer);
-
-		_ASSERT(hr == D3D_OK);
-
-		RECT rt;
-		GetWindowRect(g_hWnd, &rt);
-
-		D3DLOCKED_RECT LRECT;
-		if (frontbuffer->LockRect(&LRECT, &rt, NULL) == D3D_OK)
+		if (!ScreenshotPixelBuffer)
 		{
-			int nWidth = rt.right - rt.left;
-			int nHeight = rt.bottom - rt.top;
-
-			int pitch = LRECT.Pitch;
-			LPBYTE source = (LPBYTE)LRECT.pBits;
-
-			data = new BYTE[nWidth*nHeight * 4];
-			for (int i = 0; i < nHeight; i++)
-			{
-				memcpy(data + i*nWidth * 4, source + pitch*i, nWidth * 4);
-			}
-
-			bool bSuccess = RScreenShot(nWidth, nHeight, data, screenshotfilename);
-			if (!bSuccess) goto SCREENSHOTERROR;
-
-			char szOutputFilename[256];
-			sprintf_safe(szOutputFilename, GUNZ_FOLDER SCREENSHOT_FOLDER"/Gunz%03d.jpg", nsscount - 1);
-
-			char szOutput[256];
-			ZTransMsg(szOutput, MSG_SCREENSHOT_SAVED, 1, szOutputFilename);
-			ZChatOutput(MCOLOR(ZCOLOR_CHAT_SYSTEM), szOutput);
-
-			SAFE_DELETE(data);
+			ScreenshotQueued = true;
 		}
-		SAFE_RELEASE(frontbuffer);
 	}
-	return;
-
-SCREENSHOTERROR:
-	SAFE_DELETE(data);
-	SAFE_RELEASE(frontbuffer);
-
-	ZChatOutput(MCOLOR(ZCOLOR_CHAT_SYSTEM),
-		ZMsg(MSG_SCREENSHOT_CANT_SAVE));
-
-	return;
+	else
+	{
+		SaveScreenshot(true);
+	}
 }
 
+void ZGameInterface::SaveScreenshotIfQueued()
+{
+	if (!ScreenshotQueued)
+		return;
+
+	ScreenshotQueued = false;
+
+	SaveScreenshot(false);
+}
+
+template <size_t Size>
+static int GetScreenshotFilename(char(&Output)[Size])
+{
+	char ScreenshotFolderName[MFile::MaxPath];
+
+	char szPath[MFile::MaxPath];
+	if (!GetMyDocumentsPath(szPath))
+	{
+		MLog("GetScreenshotFilename -- Failed to get documents folder path\n");
+		return -1;
+	}
+
+	strcpy_safe(ScreenshotFolderName, szPath);
+	strcat_safe(ScreenshotFolderName, GUNZ_FOLDER);
+	CreatePath(ScreenshotFolderName);
+	strcat_safe(ScreenshotFolderName, SCREENSHOT_FOLDER);
+	CreatePath(ScreenshotFolderName);
+
+	int ScreenshotCount = -1;
+	char ScreenshotFilenameWithExtension[MFile::MaxPath];
+
+	auto ExistsWithWildcard = [](const char* Spec)
+	{
+		auto range = MFile::FilesAndSubdirsInDir(Spec);
+		return range.begin() != range.end();
+	};
+
+	do {
+		ScreenshotCount++;
+		sprintf_safe(ScreenshotFilenameWithExtension, "%s/Gunz%03d.*", ScreenshotFolderName, ScreenshotCount);
+	} while (ExistsWithWildcard(ScreenshotFilenameWithExtension));
+
+	sprintf_safe(Output, "%s/Gunz%03d", ScreenshotFolderName, ScreenshotCount);
+
+	return ScreenshotCount;
+}
+
+static void NotifyFailedScreenshot()
+{
+	ZChatOutput(MCOLOR(ZCOLOR_CHAT_SYSTEM),
+		ZMsg(MSG_SCREENSHOT_CANT_SAVE));
+}
+
+static void NotifyScreenshotStatus(bool ScreenshotSucceeded, int ScreenshotCount)
+{
+	ZGetGameInterface()->ScreenshotPixelBuffer.reset();
+
+	if (ScreenshotSucceeded)
+	{
+		auto* Extension = GetScreenshotFormatExtension(ZGetConfiguration()->ScreenshotFormat);
+
+		char szOutputFilename[512];
+		sprintf_safe(szOutputFilename, GUNZ_FOLDER SCREENSHOT_FOLDER"/Gunz%03d.%s",
+			ScreenshotCount, Extension);
+
+		char szOutput[512];
+		ZTransMsg(szOutput, MSG_SCREENSHOT_SAVED, 1, szOutputFilename);
+		ZChatOutput(MCOLOR(ZCOLOR_CHAT_SYSTEM), szOutput);
+	}
+	else
+	{
+		NotifyFailedScreenshot();
+	}
+};
+
+#define FAIL() do { NotifyFailedScreenshot(); return; } while (false)
+#define V(expr) do { if (DXERR(expr)) FAIL(); } while (false)
+
+void ZGameInterface::SaveScreenshot(bool Sync)
+{
+	char ScreenshotFilename[MFile::MaxPath];
+	auto ScreenshotCount = GetScreenshotFilename(ScreenshotFilename);
+
+	if (ScreenshotCount < 0)
+	{
+		MLog("ZGameInterface::SaveScreenshot -- Failed to get screenshot filename, "
+			"ScreenshotCount = %d\n", ScreenshotCount);
+		FAIL();
+	}
+
+	auto* pDevice = RGetDevice();
+
+	D3DPtr<IDirect3DSurface9> Surface;
+
+	if (Sync)
+	{
+		V(pDevice->CreateOffscreenPlainSurface(RGetScreenWidth(), RGetScreenHeight(),
+			D3DFMT_A8R8G8B8, D3DPOOL_SCRATCH, MakeWriteProxy(Surface), NULL));
+		V(pDevice->GetFrontBufferData(0, Surface.get()));
+	}
+	else
+	{
+		V(pDevice->CreateOffscreenPlainSurface(RGetScreenWidth(), RGetScreenHeight(),
+			RGetPixelFormat(), D3DPOOL_SYSTEMMEM, MakeWriteProxy(Surface), NULL));
+
+		D3DPtr<IDirect3DSurface9> RenderTarget;
+		V(pDevice->GetRenderTarget(0, MakeWriteProxy(RenderTarget)));
+		V(pDevice->GetRenderTargetData(RenderTarget.get(), Surface.get()));
+	}
+
+	RECT rt;
+	GetWindowRect(g_hWnd, &rt);
+
+	D3DLOCKED_RECT Rect;
+	V(Surface->LockRect(&Rect, &rt, NULL));
+
+	int nWidth = rt.right - rt.left;
+	int nHeight = rt.bottom - rt.top;
+
+	auto* TexturePtr = static_cast<u8*>(Rect.pBits);
+
+	ScreenshotPixelBuffer = std::make_unique<u8[]>(nWidth * nHeight * 4);
+	auto ScreenshotPixelBufferPtr = ScreenshotPixelBuffer.get();
+
+	for (int i = 0; i < nHeight; i++)
+	{
+		memcpy(ScreenshotPixelBufferPtr + i * nWidth * 4, TexturePtr + Rect.Pitch * i, nWidth * 4);
+	}
+
+	V(Surface->UnlockRect());
+
+	if (Sync)
+	{
+		bool ScreenshotSucceeded = RScreenShot(nWidth, nHeight,
+			ScreenshotPixelBuffer.get(), ScreenshotFilename,
+			ZGetConfiguration()->ScreenshotFormat);
+
+		NotifyScreenshotStatus(ScreenshotSucceeded, ScreenshotCount);
+	}
+	else
+	{
+		auto AsyncProc = [nWidth, nHeight, ScreenshotCount,
+			Filename = std::string{ ScreenshotFilename }]
+		{
+			auto* Interface = ZGetGameInterface();
+
+			bool ScreenshotSucceeded = Interface && RScreenShot(nWidth, nHeight,
+				ZGetGameInterface()->ScreenshotPixelBuffer.get(), Filename.c_str(),
+				ZGetConfiguration()->ScreenshotFormat);
+
+			auto MainThreadProc = [ScreenshotSucceeded, ScreenshotCount]
+			{
+				NotifyScreenshotStatus(ScreenshotSucceeded, ScreenshotCount);
+			};
+			GetRGMain().Invoke(MainThreadProc);
+		};
+
+		TaskManager::GetInstance().AddTask(std::move(AsyncProc));
+	}
+}
+
+#undef V
+#undef FAIL
 
 void ZGameInterface::Sell()
 {

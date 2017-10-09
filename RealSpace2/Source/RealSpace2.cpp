@@ -8,6 +8,7 @@
 #include "RFont.h"
 #include "dxerr.h"
 #include "RS2.h"
+#include "MFile.h"
 using std::min;
 using std::max;
 #ifdef _USE_GDIPLUS
@@ -590,6 +591,8 @@ void RFlip()
 {
 	REndScene();
 
+	RFrame_PrePresent();
+
 	g_pd3dDevice->Present(NULL, NULL, NULL, NULL);
 
 	RClear();
@@ -731,14 +734,13 @@ int GetCodecClsid(const WCHAR* format, CLSID* pClsid)
 	return -1;  // Failure
 } // GetCodecClsid
 
-// data ´Â ARGB 32bit Æ÷¸Ë
-bool RSaveAsJpeg(int x, int y, void *data, const char *szFilename)
+bool RSaveAsGeneric(int x, int y, void *data, const char *szFilename, bool JPG)
 {
 	// Setting up RAW Data
 	BitmapData bitmapData;
-	bitmapData.Width = x,
-		bitmapData.Height = y,
-		bitmapData.Stride = 4 * bitmapData.Width;
+	bitmapData.Width = x;
+	bitmapData.Height = y;
+	bitmapData.Stride = 4 * bitmapData.Width;
 	bitmapData.PixelFormat = PixelFormat32bppARGB;
 	bitmapData.Scan0 = data;
 	bitmapData.Reserved = NULL;
@@ -750,18 +752,34 @@ bool RSaveAsJpeg(int x, int y, void *data, const char *szFilename)
 	bitmap.UnlockBits(&bitmapData);
 
 	// Make WFileName
-	WCHAR wstrName[256];
+	WCHAR wstrName[512];
 	int nNameLen = strlen(szFilename) + 1;
 	MultiByteToWideChar(CP_ACP, 0, szFilename, -1, wstrName, nNameLen - 1);
 	wstrName[nNameLen - 1] = 0;
 
 	// Save Bitmap
-	CLSID  Clsid;
-	int ret = GetCodecClsid(L"image/jpeg", &Clsid);;
-	if (bitmap.Save(wstrName, &Clsid, NULL) == Ok)
-		return true;
-	else
+	CLSID Clsid;
+	int ret = GetCodecClsid(JPG ? L"image/jpeg" : L"image/png", &Clsid);
+	if (ret == -1)
 		return false;
+
+	return bitmap.Save(wstrName, &Clsid, NULL) == Ok;
+}
+
+bool RSaveAsJpeg(int x, int y, void *data, const char *szFilename)
+{
+	return RSaveAsGeneric(x, y, data, szFilename, true);
+}
+
+bool RSaveAsPng(int x, int y, void *data, const char *szFilename)
+{
+	auto* ByteData = static_cast<u8*>(data);
+	for (int i = 0; i < x * y; ++i)
+	{
+		ByteData[i * 4 + 3] = 0xFF;
+	}
+
+	return RSaveAsGeneric(x, y, data, szFilename, false);
 }
 #endif	// _USE_GDIPLUS
 
@@ -785,17 +803,28 @@ bool RSaveAsBmp(int x, int y, void *data, const char *szFilename)
 	return true;
 }
 
-bool RScreenShot(int x, int y, void *data, const char *szFilename)
+bool RScreenShot(int x, int y, void *data, const char *szFilename, ScreenshotFormatType Format)
 {
-	char szFullFileName[_MAX_DIR];
+	auto* Extension = GetScreenshotFormatExtension(Format);
+	if (!Extension)
+		return false;
 
+	char FullFilename[MFile::MaxPath];
+	sprintf_safe(FullFilename, "%s.%s", szFilename, Extension);
+
+	switch (Format)
+	{
+	case ScreenshotFormatType::BMP:
+		return RSaveAsBmp(x, y, data, FullFilename);
 #ifdef _USE_GDIPLUS
-	sprintf_safe(szFullFileName, "%s.jpg", szFilename);
-	return RSaveAsJpeg(x, y, data, szFullFileName);
-#else
-	sprintf_safe(szFullFileName, "%s.bmp", szFilename);
-	return RSaveAsBmp(x, y, data, szFullFileName);
+	case ScreenshotFormatType::JPG:
+		return RSaveAsJpeg(x, y, data, FullFilename);
+	case ScreenshotFormatType::PNG:
+		return RSaveAsPng(x, y, data, FullFilename);
 #endif
+	}
+
+	return false;
 }
 
 bool RGetScreenLine(int sx, int sy, rvector *pos, rvector *dir)

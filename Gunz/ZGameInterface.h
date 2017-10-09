@@ -250,7 +250,12 @@ public:
 	void ReserveLeaveBattle();
 	void FinishGame(void);
 
-	void SaveScreenShot();
+	void OnScreenshot();
+	void SaveScreenshotIfQueued();
+	void SaveScreenshot(bool Sync);
+
+	bool ScreenshotQueued{};
+	std::unique_ptr<u8[]> ScreenshotPixelBuffer;
 
 	void ShowMessage(const char* szText, MListener* pCustomListenter=NULL, int nMessageID=0);
 	void ShowConfirmMessage(const char* szText, MListener* pCustomListenter=NULL);

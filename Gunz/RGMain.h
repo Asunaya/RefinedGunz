@@ -12,6 +12,22 @@
 #include "ZReplay.h"
 #include "NewChat.h"
 #include "optional.h"
+#include <DxErr.h>
+
+inline bool DXErr(HRESULT hr, const char* CallingFunction, const char* DXFunction)
+{
+	if (SUCCEEDED(hr))
+		return false;
+
+	MLog("In %s, %s failed -- error code: %s, description: %s\n",
+		CallingFunction, DXFunction, DXGetErrorString(hr), DXGetErrorDescription(hr));
+
+	return true;
+}
+
+// Returns true if DirectX expression failed, and false otherwise. Additionally, if it failed,
+// it logs the error.
+#define DXERR(expr) DXErr(expr, __func__, #expr)
 
 class ZChatCmdManager;
 class MEvent;

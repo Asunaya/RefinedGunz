@@ -504,6 +504,13 @@ RRESULT OnError(void *pParam)
 	return R_OK;
 }
 
+static RRESULT OnPrePresent(void*)
+{
+	if (ZGetGameInterface())
+		ZGetGameInterface()->SaveScreenshotIfQueued();
+	return R_OK;
+}
+
 static void SetModeParams()
 {
 	g_ModeParams.FullscreenMode = ZGetConfiguration()->GetVideo()->FullscreenMode;
@@ -604,6 +611,7 @@ static void SetRS2Callbacks()
 	RSetFunction(RF_ACTIVATE, OnActivate);
 	RSetFunction(RF_DEACTIVATE, OnDeActivate);
 	RSetFunction(RF_ERROR, OnError);
+	RSetFunction(RF_PREPRESENT, OnPrePresent);
 }
 
 int PASCAL WinMain(HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline, int cmdshow)

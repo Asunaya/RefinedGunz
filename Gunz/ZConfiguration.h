@@ -205,6 +205,8 @@ public:
 	bool IsComplete() const			{ return m_bIsComplete; }
 
 	bool ConvertMacroStrings();
+	bool AsyncScreenshots = true;
+	ScreenshotFormatType ScreenshotFormat = ScreenshotFormatType::PNG;
 
 private:
 	friend void LoadRGCommands(ZChatCmdManager &CmdManager);

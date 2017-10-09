@@ -37,9 +37,32 @@ enum RFUNCTIONTYPE {
 	RF_ACTIVATE,
 	RF_DEACTIVATE,
 	RF_ERROR,
+	RF_PREPRESENT,
 
 	RF_ENDOFRFUNCTIONTYPE
 };
+
+enum class ScreenshotFormatType
+{
+	BMP,
+	JPG,
+	PNG,
+};
+
+inline const char* GetScreenshotFormatExtension(ScreenshotFormatType Format)
+{
+	switch (Format)
+	{
+	case ScreenshotFormatType::BMP:
+		return "bmp";
+	case ScreenshotFormatType::JPG:
+		return "jpg";
+	case ScreenshotFormatType::PNG:
+		return "png";
+	}
+
+	return nullptr;
+}
 
 using RFFUNCTION = RRESULT(*)(void *Params);
 
@@ -136,7 +159,7 @@ void RDrawCircle(rvector origin, float fRadius, int nSegment);
 void RDrawArc(rvector origin, float fRadius, float fAngle1, float fAngle2, int nSegment, DWORD color);
 
 bool RSaveAsBmp(int x, int y, void *data, const char *szFilename);
-bool RScreenShot(int x, int y, void *data, const char *szFilename);
+bool RScreenShot(int x, int y, void *data, const char *szFilename, ScreenshotFormatType Format);
 
 void RSetGammaRamp(unsigned short nGammaValue = 255);
 void RSetWBuffer(bool bEnable);

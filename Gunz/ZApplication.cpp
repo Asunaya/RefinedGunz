@@ -638,9 +638,11 @@ void ZApplication::OnUpdate()
 
 	__EP(2);
 
-	if(ZIsActionKeyDown(ZACTION_SCREENSHOT)) {
-		if(m_pGameInterface)
-			m_pGameInterface->SaveScreenShot();
+	if (ZWasActionKeyPressed(ZACTION_SCREENSHOT)) {
+		if (m_pGameInterface)
+		{
+			m_pGameInterface->OnScreenshot();
+		}
 	}
 }
 
