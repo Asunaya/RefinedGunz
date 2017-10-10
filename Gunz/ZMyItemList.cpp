@@ -51,6 +51,9 @@ void ZMyItemList::Clear()
 
 u32 ZMyItemList::GetEquipedItemID(MMatchCharItemParts parts)
 {
+	if (parts < MMCIP_HEAD || parts >= MMCIP_END)
+		return 0;
+
 	MITEMNODEMAP::iterator itor = m_ItemMap.find(m_uidEquipItems[(int)parts]);
 	if (itor != m_ItemMap.end())
 	{
