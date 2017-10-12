@@ -856,15 +856,18 @@ void ZScreenEffectManager::UpdateEffects()
 		m_pBossHPPanel->Update();
 	}
 
-	if(!ZGetGameInterface()->GetCombatInterface()->GetObserverMode())
+	if (ZGetGameInterface()->GetCombatInterface())
 	{
-		for (auto* p : m_pKONumberEffect)
-			if (p)
-				p->Update();
+		if (!ZGetGameInterface()->GetCombatInterface()->GetObserverMode())
+		{
+			for (auto* p : m_pKONumberEffect)
+				if (p)
+					p->Update();
 
-		if (m_pKO)
-			m_pKO->Update();
-	}	
+			if (m_pKO)
+				m_pKO->Update();
+		}
+	}
 }
 
 
