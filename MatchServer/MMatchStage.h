@@ -222,6 +222,8 @@ public:
 	void OnInitRound();			// 라운드 시작시 Rule클래스에서 호출
 
 	void UpdateWorldItems();
+
+	void ResetTeams();
 };
 
 

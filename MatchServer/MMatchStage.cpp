@@ -270,6 +270,18 @@ void MMatchStage::UpdateWorldItems()
 {
 }
 
+void MMatchStage::ResetTeams()
+{
+	auto Team = GetRecommandedTeam();
+	for (auto&& Object : GetObjectList())
+	{
+		if (Object->GetEnterBattle())
+			continue;
+
+		Object->SetTeam(Team);
+	}
+}
+
 void MMatchStage::Tick(u64 nClock)
 {
 	switch (GetState())
@@ -454,13 +466,28 @@ int MMatchStage::GetTeamMemberCount(MMatchTeam nTeam)
 
 MMatchTeam MMatchStage::GetRecommandedTeam()
 {
-	int nRed, nBlue;
-	GetTeamMemberCount(&nRed, &nBlue, NULL, false);
+	auto GameType = GetStageSetting()->GetGameType();
+	auto&& GTMgr = *MGetGameTypeMgr();
 
-	if (nRed <= nBlue)
+	if (GTMgr.IsTeamGame(GameType))
+	{
+		int nRed, nBlue;
+		GetTeamMemberCount(&nRed, &nBlue, NULL, false);
+
+		if (nRed <= nBlue)
+			return MMT_RED;
+		else
+			return MMT_BLUE;
+	}
+	
+	if (GTMgr.IsQuestDerived(GameType))
+	{
+		// ZActor::GetTeamID returns MMT_BLUE, so we return MMT_RED so that the players are on a
+		// different team and friendly/enemy fire works correctly.
 		return MMT_RED;
-	else
-		return MMT_BLUE;
+	}
+
+	return MMT_ALL;
 }
 
 void MMatchStage::PlayerTeam(const MUID& uidPlayer, MMatchTeam nTeam)

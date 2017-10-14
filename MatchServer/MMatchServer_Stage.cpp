@@ -998,37 +998,57 @@ void MMatchServer::OnStageSetting(const MUID& uidPlayer, const MUID& uidStage, v
 
 	pNode->nMapIndex = pSetting->GetMapIndex();
 
-#ifdef _QUEST
-	MMATCH_GAMETYPE nLastGameType = pSetting->GetGameType();
+	auto LastGameType = pSetting->GetGameType();
+	auto CurGameType = pNode->nGameType;
 
-	if (MGetGameTypeMgr()->IsQuestDerived(pNode->nGameType))
+	if (LastGameType != CurGameType)
 	{
-		if (pNode->bForcedEntryEnabled == true) pNode->bForcedEntryEnabled = false;
-		pNode->nMaxPlayers = STAGE_QUEST_MAX_PLAYER;
-		pNode->nLimitTime = STAGESETTING_LIMITTIME_UNLIMITED;
+#ifdef _QUEST
+		bool LastQuest = MGetGameTypeMgr()->IsQuestDerived(LastGameType);
+		bool CurQuest = MGetGameTypeMgr()->IsQuestDerived(CurGameType);
 
-		if (!QuestTestServer())
+		if (LastQuest ^ CurQuest)
 		{
-			pNode->nGameType = MMATCH_GAMETYPE_DEATHMATCH_SOLO;
-		}
-	}
+			pNode->bForcedEntryEnabled = !CurQuest;
+			pNode->ForceHPAP = !CurQuest;
 
-	if ( (nLastGameType == MMATCH_GAMETYPE_QUEST) && (pNode->nGameType != MMATCH_GAMETYPE_QUEST))
-		pNode->bForcedEntryEnabled = true;
+			if (CurQuest)
+			{
+				pNode->nMaxPlayers = STAGE_QUEST_MAX_PLAYER;
+				pNode->nLimitTime = STAGESETTING_LIMITTIME_UNLIMITED;
+
+				if (!QuestTestServer())
+				{
+					pNode->nGameType = MMATCH_GAMETYPE_DEATHMATCH_SOLO;
+				}
+			}
+		}
 #endif
 
-	if (!MGetGameTypeMgr()->IsTeamGame(pNode->nGameType))
-	{
-		pNode->bAutoTeamBalancing = true;
-	}
-
-	if (nLastGameType != pNode->nGameType)
-	{
-		bool CurSwordsOnly = IsSwordsOnly(pNode->nGameType) || pNode->SwordsOnly;
-		bool LastSwordsOnly = IsSwordsOnly(nLastGameType) || pSetting->IsSwordsOnly();
-		if (LastSwordsOnly && !CurSwordsOnly && pNode->Netcode == NetcodeType::P2PLead)
+		if (!MGetGameTypeMgr()->IsTeamGame(pNode->nGameType))
 		{
-			pNode->Netcode = NetcodeType::ServerBased;
+			pNode->bAutoTeamBalancing = true;
+		}
+
+		bool LastSwordsOnly = IsSwordsOnly(LastGameType) || pSetting->IsSwordsOnly();
+		bool CurSwordsOnly = IsSwordsOnly(CurGameType) || pNode->SwordsOnly;
+
+		if (LastSwordsOnly ^ CurSwordsOnly)
+		{
+			pNode->SwordsOnly = CurSwordsOnly;
+			pNode->NoFlip = CurSwordsOnly;
+
+			if (!CurSwordsOnly && pNode->Netcode == NetcodeType::P2PLead)
+			{
+				if (MGetServerConfig()->HasGameData())
+				{
+					pNode->Netcode = NetcodeType::ServerBased;
+				}
+				else
+				{
+					pNode->Netcode = NetcodeType::P2PAntilead;
+				}
+			}
 		}
 	}
 
@@ -1040,35 +1060,36 @@ void MMatchServer::OnStageSetting(const MUID& uidPlayer, const MUID& uidStage, v
 	RouteToStage(uidStage, pCmd);
 
 
-	// 게임 모드가 변경되었을경우
-	if (nLastGameType != pSetting->GetGameType())
+	if (LastGameType != pSetting->GetGameType())
 	{
+		pStage->ResetTeams();
+
 		char szNewMap[256];
 
-		if ( (nLastGameType != MMATCH_GAMETYPE_QUEST) && ( pSetting->GetGameType() == MMATCH_GAMETYPE_QUEST))
+		if (LastGameType != MMATCH_GAMETYPE_QUEST && CurGameType == MMATCH_GAMETYPE_QUEST)
 		{
 			OnStageMap(uidStage, GetQuest()->GetSurvivalMapInfo(MSURVIVAL_MAP(0))->szName);
 
 			MMatchRuleQuest* pQuest = static_cast<MMatchRuleQuest*>(pStage->GetRule());
 			pQuest->RefreshStageGameInfo();
 		}
-		else if ( (nLastGameType != MMATCH_GAMETYPE_DUEL) && ( pSetting->GetGameType() == MMATCH_GAMETYPE_DUEL))
+		else if (LastGameType != MMATCH_GAMETYPE_DUEL && CurGameType == MMATCH_GAMETYPE_DUEL)
 		{
-			strcpy_safe( szNewMap, MGetMapName( MMATCH_MAP_HALL));
+			strcpy_safe(szNewMap, MGetMapName(MMATCH_MAP_HALL));
 			OnStageMap(uidStage, szNewMap);
 		}
-		else if ( ((nLastGameType == MMATCH_GAMETYPE_QUEST) || (nLastGameType == MMATCH_GAMETYPE_DUEL)) &&
-			      ((pSetting->GetGameType() != MMATCH_GAMETYPE_QUEST) && ( pSetting->GetGameType() != MMATCH_GAMETYPE_DUEL)))
+		else if ((LastGameType == MMATCH_GAMETYPE_QUEST || LastGameType == MMATCH_GAMETYPE_DUEL) &&
+			      (CurGameType != MMATCH_GAMETYPE_QUEST && CurGameType != MMATCH_GAMETYPE_DUEL))
 		{
-			strcpy_safe( szNewMap, MGetMapName( MMATCH_MAP_MANSION));
+			strcpy_safe(szNewMap, MGetMapName(MMATCH_MAP_MANSION));
 			OnStageMap(uidStage, szNewMap);
 		}
 
-		if (nLastGameType != MMATCH_GAMETYPE_SKILLMAP && pSetting->GetGameType() == MMATCH_GAMETYPE_SKILLMAP)
+		if (LastGameType != MMATCH_GAMETYPE_SKILLMAP && CurGameType == MMATCH_GAMETYPE_SKILLMAP)
 		{
 			OnStageMap(uidStage, "Skillmap");
 		}
-		else if (nLastGameType == MMATCH_GAMETYPE_SKILLMAP && pSetting->GetGameType() != MMATCH_GAMETYPE_SKILLMAP)
+		else if (LastGameType == MMATCH_GAMETYPE_SKILLMAP && CurGameType != MMATCH_GAMETYPE_SKILLMAP)
 		{
 			OnStageMap(uidStage, MGetMapName(MMATCH_MAP_MANSION));
 		}

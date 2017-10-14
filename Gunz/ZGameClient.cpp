@@ -960,7 +960,7 @@ void ZGameClient::UpdateStageSetting(MSTAGE_SETTING_NODE* pSetting, STAGE_STATE 
 			pSetting->AP);
 		ZChatOutput(buf, ZChat::CMT_SYSTEM);
 	}
-	if (CHECK_SETTING(NoFlip, true))
+	if (CHECK_SETTING(NoFlip, false))
 	{
 		sprintf_safe(buf, "No flip%s%s", Changed ? " changed to " : ": ",
 			pSetting->NoFlip ? "true" : "false");

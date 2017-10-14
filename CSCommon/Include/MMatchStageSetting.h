@@ -103,7 +103,7 @@ struct MSTAGE_SETTING_NODE {
 		ForceHPAP = true;
 		HP = 100;
 		AP = 50;
-		NoFlip = true;
+		NoFlip = false;
 		SwordsOnly = false;
 		VanillaMode = false;
 		InvulnerabilityStates = false;
