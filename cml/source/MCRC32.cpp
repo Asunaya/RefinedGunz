@@ -94,7 +94,7 @@ inline void MCRC32::LookupCRC32(const u8 byte, u32& dwCRC32)
 	dwCRC32 = ((dwCRC32)>>8) ^ CRC32Table[ (byte)^((dwCRC32)&0x000000FF) ];
 }
 
-u32 MCRC32::BuildCRC32(u8* pData, u32 dwSize)
+u32 MCRC32::BuildCRC32(const u8* pData, u32 dwSize)
 {
 	u32 dwCRC32 = 0xFFFFFFFF;
 

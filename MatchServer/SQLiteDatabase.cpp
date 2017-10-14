@@ -6,6 +6,7 @@
 #include "MErrorTable.h"
 #include "MMatchTransDataType.h"
 #include <cstdarg>
+#include "MCRC32.h"
 
 
 //
@@ -1173,10 +1174,56 @@ catch (const SQLiteError& e)
 	return false;
 }
 
-bool SQLiteDatabase::UpdateQuestItem(int nCID, MQuestItemMap & rfQuestIteMap, MQuestMonsterBible & rfQuestMonster)
+bool SQLiteDatabase::UpdateQuestItem(int nCID, MQuestItemMap& rfQuestIteMap, MQuestMonsterBible& rfQuestMonster)
 try
 {
-	// TODO: Implement
+	constexpr auto ActualQuestDataSize = MCRC32::SIZE + MAX_DB_QUEST_ITEM_SIZE + MAX_DB_MONSTERBIBLE_SIZE;
+	static_assert(QUEST_DATA >= ActualQuestDataSize, "Invalid constants");
+
+	u8 QuestData[QUEST_DATA]{};
+
+	for (auto&& Pair : rfQuestIteMap)
+	{
+		auto ItemID = Pair.first;
+		auto* QuestItem = Pair.second;
+
+		if (!GetQuestItemDescMgr().IsQItemID(ItemID) || !QuestItem)
+		{
+			MLog("SQLiteDatabase::UpdateQuestItem -- Invalid data in quest item map. "
+				"ItemID = %u, QuestItem = %p.\n", ItemID, static_cast<void*>(QuestItem));
+			assert(false);
+			continue;
+		}
+
+		int nIndex = MCRC32::SIZE + QuestItem->GetItemID() - MIN_QUEST_ITEM_ID;
+		unsigned char nValue = 0;
+		if (QuestItem->GetCount() > 0)
+		{
+			nValue = QuestItem->GetCount() + MIN_QUEST_DB_ITEM_COUNT;
+		}
+		else if (QuestItem->IsKnown())
+		{
+			nValue = MIN_QUEST_DB_ITEM_COUNT;
+		}
+		else
+		{
+			nValue = 0;
+		}
+
+		QuestData[nIndex] = static_cast<u8>(nValue);
+	}
+
+	memcpy(QuestData + MCRC32::SIZE + MAX_DB_QUEST_ITEM_SIZE, &rfQuestMonster, MAX_DB_MONSTERBIBLE_SIZE);
+
+	auto CRC32 = MCRC32::BuildCRC32(QuestData + MCRC32::SIZE,
+		MAX_DB_QUEST_ITEM_SIZE + MAX_DB_MONSTERBIBLE_SIZE);
+
+	memcpy(QuestData, &CRC32, MCRC32::CRC::SIZE);
+
+	ExecuteSQL("UPDATE Character SET QuestItemInfo = ? WHERE CID = ?",
+		Blob{ QuestData, ActualQuestDataSize }, nCID);
+
+	ASSERT_ROWS_MODIFIED_NOT_ZERO();
 
 	return true;
 }
@@ -1187,10 +1234,115 @@ catch (const SQLiteError& e)
 }
 
 bool SQLiteDatabase::GetCharQuestItemInfo(MMatchCharInfo * pCharInfo)
+try
 {
-	// TODO: Implement
+	if (!pCharInfo)
+		return false;
+
+	pCharInfo->m_QuestItemList.Clear();
+	pCharInfo->m_QMonsterBible.Clear();
+
+	auto stmt = ExecuteSQL("SELECT QuestItemInfo FROM Character WHERE CID = ?",
+		pCharInfo->m_nCID);
+	
+	if (!stmt.HasRow())
+		return false;
+
+	auto QuestItemInfo = stmt.Get<Blob>();
+
+	if (QuestItemInfo.Size < 4)
+	{
+		pCharInfo->m_QuestItemList.SetDBAccess(true);
+		return true;
+	}
+
+	auto* QuestData = static_cast<const u8*>(QuestItemInfo.Ptr);
+
+	MCRC32::crc_t ExpectedCRC32;
+	memcpy(&ExpectedCRC32, QuestData, MCRC32::CRC::SIZE);
+
+	auto ActualCRC32 = MCRC32::BuildCRC32(QuestData + MCRC32::CRC::SIZE,
+		QuestItemInfo.Size - MCRC32::CRC::SIZE);
+	if (ExpectedCRC32 != ActualCRC32)
+	{
+		Log("MSSQLDatabase::GetQuestItem - CRC check error, quest data is corrupt!\n"
+		"Expected CRC32 = %08X, actual CRC32 = %08X, QuestItemInfo.Size = %zu\n",
+			ExpectedCRC32, ActualCRC32, QuestItemInfo.Size);
+		assert(false);
+		return false;
+	}
+
+	for (int i = 0; i < MAX_DB_QUEST_ITEM_SIZE; ++i)
+	{
+		int QuestItemCount = static_cast<int>(QuestData[MCRC32::CRC::SIZE + i]);
+		if (QuestItemCount < MIN_QUEST_DB_ITEM_COUNT)
+			continue;
+
+		u32 ItemID = static_cast<u32>(i) + MIN_QUEST_ITEM_ID;
+		bool KnownItem;
+
+		// NOTE: This is always true since MIN_QUEST_DB_ITEM_COUNT = 1.
+		// Not sure if it's useful to keep it, just copied it from the corresponding MSSQL
+		// implementation.
+		if (QuestItemCount > 0)
+		{
+			KnownItem = true;
+			QuestItemCount--;
+		}
+		else
+		{
+			KnownItem = false;
+		}
+
+		if (!pCharInfo->m_QuestItemList.CreateQuestItem(ItemID, QuestItemCount, KnownItem))
+		{
+			mlog("MSSQLDatabase::GetCharQuestItemInfo - Failed to create quest item with "
+				"properties ItemID = %u, Count = %d, Known = %d\n",
+				ItemID, QuestItemCount, KnownItem);
+		}
+	}
+
+	{
+		constexpr int Offset = MCRC32::SIZE + MAX_DB_QUEST_ITEM_SIZE;
+		auto* SrcPtr = QuestData + Offset;
+		int Size = static_cast<int>(QuestItemInfo.Size) - Offset;
+		if (Size > 0)
+		{
+			memcpy(pCharInfo->m_QMonsterBible.szData, SrcPtr, static_cast<size_t>(Size));
+		}
+	}
+
+#ifdef _DEBUG
+	{
+		mlog("\nStart %s's debug MonsterBible info.\n", pCharInfo->m_szName);
+		for (int i = 0; i < (220000 - 210001); ++i)
+		{
+			if (pCharInfo->m_QMonsterBible.IsKnownMonster(i))
+			{
+				MQuestItemDesc* pMonDesc = GetQuestItemDescMgr().FindMonserBibleDesc(i);
+				if (0 == pMonDesc)
+				{
+					mlog("MSSQLDatabase::GetCharQuestItemInfo - %d Fail to find monster bible description.\n", i);
+					continue;
+				}
+				else
+				{
+					mlog("Get DB MonBibleID:%d MonName:%s\n", i, pMonDesc->m_szQuestItemName);
+				}
+			}
+		}
+		mlog("End %s's debug MonsterBible info.\n\n", pCharInfo->m_szName);
+	}
+#endif
+
+	pCharInfo->m_QuestItemList.SetDBAccess(true);
 
 	return true;
+}
+catch (const SQLiteError& e)
+{
+	HandleException(e);
+	return false;
 }
 
 bool SQLiteDatabase::InsertQuestGameLog(const char * pszStageName, int nScenarioID, int nMasterCID, int nPlayer1, int nPlayer2, int nPlayer3, int nTotalRewardQItemCount, int nElapsedPlayTime, int & outQGLID)

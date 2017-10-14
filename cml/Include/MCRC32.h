@@ -17,5 +17,5 @@ public:
 		SIZE = sizeof(u32),
 	};
 
-	static u32 BuildCRC32(u8* pData, u32 dwSize);
+	static u32 BuildCRC32(const u8* pData, u32 dwSize);
 };

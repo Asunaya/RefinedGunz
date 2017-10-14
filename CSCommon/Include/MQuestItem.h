@@ -45,7 +45,6 @@ public :
 
 	void Clear() { memset( szData, 0, MAX_DB_MONSTERBIBLE_SIZE ); }
 
-private :
 	char szData[ MAX_DB_MONSTERBIBLE_SIZE ];
 };
 
