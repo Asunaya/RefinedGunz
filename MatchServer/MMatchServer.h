@@ -321,9 +321,11 @@ protected:
 	void OnStopChannelList(const MUID& uidPlayer);
 
 	void OnChannelRequestPlayerList(const MUID& uidPlayer, const MUID& uidChannel, int nPage);
-	void OnChannelRequestAllPlayerList(const MUID& uidPlayer, const MUID& uidChannel, unsigned long int nPlaceFilter, unsigned long int nOptions);
+	void OnChannelRequestAllPlayerList(const MUID& uidPlayer, const MUID& uidChannel,
+		unsigned long int nPlaceFilter, unsigned long int nOptions);
 
-	bool StageAdd(MMatchChannel* pChannel, const char* pszStageName, bool bPrivate, const char* pszStagePassword, MUID* pAllocUID);
+	bool StageAdd(MMatchChannel* pChannel, const char* pszStageName, bool bPrivate,
+		const char* pszStagePassword, MUID* pAllocUID);
 	bool StageRemove(const MUID& uidStage, MMatchStageMap::iterator* pNextItor);
 	bool StageJoin(const MUID& uidPlayer, const MUID& uidStage);
 	bool StageLeave(const MUID& uidPlayer, const MUID& uidStage);
@@ -348,7 +350,7 @@ protected:
 	float GetDuelPlayersMultiflier(int nPlayerCount);
 	void CalcExpOnGameKill(MMatchStage* pStage, MMatchObject* pAttacker, MMatchObject* pVictim,
 		int* poutAttackerExp, int* poutVictimExp);
-	const int CalcBPonGameKill(MMatchStage* pStage, MMatchObject* pAttacker, const int nAttackerLevel, const int nVictimLevel);
+	int CalcBPonGameKill(MMatchStage* pStage, MMatchObject* pAttacker, int nAttackerLevel, int nVictimLevel);
 	void ProcessOnGameKill(MMatchStage* pStage, MMatchObject* pAttacker, MMatchObject* pVictim);
 	void PostGameDeadOnGameKill(MUID& uidStage, MMatchObject* pAttacker, MMatchObject* pVictim,
 		int nAddedAttackerExp, int nSubedVictimExp);

@@ -31,7 +31,7 @@ private:
 // BindParameter
 //
 
-template <typename T, typename = void>
+template <typename T>
 struct BindFunctionMap;
 
 template <> struct BindFunctionMap<int> { static constexpr auto function = sqlite3_bind_int; };
@@ -296,98 +296,98 @@ SQLiteDatabase::SQLiteDatabase()
 			Log("Error during database construction: error code %d, error message: %s\n", err_code, err_msg);
 	};
 
-	exec("CREATE TABLE IF NOT EXISTS Login(AID integer NOT NULL, \
-		UserID text UNIQUE, \
-		PasswordData text, \
-		LastConnDate text, \
-		LastIP text)");
+	exec("CREATE TABLE IF NOT EXISTS Login(AID integer NOT NULL, "
+		"UserID text UNIQUE, "
+		"PasswordData text, "
+		"LastConnDate text, "
+		"LastIP text)");
 
-	exec("CREATE TABLE IF NOT EXISTS Account(AID integer PRIMARY KEY NOT NULL, \
-		UserID text UNIQUE, \
-		UGradeID integer, \
-		PGradeID integer, \
-		Email text, \
-		RegDate datetime)");
+	exec("CREATE TABLE IF NOT EXISTS Account(AID integer PRIMARY KEY NOT NULL, "
+		"UserID text UNIQUE, "
+		"UGradeID integer, "
+		"PGradeID integer, "
+		"Email text, "
+		"RegDate datetime)");
 
-	exec("CREATE TABLE IF NOT EXISTS Character( \
-		CID integer PRIMARY KEY NOT NULL, \
-		AID integer NOT NULL, \
-		Name text NOT NULL, \
-		Level integer NOT NULL, \
-		Sex integer NOT NULL, \
-		CharNum integer NOT NULL, \
-		Hair integer NULL, \
-		Face integer NULL, \
-		XP integer NOT NULL, \
-		BP integer NOT NULL, \
-		Items blob NULL, \
-		RegDate text NULL, \
-		LastTime text NULL, \
-		PlayTime integer NULL, \
-		GameCount integer NULL, \
-		KillCount integer NULL, \
-		DeathCount integer NULL, \
-		DeleteFlag integer NULL, \
-		DeleteName text NULL, \
-		QuestItemInfo blob NULL)");
+	exec("CREATE TABLE IF NOT EXISTS Character( "
+		"CID integer PRIMARY KEY NOT NULL, "
+		"AID integer NOT NULL, "
+		"Name text NOT NULL, "
+		"Level integer NOT NULL, "
+		"Sex integer NOT NULL, "
+		"CharNum integer NOT NULL, "
+		"Hair integer NULL, "
+		"Face integer NULL, "
+		"XP integer NOT NULL, "
+		"BP integer NOT NULL, "
+		"Items blob NULL, "
+		"RegDate text NULL, "
+		"LastTime text NULL, "
+		"PlayTime integer NULL, "
+		"GameCount integer NULL, "
+		"KillCount integer NULL, "
+		"DeathCount integer NULL, "
+		"DeleteFlag integer NULL, "
+		"DeleteName text NULL, "
+		"QuestItemInfo blob NULL)");
 
-	exec("CREATE TABLE IF NOT EXISTS CharacterMakingLog( \
-		id integer PRIMARY KEY NOT NULL, \
-		AID integer NULL, \
-		CharName text NULL, \
-		Type text NULL, \
-		Date text NULL)");
+	exec("CREATE TABLE IF NOT EXISTS CharacterMakingLog( "
+		"id integer PRIMARY KEY NOT NULL, "
+		"AID integer NULL, "
+		"CharName text NULL, "
+		"Type text NULL, "
+		"Date text NULL)");
 
-	exec("CREATE TABLE IF NOT EXISTS CharacterItem( \
-		CIID integer PRIMARY KEY NOT NULL, \
-		CID integer NULL, \
-		ItemID integer NOT NULL, \
-		RegDate integer NULL, \
-		RentDate integer NULL, \
-		RentHourPeriod integer NULL, \
-		Cnt integer NULL)");
+	exec("CREATE TABLE IF NOT EXISTS CharacterItem( "
+		"CIID integer PRIMARY KEY NOT NULL, "
+		"CID integer NULL, "
+		"ItemID integer NOT NULL, "
+		"RegDate integer NULL, "
+		"RentDate integer NULL, "
+		"RentHourPeriod integer NULL, "
+		"Cnt integer NULL)");
 
-	exec("CREATE TABLE IF NOT EXISTS Clan( \
-		CLID integer PRIMARY KEY NOT NULL, \
-		Name text NULL, \
-		Exp integer NOT NULL, \
-		Level integer NOT NULL, \
-		Point integer NOT NULL, \
-		MasterCID integer NULL, \
-		Wins integer NOT NULL, \
-		MarkWebImg text NULL, \
-		Introduction text NULL, \
-		RegDate text NOT NULL, \
-		DeleteFlag text NULL, \
-		DeleteName text NULL, \
-		Homepage text NULL, \
-		Losses integer NOT NULL, \
-		Draws integer NOT NULL, \
-		Ranking integer NOT NULL, \
-		TotalPoint integer NOT NULL, \
-		Cafe_Url text NULL, \
-		Email text NULL, \
-		EmblemUrl text NULL, \
-		RankIncrease integer NOT NULL, \
-		EmblemChecksum integer NOT NULL, \
-		LastDayRanking integer NOT NULL, \
-		LastMonthRanking integer NOT NULL)");
+	exec("CREATE TABLE IF NOT EXISTS Clan( "
+		"CLID integer PRIMARY KEY NOT NULL, "
+		"Name text NULL, "
+		"Exp integer NOT NULL, "
+		"Level integer NOT NULL, "
+		"Point integer NOT NULL, "
+		"MasterCID integer NULL, "
+		"Wins integer NOT NULL, "
+		"MarkWebImg text NULL, "
+		"Introduction text NULL, "
+		"RegDate text NOT NULL, "
+		"DeleteFlag text NULL, "
+		"DeleteName text NULL, "
+		"Homepage text NULL, "
+		"Losses integer NOT NULL, "
+		"Draws integer NOT NULL, "
+		"Ranking integer NOT NULL, "
+		"TotalPoint integer NOT NULL, "
+		"Cafe_Url text NULL, "
+		"Email text NULL, "
+		"EmblemUrl text NULL, "
+		"RankIncrease integer NOT NULL, "
+		"EmblemChecksum integer NOT NULL, "
+		"LastDayRanking integer NOT NULL, "
+		"LastMonthRanking integer NOT NULL)");
 
-	exec("CREATE TABLE IF NOT EXISTS ClanMember( \
-		CMID integer PRIMARY KEY NOT NULL, \
-		CLID integer NULL, \
-		CID integer NULL, \
-		Grade integer NOT NULL, \
-		RegDate text NOT NULL, \
-		ContPoint integer NOT NULL)");
+	exec("CREATE TABLE IF NOT EXISTS ClanMember( "
+		"CMID integer PRIMARY KEY NOT NULL, "
+		"CLID integer NULL, "
+		"CID integer NULL, "
+		"Grade integer NOT NULL, "
+		"RegDate text NOT NULL, "
+		"ContPoint integer NOT NULL)");
 
-	exec("CREATE TABLE IF NOT EXISTS Friend( \
-		id integer PRIMARY KEY NOT NULL, \
-		CID integer NOT NULL, \
-		FriendCID integer NOT NULL, \
-		Type integer NOT NULL, \
-		Favorite integer NULL, \
-		DeleteFlag integer NULL)");
+	exec("CREATE TABLE IF NOT EXISTS Friend( "
+		"id integer PRIMARY KEY NOT NULL, "
+		"CID integer NOT NULL, "
+		"FriendCID integer NOT NULL, "
+		"Type integer NOT NULL, "
+		"Favorite integer NULL, "
+		"DeleteFlag integer NULL)");
 }
 
 void SQLiteDatabase::HandleException(const SQLiteError & e)
@@ -484,7 +484,8 @@ try
 
 	auto Trans = BeginTransaction();
 
-	stmt = ExecuteSQL("INSERT INTO Account (UserID, UGradeID, PGradeID, RegDate, Email) VALUES (?, 0, 0, date('now'), ?)",
+	stmt = ExecuteSQL("INSERT INTO Account (UserID, UGradeID, PGradeID, RegDate, Email) "
+		"VALUES (?, 0, 0, date('now'), ?)",
 		Username, Email);
 	stmt = ExecuteSQL("SELECT AID FROM Account WHERE UserID = ?",
 		Username);
@@ -527,7 +528,8 @@ bool SQLiteDatabase::InsertLevelUpLog(int nCID, int nLevel, int nBP, int nKillCo
 bool SQLiteDatabase::UpdateLastConnDate(const char * UserID, const char * IP)
 try
 {
-	auto stmt = ExecuteSQL("UPDATE Login SET LastConnDate = date('now'), LastIP = ? WHERE UserID = ?", IP, UserID);
+	auto stmt = ExecuteSQL("UPDATE Login SET LastConnDate = date('now'), "
+		"LastIP = ? WHERE UserID = ?", IP, UserID);
 
 	return true;
 }
@@ -570,10 +572,10 @@ try
 
 	auto Trans = BeginTransaction();
 
-	ExecuteSQL("INSERT INTO Character (AID, Name, CharNum, Level, Sex, Hair, Face, XP, BP, \
-		GameCount, KillCount, DeathCount, RegDate, PlayTime, DeleteFlag) \
-		Values(?, ?, ?, 1, ?, ?, ?, 0, 0, \
-		0, 0, 0, date('now'), 0, 0)",
+	ExecuteSQL("INSERT INTO Character (AID, Name, CharNum, Level, Sex, Hair, Face, XP, BP, "
+		"GameCount, KillCount, DeathCount, RegDate, PlayTime, DeleteFlag) "
+		"Values(?, ?, ?, 1, ?, ?, ?, 0, 0, "
+		"0, 0, 0, date('now'), 0, 0)",
 		AID, NewName, CharIndex, Sex, Hair, Face);
 
 	auto CID = sqlite3_last_insert_rowid(sqlite.get());
@@ -622,7 +624,8 @@ try
 
 	auto CID = stmt.Get<int>();
 
-	stmt = ExecuteSQL("SELECT COUNT(*) AS CashItemCount FROM CharacterItem WHERE CID = ? AND ItemID >= 500000", CID);
+	stmt = ExecuteSQL("SELECT COUNT(*) AS CashItemCount FROM CharacterItem "
+		"WHERE CID = ? AND ItemID >= 500000", CID);
 
 	if (stmt.HasRow())
 	{
@@ -632,8 +635,8 @@ try
 			return false;
 	}
 
-	stmt = ExecuteSQL("UPDATE Character SET CharNum = -1, DeleteFlag = 1, Name = '', DeleteName = ? \
-		WHERE AID = ? AND CharNum = ?",
+	stmt = ExecuteSQL("UPDATE Character SET CharNum = -1, DeleteFlag = 1, Name = '', DeleteName = ?"
+		"WHERE AID = ? AND CharNum = ?",
 		CharName, AID, CharIndex);
 
 	InsertCharMakingLog(AID, CharName, CharMakingType::Delete);
@@ -649,8 +652,8 @@ catch (const SQLiteError& e)
 bool SQLiteDatabase::InsertCharMakingLog(unsigned int AID, const char * CharName, CharMakingType Type)
 try
 {
-	ExecuteSQL("INSERT INTO CharacterMakingLog(AID, CharName, Type, Date) \
-		VALUES(?, ?, ?, date('now'))",
+	ExecuteSQL("INSERT INTO CharacterMakingLog(AID, CharName, Type, Date) "
+		"VALUES(?, ?, ?, date('now'))",
 		AID, CharName, Type);
 
 	return true;
@@ -664,9 +667,9 @@ catch (const SQLiteError& e)
 bool SQLiteDatabase::GetAccountCharList(int AID, MTD_AccountCharInfo * outCharList, int * outCharCount)
 try
 {
-	auto stmt = ExecuteSQL("SELECT Name, CharNum, Level \
-		FROM Character \
-		WHERE AID = ? AND DeleteFlag = 0",
+	auto stmt = ExecuteSQL("SELECT Name, CharNum, Level "
+		"FROM Character "
+		"WHERE AID = ? AND DeleteFlag = 0",
 		AID);
 
 	int i = 0;
@@ -700,11 +703,11 @@ try
 
 	auto CID = stmt.Get<int>();
 
-	stmt = ExecuteSQL("SELECT Name, CharNum, Level, Sex, Hair, Face, XP, BP, \
-		(SELECT cl.Name FROM Clan cl, ClanMember cm WHERE cm.cid = ?1 AND cm.CLID = cl.CLID) AS ClanName, \
-		Items \
-		FROM Character \
-		WHERE CID = ?1",
+	stmt = ExecuteSQL("SELECT Name, CharNum, Level, Sex, Hair, Face, XP, BP, "
+		"(SELECT cl.Name FROM Clan cl, ClanMember cm WHERE cm.cid = ?1 AND cm.CLID = cl.CLID) AS ClanName, "
+		"Items "
+		"FROM Character "
+		"WHERE CID = ?1",
 		CID);
 
 	if (!stmt.HasRow())
@@ -754,8 +757,8 @@ catch (const SQLiteError& e)
 bool SQLiteDatabase::GetAccountInfo(int AID, MMatchAccountInfo * outAccountInfo)
 try
 {
-	auto stmt = ExecuteSQL("SELECT UserID, UGradeID \
-		FROM Account WHERE AID = ?",
+	auto stmt = ExecuteSQL("SELECT UserID, UGradeID "
+		"FROM Account WHERE AID = ?",
 		AID);
 
 	if (!stmt.HasRow())
@@ -784,10 +787,10 @@ try
 
 	auto CID = stmt.Get<int>();
 
-	stmt = ExecuteSQL("SELECT Name, Level, Sex, CharNum, Hair, Face, \
-		XP, BP, GameCount, KillCount, DeathCount, PlayTime, Items \
-		FROM Character \
-		WHERE CID = ?",
+	stmt = ExecuteSQL("SELECT Name, Level, Sex, CharNum, Hair, Face, "
+		"XP, BP, GameCount, KillCount, DeathCount, PlayTime, Items "
+		"FROM Character "
+		"WHERE CID = ?",
 		CID);
 
 	if (!stmt.HasRow())
@@ -822,9 +825,9 @@ try
 		stmt.NextColumn();
 	}
 
-	stmt = ExecuteSQL("SELECT cl.CLID, cl.Name, cm.Grade, cm.ContPoint \
-		FROM ClanMember cm, Clan cl \
-		WHERE cm.cid = ? AND cm.CLID = cl.CLID",
+	stmt = ExecuteSQL("SELECT cl.CLID, cl.Name, cm.Grade, cm.ContPoint "
+		"FROM ClanMember cm, Clan cl "
+		"WHERE cm.cid = ? AND cm.CLID = cl.CLID",
 		CID);
 
 	if (stmt.HasRow())
@@ -863,9 +866,9 @@ catch (const SQLiteError& e)
 bool SQLiteDatabase::GetCharCID(const char * Name, int * outCID)
 try
 {
-	auto stmt = ExecuteSQL("SELECT CID \
-		FROM Character \
-		WHERE Name = ?",
+	auto stmt = ExecuteSQL("SELECT CID "
+		"FROM Character "
+		"WHERE Name = ?",
 		Name);
 
 	if (!stmt.HasRow())
@@ -884,9 +887,9 @@ catch (const SQLiteError& e)
 bool SQLiteDatabase::SimpleUpdateCharInfo(const MMatchCharInfo& CharInfo)
 try
 {
-	ExecuteSQL("UPDATE Character \
-		SET Level = ?, XP = ?, BP = ? \
-		WHERE CID = ?",
+	ExecuteSQL("UPDATE Character "
+		"SET Level = ?, XP = ?, BP = ? "
+		"WHERE CID = ?",
 		CharInfo.m_nLevel, CharInfo.m_nXP, CharInfo.m_nBP,
 		CharInfo.m_nCID);
 
@@ -901,9 +904,9 @@ catch (const SQLiteError& e)
 bool SQLiteDatabase::UpdateCharBP(int CID, int BPInc)
 try
 {
-	ExecuteSQL("UPDATE Character \
-		SET BP = BP + ? \
-		WHERE CID = ?",
+	ExecuteSQL("UPDATE Character "
+		"SET BP = BP + ? "
+		"WHERE CID = ?",
 		BPInc, CID);
 
 	return true;
@@ -917,9 +920,9 @@ catch (const SQLiteError& e)
 bool SQLiteDatabase::UpdateCharInfoData(int CID, int AddedXP, int AddedBP, int AddedKillCount, int AddedDeathCount)
 try
 {
-	ExecuteSQL("UPDATE Character \
-		SET XP = XP + ?, BP = BP + ?, KillCount = KillCount + ?, DeathCount = DeathCount + ? \
-		WHERE CID = ?",
+	ExecuteSQL("UPDATE Character "
+		"SET XP = XP + ?, BP = BP + ?, KillCount = KillCount + ?, DeathCount = DeathCount + ? "
+		"WHERE CID = ?",
 		AddedXP, AddedBP, AddedKillCount, AddedDeathCount,
 		CID);
 
@@ -935,8 +938,8 @@ bool SQLiteDatabase::InsertCharItem(unsigned int CID, int ItemID, bool RentItem,
 	unsigned long * outCIID)
 try
 {
-	ExecuteSQL("INSERT INTO CharacterItem (CID, ItemID, RegDate) \
-		Values (?, ?, date('now')))",
+	ExecuteSQL("INSERT INTO CharacterItem (CID, ItemID, RegDate) "
+		"Values (?, ?, date('now')))",
 		CID, ItemID);
 
 	return true;
@@ -950,8 +953,8 @@ catch (const SQLiteError& e)
 bool SQLiteDatabase::DeleteCharItem(unsigned int CID, int CIID)
 try
 {
-	ExecuteSQL("UPDATE CharacterItem SET CID = NULL \
-		WHERE CID = ? AND CIID = ?",
+	ExecuteSQL("UPDATE CharacterItem SET CID = NULL "
+		"WHERE CID = ? AND CIID = ?",
 		CID, CIID);
 
 	return true;
@@ -965,11 +968,11 @@ catch (const SQLiteError& e)
 bool SQLiteDatabase::GetCharItemInfo(MMatchCharInfo& CharInfo)
 try
 {
-	auto stmt = ExecuteSQL("SELECT CIID, ItemID, \
-		(RentHourPeriod*60) - CAST((JulianDay(datetime('now')) - JulianDay(RentDate)) * 24 * 60 As Integer) \
-		AS RentPeriodRemainder \
-		FROM CharacterItem \
-		WHERE CID = ? ORDER BY CIID",
+	auto stmt = ExecuteSQL("SELECT CIID, ItemID, "
+		"(RentHourPeriod*60) - CAST((JulianDay(datetime('now')) - JulianDay(RentDate)) * 24 * 60 As Integer) "
+		"AS RentPeriodRemainder "
+		"FROM CharacterItem "
+		"WHERE CID = ? ORDER BY CIID",
 		CharInfo.m_nCID);
 
 	while (stmt.HasRow())
@@ -1010,11 +1013,11 @@ bool SQLiteDatabase::GetAccountItemInfo(int AID, MAccountItemNode * outItemNode,
 	int * outExpiredItemCount, int MaxExpiredItemCount)
 try
 {
-	auto stmt = ExecuteSQL("SELECT AIID, ItemID, \
-		(RentHourPeriod*60) - CAST((JulianDay(datetime('now')) - JulianDay(RentDate)) * 24 * 60 As Integer) \
-		 AS RentPeriodRemainder \
-		FROM AccountItem \
-		WHERE AID = ? ORDER BY AIID",
+	auto stmt = ExecuteSQL("SELECT AIID, ItemID, "
+		"(RentHourPeriod*60) - CAST((JulianDay(datetime('now')) - JulianDay(RentDate)) * 24 * 60 As Integer) "
+		" AS RentPeriodRemainder "
+		"FROM AccountItem "
+		"WHERE AID = ? ORDER BY AIID",
 		AID);
 
 	int NodeCount;
@@ -1414,8 +1417,8 @@ catch (const SQLiteError& e)
 bool SQLiteDatabase::BringAccountItem(int AID, int CID, int AIID, unsigned int * outCIID, unsigned long int * outItemID, bool * outIsRentItem, int * outRentMinutePeriodRemainder)
 try
 {
-	auto stmt = ExecuteSQL("SELECT ItemID, RentDate, RentHourPeriod, Cnt \
-		FROM AccountItem WHERE AIID = ?", AIID);
+	auto stmt = ExecuteSQL("SELECT ItemID, RentDate, RentHourPeriod, Cnt "
+		"FROM AccountItem WHERE AIID = ?", AIID);
 	if (!stmt.HasRow())
 		return false;
 
@@ -1428,8 +1431,8 @@ try
 
 	ExecuteSQL("DELETE FROM AccountItem WHERE AIID = ?", AIID);
 
-	ExecuteSQL("INSERT INTO CharacterItem(CID, ItemID, RegDate, RentDate, RentHourPeriod, Cnt) \
-		VALUES(?, ?, date('now'), ?, ?, ?)",
+	ExecuteSQL("INSERT INTO CharacterItem(CID, ItemID, RegDate, RentDate, RentHourPeriod, Cnt) "
+		"VALUES(?, ?, date('now'), ?, ?, ?)",
 		CID, ItemID, RentDate, RentHourPeriod, Cnt);
 
 
@@ -1451,8 +1454,8 @@ try
 
 	// TODO: Check that the item isn't equipped
 
-	auto stmt = ExecuteSQL("SELECT ItemID, RentDate, @RentHourPeriod=RentHourPeriod, Cnt \
-		FROM CharacterItem WHERE CIID = ? AND CID = ?", CIID, CID);
+	auto stmt = ExecuteSQL("SELECT ItemID, RentDate, @RentHourPeriod=RentHourPeriod, Cnt "
+		"FROM CharacterItem WHERE CIID = ? AND CID = ?", CIID, CID);
 
 	if (!stmt.HasRow())
 		return false;
@@ -1464,8 +1467,8 @@ try
 
 	ExecuteSQL("UPDATE CharacterItem SET CID = NULL WHERE CIID = ? AND CID = ?", CIID, CID);
 
-	ExecuteSQL("INSERT INTO AccountItem(AID, ItemID, RentDate, RentHourPeriod, Cnt) \
-		VALUES(?, ?, ?, ?, ?)",
+	ExecuteSQL("INSERT INTO AccountItem(AID, ItemID, RentDate, RentHourPeriod, Cnt) "
+		"VALUES(?, ?, ?, ?, ?)",
 		AID, ItemID, RentDate, RentHourPeriod, Cnt);
 
 	CommitTransaction();
@@ -1480,8 +1483,8 @@ catch (const SQLiteError& e)
 bool SQLiteDatabase::FriendAdd(int CID, int FriendCID, int Favorite)
 try
 {
-	ExecuteSQL("INSERT INTO Friend(CID, FriendCID, Favorite, DeleteFlag, Type) \
-		Values (?, ?, ?, 0, 1)",
+	ExecuteSQL("INSERT INTO Friend(CID, FriendCID, Favorite, DeleteFlag, Type) "
+		"Values (?, ?, ?, 0, 1)",
 		CID, FriendCID, Favorite);
 
 	return true;
@@ -1495,9 +1498,9 @@ catch (const SQLiteError& e)
 bool SQLiteDatabase::FriendRemove(int CID, int FriendCID)
 try
 {
-	ExecuteSQL("UPDATE Friend \
-		SET DeleteFlag = 1 \
-		WHERE CID = ? AND FriendCID = ?",
+	ExecuteSQL("UPDATE Friend "
+		"SET DeleteFlag = 1 "
+		"WHERE CID = ? AND FriendCID = ?",
 		CID, FriendCID);
 
 	return true;
@@ -1511,9 +1514,9 @@ catch (const SQLiteError& e)
 bool SQLiteDatabase::FriendGetList(int CID, MMatchFriendInfo * FriendInfo)
 try
 {
-	auto stmt = ExecuteSQL("SELECT f.FriendCID, f.Favorite, c.Name \
-		FROM Friend f, Character c \
-		WHERE f.CID = ? AND f.FriendCID = c.CID AND f.DeleteFlag = 0 AND f.Type = 1",
+	auto stmt = ExecuteSQL("SELECT f.FriendCID, f.Favorite, c.Name "
+		"FROM Friend f, Character c "
+		"WHERE f.CID = ? AND f.FriendCID = c.CID AND f.DeleteFlag = 0 AND f.Type = 1",
 		CID);
 
 	while (stmt.HasRow())
@@ -1536,9 +1539,9 @@ catch (const SQLiteError& e)
 bool SQLiteDatabase::GetCharClan(int CID, int * outClanID, char * outClanName, int maxlen)
 try
 {
-	auto stmt = ExecuteSQL("SELECT cl.CLID AS CLID, cl.Name AS ClanName \
-		FROM ClanMember cm, Clan cl \
-		WHERE cm.cid = ? AND cm.CLID = cl.CLID",
+	auto stmt = ExecuteSQL("SELECT cl.CLID AS CLID, cl.Name AS ClanName "
+		"FROM ClanMember cm, Clan cl "
+		"WHERE cm.cid = ? AND cm.CLID = cl.CLID",
 		CID);
 
 	if (!stmt.HasRow())
@@ -1582,9 +1585,9 @@ try
 	if (stmt.HasRow())
 		return false;
 
-	stmt = ExecuteSQL("SELECT COUNT(*) FROM ClanMember cm, Character c \
-		WHERE((cm.CID = ?) OR(cm.CID = ?) OR(cm.CID = ?) OR(cm.CID = ?) OR \
-		(cm.CID = ?)) AND cm.CID = c.CID AND c.DeleteFlag = 0",
+	stmt = ExecuteSQL("SELECT COUNT(*) FROM ClanMember cm, Character c "
+		"WHERE((cm.CID = ?) OR(cm.CID = ?) OR(cm.CID = ?) OR(cm.CID = ?) OR "
+		"(cm.CID = ?)) AND cm.CID = c.CID AND c.DeleteFlag = 0",
 		MasterCID, Member1CID, Member2CID, Member3CID, Member4CID);
 
 	if (stmt.HasRow())
@@ -1780,8 +1783,8 @@ catch (const SQLiteError& e)
 ExpelResult SQLiteDatabase::ExpelClanMember(int CLID, int AdminGrade, const char * MemberName)
 try
 {
-	auto stmt = ExecuteSQL("SELECT c.cid, cm.Grade FROM Character c, ClanMember cm \
-		WHERE cm.clid = ? AND c.cid = cm.cid AND c.Name = ? AND DeleteFlag = 0",
+	auto stmt = ExecuteSQL("SELECT c.cid, cm.Grade FROM Character c, ClanMember cm "
+		"WHERE cm.clid = ? AND c.cid = cm.cid AND c.Name = ? AND DeleteFlag = 0",
 		CLID, MemberName);
 
 	if (!stmt.HasRow())
@@ -1809,14 +1812,14 @@ catch (const SQLiteError& e)
 bool SQLiteDatabase::GetClanInfo(int CLID, MDB_ClanInfo * outClanInfo)
 try
 {
-	auto stmt = ExecuteSQL("SELECT cl.Name AS Name, cl.TotalPoint AS TotalPoint, \
-		cl.Level AS Level, cl.Ranking AS Ranking, \
-		cl.Point AS Point, cl.Wins AS Wins, cl.Losses AS Losses, cl.Draws AS Draws, \
-		c.Name AS ClanMaster, \
-		(SELECT COUNT(*) FROM ClanMember WHERE CLID = ?1) AS MemberCount, \
-		cl.EmblemUrl AS EmblemUrl, cl.EmblemChecksum AS EmblemChecksum \
-		FROM Clan cl, Character c \
-		WHERE cl.CLID = ?1 and cl.MasterCID = c.CID",
+	auto stmt = ExecuteSQL("SELECT cl.Name AS Name, cl.TotalPoint AS TotalPoint, "
+		"cl.Level AS Level, cl.Ranking AS Ranking, "
+		"cl.Point AS Point, cl.Wins AS Wins, cl.Losses AS Losses, cl.Draws AS Draws, "
+		"c.Name AS ClanMaster, "
+		"(SELECT COUNT(*) FROM ClanMember WHERE CLID = ?1) AS MemberCount, "
+		"cl.EmblemUrl AS EmblemUrl, cl.EmblemChecksum AS EmblemChecksum "
+		"FROM Clan cl, Character c "
+		"WHERE cl.CLID = ?1 and cl.MasterCID = c.CID",
 		CLID);
 
 	if (!stmt.HasRow())
@@ -1907,15 +1910,15 @@ bool SQLiteDatabase::WinTheClanGame(int WinnerCLID, int LoserCLID, bool IsDrawGa
 
 	auto Trans = BeginTransaction();
 
-	ExecuteSQL("UPDATE Clan SET Wins = Wins + 1, Point = Point + ?1, TotalPoint = TotalPoint + ?1 \
-		WHERE CLID = ?2", WinnerPoint, WinnerCLID);
+	ExecuteSQL("UPDATE Clan SET Wins = Wins + 1, Point = Point + ?1, TotalPoint = TotalPoint + ?1 "
+		"WHERE CLID = ?2", WinnerPoint, WinnerCLID);
 	ExecuteSQL("UPDATE Clan SET Losses = Losses + 1, Point = max(0, Point + ?) WHERE CLID = ?",
 		LoserPoint, LoserCLID);
-	ExecuteSQL("INSERT INTO ClanGameLog(WinnerCLID, LoserCLID, WinnerClanName, LoserClanName, \
-		RoundWins, RoundLosses, \
-		MapID, GameType, RegDate, WinnerMembers, LoserMembers, WinnerPoint, LoserPoint) \
-		VALUES(?, ?, ?, ?, ?, ?, \
-		?, ?, date('now'), ?, ?, ?, ?)",
+	ExecuteSQL("INSERT INTO ClanGameLog(WinnerCLID, LoserCLID, WinnerClanName, LoserClanName, "
+		"RoundWins, RoundLosses, "
+		"MapID, GameType, RegDate, WinnerMembers, LoserMembers, WinnerPoint, LoserPoint) "
+		"VALUES(?, ?, ?, ?, ?, ?, "
+		"?, ?, date('now'), ?, ?, ?, ?)",
 		WinnerCLID, LoserCLID, WinnerClanName, LoserClanName, RoundWins, RoundLosses,
 		MapID, GameType, WinnerMembers, LoserMembers, WinnerPoint, LoserPoint);
 

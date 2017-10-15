@@ -107,49 +107,28 @@ void MMatchServer::LocateAgentToClient(const MUID& uidPlayer, const MUID& uidAge
 
 void MMatchServer::OnRegisterAgent(const MUID& uidComm, char* szIP, int nTCPPort, int nUDPPort)
 {
-	// Remove Old Connections ////////////////////////
 	MAgentObject* pOldAgent = NULL;
 	while(pOldAgent=FindFreeAgent()) {
 		AgentRemove(pOldAgent->GetUID(), NULL);
 	}
-	//////////////////////////////////////////////////
 
 	int nErrCode = AgentAdd(uidComm);
 	if(nErrCode!=MOK) {
 		LOG(LOG_DEBUG, MErrStr(nErrCode) );
 	}
 
-	// 패킷 시리얼 체크를 하지 않도록 한다.
 	MCommObject* pCommObj = (MCommObject*)m_CommRefCache.GetRef(uidComm);
 	if (pCommObj)
 	{
 		pCommObj->GetCommandBuilder()->SetCheckCommandSN(false);
 	}
 
-
 	MAgentObject* pAgent = GetAgent(uidComm);
 	pAgent->AddCommListener(uidComm);
 	pAgent->SetAddr(szIP, nTCPPort, nUDPPort);
 
-//	SetClientClockSynchronize(uidComm);
 	LOG(LOG_DEBUG, "Agent Registered (CommUID %u:%u) IP:%s, TCPPort:%d, UDPPort:%d ", 
 		uidComm.High, uidComm.Low, szIP, nTCPPort, nUDPPort);
-
-/*	//// IOCP DEBUG RAONHAJE ///////////////////////////////////
-	char* pszAlpha = "abcdefghijklmnopqrstuvwxyz";
-	int nAlphaLen = strlen(pszAlpha);
-	char szBulk[200];	ZeroMemory(szBulk, 200);
-	for (int i=0; i<200; i++)
-		szBulk[i] = pszAlpha[i%nAlphaLen];
-	for (i=0; i<1000; i++) {
-		char szMsg[512];
-		sprintf_safe(szMsg, "TEST_STRING=%d  (%s)", i, szBulk);
-
-		MCommand* pCmd = CreateCommand(MC_AGENT_DEBUGTEST, pAgent->GetCommListener());
-		pCmd->AddParameter(new MCmdParamStr(szMsg));
-		Post(pCmd);
-	}
-	//////////////////////////////////////////////////////////// */
 }
 
 void MMatchServer::OnUnRegisterAgent(const MUID& uidComm)
@@ -171,12 +150,6 @@ void MMatchServer::OnAgentStageReady(const MUID& uidCommAgent, const MUID& uidSt
 	pStage->SetAgentReady(true);
 
 	LOG(LOG_DEBUG, "Agent Ready to Handle Stage(%d%d)", uidStage.High, uidStage.Low);
-
-/*	for (MMatchObjectList::iterator i=m_Objects.begin(); i!=m_Objects.end(); i++) {
-		MMatchObject* pObj = (*i).second;
-		if (pObj->GetBridgePeer() == false)
-			LocateAgentToClient(pObj->GetUID(), pAgent->GetUID());
-	}*/
 }
 
 void MMatchServer::OnRequestLiveCheck(const MUID& uidComm, unsigned long nTimeStamp, unsigned long nStageCount, unsigned long nUserCount)
@@ -185,8 +158,6 @@ void MMatchServer::OnRequestLiveCheck(const MUID& uidComm, unsigned long nTimeSt
 	pCmd->AddParameter(new MCmdParamUInt(nTimeStamp));
 	PostSafeQueue(pCmd);
 }
-
-
 
 void MMatchServer::OnPeerReady(const MUID& uidChar, const MUID& uidPeer)
 {
@@ -240,16 +211,4 @@ void MMatchServer::OnRequestRelayPeer(const MUID& uidChar, const MUID& uidPeer)
 	pCmd->AddParameter(new MCmdParamUID(uidPeer));
 	pCmd->AddParameter(new MCmdParamUID(pStage->GetUID()));
 	Post(pCmd);
-
-/*	MCommand* pCmd2 = CreateCommand(MC_AGENT_RELAY_PEER, pAgent->GetCommListener());
-	pCmd2->AddParameter(new MCmdParamUID(uidPeer));
-	pCmd2->AddParameter(new MCmdParamUID(uidChar));
-	pCmd2->AddParameter(new MCmdParamUID(pStage->GetUID()));
-	Post(pCmd2);*/
-
-//	for (MUIDRefCache::iterator i=pStage->GetObjBegin(); i!=pStage->GetObjEnd(); i++) {
-//		MMatchObject* pObj = (MMatchObject*)(*i).second;
-//		LocateAgentToClient(pObj->GetUID(), pStage->GetAgentUID());
-//	}
 }
-

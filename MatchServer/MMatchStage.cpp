@@ -116,7 +116,6 @@ void MMatchStage::AddObject(const MUID& uid, MMatchObject* pObj)
 	m_ObjUIDCaches.Insert(uid, pObj);
 
 
-	// 어드민 유저 따로 관리한다.
 	MMatchObject* pObject = pObj;
 	if (IsEnabledObject(pObject))
 	{
@@ -126,7 +125,6 @@ void MMatchStage::AddObject(const MUID& uid, MMatchObject* pObj)
 		}
 	}
 
-	// 방장 등록
 	if (GetObjCount() == 1)
 	{
 		SetMasterUID(uid);
@@ -143,7 +141,7 @@ MMatchObjectMap::iterator MMatchStage::RemoveObject(const MUID& uid)
 		m_VoteMgr.StopVote( uid );
 	}
 
-	MMatchObject* pObj = MMatchServer::GetInstance()->GetObject(uid);	// NULL이라도 m_ObjUIDCaches에선 빼줘야함
+	MMatchObject* pObj = MMatchServer::GetInstance()->GetObject(uid);
 	if (pObj) {
 		// 어드민 유저 관리
 		if (IsAdminGrade(pObj->GetAccountInfo()->m_nUGrade))
@@ -162,9 +160,6 @@ MMatchObjectMap::iterator MMatchStage::RemoveObject(const MUID& uid)
 	MMatchObjectMap::iterator i = m_ObjUIDCaches.find(uid);
 	if (i==m_ObjUIDCaches.end()) 
 	{
-		//MMatchServer::GetInstance()->LOG(MCommandCommunicator::LOG_FILE, "RemoveObject: Cannot Find Object uid");
-		//mlog("RemoveObject: Cannot Find Object uid\n");
-		//_ASSERT(0);
 		return i;
 	}
 
@@ -230,10 +225,8 @@ void MMatchStage::EnterBattle(MMatchObject* pObj)
 				pObj->SetAlive(false);
 			}
 
-			// 월드아이템 정보를 보내준다
 			m_WorldItemManager.RouteAllItems(pObj);
 
-			// 난입자에게 방상태를 전송한다.
 			MMatchServer::GetInstance()->ResponseRoundState(pObj, GetUID());
 		}
 
@@ -244,7 +237,6 @@ void MMatchStage::EnterBattle(MMatchObject* pObj)
 		}
 	}
 
-	// 방에 들어갔으면 난입했는지 여부는 다시 false로 초기화
 	pObj->SetForcedEntry(false);
 
 }
@@ -436,34 +428,6 @@ void MMatchStage::ChangeRule(MMATCH_GAMETYPE nRule)
 	m_pRule = CreateRule(nRule);
 }
 
-/*
-int MMatchStage::GetTeamMemberCount(MMatchTeam nTeam)
-{
-	int nSpec = 0;
-	int nRed = 0;
-	int nBlue = 0;
-
-	for (MUIDRefCache::iterator i=m_ObjUIDCaches.begin(); i!=m_ObjUIDCaches.end(); i++) 
-	{
-		MMatchObject* pObj = (MMatchObject*)(*i).second;
-		if (pObj->GetTeam() == MMT_SPECTATOR)
-			nSpec++;
-		else if (pObj->GetTeam() == MMT_RED)
-			nRed++;
-		else if (pObj->GetTeam() == MMT_BLUE)
-			nBlue++;
-	}
-
-	if (nTeam == MMT_SPECTATOR)
-		return nSpec;
-	else if (nTeam == MMT_RED)
-		return nRed;
-	else if (nTeam == MMT_BLUE)
-		return nBlue;
-	return 0;
-}
-*/
-
 MMatchTeam MMatchStage::GetRecommandedTeam()
 {
 	auto GameType = GetStageSetting()->GetGameType();
@@ -523,9 +487,6 @@ template<size_t size> bool _GetUserGradeIDName(MMatchUserGradeID gid, char(&sp_n
 	return _GetUserGradeIDName(gid, sp_name, size);
 }
 
-// 필요하면 클라이언트 쪽이랑 통합.. 서버쪽은 컬러는 필요없다..
-// color 구조체 때문에 민트랑 묶이는 것이...
-
 bool _GetUserGradeIDName(MMatchUserGradeID gid, char* sp_name, int maxlen)
 {
 	if(gid == MMUG_DEVELOPER) 
@@ -548,7 +509,6 @@ bool _GetUserGradeIDName(MMatchUserGradeID gid, char* sp_name, int maxlen)
 
 bool MMatchStage::StartGame()
 {
-	// 인원수 체크
 	int nPlayer = GetCountableObjCount();
 	if (nPlayer > m_StageSetting.GetMaxPlayers())
 	{
@@ -566,14 +526,13 @@ bool MMatchStage::StartGame()
 	bool bResult = true;
 	bool bNotReadyExist = false;
 
-	// 대기 체크
 	for (auto i=m_ObjUIDCaches.begin(); i!=m_ObjUIDCaches.end(); i++) {
 
 		MMatchObject* pObj = i->second;
 
 		if ((GetMasterUID() != (*i).first) && (pObj->GetStageState() != MOSS_READY)) {
 			if (IsAdminGrade(pObj) && pObj->CheckPlayerFlags(MTD_PlayerFlags_AdminHide))
-				continue;	// 투명 운영자는 Ready 안해도됨
+				continue;
 
 			bNotReadyExist = true;
 			bResult = false;
@@ -594,8 +553,6 @@ bool MMatchStage::StartGame()
 		}
 	}
 
-	// 모든 유저가 Ready를 하지 않아서 게임을 시작할수 없다는것을 통보해 줌. 
-	// 새로 추가됨. - by 추교성. 2005.04.19
 	if (bNotReadyExist)
 	{
 		MCommand* pCmdNotReady = MMatchServer::GetInstance()->CreateCommand( MC_GAME_START_FAIL, MUID(0, 0) );
@@ -619,7 +576,6 @@ bool MMatchStage::StartGame()
 		}
 	}
 
-	// 퀘스트 서버가 아닌데 퀘스트 모드이면 시작이 안된다.
 	if (!QuestTestServer())
 	{
 		if (MGetGameTypeMgr()->IsQuestDerived(GetStageSetting()->GetGameType())) return false;
@@ -644,9 +600,6 @@ bool MMatchStage::StartGame()
 				return false;
 			}
 
-			// 퀘스트 게임을 시작하는데 필요한 준비 작업이 정상적으로 처리되었는지 검사.
-			// 실패하면 퀘스트를 시작할수 없음.
-			// 해당 command는 MMatchRuleBaseQuest관련 함수에서 담당함.
 			if( !pRuleQuest->PrepareStart() )
 			{
 				MCommand* pCmdNotReady = MMatchServer::GetInstance()->CreateCommand( MC_GAME_START_FAIL, MUID(0, 0) );
@@ -666,7 +619,6 @@ bool MMatchStage::StartGame()
 
 
 				#ifdef _DEBUG
-					//  실패해서 게임을 시작 못했다는 커맨드는 CheckPrepareRuleStart()에서 보내줌.
 					mlog( "MMatchServer::OnStageStart - 슬롯 조건 검사에서 실패하여 게임을 시작할수 없음.\n" );
 				#endif
 
@@ -715,7 +667,6 @@ void MMatchStage::SetStageType(MMatchStageType nStageType)
 		break;
 	case MST_LADDER:
 		{
-			// 래더게임이면 선승제로 세팅
 			m_StageSetting.SetTeamWinThePoint(true);
 		}
 		break;
@@ -724,14 +675,8 @@ void MMatchStage::SetStageType(MMatchStageType nStageType)
 	m_nStageType = nStageType;
 }
 
-
-
-
-
-
 void MMatchStage::OnStartGame()
 {
-	// Death, Kill 카운트를 0으로 리셋
 	for (auto i=m_ObjUIDCaches.begin(); i!=m_ObjUIDCaches.end(); i++)
 	{
 		MMatchObject* pObj = i->second;
@@ -753,11 +698,8 @@ void MMatchStage::OnStartGame()
 
 	m_nStartTime = MMatchServer::GetInstance()->GetTickTime();
 
-	//m_WorldItemManager.OnStageBegin(m_StageSetting.GetMapIndex(), m_StageSetting.IsTeamPlay());
 	m_WorldItemManager.OnStageBegin(&m_StageSetting);
 
-
-	// 게임 시작 메세지를 보낸다.
 	if (GetStageType() == MST_NORMAL)
 		MMatchServer::GetInstance()->StageLaunch(GetUID());
 }
@@ -782,17 +724,14 @@ void MMatchStage::OnFinishGame()
 
 			GetTeamMemberCount(&nRedTeamCount, &nBlueTeamCount, NULL, true);
 
-			// red팀 승리
 			if ((m_Teams[MMT_RED].nScore > m_Teams[MMT_BLUE].nScore) || (nBlueTeamCount==0))
 			{
 				nWinnerTeam = MMT_RED;
 			}
-			// blue팀 승리
 			else if ((m_Teams[MMT_RED].nScore < m_Teams[MMT_BLUE].nScore) || (nRedTeamCount==0))
 			{
 				nWinnerTeam = MMT_BLUE;
 			}
-			// draw
 			else
 			{
 				bIsDrawGame = true;
@@ -807,25 +746,11 @@ void MMatchStage::OnFinishGame()
 		}
 	}
 
-	// Ready Reset
 	for (auto i=m_ObjUIDCaches.begin(); i!=m_ObjUIDCaches.end(); i++) {
 		MMatchObject* pObj = i->second;
 		if (pObj->GetStageState())
 			pObj->SetStageState(MOSS_NONREADY);
 	}
-
-
-/*	최종결과 나올떄 다른사람이 이미 나간상태가 되어서 봉인 -_-
-	MMatchServer* pServer = MMatchServer::GetInstance();
-	for (MUIDRefCache::iterator i=m_ObjUIDCaches.begin(); i!=m_ObjUIDCaches.end(); i++) {
-		MMatchObject* pObj = (MMatchObject*)(*i).second;
-
-		MCommand* pCmd = pServer->CreateCommand(MC_MATCH_STAGE_LEAVEBATTLE, pServer->GetUID());
-		pCmd->AddParameter(new MCmdParamUID(pObj->GetUID()));
-		pCmd->AddParameter(new MCmdParamUID(GetUID()));
-		pServer->Post(pCmd);
-	}
-	*/
 
 	m_nStartTime = 0;
 }
@@ -905,7 +830,6 @@ bool MMatchStage::IsApplyTeamBonus()
 
 void MMatchStage::OnInitRound()
 {
-	// 팀보너스 초기화
 	m_TeamBonus.bApplyTeamBonus = false;
 
 	for (int i = 0; i < MMT_END; i++)
@@ -917,7 +841,6 @@ void MMatchStage::OnInitRound()
 
 	int nRedTeamCount = 0, nBlueTeamCount = 0;
 
-	// Setup Life
 	for (auto i=GetObjBegin(); i!=GetObjEnd(); i++) {
 		MMatchObject* pObj = i->second;
 		if (pObj->GetEnterBattle() == true)
@@ -960,7 +883,7 @@ void MMatchStage::AddTeamBonus(int nExp, MMatchTeam nTeam)
 
 void MMatchStage::OnApplyTeamBonus(MMatchTeam nTeam)
 {
-	if (GetStageType() != MMATCH_GAMETYPE_DEATHMATCH_TEAM2)		// 으아아악 이런 갓뎀코드를 만들다니 -_-;
+	if (GetStageType() != MMATCH_GAMETYPE_DEATHMATCH_TEAM2)
 	{
 		for (auto i=GetObjBegin(); i!=GetObjEnd(); i++)
 		{
@@ -1019,26 +942,21 @@ void MMatchStage::OnApplyTeamBonus(MMatchTeam nTeam)
 
 void MMatchStage::OnRoundEnd_FromTeamGame(MMatchTeam nWinnerTeam)
 {
-	// 팀 보너스 적용
 	if (IsApplyTeamBonus())
 	{
 		OnApplyTeamBonus(nWinnerTeam);
 	}
 	m_Teams[nWinnerTeam].nScore++;
 
-	// 연승 기록
 	m_Teams[nWinnerTeam].nSeriesOfVictories++;
 	m_Teams[NegativeTeam(nWinnerTeam)].nSeriesOfVictories = 0;
 
-	// 오토 팀밸런스 체크
 	if (CheckAutoTeamBalancing())
 	{
 		ShuffleTeamMembers();
 	}
 }
 
-
-// Ladder서버는 팀의 ID, 클랜전일 경우 클랜 ID가 들어간다.
 void MMatchStage::SetLadderTeam(MMatchLadderTeamInfo* pRedLadderTeamInfo, MMatchLadderTeamInfo* pBlueLadderTeamInfo)
 {
 	memcpy(&m_Teams[MMT_RED].LadderInfo, pRedLadderTeamInfo, sizeof(MMatchLadderTeamInfo));
@@ -1049,7 +967,6 @@ void MMatchStage::OnCommand(MCommand* pCommand)
 {
 	if (m_pRule) m_pRule->OnCommand(pCommand);
 }
-
 
 int MMatchStage::GetMinPlayerLevel()
 {
@@ -1065,7 +982,6 @@ int MMatchStage::GetMinPlayerLevel()
 
 	return nMinLevel;
 }
-
 
 bool MMatchStage::CheckUserWasVoted( const MUID& uidPlayer )
 {
@@ -1094,7 +1010,6 @@ bool MMatchStage::CheckUserWasVoted( const MUID& uidPlayer )
 	return true;
 }
 
-
 MMatchItemBonusType GetStageBonusType(MMatchStageSetting* pStageSetting)
 {
 	if (pStageSetting->IsQuestDrived()) return MIBT_QUEST;
@@ -1111,16 +1026,13 @@ void MMatchStage::OnGameKill(const MUID& uidAttacker, const MUID& uidVictim)
 	}
 }
 
-
 bool moreTeamMemberKills(MMatchObject* pObject1, MMatchObject* pObject2)
 {
 	return (pObject1->GetAllRoundKillCount() > pObject2->GetAllRoundKillCount());
 }
 
-
 void MMatchStage::ShuffleTeamMembers()
 {
-	// 래더게임이나 팀게임이 아니면 하지 않는다.
 	if ((m_nStageType == MST_LADDER) || (m_StageSetting.IsTeamPlay() == false)) return;
 	if (m_ObjUIDCaches.empty()) return;
 
@@ -1161,7 +1073,6 @@ void MMatchStage::ShuffleTeamMembers()
 		if (nCounter >= nShuffledMemberCount) break;
 	}
 
-	// 메세지 전송
 	MCommand* pCmd = MMatchServer::GetInstance()->CreateCommand(MC_MATCH_RESET_TEAM_MEMBERS, MUID(0,0));
 	int nMemberCount = (int)m_ObjUIDCaches.size();
 	void* pTeamMemberDataArray = MMakeBlobArray(sizeof(MTD_ResetTeamMembersData), nMemberCount);
@@ -1190,12 +1101,8 @@ bool MMatchStage::CheckAutoTeamBalancing()
 	int nMemberCount[MMT_END] = {0, };
 	GetTeamMemberCount(&nMemberCount[MMT_RED], &nMemberCount[MMT_BLUE], NULL, true);
 
-	// 2명 이상 인원수가 차이나고 인원수 많은 팀이 3연승이상 계속될 경우 팀을 섞는다.
 	const int MEMBER_COUNT = 2;
 	const int SERIES_OF_VICTORIES = 3;
-
-//	const int MEMBER_COUNT = 1;
-//	const int SERIES_OF_VICTORIES = 2;
 
 	if ( ((nMemberCount[MMT_RED] - nMemberCount[MMT_BLUE]) >= MEMBER_COUNT) && 
 		 (m_Teams[MMT_RED].nSeriesOfVictories >= SERIES_OF_VICTORIES) )

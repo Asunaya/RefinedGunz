@@ -1,6 +1,4 @@
-#ifndef MMATCHSTAGE_H
-#define MMATCHSTAGE_H
-
+#pragma once
 #include <list>
 #include "MMatchItem.h"
 #include "MMatchTransDataType.h"
@@ -21,46 +19,39 @@ class MMatchStage;
 class MMatchServer;
 class MLadderGroup;
 
-// 스테이지 타입
 enum MMatchStageType
 {
-	MST_NORMAL	= 0,			// 일반
-	MST_LADDER,					// 레더나 클랜게임
+	MST_NORMAL	= 0,
+	MST_LADDER,
 	
 	MST_MAX
 };
 
 struct MMatchStageTeamBonus
 {
-	bool		bApplyTeamBonus;		// 해당 게임에서 경험치 보너스가 적용되는지 여부
+	bool		bApplyTeamBonus;
 };
 
-// Ladder전일경우 래더팀 정보
 struct MMatchLadderTeamInfo
 {
-	int		nTID;				// Ladder Team ID
-	int		nFirstMemberCount;	// 초기멤버수
+	int		nTID;
+	int		nFirstMemberCount;
 
-	// Clan전에서만 사용하는 변수
-	int		nCLID;				// 클랜ID
-	int		nCharLevel;			// 캐릭터 평균 레벨
-	int		nContPoint;			// 캐릭터 기여도 평균
+	int		nCLID;
+	int		nCharLevel;
+	int		nContPoint;
 };
 
-
-// Stage에서 사용하는 팀의 추가정보
 struct MMatchStageTeam
 {
-	int						nTeamBonusExp;			// 누적된 팀 경험치
-	int						nTeamTotalLevel;		// 팀원들의 레벨 총합 - 팀보너스 배분시 사용한다
-	int						nScore;					// 스코어
-	int						nSeriesOfVictories;		// 연승정보
-	int						nTotalKills;			// 누적 팀 킬수 (라운드 시작, 즉 게임 시작때 초기화 - 무한팀데스매치를 위함)
+	int						nTeamBonusExp;
+	int						nTeamTotalLevel;
+	int						nScore;
+	int						nSeriesOfVictories;
+	int						nTotalKills;
 	MMatchLadderTeamInfo	LadderInfo;
 };
 
-
-// 스테이지 메인 클래스 - 스테이지와 관련된 일을 총괄한다.
 class MMatchStage {
 private:
 	int						m_nIndex;
@@ -69,7 +60,7 @@ private:
 	MUID					m_uidStage;
 	MUID					m_uidOwnerChannel;
 	char					m_szStageName[STAGENAME_LENGTH];
-	bool					m_bPrivate;		// 비밀방
+	bool					m_bPrivate;
 	char					m_szStagePassword[STAGENAME_LENGTH];
 	MMatchStageTeamBonus	m_TeamBonus;
 	MMatchStageTeam			m_Teams[MMT_END];
@@ -131,7 +122,6 @@ public:
 	bool CheckAutoTeamBalancing();
 	void ShuffleTeamMembers();
 
-
 	const char* GetName()		{ return m_szStageName; }
 	const char* GetPassword()	{ return m_szStagePassword; }
 	void SetPassword(const char* pszPassword)	{ strcpy_safe(m_szStagePassword, pszPassword); }
@@ -145,14 +135,20 @@ public:
 	char* GetFirstMasterName()	{ return m_szFirstMasterName; }
 	void SetFirstMasterName(char* pszName)	{ strcpy_safe(m_szFirstMasterName, pszName); }
 
-	MMatchObject* GetObj(const MUID& uid)	{ if (m_ObjUIDCaches.count(uid) == 0) return NULL; else return (MMatchObject*)(m_ObjUIDCaches[uid]); }			///< 추가by 동섭, 듀얼을 위해 -_-
-	size_t GetObjCount()					{ return m_ObjUIDCaches.size(); }
+	MMatchObject* GetObj(const MUID& uid)
+	{
+		if (m_ObjUIDCaches.count(uid) == 0)
+			return NULL;
+
+		return (MMatchObject*)(m_ObjUIDCaches[uid]);
+	}
+
+	size_t GetObjCount() const { return m_ObjUIDCaches.size(); }
 	int GetPlayers();
 	auto GetObjBegin()	{ return m_ObjUIDCaches.begin(); }
 	auto GetObjEnd()	{ return m_ObjUIDCaches.end(); }
-	int GetObjInBattleCount();															///< 전투하고 있는 플레이어수
-	int GetCountableObjCount()				{ return ((int)GetObjCount() - m_nAdminObjectCount); }	///< 운영자를 제외한 플레이어수
-
+	int GetObjInBattleCount();
+	int GetCountableObjCount() const { return ((int)GetObjCount() - m_nAdminObjectCount); }
 
 	void AddBanList(int nCID);
 	bool CheckBanList(int nCID);
@@ -165,7 +161,7 @@ public:
 	void EnterBattle(MMatchObject* pObj);
 	void LeaveBattle(MMatchObject* pObj);
 
-	STAGE_STATE GetState()		{ return m_nState; }
+	STAGE_STATE GetState() const { return m_nState; }
 	void ChangeState(STAGE_STATE nState)	{ m_nState = nState; UpdateStateTimer(); }
 
 	bool CheckTick(u64 nClock);
@@ -180,16 +176,16 @@ public:
 
 	MVoteMgr* GetVoteMgr()			{ return &m_VoteMgr; }
 
-	MUID GetAgentUID()				{ return m_uidAgent; }
+	MUID GetAgentUID() const		{ return m_uidAgent; }
 	void SetAgentUID(MUID uid)		{ m_uidAgent = uid; }
-	bool GetAgentReady()			{ return m_bAgentReady; }
+	bool GetAgentReady() const		{ return m_bAgentReady; }
 	void SetAgentReady(bool bReady)	{ m_bAgentReady = bReady; }
 
-	MUID GetMasterUID()				{ return m_StageSetting.GetMasterUID(); }
+	MUID GetMasterUID()	const		{ return m_StageSetting.GetMasterUID(); }
 	int GetIndex()					{ return m_nIndex; }
 
 	void SetOwnerChannel(MUID& uidOwnerChannel, int nIndex);
-	MUID GetOwnerChannel() { return m_uidOwnerChannel; }
+	MUID GetOwnerChannel() const { return m_uidOwnerChannel; }
 
 	void PlayerTeam(const MUID& uidPlayer, MMatchTeam nTeam);
 	void PlayerState(const MUID& uidPlayer, MMatchObjectStageState nStageState);
@@ -205,29 +201,28 @@ public:
 							   const float x, const float y, const float z, 
 							   int nLifeTime, int* pnExtraValues );
 
-	bool IsApplyTeamBonus();	// 팀전 보너스 적용여부 확인
+	bool IsApplyTeamBonus();
 	void AddTeamBonus(int nExp, MMatchTeam nTeam);
-	int GetTeamScore(MMatchTeam nTeam)		{ return m_Teams[nTeam].nScore; }
+	int GetTeamScore(MMatchTeam nTeam) const { return m_Teams[nTeam].nScore; }
 
-	int GetTeamKills(MMatchTeam nTeam)		{ return m_Teams[nTeam].nTotalKills; }
+	int GetTeamKills(MMatchTeam nTeam) const { return m_Teams[nTeam].nTotalKills; }
 	void AddTeamKills(MMatchTeam nTeam, int amount=1)		{ m_Teams[nTeam].nTotalKills+=amount; }
 	void InitTeamKills()		{ m_Teams[MMT_BLUE].nTotalKills = m_Teams[MMT_RED].nTotalKills = 0; }
 
-	const MMatchStageType GetStageType()	{ return m_nStageType; }
-	int GetMinPlayerLevel();	// 방에 있는 플레이어중 최소 레벨을 구한다.
+	MMatchStageType GetStageType() const { return m_nStageType; }
+	int GetMinPlayerLevel();
 
 	bool CheckUserWasVoted( const MUID& uidPlayer );
 
 	void OnRoundEnd_FromTeamGame(MMatchTeam nWinnerTeam);
-	void OnInitRound();			// 라운드 시작시 Rule클래스에서 호출
+	void OnInitRound();
 
 	void UpdateWorldItems();
 
 	void ResetTeams();
 };
 
-
-class MMatchStageMap : public map<MUID, MMatchStage*> {
+class MMatchStageMap : public std::map<MUID, MMatchStage*> {
 	MUID	m_uidGenerate;
 public:
 	MMatchStageMap()			{	m_uidGenerate = MUID(0,0);	}
@@ -238,9 +233,4 @@ public:
 
 MMatchItemBonusType GetStageBonusType(MMatchStageSetting* pStageSetting);
 
-
-#define TRANS_STAGELIST_NODE_COUNT	8	// 한번에 클라이언트에게 보내주는 스테이지노드 개수
-
-
-
-#endif
+#define TRANS_STAGELIST_NODE_COUNT	8

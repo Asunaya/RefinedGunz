@@ -45,8 +45,6 @@ MMatchStage* MMatchServer::FindStage(const MUID& uidStage)
 
 bool MMatchServer::StageAdd(MMatchChannel* pChannel, const char* pszStageName, bool bPrivate, const char* pszStagePassword, MUID* pAllocUID)
 {
-	// 클랜전은 pChannel이 NULL이다.
-
 	MUID uidStage = m_StageMap.UseUID();
 	
 	MMatchStage* pStage= new MMatchStage;
@@ -74,7 +72,6 @@ bool MMatchServer::StageAdd(MMatchChannel* pChannel, const char* pszStageName, b
 	return true;
 }
 
-
 bool MMatchServer::StageRemove(const MUID& uidStage, MMatchStageMap::iterator* pNextItor)
 {
 	MMatchStageMap::iterator i = m_StageMap.find(uidStage);
@@ -101,7 +98,6 @@ bool MMatchServer::StageRemove(const MUID& uidStage, MMatchStageMap::iterator* p
 	return true;
 }
 
-
 bool MMatchServer::StageJoin(const MUID& uidPlayer, const MUID& uidStage)
 {
 	MMatchObject* pObj = GetObject(uidPlayer);
@@ -122,19 +118,16 @@ bool MMatchServer::StageJoin(const MUID& uidPlayer, const MUID& uidStage)
 	}
 	pObj->OnStageJoin();
 
-	// Cache Add
 	MMatchObjectCacheBuilder CacheBuilder;
 	CacheBuilder.AddObject(pObj);
 	MCommand* pCmdCacheAdd = CacheBuilder.GetResultCmd(MATCHCACHEMODE_ADD, this);
 	RouteToStage(pStage->GetUID(), pCmdCacheAdd);
 
-	// Join
 	pStage->AddObject(uidPlayer, pObj);
 	pObj->SetStageUID(uidStage);
 	pObj->SetStageState(MOSS_NONREADY);
 	pObj->SetTeam(pStage->GetRecommandedTeam());
 
-	// Cast Join
 	MCommand* pNew = new MCommand(m_CommandManager.GetCommandDescByID(MC_MATCH_STAGE_JOIN), MUID(0,0), m_This);
 	pNew->AddParameter(new MCommandParameterUID(uidPlayer));
 	pNew->AddParameter(new MCommandParameterUID(pStage->GetUID()));
@@ -145,8 +138,6 @@ bool MMatchServer::StageJoin(const MUID& uidPlayer, const MUID& uidStage)
 	else
 		RouteToListener(pObj, pNew);
 
-
-	// Cache Update
 	CacheBuilder.Reset();
 	for (auto i=pStage->GetObjBegin(); i!=pStage->GetObjEnd(); i++) {
 		MUID uidObj = i->first;
@@ -163,8 +154,6 @@ bool MMatchServer::StageJoin(const MUID& uidPlayer, const MUID& uidStage)
     MCommand* pCmdCacheUpdate = CacheBuilder.GetResultCmd(MATCHCACHEMODE_UPDATE, this);
 	RouteToListener(pObj, pCmdCacheUpdate);
 
-
-	// Cast Master(방장)
 	MUID uidMaster = pStage->GetMasterUID();
 	MCommand* pMasterCmd = CreateCommand(MC_MATCH_STAGE_MASTER, MUID(0,0));
 	pMasterCmd->AddParameter(new MCommandParameterUID(uidStage));
@@ -196,8 +185,6 @@ bool MMatchServer::StageJoin(const MUID& uidPlayer, const MUID& uidStage)
 	}
 #endif
 
-
-	// Cast Character Setting
 	StageTeam(uidPlayer, uidStage, pObj->GetTeam());
 	StagePlayerState(uidPlayer, uidStage, pObj->GetStageState());
 
@@ -252,7 +239,6 @@ bool MMatchServer::StageLeave(const MUID& uidPlayer, const MUID& uidStage)
 		RouteToStage(uidStage, pCmdCache);
 	}
 
-	// cast Master
 	if (bLeaverMaster) StageMaster(uidStage);
 
 #ifdef _QUEST_ITEM
@@ -294,8 +280,6 @@ bool MMatchServer::StageEnterBattle(const MUID& uidPlayer, const MUID& uidStage)
 	pObj->SetPlace(MMP_BATTLE);
 
 	MCommand* pNew = CreateCommand(MC_MATCH_STAGE_ENTERBATTLE, MUID(0,0));
-	//pNew->AddParameter(new MCommandParameterUID(uidPlayer));
-	//pNew->AddParameter(new MCommandParameterUID(uidStage));
 
 	unsigned char nParam = MCEP_NORMAL;
 	if (pObj->IsForcedEntried()) nParam = MCEP_FORCED;
@@ -314,10 +298,7 @@ bool MMatchServer::StageEnterBattle(const MUID& uidPlayer, const MUID& uidStage)
 	CopyCharInfoForTrans(&pNode->CharInfo, pObj->GetCharInfo(), pObj);
 
 	ZeroMemory(&pNode->ExtendInfo, sizeof(MTD_ExtendInfo));
-	//if (pStage->GetStageSetting()->IsTeamPlay())
-		pNode->ExtendInfo.nTeam = (char)pObj->GetTeam();
-	//else
-		//pNode->ExtendInfo.nTeam = 0;
+	pNode->ExtendInfo.nTeam = (char)pObj->GetTeam();
 	pNode->ExtendInfo.nPlayerFlags = pObj->GetPlayerFlags();
 
 	pNew->AddParameter(new MCommandParameterBlob(pPeerArray, MGetBlobArraySize(pPeerArray)));
@@ -325,10 +306,7 @@ bool MMatchServer::StageEnterBattle(const MUID& uidPlayer, const MUID& uidStage)
 
 	RouteToStage(uidStage, pNew);
 
-
-	// 라우팅 후에 넣어야 한다.
 	pStage->EnterBattle(pObj);
-
 
 	return true;
 }
@@ -342,17 +320,14 @@ bool MMatchServer::StageLeaveBattle(const MUID& uidPlayer, const MUID& uidStage)
 
 	if (pObj->GetPlace() != MMP_BATTLE) 
 	{
-//		_ASSERT(0);
 		return false;
 	}
 
 	pStage->LeaveBattle(pObj);
 	pObj->SetPlace(MMP_STAGE);
 	
-	// 디비 캐슁 업데이트
 	UpdateCharDBCachingData(pObj);
 
-	// 레벨에 안맞는 장비아이템 체크
 #define LEGAL_ITEMLEVEL_DIFF		3
 	bool bIsCorrect = true;
 	for (int i = 0; i < MMCIP_END; i++)
@@ -369,9 +344,7 @@ bool MMatchServer::StageLeaveBattle(const MUID& uidPlayer, const MUID& uidStage)
 		RouteToListener(pObj, pNewCmd);
 	}
 
-	// 기간 만료 아이템이 있는지 체크
 	CheckExpiredItems(pObj);
-
 
 	MCommand* pNew = CreateCommand(MC_MATCH_STAGE_LEAVEBATTLE, MUID(0,0));
 	pNew->AddParameter(new MCommandParameterUID(uidPlayer));
@@ -398,8 +371,6 @@ bool MMatchServer::StageChat(const MUID& uidPlayer, const MUID& uidStage, char* 
 	if ((pObj == NULL) || (pObj->GetCharInfo() == NULL)) return false;
 
 	if (pObj->GetAccountInfo()->m_nUGrade == MMUG_CHAT_LIMITED) return false;
-
-//	InsertChatDBLog(uidPlayer, pszChat);
 
 	MCommand* pCmd = new MCommand(m_CommandManager.GetCommandDescByID(MC_MATCH_STAGE_CHAT), MUID(0,0), m_This);
 	pCmd->AddParameter(new MCommandParameterUID(uidPlayer));
@@ -480,7 +451,6 @@ void MMatchServer::StageFinishGame(const MUID& uidStage)
 	return;
 }
 
-
 MCommand* MMatchServer::CreateCmdResponseStageSetting(const MUID& uidStage)
 {
 	MMatchStage* pStage = FindStage(uidStage);
@@ -521,8 +491,6 @@ MCommand* MMatchServer::CreateCmdResponseStageSetting(const MUID& uidStage)
 	return pCmd;
 }
 
-
-
 void MMatchServer::OnStageCreate(const MUID& uidChar, char* pszStageName, bool bPrivate, char* pszStagePassword)
 {
 	MMatchObject* pObj = GetObject(uidChar);
@@ -543,7 +511,6 @@ void MMatchServer::OnStageCreate(const MUID& uidChar, char* pszStageName, bool b
 	if (pStage)
 		pStage->SetFirstMasterName(pObj->GetCharInfo()->m_szName);
 }
-
 
 void MMatchServer::OnStageJoin(const MUID& uidChar, const MUID& uidStage)
 {
@@ -598,8 +565,6 @@ void MMatchServer::OnPrivateStageJoin(const MUID& uidPlayer, const MUID& uidStag
 		return;
 	}
 
-	// 영자나 개발자면 무시..
-
 	bool bSkipPassword = false;
 
 	MMatchObject* pObj = GetObject(uidPlayer);
@@ -612,7 +577,6 @@ void MMatchServer::OnPrivateStageJoin(const MUID& uidPlayer, const MUID& uidStag
 	if (ugid == MMUG_DEVELOPER || ugid == MMUG_ADMIN) 
 		bSkipPassword = true;
 
-	// 비밀방이 아니거나 패스워드가 틀리면 패스워드가 틀렸다고 응답한다.
 	if(bSkipPassword==false) {
 		if ((!pStage->IsPrivate()) || (strcmp(pStage->GetPassword(), pszPassword)))
 		{
@@ -637,14 +601,10 @@ void MMatchServer::OnStageFollow(const MUID& uidPlayer, const char* pszTargetNam
 	MMatchObject* pTargetObj = GetPlayerByName(pszTargetName);
 	if (pTargetObj == NULL) return;
 
-	// 자기 자신을 따라 가려고 했을경우 검사.
 	if (pPlayerObj->GetUID() == pTargetObj->GetUID()) return;
 
-	// 스테이트가 잘못되어 있는지 검사.
 	if (!pPlayerObj->CheckEnableAction(MMatchObject::MMOA_STAGE_FOLLOW)) return;
 
-
-	// 서로 다른 채널인지 검사.
 	if (pPlayerObj->GetChannelUID() != pTargetObj->GetChannelUID()) {
 
 #ifdef _VOTESETTING
@@ -661,7 +621,6 @@ void MMatchServer::OnStageFollow(const MUID& uidPlayer, const char* pszTargetNam
 	MMatchStage* pStage = FindStage(pTargetObj->GetStageUID());
 	if (pStage == NULL) return;
 
-	// 클랜전게임은 따라갈 수 없음
 	if (pStage->GetStageType() != MST_NORMAL) return;
 
 	if (pStage->IsPrivate()==false) {
@@ -676,10 +635,6 @@ void MMatchServer::OnStageFollow(const MUID& uidPlayer, const char* pszTargetNam
 		}
 	}
 	else {
-		// 따라가려는 방이 비밀번호를 필요로 할경우는 따라갈수 없음.
-		//RouteResponseToListener( pPlayerObj, MC_MATCH_RESPONSE_STAGE_FOLLOW, MERR_CANNOT_FOLLOW_BY_PASSWORD );
-
-		// 해당방이 비밀방이면 비밀번호를 요구한다.
 		MCommand* pNew = new MCommand(m_CommandManager.GetCommandDescByID(MC_MATCH_STAGE_REQUIRE_PASSWORD), MUID(0,0), m_This);
 		pNew->AddParameter(new MCommandParameterUID(pStage->GetUID()));
 		pNew->AddParameter(new MCommandParameterString((char*)pStage->GetName()));
@@ -703,7 +658,6 @@ void MMatchServer::OnStageRequestPlayerList(const MUID& uidPlayer, const MUID& u
 	MMatchStage* pStage = FindStage(uidStage);
 	if (pStage == NULL) return;
 
-	// 방인원 목록
 	MMatchObjectCacheBuilder CacheBuilder;
 	CacheBuilder.Reset();
 	for (auto i=pStage->GetObjBegin(); i!=pStage->GetObjEnd(); i++) {
@@ -713,14 +667,12 @@ void MMatchServer::OnStageRequestPlayerList(const MUID& uidPlayer, const MUID& u
     MCommand* pCmdCacheUpdate = CacheBuilder.GetResultCmd(MATCHCACHEMODE_UPDATE, this);
 	RouteToListener(pObj, pCmdCacheUpdate);
 
-	// Cast Master(방장)
 	MUID uidMaster = pStage->GetMasterUID();
 	MCommand* pMasterCmd = CreateCommand(MC_MATCH_STAGE_MASTER, MUID(0,0));
 	pMasterCmd->AddParameter(new MCommandParameterUID(uidStage));
 	pMasterCmd->AddParameter(new MCommandParameterUID(uidMaster));
 	RouteToListener(pObj, pMasterCmd);
 
-	// Cast Character Setting
 	StageTeam(uidPlayer, uidStage, pObj->GetTeam());
 	StagePlayerState(uidPlayer, uidStage, pObj->GetStageState());
 }
@@ -743,7 +695,6 @@ void MMatchServer::OnStageLeaveBattle(const MUID& uidPlayer, const MUID& uidStag
 
 
 #include "CMLexicalAnalyzer.h"
-// 강퇴 임시코드
 bool StageKick(MMatchServer* pServer, const MUID& uidPlayer, const MUID& uidStage, char* pszChat)
 {
 	MMatchObject* pChar = pServer->GetObject(uidPlayer);
@@ -785,7 +736,6 @@ bool StageKick(MMatchServer* pServer, const MUID& uidPlayer, const MUID& uidStag
 	return bResult;
 }
 
-// 방장확인 임시코드
 bool StageShowInfo(MMatchServer* pServer, const MUID& uidPlayer, const MUID& uidStage, char* pszChat)
 {
 	MMatchObject* pChar = pServer->GetObject(uidPlayer);
@@ -806,7 +756,7 @@ bool StageShowInfo(MMatchServer* pServer, const MUID& uidPlayer, const MUID& uid
 				sprintf_safe(szMsg, "FirstMaster : (%s)", pStage->GetFirstMasterName());
 				pServer->Announce(pChar, szMsg);
 				bResult = true;
-			}	// ShowInfo
+			}
 		}
 	}
 
@@ -815,7 +765,6 @@ bool StageShowInfo(MMatchServer* pServer, const MUID& uidPlayer, const MUID& uid
 }
 void MMatchServer::OnStageChat(const MUID& uidPlayer, const MUID& uidStage, char* pszChat)
 {
-	// RAONHAJE : 강퇴 임시코드
 	if (pszChat[0] == '/') {
 		if (StageKick(this, uidPlayer, uidStage, pszChat))
 			return;
@@ -839,12 +788,10 @@ void MMatchServer::OnStageStart(const MUID& uidPlayer, const MUID& uidStage, int
 		pNew->AddParameter(new MCommandParameterInt(min(nCountdown,3)));
 		RouteToStage(uidStage, pNew);
 
-		// 디비에 로그를 남긴다.
 		int nMapID = pStage->GetStageSetting()->GetMapIndex();
 		int nGameType = (int)pStage->GetStageSetting()->GetGameType();
 		MMatchObject* pMaster = GetObject(pStage->GetMasterUID());
 
-		// test 맵등은 로그 남기지 않는다.
 		if ( (MIsCorrectMap(nMapID)) && (pMaster) && (MGetGameTypeMgr()->IsCorrectGameType(nGameType)) )
 		{
 			char szPlayers[1024] = "";
@@ -867,15 +814,6 @@ void MMatchServer::OnStageStart(const MUID& uidPlayer, const MUID& uidStage, int
 							(int)pStage->GetObjCount(),
 							szPlayers);
 				PostAsyncJob(pJob);
-
-/*
-				GetDBMgr()->InsertGameLog(pStage->GetName(), g_MapDesc[nMapID].szMapName, 
-										MGetGameTypeMgr()->GetInfo(MMATCH_GAMETYPE(nGameType))->szGameTypeStr,
-										pStage->GetStageSetting()->GetRoundMax(),
-										pMaster->GetCharInfo()->m_nCID,
-										(int)pStage->GetObjCount(),
-										szPlayers);
-*/
 			}
 		}
 
@@ -903,7 +841,6 @@ void MMatchServer::OnStagePlayerState(const MUID& uidPlayer, const MUID& uidStag
 	StagePlayerState(uidPlayer, uidStage, nStageState);
 }
 
-
 void MMatchServer::OnStageTeam(const MUID& uidPlayer, const MUID& uidStage, MMatchTeam nTeam)
 {
 	MMatchStage* pStage = FindStage(uidStage);
@@ -919,12 +856,10 @@ void MMatchServer::OnStageMap(const MUID& uidStage, const char* pszMapName)
 {
 	MMatchStage* pStage = FindStage(uidStage);
 	if (pStage == NULL) return;
-	if (pStage->GetState() != STAGE_STATE_STANDBY) return;	// 대기상태에서만 바꿀수 있다
+	if (pStage->GetState() != STAGE_STATE_STANDBY) return;
 	if (strlen(pszMapName) < 2) return;
 
-
 	pStage->SetMapName(pszMapName);
-
 
 	MCommand* pNew = new MCommand(m_CommandManager.GetCommandDescByID(MC_MATCH_STAGE_MAP), MUID(0,0), m_This);
 	pNew->AddParameter(new MCommandParameterUID(uidStage));
@@ -936,7 +871,7 @@ void MMatchServer::OnStageSetting(const MUID& uidPlayer, const MUID& uidStage, v
 {
 	MMatchStage* pStage = FindStage(uidStage);
 	if (pStage == NULL) return;
-	if (pStage->GetState() != STAGE_STATE_STANDBY) return;	// 대기상태에서만 바꿀수 있다
+	if (pStage->GetState() != STAGE_STATE_STANDBY) return;
 	if (nStageCount <= 0) return;
 
 	if (pStage->GetMasterUID() != uidPlayer)
@@ -972,7 +907,6 @@ void MMatchServer::OnStageSetting(const MUID& uidPlayer, const MUID& uidStage, v
 
 	if ((pChannel) && (bCheckChannelRule))
 	{
-		// 세팅할 수 있는 맵, 게임타입인지 체크
 		MChannelRule* pRule = MGetChannelRuleMgr()->GetRule(pChannel->GetRuleType());
 		if (pRule)
 		{
@@ -991,10 +925,6 @@ void MMatchServer::OnStageSetting(const MUID& uidPlayer, const MUID& uidStage, v
 			}
 		}
 	}
-	
-	
-		
-
 
 	pNode->nMapIndex = pSetting->GetMapIndex();
 
@@ -1107,7 +1037,6 @@ void MMatchServer::OnRequestStageSetting(const MUID& uidComm, const MUID& uidSta
 
 	MMatchObject* pChar = GetObject(uidComm);
 	if (pChar && (MMUG_EVENTMASTER == pChar->GetAccountInfo()->m_nUGrade)) 	{
-		// 이벤트 마스터에게 처음 방만들었던 사람을 알려준다
 		StageShowInfo(this, uidComm, uidStage, "/showinfo");
 	}
 }
@@ -1131,7 +1060,6 @@ void MMatchServer::ResponseGameInfo(const MUID& uidChar, const MUID& uidStage)
 	MCommand* pNew = CreateCommand(MC_MATCH_RESPONSE_GAME_INFO, MUID(0,0));
 	pNew->AddParameter(new MCommandParameterUID(pStage->GetUID()));
 
-	// 게임정보
 	void* pGameInfoArray = MMakeBlobArray(sizeof(MTD_GameInfo), 1);
 	MTD_GameInfo* pGameItem = (MTD_GameInfo*)MGetBlobArrayElement(pGameInfoArray, 0);
 	memset(pGameItem, 0, sizeof(MTD_GameInfo));
@@ -1148,7 +1076,6 @@ void MMatchServer::ResponseGameInfo(const MUID& uidChar, const MUID& uidStage)
 	pNew->AddParameter(new MCommandParameterBlob(pGameInfoArray, MGetBlobArraySize(pGameInfoArray)));
 	MEraseBlobArray(pGameInfoArray);
 
-	// 룰정보
 	void* pRuleInfoArray = NULL;
 	if (pStage->GetRule())
 		pRuleInfoArray = pStage->GetRule()->CreateRuleInfoBlob();
@@ -1157,7 +1084,6 @@ void MMatchServer::ResponseGameInfo(const MUID& uidChar, const MUID& uidStage)
 	pNew->AddParameter(new MCommandParameterBlob(pRuleInfoArray, MGetBlobArraySize(pRuleInfoArray)));
 	MEraseBlobArray(pRuleInfoArray);
 
-	// Battle에 들어간 사람만 List를 만든다.
 	int nPlayerCount = pStage->GetObjInBattleCount();
 
 	void* pPlayerItemArray = MMakeBlobArray(sizeof(MTD_GameInfoPlayerItem), nPlayerCount);
@@ -1190,7 +1116,6 @@ void MMatchServer::OnMatchLoadingComplete(const MUID& uidPlayer, int nPercent)
 	RouteToStage(pObj->GetStageUID(), pCmd);	
 }
 
-
 void MMatchServer::OnGameRoundState(const MUID& uidStage, int nState, int nRound)
 {
 	MMatchStage* pStage = FindStage(uidStage);
@@ -1208,7 +1133,6 @@ void MMatchServer::OnGameKill(const MUID& uidAttacker, const MUID& uidVictim)
 	MMatchStage* pStage = FindStage(pVictim->GetStageUID());
 	if (pStage == NULL) return;
 
-	// 서버는 죽은줄 알고있었는데 또 죽었다고 신고들어온경우 죽었다는 메시지만 라우팅한다
 	if (pVictim->CheckAlive() == false) {	
 		MCommand* pNew = CreateCommand(MC_MATCH_RESPONSE_SUICIDE, MUID(0,0));
 		int nResult = MOK;
@@ -1252,7 +1176,6 @@ void MMatchServer::OnGameKill(const MUID& uidAttacker, const MUID& uidVictim)
 	}
 }
 
-
 void MMatchServer::OnDuelSetObserver(const MUID& uidChar)
 {
 	MMatchObject* pObj = GetObject(uidChar);
@@ -1274,12 +1197,10 @@ void MMatchServer::OnRequestSpawn(const MUID& uidChar, const MVector& pos, const
 		return;
 	}
 
-	// 마지막 죽었던 시간과 새로 리스폰을 요청한 시간 사이에 5초 이상의 시간이 있었는지 검사한다.
 	auto dwTime = GetGlobalTimeMS() - pObj->GetLastSpawnTime();;
 	if (dwTime < 5000)
 		return;
 	pObj->SetLastSpawnTime(GetGlobalTimeMS());
-
 
 	MMatchStage* pStage = FindStage(pObj->GetStageUID());
 	if (pStage == NULL) return;
@@ -1287,18 +1208,17 @@ void MMatchServer::OnRequestSpawn(const MUID& uidChar, const MVector& pos, const
 		 (!pObj->IsEnabledRespawnDeathTime(GetTickTime()))  )
 		 return;
 
-	MMatchRule* pRule = pStage->GetRule();					// 이런 식의 코드는 마음에 안들지만 -_-; 게임타입 보고 예외처리.
-	MMATCH_GAMETYPE gameType = pRule->GetGameType();		// 다른 방법 있나요.
+	MMatchRule* pRule = pStage->GetRule();
+	MMATCH_GAMETYPE gameType = pRule->GetGameType();
 	if (gameType == MMATCH_GAMETYPE_DUEL)
 	{
-		MMatchRuleDuel* pDuel = (MMatchRuleDuel*)pRule;		// RTTI 안써서 dynamic cast는 패스.. 예외처리도 짜증나고 -,.-
+		MMatchRuleDuel* pDuel = (MMatchRuleDuel*)pRule;
 		if (uidChar != pDuel->uidChampion && uidChar != pDuel->uidChallenger)
 		{
 			OnDuelSetObserver(uidChar);
 			return;
 		}
 	}
-
 
 	pObj->SetAlive(true);
 	pObj->ResetHPAP();
@@ -1329,7 +1249,7 @@ void MMatchServer::OnGameReportTimeSync(const MUID& uidComm, unsigned long nLoca
 	MMatchObject* pObj = GetPlayerByCommUID(uidComm);
 	if (pObj == NULL) return;
 
-	pObj->UpdateTickLastPacketRecved();	// Last Packet Timestamp
+	pObj->UpdateTickLastPacketRecved();
 
 	if (pObj->GetEnterBattle() == false)
 		return;
@@ -1340,9 +1260,9 @@ void MMatchServer::OnGameReportTimeSync(const MUID& uidComm, unsigned long nLoca
 	float fError = static_cast<float>(nSyncDiff) / static_cast<float>(MATCH_CYCLE_CHECK_SPEEDHACK);
 	if (fError > 2.f) {	
 		pSync->AddFoulCount();
-		if (pSync->GetFoulCount() >= 3) {	// 3연속 스피드핵 검출 - 3진아웃
+		if (pSync->GetFoulCount() >= 3) {
 
-			#ifndef _DEBUG		// 디버그할때는 빼놓았음
+			#ifndef _DEBUG
 				NotifyMessage(pObj->GetUID(), MATCHNOTIFY_GAME_SPEEDHACK);
 				StageLeave(pObj->GetUID(), pObj->GetStageUID());
 				DisconnectObject(pObj->GetUID());
@@ -1357,7 +1277,7 @@ void MMatchServer::OnGameReportTimeSync(const MUID& uidComm, unsigned long nLoca
 	pSync->Update(GetGlobalClockCount());
 
 	//// MemoryHack Test ////
-	if (nDataChecksum > 0) {	// 서버가 Client MemoryChecksum 모르므로 일단 클라이언트가 신고하는의미로 사용한다.
+	if (nDataChecksum > 0) {
 		NotifyMessage(pObj->GetUID(), MATCHNOTIFY_GAME_MEMORYHACK);
 		StageLeave(pObj->GetUID(), pObj->GetStageUID());
 		DisconnectObject(pObj->GetUID());
@@ -1389,10 +1309,8 @@ void MMatchServer::OnRequestSuicide(const MUID& uidPlayer)
 	if (pObj == NULL) return;
 	MMatchStage* pStage = FindStage(pObj->GetStageUID());
 	if (pStage == NULL) return;
-
 	
 	OnGameKill(uidPlayer, uidPlayer);
-
 
 	MCommand* pNew = CreateCommand(MC_MATCH_RESPONSE_SUICIDE, MUID(0,0));
 	int nResult = MOK;
@@ -1411,7 +1329,8 @@ void MMatchServer::OnRequestObtainWorldItem(const MUID& uidPlayer, const int nIt
 	pStage->ObtainWorldItem(pObj, nItemUID);
 }
 
-void MMatchServer::OnRequestSpawnWorldItem(const MUID& uidPlayer, const int nItemID, const float x, const float y, const float z)
+void MMatchServer::OnRequestSpawnWorldItem(const MUID& uidPlayer, int nItemID,
+	float x, float y, float z)
 {
 	MMatchObject* pObj = GetObject(uidPlayer);
 	if (pObj == NULL) return;
@@ -1434,20 +1353,18 @@ float MMatchServer::GetDuelPlayersMultiflier(int nPlayerCount)
 void MMatchServer::CalcExpOnGameKill(MMatchStage* pStage, MMatchObject* pAttacker, MMatchObject* pVictim, 
 					   int* poutAttackerExp, int* poutVictimExp)
 {
-	bool bSuicide = false;		// 자살
+	bool bSuicide = false;
 	if (pAttacker == pVictim) bSuicide = true;		
 
 	MMATCH_GAMETYPE nGameType = pStage->GetStageSetting()->GetGameType();
 	float fGameExpRatio = MGetGameTypeMgr()->GetInfo(nGameType)->fGameExpRatio;
 
-	// 게임타입이 Training이면 바로 0리턴
 	if (nGameType == MMATCH_GAMETYPE_TRAINING)
 	{
 		*poutAttackerExp = 0;
 		*poutVictimExp = 0;
 		return;
 	}
-	// 게임타입이 버서커일 경우
 	else if (nGameType == MMATCH_GAMETYPE_BERSERKER)
 	{
 		MMatchRuleBerserker* pRuleBerserker = (MMatchRuleBerserker*)pStage->GetRule();
@@ -1456,12 +1373,10 @@ void MMatchServer::CalcExpOnGameKill(MMatchStage* pStage, MMatchObject* pAttacke
 		{
 			if (pAttacker != pVictim)
 			{
-				// 버서커는 경험치를 80%만 획득한다.
 				fGameExpRatio = fGameExpRatio * 0.8f;
 			}
 			else
 			{
-				// 버서커는 자살 또는 피가 줄어 죽는경우 손실 경험치는 없도록 한다.
 				fGameExpRatio = 0.0f;
 			}
 		}
@@ -1478,13 +1393,8 @@ void MMatchServer::CalcExpOnGameKill(MMatchStage* pStage, MMatchObject* pAttacke
 			fGameExpRatio *= GetDuelVictoryMultiflier(pRuleDuel->GetVictory()) * GetDuelPlayersMultiflier(pStage->GetPlayers());
 
 		}
-//		if (pRuleDuel->GetVictory() <= 1)
-//		{
-//			fGameExpRatio = fGameExpRatio * GetDuelPlayersMultiflier(pStage->GetPlayers()) * GetDuelVictoryMultiflier()
-//		}
 	}
 
-	// 맵, 게임타입에 대한 경험치 비율 적용
 	int nMapIndex = pStage->GetStageSetting()->GetMapIndex();
 	if ((nMapIndex >=0) && (nMapIndex < MMATCH_MAP_COUNT))
 	{
@@ -1495,19 +1405,15 @@ void MMatchServer::CalcExpOnGameKill(MMatchStage* pStage, MMatchObject* pAttacke
 	int nAttackerLevel = pAttacker->GetCharInfo()->m_nLevel;
 	int nVictimLevel = pVictim->GetCharInfo()->m_nLevel;
 
-	// 경험치 계산
 	int nAttackerExp = (int)(MMatchFormula::GetGettingExp(nAttackerLevel, nVictimLevel) * fGameExpRatio);
 	int nVictimExp = (int)(MMatchFormula::CalcPanaltyEXP(nAttackerLevel, nVictimLevel) * fGameExpRatio);
 
-
-	// 클랜전일 경우는 획득 경험치가 1.5배, 손실경험치 없음
 	if ((MGetServerConfig()->GetServerMode() == MSM_CLAN) && (pStage->GetStageType() == MST_LADDER))
 	{
 		nAttackerExp = (int)((float)nAttackerExp * 1.5f);
 		nVictimExp = 0;
 	}
 
-	// 고수채널, 초고수채널일 경우에는 경치다운 없음(자살제외)
 	MMatchChannel* pOwnerChannel = FindChannel(pStage->GetOwnerChannel());
 	if ((pOwnerChannel) && (!bSuicide))
 	{
@@ -1518,13 +1424,12 @@ void MMatchServer::CalcExpOnGameKill(MMatchStage* pStage, MMatchObject* pAttacke
 		}
 	}
 
-	// 죽은사람이 운영자, 개발자일 경우 경험치 두배
 	if ((pVictim->GetAccountInfo()->m_nUGrade == MMUG_ADMIN) || 
 		(pVictim->GetAccountInfo()->m_nUGrade == MMUG_DEVELOPER))
 	{
 		nAttackerExp = nAttackerExp * 2;
 	}
-	// 죽인사람이 운영자, 개발자일 경우 경치다운 없음
+
 	if ((!bSuicide) &&
 		((pAttacker->GetAccountInfo()->m_nUGrade == MMUG_ADMIN) || 
 		(pAttacker->GetAccountInfo()->m_nUGrade == MMUG_DEVELOPER)))
@@ -1532,21 +1437,17 @@ void MMatchServer::CalcExpOnGameKill(MMatchStage* pStage, MMatchObject* pAttacke
 		nVictimExp = 0;
 	}
 
-	// 자살일 경우 경험치 손실이 두배
 	if (bSuicide) 
 	{
 		nVictimExp = (int)(MMatchFormula::GetSuicidePanaltyEXP(nVictimLevel) * fGameExpRatio);
 		nAttackerExp = 0;
 	}
 
-	// 팀킬인경우 경험치 제로
 	if ((pStage->GetStageSetting()->IsTeamPlay()) && (pAttacker->GetTeam() == pVictim->GetTeam()))
 	{
 		nAttackerExp = 0;
 	}
 
-
-	// 팀전일 경우 경험치 배분
 	if (pStage->IsApplyTeamBonus())
 	{
 		int nTeamBonus = 0;
@@ -1557,11 +1458,9 @@ void MMatchServer::CalcExpOnGameKill(MMatchStage* pStage, MMatchObject* pAttacke
 			nAttackerExp = nNewAttackerExp;
 		}
 
-		// 팀 경험치 적립
 		pStage->AddTeamBonus(nTeamBonus, MMatchTeam(pAttacker->GetTeam()));
 	}
 
-	// xp 보너스 적용(넷마블 PC방, 경험치 반지)
 	int nAttackerExpBonus = 0;
 	if (nAttackerExp != 0)
 	{
@@ -1574,8 +1473,8 @@ void MMatchServer::CalcExpOnGameKill(MMatchStage* pStage, MMatchObject* pAttacke
 	*poutVictimExp = nVictimExp;
 }
 
-
-const int MMatchServer::CalcBPonGameKill( MMatchStage* pStage, MMatchObject* pAttacker, const int nAttackerLevel, const int nVictimLevel )
+int MMatchServer::CalcBPonGameKill( MMatchStage* pStage, MMatchObject* pAttacker,
+	int nAttackerLevel, int nVictimLevel )
 {
 	if( (0 == pStage) || (0 == pAttacker) ) 
 		return -1;
@@ -1587,21 +1486,9 @@ const int MMatchServer::CalcBPonGameKill( MMatchStage* pStage, MMatchObject* pAt
 	return nAddedBP + nBPBonus;
 }
 
-
-// 적을 죽였을 경우 경험치 계산
 void MMatchServer::ProcessOnGameKill(MMatchStage* pStage, MMatchObject* pAttacker, MMatchObject* pVictim)
 {
-	/*
-		경험치 계산
-		죽었다는 메세지 전송
-		캐릭터에 경험치 적용
-		레벨 계산
-		Kill, Death, 바운티 계산, 적용
-		DB캐싱 업데이트
-		레벨업 메세지 전송
-	*/
-
-	bool bSuicide = false;		// 자살
+	bool bSuicide = false;
 	if (pAttacker == pVictim) bSuicide = true;		
 
 	int nAttackerExp = 0;
@@ -1612,21 +1499,15 @@ void MMatchServer::ProcessOnGameKill(MMatchStage* pStage, MMatchObject* pAttacke
 	float fGameExpRatio = MGetGameTypeMgr()->GetInfo(nGameType)->fGameExpRatio;
 	MUID uidStage = pAttacker->GetStageUID();
 
-	// 경험치 계산
 	CalcExpOnGameKill(pStage, pAttacker, pVictim, &nAttackerExp, &nVictimExp);
 
-	// 죽었다는 메세지를 방전체에게 보낸다.
 	PostGameDeadOnGameKill(uidStage, pAttacker, pVictim, nAttackerExp, nVictimExp);
 
-	// 만약 게임모드가 Training이면 Xp등의 업데이트를 하지 않는다.
 	if (nGameType == MMATCH_GAMETYPE_TRAINING) return;
 
-
-	// 캐릭터 XP 업데이트
 	pAttacker->GetCharInfo()->IncXP(nAttackerExp);
 	pVictim->GetCharInfo()->DecXP(nVictimExp);
 
-	// 레벨 계산
 	int nNewAttackerLevel = -1, nNewVictimLevel = -1;
 	if ((!bSuicide) && (pAttacker->GetCharInfo()->m_nLevel < MAX_LEVEL) &&
 		(pAttacker->GetCharInfo()->m_nXP >= MMatchFormula::GetNeedExp(nAttackerLevel)))
@@ -1644,20 +1525,15 @@ void MMatchServer::ProcessOnGameKill(MMatchStage* pStage, MMatchObject* pAttacke
 
 	if (!bSuicide)
 	{
-		// KillCount 계산
 		pAttacker->GetCharInfo()->IncKill();
 
-		// 바운티 추가해준다
-		// int nAddedBP = (int)(MMatchFormula::GetGettingBounty(nAttackerLevel, nVictimLevel) * fGameExpRatio);
 		const int nBPBonus = CalcBPonGameKill( pStage, pAttacker, nAttackerLevel, nVictimLevel );
 
 		pAttacker->GetCharInfo()->IncBP(nBPBonus);
 	}
 
-	// DeathCount 계산
 	pVictim->GetCharInfo()->IncDeath();
 
-	// DB 캐슁 업데이트
 	if (pAttacker->GetCharInfo()->GetDBCachingData()->IsRequestUpdate())
 	{
 		UpdateCharDBCachingData(pAttacker);
@@ -1667,10 +1543,8 @@ void MMatchServer::ProcessOnGameKill(MMatchStage* pStage, MMatchObject* pAttacke
 		UpdateCharDBCachingData(pAttacker);
 	}
 
-	// 만약 레벨이 바뀌면 따로 레벨업한다.
 	if ((!bSuicide) && (nNewAttackerLevel >= 0) && (nNewAttackerLevel != nAttackerLevel))
 	{
-		// 레벨이 바뀌면 바로 캐슁 업데이트한다
 		UpdateCharDBCachingData(pAttacker);
 
 		pAttacker->GetCharInfo()->m_nLevel = nNewAttackerLevel;
@@ -1687,7 +1561,6 @@ void MMatchServer::ProcessOnGameKill(MMatchStage* pStage, MMatchObject* pAttacke
 	}
 	if ((nNewVictimLevel >= 0) && (nNewVictimLevel != nVictimLevel))
 	{
-		// 레벨이 바뀌면 바로 캐슁 업데이트한다
 		UpdateCharDBCachingData(pVictim);
 
 		pVictim->GetCharInfo()->m_nLevel = nNewVictimLevel;
@@ -1704,9 +1577,6 @@ void MMatchServer::ProcessOnGameKill(MMatchStage* pStage, MMatchObject* pAttacke
 		}
 	}
 
-
-
-	// 레벨업, 레벨 다운 메세지 보내기
 	if ((!bSuicide) && (nNewAttackerLevel >= 0) && (nNewAttackerLevel > nAttackerLevel))
 	{
 		MCommand* pCmd = CreateCommand(MC_MATCH_GAME_LEVEL_UP, MUID(0,0));
@@ -1730,21 +1600,11 @@ void MMatchServer::ProcessPlayerXPBP(MMatchStage* pStage, MMatchObject* pPlayer,
 	if (pStage == NULL) return;
 	if (!IsEnabledObject(pPlayer)) return;
 
-	/*
-		경험치 계산
-		캐릭터에 경험치 적용
-		레벨 계산
-		DB캐싱 업데이트
-		레벨업,다운 메세지 전송
-	*/
-
 	MUID uidStage = pPlayer->GetStageUID();
 	int nPlayerLevel = pPlayer->GetCharInfo()->m_nLevel;
 
-	// 캐릭터 XP 업데이트
 	pPlayer->GetCharInfo()->IncXP(nAddedXP);
 
-	// 레벨 계산
 	int nNewPlayerLevel = -1;
 	if ((pPlayer->GetCharInfo()->m_nLevel < MAX_LEVEL) &&
 		(pPlayer->GetCharInfo()->m_nXP >= MMatchFormula::GetNeedExp(nPlayerLevel)))
@@ -1753,20 +1613,15 @@ void MMatchServer::ProcessPlayerXPBP(MMatchStage* pStage, MMatchObject* pPlayer,
 		if (nNewPlayerLevel != pPlayer->GetCharInfo()->m_nLevel) pPlayer->GetCharInfo()->m_nLevel = nNewPlayerLevel;
 	}
 
-	// 바운티 추가해준다
 	pPlayer->GetCharInfo()->IncBP(nAddedBP);
 
-
-	// DB 캐슁 업데이트
 	if (pPlayer->GetCharInfo()->GetDBCachingData()->IsRequestUpdate())
 	{
 		UpdateCharDBCachingData(pPlayer);
 	}
 
-	// 만약 레벨이 바뀌면 따로 레벨업한다.
 	if ((nNewPlayerLevel >= 0) && (nNewPlayerLevel != nPlayerLevel))
 	{
-		// 레벨이 바뀌면 바로 캐슁 업데이트한다
 		UpdateCharDBCachingData(pPlayer);
 
 		pPlayer->GetCharInfo()->m_nLevel = nNewPlayerLevel;
@@ -1782,7 +1637,6 @@ void MMatchServer::ProcessPlayerXPBP(MMatchStage* pStage, MMatchObject* pPlayer,
 		}
 	}
 
-	// 레벨업, 레벨 다운 메세지 보내기
 	if (nNewPlayerLevel > 0)
 	{
 		if (nNewPlayerLevel > nPlayerLevel)
@@ -1802,7 +1656,6 @@ void MMatchServer::ProcessPlayerXPBP(MMatchStage* pStage, MMatchObject* pPlayer,
 	}
 }
 
-// 팀 보너스 적용
 void MMatchServer::ApplyObjectTeamBonus(MMatchObject* pObject, int nAddedExp)
 {
 	if (!IsEnabledObject(pObject)) return;
@@ -1814,20 +1667,14 @@ void MMatchServer::ApplyObjectTeamBonus(MMatchObject* pObject, int nAddedExp)
 	
 	bool bIsLevelUp = false;
 
-	// 보너스 적용
 	if (nAddedExp != 0)
 	{
 		int nExpBonus = (int)(nAddedExp * MMatchFormula::CalcXPBonusRatio(pObject, MIBT_TEAM));
 		nAddedExp += nExpBonus;
 	}
 
-
-
-
-	// 캐릭터 XP 업데이트
 	pObject->GetCharInfo()->IncXP(nAddedExp);
 
-	// 레벨 계산
 	int nNewLevel = -1;
 	int nCurrLevel = pObject->GetCharInfo()->m_nLevel;
 
@@ -1840,16 +1687,13 @@ void MMatchServer::ApplyObjectTeamBonus(MMatchObject* pObject, int nAddedExp)
 		if (nNewLevel != nCurrLevel) pObject->GetCharInfo()->m_nLevel = nNewLevel;
 	}
 
-	// DB 캐슁 업데이트
 	if (pObject->GetCharInfo()->GetDBCachingData()->IsRequestUpdate())
 	{
 		UpdateCharDBCachingData(pObject);
 	}
 
-	// 만약 레벨이 바뀌면 바로 레벨업한다.
 	if ((nNewLevel >= 0) && (nNewLevel != nCurrLevel))
 	{
-		// 레벨이 바뀌면 바로 캐슁 업데이트한다
 		UpdateCharDBCachingData(pObject);
 
 		pObject->GetCharInfo()->m_nLevel = nNewLevel;
@@ -1877,17 +1721,13 @@ void MMatchServer::ApplyObjectTeamBonus(MMatchObject* pObject, int nAddedExp)
 
 	nChrExp = pObject->GetCharInfo()->m_nXP;
 	nPercent = MMatchFormula::GetLevelPercent(nChrExp, nCurrLevel);
-	// 상위 2바이트는 경험치, 하위 2바이트는 경험치의 퍼센트이다.
 	nExpArg = MakeExpTransData(nAddedExp, nPercent);
-
 
 	MCommand* pCmd = CreateCommand(MC_MATCH_GAME_TEAMBONUS, MUID(0,0));
 	pCmd->AddParameter(new MCommandParameterUID(pObject->GetUID()));
 	pCmd->AddParameter(new MCommandParameterUInt(nExpArg));
 	RouteToBattle(uidStage, pCmd);	
 
-
-	// 레벨업 메세지 보내기
 	if ((nNewLevel >= 0) && (nNewLevel > nCurrLevel))
 	{
 		MCommand* pCmd = CreateCommand(MC_MATCH_GAME_LEVEL_UP, MUID(0,0));
@@ -1932,13 +1772,11 @@ void MMatchServer::StageList(const MUID& uidPlayer, int nStageStartIndex, bool b
 	MMatchChannel* pChannel = FindChannel(pChar->GetChannelUID());
 	if (pChannel == NULL) return;
 
-	// 클랜서버인데 클랜채널일 경우에는 방 리스트대신 대기중 클랜 리스트를 보낸다.
 	if ((MGetServerConfig()->GetServerMode() == MSM_CLAN) && (pChannel->GetChannelType() == MCHANNEL_TYPE_CLAN))
 	{
 		StandbyClanList(uidPlayer, nStageStartIndex, bCacheUpdate);
 		return;
 	}
-
 
 	MCommand* pNew = new MCommand(m_CommandManager.GetCommandDescByID(MC_MATCH_STAGE_LIST), MUID(0,0), m_This);
 
@@ -1984,7 +1822,7 @@ void MMatchServer::StageList(const MUID& uidPlayer, int nStageStartIndex, bool b
 		MTD_StageListNode* pNode = (MTD_StageListNode*)MGetBlobArrayElement(pStageArray, nArrayIndex++);
 		pNode->uidStage = pStage->GetUID();
 		strcpy_safe(pNode->szStageName, pStage->GetName());
-		pNode->nNo = (unsigned char)(pStage->GetIndex() + 1);	// 사용자에게 보여주는 인덱스는 1부터 시작한다
+		pNode->nNo = (unsigned char)(pStage->GetIndex() + 1);
 		pNode->nPlayers = (char)pStage->GetPlayers();
 		pNode->nMaxPlayers = pStage->GetStageSetting()->GetMaxPlayers();
 		pNode->nState = pStage->GetState();
@@ -1992,17 +1830,14 @@ void MMatchServer::StageList(const MUID& uidPlayer, int nStageStartIndex, bool b
 		pNode->nMapIndex = pStage->GetStageSetting()->GetMapIndex();
 		
 		pNode->nSettingFlag = 0;
-		// 난입
 		if (pStage->GetStageSetting()->GetForcedEntry())
 		{
 			pNode->nSettingFlag |= MSTAGENODE_FLAG_FORCEDENTRY_ENABLED;
 		}
-		// 비밀방
 		if (pStage->IsPrivate())
 		{
 			pNode->nSettingFlag |= MSTAGENODE_FLAG_PRIVATE;
 		}
-		// 레벨제한
 		pNode->nLimitLevel = pStage->GetStageSetting()->GetLimitLevel();
 		pNode->nMasterLevel = 0;
 
@@ -2027,7 +1862,6 @@ void MMatchServer::StageList(const MUID& uidPlayer, int nStageStartIndex, bool b
 
 	RouteToListener(pChar, pNew);	
 }
-
 
 void MMatchServer::OnStageRequestStageList(const MUID& uidPlayer, const MUID& uidChannel, const int nStageCursor)
 {
@@ -2078,9 +1912,6 @@ void MMatchServer::ResponseQuickJoin(const MUID& uidPlayer, MTD_QuickJoinParam* 
 			if (!CheckBitSet(pQuickJoinParam->nMapEnum, nMapIndex)) continue;
 			if (!CheckBitSet(pQuickJoinParam->nModeEnum, nGameType)) continue;
 
-			//if (((1 << nMapIndex) & (pQuickJoinParam->nMapEnum)) == 0) continue;
-			//if (((1 << nGameType) & (pQuickJoinParam->nModeEnum)) == 0) continue;
-
 			recommended_stage_list.push_back(pStage->GetUID());
 		}
 	}
@@ -2117,7 +1948,6 @@ static int __cdecl _int_sortfunc(const void* a, const void* b)
 	return *((int*)a) - *((int*)b);
 }
 
-
 int MMatchServer::GetLadderTeamIDFromDB(const int nTeamTableIndex, const int* pnMemberCIDArray, const int nMemberCount)
 {
 	if ((nMemberCount <= 0) || (nTeamTableIndex != nMemberCount))
@@ -2126,7 +1956,6 @@ int MMatchServer::GetLadderTeamIDFromDB(const int nTeamTableIndex, const int* pn
 		return 0;
 	}
 
-	// cid 오름차순으로 소팅 - db상에 소팅되어 들어가있다. 
 	int* pnSortedCIDs = new int[nMemberCount];
 	for (int i = 0; i < nMemberCount; i++)
 	{
@@ -2142,7 +1971,6 @@ int MMatchServer::GetLadderTeamIDFromDB(const int nTeamTableIndex, const int* pn
 			nTID = 0;
 		}
 	}
-	
 
 	delete[] pnSortedCIDs;
 
@@ -2151,13 +1979,12 @@ int MMatchServer::GetLadderTeamIDFromDB(const int nTeamTableIndex, const int* pn
 
 void MMatchServer::SaveLadderTeamPointToDB(const int nTeamTableIndex, const int nWinnerTeamID, const int nLoserTeamID, const bool bIsDrawGame)
 {
-	// 포인트 계산 - 액션리그 전용
 	int nWinnerPoint = 0, nLoserPoint = 0, nDrawPoint = 0;
 
 	nLoserPoint = -1;
 	switch (nTeamTableIndex)
 	{
-	case 2:	// 2대2
+	case 2:
 		{
 			nWinnerPoint = 4;
 			nDrawPoint = 1;
@@ -2190,7 +2017,6 @@ void MMatchServer::OnVoteCallVote(const MUID& uidPlayer, const char* pszDiscuss,
 	MMatchObject* pObj = GetObject(uidPlayer);
 	if (pObj == NULL) return;
 
-	// 운영자가 강퇴투표하면 강제로 강퇴
 	if (IsAdminGrade(pObj)) {
 		MMatchStage* pStage = FindStage(pObj->GetStageUID());
 		if (pStage)
@@ -2201,7 +2027,6 @@ void MMatchServer::OnVoteCallVote(const MUID& uidPlayer, const char* pszDiscuss,
 	MMatchStage* pStage = FindStage(pObj->GetStageUID());
 	if (pStage == NULL) return;
 
-	// 운영자가 같이 게임중이면 투표 불가능
 	for (auto itor = pStage->GetObjBegin(); itor != pStage->GetObjEnd(); itor++) {
 		MUID uidObj = itor->first;
 		MMatchObject* pPlayer = (MMatchObject*)GetObject(uidObj);
@@ -2221,7 +2046,6 @@ void MMatchServer::OnVoteCallVote(const MUID& uidPlayer, const char* pszDiscuss,
 		return;
 	}
 
-	// 투표를 했다는걸 표시해놓음.
 	pObj->SetVoteState( true );
 
 	if (pStage->GetStageType() == MST_LADDER)
@@ -2231,13 +2055,11 @@ void MMatchServer::OnVoteCallVote(const MUID& uidPlayer, const char* pszDiscuss,
 		return;
 	}
 #ifdef _VOTESETTING
-	// 방 설정중 투표기능을 검사함.
 	if( !pStage->GetStageSetting()->bVoteEnabled ) {
 		VoteAbort( uidPlayer );
 		return;
 	}
 
-	// 이번 게임에서 투표를 건의했는지 검사.
 	if( pStage->WasCallVote() ) {
 		VoteAbort( uidPlayer );
 		return;
@@ -2258,7 +2080,7 @@ void MMatchServer::OnVoteCallVote(const MUID& uidPlayer, const char* pszDiscuss,
 	if (pDiscuss == NULL) return;
 
 	if (pStage->GetVoteMgr()->CallVote(pDiscuss)) {
-		pDiscuss->Vote(uidPlayer, MVOTE_YES);	// 발의자 무조건 찬성
+		pDiscuss->Vote(uidPlayer, MVOTE_YES);
 
 		MCommand* pCmd = CreateCommand(MC_MATCH_NOTIFY_CALLVOTE, MUID(0,0));
 		pCmd->AddParameter(new MCmdParamStr(pszDiscuss));
@@ -2330,10 +2152,8 @@ void MMatchServer::OnEventChangeMaster(const MUID& uidAdmin)
 	MMatchStage* pStage = FindStage(pObj->GetStageUID());
 	if (pStage == NULL) return;
 
-	// 관리자 권한을 가진 사람이 아니면 연결을 끊는다.
 	if (!IsAdminGrade(pObj))
 	{
-//		DisconnectObject(uidAdmin);		
 		return;
 	}
 
@@ -2352,10 +2172,8 @@ void MMatchServer::OnEventChangePassword(const MUID& uidAdmin, const char* pszPa
 	MMatchStage* pStage = FindStage(pObj->GetStageUID());
 	if (pStage == NULL) return;
 
-	// 관리자 권한을 가진 사람이 아니면 연결을 끊는다.
 	if (!IsAdminGrade(pObj))
 	{
-//		DisconnectObject(uidAdmin);		
 		return;
 	}
 
@@ -2371,7 +2189,6 @@ void MMatchServer::OnEventRequestJjang(const MUID& uidAdmin, const char* pszTarg
 	MMatchStage* pStage = FindStage(pObj->GetStageUID());
 	if (pStage == NULL) return;
 
-	// 관리자 권한을 가진 사람이 아니면 무시
 	if (!IsAdminGrade(pObj))
 	{
 		return;
@@ -2379,8 +2196,8 @@ void MMatchServer::OnEventRequestJjang(const MUID& uidAdmin, const char* pszTarg
 
 	MMatchObject* pTargetObj = GetPlayerByName(pszTargetName);
 	if (pTargetObj == NULL) return;
-	if (IsAdminGrade(pTargetObj)) return;		// 어드민 대상으로 짱불가
-	if (MMUG_STAR == pTargetObj->GetAccountInfo()->m_nUGrade) return;	// 이미 짱
+	if (IsAdminGrade(pTargetObj)) return;
+	if (MMUG_STAR == pTargetObj->GetAccountInfo()->m_nUGrade) return;
 
 	pTargetObj->GetAccountInfo()->m_nUGrade = MMUG_STAR;
 
@@ -2405,14 +2222,13 @@ void MMatchServer::OnEventRemoveJjang(const MUID& uidAdmin, const char* pszTarge
 	MMatchStage* pStage = FindStage(pObj->GetStageUID());
 	if (pStage == NULL) return;
 
-	// 관리자 권한을 가진 사람이 아니면 연결을 끊는다.
 	if (!IsAdminGrade(pObj))
 	{
 		return;
 	}
 	
 	MMatchObject* pTargetObj = GetPlayerByName(pszTargetName);
-	if (pTargetObj == NULL) return;			// 어드민 대상으로 짱불가
+	if (pTargetObj == NULL) return;
 
 	pTargetObj->GetAccountInfo()->m_nUGrade = MMUG_FREE;
 
@@ -2428,7 +2244,6 @@ void MMatchServer::OnEventRemoveJjang(const MUID& uidAdmin, const char* pszTarge
 		RouteToStage(pStage->GetUID(), pCmdUIUpdate);
 	}
 }
-
 
 void MMatchServer::OnStageGo(const MUID& uidPlayer, unsigned int nRoomNo)
 {
@@ -2447,15 +2262,12 @@ void MMatchServer::OnStageGo(const MUID& uidPlayer, unsigned int nRoomNo)
 	}
 }
 
-
-
 void MMatchServer::OnDuelQueueInfo(const MUID& uidStage, const MTD_DuelQueueInfo& QueueInfo)
 {
 	MCommand* pCmd = CreateCommand(MC_MATCH_DUEL_QUEUEINFO, MUID(0,0));
 	pCmd->AddParameter(new MCmdParamBlob(&QueueInfo, sizeof(MTD_DuelQueueInfo)));
 	RouteToBattle(uidStage, pCmd);
 }
-
 
 void MMatchServer::OnQuestSendPing(const MUID& uidStage, unsigned long int t)
 {
