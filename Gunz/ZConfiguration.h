@@ -207,6 +207,7 @@ public:
 	bool ConvertMacroStrings();
 	bool AsyncScreenshots = true;
 	ScreenshotFormatType ScreenshotFormat = ScreenshotFormatType::PNG;
+	bool FastWeaponCycle{};
 
 private:
 	friend void LoadRGCommands(ZChatCmdManager &CmdManager);

@@ -454,6 +454,13 @@ void LoadRGCommands(ZChatCmdManager& CmdManager)
 		ZGetConfiguration()->Save();
 	}, CCF_ALL, 1, 1, true, "/chartex <level>", "");
 
+	CmdManager.AddCommand(0, "FastWeaponCycle", [](const char *line, int argc, char ** const argv) {
+		if (SetBool("Fast weapon cycle", ZGetConfiguration()->FastWeaponCycle, argc, argv))
+		{
+			ZGetConfiguration()->Save();
+		}
+	}, CCF_ALL, 0, 1, true, "/FastWeaponCycle [0/1]", "");
+
 	CmdManager.AddCommand(0, "setparts", [](const char *line, int argc, char ** const argv) {
 		if (!CheckDeveloperMode("setparts"))
 			return;

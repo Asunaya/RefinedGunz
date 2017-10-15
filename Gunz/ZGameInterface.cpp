@@ -2647,7 +2647,9 @@ void ZGameInterface::ChangeWeapon(ZChangeWeaponType nType)
 	if (nParts < 0) return;
 	if (pChar->GetItems()->GetSelectedWeaponParts() == nParts) return;
 
-	if (bWheel && (pChar->GetStateUpper() == ZC_STATE_UPPER_LOAD && pChar->IsUpperPlayDone() == false))
+	if (bWheel &&
+		!ZGetConfiguration()->FastWeaponCycle &&
+		(pChar->GetStateUpper() == ZC_STATE_UPPER_LOAD && pChar->IsUpperPlayDone() == false))
 		return;
 
 	if (pChar->m_bWallHang || pChar->m_bShot || pChar->m_bShotReturn || pChar->m_bTumble
