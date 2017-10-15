@@ -221,7 +221,7 @@ bool ZDirectInput::Create(HWND hWnd, BOOL bExclusive, BOOL bImmediateMode)
 
 	if( FAILED(hr) ) return false;
 
-	const bool bMouseImmediate = false;
+	const bool bMouseImmediate = true;
 
 	if( !bMouseImmediate )
 	{
@@ -412,53 +412,50 @@ DWORD ZDirectInput::GetKeyboardBufferedData(ZDIBUFFER* pBuffer,unsigned int nBuf
 
 DWORD ZDirectInput::GetMouseBufferedData(int* pSumX,int* pSumY, ZDIBUFFER* pBuffer,unsigned int nBuffer)
 {
-	DIDEVICEOBJECTDATA didod[ SAMPLE_BUFFER_SIZE ];  // Receives buffered data 
-	DWORD              dwElements;
-	DWORD              i;
-	HRESULT            hr;
-
 	*pSumX = 0;
 	*pSumY = 0;
 
 	if( NULL == m_pMouse ) return 0;
 
-	dwElements = SAMPLE_BUFFER_SIZE;
-	hr = m_pMouse->GetDeviceData( sizeof(DIDEVICEOBJECTDATA),didod, &dwElements, 0 );
-	if( hr != DI_OK ) 
+	DIMOUSESTATE2 dims2{};
+	auto hr = m_pMouse->GetDeviceState(sizeof(dims2), &dims2);
+
+	if (FAILED(hr))
 	{
 		hr = m_pMouse->Acquire();
-		while( hr == DIERR_INPUTLOST ) 
+		while (hr == DIERR_INPUTLOST)
 			hr = m_pMouse->Acquire();
-		return 0; 
+		return 0;
 	}
 
-	int nSumX = 0, nSumY = 0;
-
 	int nCount = 0;
-	for( i = 0; i < dwElements; i++ ) 
+
+	// wheel
+	if (dims2.lZ != 0)
 	{
-		int nButton = -1;
-		pBuffer[nCount].bPressed = (didod[ i ].dwData & 0x80) ? true:false;
-
-		if (didod[i].dwOfs == DIMOFS_X) { nSumX += (int)didod[i].dwData; continue; }
-		if (didod[i].dwOfs == DIMOFS_Y) { nSumY += (int)didod[i].dwData; continue; }
-		if (didod[i].dwOfs == DIMOFS_Z)
-		{
-			nButton = ((int)didod[i].dwData) > 0 ? 0 : 1;
-			pBuffer[nCount].bPressed = true;
-		}
-		else if (didod[i].dwOfs == DIMOFS_BUTTON0) nButton = 2;
-		else if (didod[i].dwOfs == DIMOFS_BUTTON1) nButton = 3;
-		else if (didod[i].dwOfs == DIMOFS_BUTTON2) nButton = 4;
-		else if (didod[i].dwOfs == DIMOFS_BUTTON3) nButton = 5;
-		else if (didod[i].dwOfs == DIMOFS_BUTTON4) nButton = 6;
-		else if (didod[i].dwOfs == DIMOFS_BUTTON5) nButton = 7;
-		else if (didod[i].dwOfs == DIMOFS_BUTTON6) nButton = 8;
-		else if (didod[i].dwOfs == DIMOFS_BUTTON7) nButton = 9;
-
+		int nButton = (dims2.lZ) > 0 ? 0 : 1;
+		pBuffer[nCount].bPressed = true;
+		pBuffer[nCount].nKey = nButton;
+		nCount++;
+		pBuffer[nCount].bPressed = false;
 		pBuffer[nCount].nKey = nButton;
 		nCount++;
 	}
+
+	for (int i = 0; i<8; i++)
+	{
+		bool bPressed = (dims2.rgbButtons[i] & 0x80) ? true : false;
+		if (m_bMouseButtonStates[i] != bPressed)
+		{
+			m_bMouseButtonStates[i] = bPressed;
+			pBuffer[nCount].bPressed = bPressed;
+			pBuffer[nCount].nKey = i + 2;
+			nCount++;
+		}
+	}
+
+	int nSumX = dims2.lX;
+	int nSumY = dims2.lY;
 
 	*pSumX = nSumX;
 	*pSumY = nSumY;

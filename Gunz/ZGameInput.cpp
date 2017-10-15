@@ -460,9 +460,6 @@ bool ZGameInput::OnEvent(MEvent* pEvent)
 				pCamera->m_fDist=min(CAMERA_DIST_MAX,pCamera->m_fDist);
 				break;
 			}
-
-			if (nDelta > 0)	ZGetGameInterface()->ChangeWeapon(ZCWT_PREV);
-			else if (nDelta < 0) ZGetGameInterface()->ChangeWeapon(ZCWT_NEXT);
 		}break;
 
 	case MWM_MOUSEMOVE:

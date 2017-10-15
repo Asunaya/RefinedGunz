@@ -19,6 +19,7 @@ protected:
 
 	LPDIRECTINPUTDEVICE8	m_pMouse;			///< mouse device
 	unsigned int			m_nMouseButtons;	///> mouse buttons
+	bool					m_bMouseButtonStates[8]{};
 
 	LPDIRECTINPUTDEVICE8	m_pJoystick;		///< joystick device
 	unsigned int			m_nJoyButtons;		///< joystick buttons
