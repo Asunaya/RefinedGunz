@@ -2594,61 +2594,28 @@ void ZGameInterface::ChangeWeapon(ZChangeWeaponType nType)
 
 		int nHasItemCount = 0;
 		int nPos = -1;
-		int ItemQueue[MMCIP_END];
+		int ItemQueue[int(MMCIP_END) - int(MMCIP_MELEE)]{};
 
 		for (int i = MMCIP_MELEE; i < MMCIP_END; i++)
 		{
-			if (!pChar->GetItems()->GetItem((MMatchCharItemParts)i)->IsEmpty())
-			{
-				if (pChar->GetItems()->GetSelectedWeaponParts() == i)
-					nPos = nHasItemCount;
+			if (pChar->GetItems()->GetItem((MMatchCharItemParts)i)->IsEmpty())
+				continue;
 
-				ItemQueue[nHasItemCount++] = i;
-			}
+			if ((i == MMCIP_CUSTOM1 || i == MMCIP_CUSTOM2) && IsOutOfAmmo(i))
+				continue;
+
+			if (pChar->GetItems()->GetSelectedWeaponParts() == i)
+				nPos = nHasItemCount;
+
+			ItemQueue[nHasItemCount++] = i;
 		}
 
 		if (nPos < 0 || nHasItemCount <= 1)
 			return;
 
-		// The loop in the else block would go on forever if all of these are true. (I.e., we only
-		// have two items equipped, and no ammo for either.)
-		if (nHasItemCount == 2 && ItemQueue[0] == MMCIP_CUSTOM1 && ItemQueue[1] == MMCIP_CUSTOM2 &&
-			IsOutOfAmmo(MMCIP_CUSTOM1) && IsOutOfAmmo(MMCIP_CUSTOM2))
-		{
-			return;
-		}
-		else
-		{
-			int nNewPos = nPos - 1;
-			while (nNewPos != nPos) {
-				if (nType == ZCWT_PREV) {
-					if (nNewPos < 0) nNewPos = nHasItemCount - 1;
-				} else {
-					if (nNewPos >= nHasItemCount) nNewPos = 0;
-				}
-
-				auto nPart = (MMatchCharItemParts)ItemQueue[nNewPos];
-
-				// We can change to any non-item weapon, even if it's out of ammo, but we don't
-				// want to change to an item that is out of ammo.
-				if (nPart == MMCIP_CUSTOM1 || nPart == MMCIP_CUSTOM2) {
-					if (!IsOutOfAmmo(nPart)) {
-						break;
-					}
-				}
-				else {
-					break;
-				}
-
-				if (nType == ZCWT_PREV) {
-					nNewPos = nNewPos - 1;
-				} else {
-					nNewPos = nNewPos + 1;
-				}
-			}
-
-			nParts = ItemQueue[nNewPos];
-		}
+		auto Offset = nType == ZCWT_PREV ? -1 : 1;
+		auto NewPos = mod(nPos + Offset, nHasItemCount);
+		nParts = ItemQueue[NewPos];
 	}
 	else
 	{

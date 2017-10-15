@@ -88,6 +88,7 @@
 
 #include "GlobalTypes.h"
 #include "MFile.h"
+#include "MUtil.h"
 
 #include "Hash.h"
 #include "LauncherConfig.h"
@@ -197,15 +198,6 @@ struct RemoteFile
 		return RemoteBlocks[Index];
 	}
 };
-
-// Returns a mod n, handling negative dividends correctly. (-1 % 5 == -1, mod(-1, 5) == 4.)
-template <typename T1, typename T2>
-auto mod(T1 a, T2 n)
-{
-	const auto div = a / n - int(a < 0);
-	const auto off = div * n;
-	return a - off;
-}
 
 // Same as ceil(float(a) / b), except without involving floats.
 template <typename T1, typename T2>

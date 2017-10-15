@@ -370,3 +370,12 @@ private:
 	auto& Derived() { return static_cast<DerivedType&>(*this); }
 	auto& Derived() const { return static_cast<const DerivedType&>(*this); }
 };
+
+// Returns a mod n, handling negative dividends correctly. (-1 % 5 == -1, mod(-1, 5) == 4.)
+template <typename T1, typename T2>
+auto mod(T1 a, T2 n)
+{
+	const auto div = a / n - int(a < 0);
+	const auto off = div * n;
+	return a - off;
+}
