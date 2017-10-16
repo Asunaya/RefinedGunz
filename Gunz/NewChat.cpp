@@ -6,6 +6,7 @@
 #include "Config.h"
 #include "defer.h"
 #include "MClipboard.h"
+#include "CodePageConversion.h"
 
 namespace ResizeFlagsType
 {
@@ -138,41 +139,6 @@ struct LineSegmentInfo
 
 // Stuff crashes if this is increased
 static constexpr int MAX_INPUT_LENGTH = 230;
-
-static constexpr size_t ConversionError = size_t(-1);
-
-template <size_t OutputSize>
-size_t acptoutf16(wchar_t(&Output)[OutputSize], const char* Input)
-{
-	// ACP = [A]NSI [C]ode [P]age
-	auto Len = MultiByteToWideChar(CP_ACP, 0,
-		Input, -1,
-		Output, std::size(Output));
-
-	// 0 indicates error.
-	// This is distinct from an empty string, which would cause to return 1 instead since it'd
-	// write just the null terminator in that case.
-	if (Len == 0)
-		return ConversionError;
-
-	// The return value is chars written including null terminator (when you pass -1 for
-	// cbMultiByte), so we need to subtract one.
-	return size_t(Len) - 1;
-}
-
-template <size_t OutputSize>
-size_t utf16toacp(char(&Output)[OutputSize], const wchar_t* Input)
-{
-	auto Len = WideCharToMultiByte(CP_ACP, 0,
-		Input, -1,
-		Output, std::size(Output),
-		nullptr, nullptr);
-
-	if (Len == 0)
-		return ConversionError;
-
-	return size_t(Len) - 1;
-}
 
 void ChatMessage::SubstituteFormatSpecifiers()
 {
@@ -345,7 +311,7 @@ void Chat::OutputChatMsg(const char *Msg){
 void Chat::OutputChatMsg(const char *szMsg, u32 dwColor)
 {
 	wchar_t WideMsg[4096];
-	auto ret = acptoutf16(WideMsg, szMsg);
+	auto ret = CodePageConversion<CP_UTF8>(WideMsg, szMsg);
 	if (ret == ConversionError)
 	{
 		MLog("Chat::OutputChatMsg -- Conversion error\n");
@@ -532,7 +498,7 @@ bool Chat::OnEvent(MEvent* pEvent) {
 		if (InputEnabled && ChatPressed && !InputField.empty())
 		{
 			char MultiByteString[1024];
-			utf16toacp(MultiByteString, InputField.c_str());
+			CodePageConversion<CP_UTF8>(MultiByteString, InputField.c_str());
 
 			ZGetGameInterface()->GetChat()->Input(MultiByteString);
 
@@ -607,10 +573,10 @@ bool Chat::OnEvent(MEvent* pEvent) {
 					continue;
 
 				wchar_t WidePlayerName[256];
-				auto len = acptoutf16(WidePlayerName, PlayerName);
+				auto len = CodePageConversion<CP_ACP>(WidePlayerName, PlayerName);
 				if (len == ConversionError)
 				{
-					MLog("Chat::OnEvent -- Conversion error while autocompleting name\n");
+					MLog("Chat::OnEvent -- Conversion error while autocompleting name %s\n", PlayerName);
 					assert(false);
 					continue;
 				}
@@ -727,10 +693,10 @@ bool Chat::OnEvent(MEvent* pEvent) {
 				{
 					wchar_t LastSenderWide[512];
 					auto* LastSender = ZGetGameInterface()->GetChat()->m_szWhisperLastSender;
-					auto len = acptoutf16(LastSenderWide, LastSender);
+					auto len = CodePageConversion<CP_ACP>(LastSenderWide, LastSender);
 					if (len == ConversionError)
 					{
-						MLog("Chat::OnEvent -- Conversion error while handling /r\n");
+						MLog("Chat::OnEvent -- Conversion error while handling /r on name %s\n", LastSender);
 						assert(false);
 						break;
 					}
