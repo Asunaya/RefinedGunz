@@ -409,16 +409,18 @@ void ZOptionInterface::InitInterfaceOption(void)
 	{
 		auto&& Cfg = *ZGetConfiguration();
 		std::pair<const char*, bool> Buttons[] = {
-			{"HitboxOption",        Cfg.GetShowHitboxes()},
-			{"DrawTrailsOption",    Cfg.GetDrawTrails()},
-			{"CamFixOption",        Cfg.GetCamFix()},
-			{"InterfaceFixOption",  Cfg.GetInterfaceFix()},
-			{"SlashEffectOption",   Cfg.GetSlashEffect()},
-			{"UnlockedDirOption",   Cfg.GetUnlockedDir()},
-			{"ShowDebugInfoOption", Cfg.GetShowDebugInfo()},
-			{"ChatFontBoldOption",  Cfg.GetChat()->BoldFont},
-			{"ColorInvertOption",   Cfg.GetColorInvert()},
-			{"MonochromeOption",    Cfg.GetMonochrome()},
+			{"HitboxOption",             Cfg.GetShowHitboxes()},
+			{"DrawTrailsOption",         Cfg.GetDrawTrails()},
+			{"CamFixOption",             Cfg.GetCamFix()},
+			{"InterfaceFixOption",       Cfg.GetInterfaceFix()},
+			{"SlashEffectOption",        Cfg.GetSlashEffect()},
+			{"UnlockedDirOption",        Cfg.GetUnlockedDir()},
+			{"ShowDebugInfoOption",      Cfg.GetShowDebugInfo()},
+			{"ChatFontBoldOption",       Cfg.GetChat()->BoldFont},
+			{"ColorInvertOption",        Cfg.GetColorInvert()},
+			{"MonochromeOption",         Cfg.GetMonochrome()},
+			{"AsyncScreenshotsOption",   Cfg.AsyncScreenshots},
+			{"FastWeaponCycleOption",    Cfg.FastWeaponCycle},
 		};
 
 		for (auto&& ButtonInfo : Buttons)
@@ -453,6 +455,17 @@ void ZOptionInterface::InitInterfaceOption(void)
 			auto EditWidget = ZFindWidgetAs<MEdit>(EditInfo.first);
 			if (EditWidget)
 				EditWidget->SetText(EditInfo.second);
+		}
+
+		std::pair<const char*, int> ComboBoxes[] = {
+			{"ScreenshotFormatOption", int(Cfg.ScreenshotFormat)},
+		};
+
+		for (auto&& ComboBoxInfo : ComboBoxes)
+		{
+			auto Widget = ZFindWidgetAs<MComboBox>(ComboBoxInfo.first);
+			if (Widget)
+				Widget->SetSelIndex(ComboBoxInfo.second);
 		}
 	}
 
@@ -837,16 +850,18 @@ bool ZOptionInterface::SaveInterfaceOption(void)
 		const auto OldFontSize = Cfg.GetChat()->FontSize;
 
 		std::pair<const char*, bool*> Buttons[] = {
-			{ "HitboxOption",        &Cfg.bShowHitboxes },
-			{ "DrawTrailsOption",    &Cfg.bDrawTrails },
-			{ "CamFixOption",        &Cfg.bCamFix },
-			{ "InterfaceFixOption",  &Cfg.InterfaceFix },
-			{ "SlashEffectOption",   &Cfg.SlashEffect },
-			{ "UnlockedDirOption",   &Cfg.UnlockedDir },
-			{ "ShowDebugInfoOption", &Cfg.ShowDebugInfo },
-			{ "ChatFontBoldOption",  &Cfg.GetChat()->BoldFont },
-			{ "ColorInvertOption",   &Cfg.ColorInvert },
-			{ "MonochromeOption",    &Cfg.Monochrome },
+			{ "HitboxOption",             &Cfg.bShowHitboxes },
+			{ "DrawTrailsOption",         &Cfg.bDrawTrails },
+			{ "CamFixOption",             &Cfg.bCamFix },
+			{ "InterfaceFixOption",       &Cfg.InterfaceFix },
+			{ "SlashEffectOption",        &Cfg.SlashEffect },
+			{ "UnlockedDirOption",        &Cfg.UnlockedDir },
+			{ "ShowDebugInfoOption",      &Cfg.ShowDebugInfo },
+			{ "ChatFontBoldOption",       &Cfg.GetChat()->BoldFont },
+			{ "ColorInvertOption",        &Cfg.ColorInvert },
+			{ "MonochromeOption",         &Cfg.Monochrome },
+			{ "AsyncScreenshotsOption",   &Cfg.AsyncScreenshots },
+			{ "FastWeaponCycleOption",    &Cfg.FastWeaponCycle },
 		};
 
 		for (auto&& ButtonInfo : Buttons)
@@ -884,6 +899,20 @@ bool ZOptionInterface::SaveInterfaceOption(void)
 			if (EditWidget)
 				EditInfo.second(EditWidget->GetText());
 		}
+
+		int ScreenshotFormat = 2;
+		std::pair<const char*, int*> ComboBoxes[] = {
+			{ "ScreenshotFormatOption", &ScreenshotFormat },
+		};
+
+		for (auto&& ComboBoxInfo : ComboBoxes)
+		{
+			auto Widget = ZFindWidgetAs<MComboBox>(ComboBoxInfo.first);
+			if (Widget)
+				*ComboBoxInfo.second = Widget->GetSelIndex();
+		}
+
+		Cfg.ScreenshotFormat = ScreenshotFormatType(ScreenshotFormat);
 
 		const auto& CurFont = Cfg.GetChat()->Font;
 		const auto CurBoldFont = Cfg.GetChat()->BoldFont;

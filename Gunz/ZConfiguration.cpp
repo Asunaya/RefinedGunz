@@ -459,6 +459,24 @@ bool ZConfiguration::LoadConfig(const char* szFileName)
 			childElement.GetChildContents(&FOV, ZTOK_ETC_FOV);
 			childElement.GetChildContents(&ColorInvert, ZTOK_ETC_COLORINVERT);
 			childElement.GetChildContents(&Monochrome, ZTOK_ETC_MONOCHROME);
+			childElement.GetChildContents(&AsyncScreenshots, ZTOK_ETC_ASYNCSCREENSHOTS);
+
+			char ScreenshotFormatString[512];
+			childElement.GetChildContents(ScreenshotFormatString, ZTOK_ETC_SCREENSHOTFORMAT);
+
+			std::pair<const char*, ScreenshotFormatType> Map[] = {
+				{"bmp", ScreenshotFormatType::BMP},
+				{"jpg", ScreenshotFormatType::JPG},
+				{"png", ScreenshotFormatType::PNG},
+			};
+
+			for (auto&& Item : Map)
+			{
+				if (iequals(ScreenshotFormatString, Item.first))
+					ScreenshotFormat = Item.second;
+			}
+
+			childElement.GetChildContents(&FastWeaponCycle, ZTOK_ETC_FASTWEAPONCYCLE);
 		}
 
 
@@ -686,6 +704,9 @@ bool ZConfiguration::SaveToFile(const char *szFileName, const char* szHeader)
 		Section.Add(ZTOK_ETC_FOV, FOV);
 		Section.Add(ZTOK_ETC_COLORINVERT, ColorInvert);
 		Section.Add(ZTOK_ETC_MONOCHROME, Monochrome);
+		Section.Add(ZTOK_ETC_ASYNCSCREENSHOTS, AsyncScreenshots);
+		Section.Add(ZTOK_ETC_SCREENSHOTFORMAT, GetScreenshotFormatExtension(ScreenshotFormat));
+		Section.Add(ZTOK_ETC_FASTWEAPONCYCLE, FastWeaponCycle);
 	}
 
 	AddIntersectionWhitespace();

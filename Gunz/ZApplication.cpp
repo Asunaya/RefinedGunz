@@ -222,9 +222,6 @@ void RegisterForbidKey()
 	ZActionKey::RegisterForbidKey(0x40);
 	ZActionKey::RegisterForbidKey(0x41);
 	ZActionKey::RegisterForbidKey(0x42);// f8
-
-	ZActionKey::RegisterForbidKey(0x35);// /
-	ZActionKey::RegisterForbidKey(0x1c);// enter
 }
 
 void ZProgressCallBack(void *pUserParam,float fProgress)
