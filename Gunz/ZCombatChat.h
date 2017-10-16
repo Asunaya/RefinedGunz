@@ -37,8 +37,8 @@ public:
 	void OutputChatMsg(MCOLOR color, const char* szMsg);
 
 	void OnDraw(MDrawContext* pDC);
-	bool IsChat() const { return m_bChatInputVisible; }
-	bool IsTeamChat() const { return m_bTeamChat; }
+	bool IsChat() const;
+	bool IsTeamChat() const;
 	bool IsShow() const;
 	void SetFont(MFont* pFont);
 

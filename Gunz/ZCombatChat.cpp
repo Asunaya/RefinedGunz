@@ -319,6 +319,22 @@ void ZCombatChat::OnDraw(MDrawContext* pDC)
 	}
 }
 
+bool ZCombatChat::IsChat() const
+{
+	if (GetRGMain().IsNewChatEnabled())
+		return GetRGMain().GetChat().IsInputEnabled();
+
+	return m_bChatInputVisible;
+}
+
+bool ZCombatChat::IsTeamChat() const
+{
+	if (GetRGMain().IsNewChatEnabled())
+		return GetRGMain().GetChat().IsTeamChat();
+
+	return m_bTeamChat;
+}
+
 bool ZCombatChat::IsShow() const
 {
 	if (GetRGMain().IsNewChatEnabled())

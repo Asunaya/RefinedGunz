@@ -59,6 +59,7 @@ public:
 	static void RegisterForbidKey(int nkey);
 	bool IsForbidKey(int nkey);
 
+	virtual bool OnEvent(MEvent* pEvent, MListener*) override;
 };
 
 

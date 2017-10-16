@@ -60,6 +60,7 @@ public:
 	void SetInterfaceColor(D3DCOLOR Color) { InterfaceColor = Color; }
 
 	bool IsInputEnabled() const { return InputEnabled; }
+	bool IsTeamChat() const { return TeamChat; }
 
 	// If HideAlways is true, or HideDuringReplays is true during a replay, the chat will be hidden.
 	// They're controlled by ZACTION_TOGGLE_CHAT and the T or H key during replays, respectively.
@@ -75,6 +76,7 @@ private:
 	std::vector<struct ChatMessage> Msgs;
 	std::vector<struct LineSegmentInfo> LineSegments;
 	bool InputEnabled{};
+	bool TeamChat{};
 	MPOINT Cursor{};
 	D3DRECT Border{};
 	MFontR2 DefaultFont;

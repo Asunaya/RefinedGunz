@@ -810,6 +810,8 @@ void ZConfiguration::LoadDefaultKeySetting()
 		{"UseWeapon2", 259, -1},		// mouse RButton
 		{ "ShowFullChat", 44, -1 },
 		{ "VoiceChat", 37, -1 },
+		{ "Chat", DIK_RETURN, -1},
+		{ "TeamChat", DIK_APOSTROPHE, -1},
 		// Ãß°¡ by Á¤µ¿¼· @ 2006/3/16
 	};
 

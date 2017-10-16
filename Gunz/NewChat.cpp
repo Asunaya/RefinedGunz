@@ -315,6 +315,7 @@ Chat::~Chat() = default;
 
 void Chat::EnableInput(bool Enable, bool ToTeam){
 	InputEnabled = Enable;
+	TeamChat = ToTeam;
 
 	if (Enable){
 		InputField.clear();
@@ -485,13 +486,64 @@ std::pair<bool, v2i> Chat::GetPos(const ChatMessage &c, unsigned long Pos)
 	return ret;
 }
 
-bool Chat::OnEvent(MEvent* pEvent){
-	if (!InputEnabled) {
-		if (pEvent->nMessage == MWM_CHAR && pEvent->nKey == VK_RETURN) {
-			EnableInput(true, false);
+bool Chat::OnEvent(MEvent* pEvent) {
+	// We want to open the chat when the chat action key is pressed and close it when enter is pressed.
+	// This is because a chat action key bound to something other than enter still has to be
+	// inputtable. E.g., if it's bound to 'y', the user still has to be able to input 'y'.
+	//
+	// However, there's a problem with this when the user has chat bound to enter: When the chat is
+	// open and the user presses enter, the char message with enter is sent, closing the chat,
+	// but then the chat action key message is sent immediately after, opening it again.
+	// Therefore, the chat would be unclosable. To fix this, we ignore the next chat action key
+	// message when enter is pressed.
+
+	const auto ActionPressed = pEvent->nMessage == MWM_ACTIONPRESSED;
+	const auto CharMessage = pEvent->nMessage == MWM_CHAR;
+
+	bool ChatPressed = false;
+	{
+		static bool IgnoreNextChatActionKey = false;
+
+		auto&& Key = ZGetConfiguration()->GetKeyboard()->ActionKeys[ZACTION_CHAT];
+		if (InputEnabled)
+		{
+			ChatPressed = CharMessage && pEvent->nKey == VK_RETURN;
+			if (Key.nVirtualKey == DIK_RETURN || Key.nVirtualKeyAlt == DIK_RETURN)
+				IgnoreNextChatActionKey = true;
+		}
+		else
+		{
+			auto ChatActionKeyPressed = ActionPressed && pEvent->nKey == ZACTION_CHAT;
+			if (IgnoreNextChatActionKey && ChatActionKeyPressed)
+			{
+				IgnoreNextChatActionKey = false;
+			}
+			else
+			{
+				ChatPressed = ChatActionKeyPressed;
+			}
+		}
+	}
+
+	const auto TeamChatPressed = !InputEnabled && ActionPressed && pEvent->nKey == ZACTION_TEAMCHAT;
+
+	if (ChatPressed || TeamChatPressed)
+	{
+		if (InputEnabled && ChatPressed && !InputField.empty())
+		{
+			char MultiByteString[1024];
+			utf16toacp(MultiByteString, InputField.c_str());
+
+			ZGetGameInterface()->GetChat()->Input(MultiByteString);
+
+			InputHistory.push_back(InputField);
+			CurInputHistoryEntry = InputHistory.size();
+
+			InputField.clear();
+			CaretPos = -1;
 		}
 
-		return false;
+		EnableInput(!InputEnabled, TeamChatPressed);
 	}
 
 	if (pEvent->nMessage == MWM_KEYDOWN) {
@@ -649,31 +701,7 @@ bool Chat::OnEvent(MEvent* pEvent){
 		switch (pEvent->nKey) {
 
 		case VK_TAB:
-			break;
-
 		case VK_RETURN:
-			/*if (bPlayerList){
-				std::string &strEntry = vstrPlayerList.at(nCurPlayer);
-				InputField.insert(CaretPos + 1, strEntry);
-				CaretPos += strEntry.length();
-				vstrPlayerList.clear();
-				bPlayerList = 0;
-				break;
-			}*/
-
-			if (!InputField.empty()) {
-				char MultiByteString[1024];
-				utf16toacp(MultiByteString, InputField.c_str());
-
-				ZGetGameInterface()->GetChat()->Input(MultiByteString);
-
-				InputHistory.push_back(InputField);
-				CurInputHistoryEntry = InputHistory.size();
-
-				InputField.clear();
-			}
-
-			EnableInput(false, false);
 			break;
 
 		case VK_BACK:

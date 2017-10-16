@@ -176,3 +176,16 @@ void ZActionKey::OnReleaseFocus()
 	ZGetInput()->SetExclusiveListener(NULL);
 	m_exclusiveActionKey = NULL;
 }
+
+// This function is here to allow the user to input enter as the binding.
+// Without it, the key event would get eaten by the "Ok" button's default key.
+bool ZActionKey::OnEvent(MEvent* pEvent, MListener*)
+{
+	if (m_exclusiveActionKey != this)
+		return false;
+
+	if (pEvent->nKey == VK_RETURN)
+		return true;
+
+	return false;
+}
