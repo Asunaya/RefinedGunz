@@ -264,13 +264,13 @@ void MMatchStage::UpdateWorldItems()
 
 void MMatchStage::ResetTeams()
 {
-	auto Team = GetRecommandedTeam();
 	for (auto&& Object : GetObjectList())
 	{
 		if (Object->GetEnterBattle())
 			continue;
 
-		Object->SetTeam(Team);
+		Object->SetTeam(GetRecommandedTeam());
+		MGetMatchServer()->StageTeam(Object->GetUID(), GetUID(), Object->GetTeam());
 	}
 }
 
