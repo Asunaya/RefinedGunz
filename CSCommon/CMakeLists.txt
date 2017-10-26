@@ -18,7 +18,7 @@ target_include_directories(CSCommon PUBLIC
 	../MCountryFilter/Include
 	../sdk/rapidxml/include
 	../sdk/libsodium/include)
-	
-if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-	ucm_add_flags(-D_WINSOCK_DEPRECATED_NO_WARNINGS)
-endif()
+
+target_link_libraries(CSCommon PUBLIC
+	rapidxml
+	sodium)

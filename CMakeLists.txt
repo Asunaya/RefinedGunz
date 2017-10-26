@@ -10,12 +10,22 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 include(macros)
 
-set(UCM_UNITY_BUILD ON)
-
 if(DEFINED MSSQL)
 	set(CMAKE_MFC_FLAG 1)
 	add_definitions(-DMSSQL_ENABLED)
 endif()
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+	ucm_add_linker_flags(/ignore:4099 /ignore:4221)
+	ucm_add_flags(-D_WINSOCK_DEPRECATED_NO_WARNINGS)
+endif()
+
+add_project_subdir(sdk/sqlite)
+add_project_subdir(sdk/libsodium)
+add_project_subdir(sdk/bullet)
+add_project_subdir(sdk/rapidxml)
+
+set(UCM_UNITY_BUILD ON)
 
 add_project_subdir(cml)
 add_project_subdir(RealSpace2)

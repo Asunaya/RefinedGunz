@@ -13,7 +13,6 @@
 #include "stuff.h"
 
 // MC_MATCH_LOGIN: crypto_generichash_BYTES.
-#define SODIUM_STATIC
 #include "sodium.h"
 
 void MAddSharedCommandTable(MCommandManager* CommandManager, MSharedCommandType::Type SharedType)

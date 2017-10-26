@@ -23,23 +23,9 @@ target_include_directories(Tests PRIVATE
 	../RealSpace2/include
 	../Gunz
 	../launcher/src
-	../sdk/rapidxml/include
-	../sdk/libsodium/include
 	../sdk/dx9/include
 	../sdk/opus/include
 	../sdk/portaudio/include)
-
-add_dependencies(Tests Gunz_lib)
-add_dependencies(Tests launcher_lib)
-
-find_library(libsodium_path NAMES libsodium PATHS ../sdk/libsodium/lib/static)
-add_definitions(-DSODIUM_STATIC)
-
-find_library(celt_path NAMES celt PATHS ../sdk/opus/lib/Release)
-find_library(opus_path NAMES opus PATHS ../sdk/opus/lib/Release)
-find_library(silk_common_path NAMES silk_common PATHS ../sdk/opus/lib/Release)
-find_library(silk_fixed_path NAMES silk_fixed PATHS ../sdk/opus/lib/Release)
-find_library(silk_float_path NAMES silk_float PATHS ../sdk/opus/lib/Release)
 
 find_library(d3dx9_path NAMES d3dx9 PATHS ../sdk/dx9/lib/x86)
 find_library(dxerr_path NAMES dxerr PATHS ../sdk/dx9/lib/x86)
@@ -49,12 +35,9 @@ target_link_libraries(Tests PRIVATE
 	RealSpace2
 	Gunz_lib
 	launcher_lib
-	${libsodium_path}
-	${celt_path}
-	${opus_path}
-	${silk_common_path}
-	${silk_fixed_path}
-	${silk_float_path}
+	sodium
+	rapidxml
+	opus
 	${d3dx9_path}
 	${dxerr_path}
 	legacy_stdio_definitions.lib)

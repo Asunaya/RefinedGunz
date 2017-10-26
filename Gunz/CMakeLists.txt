@@ -64,7 +64,7 @@ find_library(libsodium_path NAMES libsodium PATHS ../sdk/libsodium/lib/static)
 target_link_libraries_both(PUBLIC
 	${zlib_path}
 	${fmodvc_path}
-	${libsodium_path}
+	sodium
 	legacy_stdio_definitions.lib
 	cml
 	RealSpace2
@@ -74,16 +74,11 @@ target_link_libraries_both(PUBLIC
 	SafeUDP
 	MDatabase)
 
-add_dependencies_both(cml RealSpace2 CSCommon MDatabase Mint2 RealSound SafeUDP)
-
-target_compile_options_both(PRIVATE 
-		-DSODIUM_STATIC
+target_compile_options_both(PRIVATE
 		-D_LOCATOR)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
 	target_compile_options_both(PRIVATE
 		/wd4244 /wd4305)
-	ucm_add_linker_flags(
-		/ignore:4099 /ignore:4221
-		/SUBSYSTEM:WINDOWS)
+	ucm_add_linker_flags(/SUBSYSTEM:WINDOWS)
 endif()

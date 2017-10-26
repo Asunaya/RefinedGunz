@@ -33,7 +33,6 @@ endmacro()
 target_include_directories_both(PUBLIC
 	../cml/include
 	../sdk/rapidxml/include
-	../sdk/libsodium/include
 	../sdk/curl/include
 	../src)
 
@@ -42,8 +41,4 @@ add_definitions(-DCURL_STATICLIB)
 find_library(libsodium_path NAMES libsodium PATHS ../sdk/libsodium/lib/static NO_DEFAULT_PATHS)
 add_definitions(-DSODIUM_STATIC)
 
-target_link_libraries_both(PRIVATE cml ${curl_path} ${libsodium_path})
-
-if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-	ucm_add_linker_flags(/ignore:4099)
-endif()
+target_link_libraries_both(PRIVATE cml ${curl_path} sodium)
