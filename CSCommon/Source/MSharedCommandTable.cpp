@@ -12,7 +12,7 @@
 // MC_PEER_BASICINFO: ZPACKEDBASICINFO.
 #include "stuff.h"
 
-// MC_MATCH_LOGIN: crypto_generichash_BYTES.
+// MC_MATCH_LOGIN: crypto_generichash_blake2b_BYTES.
 #include "sodium.h"
 
 void MAddSharedCommandTable(MCommandManager* CommandManager, MSharedCommandType::Type SharedType)
@@ -141,7 +141,7 @@ void MAddSharedCommandTable(MCommandManager* CommandManager, MSharedCommandType:
 			P(MPT_UINT, "GlobalClock(msec);");
 		C(MC_MATCH_LOGIN, "Match.Login", "Login Match Server", MCDT_MACHINE2MACHINE);
 			P(MPT_STR, "UserID");
-			P(MPT_BLOB, "Hashed password", MCPCBlobSize{ crypto_generichash_BYTES });
+			P(MPT_BLOB, "Hashed password", MCPCBlobSize{ crypto_generichash_blake2b_BYTES });
 			P(MPT_INT, "CommandVersion");
 			P(MPT_UINT, "nChecksumPack");
 			P(MPT_UINT, "ClientVersionMajor");

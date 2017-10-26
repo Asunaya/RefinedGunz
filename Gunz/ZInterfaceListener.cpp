@@ -163,9 +163,9 @@ public:
 					if (pWidget == NULL) return;
 					strcpy_safe(szPassword, pWidget->GetText());
 
-					unsigned char hashed_password[crypto_generichash_BYTES];
+					unsigned char hashed_password[crypto_generichash_blake2b_BYTES];
 
-					crypto_generichash(hashed_password, sizeof(hashed_password),
+					crypto_generichash_blake2b(hashed_password, sizeof(hashed_password),
 						(const unsigned char *)szPassword, strlen(szPassword), NULL, 0);
 
 					pWidget->SetText("");
@@ -268,9 +268,10 @@ public:
 				auto szPassword = pPassEdit->GetText();
 				auto szEmail = pEmailEdit->GetText();
 
-				unsigned char hashed_password[crypto_generichash_BYTES];
+				unsigned char hashed_password[crypto_generichash_blake2b_BYTES];
 
-				crypto_generichash(hashed_password, sizeof(hashed_password), (const unsigned char *)szPassword, strlen(szPassword), NULL, 0);
+				crypto_generichash_blake2b(hashed_password, sizeof(hashed_password),
+					(const unsigned char *)szPassword, strlen(szPassword), NULL, 0);
 
 				ZPostCreateAccount(szUsername, hashed_password, szEmail);
 			};

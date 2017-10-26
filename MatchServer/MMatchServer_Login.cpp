@@ -64,7 +64,7 @@ void MMatchServer::OnMatchLogin(const MUID& CommUID, const char* UserID, const u
 	int HashLength, int CommandVersion, unsigned long ChecksumPack,
 	u32 Major, u32 Minor, u32 Patch, u32 Revision)
 {
-	if (HashLength != crypto_generichash_BYTES)
+	if (HashLength != crypto_generichash_blake2b_BYTES)
 		return;
 
 	int nMapID = 0;
@@ -161,7 +161,7 @@ void MMatchServer::CreateAccount(const MUID &uidComm, const char *Username,
 		return;
 	}
 
-	if (HashLength != crypto_generichash_BYTES)
+	if (HashLength != crypto_generichash_blake2b_BYTES)
 	{
 		CreateAccountResponse(uidComm, "Account creation failed: Invalid hash");
 		return;
