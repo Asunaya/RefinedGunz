@@ -1,3 +1,0 @@
-<!-- MODIFY THIS FILE AS YOU WISH -->
-</BODY>
-</HTML>

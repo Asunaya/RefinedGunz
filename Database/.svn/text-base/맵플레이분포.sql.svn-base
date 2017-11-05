@@ -1,2 +1,0 @@
-SELECT  Map, COUNT(*) fROM GameLog(nolock) WHERE StartTime BETWEEN '2004.7.27' AND '2004.7.28'
-GROUP BY Map
