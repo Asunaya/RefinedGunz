@@ -2,6 +2,8 @@
 #include "MCommandRegistration.h"
 #include "MMatchGlobal.h"
 #include "MMatchItem.h"
+#include "MBlobArray.h"
+#include "reinterpret.h"
 
 // Transmission data types for blob validation.
 #include "MMatchTransDataType.h"
@@ -296,14 +298,52 @@ void MAddSharedCommandTable(MCommandManager* CommandManager, MSharedCommandType:
 			P(MPT_UID, "uidStage");
 			P(MPT_STR, "StageName");
 
+		struct RuleInfoCondition : public MCommandParamCondition
+		{
+			virtual bool Check(MCommandParameter* pCP) override
+			{
+				assert(pCP->GetType() == MPT_BLOB);
+
+				auto* Blob = static_cast<MCmdParamBlob*>(pCP);
+				const auto* Ptr = static_cast<const u8*>(Blob->GetPointer());
+				const auto Size = Blob->GetPayloadSize();
+
+				if (!MValidateBlobArraySize(Ptr, Size))
+					return false;
+
+				const auto ElementSize = MGetBlobArrayElementSize(Ptr);
+				const auto ArrayCount = MGetBlobArrayCount(Ptr);
+				if (ElementSize < sizeof(MTD_RuleInfo))
+					return false;
+
+				if (ArrayCount != 1)
+					return ArrayCount == 0;
+
+				auto&& RuleInfo = reinterpret_pointee<MTD_RuleInfo>(MGetBlobArrayElement(Ptr, 0));
+
+				if (RuleInfo.nRuleType < MMATCH_GAMETYPE_DEATHMATCH_SOLO ||
+					RuleInfo.nRuleType >= MMATCH_GAMETYPE_MAX)
+					return false;
+
+				switch (MMATCH_GAMETYPE(RuleInfo.nRuleType))
+				{
+				case MMATCH_GAMETYPE_ASSASSINATE:
+					return ElementSize == sizeof(MTD_RuleInfo_Assassinate);
+				case MMATCH_GAMETYPE_BERSERKER:
+					return ElementSize == sizeof(MTD_RuleInfo_Berserker);
+				default:
+					return true;
+				}
+			}
+		};
 
 		C(MC_MATCH_REQUEST_GAME_INFO, "RequestGameInfo", "Request Game Info", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uidChar");
 			P(MPT_UID, "uidStage");
 		C(MC_MATCH_RESPONSE_GAME_INFO, "ResponseGameInfo", "Response Game Info", MCDT_MACHINE2MACHINE);
 			P(MPT_UID, "uidStage");
-			P(MPT_BLOB, "GameInfo", MCPCBlobArraySize{ sizeof(MTD_GameInfo) });
-			P(MPT_BLOB, "RuleInfo", MCPCBlobArraySize{ sizeof(MTD_RuleInfo) });
+			P(MPT_BLOB, "GameInfo", MCPCBlobArraySize{ sizeof(MTD_GameInfo), 1, 1 });
+			P(MPT_BLOB, "RuleInfo", RuleInfoCondition{});
 			P(MPT_BLOB, "PlayerInfo", MCPCBlobArraySize{ sizeof(MTD_GameInfoPlayerItem) });
 		C(MC_MATCH_RESPONSE_STAGE_CREATE, "Stage.ResponseCreate", "Response Create a Stage", MCDT_MACHINE2MACHINE);
 			P(MPT_INT, "Result");
