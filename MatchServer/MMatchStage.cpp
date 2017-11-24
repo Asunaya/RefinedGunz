@@ -177,6 +177,7 @@ MMatchObjectMap::iterator MMatchStage::RemoveObject(const MUID& uid)
 				SetMasterUID(RecommandMaster(false));
 		}
 	}
+
 	return itorNext;
 }
 
@@ -250,6 +251,19 @@ void MMatchStage::LeaveBattle(MMatchObject* pObj)
 	}
 
 	pObj->OnLeaveBattle();
+
+	// Remove the object's bots.
+	if (!(pObj->GetPlayerFlags() & MTD_PlayerFlags_Bot))
+	{
+		auto it = std::find_if(std::begin(Bots), std::end(Bots), [&](auto&& Bot) {
+			return Bot.OwnerUID == pObj->GetUID();
+		});
+		if (it != std::end(Bots))
+		{
+			MGetMatchServer()->StageLeaveBattle(pObj->GetUID(), GetUID(), it->BotUID);
+			Bots.erase(it);
+		}
+	}
 }
 
 bool MMatchStage::CheckTick(u64 nClock)

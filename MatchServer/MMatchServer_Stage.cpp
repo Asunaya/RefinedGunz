@@ -311,10 +311,29 @@ bool MMatchServer::StageEnterBattle(const MUID& uidPlayer, const MUID& uidStage)
 	return true;
 }
 
-bool MMatchServer::StageLeaveBattle(const MUID& uidPlayer, const MUID& uidStage)
+bool MMatchServer::StageLeaveBattle(const MUID& uidPlayer, const MUID& uidStage, const MUID& uidTarget)
 {
+	auto PostLeaveBattle = [this](const MUID& uidPlayer, const MUID& uidStage) {
+		MCommand* pNew = CreateCommand(MC_MATCH_STAGE_LEAVEBATTLE, MUID(0, 0));
+		pNew->AddParameter(new MCommandParameterUID(uidPlayer));
+		pNew->AddParameter(new MCommandParameterUID(uidStage));
+		RouteToStage(uidStage, pNew);
+	};
+
 	MMatchObject* pObj = GetObject(uidPlayer);
 	if (!IsEnabledObject(pObj)) return false;
+
+	if (uidTarget.IsValid() && uidPlayer != uidTarget)
+	{
+		if (uidTarget != pObj->BotUID)
+		{
+			assert(false);
+			return false;
+		}
+
+		PostLeaveBattle(uidTarget, uidStage);
+		return true;
+	}
 	MMatchStage* pStage = FindStage(uidStage);
 	if (pStage == NULL) return false;
 
@@ -346,10 +365,7 @@ bool MMatchServer::StageLeaveBattle(const MUID& uidPlayer, const MUID& uidStage)
 
 	CheckExpiredItems(pObj);
 
-	MCommand* pNew = CreateCommand(MC_MATCH_STAGE_LEAVEBATTLE, MUID(0,0));
-	pNew->AddParameter(new MCommandParameterUID(uidPlayer));
-	pNew->AddParameter(new MCommandParameterUID(uidStage));
-	RouteToStage(uidStage, pNew);
+	PostLeaveBattle(uidPlayer, uidStage);
 
 	if (pObj->GetRelayPeer()) {
 		MAgentObject* pAgent = GetAgent(pObj->GetAgentUID());
@@ -685,12 +701,12 @@ void MMatchServer::OnStageEnterBattle(const MUID& uidPlayer, const MUID& uidStag
 	StageEnterBattle(uidPlayer, uidStage);
 }
 
-void MMatchServer::OnStageLeaveBattle(const MUID& uidPlayer, const MUID& uidStage)
+void MMatchServer::OnStageLeaveBattle(const MUID& uidSender, const MUID& uidStage, const MUID& uidTarget)
 {
 	MMatchStage* pStage = FindStage(uidStage);
 	if (pStage == NULL) return;
 
-	StageLeaveBattle(uidPlayer, uidStage);
+	StageLeaveBattle(uidSender, uidStage, uidTarget);
 }
 
 

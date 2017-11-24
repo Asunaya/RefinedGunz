@@ -370,6 +370,8 @@ public:
 
 	i32 Ping{999};
 
+	bool IsBot = false;
+
 protected:
 	void UpdateSound();
 
@@ -433,6 +435,8 @@ protected:
 	u64			m_dwInvincibleStartTime;
 	u32			m_dwInvincibleDuration;
 
+	rvector m_DirectionLower, m_DirectionUpper;
+
 private:
 	// The origin of the character model.
 	v3 m_vProxyPosition{ 0, 0, 0 };
@@ -457,7 +461,6 @@ private:
 	int		m_nLastShotItemID;
 	float	m_fLastShotTime;
 
-	rvector m_DirectionLower, m_DirectionUpper;
 	rvector m_RealPositionBefore;
 
 	ZC_STATE_UPPER	m_AniState_Upper;

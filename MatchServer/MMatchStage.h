@@ -106,6 +106,14 @@ public:
 	MovingWeaponManager MovingWeaponMgr;
 	MMatchWorldItemManager	m_WorldItemManager;
 
+	struct Bot
+	{
+		MUID OwnerUID;
+		MUID BotUID;
+		MTD_PeerListNode PeerListNode;
+	};
+	std::vector<Bot> Bots;
+
 	void UpdateStateTimer();
 	auto GetStateTimer() const	{ return m_nStateTimer; }
 	auto GetChecksum() const { return m_nChecksum; }

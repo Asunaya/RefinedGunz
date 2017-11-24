@@ -9,7 +9,7 @@
 #include <cstdint>
 #include "ZOptionInterface.h"
 #include "ZTestGame.h"
-#include "ZBotCharacter.h"
+#include "ZMyBotCharacter.h"
 
 bool CheckDeveloperMode(const char* Name)
 {
@@ -566,6 +566,46 @@ void LoadRGCommands(ZChatCmdManager& CmdManager)
 	},
 		CCF_ALL, 1, 1, true, "/screenshotformat <bmp/jpg/png>", "");
 
+	CmdManager.AddCommand(0, "createbot", [](const char *line, int argc, char ** const argv) {
+		RequestCreateBot();
+	},
+		CCF_ALL, 0, 0, true, "", "");
+
+	CmdManager.AddCommand(0, "destroybot", [](const char *line, int argc, char ** const argv) {
+		RequestDestroyBot();
+	},
+		CCF_ALL, 0, 0, true, "", "");
+
+	CmdManager.AddCommand(0, "botrecord", [](const char *line, int argc, char ** const argv) {
+		auto& Bot = GetBotInfo().MyBot;
+
+		if (!Bot)
+		{
+			ZChatOutput("Bot hasn't been created");
+			return;
+		}
+
+		auto NewState = Bot->GetState() == BotStateType::Recording ?
+			BotStateType::Replaying : BotStateType::Recording;
+		Bot->SetState(NewState);
+	},
+		CCF_ALL, 0, 0, true, "", "");
+
+	CmdManager.AddCommand(0, "botcam", [](const char *line, int argc, char ** const argv) {
+		if (!GetBotInfo().MyBot)
+		{
+			ZChatOutput("Bot hasn't been created");
+			return;
+		}
+
+		bool Value = GetBotInfo().Settings.ShowCam;
+		if (SetBool("Bot cam", Value, argc, argv))
+		{
+			SetShowBotCam(Value);
+		}
+	},
+		CCF_ALL, 0, 1, true, "/botcam [0/1]", "");
+
 	CmdManager.AddCommand(0, "freelook", [](const char *line, int argc, char ** const argv) {
 		if (!CheckDeveloperMode("freelook"))
 			return;
@@ -692,31 +732,6 @@ void LoadRGCommands(ZChatCmdManager& CmdManager)
 		if (SetBool("Frustra draw", Value, argc, argv)) {
 			SetPortalFrustraDrawEnabled(Value);
 		}
-	},
-		CCF_ALL, 0, 1, true, "", "");
-
-	CmdManager.AddCommand(0, "addbot", [](const char *line, int argc, char ** const argv) {
-		if (!CheckDeveloperMode("addbot"))
-			return;
-
-		auto* NewChar = new ZBotCharacter;
-
-		MTD_CharInfo info;
-		strcpy_safe(info.szName, "BotCats");
-		info.szClanName[0] = 0;
-		info.nSex = MMS_FEMALE;
-		info.nHP = 100;
-		info.nAP = 0;
-		info.nLevel = 0;
-
-		NewChar->Create(info);
-		NewChar->Revival();
-
-		NewChar->SetUID({ 0, 42 });
-		NewChar->SetPosition(MyChar()->GetPosition());
-		NewChar->SetDirection(MyChar()->GetDirection());
-
-		ZGetCharacterManager()->Add(NewChar);
 	},
 		CCF_ALL, 0, 1, true, "", "");
 

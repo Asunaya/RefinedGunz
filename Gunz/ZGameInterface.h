@@ -139,10 +139,6 @@ protected:
 	virtual bool	OnCommand(MWidget* pWidget, const char* szMessage);
 	static bool		OnCommand(MCommand* pCommand);
 
-	friend class RGMain;
-
-	void SetListenerWidget(const char* szName, MListener* pListener);
-
 	void UpdateCursorEnable();
 
 	bool InitInterface(const char* szSkinName,ZLoadingProgress *pLoadingProgress = NULL);
@@ -341,6 +337,8 @@ public:
 	void OnAnnounceDeleteClan( const string& strAnnounce );
 
 	MBitmap* GetQuestItemIcon( int nItemID, bool bSmallIcon);
+
+	void SetListenerWidget(const char* szName, MListener* pListener);
 
 	ZScreenEffectManager* GetScreenEffectManager() { return m_pScreenEffectManager; }
 	ZEffectManager* GetEffectManager()			{ return m_pEffectManager; }

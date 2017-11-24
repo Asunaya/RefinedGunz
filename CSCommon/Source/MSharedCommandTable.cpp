@@ -83,6 +83,10 @@ void MAddSharedCommandTable(MCommandManager* CommandManager, MSharedCommandType:
 		P(MPT_UINT, "secondary");
 		P(MPT_UINT, "custom1");
 		P(MPT_UINT, "custom2");
+	C(MC_MATCH_REQUEST_CREATE_BOT, "", "", MCDT_MACHINE2MACHINE);
+	C(MC_PEER_TUNNEL_BOT_COMMAND, "", "", MCDT_PEER2PEER);
+		P(MPT_UID, "Bot UID");
+		P(MPT_BLOB, "Command");
 
 
 	// Freestyle Gunz commands

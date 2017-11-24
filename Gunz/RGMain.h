@@ -73,7 +73,8 @@ public:
 
 	void OnUpdate(double Elapsed);
 	bool OnEvent(MEvent *pEvent);
-	void OnReset();
+	void OnInvalidate();
+	void OnRestore();
 	void OnInitInterface(ZIDLResource &IDLResource);
 	void OnReplaySelected(MListBox* ReplayFileListWidget);
 	void OnCreateDevice();
@@ -84,6 +85,7 @@ public:
 
 	void OnDrawLobby(MDrawContext* pDC);
 	void OnDrawGame();
+	void OnPreDrawGame();
 	void OnDrawGameInterface(MDrawContext* pDC);
 	void OnGameCreate();
 	bool OnGameInput();
@@ -120,6 +122,8 @@ public:
 
 	void DrawReplayInfo(MDrawContext* pDC, MWidget* Widget) const;
 
+	void SetListeners();
+
 	// Lines created with /drawline
 	struct LineInfo
 	{
@@ -127,6 +131,11 @@ public:
 		u32 Color;
 	};
 	std::vector<LineInfo> Lines;
+
+	struct {
+		bool Godmode{};
+		bool NoStuns{};
+	} TrainingSettings;
 
 private:
 	friend void LoadRGCommands(ZChatCmdManager& CmdManager);
@@ -167,6 +176,7 @@ private:
  RGMain& GetRGMain();
  void CreateRGMain();
  void DestroyRGMain();
+ bool IsRGMainAlive();
  inline Chat& GetNewChat() { return GetRGMain().GetChat(); }
 
 inline ZMyCharacter* MyChar()

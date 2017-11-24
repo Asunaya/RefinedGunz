@@ -740,6 +740,9 @@ void ZApplication::OnInvalidate()
 	RGetShaderMgr()->OnInvalidate();
 	if(m_pGameInterface)
 		m_pGameInterface->OnInvalidate();
+
+	if (IsRGMainAlive())
+		GetRGMain().OnInvalidate();
 }
 
 void ZApplication::OnRestore()
@@ -752,7 +755,8 @@ void ZApplication::OnRestore()
 		RGetShaderMgr()->SetEnable();
 	}
 
-	GetRGMain().OnReset();
+	if (IsRGMainAlive())
+		GetRGMain().OnRestore();
 }
 
 void ZApplication::Exit()

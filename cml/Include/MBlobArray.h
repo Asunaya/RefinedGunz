@@ -39,3 +39,50 @@ auto MGetBlobArrayRange(void* pBlob)
 // Validates that the blob array's count info values
 // exist and match the total blob array size.
 bool MValidateBlobArraySize(const void* pBlob, size_t Size);
+
+template <typename T, size_t N, size_t Alignment = sizeof(void*)>
+struct StaticBlobArray
+{
+	static_assert(std::is_trivially_copyable_v<T>, "Illegal type");
+
+	StaticBlobArray()
+	{
+		int OneBlobSize = sizeof(T);
+		int BlobCount = N;
+		memcpy(Buffer, &OneBlobSize, sizeof(OneBlobSize));
+		memcpy(Buffer + sizeof(OneBlobSize), &BlobCount, sizeof(BlobCount));
+	}
+
+	void* Data() { return Buffer; }
+	const void* Data() const { return Buffer; }
+	size_t Size() const { return BufferSize; }
+
+	T& Get(size_t Index)
+	{
+		return *reinterpret_cast<T*>(Buffer + sizeof(int) * 2 + sizeof(T) * Index);
+	}
+
+	const T& Get(size_t Index) const
+	{
+		return static_cast<const StaticBlobArray*>(this)->Get(Index);
+	}
+
+private:
+	static constexpr auto BufferSize = sizeof(int) * 2 + sizeof(T) * N;
+	alignas(Alignment) unsigned char Buffer[BufferSize];
+};
+
+struct BlobDeleter
+{
+	void operator()(void* Blob) const
+	{
+		MEraseBlobArray(Blob);
+	}
+};
+
+using BlobPtr = std::unique_ptr<void, BlobDeleter>;
+
+inline BlobPtr MMakeBlobArrayPtr(int OneBlobSize, int BlobCount)
+{
+	return BlobPtr{MMakeBlobArray(OneBlobSize, BlobCount)};
+}

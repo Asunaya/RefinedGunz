@@ -96,8 +96,8 @@ struct BasicInfoItem : BasicInfo
 {
 	double SentTime;
 	double RecvTime;
-	double LowerFrameTime;
-	double UpperFrameTime;
+	float LowerFrameTime;
+	float UpperFrameTime;
 
 	BasicInfoItem() = default;
 	BasicInfoItem(const BasicInfo& a, float b, float c)
@@ -138,9 +138,23 @@ struct CharacterInfo
 // this stores some of the data from the last transmission to track whether it has changed.
 struct BasicInfoNetState
 {
-	ZC_STATE_LOWER LastNetLowerAni = ZC_STATE_LOWER_IDLE1;
-	ZC_STATE_UPPER LastNetUpperAni = ZC_STATE_UPPER_NONE;
-	int LastNetSlot = -1;
+	BasicInfoNetState()
+	{
+		QueueSync();
+	}
+
+	ZC_STATE_LOWER LastNetLowerAni;
+	ZC_STATE_UPPER LastNetUpperAni;
+	int LastNetSlot;
+
+	// Sets all the cached data to invalid values such that the next basic info packing will
+	// necessarily explicitly contain all the current data.
+	void QueueSync()
+	{
+		LastNetLowerAni = ZC_STATE_LOWER(-1);
+		LastNetUpperAni = ZC_STATE_UPPER(-1);
+		LastNetSlot = -1;
+	}
 };
 
 MCommandParameterBlob* PackNewBasicInfo(const CharacterInfo& Input, BasicInfoNetState& State, float Time);

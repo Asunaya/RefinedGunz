@@ -106,6 +106,8 @@ public:
 	int GetPingToServer() const { return PingToServer; }
 
 private:
+	friend void RunNetBotTunnelledCommand(MCommand* Command);
+
 	void SetChannelRuleName(const char* pszName) { strcpy_safe(m_szChannelRule, pszName); }
 	int GetBridgePeerCount()			{ return m_nBridgePeerCount; }
 	void SetBridgePeerCount(int nCount)	{ m_nBridgePeerCount = nCount; }

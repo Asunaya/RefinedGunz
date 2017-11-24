@@ -120,6 +120,11 @@ _STATUS_CMD_START;
 			Obj->ClientSettings = { reinterpret_cast<MTD_ClientSettings*>(BlobPtr)->DebugOutput };
 		}
 		break;
+		case MC_MATCH_REQUEST_CREATE_BOT:
+		{
+			OnRequestCreateBot(pCommand->GetSenderUID());
+		}
+		break;
 		case MC_MATCH_LOGIN_FROM_DBAGENT:
 			{
 				MUID CommUID;
@@ -318,11 +323,12 @@ _STATUS_CMD_START;
 			break;
 		case MC_MATCH_STAGE_LEAVEBATTLE:
 			{
-				MUID uidPlayer, uidStage;
+				MUID uidPlayer, uidStage, uidTarget;
 				uidPlayer = pCommand->GetSenderUID();
 
+				pCommand->GetParameter(&uidTarget, 0, MPT_UID);
 				pCommand->GetParameter(&uidStage, 1, MPT_UID);
-				OnStageLeaveBattle(uidPlayer, uidStage);
+				OnStageLeaveBattle(uidPlayer, uidStage, uidTarget);
 			}
 			break;
 		case MC_MATCH_STAGE_START:

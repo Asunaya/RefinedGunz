@@ -330,7 +330,7 @@ protected:
 	bool StageJoin(const MUID& uidPlayer, const MUID& uidStage);
 	bool StageLeave(const MUID& uidPlayer, const MUID& uidStage);
 	bool StageEnterBattle(const MUID& uidPlayer, const MUID& uidStage);
-	bool StageLeaveBattle(const MUID& uidPlayer, const MUID& uidStage);
+	bool StageLeaveBattle(const MUID& uidPlayer, const MUID& uidStage, const MUID& uidTarget = {});
 	bool StageChat(const MUID& uidPlayer, const MUID& uidStage, char* pszChat);
 	bool StageTeam(const MUID& uidPlayer, const MUID& uidStage, MMatchTeam nTeam);
 	bool StagePlayerState(const MUID& uidPlayer, const MUID& uidStage, MMatchObjectStageState nStageState);
@@ -363,7 +363,7 @@ protected:
 	void OnStageLeave(const MUID& uidPlayer, const MUID& uidStage);
 	void OnStageRequestPlayerList(const MUID& uidPlayer, const MUID& uidStage);
 	void OnStageEnterBattle(const MUID& uidPlayer, const MUID& uidStage);
-	void OnStageLeaveBattle(const MUID& uidPlayer, const MUID& uidStage);
+	void OnStageLeaveBattle(const MUID& uidSender, const MUID& uidStage, const MUID& uidTarget);
 	void OnStageChat(const MUID& uidPlayer, const MUID& uidStage, char* pszChat);
 	void OnRequestQuickJoin(const MUID& uidPlayer, void* pQuickJoinBlob);
 	void ResponseQuickJoin(const MUID& uidPlayer, MTD_QuickJoinParam* pQuickJoinParam);
@@ -611,6 +611,7 @@ protected:
 		unsigned long nStageCount, unsigned long nUserCount);
 
 	void OnVoiceChat(const MUID& Player, unsigned char* EncodedFrame, int Length);
+	void OnRequestCreateBot(const MUID& Owner);
 
 	void OnTunnelledP2PCommand(const MUID& Sender, const MUID& Receiver,
 		const char* Blob, size_t BlobSize);

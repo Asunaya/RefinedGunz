@@ -24,9 +24,9 @@
 #include "ZModule_ElementalDamage.h"
 #include "ZModule_QuestStatus.h"
 #include "ZGameConst.h"
-#include "BasicInfoHistory.inl"
 #include "RGMain.h"
 #include "Portal.h"
+#include "ZMyBotCharacter.h"
 
 #define ANGLE_TOLER			.1f
 #define ANGLE_SPEED			12.f
@@ -1362,28 +1362,25 @@ void ZCharacter::OnDie()
 
 bool ZCharacter::GetHistory(rvector *pos, rvector *direction, float fTime, rvector* cameradir)
 {
-	auto SetReturnValues = [&](auto& Pos, auto& Dir, auto& CameraDir)
-	{
-		if (pos)
-			*pos = Pos;
-		if (direction)
-			*direction = Dir;
-		if (cameradir)
-			*cameradir = CameraDir;
-
-		return true;
-	};
-
 	if (!BasicInfoHistory.empty() && fTime >= BasicInfoHistory.front().RecvTime)
-		return SetReturnValues(m_Position, m_Direction, m_Direction);
+	{
+		auto Set = [](auto* a, auto&& b) { if (a) *a = b; };
+		Set(pos, m_Position);
+		Set(direction, m_Direction);
+		Set(cameradir, m_Direction);
+		return true;
+	}
 
 	auto GetItemDesc = [&](auto slot) {
 		return m_Items.GetDesc(slot); };
 
-	BasicInfoHistoryManager::Info Info;
-	BasicInfoHistory.GetInfo(Info, fTime, GetItemDesc, MMS_MALE, IsDie());
+	const auto Sex = IsMan() ? MMS_MALE : MMS_FEMALE;
 
-	return SetReturnValues(Info.Origin, Info.Dir, Info.CameraDir);
+	BasicInfoHistoryManager::Info Info;
+	Info.Pos = pos;
+	Info.Dir = direction;
+	Info.CameraDir = cameradir;
+	return BasicInfoHistory.GetInfo(Info, fTime, std::ref(GetItemDesc), Sex, IsDie());
 }
 
 void ZCharacter::GetPositions(v3* Head, v3* Foot, double Time)
@@ -1394,11 +1391,9 @@ void ZCharacter::GetPositions(v3* Head, v3* Foot, double Time)
 	if (!BasicInfoHistory.empty() && Time <= BasicInfoHistory.front().RecvTime)
 	{
 		BasicInfoHistoryManager::Info Info;
+		Info.Head = Head;
+		Info.Pos = Foot;
 		BasicInfoHistory.GetInfo(Info, Time, GetItemDesc, m_Property.nSex, IsDie());
-		if (Head)
-			*Head = Info.Head;
-		if (Foot)
-			*Foot = Info.Origin;
 		return;
 	}
 

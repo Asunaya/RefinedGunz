@@ -927,6 +927,77 @@ void MMatchServer::OnVoiceChat(const MUID & Player, unsigned char* EncodedFrame,
 	RouteToBattleExcept(Stage, Command, Player);
 }
 
+void MMatchServer::OnRequestCreateBot(const MUID& OwnerUID)
+{
+	auto OwnerObj = GetObject(OwnerUID);
+	if (!OwnerObj)
+		return;
+
+	auto StageUID = OwnerObj->GetStageUID();
+	auto* Stage = FindStage(StageUID);
+	if (!Stage)
+		return;
+
+	if (OwnerObj->BotUID.IsInvalid())
+	{
+		OwnerObj->BotUID = UseUID();
+	}
+
+	auto BotUID = OwnerObj->BotUID;
+	
+	Stage->Bots.push_back({OwnerUID, BotUID, MTD_PeerListNode{}});
+	auto&& Node = Stage->Bots.back().PeerListNode;
+
+	Node.uidChar = BotUID;
+
+	auto&& info = Node.CharInfo;
+
+	strcpy_safe(info.szName, "Bot");
+	info.nSex = MMS_FEMALE;
+	info.nHP = 100;
+	info.nAP = 0;
+	info.nLevel = 0;
+
+	// Copy owner's weapons to the bots weapons.
+	// We don't have an MTD_CharInfo at hand so we have to get each item ID ourselves.
+	for (size_t i = size_t(MMCIP_MELEE); i <= size_t(MMCIP_CUSTOM2); ++i)
+	{
+		auto& DestItemID = info.nEquipedItemDesc[i];
+		auto& SrcItem = OwnerObj->GetCharInfo()->m_EquipedItem;
+		auto Parts = MMatchCharItemParts(i);
+		auto* Item = SrcItem.IsEmpty(Parts) ? nullptr : SrcItem.GetItem(Parts);
+		DestItemID = Item ? Item->GetDescID() : 0;
+	}
+
+	Node.ExtendInfo.nTeam = MMT_ALL;
+	Node.ExtendInfo.nPlayerFlags = MTD_PlayerFlags_Bot;
+
+	// We use the dwIP and nPort fields to indicate the bots.
+	// when sending the packet to someonm other than the owner, we use the owner's IP and port,
+	// from which the receiving client identifies the owner.
+	// However, since clients themselves don't know their own IP, we send sentinel values that
+	// indicate "you're the owner" instead.
+	Node.dwIP = OwnerObj->GetIP();
+	Node.nPort = OwnerObj->GetPort();
+
+	StaticBlobArray<MTD_PeerListNode, 1> BlobArray;
+	auto& CommandNode = BlobArray.Get(0);
+	CommandNode = Node;
+
+	auto MakeCommand = [&] {
+		auto* Command = CreateCommand(MC_MATCH_STAGE_ENTERBATTLE, MUID(0, 0));
+		Command->AddParameter(new MCommandParameterUChar(MCEP_NORMAL));
+		Command->AddParameter(new MCommandParameterBlob(BlobArray));
+		return Command;
+	};
+
+	RouteToBattleExcept(StageUID, MakeCommand(), OwnerUID);
+
+	CommandNode.dwIP = u32(-1);
+	CommandNode.nPort = 0;
+	RouteToListener(OwnerObj, MakeCommand());
+}
+
 static int GetBlobCmdID(const char* Data)
 {
 	return *(u16*)(Data + 2);
@@ -1804,7 +1875,7 @@ void MMatchServer::ResponsePeerList(const MUID& uidChar, const MUID& uidStage)
 	pNew->AddParameter(new MCommandParameterUID(pStage->GetUID()));
 
 	// Battle에 들어간 사람만 List를 만든다.
-	int nPeerCount = pStage->GetObjInBattleCount();
+	int nPeerCount = pStage->GetObjInBattleCount() + pStage->Bots.size();
 
 	void* pPeerArray = MMakeBlobArray(sizeof(MTD_PeerListNode), nPeerCount);
 	int nIndex=0;
@@ -1828,6 +1899,18 @@ void MMatchServer::ResponsePeerList(const MUID& uidChar, const MUID& uidStage)
 			pNode->ExtendInfo.nTeam = 0;
 		pNode->ExtendInfo.nPlayerFlags = pObj->GetPlayerFlags();
 	}
+
+	for (auto&& Bot : pStage->Bots)
+	{
+		auto* Node = static_cast<MTD_PeerListNode*>(MGetBlobArrayElement(pPeerArray, nIndex++));
+		*Node = Bot.PeerListNode;
+		if (uidChar == Bot.OwnerUID)
+		{
+			Node->dwIP = u32(-1);
+			Node->nPort = 0;
+		}
+	}
+
 	pNew->AddParameter(new MCommandParameterBlob(pPeerArray, MGetBlobArraySize(pPeerArray)));
 	MEraseBlobArray(pPeerArray);
 

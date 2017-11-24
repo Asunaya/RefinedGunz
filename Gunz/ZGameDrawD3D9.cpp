@@ -121,6 +121,8 @@ void ZGameDrawD3D9::DrawScene()
 	g_pPortal->PreDraw();
 #endif
 
+	GetRGMain().OnPreDrawGame();
+
 	SetStatesPreDraw(Game);
 
 	GetRenderer().PostProcess.Begin();

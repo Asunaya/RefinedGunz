@@ -82,6 +82,7 @@
 #include "ZReplayWrite.h"
 #include "reinterpret.h"
 #include "CodePageConversion.h"
+#include "ZMyBotCharacter.h"
 
 _USING_NAMESPACE_REALSPACE2
 
@@ -524,6 +525,8 @@ bool ZGame::Create(MZFileSystem *pfs, ZLoadingProgress *pLoading )
 
 void ZGame::Destroy()
 {
+	DestroyAllBots();
+
 	StopRecording();
 
 	g_SnowTownParticleSystem.Destroy();
@@ -1074,6 +1077,15 @@ static void ZLogCommand(MCommand* pCmd)
 
 bool ZGame::OnCommand_Immediate(MCommand* pCommand)
 {
+	{
+		auto&& Bot = GetBotInfo().MyBot;
+		if (Bot && Bot->GetState() == BotStateType::Recording &&
+			pCommand->GetSenderUID() == m_pMyCharacter->GetUID())
+		{
+			Bot->RecordCommand(pCommand);
+		}
+	}
+
 	if(GameAction.OnCommand(pCommand))
 		return true;
 
@@ -1263,6 +1275,11 @@ bool ZGame::OnCommand_Immediate(MCommand* pCommand)
 			break;
 
 		OnPeerNewBasicInfo(pCommand, true, true);
+	}
+	break;
+	case MC_PEER_TUNNEL_BOT_COMMAND:
+	{
+		RunNetBotTunnelledCommand(pCommand);
 	}
 	break;
 	case MC_MATCH_STAGE_ENTERBATTLE:
@@ -4645,6 +4662,12 @@ void ZGame::OnStageLeaveBattle(const MUID& uidChar, const MUID& uidStage)
 			char temp[256] = "";
 			ZTransMsg(temp, MSG_GAME_LEAVE_BATTLE, 1, pChar->GetUserAndClanName());
 			ZChatOutput(MCOLOR(ZCOLOR_GAME_INFO), temp);
+
+			if (IsBot(pChar))
+			{
+				DestroyBot(pChar);
+				return;
+			}
 		}
 
 		ZGetGameClient()->DeletePeer(uidChar);
@@ -4661,11 +4684,24 @@ void ZGame::OnAddPeer(const MUID& uidChar, DWORD dwIP, const int nPort, MTD_Peer
 {
 	if (ZApplication::GetGameInterface()->GetState() != GUNZ_GAME || g_pGame == NULL) return;
 
+	assert(pNode);
+
 	if (uidChar != ZGetMyUID())
 	{
-		if (pNode == NULL)
+		if (pNode->ExtendInfo.nPlayerFlags & MTD_PlayerFlags_Bot)
 		{
-			_ASSERT(0);
+			auto OwnerUID = pNode->dwIP == u32(-1) ?
+				ZGetMyUID() :
+				ZGetGameClient()->GetPeers()->FindUID(pNode->dwIP, pNode->nPort);
+
+			if (OwnerUID.IsInvalid())
+			{
+				assert(false);
+				return;
+			}
+
+			CreateBot(OwnerUID, uidChar, pNode->CharInfo, pNode->ExtendInfo);
+			return;
 		}
 
 		ZGetGameClient()->DeletePeer(uidChar);

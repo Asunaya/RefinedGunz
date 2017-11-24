@@ -263,8 +263,6 @@ public:
 	ZHelpScreen	m_HelpScreen;
 
 protected:
-	friend class ZBotCharacter;
-
 	int	m_nGunzReplayNumber;
 	ZFile *m_pReplayFile;
 	bool m_bReplaying;
@@ -334,6 +332,8 @@ protected:
 	void AutoAiming();
 
 private:
+	friend class ZMyBotCharacter;
+
 	bool OnRuleCommand(MCommand* pCommand);
 	void PostNewBasicInfo();
 

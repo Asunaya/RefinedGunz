@@ -24,6 +24,7 @@ desc : 무기 사용 키 커스터마이즈 관련
 #include "RBspObject.h"
 #include "ZPickInfo.h"
 #include "reinterpret.h"
+#include "RGMain.h"
 
 #define CHARGE_SHOT
 // Ninja jumping
@@ -2297,7 +2298,12 @@ void ZMyCharacter::SetDirection(const rvector& dir)
 
 void ZMyCharacter::OnDamagedAnimation(ZObject *pAttacker, int type)
 {
-	if (ZGetGame()->GetMatch()->GetMatchType() == MMATCH_GAMETYPE_SKILLMAP)
+	const auto GameType = ZGetGame()->GetMatch()->GetMatchType();
+	if (GameType == MMATCH_GAMETYPE_SKILLMAP)
+		return;
+
+	if (GameType == MMATCH_GAMETYPE_TRAINING &&
+		GetRGMain().TrainingSettings.NoStuns)
 		return;
 
 	ZCharacter::OnDamagedAnimation(pAttacker, type);
@@ -2818,8 +2824,19 @@ void ZMyCharacter::OnGuardSuccess()
 
 void ZMyCharacter::OnDamaged(ZObject* pAttacker, rvector srcPos, ZDAMAGETYPE damageType, MMatchWeaponType weaponType, float fDamage, float fPiercingRatio, int nMeleeType)
 {
-	if (ZGetGame()->GetMatch()->GetMatchType() == MMATCH_GAMETYPE_SKILLMAP)
+	const auto GameType = ZGetGame()->GetMatch()->GetMatchType();
+	if (GameType == MMATCH_GAMETYPE_SKILLMAP)
 		return;
+
+	if (GameType == MMATCH_GAMETYPE_TRAINING &&
+		GetRGMain().TrainingSettings.Godmode)
+	{
+		if (damageType == ZD_MELEE)
+		{
+			OnDamagedAnimation(pAttacker, nMeleeType);
+		}
+		return;
+	}
 
 	ZCharacter::OnDamaged(pAttacker, srcPos, damageType, weaponType, fDamage, fPiercingRatio, nMeleeType);
 	ZGetScreenEffectManager()->AddAlert(GetPosition(), m_Direction, srcPos);
@@ -2835,7 +2852,12 @@ void ZMyCharacter::OnDamaged(ZObject* pAttacker, rvector srcPos, ZDAMAGETYPE dam
 
 void ZMyCharacter::OnKnockback(const rvector& dir, float fForce)
 {
-	if (ZGetGame()->GetMatch()->GetMatchType() == MMATCH_GAMETYPE_SKILLMAP)
+	const auto GameType = ZGetGame()->GetMatch()->GetMatchType();
+	if (GameType == MMATCH_GAMETYPE_SKILLMAP)
+		return;
+
+	if (GameType == MMATCH_GAMETYPE_TRAINING &&
+		GetRGMain().TrainingSettings.NoStuns)
 		return;
 
 	if (m_bBlast || m_bBlastFall) {

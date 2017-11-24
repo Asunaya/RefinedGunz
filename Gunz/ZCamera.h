@@ -51,6 +51,8 @@ public:
 
 	static v3 GetTargetOffset(const v3& Dir, float Scale = 1);
 
+	ZCharacter* TargetCharacterOverride{};
+
 private:
 	friend class Portal;
 	friend class ZGameInput;

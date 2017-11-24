@@ -409,6 +409,7 @@ public:
 	virtual ~MMatchObject();
 
 	ClientSettings ClientSettings;
+	MUID BotUID = MUID::Invalid();
 
 	char* GetName() { 
 		if (m_pCharInfo)

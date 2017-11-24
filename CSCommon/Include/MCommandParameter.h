@@ -6,6 +6,7 @@
 
 #include "SafeString.h"
 #include "GlobalTypes.h"
+#include "MBlobArray.h"
 
 class MCommandParamCondition;
 class MCommandParamConditionMinMax;
@@ -293,6 +294,9 @@ public:
 	MCommandParameterBlob();
 	explicit MCommandParameterBlob(size_t Size);
 	explicit MCommandParameterBlob(const void* Value, int nSize);
+	template <typename T, size_t N, size_t Alignment>
+	explicit MCommandParameterBlob(const StaticBlobArray<T, N, Alignment>& Array)
+		: MCommandParameterBlob{Array.Data(), Array.Size()} {}
 	virtual ~MCommandParameterBlob() override;
 
 	virtual MCommandParameterBlob* Clone() override;

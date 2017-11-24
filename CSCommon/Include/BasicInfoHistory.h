@@ -1,7 +1,8 @@
 #pragma once
 
-#include "stuff.h"
 #include <deque>
+#include <functional>
+#include "stuff.h"
 #include "AnimationStuff.h"
 
 class BasicInfoHistoryManager
@@ -11,15 +12,15 @@ public:
 
 	struct Info
 	{
-		v3 Head;
-		v3 Origin;
-		v3 Dir;
-		v3 CameraDir;
+		v3* Head{};
+		v3* Pos{};
+		v3* Dir{};
+		v3* CameraDir{};
 	};
 
-	template <typename GetItemDescT>
-	bool GetInfo(Info& Out, double Time,
-		GetItemDescT& GetItemDesc, MMatchSex Sex, bool IsDead) const;
+	bool GetInfo(const Info& Out, double Time,
+		const std::function<MMatchItemDesc*(MMatchCharItemParts)>& GetItemDesc,
+		MMatchSex Sex, bool IsDead) const;
 	
 	bool empty() const { return BasicInfoList.empty(); }
 	auto& front() const { return BasicInfoList.front(); }

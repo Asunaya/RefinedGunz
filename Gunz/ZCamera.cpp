@@ -68,24 +68,37 @@ void ZCamera::Update(float fElapsed)
 
 	ZCombatInterface*	pCombatInterface = ZGetGameInterface()->GetCombatInterface();
 	ZCharacter*			pTargetCharacter = g_pGame->m_pMyCharacter;
+	if (TargetCharacterOverride)
+	{
+		pTargetCharacter = TargetCharacterOverride;
+	}
 
 	v3 PlayerPosition{ pTargetCharacter->m_Position };
 	v3 PlayerDirection{ pTargetCharacter->CameraDir };
 	bool Observing = false;
 
-	if (pCombatInterface->GetObserver()->IsVisible())
+	auto&& Observer = *pCombatInterface->GetObserver();
+	
+	if (TargetCharacterOverride)
 	{
-		ZCharacter *pObserverTargetCharacter = pCombatInterface->GetObserver()->GetTargetCharacter();
-		if (pObserverTargetCharacter)
+		Observing = true;
+		pTargetCharacter->GetHistory(&PlayerPosition, nullptr,
+			g_pGame->GetTime(), &PlayerDirection);
+	}
+	else if (pCombatInterface->GetObserver()->IsVisible())
+	{
+		auto&& ObserverTarget = Observer.GetTargetCharacter();
+		if (ObserverTarget)
 		{
-			pTargetCharacter = pObserverTargetCharacter;
+			pTargetCharacter = ObserverTarget;
 			Observing = pTargetCharacter != nullptr;
 		}
 
 		if (pTargetCharacter)
 			pTargetCharacter->GetHistory(&PlayerPosition, nullptr,
-				g_pGame->GetTime() - pCombatInterface->GetObserver()->GetDelay(), &PlayerDirection);
+				g_pGame->GetTime() - Observer.GetDelay(), &PlayerDirection);
 	}
+
 	if (!pTargetCharacter) return;
 
 	m_Target = PlayerPosition + GetTargetOffset(PlayerDirection, pTargetCharacter->GetScale());

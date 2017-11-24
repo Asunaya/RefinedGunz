@@ -143,7 +143,8 @@ struct MTD_RuleInfo_Berserker : public MTD_RuleInfo
 enum MTD_PlayerFlags {
 	MTD_PlayerFlags_AdminHide	= 1,
 	MTD_PlayerFlags_BridgePeer	= 1<<1,
-	MTD_PlayerFlags_Premium		= 1<<2			// 넷마블 피시방 보너스
+	MTD_PlayerFlags_Premium		= 1<<2,
+	MTD_PlayerFlags_Bot			= 1<<3,
 };
 
 struct MTD_ChannelPlayerListNode 

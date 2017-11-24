@@ -17,12 +17,15 @@
 #include "dxerr.h"
 #include "defer.h"
 #include "RS2.h"
+#include "ZMyBotCharacter.h"
+#include "FunctionalListener.h"
 
-optional<RGMain> g_RGMain;
+static optional<RGMain> g_RGMain;
 
 RGMain& GetRGMain() { return g_RGMain.value(); }
 void CreateRGMain() { g_RGMain.emplace(); }
 void DestroyRGMain() { g_RGMain.reset(); }
+bool IsRGMainAlive() { return g_RGMain.has_value(); }
 
 void RGMain::OnAppCreate()
 {
@@ -72,6 +75,15 @@ void RGMain::OnDrawGame()
 
 	if (ZGetConfiguration()->GetShowHitboxes())
 		m_HitboxManager.Draw();
+}
+
+void RGMain::OnPreDrawGame()
+{
+	auto&& Bot = GetBotInfo().MyBot;
+	if (Bot && GetBotInfo().Settings.ShowCam)
+	{
+		Bot->RenderCam();
+	}
 }
 
 void RGMain::OnDrawGameInterface(MDrawContext* pDC)
@@ -284,7 +296,8 @@ bool RGMain::OnEvent(MEvent *pEvent)
 	return ret;
 }
 
-void RGMain::OnReset() {}
+void RGMain::OnInvalidate() { InvalidateBotCamRT(); }
+void RGMain::OnRestore() { RestoreBotCamRT(); }
 void RGMain::OnDrawLobby(MDrawContext* pDC) {}
 
 struct CustomReplayFrame : MWidget
@@ -517,6 +530,98 @@ void RGMain::DrawReplayInfo(MDrawContext* pDC, MWidget* Widget) const
 	}
 }
 
+void RGMain::SetListeners()
+{
+	auto& MySettings = TrainingSettings;
+	auto& BotSettings = GetBotInfo().Settings;
+
+	static const std::pair<const char*, bool&> Buttons[] = {
+		{"TrainingGodmodeOption", MySettings.Godmode},
+		{"TrainingNoStunsOption", MySettings.NoStuns},
+		{"TrainingBotGodmodeOption", BotSettings.Godmode},
+		{"TrainingBotNoStunsOption", BotSettings.NoStuns},
+		{"TrainingBotLoopOption", BotSettings.Loop},
+		// Gotta call SetShowBotCam to set this one.
+		{"TrainingBotCamOption", BotSettings.ShowCam},
+	};
+
+	auto LastIndex = std::size(Buttons) - 1;
+	for (size_t i = 0; i < LastIndex; ++i)
+	{
+		Listen(Buttons[i].first, SetToButtonState(Buttons[i].second));
+	}
+
+	auto&& LastButton = Buttons[LastIndex];
+	Listen(LastButton.first, ApplyToButtonState(SetShowBotCam));
+
+	Listen("TrainingFrame", OnMessage(MBTN_CLK_MSG, [] {
+		if (auto&& Widget = ZFindWidget("Training"))
+		{
+			Widget->Show(true, true);
+		}
+		else
+		{
+			return;
+		}
+
+		for (auto&& Button : Buttons)
+		{
+			if (auto&& Widget = ZFindWidgetAs<MButton>(Button.first))
+			{
+				Widget->SetCheck(Button.second);
+			}
+		}
+
+		UpdateToggleBotWidget();
+		UpdateToggleRecordingWidget();
+	}));
+
+	Listen("TrainingToggleBotButton", [](MWidget* Widget, const char* Message) {
+		if (!MWidget::IsMsg(Message, MBTN_CLK_MSG))
+			return false;
+
+		if (!GetBotInfo().MyBot)
+		{
+			RequestCreateBot();
+		}
+		else
+		{
+			RequestDestroyBot();
+		}
+
+		// Toggle*Widget will be called when the response packets are received, in CreateBot and
+		// DestroyBot.
+
+		return true;
+	});
+
+	Listen("TrainingToggleRecordingButton", [=](MWidget* Widget, const char* Message) {
+		if (!MWidget::IsMsg(Message, MBTN_CLK_MSG) ||
+			!GetBotInfo().MyBot)
+			return false;
+
+		if (GetBotInfo().MyBot->GetState() == BotStateType::Recording)
+		{
+			GetBotInfo().MyBot->SetState(BotStateType::Replaying);
+		}
+		else
+		{
+			GetBotInfo().MyBot->SetState(BotStateType::Recording);
+		}
+
+		UpdateToggleRecordingWidget();
+
+		return true;
+	});
+
+	Listen("TrainingCloseButton", OnMessage(MBTN_CLK_MSG, [] {
+		if (auto&& Widget = ZFindWidget("Training"))
+		{
+			Widget->Show(false);
+		}
+	}));
+}
+
 std::pair<bool, uint32_t> RGMain::GetPlayerSwordColor(const MUID& UID)
 {
 	auto it = SwordColors.find(UID);
@@ -548,6 +653,11 @@ void RGMain::OnReceiveVoiceChat(ZCharacter *Char, const uint8_t *Buffer, int Len
 
 void RGMain::OnGameCreate()
 {
+	if (auto&& Widget = ZFindWidget("TrainingFrame"))
+	{
+		const auto GameType = ZGetGameClient()->GetMatchStageSetting()->GetGameType();
+		Widget->Enable(GameType == MMATCH_GAMETYPE_TRAINING);
+	}
 }
 
 void RGMain::OnSlash(ZCharacter * Char, const rvector & Pos, const rvector & Dir)

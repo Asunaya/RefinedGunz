@@ -760,6 +760,8 @@ bool ZGameInterface::InitInterfaceListener()
 	if (pTab)
 		pTab->UpdateListeners();
 
+	GetRGMain().SetListeners();
+
 	return true;
 }
 

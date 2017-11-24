@@ -42,7 +42,7 @@ T1 reinterpret_address(const void* val)
 template <typename T1, typename T2>
 std::enable_if_t<!std::is_same<T2, void>::value, T1> reinterpret_pointee(const T2* val)
 {
-	return reinterpret(*val);
+	return reinterpret<T1>(*val);
 }
 
 // Reinterprets the data pointed to by a pointer.
@@ -50,5 +50,5 @@ std::enable_if_t<!std::is_same<T2, void>::value, T1> reinterpret_pointee(const T
 template <typename T1, typename T2>
 std::enable_if_t<std::is_same<T2, void>::value, T1> reinterpret_pointee(const T2* val)
 {
-	return reinterpret(*reinterpret_cast<char(*)[sizeof(T1)]>(val));
+	return reinterpret<T1>(*reinterpret_cast<const char(*)[sizeof(T1)]>(val));
 }

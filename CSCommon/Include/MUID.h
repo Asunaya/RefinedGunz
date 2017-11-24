@@ -34,11 +34,11 @@ struct MUID{
 		return *this;
 	}
 
-	bool IsInvalid(){
+	bool IsInvalid() const {
 		if(High==Low && Low==0) return true;
 		return false;
 	}
-	bool IsValid(){
+	bool IsValid() const {
 		if(High==Low && Low==0) return false;
 		return true;
 	}
@@ -77,11 +77,6 @@ struct MUID{
 		Low = v;
 		return *this;
 	}
-	inline MUID& operator=(const MUID& a){
-		High = a.High;
-		Low = a.Low;
-		return *this;
-	}
 	inline friend bool operator==(const MUID& a, const MUID& b){
 		if(a.High==b.High){
 			if(a.Low==b.Low) return true;
@@ -105,7 +100,7 @@ struct MUIDRANGE{
 	MUID Start;
 	MUID End;
 
-	bool IsEmpty(){
+	bool IsEmpty() const {
 		return Start == End;
 	}
 	void Empty(){

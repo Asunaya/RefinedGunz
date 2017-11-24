@@ -5,7 +5,6 @@
 #include "MMatchGlobal.h"
 #include "MMatchConfig.h"
 #include "MUtil.h"
-#include "BasicInfoHistory.inl"
 
 
 #define CYCLE_MATCHSTAGELISTUPDATE			1000
@@ -324,9 +323,9 @@ void MMatchObject::GetPositions(v3* Head, v3* Foot, double Time) const
 	};
 
 	BasicInfoHistoryManager::Info Info;
+	Info.Head = Head;
+	Info.Pos = Foot;
 	BasicInfoHistory.GetInfo(Info, Time, GetItemDesc, m_pCharInfo->m_nSex, !IsAlive());
-	if (Head) *Head = Info.Head;
-	if (Foot) *Foot = Info.Origin;
 }
 
 void MMatchObject::SetMaxHPAP()
