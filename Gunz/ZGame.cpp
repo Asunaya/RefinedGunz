@@ -412,8 +412,11 @@ bool ZGame::Create(MZFileSystem *pfs, ZLoadingProgress *pLoading )
 		ZGetWorldManager()->AddWorld(ZGetGameClient()->GetMatchStageSetting()->GetMapName());
 	}
 
-	if(!ZGetWorldManager()->LoadAll(pLoading))
+	if (!ZGetWorldManager()->LoadAll(pLoading))
+	{
+		ZGetWorldManager()->Clear();
 		return false;
+	}
 
 	ZGetWorldManager()->SetCurrent(0);
 
