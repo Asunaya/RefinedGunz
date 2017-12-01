@@ -24,6 +24,10 @@ add_project_subdir(sdk/sqlite)
 add_project_subdir(sdk/libsodium)
 add_project_subdir(sdk/bullet)
 add_project_subdir(sdk/rapidxml)
+add_project_subdir(sdk/zlib)
+add_project_subdir(sdk/portaudio)
+add_project_subdir(sdk/opus)
+add_project_subdir(sdk/curl)
 
 set(UCM_UNITY_BUILD ON)
 

@@ -6,7 +6,6 @@
 
 #include "dxerr.h"
 
-#include "main.h"
 #include "resource.h"
 #include "VersionNo.h"
 
@@ -614,7 +613,7 @@ static void SetRS2Callbacks()
 	RSetFunction(RF_PREPRESENT, OnPrePresent);
 }
 
-int PASCAL WinMain(HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline, int cmdshow)
+int PASCAL GunzMain(HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline, int cmdshow)
 {
 	SetUnhandledExceptionFilter(ExceptionFilter);
 

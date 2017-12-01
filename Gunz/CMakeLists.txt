@@ -13,32 +13,13 @@ file(GLOB src
     "*.cpp"
 )
 
-set(src "${src};${CMAKE_CURRENT_SOURCE_DIR}/Gunz.rc")
+set(main_file "${CMAKE_CURRENT_SOURCE_DIR}/WinMain.cpp")
+list(REMOVE_ITEM src "${main_file}")
 
-add_target(NAME Gunz TYPE EXECUTABLE SOURCES "${src}")
 add_target(NAME Gunz_lib TYPE STATIC SOURCES "${src}")
 
-macro(target_include_directories_both)
-	target_include_directories(Gunz ${ARGV})
-	target_include_directories(Gunz_lib ${ARGV})
-endmacro()
-
-macro(target_link_libraries_both)
-	target_link_libraries(Gunz ${ARGV})
-	target_link_libraries(Gunz_lib ${ARGV})
-endmacro()
-
-macro(add_dependencies_both)
-	add_dependencies(Gunz ${ARGV})
-	add_dependencies(Gunz_lib ${ARGV})
-endmacro()
-
-macro(target_compile_options_both)
-	target_compile_options(Gunz ${ARGV})
-	target_compile_options(Gunz_lib ${ARGV})
-endmacro()
-
-target_include_directories_both(PRIVATE
+target_include_directories(Gunz_lib
+PUBLIC
 	../sdk/dx9/include
 	../sdk
 	../CSCommon/Include
@@ -54,31 +35,44 @@ target_include_directories_both(PRIVATE
 	../sdk/rapidxml/include
 	../sdk/libsodium/include
 	../sdk/opus/include
-	../sdk/portaudio/include)
+	../sdk/portaudio/include
+INTERFACE
+    .
+)
 
 find_library(zlib_path NAMES zlib PATHS ../sdk/zlib/lib)
 find_library(fmodvc_path NAMES fmodvc PATHS .)
 
 find_library(libsodium_path NAMES libsodium PATHS ../sdk/libsodium/lib/static)
 
-target_link_libraries_both(PUBLIC
+target_link_libraries(Gunz_lib PUBLIC
+	legacy_stdio_definitions.lib
+	winmm.lib
 	${zlib_path}
 	${fmodvc_path}
 	sodium
-	legacy_stdio_definitions.lib
+	opus
+	bullet
+    portaudio
+	
 	cml
 	RealSpace2
 	CSCommon
 	Mint2
 	RealSound
 	SafeUDP
-	MDatabase)
+	MDatabase
+)
 
-target_compile_options_both(PRIVATE
-		-D_LOCATOR)
+target_compile_options(Gunz_lib
+    PUBLIC -D_LOCATOR
+    PRIVATE -DLIB_COMPILE)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-	target_compile_options_both(PRIVATE
+	target_compile_options(Gunz_lib PUBLIC
 		/wd4244 /wd4305)
 	ucm_add_linker_flags(/SUBSYSTEM:WINDOWS)
 endif()
+
+add_target(NAME Gunz TYPE EXECUTABLE SOURCES "${main_file};${CMAKE_CURRENT_SOURCE_DIR}/Gunz.rc")
+target_link_libraries(Gunz PUBLIC Gunz_lib)

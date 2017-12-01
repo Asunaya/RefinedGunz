@@ -1,0 +1,5 @@
+add_library(curl INTERFACE)
+target_include_directories(curl INTERFACE include)
+find_library(curl_path NAMES libcurl PATHS lib/static)
+target_link_libraries(curl INTERFACE ${curl_path})
+target_compile_options(curl INTERFACE -DCURL_STATICLIB)
