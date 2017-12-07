@@ -840,7 +840,7 @@ END_IMPLEMENT_LISTENER()
 
 
 BEGIN_IMPLEMENT_LISTENER(ZGetCombatMenuCloseButtonListener, MBTN_CLK_MSG)
-	if(pWidget->GetParent()!=NULL) pWidget->GetParent()->Show(false);
+	ZGetGameInterface()->ShowMenu(false);
 END_IMPLEMENT_LISTENER()
 
 

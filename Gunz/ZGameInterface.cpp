@@ -4728,6 +4728,11 @@ void ZGameInterface::ReserveLeaveBattle()
 
 void ZGameInterface::ShowMenu(bool bEnable)
 {
+	if (!bEnable && IsMenuVisible())
+	{
+		ZGetInput()->ResetRotation();
+	}
+
 	m_CombatMenu.ShowModal(bEnable);
 	ZGetGameInterface()->SetCursorEnable(bEnable);
 }

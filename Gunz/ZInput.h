@@ -50,8 +50,6 @@ class ZInput
 	float			m_fRotationDeltaX;	// 누적된 회전값 움직임
 	float			m_fRotationDeltaY;
 
-	friend class Chat;
-
 public:
 	ZInput(ZDirectInput* pDI);
 	virtual ~ZInput(void);
@@ -103,4 +101,8 @@ public:
 	// 입력은 0~1 사이, 0 = 진동없음. 1 = 진동 최대
 	bool SetDeviceForcesXY(float fXForce, float fYForce);
 
+	void ResetRotation()
+	{
+		m_fRotationDeltaX = m_fRotationDeltaY = 0;
+	}
 };

@@ -709,9 +709,7 @@ void ZCombatInterface::OnDraw(MDrawContext* pDC)
 			MWidget* pWidget = ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "Option");
 			if ( pWidget)
 				pWidget->Show( false);
-			pWidget = ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "CombatMenuFrame");
-			if ( pWidget)
-				pWidget->Show( false);
+			ZGetGameInterface()->ShowMenu(false);
 			MLabel* pLabel = (MLabel*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "CombatChatInput");
 			if ( pLabel)
 				pLabel->SetText("");

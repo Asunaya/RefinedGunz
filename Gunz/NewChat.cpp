@@ -291,10 +291,7 @@ void Chat::EnableInput(bool Enable, bool ToTeam){
 		SetCursorPos(RGetScreenWidth() / 2, RGetScreenHeight() / 2);
 	}
 	else{
-		cprint("RotationDelta: %f, %f\n", ZGetInput()->m_fRotationDeltaX, ZGetInput()->m_fRotationDeltaY);
-		// These are too buggy, they change on different systems and compilations.
-		//ZGetInput()->m_fRotationDeltaX = 0.f;
-		//ZGetInput()->m_fRotationDeltaY = 0.f;
+		ZGetInput()->ResetRotation();
 
 		SelectionState = SelectionStateType{};
 	}
