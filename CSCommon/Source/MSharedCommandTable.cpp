@@ -72,7 +72,7 @@ void MAddSharedCommandTable(MCommandManager* CommandManager, MSharedCommandType:
 		P(MPT_UCHAR, "DamageType");
 		P(MPT_UCHAR, "WeaponType");
 	C(MC_MATCH_UPDATE_CLIENT_SETTINGS, "", "", MCDT_MACHINE2MACHINE);
-		P(MPT_BLOB, "Settings");
+		P(MPT_BLOB, "Settings", MCPCBlobSize{sizeof(MTD_ClientSettings)});
 	C(MC_MATCH_PING_LIST, "", "", MCDT_MACHINE2MACHINE);
 		P(MPT_BLOB, "Ping list", MCPCBlobArraySize{ sizeof(MTD_PingInfo) });
 	C(MC_PEER_BASICINFO_RG, "", "", MCDT_PEER2PEER);
