@@ -59,6 +59,10 @@ public:
 	void SetBackgroundColor(D3DCOLOR Color) { BackgroundColor = Color; }
 	void SetInterfaceColor(D3DCOLOR Color) { InterfaceColor = Color; }
 
+	using TimeType = u64;
+	static TimeType GetTime();
+	static TimeType Seconds(float Value) { return TimeType(Value * 1000); }
+
 	bool IsInputEnabled() const { return InputEnabled; }
 	bool IsTeamChat() const { return TeamChat; }
 
@@ -72,7 +76,7 @@ private:
 	bool BoldFont = true;
 	int FontSize = 16;
 	int FontHeight{};
-	double FadeTime = 10;
+	TimeType FadeTime = Seconds(10);
 	std::vector<struct ChatMessage> Msgs;
 	std::vector<struct LineSegmentInfo> LineSegments;
 	bool InputEnabled{};
@@ -120,10 +124,10 @@ private:
 	void UpdateNewMessagesAnimation(float TimeDelta);
 
 	void DrawBorder(MDrawContext* pDC);
-	void DrawBackground(MDrawContext* pDC, float Time, int Limit, bool ShowAll);
-	void DrawChatLines(MDrawContext* pDC, float Time, int Limit, bool ShowAll);
+	void DrawBackground(MDrawContext* pDC, TimeType Time, int Limit, bool ShowAll);
+	void DrawChatLines(MDrawContext* pDC, TimeType Time, int Limit, bool ShowAll);
 	void DrawSelection(MDrawContext* pDC);
-	void DrawFrame(MDrawContext* pDC, float Time);
+	void DrawFrame(MDrawContext* pDC, TimeType Time);
 	MFontR2& GetFont(u32 Emphasis);
 
 	D3DRECT GetOutputRect();

@@ -44,8 +44,9 @@ struct FormatSpecifier {
 	FormatSpecifier(int nStart, FormatSpecifierType type) : nStartPos(nStart), ft(type) { }
 };
 
+
 struct ChatMessage {
-	float Time{};
+	Chat::TimeType Time{};
 	std::wstring Msg;
 	u32 DefaultColor;
 	std::vector<FormatSpecifier> FormatSpecifiers;
@@ -318,7 +319,7 @@ void Chat::OutputChatMsg(const char *szMsg, u32 dwColor)
 
 	Msgs.emplace_back();
 	auto&& Msg = Msgs.back();
-	Msg.Time = ZGetGame()->GetTime();
+	Msg.Time = GetTime();
 	Msg.Msg = WideMsg;
 	Msg.DefaultColor = dwColor;
 
@@ -355,6 +356,11 @@ void Chat::ClearHistory()
 	LineSegments.clear();
 	NumNewlyAddedLines = 0;
 	ChatLinesPixelOffsetY = 0;
+}
+
+Chat::TimeType Chat::GetTime()
+{
+	return ZGetApplication()->GetTime();
 }
 
 bool Chat::CursorInRange(int x1, int y1, int x2, int y2){
@@ -1028,7 +1034,7 @@ void Chat::OnDraw(MDrawContext* pDC)
 		CeiledLimit = int(ceil(Limit));
 	}
 
-	auto Time = ZGetGame()->GetTime();
+	auto Time = GetTime();
 
 	DrawBackground(pDC, Time, NumNewlyAddedLines > 0 ? CeiledLimit : FlooredLimit, ShowAll);
 	DrawChatLines(pDC, Time, InputEnabled ? CeiledLimit : FlooredLimit, ShowAll);
@@ -1100,7 +1106,7 @@ void Chat::DrawBorder(MDrawContext* pDC)
 	pDC->Line(rect.x1, rect.y2, rect.x2, rect.y2);
 }
 
-void Chat::DrawBackground(MDrawContext* pDC, float Time, int Limit, bool ShowAll)
+void Chat::DrawBackground(MDrawContext* pDC, TimeType Time, int Limit, bool ShowAll)
 {
 	if (BackgroundColor & 0xFF000000)
 	{
@@ -1335,7 +1341,7 @@ static u32 ScaleAlpha(u32 Color, float MessageTime, float CurrentTime,
 	return (AS << 24) | RGB;
 }
 
-void Chat::DrawChatLines(MDrawContext* pDC, float Time, int Limit, bool ShowAll)
+void Chat::DrawChatLines(MDrawContext* pDC, TimeType Time, int Limit, bool ShowAll)
 {
 	auto Reverse = [&](auto&& Container, int Offset = 0) {
 		return MakeRange(Container.rbegin() + Offset, Container.rend());
@@ -1458,7 +1464,7 @@ void Chat::DrawSelection(MDrawContext * pDC)
 	}
 }
 
-void Chat::DrawFrame(MDrawContext * pDC, float Time)
+void Chat::DrawFrame(MDrawContext * pDC, TimeType Time)
 {
 	// Draw top of border
 	{
@@ -1498,8 +1504,8 @@ void Chat::DrawFrame(MDrawContext * pDC, float Time)
 	int y = Rect.y1 + (CaretCoord.y - 1) * FontHeight;
 
 	// Alternate every 0.4 seconds
-	auto Period = 0.4f;
-	if (fmod(Time, Period * 2) > Period)
+	auto Period = Seconds(0.4f);
+	if (Time % (Period * 2) > Period)
 	{
 		// Draw caret
 		pDC->SetColor(TextColor);
