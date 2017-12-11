@@ -10,6 +10,7 @@
 #include "RGMain.h"
 #include "RBspObject.h"
 #include "RS2.h"
+#include "FunctionalListener.h"
 
 #define DEFAULT_SLIDER_MAX			10000
 
@@ -46,9 +47,70 @@ ZOptionInterface::ZOptionInterface(void)
 
 }
 
-ZOptionInterface::~ZOptionInterface(void)
+static auto SliderClamp(int Value)
 {
-	gDisplayMode.clear();
+	return max(0, min(DEFAULT_SLIDER_MAX, Value));
+}
+
+void ZOptionInterface::SetListeners()
+{
+	Listen("MouseSensitivitySlider", [this](MWidget* Widget, const char* Message) {
+		if (!MWidget::IsMsg(Message, MLIST_VALUE_CHANGED))
+			return false;
+
+		auto* Slider = static_cast<MSlider*>(Widget);
+
+		Sensitivity = Slider->GetValue();
+		
+		if (auto&& Edit = ZFindWidgetAs<MEdit>("MouseSensitivityEdit"))
+		{
+			char String[64];
+			sprintf_safe(String, "%d", Sensitivity);
+			Edit->SetText(String);
+		}
+
+		return true;
+	});
+
+	Listen("MouseSensitivityEdit", [this](MWidget* Widget, const char* Message) {
+		if (!MWidget::IsMsg(Message, MEDIT_CHAR_MSG))
+			return false;
+
+		auto IsIllegalChar = [](char c) {
+			return !isdigit(c);
+		};
+		StringView Text = Widget->GetText();
+		auto it = std::find_if(Text.begin(), Text.end(), IsIllegalChar);
+		if (it != Text.end())
+		{
+			char FilteredText[512];
+			size_t i = 0;
+			for (char c : Text)
+			{
+				if (IsIllegalChar(c))
+					continue;
+
+				FilteredText[i] = c;
+				++i;
+				if (i == std::size(FilteredText) - 1)
+				{
+					break;
+				}
+			}
+			FilteredText[i] = 0;
+
+			Widget->SetText(FilteredText);
+		}
+
+		Sensitivity = StringToInt<int>(Text).value_or(Sensitivity);
+
+		if (auto&& Slider = ZFindWidgetAs<MSlider>("MouseSensitivitySlider"))
+		{
+			Slider->SetValue(SliderClamp(Sensitivity));
+		}
+
+		return true;
+	});
 }
 
 void ZOptionInterface::InitInterfaceOption(void)
@@ -57,11 +119,20 @@ void ZOptionInterface::InitInterfaceOption(void)
 
 	mlog("ZOptionInterface::InitInterfaceOption\n");
 
+	Sensitivity = int(round(Z_MOUSE_SENSITIVITY * DEFAULT_SLIDER_MAX));
+
 	MSlider* pWidget = (MSlider*)pResource->FindWidget("MouseSensitivitySlider");
 	if(pWidget)
 	{
 		pWidget->SetMinMax(0, DEFAULT_SLIDER_MAX);
-		pWidget->SetValue(Z_MOUSE_SENSITIVITY*DEFAULT_SLIDER_MAX);
+		pWidget->SetValue(SliderClamp(Sensitivity));
+	}
+
+	if (auto&& Widget = ZFindWidgetAs<MEdit>("MouseSensitivityEdit"))
+	{
+		char buf[64];
+		sprintf_safe(buf, "%d", Sensitivity);
+		Widget->SetText(buf);
 	}
 
 	pWidget = (MSlider*)pResource->FindWidget("JoystickSensitivitySlider");
@@ -477,11 +548,9 @@ bool ZOptionInterface::SaveInterfaceOption(void)
 	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
 
 	{ // 슬라이더
-		MSlider* pWidget = (MSlider*)pResource->FindWidget("MouseSensitivitySlider");
-		if (((MSlider*)pWidget)->GetValue())
-			Z_MOUSE_SENSITIVITY = (float)((MSlider*)pWidget)->GetValue() / (float)DEFAULT_SLIDER_MAX;
+		Z_MOUSE_SENSITIVITY = float(Sensitivity) / DEFAULT_SLIDER_MAX;;
 
-		pWidget = (MSlider*)pResource->FindWidget("JoystickSensitivitySlider");
+		auto&& pWidget = (MSlider*)pResource->FindWidget("JoystickSensitivitySlider");
 		Z_JOYSTICK_SENSITIVITY = (float) ((MSlider*)pWidget)->GetValue() / (float)DEFAULT_SLIDER_MAX;
 
 		pWidget = (MSlider*)pResource->FindWidget("BGMVolumeSlider");

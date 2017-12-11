@@ -762,6 +762,8 @@ bool ZGameInterface::InitInterfaceListener()
 
 	GetRGMain().SetListeners();
 
+	ZGetOptionInterface()->SetListeners();
+
 	return true;
 }
 

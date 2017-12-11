@@ -9,6 +9,8 @@
 #include "ZStageInterface.h"
 #include "ZSkill.h"
 #include "ZWorldManager.h"
+#include "ZStageInterface.h"
+#include "ZOptionInterface.h"
 #include <string>
 #include <memory>
 
@@ -52,8 +54,8 @@ public:
 private:
 	ZGameInterface*			m_pGameInterface;
 	GunzState				m_nInitialState;
-	ZStageInterface*		m_pStageInterface;
-	ZOptionInterface*		m_pOptionInterface;
+	ZStageInterface			m_StageInterface;
+	ZOptionInterface		m_OptionInterface;
 	ZLAUNCH_MODE			m_nLaunchMode;
     std::string				m_szFileName;
 	std::string				m_szCmdLine;

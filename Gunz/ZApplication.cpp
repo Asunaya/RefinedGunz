@@ -60,7 +60,6 @@ ZApplication::ZApplication()
 
 
 	m_pGameInterface=NULL;
-	m_pStageInterface = NULL;
 
 	m_nInitialState = GUNZ_LOGIN;
 
@@ -345,11 +344,6 @@ bool ZApplication::OnCreate(ZLoadingProgress *pLoadingProgress)
 
 	giLoading.UpdateAndDraw(1.f);
 
-	__BP(1998, "ZStageInterface/ZOptionInterface constructor");
-	m_pStageInterface = new ZStageInterface;
-	m_pOptionInterface = new ZOptionInterface;
-	__EP(1998);
-
 	mlog("ZApplication::OnCreate : m_pInterface->OnCreate() \n");
 
 	__EP(2002);
@@ -516,8 +510,6 @@ void ZApplication::OnDestroy()
 
 	SAFE_DELETE(m_pLogFrame);
 	SAFE_DELETE(m_pGameInterface);
-	SAFE_DELETE(m_pStageInterface);
-	SAFE_DELETE(m_pOptionInterface);
 
 	m_NPCMeshMgr.DelAll();
 
@@ -702,13 +694,13 @@ ZStageInterface* ZApplication::GetStageInterface(void)
 {
 	ZApplication* pApp = GetInstance();
 	if(pApp==NULL) return NULL;
-	return pApp->m_pStageInterface;
+	return &pApp->m_StageInterface;
 }
 ZOptionInterface* ZApplication::GetOptionInterface(void)
 {
 	ZApplication* pApp = GetInstance();
 	if(pApp==NULL) return NULL;
-	return pApp->m_pOptionInterface;
+	return &pApp->m_OptionInterface;
 }
 MZFileSystem* ZApplication::GetFileSystem(void)
 {

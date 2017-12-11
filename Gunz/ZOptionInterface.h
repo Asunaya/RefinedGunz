@@ -1,6 +1,7 @@
 #pragma once
 
 #include "RTypes.h"
+#include "ZInterfaceListener.h"
 
 class ZOptionInterface
 {
@@ -13,12 +14,15 @@ class ZOptionInterface
 	bool	mbTimer;
 	DWORD	mTimerTime;
 
+	int Sensitivity{};
+
 
 public:
 	ZOptionInterface(void);
-	virtual ~ZOptionInterface(void);
 
 	void Update(void);
+
+	void SetListeners();
 
 	void InitInterfaceOption(void);
 	bool SaveInterfaceOption(void);
@@ -41,7 +45,7 @@ public:
 	bool IsDiffNetworkPort();
 
 	// 액션키 중복 확인
-	void OnActionKeySet(ZActionKey* pActionKey, int key);
+	void OnActionKeySet(class ZActionKey* pActionKey, int key);
 };
 
 

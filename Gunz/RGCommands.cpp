@@ -240,14 +240,21 @@ void LoadRGCommands(ZChatCmdManager& CmdManager)
 	}, CCF_ALL, 2, 2, true, "/resolution <width> <height>", "");
 
 	CmdManager.AddCommand(0, "sensitivity", [](const char *line, int argc, char ** const argv) {
-		float fSens = atof(argv[1]);
+		if (argc == 1)
+		{
+			ZChatOutputF("Your sensitivity is %f", ZGetConfiguration()->GetMouse()->fSensitivity);
+		}
+		else
+		{
+			float fSens = atof(argv[1]);
 
-		ZGetConfiguration()->GetMouse()->fSensitivity = fSens;
+			ZGetConfiguration()->GetMouse()->fSensitivity = fSens;
 
-		ZGetConfiguration()->Save();
+			ZGetConfiguration()->Save();
 
-		ZChatOutputF("Sensitivity set to %f", fSens);
-	}, CCF_ALL, 1, 1, true, "/sensitivity <value>", "");
+			ZChatOutputF("Sensitivity set to %f", fSens);
+		}
+	}, CCF_ALL, 0, 1, true, "/sensitivity [value]", "");
 
 	CmdManager.AddAlias("sens", "sensitivity");
 
