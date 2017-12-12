@@ -324,7 +324,7 @@ void LoadRGCommands(ZChatCmdManager& CmdManager)
 		CCF_ALL, 0, 0, true, "/clear", "");
 
 	CmdManager.AddCommand(0, "fov", [](const char *line, int argc, char ** const argv) {
-#ifndef ENABLE_FOV_COMMAND
+#ifndef ENABLE_FOV_OPTION
 		if (!CheckDeveloperMode("fov"))
 			return;
 #endif

@@ -538,6 +538,13 @@ void ZOptionInterface::InitInterfaceOption(void)
 			if (Widget)
 				Widget->SetSelIndex(ComboBoxInfo.second);
 		}
+
+#ifndef ENABLE_FOV_OPTION
+		if (auto&& Widget = ZFindWidget("FOVOption"))
+		{
+			Widget->Enable(false);
+		}
+#endif
 	}
 
 	//mlog("ZGameInterface::InitInterfaceOption ok\n");
@@ -947,8 +954,10 @@ bool ZOptionInterface::SaveInterfaceOption(void)
 
 		using SetEditFunction = void(*)(const char*);
 		std::pair<const char*, SetEditFunction> Edits[] = {
+#ifndef ENABLE_FOV_OPTION
 			{ "FOVOption",      [](const char* Value) {
 				ZGetConfiguration()->FOV = atof(Value); } },
+#endif
 			{ "ChatFontOption", [](const char* Value) {
 				ZGetConfiguration()->GetChat()->Font = Value; } },
 			{ "ChatFontSizeOption", [](const char* Value) {
@@ -997,7 +1006,9 @@ bool ZOptionInterface::SaveInterfaceOption(void)
 
 		GetRGMain().GetChat().SetBackgroundColor(Cfg.GetChat()->BackgroundColor);
 
+#ifndef ENABLE_FOV_OPTION
 		g_fFOV = ToRadian(Cfg.FOV);
+#endif
 	}
 
 	{

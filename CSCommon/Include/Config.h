@@ -71,8 +71,8 @@
 // as numbers on top of the health gauges in the UI
 #define DRAW_HPAP_NUMBERS
 
-// Controls whether the /fov command is usable (outside of dev mode).
-#define ENABLE_FOV_COMMAND
+// Controls whether FOV can be changed (outside of debug mode).
+#define ENABLE_FOV_OPTION
 
 // Controls whether clans can be created with no sponsors.
 #define SOLO_CLAN_CREATION
