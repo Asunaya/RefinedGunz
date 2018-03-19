@@ -5,6 +5,7 @@
 namespace LauncherConfig
 {
 
+constexpr char ApplicationName[] = "Refined Gunz Launcher";
 constexpr char LauncherFilename[] = "launcher.exe";
 constexpr char PatchDomain[] = "http://refinedgunz.com";
 constexpr u16 PatchPort = 80; // 80 is the default http port.

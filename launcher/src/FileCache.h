@@ -37,16 +37,33 @@ struct CachedFileData
 	char Hash[Hash::Strong::MinimumStringSize];
 };
 
+struct FileQueryResult
+{
+	enum {
+		Found,
+		NotFound,
+		Outdated,
+		Error,
+	} Result;
+	const CachedFileData* FileData;
+};
+
 struct FileCacheType
 {
 	bool Load()
 	{
 		auto CacheFilename = "launcher_cache.xml";
 
+		if (!MFile::Exists(CacheFilename))
+		{
+			Log.Info("Cache does not exist\n");
+			return true;
+		}
+
 		XMLFile xml;
 		if (!xml.CreateFromFile(CacheFilename))
 		{
-			Log(LogLevel::Error, "Failed to read and parse %s!\n", CacheFilename);
+			Log.Error("Failed to read and parse %s!\n", CacheFilename);
 			return false;
 		}
 
@@ -69,7 +86,7 @@ struct FileCacheType
 			strcpy_safe(NewFile.Hash, Hash);
 			Map.emplace(Filename, NewFile);
 
-			Log(LogLevel::Debug, "Mapped %.*s to {Size: %llu, LastModifiedTime: %llu, Hash: %s}\n",
+			LOG_DEBUG("Mapped %.*s to {Size: %llu, LastModifiedTime: %llu, Hash: %s}\n",
 				Filename.size(), Filename.data(), NewFile.Size, NewFile.LastModifiedTime, NewFile.Hash);
 		}
 
@@ -97,13 +114,13 @@ struct FileCacheType
 			doc.append_node(&node);
 		}
 
-		const char Filename[] = "launcher_cache.xml";
+		auto&& Filename = "launcher_cache.xml";
 
 		MFile::RWFile File{ Filename, MFile::ClearExistingContents };
 
 		if (File.error())
 		{
-			Log(LogLevel::Error, "Failed to open file %s for writing cache\n", Filename);
+			Log.Error("Failed to open file %s for writing cache\n", Filename);
 			return false;
 		}
 
@@ -111,33 +128,36 @@ struct FileCacheType
 
 		if (File.error())
 		{
-			Log(LogLevel::Error, "Failed to write cache to %s\n", Filename);
+			Log.Error("Failed to write cache to %s\n", Filename);
 			return false;
 		}
 
-		Log(LogLevel::Info, "Saving cache to %s succeeded!\n", Filename);
+		Log.Info("Saved file cache to %s\n", Filename);
 
 		return true;
 	}
 
-	// Returns the cached hash of the file, or an empty string if not found or on error.
-	StringView GetHash(const char* Path)
+	FileQueryResult GetCachedFileData(const char* Path) const
 	{
 		auto it = Map.find(Path);
 		if (it == Map.end())
-			return{};
+			return {FileQueryResult::NotFound};
 
-		CachedFileData Data;
-		if (!GetFileSizeAndTime(Data, Path))
-			return{};
+		auto& CachedData = it->second;
 
-		if (!ConfirmUnchangedFileSizeAndTime(Path, it->second))
+		CachedFileData CurrentData;
+		if (!GetFileSizeAndTime(CurrentData, Path))
+			return {FileQueryResult::Error};
+
+		bool Unchanged = CachedData.LastModifiedTime == CurrentData.LastModifiedTime &&
+			CachedData.Size == CurrentData.Size;
+
+		if (!Unchanged)
 		{
-			Log(LogLevel::Debug, "FileCache::GetHash -- %s changed\n", Path);
-			return{};
+			return {FileQueryResult::Outdated};
 		}
 
-		return it->second.Hash;
+		return {FileQueryResult::Found, &CachedData};
 	}
 
 	// Note: The Path pointer is saved in the map, so the caller is responsible for
@@ -160,13 +180,16 @@ struct FileCacheType
 	}
 
 private:
-	bool GetFileSizeAndTime(CachedFileData& Output, const char* Path)
+	static bool GetFileSizeAndTime(CachedFileData& Output, const char* Path)
 	{
 		auto MaybeResult = MFile::GetAttributes(Path);
 
 		if (!MaybeResult.has_value())
 		{
-			Log(LogLevel::Error, "MFile::GetAttributes on %s failed!\n", Path);
+			if (MFile::Exists(Path))
+			{
+				Log(LogLevel::Error, "MFile::GetAttributes on %s failed!\n", Path);
+			}
 			return false;
 		}
 
@@ -178,14 +201,14 @@ private:
 		return true;
 	}
 
-	bool ConfirmUnchangedFileSizeAndTime(const char* Path, const CachedFileData& CachedData)
+	bool ConfirmUnchangedFileSizeAndTime(const char* Path, const CachedFileData& CachedData) const
 	{
 		CachedFileData CurrentData;
 
 		if (!GetFileSizeAndTime(CurrentData, Path))
 			return false;
 
-		Log(LogLevel::Debug, "Cur.Size = %llu, Cur.LastModifiedTime = %llu\n"
+		LOG_DEBUG("Cur.Size = %llu, Cur.LastModifiedTime = %llu\n"
 			"Last.Size = %llu, Last.LastModifiedTime = %llu\n",
 			CurrentData.Size, CurrentData.LastModifiedTime,
 			CachedData.Size, CachedData.LastModifiedTime);
@@ -200,7 +223,7 @@ private:
 	// contained within the launcher_cache.xml string.
 	// The lifetimes of paths inserted by calling FileCache::Add are tracked by
 	// the caller.
-	using MapType = std::unordered_map<StringView, CachedFileData, StringHasher>;
+	using MapType = std::unordered_map<StringView, CachedFileData>;
 	MapType Map;
 
 	// Tracks whether the map was changed.

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "GlobalTypes.h"
 #include "StringView.h"
 #include "MUtil.h"
 #include "optional.h"
@@ -14,6 +15,7 @@ constexpr size_t MaxPath = 260;
 bool Exists(const char* Path);
 bool Delete(const char* Path);
 bool Move(const char* OldPath, const char* NewPath);
+optional<u64> Size(const char* Path);
 
 // Returns true if the path is an existing file.
 bool IsFile(const char* Path);
@@ -142,6 +144,8 @@ struct File
 	// (i.e. anything that is not a class with non-trivial constructors or
 	// assignment operators).
 	size_t read(void* buffer, size_t size);
+
+	bool flush();
 
 	// Returns true if the file is at the end.
 	bool eof() const;

@@ -1,207 +1,215 @@
-#include "Patch.h"
-#include "Log.h"
-#include "XML.h"
-#include "Download.h"
-#include "FileCache.h"
-#include "StringAllocator.h"
-#include "SelfUpdate.h"
-#include "LauncherConfig.h"
+#include <imgui.h>
+#include "imgui_impl_dx9.h"
 
+#include "MUtil.h"
 #include "defer.h"
-#include "SafeString.h"
-#include "MDebug.h"
-#include "MProcess.h"
-#include "MFile.h"
-#include "Hash.h"
-#include "StringView.h"
-#include "ArrayView.h"
 
-#include <thread>
-#include <chrono>
-#include <string>
-#include <vector>
+#include "GUI.h"
+#include "Log.h"
+#include "LauncherConfig.h"
+#include "Patch.h"
 
-using namespace std::chrono_literals;
-using namespace std::string_literals;
+#define WIN32_LEAN_AND_MEAN
+#include <d3d9.h>
+#define DIRECTINPUT_VERSION 0x0800
+#include <dinput.h>
+#include <tchar.h>
 
-// Deletes any temporary files left over from a previous run of the program.
-static void DeleteResidualTemporaryFiles()
+namespace launcher_main
 {
-	// launcher_new.exe should not normally exist at this point, but if it does, delete it anyway.
-	if (MFile::Exists("launcher_new.exe"))
-	{
-		Log(LogLevel::Debug, "Deleting launcher_new.exe\n");
-
-		if (!MFile::Delete("launcher_new.exe"))
-			Log(LogLevel::Error, "DeleteFile failed on launcher_new.exe!\n");
-	}
-	
-	if (MFile::Exists("launcher_old.exe"))
-	{
-		// Sleep so that the old launcher instance has a chance to close.
-		std::this_thread::sleep_for(100ms);
-
-		Log(LogLevel::Debug, "Deleting launcher_old.exe\n");
-
-		if (!MFile::Delete("launcher_old.exe"))
-			Log(LogLevel::Error, "DeleteFile failed on launcher_old.exe!\n");
-	}
+static LPDIRECT3DDEVICE9 g_pd3dDevice;
+static D3DPRESENT_PARAMETERS g_d3dpp;
 }
 
-static void PatchFiles(XMLFile& xml, rapidxml::xml_node<>& ParentNode,
-	DownloadManagerType& DownloadManager, FileCacheType& FileCache)
+LRESULT ImGui_ImplDX9_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	for (auto&& node : GetFileNodeRange(ParentNode))
+	if (ImGui_ImplDX9_WndProcHandler(hWnd, msg, wParam, lParam))
+		return true;
+
+	switch (msg)
 	{
-		auto Filename = xml.GetName(node);
-		if (Filename.empty() || Filename == LauncherConfig::LauncherFilename)
-			continue;
-
-		auto ExpectedHash = xml.GetHash(node, Filename);
-		auto ExpectedSize = xml.GetSize(node, Filename);
-		if (ExpectedHash.empty() || !ExpectedSize.has_value())
-			continue;
-
-		auto ret = PatchFile(DownloadManager,
-			Filename.data(), Filename.data(),
-			ExpectedHash, ExpectedSize.value(),
-			FileCache,
-			node);
-
-		Log(LogLevel::Debug, "PatchFile on %s returned Succeeded = %d, FileChanged = %d\n",
-			Filename.data(), ret.Succeeded, ret.FileChanged);
-	}
-}
-
-struct Options
-{
-	bool IgnoreSelfUpdate{};
-};
-
-static bool HandleArguments(Options& Opt, int argc, char** argv)
-{
-	// Start i at 1 because argv[0] is the program name.
-	for (int i = 1; i < argc; ++i)
-	{
-		static constexpr char VerbosityOpt[] = "--verbosity=";
-		static constexpr char IgnoreSelfUpdateOpt[] = "--ignore-self-update";
-
-		auto Check = [&](auto&& String) {
-			return strncmp(argv[i], String, strlen(String)) == 0;
-		};
-
-		if (Check(VerbosityOpt))
+	case WM_SIZE:
+		if (launcher_main::g_pd3dDevice != NULL && wParam != SIZE_MINIMIZED)
 		{
-			auto MaybeVerbosity = StringToInt<int>(argv[i] + strlen(VerbosityOpt));
-			if (!MaybeVerbosity.has_value())
-			{
-				Log.Fatal("Invalid --verbosity option value. "
-					"Expected integral value, got %s\n",
-					argv[i]);
-				return false;
-			}
-
-			auto Verbosity = MaybeVerbosity.value();
-			Log.DebugVerbosity = Verbosity;
+			ImGui_ImplDX9_InvalidateDeviceObjects();
+			launcher_main::g_d3dpp.BackBufferWidth = LOWORD(lParam);
+			launcher_main::g_d3dpp.BackBufferHeight = HIWORD(lParam);
+			HRESULT hr = launcher_main::g_pd3dDevice->Reset(&launcher_main::g_d3dpp);
+			if (hr == D3DERR_INVALIDCALL)
+				IM_ASSERT(0);
+			ImGui_ImplDX9_CreateDeviceObjects();
 		}
-		else if (Check(IgnoreSelfUpdateOpt))
-		{
-			Opt.IgnoreSelfUpdate = true;
-		}
-		else
-		{
-			Log.Fatal("Unknown option %s\n", argv[i]);
-			return false;
-		}
-	}
-
-	return true;
-}
-
-int main(int argc, char** argv)
-{
-	// Add a three-second delay before closing the console window 
-	// so that users can actually read the final output.
-	// Can be disabled by setting ShouldSleep to false, in order to exit instantly.
-	bool ShouldSleep = true;
-	auto OnExit = [&] {
-#ifndef _DEBUG
-		if (ShouldSleep)
-			std::this_thread::sleep_for(3s);
-#else
-		Log(LogLevel::Debug, "Enter anything to end the program\n");
-		getchar();
-#endif
-	};
-	DEFER(OnExit);
-
-	Log.InitFile("launcher_log.txt");
-
-	Options Opt;
-	if (!HandleArguments(Opt, argc, argv))
-		return -1;
-
-	auto DownloadManager = CreateDownloadManager();
-	if (!DownloadManager)
-	{
-		Log(LogLevel::Fatal, "Failed to initialize download manager!\n");
-		return -1;
-	}
-
-	Log(LogLevel::Debug, "Created download manager!\n");
-
-	DeleteResidualTemporaryFiles();
-
-	// The patch.xml file's memory must be in scope for the rest of the program,
-	// since references to parts of it are retained in many places.
-	XMLFile PatchXML;
-	if (!GetPatchXML(PatchXML, DownloadManager))
-		return -1;
-
-	// Load the file cache.
-	FileCacheType FileCache;
-	FileCache.Load();
-
-	// Find the <files> node.
-	auto* files = PatchXML.Doc.first_node("files");
-	if (!files)
-	{
-		Log(LogLevel::Fatal, "Failed to find files node in patch.xml!\n");
-		return false;
-	}
-
-	// Self-update.
-	if (!Opt.IgnoreSelfUpdate)
-	{
-		auto SelfUpdateResult = SelfUpdate(DownloadManager, PatchXML, *files, FileCache);
-
-		switch (SelfUpdateResult)
-		{
-		case SelfUpdateResultType::Updated:
-			Log(LogLevel::Info, "Self-updated! Starting new launcher and terminating\n");
-			// Exit immediately.
-			ShouldSleep = false;
+		return 0;
+	case WM_SYSCOMMAND:
+		if ((wParam & 0xfff0) == SC_KEYMENU) // Disable ALT application menu
 			return 0;
+		break;
+	case WM_DESTROY:
+		PostQuitMessage(0);
+		return 0;
+	}
+	return DefWindowProc(hWnd, msg, wParam, lParam);
+}
 
-		case SelfUpdateResultType::NoUpdateAvailable:
-			Log(LogLevel::Info, "No self-update available\n");
-			break;
-
-		case SelfUpdateResultType::Failed:
-			Log(LogLevel::Fatal, "Can't self-update!\n");
-			return -1;
-		}
+int PASCAL WinMain(HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline, int cmdshow)
+{
+	auto&& AppName = LauncherConfig::ApplicationName;
+	auto MsgBox = [&](const char* Msg) {
+		MessageBoxA(0, Msg, AppName, 0);
+	};
+	if (!Log.InitFile("launcher_log.txt"))
+	{
+		auto&& Msg = "Failed to open log file launcher_log.txt. Logging will be disabled.";
+		MsgBox(Msg);
+		fputs(Msg, stderr);
 	}
 
-	PatchFiles(PatchXML, *files, DownloadManager, FileCache);
+	auto Fatal = [&](const char* Msg) {
+		Log.Fatal("%s\n", Msg);
+		MsgBox(Msg);
+	};
 
-	FileCache.Save();
+	struct {
+		auto size() const { return __argc; }
+		auto operator[](size_t i) const { return StringView{__argv[i]}; }
+	} Args;
+	Options Opt;
+	auto ArgRes = HandleArguments(Opt, Args);
+	if (!ArgRes.Success)
+	{
+		Fatal(("Invalid command line arguments: " + ArgRes.ErrorMessage).c_str());
+		return 1;
+	}
 
-#ifdef _DEBUG
-	Log(LogLevel::Debug, "Enter anything to start Gunz\n");
-	getchar();
-#endif
+	WNDCLASSEX wc = {sizeof(WNDCLASSEX), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(NULL), NULL,
+		LoadCursor(NULL, IDC_ARROW), NULL, NULL, AppName, NULL};
+	RegisterClassEx(&wc);
+	HWND hwnd = CreateWindow(AppName, AppName, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,
+		600, 150, NULL, NULL, wc.hInstance, NULL);
 
-	Log(LogLevel::Info, "Starting Gunz...\n");
-	MProcess::Start("Gunz.exe");
+	DEFER([&] { UnregisterClass(AppName, wc.hInstance); });
+
+	if (!hwnd)
+	{
+		Fatal("Failed to create window!");
+		return 1;
+	}
+
+	auto d3d9_dll = LoadLibrary("d3d9.dll");
+
+	if (!d3d9_dll)
+	{
+		Fatal("Couldn't load d3d9.dll");
+		return 1;
+	}
+
+	DEFER([&] { FreeLibrary(d3d9_dll); });
+
+	using D3DCreateType = IDirect3D9* (__stdcall *)(UINT);
+	auto D3DCreatePtr = GetProcAddress(d3d9_dll, "Direct3DCreate9");
+	auto D3DCreateFunc = reinterpret_cast<D3DCreateType>(D3DCreatePtr);
+
+	if (!D3DCreateFunc)
+	{
+		Fatal("Couldn't get address of Direct3DCreate9");
+		return 1;
+	}
+
+	auto D3D = D3DPtr<IDirect3D9>{D3DCreateFunc(D3D_SDK_VERSION)};
+
+	if (!D3D)
+	{
+		Fatal("Direct3DCreate9 failed");
+		return 1;
+	}
+
+	auto& Device = launcher_main::g_pd3dDevice;
+	auto& pp = launcher_main::g_d3dpp;
+
+	pp.Windowed = TRUE;
+	pp.SwapEffect = D3DSWAPEFFECT_DISCARD;
+	pp.BackBufferFormat = D3DFMT_UNKNOWN;
+	pp.EnableAutoDepthStencil = TRUE;
+	pp.AutoDepthStencilFormat = D3DFMT_D16;
+	pp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
+
+	if (D3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hwnd,
+		D3DCREATE_HARDWARE_VERTEXPROCESSING, &pp, &Device) < 0)
+	{
+		Fatal("Failed to create D3D device");
+		return 1;
+	}
+
+	DEFER([&] { SafeRelease(Device); });
+
+	// Setup ImGui binding
+	ImGui_ImplDX9_Init(hwnd, Device);
+
+	ImGui::GetIO().Fonts->AddFontFromFileTTF(R"(c:\Windows\Fonts\consola.ttf)", 18.0f, NULL);
+	ImGui::GetIO().Fonts->AddFontFromFileTTF(R"(c:\Windows\Fonts\arial.ttf)", 18.0f, NULL);
+
+	ImGui::GetIO().IniFilename = nullptr;
+
+	PatchInternalState PatchState;
+	std::thread{[&] { Patch(PatchState, Opt); }}.detach();
+
+	GUIState State;
+
+	// Main loop
+	MSG msg{};
+	ShowWindow(hwnd, SW_SHOWDEFAULT);
+	UpdateWindow(hwnd);
+	while (msg.message != WM_QUIT)
+	{
+		if (PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE))
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+			continue;
+		}
+		ImGui_ImplDX9_NewFrame();
+
+		RECT Rect;
+		GetClientRect(hwnd, &Rect);
+		ImVec2 WindowSize{float(Rect.right - Rect.left),
+			float(Rect.bottom - Rect.top)};
+		auto Res = Render(State, PatchState.Load(), WindowSize);
+		if (Res.ShouldExit)
+		{
+			break;
+		}
+
+		// Rendering
+		Device->SetRenderState(D3DRS_ZENABLE, false);
+		Device->SetRenderState(D3DRS_ALPHABLENDENABLE, false);
+		Device->SetRenderState(D3DRS_SCISSORTESTENABLE, false);
+		ImVec4 clear_col = ImColor(114, 144, 154);
+		D3DCOLOR clear_col_dx = D3DCOLOR_RGBA(
+			int(clear_col.x*255.0f),
+			int(clear_col.y*255.0f),
+			int(clear_col.z*255.0f),
+			int(clear_col.w*255.0f)
+		);
+		Device->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, clear_col_dx, 1.0f, 0);
+		if (Device->BeginScene() >= 0)
+		{
+			ImGui::Render();
+			Device->EndScene();
+		}
+		Device->Present(NULL, NULL, NULL, NULL);
+	}
+
+	ImGui_ImplDX9_Shutdown();
+
+	if (msg.message == WM_QUIT)
+	{
+		Log.Info("Exiting due to WM_QUIT message\n");
+	}
+	else
+	{
+		Log.Info("Exiting due to Render request\n");
+	}
+
+	return 0;
 }

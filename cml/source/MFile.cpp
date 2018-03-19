@@ -11,6 +11,14 @@
 namespace MFile
 {
 
+optional<u64> Size(const char* Path)
+{
+	auto Attr = MFile::GetAttributes(Path);
+	if (!Attr)
+		return nullopt;
+	return Attr->Size;
+}
+
 #ifdef _WIN32
 
 bool Exists(const char* Path)
@@ -264,6 +272,15 @@ size_t File::read(void* buffer, size_t size)
 	}
 
 	return fread_ret;
+}
+
+bool File::flush()
+{
+	auto fflush_ret = fflush(fp());
+	state.error = fflush_ret == EOF;
+	if (state.error)
+		clearerr(fp());
+	return !state.error;
 }
 
 bool File::eof() const

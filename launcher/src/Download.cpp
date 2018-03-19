@@ -94,7 +94,7 @@ static CURL* CreateCurl()
 {
 	auto res = curl_global_init(CURL_GLOBAL_DEFAULT);
 	if (res != CURLE_OK)
-		return false;
+		return nullptr;
 	return curl_easy_init();
 }
 
@@ -118,15 +118,7 @@ void DownloadManagerDeleter::operator()(void* curl) const
 struct CurlWriteData
 {
 	CURL* curl;
-
 	const std::function<DownloadCallbackType>& Callback;
-
-	// Null if no hash was requested.
-	crypto_generichash_blake2b_state* HashState;
-
-	// Null if no size was requested.
-	u64* SizeOutput;
-
 	DownloadInfoContext Context;
 };
 
@@ -138,21 +130,19 @@ extern "C" static size_t CurlWriteFunction(void* buffer, size_t size, size_t nme
 
 	const auto total_size = size * nmemb;
 
-	if (Data.HashState)
-	{
-		crypto_generichash_blake2b_update(Data.HashState,
-			reinterpret_cast<const unsigned char*>(buffer), total_size);
-	}
-
-	if (Data.SizeOutput)
-	{
-		*Data.SizeOutput += total_size;
-	}
-
 	DownloadInfo Info{ &Data.Context };
 	auto CallbackRet = Data.Callback(static_cast<const u8*>(buffer), total_size, Info);
 
 	return CallbackRet ? total_size : 0;
+}
+
+extern "C" static int CurlProgressFunction(void *clientp,
+	curl_off_t dltotal, curl_off_t dlnow,
+	curl_off_t ultotal, curl_off_t ulnow)
+{
+	auto&& ProgressFunction = *static_cast<std::function<ProgressCallbackType>*>(clientp);
+	ProgressFunction(size_t(dltotal), size_t(dlnow));
+	return 0;
 }
 
 static bool SetProtocol(ProtocolType& Protocol, const char* URL)
@@ -180,36 +170,40 @@ bool DownloadFile(const DownloadManagerType& DownloadManager,
 	const char* URL,
 	int Port,
 	const std::function<DownloadCallbackType>& Callback,
+	const std::function<ProgressCallbackType>& ProgressCallback,
 	const char* Range,
-	Hash::Strong* HashOutput,
-	u64* SizeOutput)
+	DownloadError* ErrorOutput)
 {
-	crypto_generichash_blake2b_state state;
-	if (HashOutput)
-	{
-		crypto_generichash_blake2b_init(&state,
-			nullptr, 0, // Key
-			sizeof(HashOutput->Value));
-	}
+	using namespace std::literals;
 
-	if (SizeOutput)
-		*SizeOutput = 0;
+	static_assert(DownloadError::Size >= CURL_ERROR_SIZE, "DownloadError::Size too small");
+	
+	auto FormatError = [&](const char* Format, ...)
+	{
+		constexpr auto Size = DownloadError::Size;
+		char Buf[Size];
+		auto Dest = ErrorOutput ? ErrorOutput->String : Buf;
+		va_list va;
+		va_start(va, Format);
+		vsprintf_safe(Dest, Size, Format, va);
+		va_end(va);
+		Log.Error("%s\n", Dest);
+	};
 
 	const auto curl = DownloadManager.get();
 
-	auto* pstate = HashOutput != nullptr ? &state : nullptr;
-	CurlWriteData WriteData{ curl, Callback, pstate, SizeOutput };
+	CurlWriteData WriteData{ curl, Callback };
 	WriteData.Context.curl = curl;
 	WriteData.Context.Range = Range;
 	if (!SetProtocol(WriteData.Context.Protocol, URL))
 	{
-		Log.Error("Unrecognized protocol in URL %s\n", URL);
+		FormatError("Unrecognized protocol in URL \"%s\"", URL);
 		return false;
 	}
 
 	if (!curl)
 	{
-		Log.Fatal("curl is dead! can't download files\n");
+		FormatError("Curl is dead! Can't download files");
 		return false;
 	}
 
@@ -229,66 +223,51 @@ bool DownloadFile(const DownloadManagerType& DownloadManager,
 	curl_easy_setopt_v(curl, CURLOPT_WRITEFUNCTION, CurlWriteFunction);
 	curl_easy_setopt_v(curl, CURLOPT_WRITEDATA, &WriteData);
 	curl_easy_setopt_v(curl, CURLOPT_RANGE, Range);
+
 	// Make curl return CURLE_HTTP_RETURNED_ERROR on HTTP response >= 400.
 	curl_easy_setopt_v(curl, CURLOPT_FAILONERROR, 1l);
 
-	const auto res = curl_easy_perform(curl);
+	curl_easy_setopt_v(curl, CURLOPT_ERRORBUFFER, ErrorOutput ? ErrorOutput->String : nullptr);
 
-	if (HashOutput)
+	if (ProgressCallback)
 	{
-		crypto_generichash_blake2b_final(&state, HashOutput->Value, sizeof(HashOutput->Value));
+		curl_easy_setopt_v(curl, CURLOPT_XFERINFOFUNCTION, CurlProgressFunction);
+		curl_easy_setopt_v(curl, CURLOPT_XFERINFODATA, &ProgressCallback);
+		curl_easy_setopt_v(curl, CURLOPT_NOPROGRESS, 0l);
 	}
+	else
+	{
+		curl_easy_setopt_v(curl, CURLOPT_XFERINFOFUNCTION, nullptr);
+		curl_easy_setopt_v(curl, CURLOPT_XFERINFODATA, nullptr);
+		curl_easy_setopt_v(curl, CURLOPT_NOPROGRESS, 1l);
+	}
+
+	const auto res = curl_easy_perform(curl);
 
 	if (res != CURLE_OK)
 	{
-		if (res == CURLE_HTTP_RETURNED_ERROR)
+		if (ErrorOutput)
 		{
-			const int ResponseCode = GetCurlResponseCode(curl);
-			Log.Error("Received HTTP error code %d when trying to download from URL %s\n",
-				ResponseCode, URL);
+			Log.Error("Curl error: %s\n", ErrorOutput->String);
 		}
 		else
 		{
-			Log.Error("Curl error! Code = %d, message = \"%s\".\n",
-				res, curl_easy_strerror(res));
+			if (res == CURLE_HTTP_RETURNED_ERROR)
+			{
+				const int ResponseCode = GetCurlResponseCode(curl);
+				FormatError("Received HTTP error code %d when trying to "
+					"download from URL %s",
+					ResponseCode, URL);
+			}
+			else
+			{
+				FormatError("Curl error! Code = %d, message = \"%s\"",
+					res, curl_easy_strerror(res));
+			}
 		}
 
 		return false;
 	}
 
 	return true;
-}
-
-bool DownloadFileToFile(const DownloadManagerType& DownloadManager,
-	const char* URL,
-	int Port,
-	const char* OutputPath,
-	const char* Range,
-	Hash::Strong* HashOutput,
-	u64* SizeOutput)
-{
-	MFile::RWFile File{ OutputPath, MFile::ClearExistingContents };
-	if (File.error())
-	{
-		Log(LogLevel::Error, "Couldn't open file %s for writing\n", OutputPath);
-		return false;
-	}
-
-	const auto Callback = [&](const void* Buffer, size_t Size, DownloadInfo&)
-	{
-		auto ret = File.write(Buffer, Size);
-		return ret == Size;
-	};
-	
-	const auto DownloadSuccess = DownloadFile(DownloadManager,
-		URL,
-		Port,
-		std::ref(Callback),
-		nullptr,
-		HashOutput,
-		SizeOutput);
-
-	const auto WriteSuccess = !File.error();
-
-	return DownloadSuccess && WriteSuccess;
 }

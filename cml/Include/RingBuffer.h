@@ -46,10 +46,25 @@ template <typename T, size_t N>
 struct RingBuffer
 {
 	RingBuffer() = default;
+	RingBuffer(const RingBuffer& Src)
+	{
+		copy(Src);
+	}
+	RingBuffer& operator=(const RingBuffer& Src)
+	{
+		copy(Src);
+	}
+	RingBuffer(RingBuffer&& Src)
+	{
+		move(std::move(Src));
+	}
+	RingBuffer& operator=(RingBuffer&& Src)
+	{
+		move(std::move(Src));
+	}
 	~RingBuffer()
 	{
-		for (auto&& x : *this)
-			x.~T();
+		destroy();
 	}
 
 	using CursorType = RingBufferCursorType<T, N>;
@@ -66,9 +81,26 @@ struct RingBuffer
 
 	template <typename... ArgsType>
 	void emplace_back(ArgsType&&... Args) {
-		new (get(0)) T{ std::forward<ArgsType>(Args)... };
-		Cursor = (Cursor + 1) % N;
-		Size = (std::min)(Size + 1, N);
+		if (Size == N)
+		{
+			new (get(0)) T{std::forward<ArgsType>(Args)...};
+			Cursor = (Cursor + 1) % N;
+		}
+		else
+		{
+			new (get(Size)) T{std::forward<ArgsType>(Args)...};
+			++Size;
+		}
+	}
+
+	void push_back(const T& Src) { emplace_back(Src); }
+	void push_back(T&& Src) { emplace_back(std::move(Src)); }
+
+	void clear()
+	{
+		destroy();
+		Size = 0;
+		Cursor = 0;
 	}
 
 	auto begin() { return RingIterator<T, N>{ *this, 0 }; }
@@ -76,7 +108,16 @@ struct RingBuffer
 	auto begin() const { return RingIterator<T, N>{ *this, 0 }; }
 	auto end() const { return RingIterator<T, N>{ *this, Size }; }
 
+	auto& front() { return *begin(); }
+	auto& front() const { return *begin(); }
+	auto& back() { return *std::prev(end());; }
+	auto& back() const { return *std::prev(end()); }
+
 	size_t size() const { return Size; }
+
+	auto empty() const { return size() == 0; }
+
+	constexpr auto max_size() const { return N; }
 
 private:
 	const T* get(size_t i) const {
@@ -89,7 +130,37 @@ private:
 		return const_cast<T*>(ptr);
 	}
 
-	alignas(T) char buf[sizeof(T) * N];
+	void copy(const RingBuffer& Src)
+	{
+		Cursor = Src.Cursor;
+		Size = Src.Size;
+		size_t i = 0;
+		for (auto&& x : Src)
+		{
+			new (get(i)) T{x};
+			++i;
+		}
+	}
+
+	void move(RingBuffer&& Src)
+	{
+		Cursor = Src.Cursor;
+		Size = Src.Size;
+		size_t i = 0;
+		for (auto&& x : Src)
+		{
+			new (get(i)) T{std::move(x)};
+			++i;
+		}
+	}
+
+	void destroy()
+	{
+		for (auto&& x : *this)
+			x.~T();
+	}
+
+	alignas(T) unsigned char buf[sizeof(T) * N];
 	CursorType Cursor{};
 	size_t Size{};
 };

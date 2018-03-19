@@ -3,6 +3,7 @@
 #include "GlobalTypes.h"
 #include "StringView.h"
 #include <cctype>
+#include <functional>
 
 inline size_t HashFNV(const void* Memory, size_t Length)
 {
@@ -118,3 +119,9 @@ struct PathComparer {
 		return true;
 	}
 };
+
+namespace std
+{
+template <typename T>
+struct hash<BasicStringView<T>> : StringHasher {};
+}

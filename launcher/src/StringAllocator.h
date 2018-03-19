@@ -7,16 +7,17 @@
 
 inline ArrayView<char> AllocateString(size_t Size)
 {
-	static std::vector<std::unique_ptr<char[]>> Strings;
-
-	Strings.emplace_back(std::make_unique<char[]>(Size));
-	return{ Strings.back().get(), Size };
+	using PtrType = std::unique_ptr<char[]>;
+	thread_local std::vector<PtrType> Strings;
+	auto Ptr = PtrType{new char[Size]};
+	Strings.emplace_back(std::move(Ptr));
+	return { Strings.back().get(), Size };
 }
 
 inline StringView AllocateString(const StringView& Src)
 {
-	const auto Size = Src.size();
+	const auto Size = Src.size() + 1;
 	auto String = AllocateString(Size);
-	strcpy_safe(String, Src);
-	return{ String.data(), String.size() };
+	memcpy(String.data(), Src.data(), Size);
+	return { String.data(), Src.size() };
 }

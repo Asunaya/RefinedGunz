@@ -50,13 +50,13 @@ struct XMLFile
 
 		if (!ReadFile(FileData, Path))
 		{
-			Log(LogLevel::Error, "Failed to read \"%s\"!\n", Path);
+			Log.Error("Failed to read \"%s\"!\n", Path);
 			return false;
 		}
 
 		if (!TryParseXML(Doc, Path, reinterpret_cast<char*>(&FileData[0]), FileData.size()))
 		{
-			Log(LogLevel::Error, "Failed to parse \"%s\"!\n", Path);
+			Log.Error("Failed to parse \"%s\"!\n", Path);
 			return false;
 		}
 
@@ -78,7 +78,9 @@ struct XMLFile
 			return true;
 		};
 
-		auto DownloadSuccess = DownloadFile(DownloadManager, URL, LauncherConfig::PatchPort, std::ref(Callback));
+		DownloadError Error;
+		auto DownloadSuccess = DownloadFile(DownloadManager, URL, LauncherConfig::PatchPort,
+			std::ref(Callback), {}, nullptr, &Error);
 
 		if (!DownloadSuccess)
 		{

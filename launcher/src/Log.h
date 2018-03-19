@@ -6,6 +6,14 @@
 #include <cstdarg>
 #include <cassert>
 
+// This macro is here since MSVC does not seem willing to optimize out a normal call, even though
+// the first line of Logger::Debug is a return statement when _DEBUG is off.
+#ifdef _DEBUG
+#define LOG_DEBUG(...) Log.Debug(__VA_ARGS__)
+#else
+#define LOG_DEBUG(...) (void)0
+#endif
+
 enum class LogLevel
 {
 	Debug,
@@ -22,9 +30,9 @@ struct Logger
 	// 4 = tight loops
 	// 5 = very tight loops
 
-	void InitFile(const char* LogFilePath)
+	bool InitFile(const char* LogFilePath)
 	{
-		LogFile.open(LogFilePath, MFile::ClearExistingContents, MFile::Text);
+		return LogFile.open(LogFilePath, MFile::ClearExistingContents);
 	}
 
 #define LOGGER_LOG_FUNCTION(Level)\
@@ -44,6 +52,9 @@ struct Logger
 
 	void Debug(const char* Format, ...)
 	{
+#ifndef _DEBUG
+		return;
+#endif
 		va_list va;
 		va_start(va, Format);
 		DebugVA(0, Format, va);
@@ -52,6 +63,9 @@ struct Logger
 
 	void Debug(int MinimumDebugVerbosity, const char* Format, ...)
 	{
+#ifndef _DEBUG
+		return;
+#endif
 		va_list va;
 		va_start(va, Format);
 		DebugVA(MinimumDebugVerbosity, Format, va);
@@ -67,6 +81,18 @@ struct Logger
 	}
 
 	void LogVA(LogLevel Level, const char* Format, va_list va)
+	{
+#ifndef _DEBUG
+		if (Level == LogLevel::Debug)
+			return;
+#endif
+
+		char FormattedString[16 * 1024];
+		const auto FormattedStringLength = vsprintf_safe(FormattedString, Format, va);
+		NoFormat(Level, FormattedString, FormattedStringLength);
+	}
+
+	void NoFormat(LogLevel Level, char* String, int StringSize)
 	{
 #ifndef _DEBUG
 		if (Level == LogLevel::Debug)
@@ -92,37 +118,36 @@ struct Logger
 			}
 		}();
 
-		char FormattedString[16 * 1024];
-		const auto FormattedStringLength = vsprintf_safe(FormattedString, Format, va);
-
 		Print(Prefix);
-		
+
 		int LastNewline = -1;
-		for (int i = 0; i < FormattedStringLength; ++i)
+		for (int i = 0; i < StringSize; ++i)
 		{
-			if (FormattedString[i] != '\n' && i != FormattedStringLength - 1)
+			if (String[i] != '\n' && i != StringSize - 1)
 				continue;
 
 			auto StartIndex = LastNewline + 1;
 			auto Size = static_cast<size_t>(i - StartIndex);
-			auto StartPtr = &FormattedString[StartIndex];
-			
+			auto StartPtr = &String[StartIndex];
+
 			auto PrevEndChar = StartPtr[Size];
 			StartPtr[Size] = 0;
-			DEFER([&] { FormattedString[Size] = PrevEndChar; });
+			DEFER([&] { String[Size] = PrevEndChar; });
 
-			Print({ StartPtr, Size });
+			Print({StartPtr, Size});
 
 			if (PrevEndChar == '\n')
 				PrintNewline();
 
-			if (i == FormattedStringLength - 1)
+			if (i == StringSize - 1)
 				break;
 
 			Print(Prefix);
 
 			LastNewline = i;
 		}
+
+		LogFile.flush();
 	}
 
 private:
@@ -147,7 +172,12 @@ private:
 
 	void PrintNewline()
 	{
-		Print("\n");
+#ifdef _WIN32
+		auto Newline = "\r\n";
+#else
+		auto Newline = "\n";
+#endif
+		Print(Newline);
 	}
 
 	void DebugVA(int MinimumDebugVerbosity, const char* Format, va_list va)

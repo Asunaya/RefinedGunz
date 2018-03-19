@@ -17,6 +17,7 @@
 #include <stdarg.h>
 #include <cassert>
 #include <algorithm>
+#include <string>
 
 #pragma warning(push)
 #pragma warning(disable:4996)
@@ -144,9 +145,14 @@ inline char* strncat_safe(char(&Dest)[size], const char* Source, size_t Count)
 	return strncat_safe(Dest, size, Source, Count);
 }
 
+// If size is 0, returns the length of the formatted string (not including the null terminator).
 inline int vsprintf_safe(char *Dest, size_t size, const char* Format, va_list va)
 {
-	return (std::min)(vsnprintf(Dest, size, Format, va), int(size));
+	if (size == 0)
+	{
+		return vsnprintf(nullptr, 0, Format, va);
+	}
+	return (std::min)(vsnprintf(Dest, size, Format, va), int(size) - 1);
 }
 
 template <size_t size>
@@ -345,6 +351,30 @@ void itoa_safe(int val, char(&dest)[size], int radix)
 
 inline auto strcpy_unsafe(char* a, const char* b) {
 	return strcpy(a, b);
+}
+
+inline std::string vstrprintf(const char* Format, va_list va)
+{
+	va_list va2;
+	va_copy(va2, va);
+	auto Size = static_cast<size_t>(vsprintf_safe(nullptr, 0, Format, va2));
+	va_end(va2);
+	std::string Ret(Size, 0);
+	vsprintf_safe(&Ret[0], Size + 1, Format, va);
+	return Ret;
+}
+
+inline std::string strprintf(const char* Format, ...)
+{
+	va_list va;
+	va_start(va, Format);
+	auto Size = static_cast<size_t>(vsprintf_safe(nullptr, 0, Format, va));
+	va_end(va);
+	std::string Ret(Size, 0);
+	va_start(va, Format);
+	vsprintf_safe(&Ret[0], Size + 1, Format, va);
+	va_end(va);
+	return Ret;
 }
 
 #pragma warning(pop)

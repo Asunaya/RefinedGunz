@@ -6,6 +6,7 @@
 #include "Hash.h"
 #include "Sync.h"
 #include "Log.h"
+#include "File.h"
 
 #include <algorithm>
 #include <numeric>
@@ -163,8 +164,10 @@ static bool TestFile(const ArrayView<u8>& SrcFileContents,
 	u64 ActualSize;
 	Sync::BlockCounts Counts;
 
-	TestAssert(Sync::SynchronizeFile(DestFilePath, nullptr, SrcURL, SyncURL, SrcFileContents.size(),
-		DownloadManager, &ActualHash, &ActualSize, &Counts));
+	static Sync::Memory SyncMemory;
+
+	TestAssert(Sync::SynchronizeFile(SyncMemory, DestFilePath, nullptr, SrcURL, SyncURL,
+		SrcFileContents.size(), DownloadManager, {}, &ActualHash, &ActualSize, &Counts).Success);
 
 	TestAssert(Counts.UnmatchingBlocks == ExpectedNumUnmatchingBlocks);
 
@@ -209,7 +212,7 @@ static bool TestSize()
 
 	ModifiedBuffer[0] = OldFirstByte;
 
-	constexpr auto NumBlocks = Sync::detail::ceildiv(FileSize, LauncherConfig::BlockSize);
+	const auto NumBlocks = int(ceil(float(FileSize) / LauncherConfig::BlockSize));
 
 	// Alter the first byte of every block but the last.
 	for (int i = 0; i < NumBlocks - 1; ++i)
