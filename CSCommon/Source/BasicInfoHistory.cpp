@@ -60,7 +60,7 @@ void BasicInfoHistoryManager::AddBasicInfo(BasicInfoItem bii)
 template <typename Iterator>
 static v3 GetHead(const v3& Pos, const v3& Dir, const Iterator& pre_it,
 	float LowerFrameTime, float UpperFrameTime, bool IsDead, MMatchSex Sex,
-	const std::function<MMatchItemDesc*(MMatchCharItemParts)>& GetItemDesc)
+	function_view<MMatchItemDesc*(MMatchCharItemParts)> GetItemDesc)
 {
 	auto ItemDesc = GetItemDesc(pre_it->SelectedSlot);
 	auto MotionType = eq_weapon_etc;
@@ -87,7 +87,7 @@ static v3 GetHead(const v3& Pos, const v3& Dir, const Iterator& pre_it,
 }
 
 bool BasicInfoHistoryManager::GetInfo(const Info& Out, double Time,
-	const std::function<MMatchItemDesc*(MMatchCharItemParts)>& GetItemDesc,
+	function_view<MMatchItemDesc*(MMatchCharItemParts)> GetItemDesc,
 	MMatchSex Sex, bool IsDead) const
 {
 	// Using a macro instead of a lambda to avoid evaluation of arguments if unused.

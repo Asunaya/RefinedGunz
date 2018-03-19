@@ -1,7 +1,7 @@
 #pragma once
 
 #include <deque>
-#include <functional>
+#include "function_view.h"
 #include "stuff.h"
 #include "AnimationStuff.h"
 
@@ -19,7 +19,7 @@ public:
 	};
 
 	bool GetInfo(const Info& Out, double Time,
-		const std::function<MMatchItemDesc*(MMatchCharItemParts)>& GetItemDesc,
+		function_view<MMatchItemDesc*(MMatchCharItemParts)> GetItemDesc,
 		MMatchSex Sex, bool IsDead) const;
 	
 	bool empty() const { return BasicInfoList.empty(); }

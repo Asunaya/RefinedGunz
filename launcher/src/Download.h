@@ -1,10 +1,10 @@
 #pragma once
 
+#include <memory>
 #include "Hash.h"
 #include "GlobalTypes.h"
 #include "optional.h"
-#include <memory>
-#include <functional>
+#include "function_view.h"
 
 struct DownloadManagerDeleter { void operator()(void*) const; };
 using DownloadManagerType = std::unique_ptr<void, DownloadManagerDeleter>;
@@ -74,7 +74,7 @@ struct DownloadError
 bool DownloadFile(const DownloadManagerType& DownloadManager,
 	const char* URL,
 	int Port,
-	const std::function<DownloadCallbackType>& Callback,
-	const std::function<ProgressCallbackType>& ProgressCallback = {},
+	function_view<DownloadCallbackType> Callback,
+	function_view<ProgressCallbackType> ProgressCallback = {},
 	const char* Range = nullptr,
 	DownloadError* ErrorOutput = nullptr);

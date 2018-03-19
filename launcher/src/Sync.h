@@ -1,11 +1,11 @@
 #pragma once
 
-#include <functional>
 #include <string>
 #include <memory>
 #include "GlobalTypes.h"
 #include "Download.h"
 #include "LauncherConfig.h"
+#include "function_view.h"
 
 struct PatchInternalState;
 namespace Hash { struct Strong; }
@@ -49,7 +49,7 @@ SyncResult SynchronizeFile(Memory&,
 	const char* SyncFileURL,
 	u64 RemoteFileSize,
 	DownloadManagerType& DownloadManager,
-	const std::function<ProgressCallbackType>& ProgressCallback = {},
+	function_view<ProgressCallbackType> ProgressCallback = {},
 	Hash::Strong* HashOutput = nullptr,
 	u64* SizeOutput = nullptr,
 	BlockCounts* BlockCountsOutput = nullptr);

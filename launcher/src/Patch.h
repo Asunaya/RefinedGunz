@@ -142,7 +142,7 @@ inline bool GetPatchXML(XMLFile& PatchXML, const DownloadManagerType& DownloadMa
 
 inline bool DownloadWholeFile(const DownloadManagerType& DownloadManager,
 	const char* Filename, const char* OutputPath = nullptr,
-	const std::function<ProgressCallbackType>& ProgressCallback = {},
+	function_view<ProgressCallbackType> ProgressCallback = {},
 	DownloadError* ErrorOutput = nullptr,
 	Hash::Strong* HashOutput = nullptr, u64* SizeOutput = nullptr)
 {

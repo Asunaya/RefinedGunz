@@ -183,7 +183,7 @@ constexpr auto ceildiv(T1 a, T2 b)
 
 static bool DownloadSyncFile(RemoteFile& Remote, const char* SyncFileURL,
 	DownloadManagerType& DownloadManager,
-	const std::function<ProgressCallbackType>& ProgressCallback)
+	function_view<ProgressCallbackType> ProgressCallback)
 {
 	// Each entry contains one rolling hash value and one strong hash value.
 	static constexpr auto EntrySize = Hash::Rolling::Size + Hash::Strong::Size;
@@ -268,7 +268,7 @@ static bool DownloadSyncFile(RemoteFile& Remote, const char* SyncFileURL,
 		return ProgressCallback(StatusType::DownloadingSyncFile, DTotal, DNow);
 	};
 
-	std::function<::ProgressCallbackType> ProgressCallbackArg;
+	function_view<::ProgressCallbackType> ProgressCallbackArg;
 	if (ProgressCallback)
 		ProgressCallbackArg = ProgressCallbackWrapper;
 
@@ -289,7 +289,7 @@ static bool DownloadSyncFile(RemoteFile& Remote, const char* SyncFileURL,
 // filling out a list of Blocks with the result.
 static bool CalculateBlocks(Memory& memory, RemoteFile& Remote, BlockCounts& Counts,
 	const char* LocalFilePath,
-	const std::function<ProgressCallbackType>& ProgressCallback)
+	function_view<ProgressCallbackType> ProgressCallback)
 {
 	using namespace detail;
 
@@ -665,7 +665,7 @@ static bool CreateNewFile(const char* LocalFilePath,
 	const char* RemoteFileURL,
 	DownloadManagerType& DownloadManager,
 	const RemoteFile& Remote,
-	const std::function<ProgressCallbackType>& ProgressCallback,
+	function_view<ProgressCallbackType> ProgressCallback,
 	Hash::Strong* HashOutput,
 	u64* SizeOutput)
 {
@@ -783,7 +783,7 @@ static bool CreateNewFile(const char* LocalFilePath,
 				RemoteFileURL,
 				LauncherConfig::PatchPort, Range);
 
-			std::function<::ProgressCallbackType> ProgressCallbackArg;
+			function_view<::ProgressCallbackType> ProgressCallbackArg;
 			if (ProgressCallback)
 				ProgressCallbackArg = ProgressCallbackWrapper;
 
@@ -930,7 +930,7 @@ SyncResult SynchronizeFile(Memory& memory,
 	const char* SyncFileURL,
 	u64 RemoteFileSize,
 	DownloadManagerType& DownloadManager,
-	const std::function<ProgressCallbackType>& ProgressCallback,
+	function_view<ProgressCallbackType> ProgressCallback,
 	Hash::Strong* HashOutput,
 	u64* SizeOutput,
 	BlockCounts* BlockCountsOutput)

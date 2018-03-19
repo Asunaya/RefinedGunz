@@ -118,7 +118,7 @@ void DownloadManagerDeleter::operator()(void* curl) const
 struct CurlWriteData
 {
 	CURL* curl;
-	const std::function<DownloadCallbackType>& Callback;
+	function_view<DownloadCallbackType> Callback;
 	DownloadInfoContext Context;
 };
 
@@ -140,7 +140,7 @@ extern "C" static int CurlProgressFunction(void *clientp,
 	curl_off_t dltotal, curl_off_t dlnow,
 	curl_off_t ultotal, curl_off_t ulnow)
 {
-	auto&& ProgressFunction = *static_cast<std::function<ProgressCallbackType>*>(clientp);
+	auto&& ProgressFunction = *static_cast<function_view<ProgressCallbackType>*>(clientp);
 	ProgressFunction(size_t(dltotal), size_t(dlnow));
 	return 0;
 }
@@ -169,8 +169,8 @@ static bool SetProtocol(ProtocolType& Protocol, const char* URL)
 bool DownloadFile(const DownloadManagerType& DownloadManager,
 	const char* URL,
 	int Port,
-	const std::function<DownloadCallbackType>& Callback,
-	const std::function<ProgressCallbackType>& ProgressCallback,
+	function_view<DownloadCallbackType> Callback,
+	function_view<ProgressCallbackType> ProgressCallback,
 	const char* Range,
 	DownloadError* ErrorOutput)
 {
