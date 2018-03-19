@@ -305,6 +305,37 @@ CFilePtr File::release()
 	return std::move(file_ptr);
 }
 
+bool RWFile::open(const char* path, ExistingFileAction efa)
+{
+	if (efa.Value == Nonexistent.Value && Exists(path))
+	{
+		state.error = true;
+		return false;
+	}
+
+	char mode_string[8];
+	auto base_string = [&] {
+		switch (efa.Value)
+		{
+		case Nonexistent.Value:
+		case Clear.Value:
+			return "w+";
+		case Append.Value:
+			return "a+";
+		case Prepend.Value:
+			// "r+" will fail if the file doesn't exist.
+			return Exists(path) ? "r+" : "w+";
+		}
+		assert(false);
+		return "r+";
+	}();
+	strcpy_safe(mode_string, base_string);
+	if (!efa.Text)
+		strcat_safe(mode_string, "b");
+
+	return open_impl(path, mode_string);
+}
+
 size_t RWFile::write(const void* buffer, size_t size)
 {
 	assert(fp());

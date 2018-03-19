@@ -117,7 +117,7 @@ static void WriteFile(const char* Path, const void* Buffer, size_t Size)
 {
 	CreateDirectoriesIfNonexistent(Path);
 
-	MFile::RWFile File{ Path, MFile::ClearExistingContents };
+	MFile::RWFile File{ Path, MFile::Clear};
 	TestAssert(!File.error());
 
 	File.write(Buffer, Size);

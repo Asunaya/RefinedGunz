@@ -96,10 +96,6 @@ enum class Seek
 	End = SEEK_END,
 };
 
-constexpr struct ClearExistingContentsType {} ClearExistingContents;
-constexpr struct PreserveExistingContentsAndAppendType {} PreserveExistingContentsAndAppend;
-constexpr struct PreserveExistingContentsAndPrependType {} PreserveExistingContentsAndPrepend;
-
 constexpr struct TextType {} Text;
 
 // A simple class that wraps a FILE*.
@@ -108,7 +104,7 @@ struct File
 {
 	File() = default;
 	// Takes ownership of an existing FILE*.
-	File(CFilePtr file_ptr) : file_ptr{ std::move(file_ptr) } {}
+	File(CFilePtr file_ptr) : file_ptr{std::move(file_ptr)} {}
 	// Wrapper for open.
 	File(const char* path) { open(path); }
 	File(const char* path, TextType) { open(path, Text); }
@@ -171,22 +167,32 @@ protected:
 	} state{};
 };
 
+struct ExistingFileAction { u32 Value; bool Text = false; };
+constexpr ExistingFileAction Clear{1 << 0}, Append{1 << 1}, Prepend{1 << 2}, Nonexistent{1 << 3};
+constexpr ExistingFileAction operator|(ExistingFileAction a, TextType b) {
+	return ExistingFileAction{a.Value, true};
+}
+constexpr ExistingFileAction operator|(TextType a, ExistingFileAction b) {
+	return b | a;
+}
+
 // A File, except it also supports writing.
 struct RWFile : public File
 {
 	RWFile() = default;
 	// Takes ownership of an existing FILE*.
 	RWFile(CFilePtr file_ptr) : File{ std::move(file_ptr) } {}
-	// Wrappers for open.
-	template <typename... Ts>
-	RWFile(const char* Path, Ts... Options) { open(Path, Options...); }
+	// Wrapper for open.
+	RWFile(const char* Path, ExistingFileAction efa) { open(Path, efa); }
 
 	// Opens a file for writing.
 	// Returns true on success, or false on error.
-	// Must specify one of ClearExistingContents, PreserveExistingContentsAndAppend, or
-	// PreserveExistingContentsAndPrepend.
-	template <typename... OptionTypes>
-	bool open(const char* path, OptionTypes...);
+	// Must specify one of Clear, Append, Prepend or Nonexistent.
+	// You can bit-or those with Text to open in text mode,
+	// e.g. `open("...", MFile::Clear | MFile::Text)
+	// If the file does not exist, it will be created, unless Nonexistent is specified, in which
+	// the file must not exist, or open will fail.
+	bool open(const char* path, ExistingFileAction);
 
 	// Writes memory to the file.
 	// Returns the number of bytes written, which may be less than
@@ -205,77 +211,5 @@ struct FileOutputIterator
 
 	RWFile* file;
 };
-
-// Implementation
-
-namespace detail
-{
-
-template <typename T, typename... Ts>
-struct is_part_of
-{
-	static constexpr auto value = tmp::any_of<
-		std::is_same<
-		std::remove_const_t<std::remove_reference_t<T>>, Ts>::value...>::value;
-};
-
-}
-
-template <typename... OptionTypes>
-bool RWFile::open(const char* path, OptionTypes...)
-{
-	static_assert(detail::is_part_of<ClearExistingContentsType, OptionTypes...>::value +
-		detail::is_part_of<PreserveExistingContentsAndAppendType, OptionTypes...>::value +
-		detail::is_part_of<PreserveExistingContentsAndPrependType, OptionTypes...>::value
-		<= 1,
-		"ClearExistingContents, PreserveExistingContentsAndAppend, and "
-		"PreserveExistingContentsAndPrepend are mutually exclusive. You can't use more than "
-		"one of these as open flags.");
-
-	static_assert(
-		tmp::all_of<
-			detail::is_part_of<OptionTypes,
-				TextType,
-				ClearExistingContentsType,
-				PreserveExistingContentsAndAppendType,
-				PreserveExistingContentsAndPrependType
-			>::value...
-		>::value,
-		"Invalid option types");
-
-	static_assert(
-		tmp::any_of<
-			detail::is_part_of<OptionTypes,
-				ClearExistingContentsType,
-				PreserveExistingContentsAndAppendType,
-				PreserveExistingContentsAndPrependType
-			>::value...
-		>::value,
-		"Must specify either ClearExistingContents, PreserveExistingContentsAndAppend, or "
-		"PreserveExistingContentsAndPrepend in options");
-
-	auto mode = [&] {
-		if (!detail::is_part_of<TextType, OptionTypes...>::value)
-		{
-			if (detail::is_part_of<ClearExistingContentsType, OptionTypes...>::value)
-				return "wb+";
-			else if (detail::is_part_of<PreserveExistingContentsAndAppendType, OptionTypes...>::value)
-				return "ab+";
-			else if (detail::is_part_of<PreserveExistingContentsAndPrependType, OptionTypes...>::value)
-				return "rb+";
-		}
-		else
-		{
-			if (detail::is_part_of<ClearExistingContentsType, OptionTypes...>::value)
-				return "w+";
-			else if (detail::is_part_of<PreserveExistingContentsAndAppendType, OptionTypes...>::value)
-				return "a+";
-			else if (detail::is_part_of<PreserveExistingContentsAndPrependType, OptionTypes...>::value)
-				return "r+";
-		}
-	}();
-
-	return open_impl(path, mode);
-}
 
 }

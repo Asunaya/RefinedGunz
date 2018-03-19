@@ -116,7 +116,7 @@ struct FileCacheType
 
 		auto&& Filename = "launcher_cache.xml";
 
-		MFile::RWFile File{ Filename, MFile::ClearExistingContents };
+		MFile::RWFile File{ Filename, MFile::Clear };
 
 		if (File.error())
 		{

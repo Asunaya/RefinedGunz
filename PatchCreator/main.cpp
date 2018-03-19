@@ -177,7 +177,7 @@ static void AppendFileNodes(rapidxml::xml_document<>& doc,
 
 static bool SaveDocumentToFile(rapidxml::xml_document<>& doc, const char* Filename)
 {
-	MFile::RWFile File{ Filename, MFile::ClearExistingContents };
+	MFile::RWFile File{ Filename, MFile::Clear};
 	if (File.error())
 	{
 		Log(LogLevel::Fatal, "Failed to open %s for writing\n", Filename);

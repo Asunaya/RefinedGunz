@@ -164,7 +164,7 @@ inline bool DownloadWholeFile(const DownloadManagerType& DownloadManager,
 		}
 	}
 
-	MFile::RWFile File{OutputPath, MFile::ClearExistingContents};
+	MFile::RWFile File{OutputPath, MFile::Clear};
 	if (File.error())
 	{
 		if (ErrorOutput)

@@ -32,7 +32,7 @@ struct Logger
 
 	bool InitFile(const char* LogFilePath)
 	{
-		return LogFile.open(LogFilePath, MFile::ClearExistingContents);
+		return LogFile.open(LogFilePath, MFile::Clear);
 	}
 
 #define LOGGER_LOG_FUNCTION(Level)\

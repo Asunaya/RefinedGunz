@@ -672,7 +672,7 @@ static bool CreateNewFile(const char* LocalFilePath,
 	if (ProgressCallback)
 		ProgressCallback(StatusType::DownloadingFile, 0, 0);
 
-	MFile::RWFile OutputFile{ SynchronizedFilePath, MFile::ClearExistingContents };
+	MFile::RWFile OutputFile{ SynchronizedFilePath, MFile::Clear};
 	if (OutputFile.error())
 	{
 		Log(LogLevel::Error, "Sync::SynchronizeFile -- Could not open file %s for writing\n",
@@ -857,7 +857,7 @@ bool MakeSyncFile(const char* OutputFilePath, const char* InputFilePath)
 {
 	CreateDirectoriesIfNonexistent(OutputFilePath);
 
-	MFile::RWFile OutputFile{ OutputFilePath, MFile::ClearExistingContents };
+	MFile::RWFile OutputFile{ OutputFilePath, MFile::Clear};
 	if (OutputFile.error())
 	{
 		Log(LogLevel::Error, "Sync::MakeSyncFile -- Could not open file %s for writing\n",

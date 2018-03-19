@@ -616,7 +616,7 @@ bool MXmlDocument::Parse(const char* Filename)
 
 bool MXmlDocument::SaveToFile(const char* m_sFileName)
 {
-	MFile::RWFile File{ m_sFileName, MFile::ClearExistingContents };
+	MFile::RWFile File{ m_sFileName, MFile::Clear };
 
 	if (File.error())
 		return false;
