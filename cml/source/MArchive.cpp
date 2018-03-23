@@ -1,7 +1,10 @@
 #include "stdafx.h"
 #include "MArchive.h"
-#include <crtdbg.h>
 
+#ifndef _ASSERT
+#include <cassert>
+#define _ASSERT assert
+#endif
 
 char MAITEM::GetCharValue(void)
 {
@@ -41,13 +44,13 @@ void* MAITEM::GetRawValue(void)
 //}
 //
 
-//#define min(_a, _b)	((_a<_b)?_a:_b)
+#define MIN(_a, _b)	((_a<_b)?_a:_b)
 
 void MArchive::Add(const char* szName, MArchiveType t, const void* pData, int nSize)
 {
 	MAITEM* pItem = new MAITEM;
 	memcpy(pItem->szName, szName, MAITEM_NAME_LENGTH);
-	pItem->szName[__min(strlen(szName), MAITEM_NAME_LENGTH-1)] = 0;
+	pItem->szName[MIN(strlen(szName), MAITEM_NAME_LENGTH-1)] = 0;
 	pItem->nType = t;
 	pItem->pData = new char[nSize];
 	memcpy(pItem->pData, pData, nSize);
@@ -64,7 +67,7 @@ MArchive::~MArchive(void)
 {
 	while(m_Items.empty()==false){
 		MAITEM* pItem = *(m_Items.begin());
-		delete pItem->pData;
+		delete[] static_cast<char*>(pItem->pData);
 		delete pItem;
 		m_Items.erase(m_Items.begin());
 	}
@@ -280,7 +283,7 @@ bool MArchive::ReadFile(FILE* fp, int nSize)
 
 		pItem->pData = new char[pItem->nSize];
 		if(fread(pItem->pData, pItem->nSize, 1, fp)!=1){
-			delete pItem->pData;
+			delete[] static_cast<char*>(pItem->pData);
 			delete pItem;
 			return false;
 		}

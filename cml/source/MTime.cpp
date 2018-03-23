@@ -9,7 +9,7 @@
 #include <time.h>
 #endif
 
-extern "C" u64 GetGlobalTimeMSDefault()
+u64 GetGlobalTimeMSDefault()
 {
 #ifdef WIN32
 	return timeGetTime();
@@ -20,6 +20,8 @@ extern "C" u64 GetGlobalTimeMSDefault()
 	return spec.tv_sec * 1000 + spec.tv_nsec / 1000000;
 #endif
 }
+
+u64 (*GetGlobalTimeMS)() = GetGlobalTimeMSDefault;
 
 float GetGlobalTime()
 {
@@ -55,7 +57,7 @@ int MTime::MakeNumber(int nFrom, int nTo)
 
 void MTime::GetTime(MTime::timeval *t)
 {
-	u32 millisec = GetTickCount();
+	auto millisec = GetGlobalTimeMS();
 
 	t->tv_sec = (int)(millisec / 1000);
 	t->tv_usec = millisec % 1000;

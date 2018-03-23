@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include <climits>
 #include "MFile.h"
 #include "defer.h"
 
@@ -6,6 +7,11 @@
 #include "MWindows.h"
 #include <io.h>
 #undef DeleteFile
+#else
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <dirent.h>
+#include <fcntl.h>
 #endif
 
 namespace MFile
@@ -109,50 +115,192 @@ static void CopyFileData(FileData& dest, const _finddata_t& src)
 	strcpy_safe(dest.Name, src.name);
 }
 
+
 FileIterator& FileIterator::operator++()
 {
 	_finddata_t fd;
-	auto find_ret = _findnext(Range.First, &fd);
-	if (find_ret != 0)
+	int find_ret;
+	do {
+		find_ret = _findnext(reinterpret_cast<intptr_t>(Range.Handle.get()), &fd);
+	} while (find_ret != -1 && (!strcmp(fd.name, ".") || !strcmp(fd.name, "..")));
+
+	if (find_ret == -1)
+	{
+		auto err = errno;
+		Range.ErrorCode = err == ENOENT ? 0 : err;
 		End = true;
+	}
 	else
+	{
 		CopyFileData(Range.Data, fd);
+	}
 
 	return *this;
 }
 
-FileIterator FileRange::begin() {
-	return{ *this, First == -1 ? true : false };
+void FileRange::Deleter::operator()(void* ptr) const
+{
+	if (!ptr)
+		return;
+	auto handle = reinterpret_cast<intptr_t>(ptr);
+	auto ret = _findclose(handle);
+	assert(ret == 0);
+	(void)ret;
 }
 
-FileIterator FileRange::end() {
-	return{ *this, true };
-}
-
-FileRange FilesAndSubdirsInDir(const char* Path)
+FileRange Glob(const char* Pattern)
 {
 	FileRange ret;
 
 	_finddata_t fd;
-	ret.First = _findfirst(Path, &fd);
+	auto SearchHandle = _findfirst(Pattern, &fd);
 
-	if (ret.First != -1)
+	if (SearchHandle != -1)
+	{
+		ret.Handle = FileRange::HandleType(reinterpret_cast<void*>(SearchHandle));
 		CopyFileData(ret.Data, fd);
+	}
+	else
+	{
+		ret.Handle = nullptr;
+		ret.ErrorCode = errno;
+	}
 
 	return ret;
 }
 
 #else
 
-bool DeleteFile(const char* Path)
+bool Exists(const char* Path)
 {
-	// TODO
-	return false;
+	return !access(Path, F_OK);
 }
 
-FileRange FilesAndSubdirsInDir(const char* Path)
+bool Delete(const char* Path)
 {
-	return false;
+	return remove(Path) == 0;
+}
+
+bool Move(const char* OldPath, const char* NewPath)
+{
+	return rename(OldPath, NewPath) == 0;
+}
+
+static bool EntityExists(const char* Path, u32 SubdirValue)
+{
+	if (!Exists(Path))
+		return false;
+
+	auto MaybeAttributes = GetAttributes(Path);
+	if (!MaybeAttributes.has_value())
+		return false;
+
+	return (MaybeAttributes.value().Attributes & Attributes::Subdir) == SubdirValue;
+}
+
+bool IsFile(const char* Path)
+{
+	return EntityExists(Path, 0);
+}
+
+bool IsDir(const char* Path)
+{
+	return EntityExists(Path, Attributes::Subdir);
+}
+
+bool CreateFile(const char* Path)
+{
+	return creat(Path, 0700) == 0;
+}
+
+bool CreateDir(const char* Path)
+{
+	return mkdir(Path, 0700) == 0;
+}
+
+optional<FileAttributes> GetAttributes(const char* Path)
+{
+	struct stat stat_ret;
+	if (stat(Path, &stat_ret) != 0)
+		return nullopt;
+	
+	FileAttributes ret{};
+
+	ret.Attributes = stat_ret.st_mode & S_IFDIR ? Attributes::Subdir : 0;
+	ret.CreationTime = UnknownCreationTime;
+	ret.LastAccessTime = stat_ret.st_atime;
+	ret.LastModifiedTime = stat_ret.st_mtime;
+	ret.Size = stat_ret.st_size;
+
+	return ret;
+}
+
+static bool GetNextFileData(FileRange& Range)
+{
+	do {
+		++Range.CurFileIndex;
+	} while (Range.CurFileIndex < Range.GlobData.gl_pathc &&
+		(!strcmp(Range.GlobData.gl_pathv[Range.CurFileIndex], ".") ||
+		 !strcmp(Range.GlobData.gl_pathv[Range.CurFileIndex], "..")));
+
+	if (Range.CurFileIndex >= Range.GlobData.gl_pathc)
+	{
+		Range.GlobData.gl_pathc = 0;
+		return false;
+	}
+
+ 	auto Path = Range.GlobData.gl_pathv[Range.CurFileIndex];
+ 	auto MaybeAttributes = GetAttributes(Path);
+	if (!MaybeAttributes)
+	{
+		Range.Handle = nullptr;
+		Range.ErrorCode = errno;
+		return false;
+	}
+	auto& Attributes = *MaybeAttributes;
+	FileData& dest = Range.Data;
+	dest.Attributes = Attributes.Attributes;
+	dest.CreationTime = Attributes.CreationTime;
+	dest.LastAccessTime = Attributes.LastAccessTime;
+	dest.LastModifiedTime = Attributes.LastModifiedTime;
+	dest.Size = Attributes.Size;
+	std::string PathCopy = Path;
+	strcpy_safe(dest.Name, basename(PathCopy.c_str()));
+
+	return true;
+}
+
+FileIterator& FileIterator::operator++()
+{
+	if (!GetNextFileData(Range))
+	{
+		End = true;
+	}
+
+	return *this;
+}
+
+void FileRange::Deleter::operator()(void* ptr) const
+{
+	if (ptr)
+		globfree(static_cast<glob_t*>(ptr));
+}
+
+FileRange Glob(const char* Pattern)
+{
+	FileRange Range;
+	Range.CurFileIndex = size_t(-1);
+	auto ret = glob(Pattern, 0, nullptr, &Range.GlobData);
+	Range.Handle = FileRange::HandleType(&Range.GlobData);
+	if (ret == 0)
+	{
+		GetNextFileData(Range);
+	}
+	else if (ret != GLOB_NOMATCH)
+	{
+		Range.ErrorCode = errno;
+	}
+	return Range;
 }
 
 #endif
@@ -226,7 +374,8 @@ bool File::seek(i64 offset, Seek origin)
 #ifdef _MSC_VER
 	auto fseek_ret = _fseeki64(fp(), offset, static_cast<int>(origin));
 #else
-	static_assert(false, "Port me!");
+	static_assert(sizeof(off_t) * CHAR_BIT == 64, "Wrong off_t");
+	auto fseek_ret = fseeko(fp(), offset, static_cast<int>(origin));
 #endif
 
 	state.error = fseek_ret != 0;
@@ -243,7 +392,7 @@ i64 File::tell()
 #ifdef _MSC_VER
 	auto ftell_ret = _ftelli64(fp());
 #else
-	static_assert(false, "Port me!");
+	auto ftell_ret = ftello(fp());
 #endif
 
 	state.error = ftell_ret == tell_error;

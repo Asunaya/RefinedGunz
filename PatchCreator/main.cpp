@@ -150,20 +150,18 @@ static void AppendFile(rapidxml::xml_document<>& doc,
 	}
 }
 
-static void AppendFileNodes(rapidxml::xml_document<>& doc,
+static bool AppendFileNodes(rapidxml::xml_document<>& doc,
 	rapidxml::xml_node<>& ParentNode,
 	PathPair& Paths)
 {
 	char SearchPattern[MFile::MaxPath];
-	sprintf_safe(SearchPattern, "%s*.*", Paths.CWD());
+	sprintf_safe(SearchPattern, "%s*", Paths.CWD());
 
-	for (auto&& FileData : MFile::FilesAndSubdirsInDir(SearchPattern))
+	auto&& Range = MFile::Glob(SearchPattern);
+	for (auto&& FileData : Range)
 	{
 		if (FileData.Attributes & MFile::Attributes::Subdir)
 		{
-			if (!strcmp(FileData.Name, ".") || !strcmp(FileData.Name, ".."))
-				continue;
-
 			// Recurse into the subdirectory.
 			const auto End = Paths.AppendDir(FileData.Name);
 			AppendFileNodes(doc, ParentNode, Paths);
@@ -173,6 +171,16 @@ static void AppendFileNodes(rapidxml::xml_document<>& doc,
 
 		AppendFile(doc, ParentNode, Paths, FileData.Name);
 	}
+	if (Range.error())
+	{
+		char ErrorMessage[256];
+		Range.error_message(ErrorMessage);
+		Log.Error("MFile::Glob(%s) failed. error code = %d, error message = %s.\n",
+			SearchPattern, Range.error_code(), ErrorMessage);
+		return false;
+	}
+	
+	return true;
 }
 
 static bool SaveDocumentToFile(rapidxml::xml_document<>& doc, const char* Filename)
@@ -203,8 +211,7 @@ int main()
 	auto&& FilesNode = AppendNode(doc, doc, "files");
 
 	PathPair Paths{ "client/" };
-	AppendFileNodes(doc, FilesNode, Paths);
-
-	if (!SaveDocumentToFile(doc, "patch.xml"))
+	if (!AppendFileNodes(doc, FilesNode, Paths) ||
+	    !SaveDocumentToFile(doc, "patch.xml"))
 		return -1;
 }

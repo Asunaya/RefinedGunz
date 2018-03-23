@@ -1,16 +1,15 @@
 #include "stdafx.h"
 #include <stdio.h>
 #include <signal.h>
-#include "fileinfo.h"
+#include "FileInfo.h"
 #include "MDebug.h"
 #include <string>
-#include "MPdb.h"
 #include <mutex>
-#include "../../sdk/dx9/Include/d3dx9.h"
 #include <cassert>
 
 #ifdef WIN32
 #include <windows.h>
+#include "MPdb.h"
 #endif
 
 static char logfilename[256];
@@ -30,8 +29,7 @@ void InitLog(int logmethodflags, const char* pszLogFileName)
 	if(g_nLogMethod&MLOGSTYLE_FILE)
 	{
 		GetFullPath(logfilename, sizeof(logfilename), pszLogFileName);
-		FILE *pFile = nullptr;
-		fopen_s(&pFile, logfilename,"w+");
+		FILE *pFile = fopen(logfilename,"w+");
 		if( !pFile ) return;
 		fclose(pFile);
 	}
@@ -50,11 +48,10 @@ void DMLog(const char* Format, ...)
 	vsprintf_safe(temp, Format, args);
 	va_end(args);
 
-	/*FILE *pFile = nullptr;
-	fopen_s(&pFile, logfilename, "a");
+	/*FILE *pFile = fopen(logfilename, "a");
 
 	if (!pFile)
-		fopen_s(&pFile, logfilename, "w");
+		pFile = fopen(logfilename, "w");
 
 	if (pFile == nullptr)
 		return;
@@ -68,11 +65,10 @@ void DMLog(const char* Format, ...)
 
 void MLogFile(const char* Msg)
 {
-	FILE *pFile = nullptr;
-	fopen_s(&pFile, logfilename, "a");
+	FILE *pFile = fopen(logfilename, "a");
 
 	if (!pFile)
-		fopen_s(&pFile, logfilename, "w");
+		pFile = fopen(logfilename, "w");
 
 	if (pFile == nullptr)
 		return;
@@ -103,9 +99,9 @@ void MLog(const char *pFormat,...)
 	CustomLog(temp);
 }
 
-extern "C" void CustomLogDefault(const char* Msg) {}
+void (*CustomLog)(const char* Msg) = [](const char*){};
 
-void __cdecl MMsg(const char *pFormat,...)
+void MMsg(const char *pFormat,...)
 {
     char buf[256];
 
@@ -122,6 +118,8 @@ void __cdecl MMsg(const char *pFormat,...)
 
 ////////////////////////////////////////////////////////////////////////////////
 // exception handler
+
+#ifdef _MSC_VER
 
 void MShowContextRecord(CONTEXT* p)
 {
@@ -191,6 +189,8 @@ void MSEHTranslator(UINT nSeCode, _EXCEPTION_POINTERS* pExcPointers)
 	// SIGABRT was ignored.  So hose the program anyway.
 	_exit(3);
 }
+
+#endif
 
 #ifdef _DEBUG
 
@@ -289,9 +289,8 @@ void MSaveProfile(const char *filename)
 
 	//assert(Stack.empty());
 
-	FILE *file = nullptr;
-	auto ret = fopen_s(&file, filename, "w+");
-	if (file == nullptr || ret != 0)
+	FILE *file = fopen(filename, "w+");
+	if (file == nullptr)
 	{
 		MLog("Failed to open file %s to save profile stats\n", filename);
 		return;

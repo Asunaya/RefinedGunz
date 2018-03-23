@@ -54,20 +54,21 @@ u32 WaitForMultipleEvents(size_t NumEvents, MSignalEvent* const * EventArray, u3
 #else
 
 #include <sys/select.h>
+#include <sys/eventfd.h>
 
-MSignalEvent::MSignalEvent() : fd{ eventfd(0, 0) } {}
-MSignalEvent::~MSignalEvent() { close(fd); }
+MSignalEvent::MSignalEvent(bool ManualReset) : EventHandle{ eventfd(0, 0) } {}
+MSignalEvent::~MSignalEvent() { close(EventHandle); }
 
 bool MSignalEvent::SetEvent()
 {
 	u64 buf = 1;
-	write(fd, &buf, sizeof(buf));
+	write(EventHandle, &buf, sizeof(buf));
 }
 
 bool MSignalEvent::ResetEvent()
 {
 	u64 buf;
-	read(fd, &buf, sizeof(buf));
+	read(EventHandle, &buf, sizeof(buf));
 }
 
 u32 WaitForMultipleEvents(size_t NumEvents, MSignalEvent* const * EventArray, u32 Timeout)
@@ -75,7 +76,7 @@ u32 WaitForMultipleEvents(size_t NumEvents, MSignalEvent* const * EventArray, u3
 	fd_set fds;
 	FD_ZERO(&fds);
 
-	int max_fd = MIN_INT;
+	int max_fd = INT_MIN;
 	for (int i = 0; i < int(NumEvents); ++i) {
 		const auto fd = EventArray[i]->GetEventHandle();
 		FD_SET(fd, &fds);
@@ -83,7 +84,7 @@ u32 WaitForMultipleEvents(size_t NumEvents, MSignalEvent* const * EventArray, u3
 			max_fd = fd;
 	}
 
-	if (max_fd == MIN_INT)
+	if (max_fd == INT_MIN)
 		return MSync::WaitFailed;
 
 	timeval tv;
@@ -103,7 +104,7 @@ u32 WaitForMultipleEvents(size_t NumEvents, MSignalEvent* const * EventArray, u3
 		return MSync::WaitFailed;
 
 	for (int i = 0; i < int(NumEvents); ++i) {
-		if (FD_ISSET(EventArray[i], &fds)) {
+		if (FD_ISSET(EventArray[i]->GetEventHandle(), &fds)) {
 			return static_cast<u32>(i);
 		}
 	}

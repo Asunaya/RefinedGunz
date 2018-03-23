@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#ifdef _MSC_VER
 #include "MHttpSpooler.h"
 #include <chrono>
 #include "MDebug.h"
@@ -26,3 +27,4 @@ void MHttpSpooler::Run()
 		std::this_thread::sleep_for(100ms);
 	}
 }
+#endif

@@ -8,7 +8,7 @@
 template <typename OutputContainerType>
 inline bool ReadFile(OutputContainerType& OutputContainer, const char* Filename)
 {
-	static_assert(sizeof(OutputContainerType::value_type) == sizeof(char), "Wrong value type");
+	static_assert(sizeof(typename OutputContainerType::value_type) == sizeof(char), "Wrong value type");
 
 	MFile::File File{ Filename };
 

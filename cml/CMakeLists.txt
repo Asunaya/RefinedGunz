@@ -11,5 +11,7 @@ target_include_directories(cml PUBLIC
 	Include
 	../sdk/rapidxml/include)
 
-find_library(zlib_path NAMES zlib PATHS ../sdk/zlib/lib NO_DEFAULT_PATHS)
-target_link_libraries(cml PRIVATE ${zlib_path})
+target_link_libraries(cml PUBLIC zlib)
+if (UNIX)
+	target_link_libraries(cml PUBLIC pthread)
+endif()

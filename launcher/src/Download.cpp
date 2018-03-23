@@ -122,7 +122,7 @@ struct CurlWriteData
 	DownloadInfoContext Context;
 };
 
-extern "C" static size_t CurlWriteFunction(void* buffer, size_t size, size_t nmemb, void* stream)
+extern "C" size_t CurlWriteFunction(void* buffer, size_t size, size_t nmemb, void* stream)
 {
 	assert(stream != nullptr);
 
@@ -136,7 +136,7 @@ extern "C" static size_t CurlWriteFunction(void* buffer, size_t size, size_t nme
 	return CallbackRet ? total_size : 0;
 }
 
-extern "C" static int CurlProgressFunction(void *clientp,
+extern "C" int CurlProgressFunction(void *clientp,
 	curl_off_t dltotal, curl_off_t dlnow,
 	curl_off_t ultotal, curl_off_t ulnow)
 {

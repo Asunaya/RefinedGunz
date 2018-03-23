@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "MStateMachine.h"
-#include "crtdbg.h"
 
 bool MState::SetNextState(int nID)
 {

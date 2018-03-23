@@ -155,7 +155,7 @@ private:
 	void Print(const StringView& String)
 	{
 		// Write to console.
-		printf("%.*s", String.size(), String.data());
+		printf("%.*s", int(String.size()), String.data());
 
 		// Write to file, if it's open.
 		if (LogFile.is_open())

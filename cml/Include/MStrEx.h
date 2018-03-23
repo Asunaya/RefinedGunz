@@ -21,7 +21,7 @@ protected:
 	}
 
 public:
-	static char* MStringCutter::GetOneArg(char *pszArg, char *pszOutArg) {
+	static char* GetOneArg(char *pszArg, char *pszOutArg) {
 		SkipSpaces(&pszArg);
 		while(*pszArg && !isspace(*pszArg)) {
 			*(pszOutArg++) = *pszArg;
@@ -31,7 +31,7 @@ public:
 		return pszArg;
 	}
 
-	static char* MStringCutter::GetTwoArgs(char* pszArg, char* pszOutArg1, char* pszOutArg2) {
+	static char* GetTwoArgs(char* pszArg, char* pszOutArg1, char* pszOutArg2) {
 		return GetOneArg(GetOneArg(pszArg, pszOutArg1), pszOutArg2);
 	}
 };

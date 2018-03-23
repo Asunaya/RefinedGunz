@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef _MSC_VER
+
 #include <list>
 #include "MThread.h"
 #include "MSync.h"
@@ -103,3 +105,5 @@ public:
 		return true;
 	}
 };
+
+#endif

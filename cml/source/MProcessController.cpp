@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "MProcessController.h"
+#ifdef _WIN32
 #include "shlwapi.h"
+#endif
 
 #ifdef _MPROCESS_CONTROLLER
 

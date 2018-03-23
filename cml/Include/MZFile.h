@@ -9,7 +9,7 @@ public:
 		bool ShouldDelete{};
 		MaybeArrayDeleter(bool ShouldDelete) : ShouldDelete{ ShouldDelete } {}
 
-		void operator()(void* ptr) const {
+		void operator()(char* ptr) const {
 			if (ptr && ShouldDelete)
 				delete[] ptr;
 		}

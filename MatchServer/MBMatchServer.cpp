@@ -362,7 +362,7 @@ void MBMatchServer::OnRun()
 	MMatchServer::OnRun();
 }
 
-void CustomLog(const char* Msg)
+void MatchServerCustomLog(const char* Msg)
 {
 	MBMatchServerLog(MMatchServer::LOG_ALL & ~MMatchServer::LOG_FILE, Msg, false);
 }

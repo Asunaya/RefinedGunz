@@ -1,8 +1,6 @@
 #include "stdafx.h"
 #include "MZFileSystem.h"
 #include "MXml.h"
-#include <io.h>
-#include <crtdbg.h>
 #include "MZip.h"
 #include "FileInfo.h"
 #include "zip/zlib.h"
@@ -23,8 +21,12 @@ static void ReplaceBackSlashToSlash(char* szPath)
 void GetRefineFilename(char *szRefine, int maxlen, const char *szSource)
 {
 	char pBasePath[256];
+#ifdef _WIN32
 	GetCurrentDirectory(sizeof(pBasePath),pBasePath);
-	strcat_s(pBasePath,"\\");
+#else
+	getcwd(pBasePath, std::size(pBasePath));
+#endif
+	strcat_safe(pBasePath,"\\");
 
 	GetRelativePath(szRefine, maxlen, pBasePath,szSource);
 
@@ -131,7 +133,7 @@ void MZFileSystem::AddFilesInArchive(PreprocessedFileTree& Tree, PreprocessedDir
 		ArchiveDir.Files.emplace_back();
 		auto&& Child = ArchiveDir.Files.back();
 
-		char Path[_MAX_PATH];
+		char Path[MFile::MaxPath];
 		sprintf_safe(Path, "%.*s%.*s",
 			ArchiveDir.Path.size(), ArchiveDir.Path.data(),
 			Filename.size(), Filename.data());
@@ -147,25 +149,18 @@ void MZFileSystem::AddFilesInArchive(PreprocessedFileTree& Tree, PreprocessedDir
 void MZFileSystem::MakeDirectoryTree(PreprocessedFileTree& Tree,
 	const StringView& FullPath, PreprocessedDir& Dir)
 {
-	char szFilter[_MAX_PATH];
+	char szFilter[MFile::MaxPath];
 	sprintf_safe(szFilter, "%.*s*",
 		FullPath.size(), FullPath.data());
 
-	_finddata_t FileData;
-	auto hFile = _findfirst(szFilter, &FileData);
-	if (hFile == -1)
+	for (auto&& FileData : MFile::Glob(szFilter))
 	{
-		MLog("MakeDirectoryTree -- _findfirst failed on filter %s\n", szFilter);
-		return;
-	}
-
-	do {
-		if (strcmp(FileData.name, ".") == 0 || strcmp(FileData.name, "..") == 0)
+		if (strcmp(FileData.Name, ".") == 0 || strcmp(FileData.Name, "..") == 0)
 			continue;
 
 		auto AddSubdir = [&](const StringView& Filename) -> auto&
 		{
-			char Path[_MAX_PATH];
+			char Path[MFile::MaxPath];
 			sprintf_safe(Path, "%.*s%.*s/",
 				Dir.Path.size(), Dir.Path.data(),
 				Filename.size(), Filename.data());
@@ -178,31 +173,31 @@ void MZFileSystem::MakeDirectoryTree(PreprocessedFileTree& Tree,
 			return Subdir;
 		};
 
-		const auto IsDirectory = (FileData.attrib & _A_SUBDIR) != 0;
+		const auto IsDirectory = (FileData.Attributes & MFile::Attributes::Subdir) != 0;
 
 		if (IsDirectory)
 		{
-			auto&& Subdir = AddSubdir(FileData.name);
+			auto&& Subdir = AddSubdir(FileData.Name);
 
-			char SubdirFullPath[_MAX_PATH];
+			char SubdirFullPath[MFile::MaxPath];
 			sprintf_safe(SubdirFullPath, "%.*s%s/",
 				FullPath.size(), FullPath.data(),
-				FileData.name);
+				FileData.Name);
 
 			MakeDirectoryTree(Tree, SubdirFullPath, Subdir);
 
 			++Tree.NumDirectories;
 		}
-		else if (IsArchivePath(FileData.name))
+		else if (IsArchivePath(FileData.Name))
 		{
-			StringView Filename{ FileData.name };
+			StringView Filename{ FileData.Name };
 			Filename = Filename.substr(0, Filename.find_last_of('.'));
 			auto&& Subdir = AddSubdir(Filename);
 
 			char ArchivePath[MFile::MaxPath];
 			sprintf_safe(ArchivePath, "%.*s%s",
 				Dir.Path.size(), Dir.Path.data(),
-				FileData.name);
+				FileData.Name);
 
 			Subdir.ArchivePath = AllocateString(ArchivePath);
 
@@ -211,8 +206,7 @@ void MZFileSystem::MakeDirectoryTree(PreprocessedFileTree& Tree,
 				BasePath.c_str(),
 				Subdir.ArchivePath.size(), Subdir.ArchivePath.data());
 
-			FILE* fp{};
-			fopen_s(&fp, FullArchivePath, "rb");
+			auto fp = fopen(FullArchivePath, "rb");
 			if (!fp)
 			{
 				MLog("fopen on %s failed\n", FullArchivePath);
@@ -232,21 +226,20 @@ void MZFileSystem::MakeDirectoryTree(PreprocessedFileTree& Tree,
 			Dir.Files.emplace_back();
 			auto&& File = Dir.Files.back();
 
-			char Path[_MAX_PATH];
+			char Path[MFile::MaxPath];
 			sprintf_safe(Path, "%.*s%s",
 				Dir.Path.size(), Dir.Path.data(),
-				FileData.name);
+				FileData.Name);
 
 			File.Path = AllocateString(Path);
 			File.ArchiveOffset = 0;
 			File.CompressedSize = 0;
-			File.Size = FileData.size;
+			assert(FileData.Size <= SIZE_MAX);
+			File.Size = static_cast<size_t>(FileData.Size);
 
 			++Tree.NumFiles;
 		}
-	} while (_findnext(hFile, &FileData) == 0);
-
-	_findclose(hFile);
+	}
 }
 
 void MZFileSystem::UpdateFileList(PreprocessedDir& Src, MZDirDesc& Dest)
@@ -446,7 +439,7 @@ private:
 
 void MZFileSystem::CacheArchive(const StringView& Filename)
 {
-	char FilenameWithExtension[_MAX_PATH];
+	char FilenameWithExtension[MFile::MaxPath];
 	sprintf_safe(FilenameWithExtension, "%.*s.%s", Filename.size(), Filename.data(), DEF_EXT);
 
 	MZip Zip;
@@ -461,12 +454,11 @@ void MZFileSystem::CacheArchive(const StringView& Filename)
 
 	const auto ZipInitialized = Zip.Initialize(File.GetPointer(), File.GetSize(), MZFile::GetReadMode());
 #else
-	FILE* fp = nullptr;
-	auto ret = fopen_s(&fp, FilenameWithExtension, "rb");
-	if (!fp || ret != 0)
+	auto fp = fopen(FilenameWithExtension, "rb");
+	if (!fp)
 	{
 		MLog("MZFileSystem::CacheArchive -- fopen_s failed on %s\n", Filename);
-		return -1;
+		return;
 	}
 
 	const auto ZipInitialized = Zip.Initialize(fp, MZFile::GetReadMode());
@@ -512,6 +504,7 @@ void MZFileSystem::ReleaseCachedArchives()
 	CachedFileMap.clear();
 }
 
+#ifdef WIN32
 MMappedFile::MMappedFile(const char * Filename)
 {
 	File = CreateFileA(Filename, GENERIC_READ, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
@@ -567,6 +560,7 @@ MMappedFile::MMappedFile(MMappedFile && src)
 	src.Mapping = INVALID_HANDLE_VALUE;
 	src.File = INVALID_HANDLE_VALUE;
 }
+#endif
 
 void RecursiveMZFileIterator::AdvanceToNextFile()
 {

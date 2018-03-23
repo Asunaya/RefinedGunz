@@ -2891,8 +2891,8 @@ static int GetScreenshotFilename(char(&Output)[Size])
 
 	auto ExistsWithWildcard = [](const char* Spec)
 	{
-		auto range = MFile::FilesAndSubdirsInDir(Spec);
-		return range.begin() != range.end();
+		auto range = MFile::Glob(Spec);
+		return !range.empty();
 	};
 
 	do {
@@ -5512,7 +5512,7 @@ void ZGameInterface::ShowReplayDialog(bool bShow)
 
 			strcat_safe(szPath, "/*.gzr");
 
-			for (auto&& FileData : MFile::FilesAndSubdirsInDir(szPath))
+			for (auto&& FileData : MFile::Glob(szPath))
 				pListBox->Add(new ReplayListBoxItem(FileData.Name, "")); // Add to listbox
 
 			pListBox->Sort();

@@ -54,20 +54,18 @@ public :
 	}
 
 	virtual void Print( const char *string ){
-		FILE *pFile = nullptr;
+		FILE *pFile = fopen( m_pFileName, "a" );
 
-		auto err = fopen_s( &pFile, m_pFileName, "a" );
-
-		if( err != 0 || pFile == nullptr ){
-			fopen_s( &pFile, m_pFileName, "w" );
+		if( pFile == nullptr ){
+			pFile = fopen( m_pFileName, "w" );
 			fclose( pFile );
-			fopen_s( &pFile, m_pFileName, "a" );
+			pFile = fopen( m_pFileName, "a" );
 
-			if (err != 0 || pFile == nullptr)
+			if( pFile == nullptr )
 				return;
 		}
 
-		fprintf(pFile,string);
+		fputs(string,pFile);
 		fclose(pFile);
 	}
 };

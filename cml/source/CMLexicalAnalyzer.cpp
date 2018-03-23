@@ -13,7 +13,7 @@ CMLexicalAnalyzer::~CMLexicalAnalyzer(void)
 	Destroy();
 }
 
-bool StrTok(char *pToken, int maxlen, const char *pStr, char *pSep)
+bool StrTok(char *pToken, int maxlen, const char *pStr, const char *pSep)
 {
 	static char szTemp[256] = "";
 

@@ -103,7 +103,7 @@ protected:
 class FNode {
 public:
 	FNode();
-	void SetName(char* str);
+	void SetName(const char* str);
 
 public:
 	int	 m_size;

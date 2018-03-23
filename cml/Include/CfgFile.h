@@ -7,12 +7,16 @@
 */
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <ctype.h>
 #include <CMList.h>
 
 #ifndef __CFGFILE_HEADER__
 #define __CFGFILE_HEADER__
 
+#ifndef _MSC_VER
+inline char* _strdup(const char* a) { return strdup(a); }
+#endif
 
 #define __MAX_STRING__	256
 
@@ -48,7 +52,7 @@ public :
 	CFGTOKEN	tValue;
 	char*		szKey;
 
-	CFGVALUE(char *Key){
+	CFGVALUE(const char *Key){
 		szKey = _strdup(Key);
 	}
 	
@@ -118,7 +122,7 @@ public:
 	char	*szKey;	// SECTION NAME
 	CMLinkedList<CFGVALUE>	aValList;
 
-	CFGSECTION( char *Key ){
+	CFGSECTION( const char *Key ){
 		szKey = _strdup(Key);
 	}
 

@@ -9,17 +9,16 @@ template <size_t size>
 bool GetLocalIP(char (&szOutIP)[size])
 {
 	char szHostName[256];
-	PHOSTENT pHostInfo;
 
-	if (gethostname(szHostName, sizeof(szHostName)) != 0)
+	if (MSocket::gethostname(szHostName, sizeof(szHostName)) != 0)
 		return false;
 
-	pHostInfo = gethostbyname(szHostName);
+	auto pHostInfo = MSocket::gethostbyname(szHostName);
 	if (!pHostInfo)
 		return false;
 
-	auto ip = inet_ntoa(*(struct in_addr *)*pHostInfo->h_addr_list);
-	strcpy_safe(szOutIP, ip);
+	auto ip = MSocket::inet_ntop(MSocket::AF::INET, *(MSocket::in_addr *)*pHostInfo->h_addr_list,
+		szOutIP, size);
 	return true;
 }
 
@@ -43,7 +42,7 @@ inline std::string GetIPv4String(MSocket::in_addr addr)
 inline u32 GetIPv4Number(const char* addr)
 {
 	MSocket::in_addr ret;
-	auto count = sscanf_s(addr, "%hhd.%hhd.%hhd.%hhd",
+	auto count = sscanf(addr, "%hhd.%hhd.%hhd.%hhd",
 		&ret.S_un.S_un_b.s_b1,
 		&ret.S_un.S_un_b.s_b2,
 		&ret.S_un.S_un_b.s_b3,

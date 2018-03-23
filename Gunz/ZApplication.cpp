@@ -242,9 +242,23 @@ namespace RealSpace2
 
 #define STARTUP_CACHE_FILES
 
+#ifdef TIMESCALE
+unsigned long long GetGlobalTimeMSOverride()
+{
+	if (!ZApplication::GetInstance())
+		return timeGetTime();
+
+	return ZApplication::GetInstance()->GetTime();
+}
+#endif
+
 bool ZApplication::OnCreate(ZLoadingProgress *pLoadingProgress)
 {
 	MInitProfile();
+
+#ifdef TIMESCALE
+	GetGlobalTimeMS = GetGlobalTimeMSOverride;
+#endif
 
 	TIMECAPS tc;
 

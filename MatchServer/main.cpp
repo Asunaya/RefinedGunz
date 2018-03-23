@@ -77,6 +77,8 @@ try
 	char LogFileName[256];
 	GetLogFileName(LogFileName);
 	InitLog(MLOGSTYLE_DEBUGSTRING | MLOGSTYLE_FILE, LogFileName);
+	void MatchServerCustomLog(const char*);
+	CustomLog = MatchServerCustomLog;
 
 	char cwd[256];
 	GetCurrentDirectory(std::size(cwd), cwd);

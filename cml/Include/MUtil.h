@@ -3,11 +3,14 @@
 #include <string>
 #include <memory>
 #include <algorithm>
-#include <intrin.h>
 #include "TMP.h"
 #include "GlobalTypes.h"
 #include "StringView.h"
 #include "optional.h"
+
+#ifdef _MSC_VER
+#include <intrin.h>
+#endif
 
 #ifndef SAFE_DELETE
 #define SAFE_DELETE(p)       { if(p) { delete (p);     (p)=NULL; } }
@@ -319,10 +322,16 @@ T& unmove(T&& x) { return x; }
 // Returns value rounded up towards the nearest power of two
 inline u32 NextPowerOfTwo(u32 value)
 {
-	unsigned long rightmost_bit;
-	if (!_BitScanReverse(&rightmost_bit, value))
+	if (value == 0)
 		return 2;
-	auto rightmost_bit_value = 1 << rightmost_bit;
+#ifdef _MSC_VER
+	unsigned long rightmost_bit;
+	_BitScanReverse(&rightmost_bit, value);
+#else
+	
+	auto rightmost_bit = static_cast<u32>(31 - __builtin_clz(value));
+#endif
+	auto rightmost_bit_value = 1u << rightmost_bit;
 	if ((value ^ rightmost_bit_value) != 0)
 		rightmost_bit_value <<= 1;
 	return rightmost_bit_value;

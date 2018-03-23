@@ -43,7 +43,7 @@ bool MValidateBlobArraySize(const void* pBlob, size_t Size);
 template <typename T, size_t N, size_t Alignment = sizeof(void*)>
 struct StaticBlobArray
 {
-	static_assert(std::is_trivially_copyable_v<T>, "Illegal type");
+	static_assert(std::is_trivially_copyable<T>::value, "Illegal type");
 
 	StaticBlobArray()
 	{

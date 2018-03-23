@@ -1,3 +1,4 @@
+#ifdef _WIN32
 #pragma once
 
 #include <string>
@@ -14,4 +15,5 @@ DWORD GetCrashInfo(LPEXCEPTION_POINTERS exceptionInfo, std::string& str);
 
 #ifdef __cplusplus
 }
+#endif
 #endif

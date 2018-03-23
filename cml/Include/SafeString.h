@@ -377,4 +377,42 @@ inline std::string strprintf(const char* Format, ...)
 	return Ret;
 }
 
+namespace detail {
+inline int strerror_r_ret_impl(int ret) { return ret; }
+inline int strerror_r_ret_impl(char*) { return 0; }
+}
+
+// Returns zero if ok, and a non-zero value on error.
+inline int strerror_safe(int errnum, char* buf, size_t buflen)
+{
+#ifdef _MSC_VER
+	return strerror_s(buf, buflen, errnum);
+#else
+	// Pass the result through an overloaded function to support the non-standard GNU strerror_r
+	// version that returns char* instead of int.
+	return detail::strerror_r_ret_impl(strerror_r(errnum, buf, buflen));
+#endif
+}
+
+template <size_t buflen>
+inline int strerror_safe(int errnum, char (&buf)[buflen]) {
+	return strerror_safe(errnum, buf, buflen);
+}
+
+inline char* strlwr_safe(char* str, size_t size)
+{
+	size_t i = 0;
+	for (; str[i] && i < size; ++i)
+	{
+		str[i] = tolower(str[i]);
+	}
+	return str + i;
+}
+
+template <size_t size>
+char* strlwr_safe(char (&str)[size])
+{
+	return strlwr_safe(str, size);
+}
+
 #pragma warning(pop)

@@ -29,12 +29,10 @@ void MLogFile(const char* Msg);
 void MLog(const char* Format,...);
 #define mlog MLog
 
-extern "C" void CustomLog(const char *Msg);
-
-#pragma comment(linker, "/alternatename:_CustomLog=_CustomLogDefault")
+extern void (*CustomLog)(const char *Msg);
 
 #ifdef _WIN32
-void __cdecl MMsg(const char *pFormat,...);
+void MMsg(const char *pFormat,...);
 #endif
 
 using LPEXCEPTION_POINTERS = struct _EXCEPTION_POINTERS*;

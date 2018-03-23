@@ -210,7 +210,7 @@ MXmlElement	MXmlElement::CreateChildElement(const char* sTagName)
 	return MXmlElement{ node };
 }
 
-bool MXmlElement::GetAttribute(char* sOutText, int maxlen, const char* sAttrName, char* sDefaultText)
+bool MXmlElement::GetAttribute(char* sOutText, int maxlen, const char* sAttrName, const char* sDefaultText)
 {
 	auto Attribute = m_pDomNode->first_attribute(sAttrName);
 	if (!Attribute || !Attribute->value())
@@ -301,7 +301,7 @@ bool MXmlElement::GetAttribute(bool* bOutValue, const char* sAttrName, bool bDef
 	return true;
 }
 
-bool MXmlElement::GetAttribute(std::string* pstrOutValue, const char* sAttrName, char* sDefaultValue)
+bool MXmlElement::GetAttribute(std::string* pstrOutValue, const char* sAttrName, const char* sDefaultValue)
 {
 	char szTemp[256];
 	memset(szTemp, 0, 256);
@@ -363,7 +363,7 @@ bool MXmlElement::AddAttribute(const char* sAttrName, const char* sAttrText)
 bool MXmlElement::AddAttribute(const char* sAttrName, int iAttrValue)
 {
 	char szTemp[20];
-	_itoa_s(iAttrValue, szTemp, 10);
+	itoa_safe(iAttrValue, szTemp, 10);
 
 	return AddAttribute(sAttrName, szTemp);
 }
@@ -409,7 +409,7 @@ bool MXmlElement::SetAttribute(const char* sAttrName, char* sAttrText)
 bool MXmlElement::SetAttribute(const char* sAttrName, int iAttrValue)
 {
 	char szTemp[20];
-	_itoa_s(iAttrValue, szTemp, 10);
+	itoa_safe(iAttrValue, szTemp, 10);
 
 	return SetAttribute(sAttrName, szTemp);
 }

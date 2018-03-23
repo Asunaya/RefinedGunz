@@ -22,7 +22,7 @@ void* MMakeBlobArray(int nOneBlobSize, int nBlobCount)
 
 void MEraseBlobArray(void* pBlob)
 {
-	delete[] pBlob;
+	delete[] static_cast<unsigned char*>(pBlob);
 }
 
 const void* MGetBlobArrayElement(const void* pBlob, int i)

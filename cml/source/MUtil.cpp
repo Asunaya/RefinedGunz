@@ -37,7 +37,11 @@ std::string MGetStrLocalTime(unsigned short wYear, unsigned short wMon, unsigned
 
 	auto t = time(nullptr);
 	tm TM;
+#ifdef _MSC_VER
 	auto ret = localtime_s(&TM, &t);
+#else
+	auto ret = localtime_r(&t, &TM);
+#endif
 	if (ret != 0)
 	{
 		MLog("MGetStrLocalTime -- localtime_s failed with error code %d\n", ret);

@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#ifdef _WIN32
 #include "MPdb.h"
 #include <stdio.h>
 #include <Windows.h>
@@ -363,3 +364,4 @@ DWORD GetCrashInfo(LPEXCEPTION_POINTERS exceptionInfo, std::string& str)
 	return EXCEPTION_EXECUTE_HANDLER;
 }
 
+#endif

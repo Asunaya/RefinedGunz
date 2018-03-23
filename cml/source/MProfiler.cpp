@@ -1,9 +1,5 @@
 #include "stdafx.h"
 #include "MProfiler.h"
-#include <windows.h>
-#include <mmsystem.h>
-#include <crtdbg.h>
-#include <time.h>
 
 MProfiler	g_DefaultProfiler;	// Default Global Profiler
 
@@ -159,8 +155,7 @@ void MProfiler::EndProfile(char* szProfileName)
 
 bool MProfiler::FinalAnalysis(char* szFileName)
 {
-	FILE* fp;
-	fopen_s(&fp, szFileName, "wt");
+	FILE* fp = fopen(szFileName, "wt");
 	if(fp==NULL) return false;
 
 	static char szLog[1024];
@@ -168,12 +163,6 @@ bool MProfiler::FinalAnalysis(char* szFileName)
 	int nTotalTime = GetTotalTime();
 	if(nTotalTime==0) nTotalTime = 1;
 
-	char szTime[128], szDate[128];
-    _strtime_s(szTime);
-    _strdate_s(szDate);
-
-	sprintf_safe(szLog, "%s %s\n\n", szDate, szTime);
-	fputs(szLog, fp);
 	sprintf_safe(szLog, "Total Profiling Time : %8.3f sec\n", nTotalTime/1000.0f);
 	fputs(szLog, fp);
 

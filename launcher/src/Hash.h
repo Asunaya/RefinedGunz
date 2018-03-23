@@ -67,7 +67,7 @@ inline bool HashFile(HashType& Output, const char* Filename)
 
 	unsigned char InputBuffer[16 * 1024];
 
-	HashType::Stream Stream;
+	typename HashType::Stream Stream;
 
 	while (true)
 	{

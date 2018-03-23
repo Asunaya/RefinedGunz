@@ -24,7 +24,7 @@ char* MCSVReader::ReadFile(const char* fname)
 	char * ptr;
 	int len;
 
-	fopen_s(&fp, fname, "rb");
+	fp = fopen(fname, "rb");
 	if (!fp) return nullptr;
 
 	fseek(fp, 0, SEEK_END);

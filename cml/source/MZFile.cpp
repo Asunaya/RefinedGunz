@@ -23,23 +23,6 @@ static void GetFullArchivePath(char(&Output)[size], const MZFileDesc& Desc, MZFi
 		Desc.ArchivePath.size(), Desc.ArchivePath.data());
 }
 
-template <size_t size>
-static void GetPathRelativeToArchive(char(&Output)[size],
-	const StringView& Path, const StringView& ArchivePath)
-{
-	auto pRelative = pDesc->Path.data();
-	auto pDest = pDesc->ArchivePath.data();
-	while (tolower(*pRelative) == tolower(*pDest))
-	{
-		pRelative++;
-		pDest++;
-	}
-	if (*pRelative == '/')
-		pRelative++;
-
-	strcpy_safe(Output, pRelative);
-}
-
 MZFile::MZFile() = default;
 
 MZFile::~MZFile()
@@ -61,7 +44,7 @@ bool MZFile::Open(const char* szFileName, MZFileSystem* pZFS)
 			return false;
 		}
 
-		fopen_s(MakeWriteProxy(fp), szFileName, "rb");
+		fp = CFilePtr{fopen(szFileName, "rb")};
 		if (!fp) {
 			return false;
 		}
@@ -100,7 +83,7 @@ bool MZFile::Open(const char* szFileName, MZFileSystem* pZFS)
 		if (!isMode(MZIPREADFLAG_FILE))
 			return false;
 
-		char FullFilePath[_MAX_PATH];
+		char FullFilePath[MFile::MaxPath];
 		GetFullFilePath(FullFilePath, *pDesc, *pZFS);
 		return Open(FullFilePath);
 	}
@@ -108,11 +91,11 @@ bool MZFile::Open(const char* szFileName, MZFileSystem* pZFS)
 
 bool MZFile::OpenArchive(const MZFileDesc& Desc, MZFileSystem& FS)
 {
-	char FullArchivePath[_MAX_PATH];
+	char FullArchivePath[MFile::MaxPath];
 	GetFullArchivePath(FullArchivePath, Desc, FS);
 
-	fopen_s(MakeWriteProxy(fp), FullArchivePath, "rb");
-	if (fp == nullptr)
+	fp = CFilePtr{fopen(FullArchivePath, "rb")};
+	if (!fp)
 	{
 		MLog("MZFile::OpenArchive -- fopen failed on %s!\n", FullArchivePath);
 		assert(false);
@@ -253,16 +236,17 @@ bool MZFile::LoadFile()
 	auto ret = InflateFile(Data.get(), Desc->Size, fp.get(), Desc->CompressedSize, -MAX_WBITS);
 	if (ret.ErrorCode < 0)
 	{
-		MLog("MZFile::LoadFile -- InflateFile failed with error code %d, error message: %s, written %d, read %d\n",
+		MLog("MZFile::LoadFile -- InflateFile failed with error code %d, error message: %s, "
+			"written %d, read %d\n",
 			ret.ErrorCode, ret.ErrorMessage, ret.BytesWritten, ret.BytesRead);
 		if (ret.ErrorCode == Z_ERRNO)
 		{
 			const auto err = errno;
-			char strerror_buffer[512]; strerror_buffer[0] = 0;
-			auto strerror_ret = strerror_s(strerror_buffer, std::size(strerror_buffer), err);
+			char strerror_buffer[512];
+			auto strerror_ret = strerror_safe(err, strerror_buffer);
 			if (strerror_ret != 0)
 			{
-				MLog("strerror_s failed with error code %d\n",
+				sprintf_safe(strerror_buffer, "strerror_safe failed with error code %d",
 					strerror_ret);
 			}
 

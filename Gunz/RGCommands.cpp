@@ -764,13 +764,3 @@ void LoadRGCommands(ZChatCmdManager& CmdManager)
 	},
 		CCF_ALL, 7, 7, true, "", "");
 }
-
-#ifdef TIMESCALE
-unsigned long long GetGlobalTimeMS()
-{
-	if (!ZApplication::GetInstance())
-		return timeGetTime();
-
-	return ZApplication::GetInstance()->GetTime();
-}
-#endif

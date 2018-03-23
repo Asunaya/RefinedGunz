@@ -4,8 +4,6 @@
 #include <memory.h>
 #include <string.h>
 #include "MDebug.h"
-#include <tchar.h>
-#include <io.h>
 #include <cassert>
 #include "zlib_util.h"
 #include <algorithm>
@@ -504,10 +502,9 @@ static int	_fileheaderReaderSize = 0;
 
 bool MZip::UpgradeMrs(char* mrs_name) // Mrs To Mrs2
 {
-	FILE* fp = nullptr;
-	auto ret = fopen_s(&fp, mrs_name, "rb+");
+	auto fp = fopen(mrs_name, "rb+");
 
-	if(!fp || ret != 0) {
+	if(!fp) {
 		mlog("MZip::UpgradeMrs - Failed to open %s\n", mrs_name);
 		return false;
 	}
@@ -623,10 +620,9 @@ bool MZip::UpgradeMrs(char* mrs_name) // Mrs To Mrs2
 
 bool MZip::ConvertZip(char* zip_name)
 {
-	FILE* fp = nullptr;
-	auto ret = fopen_s(&fp, zip_name, "rb+");
+	FILE* fp = fopen(zip_name, "rb+");
 
-	if(!fp || ret != 0) {
+	if(!fp) {
 		mlog("MZip::ConvertZip - Failed to open %s\n", zip_name);
 		return false;
 	}
@@ -894,11 +890,9 @@ bool MZip::isVersion1Mrs(FILE* fp)
 
 bool MZip::RecoveryZip(char* zip_name)
 {
-	FILE* fp = nullptr;
-	
-	auto err = fopen_s(&fp, zip_name, "rb+");
+	FILE* fp = fopen(zip_name, "rb+");
 
-	if(err != 0 || fp == nullptr) {
+	if(fp == nullptr) {
 		mlog("Couldn't open file %s \n", zip_name);
 		return false;
 	}
@@ -926,11 +920,10 @@ FNode::FNode()
 	m_offset = 0;
 }
 
-void FNode::SetName(char* str)	
+void FNode::SetName(const char* str)	
 {
 	if(strlen(str) > 255) return;
 	strcpy_safe(m_name,str);
-	str[255] = 0;
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -1006,6 +999,9 @@ void FFileList::RecoveryZip()
 #ifdef WIN32
 #include <Windows.h>
 #include <shellapi.h>
+#ifndef _T
+#define _T(x) x
+#endif
 void FFileList::ConvertVtf() 
 {
 	iterator node;
@@ -1043,7 +1039,7 @@ void FFileList::ConvertNameMRes2Zip()
 		strcpy_safe(_buf_rename,pNode->m_name);
 		len = (int)strlen(pNode->m_name);
 
-		_buf_rename[len-3] = NULL;
+		_buf_rename[len-3] = 0;
 		strcat_safe(_buf_rename,"zip");
 
 		rename( pNode->m_name, _buf_rename);
@@ -1066,7 +1062,7 @@ void FFileList::ConvertNameZip2MRes()
 		strcpy_safe(_buf_rename,pNode->m_name);
 		len = (int)strlen(pNode->m_name);
 
-		_buf_rename[len-3] = NULL;
+		_buf_rename[len-3] = 0;
 		strcat_safe(_buf_rename,"mrs");
 
 		rename( pNode->m_name, _buf_rename);
@@ -1075,58 +1071,36 @@ void FFileList::ConvertNameZip2MRes()
 	}
 }
 
-bool GetDirList(const char* path, FFileList& pList)
+static bool GetEntityList(const char* path, FFileList& pList, bool Dirs)
 {
-	struct _finddata_t file_t;
-	long hFile;
-
 	FNode* pNode;
 
-	if( (hFile = _findfirst( path , &file_t )) != -1L ) {
-		do{
-			if(strcmp(file_t.name, "." )==0)	continue;
-			if(strcmp(file_t.name, "..")==0)	continue;
-			if( !(file_t.attrib & _A_SUBDIR) )	continue;
+	for (auto&& File : MFile::Glob(path))
+	{
+		if (strcmp(File.Name, ".") == 0)	continue;
+		if (strcmp(File.Name, "..") == 0)	continue;
+		if (bool(File.Attributes & MFile::Attributes::Subdir) == Dirs)	continue;
 
-			pNode = new FNode;
-			pNode->SetName(file_t.name);
-			pList.Add(pNode);
+		pNode = new FNode;
+		pNode->SetName(File.Name);
+		pList.Add(pNode);
 
-		} 
-		while( _findnext( hFile, &file_t ) == 0 );
-
-		_findclose(hFile);
 	}
 
 	return true;
+}
+
+bool GetDirList(const char* path, FFileList& pList)
+{
+	return GetEntityList(path, pList, true);
 }
 
 bool GetFileList(const char* path, FFileList& pList)
 {
-	struct _finddata_t file_t;
-	long hFile;
-
-	FNode* pNode;
-
-	if( (hFile = _findfirst( path , &file_t )) != -1L ) {
-		do{
-			if(strcmp(file_t.name, "." )==0) continue;
-			if(strcmp(file_t.name, "..")==0) continue;
-			if(file_t.attrib & _A_SUBDIR )	 continue;
-
-			pNode = new FNode;
-			pNode->SetName(file_t.name);
-			pList.Add(pNode);
-
-		} 
-		while( _findnext( hFile, &file_t ) == 0 );
-
-		_findclose(hFile);
-	}
-
-	return true;
+	return GetEntityList(path, pList, false);
 }
 
+#if _WIN32
 bool GetFileListWin(const char* path, FFileList& pList)
 {
 	WIN32_FIND_DATA		file_t;
@@ -1272,3 +1246,4 @@ bool GetFindFileListWin(const char* path, const char* ext, FFileList& pList)
 
 	return true;
 }
+#endif

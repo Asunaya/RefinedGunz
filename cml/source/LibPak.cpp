@@ -6,9 +6,17 @@
 	All copyright (c) 1997, MAIET entertainment software
 */
 #include "stdafx.h"
-#include "MWindows.h"
 #include <stdio.h>
 #include "LibPak.h"
+
+#ifdef _MSC_VER
+#include "MWindows.h"
+#else
+#include <string.h>
+#include "MDebug.h"
+void OutputDebugString(const char* p){ mlog("%s", p); }
+int _stricmp(const char* a, const char* b) { return strcasecmp(a, b); }
+#endif
 
 //	Modified by Leejangho ( 98-01-10 5:30:04 오전 )
 //		u8* MemoryMappedFile::Open( char *lpszFileName )
@@ -17,6 +25,7 @@ u8* MemoryMappedFile::Open( const char *lpszFileName, bool bReadOnly )
 {
 	Close();
 
+#ifdef _MSC_VER
 	// Modified by Leejangho ( 98-01-30 5:58:49 오후 )
 	//		m_fileHandle=CreateFile(lpszFileName,GENERIC_READ,FILE_SHARE_READ,NULL,OPEN_EXISTING,FILE_FLAG_RANDOM_ACCESS,NULL);
 	if(bReadOnly==TRUE)
@@ -78,6 +87,10 @@ u8* MemoryMappedFile::Open( const char *lpszFileName, bool bReadOnly )
 		return NULL;
 	}
 
+#else
+	assert(false);
+#endif
+
 	m_bOpened = TRUE;
 
 	return m_lpPointer;	
@@ -86,6 +99,7 @@ u8* MemoryMappedFile::Open( const char *lpszFileName, bool bReadOnly )
 
 void MemoryMappedFile::Close(void)
 {
+#ifdef _MSC_VER
 	if(m_lpPointer){
 		UnmapViewOfFile(m_lpPointer);
 		m_lpPointer = NULL;
@@ -100,6 +114,10 @@ void MemoryMappedFile::Close(void)
 		CloseHandle(m_fileHandle);
 		m_fileHandle = NULL;
 	}
+#else
+	assert(false);
+#endif
+
 	m_nPosition = 0;
 	m_nFileSize = 0;
 

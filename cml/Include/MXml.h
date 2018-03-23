@@ -82,14 +82,14 @@ public:
 	bool GetChildContents(bool* bOutValue, const char* sChildTagName);
 
 	template<size_t size> bool GetAttribute(char(&sOutText)[size], const char *szAttrName,
-		char *sDefaultText = "") {
+		const char *sDefaultText = "") {
 		return GetAttribute(sOutText, size, szAttrName, sDefaultText);
 	}
-	bool GetAttribute(char* sOutText, int maxlen, const char* sAttrName, char* sDefaultText = "");
+	bool GetAttribute(char* sOutText, int maxlen, const char* sAttrName, const char* sDefaultText = "");
 	bool GetAttribute(int* ipOutValue, const char* sAttrName, int nDefaultValue = 0);
 	bool GetAttribute(bool* bOutValue, const char* sAttrName, bool bDefaultValue = false);
 	bool GetAttribute(float* fpOutValue, const char* sAttrName, float fDefaultValue = 0.0f);
-	bool GetAttribute(std::string* pstrOutValue, const char* sAttrName, char* sDefaultValue = "");
+	bool GetAttribute(std::string* pstrOutValue, const char* sAttrName, const char* sDefaultValue = "");
 	bool AddAttribute(const char* sAttrName, const char* sAttrText);
 	bool AddAttribute(const char* sAttrName, int iAttrValue);
 	bool AddAttribute(const char* sAttrName, bool bAttrValue);

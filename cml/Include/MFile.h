@@ -1,16 +1,27 @@
 #pragma once
 
 #include "GlobalTypes.h"
+#include "SafeString.h"
 #include "StringView.h"
+#include "ArrayView.h"
 #include "MUtil.h"
 #include "optional.h"
 #include <functional>
 #include <cassert>
+#include <cstdint>
+
+#ifndef _WIN32
+#include <glob.h>
+#endif
 
 namespace MFile
 {
 
+#ifdef _WIN32
 constexpr size_t MaxPath = 260;
+#else
+constexpr size_t MaxPath = 4096;
+#endif
 
 bool Exists(const char* Path);
 bool Delete(const char* Path);
@@ -39,9 +50,12 @@ enum Type
 };
 }
 
+constexpr u64 UnknownCreationTime = UINT64_MAX;
+
 struct FileAttributes
 {
 	u32 Attributes;
+	// May be set to UnknownCreationTime if unknown.
 	u64 CreationTime;
 	u64 LastAccessTime;
 	u64 LastModifiedTime;
@@ -53,6 +67,7 @@ optional<FileAttributes> GetAttributes(const char* Path);
 struct FileData
 {
 	u32 Attributes;
+	// May be set to UnknownCreationTime if unknown.
 	u64 CreationTime;
 	u64 LastAccessTime;
 	u64 LastModifiedTime;
@@ -64,16 +79,37 @@ struct FileIterator;
 
 struct FileRange
 {
-	FileIterator begin();
-	FileIterator end();
+	inline FileIterator begin();
+	inline FileIterator end();
 
-	intptr_t First;
+	bool error() const { return ErrorCode != 0; }
+	int error_code() const { return ErrorCode; }
+	void error_message(ArrayView<char> Output) const
+	{
+		strerror_safe(ErrorCode, Output.data(), Output.size());
+	}
+
+	struct Deleter { void operator()(void*) const; };
+	using HandleType = std::unique_ptr<void, Deleter>;
+	HandleType Handle;
 	FileData Data;
+	int ErrorCode{};
+
+#ifdef _WIN32
+	bool empty() const { return !bool(Handle); }
+#else
+	glob_t GlobData;
+	size_t CurFileIndex;
+	bool empty() const { return GlobData.gl_pathc == 0; }
+#endif
 };
 
 struct FileIterator
 {
-	bool operator==(const FileIterator& rhs) const { assert(&Range == &rhs.Range); return End == rhs.End; }
+	bool operator==(const FileIterator& rhs) const {
+		assert(&Range == &rhs.Range);
+		return End == rhs.End;
+	}
 	bool operator!=(const FileIterator& rhs) const { return !(*this == rhs); }
 	const FileData& operator*() const { return Range.Data; }
 	FileIterator& operator++();
@@ -87,7 +123,10 @@ struct FileIterator
 	bool End;
 };
 
-FileRange FilesAndSubdirsInDir(const char* Path);
+inline FileIterator FileRange::begin() { return {*this, empty()}; }
+inline FileIterator FileRange::end() { return {*this, true}; }
+
+FileRange Glob(const char* Pattern);
 
 enum class Seek
 {

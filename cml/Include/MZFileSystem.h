@@ -160,7 +160,7 @@ public:
 		return *this;
 	}
 
-	RecursiveMZFileIterator& operator++(int) {
+	RecursiveMZFileIterator operator++(int) {
 		auto temp = *this;
 		++*this;
 		return temp;

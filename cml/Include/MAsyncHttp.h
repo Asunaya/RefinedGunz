@@ -1,5 +1,10 @@
 #pragma once
 
+#ifdef _MSC_VER
+
+#include <type_traits>
+#include "MFile.h"
+
 /*
 200 OK 
 201 Created 
@@ -59,7 +64,7 @@ protected:
 	HANDLE		m_hRequestOpenedEvent;
 	HANDLE		m_hRequestCompleteEvent;
 
-	char		m_szBasePath[_MAX_DIR];
+	char		m_szBasePath[MFile::MaxPath];
 
 	int			m_nLastHttpStatusCode;
 	bool		m_bTransferFinished;
@@ -88,3 +93,5 @@ public:
 
 	bool Get(const char* pszURL);
 };
+
+#endif

@@ -191,8 +191,8 @@ int CfgFile::Open(char *filename)
 
 	m_nErrorLine = -1; m_nLineNum = 0;
 
-	m_FilePointer = nullptr;
-	if (fopen_s(&m_FilePointer, filename, "r") != 0 || m_FilePointer == nullptr) {
+	m_FilePointer = fopen(filename, "r");
+	if (!m_FilePointer) {
 		ret = CFG_OPENFAIL;	
 		goto return_label;
 	}

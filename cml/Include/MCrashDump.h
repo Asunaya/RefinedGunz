@@ -1,6 +1,8 @@
 #ifndef _MCRASHDUMP_H
 #define _MCRASHDUMP_H
 
+#ifdef _WIN32
+
 #include "MDebug.h"
 #include "Shlwapi.h"
 #ifdef _MSC_VER
@@ -14,5 +16,7 @@
 
 
 DWORD CrashExceptionDump(PEXCEPTION_POINTERS ExceptionInfo, const char* szDumpFileName);
+
+#endif
 
 #endif

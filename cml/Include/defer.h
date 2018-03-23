@@ -13,7 +13,7 @@ struct defer : private std::tuple<std::decay_t<ArgsType>...>
 	defer(T&& fn, ArgsType&&... Args) : fn(std::forward<T>(fn)), Base{ std::forward<ArgsType>(Args)... } {}
 	defer(const defer& src) = delete;
 	defer& operator=(const defer& src) = delete;
-	~defer() { /*std::*/apply(fn, *static_cast<Base*>(this)); }
+	~defer() { /*std::*/::apply(fn, *static_cast<Base*>(this)); }
 
 private:
 	std::decay_t<T> fn;

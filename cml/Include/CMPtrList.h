@@ -6,7 +6,11 @@
 #ifndef CMPTRLIST_H
 #define CMPTRLIST_H
 
-#include <crtdbg.h>			// _ASSERT
+#include <cstddef>
+#include <cassert>
+#ifndef _ASSERT
+#define _ASSERT assert
+#endif
 
 // 리스트를 구성할 레코드
 template<class NEW_TYPE>

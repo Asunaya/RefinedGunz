@@ -4,6 +4,8 @@
 #include <cassert>
 #include <string>
 #include <cwchar>
+#include <cctype>
+#include <cwctype>
 #include <utility>
 #include "ArrayView.h"
 
@@ -144,15 +146,31 @@ using WStringView = BasicStringView<wchar_t>;
 inline bool iequals(const StringView& lhs, const StringView& rhs) {
 	if (lhs.size() != rhs.size())
 		return false;
+	
+	for (size_t i = 0, end = lhs.size(); i < end; ++i)
+	{
+		if (tolower(lhs[i]) != tolower(rhs[i]))
+		{
+			return false;
+		}
+	}
 
-	return _strnicmp(lhs.data(), rhs.data(), lhs.size()) == 0;
+	return true;
 }
 
 inline bool iequals(const WStringView& lhs, const WStringView& rhs) {
 	if (lhs.size() != rhs.size())
 		return false;
 
-	return _wcsnicmp(lhs.data(), rhs.data(), lhs.size()) == 0;
+	for (size_t i = 0, end = lhs.size(); i < end; ++i)
+	{
+		if (towlower(lhs[i]) != towlower(rhs[i]))
+		{
+			return false;
+		}
+	}
+
+	return true;
 }
 
 template <typename CharType>
@@ -224,16 +242,16 @@ CharType* strcat_safe(CharType *Dest, size_t DestSize, const BasicStringView<Cha
 	auto SourceLen = Source.size();
 
 	auto CharsToCopy = SourceLen;
-	if (DestLen + CharsToCopy + 1 > size && size > 0)
+	if (DestLen + CharsToCopy + 1 > DestSize && DestSize > 0)
 	{
-		CharsToCopy = size - 1 - DestLen;
+		CharsToCopy = DestSize - 1 - DestLen;
 	}
 
-	memcpy(Dest + DestLen, Source.data(), BytesToCopy * sizeof(CharType));
+	memcpy(Dest + DestLen, Source.data(), CharsToCopy * sizeof(CharType));
 
-	Dest[DestLen + BytesToCopy] = 0;
+	Dest[DestLen + CharsToCopy] = 0;
 
-	return Dest + DestLen + BytesToCopy;
+	return Dest + DestLen + CharsToCopy;
 }
 
 template <typename CharType, size_t DestSize>

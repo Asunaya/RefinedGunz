@@ -428,7 +428,11 @@ struct  protoent {
 	short   p_proto;                /* protocol # */
 };
 
+#ifdef _MSC_VER
 #define MSOCKET_CALL __stdcall
+#else
+#define MSOCKET_CALL
+#endif
 
 SOCKET MSOCKET_CALL accept(
 	SOCKET s,
@@ -515,7 +519,7 @@ int MSOCKET_CALL recvfrom(
 
 int MSOCKET_CALL send(
 	SOCKET s,
-	_In_reads_bytes_(len) const char * buf,
+	const char * buf,
 	int len,
 	int flags);
 

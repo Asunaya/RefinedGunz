@@ -6,7 +6,7 @@ namespace MProcess
 {
 
 // Starts a process, returns a handle to the process on success or 0 on error.
-uintptr_t Start(const char* CommandLine);
+uintptr_t Start(const char* File, const char * const * argv = nullptr);
 
 struct AwaitResult {
 	bool TimedOut;

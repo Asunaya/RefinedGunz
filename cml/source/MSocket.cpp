@@ -4,6 +4,12 @@
 #include <WinSock2.h>
 #include <WS2tcpip.h>
 #undef CreateEvent
+#else
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/ioctl.h>
+#include <arpa/inet.h>
+#include <netdb.h>
 #endif
 
 #include "MSocket.h"
@@ -12,6 +18,13 @@
 #include "MInetUtil.h"
 #include "StringView.h"
 #include "MUtil.h"
+
+#ifndef _MSC_VER
+void _set_errno(int errnum)
+{
+	errno = errnum;
+}
+#endif
 
 namespace MSocket
 {
@@ -143,7 +156,7 @@ void LogError(const char* CallerName, const char* FunctionName, int ErrorCode)
 
 #else
 
-static_assert(false, "Implement this");
+//static_assert(false, "Implement this");
 
 #endif
 
@@ -159,11 +172,33 @@ in_addr::operator const ::in_addr&() const
 
 // POSIX socket API
 
+namespace detail {
+// Stuff to convert between WinSock parameter types and POSIX ones to avoid repeating a bunch of casts.
+template <typename To, typename From>
+static To convert1(From x) { return x; }
+template <>
+::sockaddr* convert1(MSocket::sockaddr* x) { return reinterpret_cast<::sockaddr*>(x); }
+static_assert(sizeof(::sockaddr) == sizeof(MSocket::sockaddr), "Wrong sockaddr_t size");
+#ifndef _MSC_VER
+template <>
+socklen_t* convert1(int* x) { return reinterpret_cast<socklen_t*>(x); }
+static_assert(sizeof(socklen_t) == sizeof(int), "Wrong socklen_t size");
+#define CALL_API
+#else
+#define CALL_API __stdcall
+#endif
+
+template <typename Ret, typename... FuncArgs, typename... Args>
+static Ret call(Ret (CALL_API *func)(FuncArgs...), Args... args) {
+	return func(convert1<FuncArgs, Args>(args)...);
+}
+}
+
 SOCKET MSOCKET_CALL accept(
 	SOCKET s,
 	struct sockaddr *addr,
 	int *addrlen) {
-	return ::accept(s, reinterpret_cast<::sockaddr*>(addr), addrlen);
+	return detail::call(::accept, s, addr, addrlen);
 }
 
 int MSOCKET_CALL bind(
@@ -174,7 +209,11 @@ int MSOCKET_CALL bind(
 }
 
 int MSOCKET_CALL closesocket(SOCKET s) {
+#ifdef _MSC_VER
 	return ::closesocket(s);
+#else
+	return ::close(s);
+#endif
 }
 
 int MSOCKET_CALL connect(
@@ -188,21 +227,25 @@ int MSOCKET_CALL ioctlsocket(
 	SOCKET s,
 	long cmd,
 	u32 *argp) {
+#ifdef _MSC_VER
 	return ::ioctlsocket(s, cmd, (unsigned long*)argp);
+#else
+	return ::ioctl(s, cmd, argp);
+#endif
 }
 
 int MSOCKET_CALL getpeername(
 	SOCKET s,
 	struct sockaddr *name,
 	int * namelen) {
-	return ::getpeername(s, reinterpret_cast<::sockaddr*>(name), namelen);
+	return detail::call(::getpeername, s, name, namelen);
 }
 
 int MSOCKET_CALL getsockname(
 	SOCKET s,
 	struct sockaddr *name,
 	int * namelen) {
-	return ::getsockname(s, reinterpret_cast<::sockaddr*>(name), namelen);
+	return detail::call(::getsockname, s, name, namelen);
 }
 
 int MSOCKET_CALL getsockopt(
@@ -211,7 +254,7 @@ int MSOCKET_CALL getsockopt(
 	int optname,
 	char * optval,
 	int *optlen) {
-	return ::getsockopt(s, level, optname, optval, optlen);
+	return detail::call(::getsockopt, s, level, optname, optval, optlen);
 }
 
 u32 MSOCKET_CALL htonl(u32 hostlong) {
@@ -429,17 +472,17 @@ int MSOCKET_CALL recvfrom(
 	int flags,
 	struct sockaddr * from,
 	int * fromlen) {
-	return ::recvfrom(s, buf, len, flags, reinterpret_cast<::sockaddr*>(from), fromlen);
+	return detail::call(::recvfrom, s, buf, len, flags, from, fromlen);
 }
 
-int MSOCKET_CALL select(
+/*int MSOCKET_CALL select(
 	int nfds,
 	fd_set *readfds,
 	fd_set *writefds,
 	fd_set *exceptfds,
 	const struct timeval *timeout) {
 	return ::select(nfds, readfds, writefds, exceptfds, timeout);
-}
+}*/
 
 int MSOCKET_CALL send(
 	SOCKET s,
@@ -519,7 +562,7 @@ MSocket::protoent * MSOCKET_CALL getprotobynumber(int proto) {
 	return reinterpret_cast<MSocket::protoent*>(::getprotobynumber(proto));
 }
 
-MSocket::protoent * MSOCKET_CALL getprotobyname(_In_z_ const char * name) {
+MSocket::protoent * MSOCKET_CALL getprotobyname(const char * name) {
 	return reinterpret_cast<MSocket::protoent*>(::getprotobyname(name));
 }
 

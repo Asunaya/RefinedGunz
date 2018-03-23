@@ -1,6 +1,11 @@
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
+
+using std::size_t;
+using std::ptrdiff_t;
+using std::nullptr_t;
 
 using i8 = int8_t;
 using i16 = int16_t;
@@ -10,6 +15,7 @@ using u8 = uint8_t;
 using u16 = uint16_t;
 using u32 = uint32_t;
 using u64 = uint64_t;
+
 struct v2;
 struct v3;
 struct v4;
