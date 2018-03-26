@@ -1237,72 +1237,66 @@ void ZCombatInterface::UpdateCombo(ZCharacter* pCharacter)
 	}
 }
 
+static void DrawName(MDrawContext* pDC, ZCharacter* pCharacter, MPOINT Position, bool LowOffset,
+	bool RedFont)
+{
+	auto NonAdminFontName = RedFont ? "FONTa12_O1Red" : "FONTa12_O1Blr";
+	bool Admin = pCharacter->IsAdmin();
+	auto FontName = Admin ? "FONTa12_O1Org" : NonAdminFontName;
+	auto Color = Admin ? ZCOLOR_ADMIN_NAME : 0xFF00FF00;
+	auto Font = MFontManager::Get(FontName);
+	assert(Font);
+	pDC->SetFont(Font);
+	pDC->SetColor(Color);
+	pDC->SetBitmap(nullptr);
+	auto Username = pCharacter->GetUserName();
+	int x = Position.x - Font->GetWidth(Username) / 2;
+	int y_offset = LowOffset ? -pDC->GetFont()->GetHeight() - 10 : -12;
+	pDC->Text(x, Position.y + y_offset, Username);
+}
+
+static void DrawNames(MDrawContext* pDC, ZCharacter* pTargetCharacter, bool TargetTeamOnly)
+{
+	auto Game = ZGetGame();
+	if (TargetTeamOnly)
+	{
+		if (!Game->m_pMyCharacter) return;
+		if (!pTargetCharacter) return;
+		if (!Game->GetMatch()->IsTeamPlay()) return;
+	}
+
+	for (ZCharacter* pCharacter : MakePairValueAdapter(Game->m_CharacterManager))
+	{
+		if (!pCharacter) continue;
+		if (!pCharacter->IsVisible()) continue;
+		if (pCharacter->IsDie()) continue;
+		if (!pCharacter->IsRendered()) continue;
+		if (TargetTeamOnly)
+		{
+			if (pCharacter == pTargetCharacter) continue;
+			if (pCharacter->GetTeamID() != pTargetCharacter->GetTeamID()) continue;
+		}
+
+		auto pos = pCharacter->GetPosition();
+		auto pMesh = pCharacter->m_pVMesh;
+		if (!pMesh) continue;
+		rboundingbox box;
+		box.vmax = pos + rvector(50.f, 50.f, 190.f);
+		box.vmin = pos + rvector(-50.f, -50.f, 0.f);
+
+		if (!isInViewFrustum(box, RGetViewFrustum())) continue;
+		
+		bool Minimap = ZGetCamera()->GetLookMode() == ZCAMERA_MINIMAP;
+		auto src_pos = Minimap ? v3{pos.x, pos.y, 0} : pMesh->GetHeadPosition() + v3(0, 0, 30.f);
+		auto screen_pos = RGetTransformCoord(src_pos);
+		DrawName(pDC, pCharacter, {int(screen_pos.x), int(screen_pos.y)}, false,
+			TargetTeamOnly ? false : pCharacter->GetTeamID() == MMT_RED);
+	}
+}
 
 void ZCombatInterface::DrawFriendName(MDrawContext* pDC)
 {
-	if (ZApplication::GetGame()->m_pMyCharacter == NULL) return;
-
-	if (ZApplication::GetGame()->GetMatch()->IsTeamPlay())
-	{
-		ZCharacter* pTargetCharacter = GetTargetCharacter();
-		if (pTargetCharacter == NULL) return;
-		
-		for(ZCharacterManager::iterator itor = ZApplication::GetGame()->m_CharacterManager.begin();
-			itor != ZApplication::GetGame()->m_CharacterManager.end(); ++itor)
-		{
-			rvector pos, screen_pos;
-			ZCharacter* pCharacter = (*itor).second;
-			if (!pCharacter->IsVisible()) continue;
-			if (pCharacter->IsDie()) continue;
-			if (pCharacter->GetTeamID() != pTargetCharacter->GetTeamID()) continue;
-			if (pCharacter==pTargetCharacter) continue;
-
-			pos = pCharacter->GetPosition();
-			RVisualMesh* pVMesh = pCharacter->m_pVMesh;
-			RealSpace2::rboundingbox box;
-
-			if (pVMesh == NULL) continue;
-			
-//			box.vmax = pVMesh->m_vBMax + pos;
-//			box.vmin = pVMesh->m_vBMin + pos;
-			
-			box.vmax = pos + rvector(50.f, 50.f, 190.f);
-			box.vmin = pos + rvector(-50.f, -50.f, 0.f);
-
-			if (isInViewFrustum(box, RGetViewFrustum()))
-			{
-				/*
-#define CHARACTER_HEIGHT	185.0f
-				pos.z = pos.z + CHARACTER_HEIGHT;
-				screen_pos = RGetTransformCoord(pos);
-				*/
-				screen_pos = RGetTransformCoord(pCharacter->GetVisualMesh()->GetHeadPosition()+rvector(0,0,30.f));
-
-				MFont *pFont=NULL;
-
-				if(pCharacter->IsAdmin()) {
-					pFont = MFontManager::Get("FONTa12_O1Org");
-					pDC->SetColor(MCOLOR(ZCOLOR_ADMIN_NAME));
-				}
-				else {
-					pFont = MFontManager::Get("FONTa12_O1Blr");
-					pDC->SetColor(MCOLOR(0xFF00FF00));
-				}
-
-				pDC->SetBitmap(NULL);
-
-				/////// Outline Font //////////
-//				MFont *pFont=MFontManager::Get("FONTa12_O1Blr");
-				if (pFont == NULL) _ASSERT(0);
-				pDC->SetFont(pFont);
-				///////////////////////////////
-
-				int x = screen_pos.x - pDC->GetFont()->GetWidth(pCharacter->GetUserName()) / 2;
-
-				pDC->Text(x, screen_pos.y - 12, pCharacter->GetUserName());
-			}
-		}
-	}
+	DrawNames(pDC, GetTargetCharacter(), true);
 }
 
 void ZCombatInterface::DrawEnemyName(MDrawContext* pDC)
@@ -1312,107 +1306,31 @@ void ZCombatInterface::DrawEnemyName(MDrawContext* pDC)
 	ZPICKINFO pickinfo;
 
 	rvector pos,dir;
-	if(!RGetScreenLine(Cp.x,Cp.y,&pos,&dir))
-		return;
+	if(!RGetScreenLine(Cp.x,Cp.y,&pos,&dir)) return;
 	
 	ZCharacter *pTargetCharacter=GetTargetCharacter();
 
-	if(ZApplication::GetGame()->Pick(pTargetCharacter,pos,dir,&pickinfo))
+	auto Game = ZGetGame();
+	if (!Game->Pick(pTargetCharacter, pos, dir, &pickinfo)) return;
+
+	if (!pickinfo.pObject) return;
+	if (!IsPlayerObject(pickinfo.pObject)) return;
+	if (pickinfo.pObject->IsDie()) return;
+
+	ZCharacter* pPickedCharacter = (ZCharacter*)pickinfo.pObject;
+
+	if (Game->GetMatch()->IsTeamPlay() && pTargetCharacter &&
+		pPickedCharacter->GetTeamID() == pTargetCharacter->GetTeamID())
 	{
-		if (pickinfo.pObject) {
-			if (!IsPlayerObject(pickinfo.pObject)) return;
-			if (pickinfo.pObject->IsDie()) return;
-
-			ZCharacter* pPickedCharacter = (ZCharacter*)pickinfo.pObject;
-
-			bool bFriend = false;
-			if (ZApplication::GetGame()->GetMatch()->IsTeamPlay()) {
-				if (pTargetCharacter && pPickedCharacter->GetTeamID() == pTargetCharacter->GetTeamID())
-					bFriend = true;
-			}
-
-			if (bFriend == false) {
-
-				/////// Outline Font //////////
-
-				MFont *pFont = NULL;//MFontManager::Get("FONTa12_O1Red");
-
-				if(pPickedCharacter->IsAdmin()) {
-					pDC->SetColor(MCOLOR(ZCOLOR_ADMIN_NAME));
-					pFont = MFontManager::Get("FONTa12_O1Org");
-				}
-				else {
-					pFont = MFontManager::Get("FONTa12_O1Red");
-				}
-
-				if (pFont == NULL) _ASSERT(0);
-				pDC->SetFont(pFont);
-
-				int x = Cp.x - pDC->GetFont()->GetWidth(pPickedCharacter->GetUserName()) / 2;
-				pDC->Text(x, Cp.y - pDC->GetFont()->GetHeight()-10, pPickedCharacter->GetUserName());
-			}			
-		}
+		return;
 	}
+
+	DrawName(pDC, pPickedCharacter, Cp, true, true);
 }
 
 void ZCombatInterface::DrawAllPlayerName(MDrawContext* pDC)
 {
-	for(ZCharacterManager::iterator itor = ZApplication::GetGame()->m_CharacterManager.begin();
-		itor != ZApplication::GetGame()->m_CharacterManager.end(); ++itor)
-	{
-		rvector pos, screen_pos;
-		ZCharacter* pCharacter = (*itor).second;
-		if (!pCharacter->IsVisible()) continue;
-		if (pCharacter->IsDie()) continue;
-
-		pos = pCharacter->GetPosition();
-		RVisualMesh* pVMesh = pCharacter->m_pVMesh;
-		RealSpace2::rboundingbox box;
-
-		if (pVMesh == NULL) continue;
-		
-		box.vmax = pos + rvector(50.f, 50.f, 190.f);
-		box.vmin = pos + rvector(-50.f, -50.f, 0.f);
-
-		if (isInViewFrustum(box, RGetViewFrustum()))
-		{
-			if(ZGetCamera()->GetLookMode()==ZCAMERA_MINIMAP) {
-				rvector pos = pCharacter->m_Position;
-				pos.z=0;
-				screen_pos = RGetTransformCoord(pos);
-			}else
-				screen_pos = RGetTransformCoord(pCharacter->GetVisualMesh()->GetHeadPosition()+rvector(0,0,30.f));
-
-			MFont *pFont=NULL;
-
-			if(pCharacter->IsAdmin()) {
-				pFont = MFontManager::Get("FONTa12_O1Org");
-				pDC->SetColor(MCOLOR(ZCOLOR_ADMIN_NAME));
-			}
-			else {
-				if (pCharacter->GetTeamID() == MMT_RED)
-					pFont = MFontManager::Get("FONTa12_O1Red");
-				else if (pCharacter->GetTeamID() == MMT_BLUE)
-					pFont = MFontManager::Get("FONTa12_O1Blr");
-				else
-					pFont = MFontManager::Get("FONTa12_O1Blr");
-
-				pDC->SetColor(MCOLOR(0xFF00FF00));
-			}
-
-			pDC->SetBitmap(NULL);
-
-			/////// Outline Font //////////
-//				MFont *pFont=MFontManager::Get("FONTa12_O1Blr");
-			if (pFont == NULL) _ASSERT(0);
-			pDC->SetFont(pFont);
-			///////////////////////////////
-
-			int x = screen_pos.x - pDC->GetFont()->GetWidth(pCharacter->GetUserName()) / 2;
-
-			pDC->Text(x, screen_pos.y - 12, pCharacter->GetUserName());
-		}
-	}
+	DrawNames(pDC, nullptr, false);
 }
 
 MFont *ZCombatInterface::GetGameFont()
