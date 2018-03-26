@@ -295,7 +295,7 @@ bool ZCamera::CheckCollisionWall(float &fRealDist, rvector& pos, rvector& dir)
 	up2 = Normalized(CrossProduct(right2, dir));
 	right2 = Normalized(CrossProduct(dir, up2));
 
-	float fov = ZGetConfiguration()->GetCamFix() ? FixedFOV(g_fFOV) : g_fFOV;
+	float fov = GetFOV();
 	float e = 1 / (tanf(fov / 2));
 	float fAspect = (float)RGetScreenWidth() / (float)RGetScreenHeight();
 	float fPV = (fAspect * fNearZ / e);

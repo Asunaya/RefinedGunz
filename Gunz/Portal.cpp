@@ -205,7 +205,7 @@ static rmatrix MakeOrientationMatrix(const v3& dir, const v3& up) {
 static rmatrix GetDefaultProjectionMatrix(float Near = DEFAULT_NEAR_Z, float Far = DEFAULT_FAR_Z) {
 	return PerspectiveProjectionMatrixViewport(
 		RGetScreenWidth(), RGetScreenHeight(),
-		CorrectedFOV(),
+		GetFOV(),
 		Near, Far);
 }
 
@@ -644,7 +644,7 @@ void Portal::RedirectCamera()
 	RViewFrustum = MakeViewFrustum(
 		View,
 		CameraPos, CameraDir,
-		CorrectedFOV(), ComputeVerticalFOV(CorrectedFOV(), RGetAspect()),
+		GetFOV(), ComputeVerticalFOV(GetFOV(), RGetAspect()),
 		MakeNearProjectionMatrix ? 0.1 : 5.0, g_fFarZ);
 }
 

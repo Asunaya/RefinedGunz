@@ -153,6 +153,7 @@ void LoadRGCommands(ZChatCmdManager& CmdManager)
 	CmdManager.AddCommand(0, "camfix", [](const char *line, int argc, char ** const argv) {
 		if (SetBool("Cam fix", ZGetConfiguration()->bCamFix, argc, argv)) {
 			ZGetConfiguration()->Save();
+			SetFOV(ToRadian(ZGetConfiguration()->GetFOV()));
 		}
 	},
 		CCF_ALL, 0, 1, true, "/camfix [0/1]", "");
@@ -340,7 +341,7 @@ void LoadRGCommands(ZChatCmdManager& CmdManager)
 		float fov_degrees = ToDegree(fov_radians);
 
 		ZGetConfiguration()->FOV = fov_degrees;
-		g_fFOV = fov_radians;
+		SetFOV(fov_radians);
 
 		ZGetConfiguration()->Save();
 

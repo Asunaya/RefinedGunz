@@ -42,7 +42,7 @@ void ZWeaponScreenEffect::InitWeapon(MMatchWeaponType nWeaponType)
 	{
 	case MWT_SNIFER:
 		{
-					   g_fFOV = (12.0f / 180.0f * PI_FLOAT);
+		SetFOV(12.0f / 180.0f * PI_FLOAT);
 		}
 		break;
 	}
@@ -57,7 +57,7 @@ void ZWeaponScreenEffect::FinalWeapon(MMatchWeaponType nWeaponType)
 	{
 	case MWT_SNIFER:
 		{
-					   g_fFOV = (70.0f / 180.0f * PI_FLOAT);
+		SetFOV(70.0f / 180.0f * PI_FLOAT);
 		}
 		break;
 	}

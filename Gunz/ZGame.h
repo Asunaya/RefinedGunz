@@ -367,10 +367,9 @@ private:
 
 extern ZGame* g_pGame;
 extern MUID g_MyChrUID;
-extern float g_fFOV;
 extern float g_fFarZ;
-
-float CorrectedFOV();
+float GetFOV();
+void SetFOV(float);
 
 ZCharacterManager*	ZGetCharacterManager();
 ZObjectManager*		ZGetObjectManager();

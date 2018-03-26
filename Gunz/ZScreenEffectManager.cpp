@@ -63,20 +63,27 @@ bool ZScreenEffect::DrawCustom(u64 nTime, const rvector& vOffset, float fAngle)
 	auto View = ViewMatrix(eye, Normalized(at - eye), up);
 	auto Offset = TranslationMatrix(vOffset);
 	rmatrix OriginalProjection;
+	float FOV = ScreenFOVInRadians;
 
 	if (ZGetConfiguration()->GetInterfaceFix())
 	{
-		OriginalProjection = RGetTransform(D3DTS_PROJECTION);
-		auto&& Proj = PerspectiveProjectionMatrixViewport(RGetScreenWidth(), RGetScreenHeight(),
-			FixedFOV(ScreenFOVInRadians), 5, 10000);
-		RSetTransform(D3DTS_PROJECTION, Proj);
+		FOV = FixedFOV(FOV);
 	}
 	else
 	{
 		auto Ratio = 4.0f / 3 / (float(RGetScreenWidth()) / RGetScreenHeight());
-		auto Scale = ScalingMatrix({ 1, Ratio, 1, 1 });
+		auto Scale = ScalingMatrix({1, Ratio, 1, 1});
 
 		View = Scale * View;
+	}
+	
+	bool ChangeProj = ZGetConfiguration()->GetInterfaceFix() || FOV != GetFOV();
+	if (ChangeProj)
+	{
+		OriginalProjection = RGetTransform(D3DTS_PROJECTION);
+		auto&& Proj = PerspectiveProjectionMatrixViewport(RGetScreenWidth(), RGetScreenHeight(),
+			FOV, 5, 10000);
+		RSetTransform(D3DTS_PROJECTION, Proj);
 	}
 
 	View = Offset * View;
@@ -86,8 +93,10 @@ bool ZScreenEffect::DrawCustom(u64 nTime, const rvector& vOffset, float fAngle)
 	m_VMesh.SetWorldMatrix(World);
 	m_VMesh.Render();
 	
-	if (ZGetConfiguration()->GetInterfaceFix())
+	if (ChangeProj)
+	{
 		RSetTransform(D3DTS_PROJECTION, OriginalProjection);
+	}
 
 	if(m_VMesh.isOncePlayDone()) {
 		return false;

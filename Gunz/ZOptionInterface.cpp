@@ -954,7 +954,7 @@ bool ZOptionInterface::SaveInterfaceOption(void)
 
 		using SetEditFunction = void(*)(const char*);
 		std::pair<const char*, SetEditFunction> Edits[] = {
-#ifndef ENABLE_FOV_OPTION
+#ifdef ENABLE_FOV_OPTION
 			{ "FOVOption",      [](const char* Value) {
 				ZGetConfiguration()->FOV = atof(Value); } },
 #endif
@@ -1006,9 +1006,7 @@ bool ZOptionInterface::SaveInterfaceOption(void)
 
 		GetRGMain().GetChat().SetBackgroundColor(Cfg.GetChat()->BackgroundColor);
 
-#ifndef ENABLE_FOV_OPTION
-		g_fFOV = ToRadian(Cfg.FOV);
-#endif
+		SetFOV(ToRadian(Cfg.FOV));
 	}
 
 	{

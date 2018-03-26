@@ -456,7 +456,7 @@ bool ZConfiguration::LoadConfig(const char* szFileName)
 			childElement.GetChildContents(&SlashEffect, ZTOK_ETC_SLASHEFFECT);
 			childElement.GetChildContents(&UnlockedDir, ZTOK_ETC_UNLOCKEDDIR);
 			childElement.GetChildContents(&ShowDebugInfo, ZTOK_ETC_SHOWDEBUGINFO);
-#ifndef ENABLE_FOV_OPTION
+#ifdef ENABLE_FOV_OPTION
 			childElement.GetChildContents(&FOV, ZTOK_ETC_FOV);
 #endif
 			childElement.GetChildContents(&ColorInvert, ZTOK_ETC_COLORINVERT);
@@ -703,7 +703,7 @@ bool ZConfiguration::SaveToFile(const char *szFileName, const char* szHeader)
 		Section.Add(ZTOK_ETC_SLASHEFFECT, SlashEffect);
 		Section.Add(ZTOK_ETC_UNLOCKEDDIR, UnlockedDir);
 		Section.Add(ZTOK_ETC_SHOWDEBUGINFO, ShowDebugInfo);
-#ifndef ENABLE_FOV_OPTION
+#ifdef ENABLE_FOV_OPTION
 		Section.Add(ZTOK_ETC_FOV, FOV);
 #endif
 		Section.Add(ZTOK_ETC_COLORINVERT, ColorInvert);

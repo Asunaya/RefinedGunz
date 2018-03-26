@@ -165,13 +165,17 @@ static ZSnowTownParticleSystem g_SnowTownParticleSystem;
 
 ZGame*	g_pGame = NULL;
 // Is in radians
-float	g_fFOV = DEFAULT_FOV;
+static float	g_fFOV = DEFAULT_FOV;
 float	g_fFarZ = DEFAULT_FAR_Z;
 
-float CorrectedFOV()
+float GetFOV()
 {
-	const auto CamFix = ZGetConfiguration()->GetCamFix();
-	return CamFix ? FixedFOV(g_fFOV) : g_fFOV;
+	return g_fFOV;
+}
+
+void SetFOV(float x)
+{
+	g_fFOV = ZGetConfiguration()->GetCamFix() ? FixedFOV(x) : x;
 }
 
 MUID tempUID(0, 0);
@@ -429,7 +433,7 @@ bool ZGame::Create(MZFileSystem *pfs, ZLoadingProgress *pLoading )
 		ZPostRequestPeerList(ZGetGameClient()->GetPlayerUID(), ZGetGameClient()->GetStageUID());
 	}
 
-	g_fFOV = ToRadian(ZGetConfiguration()->GetFOV());
+	SetFOV(ToRadian(ZGetConfiguration()->GetFOV()));
 
 	rvector dir = GetMapDesc()->GetWaitCamDir();
 	rvector pos = GetMapDesc()->GetWaitCamPos();

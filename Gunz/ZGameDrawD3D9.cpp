@@ -27,9 +27,6 @@ using namespace RealSpace2;
 
 ZGameDrawD3D9::ZGameDrawD3D9(ZGame& Game) : Game(Game) {}
 
-extern float g_fFOV;
-extern float g_fFarZ;
-
 static void SetProjection()
 {
 #ifdef PORTAL
@@ -37,17 +34,7 @@ static void SetProjection()
 		return;
 #endif
 	
-	RSetProjection(CorrectedFOV(), DEFAULT_NEAR_Z, g_fFarZ);
-}
-
-static void ResetProjection()
-{
-#ifdef PORTAL
-	if (g_pPortal->ForcingProjection())
-		return;
-#endif
-
-	RSetProjection(g_fFOV, DEFAULT_NEAR_Z, g_fFarZ);
+	RSetProjection(GetFOV(), DEFAULT_NEAR_Z, g_fFarZ);
 }
 
 static void SetStatesPreDraw(ZGame& Game)
@@ -194,8 +181,6 @@ void ZGameDrawD3D9::DrawScene()
 	PROFILE(g_pPortal->PostDraw());
 
 	GetRenderer().PostProcess.End();
-
-	ResetProjection();
 
 	MEndProfile(profZGameDraw);
 }
