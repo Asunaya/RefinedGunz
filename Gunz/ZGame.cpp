@@ -2942,7 +2942,7 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 #endif
 
 		bool Picked = ::PickHistory(pOwnerCharacter, from, to, GetWorld()->GetBsp(),
-			pickinfo, MakePairValueAdapter(m_CharacterManager), fShotTime, dwPickPassFlag);
+			pickinfo, MakePairValueAdapter(m_ObjectManager), fShotTime, dwPickPassFlag);
 
 		if(Picked)
 		{
