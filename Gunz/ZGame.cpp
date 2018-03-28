@@ -594,6 +594,10 @@ void ZGame::Destroy()
 
 	ZGetWorldManager()->Clear();
 
+#ifdef FLASH_WINDOW_ON_RESPAWN
+	FlashWindow(g_hWnd, FALSE);
+#endif
+
 	char tmpbuf[128];
 	_strtime_s(tmpbuf);
 
