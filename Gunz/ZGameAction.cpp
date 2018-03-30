@@ -143,7 +143,7 @@ void ZGameAction::OnPeerSkill_LastShot(float fShotTime,ZCharacter *pOwnerCharact
 
 				if (g_pGame->CheckWall(pOwnerCharacter, pTar) == false)
 				{
-					if (pTar->IsGuard() && DotProduct(pTar->m_Direction, OwnerDir) < 0)
+					if (pTar->IsGuardNonrecoilable() && DotProduct(pTar->m_Direction, OwnerDir) < 0)
 					{
 						rvector addVel = pTar->GetPosition() - waveCenter;
 						Normalize(addVel);

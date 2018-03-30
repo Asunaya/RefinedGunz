@@ -2682,7 +2682,22 @@ float ZCharacter::ColTest(const rvector& pos, const rvector& vec, float radius, 
 	return SweepTest(rsphere(pos, radius), vec, rsphere(m_Position, CHARACTER_COLLISION_DIST), out);
 }
 
-bool ZCharacter::IsGuard() const
+bool ZCharacter::IsGuardNonrecoilable() const
+{
+#ifndef GUARD_CANCEL_FIX
+	return IsGuardRecoilable();
+#else
+#ifdef GUARD_START_CAN_BLOCK
+	if (m_AniState_Lower == ZC_STATE_LOWER_GUARD_START ||
+		m_AniState_Upper == ZC_STATE_UPPER_GUARD_START)
+		return true;
+#endif
+	return ((ZC_STATE_LOWER_GUARD_IDLE<=m_AniState_Lower && m_AniState_Lower<=ZC_STATE_LOWER_GUARD_CANCEL) ||
+		(ZC_STATE_UPPER_GUARD_IDLE<=m_AniState_Upper && m_AniState_Upper<=ZC_STATE_LOWER_GUARD_CANCEL));
+#endif
+}
+
+bool ZCharacter::IsGuardRecoilable() const
 {
 	return ((ZC_STATE_LOWER_GUARD_IDLE<=m_AniState_Lower && m_AniState_Lower<=ZC_STATE_LOWER_GUARD_BLOCK2) ||
 		(ZC_STATE_UPPER_GUARD_IDLE<=m_AniState_Upper && m_AniState_Upper<=ZC_STATE_UPPER_GUARD_BLOCK2));

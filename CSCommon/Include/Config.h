@@ -79,3 +79,6 @@
 
 // Controls whether the /suicide command kills you instantly or after a delay.
 //#define DELAYED_SUICIDE
+
+// Controls whether guard_cancel registers as a block on the attacking client.
+#define GUARD_CANCEL_FIX

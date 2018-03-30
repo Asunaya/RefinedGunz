@@ -295,8 +295,8 @@ public:
 	virtual float ColTest(const rvector& pos, const rvector& vec, float radius, rplane* out=0) override;
 	virtual bool IsAttackable() override;
 
-	virtual bool IsGuard() const override;
-	virtual bool IsGuardCustom() const override { return IsGuard(); }
+	virtual bool IsGuardNonrecoilable() const override;
+	virtual bool IsGuardRecoilable() const override;
 	virtual void OnMeleeGuardSuccess() override;
 
 	void AddMassiveEffect(const rvector &pos, const rvector &dir);

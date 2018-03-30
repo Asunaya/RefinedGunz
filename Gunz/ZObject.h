@@ -105,8 +105,8 @@ public:
 	virtual bool IsAttackable()	 { return true; }
 	virtual bool IsDie() { return false; }
 	virtual void SetDirection(const rvector& dir);
-	virtual bool IsGuard() const { return false; }
-	virtual bool IsGuardCustom() const { return false; }
+	virtual bool IsGuardNonrecoilable() const { return false; }
+	virtual bool IsGuardRecoilable() const { return false; }
 	virtual MMatchTeam GetTeamID() const { return MMT_ALL; }
 	
 	virtual ZOBJECTHITTEST HitTest(const rvector& origin, const rvector& to, float fTime, rvector *pOutPos = NULL) = 0;

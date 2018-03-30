@@ -2522,17 +2522,21 @@ void ZDummyCharacter::OnUpdate(float fDelta)
 
 #endif // _PUBLISH
 
-bool ZMyCharacter::IsGuard() const
-{
-	return m_bGuard && !m_bGuardStart;
-}
-
-bool ZMyCharacter::IsGuardCustom() const
+bool ZMyCharacter::IsGuardNonrecoilable() const
 {
 #ifdef GUARD_START_CAN_BLOCK
 	return m_bGuard;
 #else
-	return IsGuard();
+	return m_bGuard && !m_bGuardStart;
+#endif
+}
+
+bool ZMyCharacter::IsGuardRecoilable() const
+{
+#ifndef GUARD_CANCEL_FIX
+	return IsGuardNonrecoilable();
+#else
+	return m_bGuard && !m_bGuardStart && !m_bGuardCancel;
 #endif
 }
 
@@ -2592,7 +2596,7 @@ void ZMyCharacter::OnDelayedWork(ZDELAYEDWORKITEM& Item)
 					float fDot = DotProduct(m_Direction, fTarDir);
 					if (fDot > 0.1 && DotProduct(m_Direction, pTar->m_Direction) < 0)
 					{
-						if (pTar->IsGuard())
+						if (pTar->IsGuardRecoilable())
 							ShotBlocked();
 					}
 				}

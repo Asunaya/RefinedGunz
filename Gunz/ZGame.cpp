@@ -2371,7 +2371,7 @@ void ZGame::OnPeerShot_Melee(const MUID& uidOwner, float fShotTime)
 
 					if(CheckWall(pOwner,pTar)==false)
 					{
-						if(pTar->IsGuard() && DotProduct(pTar->m_Direction,OwnerDir)<0 ) {
+						if(pTar->IsGuardNonrecoilable() && DotProduct(pTar->m_Direction,OwnerDir)<0 ) {
 							rvector t_pos = pTar->GetPosition();
 							t_pos.z += 120.f;
 							ZGetEffectManager()->AddSwordDefenceEffect(t_pos+(pTar->m_Direction*50.f),pTar->m_Direction);
@@ -2529,13 +2529,13 @@ void ZGame::OnPeerSlash(ZCharacter *pOwner, const rvector &pos, const rvector &d
 
 		if (pCharTarget)
 		{
-			if (pCharTarget->IsGuardCustom() && DotProduct(OwnerHDir, TargetHDir) < 0)
+			if (pCharTarget->IsGuardNonrecoilable() && DotProduct(OwnerHDir, TargetHDir) < 0)
 			{
 				rvector pos = pTarget->GetPosition() + rvector(0, 0, 120) + pTarget->GetDirection() * 50;
 				ZGetEffectManager()->AddSwordDefenceEffect(pos, pTarget->m_Direction);
 				pTarget->OnMeleeGuardSuccess();
 
-				if (pOwner == m_pMyCharacter && pCharTarget->IsGuard())
+				if (pOwner == m_pMyCharacter && pCharTarget->IsGuardRecoilable())
 					m_pMyCharacter->AddRecoilTarget(pCharTarget);
 
 				continue;
@@ -2644,7 +2644,7 @@ void ZGame::OnPeerMassive(ZCharacter *pOwner, const rvector &pos, const rvector 
 
 		const rvector &VictimDir = pVictim->GetDirection();
 
-		if (pVictim->IsGuardCustom() && DotProduct(dir, VictimDir) < 0)
+		if (pVictim->IsGuardNonrecoilable() && DotProduct(dir, VictimDir) < 0)
 		{
 			rvector addVel = TargetPos - pos;
 			Normalize(addVel);
@@ -2740,7 +2740,7 @@ void ZGame::OnPeerShot_Range(MMatchCharItemParts sel_type, const MUID& uidOwner,
 		if(pickinfo.pObject)
 		{
 			ZObject *pObject = pickinfo.pObject;
-			bool bGuard = pObject->IsGuard() && (pickinfo.info.parts != eq_parts_legs) &&
+			bool bGuard = pObject->IsGuardNonrecoilable() && (pickinfo.info.parts != eq_parts_legs) &&
 				DotProduct(dir, pObject->GetDirection()) < 0; // Over 90 degrees difference
 
 			if(bGuard) {
@@ -2957,7 +2957,7 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 			ZObject *pObject = pickinfo.pObject;
 			if(pObject)
 			{
-				bool bGuard = pObject->IsGuard() && (pickinfo.info.parts!=eq_parts_legs) &&
+				bool bGuard = pObject->IsGuardNonrecoilable() && (pickinfo.info.parts!=eq_parts_legs) &&
 								DotProduct(dir,pObject->GetDirection())<0;
 
 				if(bGuard) {

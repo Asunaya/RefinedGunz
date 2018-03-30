@@ -180,8 +180,8 @@ public:
 	void OutputDebugString_CharacterState();
 
 	float GetCAFactor() { return m_fCAFactor; }
-	virtual bool IsGuard() const override final;
-	virtual bool IsGuardCustom() const override final;
+	virtual bool IsGuardNonrecoilable() const override final;
+	virtual bool IsGuardRecoilable() const override final;
 
 	void ShotBlocked();
 
