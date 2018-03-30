@@ -655,18 +655,21 @@ bool MTextArea::GetText(char *pBuffer,int nBufferSize)
 {
 	if(GetLength()>nBufferSize) return false;
 
-	int nSize=0;
 	char *temp=pBuffer;
-	temp[0]=0;
-	MLINELISTITERATOR i;
-	for(i=m_Lines.begin();i!=m_Lines.end();i++)
+	temp[0] = 0;
+
+	auto append = [&](const char* str)
 	{
-		strcpy_safe(temp, nBufferSize, i->text.c_str());temp+=i->text.size();
-		strcat_s(temp, nBufferSize, "\n");temp++;
-		nSize+=i->text.length()+1;
+		temp = strcpy_safe(temp, nBufferSize - (temp - pBuffer), str);
+	};
+
+	for (auto& Line : m_Lines)
+	{
+		append(Line.text.c_str());
+		append("\n");
 	}
-	temp--;*temp=0;
-	_ASSERT(GetLength()==nSize);
+
+	assert(GetLength()==temp - pBuffer);
 
 	return true;
 }
