@@ -20,6 +20,7 @@
 #include <utility>
 #include "ZGameDraw.h"
 #include "BasicInfo.h"
+#include "function_view.h"
 
 _USING_NAMESPACE_REALSPACE2
 
@@ -231,7 +232,7 @@ public:
 	void PostSpMotion(ZC_SPMOTION_TYPE type);
 
 	void OnPeerShot_Melee(const MUID& uidOwner, float fShotTime);
-	void OnPeerShot_Range(MMatchCharItemParts sel_type, const MUID& uidOwner, float fShotTime,
+	void OnPeerShot_Range(MMatchCharItemParts sel_type, ZObject* pOwner, float fShotTime,
 		rvector pos, rvector to, u32 seed);
 	void OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float fShotTime,
 		rvector& pos, rvector& to, u32 seed);
@@ -336,6 +337,8 @@ private:
 
 	bool OnRuleCommand(MCommand* pCommand);
 	void PostNewBasicInfo();
+	struct ShotInfo DoOneShot(ZObject* pOwner, v3 SrcPos, v3 DestPos, float ShotTime, ZItem* pItem,
+		float KnockbackForceRatio = 1);
 
 	ZGameAction GameAction;
 	MDataChecker m_DataChecker;

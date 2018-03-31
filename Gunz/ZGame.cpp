@@ -83,6 +83,7 @@
 #include "reinterpret.h"
 #include "CodePageConversion.h"
 #include "ZMyBotCharacter.h"
+#include "Arena.h"
 
 _USING_NAMESPACE_REALSPACE2
 
@@ -2320,14 +2321,13 @@ void ZGame::OnPeerShot_Melee(const MUID& uidOwner, float fShotTime)
 
 	RPickInfo info;
 
-	bool bCheck = false;
+	bool HitEnemy = false;
 
-	fShotTime=GetTime();
+	fShotTime = GetTime();
 
-	rvector OwnerPosition,OwnerDir;
-	OwnerPosition = pOwner->GetPosition();
-	OwnerDir = pOwner->m_Direction;
-	OwnerDir.z=0; 
+	v3 OwnerPosition = pOwner->GetPosition();
+	v3 OwnerDir = pOwner->m_Direction;
+	OwnerDir.z = 0;
 	Normalize(OwnerDir);
 
 	float fMeleeRange = pDesc->m_nRange;
@@ -2336,94 +2336,82 @@ void ZGame::OnPeerShot_Melee(const MUID& uidOwner, float fShotTime)
 		fMeleeRange = 150.f;
 	}
 
-
 	int cm = 0;
 	
-	ZCharacter *pOwnerCharacter = m_CharacterManager.Find(uidOwner);
-	if(pOwnerCharacter) {
+	if (auto pOwnerCharacter = MDynamicCast(ZCharacter, pOwner)) {
 		cm = SelectSlashEffectMotion(pOwnerCharacter);
 	}
 
-	for (ZObjectManager::iterator itor = m_ObjectManager.begin();
-		itor != m_ObjectManager.end(); ++itor)
+	for (ZObject* pTar : MakePairValueAdapter(m_ObjectManager))
 	{
-		ZObject* pTar = (*itor).second;
 		if (pOwner == pTar) continue;
-
+		if (pTar->IsDie()) continue;
 		rvector TargetPosition, TargetDir;
-
-		if(pTar->IsDie()) continue;
-		if( !pTar->GetHistory(&TargetPosition,&TargetDir,fShotTime)) continue;
+		if (!pTar->GetHistory(&TargetPosition, &TargetDir, fShotTime)) continue;
+		if (!IsAttackable(pOwner, pTar)) continue;
 
 		rvector swordPos = OwnerPosition + OwnerDir*100.f;
 		swordPos.z += pOwner->GetCollHeight() * .5f;
-		float fDist = GetDistanceLineSegment(swordPos,TargetPosition,TargetPosition+rvector(0,0,pTar->GetCollHeight()));
+		float fDist = GetDistanceLineSegment(swordPos, TargetPosition,
+			TargetPosition + rvector(0, 0, pTar->GetCollHeight()));
 
-		if (fDist < fMeleeRange) {
+		if (fDist >= fMeleeRange) continue;
 
-			if( IsAttackable(pOwner,pTar) ) {
-				
-				rvector fTarDir = TargetPosition - (OwnerPosition - OwnerDir*50.f);
-				Normalize(fTarDir);
-				float fDot = DotProduct(OwnerDir, fTarDir);
+		rvector fTarDir = Normalized(TargetPosition - (OwnerPosition - OwnerDir*50.f));
+		float fDot = DotProduct(OwnerDir, fTarDir);
 
-				if (fDot > 0.5f) {
+		if (fDot <= 0.5f || CheckWall(pOwner, pTar)) continue;
 
-					if(CheckWall(pOwner,pTar)==false)
-					{
-						if(pTar->IsGuardNonrecoilable() && DotProduct(pTar->m_Direction,OwnerDir)<0 ) {
-							rvector t_pos = pTar->GetPosition();
-							t_pos.z += 120.f;
-							ZGetEffectManager()->AddSwordDefenceEffect(t_pos+(pTar->m_Direction*50.f),pTar->m_Direction);
-							pTar->OnMeleeGuardSuccess();
-						}else
-						{
-							rvector tpos = pTar->GetPosition();
+		if (pTar->IsGuardNonrecoilable() && DotProduct(pTar->m_Direction, OwnerDir) < 0) {
+			rvector t_pos = pTar->GetPosition();
+			t_pos.z += 120.f;
+			ZGetEffectManager()->AddSwordDefenceEffect(t_pos + (pTar->m_Direction*50.f),
+				pTar->m_Direction);
+			pTar->OnMeleeGuardSuccess();
+			continue;
+		}
 
-							tpos.z += 130.f;
-							tpos -= pOwner->m_Direction * 50.f;
+		rvector tpos = pTar->GetPosition();
 
-							ZGetEffectManager()->AddBloodEffect( tpos , -fTarDir);
-							ZGetEffectManager()->AddSlashEffect( tpos , -fTarDir , cm);
+		tpos.z += 130.f;
+		tpos -= pOwner->m_Direction * 50.f;
 
-							float fActualDamage = CalcActualDamage(pOwner, pTar, (float)pDesc->m_nDamage);
-							float fRatio = pItem->GetPiercingRatio( pDesc->m_nWeaponType , eq_parts_chest );
-							pTar->OnDamaged(pOwner, pOwner->GetPosition(), ZD_MELEE, pDesc->m_nWeaponType, fActualDamage, fRatio, cm);
+		ZGetEffectManager()->AddBloodEffect(tpos, -fTarDir);
+		ZGetEffectManager()->AddSlashEffect(tpos, -fTarDir, cm);
 
-							ZActor* pATarget = MDynamicCast(ZActor,pTar);
+		float fActualDamage = CalcActualDamage(pOwner, pTar, (float)pDesc->m_nDamage);
+		float fRatio = pItem->GetPiercingRatio(pDesc->m_nWeaponType, eq_parts_chest);
+		pTar->OnDamaged(pOwner, pOwner->GetPosition(), ZD_MELEE, pDesc->m_nWeaponType,
+			fActualDamage, fRatio, cm);
 
-							bool bPushSkip = false;
+		ZActor* pATarget = MDynamicCast(ZActor, pTar);
 
-							if(pATarget) {
-								bPushSkip = pATarget->GetNPCInfo()->bNeverPushed;
-							}
+		bool bPushSkip = false;
 
-							float fKnockbackForce = pItem->GetKnockbackForce();
+		if (pATarget) {
+			bPushSkip = pATarget->GetNPCInfo()->bNeverPushed;
+		}
 
-							if(bPushSkip) {
-								ZGetSoundEngine()->PlaySound("fx_bullethit_mt_met");
-								fKnockbackForce = 1.0f;
-							}
+		float fKnockbackForce = pItem->GetKnockbackForce();
 
-							pTar->OnKnockback( pOwner->m_Direction, fKnockbackForce );
+		if (bPushSkip) {
+			ZGetSoundEngine()->PlaySound("fx_bullethit_mt_met");
+			fKnockbackForce = 1.0f;
+		}
 
-							ZGetSoundEngine()->PlaySound("blade_damage", tpos );
+		pTar->OnKnockback(pOwner->m_Direction, fKnockbackForce);
 
-							bCheck = true;
+		ZGetSoundEngine()->PlaySound("blade_damage", tpos);
 
-							if(pOwner == m_pMyCharacter) {
-								CheckCombo(m_pMyCharacter, pTar,!bPushSkip);
-								CheckStylishAction(m_pMyCharacter);
-							}
-						}
-					}
-				}
-			}
+		HitEnemy = true;
+
+		if (pOwner == m_pMyCharacter) {
+			CheckCombo(m_pMyCharacter, pTar, !bPushSkip);
+			CheckStylishAction(m_pMyCharacter);
 		}
 	}
 
-	if(!bCheck){
-
+	if (!HitEnemy) {
 		rvector vPos = pOwner->GetPosition();
 		rvector vDir = OwnerDir;
 
@@ -2431,26 +2419,21 @@ void ZGame::OnPeerShot_Melee(const MUID& uidOwner, float fShotTime)
 
 		RBSPPICKINFO bpi;
 
-		if(GetWorld()->GetBsp()->Pick(vPos, vDir, &bpi)) {
+		if (!GetWorld()->GetBsp()->Pick(vPos, vDir, &bpi))
+			return;
 
-			float fDist = Magnitude(vPos - bpi.PickPos);
+		float fDist = Magnitude(vPos - bpi.PickPos);
 
-			if (fDist < fMeleeRange) {
+		if (fDist >= fMeleeRange)
+			return;
 
-				rplane r = bpi.pInfo->plane;
-				rvector vWallDir = rvector( r.a, r.b, r.c );
-				Normalize(vWallDir);
+		rplane r = bpi.pInfo->plane;
+		rvector vWallDir = Normalized(v3(r.a, r.b, r.c));
 
-				ZGetEffectManager()->AddSlashEffectWall( bpi.PickPos - (vDir*5.f) , vWallDir ,cm);
+		ZGetEffectManager()->AddSlashEffectWall(bpi.PickPos - (vDir*5.f), vWallDir, cm);
 
-				rvector pos = bpi.PickPos;
-
-				ZGetSoundEngine()->PlaySound("blade_concrete", pos );
-			}
-		}
+		ZGetSoundEngine()->PlaySound("blade_concrete", bpi.PickPos);
 	}
-
-	return;
 }
 
 void ZGame::OnPeerSlash(ZCharacter *pOwner, const rvector &pos, const rvector &dir, int Type)
@@ -2689,207 +2672,256 @@ void ZGame::OnPeerMassive(ZCharacter *pOwner, const rvector &pos, const rvector 
 	}
 }
 
-void ZGame::OnPeerShot_Range(MMatchCharItemParts sel_type, const MUID& uidOwner, float fShotTime,
-	rvector pos, rvector to, u32 seed)
+struct ShotDamageInfo
 {
-	ZObject *pOwner = m_ObjectManager.GetObject(uidOwner);
-	if(!pOwner) return;
+	ZObject* Target;
+	int Damage;
+	float PiercingRatio;
+	ZDAMAGETYPE DamageType;
+	MMatchWeaponType WeaponType;
+};
 
-	ZItem *pItem = pOwner->GetItems()->GetItem(sel_type);
-	if(!pItem) return;
-	MMatchItemDesc *pDesc = pItem->GetDesc();
-	if(!pDesc) { _ASSERT(FALSE); return; }
+void ZPostAntileadDamage(const ShotDamageInfo& s)
+{
+	ZPostAntileadDamage(s.Target->GetUID(), s.Damage, s.PiercingRatio, s.DamageType, s.WeaponType);
+}
 
-	rvector dir = to - pos;
-
-	Normalize(dir);
-
-	rvector v1, v2;
-	rvector BulletMarkNormal;
-	bool bBulletMark = false;
-	ZTargetType nTargetType = ZTT_OBJECT;
-
-	ZCharacter* pCharacter = NULL;
-
+struct ShotInfo
+{
+	ZTargetType TargetType;
+	v3 HitPos;
+	v3 BulletMarkNormal;
+	ShotDamageInfo sdi;
 	ZPICKINFO pickinfo;
+	bool Error;
+	bool BulletMark;
+	bool HitEnemy;
+	bool PushSkip;
+};
 
-	memset(&pickinfo,0,sizeof(ZPICKINFO));
+ShotInfo ZGame::DoOneShot(ZObject* pOwner, v3 SrcPos, v3 DestPos, float ShotTime, ZItem* pItem,
+	float KnockbackForceRatio)
+{
+	ShotInfo ret{};
+	auto& pickinfo = ret.pickinfo;
+	auto Netcode = ZGetGameClient()->GetMatchStageSetting()->GetNetcode();
+	constexpr u32 PickPassFlag = RM_FLAG_ADDITIVE   | RM_FLAG_HIDE |
+	                             RM_FLAG_PASSROCKET | RM_FLAG_PASSBULLET;
+	auto dir = Normalized(DestPos - SrcPos);
+	auto pDesc = pItem->GetDesc();
+	if (!pDesc)
+	{
+		assert(false);
+		ret.Error = true;
+		return ret;
+	}
 
-	const DWORD dwPickPassFlag=RM_FLAG_ADDITIVE | RM_FLAG_HIDE | RM_FLAG_PASSROCKET | RM_FLAG_PASSBULLET;
-
-	pOwner->Tremble(8.f, 50, 30);
+	auto pOwnerCharacter = MDynamicCast(ZCharacter, pOwner);
 
 #ifdef PORTAL
-	g_pPortal->RedirectPos(pos, to);
+	g_pPortal->RedirectPos(SrcPos, DestPos);
 #endif
-	
-	bool Picked = ::PickHistory(m_pMyCharacter, pos, to, GetWorld()->GetBsp(), pickinfo,
-			MakePairValueAdapter(m_ObjectManager), fShotTime, dwPickPassFlag);
+
+	auto OnHitObject = [&]
+	{
+		ret.TargetType = ZTT_CHARACTER;
+
+		ZActor* pATarget = MDynamicCast(ZActor, pickinfo.pObject);
+
+		if (pATarget) {
+			ret.PushSkip = pATarget->GetNPCInfo()->bNeverPushed;
+		}
+
+		float fKnockbackForce = pItem->GetKnockbackForce() / KnockbackForceRatio;
+
+		if (ret.PushSkip)
+		{
+			auto Delta = pickinfo.pObject->GetPosition() - pOwner->GetPosition();
+			rvector vPos = pOwner->GetPosition() + Delta * 0.1f;
+			ZGetSoundEngine()->PlaySound("fx_bullethit_mt_met", vPos);
+			fKnockbackForce = 1.0f;
+		}
+
+		pickinfo.pObject->OnKnockback(pOwner->m_Direction, fKnockbackForce);
+
+		float fActualDamage = CalcActualDamage(pOwner, pickinfo.pObject, (float)pDesc->m_nDamage);
+		float fRatio = pItem->GetPiercingRatio(pDesc->m_nWeaponType, pickinfo.info.parts);
+		auto dt = (pickinfo.info.parts == eq_parts_head) ? ZD_BULLET_HEADSHOT : ZD_BULLET;
+
+		if (!IsAttackable(pOwner, pickinfo.pObject))
+			return;
+
+		ret.HitEnemy = true;
+
+		if (Netcode == NetcodeType::P2PLead)
+			pickinfo.pObject->OnDamaged(pOwner, pOwner->GetPosition(), dt, pDesc->m_nWeaponType, fActualDamage, fRatio);
+
+		ret.sdi.Target = pickinfo.pObject;
+		ret.sdi.Damage = static_cast<int>(fActualDamage);
+		ret.sdi.PiercingRatio = fRatio;
+		ret.sdi.DamageType = dt;
+		ret.sdi.WeaponType = pDesc->m_nWeaponType;
+	};
+
+	bool Picked = ::PickHistory(pOwner, SrcPos, DestPos, GetWorld()->GetBsp(), pickinfo,
+		MakePairValueAdapter(m_ObjectManager), ShotTime, PickPassFlag);
 
 	if (Picked)
 	{
-		if (ZGetGameClient()->GetMatchStageSetting()->GetNetcode() == NetcodeType::ServerBased
-			&& ZGetConfiguration()->GetShowHitRegDebugOutput()
-			&& pickinfo.pObject)
-		{
-			auto Char = MDynamicCast(ZCharacter, pickinfo.pObject);
-			if (Char)
-				ZChatOutputF("Client: Hit %s", Char->GetUserName());
-		}
-
-		if(pickinfo.pObject)
+		if (pickinfo.pObject)
 		{
 			ZObject *pObject = pickinfo.pObject;
-			bool bGuard = pObject->IsGuardNonrecoilable() && (pickinfo.info.parts != eq_parts_legs) &&
+			bool bGuard = pObject->IsGuardNonrecoilable() &&
+				(pickinfo.info.parts != eq_parts_legs) &&
 				DotProduct(dir, pObject->GetDirection()) < 0; // Over 90 degrees difference
 
-			if(bGuard) {
-				nTargetType = ZTT_CHARACTER_GUARD;
-				rvector t_pos = pObject->GetPosition();
-				t_pos.z += 100.f;
-				ZGetEffectManager()->AddSwordDefenceEffect(t_pos+(-dir*50.f),-dir);
+			if (bGuard) {
+				ret.TargetType = ZTT_CHARACTER_GUARD;
+				v3 t_pos = pObject->GetPosition() + v3(0, 0, 100) - (dir * 50);
+				v3 t_dir = -dir;
+				ZGetEffectManager()->AddSwordDefenceEffect(t_pos, t_dir);
 				pObject->OnGuardSuccess();
-			} else {
-				nTargetType = ZTT_CHARACTER;
-
-				ZActor* pATarget = MDynamicCast(ZActor,pickinfo.pObject);
-
-				bool bPushSkip = false;
-
-				if(pATarget) {
-					bPushSkip = pATarget->GetNPCInfo()->bNeverPushed;
-				}
-
-				float fKnockbackForce = pItem->GetKnockbackForce();
-
-				if(bPushSkip) 
-				{
-					rvector vPos = pOwner->GetPosition() + (pickinfo.pObject->GetPosition() - pOwner->GetPosition()) * 0.1f; 
-					ZGetSoundEngine()->PlaySound("fx_bullethit_mt_met", vPos );
-					fKnockbackForce = 1.0f;
-				}
-
-				pickinfo.pObject->OnKnockback( pOwner->m_Direction, fKnockbackForce );
-
-				float fActualDamage = CalcActualDamage(pOwner, pickinfo.pObject, (float)pDesc->m_nDamage);
-				float fRatio = pItem->GetPiercingRatio( pDesc->m_nWeaponType, pickinfo.info.parts );
-				ZDAMAGETYPE dt = (pickinfo.info.parts == eq_parts_head) ? ZD_BULLET_HEADSHOT : ZD_BULLET;
-
-				if (ZGetGameClient()->GetMatchStageSetting()->GetNetcode() == NetcodeType::P2PLead)
-					pickinfo.pObject->OnDamaged(pOwner, pOwner->GetPosition(), dt, pDesc->m_nWeaponType, fActualDamage, fRatio);
-
-				if(pOwner == m_pMyCharacter) {
-					CheckCombo(m_pMyCharacter,pickinfo.pObject,!bPushSkip);
-					CheckStylishAction(m_pMyCharacter);
-
-					if (ZGetGameClient()->GetMatchStageSetting()->GetNetcode() == NetcodeType::P2PAntilead && !IsReplay())
-					{
-						auto Char = MDynamicCast(ZCharacter, pickinfo.pObject);
-
-						if (Char)
-						{
-							ZPostAntileadDamage(Char->GetUID(), fActualDamage, fRatio, dt, pDesc->m_nWeaponType);
-						}
-					}
-				}
-			}
-
-			v1 = pos;
-			v2 = pickinfo.info.vOut;
-
-		}else
-			if(pickinfo.bBspPicked)
-			{
-				nTargetType = ZTT_OBJECT;
-
-				v1 = pos;
-				v2 = pickinfo.bpi.PickPos;
-
-				BulletMarkNormal.x = pickinfo.bpi.pInfo->plane.a;
-				BulletMarkNormal.y = pickinfo.bpi.pInfo->plane.b;
-				BulletMarkNormal.z = pickinfo.bpi.pInfo->plane.c;
-				Normalize(BulletMarkNormal);
-				bBulletMark = true;
-
 			}
 			else {
-				_ASSERT(false);
-				return;
+				OnHitObject();
 			}
+
+			ret.HitPos = pickinfo.info.vOut;
+		}
+		else if (pickinfo.bBspPicked)
+		{
+			ret.HitPos = pickinfo.bpi.PickPos;
+
+			ret.TargetType = ZTT_OBJECT;
+
+			ret.BulletMarkNormal = Normalized(pickinfo.bpi.pInfo->plane.normal());
+			ret.BulletMark = true;
+
+		}
+		else {
+			assert(false);
+			ret.Error = true;
+			return ret;
+		}
 	}
 	else {
-		v1 = pos;
-		v2 = pos+dir*10000.f;
-		nTargetType	= ZTT_NOTHING;
+		ret.HitPos = SrcPos + dir * 10000.f;
+		ret.TargetType = ZTT_NOTHING;
 	}
 
-	bool bPlayer = false;
-	rvector Pos = v1;
-	if(pOwner==m_pMyCharacter)
-	{
-		Pos = RCameraPosition;
-		bPlayer = true;
-	}
+	return ret;
+}
 
-	ZCharacter *pTargetCharacter=ZGetGameInterface()->GetCombatInterface()->GetTargetCharacter();
-	ZApplication::GetSoundEngine()->PlaySEFire(pDesc, Pos.x, Pos.y, Pos.z, bPlayer);
-#define SOUND_CULL_DISTANCE 1500.0F
-	auto vec = v2 - pTargetCharacter->m_Position;
-	if (MagnitudeSq(vec) < SOUND_CULL_DISTANCE * SOUND_CULL_DISTANCE)
-	{
-		if(nTargetType == ZTT_OBJECT) { 
-			ZGetSoundEngine()->PlaySEHitObject( v2.x, v2.y, v2.z, pickinfo.bpi ); 
-		}
+void ZGame::OnPeerShot_Range(MMatchCharItemParts sel_type, ZObject* pOwner, float fShotTime,
+	rvector pos, rvector to, u32 seed)
+{
+	ZItem *pItem = pOwner->GetItems()->GetItem(sel_type);
+	if(!pItem) return;
+	MMatchItemDesc *pDesc = pItem->GetDesc();
+	if(!pDesc) { assert(false); return; }
 
-		if(nTargetType == ZTT_CHARACTER) { 
-			ZGetSoundEngine()->PlaySEHitBody(v2.x, v2.y, v2.z); 
-		}
-	}
-
-	bool bDrawFireEffects = isInViewFrustum(v1,100.f,RGetViewFrustum());
-
-	if(!isInViewFrustum(v1,v2,RGetViewFrustum())
-		&& !bDrawFireEffects) return;
-
-	bool bDrawTargetEffects = isInViewFrustum(v2,100.f,RGetViewFrustum());
-
-	GetWorld()->GetWaters()->CheckSpearing( v1, v2, 250, 0.3 );
+	pOwner->Tremble(8.f, 50, 30);
 	
-	ZCharacterObject* pCOwnerObject = MDynamicCast(ZCharacterObject, pOwner);
+	auto Info = DoOneShot(pOwner, pos, to, fShotTime, pItem);
+	if (Info.Error)
+		return;
 
-	if(pCOwnerObject) {
-		rvector pdir = v2-v1;
-		Normalize(pdir);
+	rvector dir = Normalized(to - pos);
+
+	if (Info.HitEnemy)
+	{
+		CheckCombo(m_pMyCharacter, Info.sdi.Target, !Info.PushSkip);
+		CheckStylishAction(m_pMyCharacter);
+
+		auto CharTarget = MDynamicCast(ZCharacter, Info.sdi.Target);
+		if (CharTarget && pOwner == m_pMyCharacter)
+		{
+			auto Netcode = ZGetGameClient()->GetMatchStageSetting()->GetNetcode();
+			if (Netcode == NetcodeType::P2PAntilead && !IsReplay())
+			{
+				ZPostAntileadDamage(Info.sdi);
+			}
+			else if (Netcode == NetcodeType::ServerBased &&
+				ZGetConfiguration()->GetShowHitRegDebugOutput())
+			{
+				ZChatOutputF("Client: Hit %s for %d", CharTarget->GetUserName(), Info.sdi.Damage);
+			}
+		}
+	}
+
+	{
+		bool bPlayer = false;
+		auto FireSrcPos = pos;
+		if (pOwner == m_pMyCharacter)
+		{
+			FireSrcPos = RCameraPosition;
+			bPlayer = true;
+		}
+		ZGetSoundEngine()->PlaySEFire(pDesc, EXPAND_VECTOR(FireSrcPos), bPlayer);
+	}
+
+	{
+#define SOUND_CULL_DISTANCE 1500.0F
+		auto pTargetCharacter = ZGetGameInterface()->GetCombatInterface()->GetTargetCharacter();
+		auto vec = Info.HitPos - pTargetCharacter->m_Position;
+		if (MagnitudeSq(vec) < SOUND_CULL_DISTANCE * SOUND_CULL_DISTANCE)
+		{
+			if (Info.TargetType == ZTT_OBJECT) {
+				ZGetSoundEngine()->PlaySEHitObject(EXPAND_VECTOR(Info.HitPos), Info.pickinfo.bpi);
+			}
+
+			if (Info.TargetType == ZTT_CHARACTER) {
+				ZGetSoundEngine()->PlaySEHitBody(EXPAND_VECTOR(Info.HitPos));
+			}
+		}
+	}
+
+	bool bDrawFireEffects = isInViewFrustum(pos, 100.f, RGetViewFrustum());
+
+	if (!isInViewFrustum(pos, Info.HitPos, RGetViewFrustum()) &&
+		!bDrawFireEffects) return;
+
+	bool bDrawTargetEffects = isInViewFrustum(Info.HitPos, 100.f, RGetViewFrustum());
+
+	GetWorld()->GetWaters()->CheckSpearing(pos, Info.HitPos, 250, 0.3);
+
+	auto CharOwner = MDynamicCast(ZCharacter, pOwner);
+	if (CharOwner) {
+		rvector pdir = Normalized(Info.HitPos - pos);
 
 		int size = 3;
 
 		rvector v[6];
 
-		if(pCOwnerObject->IsRendered())
-			size = pCOwnerObject->GetWeapondummyPos(v);
+		if (CharOwner->IsRendered())
+		{
+			size = CharOwner->GetWeapondummyPos(v);
+		}
 		else
 		{
 			size = 6;
-			v[0] = v[1] = v[2] = v1;
+			v[0] = v[1] = v[2] = pos;
 			v[3] = v[4] = v[5] = v[0];
 		}
 
 		MMatchWeaponType wtype = pDesc->m_nWeaponType;
 
-		if(bBulletMark==false) BulletMarkNormal = -pdir;
+		if (Info.BulletMark == false) Info.BulletMarkNormal = -pdir;
 
-		ZGetEffectManager()->AddShotEffect(v, size, v2, BulletMarkNormal, nTargetType,
-			wtype, pCOwnerObject, bDrawFireEffects, bDrawTargetEffects);
-
-		if( ZGetConfiguration()->GetVideo()->bDynamicLight && pCOwnerObject != NULL )
-		{
-			pCOwnerObject->SetLight(CharacterLight::Gun);
-		}
+		ZGetEffectManager()->AddShotEffect(v, size, Info.HitPos, Info.BulletMarkNormal,
+			Info.TargetType, wtype, CharOwner, bDrawFireEffects, bDrawTargetEffects);
 	}
 		   
-	GetWorld()->GetFlags()->CheckSpearing( v1, v2, BULLET_SPEAR_EMBLEM_POWER );
-	if(Z_VIDEO_DYNAMICLIGHT)
-		ZGetStencilLight()->AddLightSource( v1, 2.0f, 75 );
+	GetWorld()->GetFlags()->CheckSpearing(pos, Info.HitPos, BULLET_SPEAR_EMBLEM_POWER);
+
+	if (Z_VIDEO_DYNAMICLIGHT)
+	{
+		if (CharOwner)
+		{
+			CharOwner->SetLight(CharacterLight::Gun);
+		}
+		ZGetStencilLight()->AddLightSource(pos, 2.0f, 75);
+	}
 }
 
 void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float fShotTime,
@@ -2901,182 +2933,103 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 	if(!pTargetCharacter) return;
 
 	MMatchItemDesc *pDesc = pItem->GetDesc();
-	if(!pDesc) { _ASSERT(false); return; }
+	if(!pDesc) { assert(false); return; }
 
 #define SHOTGUN_BULLET_COUNT	12
 #define SHOTGUN_DIFFUSE_RANGE	0.1f
 
-	bool waterSound{};
+	bool PlayedWaterSound = false;
+	bool HitEnemy = false;
 
-	bool bHitGuard{}, bHitBody{}, bHitGround{}, bHitEnemy{};
+	rvector origdir = Normalized(to - pos);
 
-	rvector v1, v2;
+	auto Netcode = ZGetGameClient()->GetMatchStageSetting()->GetNetcode();
 
-	rvector origdir = to - pos;
-	Normalize(origdir);
+	ShotDamageInfo DamageList[SHOTGUN_BULLET_COUNT];
+	size_t DamageListSize = 0;
+	bool UseDamageList =
+		(Netcode == NetcodeType::P2PAntilead && pOwnerCharacter == m_pMyCharacter && !IsReplay()) ||
+		(Netcode == NetcodeType::ServerBased && ZGetConfiguration()->GetShowHitRegDebugOutput());
 
-	int nHitCount = 0;
-
-	struct DamageInfo
+	auto AddToDamageList = [&](const ShotDamageInfo& New)
 	{
-		int Damage = 0;
-		float PiercingRatio = 0;
-		ZDAMAGETYPE DamageType;
-		MMatchWeaponType WeaponType;
-	};
+		if (!MIsDerivedFromClass(ZCharacter, New.Target))
+			return;
 
-	std::unordered_map<MUID, DamageInfo> DamageMap;
+		auto Begin = DamageList, End = DamageList + DamageListSize;
+		auto it = std::find_if(Begin, End, [&](const ShotDamageInfo& x) {
+			return x.Target == New.Target;
+		});
+		if (it == End)
+		{
+			assert(DamageListSize < std::size(DamageList));
+			++DamageListSize;
+			*it = New;
+			return;
+		}
+
+		auto& Item = *it;
+
+		int NewDamage = Item.Damage + New.Damage;
+		if (New.PiercingRatio != Item.PiercingRatio)
+		{
+			auto OldHPDamage = Item.Damage * Item.PiercingRatio;
+			auto AddHPDamage = New.Damage * New.PiercingRatio;
+			Item.PiercingRatio = (OldHPDamage + AddHPDamage) / NewDamage;
+		}
+
+		Item.Damage = NewDamage;
+		static_assert(ZD_BULLET_HEADSHOT > ZD_BULLET, "Fix me");
+		Item.DamageType = max(Item.DamageType, New.DamageType);
+		Item.WeaponType = pDesc->m_nWeaponType;
+	};
 
 	auto DirGen = GetShotgunPelletDirGenerator(origdir, seed);
 
-	for(int i=0;i<SHOTGUN_BULLET_COUNT;i++)
+	for (int i = 0; i < SHOTGUN_BULLET_COUNT; i++)
 	{
 		auto dir = DirGen();
 
-		rvector BulletMarkNormal;
-		bool bBulletMark = false;
-		ZTargetType nTargetType = ZTT_OBJECT;
-
-		ZPICKINFO pickinfo;
-
-		memset(&pickinfo,0,sizeof(ZPICKINFO));
-
-		const DWORD dwPickPassFlag=RM_FLAG_ADDITIVE | RM_FLAG_HIDE | RM_FLAG_PASSROCKET | RM_FLAG_PASSBULLET;
-
 		auto from = pos;
-		auto to = pos + 10000 * dir;
-#ifdef PORTAL
-		g_pPortal->RedirectPos(from, to);
-#endif
+		auto to = pos + dir * 10000;
 
-		bool Picked = ::PickHistory(pOwnerCharacter, from, to, GetWorld()->GetBsp(),
-			pickinfo, MakePairValueAdapter(m_ObjectManager), fShotTime, dwPickPassFlag);
+		auto Info = DoOneShot(pOwnerCharacter, from, to, fShotTime, pItem,
+			0.5f * float(SHOTGUN_BULLET_COUNT));
+		if (Info.Error)
+			return;
 
-		if(Picked)
+		HitEnemy |= Info.HitEnemy;
+
+		if (UseDamageList)
 		{
-			ZObject *pObject = pickinfo.pObject;
-			if(pObject)
-			{
-				bool bGuard = pObject->IsGuardNonrecoilable() && (pickinfo.info.parts!=eq_parts_legs) &&
-								DotProduct(dir,pObject->GetDirection())<0;
-
-				if(bGuard) {
-					rvector t_pos = pObject->GetPosition();
-					t_pos.z += 100.f;
-					ZGetEffectManager()->AddSwordDefenceEffect(t_pos+(-dir*50.f),-dir);
-					pObject->OnGuardSuccess();
-
-					nTargetType = ZTT_CHARACTER_GUARD;
-					bHitGuard=true;
-
-				} else {
-
-					ZActor* pATarget = MDynamicCast(ZActor,pObject);
-
-					bool bPushSkip = false;
-
-					if(pATarget) {
-						bPushSkip = pATarget->GetNPCInfo()->bNeverPushed;
-					}
-
-					float fKnockbackForce = pItem->GetKnockbackForce() / (.5f*float(SHOTGUN_BULLET_COUNT));
-
-					if(bPushSkip) {
-						rvector vPos = pOwnerCharacter->GetPosition() + (pObject->GetPosition() - pOwnerCharacter->GetPosition()) * 0.1f;
-						ZGetSoundEngine()->PlaySound("fx_bullethit_mt_met", vPos );
-						fKnockbackForce = 1.0;
-					}
-
-					pObject->OnKnockback( dir, fKnockbackForce );
-
-					float fActualDamage = CalcActualDamage(pOwnerCharacter, pObject, (float)pDesc->m_nDamage);
-					float fRatio = ZItem::GetPiercingRatio( pDesc->m_nWeaponType , pickinfo.info.parts );
-					ZDAMAGETYPE dt = (pickinfo.info.parts==eq_parts_head) ? ZD_BULLET_HEADSHOT : ZD_BULLET;
-
-					if (ZGetGameClient()->GetMatchStageSetting()->GetNetcode() == NetcodeType::P2PLead)
-						pObject->OnDamaged(pOwnerCharacter, pOwnerCharacter->GetPosition(), dt, pDesc->m_nWeaponType, fActualDamage, fRatio );
-
-					nTargetType = ZTT_CHARACTER;
-					bHitBody=true;
-
-					if(!m_Match.IsTeamPlay() || (pTargetCharacter->GetTeamID()!=pObject->GetTeamID()))
-					{
-						bHitEnemy=true;
-					}
-
-					if (ZGetGameClient()->GetMatchStageSetting()->GetNetcode() == NetcodeType::P2PAntilead
-						&& pOwnerCharacter == m_pMyCharacter && !IsReplay()
-						|| ZGetGameClient()->GetMatchStageSetting()->GetNetcode() == NetcodeType::ServerBased)
-					{
-						auto Char = MDynamicCast(ZCharacter, pObject);
-
-						if (Char)
-						{
-							int Damage = int(fActualDamage);
-
-							auto& item = DamageMap[Char->GetUID()];
-
-							int NewDamage = item.Damage + Damage;
-							if (fRatio != item.PiercingRatio)
-								item.PiercingRatio = (item.Damage * item.PiercingRatio + Damage * fRatio) / NewDamage;
-
-							item.Damage = NewDamage;
-							static_assert(ZD_BULLET_HEADSHOT > ZD_BULLET, "Fix me");
-							item.DamageType = max(item.DamageType, dt);
-							item.WeaponType = pDesc->m_nWeaponType;
-						}
-					}
-				}
-
-				v1 = pos;
-				v2 = pickinfo.info.vOut;
-
-			}else
-				if(pickinfo.bBspPicked)
-				{
-					bHitGround=true;
-					nTargetType = ZTT_OBJECT;
-
-					v1 = pos;
-					v2 = pickinfo.bpi.PickPos;
-
-					BulletMarkNormal.x = pickinfo.bpi.pInfo->plane.a;
-					BulletMarkNormal.y = pickinfo.bpi.pInfo->plane.b;
-					BulletMarkNormal.z = pickinfo.bpi.pInfo->plane.c;
-					Normalize(BulletMarkNormal);
-					bBulletMark = true;
-
-					bool bDrawTargetEffects = isInViewFrustum(v2,20.f,RGetViewFrustum());
-					if(bDrawTargetEffects)
-						ZGetEffectManager()->AddBulletMark(v2,BulletMarkNormal);
-				}
-				else {
-					_ASSERT(false);
-					return;
-				}
+			AddToDamageList(Info.sdi);
 		}
-		else {
-			v1 = pos;
-			v2 = pos+dir*10000.f;
-			nTargetType	= ZTT_NOTHING;
+		
+		if (Info.pickinfo.bBspPicked)
+		{
+			bool DrawTargetEffects = isInViewFrustum(Info.HitPos, 20.f, RGetViewFrustum());
+			if (DrawTargetEffects)
+				ZGetEffectManager()->AddBulletMark(Info.HitPos, Info.BulletMarkNormal);
 		}
 
-		waterSound = GetWorld()->GetWaters()->CheckSpearing( v1, v2, 250, 0.3, !waterSound );
+		PlayedWaterSound = GetWorld()->GetWaters()->CheckSpearing(pos, Info.HitPos, 250, 0.3,
+			!PlayedWaterSound);
 	}
 
-	if (ZGetGameClient()->GetMatchStageSetting()->GetNetcode() == NetcodeType::P2PAntilead
-		|| ZGetGameClient()->GetMatchStageSetting()->GetNetcode() == NetcodeType::ServerBased)
+	if (UseDamageList)
 	{
-		for (auto& Pair : DamageMap)
+		for (size_t i = 0; i < DamageListSize; ++i)
 		{
-			if (ZGetGameClient()->GetMatchStageSetting()->GetNetcode() == NetcodeType::P2PAntilead)
-				ZPostAntileadDamage(Pair.first, Pair.second.Damage, Pair.second.PiercingRatio,
-					Pair.second.DamageType, Pair.second.WeaponType);
-			else if (ZGetConfiguration()->GetShowHitRegDebugOutput())
+			auto& Item = DamageList[i];
+			if (Netcode == NetcodeType::P2PAntilead)
 			{
-				auto& Char = *m_CharacterManager.at(Pair.first);
+				ZPostAntileadDamage(Item);
+			}
+			else
+			{
+				auto& Char = *static_cast<ZCharacter*>(Item.Target);
 				ZChatOutputF("Client: Hit %s for %d damage",
-					Char.GetUserName(), Pair.second.Damage);
+					Char.GetUserName(), Item.Damage);
 				v3 Head, Origin;
 				Char.GetPositions(&Head, &Origin, fShotTime);
 				ZChatOutputF("Client: Head: %d, %d, %d; origin: %d, %d, %d",
@@ -3086,33 +3039,28 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 		}
 	}
 
-	if(bHitEnemy) {
+	if (HitEnemy) {
 		CheckStylishAction(pOwnerCharacter);
-		CheckCombo(pOwnerCharacter, NULL,true);
+		CheckCombo(pOwnerCharacter, nullptr, true);
 	}
 
-	ZApplication::GetSoundEngine()->PlaySEFire(pItem->GetDesc(),
-		pos.x, pos.y, pos.z,
+	ZGetSoundEngine()->PlaySEFire(pItem->GetDesc(),
+		EXPAND_VECTOR(pos),
 		pOwnerCharacter == m_pMyCharacter);
 
-	if(!pOwnerCharacter->IsRendered()) return;
+	if (!pOwnerCharacter->IsRendered()) return;
 
 	rvector v[6];
 
 	int _size = pOwnerCharacter->GetWeapondummyPos(v);
 
-	rvector dir = to - pos;
-	Normalize(dir);
+	ZGetEffectManager()->AddShotgunEffect(pos, v[1], origdir, pOwnerCharacter);
 
-	ZGetEffectManager()->AddShotgunEffect(pos,v[1],dir,pOwnerCharacter);
-
-	if( ZGetConfiguration()->GetVideo()->bDynamicLight && pOwnerCharacter != NULL )
+	if (Z_VIDEO_DYNAMICLIGHT)
 	{
 		pOwnerCharacter->SetLight(CharacterLight::Shotgun);
+		ZGetStencilLight()->AddLightSource(pos, 2.0f, 200);
 	}
-
-	if(Z_VIDEO_DYNAMICLIGHT)
-		ZGetStencilLight()->AddLightSource(v1, 2.0f, 200 );
 }
 
 void ZGame::OnPeerShot(const MUID& uid, float fShotTime, rvector& pos, rvector& to,
@@ -3178,11 +3126,11 @@ void ZGame::OnPeerShot(const MUID& uid, float fShotTime, rvector& pos, rvector& 
 
 	if(wtype == MWT_SHOTGUN)
 	{
-		OnPeerShot_Shotgun(pItem,pOwnerCharacter,fShotTime,pos,to, seed);
+		OnPeerShot_Shotgun(pItem, pOwnerCharacter, fShotTime, pos, to, seed);
 		return;
 	}
 
-	OnPeerShot_Range(sel_type,uid,fShotTime,pos,to, seed);
+	OnPeerShot_Range(sel_type, pOwnerCharacter, fShotTime, pos, to, seed);
 
 	rvector position;
 	pOwnerCharacter->GetWeaponTypePos( weapon_dummy_muzzle_flash , &position );

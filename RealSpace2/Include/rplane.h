@@ -1,5 +1,7 @@
 #pragma once
 
+#include "rvector.h"
+
 struct rplane
 {
 	float a, b, c, d;
@@ -12,4 +14,6 @@ struct rplane
 
 	rplane operator +() const { return *this; }
 	rplane operator -() const { return{ -a, -b, -c, -d }; }
+
+	v3 normal() const { return v3{a, b, c}; }
 };
