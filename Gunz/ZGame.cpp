@@ -2971,7 +2971,7 @@ void ZGame::OnPeerShot_Shotgun(ZItem *pItem, ZCharacter* pOwnerCharacter, float 
 		auto& Item = *it;
 
 		int NewDamage = Item.Damage + New.Damage;
-		if (New.PiercingRatio != Item.PiercingRatio)
+		if (New.PiercingRatio != Item.PiercingRatio && NewDamage > 0)
 		{
 			auto OldHPDamage = Item.Damage * Item.PiercingRatio;
 			auto AddHPDamage = New.Damage * New.PiercingRatio;
