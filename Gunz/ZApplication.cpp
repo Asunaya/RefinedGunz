@@ -83,8 +83,12 @@ bool GetNextName(char *szBuffer, int nBufferCount, const char *szSource)
 	while(*szSource==' ' || *szSource=='\t') szSource++;
 
 	const char *end=NULL;
-	if(szSource[0]=='"') 
-		end=strchr(szSource+1,'"');
+	if (szSource[0] == '"')
+	{
+		end = strchr(szSource + 1, '"');
+		szSource++;
+		end--;
+	}
 	else
 	{
 		end=strchr(szSource,' ');
@@ -93,10 +97,10 @@ bool GetNextName(char *szBuffer, int nBufferCount, const char *szSource)
 
 	if(end)
 	{
-		int nCount=end-szSource-1;
+		int nCount=end-szSource;
 		if(nCount==0 || nCount>=nBufferCount) return false;
 
-		strncpy_safe(szBuffer, nBufferCount, szSource+1, nCount);
+		strncpy_safe(szBuffer, nBufferCount, szSource, nCount);
 		szBuffer[nCount]=0;
 	}
 	else
