@@ -146,7 +146,7 @@ void ZGameInterface::LoadBitmaps(const char* szDir, ZLoadingProgress *pLoadingPr
 		if (!DirNode)
 			return;
 
-		for (auto&& File : FilesInDirRecursive(FS, *DirNode))
+		for (auto&& File : FilesInDirRecursive(*DirNode))
 		{
 			if (HasBitmapExtension(File.Path))
 				AddBitmap(File.Path, AddDirToAliasName);

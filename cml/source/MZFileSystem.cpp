@@ -562,6 +562,43 @@ MMappedFile::MMappedFile(MMappedFile && src)
 }
 #endif
 
+static const MZDirDesc* Down(const MZDirDesc* Dir);
+
+static const MZDirDesc* DownThroughRange(Range<const MZDirDesc*> range)
+{
+	for (auto& Subdir : range)
+		if (auto NextDir = Down(&Subdir))
+			return NextDir;
+
+	return nullptr;
+}
+
+static const MZDirDesc* DownThroughSubdirs(const MZDirDesc* Dir)
+{
+	return DownThroughRange(Dir->SubdirsRange());
+}
+
+static const MZDirDesc* Down(const MZDirDesc* Dir)
+{
+	if (Dir->NumFiles)
+		return Dir;
+
+	return DownThroughSubdirs(Dir);
+}
+
+static const MZDirDesc* AcrossOrUp(const MZDirDesc* Dir, const MZDirDesc* Root)
+{
+	while (true)
+	{
+		if (Dir == Root)
+			return Dir;
+		auto End = Dir->Parent->Subdirs + Dir->Parent->NumSubdirs;
+		if (auto NextDir = DownThroughRange(MakeRange(Dir + 1, End)))
+			return NextDir;
+		Dir = Dir->Parent;
+	}
+}
+
 void RecursiveMZFileIterator::AdvanceToNextFile()
 {
 	if (FileIndex < int(CurrentSubdir->NumFiles) - 1)
@@ -570,42 +607,30 @@ void RecursiveMZFileIterator::AdvanceToNextFile()
 		return;
 	}
 
-	if (CurrentSubdir == &Dir)
+	if (auto NextDir = DownThroughSubdirs(CurrentSubdir))
 	{
-		FileIndex = Dir.NumFiles;
+		CurrentSubdir = NextDir;
+		FileIndex = 0;
 		return;
 	}
 
-	auto ParentRange = CurrentSubdir->Parent->SubdirsRange();
-
-	auto CurrentSubdirIt = std::find_if(std::begin(ParentRange), std::end(ParentRange),
-		[&](auto&& x) { return &x == CurrentSubdir; });
-
-	assert(CurrentSubdirIt != std::end(ParentRange));
-
-	if (CurrentSubdirIt == std::prev(std::end(ParentRange)))
+	CurrentSubdir = AcrossOrUp(CurrentSubdir, &Dir);
+	if (CurrentSubdir == &Dir)
 	{
-		CurrentSubdir = CurrentSubdir->Parent;
+		FileIndex = Dir.NumFiles;
+	}
+	else
+	{
 		FileIndex = 0;
 	}
-
-	FileIndex = CurrentSubdirIt - std::begin(ParentRange);
-
-	AdvanceToNextFile();
 }
 
-Range<RecursiveMZFileIterator> FilesInDirRecursive(MZFileSystem& FS, const MZDirDesc& Dir)
+Range<RecursiveMZFileIterator> FilesInDirRecursive(const MZDirDesc& Dir)
 {
-	// Find first file
-	auto* CurrentSubdir = &Dir;
-	int FileIndex = 0;
-	while (CurrentSubdir->NumFiles == 0)
-	{
-		CurrentSubdir = CurrentSubdir->Subdirs;
-	}
+	auto CurrentSubdir = Down(&Dir);
 
 	return{
-		RecursiveMZFileIterator{ FS, Dir, CurrentSubdir, FileIndex },
-		RecursiveMZFileIterator{ FS, Dir, &Dir, int(Dir.NumFiles) },
+		RecursiveMZFileIterator{ Dir, CurrentSubdir, 0 },
+		RecursiveMZFileIterator{ Dir, &Dir, int(Dir.NumFiles) },
 	};
 }

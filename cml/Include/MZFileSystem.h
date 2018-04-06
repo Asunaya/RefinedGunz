@@ -138,11 +138,10 @@ protected:
 struct RecursiveMZFileIterator
 {
 public:
-	RecursiveMZFileIterator(MZFileSystem& FS,
-		const MZDirDesc& Dir,
+	RecursiveMZFileIterator(const MZDirDesc& Dir,
 		const MZDirDesc* CurrentSubdir,
 		int FileIndex)
-		: FS{ FS }, Dir{ Dir }, CurrentSubdir{ CurrentSubdir }, FileIndex{ FileIndex }
+		: Dir{ Dir }, CurrentSubdir{ CurrentSubdir }, FileIndex{ FileIndex }
 	{}
 
 	bool operator==(const RecursiveMZFileIterator& rhs) const {
@@ -169,13 +168,12 @@ public:
 private:
 	void AdvanceToNextFile();
 
-	MZFileSystem& FS;
 	const MZDirDesc& Dir;
 	const MZDirDesc* CurrentSubdir;
 	int FileIndex;
 };
 
-Range<RecursiveMZFileIterator> FilesInDirRecursive(MZFileSystem& FS, const MZDirDesc& Dir);
+Range<RecursiveMZFileIterator> FilesInDirRecursive(const MZDirDesc& Dir);
 
 template<size_t size> void GetRefineFilename(char(&szRefine)[size], const char *szSource) {
 	GetRefineFilename(szRefine, size, szSource);
