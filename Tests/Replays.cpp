@@ -32,20 +32,26 @@ bool LoadFile(ReplayData& Output, const char* Filename)
 	try
 	{
 		if (!Loader.LoadFile(Filename))
+		{
+			TestFail("ZReplayLoader::LoadFile failed");
 			return false;
+		}
 
 		Output.Version = Loader.GetVersion();
 
 		auto VersionString = Output.Version.GetVersionString();
 
-		printf_s("Replay header loaded for %s: %s\n", Filename, VersionString.c_str());
+		MLog("Replay header loaded for %s: %s\n", Filename, VersionString.c_str());
 
 		if (Output.Version.Server == ServerType::None)
+		{
+			TestFail("Unrecognized replay server");
 			return false;
+		}
 
 		Loader.GetStageSetting(Output.StageSetting);
 
-		printf_s("Character position: %d\n", Loader.GetPosition());
+		MLog("Character position: %d\n", Loader.GetPosition());
 
 		if (Output.StageSetting.nGameType == MMATCH_GAMETYPE_DUEL)
 		{
@@ -54,7 +60,7 @@ bool LoadFile(ReplayData& Output, const char* Filename)
 
 		Output.Players = Loader.GetCharInfo();
 
-		printf_s("Command stream position: %d\n", Loader.GetPosition());
+		MLog("Command stream position: %d\n", Loader.GetPosition());
 
 		Output.CommandStreamPos = Loader.GetPosition();
 
@@ -62,12 +68,14 @@ bool LoadFile(ReplayData& Output, const char* Filename)
 	}
 	catch (EOFException& e)
 	{
-		printf_s("Unexpected EOF while reading replay %s at position %d\n", Filename, e.GetPosition());
+		MLog("Unexpected EOF while reading replay %s at position %d\n", Filename, e.GetPosition());
+		TestFail("EOFException");
 		return false;
 	}
 	catch (...)
 	{
-		printf_s("Something went wrong while reading replay %s\n", Filename);
+		MLog("Something went wrong while reading replay %s\n", Filename);
+		TestFail("Unknown exception");
 		return false;
 	}
 
@@ -78,21 +86,21 @@ void PrintPlayers(ReplayData& Data)
 {
 	for (auto& Player : Data.Players)
 	{
-		printf_s("IsHero: %d\n", Player.IsHero);
-		printf_s("Name: %s\n", Player.Info.szName);
-		printf_s("Level: %d\n", Player.Info.nLevel);
-		printf_s("Clan name: %s\n", Player.Info.szClanName);
-		printf_s("Clan grade: %d\n", Player.Info.nClanGrade);
-		printf_s("Clan cont point: %d\n", Player.Info.nClanContPoint);
-		printf_s("Position: %f, %f, %f / %08X, %08X, %08X\n",
+		MLog("IsHero: %d\n", Player.IsHero);
+		MLog("Name: %s\n", Player.Info.szName);
+		MLog("Level: %d\n", Player.Info.nLevel);
+		MLog("Clan name: %s\n", Player.Info.szClanName);
+		MLog("Clan grade: %d\n", Player.Info.nClanGrade);
+		MLog("Clan cont point: %d\n", Player.Info.nClanContPoint);
+		MLog("Position: %f, %f, %f / %08X, %08X, %08X\n",
 			Player.State.Position.x, Player.State.Position.y, Player.State.Position.z,
 			reinterpret<u32>(Player.State.Position.x), reinterpret<u32>(Player.State.Position.y), reinterpret<u32>(Player.State.Position.z));
 
-		printf_s("Property name: %s\n", Player.State.Property.szName);
-		printf_s("Property clan name: %s\n", Player.State.Property.szClanName);
-		printf_s("Property sex: %d\n", Player.State.Property.nSex);
-		printf_s("Property hair: %d\n", Player.State.Property.nHair);
-		printf_s("Property face: %d\n", Player.State.Property.nFace);
+		MLog("Property name: %s\n", Player.State.Property.szName);
+		MLog("Property clan name: %s\n", Player.State.Property.szClanName);
+		MLog("Property sex: %d\n", Player.State.Property.nSex);
+		MLog("Property hair: %d\n", Player.State.Property.nHair);
+		MLog("Property face: %d\n", Player.State.Property.nFace);
 	}
 }
 
@@ -235,7 +243,7 @@ std::vector<ReplayFile> GetFileInfo()
 	std::string cwd(MAX_PATH, 0);
 	_getcwd(&cwd[0], cwd.size());
 	cwd.resize(cwd.find_first_of('\0'));
-	printf("cwd: %s\n", cwd.c_str());
+	MLog("cwd: %s\n", cwd.c_str());
 	auto pos = cwd.find_last_of("\\/");
 	if (pos != std::string::npos)
 	{
@@ -260,7 +268,7 @@ std::vector<ReplayFile> GetFileInfo()
 	return Files;
 }
 
-bool TestReplays()
+void TestReplays()
 {
 	const auto Files = GetFileInfo();
 
@@ -268,17 +276,21 @@ bool TestReplays()
 
 	for (auto& File : Files)
 	{
-		printf("Loading file %s\n", File.Name.c_str());
-		TestAssert(LoadFile(Data, File.Name.c_str()));
+		MLog("Loading file %s\n", File.Name.c_str());
+		if (!LoadFile(Data, File.Name.c_str()))
+		{
+			TestFail(strprintf("Failed to load replay file %s").c_str());
+			continue;
+		}
 
-		printf_s("Map name: %s\n", Data.StageSetting.szMapName);
-		printf_s("Stage name: %s\n", Data.StageSetting.szStageName);
-		printf_s("Gametype: %d\n", Data.StageSetting.nGameType);
-		printf_s("Max players: %d\n", Data.StageSetting.nMaxPlayers);
-		printf_s("Team kill enabled: %d\n", Data.StageSetting.bTeamKillEnabled);
-		printf_s("Team win the point: %d\n", Data.StageSetting.bTeamWinThePoint);
-		printf_s("Forced entry enabled: %d\n", Data.StageSetting.bForcedEntryEnabled);
-		printf_s("Num commands = %d\n", Data.NumCommands);
+		MLog("Map name: %s\n", Data.StageSetting.szMapName);
+		MLog("Stage name: %s\n", Data.StageSetting.szStageName);
+		MLog("Gametype: %d\n", Data.StageSetting.nGameType);
+		MLog("Max players: %d\n", Data.StageSetting.nMaxPlayers);
+		MLog("Team kill enabled: %d\n", Data.StageSetting.bTeamKillEnabled);
+		MLog("Team win the point: %d\n", Data.StageSetting.bTeamWinThePoint);
+		MLog("Forced entry enabled: %d\n", Data.StageSetting.bForcedEntryEnabled);
+		MLog("Num commands = %d\n", Data.NumCommands);
 
 		PrintPlayers(Data);
 
@@ -293,11 +305,9 @@ bool TestReplays()
 
 		for (auto& ExpectedPlayer : File.Players)
 		{
-			decltype(ReplayData::Players)::iterator it;
-
 			auto FindPlayer = [&](const char* Name) -> auto&
 			{
-				it = std::find_if(Data.Players.begin(), Data.Players.end(), [&](ReplayPlayerInfo& Player) {
+				auto it = std::find_if(Data.Players.begin(), Data.Players.end(), [&](ReplayPlayerInfo& Player) {
 					return strcmp(Player.Info.szName, Name) == 0;
 				});
 				TestAssert(it != Data.Players.end());
@@ -313,6 +323,4 @@ bool TestReplays()
 
 		TestAssert(Data.CommandStreamPos == File.CommandStreamPos);
 	}
-	
-	return true;
 }

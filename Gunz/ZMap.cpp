@@ -38,7 +38,7 @@ static StringView GetMapName(const StringView& Path)
 
 	const auto SlashIndex = Path.find_last_of("/\\", Path.size() - 2);
 	if (SlashIndex == Path.npos)
-		return false;
+		return "";
 	const auto NameIndex = SlashIndex + 1;
 	return Path.substr(NameIndex, Path.size() - NameIndex - 1);
 }

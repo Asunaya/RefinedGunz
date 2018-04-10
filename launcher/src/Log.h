@@ -23,6 +23,16 @@ enum class LogLevel
 	Fatal,
 };
 
+namespace LogTo
+{
+enum Type : u32
+{
+	Stdout = 1 << 0,
+	File = 1 << 1,
+	Debugger = 1 << 2,
+};
+}
+
 struct Logger
 {
 	int DebugVerbosity = -1;
@@ -30,9 +40,23 @@ struct Logger
 	// 4 = tight loops
 	// 5 = very tight loops
 
-	bool InitFile(const char* LogFilePath)
+	LogTo::Type Dest;
+
+	bool Init(const char* LogFilePath, u32 Dest)
 	{
+		this->Dest = LogTo::Type(Dest);
+		if (!(Dest & LogTo::File))
+			return true;
 		return LogFile.open(LogFilePath, MFile::Clear);
+	}
+
+	bool Init(const char* LogFilePath)
+	{
+		auto DefaultDest = LogTo::Stdout | LogTo::File;
+#ifdef _DEBUG
+		DefaultDest |= LogTo::Debugger;
+#endif
+		return Init(LogFilePath, DefaultDest);
 	}
 
 #define LOGGER_LOG_FUNCTION(Level)\
@@ -154,20 +178,22 @@ private:
 	// Must be null terminated.
 	void Print(const StringView& String)
 	{
-		// Write to console.
-		printf("%.*s", int(String.size()), String.data());
+		if (Dest & LogTo::Stdout)
+		{
+			printf("%.*s", int(String.size()), String.data());
+		}
 
-		// Write to file, if it's open.
-		if (LogFile.is_open())
+		if (Dest & LogTo::File && LogFile.is_open())
 		{
 			LogFile.write(String.data(), String.size());
 		}
 
-		// If we're compiling in debug mode and on Windows, write to debug output with
-		// OutputDebugString also.
-#if defined(_DEBUG) && defined(_WIN32)
-		OutputDbgString(String.data());
+		if (Dest & LogTo::Debugger)
+		{
+#if defined(_WIN32)
+			OutputDbgString(String.data());
 #endif
+		}
 	}
 
 	void PrintNewline()

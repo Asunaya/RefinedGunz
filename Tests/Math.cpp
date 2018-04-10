@@ -9,13 +9,15 @@
 
 using namespace RealSpace2;
 
-#define TEST_COMPARE_TO_D3DX
+#if _WIN32 && !defined(TEST_COMPARE_TO_D3DX)
+#define TEST_COMPARE_TO_D3DX 1
+#endif
 
-#ifdef TEST_COMPARE_TO_D3DX
+#if TEST_COMPARE_TO_D3DX && defined(_MSC_VER)
 #pragma comment(lib, "d3dx9.lib")
 #endif
 
-static bool TestIntersectLineSegmentPlane()
+static void TestIntersectLineSegmentPlane()
 {
 	rplane p{ 1, 0, 0, -500 };
 
@@ -46,11 +48,9 @@ static bool TestIntersectLineSegmentPlane()
 	result = IntersectLineSegmentPlane(&hit, p, l0, l1);
 	TestAssert(result);
 	TestAssert(Equals(hit, v3(4104.648438f, -834.347534f, 602.078552f)));
-
-	return true;
 }
 
-static bool TestIntersectTriangle()
+static void TestIntersectTriangle()
 {
 	v3 v0{ 0, 0, 0 }, v1{ 1, 0, 0 }, v2{ 1, 1, 0 };
 	v3 Origin{ 0.4f, 0.4f, -1 }, Dir{ 0, 0, 1 };
@@ -85,11 +85,9 @@ static bool TestIntersectTriangle()
 	Origin = { 0.4f, -1, 0.4f };
 	Dir = { 0, 1, 0 };
 	Test(true, 1);
-
-	return true;
 }
 
-static bool TestRotationMatrix()
+static void TestRotationMatrix()
 {
 	v3 axis{ 0, 0, 1 };
 	v3 v{ 1, 0, 0 };
@@ -125,11 +123,9 @@ static bool TestRotationMatrix()
 	inv = Inverse(rot);
 	result = result * inv;
 	Check(v);
-
-	return true;
 }
 
-static bool TestPlaneFromPointNormal()
+static void TestPlaneFromPointNormal()
 {
 	v3 normal{ 1, 0, 0 };
 	rplane plane = PlaneFromPointNormal({ 2, 1, 0 }, normal);
@@ -138,11 +134,9 @@ static bool TestPlaneFromPointNormal()
 	normal = { -1, 0, 0 };
 	plane = PlaneFromPointNormal({ 2, 1, 0 }, normal);
 	TestAssert(GetPlaneNormal(plane) == normal && IS_EQ(plane.d, 2));
-	
-	return true;
 }
 
-static bool TestIntersectLineAABB()
+static void TestIntersectLineAABB()
 {
 	rboundingbox bbox;
 	bbox.vmin = { 0, 0, 0 };
@@ -166,11 +160,9 @@ static bool TestIntersectLineAABB()
 	dir = { 1, 0, 0 };
 	success = IntersectLineAABB(origin, dir, bbox, &t);
 	TestAssert(!success);
-
-	return true;
 }
 
-static bool TestDotAndCross()
+static void TestDotAndCross()
 {
 	v3 a{ 1, 0, 0 }, b{ 0, 1, 0 };
 
@@ -179,11 +171,9 @@ static bool TestDotAndCross()
 
 	auto cross = CrossProduct(a, b);
 	TestAssert(cross == v3(0, 0, 1));
-
-	return true;
 }
 
-static bool TestNormalize()
+static void TestNormalize()
 {
 	v3 v{ 100, 100, 100 };
 	auto n = Normalized(v);
@@ -192,8 +182,6 @@ static bool TestNormalize()
 	v = { 0, 0, 0 };
 	n = Normalized(v);
 	TestAssert(n == v);
-
-	return true;
 }
 
 static bool Equals(const rplane& a, const rplane& b)
@@ -204,7 +192,7 @@ static bool Equals(const rplane& a, const rplane& b)
 		IS_EQ(a.d, b.d);
 }
 
-static bool TestTransform()
+static void TestTransform()
 {
 	rplane p{ 1, 0, 0, -100 };
 	auto mat = RotationMatrix({ 0, 1, 0 }, static_cast<float>(TAU / 4));
@@ -213,8 +201,6 @@ static bool TestTransform()
 	auto result = p * mat;
 	rplane expected_result{ 0, 0, -1, -200 };
 	TestAssert(Equals(expected_result, result));
-
-	return true;
 }
 
 inline v3 operator *(const v3& vec, const rquaternion& quat) {
@@ -224,7 +210,7 @@ inline v3 operator *(const v3& vec, const rquaternion& quat) {
 	return vec + ((uv * quat.w) + uuv) * 2;
 }
 
-static bool TestQuaternionAxisAngle(const v3& axis, float angle)
+static void TestQuaternionAxisAngle(const v3& axis, float angle)
 {
 	auto test_vec = Normalized(v3{ 1, 1, 1 });
 	auto ref_mat = RotationMatrix(axis, angle);
@@ -270,8 +256,6 @@ static bool TestQuaternionAxisAngle(const v3& axis, float angle)
 
 	TestAssert(Equals(d3dx_mat, quat_mat));
 #endif
-
-	return true;
 }
 
 static v3 test_vecs[] = {
@@ -283,7 +267,7 @@ static v3 test_vecs[] = {
 	{ 1, 0.5, 0.333f },
 };
 
-static bool TestSlerp(const rquaternion& a, const rquaternion& b)
+static void TestSlerp(const rquaternion& a, const rquaternion& b)
 {
 	for (auto&& test_vec : test_vecs)
 	{
@@ -304,20 +288,18 @@ static bool TestSlerp(const rquaternion& a, const rquaternion& b)
 #endif
 		}
 	}
-
-	return true;
 }
 
-static bool TestQuaternions()
+static void TestQuaternions()
 {
 	auto ret = true;
 	rquaternion last = Normalized(rquaternion{ 1, 1, 1, 1 });
 
 	auto TestAxisAngle = [&](const v3& axis, float angle) {
-		ret &= TestQuaternionAxisAngle(Normalized(axis), angle);
+		TestQuaternionAxisAngle(Normalized(axis), angle);
 		
 		auto quat = AngleAxisToQuaternion(axis, angle);
-		ret &= TestSlerp(quat, last);
+		TestSlerp(quat, last);
 		last = quat;
 	};
 
@@ -337,12 +319,10 @@ static bool TestQuaternions()
 
 	rquaternion a{ 0.814870715f, -0.239277035f, 0.0268819593f, 0.527266204f };
 	rquaternion b{ -0.839663744f, 0.264600188f, -0.0283754189f, -0.473441035f };
-	ret &= TestSlerp(a, b);
-
-	return ret;
+	TestSlerp(a, b);
 }
 
-static bool TestInterpolation()
+static void TestInterpolation()
 {
 	v3 p{ 1, 2, 3 };
 	auto expected = p;
@@ -351,24 +331,18 @@ static bool TestInterpolation()
 
 	actual = Slerp(p, p, 0.5);
 	TestAssert(expected == actual);
-
-	return true;
 }
 
-bool TestMath()
+void TestMath()
 {
-	auto ret = true;
-
-	ret &= TestIntersectLineSegmentPlane();
-	ret &= TestIntersectTriangle();
-	ret &= TestRotationMatrix();
-	ret &= TestPlaneFromPointNormal();
-	ret &= TestIntersectLineAABB();
-	ret &= TestDotAndCross();
-	ret &= TestNormalize();
-	ret &= TestTransform();
-	ret &= TestQuaternions();
-	ret &= TestInterpolation();
-
-	return ret;
+	TestIntersectLineSegmentPlane();
+	TestIntersectTriangle();
+	TestRotationMatrix();
+	TestPlaneFromPointNormal();
+	TestIntersectLineAABB();
+	TestDotAndCross();
+	TestNormalize();
+	TestTransform();
+	TestQuaternions();
+	TestInterpolation();
 }

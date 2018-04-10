@@ -10,6 +10,7 @@
 
 #ifdef _MSC_VER
 #include <intrin.h>
+#include <intsafe.h>
 #endif
 
 #ifndef SAFE_DELETE
@@ -195,6 +196,25 @@ private:
 template <typename T>
 auto MakePairValueAdapter(T& Container) { return MakeAdapter<ValueIterator>(Container); }
 
+#ifdef _MSC_VER
+inline bool add_overflow(u16 a, u16 b, u16* c) { return UShortAdd(a, b, c) != S_OK; }
+inline bool add_overflow(u32 a, u32 b, u32* c) { return UIntAdd(a, b, c) != S_OK; }
+inline bool add_overflow(u64 a, u64 b, u64* c) { return ULongLongAdd(a, b, c) != S_OK; }
+inline bool sub_overflow(u16 a, u16 b, u16* c) { return UShortSub(a, b, c) != S_OK; }
+inline bool sub_overflow(u32 a, u32 b, u32* c) { return UIntSub(a, b, c) != S_OK; }
+inline bool sub_overflow(u64 a, u64 b, u64* c) { return ULongLongSub(a, b, c) != S_OK; }
+inline bool mul_overflow(u16 a, u16 b, u16* c) { return UShortMult(a, b, c) != S_OK; }
+inline bool mul_overflow(u32 a, u32 b, u32* c) { return UIntMult(a, b, c) != S_OK; }
+inline bool mul_overflow(u64 a, u64 b, u64* c) { return ULongLongMult(a, b, c) != S_OK; }
+#else
+template <typename T>
+bool add_overflow(T a, T b, T* c) { return __builtin_add_overflow(a, b, c); }
+template <typename T>
+bool sub_overflow(T a, T b, T* c) { return __builtin_sub_overflow(a, b, c); }
+template <typename T>
+bool mul_overflow(T a, T b, T* c) { return __builtin_mul_overflow(a, b, c); }
+#endif
+
 namespace detail
 {
 inline bool isdecdigit(char c) { return c >= '0' && c <= '9'; }
@@ -231,54 +251,109 @@ auto Reverse(T&& Container)
 	return MakeRange(std::rbegin(Container), std::rend(Container));
 }
 
-template <typename DestType, int Radix = 10>
-optional<DestType> StringToInt(StringView Str)
+template <typename T = int, int Radix = 0, bool Wrap = false>
+optional<T> StringToInt(StringView Str)
 {
-	static_assert(Radix > 0 && Radix <= 36, "Invalid radix");
+	static_assert(Radix >= 0 && Radix != 1 && Radix <= 36, "Invalid radix");
 
-	// Discard whitespace in the beginning
-	{
-		size_t LastWhitespacePos = 0;
+	Str = trim(Str);
 
-		while (true)
-		{
-			if (LastWhitespacePos >= Str.size())
-			{
-				// The string is either empty (if LastWhitespacePos == 0), or
-				// non-empty and entirely composed of whitespace.
-				return nullopt;
-			}
-
-			if (Str[LastWhitespacePos] != ' ')
-				break;
-
-			++LastWhitespacePos;
-		}
-
-		Str = Str.substr(LastWhitespacePos);
-	}
-
-	DestType Accumulator = 0;
-	DestType Coefficient = 1;
+	if (Str.empty())
+		return nullopt;
 
 	bool IsNegative = Str[0] == '-';
 	if (IsNegative)
-		Str = Str.substr(1);
-
-	for (auto DigitChar : Reverse(Str))
 	{
-		auto Digit = detail::GetDigit<Radix>(DigitChar);
-		if (Digit == -1)
+		if (!Wrap && std::is_unsigned<T>::value)
 			return nullopt;
-
-		Accumulator += Digit * Coefficient;
-		Coefficient *= Radix;
+		Str = Str.substr(1);
 	}
 
-	if (IsNegative)
-		Accumulator = 0 - Accumulator;
+	using U = std::conditional_t<sizeof(T) * CHAR_BIT < 32, u32, std::make_unsigned_t<T>>;
 
-	return Accumulator;
+	auto MAbsVal = [&]() -> optional<U> {
+		if ((Radix == 0 || Radix == 16) && starts_with(Str, "0x"))
+			return StringToInt<U, 16>(Str.substr(2));
+		if ((Radix == 0 || Radix == 8) && starts_with(Str, "0o"))
+			return StringToInt<U, 8>(Str.substr(2));
+		if (Radix == 0)
+			return StringToInt<U, 10>(Str);
+
+		U Accumulator = 0;
+		U Coefficient = 1;
+
+		bool MulWrapped = false;
+		for (auto DigitChar : Reverse(Str))
+		{
+			auto Digit = detail::GetDigit<Radix>(DigitChar);
+			if (Digit == -1)
+				return nullopt;
+			if (Wrap)
+			{
+				Accumulator += Digit * Coefficient;
+				Coefficient *= Radix;
+			}
+			else
+			{
+				if (MulWrapped ||
+					add_overflow(Accumulator, Digit * Coefficient, &Accumulator))
+					return nullopt;
+				MulWrapped = mul_overflow(Coefficient, Radix, &Coefficient);
+			}
+		}
+
+		return Accumulator;
+	}();
+
+	if (!MAbsVal)
+		return nullopt;
+	auto AbsVal = *MAbsVal;
+
+	U Max = U((std::numeric_limits<T>::max)()) + U(IsNegative);
+	if (!Wrap && AbsVal > Max)
+		return nullopt;
+
+	if (IsNegative)
+	{
+		if (AbsVal == 0)
+			return T(0);
+		return T(T(-1) - T(AbsVal - 1));
+	}
+
+	return T(AbsVal);
+}
+
+// Comparison functions for mixed-sign values (e.g. -2 < 4u is false, but
+// mixed_sign::lt(-2, 4u) is true.
+namespace mixed_sign
+{
+template <typename A, typename B>
+int cmp(A a, B b)
+{
+	// Disable signed-unsigned mismatch warning since we're explicitly checking that already.
+#pragma warning(push)
+#pragma warning(disable:4018)
+	constexpr bool sa = std::is_signed<A>::value;
+	constexpr bool sb = std::is_signed<B>::value;
+	if (!(sa ^ sb))
+	{
+		if (a < b) return -1;
+		if (a == b) return 0;
+		if (a > b) return 1;
+	}
+	if (sa && a < 0)
+		return -1;
+	if (sb && b < 0)
+		return 1;
+	return cmp(static_cast<std::make_unsigned_t<A>>(a),
+	           static_cast<std::make_unsigned_t<B>>(b));
+#pragma warning(pop)
+}
+template <typename A, typename B> bool eq   (A a, B b) { return cmp(a, b) == 0; }
+template <typename A, typename B> bool lt   (A a, B b) { return cmp(a, b) <  0; }
+template <typename A, typename B> bool lt_eq(A a, B b) { return cmp(a, b) <= 0; }
+template <typename A, typename B> bool gt   (A a, B b) { return cmp(a, b) >  0; }
+template <typename A, typename B> bool gt_eq(A a, B b) { return cmp(a, b) >= 0; }
 }
 
 // WriteProxy

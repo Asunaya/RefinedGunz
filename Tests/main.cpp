@@ -1,19 +1,42 @@
 #include "MDebug.h"
 #include <cstdio>
+#include <vector>
 #include "TestAssert.h"
 
 int main()
 {
 	InitLog();
 
-	bool TestReplays();
-	TestAssert(TestReplays());
-	bool TestMath();
-	TestAssert(TestMath());
-	bool TestLauncher();
-	TestAssert(TestLauncher());
+	using TestFuncType = void();
+	std::vector<std::pair<const char*, TestFuncType*>> TestFuncs;
+#define ADD(x) TestFuncType x; TestFuncs.push_back({#x, x})
+	ADD(TestReplays);
+	ADD(TestMath);
+	ADD(TestMUtil);
+	ADD(TestStringView);
+	ADD(TestLauncher);
+#undef ADD
 
-	printf("\n\n\nAll OK!\n\n");
+	int NumFail = 0;
+	for (auto&& TestFunc : TestFuncs)
+	{
+		TestFunc.second();
+		auto Result = !TestState<>::AssertionFailed;
+		TestState<>::AssertionFailed = false;
+		printf("%s %s\n", TestFunc.first, Result ? "succeeded" : "failed");
+		if (!Result)
+			++NumFail;
+	}
 
-	getchar();
+	printf("\n\n");
+	if (NumFail)
+	{
+		printf("%d tests failed\n", NumFail);
+	}
+	else
+	{
+		printf("All OK!");
+	}
+
+	return NumFail;
 }

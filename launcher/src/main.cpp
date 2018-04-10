@@ -58,7 +58,7 @@ int PASCAL WinMain(HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline, int 
 	auto MsgBox = [&](const char* Msg) {
 		MessageBoxA(0, Msg, AppName, 0);
 	};
-	if (!Log.InitFile("launcher_log.txt"))
+	if (!Log.Init("launcher_log.txt"))
 	{
 		auto&& Msg = "Failed to open log file launcher_log.txt. Logging will be disabled.";
 		MsgBox(Msg);

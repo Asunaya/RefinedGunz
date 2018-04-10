@@ -36,7 +36,7 @@ static auto MakeRandomBytes(size_t Size) {
 	return Bytes;
 }
 
-static bool TestRollingHashMove()
+static void TestRollingHashMove()
 {
 	// Generate some data and check that, for every window in the sequence, the rolling hash
 	// obtained by hashing the entire window at that position and the one gotten by updating
@@ -66,11 +66,9 @@ static bool TestRollingHashMove()
 			TestAssert(IncrementalHash == NonincrementalHash);
 		}
 	}
-
-	return true;
 }
 
-static bool TestRollingHashStream()
+static void TestRollingHashStream()
 {
 	constexpr auto SequenceSize = LauncherConfig::BlockSize;
 	auto Sequence = MakeRandomBytes(SequenceSize);
@@ -101,16 +99,12 @@ static bool TestRollingHashStream()
 
 		TestAssert(Nonincremental == Incremental);
 	}
-
-	return true;
 }
 
-static bool TestRollingHash()
+static void TestRollingHash()
 {
-	TestAssert(TestRollingHashMove());
-	TestAssert(TestRollingHashStream());
-
-	return true;
+	TestRollingHashMove();
+	TestRollingHashStream();
 }
 
 static void WriteFile(const char* Path, const void* Buffer, size_t Size)
@@ -124,7 +118,7 @@ static void WriteFile(const char* Path, const void* Buffer, size_t Size)
 	TestAssert(!File.error());
 }
 
-static bool TestFile(const ArrayView<u8>& SrcFileContents,
+static void TestFile(const ArrayView<u8>& SrcFileContents,
 	const ArrayView<u8>& DestFileContents,
 	size_t ExpectedNumUnmatchingBlocks)
 {
@@ -179,12 +173,10 @@ static bool TestFile(const ArrayView<u8>& SrcFileContents,
 
 	TestAssert(ActualHash == ExpectedHash);
 	TestAssert(ActualSize == ExpectedSize);
-
-	return true;
 }
 
 template <size_t FileSize>
-static bool TestSize()
+static void TestSize()
 {
 	auto MakeView = [&](auto&& c) { return ArrayView<u8>{c.data(), c.size()}; };
 
@@ -192,7 +184,7 @@ static bool TestSize()
 
 	// Test that the sync algorithm can recognize that two files are the same.
 	auto View = MakeView(FileBuffer);
-	TestAssert(TestFile(View, View, 0));
+	TestFile(View, View, 0);
 
 	// This performs a copy.
 	auto ModifiedBuffer = FileBuffer;
@@ -202,13 +194,13 @@ static bool TestSize()
 	// Change the first byte.
 	ModifiedBuffer[0] += 128;
 
-	TestAssert(TestFile(MakeView(FileBuffer), MakeView(ModifiedBuffer), 1));
+	TestFile(MakeView(FileBuffer), MakeView(ModifiedBuffer), 1);
 
 	// Check that it can recognize that only one block differs between FileBuffer and FileBuffer
 	// from the first byte to the end.
-	TestAssert(TestFile(MakeView(FileBuffer),
+	TestFile(MakeView(FileBuffer),
 		ArrayView<u8>{FileBuffer.data() + 1, FileBuffer.size() - 1},
-		1));
+		1);
 
 	ModifiedBuffer[0] = OldFirstByte;
 
@@ -221,9 +213,9 @@ static bool TestSize()
 	}
 
 	// All blocks but the last should be modified.
-	TestAssert(TestFile(MakeView(FileBuffer),
+	TestFile(MakeView(FileBuffer),
 		MakeView(ModifiedBuffer),
-		NumBlocks - 1));
+		NumBlocks - 1);
 
 	// Undo every second alteration, so that (NumBlocks - 1) / 2 blocks will be modified.
 	for (int i = 0; i < NumBlocks - 1; i += 2)
@@ -231,30 +223,27 @@ static bool TestSize()
 		ModifiedBuffer[i * LauncherConfig::BlockSize] -= 42;
 	}
 
-	TestAssert(TestFile(MakeView(FileBuffer),
+	TestFile(MakeView(FileBuffer),
 		MakeView(ModifiedBuffer),
-		(NumBlocks - 1) / 2));
-
-	return true;
+		(NumBlocks - 1) / 2);
 }
 
-static bool TestSyncFile()
+static void TestSyncFile()
 {
 	TestSize<1>(); // 1 byte
 	TestSize<72>(); // 72 bytes
 	TestSize<LauncherConfig::BlockSize / 2>(); // Half a block
 	TestSize<100 * 1024>(); // 100 KiB
 	TestSize<LauncherConfig::BlockSize * 5>(); // 5 blocks
+#ifndef _DEBUG
 	TestSize<5 * 1024 * 1024>(); // 5 MiB
 	TestSize<60 * 1024 * 1024>(); // 60 MiB
-
-	return true;
+#endif
 }
 
-bool TestLauncher()
+void TestLauncher()
 {
-	TestAssert(TestRollingHash());
-	TestAssert(TestSyncFile());
-
-	return true;
+	TestAssert(Log.Init("launcher_log.txt", LogTo::File | LogTo::Debugger));
+	TestRollingHash();
+	TestSyncFile();
 }

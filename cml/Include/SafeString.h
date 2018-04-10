@@ -338,15 +338,41 @@ inline int vprintf_safe(const char* Format, va_list va)
 	return vprintf(Format, va);
 }
 
-template <size_t size>
-void itoa_safe(int val, char(&dest)[size], int radix)
+template <typename T, size_t size>
+char* itoa_safe(T val, char(&dest)[size], int radix)
 {
-	if (radix == 10)
-		sprintf_safe(dest, "%d", val);
-	else if (radix == 16)
-		sprintf_safe(dest, "%x", val);
+	assert(radix > 1 && radix <= 36);
+	auto i = dest, end = dest + size - 1;
+	bool negative = val < 0;
+	std::make_unsigned_t<T> absval;
+	if (negative)
+	{
+		--end;
+		absval = 0;
+		absval -= val;
+	}
 	else
-		assert(false);
+	{
+		absval = val;
+	}
+	while (i < end)
+	{
+		auto digit = absval % radix;
+		auto c = digit + (digit < 10 ? '0' : 'a' - 10);
+		*i = c;
+		absval /= radix;
+		++i;
+		if (!absval)
+			break;
+	}
+	if (negative)
+	{
+		*i = '-';
+		++i;
+	}
+	*i = 0;
+	std::reverse(dest, i);
+	return i;
 }
 
 inline auto strcpy_unsafe(char* a, const char* b) {
