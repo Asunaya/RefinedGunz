@@ -235,9 +235,6 @@ bool MServer::OnCommand(MCommand* pCommand)
 			pCommand->GetParameter(&nTimeStamp, 0, MPT_UINT);
 
 			OnNetPong(pCommand->GetSenderUID(), nTimeStamp);
-
-			LOG(LOG_DEBUG, "Ping from (%u:%u) = %d", 
-				pCommand->GetSenderUID().High, pCommand->GetSenderUID().Low, GetGlobalTimeMS() - nTimeStamp);
 			return true;
 		}
 		break;

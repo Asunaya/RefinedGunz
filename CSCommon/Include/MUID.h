@@ -14,6 +14,10 @@ struct MUID{
 		High = h;
 		Low = l;
 	}
+	explicit MUID(u64 x) {
+		High = u32(x >> 32);
+		Low = u32(x & 0xFFFF'FFFF);
+	}
 
 	void SetZero(){
 		High = Low = 0;
@@ -91,6 +95,9 @@ struct MUID{
 	inline friend MUID& operator++(MUID& a){
 		a.Increase();
 		return a;
+	}
+	u64 AsU64() const {
+		return (u64(High) << 32) | Low;
 	}
 
 	static MUID Invalid();

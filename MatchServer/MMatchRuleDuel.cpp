@@ -261,6 +261,13 @@ void MMatchRuleDuel::SpawnPlayers()
 			WaitQueue.pop_front();
 		}
 	}
+
+	for (MUID UID : {uidChampion, uidChallenger})
+	{
+		auto Object = MGetMatchServer()->GetObject(UID);
+		if (!Object || !(Object->GetPlayerFlags() & MTD_PlayerFlags_Bot)) continue;
+		Object->SetAlive(true);
+	}
 }
 
 bool MMatchRuleDuel::OnCheckEnableBattleCondition()

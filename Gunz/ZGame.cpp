@@ -4649,9 +4649,18 @@ void ZGame::OnAddPeer(const MUID& uidChar, DWORD dwIP, const int nPort, MTD_Peer
 	{
 		if (pNode->ExtendInfo.nPlayerFlags & MTD_PlayerFlags_Bot)
 		{
-			auto OwnerUID = pNode->dwIP == u32(-1) ?
-				ZGetMyUID() :
-				ZGetGameClient()->GetPeers()->FindUID(pNode->dwIP, pNode->nPort);
+			MUID OwnerUID;
+			if (pNode->dwIP == u32(-1))
+			{
+				if (pNode->nPort == 0)
+					OwnerUID = ZGetMyUID();
+				else
+					OwnerUID = ZGetGameClient()->GetServerUID();
+			}
+			else
+			{
+				OwnerUID = ZGetGameClient()->GetPeers()->FindUID(pNode->dwIP, pNode->nPort);
+			}
 
 			if (OwnerUID.IsInvalid())
 			{

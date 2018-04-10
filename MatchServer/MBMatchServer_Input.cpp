@@ -138,7 +138,7 @@ void MBMatchServer::InitConsoleCommands()
 		MLog("Set version checking to %s.\n", MGetServerConfig()->VersionChecking ? "true" : "false");
 	});
 
-	AddConsoleCommand("getversion", 0, 1,
+	AddConsoleCommand("getversion", 0, 0,
 		"Outputs the current version.",
 		"getversion",
 		"",
@@ -146,6 +146,97 @@ void MBMatchServer::InitConsoleCommands()
 		MLog("%d.%d.%d-%X\n",
 			MGetServerConfig()->Version.Major, MGetServerConfig()->Version.Minor,
 			MGetServerConfig()->Version.Patch, MGetServerConfig()->Version.Revision);
+	});
+
+	AddConsoleCommand("players", 0, 0,
+		"Lists information about all the players on the server.",
+		"players",
+		"",
+		[&] {
+		for (auto& Pair : m_Objects)
+		{
+			auto&& UID = Pair.first;
+			auto&& Object = Pair.second;
+			auto&& Stage = FindStage(Object->GetStageUID());
+			MLog("%s (%llX) -- %s (%llX)\n", Object->GetName(), UID.AsU64(),
+				Stage ? Stage->GetName() : "not in a stage",
+				Stage ? Stage->GetUID().AsU64() : 0);
+		}
+	});
+
+	AddConsoleCommand("stages", 0, 0,
+		"Lists information about all the stages on the server.",
+		"stages",
+		"",
+		[&] {
+		for (auto& Pair : m_StageMap)
+		{
+			auto&& UID = Pair.first;
+			auto&& Stage = Pair.second;
+			MLog("%llX -- %s, map: %s\n", UID.AsU64(),
+				Stage->GetName(), Stage->GetMapName());
+		}
+	});
+
+	AddConsoleCommand("addbot", 1, 2,
+		"",
+		"addbot <stage UID> [team]",
+		"",
+		[&] {
+		auto StageUID = StringToInt<u64>(Splits[1]);
+		if (!StageUID)
+		{
+			MLog("Malformed UID\n");
+			return;
+		}
+		MMatchTeam Team = MMT_ALL;
+		if (Splits.size() == 3)
+		{
+			auto TeamVal = StringToInt<int>(Splits[2]);
+			if (!TeamVal)
+			{
+				MLog("Malformed team\n");
+				return;
+			}
+			Team = MMatchTeam(*TeamVal);
+		}
+		auto Object = AddBot(MUID(*StageUID), Team);
+		MLog("UID = %llX\n", Object->GetUID().AsU64());
+	});
+
+	AddConsoleCommand("kill", 1, 1,
+		"",
+		"kill <player UID>",
+		"",
+		[&] {
+		auto PlayerUIDVal = StringToInt<u64>(Splits[1]);
+		if (!PlayerUIDVal)
+		{
+			MLog("Malformed UID\n");
+			return;
+		}
+		auto PlayerUID = MUID(*PlayerUIDVal);
+		auto Player = GetObject(PlayerUID);
+		if (!Player)
+		{
+			MLog("Player with UID %llX not found\n", PlayerUID);
+			return;
+		}
+		OnGameKill(PlayerUID, PlayerUID);
+	});
+
+	AddConsoleCommand("disconnect", 1, 1,
+		"",
+		"disconnect <player UID>",
+		"",
+		[&] {
+		auto UID = StringToInt<u64>(Splits[1]);
+		if (!UID)
+		{
+			MLog("Malformed UID\n");
+			return;
+		}
+		Disconnect(MUID(*UID));
 	});
 }
 

@@ -132,10 +132,10 @@ void CreateBot(const MUID& OwnerUID, const MUID& BotUID,
 	Bot->SetUID(BotUID);
 
 	Bot->Create(CharInfo);
+	ZGetCharacterManager()->Add(Bot);
 	ZGetGame()->ConfigureCharacter(Bot->GetUID(),
 		MMatchTeam(ExtendInfo.nTeam),
 		ExtendInfo.nPlayerFlags);
-	ZGetCharacterManager()->Add(Bot);
 }
 
 static bool VerifyOwnership(const MUID& OwnerUID, const MUID& BotUID)

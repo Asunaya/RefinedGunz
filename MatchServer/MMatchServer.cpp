@@ -768,6 +768,7 @@ void MMatchServer::OnRun(void)
 	for(MMatchObjectList::iterator i=m_Objects.begin(); i!=m_Objects.end(); i++){
 		MMatchObject* pObj = (MMatchObject*)((*i).second);
 		if (pObj->GetUID() < MUID(0,3)) continue;
+		if (pObj->GetPlayerFlags() & MTD_PlayerFlags_Bot) continue;
 		if (GetTickTime() - pObj->GetTickLastPacketRecved() >= MINTERVAL_GARBAGE_SESSION_CLEANING) {
 			LOG(LOG_PROG, "TIMEOUT CLIENT CLEANING : %s(%u%u, %s) (ClientCnt=%d, SessionCnt=%d)", 
 			pObj->GetName(), pObj->GetUID().High, pObj->GetUID().Low, pObj->GetIPString(), GetClientCount(), GetCommObjCount());
@@ -996,6 +997,37 @@ void MMatchServer::OnRequestCreateBot(const MUID& OwnerUID)
 	CommandNode.dwIP = u32(-1);
 	CommandNode.nPort = 0;
 	RouteToListener(OwnerObj, MakeCommand());
+}
+
+MMatchObject* MMatchServer::AddBot(const MUID& StageUID, MMatchTeam Team)
+{
+	auto* Stage = FindStage(StageUID);
+	if (!Stage)
+		return nullptr;
+
+	auto UID = UseUID();
+
+	{
+		auto Err = ObjectAdd(UID);
+		if (Err != MOK)
+		{
+			MLog("AddVirtualClient -- Failed to add object\n");
+			return nullptr;
+		}
+	}
+
+	auto Object = GetObject(UID);
+	Object->SetPeerAddr(u32(-1), "255.255.255.255", 1);
+	Object->SetPlayerFlag(MTD_PlayerFlags_Bot, true);
+	auto CharInfo = new MMatchCharInfo;
+	strcpy_safe(CharInfo->m_szName, "Bot");
+	Object->SetCharInfo(CharInfo);
+
+	OnStageJoin(UID, StageUID);
+	StageTeam(UID, StageUID, Team);
+	OnStageEnterBattle(UID, StageUID);
+
+	return Object;
 }
 
 static int GetBlobCmdID(const char* Data)

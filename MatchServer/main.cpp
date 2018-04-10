@@ -46,7 +46,7 @@ static void InputThreadProc()
 		Input.clear();
 		std::getline(std::cin, Input);
 		if (Input.empty())
-			return;
+			continue;
 		{
 			std::lock_guard<std::mutex> Lock{ InputMutex };
 			InputQueue.emplace_back(Input);
