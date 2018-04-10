@@ -1030,6 +1030,51 @@ MMatchObject* MMatchServer::AddBot(const MUID& StageUID, MMatchTeam Team)
 	return Object;
 }
 
+void MMatchServer::OnRequestSpec(const MUID& UID, bool Value)
+{
+	auto Object = GetObject(UID);
+	if (!Object) return;
+	if (!Object->GetEnterBattle()) return;
+	auto StageUID = Object->GetStageUID();
+	auto Stage = FindStage(StageUID);
+	if (!Stage) return;
+
+	bool IsSpec = Object->GetTeam() == MMT_SPECTATOR;
+	if (Value == IsSpec) return;
+	MMatchTeam NewTeam;
+	if (Value)
+	{
+		OnGameKill(UID, UID);
+		NewTeam = MMT_SPECTATOR;
+	}
+	else if (Stage->GetStageSetting()->IsTeamPlay())
+	{
+		int Red = 0, Blue = 0;
+		for (auto&& Object : MakePairValueAdapter(*GetObjects()))
+		{
+			auto Team = Object->GetTeam();
+			if (Team == MMT_RED)
+				++Red;
+			else if (Team == MMT_BLUE)
+				++Blue;
+		}
+		NewTeam = Red > Blue ? MMT_BLUE : MMT_RED;
+	}
+	else
+	{
+		NewTeam = MMT_ALL;
+	}
+
+	// For players ingame.
+	auto* Command = CreateCommand(MC_MATCH_RESPONSE_SPEC, MUID(0, 0));
+	Command->AddParameter(new MCmdParamUID(UID));
+	Command->AddParameter(new MCmdParamUInt(u32(NewTeam)));
+	RouteToBattle(StageUID, Command);
+
+	// For players in the gameroom.
+	StageTeam(UID, StageUID, NewTeam);
+}
+
 static int GetBlobCmdID(const char* Data)
 {
 	return *(u16*)(Data + 2);

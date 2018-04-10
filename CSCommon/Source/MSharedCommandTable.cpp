@@ -89,6 +89,11 @@ void MAddSharedCommandTable(MCommandManager* CommandManager, MSharedCommandType:
 	C(MC_PEER_TUNNEL_BOT_COMMAND, "", "", MCDT_PEER2PEER);
 		P(MPT_UID, "Bot UID");
 		P(MPT_BLOB, "Command");
+	C(MC_MATCH_REQUEST_SPEC, "", "", MCDT_MACHINE2MACHINE);
+		P(MPT_BOOL, "On/Off");
+	C(MC_MATCH_RESPONSE_SPEC, "", "", MCDT_MACHINE2MACHINE);
+		P(MPT_UID, "Target player");
+		P(MPT_UINT, "Team");
 
 
 	// Freestyle Gunz commands

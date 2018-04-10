@@ -239,8 +239,6 @@ void MMatchRuleDuel::OnTeam(const MUID &uidPlayer, MMatchTeam nTeam)
 		return;
 
 	WaitQueue.remove(uidPlayer);
-
-	MGetMatchServer()->Announce(uidPlayer, "Popped from duel queue");
 }
 
 void MMatchRuleDuel::SpawnPlayers()

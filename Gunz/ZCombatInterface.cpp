@@ -905,16 +905,17 @@ void ZCombatInterface::OnDrawCustom(MDrawContext* pDC)
 
 void ZCombatInterface::DrawSoloSpawnTimeMessage(MDrawContext* pDC)
 {
-	if(g_pGame->m_pMyCharacter->IsAdminHide()) return;
+	auto Me = g_pGame->m_pMyCharacter;
+	if(!Me || Me->IsAdminHide() || Me->GetTeamID() == MMT_SPECTATOR) return;
 
 	ZMatch* pMatch = ZApplication::GetGame()->GetMatch();
 	if (pMatch->GetRoundState() == MMATCH_ROUNDSTATE_PLAY)
 	{
 		if (!pMatch->IsWaitForRoundEnd())
 		{
-			if (g_pGame->m_pMyCharacter && g_pGame->m_pMyCharacter->IsDie())
-				{
-					char szMsg[128] = "";
+			if (Me->IsDie())
+			{
+				char szMsg[128] = "";
 				int nRemainTime = pMatch->GetRemainedSpawnTime();
 				if ((nRemainTime > 0) && (nRemainTime <= 5))
 				{
@@ -1929,7 +1930,10 @@ void ZCombatInterface::DrawScoreBoard(MDrawContext* pDC)
 	}
 
 	if (count)
-		TextRelative(pDC, 0.2, 0.8, buf);
+	{
+		pDC->SetColor(TEXT_COLOR_TITLE);
+		TextRelative(pDC, ITEM_XPOS[0], 0.9, buf);
+	}
 }
 
 bool CompareZResultBoardItem(ZResultBoardItem* a,ZResultBoardItem* b) {

@@ -130,7 +130,8 @@ void ZMatch::OnDrawGameMessage() {}
 
 void ZMatch::SoloSpawn()
 {
-	if (GetMatchType() == MMATCH_GAMETYPE_DUEL) return;
+	auto MyTeam = ZApplication::GetGame()->m_pMyCharacter->GetTeamID();
+	if (GetMatchType() == MMATCH_GAMETYPE_DUEL || MyTeam == MMT_SPECTATOR) return;
 
 	rvector pos = rvector(0.0f, 0.0f, 0.0f);
 	rvector dir = rvector(0.0f, 1.0f, 0.0f);
@@ -141,7 +142,7 @@ void ZMatch::SoloSpawn()
 	{
 		int nSpawnIndex[2] = { 0, 0 };
 		for (int i = 0; i < 2; i++)
-			if (ZApplication::GetGame()->m_pMyCharacter->GetTeamID() == MMT_RED + i)
+			if (MyTeam == MMT_RED + i)
 				pSpawnData = g_pGame->GetMapDesc()->GetSpawnManager()->GetTeamData(i, nSpawnIndex[i]);
 	}
 	else
@@ -276,7 +277,7 @@ void ZMatch::InitRound()
 					pCharacter->SetVisible(false);
 				}
 			}
-			else
+			else if (g_pGame->m_pMyCharacter->GetTeamID() != MMT_SPECTATOR)
 			{
 				ZPostRequestSpawn(ZGetMyUID(), pos, dir);
 				g_pGame->SetSpawnRequested(true);
@@ -286,7 +287,8 @@ void ZMatch::InitRound()
 
 	// AdminHide
 	MMatchObjCache* pObjCache = ZGetGameClient()->FindObjCache(ZGetMyUID());
-	if (pObjCache && pObjCache->CheckFlag(MTD_PlayerFlags_AdminHide)) {
+	if (pObjCache && pObjCache->CheckFlag(MTD_PlayerFlags_AdminHide) ||
+		ZGetGame()->m_pMyCharacter->GetTeamID() == MMT_SPECTATOR) {
 		ZGetGameInterface()->GetCombatInterface()->SetObserverMode(true);
 	} else {
 		if (!isObserver)

@@ -284,7 +284,10 @@ void MMatchObject::OnLeaveBattle()
 
 void MMatchObject::OnInitRound()
 {
-	SetAlive(true);
+	if (GetTeam() != MMT_SPECTATOR)
+	{
+		SetAlive(true);
+	}
 	SetKillCount(0);
 	SetDeathCount(0);
 

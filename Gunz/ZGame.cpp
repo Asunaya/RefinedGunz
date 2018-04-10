@@ -1175,6 +1175,34 @@ bool ZGame::OnCommand_Immediate(MCommand* pCommand)
 		pSender.ForceDie();
 	}
 		break;
+	case MC_MATCH_RESPONSE_SPEC:
+	{
+		MUID TargetUID;
+		MMatchTeam NewTeam;
+
+		if (!pCommand->GetParameter(&TargetUID, 0, MPT_UID)) break;
+		if (!pCommand->GetParameter(&NewTeam,   1, MPT_UINT)) break;
+
+		auto Target = m_CharacterManager.Find(TargetUID);
+		if (!Target) break;
+
+		Target->SetTeamID(NewTeam);
+		bool Spec = NewTeam == MMT_SPECTATOR;
+		if (Spec)
+		{
+			if (!Target->IsDie())
+			{
+				Target->ActDead();
+				Target->Die();
+			}
+			if (Target == m_pMyCharacter)
+			{
+				ZGetCombatInterface()->SetObserverMode(true);
+			}
+		}
+		ZChatOutputF("%s %s spectator", Target->GetUserName(), Spec ? "entered" : "left");
+	}
+	break;
 	case MC_PEER_COMPLETED_SKILLMAP:
 	{
 		auto it = m_CharacterManager.find(pCommand->GetSenderUID());
@@ -3515,6 +3543,8 @@ void ZGame::OnPeerSpawn(const MUID& uid, const rvector& pos, const rvector& dir)
 		}
 
 		ZGetScreenEffectManager()->ReSetHpPanel();
+
+		ReleaseObserver();
 	}
 
 #ifndef _PUBLISH

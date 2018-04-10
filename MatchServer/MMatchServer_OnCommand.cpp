@@ -125,6 +125,13 @@ _STATUS_CMD_START;
 			OnRequestCreateBot(pCommand->GetSenderUID());
 		}
 		break;
+		case MC_MATCH_REQUEST_SPEC:
+		{
+			bool Value;
+			if (!pCommand->GetParameter(&Value, 0, MPT_BOOL)) break;
+			OnRequestSpec(pCommand->GetSenderUID(), Value);
+		}
+		break;
 		case MC_MATCH_LOGIN_FROM_DBAGENT:
 			{
 				MUID CommUID;

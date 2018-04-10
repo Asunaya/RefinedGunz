@@ -190,19 +190,8 @@ void LoadRGCommands(ZChatCmdManager& CmdManager)
 		if (ZGetGameInterface()->GetState() != GUNZ_GAME)
 			return;
 
-		ZCharacter &mychar = *ZGetGame()->m_pMyCharacter;
-		if (mychar.GetTeamID() == MMT_SPECTATOR)
-		{
-			ZChatOutputF("Spectator mode is already enabled");
-			return;
-		}
-
-		mychar.SetTeamID(MMT_SPECTATOR);
-		mychar.ForceDie();
-		ZPostStageTeam(ZGetGame()->m_pMyCharacter->GetUID(), ZGetGameClient()->GetStageUID(), MMT_SPECTATOR);
-		ZPostSpec();
-
-		ZChatOutputF("Spectator mode enabled.");
+		bool IsSpec = ZGetGame()->m_pMyCharacter->GetTeamID() == MMT_SPECTATOR;
+		ZPostSpec(!IsSpec);
 	}, CCF_ALL, 0, 0, true, "/spec", "");
 
 	CmdManager.AddCommand(0, "fullscreen", [](const char *line, int argc, char ** const argv){

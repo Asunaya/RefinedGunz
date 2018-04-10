@@ -1418,7 +1418,7 @@ void ZCharacter::Revival()
 	m_bDie = false;
 	m_Collision.bCollideable = true;
 
-	if(IsAdminHide())
+	if(IsAdminHide() || GetTeamID() == MMT_SPECTATOR)
 		m_bDie = true;
 
 	SetAnimationLower(ZC_STATE_LOWER_IDLE1);
@@ -1677,8 +1677,10 @@ void ZCharacter::InitStatus()
 	m_bCharging = false;
 	m_bFallingToNarak = false;
 
-	if(IsAdminHide()) {
+	if(IsAdminHide() || GetTeamID() == MMT_SPECTATOR) {
 		m_bDie = true;
+		SetHP(0);
+		SetAP(0);
 		SetVisible(false);
 	}
 

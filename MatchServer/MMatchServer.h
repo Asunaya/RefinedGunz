@@ -613,6 +613,7 @@ protected:
 	void OnVoiceChat(const MUID& Player, unsigned char* EncodedFrame, int Length);
 	void OnRequestCreateBot(const MUID& Owner);
 	MMatchObject* AddBot(const MUID& StageUID, MMatchTeam Team);
+	void OnRequestSpec(const MUID& UID, bool Value);
 
 	void OnTunnelledP2PCommand(const MUID& Sender, const MUID& Receiver,
 		const char* Blob, size_t BlobSize);

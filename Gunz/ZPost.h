@@ -955,9 +955,9 @@ inline void ZPostPortal(int iPortal, const rvector &Pos, const rvector &Normal, 
 	ZPOSTCMD4(MC_PEER_PORTAL, MCmdParamInt(iPortal), VEC(Pos), VEC(Normal), VEC(Up));
 }
 
-inline void ZPostSpec()
+inline void ZPostSpec(bool Value)
 {
-	ZPOSTCMD0(MC_PEER_SPEC);
+	ZPOSTCMD1(MC_MATCH_REQUEST_SPEC, MCmdParamBool(Value));
 }
 
 inline void ZPostCompletedSkillmap(float fTime, const char *szCourse)
