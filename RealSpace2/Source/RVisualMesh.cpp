@@ -1477,23 +1477,27 @@ void RVisualMesh::SetParts(RMeshPartsType parts, const char* name)
 
 	if(!m_pMesh) return;
 
+	auto& TMesh = m_pTMesh[parts];
+	if (TMesh && strcmp(TMesh->GetName(), name) == 0)
+		return;
+
 	if (IsDynamicResourceLoad())
 	{
-		auto lambda = [this, saved_name = std::string(name), parts](RMeshNode *pNode)
+		auto lambda = [this, parts](RMeshNodePtr Node, const char* NodeName)
 		{
-			if (!pNode)
-				pNode = m_pMesh->GetPartsNode(saved_name.c_str());
+			if (!Node)
+				Node = RMeshNodePtr{m_pMesh->GetPartsNode(NodeName), {false}};
 
-			if (!pNode)
+			if (!Node)
 			{
-				MLog("RVisualMesh::SetParts(): Failed to find parts %s\n", saved_name.c_str());
+				MLog("RVisualMesh::SetParts(): Failed to find parts %s\n", NodeName);
 				return;
 			}
 
-			m_pTMesh[parts] = RMeshNodePtr{ pNode };
-			m_pMesh->ConnectPhysiqueParent(pNode);
+			m_pTMesh[parts] = std::move(Node);
+			m_pMesh->ConnectPhysiqueParent(m_pTMesh[parts].get());
 		};
-		GetMeshManager()->GetAsync(m_pMesh->GetName(), name, this, lambda);
+		GetMeshManager()->Get(m_pMesh->GetName(), name, this, lambda);
 	}
 	else
 	{

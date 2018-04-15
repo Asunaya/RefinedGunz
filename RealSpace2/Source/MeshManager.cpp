@@ -124,7 +124,7 @@ void MeshManager::Destroy()
 			"AllocatedMeshes.size() = %zu\n"
 			"AllocatedNodes.size() = %zu\n"
 			"\n",
-			BaseMeshName,
+			BaseMeshName.c_str(),
 			BaseMesh.PartsToEluMap.size(),
 			BaseMesh.AllocatedMeshes.size(),
 			BaseMesh.AllocatedNodes.size());
@@ -133,11 +133,12 @@ void MeshManager::Destroy()
 	BaseMeshMap.clear();
 }
 
-RMeshNode *MeshManager::Get(const char *szMeshName, const char *szNodeName)
+MeshManager::GetResult MeshManager::GetCached(const char *szMeshName, const char *szNodeName,
+	RMeshNodePtr& NodeOutput, LoadInfoType& LoadInfoOutput)
 {
 	auto Prof = MBeginProfile("MeshManager::Get");
 
-	std::unique_lock<std::mutex> lock{ mutex };
+	std::lock_guard<std::mutex> lock{ mutex };
 
 	LOG("Get mesh: %s, node: %s\n", szMeshName, szNodeName);
 
@@ -145,36 +146,39 @@ RMeshNode *MeshManager::Get(const char *szMeshName, const char *szNodeName)
 	if (mesh_it == BaseMeshMap.end())
 	{
 		LOG("Couldn't find mesh %s in MeshMap!\n", szMeshName);
-		return nullptr;
+		return GetResult::NotFound;
 	}
 
 	auto&& BaseMesh = mesh_it->second;
 
-	auto alloc_node_it = BaseMesh.AllocatedNodes.find(szNodeName);
-
-	if (alloc_node_it != BaseMesh.AllocatedNodes.end())
 	{
-		auto* meshnode = alloc_node_it->second.Obj;
+		auto alloc_node_it = BaseMesh.AllocatedNodes.find(szNodeName);
 
-		LOG("Found already allocated node %s %p\n",
-			meshnode->GetName(), static_cast<void*>(meshnode));
-		
-		auto* mesh = meshnode->m_pParentMesh;
-		auto alloc_mesh_it = BaseMesh.AllocatedMeshes.find(mesh->GetFileName());
-		if (alloc_mesh_it == BaseMesh.AllocatedMeshes.end())
+		if (alloc_node_it != BaseMesh.AllocatedNodes.end())
 		{
-			LOG("Couldn't find mesh %s %p in AllocatedMeshes\n",
+			auto* meshnode = alloc_node_it->second.Node;
+
+			LOG("Found already allocated node %s %p\n",
+				meshnode->GetName(), static_cast<void*>(meshnode));
+
+			auto* mesh = meshnode->m_pParentMesh;
+			auto alloc_mesh_it = BaseMesh.AllocatedMeshes.find(mesh->GetFileName());
+			if (alloc_mesh_it == BaseMesh.AllocatedMeshes.end())
+			{
+				LOG("Couldn't find mesh %s %p in AllocatedMeshes\n",
+					mesh->GetFileName(), static_cast<void*>(mesh));
+				return GetResult::NotFound;
+			}
+
+			LOG("Returning already allocated node %s %p in mesh %s %p\n",
+				meshnode->GetName(), static_cast<void*>(meshnode),
 				mesh->GetFileName(), static_cast<void*>(mesh));
-			return nullptr;
+
+			alloc_mesh_it->second.References.fetch_add(1, std::memory_order_relaxed);
+			alloc_node_it->second.References++;
+			NodeOutput = RMeshNodePtr{alloc_node_it->second.Node};
+			return GetResult::Found;
 		}
-
-		LOG("Returning already allocated node %s %p in mesh %s %p\n",
-			meshnode->GetName(), static_cast<void*>(meshnode),
-			mesh->GetFileName(), static_cast<void*>(mesh));
-
-		alloc_mesh_it->second.References++;
-		alloc_node_it->second.References++;
-		return meshnode;
 	}
 
 	auto nodeit = BaseMesh.PartsToEluMap.find(szNodeName);
@@ -183,41 +187,38 @@ RMeshNode *MeshManager::Get(const char *szMeshName, const char *szNodeName)
 	{ 
 		LOG("Couldn't find node %s in PartsToEluMap element\n", szNodeName);
 
-		return nullptr;
+		return GetResult::NotFound;
 	}
 
 	RMesh *pMesh = nullptr;
 
-	auto allocmesh = BaseMesh.AllocatedMeshes.find(nodeit->second);
-
-	if (allocmesh != BaseMesh.AllocatedMeshes.end())
 	{
-		pMesh = allocmesh->second.Obj.get();
-		allocmesh->second.References++;
-		LOG("Found already allocated mesh %s %p, new ref count %d\n",
-			pMesh->GetFileName(), static_cast<void*>(pMesh),
-			allocmesh->second.References);
-	}
-	else
-	{
-		auto UniqueMeshPtr = RMeshPtr{ new RMesh };
-		pMesh = UniqueMeshPtr.get();
+		auto AllocMeshEmplaceRes = BaseMesh.AllocatedMeshes.try_emplace(nodeit->second);
+		auto& MeshAlloc = AllocMeshEmplaceRes.first->second;
 
-		// Unlock the mutex since ReadElu takes a while
-		lock.unlock();
-		if (!pMesh->ReadElu(nodeit->second.c_str()))
+		if (!AllocMeshEmplaceRes.second)
 		{
-			MLog("Couldn't load elu %s\n", nodeit->second.c_str());
-			return nullptr;
+			if (MeshAlloc.References == -1)
+			{
+				LOG("Mesh %s for %s being loaded\n", nodeit->second.c_str(), szNodeName);
+				LoadInfoOutput = {nodeit->first.c_str(), nodeit->second.c_str(), &MeshAlloc,
+					&BaseMesh};
+				return GetResult::MeshBeingLoaded;
+			}
+			pMesh = &MeshAlloc.Mesh;
+			MeshAlloc.References.fetch_add(1, std::memory_order_relaxed);
+			LOG("Found already allocated mesh %s %p, new ref count %d\n",
+				pMesh->GetFileName(), static_cast<void*>(pMesh),
+				MeshAlloc.References.load(std::memory_order_relaxed));
 		}
-		lock.lock();
-
-		LOG("Loaded mesh %s, %s, %p\n",
-			nodeit->second.c_str(), pMesh->GetFileName(),
-			static_cast<void*>(pMesh));
-
-		BaseMesh.AllocatedMeshes.emplace(nodeit->second.c_str(),
-			Allocation<RMeshPtr>{ std::move(UniqueMeshPtr), 1 });
+		else
+		{
+			LOG("Loading mesh %s for %s\n", nodeit->second.c_str(), szNodeName);
+			MeshAlloc.References.store(-1, std::memory_order_relaxed);
+			LoadInfoOutput = {nodeit->first.c_str(), nodeit->second.c_str(), &MeshAlloc,
+				&BaseMesh};
+			return GetResult::LoadMesh;
+		}
 	}
 
 	auto node = pMesh->GetMeshData(szNodeName);
@@ -226,15 +227,100 @@ RMeshNode *MeshManager::Get(const char *szMeshName, const char *szNodeName)
 	{
 		LOG("Failed to find node %s\n", szNodeName);
 
-		return nullptr;
+		return GetResult::NotFound;
 	}
 
 	LOG("Placing %p -> %p in MeshNodeToMeshMap\n",
 		static_cast<void*>(node), static_cast<void*>(pMesh));
 
-	BaseMesh.AllocatedNodes.emplace(szNodeName, Allocation<RMeshNode*>{ node, 1 });
+	BaseMesh.AllocatedNodes.emplace(szNodeName, RMeshNodeAllocation{ node, 1 });
 
-	return node;
+	NodeOutput = RMeshNodePtr{node};
+	return GetResult::Found;
+}
+
+RMeshNode* MeshManager::Load(const LoadInfoType& LoadInfo)
+{
+	if (!LoadInfo.MeshAlloc->Mesh.ReadElu(LoadInfo.EluFilename))
+	{
+		MLog("Couldn't load elu %s\n", LoadInfo.EluFilename);
+		return nullptr;
+	}
+
+	LOG("Loaded mesh %s, %s, %p\n",
+		LoadInfo.EluFilename, LoadInfo.MeshAlloc->Mesh.GetFileName(),
+		static_cast<void*>(&LoadInfo.MeshAlloc->Mesh));
+
+	LoadInfo.MeshAlloc->References.store(1, std::memory_order_release);
+	auto Node = LoadInfo.MeshAlloc->Mesh.GetMeshData(LoadInfo.NodeName);
+	{
+		std::lock_guard<std::mutex> lock{mutex};
+		auto emplace_ret = LoadInfo.BaseMesh->AllocatedNodes.emplace(LoadInfo.NodeName,
+			RMeshNodeAllocation{Node, 0});
+		emplace_ret.first->second.References++;
+	}
+	LOG("Load -- Placed node %s -> %p from mesh %s, %p\n", LoadInfo.NodeName, Node,
+		LoadInfo.MeshAlloc->Mesh.GetFileName(), &LoadInfo.MeshAlloc->Mesh);
+	return Node;
+}
+
+void MeshManager::LoadAsync(const LoadInfoType& LoadInfo, void* Obj,
+	std::function<void(RMeshNodePtr, const char*)> Callback)
+{
+	{
+		std::lock_guard<std::mutex> lock(ObjQueueMutex);
+		QueuedObjs.push_back(Obj);
+	}
+
+	auto Task = [this, LoadInfo, Obj, Callback = std::move(Callback)]() mutable
+	{
+		auto Node = Load(LoadInfo);
+		InvokeCallback(Obj, Node, LoadInfo.NodeName, std::move(Callback));
+	};
+	TaskManager::GetInstance().AddTask(std::move(Task));
+}
+
+void MeshManager::AwaitMeshLoad(const LoadInfoType& LoadInfo, void* Obj,
+	CallbackType Callback)
+{
+	{
+		std::lock_guard<std::mutex> lock(ObjQueueMutex);
+		QueuedObjs.push_back(Obj);
+	}
+
+	auto Task = [this, LoadInfo, Obj, Callback = std::move(Callback)]() mutable
+	{
+		while (LoadInfo.MeshAlloc->References.load(std::memory_order_acquire) == -1)
+		{
+			std::this_thread::sleep_for(std::chrono::milliseconds(1));
+		}
+		auto Node = LoadInfo.MeshAlloc->Mesh.GetMeshData(LoadInfo.NodeName);
+		{
+			std::lock_guard<std::mutex> lock{mutex};
+			LoadInfo.MeshAlloc->References.fetch_add(1, std::memory_order_relaxed);
+			auto emplace_ret = LoadInfo.BaseMesh->AllocatedNodes.try_emplace(LoadInfo.NodeName,
+				RMeshNodeAllocation{Node, 0});
+			emplace_ret.first->second.References++;
+		}
+		LOG("AwaitMeshLoad -- Placed node %s -> %p from mesh %s, %p\n", LoadInfo.NodeName, Node,
+			LoadInfo.MeshAlloc->Mesh.GetFileName(), &LoadInfo.MeshAlloc->Mesh);
+		InvokeCallback(Obj, Node, LoadInfo.NodeName, std::move(Callback));
+	};
+	TaskManager::GetInstance().AddTask(std::move(Task));
+}
+
+void MeshManager::InvokeCallback(void* Obj, RMeshNode* Node, const char* NodeName,
+	CallbackType&& Callback)
+{
+	auto Invokation = [this, Obj, Node, NodeName,
+		Callback = std::move(Callback)]() mutable
+	{
+		// We want to make sure the object hasn't been destroyed
+		// between the GetAsync call and the invokation.
+		if (RemoveObject(Obj, false))
+			Callback(RMeshNodePtr{Node}, NodeName);
+	};
+	TaskManager::GetInstance().Invoke(std::move(Invokation));
 }
 
 void MeshManager::Release(RMeshNode *pNode)
@@ -275,23 +361,15 @@ void MeshManager::Release(RMeshNode *pNode)
 
 	auto&& BaseMesh = BaseMeshIt->second;
 
-	auto GetMeshAndReleaseNodeAllocation = [&]() -> RMesh*
+	auto AllocIt = BaseMesh.AllocatedNodes.find(pNode->GetName());
+	if (AllocIt == BaseMesh.AllocatedNodes.end())
 	{
-		auto AllocIt = BaseMesh.AllocatedNodes.find(pNode->GetName());
-		if (AllocIt == BaseMesh.AllocatedNodes.end())
-		{
-			LOG("Couldn't find allocated node %s\n", pNode->GetName());
-			return nullptr;
-		}
-		
-		auto* pMesh = AllocIt->second.Obj->m_pParentMesh;
-		DecrementRefCount(BaseMesh.AllocatedNodes, AllocIt);
-
-		return pMesh;
-	};
-	auto* pMesh = GetMeshAndReleaseNodeAllocation();
-	if (!pMesh)
+		LOG("Couldn't find allocated node %s\n", pNode->GetName());
 		return;
+	}
+
+	auto* pMesh = AllocIt->second.Node->m_pParentMesh;
+	DecrementRefCount(BaseMesh.AllocatedNodes, AllocIt);
 
 	LOG("Filename %s, %d\n", pMesh->m_FileName.c_str(), pMesh->m_FileName.length());
 
@@ -305,39 +383,39 @@ void MeshManager::Release(RMeshNode *pNode)
 	DecrementRefCount(BaseMesh.AllocatedMeshes, allocmesh);
 }
 
-void MeshManager::DecrementRefCount(AllocatedMeshesType& AllocatedMeshes, AllocatedMeshesType::iterator AllocIt)
+void MeshManager::DecrementRefCount(AllocatedMeshesType& AllocatedMeshes,
+	AllocatedMeshesType::iterator AllocIt)
 {
-	auto& alloc = AllocIt->second;
-	auto* mesh = alloc.Obj.get();
-	alloc.References--;
+	auto& Alloc = AllocIt->second;
+	Alloc.References.fetch_sub(1, std::memory_order_relaxed);
 
 	LOG("DecRefCount mesh %s %p, new ref count %d\n",
-		mesh->GetFileName(), static_cast<void*>(mesh),
-		alloc.References);
+		Alloc.Mesh.GetFileName(), static_cast<void*>(&Alloc.Mesh),
+		Alloc.References.load());
 
-	if (alloc.References <= 0)
+	if (Alloc.References <= 0)
 	{
 		LOG("Releasing mesh %s %p\n",
-			mesh->GetFileName(), static_cast<void*>(mesh));
+			Alloc.Mesh.GetFileName(), static_cast<void*>(&Alloc.Mesh));
 
 		AllocatedMeshes.erase(AllocIt);
 	}
 }
 
-void MeshManager::DecrementRefCount(AllocatedNodesType& AllocatedNodes, AllocatedNodesType::iterator AllocIt)
+void MeshManager::DecrementRefCount(AllocatedNodesType& AllocatedNodes,
+	AllocatedNodesType::iterator AllocIt)
 {
-	auto& alloc = AllocIt->second;
-	auto* meshnode = alloc.Obj;
-	alloc.References--;
+	auto& Alloc = AllocIt->second;
+	Alloc.References--;
 
 	LOG("DecRefCount node %s %p, new ref count %d\n",
-		meshnode->GetName(), static_cast<void*>(meshnode),
-		alloc.References);
+		Alloc.Node->GetName(), static_cast<void*>(Alloc.Node),
+		Alloc.References);
 
-	if (alloc.References <= 0)
+	if (Alloc.References <= 0)
 	{
 		LOG("Erasing node allocation %s %p\n",
-			meshnode->GetName(), static_cast<void*>(meshnode));
+			Alloc.Node->GetName(), static_cast<void*>(Alloc.Node));
 
 		AllocatedNodes.erase(AllocIt);
 	}
@@ -367,32 +445,6 @@ bool MeshManager::RemoveObject(void *Obj, bool All)
 	}
 
 	return true;
-}
-
-void MeshManager::GetAsync(const char *szMeshName, const char *szNodeName, void* Obj,
-	std::function<void(RMeshNode*)> Callback)
-{
-	{
-		std::lock_guard<std::mutex> lock(ObjQueueMutex);
-
-		QueuedObjs.push_back(Obj);
-	}
-
-	auto Task = [this,
-		PersistentMesh = std::string{ szMeshName }, PersistentNode = std::string{ szNodeName },
-		Obj, Callback]
-		()
-	{
-		auto ret = Get(PersistentMesh.c_str(), PersistentNode.c_str());
-
-		TaskManager::GetInstance().Invoke([=]() {
-			// We want to make sure the object hasn't been destroyed
-			// between the GetAsync call and the invokation.
-			if (RemoveObject(Obj, false))
-				Callback(ret);
-		});
-	};
-	TaskManager::GetInstance().AddTask(std::move(Task));
 }
 
 MeshManager* GetMeshManager()

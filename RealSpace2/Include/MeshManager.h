@@ -65,6 +65,10 @@
 #include <queue>
 #include <thread>
 #include <condition_variable>
+#include <atomic>
+
+struct MeshNodeDeleter { bool Managed = true; void operator()(RMeshNode* ptr) const; };
+using RMeshNodePtr = std::unique_ptr<RMeshNode, MeshNodeDeleter>;
 
 class MeshManager
 {
@@ -72,35 +76,34 @@ public:
 	bool LoadParts(std::vector<unsigned char>& File);
 	void Destroy();
 
-	RMeshNode *Get(const char *szMeshName, const char *szNodeName);
-	void GetAsync(const char *szMeshName, const char *szNodeName, void* Obj,
-		std::function<void(RMeshNode*)> Callback);
-
+	// Callback should have the signature `void(RMeshNodePtr Node, const char* NodeName)`.
+	template <typename T>
+	void Get(const char *MeshName, const char *NodeName, void* Obj, T&& Callback);
 	void Release(RMeshNode *pNode);
 
 	bool RemoveObject(void* Obj, bool All = true);
 
 private:
-	template <typename T>
-	struct Allocation
+	struct RMeshAllocation
 	{
-		T Obj;
-		int References;
-	};
-
-	struct RMeshDeleter {
-		void operator()(RMesh* ptr) const {
-			// Not sure why the RMesh destructor doesn't do this.
-			ptr->ClearMtrl();
-			delete ptr;
+		RMesh Mesh;
+		// -1 indicates it's being loaded.
+		std::atomic<int> References;
+		~RMeshAllocation()
+		{
+			Mesh.ClearMtrl();
 		}
 	};
 
-	using RMeshPtr = std::unique_ptr<RMesh, RMeshDeleter>;
+	struct RMeshNodeAllocation
+	{
+		RMeshNode* Node;
+		int References;
+	};
 
 	using PartsToEluMapType = std::unordered_map<std::string, std::string>;
-	using AllocatedMeshesType = std::unordered_map<std::string, Allocation<RMeshPtr>>;
-	using AllocatedNodesType = std::unordered_map<std::string, Allocation<RMeshNode*>>;
+	using AllocatedMeshesType = std::unordered_map<std::string, RMeshAllocation>;
+	using AllocatedNodesType = std::unordered_map<std::string, RMeshNodeAllocation>;
 
 	struct BaseMeshData
 	{
@@ -122,6 +125,31 @@ private:
 	// E.g., both the female and male black dragon headpieces are called "eq_head_blackdragon".
 	std::unordered_map<std::string, BaseMeshData> BaseMeshMap;
 
+	struct LoadInfoType
+	{
+		// These three pointers' lifetime are all tied to the MeshManager instance.
+		const char* NodeName;
+		const char* EluFilename;
+		RMeshAllocation* MeshAlloc;
+		BaseMeshData* BaseMesh;
+	};
+	enum class GetResult
+	{
+		Found,
+		MeshBeingLoaded,
+		LoadMesh,
+		NotFound,
+	};
+	GetResult GetCached(const char *szMeshName, const char *szNodeName,
+		RMeshNodePtr& NodeOutput, LoadInfoType& LoadInfoOutput);
+	RMeshNode* Load(const LoadInfoType& LoadInfo);
+	using CallbackType = std::function<void(RMeshNodePtr, const char*)>;
+	void LoadAsync(const LoadInfoType& LoadInfo, void* Obj, CallbackType Callback);
+	void AwaitMeshLoad(const LoadInfoType& LoadInfo, void* Obj,
+		CallbackType Callback);
+	void InvokeCallback(void* Obj, RMeshNode* Node, const char* NodeName,
+		CallbackType&& Callback);
+
 	// Decrements the reference count of an allocation, performing the appropriate deletions if it
 	// has hit zero.
 	void DecrementRefCount(AllocatedMeshesType& AllocatedMeshes, AllocatedMeshesType::iterator);
@@ -137,14 +165,34 @@ private:
 
 MeshManager* GetMeshManager();
 
-struct MeshNodeDeleter {
-	void operator()(RMeshNode* ptr) const {
-		if (ptr)
-			GetMeshManager()->Release(ptr);
+template <typename T>
+void MeshManager::Get(const char *MeshName, const char *NodeName, void* Obj,
+	T&& Callback)
+{
+	RMeshNodePtr Node;
+	LoadInfoType LoadInfo;
+	auto Res = GetCached(MeshName, NodeName, Node, LoadInfo);
+	switch (Res)
+	{
+	case GetResult::Found:
+		Callback(std::move(Node), NodeName);
+		break;
+	case GetResult::NotFound:
+		Callback(nullptr, NodeName);
+		break;
+	case GetResult::LoadMesh:
+		LoadAsync(LoadInfo, Obj, std::forward<T>(Callback));
+		break;
+	case GetResult::MeshBeingLoaded:
+		AwaitMeshLoad(LoadInfo, Obj, std::forward<T>(Callback));
+		break;
 	}
-};
+}
 
-using RMeshNodePtr = std::unique_ptr<RMeshNode, MeshNodeDeleter>;
+inline void MeshNodeDeleter::operator()(RMeshNode* ptr) const {
+	if (ptr && Managed)
+		GetMeshManager()->Release(ptr);
+}
 
 // TODO: Move this awkward thing or something
 class TaskManager
@@ -157,8 +205,7 @@ public:
 	{
 		{
 			std::lock_guard<std::mutex> lock(QueueMutex[0]);
-			auto Func = std::function<void()>{ std::forward<T>(Task) };
-			Tasks.emplace(std::move(Func));
+			Tasks.emplace(std::forward<T>(Task));
 			Notified = true;
 		}
 
@@ -169,7 +216,7 @@ public:
 	void Invoke(T&& Task)
 	{
 		std::lock_guard<std::mutex> lock(QueueMutex[1]);
-		Invokations.push(Task);
+		Invokations.emplace(std::forward<T>(Task));
 	}
 
 	void Update(float Elapsed);

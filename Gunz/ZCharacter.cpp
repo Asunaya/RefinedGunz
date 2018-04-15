@@ -69,8 +69,6 @@ bool CheckTeenVersionMesh(RMesh** ppMesh)
 
 static void ChangeEquipParts(RVisualMesh* pVMesh, u32* pItemID)
 {
-	pVMesh->ClearParts();
-
 	struct _ZPARTSPAIR
 	{
 		_RMeshPartsType			meshparts;
