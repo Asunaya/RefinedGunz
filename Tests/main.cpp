@@ -14,6 +14,7 @@ int main()
 	ADD(TestMath);
 	ADD(TestMUtil);
 	ADD(TestStringView);
+	ADD(TestSafeString);
 	ADD(TestLauncher);
 #undef ADD
 

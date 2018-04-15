@@ -372,7 +372,7 @@ int Chat::GetTextLength(MFontR2& Font, const wchar_t* Format, ...)
 	wchar_t buf[1024];
 	va_list va;
 	va_start(va, Format);
-	vswprintf_safe(buf, Format, va);
+	vsprintf_safe(buf, Format, va);
 	va_end(va);
 	return Font.GetWidth(buf);
 }

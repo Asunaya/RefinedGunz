@@ -1,4 +1,6 @@
+#include "TestAssert.h"
 #include "MUtil.h"
+#include "SafeString.h"
 #include <climits>
 #include <string>
 #include <algorithm>

@@ -3,6 +3,7 @@
 #include "ZRuleDuel.h"
 #include "has_xxx.h"
 #include "Arena.h"
+#include "defer.h"
 
 template <typename HeaderType, typename StageSettingType, typename PlayerInfoType>
 inline bool ZReplayLoader::IsVersion()
