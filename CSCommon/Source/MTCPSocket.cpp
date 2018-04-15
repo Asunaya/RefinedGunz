@@ -162,7 +162,7 @@ void MClientSocketThread::Run()
 
 	while (true)
 	{
-		const auto Timeout = MSync::Infinite;
+		const auto Timeout = 100;
 		int WaitResult = WaitForMultipleEvents(EventArray, Timeout);
 		if (WaitResult == MSync::WaitFailed)
 		{
@@ -181,12 +181,10 @@ void MClientSocketThread::Run()
 		case 1:
 			if (m_bActive)
 				FlushSend();
-			m_SendEvent.ResetEvent();
 			break;
 
 			// Kill Event
 		case 2:
-			m_KillEvent.ResetEvent();
 			DMLog("MClientSocketThread::Run -- Received kill event\n");
 			goto end_thread;
 			break;
