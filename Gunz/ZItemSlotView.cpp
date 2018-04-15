@@ -19,6 +19,7 @@ ZItemSlotView::ZItemSlotView(const char* szName, MWidget* pParent, MListener* pL
 	m_bKindable = false;
 	m_bDragAndDrop = false;
 	m_szItemSlotPlace[0] = '\0';
+	SetFocusEnable(true);
 }
 
 ZItemSlotView::~ZItemSlotView(void)
@@ -197,6 +198,7 @@ bool ZItemSlotView::OnDrop(MWidget* pSender, MBitmap* pBitmap, const char* szStr
 	
 	else if (strcmp(pSender->GetClassName(), MINT_ITEMSLOTVIEW)==0) {	// Equip ½½·Ô¿¡¼­ Equip ½½·ÔÀ¸·Î
 		ZItemSlotView* pWidget = (ZItemSlotView*)pSender;
+		if (pWidget == this) return false;
 		MUID uidItem = ZGetMyInfo()->GetItemList()->GetEquipedItemUID(pWidget->GetParts());
 		MMatchItemDesc* pItemDesc = MGetMatchItemDescMgr()->GetItemDesc(ZGetMyInfo()->GetItemList()->GetItemID(uidItem));
 		if (pItemDesc == NULL) return false;
