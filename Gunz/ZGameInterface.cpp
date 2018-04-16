@@ -3328,7 +3328,10 @@ bool ZGameInterface::Equip(MMatchCharItemParts parts, MUID& uidItem)
 {
 
 	ZPostRequestEquipItem(ZGetGameClient()->GetPlayerUID(), uidItem, parts);
+	// The server sends this automatically if UPDATE_STAGE_EQUIP_LOOK is defined.
+#ifndef UPDATE_STAGE_EQUIP_LOOK
 	ZPostRequestCharacterItemList(ZGetGameClient()->GetPlayerUID());
+#endif
 	return true;
 }
 

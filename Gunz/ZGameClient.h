@@ -202,6 +202,8 @@ private:
 	void OnChatRoomInvite(char* pszSenderName, char* pszRoomName);
 	void OnChatRoomChat(char* pszChatRoomName, char* pszPlayerName, char* pszChat);
 
+	void OnResponseUpdateStageEquipLook(const MUID& uidPlayer, int nParts, int nItemID);
+
 	void OnFollowResponse( const int nMsgID );
 	void OnExpiredRentItem(void* pBlob);
 

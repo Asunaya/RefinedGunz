@@ -204,12 +204,19 @@ void ZCharacterView::InitCharParts(MMatchSex nSex, unsigned int nHair, unsigned 
 void ZCharacterView::SetParts(MMatchCharItemParts nParts, unsigned int nItemID)
 {
 	MMatchItemDesc* pItemDesc = MGetMatchItemDescMgr()->GetItemDesc(nItemID);
-	if (pItemDesc == NULL) return;
-	if (IsSuitableItemSlot(pItemDesc->m_nSlot, nParts) == false) return;
-
-	if (pItemDesc->m_nResSex != -1)
+	if (pItemDesc == NULL)
 	{
-		if (pItemDesc->m_nResSex != int(ZGetMyInfo()->GetSex())) return;
+		if (nItemID != 0)
+			return;
+	}
+	else
+	{
+		if (IsSuitableItemSlot(pItemDesc->m_nSlot, nParts) == false) return;
+
+		if (pItemDesc->m_nResSex != -1)
+		{
+			if (pItemDesc->m_nResSex != int(ZGetMyInfo()->GetSex())) return;
+		}
 	}
 
 	m_ItemSlots[nParts].m_nItemID = nItemID;

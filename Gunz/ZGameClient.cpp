@@ -1926,3 +1926,30 @@ void ZGameClient::OnBroadcastDuelInterruptVictories(const char* pszChampionName,
 
 	ZChatOutput(szText, ZChat::CMT_BROADCAST);
 }
+
+void ZGameClient::OnResponseUpdateStageEquipLook(const MUID& uidPlayer, int nParts, int nItemID)
+{
+	MMatchObjCacheMap::iterator itFind = m_ObjCacheMap.find(uidPlayer);
+	if (m_ObjCacheMap.end() == itFind)
+	{
+		return;
+	}
+
+	MMatchObjCache* pObjCache = itFind->second;
+
+	pObjCache->GetCostume()->nEquipedItemID[nParts] = nItemID;
+
+#ifdef UPDATE_STAGE_CHARVIEWER
+	auto StageCharViewer = ZFindWidgetAs<ZCharacterView>("Stage_Charviewer");
+	if (StageCharViewer && StageCharViewer->m_Info.UID == uidPlayer)
+	{
+		StageCharViewer->SetParts(MMatchCharItemParts(nParts), nItemID);
+	}
+#endif
+
+#ifdef _DEBUG
+	mlog("update stage look : parts(%d), itemid(%d)\n"
+		, nParts
+		, nItemID);
+#endif
+}

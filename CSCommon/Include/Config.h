@@ -82,3 +82,10 @@
 
 // Controls whether guard_cancel registers as a block on the attacking client.
 #define GUARD_CANCEL_FIX
+
+// Controls whether other players' view of a player's equipment in a stage updates when they change
+// equipment in the inventory (backported from 1.5).
+#define UPDATE_STAGE_EQUIP_LOOK
+
+// Controls whether the equipment on the stage charviewer is updated immediately.
+#define UPDATE_STAGE_CHARVIEWER

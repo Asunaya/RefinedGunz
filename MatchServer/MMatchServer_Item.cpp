@@ -494,31 +494,31 @@ void MMatchServer::ResponseEquipItem(const MUID& uidPlayer, const MUID& uidItem,
 	MMatchObject* pObj = GetObject(uidPlayer);
 	if (pObj == NULL) return;
 
-	int nResult = MOK;
 	MMatchCharInfo* pCharInfo = pObj->GetCharInfo();
 	if (pCharInfo == NULL) return;
 
 	MUID uidRealItem = uidItem;
 	MMatchItem* pItem = pCharInfo->m_ItemList.GetItem(uidRealItem);
 
-	if ((pItem == NULL) || (!IsSuitableItemSlot(pItem->GetDesc()->m_nSlot, parts)))
-	{
-		// 결과를 플레이어에게 응답한다.
-		nResult = MERR_CANNOT_EQUIP_ITEM;
-		MCommand* pNew = CreateCommand(MC_MATCH_RESPONSE_EQUIP_ITEM, MUID(0,0));
+	auto Respond = [&](int nResult) {
+		MCommand* pNew = CreateCommand(MC_MATCH_RESPONSE_EQUIP_ITEM, MUID(0, 0));
 		pNew->AddParameter(new MCommandParameterInt(nResult));
 		RouteToListener(pObj, pNew);
+	};
+
+	if ((pItem == NULL) || (!IsSuitableItemSlot(pItem->GetDesc()->m_nSlot, parts)))
+	{
+		Respond(MERR_CANNOT_EQUIP_ITEM);
 		return;
 	}
 
-	nResult = ValidateEquipItem(pObj, pItem, parts);
-	if (nResult != MOK)
 	{
-		// 결과를 플레이어에게 응답한다.
-		MCommand* pNew = CreateCommand(MC_MATCH_RESPONSE_EQUIP_ITEM, MUID(0,0));
-		pNew->AddParameter(new MCommandParameterInt(nResult));
-		RouteToListener(pObj, pNew);
-		return;
+		auto nResult = ValidateEquipItem(pObj, pItem, parts);
+		if (nResult != MOK)
+		{
+			Respond(nResult);
+			return;
+		}
 	}
 
 	unsigned long int nItemCIID = 0;
@@ -533,14 +533,24 @@ void MMatchServer::ResponseEquipItem(const MUID& uidPlayer, const MUID& uidItem,
 	}
 	else
 	{
-		//mlog("DB Query(ResponseEquipItem > UpdateEquipedItem) Failed\n");
-		nResult = MERR_CANNOT_EQUIP_ITEM;
+		Respond(MERR_CANNOT_EQUIP_ITEM);
+		return;
 	}
 
-	// 결과를 플레이어에게 응답한다.
-	MCommand* pNew = CreateCommand(MC_MATCH_RESPONSE_EQUIP_ITEM, MUID(0,0));
-	pNew->AddParameter(new MCommandParameterInt(nResult));
-	RouteToListener(pObj, pNew);	
+#ifdef UPDATE_STAGE_EQUIP_LOOK
+	ResponseCharacterItemList(uidPlayer);
+
+	if (FindStage(pObj->GetStageUID()))
+	{
+		MCommand* pEquipInfo = CreateCommand(MC_MATCH_ROUTE_UPDATE_STAGE_EQUIP_LOOK, MUID(0, 0));
+		pEquipInfo->AddParameter(new MCmdParamUID(uidPlayer));
+		pEquipInfo->AddParameter(new MCmdParamInt(parts));
+		pEquipInfo->AddParameter(new MCmdParamInt(pItem->GetDescID()));
+		RouteToStage(pObj->GetStageUID(), pEquipInfo);
+	}
+#else
+	Respond(MOK);
+#endif
 }
 
 void MMatchServer::OnRequestTakeoffItem(const MUID& uidPlayer, const unsigned long int nEquipmentSlot)
@@ -557,7 +567,6 @@ void MMatchServer::ResponseTakeoffItem(const MUID& uidPlayer, const MMatchCharIt
 {
 	MMatchObject* pObj = GetObject(uidPlayer);
 	if (pObj == NULL) return;
-	int nResult = MOK;
 
 	MMatchCharInfo* pCharInfo = pObj->GetCharInfo();
 	if (pCharInfo == NULL) return;
@@ -569,28 +578,45 @@ void MMatchServer::ResponseTakeoffItem(const MUID& uidPlayer, const MMatchCharIt
 	MMatchItemDesc* pItemDesc = pItem->GetDesc();
 	if (pItemDesc == NULL) return;
 
-	// 무게 체크
+	auto Respond = [&](int nResult) {
+		MCommand* pNew = CreateCommand(MC_MATCH_RESPONSE_TAKEOFF_ITEM, MUID(0, 0));
+		pNew->AddParameter(new MCommandParameterInt(nResult));
+		RouteToListener(pObj, pNew);
+	};
+
 	int nWeight=0, nMaxWeight=0;
 	pCharInfo->m_EquipedItem.GetTotalWeight(&nWeight, &nMaxWeight);
 	nMaxWeight = pCharInfo->m_nMaxWeight + nMaxWeight - pItemDesc->m_nMaxWT;
 	nWeight -= pItemDesc->m_nWeight;
 
-	if (nWeight > nMaxWeight) nResult = MERR_CANNOT_TAKEOFF_ITEM_BY_WEIGHT;
-	
-
-	if (nResult == MOK)
+	if (nWeight > nMaxWeight)
 	{
-		pCharInfo->m_EquipedItem.Remove(parts);
-
-		if (!GetDBMgr()->UpdateEquipedItem(pCharInfo->m_nCID, parts, 0, 0))
-		{
-			nResult = MERR_CANNOT_TAKEOFF_ITEM;
-		}
+		Respond(MERR_CANNOT_TAKEOFF_ITEM_BY_WEIGHT);
+		return;
 	}
 
-	MCommand* pNew = CreateCommand(MC_MATCH_RESPONSE_TAKEOFF_ITEM, MUID(0,0));
-	pNew->AddParameter(new MCommandParameterInt(nResult));
-	RouteToListener(pObj, pNew);	
+	pCharInfo->m_EquipedItem.Remove(parts);
+
+	if (!GetDBMgr()->UpdateEquipedItem(pCharInfo->m_nCID, parts, 0, 0))
+	{
+		Respond(MERR_CANNOT_TAKEOFF_ITEM);
+		return;
+	}
+
+#ifdef UPDATE_STAGE_EQUIP_LOOK
+	ResponseCharacterItemList(uidPlayer);
+
+	if (FindStage(pObj->GetStageUID()))
+	{
+		MCommand* pEquipInfo = CreateCommand(MC_MATCH_ROUTE_UPDATE_STAGE_EQUIP_LOOK, MUID(0, 0));
+		pEquipInfo->AddParameter(new MCmdParamUID(uidPlayer));
+		pEquipInfo->AddParameter(new MCmdParamInt(parts));
+		pEquipInfo->AddParameter(new MCmdParamInt(0));
+		RouteToStage(pObj->GetStageUID(), pEquipInfo);
+	}
+#else
+	Respond(MOK);
+#endif
 }
 
 

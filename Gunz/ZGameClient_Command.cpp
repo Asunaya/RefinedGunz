@@ -1040,6 +1040,19 @@ bool ZGameClient::OnCommand(MCommand* pCommand)
 	{
 	}
 	break;
+	case MC_MATCH_ROUTE_UPDATE_STAGE_EQUIP_LOOK:
+	{
+		MUID uidPlayer;
+		int nParts;
+		int nItemID;
+
+		pCommand->GetParameter(&uidPlayer, 0, MPT_UID);
+		pCommand->GetParameter(&nParts, 1, MPT_INT);
+		pCommand->GetParameter(&nItemID, 2, MPT_INT);
+
+		OnResponseUpdateStageEquipLook(uidPlayer, nParts, nItemID);
+	}
+	break;
 	default:
 		if (!ret)
 		{

@@ -1532,4 +1532,10 @@ void MAddSharedCommandTable(MCommandManager* CommandManager, MSharedCommandType:
 	C( MC_LOCAL_UPDATE_BLOCK_COUTRYCODE, "MC_LOCAL_UPDAET_BLOCK_COUTRYCODE", "update block country code.", MCDT_LOCAL );
 	C( MC_LOCAL_UPDATE_CUSTOM_IP, "MC_LOCAL_UPDAET_CUSTOM_IP", "update custom ip.", MCDT_LOCAL );
 	C( MC_LOCAL_UPDATE_ACCEPT_INVALID_IP, "MC_LOCAL_UPDATE_ACCEPT_INVALID_IP", "update accept invalid ip.", MCDT_LOCAL );
+
+	C(MC_MATCH_ROUTE_UPDATE_STAGE_EQUIP_LOOK, "MC_MATCH_ROUTE_UPDATE_STAGE_EQUIP_LOOK",
+		"route updated user equip info", MCDT_MACHINE2MACHINE);
+		P(MPT_UID, "user uid");
+		P(MPT_INT, "parts");
+		P(MPT_INT, "itemid");
 }

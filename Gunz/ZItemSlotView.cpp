@@ -302,7 +302,10 @@ bool ZItemSlotView::OnEvent(MEvent* pEvent, MListener* pListener)
 			if (pItemDesc && m_bDragAndDrop)
 			{
 				ZPostRequestTakeoffItem( ZGetGameClient()->GetPlayerUID(), m_nParts);
+				// The server sends this automatically if UPDATE_STAGE_EQUIP_LOOK is defined.
+#ifndef UPDATE_STAGE_EQUIP_LOOK
 				ZPostRequestCharacterItemList(ZGetGameClient()->GetPlayerUID());
+#endif
 			}
 		}
 
