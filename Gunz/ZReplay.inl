@@ -579,12 +579,6 @@ inline std::vector<ReplayPlayerInfo> ZReplayLoader::GetCharInfo()
 			{
 				assert(false);
 			}
-
-			CharInfo.nEquipedItemDesc[MMCIP_MELEE]     = 2;     // Rusty Sword
-			CharInfo.nEquipedItemDesc[MMCIP_PRIMARY]   = 6001;  // Breaker 5
-			CharInfo.nEquipedItemDesc[MMCIP_SECONDARY] = 6002;  // Breaker 6
-			CharInfo.nEquipedItemDesc[MMCIP_CUSTOM1]   = 30001; // Medical Kit MK-1
-			CharInfo.nEquipedItemDesc[MMCIP_SECONDARY] = 30101; // Repair Kit RK-1
 		}
 		else if (Version.Server == ServerType::RefinedGunz)
 		{
@@ -677,8 +671,6 @@ inline std::vector<ReplayPlayerInfo> ZReplayLoader::GetCharInfo()
 			IsHero = rpi.IsHero;
 			CopyCharInfo(rpi.Info);
 			CopyCharState(rpi.State);
-
-			CharInfo.nEquipedItemDesc[MMCIP_MELEE] = 2; // Rusty Sword
 		}
 
 		DMLog("Char %d name = %s\n", i, CharInfo.szName);

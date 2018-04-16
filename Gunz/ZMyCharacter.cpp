@@ -1083,9 +1083,9 @@ void ZMyCharacter::ProcessGuard()
 	}
 }
 
-void ZMyCharacter::OnChangeWeapon(const char* WeaponModelName)
+void ZMyCharacter::OnChangeWeapon(MMatchItemDesc* Weapon)
 {
-	ZCharacter::OnChangeWeapon(WeaponModelName);
+	ZCharacter::OnChangeWeapon(Weapon);
 
 	ReleaseLButtonQueue();
 	m_fNextShotTime = 0.f;

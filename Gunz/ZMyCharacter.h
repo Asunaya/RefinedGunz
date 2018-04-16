@@ -160,7 +160,7 @@ public:
 
 	void UpdateLimit();
 	
-	virtual void OnChangeWeapon(const char* WeaponModelName) override;
+	virtual void OnChangeWeapon(MMatchItemDesc* Weapon) override;
 
 	void Animation_Reload();
 

@@ -533,6 +533,11 @@ bool ZGame::Create(MZFileSystem *pfs, ZLoadingProgress *pLoading )
 
 void ZGame::Destroy()
 {
+	if (IsReplay())
+	{
+		MSetMatchItemDescMgr(&MMatchItemDescMgr::DefaultInstance);
+	}
+
 	DestroyAllBots();
 
 	StopRecording();

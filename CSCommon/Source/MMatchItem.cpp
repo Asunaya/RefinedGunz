@@ -291,6 +291,7 @@ void MMatchItemDescMgr::ParseItem(MXmlElement& element)
 			else if (!_stricmp(szAttrValue, "range")) pNewDesc->m_nType = MMIT_RANGE;
 			else if (!_stricmp(szAttrValue, "equip")) pNewDesc->m_nType = MMIT_EQUIPMENT;
 			else if (!_stricmp(szAttrValue, "custom")) pNewDesc->m_nType = MMIT_CUSTOM;
+			else if (!_stricmp(szAttrValue, "avatar")) return;
 			else _ASSERT(0);
 		}
 		else if (!_stricmp(szAttrName, MICTOK_RES_SEX))
@@ -318,6 +319,7 @@ void MMatchItemDescMgr::ParseItem(MXmlElement& element)
 			else if (!_stricmp(szAttrValue, "feet"))		pNewDesc->m_nSlot = MMIST_FEET;
 			else if (!_stricmp(szAttrValue, "finger"))	pNewDesc->m_nSlot = MMIST_FINGER;
 			else if (!_stricmp(szAttrValue, "extra"))	pNewDesc->m_nSlot = MMIST_EXTRA;
+			else if (!_stricmp(szAttrValue, "dash"))	return;
 			else _ASSERT(0);
 		}
 		else if (!_stricmp(szAttrName, MICTOK_WEAPON))
@@ -565,11 +567,17 @@ void MMatchItemDescMgr::ParseItem(MXmlElement& element)
 	insert(value_type(pNewDesc->m_nID, pNewDesc));
 }
 
+MMatchItemDescMgr MMatchItemDescMgr::DefaultInstance;
+static MMatchItemDescMgr* CurrentMatchItemDescMgr = &MMatchItemDescMgr::DefaultInstance;
 
 MMatchItemDescMgr* MMatchItemDescMgr::GetInstance()
 {
-	static MMatchItemDescMgr m_ItemDescMgr;
-	return &m_ItemDescMgr;
+	return CurrentMatchItemDescMgr;
+}
+
+void MSetMatchItemDescMgr(MMatchItemDescMgr* New)
+{
+	CurrentMatchItemDescMgr = New;
 }
 
 

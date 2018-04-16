@@ -150,6 +150,45 @@ static bool ApplyGunGameWeapons(const std::vector<MTD_GunGameWeaponInfo>& Weapon
 	return true;
 }
 
+struct ReplayVersionItems
+{
+	const char* Filename;
+	bool Loaded = false;
+	bool FailedToLoad = false;
+	MMatchItemDescMgr ItemDescMgr;
+};
+
+ReplayVersionItems OfficialItems{"system/official_zitem.xml"};
+ReplayVersionItems FGItems      {"system/fg_zitem.xml"};
+ReplayVersionItems DGItems      {"system/dg_zitem.xml"};
+
+bool SetReplayVersionItems(ReplayVersion Version)
+{
+	ReplayVersionItems* rvi;
+	if (Version.Server == ServerType::Official)
+		rvi = &OfficialItems;
+	else if (Version.Server == ServerType::FreestyleGunz)
+		rvi = &FGItems;
+	else if (Version.Server == ServerType::DarkGunz)
+		rvi = &DGItems;
+	else if (Version.Server == ServerType::RefinedGunz)
+		return true;
+	else
+		return false;
+
+	if (!rvi->Loaded)
+	{
+		rvi->FailedToLoad = !rvi->ItemDescMgr.ReadXml(ZGetFileSystem(), rvi->Filename);
+		rvi->Loaded = true;
+	}
+
+	if (rvi->FailedToLoad)
+		return false;
+
+	MSetMatchItemDescMgr(&rvi->ItemDescMgr);
+	return true;
+}
+
 static bool LoadReplayData(ZReplayLoader& Loader, const char* filename)
 {
 	try
@@ -165,6 +204,8 @@ static bool LoadReplayData(ZReplayLoader& Loader, const char* filename)
 
 		if (Version.Server == ServerType::None)
 			return false;
+
+		bool DefaultItems = !SetReplayVersionItems(Version);
 
 		REPLAY_STAGE_SETTING_NODE StageSetting;
 		Loader.GetStageSetting(StageSetting);
@@ -183,7 +224,22 @@ static bool LoadReplayData(ZReplayLoader& Loader, const char* filename)
 			GunGameWeaponInfos = Loader.GetGunGameWeaponInfo();
 		}
 
-		CreatePlayers(Loader.GetCharInfo());
+		{
+			auto CharInfos = Loader.GetCharInfo();
+			if (DefaultItems)
+			{
+				for (auto& CharInfo : CharInfos)
+				{
+					auto& Items = CharInfo.Info.nEquipedItemDesc;
+					Items[MMCIP_MELEE] = 2;         // Rusty Sword
+					Items[MMCIP_PRIMARY] = 6001;    // Breaker 5
+					Items[MMCIP_SECONDARY] = 6002;  // Breaker 6
+					Items[MMCIP_CUSTOM1] = 30001;   // Medical Kit MK-1
+					Items[MMCIP_SECONDARY] = 30101; // Repair Kit RK-1
+				}
+			}
+			CreatePlayers(CharInfos);
+		}
 
 		if (StageSetting.nGameType == MMATCH_GAMETYPE_GUNGAME)
 		{

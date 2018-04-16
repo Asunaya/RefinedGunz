@@ -296,8 +296,11 @@ public:
 	static MMatchItemDescMgr* GetInstance();
 
 	unsigned long GetChecksum() { return m_nChecksum; }
+
+	static MMatchItemDescMgr DefaultInstance;
 };
 inline MMatchItemDescMgr* MGetMatchItemDescMgr() { return MMatchItemDescMgr::GetInstance(); }
+void MSetMatchItemDescMgr(MMatchItemDescMgr*);
 
 
 

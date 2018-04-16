@@ -180,7 +180,7 @@ public:
 
 	virtual bool Pick(const rvector& pos, const rvector& dir, RPickInfo* pInfo = NULL) override;
 
-	virtual void OnChangeWeapon(const char* WeaponModelName);
+	virtual void OnChangeWeapon(MMatchItemDesc* Weapon);
 	void OnChangeParts(RMeshPartsType type,int PartsID);
 	void OnAttack(int type,rvector& pos);
 	void OnShot();

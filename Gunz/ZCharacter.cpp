@@ -1180,7 +1180,20 @@ void ZCharacter::SetTargetDir(rvector vTarget) {
 	m_TargetDir = vTarget;
 }
 
-void ZCharacter::OnChangeWeapon(const char* WeaponModelName)
+static RMesh* GetDefaultWeaponMesh(MMatchWeaponType Type)
+{
+	auto& Items = *MGetMatchItemDescMgr();
+	auto it = std::find_if(std::begin(Items), std::end(Items), [&](auto&& Item) {
+		return Item.second->m_nWeaponType == Type;
+	});
+
+	if (it == std::end(Items))
+		return nullptr;
+
+	return ZGetWeaponMeshMgr()->Get(it->second->m_szMeshName);
+}
+
+void ZCharacter::OnChangeWeapon(MMatchItemDesc* Weapon)
 {
 	if(m_bInitialized==false) 
 		return;
@@ -1189,7 +1202,10 @@ void ZCharacter::OnChangeWeapon(const char* WeaponModelName)
 
 		RWeaponMotionType type = eq_weapon_etc;
 
+		auto WeaponModelName = Weapon->m_szMeshName;
 		RMesh* pMesh = ZGetWeaponMeshMgr()->Get( WeaponModelName );
+		if (!pMesh && ZGetGame()->IsReplay())
+			pMesh = GetDefaultWeaponMesh(Weapon->m_nWeaponType);
 
 		if( pMesh ) {
 
@@ -2218,9 +2234,10 @@ void ZCharacter::InitMeshParts()
 				continue;
 			}
 
-			if (!GetItems()->GetItem(MMatchCharItemParts(i))->IsEmpty())
+			auto&& Item = GetItems()->GetItem(MMatchCharItemParts(i));
+			if (!Item->IsEmpty())
 			{
-				m_pVMesh->SetParts(mesh_parts_type, GetItems()->GetItem(MMatchCharItemParts(i))->GetDesc()->m_szMeshName);
+				m_pVMesh->SetParts(mesh_parts_type, Item->GetDesc()->m_szMeshName);
 			}
 			else
 			{
@@ -2297,7 +2314,7 @@ void ZCharacter::ChangeWeapon(MMatchCharItemParts nParts)
 		return;
 	}
 
-	OnChangeWeapon(pSelectedItemDesc->m_szMeshName);
+	OnChangeWeapon(pSelectedItemDesc);
 
 	if(nParts!=MMCIP_MELEE)
 		m_bCharged = false;

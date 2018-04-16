@@ -56,7 +56,7 @@ void ZRuleGunGame::SetPlayerWeapons(ZCharacter* pChar, const u32* WeaponSetArray
 		auto* Desc = pChar->GetSelectItemDesc();
 		if (Desc)
 		{
-			pChar->OnChangeWeapon(Desc->m_szMeshName);
+			pChar->OnChangeWeapon(Desc);
 		}
 	}
 }
