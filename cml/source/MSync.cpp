@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "MSync.h"
+#include "MSocket.h"
 
 #ifdef WIN32
 
@@ -62,7 +63,7 @@ MSignalEvent::~MSignalEvent() { close(EventHandle); }
 bool MSignalEvent::SetEvent()
 {
 	u64 buf = 1;
-	write(EventHandle, &buf, sizeof(buf));
+	auto ret = write(EventHandle, &buf, sizeof(buf));
 }
 
 bool MSignalEvent::ResetEvent()
@@ -73,15 +74,22 @@ bool MSignalEvent::ResetEvent()
 
 u32 WaitForMultipleEvents(size_t NumEvents, MSignalEvent* const * EventArray, u32 Timeout)
 {
-	fd_set fds;
-	FD_ZERO(&fds);
+	fd_set rfds, wfds, efds;
+	for (auto fds : {&rfds, &wfds, &efds})
+		FD_ZERO(fds);
 
 	int max_fd = INT_MIN;
 	for (int i = 0; i < int(NumEvents); ++i) {
-		const auto fd = EventArray[i]->GetEventHandle();
-		FD_SET(fd, &fds);
-		if (fd > max_fd)
-			max_fd = fd;
+		auto& e = EventArray[i];
+		const auto fd = e->GetEventHandle();
+		e->SetEvents = 0;
+		auto ev = e->Events;
+		if (ev & (MSignalEvent::Read | MSignalEvent::Close))
+			FD_SET(fd, &rfds);
+		if (ev & (MSignalEvent::Write | MSignalEvent::Connect))
+			FD_SET(fd, &wfds);
+		if (fd + 1 > max_fd)
+			max_fd = fd + 1;
 	}
 
 	if (max_fd == INT_MIN)
@@ -91,25 +99,29 @@ u32 WaitForMultipleEvents(size_t NumEvents, MSignalEvent* const * EventArray, u3
 	const bool BlockIndefinitely = Timeout == MSync::Infinite;
 	if (!BlockIndefinitely)
 	{
-		// Set the seconds from the Timeout value.
 		tv.tv_sec = Timeout / 1000;
-		// Set the microseconds.
 		tv.tv_usec = (Timeout % 1000) * 1000;
 	}
 
-	auto ret = select(max_fd, &fds, nullptr, nullptr, BlockIndefinitely ? nullptr : &tv);
+	auto ret = select(max_fd, &rfds, &wfds, &efds, BlockIndefinitely ? nullptr : &tv);
 	if (ret == 0)
 		return MSync::WaitTimeout;
 	if (ret < 0)
 		return MSync::WaitFailed;
 
 	for (int i = 0; i < int(NumEvents); ++i) {
-		if (FD_ISSET(EventArray[i]->GetEventHandle(), &fds)) {
+		auto& e = EventArray[i];
+		if (FD_ISSET(e->GetEventHandle(), &rfds))
+			e->SetEvents |= MSignalEvent::Read;
+		bool wset = FD_ISSET(e->GetEventHandle(), &wfds);
+		if (wset && !e->ReadyForWriting)
+			e->SetEvents |= MSignalEvent::Write;
+		e->ReadyForWriting = wset;
+		if (e->SetEvents)
 			return static_cast<u32>(i);
-		}
 	}
 
-	return MSync::WaitFailed;
+	return MSync::WaitTimeout;
 }
 
 #endif

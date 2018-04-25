@@ -120,16 +120,21 @@ struct in_addr
 	in_addr(const ::in_addr&);
 
 	union {
-		struct { u8 s_b1, s_b2, s_b3, s_b4; } S_un_b;
-		struct { u16 s_w1, s_w2; } S_un_w;
-		u32 S_addr;
-	} S_un;
-#define s_addr  S_un.S_addr /* can be used for most tcp & ip code */
-#define s_host  S_un.S_un_b.s_b2    // host on imp
-#define s_net   S_un.S_un_b.s_b1    // network
-#define s_imp   S_un.S_un_w.s_w2    // imp
-#define s_impno S_un.S_un_b.s_b4    // imp #
-#define s_lh    S_un.S_un_b.s_b3    // logical host
+		union {
+			struct { u8 s_b1, s_b2, s_b3, s_b4; };
+			struct { u16 s_w1, s_w2; };
+#ifndef s_imp
+			struct { u16 id1, s_imp; };
+			u32 s_addr;
+			struct { u8 s_net; u8 s_host; u8 s_lh; u8 s_impno; };
+#endif
+		};
+		union {
+			struct { u8 s_b1, s_b2, s_b3, s_b4; } S_un_b;
+			struct { u16 s_w1, s_w2; } S_un_w;
+			u32 S_addr;
+		} S_un;
+	};
 
 	operator const ::in_addr&() const;
 };

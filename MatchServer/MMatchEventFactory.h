@@ -20,14 +20,14 @@ using std::string;
 
 struct EventServerType
 {
-	DWORD				dwOrder;
+	u32				dwOrder;
 	MMatchServerMode	ServerType;
 };
 
 
 struct EventGameType
 {
-	DWORD			dwOrder;
+	u32			dwOrder;
 	MMATCH_GAMETYPE GameType;
 };
 
@@ -45,18 +45,18 @@ struct EventData
 		fBPBonusRatio	= 0.0f;
 	}
 
-	DWORD					dwEventListID;
-	DWORD					dwEventID;
+	u32					dwEventListID;
+	u32					dwEventID;
 	string					strName;
 	string					strAnnounce;
 	EVENT_TYPE				EventType;
 	MMATCH_GAMETYPE			GameType;
-	DWORD					dwElapsedTime;
-	DWORD					dwPercent;
-	DWORD					dwRate;
+	u32					dwElapsedTime;
+	u32					dwPercent;
+	u32					dwRate;
 	MMatchServerMode		ServerType;
-	SYSTEMTIME				Start;
-	SYSTEMTIME				End;
+	tm				Start;
+	tm				End;
 	float					fXPBonusRatio;
 	float					fBPBonusRatio;
 	vector< EventPartTime > EventPartTimeVec;
@@ -64,7 +64,7 @@ struct EventData
 
 
 typedef vector< EventData >			EventDataVec;
-typedef map< DWORD, EventDataVec >	GameTypeEventMap;
+typedef map< u32, EventDataVec >	GameTypeEventMap;
 
 
 class MMatchEventFactory
@@ -79,9 +79,9 @@ public :
 
 private :
 	bool MakeEventList( const EventDataVec& EvnDataVec, EventPtrVec& epc );
-	MMatchEvent* CreateEvent( const DWORD dwEventID );
+	MMatchEvent* CreateEvent( const u32 dwEventID );
 
-	void CreateFailMLog( MMatchEvent* pEvent, const DWORD dwEventID );
+	void CreateFailMLog( MMatchEvent* pEvent, const u32 dwEventID );
 
 private :
 	EventDataVec		m_vAllGameTypeEventData;
@@ -99,7 +99,7 @@ public :
 	bool LoadEventListXML( const string& strFileName );
 
 	bool		GetEventList( const MMATCH_GAMETYPE GameType, const EVENT_TYPE EventType, EventPtrVec& EvnPtrVec );
-	const WORD	GetLoadEventSize() const { return m_LoadEventSize; }
+	const u16	GetLoadEventSize() const { return m_LoadEventSize; }
 
 	void SetUsableState( const bool bIsUsable ) { m_bIsUsable = bIsUsable; }
 
@@ -121,7 +121,7 @@ private :
 	void ParseEvent( MXmlElement& chrElement );
 	void ParseServerType( MXmlElement& chrElement, vector< EventServerType >& vServerType );
 	void ParseGameType( MXmlElement& chrElement, vector< EventGameType >& vGameType );
-	void ParseStartEndTime( MXmlElement& chrElement, SYSTEMTIME& stTime );
+	void ParseStartEndTime( MXmlElement& chrElement, tm& stTime );
 	void ParseEventPartTime( MXmlElement& chrElement, vector<EventPartTime>& EventPartTimeVec );
 	
 private :
@@ -132,7 +132,7 @@ private :
 
 	bool m_bIsUsable;
 
-	static WORD m_LoadEventSize;
+	static u16 m_LoadEventSize;
 };
 
 #endif

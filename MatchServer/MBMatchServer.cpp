@@ -5,8 +5,8 @@
 #include "OutputView.h"
 #include "MatchServer.h"
 #include "CommandLogView.h"
-#endif
 #include <atltime.h>
+#endif
 #include "MErrorTable.h"
 #include "MDebug.h"
 #include "MMatchRule.h"
@@ -97,8 +97,8 @@ static void MBMatchServerLog(unsigned int LogLevel, const char* Msg, bool Newlin
 	}
 #endif
 
-	CTime theTime = CTime::GetCurrentTime();
-	CString szTime = theTime.Format("[%c] ");
+	char szTime[256];
+	strftime(szTime, sizeof(szTime), "%c", localtime(&unmove(time(0))));
 
 	if (LogLevel | MMatchServer::LOG_FILE)
 	{
@@ -118,7 +118,7 @@ static void MBMatchServerLog(unsigned int LogLevel, const char* Msg, bool Newlin
 		m_pView->AddString(szLog, RGB(0, 0, 0));
 	}
 #else
-	printf("%s%s%s", static_cast<const char*>(szTime), Msg, Newline ? "\n" : "");
+	printf("%s%s%s", szTime, Msg, Newline ? "\n" : "");
 #endif
 }
 

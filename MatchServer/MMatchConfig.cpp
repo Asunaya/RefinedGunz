@@ -1,26 +1,14 @@
 #include "stdafx.h"
 #include "MMatchConfig.h"
-#include <windows.h>
 #include "MMatchMap.h"
 #include "MLex.h"
 #include "MZFileSystem.h"
-
 #include "MErrorTable.h"
 #include "MMatchServer.h"
 #include "rapidxml.hpp"
 #include <fstream>
 #include "RGVersion.h"
-
-bool MMatchConfig::GetPrivateProfileBool(const char* szAppName, const char* szKeyName, 
-						   bool bDefault, const char* szFileName)
-{
-	int nDefault = bDefault ? 1 : 0;
-
-	int n;
-	n = GetPrivateProfileInt(szAppName, szKeyName, nDefault, szFileName);
-	if (n == 0) return false;
-	return true;
-}
+#include "ini.h"
 
 MMatchConfig::MMatchConfig()
 {
@@ -56,8 +44,62 @@ MMatchConfig* MMatchConfig::GetInstance()
 	return &m_MatchConfig;
 }
 
+using MapType = std::unordered_map<std::string, std::unordered_map<std::string, std::string>>;
+
+extern "C" {
+static int IniCallbackFwd(void* user, const char* section, const char* name, const char* value)
+{
+	auto& Map = *static_cast<MapType*>(user);
+	StringView v = value;
+	if (starts_with(v, "\""))
+		v.remove_prefix(1);
+	if (ends_with(v, "\""))
+		v.remove_suffix(1);
+	Map[section][name] = v.str();
+	return 0;
+}
+}
+
 bool MMatchConfig::Create()
 {
+	MapType Map;
+	if (!ini_parse(SERVER_CONFIG_FILENAME, IniCallbackFwd, &Map))
+		return false;
+
+	auto GetString = [&](const char* arg_section, const char* arg_name,
+		const char* default_value, char* output, size_t output_size)
+	{
+		const char* src = default_value;
+		auto it = Map.find(arg_section);
+		if (it != Map.end())
+		{
+			auto it2 = it->second.find(arg_name);
+			if (it2 != it->second.end())
+			{
+				src = it2->second.c_str();
+			}
+		}
+		if (src)
+			strcpy_safe(output, output_size, src);
+		return src != default_value;
+	};
+
+	auto GetPrivateProfileString = [&](const char* arg_section, const char* arg_name,
+		const char* default_value, char* output, size_t output_size, const char*)
+	{
+		GetString(arg_section, arg_name, default_value, output, output_size);
+	};
+
+	auto GetPrivateProfileInt = [&](const char* arg_section, const char* arg_name,
+		int default_value, const char*)
+	{
+		int value = default_value;
+		char buf[256];
+		if (GetString(arg_section, arg_name, nullptr, buf, sizeof(buf)))
+			value = StringToInt(buf).value_or(default_value);
+		return value;
+	};
+
 	int nTemp = 0;
 
 	GetPrivateProfileString("DB", "DNS", "gunzdb", m_szDB_DNS, 64, SERVER_CONFIG_FILENAME);
@@ -86,7 +128,7 @@ bool MMatchConfig::Create()
 	while(true) {
 		char szIP[128] = "";
 		pNextArg = lex.GetOneArg(pNextArg, szIP);
-		if (*szIP == NULL)
+		if (*szIP == 0)
 			break;
 		AddFreeLoginIP(szIP);
 	}
@@ -105,7 +147,7 @@ bool MMatchConfig::Create()
 	while(true) {
 		char szIP[128] = "";
 		pNextDbgIP = lex.GetOneArg(pNextDbgIP, szIP);
-		if (*szIP == NULL)
+		if (*szIP == 0)
 			break;
 		AddDebugLoginIP(szIP);
 	}
@@ -152,7 +194,37 @@ bool MMatchConfig::Create()
 	m_NJ_nGameCode = GetPrivateProfileInt("LOCALE", "GameCode",			SERVER_CONFIG_DEFAULT_NJ_DBAGENT_GAMECODE, SERVER_CONFIG_FILENAME);
 
 
-	ReadEnableMaps();
+	char szEnableMap[512];
+	GetPrivateProfileString("SERVER", "EnableMap", "", szEnableMap, 512, SERVER_CONFIG_FILENAME);
+
+	char seps[] = ";";
+
+	int nMapCount = 0;
+
+	char *context = nullptr;
+
+	Split(szEnableMap, seps, [&](StringView token) {
+		token = trim(token);
+
+		auto it = std::find_if(std::begin(g_MapDesc), std::end(g_MapDesc), [&](auto& x) {
+			return iequals(token, x.szMapName);
+		});
+		if (it != std::end(g_MapDesc))
+		{
+			nMapCount++;
+			m_EnableMaps.insert(set<int>::value_type(it - std::begin(g_MapDesc)));
+		}
+	});
+
+	if (nMapCount <= 0)
+	{
+		for (int i = 0; i < MMATCH_MAP_MAX; i++) m_EnableMaps.insert(set<int>::value_type(i));
+		m_bRestrictionMap = false;
+	}
+	else
+	{
+		m_bRestrictionMap = true;
+	}
 
 	// filer.
 	char szUse[ 2 ] = {0,};
@@ -296,55 +368,6 @@ bool MMatchConfig::IsDebugLoginIPList( const char* pszIP )
 }
 
 
-void MMatchConfig::ReadEnableMaps()
-{
-	char szEnableMap[512];
-	GetPrivateProfileString("SERVER", "EnableMap", "", szEnableMap, 512, SERVER_CONFIG_FILENAME);
-
-	char seps[] = ";";
-	char *token;
-
-	int nMapCount = 0;
-
-	char *context = nullptr;
-
-	token = strtok_s(szEnableMap, seps, &context);
-	while( token != NULL )
-	{
-		char szInputMapName[256] = "";
-		TrimStr(token, szInputMapName, sizeof(szInputMapName));
-
-		int nMapIndex = -1;
-		for (int i = 0; i < MMATCH_MAP_MAX; i++)
-		{
-			if (!_stricmp(szInputMapName, g_MapDesc[i].szMapName))
-			{
-				nMapIndex = i;
-				break;
-			}
-		}
-		if (nMapIndex != -1)
-		{
-			nMapCount++;
-			m_EnableMaps.insert(set<int>::value_type(nMapIndex));
-		}
-
-		// Get next token
-		token = strtok_s(NULL, seps, &context);
-   }
-
-	if (nMapCount <= 0)
-	{
-		for (int i = 0; i < MMATCH_MAP_MAX; i++) m_EnableMaps.insert(set<int>::value_type(i));
-		m_bRestrictionMap = false;
-	}
-	else
-	{
-		m_bRestrictionMap = true;
-	}
-
-
-}
 void MMatchConfig::TrimStr(const char* szSrcStr, char* outStr, int maxlen)
 {
 	char szInputMapName[256] = "";

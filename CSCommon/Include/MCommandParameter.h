@@ -2,7 +2,7 @@
 
 #include "MUID.h"
 #include "MTypes.h"
-#include "mempool.h"
+#include "MemPool.h"
 
 #include "SafeString.h"
 #include "GlobalTypes.h"
@@ -296,7 +296,7 @@ public:
 	explicit MCommandParameterBlob(const void* Value, int nSize);
 	template <typename T, size_t N, size_t Alignment>
 	explicit MCommandParameterBlob(const StaticBlobArray<T, N, Alignment>& Array)
-		: MCommandParameterBlob{Array.Data(), Array.Size()} {}
+		: MCommandParameterBlob{Array.Data(), int(Array.Size())} {}
 	virtual ~MCommandParameterBlob() override;
 
 	virtual MCommandParameterBlob* Clone() override;
@@ -433,10 +433,10 @@ public:
 class MCommandParameterInt64 : public MCommandParameter, public CMemPool<MCommandParameterInt64>
 {
 public:
-	int64	m_Value;
+	int64_t m_Value;
 public:
 	MCommandParameterInt64();
-	MCommandParameterInt64(int64 Value);
+	MCommandParameterInt64(int64_t Value);
 	virtual ~MCommandParameterInt64() override = default;
 
 	virtual MCommandParameter* Clone() override;
@@ -445,16 +445,16 @@ public:
 	virtual int SetData(const char* pData) override;
 	virtual void *GetPointer() override { return &m_Value; }
 	virtual void GetString(char* szValue, int maxlen) override { sprintf_safe(szValue, maxlen, "%lld", m_Value); }
-	virtual int GetSize() override { return sizeof(int64); }
+	virtual int GetSize() override { return sizeof(int64_t); }
 };
 
 class MCommandParameterUInt64 : public MCommandParameter, public CMemPool<MCommandParameterUInt64>
 {
 public:
-	uint64	m_Value;
+	uint64_t m_Value;
 public:
 	MCommandParameterUInt64();
-	MCommandParameterUInt64(uint64 Value);
+	MCommandParameterUInt64(uint64_t Value);
 	virtual ~MCommandParameterUInt64() override = default;
 
 	virtual MCommandParameter* Clone() override;
@@ -463,7 +463,7 @@ public:
 	virtual int SetData(const char* pData) override;
 	virtual void *GetPointer() override { return &m_Value; }
 	virtual void GetString(char* szValue, int maxlen) override { sprintf_safe(szValue, maxlen, "%llu", m_Value); }
-	virtual int GetSize() override { return sizeof(uint64); }
+	virtual int GetSize() override { return sizeof(uint64_t); }
 };
 
 class MCommandParameterShortVector : public MCommandParameter, public CMemPool<MCommandParameterShortVector> {
@@ -536,7 +536,7 @@ public:
 	}
 };
 
-static inline MCommandParameterCommand* MakeOwningMCmdParamCmd(const void* Data, size_t Size)
+inline MCommandParameterCommand* MakeOwningMCmdParamCmd(const void* Data, size_t Size)
 {
 	auto Param = new MCommandParameterCommand;
 

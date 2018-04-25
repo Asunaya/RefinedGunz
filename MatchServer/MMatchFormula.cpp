@@ -20,6 +20,7 @@ unsigned long int MMatchFormula::m_nGettingBounty[MAX_LEVEL+1];
 
 bool MMatchFormula::Create()
 {
+	auto ZeroMemory = [](void* a, size_t b) { memset(a, 0, b); };
 	ZeroMemory(m_fNeedExpLMTable, sizeof(m_fNeedExpLMTable));
 	ZeroMemory(m_fGettingExpLMTable, sizeof(m_fGettingExpLMTable));
 	ZeroMemory(m_fGettingBountyLMTable, sizeof(m_fGettingBountyLMTable));

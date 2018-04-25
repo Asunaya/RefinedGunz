@@ -44,7 +44,7 @@ void MMakeSeedKey(MPacketCrypterKey* pKey, const MUID& uidServer, const MUID& ui
 	memcpy(p+sizeof(unsigned int), &uidServer.Low, sizeof(unsigned int));
 	memcpy(p+nUIDSize, &uidClient, nUIDSize);
 
-	const BYTE XOR[16] = {87, 2, 91, 4, 52, 6, 1, 8, 55, 10, 18, 105, 65, 56, 15, 120};
+	const u8 XOR[16] = {87, 2, 91, 4, 52, 6, 1, 8, 55, 10, 18, 105, 65, 56, 15, 120};
 
 	for (int i = 0; i < 16; i++)
 	{

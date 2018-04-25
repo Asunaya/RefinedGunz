@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "HitRegistration.h"
 #include "RMath.h"
+#include "RBspObject.h"
 
 using namespace RealSpace2;
 
@@ -77,4 +78,9 @@ ZOBJECTHITTEST PlayerHitTest(const v3& head, const v3& foot,
 	}
 
 	return ZOH_NONE;
+}
+
+void RBspObject_PickTo(RBspObject* a, v3 b, v3 c, RBSPPICKINFO* d, u32 e)
+{
+	a->PickTo(b, c, d, e);
 }

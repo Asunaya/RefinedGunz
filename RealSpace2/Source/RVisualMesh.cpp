@@ -512,7 +512,7 @@ bool RVisualMesh::BBoxPickCheck(int mx,int my)
 	return BBoxPickCheck(pos, dir);
 }
 
-void BBoxSubCalc(rvector* max,rvector* min)
+void BBoxSubCalc(v3_pod* max,v3_pod* min)
 {
 	float t;
 
@@ -523,7 +523,7 @@ void BBoxSubCalc(rvector* max,rvector* min)
 
 bool RVisualMesh::BBoxPickCheck(const rvector& pos, const rvector& dir)
 {
-	rvector min,max;
+	v3_pod min,max;
 
 	CalcBox();
 

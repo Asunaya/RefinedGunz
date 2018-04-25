@@ -61,9 +61,7 @@ void MServerStatusMgr::CheckDeadServerByLastUpdatedTime( const int nMarginOfErrM
 
 const int MServerStatusMgr::CalcuMaxCmpCustomizeMin()
 {
-	auto t = time(nullptr);
-	tm TM;
-	auto ret = localtime_s(&TM, &t);
+	auto TM = *localtime(&unmove(time(0)));
 
 	return static_cast< int >( (TM.tm_hour * 60) + TM.tm_min );
 }

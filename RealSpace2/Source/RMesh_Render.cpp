@@ -420,7 +420,7 @@ public:
 	int		m_tAddPos;
 };
 
-void BBoxSubCalc(rvector* max,rvector* min);
+void BBoxSubCalc(v3_pod* max,v3_pod* min);
 
 bool RMesh::CheckOcclusion(RMeshNode *pMeshNode)
 {

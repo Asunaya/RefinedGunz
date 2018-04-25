@@ -71,8 +71,14 @@ public:
 
 	HandleType GetEventHandle() const { return EventHandle; }
 
-private:
 	HandleType EventHandle;
+
+#ifndef _WIN32
+	enum { Connect = 1 << 0, Read = 1 << 1, Write = 1 << 2, Close = 1 << 3 };
+	u32 Events = Read;
+	u32 SetEvents = 0;
+	bool ReadyForWriting = false;
+#endif
 };
 
 // Returns the index of the event that was triggered, WAIT_TIMEOUT on timeout, or WAIT_FAILED on error.

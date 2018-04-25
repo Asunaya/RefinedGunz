@@ -2,7 +2,7 @@
 #include "MMatchTransDataType.h"
 #include "MMath.h"
 
-void Make_MTDItemNode(MTD_ItemNode* pout, MUID& uidItem, unsigned long int nItemID, int nRentMinutePeriodRemainder)
+void Make_MTDItemNode(MTD_ItemNode* pout, const MUID& uidItem, u32 nItemID, int nRentMinutePeriodRemainder)
 {
 	pout->uidItem = uidItem;
 	pout->nItemID = nItemID;
@@ -10,7 +10,7 @@ void Make_MTDItemNode(MTD_ItemNode* pout, MUID& uidItem, unsigned long int nItem
 	pout->nRentMinutePeriodRemainder = nRentMinutePeriodRemainder;		// ÃÊ´ÜÀ§
 }
 
-void Make_MTDAccountItemNode(MTD_AccountItemNode* pout, int nAIID, unsigned long int nItemID, int nRentMinutePeriodRemainder)
+void Make_MTDAccountItemNode(MTD_AccountItemNode* pout, int nAIID, u32 nItemID, int nRentMinutePeriodRemainder)
 {
 	pout->nAIID = nAIID;
 	pout->nItemID = nItemID;
@@ -18,7 +18,7 @@ void Make_MTDAccountItemNode(MTD_AccountItemNode* pout, int nAIID, unsigned long
 }
 
 
-void Make_MTDQuestItemNode( MTD_QuestItemNode* pOut, const unsigned long int nItemID, const int nCount )
+void Make_MTDQuestItemNode( MTD_QuestItemNode* pOut, const u32 nItemID, const int nCount )
 {
 	if( 0 == pOut )
 		return;

@@ -1,8 +1,8 @@
 #pragma once
 
 struct RHEADER {
-	DWORD dwID;
-	DWORD dwVersion;
+	u32 dwID;
+	u32 dwVersion;
 };
 
 #define RS_ID			0x12345678			// .rs

@@ -107,7 +107,7 @@ public:
 				if(nX<0 || nX>=m_nXDivision) continue;
 				if(nY<0 || nY>=m_nYDivision) continue;
 				MRefCell* pRefCell = &(m_pGridMap[nX+nY*m_nXDivision]);
-				for(MRefCell::iterator it=pRefCell->begin(); it!=pRefCell->end(); it++){
+				for(auto it=pRefCell->begin(); it!=pRefCell->end(); it++){
 					MITEM* pItem = &(*it);
 					float f3DLenPow = float(pow(pItem->x-x, 2)+pow(pItem->y-y, 2)+pow(pItem->z-z, 2));
 					if(f3DLenPow<=fRadiusPow){
@@ -161,8 +161,8 @@ public:
 		int nCellCount = GetCellCount();
 		for(int i=0; i<nCellCount; i++){
 			MRefCell* pRefCell = GetCell(i);
-			for(MMap::MRefCell::iterator it=pRefCell->begin(); it!=pRefCell->end(); it++){
-				MMap::MITEM* pItem = &(*it);
+			for(auto it=pRefCell->begin(); it!=pRefCell->end(); it++){
+				auto pItem = &(*it);
 			}
 			pRefCell->clear();
 		}

@@ -4,7 +4,6 @@
 
 #include "RealSpace2.h"
 
-#include "RMesh.h"
 
 _USING_NAMESPACE_REALSPACE2
 
@@ -93,7 +92,7 @@ bool RAnimation::IsLoadDone()
 
 void RAnimation::ClearSoundFile(void)
 {
-	m_sound_name[0] = NULL;
+	m_sound_name[0] = 0;
 	m_bIsHaveSound = false;
 }
 
@@ -130,8 +129,10 @@ bool RAnimation::LoadAni(const char* filename)
 
 AnimationLoopType RAnimation::GetAnimationLoopType()
 {
+#ifdef _WIN32
 	if(RMesh::m_bToolMesh)
 		return RAniLoopType_Loop;
+#endif
 	return m_ani_loop_type;
 }
 

@@ -15,7 +15,7 @@
 #define CYCLE_MATCH_STANDBY_CLANLIST_UPDATE	1000		// 클랜전 대기 클랜 리스트 업데이트 시간은 10초이다.
 
 
-const DWORD MMatchDisconnStatusInfo::MINTERVAL_DISCONNECT_STATUS_MIN = (5 * 1000);
+const u32 MMatchDisconnStatusInfo::MINTERVAL_DISCONNECT_STATUS_MIN = (5 * 1000);
 
 MMatchObject::MMatchObject(const MUID& uid) : MObject(uid) 
 { 
@@ -23,7 +23,7 @@ MMatchObject::MMatchObject(const MUID& uid) : MObject(uid)
 	m_pFriendInfo = NULL;
 
 	m_dwIP = 0;
-	ZeroMemory(m_szIP, sizeof(char)*64);	
+	memset(m_szIP, 0, sizeof(char)*64);	
 	m_nPort=0;
 	
 	m_uidStage = MUID(0,0);

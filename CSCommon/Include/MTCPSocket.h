@@ -180,12 +180,12 @@ public:
 	void SetCallbackContext(void* pCallbackContext) {
 		Derived().Thread.m_pCallbackContext = pCallbackContext;
 	}
-	template <typename T>
-	void SetRecvCallback(T pCallback) {
+	template <typename U>
+	void SetRecvCallback(U pCallback) {
 		Derived().Thread.m_fnRecvCallback = pCallback;
 	}
-	template <typename T>
-	void SetDisconnectCallback(T pCallback) {
+	template <typename U>
+	void SetDisconnectCallback(U pCallback) {
 		Derived().Thread.m_fnDisconnectCallback = pCallback;
 	}
 

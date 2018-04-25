@@ -3,7 +3,6 @@
 #include "XMLFileStructs.h"
 #include "XMLParser.h"
 #include <vector>
-#include "gli/gli.hpp"
 
 namespace RealSpace2
 {

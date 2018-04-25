@@ -1,4 +1,4 @@
-#include "StdAfx.h"
+#include "stdafx.h"
 #ifdef MFC
 #include ".\mlocatordbmgr.h"
 #include "MDebug.h"

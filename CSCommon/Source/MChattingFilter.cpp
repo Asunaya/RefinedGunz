@@ -184,19 +184,14 @@ bool MChattingFilter::FindInvalidWord( const std::string& strWord, const std::st
 
 	int nHead = 0;
 
-	while ( nHead < (int)strText.length() )
+	auto it = std::search(strText.begin(), strText.end(), strWord.begin(), strWord.end());
+	if (it == strText.end())
 	{
-		if ( !_strnicmp( strWord.c_str(), &strText[ nHead], nWordLen))
-		{
-			strcpy_safe(m_szLastFilterdStr, strWord.c_str());
-
-			return true;
-		}
-
-		nHead++;
+		return false;
 	}
 
-	return false;
+	strcpy_safe(m_szLastFilterdStr, strWord);
+	return true;
 }
 
 bool MChattingFilter::FindInvalidChar( const std::string& strText)

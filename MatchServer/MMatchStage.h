@@ -52,6 +52,11 @@ struct MMatchStageTeam
 	MMatchLadderTeamInfo	LadderInfo;
 };
 
+namespace RealSpace2
+{
+class RBspObject;
+}
+
 class MMatchStage {
 private:
 	int						m_nIndex;
@@ -102,7 +107,7 @@ protected:
 	void SetStageType(MMatchStageType nStageType);
 	void SetLadderTeam(MMatchLadderTeamInfo* pRedLadderTeamInfo, MMatchLadderTeamInfo* pBlueLadderTeamInfo);
 public:
-	class RBspObject* BspObject = nullptr;
+	RealSpace2::RBspObject* BspObject = nullptr;
 	MovingWeaponManager MovingWeaponMgr;
 	MMatchWorldItemManager	m_WorldItemManager;
 
@@ -141,7 +146,7 @@ public:
 	void SetMapName(const char* pszMapName)	{ m_StageSetting.SetMapName(pszMapName); }
 
 	char* GetFirstMasterName()	{ return m_szFirstMasterName; }
-	void SetFirstMasterName(char* pszName)	{ strcpy_safe(m_szFirstMasterName, pszName); }
+	void SetFirstMasterName(const char* pszName)	{ strcpy_safe(m_szFirstMasterName, pszName); }
 
 	MMatchObject* GetObj(const MUID& uid)
 	{
@@ -192,7 +197,7 @@ public:
 	MUID GetMasterUID()	const		{ return m_StageSetting.GetMasterUID(); }
 	int GetIndex()					{ return m_nIndex; }
 
-	void SetOwnerChannel(MUID& uidOwnerChannel, int nIndex);
+	void SetOwnerChannel(const MUID& uidOwnerChannel, int nIndex);
 	MUID GetOwnerChannel() const { return m_uidOwnerChannel; }
 
 	void PlayerTeam(const MUID& uidPlayer, MMatchTeam nTeam);

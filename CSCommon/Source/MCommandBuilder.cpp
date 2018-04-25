@@ -38,10 +38,10 @@ void MCommandBuilder::AddBuffer(char* pBuffer, int nLen)
 {
 	if (nLen <= 0) return;
 	if ((m_nBufferNext + nLen) >= COMMAND_BUFFER_LEN) {
-		_ASSERT(FALSE);
+		_ASSERT(false);
 		return;
 	}
-	CopyMemory(m_Buffer+m_nBufferNext, pBuffer, nLen);
+	memcpy(m_Buffer+m_nBufferNext, pBuffer, nLen);
 	m_nBufferNext += nLen;
 }
 
@@ -49,7 +49,7 @@ bool MCommandBuilder::MoveBufferToFront(int nStart, int nLen)
 {
 	if (nStart+nLen > m_nBufferNext) 
 		return false;
-	CopyMemory(m_Buffer, m_Buffer+nStart, nLen);
+	memcpy(m_Buffer, m_Buffer+nStart, nLen);
 	m_nBufferNext = nLen;
 	return true;
 }
@@ -159,7 +159,7 @@ int MCommandBuilder::MakeCommand(char* pBuffer, int nBufferLen)
 			if (nPacketSize == sizeof(MReplyConnectMsg))
 			{
 				MPacketHeader* pNewPacket = (MPacketHeader*)malloc(nPacketSize);
-				CopyMemory(pNewPacket, pPacket, nPacketSize);
+				memcpy(pNewPacket, pPacket, nPacketSize);
 				m_NetCmdList.push_back(pNewPacket);
 			}
 			else

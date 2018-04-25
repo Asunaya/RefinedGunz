@@ -4,28 +4,31 @@
 #include <list>
 #include <array>
 
+#include "MUtil.h"
 #include "RTypes.h"
 #include "RLightList.h"
-#include "RMeshMgr.h"
-#include "RAnimationMgr.h"
-#include "RMaterialList.h"
-#include "ROcclusionList.h"
-#include "RDummyList.h"
 #include "RSolidBsp.h"
+#include "RMaterialList.h"
 #include "RNavigationMesh.h"
-#include "MUtil.h"
+#include "ROcclusionList.h"
+#include "RAnimationMgr.h"
+#include "RDummyList.h"
+#include "rapidxml.hpp"
+#include "LightmapGenerator.h"
+#ifdef _WIN32
+#include "RMeshMgr.h"
 #include "VulkanMaterial.h"
 #include "RBspObjectDraw.h"
-#include "rapidxml.hpp"
 #include "RVisualMesh.h"
-
-class MZFile;
-class MZFileSystem;
-class MXmlElement;
 
 #define BSP_FVF	(D3DFVF_XYZ | D3DFVF_TEX2)
 #define BSP_NORMAL_FVF (D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_TEX2)
 #define LIGHT_BSP_FVF (D3DFVF_XYZ | D3DFVF_TEX2 | D3DFVF_DIFFUSE)
+#endif
+
+class MZFile;
+class MZFileSystem;
+class MXmlElement;
 
 _NAMESPACE_REALSPACE2_BEGIN
 
@@ -84,7 +87,9 @@ struct RCONVEXPOLYGONINFO {
 struct ROBJECTINFO {
 	std::string name;
 	int nMeshID{};
+#ifdef _WIN32
 	std::unique_ptr<RVisualMesh> pVisualMesh;
+#endif
 	RLIGHT* pLight{};
 	float fDist{};
 };
@@ -138,16 +143,18 @@ struct RSBspNode
 	~RSBspNode();
 
 	RSBspNode *GetLeafNode(const rvector &pos);
-	void DrawWireFrame(int nFace, DWORD color);
-	void DrawBoundingBox(DWORD color);
+	void DrawWireFrame(int nFace, u32 color);
+	void DrawBoundingBox(u32 color);
 };
 
 struct RBSPMATERIAL : public RMATERIAL {
+#ifdef _WIN32
 	union
 	{
 		RBaseTexture *texture = nullptr;
 		VulkanMaterial VkMaterial;
 	};
+#endif
 
 	RBSPMATERIAL() = default;
 	RBSPMATERIAL(RMATERIAL *mat)
@@ -167,7 +174,7 @@ struct RBSPMATERIAL : public RMATERIAL {
 struct FogInfo
 {
 	bool bFogEnable;
-	DWORD dwFogColor;
+	u32 dwFogColor;
 	float fNear;
 	float fFar;
 	FogInfo() { bFogEnable = false; }
@@ -223,11 +230,13 @@ public:
 
 	bool IsVisible(const rboundingbox &bb) const;
 
+#ifdef _WIN32
 	bool Draw();
 	void DrawObjects();
 
 	bool DrawLight(RSBspNode *pNode, int nMaterial);
 	void DrawLight(D3DLIGHT9 *pLight);
+#endif
 
 	bool GenerateLightmap(const char *filename, int nMaxLightmapSize, int nMinLightmapSize, int nSuperSample,
 		float fToler, v3 AmbientLight, RGENERATELIGHTMAPCALLBACK pProgressFn = nullptr);
@@ -244,7 +253,7 @@ public:
 	bool PickOcTree(const rvector &pos, const rvector &dir, RBSPPICKINFO *pOut,
 		u32 dwPassFlag = DefaultPassFlag);
 
-	DWORD GetLightmap(rvector &Pos, RSBspNode *pNode, int nIndex);
+	u32 GetLightmap(rvector &Pos, RSBspNode *pNode, int nIndex);
 
 	RBSPMATERIAL *GetMaterial(RSBspNode *pNode, int nIndex) {
 		return GetMaterial(pNode->pInfo[nIndex].nMaterial); }
@@ -271,7 +280,9 @@ public:
 	int	GetBspPolygonCount() const { return BspInfo.size(); }
 	int GetBspNodeCount() const { return BspRoot.size(); }
 	int GetConvexPolygonCount() const { return ConvexPolygons.size(); }
+#ifdef _WIN32
 	int GetLightmapCount() const { return LightmapTextures.size(); }
+#endif
 
 	// TODO: Make a separate output parameter
 	bool CheckWall(const rvector &origin, rvector &targetpos, float fRadius, float fHeight = 0.f,
@@ -289,7 +300,9 @@ public:
 
 	bool GetShadowPosition(const rvector& pos_, const rvector& dir_, rvector* outNormal_, rvector* outPos_);
 
+#ifdef _WIN32
 	auto* GetMeshManager() { return &m_MeshList; }
+#endif
 
 	void test_MakePortals();
 
@@ -325,23 +338,31 @@ public:
 
 	void SetMapObjectOcclusion(bool b) { m_bNotOcclusion = b; }
 
+#ifdef _WIN32
 	u32 GetFVF() const { return RenderWithNormal ? BSP_NORMAL_FVF : BSP_FVF; }
+#endif
 	size_t GetStride() const { return RenderWithNormal ? sizeof(BSPNORMALVERTEX) : sizeof(BSPVERTEX); }
 
 	void UpdateUBO();
 
+#ifdef _WIN32
 	RBspObjectDraw DrawObj;
+#endif
 
 private:
+#ifdef _WIN32
 	friend class RBspObjectDrawVulkan;
 	friend class RBspObjectDrawD3D9;
+#endif
 	friend struct LightmapGenerator;
 
 	bool LoadRS2Map(rapidxml::xml_node<>&);
 	bool LoadRS3Map(rapidxml::xml_node<>&, const std::string& directory);
 
+#ifdef _WIN32
 	void Draw(RSBspNode *Node, int Material);
 	void DrawNoTNL(RSBspNode *Node, int Material);
+#endif
 
 	template <u32 Flags, bool ShouldHaveFlags, bool SetAlphaTestFlags>
 	void DrawNodes(int LoopCount);
@@ -401,7 +422,9 @@ private:
 
 	static constexpr u32 DefaultPassFlag = RM_FLAG_ADDITIVE | RM_FLAG_USEOPACITY | RM_FLAG_HIDE;
 
+#ifdef _WIN32
 	D3DPtr<IDirect3DVertexBuffer9> DynLightVertexBuffer;
+#endif
 
 	static RBaseTexture *m_pShadeMap;
 
@@ -417,9 +440,11 @@ private:
 	std::vector<RSBspNode> OcRoot;
 	std::vector<RPOLYGONINFO> OcInfo;
 
+#ifdef _WIN32
 	// Vertex and index buffer objects
 	D3DPtr<IDirect3DVertexBuffer9> VertexBuffer;
 	D3DPtr<IDirect3DIndexBuffer9> IndexBuffer;
+#endif
 
 	// Stores material data, i.e. the stuff drawn onto geometry.
 	// The first index is special: It's an untextured material
@@ -431,7 +456,9 @@ private:
 
 	ROcclusionList m_OcclusionList;
 
+#ifdef _WIN32
 	std::vector<RBaseTexturePtr> LightmapTextures;
+#endif
 
 	// Convex polygons.
 	// Note that these are only used for lightmap generation, and therefore
@@ -446,7 +473,9 @@ private:
 	RLightList	StaticObjectLightList;
 	RLightList	StaticSunLightList;
 
+#ifdef _WIN32
 	RMeshMgr			m_MeshList;
+#endif
 	RAnimationMgr		m_AniList;
 	RMapObjectList		m_ObjectList;
 	bool				m_bNotOcclusion{};
@@ -485,7 +514,9 @@ private:
 
 	bool IsRS3Map{};
 
+#ifdef _WIN32
 	std::unique_ptr<BulletCollision> Collision;
+#endif
 };
 
 #ifdef _DEBUG

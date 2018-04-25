@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "RNavigationNode.h"
 #include "RMath.h"
-#include <crtdbg.h>
 
 RNavigationNode::RNavigationNode() : RAStarNode(), bSelected(false), m_nArrivalLink(0), m_nID(-1)
 {

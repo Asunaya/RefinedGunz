@@ -2,6 +2,8 @@
 
 #include "GlobalTypes.h"
 #include "MUtil.h"
+#include "RMeshUtil.h"
+#include "MMatchGlobal.h"
 
 enum ZC_STATE_UPPER {
 
@@ -134,9 +136,7 @@ namespace RealSpace2
 	class RAnimationMgr;
 }
 
-enum MMatchSex;
 struct MMatchItemDesc;
-enum RWeaponMotionType;
 
 RealSpace2::RAnimationMgr* GetAnimationMgr(MMatchSex Sex);
 void SetAnimationMgr(MMatchSex Sex, RealSpace2::RAnimationMgr* AniMgr);

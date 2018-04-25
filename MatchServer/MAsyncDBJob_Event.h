@@ -16,8 +16,8 @@ using std::string;
 struct AsyncEventObj
 {
 	MUID  uidUser;
-	DWORD dwAID;
-	DWORD dwCID;
+	u32 dwAID;
+	u32 dwCID;
 };
 
 typedef vector< AsyncEventObj > AsyncEventObjVec;

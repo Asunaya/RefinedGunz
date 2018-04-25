@@ -6,6 +6,7 @@
 #include "MUID.h"
 #include <string>
 #include <map>
+#include <mutex>
 using namespace std;
 
 #define NJ_QUE_SIZE (256*100)
@@ -123,15 +124,15 @@ private:
 	int					m_nQueueTop;
 	MDBAgentPool		m_Pool;
 
-	CRITICAL_SECTION	m_csPoolLock;
-	void LockPool()		{ EnterCriticalSection(&m_csPoolLock); }
-	void UnlockPool()	{ LeaveCriticalSection(&m_csPoolLock); }
+	std::mutex	m_csPoolLock;
+	void LockPool()		{ m_csPoolLock.lock(); }
+	void UnlockPool()	{ m_csPoolLock.unlock(); }
 
 	void OnRecvPacket(NJ_PACKET *pPacket);
 protected:
 	virtual bool OnSockConnect(SOCKET sock);
 	virtual bool OnSockDisconnect(SOCKET sock);
-	virtual bool OnSockRecv(SOCKET sock, char* pPacket, DWORD dwSize);
+	virtual bool OnSockRecv(SOCKET sock, char* pPacket, u32 dwSize);
 public:
 	MNJ_DBAgentClient(int nGameCode, int nServerCode);
 	virtual ~MNJ_DBAgentClient();

@@ -28,7 +28,7 @@ struct MTD_CharInfo
 	char				nSex;
 	char				nHair;
 	char				nFace;
-	unsigned long int	nXP;
+	u32	nXP;
 	int					nBP;
 	float				fBonusRate;
 	unsigned short		nPrize;
@@ -60,22 +60,22 @@ struct MTD_SimpleCharInfo
 	char				nSex;
 	char				nHair;
 	char				nFace;
-	unsigned long int	nEquipedItemDesc[MMCIP_END];
+	u32	nEquipedItemDesc[MMCIP_END];
 };
 
 
 struct MTD_MySimpleCharInfo
 {
 	unsigned char		nLevel;
-	unsigned long int	nXP;
+	u32	nXP;
 	int					nBP;
 };
 
 struct MTD_CharLevelInfo
 {
 	unsigned char		nLevel;
-	unsigned long int	nCurrLevelExp;
-	unsigned long int	nNextLevelExp;
+	u32	nCurrLevelExp;
+	u32	nNextLevelExp;
 };
 
 struct MTD_RoundPeerInfo
@@ -94,14 +94,14 @@ struct MTD_RoundKillInfo
 struct MTD_ItemNode
 {
 	MUID				uidItem;
-	unsigned long int	nItemID;
+	u32	nItemID;
 	int					nRentMinutePeriodRemainder;		// 기간제 아이템 사용가능시간(초단위), RENT_MINUTE_PERIOD_UNLIMITED이면 무제한
 };
 
 struct MTD_AccountItemNode
 {
 	int					nAIID;
-	unsigned long int	nItemID;
+	u32	nItemID;
 	int					nRentMinutePeriodRemainder;		// 기간제 아이템 사용가능시간(초단위), RENT_MINUTE_PERIOD_UNLIMITED이면 무제한
 };
 
@@ -196,8 +196,8 @@ struct MTD_WorldItem
 // 바로게임하기 필터링 정보
 struct MTD_QuickJoinParam
 {
-	unsigned long int	nMapEnum;		// 원하는 맵의 비트어레이
-	unsigned long int	nModeEnum;		// 윈하는 게임모드의 비트어레이
+	u32	nMapEnum;		// 원하는 맵의 비트어레이
+	u32	nModeEnum;		// 윈하는 게임모드의 비트어레이
 };
 
 
@@ -220,7 +220,7 @@ struct MTD_CharInfo_Detail
 	char				nSex;							// 성별
 	char				nHair;							// 머리 코스츔
 	char				nFace;							// 얼굴 코스츔
-	unsigned long int	nXP;							// xp
+	u32	nXP;							// xp
 	int					nBP;							// bp
 
 	int					nKillCount;
@@ -228,11 +228,11 @@ struct MTD_CharInfo_Detail
 
 	// 접속상황
 
-	unsigned long int	nTotalPlayTimeSec;				// 총 플레이 시간
-	unsigned long int	nConnPlayTimeSec;				// 현재 접속 시간
+	u32	nTotalPlayTimeSec;				// 총 플레이 시간
+	u32	nConnPlayTimeSec;				// 현재 접속 시간
 
 
-	unsigned long int	nEquipedItemDesc[MMCIP_END];	// 아이템 정보
+	u32	nEquipedItemDesc[MMCIP_END];	// 아이템 정보
 
 	MMatchUserGradeID	nUGradeID;						// account UGrade
 
@@ -269,7 +269,7 @@ struct MTD_ExtendInfo
 struct MTD_PeerListNode
 {
 	MUID			uidChar;
-	DWORD			dwIP;
+	u32			dwIP;
 	unsigned int	nPort;
 	MTD_CharInfo	CharInfo;
 	MTD_ExtendInfo	ExtendInfo;
@@ -359,7 +359,7 @@ struct MTD_QuestZItemNode
 
 struct MTD_ServerStatusInfo
 {
-	DWORD			m_dwIP;
+	u32			m_dwIP;
 	int				m_nPort;
 	unsigned char	m_nServerID;
 	short			m_nMaxPlayer;
@@ -415,20 +415,20 @@ struct ZACTOR_BASICINFO {
 	short			posx, posy, posz;
 	short			velx, vely, velz;
 	short			dirx, diry, dirz;
-	BYTE			anistate;
+	u8			anistate;
 };
 
 struct ZPACKEDSHOTINFO {
 	float	fTime;
 	short	posx, posy, posz;
 	short	tox, toy, toz;
-	BYTE	sel_type;
+	u8	sel_type;
 };
 
 struct ZPACKEDDASHINFO {
 	short	posx, posy, posz;
 	short	dirx, diry, dirz;
-	BYTE	seltype;
+	u8	seltype;
 };
 
 #pragma pack(pop, old)
@@ -444,26 +444,26 @@ enum ZAdminAnnounceType
 
 
 /////////////////////////////////////////////////////////
-void Make_MTDItemNode(MTD_ItemNode* pout, MUID& uidItem, unsigned long int nItemID, int nRentMinutePeriodRemainder);
-void Make_MTDAccountItemNode(MTD_AccountItemNode* pout, int nAIID, unsigned long int nItemID, int nRentMinutePeriodRemainder);
+void Make_MTDItemNode(MTD_ItemNode* pout, const MUID& uidItem, u32 nItemID, int nRentMinutePeriodRemainder);
+void Make_MTDAccountItemNode(MTD_AccountItemNode* pout, int nAIID, u32 nItemID, int nRentMinutePeriodRemainder);
 
-void Make_MTDQuestItemNode( MTD_QuestItemNode* pOut, const unsigned long int nItemID, const int nCount );
+void Make_MTDQuestItemNode( MTD_QuestItemNode* pOut, const u32 nItemID, const int nCount );
 
 // 경험치, 경험치 비율을 4byte로 조합
 // 상위 2바이트는 경험치, 하위 2바이트는 경험치의 퍼센트이다.
-inline unsigned long int MakeExpTransData(int nAddedXP, int nPercent)
+inline u32 MakeExpTransData(int nAddedXP, int nPercent)
 {
-	unsigned long int ret = 0;
+	u32 ret = 0;
 	ret |= (nAddedXP & 0x0000FFFF) << 16;
 	ret |= nPercent & 0xFFFF;
 	return ret;
 }
-inline int GetExpFromTransData(unsigned long int nValue)
+inline int GetExpFromTransData(u32 nValue)
 {
 	return (int)((nValue & 0xFFFF0000) >> 16);
 
 }
-inline int GetExpPercentFromTransData(unsigned long int nValue)
+inline int GetExpPercentFromTransData(u32 nValue)
 {
 	return (int)(nValue & 0x0000FFFF);
 }

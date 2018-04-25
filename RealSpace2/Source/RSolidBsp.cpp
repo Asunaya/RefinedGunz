@@ -27,6 +27,7 @@ rvector	RSolidBspNode::impact;
 rplane	RSolidBspNode::impactPlane;
 
 #ifndef _PUBLISH
+#ifdef _WIN32
 void RSolidBspNode::DrawPolygon()
 {
 	if(nPolygon && !m_bSolid)
@@ -47,7 +48,7 @@ void RSolidBspNode::DrawPolygonWireframe()
 		rvector v[4];
 		for(int i=0;i<nPolygon;i++)
 		{
-			memcpy(v,pVertices[i*3],3*sizeof(rvector));
+			memcpy(&v,&pVertices[i*3],3*sizeof(rvector));
 			v[3]=v[0];
 
 			RGetDevice()->DrawPrimitiveUP(D3DPT_LINESTRIP,3,&v,sizeof(rvector));
@@ -105,7 +106,7 @@ void RSolidBspNode::DrawSolidPolygonWireframe()
 		rvector v[4];
 		for(int i=0;i<nPolygon;i++)
 		{
-			memcpy(v,pVertices[i*3],3*sizeof(rvector));
+			memcpy(&v,&pVertices[i*3],3*sizeof(rvector));
 			v[3]=v[0];
 
 			RGetDevice()->DrawPrimitiveUP(D3DPT_LINESTRIP,3,&v,sizeof(rvector));
@@ -206,6 +207,7 @@ void RSolidBspNode::DrawPlaneVertices(const rplane &plane)
 		m_pPositive->DrawPlaneVertices(plane);
 }
 
+#endif
 void RSolidBspNode::ConstructBoundingBox()
 {
 	if(!m_pPositive && !m_pNegative) return;
@@ -465,7 +467,7 @@ bool RSolidBspNode::CheckWall2(RSolidBspNode *pRootNode,RImpactPlanes &impactPla
 
 			if(plane==rplane(0,0,0,0)) 
 			{
-				_ASSERT(FALSE);
+				_ASSERT(false);
 				i=impactPlanes.erase(i);
 				continue;
 			}
@@ -596,7 +598,7 @@ bool RSolidBspNode::CheckWall(RSolidBspNode *pRootNode, const rvector &origin,rv
 
 			if(plane==rplane(0,0,0,0)) 
 			{
-				_ASSERT(FALSE);
+				_ASSERT(false);
 				i=impactPlanes.erase(i);
 				continue;
 			}

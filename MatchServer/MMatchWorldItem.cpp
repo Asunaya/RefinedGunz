@@ -107,7 +107,7 @@ void MMatchWorldItemManager::Update()
 			bool PickedUp = false;
 			for (auto* Player : m_pMatchStage->GetObjectList())
 			{
-				if (Magnitude(WorldItem.Origin - Player->GetPosition()) < WORLDITEM_PICKUP_RADIUS)
+				if (RealSpace2::Magnitude(WorldItem.Origin - Player->GetPosition()) < WORLDITEM_PICKUP_RADIUS)
 				{
 					// This takes care of deleting them also
 					it = std::next(it);

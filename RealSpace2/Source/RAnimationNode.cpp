@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "RAnimationNode.h"
 #include "RealSpace2.h"
+#include "RMeshNodeStringTable.h"
 
 _USING_NAMESPACE_REALSPACE2
 _NAMESPACE_REALSPACE2_BEGIN
@@ -176,7 +177,7 @@ rvector RAnimationNode::GetPosValue(int frame)
 
 int	RAnimationNode::GetVecValue(int frame,rvector* pVecTable)
 {
-	DWORD dwFrame = frame;
+	u32 dwFrame = frame;
 
 	int j;
 	for (j=0;j<m_vertex_cnt;j++) {

@@ -35,13 +35,13 @@ bool RDummyList::Open(rapidxml::xml_node<>& parent)
 			auto* szTagName = prop_node->name();
 			if (!szTagName)
 				continue;
-			auto* szContents = prop_node->value();
+			const char* szContents = prop_node->value();
 			if (!szContents)
 				szContents = "";
 
 			auto ReadVector = [&]() {
 				v3 vec;
-				if (sscanf_s(szContents, "%f %f %f", &vec.x, &vec.y, &vec.z) != 3)
+				if (sscanf(szContents, "%f %f %f", &vec.x, &vec.y, &vec.z) != 3)
 					vec = { 0, 0, 0 };
 				return vec;
 			};

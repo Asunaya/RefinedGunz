@@ -65,6 +65,7 @@ public:
 
 inline float rline2d::SignedDistance(const rvector2& point) const
 {
+	using namespace RealSpace2;
 	auto TestVector = Normalized(point - start);
 	auto normal = Normalized(end - start);
 

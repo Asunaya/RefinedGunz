@@ -93,7 +93,7 @@ _STATUS_CMD_START;
 		break;
 		case MC_MATCH_P2P_COMMAND:
 		{
-			auto& Sender = pCommand->GetSenderUID();
+			auto Sender = pCommand->GetSenderUID();
 			MUID Receiver;
 			if (!pCommand->GetParameter(&Receiver, 0, MPT_UID)) break;
 			auto Param = pCommand->GetParameter(1);
@@ -117,7 +117,7 @@ _STATUS_CMD_START;
 			if (!Obj)
 				break;
 
-			Obj->ClientSettings = { reinterpret_cast<MTD_ClientSettings*>(BlobPtr)->DebugOutput };
+			Obj->clientSettings = { reinterpret_cast<MTD_ClientSettings*>(BlobPtr)->DebugOutput };
 		}
 		break;
 		case MC_MATCH_REQUEST_CREATE_BOT:
@@ -166,7 +166,7 @@ _STATUS_CMD_START;
 		case MC_MATCH_BRIDGEPEER:
 			{
 				MUID uidChar;
-				DWORD dwIP, nPort;
+				u32 dwIP, nPort;
 
 				pCommand->GetParameter(&uidChar,	0, MPT_UID);
 				pCommand->GetParameter(&dwIP,		1, MPT_UINT);
@@ -472,7 +472,7 @@ _STATUS_CMD_START;
 			{
 				MUID uidStage;
 				pCommand->GetParameter(&uidStage, 0, MPT_UID);
-				char szMapName[_MAX_DIR];
+				char szMapName[MFile::MaxPath];
 				pCommand->GetParameter(szMapName, 1, MPT_STR, sizeof(szMapName) );
 				OnStageMap(uidStage, szMapName);
 			}

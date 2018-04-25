@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "RAStar.h"
-#include <crtdbg.h>
 
 RAStarNode::RAStarNode()
 {

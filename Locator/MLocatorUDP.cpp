@@ -1,4 +1,4 @@
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "MLocatorUDP.h"
 #include "MDebug.h"
 #include <utility>

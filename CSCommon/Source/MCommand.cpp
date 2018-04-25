@@ -170,7 +170,7 @@ bool MCommand::GetParameter(void* pValue, int i, MCommandParameterType t, int nB
 		int nLength = (int)strlen(szParamString);
 		if(nLength>=nBufferSize-1) {
 //			mlog("buffer overflow command id %d, sender uid(%d,%d)\n", GetID(), m_Sender.High, m_Sender.Low);
-			strncpy_s((char*)pValue, nBufferSize, szParamString, nBufferSize - 2);
+			strncpy_safe((char*)pValue, nBufferSize, szParamString, nBufferSize - 2);
 			((char*)pValue)[nBufferSize-1]=0;
 		}else{
 			pParam->GetValue(pValue);

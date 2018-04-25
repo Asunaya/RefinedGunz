@@ -75,12 +75,12 @@ void CourseManager::Init()
 
 			rboundingbox Start, End;
 
-			auto ReadVector = [](rvector &out, rapidxml::xml_attribute<> *attr)
+			auto ReadVector = [](v3_pod &out, rapidxml::xml_attribute<> *attr)
 			{
 				if (!attr)
 					return false;
 
-				if(sscanf_s(attr->value(), "%f, %f, %f", &out.x, &out.y, &out.z) != 3)
+				if(sscanf(attr->value(), "%f, %f, %f", &out.x, &out.y, &out.z) != 3)
 					return false;
 
 				return true;

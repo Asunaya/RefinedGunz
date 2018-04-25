@@ -15,7 +15,6 @@
 #include <string.h>
 #include "MDebug.h"
 void OutputDebugString(const char* p){ mlog("%s", p); }
-int _stricmp(const char* a, const char* b) { return strcasecmp(a, b); }
 #endif
 
 //	Modified by Leejangho ( 98-01-10 5:30:04 ¿ÀÀü )

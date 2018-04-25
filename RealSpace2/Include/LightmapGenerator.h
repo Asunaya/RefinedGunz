@@ -2,6 +2,9 @@
 
 #include "RNameSpace.h"
 #include "GlobalTypes.h"
+#ifdef _WIN32
+#include "RMesh.h"
+#endif
 
 _NAMESPACE_REALSPACE2_BEGIN
 
@@ -12,7 +15,8 @@ struct RLIGHT;
 struct RLIGHTMAPTEXTURE;
 class RBspLightmapManager;
 
-using RFREEBLOCKLIST = std::list<POINT>;
+struct FreeBlock { int x; int y; };
+using RFREEBLOCKLIST = std::list<FreeBlock>;
 
 using RGENERATELIGHTMAPCALLBACK = bool(*)(float fProgress);
 

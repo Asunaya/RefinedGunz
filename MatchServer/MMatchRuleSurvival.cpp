@@ -88,7 +88,7 @@ void MMatchRuleSurvival::QuestRoundStart()
 void MMatchRuleSurvival::RouteQuestRoundStart()
 {
 	MCommand* pCmd = MMatchServer::GetInstance()->CreateCommand(MC_QUEST_ROUND_START, MUID(0,0));
-	pCmd->AddParameter(new MCmdParamUChar(unsigned char(m_QuestRound.GetRound())));
+	pCmd->AddParameter(new MCmdParamUChar((unsigned char)m_QuestRound.GetRound()));
 	MMatchServer::GetInstance()->RouteToStage(GetStage()->GetUID(), pCmd);
 
 }

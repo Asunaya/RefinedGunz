@@ -20,6 +20,7 @@
 #include <vector>
 #include <string>
 #include <map>
+#include "MUtil.h"
 using namespace std;
 
 
@@ -29,7 +30,7 @@ public :
 	MBMatchServerReloadObj() 
 		: m_bIsReloadOK( false )
 	{
-		memset( &m_LastReloadTime, 0, sizeof(SYSTEMTIME) );
+		memset( &m_LastReloadTime, 0, sizeof(tm) );
 	}
 
 	virtual ~MBMatchServerReloadObj() 
@@ -45,14 +46,14 @@ public :
 
 		SetReloadStatus( bIsReloadOK );
 		if( bIsReloadOK )
-			GetLocalTime( &m_LastReloadTime );
+			m_LastReloadTime = *localtime( &unmove(time(0)) );
 		
 		return bIsReloadOK;
 	}
 
 	const string&		GetFileName() const			{ return m_strFileName; }
 	const bool			IsReloadOK() const			{ return m_bIsReloadOK; }
-	const SYSTEMTIME&	GetLastReloadTime() const	{ return m_LastReloadTime; }
+	const tm&	GetLastReloadTime() const	{ return m_LastReloadTime; }
 
 	void SetFileName( const string& strFileName )	{ m_strFileName = strFileName; }
 	
@@ -64,7 +65,7 @@ private :
 private :
 	string		m_strFileName;
 	bool		m_bIsReloadOK;
-	SYSTEMTIME	m_LastReloadTime;
+	tm	m_LastReloadTime;
 };
 
 

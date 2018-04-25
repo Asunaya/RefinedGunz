@@ -26,7 +26,7 @@ public:
 	static void FreeInstance();
 
 	const char* GetErrorStr(int nID);
-	const char* GetString(std::string& key);
+	const char* GetString(const std::string& key);
 	const char* GetStringFromXml(const char* str);
 };
 

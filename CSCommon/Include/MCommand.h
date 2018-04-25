@@ -8,10 +8,9 @@
 #include <deque>
 
 #include "MCommandParameter.h"
-#include "mempool.h"
+#include "MCommandManager.h"
+#include "MemPool.h"
 #include "GlobalTypes.h"
-
-class MCommandManager;
 
 // Command Description Flag
 #define MCDT_NOTINITIALIZED		0
@@ -78,11 +77,11 @@ protected:
 public:
 	MCommand();
 	MCommand(const MCommandDesc* pCommandDesc, MUID Receiver, MUID Sender);
-	MCommand::MCommand(int nID, MUID Sender, MUID Receiver, MCommandManager* pCommandManager);
+	MCommand(int nID, MUID Sender, MUID Receiver, MCommandManager* pCommandManager);
 	virtual ~MCommand(void);
 
 	void SetID(const MCommandDesc* pCommandDesc);
-	void MCommand::SetID(int nID, MCommandManager* pCommandManager);
+	void SetID(int nID, MCommandManager* pCommandManager);
 	int GetID() const { return m_pCommandDesc->GetID(); }
 	const char* GetDescription(){ return m_pCommandDesc->GetDescription(); }
 

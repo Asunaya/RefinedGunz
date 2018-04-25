@@ -11,7 +11,7 @@
 #include "MMatchConfig.h"
 #include "MMatchFormula.h"
 #include "MQuestItem.h"
-#include "MMATH.H"
+#include "MMath.h"
 #include "MAsyncDBJob.h"
 #include "MQuestNPCSpawnTrigger.h"
 #include "MQuestItem.h"
@@ -1071,9 +1071,9 @@ void MMatchRuleQuest::OnObtainWorldItem(MMatchObject* pObj, int nItemID, int* pn
 		// true값이면 실제로 먹은것임.
 
 		if (IsQuestItemID(nQuestItemID))
-            RouteObtainQuestItem(unsigned long int(nQuestItemID));
+            RouteObtainQuestItem((unsigned long int)nQuestItemID);
 		else 
-			RouteObtainZItem(unsigned long int(nQuestItemID));
+			RouteObtainZItem((unsigned long int)nQuestItemID);
 	}
 }
 

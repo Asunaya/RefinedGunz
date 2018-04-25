@@ -1,34 +1,36 @@
 #include "stdafx.h"
 // RBspObject.cpp: 99.2.9 by dubble
 
-#include <crtdbg.h>
+#include <cfloat>
 #include <map>
 #include <array>
+#include "MFile.h"
 #include "MXml.h"
 #include "MZFileSystem.h"
 #include "RBspObject.h"
 #include "RMaterialList.h"
 #include "RealSpace2.h"
-#include "RBaseTexture.h"
 #include "MDebug.h"
 #include "RVersions.h"
 #include "RMaterialList.h"
-#include "RVisualMeshMgr.h"
 #include "FileInfo.h"
 #include "ROcclusionList.h"
 #include "MProfiler.h"
-#include "RShaderMgr.h"
 #include "RLenzFlare.h"
-#include "dxerr.h"
 #include "RNavigationNode.h"
 #include <fstream>
-#include "ShaderGlobals.h"
-#include "RS2.h"
 #include "rapidxml.hpp"
-#include "EluLoader.h"
-#include "BulletCollision.h"
 #include "LightmapGenerator.h"
 #include "LogMatrix.h"
+#include "EluLoader.h"
+#ifdef _WIN32
+#include "RS2.h"
+#include "BulletCollision.h"
+#include "RVisualMeshMgr.h"
+#include "ShaderGlobals.h"
+#include "RShaderMgr.h"
+#include "RBaseTexture.h"
+#endif
 
 #ifndef _PUBLISH
 
@@ -68,7 +70,8 @@ struct OpenNodesState
 	int PolygonID;
 };
 
-void DrawBoundingBox(rboundingbox *bb, DWORD color)
+#ifdef _WIN32
+void DrawBoundingBox(rboundingbox *bb, u32 color)
 {
 	int i, j;
 
@@ -87,13 +90,16 @@ void DrawBoundingBox(rboundingbox *bb, DWORD color)
 		RDrawLine(a, b, color);
 	}
 }
+#endif
 
 RBSPMATERIAL::~RBSPMATERIAL()
 {
+#ifdef _WIN32
 	if (GetRS2().UsingD3D9() && texture)
 		RDestroyBaseTexture(texture);
 	else if (GetRS2().UsingVulkan())
 		DestroyVkMaterial(VkMaterial);
+#endif
 }
 
 RSBspNode::RSBspNode()
@@ -111,7 +117,8 @@ RSBspNode::~RSBspNode()
 	SAFE_DELETE_ARRAY(pDrawInfo);
 }
 
-void RSBspNode::DrawBoundingBox(DWORD color)
+#ifdef _WIN32
+void RSBspNode::DrawBoundingBox(u32 color)
 {
 	RGetDevice()->SetFVF(D3DFVF_XYZ | D3DFVF_DIFFUSE);
 	RealSpace2::DrawBoundingBox(&bbTree, color);
@@ -120,13 +127,14 @@ void RSBspNode::DrawBoundingBox(DWORD color)
 	if (m_pPositive) m_pPositive->DrawBoundingBox(color);
 }
 
-void RSBspNode::DrawWireFrame(int nPolygon, DWORD color)
+void RSBspNode::DrawWireFrame(int nPolygon, u32 color)
 {
 	RPOLYGONINFO *info = &pInfo[nPolygon];
 
 	for (int i = 0; i < info->nVertices; i++)
 		RDrawLine(*info->pVertices[i].Coord(), *info->pVertices[(i + 1) % info->nVertices].Coord(), color);
 }
+#endif
 
 RSBspNode* RSBspNode::GetLeafNode(const rvector &pos)
 {
@@ -144,7 +152,11 @@ RSBspNode* RSBspNode::GetLeafNode(const rvector &pos)
 bool RBspObject::m_bisDrawLightMap = true;
 
 RBspObject::RBspObject(bool PhysOnly)
-	: PhysOnly(PhysOnly), DrawObj{ GetGraphicsAPI(), *this }
+	: PhysOnly(PhysOnly)
+#ifndef _WIN32
+{}
+#else
+	, DrawObj{ GetGraphicsAPI(), *this }
 {
 	m_MeshList.SetMtrlAutoLoad(true);
 	m_MeshList.SetMapObject(true);
@@ -152,16 +164,20 @@ RBspObject::RBspObject(bool PhysOnly)
 	if (GetRS2().UsingD3D9())
 		DrawObj.SetLightingStatic<RBspObjectDrawD3D9>(m_bisDrawLightMap);
 }
+#endif
 
 RBspObject::~RBspObject() = default;
 
 void RBspObject::ClearLightmaps()
 {
+#ifdef _WIN32
 	LightmapTextures.clear();
+#endif
 }
 
 void RBspObject::LightMapOnOff(bool bDraw)
 {
+#ifdef _WIN32
 	if (m_bisDrawLightMap == bDraw)
 		return;
 
@@ -187,6 +203,7 @@ void RBspObject::LightMapOnOff(bool bDraw)
 		if (!RIsHardwareTNL())
 			CreatePolygonTable();
 	}
+#endif
 }
 
 void RBspObject::SetDrawLightMap(bool b) {
@@ -195,6 +212,7 @@ void RBspObject::SetDrawLightMap(bool b) {
 
 void RBspObject::DrawNormal(int nIndex, float fSize)
 {
+#ifdef _WIN32
 	RCONVEXPOLYGONINFO *pInfo = &ConvexPolygons[nIndex];
 
 	RGetDevice()->SetFVF(D3DFVF_XYZ | D3DFVF_DIFFUSE);
@@ -207,10 +225,12 @@ void RBspObject::DrawNormal(int nIndex, float fSize)
 		// Draw normal
 		RDrawLine(pInfo->pVertices[j], pInfo->pVertices[j] + fSize*pInfo->pNormals[j], 0xff00ff);
 	}
+#endif
 }
 
 void RBspObject::SetDiffuseMap(int nMaterial)
 {
+#ifdef _WIN32
 	LPDIRECT3DDEVICE9 pd3dDevice = RGetDevice();
 
 	RBaseTexture *pTex = Materials[nMaterial].texture;
@@ -225,6 +245,7 @@ void RBspObject::SetDiffuseMap(int nMaterial)
 		pd3dDevice->SetRenderState(D3DRS_TEXTUREFACTOR, Diffuse);
 		pd3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TFACTOR);
 	}
+#endif
 }
 
 // TODO: This whole setup seems like an awful way of drawing anything. Fix.
@@ -263,9 +284,12 @@ static void DrawImpl(RSBspNode& Node, int Material, T& DrawFunc)
 
 void RBspObject::UpdateUBO()
 {
+#ifdef _WIN32
 	DrawObj.Get<RBspObjectDrawVulkan>().UpdateUniformBuffers();
+#endif
 }
 
+#ifdef _WIN32
 void RBspObject::Draw(RSBspNode* Node, int Material)
 {
 	DrawImpl(*Node, Material, [&](auto& Node, auto Count)
@@ -323,7 +347,7 @@ void RBspObject::DrawNodesImpl(int LoopCount)
 			SetDiffuseMap(MaterialIndex);
 
 			if (!LightmapTextures.empty())
-				dev->SetTexture(static_cast<DWORD>(ShaderSampler::Lightmap),
+				dev->SetTexture(static_cast<u32>(ShaderSampler::Lightmap),
 					LightmapTextures[i / Materials.size()].get()->GetTexture());
 		}
 
@@ -801,6 +825,7 @@ void RBspObject::DrawCollision_Solid() {}
 void RBspObject::DrawNavi_Polygon() {}
 void RBspObject::DrawNavi_Links() {}
 #endif
+#endif
 
 template <bool UseOccluders>
 void RBspObject::ChooseNodes(RSBspNode *bspNode, const rfrustum& LocalViewFrustum)
@@ -934,7 +959,7 @@ bool RBspObject::Open(const char *filename, ROpenMode nOpenFlag, RFPROGRESSCALLB
 	m_OpenMode = nOpenFlag;
 	m_filename = filename;
 
-	char xmlname[_MAX_PATH];
+	char xmlname[MFile::MaxPath];
 	if (!CompareEnd(filename, strlen(filename), ".xml", strlen(".xml")))
 		sprintf_safe(xmlname, "%s.xml", filename);
 	else
@@ -958,7 +983,7 @@ bool RBspObject::Open(const char *filename, ROpenMode nOpenFlag, RFPROGRESSCALLB
 
 		if (pfnProgressCallback) pfnProgressCallback(CallbackParam, .6f);
 
-		char bspname[_MAX_PATH];
+		char bspname[MFile::MaxPath];
 		sprintf_safe(bspname, "%s.bsp", filename);
 		if (!OpenBsp(bspname, Counts))
 		{
@@ -968,7 +993,7 @@ bool RBspObject::Open(const char *filename, ROpenMode nOpenFlag, RFPROGRESSCALLB
 
 		if (pfnProgressCallback) pfnProgressCallback(CallbackParam, .8f);
 
-		char colfilename[_MAX_PATH];
+		char colfilename[MFile::MaxPath];
 		sprintf_safe(colfilename, "%s.col", filename);
 		if (!OpenCol(colfilename))
 		{
@@ -976,13 +1001,14 @@ bool RBspObject::Open(const char *filename, ROpenMode nOpenFlag, RFPROGRESSCALLB
 			return false;
 		}
 
-		char navfilename[_MAX_PATH];
+		char navfilename[MFile::MaxPath];
 		sprintf_safe(navfilename, "%s.nav", filename);
 		if (!OpenNav(navfilename))
 		{
 			MLog("RBspObject::Open -- No navigation file for %s\n", filename);
 		}
 
+#ifdef _WIN32
 		if (!PhysOnly && GetRS2().UsingD3D9())
 		{
 			if (RIsHardwareTNL())
@@ -994,9 +1020,11 @@ bool RBspObject::Open(const char *filename, ROpenMode nOpenFlag, RFPROGRESSCALLB
 			if (m_bisDrawLightMap)
 				OpenLightmap();
 		}
+#endif
 
 		Sort_Nodes(OcRoot.data());
 
+#ifdef _WIN32
 		if (RIsHardwareTNL() && !PhysOnly && GetRS2().UsingD3D9())
 		{
 			UpdateVertexBuffer();
@@ -1011,14 +1039,17 @@ bool RBspObject::Open(const char *filename, ROpenMode nOpenFlag, RFPROGRESSCALLB
 
 			UpdateIndexBuffer();
 		}
+#endif
 
 		if (pfnProgressCallback) pfnProgressCallback(CallbackParam, 1.f);
 	}
 
+#ifdef _WIN32
 	if (!PhysOnly && GetRS2().UsingVulkan())
 	{
 		DrawObj.InitStatic<RBspObjectDrawVulkan>();
 	}
+#endif
 
 	return true;
 }
@@ -1031,6 +1062,7 @@ void RBspObject::OptimizeBoundingBox()
 	RecalcBoundingBox(OcRoot.data());
 }
 
+#ifdef _WIN32
 bool RBspObject::CreateIndexBuffer()
 {
 	SAFE_RELEASE(IndexBuffer);
@@ -1077,6 +1109,7 @@ void RBspObject::OnRestore()
 
 	DrawObj.OnRestoreStatic<RBspObjectDrawD3D9>();
 }
+#endif
 
 bool RBspObject::Open_MaterialList(rapidxml::xml_node<>& parent)
 {
@@ -1085,7 +1118,9 @@ bool RBspObject::Open_MaterialList(rapidxml::xml_node<>& parent)
 
 	Materials.resize(ml.size() + 1);
 
+#ifdef _WIN32
 	Materials[0].texture = nullptr;
+#endif
 	Materials[0].Diffuse = rvector(1, 1, 1);
 	Materials[0].dwFlags = 0;
 
@@ -1115,6 +1150,7 @@ bool RBspObject::Open_MaterialList(rapidxml::xml_node<>& parent)
 		char szMapName[256];
 		GetRefineFilename(szMapName, DiffuseMapName.c_str());
 
+#ifdef _WIN32
 		if (!PhysOnly && szMapName[0])
 		{
 			if (GetRS2().UsingD3D9())
@@ -1122,6 +1158,7 @@ bool RBspObject::Open_MaterialList(rapidxml::xml_node<>& parent)
 			else
 				Materials[i].VkMaterial.Texture = GetRS2Vulkan().LoadTexture(szMapName);
 		}
+#endif
 	}
 
 	return true;
@@ -1135,13 +1172,13 @@ bool RBspObject::Open_LightList(rapidxml::xml_node<>& parent)
 
 	for (auto& Light : llist)
 	{
-		if (_strnicmp(Light.Name.c_str(), RTOK_MAX_OBJLIGHT, strlen(RTOK_MAX_OBJLIGHT)) == 0) {
+		if (istarts_with(Light.Name, RTOK_MAX_OBJLIGHT)) {
 			StaticObjectLightList.push_back(Light);
 		}
 		else {
 			StaticMapLightList.push_back(Light);
 
-			if (_strnicmp(Light.Name.c_str(), "sun_omni", 8) == 0)
+			if (istarts_with(Light.Name, "sun_omni"))
 			{
 				RLIGHT Sunlight;
 				Sunlight.Name = Light.Name;
@@ -1168,6 +1205,7 @@ bool RBspObject::Open_OcclusionList(rapidxml::xml_node<>& parent)
 
 bool RBspObject::Open_ObjectList(rapidxml::xml_node<>& parent)
 {
+#ifdef _WIN32
 	if (GetRS2().UsingVulkan())
 		return true;
 
@@ -1190,7 +1228,7 @@ bool RBspObject::Open_ObjectList(rapidxml::xml_node<>& parent)
 		ObjectInfo.name = object_name;
 		ObjectInfo.pLight = nullptr;
 
-		char fname[_MAX_PATH];
+		char fname[MFile::MaxPath];
 		GetPurePath(fname, m_descfilename.c_str());
 		strcat_safe(fname, object_name);
 
@@ -1265,6 +1303,7 @@ bool RBspObject::Open_ObjectList(rapidxml::xml_node<>& parent)
 			}
 		}
 	}
+#endif
 
 	return true;
 }
@@ -1382,19 +1421,8 @@ bool RBspObject::Set_AmbSound(rapidxml::xml_node<>& parent)
 			auto* prop_value = prop_node->value();
 			if (!prop_value) continue;
 
-			char* context{};
-			token = strtok_s(prop_value, " ", &context);
-
-			auto get_token = [&] {
-				token = strtok_s(nullptr, " ", &context);
-			};
-
 			auto get_vector = [&](auto& vec) {
-				if (token != nullptr) vec.x = float(atof(token));
-				get_token();
-				if (token != nullptr) vec.y = float(atof(token));
-				get_token();
-				if (token != nullptr) vec.z = float(atof(token));
+				sscanf(prop_value, "%f %f %f", EXPAND_VECTOR(&vec));
 			};
 
 			if (_stricmp("MIN_POSITION", prop_name) == 0)
@@ -1412,7 +1440,7 @@ bool RBspObject::Set_AmbSound(rapidxml::xml_node<>& parent)
 	return true;
 }
 
-#define LOGERROR(msg, ...) MLog(__FUNCTION__  " -- " msg, __VA_ARGS__)
+#define LOGERROR(msg, ...) MLog("%s -- " msg, __FUNCTION__, __VA_ARGS__)
 
 bool RBspObject::OpenDescription(const char *filename)
 {
@@ -1492,6 +1520,7 @@ bool RBspObject::LoadRS2Map(rapidxml::xml_node<>& aParent)
 
 bool RBspObject::LoadRS3Map(rapidxml::xml_node<>& parent, const std::string& directory)
 {
+#ifdef _WIN32
 	auto* map_name_node = parent.first_node("NAME");
 	if (!map_name_node)
 	{
@@ -1574,6 +1603,9 @@ bool RBspObject::LoadRS3Map(rapidxml::xml_node<>& parent, const std::string& dir
 	}
 
 	return true;
+#else
+	return false;
+#endif
 }
 
 bool RBspObject::OpenRs(const char *filename, BspCounts& Counts)
@@ -1770,7 +1802,8 @@ bool SaveMemoryBmp(int x, int y, void *data, void **retmemory, int *nsize);
 
 bool RBspObject::OpenLightmap()
 {
-	char lightmapinfofilename[_MAX_PATH];
+#ifdef _WIN32
+	char lightmapinfofilename[MFile::MaxPath];
 	sprintf_safe(lightmapinfofilename, "%s.lm", m_filename.c_str());
 
 	MZFile file;
@@ -1844,6 +1877,9 @@ bool RBspObject::OpenLightmap()
 	file.Close();
 
 	return true;
+#else
+	return false;
+#endif
 }
 
 bool RBspObject::Open_ConvexPolygons(MZFile *pfile)
@@ -1857,7 +1893,7 @@ bool RBspObject::Open_ConvexPolygons(MZFile *pfile)
 	{
 		for (int i = 0; i < NumConvexPolygons; i++)
 		{
-			pfile->Seek(sizeof(int) + sizeof(DWORD) + sizeof(rplane) + sizeof(float), MZFile::current);
+			pfile->Seek(sizeof(int) + sizeof(u32) + sizeof(rplane) + sizeof(float), MZFile::current);
 
 			int nVertices;
 			pfile->Read(&nVertices, sizeof(int));
@@ -1878,7 +1914,7 @@ bool RBspObject::Open_ConvexPolygons(MZFile *pfile)
 	{
 		pfile->Read(&ConvexPolygons[i].nMaterial, sizeof(int));
 		ConvexPolygons[i].nMaterial += 2;
-		pfile->Read(&ConvexPolygons[i].dwFlags, sizeof(DWORD));
+		pfile->Read(&ConvexPolygons[i].dwFlags, sizeof(u32));
 		pfile->Read(&ConvexPolygons[i].plane, sizeof(rplane));
 		pfile->Read(&ConvexPolygons[i].fArea, sizeof(float));
 		pfile->Read(&ConvexPolygons[i].nVertices, sizeof(int));
@@ -1907,6 +1943,7 @@ void RBspObject::CreatePolygonTable()
 
 void RBspObject::CreatePolygonTable(RSBspNode *pNode, u16** Indices)
 {
+#ifdef _WIN32
 	if (pNode->m_pPositive)
 		CreatePolygonTable(pNode->m_pPositive, Indices);
 
@@ -1923,7 +1960,7 @@ void RBspObject::CreatePolygonTable(RSBspNode *pNode, u16** Indices)
 			pInfo->nIndicesPos = *Indices - OcIndices.data();
 			if (RIsHardwareTNL())
 			{
-				WORD base = pInfo->pVertices - OcVertices.data();
+				u16 base = pInfo->pVertices - OcVertices.data();
 				for (int j = 0; j < pInfo->nVertices - 2; j++)
 				{
 					*pInd++ = base + 0;
@@ -2001,12 +2038,12 @@ void RBspObject::CreatePolygonTable(RSBspNode *pNode, u16** Indices)
 
 						pdi->pVertices = new BSPVERTEX[pdi->nVertice];
 
-						WORD base = 0;
+						u16 base = 0;
 						for (int k = lastj; k < j; k++)
 						{
 							memcpy(pdi->pVertices + base, pNode->pInfo[k].pVertices, sizeof(BSPVERTEX)*pNode->pInfo[k].nVertices);
 
-							WORD *pInd = OcIndices.data() + pNode->pInfo[k].nIndicesPos;
+							u16 *pInd = OcIndices.data() + pNode->pInfo[k].nIndicesPos;
 							for (int l = 0; l < pNode->pInfo[k].nVertices - 2; l++)
 							{
 								*pInd++ = base + 0;
@@ -2031,6 +2068,7 @@ void RBspObject::CreatePolygonTable(RSBspNode *pNode, u16** Indices)
 			nTriangle += pNode->pInfo[j].nVertices - 2;
 		}
 	}
+#endif
 }
 
 void RBspObject::Sort_Nodes(RSBspNode *pNode)
@@ -2070,18 +2108,18 @@ OpenNodesState RBspObject::Open_Nodes(RSBspNode *pNode, MZFile *pfile, OpenNodes
 	pfile->Read(&pNode->bbTree, sizeof(rboundingbox));
 	pfile->Read(&pNode->plane, sizeof(rplane));
 
-	auto Open = [&](auto Branch)
+	auto Open = [&](RSBspNode*& Branch)
 	{
 		bool flag;
 		pfile->Read(&flag, sizeof(bool));
 		if (!flag) return;
 		++State.Node;
-		pNode->*Branch = State.Node;
-		State = Open_Nodes(pNode->*Branch, pfile, State);
+		Branch = State.Node;
+		State = Open_Nodes(Branch, pfile, State);
 	};
 
-	Open(&RSBspNode::m_pPositive);
-	Open(&RSBspNode::m_pNegative);
+	Open(pNode->m_pPositive);
+	Open(pNode->m_pNegative);
 
 	pfile->Read(&pNode->nPolygon, sizeof(int));
 
@@ -2098,7 +2136,7 @@ OpenNodesState RBspObject::Open_Nodes(RSBspNode *pNode, MZFile *pfile, OpenNodes
 
 			pfile->Read(&mat, sizeof(int));
 			pfile->Read(&pInfo->nConvexPolygon, sizeof(int));
-			pfile->Read(&pInfo->dwFlags, sizeof(DWORD));
+			pfile->Read(&pInfo->dwFlags, sizeof(u32));
 			pfile->Read(&pInfo->nVertices, sizeof(int));
 
 			BSPVERTEX *pVertex = pInfo->pVertices = State.Vertices;
@@ -2154,6 +2192,7 @@ OpenNodesState RBspObject::Open_Nodes(RSBspNode *pNode, MZFile *pfile, OpenNodes
 	return State;
 }
 
+#ifdef _WIN32
 bool RBspObject::CreateVertexBuffer()
 {
 	if (OcInfo.size() * 3 > 65530 || OcInfo.size() == 0) return false;
@@ -2188,8 +2227,9 @@ bool RBspObject::UpdateVertexBuffer()
 
 	return true;
 }
+#endif
 
-DWORD RBspObject::GetLightmap(rvector &Pos, RSBspNode *pNode, int nIndex)
+u32 RBspObject::GetLightmap(rvector &Pos, RSBspNode *pNode, int nIndex)
 {
 	return 0xffffffff;
 }
@@ -2202,6 +2242,7 @@ rvector RBspObject::GetDimension() const
 	return OcRoot[0].bbTree.vmax - OcRoot[0].bbTree.vmin;
 }
 
+#ifdef _WIN32
 void RBspObject::DrawSolid()
 {
 #ifndef _PUBLISH
@@ -2270,10 +2311,12 @@ void RBspObject::DrawSolidNode()
 
 #endif
 }
+#endif
 
 bool RBspObject::CheckWall(const rvector &origin, rvector &targetpos, float Radius, float Height,
 	RCOLLISIONMETHOD method, int nDepth, rplane *impactplane)
 {
+#ifdef _WIN32
 	if (Collision)
 	{
 		auto CheckPrimitive = [&](auto& func) {
@@ -2300,6 +2343,7 @@ bool RBspObject::CheckWall(const rvector &origin, rvector &targetpos, float Radi
 		assert(!"Unknown collision method");
 		return false;
 	}
+#endif
 
 	return RSolidBspNode::CheckWall(ColRoot.data(), origin, targetpos,
 		Radius, Height, method, nDepth, impactplane);
@@ -2307,6 +2351,7 @@ bool RBspObject::CheckWall(const rvector &origin, rvector &targetpos, float Radi
 
 bool RBspObject::CheckSolid(const rvector &pos, float Radius, float Height, RCOLLISIONMETHOD method)
 {
+#ifdef _WIN32
 	if (Collision)
 	{
 		if (method == RCW_CYLINDER)
@@ -2316,6 +2361,7 @@ bool RBspObject::CheckSolid(const rvector &pos, float Radius, float Height, RCOL
 		assert(!"Unknown collision method");
 		return false;
 	}
+#endif
 
 	RImpactPlanes impactPlanes;
 	if (method == RCW_SPHERE)
@@ -2328,6 +2374,7 @@ rvector RBspObject::GetFloor(const rvector &origin, float Radius, float Height, 
 {
 	auto targetpos = origin + rvector(0, 0, -10000);
 
+#ifdef _WIN32
 	if (Collision)
 	{
 		v3 Hit, Normal;
@@ -2337,6 +2384,7 @@ rvector RBspObject::GetFloor(const rvector &origin, float Radius, float Height, 
 			*impactplane = PlaneFromPointNormal(Hit, Normal);
 		return Hit;
 	}
+#endif
 
 	RImpactPlanes impactPlanes;
 	bool bIntersect = ColRoot[0].GetColPlanes_Cylinder(&impactPlanes, origin, targetpos, Radius, Height);
@@ -2358,8 +2406,10 @@ RBSPMATERIAL *RBspObject::GetMaterial(int nIndex)
 }
 
 RBaseTexture* RBspObject::GetBaseTexture(int n) {
+#ifdef _WIN32
 	if (n >= 0 && static_cast<size_t>(n) < Materials.size())
 		return Materials[n].texture;
+#endif
 	return nullptr;
 }
 
@@ -2408,6 +2458,7 @@ bool RBspObject::Pick(std::vector<RSBspNode>& Nodes,
 	if (MagSq == 0)
 		return false;
 
+#ifdef _WIN32
 	if (Collision)
 	{
 		v3 normal;
@@ -2419,6 +2470,7 @@ bool RBspObject::Pick(std::vector<RSBspNode>& Nodes,
 		Out->nIndex = -1;
 		return true;
 	}
+#endif
 
 	if (Nodes.empty())
 		return false;
@@ -2546,7 +2598,7 @@ bool RBspObject::CheckBranches(RSBspNode* pNode, const v3& v0, const v3& v1, Pic
 {
 	rvector w0, w1;
 	//float t;
-	auto CheckBranch = [&](int side, auto* branch) {
+	auto CheckBranch = [&](int side, RSBspNode* branch) {
 		// This commented out check introduces false negatives because
 		// the bounding boxes are apparently wrong for some nodes.
 		// TODO: Fix the bounding boxes
@@ -2578,6 +2630,7 @@ bool RBspObject::Pick(RSBspNode *pNode, const rvector &v0, const rvector &v1, Pi
 
 RBaseTexture *RBspObject::m_pShadeMap;
 
+#ifdef _WIN32
 bool RBspObject::CreateShadeMap(const char *szShadeMap)
 {
 	if (m_pShadeMap)
@@ -2591,19 +2644,21 @@ void RBspObject::DestroyShadeMap()
 	RDestroyBaseTexture(m_pShadeMap);
 	m_pShadeMap = NULL;
 }
+#endif
 
 struct LIGHTBSPVERTEX {
 	rvector coord;
-	DWORD dwColor;
+	u32 dwColor;
 	float tu1, tv1;
 	float tu2, tv2;
 };
 
 #define LIGHTVERTEXBUFFER_SIZE	1024
 
-DWORD m_dwLightVBBase = 0;
+u32 m_dwLightVBBase = 0;
 LIGHTBSPVERTEX *m_pLightVertex;
 
+#ifdef _WIN32
 bool RBspObject::CreateDynamicLightVertexBuffer()
 {
 	InvalidateDynamicLightVertexBuffer();
@@ -2651,7 +2706,7 @@ bool RBspObject::LockLightVB()
 }
 
 D3DLIGHT9* g_pTargetLight;
-DWORD g_dwTargetLightColor;
+u32 g_dwTargetLightColor;
 
 bool RBspObject::DrawLight(RSBspNode *pNode, int nMaterial)
 {
@@ -2676,7 +2731,7 @@ bool RBspObject::DrawLight(RSBspNode *pNode, int nMaterial)
 
 				rplane *pPlane = &pdi->pPlanes[i];
 
-				WORD indices[3] = { OcIndices[index++], OcIndices[index++], OcIndices[index++] };
+				u16 indices[3] = { OcIndices[index++], OcIndices[index++], OcIndices[index++] };
 
 				float fPlaneDotCoord = pPlane->a * g_pTargetLight->Position.x + pPlane->b * g_pTargetLight->Position.y +
 					pPlane->c * g_pTargetLight->Position.z + pPlane->d;
@@ -2709,7 +2764,7 @@ bool RBspObject::DrawLight(RSBspNode *pNode, int nMaterial)
 
 					float fIntensity = min(1.f, max(0.f, 1.f - fPlaneDotCoord / g_pTargetLight->Range));
 
-					v[j].dwColor = DWORD(fIntensity * 255) << 24 | g_dwTargetLightColor;
+					v[j].dwColor = u32(fIntensity * 255) << 24 | g_dwTargetLightColor;
 
 				}
 
@@ -2783,7 +2838,7 @@ void RBspObject::DrawLight(D3DLIGHT9 *pLight)
 			}
 			else
 			{
-				DWORD dwDiffuse = VECTOR2RGB24(Materials[nMaterial].Diffuse);
+				u32 dwDiffuse = VECTOR2RGB24(Materials[nMaterial].Diffuse);
 				pd3dDevice->SetRenderState(D3DRS_TEXTUREFACTOR, dwDiffuse);
 				pd3dDevice->SetTextureStageState(1, D3DTSS_COLORARG1, D3DTA_TFACTOR);
 			}
@@ -2796,6 +2851,7 @@ void RBspObject::DrawLight(D3DLIGHT9 *pLight)
 
 	pd3dDevice->SetStreamSource(0, NULL, 0, 0);
 }
+#endif
 
 void RBspObject::GetNormal(int nConvexPolygon, const rvector &position, rvector *normal)
 {
@@ -2812,7 +2868,7 @@ void RBspObject::GetNormal(int nConvexPolygon, const rvector &position, rvector 
 	au = (ax + 1) % 3;
 	av = (ax + 2) % 3;
 
-	*normal = ::GetNormal(poly, position, au, av);
+	*normal = RealSpace2::GetNormal(poly, position, au, av);
 }
 
 bool RBspObject::GenerateLightmap(const char * filename,
@@ -2822,6 +2878,7 @@ bool RBspObject::GenerateLightmap(const char * filename,
 	v3 AmbientLight,
 	RGENERATELIGHTMAPCALLBACK pProgressFn)
 {
+#ifdef _WIN32
 	ClearLightmaps();
 
 	LightmapGenerator Generator{ *this };
@@ -2833,6 +2890,9 @@ bool RBspObject::GenerateLightmap(const char * filename,
 	Generator.pProgressFn = pProgressFn;
 	Generator.Supersample = Supersample;
 	return Generator.Generate();
+#else
+	return false;
+#endif
 }
 
 _NAMESPACE_REALSPACE2_END

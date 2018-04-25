@@ -7,6 +7,7 @@
 #include <cctype>
 #include <cwctype>
 #include <utility>
+#include "GlobalTypes.h"
 #include "ArrayView.h"
 
 namespace StringViewDetail
@@ -238,6 +239,28 @@ bool ends_with(BasicStringView<CharType> a, BasicStringView<CharType> b)
 
 inline bool ends_with(StringView a, StringView b) { return ends_with<char>(a, b); }
 inline bool ends_with(WStringView a, WStringView b) { return ends_with<wchar_t>(a, b); }
+
+template <typename CharType>
+bool istarts_with(BasicStringView<CharType> a, BasicStringView<CharType> b)
+{
+	if (b.size() > a.size())
+		return false;
+	return iequals(a.substr(0, b.size()), b);
+}
+
+inline bool istarts_with(StringView a, StringView b) { return istarts_with<char>(a, b); }
+inline bool istarts_with(WStringView a, WStringView b) { return istarts_with<wchar_t>(a, b); }
+
+template <typename CharType>
+bool iends_with(BasicStringView<CharType> a, BasicStringView<CharType> b)
+{
+	if (b.size() > a.size())
+		return false;
+	return iequals(a.substr(a.size() - b.size(), b.size()), b);
+}
+
+inline bool iends_with(StringView a, StringView b) { return iends_with<char>(a, b); }
+inline bool iends_with(WStringView a, WStringView b) { return iends_with<wchar_t>(a, b); }
 
 template <typename CharType>
 inline BasicStringView<CharType> trim(BasicStringView<CharType> Str)

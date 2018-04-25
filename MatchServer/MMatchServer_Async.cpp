@@ -185,7 +185,7 @@ void MMatchServer::OnAsyncGetAccountCharList(MAsyncJob* pJobResult)
 
 	if (pJob->GetResult() != MASYNC_RESULT_SUCCEED) {
 		char szTime[128];
-		_strtime_s(szTime);
+		strftime(szTime, sizeof(szTime), "%T", localtime(&unmove(time(0))));
 
 		mlog("[%s] Async DB Query(ResponseAccountCharList) Failed\n", szTime);
 		return;
@@ -206,7 +206,7 @@ void MMatchServer::OnAsyncGetAccountCharInfo(MAsyncJob* pJobResult)
 
 	if (pJob->GetResult() != MASYNC_RESULT_SUCCEED) {
 		char szTime[128];
-		_strtime_s(szTime);
+		strftime(szTime, sizeof(szTime), "%T", localtime(&unmove(time(0))));
 
 		mlog("[%s] Async DB Query(ResponseAccountCharInfo) Failed\n", szTime);
 		return;
@@ -323,7 +323,7 @@ void MMatchServer::OnAsyncCreateChar(MAsyncJob* pJobResult)
 
 	if (pJob->GetResult() != MASYNC_RESULT_SUCCEED) {
 		char szTime[128];
-		_strtime_s(szTime);
+		strftime(szTime, sizeof(szTime), "%T", localtime(&unmove(time(0))));
 
 		mlog("[%s] Async DB Query(CreateChar) Failed\n", szTime);
 		return;
@@ -342,7 +342,7 @@ void MMatchServer::OnAsyncDeleteChar(MAsyncJob* pJobResult)
 
 	if (pJob->GetResult() != MASYNC_RESULT_SUCCEED) {
 		char szTime[128];
-		_strtime_s(szTime);
+		strftime(szTime, sizeof(szTime), "%T", localtime(&unmove(time(0))));
 
 		mlog("[%s] Async DB Query(DeleteChar) Failed\n", szTime);
 	}		
@@ -357,7 +357,7 @@ void MMatchServer::OnAsyncWinTheClanGame(MAsyncJob* pJobInput)
 {
 	if (pJobInput->GetResult() != MASYNC_RESULT_SUCCEED) {
 		char szTime[128];
-		_strtime_s(szTime);
+		strftime(szTime, sizeof(szTime), "%T", localtime(&unmove(time(0))));
 
 		mlog("[%s] Async DB Query(OnAsyncWinTheClanGame) Failed\n", szTime);
 		return;
@@ -370,7 +370,7 @@ void MMatchServer::OnAsyncUpdateCharInfoData(MAsyncJob* pJobInput)
 {
 	if (pJobInput->GetResult() != MASYNC_RESULT_SUCCEED) {
 		char szTime[128];
-		_strtime_s(szTime);
+		strftime(szTime, sizeof(szTime), "%T", localtime(&unmove(time(0))));
 
 		mlog("[%s] Async DB Query(OnAsyncUpdateCharInfoData) Failed\n", szTime);
 		return;
@@ -382,7 +382,7 @@ void MMatchServer::OnAsyncCharFinalize(MAsyncJob* pJobInput)
 {
 	if (pJobInput->GetResult() != MASYNC_RESULT_SUCCEED) {
 		char szTime[128];
-		_strtime_s(szTime);
+		strftime(szTime, sizeof(szTime), "%T", localtime(&unmove(time(0))));
 
 		mlog("[%s] Async DB Query(OnAsyncCharFinalize) Failed\n", szTime);
 		return;
@@ -430,7 +430,7 @@ void MMatchServer::OnAsyncInsertConnLog(MAsyncJob* pJobResult)
 {
 	if (pJobResult->GetResult() != MASYNC_RESULT_SUCCEED) {
 		char szTime[128];
-		_strtime_s(szTime);
+		strftime(szTime, sizeof(szTime), "%T", localtime(&unmove(time(0))));
 
 		mlog("[%s] Async DB Query(OnAsyncInsertConnLog) Failed\n", szTime);
 		return;
@@ -442,7 +442,7 @@ void MMatchServer::OnAsyncInsertGameLog(MAsyncJob* pJobResult)
 {
 	if (pJobResult->GetResult() != MASYNC_RESULT_SUCCEED) {
 		char szTime[128];
-		_strtime_s(szTime);
+		strftime(szTime, sizeof(szTime), "%T", localtime(&unmove(time(0))));
 
 		mlog("[%s] Async DB Query(OnAsyncInsertGameLog) Failed\n", szTime);
 		return;

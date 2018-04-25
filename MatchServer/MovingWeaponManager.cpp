@@ -20,6 +20,7 @@ static std::enable_if_t<!has_Update<std::remove_reference_t<T>>::value, bool> Tr
 
 void MovingWeaponManager::Update(float Elapsed)
 {
+	using namespace RealSpace2;
 	Weapons.apply([&](auto& Obj)
 	{
 		if (!TryUpdate(Obj, *this, Elapsed))
@@ -48,8 +49,8 @@ void MovingWeaponManager::Update(float Elapsed)
 #ifdef REFLECT_ROCKETS
 				if (zpi.pObject->IsGuard() && DotProduct(zpi.pObject->GetDirection(), m_Dir) < 0)
 				{
-					auto ReflectedDir = GetReflectionVector(m_Dir, zpi.pObject->GetDirection());
-					auto ReflectedVel = GetReflectionVector(m_Velocity, zpi.pObject->GetDirection());
+					auto ReflectedDir = RealSpace2::GetReflectionVector(m_Dir, zpi.pObject->GetDirection());
+					auto ReflectedVel = RealSpace2::GetReflectionVector(m_Velocity, zpi.pObject->GetDirection());
 
 					m_Dir = ReflectedDir;
 					m_Velocity = ReflectedVel;
@@ -151,7 +152,7 @@ bool Rocket::OnCollision(MovingWeaponManager& Mgr, const v3& ColPos, const v3& N
 bool Grenade::OnCollision(MovingWeaponManager & Mgr, const v3 & ColPos, const v3& Normal, const MPICKINFO& pi)
 {
 	Pos = ColPos + Normal;
-	Vel = GetReflectionVector(Vel, Normal);
+	Vel = RealSpace2::GetReflectionVector(Vel, Normal);
 	Vel *= pi.pObject ? 0.4f : 0.8f;
 	return true;
 }
@@ -177,7 +178,7 @@ bool Grenade::Update(MovingWeaponManager& Mgr, float Elapsed)
 bool ItemKit::OnCollision(MovingWeaponManager & Mgr, const v3 & ColPos, const v3 & Normal, const MPICKINFO & pi)
 {
 	Pos = ColPos + Normal;
-	Vel = GetReflectionVector(Vel, Normal);
+	Vel = RealSpace2::GetReflectionVector(Vel, Normal);
 	Vel *= pi.pObject ? 0.4f : 0.8f;
 	return true;
 }
@@ -201,11 +202,11 @@ bool ItemKit::Update(MovingWeaponManager & Mgr, float Elapsed)
 {
 	Vel.z += -1000.0f * Elapsed;
 
-	RBSPPICKINFO rpi;
+	RealSpace2::RBSPPICKINFO rpi;
 	auto PickFlag = RM_FLAG_ADDITIVE | RM_FLAG_HIDE | RM_FLAG_PASSROCKET;
 	bool bPicked = Mgr.Stage->BspObject->Pick(Pos, rvector(0, 0, -1), &rpi, PickFlag);
 
-	if (bPicked && fabsf(Magnitude(rpi.PickPos - Pos)) > 5.0f)
+	if (bPicked && fabsf(RealSpace2::Magnitude(rpi.PickPos - Pos)) > 5.0f)
 		return true;
 
 	Mgr.Stage->m_WorldItemManager.SpawnDynamicItem(GetWorldItemID(ItemDesc), Pos.x, Pos.y, Pos.z);

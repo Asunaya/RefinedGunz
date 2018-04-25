@@ -4,6 +4,7 @@
 #include <mutex>
 #include "MDebug.h"
 #include "MUtil.h"
+#include "MFile.h"
 
 #define MAX_RECVBUF_LEN		65535
 
@@ -17,11 +18,9 @@
 
 
 #define LINKSTATE_LOG
-void MTRACE(char* pszLog)
+void MTRACE(const char* pszLog)
 {
-	char szBuf[_MAX_DIR];
-	sprintf_safe(szBuf, "%s", pszLog);
-	DMLog(szBuf);
+	DMLog("%s", pszLog);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -255,7 +254,6 @@ void MSocketThread::Create()
 void MSocketThread::Destroy()
 { 
 	m_KillEvent.SetEvent(); 
-	DMLog("MSocketThread set kill event\n");
 	MThread::Destroy(); // Wait for Thread Death
 }
 
@@ -785,6 +783,7 @@ bool MSafeUDP::OpenSocket(int nPort, bool bReuse)
 	if (sockfd == MSocket::InvalidSocket)
 		return false;
 
+#ifdef _WIN32
 	if (bReuse) {
 		int opt = 1;
 		auto setsockopt_retval = MSocket::setsockopt(sockfd, MSocket::SOL::SOCKET,
@@ -792,6 +791,7 @@ bool MSafeUDP::OpenSocket(int nPort, bool bReuse)
 		if (setsockopt_retval == MSocket::SocketError)
 			return false;
 	}
+#endif
 
 	MSocket::sockaddr_in LocalAddress;
 	LocalAddress.sin_family			= MSocket::AF::INET;
@@ -835,7 +835,7 @@ bool MSafeUDP::Send(u32 dwIP, int nPort, char* pPacket, u32 dwSize )
 
 MNetLink* MSafeUDP::FindNetLink(u32 dwIP, u16 wRawPort)
 {
-	__int64 nKey = wRawPort;
+	i64 nKey = wRawPort;
 	nKey = nKey << 32;
 	nKey += dwIP;
 
@@ -846,7 +846,7 @@ MNetLink* MSafeUDP::FindNetLink(u32 dwIP, u16 wRawPort)
 	return NULL;
 }
 
-MNetLink* MSafeUDP::FindNetLink(__int64 nMapKey)
+MNetLink* MSafeUDP::FindNetLink(i64 nMapKey)
 {
 	NetLinkItor pos = m_NetLinkMap.find(nMapKey);
 	if (pos != m_NetLinkMap.end())

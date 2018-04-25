@@ -3,6 +3,7 @@
 
 #include <list>
 #include <map>
+#include <cassert>
 
 #include "MUID.h"
 

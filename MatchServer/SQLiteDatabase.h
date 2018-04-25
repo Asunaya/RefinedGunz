@@ -5,7 +5,7 @@
 #include <string>
 #include <unordered_map>
 #include "IDatabase.h"
-#include "..\..\sdk\sqlite\include\sqlite3.h"
+#include "sqlite3.h"
 
 class SQLiteStatement;
 

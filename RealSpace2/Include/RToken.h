@@ -65,18 +65,18 @@
 
 #define FORMAT_FLOAT	"%.7f"
 
+char *Format(char *buffer, int maxlen, const rvector &v);
+char *Format(char *buffer, int maxlen, float f);
+char *Format(char *buffer, int maxlen, u32 dw);
 template<size_t size> char *Format(char(&buffer)[size], const rvector &v) {
 	return Format(buffer, size, v);
 }
 template<size_t size> char *Format(char(&buffer)[size], float f) {
 	return Format(buffer, size, f);
 }
-template<size_t size> char *Format(char(&buffer)[size], DWORD dw) {
+template<size_t size> char *Format(char(&buffer)[size], u32 dw) {
 	return Format(buffer, size, dw);
 }
-char *Format(char *buffer, int maxlen, const rvector &v);
-char *Format(char *buffer, int maxlen, float f);
-char *Format(char *buffer, int maxlen, DWORD dw);
 
 #define RTOK_MAX_OBJLIGHT		"obj_"
 #define RTOK_MAX_NOPATH			"nopath_"

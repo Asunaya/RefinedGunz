@@ -48,9 +48,9 @@ public:
 private:
 	MLocatorConfig();
 
-	bool LoadDBConfig();
-	bool LoadNetConfig();
-	bool LoadEnvConfig();
+	bool LoadDBConfig(const struct IniContext&);
+	bool LoadNetConfig(const IniContext&);
+	bool LoadEnvConfig(const IniContext&);
 
 	// DB
 	bool SetDBDSN( const char* pszDSN );

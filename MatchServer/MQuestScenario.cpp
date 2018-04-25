@@ -36,10 +36,6 @@ void MQuestScenarioCatalogue::Clear()
 	clear();
 }
 
-static int __cdecl _uint_r_sortfunc(const void* a, const void* b)
-{
-	return (int)(*((unsigned int*)b) - *((unsigned int*)a));
-}
 
 void MQuestScenarioCatalogue::Insert(MQuestScenarioInfo* pScenarioInfo)
 {
@@ -53,8 +49,8 @@ void MQuestScenarioCatalogue::Insert(MQuestScenarioInfo* pScenarioInfo)
 		return;
 	}
 
-	// reward 아이템 소팅
-	qsort(pScenarioInfo->nResSacriItemID, MAX_SCENARIO_SACRI_ITEM, sizeof(unsigned int), _uint_r_sortfunc);
+	auto&& r = pScenarioInfo->nResSacriItemID;
+	std::sort(std::begin(r), std::end(r), std::greater<>{});
 
 	insert(value_type(nID, pScenarioInfo));
 }
@@ -111,8 +107,7 @@ unsigned int MQuestScenarioCatalogue::MakeScenarioID(int nMapsetID, int nPlayerQ
 		nSQItems[i] = SacriQItemIDs[i];
 	}
 	
-	// 소팅
-	qsort(nSQItems, MAX_SCENARIO_SACRI_ITEM, sizeof(unsigned int), _uint_r_sortfunc);
+	std::sort(std::begin(nSQItems), std::end(nSQItems), std::greater<>{});
 
 	unsigned int nOutScenarioID = 0;
 

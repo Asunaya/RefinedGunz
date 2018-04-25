@@ -8,12 +8,10 @@
 
 MMatchPremiumIPCache::MMatchPremiumIPCache() : m_nDBFailedCount(0), m_nFailedCheckCount(0)
 {
-	InitializeCriticalSection(&m_csLock);
 }
 
 MMatchPremiumIPCache::~MMatchPremiumIPCache()
 {
-	DeleteCriticalSection(&m_csLock);
 }
 
 MMatchPremiumIPCache* MMatchPremiumIPCache::GetInstance()
@@ -23,7 +21,7 @@ MMatchPremiumIPCache* MMatchPremiumIPCache::GetInstance()
 }
 
 
-bool MMatchPremiumIPCache::CheckPremiumIP(DWORD dwIP, bool& outIsPremiumIP)
+bool MMatchPremiumIPCache::CheckPremiumIP(u32 dwIP, bool& outIsPremiumIP)
 {
 	MMatchPremiumIPMap::iterator itor;
 	bool bExist = false;
@@ -70,7 +68,7 @@ bool MMatchPremiumIPCache::CheckPremiumIP(DWORD dwIP, bool& outIsPremiumIP)
 	return bExist;
 }
 
-void MMatchPremiumIPCache::AddIP(DWORD dwIP, bool bPremiumIP)
+void MMatchPremiumIPCache::AddIP(u32 dwIP, bool bPremiumIP)
 {
 	Lock(); ///////////////////
 

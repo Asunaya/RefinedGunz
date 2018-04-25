@@ -4,12 +4,13 @@
 #include "RealCPNet.h"
 #include "MDebug.h"
 #include <list>
+#include "NetIO.h"
 
 class MCommand;
 
 class MServer : public MCommandCommunicator {
 protected:
-	MRealCPNet					m_RealCPNet;
+	NetIO Net;
 
 	std::list<MCommObject*>			m_AcceptWaitQueue;
 	MCriticalSection				m_csAcceptWaitQueue;
@@ -48,15 +49,15 @@ protected:
 
 	bool SendMsgReplyConnect(MUID* pHostUID, MUID* pAllocUID, unsigned int nTimeStamp,
 		MCommObject* pCommObj);
-	bool SendMsgCommand(u32 nClientKey, char* pBuf, int nSize,
+	bool SendMsgCommand(uintptr_t nClientKey, char* pBuf, int nSize,
 		unsigned short nMsgHeaderID, MPacketCrypterKey* pCrypterKey);
 
-	static void RCPCallback(void* pCallbackContext, RCP_IO_OPERATION nIO,
-		u32 nKey, MPacketHeader* pPacket, u32 dwPacketLen);	// Thread not safe
+	static void RCPCallback(void* pCallbackContext, NetIO::IOOperation Op,
+		NetIO::ConnectionHandle Handle, const void* Data);	// Thread not safe
 
 public:	// For Debugging
 	char m_szName[128];
-	void SetName(char* pszName) { strcpy_safe(m_szName, pszName); }
+	void SetName(const char* pszName) { strcpy_safe(m_szName, pszName); }
 	void DebugLog(char* pszLog) {
 		char szLog[128];
 		sprintf_safe(szLog, "[%s] %s\n", m_szName, pszLog);

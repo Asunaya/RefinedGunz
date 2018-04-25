@@ -1,29 +1,25 @@
 #include "stdafx.h"
 #include "MBMatchServer.h"
-#include <Shlwapi.h>
 #include <iostream>
 #include <atomic>
+#include "MFile.h"
 
 template <size_t size>
 static bool GetLogFileName(char (&pszBuf)[size])
 {
-	if (PathIsDirectory("Log") == FALSE)
-		CreateDirectory("Log", NULL);
+	if (!MFile::IsDir("Log"))
+		MFile::CreateDir("Log");
 
-	time_t		tClock;
-	struct tm	tmTime;
+	struct tm	tmTime = *localtime(&unmove(time(0)));
 
-	time(&tClock);
-	auto err = localtime_s(&tmTime, &tClock);
-
-	char szFileName[_MAX_DIR];
+	char szFileName[MFile::MaxPath];
 
 	int nFooter = 1;
-	while (TRUE) {
+	while (true) {
 		sprintf_safe(szFileName, "Log/MatchLog_%02d-%02d-%02d-%d.txt",
 			tmTime.tm_year + 1900, tmTime.tm_mon + 1, tmTime.tm_mday, nFooter);
 
-		if (PathFileExists(szFileName) == FALSE)
+		if (!MFile::IsFile(szFileName))
 			break;
 
 		nFooter++;
@@ -72,17 +68,11 @@ static void HandleInput(MBMatchServer& MatchServer)
 int main(int argc, char** argv)
 try
 {
-	SetCurrentDirectory("./Runtime");
-
 	char LogFileName[256];
 	GetLogFileName(LogFileName);
 	InitLog(MLOGSTYLE_DEBUGSTRING | MLOGSTYLE_FILE, LogFileName);
 	void MatchServerCustomLog(const char*);
 	CustomLog = MatchServerCustomLog;
-
-	char cwd[256];
-	GetCurrentDirectory(std::size(cwd), cwd);
-	MLog("cwd: %s\n", cwd);
 
 	MBMatchServer MatchServer;
 
@@ -100,7 +90,7 @@ try
 	{
 		MatchServer.Run();
 		HandleInput(MatchServer);
-		Sleep(1);
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	}
 }
 catch (std::runtime_error& e)

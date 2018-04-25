@@ -23,3 +23,19 @@ using rvector = v3;
 struct rmatrix;
 struct rplane;
 struct rquaternion;
+
+#ifndef _WIN32
+#include <cstring>
+#include <cassert>
+#include <cstddef>
+inline int _stricmp(const char* a, const char* b) { return strcasecmp(a, b); }
+#define _ASSERT assert
+#ifndef __cpp_lib_nonmember_container_access
+namespace std {
+template <typename T, std::size_t N>
+constexpr std::size_t size(T(&)[N]) { return N; }
+template <typename T>
+constexpr auto size(T&& x) -> decltype(x.size()) { return x.size(); }
+}
+#endif
+#endif

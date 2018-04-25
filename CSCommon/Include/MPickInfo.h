@@ -1,11 +1,12 @@
 #pragma once
 
+#include "RMeshUtil.h"
 #include "RBspObject.h"
 
 struct MPICKINFO {
 	class MMatchObject*	pObject;
-	RPickInfo	info;
+	struct { v3 vOut; float t; RMeshPartsType parts; } info;
 
 	bool bBspPicked;
-	RBSPPICKINFO bpi;
+	RealSpace2::RBSPPICKINFO bpi;
 };

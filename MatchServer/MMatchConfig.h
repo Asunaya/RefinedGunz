@@ -55,11 +55,8 @@ private:
 	bool				m_bIsComplete;
 
 private:
-	bool GetPrivateProfileBool(const char* szAppName, const char* szKeyName, 
-							   bool bDefault, const char* szFileName);
 	void AddFreeLoginIP(const char* szIP);
 	void AddDebugLoginIP( const char* szIP );
-	void ReadEnableMaps();
 	void TrimStr(const char* szSrcStr, char* outStr, int maxlen);
 
 public:

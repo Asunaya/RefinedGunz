@@ -5,8 +5,8 @@
 #include "MatchServerDoc.h"
 #include "OutputView.h"
 #include "MatchServer.h"
-#endif
 #include <atltime.h>
+#endif
 #include "MErrorTable.h"
 #include "MDebug.h"
 #include "MMatchRule.h"

@@ -27,7 +27,7 @@ struct MMatchAccountInfo
 	MMatchUserGradeID		m_nUGrade;
 	MMatchPremiumGradeID	m_nPGrade;
 	MMatchBlockType			m_BlockType;
-	SYSTEMTIME				m_EndBlockDate;
+	tm						m_EndBlockDate;
 
 	MMatchAccountInfo() : m_nAID(-1), m_nUGrade(MMUG_FREE),
 		m_nPGrade(MMPG_FREE), m_BlockType(MMBT_NO), m_szUserID()
@@ -281,7 +281,7 @@ private :
 	bool					m_bIsSendDisconnMsg;
 	bool					m_bIsUpdateDB;
 
-	const static DWORD MINTERVAL_DISCONNECT_STATUS_MIN;
+	const static u32 MINTERVAL_DISCONNECT_STATUS_MIN;
 };
 
 
@@ -328,7 +328,7 @@ protected:
 	MUID			m_uidAgent;
 	MMatchTeam		m_nTeam;
 
-	DWORD			m_dwIP;
+	u32				m_dwIP;
 	char 			m_szIP[64];
 	unsigned int	m_nPort;
 	bool			m_bFreeLoginIP;
@@ -408,10 +408,10 @@ public:
 	MMatchObject(const MUID& uid);
 	virtual ~MMatchObject();
 
-	ClientSettings ClientSettings;
+	ClientSettings clientSettings;
 	MUID BotUID = MUID::Invalid();
 
-	char* GetName() { 
+	const char* GetName() { 
 		if (m_pCharInfo)
 			return m_pCharInfo->m_szName; 
 		else
@@ -426,8 +426,10 @@ public:
 	const MUID& GetAgentUID()		{ return m_uidAgent; }
 	void SetAgentUID(const MUID& uidAgent)	{ m_uidAgent = uidAgent; }
 
-	void SetPeerAddr(DWORD dwIP, const char* szIP, unsigned short nPort)	{ m_dwIP=dwIP; strcpy_safe(m_szIP, szIP); m_nPort = nPort; }
-	DWORD GetIP() const				{ return m_dwIP; }
+	void SetPeerAddr(u32 dwIP, const char* szIP, unsigned short nPort) {
+		m_dwIP=dwIP; strcpy_safe(m_szIP, szIP); m_nPort = nPort;
+	}
+	u32 GetIP() const				{ return m_dwIP; }
 	char* GetIPString()				{ return m_szIP; }
 	unsigned short GetPort()		{ return m_nPort; }
 	bool GetFreeLoginIP()			{ return m_bFreeLoginIP; }
@@ -504,7 +506,7 @@ public:
 
 	void UpdateTickLastPacketRecved();
 
-	void SetLastRecvNewHashValueTime( const DWORD dwTime )	
+	void SetLastRecvNewHashValueTime( const u32 dwTime )	
 	{ 
 		m_dwLastRecvNewHashValueTime = dwTime; 
 		m_bIsRequestNewHashValue = false; 

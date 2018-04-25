@@ -1,6 +1,4 @@
 #include "stdafx.h"
-#include <windows.h>
-#include <Mmsystem.h>
 #include "MAsyncProxy.h"
 #include "MMatchConfig.h"
 #include "MCrashDump.h"
@@ -37,13 +35,17 @@ void MAsyncProxy::PostJob(MAsyncJob* pJob)
 
 void MAsyncProxy::WorkerThread()
 {
+#ifdef _WIN32
 	__try
 	{
+#endif
 		OnRun();
+#ifdef _WIN32
 	}
 	__except(CrashDump(GetExceptionInformation())) 
 	{
 	}
+#endif
 }
 
 void MAsyncProxy::OnRun()
@@ -114,6 +116,7 @@ void MAsyncProxy::OnRun()
 	};
 }
 
+#ifdef _WIN32
 u32 MAsyncProxy::CrashDump(EXCEPTION_POINTERS* ExceptionInfo)
 {
 	mlog("CrashDump Entered 1\n");
@@ -151,3 +154,4 @@ u32 MAsyncProxy::CrashDump(EXCEPTION_POINTERS* ExceptionInfo)
 
 	return ret;
 }
+#endif

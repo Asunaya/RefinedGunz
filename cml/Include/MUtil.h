@@ -3,10 +3,13 @@
 #include <string>
 #include <memory>
 #include <algorithm>
+#include <climits>
+#include <cstring>
 #include "TMP.h"
 #include "GlobalTypes.h"
 #include "StringView.h"
 #include "optional.h"
+#include "function_view.h"
 
 #ifdef _MSC_VER
 #include <intrin.h>
@@ -125,6 +128,14 @@ struct is_container<T, decltype(std::begin(std::declval<T>()), std::end(std::dec
 template <typename T>
 struct Range
 {
+	using value_type = std::decay_t<decltype(*std::declval<T>())>;
+	using reference = value_type&;
+	using const_reference = const value_type&;
+	using pointer = value_type*;
+	using const_pointer = const value_type*;
+	using iterator = T;
+	using const_iterator = const T;
+
 	T first;
 	T second;
 
@@ -206,6 +217,12 @@ inline bool sub_overflow(u64 a, u64 b, u64* c) { return ULongLongSub(a, b, c) !=
 inline bool mul_overflow(u16 a, u16 b, u16* c) { return UShortMult(a, b, c) != S_OK; }
 inline bool mul_overflow(u32 a, u32 b, u32* c) { return UIntMult(a, b, c) != S_OK; }
 inline bool mul_overflow(u64 a, u64 b, u64* c) { return ULongLongMult(a, b, c) != S_OK; }
+template <typename T>
+bool add_overflow(T a, T b, T* c) { return add_overflow(a, b, c); }
+template <typename T>
+bool sub_overflow(T a, T b, T* c) { return sub_overflow(a, b, c); }
+template <typename T>
+bool mul_overflow(T a, T b, T* c) { return mul_overflow(a, b, c); }
 #else
 template <typename T>
 bool add_overflow(T a, T b, T* c) { return __builtin_add_overflow(a, b, c); }
@@ -296,9 +313,9 @@ optional<T> StringToInt(StringView Str)
 			else
 			{
 				if (MulWrapped ||
-					add_overflow(Accumulator, Digit * Coefficient, &Accumulator))
+					add_overflow<U>(Accumulator, Digit * Coefficient, &Accumulator))
 					return nullopt;
-				MulWrapped = mul_overflow(Coefficient, Radix, &Coefficient);
+				MulWrapped = mul_overflow<U>(Coefficient, Radix, &Coefficient);
 			}
 		}
 
@@ -394,18 +411,25 @@ WriteProxy<std::unique_ptr<T...>> MakeWriteProxy(std::unique_ptr<T...>& ptr) {
 template <typename T>
 T& unmove(T&& x) { return x; }
 
+inline u32 bsr(u32 Value)
+{
+#ifdef _WIN32
+	unsigned long ret = 0;
+	_BitScanReverse(&ret, Value);
+	return ret;
+#else
+	if (!Value)
+		return 0;
+	return u32(31 - __builtin_clz(Value));
+#endif
+}
+
 // Returns value rounded up towards the nearest power of two
 inline u32 NextPowerOfTwo(u32 value)
 {
 	if (value == 0)
 		return 2;
-#ifdef _MSC_VER
-	unsigned long rightmost_bit;
-	_BitScanReverse(&rightmost_bit, value);
-#else
-	
-	auto rightmost_bit = static_cast<u32>(31 - __builtin_clz(value));
-#endif
+	auto rightmost_bit = bsr(value);
 	auto rightmost_bit_value = 1u << rightmost_bit;
 	if ((value ^ rightmost_bit_value) != 0)
 		rightmost_bit_value <<= 1;
@@ -462,4 +486,22 @@ auto mod(T1 a, T2 n)
 	const auto div = a / n - int(a < 0);
 	const auto off = div * n;
 	return a - off;
+}
+
+inline void Split(StringView Str, StringView Delim, function_view<void(StringView)> Callback)
+{
+	size_t idx = 0;
+	while (true)
+	{
+		auto idx2 = Str.find_first_of(Delim, idx);
+		if (idx2 == Str.npos)
+		{
+			Callback(Str.substr(idx));
+			return;
+		}
+		Callback(Str.substr(idx, idx2 - idx));
+		idx = idx2 + 1;
+		if (idx >= Str.size())
+			return;
+	}
 }

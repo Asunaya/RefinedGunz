@@ -329,7 +329,7 @@ private :
 	list< MMatchScheduleData* >		m_lstDynamicSchedule;	// 공지사항.
 };
 
-errno_t MMatchGetLocalTime(tm *ptm);
+int MMatchGetLocalTime(tm *ptm);
 char GetMaxDay( const int iMonth );
 char GetMaxDay();
 bool AddDynamicSchedule( MMatchScheduleMgr* pScheduleMgr, const int nType, MCommand* pCmd, const int nYear, const int nMonth, const int nDay, const int nHour, const int nMin, const int nCount );

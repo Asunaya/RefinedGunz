@@ -1,5 +1,6 @@
 #pragma once
 
+#include "GlobalTypes.h"
 #include "RAnimationDef.h"
 
 _NAMESPACE_REALSPACE2_BEGIN
@@ -39,7 +40,7 @@ public:
 
 	int				m_vertex_cnt;
 	int				m_vertex_vcnt;
-	DWORD*			m_vertex_frame;
+	u32*			m_vertex_frame;
 	rvector**		m_vertex;
 };
 

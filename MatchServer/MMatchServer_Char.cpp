@@ -43,7 +43,7 @@ void MMatchServer::OnRequestAccountCharList(const MUID& uidPlayer)
 		{
 			if( !bIsEndTimeExpire )
 			{
-				DWORD dwMsgID = 0;
+				u32 dwMsgID = 0;
 
 				pObj->GetDisconnStatusInfo().SetMsgID( dwMsgID );
 				pObj->GetDisconnStatusInfo().SetStatus( MMDS_DISCONN_WAIT );

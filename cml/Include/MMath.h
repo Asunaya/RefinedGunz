@@ -15,7 +15,7 @@
 inline int RandomNumber(int nMin, int nMax)
 {
 	assert((nMax-nMin) < 131072);
-	return (rand() * (nMax - nMin + 1) / (RAND_MAX+1) + nMin );
+	return (rand() * (nMax - nMin + 1) / ((long long)RAND_MAX+1) + nMin );
 }
 
 inline float RandomNumber(float fMin, float fMax)

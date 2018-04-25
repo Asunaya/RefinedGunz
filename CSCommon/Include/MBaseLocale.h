@@ -1,7 +1,5 @@
 #pragma once
 
-#include <winnt.rh>
-
 enum MCountry
 {
 	MC_INVALID			= 0,
@@ -15,13 +13,13 @@ enum MCountry
 enum MLanguage
 {
 	ML_INVALID				= 0x00,
-	ML_CHINESE				= LANG_CHINESE,
-	ML_CHINESE_TRADITIONAL	= SUBLANG_CHINESE_TRADITIONAL,
-	ML_KOREAN				= LANG_KOREAN,
-	ML_ENGLISH				= LANG_ENGLISH,
-	ML_JAPANESE				= LANG_JAPANESE,
-	ML_BRAZIL				= LANG_PORTUGUESE,
-	ML_INDIA				= LANG_INDONESIAN,
+	ML_CHINESE				= 4,
+	ML_CHINESE_TRADITIONAL	= 1,
+	ML_KOREAN				= 0x12,
+	ML_ENGLISH				= 0x9,
+	ML_JAPANESE				= 0x11,
+	ML_BRAZIL				= 0x16,
+	ML_INDIA				= 0x21,
 };
 
 class MBaseLocale

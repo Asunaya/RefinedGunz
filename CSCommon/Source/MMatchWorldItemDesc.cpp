@@ -276,7 +276,7 @@ void MMatchMapsWorldItemSpawnInfo::ParseSpawnInfo(MXmlElement& element, int nMap
 
 		char szPosition[128];
 		spawnElement.GetChildContents(szPosition, MMSITOK_POSITION);
-		int nCnt = sscanf_s( szPosition, "%f %f %f", &x, &y, &z );
+		int nCnt = sscanf( szPosition, "%f %f %f", &x, &y, &z );
 		if (nCnt != 3)
 		{
 			_ASSERT(0);

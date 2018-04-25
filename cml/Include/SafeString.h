@@ -50,7 +50,7 @@ size_t GetMinSize(T* p, size_t s) {
 }
 template <typename T>
 inline size_t GetMinSize(BasicStringView<T> p, size_t s) {
-	return (std::min(p.size(), Count));
+	return (std::min(p.size(), s));
 }
 }
 

@@ -9,9 +9,7 @@ target_include_directories(CSCommon PUBLIC
 	.
 	Include
 	../SafeUDP/Include
-	../CML/Include
 	../RealSpace2/Include
-	../MAI/Include
 	../sdk/dx9/Include
 	../sdk
 	../MDatabase/Include
@@ -20,5 +18,6 @@ target_include_directories(CSCommon PUBLIC
 	../sdk/libsodium/include)
 
 target_link_libraries(CSCommon PUBLIC
+	cml
 	rapidxml
 	sodium)

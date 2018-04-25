@@ -11,16 +11,16 @@ target_include_directories(Locator PRIVATE
 	../SafeUDP/Include
 	../MDatabase/Include
 	../MCountryFilter/Include
+	../sdk/sqlite/include
 	../sdk/dx9/include
 	../sdk)
 
-find_library(zlib_path NAMES zlib PATHS ../sdk/zlib/lib)
-find_library(libsodium_path NAMES libsodium PATHS ../sdk/libsodium/lib/static)
-find_library(sqlite_path NAMES sqlite PATHS ../sdk/sqlite/lib/Release)
-
-target_link_libraries(Locator
-	legacy_stdio_definitions.lib
+target_link_libraries(Locator PUBLIC
+	ini
 	cml
 	CSCommon
-	SafeUDP
-	MDatabase)
+	SafeUDP)
+	
+if(MSVC)
+target_link_libraries(Locator PUBLIC MDatabase)
+endif()

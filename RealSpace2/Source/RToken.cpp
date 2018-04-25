@@ -13,7 +13,7 @@ char *Format(char *buffer, int maxlen, float f)
 	return buffer;
 }
 
-char *Format(char *buffer, int maxlen, DWORD dw)
+char *Format(char *buffer, int maxlen, u32 dw)
 {
 	sprintf_safe(buffer, maxlen, "%x",dw);
 	return buffer;

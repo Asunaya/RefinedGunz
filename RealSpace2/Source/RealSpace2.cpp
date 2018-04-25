@@ -1,20 +1,22 @@
 #include "stdafx.h"
 #include "RealSpace2.h"
+#include "MFile.h"
 #include "MDebug.h"
+#ifdef _WIN32
+#include <DxErr.h>
 #include "RParticleSystem.h"
 #include "RFrameWork.h"
 #include "RBaseTexture.h"
 #include "RMeshUtil.h"
 #include "RFont.h"
-#include "dxerr.h"
 #include "RS2.h"
-#include "MFile.h"
 using std::min;
 using std::max;
 #ifdef _USE_GDIPLUS
 #include "unknwn.h"
 #include "gdiplus.h"
 using namespace Gdiplus;
+#endif
 #endif
 
 _NAMESPACE_REALSPACE2_BEGIN
@@ -27,17 +29,18 @@ static int g_nScreenWidth;
 static int g_nScreenHeight;
 static int g_nPicmip;
 static RPIXELFORMAT g_PixelFormat;
+MZFileSystem* g_pFileSystem;
+bool DynamicResourceLoading = true;
+#ifdef _WIN32
+static RParticleSystem g_ParticleSystem;
+HWND g_hWnd;
+static HMODULE g_hD3DLibrary;
+static bool g_bStencilBuffer;
 static LPDIRECT3D9 g_pD3D;
 static LPDIRECT3DDEVICE9 g_pd3dDevice;
 static D3DADAPTER_IDENTIFIER9 g_DeviceID;
 static D3DPRESENT_PARAMETERS g_d3dpp;
 static D3DCAPS9 g_d3dcaps;
-HWND g_hWnd;
-MZFileSystem* g_pFileSystem;
-static RParticleSystem g_ParticleSystem;
-static HMODULE g_hD3DLibrary;
-static bool g_bStencilBuffer;
-bool DynamicResourceLoading = true;
 static D3DDISPLAYMODE g_d3ddm;
 static GraphicsAPI g_GraphicsAPI;
 
@@ -263,7 +266,7 @@ void CheckMipFilter()
 	RGetDevice()->CreateVertexDeclaration(Elements, MakeWriteProxy(DefaultVertexDeclaration));
 	RGetDevice()->SetVertexDeclaration(DefaultVertexDeclaration.get());
 
-	DWORD dwNumPasses;
+	unsigned long dwNumPasses;
 	HRESULT hr = pd3dDevice->ValidateDevice(&dwNumPasses);
 	if (hr == D3DERR_UNSUPPORTEDTEXTUREFILTER) {
 		g_bTrilinear = false;
@@ -359,7 +362,7 @@ static bool InitD3D9(HWND hWnd, const RMODEPARAMS* params)
 	g_d3dpp.Flags = 0;
 	g_d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
 
-	DWORD BehaviorFlags = D3DCREATE_FPU_PRESERVE |
+	u32 BehaviorFlags = D3DCREATE_FPU_PRESERVE |
 		(g_bHardwareTNL ? D3DCREATE_HARDWARE_VERTEXPROCESSING : D3DCREATE_SOFTWARE_VERTEXPROCESSING);
 
 	if (IsDynamicResourceLoad())
@@ -619,11 +622,11 @@ void RClear()
 		g_pd3dDevice->Clear(0, NULL, D3DCLEAR_ZBUFFER, g_clear_color, 1.0f, 0);
 }
 
-void RDrawLine(const rvector &v1, const rvector &v2, DWORD dwColor)
+void RDrawLine(const rvector &v1, const rvector &v2, u32 dwColor)
 {
 	struct LVERTEX {
 		float x, y, z;
-		DWORD color;
+		u32 color;
 	};
 
 	LVERTEX ver[2] = { {v1.x,v1.y,v1.z,dwColor}, {v2.x,v2.y,v2.z,dwColor} };
@@ -679,15 +682,15 @@ bool SaveMemoryBmp(int x, int y, void *data, void **retmemory, int *nsize)
 
 	int i, j;
 
-	DWORD *p = (DWORD*)data + (y - 1)*x;
+	u32 *p = (u32*)data + (y - 1)*x;
 
 	for (i = y - 1; i >= 0; i--)
 	{
 		for (j = 0; j < x; j++)
 		{
-			*dest++ = *((BYTE*)p + j * 4 + 0);
-			*dest++ = *((BYTE*)p + j * 4 + 1);
-			*dest++ = *((BYTE*)p + j * 4 + 2);
+			*dest++ = *((u8*)p + j * 4 + 0);
+			*dest++ = *((u8*)p + j * 4 + 1);
+			*dest++ = *((u8*)p + j * 4 + 2);
 		}
 		if (x * 3 % 4 != 0)
 		{
@@ -747,7 +750,7 @@ bool RSaveAsGeneric(int x, int y, void *data, const char *szFilename, bool JPG)
 
 	// Write to Bitmap
 	Rect rect(0, 0, x, y);
-	Bitmap bitmap(x, y, 4 * bitmapData.Width, PixelFormat32bppARGB, (BYTE*)data);
+	Bitmap bitmap(x, y, 4 * bitmapData.Width, PixelFormat32bppARGB, (u8*)data);
 	bitmap.LockBits(&rect, ImageLockModeWrite | ImageLockModeUserInputBuf, PixelFormat32bppARGB, &bitmapData);
 	bitmap.UnlockBits(&bitmapData);
 
@@ -1006,7 +1009,7 @@ void RDrawCircle(rvector origin, float fRadius, int nSegment)
 	}
 }
 
-void RDrawArc(rvector origin, float fRadius, float fAngle1, float fAngle2, int nSegment, DWORD color)
+void RDrawArc(rvector origin, float fRadius, float fAngle1, float fAngle2, int nSegment, u32 color)
 {
 	float fAngle = fAngle2 - fAngle1;
 	for (int i = 0; i < nSegment; i++)
@@ -1061,8 +1064,8 @@ void RSetFog(bool bFog, float fNear, float fFar, u32 dwColor)
 		g_dwFogColor = dwColor;
 		g_pd3dDevice->SetRenderState(D3DRS_FOGCOLOR, dwColor);
 		g_pd3dDevice->SetRenderState(D3DRS_FOGTABLEMODE, D3DFOG_LINEAR);
-		g_pd3dDevice->SetRenderState(D3DRS_FOGSTART, *(DWORD *)(&g_fFogNear));
-		g_pd3dDevice->SetRenderState(D3DRS_FOGEND, *(DWORD *)(&g_fFogFar));
+		g_pd3dDevice->SetRenderState(D3DRS_FOGSTART, *(u32 *)(&g_fFogNear));
+		g_pd3dDevice->SetRenderState(D3DRS_FOGEND, *(u32 *)(&g_fFogFar));
 	}
 }
 
@@ -1093,5 +1096,6 @@ bool CheckVideoAdapterSupported()
 
 	return bSupported;
 }
+#endif
 
 _NAMESPACE_REALSPACE2_END

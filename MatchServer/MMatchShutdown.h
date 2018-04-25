@@ -29,7 +29,7 @@ protected:
 
 	unsigned short GetProgressIndex() const	{ return m_nProgressIndex; }
 	auto GetTimeLastProgress() const		{ return m_nTimeLastProgress; }
-	void MMatchShutdown::SetProgress(int nIndex, u64 nClock);
+	void SetProgress(int nIndex, u64 nClock);
 
 public:
 	MMatchShutdown() { m_bShutdown = false; }

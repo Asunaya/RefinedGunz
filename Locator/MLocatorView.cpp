@@ -126,4 +126,4 @@ void MLocatorView::UpdateView()
 		}
 	}
 }
-#endif MFC
+#endif

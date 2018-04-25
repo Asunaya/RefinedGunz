@@ -1,5 +1,6 @@
 #pragma once
 
+#include <climits>
 #include <map>
 #include <vector>
 #include "GlobalTypes.h"
@@ -141,6 +142,12 @@ public:
 template <typename T>
 class MUIDRefCache : public std::map<MUID, T*> {
 public:
+	using Base = std::map<MUID, T*>;
+	using Base::insert;
+	using Base::find;
+	using Base::end;
+	using Base::erase;
+
 	void Insert(const MUID& uid, T* pRef)
 	{
 #ifdef _DEBUG
@@ -149,17 +156,17 @@ public:
 			MLog("MUIDRefCache DUPLICATED Data. \n");
 		}
 #endif
-		insert(value_type(uid, pRef));
+		insert({uid, pRef});
 	}
 	T* GetRef(const MUID& uid)
 	{
-		iterator i = find(uid);
+		auto i = find(uid);
 		if (i == end()) return nullptr;
 		return i->second;
 	}
 	T* Remove(const MUID& uid)
 	{
-		iterator i = find(uid);
+		auto i = find(uid);
 		if (i == end()) return nullptr;
 		auto pRef = i->second;
 		erase(i);

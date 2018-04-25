@@ -67,20 +67,13 @@ const char* MBaseStringResManager::GetErrorStr(int nID)
 	return m_ErrorTable.GetStr(nID);
 }
 
-const char* MBaseStringResManager::GetString(std::string& key)
+const char* MBaseStringResManager::GetString(const std::string& key)
 {
 	return m_StringTable.GetStr(key);
 }
 
 const char* MBaseStringResManager::GetStringFromXml(const char* str)
 {
-	int nHeaderLen = (int)strlen(TOK_XML_STRING_HEADER);
-	int nStrLen = (int)strlen(str);
-
-	if (nStrLen <= nHeaderLen) return str;
-	if (_strnicmp(str, TOK_XML_STRING_HEADER, nHeaderLen)) return str;
-
-	std::string key = &str[nHeaderLen];
-
-	return GetString(key);
+	if (!starts_with(str, TOK_XML_STRING_HEADER)) return str;
+	return GetString(str + strlen(TOK_XML_STRING_HEADER));
 }

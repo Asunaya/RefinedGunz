@@ -30,8 +30,7 @@ void MLadderStatistics::Init()
 
 void MLadderStatistics::Load()
 {
-	FILE* fp = nullptr;
-	fopen_s(&fp, FILENAME_LADDER_STATISTICS, "rb");
+	FILE* fp = fopen(FILENAME_LADDER_STATISTICS, "rb");
 	if (fp == NULL) return;
 	size_t numread;
 
@@ -50,8 +49,7 @@ void MLadderStatistics::Load()
 
 void MLadderStatistics::Save()
 {
-	FILE* fp = nullptr;
-	fopen_s(&fp, FILENAME_LADDER_STATISTICS, "wb");
+	FILE* fp = fopen(FILENAME_LADDER_STATISTICS, "wb");
 	if (fp == NULL) return;
 
 

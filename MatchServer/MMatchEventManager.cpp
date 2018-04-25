@@ -20,7 +20,7 @@ void MMatchEventManager::AddEvent( MMatchEvent* pEvent )
 		ASSERT( m_EventMap.end() == m_EventMap.find(pEvent->GetEventListID()) );
 
 		m_EventVec.push_back( pEvent );
-		m_EventMap.insert( pair<DWORD, MMatchEvent*>(pEvent->GetEventListID(), pEvent) );
+		m_EventMap.insert( pair<u32, MMatchEvent*>(pEvent->GetEventListID(), pEvent) );
 	}
 }
 
@@ -34,7 +34,7 @@ void MMatchEventManager::AddEventList( EventPtrVec& EvnPtrVec )
 		ASSERT( m_EventMap.end() == m_EventMap.find((*it)->GetEventListID()) );
 
 		m_EventVec.push_back( (*it) );
-		m_EventMap.insert( pair<DWORD, MMatchEvent*>((*it)->GetEventListID(), (*it)) );
+		m_EventMap.insert( pair<u32, MMatchEvent*>((*it)->GetEventListID(), (*it)) );
 	}
 }
 
@@ -50,14 +50,14 @@ void MMatchEventManager::ChangeEventList( EventPtrVec& EvnPtrVec )
 	{
 		MMatchEvent* pEvent = (*it);
 		ASSERT( m_EventMap.end() == m_EventMap.find(pEvent->GetEventListID()) );
-		m_EventMap.insert( pair<DWORD, MMatchEvent*>(pEvent->GetEventListID(), pEvent) );
+		m_EventMap.insert( pair<u32, MMatchEvent*>(pEvent->GetEventListID(), pEvent) );
 	}
 }
 
 // 한번에 하나씩 제거됨. 같은게 여러게 있을시는 처음거만 지워짐.
 // 같은걸 전부 지우고 싶을시는 GetEventCount로 카운트를 확인한다음,
 //  필요한 만큼 호출해야 된다.
-void MMatchEventManager::DeleteEvent( const DWORD dwEventID )
+void MMatchEventManager::DeleteEvent( const u32 dwEventID )
 {
 	EventPtrVec::iterator it, end;
 	end = m_EventVec.end();
@@ -108,7 +108,7 @@ void MMatchEventManager::Clear()
 }
 
 
-size_t MMatchEventManager::GetEventCount( const DWORD dwEventID )
+size_t MMatchEventManager::GetEventCount( const u32 dwEventID )
 {
 	size_t cnt = 0;
 	EventPtrVec::iterator it, end;
@@ -133,7 +133,7 @@ void MMatchEventManager::StartNewEvent()
 }
 
 
-void MMatchEventManager::CustomCheckEventObj( const DWORD dwEventID, MMatchObject* pObj, void* pContext )
+void MMatchEventManager::CustomCheckEventObj( const u32 dwEventID, MMatchObject* pObj, void* pContext )
 {
 	EventPtrVec::iterator it, end;
 	end = m_EventVec.end();
@@ -145,7 +145,7 @@ void MMatchEventManager::CustomCheckEventObj( const DWORD dwEventID, MMatchObjec
 }
 
 
-void MMatchEventManager::CustomCheckEventObj( const DWORD dwEventListID, const DWORD dwEventID, MMatchObject* pObj, void* pContext )
+void MMatchEventManager::CustomCheckEventObj( const u32 dwEventListID, const u32 dwEventID, MMatchObject* pObj, void* pContext )
 {
 	EventPtrMap::iterator it = m_EventMap.find( dwEventListID );
 	ASSERT( (m_EventMap.end() != it) && (dwEventID == it->second->GetEventID()) );

@@ -83,7 +83,7 @@ public:
 	}
 	bool Translate(char* poutStr, int maxlen, const _T& code, const int argnum, const char* arg1, va_list args )
 	{
-		typename map<_T, string>::iterator itor = m_StringMap.find(code);
+		auto itor = m_StringMap.find(code);
 		if(itor==m_StringMap.end())
 		{
 			_ASSERT(0);
@@ -109,7 +109,7 @@ public:
 
 		int taridx = 0;
 		poutStr[taridx] = 0;
-		string formatstring = (*itor).second;
+		std::string formatstring = (*itor).second;
 		
 		for(size_t j=0;j<formatstring.size();j++)
 		{
@@ -132,7 +132,7 @@ public:
 					}
 					else
 					{
-						_ASSERT(0);	
+						assert(0);	
 					}
 				}
 
@@ -159,8 +159,7 @@ public:
 	{
 		typename std::map<_T, std::string>::iterator it = m_StringMap.find( code );
 		if( m_StringMap.end() == it ){
-			static char *szBlahBlah = "nomsg";
-			return szBlahBlah;
+			return "nomsg";
 		}
 		
 		return it->second.c_str();

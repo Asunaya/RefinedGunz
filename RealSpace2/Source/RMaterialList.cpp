@@ -34,12 +34,12 @@ bool RMaterialList::Open(rapidxml::xml_node<>& parent)
 			auto* szTagName = prop_node->name();
 			if (!szTagName)
 				continue;
-			auto* szContents = prop_node->value();
+			const char* szContents = prop_node->value();
 			if (!szContents)
 				szContents = "";
 
 			auto ReadVector = [&](auto& v) {
-				sscanf_s(szContents, "%f %f %f", &v.x, &v.y, &v.z);
+				sscanf(szContents, "%f %f %f", &v.x, &v.y, &v.z);
 			};
 
 			if (_stricmp(szTagName, RTOK_AMBIENT) == 0)

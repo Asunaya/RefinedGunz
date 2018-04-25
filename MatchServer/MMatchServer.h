@@ -153,7 +153,7 @@ public:
 	void RouteToAllConnection(MCommand* pCommand);
 	void RouteToAllClient(MCommand* pCommand);
 	template <typename T>
-	void RouteToAllClientIf(MCommand* pCommand, T& pred)
+	void RouteToAllClientIf(MCommand* pCommand, T&& pred)
 	{
 		for (MMatchObjectList::iterator i = m_Objects.begin(); i != m_Objects.end(); i++) {
 			MMatchObject* pObj = (MMatchObject*)((*i).second);
@@ -195,9 +195,9 @@ public:
 	void ResponseGameInfo(const MUID& uidChar, const MUID& uidStage);
 
 	// Announce
-	void Announce(const MUID& CommUID, char* pszMsg);
-	void Announce(MObject* pObj, char* pszMsg);
-	void AnnounceF(const MUID& CommUID, char* pszMsg, ...)
+	void Announce(const MUID& CommUID, const char* pszMsg);
+	void Announce(MObject* pObj, const char* pszMsg);
+	void AnnounceF(const MUID& CommUID, const char* pszMsg, ...)
 	{
 		char buf[512];
 
@@ -725,7 +725,7 @@ inline const char* MErrStr(const int nID)
 	return MGetStringResManager()->GetErrorStr(nID);
 }
 
-bool IsExpiredBlockEndTime(const SYSTEMTIME& st);
+bool IsExpiredBlockEndTime(const tm& st);
 
 void _CheckValidPointer(void* pPointer1, void* pPointer2, void* pPointer3, int nState, int nValue);
 #define CheckValidPointer(A, B)		_CheckValidPointer(m_pMessengerManager, m_pScheduler, m_pAuthBuilder, A, B);CheckMemoryTest(A, B);

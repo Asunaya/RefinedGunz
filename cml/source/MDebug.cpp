@@ -59,7 +59,11 @@ void DMLog(const char* Format, ...)
 	fprintf(pFile, "%s", temp);
 	fclose(pFile);*/
 
+#ifdef _WIN32
 	OutputDebugString(temp);
+#else
+	MLog(temp);
+#endif
 }
 #endif
 
@@ -93,7 +97,9 @@ void MLog(const char *pFormat,...)
 	}
 	if (g_nLogMethod & MLOGSTYLE_DEBUGSTRING)
 	{
+#ifdef _WIN32
 		OutputDebugString(temp);
+#endif
 	}
 
 	CustomLog(temp);

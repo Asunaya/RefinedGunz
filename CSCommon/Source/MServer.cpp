@@ -3,7 +3,6 @@
 #include "MSharedCommandTable.h"
 #include "MCommandBuilder.h"
 #include <stdarg.h>
-#include <windowsx.h>
 #include "MErrorTable.h"
 #include "MCRC32.h"
 #include "MMatchUtil.h"
@@ -12,7 +11,7 @@
 static int g_LogCommObjectCreated = 0;
 static int g_LogCommObjectDestroyed = 0;
 
-void __cdecl RCPLog(const char *pFormat,...)
+extern "C" void RCPLog(const char *pFormat,...)
 {
 	char szBuf[256];
 
@@ -24,7 +23,7 @@ void __cdecl RCPLog(const char *pFormat,...)
 
 	int nEnd = (int)(strlen(szBuf)-1);
 	if ((nEnd >= 0) && (szBuf[nEnd] == '\n')) {
-		szBuf[nEnd] = NULL;
+		szBuf[nEnd] = 0;
 		strcat_safe(szBuf, "\n");
 	}
 	DMLog(szBuf);
@@ -49,13 +48,11 @@ bool MServer::Create(int nPort, const bool bReuse)
 		mlog( "MServer::Create - MCommandCommunicator::Create()==false\n" );
 		bResult = false;
 	}
-	if(m_RealCPNet.Create(nPort, bReuse)==false) 
+	if(Net.Create(nPort, {RCPCallback, this}, bReuse)==false) 
 	{
-		mlog( "MServer::Create - m_RealCPNet.Create(%u)==false", nPort );
+		mlog( "MServer::Create - Net.Create(%u)==false", nPort );
 		bResult = false;
 	}
-
-	m_RealCPNet.SetCallback(MServer::RCPCallback, this);
 
 	return bResult;
 }
@@ -66,7 +63,7 @@ void MServer::Destroy(void)
 	RCPLog("MServer::Destroy() CommObjectCreated=%d, CommObjectDestroyed=%d \n", 
 		g_LogCommObjectCreated, g_LogCommObjectDestroyed);
 
-	m_RealCPNet.Destroy();
+	Net.Destroy();
 
 	LockCommList();
 		for(auto i=m_CommRefCache.begin(); i!=m_CommRefCache.end(); i++){
@@ -125,7 +122,7 @@ void MServer::SendCommand(MCommand* pCommand)
 {
 	_ASSERT(pCommand->GetReceiverUID().High || pCommand->GetReceiverUID().Low);
 
-	u32 nClientKey = NULL;
+	uintptr_t nClientKey = 0;
 	bool bGetComm = false;
 
 	MPacketCrypterKey CrypterKey;
@@ -255,17 +252,12 @@ void MServer::OnNetPong(const MUID& CommUID, unsigned int nTimeStamp)
 
 int MServer::Connect(MCommObject* pCommObj)
 {
-	u32 nKey = 0;
-	if (m_RealCPNet.Connect((SOCKET*)&nKey, pCommObj->GetIPString(), pCommObj->GetPort()) == false) {
-		delete pCommObj;
-		return MERR_UNKNOWN;
-	}
+	auto Handle = Net.Connect(pCommObj->GetIP(), pCommObj->GetPort(), pCommObj);
 
 	// UID Caching
 	LockCommList();
 		AddCommObject(pCommObj->GetUID(), pCommObj);
-		pCommObj->SetUserContext(nKey);
-		m_RealCPNet.SetUserContext(nKey, pCommObj);	
+		pCommObj->SetUserContext(Handle);
 	UnlockCommList();
 
 	return MOK;
@@ -331,7 +323,7 @@ void MServer::OnLocalLogin(MUID CommUID, MUID PlayerUID)
 
 void MServer::Disconnect(MUID uid)
 {
-	u32 nClientKey = NULL;
+	uintptr_t nClientKey = 0;
 	bool bGetComm = false;
 
 	LockCommList();
@@ -346,7 +338,7 @@ void MServer::Disconnect(MUID uid)
 		return;
 
 	OnDisconnect(uid);
-	m_RealCPNet.Disconnect(nClientKey);
+	Net.Disconnect(nClientKey);
 }
 
 int MServer::OnDisconnect(const MUID& uid)
@@ -360,7 +352,7 @@ int MServer::OnDisconnect(const MUID& uid)
 
 bool MServer::SendMsgReplyConnect(MUID* pHostUID, MUID* pAllocUID, unsigned int nTimeStamp, MCommObject* pCommObj)
 {
-	u32 nKey = pCommObj->GetUserContext();
+	auto nKey = pCommObj->GetUserContext();
 	
 	MReplyConnectMsg* pMsg = (MReplyConnectMsg*)malloc(sizeof(MReplyConnectMsg));
 	pMsg->nMsg = MSGID_REPLYCONNECT; 
@@ -371,10 +363,10 @@ bool MServer::SendMsgReplyConnect(MUID* pHostUID, MUID* pAllocUID, unsigned int 
 	pMsg->nAllocLow = pAllocUID->Low;
 	pMsg->nTimeStamp = nTimeStamp;
 
-	return m_RealCPNet.Send(nKey, pMsg, pMsg->nSize);
+	return Net.Send(nKey, pMsg, pMsg->nSize);
 }
 
-bool MServer::SendMsgCommand(u32 nClientKey, char* pBuf, int nSize, unsigned short nMsgHeaderID, MPacketCrypterKey* pCrypterKey)
+bool MServer::SendMsgCommand(uintptr_t nClientKey, char* pBuf, int nSize, unsigned short nMsgHeaderID, MPacketCrypterKey* pCrypterKey)
 {
 	int nBlockSize = nSize+sizeof(MPacketHeader);
 	MCommandMsg* pMsg = (MCommandMsg*)malloc(nBlockSize);
@@ -410,43 +402,44 @@ bool MServer::SendMsgCommand(u32 nClientKey, char* pBuf, int nSize, unsigned sho
 
 	pMsg->nCheckSum = MBuildCheckSum(pMsg, nPacketSize);
 
-	return m_RealCPNet.Send(nClientKey, pMsg, nPacketSize);
+	return Net.Send(nClientKey, pMsg, nPacketSize);
 }
 
-void MServer::RCPCallback(void* pCallbackContext, RCP_IO_OPERATION nIO, u32 nKey, MPacketHeader* pPacket, u32 dwPacketLen)
+void MServer::RCPCallback(void* pCallbackContext, NetIO::IOOperation Op, NetIO::ConnectionHandle Handle,
+	const void* Data)
 {
 	MServer* pServer = (MServer*)pCallbackContext;
 
-	if (nIO == RCP_IO_ACCEPT) {
-		//pServer->DebugLog("MServer::RCPCallback(RCP_IO_ACCEPT) \n");
-
-		char szIP[64] = "";
-		int nPort = 0;
-
-		pServer->m_RealCPNet.GetAddress(nKey, szIP, &nPort);
-
+	switch (Op)
+	{
+	case NetIO::IOOperation::Accept:
+	{
+		auto AData = static_cast<const NetIO::AcceptData*>(Data);
 		MCommObject* pCommObj = new MCommObject(pServer);
-		pCommObj->SetAddress(szIP, nPort);
-		pCommObj->SetUserContext(nKey);
+		MSocket::in_addr addr;
+		addr.s_addr = AData->Address;
+		char IPString[64];
+		GetIPv4String(addr, IPString);
+		pCommObj->SetAddress(IPString, AData->Port);
+		pCommObj->SetUserContext(Handle);
 
 		pServer->OnAccept(pCommObj);
 			
-		pServer->m_RealCPNet.SetUserContext(nKey, pCommObj);
+		pServer->Net.SetContext(Handle, pCommObj);
 	}
-	else if (nIO == RCP_IO_CONNECT) {
-		//pServer->DebugLog("MServer::RCPCallback(RCP_IO_CONNECT) \n");
-	}
-	else if (nIO == RCP_IO_DISCONNECT) {
-		//pServer->DebugLog("MServer::RCPCallback(RCP_IO_DISCONNECT) \n");
-
-		MCommObject* pCommObj = (MCommObject*)pServer->m_RealCPNet.GetUserContext(nKey);
-		if (pCommObj)
+		break;
+	case NetIO::IOOperation::Disconnect:
+	{
+		if (auto pCommObj = static_cast<MCommObject*>(pServer->Net.GetContext(Handle)))
 			pServer->OnDisconnect(pCommObj->GetUID());
 	}
-	else if (nIO == RCP_IO_READ) {
-		//pServer->DebugLog("MServer::RCPCallback(RCP_IO_READ) \n");
-
-		MCommObject* pCommObj = (MCommObject*)pServer->m_RealCPNet.GetUserContext(nKey);
+		break;
+	case NetIO::IOOperation::Read:
+	{
+		auto RData = static_cast<const NetIO::ReadData*>(Data);
+		auto pPacket = RData->Data.data();
+		auto dwPacketLen = RData->Data.size();
+		auto pCommObj = static_cast<MCommObject*>(pServer->Net.GetContext(Handle));
 		if ((pCommObj) && (pCommObj->IsAllowed()))
 		{
 			// New Cmd Buffer ////////////////
@@ -458,7 +451,7 @@ void MServer::RCPCallback(void* pCallbackContext, RCP_IO_OPERATION nIO, u32 nKey
 				{
 					// 패킷이 제대로 안오면 끊어버린다.
 					pCommObj->SetAllowed(false);
-					pServer->m_RealCPNet.Disconnect(pCommObj->GetUserContext());
+					pServer->Net.Disconnect(pCommObj->GetUserContext());
 					return;
 				}
 
@@ -486,13 +479,10 @@ void MServer::RCPCallback(void* pCallbackContext, RCP_IO_OPERATION nIO, u32 nKey
 					}
 				}
 			}
-
 		}
 	}
-	else if (nIO == RCP_IO_WRITE) {
-		//pServer->DebugLog("MServer::RCPCallback(RCP_IO_WRITE) \n");
+		break;
 	}
-
 }
 
 void MServer::LogF(unsigned int Level, const char* Format, ...)

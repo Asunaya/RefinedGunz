@@ -19,6 +19,8 @@ struct MMatchObjCacheCostume
 
 class MMatchObjCache {
 protected:
+	// For backwards compatibility, since this type used to have a virtual destructor.
+	u32 dummy_vtable_standin;
 	MUID					m_uidObject;
 	char					m_szName[32];
 	char					m_szClanName[CLAN_NAME_LENGTH];
@@ -32,14 +34,14 @@ protected:
 	
 public:
 	MMatchObjCache()				{ 
-		m_szName[0] = NULL;
+		m_szName[0] = 0;
 		m_nLevel = 0;
 		m_nUGrade = MMUG_FREE;
 		m_nPGrade = MMPG_FREE;
 		memset(&m_Costume, 0, sizeof(MMatchObjCacheCostume));
 		ResetFlag();
 	}
-	virtual ~MMatchObjCache()		{}
+	~MMatchObjCache()		{}
 
 	MUID GetUID()					{ return m_uidObject; }
 

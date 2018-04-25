@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include <tuple>
 #include "MMatchServer.h"
 #include "MSharedCommandTable.h"
 #include "MErrorTable.h"
@@ -28,7 +29,6 @@
 #include "MMatchUtil.h"
 #include "MLadderStatistics.h"
 #include "MMatchSchedule.h"
-#include <winbase.h>
 #include "MMatchGameType.h"
 #include "MQuestFormula.h"
 #include "MQuestItem.h"
@@ -79,10 +79,10 @@ static void RcpLog(const char *pFormat,...)
 
 	int nEnd = (int)strlen(szBuf)-1;
 	if ((nEnd >= 0) && (szBuf[nEnd] == '\n')) {
-		szBuf[nEnd] = NULL;
-		strcat_s(szBuf, "\n");
+		szBuf[nEnd] = 0;
+		strcat_safe(szBuf, "\n");
 	}
-	OutputDebugString(szBuf);
+	DMLog(szBuf);
 }
 
 class MPointerChecker
@@ -232,36 +232,10 @@ void CopyCharInfoDetailForTrans(MTD_CharInfo_Detail* pDest, MMatchCharInfo* pSrc
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool IsExpiredBlockEndTime( const SYSTEMTIME& st )
+bool IsExpiredBlockEndTime( const tm& st )
 {
-	SYSTEMTIME stLocal;
-	GetLocalTime( &stLocal );
-
-
-	if( st.wYear < stLocal.wYear )
-		return true;
-	else if( st.wYear > stLocal.wYear )
-		return false;
-
-	if( st.wMonth < stLocal.wMonth )
-		return true;
-	else if( st.wMonth > stLocal.wMonth )
-		return false;
-
-	if( st.wDay < stLocal.wDay )
-		return true;
-	else if( st.wDay > stLocal.wDay )
-		return false;
-
-	if( st.wHour < stLocal.wHour )
-		return true;
-	else if( st.wHour > stLocal.wHour )
-		return false;
-
-	if( st.wMinute < stLocal.wMinute )
-		return true;
-
-	return true;
+	auto tie_tm = [](const tm& t) { return std::tie(t.tm_year, t.tm_mon, t.tm_yday, t.tm_hour); };
+	return tie_tm(st) <= tie_tm(*localtime(&unmove(time(0))));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -308,8 +282,8 @@ bool MMatchServer::LoadInitFile()
 		{
 			if (MGetServerConfig()->IsEnableMap(MMATCH_MAP(i)))
 			{
-				strcat_s(szText, g_MapDesc[i].szMapName);
-				strcat_s(szText, ", ");
+				strcat_safe(szText, g_MapDesc[i].szMapName);
+				strcat_safe(szText, ", ");
 			}
 		}
 		LOG(LOG_ALL, szText);
@@ -499,11 +473,11 @@ bool MMatchServer::Create(int nPort)
 	m_NextUseUID.SetZero();
 	m_NextUseUID.Increase(10);
 
-	SetupRCPLog(RcpLog);
+	Net.SetLogCallback(RcpLog);
 #ifdef _DEBUG
-	m_RealCPNet.SetLogLevel(1);
+	Net.SetLogLevel(1);
 #else
-	m_RealCPNet.SetLogLevel(0);
+	Net.SetLogLevel(0);
 #endif
 
 	if (m_SafeUDP.Create(true, MATCHSERVER_DEFAULT_UDP_PORT)==false) {
@@ -1082,7 +1056,7 @@ static int GetBlobCmdID(const char* Data)
 
 void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Receiver, const char * Blob, size_t BlobSize)
 {
-	auto SenderObj = GetObjectA(Sender);
+	auto SenderObj = GetObject(Sender);
 	if (!SenderObj)
 		return;
 
@@ -1096,7 +1070,7 @@ void MMatchServer::OnTunnelledP2PCommand(const MUID & Sender, const MUID & Recei
 
 	if (Netcode == NetcodeType::ServerBased)
 	{
-		auto TrySuicide = [&](auto Z, auto&& Sender)
+		auto TrySuicide = [&](float Z, MUID Sender)
 		{
 			constexpr auto DIE_CRITICAL_LINE = -2500.f;
 			if (Z <= DIE_CRITICAL_LINE)
@@ -1214,7 +1188,7 @@ void MMatchServer::OnPeerShot(MMatchObject& SenderObj, MMatchStage& Stage, const
 	v3 src = v3(psi.posx, psi.posy, psi.posz);
 	v3 dest = v3(psi.tox, psi.toy, psi.toz);
 	v3 orig_dir = dest - src;
-	Normalize(orig_dir);
+	RealSpace2::Normalize(orig_dir);
 
 	//AnnounceF(Sender, "Shot! %f, %f, %f -> %f, %f, %f", src.x, src.y, src.z, dest.x, dest.y, dest.z);
 
@@ -1272,7 +1246,7 @@ void MMatchServer::OnPeerShot(MMatchObject& SenderObj, MMatchStage& Stage, const
 
 			if (!pickinfo.pObject)
 			{
-				if (SenderObj.ClientSettings.DebugOutput)
+				if (SenderObj.clientSettings.DebugOutput)
 					AnnounceF(SenderUID, "Server: No wall, no object");
 				continue;
 			}
@@ -1298,7 +1272,7 @@ void MMatchServer::OnPeerShot(MMatchObject& SenderObj, MMatchStage& Stage, const
 				item.second.Damage, item.second.PiercingRatio,
 				item.second.DamageType, item.second.WeaponType);
 
-			if (SenderObj.ClientSettings.DebugOutput)
+			if (SenderObj.clientSettings.DebugOutput)
 			{
 				AnnounceF(SenderUID, "Server: Hit %s for %d damage",
 					item.first->GetName(), item.second.Damage);
@@ -1325,7 +1299,7 @@ void MMatchServer::OnPeerShot(MMatchObject& SenderObj, MMatchStage& Stage, const
 
 		if (!pickinfo.pObject)
 		{
-			if (SenderObj.ClientSettings.DebugOutput)
+			if (SenderObj.clientSettings.DebugOutput)
 				AnnounceF(SenderUID, "Server: No wall, no object");
 			return;
 		}
@@ -1334,7 +1308,7 @@ void MMatchServer::OnPeerShot(MMatchObject& SenderObj, MMatchStage& Stage, const
 		auto DamageType = (pickinfo.info.parts == eq_parts_head) ? ZD_BULLET_HEADSHOT : ZD_BULLET;
 		auto WeaponType = ItemDesc->m_nWeaponType;
 
-		if (SenderObj.ClientSettings.DebugOutput)
+		if (SenderObj.clientSettings.DebugOutput)
 		{
 			AnnounceF(SenderUID, "Server: Hit %s for %d damage", pickinfo.pObject->GetName(), Damage);
 			v3 Head, Origin;
@@ -1350,7 +1324,7 @@ void MMatchServer::OnPeerShot(MMatchObject& SenderObj, MMatchStage& Stage, const
 
 struct stRouteListenerNode
 {
-	u32				nUserContext;
+	uintptr_t			nUserContext;
 	MPacketCrypterKey	CryptKey;
 };
 
@@ -1750,7 +1724,7 @@ void MMatchServer::SetClientClockSynchronize(const MUID& CommUID)
 	Post(pNew);
 }
 
-void MMatchServer::Announce(const MUID& CommUID, char* pszMsg)
+void MMatchServer::Announce(const MUID& CommUID, const char* pszMsg)
 {
 	MCommand* pCmd = CreateCommand(MC_MATCH_ANNOUNCE, CommUID);
 	pCmd->AddParameter(new MCmdParamUInt(0));
@@ -1758,7 +1732,7 @@ void MMatchServer::Announce(const MUID& CommUID, char* pszMsg)
 	Post(pCmd);
 }
 
-void MMatchServer::Announce(MObject* pObj, char* pszMsg)
+void MMatchServer::Announce(MObject* pObj, const char* pszMsg)
 {
 	MCommand* pCmd = CreateCommand(MC_MATCH_ANNOUNCE, MUID(0,0));
 	pCmd->AddParameter(new MCmdParamUInt(0));
@@ -1969,7 +1943,7 @@ void MMatchServer::ResponsePeerList(const MUID& uidChar, const MUID& uidStage)
 
 		CopyCharInfoForTrans(&pNode->CharInfo, pObj->GetCharInfo(), pObj);
 
-		ZeroMemory(&pNode->ExtendInfo, sizeof(MTD_ExtendInfo));
+		memset(&pNode->ExtendInfo, 0, sizeof(MTD_ExtendInfo));
 		if (pStage->GetStageSetting()->IsTeamPlay())
 			pNode->ExtendInfo.nTeam = (char)pObj->GetTeam();
 		else
@@ -2592,8 +2566,7 @@ bool MMatchServer::CheckItemXML()
 
 	xmlIniData.Destroy();
 
-	FILE* fp = nullptr;
-	fopen_s(&fp, "item.sql", "wt");
+	FILE* fp = fopen("item.sql", "wt");
 	if (!fp)
 	{
 		MLog("Failed to open item.sql\n");
@@ -2683,7 +2656,7 @@ bool MMatchServer::CheckItemXML()
 		fprintf(fp, "Description='%s' \n", pItemDesc->m_szDesc);
 
 		// 이거 절대로 지우지 마세요. DB작업할때 대형 사고 날수 있습니다. - by SungE.
-		fprintf(fp, "WHERE ItemID = %u\n", pItemDesc->m_nID );
+		fprintf(fp, "WHERE ItemID = %lu\n", pItemDesc->m_nID );
 
 		/*
 		fprintf(fp, "UPDATE Item SET Slot = %d WHERE ItemID = %u AND Slot IS NULL\n", nSlot, pItemDesc->m_nID );
@@ -2786,8 +2759,7 @@ bool MMatchServer::CheckUpdateItemXML()
 	map< string, ix >::iterator it, end;
 	it = imName.begin();
 	end = imName.end();
-	FILE* fpName;
-	fopen_s(&fpName, "name.sql", "w");
+	FILE* fpName = fopen("name.sql", "w");
 	for( ; it != end; ++it )
 	{
 		char szID[ 128 ];
@@ -2804,8 +2776,7 @@ bool MMatchServer::CheckUpdateItemXML()
 
 	it = imDesc.begin();
 	end = imDesc.end();
-	FILE* fpDesc = nullptr;
-	fopen_s(&fpDesc, "desc.sql", "w");
+	FILE* fpDesc = fopen("desc.sql", "w");
 	if (!fpDesc)
 	{
 		MLog("Failed to open desc.spl\n");

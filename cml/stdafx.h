@@ -25,15 +25,6 @@ using DWORD_PTR = std::conditional_t<sizeof(void*) == 4, DWORD, QWORD>;
 
 #ifndef _MSC_VER
 #define _FILE_OFFSET_BITS 64
-#ifndef __cpp_lib_nonmember_container_access
-#include <cstddef>
-namespace std {
-template <typename T, std::size_t N>
-constexpr std::size_t size(T (&)[N]) { return N; }
-template <typename T>
-constexpr auto size(T&& x) -> decltype(x.size()) { return x.size(); }
-}
-#endif
 #endif
 
 #include <stdio.h>

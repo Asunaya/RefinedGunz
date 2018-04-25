@@ -438,7 +438,7 @@ MCommandParameterBlob::MCommandParameterBlob(const void* Value, int nSize)
 MCommandParameterBlob::~MCommandParameterBlob(void)
 {
 	if(m_Value!=NULL){
-		delete[] m_Value;
+		delete[] (char*)m_Value;
 		m_Value = NULL;
 	}
 }
@@ -463,7 +463,7 @@ int MCommandParameterBlob::GetData(char* pData, int nSize)
 }
 int MCommandParameterBlob::SetData(const char* pData)
 {
-	if(m_Value!=NULL) delete[] m_Value;
+	if(m_Value!=NULL) delete[] (char*)m_Value;
 
 	memcpy(&m_nSize, pData, sizeof(m_nSize));
 	if (m_nSize > MAX_BLOB_SIZE)
@@ -630,7 +630,7 @@ MCommandParameterInt64::MCommandParameterInt64(void)
 {
 	m_Value = 0;
 }
-MCommandParameterInt64::MCommandParameterInt64(int64 Value)
+MCommandParameterInt64::MCommandParameterInt64(int64_t Value)
  : MCommandParameter(MPT_INT64)
 {
 	m_Value = Value;
@@ -643,7 +643,7 @@ MCommandParameter* MCommandParameterInt64::Clone(void)
 
 void MCommandParameterInt64::GetValue(void* p)
 {
-	*(int64*)p = m_Value;
+	*(int64_t*)p = m_Value;
 }
 int MCommandParameterInt64::GetData(char* pData, int nSize)
 {
@@ -665,7 +665,7 @@ MCommandParameterUInt64::MCommandParameterUInt64(void)
 {
 	m_Value = 0;
 }
-MCommandParameterUInt64::MCommandParameterUInt64(uint64 Value)
+MCommandParameterUInt64::MCommandParameterUInt64(uint64_t Value)
  : MCommandParameter(MPT_UINT64)
 {
 	m_Value = Value;
@@ -678,7 +678,7 @@ MCommandParameter* MCommandParameterUInt64::Clone(void)
 
 void MCommandParameterUInt64::GetValue(void* p)
 {
-	*(uint64*)p = m_Value;
+	*(uint64_t*)p = m_Value;
 }
 int MCommandParameterUInt64::GetData(char* pData, int nSize)
 {

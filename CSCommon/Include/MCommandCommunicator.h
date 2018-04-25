@@ -25,7 +25,7 @@ protected:
 	MPacketCrypter			m_PacketCrypter;
 
 	MCommandCommunicator*	m_pDirectConnection;
-	u32						m_dwUserContext;
+	uintptr_t				m_dwUserContext;
 
 	char					m_szIP[128];
 	int						m_nPort;
@@ -44,8 +44,8 @@ public:
 
 	MCommandCommunicator* GetDirectConnection()			{ return m_pDirectConnection; }
 	void SetDirectConnection(MCommandCommunicator* pDC)	{ m_pDirectConnection = pDC; }
-	u32 GetUserContext() const							{ return m_dwUserContext; }
-	void SetUserContext(u32 dwContext)					{ m_dwUserContext = dwContext; }
+	uintptr_t GetUserContext() const					{ return m_dwUserContext; }
+	void SetUserContext(uintptr_t dwContext)			{ m_dwUserContext = dwContext; }
 
 	auto* GetIPString() const { return m_szIP; }
 	u32 GetIP() const		{ return m_dwIP; }

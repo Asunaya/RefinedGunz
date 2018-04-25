@@ -14,7 +14,6 @@
 #include "MAsyncDBJob_InsertConnLog.h"
 #include "RTypes.h"
 #include "MMatchUtil.h"
-#include <winbase.h>
 #include "MMatchPremiumIPCache.h"
 #include "MCommandBuilder.h"
 #include "MMatchStatus.h"
@@ -215,7 +214,7 @@ void MMatchServer::OnMatchLoginFromDBAgent(const MUID& CommUID, const char* szLo
 
 	bool bCheckPremiumIP = MGetServerConfig()->CheckPremiumIP();
 	const char* szIP = pCommObj->GetIPString();
-	DWORD dwIP = pCommObj->GetIP();
+	u32 dwIP = pCommObj->GetIP();
 
 	// Async DB
 	MAsyncDBJob_GetLoginInfo* pNewJob = new MAsyncDBJob_GetLoginInfo(CommUID);
@@ -280,7 +279,7 @@ MCommand* MMatchServer::CreateCmdMatchResponseLoginFailed(const MUID& uidComm, c
 	unsigned char tmp = 0;
 	void* pBlob = MMakeBlobArray(sizeof(unsigned char), sizeof(unsigned char));
 	unsigned char* pCmdBlock = (unsigned char*)MGetBlobArrayElement(pBlob, 0);
-	CopyMemory(pCmdBlock, &tmp, sizeof(unsigned char));
+	memcpy(pCmdBlock, &tmp, sizeof(unsigned char));
 
 	pCmd->AddParameter(new MCommandParameterBlob(pBlob, MGetBlobArraySize(pBlob)));
 	MEraseBlobArray(pBlob);

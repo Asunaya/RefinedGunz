@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "RNavigationMesh.h"
 #include "RNavigationNode.h"
-#include <crtdbg.h>
 #include "MZFileSystem.h"
 #include "RVersions.h"
 #include "RMath.h"
@@ -170,6 +169,7 @@ RNavigationNode* RNavigationMesh::FindClosestNode(const rvector& point) const
 
 }
 
+#ifdef _WIN32
 void DrawNavFace(LPDIRECT3DDEVICE9 pd3dDevice, rvector* vertices, int v1, int v2, int v3)
 {
 	rvector v[3];
@@ -302,6 +302,7 @@ void RNavigationMesh::RenderLinks()
 	}
 
 }
+#endif
 
 rvector RNavigationMesh::SnapPointToNode(RNavigationNode* pNode, const rvector& Point)
 {
@@ -486,9 +487,8 @@ bool RNavigationMesh::Save(const char* szFileName)
 {
 	if (m_nVertCount <= 0) return false;
 
-	FILE* file{};
-	auto ret = fopen_s(&file, szFileName, "wb");
-	if (ret != 0 || !file) return false;
+	FILE* file = fopen(szFileName, "wb");
+	if (!file) return false;
 
 	// header -------------
 	RHEADER header{ R_NAV_ID, R_NAV_VERSION };

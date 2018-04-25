@@ -10,7 +10,7 @@ protected:
 	unsigned long	m_nChecksumPack;
 	bool			m_bCheckPremiumIP;
 	char			m_szIP[128];
-	DWORD			m_dwIP;
+	u32			m_dwIP;
 protected:	// Input Argument
 	char	m_szUserID[256];
 	char	m_szUniqueID[1024];
@@ -50,7 +50,7 @@ public:
 			   unsigned long nChecksumPack,
 			   const bool bCheckPremiumIP,
 			   const char* szIP,
-			   DWORD dwIP,
+			   u32 dwIP,
 			   const string& strCountryCode3);
 	virtual void Run(void* pContext);
 

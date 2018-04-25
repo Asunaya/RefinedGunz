@@ -22,8 +22,7 @@ bool GetLocalIP(char (&szOutIP)[size])
 	return true;
 }
 
-template <size_t size>
-void GetIPv4String(MSocket::in_addr addr, char(&ip_string)[size])
+inline void GetIPv4String(MSocket::in_addr addr, ArrayView<char> ip_string)
 {
 	sprintf_safe(ip_string, "%d.%d.%d.%d",
 		addr.S_un.S_un_b.s_b1,
@@ -37,6 +36,14 @@ inline std::string GetIPv4String(MSocket::in_addr addr)
 	char buf[32];
 	GetIPv4String(addr, buf);
 	return buf;
+}
+
+template <typename... Args>
+auto GetIPv4String(u32 addr, Args&... args)
+{
+	MSocket::in_addr addr2;
+	addr2.s_addr = addr;
+	return GetIPv4String(addr2, args...);
 }
 
 inline u32 GetIPv4Number(const char* addr)

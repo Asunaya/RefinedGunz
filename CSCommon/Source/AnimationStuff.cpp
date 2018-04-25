@@ -430,9 +430,9 @@ static rmatrix LogNodeHierarchyMatrix(RAnimation* LowerAni, RAnimation* UpperAni
 {
 	ASSERT(LowerFrame >= 0);
 	ASSERT(UpperFrame >= 0);
-	matrix last_mat;
-	matrix last_mat_inv;
-	matrix mat;
+	rmatrix last_mat;
+	rmatrix last_mat_inv;
+	rmatrix mat;
 	rmatrix* last_mat_inv_ptr = nullptr;
 	for (auto Parts : Hierarchy)
 	{
@@ -461,7 +461,7 @@ static rmatrix LogNodeHierarchyMatrix(RAnimation* LowerAni, RAnimation* UpperAni
 
 		auto& cur = *Ani->m_pAniData->GetNode(nodeinfo.Name);
 
-		GetIdentityMatrix(&mat);
+		GetIdentityMatrix(mat);
 
 		if (Parts == eq_parts_pos_info_Spine1 && UpperAni)
 		{

@@ -21,8 +21,8 @@ public:
 	void SetSize(int nSize) { m_nSize = nSize; }
 	void SetData(std::unique_ptr<u32[]> pData) { m_pData = std::move(pData); }
 
-	bool Add(const u32 * data, int nSize, POINT * retpoint);
-	bool GetFreeRect(int nLevel, POINT *pt);
+	bool Add(const u32 * data, int nSize, FreeBlock * retpoint);
+	bool GetFreeRect(int nLevel, FreeBlock *pt);
 
 	void Save(const char *filename);
 
@@ -39,7 +39,7 @@ struct RLIGHTMAPTEXTURE {
 	int nSize;
 	std::unique_ptr<u32> data;
 	bool bLoaded;
-	POINT position;
+	FreeBlock position;
 	int	nLightmapIndex;
 };
 
@@ -64,19 +64,19 @@ float RBspLightmapManager::CalcUnused()
 	return fUnused;
 }
 
-bool RBspLightmapManager::GetFreeRect(int nLevel, POINT *pt)
+bool RBspLightmapManager::GetFreeRect(int nLevel, FreeBlock *pt)
 {
 	if (nLevel > MAX_LEVEL_COUNT) return false;
 
 	if (m_pFreeList[nLevel].empty())
 	{
-		POINT point;
+		FreeBlock point;
 		if (!GetFreeRect(nLevel + 1, &point))
 			return false;
 
 		int nSize = 1 << nLevel;
 
-		POINT newpoint;
+		FreeBlock newpoint;
 
 		newpoint.x = point.x + nSize; newpoint.y = point.y;
 		m_pFreeList[nLevel].push_back(newpoint);
@@ -98,7 +98,7 @@ bool RBspLightmapManager::GetFreeRect(int nLevel, POINT *pt)
 	return true;
 }
 
-bool RBspLightmapManager::Add(const u32 *data, int nSize, POINT *retpoint)
+bool RBspLightmapManager::Add(const u32 *data, int nSize, FreeBlock *retpoint)
 {
 	int nLevel = 0, nTemp = 1;
 	while (nSize > nTemp)
@@ -108,7 +108,7 @@ bool RBspLightmapManager::Add(const u32 *data, int nSize, POINT *retpoint)
 	}
 	_ASSERT(nSize == nTemp);
 
-	POINT pt;
+	FreeBlock pt;
 	if (!GetFreeRect(nLevel, &pt))
 		return false;
 
@@ -125,7 +125,9 @@ bool RBspLightmapManager::Add(const u32 *data, int nSize, POINT *retpoint)
 
 void RBspLightmapManager::Save(const char *filename)
 {
+#ifdef _WIN32
 	RSaveAsBmp(GetSize(), GetSize(), m_pData.get(), filename);
+#endif
 }
 
 static v3 InterpolatedVector(const v3 &a, const v3 &b, float x)
@@ -294,7 +296,7 @@ static void CalcLightmapUV(
 
 			if (!DestLightmap.bLoaded)
 			{
-				POINT pt;
+				FreeBlock pt;
 
 				while (!CurrentLightmap || !CurrentLightmap->Add(DestLightmap.data.get(), DestLightmap.nSize, &pt))
 				{
@@ -450,6 +452,7 @@ bool LightmapGenerator::CheckShadow(const RLIGHT* plight,
 			return true;
 	}
 
+#ifdef _WIN32
 	for (auto& ObjectInfo : bsp.m_ObjectList)
 	{
 		if (!ObjectInfo.pVisualMesh) return false;
@@ -477,6 +480,9 @@ bool LightmapGenerator::CheckShadow(const RLIGHT* plight,
 			return true;
 		}
 	}
+#else
+	assert(false);
+#endif
 
 	return false;
 }
@@ -659,9 +665,8 @@ bool LightmapGenerator::SaveToFile()
 	CalcTreeUV(bsp.BspRoot.data());
 	CalcTreeUV(bsp.OcRoot.data());
 
-	FILE *file = nullptr;
-	auto ret = fopen_s(&file, filename, "wb+");
-	if (ret != 0 || !file)
+	FILE *file = fopen(filename, "wb+");
+	if (!file)
 		return false;
 
 	fwrite(&header, sizeof(RHEADER), 1, file);
@@ -677,17 +682,21 @@ bool LightmapGenerator::SaveToFile()
 	{
 		char lightfilename[256];
 		sprintf_safe(lightfilename, "%s.light%d.bmp", filename, i);
+#ifdef _WIN32
 		RSaveAsBmp(LightmapList[i].GetSize(), LightmapList[i].GetSize(),
 			LightmapList[i].GetData(), lightfilename);
+#endif
 
 		void *memory;
 		int nSize;
+#ifdef _WIN32
 		bool bSaved = SaveMemoryBmp(LightmapList[i].GetSize(), LightmapList[i].GetSize(),
 			LightmapList[i].GetData(), &memory, &nSize);
 		_ASSERT(bSaved);
+#endif
 		fwrite(&nSize, sizeof(int), 1, file);
 		fwrite(memory, nSize, 1, file);
-		delete memory;
+		delete[] (unsigned char*)memory;
 	}
 
 	bsp.Sort_Nodes(bsp.OcRoot.data());

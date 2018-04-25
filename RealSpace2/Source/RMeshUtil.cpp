@@ -5,6 +5,7 @@
 
 using namespace RealSpace2;
 
+#ifdef _WIN32
 RIndexBuffer::RIndexBuffer()
 {
 	m_size = 0;
@@ -29,7 +30,7 @@ RIndexBuffer::~RIndexBuffer()
 
 void RIndexBuffer::Lock() 
 {
-	m_ib->Lock( 0, sizeof(WORD)*m_size, (VOID**)&m_i, m_dwLockFlag );
+	m_ib->Lock( 0, sizeof(u16)*m_size, (VOID**)&m_i, m_dwLockFlag );
 }
 
 void RIndexBuffer::Unlock() 
@@ -44,7 +45,7 @@ int RIndexBuffer::GetFaceCnt()
 	return 0;
 }
 
-void RIndexBuffer::Update(int size,WORD* pData) 
+void RIndexBuffer::Update(int size,u16* pData) 
 {
 	if(size!=m_size) 
 		return;
@@ -53,16 +54,16 @@ void RIndexBuffer::Update(int size,WORD* pData)
 
 		Lock();
 
-		memcpy(m_i,pData,sizeof(WORD)*m_size);
+		memcpy(m_i,pData,sizeof(u16)*m_size);
 
 		Unlock();
 	}
 
 	if(m_bUseSWVertex && m_pIndex)
-		memcpy(m_pIndex,pData,sizeof(WORD)*m_size);
+		memcpy(m_pIndex,pData,sizeof(u16)*m_size);
 }
 
-bool RIndexBuffer::Create(int size,WORD* pData,DWORD flag,DWORD Usage,D3DPOOL Pool)
+bool RIndexBuffer::Create(int size,u16* pData,u32 flag,u32 Usage,D3DPOOL Pool)
 {
 	m_size = size;
 
@@ -70,14 +71,14 @@ bool RIndexBuffer::Create(int size,WORD* pData,DWORD flag,DWORD Usage,D3DPOOL Po
 	if(flag & USE_VERTEX_SW) m_bUseSWVertex = true;
 
 	if(m_bUseHWVertex) {
-		if (FAILED(RGetDevice()->CreateIndexBuffer(sizeof(WORD)*size, Usage, D3DFMT_INDEX16,
+		if (FAILED(RGetDevice()->CreateIndexBuffer(sizeof(u16)*size, Usage, D3DFMT_INDEX16,
 			Pool, &m_ib, 0))) {
 			mlog("RIndexBuffer::Create Error : use soft index buffer\n");
 		}
 	}
 
 	if(m_bUseSWVertex)
-		m_pIndex = new WORD[size];
+		m_pIndex = new u16[size];
 
 	if(pData)
 		Update(size,pData);
@@ -130,8 +131,8 @@ void RVertexBuffer::Clear() {
 	Init();
 }
 
-bool RVertexBuffer::Create(char* pVertex, DWORD fvf, int VertexSize, int VertexCnt,
-	DWORD flag, DWORD Usage, D3DPOOL Pool)
+bool RVertexBuffer::Create(char* pVertex, u32 fvf, int VertexSize, int VertexCnt,
+	u32 flag, u32 Usage, D3DPOOL Pool)
 {
 	Clear();
 
@@ -244,7 +245,7 @@ bool RVertexBuffer::UpdateData(rvector* pVec)
 	return true;
 }
 
-bool RVertexBuffer::Update(char* pVertex,DWORD fvf,int VertexSize,int VertexCnt) 
+bool RVertexBuffer::Update(char* pVertex,u32 fvf,int VertexSize,int VertexCnt) 
 {
 	if(!m_is_init) 	return false;
 
@@ -413,11 +414,12 @@ void RVertexBuffer::RenderIndexBuffer(RIndexBuffer* ib)
 	dev->SetIndices(ib->m_ib);
 	dev->DrawIndexedPrimitive(m_PrimitiveType,0, 0,m_nVertexCnt,0,ib->GetFaceCnt() );
 }
+#endif
 
 void GetPath(const char* str, char* path, size_t path_len)
 {
 	if(!str) { 
-		path[0] = NULL;
+		path[0] = 0;
 		return;
 	}
 
@@ -426,15 +428,16 @@ void GetPath(const char* str, char* path, size_t path_len)
 	for(i=strlen(str)-1; i>=0; i--) {
 		if( (str[i]=='\\') || (str[i]=='/')) {
 			strncpy_safe(path, path_len, str, i+1);
-			path[i+1] = NULL;
+			path[i+1] = 0;
 			return;
 		}
 	}
 }
 
+#ifdef _WIN32
 static RLVertex t_grid_vert[1000];
 
-void _GetModelTry(RLVertex* pVert,int size,DWORD color,int* face_num)
+void _GetModelTry(RLVertex* pVert,int size,u32 color,int* face_num)
 {
 	RLVertex _vert[4];
 
@@ -482,7 +485,7 @@ void _GetModelTry(RLVertex* pVert,int size,DWORD color,int* face_num)
 	*face_num = 4;
 }
 
-void _draw_try(LPDIRECT3DDEVICE9 dev,rmatrix& mat,float size,DWORD color)
+void _draw_try(LPDIRECT3DDEVICE9 dev,rmatrix& mat,float size,u32 color)
 {
 	int face_num = 0;
 
@@ -591,6 +594,7 @@ void _draw_matrix(LPDIRECT3DDEVICE9 dev,rmatrix& mat,float size)
 
 _USING_NAMESPACE_REALSPACE2
 
+#endif
 void RRot2Quat(RQuatKey& q, const RRotKey& v)
 {
 	auto ret = AngleAxisToQuaternion({ EXPAND_VECTOR(v) }, v.w);
@@ -602,8 +606,9 @@ void RQuat2Mat(rmatrix& mat, const RQuatKey& q)
 {
 	mat = QuaternionToMatrix(q);
 }
+#ifdef _WIN32
 
-void draw_line(LPDIRECT3DDEVICE9 dev,rvector* vec,int size,DWORD color)
+void draw_line(LPDIRECT3DDEVICE9 dev,rvector* vec,int size,u32 color)
 {
 	static RLVertex t_vert[50];
 
@@ -622,11 +627,11 @@ void draw_line(LPDIRECT3DDEVICE9 dev,rvector* vec,int size,DWORD color)
 
 struct	_Vertex { 
 	float x,y,z;
-	DWORD color;
+	u32 color;
 };
 #define _VertexType			(D3DFVF_XYZ | D3DFVF_DIFFUSE)
 
-void draw_query_fill_box(rmatrix* wmat , rvector& max,rvector& min,DWORD color)
+void draw_query_fill_box(rmatrix* wmat , rvector& max,rvector& min,u32 color)
 {
 	static _Vertex _vert[8];
 
@@ -639,7 +644,7 @@ void draw_query_fill_box(rmatrix* wmat , rvector& max,rvector& min,DWORD color)
 	_vert[6].x = max.x;	_vert[6].y = max.y;	_vert[6].z = max.z;	_vert[6].color = color;
 	_vert[7].x = max.x;	_vert[7].y = min.y;	_vert[7].z = max.z;	_vert[7].color = color;
 
-	static WORD	_index[36] = {
+	static u16	_index[36] = {
 		0,1,3 ,
 		1,2,3 ,
 		3,2,7 ,
@@ -671,7 +676,7 @@ void draw_query_fill_box(rmatrix* wmat , rvector& max,rvector& min,DWORD color)
 	RGetDevice()->SetRenderState( D3DRS_ZWRITEENABLE , TRUE );
 }
 
-void draw_box(rmatrix* wmat, const rvector& max, const rvector& min, DWORD color)
+void draw_box(rmatrix* wmat, const rvector& max, const rvector& min, u32 color)
 {
 	RGetDevice()->SetRenderState( D3DRS_LIGHTING, FALSE );
 
@@ -764,6 +769,11 @@ VOID CD3DArcBall::SetRadius( FLOAT fRadius )
 	m_fRadiusTranslation = fRadius;
 }
 
+#ifndef LOu16
+#define LOu16(x) ((x) & 0xFF)
+#define HIu16(x) (((x) & 0xFF00) >> 8)
+#endif
+
 LRESULT CD3DArcBall::HandleMouseMessages( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 {
 	static int         iCurMouseX;      
@@ -771,8 +781,8 @@ LRESULT CD3DArcBall::HandleMouseMessages( HWND hWnd, UINT uMsg, WPARAM wParam, L
 
 	static rvector s_vDown;         
 
-	int iMouseX = LOWORD(lParam);
-	int iMouseY = HIWORD(lParam);
+	int iMouseX = LOu16(lParam);
+	int iMouseY = HIu16(lParam);
 
 	switch( uMsg )
 	{
@@ -812,6 +822,7 @@ LRESULT CD3DArcBall::HandleMouseMessages( HWND hWnd, UINT uMsg, WPARAM wParam, L
 
 	return FALSE;
 }
+#endif
 
 RDebugStr::RDebugStr()
 {

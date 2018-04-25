@@ -802,7 +802,7 @@ int MMatchStage::GetObjInBattleCount()
 	return nCount;
 }
 
-void MMatchStage::SetOwnerChannel(MUID& uidOwnerChannel, int nIndex)
+void MMatchStage::SetOwnerChannel(const MUID& uidOwnerChannel, int nIndex)
 {
 	m_uidOwnerChannel = uidOwnerChannel;
 	m_nIndex = nIndex;
@@ -897,7 +897,7 @@ void MMatchStage::AddTeamBonus(int nExp, MMatchTeam nTeam)
 
 void MMatchStage::OnApplyTeamBonus(MMatchTeam nTeam)
 {
-	if (GetStageType() != MMATCH_GAMETYPE_DEATHMATCH_TEAM2)
+	if (GetStageSetting()->GetGameType() != MMATCH_GAMETYPE_DEATHMATCH_TEAM2)
 	{
 		for (auto i=GetObjBegin(); i!=GetObjEnd(); i++)
 		{

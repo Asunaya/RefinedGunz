@@ -422,9 +422,6 @@ bool MLocator::IsBlocker(u32 dwIPKey, u64 dwEventTime)
 
 		if( IsOverflowedNormalUseCount(pBlkRecvUDPInfo) )
 		{
-			SYSTEMTIME st;
-			GetLocalTime( &st );
-			
 			pBlkRecvUDPInfo->SetUseStartTime( dwEventTime );
 			pBlkRecvUDPInfo->SetUseCount( 1 );
 		}

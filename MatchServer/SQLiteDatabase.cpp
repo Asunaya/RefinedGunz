@@ -34,12 +34,14 @@ private:
 template <typename T>
 struct BindFunctionMap;
 
+using long_equivalent = std::conditional_t<sizeof(long) == 32, int, long long>;
+
 template <> struct BindFunctionMap<int> { static constexpr auto function = sqlite3_bind_int; };
-template <> struct BindFunctionMap<int64_t> { static constexpr auto function = sqlite3_bind_int64; };
-template <> struct BindFunctionMap<long> : BindFunctionMap<int> {};
+template <> struct BindFunctionMap<long long> { static constexpr auto function = sqlite3_bind_int64; };
 template <> struct BindFunctionMap<unsigned int> : BindFunctionMap<int> {};
-template <> struct BindFunctionMap<unsigned long> : BindFunctionMap<int> {};
-template <> struct BindFunctionMap<unsigned long long> : BindFunctionMap<int64_t> {};
+template <> struct BindFunctionMap<unsigned long long> : BindFunctionMap<long long> {};
+template <> struct BindFunctionMap<long> : BindFunctionMap<long_equivalent> {};
+template <> struct BindFunctionMap<unsigned long> : BindFunctionMap<std::make_unsigned_t<long_equivalent>> {};
 
 inline void BindParameter(sqlite3_stmt* stmt, int ParamNum) { }
 

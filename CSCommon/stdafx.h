@@ -4,8 +4,10 @@
 
 #define POINTER_64 __ptr64
 
+#ifdef _WIN32
 #include <WinSock2.h>
 #include "MWindows.h"
+#endif
 
 #ifdef MFC
 #include <afxdb.h>
@@ -42,3 +44,7 @@
 
 #include <cassert>
 #define ASSERT assert
+#ifdef _ASSERT
+#undef _ASSERT
+#endif
+#define _ASSERT assert

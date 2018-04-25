@@ -238,6 +238,9 @@ void MBMatchServer::InitConsoleCommands()
 		}
 		Disconnect(MUID(*UID));
 	});
+
+	AddConsoleCommand("quit", 0, 0, "", "", "", [] { exit(0); });
+	AddConsoleCommand("exit", 0, 0, "", "", "", [] { exit(0); });
 }
 
 void MBMatchServer::OnInput(const std::string & Input)
@@ -246,19 +249,7 @@ void MBMatchServer::OnInput(const std::string & Input)
 
 	Splits.clear();
 
-	size_t LastPos = 0;
-	for (size_t Pos = 0; Pos < Input.length(); ++Pos)
-	{
-		if (Input[Pos] == ' ') {
-			Splits.emplace_back(Input.begin() + LastPos, Input.begin() + Pos);
-			while (Input[Pos] == ' ' && Pos < Input.length())
-				++Pos;
-			LastPos = Pos;
-		}
-	}
-
-	if (LastPos < Input.length())
-		Splits.emplace_back(Input.begin() + LastPos, Input.end());
+	Split(Input, " ", [](auto&& Str) { Splits.push_back(Str.str()); });
 
 	if (Splits.empty())
 		return;

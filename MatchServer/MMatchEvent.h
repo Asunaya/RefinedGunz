@@ -2,6 +2,7 @@
 #define _MMATCH_EVENT
 
 
+#include <ctime>
 #include <vector>
 #include <string>
 using std::vector;
@@ -75,8 +76,8 @@ enum EVENT_ID
 
 struct EventPartTime
 {
-	BYTE btStartHour;
-	BYTE btEndHour;
+	u8 btStartHour;
+	u8 btEndHour;
 };
 
 
@@ -85,15 +86,15 @@ class MMatchEvent
 public :
 	virtual ~MMatchEvent();
 
-	const DWORD GetEventID() const		{ return m_dwEventID; }
-	const DWORD GetEventListID() const	{ return m_dwEventListID; }
+	const u32 GetEventID() const		{ return m_dwEventID; }
+	const u32 GetEventListID() const	{ return m_dwEventListID; }
 	const string& GetName()				{ return m_strName; }
 	// 정해진 이벤트 처리루틴외 등록을 위해서. 
 	
-	bool DoItNow( const DWORD dwCurTime );
+	bool DoItNow( const u32 dwCurTime );
 
-	void Set( const DWORD dwEventListID, const DWORD dwEventType, const DWORD dwGameType, const DWORD dwCheckElapsedTime, const DWORD dwPercent, 
-		const DWORD dwRate, const SYSTEMTIME& Start, const SYSTEMTIME& End, const string& strName, const string& strAnnounce,
+	void Set( const u32 dwEventListID, const u32 dwEventType, const u32 dwGameType, const u32 dwCheckElapsedTime, const u32 dwPercent, 
+		const u32 dwRate, const tm& Start, const tm& End, const string& strName, const string& strAnnounce,
 		const float fXPBonusRatio, const float fBPBonusRatio, const vector<EventPartTime>& EventPartTimeVec );
 
 	void StartNewEvent() { m_vEventObj.clear(); }
@@ -113,7 +114,7 @@ public :
 
 protected :
 	MMatchEvent() { Reset(); }
-	MMatchEvent( const DWORD dwEventID ) : m_dwEventID ( dwEventID ), m_dwLastCheckTime( 0 ) {}
+	MMatchEvent( const u32 dwEventID ) : m_dwEventID ( dwEventID ), m_dwLastCheckTime( 0 ) {}
 	
 	bool CheckEventTime();
 	bool CheckElapsedTimeIsOverflow(u64 dwCurTime );
@@ -124,18 +125,18 @@ protected :
 	virtual void OnRun() {}
 
 protected :
-	DWORD					m_dwEventListID;
-	DWORD					m_dwEventID;
-	DWORD					m_dwEventType;
-	DWORD					m_dwGameType;
+	u32					m_dwEventListID;
+	u32					m_dwEventID;
+	u32					m_dwEventType;
+	u32					m_dwGameType;
 	u64						m_dwCheckElapsedTime;
 	u64						m_dwLastCheckTime;
-	DWORD					m_dwPercent;
-	DWORD					m_dwRate;
+	u32					m_dwPercent;
+	u32					m_dwRate;
 	float					m_fXPBonusRatio;
 	float					m_fBPBonusRatio;
-	SYSTEMTIME				m_Start;
-	SYSTEMTIME				m_End;
+	tm				m_Start;
+	tm				m_End;
 	std::string				m_strName;
 	std::string				m_strAnnounce;
 	std::vector< MUID >		m_vEventObj;
@@ -151,18 +152,18 @@ public :
 	MMatchEventDesc() {}
 	~MMatchEventDesc() {}
 
-	void Set( const DWORD dwEventID, const string& strDesc );
+	void Set( const u32 dwEventID, const string& strDesc );
 
-	const DWORD GetEventID() const			{ return m_dwEventID; }
+	const u32 GetEventID() const			{ return m_dwEventID; }
 	const string& GetDescription() const	{ return m_strDesc; }
 
 private :
-	DWORD	m_dwEventID;
+	u32	m_dwEventID;
 	string	m_strDesc;
 };
 
 
-class MMatchEventDescManager : private std::map< DWORD, const MMatchEventDesc* >
+class MMatchEventDescManager : private std::map< u32, const MMatchEventDesc* >
 {
 public :
 	MMatchEventDescManager() {}
@@ -173,7 +174,7 @@ public :
 	bool LoadEventXML( class MZFileSystem* pFileSystem, const string& strFileName );
 	bool LoadEventXML( const std::string& strFileName );
 
-	const MMatchEventDesc* Find( const DWORD dwEventID );
+	const MMatchEventDesc* Find( const u32 dwEventID );
 
 	static MMatchEventDescManager& GetInstance()
 	{
@@ -183,7 +184,7 @@ public :
 
 private :
 	void ParseEvent( MXmlElement& chrElement );
-	bool Insert( const DWORD dwEventID, MMatchEventDesc* pEventDesc );
+	bool Insert( const u32 dwEventID, MMatchEventDesc* pEventDesc );
 };
 
 
@@ -198,7 +199,7 @@ public :
 	virtual ~MMatchProbabiltyEventPerTime();
 	
 protected :
-	void OnCheckEventObj( MMatchObject* pObj, const DWORD dwCurTime );
+	void OnCheckEventObj( MMatchObject* pObj, const u32 dwCurTime );
 	void OnRun();
 
 private :
@@ -230,8 +231,8 @@ public :
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-bool CheckUsableEventTimeByStartTime( const SYSTEMTIME& StartTime );
-bool CheckUsableEventTimeByEndTime( const SYSTEMTIME& EndTime );
+bool CheckUsableEventTimeByStartTime( const tm& StartTime );
+bool CheckUsableEventTimeByEndTime( const tm& EndTime );
 bool CheckUsableEventPartTime( const EventPartTime& ept );
 
 #endif

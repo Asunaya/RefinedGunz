@@ -1,10 +1,11 @@
 #pragma once
 
-#include "MCommand.h"
-#include "MCommandParameter.h"
 #include <map>
 #include <string>
+#include <list>
 
+class MCommand;
+class MCommandDesc;
 using MCommandDescMap = std::map<int, MCommandDesc*>;
 using MCommandList = std::list<MCommand*>;
 using MCommandAliasMap = std::map<std::string, std::string>;

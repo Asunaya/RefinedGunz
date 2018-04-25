@@ -5,7 +5,7 @@
 #include "MMatchEvent.h"
 
 typedef std::vector< MMatchEvent* >		EventPtrVec;
-typedef std::map< DWORD, MMatchEvent* >	EventPtrMap;
+typedef std::map< u32, MMatchEvent* >	EventPtrMap;
 
 
 class MMatchEventManager
@@ -17,16 +17,16 @@ public:
 	void			AddEvent(MMatchEvent* pEvent);
 	void			AddEventList(EventPtrVec& EvnPtrVec);
 	void			ChangeEventList(EventPtrVec& EvnPtrVec);
-	void			DeleteEvent(const DWORD dwEventID);
+	void			DeleteEvent(const u32 dwEventID);
 	void			Clear();
 	void			StartNewEvent();
-	size_t			GetEventCount(const DWORD dwEventID);
+	size_t			GetEventCount(const u32 dwEventID);
 	bool			Empty() { return m_EventVec.empty(); }
 	MMATCH_GAMETYPE GetLastSetGameType() { return m_GameType; }
 	void			SetGameType(const MMATCH_GAMETYPE GameType) { m_GameType = GameType; }
 
-	void CustomCheckEventObj(const DWORD dwEventID, class MMatchObject* pObj, void* pContext);
-	void CustomCheckEventObj(const DWORD dwEventListID, const DWORD dwEventID, MMatchObject* pObj, void* pContext);
+	void CustomCheckEventObj(const u32 dwEventID, class MMatchObject* pObj, void* pContext);
+	void CustomCheckEventObj(const u32 dwEventListID, const u32 dwEventID, MMatchObject* pObj, void* pContext);
 	void CheckEventObj(MMatchObject* pObj, u64 dwCurTime);
 	void Run();
 

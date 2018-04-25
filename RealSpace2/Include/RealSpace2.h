@@ -5,12 +5,16 @@
 #include "RError.h"
 #include "MZFileSystem.h"
 #include "RNameSpace.h"
+#ifdef _WIN32
 #include <d3d9.h>
+#endif
 _NAMESPACE_REALSPACE2_BEGIN
 
 extern int g_nFrameCount, g_nLastFrameCount;
 extern float g_fFPS;
+#ifdef _WIN32
 extern HWND	g_hWnd;
+#endif
 extern MZFileSystem *g_pFileSystem;
 extern rvector RCameraPosition, RCameraDirection, RCameraUp;
 extern rmatrix RView, RProjection, RViewProjection, RViewport, RViewProjectionViewport;
@@ -81,7 +85,6 @@ int		RGetScreenHeight();
 inline float RGetAspect() { return float(RGetScreenWidth()) / RGetScreenHeight(); }
 int		RGetPicmip();
 RPIXELFORMAT RGetPixelFormat();
-D3DADAPTER_IDENTIFIER9*	RGetAdapterID();
 void SetClearColor(u32 c);
 int		RGetVideoMemory();
 void	RSetWBuffer(bool bEnable);
@@ -91,20 +94,26 @@ bool SupportsVertexShaderVersion(int Major, int Minor);
 bool SupportsPixelShaderVersion(int Major, int Minor);
 int MaxStreamsSupported();
 void SetVSync(bool b);
-D3DFORMAT GetDepthStencilFormat();
-const D3DCAPS9& GetDeviceCaps();
 GraphicsAPI GetGraphicsAPI();
 
-rmatrix RGetTransform(D3DTRANSFORMSTATETYPE ts);
-void RSetTransform(D3DTRANSFORMSTATETYPE ts, const rmatrix& mat);
+#ifdef _WIN32
+D3DADAPTER_IDENTIFIER9*	RGetAdapterID();
+D3DFORMAT GetDepthStencilFormat();
+const D3DCAPS9& GetDeviceCaps();
 
+rmatrix RGetTransform(D3DTRANSFORMSTATETYPE ts);
 int RGetAdapterModeCount(D3DFORMAT Format, UINT Adapter = D3DADAPTER_DEFAULT);
 bool REnumAdapterMode(UINT Adapter, D3DFORMAT Format, UINT Mode, D3DDISPLAYMODE* pMode);
+void RSetTransform(D3DTRANSFORMSTATETYPE ts, const rmatrix& mat);
+#endif
+
 
 class RParticleSystem *RGetParticleSystem();
 
+#ifdef _WIN32
 bool RInitDisplay(HWND hWnd, HINSTANCE inst, const RMODEPARAMS *params, GraphicsAPI API);
 bool RCloseDisplay();
+#endif
 void RSetFileSystem(MZFileSystem *pFileSystem);
 void RAdjustWindow(const RMODEPARAMS* ModeParams);
 #ifdef GetWindowStyle
@@ -112,7 +121,9 @@ void RAdjustWindow(const RMODEPARAMS* ModeParams);
 #endif
 u32 GetWindowStyle(const RMODEPARAMS& ModeParams);
 
+#ifdef _WIN32
 LPDIRECT3DDEVICE9 RGetDevice();
+#endif
 
 void RResetDevice(const RMODEPARAMS *params);
 RRESULT RIsReadyToRender();
@@ -139,7 +150,9 @@ void RSetProjection(float fFov, float fAspect, float fNearZ, float fFarZ);
 
 inline rfrustum& RGetViewFrustum() { return RViewFrustum; }
 void RSetViewport(int x1, int y1, int x2, int y2);
+#ifdef _WIN32
 D3DVIEWPORT9 *RGetViewport();
+#endif
 
 void RResetTransform();
 
@@ -150,13 +163,13 @@ bool RGetIntersection(rvector& a, rvector& b, rplane &plane, rvector* pIntersect
 
 rvector RGetTransformCoord(const rvector &coord);
 
-void RDrawLine(const rvector &v1, const rvector &v2, DWORD dwColor);
+void RDrawLine(const rvector &v1, const rvector &v2, u32 dwColor);
 void RDrawCylinder(rvector origin, float fRadius, float fHeight, int nSegment);
 void RDrawCorn(rvector center, rvector pole, float fRadius, int nSegment);
 void RDrawSphere(rvector origin, float fRadius, int nSegment, u32 Color = 0xFFFF0000);
 void RDrawAxis(rvector origin, float fSize);
 void RDrawCircle(rvector origin, float fRadius, int nSegment);
-void RDrawArc(rvector origin, float fRadius, float fAngle1, float fAngle2, int nSegment, DWORD color);
+void RDrawArc(rvector origin, float fRadius, float fAngle1, float fAngle2, int nSegment, u32 color);
 
 bool RSaveAsBmp(int x, int y, void *data, const char *szFilename);
 bool RScreenShot(int x, int y, void *data, const char *szFilename, ScreenshotFormatType Format);
@@ -165,8 +178,10 @@ void RSetGammaRamp(unsigned short nGammaValue = 255);
 void RSetWBuffer(bool bEnable);
 
 void RSetFunction(RFUNCTIONTYPE ft, RFFUNCTION pfunc);
+#ifdef _WIN32
 int RMain(const char *AppName, HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline,
 	int cmdshow, RMODEPARAMS *pModeParams, WNDPROC winproc, WORD nIconResID,
 	GraphicsAPI API);
+#endif
 
 _NAMESPACE_REALSPACE2_END

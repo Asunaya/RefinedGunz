@@ -5,6 +5,7 @@
 #include <random>
 #include "RTypes.h"
 #include "RMath.h"
+#include "RBspObject.h"
 
 template <typename rngT>
 float RandomAngle(rngT& rng)
@@ -69,11 +70,13 @@ namespace RealSpace2
 }
 
 template <typename ContainerT, typename PickInfoT>
-bool PickHistory(std::remove_reference_t<decltype(*std::declval<ContainerT>().begin())> Exception,
+bool PickHistory(typename ContainerT::value_type Exception,
 	const v3& src, const v3& dest,
 	RealSpace2::RBspObject* BspObject, PickInfoT& pickinfo, const ContainerT& Container,
 	double Time, u32 PassFlag = RM_FLAG_ADDITIVE | RM_FLAG_USEOPACITY | RM_FLAG_HIDE)
 {
+	using namespace RealSpace2;
+
 	decltype(Exception) HitObject = nullptr;
 	v3 HitPos;
 	pickinfo.info.t = 0;
@@ -140,6 +143,8 @@ template <typename ObjectT, typename ContainerT, typename GetOriginT>
 void GrenadeExplosion(const ObjectT& Owner, const ContainerT& Container, const v3& ExplosionPos,
 	int Damage, float fRange, float fMinDamage, float fKnockBack, const GetOriginT& GetOrigin)
 {
+	using namespace RealSpace2;
+
 	float fDist, fDamageRange;
 
 	for (auto* Target : Container)
@@ -165,7 +170,7 @@ void GrenadeExplosion(const ObjectT& Owner, const ContainerT& Container, const v
 		{
 			constexpr auto MAX_DMG_RANGE = 50.f;
 
-			fDamageRange = 1.f - (1.f - fMinDamage)*(max(fDist - MAX_DMG_RANGE, 0) / (fRange - MAX_DMG_RANGE));
+			fDamageRange = 1.f - (1.f - fMinDamage)*(max(fDist - MAX_DMG_RANGE, 0.f) / (fRange - MAX_DMG_RANGE));
 		}
 
 		float fActualDamage = Damage * fDamageRange;

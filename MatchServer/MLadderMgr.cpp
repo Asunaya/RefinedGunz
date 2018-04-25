@@ -254,7 +254,7 @@ void MLadderMgr::LaunchLadder(MLADDERTYPE nLadderType, int nGroupA, int nGroupB)
 	RemoveFromGroupList(pGroupB);
 
 	if ((pGroupA == NULL) || (pGroupB == NULL)) {
-		OutputDebugString("LADDER 불발 \n");
+		DMLog("LADDER 불발 \n");
 		return;
 	}
 
@@ -351,7 +351,7 @@ unsigned long MLadderMgr::GetChecksum(int nFirstIndex, int nGroupCount)
 void MLadderMgr::DebugTest()
 {
 #ifdef _DEBUG
-	OutputDebugString("Ahehheh \n");
+	DMLog("Ahehheh \n");
 
 	MMatchServer* pServer = MMatchServer::GetInstance();
 

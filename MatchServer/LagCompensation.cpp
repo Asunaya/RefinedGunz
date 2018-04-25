@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "LagCompensation.h"
-#include <d3d9.h>
 #include "GlobalTypes.h"
 #include "RealSpace2.h"
 #include "MZFileSystem.h"
@@ -15,6 +14,7 @@ static auto Log = [&](auto&&... Args) {
 
 bool LagCompManager::Create()
 {
+	using namespace RealSpace2;
 	if (!MGetServerConfig()->HasGameData())
 	{
 		Log("game_dir is empty! Server-based netcode will be disabled.");
@@ -94,6 +94,7 @@ bool LagCompManager::Create()
 
 bool LagCompManager::LoadAnimations(const char* filename, int Index)
 {
+	using namespace RealSpace2;
 	auto& AniMgr = AniMgrs[Index];
 
 	MXmlDocument	XmlDoc;
@@ -102,7 +103,7 @@ bool LagCompManager::LoadAnimations(const char* filename, int Index)
 	XmlDoc.Create();
 
 	char Path[256];
-	Path[0] = NULL;
+	Path[0] = 0;
 
 	GetPath(filename, Path);
 
@@ -171,7 +172,7 @@ bool LagCompManager::LoadAnimations(const char* filename, int Index)
 
 		if (strcmp(NodeName, "AddAnimation") == 0) {
 
-			SoundFileName[0] = NULL;
+			SoundFileName[0] = 0;
 			Node.GetAttribute(IDName, "name");
 			Node.GetAttribute(FileName, "filename");
 			Node.GetAttribute(MotionTypeID, "motion_type");
@@ -212,7 +213,7 @@ bool LagCompManager::LoadAnimations(const char* filename, int Index)
 			else
 				strcpy_safe(PathFileName, FileName);
 
-			RAnimation* pAni = NULL;
+			RAnimation* pAni = 0;
 
 			//MLog("AddAnimation %s, %s\n", IDName, PathFileName);
 
@@ -228,10 +229,10 @@ bool LagCompManager::LoadAnimations(const char* filename, int Index)
 
 				pAni->SetAnimationLoopType(MLoopType);
 
-				if (SoundFileName[0] == NULL) {
+				if (SoundFileName[0] == 0) {
 					int len = (int)strlen(FileName);
 					strncpy_safe(SoundFileName, FileName, len - 8);
-					SoundFileName[len - 8] = NULL;
+					SoundFileName[len - 8] = 0;
 
 					strcpy_safe(PathSoundFileName, "/sound/effect/");
 					strcat_safe(PathSoundFileName, SoundFileName);
@@ -248,7 +249,7 @@ bool LagCompManager::LoadAnimations(const char* filename, int Index)
 	return true;
 }
 
-RBspObject * LagCompManager::GetBspObject(const char * MapName)
+RealSpace2::RBspObject * LagCompManager::GetBspObject(const char * MapName)
 {
 	auto it = Maps.find(MapName);
 	if (it == Maps.end())

@@ -281,7 +281,7 @@ public:
 	
 	}
 	virtual ~MAsyncDBJob_CreateClan()	{}
-	bool Input(const TCHAR* szClanName, 
+	bool Input(const char* szClanName, 
 			   const int nMasterCID, 
 			   const int nMember1CID, 
 			   const int nMember2CID,
@@ -396,10 +396,10 @@ public :
 	{
 	}
 
-	bool Input( const DWORD dwAID, 
-				const DWORD dwCID, 
-				const BYTE btBlockType, 
-				const BYTE btBlockLevel,
+	bool Input( const u32 dwAID, 
+				const u32 dwCID, 
+				const u8 btBlockType, 
+				const u8 btBlockLevel,
 				const string& strComment, 
 				const string& strIP,
 				const string& strEndDate );
@@ -407,10 +407,10 @@ public :
 	virtual void Run( void* pContext );
 
 private :
-	DWORD	m_dwAID;
-	DWORD	m_dwCID;
-	BYTE	m_btBlockType;
-	BYTE	m_btBlockLevel;
+	u32	m_dwAID;
+	u32	m_dwCID;
+	u8	m_btBlockType;
+	u8	m_btBlockLevel;
 	string	m_strComment;
 	string	m_strIP;
 	string	m_strEndDate;
@@ -428,12 +428,12 @@ public :
 	{
 	}
 
-	bool Input( const DWORD dwAID, const BYTE btBlockType = 0 );
+	bool Input( const u32 dwAID, const u8 btBlockType = 0 );
 
 	virtual void Run( void* pContext );
 
 private :
-	DWORD	m_dwAID;
-	BYTE	m_btBlockType;
+	u32	m_dwAID;
+	u8	m_btBlockType;
 };
 	

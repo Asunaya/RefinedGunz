@@ -11,7 +11,7 @@ MCommObject::MCommObject(MCommandCommunicator* pCommunicator)
 	m_pDirectConnection = NULL;
 	m_dwUserContext = 0;
 
-	m_szIP[0] = NULL;
+	m_szIP[0] = 0;
 	m_nPort = 0;
 
 	m_bAllowed = true;

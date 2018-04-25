@@ -18,9 +18,10 @@ _NAMESPACE_REALSPACE2_BEGIN
 
 RBaseTexture*			RLenzFlare::msTextures[MAX_NUMBER_TEXTURE];
 sFlareElement			RLenzFlare::msElements[MAX_NUMBER_ELEMENT];
-bool					RLenzFlare::mbIsReady = FALSE;
+bool					RLenzFlare::mbIsReady = false;
 RLenzFlare				RLenzFlare::msInstance;
 
+#ifdef _WIN32
 bool RLenzFlare::Render( rvector& light_pos_, rvector& centre_, RBspObject* pbsp_  ) 
 {
 	rvector rDir	= light_pos_ - centre_;
@@ -123,6 +124,7 @@ bool	RLenzFlare::Render( rvector& centre_, RBspObject* pbsp_  )
 	}
 	return true;
 }
+#endif
 
 bool RLenzFlare::SetLight( rvector& pos_ )
 {
@@ -148,8 +150,9 @@ void RLenzFlare::Initialize()
 	}
 }
 
+#ifdef _WIN32
 bool RLenzFlare::draw( float x_, float y_,  float width_, float height_,  
-					  float alpha_,  DWORD color_, int textureIndex_ )
+					  float alpha_,  u32 color_, int textureIndex_ )
 {
 	RTLVertex vertices[4];
 
@@ -220,7 +223,8 @@ bool RLenzFlare::draw( float x_, float y_,  float width_, float height_,
 	RGetDevice()->SetRenderState( D3DRS_ALPHABLENDENABLE, FALSE );
 
 	return true;
-}	
+}
+#endif
 
 bool RLenzFlare::Create( char* filename_ )
 {
@@ -232,7 +236,7 @@ bool RLenzFlare::Create( char* filename_ )
 	PNode = XmlDoc.GetDocumentElement();
 
 	char Path[256];
-	Path[0] = NULL;
+	Path[0] = 0;
 
 	GetPath(filename_, Path);
 
@@ -253,7 +257,9 @@ bool RLenzFlare::Destroy()
 {
 	for( int i = 0 ; i < MAX_NUMBER_TEXTURE; ++i )
 	{
+#ifdef _WIN32
 		RDestroyBaseTexture( msTextures[i] );
+#endif
 		msTextures[i] = NULL;
 	}
 
@@ -311,11 +317,15 @@ bool RLenzFlare::ReadXmlElement(MXmlElement* PNode,char* Path)
 				{
 					for (int k = 0; k < MAX_NUMBER_TEXTURE; ++k)
 					{
+#ifdef _WIN32
 						RDestroyBaseTexture(msTextures[k]);
+#endif
 					}
 					return false;
 				}
+#ifdef _WIN32
 				msTextures[index++] = RCreateBaseTexture(texture_file_name);
+#endif
 			}
 		}
 		else if( !strcmp( NodeName, "ELEMENTS" ) )

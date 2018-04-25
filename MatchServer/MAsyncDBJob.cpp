@@ -318,7 +318,7 @@ void MAsyncDBJob_CreateClan::Run(void* pContext)
 	SetResult(MASYNC_RESULT_SUCCEED);
 }
 
-bool MAsyncDBJob_CreateClan::Input(const TCHAR* szClanName, 
+bool MAsyncDBJob_CreateClan::Input(const char* szClanName, 
 									const int nMasterCID, 
 									const int nMember1CID, 
 									const int nMember2CID,
@@ -549,10 +549,10 @@ void MAsyncDBJob_UpdateQuestItemInfo::Run( void* pContext )
 }
 
 
-bool MAsyncDBJob_SetBlockAccount::Input( const DWORD dwAID, 
-										 const DWORD dwCID, 
-										 const BYTE btBlockType, 
-										 const BYTE btBlockLevel,
+bool MAsyncDBJob_SetBlockAccount::Input( const u32 dwAID, 
+										 const u32 dwCID, 
+										 const u8 btBlockType, 
+										 const u8 btBlockLevel,
 										 const string& strComment, 
 										 const string& strIP,
 										 const string& strEndDate )
@@ -593,7 +593,7 @@ void MAsyncDBJob_SetBlockAccount::Run( void* pContext )
 }
 
 
-bool MAsyncDBJob_ResetAccountBlock::Input( const DWORD dwAID, const BYTE btBlockType )
+bool MAsyncDBJob_ResetAccountBlock::Input( const u32 dwAID, const u8 btBlockType )
 {
 	m_dwAID			= dwAID;
 	m_btBlockType	= btBlockType;

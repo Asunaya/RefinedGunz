@@ -32,7 +32,7 @@
 #include "MMatchUtil.h"
 #include "MMatchObjectCacheBuilder.h"
 
-static bool StageShowInfo(MMatchServer* pServer, const MUID& uidPlayer, const MUID& uidStage, char* pszChat);
+static bool StageShowInfo(MMatchServer* pServer, const MUID& uidPlayer, const MUID& uidStage, const char* pszChat);
 
 MMatchStage* MMatchServer::FindStage(const MUID& uidStage)
 {
@@ -297,7 +297,7 @@ bool MMatchServer::StageEnterBattle(const MUID& uidPlayer, const MUID& uidStage)
 
 	CopyCharInfoForTrans(&pNode->CharInfo, pObj->GetCharInfo(), pObj);
 
-	ZeroMemory(&pNode->ExtendInfo, sizeof(MTD_ExtendInfo));
+	memset(&pNode->ExtendInfo, 0, sizeof(MTD_ExtendInfo));
 	pNode->ExtendInfo.nTeam = (char)pObj->GetTeam();
 	pNode->ExtendInfo.nPlayerFlags = pObj->GetPlayerFlags();
 
@@ -480,7 +480,7 @@ MCommand* MMatchServer::CreateCmdResponseStageSetting(const MUID& uidStage)
 	// Param 1 : Stage Settings
 	void* pStageSettingArray = MMakeBlobArray(sizeof(MSTAGE_SETTING_NODE), 1);
 	MSTAGE_SETTING_NODE* pNode = (MSTAGE_SETTING_NODE*)MGetBlobArrayElement(pStageSettingArray, 0);
-	CopyMemory(pNode, pSetting->GetStageSetting(), sizeof(MSTAGE_SETTING_NODE));
+	memcpy(pNode, pSetting->GetStageSetting(), sizeof(MSTAGE_SETTING_NODE));
 	pCmd->AddParameter(new MCommandParameterBlob(pStageSettingArray, MGetBlobArraySize(pStageSettingArray)));
 	MEraseBlobArray(pStageSettingArray);
 
@@ -752,7 +752,7 @@ bool StageKick(MMatchServer* pServer, const MUID& uidPlayer, const MUID& uidStag
 	return bResult;
 }
 
-bool StageShowInfo(MMatchServer* pServer, const MUID& uidPlayer, const MUID& uidStage, char* pszChat)
+bool StageShowInfo(MMatchServer* pServer, const MUID& uidPlayer, const MUID& uidStage, const char* pszChat)
 {
 	MMatchObject* pChar = pServer->GetObject(uidPlayer);
 	if (pChar == NULL)	return false;
@@ -1959,11 +1959,6 @@ void MMatchServer::ResponseQuickJoin(const MUID& uidPlayer, MTD_QuickJoinParam* 
 	RouteToListener(pObj, pCmd);	
 }
 
-static int __cdecl _int_sortfunc(const void* a, const void* b)
-{
-	return *((int*)a) - *((int*)b);
-}
-
 int MMatchServer::GetLadderTeamIDFromDB(const int nTeamTableIndex, const int* pnMemberCIDArray, const int nMemberCount)
 {
 	if ((nMemberCount <= 0) || (nTeamTableIndex != nMemberCount))
@@ -1977,7 +1972,7 @@ int MMatchServer::GetLadderTeamIDFromDB(const int nTeamTableIndex, const int* pn
 	{
 		pnSortedCIDs[i] = pnMemberCIDArray[i];
 	}
-	qsort(pnSortedCIDs, nMemberCount, sizeof(int), _int_sortfunc);
+	std::sort(pnSortedCIDs, pnSortedCIDs + nMemberCount);
 
 	int nTID = 0;
 	if (pnSortedCIDs[0] != 0)

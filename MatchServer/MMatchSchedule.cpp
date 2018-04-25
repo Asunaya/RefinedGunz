@@ -642,14 +642,10 @@ void MMatchScheduleMgr::MMatchScheduleImplPrototype::Release()
 }
 
 //////////////////////////////////////////////////////////////////////
-errno_t MMatchGetLocalTime(tm *ptm)
+int MMatchGetLocalTime(tm *ptm)
 {
-	__time64_t long_time;
-
-	_time64( &long_time );
-
-	/* Obtain coordinated universal time: */
-	return _localtime64_s( ptm, &long_time );
+	*ptm = *localtime(&unmove(time(0)));
+	return 0;
 }
 
 char GetMaxDay( const int iMonth )

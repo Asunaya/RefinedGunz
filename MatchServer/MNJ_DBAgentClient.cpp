@@ -5,14 +5,11 @@
 MNJ_DBAgentClient::MNJ_DBAgentClient(int nGameCode, int nServerCode) 
 		: MCustomClient(), m_bConnected(false), m_nGameCode(nGameCode), m_nServerCode(nServerCode), m_nQueueTop(0)
 {
-	InitializeCriticalSection(&m_csPoolLock);
-
 	memset(m_cPacketBuf, 0, sizeof(m_cPacketBuf));
 }
 
 MNJ_DBAgentClient::~MNJ_DBAgentClient()
 {
-	DeleteCriticalSection(&m_csPoolLock);
 }
 
 bool MNJ_DBAgentClient::OnSockConnect(SOCKET sock)
@@ -63,7 +60,7 @@ void MNJ_DBAgentClient::Send(const MUID& uidComm, const char* szCN, const char* 
 }
 
 
-bool MNJ_DBAgentClient::OnSockRecv(SOCKET sock, char* pPacket, DWORD dwSize)
+bool MNJ_DBAgentClient::OnSockRecv(SOCKET sock, char* pPacket, u32 dwSize)
 {
 	if (((m_nQueueTop + dwSize) >= NJ_QUE_SIZE) || (dwSize <= 0))
 	{

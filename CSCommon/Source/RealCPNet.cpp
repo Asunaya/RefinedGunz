@@ -13,7 +13,6 @@
 #include "MWindows.h"
 #include <MSWSock.h>
 #pragma comment(lib, "Mswsock.lib")
-#endif
 
 #include "MSocket.h"
 #include "RealCPNet.h"
@@ -887,3 +886,4 @@ u32 MRealCPNet::CrashDump(EXCEPTION_POINTERS* ExceptionInfo)
 
 	return ret;
 }
+#endif

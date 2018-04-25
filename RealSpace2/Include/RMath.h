@@ -11,6 +11,16 @@
 #include <mmintrin.h>
 using std::min;
 using std::max;
+using std::sin;
+using std::cos;
+using std::tan;
+using std::asin;
+using std::acos;
+using std::atan;
+using std::atan2;
+using std::abs;
+using std::pow;
+using std::log;
 
 #ifndef TOLER
 #define TOLER 0.001

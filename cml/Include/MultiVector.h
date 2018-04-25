@@ -31,7 +31,7 @@ struct MultiVector
 	template <typename T>
 	void push(T&& val)
 	{
-		pushImpl(std::forward<T>(val), std::is_same<std::remove_reference<T>::type, Type>());
+		pushImpl(std::forward<T>(val), std::is_same<std::remove_reference_t<T>, Type>());
 	}
 
 	template <typename T, typename... ArgsT>
@@ -49,7 +49,7 @@ struct MultiVector
 	template <typename T, typename... ArgsT>
 	void emplace(ArgsT&&... Args)
 	{
-		emplaceImpl<T>(std::is_same<std::remove_reference<T>::type, Type>(), std::forward<ArgsT>(Args)...);
+		emplaceImpl<T>(std::is_same<std::remove_reference_t<T>, Type>(), std::forward<ArgsT>(Args)...);
 	}
 };
 
@@ -71,15 +71,10 @@ struct MultiVector<Type>
 	}
 
 	template <typename T>
-	void pushImpl(T&& val, std::false_type)
-	{
-		static_assert(false, "Type is not in MultiVector");
-	}
-
-	template <typename T>
 	void push(T&& val)
 	{
-		pushImpl(std::forward<T>(val), std::is_same<std::remove_reference<T>::type, Type>());
+		static_assert(std::is_same<std::remove_reference_t<T>, Type>::value, "Type is not in MultiVector");
+		pushImpl(std::forward<T>(val), std::is_same<std::remove_reference_t<T>, Type>());
 	}
 
 	template <typename T, typename... ArgsT>
@@ -89,14 +84,9 @@ struct MultiVector<Type>
 	}
 
 	template <typename T, typename... ArgsT>
-	void emplaceImpl(std::false_type, ArgsT&&... Args)
-	{
-		static_assert(false, "Type is not in MultiVector");
-	}
-
-	template <typename T, typename... ArgsT>
 	void emplace(ArgsT&&... Args)
 	{
-		emplaceImpl<T>(std::is_same<std::remove_reference<T>::type, Type>(), std::forward<ArgsT>(Args)...);
+		static_assert(std::is_same<std::remove_reference_t<T>, Type>::value, "Type is not in MultiVector");
+		emplaceImpl<T>(std::is_same<std::remove_reference_t<T>, Type>(), std::forward<ArgsT>(Args)...);
 	}
 };

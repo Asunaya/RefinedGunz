@@ -1,12 +1,8 @@
 #pragma once
 
-#include "RAnimationMgr.h"
 #include <unordered_map>
-
-namespace RealSpace2
-{
-	class RBspObject;
-}
+#include "RAnimationMgr.h"
+#include "RBspObject.h"
 
 class LagCompManager
 {

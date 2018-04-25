@@ -102,13 +102,6 @@ int EnumNetworkEvents(SOCKET Socket, MSignalEvent& EventHandle, NetworkEvents* O
 	return ret;
 }
 
-static u32 ctz(u32 Value)
-{
-	unsigned long ret = 0;
-	_BitScanReverse(&ret, Value);
-	return ret;
-}
-
 bool IsNetworkEventSet(const NetworkEvents & Events, int Flag)
 {
 	return (Events.NetworkEventsSet & Flag) == Flag;
@@ -116,7 +109,7 @@ bool IsNetworkEventSet(const NetworkEvents & Events, int Flag)
 
 int GetNetworkEventValue(const NetworkEvents & Events, int Flag)
 {
-	return Events.ErrorCode[ctz(Flag)];
+	return Events.ErrorCode[bsr(Flag)];
 }
 
 u32 GetLastError()
@@ -156,7 +149,121 @@ void LogError(const char* CallerName, const char* FunctionName, int ErrorCode)
 
 #else
 
-//static_assert(false, "Implement this");
+static bool Initialized;
+
+bool Startup()
+{
+	return true;
+}
+
+void Cleanup()
+{
+}
+
+MSignalEvent CreateEvent()
+{
+	return MSignalEvent{ true };
+}
+
+int EventSelect(SOCKET Socket, MSignalEvent& EventHandle, int NetworkEvents)
+{
+	close(EventHandle.EventHandle);
+	EventHandle.EventHandle = Socket;
+	int flags = fcntl(Socket, F_GETFL, 0);
+	fcntl(Socket, F_SETFL, flags | O_NONBLOCK);
+	auto& e = EventHandle.Events;
+	e = 0;
+	if (NetworkEvents & FD::CONNECT)
+		e |= MSignalEvent::Connect;
+	if (NetworkEvents & FD::READ)
+		e |= MSignalEvent::Read;
+	if (NetworkEvents & FD::WRITE)
+		e |= MSignalEvent::Write;
+	if (NetworkEvents & FD::CLOSE)
+		e |= MSignalEvent::Close;
+	return 0;
+}
+
+int EnumNetworkEvents(SOCKET Socket, MSignalEvent& EventHandle, NetworkEvents* Out)
+{
+	Out->NetworkEventsSet = 0;
+	if (EventHandle.SetEvents & MSignalEvent::Read)
+	{
+		auto IsClosed = [&] {
+			int n = 0;
+			ioctl(Socket, FIONREAD, &n);
+			return n == 0;
+		};
+		if (EventHandle.Events & MSignalEvent::Close && IsClosed())
+		{
+			Out->NetworkEventsSet |= FD::CLOSE;
+		}
+		else
+		{
+			Out->NetworkEventsSet |= FD::READ;
+			if (EventHandle.Events & MSignalEvent::Connect)
+			{
+				Out->NetworkEventsSet |= FD::CONNECT;
+				EventHandle.Events &= ~MSignalEvent::Connect;
+			}
+		}
+	}
+	if (EventHandle.SetEvents & MSignalEvent::Write)
+	{
+		Out->NetworkEventsSet |= FD::WRITE;
+		if (EventHandle.Events & MSignalEvent::Connect)
+		{
+			Out->NetworkEventsSet |= FD::CONNECT;
+			EventHandle.Events &= ~MSignalEvent::Connect;
+		}
+	}
+	for (auto& e : Out->ErrorCode)
+		e = 0;
+	return 0;
+}
+
+bool IsNetworkEventSet(const NetworkEvents & Events, int Flag)
+{
+	return (Events.NetworkEventsSet & Flag) == Flag;
+}
+
+int GetNetworkEventValue(const NetworkEvents & Events, int Flag)
+{
+	return Events.ErrorCode[bsr(Flag)];
+}
+
+u32 GetLastError()
+{
+	return u32(errno);
+}
+
+bool GetErrorString(u32 ErrorCode, char* Output, size_t OutputSize)
+{
+	return strerror_safe(int(ErrorCode), Output, OutputSize) != 0;
+}
+
+bool GetErrorString(u32 ErrorCode, std::string& Output)
+{
+	char Buffer[512]; Buffer[0] = 0;
+	auto ret = GetErrorString(ErrorCode, Buffer);
+	if (!ret)
+		return false;
+	Output = Buffer;
+	return true;
+}
+
+void LogError(const char* CallerName, const char* FunctionName, int ErrorCode)
+{
+	const auto LastErrorCode = MSocket::GetLastError();
+
+	char LastErrorString[512]; LastErrorString[0] = 0;
+	MSocket::GetErrorString(LastErrorCode, LastErrorString);
+
+	MLog("%s -- %s failed with error code %d\n"
+		"GetLastError() = %d, LastErrorString = %s\n",
+		CallerName, FunctionName, ErrorCode,
+		LastErrorCode, LastErrorString);
+}
 
 #endif
 

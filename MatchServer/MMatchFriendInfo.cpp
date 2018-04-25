@@ -77,7 +77,7 @@ void MMatchFriendInfo::UpdateDesc()
 	for (MMatchFriendList::iterator i=m_FriendList.begin(); i!= m_FriendList.end(); i++) 
 	{
 		MMatchFriendNode* pNode = (*i);
-		pNode->szDescription[0] = NULL;
+		pNode->szDescription[0] = 0;
 
 		MMatchObject* pObj = pServer->GetPlayerByName(pNode->szName);
 		if (pObj) {

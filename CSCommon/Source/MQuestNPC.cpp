@@ -292,7 +292,7 @@ void MQuestNPCCatalogue::ParseNPC(MXmlElement& element)
 		}
 		else if (!_stricmp(szAttrName, MTOK_NPC_ATTR_SCALE))
 		{
-			sscanf_s(szAttrValue,"%f %f %f",&pNPCInfo->vScale.x,&pNPCInfo->vScale.y,&pNPCInfo->vScale.z);
+			sscanf(szAttrValue,"%f %f %f",&pNPCInfo->vScale.x,&pNPCInfo->vScale.y,&pNPCInfo->vScale.z);
 		}
 		else if (!_stricmp(szAttrName, MTOK_NPC_ATTR_DC))
 		{
@@ -624,7 +624,7 @@ MQuestNPCSetInfo* MQuestNPCSetCatalogue::GetInfo(const char* szName)
 {
 	char szLwrName[64];
 	strcpy_safe(szLwrName, szName);
-	_strlwr_s(szLwrName);
+	strlwr_safe(szLwrName);
 	auto strName = szLwrName;
 
 	auto itor = m_NameMap.find(strName);
@@ -652,7 +652,7 @@ void MQuestNPCSetCatalogue::Insert(MQuestNPCSetInfo* pNPCSetInfo)
 	char szLwrName[64];
 	strcpy_safe(szLwrName, pNPCSetInfo->szName);
 
-	_strlwr_s(szLwrName);
+	strlwr_safe(szLwrName);
 	auto strName = szLwrName;
 	m_NameMap.emplace(strName, pNPCSetInfo);
 }

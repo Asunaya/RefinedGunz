@@ -232,7 +232,7 @@ public:
 	u16 GetLocalPort() const { return m_LocalAddress.sin_port; }
 
 	MNetLink* FindNetLink(u32 dwIP, u16 wRawPort);
-	MNetLink* FindNetLink(__int64 nMapKey);
+	MNetLink* FindNetLink(i64 nMapKey);
 
 	void GetTraffic(int* nSendTraffic, int* nRecvTraffic) const {
 		*nSendTraffic = m_SocketThread.GetSendTraffic();

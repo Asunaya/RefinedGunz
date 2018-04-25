@@ -5,6 +5,7 @@
 #include "MBMatchServerConfigReloader.h"
 #include <memory>
 #include "MLocator.h"
+#include "MFile.h"
 
 class COutputView;
 class CCommandLogView;
@@ -89,7 +90,7 @@ protected :
 	void OnRequestAddHashMapnResponseAddHashMap( const MUID& uidSender, const string& strNewHashValue );
 
 public:
-	char	m_strFileCrcDataPath[MAX_PATH];
+	char	m_strFileCrcDataPath[MFile::MaxPath];
 
 	void InitLocator();
 

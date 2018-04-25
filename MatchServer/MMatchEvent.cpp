@@ -4,71 +4,37 @@
 #include "MAsyncDBJob_Event.h"
 #include "MMatchEvent.h"
 #include "MUtil.h"
+#include <tuple>
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-bool CheckUsableEventTimeByStartTime( const SYSTEMTIME& StartTime )
+// Use tuple's operator <= to implement a lexicographical comparison.
+auto tie_tm(const tm& t)
 {
-	bool bRes;
-	SYSTEMTIME stCurTime;
-	GetLocalTime( &stCurTime );
+	return std::tie(t.tm_year, t.tm_mon, t.tm_yday, t.tm_hour);
+};
 
-	bRes = StartTime.wHour <= stCurTime.wHour;
-
-	if( StartTime.wDay < stCurTime.wDay )
-		bRes = true;
-	else if( stCurTime.wDay < StartTime.wDay )
-		bRes = false;
-
-	if( StartTime.wMonth < stCurTime.wMonth )
-		bRes = true;
-	else if( stCurTime.wMonth < StartTime.wMonth )
-		bRes = false;
-
-	if( StartTime.wYear < stCurTime.wYear )
-		bRes = true;
-	else if( stCurTime.wYear < StartTime.wYear )
-		bRes = false;
-	
-	return bRes;
+auto get_cur_time()
+{
+	return *localtime(&unmove(time(0)));
 }
 
-
-bool CheckUsableEventTimeByEndTime( const SYSTEMTIME& EndTime )
+bool CheckUsableEventTimeByStartTime( const tm& StartTime )
 {
-	bool bRes;
-	SYSTEMTIME stCurTime;
-	GetLocalTime( &stCurTime );
+	return tie_tm(StartTime) <= tie_tm(get_cur_time());
+}
 
-	bRes = EndTime.wHour >= stCurTime.wHour;
-
-	if( EndTime.wDay > stCurTime.wDay )
-		bRes = true;
-	else if( stCurTime.wDay > EndTime.wDay )
-		bRes = false;
-
-	if( EndTime.wMonth > stCurTime.wMonth )
-		bRes = true;
-	else if( stCurTime.wMonth > EndTime.wMonth )
-		bRes = false;
-
-	if( EndTime.wYear > stCurTime.wYear )
-		bRes = true;
-	else if( stCurTime.wYear > EndTime.wYear )
-		bRes = false;
-	
-	return bRes;
+bool CheckUsableEventTimeByEndTime( const tm& EndTime )
+{
+	return tie_tm(EndTime) >= tie_tm(get_cur_time());
 }
 
 
 bool CheckUsableEventPartTime( const EventPartTime& ept )
 {
-	SYSTEMTIME stCurTime;
-	GetLocalTime( &stCurTime );
-
-	return (ept.btStartHour <= stCurTime.wHour) && (ept.btEndHour >= stCurTime.wHour);
+	auto cur_time = get_cur_time();
+	return (ept.btStartHour <= cur_time.tm_hour) && (ept.btEndHour >= cur_time.tm_hour);
 }
 
 
@@ -80,7 +46,7 @@ MMatchEvent::~MMatchEvent()
 }
 
 
-bool MMatchEvent::DoItNow( const DWORD dwCurTime )
+bool MMatchEvent::DoItNow( const u32 dwCurTime )
 {
 	return CheckEventTime() && CheckElapsedTimeIsOverflow( dwCurTime );
 }
@@ -124,8 +90,8 @@ void MMatchEvent::SetLastCheckTime( u64 dwCurTime )
 }
 
 
-void MMatchEvent::Set( const DWORD dwEventListID, const DWORD dwEventType, const DWORD dwGameType, const DWORD dwCheckElapsedTime, const DWORD dwPercent, 
-		const DWORD dwRate, const SYSTEMTIME& Start, const SYSTEMTIME& End, const string& strName, const string& strAnnounce,
+void MMatchEvent::Set( const u32 dwEventListID, const u32 dwEventType, const u32 dwGameType, const u32 dwCheckElapsedTime, const u32 dwPercent, 
+		const u32 dwRate, const tm& Start, const tm& End, const string& strName, const string& strAnnounce,
 		const float fXPBonusRatio, const float fBPBonusRatio, const vector<EventPartTime>& EventPartTimeVec )
 {
 	m_dwEventListID			= dwEventListID;
@@ -185,14 +151,14 @@ bool MMatchEvent::CheckEventPartTime()
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-void MMatchEventDesc::Set( const DWORD dwEventID, const string& strDesc )
+void MMatchEventDesc::Set( const u32 dwEventID, const string& strDesc )
 {
 	m_dwEventID = dwEventID;
 	m_strDesc = strDesc;
 }
 
 
-bool MMatchEventDescManager::Insert( const DWORD dwEventID, MMatchEventDesc* pEventDesc )
+bool MMatchEventDescManager::Insert( const u32 dwEventID, MMatchEventDesc* pEventDesc )
 {
 	if( 0 == pEventDesc ) 
 		return false;
@@ -204,7 +170,7 @@ bool MMatchEventDescManager::Insert( const DWORD dwEventID, MMatchEventDesc* pEv
 }
 
 
-const MMatchEventDesc* MMatchEventDescManager::Find( const DWORD dwEventID )
+const MMatchEventDesc* MMatchEventDescManager::Find( const u32 dwEventID )
 {
 	auto itFind = find( dwEventID );
 
@@ -320,7 +286,7 @@ bool MMatchEventDescManager::LoadEventXML( const string& strFileName )
 
 void MMatchEventDescManager::ParseEvent( MXmlElement& chrElement )
 {
-	DWORD dwEventID;
+	u32 dwEventID;
 	string strDesc;
 	MMatchEventDesc* pEventDesc;
 	char szAttrName[ 128 ];
@@ -332,7 +298,7 @@ void MMatchEventDescManager::ParseEvent( MXmlElement& chrElement )
 
 		if( 0 == _stricmp(EV_EVENTID, szAttrName) )
 		{
-			dwEventID = static_cast< DWORD >( atol(szAttrValue) );
+			dwEventID = static_cast< u32 >( atol(szAttrValue) );
 			continue;
 		}
 
@@ -361,7 +327,7 @@ MMatchProbabiltyEventPerTime::~MMatchProbabiltyEventPerTime()
 }
 
 
-void MMatchProbabiltyEventPerTime::OnCheckEventObj( MMatchObject* pObj, const DWORD dwCurTime )
+void MMatchProbabiltyEventPerTime::OnCheckEventObj( MMatchObject* pObj, const u32 dwCurTime )
 {
 	if( 0 == pObj ) 
 		return;
@@ -374,7 +340,7 @@ void MMatchProbabiltyEventPerTime::OnCheckEventObj( MMatchObject* pObj, const DW
 			pObj->GetCharInfo()->m_szName );
 #endif
 
-		const DWORD nRndNum = RandomNumber( 1, m_dwPercent );
+		const u32 nRndNum = RandomNumber( 1, m_dwPercent );
 		if( nRndNum <= m_dwRate )
 		{
 			m_vEventObj.push_back( pObj->GetUID() );		

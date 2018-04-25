@@ -378,7 +378,7 @@ void RMeshNode::RenderNodeVS(RMesh* pMesh, const rmatrix& pWorldMat_,ESHADER sha
 	__BP(5010,"RMesh::RenderNodeVS_SetVertexShaderConstant");
 
 	//Register Matrix
-	dev->SetVertexShaderConstantF( CAMERA_POSITION, RCameraPosition, 1 );
+	dev->SetVertexShaderConstantF( CAMERA_POSITION, static_cast<float*>(RCameraPosition), 1 );
 
 	dev->GetTransform(D3DTS_WORLD, static_cast<D3DMATRIX*>(world));
 	dev->GetTransform(D3DTS_VIEW, static_cast<D3DMATRIX*>(view));

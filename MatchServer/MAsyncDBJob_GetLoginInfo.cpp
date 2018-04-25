@@ -77,7 +77,7 @@ bool MAsyncDBJob_GetLoginInfo::Input(MMatchAccountInfo* pNewAccountInfo,
 			unsigned long nChecksumPack,
 			const bool bCheckPremiumIP,
 			const char* szIP,
-            DWORD dwIP,
+            u32 dwIP,
 			const string& strCountryCode3)
 {
 	m_pAccountInfo = pNewAccountInfo;

@@ -23,6 +23,8 @@ struct function_view<Ret(Args...)>
 		data = (void*)std::addressof(x);
 	}
 
+	function_view(Ret(*fn)(void*, Args...), void* data) : fn(fn), data(data) {}
+
 	Ret operator()(Args... args) const
 	{
 		return fn(data, std::forward<Args>(args)...);

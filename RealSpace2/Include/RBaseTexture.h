@@ -8,6 +8,7 @@
 #include "TextureLoader.h"
 #include "StringView.h"
 #include "MHash.h"
+#include "RTypes.h"
 
 typedef struct IDirect3DTexture9 *LPDIRECT3DTEXTURE9;
 
@@ -43,7 +44,7 @@ public:
 	auto GetTexType() const { return m_nTexType; }
 	void SetTexType(RTextureType type) { m_nTexType = type; }
 
-	auto GetFormat() const { return m_Info.Format; }
+	auto GetFormat() const { return static_cast<RPIXELFORMAT>(m_Info.Format); }
 
 	auto& GetFileName() const { return filename; }
 

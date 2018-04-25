@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#include "RMesh.h"
 #include "RAnimationFile.h"
 
 #include "RealSpace2.h"
@@ -77,7 +76,7 @@ bool RAnimationFile::LoadAni(const char* filename)
 
 	mzf.Read(&t_hd,sizeof(ex_ani_t));
 
-	DWORD ver = t_hd.ver;
+	u32 ver = t_hd.ver;
 
 	m_ani_node_cnt = t_hd.model_num;
 
@@ -122,10 +121,10 @@ bool RAnimationFile::LoadAni(const char* filename)
 			pANode->m_vertex_vcnt = vcnt;
 
 			if(pANode->m_vertex_cnt) {
-				pANode->m_vertex_frame = new DWORD[pANode->m_vertex_cnt];
+				pANode->m_vertex_frame = new u32[pANode->m_vertex_cnt];
 			}
 
-			mzf.Read(pANode->m_vertex_frame,sizeof(DWORD)*pANode->m_vertex_cnt);
+			mzf.Read(pANode->m_vertex_frame,sizeof(u32)*pANode->m_vertex_cnt);
 
 			for(j=0;j<pANode->m_vertex_cnt;j++) {
 
@@ -134,7 +133,7 @@ bool RAnimationFile::LoadAni(const char* filename)
 			}
 
 			if(ver > EXPORTER_ANI_VER1) {
-				mzf.Read(&pANode->m_vis_cnt,sizeof(DWORD) );
+				mzf.Read(&pANode->m_vis_cnt,sizeof(u32) );
 
 				if(pANode->m_vis_cnt) {
 					pANode->m_vis = new RVisKey[pANode->m_vis_cnt];
@@ -177,7 +176,7 @@ bool RAnimationFile::LoadAni(const char* filename)
 			mzf.Read(pANode->m_mat,sizeof(RTMKey)*pANode->m_mat_cnt);
 
 			if(ver > EXPORTER_ANI_VER1) {
-				mzf.Read(&pANode->m_vis_cnt,sizeof(DWORD) );
+				mzf.Read(&pANode->m_vis_cnt,sizeof(u32) );
 
 				if(pANode->m_vis_cnt) {
 					pANode->m_vis = new RVisKey[pANode->m_vis_cnt];
@@ -281,7 +280,7 @@ bool RAnimationFile::LoadAni(const char* filename)
 			}
 
 			if(ver > EXPORTER_ANI_VER1) {
-				mzf.Read(&pANode->m_vis_cnt,sizeof(DWORD) );
+				mzf.Read(&pANode->m_vis_cnt,sizeof(u32) );
 
 				if(pANode->m_vis_cnt) {
 					pANode->m_vis = new RVisKey[pANode->m_vis_cnt];

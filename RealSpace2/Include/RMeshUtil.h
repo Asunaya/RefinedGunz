@@ -3,9 +3,12 @@
 #include <list>
 #include <string>
 #include <unordered_map>
-#include <d3d9.h>
 #include "RTypes.h"
 #include "RMath.h"
+#include "GlobalTypes.h"
+#ifdef _WIN32
+#include <d3d9.h>
+#endif
 
 #define DEL(p)  { if(p) { delete (p);   (p)=NULL; } }
 #define DEL2(p) { if(p) { delete[] (p);   (p)=NULL; } }
@@ -38,15 +41,15 @@
 #define EXPORTER_SIG		0x0107f060
 
 typedef struct {
-	DWORD	sig;
-	DWORD	ver;
+	u32	sig;
+	u32	ver;
 	int		mtrl_num;
 	int		mesh_num;
 } ex_hd_t;
 
 typedef struct {
-	DWORD	sig;
-	DWORD	ver;
+	u32	sig;
+	u32	ver;
 	int		maxframe;
 	int		model_num;
 	int		ani_type;
@@ -252,14 +255,14 @@ enum RShaderBlendInput {
 
 struct RTLVertex { 
 	v4 p;   
-	DWORD color;     
-	FLOAT tu, tv; 
+	u32 color;     
+	float tu, tv; 
 };
 
 struct RLVertex { 
 	rvector p;   
-	DWORD color;     
-	FLOAT tu, tv; 
+	u32 color;     
+	float tu, tv; 
 };
 
 #ifndef _MAX_EXPORT
@@ -267,7 +270,7 @@ struct RLVertex {
 struct RVertex { 
 	rvector p;
 	rvector n; 
-	FLOAT tu, tv;
+	float tu, tv;
 };
 
 #endif
@@ -354,6 +357,7 @@ struct RPhysiqueInfo {
 #define USE_VERTEX_SW 1
 #define USE_VERTEX_HW 1<<1
 
+#ifdef _WIN32
 class RIndexBuffer final {
 public:
 	RIndexBuffer();
@@ -362,8 +366,8 @@ public:
 	void Lock();
 	void Unlock();
 
-	void Update(int size,WORD* pData);
-	bool Create(int size,WORD* pData,DWORD flag=USE_VERTEX_HW|USE_VERTEX_SW,DWORD Usage=D3DUSAGE_WRITEONLY,D3DPOOL Pool=D3DPOOL_MANAGED);
+	void Update(int size,u16* pData);
+	bool Create(int size,u16* pData,u32 flag=USE_VERTEX_HW|USE_VERTEX_SW,u32 Usage=D3DUSAGE_WRITEONLY,D3DPOOL Pool=D3DPOOL_MANAGED);
 
 
 	int GetFaceCnt();
@@ -375,12 +379,12 @@ public:
 	bool	m_bUseSWVertex;
 	bool	m_bUseHWVertex;
 
-	DWORD	m_dwUsage;
+	u32	m_dwUsage;
 	D3DPOOL	m_dwPool;
-	DWORD	m_dwLockFlag;
+	u32	m_dwLockFlag;
 
-	WORD*	m_pIndex;
-	WORD*	m_i;
+	u16*	m_pIndex;
+	u16*	m_i;
 
 	int m_size;
 	LPDIRECT3DINDEXBUFFER9 m_ib;
@@ -394,10 +398,10 @@ public:
 	void Init();
 	void Clear();
 
-	bool Create(char* pVertex, DWORD fvf, int VertexSize, int VertexCnt,
-		DWORD flag, DWORD Usage = D3DUSAGE_WRITEONLY, D3DPOOL Pool = D3DPOOL_MANAGED);
+	bool Create(char* pVertex, u32 fvf, int VertexSize, int VertexCnt,
+		u32 flag, u32 Usage = D3DUSAGE_WRITEONLY, D3DPOOL Pool = D3DPOOL_MANAGED);
 
-	bool Update(char* pVertex,DWORD fvf,int VertexSize,int VertexCnt);
+	bool Update(char* pVertex,u32 fvf,int VertexSize,int VertexCnt);
 	bool UpdateData(char* pVertex);		
 	bool UpdateDataSW(char* pVertex);
 	bool UpdateDataHW(char* pVertex);
@@ -434,10 +438,10 @@ public:
 	char*	m_pVert;
 	char*	m_v;
 
-	DWORD	m_dwFVF;
-	DWORD	m_dwUsage;
+	u32	m_dwFVF;
+	u32	m_dwUsage;
 	D3DPOOL	m_dwPool;
-	DWORD	m_dwLockFlag;
+	u32	m_dwLockFlag;
 	int		m_nVertexSize;
 	int		m_nVertexCnt;
 	int		m_nBufferSize;
@@ -449,16 +453,18 @@ public:
 
 	LPDIRECT3DVERTEXBUFFER9	m_vb;
 };
+#endif
 
 rquaternion* QuaternionUnitAxisToUnitAxis2(rquaternion *pOut, const rvector *pvFrom, const rvector *pvTo);
 rquaternion* QuaternionAxisToAxis(rquaternion *pOut, const rvector *pvFrom, const rvector *pvTo);
 
+#ifdef _WIN32
 class CD3DArcBall
 {
-	INT            m_iWidth;				
-	INT            m_iHeight;				
-	FLOAT          m_fRadius;				
-	FLOAT          m_fRadiusTranslation;	
+	int            m_iWidth;				
+	int            m_iHeight;				
+	float          m_fRadius;				
+	float          m_fRadiusTranslation;	
 
 	rquaternion m_qDown;					
 	rquaternion m_qNow;
@@ -466,8 +472,8 @@ class CD3DArcBall
 	rmatrix     m_matRotationDelta;		
 	rmatrix     m_matTranslation;		
 	rmatrix     m_matTranslationDelta;	
-	BOOL           m_bDrag;					
-	BOOL           m_bRightHanded;			
+	bool           m_bDrag;					
+	bool           m_bRightHanded;			
 
 	rvector ScreenToVector( int sx, int sy );
 
@@ -479,24 +485,27 @@ public:
 	rmatrix* GetRotationDeltaMatrix()    { return &m_matRotationDelta; }
 	rmatrix* GetTranslationMatrix()      { return &m_matTranslation; }
 	rmatrix* GetTranslationDeltaMatrix() { return &m_matTranslationDelta; }
-	BOOL        IsBeingDragged()            { return m_bDrag; }
+	bool        IsBeingDragged()            { return m_bDrag; }
 
-	VOID        SetRadius( FLOAT fRadius );
-	VOID        SetWindow( INT w, INT h, FLOAT r=0.9 );
-	VOID        SetRightHanded( BOOL bRightHanded ) { m_bRightHanded = bRightHanded; }
+	VOID        SetRadius( float fRadius );
+	VOID        SetWindow( int w, int h, float r=0.9 );
+	VOID        SetRightHanded( bool bRightHanded ) { m_bRightHanded = bRightHanded; }
 
 	CD3DArcBall();
 };
+#endif
 
 void RRot2Quat(RQuatKey& q, const RRotKey& v);
 void RQuat2Mat(rmatrix& mat, const RQuatKey& q);
 
-void draw_line(LPDIRECT3DDEVICE9 dev, rvector* vec, int size, DWORD color);
-void draw_box(rmatrix* wmat, const rvector& max, const rvector& min, DWORD color);
-void draw_query_fill_box(rmatrix* wmat , rvector& max,rvector& min,DWORD color);
+struct IDirect3DDevice9;
+using LPDIRECT3DDEVICE9 = IDirect3DDevice9*;
+void draw_line(LPDIRECT3DDEVICE9 dev, rvector* vec, int size, u32 color);
+void draw_box(rmatrix* wmat, const rvector& max, const rvector& min, u32 color);
+void draw_query_fill_box(rmatrix* wmat , rvector& max,rvector& min,u32 color);
 
-void _GetModelTry(RLVertex* pVert,int size,DWORD color,int* face_num);
-void _draw_try(LPDIRECT3DDEVICE9 dev,rmatrix& mat,float size,DWORD color);
+void _GetModelTry(RLVertex* pVert,int size,u32 color,int* face_num);
+void _draw_try(LPDIRECT3DDEVICE9 dev,rmatrix& mat,float size,u32 color);
 void _draw_matrix(LPDIRECT3DDEVICE9 dev,rmatrix& mat,float size);
 
 class RDebugStr
@@ -570,24 +579,24 @@ protected:
 	std::unordered_map<int, T>			m_HashMapID;
 public:
 	void PushBack(T pNode) {
-		push_back(pNode);
-		m_HashMap.insert(typename std::unordered_map<std::string, T>::value_type(std::string(pNode->GetName()), pNode));
+		this->push_back(pNode);
+		m_HashMap.insert({std::string(pNode->GetName()), pNode});
 		if (pNode->m_NameID != -1)
-			m_HashMapID.insert(typename std::unordered_map<int, T>::value_type(pNode->m_NameID, pNode));
+			m_HashMapID.insert({pNode->m_NameID, pNode});
 
 	}
 
 	void Clear() {
 		m_HashMap.clear();
 		m_HashMapID.clear();
-		clear();
+		this->clear();
 	}
 
 	auto Erase(typename RHashList<T>::iterator where) {
 
-		auto itor = erase(where);
+		auto itor = this->erase(where);
 
-		if (itor != end()) {
+		if (itor != this->end()) {
 
 			auto it = m_HashMap.find(std::string((*itor)->GetName()));
 

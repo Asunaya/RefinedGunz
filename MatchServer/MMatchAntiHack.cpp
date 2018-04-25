@@ -6,8 +6,7 @@ std::list<unsigned int>	MMatchAntiHack::m_clientFileListCRC;
 
 void MMatchAntiHack::InitClientFileList()
 {
-	FILE* fp;
-	fopen_s(&fp, "filelistcrc.txt", "r");
+	FILE* fp = fopen("filelistcrc.txt", "r");
 	if (fp == NULL) return;
 
 	char str[256];
@@ -15,7 +14,7 @@ void MMatchAntiHack::InitClientFileList()
 	while (fgets(str, 256, fp) != NULL)
 	{
 		unsigned int crc;
-		sscanf_s(str, "%u", &crc);
+		sscanf(str, "%u", &crc);
 		m_clientFileListCRC.push_back(crc);
 	}
 

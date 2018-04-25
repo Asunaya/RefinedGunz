@@ -12,8 +12,12 @@
 #include "rquaternion.h"
 #include "ColorTypes.h"
 
-enum _D3DFORMAT;
-using RPIXELFORMAT = _D3DFORMAT;
+#ifdef _WIN32
+using D3DFORMAT = enum _D3DFORMAT;
+using RPIXELFORMAT = D3DFORMAT;
+#else
+using RPIXELFORMAT = u32;
+#endif
 
 _NAMESPACE_REALSPACE2_BEGIN
 
@@ -60,14 +64,14 @@ struct RMODEPARAMS {
 struct rboundingbox
 {
 	rboundingbox() = default;
-	rboundingbox(const v3& vmin, const v3& vmax) : vmin{ vmin }, vmax{ vmax } {}
+	rboundingbox(const v3& vmin, const v3& vmax) : vmin{ EXPAND_VECTOR(vmin) }, vmax{ EXPAND_VECTOR(vmax) } {}
 
 	union {
 	struct {
 		float minx, miny, minz, maxx, maxy, maxz;
 	};
 	struct {
-		rvector vmin,vmax;
+		v3_pod vmin,vmax;
 	};
 	float m[2][3];
 	};

@@ -418,13 +418,13 @@ void MClanGameStrategy::SavePointOnFinishGame(MMatchStage* pStage, MMatchTeam nW
 			if (pObj->GetTeam() == nWinnerTeam)
 			{
 				WinnerObjUIDs.push_back(pObj->GetUID());
-				strcat_s(szWinnerMembers, pObj->GetCharInfo()->m_szName);
-				strcat_s(szWinnerMembers, " ");
+				strcat_safe(szWinnerMembers, pObj->GetCharInfo()->m_szName);
+				strcat_safe(szWinnerMembers, " ");
 			}
 			else
 			{
-				strcat_s(szLoserMembers, pObj->GetCharInfo()->m_szName);
-				strcat_s(szLoserMembers, " ");
+				strcat_safe(szLoserMembers, pObj->GetCharInfo()->m_szName);
+				strcat_safe(szLoserMembers, " ");
 			}
 		}
 	}

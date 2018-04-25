@@ -1,5 +1,8 @@
 #include "stdafx.h"
 #include "BasicInfoHistory.h"
+#include "RAnimation.h"
+#include "RAnimationMgr.h"
+using namespace RealSpace2;
 
 void BasicInfoHistoryManager::AddBasicInfo(BasicInfoItem bii)
 {

@@ -5,7 +5,5 @@ file(GLOB src
 
 add_target(NAME SafeUDP TYPE STATIC SOURCES "${src}")
 
-target_include_directories(SafeUDP PUBLIC
-	.
-	Include
-	../CML/Include)
+target_include_directories(SafeUDP PUBLIC . Include)
+target_link_libraries(SafeUDP PUBLIC cml)

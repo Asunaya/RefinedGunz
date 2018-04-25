@@ -10,24 +10,26 @@ target_include_directories(MatchServer PRIVATE
 	../Locator
 	../sdk)
 
-find_library(zlib_path NAMES zlib PATHS ../sdk/zlib/lib)
-
 target_link_libraries(MatchServer PUBLIC
-	${zlib_path}
+	zlib
 	sodium
 	sqlite
 	rapidxml
-	legacy_stdio_definitions.lib
+	ini
 	cml
 	CSCommon
 	RealSpace2
 	SafeUDP
-	MDatabase
 	Locator)
+
+if (UNIX)
+	target_link_libraries(MatchServer PUBLIC dl)
+endif()
 
 target_compile_options(MatchServer PRIVATE 
 	-D_WINSOCKAPI_)
 
-if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+if (MSVC)
 	ucm_add_linker_flags(/SUBSYSTEM:CONSOLE)
+	target_link_libraries(MatchServer PUBLIC legacy_stdio_definitions.lib MDatabase)
 endif()

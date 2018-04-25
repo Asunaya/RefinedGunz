@@ -7,7 +7,7 @@
 #include "MBaseStringResManager.h"
 
 
-WORD MMatchEventFactoryManager::m_LoadEventSize = 0;
+u16 MMatchEventFactoryManager::m_LoadEventSize = 0;
 
 
 MMatchEventFactory::MMatchEventFactory()
@@ -115,7 +115,7 @@ bool MMatchEventFactory::MakeEventList( const EventDataVec& EvnDataVec, EventPtr
 }
 
 
-MMatchEvent* MMatchEventFactory::CreateEvent( const DWORD dwEventID )
+MMatchEvent* MMatchEventFactory::CreateEvent( const u32 dwEventID )
 {
 	switch( dwEventID )
 	{
@@ -190,7 +190,7 @@ MMatchEvent* MMatchEventFactory::CreateEvent( const DWORD dwEventID )
 }
 
 
-void MMatchEventFactory::CreateFailMLog( MMatchEvent* pEvent, const DWORD dwEventID )
+void MMatchEventFactory::CreateFailMLog( MMatchEvent* pEvent, const u32 dwEventID )
 {
 	mlog( "Fail to create event : created event:%u, event:%u\n",
 		pEvent->GetEventID(), dwEventID );
@@ -405,23 +405,23 @@ void MMatchEventFactoryManager::ParseEvent( MXmlElement& chrElement )
 	char szAttrName[ 128 ];
 	char szAttrValue[ 256 ];
 	
-	DWORD						dwEventListID = 0;
-	DWORD						dwEventID = 0;
+	u32						dwEventListID = 0;
+	u32						dwEventID = 0;
 	string						strEventName;
 	string						strAnnounce;
 	EVENT_TYPE					EventType;
-	DWORD						dwElapsedTime = 0;
-	DWORD						dwPercent = 0;
-	DWORD						dwRate = 0;
+	u32						dwElapsedTime = 0;
+	u32						dwPercent = 0;
+	u32						dwRate = 0;
 	vector< EventServerType >	vServerType;
 	vector< EventGameType >		vGameType;
-	SYSTEMTIME					Start, End;
+	tm					Start, End;
 	float						fXPBonusRatio = 0.0f;
 	float						fBPBonusRatio = 0.0f;
 	vector< EventPartTime >		EventPartTimeVec;
 
-	memset( &Start, 0, sizeof(SYSTEMTIME) );
-	memset( &End, 0, sizeof(SYSTEMTIME) );
+	memset( &Start, 0, sizeof(tm) );
+	memset( &End, 0, sizeof(tm) );
 
 	const int nAttrCnt = chrElement.GetAttributeCount();
 	for( int i = 0; i < nAttrCnt; ++i )
@@ -430,14 +430,14 @@ void MMatchEventFactoryManager::ParseEvent( MXmlElement& chrElement )
 
 		if( 0 == _stricmp(EL_EVENT_LIST_ID, szAttrName) )
 		{
-			dwEventListID = static_cast< DWORD >( atoi(szAttrValue) );
+			dwEventListID = static_cast< u32 >( atoi(szAttrValue) );
 			ASSERT( 0 < dwEventListID );
 			continue;
 		}
 
 		if( 0 == _stricmp(EL_EVENTID, szAttrName) )
 		{
-			dwEventID = static_cast< DWORD >( atol(szAttrValue) );
+			dwEventID = static_cast< u32 >( atol(szAttrValue) );
 			if( NULL == MMatchEventDescManager::GetInstance().Find(dwEventID) )
 			{
 				// TODO: Fix
@@ -463,19 +463,19 @@ void MMatchEventFactoryManager::ParseEvent( MXmlElement& chrElement )
 
 		if( 0 == _stricmp(EL_ELAPSEDTIME, szAttrName) )
 		{
-			dwElapsedTime = static_cast< DWORD >( atoi(szAttrValue) );
+			dwElapsedTime = static_cast< u32 >( atoi(szAttrValue) );
 			continue;
 		}
 
 		if( 0 == _stricmp(EL_PERCENT, szAttrName) )
 		{
-			dwPercent = static_cast< DWORD >( atol(szAttrValue) );
+			dwPercent = static_cast< u32 >( atol(szAttrValue) );
 			continue;
 		}
 
 		if( 0 == _stricmp(EL_RATE, szAttrName) )
 		{
-			dwRate = static_cast< DWORD >( atol(szAttrValue) );
+			dwRate = static_cast< u32 >( atol(szAttrValue) );
 			continue;
 		}
 
@@ -548,8 +548,8 @@ void MMatchEventFactoryManager::ParseEvent( MXmlElement& chrElement )
 #ifdef _DEBUG
 		mlog( "Time out Event(%u:%u.%u.%u.%u~%u.%u.%u.%u)\n", 
 			dwEventID,
-			Start.wYear, Start.wMonth, Start.wDay, Start.wHour,
-			End.wYear, End.wMonth, End.wDay, End.wHour );
+			Start.tm_year, Start.tm_mon, Start.tm_yday, Start.tm_hour,
+			End.tm_year, End.tm_mon, End.tm_yday, End.tm_hour);
 #endif
 		return;
 	}
@@ -575,8 +575,8 @@ void MMatchEventFactoryManager::ParseEvent( MXmlElement& chrElement )
 		}
 	}
 
-	ASSERT( (0 < Start.wYear) && (0 < Start.wMonth) && (0 < Start.wDay) && (0 <= Start.wHour) &&
-			(0 < End.wYear) && (0 < End.wMonth) && (0 < End.wDay) && (0 <= End.wHour) );
+	ASSERT( (0 < Start.tm_year) && (0 < Start.tm_mon) && (0 < Start.tm_yday) && (0 <= Start.tm_hour) &&
+			(0 < End.tm_year) && (0 < End.tm_mon) && (0 < End.tm_yday) && (0 <= End.tm_hour) );
 
 	// check game type.
 	if( bUseEvent )
@@ -625,7 +625,7 @@ void MMatchEventFactoryManager::ParseServerType( MXmlElement& chrElement, vector
 
 		if( 0 == _stricmp(EL_ORDER, szAttrName) )
 		{
-			ServerType.dwOrder = static_cast< DWORD >( atoi(szAttrValue) );
+			ServerType.dwOrder = static_cast< u32 >( atoi(szAttrValue) );
 			continue;
 		}
 
@@ -652,7 +652,7 @@ void MMatchEventFactoryManager::ParseGameType( MXmlElement& chrElement, vector< 
 
 		if( 0 == _stricmp(EL_ORDER, szAttrName) )
 		{
-			GameType.dwOrder = static_cast< DWORD >( atol(szAttrValue) );
+			GameType.dwOrder = static_cast< u32 >( atol(szAttrValue) );
 			continue;
 		}
 
@@ -667,7 +667,7 @@ void MMatchEventFactoryManager::ParseGameType( MXmlElement& chrElement, vector< 
 }
 
 
-void MMatchEventFactoryManager::ParseStartEndTime( MXmlElement& chrElement, SYSTEMTIME& stTime )
+void MMatchEventFactoryManager::ParseStartEndTime( MXmlElement& chrElement, tm& stTime )
 {
 	memset( &stTime, 0, sizeof(stTime) );
 
@@ -680,25 +680,25 @@ void MMatchEventFactoryManager::ParseStartEndTime( MXmlElement& chrElement, SYST
 
 		if( 0 == _stricmp(EL_YEAR, szAttrName) )
 		{
-			stTime.wYear =  static_cast< WORD >( atoi(szAttrValue) );
+			stTime.tm_year =  static_cast< u16 >( atoi(szAttrValue) );
 			continue;
 		}
 
 		if( 0 == _stricmp(EL_MONTH, szAttrName) )
 		{
-			stTime.wMonth = static_cast< WORD >( atoi(szAttrValue) );
+			stTime.tm_mon = static_cast< u16 >( atoi(szAttrValue) );
 			continue;
 		}
 
 		if( 0 == _stricmp(EL_DAY, szAttrName) )
 		{
-			stTime.wDay = static_cast< WORD >( atoi(szAttrValue) );
+			stTime.tm_yday = static_cast< u16 >( atoi(szAttrValue) );
 			continue;
 		}
 
 		if( 0 == _stricmp(EL_HOUR, szAttrName) )
 		{
-			stTime.wHour = static_cast< WORD >( atoi(szAttrValue) );
+			stTime.tm_hour = static_cast< u16 >( atoi(szAttrValue) );
 			continue;
 		}
 	}
@@ -725,13 +725,13 @@ void MMatchEventFactoryManager::ParseEventPartTime( MXmlElement& chrElement, vec
 
 		if( 0 == _stricmp(EL_START_HOUR, szAttrName) )
 		{
-			ept.btStartHour = static_cast< BYTE >( atoi(szAttrValue) );
+			ept.btStartHour = static_cast< u8 >( atoi(szAttrValue) );
 			continue;
 		}
 
 		if( 0 == _stricmp(EL_END_HOUR, szAttrName) )
 		{
-			ept.btEndHour = static_cast< BYTE >( atoi(szAttrValue) );
+			ept.btEndHour = static_cast< u8 >( atoi(szAttrValue) );
 			continue;
 		}
 	}

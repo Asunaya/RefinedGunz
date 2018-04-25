@@ -22,7 +22,7 @@ struct sFlareElement
 {
 	int iType;
 	float width, height;
-	DWORD color;
+	u32 color;
 	int iTextureIndex;
 };
 
@@ -52,7 +52,7 @@ private:
 	bool draw(float x_, float y_,
 		float width_, float height_,
 		float alpha,
-		DWORD color_,
+		u32 color_,
 		int	textureIndex_);
 
 	static bool ReadXmlElement(MXmlElement* PNode, char* Path);

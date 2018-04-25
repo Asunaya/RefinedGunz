@@ -175,8 +175,8 @@ private:
 
 Range<RecursiveMZFileIterator> FilesInDirRecursive(const MZDirDesc& Dir);
 
+void GetRefineFilename(char *szRefine, int maxlen, const char *szSource);
 template<size_t size> void GetRefineFilename(char(&szRefine)[size], const char *szSource) {
 	GetRefineFilename(szRefine, size, szSource);
 }
-void GetRefineFilename(char *szRefine, int maxlen, const char *szSource);
 unsigned MGetCRC32(const char *data, int nLength);
