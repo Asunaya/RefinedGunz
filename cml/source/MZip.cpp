@@ -128,7 +128,7 @@ MZip::~MZip()
 	Finalize();
 }
 
-bool MZip::isReadAble(unsigned long mode)
+bool MZip::isReadAble(u32 mode)
 {
 	if (m_nZipMode == ZMode_Zip) {
 		return (MZIPREADFLAG_ZIP & mode) != 0;
@@ -142,7 +142,7 @@ bool MZip::isReadAble(unsigned long mode)
 	return false;
 }
 
-bool MZip::Initialize(FILE* fp, unsigned long ReadMode)
+bool MZip::Initialize(FILE* fp, u32 ReadMode)
 {
 	if (fp == NULL) return false;
 
@@ -152,7 +152,7 @@ bool MZip::Initialize(FILE* fp, unsigned long ReadMode)
 	return InitializeImpl();
 }
 
-bool MZip::Initialize(const char * File, size_t Size, unsigned long ReadMode)
+bool MZip::Initialize(const char * File, size_t Size, u32 ReadMode)
 {
 	FileBuffer = File;
 	FileSize = Size;

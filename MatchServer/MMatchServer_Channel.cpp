@@ -461,15 +461,15 @@ void MMatchServer::ChannelResponsePlayerList(const MUID& uidPlayer, const MUID& 
 	RouteToListener(pObj, pNew);
 }
 
-void MMatchServer::OnChannelRequestAllPlayerList(const MUID& uidPlayer, const MUID& uidChannel, unsigned long int nPlaceFilter,
-												 unsigned long int nOptions)
+void MMatchServer::OnChannelRequestAllPlayerList(const MUID& uidPlayer, const MUID& uidChannel, u32 nPlaceFilter,
+												 u32 nOptions)
 {
 	ChannelResponseAllPlayerList(uidPlayer, uidChannel, nPlaceFilter, nOptions);
 }
 
 
-void MMatchServer::ChannelResponseAllPlayerList(const MUID& uidPlayer, const MUID& uidChannel, unsigned long int nPlaceFilter,
-												unsigned long int nOptions)
+void MMatchServer::ChannelResponseAllPlayerList(const MUID& uidPlayer, const MUID& uidChannel, u32 nPlaceFilter,
+												u32 nOptions)
 {
 	MMatchChannel* pChannel = FindChannel(uidChannel);
 	if (pChannel == NULL) return;

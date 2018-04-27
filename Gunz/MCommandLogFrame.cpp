@@ -29,7 +29,7 @@ MCommandLogFrame::~MCommandLogFrame(void)
 	delete m_pCommandList;
 }
 
-void MCommandLogFrame::AddCommand(unsigned long int nGlobalClock, MCommand* pCmd)
+void MCommandLogFrame::AddCommand(u32 nGlobalClock, MCommand* pCmd)
 {
 #ifndef _PUBLISH
 	char temp[1024];

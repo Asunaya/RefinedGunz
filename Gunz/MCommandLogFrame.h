@@ -14,7 +14,7 @@ protected:
 public:
 	MCommandLogFrame(const char* szName=NULL, MWidget* pParent=NULL, MListener* pListener=NULL);
 	virtual ~MCommandLogFrame(void);
-	void AddCommand(unsigned long int nGlobalClock, MCommand* pCmd);
+	void AddCommand(u32 nGlobalClock, MCommand* pCmd);
 	MListBox* GetCommandList() { return m_pCommandList; }
 };
 

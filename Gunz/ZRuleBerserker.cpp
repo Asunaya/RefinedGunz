@@ -33,7 +33,7 @@ bool ZRuleBerserker::OnCommand(MCommand* pCommand)
 	case MC_MATCH_GAME_DEAD:
 		{
 			MUID uidAttacker, uidVictim;
-			unsigned long int nAttackerArg, nVictimArg;
+			u32 nAttackerArg, nVictimArg;
 
 			pCommand->GetParameter(&uidAttacker, 0, MPT_UID);
 			pCommand->GetParameter(&nAttackerArg, 1, MPT_UINT);

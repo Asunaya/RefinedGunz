@@ -47,7 +47,7 @@ class ZActor : public ZCharacterObjectHistory
 	friend ZBrain;
 	friend ZActorAnimation;
 private:
-	unsigned long int		m_nFlags;
+	u32		m_nFlags;
 	void UpdateHeight(float fDelta);
 	void UpdatePosition(float fDelta);
 protected:
@@ -75,7 +75,7 @@ protected:
 		ACTOR_LASTTIME_BASICINFO,
 		ACTOR_LASTTIME_MAX
 	};
-	unsigned long int	m_nLastTime[ACTOR_LASTTIME_MAX];
+	u32	m_nLastTime[ACTOR_LASTTIME_MAX];
 
 	ZModule_Skills			*m_pModule_Skills;
 
@@ -118,7 +118,7 @@ public:
 	inline void SetFlag(unsigned int nFlag, bool bValue);
 	inline bool CheckFlag(unsigned int nFlag);
 	inline void SetFlags(unsigned int nFlags);
-	inline unsigned long GetFlags();
+	inline u32 GetFlags();
 	inline bool IsMyControl();
 	inline int GetHP();
 	inline int GetAP();
@@ -191,7 +191,7 @@ inline bool ZActor::CheckFlag(unsigned int nFlag)
 	return ((m_nFlags & nFlag) != 0);
 }
 
-inline unsigned long ZActor::GetFlags() 
+inline u32 ZActor::GetFlags() 
 { 
 	return m_nFlags; 
 }

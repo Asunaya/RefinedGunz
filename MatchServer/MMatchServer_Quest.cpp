@@ -261,7 +261,7 @@ void MMatchServer::OnResponseCharQuestItemList( const MUID& uidSender )
 }
 
 
-void MMatchServer::OnRequestBuyQuestItem( const MUID& uidSender, const unsigned long int nItemID )
+void MMatchServer::OnRequestBuyQuestItem( const MUID& uidSender, const u32 nItemID )
 {
 #ifdef _QUEST_ITEM
 	if (MGetServerConfig()->GetServerMode() == MSM_TEST)
@@ -270,7 +270,7 @@ void MMatchServer::OnRequestBuyQuestItem( const MUID& uidSender, const unsigned 
 	}
 #endif
 }
-void MMatchServer::OnResponseBuyQeustItem( const MUID& uidSender, const unsigned long int nItemID )
+void MMatchServer::OnResponseBuyQeustItem( const MUID& uidSender, const u32 nItemID )
 {
 	MMatchObject* pPlayer = GetObject( uidSender );
 	if( !IsEnabledObject(pPlayer) )
@@ -391,7 +391,7 @@ void MMatchServer::OnResponseBuyQeustItem( const MUID& uidSender, const unsigned
 }
 
 
-void MMatchServer::OnRequestSellQuestItem( const MUID& uidSender, const unsigned long int nItemID, const int nCount )
+void MMatchServer::OnRequestSellQuestItem( const MUID& uidSender, const u32 nItemID, const int nCount )
 {
 #ifdef _QUEST_ITEM
 	if (MGetServerConfig()->GetServerMode() == MSM_TEST)
@@ -402,7 +402,7 @@ void MMatchServer::OnRequestSellQuestItem( const MUID& uidSender, const unsigned
 }
 
 
-void MMatchServer::OnResponseSellQuestItem( const MUID& uidSender, const unsigned long int nItemID, const int nCount )
+void MMatchServer::OnResponseSellQuestItem( const MUID& uidSender, const u32 nItemID, const int nCount )
 {
 	MMatchObject* pPlayer = GetObject( uidSender );
 	if( !IsEnabledObject(pPlayer) )
@@ -483,7 +483,7 @@ void MMatchServer::OnResponseSellQuestItem( const MUID& uidSender, const unsigne
 }
 
 
-void MMatchServer::OnRequestDropSacrificeItemOnSlot( const MUID& uidSender, const int nSlotIndex, const unsigned long int nItemID )
+void MMatchServer::OnRequestDropSacrificeItemOnSlot( const MUID& uidSender, const int nSlotIndex, const u32 nItemID )
 {
 #ifdef _QUEST_ITEM
 	if (MGetServerConfig()->GetServerMode() == MSM_TEST)
@@ -519,7 +519,7 @@ void MMatchServer::OnRequestDropSacrificeItemOnSlot( const MUID& uidSender, cons
 }
 
 
-void MMatchServer::OnRequestCallbackSacrificeItem( const MUID& uidSender, const int nSlotIndex, const unsigned long int nItemID )
+void MMatchServer::OnRequestCallbackSacrificeItem( const MUID& uidSender, const int nSlotIndex, const u32 nItemID )
 {
 #ifdef _QUEST_ITEM
 	if (MGetServerConfig()->GetServerMode() == MSM_TEST)

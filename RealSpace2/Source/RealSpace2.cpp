@@ -135,9 +135,9 @@ void RSetTransform(D3DTRANSFORMSTATETYPE ts, const rmatrix & mat)
 {
 	RGetDevice()->SetTransform(ts, static_cast<const D3DMATRIX*>(mat));
 }
-static unsigned long g_rsnRenderFlags = RRENDER_CLEAR_BACKBUFFER;
-void RSetRenderFlags(unsigned long nFlags) { g_rsnRenderFlags = nFlags; }
-unsigned long RGetRenderFlags() { return g_rsnRenderFlags; }
+static u32 g_rsnRenderFlags = RRENDER_CLEAR_BACKBUFFER;
+void RSetRenderFlags(u32 nFlags) { g_rsnRenderFlags = nFlags; }
+u32 RGetRenderFlags() { return g_rsnRenderFlags; }
 int RGetVideoMemory() { return g_nVideoMemory; }
 
 int RGetApproxVMem() {

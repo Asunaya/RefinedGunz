@@ -152,11 +152,11 @@ bool ZGameClient::OnCommand(MCommand* pCommand)
 	break;
 	case MC_CLOCK_SYNCHRONIZE:
 	{
-		unsigned long int nGlobalClock;
+		u32 nGlobalClock;
 		pCommand->GetParameter(&nGlobalClock, 0, MPT_UINT);
 
 
-		unsigned long int nLocalClock = GetClockCount();
+		u32 nLocalClock = GetClockCount();
 
 		if (nGlobalClock > nLocalClock) m_bIsBigGlobalClock = true;
 		else m_bIsBigGlobalClock = false;
@@ -461,7 +461,7 @@ bool ZGameClient::OnCommand(MCommand* pCommand)
 	case MC_ADMIN_ANNOUNCE:
 	{
 		char szChat[512];
-		unsigned long int nMsgType = 0;
+		u32 nMsgType = 0;
 
 		pCommand->GetParameter(szChat, 1, MPT_STR, sizeof(szChat));
 		pCommand->GetParameter(&nMsgType, 2, MPT_UINT);

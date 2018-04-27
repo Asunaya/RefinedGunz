@@ -248,7 +248,7 @@ void MMatchItemDescMgr::Clear()
 		erase(begin());
 	}
 }
-MMatchItemDesc* MMatchItemDescMgr::GetItemDesc(unsigned long int nID)
+MMatchItemDesc* MMatchItemDescMgr::GetItemDesc(u32 nID)
 {
 	iterator itor = find(nID);
 	if (itor != end())

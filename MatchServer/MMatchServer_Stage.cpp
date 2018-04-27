@@ -1246,7 +1246,7 @@ void MMatchServer::OnRequestSpawn(const MUID& uidChar, const MVector& pos, const
 	RouteToBattle(pObj->GetStageUID(), pCmd);
 }
 
-void MMatchServer::OnGameRequestTimeSync(const MUID& uidComm, unsigned long nLocalTimeStamp)
+void MMatchServer::OnGameRequestTimeSync(const MUID& uidComm, u32 nLocalTimeStamp)
 {
 	MMatchObject* pObj = GetPlayerByCommUID(uidComm);
 	if (pObj == NULL) return;
@@ -1260,7 +1260,7 @@ void MMatchServer::OnGameRequestTimeSync(const MUID& uidComm, unsigned long nLoc
 	RouteToListener(pObj, pCmd);
 }
 
-void MMatchServer::OnGameReportTimeSync(const MUID& uidComm, unsigned long nLocalTimeStamp, unsigned int nDataChecksum)
+void MMatchServer::OnGameReportTimeSync(const MUID& uidComm, u32 nLocalTimeStamp, unsigned int nDataChecksum)
 {
 	MMatchObject* pObj = GetPlayerByCommUID(uidComm);
 	if (pObj == NULL) return;
@@ -1731,8 +1731,8 @@ void MMatchServer::ApplyObjectTeamBonus(MMatchObject* pObject, int nAddedExp)
 
 	MUID uidStage = pObject->GetStageUID();
 
-	unsigned long int nExpArg;
-	unsigned long int nChrExp;
+	u32 nExpArg;
+	u32 nChrExp;
 	int nPercent;
 
 	nChrExp = pObject->GetCharInfo()->m_nXP;
@@ -1756,13 +1756,13 @@ void MMatchServer::ApplyObjectTeamBonus(MMatchObject* pObject, int nAddedExp)
 void MMatchServer::PostGameDeadOnGameKill(MUID& uidStage, MMatchObject* pAttacker, MMatchObject* pVictim,
 									int nAddedAttackerExp, int nSubedVictimExp)
 {
-	unsigned long int nAttackerArg = 0;
-	unsigned long int nVictimArg =0;
+	u32 nAttackerArg = 0;
+	u32 nVictimArg =0;
 
 	int nRealAttackerLevel = pAttacker->GetCharInfo()->m_nLevel;
 	int nRealVictimLevel = pVictim->GetCharInfo()->m_nLevel;
 
-	unsigned long int nChrExp;
+	u32 nChrExp;
 	int nPercent;
 
 	nChrExp = pAttacker->GetCharInfo()->m_nXP;
@@ -2280,7 +2280,7 @@ void MMatchServer::OnDuelQueueInfo(const MUID& uidStage, const MTD_DuelQueueInfo
 	RouteToBattle(uidStage, pCmd);
 }
 
-void MMatchServer::OnQuestSendPing(const MUID& uidStage, unsigned long int t)
+void MMatchServer::OnQuestSendPing(const MUID& uidStage, u32 t)
 {
 	MCommand* pCmd = CreateCommand(MC_QUEST_PING, MUID(0,0));
 	pCmd->AddParameter(new MCommandParameterUInt(t));

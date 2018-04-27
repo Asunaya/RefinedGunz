@@ -41,7 +41,7 @@ void MAsyncDBJob_CharFinalize::Run(void* pContext)
 
 
 bool MAsyncDBJob_CharFinalize::Input(int nCID, 
- 									 unsigned long int nPlayTime, 
+ 									 u32 nPlayTime, 
 									 int nConnKillCount, 
 									 int nConnDeathCount, 
 									 int nConnXP, 

@@ -150,7 +150,7 @@ void ZChatCmdManager::AddCommand(int nID, const char* szName, ZChatCmdProc fnPro
 	m_CmdMap.emplace(szLwrName, std::move(Cmd));
 }
 
-bool ZChatCmdManager::DoCommand(const char* szLine, ZChatCmdFlag nCurrFlag, unsigned long nInputFlag)
+bool ZChatCmdManager::DoCommand(const char* szLine, ZChatCmdFlag nCurrFlag, u32 nInputFlag)
 {
 	if ((szLine == 0) || (szLine[0] == 0)) return false;
 	

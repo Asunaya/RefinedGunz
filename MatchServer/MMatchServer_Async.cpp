@@ -401,8 +401,8 @@ void MMatchServer::OnAsyncBringAccountItem(MAsyncJob* pJobResult)
 
 	if (pJob->GetResult() == MASYNC_RESULT_SUCCEED) 
 	{
-		unsigned long int nNewCIID =	pJob->GetNewCIID();
-		unsigned long int nNewItemID =	pJob->GetNewItemID();
+		u32 nNewCIID =	pJob->GetNewCIID();
+		u32 nNewItemID =	pJob->GetNewItemID();
 		bool bIsRentItem =				pJob->GetRentItem();
 		int nRentMinutePeriodRemainder = pJob->GetRentMinutePeriodRemainder();
 

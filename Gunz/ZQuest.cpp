@@ -903,7 +903,7 @@ bool ZQuest::OnQuestFailed(MCommand* pCommand)
 
 bool ZQuest::OnObtainQuestItem(MCommand* pCommand)
 {
-	unsigned long int nQuestItemID;
+	u32 nQuestItemID;
 	pCommand->GetParameter(&nQuestItemID,	0, MPT_UINT);
 
 	m_GameInfo.IncreaseObtainQuestItem();
@@ -924,7 +924,7 @@ bool ZQuest::OnObtainQuestItem(MCommand* pCommand)
 
 bool ZQuest::OnObtainZItem(MCommand* pCommand)
 {
-	unsigned long int nItemID;
+	u32 nItemID;
 	pCommand->GetParameter(&nItemID,	0, MPT_UINT);
 
 	m_GameInfo.IncreaseObtainQuestItem();
@@ -1278,7 +1278,7 @@ bool ZQuest::OnPeerNPCDead(MCommand* pCommand)
 bool ZQuest::OnSectorBonus(MCommand* pCommand)
 {
 	MUID uidPlayer;
-	unsigned long int nExpValue = 0;
+	u32 nExpValue = 0;
 	pCommand->GetParameter(&uidPlayer,	0, MPT_UID);
 	pCommand->GetParameter(&nExpValue,	1, MPT_UINT);
 
@@ -1300,7 +1300,7 @@ bool ZQuest::OnSectorBonus(MCommand* pCommand)
 
 bool ZQuest::OnQuestPing(MCommand* pCommand)
 {
-	unsigned long int TimeStamp;
+	u32 TimeStamp;
 	pCommand->GetParameter(&TimeStamp,	0, MPT_UINT);
 	ZPostQuestPong(TimeStamp);
 

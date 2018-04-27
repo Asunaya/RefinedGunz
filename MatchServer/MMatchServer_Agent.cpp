@@ -152,7 +152,7 @@ void MMatchServer::OnAgentStageReady(const MUID& uidCommAgent, const MUID& uidSt
 	LOG(LOG_DEBUG, "Agent Ready to Handle Stage(%d%d)", uidStage.High, uidStage.Low);
 }
 
-void MMatchServer::OnRequestLiveCheck(const MUID& uidComm, unsigned long nTimeStamp, unsigned long nStageCount, unsigned long nUserCount)
+void MMatchServer::OnRequestLiveCheck(const MUID& uidComm, u32 nTimeStamp, u32 nStageCount, u32 nUserCount)
 {
 	MCommand* pCmd = CreateCommand(MC_MATCH_AGENT_RESPONSE_LIVECHECK, uidComm);
 	pCmd->AddParameter(new MCmdParamUInt(nTimeStamp));

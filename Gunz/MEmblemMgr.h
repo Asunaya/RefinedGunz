@@ -13,7 +13,7 @@ using namespace std;
 class MEmblemNode {
 protected:
 	unsigned int	m_nCLID;
-	unsigned long	m_nChecksum;
+	u32	m_nChecksum;
 	char			m_szURL[256];
 	time_t			m_tmLastUsed;
 public:
@@ -24,8 +24,8 @@ public:
 	void SetCLID(unsigned int nCLID){ m_nCLID = nCLID; }
 	const char* GetURL()			{ return m_szURL; }
 	void SetURL(const char* pszURL)	{ strcpy_safe(m_szURL, pszURL); }
-	unsigned long GetChecksum()		{ return m_nChecksum; }
-	void SetChecksum(unsigned long nChecksum)	{ m_nChecksum = nChecksum; }
+	u32 GetChecksum()		{ return m_nChecksum; }
+	void SetChecksum(u32 nChecksum)	{ m_nChecksum = nChecksum; }
 
 	time_t GetTimeLastUsed()		{ return m_tmLastUsed; }
 	void SetTimeLastUsed(time_t tm)	{ m_tmLastUsed = tm; }
@@ -44,7 +44,7 @@ protected:
 	char			m_szEmblemDataFile[_MAX_DIR];
 
 	bool			m_bSave;
-	unsigned long	m_tmLastSavedTick;
+	u32	m_tmLastSavedTick;
 
 	int				m_nTotalRequest;
 	int				m_nCachedRequest;
@@ -56,8 +56,8 @@ protected:
 
 	bool CheckSaveFlag()						{ return m_bSave; }
 	void SetSaveFlag(bool bSave)				{ m_bSave = bSave; }
-	unsigned long GetLastSavedTick()			{ return m_tmLastSavedTick; }
-	void SetLastSavedTick(unsigned long nTick)	{ m_tmLastSavedTick = nTick; }
+	u32 GetLastSavedTick()			{ return m_tmLastSavedTick; }
+	void SetLastSavedTick(u32 nTick)	{ m_tmLastSavedTick = nTick; }
 
 	bool CreateCache();
 	bool LoadCache();
@@ -65,7 +65,7 @@ protected:
 	void ClearCache();
 
 	void PostDownload(unsigned int nCLID, unsigned int nChecksum, const char* pszURL);
-	bool RegisterEmblem(unsigned int nCLID, const char* pszURL, unsigned long nChecksum, time_t tmLastUsed=0);
+	bool RegisterEmblem(unsigned int nCLID, const char* pszURL, u32 nChecksum, time_t tmLastUsed=0);
 	void NotifyDownloadDone(unsigned int nCLID, const char* pszURL);
 
 public:
@@ -88,10 +88,10 @@ public:
 
 	bool PrepareCache();
 
-	bool CheckEmblem(unsigned int nCLID, unsigned long nChecksum);
-	bool ProcessEmblem(unsigned int nCLID, const char* pszURL, unsigned long nChecksum);
+	bool CheckEmblem(unsigned int nCLID, u32 nChecksum);
+	bool ProcessEmblem(unsigned int nCLID, const char* pszURL, u32 nChecksum);
 
-	void Tick(unsigned long nTick);
+	void Tick(u32 nTick);
 };
 
 

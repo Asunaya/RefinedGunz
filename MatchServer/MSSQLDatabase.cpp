@@ -561,8 +561,8 @@ bool MSSQLDatabase::GetAccountCharInfo(const int nAID, const int nCharIndex, MTD
 	poutCharInfo->nSex = rs.Field("Sex").AsInt();
 	poutCharInfo->nHair = rs.Field("Hair").AsInt();
 	poutCharInfo->nFace = rs.Field("Face").AsInt();
-	poutCharInfo->nXP = (unsigned long)rs.Field("XP").AsLong();
-	poutCharInfo->nBP = (unsigned long)rs.Field("BP").AsLong();
+	poutCharInfo->nXP = (u32)rs.Field("XP").AsLong();
+	poutCharInfo->nBP = (u32)rs.Field("BP").AsLong();
 
 
 	poutCharInfo->nEquipedItemDesc[MMCIP_HEAD] = rs.Field("head_itemid").AsInt();
@@ -612,15 +612,15 @@ bool MSSQLDatabase::GetCharInfoByAID(const int nAID, const int nCharIndex, MMatc
 	{
 		return false;
 	}
-	poutCharInfo->m_nCID = (unsigned long)rs.Field("CID").AsLong();
+	poutCharInfo->m_nCID = (u32)rs.Field("CID").AsLong();
 	CString db_strName = rs.Field("Name").AsString();
 	strcpy_safe(poutCharInfo->m_szName, (LPCTSTR)db_strName);
 	poutCharInfo->m_nLevel = (int)rs.Field("Level").AsInt();
 	poutCharInfo->m_nSex = (MMatchSex)rs.Field("Sex").AsInt();
 	poutCharInfo->m_nHair = rs.Field("Hair").AsInt();
 	poutCharInfo->m_nFace = rs.Field("Face").AsInt();
-	poutCharInfo->m_nXP = (unsigned long)rs.Field("XP").AsLong();
-	poutCharInfo->m_nBP = (unsigned long)rs.Field("BP").AsLong();
+	poutCharInfo->m_nXP = (u32)rs.Field("XP").AsLong();
+	poutCharInfo->m_nBP = (u32)rs.Field("BP").AsLong();
 	//	poutCharInfo->m_fBonusRate = (float)rs.Field("BonusRate").AsFloat();
 	//	poutCharInfo->m_nPrize = (int)rs.Field("Prize").AsInt();
 	poutCharInfo->m_nHP = (int)rs.Field("HP").AsInt();
@@ -654,18 +654,18 @@ bool MSSQLDatabase::GetCharInfoByAID(const int nAID, const int nCharIndex, MMatc
 
 	memset(&poutCharInfo->m_nEquipedItemCIID, 0, sizeof(poutCharInfo->m_nEquipedItemCIID));
 
-	poutCharInfo->m_nEquipedItemCIID[MMCIP_HEAD] = (unsigned long int)rs.Field("head_slot").AsLong();
-	poutCharInfo->m_nEquipedItemCIID[MMCIP_CHEST] = (unsigned long int)rs.Field("chest_slot").AsLong();
-	poutCharInfo->m_nEquipedItemCIID[MMCIP_HANDS] = (unsigned long int)rs.Field("hands_slot").AsLong();
-	poutCharInfo->m_nEquipedItemCIID[MMCIP_LEGS] = (unsigned long int)rs.Field("legs_slot").AsLong();
-	poutCharInfo->m_nEquipedItemCIID[MMCIP_FEET] = (unsigned long int)rs.Field("feet_slot").AsLong();
-	poutCharInfo->m_nEquipedItemCIID[MMCIP_FINGERL] = (unsigned long int)rs.Field("fingerl_slot").AsLong();
-	poutCharInfo->m_nEquipedItemCIID[MMCIP_FINGERR] = (unsigned long int)rs.Field("fingerr_slot").AsLong();
-	poutCharInfo->m_nEquipedItemCIID[MMCIP_MELEE] = (unsigned long int)rs.Field("melee_slot").AsLong();
-	poutCharInfo->m_nEquipedItemCIID[MMCIP_PRIMARY] = (unsigned long int)rs.Field("primary_slot").AsLong();
-	poutCharInfo->m_nEquipedItemCIID[MMCIP_SECONDARY] = (unsigned long int)rs.Field("secondary_slot").AsLong();
-	poutCharInfo->m_nEquipedItemCIID[MMCIP_CUSTOM1] = (unsigned long int)rs.Field("custom1_slot").AsLong();
-	poutCharInfo->m_nEquipedItemCIID[MMCIP_CUSTOM2] = (unsigned long int)rs.Field("custom2_slot").AsLong();
+	poutCharInfo->m_nEquipedItemCIID[MMCIP_HEAD] = (u32)rs.Field("head_slot").AsLong();
+	poutCharInfo->m_nEquipedItemCIID[MMCIP_CHEST] = (u32)rs.Field("chest_slot").AsLong();
+	poutCharInfo->m_nEquipedItemCIID[MMCIP_HANDS] = (u32)rs.Field("hands_slot").AsLong();
+	poutCharInfo->m_nEquipedItemCIID[MMCIP_LEGS] = (u32)rs.Field("legs_slot").AsLong();
+	poutCharInfo->m_nEquipedItemCIID[MMCIP_FEET] = (u32)rs.Field("feet_slot").AsLong();
+	poutCharInfo->m_nEquipedItemCIID[MMCIP_FINGERL] = (u32)rs.Field("fingerl_slot").AsLong();
+	poutCharInfo->m_nEquipedItemCIID[MMCIP_FINGERR] = (u32)rs.Field("fingerr_slot").AsLong();
+	poutCharInfo->m_nEquipedItemCIID[MMCIP_MELEE] = (u32)rs.Field("melee_slot").AsLong();
+	poutCharInfo->m_nEquipedItemCIID[MMCIP_PRIMARY] = (u32)rs.Field("primary_slot").AsLong();
+	poutCharInfo->m_nEquipedItemCIID[MMCIP_SECONDARY] = (u32)rs.Field("secondary_slot").AsLong();
+	poutCharInfo->m_nEquipedItemCIID[MMCIP_CUSTOM1] = (u32)rs.Field("custom1_slot").AsLong();
+	poutCharInfo->m_nEquipedItemCIID[MMCIP_CUSTOM2] = (u32)rs.Field("custom2_slot").AsLong();
 
 	_STATUS_DB_END(4);
 
@@ -700,7 +700,7 @@ bool MSSQLDatabase::GetAccountInfo(int nAID, MMatchAccountInfo* poutAccountInfo)
 		return false;
 	}
 
-	poutAccountInfo->m_nAID = (unsigned long)rs.Field("AID").AsLong();
+	poutAccountInfo->m_nAID = (u32)rs.Field("AID").AsLong();
 	poutAccountInfo->m_nUGrade = (MMatchUserGradeID)rs.Field("UGradeID").AsInt();
 	poutAccountInfo->m_nPGrade = MMPG_FREE;
 	strcpy_safe(poutAccountInfo->m_szUserID, (LPCTSTR)rs.Field("UserID").AsString());
@@ -789,7 +789,7 @@ bool MSSQLDatabase::SimpleUpdateCharInfo(const MMatchCharInfo& CharInfo)
 }
 
 
-bool MSSQLDatabase::InsertCharItem(const unsigned int nCID, int nItemDescID, bool bRentItem, int nRentPeriodHour, unsigned long int* poutCIID)
+bool MSSQLDatabase::InsertCharItem(const unsigned int nCID, int nItemDescID, bool bRentItem, int nRentPeriodHour, u32* poutCIID)
 {
 	_STATUS_DB_START
 		if (!CheckOpen()) return false;
@@ -825,7 +825,7 @@ bool MSSQLDatabase::InsertCharItem(const unsigned int nCID, int nItemDescID, boo
 }
 
 
-bool MSSQLDatabase::BuyBountyItem(const unsigned int nCID, int nItemID, int nPrice, unsigned long int* poutCIID)
+bool MSSQLDatabase::BuyBountyItem(const unsigned int nCID, int nItemID, int nPrice, u32* poutCIID)
 {
 	_STATUS_DB_START
 		if (!CheckOpen()) return false;
@@ -946,13 +946,13 @@ bool MSSQLDatabase::GetCharItemInfo(MMatchCharInfo& CharInfo)
 
 	int t = 0;
 	int nItemDescID = 0;
-	unsigned long int nCIID = 0;
+	u32 nCIID = 0;
 
 	for (; !rs.IsEOF(); rs.MoveNext())
 	{
 		nItemDescID = 0; nCIID = 0;
 		nItemDescID = (int)rs.Field("ItemID").AsInt();
-		nCIID = (unsigned long int)rs.Field("CIID").AsLong();
+		nCIID = (u32)rs.Field("CIID").AsLong();
 
 		bool bIsRentItem = !rs.Field("RentPeriodRemainder").IsNull();
 		int nRentMinutePeriodRemainder = RENT_MINUTE_PERIOD_UNLIMITED;
@@ -1029,14 +1029,14 @@ bool MSSQLDatabase::GetAccountItemInfo(const int nAID, MAccountItemNode* pOut, i
 			if (nExpiredItemCount < nMaxExpiredItemCount)
 			{
 				pOutExpiredItemList[nExpiredItemCount].nAIID = aiid;
-				pOutExpiredItemList[nExpiredItemCount].nItemID = (unsigned long int)itemid;
+				pOutExpiredItemList[nExpiredItemCount].nItemID = (u32)itemid;
 				nExpiredItemCount++;
 			}
 		}
 		else
 		{
 			pOut[nodecount].nAIID = aiid;
-			pOut[nodecount].nItemID = (unsigned long int)itemid;
+			pOut[nodecount].nItemID = (u32)itemid;
 			pOut[nodecount].nRentMinutePeriodRemainder = nRentMinutePeriodRemainder;
 
 			nodecount++;
@@ -1051,8 +1051,8 @@ bool MSSQLDatabase::GetAccountItemInfo(const int nAID, MAccountItemNode* pOut, i
 	return true;
 }
 
-bool MSSQLDatabase::UpdateEquipedItem(const unsigned long nCID, MMatchCharItemParts parts,
-	unsigned long int nCIID, const unsigned long int nItemID)
+bool MSSQLDatabase::UpdateEquipedItem(const u32 nCID, MMatchCharItemParts parts,
+	u32 nCIID, const u32 nItemID)
 {
 	_STATUS_DB_START
 		if (!CheckOpen()) return false;
@@ -1176,7 +1176,7 @@ bool MSSQLDatabase::InsertKillLog(const unsigned int nAttackerCID, const unsigne
 	return true;
 }
 
-bool MSSQLDatabase::InsertChatLog(const unsigned long int nCID, const char* szMsg, u64 nTime)
+bool MSSQLDatabase::InsertChatLog(const u32 nCID, const char* szMsg, u64 nTime)
 {
 	return true;
 
@@ -1245,7 +1245,7 @@ bool MSSQLDatabase::UpdateCharBP(const int nCID, const int nBPInc)
 	return true;
 }
 
-bool MSSQLDatabase::InsertItemPurchaseLogByBounty(const unsigned long int nItemID, const unsigned long int nCID,
+bool MSSQLDatabase::InsertItemPurchaseLogByBounty(const u32 nItemID, const u32 nCID,
 	const int nBounty, const int nCharBP, const ItemPurchaseType nType)
 {
 	_STATUS_DB_START
@@ -1380,7 +1380,7 @@ bool MSSQLDatabase::UpdateServerInfo(const int nServerID, const int nMaxPlayer, 
 	return true;
 }
 
-bool MSSQLDatabase::InsertPlayerLog(const unsigned long int nCID,
+bool MSSQLDatabase::InsertPlayerLog(const u32 nCID,
 	const int nPlayTime, const int nKillCount, const int nDeathCount, const int nXP, const int nTotalXP)
 {
 	_STATUS_DB_START
@@ -1427,7 +1427,7 @@ bool MSSQLDatabase::InsertLevelUpLog(const int nCID, const int nLevel, const int
 
 }
 
-bool MSSQLDatabase::UpdateCharPlayTime(const unsigned long int nCID, const unsigned long int nPlayTime)
+bool MSSQLDatabase::UpdateCharPlayTime(const u32 nCID, const u32 nPlayTime)
 {
 	_STATUS_DB_START
 	if (!CheckOpen()) return false;
@@ -1498,7 +1498,7 @@ bool MSSQLDatabase::UpdateLastConnDate(const char* szUserID, const char* szIP)
 }
 
 bool MSSQLDatabase::BringAccountItem(const int nAID, const int nCID, const int nAIID,
-	unsigned int* poutCIID, unsigned long int* poutItemID,
+	unsigned int* poutCIID, u32* poutItemID,
 	bool* poutIsRentItem, int* poutRentMinutePeriodRemainder)
 {
 	_STATUS_DB_START
@@ -1563,7 +1563,7 @@ bool MSSQLDatabase::BringBackAccountItem(const int nAID, const int nCID, const i
 	return true;
 }
 
-bool MSSQLDatabase::ClearAllEquipedItem(const unsigned long nCID)
+bool MSSQLDatabase::ClearAllEquipedItem(const u32 nCID)
 {
 	_STATUS_DB_START
 	if (!CheckOpen()) return false;
@@ -2522,7 +2522,7 @@ bool MSSQLDatabase::GetCharQuestItemInfo(MMatchCharInfo* pCharInfo)
 				continue; // 한번도 획득한 적이 없는 아이템.
 
 						  // 한번이라도 획든한적이 있던 아이템. 수량은 상관 없음. 
-			unsigned long int nItemID = i + MIN_QUEST_ITEM_ID;
+			u32 nItemID = i + MIN_QUEST_ITEM_ID;
 			int nQuestItemCount = static_cast<int>(szData[MCRC32::CRC::SIZE + i]);
 			bool bKnownItem;
 

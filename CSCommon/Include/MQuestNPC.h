@@ -71,7 +71,7 @@ struct MQuestNPCInfo
 	MQUEST_NPC_GRADE	nGrade;
 	char				szName[256];
 	char				szDesc[256];
-	unsigned long int	nNPCAttackTypes;
+	u32	nNPCAttackTypes;
 	float				fSpeed;
 	float				fWeight;
 	int					nMaxHP;
@@ -86,7 +86,7 @@ struct MQuestNPCInfo
 	MVector				vScale;
 	MVector				vColor;
 	unsigned char		nSpawnWeight;
-	unsigned long int	nWeaponItemID;
+	u32	nWeaponItemID;
 	float				fDyingTime;
 	float				fTremble;
 

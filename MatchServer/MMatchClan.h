@@ -13,7 +13,7 @@ class MMatchClan
 private:
 	int				m_nCLID;
 	char			m_szClanName[CLAN_NAME_LENGTH];
-	unsigned long	m_nDBRefreshLifeTime;
+	u32	m_nDBRefreshLifeTime;
 
 	struct ClanInfoEx
 	{
@@ -36,7 +36,7 @@ private:
 	int				m_nSeriesOfVictories;
 	std::list<int>	m_MatchedClanList;
 
-	unsigned long	m_nEmptyPeriod;
+	u32	m_nEmptyPeriod;
 
 	void	Clear();
 	void InitClanInfoEx(const int nLevel, const int nTotalPoint, const int nPoint, const int nRanking,

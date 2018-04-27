@@ -94,7 +94,7 @@ bool MMatchChannel::IsChecksumUpdateTime(u64 nTick)
 
 void MMatchChannel::UpdateChecksum(u64 nTick)
 {
-	m_nChecksum = (unsigned long)m_ObjUIDCaches.size() + m_uidChannel.Low;
+	m_nChecksum = (u32)m_ObjUIDCaches.size() + m_uidChannel.Low;
 	m_nLastChecksumTick = nTick;
 }
 
@@ -351,7 +351,7 @@ void MMatchChannelMap::Destroy()
 
 void MMatchChannelMap::Update(u64 nClock)
 {
-	unsigned long nChannelListChecksum = 0;
+	u32 nChannelListChecksum = 0;
 	for(iterator itor=begin(); itor != end();)
 	{
 		MMatchChannel* pChannel = (*itor).second;

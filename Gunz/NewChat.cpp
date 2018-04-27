@@ -405,7 +405,7 @@ static CaretType GetCaretPos(MFontR2& Font, const wchar_t* Text, int CaretPos, i
 	return ret;
 }
 
-std::pair<bool, v2i> Chat::GetPos(const ChatMessage &c, unsigned long Pos)
+std::pair<bool, v2i> Chat::GetPos(const ChatMessage &c, u32 Pos)
 {
 	std::pair<bool, v2i> ret{ false, {0, 0} };
 	if (Pos > c.Msg.length())

@@ -4,7 +4,7 @@
 #include "MAsyncDBJob.h"
 
 
-void MQuestPlayerLogInfo::AddUniqueItem( const unsigned long int nItemID, int nCount )
+void MQuestPlayerLogInfo::AddUniqueItem( const u32 nItemID, int nCount )
 {
 	if (IsQuestItemID(nItemID))
 	{
@@ -17,7 +17,7 @@ void MQuestPlayerLogInfo::AddUniqueItem( const unsigned long int nItemID, int nC
 			return;
 	}
 
-	m_UniqueItemList.insert( map<unsigned long int, int>::value_type(nItemID, nCount) );
+	m_UniqueItemList.insert( map<u32, int>::value_type(nItemID, nCount) );
 }
 
 

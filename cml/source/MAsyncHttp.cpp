@@ -321,7 +321,7 @@ void CALLBACK MAsyncHttp::StatusCallback(HINTERNET hInternet,
 					{
 						char szLog[256];
 						sprintf_safe(szLog, "MAsyncHttp::StatusCallback> RequestComplete(Result=%u, Error=%u) \n", 
-								(unsigned long)pAsyncRes->dwResult, pAsyncRes->dwError);
+								(u32)pAsyncRes->dwResult, pAsyncRes->dwError);
 						OutputDebugString(szLog);
 					}
 					SetEvent(pAsyncHttp->m_hRequestCompleteEvent);

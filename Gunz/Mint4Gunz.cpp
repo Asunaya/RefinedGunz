@@ -4,7 +4,7 @@
 extern ZDirectInput	g_DInput;
 
 
-const char* Mint4Gunz::GetActionKeyName(unsigned long int nKey){
+const char* Mint4Gunz::GetActionKeyName(u32 nKey){
 	return g_DInput.GetKeyName(nKey);
 }
 

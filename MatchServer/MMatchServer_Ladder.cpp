@@ -168,7 +168,7 @@ void MMatchServer::LadderGameLaunch(MLadderGroup* pGroupA, MLadderGroup* pGroupB
 	}
 }
 
-void MMatchServer::OnLadderRequestChallenge(const MUID& uidPlayer, void* pMemberNamesBlob, unsigned long int nOptions)
+void MMatchServer::OnLadderRequestChallenge(const MUID& uidPlayer, void* pMemberNamesBlob, u32 nOptions)
 {
 	if ((MGetServerConfig()->GetServerMode() != MSM_LADDER) && 
 		(MGetServerConfig()->GetServerMode() != MSM_CLAN)) return;

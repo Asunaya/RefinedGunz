@@ -11,7 +11,7 @@ void MAsyncDBJob_InsertConnLog::Run(void* pContext)
 }
 
 
-bool MAsyncDBJob_InsertConnLog::Input(unsigned long int nAID, char* szIP, const string& strCountryCode3 )
+bool MAsyncDBJob_InsertConnLog::Input(u32 nAID, char* szIP, const string& strCountryCode3 )
 {
 	m_nAID = nAID;
 	strcpy_safe(m_szIP, szIP);

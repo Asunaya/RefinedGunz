@@ -391,7 +391,7 @@ void ZCharacterSelectView::SelectChar(int nSelectIndex)
 			if( m_pVisualMesh ) 
 			{
 				RWeaponMotionType type = eq_weapon_etc;
-				unsigned long int nItemDescID = GetVisualWeaponID(
+				u32 nItemDescID = GetVisualWeaponID(
 					m_CharInfo[nSelectIndex].m_CharInfo.nEquipedItemDesc[MMCIP_MELEE],
 					m_CharInfo[nSelectIndex].m_CharInfo.nEquipedItemDesc[MMCIP_PRIMARY],
 					m_CharInfo[nSelectIndex].m_CharInfo.nEquipedItemDesc[MMCIP_SECONDARY],
@@ -455,7 +455,7 @@ void ZCharacterSelectView::OnChangedCharInfo(int sex,int index)
 	if(pResource==NULL)
 		return;
 
-	unsigned long int nItemID[MMCIP_END];
+	u32 nItemID[MMCIP_END];
 	memset(nItemID, 0, sizeof(nItemID));
 
 	// Çì¾î

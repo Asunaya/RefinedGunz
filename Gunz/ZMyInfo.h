@@ -118,7 +118,7 @@ public:
 	bool IsPremiumIPUser() const { return (m_nPGradeID == MMPG_PREMIUM_IP); }
 	bool IsClanJoined() const { return ((m_szClanName[0] == 0) ? false : true); }
 
-	void SetXP(unsigned long int nXP)			{ m_nXP = nXP; }
+	void SetXP(u32 nXP)			{ m_nXP = nXP; }
 	void SetBP(int nBP)							{ m_nBP = nBP; }
 	void SetLevel( int nLevel );
 	void SetLevelPercent(int nPercent)			{ m_nLevelPercent = nPercent; }

@@ -60,7 +60,7 @@ bool MMatchServer::CheckOnLoginPre(const MUID& CommUID, int nCmdVersion,
 }
 
 void MMatchServer::OnMatchLogin(const MUID& CommUID, const char* UserID, const unsigned char *HashedPassword,
-	int HashLength, int CommandVersion, unsigned long ChecksumPack,
+	int HashLength, int CommandVersion, u32 ChecksumPack,
 	u32 Major, u32 Minor, u32 Patch, u32 Revision)
 {
 	if (HashLength != crypto_generichash_blake2b_BYTES)
@@ -201,7 +201,7 @@ void MMatchServer::CreateAccountResponse(const MUID& uidComm, const char *szReas
 	Post(pCmd);
 }
 
-void MMatchServer::OnMatchLoginFromDBAgent(const MUID& CommUID, const char* szLoginID, const char* szName, int nSex, bool bFreeLoginIP, unsigned long nChecksumPack)
+void MMatchServer::OnMatchLoginFromDBAgent(const MUID& CommUID, const char* szLoginID, const char* szName, int nSex, bool bFreeLoginIP, u32 nChecksumPack)
 {
 	MCommObject* pCommObj = (MCommObject*)m_CommRefCache.GetRef(CommUID);
 	if (pCommObj == NULL) return;
@@ -292,7 +292,7 @@ bool MMatchServer::AddObjectOnMatchLogin(const MUID& uidComm,
  										 MMatchAccountInfo* pSrcAccountInfo,
  										 bool bFreeLoginIP,
 										 string strCountryCode3,
-										 unsigned long nChecksumPack)
+										 u32 nChecksumPack)
 {
 	MCommObject* pCommObj = (MCommObject*)m_CommRefCache.GetRef(uidComm);
 	if (pCommObj == NULL) return false;

@@ -27,7 +27,7 @@ protected:
 
 	void SetDefaultText(MMatchCharItemParts nParts);
 	virtual bool OnEvent(MEvent* pEvent, MListener* pListener);
-	bool IsEquipableItem(unsigned long int nItemID, int nPlayerLevel, MMatchSex nPlayerSex);
+	bool IsEquipableItem(u32 nItemID, int nPlayerLevel, MMatchSex nPlayerSex);
 public:
 	char					m_szItemSlotPlace[128];
 

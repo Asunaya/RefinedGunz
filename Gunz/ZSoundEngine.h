@@ -89,7 +89,7 @@ struct SoundSource
 {
 	FSOUND_SAMPLE* pFS;
 	float fMaxDistance; // to Culling
-	unsigned long int	nLastPlayedTime;
+	u32	nLastPlayedTime;
 	SoundSource()
 	{
 		pFS = 0;

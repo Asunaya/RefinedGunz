@@ -93,7 +93,7 @@ public:
 		const char*			szHelp = nullptr);
 	void AddAlias(const char* szNewCmdName, const char* szTarCmdName);
 	bool IsRepeatEnabled(const char* szLine);
-	bool DoCommand(const char* szLine, ZChatCmdFlag nCurrFlag, unsigned long nInputFlag=CIF_NORMAL);
+	bool DoCommand(const char* szLine, ZChatCmdFlag nCurrFlag, u32 nInputFlag=CIF_NORMAL);
 	ZChatCmd* GetCommandByName(const char* szName);
 	ZChatCmd* GetCommandByID(int nID);
 	ZChatCmdMap::iterator GetCmdBegin() { return m_CmdMap.begin(); }

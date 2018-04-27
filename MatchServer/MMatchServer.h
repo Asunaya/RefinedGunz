@@ -67,7 +67,7 @@ public:
 
 	void ChannelResponsePlayerList(const MUID& uidPlayer, const MUID& uidChannel, int nPage);
 	void ChannelResponseAllPlayerList(const MUID& uidPlayer, const MUID& uidChannel,
-		unsigned long int nPlaceFilter, unsigned long int nOptions);
+		u32 nPlaceFilter, u32 nOptions);
 
 	MMatchStage* FindStage(const MUID& uidStage);
 
@@ -127,11 +127,11 @@ public:
 	bool OnAdminExecute(MAdminArgvInfo* pAI, char* szOut, int maxlen);
 	void ApplyObjectTeamBonus(MMatchObject* pObject, int nAddedExp);
 	void ProcessPlayerXPBP(MMatchStage* pStage, MMatchObject* pPlayer, int nAddedXP, int nAddedBP);
-	bool InsertCharItem(const MUID& uidPlayer, const unsigned long int nItemID, bool bRentItem, int nRentPeriodHour);
+	bool InsertCharItem(const MUID& uidPlayer, const u32 nItemID, bool bRentItem, int nRentPeriodHour);
 
 	void OnDuelSetObserver(const MUID& uidChar);
 	void OnDuelQueueInfo(const MUID& uidStage, const MTD_DuelQueueInfo& QueueInfo);
-	void OnQuestSendPing(const MUID& uidStage, unsigned long int t);
+	void OnQuestSendPing(const MUID& uidStage, u32 t);
 
 	void OnRequestCharQuestItemList(const MUID& uidSender);
 
@@ -142,7 +142,7 @@ public:
 	MMatchObject* GetObject(const MUID& uid);
 	MMatchObject* GetPlayerByCommUID(const MUID& uid);
 	MMatchObject* GetPlayerByName(const char* pszName);
-	MMatchObject* GetPlayerByAID(unsigned long int nAID);
+	MMatchObject* GetPlayerByAID(u32 nAID);
 
 	// Get channel
 	MMatchChannel* FindChannel(const MUID& uidChannel);
@@ -176,14 +176,14 @@ public:
 	void RouteToClan(const int nCLID, MCommand* pCommand);
 	void RouteResponseToListener(MObject* pObject, const int nCmdID, int nResult);
 
-	unsigned long int GetStageListChecksum(MUID& uidChannel, int nStageCursor, int nStageCount);
+	u32 GetStageListChecksum(MUID& uidChannel, int nStageCursor, int nStageCount);
 	void StageList(const MUID& uidPlayer, int nStageStartIndex, bool bCacheUpdate);
 	void StageLaunch(const MUID& uidStage);
 	void StageFinishGame(const MUID& uidStage);
 
 	void StandbyClanList(const MUID& uidPlayer, int nClanListStartIndex, bool bCacheUpdate);
 
-	unsigned long GetChannelListChecksum() const { return m_ChannelMap.GetChannelListChecksum(); }
+	u32 GetChannelListChecksum() const { return m_ChannelMap.GetChannelListChecksum(); }
 	void ChannelList(const MUID& uidPlayer, MCHANNEL_TYPE nChannelType);
 
 	u64 GetGlobalClockCount();
@@ -235,17 +235,17 @@ protected:
 	bool CheckOnLoginPre(const MUID& CommUID, int nCmdVersion, bool& outbFreeIP,
 		std::string& strCountryCode3);
 	void OnMatchLogin(const MUID& CommUID, const char* UserID, const unsigned char *HashedPassword,
-		int HashLength, int CommandVersion, unsigned long ChecksumPack,
+		int HashLength, int CommandVersion, u32 ChecksumPack,
 		u32 Major, u32 Minor, u32 Patch, u32 Revision);
 	void OnMatchLoginFromDBAgent(const MUID& CommUID, const char* szLoginID,
-		const char* szName, int nSex, bool bFreeLoginIP, unsigned long nChecksumPack);
+		const char* szName, int nSex, bool bFreeLoginIP, u32 nChecksumPack);
 	void OnMatchLoginFailedFromDBAgent(const MUID& CommUID, int nResult);
 	void OnBridgePeer(const MUID& uidChar, u32 dwIP, u32 nPort);
 	bool AddObjectOnMatchLogin(const MUID& uidComm,
 		MMatchAccountInfo* pSrcAccountInfo,
 		bool bFreeLoginIP,
 		std::string strCountryCode3,
-		unsigned long nChecksumPack);
+		u32 nChecksumPack);
 
 	void NotifyFailedLogin(const MUID &uidComm, const char *szReason);
 	void CreateAccount(const MUID &uidComm, const char *szUsername,
@@ -322,7 +322,7 @@ protected:
 
 	void OnChannelRequestPlayerList(const MUID& uidPlayer, const MUID& uidChannel, int nPage);
 	void OnChannelRequestAllPlayerList(const MUID& uidPlayer, const MUID& uidChannel,
-		unsigned long int nPlaceFilter, unsigned long int nOptions);
+		u32 nPlaceFilter, u32 nOptions);
 
 	bool StageAdd(MMatchChannel* pChannel, const char* pszStageName, bool bPrivate,
 		const char* pszStagePassword, MUID* pAllocUID);
@@ -386,8 +386,8 @@ protected:
 
 	// Ingame stuff
 	void OnRequestSpawn(const MUID& uidChar, const MVector& pos, const MVector& dir);
-	void OnGameRequestTimeSync(const MUID& uidComm, unsigned long nLocalTimeStamp);
-	void OnGameReportTimeSync(const MUID& uidComm, unsigned long nLocalTimeStamp,
+	void OnGameRequestTimeSync(const MUID& uidComm, u32 nLocalTimeStamp);
+	void OnGameReportTimeSync(const MUID& uidComm, u32 nLocalTimeStamp,
 		unsigned int nDataChecksum);
 	void OnUpdateFinishedRound(const MUID& uidStage, const MUID& uidChar,
 		void* pPeerInfo, void* pKillInfo);
@@ -400,7 +400,7 @@ protected:
 	// User actions
 	void OnUserWhisper(const MUID& uidComm, char* pszSenderName, char* pszTargetName, char* pszMessage);
 	void OnUserWhere(const MUID& uidComm, char* pszTargetName);
-	void OnUserOption(const MUID& uidComm, unsigned long nOptionFlags);
+	void OnUserOption(const MUID& uidComm, u32 nOptionFlags);
 
 	// Chatrooms
 	void OnChatRoomCreate(const MUID& uidPlayer, const char* pszChatRoomName);
@@ -418,7 +418,7 @@ protected:
 	void OnLadderInviteAgree(const MUID& uidPlayer);
 	void OnLadderInviteCancel(const MUID& uidPlayer);
 	void OnLadderRequestChallenge(const MUID& uidPlayer, void* pGroupBlob,
-		unsigned long int nOptions);
+		u32 nOptions);
 	void OnLadderRequestCancelChallenge(const MUID& uidPlayer);
 
 	void OnRequestProposal(const MUID& uidProposer, int nProposalMode, int nRequestID,
@@ -498,7 +498,7 @@ protected:
 
 	// Admin
 	void OnAdminTerminal(const MUID& uidAdmin, const char* szText);
-	void OnAdminAnnounce(const MUID& uidAdmin, const char* szChat, unsigned long int nType);
+	void OnAdminAnnounce(const MUID& uidAdmin, const char* szChat, u32 nType);
 	void OnAdminRequestServerInfo(const MUID& uidAdmin);
 	void OnAdminServerHalt(const MUID& uidAdmin);
 
@@ -517,8 +517,8 @@ protected:
 
 	// Items
 	bool BuyItem(MMatchObject* pObject, unsigned int nItemID, bool bRentItem = false, int nRentPeriodHour = 0);
-	void OnRequestBuyItem(const MUID& uidPlayer, const unsigned long int nItemID);
-	bool ResponseBuyItem(const MUID& uidPlayer, const unsigned long int nItemID);
+	void OnRequestBuyItem(const MUID& uidPlayer, const u32 nItemID);
+	bool ResponseBuyItem(const MUID& uidPlayer, const u32 nItemID);
 	void OnRequestSellItem(const MUID& uidPlayer, const MUID& uidItem);
 	bool ResponseSellItem(const MUID& uidPlayer, const MUID& uidItem);
 	void OnRequestShopItemList(const MUID& uidPlayer, const int nFirstItemIndex, const int nItemCount);
@@ -527,9 +527,9 @@ protected:
 	void ResponseCharacterItemList(const MUID& uidPlayer);
 	void OnRequestAccountItemList(const MUID& uidPlayer);
 	void ResponseAccountItemList(const MUID& uidPlayer);
-	void OnRequestEquipItem(const MUID& uidPlayer, const MUID& uidItem, const long int nEquipmentSlot);
+	void OnRequestEquipItem(const MUID& uidPlayer, const MUID& uidItem, const i32 nEquipmentSlot);
 	void ResponseEquipItem(const MUID& uidPlayer, const MUID& uidItem, const MMatchCharItemParts parts);
-	void OnRequestTakeoffItem(const MUID& uidPlayer, const unsigned long int nEquipmentSlot);
+	void OnRequestTakeoffItem(const MUID& uidPlayer, const u32 nEquipmentSlot);
 	void ResponseTakeoffItem(const MUID& uidPlayer, const MMatchCharItemParts parts);
 	void OnRequestBringAccountItem(const MUID& uidPlayer, const int nAIID);
 	void ResponseBringAccountItem(const MUID& uidPlayer, const int nAIID);
@@ -579,14 +579,14 @@ protected:
 
 	// Quest
 	void OnResponseCharQuestItemList(const MUID& uidSender);
-	void OnRequestBuyQuestItem(const MUID& uidSender, unsigned long int nItemID);
-	void OnResponseBuyQeustItem(const MUID& uidSender, unsigned long int nItemID);
-	void OnRequestSellQuestItem(const MUID& uidSender, unsigned long int nItemID, int nCount);
-	void OnResponseSellQuestItem(const MUID& uidSender, unsigned long int nItemID, int nCount);
+	void OnRequestBuyQuestItem(const MUID& uidSender, u32 nItemID);
+	void OnResponseBuyQeustItem(const MUID& uidSender, u32 nItemID);
+	void OnRequestSellQuestItem(const MUID& uidSender, u32 nItemID, int nCount);
+	void OnResponseSellQuestItem(const MUID& uidSender, u32 nItemID, int nCount);
 	void OnRequestDropSacrificeItemOnSlot(const MUID& uidSender, int nSlotIndex,
-		unsigned long int nItemID);
+		u32 nItemID);
 	void OnRequestCallbackSacrificeItem(const MUID& uidSender, int nSlotIndex,
-		unsigned long int nItemID);
+		u32 nItemID);
 	void OnRequestQL(const MUID& uidSender);
 	void OnRequestSacrificeSlotInfo(const MUID& uidSender);
 	void OnRequestMonsterBibleInfo(const MUID& uidSender);
@@ -607,8 +607,8 @@ protected:
 	void OnRegisterAgent(const MUID& uidComm, char* szIP, int nTCPPort, int nUDPPort);
 	void OnUnRegisterAgent(const MUID& uidComm);
 	void OnAgentStageReady(const MUID& uidCommAgent, const MUID& uidStage);
-	void OnRequestLiveCheck(const MUID& uidComm, unsigned long nTimeStamp,
-		unsigned long nStageCount, unsigned long nUserCount);
+	void OnRequestLiveCheck(const MUID& uidComm, u32 nTimeStamp,
+		u32 nStageCount, u32 nUserCount);
 
 	void OnVoiceChat(const MUID& Player, unsigned char* EncodedFrame, int Length);
 	void OnRequestCreateBot(const MUID& Owner);
@@ -623,12 +623,12 @@ protected:
 	void NotifyMessage(const MUID& uidChar, int nMsgID);
 
 	void SetClientClockSynchronize(const MUID& CommUID);
-	static unsigned long int ConvertLocalClockToGlobalClock(
-		unsigned long int nLocalClock,
-		unsigned long int nLocalClockDistance);
-	static unsigned long int ConvertGlobalClockToLocalClock(
-		unsigned long int nGlobalClock,
-		unsigned long int nLocalClockDistance);
+	static u32 ConvertLocalClockToGlobalClock(
+		u32 nLocalClock,
+		u32 nLocalClockDistance);
+	static u32 ConvertGlobalClockToLocalClock(
+		u32 nGlobalClock,
+		u32 nLocalClockDistance);
 
 	void InsertChatDBLog(const MUID& uidPlayer, const char* szMsg);
 	int ValidateMakingName(const char* szCharName, int nMinLength, int nMaxLength);
@@ -639,7 +639,7 @@ protected:
 	int ValidateChallengeLadderGame(MMatchObject** ppMemberObject, int nMemberCount);
 	void CheckExpiredItems(MMatchObject* pObj);
 	void ResponseExpiredItemIDList(MMatchObject* pObj,
-		std::vector<unsigned long int>& vecExpiredItemIDList);
+		std::vector<u32>& vecExpiredItemIDList);
 
 	bool LoadInitFile();
 	bool LoadChannelPreset();
@@ -649,8 +649,8 @@ protected:
 
 	void UpdateCharDBCachingData(MMatchObject* pObject);
 
-	unsigned long GetItemFileChecksum() const { return m_nItemFileChecksum; }
-	void SetItemFileChecksum(unsigned long nChecksum) { m_nItemFileChecksum = nChecksum; }
+	u32 GetItemFileChecksum() const { return m_nItemFileChecksum; }
+	void SetItemFileChecksum(u32 nChecksum) { m_nItemFileChecksum = nChecksum; }
 
 	bool CheckItemXML();
 

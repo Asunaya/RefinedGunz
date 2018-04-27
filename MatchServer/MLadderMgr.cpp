@@ -264,9 +264,9 @@ void MLadderMgr::LaunchLadder(MLADDERTYPE nLadderType, int nGroupA, int nGroupB)
 
 #define MTIME_LADDER_DEFAULT_TICKINTERVAL		10000			// 기본틱 10초
 
-unsigned long int MLadderMgr::GetTickInterval()
+u32 MLadderMgr::GetTickInterval()
 {
-	unsigned long int nDefaultTickInterval = MTIME_LADDER_DEFAULT_TICKINTERVAL;
+	u32 nDefaultTickInterval = MTIME_LADDER_DEFAULT_TICKINTERVAL;
 
 	// 동접에 따라 틱시간을 가변으로 한다.
 	int nObjSize = (int)MMatchServer::GetInstance()->GetObjects()->size();
@@ -325,9 +325,9 @@ int MLadderMgr::GetTotalGroupCount()
 	return ret;
 }
 
-unsigned long MLadderMgr::GetChecksum(int nFirstIndex, int nGroupCount)
+u32 MLadderMgr::GetChecksum(int nFirstIndex, int nGroupCount)
 {
-	unsigned long int nGroupListChecksum = 0;
+	u32 nGroupListChecksum = 0;
 
 	list<MLadderGroup*>::iterator itorGroup = m_GroupList.begin();
 	for (int i = 0; i < nFirstIndex; i++, itorGroup++)

@@ -1011,8 +1011,8 @@ bool ZStageInterface::OnStageGameInfo( const int nQL, const int nMapsetID, const
 	return true;
 }
 
-bool ZStageInterface::OnResponseSacrificeSlotInfo( const MUID& uidOwner1, const unsigned long int nItemID1, 
-												   const MUID& uidOwner2, const unsigned long int nItemID2 )
+bool ZStageInterface::OnResponseSacrificeSlotInfo( const MUID& uidOwner1, const u32 nItemID1, 
+												   const MUID& uidOwner2, const u32 nItemID2 )
 {
 	if ( (uidOwner1 != MUID(0,0)) && nItemID1)
 	{
@@ -1138,7 +1138,7 @@ void ZStageInterface::UpdateStageGameInfo(const int nQL, const int nMapsetID, co
 	}
 }
 
-void SacrificeItemSlotDesc::SetSacrificeItemSlot( const MUID& uidUserID, const unsigned long int nItemID, MBitmap* pBitmap, const char* szItemName, const int nQL)
+void SacrificeItemSlotDesc::SetSacrificeItemSlot( const MUID& uidUserID, const u32 nItemID, MBitmap* pBitmap, const char* szItemName, const int nQL)
 {
 	m_uidUserID = uidUserID;
 	m_nItemID = nItemID;

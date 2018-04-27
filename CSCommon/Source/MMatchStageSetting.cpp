@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "MMatchStageSetting.h"
 
-unsigned long MMatchStageSetting::GetChecksum()
+u32 MMatchStageSetting::GetChecksum()
 {
 	return (m_StageSetting.nMapIndex + m_StageSetting.nGameType + m_StageSetting.nMaxPlayers);
 }

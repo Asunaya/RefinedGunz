@@ -93,9 +93,9 @@ BOOL CCommandLogView::PreCreateWindow(CREATESTRUCT& cs)
 }
 
 
-void CCommandLogView::AddCommand(unsigned long int nGlobalClock, CCommandType t, MCommand* pCmd)
+void CCommandLogView::AddCommand(u32 nGlobalClock, CCommandType t, MCommand* pCmd)
 {
-	static unsigned long int m_stLogCount = 0;
+	static u32 m_stLogCount = 0;
 	m_stLogCount++;
 
 	char temp[4096]="";

@@ -7,7 +7,7 @@
 #define MAX_FRIEND_COUNT	20
 
 struct MMatchFriendNode {
-	unsigned long	nFriendCID;
+	u32	nFriendCID;
 	unsigned short	nFavorite;
 	char			szName[MATCHOBJECT_NAME_LENGTH];
 
@@ -25,9 +25,9 @@ public:
 public:
 	MMatchFriendInfo();
 	virtual ~MMatchFriendInfo();
-	bool Add(unsigned long nFriendCID, unsigned short nFavorite, const StringView& Name);
+	bool Add(u32 nFriendCID, unsigned short nFavorite, const StringView& Name);
 	void Remove(const StringView& Name);
-	MMatchFriendNode* Find(unsigned long nFriendCID);
+	MMatchFriendNode* Find(u32 nFriendCID);
 	MMatchFriendNode* Find(const StringView& Name);
 	void UpdateDesc();
 };

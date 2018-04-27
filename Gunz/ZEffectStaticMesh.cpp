@@ -58,7 +58,7 @@ bool ZEffectStaticMesh::Draw(u64 nTime)
 	rvector Dir(1,0,0);
 	rvector Up = m_Up;
 	rmatrix World;
-	unsigned long int Opacity = 0xFF*fOpacity;
+	u32 Opacity = 0xFF*fOpacity;
 	MakeWorldMatrix(&World, Pos, Dir, Up);
 	rmatrix Rotation = RotationMatrix(m_RotationAxis, m_fRotateAngle);
 	m_fRotateAngle+=EC_ROTATION;

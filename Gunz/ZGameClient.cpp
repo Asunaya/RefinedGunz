@@ -1177,7 +1177,7 @@ u64 ZGameClient::GetGlobalClockCount() const
 	return (nLocalClock - m_nClockDistance);
 }
 
-unsigned long int ZGetClockDistance(unsigned long int nGlobalClock, unsigned long int nLocalClock)
+u32 ZGetClockDistance(u32 nGlobalClock, u32 nLocalClock)
 {
 	if (nGlobalClock > nLocalClock)
 		return nGlobalClock - nLocalClock;
@@ -1827,7 +1827,7 @@ void ZGameClient::OnExpiredRentItem(void* pBlob)
 
 	for (int i = 0; i < nBlobSize; i++)
 	{
-		unsigned long int* pExpiredItemID = (unsigned long int*)MGetBlobArrayElement(pBlob, i);
+		u32* pExpiredItemID = (u32*)MGetBlobArrayElement(pBlob, i);
 
 		char szItemText[256];
 

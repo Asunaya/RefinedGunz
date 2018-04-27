@@ -40,7 +40,7 @@ void ZConfiguration::Destroy()
 {
 }
 
-unsigned long int GetVirtKey(const char *key)
+u32 GetVirtKey(const char *key)
 {
 	int n=atoi(key+1);
 	if((key[0]=='f' || key[0]=='F') && n>=1 && n<=12)
@@ -53,11 +53,11 @@ unsigned long int GetVirtKey(const char *key)
 }
 
 template<size_t size>
-char *GetKeyName(unsigned long int nVirtKey, char(&out)[size]) {
+char *GetKeyName(u32 nVirtKey, char(&out)[size]) {
 	return GetKeyName(nVirtKey out, size);
 }
 
-char *GetKeyName(unsigned long int nVirtKey, char *out, int maxlen)
+char *GetKeyName(u32 nVirtKey, char *out, int maxlen)
 {
 	if(nVirtKey>=VK_F1 && nVirtKey<=VK_F12)
 		sprintf_safe(out, maxlen, "F%d",nVirtKey-VK_F1+1);

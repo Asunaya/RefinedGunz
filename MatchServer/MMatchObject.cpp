@@ -166,7 +166,7 @@ void MMatchObject::Tick(u64 nTime)
 			(pChannel) && (pChannel->GetChannelType() == MCHANNEL_TYPE_CLAN))
 		{
 			if ((unsigned int)(nTime - m_nTimeLastStageListTrans) > CYCLE_MATCH_STANDBY_CLANLIST_UPDATE) {
-				unsigned long int nCurrStageListChecksum = pServer->GetLadderMgr()->GetChecksum(m_nStageCursor, 
+				u32 nCurrStageListChecksum = pServer->GetLadderMgr()->GetChecksum(m_nStageCursor, 
 																			TRANS_STANDBY_CLANLIST_NODE_COUNT);
 				if (nCurrStageListChecksum != GetStageListChecksum()) {
 					m_nTimeLastStageListTrans = nTime;
@@ -179,7 +179,7 @@ void MMatchObject::Tick(u64 nTime)
 		else
 		{
 			if ((unsigned int)(nTime - m_nTimeLastStageListTrans) > CYCLE_MATCHSTAGELISTUPDATE) {
-				unsigned long int nCurrStageListChecksum = pServer->GetStageListChecksum(m_ChannelInfo.uidChannel, 
+				u32 nCurrStageListChecksum = pServer->GetStageListChecksum(m_ChannelInfo.uidChannel, 
 																		m_nStageCursor, TRANS_STAGELIST_NODE_COUNT);
 				if (nCurrStageListChecksum != GetStageListChecksum()) {
 					m_nTimeLastStageListTrans = nTime;
@@ -508,7 +508,7 @@ void MMatchCharInfo::GetTotalWeight(int* poutWeight, int* poutMaxWeight)
 }
 
 
-bool IsEquipableItem(unsigned long int nItemID, int nPlayerLevel, MMatchSex nPlayerSex)
+bool IsEquipableItem(u32 nItemID, int nPlayerLevel, MMatchSex nPlayerSex)
 {
 	MMatchItemDesc* pItemDesc = MGetMatchItemDescMgr()->GetItemDesc(nItemID);
 	if (pItemDesc == NULL) return false;

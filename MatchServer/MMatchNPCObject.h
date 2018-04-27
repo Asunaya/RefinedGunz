@@ -28,7 +28,7 @@ private:
 	MQUEST_NPC			m_nType;					///< NPC타입
 	MUID				m_uidController;			///< 조종자
 	MVector3			m_Pos;						///< 위치
-	unsigned long int	m_nFlags;					///< 플래그 모음
+	u32	m_nFlags;					///< 플래그 모음
 	MQuestDropItem		m_DropItem;					///< 가지고 있는 아이템 - 없을 경우 nDropItemType가 QDIT_NA이다.
 
 public:
@@ -36,7 +36,7 @@ public:
 	/// @param uid		NPC UID
 	/// @param nType	NPC 종류
 	/// @param nFlags	플래스
-	MMatchNPCObject(MUID& uid, MQUEST_NPC nType, unsigned long int nFlags=0);
+	MMatchNPCObject(MUID& uid, MQUEST_NPC nType, u32 nFlags=0);
 	/// 소멸자
 	~MMatchNPCObject() { }
 	/// NPC 조종을 플레이어에게 할당한다.
@@ -57,7 +57,7 @@ public:
 	inline void SetFlag(unsigned int nFlag, bool bValue);			///< 플래그 설정
 	inline bool CheckFlag(unsigned int nFlag);						///< 플래그 체크
 	inline void SetFlags(unsigned int nFlags);						///< 플래그 설정
-	inline unsigned long GetFlags();								///< 플래그 반환
+	inline u32 GetFlags();								///< 플래그 반환
 	inline bool HasDropItem();										///< 드롭 아이템을 가지고 있는지 반환
 
 };
@@ -76,7 +76,7 @@ private:
 	MQuestPlayerManager*			m_pPlayerManager;
 	MMatchNPCObjectMap				m_NPCObjectMap;
 
-	unsigned long int				m_nLastSpawnTime;		// for test
+	u32				m_nLastSpawnTime;		// for test
 
 	int								m_nNPCCount[MNST_END];		// 스폰타입별 살아있는 NPC수
 	int								m_nBossCount;				// 살아있는 보스 수
@@ -153,7 +153,7 @@ inline bool MMatchNPCObject::CheckFlag(unsigned int nFlag)
 	return ((m_nFlags & nFlag) != 0);
 }
 
-inline unsigned long MMatchNPCObject::GetFlags() 
+inline u32 MMatchNPCObject::GetFlags()
 { 
 	return m_nFlags; 
 }

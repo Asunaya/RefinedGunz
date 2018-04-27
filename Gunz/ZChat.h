@@ -18,10 +18,10 @@ class ZChat
 private:
 	ZChatCmdManager		m_CmdManager;
 
-	unsigned long int	m_nLastInputTime;
+	u32	m_nLastInputTime;
 	int					m_nSameMsgCount;
 	char				m_nLastInputMsg[512];
-	unsigned long int	m_nLastAbuseTime;
+	u32	m_nLastAbuseTime;
 	int					m_nAbuseCounter;
 	char				m_szWhisperLastSender[64];		// 마지막에 나한테 귓말 보냈던 사람
 

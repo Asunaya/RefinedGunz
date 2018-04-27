@@ -45,7 +45,7 @@ void MMatchServer::OnAdminTerminal(const MUID& uidAdmin, const char* szText)
 	}
 }
 
-void MMatchServer::OnAdminAnnounce(const MUID& uidAdmin, const char* szChat, unsigned long int nType)
+void MMatchServer::OnAdminAnnounce(const MUID& uidAdmin, const char* szChat, u32 nType)
 {
 	MMatchObject* pObj = GetObject(uidAdmin);
 	if (pObj == NULL) return;

@@ -39,24 +39,24 @@ private:
 	MChannelUserArray			m_UserArray;
 	MSmartRefresh				m_SmartRefresh;
 
-	unsigned long	m_nChecksum;
+	u32	m_nChecksum;
 	u64				m_nLastChecksumTick;
 
 	u64				m_nLastTick;
-	unsigned long	m_nEmptyPeriod;
+	u32	m_nEmptyPeriod;
 
 	void JoinLobby(const MUID& uid, MMatchObject* pObj);
 	void LeaveLobby(const MUID& uid);
 protected:
 	bool IsChecksumUpdateTime(u64 nTick);
 	void UpdateChecksum(u64 nTick);
-	unsigned long GetEmptyPeriod()	{ return m_nEmptyPeriod; }
+	u32 GetEmptyPeriod()	{ return m_nEmptyPeriod; }
 
 public:
 	bool CheckTick(u64 nClock);
 	void Tick(u64 nClock);
 
-	unsigned long GetChecksum()		{ return m_nChecksum; }
+	u32 GetChecksum()		{ return m_nChecksum; }
 	bool CheckLifePeriod();
 
 public:
@@ -102,7 +102,7 @@ public:
 class MMatchChannelMap : public std::map<MUID, MMatchChannel*> {
 private:
 	MUID						m_uidGenerate;
-	unsigned long				m_nChecksum;
+	u32				m_nChecksum;
 	std::map<MUID, MMatchChannel*>	m_TypesChannelMap[MCHANNEL_TYPE_MAX];
 	void Insert(const MUID& uid, MMatchChannel* pChannel)	{	insert(value_type(uid, pChannel));	}
 	MUID UseUID()				{	m_uidGenerate.Increase();	return m_uidGenerate;	}
@@ -119,7 +119,7 @@ public:
 	bool Remove(const MUID& uidChannel, MMatchChannelMap::iterator* pNextItor);
 	void Update(u64 nClock);
 
-	unsigned long GetChannelListChecksum() const { return m_nChecksum; }
+	u32 GetChannelListChecksum() const { return m_nChecksum; }
 	int GetChannelCount(MCHANNEL_TYPE nChannelType);
 
 	std::map<MUID, MMatchChannel*>::iterator GetTypesChannelMapBegin(MCHANNEL_TYPE nType);

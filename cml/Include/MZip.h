@@ -33,15 +33,15 @@ public:
 	MZip();
 	~MZip();
 
-	bool Initialize(FILE* fp, unsigned long ReadMode);
-	bool Initialize(const char* File, size_t Size, unsigned long ReadMode);
+	bool Initialize(FILE* fp, u32 ReadMode);
+	bool Initialize(const char* File, size_t Size, u32 ReadMode);
 	bool Finalize();
 
-	void SetReadMode(unsigned long mode) { m_dwReadMode = mode; }
-	bool isMode(unsigned long mode) const { return (m_dwReadMode & mode) ? true : false; }
-	bool isReadAble(unsigned long mode);
+	void SetReadMode(u32 mode) { m_dwReadMode = mode; }
+	bool isMode(u32 mode) const { return (m_dwReadMode & mode) ? true : false; }
+	bool isReadAble(u32 mode);
 
-	int GetFileCount(void) const;
+	int GetFileCount() const;
 
 	void GetFileName(int i, char *szDest) const;
 	StringView GetFileName(int i) const;
@@ -93,7 +93,7 @@ protected:
 	int							m_nDirEntries;	// Number of Directory Entries
 
 	MZipMode					m_nZipMode;
-	unsigned long				m_dwReadMode;
+	u32				m_dwReadMode;
 
 	const char* FileBuffer{};
 	size_t FileSize{};

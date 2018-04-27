@@ -11,7 +11,7 @@
 #include "MQuestLevel.h"
 #include "MMatchGameType.h"
 
-typedef std::pair< MUID, unsigned long int > SacrificeSlot;
+typedef std::pair< MUID, u32 > SacrificeSlot;
 
 class MQuestSacrificeSlot
 {
@@ -26,7 +26,7 @@ public :
 	}
 
 	MUID&				GetOwnerUID()	{ return m_SacrificeSlot.first; }
-	unsigned long int	GetItemID()		{ return m_SacrificeSlot.second; }
+	u32	GetItemID()		{ return m_SacrificeSlot.second; }
 
 	bool IsEmpty() 
 	{
@@ -37,15 +37,15 @@ public :
 
 
 	void SetOwnerUID( const MUID& uidItemOwner )		{ m_SacrificeSlot.first = uidItemOwner; }
-	void SetItemID( const unsigned long int nItemID )	{ m_SacrificeSlot.second = nItemID; }
-	void SetAll( const MUID& uidItemOwner, const unsigned long int nItemID )
+	void SetItemID( const u32 nItemID )	{ m_SacrificeSlot.second = nItemID; }
+	void SetAll( const MUID& uidItemOwner, const u32 nItemID )
 	{
 		SetOwnerUID( uidItemOwner );
 		SetItemID( nItemID );
 	}
 
 
-	bool IsOwner( const MUID& uidRequester, const unsigned long int nItemID )
+	bool IsOwner( const MUID& uidRequester, const u32 nItemID )
 	{
 		if( (m_SacrificeSlot.first == uidRequester) && (m_SacrificeSlot.second == nItemID) )
 			return true;
@@ -118,12 +118,12 @@ protected:
 	void RouteReadyToNewSector(const MUID& uidPlayer);
 	/// 해당 퀘스트 아이템을 먹었다고 메세지 보낸다.
 	/// @param nQuestItemID  퀘스트 아이템 ID
-	void RouteObtainQuestItem(unsigned long int nQuestItemID);
+	void RouteObtainQuestItem(u32 nQuestItemID);
 	/// 해당 일반 아이템을 먹었다고 메세지 보낸다.
 	/// @param nItemID  일반 아이템 ID
-	void RouteObtainZItem(unsigned long int nItemID);
+	void RouteObtainZItem(u32 nItemID);
 	/// 섹터 경험치 라우트
-	void RouteSectorBonus(const MUID& uidPlayer, unsigned long int nEXPValue);
+	void RouteSectorBonus(const MUID& uidPlayer, u32 nEXPValue);
 	/// 섹터 전투 상태 변화시 메세지 보낸다.
 	void RouteCombatState();
 	/// 퀘스트 레벨 생성
@@ -192,10 +192,10 @@ public:
 	/// @param uidPlayer			플레이어 UID
 	void OnReadyToNewSector(const MUID& uidPlayer);
 
-	virtual void OnRequestDropSacrificeItemOnSlot( const MUID& uidSender, const int nSlotIndex, const unsigned long int nItemID );
-	virtual void OnResponseDropSacrificeItemOnSlot( const MUID& uidSender, const int nSlotIndex, const unsigned long int nItemID );
-	virtual void OnRequestCallbackSacrificeItem( const MUID& uidSender, const int nSlotIndex, const unsigned long int nItemID );
-    virtual void OnResponseCallBackSacrificeItem( const MUID& uidSender, const int nSlotIndex, const unsigned long int nItemID );
+	virtual void OnRequestDropSacrificeItemOnSlot( const MUID& uidSender, const int nSlotIndex, const u32 nItemID );
+	virtual void OnResponseDropSacrificeItemOnSlot( const MUID& uidSender, const int nSlotIndex, const u32 nItemID );
+	virtual void OnRequestCallbackSacrificeItem( const MUID& uidSender, const int nSlotIndex, const u32 nItemID );
+    virtual void OnResponseCallBackSacrificeItem( const MUID& uidSender, const int nSlotIndex, const u32 nItemID );
 	virtual void OnRequestQL( const MUID& uidSender );
 	virtual void OnResponseQL_ToStage( const MUID& uidStage );
 	virtual void OnRequestSacrificeSlotInfo( const MUID& uidSender );
@@ -204,7 +204,7 @@ public:
 	virtual void OnChangeCondition();
 
 	virtual bool							PrepareStart();
-	virtual bool							IsSacrificeItemDuplicated( const MUID& uidSender, const int nSlotIndex, const unsigned long int nItemID );
+	virtual bool							IsSacrificeItemDuplicated( const MUID& uidSender, const int nSlotIndex, const u32 nItemID );
 	virtual void							PreProcessLeaveStage( const MUID& uidLeaverUID );
 	virtual void							DestroyAllSlot();
 	virtual MMATCH_GAMETYPE GetGameType() { return MMATCH_GAMETYPE_QUEST; }
@@ -222,5 +222,5 @@ public:
 	void RouteRewardCommandToStage( MMatchObject* pPlayer, const int nRewardXP, const int nRewardBP, void* pSimpleQuestItemBlob, void* pSimpleZItemBlob );
 	
 private :
-	int CalcuOwnerQItemCount( const MUID& uidPlayer, const unsigned long nItemID );
+	int CalcuOwnerQItemCount( const MUID& uidPlayer, const u32 nItemID );
 };

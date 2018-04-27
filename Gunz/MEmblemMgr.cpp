@@ -261,7 +261,7 @@ bool MEmblemMgr::GetEmblemPathByCLID(unsigned int nCLID, char* poutFilePath, siz
 	return GetEmblemPath(poutFilePath, maxlen, pEmblem->GetURL());
 }
 
-bool MEmblemMgr::CheckEmblem(unsigned int nCLID, unsigned long nChecksum)
+bool MEmblemMgr::CheckEmblem(unsigned int nCLID, u32 nChecksum)
 {
 	MEmblemMap::iterator i = m_EmblemMap.find(nCLID);
 	if (i==m_EmblemMap.end()) {
@@ -282,7 +282,7 @@ void MEmblemMgr::PostDownload(unsigned int nCLID, unsigned int nChecksum, const 
 	m_HttpSpooler.Post(nCLID, nChecksum, pszURL);
 }
 
-bool MEmblemMgr::RegisterEmblem(unsigned int nCLID, const char* pszURL, unsigned long nChecksum, time_t tmLastUsed)
+bool MEmblemMgr::RegisterEmblem(unsigned int nCLID, const char* pszURL, u32 nChecksum, time_t tmLastUsed)
 {
 	MEmblemMap::iterator i = m_EmblemMap.find(nCLID);
 	if (i!=m_EmblemMap.end()) {
@@ -313,7 +313,7 @@ void MEmblemMgr::NotifyDownloadDone(unsigned int nCLID, const char* pszURL)
 	ZPostClanEmblemReady(nCLID, const_cast<char*>(pszURL));
 }
 
-bool MEmblemMgr::ProcessEmblem(unsigned int nCLID, const char* pszURL, unsigned long nChecksum)
+bool MEmblemMgr::ProcessEmblem(unsigned int nCLID, const char* pszURL, u32 nChecksum)
 {
 	m_nTotalRequest++;
 
@@ -326,7 +326,7 @@ bool MEmblemMgr::ProcessEmblem(unsigned int nCLID, const char* pszURL, unsigned 
 	}
 }
 
-void MEmblemMgr::Tick(unsigned long nTick)
+void MEmblemMgr::Tick(u32 nTick)
 {
 	int nRegisterCount = 0;
 
@@ -339,7 +339,7 @@ void MEmblemMgr::Tick(unsigned long nTick)
 		if (GetEmblemPath(szFilePath, strURL.c_str()) == false)
 			return;
 
-		//unsigned long nChecksum = GetFileCheckSum(szFilePath);
+		//u32 nChecksum = GetFileCheckSum(szFilePath);
 		if (RegisterEmblem(nCLID, strURL.c_str(), nChecksum)) {
 			nRegisterCount++;
 			CheckEmblem(nCLID, nChecksum);	// LastUsedTime 업데이트위해 공체크

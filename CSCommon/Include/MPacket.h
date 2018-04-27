@@ -51,7 +51,7 @@ inline unsigned short MBuildCheckSum(MPacketHeader* pPacket, int nPacketSize)
 	u8* pBulk = reinterpret_cast<u8*>(pPacket);
 	nPacketSize = (std::min)(65535, nPacketSize);
 
-	unsigned long nCheckSum = 0;
+	u32 nCheckSum = 0;
 	for (int i=nStartOffset; i<nPacketSize; i++) {
 		nCheckSum += pBulk[i];
 	}

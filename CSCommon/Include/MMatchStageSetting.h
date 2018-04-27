@@ -126,7 +126,7 @@ class MMatchStageSetting final
 public:
 	void Clear();
 	void SetDefault();
-	unsigned long GetChecksum();
+	u32 GetChecksum();
 	MSTAGE_CHAR_SETTING_NODE* FindCharSetting(const MUID& uid);
 
 	// Get

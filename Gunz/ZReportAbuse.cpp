@@ -32,7 +32,7 @@ ZReportAbuse::~ZReportAbuse()
 
 void ZReportAbuse::Report(const char* szReason)
 {
-	unsigned long int nNowTime = GetGlobalTimeMS();
+	u32 nNowTime = GetGlobalTimeMS();
 	if ((nNowTime - m_nReportTime) < REPORT_ABUSE_COOL_TIME)
 	{
 		ZChatOutput( ZMsg(MSG_119_REPORT_WAIT_ONEMINUTE) );

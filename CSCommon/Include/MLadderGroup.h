@@ -60,8 +60,8 @@ public:
 		}
 		m_uidPlayerList.push_back(pObj->GetUID()); 
 	}
-	unsigned long GetChecksum() {
-		return (unsigned long)(m_nType + m_nID);
+	u32 GetChecksum() {
+		return (u32)(m_nType + m_nID);
 	}
 	void UpdateTick() { 
 		if (!m_bWantBalancedMatching) m_nTickCount++; 

@@ -368,7 +368,7 @@ bool MMatchServer::LoadInitFile()
 		return false;
 	}
 
-	unsigned long nItemChecksum = MGetMZFileChecksum(FILENAME_ITEM_DESC);
+	u32 nItemChecksum = MGetMZFileChecksum(FILENAME_ITEM_DESC);
 	SetItemFileChecksum(nItemChecksum);
 
 	if( !InitEvent() )
@@ -1691,7 +1691,7 @@ MMatchObject* MMatchServer::GetPlayerByName(const char* pszName)
 	return NULL;
 }
 
-MMatchObject* MMatchServer::GetPlayerByAID(unsigned long int nAID)
+MMatchObject* MMatchServer::GetPlayerByAID(u32 nAID)
 {
 	if (nAID == 0) return NULL;
 
@@ -1778,12 +1778,12 @@ u64 MMatchServer::GetGlobalClockCount()
 	return GetGlobalTimeMS();
 }
 
-unsigned long int MMatchServer::ConvertLocalClockToGlobalClock(unsigned long int nLocalClock, unsigned long int nLocalClockDistance)
+u32 MMatchServer::ConvertLocalClockToGlobalClock(u32 nLocalClock, u32 nLocalClockDistance)
 {
 	return (nLocalClock + nLocalClockDistance);
 }
 
-unsigned long int MMatchServer::ConvertGlobalClockToLocalClock(unsigned long int nGlobalClock, unsigned long int nLocalClockDistance)
+u32 MMatchServer::ConvertGlobalClockToLocalClock(u32 nGlobalClock, u32 nLocalClockDistance)
 {
 	return (nGlobalClock - nLocalClockDistance);
 }
@@ -1860,7 +1860,7 @@ void MMatchServer::ParseUDPPacket(char* pData, MPacketHeader* pPacketHeader, u32
 					pCmd->m_Sender = MUID(0,0);
 					pCmd->m_Receiver = m_This;
 
-					unsigned long nPort = MSocket::ntohs(wRawPort);
+					u32 nPort = MSocket::ntohs(wRawPort);
 
 					MCommandParameterUInt* pParamIP = (MCommandParameterUInt*)pCmd->GetParameter(1);
 					MCommandParameterUInt* pParamPort = (MCommandParameterUInt*)pCmd->GetParameter(2);
@@ -2060,7 +2060,7 @@ void MMatchServer::OnUserWhere(const MUID& uidComm, char* pszTargetName)
 	Announce(pObj, szLog);
 }
 
-void MMatchServer::OnUserOption(const MUID& uidComm, unsigned long nOptionFlags)
+void MMatchServer::OnUserOption(const MUID& uidComm, u32 nOptionFlags)
 {
 	MMatchObject* pObj = GetPlayerByCommUID(uidComm);
 	if (pObj == NULL) return;
@@ -2260,7 +2260,7 @@ void MMatchServer::InsertChatDBLog(const MUID& uidPlayer, const char* szMsg)
 
 	static struct MCHATLOG
 	{
-		unsigned long int nCID;
+		u32 nCID;
 		char szMsg[256];
 		u64 nTime;
 	} stChatLog[MAX_CHAT_LOG];
@@ -2519,7 +2519,7 @@ void MMatchServer::UpdateCharDBCachingData(MMatchObject* pObject)
 // item xml 체크용 - 테스트
 bool MMatchServer::CheckItemXML()
 {
-	map<unsigned long int, string>	ItemXmlMap;
+	map<u32, string>	ItemXmlMap;
 
 	MXmlDocument	xmlIniData;
 
@@ -2545,7 +2545,7 @@ bool MMatchServer::CheckItemXML()
 
 		if (!_stricmp(szTagName, MICTOK_ITEM))
 		{
-			unsigned long int id;
+			u32 id;
 			int n;
 			char szItemName[256];
 			chrElement.GetAttribute(&n, MICTOK_ID);
@@ -2560,7 +2560,7 @@ bool MMatchServer::CheckItemXML()
 				mlog(szTemp);
 				return false;
 			}
-			ItemXmlMap.insert(map<unsigned long int, string>::value_type(id, string(szItemName)));
+			ItemXmlMap.insert(map<u32, string>::value_type(id, string(szItemName)));
 		}
 	}
 
@@ -2573,11 +2573,11 @@ bool MMatchServer::CheckItemXML()
 		return false;
 	}
 
-	for (map<unsigned long int, string>::iterator itor = ItemXmlMap.begin();
+	for (map<u32, string>::iterator itor = ItemXmlMap.begin();
 		itor != ItemXmlMap.end(); ++itor)
 	{
 		char szTemp2[256];
-		unsigned long int id = (*itor).first;
+		u32 id = (*itor).first;
 		size_t pos = (*itor).second.find( ":" );
 		if( string::npos == pos ) 
 		{
@@ -2681,7 +2681,7 @@ struct ix
 
 bool MMatchServer::CheckUpdateItemXML()
 {
-	// map<unsigned long int, string>	ItemXmlMap;
+	// map<u32, string>	ItemXmlMap;
 	
 	map< string, ix > imName;
 	map< string, ix > imDesc;
@@ -2766,10 +2766,10 @@ bool MMatchServer::CheckUpdateItemXML()
 		string a = it->second.name;
 		strcpy_safe(szID, it->second.id.c_str() + 11);
 
-		unsigned int nID = static_cast< unsigned long >( atol(szID) );
+		auto nID = StringToInt<u32>(szID).value_or(0);
 		int k = 0;
 
-		fprintf( fpName, "UPDATE Item SET Name = '%s' WHERE ItemID = %d\n",
+		fprintf( fpName, "UPDATE Item SET Name = '%s' WHERE ItemID = %u\n",
 			it->second.name.c_str(), nID );
 	}
 	fclose( fpName );
@@ -2789,11 +2789,11 @@ bool MMatchServer::CheckUpdateItemXML()
 		string a = it->second.name;
 		strcpy_safe(szID, it->second.id.c_str() + 11);
 
-		unsigned int nID = static_cast< unsigned long >( atol(szID) );
+		auto nID = StringToInt<u32>(szID).value_or(0);
 		int k = 0;
 
 		char szQ[ 1024 ] = {0,};
-		fprintf( fpDesc, "UPDATE Item SET Description = '%s' WHERE ItemID = %d\n",
+		fprintf( fpDesc, "UPDATE Item SET Description = '%s' WHERE ItemID = %u\n",
 			it->second.desc.c_str(), nID );
 	}
 	fclose( fpDesc );
@@ -2802,12 +2802,12 @@ bool MMatchServer::CheckUpdateItemXML()
 }
 
 
-unsigned long int MMatchServer::GetStageListChecksum(MUID& uidChannel, int nStageCursor, int nStageCount)
+u32 MMatchServer::GetStageListChecksum(MUID& uidChannel, int nStageCursor, int nStageCount)
 {
 	MMatchChannel* pChannel = FindChannel(uidChannel);
 	if (pChannel == NULL) return 0;
 
-	unsigned long int nStageListChecksum = 0;
+	u32 nStageListChecksum = 0;
 	int nRealStageCount = 0;
 
 	for (int i = nStageCursor; i < pChannel->GetMaxPlayers(); i++)

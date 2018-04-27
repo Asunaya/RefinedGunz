@@ -395,7 +395,7 @@ bool MQuestLevel::IsEnableSpawnNow(MQuestNPCSpawnType nSpawnType, u64 nNowTime)
 	return false;
 }
 
-void MQuestLevel::OnItemCreated(unsigned long int nItemID, int nRentPeriodHour)
+void MQuestLevel::OnItemCreated(u32 nItemID, int nRentPeriodHour)
 {
 	MQuestLevelItem* pNewItem = new MQuestLevelItem();
 	pNewItem->nItemID = nItemID;
@@ -405,7 +405,7 @@ void MQuestLevel::OnItemCreated(unsigned long int nItemID, int nRentPeriodHour)
 	m_DynamicInfo.ItemMap.insert(make_pair(nItemID, pNewItem));
 }
 
-bool MQuestLevel::OnItemObtained( MMatchObject* pPlayer, unsigned long int nItemID )
+bool MQuestLevel::OnItemObtained( MMatchObject* pPlayer, u32 nItemID )
 {
 	if( 0 == pPlayer ) return false;
 

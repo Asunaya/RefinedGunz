@@ -35,7 +35,7 @@ private:
 
 	bool					m_bReserveSelectChar;
 	int						m_nSelCharIndex;
-	unsigned long int		m_nReservedSelectTime;
+	u32		m_nReservedSelectTime;
 	RVisualMesh*			m_pVisualMesh;
 	RMesh*					m_pMesh;
 	ZShadow*				m_pShadow;

@@ -35,7 +35,7 @@ _STATUS_CMD_START;
 			{
 				char szUserID[64];
 				int nCommandVersion = 0;
-				unsigned long nChecksumPack = 0;
+				u32 nChecksumPack = 0;
 				int nVersion = -1;
 				if (pCommand->GetParameter(szUserID, 0, MPT_STR, sizeof(szUserID) )==false) break;
 
@@ -139,7 +139,7 @@ _STATUS_CMD_START;
 				char szName[256];
 				int nSex;
 				bool bFreeLoginIP;
-				unsigned long nChecksumPack;
+				u32 nChecksumPack;
 
 				if (pCommand->GetParameter(&CommUID,		0, MPT_UID)==false) break;
 				if (pCommand->GetParameter(szLoginID,		1, MPT_STR, sizeof(szLoginID) )==false) break;
@@ -572,9 +572,9 @@ _STATUS_CMD_START;
 			break;
 		case MC_MATCH_AGENT_REQUEST_LIVECHECK:
 			{
-				unsigned long nTimeStamp;
-				unsigned long nStageCount;
-				unsigned long nUserCount;
+				u32 nTimeStamp;
+				u32 nStageCount;
+				u32 nUserCount;
 
 				if (pCommand->GetParameter(&nTimeStamp, 0, MPT_UINT) == false) break;
 				if (pCommand->GetParameter(&nStageCount, 1, MPT_UINT) == false) break;
@@ -619,7 +619,7 @@ _STATUS_CMD_START;
 		case MC_MATCH_REQUEST_SELECT_CHAR:
 			{
 				MUID uidPlayer = pCommand->GetSenderUID();
-				unsigned long int nCharIndex;
+				u32 nCharIndex;
 
 				pCommand->GetParameter(&nCharIndex, 1, MPT_UINT);
 
@@ -629,7 +629,7 @@ _STATUS_CMD_START;
 		case MC_MATCH_REQUEST_DELETE_CHAR:
 			{
 				MUID uidPlayer = pCommand->GetSenderUID();
-				unsigned long int nCharIndex;
+				u32 nCharIndex;
 				char szCharName[256];
 
 				pCommand->GetParameter(&nCharIndex, 1, MPT_UINT);
@@ -641,8 +641,8 @@ _STATUS_CMD_START;
 		case MC_MATCH_REQUEST_CREATE_CHAR:
 			{
 				MUID uidPlayer = pCommand->GetSenderUID();
-				unsigned long int nCharIndex;
-				unsigned long int nSex, nHair, nFace, nCostume;
+				u32 nCharIndex;
+				u32 nSex, nHair, nFace, nCostume;
 
 				char szCharName[128];
 
@@ -668,7 +668,7 @@ _STATUS_CMD_START;
 		case MC_MATCH_REQUEST_BUY_ITEM:
 			{
 				MUID uidPlayer = pCommand->GetSenderUID();
-				unsigned long int nItemID;
+				u32 nItemID;
 				pCommand->GetParameter(&nItemID, 1, MPT_UINT);
 
 				OnRequestBuyItem(uidPlayer, nItemID);
@@ -727,7 +727,7 @@ _STATUS_CMD_START;
 			{
 				MUID uidAdmin;
 				static char szChat[1024];
-				unsigned long int nMsgType = 0;
+				u32 nMsgType = 0;
 
 				pCommand->GetParameter(&uidAdmin, 0, MPT_UID);
 				pCommand->GetParameter(szChat, 1, MPT_STR, sizeof(szChat) );
@@ -890,7 +890,7 @@ _STATUS_CMD_START;
 			{
 				MUID uidPlayer, uidItem;
 				uidPlayer = pCommand->GetSenderUID();
-				unsigned long int nEquipmentSlot = 0;
+				u32 nEquipmentSlot = 0;
 
 				pCommand->GetParameter(&uidItem, 1, MPT_UID);
 				pCommand->GetParameter(&nEquipmentSlot, 2, MPT_UINT);
@@ -901,7 +901,7 @@ _STATUS_CMD_START;
 		case MC_MATCH_REQUEST_TAKEOFF_ITEM:
 			{
 				MUID uidPlayer = pCommand->GetSenderUID();
-				unsigned long int nEquipmentSlot = 0;
+				u32 nEquipmentSlot = 0;
 				pCommand->GetParameter(&nEquipmentSlot, 1, MPT_UINT);
 
 				OnRequestTakeoffItem(uidPlayer, nEquipmentSlot);
@@ -959,7 +959,7 @@ _STATUS_CMD_START;
 			break;
 		case MC_MATCH_USER_OPTION:
 			{
-				unsigned long nOptionFlags=0;
+				u32 nOptionFlags=0;
 				pCommand->GetParameter(&nOptionFlags, 0, MPT_UINT);
 
 				OnUserOption(pCommand->GetSenderUID(), nOptionFlags);
@@ -1224,8 +1224,8 @@ _STATUS_CMD_START;
 		case MC_MATCH_CHANNEL_REQUEST_ALL_PLAYER_LIST:
 			{
 				MUID uidPlayer, uidChannel;
-				unsigned long int nPlaceFilter;
-				unsigned long int nOptions;
+				u32 nPlaceFilter;
+				u32 nOptions;
 				uidPlayer = pCommand->GetSenderUID();
 
 				pCommand->GetParameter(&uidChannel,		1, MPT_UID);
@@ -1251,7 +1251,7 @@ _STATUS_CMD_START;
 		case MC_MATCH_LADDER_REQUEST_CHALLENGE:
 			{
 				int nMemberCount;
-				unsigned long int nOptions;
+				u32 nOptions;
 
 				pCommand->GetParameter(&nMemberCount,		0, MPT_INT);
 				pCommand->GetParameter(&nOptions,			1, MPT_UINT);

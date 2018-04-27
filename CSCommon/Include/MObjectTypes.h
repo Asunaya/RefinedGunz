@@ -21,7 +21,7 @@ enum MCharacterRace
 	MCR_DWARF,
 	MCR_OGRE
 };
-typedef unsigned long int MCharacterRaces;
+typedef u32 MCharacterRaces;
 
 /// 캐릭터 클래스
 enum MCharacterClass
@@ -54,7 +54,7 @@ enum MCharacterClass
 	MCC_MAGICIAN,
 	MCC_WARLOCK
 };
-typedef unsigned long int MCharacterClasses;
+typedef u32 MCharacterClasses;
 
 /// 캐릭터의 타입
 enum MCharacterType
@@ -97,7 +97,7 @@ enum MCharacterAbility
 	MCAB_STUN				= 256,
 	MCAB_SLEEP				= 512
 };
-typedef unsigned long int MCharacterStates;
+typedef u32 MCharacterStates;
 
 
 /*

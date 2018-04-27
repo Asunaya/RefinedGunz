@@ -75,7 +75,7 @@ private:
 
 	u64						m_nStateTimer;
 	u64						m_nLastTick;
-	unsigned long			m_nChecksum;
+	u32			m_nChecksum;
 	u64						m_nLastChecksumTick;
 	int						m_nAdminObjectCount;
 	u64						m_nStartTime;

@@ -35,7 +35,7 @@ protected:
 	MMatchObject*	m_pObject;
 
 protected:
-	virtual bool OnSync(unsigned long nChecksum);
+	virtual bool OnSync(u32 nChecksum);
 
 public:
 	void SetMatchObject(MMatchObject* pObj)	{ m_pObject = pObj; }
@@ -68,7 +68,7 @@ protected:
 	MMatchObject*	m_pObject;
 
 protected:
-	virtual bool OnSync(unsigned long nChecksum);
+	virtual bool OnSync(u32 nChecksum);
 
 public:
 	void SetMatchObject(MMatchObject* pObj)	{ m_pObject = pObj; }

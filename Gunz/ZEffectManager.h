@@ -315,8 +315,8 @@ public:
 	void Clear();
 	
 	void Update(float fElapsed);
-	void Draw(unsigned long int nTime);
-	void Draw(unsigned long int nTime,int mode,float height);
+	void Draw(u32 nTime);
+	void Draw(u32 nTime,int mode,float height);
 
 	int  DeleteSameType(ZEffectAniMesh* pNew);
 

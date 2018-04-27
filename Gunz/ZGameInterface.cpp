@@ -3169,7 +3169,7 @@ void ZGameInterface::Buy()
 		pButton->Show(false);
 		pButton->Show(true);
 	}
-	unsigned long int nItemID = 0;
+	u32 nItemID = 0;
 	ZEquipmentListBox* pListBox = (ZEquipmentListBox*)m_IDLResource.FindWidget("AllEquipmentList");
 	if (pListBox == NULL)
 		return;
@@ -3350,7 +3350,7 @@ int ZGameInterface::CheckRestrictBringAccountItem()
 		ZEquipmentListItem* pListItem = (ZEquipmentListItem*)pListBox->GetSelItem();
 		if (pListItem == NULL) return -1;
 
-		const unsigned long nItemID = pListItem->GetItemID();
+		const auto nItemID = pListItem->GetItemID();
 		MMatchItemDesc* pItemDesc = MGetMatchItemDescMgr()->GetItemDesc(nItemID);
 		if (pItemDesc == NULL)
 			return -1;	// Item Not Found
@@ -3380,8 +3380,8 @@ void ZGameInterface::BringAccountItem()
 		const int nAIID = pListItem->GetAIID();
 		if (nAIID != 0)
 		{
-			static unsigned long int st_LastRequestTime = 0;
-			unsigned long int nNowTime = GetGlobalTimeMS();
+			static u32 st_LastRequestTime = 0;
+			u32 nNowTime = GetGlobalTimeMS();
 			if ((nNowTime - st_LastRequestTime) >= 1000)
 			{
 				ZPostRequestBringAccountItem(ZGetGameClient()->GetPlayerUID(), nAIID);
@@ -3720,7 +3720,7 @@ void ZGameInterface::ShowInterface(bool bShowInterface)
 	}
 }
 
-void ZGameInterface::OnResponseShopItemList(unsigned long int* nItemList, int nItemCount)
+void ZGameInterface::OnResponseShopItemList(u32* nItemList, int nItemCount)
 {
 	ZGetShop()->SetItemsAll(nItemList, nItemCount);
 	ZGetShop()->Serialize();

@@ -18,7 +18,7 @@ MMatchFriendInfo::~MMatchFriendInfo()
 	}
 }
 
-bool MMatchFriendInfo::Add(unsigned long nFriendCID, unsigned short nFavorite, const StringView& Name)
+bool MMatchFriendInfo::Add(u32 nFriendCID, unsigned short nFavorite, const StringView& Name)
 {
 	if (Find(nFriendCID) != NULL)
 		return false;
@@ -47,7 +47,7 @@ void MMatchFriendInfo::Remove(const StringView& Name)
 	}
 }
 
-MMatchFriendNode* MMatchFriendInfo::Find(unsigned long nFriendCID)
+MMatchFriendNode* MMatchFriendInfo::Find(u32 nFriendCID)
 {
 	for (MMatchFriendList::iterator i=m_FriendList.begin(); i!= m_FriendList.end(); i++) 
 	{

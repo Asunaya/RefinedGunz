@@ -52,7 +52,7 @@ void ZItemSlotView::OnDraw(MDrawContext* pDC)
 	if ( m_nParts == MMCIP_END)
 		return;
 
-	unsigned long int nItemID = ZGetMyInfo()->GetItemList()->GetEquipedItemID(m_nParts);
+	u32 nItemID = ZGetMyInfo()->GetItemList()->GetEquipedItemID(m_nParts);
 	MMatchItemDesc* pItemDesc = NULL;
 	if (nItemID != 0) 
 		pItemDesc = MGetMatchItemDescMgr()->GetItemDesc(nItemID);
@@ -146,7 +146,7 @@ bool ZItemSlotView::IsDropable(MWidget* pSender)
 }
 
 
-bool ZItemSlotView::IsEquipableItem(unsigned long int nItemID, int nPlayerLevel, MMatchSex nPlayerSex)
+bool ZItemSlotView::IsEquipableItem(u32 nItemID, int nPlayerLevel, MMatchSex nPlayerSex)
 {
 	MMatchItemDesc* pItemDesc = MGetMatchItemDescMgr()->GetItemDesc(nItemID);
 	if (pItemDesc == NULL) return false;
@@ -176,7 +176,7 @@ bool ZItemSlotView::OnDrop(MWidget* pSender, MBitmap* pBitmap, const char* szStr
 		ZEquipmentListBox* pWidget = (ZEquipmentListBox*)pResource->FindWidget("EquipmentList");
 		if (pWidget==NULL) return false;
 
-		unsigned long int nItemIndex = 0;
+		u32 nItemIndex = 0;
 		if (pWidget->IsSelected())
 		{
 			nItemIndex = pWidget->GetSelIndex();
@@ -234,7 +234,7 @@ bool ZItemSlotView::OnEvent(MEvent* pEvent, MListener* pListener)
 		m_bSelectBox = true;
 
 		// 상점 및 장비 아이템 슬롯일 경우
-		unsigned long int nItemID = ZGetMyInfo()->GetItemList()->GetEquipedItemID(m_nParts);
+		u32 nItemID = ZGetMyInfo()->GetItemList()->GetEquipedItemID(m_nParts);
 		MMatchItemDesc* pItemDesc = NULL;
 		if (nItemID != 0)
 		{
@@ -293,7 +293,7 @@ bool ZItemSlotView::OnEvent(MEvent* pEvent, MListener* pListener)
 	// 더블클릭시 아이템 해제
 	else if ( pEvent->nMessage == MWM_LBUTTONDBLCLK)
 	{
-		unsigned long int nItemID = ZGetMyInfo()->GetItemList()->GetEquipedItemID(m_nParts);
+		u32 nItemID = ZGetMyInfo()->GetItemList()->GetEquipedItemID(m_nParts);
 		MMatchItemDesc* pItemDesc = NULL;
 		if (nItemID != 0)
 		{

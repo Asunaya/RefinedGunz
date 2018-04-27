@@ -265,7 +265,7 @@ void MMatchServer::CheckExpiredItems(MMatchObject* pObj)
 	MMatchCharInfo*	pCharInfo = pObj->GetCharInfo();
 	if (!pCharInfo->m_ItemList.HasRentItem()) return;
 
-	vector<unsigned long int> vecExpiredItemIDList;
+	vector<u32> vecExpiredItemIDList;
 	vector<MUID> vecExpiredItemUIDList;				// 만료된 아이템 UID
 
 	// 기간 만료 아이템이 있는지 체크하고 있으면 아이템 해제하고 통지한다.
@@ -312,16 +312,16 @@ void MMatchServer::CheckExpiredItems(MMatchObject* pObj)
 	}
 }
 
-void MMatchServer::ResponseExpiredItemIDList(MMatchObject* pObj, vector<unsigned long int>& vecExpiredItemIDList)
+void MMatchServer::ResponseExpiredItemIDList(MMatchObject* pObj, vector<u32>& vecExpiredItemIDList)
 {
 	int nBlobSize = (int)vecExpiredItemIDList.size();
 	MCommand* pNewCmd = CreateCommand(MC_MATCH_EXPIRED_RENT_ITEM, MUID(0,0));
 	
-	void* pExpiredItemIDArray = MMakeBlobArray(sizeof(unsigned long int), nBlobSize);
+	void* pExpiredItemIDArray = MMakeBlobArray(sizeof(u32), nBlobSize);
 
 	for (int i = 0; i < nBlobSize; i++)
 	{
-		unsigned long int *pItemID = (unsigned long int*)MGetBlobArrayElement(pExpiredItemIDArray, i);
+		u32 *pItemID = (u32*)MGetBlobArrayElement(pExpiredItemIDArray, i);
 		*pItemID = vecExpiredItemIDList[i];
 	}
 	pNewCmd->AddParameter(new MCommandParameterBlob(pExpiredItemIDArray, MGetBlobArraySize(pExpiredItemIDArray)));

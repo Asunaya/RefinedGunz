@@ -522,10 +522,10 @@ void ZObserver::OnDraw(MDrawContext* pDC)
 
 void ZObserver::CheckDeadTarget()
 {
-	static unsigned long int nLastTime = GetGlobalTimeMS();
-	static unsigned long int st_nDeadTime = 0;
+	static u32 nLastTime = GetGlobalTimeMS();
+	static u32 st_nDeadTime = 0;
 
-	unsigned long int nNowTime = GetGlobalTimeMS();
+	u32 nNowTime = GetGlobalTimeMS();
 
 	if (m_pTargetCharacter == NULL) 
 	{

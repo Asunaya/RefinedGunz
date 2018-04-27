@@ -6,16 +6,16 @@
 #include "MMath.h"
 #include "MDebug.h"
 
-unsigned long MGetMemoryChecksum(char *pBuffer, int nLen)
+u32 MGetMemoryChecksum(char *pBuffer, int nLen)
 {
-	unsigned long nChecksum = 0;
+	u32 nChecksum = 0;
 	for (int i=0; i<nLen; i++)
 		nChecksum += pBuffer[i];
 
 	return nChecksum;
 }
 
-unsigned long MGetMZFileChecksum(const char* pszFileName) 
+u32 MGetMZFileChecksum(const char* pszFileName) 
 {
 	MZFile mzf;
 	if(!mzf.Open(pszFileName)) 
@@ -28,7 +28,7 @@ unsigned long MGetMZFileChecksum(const char* pszFileName)
 	mzf.Read(pBuffer, nLen);
 	mzf.Close();
 
-	unsigned long nChecksum = MGetMemoryChecksum(pBuffer,nLen);
+	u32 nChecksum = MGetMemoryChecksum(pBuffer,nLen);
 	delete pBuffer;
 	return nChecksum;
 }

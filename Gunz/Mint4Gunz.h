@@ -45,7 +45,7 @@ public:
 		return Mint::NewWidget(szClass, szName, pParent, pListener);
 	}
 
-	virtual const char* GetActionKeyName(unsigned long int nKey);
+	virtual const char* GetActionKeyName(u32 nKey);
 
 	virtual void Draw(void){
 		Mint::Draw();

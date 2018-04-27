@@ -146,7 +146,7 @@ void ZBirdDummyAIMakeRoomFlood::OnCommand(MCommand* pCmd)
 					MCommandParameterInt(3));
 
 
-				static unsigned long int stJoinCount = 0;
+				static u32 stJoinCount = 0;
 				stJoinCount++;
 				char szTemp[512];
 				if ((stJoinCount % 100) == 0)
@@ -232,7 +232,7 @@ void ZBirdDummyAIMakeRoomFlood::OnCommand(MCommand* pCmd)
 
 void ZBirdDummyAIMakeRoomFlood::OnRun()
 {
-	unsigned long int nNowTime = GetGlobalTimeMS();
+	u32 nNowTime = GetGlobalTimeMS();
 
 	if (m_bInCombat)
 	{
@@ -345,7 +345,7 @@ void ZBirdDummyAIJoinFlood::OnCommand(MCommand* pCmd)
 //				MCommandParameterUID(m_pClient->GetPlayerUID()), 
 //				MCommandParameterUID(m_uidWantedRoom));
 
-				static unsigned long int stJoinCount = 0;
+				static u32 stJoinCount = 0;
 				stJoinCount++;
 				char szTemp[512];
 				if ((stJoinCount % 100) == 0)
@@ -360,7 +360,7 @@ void ZBirdDummyAIJoinFlood::OnCommand(MCommand* pCmd)
 
 void ZBirdDummyAIJoinFlood::OnRun()
 {
-	unsigned long int nNowTime = GetGlobalTimeMS();
+	u32 nNowTime = GetGlobalTimeMS();
 
 	if (m_bReserved)
 	{

@@ -937,7 +937,7 @@ catch (const SQLiteError& e)
 }
 
 bool SQLiteDatabase::InsertCharItem(unsigned int CID, int ItemID, bool RentItem, int RentPeriodHour,
-	unsigned long * outCIID)
+	u32 * outCIID)
 try
 {
 	ExecuteSQL("INSERT INTO CharacterItem (CID, ItemID, RegDate) "
@@ -1028,7 +1028,7 @@ try
 	while (stmt.HasRow())
 	{
 		auto aiid = stmt.Get<int>();
-		unsigned long itemid = stmt.Get<int>();
+		u32 itemid = stmt.Get<int>();
 
 		auto IsRentItem = !stmt.IsNull();
 		auto RentMinutePeriodRemainder = 0;
@@ -1075,8 +1075,8 @@ catch (const SQLiteError& e)
 	return false;
 }
 
-bool SQLiteDatabase::UpdateEquipedItem(unsigned long CID, MMatchCharItemParts parts, unsigned long int CIID,
-	unsigned long int ItemID)
+bool SQLiteDatabase::UpdateEquipedItem(u32 CID, MMatchCharItemParts parts, u32 CIID,
+	u32 ItemID)
 try
 {
 	auto stmt = ExecuteSQL("SELECT Items FROM Character WHERE CID = ?", CID);
@@ -1115,7 +1115,7 @@ catch (const SQLiteError& e)
 	return false;
 }
 
-bool SQLiteDatabase::ClearAllEquipedItem(unsigned long CID)
+bool SQLiteDatabase::ClearAllEquipedItem(u32 CID)
 try
 {
 	ExecuteSQL("UPDATE Character SET Items = NULL WHERE CID = ?", CID);
@@ -1139,7 +1139,7 @@ catch (const SQLiteError& e)
 	return false;
 }
 
-bool SQLiteDatabase::BuyBountyItem(unsigned int CID, int ItemID, int Price, unsigned long * outCIID)
+bool SQLiteDatabase::BuyBountyItem(unsigned int CID, int ItemID, int Price, u32 * outCIID)
 try
 {
 	auto stmt = ExecuteSQL("SELECT BP FROM Character WHERE CID = ?", CID);
@@ -1383,7 +1383,7 @@ bool SQLiteDatabase::InsertKillLog(unsigned int nAttackerCID, unsigned int nVict
 	return true;
 }
 
-bool SQLiteDatabase::InsertChatLog(unsigned long int nCID, const char * szMsg, u64 nTime)
+bool SQLiteDatabase::InsertChatLog(u32 nCID, const char * szMsg, u64 nTime)
 {
 	// TODO: Implement
 
@@ -1397,14 +1397,14 @@ bool SQLiteDatabase::InsertServerLog(int nServerID, int nPlayerCount, int nGameC
 	return true;
 }
 
-bool SQLiteDatabase::InsertPlayerLog(unsigned long int nCID, int nPlayTime, int nKillCount, int nDeathCount, int nXP, int nTotalXP)
+bool SQLiteDatabase::InsertPlayerLog(u32 nCID, int nPlayTime, int nKillCount, int nDeathCount, int nXP, int nTotalXP)
 {
 	// TODO: Implement
 
 	return true;
 }
 
-bool SQLiteDatabase::UpdateCharPlayTime(unsigned long CID, unsigned long PlayTime)
+bool SQLiteDatabase::UpdateCharPlayTime(u32 CID, u32 PlayTime)
 try
 {
 	ExecuteSQL("UPDATE Character SET PlayTime = PlayTime + ?, LastTime = date('now') WHERE CID = ?", CID);
@@ -1416,7 +1416,7 @@ catch (const SQLiteError& e)
 	return false;
 }
 
-bool SQLiteDatabase::BringAccountItem(int AID, int CID, int AIID, unsigned int * outCIID, unsigned long int * outItemID, bool * outIsRentItem, int * outRentMinutePeriodRemainder)
+bool SQLiteDatabase::BringAccountItem(int AID, int CID, int AIID, unsigned int * outCIID, u32 * outItemID, bool * outIsRentItem, int * outRentMinutePeriodRemainder)
 try
 {
 	auto stmt = ExecuteSQL("SELECT ItemID, RentDate, RentHourPeriod, Cnt "

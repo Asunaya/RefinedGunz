@@ -114,19 +114,19 @@ public:
 		int AddedKillCount, int AddedDeathCount) = 0;
 
 	virtual bool InsertCharItem(unsigned int nCID, int nItemDescID, bool bRentItem,
-		int nRentPeriodHour, unsigned long int* poutCIID) = 0;
+		int nRentPeriodHour, u32* poutCIID) = 0;
 	virtual bool DeleteCharItem(unsigned int nCID, int nCIID) = 0;
 	virtual bool GetCharItemInfo(MMatchCharInfo& CharInfo) = 0;
 	virtual bool GetAccountItemInfo(int nAID, struct MAccountItemNode* pOut, int* poutNodeCount,
 		int nMaxNodeCount, MAccountItemNode* pOutExpiredItemList, int* poutExpiredItemCount,
 		int nMaxExpiredItemCount) = 0;
-	virtual bool UpdateEquipedItem(const unsigned long nCID,
+	virtual bool UpdateEquipedItem(const u32 nCID,
 		enum MMatchCharItemParts parts,
-		unsigned long int nCIID,
-		unsigned long int nItemID) = 0;
-	virtual bool ClearAllEquipedItem(unsigned long nCID) = 0;
+		u32 nCIID,
+		u32 nItemID) = 0;
+	virtual bool ClearAllEquipedItem(u32 nCID) = 0;
 	virtual bool DeleteExpiredAccountItem(int nAIID) = 0;
-	virtual bool BuyBountyItem(unsigned int nCID, int nItemID, int nPrice, unsigned long int* poutCIID) = 0;
+	virtual bool BuyBountyItem(unsigned int nCID, int nItemID, int nPrice, u32* poutCIID) = 0;
 	virtual bool SellBountyItem(unsigned int nCID, unsigned int nItemID, unsigned int nCIID,
 		int nPrice, int nCharBP) = 0;
 
@@ -150,25 +150,25 @@ public:
 		int nRound, unsigned int nMasterCID,
 		int nPlayerCount, const char* szPlayers) = 0;
 	virtual bool InsertKillLog(unsigned int nAttackerCID, unsigned int nVictimCID) = 0;
-	virtual bool InsertChatLog(unsigned long int nCID, const char* szMsg, u64 nTime) = 0;
+	virtual bool InsertChatLog(u32 nCID, const char* szMsg, u64 nTime) = 0;
 	virtual bool InsertServerLog(int nServerID, int nPlayerCount, int nGameCount,
 		uint32_t dwBlockCount, uint32_t dwNonBlockCount) = 0;
-	virtual bool InsertPlayerLog(unsigned long int nCID,
+	virtual bool InsertPlayerLog(u32 nCID,
 		int nPlayTime, int nKillCount, int nDeathCount, int nXP, int nTotalXP) = 0;
 
 	virtual bool UpdateServerStatus(int nServerID, int nPlayerCount) = 0;
 	virtual bool UpdateMaxPlayer(int nServerID, int nMaxPlayer) = 0;
 	virtual bool UpdateServerInfo(int nServerID, int nMaxPlayer, const char* szServerName) = 0;
-	virtual bool UpdateCharPlayTime(unsigned long int nCID, unsigned long int nPlayTime) = 0;
+	virtual bool UpdateCharPlayTime(u32 nCID, u32 nPlayTime) = 0;
 
-	virtual bool InsertItemPurchaseLogByBounty(unsigned long int nItemID, unsigned long int nCID,
+	virtual bool InsertItemPurchaseLogByBounty(u32 nItemID, u32 nCID,
 		int nBounty, int nCharBP, ItemPurchaseType nType) = 0;
 
 	virtual bool InsertCharMakingLog(unsigned int nAID, const char* szCharName,
 		CharMakingType nType) = 0;
 
 	virtual bool BringAccountItem(int nAID, int nCID, int nAIID,
-		unsigned int* poutCIID, unsigned long int* poutItemID,
+		unsigned int* poutCIID, u32* poutItemID,
 		bool* poutIsRentItem, int* poutRentMinutePeriodRemainder) = 0;
 
 	virtual bool BringBackAccountItem(int nAID, int nCID, int nCIID) = 0;

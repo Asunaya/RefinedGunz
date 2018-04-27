@@ -319,7 +319,7 @@ void OnBTDummyConnFloodOnCommand(ZBirdDummyClient* pClient, MCommand* pCmd)
 						MCommandParameterUInt(0));
 
 
-			static unsigned long int stConnCount = 0;
+			static u32 stConnCount = 0;
 			stConnCount++;
 			char szTemp[512];
 			if ((stConnCount % 100) == 0)
@@ -421,7 +421,7 @@ void OnBTDummyChannelChatFloodOnCommand(ZBirdDummyClient* pClient, MCommand* pCm
 					MCmdParamStr(g_szDummyChattingMsg[nChatIndex]));
 			}
 
-			static unsigned long int st_nChatCount = 0;
+			static u32 st_nChatCount = 0;
 			st_nChatCount++;
 			char szTemp[512];
 
@@ -456,7 +456,7 @@ void OnBTDummyEchoFloodOnCommand(ZBirdDummyClient* pClient, MCommand* pCmd)
 		break;
 	case MC_NET_ECHO:
 		{
-			static unsigned long int st_nEchoCount = 0;
+			static u32 st_nEchoCount = 0;
 			st_nEchoCount++;
 			char szTemp[512];
 			if ((st_nEchoCount % 100) == 0)
@@ -481,7 +481,7 @@ void OnBTDummyChannelChangeOnCommand(ZBirdDummyClient* pClient, MCommand* pCmd)
 	{
 	case MC_MATCH_CHANNEL_RESPONSE_JOIN:
 		{
-			static unsigned long int st_nCount = 0;
+			static u32 st_nCount = 0;
 			st_nCount++;
 			char szTemp[128];
 			if ((st_nCount % 100) == 0)

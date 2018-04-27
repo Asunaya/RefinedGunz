@@ -1046,7 +1046,7 @@ static void ZTranslateCommand(MCommand* pCmd, std::string& strLog)
 {
 	char szBuf[256]="";
 
-	unsigned long nGlobalClock = ZGetGame()->GetTickTime();
+	auto nGlobalClock = ZGetGame()->GetTickTime();
 	itoa_safe(nGlobalClock, szBuf, 10);
 	strLog = szBuf;
 	strLog += ": ";
@@ -1577,7 +1577,7 @@ bool ZGame::OnCommand_Immediate(MCommand* pCommand)
 	case MC_MATCH_GAME_DEAD:
 		{
 			MUID uidAttacker, uidVictim;
-			unsigned long int nAttackerArg, nVictimArg;
+			u32 nAttackerArg, nVictimArg;
 
 			pCommand->GetParameter(&uidAttacker, 0, MPT_UID);
 			pCommand->GetParameter(&nAttackerArg, 1, MPT_UINT);
@@ -1590,7 +1590,7 @@ bool ZGame::OnCommand_Immediate(MCommand* pCommand)
 	case MC_MATCH_GAME_TEAMBONUS:
 		{
 			MUID uidChar;
-			unsigned long int nExpArg;
+			u32 nExpArg;
 
 			pCommand->GetParameter(&uidChar, 0, MPT_UID);
 			pCommand->GetParameter(&nExpArg, 1, MPT_UINT);
@@ -3245,8 +3245,8 @@ void ZGame::OnPeerDie(const MUID& uidVictim, const MUID& uidAttacker)
 	}
 }
 
-void ZGame::OnPeerDead(const MUID& uidAttacker, const unsigned long int nAttackerArg, 
-					   const MUID& uidVictim, const unsigned long int nVictimArg)
+void ZGame::OnPeerDead(const MUID& uidAttacker, const u32 nAttackerArg, 
+					   const MUID& uidVictim, const u32 nVictimArg)
 {
 	ZCharacter* pVictim = m_CharacterManager.Find(uidVictim);
 	ZCharacter* pAttacker = m_CharacterManager.Find(uidAttacker);
@@ -3323,7 +3323,7 @@ void ZGame::CheckKillSound(ZCharacter* pAttacker)
 	}
 }
 
-void ZGame::OnReceiveTeamBonus(const MUID& uidChar, const unsigned long int nExpArg)
+void ZGame::OnReceiveTeamBonus(const MUID& uidChar, const u32 nExpArg)
 {
 	ZCharacter* pCharacter = m_CharacterManager.Find(uidChar);
 	if (pCharacter == NULL) return;
@@ -3966,7 +3966,7 @@ void ZGame::PostPeerPingInfo()
 	if ((nNowTime - m_nLastTime[ZLASTTIME_PEERPINGINFO]) >= PEER_PING_TICK) {
 		m_nLastTime[ZLASTTIME_PEERPINGINFO] = nNowTime;
 
-		unsigned long nTimeStamp = GetTickTime();
+		auto nTimeStamp = GetTickTime();
 		MMatchPeerInfoList* pPeers = ZGetGameClient()->GetPeers();
 		for (auto* pPeerInfo : MakePairValueAdapter(pPeers->MUIDMap))
 		{

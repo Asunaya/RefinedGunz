@@ -95,7 +95,7 @@ void ChatCmd_RemoveJjang(const char* line, const int argc, char **const argv);
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
 void _AddCmdFromXml(ZChatCmdManager* pCmdManager, ZCmdXmlParser* pParser, 
-				int nCmdID, ZChatCmdProc fnProc, unsigned long int flag,
+				int nCmdID, ZChatCmdProc fnProc, u32 flag,
 				int nMinArgs, int nMaxArgs, bool bRepeatEnabled)
 {
 	auto pCmdStr = pParser->GetStr(nCmdID);
@@ -482,8 +482,8 @@ void ChatCmd_CopyToTestServer(const char* line, const int argc, char **const arg
 
 	if (argc != 1) return;
 
-	static unsigned long int st_nLastTime = 0;
-	unsigned long int nNowTime = GetGlobalTimeMS();
+	static u32 st_nLastTime = 0;
+	u32 nNowTime = GetGlobalTimeMS();
 
 #define DELAY_POST_COPY_TO_TESTSERVER		(1000 * 60)		// 5ºÐ µô·¹ÀÌ
 
@@ -1247,7 +1247,7 @@ void ChatCmd_QUESTTEST_LocalSpawnNPC(const char* line,const int argc, char **con
 	
 	MUID uidLocal;
 	uidLocal.High = 10000;
-	uidLocal.Low = (unsigned long)ZGetObjectManager()->size();
+	uidLocal.Low = (u32)ZGetObjectManager()->size();
 
 	pCmd->AddParameter(new MCmdParamUID(uidLocal));
 	pCmd->AddParameter(new MCmdParamUChar((unsigned char)nNPCID));

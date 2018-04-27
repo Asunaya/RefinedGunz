@@ -82,14 +82,14 @@ void ZRadar::OnDraw(MDrawContext* pDC)
 	if (ret == false) return;
 
 
-	unsigned long int currentTime = GetGlobalTimeMS();
+	u32 currentTime = GetGlobalTimeMS();
 	for (int i = 0; i < 8; i++)
 	{
 		if (m_Nodes[i].bShoted)
 		{
 			if (currentTime - m_Nodes[i].nLastShotTime < 800)
 			{
-				unsigned long int nTime = currentTime - m_Nodes[i].nLastShotTime;
+				u32 nTime = currentTime - m_Nodes[i].nLastShotTime;
 
 				if (currentTime % 200 < 120)
 				{

@@ -39,7 +39,7 @@ MRefreshClient::~MRefreshClient()
 {
 }
 
-bool MRefreshClient::Sync(unsigned long nChecksum)
+bool MRefreshClient::Sync(u32 nChecksum)
 {
 	if (OnSync(nChecksum) == true) {
 		SetChecksum(nChecksum);

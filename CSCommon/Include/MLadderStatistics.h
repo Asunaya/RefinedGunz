@@ -18,8 +18,8 @@ class MLadderStatistics
 private:
 	struct _RECORD
 	{
-		unsigned long int nCount;
-		unsigned long int nWinCount;
+		u32 nCount;
+		u32 nWinCount;
 	};
 
 	_RECORD				m_LevelVictoriesRates[MAX_LADDER_STATISTICS_LEVEL];

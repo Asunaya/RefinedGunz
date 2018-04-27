@@ -136,7 +136,7 @@ void MMatchWorldItemDescMgr::ParseWorldItem(MXmlElement& element)
 
 
 	int nTime = 0;
-	element.GetChildContents(&nTime, MWICTOK_TIME); pNewWorldItemDesc->m_nTime = (unsigned long int)nTime;
+	element.GetChildContents(&nTime, MWICTOK_TIME); pNewWorldItemDesc->m_nTime = (u32)nTime;
 	element.GetChildContents(&pNewWorldItemDesc->m_fAmount, MWICTOK_AMOUNT);
 
 /*
@@ -284,7 +284,7 @@ void MMatchMapsWorldItemSpawnInfo::ParseSpawnInfo(MXmlElement& element, int nMap
 
 		if (nItemID > 0)
 		{
-			SetMapsSpawnInfo(nMapID, szGameTypeID, nItemID, x, y, z, (unsigned long int)nTime);
+			SetMapsSpawnInfo(nMapID, szGameTypeID, nItemID, x, y, z, (u32)nTime);
 		}
 		
 	}
@@ -293,7 +293,7 @@ void MMatchMapsWorldItemSpawnInfo::ParseSpawnInfo(MXmlElement& element, int nMap
 
 void MMatchMapsWorldItemSpawnInfo::SetMapsSpawnInfo(int nMapID, char* szGameTypeID,
 													int nItemID, float x, float y, float z, 
-													unsigned long int nCoolTime)
+													u32 nCoolTime)
 {
 	int nSpawnID;
 	if (nCoolTime == 0) nCoolTime = 99999999;

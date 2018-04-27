@@ -102,7 +102,7 @@ bool MMatchRuleSurvival::CheckNPCSpawnEnable()
 
 	if (m_nNPCSpawnCount >= m_QuestRound.ClearConditionNPCCount(m_nFirstPlayerCount)) return false;
 
-	const unsigned long int NPC_SPAWN_ROUND_START_DELAY = 3000;
+	const u32 NPC_SPAWN_ROUND_START_DELAY = 3000;
 	if ((nNowTime - m_nRountStartTime) <= NPC_SPAWN_ROUND_START_DELAY) return false;
 
 	if ((int)(nNowTime - m_nLastNPCSpawnTime) >= m_nSpawnTime)

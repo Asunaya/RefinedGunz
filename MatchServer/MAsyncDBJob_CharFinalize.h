@@ -8,7 +8,7 @@
 class MAsyncDBJob_CharFinalize : public MAsyncJob {
 protected:	// Input Argument
 	int					m_nCID;
-	unsigned long int	m_nPlayTime;
+	u32	m_nPlayTime;
 	int					m_nConnKillCount;
 	int					m_nConnDeathCount;
 	int					m_nConnXP;
@@ -31,7 +31,7 @@ public:
 	}
 
 	bool Input( int	nCID, 
-				unsigned long int nPlayTime, 
+				u32 nPlayTime, 
 				int nConnKillCount, 
 				int nConnDeathCount, 
 				int nConnXP, 

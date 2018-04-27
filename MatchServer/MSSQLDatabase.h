@@ -64,19 +64,19 @@ public:
 		int AddedKillCount, int AddedDeathCount) override;
 
 	virtual bool InsertCharItem(unsigned int nCID, int nItemDescID, bool bRentItem,
-		int nRentPeriodHour, unsigned long int* poutCIID) override;
+		int nRentPeriodHour, u32* poutCIID) override;
 	virtual bool DeleteCharItem(unsigned int nCID, int nCIID) override;
 	virtual bool GetCharItemInfo(MMatchCharInfo& CharInfo) override;
 	virtual bool GetAccountItemInfo(int nAID, struct MAccountItemNode* pOut, int* poutNodeCount,
 		int nMaxNodeCount, MAccountItemNode* pOutExpiredItemList, int* poutExpiredItemCount,
 		int nMaxExpiredItemCount) override;
-	virtual bool UpdateEquipedItem(const unsigned long nCID,
+	virtual bool UpdateEquipedItem(const u32 nCID,
 	enum MMatchCharItemParts parts,
-		unsigned long int nCIID,
-		unsigned long int nItemID) override;
-	virtual bool ClearAllEquipedItem(unsigned long nCID) override;
+		u32 nCIID,
+		u32 nItemID) override;
+	virtual bool ClearAllEquipedItem(u32 nCID) override;
 	virtual bool DeleteExpiredAccountItem(int nAIID) override;
-	virtual bool BuyBountyItem(unsigned int nCID, int nItemID, int nPrice, unsigned long int* poutCIID) override;
+	virtual bool BuyBountyItem(unsigned int nCID, int nItemID, int nPrice, u32* poutCIID) override;
 	virtual bool SellBountyItem(unsigned int nCID, unsigned int nItemID, unsigned int nCIID,
 		int nPrice, int nCharBP) override;
 
@@ -100,26 +100,26 @@ public:
 		int nRound, unsigned int nMasterCID,
 		int nPlayerCount, const char* szPlayers) override;
 	virtual bool InsertKillLog(unsigned int nAttackerCID, unsigned int nVictimCID) override;
-	virtual bool InsertChatLog(unsigned long int nCID, const char* szMsg, u64 nTime) override;
+	virtual bool InsertChatLog(u32 nCID, const char* szMsg, u64 nTime) override;
 	virtual bool InsertServerLog(int nServerID, int nPlayerCount, int nGameCount,
 		uint32_t dwBlockCount, uint32_t dwNonBlockCount) override;
-	virtual bool InsertPlayerLog(unsigned long int nCID,
+	virtual bool InsertPlayerLog(u32 nCID,
 		int nPlayTime, int nKillCount, int nDeathCount, int nXP, int nTotalXP) override;
 
 	virtual bool UpdateServerStatus(int nServerID, int nPlayerCount) override;
 	virtual bool UpdateMaxPlayer(int nServerID, int nMaxPlayer) override { return false; }
 	virtual bool UpdateServerInfo(int nServerID, int nMaxPlayer, const char* szServerName) override;
 
-	virtual bool UpdateCharPlayTime(unsigned long int nCID, unsigned long int nPlayTime) override;
+	virtual bool UpdateCharPlayTime(u32 nCID, u32 nPlayTime) override;
 
-	virtual bool InsertItemPurchaseLogByBounty(unsigned long int nItemID, unsigned long int nCID,
+	virtual bool InsertItemPurchaseLogByBounty(u32 nItemID, u32 nCID,
 		int nBounty, int nCharBP, ItemPurchaseType nType) override;
 
 	virtual bool InsertCharMakingLog(unsigned int nAID, const char* szCharName,
 		CharMakingType nType) override;
 
 	virtual bool BringAccountItem(int nAID, int nCID, int nAIID,
-		unsigned int* poutCIID, unsigned long int* poutItemID,
+		unsigned int* poutCIID, u32* poutItemID,
 		bool* poutIsRentItem, int* poutRentMinutePeriodRemainder) override;
 
 	virtual bool BringBackAccountItem(int nAID, int nCID, int nCIID) override;

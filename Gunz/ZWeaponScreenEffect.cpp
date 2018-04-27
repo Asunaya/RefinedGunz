@@ -90,7 +90,7 @@ void ZWeaponScreenEffect::Create()
 					 nSecondaryWeaponType = MWT_NONE, 
 					 nMeleeWeaponType = MWT_NONE;
 
-	unsigned long int nItemID;
+	u32 nItemID;
 	nItemID = ZGetMyInfo()->GetItemList()->GetEquipedItemID(MMCIP_PRIMARY);
 	MMatchItemDesc* pItemDesc = NULL;
 	pItemDesc = MGetMatchItemDescMgr()->GetItemDesc(nItemID);

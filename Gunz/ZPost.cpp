@@ -13,7 +13,7 @@
 
 void ZPostUserOption()
 {
-	unsigned long nOptionFlags = 0;
+	u32 nOptionFlags = 0;
 
 	if (Z_ETC_REJECT_WHISPER)
 		nOptionFlags |= MBITFLAG_USEROPTION_REJECT_WHISPER;

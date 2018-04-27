@@ -112,7 +112,7 @@ bool ZSoundEngine::LoadResource(char* pFileName)
 		float fDefaultVolume = 1.0f;
 		chr.GetAttribute(&fDefaultVolume, "volume", 1.0f);
 
-		unsigned long int nFlags=0;
+		u32 nFlags=0;
 
 		if (bLoop) nFlags |= RSOUND_LOOP_NORMAL;
 		else nFlags |= RSOUND_LOOP_OFF;
@@ -1570,7 +1570,7 @@ bool ZSoundEngine::CheckCulling(const char* szName, SoundSource* pSS, const rvec
 	}
 
 
-	unsigned long int nNowTime = GetGlobalTimeMS();
+	u32 nNowTime = GetGlobalTimeMS();
 
 	if ((nNowTime - pSS->nLastPlayedTime) < 10)
 	{

@@ -23,7 +23,7 @@ struct MQuestPlayerInfo
 {
 	// NPC Control 관련 /////////
 	MMatchObject*		pObject;					///< Object 정보
-	unsigned long int	nNPCControlCheckSum;		///< NPC 조종 체크섬
+	u32	nNPCControlCheckSum;		///< NPC 조종 체크섬
 	MMatchNPCObjectMap	NPCObjects;					///< 조종중인 NPC
 	bool				bEnableNPCControl;			///< NPC Control이 가능한지 여부
 

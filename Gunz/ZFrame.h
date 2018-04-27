@@ -11,7 +11,7 @@ class ZFrame : public MFrame
 {
 protected:
 	bool				m_bExclusive;
-	unsigned long int	m_nShowTime;
+	u32	m_nShowTime;
 	bool				m_bNextVisible;
 
 	virtual void OnDraw(MDrawContext* pDC);

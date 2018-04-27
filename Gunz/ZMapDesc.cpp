@@ -183,7 +183,7 @@ void ZMapSpawnManager::ShiftBackupIndex(int index)
 ZMapSpawnData* ZMapSpawnManager::GetSoloRandomData()
 {
 	int nIndex = -1;
-	unsigned long nRandomNumber = GetGlobalTimeMS();
+	auto nRandomNumber = GetGlobalTimeMS();
 
 	m_nBackUpIndexCnt = min(GetSoloCount(),MAX_BACKUP_SPAWN);
 

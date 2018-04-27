@@ -14,7 +14,7 @@ class ZReportAbuse
 private:
 	struct _ChatHistory
 	{
-		unsigned long int	timestamp;
+		u32	timestamp;
 		string				str;
 	};
 
@@ -22,7 +22,7 @@ private:
 	_ChatHistory			m_ChatHistory[REPORT_MAX_HISTORY];
 	int						m_nChatTop;
 
-	unsigned long int		m_nReportTime;
+	u32		m_nReportTime;
 
 	void SendFile();
 	void SaveFile();

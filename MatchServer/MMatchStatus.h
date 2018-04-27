@@ -12,19 +12,19 @@ private:
 	MMatchServer*	m_pMatchServer;
 protected:
 	u64					m_nStartTime;
-	unsigned long int	m_nTotalCommandQueueCount;
-	unsigned long int	m_nTickCommandQueueCount;
+	u32	m_nTotalCommandQueueCount;
+	u32	m_nTickCommandQueueCount;
 
 #define MSTATUS_MAX_CMD_COUNT		100000
 #define MSTATUS_MAX_DBQUERY_COUNT	60
 #define MSTATUS_MAX_CMD_HISTORY		20
 
-	unsigned long int	m_nCmdCount[MSTATUS_MAX_CMD_COUNT][3];
-	unsigned long int	m_nDBQueryCount[MSTATUS_MAX_DBQUERY_COUNT][3];
-	unsigned long int	m_nCmdHistory[MSTATUS_MAX_CMD_HISTORY];
+	u32	m_nCmdCount[MSTATUS_MAX_CMD_COUNT][3];
+	u32	m_nDBQueryCount[MSTATUS_MAX_DBQUERY_COUNT][3];
+	u32	m_nCmdHistory[MSTATUS_MAX_CMD_HISTORY];
 	int					m_nHistoryCursor;
 	int					m_nRunStatus;
-	void AddCmdHistory(unsigned long int nCmdID);
+	void AddCmdHistory(u32 nCmdID);
 
 	char				m_szDump[MATCHSTATUS_DUMP_LEN];
 public:
@@ -34,12 +34,12 @@ public:
 	bool Create(MMatchServer* pMatchServer);
 public:
 	void SaveToLogFile();
-	void AddCmdCount(unsigned long int nCmdCount)
+	void AddCmdCount(u32 nCmdCount)
 	{
 		m_nTickCommandQueueCount = nCmdCount;
 		m_nTotalCommandQueueCount += m_nTickCommandQueueCount;
 	}
-	void AddCmd(unsigned long int nCmdID, int nCount = 1, u64 nTime = 0)
+	void AddCmd(u32 nCmdID, int nCount = 1, u64 nTime = 0)
 	{
 		AddCmdHistory(nCmdID);
 
@@ -48,7 +48,7 @@ public:
 		m_nCmdCount[nCmdID][1] += static_cast<u32>(nTime);
 		m_nCmdCount[nCmdID][2] = static_cast<u32>(nTime);
 	}
-	void AddDBQuery(unsigned long int nDBQueryID, u64 nTime)
+	void AddDBQuery(u32 nDBQueryID, u64 nTime)
 	{
 		if (nDBQueryID >= MSTATUS_MAX_DBQUERY_COUNT) return;
 

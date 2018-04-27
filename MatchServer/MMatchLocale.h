@@ -22,7 +22,7 @@ public:
 												   const char*		szCN, 
 												   const char*		szPW, 
 												   bool				bFreeLoginIP, 
-												   unsigned long	nChecksumPack, 
+												   u32	nChecksumPack, 
 												   int				nTotalUserCount);
 	bool					SkipCheckAntiHackCrack();
 };

@@ -27,7 +27,7 @@ struct MMatchWorldItemDesc
 	short					m_nID;
 	MMATCH_WORLD_ITEM_TYPE	m_nItemType;
 	float					m_fAmount;
-	unsigned long int		m_nTime;
+	u32		m_nTime;
 	char					m_szModelName[WORLDITEM_NAME_LENGTH];
 	char					m_szDescName[WORLDITEM_NAME_LENGTH];
 };
@@ -77,8 +77,8 @@ struct MMatchWorldItem
 struct MMatchWorldItemSpawnInfo
 {
 	unsigned short		nItemID;
-	unsigned long int	nCoolTime;
-	unsigned long int	nElapsedTime;
+	u32	nCoolTime;
+	u32	nElapsedTime;
 	float x;
 	float y;
 	float z;
@@ -101,7 +101,7 @@ class MMatchMapsWorldItemSpawnInfo
 private:
 	void ParseSpawnInfo(MXmlElement& element, int nMapID);
 	void SetMapsSpawnInfo(int nMapID, char* szGameTypeID, int nItemID, float x, float y, float z, 
-						  unsigned long int nCoolTime);
+						  u32 nCoolTime);
 	bool ReadXml(const char* szFileName, int nMapID);
 protected:
 public:

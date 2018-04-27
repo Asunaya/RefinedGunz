@@ -63,7 +63,7 @@ typedef struct _NJ_PACKET
 struct MDBAgentPoolNode
 {
 	MUID			uidComm;
-	unsigned long	nChecksumPack;
+	u32	nChecksumPack;
 	bool			bFreeLoginIP;
 };
 
@@ -74,7 +74,7 @@ public:
 	{
 		Clear();
 	}
-	void Insert(string strLoginID, MUID uidComm, unsigned long nChecksumPack, bool bFreeLoginIP)
+	void Insert(string strLoginID, MUID uidComm, u32 nChecksumPack, bool bFreeLoginIP)
 	{
 		MDBAgentPoolNode* pNewNode = new MDBAgentPoolNode;
 		pNewNode->uidComm = uidComm;
@@ -136,7 +136,7 @@ protected:
 public:
 	MNJ_DBAgentClient(int nGameCode, int nServerCode);
 	virtual ~MNJ_DBAgentClient();
-	void Send(const MUID& uidComm, const char* szCN, const char* szPW, bool bFreeLoginIP, unsigned long nChecksumPack, int nTotalUserCount);
+	void Send(const MUID& uidComm, const char* szCN, const char* szPW, bool bFreeLoginIP, u32 nChecksumPack, int nTotalUserCount);
 	bool IsConnected() { return m_bConnected; }
 };
 

@@ -301,9 +301,9 @@ protected:
 	void OnGameResponseTimeSync(u64 nLocalTimeStamp, u64 nGlobalTimeSync);
 	void OnEventUpdateJjang(const MUID& uidChar, bool bJjang);
 
-	void OnPeerDead(const MUID& uidAttacker, const unsigned long int nAttackerArg,
-					const MUID& uidVictim, const unsigned long int nVictimArg);
-	void OnReceiveTeamBonus(const MUID& uidChar, const unsigned long int nExpArg);
+	void OnPeerDead(const MUID& uidAttacker, const u32 nAttackerArg,
+					const MUID& uidVictim, const u32 nVictimArg);
+	void OnReceiveTeamBonus(const MUID& uidChar, const u32 nExpArg);
 	void OnPeerDie(const MUID& uidVictim, const MUID& uidAttacker);
 	void OnPeerDieMessage(ZCharacter* pVictim, ZCharacter* pAttacker);
 	void OnChangeParts(const MUID& uid,int partstype,int PartsID);

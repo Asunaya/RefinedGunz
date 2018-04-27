@@ -135,7 +135,7 @@ private:
 	D3DRECT GetTotalRect();
 	template <typename T>
 	void DivideIntoLines(int ChatLineIndex, T&& OutputIterator);
-	std::pair<bool, v2i> GetPos(const ChatMessage &cl, unsigned long nPos);
+	std::pair<bool, v2i> GetPos(const ChatMessage &cl, u32 nPos);
 	bool CursorInRange(int x, int y, int Width, int Height);
 	int GetTextLen(ChatMessage &cl, int Pos, int Count);
 	int GetTextLen(const char *Msg, int Count);

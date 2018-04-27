@@ -149,10 +149,10 @@ enum MMatchWeaponType
 
 struct MMatchItemEffectDesc
 {
-	unsigned long int	m_nID;
+	u32	m_nID;
 	char				m_szName[128];
 	int					m_nArea;
-	unsigned long int	m_nTime;
+	u32	m_nTime;
 	int					m_nModHP;
 	int					m_nModAP;
 	int					m_nModMaxWT;
@@ -194,7 +194,7 @@ struct MMatchItemBonus
 
 struct MMatchItemDesc
 {
-	unsigned long int	m_nID;
+	u32	m_nID;
 	char				m_szName[128];
 	int					m_nTotalPoint;
 	MMatchItemType		m_nType;
@@ -230,7 +230,7 @@ struct MMatchItemDesc
 	int					m_nEffectLevel;
 	char				m_szDesc[8192];
 
-	unsigned long int	m_nColor;
+	u32	m_nColor;
 	char				m_szMeshName[128];
 	int					m_nImageID;
 	int					m_nBulletImageID;
@@ -283,7 +283,7 @@ inline MMatchItemEffectDescMgr* MGetMatchItemEffectDescMgr() {
 
 class MMatchItemDescMgr : public std::map<int, MMatchItemDesc*>
 {
-	unsigned long m_nChecksum;
+	u32 m_nChecksum;
 protected:
 	void ParseItem(MXmlElement& element);
 public:
@@ -292,10 +292,10 @@ public:
 	bool ReadXml(const char* szFileName);
 	bool ReadXml(MZFileSystem* pFileSystem, const char* szFileName);
 	void Clear();
-	MMatchItemDesc* GetItemDesc(unsigned long int nID);
+	MMatchItemDesc* GetItemDesc(u32 nID);
 	static MMatchItemDescMgr* GetInstance();
 
-	unsigned long GetChecksum() { return m_nChecksum; }
+	u32 GetChecksum() { return m_nChecksum; }
 
 	static MMatchItemDescMgr DefaultInstance;
 };
@@ -309,7 +309,7 @@ class MMatchItem : public MBaseItem
 private:
 protected:
 	MUID				m_uidItem;			
-	unsigned long int	m_nCIID;
+	u32	m_nCIID;
 	MMatchItemDesc*		m_pDesc;
 	bool				m_bEquiped;
 	u64					m_nRentItemRegTime;
@@ -325,11 +325,11 @@ public:
 
 
 	bool IsEmpty() { return (((m_pDesc == NULL) || (m_nCount <= 0)) ? true : false); }
-	void SetCIID(unsigned long int nCIID) { m_nCIID = nCIID; }
-	unsigned long int GetCIID() { return m_nCIID; }
+	void SetCIID(u32 nCIID) { m_nCIID = nCIID; }
+	u32 GetCIID() { return m_nCIID; }
 	auto* GetDesc() { return m_pDesc; }
 	auto* GetDesc() const { return m_pDesc; }
-	unsigned long int GetDescID() { if (m_pDesc) return m_pDesc->m_nID; else return 0; }
+	u32 GetDescID() { if (m_pDesc) return m_pDesc->m_nID; else return 0; }
 	void SetCount(int n) { m_nCount = n; }
 	int GetCount() { return m_nCount; }
 	void Inc(int n=1) { m_nCount += n; }
@@ -400,7 +400,7 @@ public:
 struct MAccountItemNode
 {
 	int					nAIID;
-	unsigned long int	nItemID;
+	u32	nItemID;
 	int					nRentMinutePeriodRemainder;
 };
 

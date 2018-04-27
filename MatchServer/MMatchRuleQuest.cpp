@@ -71,14 +71,14 @@ void MMatchRuleQuest::RouteReadyToNewSector(const MUID& uidPlayer)
 	MMatchServer::GetInstance()->RouteToStage(GetStage()->GetUID(), pCmd);
 }
 
-void MMatchRuleQuest::RouteObtainQuestItem(unsigned long int nQuestItemID)
+void MMatchRuleQuest::RouteObtainQuestItem(u32 nQuestItemID)
 {
 	MCommand* pCmd = MMatchServer::GetInstance()->CreateCommand(MC_QUEST_OBTAIN_QUESTITEM, MUID(0,0));
 	pCmd->AddParameter(new MCmdParamUInt(nQuestItemID));
 	MMatchServer::GetInstance()->RouteToStage(GetStage()->GetUID(), pCmd);
 }
 
-void MMatchRuleQuest::RouteObtainZItem(unsigned long int nItemID)
+void MMatchRuleQuest::RouteObtainZItem(u32 nItemID)
 {
 	MCommand* pCmd = MMatchServer::GetInstance()->CreateCommand(MC_QUEST_OBTAIN_ZITEM, MUID(0,0));
 	pCmd->AddParameter(new MCmdParamUInt(nItemID));
@@ -148,7 +148,7 @@ void MMatchRuleQuest::RouteStageGameInfo()
 	MMatchServer::GetInstance()->RouteToStage(GetStage()->GetUID(), pCmd);
 }
 
-void MMatchRuleQuest::RouteSectorBonus(const MUID& uidPlayer, unsigned long int nEXPValue)
+void MMatchRuleQuest::RouteSectorBonus(const MUID& uidPlayer, u32 nEXPValue)
 {
 	MMatchObject* pPlayer = MMatchServer::GetInstance()->GetObject(uidPlayer);	
 	if (!IsEnabledObject(pPlayer)) return;
@@ -501,7 +501,7 @@ void MMatchRuleQuest::OnSectorCompleted()
 				// 라우팅
 				int nExpPercent = MMatchFormula::GetLevelPercent(pPlayer->GetCharInfo()->m_nXP, 
 																pPlayer->GetCharInfo()->m_nLevel);
-				unsigned long int nExpValue = MakeExpTransData(nAddedSectorXP, nExpPercent);
+				u32 nExpValue = MakeExpTransData(nAddedSectorXP, nExpPercent);
 				RouteSectorBonus(pPlayer->GetUID(), nExpValue);
 			}
 		}
@@ -606,7 +606,7 @@ void MMatchRuleQuest::MakeNPCnSpawn(MQUEST_NPC nNPCID, bool bAddQuestDropItem)
 				// 만들어진 아이템은 level에 넣어놓는다.
 				if ((item.nDropItemType == QDIT_QUESTITEM) || (item.nDropItemType == QDIT_ZITEM))
 				{
-					m_pQuestLevel->OnItemCreated((unsigned long int)(item.nID), item.nRentPeriodHour);
+					m_pQuestLevel->OnItemCreated((u32)(item.nID), item.nRentPeriodHour);
 				}
 			}
 		}
@@ -1066,19 +1066,19 @@ void MMatchRuleQuest::OnObtainWorldItem(MMatchObject* pObj, int nItemID, int* pn
 	int nQuestItemID = pnExtraValues[0];
 	int nRentPeriodHour = pnExtraValues[1];
 
-	if (m_pQuestLevel->OnItemObtained(pObj, (unsigned long int)nQuestItemID))
+	if (m_pQuestLevel->OnItemObtained(pObj, (u32)nQuestItemID))
 	{
 		// true값이면 실제로 먹은것임.
 
 		if (IsQuestItemID(nQuestItemID))
-            RouteObtainQuestItem((unsigned long int)nQuestItemID);
+            RouteObtainQuestItem((u32)nQuestItemID);
 		else 
-			RouteObtainZItem((unsigned long int)nQuestItemID);
+			RouteObtainZItem((u32)nQuestItemID);
 	}
 }
 
 
-void MMatchRuleQuest::OnRequestDropSacrificeItemOnSlot( const MUID& uidSender, const int nSlotIndex, const unsigned long int nItemID )
+void MMatchRuleQuest::OnRequestDropSacrificeItemOnSlot( const MUID& uidSender, const int nSlotIndex, const u32 nItemID )
 {
 	if( MSM_TEST == MGetServerConfig()->GetServerMode() ) 
 	{
@@ -1087,7 +1087,7 @@ void MMatchRuleQuest::OnRequestDropSacrificeItemOnSlot( const MUID& uidSender, c
 }
 
 
-void MMatchRuleQuest::OnResponseDropSacrificeItemOnSlot( const MUID& uidSender, const int nSlotIndex, const unsigned long int nItemID )
+void MMatchRuleQuest::OnResponseDropSacrificeItemOnSlot( const MUID& uidSender, const int nSlotIndex, const u32 nItemID )
 {
 	if( (MAX_SACRIFICE_SLOT_COUNT > nSlotIndex) && (0 <= nSlotIndex) ) 
 	{
@@ -1182,7 +1182,7 @@ void MMatchRuleQuest::OnResponseDropSacrificeItemOnSlot( const MUID& uidSender, 
 }
 
 
-void MMatchRuleQuest::OnRequestCallbackSacrificeItem( const MUID& uidSender, const int nSlotIndex, const unsigned long int nItemID )
+void MMatchRuleQuest::OnRequestCallbackSacrificeItem( const MUID& uidSender, const int nSlotIndex, const u32 nItemID )
 {
 	if( MSM_TEST == MGetServerConfig()->GetServerMode() ) 
 	{
@@ -1191,7 +1191,7 @@ void MMatchRuleQuest::OnRequestCallbackSacrificeItem( const MUID& uidSender, con
 }
 
 
-void MMatchRuleQuest::OnResponseCallBackSacrificeItem( const MUID& uidSender, const int nSlotIndex, const unsigned long int nItemID )
+void MMatchRuleQuest::OnResponseCallBackSacrificeItem( const MUID& uidSender, const int nSlotIndex, const u32 nItemID )
 {
 	// 아무나 접근할수 있음.
 
@@ -1232,7 +1232,7 @@ void MMatchRuleQuest::OnResponseCallBackSacrificeItem( const MUID& uidSender, co
 }
 
 
-bool MMatchRuleQuest::IsSacrificeItemDuplicated( const MUID& uidSender, const int nSlotIndex, const unsigned long int nItemID )
+bool MMatchRuleQuest::IsSacrificeItemDuplicated( const MUID& uidSender, const int nSlotIndex, const u32 nItemID )
 {
 	if( (uidSender == m_SacrificeSlot[nSlotIndex].GetOwnerUID()) && (nItemID == m_SacrificeSlot[nSlotIndex].GetItemID()) )
 	{
@@ -1290,7 +1290,7 @@ void MMatchRuleQuest::DestroyAllSlot()
 	MMatchObject*	pOwner;
 	MQuestItem*		pQItem;
 	MUID			uidOwner;
-	unsigned long	nItemID;
+	u32	nItemID;
 
 	for( int i = 0; i < MAX_SACRIFICE_SLOT_COUNT; ++i )
 	{
@@ -1454,7 +1454,7 @@ void MMatchRuleQuest::PostInsertQuestGameLogAsyncJob()
 
 
 
-int MMatchRuleQuest::CalcuOwnerQItemCount( const MUID& uidPlayer, const unsigned long nItemID )
+int MMatchRuleQuest::CalcuOwnerQItemCount( const MUID& uidPlayer, const u32 nItemID )
 {
 	if(  0 == MMatchServer::GetInstance()->GetObject(uidPlayer) )
 		return -1;

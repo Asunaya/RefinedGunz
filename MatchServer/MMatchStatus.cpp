@@ -13,9 +13,9 @@ MMatchStatus::MMatchStatus()
 	m_bCreated = false;
 
 	m_nTotalCommandQueueCount = 0;
-	memset(m_nCmdCount, 0, sizeof(unsigned long int) * MSTATUS_MAX_CMD_COUNT * 3);
-	memset(m_nDBQueryCount, 0, sizeof(unsigned long int) * MSTATUS_MAX_DBQUERY_COUNT * 3);
-	memset(m_nCmdHistory, 0, sizeof(unsigned long int) * MSTATUS_MAX_CMD_HISTORY);
+	memset(m_nCmdCount, 0, sizeof(u32) * MSTATUS_MAX_CMD_COUNT * 3);
+	memset(m_nDBQueryCount, 0, sizeof(u32) * MSTATUS_MAX_DBQUERY_COUNT * 3);
+	memset(m_nCmdHistory, 0, sizeof(u32) * MSTATUS_MAX_CMD_HISTORY);
 	m_nHistoryCursor = 0;
 	m_nRunStatus = -1;
 
@@ -102,7 +102,7 @@ void MMatchStatus::SaveToLogFile()
 
 }
 
-void MMatchStatus::AddCmdHistory(unsigned long int nCmdID)
+void MMatchStatus::AddCmdHistory(u32 nCmdID)
 {
 	m_nCmdHistory[m_nHistoryCursor] = nCmdID;
 	m_nHistoryCursor++;

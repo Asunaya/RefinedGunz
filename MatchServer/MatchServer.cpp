@@ -217,8 +217,8 @@ void CMatchServerApp::HeartBeat()
 
 
 #ifdef _FETCH_112
-	unsigned long int nNowTime=timeGetTime();
-	static unsigned long int nLastTime = 0;
+	u32 nNowTime=timeGetTime();
+	static u32 nLastTime = 0;
 	//if ((nNowTime - nLastTime) >= (1000 * 60 * 5))		// 5분마다 한번씩 fetch
 	if ((nNowTime - nLastTime) >= (1000 * 60  * 1))		// 5분마다 한번씩 fetch
 	{

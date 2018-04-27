@@ -34,7 +34,7 @@ public:
 
 	void Clear();
 	int GetCount() { return static_cast< int >( m_ItemNodeVector.size() ); }
-	bool IsSellItem(const unsigned long int nItemID);
+	bool IsSellItem(const u32 nItemID);
 	ShopItemNode* GetSellItem(int nListIndex);
 
 	static MMatchShop* GetInstance();

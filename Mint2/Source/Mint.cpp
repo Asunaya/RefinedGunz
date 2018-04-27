@@ -277,7 +277,7 @@ bool Mint::IsEnableIME()
 }
 
 
-int Mint::RegisterHotKey(unsigned long int nModifier, unsigned long int nVirtKey)
+int Mint::RegisterHotKey(u32 nModifier, u32 nVirtKey)
 {
 #ifdef WIN32
 	_ASSERT(m_hWnd != NULL);	// Should call SetHWND() before this function

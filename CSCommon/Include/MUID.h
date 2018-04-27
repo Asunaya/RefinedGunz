@@ -11,7 +11,7 @@ struct MUID{
 	u32	Low{};
 
 	MUID() = default;
-	MUID(unsigned long int h, unsigned long int l){
+	MUID(u32 h, u32 l){
 		High = h;
 		Low = l;
 	}
@@ -27,7 +27,7 @@ struct MUID{
 		SetZero();
 	}
 
-	MUID Increase(unsigned long int nSize=1){
+	MUID Increase(u32 nSize=1){
 		if(Low+nSize>UINT_MAX){
 			_ASSERT(High<UINT_MAX);
 			Low = nSize-(UINT_MAX-Low);

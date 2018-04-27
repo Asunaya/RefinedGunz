@@ -53,7 +53,7 @@ public :
 
 struct MQuestItemDesc
 {
-	unsigned long int	m_nItemID;
+	u32	m_nItemID;
 	char				m_szQuestItemName[ 32 ];
 	int					m_nLevel;
 	MQuestItemType		m_nType;
@@ -108,7 +108,7 @@ private :
 
 struct SimpleQuestItem
 {
-	unsigned long int	m_nItemID;
+	u32	m_nItemID;
 	unsigned int		m_nCount;
 };
 
@@ -123,27 +123,27 @@ public:
 	{
 	}
 
-	bool Create( const unsigned long int nItemID, const int nCount, MQuestItemDesc* pDesc, bool bKnown=true );
+	bool Create( const u32 nItemID, const int nCount, MQuestItemDesc* pDesc, bool bKnown=true );
 	int Increase( const int nCount = 1 );
 	int Decrease( const int nCount = 1 );
 
-	unsigned long int	GetItemID()	{ return m_nItemID; }
+	u32	GetItemID()	{ return m_nItemID; }
 	int GetCount()	{ return m_nCount; }
 	bool IsKnown()	{ return m_bKnown; }
 	MQuestItemDesc* GetDesc();
 	void SetDesc( MQuestItemDesc* pDesc ) { m_pDesc = pDesc; }
-	void SetItemID( unsigned long int nItemID )	{ m_nItemID = nItemID; }
+	void SetItemID( u32 nItemID )	{ m_nItemID = nItemID; }
 	
 	bool SetCount( int nCount, bool bKnown = true );
 
 private:
-	unsigned long int	m_nItemID;
+	u32	m_nItemID;
 	MQuestItemDesc*		m_pDesc;
 	int					m_nCount;
 	bool				m_bKnown;
 };
 
-class MQuestItemMap : public std::map< unsigned long int, MQuestItem* >
+class MQuestItemMap : public std::map< u32, MQuestItem* >
 {
 public :
 	MQuestItemMap() : m_bDoneDbAccess( false )
@@ -159,11 +159,11 @@ public :
 	void SetDBAccess( const bool bState )	{ m_bDoneDbAccess = bState; }
 	bool IsDoneDbAccess()					{ return m_bDoneDbAccess; }
 
-	virtual bool	CreateQuestItem( const unsigned long int nItemID, const int nCount, bool bKnown=true );
+	virtual bool	CreateQuestItem( const u32 nItemID, const int nCount, bool bKnown=true );
 	void			Clear();
-	void			Remove( const unsigned long int nItemID );
-	MQuestItem*		Find( const unsigned long int nItemID );
-	void			Insert( unsigned long int nItemID, MQuestItem* pQuestItem );
+	void			Remove( const u32 nItemID );
+	MQuestItem*		Find( const u32 nItemID );
+	void			Insert( u32 nItemID, MQuestItem* pQuestItem );
 	
 private :
 	static MUID				m_uidGenerate;

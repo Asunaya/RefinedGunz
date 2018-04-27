@@ -718,7 +718,7 @@ void ZEffectManager::CheckWaterSkip(int mode,float height)
 	}
 }
 
-void ZEffectManager::Draw(unsigned long int nTime,int mode,float height)
+void ZEffectManager::Draw(u32 nTime,int mode,float height)
 {
 	// TODO: Remove
 	IDirect3DStateBlock9* pStateBlock = NULL;
@@ -871,7 +871,7 @@ void ZEffectManager::Draw(unsigned long int nTime,int mode,float height)
 	SAFE_RELEASE( pStateBlock  );
 }
 
-void ZEffectManager::Draw(unsigned long int nTime)
+void ZEffectManager::Draw(u32 nTime)
 {
 	LPDIRECT3DDEVICE9 pDevice = RGetDevice();
 

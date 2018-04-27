@@ -40,9 +40,9 @@ public:
 	bool CheckAddType(int type);
 
 	int GetItemCount() { return (int)m_ItemVector.size(); }
-	void SetItemsAll(unsigned long int* nItemList, int nItemCount);
+	void SetItemsAll(u32* nItemList, int nItemCount);
 	int GetPage() { return m_nPage; }
-	unsigned long int GetItemID(int nIndex);
+	u32 GetItemID(int nIndex);
 	static ZShop* GetInstance();
 };
 

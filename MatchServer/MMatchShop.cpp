@@ -129,7 +129,7 @@ MMatchShop* MMatchShop::GetInstance()
 	return &g_stMatchShop;
 }
 
-bool MMatchShop::IsSellItem(const unsigned long int nItemID)
+bool MMatchShop::IsSellItem(const u32 nItemID)
 {
 	map<unsigned int, ShopItemNode*>::iterator itor = m_ItemNodeMap.find(nItemID);
 	if (itor != m_ItemNodeMap.end())

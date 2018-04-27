@@ -7,7 +7,7 @@
 struct ZRadarNode
 {
 	bool			bShoted;
-	unsigned long	nLastShotTime;
+	u32	nLastShotTime;
 //	float			fRot;
 	int				x[4];
 	int				y[4];

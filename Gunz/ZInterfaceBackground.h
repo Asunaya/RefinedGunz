@@ -28,7 +28,7 @@ private:
 
 
 protected:
-	void SetFogState(float fStart, float fEnd, unsigned long int color);
+	void SetFogState(float fStart, float fEnd, u32 color);
 
 public:
 	ZInterfaceBackground();

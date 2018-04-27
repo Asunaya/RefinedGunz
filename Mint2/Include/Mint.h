@@ -83,7 +83,7 @@ public:
 	void EnableIME(bool bEnable);
 	bool IsEnableIME();
 
-	int RegisterHotKey(unsigned long int nModifier, unsigned long int nVirtKey);
+	int RegisterHotKey(u32 nModifier, u32 nVirtKey);
 	void UnregisterHotKey(int nID);
 
 	MWidget* SetDragObject(MWidget* pSender, MBitmap* pBitmap, const char* szString, const char* szItemString);

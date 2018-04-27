@@ -50,8 +50,8 @@ public:
 	}
 };
 
-#define MINT_ARGB(a,r,g,b)		( ((((unsigned long int)a)&0xFF)<<24) | ((((unsigned long int)r)&0xFF)<<16) | ((((unsigned long int)g)&0xFF)<<8) | (((unsigned long int)b)&0xFF) )
-#define MINT_RGB(r,g,b)			( ((((unsigned long int)r)&0xFF)<<16) | ((((unsigned long int)g)&0xFF)<<8) | (((unsigned long int)b)&0xFF) )
+#define MINT_ARGB(a,r,g,b)		( ((((u32)a)&0xFF)<<24) | ((((u32)r)&0xFF)<<16) | ((((u32)g)&0xFF)<<8) | (((u32)b)&0xFF) )
+#define MINT_RGB(r,g,b)			( ((((u32)r)&0xFF)<<16) | ((((u32)g)&0xFF)<<8) | (((u32)b)&0xFF) )
 
 struct MCOLOR {
 public:
@@ -66,17 +66,17 @@ public:
 	MCOLOR(unsigned char r, unsigned char g, unsigned char b, unsigned char a = 255) {
 		MCOLOR::r = r, MCOLOR::g = g, MCOLOR::b = b, MCOLOR::a = a;
 	}
-	MCOLOR(unsigned long int argb){
+	MCOLOR(u32 argb){
 		a = u8( (argb & 0xFF000000) >> 24 );
 		r = u8( (argb & 0x00FF0000) >> 16 );
 		g = u8( (argb & 0x0000FF00) >> 8 );
 		b = u8( (argb & 0x000000FF) );
 	}
 	
-	unsigned long int GetARGB(){
+	u32 GetARGB(){
 		return MINT_ARGB(a, r, g, b);
 	}
-	unsigned long int GetRGB(){
+	u32 GetRGB(){
 		return MINT_RGB(r, g, b);
 	}
 };

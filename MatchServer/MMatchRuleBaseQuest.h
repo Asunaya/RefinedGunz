@@ -85,10 +85,10 @@ public:
 
 	// 퀘스트때문에 추가된 가상 인터페이스.
 	// 구조에대해 좀더 생각을 해봐야함. 너무 많은 인터페이스가 MMatchRule까지 올라와 버렸음... - by 추교성.
-	virtual void OnRequestDropSacrificeItemOnSlot( const MUID& uidSender, const int nSlotIndex, const unsigned long int nItemID ) {}
-	virtual void OnResponseDropSacrificeItemOnSlot( const MUID& uidSender, const int nSlotIndex, const unsigned long int nItemID ) {}
-	virtual void OnRequestCallbackSacrificeItem( const MUID& uidSender, const int nSlotIndex, const unsigned long int nItemID ) {}
-	virtual void OnResponseCallBackSacrificeItem( const MUID& uidSender, const int nSlotIndex, const unsigned long int nItemID )	{}
+	virtual void OnRequestDropSacrificeItemOnSlot( const MUID& uidSender, const int nSlotIndex, const u32 nItemID ) {}
+	virtual void OnResponseDropSacrificeItemOnSlot( const MUID& uidSender, const int nSlotIndex, const u32 nItemID ) {}
+	virtual void OnRequestCallbackSacrificeItem( const MUID& uidSender, const int nSlotIndex, const u32 nItemID ) {}
+	virtual void OnResponseCallBackSacrificeItem( const MUID& uidSender, const int nSlotIndex, const u32 nItemID )	{}
 	virtual void OnRequestQL( const MUID& uidSender ) {}
 	virtual void OnResponseQL_ToStage( const MUID& uidStage )	{}
 	virtual void OnRequestSacrificeSlotInfo( const MUID& uidSender ) {}

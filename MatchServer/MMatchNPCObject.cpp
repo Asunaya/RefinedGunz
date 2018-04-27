@@ -8,7 +8,7 @@
 #include "MMatchRuleQuest.h"
 #include "MQuestPlayer.h"
 
-MMatchNPCObject::MMatchNPCObject(MUID& uid, MQUEST_NPC nType, unsigned long int nFlags)
+MMatchNPCObject::MMatchNPCObject(MUID& uid, MQUEST_NPC nType, u32 nFlags)
 					: m_UID(uid), m_nType(nType), m_uidController(MUID(0,0)), m_Pos(0.0f,0.0f,0.0f), m_nFlags(nFlags)
 {
 
@@ -106,7 +106,7 @@ MMatchNPCObject* MMatchNPCManager::CreateNPCObject(MQUEST_NPC nType, unsigned ch
 	if (pNPCInfo == NULL) return NULL;
 
 	MUID uidNPC = NewUID();
-	unsigned long int nNPCFlags=0;
+	u32 nNPCFlags=0;
 
 	MMatchNPCObject* pNewNPC = new MMatchNPCObject(uidNPC, nType, nNPCFlags);
 

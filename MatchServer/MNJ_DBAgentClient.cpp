@@ -38,7 +38,7 @@ bool MNJ_DBAgentClient::OnSockDisconnect(SOCKET sock)
 	return true;
 }
 
-void MNJ_DBAgentClient::Send(const MUID& uidComm, const char* szCN, const char* szPW, bool bFreeLoginIP, unsigned long nChecksumPack, int nTotalUserCount)
+void MNJ_DBAgentClient::Send(const MUID& uidComm, const char* szCN, const char* szPW, bool bFreeLoginIP, u32 nChecksumPack, int nTotalUserCount)
 {
 	// 풀에 넣어놓는다.
 	LockPool();  //-------------------------------------------------------|
@@ -94,7 +94,7 @@ void MNJ_DBAgentClient::OnRecvPacket(NJ_PACKET *pPacket)
 	bool bExist = false;
 	MUID uidComm;
 	bool bFreeLoginIP;
-	unsigned long nChecksumPack;
+	u32 nChecksumPack;
 
 	LockPool(); //------------------------------------------------------|
 

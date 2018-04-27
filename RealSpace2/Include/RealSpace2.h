@@ -132,8 +132,8 @@ void RClear();
 bool REndScene();
 bool RBeginScene();
 
-void RSetRenderFlags(unsigned long nFlags);
-unsigned long RGetRenderFlags();
+void RSetRenderFlags(u32 nFlags);
+u32 RGetRenderFlags();
 
 //Fog
 void RSetFog(bool bFog, float fNear = 0, float fFar = 0, u32 dwColor = 0xFFFFFFFF);

@@ -9,13 +9,13 @@
 class MRefreshCategory {
 protected:
 	int				m_nCategory;
-	unsigned long	m_nChecksum;
+	u32	m_nChecksum;
 
 	u64				m_nLastUpdateTick;
 
 protected:
 
-	void SetChecksum(unsigned long nChecksum)	{ m_nChecksum = nChecksum; }
+	void SetChecksum(u32 nChecksum)	{ m_nChecksum = nChecksum; }
 
 	auto GetLastUpdateTick()			{ return m_nLastUpdateTick; }
 	void SetLastUpdateTick(u64 nTick)	{ m_nLastUpdateTick = nTick; }
@@ -27,7 +27,7 @@ public:
 	virtual ~MRefreshCategory();
 
 	int GetCategory()							{ return m_nCategory; }
-	unsigned long GetChecksum()					{ return m_nChecksum; }
+	u32 GetChecksum()					{ return m_nChecksum; }
 	bool UpdateChecksum(u64 nTick);
 };
 class MRefreshCategoryMap : public std::map<int, MRefreshCategory*>{};
@@ -36,12 +36,12 @@ class MRefreshCategoryMap : public std::map<int, MRefreshCategory*>{};
 class MRefreshClient {
 protected:
 	int				m_nCategory;
-	unsigned long	m_nChecksum;
+	u32	m_nChecksum;
 	bool			m_bEnable;
 	u64				m_tmLastUpdated;
 
 protected:
-	virtual bool OnSync(unsigned long nChecksum) = 0;
+	virtual bool OnSync(u32 nChecksum) = 0;
 
 public:
 	MRefreshClient();
@@ -50,8 +50,8 @@ public:
 	int GetCategory()								{ return m_nCategory; }
 	void SetCategory(int nCategory)					{ m_nCategory = nCategory; }
 
-	unsigned long GetChecksum()						{ return m_nChecksum; }
-	void SetChecksum(unsigned long nChecksum)		{ m_nChecksum = nChecksum; }
+	u32 GetChecksum()						{ return m_nChecksum; }
+	void SetChecksum(u32 nChecksum)		{ m_nChecksum = nChecksum; }
 
 	bool IsEnable()									{ return m_bEnable; }
 	void Enable(bool bEnable)						{ m_bEnable = bEnable; }
@@ -59,7 +59,7 @@ public:
 	auto GetLastUpdatedTime()				{ return m_tmLastUpdated; }
 	void SetLastUpdatedTime(u64 tmTime)	{ m_tmLastUpdated = tmTime; }
 
-	bool Sync(unsigned long nChecksum);
+	bool Sync(u32 nChecksum);
 };
 
 

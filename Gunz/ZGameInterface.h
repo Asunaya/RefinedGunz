@@ -179,7 +179,7 @@ protected:
 
 	void HideAllWidgets();
 
-	void OnResponseShopItemList(unsigned long int* nItemList, int nItemCount);
+	void OnResponseShopItemList(u32* nItemList, int nItemCount);
 	void OnResponseCharacterItemList(MUID* puidEquipItem, MTD_ItemNode* pItemNodes, int nItemCount);
 
 	void OnDrawStateGame(MDrawContext* pDC);

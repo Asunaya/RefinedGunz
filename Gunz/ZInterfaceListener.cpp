@@ -1598,7 +1598,7 @@ BEGIN_IMPLEMENT_LISTENER(ZGetLobbyPlayerListTabClanCreateButtonListener, MBTN_CL
 	{
 		pWidget->Show(true,true);
 
-		unsigned long int nPlaceFilter = 0;
+		u32 nPlaceFilter = 0;
 		SetBitSet(nPlaceFilter, MMP_LOBBY);
 
 		ZPostRequestChannelAllPlayerList(ZGetGameClient()->GetPlayerUID(), ZGetGameClient()->GetChannelUID(),nPlaceFilter,
@@ -1736,7 +1736,7 @@ BEGIN_IMPLEMENT_LISTENER(ZGetArrangedTeamGameListener, MBTN_CLK_MSG)
 	{
 		pWidget->Show(true,true);
 
-		unsigned long int nPlaceFilter = 0;
+		u32 nPlaceFilter = 0;
 		SetBitSet(nPlaceFilter, MMP_LOBBY);
 
 		ZPostRequestChannelAllPlayerList(ZGetGameClient()->GetPlayerUID(), ZGetGameClient()->GetChannelUID(),nPlaceFilter,

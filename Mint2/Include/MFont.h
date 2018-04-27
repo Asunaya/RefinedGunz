@@ -14,8 +14,8 @@ public:
 	char	m_szName[MFONT_NAME_LENGTH];
 
 	int				m_nOutlineStyle;
-	unsigned long	m_ColorArg1;	// For Custom FontStyle like OutlineStyle
-	unsigned long	m_ColorArg2;
+	u32	m_ColorArg1;	// For Custom FontStyle like OutlineStyle
+	u32	m_ColorArg2;
 
 public:
 	MFont();

@@ -366,7 +366,7 @@ inline void ZPostGameKill(const MUID& uidAttacker)
 	ZPOSTCMD1(MC_MATCH_GAME_KILL, MCommandParameterUID(uidAttacker));
 }
 
-inline void ZPostRequestTimeSync(unsigned long nTimeStamp)
+inline void ZPostRequestTimeSync(u32 nTimeStamp)
 {
 	ZPOSTCMD1(MC_MATCH_GAME_REQUEST_TIMESYNC, MCmdParamUInt(nTimeStamp));
 }
@@ -727,7 +727,7 @@ inline void ZPostRequestExpelClanMember(const MUID& uidClanAdmin, const char* sz
 
 
 inline void ZPostRequestChannelAllPlayerList(const MUID& uidChar, const MUID& uidChannel,
-	const unsigned long int nPlaceFilter, const unsigned long int nOptions)
+	const u32 nPlaceFilter, const u32 nOptions)
 {
 	ZPOSTCMD4(MC_MATCH_CHANNEL_REQUEST_ALL_PLAYER_LIST, MCommandParameterUID(uidChar),
 		MCommandParameterUID(uidChannel), MCommandParameterUInt(nPlaceFilter),
@@ -778,7 +778,7 @@ inline void ZPostReplyAgreement(const MUID& uidProposer, const MUID& uidChar, ch
 
 
 inline void ZPostLadderRequestChallenge(const char* const* ppMemberCharNames, int nMemberCount,
-	unsigned long int nOptions)
+	u32 nOptions)
 {
 	void* pBlobMembersName = MMakeBlobArray(sizeof(MTD_ReplierNode), nMemberCount);
 	for (int i = 0; i < nMemberCount; i++)
@@ -931,7 +931,7 @@ inline void ZPostQuestReadyToNewSector(const MUID& uidPlayer)
 	ZPOSTCMD1(MC_QUEST_READYTO_NEWSECTOR, MCmdParamUID(uidPlayer));
 }
 
-inline void ZPostQuestPong(unsigned long int nTime)
+inline void ZPostQuestPong(u32 nTime)
 {
 	ZPOSTCMD1(MC_QUEST_PONG, MCmdParamUInt(nTime));
 }

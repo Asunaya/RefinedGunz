@@ -582,7 +582,7 @@ bool ZBrain::FindTarget()
 
 bool ZBrain::CheckEnableTargetting(ZCharacter* pCharacter)
 {
-	unsigned long int nAttackTypes = m_pBody->GetNPCInfo()->nNPCAttackTypes;
+	u32 nAttackTypes = m_pBody->GetNPCInfo()->nNPCAttackTypes;
 	if (nAttackTypes == NPC_ATTACK_MELEE)
 	{
 		if ((pCharacter->GetStateLower() == ZC_STATE_LOWER_BIND) &&

@@ -71,7 +71,7 @@ bool MMatchLocale::ConnectToDBAgent()
 }
 
 
-bool MMatchLocale::PostLoginInfoToDBAgent(const MUID& uidComm, const char* szCN, const char* szPW, bool bFreeLoginIP, unsigned long nChecksumPack, int nTotalUserCount)
+bool MMatchLocale::PostLoginInfoToDBAgent(const MUID& uidComm, const char* szCN, const char* szPW, bool bFreeLoginIP, u32 nChecksumPack, int nTotalUserCount)
 {
 	if (m_nCountry != MC_JAPAN) return false;
 	if (m_pDBAgentClient)

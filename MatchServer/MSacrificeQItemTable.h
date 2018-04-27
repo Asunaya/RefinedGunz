@@ -36,9 +36,9 @@ class MSacrificeQItemInfo
 	friend class MSacrificeQItemTable;
 
 public :
-	unsigned long	GetDefQItemID()		{ return m_nDefaultQItemID; }
-	unsigned long	GetSpeQItemID1()	{ return m_nSpecialQItemID1; }
-	unsigned long	GetSpeQItemID2()	{ return m_nSpecialQItemID2; }
+	u32	GetDefQItemID()		{ return m_nDefaultQItemID; }
+	u32	GetSpeQItemID1()	{ return m_nSpecialQItemID1; }
+	u32	GetSpeQItemID2()	{ return m_nSpecialQItemID2; }
 	const char*		GetMap()			{ return m_szMap; }
 	int				GetSigNPCID()		{ return m_nSignificantNPCID; }
 	float			GetSDC()			{ return m_fSDC; }
@@ -47,13 +47,13 @@ public :
 	
 private :
 	MSacrificeQItemInfo() : m_nDefaultQItemID( 0 ), m_nSpecialQItemID1( 0 ), m_nSpecialQItemID2( 0 ), m_nSignificantNPCID( 0 ), m_fSDC( 0.0f ) {}
-	MSacrificeQItemInfo( unsigned long nDfQItemID, unsigned long nSpecIID1, unsigned long nSpecIID2, const int nSigNPCID, const float fSdc ) :
+	MSacrificeQItemInfo(u32 nDfQItemID, u32 nSpecIID1, u32 nSpecIID2, const int nSigNPCID, const float fSdc ) :
 		m_nDefaultQItemID( nDfQItemID ), m_nSpecialQItemID1( nSpecIID1 ), m_nSpecialQItemID2( nSpecIID2 ), 
 		m_nSignificantNPCID( nSigNPCID ), m_fSDC( fSdc ) {}
 
-	unsigned long	m_nDefaultQItemID;
-	unsigned long	m_nSpecialQItemID1;
-	unsigned long	m_nSpecialQItemID2;
+	u32	m_nDefaultQItemID;
+	u32	m_nSpecialQItemID1;
+	u32	m_nSpecialQItemID2;
 	char			m_szMap[ 24 ];
 	int				m_nSignificantNPCID;
 	float			m_fSDC;

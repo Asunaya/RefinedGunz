@@ -12,7 +12,7 @@ protected:	// Input Argument
 	int		m_nAIID;
 protected:	// Output Result
 	unsigned int		m_nNewCIID;
-	unsigned long int	m_nNewItemID;
+	u32	m_nNewItemID;
 	bool				m_bIsRentItem;
 	int					m_nRentMinutePeriodRemainder;
 
@@ -33,8 +33,8 @@ public:
 	virtual void Run(void* pContext);
 
 	const MUID& GetUID()			{ return m_uid; }
-	unsigned long int GetNewCIID()		{ return m_nNewCIID; }
-	unsigned long int GetNewItemID()	{ return m_nNewItemID; }
+	u32 GetNewCIID()		{ return m_nNewCIID; }
+	u32 GetNewItemID()	{ return m_nNewItemID; }
 	bool GetRentItem()					{ return m_bIsRentItem; }
 	int GetRentMinutePeriodRemainder()	{ return m_nRentMinutePeriodRemainder; }
 };

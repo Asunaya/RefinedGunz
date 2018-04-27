@@ -65,7 +65,7 @@ struct MQuestLevelStaticInfo
 /// 퀘스트에서 나온 아이템
 struct MQuestLevelItem
 {
-	unsigned long int	nItemID;			///< 퀘스트 아이템 ID
+	u32	nItemID;			///< 퀘스트 아이템 ID
 	int					nRentPeriodHour;	///< 일반 아이템일 경우 사용 기간
 	bool				bObtained;			///< 플레이어가 먹었는지 여부
 	int					nMonsetBibleIndex;	// 몬스터 도감에 사용될 몬스터 타입의 고유 인덱스.
@@ -75,7 +75,7 @@ struct MQuestLevelItem
 };
 
 /// 퀘스트에서 얻은 아이템들
-class MQuestLevelItemMap : public multimap<unsigned long int, MQuestLevelItem*>
+class MQuestLevelItemMap : public multimap<u32, MQuestLevelItem*>
 {
 public:
 	MQuestLevelItemMap() {}
@@ -166,10 +166,10 @@ public:
 	/// 퀘스트 아이템이 생성될 경우 호출된다.
 	/// @nItemID				퀘스트 아이템 ID
 	/// @nRentPeriodHour		일반 아이템일 경우 사용 기간
-	void OnItemCreated(unsigned long int	nItemID, int nRentPeriodHour);
+	void OnItemCreated(u32	nItemID, int nRentPeriodHour);
 	/// 플레이어가 퀘스트 아이템 먹었을 경우 호출된다.
 	/// @nItemID				퀘스트 아이템 ID
-	bool OnItemObtained( MMatchObject* pPlayer, unsigned long int	nItemID);		
+	bool OnItemObtained( MMatchObject* pPlayer, u32	nItemID);		
 
 	MQuestNPCQueue* GetNPCQueue()				{ return &m_NPCQueue; }
 	MQuestLevelStaticInfo* GetStaticInfo()		{ return &m_StaticInfo; }

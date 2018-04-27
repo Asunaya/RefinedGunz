@@ -147,14 +147,14 @@ void ZShop::Serialize()
 #endif
 }
 
-unsigned long int ZShop::GetItemID(int nIndex)
+u32 ZShop::GetItemID(int nIndex)
 {
 	if ((nIndex < 0) || (nIndex >= (int)m_ItemVector.size())) return 0;
 
 	return m_ItemVector[nIndex];
 }
 
-void ZShop::SetItemsAll(unsigned long int* nItemList, int nItemCount)
+void ZShop::SetItemsAll(u32* nItemList, int nItemCount)
 {
 	Clear();
 	for (int i = 0; i < nItemCount; i++)

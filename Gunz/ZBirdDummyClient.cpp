@@ -360,7 +360,7 @@ bool ZBirdDummyClient::OnCommand(MCommand* pCommand)
 
 void AddToLogFrame(int nDummyID, const char* szStr)
 {
-	static unsigned long st_nFirstTime = GetGlobalTimeMS();
+	static auto st_nFirstTime = GetGlobalTimeMS();
 	if (!m_pLogFrame) return;
 	
 	char szTemp[1024];

@@ -7,7 +7,7 @@ MUID MQuestItemMap::m_uidGenerate = MUID(0,0);
 MCriticalSection MQuestItemMap::m_csUIDGenerateLock;
 
 /////////////////////////////////////////////////////////////////////////////////////////////
-bool MQuestItem::Create( const unsigned long int nItemID, const int nCount, MQuestItemDesc* pDesc, bool bKnown )
+bool MQuestItem::Create( const u32 nItemID, const int nCount, MQuestItemDesc* pDesc, bool bKnown )
 {
 	m_nItemID	= nItemID;
 	m_pDesc		= pDesc;
@@ -314,7 +314,7 @@ void MQuestItemMap::Clear()
 	clear();
 }
 
-void MQuestItemMap::Remove( const unsigned long int nItemID )
+void MQuestItemMap::Remove( const u32 nItemID )
 {
 	iterator It = find( nItemID );
 	if( end() == It )
@@ -325,7 +325,7 @@ void MQuestItemMap::Remove( const unsigned long int nItemID )
 	erase( It );
 }
 
-MQuestItem* MQuestItemMap::Find( const unsigned long int nItemID )
+MQuestItem* MQuestItemMap::Find( const u32 nItemID )
 {
 	iterator It = find( nItemID );
 	if( end() == It )
@@ -334,7 +334,7 @@ MQuestItem* MQuestItemMap::Find( const unsigned long int nItemID )
 	return It->second;
 }
 
-bool MQuestItemMap::CreateQuestItem( const unsigned long int nItemID, const int nCount, bool bKnown)
+bool MQuestItemMap::CreateQuestItem( const u32 nItemID, const int nCount, bool bKnown)
 {
 	MQuestItemDesc* pDesc = GetQuestItemDescMgr().FindQItemDesc( nItemID );
 	if( 0 == pDesc )
@@ -363,7 +363,7 @@ bool MQuestItemMap::CreateQuestItem( const unsigned long int nItemID, const int 
 	return true;
 }
 
-void MQuestItemMap::Insert( unsigned long int nItemID, MQuestItem* pQuestItem )
+void MQuestItemMap::Insert( u32 nItemID, MQuestItem* pQuestItem )
 {
 	if( 0 == pQuestItem )
 		return;

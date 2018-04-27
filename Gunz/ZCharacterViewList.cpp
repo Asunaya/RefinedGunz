@@ -280,7 +280,7 @@ void ZCharacterViewList::ChangeMyCharacterInfo()
 	ZMyInfo* pmi = ZGetMyInfo();
 	ZMyItemList* pil = ZGetMyInfo()->GetItemList();
 
-	unsigned long int nWeaponID = GetVisualWeaponID(pil->GetEquipedItemID(MMCIP_MELEE),
+	u32 nWeaponID = GetVisualWeaponID(pil->GetEquipedItemID(MMCIP_MELEE),
 		pil->GetEquipedItemID(MMCIP_PRIMARY), pil->GetEquipedItemID(MMCIP_SECONDARY),
 		pil->GetEquipedItemID(MMCIP_CUSTOM1), pil->GetEquipedItemID(MMCIP_CUSTOM2));
 

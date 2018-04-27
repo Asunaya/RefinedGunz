@@ -224,7 +224,7 @@ ZWorldItem *ZWorldItemManager::AddWorldItem( int nID, short nItemID,MTD_WorldIte
 		}
 		MMatchWorldItemDesc* pDesc = iter->second;
 
-		unsigned long int nSpawnTypeFlags = WORLD_ITEM_TIME_ONCE;
+		u32 nSpawnTypeFlags = WORLD_ITEM_TIME_ONCE;
 		if (pDesc->m_nItemType == WIT_CLIENT) 
 			SetBitSet(nSpawnTypeFlags, WORLD_ITEM_STAND_ALINE);
 

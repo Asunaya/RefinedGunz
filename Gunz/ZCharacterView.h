@@ -9,7 +9,7 @@
 
 class ZItemSlot{
 public:
-	unsigned long int	m_nItemID;
+	u32	m_nItemID;
 	MRECT				m_Rect;
 };
 
@@ -80,6 +80,6 @@ public:
 	void SetCharacter( MUID uid );
 };
 
-unsigned long int GetVisualWeaponID(unsigned long int nMeleeItemID, unsigned long int nPrimaryItemID,
-									unsigned long int nSecondaryItemID, unsigned long int nCustom1ItemID,
-									unsigned long int nCustom2ItemID);
+u32 GetVisualWeaponID(u32 nMeleeItemID, u32 nPrimaryItemID,
+									u32 nSecondaryItemID, u32 nCustom1ItemID,
+									u32 nCustom2ItemID);

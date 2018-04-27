@@ -239,7 +239,7 @@ bool ZGameInterface::OnCommand(MCommand* pCommand)
 		break;
 	case MC_MATCH_RESPONSE_SHOP_ITEMLIST:
 		{
-			unsigned long int* pnItemList;
+			u32* pnItemList;
 			int nItemCount = 0;
 
 
@@ -251,12 +251,12 @@ bool ZGameInterface::OnCommand(MCommand* pCommand)
 			}
 			void* pItemListBlob = pParam->GetPointer();
 			nItemCount = MGetBlobArrayCount(pItemListBlob);
-			pnItemList = new unsigned long int[nItemCount];
+			pnItemList = new u32[nItemCount];
 
 
 			for (int i = 0; i < nItemCount; i++)
 			{
-				pnItemList[i] = *(unsigned long int*)MGetBlobArrayElement(pItemListBlob, i);
+				pnItemList[i] = *(u32*)MGetBlobArrayElement(pItemListBlob, i);
 			}
 
 			ZApplication::GetGameInterface()->OnResponseShopItemList(pnItemList, nItemCount);

@@ -471,5 +471,5 @@ private:
 };
 
 void ZChangeCharParts(RVisualMesh* pVMesh, MMatchSex nSex, int nHair, int nFace, u32* pItemID);
-void ZChangeCharWeaponMesh(RVisualMesh* pVMesh, unsigned long int nWeaponID);
+void ZChangeCharWeaponMesh(RVisualMesh* pVMesh, u32 nWeaponID);
 bool CheckTeenVersionMesh(RMesh** ppMesh);

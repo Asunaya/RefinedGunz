@@ -402,7 +402,7 @@ void MMatchRuleBaseQuest::ReAssignNPC()
 			MMatchObject* pObj = i->second;
 			if (pObj->GetEnterBattle() == false) continue;	// 배틀참가하고 있는 플레이어만 체크
 
-			unsigned long int lat = pObj->GetQuestLatency();
+			u32 lat = pObj->GetQuestLatency();
 
 			if (lat > PING_LOST_LIMIT)
 			{

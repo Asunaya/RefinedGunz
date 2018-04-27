@@ -41,12 +41,12 @@ public:
 	}
 
 public:
-	void SetSacrificeItemSlot( const MUID& uidUserID, const unsigned long int nItemID, MBitmap* pBitmap, const char* szItemName, const int nQL);
+	void SetSacrificeItemSlot( const MUID& uidUserID, const u32 nItemID, MBitmap* pBitmap, const char* szItemName, const int nQL);
 	void RemoveItem( void)						{ m_bExist = false; }
 
 	MUID GetUID( void)							{ return m_uidUserID; }
 	MBitmap* GetIconBitmap( void)				{ return m_pIconBitmap; }
-	unsigned long int GetItemID( void)			{ return m_nItemID; }
+	u32 GetItemID( void)			{ return m_nItemID; }
 	const char* GetName( void)					{ return m_szItemName; }
 	int GetQL( void)							{ return m_nQL; }
 	bool IsExist( void)							{ return m_bExist; }
@@ -57,14 +57,14 @@ public:
 class SacrificeItemListBoxItem : public MListItem
 {
 protected:
-	unsigned long		m_nItemID;
+	u32		m_nItemID;
 	MBitmap*			m_pBitmap;
 	char				m_szName[ 128];
 	int					m_nCount;
 	char				m_szDesc[ 256];
 
 public:
-	SacrificeItemListBoxItem( const unsigned long nItemID, MBitmap* pBitmap, const char* szName, int nCount, const char* szDesc)
+	SacrificeItemListBoxItem( const u32 nItemID, MBitmap* pBitmap, const char* szName, int nCount, const char* szDesc)
 	{
 		m_nItemID = nItemID;
 		m_pBitmap = pBitmap;
@@ -99,7 +99,7 @@ public:
 		return true;
 	}
 
-	unsigned long GetItemID( void)		{ return m_nItemID; }
+	u32 GetItemID( void)		{ return m_nItemID; }
 	const char* GetItemName( void)		{ return m_szName; }
 	int GetItemCount( void)				{ return m_nCount; }
 	const char* GetItemDesc( void)		{ return m_szDesc; }
@@ -184,8 +184,8 @@ public:		// public functions
 	bool OnResponseDropSacrificeItemOnSlot( const int nResult, const MUID& uidRequester, const int nSlotIndex, const int nItemID );
 	bool OnResponseCallbackSacrificeItem( const int nResult, const MUID& uidRequester, const int nSlotIndex, const int nItemID );
 	bool OnResponseQL( const int nQL );
-	bool OnResponseSacrificeSlotInfo( const MUID& uidOwner1, const unsigned long int nItemID1, 
-									  const MUID& uidOwner2, const unsigned long int nItemID2 );
+	bool OnResponseSacrificeSlotInfo( const MUID& uidOwner1, const u32 nItemID1, 
+									  const MUID& uidOwner2, const u32 nItemID2 );
 	bool OnNotAllReady();
 	bool OnQuestStartFailed( const int nState );
 	bool OnStageGameInfo( const int nQL, const int nMapsetID, const unsigned int nScenarioID );

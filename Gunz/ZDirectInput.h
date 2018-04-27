@@ -47,7 +47,7 @@ public:
 	BOOL IsInitialized()	{ return m_bInitialized; }
 
 	DWORD GetKeyboardBufferedData(ZDIBUFFER* pBuffer,unsigned int nBuffer);
-	const char* GetKeyName(unsigned long int nKey);
+	const char* GetKeyName(u32 nKey);
 
 
 	unsigned int GetMouseButtonCount()		{ return m_nMouseButtons; }

@@ -305,7 +305,7 @@ void ZInterfaceBackground::SetScene( int nSceneNumber)
 }
 
 
-void ZInterfaceBackground::SetFogState( float fStart, float fEnd, unsigned long int color)
+void ZInterfaceBackground::SetFogState( float fStart, float fEnd, u32 color)
 {
 	RGetDevice()->SetRenderState( D3DRS_FOGENABLE, TRUE);
 	RGetDevice()->SetRenderState( D3DRS_FOGCOLOR, color);

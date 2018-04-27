@@ -13,7 +13,7 @@ private:
 protected:
 	ZBirdDummyClient*	m_pClient;
 	int			m_nKillCount;
-	unsigned long int m_nKillLastTime;
+	u32 m_nKillLastTime;
 	bool		m_bInCombat;
 	int			m_nID;
 
@@ -28,7 +28,7 @@ protected:
 	_MasterType	m_nMasterType;
 	_GuestType	m_nGuestType;
 
-	unsigned long int	m_nLastCommandTime;
+	u32	m_nLastCommandTime;
 	virtual void OnRun() {}
 public:
 	ZBirdDummyAI();
@@ -51,7 +51,7 @@ class ZBirdDummyAIJoinFlood : public ZBirdDummyAI
 public:
 	ZBirdDummyAIJoinFlood();
 	MUID				m_uidWantedRoom;
-	unsigned long		m_nReservedTime;
+	u32		m_nReservedTime;
 	bool				m_bReserved;
 	char				m_szLastStage[256];
 	virtual void OnCommand(MCommand* pCmd);

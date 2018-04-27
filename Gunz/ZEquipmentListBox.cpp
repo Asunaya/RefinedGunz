@@ -129,7 +129,7 @@ MBitmap* GetItemIconBitmap(MMatchItemDesc* pItemDesc, bool bSmallIcon)
 	return pBitmap;
 }
 
-bool ZGetIsCashItem( unsigned long nItemID)
+bool ZGetIsCashItem(u32 nItemID)
 {
 	MMatchItemDesc* pItemDesc = MGetMatchItemDescMgr()->GetItemDesc(nItemID);
 	if (pItemDesc == NULL) 
@@ -237,12 +237,12 @@ void ZEquipmentListBox::AttachMenu(ZItemMenu* pMenu)
 	((MPopupMenu*)m_pItemMenu)->Show(false);
 }
 
-void ZEquipmentListBox::Add(const MUID& uidItem, unsigned long nItemID, MBitmap* pIconBitmap, const char* szName, const char* szLevel, const char* szPrice)
+void ZEquipmentListBox::Add(const MUID& uidItem, u32 nItemID, MBitmap* pIconBitmap, const char* szName, const char* szLevel, const char* szPrice)
 {
 	MListBox::Add(new ZEquipmentListItem(uidItem, nItemID, pIconBitmap, szName, szLevel, szPrice));
 }
 
-void ZEquipmentListBox::Add(const MUID& uidItem, unsigned long nItemID, MBitmap* pIconBitmap, const char* szName, int nLevel,int nBountyPrice)
+void ZEquipmentListBox::Add(const MUID& uidItem, u32 nItemID, MBitmap* pIconBitmap, const char* szName, int nLevel,int nBountyPrice)
 {
 	char szBounty[64], szLevel[64];
 	
@@ -252,7 +252,7 @@ void ZEquipmentListBox::Add(const MUID& uidItem, unsigned long nItemID, MBitmap*
 	Add(uidItem, nItemID, pIconBitmap, szName, szLevel, szBounty);
 }
 
-void ZEquipmentListBox::Add(const int nAIID, unsigned long nItemID, MBitmap* pIconBitmap, const char* szName, int nLevel)
+void ZEquipmentListBox::Add(const int nAIID, u32 nItemID, MBitmap* pIconBitmap, const char* szName, int nLevel)
 {
 	char szLevel[64];
 	itoa_safe(nLevel, szLevel, 10);
@@ -288,7 +288,7 @@ public:
 		if(MWidget::IsMsg(szMessage, MLB_ITEM_SEL)==true)
 		{
 			ZEquipmentListBox* pEquipmentListBox = (ZEquipmentListBox*)pWidget;
-			unsigned long int nItemID = 0;
+			u32 nItemID = 0;
 			ZEquipmentListItem* pListItem;
 			if (pEquipmentListBox->IsSelected())
 			{
@@ -385,7 +385,7 @@ public:
 	{
 		if ( MWidget::IsMsg( szMessage, MLB_ITEM_SEL)==true)
 		{
-			unsigned long int nItemID = 0;
+			u32 nItemID = 0;
 
 			ZEquipmentListBox* pEquipmentListBox = (ZEquipmentListBox*)pWidget;
 			ZEquipmentListItem* pListItem = ( ZEquipmentListItem*)pEquipmentListBox->GetSelItem();
@@ -516,7 +516,7 @@ public:
 	virtual bool OnCommand(MWidget* pWidget, const char* szMessage)
 	{
 		if(MWidget::IsMsg(szMessage, MLB_ITEM_SEL)==true) {
-			unsigned long int nItemID = 0;
+			u32 nItemID = 0;
 
 			ZEquipmentListBox* pEquipmentListBox = (ZEquipmentListBox*)pWidget;
 			ZEquipmentListItem* pListItem = (ZEquipmentListItem*)pEquipmentListBox->GetSelItem();
@@ -632,7 +632,7 @@ public:
 	virtual bool OnCommand(MWidget* pWidget, const char* szMessage)
 	{
 		if ( MWidget::IsMsg(szMessage, MLB_ITEM_SEL)==true) {
-			unsigned long int nItemID = 0;
+			u32 nItemID = 0;
 
 			ZEquipmentListBox* pEquipmentListBox = (ZEquipmentListBox*)pWidget;
 			ZEquipmentListItem* pListItem = (ZEquipmentListItem*)pEquipmentListBox->GetSelItem();
@@ -722,7 +722,7 @@ public:
 	virtual bool OnCommand(MWidget* pWidget, const char* szMessage)
 	{
 		if ( MWidget::IsMsg(szMessage, MLB_ITEM_SEL)==true) {
-			unsigned long int nItemID = 0;
+			u32 nItemID = 0;
 
 			ZEquipmentListBox* pEquipmentListBox = (ZEquipmentListBox*)pWidget;
 			ZEquipmentListItem* pListItem = (ZEquipmentListItem*)pEquipmentListBox->GetSelItem();

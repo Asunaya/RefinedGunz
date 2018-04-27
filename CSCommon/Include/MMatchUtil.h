@@ -8,8 +8,8 @@
 inline auto MGetTimeDistance(u64 a, u64 b) { return b - a; }
 
 class MZFileSystem;
-unsigned long MGetMemoryChecksum(char *pBuffer, int nLen);
-unsigned long MGetMZFileChecksum(const char* pszFileName);
+u32 MGetMemoryChecksum(char *pBuffer, int nLen);
+u32 MGetMZFileChecksum(const char* pszFileName);
 void MMakeSeedKey(MPacketCrypterKey* pKey, const MUID& uidServer, const MUID& uidClient, unsigned int nTimeStamp);
 
 template <typename T>

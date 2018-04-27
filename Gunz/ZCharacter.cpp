@@ -162,7 +162,7 @@ void ZChangeCharParts(RVisualMesh* pVMesh, MMatchSex nSex, int nHair, int nFace,
 	ChangeCharFace(pVMesh, nSex, nFace);
 }
 
-void ZChangeCharWeaponMesh(RVisualMesh* pVMesh, unsigned long int nWeaponID)
+void ZChangeCharWeaponMesh(RVisualMesh* pVMesh, u32 nWeaponID)
 {
 	if( pVMesh ) 
 	{

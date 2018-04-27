@@ -23,7 +23,7 @@
 #include "MAsyncDBJob_BringAccountItem.h"
 #include "MMatchUtil.h"
 
-bool MMatchServer::InsertCharItem(const MUID& uidPlayer, const unsigned long int nItemID, bool bRentItem, int nRentPeriodHour)
+bool MMatchServer::InsertCharItem(const MUID& uidPlayer, const u32 nItemID, bool bRentItem, int nRentPeriodHour)
 {
 	MMatchObject* pObject = GetObject(uidPlayer);
 	if (!IsEnabledObject(pObject)) return false;
@@ -33,7 +33,7 @@ bool MMatchServer::InsertCharItem(const MUID& uidPlayer, const unsigned long int
 
 
 	// 디비에 아이템 추가
-	unsigned long int nNewCIID = 0;
+	u32 nNewCIID = 0;
 	if (!GetDBMgr()->InsertCharItem(pObject->GetCharInfo()->m_nCID, nItemID, bRentItem, nRentPeriodHour, &nNewCIID))
 	{
 		return false;
@@ -82,7 +82,7 @@ bool MMatchServer::BuyItem(MMatchObject* pObject, unsigned int nItemID, bool bRe
 	UpdateCharDBCachingData(pObject);	
 
 
-	unsigned long int nNewCIID = 0;
+	u32 nNewCIID = 0;
 	if (!GetDBMgr()->BuyBountyItem(pObject->GetCharInfo()->m_nCID, pItemDesc->m_nID, nPrice, &nNewCIID))
 	{
 		MCommand* pNew = CreateCommand(MC_MATCH_RESPONSE_BUY_ITEM, MUID(0,0));
@@ -109,11 +109,11 @@ bool MMatchServer::BuyItem(MMatchObject* pObject, unsigned int nItemID, bool bRe
 }
 
 
-void MMatchServer::OnRequestBuyItem(const MUID& uidPlayer, const unsigned long int nItemID)
+void MMatchServer::OnRequestBuyItem(const MUID& uidPlayer, const u32 nItemID)
 {
 	ResponseBuyItem(uidPlayer, nItemID);
 }
-bool MMatchServer::ResponseBuyItem(const MUID& uidPlayer, const unsigned long int nItemID)
+bool MMatchServer::ResponseBuyItem(const MUID& uidPlayer, const u32 nItemID)
 {
 	MMatchObject* pObj = GetObject(uidPlayer);
 	if (pObj == NULL) return false;
@@ -210,7 +210,7 @@ bool MMatchServer::ResponseSellItem(const MUID& uidPlayer, const MUID& uidItem)
 	// 오브젝트에 바운티 더해준다.
 	pObj->GetCharInfo()->m_nBP += nPrice;
 
-	unsigned long int nSelItemID = pItem->GetDesc()->m_nID;
+	u32 nSelItemID = pItem->GetDesc()->m_nID;
 	if (RemoveCharItem(pObj, uidCharItem) == true)
 	{
 		// RemoveCharItem 함수 이후에 pItem을 사용하면 안된다.
@@ -279,12 +279,12 @@ void MMatchServer::ResponseShopItemList(const MUID& uidPlayer, const int nFirstI
 
 
 	MCommand* pNew = CreateCommand(MC_MATCH_RESPONSE_SHOP_ITEMLIST, MUID(0,0));
-	void* pItemArray = MMakeBlobArray(sizeof(unsigned long int), nRealItemCount);
+	void* pItemArray = MMakeBlobArray(sizeof(u32), nRealItemCount);
 	int nIndex=0;
 
 	for (int i = nFirstItemIndex; i < nFirstItemIndex+nRealItemCount; i++)
 	{
-		unsigned long int* pnItemID = (unsigned long int*)MGetBlobArrayElement(pItemArray, nIndex++);
+		u32* pnItemID = (u32*)MGetBlobArrayElement(pItemArray, nIndex++);
 		ShopItemNode* pSINode = MGetMatchShop()->GetSellItem(i);
 
 		if (pSINode != NULL)
@@ -433,7 +433,7 @@ void MMatchServer::ResponseAccountItemList(const MUID& uidPlayer)
 	// 여기서 중앙은행의 기간만료 아이템이 있는지 체크한다.
 	if (nExpiredItemCount > 0)
 	{
-		vector<unsigned long int> vecExpiredItemIDList;
+		vector<u32> vecExpiredItemIDList;
 
 		for (int i = 0; i < nExpiredItemCount; i++)
 		{
@@ -481,7 +481,7 @@ void MMatchServer::ResponseAccountItemList(const MUID& uidPlayer)
 	}
 }
 
-void MMatchServer::OnRequestEquipItem(const MUID& uidPlayer, const MUID& uidItem, const long int nEquipmentSlot)
+void MMatchServer::OnRequestEquipItem(const MUID& uidPlayer, const MUID& uidItem, const i32 nEquipmentSlot)
 {
 	if (nEquipmentSlot >= MMCIP_END) return;
 	MMatchCharItemParts parts = MMatchCharItemParts(nEquipmentSlot);
@@ -521,8 +521,8 @@ void MMatchServer::ResponseEquipItem(const MUID& uidPlayer, const MUID& uidItem,
 		}
 	}
 
-	unsigned long int nItemCIID = 0;
-	unsigned long int nItemID = 0;
+	u32 nItemCIID = 0;
+	u32 nItemID = 0;
 
 	nItemCIID = pItem->GetCIID();
 	nItemID = pItem->GetDesc()->m_nID;
@@ -553,7 +553,7 @@ void MMatchServer::ResponseEquipItem(const MUID& uidPlayer, const MUID& uidItem,
 #endif
 }
 
-void MMatchServer::OnRequestTakeoffItem(const MUID& uidPlayer, const unsigned long int nEquipmentSlot)
+void MMatchServer::OnRequestTakeoffItem(const MUID& uidPlayer, const u32 nEquipmentSlot)
 {
 	if (nEquipmentSlot >= MMCIP_END) return;
 	MMatchCharItemParts parts = MMatchCharItemParts(nEquipmentSlot);

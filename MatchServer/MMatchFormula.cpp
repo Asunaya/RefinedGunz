@@ -14,9 +14,9 @@ float MMatchFormula::m_fNeedExpLMTable[MAX_LEVEL+1];
 float MMatchFormula::m_fGettingExpLMTable[MAX_LEVEL+1];
 float MMatchFormula::m_fGettingBountyLMTable[MAX_LEVEL+1];
 
-unsigned long int MMatchFormula::m_nNeedExp[MAX_LEVEL+1];
-unsigned long int MMatchFormula::m_nGettingExp[MAX_LEVEL+1];
-unsigned long int MMatchFormula::m_nGettingBounty[MAX_LEVEL+1];
+u32 MMatchFormula::m_nNeedExp[MAX_LEVEL+1];
+u32 MMatchFormula::m_nGettingExp[MAX_LEVEL+1];
+u32 MMatchFormula::m_nGettingBounty[MAX_LEVEL+1];
 
 bool MMatchFormula::Create()
 {
@@ -182,10 +182,10 @@ void MMatchFormula::ParseGettingBountyLM(MXmlElement& element)
 
 void MMatchFormula::PreCalcNeedExp()
 {
-	unsigned long int n;
+	u32 n;
 	for (int lvl = 1; lvl <= MAX_LEVEL; lvl++)
 	{
-		n = (unsigned long int)((lvl * lvl * m_fNeedExpLMTable[lvl] * 100) + 0.5f);
+		n = (u32)((lvl * lvl * m_fNeedExpLMTable[lvl] * 100) + 0.5f);
 		n = n * 2;	// 기획서보다 2배 더한다.
 		m_nNeedExp[lvl] = m_nNeedExp[lvl-1] + n;
 	}
@@ -195,11 +195,11 @@ void MMatchFormula::PreCalcGettingExp()
 {
 	for (int lvl = 1; lvl <= MAX_LEVEL; lvl++)
 	{
-		unsigned long int nExp = 0;
+		u32 nExp = 0;
 
 		// 획득경험치 = LVL * LM * 20 + (LVL-1) * LM * 10
-		m_nGettingExp[lvl] = ( (unsigned long int)((lvl * m_fGettingExpLMTable[lvl] * 20) +0.5f) + 
-                            (unsigned long int)(((lvl-1) * m_fGettingExpLMTable[lvl] * 10) + 0.5f) );
+		m_nGettingExp[lvl] = ( (u32)((lvl * m_fGettingExpLMTable[lvl] * 20) +0.5f) + 
+                            (u32)(((lvl-1) * m_fGettingExpLMTable[lvl] * 10) + 0.5f) );
 	}
 }
 
@@ -207,15 +207,15 @@ void MMatchFormula::PreCalcGettingBounty()
 {
 	for (int lvl = 1; lvl <= MAX_LEVEL; lvl++)
 	{
-		unsigned long int nExp = 0;
+		u32 nExp = 0;
 
 		// 획득바운티 = TRUNC(LVL * LM * 1.2)
-		m_nGettingBounty[lvl] = ( (unsigned long int)((lvl * m_fGettingBountyLMTable[lvl] * 1.2f) + 0.5f) );
+		m_nGettingBounty[lvl] = ( (u32)((lvl * m_fGettingBountyLMTable[lvl] * 1.2f) + 0.5f) );
 	}
 }
 
 
-unsigned long int MMatchFormula::CalcPanaltyEXP(int nAttackerLevel, int nVictimLevel)
+u32 MMatchFormula::CalcPanaltyEXP(int nAttackerLevel, int nVictimLevel)
 {
 #define BOUNDARY_PANALTY_LEVEL		20
 
@@ -228,42 +228,42 @@ unsigned long int MMatchFormula::CalcPanaltyEXP(int nAttackerLevel, int nVictimL
 	// 일정 레벨차이에는 경험치 손실이 없다
 	if (abs(nAttackerLevel - nVictimLevel) <= (int(nVictimLevel/10) + 1) * 2) return 0;
 
-	unsigned long int nExp = 0;
-	unsigned long int nGettingExp = GetGettingExp(nAttackerLevel, nVictimLevel);
+	u32 nExp = 0;
+	u32 nGettingExp = GetGettingExp(nAttackerLevel, nVictimLevel);
 	int nGap = (nVictimLevel - nAttackerLevel);
 	if (nGap < 0) nGap = 0;
 
-	nExp = (unsigned long int)(nGettingExp * 0.5f * (1 + 0.1f * nGap));
-	unsigned long int nMaxExp = m_nGettingExp[nVictimLevel] * 2;
+	nExp = (u32)(nGettingExp * 0.5f * (1 + 0.1f * nGap));
+	u32 nMaxExp = m_nGettingExp[nVictimLevel] * 2;
 
 	if (nExp > nMaxExp) nExp = nMaxExp;
 
-	return (unsigned long int)nExp;
+	return (u32)nExp;
 }
 
-unsigned long int MMatchFormula::GetSuicidePanaltyEXP(int nLevel)
+u32 MMatchFormula::GetSuicidePanaltyEXP(int nLevel)
 {
 #define BOUNDARY_SUICIDE_PANALTY_LEVEL		5
 
 	// 5레벨 이하는 경험치가 떨어지지 않는다.
 	if (nLevel <= BOUNDARY_SUICIDE_PANALTY_LEVEL) return 0;
 
-	unsigned long int nExp = 0;
-	unsigned long int nGettingExp = GetGettingExp(nLevel, nLevel);
+	u32 nExp = 0;
+	u32 nGettingExp = GetGettingExp(nLevel, nLevel);
 	int nGap = 0;
 
-	nExp = (unsigned long int)(nGettingExp * 0.5f * (1 + 0.1f * nGap));
-	unsigned long int nMaxExp = m_nGettingExp[nLevel] * 2;
+	nExp = (u32)(nGettingExp * 0.5f * (1 + 0.1f * nGap));
+	u32 nMaxExp = m_nGettingExp[nLevel] * 2;
 
 	if (nExp > nMaxExp) nExp = nMaxExp;
 
 	// 자살일 경우 경험치 손실이 두배
 	nExp = nExp * 2;
 
-	return (unsigned long int)nExp;
+	return (u32)nExp;
 }
 
-int MMatchFormula::GetLevelFromExp(unsigned long int nExp)
+int MMatchFormula::GetLevelFromExp(u32 nExp)
 {
 	for (int level = 1; level < MAX_LEVEL; level++)
 	{
@@ -276,9 +276,9 @@ int MMatchFormula::GetLevelFromExp(unsigned long int nExp)
 	return MAX_LEVEL;
 }
 
-unsigned long int MMatchFormula::GetGettingExp(int nAttackerLevel, int nVictimLevel)
+u32 MMatchFormula::GetGettingExp(int nAttackerLevel, int nVictimLevel)
 { 
-	unsigned long int nExp, nAttackerMaxExp;
+	u32 nExp, nAttackerMaxExp;
     
 	nExp = m_nGettingExp[nVictimLevel];
 	nAttackerMaxExp = m_nGettingExp[nAttackerLevel] * 2;
@@ -287,9 +287,9 @@ unsigned long int MMatchFormula::GetGettingExp(int nAttackerLevel, int nVictimLe
 	return nExp;
 }
 
-unsigned long int MMatchFormula::GetGettingBounty(int nAttackerLevel, int nVictimLevel)
+u32 MMatchFormula::GetGettingBounty(int nAttackerLevel, int nVictimLevel)
 {
-	unsigned long int nBounty, nAttackerMaxBounty;
+	u32 nBounty, nAttackerMaxBounty;
     
 	nBounty = m_nGettingBounty[nVictimLevel];
 	nAttackerMaxBounty = m_nGettingBounty[nAttackerLevel] * 2;
@@ -298,9 +298,9 @@ unsigned long int MMatchFormula::GetGettingBounty(int nAttackerLevel, int nVicti
 	return nBounty;
 }
 
-int MMatchFormula::GetLevelPercent(unsigned long int nExp, int nNowLevel)
+int MMatchFormula::GetLevelPercent(u32 nExp, int nNowLevel)
 {
-	unsigned long int nNowLevelExp, nNextLevelExp;
+	u32 nNowLevelExp, nNextLevelExp;
 	int nPercent;
 
 	nNowLevelExp = MMatchFormula::GetNeedExp(nNowLevel-1);

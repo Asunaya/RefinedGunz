@@ -7,7 +7,7 @@ class MAsyncDBJob_GetLoginInfo : public MAsyncJob {
 protected:
 	MUID			m_uidComm;
 	bool			m_bFreeLoginIP;
-	unsigned long	m_nChecksumPack;
+	u32	m_nChecksumPack;
 	bool			m_bCheckPremiumIP;
 	char			m_szIP[128];
 	u32			m_dwIP;
@@ -47,7 +47,7 @@ public:
 			   const int nAge, 
 			   const int nSex,
 			   const bool bFreeLoginIP,
-			   unsigned long nChecksumPack,
+		u32 nChecksumPack,
 			   const bool bCheckPremiumIP,
 			   const char* szIP,
 			   u32 dwIP,
@@ -60,7 +60,7 @@ public:
 	const char* GetDBPassword() { return m_szDBPassword; }
 	const MUID& GetCommUID() { return m_uidComm; }
 	bool IsFreeLoginIP() { return m_bFreeLoginIP; }
-	unsigned long GetChecksumPack() { return m_nChecksumPack; }
+	u32 GetChecksumPack() { return m_nChecksumPack; }
 	const string& GetCountryCode3() { return m_strCountryCode3; }
 };
 

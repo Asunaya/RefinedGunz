@@ -462,7 +462,7 @@ DWORD ZDirectInput::GetMouseBufferedData(int* pSumX,int* pSumY, ZDIBUFFER* pBuff
 	return nCount;
 }
 
-const char* ZDirectInput::GetKeyName(unsigned long int nKey)
+const char* ZDirectInput::GetKeyName(u32 nKey)
 {
 	if(nKey<0 || nKey>=KEYNAMETABLE_COUNT){
 		static char* szUnknownKeyName = "N/A";

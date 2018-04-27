@@ -9,9 +9,9 @@
 
 extern bool Enable_Cloth;
 
-unsigned long int GetVisualWeaponID(unsigned long int nMeleeItemID, unsigned long int nPrimaryItemID,
-									unsigned long int nSecondaryItemID, unsigned long int nCustom1ItemID,
-									unsigned long int nCustom2ItemID)
+u32 GetVisualWeaponID(u32 nMeleeItemID, u32 nPrimaryItemID,
+									u32 nSecondaryItemID, u32 nCustom1ItemID,
+									u32 nCustom2ItemID)
 {
 	if (nPrimaryItemID != 0) return nPrimaryItemID;
 	else if (nSecondaryItemID != 0) return nSecondaryItemID;
@@ -172,7 +172,7 @@ void ZCharacterView::InitCharParts(MMatchSex nSex, unsigned int nHair, unsigned 
 		m_ItemSlots[i].m_nItemID = nEquipItemIDs[i];
 	}
 
-	unsigned long int nWeaponID = 0;
+	u32 nWeaponID = 0;
 
 	if (nVisualWeaponParts == MMCIP_PRIMARY)
 	{
@@ -240,10 +240,10 @@ void ZCharacterView::ChangeVisualWeaponParts(MMatchCharItemParts nVisualWeaponPa
 {
 	if (m_pTVisualMesh.GetVMesh() == NULL) return;
 
-	unsigned long int itemids[MMCIP_END];
+	u32 itemids[MMCIP_END];
 	for (int i = 0; i < MMCIP_END; i++) itemids[i] = m_ItemSlots[i].m_nItemID;
 
-	unsigned long int nWeaponID;
+	u32 nWeaponID;
 
 	if (nVisualWeaponParts == MMCIP_PRIMARY)
 	{
@@ -271,7 +271,7 @@ void ZCharacterView::SetSelectMyCharacter()
 	ZMyInfo* pmi = ZGetMyInfo();
 	ZMyItemList* pil = ZGetMyInfo()->GetItemList();
 
-	unsigned long int nWeaponID = GetVisualWeaponID(pil->GetEquipedItemID(MMCIP_MELEE),
+	u32 nWeaponID = GetVisualWeaponID(pil->GetEquipedItemID(MMCIP_MELEE),
 		pil->GetEquipedItemID(MMCIP_PRIMARY), pil->GetEquipedItemID(MMCIP_SECONDARY),
 		pil->GetEquipedItemID(MMCIP_CUSTOM1), pil->GetEquipedItemID(MMCIP_CUSTOM2));
 

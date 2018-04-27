@@ -32,7 +32,7 @@ public:
 		CCT_SEND = 1,
 		CCT_RECEIVE = 2,
 	};
-	void AddCommand(unsigned long int nGlobalClock, CCommandType t, MCommand* pCmd);
+	void AddCommand(u32 nGlobalClock, CCommandType t, MCommand* pCmd);
 };
 
 

@@ -111,7 +111,7 @@ private:
 	void SetChannelRuleName(const char* pszName) { strcpy_safe(m_szChannelRule, pszName); }
 	int GetBridgePeerCount()			{ return m_nBridgePeerCount; }
 	void SetBridgePeerCount(int nCount)	{ m_nBridgePeerCount = nCount; }
-	void UpdateBridgePeerTime(unsigned long int nClock)	{ m_tmLastBridgePeer = nClock; }
+	void UpdateBridgePeerTime(u32 nClock)	{ m_tmLastBridgePeer = nClock; }
 	void StartBridgePeer();
 
 	bool JustJoinedStage = false;
@@ -279,13 +279,13 @@ private:
 	MCHANNEL_TYPE		m_CurrentChannelType;
 	char				m_szVoteText[256];
 
-	unsigned long int		m_nPrevClockRequestAttribute;
+	u32		m_nPrevClockRequestAttribute;
 
 	int						m_nBridgePeerCount;
-	unsigned long int		m_tmLastBridgePeer;
+	u32		m_tmLastBridgePeer;
 
 	int						m_nCountdown;
-	unsigned long int		m_tmLastCountdown;
+	u32		m_tmLastCountdown;
 
 	int						m_nRequestID;
 	MUID					m_uidRequestPlayer;
@@ -318,7 +318,7 @@ bool GetUserInfoUID(MUID uid, MCOLOR& _color, char(&sp_name)[size], MMatchUserGr
 	return GetUserInfoUID(uid, _color, sp_name, size, gid);
 }
 
-unsigned long int ZGetClockDistance(unsigned long int nGlobalClock, unsigned long int nLocalClock);
+u32 ZGetClockDistance(u32 nGlobalClock, u32 nLocalClock);
 
 // Post Command Macro For Convenience
 #define ZPOSTCMD0(_ID)									{ MCommand* pC=ZNewCmd(_ID); ZPostCommand(pC); }

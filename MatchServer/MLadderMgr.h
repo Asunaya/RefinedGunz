@@ -28,7 +28,7 @@ protected:
 	void LaunchLadder(MLADDERTYPE nLadderType, int nGroupA, int nGroupB);
 	void RemoveFromGroupList(MLadderGroup* pGroup);
 	void CleaningGarbages();
-	unsigned long int GetTickInterval();
+	u32 GetTickInterval();
 public:
 	MLadderMgr() {
 		m_idGenerate = 0;
@@ -43,7 +43,7 @@ public:
 	int GenerateID()	{ return ++m_idGenerate; }	
 	int GetNeedMemberCount(MLADDERTYPE nLadderType);
 	int GetTotalGroupCount();
-	unsigned long GetChecksum(int nFirstIndex, int nGroupCount);
+	u32 GetChecksum(int nFirstIndex, int nGroupCount);
 
 	void DebugTest();
 	

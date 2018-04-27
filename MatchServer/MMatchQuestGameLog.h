@@ -2,10 +2,10 @@
 #define _MMATCH_QUESTGAMELOG_H
 
 
-typedef map< unsigned long int, int >	QItemLogMap;
+typedef map< u32, int >	QItemLogMap;
 typedef QItemLogMap::iterator			QItemLogMapIter;
 
-typedef pair< int, unsigned long >		SacriItemOwnerPair;
+typedef pair< int, u32 >		SacriItemOwnerPair;
 typedef vector< SacriItemOwnerPair >	SacriSlotLogVec;
 typedef SacriSlotLogVec::iterator		SacrislotLogVecIter;
 
@@ -23,7 +23,7 @@ public :
 	~MQuestPlayerLogInfo() 
 	{}
 
-	void AddUniqueItem( const unsigned long int nItemID, int nCount );
+	void AddUniqueItem( const u32 nItemID, int nCount );
 
 	void ClearQItemInfo() 
 	{

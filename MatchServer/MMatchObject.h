@@ -85,14 +85,14 @@ struct MMatchCharClanInfo
 class MMatchCharInfo
 {
 public:
-	unsigned long int	m_nCID;
+	u32	m_nCID;
 	int					m_nCharNum;
 	char				m_szName[MATCHOBJECT_NAME_LENGTH];
 	int					m_nLevel;
 	MMatchSex			m_nSex;
 	int					m_nHair;
 	int					m_nFace;
-	unsigned long int	m_nXP;
+	u32	m_nXP;
 	int					m_nBP;
 	float				m_fBonusRate;
 	int					m_nPrize;
@@ -104,7 +104,7 @@ public:
 	int					m_nCR;
 	int					m_nER;
 	int					m_nWR;
-	unsigned long int	m_nEquipedItemCIID[MMCIP_END];
+	u32	m_nEquipedItemCIID[MMCIP_END];
 	MMatchItemMap		m_ItemList;
 	MMatchEquipedItem	m_EquipedItem;
 	MMatchCharClanInfo	m_ClanInfo;
@@ -115,14 +115,14 @@ public:
 
 	MQuestMonsterBible	m_QMonsterBible;
 
-	unsigned long int	m_nTotalPlayTimeSec;
+	u32	m_nTotalPlayTimeSec;
 	u64					m_nConnTime;
 
-	unsigned long int	m_nTotalKillCount;
-	unsigned long int	m_nTotalDeathCount;
-	unsigned long int	m_nConnKillCount;
-	unsigned long int	m_nConnDeathCount;
-	unsigned long int   m_nConnXP;
+	u32	m_nTotalKillCount;
+	u32	m_nTotalDeathCount;
+	u32	m_nConnKillCount;
+	u32	m_nConnDeathCount;
+	u32   m_nConnXP;
 
 protected:
 	DBCharCachingData	m_DBCachingData;
@@ -291,7 +291,7 @@ struct MMatchObjectChannelInfo
 	MUID			uidRecentChannel;
 	bool			bChannelListTransfer;
 	MCHANNEL_TYPE	nChannelListType;
-	unsigned long	nChannelListChecksum;
+	u32	nChannelListChecksum;
 	u64				nTimeLastChannelListTrans;
 	void Clear()
 	{
@@ -334,14 +334,14 @@ protected:
 	bool			m_bFreeLoginIP;
 
 	unsigned char	m_nPlayerFlags;
-	unsigned long	m_nUserOptionFlags;
+	u32	m_nUserOptionFlags;
 
 	MUID			m_uidStage;
 	MUID			m_uidChatRoom;
 
 	bool			m_bStageListTransfer;
-	unsigned long	m_nStageListChecksum;
-	unsigned long	m_nStageListLastChecksum;
+	u32	m_nStageListChecksum;
+	u32	m_nStageListLastChecksum;
 	u64				m_nTimeLastStageListTrans;
 	int				m_nStageCursor;
 
@@ -362,8 +362,8 @@ protected:
 
 	unsigned int			m_nKillCount;
 	unsigned int			m_nDeathCount;
-	unsigned long int		m_nAllRoundKillCount;
-	unsigned long int		m_nAllRoundDeathCount;
+	u32		m_nAllRoundKillCount;
+	u32		m_nAllRoundDeathCount;
 
 	bool			m_bWasCallVote;
 
@@ -378,7 +378,7 @@ protected:
 	u64		LastSpawnTime;
 
 	u64 m_nLastPingTime;
-	mutable unsigned long int m_nQuestLatency;
+	mutable u32 m_nQuestLatency;
 	
 	// This is awkward.
 	std::deque<int> Pings;
@@ -394,11 +394,11 @@ protected:
 	v3 Velocity;
 
 protected:
-	void UpdateChannelListChecksum(unsigned long nChecksum)	{ m_ChannelInfo.nChannelListChecksum = nChecksum; }
-	unsigned long GetChannelListChecksum()					{ return m_ChannelInfo.nChannelListChecksum; }
+	void UpdateChannelListChecksum(u32 nChecksum)	{ m_ChannelInfo.nChannelListChecksum = nChecksum; }
+	u32 GetChannelListChecksum()					{ return m_ChannelInfo.nChannelListChecksum; }
 
-	void UpdateStageListChecksum(unsigned long nChecksum)	{ m_nStageListChecksum = nChecksum; }
-	unsigned long GetStageListChecksum()					{ return m_nStageListChecksum; }
+	void UpdateStageListChecksum(u32 nChecksum)	{ m_nStageListChecksum = nChecksum; }
+	u32 GetStageListChecksum()					{ return m_nStageListChecksum; }
 	MMatchObject() : MObject()
 	{
 	}
@@ -444,8 +444,8 @@ public:
 		else m_nPlayerFlags &= (0xff ^ nFlagIdx);
 	}
 
-	void SetUserOption(unsigned long nFlags)	{ m_nUserOptionFlags = nFlags; }
-	bool CheckUserOption(unsigned long nFlag)	{ return (m_nUserOptionFlags&nFlag?true:false); }
+	void SetUserOption(u32 nFlags)	{ m_nUserOptionFlags = nFlags; }
+	bool CheckUserOption(u32 nFlag)	{ return (m_nUserOptionFlags&nFlag?true:false); }
 
 	MUID GetChannelUID()						{ return m_ChannelInfo.uidChannel; }
 	void SetChannelUID(const MUID& uid)			{ SetRecentChannelUID(m_ChannelInfo.uidChannel); m_ChannelInfo.uidChannel = uid; }
@@ -609,7 +609,7 @@ public:
 
 using MMatchObjectList = std::map<MUID, MMatchObject*>;
 
-bool IsEquipableItem(unsigned long int nItemID, int nPlayerLevel, MMatchSex nPlayerSex);
+bool IsEquipableItem(u32 nItemID, int nPlayerLevel, MMatchSex nPlayerSex);
 
 inline bool IsEnabledObject(MMatchObject* pObject) 
 {

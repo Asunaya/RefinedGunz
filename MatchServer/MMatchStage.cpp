@@ -84,7 +84,7 @@ void MMatchStage::UpdateChecksum(u64 nTick)
 	m_nChecksum = (m_nIndex + 
 		           GetState() + 
 				   m_StageSetting.GetChecksum() + 
-				   (unsigned long)m_ObjUIDCaches.size());
+				   (u32)m_ObjUIDCaches.size());
 
 	m_nLastChecksumTick = nTick;
 }

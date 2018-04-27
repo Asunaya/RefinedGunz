@@ -47,10 +47,10 @@ class ZObjectManager : public map<MUID, ZObject*>
 private:
 	int									m_nOnDrawCnt;
 	int									m_nRenderedCnt;
-	unsigned long int					m_nGenerate;
+	u32					m_nGenerate;
 	ZNPCObjectMap						m_NPCObjectMap;			// NPC id도 여기서 관리한다.
 
-//	unsigned long int UseID()	{	m_nGenerate++;	return m_nGenerate;	}
+//	u32 UseID()	{	m_nGenerate++;	return m_nGenerate;	}
 	void Insert(ZObject* pObject);
 	bool DrawObject(ZObject* pObject);
 public:
