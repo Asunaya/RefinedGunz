@@ -172,7 +172,8 @@ inline ReplayVersion ZReplayLoader::GetVersion()
 		VER      (RefinedGunz,   1,     REPLAY_HEADER,       REPLAY_STAGE_SETTING_NODE_RG_V1, ReplayPlayerInfo),
 		VER      (RefinedGunz,   2,     REPLAY_HEADER_RG_V3, REPLAY_STAGE_SETTING_NODE_RG_V2, ReplayPlayerInfo),
 		VER      (RefinedGunz,   3,     REPLAY_HEADER_RG_V3, REPLAY_STAGE_SETTING_NODE,       ReplayPlayerInfo),
-		VER      (RefinedGunz,   4,     REPLAY_HEADER_RG,    REPLAY_STAGE_SETTING_NODE,       ReplayPlayerInfo),
+		VER      (RefinedGunz,   4,     REPLAY_HEADER_RG,    REPLAY_STAGE_SETTING_NODE,       ReplayPlayerInfo_RG_V4),
+		VER      (RefinedGunz,   5,     REPLAY_HEADER_RG,    REPLAY_STAGE_SETTING_NODE,       ReplayPlayerInfo),
 
 		// Freestyle Gunz
 		VER      (FreestyleGunz, 7,     REPLAY_HEADER,       REPLAY_STAGE_SETTING_NODE_FG,    ReplayPlayerInfo_FG_V7_0),
@@ -587,6 +588,7 @@ inline std::vector<ReplayPlayerInfo> ZReplayLoader::GetCharInfo()
 #undef READ_CHARINFO
 
 		ZCharacterReplayState CharState;
+		CharState.LowerAnimation = CharState.UpperAnimation = CharState.SelectedItem = u8(-1);
 
 #define COPY_CHARSTATE(member) CharState.member = src.member
 		auto CopyCharState = [&](const auto& src)
@@ -642,7 +644,14 @@ inline std::vector<ReplayPlayerInfo> ZReplayLoader::GetCharInfo()
 		}
 		else if (Version.Server == ServerType::RefinedGunz)
 		{
-			Read(CharState);
+			if (Version.nVersion <= 4)
+			{
+				READ_CHARSTATE(ZCharacterReplayState_RG_V4);
+			}
+			else
+			{
+				Read(CharState);
+			}
 		}
 		else if (Version.Server == ServerType::Official)
 		{

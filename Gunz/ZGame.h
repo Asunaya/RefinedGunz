@@ -366,6 +366,7 @@ private:
 	ZGameDraw DrawObj;
 
 	BasicInfoNetState BasicInfoState;
+	u32 LastSyncTime = 0;
 };
 
 extern ZGame* g_pGame;

@@ -2593,10 +2593,14 @@ void ZCharacter::Save(ReplayPlayerInfo& rpi)
 	rpi.State.Team = m_nTeamID;
 	rpi.State.Dead = m_bDie;
 	rpi.State.HidingAdmin = m_bAdminHide;
+	rpi.State.LowerAnimation = u8(m_AniState_Lower);
+	rpi.State.UpperAnimation = u8(m_AniState_Upper);
+	rpi.State.SelectedItem = u8(m_Items.GetSelectedWeaponParts());
 }
 
 void ZCharacter::Load(const ReplayPlayerInfo& rpi)
 {
+	m_bHero = rpi.IsHero;
 	m_InitialInfo = rpi.Info;
 	m_UID = rpi.State.UID;
 	m_Property = rpi.State.Property;
@@ -2609,6 +2613,14 @@ void ZCharacter::Load(const ReplayPlayerInfo& rpi)
 	m_nTeamID = rpi.State.Team;
 	m_bDie = rpi.State.Dead;
 	m_bAdminHide = rpi.State.HidingAdmin;
+	if (rpi.State.LowerAnimation != u8(-1))
+	{
+		// Change weapon first so that the SetAnimation* calls override the animations that
+		// ChangeWeapon set (NONE and LOAD).
+		ChangeWeapon(MMatchCharItemParts(rpi.State.SelectedItem));
+		SetAnimationLower(ZC_STATE_LOWER(rpi.State.LowerAnimation));
+		SetAnimationUpper(ZC_STATE_UPPER(rpi.State.UpperAnimation));
+	}
 }
 
 void ZCharacter::OnLevelDown()

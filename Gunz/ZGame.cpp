@@ -665,6 +665,15 @@ void ZGame::Update(float fElapsed)
 
 	m_ObjectManager.Update(fElapsed);
 
+	{
+		auto Time = u32(GetGlobalTimeMS());
+		if (Time - LastSyncTime >= 1000)
+		{
+			BasicInfoState.QueueSync();
+			LastSyncTime = Time;
+		}
+	}
+
 	if(m_pMyCharacter && !m_bReplaying)
 	{
 		PostBasicInfo();

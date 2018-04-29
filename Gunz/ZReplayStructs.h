@@ -435,7 +435,31 @@ struct ZCharacterReplayStateImpl
 	bool HidingAdmin;
 };
 
-using ZCharacterReplayState = ZCharacterReplayStateImpl<MMCIP_END>;
+struct ZCharacterReplayState
+{
+	MUID UID;
+	ZCharacterProperty Property;
+	float HP;
+	float AP;
+	ZCharacterStatus Status;
+
+	BulletInfo BulletInfos[MMCIP_END];
+
+	rvector Position;
+	rvector Direction;
+
+	MMatchTeam Team;
+
+	bool Dead;
+
+	bool HidingAdmin;
+
+	u8 LowerAnimation;
+	u8 UpperAnimation;
+	u8 SelectedItem;
+};
+
+using ZCharacterReplayState_RG_V4 = ZCharacterReplayStateImpl<12>;
 using ZCharacterReplayState_FG_V7_0 = ZCharacterReplayStateImpl<17>;
 using ZCharacterReplayState_FG_V7_1 = ZCharacterReplayStateImpl<22>;
 using ZCharacterReplayState_FG_V8 = ZCharacterReplayStateImpl<23>;
@@ -540,6 +564,7 @@ struct ReplayPlayerInfo_DG
 };
 
 using ReplayPlayerInfo = ReplayPlayerInfoImpl<MTD_CharInfo, ZCharacterReplayState>;
+using ReplayPlayerInfo_RG_V4 = ReplayPlayerInfoImpl<MTD_CharInfo, ZCharacterReplayState_RG_V4>;
 
 using ReplayPlayerInfo_FG_V7_0 = ReplayPlayerInfoImpl<MTD_CharInfo_FG_V7_0, ZCharacterReplayState_FG_V7_0>;
 using ReplayPlayerInfo_FG_V7_1 = ReplayPlayerInfoImpl<MTD_CharInfo_FG_V7_1, ZCharacterReplayState_FG_V7_1>;
