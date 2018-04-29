@@ -571,8 +571,8 @@ void ZPlayerListBox::AddPlayerClan(const MUID& puid, ePlayerState state, char* s
 
 	auto* Bitmap = GetPlayerStateBitmap(state);
 	auto* pItem = new ZClanPlayerListItem(puid, Bitmap,
-		szName, GetClanGradeName(nGrade),
-		nullptr, state, nGrade);
+		szName, nullptr, GetClanGradeName(nGrade),
+		state, nGrade);
 
 	MCOLOR Color{ 240, 64, 64 };
 	if (IsSpecialClanGrade(nGrade)) {

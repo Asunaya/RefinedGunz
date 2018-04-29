@@ -192,7 +192,7 @@ public:
 		if (i == 1)
 			return m_szName;
 		else if (i == 3)
-			return m_szClanName;
+			return m_szLevel;
 
 		return nullptr;
 	}
