@@ -1798,7 +1798,7 @@ try
 	auto CID = stmt.Get<int>();
 	auto Grade = stmt.Get<int>();
 
-	if (Grade >= AdminGrade)
+	if (AdminGrade >= Grade)
 		return ExpelResult::TooLowGrade;
 
 	ExecuteSQL("DELETE FROM ClanMember WHERE CLID = ? AND CID = ? AND Grade != 1", CLID, CID);

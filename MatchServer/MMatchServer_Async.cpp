@@ -518,13 +518,19 @@ void MMatchServer::OnAsyncExpelClanMember(MAsyncJob* pJobResult)
 
 	MMatchObject* pAdminObject = GetObject(pJob->GetAdminUID());
 
-	int ErrCode = MERR_UNKNOWN;
+	int ErrCode;
 
 	switch (pJob->GetDBResult())
 	{
 	case ExpelResult::OK:
-		ErrCode = MERR_UNKNOWN;
+	{
+		MMatchObject* pMemberObject = GetPlayerByName(pJob->GetTarMember());
+		if (IsEnabledObject(pMemberObject))
+			UpdateCharClanInfo(pMemberObject, 0, "", MCG_NONE);
+
+		ErrCode = MOK;
 		break;
+	}
 	case ExpelResult::NoSuchMember:
 		ErrCode = MERR_CLAN_CANNOT_EXPEL_FOR_NO_MEMBER;
 		break;
@@ -533,13 +539,8 @@ void MMatchServer::OnAsyncExpelClanMember(MAsyncJob* pJobResult)
 		break;
 	default:
 		ErrCode = MERR_UNKNOWN;
-		return;
-	break;
+		break;
 	}
-
-	MMatchObject* pMemberObject = GetPlayerByName(pJob->GetTarMember());
-	if (IsEnabledObject(pMemberObject))
-		UpdateCharClanInfo(pMemberObject, 0, "", MCG_NONE);
 
 	if (IsEnabledObject(pAdminObject))
 		RouteResponseToListener(pAdminObject, MC_MATCH_CLAN_ADMIN_RESPONSE_EXPEL_MEMBER, ErrCode);
