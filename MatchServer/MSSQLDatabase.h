@@ -13,6 +13,8 @@ public:
 	MSSQLDatabase& operator=(const MSSQLDatabase&) = delete;
 	~MSSQLDatabase();
 
+	bool DeleteAllRows();
+
 	virtual bool IsOpen() override { return CheckOpen(); }
 
 	virtual bool GetLoginInfo(const char* szUserID, unsigned int* poutnAID,

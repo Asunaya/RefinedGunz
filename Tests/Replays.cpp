@@ -13,7 +13,7 @@
 #include "RGMain.h"
 #include "ZReplay.inl"
 #include "reinterpret.h"
-#include <direct.h>
+#include "MFile.h"
 #include "TestAssert.h"
 
 struct ReplayData
@@ -240,8 +240,8 @@ std::vector<ReplayFile> GetFileInfo()
 	AddPlayer("Banner", 90, false);
 	File->CommandStreamPos = 2623;
 
-	std::string cwd(MAX_PATH, 0);
-	_getcwd(&cwd[0], cwd.size());
+	std::string cwd(MFile::MaxPath, 0);
+	MFile::GetCWD({&cwd[0], cwd.size()});
 	cwd.resize(cwd.find_first_of('\0'));
 	MLog("cwd: %s\n", cwd.c_str());
 	auto pos = cwd.find_last_of("\\/");

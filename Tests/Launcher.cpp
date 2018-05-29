@@ -12,8 +12,6 @@
 #include <numeric>
 #include <random>
 
-#include <direct.h>
-
 #include "TestAssert.h"
 
 static std::mt19937 rng;
@@ -135,7 +133,7 @@ static void TestFile(const ArrayView<u8>& SrcFileContents,
 
 	// Instead of starting a local webserver, just use FILE URIs.
 	char cwd[MFile::MaxPath];
-	_getcwd(cwd, sizeof(cwd));
+	TestAssert(MFile::GetCWD(cwd));
 
 	auto MakeFileURI = [&](auto&& Dest, auto&& Src) {
 		sprintf_safe(Dest, "file:///%s/%s", cwd, Src);

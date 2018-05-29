@@ -15,13 +15,19 @@ public:
 	template <size_t arr_size>
 	ArrayView(T(&arr)[arr_size]) : ptr(arr), sz(arr_size) {}
 
-	auto& operator[](size_t Index)       { return ptr[Index]; }
-	const auto& operator[](size_t Index) const { return ptr[Index]; }
+	template <typename U, typename = decltype(std::declval<U&>().data()),
+		typename = decltype(std::declval<U&>().size())>
+	ArrayView(U& x) : ArrayView(x.data(), x.size()) {}
+
+	auto& operator[](size_t Index) const { return ptr[Index]; }
 
 	size_t size() const { return sz; }
 
 	auto begin() const { return ptr; }
 	auto end() const { return ptr + sz; }
+
+	auto& front() const { return ptr[0]; }
+	auto& back() const { return ptr[sz - 1]; }
 
 	auto* data() const { return ptr; }
 

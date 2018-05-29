@@ -13,12 +13,18 @@ struct TestState
 template <> bool TestState<>::AssertionFailed = false;
 template <> bool TestState<>::BreakOnFailedAssertion = true;
 
+#ifdef _MSC_VER
+#define BREAK() __debugbreak()
+#else
+#define BREAK() __builtin_trap()
+#endif
+
 #define TestAssert(pred)\
 	do {\
 		if (!(pred)) {\
 			OnFailedAssertion(#pred, __FILE__, __LINE__);\
 			if (TestState<>::BreakOnFailedAssertion)\
-				__asm { int 3 };\
+				BREAK();\
 		}\
 	} while(false)
 

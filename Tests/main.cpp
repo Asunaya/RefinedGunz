@@ -5,16 +5,19 @@
 
 int main()
 {
-	InitLog();
+	InitLog(MLOGSTYLE_DEBUGSTRING | MLOGSTYLE_FILE);
 
 	using TestFuncType = void();
 	std::vector<std::pair<const char*, TestFuncType*>> TestFuncs;
 #define ADD(x) TestFuncType x; TestFuncs.push_back({#x, x})
+#ifdef _WIN32
 	ADD(TestReplays);
 	ADD(TestMath);
+#endif
 	ADD(TestMUtil);
 	ADD(TestStringView);
 	ADD(TestSafeString);
+	ADD(TestDB);
 	ADD(TestLauncher);
 #undef ADD
 

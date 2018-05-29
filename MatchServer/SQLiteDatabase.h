@@ -13,7 +13,7 @@ class SQLiteStatement;
 class SQLiteDatabase final : public IDatabase
 {
 public:
-	SQLiteDatabase();
+	SQLiteDatabase(const char* Filename = "GunzDB.sq3");
 
 
 	//
@@ -276,6 +276,7 @@ private:
 	int RowsModified();
 	// Rows modified by any INSERT, UPDATE or DELETE in the entire lifetime of this instance.
 	int TotalRowsModified();
+	i64 LastInsertedRowID();
 
 	void ReportWrongRowsModified(const char* ExpectedValue);
 

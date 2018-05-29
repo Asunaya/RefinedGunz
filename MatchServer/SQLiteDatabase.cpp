@@ -286,8 +286,8 @@ static sqlite3* OpenSQLite(const char* Filename, int Timeout)
 	return ret;
 }
 
-SQLiteDatabase::SQLiteDatabase()
-	: sqlite(OpenSQLite("GunzDB.sq3", 5000))
+SQLiteDatabase::SQLiteDatabase(const char* Filename)
+	: sqlite(OpenSQLite(Filename, 5000))
 {
 
 	auto exec = [&](const char* sql)
@@ -585,7 +585,7 @@ try
 		"0, 0, 0, date('now'), 0, 0)",
 		AID, NewName, CharIndex, Sex, Hair, Face);
 
-	auto CID = sqlite3_last_insert_rowid(sqlite.get());
+	auto CID = LastInsertedRowID();
 
 	std::pair<int, int> Clothes[2][2] = { { { MMCIP_CHEST, 21001 },{ MMCIP_LEGS, 23001 }},
 	{{ MMCIP_CHEST, 21501 },{ MMCIP_LEGS, 23501 }} };
@@ -599,7 +599,7 @@ try
 		auto ItemID = Parts.second;
 		Items.ItemIDs[Index] = ItemID;
 		ExecuteSQL("INSERT INTO CharacterItem (CID, ItemID) VALUES (?, ?)", CID, ItemID);
-		auto CIID = static_cast<i32>(sqlite3_last_insert_rowid(sqlite.get()));
+		auto CIID = static_cast<i32>(LastInsertedRowID());
 		Items.CIIDs[Index] = CIID;
 	};
 
@@ -946,8 +946,10 @@ bool SQLiteDatabase::InsertCharItem(unsigned int CID, int ItemID, bool RentItem,
 try
 {
 	ExecuteSQL("INSERT INTO CharacterItem (CID, ItemID, RegDate) "
-		"Values (?, ?, date('now')))",
+		"Values (?, ?, date('now'))",
 		CID, ItemID);
+
+	*outCIID = static_cast<u32>(LastInsertedRowID());
 
 	return true;
 }
@@ -1154,7 +1156,15 @@ try
 	auto Trans = BeginTransaction();
 
 	ExecuteSQL("UPDATE Character SET BP = BP - ? WHERE CID = ?", Price, CID);
-	ExecuteSQL("INSERT INTO CharacterItem (CID, ItemID, RegDate) Values (?, ?, date('now'))", CID, ItemID);
+	if (RowsModified() == 0)
+		return false;
+
+	ExecuteSQL("INSERT INTO CharacterItem (CID, ItemID, RegDate) Values (?, ?, date('now'))",
+		CID, ItemID);
+	if (RowsModified() == 0)
+		return false;
+
+	*outCIID = static_cast<u32>(LastInsertedRowID());
 
 	CommitTransaction();
 
@@ -1171,8 +1181,17 @@ catch (const SQLiteError& e)
 bool SQLiteDatabase::SellBountyItem(unsigned int CID, unsigned int ItemID, unsigned int CIID, int Price, int CharBP)
 try
 {
+	auto Trans = BeginTransaction();
+
 	ExecuteSQL("UPDATE CharacterItem SET CID = NULL WHERE CID = ? AND CIID = ?", CID, CIID);
+	if (RowsModified() == 0)
+		return false;
+
 	ExecuteSQL("UPDATE Character SET BP = BP + ? WHERE CID = ?", Price, CID);
+	if (RowsModified() == 0)
+		return false;
+
+	CommitTransaction();
 
 	// TODO: Insert sell log
 
@@ -1321,29 +1340,6 @@ try
 			memcpy(pCharInfo->m_QMonsterBible.szData, SrcPtr, static_cast<size_t>(Size));
 		}
 	}
-
-#ifdef _DEBUG
-	{
-		mlog("\nStart %s's debug MonsterBible info.\n", pCharInfo->m_szName);
-		for (int i = 0; i < (220000 - 210001); ++i)
-		{
-			if (pCharInfo->m_QMonsterBible.IsKnownMonster(i))
-			{
-				MQuestItemDesc* pMonDesc = GetQuestItemDescMgr().FindMonserBibleDesc(i);
-				if (0 == pMonDesc)
-				{
-					mlog("MSSQLDatabase::GetCharQuestItemInfo - %d Fail to find monster bible description.\n", i);
-					continue;
-				}
-				else
-				{
-					mlog("Get DB MonBibleID:%d MonName:%s\n", i, pMonDesc->m_szQuestItemName);
-				}
-			}
-		}
-		mlog("End %s's debug MonsterBible info.\n\n", pCharInfo->m_szName);
-	}
-#endif
 
 	pCharInfo->m_QuestItemList.SetDBAccess(true);
 
@@ -1586,6 +1582,8 @@ catch (const SQLiteError& e)
 bool SQLiteDatabase::CreateClan(const char * ClanName, int MasterCID, int Member1CID, int Member2CID, int Member3CID, int Member4CID, bool * outRet, int * outNewCLID)
 try
 {
+	*outRet = false;
+	
 	auto stmt = ExecuteSQL("SELECT CLID FROM Clan WHERE Name = ?",
 		ClanName);
 
@@ -1624,6 +1622,7 @@ try
 
 	CommitTransaction();
 
+	*outRet = true;
 	*outNewCLID = CLID;
 
 	return true;
@@ -1637,6 +1636,8 @@ catch (const SQLiteError& e)
 bool SQLiteDatabase::CreateClan(const char * ClanName, int MasterCID, bool * outRet, int * outNewCLID)
 try
 {
+	*outRet = false;
+
 	auto stmt = ExecuteSQL("SELECT CLID FROM Clan WHERE Name = ?",
 		ClanName);
 
@@ -1674,6 +1675,7 @@ try
 
 	CommitTransaction();
 
+	*outRet = true;
 	*outNewCLID = CLID;
 
 	return true;
@@ -1730,13 +1732,9 @@ try
 
 	ExecuteSQL("DELETE FROM ClanMember WHERE CLID = ?", CLID);
 
-	ASSERT_ROWS_MODIFIED_NOT_ZERO();
-
 	ExecuteSQL("UPDATE Clan SET DeleteFlag = 1, MasterCID = NULL, DeleteName = ?, Name = NULL "
 		"WHERE CLID = ? AND Name = ? AND MasterCID = ?",
 		ClanName, CLID, ClanName, MasterCID);
-
-	ASSERT_ROWS_MODIFIED_NOT_ZERO();
 
 	CommitTransaction();
 

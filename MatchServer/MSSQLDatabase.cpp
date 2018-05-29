@@ -155,6 +155,26 @@ MSSQLDatabase::MSSQLDatabase(const MDatabase::ConnectionDetails& Details)
 
 MSSQLDatabase::~MSSQLDatabase() {}
 
+bool MSSQLDatabase::DeleteAllRows()
+{
+	auto Query =
+		"EXEC sp_MSForEachTable 'DISABLE TRIGGER ALL ON ?'\n"
+		"EXEC sp_MSForEachTable 'ALTER TABLE ? NOCHECK CONSTRAINT ALL'\n"
+		"EXEC sp_MSForEachTable 'DELETE FROM ?'\n"
+		"EXEC sp_MSForEachTable 'ALTER TABLE ? CHECK CONSTRAINT ALL'\n"
+		"EXEC sp_MSForEachTable 'ENABLE TRIGGER ALL ON ?'"_sv;
+	try
+	{
+		m_DB.ExecuteSQL(Query);
+	}
+	catch (CDBException* e)
+	{
+		Log("MSSQLDatabase::DeleteAllRows - %s\n", e->m_strError);
+		return false;
+	}
+	return true;
+}
+
 bool MSSQLDatabase::CheckOpen()
 {
 	return m_DB.CheckOpen();
@@ -2488,28 +2508,6 @@ bool MSSQLDatabase::GetCharQuestItemInfo(MMatchCharInfo* pCharInfo)
 
 		// 몬스터 정보 저장.
 		memcpy(&pCharInfo->m_QMonsterBible, szData + MCRC32::SIZE + MAX_DB_QUEST_ITEM_SIZE, MAX_DB_MONSTERBIBLE_SIZE);
-#ifdef _DEBUG
-		{
-			mlog("\nStart %s's debug MonsterBible info.\n", pCharInfo->m_szName);
-			for (int i = 0; i < (220000 - 210001); ++i)
-			{
-				if (pCharInfo->m_QMonsterBible.IsKnownMonster(i))
-				{
-					MQuestItemDesc* pMonDesc = GetQuestItemDescMgr().FindMonserBibleDesc(i);
-					if (0 == pMonDesc)
-					{
-						mlog("MSSQLDatabase::GetCharQuestItemInfo - %d Fail to find monster bible description.\n", i);
-						continue;
-					}
-					else
-					{
-						mlog("Get DB MonBibleID:%d MonName:%s\n", i, pMonDesc->m_szQuestItemName);
-					}
-				}
-			}
-			mlog("End %s's debug MonsterBible info.\n\n", pCharInfo->m_szName);
-		}
-#endif
 
 		pCharInfo->m_QuestItemList.SetDBAccess(true);
 	}
