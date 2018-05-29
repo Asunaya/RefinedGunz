@@ -10,11 +10,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 include(macros)
 
-if(DEFINED MSSQL)
-	set(CMAKE_MFC_FLAG 1)
-	add_definitions(-DMSSQL_ENABLED)
-endif()
-
 if(MSVC)
 	ucm_add_flags(/Zi)
 	ucm_add_linker_flags(EXE CONFIG Release /DEBUG /OPT:REF /OPT:ICF)

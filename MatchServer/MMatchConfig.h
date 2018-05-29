@@ -6,11 +6,17 @@
 
 #include "MMatchMap.h"
 #include "MMatchGlobal.h"
-#include "IDatabase.h"
+#include "MDatabase.h"
+
+bool GetDBConnDetails(const struct IniParser& ini, MDatabase::ConnectionDetails& Output);
 
 class MMatchConfig
 {
 private:
+	MDatabase::DBDriver Driver;
+	MDatabase::DBAuth Auth;
+	char Server[256];
+	char Database[256];
 	char				m_szDB_DNS[64];
 	char				m_szDB_UserName[64];
 	char				m_szDB_Password[64];
@@ -68,9 +74,9 @@ public:
 	void Clear();
 
 	// get
-	const char* GetDB_DNS()							{ return m_szDB_DNS; }
-	const char* GetDB_UserName()					{ return m_szDB_UserName; }
-	const char* GetDB_Password()					{ return m_szDB_Password; }
+	MDatabase::ConnectionDetails GetDBConnectionDetails() const {
+		return {Driver, Auth, Server, Database, m_szDB_DNS, m_szDB_UserName, m_szDB_Password};
+	}
 	const int GetMaxUser()							{ return m_nMaxUser; }
 	const int GetServerID()							{ return m_nServerID; }
 	const char* GetServerName()						{ return m_szServerName; }

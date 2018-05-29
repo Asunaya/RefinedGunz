@@ -237,27 +237,41 @@ int sprintf_safe(T* Dest, size_t Size, const T* Format, ...) {
 #undef SPRINTF_SAFE_IMPL
 
 template <typename T>
-std::basic_string<T> vstrprintf(const T* Format, va_list va)
+void vstrprintf_append(std::basic_string<T>& Output, const T* Format, va_list va)
 {
 	va_list va2;
 	va_copy(va2, va);
 	auto Size = static_cast<size_t>(vsprintf_safe(nullptr, 0, Format, va2));
 	va_end(va2);
-	std::basic_string<T> Ret(Size, 0);
-	vsprintf_safe(&Ret[0], Size + 1, Format, va);
+	auto CurSize = Output.size();
+	Output.resize(CurSize + Size);
+	vsprintf_safe(&Output[CurSize], Size + 1, Format, va);
+}
+
+template <typename T>
+void strprintf_append(std::basic_string<T>& Output, const T* Format, ...)
+{
+	va_list va;
+	va_start(va, Format);
+	vstrprintf_append(Output, Format, va);
+	va_end(va);
+}
+
+template <typename T>
+std::basic_string<T> vstrprintf(const T* Format, va_list va)
+{
+	std::basic_string<T> Ret;
+	vstrprintf_append(Ret, Format, va);
 	return Ret;
 }
 
 template <typename T>
 std::basic_string<T> strprintf(const T* Format, ...)
 {
+	std::basic_string<T> Ret;
 	va_list va;
 	va_start(va, Format);
-	auto Size = static_cast<size_t>(vsprintf_safe(nullptr, 0, Format, va));
-	va_end(va);
-	std::basic_string<T> Ret(Size, 0);
-	va_start(va, Format);
-	vsprintf_safe(&Ret[0], Size + 1, Format, va);
+	vstrprintf_append(Ret, Format, va);
 	va_end(va);
 	return Ret;
 }

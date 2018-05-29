@@ -5,9 +5,11 @@
 
 #ifdef WIN32
 #include "MWindows.h"
+#include <direct.h>
 #include <io.h>
 #undef DeleteFile
 #else
+#include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <dirent.h>
@@ -103,6 +105,11 @@ optional<FileAttributes> GetAttributes(const char* Path)
 	ret.Size = GetU64(wfad.nFileSizeHigh, wfad.nFileSizeLow);
 
 	return ret;
+}
+
+bool GetCWD(ArrayView<char> Output)
+{
+	return _getcwd(Output.data(), Output.size());
 }
 
 static void CopyFileData(FileData& dest, const _finddata_t& src)
@@ -233,6 +240,11 @@ optional<FileAttributes> GetAttributes(const char* Path)
 	ret.Size = stat_ret.st_size;
 
 	return ret;
+}
+
+bool GetCWD(ArrayView<char> Output)
+{
+	return getcwd(Output.data(), Output.size());
 }
 
 static bool GetNextFileData(FileRange& Range)

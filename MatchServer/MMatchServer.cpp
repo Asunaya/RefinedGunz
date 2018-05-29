@@ -2656,7 +2656,7 @@ bool MMatchServer::CheckItemXML()
 		fprintf(fp, "Description='%s' \n", pItemDesc->m_szDesc);
 
 		// 이거 절대로 지우지 마세요. DB작업할때 대형 사고 날수 있습니다. - by SungE.
-		fprintf(fp, "WHERE ItemID = %lu\n", pItemDesc->m_nID );
+		fprintf(fp, "WHERE ItemID = %u\n", pItemDesc->m_nID );
 
 		/*
 		fprintf(fp, "UPDATE Item SET Slot = %d WHERE ItemID = %u AND Slot IS NULL\n", nSlot, pItemDesc->m_nID );

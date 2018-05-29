@@ -1,24 +1,3 @@
-#ifdef MSSQL_ENABLED
-
-// MFC stuff
-#undef _WINSOCKAPI_
-
-#define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS
-
-#define _AFX_ALL_WARNINGS
-
-#include <afxwin.h>
-#include <afxext.h>
-#include <afxdisp.h>
-
-#include <afxdtctl.h>
-#ifndef _AFX_NO_AFXCMN_SUPPORT
-#include <afxcmn.h>
-#endif
-#include <afxrich.h>
-#include <afxcview.h>
-
-
 #include "MMatchServer.h"
 #include "ODBCRecordset.h"
 #include "MSSQLDatabase.h"
@@ -34,72 +13,74 @@
 #include "MMatchFriendInfo.h"
 #include "MMatchClan.h"
 #include "MInetUtil.h"
-#include "mcrc32.h"
+#include "MCRC32.h"
 #include "MQuestConst.h"
 #include "MQuestItem.h"
 #include "MMatchConfig.h"
+#include <thread>
+#include <sstream>
 
 // SQL ////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
 // UserID, Password, Cert, Name, Age, Sex 
-static TCHAR g_szDB_CREATE_ACCOUNT[] = _T("{CALL spInsertAccount ('%s', '%s', %d, '%s', %d, %d)}");
-static TCHAR g_szDB_GET_LOGININFO[] = _T("{CALL spGetLoginInfo ('%s')}");
-static TCHAR g_szDB_GET_ACCOUNTINFO[] = _T("{CALL spGetAccountInfo (%d)}");
-static TCHAR g_szDB_CREATE_CHAR[] = _T("{CALL spInsertChar (%d, %d, '%s', %d, %d, %d, %d)}");
-static TCHAR g_szDB_DELETE_CHAR[] = _T("{CALL spDeleteChar (%d, %d, '%s')}");
-static TCHAR g_szDB_GET_CHARLIST[] = _T("{CALL spGetCharList (%d)}");
-static TCHAR g_szDB_GET_ACCOUNT_CHARINFO[] = _T("{CALL spGetAccountCharInfo (%d, %d)}");
-static TCHAR g_szDB_GET_CHARINFO_BY_AID[] = _T("{CALL spGetCharInfoByCharNum (%d, %d)}");
-static TCHAR g_szDB_SIMPLE_UPDATE_CHARINFO[] = _T("{CALL spSimpleUpdateChar (%d, '%s', %d, %d, %d)}");
-static TCHAR g_szDB_INSERT_CHAR_ITEM[] = _T("{CALL spInsertCharItem (%d, %d, %d)}");
-static TCHAR g_szDB_DELETE_CHAR_ITEM[] = _T("{CALL spDeleteCharItem (%d, %d)}");
-static TCHAR g_szDB_SELECT_CHAR_ITEM[] = _T("{CALL spSelectCharItem (%d)}");
-static TCHAR g_szDB_SELECT_ACCOUNT_ITEM[] = _T("{CALL spSelectAccountItem (%d)}");
-static TCHAR g_szDB_BUY_BOUNTY_ITEM[] = _T("{CALL spBuyBountyItem (%d, %d, %d)}");
-static TCHAR g_szDB_SELL_BOUNTY_ITEM[] = _T("{CALL spSellBountyItem (%d, %d, %d, %d, %d)}");
-static TCHAR g_szDB_UPDATE_EQUIPITEM[] = _T("{CALL spUpdateEquipItem (%d, %d, %d, %d)}");
-static TCHAR g_szDB_INSERT_CONN_LOG[] = _T("{CALL spInsertConnLog (%d, %d, %d, %d, %d, '%s')}");
-static TCHAR g_szDB_INSERT_GAME_LOG[] = _T("{CALL spInsertGameLog ('%s', '%s', '%s', %d, %d, %d, '%s')}");
-static TCHAR g_szDB_INSERT_KILL_LOG[] = _T("{CALL spInsertKillLog (%d, %d)}");
-static TCHAR g_szDB_INSERT_ITEM_PURCHASE_BY_BOUNTY_LOG[] = _T("{CALL spInsertItemPurchaseLogByBounty (%d, %d, %d, %d, '%s')}");
-static TCHAR g_szDB_INSERT_CHAR_MAKING_LOG[] = _T("{CALL spInsertCharMakingLog (%d, '%s', '%s')}");
-static TCHAR g_szDB_INSERT_SERVER_LOG[] = _T("{CALL spInsertServerLog (%d, %d, %d, %u, %u)}");
-static TCHAR g_szDB_UPDATE_SERVER_STATUS[] = _T("{CALL spUpdateServerStatus (%d, %d)}");
-static TCHAR g_szDB_UPDATE_SERVER_INFO[] = _T("UPDATE ServerStatus Set MaxPlayer=%d, ServerName='%s' WHERE ServerID=%d");
-static TCHAR g_szDB_INSERT_PLAYER_LOG[] = _T("{CALL spInsertPlayerLog (%d, %d, %d, %d, %d, %d)}");
-static TCHAR g_szDB_INSERT_LEVELUP_LOG[] = _T("{CALL spInsertLevelUpLog (%d, %d, %d, %d, %d, %d)}");
-static TCHAR g_szDB_UPDATE_CHAR_LEVEL[] = _T("{CALL spUpdateCharLevel (%d, %d)}");
-static TCHAR g_szDB_UPDATE_CHAR_BP[] = _T("{CALL spUpdateCharBP (%d, %d)}");
-static TCHAR g_szDB_UPDATE_CHAR_INFO_DATA[] = _T("{CALL spUpdateCharInfoData (%d, %d, %d, %d, %d)}");
-static TCHAR g_szDB_UPDATE_CHAR_PLAYTIME[] = _T("{CALL	spUpdateCharPlayTime (%d, %d)}");
-static TCHAR g_szDB_UPDATE_LAST_CONNDATE[] = _T("{CALL	spUpdateLastConnDate ('%s', '%s')}");
-static TCHAR g_szDB_BRING_ACCOUNTITEM[] = _T("{CALL spBringAccountItem (%d, %d, %d)}");
-static TCHAR g_szDB_BRING_BACK_ACCOUNTITEM[] = _T("{CALL spBringBackAccountItem (%d, %d, %d)}");
-static TCHAR g_szDB_CLEARALL_EQUIPEDITEM[] = _T("{CALL spClearAllEquipedItem (%d)}");
-static TCHAR g_szDB_ADD_FRIEND[] = _T("{CALL spAddFriend (%d, %d, %d)}");
-static TCHAR g_szDB_REMOVE_FRIEND[] = _T("{CALL spRemoveFriend (%d, %d)}");
-static TCHAR g_szDB_GET_FRIEND_LIST[] = _T("{CALL spGetFriendList (%d)}");
-static TCHAR g_szDB_GET_CHAR_CLAN[] = _T("{CALL spGetCharClan (%d)}");
-static TCHAR g_szDB_GET_CLID_FROM_CLANNAME[] = _T("{CALL spGetCLIDFromClanName ('%s')}");
-static TCHAR g_szDB_CREATE_CLAN[] = _T("{CALL spCreateClan ('%s', %d, %d, %d, %d, %d)}");
-static TCHAR g_szDB_CREATE_CLAN2[] = _T("{CALL spCreateClan ('%s', %d)}");
-static TCHAR g_szDB_RESERVE_CLOSE_CLAN[] = _T("{CALL spReserveCloseClan (%d, '%s', %d, '%s')}");
-static TCHAR g_szDB_CLOSE_CLAN[] = _T("{CALL spCloseClan (%d, '%s', %d)}");
-static TCHAR g_szDB_DELETE_CLAN[] = _T("{CALL spDeleteClan (%d, '%s')}");
-static TCHAR g_szDB_ADD_CLAN_MEMBER[] = _T("{CALL spAddClanMember (%d, %d, %d)}");
-static TCHAR g_szDB_REMOVE_CLAN_MEMBER[] = _T("{CALL spRemoveClanMember (%d, %d)}");
-static TCHAR g_szDB_UPDATE_CLAN_GRADE[] = _T("{CALL spUpdateClanGrade (%d, %d, %d)}");
-static TCHAR g_szDB_EXPEL_CLAN_MEMBER[] = _T("{CALL spRemoveClanMemberFromCharName (%d, %d, '%s')}");
-static TCHAR g_szDB_GET_CLAN_INFO[] = _T("{CALL spGetClanInfo (%d)}");
-static TCHAR g_szDB_GET_LADDER_TEAM4_ID[] = _T("{CALL spGetTeamID4 (%d, %d, %d, %d)}");
-static TCHAR g_szDB_TEAM4_WIN_THE_GAME[] = _T("{CALL spTeam4WinTheGame (%d, %d, %d, %d, %d, %d)}");
-static TCHAR g_szDB_GET_LADDER_TEAM_MEMBERLIST[] = _T("{CALL spGetLadderTeamMemberByCID (%d)}");
-static TCHAR g_szDB_WIN_THE_CLAN_GAME[] = _T("{CALL spWinTheClanGame (%d, %d, %d, %d, %d, '%s', '%s', %d, %d, %d, %d, '%s', '%s')}");
-static TCHAR g_szDB_UPDATE_CHAR_CLAN_CONTPOINT[] = _T("{CALL spUpdateCharClanContPoint (%d, %d, %d)}");
-static TCHAR g_szDB_EVENT_JJANG_UPDATE[] = _T("UPDATE Account SET UGradeID=%d WHERE AID=%d");
-static TCHAR g_szDB_DELETE_EXPIRED_ACCOUNT_ITEM[] = _T("{CALL spDeleteExpiredAccountItem (%d)}");
-static TCHAR g_szDB_SELECT_QUEST_ITEM_INFO_BY_CID[] = _T("{CALL spSelectCharQuestItemInfoByCID (%d)}");
+static char g_szDB_CREATE_ACCOUNT[] = "{CALL spInsertAccount ('%s', '%s', %d, '%s', %d, %d)}";
+static char g_szDB_GET_LOGININFO[] = "{CALL spGetLoginInfo ('%s')}";
+static char g_szDB_GET_ACCOUNTINFO[] = "{CALL spGetAccountInfo (%d)}";
+static char g_szDB_CREATE_CHAR[] = "{CALL spInsertChar (%d, %d, '%s', %d, %d, %d, %d)}";
+static char g_szDB_DELETE_CHAR[] = "{CALL spDeleteChar (%d, %d, '%s')}";
+static char g_szDB_GET_CHARLIST[] = "{CALL spGetCharList (%d)}";
+static char g_szDB_GET_ACCOUNT_CHARINFO[] = "{CALL spGetAccountCharInfo (%d, %d)}";
+static char g_szDB_GET_CHARINFO_BY_AID[] = "{CALL spGetCharInfoByCharNum (%d, %d)}";
+static char g_szDB_SIMPLE_UPDATE_CHARINFO[] = "{CALL spSimpleUpdateChar (%d, '%s', %d, %d, %d)}";
+static char g_szDB_INSERT_CHAR_ITEM[] = "{CALL spInsertCharItem (%d, %d)}";
+static char g_szDB_DELETE_CHAR_ITEM[] = "{CALL spDeleteCharItem (%d, %d)}";
+static char g_szDB_SELECT_CHAR_ITEM[] = "{CALL spSelectCharItem (%d)}";
+static char g_szDB_SELECT_ACCOUNT_ITEM[] = "{CALL spSelectAccountItem (%d)}";
+static char g_szDB_BUY_BOUNTY_ITEM[] = "{CALL spBuyBountyItem (%d, %d, %d)}";
+static char g_szDB_SELL_BOUNTY_ITEM[] = "{CALL spSellBountyItem (%d, %d, %d, %d, %d)}";
+static char g_szDB_UPDATE_EQUIPITEM[] = "{CALL spUpdateEquipItem (%d, %d, %d, %d)}";
+static char g_szDB_INSERT_CONN_LOG[] = "{CALL spInsertConnLog (%d, %d, %d, %d, %d, '%s')}";
+static char g_szDB_INSERT_GAME_LOG[] = "{CALL spInsertGameLog ('%s', '%s', '%s', %d, %d, %d, '%s')}";
+static char g_szDB_INSERT_KILL_LOG[] = "{CALL spInsertKillLog (%d, %d)}";
+static char g_szDB_INSERT_ITEM_PURCHASE_BY_BOUNTY_LOG[] = "{CALL spInsertItemPurchaseLogByBounty (%d, %d, %d, %d, '%s')}";
+static char g_szDB_INSERT_CHAR_MAKING_LOG[] = "{CALL spInsertCharMakingLog (%d, '%s', '%s')}";
+static char g_szDB_INSERT_SERVER_LOG[] = "{CALL spInsertServerLog (%d, %d, %d, %u, %u)}";
+static char g_szDB_UPDATE_SERVER_STATUS[] = "{CALL spUpdateServerStatus (%d, %d)}";
+static char g_szDB_UPDATE_SERVER_INFO[] = "UPDATE ServerStatus Set MaxPlayer=%d, ServerName='%s' WHERE ServerID=%d";
+static char g_szDB_INSERT_PLAYER_LOG[] = "{CALL spInsertPlayerLog (%d, %d, %d, %d, %d, %d)}";
+static char g_szDB_INSERT_LEVELUP_LOG[] = "{CALL spInsertLevelUpLog (%d, %d, %d, %d, %d, %d)}";
+static char g_szDB_UPDATE_CHAR_LEVEL[] = "{CALL spUpdateCharLevel (%d, %d)}";
+static char g_szDB_UPDATE_CHAR_BP[] = "{CALL spUpdateCharBP (%d, %d)}";
+static char g_szDB_UPDATE_CHAR_INFO_DATA[] = "{CALL spUpdateCharInfoData (%d, %d, %d, %d, %d)}";
+static char g_szDB_UPDATE_CHAR_PLAYTIME[] = "{CALL	spUpdateCharPlayTime (%d, %d)}";
+static char g_szDB_UPDATE_LAST_CONNDATE[] = "{CALL	spUpdateLastConnDate ('%s', '%s')}";
+static char g_szDB_BRING_ACCOUNTITEM[] = "{CALL spBringAccountItem (%d, %d, %d)}";
+static char g_szDB_BRING_BACK_ACCOUNTITEM[] = "{CALL spBringBackAccountItem (%d, %d, %d)}";
+static char g_szDB_CLEARALL_EQUIPEDITEM[] = "{CALL spClearAllEquipedItem (%d)}";
+static char g_szDB_ADD_FRIEND[] = "{CALL spAddFriend (%d, %d, %d)}";
+static char g_szDB_REMOVE_FRIEND[] = "{CALL spRemoveFriend (%d, %d)}";
+static char g_szDB_GET_FRIEND_LIST[] = "{CALL spGetFriendList (%d)}";
+static char g_szDB_GET_CHAR_CLAN[] = "{CALL spGetCharClan (%d)}";
+static char g_szDB_GET_CLID_FROM_CLANNAME[] = "{CALL spGetCLIDFromClanName ('%s')}";
+static char g_szDB_CREATE_CLAN[] = "{CALL spCreateClan ('%s', %d, %d, %d, %d, %d)}";
+static char g_szDB_CREATE_CLAN2[] = "{CALL spCreateClan ('%s', %d)}";
+static char g_szDB_RESERVE_CLOSE_CLAN[] = "{CALL spReserveCloseClan (%d, '%s', %d, '%s')}";
+static char g_szDB_CLOSE_CLAN[] = "{CALL spCloseClan (%d, '%s', %d)}";
+static char g_szDB_DELETE_CLAN[] = "{CALL spDeleteClan (%d, '%s')}";
+static char g_szDB_ADD_CLAN_MEMBER[] = "{CALL spAddClanMember (%d, %d, %d)}";
+static char g_szDB_REMOVE_CLAN_MEMBER[] = "{CALL spRemoveClanMember (%d, %d)}";
+static char g_szDB_UPDATE_CLAN_GRADE[] = "{CALL spUpdateClanGrade (%d, %d, %d)}";
+static char g_szDB_EXPEL_CLAN_MEMBER[] = "{CALL spRemoveClanMemberFromCharName (%d, %d, '%s')}";
+static char g_szDB_GET_CLAN_INFO[] = "{CALL spGetClanInfo (%d)}";
+static char g_szDB_GET_LADDER_TEAM4_ID[] = "{CALL spGetTeamID4 (%d, %d, %d, %d)}";
+static char g_szDB_TEAM4_WIN_THE_GAME[] = "{CALL spTeam4WinTheGame (%d, %d, %d, %d, %d, %d)}";
+static char g_szDB_GET_LADDER_TEAM_MEMBERLIST[] = "{CALL spGetLadderTeamMemberByCID (%d)}";
+static char g_szDB_WIN_THE_CLAN_GAME[] = "{CALL spWinTheClanGame (%d, %d, %d, %d, %d, '%s', '%s', %d, %d, %d, %d, '%s', '%s')}";
+static char g_szDB_UPDATE_CHAR_CLAN_CONTPOINT[] = "{CALL spUpdateCharClanContPoint (%d, %d, %d)}";
+static char g_szDB_EVENT_JJANG_UPDATE[] = "UPDATE Account SET UGradeID=%d WHERE AID=%d";
+static char g_szDB_DELETE_EXPIRED_ACCOUNT_ITEM[] = "{CALL spDeleteExpiredAccountItem (%d)}";
+static char g_szDB_SELECT_QUEST_ITEM_INFO_BY_CID[] = "{CALL spSelectCharQuestItemInfoByCID (%d)}";
 // @GameName varchar(64)
 // @Master int 
 // @Player1 int 
@@ -108,41 +89,41 @@ static TCHAR g_szDB_SELECT_QUEST_ITEM_INFO_BY_CID[] = _T("{CALL spSelectCharQues
 // @TotalQItemCount smallint 
 // @ScenarioID smallint 
 // @GamePlayTime tinyint 
-static TCHAR g_szDB_INSERT_QUEST_GAME_LOG[] = _T("{CALL spInsertQuestGameLog ('%s', %d, %d, %d, %d, %d, %d, %d)}");
+static char g_szDB_INSERT_QUEST_GAME_LOG[] = "{CALL spInsertQuestGameLog ('%s', %d, %d, %d, %d, %d, %d, %d)}";
 // @QGLID int 
 // @CID int
 // @QIID int
-static TCHAR g_szDB_INSERT_QUINQUEITEMLOG[] = _T("{CALL spInsertQUniqueItemLog (%d, %d, %d)}");
-static TCHAR g_szDB_CHECK_PREMIUM_IP[] = _T("{CALL spCheckPremiumIP ('%s')}");
+static char g_szDB_INSERT_QUINQUEITEMLOG[] = "{CALL spInsertQUniqueItemLog (%d, %d, %d)}";
+static char g_szDB_CHECK_PREMIUM_IP[] = "{CALL spCheckPremiumIP ('%s')}";
 // @AID int
 // @CID int
 // @EventName varchar(24)
-static TCHAR g_szInsertEvent[] = _T("{CALL spInsertEvent (%u, %u, '%s')}");
+static char g_szInsertEvent[] = "{CALL spInsertEvent (%u, %u, '%s')}";
 // @AID int
 // @CID int
 // @BlockType tinyint
 // @Comment varchar(256)
 // @EndBlockDate datetime
-static TCHAR g_szSetBlockAccount[] = _T("{CALL spSetBlockAccount (%u, %u, %u, '%s', '%s', '%s')}");
+static char g_szSetBlockAccount[] = "{CALL spSetBlockAccount (%u, %u, %u, '%s', '%s', '%s')}";
 // @AID int
 // @BlockType tinyint
-static TCHAR g_szResetAccountBlock[] = _T("{CALL spResetAccountBlock (%u, %u)}");
+static char g_szResetAccountBlock[] = "{CALL spResetAccountBlock (%u, %u)}";
 // @AID int
 // @CID int
 // @BlockType tinyint
 // @Comment varchar(256)
 // @IP varchar(15)
-static TCHAR g_szInsertBlockLog[] = _T("{CALL spInsertBlockLog (%u, %u, %u,'%s', '%s')}");
+static char g_szInsertBlockLog[] = "{CALL spInsertBlockLog (%u, %u, %u,'%s', '%s')}";
 // @CID int
 // @CLID int
 // @DeleteDate smalldatetime
-static TCHAR g_szSetClanDeleteDate[] = _T("{CALL spSetClanDeleteDate (%u, %u, '%s')}");
+static char g_szSetClanDeleteDate[] = "{CALL spSetClanDeleteDate (%u, %u, '%s')}";
 // @CLID int
 // @MasterCID int
 // @DeleteName varchar(24)
 // @WaitHour int = 168 -- 1주일
-static TCHAR g_szDeleteExpiredClan[] = _T("{CALL spDeleteExpiredClan (%u, %u, '%s', %u)}");
-static TCHAR g_szAdminResetAllHackingBlock[] = _T("{CALL spResetHackingBlock}");
+static char g_szDeleteExpiredClan[] = "{CALL spDeleteExpiredClan (%u, %u, '%s', %u)}";
+static char g_szAdminResetAllHackingBlock[] = "{CALL spResetHackingBlock}";
 
 static std::string FilterSQL(std::string str)
 {
@@ -150,66 +131,33 @@ static std::string FilterSQL(std::string str)
 	return str;
 }
 
-class MSSQLDatabaseImpl
+MSSQLDatabase::MSSQLDatabase()
+	: MSSQLDatabase(MGetServerConfig()->GetDBConnectionDetails())
+{}
+
+MSSQLDatabase::MSSQLDatabase(const MDatabase::ConnectionDetails& Details)
 {
-public:
-	MSSQLDatabaseImpl();
-
-private:
-	CString BuildDSNString(const CString strDSN, const CString strUserName, const CString strPassword);
-	bool Connect(CString strDSNConnect);
-	static void LogCallback(const std::string& strLog);
-
-	MDatabase	m_DB;
-	CString		m_strDSNConnect;
-
-	MMatchDBFilter m_DBFilter;
-
-	friend class MSSQLDatabase;
-};
-
-MSSQLDatabaseImpl::MSSQLDatabaseImpl()
-{
-	m_strDSNConnect = "";
 	m_DB.SetLogCallback(LogCallback);
 
-	m_strDSNConnect = BuildDSNString(MGetServerConfig()->GetDB_DNS(),
-		MGetServerConfig()->GetDB_UserName(),
-		MGetServerConfig()->GetDB_Password());
-
-	auto ThreadID = GetCurrentThreadId();
-	if (Connect(m_strDSNConnect))
+	std::ostringstream ss;
+	ss << std::this_thread::get_id();
+	auto Str = ss.str();
+	auto ThreadID = Str.c_str();
+	if (m_DB.Connect(Details))
 	{
-		MGetMatchServer()->LogF(MMatchServer::LOG_ALL, "DBMS connected @ thread ID %d", ThreadID);
+		Log("DBMS connected @ thread ID %s\n", ThreadID);
 	}
 	else
 	{
-		MGetMatchServer()->LogF(MMatchServer::LOG_ALL, "DBMS failed to connect @ thread ID %d", ThreadID);
+		Log("DBMS failed to connect @ thread ID %s\n", ThreadID);
 	}
 }
 
-
-MSSQLDatabase::MSSQLDatabase() : Impl(std::make_unique<MSSQLDatabaseImpl>())
-{
-}
-
-MSSQLDatabase::~MSSQLDatabase()
-{
-}
+MSSQLDatabase::~MSSQLDatabase() {}
 
 bool MSSQLDatabase::CheckOpen()
 {
-	return Impl->m_DB.CheckOpen();
-}
-
-CString MSSQLDatabaseImpl::BuildDSNString(const CString strDSN, const CString strUserName, const CString strPassword)
-{
-	return m_DB.BuildDSNString(strDSN, strUserName, strPassword);
-}
-
-bool MSSQLDatabaseImpl::Connect(CString strDSNConnect)
-{
-	return m_DB.Connect(strDSNConnect);
+	return m_DB.CheckOpen();
 }
 
 void MSSQLDatabase::Log(const char *pFormat, ...)
@@ -226,7 +174,7 @@ void MSSQLDatabase::Log(const char *pFormat, ...)
 }
 
 
-void MSSQLDatabaseImpl::LogCallback(const string& strLog)
+void MSSQLDatabase::LogCallback(const std::string& strLog)
 {
 	mlog(strLog.c_str());
 }
@@ -247,7 +195,7 @@ bool MSSQLDatabase::GetLoginInfo(const char* szUserID, unsigned int* poutnAID, c
 	CString strSQL;
 	strSQL.Format(g_szDB_GET_LOGININFO, szUserID);
 
-	CODBCRecordset rs(&Impl->m_DB);
+	CODBCRecordset rs(&m_DB);
 
 	bool bException = false;
 	try
@@ -263,7 +211,7 @@ bool MSSQLDatabase::GetLoginInfo(const char* szUserID, unsigned int* poutnAID, c
 		return false;
 	}
 
-	if ((rs.IsOpen() == FALSE) || (rs.GetRecordCount() <= 0) || (rs.IsBOF() == TRUE))
+	if ((rs.IsOpen() == false) || (rs.GetRecordCount() <= 0) || (rs.IsBOF() == true))
 	{
 		return false;
 	}
@@ -276,10 +224,10 @@ bool MSSQLDatabase::GetLoginInfo(const char* szUserID, unsigned int* poutnAID, c
 	return true;
 }
 
-bool MSSQLDatabase::CreateAccount(const TCHAR* szUserID,
-	const TCHAR* szPassword,
+bool MSSQLDatabase::CreateAccount(const char* szUserID,
+	const char* szPassword,
 	const int nCert,
-	const TCHAR* szName,
+	const char* szName,
 	const int nAge,
 	const int nSex)
 
@@ -295,7 +243,7 @@ bool MSSQLDatabase::CreateAccount(const TCHAR* szUserID,
 		CString strSQL;
 		strSQL.Format(g_szDB_CREATE_ACCOUNT, temp1.c_str(), temp2.c_str(), nCert, szName, nAge, nSex);
 
-		Impl->m_DB.ExecuteSQL(strSQL);
+		m_DB.ExecuteSQL(strSQL);
 	}
 	catch (CDBException* e)
 	{
@@ -314,7 +262,7 @@ AccountCreationResult MSSQLDatabase::CreateAccountNew(const char *szUsername,
 	_STATUS_DB_START
 		if (!CheckOpen()) return AccountCreationResult::DBError;
 
-	CODBCRecordset rs(&Impl->m_DB);
+	CODBCRecordset rs(&m_DB);
 
 	std::string Username = FilterSQL(szUsername), Email = FilterSQL(szEmail);
 
@@ -323,14 +271,14 @@ AccountCreationResult MSSQLDatabase::CreateAccountNew(const char *szUsername,
 
 	try
 	{
-		TCHAR sql[1024];
+		char sql[1024];
 
 		sprintf_safe(sql, "SELECT AID FROM Account WHERE UserID = '%s'",
 			szUsername);
 
 		rs.Open(sql, CRecordset::forwardOnly, CRecordset::readOnly);
 
-		if (rs.IsOpen() == FALSE)
+		if (rs.IsOpen() == false)
 			return AccountCreationResult::DBError;
 
 		if (rs.GetRecordCount() > 0)
@@ -339,7 +287,7 @@ AccountCreationResult MSSQLDatabase::CreateAccountNew(const char *szUsername,
 		sprintf_safe(sql, "INSERT INTO Account (UserID, UGradeID, PGradeID, RegDate, Email, Age, Name) VALUES ('%s', '0', '0', GETDATE(), '%s', %d, '%s')",
 			szUsername, szEmail, 0, "");
 
-		Impl->m_DB.ExecuteSQL(sql);
+		m_DB.ExecuteSQL(sql);
 
 		rs.Close();
 
@@ -348,7 +296,7 @@ AccountCreationResult MSSQLDatabase::CreateAccountNew(const char *szUsername,
 
 		rs.Open(sql, CRecordset::forwardOnly, CRecordset::readOnly);
 
-		if (rs.IsOpen() == FALSE || rs.GetRecordCount() <= 0 || rs.IsBOF() == TRUE)
+		if (rs.IsOpen() == false || rs.GetRecordCount() <= 0 || rs.IsBOF() == true)
 			return AccountCreationResult::DBError;
 
 		int AID = rs.Field("AID").AsInt();
@@ -357,7 +305,7 @@ AccountCreationResult MSSQLDatabase::CreateAccountNew(const char *szUsername,
 
 		sprintf_safe(sql, "INSERT INTO Login(UserID, AID, PasswordData) VALUES('%s', %d, '%s')", szUsername, AID, szPasswordData);
 
-		Impl->m_DB.ExecuteSQL(sql);
+		m_DB.ExecuteSQL(sql);
 	}
 	catch (CDBException* e)
 	{
@@ -388,24 +336,22 @@ bool MSSQLDatabase::BanPlayer(int nAID, const char *szReason, const time_t &Unba
 
 	char szTime[128];
 
-	tm Tm;
-
-	localtime_s(&Tm, &UnbanTime);
+	tm Tm = *localtime(&UnbanTime);
 
 	strftime(szTime, sizeof(szTime), "%c", &Tm);
 
 	try
 	{
-		TCHAR sql[1024];
+		char sql[1024];
 
 		sprintf_safe(sql, "UPDATE Account SET UGradeID = %d WHERE AID = %d", MMUG_BLOCKED, nAID);
 
-		Impl->m_DB.ExecuteSQL(sql);
+		m_DB.ExecuteSQL(sql);
 
 		sprintf_safe(sql, "INSERT INTO Blocks (AID, Type, Reason, EndDate) VALUES (%d, %d, '%s', '%s')",
 			nAID, MMBT_BANNED, temp.c_str(), szTime);
 
-		Impl->m_DB.ExecuteSQL(sql);
+		m_DB.ExecuteSQL(sql);
 	}
 	catch (CDBException* e)
 	{
@@ -423,7 +369,7 @@ int MSSQLDatabase::CreateCharacter(int nAID, const char* szNewName, int nCharInd
 		if (!CheckOpen()) return false;
 
 
-	CODBCRecordset rs(&Impl->m_DB);
+	CODBCRecordset rs(&m_DB);
 
 
 	try
@@ -441,7 +387,7 @@ int MSSQLDatabase::CreateCharacter(int nAID, const char* szNewName, int nCharInd
 		return MERR_UNKNOWN;
 	}
 
-	if ((rs.IsOpen() == FALSE) || (rs.GetRecordCount() <= 0) || (rs.IsBOF() == TRUE))
+	if ((rs.IsOpen() == false) || (rs.GetRecordCount() <= 0) || (rs.IsBOF() == true))
 	{
 		return MERR_UNKNOWN;
 	}
@@ -458,7 +404,7 @@ int MSSQLDatabase::CreateCharacter(int nAID, const char* szNewName, int nCharInd
 		auto temp = FilterSQL(szNewName);
 
 		strSQL.Format(g_szDB_CREATE_CHAR, nAID, nCharIndex, temp.c_str(), nSex, nHair, nFace, nCostume);
-		Impl->m_DB.ExecuteSQL(strSQL);
+		m_DB.ExecuteSQL(strSQL);
 	}
 	catch (CDBException* e)
 	{
@@ -479,7 +425,7 @@ bool MSSQLDatabase::GetAccountCharList(const int nAID, MTD_AccountCharInfo* pout
 
 	CString strSQL;
 	strSQL.Format(g_szDB_GET_CHARLIST, nAID);
-	CODBCRecordset rs(&Impl->m_DB);
+	CODBCRecordset rs(&m_DB);
 
 	bool bException = false;
 	try
@@ -493,7 +439,7 @@ bool MSSQLDatabase::GetAccountCharList(const int nAID, MTD_AccountCharInfo* pout
 		return false;
 	}
 
-	if (rs.IsOpen() == FALSE)
+	if (rs.IsOpen() == false)
 	{
 		return false;
 	}
@@ -505,8 +451,8 @@ bool MSSQLDatabase::GetAccountCharList(const int nAID, MTD_AccountCharInfo* pout
 
 		memset(&poutCharList[t], 0, sizeof(MTD_AccountCharInfo));
 
-		strcpy_safe(poutCharList[t].szName, (LPCTSTR)rs.Field("Name").AsString());
-		//strcpy_safe(poutCharList[t].szClanName, (LPCTSTR)rs.Field("ClanName").AsString());
+		strcpy_safe(poutCharList[t].szName, (const char*)rs.Field("Name").AsString());
+		//strcpy_safe(poutCharList[t].szClanName, (const char*)rs.Field("ClanName").AsString());
 
 		poutCharList[t].nCharNum = rs.Field("CharNum").AsInt();
 		poutCharList[t].nLevel = rs.Field("Level").AsInt();
@@ -528,7 +474,7 @@ bool MSSQLDatabase::GetAccountCharInfo(const int nAID, const int nCharIndex, MTD
 	CString strSQL;
 
 	strSQL.Format(g_szDB_GET_ACCOUNT_CHARINFO, nAID, nCharIndex);
-	CODBCRecordset rs(&Impl->m_DB);
+	CODBCRecordset rs(&m_DB);
 
 	bool bException = false;
 	try
@@ -542,7 +488,7 @@ bool MSSQLDatabase::GetAccountCharInfo(const int nAID, const int nCharIndex, MTD
 		return false;
 	}
 
-	if ((rs.IsOpen() == FALSE) || (rs.GetRecordCount() <= 0) || (rs.IsBOF() == TRUE))
+	if ((rs.IsOpen() == false) || (rs.GetRecordCount() <= 0) || (rs.IsBOF() == true))
 	{
 		return false;
 	}
@@ -553,8 +499,8 @@ bool MSSQLDatabase::GetAccountCharInfo(const int nAID, const int nCharIndex, MTD
 	memset(poutCharInfo, 0, sizeof(MTD_CharInfo));
 
 
-	strcpy_safe(poutCharInfo->szName, (LPCTSTR)rs.Field("Name").AsString());
-	strcpy_safe(poutCharInfo->szClanName, (LPCTSTR)rs.Field("ClanName").AsString());
+	strcpy_safe(poutCharInfo->szName, (const char*)rs.Field("Name").AsString());
+	strcpy_safe(poutCharInfo->szClanName, (const char*)rs.Field("ClanName").AsString());
 
 	poutCharInfo->nCharNum = rs.Field("CharNum").AsInt();
 	poutCharInfo->nLevel = rs.Field("Level").AsInt();
@@ -594,7 +540,7 @@ bool MSSQLDatabase::GetCharInfoByAID(const int nAID, const int nCharIndex, MMatc
 	CString strSQL;
 
 	strSQL.Format(g_szDB_GET_CHARINFO_BY_AID, nAID, nCharIndex);
-	CODBCRecordset rs(&Impl->m_DB);
+	CODBCRecordset rs(&m_DB);
 
 	bool bException = false;
 	try
@@ -608,13 +554,13 @@ bool MSSQLDatabase::GetCharInfoByAID(const int nAID, const int nCharIndex, MMatc
 		return false;
 	}
 
-	if ((rs.IsOpen() == FALSE) || (rs.GetRecordCount() <= 0) || (rs.IsBOF() == TRUE))
+	if ((rs.IsOpen() == false) || (rs.GetRecordCount() <= 0) || (rs.IsBOF() == true))
 	{
 		return false;
 	}
 	poutCharInfo->m_nCID = (u32)rs.Field("CID").AsLong();
 	CString db_strName = rs.Field("Name").AsString();
-	strcpy_safe(poutCharInfo->m_szName, (LPCTSTR)db_strName);
+	strcpy_safe(poutCharInfo->m_szName, (const char*)db_strName);
 	poutCharInfo->m_nLevel = (int)rs.Field("Level").AsInt();
 	poutCharInfo->m_nSex = (MMatchSex)rs.Field("Sex").AsInt();
 	poutCharInfo->m_nHair = rs.Field("Hair").AsInt();
@@ -641,7 +587,7 @@ bool MSSQLDatabase::GetCharInfoByAID(const int nAID, const int nCharIndex, MMatc
 	poutCharInfo->m_ClanInfo.m_nClanID = (int)rs.Field("CLID").AsInt();
 
 	CString db_strClanName = rs.Field("ClanName").AsString();
-	strcpy_safe(poutCharInfo->m_ClanInfo.m_szClanName, (LPCTSTR)db_strClanName);
+	strcpy_safe(poutCharInfo->m_ClanInfo.m_szClanName, (const char*)db_strClanName);
 
 	poutCharInfo->m_ClanInfo.m_nGrade = (MMatchClanGrade)rs.Field("ClanGrade").AsInt();
 	poutCharInfo->m_ClanInfo.m_nContPoint = (MMatchClanGrade)rs.Field("ClanContPoint").AsInt();
@@ -681,7 +627,7 @@ bool MSSQLDatabase::GetAccountInfo(int nAID, MMatchAccountInfo* poutAccountInfo)
 	CString strSQL;
 	strSQL.Format(g_szDB_GET_ACCOUNTINFO, nAID);
 
-	CODBCRecordset rs(&Impl->m_DB);
+	CODBCRecordset rs(&m_DB);
 
 	bool bException = false;
 	try
@@ -695,7 +641,7 @@ bool MSSQLDatabase::GetAccountInfo(int nAID, MMatchAccountInfo* poutAccountInfo)
 		return false;
 	}
 
-	if ((rs.IsOpen() == FALSE) || (rs.GetRecordCount() <= 0) || (rs.IsBOF() == TRUE))
+	if ((rs.IsOpen() == false) || (rs.GetRecordCount() <= 0) || (rs.IsBOF() == true))
 	{
 		return false;
 	}
@@ -703,7 +649,7 @@ bool MSSQLDatabase::GetAccountInfo(int nAID, MMatchAccountInfo* poutAccountInfo)
 	poutAccountInfo->m_nAID = (u32)rs.Field("AID").AsLong();
 	poutAccountInfo->m_nUGrade = (MMatchUserGradeID)rs.Field("UGradeID").AsInt();
 	poutAccountInfo->m_nPGrade = MMPG_FREE;
-	strcpy_safe(poutAccountInfo->m_szUserID, (LPCTSTR)rs.Field("UserID").AsString());
+	strcpy_safe(poutAccountInfo->m_szUserID, (const char*)rs.Field("UserID").AsString());
 
 #ifdef _BLOCK_HACKER
 	if (rs.Field("BlockType").IsNull())
@@ -736,7 +682,7 @@ bool MSSQLDatabase::DeleteCharacter(const int nAID, const int nCharIndex, const 
 	CString strSQL;
 	strSQL.Format(g_szDB_DELETE_CHAR, nAID, nCharIndex, FilterSQL(szCharName).c_str());
 
-	CODBCRecordset rs(&Impl->m_DB);
+	CODBCRecordset rs(&m_DB);
 
 	try
 	{
@@ -748,7 +694,7 @@ bool MSSQLDatabase::DeleteCharacter(const int nAID, const int nCharIndex, const 
 		return false;
 	}
 
-	if ((rs.IsOpen() == FALSE) || (rs.GetRecordCount() <= 0) || (rs.IsBOF() == TRUE))
+	if ((rs.IsOpen() == false) || (rs.GetRecordCount() <= 0) || (rs.IsBOF() == true))
 	{
 		return false;
 	}
@@ -775,7 +721,7 @@ bool MSSQLDatabase::SimpleUpdateCharInfo(const MMatchCharInfo& CharInfo)
 		strSQL.Format(g_szDB_SIMPLE_UPDATE_CHARINFO, CharInfo.m_nCID, FilterSQL(CharInfo.m_szName).c_str(),
 			CharInfo.m_nLevel, CharInfo.m_nXP, CharInfo.m_nBP);
 
-		Impl->m_DB.ExecuteSQL(strSQL);
+		m_DB.ExecuteSQL(strSQL);
 	}
 	catch (CDBException* e)
 	{
@@ -797,8 +743,8 @@ bool MSSQLDatabase::InsertCharItem(const unsigned int nCID, int nItemDescID, boo
 	if (bRentItem == false) nRentPeriodHour = 0;
 
 	CString strSQL;
-	strSQL.Format(g_szDB_INSERT_CHAR_ITEM, nCID, nItemDescID, nRentPeriodHour);
-	CODBCRecordset rs(&Impl->m_DB);
+	strSQL.Format(g_szDB_INSERT_CHAR_ITEM, nCID, nItemDescID);
+	CODBCRecordset rs(&m_DB);
 
 	bool bException = false;
 	try
@@ -813,7 +759,7 @@ bool MSSQLDatabase::InsertCharItem(const unsigned int nCID, int nItemDescID, boo
 		return false;
 	}
 
-	if ((rs.IsOpen() == FALSE) || (rs.GetRecordCount() <= 0) || (rs.IsBOF() == TRUE))
+	if ((rs.IsOpen() == false) || (rs.GetRecordCount() <= 0) || (rs.IsBOF() == true))
 	{
 		return false;
 	}
@@ -833,7 +779,7 @@ bool MSSQLDatabase::BuyBountyItem(const unsigned int nCID, int nItemID, int nPri
 
 	CString strSQL;
 	strSQL.Format(g_szDB_BUY_BOUNTY_ITEM, nCID, nItemID, nPrice);
-	CODBCRecordset rs(&Impl->m_DB);
+	CODBCRecordset rs(&m_DB);
 
 	bool bException = false;
 	try
@@ -847,7 +793,7 @@ bool MSSQLDatabase::BuyBountyItem(const unsigned int nCID, int nItemID, int nPri
 		return false;
 	}
 
-	if ((rs.IsOpen() == FALSE) || (rs.GetRecordCount() <= 0) || (rs.IsBOF() == TRUE))
+	if ((rs.IsOpen() == false) || (rs.GetRecordCount() <= 0) || (rs.IsBOF() == true))
 	{
 		return false;
 	}
@@ -866,7 +812,7 @@ bool MSSQLDatabase::SellBountyItem(const unsigned int nCID, unsigned int nItemID
 
 	CString strSQL;
 	strSQL.Format(g_szDB_SELL_BOUNTY_ITEM, nCID, nItemID, nCIID, nPrice, nCharBP);
-	CODBCRecordset rs(&Impl->m_DB);
+	CODBCRecordset rs(&m_DB);
 
 	bool bException = false;
 	try
@@ -880,7 +826,7 @@ bool MSSQLDatabase::SellBountyItem(const unsigned int nCID, unsigned int nItemID
 		return false;
 	}
 
-	if ((rs.IsOpen() == FALSE) || (rs.GetRecordCount() <= 0) || (rs.IsBOF() == TRUE))
+	if ((rs.IsOpen() == false) || (rs.GetRecordCount() <= 0) || (rs.IsBOF() == true))
 	{
 		return false;
 	}
@@ -905,7 +851,7 @@ bool MSSQLDatabase::DeleteCharItem(const unsigned int nCID, int nCIID)
 	{
 		CString strSQL;
 		strSQL.Format(g_szDB_DELETE_CHAR_ITEM, nCID, nCIID);
-		Impl->m_DB.ExecuteSQL(strSQL);
+		m_DB.ExecuteSQL(strSQL);
 	}
 	catch (CDBException* e)
 	{
@@ -925,7 +871,7 @@ bool MSSQLDatabase::GetCharItemInfo(MMatchCharInfo& CharInfo)
 
 	CString strSQL;
 	strSQL.Format(g_szDB_SELECT_CHAR_ITEM, CharInfo.m_nCID);
-	CODBCRecordset rs(&Impl->m_DB);
+	CODBCRecordset rs(&m_DB);
 
 	bool bException = false;
 	try
@@ -939,7 +885,7 @@ bool MSSQLDatabase::GetCharItemInfo(MMatchCharInfo& CharInfo)
 		return false;
 	}
 
-	if (rs.IsOpen() == FALSE)
+	if (rs.IsOpen() == false)
 	{
 		return false;
 	}
@@ -985,7 +931,7 @@ bool MSSQLDatabase::GetAccountItemInfo(const int nAID, MAccountItemNode* pOut, i
 
 	CString strSQL;
 	strSQL.Format(g_szDB_SELECT_ACCOUNT_ITEM, nAID);
-	CODBCRecordset rs(&Impl->m_DB);
+	CODBCRecordset rs(&m_DB);
 
 	bool bException = false;
 	try
@@ -999,7 +945,7 @@ bool MSSQLDatabase::GetAccountItemInfo(const int nAID, MAccountItemNode* pOut, i
 		return false;
 	}
 
-	if (rs.IsOpen() == FALSE)
+	if (rs.IsOpen() == false)
 	{
 		return false;
 	}
@@ -1059,7 +1005,7 @@ bool MSSQLDatabase::UpdateEquipedItem(const u32 nCID, MMatchCharItemParts parts,
 
 	CString strSQL;
 	strSQL.Format(g_szDB_UPDATE_EQUIPITEM, (int)nCID, (int)parts, (int)nCIID, (int)nItemID);
-	CODBCRecordset rs(&Impl->m_DB);
+	CODBCRecordset rs(&m_DB);
 
 	int nRet = 0;
 	try
@@ -1072,7 +1018,7 @@ bool MSSQLDatabase::UpdateEquipedItem(const u32 nCID, MMatchCharItemParts parts,
 		return false;
 	}
 
-	if ((rs.IsOpen() == FALSE) || (rs.GetRecordCount() <= 0) || (rs.IsBOF() == TRUE))
+	if ((rs.IsOpen() == false) || (rs.GetRecordCount() <= 0) || (rs.IsBOF() == true))
 	{
 		return false;
 	}
@@ -1084,7 +1030,7 @@ bool MSSQLDatabase::UpdateEquipedItem(const u32 nCID, MMatchCharItemParts parts,
 
 static bool SplitStrIP(int(&out)[4], const char* szIP)
 {
-	if (sscanf_s(szIP, "%d.%d.%d.%d", &out[0], &out[1], &out[2], &out[3]) != 4)
+	if (sscanf(szIP, "%d.%d.%d.%d", &out[0], &out[1], &out[2], &out[3]) != 4)
 		return false;
 
 	for (auto val : out)
@@ -1116,7 +1062,7 @@ bool MSSQLDatabase::InsertConnLog(const int nAID, const char* szIP, const string
 		CString strSQL;
 		strSQL.Format(g_szDB_INSERT_CONN_LOG, nAID, nIP[0], nIP[1], nIP[2], nIP[3], temp.c_str());
 
-		Impl->m_DB.ExecuteSQL(strSQL);
+		m_DB.ExecuteSQL(strSQL);
 	}
 	catch (CDBException* e)
 	{
@@ -1143,7 +1089,7 @@ bool MSSQLDatabase::InsertGameLog(const char* szGameName, const char* szMap, con
 		strSQL.Format(g_szDB_INSERT_GAME_LOG, &strStageName[0], szMap, szGameType, nRound, nMasterCID,
 			nPlayerCount, szPlayers);
 
-		Impl->m_DB.ExecuteSQL(strSQL);
+		m_DB.ExecuteSQL(strSQL);
 	}
 	catch (CDBException* e)
 	{
@@ -1165,7 +1111,7 @@ bool MSSQLDatabase::InsertKillLog(const unsigned int nAttackerCID, const unsigne
 		CString strSQL;
 		strSQL.Format(g_szDB_INSERT_KILL_LOG, nAttackerCID, nVictimCID);
 
-		Impl->m_DB.ExecuteSQL(strSQL);
+		m_DB.ExecuteSQL(strSQL);
 	}
 	catch (CDBException* e)
 	{
@@ -1187,7 +1133,7 @@ bool MSSQLDatabase::InsertChatLog(const u32 nCID, const char* szMsg, u64 nTime)
 		auto temp = FilterSQL(szMsg);
 		CString strSQL;
 		strSQL.Format("INSERT Into ChatLog (CID, Msg, Time) Values (%u, '%s', GETDATE())", nCID, temp.c_str());
-		Impl->m_DB.ExecuteSQL(strSQL);
+		m_DB.ExecuteSQL(strSQL);
 	}
 	catch (CDBException* e)
 	{
@@ -1207,7 +1153,7 @@ bool MSSQLDatabase::UpdateCharLevel(const int nCID, const int nLevel)
 		CString strSQL;
 		strSQL.Format(g_szDB_UPDATE_CHAR_LEVEL, nLevel, nCID);
 
-		Impl->m_DB.ExecuteSQL(strSQL);
+		m_DB.ExecuteSQL(strSQL);
 	}
 	catch (CDBException* e)
 	{
@@ -1233,7 +1179,7 @@ bool MSSQLDatabase::UpdateCharBP(const int nCID, const int nBPInc)
 		CString strSQL;
 		strSQL.Format(g_szDB_UPDATE_CHAR_BP, nBPInc, nCID);
 
-		Impl->m_DB.ExecuteSQL(strSQL);
+		m_DB.ExecuteSQL(strSQL);
 	}
 	catch (CDBException* e)
 	{
@@ -1264,7 +1210,7 @@ bool MSSQLDatabase::InsertItemPurchaseLogByBounty(const u32 nItemID, const u32 n
 		CString strSQL;
 		strSQL.Format(g_szDB_INSERT_ITEM_PURCHASE_BY_BOUNTY_LOG, nItemID, nCID, nBounty, nCharBP, szType);
 
-		Impl->m_DB.ExecuteSQL(strSQL);
+		m_DB.ExecuteSQL(strSQL);
 	}
 	catch (CDBException* e)
 	{
@@ -1298,7 +1244,7 @@ bool MSSQLDatabase::InsertCharMakingLog(const unsigned int nAID, const char* szC
 		CString strSQL;
 		strSQL.Format(g_szDB_INSERT_CHAR_MAKING_LOG, nAID, temp.c_str(), szType);
 
-		Impl->m_DB.ExecuteSQL(strSQL);
+		m_DB.ExecuteSQL(strSQL);
 	}
 	catch (CDBException* e)
 	{
@@ -1322,7 +1268,7 @@ bool MSSQLDatabase::InsertServerLog(const int nServerID, const int nPlayerCount,
 		CString strSQL;
 		strSQL.Format(g_szDB_INSERT_SERVER_LOG, nServerID, nPlayerCount, nGameCount, dwBlockCount, dwNonBlockCount);
 
-		Impl->m_DB.ExecuteSQL(strSQL);
+		m_DB.ExecuteSQL(strSQL);
 	}
 	catch (CDBException* e)
 	{
@@ -1344,7 +1290,7 @@ bool MSSQLDatabase::UpdateServerStatus(const int nServerID, const int nCurrPlaye
 		CString strSQL;
 		strSQL.Format(g_szDB_UPDATE_SERVER_STATUS, nCurrPlayer, nServerID);
 
-		Impl->m_DB.ExecuteSQL(strSQL);
+		m_DB.ExecuteSQL(strSQL);
 	}
 	catch (CDBException* e)
 	{
@@ -1368,7 +1314,7 @@ bool MSSQLDatabase::UpdateServerInfo(const int nServerID, const int nMaxPlayer, 
 		CString strSQL;
 		strSQL.Format(g_szDB_UPDATE_SERVER_INFO, nMaxPlayer, temp.c_str(), nServerID);
 
-		Impl->m_DB.ExecuteSQL(strSQL);
+		m_DB.ExecuteSQL(strSQL);
 	}
 	catch (CDBException* e)
 	{
@@ -1391,7 +1337,7 @@ bool MSSQLDatabase::InsertPlayerLog(const u32 nCID,
 		CString strSQL;
 		strSQL.Format(g_szDB_INSERT_PLAYER_LOG, nCID, nPlayTime, nKillCount, nDeathCount, nXP, nTotalXP);
 
-		Impl->m_DB.ExecuteSQL(strSQL);
+		m_DB.ExecuteSQL(strSQL);
 	}
 	catch (CDBException* e)
 	{
@@ -1414,7 +1360,7 @@ bool MSSQLDatabase::InsertLevelUpLog(const int nCID, const int nLevel, const int
 		CString strSQL;
 		strSQL.Format(g_szDB_INSERT_LEVELUP_LOG, nCID, nLevel, nBP, nKillCount, nDeathCount, nPlayTime);
 
-		Impl->m_DB.ExecuteSQL(strSQL);
+		m_DB.ExecuteSQL(strSQL);
 	}
 	catch (CDBException* e)
 	{
@@ -1437,7 +1383,7 @@ bool MSSQLDatabase::UpdateCharPlayTime(const u32 nCID, const u32 nPlayTime)
 		CString strSQL;
 		strSQL.Format(g_szDB_UPDATE_CHAR_PLAYTIME, nPlayTime, nCID);
 
-		Impl->m_DB.ExecuteSQL(strSQL);
+		m_DB.ExecuteSQL(strSQL);
 	}
 	catch (CDBException* e)
 	{
@@ -1461,7 +1407,7 @@ bool MSSQLDatabase::UpdateCharInfoData(const int nCID, const int nAddedXP, const
 		strSQL.Format(g_szDB_UPDATE_CHAR_INFO_DATA, nAddedXP, nAddedBP,
 			nAddedKillCount, nAddedDeathCount, nCID);
 
-		Impl->m_DB.ExecuteSQL(strSQL);
+		m_DB.ExecuteSQL(strSQL);
 	}
 	catch (CDBException* e)
 	{
@@ -1485,7 +1431,7 @@ bool MSSQLDatabase::UpdateLastConnDate(const char* szUserID, const char* szIP)
 		CString strSQL;
 		strSQL.Format(g_szDB_UPDATE_LAST_CONNDATE, temp.c_str(), szUserID);
 
-		Impl->m_DB.ExecuteSQL(strSQL);
+		m_DB.ExecuteSQL(strSQL);
 	}
 	catch (CDBException* e)
 	{
@@ -1506,7 +1452,7 @@ bool MSSQLDatabase::BringAccountItem(const int nAID, const int nCID, const int n
 
 	CString strSQL;
 	strSQL.Format(g_szDB_BRING_ACCOUNTITEM, nAID, nCID, nAIID);
-	CODBCRecordset rs(&Impl->m_DB);
+	CODBCRecordset rs(&m_DB);
 
 	try
 	{
@@ -1518,7 +1464,7 @@ bool MSSQLDatabase::BringAccountItem(const int nAID, const int nCID, const int n
 		return false;
 	}
 
-	if ((rs.IsOpen() == FALSE) || (rs.GetRecordCount() <= 0) || (rs.IsBOF() == TRUE))
+	if ((rs.IsOpen() == false) || (rs.GetRecordCount() <= 0) || (rs.IsBOF() == true))
 	{
 		return false;
 	}
@@ -1551,7 +1497,7 @@ bool MSSQLDatabase::BringBackAccountItem(const int nAID, const int nCID, const i
 		CString strSQL;
 		strSQL.Format(g_szDB_BRING_BACK_ACCOUNTITEM, nAID, nCID, nCIID);
 
-		Impl->m_DB.ExecuteSQL(strSQL);
+		m_DB.ExecuteSQL(strSQL);
 	}
 	catch (CDBException* e)
 	{
@@ -1573,7 +1519,7 @@ bool MSSQLDatabase::ClearAllEquipedItem(const u32 nCID)
 		CString strSQL;
 		strSQL.Format(g_szDB_CLEARALL_EQUIPEDITEM, nCID);
 
-		Impl->m_DB.ExecuteSQL(strSQL);
+		m_DB.ExecuteSQL(strSQL);
 	}
 	catch (CDBException* e)
 	{
@@ -1585,12 +1531,12 @@ bool MSSQLDatabase::ClearAllEquipedItem(const u32 nCID)
 	return true;
 }
 
-bool MSSQLDatabase::GetCharCID(const TCHAR* pszName, int* poutCID)
+bool MSSQLDatabase::GetCharCID(const char* pszName, int* poutCID)
 {
 	_STATUS_DB_START
 
 	if (!CheckOpen()) return false;
-	CODBCRecordset rs(&Impl->m_DB);
+	CODBCRecordset rs(&m_DB);
 
 	try
 	{
@@ -1606,7 +1552,7 @@ bool MSSQLDatabase::GetCharCID(const TCHAR* pszName, int* poutCID)
 		return false;
 	}
 
-	if ((rs.IsOpen() == FALSE) || (rs.GetRecordCount() <= 0) || (rs.IsBOF() == TRUE))
+	if ((rs.IsOpen() == false) || (rs.GetRecordCount() <= 0) || (rs.IsBOF() == true))
 	{
 		return false;
 	}
@@ -1622,7 +1568,7 @@ bool MSSQLDatabase::FriendAdd(const int nCID, const int nFriendCID, const int nF
 	_STATUS_DB_START
 
 	if (!CheckOpen()) return false;
-	CODBCRecordset rs(&Impl->m_DB);
+	CODBCRecordset rs(&m_DB);
 
 	CString strSQL;
 	strSQL.Format(g_szDB_ADD_FRIEND, nCID, nFriendCID, nFavorite);
@@ -1652,7 +1598,7 @@ bool MSSQLDatabase::FriendRemove(const int nCID, const int nFriendCID)
 	{
 		CString strSQL;
 		strSQL.Format(g_szDB_REMOVE_FRIEND, nCID, nFriendCID);
-		Impl->m_DB.ExecuteSQL(strSQL);
+		m_DB.ExecuteSQL(strSQL);
 	}
 	catch (CDBException* e)
 	{
@@ -1673,7 +1619,7 @@ bool MSSQLDatabase::FriendGetList(const int nCID, MMatchFriendInfo* pFriendInfo)
 
 	CString strSQL;
 	strSQL.Format(g_szDB_GET_FRIEND_LIST, nCID);
-	CODBCRecordset rs(&Impl->m_DB);
+	CODBCRecordset rs(&m_DB);
 
 	bool bException = false;
 	try
@@ -1687,7 +1633,7 @@ bool MSSQLDatabase::FriendGetList(const int nCID, MMatchFriendInfo* pFriendInfo)
 		return false;
 	}
 
-	if (rs.IsOpen() == FALSE)
+	if (rs.IsOpen() == false)
 	{
 		return false;
 	}
@@ -1702,7 +1648,7 @@ bool MSSQLDatabase::FriendGetList(const int nCID, MMatchFriendInfo* pFriendInfo)
 		nFavorite = (int)rs.Field("Favorite").AsInt();
 		strName = rs.Field("Name").AsString();
 
-		pFriendInfo->Add(nFriendCID, nFavorite, (LPCTSTR)strName);
+		pFriendInfo->Add(nFriendCID, nFavorite, (const char*)strName);
 	}
 
 	_STATUS_DB_END(31);
@@ -1710,7 +1656,7 @@ bool MSSQLDatabase::FriendGetList(const int nCID, MMatchFriendInfo* pFriendInfo)
 }
 
 
-bool MSSQLDatabase::GetCharClan(const int nCID, int* poutClanID, TCHAR* poutClanName, int maxlen)
+bool MSSQLDatabase::GetCharClan(const int nCID, int* poutClanID, char* poutClanName, int maxlen)
 {
 	_STATUS_DB_START
 	if (!CheckOpen()) return false;
@@ -1718,7 +1664,7 @@ bool MSSQLDatabase::GetCharClan(const int nCID, int* poutClanID, TCHAR* poutClan
 	CString strSQL;
 	strSQL.Format(g_szDB_GET_CHAR_CLAN, nCID);
 
-	CODBCRecordset rs(&Impl->m_DB);
+	CODBCRecordset rs(&m_DB);
 
 	bool bException = false;
 	try
@@ -1732,20 +1678,20 @@ bool MSSQLDatabase::GetCharClan(const int nCID, int* poutClanID, TCHAR* poutClan
 		return false;
 	}
 
-	if ((rs.IsOpen() == FALSE) || (rs.GetRecordCount() <= 0) || (rs.IsBOF() == TRUE))
+	if ((rs.IsOpen() == false) || (rs.GetRecordCount() <= 0) || (rs.IsBOF() == true))
 	{
 		return false;
 	}
 
 	*poutClanID = rs.Field("CLID").AsInt();
-	strcpy_safe(poutClanName, maxlen, (LPCTSTR)rs.Field("ClanName").AsString());
+	strcpy_safe(poutClanName, maxlen, (const char*)rs.Field("ClanName").AsString());
 
 	_STATUS_DB_END(33);
 
 	return true;
 }
 
-bool MSSQLDatabase::GetClanIDFromName(const TCHAR* szClanName, int* poutCLID)
+bool MSSQLDatabase::GetClanIDFromName(const char* szClanName, int* poutCLID)
 {
 	_STATUS_DB_START
 	if (!CheckOpen()) return false;
@@ -1755,7 +1701,7 @@ bool MSSQLDatabase::GetClanIDFromName(const TCHAR* szClanName, int* poutCLID)
 	CString strSQL;
 	strSQL.Format(g_szDB_GET_CLID_FROM_CLANNAME, temp.c_str());
 
-	CODBCRecordset rs(&Impl->m_DB);
+	CODBCRecordset rs(&m_DB);
 
 	bool bException = false;
 	try
@@ -1771,7 +1717,7 @@ bool MSSQLDatabase::GetClanIDFromName(const TCHAR* szClanName, int* poutCLID)
 		return false;
 	}
 
-	if ((rs.IsOpen() == FALSE) || (rs.GetRecordCount() <= 0) || (rs.IsBOF() == TRUE))
+	if ((rs.IsOpen() == false) || (rs.GetRecordCount() <= 0) || (rs.IsBOF() == true))
 	{
 		*poutCLID = 0;
 		return false;
@@ -1784,7 +1730,7 @@ bool MSSQLDatabase::GetClanIDFromName(const TCHAR* szClanName, int* poutCLID)
 	return true;
 }
 
-bool MSSQLDatabase::CreateClan(const TCHAR* szClanName, const int nMasterCID, const int nMember1CID, const int nMember2CID,
+bool MSSQLDatabase::CreateClan(const char* szClanName, const int nMasterCID, const int nMember1CID, const int nMember2CID,
 	const int nMember3CID, const int nMember4CID, bool* boutRet, int* noutNewCLID)
 {
 	_STATUS_DB_START
@@ -1795,7 +1741,7 @@ bool MSSQLDatabase::CreateClan(const TCHAR* szClanName, const int nMasterCID, co
 	CString strSQL;
 	strSQL.Format(g_szDB_CREATE_CLAN, temp.c_str(), nMasterCID, nMember1CID, nMember2CID, nMember3CID, nMember4CID);
 
-	CODBCRecordset rs(&Impl->m_DB);
+	CODBCRecordset rs(&m_DB);
 
 
 	bool bException = false;
@@ -1812,7 +1758,7 @@ bool MSSQLDatabase::CreateClan(const TCHAR* szClanName, const int nMasterCID, co
 		return false;
 	}
 
-	if ((rs.IsOpen() == FALSE) || (rs.GetRecordCount() <= 0) || (rs.IsBOF() == TRUE))
+	if ((rs.IsOpen() == false) || (rs.GetRecordCount() <= 0) || (rs.IsBOF() == true))
 	{
 		*boutRet = false;
 		return false;
@@ -1825,7 +1771,7 @@ bool MSSQLDatabase::CreateClan(const TCHAR* szClanName, const int nMasterCID, co
 	return true;
 }
 
-bool MSSQLDatabase::CreateClan(const TCHAR* szClanName, const int nMasterCID, bool* boutRet, int* noutNewCLID)
+bool MSSQLDatabase::CreateClan(const char* szClanName, const int nMasterCID, bool* boutRet, int* noutNewCLID)
 {
 	_STATUS_DB_START
 	if (!CheckOpen()) return false;
@@ -1835,7 +1781,7 @@ bool MSSQLDatabase::CreateClan(const TCHAR* szClanName, const int nMasterCID, bo
 	CString strSQL;
 	strSQL.Format(g_szDB_CREATE_CLAN2, temp.c_str(), nMasterCID);
 
-	CODBCRecordset rs(&Impl->m_DB);
+	CODBCRecordset rs(&m_DB);
 
 
 	bool bException = false;
@@ -1852,7 +1798,7 @@ bool MSSQLDatabase::CreateClan(const TCHAR* szClanName, const int nMasterCID, bo
 		return false;
 	}
 
-	if ((rs.IsOpen() == FALSE) || (rs.GetRecordCount() <= 0) || (rs.IsBOF() == TRUE))
+	if ((rs.IsOpen() == false) || (rs.GetRecordCount() <= 0) || (rs.IsBOF() == true))
 	{
 		*boutRet = false;
 		return false;
@@ -1865,7 +1811,7 @@ bool MSSQLDatabase::CreateClan(const TCHAR* szClanName, const int nMasterCID, bo
 	return true;
 }
 
-bool MSSQLDatabase::ReserveCloseClan(const int nCLID, const TCHAR* szClanName, const int nMasterCID, const string& strDeleteDate)
+bool MSSQLDatabase::ReserveCloseClan(const int nCLID, const char* szClanName, const int nMasterCID, const string& strDeleteDate)
 {
 	_STATUS_DB_START
 	if (!CheckOpen()) return false;
@@ -1877,7 +1823,7 @@ bool MSSQLDatabase::ReserveCloseClan(const int nCLID, const TCHAR* szClanName, c
 
 		CString strSQL;
 		strSQL.Format(g_szDB_RESERVE_CLOSE_CLAN, nCLID, temp1.c_str(), nMasterCID, temp2.c_str());
-		Impl->m_DB.ExecuteSQL(strSQL);
+		m_DB.ExecuteSQL(strSQL);
 	}
 	catch (CDBException* e)
 	{
@@ -1889,7 +1835,7 @@ bool MSSQLDatabase::ReserveCloseClan(const int nCLID, const TCHAR* szClanName, c
 	return true;
 }
 
-bool MSSQLDatabase::CloseClan(int nCLID, const TCHAR* szClanName, int nMasterCID)
+bool MSSQLDatabase::CloseClan(int nCLID, const char* szClanName, int nMasterCID)
 {
 	_STATUS_DB_START
 		if (!CheckOpen()) return false;
@@ -1900,7 +1846,7 @@ bool MSSQLDatabase::CloseClan(int nCLID, const TCHAR* szClanName, int nMasterCID
 
 		CString strSQL;
 		strSQL.Format(g_szDB_DELETE_CLAN, nCLID, temp1.c_str());
-		Impl->m_DB.ExecuteSQL(strSQL);
+		m_DB.ExecuteSQL(strSQL);
 	}
 	catch (CDBException* e)
 	{
@@ -1921,7 +1867,7 @@ bool MSSQLDatabase::AddClanMember(const int nCLID, const int nJoinerCID, const i
 	CString strSQL;
 	strSQL.Format(g_szDB_ADD_CLAN_MEMBER, nCLID, nJoinerCID, nClanGrade);
 
-	CODBCRecordset rs(&Impl->m_DB);
+	CODBCRecordset rs(&m_DB);
 
 
 	bool bException = false;
@@ -1938,7 +1884,7 @@ bool MSSQLDatabase::AddClanMember(const int nCLID, const int nJoinerCID, const i
 		return false;
 	}
 
-	if ((rs.IsOpen() == FALSE) || (rs.GetRecordCount() <= 0) || (rs.IsBOF() == TRUE))
+	if ((rs.IsOpen() == false) || (rs.GetRecordCount() <= 0) || (rs.IsBOF() == true))
 	{
 		*boutRet = false;
 		return false;
@@ -1961,7 +1907,7 @@ bool MSSQLDatabase::RemoveClanMember(const int nCLID, const int nLeaverCID)
 	{
 		CString strSQL;
 		strSQL.Format(g_szDB_REMOVE_CLAN_MEMBER, nCLID, nLeaverCID);
-		Impl->m_DB.ExecuteSQL(strSQL);
+		m_DB.ExecuteSQL(strSQL);
 	}
 	catch (CDBException* e)
 	{
@@ -1985,7 +1931,7 @@ bool MSSQLDatabase::UpdateClanGrade(const int nCLID, const int nMemberCID, const
 	{
 		CString strSQL;
 		strSQL.Format(g_szDB_UPDATE_CLAN_GRADE, nCLID, nMemberCID, nClanGrade);
-		Impl->m_DB.ExecuteSQL(strSQL);
+		m_DB.ExecuteSQL(strSQL);
 	}
 	catch (CDBException* e)
 	{
@@ -2008,7 +1954,7 @@ ExpelResult MSSQLDatabase::ExpelClanMember(const int nCLID, const int nAdminGrad
 	CString strSQL;
 	strSQL.Format(g_szDB_EXPEL_CLAN_MEMBER, nCLID, nAdminGrade, temp.c_str());
 
-	CODBCRecordset rs(&Impl->m_DB);
+	CODBCRecordset rs(&m_DB);
 
 	bool bException = false;
 	try
@@ -2023,7 +1969,7 @@ ExpelResult MSSQLDatabase::ExpelClanMember(const int nCLID, const int nAdminGrad
 		return ExpelResult::DBError;
 	}
 
-	if ((rs.IsOpen() == FALSE) || (rs.GetRecordCount() <= 0) || (rs.IsBOF() == TRUE))
+	if ((rs.IsOpen() == false) || (rs.GetRecordCount() <= 0) || (rs.IsBOF() == true))
 		return ExpelResult::NoSuchMember;
 
 	_STATUS_DB_END(40);
@@ -2084,7 +2030,7 @@ bool MSSQLDatabase::GetLadderTeamID(const int nTeamTableIndex, const int* pnMemb
 		return false;
 	}
 
-	CODBCRecordset rs(&Impl->m_DB);
+	CODBCRecordset rs(&m_DB);
 
 
 	try
@@ -2098,7 +2044,7 @@ bool MSSQLDatabase::GetLadderTeamID(const int nTeamTableIndex, const int* pnMemb
 		return false;
 	}
 
-	if ((rs.IsOpen() == FALSE) || (rs.GetRecordCount() <= 0) || (rs.IsBOF() == TRUE))
+	if ((rs.IsOpen() == false) || (rs.GetRecordCount() <= 0) || (rs.IsBOF() == true))
 	{
 		*pnoutTID = 0;
 		return false;
@@ -2136,7 +2082,7 @@ bool MSSQLDatabase::LadderTeamWinTheGame(const int nTeamTableIndex, const int nW
 		CString strSQL;
 
 		strSQL.Format(g_szDB_TEAM4_WIN_THE_GAME, nWinnerTID, nLoserTID, nDrawGame, nWinnerPoint, nLoserPoint, nDrawPoint);
-		Impl->m_DB.ExecuteSQL(strSQL);
+		m_DB.ExecuteSQL(strSQL);
 	}
 	catch (CDBException* e)
 	{
@@ -2153,7 +2099,7 @@ bool MSSQLDatabase::GetLadderTeamMemberByCID(const int nCID, int* poutTeamID, ch
 	_STATUS_DB_START
 		if (!CheckOpen()) return false;
 
-	CODBCRecordset rs(&Impl->m_DB);
+	CODBCRecordset rs(&m_DB);
 
 	try
 	{
@@ -2167,7 +2113,7 @@ bool MSSQLDatabase::GetLadderTeamMemberByCID(const int nCID, int* poutTeamID, ch
 		return false;
 	}
 
-	if ((rs.IsOpen() == FALSE) || (rs.GetRecordCount() <= 0) || (rs.IsBOF() == TRUE))
+	if ((rs.IsOpen() == false) || (rs.GetRecordCount() <= 0) || (rs.IsBOF() == true))
 	{
 		return false;
 	}
@@ -2183,7 +2129,7 @@ bool MSSQLDatabase::GetLadderTeamMemberByCID(const int nCID, int* poutTeamID, ch
 
 		CString strName = rs.Field("Name").AsString();
 		if (ppoutCharArray)
-			strcpy_safe(ppoutCharArray[nIndex], maxlen, (LPCTSTR)strName);
+			strcpy_safe(ppoutCharArray[nIndex], maxlen, (const char*)strName);
 		nIndex++;
 	}
 
@@ -2215,7 +2161,7 @@ bool MSSQLDatabase::GetClanInfo(const int nCLID, MDB_ClanInfo* poutClanInfo)
 	_STATUS_DB_START
 
 		if (!CheckOpen()) return false;
-	CODBCRecordset rs(&Impl->m_DB);
+	CODBCRecordset rs(&m_DB);
 
 	try
 	{
@@ -2229,7 +2175,7 @@ bool MSSQLDatabase::GetClanInfo(const int nCLID, MDB_ClanInfo* poutClanInfo)
 		return false;
 	}
 
-	if ((rs.IsOpen() == FALSE) || (rs.GetRecordCount() <= 0) || (rs.IsBOF() == TRUE))
+	if ((rs.IsOpen() == false) || (rs.GetRecordCount() <= 0) || (rs.IsBOF() == true))
 	{
 		return false;
 	}
@@ -2281,7 +2227,7 @@ bool MSSQLDatabase::WinTheClanGame(const int nWinnerCLID, const int nLoserCLID, 
 			temp[0].c_str(), temp[1].c_str(), nRoundWins, nRoundLosses, nMapID, nGameType,
 			temp[2].c_str(), temp[3].c_str());
 
-		Impl->m_DB.ExecuteSQL(strSQL);
+		m_DB.ExecuteSQL(strSQL);
 	}
 	catch (CDBException* e)
 	{
@@ -2303,7 +2249,7 @@ bool MSSQLDatabase::UpdateCharClanContPoint(const int nCID, const int nCLID, con
 		CString strSQL;
 
 		strSQL.Format(g_szDB_UPDATE_CHAR_CLAN_CONTPOINT, nCID, nCLID, nAddedContPoint);
-		Impl->m_DB.ExecuteSQL(strSQL);
+		m_DB.ExecuteSQL(strSQL);
 	}
 	catch (CDBException* e)
 	{
@@ -2326,7 +2272,7 @@ bool MSSQLDatabase::EventJjangUpdate(const int nAID, bool bJjang)
 
 		MMatchUserGradeID nGrade = bJjang ? MMUG_STAR : MMUG_FREE;
 		strSQL.Format(g_szDB_EVENT_JJANG_UPDATE, nGrade, nAID);
-		Impl->m_DB.ExecuteSQL(strSQL);
+		m_DB.ExecuteSQL(strSQL);
 	}
 	catch (CDBException* e)
 	{
@@ -2349,7 +2295,7 @@ bool MSSQLDatabase::DeleteExpiredAccountItem(const int nAIID)
 		CString strSQL;
 
 		strSQL.Format(g_szDB_DELETE_EXPIRED_ACCOUNT_ITEM, nAIID);
-		Impl->m_DB.ExecuteSQL(strSQL);
+		m_DB.ExecuteSQL(strSQL);
 	}
 	catch (CDBException* e)
 	{
@@ -2376,7 +2322,7 @@ bool MSSQLDatabase::UpdateQuestItem(int nCID, MQuestItemMap& rfQuestIteMap, MQue
 		// 7000byte가 넘는지 검사함.
 		if (QUEST_DATA < MCRC32::SIZE + MAX_DB_QUEST_ITEM_SIZE + MAX_DB_MONSTERBIBLE_SIZE)
 		{
-			ASSERT(0);
+			assert(0);
 			Log("MSSQLDatabase::UpdateQuestItem - 아이템의 크기가 %d보다 큼.", QUEST_DATA);
 			return false;
 		}
@@ -2434,7 +2380,7 @@ bool MSSQLDatabase::UpdateQuestItem(int nCID, MQuestItemMap& rfQuestIteMap, MQue
 		CString strQuery;
 		strQuery.Format("UPDATE Character SET QuestItemInfo = (?) WHERE CID = %d", nCID);
 
-		CODBCRecordset rs(&Impl->m_DB);
+		CODBCRecordset rs(&m_DB);
 		if (!rs.InsertBinary(strQuery, szData, MCRC32::CRC::SIZE + MAX_DB_QUEST_ITEM_SIZE + MAX_DB_MONSTERBIBLE_SIZE))
 		{
 			Log("MSSQLDatabase::UpdateQuestItem - Querry fail.");
@@ -2463,7 +2409,7 @@ bool MSSQLDatabase::GetCharQuestItemInfo(MMatchCharInfo* pCharInfo)
 		if (0 == pCharInfo)
 			return false;
 
-		CODBCRecordset rs(&Impl->m_DB);
+		CODBCRecordset rs(&m_DB);
 
 		CString strQuery;
 		strQuery.Format(g_szDB_SELECT_QUEST_ITEM_INFO_BY_CID, pCharInfo->m_nCID);
@@ -2591,7 +2537,7 @@ bool MSSQLDatabase::InsertQuestGameLog(const char* pszStageName,
 			return false;
 
 	CString strQuery;
-	CODBCRecordset rs(&Impl->m_DB);
+	CODBCRecordset rs(&m_DB);
 
 	try
 	{
@@ -2607,7 +2553,7 @@ bool MSSQLDatabase::InsertQuestGameLog(const char* pszStageName,
 		return false;
 	}
 
-	if ((rs.IsOpen() == FALSE) || (rs.GetRecordCount() <= 0) || (rs.IsBOF() == TRUE))
+	if ((rs.IsOpen() == false) || (rs.GetRecordCount() <= 0) || (rs.IsBOF() == true))
 	{
 		return false;
 	}
@@ -2632,7 +2578,7 @@ bool MSSQLDatabase::InsertQUniqueGameLog(const int nQGLID, const int nCID, const
 	try
 	{
 		strQuery.Format(g_szDB_INSERT_QUINQUEITEMLOG, nQGLID, nCID, nQIID);
-		Impl->m_DB.ExecuteSQL(strQuery);
+		m_DB.ExecuteSQL(strQuery);
 	}
 	catch (CDBException* e)
 	{
@@ -2654,7 +2600,7 @@ bool MSSQLDatabase::GetCID(const char* pszCharName, int& outCID)
 	strQuery.Format("SELECT CID FROM Character (UPDLOCK) WHERE Name LIKE '%s'",
 		pszCharName);
 
-	CODBCRecordset rs(&Impl->m_DB);
+	CODBCRecordset rs(&m_DB);
 	try
 	{
 		rs.Open(strQuery, CRecordset::forwardOnly, CRecordset::readOnly);
@@ -2679,7 +2625,7 @@ bool MSSQLDatabase::GetCharName(const int nCID, string& outCharName)
 	CString strQuery;
 	strQuery.Format("SELECT Name FROM Character (NOLOCK) WHERE CID = %u", nCID);
 
-	CODBCRecordset rs(&Impl->m_DB);
+	CODBCRecordset rs(&m_DB);
 	try
 	{
 		rs.Open(strQuery, CRecordset::forwardOnly, CRecordset::readOnly);
@@ -2706,7 +2652,7 @@ bool MSSQLDatabase::CheckPremiumIP(const char* szIP, bool& outbResult)
 	CString strSQL;
 	strSQL.Format(g_szDB_CHECK_PREMIUM_IP, temp.c_str());
 
-	CODBCRecordset rs(&Impl->m_DB);
+	CODBCRecordset rs(&m_DB);
 
 	bool bException = false;
 	try
@@ -2719,7 +2665,7 @@ bool MSSQLDatabase::CheckPremiumIP(const char* szIP, bool& outbResult)
 		return false;
 	}
 
-	if (rs.IsOpen() == FALSE)
+	if (rs.IsOpen() == false)
 	{
 		return false;
 	}
@@ -2752,7 +2698,7 @@ bool MSSQLDatabase::InsertEvent(const uint32_t dwAID, const uint32_t dwCID, cons
 	strSQL.Format(g_szInsertEvent, dwAID, dwCID, temp.c_str());
 	try
 	{
-		Impl->m_DB.ExecuteSQL(strSQL);
+		m_DB.ExecuteSQL(strSQL);
 	}
 	catch (CDBException* e)
 	{
@@ -2777,7 +2723,7 @@ bool MSSQLDatabase::SetBlockAccount(const uint32_t dwAID, const uint32_t dwCID, 
 	strSQL.Format(g_szSetBlockAccount, dwAID, dwCID, btBlockType, strComment.c_str(), strIP.c_str(), strEndHackBlockerDate.c_str());
 	try
 	{
-		Impl->m_DB.ExecuteSQL(strSQL);
+		m_DB.ExecuteSQL(strSQL);
 	}
 	catch (CDBException* e)
 	{
@@ -2802,7 +2748,7 @@ bool MSSQLDatabase::ResetAccountBlock(const uint32_t dwAID, const uint8_t btBloc
 	strSQL.Format(g_szResetAccountBlock, dwAID, btBlockType);
 	try
 	{
-		Impl->m_DB.ExecuteSQL(strSQL);
+		m_DB.ExecuteSQL(strSQL);
 	}
 	catch (CDBException* e)
 	{
@@ -2828,7 +2774,7 @@ bool MSSQLDatabase::InsertBlockLog(const uint32_t dwAID, const uint32_t dwCID, c
 	strSQL.Format(g_szInsertBlockLog, dwAID, dwCID, btBlockType, strComment.c_str(), strIP.c_str());
 	try
 	{
-		Impl->m_DB.ExecuteSQL(strSQL);
+		m_DB.ExecuteSQL(strSQL);
 	}
 	catch (CDBException* e)
 	{
@@ -2853,7 +2799,7 @@ bool MSSQLDatabase::DeleteExpiredClan(const uint32_t dwCID, const uint32_t dwCLI
 	strSQL.Format(g_szDeleteExpiredClan, dwCLID, dwCID, strDeleteName.c_str(), dwWaitHour);
 	try
 	{
-		Impl->m_DB.ExecuteSQL(strSQL);
+		m_DB.ExecuteSQL(strSQL);
 	}
 	catch (CDBException* e)
 	{
@@ -2880,7 +2826,7 @@ bool MSSQLDatabase::SetDeleteTime(const uint32_t dwMasterCID, const uint32_t dwC
 	strSQL.Format(g_szSetClanDeleteDate, dwMasterCID, dwCLID, strDeleteDate.c_str());
 	try
 	{
-		Impl->m_DB.ExecuteSQL(strSQL);
+		m_DB.ExecuteSQL(strSQL);
 	}
 	catch (CDBException* e)
 	{
@@ -2902,7 +2848,7 @@ bool MSSQLDatabase::AdminResetAllHackingBlock()
 
 	try
 	{
-		Impl->m_DB.ExecuteSQL(g_szAdminResetAllHackingBlock);
+		m_DB.ExecuteSQL(g_szAdminResetAllHackingBlock);
 	}
 	catch (CDBException* e)
 	{
@@ -2914,5 +2860,3 @@ bool MSSQLDatabase::AdminResetAllHackingBlock()
 
 	return true;
 }
-
-#endif

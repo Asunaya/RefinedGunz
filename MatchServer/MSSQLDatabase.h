@@ -1,12 +1,16 @@
 #pragma once
 
 #include "IDatabase.h"
+#include "MDatabase.h"
 #include <memory>
 
 class MSSQLDatabase final : public IDatabase
 {
 public:
 	MSSQLDatabase();
+	MSSQLDatabase(const MDatabase::ConnectionDetails&);
+	MSSQLDatabase(const MSSQLDatabase&) = delete;
+	MSSQLDatabase& operator=(const MSSQLDatabase&) = delete;
 	~MSSQLDatabase();
 
 	virtual bool IsOpen() override { return CheckOpen(); }
@@ -197,8 +201,9 @@ public:
 
 private:
 	void Log(const char *pFormat, ...);
+	static void LogCallback(const std::string& strLog);
 
 	bool CheckOpen();
 
-	std::unique_ptr<class MSSQLDatabaseImpl> Impl;
+	MDatabase m_DB;
 };

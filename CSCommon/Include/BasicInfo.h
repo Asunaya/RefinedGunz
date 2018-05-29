@@ -157,4 +157,5 @@ struct BasicInfoNetState
 	}
 };
 
-MCommandParameterBlob* PackNewBasicInfo(const CharacterInfo& Input, BasicInfoNetState& State, float Time);
+class MCommandParameterBlob* PackNewBasicInfo(const CharacterInfo& Input,
+	BasicInfoNetState& State, float Time);

@@ -1,32 +1,111 @@
 #pragma once
 
-#include "afxdb.h"
+#include <cassert>
 #include <string>
+#include <vector>
+#include <exception>
+#include "variant.h"
+#include "SafeString.h"
+#include "StringView.h"
+#include "MWindowsFwd.h"
+#include <sqltypes.h>
 
-typedef void(LOGCALLBACK)( const std::string& strLog );
+#ifdef _WIN32
+#pragma comment(lib, "odbc32.lib")
+#endif
 
-class MDatabase
+struct CString : std::string
 {
-public:
-	MDatabase();
-	~MDatabase();
+	using std::string::string;
+	using std::string::operator=;
+	CString() = default;
+	CString(const CString&) = default;
+	CString(CString&&) = default;
+	CString& operator=(const CString&) = default;
+	CString& operator=(CString&&) = default;
+	CString(std::string str) : std::string{std::move(str)} {}
+	explicit operator const char*() const { return c_str(); }
+	char* GetBuffer() { return &(*this)[0]; }
+	size_t GetLength() const { return length(); }
+	void Format(const char* fmt, ...)
+	{
+		va_list va;
+		va_start(va, fmt);
+		*this = vstrprintf(fmt, va);
+		va_end(va);
+	}
+};
 
-	CDatabase* GetDatabase()	{ return &m_DB; }
+struct CException
+{
+	void GetErrorMessage(...) const {}
+};
+
+struct CDBException
+{
+	const char* m_strError;
+};
+
+namespace SQLHandleTypes
+{
+enum Type : SQLSMALLINT
+{
+	Env = 1,
+	DBC,
+	Stmt,
+};
+}
+
+template <SQLSMALLINT HandleTypeParam>
+struct SQLHandle
+{
+	static constexpr SQLSMALLINT HandleType = HandleTypeParam;
+	operator SQLHANDLE() const { return Handle.get(); }
+	struct Deleter { void operator()(SQLHANDLE Handle) const; };
+	std::unique_ptr<void, Deleter> Handle;
+};
+
+template <SQLSMALLINT HandleTypeParam>
+SQLSMALLINT const SQLHandle<HandleTypeParam>::HandleType;
+
+struct MDatabase
+{
+	enum class DBDriver { ODBC, SQLServer };
+	enum class DBAuth { SQLServer, Windows };
+
+	struct ConnectionDetails
+	{
+		DBDriver Driver;
+		DBAuth Auth;
+		// These are only used if Driver is SQLServer.
+		StringView Server;
+		StringView Database;
+		// This is only used is Driver is ODBC.
+		StringView DSN;
+		// These are only used if Auth is SQLServer.
+		StringView Username;
+		StringView Password;
+	};
+
+	typedef void(LOGCALLBACK)(const std::string& strLog);
+
+	MDatabase() = default;
+	MDatabase(const MDatabase&) = delete;
+	MDatabase& operator=(const MDatabase&) = delete;
 
 	bool CheckOpen();
-	CString BuildDSNString(const CString strDSN, const CString strUserName, const CString strPassword);
-	bool Connect(CString strDSNConnect);
+	bool Connect(const ConnectionDetails& cd);
 	void Disconnect();
-	BOOL IsOpen() const;
-	void ExecuteSQL(LPCTSTR lpszSQL);
-	// thread unsafe
-	void SetLogCallback( LOGCALLBACK* fnLogCallback ) { m_fnLogCallback = fnLogCallback; }
+	bool IsOpen() const;
+	void ExecuteSQL(StringView SQL);
+	void SetLogCallback(LOGCALLBACK* fnLogCallback) { m_fnLogCallback = fnLogCallback; }
+	SQLHANDLE GetConn() const { return Conn; }
 
-private :
-	void WriteLog( const std::string& strLog );
+private:
+	void WriteLog(const std::string& strLog) const { if (m_fnLogCallback) m_fnLogCallback(strLog); }
 
-private :
-	CDatabase		m_DB;
-	CString			m_strDSNConnect;
-	LOGCALLBACK*	m_fnLogCallback;
+	SQLHandle<SQLHandleTypes::Env> Env;
+	SQLHandle<SQLHandleTypes::DBC> Conn;
+	CString ConnectString;
+	LOGCALLBACK* m_fnLogCallback = nullptr;
 };

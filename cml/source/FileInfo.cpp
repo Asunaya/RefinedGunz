@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "FileInfo.h"
 #include <stdio.h>
+#include "MFile.h"
 
 #ifdef _WIN32
 #include <shlwapi.h>
@@ -254,8 +255,6 @@ void GetFullPath(char *pFullPath, int maxlen, const char *pRelativePath)
 	_splitpath_s(szFullPath, szDrive, szDir, szFileName, szExt);
 	wsprintf(pFullPath, "%s%s%s", szDrive, szDir, pRelativePath);
 #else
-	if (maxlen < MFile::MaxPath)
-		return;
 	realpath(pRelativePath, pFullPath);
 #endif
 }

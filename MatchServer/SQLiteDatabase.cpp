@@ -432,6 +432,11 @@ int SQLiteDatabase::TotalRowsModified()
 	return sqlite3_total_changes(sqlite.get());
 }
 
+i64 SQLiteDatabase::LastInsertedRowID()
+{
+	return sqlite3_last_insert_rowid(sqlite.get());
+}
+
 void SQLiteDatabase::ReportWrongRowsModified(const char* ExpectedValue)
 {
 	const auto ActualValue = RowsModified();

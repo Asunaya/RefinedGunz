@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "MLocatorConfig.h"
-#include "ini.h"
+#include "IniParser.h"
 #include "MUtil.h"
 #include "StringView.h"
 #include "ArrayView.h"
@@ -19,50 +19,10 @@ MLocatorConfig::~MLocatorConfig(void)
 {
 }
 
-using MapType = std::unordered_map<std::string, std::unordered_map<std::string, std::string>>;
-
-struct IniContext
-{
-	MapType Map;
-	optional<StringView> GetString(const char* arg_section, const char* arg_name) const
-	{
-		auto it = Map.find(arg_section);
-		if (it == Map.end())
-			return nullopt;
-
-		auto it2 = it->second.find(arg_name);
-		if (it2 == it->second.end())
-			return nullopt;
-
-		return it2->second;
-	}
-	optional<int> GetInt(const char* arg_section, const char* arg_name) const
-	{
-		auto Str = GetString(arg_section, arg_name);
-		if (!Str)
-			return nullopt;
-		return StringToInt(*Str);
-	};
-};
-
-extern "C" {
-static int IniCallbackFwd(void* user, const char* section, const char* name, const char* value)
-{
-	auto& Map = *static_cast<MapType*>(user);
-	StringView v = value;
-	if (starts_with(v, "\""))
-		v.remove_prefix(1);
-	if (ends_with(v, "\""))
-		v.remove_suffix(1);
-	Map[section][name] = v.str();
-	return 0;
-}
-}
-
 bool MLocatorConfig::LoadConfig()
 {
-	IniContext ini;
-	if (!ini_parse(LOCATOR_CONFIG, IniCallbackFwd, &ini.Map))
+	IniParser ini;
+	if (!ini.Parse(LOCATOR_CONFIG))
 		return false;
 #ifdef LOCATOR_FREESTANDING
 	if( !LoadDBConfig(ini) )	return false;
@@ -75,7 +35,7 @@ bool MLocatorConfig::LoadConfig()
 	return true;
 }
 
-bool Set(const IniContext& ini, const char* section, const char* name, MLocatorConfig* conf,
+bool Set(const IniParser& ini, const char* section, const char* name, MLocatorConfig* conf,
 	bool (MLocatorConfig::*func)(const char*))
 {
 	auto Str = ini.GetString(section, name);
@@ -85,7 +45,7 @@ bool Set(const IniContext& ini, const char* section, const char* name, MLocatorC
 }
 
 template <typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
-bool Set(const IniContext& ini, const char* section, const char* name, MLocatorConfig* conf,
+bool Set(const IniParser& ini, const char* section, const char* name, MLocatorConfig* conf,
 	void (MLocatorConfig::*func)(T))
 {
 	auto Value = ini.GetInt(section, name);
@@ -98,7 +58,7 @@ bool Set(const IniContext& ini, const char* section, const char* name, MLocatorC
 		if (!Set(ini, section, name, this, &MLocatorConfig::func)) return false;\
 	} while (false)
 
-bool MLocatorConfig::LoadDBConfig(const IniContext& ini)
+bool MLocatorConfig::LoadDBConfig(const IniParser& ini)
 {
 	SET("DB", "DNS", SetDBDSN);
 	SET("DB", "USERNAME", SetDBUserName);
@@ -107,7 +67,7 @@ bool MLocatorConfig::LoadDBConfig(const IniContext& ini)
 }
 
 
-bool MLocatorConfig::LoadNetConfig(const IniContext& ini)
+bool MLocatorConfig::LoadNetConfig(const IniParser& ini)
 {
 #ifdef LOCATOR_FREESTANDING
 	SET("NETWORK", "IP", SetLocatorIP);
@@ -116,7 +76,7 @@ bool MLocatorConfig::LoadNetConfig(const IniContext& ini)
 	return true;
 }
 
-bool MLocatorConfig::LoadEnvConfig(const IniContext& ini)
+bool MLocatorConfig::LoadEnvConfig(const IniParser& ini)
 {
 	auto High = ini.GetInt("ENV", "LOCATOR_UID_HIGH");
 	auto Low = ini.GetInt("ENV", "LOCATOR_UID_LOW");

@@ -104,12 +104,18 @@ struct is_in_heap_wrapper
 	static constexpr bool value = tmp::any_of<std::is_same<heap_wrapper<T>, Ts>::value...>::value;
 };
 
+template <typename T, typename...>
+struct head { using type = T; };
+
+template <typename... Ts>
+using head_t = typename head<Ts...>::type;
+
 }
 
 template <size_t alignment, size_t size, typename... Ts>
 struct variant_impl
 {
-	template <typename = std::enable_if_t<detail::is_part_of<monostate, Ts...>::value>>
+	template <bool B = detail::is_part_of<monostate, Ts...>::value, typename = std::enable_if_t<B>>
 	variant_impl() {
 		this->construct(monostate{});
 	}
@@ -139,9 +145,9 @@ struct variant_impl
 	}
 
 	template <typename fn_t, bool include_monostate = true>
-	void visit(fn_t&& fn) { visit_impl<fn_t, include_monostate, 0, Ts...>(std::forward<fn_t>(fn)); }
+	decltype(auto) visit(fn_t&& fn) { return visit_impl<fn_t, include_monostate, 0, Ts...>(std::forward<fn_t>(fn)); }
 	template <typename fn_t, bool include_monostate = true>
-	void visit(fn_t&& fn) const { visit_impl<fn_t, include_monostate, 0, Ts...>(std::forward<fn_t>(fn)); }
+	decltype(auto) visit(fn_t&& fn) const { return visit_impl<fn_t, include_monostate, 0, Ts...>(std::forward<fn_t>(fn)); }
 
 	template <typename T, typename = std::enable_if_t<
 		detail::any_of<(std::is_same<T, detail::substitute_heap_wrapper_t<Ts>>::value
@@ -163,9 +169,10 @@ struct variant_impl
 	auto is_type() const { return get_type_index() == get_index_of_type<T>(); }
 
 	template <typename T>
-	void emplace(T&& src)
+	T& emplace(T&& src)
 	{
-		construct(std::forward<T>(src));
+		assign(std::forward<T>(src));
+		return get_ref<std::decay_t<T>>();
 	}
 
 private:
@@ -224,61 +231,69 @@ private:
 	struct dummy
 	{
 		template <typename buffer_t>
-		static void call_visitor(fn_t&& fn, buffer_t* buffer)
+		static decltype(auto) call_visitor(fn_t&& fn, buffer_t* buffer)
 		{
-			fn(reinterpret_cast<T&>(*buffer));
+			return fn(reinterpret_cast<T&>(*buffer));
 		}
 	};
 	template <typename fn_t, typename T>
 	struct dummy<fn_t, heap_wrapper<T>>
 	{
 		template <typename buffer_t>
-		static void call_visitor(fn_t&& fn, buffer_t* buffer)
+		static decltype(auto) call_visitor(fn_t&& fn, buffer_t* buffer)
 		{
-			fn(*reinterpret_cast<heap_wrapper<T>&>(*buffer).get());
+			return fn(*reinterpret_cast<heap_wrapper<T>&>(*buffer).get());
 		}
 	};
 	template <typename fn_t, typename T>
 	struct dummy<fn_t, const heap_wrapper<T>>
 	{
 		template <typename buffer_t>
-		static void call_visitor(fn_t&& fn, buffer_t* buffer)
+		static decltype(auto) call_visitor(fn_t&& fn, buffer_t* buffer)
 		{
-			fn(*reinterpret_cast<const heap_wrapper<T>&>(*buffer).get());
+			return fn(*reinterpret_cast<const heap_wrapper<T>&>(*buffer).get());
 		}
 	};
 
-	template <typename fn_t, bool include_monostate, int cur_type_index, typename cur_type, typename... rest>
-	std::enable_if_t<!std::is_same<cur_type, monostate>::value || include_monostate> visit_impl(fn_t&& fn)
-	{
-		if (cur_type_index == type_index)
-			dummy<fn_t, cur_type>::call_visitor(std::forward<fn_t>(fn), buffer);
-		else
-			visit_impl<fn_t, include_monostate, cur_type_index + 1, rest...>(std::forward<fn_t>(fn));
-	}
-	template <typename fn_t, bool include_monostate, int cur_type_index, typename cur_type, typename... rest>
-	std::enable_if_t<std::is_same<cur_type, monostate>::value && !include_monostate> visit_impl(fn_t&& fn)
-	{
-		visit_impl<fn_t, include_monostate, cur_type_index + 1, rest...>(std::forward<fn_t>(fn));
-	}
 	template <typename fn_t, bool include_monostate, int cur_type_index>
-	void visit_impl(fn_t&&) { assert(false); }
-
+	decltype(auto) visit_impl(fn_t&& fn)
+	{
+		assert(false);
+		return dummy<fn_t, detail::head_t<Ts...>>::call_visitor(std::forward<fn_t>(fn), buffer);
+	}
 	template <typename fn_t, bool include_monostate, int cur_type_index, typename cur_type, typename... rest>
-	std::enable_if_t<!std::is_same<cur_type, monostate>::value || include_monostate> visit_impl(fn_t&& fn) const
+	decltype(auto) visit_impl(fn_t&& fn, std::enable_if_t<!std::is_same<cur_type, monostate>::value || include_monostate>* = nullptr)
 	{
 		if (cur_type_index == type_index)
-			dummy<fn_t, const cur_type>::call_visitor(std::forward<fn_t>(fn), buffer);
+			return dummy<fn_t, cur_type>::call_visitor(std::forward<fn_t>(fn), buffer);
 		else
-			visit_impl<fn_t, include_monostate, cur_type_index + 1, rest...>(std::forward<fn_t>(fn));
+			return visit_impl<fn_t, include_monostate, cur_type_index + 1, rest...>(std::forward<fn_t>(fn));
 	}
 	template <typename fn_t, bool include_monostate, int cur_type_index, typename cur_type, typename... rest>
-	std::enable_if_t<std::is_same<cur_type, monostate>::value && !include_monostate> visit_impl(fn_t&& fn) const
+	decltype(auto) visit_impl(fn_t&& fn, std::enable_if_t<std::is_same<cur_type, monostate>::value && !include_monostate>* = nullptr)
 	{
-		visit_impl<fn_t, include_monostate, cur_type_index + 1, rest...>(std::forward<fn_t>(fn));
+		return visit_impl<fn_t, include_monostate, cur_type_index + 1, rest...>(std::forward<fn_t>(fn));
 	}
-	template <typename fn_t, int cur_type_index>
-	void visit_impl(fn_t&&) const { assert(false); }
+
+	template <typename fn_t, bool include_monostate, int cur_type_index>
+	decltype(auto) visit_impl(fn_t&& fn) const
+	{
+		assert(false);
+		return dummy<fn_t, const detail::head_t<Ts...>>::call_visitor(std::forward<fn_t>(fn), buffer);
+	}
+	template <typename fn_t, bool include_monostate, int cur_type_index, typename cur_type, typename... rest>
+	decltype(auto) visit_impl(fn_t&& fn, std::enable_if_t<!std::is_same<cur_type, monostate>::value || include_monostate>* = nullptr) const
+	{
+		if (cur_type_index == type_index)
+			return dummy<fn_t, const cur_type>::call_visitor(std::forward<fn_t>(fn), buffer);
+		else
+			return visit_impl<fn_t, include_monostate, cur_type_index + 1, rest...>(std::forward<fn_t>(fn));
+	}
+	template <typename fn_t, bool include_monostate, int cur_type_index, typename cur_type, typename... rest>
+	decltype(auto) visit_impl(fn_t&& fn, std::enable_if_t<std::is_same<cur_type, monostate>::value && !include_monostate>* = nullptr) const
+	{
+		return visit_impl<fn_t, include_monostate, cur_type_index + 1, rest...>(std::forward<fn_t>(fn));
+	}
 
 	int type_index;
 	alignas(alignment) char buffer[size];
@@ -367,35 +382,20 @@ struct recursive_variant : variant_impl<
 	using base::operator=;
 };
 
-namespace detail
+template <typename VisitorType, typename VariantType>
+decltype(auto) visit(VisitorType&& visitor, VariantType&& variant)
 {
-
-template <typename VisitorType>
-auto visit_impl(VisitorType&& visitor) {}
-
-template <typename VisitorType, typename First, typename... Rest>
-auto visit_impl(VisitorType&& visitor, First&& first, Rest&&... rest)
-{
-	std::forward<First>(first).visit(visitor);
-	visit_impl(std::forward<VisitorType>(visitor), std::forward<Rest>(rest)...);
+	return std::forward<VariantType>(variant).visit(std::forward<VisitorType>(visitor));
 }
 
+template <typename T, typename Var>
+bool holds_alternative(Var& v) noexcept
+{
+	return v.template is_type<T>();
 }
 
-template <typename VisitorType, typename... VariantTypes>
-auto visit(VisitorType&& visitor, VariantTypes&&... variants)
+template <typename T, typename Var>
+decltype(auto) get(Var& v)
 {
-	detail::visit_impl(std::forward<VisitorType>(visitor), std::forward<VariantTypes>(variants)...);
-}
-
-template <typename T, typename... Ts>
-bool holds_alternative(const variant<Ts...>& v) noexcept
-{
-	return v.is_type<T>();
-}
-
-template <typename T, typename... Ts>
-T& get(variant<Ts...>& v)
-{
-	return v.get_ref<T>();
+	return v.template get_ref<T>();
 }

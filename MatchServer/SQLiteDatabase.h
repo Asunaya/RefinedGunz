@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
+#include <memory>
 #include "IDatabase.h"
 #include "sqlite3.h"
 

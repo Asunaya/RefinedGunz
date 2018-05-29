@@ -3,6 +3,8 @@
 #include <cstdint>
 #include <string>
 #include "MMatchGlobal.h"
+#include "MMatchItem.h"
+#include "MErrorTable.h"
 
 enum class AccountCreationResult
 {
@@ -121,7 +123,7 @@ public:
 		int nMaxNodeCount, MAccountItemNode* pOutExpiredItemList, int* poutExpiredItemCount,
 		int nMaxExpiredItemCount) = 0;
 	virtual bool UpdateEquipedItem(const u32 nCID,
-		enum MMatchCharItemParts parts,
+		MMatchCharItemParts parts,
 		u32 nCIID,
 		u32 nItemID) = 0;
 	virtual bool ClearAllEquipedItem(u32 nCID) = 0;

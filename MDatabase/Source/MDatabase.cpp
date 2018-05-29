@@ -1,114 +1,126 @@
-#include "stdafx.h"
-#include "MDatabase.h"
+#include "MDatabaseInternal.h"
+#include "MUtil.h"
 
-MDatabase::MDatabase(void) : m_fnLogCallback( 0 )
+#define CALL_NOTHROW(func, ...) do {\
+		if (SQLCall(PRETTY_FUNCTION, __FILE__, __LINE__, #func,\
+			[this](auto&... a) { this->WriteLog(GetErrorMessage(a...) + "\n"); },\
+			func, __VA_ARGS__) == SQL_ERROR)\
+		{\
+			return false;\
+		}\
+	} while (false);
+
+template <SQLSMALLINT HandleType>
+void SQLHandle<HandleType>::Deleter::operator()(SQLHANDLE Handle) const
 {
-	m_strDSNConnect = "";
+	if (!Handle)
+		return;
+	auto a = [](SQLRETURN r) { assert(r != SQL_ERROR); };
+	if (HandleType == SQL_HANDLE_DBC)
+		a(SQLDisconnect(Handle));
+	else if (HandleType == SQL_HANDLE_STMT)
+		a(SQLFreeStmt(Handle, SQL_CLOSE));
+	a(SQLFreeHandle(HandleType, Handle));
 }
 
-MDatabase::~MDatabase(void)
+static HWND GetHwnd()
 {
-	if (m_DB.IsOpen())
-		Disconnect();
+#ifdef _WIN32
+	return GetConsoleWindow();
+#else
+	return nullptr;
+#endif
 }
-
 
 bool MDatabase::CheckOpen()
 {
-	bool ret = true;
-	if (!m_DB.IsOpen())
+	if (!IsOpen())
 	{
-		ret = Connect(m_strDSNConnect);
-		WriteLog( "MDatabase::CheckOpen - Reconnet database\n" );
+		SQLSMALLINT Len;
+		CALL_NOTHROW(SQLDriverConnect, Conn, GetHwnd(), SQLData(ConnectString), SQLSize(ConnectString),
+			nullptr, 0, &Len, SQL_DRIVER_COMPLETE);
 	}
 
-	return ret;
+	return true;
 }
 
-CString MDatabase::BuildDSNString(const CString strDSN, const CString strUserName, const CString strPassword)
+bool MDatabase::Connect(const ConnectionDetails& cd)
 {
-	CString strDSNConnect =  _T("ODBC;DSN=") + strDSN
-					+ _T(";UID=") + strUserName
-					+ _T(";PWD=") + strPassword;
-	return strDSNConnect;
-}
-
-bool MDatabase::Connect(CString strDSNConnect)
-{
-	if (m_DB.m_hdbc && m_DB.IsOpen()) m_DB.Close();
-
-	m_strDSNConnect = strDSNConnect;
-
-	BOOL bRet = FALSE;
-	if (strDSNConnect.IsEmpty()) {
-		try {
-			bRet = m_DB.Open(NULL);
-		} catch(CDBException* e) {
-			char szLog[ 256 ] = {0,};
-			sprintf_safe( szLog, "MDatabase::Connect - %s\n", (const char*)e->m_strError );
-			WriteLog( szLog );
-		}
-	} else {
-		try {
-			bRet = m_DB.Open(NULL,			//	DSN
-							 FALSE,			//	Exclusive
-							 FALSE,			//	ReadOnly
-							 strDSNConnect,	//	ODBC Connect string
-							 TRUE);			//	Use cursor lib
-		} catch(CDBException* e) {
-			char szLog[ 256 ] = {0,};
-			sprintf_safe( szLog, "MDatabase::Connect - %s\n", (const char*)e->m_strError );
-			WriteLog( szLog );
-			try {
-				bRet = m_DB.Open(NULL);
-			} catch(CDBException* e) {
-				char szLog2[ 256 ] = {0,};
-				sprintf_safe( szLog2, "MDatabase::Connect - %s\n", (const char*)e->m_strError );
-				WriteLog( szLog2 );
-				
-				AfxMessageBox(e->m_strError);
-			}
-		}
-	}
-	if (bRet == TRUE) {
-		m_DB.SetQueryTimeout(60);
-		return true;
-	} else {
-		OutputDebugString("DATABASE Error \n");
-		return false;
-	}
-}
-
-void MDatabase::Disconnect()
-{
-	if (m_DB.IsOpen())
-		m_DB.Close();
-}
-
-
-BOOL MDatabase::IsOpen() const
-{
-	return m_DB.IsOpen();
-}
-
-
-void MDatabase::ExecuteSQL( LPCTSTR lpszSQL )
-{
-	try
+	char InitialConnectString[1024];
+	size_t end = 0;
+	auto append = [&](const char* fmt, ...) {
+		if (end >= std::size(InitialConnectString))
+			return;
+		va_list va;
+		va_start(va, fmt);
+		end += vsprintf_safe(InitialConnectString + end, std::size(InitialConnectString) - end,
+			fmt, va);
+		va_end(va);
+	};
+	if (cd.Driver == DBDriver::SQLServer)
 	{
-		m_DB.ExecuteSQL( lpszSQL );
+		append("DRIVER={SQL Server};SERVER=%.*s;DATABASE=%.*s;",
+			cd.Server.size(), cd.Server.data(),
+			cd.Database.size(), cd.Database.data());
 	}
-	catch( ... )
+	else if (cd.Driver == DBDriver::ODBC)
 	{
-		throw;
+		append("DSN=%.*s;", cd.DSN.size(), cd.DSN.data());
 	}
+
+	if (cd.Auth == DBAuth::SQLServer)
+	{
+		append("UID=%.*s;PWD=%.*s",
+			cd.Username.size(), cd.Username.data(),
+			cd.Password.size(), cd.Password.data());
+	}
+	else if (cd.Auth == DBAuth::Windows)
+	{
+		append("Trusted_Connection=yes");
+	}
+
+	CALL_NOTHROW(SQLAlloc, Env, static_cast<SQLHANDLE>(SQL_NULL_HANDLE));
+	CALL_NOTHROW(SQLSetEnvAttr, Env, SQL_ATTR_ODBC_VERSION, reinterpret_cast<SQLPOINTER*>(SQL_OV_ODBC3), 0);
+	CALL_NOTHROW(SQLAlloc, Conn, Env);
+	ConnectString.resize(1024);
+	SQLSMALLINT ConnStrLen;
+	
+	auto TryConnect = [&](SQLHandle<SQLHandleTypes::DBC>& Handle) {
+		return SQLDriverConnect(Handle, GetHwnd(),
+			SQLData(InitialConnectString), SQLSize(InitialConnectString),
+			SQLData(ConnectString), SQLSize(ConnectString),
+			&ConnStrLen, SQL_DRIVER_COMPLETE);
+	};
+
+	CALL_NOTHROW(TryConnect, Conn);
+	if (ConnStrLen > SQLSize(ConnectString))
+	{
+		ConnectString.resize(ConnStrLen);
+		CALL_NOTHROW(TryConnect, Conn);
+		assert(ConnStrLen == SQLSize(ConnectString));
+	}
+	else
+	{
+		ConnectString.resize(ConnStrLen);
+		ConnectString.shrink_to_fit();
+	}
+	return true;
 }
 
+void MDatabase::Disconnect() { Conn.Handle.reset(); }
 
-void MDatabase::WriteLog( const std::string& strLog )
+bool MDatabase::IsOpen() const
 {
-	if( 0 != m_fnLogCallback  )
-	{
-		m_fnLogCallback( strLog );
-	}
+	SQLULEN Value = 0;
+	CALL_NOTHROW(SQLGetConnectAttr, Conn, SQL_ATTR_CONNECTION_DEAD, &Value, 0, nullptr);
+	return Value == 0;
 }
+
+void MDatabase::ExecuteSQL(StringView SQL)
+{
+	SQLHandle<SQL_HANDLE_STMT> Statement;
+	CALL(SQLAlloc, Statement, Conn);
+	CALL(SQLExecDirect, Statement, SQLData(SQL), SQLSize(SQL));
+}
+
+#undef CALL_NOTHROW

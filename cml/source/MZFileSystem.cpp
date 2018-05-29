@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <cassert>
 #include "Arena.h"
+#include "MFile.h"
 
 static void ReplaceBackSlashToSlash(char* szPath)
 {
@@ -20,12 +21,8 @@ static void ReplaceBackSlashToSlash(char* szPath)
 
 void GetRefineFilename(char *szRefine, int maxlen, const char *szSource)
 {
-	char pBasePath[256];
-#ifdef _WIN32
-	GetCurrentDirectory(sizeof(pBasePath),pBasePath);
-#else
-	getcwd(pBasePath, std::size(pBasePath));
-#endif
+	char pBasePath[MFile::MaxPath];
+	MFile::GetCWD(pBasePath);
 	strcat_safe(pBasePath,"\\");
 
 	GetRelativePath(szRefine, maxlen, pBasePath,szSource);

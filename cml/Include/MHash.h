@@ -4,6 +4,7 @@
 #include "StringView.h"
 #include <cctype>
 #include <functional>
+#include <algorithm>
 #include <climits>
 
 namespace detail
@@ -46,48 +47,37 @@ inline size_t HashFNV(const void* Memory, size_t Length) {
 inline size_t HashFNVCaseInsensitive(const void* Memory, size_t Length) {
 	return HashFNVApply(Memory, Length, [](unsigned char c) { return std::tolower(c); });
 }
+inline unsigned char PathTrans(unsigned char c) { return std::tolower(c == '\\' ? '/' : c); }
 inline size_t HashFNVPath(const void* Memory, size_t Length) {
-	return HashFNVApply(Memory, Length, [](unsigned char c) { return std::tolower(c == '\\' ? '/' : c); });
+	return HashFNVApply(Memory, Length, PathTrans);
 }
 
 struct StringHasher {
-	size_t operator()(const StringView& str) const {
+	size_t operator()(StringView str) const {
 		return HashFNV(str.data(), str.size());
 	}
 };
 
 struct CaseInsensitiveStringHasher {
-	size_t operator()(const StringView& str) const {
+	size_t operator()(StringView str) const {
 		return HashFNVCaseInsensitive(str.data(), str.size());
 	}
 };
 
+struct CaseInsensitiveComparer {
+	bool operator()(StringView a, StringView b) const { return iequals(a, b); }
+};
+
 struct PathHasher {
-	size_t operator()(const StringView& str) const {
+	size_t operator()(StringView str) const {
 		return HashFNVPath(str.data(), str.size());
 	}
 };
 
 struct PathComparer {
-	bool operator()(const StringView& lhs, const StringView& rhs) const {
-		if (lhs.size() != rhs.size())
-			return false;
-
-		for (size_t i = 0; i < lhs.size(); ++i)
-		{
-			auto Trans = [&](auto c) {
-				if (isalpha(c))
-					c = tolower(c);
-				if (c == '\\')
-					c = '/';
-				return c;
-			};
-
-			if (Trans(lhs[i]) != Trans(rhs[i]))
-				return false;
-		}
-
-		return true;
+	bool operator()(StringView lhs, StringView rhs) const {
+		return std::equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end(),
+			[](char a, char b) { return PathTrans(u8(a)) == PathTrans(u8(b)); });
 	}
 };
 

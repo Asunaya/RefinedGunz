@@ -104,3 +104,15 @@ private:
 	alignas(T) char buf[sizeof(T)];
 	bool Constructed{};
 };
+
+template <typename T>
+optional<std::decay_t<T>> make_optional(T&& x)
+{
+	return optional<std::decay_t<T>>(x);
+};
+
+template <typename T, typename... Args>
+optional<T> make_optional(Args&&... args)
+{
+	return optional<T>(in_place, std::forward<Args>(args)...);
+};

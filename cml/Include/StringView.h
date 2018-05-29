@@ -162,6 +162,9 @@ private:
 using StringView = BasicStringView<char>;
 using WStringView = BasicStringView<wchar_t>;
 
+inline StringView operator "" _sv(const char* ptr, size_t sz) { return {ptr, sz}; }
+inline WStringView operator "" _sv(const wchar_t* ptr, size_t sz) { return {ptr, sz}; }
+
 namespace detail
 {
 struct ieq

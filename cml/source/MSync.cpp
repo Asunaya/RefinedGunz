@@ -54,6 +54,7 @@ u32 WaitForMultipleEvents(size_t NumEvents, MSignalEvent* const * EventArray, u3
 
 #else
 
+#include <unistd.h>
 #include <sys/select.h>
 #include <sys/eventfd.h>
 

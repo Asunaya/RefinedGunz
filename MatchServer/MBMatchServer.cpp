@@ -102,7 +102,7 @@ static void MBMatchServerLog(unsigned int LogLevel, const char* Msg, bool Newlin
 
 	if (LogLevel | MMatchServer::LOG_FILE)
 	{
-		char szTemp[1024];
+		char szTemp[1024 * 16];
 		strcpy_safe(szTemp, szTime);
 		strcat_safe(szTemp, Msg);
 		if (Newline)

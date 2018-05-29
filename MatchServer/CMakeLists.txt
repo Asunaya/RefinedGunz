@@ -3,14 +3,18 @@ file(GLOB src
     "*.cpp"
 )
 
-add_target(NAME MatchServer TYPE EXECUTABLE SOURCES "${src}" UNITY_EXCLUDED "MSSQLDatabase.cpp")
+set(main_file "${CMAKE_CURRENT_SOURCE_DIR}/main.cpp")
+list(REMOVE_ITEM src "${main_file}")
 
-target_include_directories(MatchServer PRIVATE
+add_target(NAME MatchServer_lib TYPE STATIC SOURCES "${src}")
+
+target_include_directories(MatchServer_lib PUBLIC
+	.
 	../sdk/dx9/Include
 	../Locator
 	../sdk)
 
-target_link_libraries(MatchServer PUBLIC
+target_link_libraries(MatchServer_lib PUBLIC
 	zlib
 	sodium
 	sqlite
@@ -18,18 +22,19 @@ target_link_libraries(MatchServer PUBLIC
 	ini
 	cml
 	CSCommon
+	MDatabase
 	RealSpace2
 	SafeUDP
 	Locator)
 
 if (UNIX)
-	target_link_libraries(MatchServer PUBLIC dl)
+	target_link_libraries(MatchServer_lib PUBLIC dl)
 endif()
-
-target_compile_options(MatchServer PRIVATE 
-	-D_WINSOCKAPI_)
 
 if (MSVC)
 	ucm_add_linker_flags(/SUBSYSTEM:CONSOLE)
-	target_link_libraries(MatchServer PUBLIC legacy_stdio_definitions.lib MDatabase)
+	target_link_libraries(MatchServer_lib PUBLIC legacy_stdio_definitions.lib)
 endif()
+
+add_target(NAME MatchServer TYPE EXECUTABLE SOURCES "${main_file}")
+target_link_libraries(MatchServer PUBLIC MatchServer_lib)

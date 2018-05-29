@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "MZip.h"
 #include "zip/zlib.h"
+#include "MFile.h"
 #include <memory.h>
 #include <string.h>
 #include "MDebug.h"

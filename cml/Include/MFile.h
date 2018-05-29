@@ -64,6 +64,8 @@ struct FileAttributes
 
 optional<FileAttributes> GetAttributes(const char* Path);
 
+bool GetCWD(ArrayView<char> Output);
+
 struct FileData
 {
 	u32 Attributes;

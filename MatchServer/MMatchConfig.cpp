@@ -8,7 +8,7 @@
 #include "rapidxml.hpp"
 #include <fstream>
 #include "RGVersion.h"
-#include "ini.h"
+#include "IniParser.h"
 
 MMatchConfig::MMatchConfig()
 {
@@ -44,67 +44,61 @@ MMatchConfig* MMatchConfig::GetInstance()
 	return &m_MatchConfig;
 }
 
-using MapType = std::unordered_map<std::string, std::unordered_map<std::string, std::string>>;
-
-extern "C" {
-static int IniCallbackFwd(void* user, const char* section, const char* name, const char* value)
+bool GetDBConnDetails(const IniParser& ini, MDatabase::ConnectionDetails& Output)
 {
-	auto& Map = *static_cast<MapType*>(user);
-	StringView v = value;
-	if (starts_with(v, "\""))
-		v.remove_prefix(1);
-	if (ends_with(v, "\""))
-		v.remove_suffix(1);
-	Map[section][name] = v.str();
-	return 0;
-}
+	auto Invalid = [](const char* name, StringView value) {
+		MLog("Invalid value for config option [DB] %s = %.*s\n", name, value.size(), value.data());
+		return false;
+	};
+
+	auto Str = ini.GetString("DB", "DRIVER").value_or("odbc");
+	if (iequals(Str, "odbc")) Output.Driver = MDatabase::DBDriver::ODBC;
+	else if (iequals(Str, "sqlserver")) Output.Driver = MDatabase::DBDriver::SQLServer;
+	else return Invalid("DRIVER", Str);
+
+	Str = ini.GetString("DB", "AUTH").value_or("sqlserver");
+	if (iequals(Str, "sqlserver")) Output.Auth = MDatabase::DBAuth::SQLServer;
+	else if (iequals(Str, "windows")) Output.Auth = MDatabase::DBAuth::Windows;
+	else return Invalid("AUTH", Str);
+
+	Output.Server = ini.GetString("DB", "SERVER").value_or("");
+	Output.Database = ini.GetString("DB", "DATABASE").value_or("");
+
+	Output.DSN = ini.GetString("DB", "DNS").value_or("gunzdb");
+	Output.Username = ini.GetString("DB", "USERNAME").value_or("gunzdb");
+	Output.Password = ini.GetString("DB", "PASSWORD").value_or("gunzdb");
+
+	return true;
 }
 
 bool MMatchConfig::Create()
 {
-	MapType Map;
-	if (!ini_parse(SERVER_CONFIG_FILENAME, IniCallbackFwd, &Map))
+	IniParser ini;
+	if (!ini.Parse(SERVER_CONFIG_FILENAME))
 		return false;
 
-	auto GetString = [&](const char* arg_section, const char* arg_name,
-		const char* default_value, char* output, size_t output_size)
-	{
-		const char* src = default_value;
-		auto it = Map.find(arg_section);
-		if (it != Map.end())
-		{
-			auto it2 = it->second.find(arg_name);
-			if (it2 != it->second.end())
-			{
-				src = it2->second.c_str();
-			}
-		}
-		if (src)
-			strcpy_safe(output, output_size, src);
-		return src != default_value;
-	};
+	MDatabase::ConnectionDetails ConnDetails;
+	if (!GetDBConnDetails(ini, ConnDetails))
+		return false;
+	Driver = ConnDetails.Driver;
+	Auth = ConnDetails.Auth;
+	strcpy_safe(Server, ConnDetails.Server);
+	strcpy_safe(Database, ConnDetails.Database);
+	strcpy_safe(m_szDB_DNS, ConnDetails.DSN);
+	strcpy_safe(m_szDB_UserName, ConnDetails.Username);
+	strcpy_safe(m_szDB_Password, ConnDetails.Password);
 
 	auto GetPrivateProfileString = [&](const char* arg_section, const char* arg_name,
 		const char* default_value, char* output, size_t output_size, const char*)
 	{
-		GetString(arg_section, arg_name, default_value, output, output_size);
+		strcpy_safe(output, output_size, ini.GetString(arg_section, arg_name).value_or(""));
 	};
 
 	auto GetPrivateProfileInt = [&](const char* arg_section, const char* arg_name,
 		int default_value, const char*)
 	{
-		int value = default_value;
-		char buf[256];
-		if (GetString(arg_section, arg_name, nullptr, buf, sizeof(buf)))
-			value = StringToInt(buf).value_or(default_value);
-		return value;
+		return ini.GetInt(arg_section, arg_name).value_or(default_value);
 	};
-
-	int nTemp = 0;
-
-	GetPrivateProfileString("DB", "DNS", "gunzdb", m_szDB_DNS, 64, SERVER_CONFIG_FILENAME);
-	GetPrivateProfileString("DB", "USERNAME", "gunzdb", m_szDB_UserName, 64, SERVER_CONFIG_FILENAME);
-	GetPrivateProfileString("DB", "PASSWORD", "gunzdb", m_szDB_Password, 64, SERVER_CONFIG_FILENAME);
 
 	m_nMaxUser = GetPrivateProfileInt("SERVER", "MAXUSER", 1500, SERVER_CONFIG_FILENAME);
 	m_nServerID = GetPrivateProfileInt("SERVER", "SERVERID", 1500, SERVER_CONFIG_FILENAME);

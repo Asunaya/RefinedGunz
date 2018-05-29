@@ -5,6 +5,7 @@
 #include <WS2tcpip.h>
 #undef CreateEvent
 #else
+#include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
