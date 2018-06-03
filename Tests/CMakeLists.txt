@@ -1,12 +1,12 @@
 link_directories(${CMAKE_CURRENT_SOURCE_DIR}/../sdk/dx9/lib/x86)
 
-if (WIN32)
 file(GLOB src
-    "./*.h"
-    "./*.cpp"
+    "*.h"
+    "*.cpp"
 )
-else()
-set(src main.cpp DB.cpp Launcher.cpp MUtil.cpp SafeString.cpp StringView.cpp)
+
+if (UNIX)
+list(REMOVE_ITEM src "${CMAKE_CURRENT_SOURCE_DIR}/Replays.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/Math.cpp")
 endif()
 
 add_target(NAME Tests TYPE EXECUTABLE SOURCES "${src}")

@@ -70,8 +70,8 @@ SQLSMALLINT const SQLHandle<HandleTypeParam>::HandleType;
 
 struct MDatabase
 {
-	enum class DBDriver { ODBC, SQLServer };
-	enum class DBAuth { SQLServer, Windows };
+	enum class DBDriver { ODBC, SQLServer, Max };
+	enum class DBAuth { SQLServer, Windows, Max };
 
 	struct ConnectionDetails
 	{
@@ -109,3 +109,25 @@ private:
 	CString ConnectString;
 	LOGCALLBACK* m_fnLogCallback = nullptr;
 };
+
+inline const char* ToString(MDatabase::DBDriver Driver)
+{
+	switch (Driver)
+	{
+	case MDatabase::DBDriver::ODBC: return "ODBC";
+	case MDatabase::DBDriver::SQLServer: return "SQLServer";
+	}
+	assert(false);
+	return nullptr;
+}
+
+inline const char* ToString(MDatabase::DBAuth Auth)
+{
+	switch (Auth)
+	{
+	case MDatabase::DBAuth::SQLServer: return "SQLServer";
+	case MDatabase::DBAuth::Windows: return "Windows";
+	}
+	assert(false);
+	return nullptr;
+}

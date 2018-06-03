@@ -69,7 +69,7 @@ bool IsDir(const char* Path)
 
 bool CreateFile(const char* Path)
 {
-	auto FileHandle = ::CreateFileA(Path, 0, 0, nullptr, 0, 0, nullptr);
+	auto FileHandle = ::CreateFileA(Path, 0, 0, nullptr, CREATE_NEW, 0, nullptr);
 	if (FileHandle == nullptr)
 		return false;
 

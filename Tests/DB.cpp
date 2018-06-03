@@ -21,43 +21,14 @@
 namespace TestDBInternal {
 namespace {
 
+#include "TestRandom.h"
+
 // These are chosen to match the database's schema restrictions.
 constexpr size_t UsernameLength = 16;
 // While the length of the char name field in the schema is 24, the length of the
 // MDB_ClanInfo::szMasterName data member is CLAN_NAME_LENGTH (which is lower).
 constexpr size_t CharNameLength = CLAN_NAME_LENGTH;
 constexpr size_t ClanNameLength = CLAN_NAME_LENGTH;
-
-std::mt19937 rng;
-
-int RandomNumber(int Min, int InclusiveMax) {
-	return std::uniform_int_distribution<>{Min, InclusiveMax}(rng);
-};
-
-int RandomNumber(int InclusiveMax) {
-	return RandomNumber(0, InclusiveMax);
-};
-
-void RandomString(ArrayView<char> String)
-{
-	for (size_t i = 0; i < String.size() - 1; ++i)
-	{
-		String[i] = RandomNumber(25) + (RandomNumber(1) ? 'A' : 'a');
-	}
-	String.back() = 0;
-}
-
-template <typename T>
-auto RandomIterator(T&& x)
-{
-	return x.begin() + RandomNumber(int(x.size() - 1));
-}
-
-template <typename T>
-auto& RandomElement(T&& x)
-{
-	return *RandomIterator(x);
-}
 
 struct AccountCharList
 {
@@ -637,11 +608,12 @@ void TestDB(IDatabase* DB)
 	TestDeleteChar(DB, AID, Attr.CharIndex, CharInfo.m_szName);
 }
 
-} // Unnamed namespace
+} // namespace
 } // namespace TestDBInternal
 
 void TestDB()
 {
+	using namespace TestDBInternal;
 	struct Timer
 	{
 		const char* Name;
@@ -672,11 +644,11 @@ void TestDB()
 			return;
 		}
 
-		TestDBInternal::TestDB(&DB);
+		TestDB(&DB);
 	}();
 	{
 		Timer timer{"SQLite"};
 		SQLiteDatabase DB{":memory:"};
-		TestDBInternal::TestDB(&DB);
+		TestDB(&DB);
 	}
 }

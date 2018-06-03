@@ -276,11 +276,13 @@ std::basic_string<T> strprintf(const T* Format, ...)
 	return Ret;
 }
 
-template <typename T, size_t size>
-char* itoa_safe(T val, char(&dest)[size], int radix)
+template <typename T>
+char* itoa_safe(T val, ArrayView<char> dest, int radix = 10)
 {
 	assert(radix > 1 && radix <= 36);
-	auto i = dest, end = dest + size - 1;
+	if (dest.empty())
+		return dest.data();
+	auto i = dest.data(), end = &dest.back();
 	bool negative = val < 0;
 	std::make_unsigned_t<T> absval;
 	if (negative)
@@ -309,7 +311,7 @@ char* itoa_safe(T val, char(&dest)[size], int radix)
 		++i;
 	}
 	*i = 0;
-	std::reverse(dest, i);
+	std::reverse(dest.data(), i);
 	return i;
 }
 

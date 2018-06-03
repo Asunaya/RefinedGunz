@@ -260,6 +260,14 @@ int GetDigit(char c)
 
 	return c - 'A' + 10;
 }
+
+template <typename T>
+struct CounterType
+{
+	using type = std::conditional_t<sizeof(T) * CHAR_BIT < 32, u32, std::make_unsigned_t<T>>;
+};
+
+template <> struct CounterType<bool> { using type = u32; };
 }
 
 template <typename T>
@@ -286,7 +294,7 @@ optional<T> StringToInt(StringView Str)
 		Str = Str.substr(1);
 	}
 
-	using U = std::conditional_t<sizeof(T) * CHAR_BIT < 32, u32, std::make_unsigned_t<T>>;
+	using U = typename detail::CounterType<T>::type;
 
 	auto MAbsVal = [&]() -> optional<U> {
 		if ((Radix == 0 || Radix == 16) && starts_with(Str, "0x"))

@@ -8,15 +8,8 @@
 
 MLocatorConfig* GetLocatorConfig()
 {
-	return MLocatorConfig::GetLocatorConfigInst();
-}
-
-MLocatorConfig::MLocatorConfig(void) : m_bIsInitCompleted( false )
-{
-}
-
-MLocatorConfig::~MLocatorConfig(void)
-{
+	static MLocatorConfig LocatorConfig;
+	return &LocatorConfig;
 }
 
 bool MLocatorConfig::LoadConfig()
@@ -24,8 +17,9 @@ bool MLocatorConfig::LoadConfig()
 	IniParser ini;
 	if (!ini.Parse(LOCATOR_CONFIG))
 		return false;
+	bool DBLoadSuccess = LoadDBConfig(ini);
 #ifdef LOCATOR_FREESTANDING
-	if( !LoadDBConfig(ini) )	return false;
+	if( !DBLoadSuccess )	return false;
 #endif
 	if( !LoadNetConfig(ini) )	return false;
 	if( !LoadEnvConfig(ini) )	return false;
@@ -35,104 +29,53 @@ bool MLocatorConfig::LoadConfig()
 	return true;
 }
 
-bool Set(const IniParser& ini, const char* section, const char* name, MLocatorConfig* conf,
-	bool (MLocatorConfig::*func)(const char*))
-{
-	auto Str = ini.GetString(section, name);
-	if (!Str || Str->empty())
-		return false;
-	return (conf->*func)(Str->data());
-}
-
-template <typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
-bool Set(const IniParser& ini, const char* section, const char* name, MLocatorConfig* conf,
-	void (MLocatorConfig::*func)(T))
-{
-	auto Value = ini.GetInt(section, name);
-	if (Value)
-		(conf->*func)(*Value);
-	return Value.has_value();
-}
-
-#define SET(section, name, func) do {\
-		if (!Set(ini, section, name, this, &MLocatorConfig::func)) return false;\
-	} while (false)
-
 bool MLocatorConfig::LoadDBConfig(const IniParser& ini)
 {
-	SET("DB", "DNS", SetDBDSN);
-	SET("DB", "USERNAME", SetDBUserName);
-	SET("DB", "PASSWORD", SetDBPassword);
+	if (auto Value = ini.GetString("DB", "DNS"))
+		m_strDBDSN = Value->str();
+	else
+		return false;
+
+	if (auto Value = ini.GetString("DB", "USERNAME"))
+		m_strDBUserName = Value->str();
+	else
+		return false;
+
+	if (auto Value = ini.GetString("DB", "PASSWORD"))
+		m_strDBPassword = Value->str();
+	else
+		return false;
+
 	return true;
 }
 
-
 bool MLocatorConfig::LoadNetConfig(const IniParser& ini)
 {
-#ifdef LOCATOR_FREESTANDING
-	SET("NETWORK", "IP", SetLocatorIP);
-#endif
-	SET("NETWORK", "PORT", SetLocatorPort);
+	m_strLocatorIP = ini.GetString("NETWORK", "IP", "127.0.0.1").str();
+	m_nLocatorPort = ini.GetInt("NETWORK", "PORT", 8900);
+
 	return true;
 }
 
 bool MLocatorConfig::LoadEnvConfig(const IniParser& ini)
 {
-	auto High = ini.GetInt("ENV", "LOCATOR_UID_HIGH");
-	auto Low = ini.GetInt("ENV", "LOCATOR_UID_LOW");
-	if (!High || !Low)
-		return false;
-	SetLocatorUID(MUID(*High, *Low));
-	SET("ENV", "ID", SetLocatorID);
-	SET("ENV", "MAX_ELAPSED_UPDATE_SERVER_STATUS_TIME", SetMaxElapsedUpdateServerSTatusTime);
-	SET("ENV", "UDP_LIVE_TIME", SetUDPLiveTime);
-	SET("ENV", "MAX_FREE_RECV_COUNT_PER_LIVE_TIME", SetMaxFreeUseCountPerLiveTime);
-	SET("ENV", "BLOCK_TIME", SetBlockTime);
-	SET("ENV", "UPDATE_UDP_MANAGER_ELAPSED_TIME", SetUpdateUDPManagerElapsedTime);
-	SET("ENV", "MARGIN_OF_ERROR_MIN", SetMarginOfErrorMin);
-	SetCountryCodeFilterStatus(bool(ini.GetInt("ENV", "USE_COUNTRY_CODE_FILTER").value_or(0)));
-	SET("ENV", "ELAPSED_TIME_UPDATE_LOCATOR_LOG", SetElapsedTimeUpdateLocaorLog);
-	SetAcceptInvalidIP(bool(ini.GetInt("ENV", "ACCEPT_INVALID_IP").value_or(1)));
-	SetTestServerOnly(bool(ini.GetInt("ENV", "TEST_SERVER").value_or(0)));
+	{
+		auto High = ini.GetInt("ENV", "LOCATOR_UID_HIGH", 5);
+		auto Low = ini.GetInt("ENV", "LOCATOR_UID_LOW", 0);
+		m_uidLocatorUID = MUID(High, Low);
+	}
+	m_dwID = ini.GetInt("ENV", "ID", 1);
+	m_dwMaxElapsedUpdateServerStatusTime = ini.GetInt("ENV",
+		"MAX_ELAPSED_UPDATE_SERVER_STATUS_TIME", 1000);
+	m_dwUDPLiveTime = ini.GetInt("ENV", "UDP_LIVE_TIME", 10000000);
+	m_dwMaxFreeUseCountPerLiveTime = ini.GetInt("ENV", "MAX_FREE_RECV_COUNT_PER_LIVE_TIME", 9);
+	m_dwBlockTime = ini.GetInt("ENV", "BLOCK_TIME", 0);
+	m_dwUpdateUDPManagerElapsedTime = ini.GetInt("ENV", "UPDATE_UDP_MANAGER_ELAPSED_TIME", 3);
+	m_dwMarginOfErrorMin = ini.GetInt("ENV", "MARGIN_OF_ERROR_MIN", 500000);
+	m_dwElapsedTimeUpdateLocatorLog = ini.GetInt("ENV", "ELAPSED_TIME_UPDATE_LOCATOR_LOG", 10000);
+	m_bIsUseCountryCodeFilter = ini.GetInt<bool>("ENV", "USE_COUNTRY_CODE_FILTER", 0);
+	m_bIsAcceptInvaildIP = ini.GetInt<bool>("ENV", "ACCEPT_INVALID_IP", 1);
+	m_bIsTestServerOnly = ini.GetInt<bool>("ENV", "TEST_SERVER", 0);
 
 	return true;
-}
-
-
-bool MLocatorConfig::SetDBDSN( const char* pszDSN )
-{
-	if( (0 != pszDSN) && (0 < strlen(pszDSN)) ) 
-	{
-#ifdef MFC
-		m_strDBDSN = pszDSN;
-#endif
-		return true;
-	}
-	return false;
-}
-
-
-bool MLocatorConfig::SetDBUserName( const char* pszUserName )
-{
-	if( (0 != pszUserName) && (0 < strlen(pszUserName)) )
-	{
-#ifdef MFC
-		m_strDBUserName = pszUserName;
-#endif
-		return true;
-	}
-	return false;
-}
-
-
-bool MLocatorConfig::SetDBPassword( const char* pszPassword )
-{
-	if( (0 != pszPassword) && (0 < strlen(pszPassword)) )
-	{
-#ifdef MFC
-		m_strDBPassword = pszPassword;
-#endif
-		return true;
-	}
-	return false;
 }

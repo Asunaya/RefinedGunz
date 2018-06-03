@@ -33,43 +33,62 @@ MMatchConfig::MMatchConfig()
 	Version.Revision = RGUNZ_VERSION_REVISION;
 }
 
-MMatchConfig::~MMatchConfig()
+template <typename T>
+static bool SetEnum(const IniParser& ini, T& Dest, const char* Section, const char* Name,
+	T Max = T::Max)
 {
-
+	auto Value = ini.GetString(Section, Name, ToString(T(0)));
+	auto Index = [&] {
+		for (int i = 0; i < int(Max); ++i)
+			if (iequals(ToString(T(i)), Value))
+				return i;
+		return -1;
+	}();
+	if (Index == -1)
+	{
+		MLog("Invalid value for config option [%s] %s = %.*s\n",
+			Section, Name, Value.size(), Value.data());
+		return false;
+	}
+	Dest = T(Index);
+	return true;
 }
 
-MMatchConfig* MMatchConfig::GetInstance()
-{
-	static MMatchConfig m_MatchConfig;
-	return &m_MatchConfig;
-}
+#define SET_OR_RETURN(Dest, Section, Name) do {\
+		auto MaybeStr = ini.GetString((Section), (Name));\
+		if (!MaybeStr){\
+			MLog("Missing value for config options [%s] %s\n", (Section), (Name));\
+			return false;\
+		}\
+		(Dest) = *MaybeStr;\
+	} while (false)
 
 bool GetDBConnDetails(const IniParser& ini, MDatabase::ConnectionDetails& Output)
 {
-	auto Invalid = [](const char* name, StringView value) {
-		MLog("Invalid value for config option [DB] %s = %.*s\n", name, value.size(), value.data());
+	if (!SetEnum(ini, Output.Driver, "DB", "DRIVER") ||
+		!SetEnum(ini, Output.Auth, "DB", "AUTH"))
 		return false;
-	};
 
-	auto Str = ini.GetString("DB", "DRIVER").value_or("odbc");
-	if (iequals(Str, "odbc")) Output.Driver = MDatabase::DBDriver::ODBC;
-	else if (iequals(Str, "sqlserver")) Output.Driver = MDatabase::DBDriver::SQLServer;
-	else return Invalid("DRIVER", Str);
+	if (Output.Driver == MDatabase::DBDriver::SQLServer)
+	{
+		SET_OR_RETURN(Output.Server, "DB", "SERVER");
+		SET_OR_RETURN(Output.Database, "DB", "DATABASE");
+	}
+	else if (Output.Driver == MDatabase::DBDriver::ODBC)
+	{
+		SET_OR_RETURN(Output.DSN, "DB", "DNS");
+	}
 
-	Str = ini.GetString("DB", "AUTH").value_or("sqlserver");
-	if (iequals(Str, "sqlserver")) Output.Auth = MDatabase::DBAuth::SQLServer;
-	else if (iequals(Str, "windows")) Output.Auth = MDatabase::DBAuth::Windows;
-	else return Invalid("AUTH", Str);
-
-	Output.Server = ini.GetString("DB", "SERVER").value_or("");
-	Output.Database = ini.GetString("DB", "DATABASE").value_or("");
-
-	Output.DSN = ini.GetString("DB", "DNS").value_or("gunzdb");
-	Output.Username = ini.GetString("DB", "USERNAME").value_or("gunzdb");
-	Output.Password = ini.GetString("DB", "PASSWORD").value_or("gunzdb");
+	if (Output.Auth == MDatabase::DBAuth::SQLServer)
+	{
+		SET_OR_RETURN(Output.Username, "DB", "USERNAME");
+		SET_OR_RETURN(Output.Password, "DB", "PASSWORD");
+	}
 
 	return true;
 }
+
+#undef SET_OR_RETURN
 
 bool MMatchConfig::Create()
 {
@@ -77,127 +96,34 @@ bool MMatchConfig::Create()
 	if (!ini.Parse(SERVER_CONFIG_FILENAME))
 		return false;
 
-	MDatabase::ConnectionDetails ConnDetails;
-	if (!GetDBConnDetails(ini, ConnDetails))
-		return false;
-	Driver = ConnDetails.Driver;
-	Auth = ConnDetails.Auth;
-	strcpy_safe(Server, ConnDetails.Server);
-	strcpy_safe(Database, ConnDetails.Database);
-	strcpy_safe(m_szDB_DNS, ConnDetails.DSN);
-	strcpy_safe(m_szDB_UserName, ConnDetails.Username);
-	strcpy_safe(m_szDB_Password, ConnDetails.Password);
+	m_nMaxUser = ini.GetInt("SERVER", "MAXUSER", 1500);
+	m_nServerID = ini.GetInt("SERVER", "SERVERID", 0);
+	strcpy_safe(m_szServerName, ini.GetString("SERVER", "SERVERNAME", "matchserver"));
 
-	auto GetPrivateProfileString = [&](const char* arg_section, const char* arg_name,
-		const char* default_value, char* output, size_t output_size, const char*)
-	{
-		strcpy_safe(output, output_size, ini.GetString(arg_section, arg_name).value_or(""));
+	if (!SetEnum(ini, m_nServerMode, "SERVER", "MODE", MSM_MAX))
+		return false;
+
+	auto AddIPs = [&](auto& Container, const char* Name) {
+		Split(ini.GetString("SERVER", Name, ""), " ", [&](StringView Str) {
+			Container.push_back(Str.str());
+		});
 	};
 
-	auto GetPrivateProfileInt = [&](const char* arg_section, const char* arg_name,
-		int default_value, const char*)
-	{
-		return ini.GetInt(arg_section, arg_name).value_or(default_value);
-	};
+	AddIPs(m_FreeLoginIPList, "FREELOGINIP");
+	AddIPs(m_DebugLoginIPList, "DEBUGIP");
 
-	m_nMaxUser = GetPrivateProfileInt("SERVER", "MAXUSER", 1500, SERVER_CONFIG_FILENAME);
-	m_nServerID = GetPrivateProfileInt("SERVER", "SERVERID", 1500, SERVER_CONFIG_FILENAME);
-	GetPrivateProfileString("SERVER", "SERVERNAME", "matchserver", m_szServerName, 256, SERVER_CONFIG_FILENAME);
+	m_strKeeperIP = ini.GetString("SERVER", "KEEPERIP", "").str();
 
-	char szServerMode[128] = "";
-	GetPrivateProfileString("SERVER", "MODE", SERVER_CONFIG_SERVERMODE_NORMAL, szServerMode, 128, SERVER_CONFIG_FILENAME);
+	m_bIsDebugServer = bool(ini.GetInt("SERVER", "DEBUG", SERVER_CONFIG_DEBUG_DEFAULT));
+	m_bCheckPremiumIP = bool(ini.GetInt("SERVER", "CheckPremiumIP", 0));
 
-	if (!_stricmp(szServerMode, SERVER_CONFIG_SERVERMODE_NORMAL)) m_nServerMode = MSM_NORMAL_;
-	else if (!_stricmp(szServerMode, SERVER_CONFIG_SERVERMODE_CLAN)) m_nServerMode = MSM_CLAN;
-	else if (!_stricmp(szServerMode, SERVER_CONFIG_SERVERMODE_LADDER)) m_nServerMode = MSM_LADDER;
-	else if (!_stricmp(szServerMode, SERVER_CONFIG_SERVERMODE_EVENT)) m_nServerMode = MSM_EVENT;
-	else if (!_stricmp(szServerMode, SERVER_CONFIG_SERVERMODE_TEST)) m_nServerMode = MSM_TEST;
-	else { _ASSERT(0); }
-
-	// 인원제한 무시하는 허용IP
-	char szAllowIP[1024] = "";
-	char* pNextArg = szAllowIP;
-	GetPrivateProfileString("SERVER", "FREELOGINIP", "", szAllowIP, 1024, SERVER_CONFIG_FILENAME);
-	MLex lex;
-	while(true) {
-		char szIP[128] = "";
-		pNextArg = lex.GetOneArg(pNextArg, szIP);
-		if (*szIP == 0)
-			break;
-		AddFreeLoginIP(szIP);
-	}
-
-	char szDebug[4] = {0,};
-	GetPrivateProfileString( "SERVER", "DEBUG", SERVER_CONFIG_DEBUG_DEFAULT, szDebug, 4, SERVER_CONFIG_FILENAME );
-	if( 0 == _stricmp("0", szDebug) )
-		m_bIsDebugServer = false;
-	else
-		m_bIsDebugServer = true;
-
-	// Debug ip.
-	char szDebugIP[ 1024 ] = {0,};
-	char* pNextDbgIP = szDebugIP;
-	GetPrivateProfileString( "SERVER", "DEBUGIP", "", szDebugIP, 1024, SERVER_CONFIG_FILENAME );
-	while(true) {
-		char szIP[128] = "";
-		pNextDbgIP = lex.GetOneArg(pNextDbgIP, szIP);
-		if (*szIP == 0)
-			break;
-		AddDebugLoginIP(szIP);
-	}
-
-	char szKeeperIP[ 32 ] = "";
-	GetPrivateProfileString( "SERVER", "KEEPERIP", "", szKeeperIP, 32, SERVER_CONFIG_FILENAME );
-	if( 0 == strlen(szKeeperIP) )
-	{
-		mlog( "server.ini - Keeper ip not setting\n" );
-		//return false;
-	}
-	m_strKeeperIP = szKeeperIP;
-	
-	// 프리미엄 IP 체크
-	int nCheckPremiumIP = GetPrivateProfileInt("SERVER", "CheckPremiumIP", 0, SERVER_CONFIG_FILENAME);
-	if (nCheckPremiumIP != 0) m_bCheckPremiumIP = true;
-
-	char szCountry[ 32 ] = "";
-	GetPrivateProfileString( "SERVER", "COUNTRY", "", szCountry, 31, SERVER_CONFIG_FILENAME );
-	if( 0 != strlen(szCountry) )
-		m_strCountry = szCountry;
-	else
-	{
-		ASSERT( 0 );
-		mlog( "server.ini - Invalid country type.\n" );
-		return false;
-	}
-
-	char szLanguage[ 32 ] = "";
-	GetPrivateProfileString( "SERVER", "LANGUAGE", "", szLanguage, 31, SERVER_CONFIG_FILENAME );
-	if( 0 != strlen(szLanguage) )
-		m_strLanguage = szLanguage;
-	else
-	{
-		ASSERT( 0 );
-		mlog( "server.ini - Invalid language type.\n" );
-		return false;
-	}
-
-
-	// 일본 넷마블 전용
-	GetPrivateProfileString("LOCALE", "DBAgentIP",						SERVER_CONFIG_DEFAULT_NJ_DBAGENT_IP, m_NJ_szDBAgentIP, 64, SERVER_CONFIG_FILENAME);
-	m_NJ_nDBAgentPort = GetPrivateProfileInt("LOCALE", "DBAgentPort",	SERVER_CONFIG_DEFAULT_NJ_DBAGENT_PORT, SERVER_CONFIG_FILENAME);
-	m_NJ_nGameCode = GetPrivateProfileInt("LOCALE", "GameCode",			SERVER_CONFIG_DEFAULT_NJ_DBAGENT_GAMECODE, SERVER_CONFIG_FILENAME);
-
-
-	char szEnableMap[512];
-	GetPrivateProfileString("SERVER", "EnableMap", "", szEnableMap, 512, SERVER_CONFIG_FILENAME);
-
-	char seps[] = ";";
+	auto DefaultCountry = "BRZ";
+	m_strCountry = ini.GetString("SERVER", "COUNTRY", DefaultCountry).str();
+	m_strLanguage = ini.GetString("SERVER", "LANGUAGE", DefaultCountry).str();
 
 	int nMapCount = 0;
 
-	char *context = nullptr;
-
-	Split(szEnableMap, seps, [&](StringView token) {
+	Split(ini.GetString("SERVER", "EnableMap", ""), ";", [&](StringView token) {
 		token = trim(token);
 
 		auto it = std::find_if(std::begin(g_MapDesc), std::end(g_MapDesc), [&](auto& x) {
@@ -220,99 +146,36 @@ bool MMatchConfig::Create()
 		m_bRestrictionMap = true;
 	}
 
-	// filer.
-	char szUse[ 2 ] = {0,};
-	GetPrivateProfileString( "FILTER", "USE", "0", szUse, 2, SERVER_CONFIG_FILENAME );
-	SetUseFilterState( atoi(szUse) != 0 );
-	
-	char szAccept[ 2 ] = {0,};
-	GetPrivateProfileString( "FILTER", "ACCEPT_INVALID_IP", "1", szAccept, 2, SERVER_CONFIG_FILENAME );
-	SetAcceptInvalidIPState( atoi(szAccept) != 0 );
+	GameDirectory = ini.GetString("SERVER", "game_dir", "").str();
+	bIsMasterServer = ini.GetInt<bool>("SERVER", "is_master_server", true);
 
-	// environment
-	char szUseEvent[ 2 ] = {0,};
-	GetPrivateProfileString("ENVIRONMENT", "USE_EVENT", SERVER_CONFIG_DEFAULT_USE_EVENT, szUseEvent, 2, SERVER_CONFIG_FILENAME);
-	ASSERT( 0 != strlen(szUseEvent) );
-	if( 0 == _stricmp("1", szUseEvent) )
-		m_bIsUseEvent = true;
-	else
-		m_bIsUseEvent = false;
-
-	char szUseFileCrc[ 2 ] = {0,};
-	GetPrivateProfileString("ENVIRONMENT", "USE_FILECRC", SERVER_CONFIG_DEFAULT_USE_FILECRC, szUseFileCrc, 2, SERVER_CONFIG_FILENAME);
-	ASSERT( 0 != strlen(szUseFileCrc) );
-	if( 0 == _stricmp("1", szUseFileCrc) )
-		m_bIsUseFileCrc = true;
-	else
-		m_bIsUseFileCrc = false;
-
-	std::string File;
-	std::ifstream FileStream("server.xml", std::ios::in | std::ios::binary | std::ios::ate);
-	File.resize(static_cast<size_t>(FileStream.tellg()));
-	FileStream.seekg(std::ios::beg);
-	FileStream.read(&File[0], File.size());
-
-	if (FileStream.fail())
-	{
-		mlog("Failed to load server.xml!\n");
+	if (!SetEnum(ini, DBType, "DB", "database_type"))
 		return false;
+
+	if (DBType == DatabaseType::MSSQL)
+	{
+		MDatabase::ConnectionDetails ConnDetails;
+		if (!GetDBConnDetails(ini, ConnDetails))
+			return false;
+		Driver = ConnDetails.Driver;
+		Auth = ConnDetails.Auth;
+		strcpy_safe(Server, ConnDetails.Server);
+		strcpy_safe(Database, ConnDetails.Database);
+		strcpy_safe(m_szDB_DNS, ConnDetails.DSN);
+		strcpy_safe(m_szDB_UserName, ConnDetails.Username);
+		strcpy_safe(m_szDB_Password, ConnDetails.Password);
 	}
 
-	rapidxml::xml_document<> doc;
-	doc.parse<0>(&File[0]);
+	strcpy_safe(m_NJ_szDBAgentIP, ini.GetString("LOCALE", "DBAgentIP",
+		SERVER_CONFIG_DEFAULT_NJ_DBAGENT_IP));
+	m_NJ_nDBAgentPort = ini.GetInt("LOCALE", "DBAgentPort", SERVER_CONFIG_DEFAULT_NJ_DBAGENT_PORT);
+	m_NJ_nGameCode = ini.GetInt("LOCALE", "GameCode", SERVER_CONFIG_DEFAULT_NJ_DBAGENT_GAMECODE);
 
-	auto FailedToFindNode = [&](const char* Name) {
-		mlog("Failed to find %s node in server.xml!\n", Name);
-	};
-
-	auto GameDirNode = doc.first_node("game_dir");
-	if (!GameDirNode)
-	{
-		FailedToFindNode("game_dir");
-	}
-	else
-	{
-		GameDirectory = GameDirNode->value();
-	}
-
-	auto IsMasterServerNode = doc.first_node("is_master_server");
-	if (!IsMasterServerNode)
-	{
-		FailedToFindNode("is_master_server");
-	}
-	else
-	{
-		bIsMasterServer = atoi(IsMasterServerNode->value()) != 0;
-		MLog("IsMasterServer: %s\n", bIsMasterServer ? "true" : "false");
-	}
-
-	auto DBTypeNode = doc.first_node("database_type");
-	if (!DBTypeNode)
-	{
-		FailedToFindNode("database_type");
-	}
-	else
-	{
-		auto* DBTypeString = DBTypeNode->value();
-
-		if (!_stricmp(DBTypeString, "sqlite"))
-		{
-			DBType = DatabaseType::SQLite;
-		}
-		else if (!_stricmp(DBTypeString, "mssql"))
-		{
-#ifdef MSSQL_ENABLED
-			DBType = DatabaseType::MSSQL;
-#else
-			throw std::runtime_error("database_type is set to mssql, but mssql isn't supported in this build! terminating...\n");
-#endif
-		}
-		else
-		{
-			DBType = DatabaseType::None;
-			MLog("Unrecognized database type %s!\n", DBTypeString);
-		}
-	}
+	SetUseFilterState(ini.GetInt<bool>("FILTER", "USE", 0));
+	SetAcceptInvalidIPState(ini.GetInt<bool>("FILTER", "ACCEPT_INVALID_IP", 1));
+	m_bIsUseEvent = ini.GetInt<bool>("ENVIRONMENT", "USE_EVENT", SERVER_CONFIG_DEFAULT_USE_EVENT);
+	m_bIsUseFileCrc = ini.GetInt<bool>("ENVIRONMENT", "USE_FILECRC",
+		SERVER_CONFIG_DEFAULT_USE_FILECRC);
 
 	m_bIsComplete = true;
 	return m_bIsComplete;

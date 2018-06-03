@@ -14,27 +14,22 @@
 
 #include "TestAssert.h"
 
-static std::mt19937 rng;
+namespace TestLauncherInternal {
+namespace {
 
-template <typename T>
-static void FillRandom(T& c)
-{
-	std::uniform_int_distribution<> dist{ 0, UCHAR_MAX - 1 };
-	for (u8& byte : c)
-		byte = dist(rng);
-}
+#include "TestRandom.h"
 
-static auto MakeBytes(size_t Size) {
+auto MakeBytes(size_t Size) {
 	return std::vector<u8>(Size);
 }
 
-static auto MakeRandomBytes(size_t Size) {
+auto MakeRandomBytes(size_t Size) {
 	auto Bytes = MakeBytes(Size);
 	FillRandom(Bytes);
 	return Bytes;
 }
 
-static void TestRollingHashMove()
+void TestRollingHashMove()
 {
 	// Generate some data and check that, for every window in the sequence, the rolling hash
 	// obtained by hashing the entire window at that position and the one gotten by updating
@@ -66,7 +61,7 @@ static void TestRollingHashMove()
 	}
 }
 
-static void TestRollingHashStream()
+void TestRollingHashStream()
 {
 	constexpr auto SequenceSize = LauncherConfig::BlockSize;
 	auto Sequence = MakeRandomBytes(SequenceSize);
@@ -99,13 +94,13 @@ static void TestRollingHashStream()
 	}
 }
 
-static void TestRollingHash()
+void TestRollingHash()
 {
 	TestRollingHashMove();
 	TestRollingHashStream();
 }
 
-static void WriteFile(const char* Path, const void* Buffer, size_t Size)
+void WriteFile(const char* Path, const void* Buffer, size_t Size)
 {
 	CreateDirectoriesIfNonexistent(Path);
 
@@ -116,7 +111,7 @@ static void WriteFile(const char* Path, const void* Buffer, size_t Size)
 	TestAssert(!File.error());
 }
 
-static void TestFile(const ArrayView<u8>& SrcFileContents,
+void TestFile(const ArrayView<u8>& SrcFileContents,
 	const ArrayView<u8>& DestFileContents,
 	size_t ExpectedNumUnmatchingBlocks)
 {
@@ -174,7 +169,7 @@ static void TestFile(const ArrayView<u8>& SrcFileContents,
 }
 
 template <size_t FileSize>
-static void TestSize()
+void TestSize()
 {
 	auto MakeView = [&](auto&& c) { return ArrayView<u8>{c.data(), c.size()}; };
 
@@ -226,7 +221,7 @@ static void TestSize()
 		(NumBlocks - 1) / 2);
 }
 
-static void TestSyncFile()
+void TestSyncFile()
 {
 	TestSize<1>(); // 1 byte
 	TestSize<72>(); // 72 bytes
@@ -239,8 +234,12 @@ static void TestSyncFile()
 #endif
 }
 
+} // namespace
+} // namespace TestLauncherInternal
+
 void TestLauncher()
 {
+	using namespace TestLauncherInternal;
 	TestAssert(Log.Init("launcher_log.txt", LogTo::File | LogTo::Debugger));
 	TestRollingHash();
 	TestSyncFile();

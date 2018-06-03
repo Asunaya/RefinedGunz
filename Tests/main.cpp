@@ -17,6 +17,7 @@ int main()
 	ADD(TestMUtil);
 	ADD(TestStringView);
 	ADD(TestSafeString);
+	ADD(TestConfig);
 	ADD(TestDB);
 	ADD(TestLauncher);
 #undef ADD

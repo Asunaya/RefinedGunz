@@ -20,7 +20,7 @@ inline int IniCallbackFwd(void* user, const char* section, const char* name, con
 	if (ends_with(v, "\""))
 		v.remove_suffix(1);
 	Map[section][name] = v.str();
-	return 0;
+	return 1;
 }
 }
 
@@ -30,7 +30,7 @@ struct IniParser
 
 	bool Parse(const char* Filename)
 	{
-		return ini_parse(Filename, IniCallbackFwd, &Map);
+		return ini_parse(Filename, IniCallbackFwd, &Map) == 0;
 	}
 
 	optional<StringView> GetString(const char* arg_section, const char* arg_name) const
@@ -46,11 +46,24 @@ struct IniParser
 		return it2->second;
 	}
 
-	optional<int> GetInt(const char* arg_section, const char* arg_name) const
+	StringView GetString(const char* arg_section, const char* arg_name,
+		const char* default_value) const
+	{
+		return GetString(arg_section, arg_name).value_or(default_value);
+	}
+
+	template <typename T = int>
+	optional<T> GetInt(const char* arg_section, const char* arg_name) const
 	{
 		auto Str = GetString(arg_section, arg_name);
 		if (!Str)
 			return nullopt;
 		return StringToInt(*Str);
+	};
+
+	template <typename T>
+	T GetInt(const char* arg_section, const char* arg_name, T default_value) const
+	{
+		return GetInt(arg_section, arg_name).value_or(default_value);
 	};
 };

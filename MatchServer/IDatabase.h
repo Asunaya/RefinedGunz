@@ -15,10 +15,21 @@ enum class AccountCreationResult
 
 enum class DatabaseType
 {
-	None,
-	MSSQL,
 	SQLite,
+	MSSQL,
+	Max,
 };
+
+inline const char* ToString(DatabaseType DBType)
+{
+	switch (DBType)
+	{
+	case DatabaseType::MSSQL: return "MSSQL";
+	case DatabaseType::SQLite: return "SQLite";
+	}
+	assert(false);
+	return nullptr;
+}
 
 enum class ItemPurchaseType
 {

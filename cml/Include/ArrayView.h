@@ -22,6 +22,7 @@ public:
 	auto& operator[](size_t Index) const { return ptr[Index]; }
 
 	size_t size() const { return sz; }
+	bool empty() const { return sz == 0; }
 
 	auto begin() const { return ptr; }
 	auto end() const { return ptr + sz; }

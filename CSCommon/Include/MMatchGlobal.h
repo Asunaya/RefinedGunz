@@ -316,6 +316,20 @@ enum MMatchServerMode
 	MSM_ALL			= 100,
 };
 
+inline const char* ToString(MMatchServerMode Mode)
+{
+	switch (Mode)
+	{
+	case MSM_NORMAL_: return "normal";
+	case MSM_CLAN: return "clan";
+	case MSM_LADDER: return "ladder";
+	case MSM_EVENT: return "event";
+	case MSM_TEST: return "test";
+	}
+	assert(false);
+	return nullptr;
+}
+
 enum MMatchProposalMode
 {
 	MPROPOSAL_NONE = 0,

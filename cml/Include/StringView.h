@@ -43,14 +43,6 @@ struct BasicStringView
 	BasicStringView(const CharType* ptr, size_t sz) : ptr{ptr}, sz{sz} {}
 	BasicStringView(const std::basic_string<CharType>& str) : ptr{str.c_str()}, sz{str.size()} {}
 
-	bool operator==(const BasicStringView& rhs) const {
-		return size() == rhs.size() && !memcmp(ptr, rhs.ptr, size() * sizeof(CharType));
-	}
-
-	bool operator!=(const BasicStringView& rhs) const {
-		return !(*this == rhs);
-	}
-
 	const CharType& operator[](size_t i) const {
 		assert(i < sz);
 		return ptr[i];
@@ -164,6 +156,50 @@ using WStringView = BasicStringView<wchar_t>;
 
 inline StringView operator "" _sv(const char* ptr, size_t sz) { return {ptr, sz}; }
 inline WStringView operator "" _sv(const wchar_t* ptr, size_t sz) { return {ptr, sz}; }
+
+template <typename C>
+bool operator==(const BasicStringView<C>& lhs, const BasicStringView<C>& rhs) {
+	return lhs.size() == rhs.size() && !memcmp(lhs.data(), rhs.data(), lhs.size() * sizeof(C));
+}
+
+template <typename C>
+bool operator!=(const BasicStringView<C>& lhs, const BasicStringView<C>& rhs) {
+	return !(lhs == rhs);
+}
+
+template <typename C>
+bool operator<(const BasicStringView<C>& lhs, const BasicStringView<C>& rhs) {
+	return std::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+}
+
+template <typename C>
+bool operator<=(const BasicStringView<C>& lhs, const BasicStringView<C>& rhs) {
+	return lhs < rhs || lhs == rhs;
+}
+
+template <typename C>
+bool operator>(const BasicStringView<C>& lhs, const BasicStringView<C>& rhs) {
+	return !(lhs <= rhs);
+}
+
+template <typename C>
+bool operator>=(const BasicStringView<C>& lhs, const BasicStringView<C>& rhs) {
+	return !(lhs < rhs);
+}
+
+inline bool operator==(StringView lhs, StringView rhs) { return operator==<char>(lhs, rhs); }
+inline bool operator!=(StringView lhs, StringView rhs) { return operator!=<char>(lhs, rhs); }
+inline bool operator< (StringView lhs, StringView rhs) { return operator< <char>(lhs, rhs); }
+inline bool operator<=(StringView lhs, StringView rhs) { return operator<=<char>(lhs, rhs); }
+inline bool operator> (StringView lhs, StringView rhs) { return operator> <char>(lhs, rhs); }
+inline bool operator>=(StringView lhs, StringView rhs) { return operator>=<char>(lhs, rhs); }
+
+inline bool operator==(WStringView lhs, WStringView rhs) { return operator==<wchar_t>(lhs, rhs); }
+inline bool operator!=(WStringView lhs, WStringView rhs) { return operator!=<wchar_t>(lhs, rhs); }
+inline bool operator< (WStringView lhs, WStringView rhs) { return operator< <wchar_t>(lhs, rhs); }
+inline bool operator<=(WStringView lhs, WStringView rhs) { return operator<=<wchar_t>(lhs, rhs); }
+inline bool operator> (WStringView lhs, WStringView rhs) { return operator> <wchar_t>(lhs, rhs); }
+inline bool operator>=(WStringView lhs, WStringView rhs) { return operator>=<wchar_t>(lhs, rhs); }
 
 namespace detail
 {

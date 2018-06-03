@@ -6,6 +6,7 @@
 
 #include "MMatchMap.h"
 #include "MMatchGlobal.h"
+#include "IDatabase.h"
 #include "MDatabase.h"
 
 bool GetDBConnDetails(const struct IniParser& ini, MDatabase::ConnectionDetails& Output);
@@ -56,19 +57,16 @@ private:
 	
 	std::string GameDirectory = "";
 	bool bIsMasterServer = true;
-	DatabaseType DBType = DatabaseType::None;
+	DatabaseType DBType = DatabaseType::SQLite;
 
 	bool				m_bIsComplete;
 
-private:
 	void AddFreeLoginIP(const char* szIP);
 	void AddDebugLoginIP( const char* szIP );
 	void TrimStr(const char* szSrcStr, char* outStr, int maxlen);
 
 public:
 	MMatchConfig();
-	virtual ~MMatchConfig();
-	static MMatchConfig* GetInstance();
 	bool Create();
 	void Destroy();
 	void Clear();
@@ -131,25 +129,22 @@ public:
 	bool VersionChecking = true;
 };
 
-inline MMatchConfig* MGetServerConfig() { return MMatchConfig::GetInstance(); }
+inline MMatchConfig* MGetServerConfig()
+{
+	static MMatchConfig m_MatchConfig;
+	return &m_MatchConfig;
+}
 
 inline bool QuestTestServer() { return (MGetServerConfig()->GetServerMode() == MSM_TEST); }
 
 
 #define SERVER_CONFIG_FILENAME			"./server.ini"
 
-
-#define SERVER_CONFIG_SERVERMODE_NORMAL			"normal"
-#define SERVER_CONFIG_SERVERMODE_CLAN			"clan"
-#define SERVER_CONFIG_SERVERMODE_LADDER			"ladder"
-#define SERVER_CONFIG_SERVERMODE_EVENT			"event"
-#define SERVER_CONFIG_SERVERMODE_TEST			"test"
-
 #define SERVER_CONFIG_DEFAULT_NJ_DBAGENT_IP			"210.174.197.180"
 #define SERVER_CONFIG_DEFAULT_NJ_DBAGENT_PORT		7500
 #define SERVER_CONFIG_DEFAULT_NJ_DBAGENT_GAMECODE	1013
 
-#define SERVER_CONFIG_DEFAULT_USE_EVENT		"1"
-#define SERVER_CONFIG_DEFAULT_USE_FILECRC	"0"
+#define SERVER_CONFIG_DEFAULT_USE_EVENT		1
+#define SERVER_CONFIG_DEFAULT_USE_FILECRC	0
 
-#define SERVER_CONFIG_DEBUG_DEFAULT			"0"
+#define SERVER_CONFIG_DEBUG_DEFAULT			0

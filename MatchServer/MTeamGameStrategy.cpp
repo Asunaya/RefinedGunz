@@ -200,7 +200,7 @@ void MLadderGameStrategy::SavePointOnFinishGame(MMatchStage* pStage, MMatchTeam 
 int MLadderGameStrategy::GetRandomMap(int nTeamMember)
 {
 	// Game Setting - 맵, TIC 클랜전은 다르게 해야한다. 월요일날 하장
-	MMatchConfig* pConfig = MMatchConfig::GetInstance();
+	MMatchConfig* pConfig = MGetServerConfig();
 
 	// Random 하게 맵을 고른다
 	list<int> mapList;
