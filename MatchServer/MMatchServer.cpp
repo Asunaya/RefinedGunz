@@ -827,13 +827,10 @@ void MMatchServer::UpdateServerStatusDB()
 		{
 			LOG(LOG_ALL, "[CRITICAL ERROR] DB Connection Lost. ");
 
-#ifdef MFC
-			if (Database.Type == DatabaseType::MSSQL)
+			if (auto DB = dynamic_cast<MSSQLDatabase*>(GetDBMgr()))
 			{
-				static_cast<MSSQLDatabase*>(GetDBMgr())->Disconnect();
 				InitDB();
 			}
-#endif
 			st_ErrCounter++;
 			if (st_ErrCounter > MAX_DB_QUERY_COUNT_OUT) 
 			{
