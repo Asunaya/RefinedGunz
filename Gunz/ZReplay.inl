@@ -668,7 +668,7 @@ inline std::vector<ReplayPlayerInfo> ZReplayLoader::GetCharInfo()
 			}
 			else
 			{
-				Read(CharState);
+				READ_CHARSTATE(ZCharacterReplayState_Official_V5);
 			}
 		}
 #undef READ_CHARSTATE
