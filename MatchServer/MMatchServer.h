@@ -727,6 +727,8 @@ inline const char* MErrStr(const int nID)
 
 bool IsExpiredBlockEndTime(const tm& st);
 
+IDatabase* MakeDatabaseFromConfig();
+
 void _CheckValidPointer(void* pPointer1, void* pPointer2, void* pPointer3, int nState, int nValue);
 #define CheckValidPointer(A, B)		_CheckValidPointer(m_pMessengerManager, m_pScheduler, m_pAuthBuilder, A, B);CheckMemoryTest(A, B);
 #define CheckValidPointer2(A, B)	MMatchServer::GetInstance()->CheckMemoryTest(A, B);

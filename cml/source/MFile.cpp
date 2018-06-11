@@ -37,7 +37,8 @@ bool Exists(const char* Path)
 
 bool Delete(const char* Path)
 {
-	return ::DeleteFileA(Path) != FALSE;
+	auto Ret = IsDir(Path) ? ::RemoveDirectoryA(Path) : ::DeleteFileA(Path);
+	return Ret != FALSE;
 }
 
 bool Move(const char* OldPath, const char* NewPath)
@@ -217,12 +218,12 @@ bool IsDir(const char* Path)
 
 bool CreateFile(const char* Path)
 {
-	return creat(Path, 0700) == 0;
+	return creat(Path, 0777) != -1;
 }
 
 bool CreateDir(const char* Path)
 {
-	return mkdir(Path, 0700) == 0;
+	return mkdir(Path, 0777) != -1;
 }
 
 optional<FileAttributes> GetAttributes(const char* Path)
@@ -317,8 +318,51 @@ FileRange Glob(const char* Pattern)
 
 #endif
 
+bool CreateParentDirs(StringView PathArgument)
+{
+	auto Sep = "/\\"_sv;
+	auto FirstIndex = PathArgument.find_first_of(Sep);
+	if (FirstIndex == PathArgument.npos)
+		return true; // No directories.
+
+	// Create our own copy so we can add zeroes.
+	char Path[MFile::MaxPath];
+	strcpy_safe(Path, PathArgument);
+	auto End = Path + PathArgument.size();
+
+	char* p = Path + FirstIndex;
+	while (true)
+	{
+		// Set the current slash to zero, and revert this change before the next loop iteration.
+		auto OldValue = *p;
+		*p = 0;
+		// Capture by value to ignore the change to p at the end.
+		DEFER([=] { *p = OldValue; });
+
+		if (!MFile::IsDir(Path))
+		{
+			if (!MFile::CreateDir(Path))
+			{
+				return false;
+			}
+		}
+
+		p = std::find_first_of(p + 1, End, Sep.begin(), Sep.end());
+		if (p == End)
+			break;
+	}
+
+	return true;
+}
+
 bool File::open_impl(const char* path, const char* mode)
 {
+	if (MFile::IsDir(path))
+	{
+		state.error = true;
+		return false;
+	}
+
 #pragma warning(push)
 #pragma warning(disable: 4996)
 	file_ptr = CFilePtr{ fopen(path, mode) };

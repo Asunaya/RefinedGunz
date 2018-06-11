@@ -6,6 +6,8 @@
 #include <mutex>
 #include "GlobalTypes.h"
 #include "MSync.h"
+#include "function_view.h"
+#include "IDatabase.h"
 
 enum MASYNC_RESULT {
 	MASYNC_RESULT_SUCCEED,
@@ -84,28 +86,20 @@ protected:
 	MAsyncJobList WaitQueue;
 	MAsyncJobList ResultQueue;
 
-	std::deque<std::function<void()>> GenericJobs;
-	std::mutex GenericJobMutex;
-
 	MCriticalSection csCrashDump;
 
-	void WorkerThread();
-	void OnRun();
+	void WorkerThread(IDatabase* Database);
+	void OnRun(IDatabase* Database);
 
 public:
 	bool Create(int ThreadCount);
+	bool Create(int ThreadCount, function_view<IDatabase*()> GetDatabase);
 	void Destroy();
 	
 	int GetWaitQueueCount()		{ return WaitQueue.GetCount(); }
 	int GetResultQueueCount()	{ return ResultQueue.GetCount(); }
 
 	void PostJob(MAsyncJob* pJob);
-	template <typename T>
-	void PostJob(T&& fn)
-	{
-		std::lock_guard<std::mutex> lock(GenericJobMutex);
-		GenericJobs.emplace_back(std::forward<T>(fn));
-	}
 	MAsyncJob* GetJobResult() {
 		ResultQueue.Lock();
 			auto pJob = ResultQueue.GetJobUnsafe();

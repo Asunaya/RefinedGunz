@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "MAsyncProxy.h"
 #include "MMatchConfig.h"
+#include "MMatchServer.h"
 #include "MCrashDump.h"
 #ifndef _PUBLISH
 	#include "MProcessController.h"
@@ -8,11 +9,16 @@
 
 bool MAsyncProxy::Create(int ThreadCount)
 {
+	return Create(ThreadCount, MakeDatabaseFromConfig);
+}
+
+bool MAsyncProxy::Create(int ThreadCount, function_view<IDatabase*()> GetDatabase)
+{
 	ThreadCount = min(ThreadCount, MAX_THREADPOOL_COUNT);
 
 	for (int i = 0; i < ThreadCount; i++)
 	{
-		std::thread{ [&] { WorkerThread(); } }.detach();
+		std::thread{ [this, Database = GetDatabase()] { WorkerThread(Database); } }.detach();
 	}
 
 	return true;
@@ -33,13 +39,13 @@ void MAsyncProxy::PostJob(MAsyncJob* pJob)
 	EventFetchJob.SetEvent();
 }
 
-void MAsyncProxy::WorkerThread()
+void MAsyncProxy::WorkerThread(IDatabase* Database)
 {
 #ifdef _WIN32
 	__try
 	{
 #endif
-		OnRun();
+		OnRun(Database);
 #ifdef _WIN32
 	}
 	__except(CrashDump(GetExceptionInformation())) 
@@ -48,26 +54,8 @@ void MAsyncProxy::WorkerThread()
 #endif
 }
 
-void MAsyncProxy::OnRun()
+void MAsyncProxy::OnRun(IDatabase* Database)
 {
-	IDatabase* Database;
-	switch (MGetServerConfig()->GetDatabaseType())
-	{
-	case DatabaseType::SQLite:
-		Database = new SQLiteDatabase;
-		break;
-
-#ifdef MSSQL_ENABLED
-	case DatabaseType::MSSQL:
-		Database = new MSSQLDatabase;
-		break;
-#endif
-
-	default:
-		MLog("Invalid db config\n");
-		return;
-	}
-
 	MSignalEvent* EventArray[]{
 		&EventShutdown,
 		&EventFetchJob,

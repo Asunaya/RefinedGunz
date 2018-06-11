@@ -855,7 +855,7 @@ static bool CreateNewFile(const char* LocalFilePath,
 
 bool MakeSyncFile(const char* OutputFilePath, const char* InputFilePath)
 {
-	CreateDirectoriesIfNonexistent(OutputFilePath);
+	MFile::CreateParentDirs(OutputFilePath);
 
 	MFile::RWFile OutputFile{ OutputFilePath, MFile::Clear};
 	if (OutputFile.error())

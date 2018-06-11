@@ -321,7 +321,7 @@ inline PatchFileResult PatchFile(PatchInternalState& State,
 
 	State.TargetFile = Filename;
 
-	CreateDirectoriesIfNonexistent(OutputFilename);
+	MFile::CreateParentDirs(OutputFilename);
 
 	Hash::Strong NewHash;
 	u64 NewFileSize;

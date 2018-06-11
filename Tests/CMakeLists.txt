@@ -6,7 +6,7 @@ file(GLOB src
 )
 
 if (UNIX)
-list(REMOVE_ITEM src "${CMAKE_CURRENT_SOURCE_DIR}/Replays.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/Math.cpp")
+list(REMOVE_ITEM src "${CMAKE_CURRENT_SOURCE_DIR}/Replays.cpp")
 endif()
 
 add_target(NAME Tests TYPE EXECUTABLE SOURCES "${src}")
@@ -24,3 +24,8 @@ target_link_libraries(Tests PUBLIC
 	${d3dx9_path}
 	${dxerr_path})
 endif()
+
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/ReplayFiles
+    DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+add_test(NAME Tests COMMAND $<TARGET_FILE:Tests>)

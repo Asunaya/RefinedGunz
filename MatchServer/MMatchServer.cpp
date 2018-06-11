@@ -238,6 +238,19 @@ bool IsExpiredBlockEndTime( const tm& st )
 	return tie_tm(st) <= tie_tm(*localtime(&unmove(time(0))));
 }
 
+IDatabase* MakeDatabaseFromConfig()
+{
+	switch (MGetServerConfig()->GetDatabaseType())
+	{
+		case DatabaseType::SQLite:
+			return new SQLiteDatabase;
+		case DatabaseType::MSSQL:
+			return new MSSQLDatabase;
+	}
+	MLog("Invalid db config\n");
+	return nullptr;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 MMatchServer::MMatchServer() : m_pScheduler( 0 )
@@ -446,24 +459,8 @@ bool MMatchServer::LoadChannelPreset()
 
 bool MMatchServer::InitDB()
 {
-	switch (MGetServerConfig()->GetDatabaseType())
-	{
-	case DatabaseType::SQLite:
-		Database = new SQLiteDatabase;
-		break;
-
-#ifdef MSSQL_ENABLED
-	case DatabaseType::MSSQL:
-		Database = new MSSQLDatabase;
-		break;
-#endif
-
-	default:
-		MLog("MMatchServer::InitDB -- Invalid database type\n");
-		assert(false);
-		return false;
-	}
-	return true;
+	Database = MakeDatabaseFromConfig();
+	return bool(Database);
 }
 
 bool MMatchServer::Create(int nPort)

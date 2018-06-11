@@ -19,6 +19,6 @@ constexpr u32 Infinite = 0xFFFFFFFF;
 AwaitResult Await(uintptr_t Handle, u32 Timeout = Infinite);
 
 // Terminates a process.
-bool Terminate(uintptr_t Handle, u32 ExitCode);
+bool Terminate(uintptr_t Handle);
 
 }

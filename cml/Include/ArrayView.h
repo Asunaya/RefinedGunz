@@ -54,3 +54,33 @@ private:
 	T* ptr{};
 	size_t sz{};
 };
+
+template <typename T>
+bool operator==(ArrayView<T> a, ArrayView<T> b) {
+	return std::equal(a.begin(), a.end(), b.begin(), b.end());
+}
+
+template <typename T>
+bool operator!=(ArrayView<T> a, ArrayView<T> b) {
+	return !(a == b);
+}
+
+template <typename T>
+bool operator<(ArrayView<T> a, ArrayView<T> b) {
+	return std::lexicographical_compare(a.begin(), a.end(), b.begin(), b.end());
+}
+
+template <typename T>
+bool operator<=(const ArrayView<T>& a, const ArrayView<T>& b) {
+	return a < b || a == b;
+}
+
+template <typename T>
+bool operator>(const ArrayView<T>& a, const ArrayView<T>& b) {
+	return !(a <= b);
+}
+
+template <typename T>
+bool operator>=(const ArrayView<T>& a, const ArrayView<T>& b) {
+	return !(a < b);
+}

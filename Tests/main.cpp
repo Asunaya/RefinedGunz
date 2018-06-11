@@ -18,6 +18,9 @@ int main()
 	ADD(TestStringView);
 	ADD(TestSafeString);
 	ADD(TestConfig);
+	ADD(TestMFile);
+	ADD(TestMProcess);
+	ADD(TestMAsyncProxy);
 	ADD(TestDB);
 	ADD(TestLauncher);
 #undef ADD

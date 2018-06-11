@@ -19,10 +19,15 @@ uintptr_t MProcess::Start(const char* File, const char * const * argv)
 #ifdef WIN32
 
 	char CommandLine[4096];
-	auto End = strcpy_safe(CommandLine, File);
-	for (auto p = argv; *p; ++p)
+	auto End = CommandLine;
+	auto Add = [&](const char* String) {
+		End = strcpy_safe(End, std::end(CommandLine) - End, String);
+	};
+	Add(argv[0] ? argv[0] : File);
+	for (auto p = argv + 1; *p; ++p)
 	{
-		End = strcpy_safe(End, std::end(CommandLine) - End, *p);
+		Add(" ");
+		Add(*p);
 	}
 
 	STARTUPINFO si{};
@@ -100,6 +105,8 @@ MProcess::AwaitResult MProcess::Await(uintptr_t Handle, u32 Timeout)
 	auto pid = static_cast<pid_t>(Handle);
 	int status = 0;
 
+	auto GetExitCode = [&] { return WIFEXITED(status) ? WEXITSTATUS(status) : 0; };
+
 	if (Timeout == Infinite)
 	{
 		auto waitret = waitpid(pid, &status, 0);
@@ -111,34 +118,45 @@ MProcess::AwaitResult MProcess::Await(uintptr_t Handle, u32 Timeout)
 		}
 
 		ret.TimedOut = false;
-		ret.ExitCode = WIFEXITED(status) ? WEXITSTATUS(status) : 0;
+		ret.ExitCode = GetExitCode();
 		return ret;
 	}
 	else
 	{
-		using namespace std::chrono_literals;
+		auto GetTime = [&] { return std::chrono::high_resolution_clock::now(); };
+		auto Start = GetTime();
 		while (true)
 		{
 			auto waitret = waitpid(pid, &status, WNOHANG);
-			if (waitret == -1 || waitret == 0)
+			if (waitret != -1 && waitret != 0)
 			{
-				std::this_thread::sleep_for(1ms);
+				ret.TimedOut = false;
+				ret.ExitCode = GetExitCode();
+				return ret;
 			}
+
+			if (GetTime() - Start >= std::chrono::milliseconds(Timeout))
+			{
+				ret.TimedOut = true;
+				ret.ExitCode = 0;
+				return ret;
+			}
+			std::this_thread::sleep_for(std::chrono::milliseconds(1));
 		}
 	}
 
 #endif
 }
 
-bool MProcess::Terminate(uintptr_t Handle, u32 ExitCode)
+bool MProcess::Terminate(uintptr_t Handle)
 {
 #ifdef WIN32
 
-	return ::TerminateProcess(reinterpret_cast<HANDLE>(Handle), ExitCode) != FALSE;
+	return ::TerminateProcess(reinterpret_cast<HANDLE>(Handle), 1) != FALSE;
 
 #else
 
-	return kill(static_cast<pid_t>(Handle), 9) == 0;
+	return kill(static_cast<pid_t>(Handle), SIGTERM) == 0;
 
 #endif
 }

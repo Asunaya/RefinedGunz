@@ -1,4 +1,3 @@
-#include <d3dx9.h>
 #include "RMath.h"
 #include "MMath.h"
 #define GLM_GTC_quaternion 
@@ -15,6 +14,8 @@ using namespace RealSpace2;
 
 #if TEST_COMPARE_TO_D3DX && defined(_MSC_VER)
 #pragma comment(lib, "d3dx9.lib")
+#include <d3dx9.h>
+#include "MWindows.h"
 #endif
 
 static void TestIntersectLineSegmentPlane()

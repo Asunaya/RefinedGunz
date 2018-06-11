@@ -36,6 +36,7 @@ bool IsDir(const char* Path);
 
 bool CreateFile(const char* Path);
 bool CreateDir(const char* Path);
+bool CreateParentDirs(StringView Path);
 
 namespace Attributes
 {
@@ -215,6 +216,10 @@ constexpr ExistingFileAction operator|(ExistingFileAction a, TextType b) {
 }
 constexpr ExistingFileAction operator|(TextType a, ExistingFileAction b) {
 	return b | a;
+}
+constexpr ExistingFileAction& operator|=(ExistingFileAction& a, TextType b) {
+    a.Text = true;
+    return a;
 }
 
 // A File, except it also supports writing.
