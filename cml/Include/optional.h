@@ -5,8 +5,8 @@
 #include <utility>
 #include <new>
 
-constexpr struct in_place_t {} in_place;
-constexpr struct nullopt_t {} nullopt;
+constexpr struct in_place_t {} in_place{};
+constexpr struct nullopt_t {} nullopt{};
 
 template <typename T>
 class optional

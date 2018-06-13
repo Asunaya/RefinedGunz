@@ -166,6 +166,18 @@ static bool SetProtocol(ProtocolType& Protocol, const char* URL)
 	return true;
 }
 
+void FormatError(DownloadError* ErrorOutput, const char* Format, ...)
+{
+	constexpr auto Size = DownloadError::Size;
+	char Buf[Size];
+	auto Dest = ErrorOutput ? ErrorOutput->String : Buf;
+	va_list va;
+	va_start(va, Format);
+	vsprintf_safe(Dest, Size, Format, va);
+	va_end(va);
+	Log.Error("%s\n", Dest);
+}
+
 bool DownloadFile(const DownloadManagerType& DownloadManager,
 	const char* URL,
 	int Port,
@@ -178,17 +190,6 @@ bool DownloadFile(const DownloadManagerType& DownloadManager,
 
 	static_assert(DownloadError::Size >= CURL_ERROR_SIZE, "DownloadError::Size too small");
 	
-	auto FormatError = [&](const char* Format, ...)
-	{
-		constexpr auto Size = DownloadError::Size;
-		char Buf[Size];
-		auto Dest = ErrorOutput ? ErrorOutput->String : Buf;
-		va_list va;
-		va_start(va, Format);
-		vsprintf_safe(Dest, Size, Format, va);
-		va_end(va);
-		Log.Error("%s\n", Dest);
-	};
 
 	const auto curl = DownloadManager.get();
 
@@ -197,13 +198,13 @@ bool DownloadFile(const DownloadManagerType& DownloadManager,
 	WriteData.Context.Range = Range;
 	if (!SetProtocol(WriteData.Context.Protocol, URL))
 	{
-		FormatError("Unrecognized protocol in URL \"%s\"", URL);
+		FormatError(ErrorOutput, "Unrecognized protocol in URL \"%s\"", URL);
 		return false;
 	}
 
 	if (!curl)
 	{
-		FormatError("Curl is dead! Can't download files");
+		FormatError(ErrorOutput, "Curl is dead! Can't download files");
 		return false;
 	}
 
@@ -255,13 +256,13 @@ bool DownloadFile(const DownloadManagerType& DownloadManager,
 			if (res == CURLE_HTTP_RETURNED_ERROR)
 			{
 				const int ResponseCode = GetCurlResponseCode(curl);
-				FormatError("Received HTTP error code %d when trying to "
+				FormatError(ErrorOutput, "Received HTTP error code %d when trying to "
 					"download from URL %s",
 					ResponseCode, URL);
 			}
 			else
 			{
-				FormatError("Curl error! Code = %d, message = \"%s\"",
+				FormatError(ErrorOutput, "Curl error! Code = %d, message = \"%s\"",
 					res, curl_easy_strerror(res));
 			}
 		}

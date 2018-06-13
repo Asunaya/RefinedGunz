@@ -31,7 +31,7 @@ size_t MGetBlobArrayElementSize(const void* pBlob);
 template <typename T>
 auto MGetBlobArrayRange(void* pBlob)
 {
-	auto* ArrayPtr = MGetBlobArrayPointer(pBlob);
+	auto* ArrayPtr = static_cast<u8*>(MGetBlobArrayPointer(pBlob));
 	const auto ArraySize = MGetBlobArrayCount(pBlob);
 	return Range<T*>{ ArrayPtr, ArrayPtr + ArraySize };
 }

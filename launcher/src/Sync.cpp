@@ -316,7 +316,7 @@ static bool CalculateBlocks(Memory& memory, RemoteFile& Remote, BlockCounts& Cou
 
 	// This is used as a circular buffer, so arithmetic on indices into it should be wrapped with
 	// Wrap.
-	constexpr auto FileBufferSize = memory.FileBufferSize;
+	constexpr auto FileBufferSize = Memory::FileBufferSize;
 	const auto FileBuffer = memory.FileBuffer.get();
 
 	// Wraps an index a such that it fits within the bounds of FileData.

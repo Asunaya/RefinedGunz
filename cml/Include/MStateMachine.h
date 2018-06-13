@@ -17,6 +17,7 @@ protected:
 
 	bool SetNextState(int nID);
 public:
+	virtual ~MState() = default;
 };
 
 typedef std::map<int, MState*>	MSTATEMAP;

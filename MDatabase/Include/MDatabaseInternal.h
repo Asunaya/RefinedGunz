@@ -44,7 +44,7 @@ const struct {
 	{
 		return SQLAllocHandle(HandleType, Input, MakeWriteProxy(Handle.Handle));
 	}
-} SQLAlloc;
+} SQLAlloc{};
 
 inline void ThrowCDBException(std::string Error)
 {

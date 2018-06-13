@@ -43,7 +43,7 @@ struct MultiVector
 	template <typename T, typename... ArgsT>
 	void emplaceImpl(std::false_type, ArgsT&&... Args)
 	{
-		next.emplace<T>(std::forward<ArgsT>(Args)...);
+		next.template emplace<T>(std::forward<ArgsT>(Args)...);
 	}
 
 	template <typename T, typename... ArgsT>

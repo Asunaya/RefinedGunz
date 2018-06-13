@@ -30,7 +30,7 @@ float GetGlobalTime()
 
 u32 MTime::Random()
 {
-	register int lo, hi, test;
+	int lo, hi, test;
 
 	hi = seed / q;
 	lo = seed%q;

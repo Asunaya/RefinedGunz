@@ -44,39 +44,39 @@ bool MDatabase::CheckOpen()
 	return true;
 }
 
+static void append(ArrayView<char>& Dest, const char* fmt, ...)
+{
+	va_list va;
+	va_start(va, fmt);
+	auto ret = vsprintf_safe(Dest, fmt, va);
+	Dest.remove_prefix(ret);
+	va_end(va);
+};
+
 bool MDatabase::Connect(const ConnectionDetails& cd)
 {
 	char InitialConnectString[1024];
-	size_t end = 0;
-	auto append = [&](const char* fmt, ...) {
-		if (end >= std::size(InitialConnectString))
-			return;
-		va_list va;
-		va_start(va, fmt);
-		end += vsprintf_safe(InitialConnectString + end, std::size(InitialConnectString) - end,
-			fmt, va);
-		va_end(va);
-	};
+	ArrayView<char> buf = InitialConnectString;
 	if (cd.Driver == DBDriver::SQLServer)
 	{
-		append("DRIVER={SQL Server};SERVER=%.*s;DATABASE=%.*s;",
+		append(buf, "DRIVER={SQL Server};SERVER=%.*s;DATABASE=%.*s;",
 			cd.Server.size(), cd.Server.data(),
 			cd.Database.size(), cd.Database.data());
 	}
 	else if (cd.Driver == DBDriver::ODBC)
 	{
-		append("DSN=%.*s;", cd.DSN.size(), cd.DSN.data());
+		append(buf, "DSN=%.*s;", cd.DSN.size(), cd.DSN.data());
 	}
 
 	if (cd.Auth == DBAuth::SQLServer)
 	{
-		append("UID=%.*s;PWD=%.*s",
+		append(buf, "UID=%.*s;PWD=%.*s",
 			cd.Username.size(), cd.Username.data(),
 			cd.Password.size(), cd.Password.data());
 	}
 	else if (cd.Auth == DBAuth::Windows)
 	{
-		append("Trusted_Connection=yes");
+		append(buf, "Trusted_Connection=yes");
 	}
 
 	CALL_NOTHROW(SQLAlloc, Env, static_cast<SQLHANDLE>(SQL_NULL_HANDLE));

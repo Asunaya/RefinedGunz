@@ -138,7 +138,7 @@ enum class Seek
 	End = SEEK_END,
 };
 
-constexpr struct TextType {} Text;
+constexpr struct TextType {} Text{};
 
 // A simple class that wraps a FILE*.
 // It supports 64-bit offsets and is always in read-only binary mode.

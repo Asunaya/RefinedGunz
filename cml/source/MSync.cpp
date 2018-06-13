@@ -64,13 +64,13 @@ MSignalEvent::~MSignalEvent() { close(EventHandle); }
 bool MSignalEvent::SetEvent()
 {
 	u64 buf = 1;
-	auto ret = write(EventHandle, &buf, sizeof(buf));
+	return write(EventHandle, &buf, sizeof(buf)) == sizeof(buf);
 }
 
 bool MSignalEvent::ResetEvent()
 {
 	u64 buf;
-	read(EventHandle, &buf, sizeof(buf));
+	return read(EventHandle, &buf, sizeof(buf)) == sizeof(buf);
 }
 
 u32 WaitForMultipleEvents(size_t NumEvents, MSignalEvent* const * EventArray, u32 Timeout)

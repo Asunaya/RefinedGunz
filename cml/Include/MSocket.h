@@ -100,8 +100,13 @@ bool GetErrorString(u32 ErrorCode, std::string& Output);
 template <size_t Size> bool GetErrorString(u32 ErrorCode, char(&Output)[Size]) {
 	return GetErrorString(ErrorCode, Output, Size); }
 
+#ifdef _WIN32
 constexpr SOCKET InvalidSocket = -1;
 constexpr SOCKET SocketError = -1;
+#else
+constexpr int InvalidSocket = -1;
+constexpr int SocketError = -1;
+#endif
 
 void LogError(const char* CallerName, const char* FunctionName, int ErrorCode);
 

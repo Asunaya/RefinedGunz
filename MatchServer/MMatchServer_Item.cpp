@@ -242,7 +242,7 @@ bool MMatchServer::ResponseSellItem(const MUID& uidPlayer, const MUID& uidItem)
 bool MMatchServer::RemoveCharItem(MMatchObject* pObject, MUID& uidItem)
 {
 	MMatchItem* pItem = pObject->GetCharInfo()->m_ItemList.GetItem(uidItem);
-	if (pItem == false) return false;
+	if (!pItem) return false;
 
 	// 디비에서 아이템 삭제
 	if (!GetDBMgr()->DeleteCharItem(pObject->GetCharInfo()->m_nCID, pItem->GetCIID()))

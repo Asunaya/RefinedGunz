@@ -163,7 +163,7 @@ void MClientSocketThread::Run()
 	while (true)
 	{
 		const auto Timeout = 100;
-		int WaitResult = WaitForMultipleEvents(EventArray, Timeout);
+		u32 WaitResult = WaitForMultipleEvents(EventArray, Timeout);
 		if (WaitResult == MSync::WaitFailed)
 		{
 			LOG_SOCKET_ERROR("WaitForMultipleEvents", WaitResult);
