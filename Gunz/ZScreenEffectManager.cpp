@@ -906,6 +906,8 @@ void ZScreenEffectManager::AddRoundStart(int nRound)
 	RMesh *pMesh = m_pEffectMeshMgr->Get("round");
 	if(pMesh)
 		Add(new ZScreenEffect(pMesh));
+
+	ZGetGameInterface()->PlayVoiceSound( VOICE_GET_READY, 1300);
 }
 
 void ZScreenEffectManager::DrawCombo()
@@ -1116,11 +1118,11 @@ void ZScreenEffectManager::AddPraise(int nPraise)
 
 	switch (nPraise)
 	{
-	case ZCI_ALLKILL:		ZApplication::GetSoundEngine()->PlayVoiceSound(VOICE_KILLEDALL);	break;
+	case ZCI_ALLKILL:		ZGetGameInterface()->PlayVoiceSound(VOICE_KILLEDALL);	break;
 	case ZCI_UNBELIEVABLE:	break;
-	case ZCI_EXCELLENT:		ZApplication::GetSoundEngine()->PlayVoiceSound(VOICE_DOUBLE_KILL);	break;
-	case ZCI_FANTASTIC:		ZApplication::GetSoundEngine()->PlayVoiceSound(VOICE_FANTASTIC);	break;
-	case ZCI_HEADSHOT:		ZApplication::GetSoundEngine()->PlayVoiceSound(VOICE_HEADSHOT);		break;
+	case ZCI_EXCELLENT:		ZGetGameInterface()->PlayVoiceSound(VOICE_DOUBLE_KILL);	break;
+	case ZCI_FANTASTIC:		ZGetGameInterface()->PlayVoiceSound(VOICE_FANTASTIC);	break;
+	case ZCI_HEADSHOT:		ZGetGameInterface()->PlayVoiceSound(VOICE_HEADSHOT);		break;
 	};
 
 }
@@ -1135,36 +1137,28 @@ void ZScreenEffectManager::SetGuageExpFromMyInfo()
 void ZScreenEffectManager::AddGood()
 {	
 	AddScreenEffect(m_pGoodEffect); 
-
 }
 void ZScreenEffectManager::AddNice()
 {	
 	AddScreenEffect(m_pNiceEffect); 
-	ZApplication::GetSoundEngine()->PlayVoiceSound(VOICE_NICE);
-
 }
 void ZScreenEffectManager::AddGreat()
 {	
 	AddScreenEffect(m_pGreatEffect); 
-	ZApplication::GetSoundEngine()->PlayVoiceSound(VOICE_GREAT);
-
 }
 void ZScreenEffectManager::AddWonderful()
 {	
 	AddScreenEffect(m_pWonderfullEffect); 
-	ZApplication::GetSoundEngine()->PlayVoiceSound(VOICE_WONDERFUL);
-
 }
 void ZScreenEffectManager::AddCool()
 {	
 	AddScreenEffect(m_pCoolEffect); 
-	ZApplication::GetSoundEngine()->PlayVoiceSound(VOICE_COOL);
 }
 
 void ZScreenEffectManager::AddRock()
 {	
 	AddScreenEffect("rock"); 
-	ZApplication::GetSoundEngine()->PlayVoiceSound(VOICE_FIGHT);
+	ZGetGameInterface()->PlayVoiceSound(VOICE_LETS_ROCK, 1100);
 }
 
 bool ZScreenEffectManager::CreateQuestRes()

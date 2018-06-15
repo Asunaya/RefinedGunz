@@ -560,13 +560,19 @@ bool ZGameInterface::OnCommand(MCommand* pCommand)
 		pCommand->GetParameter(&nType, 0, MPT_INT);
 		pCommand->GetParameter(&nState, 1, MPT_INT);
 
-		if (QUEST_START_FAILED_BY_SACRIFICE_SLOT == nType)
+		if( ALL_PLAYER_NOT_READY == nType )
 		{
-			ZApplication::GetStageInterface()->OnQuestStartFailed(nState);
+			ZGetGameInterface()->PlayVoiceSound( VOICE_PLAYER_NOT_READY, 1500);
+		}
+		else if( QUEST_START_FAILED_BY_SACRIFICE_SLOT == nType )
+		{
+			ZApplication::GetStageInterface()->OnQuestStartFailed( nState );
+
+			ZGetGameInterface()->PlayVoiceSound( VOICE_QUEST_START_FAIL, 2800);
 		}
 
 		// Stage UI Enable
-		ZApplication::GetStageInterface()->ChangeStageEnableReady(false);
+		ZApplication::GetStageInterface()->ChangeStageEnableReady( false);
 	}
 		break;
 

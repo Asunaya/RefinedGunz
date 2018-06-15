@@ -204,7 +204,10 @@ public:
 
 	void AddRoundStart(int nRound);
 
-	void AddFinalRoundStart()	{	AddScreenEffect("finalround"); 	}
+	void AddFinalRoundStart() {
+		AddScreenEffect("finalround");
+		ZGetGameInterface()->PlayVoiceSound( VOICE_FINAL_ROUND, 1000);
+	}
 
 	void AddRoundFinish()		{	AddScreenEffect("finishround"); }
 	void AddRock();

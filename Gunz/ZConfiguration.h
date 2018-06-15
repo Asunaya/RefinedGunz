@@ -51,6 +51,7 @@ struct ZCONFIG_AUDIO{
 	bool bInverse;
 	bool bHWMixing;
 	bool bHitSound;
+	bool bNarrationSound;
 };
 
 struct ZCONFIG_MOUSE{
@@ -325,6 +326,7 @@ ZConfiguration*	ZGetConfiguration();
 #define ZTOK_AUDIO_INVERSE			"INVERSESOUND"
 #define ZTOK_AUDIO_HWMIXING			"HWMIXING"
 #define ZTOK_AUDIO_HITSOUND			"HITSOUND"
+#define ZTOK_AUDIO_NARRATIONSOUND	"NARRATIONSOUND"
 
 #define ZTOK_MOUSE				"MOUSE"
 #define ZTOK_MOUSE_SENSITIVITY	"SENSITIVITY"
@@ -393,6 +395,7 @@ ZConfiguration*	ZGetConfiguration();
 #define Z_AUDIO_INVERSE			(ZGetConfiguration()->GetAudio()->bInverse)
 #define Z_AUDIO_HWMIXING		(ZGetConfiguration()->GetAudio()->bHWMixing)
 #define Z_AUDIO_HITSOUND		(ZGetConfiguration()->GetAudio()->bHitSound)
+#define Z_AUDIO_NARRATIONSOUND	(ZGetConfiguration()->GetAudio()->bNarrationSound)
 
 #define Z_VIDEO_GAMMA_VALUE		(ZGetConfiguration()->GetVideo()->nGamma)
 #define Z_VIDEO_REFLECTION		(ZGetConfiguration()->GetVideo()->bReflection)

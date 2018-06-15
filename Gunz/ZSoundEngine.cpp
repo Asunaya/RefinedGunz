@@ -1454,31 +1454,6 @@ void ZSoundEngine::SetVolumeControlwithDuration( float fStartPercent, float fEnd
 	}
 }
 
-//#define _VOICE_EFFECT
-
-void ZSoundEngine::PlayVoiceSound(char* szName)
-{
-#ifndef _VOICE_EFFECT
-	return;
-#endif
-
-	if( !m_bSoundEnable )	return;
-
-	SoundSource* pSS = GetSoundSource(szName, true);
-	if(pSS == 0 )
-	{
-		return;
-	}
-
-	FSOUND_SAMPLE* pFS = pSS->pFS;
-	if(pFS == NULL)
-	{
-		return;
-	}
-	PlaySE( pFS, rvector(0,0,0), 254, true, false );
-
-}
-
 bool ZSoundEngine::LoadNPCResource(MQUEST_NPC nNPC, ZLoadingProgress* pLoading)
 {
 	FSOUND_SAMPLE* pFS = NULL;

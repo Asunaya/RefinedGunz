@@ -353,6 +353,11 @@ void ZOptionInterface::InitInterfaceOption(void)
 		{
 			pWidget->SetCheck(Z_AUDIO_HITSOUND);
 		}
+		pWidget = (MButton*)pResource->FindWidget("NarrationSound");
+		if(pWidget)
+		{
+			pWidget->SetCheck(Z_AUDIO_NARRATIONSOUND);
+		}
 		pWidget = (MButton*)pResource->FindWidget("InvertMouse");
 		if(pWidget)
 		{
@@ -815,6 +820,11 @@ bool ZOptionInterface::SaveInterfaceOption(void)
 		if(pWidget)
 		{
 			Z_AUDIO_HITSOUND = pWidget->GetCheck();
+		}
+		pWidget = (MButton*)pResource->FindWidget("NarrationSound");
+		if(pWidget)
+		{
+			Z_AUDIO_NARRATIONSOUND = pWidget->GetCheck();
 		}
 		pWidget = (MButton*)pResource->FindWidget("InvertMouse");
 		if(pWidget)

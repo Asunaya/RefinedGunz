@@ -5869,3 +5869,38 @@ void ZGameInterface::OnAnnounceDeleteClan(const string& strAnnounce)
 	sprintf_safe(szMsg, MGetStringResManager()->GetErrorStr(MERR_CLAN_ANNOUNCE_DELETE), strAnnounce.c_str());
 	ShowMessage(szMsg);
 }
+
+void ZGameInterface::OnVoiceSound()
+{
+	DWORD dwCurrTime = timeGetTime();
+
+	if ( dwCurrTime < m_dwVoiceTime)
+		return;
+
+	m_szCurrVoice[ 0] = 0;
+
+	if ( m_szNextVoice[ 0] == 0)
+		return;
+
+	ZApplication::GetSoundEngine()->PlaySound( m_szNextVoice);
+	m_dwVoiceTime = dwCurrTime + m_dwNextVoiceTime;
+
+	strcpy( m_szCurrVoice, m_szNextVoice);
+	m_szNextVoice[ 0] = 0;
+	m_dwNextVoiceTime = 0;
+}
+
+void ZGameInterface::PlayVoiceSound(const char* pszSoundName, u32 time)
+{
+	if (!Z_AUDIO_NARRATIONSOUND)
+		return;
+
+	if (!equals(pszSoundName, m_szCurrVoice))
+	{
+		sprintf_safe(m_szNextVoice, pszSoundName);
+		m_dwNextVoiceTime = time;
+	}
+
+	if (GetGlobalTimeMS() > m_dwVoiceTime)
+		OnVoiceSound();
+}

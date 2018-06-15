@@ -89,6 +89,11 @@ void ZRuleBerserker::AssignBerserker(MUID& uidBerserker)
 			float fMaxAP = pBerserkerChar->GetProperty()->fMaxAP;
 			pBerserkerChar->SetHP(fMaxHP);
 			pBerserkerChar->SetAP(fMaxAP);
+
+			if ( uidBerserker == ZGetMyUID())
+				ZGetGameInterface()->PlayVoiceSound( VOICE_GOT_BERSERKER, 1600);
+			else
+				ZGetGameInterface()->PlayVoiceSound( VOICE_BERSERKER_DOWN, 1200);
 		}
 
 	}

@@ -132,6 +132,11 @@ protected:
 	u32				m_dwTimeCount{};
 	u32				m_dwHourCount{};
 
+	u32				m_dwVoiceTime;
+	char			m_szCurrVoice[ 256];
+	char			m_szNextVoice[ 256];
+	u32				m_dwNextVoiceTime;
+
 protected:
 	static bool		OnGlobalEvent(MEvent* pEvent);
 	virtual bool	OnEvent(MEvent* pEvent, MListener* pListener);
@@ -337,6 +342,9 @@ public:
 	void OnAnnounceDeleteClan( const string& strAnnounce );
 
 	MBitmap* GetQuestItemIcon( int nItemID, bool bSmallIcon);
+
+	void OnVoiceSound();
+	void PlayVoiceSound( const char* pszSoundName, u32 time=0);
 
 	void SetListenerWidget(const char* szName, MListener* pListener);
 

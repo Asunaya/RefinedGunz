@@ -3328,7 +3328,7 @@ void ZGame::CheckKillSound(ZCharacter* pAttacker)
 
 	if (m_Match.GetRoundKills() == 1)
 	{
-		ZApplication::GetSoundEngine()->PlayVoiceSound(VOICE_FIRST_KILL);
+		ZGetGameInterface()->PlayVoiceSound(VOICE_FIRST_KILL);
 	}
 }
 
@@ -4222,7 +4222,7 @@ void ZGame::AddEffectRoundState(MMATCH_ROUNDSTATE nRoundState, int nArg)
 				else 
 				{
 					if (nArg == MMATCH_ROUNDRESULT_DRAW) {
-						// Do nothing
+						ZGetGameInterface()->PlayVoiceSound( VOICE_DRAW_GAME, 1200);
 					} else {
 						MMatchTeam nMyTeam = (MMatchTeam)m_pMyCharacter->GetTeamID();
 						MMatchTeam nTeamWon = (nArg == MMATCH_ROUNDRESULT_REDWON ? MMT_RED : MMT_BLUE);
@@ -4244,6 +4244,21 @@ void ZGame::AddEffectRoundState(MMATCH_ROUNDSTATE nRoundState, int nArg)
 							ZGetScreenEffectManager()->AddWin();
 						} else {
 							ZGetScreenEffectManager()->AddLose();
+						}
+
+						if (GetMatch()->GetMatchType() == MMATCH_GAMETYPE_ASSASSINATE)
+						{
+							if ( nTeamWon == MMT_RED)
+								ZGetGameInterface()->PlayVoiceSound( VOICE_BLUETEAM_BOSS_DOWN, 2100);
+							else
+								ZGetGameInterface()->PlayVoiceSound( VOICE_REDTEAM_BOSS_DOWN, 2000);
+						}
+						else
+						{
+							if ( nTeamWon == MMT_RED)
+								ZGetGameInterface()->PlayVoiceSound( VOICE_RED_TEAM_WON, 1400);
+							else
+								ZGetGameInterface()->PlayVoiceSound( VOICE_BLUE_TEAM_WON, 1400);
 						}
 					}
 				}
@@ -4352,15 +4367,24 @@ void ZGame::AddEffectRoundState(MMATCH_ROUNDSTATE nRoundState, int nArg)
 
 					// Draw
 					if ( (nCount < 2) || (bAddWin == bAddLose))
+					{
 						ZGetScreenEffectManager()->AddDraw();
+						ZGetGameInterface()->PlayVoiceSound( VOICE_DRAW_GAME, 1200);
+					}
 					
 					// Win
 					else if ( bAddWin)
+					{
 						ZGetScreenEffectManager()->AddWin();
+						ZGetGameInterface()->PlayVoiceSound( VOICE_YOU_WON, 1000);
+					}
 
 					// Lose
 					else
+					{
 						ZGetScreenEffectManager()->AddLose();
+						ZGetGameInterface()->PlayVoiceSound( VOICE_YOU_LOSE, 1300);
+					}
 				}
 			}
 		}

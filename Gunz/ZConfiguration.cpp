@@ -396,6 +396,7 @@ bool ZConfiguration::LoadConfig(const char* szFileName)
 			childElement.GetChildContents(&m_Audio.bInverse, ZTOK_AUDIO_INVERSE);
 			childElement.GetChildContents(&m_Audio.bHWMixing, ZTOK_AUDIO_HWMIXING);
 			childElement.GetChildContents(&m_Audio.bHitSound, ZTOK_AUDIO_HITSOUND);
+			childElement.GetChildContents(&m_Audio.bNarrationSound, ZTOK_AUDIO_NARRATIONSOUND);
 			//childElement.GetChildContents(&m_Audio.b3DSound, ZTOK_AUDIO_3D_SOUND);
 			m_Audio.b3DSound = true;
 		}
@@ -623,6 +624,7 @@ bool ZConfiguration::SaveToFile(const char *szFileName, const char* szHeader)
 		Section.Add(ZTOK_AUDIO_INVERSE, m_Audio.bInverse);
 		Section.Add(ZTOK_AUDIO_HWMIXING, m_Audio.bHWMixing);
 		Section.Add(ZTOK_AUDIO_HITSOUND, m_Audio.bHitSound);
+		Section.Add(ZTOK_AUDIO_NARRATIONSOUND, m_Audio.bNarrationSound);
 	}
 
 	AddIntersectionWhitespace();

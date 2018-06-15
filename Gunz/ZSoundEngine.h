@@ -258,9 +258,6 @@ public:
 	void SetAmbientSoundSphere( char* Name, rvector& pos, float radius, bool b2d = true );
 	void ClearAmbientSound();
 
-	// Special Functions
-	void PlayVoiceSound(char* szName);
-    
 	// 일정시간에 걸쳐 시작 볼륨에서부터 끝 볼륨까지 조절해 주는 함수
 	void SetVolumeControlwithDuration( float fStartPercent, float fEndPercent, DWORD dwDuration, bool bEffect, bool bBGM );
 
@@ -282,29 +279,35 @@ public:
 
 
 
-#define VOICE_COOL					"voice_cool"		// 적용됨
-#define VOICE_NICE					"voice_nice"		// 적용됨
-#define VOICE_GREAT					"voice_great"		// 적용됨
-#define VOICE_WONDERFUL				"voice_wonderful"	// 적용됨
-#define VOICE_KILLEDALL				"voice_perfect"		// 적용됨
-#define VOICE_HEADSHOT				"voice_headshot"	// 적용됨
-#define VOICE_FANTASTIC				"voice_fantastic"	// 적용됨
-#define VOICE_EXCELLENT				""
-#define VOICE_UNBELIEVABLE			""
-#define VOICE_GET_READY_TO_FIGHT	""
-#define VOICE_LETS_ROCK				""
-#define VOICE_YOU_WON				""
-#define VOICE_YOU_LOSE				"voice_youlose"
-#define VOICE_RED_TEAM_WON			"voice_redteamwon"
-#define VOICE_BLUE_TEAM_WON			"voice_blueteamwon"
-#define VOICE_DRAW_GAME				"voice_drawgame"
-#define VOICE_GET_READY				"voice_getready"
-#define VOICE_FIGHT					"voice_fight"		// 적용됨
-#define VOICE_NEW_INTRUDER			""
-#define VOICE_NEW_CHALLENGER		"voice_newchallenger"
-#define VOICE_FIRST_KILL			"voice_firstkill"
-#define VOICE_DOUBLE_KILL			"voice_doublekill"
-#define VOICE_MULTI_KILL			"voice_multikill"
+#define VOICE_COOL					"nar/NAR01"		// 0.7  추가 완료
+#define VOICE_NICE					"nar/NAR02"		// 1.0  추가 완료
+#define VOICE_GREAT					"nar/NAR03"		// 0.8  추가 완료
+#define VOICE_WONDERFUL				"nar/NAR04"		// 1.2  추가 완료
+#define VOICE_KILLEDALL				"nar/NAR05"		// 2.0  추가 완료
+#define VOICE_HEADSHOT				"nar/NAR06"		// 0.7  추가 완료
+#define VOICE_FANTASTIC				"nar/NAR07"		// 1.5  추가 완료
+#define VOICE_EXCELLENT				"nar/NAR08"		// 1.0  추가 완료
+#define VOICE_UNBELIEVABLE			"nar/NAR09"		// 1.3  추가 완료
+#define VOICE_GET_READY				"nar/NAR10"		// 1.3  추가 완료
+#define VOICE_LETS_ROCK				"nar/NAR11"		// 1.1  추가 완료
+#define VOICE_FINAL_ROUND			"nar/NAR27"		// 1.2  추가 완료
+#define VOICE_YOU_WON				"nar/NAR12"		// 1.0  추가 완료
+#define VOICE_YOU_LOSE				"nar/NAR13"		// 1.3  추가 완료
+#define VOICE_RED_TEAM_WON			"nar/NAR14"		// 1.4  추가 완료
+#define VOICE_BLUE_TEAM_WON			"nar/NAR15"		// 1.4  추가 완료
+#define VOICE_DRAW_GAME				"nar/NAR16"		// 1.2  추가 완료
+#define VOICE_REDTEAM_BOSS_DOWN		"nar/NAR19"		// 2.0  추가 완료
+#define VOICE_BLUETEAM_BOSS_DOWN	"nar/NAR20"		// 2.1  추가 완료
+#define VOICE_PLAYER_NOT_READY		"nar/NAR26"		// 1.5  추가 완료
+#define VOICE_BERSERKER_DOWN		"nar/NAR28"		// 1.3  추가 완료
+#define VOICE_GOT_BERSERKER			"nar/NAR29"		// 1.6  추가 완료
+#define VOICE_QUEST_START_FAIL		"nar/NAR22"		// 2.8  추가 완료
+#define VOICE_FIGHT					""
+#define VOICE_NEW_INTRUDER			"nar/NAR17"		// 1.3
+#define VOICE_NEW_CHALLENGER		"nar/NAR18"		// 1.6
+#define VOICE_FIRST_KILL			""
+#define VOICE_DOUBLE_KILL			""
+#define VOICE_MULTI_KILL			""
 #define VOICE_GOGOGO				""
 #define VOICE_GO_LEFT				""
 #define VOICE_GO_RIGHT				""
