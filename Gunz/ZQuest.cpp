@@ -106,6 +106,15 @@ bool ZQuest::Load()
 		return false;
 	}
 
+	if (!ZGetAniEventMgr()->ReadXml(ZApplication::GetFileSystem(), "System/AnimationEvent.xml"))
+	{
+		mlog("Read Animation Event Failed");
+		return false;
+	}
+	AniFrameInfo::m_pEventFunc = [](const RAniEventInfo& Info, v3 Pos) {
+		ZGetSoundEngine()->PlaySound(Info.Filename, Pos, false);
+	};
+
 	m_bLoaded = true;
 	return true;
 }

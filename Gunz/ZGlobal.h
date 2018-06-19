@@ -55,6 +55,7 @@ ZGameClient*			ZGetGameClient(void);
 RMeshMgr*				ZGetNpcMeshMgr(void);
 RMeshMgr*				ZGetMeshMgr(void);
 RMeshMgr*				ZGetWeaponMeshMgr(void);
+RAniEventMgr*			ZGetAniEventMgr(void);
 ZSoundEngine*			ZGetSoundEngine(void);
 ZGameInterface*			ZGetGameInterface(void);
 ZCombatInterface*		ZGetCombatInterface(void);

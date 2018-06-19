@@ -63,7 +63,7 @@ protected:
 	int						m_nDamageCount;
 private:
 	void InitFromNPCType(MQUEST_NPC nNPCType, float fTC, int nQL);
-	void InitMesh(char* szMeshName);
+	void InitMesh(char* szMeshName, MQUEST_NPC nNPCType);
 	void OnTaskFinished(ZTASK_ID nLastID);
 	static void OnTaskFinishedCallback(ZActor* pActor, ZTASK_ID nLastID);
 	inline static int CalcMaxHP(int nQL, int nSrcHP);

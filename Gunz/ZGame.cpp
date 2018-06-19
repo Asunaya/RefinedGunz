@@ -3474,12 +3474,42 @@ void ZGame::OnPeerSpMotion(const MUID& uid,int nMotionType)
 
 	ZC_STATE_LOWER zsl = ZC_STATE_TAUNT;
 
-		 if(nMotionType == ZC_SPMOTION_TAUNT) zsl = ZC_STATE_TAUNT;
-	else if(nMotionType == ZC_SPMOTION_BOW  ) zsl = ZC_STATE_BOW;
-	else if(nMotionType == ZC_SPMOTION_WAVE ) zsl = ZC_STATE_WAVE;
-	else if(nMotionType == ZC_SPMOTION_LAUGH) zsl = ZC_STATE_LAUGH;
-	else if(nMotionType == ZC_SPMOTION_CRY  ) zsl = ZC_STATE_CRY;
-	else if(nMotionType == ZC_SPMOTION_DANCE) zsl = ZC_STATE_DANCE;
+	if(nMotionType == ZC_SPMOTION_TAUNT)
+	{
+		zsl = ZC_STATE_TAUNT;
+
+		char szSoundName[ 50];
+		if ( pCharacter->GetProperty()->nSex == MMS_MALE)
+			sprintf( szSoundName, "fx2/MAL1%d", (RandomNumber(0, 300) % 3) + 1);
+		else
+			sprintf( szSoundName, "fx2/FEM1%d", (RandomNumber(0, 300) % 3) + 1);
+
+		ZGetSoundEngine()->PlaySound( szSoundName, pCharacter->GetPosition());
+	}
+	else if(nMotionType == ZC_SPMOTION_BOW)
+		zsl = ZC_STATE_BOW;
+	else if(nMotionType == ZC_SPMOTION_WAVE)
+		zsl = ZC_STATE_WAVE;
+	else if(nMotionType == ZC_SPMOTION_LAUGH)
+	{
+		zsl = ZC_STATE_LAUGH;
+
+		if ( pCharacter->GetProperty()->nSex == MMS_MALE)
+			ZGetSoundEngine()->PlaySound( "fx2/MAL01", pCharacter->GetPosition());
+		else
+			ZGetSoundEngine()->PlaySound( "fx2/FEM01", pCharacter->GetPosition());
+	}
+	else if(nMotionType == ZC_SPMOTION_CRY)
+	{
+		zsl = ZC_STATE_CRY;
+
+		if ( pCharacter->GetProperty()->nSex == MMS_MALE)
+			ZGetSoundEngine()->PlaySound( "fx2/MAL02", pCharacter->GetPosition());
+		else
+			ZGetSoundEngine()->PlaySound( "fx2/FEM02", pCharacter->GetPosition());
+	}
+	else if(nMotionType == ZC_SPMOTION_DANCE)
+		zsl = ZC_STATE_DANCE;
 
 	pCharacter->m_SpMotion = zsl;
 

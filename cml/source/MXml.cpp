@@ -22,6 +22,13 @@ void MXmlNode::GetNodeName(char* sOutStr, int maxlen)
 	}
 }
 
+StringView MXmlNode::GetNodeName() const
+{
+	if (!m_pDomNode)
+		return nullptr;
+	return StringView(m_pDomNode->name(), m_pDomNode->name_size());
+}
+
 void MXmlNode::GetText(char* sOutStr, int nMaxCharNum)
 {
 	if (!m_pDomNode)
@@ -208,6 +215,14 @@ MXmlElement	MXmlElement::CreateChildElement(const char* sTagName)
 	m_pDomNode->append_node(node);
 
 	return MXmlElement{ node };
+}
+
+optional<StringView> MXmlElement::GetAttribute(StringView AttrName) const
+{
+	auto Attribute = m_pDomNode->first_attribute(AttrName.data(), AttrName.size());
+	if (!Attribute || !Attribute->value())
+		return nullopt;
+	return StringView(Attribute->value(), Attribute->value_size());
 }
 
 bool MXmlElement::GetAttribute(char* sOutText, int maxlen, const char* sAttrName, const char* sDefaultText)

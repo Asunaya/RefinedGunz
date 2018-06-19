@@ -196,7 +196,7 @@ void ZActor::InitFromNPCType(MQUEST_NPC nNPCType, float fTC, int nQL)
 	m_pNPCInfo = ZGetGameInterface()->GetQuest()->GetNPCInfo(nNPCType);
 	_ASSERT(m_pNPCInfo);
 
-	InitMesh(m_pNPCInfo->szMeshName);
+	InitMesh(m_pNPCInfo->szMeshName, nNPCType);
 
 	if(m_pNPCInfo->nNPCAttackTypes & NPC_ATTACK_MELEE ) {
 		m_Items.EquipItem(MMCIP_MELEE, m_pNPCInfo->nWeaponItemID);
@@ -245,7 +245,7 @@ void ZActor::InitFromNPCType(MQUEST_NPC nNPCType, float fTC, int nQL)
 	_ASSERT(m_pNPCInfo != NULL);
 }
 
-void ZActor::InitMesh(char* szMeshName)
+void ZActor::InitMesh(char* szMeshName, MQUEST_NPC nNPCType)
 {
 	// for test
 	RMesh* pMesh;
@@ -268,6 +268,8 @@ void ZActor::InitMesh(char* szMeshName)
 	pVMesh->SetScale(rvector(15,15,15));
 
 	m_Animation.Set(ZA_ANIM_RUN);
+
+	pVMesh->m_FrameInfo[0].m_pAniIdEventSet = ZGetAniEventMgr()->GetAniIDEventSet((int)nNPCType);
 }
 
 void ZActor::UpdateHeight(float fDelta)

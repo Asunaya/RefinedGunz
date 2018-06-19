@@ -16,6 +16,8 @@ _NAMESPACE_REALSPACE2_BEGIN
 #define __BP(i,n) ;
 #define __EP(i) ;
 
+void (*AniFrameInfo::m_pEventFunc)(const RAniEventInfo&, v3);
+
 AniFrameInfo::AniFrameInfo()
 {
 	m_isOncePlayDone = false;
@@ -67,6 +69,16 @@ void AniFrameInfo::Frame(RAniMode amode,RVisualMesh* pVMesh)
 		m_1frame_time		= cur;
 		m_isPlayDone		= false;
 		m_isOncePlayDone	= false;
+
+		if (m_pAniIdEventSet)
+		{
+			m_pAniNameEventSet = m_pAniIdEventSet->GetAniNameEventSet(m_pAniSet->GetName());
+			if (m_pAniNameEventSet)
+			{
+				AniEventFired.clear();
+				AniEventFired.resize(m_pAniNameEventSet->AniNameEventSet.size(), false);
+			}
+		}
 
 		m_nFrame = m_nAddFrame;
 
@@ -186,6 +198,21 @@ void AniFrameInfo::Frame(RAniMode amode,RVisualMesh* pVMesh)
 	}
 
 	m_1frame_time = cur;
+
+	if (m_pAniNameEventSet)
+	{
+		auto e = m_pAniNameEventSet->AniNameEventSet.size();
+		for (size_t i = 0; i < e; ++i)
+		{
+			auto& Fired = AniEventFired[i];
+			auto& Info = m_pAniNameEventSet->AniNameEventSet[i];
+			if (Fired || Info.BeginFrame > m_nFrame)
+				continue;
+
+			m_pEventFunc(Info, GetTransPos(pVMesh->m_WorldMat));
+			Fired = true;
+		}
+	}
 }
 
 

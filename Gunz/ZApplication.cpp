@@ -44,6 +44,7 @@ ZSoundEngine	ZApplication::m_SoundEngine;
 RMeshMgr		ZApplication::m_NPCMeshMgr;
 RMeshMgr		ZApplication::m_MeshMgr;
 RMeshMgr		ZApplication::m_WeaponMeshMgr;
+RAniEventMgr    ZApplication::m_AniEventMgr;
 ZTimer			ZApplication::m_Timer;
 ZEmblemInterface	ZApplication::m_EmblemInterface;
 ZSkillManager	ZApplication::m_SkillManager;

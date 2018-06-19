@@ -513,3 +513,10 @@ inline void Split(StringView Str, StringView Delim, function_view<void(StringVie
 			return;
 	}
 }
+
+template <typename ContainerType, typename... ArgsType>
+constexpr decltype(auto) emplace_back(ContainerType& Container, ArgsType&&... Args)
+{
+	Container.emplace_back(std::forward<ArgsType>(Args)...);
+	return Container.back();
+}

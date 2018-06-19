@@ -3,7 +3,9 @@
 #include <stdio.h>
 #include <string>
 #include "rapidxml.hpp"
-#include "MZFileSystem.h"
+#include "MUtil.h"
+#include "StringView.h"
+#include "optional.h"
 
 using MXmlDomDoc = rapidxml::xml_document<>;
 using MXmlDomDocPtr = MXmlDomDoc*;
@@ -16,6 +18,27 @@ using MXmlDomParseError = rapidxml::parse_error;
 using MXmlDomNodeType = rapidxml::node_type;
 
 class MXmlDocument;
+
+template <typename T>
+struct MXmlIterator : IteratorBase<MXmlIterator<T>, T, std::forward_iterator_tag>
+{
+	MXmlIterator(T Node) : Node(Node) {}
+
+	bool operator==(const MXmlIterator& rhs) const
+	{
+		return Node.GetXmlDomNodePtr() == rhs.Node.GetXmlDomNodePtr();
+	}
+
+	T& operator*() { return Node; }
+	const T& operator*() const { return Node; }
+
+	MXmlIterator& operator++() {
+		Node.NextSibling();
+		return *this;
+	}
+
+	T Node;
+};
 
 class MXmlNode
 {
@@ -35,6 +58,7 @@ public:
 		GetNodeName(sOutStr, size);
 	}
 	void GetNodeName(char* sOutStr, int maxlen);
+	StringView MXmlNode::GetNodeName() const;
 	void GetText(char* sOutStr, int nMaxCharNum = -1);
 	void SetText(const char* sText);
 	
@@ -51,6 +75,11 @@ public:
 
 	MXmlNode GetParent() { if (m_pDomNode) return MXmlNode(m_pDomNode->parent()); else return MXmlNode(); }
 	MXmlNode GetChildNode(int iIndex);
+
+	Range<MXmlIterator<MXmlNode>> Children() const
+	{
+		return {MXmlNode{m_pDomNode->first_node()}, MXmlNode{nullptr}};
+	}
 };
 
 class MXmlElement : public MXmlNode
@@ -64,6 +93,7 @@ public:
 		GetTagName(sOutStr, size);
 	}
 	void GetTagName(char* sOutStr, int maxlen) { MXmlNode::GetNodeName(sOutStr, maxlen); }
+	StringView GetTagName() const { return MXmlNode::GetNodeName(); }
 	
 	void GetContents(char* sOutStr) { MXmlNode::GetText(sOutStr); }
 	void GetContents(int* ipOutValue);
@@ -81,6 +111,7 @@ public:
 	bool GetChildContents(float* fOutValue, const char* sChildTagName);
 	bool GetChildContents(bool* bOutValue, const char* sChildTagName);
 
+	optional<StringView> GetAttribute(StringView AttrName) const;
 	template<size_t size> bool GetAttribute(char(&sOutText)[size], const char *szAttrName,
 		const char *sDefaultText = "") {
 		return GetAttribute(sOutText, size, szAttrName, sDefaultText);
@@ -109,6 +140,11 @@ public:
 	MXmlElement	CreateChildElement(const char* sTagName);
 
 	bool AppendText(const char* sText);
+
+	Range<MXmlIterator<MXmlElement>> Children() const
+	{
+		return {MXmlElement{m_pDomNode->first_node()}, MXmlElement{nullptr}};
+	}
 };
 
 class MXmlDocument final
@@ -118,7 +154,7 @@ public:
 	bool Create() { return true; }
 	bool Destroy() { return true; }
 
-	bool				LoadFromFile(const char* m_sFileName, MZFileSystem* FileSystem = nullptr);
+	bool				LoadFromFile(const char* m_sFileName, class MZFileSystem* FileSystem = nullptr);
 	// If Size is -1, szBuffer must be null-terminated.
 	bool				LoadFromMemory(char* szBuffer, size_t Size = -1);
 

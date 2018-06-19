@@ -19,6 +19,11 @@ public:
 
 	void Frame(RAniMode amode, RVisualMesh* pVMesh);
 
+	static void (*m_pEventFunc)(const struct RAniEventInfo&, v3);
+	const struct RAniIDEventSet* m_pAniIdEventSet{};
+	const struct RAniNameEventSet* m_pAniNameEventSet{};
+	std::vector<bool> AniEventFired;
+
 	bool			m_isOncePlayDone;
 	bool			m_isPlayDone;
 

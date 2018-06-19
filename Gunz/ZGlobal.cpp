@@ -30,6 +30,10 @@ RMeshMgr* ZGetWeaponMeshMgr(void) {
 	return ZApplication::GetWeaponMeshMgr(); 
 }
 
+RAniEventMgr* ZGetAniEventMgr(void) {
+	return ZApplication::GetAniEventMgr();
+}
+
 ZSoundEngine* ZGetSoundEngine(void) { 
 	return ZApplication::GetSoundEngine(); 
 }

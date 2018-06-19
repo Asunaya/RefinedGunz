@@ -108,13 +108,6 @@ using std::max;
 namespace Sync
 {
 
-template <typename ContainerType, typename... ArgsType>
-constexpr decltype(auto) emplace_back(ContainerType& Container, ArgsType&&... Args)
-{
-	Container.emplace_back(std::forward<ArgsType>(Args)...);
-	return Container.back();
-}
-
 const auto BlockSize = LauncherConfig::BlockSize;
 
 // A block in the remote file.

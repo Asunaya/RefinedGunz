@@ -11,6 +11,7 @@
 #include "ZWorldManager.h"
 #include "ZStageInterface.h"
 #include "ZOptionInterface.h"
+#include "RAniEventInfo.h"
 #include <string>
 #include <memory>
 
@@ -82,6 +83,7 @@ protected:
 #ifdef _ZPROFILER
 	std::unique_ptr<ZProfiler> m_pProfiler;
 #endif
+	static RAniEventMgr		m_AniEventMgr;
 
 public:
 	ZApplication();
@@ -124,6 +126,7 @@ public:
 	static RMeshMgr*			GetWeaponMeshMgr()		{ return &m_WeaponMeshMgr; }
 	static ZEmblemInterface*	GetEmblemInterface()	{ return &m_EmblemInterface; }
 	static ZSkillManager*		GetSkillManager()		{ return &m_SkillManager; }
+	static RAniEventMgr*		GetAniEventMgr()		{ return &m_AniEventMgr;}
 	ZWorldManager*				GetWorldManager()		{ return &m_WorldManager; }
 
 	ZLAUNCH_MODE GetLaunchMode() const		{ return m_nLaunchMode; }
