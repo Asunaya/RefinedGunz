@@ -89,3 +89,6 @@
 
 // Controls whether the equipment on the stage charviewer is updated immediately.
 #define UPDATE_STAGE_CHARVIEWER
+
+// Controls whether the hit sound (fx_myhit) stacks when hitting multiple enemies at once.
+#define DONT_STACK_HITSOUNDS

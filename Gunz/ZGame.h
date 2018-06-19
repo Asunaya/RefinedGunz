@@ -367,6 +367,8 @@ private:
 
 	BasicInfoNetState BasicInfoState;
 	u32 LastSyncTime = 0;
+
+	float LastHitSoundTime = 0;
 };
 
 extern ZGame* g_pGame;

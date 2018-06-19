@@ -4071,14 +4071,20 @@ void ZGame::CheckCombo(ZCharacter *pOwnerCharacter, ZObject *pHitObject, bool bP
 
 	UpdateCombo(true);
 
-	if (Z_AUDIO_HITSOUND )
+	if (bPlaySound)
 	{
-#ifdef _BIRDSOUND
-		ZGetSoundEngine()->PlaySound("fx_myhit", 128);
-#else
-		if(bPlaySound && ZGetSoundEngine()->Get3DSoundUpdate())
-			ZGetSoundEngine()->PlaySound("fx_myhit");
+		bool PlayHitSound = Z_AUDIO_HITSOUND;
+
+#ifdef DONT_STACK_HITSOUNDS
+		auto Now = GetTime();
+		PlayHitSound &= LastHitSoundTime != Now;
+		LastHitSoundTime = Now;
 #endif
+
+		if (PlayHitSound && ZGetSoundEngine()->Get3DSoundUpdate())
+		{
+			ZGetSoundEngine()->PlaySound("fx_myhit");
+		}
 	}
 }
 
