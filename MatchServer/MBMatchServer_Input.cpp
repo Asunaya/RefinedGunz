@@ -158,7 +158,8 @@ void MBMatchServer::InitConsoleCommands()
 			auto&& UID = Pair.first;
 			auto&& Object = Pair.second;
 			auto&& Stage = FindStage(Object->GetStageUID());
-			MLog("%s (%llX) -- %s (%llX)\n", Object->GetName(), UID.AsU64(),
+			MLog("%s: CID: %u, UID: 0x%llX, stage: {%s, UID: 0x%llX}\n",
+				Object->GetName(), Object->GetCharInfo()->m_nCID, UID.AsU64(),
 				Stage ? Stage->GetName() : "not in a stage",
 				Stage ? Stage->GetUID().AsU64() : 0);
 		}
@@ -237,6 +238,139 @@ void MBMatchServer::InitConsoleCommands()
 			return;
 		}
 		Disconnect(MUID(*UID));
+	});
+
+	AddConsoleCommand("addquestitem", 2, 3,
+		"",
+		"addquestitem <player UID> <item ID> [count (default 1)]",
+		"",
+		[&] {
+		auto UID = StringToInt<u64>(Splits[1]);
+		auto ID = StringToInt<u32>(Splits[2]);
+		auto Count = 1;
+		if (Splits.size() > 3)
+		{
+			auto MCount = StringToInt<int>(Splits[3]);
+			if (!MCount || *MCount <= 0)
+			{
+				MLog("Invalid count value\n");
+				return;
+			}
+			Count = *MCount;
+		}
+		if (!UID)
+		{
+			MLog("Malformed UID\n");
+			return;
+		}
+
+		if (!ID)
+		{
+			MLog("Malformed item ID\n");
+			return;
+		}
+
+		auto Object = GetObject(MUID(*UID));
+		if (!Object)
+		{
+			MLog("Could not find player from UID %llu\n", *UID);
+			return;
+		}
+
+		auto QuestItem = GetQuestItemDescMgr().FindQItemDesc(*ID);
+		if (!QuestItem)
+		{
+			MLog("Could not find item from ID %u\n", *ID);
+			return;
+		}
+		auto& ci = *Object->GetCharInfo();
+		auto& qil = ci.m_QuestItemList;
+		auto it = qil.find(*ID);
+		if (it != qil.end())
+		{
+			if (int Overflow = it->second->Increase(Count))
+			{
+				MLog("Could not add %d of %d count\n", Overflow, Count);
+			}
+		}
+		else
+		{
+			if (!qil.CreateQuestItem(*ID, Count))
+			{
+				MLog("MQuestItemList::CreateQuestItem failed\n");
+				return;
+			}
+		}
+
+		if (!Database->UpdateQuestItem(ci.m_nCID, qil, ci.m_QMonsterBible))
+		{
+			MLog("IDatabase::UpdateQuestItem failed\n");
+		}
+
+		OnResponseCharQuestItemList(MUID(*UID));
+	});
+
+	AddConsoleCommand("additem", 2, 2,
+		"",
+		"additem <player UID> <item ID>",
+		"",
+		[&] {
+		auto UID = StringToInt<u64>(Splits[1]);
+		auto ID = StringToInt<u32>(Splits[2]);
+		if (!UID)
+		{
+			MLog("Malformed player UID\n");
+			return;
+		}
+
+		if (!ID)
+		{
+			MLog("Malformed ID\n");
+			return;
+		}
+
+		auto Object = GetObject(MUID(*UID));
+		if (!Object)
+		{
+			MLog("Could not find player from UID %llu\n", *UID);
+			return;
+		}
+
+		auto Success = InsertCharItem(MUID(*UID), *ID, false, 0);
+		ResponseCharacterItemList(MUID(*UID));
+		MLog("Adding item %u %s\n", *ID, Success ? "succeeded" : "failed");
+	});
+
+	AddConsoleCommand("setlevel", 2, 2,
+		"",
+		"setlevel <player UID> <level>",
+		"",
+		[&] {
+		auto UID = StringToInt<u64>(Splits[1]);
+		auto Level = StringToInt<u32>(Splits[2]);
+		if (!UID)
+		{
+			MLog("Malformed player UID\n");
+			return;
+		}
+
+		if (!Level)
+		{
+			MLog("Malformed level\n");
+			return;
+		}
+
+		auto Object = GetObject(MUID(*UID));
+		if (!Object)
+		{
+			MLog("Could not find player from UID %llu\n", *UID);
+			return;
+		}
+
+		auto& ci = *Object->GetCharInfo();
+		ci.m_nLevel = *Level;
+		Database->UpdateCharLevel(ci.m_nCID, ci.m_nLevel);
+		ResponseMySimpleCharInfo(MUID(*UID));
 	});
 
 	AddConsoleCommand("quit", 0, 0, "", "", "", [] { exit(0); });
