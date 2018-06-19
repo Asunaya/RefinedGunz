@@ -1154,7 +1154,6 @@ void ZMyCharacter::ProcessShot()
 {
 	if (ZApplication::GetGame()->GetMatch()->GetRoundState() == MMATCH_ROUNDSTATE_PREPARE) return;
 	if (m_bInitialized == false) return;
-	if (ZIsActionKeyDown(ZACTION_USE_WEAPON2)) return;
 
 	if (!m_bLButtonPressed) m_bEnterCharge = false;
 
