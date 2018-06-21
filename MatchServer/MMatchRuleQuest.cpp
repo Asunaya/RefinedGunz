@@ -314,10 +314,14 @@ void MMatchRuleQuest::OnEndCombatState(MQuestCombatState nState)
 
 MMatchRuleQuest::COMBAT_PLAY_RESULT MMatchRuleQuest::CheckCombatPlay()
 {
+	if (m_pQuestLevel->GetDynamicInfo()->bCurrBossSector && m_NPCManager.BossDead)
+	{
+		return CPR_COMPLETE;
+	}
+
 	if ((m_pQuestLevel->GetNPCQueue()->IsEmpty()) && (m_NPCManager.GetNPCObjectCount() <= 0))
 	{
 		return CPR_COMPLETE;
-	
 	}
 
 	// 모든 유저가 죽었으면 게임 실패로 설정함.

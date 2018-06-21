@@ -183,6 +183,8 @@ bool MMatchNPCManager::DestroyNPCObject(MUID& uidNPC, MQuestDropItem& outItem)
 			if ((pNPCInfo->nGrade == NPC_GRADE_BOSS) || (pNPCInfo->nGrade == NPC_GRADE_LEGENDARY))
 			{
 				m_nBossCount--;
+				if (m_nBossCount <= 0)
+					BossDead = true;
 			}
 		}
 		m_nNPCCount[nSpawnType]--;
@@ -207,6 +209,8 @@ void MMatchNPCManager::Create(MMatchStage* pStage, MQuestPlayerManager* pPlayerM
 {
 	m_pStage = pStage;
 	m_pPlayerManager = pPlayerManager;
+	m_nBossCount = 0;
+	BossDead = false;
 
 	memset(m_nNPCCount, 0, sizeof(m_nNPCCount));
 }

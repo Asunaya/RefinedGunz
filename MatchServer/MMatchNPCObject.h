@@ -91,6 +91,8 @@ private:
 	void SetNPCObjectToControllerInfo(MUID& uidChar, MMatchNPCObject* pNPCObject);
 	void DelNPCObjectToControllerInfo(MUID& uidChar, MMatchNPCObject* pNPCObject);
 public:
+	bool BossDead{};
+
 	/// 持失切
 	MMatchNPCManager();
 	/// 社瑚切
