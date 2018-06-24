@@ -88,8 +88,31 @@ static void MBMatchServerLog(unsigned int LogLevel, const char* Msg, bool Newlin
 {
 	static std::mutex LogMutex;
 	std::lock_guard<std::mutex> Lock(LogMutex);
+
+	char Str[1024 * 16];
+	ArrayView<char> Remaining = Str;
+	auto Consumed = strftime(Str, sizeof(Str), "%FT%T%z", localtime(&unmove(time(0))));
+	if (!Consumed)
+	{
+		assert(false);
+		return;
+	}
+	Remaining.remove_prefix(Consumed);
+	auto Append = [&](const char* a) {
+		auto Zero = strcpy_safe(Remaining, a);
+		Remaining.remove_prefix(Zero - Remaining.data());
+	};
+	Append(" | ");
+	Append(Msg);
+	Append(Newline ? "\n" : "");
+
+	fputs(Str, stdout);
+
+	if (LogLevel & MMatchServer::LOG_FILE)
+		MLogFile(Str);
+
 #ifdef _DEBUG
-	if (LogLevel | MMatchServer::LOG_DEBUG)
+	if (LogLevel & MMatchServer::LOG_DEBUG)
 	{
 		OutputDebugString(Msg);
 		if (Newline)
@@ -97,29 +120,6 @@ static void MBMatchServerLog(unsigned int LogLevel, const char* Msg, bool Newlin
 	}
 #endif
 
-	char szTime[256];
-	strftime(szTime, sizeof(szTime), "%c", localtime(&unmove(time(0))));
-
-	if (LogLevel | MMatchServer::LOG_FILE)
-	{
-		char szTemp[1024 * 16];
-		strcpy_safe(szTemp, szTime);
-		strcat_safe(szTemp, Msg);
-		if (Newline)
-			strcat_safe(szTemp, "\n");
-		MLogFile(szTemp);
-	}
-
-#ifdef MFC
-	if (nLogLevel || LOG_PROG)
-	{
-		if (m_pView == NULL) return;
-		m_pView->AddString(szTime, TIME_COLOR, false);
-		m_pView->AddString(szLog, RGB(0, 0, 0));
-	}
-#else
-	printf("%s%s%s", szTime, Msg, Newline ? "\n" : "");
-#endif
 }
 
 void MBMatchServer::Log(unsigned int LogLevel, const char* Msg)
