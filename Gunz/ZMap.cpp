@@ -115,7 +115,8 @@ bool InitMapSelectionWidget()
 
 	if (IsQuestDerivedGameType())
 	{
-		MapSelection->Add("Mansion");
+		for (auto&& MapName : GetScenarioManager().MapNames)
+			MapSelection->Add(MapName.data());
 		return true;
 	}
 

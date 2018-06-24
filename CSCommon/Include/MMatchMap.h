@@ -111,3 +111,12 @@ inline bool MIsMapOnlyDuel( const int nMapID)
 	else
 		return 0;
 }
+
+inline int QuestMapNameToID(StringView Name)
+{
+	const char* Mapsets[] = {"mansion", "prison", "dungeon"};
+	for (int i = 0; i < int(std::size(Mapsets)); ++i)
+		if (iequals(Name, Mapsets[i]))
+			return i + 1;
+	return 1;
+}

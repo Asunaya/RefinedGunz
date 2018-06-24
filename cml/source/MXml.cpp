@@ -217,9 +217,9 @@ MXmlElement	MXmlElement::CreateChildElement(const char* sTagName)
 	return MXmlElement{ node };
 }
 
-optional<StringView> MXmlElement::GetAttribute(StringView AttrName) const
+optional<StringView> MXmlElement::GetAttribute(StringView AttrName, bool CaseSensitive) const
 {
-	auto Attribute = m_pDomNode->first_attribute(AttrName.data(), AttrName.size());
+	auto Attribute = m_pDomNode->first_attribute(AttrName.data(), AttrName.size(), CaseSensitive);
 	if (!Attribute || !Attribute->value())
 		return nullopt;
 	return StringView(Attribute->value(), Attribute->value_size());

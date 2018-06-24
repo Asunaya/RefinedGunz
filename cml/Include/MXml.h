@@ -4,6 +4,7 @@
 #include <string>
 #include "rapidxml.hpp"
 #include "MUtil.h"
+#include "SafeString.h"
 #include "StringView.h"
 #include "optional.h"
 
@@ -40,6 +41,34 @@ struct MXmlIterator : IteratorBase<MXmlIterator<T>, T, std::forward_iterator_tag
 	T Node;
 };
 
+struct MXmlAttribute
+{
+	StringView Name;
+	StringView Value;
+};
+
+struct MXmlAttributeIterator : IteratorBase<MXmlAttributeIterator, MXmlAttribute, std::input_iterator_tag>
+{
+	MXmlAttributeIterator(rapidxml::xml_attribute<>* a) : a(a) {}
+
+	bool operator==(const MXmlAttributeIterator& rhs) const
+	{
+		return a == rhs.a;
+	}
+
+	MXmlAttribute operator*() const
+	{
+		return {StringView(a->name(), a->name_size()), StringView(a->value(), a->value_size())};
+	}
+
+	MXmlAttributeIterator& operator++() {
+		a = a->next_attribute();
+		return *this;
+	}
+
+	rapidxml::xml_attribute<>* a;
+};
+
 class MXmlNode
 {
 protected:
@@ -54,12 +83,12 @@ public:
 
 	bool IsEmpty() const { return m_pDomNode == nullptr; }
 
-	template<size_t size> void GetNodeName(char(&sOutStr)[size]) {
-		GetNodeName(sOutStr, size);
-	}
+	void GetNodeName(ArrayView<char> Out) { GetNodeName(Out.data(), int(Out.size())); }
 	void GetNodeName(char* sOutStr, int maxlen);
 	StringView MXmlNode::GetNodeName() const;
-	void GetText(char* sOutStr, int nMaxCharNum = -1);
+	void GetText(char* sOutStr, int nMaxCharNum);
+	void GetText(ArrayView<char> Out) { GetText(Out.data(), int(Out.size())); }
+	void GetTextUnsafe(char* Out) { GetText(Out, INT_MAX); }
 	void SetText(const char* sText);
 	
 	int	GetChildNodeCount();
@@ -89,13 +118,11 @@ public:
 	MXmlElement(MXmlNode Node) : MXmlNode{ Node } {}
 	using MXmlNode::MXmlNode;
 
-	template<size_t size> void GetTagName(char(&sOutStr)[size]) {
-		GetTagName(sOutStr, size);
-	}
+	void GetTagName(ArrayView<char> Out) { GetTagName(Out.data(), int(Out.size())); }
 	void GetTagName(char* sOutStr, int maxlen) { MXmlNode::GetNodeName(sOutStr, maxlen); }
 	StringView GetTagName() const { return MXmlNode::GetNodeName(); }
 	
-	void GetContents(char* sOutStr) { MXmlNode::GetText(sOutStr); }
+	void GetContents(ArrayView<char> sOutStr) { MXmlNode::GetText(sOutStr); }
 	void GetContents(int* ipOutValue);
 	void GetContents(bool* bpOutValue);
 	void GetContents(float* fpOutValue);
@@ -111,10 +138,9 @@ public:
 	bool GetChildContents(float* fOutValue, const char* sChildTagName);
 	bool GetChildContents(bool* bOutValue, const char* sChildTagName);
 
-	optional<StringView> GetAttribute(StringView AttrName) const;
-	template<size_t size> bool GetAttribute(char(&sOutText)[size], const char *szAttrName,
-		const char *sDefaultText = "") {
-		return GetAttribute(sOutText, size, szAttrName, sDefaultText);
+	optional<StringView> GetAttribute(StringView AttrName, bool CaseSensitive = false) const;
+	bool GetAttribute(ArrayView<char> OutText, const char* AttrName, const char* DefaultText = "") {
+		return GetAttribute(OutText.data(), int(OutText.size()), AttrName, DefaultText);
 	}
 	bool GetAttribute(char* sOutText, int maxlen, const char* sAttrName, const char* sDefaultText = "");
 	bool GetAttribute(int* ipOutValue, const char* sAttrName, int nDefaultValue = 0);
@@ -129,10 +155,11 @@ public:
 	bool RemoveAttribute(const char* sAttrName);
 
 	int GetAttributeCount();
-	template<size_t size1, size_t size2> void GetAttribute(int index, char(&szoutAttrName)[size1], char(&szoutAttrValue)[size2]) {
-		GetAttribute(index, szoutAttrName, size1, szoutAttrValue, size2);
+	void GetAttribute(int index, ArrayView<char> OutName, ArrayView<char> OutValue) {
+		GetAttribute(index, OutName.data(), int(OutName.size()), OutValue.data(), int(OutValue.size()));
 	}
 	void GetAttribute(int index, char* szoutAttrName, int maxlen1, char* szoutAttrValue, int maxlen2);
+	Range<MXmlAttributeIterator> Attributes() const { return {m_pDomNode->first_attribute(), nullptr}; }
 
 	bool AppendChild(const char* sTagName, const char* sTagText = NULL);
 	bool AppendChild(MXmlElement aChildElement);

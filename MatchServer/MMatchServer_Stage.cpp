@@ -1014,7 +1014,7 @@ void MMatchServer::OnStageSetting(const MUID& uidPlayer, const MUID& uidStage, v
 
 		if (LastGameType != MMATCH_GAMETYPE_QUEST && CurGameType == MMATCH_GAMETYPE_QUEST)
 		{
-			OnStageMap(uidStage, GetQuest()->GetSurvivalMapInfo(MSURVIVAL_MAP(0))->szName);
+			OnStageMap(uidStage, MGetMapName(MMATCH_MAP_MANSION));
 
 			MMatchRuleQuest* pQuest = static_cast<MMatchRuleQuest*>(pStage->GetRule());
 			pQuest->RefreshStageGameInfo();

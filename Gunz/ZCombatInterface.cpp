@@ -1434,16 +1434,8 @@ void ZCombatInterface::DrawScoreBoard(MDrawContext* pDC)
    	strcpy_safe( szText, ZGetGameClient()->GetMatchStageSetting()->GetMapName());
 	if ( ZGetGameTypeManager()->IsQuestOnly(g_pGame->GetMatch()->GetMatchType()))
 	{
-	   	strcpy_safe( szText, "Mansion");
-		if ( ZGetQuest()->GetGameInfo()->GetQuestLevel() > 0)
-		{
-   			strcat_safe( szText, " (");
-
-			for ( int i = 0;  i < ZGetQuest()->GetGameInfo()->GetQuestLevel();  i++)
-    			strcat_safe( szText, ZMsg( MSG_WORD_QUESTLEVELMARKER));
-
-   			strcat_safe( szText, ")");
-		}
+   		sprintf_safe(szText, "%s (%s %d)", szText, ZMsg(MSG_CHARINFO_LEVELMARKER),
+				ZGetQuest()->GetGameInfo()->GetQuestLevel());
 	}
 	TextRelative(pDC,x,y,szText);
 

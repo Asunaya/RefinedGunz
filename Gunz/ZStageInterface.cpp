@@ -157,8 +157,6 @@ void ZStageInterface::OnDestroy()
 	MWidget* pWidget = ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "Stage_CharacterInfo");
 	if ( pWidget)
 		pWidget->Enable( true);
-
-	m_SenarioNameDesc.clear();
 }
 
 void ZStageInterface::OnStageInterfaceSettup()
@@ -224,11 +222,8 @@ void ZStageInterface::OnStageInterfaceSettup()
  	pPicture = (MPicture*)pResource->FindWidget( "Stage_MainBGTop");
 	if ( pPicture)
 	{
-		sprintf_safe( szMapName, "interface/loadable/%s",
+		sprintf_safe(szMapName, "interface/loadable/%s",
 			MGetMapImageName( ZGetGameClient()->GetMatchStageSetting()->GetMapName()));
-
-		if ( m_nGameType == MMATCH_GAMETYPE_QUEST)
-			strcpy_safe( szMapName, "interface/loadable/map_Mansion.bmp");
 
 		if ( m_pTopBgImg != NULL)
 		{
@@ -545,20 +540,11 @@ void ZStageInterface::ChangeStageEnableReady( bool bReady)
 	END_WIDGETLIST();
 }
 
-void ZStageInterface::SetMapName( const char* szMapName)
+void ZStageInterface::SetMapName(const char* szMapName)
 {
-	ZIDLResource* pResource = ZApplication::GetGameInterface()->GetIDLResource();
-
-	if ( szMapName == NULL)
-		return;
-
-	MComboBox* pMapCombo = (MComboBox*)pResource->FindWidget( "MapSelection");
-	if ( pMapCombo)
+	if (auto MapCombo = ZFindWidgetAs<MComboBox>("MapSelection"))
 	{
-		if ( m_nGameType == MMATCH_GAMETYPE_QUEST)
-			pMapCombo->SetText( "Mansion");
-		else
-			pMapCombo->SetText( szMapName);
+		MapCombo->SetText(szMapName);
 	}
 }
 
@@ -1064,77 +1050,59 @@ bool ZStageInterface::OnNotAllReady()
 
 void ZStageInterface::UpdateStageGameInfo(const int nQL, const int nMapsetID, const int nScenarioID)
 {
-	if (!ZGetGameTypeManager()->IsQuestDerived(ZGetGameClient()->GetMatchStageSetting()->GetGameType())) return;
+	if (!IsQuestDerivedGameType())
+		return;
 
-	MLabel* pLabel = (MLabel*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "Stage_QuestLevel");
-	if ( pLabel)
+	if (auto pLabel = ZFindWidgetAs<MLabel>("Stage_QuestLevel"))
 	{
 		char szText[125];
-		sprintf_safe( szText, "%s %s : %d", ZMsg( MSG_WORD_QUEST), ZMsg( MSG_CHARINFO_LEVEL), nQL);
-		pLabel->SetText( szText);
+		sprintf_safe(szText, "%s %s : %d", ZMsg(MSG_WORD_QUEST), ZMsg(MSG_CHARINFO_LEVEL), nQL);
+		pLabel->SetText(szText);
 	}
 
+	static const MCOLOR MapSetNormal  = 0xFFFFFFFF;
+	static const MCOLOR MapSetSpecial = 0xFFFFFF40;
 
-#define		MAPSET_NORMAL		MCOLOR(0xFFFFFFFF)
-#define		MAPSET_SPECIAL		MCOLOR(0xFFFFFF40)			// Green
+	auto pLabel = ZFindWidgetAs<MLabel>("Stage_SenarioName");
+	if (!pLabel)
+		return;
 
-	pLabel = (MLabel*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "Stage_SenarioName");
-	MWidget* pWidget = ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "Stage_SenarioNameImg");
-	MPicture* pPictureL = (MPicture*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "Stage_Lights0");
-	MPicture* pPictureR = (MPicture*)ZApplication::GetGameInterface()->GetIDLResource()->FindWidget( "Stage_Lights1");
-	if ( pLabel)
+	auto pWidget = ZFindWidget("Stage_SenarioNameImg");
+	auto pPictureL = ZFindWidgetAs<MPicture>("Stage_Lights0");
+	auto pPictureR = ZFindWidgetAs<MPicture>("Stage_Lights1");
+
+	if (nScenarioID == 0)
 	{
-		if (nScenarioID == 0)
-		{
-			pLabel->SetText( "");
-			if ( pWidget)
-				pWidget->Show( false);
-			if ( pPictureL) {
-				pPictureL->Show( false);
-			}
-			if ( pPictureR) {
-				pPictureR->Show( false);
-			}
-		}
-		else
-		{
-			pLabel->SetAlignment( MAM_HCENTER | MAM_VCENTER);
+		pLabel->SetText("");
+		MWidget* Widgets[] = {pWidget, pPictureL, pPictureR};
+		for (auto Widget : Widgets)
+			Widget->Show(false);
+		return;
+	}
 
-			map< int, MSenarioNameList>::iterator itr =  m_SenarioNameDesc.find( nScenarioID);
-			if ( itr != m_SenarioNameDesc.end())
-			{
-				pLabel->SetText( (*itr).second.m_szName);
-				pLabel->SetTextColor(MCOLOR(0xFFFFFF00));
-				if ( pWidget)
-					pWidget->Show( true);
+	pLabel->SetAlignment( MAM_HCENTER | MAM_VCENTER);
 
-				if ( pPictureL) {
-					pPictureL->Show( true);
-					pPictureL->SetBitmapColor(MAPSET_SPECIAL);
-				}
-				if ( pPictureR) {
-					pPictureR->Show( true);
-					pPictureR->SetBitmapColor(MAPSET_SPECIAL);
-				}
-			}
-			else
-			{
-				pLabel->SetText("");
-				pLabel->SetTextColor(MCOLOR(0xFFFFFFFF));
-				if ( pWidget)
-					pWidget->Show( false);
+	const char* Text = "";
+	MCOLOR TextColor = 0xFFFFFFFF;
+	MCOLOR BitmapColor = MapSetNormal;
+	bool ShowScenarioNameImage = false;
+	if (auto Scenario = GetScenarioManager().GetSpecialScenario(nScenarioID))
+	{
+		Text = Scenario->Title;
+		TextColor = 0xFFFFFF00;
+		BitmapColor = MapSetSpecial;
+		ShowScenarioNameImage = true;
+	}
 
-				if ( pPictureL) {
-					pPictureL->Show( true);
-					pPictureL->SetBitmapColor(MAPSET_NORMAL);
-				}
-				if ( pPictureR) {
-					pPictureR->Show( true);
-					pPictureR->SetBitmapColor(MAPSET_NORMAL);
-				}
+	pLabel->SetText(Text);
+	pLabel->SetTextColor(TextColor);
+	if (pWidget)
+		pWidget->Show(ShowScenarioNameImage);
 
-			}
-		}
+	for (auto Picture : {pPictureL, pPictureR})
+	{
+		Picture->Show(true);
+		Picture->SetBitmapColor(BitmapColor);
 	}
 }
 
@@ -1148,54 +1116,102 @@ void SacrificeItemSlotDesc::SetSacrificeItemSlot( const MUID& uidUserID, const u
 	m_bExist = true;
 }
 
-bool ZStageInterface::ReadSenarioNameXML()
+template <typename V>
+static auto SearchSpecialScenarios(V& v, int ID)
 {
-	m_SenarioNameDesc.clear();
+	return std::lower_bound(v.begin(), v.end(), ID, [](const SpecialScenario& a, int b) {
+		return a.ID < b;
+	});
+}
+
+bool ScenarioManager::Load()
+{
+	if (Loaded)
+		return true;
+	Loaded = true;
 
 	MXmlDocument xmlQuestItemDesc;
-	if( !xmlQuestItemDesc.LoadFromFile("System/scenario.xml", ZApplication::GetFileSystem()))
+	if (!xmlQuestItemDesc.LoadFromFile("System/scenario.xml", ZApplication::GetFileSystem()))
 	{
 		return false;
 	}
 
-	MXmlElement rootElement = xmlQuestItemDesc.GetDocumentElement();
-	for ( int i = 0;  i < rootElement.GetChildNodeCount();  i++)
+	for (auto&& chrElement : xmlQuestItemDesc.GetDocumentElement().Children())
 	{
-		MXmlElement chrElement = rootElement.GetChildNode( i);
-
-		char szTagName[ 256];
-		chrElement.GetTagName( szTagName);
-
-		if ( szTagName[ 0] == '#')
+		auto TagName = chrElement.GetTagName();
+		if (starts_with(TagName, "#"))
 			continue;
 
-		bool bFindPage = false;
-		if ( !_stricmp( szTagName, "SPECIAL_SCENARIO"))
+		bool IsSpecialScenario = iequals(TagName, "SPECIAL_SCENARIO");
+		if (!IsSpecialScenario && !iequals(TagName, "STANDARD_SCENARIO"))
 		{
-			char szAttrName[64];
-			char szAttrValue[256];
-			int nItemID = 0;
-			MSenarioNameList SenarioMapList;
-			
-			// Set Tag
-			for ( int k = 0;  k < chrElement.GetAttributeCount();  k++)
+			mlog("Invalid scenario type %.*s\n", TagName.size(), TagName.data());
+			return false;
+		}
+
+		auto MissingAttribute = [](const char* Name) {
+			mlog("Scenario entry missing attribute %s\n", Name);
+			return false;
+		};
+
+		auto MapSet = chrElement.GetAttribute("mapset");
+		if (!MapSet)
+			return MissingAttribute("mapset");
+
+		if (IsSpecialScenario)
+		{
+			auto Title = chrElement.GetAttribute("title");
+			if (!Title)
+				return MissingAttribute("title");
+
+			auto IDAttr = chrElement.GetAttribute("id");
+			if (!IDAttr)
+				return MissingAttribute("id");
+			auto ID = StringToInt(*IDAttr);
+			if (!ID)
 			{
-				chrElement.GetAttribute( k, szAttrName, szAttrValue);
-
-				if ( !_stricmp( szAttrName, "id"))				// ID
-					nItemID = atoi( szAttrValue);
-
-				else if ( !_stricmp( szAttrName, "title"))		// Title
-					strcpy_safe( SenarioMapList.m_szName, szAttrValue);
+				mlog("Malformed special scenario ID. Expected integral value, got %.*s\n",
+						IDAttr->size(), IDAttr->data());
+				return false;
 			}
 
-			m_SenarioNameDesc.insert( map< int, MSenarioNameList>::value_type( nItemID, SenarioMapList));
+			auto& Scenario = *SpecialScenarios.emplace(SearchSpecialScenarios(SpecialScenarios, *ID));
+			Scenario.ID = *ID;
+			strcpy_safe(Scenario.Title, *Title);
+			strcpy_safe(Scenario.MapSet, *MapSet);
+		}
+		else
+		{
+			auto AlreadyExists = [&] {
+				for (auto&& MapName : MapNames)
+					if (iequals(MapName.data(), *MapSet))
+						return true;
+				return false;
+			}();
+			if (AlreadyExists)
+				continue;
+			auto& MapName = emplace_back(MapNames);
+			strcpy_safe(MapName, *MapSet);
 		}
 	}
 
-	xmlQuestItemDesc.Destroy();
+	MapNames.shrink_to_fit();
+	SpecialScenarios.shrink_to_fit();
 
 	return true;
+}
+
+const SpecialScenario* ScenarioManager::GetSpecialScenario(int ID) const
+{
+	auto it = SearchSpecialScenarios(SpecialScenarios, ID);
+	if (it == SpecialScenarios.end() || it->ID != ID)
+	   return nullptr;
+	return &*it;
+}
+
+bool ZStageInterface::ReadSenarioNameXML()
+{
+	return GetScenarioManager().Load();
 }
 
 bool ZStageInterface::OnStopVote()

@@ -1542,6 +1542,8 @@ void MMatchRuleQuest::MakeStageGameInfo()
 		unsigned int nScenarioID = pQuest->GetScenarioCatalogue()->MakeScenarioID(m_StageGameInfo.nMapsetID,
 																				  nPlayerQL, SQItems);
 
+		m_StageGameInfo.nMapsetID = QuestMapNameToID(pStage->GetMapName());
+
 		m_StageGameInfo.nScenarioID = nScenarioID;
 		MQuestScenarioInfo* pScenario = pQuest->GetScenarioCatalogue()->GetInfo(nScenarioID);
 		if (pScenario)

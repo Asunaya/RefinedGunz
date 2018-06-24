@@ -2706,7 +2706,7 @@ bool MMatchServer::CheckUpdateItemXML()
 		{
 			ix tix;
 			char szID[256] = {0,};
-			char szInfo[256] = {0,};
+			char szInfo[512] = {0,};
 
 			chrElement.GetAttribute(szID, "id");
 			chrElement.GetContents( szInfo );
@@ -2784,9 +2784,7 @@ bool MMatchServer::CheckUpdateItemXML()
 		strcpy_safe(szID, it->second.id.c_str() + 11);
 
 		auto nID = StringToInt<u32>(szID).value_or(0);
-		int k = 0;
 
-		char szQ[ 1024 ] = {0,};
 		fprintf( fpDesc, "UPDATE Item SET Description = '%s' WHERE ItemID = %u\n",
 			it->second.desc.c_str(), nID );
 	}

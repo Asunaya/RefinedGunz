@@ -228,11 +228,7 @@ void MQuestScenarioCatalogue::ParseSpecialScenario(MXmlElement& element)
 		}
 		else if (!_stricmp(szAttrName, MTOK_SCENARIO_MAPSET))
 		{
-			// 여기 나중에 고쳐야 함
-			if (!_stricmp(szAttrValue, "mansion"))
-			{
-				pScenarioInfo->nMapSet = 1;
-			}
+			pScenarioInfo->nMapSet = QuestMapNameToID(szAttrValue);
 		}
 		else if (!_stricmp(szAttrName, MTOK_SCENARIO_XP))
 		{
@@ -308,11 +304,7 @@ void MQuestScenarioCatalogue::ParseStandardScenario(MXmlElement& element)
 		}
 		else if (!_stricmp(szAttrName, MTOK_SCENARIO_MAPSET))
 		{
-			// 여기 나중에 고쳐야 함
-			if (!_stricmp(szAttrValue, "mansion"))
-			{
-				pScenarioInfo->nMapSet = 1;
-			}
+			pScenarioInfo->nMapSet = QuestMapNameToID(szAttrValue);
 		}
 		else if (!_stricmp(szAttrName, MTOK_SCENARIO_XP))
 		{

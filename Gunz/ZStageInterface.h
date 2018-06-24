@@ -105,19 +105,24 @@ public:
 	const char* GetItemDesc( void)		{ return m_szDesc; }
 };
 
-
-// 퀘스트 시나리오 이름 리스트
-struct MSenarioNameList
+struct SpecialScenario
 {
-	char			m_szName[ 32];								// 퀘스트 시나리오 이름
-
-	MSenarioNameList()
-	{
-		m_szName[ 0] = 0;
-	}
+	char Title[32];
+	char MapSet[32];
+	int ID;
 };
 
+struct ScenarioManager
+{
+	std::vector<std::array<char, 32>> MapNames;
+	std::vector<SpecialScenario> SpecialScenarios;
+	bool Loaded{};
 
+	bool Load();
+	const SpecialScenario* GetSpecialScenario(int ID) const;
+};
+
+inline ScenarioManager& GetScenarioManager() { static ScenarioManager sm; return sm; }
 
 // Class : ZStageInterface
 class ZStageInterface
@@ -131,9 +136,6 @@ protected:	// protected varialbes
 	MBitmapR2*		m_pTopBgImg;								// 상단 맵 이미지
 	MBitmapR2*		m_pStageFrameImg;							// 프레임 이미지
 	MBitmapR2*		m_pItemListFrameImg;						// 아이템 리스트 프레임 이미지
-	map< int, MSenarioNameList>	 m_SenarioNameDesc;				// 퀘스트 시나리오 이름 리스트
-
-
 
 protected:	// protected functions
 	void UpdateSacrificeItem( void);
@@ -144,7 +146,6 @@ public:		// public variables
 	
 	int				m_nListFramePos;							// 아이템 리스트 프레임 위치
 	int				m_nStateSacrificeItemBox;					// 아이템 리스트 프레임 상태
-
 
 public:		// public functions
 	// Initialize

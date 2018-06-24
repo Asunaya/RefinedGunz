@@ -41,7 +41,9 @@ struct BasicStringView
 	BasicStringView() : ptr{""}, sz{0} {}
 	BasicStringView(const CharType* ptr) : ptr{ptr}, sz{StringViewDetail::len(ptr)} {}
 	BasicStringView(const CharType* ptr, size_t sz) : ptr{ptr}, sz{sz} {}
-	BasicStringView(const std::basic_string<CharType>& str) : ptr{str.c_str()}, sz{str.size()} {}
+	template <typename U, typename = decltype(std::declval<pointer&>() = std::declval<U&>().data()),
+		typename = decltype(std::declval<U&>().size())>
+	BasicStringView(U&& x) : BasicStringView(x.data(), x.size()) {}
 
 	const CharType& operator[](size_t i) const {
 		assert(i < sz);
