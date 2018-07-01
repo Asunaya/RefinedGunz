@@ -1,11 +1,13 @@
 #include "stdafx.h"
 #include <stdio.h>
 #include <signal.h>
+#include "MFile.h"
 #include "FileInfo.h"
 #include "MDebug.h"
 #include <string>
 #include <mutex>
 #include <cassert>
+#include <ctime>
 
 #ifdef WIN32
 #include <windows.h>
@@ -197,6 +199,25 @@ void MSEHTranslator(UINT nSeCode, _EXCEPTION_POINTERS* pExcPointers)
 }
 
 #endif
+
+void GetLogFilename(ArrayView<char> Output, StringView Prefix, StringView Extension)
+{
+	if (!MFile::IsDir("Log"))
+		MFile::CreateDir("Log");
+
+	auto Time = *localtime(&unmove(time(0)));
+	auto Written = sprintf_safe(Output, "Log/%.*s_%02d-%02d-%02d-",
+		Prefix.size(), Prefix.data(),
+		Time.tm_year + 1900, Time.tm_mon + 1, Time.tm_mday);
+	auto End = Output.subview(Written);
+
+	for (int i = 1; i <= 100; ++i)
+	{
+		sprintf_safe(End, "%d.%.*s", i, Extension.size(), Extension.data());
+		if (!MFile::IsFile(Output.data()))
+			break;
+	}
+}
 
 #ifdef _DEBUG
 

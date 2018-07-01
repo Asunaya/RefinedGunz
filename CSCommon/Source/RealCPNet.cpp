@@ -21,12 +21,6 @@
 #include "MInetUtil.h"
 #include "MFile.h"
 
-#ifndef _PUBLISH
-	#include "MProcessController.h"
-#endif
-
-
-
 static RCPLOGFUNC*	g_RCPLog = NULL;
 void SetupRCPLog(RCPLOGFUNC* pFunc) { g_RCPLog = pFunc; }
 #define RCPLOG if(g_RCPLog) g_RCPLog
@@ -147,7 +141,17 @@ bool MRealCPNet::Create(int nPort, const bool bReuse )
 		// to create 2 worker threads per CPU in the system is a heuristic.  Also,
 		// note that thread handles are closed right away, because we will not need them
 		// and the worker threads will continue to execute.
-		std::thread{ [&] { WorkerThread(); } }.detach();
+		std::thread{[this] {
+			auto CrashCallback = [=](uintptr_t ExceptionInfo) {
+				mlog("MRealCPNet CrashDump Entered\n");
+				std::lock_guard<MCriticalSection> lock{m_csCrashDump};
+				char Filename[MFile::MaxPath];
+				GetLogFilename(Filename, "RealCPNet", "dmp");
+				MCrashDump::WriteDump(ExceptionInfo, Filename);
+				mlog("MRealCPNet CrashDump Leaving\n");
+			};
+			MCrashDump::Try([=] { WorkerThread(); }, CrashCallback);
+		}}.detach();
 	}
     
 	if (!CreateListenSocket(bReuse))
@@ -655,9 +659,6 @@ void MRealCPNet::WorkerThread()
 	u32 dwFlags = 0;
 	unsigned long dwIoSize;
 
-#ifndef _DEBUG
-__try{
-#endif
     while (true) {
 		// continually loop to service io completion packets
 		bSuccess = GetQueuedCompletionStatus(
@@ -842,48 +843,5 @@ __try{
 			break;
 		} //switch
 	} //while
-#ifndef _DEBUG
-} __except(CrashDump(GetExceptionInformation())) 
-{
-}
-#endif
 } 
-
-u32 MRealCPNet::CrashDump(EXCEPTION_POINTERS* ExceptionInfo)
-{
-	mlog("CrashDump Entered\n");
-	std::lock_guard<MCriticalSection> lock{ m_csCrashDump };
-
-	if (!MFile::IsDir("Log"))
-		MFile::CreateDir("Log");
-
-	time_t tClock;
-	tm tmTime;
-
-	time(&tClock);
-	localtime_s(&tmTime, &tClock);
-
-	char szFileName[_MAX_DIR];
-
-	int nFooter = 1;
-	while (true) {
-		sprintf_safe(szFileName, "Log/RealCPNet_%02d-%02d-%02d-%d.dmp", 
-			tmTime.tm_year + 1900, tmTime.tm_mon + 1, tmTime.tm_mday, nFooter);
-
-		if (PathFileExists(szFileName) == FALSE)
-			break;
-
-		nFooter++;
-		if (nFooter > 100) 
-		{
-			return false;
-		}
-	}
-
-	auto ret = CrashExceptionDump(ExceptionInfo, szFileName);
-
-	mlog("CrashDump Leaving\n");
-
-	return ret;
-}
 #endif

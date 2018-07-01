@@ -1,6 +1,8 @@
 #pragma once
 
 #include "GlobalTypes.h"
+#include "ArrayView.h"
+#include "StringView.h"
 
 #define MASSERT(x) _ASSERT(x)
 
@@ -37,6 +39,8 @@ void MMsg(const char *pFormat,...);
 
 using LPEXCEPTION_POINTERS = struct _EXCEPTION_POINTERS*;
 void MFilterException(LPEXCEPTION_POINTERS p);
+
+void GetLogFilename(ArrayView<char> Output, StringView Prefix, StringView Extension);
 
 void MInitProfile();
 void MBeginProfile(int nIndex,const char *szName);

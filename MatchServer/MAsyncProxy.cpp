@@ -3,9 +3,7 @@
 #include "MMatchConfig.h"
 #include "MMatchServer.h"
 #include "MCrashDump.h"
-#ifndef _PUBLISH
-	#include "MProcessController.h"
-#endif
+#include "MFile.h"
 
 bool MAsyncProxy::Create(int ThreadCount)
 {
@@ -18,7 +16,17 @@ bool MAsyncProxy::Create(int ThreadCount, function_view<IDatabase*()> GetDatabas
 
 	for (int i = 0; i < ThreadCount; i++)
 	{
-		std::thread{ [this, Database = GetDatabase()] { WorkerThread(Database); } }.detach();
+		std::thread{[this, Database = GetDatabase()] {
+			auto CrashCallback = [=](uintptr_t ExceptionInfo) {
+				mlog("MAsyncProxy CrashDump Entered\n");
+				std::lock_guard<MCriticalSection> lock{csCrashDump};
+				char Filename[MFile::MaxPath];
+				GetLogFilename(Filename, "MAsyncProxy", "dmp");
+				MCrashDump::WriteDump(ExceptionInfo, Filename);
+				mlog("MAsyncProxy CrashDump Leaving\n");
+			};
+			MCrashDump::Try([=] { OnRun(Database); }, CrashCallback);
+		}}.detach();
 	}
 
 	return true;
@@ -37,21 +45,6 @@ void MAsyncProxy::PostJob(MAsyncJob* pJob)
 	WaitQueue.Unlock();
 
 	EventFetchJob.SetEvent();
-}
-
-void MAsyncProxy::WorkerThread(IDatabase* Database)
-{
-#ifdef _WIN32
-	__try
-	{
-#endif
-		OnRun(Database);
-#ifdef _WIN32
-	}
-	__except(CrashDump(GetExceptionInformation())) 
-	{
-	}
-#endif
 }
 
 void MAsyncProxy::OnRun(IDatabase* Database)
@@ -103,43 +96,3 @@ void MAsyncProxy::OnRun(IDatabase* Database)
 		};
 	};
 }
-
-#ifdef _WIN32
-u32 MAsyncProxy::CrashDump(EXCEPTION_POINTERS* ExceptionInfo)
-{
-	mlog("CrashDump Entered 1\n");
-	std::lock_guard<MCriticalSection> lock{ csCrashDump };
-
-	if (PathIsDirectory("Log") == FALSE)
-		CreateDirectory("Log", NULL);
-
-	time_t		tClock;
-	struct tm	tmTime;
-
-	time(&tClock);
-	localtime_s(&tmTime, &tClock);
-
-	char szFileName[_MAX_DIR];
-
-	int nFooter = 1;
-	while(TRUE) {
-		sprintf_safe(szFileName, "Log/MAsyncProxy_%02d-%02d-%02d-%d.dmp", 
-			tmTime.tm_year+1900, tmTime.tm_mon+1, tmTime.tm_mday, nFooter);
-
-		if (PathFileExists(szFileName) == FALSE)
-			break;
-
-		nFooter++;
-		if (nFooter > 100) 
-		{
-			return false;
-		}
-	}
-
-	auto ret = CrashExceptionDump(ExceptionInfo, szFileName);
-
-	mlog("CrashDump Leaving\n");
-
-	return ret;
-}
-#endif

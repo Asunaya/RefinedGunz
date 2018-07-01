@@ -594,11 +594,6 @@ void UpgradeMrsFile()
 	file_list.UpgradeMrs();
 }
 
-static LONG __stdcall ExceptionFilter(_EXCEPTION_POINTERS* p)
-{
-	return CrashExceptionDump(p, "Gunz.dmp");
-}
-
 static void SetRS2Callbacks()
 {
 	RSetFunction(RF_CREATE, OnCreate);
@@ -615,7 +610,7 @@ static void SetRS2Callbacks()
 
 int PASCAL GunzMain(HINSTANCE this_inst, HINSTANCE prev_inst, LPSTR cmdline, int cmdshow)
 {
-	SetUnhandledExceptionFilter(ExceptionFilter);
+	MCrashDump::SetCallback([](uintptr_t p) { MCrashDump::WriteDump(p, "Gunz.dmp"); });
 
 	_set_invalid_parameter_handler([](const wchar_t* expression,
 		const wchar_t* function,

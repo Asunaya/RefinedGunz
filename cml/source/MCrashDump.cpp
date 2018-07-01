@@ -1,13 +1,24 @@
 #include "stdafx.h"
 #include "MCrashDump.h"
+#include "MFile.h"
 
 #ifdef _WIN32
 
-// CrashExceptionDump 함수를 사용하려면 dbghelp.dll이 필요하다.
-// 해당 dll은 http://www.microsoft.com/whdc/ddk/debugging/ 에서 구할 수 있다.
+#include "MDebug.h"
+#include "Shlwapi.h"
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4091)
+#endif
+#include <imagehlp.h>
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 #pragma comment(lib, "dbghelp.lib") 
 
-DWORD CrashExceptionDump(PEXCEPTION_POINTERS ExceptionInfo, const char* szDumpFileName)
+constexpr auto HandlerReturnValue = EXCEPTION_EXECUTE_HANDLER;
+
+static void CrashExceptionDump(PEXCEPTION_POINTERS ExceptionInfo, const char* szDumpFileName)
 {
 	HANDLE hFile = CreateFileA(
 		szDumpFileName,
@@ -26,7 +37,6 @@ DWORD CrashExceptionDump(PEXCEPTION_POINTERS ExceptionInfo, const char* szDumpFi
 		eInfo.ClientPointers = FALSE;
 
 		MINIDUMP_CALLBACK_INFORMATION cbMiniDump;
-		//cbMiniDump.CallbackRoutine = miniDumpCallback;
 		cbMiniDump.CallbackRoutine = NULL;
 		cbMiniDump.CallbackParam = 0;
 
@@ -38,19 +48,51 @@ DWORD CrashExceptionDump(PEXCEPTION_POINTERS ExceptionInfo, const char* szDumpFi
 			ExceptionInfo ? &eInfo : NULL,
 			NULL,
 			NULL);
-			//&cbMiniDump);
 	}
 
 	CloseHandle(hFile);
 
 	if (IsLogAvailable())
 		MFilterException(ExceptionInfo);
-	else
-		MessageBox(0, "Crashed! MLog not available", "RGunz", 0);
+}
 
-	abort();
+void MCrashDump::WriteDump(uintptr_t ExceptionInfo, const char* Filename)
+{
+	CrashExceptionDump(reinterpret_cast<PEXCEPTION_POINTERS>(ExceptionInfo), Filename);
+}
 
-	return EXCEPTION_EXECUTE_HANDLER;
+static thread_local function_view<void(uintptr_t)> UserCallback;
+
+static LONG __stdcall ExceptionFilter(_EXCEPTION_POINTERS* p)
+{
+	if (UserCallback)
+		UserCallback(reinterpret_cast<uintptr_t>(p));
+	return HandlerReturnValue;
+}
+
+void MCrashDump::SetCallback(function_view<void(uintptr_t)> CrashCallback)
+{
+	UserCallback = CrashCallback;
+	SetUnhandledExceptionFilter(ExceptionFilter);
+}
+
+void MCrashDump::Try(function_view<void()> Func, function_view<void(uintptr_t)> CrashCallback)
+{
+	__try
+	{
+		Func();
+	}
+	__except((CrashCallback(reinterpret_cast<uintptr_t>(GetExceptionInformation())), HandlerReturnValue))
+	{
+	}
+}
+
+#else
+
+void InstallUnhandledExceptionFilter(){}
+void MCrashDump::Try(function_view<void()> Func, function_view<void(ArrayView<char>)>)
+{
+	Func();
 }
 
 #endif

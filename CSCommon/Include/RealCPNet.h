@@ -170,9 +170,6 @@ private:
 	RCPCALLBACK*		m_fnCallback{};
 	void*				m_pCallbackContext{};
 
-private:
-	u32 CrashDump(struct _EXCEPTION_POINTERS* ExceptionInfo);
-
 protected:
 	SOCKET CreateSocket();
 	bool CreateListenSocket(bool bReuse);

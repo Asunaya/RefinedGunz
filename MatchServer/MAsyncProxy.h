@@ -76,8 +76,6 @@ public:
 
 #define MAX_THREADPOOL_COUNT 10
 
-using EXCEPTION_POINTERS = struct _EXCEPTION_POINTERS;
-
 class MAsyncProxy final {
 protected:
 	MSignalEvent EventShutdown;
@@ -88,7 +86,6 @@ protected:
 
 	MCriticalSection csCrashDump;
 
-	void WorkerThread(IDatabase* Database);
 	void OnRun(IDatabase* Database);
 
 public:
@@ -106,6 +103,4 @@ public:
 		ResultQueue.Unlock();
 		return pJob;
 	}
-
-	u32 CrashDump(EXCEPTION_POINTERS* ExceptionInfo);
 };
