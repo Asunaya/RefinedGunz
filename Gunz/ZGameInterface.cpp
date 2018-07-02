@@ -343,6 +343,11 @@ ZGameInterface::ZGameInterface(const char* szName, MWidget* pParent, MListener* 
 
 	m_pLocatorList = ZGetConfiguration()->GetLocatorList();
 	m_pTLocatorList = ZGetConfiguration()->GetTLocatorList();
+
+	m_dwVoiceTime = 0;
+	m_szCurrVoice[ 0] = 0;
+	m_szNextVoice[ 0] = 0;
+	m_dwNextVoiceTime = 0;
 }
 
 ZGameInterface::~ZGameInterface()
