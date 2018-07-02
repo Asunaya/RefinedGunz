@@ -61,7 +61,7 @@ void MCrashDump::WriteDump(uintptr_t ExceptionInfo, const char* Filename)
 	CrashExceptionDump(reinterpret_cast<PEXCEPTION_POINTERS>(ExceptionInfo), Filename);
 }
 
-static thread_local function_view<void(uintptr_t)> UserCallback;
+static thread_local std::function<void(uintptr_t)> UserCallback;
 
 static LONG __stdcall ExceptionFilter(_EXCEPTION_POINTERS* p)
 {
@@ -70,9 +70,9 @@ static LONG __stdcall ExceptionFilter(_EXCEPTION_POINTERS* p)
 	return HandlerReturnValue;
 }
 
-void MCrashDump::SetCallback(function_view<void(uintptr_t)> CrashCallback)
+void MCrashDump::SetCallback(std::function<void(uintptr_t)> CrashCallback)
 {
-	UserCallback = CrashCallback;
+	UserCallback = std::move(CrashCallback);
 	SetUnhandledExceptionFilter(ExceptionFilter);
 }
 
@@ -89,10 +89,11 @@ void MCrashDump::Try(function_view<void()> Func, function_view<void(uintptr_t)> 
 
 #else
 
-void InstallUnhandledExceptionFilter(){}
-void MCrashDump::Try(function_view<void()> Func, function_view<void(ArrayView<char>)>)
+void MCrashDump::SetCallback(std::function<void(uintptr_t)>){}
+void MCrashDump::Try(function_view<void()> Func, function_view<void(uintptr_t)>)
 {
 	Func();
 }
+void MCrashDump::WriteDump(uintptr_t, const char*){}
 
 #endif

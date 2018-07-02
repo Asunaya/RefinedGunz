@@ -85,7 +85,7 @@ public:
 
 	void GetNodeName(ArrayView<char> Out) { GetNodeName(Out.data(), int(Out.size())); }
 	void GetNodeName(char* sOutStr, int maxlen);
-	StringView MXmlNode::GetNodeName() const;
+	StringView GetNodeName() const;
 	void GetText(char* sOutStr, int nMaxCharNum);
 	void GetText(ArrayView<char> Out) { GetText(Out.data(), int(Out.size())); }
 	void GetTextUnsafe(char* Out) { GetText(Out, INT_MAX); }
