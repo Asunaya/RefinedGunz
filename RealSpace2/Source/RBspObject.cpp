@@ -1341,7 +1341,7 @@ bool RBspObject::Set_Fog(rapidxml::xml_node<>& parent)
 
 	auto GetFloatAttr = [&](const char* name) -> float
 	{
-		auto* attr = parent.first_attribute("min");
+		auto* attr = parent.first_attribute(name);
 		if (!attr)
 			return 0;
 		auto* value = attr->value();
@@ -1506,8 +1506,10 @@ bool RBspObject::LoadRS2Map(rapidxml::xml_node<>& aParent)
 			else if (_stricmp(szTagName, RTOK_OCCLUSIONLIST) == 0)
 				Open_OcclusionList(*node);
 			else if (_stricmp(szTagName, RTOK_DUMMYLIST) == 0)
+			{
 				if (!Open_DummyList(*node))
 					MLog("RBspObject::LoadRS2Map -- Failed to open dummy list\n");
+			}
 			else if (_stricmp(szTagName, RTOK_FOG) == 0)
 				Set_Fog(*node);
 			else if (_stricmp(szTagName, "AMBIENTSOUNDLIST") == 0)
