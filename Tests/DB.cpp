@@ -231,6 +231,7 @@ void TestItems(IDatabase* DB, u32 AID, int CharIndex, int CID)
 	};
 
 	auto GetItemsFromDB = [&](ItemList& Output) {
+		MCharInfo.m_EquipedItem.Clear();
 		MCharInfo.m_ItemList.Clear();
 		TestAssert(DB->GetCharItemInfo(MCharInfo));
 		Output.clear();
