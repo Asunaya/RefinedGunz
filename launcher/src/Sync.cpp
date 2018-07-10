@@ -326,10 +326,6 @@ static bool CalculateBlocks(Memory& memory, RemoteFile& Remote, BlockCounts& Cou
 		return false;
 	}
 
-	Hash::Rolling RollingHash;
-
-	RollingHash.HashMemory(FileBuffer, BlockSize);
-
 	// Most types from here on just use int for index and size types, which is ok because the
 	// FileData buffer couldn't reasonably be larger than that.
 
@@ -530,7 +526,7 @@ static bool CalculateBlocks(Memory& memory, RemoteFile& Remote, BlockCounts& Cou
 	};
 
 	// Adds the final block when the end of the file has been reached.
-	auto OnReachedEnd = [&](int Advanced)
+	auto OnReachedEnd = [&]
 	{
 		if (Remote.LastBlock.Empty)
 			return;
@@ -547,6 +543,33 @@ static bool CalculateBlocks(Memory& memory, RemoteFile& Remote, BlockCounts& Cou
 
 		LOG_DEBUG(4, "Last block found at local file offset %llu\n", Remote.LastBlock.LocalFileOffset);
 	};
+
+	auto SetCounts = [&]
+	{
+		bool LastBlockFound = Remote.LastBlock.LocalFileOffset != -1;
+
+		if (!LastBlockFound)
+			LOG_DEBUG(4, "Last block was not found\n");
+
+		Counts.MatchingBlocks = NumFoundBlocks +
+			size_t(LastBlockFound && !Remote.LastBlock.Empty);
+		Counts.UnmatchingBlocks = Remote.RemoteBlocks.size() - NumFoundBlocks + 
+			size_t(!LastBlockFound && !Remote.LastBlock.Empty);
+		Remote.UnmatchingSize = (Remote.RemoteBlocks.size() - NumFoundBlocks) * BlockSize +
+			(LastBlockFound ? 0 : Remote.LastBlock.Size);
+	};
+
+	Hash::Rolling RollingHash;
+
+	if (InitialReadSize < BlockSize)
+	{
+		if (InitialReadSize >= Remote.LastBlock.Size)
+			OnReachedEnd();
+		SetCounts();
+		return true;
+	}
+
+	RollingHash.HashMemory(FileBuffer, BlockSize);
 
 	while (true)
 	{
@@ -601,7 +624,7 @@ static bool CalculateBlocks(Memory& memory, RemoteFile& Remote, BlockCounts& Cou
 				const auto Advanced = AdvanceWindow(BlockSize);
 				if (Advanced != BlockSize)
 				{
-					OnReachedEnd(Advanced);
+					OnReachedEnd();
 					break;
 				}
 				SkippedBytes = 0;
@@ -622,7 +645,7 @@ static bool CalculateBlocks(Memory& memory, RemoteFile& Remote, BlockCounts& Cou
 		const auto Advanced = AdvanceWindow(1);
 		if (Advanced != 1)
 		{
-			OnReachedEnd(Advanced);
+			OnReachedEnd();
 			break;
 		}
 
@@ -632,17 +655,7 @@ static bool CalculateBlocks(Memory& memory, RemoteFile& Remote, BlockCounts& Cou
 		RollingHash.Move(OldByte, NewByte, BlockSize);
 	}
 
-	bool LastBlockFound = Remote.LastBlock.LocalFileOffset != -1;
-
-	if (!LastBlockFound)
-		LOG_DEBUG(4, "Last block was not found\n");
-
-	Counts.MatchingBlocks = NumFoundBlocks +
-		size_t(LastBlockFound && !Remote.LastBlock.Empty);
-	Counts.UnmatchingBlocks = Remote.RemoteBlocks.size() - NumFoundBlocks + 
-		size_t(!LastBlockFound && !Remote.LastBlock.Empty);
-	Remote.UnmatchingSize = (Remote.RemoteBlocks.size() - NumFoundBlocks) * BlockSize +
-		(LastBlockFound ? 0 : Remote.LastBlock.Size);
+	SetCounts();
 
 	return true;
 }
@@ -940,6 +953,7 @@ SyncResult SynchronizeFile(Memory& memory,
 	Remote.Size = RemoteFileSize;
 	Remote.LastBlock.Size = Remote.Size % BlockSize;
 	Remote.LastBlock.Empty = Remote.LastBlock.Size == 0;
+	Remote.LastBlock.LocalFileOffset = -1;
 
 	Log.Debug("Remote.LastBlock.Size = %u\n", Remote.LastBlock.Size);
 

@@ -87,7 +87,7 @@ bool MDatabase::Connect(const ConnectionDetails& cd)
 	
 	auto TryConnect = [&](SQLHandle<SQLHandleTypes::DBC>& Handle) {
 		return SQLDriverConnect(Handle, GetHwnd(),
-			SQLData(InitialConnectString), SQLSize(InitialConnectString),
+			SQLData(InitialConnectString), SQLSize(InitialConnectString) - buf.size(),
 			SQLData(ConnectString), SQLSize(ConnectString),
 			&ConnStrLen, SQL_DRIVER_COMPLETE);
 	};
