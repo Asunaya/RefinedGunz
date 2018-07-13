@@ -67,6 +67,7 @@ void CheckFiles(char (&Filenames)[NumFiles][64], size_t Size)
 
 	for (auto& File : MFile::Glob("*"))
 	{
+		TestAssert(!equals(File.Name, ".") && !equals(File.Name, ".."));
         int i = 0;
 		for (auto& Filename : Filenames)
 		{
