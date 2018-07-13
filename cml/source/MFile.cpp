@@ -3,6 +3,8 @@
 #include "MFile.h"
 #include "defer.h"
 
+static bool IsDots(StringView Name) { return equals(Name, ".") || equals(Name, ".."); }
+
 #ifdef WIN32
 #include "MWindows.h"
 #include <direct.h>
@@ -123,26 +125,33 @@ static void CopyFileData(FileData& dest, const _finddata_t& src)
 	strcpy_safe(dest.Name, src.name);
 }
 
-
-FileIterator& FileIterator::operator++()
+static bool GetNextFileData(FileRange& Range)
 {
 	_finddata_t fd;
 	int find_ret;
 	do {
 		find_ret = _findnext(reinterpret_cast<intptr_t>(Range.Handle.get()), &fd);
-	} while (find_ret != -1 && (!strcmp(fd.name, ".") || !strcmp(fd.name, "..")));
+	} while (find_ret != -1 && IsDots(fd.name));
 
 	if (find_ret == -1)
 	{
 		auto err = errno;
 		Range.ErrorCode = err == ENOENT ? 0 : err;
-		End = true;
-	}
-	else
-	{
-		CopyFileData(Range.Data, fd);
+		Range.Handle = nullptr;
+		return false;
 	}
 
+	CopyFileData(Range.Data, fd);
+	return true;
+}
+
+
+FileIterator& FileIterator::operator++()
+{
+	if (!GetNextFileData(Range))
+	{
+		End = true;
+	}
 	return *this;
 }
 
@@ -166,7 +175,10 @@ FileRange Glob(const char* Pattern)
 	if (SearchHandle != -1)
 	{
 		ret.Handle = FileRange::HandleType(reinterpret_cast<void*>(SearchHandle));
-		CopyFileData(ret.Data, fd);
+		if (IsDots(fd.name))
+			GetNextFileData(ret);
+		else
+			CopyFileData(ret.Data, fd);
 	}
 	else
 	{
@@ -252,9 +264,7 @@ static bool GetNextFileData(FileRange& Range)
 {
 	do {
 		++Range.CurFileIndex;
-	} while (Range.CurFileIndex < Range.GlobData.gl_pathc &&
-		(!strcmp(Range.GlobData.gl_pathv[Range.CurFileIndex], ".") ||
-		 !strcmp(Range.GlobData.gl_pathv[Range.CurFileIndex], "..")));
+	} while (Range.CurFileIndex < Range.GlobData.gl_pathc && IsDots(Range.GlobData.gl_pathv[Range.CurFileIndex]));
 
 	if (Range.CurFileIndex >= Range.GlobData.gl_pathc)
 	{

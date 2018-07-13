@@ -206,6 +206,8 @@ static bool SaveDocumentToFile(rapidxml::xml_document<>& doc, const char* Filena
 
 int main()
 {
+	Log.Init("", LogTo::Stdout);
+
 	rapidxml::xml_document<> doc;
 
 	auto&& FilesNode = AppendNode(doc, doc, "files");
